@@ -89,6 +89,10 @@ function setup_build()
 		else
 			exe_ext = ".exe"
 		end if
+	elsif TOSX then
+		if dll_option then
+			exe_ext = ".dylib"
+		end if
 	else
 		if dll_option then
 			exe_ext = ".so"
