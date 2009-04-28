@@ -84,7 +84,15 @@ function setup_build()
 	end if
 
 	if TDOS or TWINDOWS then
-		exe_ext = ".exe"
+		if dll_option then
+			exe_ext = ".dll"
+		else
+			exe_ext = ".exe"
+		end if
+	else
+		if dll_option then
+			exe_ext = ".so"
+		end if
 	end if
 
 	switch compiler_type do
@@ -271,7 +279,7 @@ procedure write_makefile_full()
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "%s.exe: $(%s_OBJECTS)" & HOSTNL, { file0, upper(file0) })
+		printf(fh, "%s%s: $(%s_OBJECTS)" & HOSTNL, { file0, upper(file0), settings[SETUP_EXE_EXT] })
 		puts(fh, "\t$(LINKER) $(LFLAGS) NAME $@ FILE { $< }" & HOSTNL)
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean: .SYMBOLIC" & HOSTNL, { file0 })
@@ -282,7 +290,7 @@ procedure write_makefile_full()
 		end for
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all: .SYMBOLIC" & HOSTNL, { file0, file0 })
-		printf(fh, "\tdel /q %s.exe" & HOSTNL, { file0 })
+		printf(fh, "\tdel /q %s%s" & HOSTNL, { file0, settings[SETUP_EXE_EXT] })
 		for i = 1 to length(generated_files) do
 			printf(fh, "\tdel /q %s" & HOSTNL, { generated_files[i] })
 		end for
@@ -385,7 +393,7 @@ procedure write_emake()
 	end for
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, " NAME %s.exe", { file0 })
+		printf(fh, " NAME %s%s", { file0, settings[SETUP_EXE_EXT] })
 	end if
 
 	puts(fh, " " & settings[SETUP_LFLAGS] & HOSTNL)
@@ -393,14 +401,11 @@ procedure write_emake()
 	if compiler_type = COMPILER_GCC then
 		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
 	else
-		printf(fh, "if not exist %s.exe goto done" & HOSTNL, { file0 })
+		printf(fh, "if not exist %s%s goto done" & HOSTNL, { file0, settings[SETUP_EXE_EXT] })
 	end if
 
-	printf(fh, "echo You can now execute %s", { file0 })
-	if TWINDOWS or TDOS then
-		puts(fh, ".exe")
-	end if
-	puts(fh, HOSTNL)
+	printf(fh, "echo You can now use %s", { file0 })
+	puts(fh, settings[SETUP_EXE_EXT] & HOSTNL)
 
 	if not keep then
 		for i = 1 to length(generated_files) do
