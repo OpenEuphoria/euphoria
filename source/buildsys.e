@@ -275,10 +275,17 @@ procedure write_makefile_full()
 		puts(fh, "\t$(LINKER) $(LFLAGS) NAME $@ FILE { $< }" & HOSTNL)
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean: .SYMBOLIC" & HOSTNL, { file0 })
-		printf(fh, "\tdel /f/q $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+		for i = 1 to length(generated_files) do
+			if match(".o", generated_files[i]) then
+				printf(fh, "\tdel /q %s" & HOSTNL, { generated_files[i] })
+			end if
+		end for
 		puts(fh, HOSTNL)
-		printf(fh, "%s-clean-all: .SYMBOLIC %s-clean" & HOSTNL, { file0, file0 })
-		printf(fh, "\tdel /f/q $(%s_SOURCES) %s.exe" & HOSTNL, { upper(file0), file0 })
+		printf(fh, "%s-clean-all: .SYMBOLIC" & HOSTNL, { file0, file0 })
+		printf(fh, "\tdel /q %s.exe" & HOSTNL, { file0 })
+		for i = 1 to length(generated_files) do
+			printf(fh, "\tdel /q %s" & HOSTNL, { generated_files[i] })
+		end for
 		puts(fh, HOSTNL)
 		puts(fh, ".c.obj: .autodepend" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
@@ -428,8 +435,7 @@ end procedure
 --   [[:BUILD_MAKEFILE_FULL]], [[:BUILD_MAKEFILE]], [[:BUILD_EMAKE]]
 
 export procedure write_buildfile()
-	/*
-	switch build_system do
+	switch build_system_type do
 		case BUILD_CMAKE then
 			write_cmake()
 
@@ -445,17 +451,4 @@ export procedure write_buildfile()
 		case else
 			CompileErr("Unknown build file type")
 	end switch
-	*/
-
-	if build_system_type = BUILD_CMAKE then
-		write_cmake()
-	elsif build_system_type = BUILD_MAKEFILE_FULL then
-		write_makefile_full()
-	elsif build_system_type = BUILD_MAKEFILE then
-		write_makefile()
-	elsif build_system_type = BUILD_EMAKE then
-		write_emake()
-	else
-		CompileErr("Unknown build file type")
-	end if
 end procedure
