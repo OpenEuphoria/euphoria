@@ -149,7 +149,11 @@ ifeq  "$(ELINUX)" "1"
 EBSDFLAG=-DELINUX
 endif
 
+ifeq  "$(EUBIN)" ""
+EXE=$(EEXU)
+else
 EXE=$(EUBIN)/$(EEXU)
+endif
 INCDIR=-i $(TRUNKDIR)/include
 
 ifdef PLAT
