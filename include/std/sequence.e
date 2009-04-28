@@ -1408,20 +1408,20 @@ end function
 
 --****
 -- Description:
--- Replaces all occurances of ##target## with ##replacement##
+-- Replaces all occurances of ##olddata## with ##newdata##
 --
 -- Parameters:
 --   # ##source##: the sequence in which replacements will be done.
---   # ##target##: the sequence/item which is going to be replaced. If this
+--   # ##olddata##: the sequence/item which is going to be replaced. If this
 --                 is an empty sequence, the ##source## is returned as is.
---   # ##replacement##: the sequence/item which will be the replacement
+--   # ##newdata##: the sequence/item which will be the replacement.
 --
 -- Returns:
---		A **sequence**, which is made of ##source## with all ##target## occurances
---      repaced by ##replacement##.
+--		A **sequence**, which is made of ##source## with all ##olddata## occurances
+--      replaced by ##newdata##.
 --
 -- Comments:
---   This also removes all ##target## occurances when ##replacement## is "".
+--   This also removes all ##olddata## occurances when ##newdata## is "".
 --
 -- Example:
 -- <eucode>
@@ -1438,29 +1438,29 @@ end function
 -- See Also:
 --     [[:replace]], [[:remove_all]]
 
-public function replace_all(sequence source, object target, object replacement)
+public function replace_all(sequence source, object olddata, object newdata)
 	integer startpos
 	integer endpos
 	
-	if atom(target) then
-		target = {target}
+	if atom(olddata) then
+		olddata = {olddata}
 	end if
 	
-	if atom(replacement) then
-		replacement = {replacement}
+	if atom(newdata) then
+		newdata = {newdata}
 	end if
 	
-	if length(target) = 0 then
+	if length(olddata) = 0 then
 		return source
 	end if
 	
 	endpos = 1
 	while startpos != 0 with entry do
-		endpos = startpos + length(target) - 1
-		source = replace(source, replacement, startpos, endpos)
-		endpos = startpos + length(replacement)
+		endpos = startpos + length(olddata) - 1
+		source = replace(source, newdata, startpos, endpos)
+		endpos = startpos + length(newdata)
 	entry
-		startpos = match_from(target, source, endpos)
+		startpos = match_from(olddata, source, endpos)
 	end while
 	
 	return source
@@ -1553,20 +1553,26 @@ end function
 --
 
 --**
--- Split a sequence on some delimiters.
+-- Split a sequence on separator delimiters into a number of sub-sequences.
 --
 -- Parameters:
 --   # ##source##: the sequence to split.
---   # ##delim##: an object, the delimiter(s) to split by. The default is " " (a space)
---   # ##limit##: an integer, the maximum number of items to split. Default is 0 (no limit)
+--   # ##delim##: an object (default is ' '). The delimiter that separates items
+--                in ##source##.
+--   # ##limit##: an integer (default is 0). The maximum number of sub-sequences
+--                to create. If zero, there is no limit.
+--   # ##no_empty##: an integer (default is 0). If not zero then all zero-length sub-sequences
+--                   removed from the returned sequence. Use this when leading,
+--                   trailing and duplicated delimiters are not significant.
 --
 -- Returns:
 --		A **sequence** of subsequences of ##source##. Delimiters are removed.
 --
 -- Comments:
--- This function may be applied to a string sequence or a complex sequence
+-- This function may be applied to a string sequence or a complex sequence.
 --
--- If ##limit## is > 0, the number of tokens that will be split is capped by ##limit##. Otherwise there is no limit.
+-- If ##limit## is > 0, this is the maximum number of sub-sequences that will 
+-- created, otherwise there is no limit.
 --
 -- Example 1:
 -- <eucode>
@@ -1581,9 +1587,9 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:split_any]], [[:chunk]], [[:join]]
+--     [[:split_any]], [[:breakup]], [[:join]]
 
-public function split(sequence st, object delim=" ", integer limit=0)
+public function split(sequence st, object delim=' ', integer limit=0, integer no_empty = 0)
 	sequence ret = {}
 	integer start
 	integer pos
@@ -1643,34 +1649,58 @@ public function split(sequence st, object delim=" ", integer limit=0)
 	
 	ret = append(ret, st[start..$])
 
-	return ret
+	integer k = length(ret)
+	if no_empty then
+		k = 0
+		for i = 1 to length(ret) do
+			if length(ret[i]) != 0 then
+				k += 1
+				if k != i then
+					ret[k] = ret[i]
+				end if
+			end if
+		end for
+	end if
+		
+	if k < length(ret) then		
+		return ret[1 .. k]
+	else
+		return ret
+	end if
 end function
 
 --**
--- Split a sequence by any item in a list of delimiters.
+-- Split a sequence by any of the separators in the list of delimiters.
 --
 -- If limit is > 0 then limit the number of tokens that will be split to limit.
 --
 -- Parameters:
 -- # ##source##: the sequence to split.
 -- # ##delim##: a list of delimiters to split by.
--- # ##limit##: maximum number of items to split.
+-- # ##limit##: an integer (default is 0). The maximum number of sub-sequences
+--              to create. If zero, there is no limit.
+-- # ##no_empty##: an integer (default is 0). If not zero then all zero-length sub-sequences
+--                   removed from the returned sequence. Use this when leading,
+--                   trailing and duplicated delimiters are not significant.
 --
 -- Comments:
--- This function may be applied to a string sequence or a complex sequence. It works like ##split##(), but splits on any delimiter on ##delim## rather than on a single delimiter.
+-- This function may be applied to a string sequence or a complex sequence.
 --
--- You cannot split by any substring in a list.
+-- It works like ##split##(), but in this case ##delim## is a set of potential
+-- delimiters rather than a single delimiter.
 --
 -- Example 1:
 -- <eucode>
 -- result = split_any("One,Two|Three.Four", ".,|")
 -- -- result is {"One", "Two", "Three", "Four"}
+-- result = split_any(",One,,Two|.Three||.Four,", ".,|",,1) -- No Empty option
+-- -- result is {"One", "Two", "Three", "Four"}
 -- </eucode>
 --
 -- See Also:
---   [[:split]], [[:chunk]], [[:join]]
+--   [[:split]], [[:breakup]], [[:join]]
 
-public function split_any(sequence source, object delim, integer limit=0)
+public function split_any(sequence source, object delim, integer limit=0, integer no_empty=0)
 	sequence ret = {}
 	integer start = 1, pos, next_pos
 
@@ -1699,7 +1729,24 @@ public function split_any(sequence source, object delim, integer limit=0)
 
 	ret = append(ret, source[start..$])
 
-	return ret
+	integer k = length(ret)
+	if no_empty then
+		k = 0
+		for i = 1 to length(ret) do
+			if length(ret[i]) != 0 then
+				k += 1
+				if k != i then
+					ret[k] = ret[i]
+				end if
+			end if
+		end for
+	end if
+		
+	if k < length(ret) then		
+		return ret[1 .. k]
+	else
+		return ret
+	end if
 end function
 
 --**
@@ -1725,7 +1772,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:split]], [[:split_any]], [[:chunk]]
+--     [[:split]], [[:split_any]], [[:breakup]]
 
 public function join(sequence items, object delim=" ")
 	object ret
@@ -1742,75 +1789,155 @@ public function join(sequence items, object delim=" ")
 	return ret
 end function
 
+public enum -- Style options for breakup()
+	BK_LEN,
+	BK_PIECES
+	
 --**
--- Split a sequence into multiple sequences of a given length.
+-- Breaks up a sequence into multiple sequences of a given length.
 --
 -- Parameters:
--- 		# ##source##: the sequence to split up
---		# ##size##: an integer, the length of each resulting sub-sequence.
+-- 		# ##source##: the sequence to be broken up into sub-sequences.
+--		# ##size##: an object, if an integer it is either the maximum length of
+--                  each resulting sub-sequence or the maximum number of 
+--                  sub-sequences to break ##source## into. \\
+--                  If ##size## is a sequence, it is a list of element counts
+--                  for the sub-sequences it creates.
+--		# ##style##: an integer, Either BK_LEN if ##size## integer represents
+--                   the sub-sequences' maximum length, or BK_PIECES if
+--                   the ##size## integer represents the maximum number of
+--                   sub-sequences (pieces) to break ##source## into.
 --
 -- Returns:
---	A **sequence** of sequences. The inner sequences have length ##size##,
---  except possibly the last one, which may be shorter. When concatenated,
---  these inner sequences yield ##source## back.
+--	A **sequence** of sequences.
 --
 -- Comments:
---   * If the length of ##source## is not evenly divisible by ##size##, 
---   the very last inner sequence in the returned value has
---   [[:remainder]](##length(source),size##) items.
---   * If ##size## is less than 1 or is greater than length of ##source##
---     this function returns a sequence with the ##source## as its only element.
+-- **When ##size## is an integer and ##style## is BK_LEN...**\\
+-- The sub-sequences have length ##size##, except possibly the last one, 
+-- which may be shorter. For example if ##source## has 11 items and ##size## is
+-- 3, then the first three sub-sequences will get 3 items each and the remaining
+-- 2 items will go into the last sub-sequence. If ##size## is less than 1 or
+-- greater than the length of the ##source##, the ##source is returned as the
+-- only sub-sequence.
+--
+-- **When ##size## is an integer and ##style## is BK_PIECES...**\\
+-- There is exactly ##size## sub-sequences created. If the ##source## is not
+-- evenly divisible into that many pieces, then the lefthand subsequences will
+-- contain one more element than the righthand subsequences. For example, if
+-- source contains 10 items and we break it into 3 pieces, piece #1 gets 4 elements,
+-- piece #2 gets 3 items and piece #3 gets 3 items - a total of 10. If source had
+-- 11 elements then the pieces will have 4,4, and 3 respectively.
+--
+-- **When ##size## is a sequence...\\
+-- The style parameter is ignored in this case. The source will be broken up 
+-- according to the counts contained in the size parameter. For example, if
+-- ##size## was {3,4,0,1} then piece #1 gets 3 items, #2 gets 4 items, #3 gets
+-- 0 items, and #4 gets 1 item. Note that if not all items from source are
+-- placed into the sub-sequences defined by ##size##, and //extra// sub-sequence
+-- is appended that contains the remaining items from ##source##.
+--
+-- In all cases, when concatenated these sub-sequences will be identical
+-- to the original ##source##.
+--
 --
 -- Example 1:
 -- <eucode>
--- s = chunk("5545112133234454", 4)
+-- s = breakup("5545112133234454", 4)
 -- -- s is {"5545", "1121", "3323", "4454"}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- s = chunk("12345", 2)
+-- s = breakup("12345", 2)
 -- -- s is {"12", "34", "5"}
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
--- s = chunk({1,2,3,4,5,6}, 3)
+-- s = breakup({1,2,3,4,5,6}, 3)
 -- -- s is {{1,2,3}, {4,5,6}}
 -- </eucode>
 --
 -- Example 4:
 -- <eucode>
--- s = chunk("ABCDEF", 0)
+-- s = breakup("ABCDEF", 0)
 -- -- s is {"ABCDEF"}
 -- </eucode>
 --
 -- See Also:
 --   [[:split]] [[:flatten]]
 
-public function chunk(sequence source, integer size)
-	sequence ns
-	integer stop
-	integer pos
+public function breakup(sequence source, object size, integer style = BK_LEN)
 
-	if size < 1 or size >= length(source) then
-		return {source}
+	if atom(size) and not integer(size) then
+		size = floor(size)
 	end if
+	
+	-- Convert simple integer size into the 'customized' size format.
+	if integer(size) then
+		integer len
+		integer rem
+		if style = BK_LEN then
+			if size < 1 or size >= length(source) then
+				return {source}
+			end if
+			len = floor(length(source) / size)
+			rem = remainder(length(source), size)
+			size = repeat(size, len)
+			if rem > 0 then
+				size &= rem
+			end if
+		else
+			if size > length(source) then
+				size = length(source)
+			end if
+			if size < 1 then
+				return {source}
+			end if
+			len = floor(length(source) / size)
+			if len < 1 then
+				len = 1
+			end if
+			rem = length(source) - (size * len)
+			size = repeat(len, size)
+			for i = 1 to length(size) do
+				if rem = 0 then
+					exit
+				end if
+				size[i] += 1
+				rem -= 1
+			end for
+		end if
+	end if
+		
 
 	-- Allocate the top level sequence.
-	ns = repeat(0, floor((length(source) + size - 1) / size))
+	sequence ns = repeat(0, length(size))
+	integer source_idx = 1
 
 	-- Place each source element into its appropriate target sub-sequence.
-	-- This sets all but the last sub-sequence.
-	pos = 1
-	for i = 1 to length(ns) - 1 do
-		stop = pos + size - 1
-		ns[i] = source[pos .. stop]
-		pos = stop + 1
+	for i = 1 to length(size) do
+		if source_idx <= length(source) then
+			integer k = 1
+			ns[i] = repeat(0, size[i])
+			for j = 1 to size[i] do
+				if source_idx > length(source) then
+					ns[i] = ns[i][1 .. k-1]
+					exit
+				end if
+				ns[i][k] = source[source_idx]
+				k += 1
+				source_idx += 1
+			end for
+		else
+			ns[i] = {}
+		end if
 	end for
 	
-	-- Set the last sub-sequence, which could be smaller than size.
-	ns[$] = source[pos .. $]
+	--Handle any leftover data from source.
+	if source_idx <= length(source) then
+		ns = append(ns, source[source_idx .. $])
+	end if
 
 	return ns
 end function
