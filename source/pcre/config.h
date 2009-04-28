@@ -7,7 +7,7 @@
 #       error **
 #       error ** No OS set!                              
 #	error ** Please run configure and make utilities 
-#	error ** from this directory's parent
+#	error ** from this directory s parent
 #	error ** 
 #    endif
 #endif
