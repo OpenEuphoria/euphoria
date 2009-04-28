@@ -109,7 +109,7 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
 
               OS Specific Options:
                  DOS    :  [-djg|-wat] [-fastfp]
-                 Windows:  [-con] [-wat|-djg|-lcc] [-dll]
+                 Windows:  [-con] [-wat|-djg|-lcc|-gcc] [-dll]
                  Linux  :  [-gcc] [-dll]
                  OSX    :  [-gcc] [-dll]
                  SunOS  :  [-gcc] [-dll]
