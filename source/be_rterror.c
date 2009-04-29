@@ -200,8 +200,9 @@ void OpenErrFile()
 // open the error diagnostics file - normally "ex.err"
 {
 	int n;
-	
-	TempErrFile = iopen(TempErrName, "w");
+
+	if (TempErrFile == NULL)	
+		TempErrFile = iopen(TempErrName, "w");
 	if (TempErrFile == NULL) {
 		if (strlen(TempErrName) > 0) {
 			screen_output(stderr, "Can't create error message file: ");

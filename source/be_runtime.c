@@ -118,7 +118,7 @@ extern unsigned char TempBuff[];
 extern struct videoconfig config;
 extern int il_file;
 extern struct IL fe;
-IFILE TempErrFile;
+IFILE TempErrFile = 0;
 char *TempErrName; // "ex.err" - but must be malloc'd
 char *TempWarningName;
 int display_warnings;
@@ -639,7 +639,10 @@ static void SimpleRTFatal(char *msg, va_list ap)
 		screen_output(stderr, crash_msg);
 	}
 	va_end(aq);
-	TempErrFile = iopen(TempErrName, "w");
+	if (TempErrFile == NULL)
+	{
+		TempErrFile = iopen(TempErrName, "w");
+	}
 	if (TempErrFile != NULL) {
 		iprintf(TempErrFile, "Fatal run-time error:\n");
 		vfprintf(TempErrFile, msg, ap);
@@ -651,8 +654,10 @@ static void SimpleRTFatal(char *msg, va_list ap)
 			iprintf(TempErrFile, "%s\n", last_traced_line);
 		}
 		iclose(TempErrFile);
+		TempErrFile = NULL;
 	}
 
+	
 	call_crash_routines();
 	gameover = TRUE;
 	Cleanup(1);
