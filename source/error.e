@@ -9,7 +9,7 @@ include reswords.e
 
 integer Errors = 0 -- number of errors detected during compile
 
-export integer TempErrFile
+export integer TempErrFile = -2
 export sequence TempErrName
 export integer display_warnings
 export object ThisLine = ""   -- current line of source (or -1)
@@ -135,7 +135,9 @@ end procedure
 
 export procedure OpenErrFile()
 -- open the error diagnostics file - normally "ex.err"
-	TempErrFile = open(TempErrName, "w")
+    if TempErrFile != -1 then
+		TempErrFile = open(TempErrName, "w")
+	end if
 	if TempErrFile = -1 then
 		if length(TempErrName) > 0 then
 			screen_output(STDERR, "Can't create error message file: ")
