@@ -3,13 +3,12 @@
 -- Display the IL code produced by the front-end.
 -- Fairly crude, used for debugging. You'll be able to check
 -- if the IL you are producing from the front end is correct or not.
--- usage (DOS):
+-- usage:
 --
---     ex showil.ex boundfile.exe
+--     eui showil.ex boundfile.exe
 -- or:
---     ex showil.ex shroudedfile.il
+--     eui showil.ex shroudedfile.il
 --
--- Run it with exwc for Windows programs, exu for Linux/FreeBSD.
 -- The result is placed in "icode.lst".
 
 include std/machine.e
@@ -393,7 +392,7 @@ sequence slist, cl
 
 cl = command_line()
 if length(cl) < 3 then
-	error("Usage: ex showil file.exe\n       ex showil file.il")
+	error("Usage: eui showil file.exe\n       eui showil file.il")
 end if
 
 f = open(cl[3], "rb")

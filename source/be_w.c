@@ -273,7 +273,7 @@ void show_console()
     have_console = TRUE;
     alloc_ret = !AllocConsole();
     if (already_had_console < 0) {
-        // this effectively tells us if we were started as a GUI app or a CONSOLE app (exw.exe or exwc.exe)
+        // this effectively tells us if we were started as a GUI app or a CONSOLE app (euiw.exe or eui.exe)
         already_had_console = alloc_ret;
     }
 
@@ -337,7 +337,8 @@ static void end_of_line(int c)
     GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
     console_info.dwCursorPosition.X = 0;
     if (c == '\n') {
-        if (console_info.dwCursorPosition.Y < console_info.dwMaximumWindowSize.Y - 1)
+//         if (console_info.dwCursorPosition.Y < console_info.dwMaximumWindowSize.Y - 1)
+        if (console_info.dwCursorPosition.Y < console_info.dwSize.Y - 1)
             console_info.dwCursorPosition.Y++;
         else {
             // scroll screen up one line
@@ -353,7 +354,8 @@ static void end_of_line(int c)
             }
 
             src.Left = 0;
-            src.Right = console_info.dwMaximumWindowSize.X - 1;
+//             src.Right = console_info.dwMaximumWindowSize.X - 1;
+            src.Right = console_info.dwSize.X - 1;
             src.Top = 0;
             src.Bottom = console_info.dwSize.Y-1; // -1 ???
             clip = src;
@@ -411,7 +413,8 @@ static void MyWriteConsole(char *string, int nchars)
     screen_loc.Top = console_info.dwCursorPosition.Y;
     screen_loc.Bottom = screen_loc.Top;
     screen_loc.Left = console_info.dwCursorPosition.X; //screen_col-1;
-    screen_loc.Right = console_info.dwMaximumWindowSize.X - 1;
+//     screen_loc.Right = console_info.dwMaximumWindowSize.X - 1;
+    screen_loc.Right = console_info.dwSize.X - 1;
 
     if (EuConsole){
 
@@ -447,11 +450,13 @@ static void MyWriteConsole(char *string, int nchars)
     } else {
 
 	    i = 0;
-	    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
+// 	    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
+	    if( line_buffer_size < console_info.dwSize.X || line_buffer == NULL){
 	        if (line_buffer != 0) {
 	            EFree(line_buffer);
 	        }
-	        line_buffer_size = console_info.dwMaximumWindowSize.X;
+//	        line_buffer_size = console_info.dwMaximumWindowSize.X;
+	        line_buffer_size = console_info.dwSize.X;
 	        line_buffer = (CHAR_INFO*) EMalloc( sizeof( CHAR_INFO ) * line_buffer_size );
 	    }
 	

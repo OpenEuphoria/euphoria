@@ -1481,16 +1481,18 @@ void NewConfig(int raise_console)
 #ifdef EWINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	if (raise_console) {
-		// properly initializes the console when running in exwc mode
+		// properly initializes the console when running in eui mode
 	show_console();
 
 	GetConsoleScreenBufferInfo(console_output, &info);
-	line_max = info.dwMaximumWindowSize.Y;
-	col_max = info.dwMaximumWindowSize.X;
+//	line_max = info.dwMaximumWindowSize.Y;
+//	col_max = info.dwMaximumWindowSize.X;
+	line_max = info.dwSize.Y;
+	col_max = info.dwSize.X;
 	} else {
 		// don't care on startup - this will be initialized later.
-	line_max = 80;
-	col_max = 25;
+	line_max = 25;
+	col_max = 80;
 	}
 
 	config.numtextrows = line_max;
@@ -1881,7 +1883,8 @@ void do_scroll(int top, int bottom, int amount)
 	show_console();
 	GetConsoleScreenBufferInfo(console_output, &info);
 	src.Left = 0;
-	src.Right = info.dwMaximumWindowSize.X - 1;
+//	src.Right = info.dwMaximumWindowSize.X - 1;
+	src.Right = info.dwSize.X - 1;
 	src.Top = top - 1;
 	src.Bottom = bottom - 1;
 	clip = src;
@@ -1891,7 +1894,8 @@ void do_scroll(int top, int bottom, int amount)
 	fill_char.Char.AsciiChar = ' ';
 	fill_char.Attributes = info.wAttributes;
 	if (abs(amount) > abs(bottom - top)) {
-		EClearLines(top, bottom, info.dwMaximumWindowSize.X - 1, fill_char.Attributes);
+//		EClearLines(top, bottom, info.dwMaximumWindowSize.X - 1, fill_char.Attributes);
+		EClearLines(top, bottom, info.dwSize.X - 1, fill_char.Attributes);
 	}
 	else {
 		ScrollConsoleScreenBuffer(console_output,

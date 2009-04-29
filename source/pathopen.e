@@ -402,8 +402,8 @@ export function GetDefaultArgs()
 
 	-- If a unix variant, this loads the config file from the current working directory
 	-- If Windows, this loads the config file from the same path as the binary. This
-	-- can be different, for instance the binary may be C:\euphoria\bin\exwc.exe but
-	-- you are loading it such as: C:\euphoria\demo> exwc demo.ex ... In this case
+	-- can be different, for instance the binary may be C:\euphoria\bin\eui.exe but
+	-- you are loading it such as: C:\euphoria\demo> eui demo.ex ... In this case
 	-- this command loads C:\euphoria\bin\euinc.conf not C:\euphoria\demo\euinc.conf
 	-- as it would under unix variants.
 	

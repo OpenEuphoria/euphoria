@@ -5,9 +5,7 @@
 -- A Euphoria Interpreter written 100% in Euphoria
 --
 -- usage:
---        ex eu.ex prog.ex     -- run a Euphoria program for DOS
---        exw eu.ex prog.exw   -- run a Euphoria program for Windows
---        exu eu.ex prog.exu   -- run a Euphoria program for Linux/FreeBSD
+--        eui eu.ex prog.ex    -- run a Euphoria program
 
 -- You can make this into a stand-alone .exe using the binder or the
 -- Euphoria To C Translator. When translated/compiled it will run

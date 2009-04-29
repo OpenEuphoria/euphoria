@@ -15,7 +15,7 @@ bash configure --managed-mem --debug --build ../build/djgpp-managed-mem-debug
 set PATH=f:\modbin;e:\djgpp\bin;%PATH%
 f:
 cd \eumod\source
-e:\djgpp\bin\make SHELL=e:\djgpp\bin\sh.exe EXE=/modbin/exwc.exe
+e:\djgpp\bin\make SHELL=e:\djgpp\bin\sh.exe EXE=/modbin/eui.exe
 
 For configure you can use any combination of --full, --managed-mem, and --debug
 Only the value passed to the variable SHELL and the invocation of make itself 

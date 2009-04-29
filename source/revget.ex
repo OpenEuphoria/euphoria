@@ -100,7 +100,7 @@ function rev_with_svnversion()
 		-- it successfully if there is a space in its path.
 		ifdef DOS32 then
 			if find(' ',line) then
-				puts(2,"This program must be interpreted using exwc.exe.")
+				puts(2,"This program must be interpreted using eui.exe.")
 				abort(0)
 			end if
 		end ifdef
