@@ -222,7 +222,7 @@ end function
 -- Points off the screen have unpredictable color values.
 --
 -- Example 1:
---<eucode>
+-- <eucode>
 --  object x
 -- 
 -- x = get_pixel({30,40})
