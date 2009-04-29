@@ -12,7 +12,7 @@ procedure update_rev_e( object f )
 	    f = sprintf( "%d", { f } )
 	end if
 	h = open("be_rev.c", "w")
-	printf(h, "extern char* get_svn_revision();\nchar * get_svn_revision() {\nreturn \"%s\";\n}\n", {f})
+	printf(h, "extern char* get_svn_revision();\n\nchar * get_svn_revision() {\n\treturn \"%s\";\n}\n", {f})
 	close(h)
 	h = open("rev.dat","w")
 	printf(h,"%s",{f})
