@@ -14,7 +14,7 @@
 #include <setjmp.h>
 
 #ifndef EUNIX
-#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(EDJGPP) && !defined(EMINGW)
 #    include <graph.h>
 #    include <bios.h>
 #  endif

@@ -1,7 +1,7 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- This module sets one of wat_path, or dj_path or none at all 
--- to indicate lcc or gcc.  Using the command line options or environment variables
+-- to indicate gcc.  Using the command line options or environment variables
 -- as hints it checks for command line sanity and sets the said environment
 -- variables.
 -- 
@@ -125,12 +125,6 @@ export procedure transoptions()
 			elsif equal("-FASTFP", uparg) then
 				fastfp = TRUE
 				
-			elsif equal("-LCCOPT-OFF", uparg) then
-				lccopt_option = FALSE
-				
-			elsif equal("-LCC", uparg) then
-				compiler_type = COMPILER_LCC
-
 			elsif equal("-GCC", uparg) then
 				compiler_type = COMPILER_GCC
 				
@@ -321,11 +315,6 @@ procedure InitBackEnd(integer c)
 				CompileErr( "DJGPP option only available for DOS." )
 			end if
 
-		case COMPILER_LCC then
-			if not TWINDOWS then
-				CompileErr( "LCC option only available for Windows." )
-			end if
-
 		case COMPILER_WATCOM then
 			if length(compiler_dir) then
 				wat_path = compiler_dir
@@ -360,10 +349,6 @@ procedure InitBackEnd(integer c)
 	
 	if con_option and not TWINDOWS then
 		CompileErr("console option only available for Windows")
-	end if
-	
-	if not lccopt_option and not TWINDOWS then
-		CompileErr("LCC Opt-Off only available for Windows.")
 	end if
 	
 	if fastfp and not TDOS then

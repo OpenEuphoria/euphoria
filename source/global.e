@@ -16,7 +16,6 @@ export constant
 -- specific C compiler used (one may be TRUE)
 export constant
 	EWATCOM  = TRUE,
-	ELCC     = FALSE,
 	EDJGPP   = FALSE
 	-- (assume GNU C for Unix variants)
 

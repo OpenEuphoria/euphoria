@@ -68,9 +68,9 @@ int emul_flock(fd, cmd)
 }
 
 #define flock(f,c) emul_flock(f,c)
-#endif
+#endif // ESUNOS
 
-#else
+#else // EUNIX
 
 #include <direct.h>
 
@@ -101,22 +101,15 @@ END_COLOR_DEPTH_LIST
 //END_MIDI_DRIVER_LIST
 //BEGIN_JOYSTICK_DRIVER_LIST
 //END_JOYSTICK_DRIVER_LIST
-#endif
-
-#ifdef ELCC
-#include <io.h>
-#endif
+#endif // EDJGPP
 
 #ifdef EWATCOM
-#include <graph.h>
-#include <i86.h>
+#  include <graph.h>
+#  include <i86.h>
 #endif
 
-#ifndef ELCC
 #include <dos.h>
-#endif
-
-#endif  //EUNIX
+#endif  // not EUNIX
 
 #include <time.h>
 #include <string.h>
@@ -2077,12 +2070,12 @@ object SetTColor(object x)
 	return ATOM_1;
 }
 
-#if defined(EDJGPP) || defined(ELCC) || defined(EMINGW)
+#if defined(EDJGPP) || defined(EMINGW)
 // temporary
 static long colors[16];
 #endif
 
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
+#if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
 static long colors[16] = {
 	_BLACK, _BLUE, _GREEN, _CYAN,
 	_RED, _MAGENTA, _BROWN, _WHITE,
@@ -3064,108 +3057,7 @@ static object Seek(object x)
 		return MAKE_INT(result);
 }
 
-// 3 implementations of dir()
-
-#if defined(ELCC)
-	// 1 of 3: findfirst method
-
-static object Dir(object x)
-/* x is the name of a directory or file */
-{
-#define path_size (MAX_FILE_NAME + 1 + 4)
-	char path[path_size];
-	s1_ptr result, row;
-	struct _finddata_t direntp;
-	object_ptr obj_ptr, temp;
-	int dirp, last, bits;
-	unsigned date, time, attrib;
-
-	/* x will be sequence if called via dir() */
-
-	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
-		RTFatal("name for dir() is too long");
-
-	MakeCString(path, x, path_size);
-
-	bits = _A_SUBDIR | _A_HIDDEN | _A_SYSTEM;
-
-		   //FA_RDONLY | FA_HIDDEN |
-		   //FA_SYSTEM | FA_LABEL |
-		   //FA_DIREC | FA_ARCH; // everything
-
-	last = strlen(path)-1;
-	while (last > 0 &&
-		   (path[last] == '\\' || path[last] == ' ' || path[last] == '\t')) {
-		last--;
-	}
-	path[last+1] = 0; // delete any trailing backslash
-	dirp = _findfirst(path, &direntp);
-	if (path[last] == ':' ||
-		(dirp != -1 && (direntp.attrib & _A_SUBDIR) &&
-		 strchr(path, '*') == NULL &&
-		 strchr(path, '?') == NULL))
-	{
-		// it's a single directory entry - add *.*
-		strlcat(path, "\\*.*", path_size - strlen(path));
-		dirp = _findfirst(path, &direntp);
-	}
-	if (dirp == -1)
-		return ATOM_M1; /* couldn't open directory (or file) */
-
-	/* start with empty sequence as result */
-	result = (s1_ptr)NewString("");
-
-	for (;;) {
-		/* create a length-9 sequence */
-		row = NewS1((long)9);
-
-		obj_ptr = row->base;
-		obj_ptr[1] = NewString(direntp.name);
-		obj_ptr[2] = NewString("");
-		temp = &obj_ptr[2];
-		attrib = direntp.attrib;
-		if (attrib & _A_RDONLY)
-			Append(temp, *temp, MAKE_INT('r'));
-		if (attrib & _A_HIDDEN)
-			Append(temp, *temp, MAKE_INT('h'));
-		if (attrib & _A_SYSTEM)
-			Append(temp, *temp, MAKE_INT('s'));
-		if (attrib & _A_SUBDIR)
-			Append(temp, *temp, MAKE_INT('d'));
-		if (attrib & _A_ARCH)
-			Append(temp, *temp, MAKE_INT('a'));
-
-		obj_ptr[3] = direntp.size;
-		{
-			struct tm *now;
-
-			now = localtime(&direntp.time_write);
-
-			obj_ptr[4] = now->tm_year+1900;
-			obj_ptr[5] = now->tm_mon+1;
-			obj_ptr[6] = now->tm_mday;
-
-			obj_ptr[7] = now->tm_hour;
-			obj_ptr[8] = now->tm_min;
-			obj_ptr[9] = now->tm_sec;
-		}
-
-		if ((unsigned)obj_ptr[3] > (unsigned)MAXINT) {
-			// file size over 1Gb
-			obj_ptr[3] = NewDouble((double)(unsigned)obj_ptr[3]);
-		}
-		/* append row to overall result (ref count 1) */
-		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
-
-		if (_findnext(dirp, &direntp)) {
-			_findclose(dirp);
-			break; /* end of list */
-		}
-	}
-
-	return (object)result;
-}
-#endif
+// 2 implementations of dir()
 
 #ifdef EWATCOM
 	// 2 of 3: WATCOM method
@@ -3604,7 +3496,7 @@ static object lock_file(object x)
 		r = flock(fd, LOCK_SH | LOCK_NB);
 	else
 		r = flock(fd, LOCK_EX | LOCK_NB);
-#else
+#else // EUNIX
 	// get 3rd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+3);
 	s = (object)SEQ_PTR(s);
@@ -3621,12 +3513,12 @@ static object lock_file(object x)
 	}
 	if (last < first)
 		return ATOM_0;
-#if defined(ELCC) || defined(EMINGW)
-	r = 0;  // FOR NOW!
-#else
+#if defined(EMINGW)
+	r = 0;  // TODO: FOR NOW!
+#else // defined EMINGW
 	r = lock(fd, first, last - first + 1);
-#endif
-#endif
+#endif // defined EMINGW
+#endif // EUNIX
 	if (r == 0)
 		return ATOM_1; // success
 	else
@@ -3648,7 +3540,7 @@ static object unlock_file(object x)
 	fd = ifileno(f);
 #ifdef EUNIX
 	flock(fd, LOCK_UN);
-#else
+#else // EUNIX
 	// get 2nd element of x - range - assume it's a sequence
 	s = *(((s1_ptr)x)->base+2);
 	s = (object)SEQ_PTR(s);
@@ -3663,13 +3555,13 @@ static object unlock_file(object x)
 	else {
 		RTFatal("2nd argument to unlock_file must be a sequence of length 0 or 2");
 	}
-#if defined(ELCC) || defined(EMINGW)
+#if defined(EMINGW)
 	/* do nothing */
-#else
+#else // defined EMINGW
 	if (last >= first)
 		unlock(fd, first, last - first + 1);
-#endif
-#endif
+#endif // EMINGW
+#endif // EUNIX
 	return ATOM_1; // ignored
 }
 
@@ -3709,8 +3601,8 @@ static object use_vesa(object x)
 		_SVGAType = c;
 	else
 		_SVGAType = original_vesa;
-#endif
-#endif
+#endif // ndef EDJGPP
+#endif // ndef EDOS
 	return ATOM_1;
 }
 

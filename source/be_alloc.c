@@ -557,7 +557,6 @@ void EFree(unsigned char *p)
 
 #ifndef EDJGPP
 #ifndef EUNIX
-#ifndef ELCC
 #ifndef EWINDOWS
 #ifdef EXTRA_CHECK
 #include <malloc.h>
@@ -598,11 +597,11 @@ int heap_dump(char *ptr)
 	}
 	return found;
 }
-#endif
-#endif
-#endif
-#endif
-#endif
+#endif // EXTRA_CHECK
+#endif // EWINDOWS
+#endif // EUNIX
+#endif // EDJGPP
+
 #ifndef ESIMPLE_MALLOC
 char *ERealloc(unsigned char *orig, unsigned long newsize)
 /* Enlarge or shrink a malloc'd block.

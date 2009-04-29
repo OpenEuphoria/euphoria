@@ -55,8 +55,7 @@ export enum
 	COMPILER_UNKNOWN = 0,
 	COMPILER_GCC,
 	COMPILER_DJGPP,
-	COMPILER_WATCOM,
-	COMPILER_LCC
+	COMPILER_WATCOM
 
 export integer compiler_type = COMPILER_UNKNOWN
 export sequence compiler_dir = ""
@@ -189,29 +188,6 @@ function setup_build()
 				end if
 
 				l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
-			end if
-
-		case COMPILER_LCC then
-			c_exe = "lcc"
-			l_exe = "lcclnk"
-			obj_ext = "obj"
-
-			if debug_option then
-				c_flags &= " -g"
-			end if
-
-			c_flags &= sprintf(" -w -Zp4 -I%s", { get_eudir() })
-			l_flags &= sprintf(" -s -stack-reserve %d -stack-commit %d", { total_stack_size,
-				total_stack_size })
-
-			if lccopt_option then
-				c_flags &= " -O"
-			end if
-
-			if con_option then
-				l_flags &= " -subsystem console"
-			else
-				l_flags &= " -subsystem windows"
 			end if
 
 		case else
@@ -363,8 +339,6 @@ procedure write_emake()
 			puts(fh, "echo Compiling with DJGPP" & HOSTNL)
 		case COMPILER_GCC then
 			puts(fh, "echo Compiling with GCC" & HOSTNL)
-		case COMPILER_LCC then
-			puts(fh, "echo Compiling with LCC" & HOSTNL)
 		case COMPILER_WATCOM then
 			puts(fh, "echo Compiling with Watcom" & HOSTNL)
 	end switch
@@ -389,7 +363,7 @@ procedure write_emake()
 			continue
 		end if
 
-		if compiler_type = COMPILER_WATCOM or compiler_type = COMPILER_LCC then
+		if compiler_type = COMPILER_WATCOM then
 			puts(fh, " FILE ")
 		end if
 

@@ -32,7 +32,7 @@
 #    include <sys\types.h>
 #    include <sys\stat.h>
 #  endif
-#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(EDJGPP) && !defined(EMINGW)
 #    include <i86.h>
 #    include <bios.h>
 #    include <graph.h>
@@ -96,7 +96,7 @@ extern char *EMalloc();
 #else
 #include "alloc.h"
 #endif
-#ifndef EWINDOWS // !defined(ELCC)
+#ifndef EWINDOWS 
 extern void *malloc();
 #endif
 
@@ -186,14 +186,10 @@ void be_init()
 
 	EuConsole = (getenv("EUCONS") != NULL && atoi(getenv("EUCONS")) == 1);
 	clocks_per_sec = CLOCKS_PER_SEC;
-#ifdef ELCC 
-	clk_tck = CLOCKS_PER_SEC;
-#else   
 #ifdef CLK_TCK
 	clk_tck = CLK_TCK;
 #else
 	clk_tck = sysconf(_SC_CLK_TCK);
-#endif
 #endif
 
 #define TempErrName_len (30)
@@ -215,9 +211,9 @@ void be_init()
 			p[p_size] = 0; // ensure NULL
 			eudir = p;
 		}
-#else
+#else // EUNIX
 		eudir = "\\EUPHORIA";
-#endif
+#endif // EUNIX
 	}
 	
 #if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)

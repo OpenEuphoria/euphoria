@@ -56,11 +56,6 @@ extern struct arg_info *c_routine; /* array of c_routine structs */
 #define  pop() asm( "movl %0,%%ecx; addl (%%ecx),%%esp;" : /* no out */ : "r"(as_offset) : "%ecx" )
 #endif  // EUNIX
 
-#ifdef ELCC
-#define push() _asm("pushl -8(%ebp)")
-#define  pop() _asm("addl -36(%ebp), %esp")
-#endif
-
 #ifdef EDJGPP
 #define push() asm("pushl -4(%ebp)")
 #define pop() 

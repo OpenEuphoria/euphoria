@@ -24,21 +24,17 @@
 #    include <gpm.h>
 #  endif
 #else
-#  if !defined(ELCC) && !defined(EMINGW)
+#  if !defined(EMINGW)
 #    include <bios.h>
 #  endif
 #  ifdef EDJGPP
 #    include <go32.h>
 #    include <allegro.h>
 #  endif
-#  if !defined(EDJGPP) && !defined(ELCC) && !defined(EMINGW)
+#  if !defined(EDJGPP) && !defined(EMINGW)
 #    include <graph.h>
 #  endif
-#  ifdef ELCC
-#    include <conio.h>
-#  else
-#    include <dos.h>
-#  endif
+#  include <dos.h>
 #  include <process.h>
 #endif
 //#include <malloc.h>
@@ -530,7 +526,7 @@ extern int color_trace;
 
 #if !defined(EDJGPP) && !defined(EBSD62)
 #undef matherr // avoid OpenWATCOM problem
-#if (defined(ELCC) || defined(EWATCOM) || defined(EUNIX)) && !defined(EOW)
+#if (defined(EWATCOM) || defined(EUNIX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
 #else
 int matherr(struct _exception *err)  // OW wants this
@@ -4473,7 +4469,7 @@ int get_key(int wait)
 #endif
 
 #ifdef EWINDOWS
-#if defined(ELCC) || defined(EMINGW)
+#if defined(EMINGW)
 		if (wait || winkbhit()) {
 			SetConsoleMode(console_input, ENABLE_PROCESSED_INPUT);
 			a = wingetch();
@@ -5595,7 +5591,7 @@ void UserCleanup(int status)
 static unsigned char one_line[84];
 static unsigned char *next_char_ptr = NULL;
 
-#if defined(ELCC) || defined(EMINGW)
+#if defined(EMINGW)
 int winkbhit()
 /* kbhit for Windows GUI apps */
 {
@@ -5619,7 +5615,7 @@ int winkbhit()
 int wingetch()
 // Windows - read next char from keyboard
 {
-#if defined(ELCC) || defined(EMINGW)
+#if defined(EMINGW)
 	int c;
 
 	c = MyReadConsoleChar();

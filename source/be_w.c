@@ -30,7 +30,7 @@
 #    include <go32.h>
 #    include <allegro.h>
 #  else
-#    if !defined(ELCC) && !defined(EMINGW)
+#    if !defined(EMINGW)
 #      include <graph.h>
 #    endif
 #  endif

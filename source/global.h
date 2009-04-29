@@ -106,7 +106,7 @@
 
 #define MAX_LONG 0x7fffffffL /* largest positive long integer */
 
-#if defined(ELCC) || defined(EDJGPP)
+#if defined(EDJGPP)
 #  define PATH_MAX 512
 #endif
 
@@ -117,22 +117,18 @@ struct time_info {
 	long tot_ticks;
 };
 
-#if defined(EUNIX) || defined(EDJGPP) || defined(ELCC) || defined(EMINGW)
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 #  define KEYBUFF_SIZE 50
 #  define __far
 #  define FAR
-#  if defined(ELCC)
-void show_console();
-#  else
-#    ifndef EMINGW
+#  ifndef EMINGW
 typedef int (*FARPROC)();
-#      define CALLBACK
-#      define WINAPI
-#    endif
-#  endif
+#    define CALLBACK
+#    define WINAPI
+#  endif // EMINGW
 #  define __interrupt
 #  define LRESULT long
-#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(EDJGPP) && !defined(EMINGW)
 #    define O_TEXT 0
 #    define HINSTANCE int
 #  endif

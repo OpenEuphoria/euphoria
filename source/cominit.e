@@ -102,22 +102,20 @@ export procedure show_usage()
 	if TRANSLATE then
 	msgtext = ##
 ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
-                          [-wat|-djg|-lcc|-gcc] [-com /compile_directory/]
+                          [-wat|-djg|-gcc] [-com /compile_directory/]
                           [-makefile] [-keep] [-debug] [-silent] [-o /output dir/]
                           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
                           [/os specific options/]:
 
               OS Specific Options:
                  DOS    :  [-djg|-wat] [-fastfp]
-                 Windows:  [-con] [-wat|-djg|-lcc|-gcc] [-dll]
+                 Windows:  [-con] [-wat|-djg|-gcc] [-dll]
                  Linux  :  [-gcc] [-dll]
                  OSX    :  [-gcc] [-dll]
                  SunOS  :  [-gcc] [-dll]
                  FreeBSD:  [-gcc] [-dll]
                  OpenBSD:  [-gcc] [-dll]
                  NetBSD :  [-gcc] [-dll]
-
-                 LCC Only: -lccopt-off
 
               Explainations:
                  -CON           : Don't create a new window when using the console

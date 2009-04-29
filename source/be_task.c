@@ -13,9 +13,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#ifdef ELCC
-#include <io.h>
-#endif
 #ifdef EWINDOWS
 #include <windows.h> /* for Sleep() */
 #endif
@@ -61,10 +58,6 @@
 // the read_esp_tc() macro. If not, fix the macro. Then move on to scheduler
 // and check that the C compiler's offset for "stack_top" matches the macros.
 
-// For Lcc, run lccelib.bat, but first edit the line that compiles be_task.c,
-// adding the -S flag. Then look at the be_task.asm file that results.
-// Remember to remove the -S flag when you are done.
-
 // For GNU C (Linux, FreeBSD), use the -S flag in gnulib (or bsdlib) 
 // when compiling be_task.c. That will give you an assembly listing .s file 
 // instead of a .obj file. Look for the #APP ... #NO_APP sections in the 
@@ -81,14 +74,6 @@
 #define read_esp() asm volatile("movl %%esp, %0" : "=r"(stack_top)  )
 // this strictly speaking isnt needed anymore but is here for historical reasons ("hysterical raisins", anyone?)
 #define read_esp_tc() asm("movl %%esp, %0" : "=r"(stack_top) : /* no in */ : "%esp" )
-#endif
-
-#ifdef ELCC
-#define push_regs() _asm("pushal")
-#define pop_regs() _asm("popal")
-#define set_esp() _asm("movl -20(%ebp), %esp")
-#define read_esp() _asm("movl %esp, -20(%ebp)")
-#define read_esp_tc() _asm("movl %esp, -52(%ebp)")
 #endif
 
 #ifdef EDJGPP
@@ -319,24 +304,24 @@ double Wait(double t)
 	double t3;
 	long itsme;
 	struct timespec req;
-#endif
+#endif // EUNIX
 	
 #ifdef EWINDOWS
 	t1 = floor(1000.0 * t);
 	t2 = t1 / 1000.0;
-#else
+#else // EWINDOWS
 	t1 = floor(t);
-#endif
+#endif // EWINDOWS
 #ifdef EUNIX
 	t2 = t - t1;
 	t3 = floor(1000000000.0 * t2);
-#endif
+#endif // EUNIX
 	if (t1 >= 1.0) {
 		it = t1; // overflow?
 #ifdef EWINDOWS
 		Sleep(it);
 		t -= t2;
-#else
+#else // EWINDOWS
 #ifdef EUNIX
 		itsme = (long)t3;
 		req.tv_sec = it;
@@ -348,7 +333,7 @@ double Wait(double t)
 		sleep(it);
 		t -= t1;
 #endif  // EUNIX
-#endif  // ELCC
+#endif // EWINDOWS
 	}
 	
 	// busy Wait for the last bit, < 1 sec

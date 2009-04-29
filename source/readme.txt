@@ -170,13 +170,6 @@ Specific Notes for each C compiler
 			Euphoria for Windows, exw.exe
 
 
-LCC
-===
-  build exw.exe with: lccexw.bat
-
-  The interactive trace, trace(1), works, but might need extra keypresses.
-
-
 WATCOM
 ======
   build exw.exe with: imakew.bat
@@ -274,7 +267,6 @@ Platforms:
 Compilers:
    EWATCOM
    EDJGPP
-   ELCC
    EMSVC
 
 Translator:
