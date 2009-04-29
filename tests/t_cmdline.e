@@ -19,7 +19,7 @@ end function
 -- Option definition
 sequence option_defs = {
     { "v", "verbose",  "Verbose output",   {MANDATORY,NO_PARAMETER} },
-    { 0  , "style",    "Style sheet file", {HAS_PARAMETER,NO_CASE} },
+    { 0  , "style",    "Style sheet file", {HAS_PARAMETER,"filename",NO_CASE} },
     { "c", "count",    "Count",            HAS_PARAMETER },
     { "d", "dummy",    "Dummy Test",       {ONCE}, routine_id("got_dummy") },
     { 0,    0,         "At least one file name is also required.", {MANDATORY}}

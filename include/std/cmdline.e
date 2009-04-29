@@ -76,10 +76,10 @@ function standardize_opts(sequence opts)
 			updated = 1
 		end if
 		
-		
+
 		if atom(opt[OPTIONS]) then
 			if equal(opt[OPTIONS], HAS_PARAMETER) then
-				opt[OPTIONS] = {HAS_PARAMETER}
+				opt[OPTIONS] = {HAS_PARAMETER,"x"}
 			else
 				opt[OPTIONS] = {}
 			end if
@@ -276,8 +276,10 @@ end function
 -- [[:Command line switches]]
 
 procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), integer std = 0)
-	integer pad_size, this_size
+	integer pad_size
+	integer this_size
 	sequence cmd
+	sequence param_name
 	integer has_param
 	integer is_mandatory
 	integer extras_mandatory = 0
@@ -290,6 +292,7 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 	pad_size = 0
 	for i = 1 to length(opts) do
 		this_size = 0
+		param_name = ""
 
 		if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
 			if find(MANDATORY, opts[i][OPTIONS]) then
@@ -317,8 +320,20 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 			this_size += 2 -- Allow for ", " between short and long names
 		end if
 
-		if find(HAS_PARAMETER, opts[i][OPTIONS]) then
-			this_size += 4 -- Allow for " = x"
+		has_param = find(HAS_PARAMETER, opts[i][OPTIONS]) 
+		if has_param != 0 then
+			this_size += 2 -- Allow for " "
+			if has_param < length(opts[i][OPTIONS]) then
+				has_param += 1
+				if sequence(opts[i][OPTIONS][has_param]) then
+					param_name = opts[i][OPTIONS][has_param]
+				else
+					param_name = "x"
+				end if
+			else
+				param_name = "x"
+			end if
+			this_size += 2 * length(param_name)
 		end if
 		
 
@@ -335,7 +350,19 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 			continue
 		end if
 		
-		has_param    = (find(HAS_PARAMETER, opts[i][OPTIONS]) != 0)
+		has_param    = find(HAS_PARAMETER, opts[i][OPTIONS])
+		if has_param != 0 then
+			if has_param < length(opts[i][OPTIONS]) then
+				has_param += 1
+				if sequence(opts[i][OPTIONS][has_param]) then
+					param_name = opts[i][OPTIONS][has_param]
+				else
+					param_name = "x"
+				end if
+			else
+				param_name = "x"
+			end if
+		end if
 		is_mandatory = (find(MANDATORY,     opts[i][OPTIONS]) != 0)
 		cmd = ""
 		
@@ -344,8 +371,8 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 				cmd &= '['
 			end if
 			cmd &= '-' & opts[i][SHORTNAME]
-			if has_param then
-				cmd &= " x"
+			if has_param != 0 then
+				cmd &= ' ' & param_name
 			end if
 			if not is_mandatory then
 				cmd &= ']'
@@ -358,8 +385,8 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 				cmd &= '['
 			end if
 			cmd &= "--" & opts[i][LONGNAME]
-			if has_param then
-				cmd &= "=x"
+			if has_param != 0 then
+				cmd &= '=' & param_name
 			end if
 			if not is_mandatory then
 				cmd &= ']'
@@ -427,14 +454,14 @@ end procedure
 
 -- show_help({
 --      {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
---      {"r", 0, "Sets how many lines the console should display", HAS_PARAMETER, -1}},
+--      {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},
 --      desc)
 -- </eucode>
 -- Outputs:
 --{{{
 -- myfile.ex options:
 -- -q, --silent      Suppresses any output to console
--- -r x              Sets how many lines the console should display
+-- -r lines          Sets how many lines the console should display
 -- Creates a file containing an analysis of the weather.
 -- The analysis includes temperature and rainfall data
 -- for the past week.
@@ -601,7 +628,10 @@ end function
 --     the option is optional, case-sensitive and can only occur once.
 --  ** If a **sequence**, it can containing zero or more processing flags in any order ...
 --   *** ##MANDATORY## to indicate that the option must always be supplied.
---   *** ##HAS_PARAMETER## to indicate that the option must have a parameter following it
+--   *** ##HAS_PARAMETER## to indicate that the option must have a parameter following it.
+--      You can optionally have a name for the parameter immediately follow the ##HAS_PARAMETER##
+--      flag. If one isn't there, the help text will show "x" otherwise it shows the
+--      supplied name.
 --   *** ##NO_CASE## to indicate that the case of the supplied option is not significant.
 --   *** ##ONCE## to indicate that the option must only occur once on the command line.
 --   *** ##MULTIPLE## to indicate that the option can occur any number of times on the command line.
