@@ -3653,12 +3653,12 @@ static object warning_file(object x)
 static object do_crash(object x)
 {
 	char *message;
-	int r;
 
 	message = malloc(SEQ_PTR(x)->length + 1);
-	MakeCString(message, x);
+	MakeCString(message, x, SEQ_PTR(x)->length + 1);
 	RTFatal(message);
 	free(message);
+
 	return ATOM_1;
 }
 
