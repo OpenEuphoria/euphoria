@@ -73,7 +73,7 @@ extern size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif
 
 #ifdef EBSD
-extern char *malloc_options="A"; // abort
+extern char *malloc_options;
 #endif
 
 #ifdef EUNIX

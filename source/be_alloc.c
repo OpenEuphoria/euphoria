@@ -59,6 +59,7 @@ extern unsigned default_heap;
 /**********************/
 /* Exported variables */
 /**********************/
+
 #ifdef EBSD
 char *malloc_options="A"; // abort
 #endif
