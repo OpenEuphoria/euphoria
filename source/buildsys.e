@@ -207,11 +207,17 @@ procedure write_objlink_file()
 	puts(fh, settings[SETUP_LFLAGS] & HOSTNL)
 	for i = 1 to length(generated_files) do
 		if match(".o", generated_files[i]) then
-			puts(fh, "FILE " & generated_files[i] & HOSTNL)
+			if compiler_type = COMPILER_WATCOM then
+				puts(fh, "FILE ")
+			end if
+
+			puts(fh, generated_files[i] & HOSTNL)
 		end if
 	end for
 
-	printf(fh, "NAME %s.exe" & HOSTNL, { file0 })
+	if compiler_type = COMPILER_WATCOM then
+		printf(fh, "NAME %s.exe" & HOSTNL, { file0 })
+	end if
 
 	close(fh)
 end procedure
@@ -295,7 +301,7 @@ procedure write_makefile_full()
 		for i = 1 to length(generated_files) do
 			printf(fh, "\tdel /q %s" & HOSTNL, { generated_files[i] })
 		end for
-		printf(fh, "\t del /q %s.lnk" & HOSTNL, { file0 })
+		printf(fh, "\tdel /q %s.lnk" & HOSTNL, { file0 })
 		puts(fh, HOSTNL)
 		puts(fh, ".c.obj: .autodepend" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
@@ -358,10 +364,12 @@ procedure write_emake()
 
 	switch compiler_type do
 		case COMPILER_DJGPP then
+			write_objlink_file()
 			puts(fh, "echo Compiling with DJGPP" & HOSTNL)
 		case COMPILER_GCC then
 			puts(fh, "echo Compiling with GCC" & HOSTNL)
 		case COMPILER_WATCOM then
+			write_objlink_file()
 			puts(fh, "echo Compiling with Watcom" & HOSTNL)
 	end switch
 
@@ -376,24 +384,26 @@ procedure write_emake()
 	printf(fh, "echo Linking %s" & HOSTNL, { file0 })
 	puts(fh, settings[SETUP_LEXE])
 
-	if compiler_type = COMPILER_WATCOM then
-		write_objlink_file()
+	switch compiler_type do
+		case COMPILER_WATCOM then
+			printf(fh, " @%s.lnk" & HOSTNL, { file0 })
 
-		printf(fh, " @%s.lnk" & HOSTNL, { file0 })
+		case COMPILER_DJGPP then
+			printf(fh, " -o%s.exe @%s.lnk" & HOSTNL, { file0, file0 })
 
-	else
-		printf(fh, " -o %s%s ", { file0, settings[SETUP_EXE_EXT] })
-		for i = 1 to length(generated_files) do
-			if generated_files[i][$] != 'c' then
-				continue
-			end if
+		case else
+			printf(fh, " -o %s%s ", { file0, settings[SETUP_EXE_EXT] })
+			for i = 1 to length(generated_files) do
+				if generated_files[i][$] != 'c' then
+					continue
+				end if
 
 
-			printf(fh, " %s.%s ", { filebase(generated_files[i]), settings[SETUP_OBJ_EXT] })
-		end for
+				printf(fh, " %s.%s ", { filebase(generated_files[i]), settings[SETUP_OBJ_EXT] })
+			end for
 
-		puts(fh, " " & settings[SETUP_LFLAGS] & HOSTNL)
-	end if
+			puts(fh, " " & settings[SETUP_LFLAGS] & HOSTNL)
+	end switch
 
 	if compiler_type = COMPILER_GCC then
 		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
@@ -415,7 +425,7 @@ procedure write_emake()
 			puts(fh, generated_files[i] & HOSTNL)
 		end for
 
-		if compiler_type = COMPILER_WATCOM then
+		if compiler_type = COMPILER_WATCOM or compiler_type = COMPILER_DJGPP then
 			printf(fh, "del /q %s.lnk" & HOSTNL, { file0 })
 		end if
 	end if
