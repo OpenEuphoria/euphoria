@@ -960,8 +960,8 @@ procedure opCALL_PROC() -- or opCALL_FUNC
     
     a = Code[pc+1]  -- routine id
     b = Code[pc+2]  -- argument list
-    if Code[pc] = CALL_FUNC and pc > length(Code)+3 then
-    	il( sprintf("%s: %s %s", {opnames[Code[pc]]} & names( a&b & Code[pc+3]) ), 3 )
+    if Code[pc] = CALL_FUNC and pc + 3 <= length(Code) then
+    	il( sprintf("%s: %s %s => %s", {opnames[Code[pc]]} & names( a&b & Code[pc+3]) ), 3 )
     else
     	il( sprintf("%s: %s %s", {opnames[Code[pc]]} & names( a&b) ), 2 )
     end if
