@@ -204,7 +204,6 @@ procedure write_objlink_file()
 	sequence settings = setup_build()
 	integer fh = open(output_dir & file0 & ".lnk", "wb")
 
-	puts(fh, settings[SETUP_LFLAGS] & HOSTNL)
 	for i = 1 to length(generated_files) do
 		if match(".o", generated_files[i]) then
 			if compiler_type = COMPILER_WATCOM then
@@ -218,6 +217,8 @@ procedure write_objlink_file()
 	if compiler_type = COMPILER_WATCOM then
 		printf(fh, "NAME %s.exe" & HOSTNL, { file0 })
 	end if
+
+	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
 
 	close(fh)
 end procedure
