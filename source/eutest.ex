@@ -23,7 +23,7 @@ ifdef DOS32 then
 end ifdef
 
 integer verbose_switch = 0
-
+object void
 integer ctcfh = 0
 sequence error_list = repeat({},4)
 
@@ -372,18 +372,16 @@ procedure do_test(sequence cmds)
 
 	sequence fail_list = {}
 	if log then
-		delete_file("unittest.dat") 
-		delete_file("unittest.log")
-		delete_file("ctc.log")
+		void = delete_file("unittest.dat")
+		void = delete_file("unittest.log")
+		void = delete_file("ctc.log")
 		ctcfh = open("ctc.log", "w")
 	end if
 
 	for i = 1 to length(files) do
-		? { 1, i, length(files) }
-
 		filename = files[i][D_NAME]
-		delete_file("ex.err")
-		delete_file("cw.err")
+		void = delete_file("ex.err")
+		void = delete_file("cw.err")
 
 		if 1 label "interpreter" then
 			sequence path_stack		
@@ -582,8 +580,8 @@ procedure do_test(sequence cmds)
 			if status = 0 and expected_status = 0 then
 				sequence exename = filename & dexe
 
-				delete_file(exename)
-				delete_file("cw.err")
+				void = delete_file(exename)
+				void = delete_file("cw.err")
 				verbose_printf(1, "compiling %s%s\n", {filename, ".c"})
 
 				emake_outcome = run_emake()
@@ -612,7 +610,7 @@ procedure do_test(sequence cmds)
 						end if -- sequence(token)
 					end if
 					
-					delete_file(exename)
+					void = delete_file(exename)
 				else
 					failed += 1
 					fail_list = append(fail_list, "compiling " & filename)					
@@ -632,8 +630,6 @@ procedure do_test(sequence cmds)
 
 			report_last_error(filename)
 		end if
-
-		? { 100, i, length(files) }
 	end for
 	
 	if log and ctcfh != -1 then
