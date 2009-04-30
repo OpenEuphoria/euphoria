@@ -147,3 +147,6 @@ mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
+
+# Copy the Makefile.gnu file to be the active Makefile
+cp Makefile.gnu Makefile

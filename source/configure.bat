@@ -1,7 +1,17 @@
 @echo off
 
 set BUILDDIR=.
+
+rem ============================================================
+rem Be sure to start with a blank config.wat
+rem by simply writing in a comment
+rem ============================================================
+
 echo # Configuration for Watcom > config.wat
+
+rem ============================================================
+rem Read command line parameters
+rem ============================================================
 
 :Loop
 IF "%1"=="" GOTO Continue
@@ -45,6 +55,12 @@ GOTO Help
 :EndLoop
 SHIFT
 GOTO Loop
+
+
+rem ============================================================
+rem Store our options to the config.wat file
+rem ============================================================
+
 :Continue
 IF "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat
@@ -63,36 +79,55 @@ IF exist %WINDIR%\command\deltree.exe (
 	echo RMDIR=deltree /y >> config.wat
 )
 IF not exist %BUILDDIR% mkdir %BUILDDIR%
-cd ..
-if exist source\%BUILDDIR% (
-	cd > source\%BUILDDIR%\config.wat.tmp
-	set /p PWD=<source\%BUILDDIR%\config.wat.tmp
-	del source\%BUILDDIR%\config.wat.tmp
-) else (
-	cd > %BUILDDIR%\config.wat.tmp
-	set /p PWD=<%BUILDDIR%\config.wat.tmp
-	del %BUILDDIR%\config.wat.tmp
-)
-set PWD > NUL
-cd source
 
-echo TRUNKDIR=%PWD% >> config.wat
-if "%BUILDDIR%" == "." (
-	echo BUILDDIR=%PWD%\source >> config.wat
-) else (
-	set TEMPCD=%PWD%
-	cd %BUILDDIR%
-	echo BUILDDIR=%PWD% >> config.wat
-	cd %TEMPCD%
-)
-if not exist %BUILDDIR%\transobj.wat copy transobj.dst %BUILDDIR%\transobj.wat
-if not exist %BUILDDIR%\intobj.wat copy intobj.dst %BUILDDIR%\intobj.wat
-if not exist %BUILDDIR%\backobj.wat copy backobj.dst %BUILDDIR%\backobj.wat
-if not exist %BUILDDIR%\dosobj.wat copy dosobj.dst %BUILDDIR%\dosobj.wat
-if not exist %BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %BUILDDIR%\dosbkobj.wat
-if not exist %BUILDDIR%\dostrobj.wat copy dostrobj.dst %BUILDDIR%\dostrobj.wat
+rem ============================================================
+rem Get the full build directory name
+rem ============================================================
+
+cd %BUILDDIR%
+cd > config.wat.tmp
+set /p FULL_BUILDDIR=<config.wat.tmp
+del config.wat.tmp
+
+rem ============================================================
+rem Going back to the source directory
+rem ============================================================
+
+cd %TRUNKDIR%\source
+
+rem ============================================================
+rem Writing our final configuration vars
+rem ============================================================
+
+echo TRUNKDIR=%TRUNKDIR% >> config.wat
+echo BUILDDIR=%FULL_BUILDDIR% >> config.wat
+
+rem ============================================================
+rem Copy temporary .wat includes
+rem ============================================================
+
+if not exist %FULL_BUILDDIR%\transobj.wat copy transobj.dst %FULL_BUILDDIR%\transobj.wat
+if not exist %FULL_BUILDDIR%\intobj.wat copy intobj.dst %FULL_BUILDDIR%\intobj.wat
+if not exist %FULL_BUILDDIR%\backobj.wat copy backobj.dst %FULL_BUILDDIR%\backobj.wat
+if not exist %FULL_BUILDDIR%\dosobj.wat copy dosobj.dst %FULL_BUILDDIR%\dosobj.wat
+if not exist %FULL_BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %FULL_BUILDDIR%\dosbkobj.wat
+if not exist %FULL_BUILDDIR%\dostrobj.wat copy dostrobj.dst %FULL_BUILDDIR%\dostrobj.wat
+
+rem ============================================================
+rem Copy the Watcom Makefile to the active Makefile
+rem ============================================================
+
+copy Makefile.wat Makefile
+
+rem ============================================================
+rem All Done
+rem ============================================================
 
 GOTO Completed
+
+rem ============================================================
+rem Display Help
+rem ============================================================
 
 :Help
 echo Configures and prepares the euphoria source for building
@@ -108,5 +143,9 @@ echo     --build value       set the build directory
 echo     --full
 echo     --debug             turn debugging on
 echo.
+
+rem ============================================================
+rem Batch file is all done
+rem ============================================================
 
 :Completed
