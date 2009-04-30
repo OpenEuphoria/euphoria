@@ -81,13 +81,23 @@ IF exist %WINDIR%\command\deltree.exe (
 IF not exist %BUILDDIR% mkdir %BUILDDIR%
 
 rem ============================================================
+rem Get the full trunk directory name
+rem ============================================================
+
+cd ..
+cd > config.tmp
+set /p TRUNKDIR=<config.tmp
+del config.tmp
+cd source
+
+rem ============================================================
 rem Get the full build directory name
 rem ============================================================
 
 cd %BUILDDIR%
-cd > config.wat.tmp
-set /p FULL_BUILDDIR=<config.wat.tmp
-del config.wat.tmp
+cd > config.tmp
+set /p FULL_BUILDDIR=<config.tmp
+del config.tmp
 
 rem ============================================================
 rem Going back to the source directory
