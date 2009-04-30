@@ -499,7 +499,7 @@ procedure replace_temp( integer pc )
 			inline_temps[temp_num] = new_inline_var( -temp_num )
 		else
 			inline_temps[temp_num] = NewTempSym( TRUE )
-			Block_var( inline_temps[temp_num] )
+-- 			Block_var( inline_temps[temp_num] )
 		end if
 	end if
 	
