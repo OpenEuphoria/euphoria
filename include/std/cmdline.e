@@ -283,6 +283,7 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 	integer has_param
 	integer is_mandatory
 	integer extras_mandatory = 0
+	integer extras_opt = 0
 
 	if std = 0 then
 		opts = standardize_opts(opts)
@@ -295,8 +296,9 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 		param_name = ""
 
 		if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
+			extras_opt = i
 			if find(MANDATORY, opts[i][OPTIONS]) then
-				extras_mandatory = i
+				extras_mandatory = 1
 			end if
 			-- Ignore 'extras' record
 			continue
@@ -396,6 +398,22 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 		puts(1, opts[i][DESCRIPTION] & '\n')
 	end for
 
+	if extras_mandatory != 0 then
+		if length(opts[extras_opt][DESCRIPTION]) > 0 then
+			puts(1, opts[extras_opt][DESCRIPTION])
+			puts(1, '\n')
+		else
+			puts(1, "One or more additional arguments are also required\n")
+		end if
+	elsif extras_opt > 0 then
+		if length(opts[extras_opt][DESCRIPTION]) > 0 then
+			puts(1, opts[extras_opt][DESCRIPTION])
+			puts(1, '\n')
+		else
+			puts(1, "One or more additional arguments can be supplied.\n")
+		end if
+	end if
+	
 	if atom(add_help_rid) then
 		if add_help_rid >= 0 then
 			puts(1, "\n")
@@ -422,14 +440,6 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 		end if
 	end if
 	
-	if extras_mandatory != 0 then
-		if length(opts[extras_mandatory][DESCRIPTION]) > 0 then
-			puts(1, opts[extras_mandatory][DESCRIPTION])
-			puts(1, '\n')
-		else
-			puts(1, "One or more additional arguments are also required\n")
-		end if
-	end if
 end procedure
 
 --**
