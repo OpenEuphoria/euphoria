@@ -69,12 +69,12 @@ function run_emake()
 	object file
 
 	ifdef UNIX then
-		emake = read_lines("emake")
+		file = read_lines("emake")
 	elsedef
-		emake = read_lines("emake.bat")
+		file = read_lines("emake.bat")
 	end ifdef
 
-	if atom(emake) then
+	if atom(file) then
 		return 1
 	end if
 
@@ -106,7 +106,7 @@ function run_emake()
 			if status then
 				sequence source = ""
 
-				dl = match(".c", line)
+				integer dl = match(".c", line)
 				for ws = dl to 1 by -1 do
 					if line[ws] = ' ' then
 						source = line[ws+1..dl-1]
@@ -397,18 +397,18 @@ procedure do_test(sequence cmds)
 			control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "interpreter" &
 				SLASH & interpreter_os_name & SLASH & "control.err"
 
-			if file_exists(control_error_file) then
+			if not file_exists(control_error_file) then
 				-- try tests/t_test/UNIX/control.err
 				control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH &
 					interpreter_os_name & SLASH & "control.err"
 			end if
 
-			if file_exists(control_error_file) then
+			if not file_exists(control_error_file) then
 				-- try tests/t_test/control.err
 				control_error_file = filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "control.err"
 			end if
 
-			if file_exists(control_error_file) then
+			if not file_exists(control_error_file) then
 				-- don't try anything
 				control_error_file = 0
 			end if
