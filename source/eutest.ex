@@ -105,8 +105,8 @@ function run_emake()
 
 			if status then
 				sequence source = ""
-
 				integer dl = match(".c", line)
+
 				for ws = dl to 1 by -1 do
 					if line[ws] = ' ' then
 						source = line[ws+1..dl-1]
@@ -379,6 +379,8 @@ procedure do_test(sequence cmds)
 	end if
 
 	for i = 1 to length(files) do
+		? { 1, i, length(files) }
+
 		filename = files[i][D_NAME]
 		delete_file("ex.err")
 		delete_file("cw.err")
@@ -630,6 +632,8 @@ procedure do_test(sequence cmds)
 
 			report_last_error(filename)
 		end if
+
+		? { 100, i, length(files) }
 	end for
 	
 	if log and ctcfh != -1 then
