@@ -219,7 +219,7 @@ procedure do_test(sequence cmds)
 	object emake_outcome, files = {}
 	sequence filename, dexe, executable, cmd, ddir
 	sequence interpreter_options = ""
-	sequence translator_options = ""
+	sequence translator_options = "-silent -emake "
 	sequence test_options = ""
 	sequence translator = "", library = "", compiler = ""
 	sequence directory

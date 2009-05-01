@@ -362,7 +362,9 @@ procedure write_emake()
 		fname &= ".bat"
 	end if
 
-	printf(1, "Writing emake file %s%s\n", { output_dir, fname })
+	if not silent then
+		printf(1, "Writing emake file %s%s\n", { output_dir, fname })
+	end if
 
 	integer fh = open(output_dir & fname, "wb")
 	if fh = -1 then
