@@ -530,25 +530,6 @@ end procedure
 --   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_CMAKE]],
 --   [[:BUILD_MAKEFILE_FULL]], [[:BUILD_MAKEFILE]], [[:BUILD_EMAKE]]
 
-/*
-	if not silent then
-		screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
-		if TUNIX then
-			if dll_option then
-				screen_output(STDERR, "To build your shared library, type: ./emake\n")
-			else
-				screen_output(STDERR, "To build your executable file, type: ./emake\n")
-			end if
-		else
-			if dll_option then
-				screen_output(STDERR, "To build your .dll file, type: emake\n")
-			else
-				screen_output(STDERR, "To build your .exe file, type: emake\n")
-			end if
-		end if
-	end if
-*/
-
 export procedure write_buildfile()
 	switch build_system_type do
 		case BUILD_CMAKE then
