@@ -1,51 +1,76 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
---
--- Translator Routines for outputting C code
+--****
+-- == c_out.e: Translator Routines for outputting C code
+
 include global.e
 
--- gtype values, TRANSLATOR:
-export constant TYPE_NULL = 0,    -- initial value for ORing of types
-		 TYPE_INTEGER = 1, -- definitely in Euphoria integer form
-		 TYPE_DOUBLE = 2,  -- definitely in double form
-		 TYPE_ATOM = 4,    -- a value stored as either an integer or a double
-		 TYPE_SEQUENCE = 8,-- definitely a sequence 
-		 TYPE_OBJECT = 16  -- could be unknown or anything 
+--****
+-- === gtype values, TRANSLATOR
+
+export constant
+	--**
+	-- initial value for ORing of types
+	TYPE_NULL = 0,
+
+	--**
+	-- definitely in Euphoria integer form
+	TYPE_INTEGER = 1,
+
+	--**
+	-- definitely in double form
+	TYPE_DOUBLE = 2,
+
+	--**
+	-- a value stored as either an integer or a double
+	TYPE_ATOM = 4,
+
+	--**
+	-- definitely a sequence
+	TYPE_SEQUENCE = 8,
+
+	--**
+	-- could be unknown or anything
+	TYPE_OBJECT = 16  
 
 export boolean emit_c_output = FALSE
 export file c_code=-1, c_h
 export integer main_name_num = 0, init_name_num = 0
 export sequence novalue = {MININT, MAXINT} --, target= {0, 0}
 
-export procedure c_putc(integer c)
+--**
 -- output a byte of C source code 
+export procedure c_putc(integer c)
 	if emit_c_output then
 		puts(c_code, c)
 	end if
 end procedure
 
-export procedure c_hputs(sequence c_source)
+--**
 -- output a string of C source code to the .h file 
+export procedure c_hputs(sequence c_source)
 	if emit_c_output then
 		puts(c_h, c_source)    
 	end if
 end procedure
 
-export procedure c_puts(sequence c_source)
+--**
 -- output a string of C source code 
+export procedure c_puts(sequence c_source)
 	if emit_c_output then
 		puts(c_code, c_source)
 	end if
 end procedure
 
-export procedure c_hprintf(sequence format, integer value)
+--**
 -- output C source code to a .h file with (one) 4-byte formatted value
+export procedure c_hprintf(sequence format, integer value)
 	if emit_c_output then
 		printf(c_h, format, value)
 	end if
 end procedure
 
-export procedure c_printf(sequence format, object value)
+--**
 -- output C source code with (one) 4-byte formatted value (should allow multiple values later)
+export procedure c_printf(sequence format, object value)
 	if emit_c_output then
 		printf(c_code, format, value)
 	end if
@@ -57,8 +82,9 @@ constant CREATE_INF = "(1.0/sqrt(0.0))"
 constant CREATE_NAN1 = "sqrt(-1.0)",
 		 CREATE_NAN2 = "((1.0/sqrt(0.0)) / (1.0/sqrt(0.0)))"
 
+--**
+-- output C source code with (one) 8-byte formatted value
 export procedure c_printf8(atom value)
--- output C source code with (one) 8-byte formatted value 
 	sequence buff
 	integer neg, p
 	
@@ -110,14 +136,17 @@ export procedure c_printf8(atom value)
 	end if
 end procedure
 
+--**
+-- long term indent with braces
+export integer indent = 0
 
-export integer indent       -- long term indent with braces
-export integer temp_indent  -- just for next statement
-temp_indent = 0
-indent = 0
+--**
+-- just for next statement
+export integer temp_indent = 0
 
+--**
+-- Adjust indent before a statement
 export procedure adjust_indent_before(sequence stmt)
--- adjust indent before a statement 
 	integer p, i
 	boolean lb, rb
 	
@@ -128,6 +157,7 @@ export procedure adjust_indent_before(sequence stmt)
 	p = 1
 	lb = FALSE
 	rb = FALSE
+
 	while p <= length(stmt) and stmt[p] != '\n' do
 		if stmt[p] = '}' then
 			rb = TRUE
@@ -136,6 +166,7 @@ export procedure adjust_indent_before(sequence stmt)
 		end if
 		p += 1
 	end while
+
 	if rb and not lb then
 		indent -= 4
 	end if
@@ -145,15 +176,18 @@ export procedure adjust_indent_before(sequence stmt)
 		c_puts("    ")
 		i -= 4
 	end while
+
 	while i > 0 do 
 		c_putc(' ')
 		i -= 1
 	end while
+
 	temp_indent = 0    
 end procedure
 
+--**
+-- Adjust indent after a statement
 export procedure adjust_indent_after(sequence stmt)
--- adjust indent after a statement 
 	integer p
 	
 	if not emit_c_output then
@@ -166,13 +200,15 @@ export procedure adjust_indent_after(sequence stmt)
 			indent += 4
 			return
 		end if
+
 		p += 1
 	end while
+
 	if length(stmt) >= 3 and equal("if ", stmt[1..3]) then
 		temp_indent = 4
 	elsif length(stmt) >= 5 and equal("else", stmt[1..4]) and
-		  (stmt[5] = ' ' or stmt[5] = '\n') then
+		(stmt[5] = ' ' or stmt[5] = '\n')
+	then
 		temp_indent = 4
 	end if
 end procedure
-

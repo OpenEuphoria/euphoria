@@ -13,6 +13,7 @@ include std/math.e
 include std/os.e
 include std/filesys.e
 
+include buildsys.e
 include global.e
 include platform.e
 include reswords.e
@@ -1105,7 +1106,6 @@ end function
 export procedure add_file(sequence filename)
 	if match(".c", filename) then
 		filename = filename[1..$-2]
-
 	elsif find('.', filename) then
 		generated_files = append(generated_files, filename)
 		return
@@ -1113,7 +1113,7 @@ export procedure add_file(sequence filename)
 
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
-	if sequence(wat_path) then
+	if compiler_type = COMPILER_WATCOM then
 		obj_fname &= ".obj"
 	else
 		obj_fname &= ".o"
@@ -1126,7 +1126,6 @@ end procedure
 --**
 -- return TRUE if the corresponding C file will contain any code
 -- Note: top level code goes into main-.c   
-
 function any_code(integer file_no)
 	symtab_index s
 	
@@ -1228,8 +1227,7 @@ export function shrink_to_83( sequence s )
 end function
 
 export function truncate_to_83( sequence lfn )
-	integer dl
-	dl = find( '.', lfn )
+	integer dl = find( '.', lfn )
 	if dl = 0 and length(lfn) > 8 then
 		return lfn[1..8]
 	elsif dl = 0 and length(lfn) <= 8 then
@@ -1237,17 +1235,26 @@ export function truncate_to_83( sequence lfn )
 	elsif dl > 9 and dl + 3 <= length(lfn) then
 		return lfn[1..8] & lfn[dl..$]
 	else
-		CompileErr( "Cannot use the filename, " & lfn & ", under DOS.  Use the Windows version with -plat DOS instead.\n")
+		CompileErr( "Cannot use the filename, " & lfn & ", under DOS. " &
+			"Use the Windows version with -plat DOS instead.\n")
 	end if
 end function
 
 --**
 -- walk through the user-defined routines, computing types and
--- optionally generating code 
+-- optionally generating code
 export procedure GenerateUserRoutines()
 	symtab_index s, sp
 	integer next_c_char, q, temps
 	sequence buff, base_name, long_c_file, c_file
+
+	if not silent then
+		if Pass = 1 then
+			puts(1, "Translating code...\n")
+		end if
+
+		printf(1, "Pass %d of %d\n", { Pass, LAST_PASS })
+	end if
 
 	for file_no = 1 to length(file_name) do
 		if file_no = 1 or any_code(file_no) then 
@@ -1275,12 +1282,11 @@ export procedure GenerateUserRoutines()
 				c_file = truncate_to_83(c_file)
 			end ifdef
 
-			--if Pass = LAST_PASS and file_no > 1 then
 			if Pass = LAST_PASS then
 				c_file = unique_c_name(c_file)
 				add_file(c_file)
 			end if
-		
+
 			if file_no = 1 then
 				-- do the standard top-level files as well
 				if Pass = LAST_PASS then
@@ -1499,5 +1505,5 @@ export procedure GenerateUserRoutines()
 				s = SymTab[s][S_NEXT]
 			end while
 		end if
-	end for   
+	end for
 end procedure
