@@ -43,7 +43,11 @@ export enum
 
 	--**
 	-- prgname.cmake file for inclusion into a parent CMake project.
-	BUILD_CMAKE
+	BUILD_CMAKE,
+
+	--**
+	-- build directly from the translator
+	BUILD_BUILD
 
 --**
 -- Build system type. This defaults to the BUILD_EMAKE process for
@@ -221,6 +225,8 @@ procedure write_objlink_file()
 	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
 
 	close(fh)
+
+	generated_files = append(generated_files, file0 & ".lnk")
 end procedure
 
 --**
@@ -302,7 +308,6 @@ procedure write_makefile_full()
 		for i = 1 to length(generated_files) do
 			printf(fh, "\tdel /q %s" & HOSTNL, { generated_files[i] })
 		end for
-		printf(fh, "\tdel /q %s.lnk" & HOSTNL, { file0 })
 		puts(fh, HOSTNL)
 		puts(fh, ".c.obj: .autodepend" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
@@ -376,13 +381,14 @@ procedure write_emake()
 
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
-			printf(fh, "echo Compiling %s" & HOSTNL, { generated_files[i] })
+			printf(fh, "echo Compiling %2.0f%%%% %s" & HOSTNL, { 100 * (i / length(generated_files)),
+				generated_files[i] })
 			printf(fh, "%s %s %s" & HOSTNL, { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
 				generated_files[i] })
 		end if
 	end for
 
-	printf(fh, "echo Linking %s" & HOSTNL, { file0 })
+	printf(fh, "echo Linking 100%%%% %s" & HOSTNL, { file0 })
 	puts(fh, settings[SETUP_LEXE])
 
 	switch compiler_type do
@@ -425,10 +431,6 @@ procedure write_emake()
 
 			puts(fh, generated_files[i] & HOSTNL)
 		end for
-
-		if compiler_type = COMPILER_WATCOM or compiler_type = COMPILER_DJGPP then
-			printf(fh, "del /q %s.lnk" & HOSTNL, { file0 })
-		end if
 	end if
 
 	if compiler_type != COMPILER_GCC then
@@ -445,25 +447,147 @@ procedure write_emake()
 end procedure
 
 --**
+-- Build the translated code directly from this process
+
+procedure build_build()
+	sequence cmd, objs = "", settings = setup_build()
+	integer status
+
+	switch compiler_type do
+		case COMPILER_DJGPP then
+			write_objlink_file()
+			puts(1, "Compiling with DJGPP\n")
+		case COMPILER_GCC then
+			puts(1, "Compiling with GCC\n")
+		case COMPILER_WATCOM then
+			write_objlink_file()
+			puts(1, "Compiling with Watcom\n")
+	end switch
+
+	for i = 1 to length(generated_files) do
+		if generated_files[i][$] = 'c' then
+			printf(1, "Compiling %2.0f%% %s" & HOSTNL, { 100 * (i / length(generated_files)),
+				generated_files[i] })
+			cmd = sprintf("%s %s %s", { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
+				generated_files[i] })
+
+			status = system_exec(cmd, 0)
+			if status != 0 then
+				printf(2, "Couldn't compile file '%s'\n", { generated_files[i] })
+				printf(2, "Status: %d Command: %s\n", { status, cmd })
+				abort(1)
+			end if
+		elsif match(".o", generated_files[i]) then
+			objs &= " " & generated_files[i]
+		end if
+	end for
+
+	printf(1, "Linking 100%% %s\n", { file0 })
+	switch compiler_type do
+		case COMPILER_WATCOM, COMPILER_DJGPP then
+			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
+
+		case COMPILER_GCC then
+			cmd = sprintf("%s -o%s%s %s %s", { settings[SETUP_LEXE], file0, settings[SETUP_EXE_EXT],
+				objs, settings[SETUP_LFLAGS] })
+
+		case else
+			printf(2, "Unknown compiler type: %d\n", { compiler_type })
+			abort(1)
+	end switch
+
+	status = system_exec(cmd, 0)
+	if status != 0 then
+		printf(2, "Unable to link %s%s\n", { file0, settings[SETUP_EXE_EXT] })
+		printf(2, "Status: %d Command: %s\n", { status, cmd })
+		abort(1)
+	end if
+
+	if keep = 0 then
+		for i = 1 to length(generated_files) do
+			delete_file(generated_files[i])
+		end for
+	end if
+end procedure
+
+--**
 -- Call's a write_BUILDSYS procedure based on the compiler setting enum
 --
 -- See Also:
 --   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_CMAKE]],
 --   [[:BUILD_MAKEFILE_FULL]], [[:BUILD_MAKEFILE]], [[:BUILD_EMAKE]]
 
+/*
+	if not silent then
+		screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
+		if TUNIX then
+			if dll_option then
+				screen_output(STDERR, "To build your shared library, type: ./emake\n")
+			else
+				screen_output(STDERR, "To build your executable file, type: ./emake\n")
+			end if
+		else
+			if dll_option then
+				screen_output(STDERR, "To build your .dll file, type: emake\n")
+			else
+				screen_output(STDERR, "To build your .exe file, type: emake\n")
+			end if
+		end if
+	end if
+*/
+
 export procedure write_buildfile()
 	switch build_system_type do
 		case BUILD_CMAKE then
 			write_cmake()
 
+			if not silent then
+				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+				printf(1, "To build your project, include %s.cmake into a parent CMake project\n", {})
+			end if
+
 		case BUILD_MAKEFILE_FULL then
 			write_makefile_full()
+
+			if not silent then
+				sequence make_command
+				if compiler_type = COMPILER_WATCOM then
+					make_command = "wmake /f "
+				else
+					make_command = "make -f "
+				end if
+
+				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+				printf(1, "To build your project, type %s%s.mak\n", { make_command, file0 })
+			end if
 
 		case BUILD_MAKEFILE then
 			write_makefile()
 
+			if not silent then
+				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+				printf(1, "To build your project, include %s.mak into a larger Makefile project\n",
+					{ file0 })
+			end if
+
 		case BUILD_EMAKE then
 			write_emake()
+
+			if not silent then
+				sequence fname = "emake"
+				if TWINDOWS or TDOS then
+					fname &= ".bat"
+				end if
+
+				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+				printf(1, "To build your project, type %s\n", { fname })
+			end if
+
+		case BUILD_BUILD then
+			build_build()
+
+			sequence settings = setup_build()
+			printf(1, "\nTo run your project, type %s%s\n", { file0, settings[SETUP_EXE_EXT] })
 
 		case else
 			CompileErr("Unknown build file type")

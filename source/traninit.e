@@ -208,6 +208,9 @@ export procedure transoptions()
 			elsif equal("-CMAKEFILE", uparg) then
 				build_system_type = BUILD_CMAKE
 
+			elsif equal("-BUILD", uparg) then
+				build_system_type = BUILD_BUILD
+
 			elsif equal("-O", uparg) then
 				if i < Argc then
 					output_dir = Argv[i+1]
