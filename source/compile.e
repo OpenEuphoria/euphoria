@@ -11,6 +11,7 @@
 
 include std/filesys.e
 include std/io.e
+include std/sort.e
 
 include buildsys.e
 include c_decl.e
@@ -6674,7 +6675,7 @@ export procedure init_opcodes()
 		
 	end for
 end procedure
-include std/sort.e
+
 procedure do_exec(integer start_pc)
 -- generate code, starting at pc
 	pc = start_pc
@@ -7159,6 +7160,7 @@ procedure BackEnd(atom ignore)
 				c_stmt0("}\n")
 				init_name = sprintf("init-%d", init_name_num)
 				new_c_file(init_name)
+				add_file(init_name)
 				c_stmt0("init_literal")
 				c_printf("%d()\n", init_name_num)
 				c_stmt0("{\n")
