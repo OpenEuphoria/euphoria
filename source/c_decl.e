@@ -1305,14 +1305,15 @@ export procedure GenerateUserRoutines()
 			s = SymTab[TopLevelSub][S_NEXT]
 			while s do
 				if SymTab[s][S_FILE_NO] = file_no and 
-				SymTab[s][S_USAGE] != U_DELETED and
-				find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
+					SymTab[s][S_USAGE] != U_DELETED and
+					find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE})
+				then
 					-- a referenced routine in this file 
 			  
 					-- Check for oversize C file 
 					if Pass = LAST_PASS and 
-					   (cfile_size > MAX_CFILE_SIZE or 
-						(s != TopLevelSub and cfile_size > MAX_CFILE_SIZE/4 and 
+						(cfile_size > MAX_CFILE_SIZE or
+						(s != TopLevelSub and cfile_size > MAX_CFILE_SIZE/4 and
 						length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE))
 					then
 						-- start a new C file 
@@ -1323,6 +1324,7 @@ export procedure GenerateUserRoutines()
 							-- make it size 8
 							c_file &= " "
 						end if
+
 						if length(c_file) >= 8 then
 							c_file[7] = '_'
 							c_file[8] = file_chars[next_c_char]
@@ -1331,6 +1333,7 @@ export procedure GenerateUserRoutines()
 							if find('_', c_file) = 0 then
 								c_file &= "_ "
 							end if
+
 							c_file[$] = file_chars[next_c_char]
 						end if
 						

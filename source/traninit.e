@@ -1,4 +1,5 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--****
+-- == traninit.e: Initialize the translator
 --
 -- This module sets one of wat_path, or dj_path or none at all 
 -- to indicate gcc.  Using the command line options or environment variables
@@ -52,8 +53,9 @@ function upper(sequence s)
 	return s
 end function
 
-export procedure transoptions()
+--**
 -- set translator command-line options  
+export procedure transoptions()
 	integer i, option
 	sequence uparg
 	object s
@@ -360,8 +362,9 @@ procedure InitBackEnd(integer c)
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
+--**
+-- make sure the defines reflect the target platform
 procedure CheckPlatform()
-	-- make sure the defines reflect the target platform
 	OpDefines = remove(OpDefines,
 		find("_PLAT_START", OpDefines),
 		find("_PLAT_STOP", OpDefines))
