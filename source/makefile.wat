@@ -433,7 +433,7 @@ $(BUILDDIR)\eutestdr.wat : $(BUILDDIR)\eutestdr\main-.c
 $(BUILDDIR)\eutestdr\main-.c : $(TRUNKDIR)\source\eutest.ex $(BUILDDIR)\eutestdr
 	-$(RM) $(BUILDDIR)\eutestdr\*.*
 	cd  $(BUILDDIR)\eutestdr
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
+	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -emake -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\eutestdr :
@@ -641,14 +641,14 @@ $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_T
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -emake -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -emake -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !endif
 !endif

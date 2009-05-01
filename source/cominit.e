@@ -103,7 +103,7 @@ export procedure show_usage()
 	msgtext = ##
 ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
                           [-wat|-djg|-gcc] [-com /compile_directory/]
-                          [-makefile] [-makefile-full] [-cmakefile] [-build]
+                          [-emake] [-makefile] [-makefile-full] [-cmakefile]
                           [-keep] [-debug] [-silent] [-o /output dir/]
                           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
                           [/os specific options/]:
@@ -125,8 +125,6 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
                  -MAKEFILE-FULL : Generate a full Makefile for stand alone use
                  -CMAKEFILE     : Generate a <prgname>.cmake file that can be included
                                   into a larger CMake project
-                 -BUILD         : Generate no build file, instead compile the project
-                                  directly from euc.
 
 
 #

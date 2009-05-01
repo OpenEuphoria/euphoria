@@ -47,21 +47,27 @@ export enum
 
 	--**
 	-- build directly from the translator
-	BUILD_BUILD
+	BUILD_DIRECT
 
 --**
--- Build system type. This defaults to the BUILD_EMAKE process for
--- backward compatability.
+-- Build system type. This defaults to the BUILD_DIRECT
 
-export integer build_system_type = BUILD_EMAKE
+export integer build_system_type = BUILD_DIRECT
 
+--**
+-- Known/Supported compiler types
 export enum
 	COMPILER_UNKNOWN = 0,
 	COMPILER_GCC,
 	COMPILER_DJGPP,
 	COMPILER_WATCOM
 
+--**
+-- Compiler type flag for this invocation
 export integer compiler_type = COMPILER_UNKNOWN
+
+--**
+-- Compiler directory (only used for a few compilers)
 export sequence compiler_dir = ""
 
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT
@@ -449,7 +455,7 @@ end procedure
 --**
 -- Build the translated code directly from this process
 
-procedure build_build()
+procedure build_direct()
 	sequence cmd, objs = "", settings = setup_build(), cwd = current_dir()
 	integer status
 
@@ -590,8 +596,8 @@ export procedure write_buildfile()
 				printf(1, "To build your project, type %s\n", { fname })
 			end if
 
-		case BUILD_BUILD then
-			build_build()
+		case BUILD_DIRECT then
+			build_direct()
 
 			sequence settings = setup_build()
 			printf(1, "\nTo run your project, type %s%s\n", { file0, settings[SETUP_EXE_EXT] })
