@@ -450,7 +450,7 @@ end procedure
 -- Build the translated code directly from this process
 
 procedure build_build()
-	sequence cmd, objs = "", settings = setup_build()
+	sequence cmd, objs = "", settings = setup_build(), cwd = current_dir()
 	integer status
 
 	switch compiler_type do
@@ -463,6 +463,11 @@ procedure build_build()
 			write_objlink_file()
 			puts(1, "Compiling with Watcom\n")
 	end switch
+
+
+	if sequence(output_dir) and length(output_dir) > 0 then
+		chdir(output_dir)
+	end if
 
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
@@ -508,6 +513,8 @@ procedure build_build()
 			delete_file(generated_files[i])
 		end for
 	end if
+
+	chdir(cwd)
 end procedure
 
 --**
