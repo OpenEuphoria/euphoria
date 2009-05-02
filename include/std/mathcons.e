@@ -77,4 +77,3 @@ public constant
 	-- Negative Infinity
 	MINF     = - PINF
 
-? power(E, LN10)
