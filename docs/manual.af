@@ -54,6 +54,8 @@
 ../include/std/filesys.e
 ../include/std/io.e
 ../include/std/math.e
+../include/std/mathcons.e
+../include/std/rand.e
 ../include/std/mouse.e
 ../include/std/os.e
 ../include/std/pipeio.e
