@@ -179,7 +179,7 @@ type White_Char(object c)
 end type
 
 type Digit_Char(object c)
-	return ('0' <= c) and (c <= '9')
+	return (('0' <= c) and (c <= '9')) or (c = '_')
 end type
 
 type uHex_Char(object c)
@@ -211,7 +211,7 @@ type Alphanum_Char(object c)
 end type
 
 type Identifier_Char(object c)
-	return Alphanum_Char(c) or (c = '_')
+	return Alphanum_Char(c)
 end type
 
 ---------------------------------------------------------------------------------
@@ -243,10 +243,7 @@ function scan_white() -- returns TRUE if a blank line was parsed
 end function
 
 function scan_multicomment()
-	if (Look != '/') then return FALSE end if
-  	if (input[in+1] != '*') then return FALSE end if
-	scan_char() -- skip the *
-	scan_char()
+  	
 	Token[TTYPE] = T_COMMENT
 	Token[TDATA] = "/*"
 	while 1 do
@@ -350,7 +347,9 @@ function scan_hex()
 	Token[TFORM] = TF_HEX
 	scan_char()
 	while Hex_Char(Look) do
-		Token[TDATA] = Token[TDATA]*16 + hex_val(Look)
+		if Look != '_' then
+			Token[TDATA] = Token[TDATA]*16 + hex_val(Look)
+		end if
 		scan_char()
 	end while
 	if STRING_NUMBERS then Token[TDATA] = sprintf("#%x",{Token[TDATA]}) end if -- convert back to string format
@@ -362,7 +361,9 @@ function scan_integer()
  atom i
 	i = 0
 	while Digit_Char(Look) do
-		i = (i*10) + (Look-'0')
+		if (Look != '_') then
+			i = (i*10) + (Look-'0')
+		end if
 		scan_char()
 	end while
 	return i
@@ -370,12 +371,15 @@ end function
 
 function scan_fraction(atom v)
  atom d
+ 
 	if not Digit_Char(Look) then report_error(ERR_DECIMAL) return 0 end if
 	
 	d = 10
 	while Digit_Char(Look) do
-		v += (Look-'0')/d
-		d *= 10
+		if Look != '_' then
+			v += (Look-'0')/d
+			d *= 10
+		end if
 		scan_char()
 	end while
 	return v
@@ -416,6 +420,7 @@ function scan_number()
 		v = Token[TDATA]
 		if Look = '.' then
 			scan_char()
+			
 			Token[TDATA] = scan_fraction(Token[TDATA])
 			if ERR then return TRUE end if
 		end if
@@ -507,6 +512,7 @@ procedure next_token()
 				scan_char()
 			else -- .number
 				Token[TTYPE] = T_NUMBER
+				
 				Token[TDATA] = scan_fraction(0)
 				Token[TFORM] = TF_ATOM
 				if ERR then return end if
@@ -529,11 +535,12 @@ procedure next_token()
 				scan_char()
 			end while
 			if IGNORE_COMMENTS then	next_token() end if
+		elsif (Look = '*') and (Token[TTYPE] = T_DIVIDE) then -- check for multi-line comment
+			scan_multicomment()
 		end if
 
 	elsif scan_identifier() then
 	elsif scan_qchar() then
-	elsif scan_multicomment() then
 	elsif scan_string() then
 	elsif scan_multistring() then -- must be before scan_hex()
 	elsif scan_hex() then
