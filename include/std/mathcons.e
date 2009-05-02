@@ -10,55 +10,71 @@
 -- === Constants
 --
 
---**
--- Base of the natural logarithm
---
--- Example 1:
--- <eucode>
--- x = E
--- -- x is 2.718281828459045235
--- </eucode>
-
 public constant
-	E = 2.7182818284590452353602874
+	--** 
+	-- PI is the ratio of a circle's circumference to it's diameter.
+	--
+	-- PI = C / D  :: C = PI * D :: C = PI * 2 * R(radius)
+	PI        = 3.14159_26535_89793_23846,
+	--**
+	-- Quarter of PI
+	QUARTPI   = 0.78539_81633_97448_30962,
+	--**
+	-- Half of PI
+	HALFPI    = 1.57079_63267_94896_61923,
+	--**
+	-- Two times PI
+	TWOPI     = 6.28318_53071_79586_47692,
+	--**
+	-- PI ^ 2
+	PISQR     = 9.86960_44010_89358_61883,
+	--**
+	-- 1 / (sqrt(2PI))
+	INVSQ2PI  = 0.39894_22804_01433_67794,
+	--**
+	-- phi  => Golden Ratio = (1 + sqrt(5)) / 2
+	PHI       = 1.61803_39887_49894_84820,
+	--** Euler (e)
+	-- The base of the natural logarithm.
+	E            = 2.71828_18284_59045_23536,
+	--**
+	-- ln(2) :: 2 = power(E, LN2)
+	LN2       = 0.69314_71805_59945_30941,
+	--**
+	-- 1 / (ln(2))
+	INVLN2    = 1.44269_50408_88963_40736,
+	--**
+	-- ln(10) :: 10 = power(E, LN10)
+	LN10      = 2.30258_50929_94045_68401,
+	--**
+	-- 1 / ln(10)
+	INVLN10   = 0.43429_44819_03251_82765,
+	--**
+	-- sqrt(2)
+	SQRT2     = 1.41421_35623_73095_04880,
+	--**
+	-- sqrt(2)/ 2
+	HALFSQRT2 = 0.70710_67811_86547_52440,
+	--**
+	-- Square root of 3
+	SQRT3     = 1.73205_08075_68877_29353,
+	--**
+	-- Conversion factor: Degrees to Radians = PI / 180
+	DEGREES_TO_RADIANS  = 0.01745_32925_19943_29576,
+	--**
+	-- Conversion factor: Radians to Degrees = 180 / PI
+	RADIANS_TO_DEGREES   = 57.29577_95130_82320_90712,
+	--**
+	-- Gamma (Euler Gamma)	
+	EULER_GAMMA  = 0.57721_56649_01532_86061,
+	--**
+	-- sqrt(e)
+	SQRTE        = 1.64872_12707_00128_14684,
+	--**
+	-- Positive Infinity
+	PINF     = 1E308 * 1000,
+	--**
+	-- Negative Infinity
+	MINF     = - PINF
 
-
---**
--- PI
---
--- Comments:
--- Enough digits have been used to attain the maximum accuracy possible for a Euphoria atom.
---
--- Example 1:
--- <eucode>
--- x = PI 
--- -- x is 3.141592653589793238
--- </eucode>
-
-public constant
-	PI        = 3.141592653589793238462643
-
-public constant
-	--** Quarter of PI
-	QUARTPI   = 0.78539816339744830962,
-	--** Half of PI
-	HALFPI    = 1.57079632679489661923,
-	--** Two times PI
-	TWOPI     = 6.28318530717958647692
-
-public constant
-	LN2       = 0.69314718055994530941,
-	INVLN2    = 1 / LN2,
-	LN10      = 2.30258509299404568401,
-	INVLN10   = 1 / LN10,
-	SQRT2     = 1.41421356237309504880,
-	HALFSQRT2 = 0.70710678118654752440,
-	DEGREES_TO_RADIANS  = 0.01745329251994329576,
-	RADIANS_TO_DEGREES   = 1/DEGREES_TO_RADIANS,
-	EULER_GAMMA  = machine_func(47,{25,182,111,252,140,120,226,63}),
-	EULER_NORMAL = machine_func(47,{81,54,212,51,69,136,217,63})
-
-
-public constant
-	PINF     = 1E308 * 1000,       -- Plus infinity (used in several routines)
-	MINF     = - PINF             -- Minus infinity (used in several routines)
+? power(E, LN10)
