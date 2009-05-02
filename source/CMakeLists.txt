@@ -70,9 +70,9 @@ INCLUDE_DIRECTORIES( "${CMAKE_BINARY_DIR}" )
 INCLUDE_DIRECTORIES( "$ENV{EUDIR}" )
 
 ADD_CUSTOM_COMMAND(
-	OUTPUT be_rev.c
-	COMMAND ${INTERPRETER} "${CMAKE_SOURCE_DIR}/source/revget.ex"
-	WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" )
+    OUTPUT be_rev.c
+    COMMAND ${INTERPRETER} "${CMAKE_SOURCE_DIR}/source/revget.ex"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}" )
 
 #
 # Targets
@@ -87,12 +87,12 @@ SET( EU_BACKEND_SOURCES be_alloc.c be_callc.c be_decompress.c be_execute.c be_in
   be_machine.c be_main.c be_pcre.c be_rev.c be_rterror.c be_runtime.c be_socket.c be_symtab.c
   be_syncolor.c be_task.c be_w.c version.h )
 ADD_LIBRARY( eu_back STATIC ${EU_BACKEND_SOURCES} ${PCRE_SOURCES} )
+SET_TARGET_PROPERTIES( eu_back PROPERTIES COMPILE_FLAGS -DERUNTIME=1 )
 
 # Euphoria runtime library
 SET( EU_LIB_SOURCES be_alloc.c be_callc.c be_decompress.c be_inline.c be_machine.c be_pcre.c
   be_rev.c be_runtime.c be_socket.c be_task.c be_w.c version.h ${PCRE_SOURCES} )
 ADD_LIBRARY( eu STATIC ${EU_LIB_SOURCES} )
-SET_TARGET_PROPERTIES( eu PROPERTIES COMPILE_FLAGS -DERUNTIME=1 )
 
 INSTALL( TARGETS eu ARCHIVE DESTINATION bin COMPONENT core )
 

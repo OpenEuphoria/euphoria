@@ -103,7 +103,7 @@ export procedure show_usage()
 	msgtext = ##
 ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
                           [-wat|-djg|-gcc] [-com /compile_directory/]
-                          [-emake] [-makefile] [-makefile-full] [-cmakefile]
+                          [-emake] [-makefile] [-makefile-full] [-cmakefile] [-nobuild]
                           [-keep] [-debug] [-silent] [-o /output dir/]
                           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
                           [/os specific options/]:
@@ -120,6 +120,7 @@ ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd]
 
               Explainations:
                  -CON           : Don't create a new window when using the console
+                 -NOBUILD       : Don't create any build file, only generate code
                  -MAKEFILE      : Generate a <prgname>.mak file that can be included
                                   into a larger Makefile project
                  -MAKEFILE-FULL : Generate a full Makefile for stand alone use

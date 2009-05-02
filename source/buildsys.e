@@ -585,6 +585,11 @@ export procedure write_buildfile()
 			sequence settings = setup_build()
 			printf(1, "\nTo run your project, type %s%s\n", { file0, settings[SETUP_EXE_EXT] })
 
+		case BUILD_NONE then
+			printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+
+			-- Do not write any build file
+
 		case else
 			CompileErr("Unknown build file type")
 	end switch

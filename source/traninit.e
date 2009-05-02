@@ -213,6 +213,9 @@ export procedure transoptions()
 			elsif equal("-EMAKE", uparg) then
 				build_system_type = BUILD_EMAKE
 
+			elsif equal("-NOBUILD", uparg) then
+				build_system_type = BUILD_NONE
+
 			elsif equal("-O", uparg) then
 				if i < Argc then
 					output_dir = Argv[i+1]
