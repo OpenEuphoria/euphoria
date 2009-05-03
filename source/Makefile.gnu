@@ -484,7 +484,7 @@ endif
 
 ifeq "$(HASCHANGEDDIRECTORY)" "1"
 translate-here :
-	$(EXE) $(TRUNKDIR)/source/ec.ex -emake $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT) $(TRUNKDIR)/source/$(EU_TARGET)
+	$(EXE) $(TRUNKDIR)/source/ec.ex -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT) $(TRUNKDIR)/source/$(EU_TARGET)
 
 .PHONY : translate-here
 	
