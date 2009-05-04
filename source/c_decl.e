@@ -1250,10 +1250,14 @@ export procedure GenerateUserRoutines()
 
 	if not silent then
 		if Pass = 1 then
-			puts(1, "Translating code...\n")
+			puts(1, "Translating code, pass: ")
 		end if
 
-		printf(1, "Pass %d of %d\n", { Pass, LAST_PASS })
+		printf(1, "%d ", { Pass, LAST_PASS })
+
+		if Pass = LAST_PASS then
+			puts(1, "\n")
+		end if
 	end if
 
 	for file_no = 1 to length(file_name) do

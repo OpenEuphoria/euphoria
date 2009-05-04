@@ -248,7 +248,7 @@ procedure write_cmake()
 			puts(fh, " " & generated_files[i])
 		end if
 	end for
-	puts(fh, " )" & HOSTNL)
+	puts(fh, " )" & HOSTNL & HOSTNL)
 
 	printf(fh, "SET( %s_OBJECTS", { upper(file0) })
 	for i = 1 to length(generated_files) do
@@ -256,11 +256,16 @@ procedure write_cmake()
 			puts(fh, " " & generated_files[i])
 		end if
 	end for
+	puts(fh, " )" & HOSTNL & HOSTNL)
+
+	printf(fh, "SET( %s_GENERATED_FILES", { upper(file0) })
+	for i = 1 to length(generated_files) do
+		puts(fh, " " & generated_files[i])
+	end for
 	puts(fh, " )" & HOSTNL)
 
 	close(fh)
 end procedure
-
 
 procedure write_makefile_srcobj_list(integer fh)
 	printf(fh, "%s_SOURCES =", { upper(file0) })
@@ -269,13 +274,19 @@ procedure write_makefile_srcobj_list(integer fh)
 			puts(fh, " " & generated_files[i])
 		end if
 	end for
-	puts(fh, HOSTNL)
+	puts(fh, HOSTNL & HOSTNL)
 
 	printf(fh, "%s_OBJECTS =", { upper(file0) })
 	for i = 1 to length(generated_files) do
 		if match(".o", generated_files[i]) then
 			puts(fh, " " & generated_files[i])
 		end if
+	end for
+	puts(fh, HOSTNL & HOSTNL)
+
+	printf(fh, "%s_GENERATED_FILES = ", { upper(file0) })
+	for i = 1 to length(generated_files) do
+		puts(fh, " " & generated_files[i])
 	end for
 	puts(fh, HOSTNL)
 end procedure
@@ -305,14 +316,14 @@ procedure write_makefile_full()
 		printf(fh, "%s-clean: .SYMBOLIC" & HOSTNL, { file0 })
 		for i = 1 to length(generated_files) do
 			if match(".o", generated_files[i]) then
-				printf(fh, "\tdel /q %s" & HOSTNL, { generated_files[i] })
+				printf(fh, "\tdel %s" & HOSTNL, { generated_files[i] })
 			end if
 		end for
 		puts(fh, HOSTNL)
-		printf(fh, "%s-clean-all: .SYMBOLIC" & HOSTNL, { file0, file0 })
-		printf(fh, "\tdel /q %s%s" & HOSTNL, { file0, settings[SETUP_EXE_EXT] })
+		printf(fh, "%s-clean-all: .SYMBOLIC" & HOSTNL, { file0 })
+		printf(fh, "\tdel %s%s" & HOSTNL, { file0, settings[SETUP_EXE_EXT] })
 		for i = 1 to length(generated_files) do
-			printf(fh, "\tdel /q %s" & HOSTNL, { generated_files[i] })
+			printf(fh, "\tdel %s" & HOSTNL, { generated_files[i] })
 		end for
 		puts(fh, HOSTNL)
 		puts(fh, ".c.obj: .autodepend" & HOSTNL)
@@ -432,7 +443,7 @@ procedure write_emake()
 	if not keep then
 		for i = 1 to length(generated_files) do
 			if TWINDOWS or TDOS then
-				puts(fh, "del /q ")
+				puts(fh, "del ")
 			else
 				puts(fh, "rm ")
 			end if
@@ -539,7 +550,8 @@ export procedure write_buildfile()
 
 			if not silent then
 				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
-				printf(1, "To build your project, include %s.cmake into a parent CMake project\n", {})
+				printf(1, "To build your project, include %s.cmake into a parent CMake project\n",
+					{ file0 })
 			end if
 
 		case BUILD_MAKEFILE_FULL then
