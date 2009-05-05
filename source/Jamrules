@@ -1,0 +1,92 @@
+USER_LIBRARY = eu$(SUFLIB) ;
+
+if $(JAM_TOOLSET) = WATCOM
+{
+    CCFLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I.. /Ipcre
+        /dMANAGED_MEM /dEWINDOWS /dEOW /dEWATCOM ;
+}
+
+rule RuntimeLibrary
+{
+    local f ;
+
+    MkDir $(BUILD_DIR)\\$(<) ;
+
+    MakeLocate $(<:S=$(SUFLIB)) : $(BUILD_DIR) ;
+
+    for f in $(>) {
+        File $(BUILD_DIR)\\$(<)\\$(f:D=) : $(f) ;
+    }
+
+    local LocalFiles = $(>:R=$(BUILD_DIR)\\$(<):D=) ;
+
+    for f in [ FGristFiles $(LocalFiles:S=$(SUFOBJ)) ] {
+        CCFLAGS on $(f) = /dERUNTIME /dBACKEND ;
+    }
+
+    Library $(<:R=$(BUILD_DIR)) : $(LocalFiles) ;
+}
+
+rule NormalLibrary
+{
+    local f ;
+
+    MkDir $(BUILD_DIR)\\$(<) ;
+
+    MakeLocate $(<:S=$(SUFLIB)) : $(BUILD_DIR) ;
+
+    for f in $(>) {
+        File $(BUILD_DIR)\\$(<)\\$(f:D=) : $(f) ;
+    }
+
+    Library $(<:R=$(BUILD_DIR)) : $(>:R=$(BUILD_DIR)\\$(<):D=) ;
+}
+
+rule EuProgram
+{
+    local _s _t ;
+
+    # Add grist to file names
+    # Add suffix to exe
+
+    _s = [ FGristFiles $(>) ] ;
+    _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+
+    # so 'jam foo' works when it's really foo.exe
+
+    if $(_t) != $(<)
+    {
+        Depends $(<) : $(_t) ;
+        NotFile $(<) ;
+    }
+
+    # make compiled sources a dependency of target
+    Depends exe : $(_t) ;
+    Depends $(_t) : $(_s) ;
+
+    Clean clean : $(_t) ;
+    _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+
+    # so 'jam foo' works when it's really foo.exe
+
+    if $(_t) != $(<)
+    {
+        Depends $(<) : $(_t) ;
+        NotFile $(<) ;
+    }
+
+    MakeLocate $(_t) : $(BUILD_DIR) ;
+
+    SOURCE_FILE on $(1) = $(2) ;
+    OUTPUT_FILE on $(1) = $(<) ;
+
+    Depends all : $(<) ;
+    Depends $(<) : $(>) ;
+    Depends $(<) : $(3) ;
+    Depends $(<) : $(BUILD_DIR)\\$(USER_LIBRARY) ;
+}
+
+actions EuProgram
+{
+    euc $(EUC_FLAGS) -o $(OUTPUT_FILE) -builddir $(BUILD_DIR) -con $(SOURCE_FILE) -lib $(USER_LIBRARY)
+}
