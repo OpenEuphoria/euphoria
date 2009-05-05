@@ -107,7 +107,7 @@ public type regex(object o)
 end type
 
 --**
--- Return an allocated regular expression which must be freed using [[:free]]() when done.
+-- Return an allocated regular expression
 --
 -- Parameters:
 --   # ##pattern##: a sequence representing a human redable regular expression
@@ -131,7 +131,6 @@ end type
 --       if re:match(line) then
 --           -- code
 --       end if
---       re:free(proper_name)
 --   end while
 --   </eucode>
 --
@@ -157,23 +156,13 @@ end type
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
 -- See Also:
---   [[:free]], [[:find]], [[:find_all]]
+--   [[:find]], [[:find_all]]
 
 public function new(sequence pattern, object options=DEFAULT)
 	if sequence(options) then options = or_all(options) end if
 
 	return machine_func(M_PCRE_COMPILE, { pattern, options })
 end function
-
---**
--- Frees the memory used by a [[:regex]].
---
--- See Also:
---   [[:new]]
-
-public procedure free(regex re)
-	machine_proc(M_PCRE_FREE, { re })
-end procedure
 
 --****
 -- === Find/Match

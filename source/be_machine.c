@@ -5165,11 +5165,6 @@ object machine(object opcode, object x)
 			case M_PCRE_REPLACE:
 				return find_replace_pcre(x);
 
-			case M_PCRE_FREE:
-				free_pcre(x);
-				return 1;
-				break;
-
 			case M_EU_INFO:
 				return eu_info();
 

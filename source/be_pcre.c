@@ -144,11 +144,6 @@ object exec_pcre(object x ){
 	return MAKE_SEQ( s );
 }
 
-void free_pcre( object x ){
-	pcre *re = get_re(x);
-	(*pcre_free)(re);
-}
-
 #define FLAG_UP_CASE     1
 #define FLAG_DOWN_CASE   2
 #define FLAG_UP_NEXT     4
