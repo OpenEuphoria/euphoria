@@ -70,6 +70,10 @@ export integer compiler_type = COMPILER_UNKNOWN
 -- Compiler directory (only used for a few compilers)
 export sequence compiler_dir = ""
 
+--**
+-- Resulting executable name
+export sequence exe_name = ""
+
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT
 
 --**
@@ -208,11 +212,22 @@ function setup_build()
 end function
 
 --**
+-- Ensure exe_name contains data, if not copy file0
+
+procedure ensure_exename(sequence ext)
+	if length(exe_name) = 0 then
+		exe_name = file0 & ext
+	end if
+end procedure
+
+--**
 -- Write a objlink.lnk file for Watcom
 
 procedure write_objlink_file()
 	sequence settings = setup_build()
 	integer fh = open(output_dir & file0 & ".lnk", "wb")
+
+	ensure_exename(settings[SETUP_EXE_EXT])
 
 	for i = 1 to length(generated_files) do
 		if match(".o", generated_files[i]) then
@@ -225,7 +240,7 @@ procedure write_objlink_file()
 	end for
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "NAME %s.exe" & HOSTNL, { file0 })
+		printf(fh, "NAME %s" & HOSTNL, { exe_name })
 	end if
 
 	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
@@ -297,6 +312,8 @@ end procedure
 procedure write_makefile_full()
 	sequence settings = setup_build()
 
+	ensure_exename(settings[SETUP_EXE_EXT])
+
 	write_objlink_file()
 
 	integer fh = open(output_dir & file0 & ".mak", "wb")
@@ -310,7 +327,7 @@ procedure write_makefile_full()
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "%s%s: $(%s_OBJECTS)" & HOSTNL, { file0, settings[SETUP_EXE_EXT], upper(file0) })
+		printf(fh, "%s: $(%s_OBJECTS)" & HOSTNL, { exe_name, upper(file0) })
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean: .SYMBOLIC" & HOSTNL, { file0 })
@@ -321,7 +338,7 @@ procedure write_makefile_full()
 		end for
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all: .SYMBOLIC" & HOSTNL, { file0 })
-		printf(fh, "\tdel %s%s" & HOSTNL, { file0, settings[SETUP_EXE_EXT] })
+		printf(fh, "\tdel %s" & HOSTNL, { exe_name })
 		for i = 1 to length(generated_files) do
 			printf(fh, "\tdel %s" & HOSTNL, { generated_files[i] })
 		end for
@@ -331,7 +348,7 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s%s: $(%s_OBJECTS)" & HOSTNL, { file0, settings[SETUP_EXE_EXT], upper(file0) })
+		printf(fh, "%s: $(%s_OBJECTS)" & HOSTNL, { exe_name, upper(file0) })
 		printf(fh, "\t$(LINKER) -o %s%s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
 			file0, settings[SETUP_EXE_EXT], upper(file0) })
 		puts(fh, HOSTNL)
@@ -341,7 +358,7 @@ procedure write_makefile_full()
 		printf(fh, "\trm -rf $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
-		printf(fh, "\trm -rf $(%s_SOURCES) %s%s" & HOSTNL, { upper(file0), file0, settings[SETUP_EXE_EXT] })
+		printf(fh, "\trm -rf $(%s_SOURCES) %s" & HOSTNL, { upper(file0), exe_name })
 		puts(fh, HOSTNL)
 		puts(fh, "%.o: %.c" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
@@ -369,6 +386,9 @@ end procedure
 procedure write_emake()
 	sequence settings = setup_build()
 	sequence fname = "emake"
+
+	ensure_exename(settings[SETUP_EXE_EXT])
+
 	if TWINDOWS or TDOS then
 		fname &= ".bat"
 	end if
@@ -407,7 +427,7 @@ procedure write_emake()
 		end if
 	end for
 
-	printf(fh, "echo Linking 100%%%% %s" & HOSTNL, { file0 })
+	printf(fh, "echo Linking 100%%%% %s" & HOSTNL, { exe_name })
 	puts(fh, settings[SETUP_LEXE])
 
 	switch compiler_type do
@@ -415,15 +435,14 @@ procedure write_emake()
 			printf(fh, " @%s.lnk" & HOSTNL, { file0 })
 
 		case COMPILER_DJGPP then
-			printf(fh, " -o%s.exe @%s.lnk" & HOSTNL, { file0, file0 })
+			printf(fh, " -o%s @%s.lnk" & HOSTNL, { exe_name, file0 })
 
 		case else
-			printf(fh, " -o %s%s ", { file0, settings[SETUP_EXE_EXT] })
+			printf(fh, " -o %s ", { exe_name })
 			for i = 1 to length(generated_files) do
 				if generated_files[i][$] != 'c' then
 					continue
 				end if
-
 
 				printf(fh, " %s.%s ", { filebase(generated_files[i]), settings[SETUP_OBJ_EXT] })
 			end for
@@ -434,10 +453,10 @@ procedure write_emake()
 	if compiler_type = COMPILER_GCC then
 		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
 	else
-		printf(fh, "if not exist %s%s goto done" & HOSTNL, { file0, settings[SETUP_EXE_EXT] })
+		printf(fh, "if not exist %s goto done" & HOSTNL, { exe_name })
 	end if
 
-	printf(fh, "echo You can now use %s", { file0 })
+	printf(fh, "echo You can now use %s", { exe_name })
 	puts(fh, settings[SETUP_EXE_EXT] & HOSTNL)
 
 	if not keep then
@@ -471,6 +490,8 @@ end procedure
 procedure build_direct()
 	sequence cmd, objs = "", settings = setup_build(), cwd = current_dir()
 	integer status
+
+	ensure_exename(settings[SETUP_EXE_EXT])
 
 	switch compiler_type do
 		case COMPILER_DJGPP then
@@ -519,7 +540,7 @@ procedure build_direct()
 	end for
 
 	if not silent then
-		printf(1, "Linking 100%% %s\n", { file0 })
+		printf(1, "Linking 100%% %s\n", { exe_name })
 	end if
 
 	switch compiler_type do
@@ -527,8 +548,7 @@ procedure build_direct()
 			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
 
 		case COMPILER_GCC then
-			cmd = sprintf("%s -o%s%s %s %s", { settings[SETUP_LEXE], file0, settings[SETUP_EXE_EXT],
-				objs, settings[SETUP_LFLAGS] })
+			cmd = sprintf("%s -o%s %s %s", { settings[SETUP_LEXE], exe_name, objs, settings[SETUP_LFLAGS] })
 
 		case else
 			printf(2, "Unknown compiler type: %d\n", { compiler_type })
@@ -537,7 +557,7 @@ procedure build_direct()
 
 	status = system_exec(cmd, 0)
 	if status != 0 then
-		printf(2, "Unable to link %s%s\n", { file0, settings[SETUP_EXE_EXT] })
+		printf(2, "Unable to link %s\n", { exe_name })
 		printf(2, "Status: %d Command: %s\n", { status, cmd })
 		abort(1)
 	end if
@@ -609,11 +629,15 @@ export procedure write_buildfile()
 		case BUILD_DIRECT then
 			build_direct()
 
-			sequence settings = setup_build()
-			printf(1, "\nTo run your project, type %s%s\n", { file0, settings[SETUP_EXE_EXT] })
+			if not silent then
+				sequence settings = setup_build()
+				printf(1, "\nTo run your project, type %s\n", { exe_name })
+			end if
 
 		case BUILD_NONE then
-			printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+			if not silent then
+				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+			end if
 
 			-- Do not write any build file
 

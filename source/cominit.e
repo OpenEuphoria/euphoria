@@ -102,9 +102,9 @@ export procedure show_usage()
 	if TRANSLATE then
 	msgtext = ##
 ______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
-                          [-wat|-djg|-gcc] [-com /compile_directory/]
+                          [-wat|-djg|-gcc] [-com /compile_directory/] [-keep] [-debug]
                           [-emake] [-makefile] [-makefile-full] [-cmakefile] [-nobuild]
-                          [-keep] [-debug] [-silent] [-o /output dir/]
+                          [-silent] [-builddir /output dir/] [-o /exe name/]
                           [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
                           [/os specific options/]:
 

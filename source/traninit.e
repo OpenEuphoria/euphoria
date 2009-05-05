@@ -216,7 +216,7 @@ export procedure transoptions()
 			elsif equal("-NOBUILD", uparg) then
 				build_system_type = BUILD_NONE
 
-			elsif equal("-O", uparg) then
+			elsif equal("-BUILDDIR", uparg) then
 				if i < Argc then
 					output_dir = Argv[i+1]
 					add_switch( output_dir, 1 )
@@ -224,7 +224,17 @@ export procedure transoptions()
 					create_directory( output_dir )
 					output_dir &= '/'
 				else
-					puts(1, "-o expects a directory name\n")
+					puts(1, "-builddir expects a directory name\n")
+					abort(1)
+				end if
+
+			elsif equal("-O", uparg) then
+				if i < Argc then
+					exe_name = Argv[i+1]
+					add_switch(exe_name, 1)
+					move_args(i+1)
+				else
+					puts(1, "-o expects a filename\n")
 					abort(1)
 				end if
 
