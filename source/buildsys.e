@@ -472,18 +472,26 @@ procedure build_direct()
 	sequence cmd, objs = "", settings = setup_build(), cwd = current_dir()
 	integer status
 
-	if not silent then
-		switch compiler_type do
-			case COMPILER_DJGPP then
-				write_objlink_file()
+	switch compiler_type do
+		case COMPILER_DJGPP then
+			write_objlink_file()
+
+			if not silent then
 				puts(1, "Compiling with DJGPP\n")
-			case COMPILER_GCC then
+			end if
+
+		case COMPILER_GCC then
+			if not silent then
 				puts(1, "Compiling with GCC\n")
-			case COMPILER_WATCOM then
-				write_objlink_file()
+			end if
+
+		case COMPILER_WATCOM then
+			write_objlink_file()
+
+			if not silent then
 				puts(1, "Compiling with Watcom\n")
-		end switch
-	end if
+			end if
+	end switch
 
 	if sequence(output_dir) and length(output_dir) > 0 then
 		chdir(output_dir)
