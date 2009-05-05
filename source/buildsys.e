@@ -472,17 +472,18 @@ procedure build_direct()
 	sequence cmd, objs = "", settings = setup_build(), cwd = current_dir()
 	integer status
 
-	switch compiler_type do
-		case COMPILER_DJGPP then
-			write_objlink_file()
-			puts(1, "Compiling with DJGPP\n")
-		case COMPILER_GCC then
-			puts(1, "Compiling with GCC\n")
-		case COMPILER_WATCOM then
-			write_objlink_file()
-			puts(1, "Compiling with Watcom\n")
-	end switch
-
+	if not silent then
+		switch compiler_type do
+			case COMPILER_DJGPP then
+				write_objlink_file()
+				puts(1, "Compiling with DJGPP\n")
+			case COMPILER_GCC then
+				puts(1, "Compiling with GCC\n")
+			case COMPILER_WATCOM then
+				write_objlink_file()
+				puts(1, "Compiling with Watcom\n")
+		end switch
+	end if
 
 	if sequence(output_dir) and length(output_dir) > 0 then
 		chdir(output_dir)
@@ -490,8 +491,11 @@ procedure build_direct()
 
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
-			printf(1, "Compiling %2.0f%% %s" & HOSTNL, { 100 * (i / length(generated_files)),
-				generated_files[i] })
+			if not silent then
+				printf(1, "Compiling %2.0f%% %s" & HOSTNL, { 100 * (i / length(generated_files)),
+					generated_files[i] })
+			end if
+
 			cmd = sprintf("%s %s %s", { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
 				generated_files[i] })
 
@@ -506,7 +510,10 @@ procedure build_direct()
 		end if
 	end for
 
-	printf(1, "Linking 100%% %s\n", { file0 })
+	if not silent then
+		printf(1, "Linking 100%% %s\n", { file0 })
+	end if
+
 	switch compiler_type do
 		case COMPILER_WATCOM, COMPILER_DJGPP then
 			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
