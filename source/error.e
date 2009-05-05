@@ -31,6 +31,12 @@ export procedure Warning(sequence msg, integer mask, sequence args = {})
 	if display_warnings=0 then
 		return
 	end if
+	if not Strict_is_on or Strict_Override then
+		if find(mask, strict_only_warnings) then
+			return
+		end if
+	end if
+	
 	p = mask -- =0 for non maskable warnings - none implemented so far
 	if Strict_is_on and Strict_Override = 0 then
 		mask = 0

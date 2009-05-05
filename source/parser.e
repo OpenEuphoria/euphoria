@@ -46,7 +46,7 @@ integer SC1_patch          -- place to patch jump address for SC1 ops
 integer SC1_type           -- OR or AND
 integer start_index        -- start of current top level command
 
-object backed_up_tok       -- place to back up a token
+sequence backed_up_tok       -- place to back up a token
 integer FuncReturn         -- TRUE if a function return appeared
 export integer param_num          -- number of parameters and private variables
 					       -- in current procedure
@@ -198,7 +198,7 @@ export procedure InitParser()
 	CurrentSub = 0
 	CreateTopLevel()
 	EnterTopLevel()
-	backed_up_tok = UNDEFINED
+	backed_up_tok = {}
 	loop_stack = {}
 	stmt_nest = 0
 	loop_labels = {}
@@ -424,7 +424,7 @@ end procedure
 
 procedure putback(token t)
 -- push a scanner token back onto the input stream
-	backed_up_tok = t
+	backed_up_tok = append(backed_up_tok, t)
 end procedure
 
 sequence
@@ -460,7 +460,7 @@ function restore_parser()
 	if n=PAM_PLAYBACK then
 		return {}
 	end if
-	if sequence(backed_up_tok) then
+	if length(backed_up_tok) > 0 then
 		return x[1..$-1]
 	else
 		return x
@@ -474,7 +474,7 @@ procedure start_playback(sequence s)
 	tok_stack = append(tok_stack,backed_up_tok)
 	canned_index = 1
 	canned_tokens = s
-	backed_up_tok = UNDEFINED
+	backed_up_tok = {}
 	Parser_mode = PAM_PLAYBACK
 end procedure
 
@@ -566,9 +566,9 @@ function next_token()
 	token t
 	sequence s
 
-	if sequence(backed_up_tok) then
-		t = backed_up_tok
-		backed_up_tok = UNDEFINED
+	if length(backed_up_tok) > 0 then
+		t = backed_up_tok[$]
+		backed_up_tok = backed_up_tok[1 .. $-1]
 	elsif Parser_mode = PAM_PLAYBACK then
 		if canned_index <= length(canned_tokens) then
 			t = canned_tokens[canned_index]
@@ -822,7 +822,7 @@ procedure ParseArgs(symtab_index subsym)
 			on_arg += 1
 			private_list = append(private_list,name)
 			private_sym &= Top()
-			backed_up_tok = tok
+			backed_up_tok = {tok} -- ????
 		elsif tok[T_ID] != RIGHT_ROUND then
 			if SymTab[subsym][S_OPCODE] then
 				name = ""
@@ -882,8 +882,8 @@ procedure ParseArgs(symtab_index subsym)
 		  		    end for
 					-- all missing args had default values
 					short_circuit += 1
-					if backed_up_tok[T_ID] = PLAYBACK_ENDS then
-						backed_up_tok = UNDEFINED
+					if backed_up_tok[$][T_ID] = PLAYBACK_ENDS then
+						backed_up_tok = {}
 					end if
 					restore_parseargs_states()
 					return
@@ -3506,12 +3506,36 @@ procedure SubProg(integer prog_type, integer scope)
 
 		if tok[T_ID] != TYPE and tok[T_ID] != QUALIFIED_TYPE then
 			if tok[T_ID] = VARIABLE or tok[T_ID] = QUALIFIED_VARIABLE then
-				if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
-					tok[T_SYM] = - new_forward_reference( TYPE, tok[T_SYM] )
-				else
-					CompileErr("a type is expected here")
+				-- I've got a name of something, so let's see if the next token is also a name.
+				token temptok = next_token()
+				integer undef_type = 0
+				if temptok[T_ID] != TYPE and temptok[T_ID] != QUALIFIED_TYPE then
+					if temptok[T_ID] = VARIABLE or temptok[T_ID] = QUALIFIED_VARIABLE then
+						-- -- So there are two names next to each other.
+						if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
+							-- The first name is undefined so it might be a type
+							-- that is declared later on. So for now, let's assume that.
+							undef_type = - new_forward_reference( TYPE, tok[T_SYM] )
+						else
+							CompileErr("a type is expected here")
+						end if
+					end if
 				end if
-				
+				putback(temptok) -- Return whatever came after the name back onto the token stream.
+				if undef_type != 0 then
+					-- The name is assumed to be a forward declared type.
+					tok[T_SYM] = undef_type
+				else
+					-- The name is assumed to be an argument id.
+					putback(tok) -- put the name back onto the token stream
+					-- Convert the current token so it looks like "object" was found.
+					Warning(sprintf("%s:%d - argument '%s' is assumed to be an 'object'",
+								{name_ext(file_name[current_file_no]), line_number,
+								 SymTab[tok[T_SYM]][S_NAME]}),
+							def_arg_type_warning_flag, {})
+					tok[T_ID] = TYPE
+					tok[T_SYM] = object_type
+				end if
 			end if
 		end if
 		type_sym = tok[T_SYM]
@@ -4067,7 +4091,7 @@ export procedure real_parser(integer nested)
 
 		elsif id = END_OF_FILE then
 			if IncludePop() then
-				backed_up_tok = UNDEFINED
+				backed_up_tok = {}
 				PopGoto()
 				read_line()
 			else

@@ -1250,10 +1250,10 @@ export procedure GenerateUserRoutines()
 
 	if not silent then
 		if Pass = 1 then
-			puts(1, "Translating code, pass: ")
+			printf(1, "Translating code (%d passes), pass: ",  LAST_PASS)
 		end if
 
-		printf(1, "%d ", { Pass, LAST_PASS })
+		printf(1, "%d ", Pass)
 
 		if Pass = LAST_PASS then
 			puts(1, "\n")

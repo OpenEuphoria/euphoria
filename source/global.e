@@ -248,9 +248,21 @@ export enum
 	T_ID,
 	T_SYM
 
-export type token(sequence t)
+export type token(object t)
 -- scanner token
-	return length(t) = 2 and integer(t[T_ID]) and symtab_index(t[T_SYM])
+	if atom(t) then
+		return FALSE
+	end if
+	if length(t) != 2 then
+		return FALSE
+	end if
+	if not integer(t[T_ID]) then
+		return FALSE
+	end if
+	if symtab_index(t[T_SYM]) = 0 then
+		return FALSE
+	end if
+	return TRUE
 end type
 
 export type file(integer f)
@@ -293,7 +305,8 @@ export constant -- maskable warning flags
 	mixed_profile_warning_flag	= #0400,
 	empty_case_warning_flag     = #0800,
 	no_case_else_warning_flag   = #1000,
-	all_warning_flag            = #1FFF
+	def_arg_type_warning_flag   = #2000,
+	all_warning_flag            = #2FFF
 
 constant default_maskable_warnings =
 	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
@@ -317,6 +330,10 @@ export constant warning_flags = {
 	no_case_else_warning_flag,
 	all_warning_flag
 }
+
+export constant strict_only_warnings = {
+	def_arg_type_warning_flag
+	}
 
 export constant warning_names = {
 	"none",
