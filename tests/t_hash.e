@@ -1,9 +1,10 @@
 -- t_hash.e
 include std/unittest.e
 constant s = "Euphoria Programming Language brought to you by Rapid Deployment Software"
-constant n = {-9.123, -4, -3, -2, -1, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
-constant r = {
+constant hashalgo = {-9.123, -5, -4, -3, -2, -1, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
+constant expected = {
 {#B7F48C20,#F8C6DB45,#32EE1F21,#E99E6554,#70CA9A7C,#F0CA6A78,#D0FC1278,#A5472C74,#E9FC1361,#BF6F937D,#7C6C3F8F,#339E9365,#A547AC74,#EEE47627,#31046996}, -- (-9.123)
+{#3C0D29F1,#B99D68D8,#B53F7BDB,#3C0D29F0,#6D67AA1D,#27DC0C95,#2F451A8C,#04975F5F,#ABE977C9,#60FD495F,#42A636FF,#D197B438,#F3660E8B,#00000000,#E5E9967B}, -- (-5)
 {#F7D71B77,#00460046,#E5861F90,#F7D71B78,#00460046,#00620062,#00630063,#0C1802CE,#14D00483,#12460440,#209000AB,#009D009D,#0C98034E,#00000001,#30FD0A1E}, -- (-4)
 {#543F7601,#45014501,#991D2072,#543F7602,#00460046,#00620062,#00630063,#EAB31DB2,#B895C0C5,#FC2B0042,#FFE58A01,#FFFFFFBC,#6AB39DB2,#00000001,#489B1012}, -- (-3)
 {#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000,#00000000}, -- (-2)
@@ -38,10 +39,17 @@ test_data = append(test_data, ""								)
 test_data = append(test_data, s[1..5] & {{1,1.1,{2.23,9}}}		)
 
 
-for i = 1 to length(n) do
+for i = 1 to length(hashalgo) do
 	for x = 1 to length(test_data) do
-    	test_equal(sprintf("hash t=%d n=%d",{x,i}), r[i][x], hash(test_data[x], n[i]) )
+		ifdef SHOWHASH then
+    		printf(1, "#%08x,", hash(test_data[x], hashalgo[i]))
+    	elsedef
+    		test_equal(sprintf("hash test# %d hashalgo=%d",{x,i}), expected[i][x], hash(test_data[x], hashalgo[i]) )
+    	end ifdef
     end for
+    ifdef SHOWHASH then
+    	puts(1, "\n")
+    end ifdef
 end for
 
 

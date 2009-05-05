@@ -2685,6 +2685,170 @@ unsigned int calc_adler32(object a)
 	return ((lB << 16) | lA);
 }
 
+// hsieh32 hash is © Copyright 2004-2008 by Paul Hsieh , http://www.azillionmonkeys.com/qed/hash.html
+
+#include "stdint.h"
+#undef get16bits
+#if defined(__X86__) || defined(__i386__)
+#define get16bits(d) (*((const uint16_t *) (d)))
+#endif
+
+#if !defined (get16bits)
+#define get16bits(d) ((((unsigned int)(((const uint8_t *)(d))[1])) << 8)\
+                       +(unsigned int)(((const uint8_t *)(d))[0]) )
+#endif
+
+
+static unsigned int hsieh32(char *data, int len, unsigned int starthash)
+{
+
+ 	int rem;
+ 	unsigned int tmp;
+ 	unsigned int hash;
+
+    if (len <= 0 || data == NULL) return 0;
+ 	hash = starthash;
+    rem = len & 3;
+    len >>= 2;
+    /* Main loop */
+    for (;len > 0; len--) {
+        hash  += get16bits (data);
+        tmp    = (get16bits (data+2) << 11) ^ hash;
+        hash   = (hash << 16) ^ tmp;
+        data  += 4; // 2*sizeof (uint16_t);
+        hash  += hash >> 11;
+    }
+
+    /* Handle end cases */
+    switch (rem) {
+        case 3: hash += get16bits (data);
+                hash ^= hash << 16;
+                hash ^= data[sizeof (uint16_t)] << 18;
+                hash += hash >> 11;
+                break;
+        case 2: hash += get16bits (data);
+                hash ^= hash << 11;
+                hash += hash >> 17;
+                break;
+        case 1: hash += *data;
+                hash ^= hash << 10;
+                hash += hash >> 1;
+    }
+
+    /* Force "avalanching" of final 127 bits */
+    hash ^= hash << 3;
+    hash += hash >> 5;
+    hash ^= hash << 4;
+    hash += hash >> 17;
+    hash ^= hash << 25;
+    hash += hash >> 6;
+    
+    return hash;
+}
+
+static unsigned int calc_hsieh32(object a)
+{
+	long lSLen;
+	int tfi;
+	union TF
+	{
+		double ieee_double;
+		int    integer;
+		char tfc[8];
+	} tf;
+
+	object_ptr ap;
+	object av;
+	char *tempstr;
+	char *sp;
+	int slen;
+ 	unsigned int lHashVal;
+ 	int len;
+ 	char *data;
+ 	
+ 	if (IS_ATOM_INT(a)) {
+	 	tf.integer = a;
+	 	lHashVal = hsieh32(tf.tfc, 4, a*2 - 1);
+ 	}
+	else if (IS_ATOM_DBL(a)) {
+ 		tf.ieee_double = (DBL_PTR(a)->dbl);
+ 		lHashVal = hsieh32(tf.tfc, 8, 8);
+	}
+	else { /* input is a sequence */
+		slen = SEQ_PTR(a)->length;
+		if (slen == 0)
+			return 0;
+			
+		lHashVal = slen;
+		ap = SEQ_PTR(a)->base;
+		// Check for a byte array first.
+		tempstr = 0;
+		while (slen > 0) {
+			av = *(++ap);
+			slen--;
+			if (av == NOVALUE) {
+				break;  // we hit the end marker
+			}
+
+			if (IS_ATOM_INT(av)) {
+				if (av >= 0 && av <= 255) {
+					if (tempstr == 0) {
+						tempstr = malloc(SEQ_PTR(a)->length + 4);
+						sp = tempstr;
+					}
+					*sp = (char)av;
+					sp++;
+				}
+				else {
+					if (tempstr != 0) {
+						free(tempstr);
+						tempstr = 0;
+					}
+					break;
+				}
+			}
+			else {
+				if (tempstr != 0) {
+					free(tempstr);
+					tempstr = 0;
+				}
+				break;
+			}
+		}
+		if (tempstr != 0) {
+			lHashVal = hsieh32(tempstr, SEQ_PTR(a)->length, lHashVal);
+			free(tempstr);
+			tempstr = 0;
+		}
+		else {
+			slen = SEQ_PTR(a)->length;
+			ap = SEQ_PTR(a)->base;
+			while (slen > 0) {
+				av = *(++ap);
+				slen--;
+				if (av == NOVALUE) {
+					break;  // we hit the end marker
+				}
+	
+				if (IS_ATOM_INT(av)) {
+				 	tf.integer = av;
+				 	lHashVal = hsieh32(tf.tfc, 4, lHashVal);
+				}
+				else if (IS_ATOM_DBL(av)) {
+					tf.ieee_double = (DBL_PTR(av)->dbl);
+			 		lHashVal = hsieh32(tf.tfc, 8, lHashVal);
+				}
+				else {
+					lHashVal ^= calc_hsieh32(av);
+				}
+			}
+		}
+	}
+ 		
+
+	return lHashVal;
+}
+ 
 
 unsigned int calc_fletcher32(object a)
 {
@@ -2782,6 +2946,7 @@ object calc_hash(object a, object b)
    b ==> -2 MD5
    b ==> -3 Fletcher-32
    b ==> -4 Adler-32
+   b ==> -5 Hsieh-32
    b ==> >=0 and  <1 69096 + b
    b ==> >=1 hash = (hash * b + x)
 
@@ -2809,6 +2974,9 @@ object calc_hash(object a, object b)
 	object av, lv;
 
 	if (IS_ATOM_INT(b)) {
+		if (b == -5)
+			return make_atom32(calc_hsieh32(a));
+
 		if (b == -4)
 			return make_atom32(calc_adler32(a));
 

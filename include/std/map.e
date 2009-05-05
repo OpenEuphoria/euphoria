@@ -81,6 +81,7 @@ constant type_is_map   = "Eu:StdMap"
 -- Parameters:
 --		# ##source##: Any Euphoria object
 --		# ##algo##: A code indicating which algorithm to use.
+-- ** -5 uses Hsieh. Fastest and good dispersion
 -- ** -4 uses Fletcher. Very fast and good dispersion
 -- ** -3 uses Adler. Very fast and reasonable dispersion, especially for small strings
 -- ** -2 uses MD5 (not implemented yet) Slower but very good dispersion. 
@@ -94,7 +95,7 @@ constant type_is_map   = "Eu:StdMap"
 --
 -- Returns:
 --     An **integer**:
---        Except for the MD5 and SHA256 algorithms, this is a 30-bit integer.
+--        Except for the MD5 and SHA256 algorithms, this is a 32-bit integer.
 --     A **sequence**:
 --        MD5 returns a 4-element sequence of integers\\
 --        SHA256 returns a 8-element sequence of integers.
@@ -113,7 +114,8 @@ constant type_is_map   = "Eu:StdMap"
 -- === Hashing Algorithms
 
 public enum
-	FLETCHER32 = -4,
+	HSIEH32 = -5,
+	FLETCHER32,
 	ADLER32,
 	MD5,
 	SHA256
