@@ -881,6 +881,8 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				local_show_help(opts, add_help_rid, cmds, 1)
 				abort(1)
 			end if
+
+			continue
 		end if
 		
 		sequence opt = opts[find_result[1]]
