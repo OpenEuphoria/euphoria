@@ -60,8 +60,7 @@ sequence trans_opt_def = {
 	{ "emake", 0, "Generate a emake/emake.bat file to build project", { NO_CASE } },
 	{ "nobuild", 0, "Do not build the project nor write a build file", { NO_CASE } },
 	{ "builddir", 0, "Generate/compile all files in 'builddir'", { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "o", 0, "Set the output filename", { NO_CASE, HAS_PARAMETER, "filename" } },
-    { 0, 0, "Filename to translate", { MANDATORY } }
+	{ "o", 0, "Set the output filename", { NO_CASE, HAS_PARAMETER, "filename" } }
 }
 
 procedure translator_help()
@@ -188,6 +187,14 @@ export procedure transoptions()
 				exe_name = val
 		end switch
 	end for
+
+	if length(m:get(opts, "extras")) = 0 then
+		show_banner()
+		puts(2, "\nERROR: Must specify the file to be translated on the command line\n\n")
+		translator_help()
+
+		abort(1)
+	end if
 
 	finalize_command_line(opts)
 end procedure
