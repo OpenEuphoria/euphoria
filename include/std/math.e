@@ -1492,3 +1492,81 @@ public function gcd(atom p, atom q)
 		end if
     end while
 end function
+
+
+--****
+-- Floating Point
+--
+
+--**
+-- Compares two (sets of) numbers based on approximate equality.
+--
+-- Parameters:
+--		# ##p##: an object, one of the sets to consider
+--		# ##q##: an object, the other set.
+--      # ##epsilon##: an atom used to define the amount of inequality allowed.
+--           This must be a postive value. Default is 0.005
+--
+-- Returns:
+-- * 1 when p > (q + epsilon) : P is definitely greater than q.
+-- * -1 when p < (q - epsilon) : P is definitely less than q.
+-- * 0 when p >= (q - epsilon) and p <= (q + epsilon) : p and q are approximately equal.
+--
+-- Comments:
+-- This can be used to see if two numbers are near enough to each other.
+--
+-- Also, because of the way floating point numbers are stored, it not always possible
+-- express every real number exactly, especially after a series of arithmetic
+-- operations. You can use ##approx()## to see if two floating point numbers
+-- are almost the same value.
+--
+-- If ##p## and ##q## are both sequences, they must be the same length as each other.
+--
+-- If ##p## or ##q## is a sequence, but the other is not, then the result is a 
+-- sequence of results whose length is the same as the sequence argument.
+--
+-- Example 1:
+-- <eucode>
+-- ? approx(10, 33.33 * 30.01 / 100) --> 0 because 10 and 10.002333 are within 0.005 of each other
+-- ? approx(10, 10.001) -> 0 because 10 and 10.001 are within 0.005 of each other
+-- ? approx(10, {10.001,9.999, 9.98, 10.04}) --> {0,0,1,-1}
+-- ? approx({10.001,9.999, 9.98, 10.04}, 10) --> {0,0,-1,1}
+-- ? approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}) --> {-1,{1,1},1,-1}
+-- ? approx(23,32, 10) -> 0 because 23 and 32 are within 10 of each other.
+-- </eucode>
+--
+
+public function approx(object p, object q, atom epsilon = 0.005)
+
+	if sequence(p) then
+		if sequence(q) then
+			if length(p) != length(q) then
+				crash("approx(): Sequence arguments must be the same length")
+			end if
+			for i = 1 to length(p) do
+				p[i] = approx(p[i], q[i])
+			end for
+			return p
+		else
+			for i = 1 to length(p) do
+				p[i] = approx(p[i], q)
+			end for
+			return p
+		end if
+	elsif sequence(q) then
+			for i = 1 to length(q) do
+				q[i] = approx(p, q[i])
+			end for
+			return q
+	else
+		if p > (q + epsilon) then
+			return 1
+		end if
+		
+		if p < (q - epsilon) then
+			return -1
+		end if
+	
+		return 0
+	end if
+end function

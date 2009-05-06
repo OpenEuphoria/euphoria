@@ -115,7 +115,16 @@ test_equal("argth", log(3)/2, arctanh(0.5))
 
 test_true("Hex Literal #1", #abcdef = #ABCDEF)
 test_true("Hex Literal #2", #012345 = #012345)
-test_true("Hex Literal #3", #AbC = #aBc)
+test_true("Hex Literal #3", #01_23_45 = #012345)
+test_true("Hex Literal #4", #AbC = #aBc)
+
+
+test_equal("approx #1", 0, approx(10, 33.33 * 30.01 / 100))
+test_equal("approx #2", 0, approx(10, 10.001))
+test_equal("approx #3", {0,0,1,-1}, approx(10, {10.001,9.999, 9.98, 10.04}))
+test_equal("approx #4", {0,0,-1,1}, approx({10.001,9.999, 9.98, 10.04}, 10))
+test_equal("approx #5", {-1,{1,1},1,-1}, approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}))
+test_equal("approx #6", 0, approx(23,32, 10))
 
 test_report()
 
