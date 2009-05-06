@@ -182,6 +182,9 @@ export procedure transoptions()
 
 			case "builddir" then
 				output_dir = val
+				if find(output_dir[$], "/\\") = 0 then
+					output_dir &= '/'
+				end if
 
 			case "o" then
 				exe_name = val
