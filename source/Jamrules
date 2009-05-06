@@ -42,6 +42,21 @@ rule NormalLibrary
     Library $(<:R=$(BUILD_DIR)) : $(>:R=$(BUILD_DIR)\\$(<):D=) ;
 }
 
+actions RevGet
+{
+    eui revget.ex
+}
+
+rule MagicGet
+{
+    Depends $(<) : $(BUILD_DIR)\\eu\\be_execute.obj ;
+}
+
+actions MagicGet
+{
+    eui findjmp.ex be_magic.c $(BUILD_DIR)\\eu\\be_execute.obj ;
+}
+
 rule EuProgram
 {
     local _s _t ;
@@ -90,3 +105,4 @@ actions EuProgram
 {
     euc $(EUC_FLAGS) -o $(OUTPUT_FILE) -builddir $(BUILD_DIR) -con $(SOURCE_FILE) -lib $(USER_LIBRARY)
 }
+

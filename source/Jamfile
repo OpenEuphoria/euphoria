@@ -16,6 +16,9 @@ EU_TRANSLATOR_FILES =  buildsys.e c_decl.e c_out.e cominit.e compile.e compress.
 EU_BACKEND_FILES = intinit.e cominit.e backend.e pathopen.e compress.e backend.e
     error.e mode.e ;
 
+RevGet be_rev.c ;
+MagicGet be_magic.c ;
+
 NormalLibrary eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES) ;
 
 EuProgram eui : eu.ex : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) ;
