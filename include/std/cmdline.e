@@ -70,7 +70,7 @@ enum -- Record fields in 'opts' argument.
 
 
 -- Local routine to validate and reformat option records if they are not in the standard format.
-function standardize_opts(sequence opts)
+function standardize_opts(sequence opts, integer add_help_options=1)
 	integer lExtras = 0 -- Ensure that there is zero or one 'extras' record only.
 	
 	for i = 1 to length(opts) do
@@ -211,7 +211,7 @@ function standardize_opts(sequence opts)
 			exit
 		end if
 	end for
-	if not has_help then
+	if not has_help and add_help_options then
 		opts = append(opts, {"h", "help", "Display the command options", {HELP}, -1})
 		opts = append(opts, {"?", 0, "Display the command options", {HELP}, -1})
 	end if
@@ -324,7 +324,7 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 	integer extras_opt = 0
 
 	if std = 0 then
-		opts = standardize_opts(opts)
+		opts = standardize_opts(opts, add_help_rid != NO_HELP)
 	end if
 	
 	-- Calculate the size of the padding required to keep option text aligned.
@@ -899,7 +899,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					param = ""
 				end if
 				
-				if length(param) = 0 then
+				if length(param) = 0 and (validation = VALIDATE_ALL or (
+					validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0))
+				then
 					printf(1, "option '%s' must have a parameter\n\n", {find_result[2]})
 					local_show_help(opts, add_help_rid, cmds, 1)
 					abort(1)
@@ -924,7 +926,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			map:remove(parsed_opts, opt[MAPNAME])
 		else
 			if find(MULTIPLE, opt[OPTIONS]) = 0 then
-				if map:has(parsed_opts, opt[MAPNAME]) then
+				if map:has(parsed_opts, opt[MAPNAME]) and (validation = VALIDATE_ALL or
+					(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0))
+				then
 					printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
 					local_show_help(opts, add_help_rid, cmds, 1)
 					abort(1)
@@ -935,7 +939,6 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				map:put(parsed_opts, opt[MAPNAME], param, map:APPEND)
 			end if
 		end if
-		
 	end while
 
 	-- Check that all mandatory options have been supplied.
