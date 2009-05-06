@@ -90,7 +90,7 @@ export procedure transoptions()
 
 	for idx = 1 to length(opt_keys) do
 		sequence key = opt_keys[idx]
-		sequence val = m:get(opts, key)
+		object val = m:get(opts, key)
 
 		switch key do
 			case "silent" then
@@ -309,7 +309,7 @@ mode:set_init_backend( routine_id("InitBackEnd") )
 --**
 -- make sure the defines reflect the target platform
 procedure CheckPlatform()
-	OpDefines = remove(OpDefines,
+	OpDefines = eu:remove(OpDefines,
 		find("_PLAT_START", OpDefines),
 		find("_PLAT_STOP", OpDefines))
 	OpDefines &= GetPlatformDefines(1)

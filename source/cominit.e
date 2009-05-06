@@ -5,6 +5,7 @@ include euphoria/info.e
 
 include std/cmdline.e
 include std/filesys.e
+include std/io.e
 include std/search.e
 include std/text.e
 include std/map.e as m
@@ -15,6 +16,7 @@ include global.e
 include pathopen.e
 include platform.e
 
+export sequence src_name = ""
 export sequence switches = {}
 
 export sequence common_opt_def = {
@@ -36,6 +38,8 @@ export sequence common_opt_def = {
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
 	{ "wf", 0, "Write all warnings to the given file instead of STDOUT",
 				{ NO_CASE, HAS_PARAMETER, "filename" } },
+	{ "version", 0, "Display the version number",
+				{ NO_CASE } },
 	{ "copyright", 0, "Display all copyright notices",
 				{ NO_CASE } }
 }
@@ -55,6 +59,32 @@ procedure show_copyrights()
 	for i = 1 to length(notices) do
 		printf(2, "%s\n  %s\n\n", { notices[i][1], find_replace("\n", notices[i][2], "\n  ") })
 	end for
+end procedure
+
+--**
+export procedure show_banner()
+	if INTERPRET and not BIND then
+		screen_output(STDERR, "Euphoria Interpreter ")
+
+	elsif TRANSLATE then
+		screen_output(STDERR, "Euphoria to C Translator ")
+
+	elsif BIND then
+		screen_output(STDERR, "Euphoria Binder ")
+	end if
+	screen_output(STDERR, version_string_long() & "\n")
+
+	ifdef EU_MANAGED_MEM then
+		screen_output(STDERR, "Using Managed Memory")
+	elsedef
+		screen_output(STDERR, "Using System Memory")
+	end ifdef
+
+	object EuConsole = getenv("EUCONS")
+	if equal(EuConsole, "1") then
+		screen_output(STDERR, ", EuConsole")
+	end if
+	screen_output(STDERR, "\n")
 end procedure
 
 --**
@@ -85,7 +115,7 @@ export procedure handle_common_options(m:map opts)
 
 	for idx = 1 to length(opt_keys) do
 		sequence key = opt_keys[idx]
-		sequence val = m:get(opts, key)
+		object val = m:get(opts, key)
 
 		switch key do
 			case "i" then
@@ -135,6 +165,10 @@ export procedure handle_common_options(m:map opts)
 			case "warning-file" then
 				TempWarningName = val
 
+			case "version" then
+				show_banner()
+				abort(0)
+
 			case "copyright" then
 				show_copyrights()
 				abort(0)
@@ -162,5 +196,7 @@ export procedure finalize_command_line(m:map opts)
 			Argv = Argv[1..2] & Argv[eufile_pos..$]
 			Argc = length(Argv)
 		end if
+
+		src_name = extras[1]
 	end if
 end procedure

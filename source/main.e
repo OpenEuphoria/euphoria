@@ -22,35 +22,15 @@ include symtab.e
 include scanner.e
 include error.e
 
-function GetSourceName()
+--**
 -- record command line options, return source file number
+
+function GetSourceName()
 	integer src_file
 	boolean dot_found
-	sequence src_name
 
-	if Argc >= 3 then
-		src_name = Argv[3]
-	else
-		if INTERPRET and not BIND then
-			screen_output(STDERR, "Euphoria Interpreter ")
-
-		elsif TRANSLATE then
-			screen_output(STDERR, "Euphoria to C Translator ")
-		elsif BIND then
-			screen_output(STDERR, "Euphoria Binder ")
-		end if
-		screen_output(STDERR, version_string_long() & "\n")
-
-		ifdef EU_MANAGED_MEM then
-			screen_output(STDERR, "Using Managed Memory")
-		elsedef
-			screen_output(STDERR, "Using System Memory")
-		end ifdef
-		object EuConsole = getenv("EUCONS")
-		if equal(EuConsole, "1") then
-			screen_output(STDERR, ", EuConsole")
-		end if
-		screen_output(STDERR, "\n")
+	if length(src_name) = 0 then
+		show_banner()
 
 		return -2 -- No source file
 	end if
