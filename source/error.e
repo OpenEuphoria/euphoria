@@ -1,6 +1,5 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
--- Compile-time Error Handling
+--****
+-- == error.e: Compile-time Error Handling
 
 include std/io.e
 
@@ -18,13 +17,15 @@ export integer bp = 0         -- input line index of next character
 export integer forward_bp     -- cached line index for a possible forward reference   
 export sequence warning_list = {}
 
-export procedure screen_output(integer f, sequence msg)
+--**
 -- output messages to the screen or a file
+export procedure screen_output(integer f, sequence msg)
 	puts(f, msg)
 end procedure
 
-export procedure Warning(sequence msg, integer mask, sequence args = {})
+--**
 -- add a warning message to the list
+export procedure Warning(sequence msg, integer mask, sequence args = {})
 	integer p
 	sequence text, w_name
 
@@ -52,6 +53,7 @@ export procedure Warning(sequence msg, integer mask, sequence args = {})
 		else
 			w_name = "" -- not maskable
 		end if
+
 		if length(args) then
 			msg = sprintf(msg,args)
 		end if
@@ -60,12 +62,14 @@ export procedure Warning(sequence msg, integer mask, sequence args = {})
 		if find(text, warning_list) then
 			return -- duplicate
 		end if
+
 		warning_list = append(warning_list, text)
 	end if
 end procedure
 
 export procedure Log_warnings(object policy)
 	display_warnings = 1
+
 	if sequence(policy) then
 		if length(policy)=0 then
 			policy = STDERR
@@ -79,14 +83,16 @@ export procedure Log_warnings(object policy)
 	end if
 end procedure
 
-export function ShowWarnings(integer errfile)
+--**
 -- print the warnings to the screen (or ex.err)
+export function ShowWarnings(integer errfile)
 	integer c
 
 	if errfile=0 then
 		if display_warnings = 0 then
 			return length(warning_list)
 		end if
+
 		if integer(TempWarningName) then
 			errfile = STDERR
 		else
@@ -114,14 +120,17 @@ export function ShowWarnings(integer errfile)
 			puts(errfile, warning_list[i])
 		end if
 	end for
+
 	if errfile > STDERR then
 	    close(errfile)
 	end if
+
 	return length(warning_list)
 end function
 
-export procedure Cleanup(integer status)
+--**
 -- clean things up before quitting
+export procedure Cleanup(integer status)
 	integer w, show_error = 0
 
 	ifdef WIN32 or UNIX then
@@ -139,11 +148,13 @@ export procedure Cleanup(integer status)
 	abort(status)
 end procedure
 
-export procedure OpenErrFile()
+--**
 -- open the error diagnostics file - normally "ex.err"
+export procedure OpenErrFile()
     if TempErrFile != -1 then
 		TempErrFile = open(TempErrName, "w")
 	end if
+
 	if TempErrFile = -1 then
 		if length(TempErrName) > 0 then
 			screen_output(STDERR, "Can't create error message file: ")
@@ -154,11 +165,13 @@ export procedure OpenErrFile()
 	end if
 end procedure
 
-procedure ShowErr(integer f)
+--**
 -- Show place where syntax error occurred
+procedure ShowErr(integer f)
 	if length(file_name) = 0 then
 		return
 	end if
+
 	if ThisLine[1] = END_OF_FILE_CHAR then
 		screen_output(f, "<end-of-file>\n")
 	else
@@ -172,11 +185,13 @@ procedure ShowErr(integer f)
 			screen_output(f, " ")
 		end if
 	end for
+
 	screen_output(f, "^\n\n")
 end procedure
 
-export procedure CompileErr(sequence msg)
+--**
 -- Handle fatal compilation errors
+export procedure CompileErr(sequence msg)
 	sequence errmsg
 
 	Errors += 1
@@ -189,7 +204,8 @@ export procedure CompileErr(sequence msg)
 			errmsg &= '\n'
 		end if
 	end if
-		-- try to open err file *before* displaying diagnostics on screen
+
+	-- try to open err file *before* displaying diagnostics on screen
 	OpenErrFile() -- exits if error filename is ""
 	screen_output(STDERR, errmsg)
 	ShowErr(STDERR)
@@ -207,15 +223,17 @@ export procedure CompileErr(sequence msg)
 	Cleanup(1)
 end procedure
 
-procedure not_supported_compile(sequence feature)
+--**
 -- report feature not supported
+procedure not_supported_compile(sequence feature)
 	CompileErr(sprintf("%s is not supported in Euphoria for %s",
 					   {feature, version_name}))
 end procedure
 
-export procedure InternalErr(sequence msg)
+--**
 -- Handles internal compile-time errors
 -- see RTInternal() for run-time internal errors
+export procedure InternalErr(sequence msg)
 	if TRANSLATE then
 		screen_output(STDERR, sprintf("Internal Error: %s\n", {msg}))
 	else

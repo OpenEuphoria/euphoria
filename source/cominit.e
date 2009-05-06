@@ -4,6 +4,7 @@
 include euphoria/info.e
 
 include std/cmdline.e
+include std/error.e as error
 include std/filesys.e
 include std/io.e
 include std/search.e
@@ -136,7 +137,7 @@ export procedure handle_common_options(m:map opts)
 			case "strict" then
 				Strict_is_on = 1
 
-			case "warning" then
+			case "w" then
 				integer n = find(val, warning_names)
 				if n != 0 then
 					if option_w = 1 then
@@ -149,7 +150,7 @@ export procedure handle_common_options(m:map opts)
 					prev_OpWarning = OpWarning
 				end if
 
-			case "exclude-warning" then
+			case "x" then
 				integer n = find(val, warning_names)
 				if n != 0 then
 					if option_w = -1 then
@@ -162,8 +163,9 @@ export procedure handle_common_options(m:map opts)
 					prev_OpWarning = OpWarning
 				end if
 
-			case "warning-file" then
+			case "wf" then
 				TempWarningName = val
+			  	error:warning_file(TempWarningName)
 
 			case "version" then
 				show_banner()
