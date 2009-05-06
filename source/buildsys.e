@@ -456,8 +456,7 @@ procedure write_emake()
 		printf(fh, "if not exist %s goto done" & HOSTNL, { exe_name })
 	end if
 
-	printf(fh, "echo You can now use %s", { exe_name })
-	puts(fh, settings[SETUP_EXE_EXT] & HOSTNL)
+	printf(fh, "echo You can now use %s" & HOSTNL, { exe_name })
 
 	if not keep then
 		for i = 1 to length(generated_files) do
