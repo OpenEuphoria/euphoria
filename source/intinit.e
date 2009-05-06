@@ -1,60 +1,29 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
---
--- Common initialization (command line options)
+--****
+-- == intinit.e: Common command line initialization of interpreter
+
+include std/cmdline.e
 include std/text.e
+include std/map.e as m
 
 include global.e
 include cominit.e
 include error.e
 include pathopen.e
 
+sequence interpreter_opt_def = {
+    { 0, 0, "Filename to interpret", { MANDATORY } }
+}
+
 export procedure intoptions()
--- set interpreter command-line options
-	integer i, option
-	sequence uparg
-
-	object default_args = 0
-	-- put file first, strip out the options
-
-	i = 3
-	if i > Argc then
-		default_args = GetDefaultArgs()
-		if length(default_args) > 0 then
-			Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
-			Argc += length(default_args)
-		end if
-	end if
-	while i <= Argc do
-		if Argv[i][1] = '-' then
-			uparg = upper(Argv[i])
-			option = find( uparg, COMMON_OPTIONS )
-			if option then
-				common_options( option, i )
-			else
-				show_usage()
-				Warning("unknown option: %s" ,cmdline_warning_flag, {Argv[i]})
-			end if
-			add_switch( Argv[i], 0 )
-			-- delete "-" option from the list of args */
-			Argv[i .. Argc-1] = Argv[i+1 .. Argc ]
-			Argc -= 1
-
-		elsif atom(default_args) then
-			default_args = GetDefaultArgs()
-			if length(default_args) > 0 then
-				Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
-				Argc += length(default_args)
-			end if
-
-		else
-			exit -- first non "-" item is assumed to be the source file
-		end if
-	end while
-
-	if Strict_is_on then -- overrides any -W/-X switches
-		OpWarning = all_warning_flag
-		prev_OpWarning = OpWarning
+	if Argc < 3 then
+		Argv &= GetDefaultArgs()
+		Argc = length(Argv)
 	end if
 
+	expand_config_options()
+	m:map opts = cmd_parse(common_opt_def & interpreter_opt_def,
+		{ NO_VALIDATION_AFTER_FIRST_EXTRA }, Argv)
+
+	handle_common_options(opts)
+	finalize_command_line(opts)
 end procedure
-

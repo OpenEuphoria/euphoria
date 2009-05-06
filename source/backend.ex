@@ -128,9 +128,6 @@ procedure InputIL()
 	slist = fdecompress(0)
 	file_include = fdecompress(0)
 	switches = fdecompress(0)
-	for i = 1 to length(switches) do
-		add_switch( switches[i], 0 )
-	end for
 end procedure
 
 sequence cl, filename

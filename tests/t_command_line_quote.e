@@ -40,6 +40,7 @@ ifdef not EC then
  		cmds = { interpreter,
  			"print_command_line.ex" } & command_arrays[i]
 		cmdline = build_commandline( splice( cmds, option_switches(), 2 ) )
+		puts(1, cmdline & "\n")
  		system( cmdline, 2 )
  		fd = open( "command_line.txt", "r" )
  		if fd != -1 then

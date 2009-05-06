@@ -12,11 +12,14 @@
 -- variables and use the selected platform to determine which compiler must
 -- be used.
 
-include std/os.e
+include std/cmdline.e
+include std/error.e
 include std/filesys.e
 include std/get.e
-include std/error.e
+include std/map.e as m
+include std/os.e
 include std/sort.e
+include std/text.e
 
 -- Translator initialization
 include global.e
@@ -31,40 +34,88 @@ include pathopen.e
 include error.e
 include platform.e
 
--- true if we want to force the user to choose the compiler
-constant FORCE_CHOOSE = FALSE
-
-boolean help_option = FALSE
-
-sequence compile_dir = ""
-
 function extract_options(sequence s)
--- dummy    
 	return s
 end function
 set_extract_options( routine_id("extract_options") )
 
-function upper(sequence s)
-	for i=1 to length(s) do
-		if s[i]>='a' and s[i]<='z' then
-			s[i]-=('a'-'A')
-		end if
-	end for
-	return s
-end function
+sequence trans_opt_def = {
+	{ "silent", 0, "Do not display status messages", { NO_CASE } },
+	{ "wat", 0, "Set the compiler to Watcom", { NO_CASE } },
+	{ "djg", 0, "Set the compiler to DJGPP", { NO_CASE } },
+	{ "gcc", 0, "Set the compiler to GCC", { NO_CASE } },
+	{ "com", 0, "Set the compiler directory", { NO_CASE, HAS_PARAMETER, "dir" } },
+	{ "con", 0, "Create a console application", { NO_CASE } },
+	{ "dll", 0, "Create a shared library", { NO_CASE } },
+	{ "so", 0, "Create a shared library", { NO_CASE } },
+	{ "plat", 0, "Set the platform for the translated code", { NO_CASE, HAS_PARAMETER, "platform" } },
+	{ "lib", 0, "Use a non-standard library", { NO_CASE, HAS_PARAMETER, "filename" } },
+	{ "fastfp", 0, "Enable hardware FPU (DOS option only)", { NO_CASE } },
+	{ "stack", 0, "Set the stack size (Watcom)", { NO_CASE, HAS_PARAMETER, "size" } },
+	{ "debug", 0, "Enable debug mode for generated code", { NO_CASE } },
+	{ "keep", 0, "Keep the generated files", { NO_CASE } },
+	{ "makefile", 0, "Generate a project Makefile", { NO_CASE } },
+	{ "makefile-full", 0, "Generate a full project Makefile", { NO_CASE } },
+	{ "cmakefile", 0, "Generate a project CMake file", { NO_CASE } },
+	{ "emake", 0, "Generate a emake/emake.bat file to build project", { NO_CASE } },
+	{ "nobuild", 0, "Do not build the project nor write a build file", { NO_CASE } },
+	{ "builddir", 0, "Generate/compile all files in 'builddir'", { NO_CASE, HAS_PARAMETER, "dir" } },
+	{ "o", 0, "Set the output filename", { NO_CASE, HAS_PARAMETER, "filename" } },
+    { 0, 0, "Filename to translate", { MANDATORY } }
+}
+
+procedure translator_help()
+	printf(1, "euc.exe [options] file.ex...\n", {})
+	printf(1, " common options:\n", {})
+	show_help(common_opt_def, NO_HELP)
+	printf(1, "\n", {})
+	printf(1, " translator options:\n", {})
+	show_help(trans_opt_def, NO_HELP)
+end procedure
 
 --**
--- set translator command-line options  
+-- Process the translator command-line options
+
 export procedure transoptions()
-	integer i, option
-	sequence uparg
-	object s
-	
-	-- Preprocess real command line args for host platform
-	for j = 1 to length(Argv) do
-		if equal("-PLAT", upper(Argv[j]) ) then
-			if j < length(Argv) then
-				switch upper(Argv[j+1]) do
+	Argv &= GetDefaultArgs()
+	Argc = length(Argv)
+
+	expand_config_options()
+	m:map opts = cmd_parse(common_opt_def & trans_opt_def, routine_id("translator_help"), Argv)
+
+	handle_common_options(opts)
+
+	sequence opt_keys = m:keys(opts)
+	integer option_w = 0
+
+	for idx = 1 to length(opt_keys) do
+		sequence key = opt_keys[idx]
+		sequence val = m:get(opts, key)
+
+		switch key do
+			case "silent" then
+				silent = TRUE
+
+			case "wat" then
+				compiler_type = COMPILER_WATCOM
+
+			case "djg" then
+				compiler_type = COMPILER_DJGPP
+
+			case "gcc" then
+				compiler_type = COMPILER_GCC
+
+			case "com" then
+				compiler_dir = val
+
+			case "con" then
+				con_option = TRUE
+
+			case "dll", "so" then
+				dll_option = TRUE
+
+			case "plat" then
+				switch upper(val) do
 					case "WIN" then
 						set_host_platform( WIN32 )
 					
@@ -88,177 +139,57 @@ export procedure transoptions()
 						
 					case "NETBSD" then
 						set_host_platform( UNETBSD )
-						
-				end switch
-			end if
-		end if
-	end for
-				
-	Argv &= GetDefaultArgs()
-	Argc = length(Argv)
 
-	-- put file first, strip out the options
-	i = 1
-	while i <= Argc do
-		if Argv[i][1] = '-' then
-			uparg = upper(Argv[i])
-			
-			if find(uparg,{"-HELP","-?"}) then
-				help_option = TRUE
-			
-			elsif (equal("-SILENT", uparg)) then
-				silent = TRUE
-				
-			elsif (equal("-DLL", uparg) or equal("-SO", uparg)) then
-				dll_option = TRUE
-				
-			elsif equal("-CON", uparg) then
-				con_option = TRUE
-				
-			elsif equal("-WAT", uparg) then
-				compiler_type = COMPILER_WATCOM
-				
-			elsif equal("-KEEP", uparg) then
-				keep = TRUE
-				
-			elsif equal("-DJG", uparg) then
-				compiler_type = COMPILER_DJGPP
-				
-			elsif equal("-FASTFP", uparg) then
+					case else
+						printf(2, "Unknown platform: %s\n", { val })
+						abort(1)
+				end switch
+
+			case "lib" then
+				user_library = val
+
+			case "fastfp" then
 				fastfp = TRUE
-				
-			elsif equal("-GCC", uparg) then
-				compiler_type = COMPILER_GCC
-				
-			elsif equal("-STACK", uparg) then
-				if i < Argc then
-					s = value(Argv[i+1])
-					add_switch( Argv[i+1], 1 )
-					if s[1] = GET_SUCCESS then
-						if s[2] >= 16384 then
-							total_stack_size = floor(s[2] / 4) * 4
-						end if
+
+			case "stack" then
+				sequence tmp = value(val)
+				if tmp[1] = GET_SUCCESS then
+					if tmp[2] >= 16384 then
+						total_stack_size = floor(tmp[2] / 4) * 4
 					end if
-					move_args( i+1 )
-				else
-					Warning("-stack option missing stack size",translator_warning_flag)
 				end if
-				
-			elsif equal("-DEBUG", uparg) then
+
+			case "debug" then
 				debug_option = TRUE
 				keep = TRUE -- you'll need the sources to debug
-				
-			elsif equal("-LIB", uparg ) then
-				if i < Argc then
-					user_library = Argv[i+1]
-					add_switch( user_library, 1 )
-					move_args( i+1 )
-				else
-					Warning("-lib option missing library name",translator_warning_flag)
-				end if
-			
-			elsif equal("-PLAT", uparg ) then
-				if i < Argc then
-					s = upper(Argv[i+1])
-					add_switch( Argv[i+1], 1 )
-					move_args( i+1 )
-					switch s do
-						case "WIN" then
-							set_host_platform( WIN32 )
-						
-						case "DOS" then
-							set_host_platform( DOS32 )
-							
-						case "LINUX" then
-							set_host_platform( ULINUX )
-							
-						case "FREEBSD" then
-							set_host_platform( UFREEBSD )
-							
-						case "OSX" then
-							set_host_platform( UOSX )
-							
-						case "SUNOS" then
-							set_host_platform( USUNOS )
-							
-						case "OPENBSD" then
-							set_host_platform( UOPENBSD )
-							
-						case "NETBSD" then
-							set_host_platform( UNETBSD )
-							
-						case else
-							Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
-					end switch
-				end if
-			
-			elsif equal("-COM", uparg ) then
-				if i < Argc then
-					compile_dir = Argv[i+1]
-					add_switch( compile_dir, 1 )
-					move_args( i+1 )
-				else
-					Warning("-com option missing compile directory",translator_warning_flag)
-				end if
 
-			elsif equal("-MAKEFILE", uparg) then
+			case "keep" then
+				keep = TRUE
+
+			case "makefile" then
 				build_system_type = BUILD_MAKEFILE
 
-			elsif equal("-MAKEFILE-FULL", uparg) then
+			case "makefile-full" then
 				build_system_type = BUILD_MAKEFILE_FULL
 
-			elsif equal("-CMAKEFILE", uparg) then
+			case "cmakefile" then
 				build_system_type = BUILD_CMAKE
 
-			elsif equal("-EMAKE", uparg) then
+			case "emake" then
 				build_system_type = BUILD_EMAKE
 
-			elsif equal("-NOBUILD", uparg) then
+			case "nobuild" then
 				build_system_type = BUILD_NONE
 
-			elsif equal("-BUILDDIR", uparg) then
-				if i < Argc then
-					output_dir = Argv[i+1]
-					add_switch( output_dir, 1 )
-					move_args( i+1)
-					create_directory( output_dir )
-					output_dir &= '/'
-				else
-					puts(1, "-builddir expects a directory name\n")
-					abort(1)
-				end if
+			case "builddir" then
+				output_dir = val
 
-			elsif equal("-O", uparg) then
-				if i < Argc then
-					exe_name = Argv[i+1]
-					add_switch(exe_name, 1)
-					move_args(i+1)
-				else
-					puts(1, "-o expects a filename\n")
-					abort(1)
-				end if
+			case "o" then
+				exe_name = val
+		end switch
+	end for
 
-			else
-				option = find( uparg, COMMON_OPTIONS )
-				if option then
-					common_options( option, i )
-				else
-					Warning("unknown option: %s", translator_warning_flag, {Argv[i]})
-				end if
-
-			end if
-			-- delete "-" option from the list of args */
-			add_switch( Argv[i], 0 )
-			move_args( i )
-		else
-			i += 1 -- ignore non "-" items
-		end if      
-	end while
-
-	if help_option then
-		show_usage()
-		CompileErr( "" )	
-	end if
+	finalize_command_line(opts)
 end procedure
 
 --**

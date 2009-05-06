@@ -1,11 +1,13 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
---
--- Common initialization (command line options)
+--****
+-- == cominit.e: Common command line initialization
 
 include euphoria/info.e
 
+include std/cmdline.e
 include std/filesys.e
 include std/search.e
+include std/text.e
+include std/map.e as m
 
 include common.e
 include error.e
@@ -13,76 +15,40 @@ include global.e
 include pathopen.e
 include platform.e
 
-sequence switches = {}, switch_cache = {}
+export sequence switches = {}
 
--- These flags are available for both the interpreter and translator
-export constant COMMON_OPTIONS = {
-	"-C",    -- specify a euinc.conf file
-	"-I",    -- specify a directory to search for include files
-	"-D",    -- define a word
-	"-BATCH",-- batch processing, do not "Press Enter" on error
-	"-TEST", -- do not execute, only test syntax
-	"-STRICT", -- enable all warnings (lint option)
-	"-W",    -- defines warning level
-	"-X",    -- defines warning level by exclusion
-	"-WF",   -- defines the file to which the warnings will go instead of stderr
-	"-?",    -- Display 'usage' help
-	"-HELP", -- Display 'usage' help
-	"-COPYRIGHT" -- Display all copyright notices.
+export sequence common_opt_def = {
+	{ "c", 0, "Specify a configuration file",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
+	{ "i", 0, "Add a directory to be searched for include files",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "dir" } },
+	{ "d", 0, "Define a preprocessor word",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "batch", 0, "Turn on batch processing (do not \"Press Enter\" on error",
+				{ NO_CASE } },
+	{ "test", 0, "Test syntax only, do not execute",
+				{ NO_CASE } },
+	{ "strict", 0, "Enable all warnings",
+				{ NO_CASE } },
+	{ "w", 0, "Defines warning level",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "x", 0, "Defines warning level by exclusion",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "wf", 0, "Write all warnings to the given file instead of STDOUT",
+				{ NO_CASE, HAS_PARAMETER, "filename" } },
+	{ "copyright", 0, "Display all copyright notices",
+				{ NO_CASE } }
 }
 
-export enum
-	EUINC_OPTION,  -- -conf
-	INCDIR_OPTION, -- -include dirs
-	DEFINE_OPTION, -- ifdef defines
-	BATCH_OPTION,  -- batch processing, do not "Press Enter" on error
-	TEST_OPTION,   -- do not execute, only test syntax
-	STRICT_OPTION,   -- enable all warnings
-	WARNING_OPTION, -- startup warning level
-	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
-	WARNING_FILE_OPTION,	-- warning file name
-	HELP_OPTION,  -- Show command line usage
-	HELP2_OPTION,  -- Show command line usage
-	COPYRIGHT_OPTION -- Show copyright notices
-
-constant COMMON_PARAMS = {
-	EUINC_OPTION,
-	INCDIR_OPTION,
-	DEFINE_OPTION, -- ifdef defines
-	0,  -- batch processing, do not "Press Enter" on error
-	0,   -- do not execute, only test syntax
-	0,   -- enable all warnings
-	WARNING_OPTION, -- startup warning level
-	WARNING_EXCLUDE_OPTION, -- startup warning level by exclusion
-	WARNING_FILE_OPTION,	-- warning file name
-	0,   -- Command line usage
-	0,   -- Command line usage
-	0    -- Copyright notices
-}
-
-
--- s = the text of the switch
--- deferred:  1 = it's an argument for the switch, and won't be added
---                to the list of switches until the next non-deferred
---                switch is passed
-export procedure add_switch( sequence s, integer deferred )
-	if deferred then
-		switch_cache = append( switch_cache, s )
-	else
-		switches = append( switches, s )
-		switches &= switch_cache
-		switch_cache = {}
-	end if
-end procedure
+--**
+-- Get the switches sequence
 
 export function get_switches()
 	return switches
 end function
 
-export procedure move_args( integer start )
-	Argv[start .. Argc - 1] = Argv[start + 1 .. Argc ]
-	Argc -= 1
-end procedure
+--**
+-- Show all copyright statements
 
 procedure show_copyrights()
 	sequence notices = all_copyrights()
@@ -91,159 +57,110 @@ procedure show_copyrights()
 	end for
 end procedure
 
-export procedure show_usage()
-	object msgtext
-	
-	if usage_shown != 0 then
-		return
-	end if
-	usage_shown = 1
-	
-	if TRANSLATE then
-	msgtext = ##
-______________Usage: euc  [-plat win|dos|linux|freebsd|osx|sunos|openbsd] 
-                          [-wat|-djg|-gcc] [-com /compile_directory/] [-keep] [-debug]
-                          [-emake] [-makefile] [-makefile-full] [-cmakefile] [-nobuild]
-                          [-silent] [-builddir /output dir/] [-o /exe name/]
-                          [-lib /library relative to %EUDIR%/bin/] [-stack /stack size/]
-                          [/os specific options/]:
+--**
+-- Expand any config file options on the command line adding
+-- their content to Argv
 
-              OS Specific Options:
-                 DOS    :  [-djg|-wat] [-fastfp]
-                 Windows:  [-con] [-wat|-djg|-gcc] [-dll]
-                 Linux  :  [-gcc] [-dll]
-                 OSX    :  [-gcc] [-dll]
-                 SunOS  :  [-gcc] [-dll]
-                 FreeBSD:  [-gcc] [-dll]
-                 OpenBSD:  [-gcc] [-dll]
-                 NetBSD :  [-gcc] [-dll]
-
-              Explainations:
-                 -CON           : Don't create a new window when using the console
-                 -NOBUILD       : Don't create any build file, only generate code
-                 -EMAKE         : Generate a batch/shell script that will compile the
-                                  the project. (emake on unix, emake.bat on Windows/DOS)
-                 -MAKEFILE      : Generate a <prgname>.mak file that can be included
-                                  into a larger Makefile project
-                 -MAKEFILE-FULL : Generate a full Makefile for stand alone use
-                 -CMAKEFILE     : Generate a <prgname>.cmake file that can be included
-                                  into a larger CMake project
-
-
-#
-		if TDOS	then
-			msgtext[11] = 'd'
+export procedure expand_config_options()
+	integer idx = 1
+	while idx < length(Argv) do
+		if equal(upper(Argv[idx]), "-C") then
+			idx += 1
+			sequence new_args = load_euinc_conf(Argv[idx])
+			Argv = Argv[1..idx] & new_args & Argv[idx + 1..$]
 		end if
-	else
-		msgtext = sprintf(
-##
-____________
-            Euphoria Interpreter Usage: %s [euswitches] [filename [appswitches]] ...
-            where euswitches are ...
 
-              -C <filename>    -- specify a configuration file
-              -I <dirname>     -- specify a directory to search for include files
-              -D <word>        -- define a word
-              -BATCH           -- batch processing, do not "Press Enter" on error
-              -TEST            -- do not execute, only test syntax
-              -STRICT          -- enable all warnings (lint option)
-              -W <warningname> -- defines warning level
-              -X <warningname> -- defines warning level by exclusion
-              -WF <warnfile>   -- defines the file to which the warnings will go
-              -? or -HELP      -- Display this 'usage' help
-              -COPYRIGHT       -- Display copyright notices
+		idx += 1
+	end while
 
-		#, {filebase(Argv[1])})
-	end if
-
-	puts(1, msgtext)
+	Argc = length(Argv)
 end procedure
 
-integer option_W
-option_W=0
-export procedure common_options( integer option, integer ix )
-	integer n
-	object param
+--**
+-- Process options that are common to the Interpreter and Translator.
 
-	-- we only need to remove our extra options
-	param = {}
+export procedure handle_common_options(m:map opts)
+	sequence opt_keys = m:keys(opts)
+	integer option_w = 0
 
-	if COMMON_PARAMS[option] != 0 then
-		if ix < Argc then
-			param = Argv[ix+1]
-			add_switch( param, 1 )
-			move_args( ix+1 )
-		else
-			Warning("missing option parameter for: %s" , cmdline_warning_flag, {Argv[ix]})
-			show_usage()
-		end if
+	for idx = 1 to length(opt_keys) do
+		sequence key = opt_keys[idx]
+		sequence val = m:get(opts, key)
+
+		switch key do
+			case "i" then
+				for i = 1 to length(val) do
+					add_include_directory(val[i])
+				end for
+
+			case "d" then
+				OpDefines &= val
+
+			case "batch" then
+				batch_job = 1
+
+			case "test" then
+				test_only = 1
+				batch_job = 1
+
+			case "strict" then
+				Strict_is_on = 1
+
+			case "warning" then
+				integer n = find(val, warning_names)
+				if n != 0 then
+					if option_w = 1 then
+						OpWarning = or_bits(OpWarning, warning_flags[n])
+					else
+						option_w = 1
+						OpWarning = warning_flags[n]
+					end if
+
+					prev_OpWarning = OpWarning
+				end if
+
+			case "exclude-warning" then
+				integer n = find(val, warning_names)
+				if n != 0 then
+					if option_w = -1 then
+						OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
+					else
+						option_w = -1
+						OpWarning = all_warning_flag - warning_flags[n]
+					end if
+
+					prev_OpWarning = OpWarning
+				end if
+
+			case "warning-file" then
+				TempWarningName = val
+
+			case "copyright" then
+				show_copyrights()
+				abort(0)
+		end switch
+	end for
+end procedure
+
+--**
+-- Finalize the command line processing by splitting Argv into
+-- Argv and switches sequences as well as handling any special
+-- cleanup cases such as -strict overriding any -W/-X switches.
+
+export procedure finalize_command_line(m:map opts)
+	if Strict_is_on then -- overrides any -W/-X switches
+		OpWarning = all_warning_flag
+		prev_OpWarning = OpWarning
 	end if
 
-	switch option with fallthru do
-	case  EUINC_OPTION then
-		sequence new_args = load_euinc_conf( param )
-		Argv = Argv[1 .. ix] & new_args & Argv[ix + 1 .. $]
-		Argc += length(new_args)
-		break
-
-	case  INCDIR_OPTION then
-		add_include_directory( param )
-		break
-
-	case  DEFINE_OPTION then
-		OpDefines &= {param}
-		break
-
-	case  TEST_OPTION then
-		test_only = 1
-		batch_job = 1
-		break
-
-	case  BATCH_OPTION then
-		batch_job = 1
-		break
-
-	case  HELP_OPTION, HELP2_OPTION then
-		show_usage()
-		break
-
-	case  COPYRIGHT_OPTION then
-		show_copyrights()
-		break
-
-	case  WARNING_OPTION then
-		n = find(param ,warning_names)
-		if n != 0 then
-			if option_W = 1 then
-				OpWarning = or_bits(OpWarning, warning_flags[n])
-			else
-				option_W = 1
-				OpWarning = warning_flags[n]
-			end if
-			prev_OpWarning = OpWarning
+	-- Split of Argv and switches
+	sequence extras = m:get(opts, "extras")
+	if length(extras) > 0 then
+		integer eufile_pos = find(extras[1], Argv)
+		if eufile_pos > 3 then
+			switches = Argv[3..eufile_pos - 1]
+			Argv = Argv[1..2] & Argv[eufile_pos..$]
+			Argc = length(Argv)
 		end if
-		break
-
-	case  WARNING_EXCLUDE_OPTION then
-		n = find(param, warning_names)
-		if n != 0 then
-			if option_W = -1 then
-				OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
-			else
-				option_W = -1
-				OpWarning = all_warning_flag - warning_flags[n]
-			end if
-			prev_OpWarning = OpWarning
-		end if
-		break
-
-	case  STRICT_OPTION then
-		Strict_is_on = 1
-		break
-
-	case  WARNING_FILE_OPTION then
-		TempWarningName = param
-		break
-
-	end switch
+	end if
 end procedure

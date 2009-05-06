@@ -171,6 +171,7 @@ procedure main()
 	-- sets up the internal namespace
 	eu_namespace()
 
+	/* TODO: cmd_parse finish
 	if src_file = -2 then	
 		-- No source supplied on command line
 		show_usage()
@@ -179,6 +180,7 @@ procedure main()
 		end if
 		Cleanup(1)
 	end if
+	*/
 	
 	-- starts reading and checks for a default namespace
 	main_file()

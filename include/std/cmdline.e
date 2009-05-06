@@ -19,7 +19,40 @@ public constant -- Processing options
 	OPTIONAL      = 'o',
 	ONCE          = '1',
 	MULTIPLE      = '*',
-	HELP          = 'h'
+	HELP          = 'h',
+	NO_HELP       = -2
+
+public enum
+	--**
+	-- Additional help routine id
+	HELP_RID,
+
+	--**
+	-- Validate all parameters (default)
+	VALIDATE_ALL,
+
+	--**
+	-- Do not cause an error for an invalid parameter
+	NO_VALIDATION,
+
+	--**
+	-- Do not cause an error for an invalid parameter after the
+	-- first extra item has been found. This can be helpful for
+	-- processes such as the Interpreter itself that must deal
+	-- with command line parameters that it is not meant to
+	-- handle.
+	--
+	-- For instance:
+	-- ##eui -D TEST greet.ex -name John -greeting Bye##
+	-- -D TEST is meant for ##eui##, but -name and -greeting options
+	-- are meant for ##greet.ex##.
+	NO_VALIDATION_AFTER_FIRST_EXTRA,
+
+	--**
+	-- Only display the option list in show_help. Do not display other
+	-- information such as program name, options, etc...
+	SHOW_ONLY_OPTIONS
+
 	
 public enum -- Record fields in the option call back parameter
 	OPT_IDX,
@@ -276,6 +309,11 @@ end function
 -- [[:Command line switches]]
 
 procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), integer std = 0)
+	if add_help_rid > -1 then
+		call_proc(add_help_rid, {})
+		return
+	end if
+
 	integer pad_size
 	integer this_size
 	sequence cmd
@@ -324,9 +362,9 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 
 		has_param = find(HAS_PARAMETER, opts[i][OPTIONS]) 
 		if has_param != 0 then
-			this_size += 2 -- Allow for " "
+			this_size += 1 -- Allow for " "
 			if has_param < length(opts[i][OPTIONS]) then
-				has_param += 1
+				--has_param += 1
 				if sequence(opts[i][OPTIONS][has_param]) then
 					param_name = opts[i][OPTIONS][has_param]
 				else
@@ -335,9 +373,8 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 			else
 				param_name = "x"
 			end if
-			this_size += 2 * length(param_name)
+			this_size += 2 + length(param_name)
 		end if
-		
 
 		if pad_size < this_size then
 			pad_size = this_size
@@ -345,7 +382,10 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 	end for
 	pad_size += 3 -- Allow for minimum gap between cmd and its description
 
-	printf(1, "%s options:\n", {cmds[2]})
+	if add_help_rid != NO_HELP then
+		printf(1, "%s options:\n", {cmds[2]})
+	end if
+
 	for i = 1 to length(opts) do
 		if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
 			-- Ignore 'extras' record
@@ -720,7 +760,7 @@ end function
 -- See Also:
 --   [[:show_help]], [[:command_line]]
 
-public function cmd_parse(sequence opts, object add_help_rid=-1, sequence cmds = command_line())
+public function cmd_parse(sequence opts, object parse_options={}, sequence cmds = command_line())
 	integer idx, opts_done
 	sequence cmd
 	object param
@@ -729,7 +769,40 @@ public function cmd_parse(sequence opts, object add_help_rid=-1, sequence cmds =
 	integer from_
 	sequence help_opts
 	sequence call_count
-	
+	integer add_help_rid = -1
+	integer validation = VALIDATE_ALL
+	integer has_extra = 0
+
+	if sequence(parse_options) then
+		integer i = 1
+
+		while i <= length(parse_options) do
+			switch parse_options[i] do
+				case HELP_RID then
+					if i < length(parse_options) then
+						i += 1
+						add_help_rid = parse_options[i]
+					else
+						crash("HELP_RID was given to cmd_parse with no routine_id")
+					end if
+
+				case VALIDATE_ALL then
+					validation = VALIDATE_ALL
+
+				case NO_VALIDATION then
+					validation = NO_VALIDATION
+
+				case NO_VALIDATION_AFTER_FIRST_EXTRA then
+					validation = NO_VALIDATION_AFTER_FIRST_EXTRA
+			end switch
+
+			i += 1
+		end while
+
+	elsif atom(parse_options) then
+		add_help_rid = parse_options
+	end if
+
 	opts = standardize_opts(opts)
 
 	call_count = repeat(0, length(opts))
@@ -768,6 +841,7 @@ public function cmd_parse(sequence opts, object add_help_rid=-1, sequence cmds =
 		cmd = cmds[idx]
 		if opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1 then
 			map:put(parsed_opts, "extras", cmd, map:APPEND)
+			has_extra = 1
 			continue
 		end if
 
@@ -799,10 +873,14 @@ public function cmd_parse(sequence opts, object add_help_rid=-1, sequence cmds =
 		end if
 		
 		if find_result[1] = 0 then
-			-- something is wrong with the option
-			printf(1, "option '%s': %s\n\n", {cmd, find_result[2]})
-			local_show_help(opts, add_help_rid, cmds, 1)
-			abort(1)
+			if validation = VALIDATE_ALL or
+				(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0)
+			then
+				-- something is wrong with the option
+				printf(1, "option '%s': %s\n\n", {cmd, find_result[2]})
+				local_show_help(opts, add_help_rid, cmds, 1)
+				abort(1)
+			end if
 		end if
 		
 		sequence opt = opts[find_result[1]]
