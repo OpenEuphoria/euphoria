@@ -53,7 +53,6 @@ public enum
 	-- information such as program name, options, etc...
 	SHOW_ONLY_OPTIONS
 
-	
 public enum -- Record fields in the option call back parameter
 	OPT_IDX,
 	OPT_CNT,
@@ -626,9 +625,7 @@ end function
 --
 -- Parameters:
 -- # ##opts## - a sequence of valid option records: See Comments: section for details
--- # ##add_help_rid##: an optional object, Either the routine_id of a procedure that will be called on
---     completion, or a sequence containing additional help text to be displayed. 
---     If omitted, only the command line options are displayed.
+-- # ##parse_options##: an optional sequence of parse options: See Parse Options section for details
 -- # ##cmds## - an optional sequence of command line arguments. If omitted the output from 
 --              command_line() is used.
 --
@@ -637,14 +634,26 @@ end function
 -- which are values passed on the command line that are not part of any option, for instance
 -- a list of files ##myprog -verbose file1.txt file2.txt##.
 --
+-- Parse Options:
+-- ##parse_options## can be a sequence of options that will affect the parsing of
+-- the command line options. Options can be:
+--
+-- # VALIDATE_ALL - The default. All options will be validated for all possible errors.
+-- # NO_VALIDATION - Do not validate any parameter.
+-- # NO_VALIDATION_AFTER_FIRST_EXTRA - Do not validate any parameter after the first extra
+--   was encountered. This is helpful for programs such as the Interpreter itself:
+--   ##eui -D TEST greet.ex -name John##. -D TEST should be validated but anything after
+--   "greet.ex" should not as it is meant for greet.ex to handle, not eui.
+-- # HELP_RID - Specify a routine id to call in the event of a parse error (invalid option
+--   given, mandatory option not given, no parameter given for an option that requires a
+--   parameter, etc...).
+--
+-- An example of parse options:
+-- <eucode>
+-- { HELP_RID, routine_id("my_help"), NO_VALIDATION }
+-- </eucode>
+--
 -- Comments:
--- If ##add_help_rid## is specified as a routine_id, it must be the id of a 
--- procedure that takes no arguments.
---
--- If ##add_help_rid## is specified as a sequence, it can either be a text string
--- or a sequence containing text strings, in which case each one is displayed
--- on a line of its own.
---
 -- Token types recognized on the command line:
 -- # a single '-'. Simply added to the 'extras' list
 -- # a single "~-~-". This signals the end of command line options. What remains of the command
@@ -749,7 +758,7 @@ end function
 -- map:map opts = cmd_parse(option_definition)
 --
 -- -- When run as: eui myprog.ex -v -o john.txt -i /usr/local -i /etc/app input1.txt input2.txt
---
+-- --
 -- -- map:get(opts, "verbose") --> 1
 -- -- map:get(opts, "hash") --> 0 (not supplied on command line)
 -- -- map:get(opts, "output") --> "john.txt"
