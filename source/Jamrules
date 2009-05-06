@@ -57,7 +57,7 @@ actions MagicGet
     eui findjmp.ex be_magic.c $(BUILD_DIR)\\eu\\be_execute.obj ;
 }
 
-rule EuProgram
+rule EuMain
 {
     local _s _t ;
 
@@ -101,8 +101,7 @@ rule EuProgram
     Depends $(<) : $(BUILD_DIR)\\$(USER_LIBRARY) ;
 }
 
-actions EuProgram
+actions EuMain
 {
-    euc $(EUC_FLAGS) -o $(OUTPUT_FILE) -builddir $(BUILD_DIR) -con $(SOURCE_FILE) -lib $(USER_LIBRARY)
+    euc $(EUCFLAGS) -o $(OUTPUT_FILE) -builddir $(BUILD_DIR) -con $(SOURCE_FILE) -lib $(USER_LIBRARY)
 }
-

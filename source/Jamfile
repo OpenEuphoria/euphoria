@@ -21,11 +21,11 @@ MagicGet be_magic.c ;
 
 NormalLibrary eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES) ;
 
-EuProgram eui : eu.ex : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) ;
-EUC_FLAGS on eui = -silent -con ;
+EuMain eui : eu.ex : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) ;
+EUCFLAGS on eui = -silent -con ;
 
-EuProgram eutest : eutest.ex ;
-EUC_FLAGS on eutest = -silent -con ;
+EuMain euc : ec.ex : $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) ;
+EUCFLAGS on euc = -silent -con ;
 
-EuProgram euc : ec.ex : $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) ;
-EUC_FLAGS on euc = -silent -con ;
+EuMain eutest : eutest.ex ;
+EUCFLAGS on eutest = -silent -con ;
