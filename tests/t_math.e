@@ -126,5 +126,12 @@ test_equal("approx #4", {0,0,-1,1}, approx({10.001,9.999, 9.98, 10.04}, 10))
 test_equal("approx #5", {-1,{1,1},1,-1}, approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}))
 test_equal("approx #6", 0, approx(23,32, 10))
 
+sequence po2 = {}
+po2 &= powof2({3, 54.322, -2})
+for i = -2 to 17 do
+	po2 &= powof2(i)
+end for
+test_equal("powof2", {0,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0}, po2)
+
 test_report()
 

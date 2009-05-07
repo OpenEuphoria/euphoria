@@ -1570,3 +1570,36 @@ public function approx(object p, object q, atom epsilon = 0.005)
 		return 0
 	end if
 end function
+
+--**
+-- Tests for power of 2
+--
+-- Parameters:
+--		# ##p##: an object. The item to test. This can be an integer, atom or sequence.
+--
+-- Returns:
+-- * 1 for each item in ##p## that is a power of two, eg. 2,4,8,16,32, ...
+-- * 0 for each item in ##p## that is **not** a power of two, eg. 3, 54.322, -2
+--
+-- Example 1:
+-- <eucode>
+-- for i = 1 to 10 do
+--   ? {i, powof2(i)}
+-- end for
+-- -- output ... 
+-- -- {1,1}
+-- -- {2,1}
+-- -- {3,0}
+-- -- {4,1}
+-- -- {5,0}
+-- -- {6,0}
+-- -- {7,0}
+-- -- {8,1}
+-- -- {9,0}
+-- -- {10,0}
+-- </eucode>
+--
+
+public function powof2(object p)
+	return not (and_bits(p, p-1))
+end function
