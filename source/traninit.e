@@ -205,6 +205,10 @@ end procedure
 --**
 -- open and initialize translator output files
 procedure OpenCFiles()
+	if sequence(output_dir) and length(output_dir) > 0 then
+		create_directory(output_dir)
+	end if
+
 	c_code = open(output_dir & "init-.c", "w")
 	if c_code = -1 then
 		CompileErr("Can't open init-.c for output\n")
