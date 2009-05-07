@@ -7,24 +7,20 @@ EU_LIB_SOURCE = be_decompress.c be_machine.c be_w.c be_alloc.c be_inline.c be_ru
     be_task.c be_callc.c be_socket.c be_pcre.c be_rev.c ;
 EU_BACKEND_SOURCE = $(EU_LIB_SOURCE) be_magic.c be_execute.c be_main.c be_rterror.c
     be_syncolor.c be_symtab.c ;
-EU_CORE_FILES = common.e main.e mode.e pathopen.e platform.e error.e symtab.e scanner.e
-    scinot.e emit.e parser.e opnames.e reswords.e keylist.e fwdref.e shift.e inline.e
-    block.e ;
-EU_INTERPRETER_FILES = global.e compress.e backend.e c_out.e cominit.e intinit.e ;
-EU_TRANSLATOR_FILES =  buildsys.e c_decl.e c_out.e cominit.e compile.e compress.e global.e
-    traninit.e ;
-EU_BACKEND_FILES = intinit.e cominit.e backend.e pathopen.e compress.e backend.e
-    error.e mode.e ;
 
 RevGet be_rev.c ;
 MagicGet be_magic.c ;
 
-NormalLibrary eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES) ;
+LOCATE_TARGET = [ FDirName $(TOP) $(BUILD_DIR) ] ;
+SEARCH_SOURCE += [ FDirName $(TOP) pcre ] ;
+Library eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
 
-EuMain eui : eu.ex : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) ;
+SEARCH_SOURCE = [ FDirName $(TOP) .. include ] ;
+
+EuMain eui : eu.ex ;
 EUCFLAGS on eui = -silent -con ;
 
-EuMain euc : ec.ex : $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) ;
+EuMain euc : ec.ex ;
 EUCFLAGS on euc = -silent -con ;
 
 EuMain eutest : eutest.ex ;

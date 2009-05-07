@@ -1,65 +1,59 @@
+#
+# Default user library
+#
 USER_LIBRARY = eu$(SUFLIB) ;
 
+#
+# Setup compiler specific flags
+#
 if $(JAM_TOOLSET) = WATCOM
 {
     CCFLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I.. /Ipcre
         /dMANAGED_MEM /dEWINDOWS /dEOW /dEWATCOM ;
 }
 
-rule RuntimeLibrary
+#
+# This rule helps debugging as it prints out a variable recursively
+#
+rule EchoVar
 {
-    local f ;
-
-    MkDir $(BUILD_DIR)\\$(<) ;
-
-    MakeLocate $(<:S=$(SUFLIB)) : $(BUILD_DIR) ;
-
-    for f in $(>) {
-        File $(BUILD_DIR)\\$(<)\\$(f:D=) : $(f) ;
+    local __i ;
+    for __i in $(1)
+    {
+        echo $(__i) "=" [$($(__i))] ;
     }
-
-    local LocalFiles = $(>:R=$(BUILD_DIR)\\$(<):D=) ;
-
-    for f in [ FGristFiles $(LocalFiles:S=$(SUFOBJ)) ] {
-        CCFLAGS on $(f) = /dERUNTIME /dBACKEND ;
-    }
-
-    Library $(<:R=$(BUILD_DIR)) : $(LocalFiles) ;
 }
 
-rule NormalLibrary
-{
-    local f ;
-
-    MkDir $(BUILD_DIR)\\$(<) ;
-
-    MakeLocate $(<:S=$(SUFLIB)) : $(BUILD_DIR) ;
-
-    for f in $(>) {
-        File $(BUILD_DIR)\\$(<)\\$(f:D=) : $(f) ;
-    }
-
-    Library $(<:R=$(BUILD_DIR)) : $(>:R=$(BUILD_DIR)\\$(<):D=) ;
-}
-
+#
+# Generates be_rev.c
+#
 actions RevGet
 {
     eui revget.ex
 }
 
+#
+# Generate the be_magic.c file
+#
 rule MagicGet
 {
-    Depends $(<) : $(BUILD_DIR)\\eu\\be_execute.obj ;
+    Depends $(<) : be_execute$(SUFOBJ) ;
+    MagicGet1 $(<) : be_execute$(SUFOBJ) ;
 }
 
-actions MagicGet
+actions MagicGet1
 {
-    eui findjmp.ex be_magic.c $(BUILD_DIR)\\eu\\be_execute.obj ;
+    eui findjmp.ex $(<) $(>) ;
 }
 
+#
+# EuMain builds an executable from euphoria source
+#
 rule EuMain
 {
     local _s _t ;
+
+    # so 'jam foo' works when it's really foo.exe
 
     # Add grist to file names
     # Add suffix to exe
@@ -67,41 +61,35 @@ rule EuMain
     _s = [ FGristFiles $(>) ] ;
     _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
 
-    # so 'jam foo' works when it's really foo.exe
-
     if $(_t) != $(<)
     {
         Depends $(<) : $(_t) ;
         NotFile $(<) ;
     }
 
-    # make compiled sources a dependency of target
     Depends exe : $(_t) ;
     Depends $(_t) : $(_s) ;
 
+    # Setup the rules that will scan Euphoria source looking
+    # for include statements, thus adding them as dependencies
+    HDRRULE on $(_s) = HdrRule ;
+    HDRSCAN on $(_s) = "^[^-\"\'\/]*include[ ]+([^ ]+.[ex])" ;
+    HDRSEARCH on $(_s) = $(SEARCH_SOURCE:E) $(SUBDIRHDRS) $(HDRS) $(STDHDRS) ;
+    HDRGRIST on $(_s) = $(HDRGRIST) ;
+
+    # Add our resulting executable to the clean target
     Clean clean : $(_t) ;
-    _t = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
-
-    # so 'jam foo' works when it's really foo.exe
-
-    if $(_t) != $(<)
-    {
-        Depends $(<) : $(_t) ;
-        NotFile $(<) ;
-    }
 
     MakeLocate $(_t) : $(BUILD_DIR) ;
 
-    SOURCE_FILE on $(1) = $(2) ;
-    OUTPUT_FILE on $(1) = $(<) ;
-
     Depends all : $(<) ;
     Depends $(<) : $(>) ;
-    Depends $(<) : $(3) ;
-    Depends $(<) : $(BUILD_DIR)\\$(USER_LIBRARY) ;
+    Depends $(<) : $(USER_LIBRARY) ;
+
+    EuMain1 $(<) : $(>) ;
 }
 
-actions EuMain
+actions EuMain1
 {
-    euc $(EUCFLAGS) -o $(OUTPUT_FILE) -builddir $(BUILD_DIR) -con $(SOURCE_FILE) -lib $(USER_LIBRARY)
+    euc $(EUCFLAGS) -o $(<) -builddir $(BUILD_DIR) -lib $(USER_LIBRARY) $(>)
 }
