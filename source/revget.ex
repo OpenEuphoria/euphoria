@@ -2,6 +2,9 @@ include std/get.e
 include std/filesys.e
 include std/os.e
 
+sequence out_file = "be_rev.c"
+sequence dat_file = "be_rev.dat"
+
 constant rev = "revision=\""
 integer interactive = 0
 
@@ -16,11 +19,11 @@ procedure update_rev_e(object f)
 	    f = sprintf("%d", { f })
 	end if
 
-	h = open("be_rev.c", "w")
+	h = open(out_file, "w")
 	printf(h, "extern char* get_svn_revision();\n\nchar * get_svn_revision() {\n\treturn \"%s\";\n}\n", {f})
 	close(h)
 
-	h = open("rev.dat","w")
+	h = open(dat_file, "w")
 	printf(h,"%s",{f})
 	close(h)
 end procedure
@@ -47,7 +50,7 @@ function is_current(object rev)
 	integer ix, jx
 	object line
 
-	fn = open("be_rev.c", "r")
+	fn = open(out_file, "r")
 	if fn = -1 then
 		return 0
 	end if
@@ -299,6 +302,12 @@ end procedure
 
 -- Only act if run directly, i.e. not included into another file
 object cmds = command_line()
+
+if length(cmds) >= 3 then
+	out_file = cmds[3]
+	dat_file = dirname(cmds[3]) & "/" & filebase(cmds[3]) & ".dat"
+end if
+
 if match("revget.ex", cmds[2]) then
 	interactive = 1
 	write_be_rev()
