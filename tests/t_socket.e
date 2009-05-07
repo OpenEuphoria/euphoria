@@ -3,7 +3,7 @@ include std/console.e
 include std/os.e
 include std/socket.e as sock
 include std/pipeio.e as pipe
-
+include std/filesys.e as fs
 object _ = 0
 
 test_equal("service_by_name echo", { "echo", "tcp", 7 }, service_by_name("echo", "tcp"))
@@ -25,8 +25,25 @@ test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
 -- new_socket, bind, listen, accept, send, receive, close_socket,
 -- connect are all tested with the below test
 --
+sequence list = command_line()
+sequence interpreter
+ifdef EC then
+	-- The tests test are here to test interpreters and libraries as we do not know where the
+	-- interpreter is we just quit.
+	test_report()
+	abort(0)
+elsedef
+	if compare(list[1],list[2]) != 0 then
+		-- okay, let's trust the EC variable.
+		interpreter = list[1]
+	else
+		-- It's most likely the EC variable was not defined when translating
+		-- yet this is a translated application.
+		interpreter = "eui"
+	end if
+end ifdef
 
-object p = pipe:exec("eui ../demo/sock_server.ex", pipe:create())
+object p = pipe:exec(interpreter & " ../demo/sock_server.ex", pipe:create())
 if atom(p) then
 	test_fail("could not launch temporary server")
 else

@@ -5,10 +5,11 @@ include std/text.e as text
 
 sequence list, interpreter
 list = command_line()
-
 ifdef EC then
-	-- pray eui is in the path.
-	interpreter = "eui"
+	-- The tests test are here to test interpreters and libraries as we do not know where the
+	-- interpreter is we just quit.
+	test_report()
+	abort(0)
 elsedef
 	if compare(list[1],list[2]) != 0 then
 		-- okay, let's trust the EC variable.
@@ -21,6 +22,7 @@ elsedef
 end ifdef
 
 object z = pipe:create()
+
 object p = pipe:exec(interpreter & " "&text:join({"..","demo","pipe_sub.ex"},fs:SLASH), z)
 if atom(p) then
 	test_fail("pipe:exec #1")
