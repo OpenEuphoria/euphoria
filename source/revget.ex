@@ -1,9 +1,17 @@
 include std/get.e
 include std/filesys.e
 include std/os.e
+include std/cmdline.e
+include std/map.e as m
 
 sequence out_file = "be_rev.c"
 sequence dat_file = "be_rev.dat"
+object svnentries
+
+sequence opt_def = {
+	{ "svnentries", 0, "Subversion directory", { HAS_PARAMETER, "dir" } },
+	{ "output", 0, "Output file", { HAS_PARAMETER, "filename" } }
+}
 
 constant rev = "revision=\""
 integer interactive = 0
@@ -103,7 +111,7 @@ function rev_with_svnversion()
 	end ifdef
 
 	line = locate_file("svnversion"&dexe, path)
-	if compare(line, "svnversion"&dexe) = 0 then
+	if eu:compare(line, "svnversion"&dexe) = 0 then
 		return 0
 	else
 		-- avoid having the rev.e string change from NNNNM to NNNN.
@@ -152,30 +160,21 @@ procedure unknown_rev()
 end procedure
 
 procedure rev_1_4()
-	sequence c
 	integer h
 	sequence f
 	object x
 	sequence g
 	integer n
-	integer tryst = 0
 
-	c = command_line()
-	if length(c) = 2 then
-		tryst = 1
-	elsif length(c) != 3 then
-		unknown_rev()
-		abort(1)
-	end if
-
-	if tryst then
+	if atom(svnentries)then
 		h = open("../.svn/entries", "r")
 		if h = -1 then
 			h = open("../svn~1/entries", "r")
 		end if
 	else
-		h = open(c[3], "r")
+		h = open(svnentries, "r")
 	end if
+
 	if h = -1 then
 		unknown_rev()
 		abort(0)
@@ -232,27 +231,17 @@ procedure rev_1_4()
 end procedure
 
 procedure rev_1_3()
-	sequence c
 	integer h
 	sequence f
 	object x
-	integer tryst = 0
 
-	c = command_line()
-	if length(c) = 2 then
-		tryst = 1
-	elsif length(c) != 3 then
-		unknown_rev()
-		abort(1)
-	end if
-
-	if tryst then
+	if atom(svnentries) then
 		h = open("../.svn/entries", "r")
 		if h = -1 then
 			h = open("../svn~1/entries", "r")
 		end if
 	else
-		h = open(c[3], "r")
+		h = open(svnentries, "r")
 	end if
 
 	if h = -1 then
@@ -302,13 +291,13 @@ end procedure
 
 -- Only act if run directly, i.e. not included into another file
 object cmds = command_line()
-
-if length(cmds) >= 3 then
-	out_file = cmds[3]
-	dat_file = dirname(cmds[3]) & "/" & filebase(cmds[3]) & ".dat"
-end if
-
 if match("revget.ex", cmds[2]) then
+	m:map opts = cmd_parse(opt_def)
+	out_file = m:get(opts, "output", "be_rev.c")
+	dat_file = dirname(out_file) & "/" & filebase(out_file) & ".dat"
+	svnentries = m:get(opts, "svnentries", 0)
+
 	interactive = 1
 	write_be_rev()
 end if
+
