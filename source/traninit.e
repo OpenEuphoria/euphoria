@@ -306,10 +306,6 @@ procedure InitBackEnd(integer c)
 		CompileErr("cannot build a dll for DOS")
 	end if
 	
-	if con_option and not TWINDOWS then
-		CompileErr("console option only available for Windows")
-	end if
-	
 	if fastfp and not TDOS then
 		CompileErr("Fast FP option only available for DOS")
 	end if
