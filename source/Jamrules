@@ -1,15 +1,74 @@
 #
-# Default user library
-#
-USER_LIBRARY = eu$(SUFLIB) ;
-
-#
 # Setup compiler specific flags
 #
+
 if $(JAM_TOOLSET) = WATCOM
 {
-    CCFLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I.. /Ipcre
-        /dMANAGED_MEM /dEWINDOWS /dEOW /dEWATCOM ;
+    CCFLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /ol /zp8 /s /I.. /Ipcre
+        -DMANAGED_MEM -DEOW -DEWATCOM ;
+}
+else if $(JAM_TOOLSET) = VISUALC
+{
+    CCFLAGS = -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DEMSVC ;
+}
+else if $(JAM_TOOLSET) = DJGPP
+{
+    CCFLAGS = -w -ffast-math -O2 -Os ;
+}
+else if $(JAM_TOOLSET) = MINGW
+{
+    CCFLAGS = -w -ffast-math -O2 -Os -DEMINGW -mno-cygwin -mwindows ;
+}
+else
+{
+    CCFLAGS = -w -ffast-math -O2 -Os ;
+}
+
+#
+# Setup platform specific flags
+#
+
+if $(NT)
+{
+    CCFLAGS += -DEWINDOWS ;
+}
+else if $(UNIX)
+{
+    CCFLAGS += -DEUNIX ;
+    if $(OS) = MACOSX
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DEOSX ;
+    }
+    else if $(OS) = SUNOS
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DESUNOS ;
+    }
+    else if $(OS) = FREEBSD
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DEFREEBSD ;
+    }
+    else if $(OS) = OPENBSD
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DEOPENBSD ;
+    }
+    else if $(OS) = NETBSD
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DENETBSD ;
+    }
+    else if $(OS) = LINUX
+    {
+        CCFLAGS += -DELINUX ;
+    }
+    else
+    {
+        Echo $(OS) is not supported by Euphoria ;
+        Exit ;
+    }
+}
+else
+{
+    Echo $(OS) is not supported by Euphoria ;
+    Exit ;
 }
 
 #
@@ -27,9 +86,15 @@ rule EchoVar
 #
 # Generates be_rev.c
 #
+rule RevGet
+{
+    Clean clean : $(<) ;
+    MakeLocate $(<) : $(BUILD_DIR) ;
+}
+
 actions RevGet
 {
-    eui revget.ex
+    eui revget.ex -output $(<)
 }
 
 #
@@ -38,12 +103,15 @@ actions RevGet
 rule MagicGet
 {
     Depends $(<) : be_execute$(SUFOBJ) ;
+    Clean clean : $(<) ;
+    MakeLocate $(<) : $(BUILD_DIR) ;
+
     MagicGet1 $(<) : be_execute$(SUFOBJ) ;
 }
 
 actions MagicGet1
 {
-    eui findjmp.ex $(<) $(>) ;
+    eui findjmp.ex $(<) $(>)
 }
 
 #
@@ -91,5 +159,6 @@ rule EuMain
 
 actions EuMain1
 {
-    euc $(EUCFLAGS) -o $(<) -builddir $(BUILD_DIR) -lib $(USER_LIBRARY) $(>)
+    euc $(EUCFLAGS) -o $(<) -builddir $(BUILD_DIR) -lib $(USER_LIBRARY)$(SUFLIB) $(>)
 }
+

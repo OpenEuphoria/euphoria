@@ -3,25 +3,50 @@ SubDir TOP ;
 BUILD_DIR = jambuild ;
 
 PCRE_SOURCES = [ Glob pcre : *.c ] ;
-EU_LIB_SOURCE = be_decompress.c be_machine.c be_w.c be_alloc.c be_inline.c be_runtime.c
-    be_task.c be_callc.c be_socket.c be_pcre.c be_rev.c ;
-EU_BACKEND_SOURCE = $(EU_LIB_SOURCE) be_magic.c be_execute.c be_main.c be_rterror.c
-    be_syncolor.c be_symtab.c ;
+EU_LIB_SOURCE = be_alloc.c be_callc.c be_decompress.c be_inline.c be_machine.c be_pcre.c be_rev.c
+    be_runtime.c be_socket.c be_task.c be_w.c ;
+EU_BACKEND_SOURCE = $(EU_LIB_SOURCE) be_execute.c be_main.c be_rterror.c be_symtab.c
+    be_syncolor.c ;
+
+SEARCH_SOURCE += [ FDirName $(TOP) pcre ] ;
+SEARCH_SOURCE += [ FDirName $(BUILD_DIR) ] ;
+
+if $(JAM_TOOLSET) = WATCOM
+{
+	EU_BACKEND_SOURCE += be_magic.c ;
+	
+	MagicGet be_magic.c ;
+}
+
+if $(NT)
+{
+	DEFAULT_EUCFLAGS = -con ;
+}
 
 RevGet be_rev.c ;
-MagicGet be_magic.c ;
 
-LOCATE_TARGET = [ FDirName $(TOP) $(BUILD_DIR) ] ;
-SEARCH_SOURCE += [ FDirName $(TOP) pcre ] ;
-Library eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
+#SOURCE_GRIST = ebackend ;
+LOCATE_TARGET = [ FDirName $(TOP) $(BUILD_DIR) ebackend ] ;
+CCFLAGS += -DEBACKEND ;
+Library ebackend : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
+MakeLocate ebackend$(SUFLIB) : [ FDirName $(BUILD_DIR) ] ;
+
+#SOURCE_GRIST = eu ;
+#LOCATE_TARGET = [ FDirName $(TOP) $(BUILD_DIR) eu ] ;
+#Library eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
+#MakeLocate eu$(SUFLIB) : [ FDirName $(BUILD_DIR) ] ;
 
 SEARCH_SOURCE = [ FDirName $(TOP) .. include ] ;
 
 EuMain eui : eu.ex ;
-EUCFLAGS on eui = -silent -con ;
+EUCFLAGS on eui = $(DEFAULT_EUCFLAGS) ;
+USER_LIBRARY on eui = ebackend ;
 
-EuMain euc : ec.ex ;
-EUCFLAGS on euc = -silent -con ;
+#EuMain euc : ec.ex ;
+#EUCFLAGS on euc = -silent -con ;
+#USER_LIBRARY on euc = eu ;
 
-EuMain eutest : eutest.ex ;
-EUCFLAGS on eutest = -silent -con ;
+#EuMain eutest : eutest.ex ;
+#EUCFLAGS on eutest = -silent -con ;
+#USER_LIBRARY on eutest = eu ;
+
