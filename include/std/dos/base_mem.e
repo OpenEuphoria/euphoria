@@ -7,7 +7,6 @@ constant
 	M_SET_VECTOR = 40,
 	M_LOCK_MEMORY = 41
 
-
 -- internal - used in dos/safe.e and dos/memory.e
 
 public constant

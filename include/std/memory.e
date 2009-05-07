@@ -1,6 +1,3 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
-
 --****
 -- == Memory Management - Low-Level
 --
@@ -92,7 +89,7 @@ end type
 
 -- When you are finished using the block, you should pass the address of the block to 
 -- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
---can be freed by calling [[:delete]], or when the ponter's reference count drops to zero.
+-- can be freed by calling [[:delete]], or when the ponter's reference count drops to zero.
 -- This will free the block and make the memory available for other purposes. When 
 -- your program terminates, the operating system will reclaim all memory for use with other 
 -- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.

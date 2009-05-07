@@ -333,28 +333,30 @@ public type positive_int(integer x)
 end type
 
 ifdef DOS32 then
-include std/dos/image.e
+	include std/dos/image.e
 end ifdef
 
 include std/graphcst.e
 
 ifdef DOS32 then
-function DOS_scr_addr(sequence vc, text_point xy)
--- calculate address in DOS screen memory for a given line, column
-	atom screen_memory
-	integer page_size
+	function DOS_scr_addr(sequence vc, text_point xy)
+	-- calculate address in DOS screen memory for a given line, column
+		atom screen_memory
+		integer page_size
 	
-	if vc[VC_MODE] = 7 then
-		screen_memory = MONO_TEXT_MEMORY
-	else
-		screen_memory = COLOR_TEXT_MEMORY
-	end if
-	page_size = vc[VC_LINES] * vc[VC_COLUMNS] * BYTES_PER_CHAR
-	page_size = 1024 * floor((page_size + 1023) / 1024)
-	screen_memory = screen_memory + get_active_page() * page_size
-	return screen_memory + ((xy[1]-1) * vc[VC_COLUMNS] + (xy[2]-1)) 
-						   * BYTES_PER_CHAR
-end function
+		if vc[VC_MODE] = 7 then
+			screen_memory = MONO_TEXT_MEMORY
+		else
+			screen_memory = COLOR_TEXT_MEMORY
+		end if
+
+		page_size = vc[VC_LINES] * vc[VC_COLUMNS] * BYTES_PER_CHAR
+		page_size = 1024 * floor((page_size + 1023) / 1024)
+		screen_memory = screen_memory + get_active_page() * page_size
+
+		return screen_memory + ((xy[1]-1) * vc[VC_COLUMNS] + (xy[2]-1)) 
+		   * BYTES_PER_CHAR
+	end function
 end ifdef
 
 --**
