@@ -102,8 +102,8 @@ Euphoria.**
 : Does this mean that all atoms are stored in memory as 8-byte floating-point
 numbers? No. The Euphoria interpreter usually stores integer-valued atoms as
 machine integers (4 bytes) to save space and improve execution speed. When
-fractional results occur or numbers get too big, conversion to floating-point
-happens automatically.
+fractional results occur or integers get too big, conversion to IEEE 8-byte
+floating-point format happens automatically.
 
 ==== Character Strings and Individual Characters
 
@@ -701,7 +701,7 @@ expressions.
 
 We need to be a bit more precise in defining the rules for **empty
 slices**. Consider a slice ##s[i..j]## where ##s## is of length ##n##. A slice from
-##i## to ##j##, where  ##j = i - 1##  and ##i >= 1## produces the [[:emptyseq|empty sequence]],
+##i## to ##j##, where  ##j = i - 1##  and ##i >= 1## produces the [[:emptyseq "empty sequence"]],
 even if ##i = n + 1##. Thus
 ##1..0## and ##n + 1..n## and everything in between are legal **(empty) slices**.  Empty
 slices are quite useful in many algorithms. A slice from ##i## to ##j## where
@@ -2636,7 +2636,7 @@ label "label strng"
 Label names must be double quoted constant strings. Characters that would be illegal in an 
 Euphria identifier may appear in a label name, since it is a regular string.
 
-[[:Labelled headers|Header labels]] do not count as possible goto label targets.
+[[:Labelled headers "Header labels"]] do not count as possible goto label targets.
 
 Use ##goto## in production code when all the following applies:
 * you want to proceed with a statement which is not the following one;
@@ -2916,22 +2916,22 @@ multiple states.
 
 ==== On/Off options
 
-|| Default || Option                     ||
-| off      | [[:Profiling|profile]]       |
-| off      | [[:Profiling|profile_time]]  |
-| off      | [[:trace]]                   |
-| off      | [[:batch|with_batch]]        |
-| on       | [[:type_check]]              |
-| on       | [[:indirect_includes]]       |
-| on       | [[:inline|with_inline]]      |
+|| Default || Option                      ||
+| without  | [[:Profiling "profile"]]      |
+| without  | [[:Profiling "profile_time"]] |
+| without  | [[:trace]]                    |
+| without  | [[:with_batch "batch"]]       |
+| with     | [[:type_check]]               |
+| with     | [[:indirect_includes]]        |
+| with     | [[:with_inline "inline"]]     |
 
 
-##with## - This turns **on** one of the options while ##without## turns
+##with## turns **on** one of the options and ##without## turns
 **off** one of the options.
 
 For more information on the ##profile##, ##profile_time## and ##trace##
 options, see [[:Debugging and Profiling]]. For more information on the
-##type_check## option, see [[perform.txt | Performance]].
+##type_check## option, see [[:Performance Tips]].
 
 There is also a rarely-used special ##with## option where a code
 number appears after ##with##.  In previous releases this code was
@@ -2974,8 +2974,7 @@ occurs. The exit code will still be set to 1 on error. This is helpful
 for programs that run in a mode where no human may be directly interacting
 with it. For example, a CGI application or a CRON job.
 
-You can also set this option via a
-[[command line parameter|batch_command_line]]..
+You can also set this option via a [[:batch_command_line "command line parameter"]].
 
 ==== Complex with/without options
 

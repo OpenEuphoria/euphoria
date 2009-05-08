@@ -230,10 +230,10 @@ customize  how the interpreter itself behaves.
 
 Unlike many other compilers and interpreters, there is no obligation for any
 special command-line options for ##ex##, ##exw## or ##exu##. Only the
-name of you Euphoria file is expected, and if you don't supply it, you
-will be prompted for it.
+name of you Euphoria file is expected, and if you don't supply it, Euphoria
+will display all the command line options available.
 
-Euphoria is forgiving about your choice of file extensions. By
+Euphoria doesn't care about your choice of file extensions. By
 convention, however, main Euphoria files have an extension of ##.ex##
 unless your program is DOS only, then the extension should be ##.exd##.
 Euphoria include files should have the extension ##.e##. The only other
@@ -341,7 +341,7 @@ screen.
 
 Under //Windows// you can associate ##ed.bat## with various kinds of text files
 that you want to edit. Color syntax highlighting is provided for ##.ex##,
-##.exw##, ##.exd##, ##.e## and ##.pro## ([[:profile_file|profile files]]).
+##.exw##, ##.exd##, ##.e## and ##.pro## ([[:profile_file "profile files"]]).
 
 Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
@@ -441,8 +441,8 @@ The following items may be changed or added, one at a time:
 : Specifies an extra include path.
 
 ; ##-D word##:
-: Defines a word as being set. Words are processed by the [[:ifdef statement]].
-  Words can also be defined via the [[with / without define]] directive.
+: Defines a word as being set. Words are processed by the [[:ifdef]] statement.
+  Words can also be defined via the [[:with / without define]] directive.
 
 ; ##-TEST##:
 : Parses the code only and issues any warnings or errors to ##STDOUT##. On
@@ -455,12 +455,12 @@ The following items may be changed or added, one at a time:
 ; ##-BATCH##:
 : Executes the program but if any error occurs, the "Press Enter" prompt is
   not presented. The exit code will be set to 1 on error, 0 on success. This
-  option can also be set via the [[with batch|with_batch]] directive.
+  option can also be set via the [[:with_batch "with batch"]] directive.
 
 ; ##-STRICT##:
 : This turns on all warnings, overriding any with/without warning statement
   found in the source. This option can also be set via the
-  [[with/without warning]] directive.
+  [[:with/without warning]] directive.
 
 ; ##-W warning_name##:
 : Resets, or adds to, the current list of warnings that may be emitted. The list of known names

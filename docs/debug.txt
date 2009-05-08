@@ -15,7 +15,7 @@ sequences, only a partial dump is shown. If the name **ex.err** is not convenien
 if a nondefault path is required, you can choose another file name, anywhere on your
 system, by calling [[:crash_file]]().
 
-In addition, you are able to create [[:udt|user-defined types]] that precisely
+In addition, you are able to create [[:udt "user-defined types"]] that precisely
 determine the set of legal values for each of your variables. An error report will
 occur the moment that one of your variables is assigned an illegal value.
 
@@ -40,7 +40,7 @@ The **with/without trace** special statements select the parts
 of your program that are available for tracing. Often you will simply insert a
 with trace statement at the very beginning of your source code to make it all
 traceable. Sometimes it is better to place the first with trace after all of
-your [[:udt|user-defined types]], so you don't trace into
+your [[:udt "user-defined types"]], so you don't trace into
 these routines after each assignment to a variable.  At other times, you may
 know exactly which routine or routines you are interested in tracing, and you
 will want to select only these ones. Of course, once you are in the trace
