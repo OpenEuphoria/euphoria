@@ -74,7 +74,8 @@ export sequence compiler_dir = ""
 -- Resulting executable name
 export sequence exe_name = ""
 
-enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT
+enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
+	SETUP_LFLAGS_BEGIN
 
 --**
 -- Setup the build environment. This includes things such as the
@@ -82,7 +83,8 @@ enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EX
 -- etc...
 
 function setup_build()
-	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "", exe_ext = ""
+	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "",
+		exe_ext = "", l_flags_begin = ""
 
 	if length(user_library) = 0 then
 		if TUNIX or compiler_type = COMPILER_GCC or compiler_type = COMPILER_DJGPP then
@@ -169,7 +171,7 @@ function setup_build()
 
 			if debug_option then
 				c_flags = " /d3"
-				l_flags = " DEBUG ALL "
+				l_flags_begin &= " DEBUG ALL "
 			end if
 
 			l_flags &= sprintf(" OPTION STACK=%d ", { total_stack_size })
@@ -208,7 +210,7 @@ function setup_build()
 			CompileErr("Compiler is unknown")
 	end switch
 
-	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext }
+	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin }
 end function
 
 --**
@@ -228,6 +230,10 @@ procedure write_objlink_file()
 	integer fh = open(output_dir & file0 & ".lnk", "wb")
 
 	ensure_exename(settings[SETUP_EXE_EXT])
+
+	if length(settings[SETUP_LFLAGS_BEGIN]) > 0 then
+		puts(fh, settings[SETUP_LFLAGS_BEGIN] & HOSTNL)
+	end if
 
 	for i = 1 to length(generated_files) do
 		if match(".o", generated_files[i]) then
