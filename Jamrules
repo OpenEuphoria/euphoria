@@ -25,6 +25,15 @@ EUC_EXE = [ FDirName $(EUDIR) bin euc$(SUFEXE) ] ;
 EUTEST_EXE = [ FDirName $(EUDIR) bin eutest$(SUFEXE) ] ;
 
 #
+# Setup our build commands
+#
+
+BUILD_EUI_CMD = $(EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
+    [ FDirName $(ROOT_DIR) source eu.ex ] ;
+BUILD_EUC_CMD = $(EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
+    [ FDirName $(ROOT_DIR) source ec.ex ] ;
+
+#
 # Echo a variables content (single or list).
 #
 # This rule is helpful in various Jam debugging tasks. It has
@@ -37,6 +46,27 @@ rule EchoVar
     for __i in $(1)
     {
         echo $(__i) "=" [$($(__i))] ;
+    }
+}
+
+#
+# Determine if a file exists. 1 is returned if it does, 0 is
+# returned if it does not.
+#
+# Example:
+#   if [ FileExists hello.txt ] = 0
+#   {
+#       Echo hello.txt exists ;
+#   }
+#
+
+rule FileExists
+{
+    local f ;
+    f = [ Glob . : $(<) ] ;
+    if $(f)
+    {
+        return 1 ;
     }
 }
 

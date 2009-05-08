@@ -5,39 +5,85 @@
 SubDir TOP ;
 
 #
-# Include our configuration file
+# Configuration
 #
-# This can be overriden with jam -sCONFIG=debug.jam
+# Use: jam DEBUG=yes config to create/update config.jam
 #
 
-if ! $(CONFIG)
-{
-    CONFIG = config.jam ;
+CONFIG  ?= [ FDirName $(TOP) config.jam ] ;
+if $(UNIX) {
+    MANAGED_MEMORY_DEFAULT = off ;
+} else {
+    MANAGED_MEMORY_DEFAULT = on ;
 }
 
-# TODO: nothing yet creates the config.jam file
-# include $(CONFIG) ;
+DEBUG          ?= no ;
+MANAGED_MEMORY ?= $(MANAGED_MEMORY_DEFAULT) ;
+BUILD_DIR      ?= [ FDirName $(TOP) build ] ;
 
-#
-# Set our build directory, if not otherwise set
-#
-# This can be overriden in the $(CONFIG) file or
-# with jam -sBUILD_DIR=abcxyz
-#
-
-if ! $(BUILD_DIR)
+if [ FileExists $(CONFIG) ]
 {
-    BUILD_DIR = [ FDirName $(TOP) build ] ;
+    include $(CONFIG) ;
+}
+else if $(JAMCMDARGS) = "config"
+{
+    # Do nothing
+}
+else
+{
+    Echo "ERROR: $(CONFIG) does not yet exist" ;
+    Echo "" ;
+    Echo "To create the $(CONFIG) file, use jam VARNAME=VALUE config" ;
+    Echo "" ;
+    Echo "Valid options are:" ;
+    Echo "" ;
+    Echo "  DEBUG=on|off       Enable/Disable debug mode (default: off)" ;
+    Echo "  MANAGED_MEM=on|off Enable/Disable managed memory " ;
+    Echo "                     (default: $(MANAGED_MEMORY_DEFAULT))" ;
+    Echo "  BUILD_DIR=dir      Directory to build Euphoria and related " ;
+    Echo "                     tools in (default: build)" ;
+    Echo "" ;
+    Echo "To create a default configuration file, simply run the command:" ;
+    Echo "" ;
+    Echo "  jam config" ;
+    Echo "" ;
+    Echo "Values can be changed at any time. Changing one value will not" ;
+    Echo "affect other values. For instance, if you have a custom build" ;
+    Echo "directory you can use jam DEBUG=on config and jam DEBUG=off config" ;
+    Echo "to toggle the debug setting without affecting the previously set" ;
+    Echo "custom build directory." ;
+    Exit ;
 }
 
-#
-# Setup our build commands
-#
+rule WriteConfig
+{
+    # Must quote filenames such as C:\Euphoria otherwise when reading them
+    # back from the config file, \E will be interpreted as a special character
+    # like \n.
 
-BUILD_EUI_CMD = $(EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
-    [ FDirName $(ROOT_DIR) source eu.ex ] ;
-BUILD_EUC_CMD = $(EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
-    [ FDirName $(ROOT_DIR) source ec.ex ] ;
+    BUILD_DIR on $(<) = $(BUILD_DIR:Q) ;
+
+    # Let the user see all the options as they may have simply changed one
+    # value and left the others alone.
+
+    Echo "" ;
+    Echo "New configuration settings:" ;
+    Echo "" ;
+    Echo "   BUILD_DIR=$(BUILD_DIR)" ;
+    Echo "   DEBUG=$(DEBUG)" ;
+    Echo "   MANAGED_MEMORY=$(MANAGED_MEMORY)" ;
+    Echo "" ;
+}
+
+actions WriteConfig
+{
+    echo # Jam configuration file for Euphoria > $(CONFIG)
+    echo BUILD_DIR ?= $(BUILD_DIR) ; >> $(CONFIG)
+    echo DEBUG ?= $(DEBUG) ; >> $(CONFIG)
+    echo MANAGED_MEMORY ?= $(MANAGED_MEMORY) ; >> $(CONFIG)
+}
+
+WriteConfig config ;
 
 #
 # Include our sub directory projects
