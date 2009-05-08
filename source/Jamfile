@@ -1,52 +1,211 @@
-SubDir TOP ;
+SubDir TOP source ;
 
-BUILD_DIR = jambuild ;
+include [ FDirName $(SUBDIR) version.jam ] ;
 
-PCRE_SOURCES = [ Glob pcre : *.c ] ;
+#
+# Setup compiler specific flags
+#
+
+if $(JAM_TOOLSET) = WATCOM
+{
+    CCFLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /ol /zp8 /s /I.. /Ipcre
+        -DMANAGED_MEM -DEOW -DEWATCOM ;
+}
+else if $(JAM_TOOLSET) = VISUALC
+{
+    CCFLAGS = -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DEMSVC ;
+}
+else if $(JAM_TOOLSET) = DJGPP
+{
+    CCFLAGS = -w -ffast-math -O2 -Os ;
+}
+else if $(JAM_TOOLSET) = MINGW
+{
+    CCFLAGS = -w -ffast-math -O2 -Os -DEMINGW -mno-cygwin -mwindows ;
+}
+else
+{
+    CCFLAGS = -w -ffast-math -O2 -Os ;
+}
+
+#
+# Setup platform specific flags
+#
+
+if $(NT)
+{
+    CCFLAGS += -DEWINDOWS ;
+}
+else if $(UNIX)
+{
+    CCFLAGS += -DEUNIX ;
+    if $(OS) = MACOSX
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DEOSX ;
+    }
+    else if $(OS) = SUNOS
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DESUNOS ;
+    }
+    else if $(OS) = FREEBSD
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DEFREEBSD ;
+    }
+    else if $(OS) = OPENBSD
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DEOPENBSD ;
+    }
+    else if $(OS) = NETBSD
+    {
+        CCFLAGS += -DEBSD -DEBSD62 -DENETBSD ;
+    }
+    else if $(OS) = LINUX
+    {
+        CCFLAGS += -DELINUX ;
+    }
+    else
+    {
+        Echo $(OS) is not supported by Euphoria ;
+        Exit ;
+    }
+}
+else
+{
+    Echo $(OS) is not supported by Euphoria ;
+    Exit ;
+}
+
+#
+# Generates be_rev.c
+#
+
+rule RevGet
+{
+    Clean clean : $(<) ;
+    Clean clean : $(<:S=.dat) ;
+
+    MakeLocate $(<) : [ FDirName $(BUILD_DIR) $(SOURCE_GRIST) ] ;
+
+    REV_GET on $(<) = [ FDirName $(TOP) source revget.ex ] ;
+}
+
+actions RevGet
+{
+    eui $(REV_GET) -output $(<)
+}
+
+#
+# Generate the be_magic.c file
+#
+
+rule MagicGet
+{
+    Depends $(<) : $(>) ;
+    Clean clean : $(<) ;
+    MakeLocate $(<) : [ FDirName $(BUILD_DIR) $(SOURCE_GRIST) ] ;
+
+    FINDJMP on $(<) = [ FDirName $(TOP) source findjmp.ex ] ;
+}
+
+actions MagicGet
+{
+    eui $(FINDJMP) $(<) $(>)
+}
+
+#
+# Define a few variables containing our C source file listings
+#
+
+PCRE_SOURCES = [ Glob [ FDirName $(TOP) source pcre ] : *.c ] ;
 EU_LIB_SOURCE = be_alloc.c be_callc.c be_decompress.c be_inline.c be_machine.c be_pcre.c be_rev.c
     be_runtime.c be_socket.c be_task.c be_w.c ;
 EU_BACKEND_SOURCE = $(EU_LIB_SOURCE) be_execute.c be_main.c be_rterror.c be_symtab.c
     be_syncolor.c ;
 
-SEARCH_SOURCE += [ FDirName $(TOP) pcre ] ;
+SEARCH_SOURCE += [ FDirName $(SUBDIR) pcre ] ;
 SEARCH_SOURCE += [ FDirName $(BUILD_DIR) ] ;
 
 if $(JAM_TOOLSET) = WATCOM
 {
-	EU_BACKEND_SOURCE += be_magic.c ;
-	
-	MagicGet be_magic.c ;
+    EU_BACKEND_SOURCE += be_magic.c ;
 }
 
-if $(NT)
+rule WriteVersionHeader
 {
-	DEFAULT_EUCFLAGS = -con ;
 }
 
-RevGet be_rev.c ;
+actions WriteVersionHeader
+{
+    echo // DO NOT EDIT, EDIT Jamfile INSTEAD > $(1)
+    echo #define MAJ_VER $(VERSION_MAJOR) >> $(1)
+    echo #define MIN_VER $(VERSION_MINOR) >> $(1)
+    echo #define PAT_VER $(VERSION_PATCH) >> $(1)
+    echo #define REL_TYPE "$(RELEASE_TYPE)" >> $(1)
+}
 
-#SOURCE_GRIST = ebackend ;
-LOCATE_TARGET = [ FDirName $(TOP) $(BUILD_DIR) ebackend ] ;
+WriteVersionHeader version.h ;
+MakeLocate version.h : $(BUILD_DIR) ;
+Clean clean : version.h ;
+
+#
+# SOURCE_GRIST enables us to use the same source file
+# with different compiler settings
+#
+# LOCATE_TARGET causes all built files to be located
+# in a given directory
+#
+# MakeLocate causes the final output to be written to
+# yet a different directory. This allows us to use
+# LOCATE_TARGET to place all the .o/.obj files into
+# a sub directory of the BUILD_DIR and the final
+# resulting .a/.lib files directly into the BUILD_DIR
+#
+
+#
+# Build the eu.a/eu.lib file
+#
+
+SOURCE_GRIST = eu ;
+LOCATE_TARGET = [ FDirName $(BUILD_DIR) eu ] ;
+Library eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
+MakeLocate eu$(SUFLIB) : $(BUILD_DIR) ;
+RevGet <eu>be_rev.c ;
+MagicGet <eu>be_magic.c : <eu>be_execute$(SUFOBJ) ;
+
+#
+# Build a utility library of the backend. This saves us compiling
+# time as it will be generated once and then linked into a few
+# different binaries.
+#
+
+SOURCE_GRIST = ebackend ;
+LOCATE_TARGET = [ FDirName $(BUILD_DIR) ebackend ] ;
 CCFLAGS += -DEBACKEND ;
 Library ebackend : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
 MakeLocate ebackend$(SUFLIB) : [ FDirName $(BUILD_DIR) ] ;
+RevGet <ebackend>be_rev.c ;
+MagicGet <ebackend>be_magic.c : <ebackend>be_execute$(SUFOBJ) ;
 
-#SOURCE_GRIST = eu ;
-#LOCATE_TARGET = [ FDirName $(TOP) $(BUILD_DIR) eu ] ;
-#Library eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
-#MakeLocate eu$(SUFLIB) : [ FDirName $(BUILD_DIR) ] ;
+#
+# Add the $(TOP)/include directory to the search path for source
+# files. This way, automatic dependency scanning can find include
+# files and cause our targets to recompile when they change.
+#
 
-SEARCH_SOURCE = [ FDirName $(TOP) .. include ] ;
+SEARCH_SOURCE = [ FDirName $(TOP) include ] ;
 
-EuMain eui : eu.ex ;
-EUCFLAGS on eui = $(DEFAULT_EUCFLAGS) ;
-USER_LIBRARY on eui = ebackend ;
+SOURCE_GRIST = ;
 
-#EuMain euc : ec.ex ;
-#EUCFLAGS on euc = -silent -con ;
-#USER_LIBRARY on euc = eu ;
+#
+# Our actual build targets
+#
 
-#EuMain eutest : eutest.ex ;
-#EUCFLAGS on eutest = -silent -con ;
-#USER_LIBRARY on eutest = eu ;
+EUCFLAGS = -con -keep ;
+USER_LIBRARY = ebackend ;
 
+EuMain eui : [ FDirName $(SUBDIR) eu.ex ] ;
+
+USER_LIBRARY = eu ;
+
+EuMain euc : [ FDirName $(SUBDIR) ec.ex ] ;
+EuMain eutest : [ FDirName $(SUBDIR) eutest.ex ] ;
