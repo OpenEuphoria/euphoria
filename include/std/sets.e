@@ -1534,7 +1534,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:is_surjective]], [[:is_bijective]], [[:direct_map]], [[:inverse]]
+-- [[:is_surjective]], [[:is_bijective]], [[:direct_map]], [[:has_inverse]]
 public function is_bijective(map f)
     if f[$]!=f[$-1] then
         return 0

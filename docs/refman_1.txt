@@ -104,8 +104,8 @@ print_sorted_list()     -- this command starts the program
 
 The above example contains 4 separate commands that are processed in order. The
 first declares two variables: ##list## and ##sorted_list## to be a [[:sequence]]
-(flexible arrays). The second defines a [[:function]], ##merge_sort##(). 
-The third defines a [[:procedure]], ##print_sorted_list##(). The final 
+(flexible arrays). The second defines a [[:"function"-> functions]], ##merge_sort##(). 
+The third defines a [[:"procedure" -> procedures]], ##print_sorted_list##(). The final 
 command calls procedure ##print_sorted_list##().
 
 The output from the program will be:
@@ -441,7 +441,7 @@ The following items may be changed or added, one at a time:
 : Specifies an extra include path.
 
 ; ##-D word##:
-: Defines a word as being set. Words are processed by the [[:ifdef]] statement.
+: Defines a word as being set. Words are processed by the [[:ifdef statement]].
   Words can also be defined via the [[:with / without define]] directive.
 
 ; ##-TEST##:

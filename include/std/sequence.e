@@ -36,7 +36,7 @@ public constant
 --		# ##b##: the other object
 --
 -- Returns:
---		An **integer**, 1 if an addition (or any [[:Relational operator]]) is possible between ##a## and ##b##, else 0.
+--		An **integer**, 1 if an addition (or any of the [[:Relational operators]]) are possible between ##a## and ##b##, else 0.
 --
 -- Example 1:
 --   <eucode>
@@ -272,6 +272,103 @@ public function rotate(sequence source, integer shift, integer start=1, integer 
 end function
 
 --**
+-- Converts a set of sub sequences into a set of 'columns'.
+--
+-- Parameters:
+-- # ##source##: sequence containing the sub-sequences
+-- # ##cols##: either a specific column number or a set of column numbers. 
+--             Default is 0, which returns the maximum number of columns.
+-- # ##defval##: an object. Used when a column value is not available. Default is 0
+--
+-- Comments:
+-- Any atoms found in ##source## are treated as if they are a 1-element sequence.
+--
+-- Example 1:
+-- <eucode>
+-- s = columnize({{1, 2}, {3, 4}, {5, 6}})
+-- -- s is { {1,3,5}, {2,4,6}}
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = columnize({{1, 2}, {3, 4}, {5, 6, 7}})
+-- -- s is { {1,3,5}, {2,4,6}, {0,0,7} }
+-- s = columnize({{1, 2}, {3, 4}, {5, 6, 7},,-999}) -- Change 'no available' value.
+-- -- s is { {1,3,5}, {2,4,6}, {-999,-999,7} }
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- s = columnize({{1, 2}, {3, 4}, {5, 6, 7}}, 2)
+-- -- s is { {2,4,6} } -- Column 2 only
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- s = columnize({{1, 2}, {3, 4}, {5, 6, 7}}, {2,1})
+-- -- s is { {2,4,6}, {1,3,5} } -- Column 2 then column 1
+-- </eucode>
+--
+-- Example 5:
+-- <eucode>
+-- s = columnize({"abc", "def", "ghi"})
+-- -- s is {"adg", "beh", "cfi" }
+-- </eucode>
+
+
+public function columnize(sequence source, object cols = {}, object defval = 0)
+	sequence result
+	sequence collist
+
+	if sequence(cols) then
+		collist = cols
+	else
+		collist = {cols}
+	end if
+	
+	if length(collist) = 0 then
+		cols = 0
+		for i = 1 to length(source) do
+			if atom(source[i]) then
+				if cols = 0 then
+					cols = 1
+				end if
+			else
+				if cols < length(source[i]) then
+					cols = length(source[i])
+				end if
+			end if
+		end for
+		for i = 1 to cols do
+			collist &= i
+		end for
+	end if
+
+	result = repeat({}, length(collist))
+	for i = 1 to length(collist) do
+		integer col = collist[i]
+		for j = 1 to length(source) do
+			if atom(source[j]) then
+				if 1 < col then
+					result[i] = append(result[i], defval)
+				else
+					result[i] = append(result[i], source[j][col])
+				end if
+			else
+				if length(source[j]) < col then
+					result[i] = append(result[i], defval)
+				else
+					result[i] = append(result[i], source[j][col])
+				end if
+			end if
+		end for
+	end for
+	
+	return result
+end function
+
+
+--**
 -- Apply a function to every element of a sequence returning a new sequence of the same size.
 --
 -- Parameters: 
@@ -337,7 +434,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:append]], [[:prepend]], [[:&]]
+--     [[:append]], [[:prepend]], [[:& -> amp_concat]]
 
 --**
 -- Reverse the order of elements in a sequence.
@@ -605,7 +702,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:prepend]], [[:&]]
+--     [[:prepend]], [[:& -> amp_concat]]
 
 --****
 -- Signature:
@@ -645,7 +742,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:append]], [[:&]]
+--     [[:append]], [[:& -> amp_concat]]
 
 
 --****
@@ -723,7 +820,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:insert]], [[:remove]], [[:replace]], [[:&]]
+--     [[:insert]], [[:remove]], [[:replace]], [[:& -> amp_concat]]
 
 --**
 -- Pad the beginning of a sequence with an object so as to meet a minimum length condition.
@@ -1099,10 +1196,10 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = vslice({5,1}, {5,2}, {5,3}}, 2)
+-- s = vslice({{5,1}, {5,2}, {5,3}}, 2)
 -- -- s is {1,2,3}
 --
--- s = vslice({5,1}, {5,2}, {5,3}}, 1)
+-- s = vslice({{5,1}, {5,2}, {5,3}}, 1)
 -- -- s is {5,5,5}
 -- </eucode>
 --
@@ -2151,4 +2248,96 @@ public function build_list( sequence source, object transformer, integer singlto
 	end for
 
 	return result
+end function
+
+
+--**
+-- Calculates the similarity between two sequences.
+--
+-- Parameters:
+--   # ##A##: A sequence.
+--   # ##B##: A sequence.
+--
+-- Returns:
+--   An **atom**: The closer to zero, the more the two sequences are alike.
+--
+-- Comments:
+-- The calculation is weighted to give mismatched elements towards the front
+-- of the sequences larger scores. This means that sequences that differ near
+-- the begining are considered more un-alike than mismatched towards the end of
+-- the sequences. Also, unused elements from the first sequence are weighted more
+-- than unused elements from the second sequence.
+--
+-- Two identical sequences return zero. A non-zero means that they are not the same
+-- and larger values indicate a larger differences.
+--
+-- Example 1:
+-- <eucode>
+-- ? sim_index("sit",      "sin")      --> 0.08784 
+-- ? sim_index("sit",      "sat")      --> 0.32394 
+-- ? sim_index("sit",      "skit")     --> 0.34324 
+-- ? sim_index("sit",      "its")      --> 0.68293 
+-- ? sim_index("sit",      "kit")      --> 0.86603 
+--
+-- ? sim_index("knitting", "knitting") --> 0.00000 
+-- ? sim_index("kitting",  "kitten")   --> 0.09068 
+-- ? sim_index("knitting", "knotting") --> 0.27717 
+-- ? sim_index("knitting", "kitten")   --> 0.35332 
+-- </eucode>
+
+public function sim_index(sequence A, sequence B)
+	atom accum_score
+	atom pos_factor
+	integer indx_a
+	integer indx_b
+	sequence used_A
+	sequence used_B
+
+	-- First pass scores only matching runs of elements.
+	accum_score = 0
+	indx_a = 1
+	used_A = repeat(0, length(A))	
+	used_B = repeat(0, length(B))
+	while indx_a <= length(A) label "DoA" do
+		pos_factor = power((1 + length(A) - indx_a) / length(A),2)
+		indx_b = 1
+		while indx_b <= length(B) do
+			if equal(A[indx_a],B[indx_b]) then
+				accum_score += power((indx_b - indx_a) * pos_factor,2)
+				while indx_a <= length(A) and indx_b <= length(B) with entry do
+					if not equal(A[indx_a], B[indx_b]) then
+						exit
+					end if
+				entry
+					used_B[indx_b] = 1
+					used_A[indx_a] = 1
+					indx_a += 1
+					indx_b += 1
+				end while
+				continue "DoA"
+			end if
+			indx_b += 1
+		end while
+		indx_a += 1
+	end while
+	
+	-- Now score the unused elements from A.
+ 	for i = 1 to length(A) do
+ 		if used_A[i] = 0 then
+			pos_factor = power((1 + length(A) - i) / length(A),2)
+ 			accum_score += power((length(A) - i + 1) * pos_factor,2)
+ 		end if
+ 	end for
+
+	-- Now score the unused elements from B.
+ 	integer total_elems = length(A)
+ 	for i = 1 to length(B) do
+ 		if used_B[i] = 0 then
+			pos_factor = power((1 + length(B) - i) / length(B),2)
+ 			accum_score += (length(B) - i + 1) * pos_factor
+ 			total_elems += 1
+ 		end if
+ 	end for
+
+	return power(accum_score / power(total_elems,2), 0.5)
 end function

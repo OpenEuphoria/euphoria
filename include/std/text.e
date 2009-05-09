@@ -1042,3 +1042,85 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 	return quote_pair[1] & text_in & quote_pair[2]
 
 end function
+
+--** 
+-- Removes 'quotation' text from the argument.
+-- Parameters:
+--   # ##text_in##: The string or set of strings to de-quote.
+--   # ##quote_pairs##: A set of one or more sub-sequences of two strings. 
+--              The first string in each sub-sequence is the opening
+--              quote to look for, and the second string is the closing quote.
+--              The default is {{"\"", "\""}} which means that the output is
+--              'quoted' if it is enclosed by double-quotation marks.
+--   # ##esc##: A single escape character. If this is not negative (the default), 
+--              then this is used to 'escape' any embedded occurances of the
+--              quote characters. In which case the 'escape' character is also
+--              removed.
+--
+-- Returns:
+-- A sequence. The original text but with 'quote' strings stripped of quotes.
+--
+-- Example 1:
+-- <eucode>
+-- -- Using the defaults. 
+-- s = quote("\"The small man\"")
+-- -- 's' now contains 'The small man'
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- -- Using the defaults. 
+-- s = quote("(The small ?(?) man)", {{"[","]"}}, '?')
+-- -- 's' now contains 'The small () man'
+-- </eucode>
+--
+public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, integer esc = -1)
+
+	if length(text_in) = 0 then
+		return text_in
+	end if
+	
+	if atom(quote_pairs) then
+		quote_pairs = {{quote_pairs}, {quote_pairs}}
+	elsif length(quote_pairs) = 1 then
+		quote_pairs = {quote_pairs[1], quote_pairs[1]}
+	elsif length(quote_pairs) = 0 then
+		quote_pairs = {"\"", "\""}
+	end if
+	
+	if sequence(text_in[1]) then
+		for i = 1 to length(text_in) do
+			if sequence(text_in[i]) then
+				text_in[i] = dequote(text_in[i], quote_pairs, esc)
+			end if
+		end for
+		
+		return text_in
+	end if
+	
+	-- If the text begins and ends with a quote-pair then strip them off and
+	-- remove the 'escape' from any 'escaped' quote_pairs within the text.
+	for i = 1 to length(quote_pairs) do
+		if length(text_in) >= length(quote_pairs[i][1]) + length(quote_pairs[i][2]) then
+			if begins(quote_pairs[i][1], text_in) and ends(quote_pairs[i][2], text_in) then
+				text_in = text_in[1 + length(quote_pairs[i][1]) .. $ - length(quote_pairs[i][2])]
+				integer pos = 1
+				while pos > 0 with entry do
+					if begins(quote_pairs[i][1], text_in[pos+1 .. $]) then
+						text_in = text_in[1 .. pos-1] & text_in[pos + 1 .. $]
+					elsif begins(quote_pairs[i][2], text_in[pos+1 .. $]) then
+						text_in = text_in[1 .. pos-1] & text_in[pos + 1 .. $]
+					else
+						pos += 1
+					end if
+				entry
+					pos = find_from(esc, text_in, pos)
+				end while
+				exit
+			end if
+		end if
+	end for
+
+	return text_in
+end function
+

@@ -482,5 +482,12 @@ test_equal("replace_all #3", "aabraacaadaabraa", replace_all("abracadabra", "a",
 test_equal("replace_all #4", "brcdbr", replace_all("abracadabra", "a", ""))
 test_equal("replace_all #5", "abracadabra", replace_all("abracadabra", "", "X"))
 
+test_equal("columnize #1", {{1,3,5}, {2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6}}))
+test_equal("columnize #2", {{1,3,5}, {2,4,6}, {0,0,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}))
+test_equal("columnize #3", {{1,3,5}, {2,4,6}, {-999,-999,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}},,-999))
+test_equal("columnize #4", {{2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, 2))
+test_equal("columnize #5", {{2,4,6},{1,3,5}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, {2,1}))
+test_equal("columnize #6", {"adg", "beh", "cfi"}, columnize({"abc", "def", "ghi"}))
+
 test_report()
 

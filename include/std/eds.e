@@ -2253,10 +2253,8 @@ end function
 --
 -- Returns:
 --		An **object**, the data portion of requested record.\\
---      **NOTE** This function returns a value of -1 if an error prevented
---      the correct data being returned. However, as -1 could possibly be
---      a valid data object, you will need to call [[:db_error]] to retrieve
---      the exact cause of an error, if in fact there was an error.
+--      **NOTE** This function calls fatal() and returns a value of -1 if an error prevented
+--      the correct data being returned. 
 --
 -- Comments:
 -- Each record in a Euphoria database consists of a key portion and a data
@@ -2350,10 +2348,8 @@ end function
 --**
 -- Returns
 -- 		An **object**, the key of the record being queried by index.\\
---      **NOTE** This function returns a value of -1 if an error prevented
---      the correct data being returned. However, as -1 could possibly be
---      a valid data object, you will need to call [[:db_error]] to retrieve
---      the exact cause of an error, if in fact there was an error.
+--      **NOTE** This function calls fatal() and returns a value of -1 if an error prevented
+--      the correct data being returned. 
 --
 -- Parameters:
 -- 		# ##key_location##: an integer, the index of the record the key is being requested.

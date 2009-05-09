@@ -80,7 +80,7 @@ statement. You can also turn it off interactively by typing 'q' to quit
 tracing. Remember that with trace must appear **//outside//** of any routine,
 whereas trace() can appear **//inside//** a routine **//or outside//**.
 
-You might want to turn on tracing from within a [[:type]]. Suppose you run your program and it fails,
+You might want to turn on tracing from within a [[:type -> types]]. Suppose you run your program and it fails,
 with the **ex.err** file showing that one of your variables has been set to a
 strange, although not illegal value, and you wonder how it could have happened.
 Simply create a type for that variable that

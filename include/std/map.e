@@ -237,7 +237,7 @@ constant maxInt = #3FFFFFFF
 public function calc_hash(object key_p, integer max_hash_p = 0)
 	atom ret_
 
-    ret_ = hash(key_p, FLETCHER32)
+    ret_ = hash(key_p, HSIEH32)
 	if max_hash_p <= 0 then
 		return ret_
 	end if
@@ -299,7 +299,7 @@ end function
 -- If ##requested_bucket_size_p## is not greater than zero, a new width is automatically derived from the current one.
 --
 -- See Also:
---		[[:statistics]], [[:optimise]]
+--		[[:statistics]], [[:optimize]]
 
 
 public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
@@ -1262,7 +1262,7 @@ end function
 -- Widens a map to increase performance.
 --
 -- Parameters:
---		# ##the_map_p##: the map being optimised
+--		# ##the_map_p##: the map being optimized
 --		# ##max_p##: an integer, the maximum desired size of a bucket. Default is 25.
 --                  This must be 3 or higher.
 --      # ##grow_p##: an atom, the factor to grow the number of buckets for each
@@ -1270,7 +1270,7 @@ end function
 --                   greater than 1.
 --
 -- Returns:
---		The optimised **map**.
+--		The optimized **map**.
 --
 -- Comments:
 --      This rehashes the map until either the maximum bucket size is less than

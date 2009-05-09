@@ -234,5 +234,5 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:pixel]], [[:graphics_mode]], [[:get_position]]
+--[[:graphics_mode]], [[:get_position]]
 -- 

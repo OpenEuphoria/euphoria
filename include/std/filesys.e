@@ -893,12 +893,6 @@ end function
 -- === File name parsing
 
 public enum
-	FILETYPE_UNDEFINED = -1,
-	FILETYPE_NOT_FOUND,
-	FILETYPE_FILE,
-	FILETYPE_DIRECTORY
-
-public enum
 	PATH_DIR,
 	PATH_FILENAME,
 	PATH_BASENAME,
@@ -926,21 +920,21 @@ public enum
 -- <eucode>
 -- -- DOS32/WIN32
 -- info = pathinfo("C:\\euphoria\\docs\\readme.txt")
--- -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt"}
+-- -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt", "C"}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- -- Unix variants
 -- info = pathinfo("/opt/euphoria/docs/readme.txt")
--- -- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt"}
+-- -- info is {"/opt/euphoria/docs", "readme.txt", "readme", "txt", ""}
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
 -- -- no extension
 -- info = pathinfo("/opt/euphoria/docs/readme")
--- -- info is {"/opt/euphoria/docs", "readme", "readme", ""}
+-- -- info is {"/opt/euphoria/docs", "readme", "readme", "", ""}
 -- </eucode>
 --
 -- See Also:
@@ -948,7 +942,7 @@ public enum
 --   [[:PATH_BASENAME]], [[:PATH_DIR]], [[:PATH_DRIVEID]], [[:PATH_FILEEXT]],
 --   [[:PATH_FILENAME]]
 
-public function pathinfo(sequence path)
+public function pathinfo(sequence path, integer std_slash = 0)
 	integer slash, period, ch
 	sequence dir_name, file_name, file_ext, file_full, drive_id
 
@@ -989,6 +983,21 @@ public function pathinfo(sequence path)
 	else
 		file_name = path[slash+1..$]
 		file_full = file_name
+	end if
+	
+	if std_slash != 0 then
+		if std_slash < 0 then
+			std_slash = SLASH
+			ifdef UNIX then
+			sequence from_slash = "\\"
+			elsedef
+			sequence from_slash = "/"
+			end ifdef
+			dir_name = replace_all(dir_name, from_slash, std_slash)
+		else
+			dir_name = replace_all(dir_name, "\\", std_slash)
+			dir_name = replace_all(dir_name, "/", std_slash)
+		end if
 	end if
 
 	return {dir_name, file_full, file_name, file_ext, drive_id}
@@ -1372,6 +1381,15 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 	return lPath
 end function
 
+
+--****
+-- === File Types
+
+public enum
+	FILETYPE_UNDEFINED = -1,
+	FILETYPE_NOT_FOUND,
+	FILETYPE_FILE,
+	FILETYPE_DIRECTORY
 
 --**
 -- Get the type of a file.

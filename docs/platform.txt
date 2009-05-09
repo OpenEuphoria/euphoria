@@ -265,7 +265,7 @@ Using the Euphoria to C Translator, you can translate Euphoria routines to C, an
 them into a shared library file. You can pass Euphoria atoms and sequences to these
 compiled Euphoria routines, and receive Euphoria data as a result. Translated/compiled
 routines typically run much faster than interpreted routines. For more information, see
-the [[::Translator]].
+the [[:Translator -> "Euphoria to C Translator"]].
 
 ==== Calling C Functions
 

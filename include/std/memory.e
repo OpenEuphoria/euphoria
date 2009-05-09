@@ -224,7 +224,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:free_pointers_array]]
+--   [[:free_pointer_array]]
 
 public function allocate_string_pointer_array(object string_list, integer cleanup = 0)
 	for i = 1 to length(string_list) do

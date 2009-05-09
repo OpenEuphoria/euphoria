@@ -4,7 +4,7 @@
 
 == Definition
 
-=== Objects
+=== Objects === @[predefined types]
 
 ==== Atoms and Sequences
 
@@ -716,7 +716,7 @@ s[$-5..$]
 s[$][1..floor($/2)] -- first half of the last element of s
 </eucode>
 
-==== Concatenation of Sequences and Atoms - The '&' Operator
+==== Concatenation of Sequences and Atoms - The '&' Operator ==== [amp_concat]
 
 Any two objects may be concatenated using the **&** operator. The
 result is a sequence with a length equal to the sum of the lengths of the
@@ -2186,14 +2186,18 @@ how to stop or otherwise alter it.  An iterative block may be informally called
 a loop, and each execution of code in a loop is called an iteration of the
 loop.
 
-Euphoria has three flavours of loops. They all may harbor a [[:labelled header]], in
+Euphoria has three flavours of loops. They all may harbor a [[:labelled header -> Header Labels]], in
 order to make exiting or resuming them more flexible.
 
 === while statement
 
 A **while statement** tests a condition to see if it is non-zero
-(true), and while it is true a loop is executed. e.g.
+(true), and while it is true a loop is executed.
 
+Syntax Format:
+>##**while** //expr// //[//**label** //"name"// //]// //[//**with entry**//]// **do**##
+
+Example 1
 <eucode>
 while x > 0 do
     a = a * 2
@@ -2201,10 +2205,46 @@ while x > 0 do
 end while
 </eucode>
 
+Example 2
+<eucode>
+while sequence(Line) with entry do
+    proc(Line)
+entry
+    Line = gets(handle)
+end while
+</eucode>
+
+Example 3
+<eucode>
+while true label "main" do
+   res = funcA()
+   if res > 5 then
+       if funcB() > somevalue then
+          continue "main" -- go to start of loop
+       end if
+       procC()
+   end if
+   procD(res)
+   for i = 1 to res do
+       if i > somevalue then
+          exit "main" -- exit the "main" loop, not just this 'for' loop.
+       end if
+       procF(i,res)
+   end if
+   
+   res = funcE(res, somevalue)
+end while
+</eucode>
+
 === loop until statement
 
 A **loop until** statement tests a condition to see if it is
-non-zero (true), and until it is true a loop is executed. e.g.
+non-zero (true), and until it is true a loop is executed.
+
+Syntax Format:
+>##**loop** //[//**label** //"name"// //]// //[//**with entry**//]// **do**##
+>>##//statements//##
+>##**until** //expr//##
 
 <eucode>
 loop do
@@ -2636,7 +2676,7 @@ label "label strng"
 Label names must be double quoted constant strings. Characters that would be illegal in an 
 Euphria identifier may appear in a label name, since it is a regular string.
 
-[[:Labelled headers "Header labels"]] do not count as possible goto label targets.
+[[:Labelled headers -> "Header labels"]] do not count as possible goto targets.
 
 Use ##goto## in production code when all the following applies:
 * you want to proceed with a statement which is not the following one;
@@ -2665,7 +2705,7 @@ may be defined only in that scope, and they may or may not have sensible values.
 the programmer to take appropriate action in this respect.
 
 
-=== Labeled headers
+=== Header Labels == @[Labelled headers]
 
 As shown in the above section on control flow statements, most of them may take
 a string referencing a block of code. In order to do so, it is enough to do
@@ -2804,11 +2844,11 @@ top-level executable statements, then nothing will happen when you run it
 routine (see [[:Example Program]]).  It's quite
 possible to have a program with nothing but top-level executable statements and
 no routines. For example you might want to use Euphoria as a simple calculator,
-typing just a few [[:print]] or [[:?]] statements into a file, and then executing it.
+typing just a few [[:print]] or [[:? -> q_print]] statements into a file, and then executing it.
 
 As we have seen, you can use any Euphoria statement, including
 [[:for statement]], [[:while statement]], [[:if statement]], etc... (but not [[:return]]),
-at the top level i.e. //outside// of any [[:function]] or [[:procedure]]. In addition, the
+at the top level i.e. //outside// of any [[:function ->functions]] or [[:procedure ->procedures]]. In addition, the
 following special statements may //only// appear at the top level:
 
 * ##include##

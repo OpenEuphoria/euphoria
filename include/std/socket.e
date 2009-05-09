@@ -136,8 +136,8 @@ public constant
 --****
 -- === Socket Options
 --
--- Pass to the ##optname## parameter of the functions [[:get_socket_options]]
--- and [[:set_socket_options]].
+-- Pass to the ##optname## parameter of the functions [[:get_option]]
+-- and [[:set_option]].
 --
 -- These options are highly OS specific and are normally not needed for most
 -- socket communication. They are provided here for your convience. If you should
@@ -184,7 +184,7 @@ public constant
 --****
 -- === Send Flags
 --
--- Pass to the ##flags## parameter of [[:send]] and [[:recv]]
+-- Pass to the ##flags## parameter of [[:send]] and [[:receive]]
 --
 
 public constant
@@ -227,8 +227,8 @@ public constant
 	MSG_TRUNC     = #20,
 
 	--**
-	-- Enables non-blocking operation; if the operation would block, [[:EAGAIN]]
-	-- or [[:EWOULDBLOCK]] is returned.
+	-- Enables non-blocking operation; if the operation would block, EAGAIN
+	-- or EWOULDBLOCK is returned.
 
 	MSG_DONTWAIT  = #40,
 
@@ -268,8 +268,8 @@ public constant
 	MSG_ERRQUEUE  = #2000,
 
 	--**
-	-- Requests not to send [[:SIGPIPE]] on errors on stream oriented sockets when
-    -- the other end breaks the connection. The [[:EPIPE]] error is still
+	-- Requests not to send SIGPIPE on errors on stream oriented sockets when
+    -- the other end breaks the connection. The EPIPE error is still
     -- returned.
 
 	MSG_NOSIGNAL  = #4000,

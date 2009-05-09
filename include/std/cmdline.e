@@ -218,96 +218,7 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 	return opts
 end function
 
---****
--- == Routines
-
---****
--- Signature:
--- <built-in> function command_line()
---
--- Description:
--- A **sequence** of strings, where each string is a word from the command-line that started your program.
---
--- Comments:
---
--- The returned sequence contains the following information:
--- # Tthe path to either the Euphoria executable, ex.exe, exw.exe or exu, or to your bound executable file.
--- # The next word is either the name of your Euphoria main file, or 
--- (again) the path to your bound executable file.
--- # Any extra words typed by the user. You can use these words in your program.
---
--- There are as many entries as words, plus the two mentioned above.
---
--- The Euphoria interpreter itself does not use any command-line options. You are free to use
--- any options for your own program. It does have [[:command line switches]] though.
---
--- The user can put quotes around a series of words to make them into a single argument.
---
--- If you convert your program into an executable file, either by binding it, or translating it to C, 
--- you will find that all command-line arguments remain the same, except for the first two, 
--- even though your user no longer types "ex" on the command-line (see examples below).
---  
--- Example 1:
--- <eucode>  
---  -- The user types:  ex myprog myfile.dat 12345 "the end"
--- 
--- cmd = command_line()
--- 
--- -- cmd will be:
---       {"C:\EUPHORIA\BIN\EX.EXE",
---        "myprog",
---        "myfile.dat",
---        "12345",
---        "the end"}
--- </eucode>
---
--- Example 2:  
--- <eucode>  
---  -- Your program is bound with the name "myprog.exe"
--- -- and is stored in the directory c:\myfiles
--- -- The user types:  myprog myfile.dat 12345 "the end"
--- 
--- cmd = command_line()
--- 
--- -- cmd will be:
---        {"C:\MYFILES\MYPROG.EXE",
---         "C:\MYFILES\MYPROG.EXE", -- place holder
---         "myfile.dat",
---         "12345",
---         "the end"
---         }
--- 
--- -- Note that all arguments remain the same as example 1
--- -- except for the first two. The second argument is always
--- -- the same as the first and is inserted to keep the numbering
--- -- of the subsequent arguments the same, whether your program
--- -- is bound or translated as a .exe, or not.
--- </eucode>
---
--- See Also:
--- [[:build_commandline]], [[::option_switches]],  [[:getenv]], [[:cmd_parse]], [[:show_help]]
-
---****
--- Signature:
--- <built-in> function option_switches()
---
--- Description:
--- Retrieves the list of switches passed to the interpreter on the comand line.
---
--- Returns:
--- A **sequence** of strings, each containing a word related to switches.
---
--- Comments:
---
--- All switches are recorded in upper case.
---
--- Example 1:
--- exw -d helLo will result in ##option_switches##() being ##{"-D","helLo"}##.
---
--- See Also:
--- [[:Command line switches]]
-
-procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), integer std = 0)
+procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), integer std = 0)
 	if add_help_rid > -1 then
 		call_proc(add_help_rid, {})
 		return
@@ -481,6 +392,96 @@ procedure local_show_help(sequence opts, object add_help_rid=-1, sequence cmds =
 	
 end procedure
 
+
+--****
+-- == Routines
+
+--****
+-- Signature:
+-- <built-in> function command_line()
+--
+-- Description:
+-- A **sequence** of strings, where each string is a word from the command-line that started your program.
+--
+-- Comments:
+--
+-- The returned sequence contains the following information:
+-- # Tthe path to either the Euphoria executable, ex.exe, exw.exe or exu, or to your bound executable file.
+-- # The next word is either the name of your Euphoria main file, or 
+-- (again) the path to your bound executable file.
+-- # Any extra words typed by the user. You can use these words in your program.
+--
+-- There are as many entries as words, plus the two mentioned above.
+--
+-- The Euphoria interpreter itself does not use any command-line options. You are free to use
+-- any options for your own program. It does have [[:command line switches]] though.
+--
+-- The user can put quotes around a series of words to make them into a single argument.
+--
+-- If you convert your program into an executable file, either by binding it, or translating it to C, 
+-- you will find that all command-line arguments remain the same, except for the first two, 
+-- even though your user no longer types "ex" on the command-line (see examples below).
+--  
+-- Example 1:
+-- <eucode>  
+--  -- The user types:  ex myprog myfile.dat 12345 "the end"
+-- 
+-- cmd = command_line()
+-- 
+-- -- cmd will be:
+--       {"C:\EUPHORIA\BIN\EX.EXE",
+--        "myprog",
+--        "myfile.dat",
+--        "12345",
+--        "the end"}
+-- </eucode>
+--
+-- Example 2:  
+-- <eucode>  
+--  -- Your program is bound with the name "myprog.exe"
+-- -- and is stored in the directory c:\myfiles
+-- -- The user types:  myprog myfile.dat 12345 "the end"
+-- 
+-- cmd = command_line()
+-- 
+-- -- cmd will be:
+--        {"C:\MYFILES\MYPROG.EXE",
+--         "C:\MYFILES\MYPROG.EXE", -- place holder
+--         "myfile.dat",
+--         "12345",
+--         "the end"
+--         }
+-- 
+-- -- Note that all arguments remain the same as example 1
+-- -- except for the first two. The second argument is always
+-- -- the same as the first and is inserted to keep the numbering
+-- -- of the subsequent arguments the same, whether your program
+-- -- is bound or translated as a .exe, or not.
+-- </eucode>
+--
+-- See Also:
+-- [[:build_commandline]], [[:option_switches]],  [[:getenv]], [[:cmd_parse]], [[:show_help]]
+
+--****
+-- Signature:
+-- <built-in> function option_switches()
+--
+-- Description:
+-- Retrieves the list of switches passed to the interpreter on the comand line.
+--
+-- Returns:
+-- A **sequence** of strings, each containing a word related to switches.
+--
+-- Comments:
+--
+-- All switches are recorded in upper case.
+--
+-- Example 1:
+-- exw -d helLo will result in ##option_switches##() being ##{"-D","helLo"}##.
+--
+-- See Also:
+-- [[:Command line switches]]
+
 --**
 -- Show help message for the given opts.
 --
@@ -518,12 +519,12 @@ end procedure
 --
 
 public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line())
-	local_show_help(opts, add_help_rid, cmds, 0)
+	local_help(opts, add_help_rid, cmds, 0)
 end procedure
 
+---
 function find_opt(sequence opts, sequence typ, object cmd_text)
 	integer slash
-	integer posn = 0
 	sequence opt_name
 	object opt_param
 	integer param_found = 0
@@ -551,14 +552,9 @@ function find_opt(sequence opts, sequence typ, object cmd_text)
 	opt_name = repeat(' ', length(cmd_text))
 	opt_param = 0
 	for i = 1 to length(cmd_text) do
-		if find(cmd_text[i], ":=-+") then
-			if find(cmd_text[i], "-+") then
-				posn = i
-			else
-				posn = i + 1
-			end if
+		if find(cmd_text[i], ":=") then
 			opt_name = opt_name[1 .. i - 1]
-			opt_param = cmd_text[posn .. $]
+			opt_param = cmd_text[i + 1 .. $]
 			if length(opt_param) >= 2 then
 				-- Strip off any enclosing quotes
 				if opt_param[1] = '\'' or opt_param[1] = '"' then
@@ -871,7 +867,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		end if
 
 		if find(cmd[from_..$], help_opts) then
-			local_show_help(opts, add_help_rid, cmds, 1)
+			local_help(opts, add_help_rid, cmds, 1)
 			abort(0)
 		end if
 
@@ -887,7 +883,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			then
 				-- something is wrong with the option
 				printf(1, "option '%s': %s\n\n", {cmd, find_result[2]})
-				local_show_help(opts, add_help_rid, cmds, 1)
+				local_help(opts, add_help_rid, cmds, 1)
 				abort(1)
 			end if
 
@@ -912,7 +908,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0))
 				then
 					printf(1, "option '%s' must have a parameter\n\n", {find_result[2]})
-					local_show_help(opts, add_help_rid, cmds, 1)
+					local_help(opts, add_help_rid, cmds, 1)
 					abort(1)
 				end if
 			else
@@ -939,7 +935,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0))
 				then
 					printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
-					local_show_help(opts, add_help_rid, cmds, 1)
+					local_help(opts, add_help_rid, cmds, 1)
 					abort(1)
 				else
 					map:put(parsed_opts, opt[MAPNAME], param)
@@ -956,13 +952,13 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			if atom(opts[i][SHORTNAME]) and atom(opts[i][LONGNAME]) then
 				if length(map:get(parsed_opts, opts[i][MAPNAME])) = 0 then
 					puts(1, "Additional arguments were expected.\n\n")
-					local_show_help(opts, add_help_rid, cmds, 1)
+					local_help(opts, add_help_rid, cmds, 1)
 					abort(1)
 				end if
 			else
 				if not map:has(parsed_opts, opts[i][MAPNAME]) then
 					printf(1, "option '%s' is mandatory but was not supplied.\n\n", {opts[i][MAPNAME]})
-					local_show_help(opts, add_help_rid, cmds, 1)
+					local_help(opts, add_help_rid, cmds, 1)
 					abort(1)
 				end if
 			end if

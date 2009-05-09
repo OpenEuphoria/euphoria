@@ -60,7 +60,7 @@ include std/dll.e
 --
 -- # Creating a subroutine that takes another routine as a parameter. (See Example 2 below)
 -- # Using a sequence of routine id's to make a case (switch) statement. Using the 
--- [[:switch_statement]] is more efficient.
+-- [[:switch statement]] is more efficient.
 -- # Setting up an Object-Oriented system.
 -- # Getting a routine id so you can pass it to [[:call_back]](). (See [[../docs/platform.txt]])
 -- # Getting a routine id so you can pass it to [[:task_create]](). (See [[../docs/tasking.txt]])

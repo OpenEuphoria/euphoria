@@ -316,7 +316,7 @@ printf(1, "Hello, %s!\n", {mystring})
 
 ==== Only 10 significant digits during printing
 
-//When I print numbers using [[:printf]] or [[:?]] only 10 significant digits are
+//When I print numbers using [[:printf]] or [[:? ->q_print]] only 10 significant digits are
 displayed.//
 
 Euphoria normally only shows about 10 digits. Internally, all

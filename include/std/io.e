@@ -44,13 +44,13 @@ public constant SCREEN = 1
 
 public constant EOF = (-1)
 
-
 --****
 -- === Read/Write Routines
 
---****
+--**
+-- @[q_print]
 -- Signature:
--- <built-in> procedure ? (no parens around he unique parameter)
+-- <built-in> procedure ? (no parens around the unique parameter)
 --
 -- Description:
 -- Shorthand way of saying: **pretty_print(STDOUT, x, {})** - i.e. printing the value of an 
@@ -64,7 +64,7 @@ public constant EOF = (-1)
 -- See Also:
 --   [[:print]]
 
---****
+--**
 -- Signature:
 -- <built-in> procedure print(integer fn, object x)
 --
@@ -100,7 +100,7 @@ public constant EOF = (-1)
 -- See Also:
 -- 		[[:?]], [[:puts]]
 
---****
+--**
 -- Signature:
 -- <built-in> procedure printf(integer fn, sequence format, object values)
 --
@@ -208,7 +208,7 @@ public constant EOF = (-1)
 -- See Also:
 --     [[:sprintf]], [[:sprint]], [[:print]]
 
---****
+--**
 -- Signature:
 -- <built-in> procedure puts(integer fn, object text)
 --
@@ -247,7 +247,7 @@ public constant EOF = (-1)
 -- See Also:
 --   [[:print]]
 
---****
+--**
 -- Signature:
 -- <built-in> function getc(integer fn)
 --
@@ -274,7 +274,7 @@ public constant EOF = (-1)
 -- See Also:
 -- 		[[:gets]], [[:get_key]]
 
---****
+--**
 -- Signature:
 -- <built-in> function gets(integer fn)
 --
@@ -341,7 +341,7 @@ public constant EOF = (-1)
 -- See Also:
 --		[[:getc]], [[:read_lines]]
 
---****
+--**
 -- Signature:
 -- <built-in> function get_key()
 --
@@ -402,7 +402,7 @@ constant CHUNK = 100
 --     </eucode>
 --
 -- See Also:
--- 		[[:getc]], [[:gets]], [[:get_integer32]], [[::get_dstring]]
+-- 		[[:getc]], [[:gets]], [[:get_integer32]], [[:get_dstring]]
 
 public function get_bytes(integer fn, integer n)
 	sequence s
@@ -473,7 +473,7 @@ mem3 = mem0 + 3
 --     </eucode>
 --
 -- See Also:
--- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
 public function get_integer32(integer fh)
 -- read the 4 bytes as a single integer value at current position in file
@@ -508,7 +508,7 @@ end function
 --     </eucode>
 --
 -- See Also:
--- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
 public function get_integer16(integer fh)
 -- read the 4 bytes as a single integer value at current position in file
@@ -537,7 +537,7 @@ end function
 --     </eucode>
 --
 -- See Also:
--- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
 public procedure put_integer32(integer fh, integer val)
 	poke4(mem0, val)
@@ -564,7 +564,7 @@ end procedure
 --     </eucode>
 --
 -- See Also:
--- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_dstring]]
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
 public procedure put_integer16(integer fh, integer val)
 	poke2(mem0, val)
@@ -598,7 +598,7 @@ end procedure
 --     </eucode>
 --
 -- See Also:
--- 		[[:getc]], [[:gets]], [[:get_bytes]], [[::get_integer32]]
+-- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_integer32]]
 
 public function get_dstring(integer fh, integer delim = 0)
 	sequence s
