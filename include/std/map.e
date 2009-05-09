@@ -88,8 +88,9 @@ constant type_is_map   = "Eu:StdMap"
 -- Suitable for signatures.
 -- ** -1 uses SHA256 (not implemented yet) Slow but excellent dispersion. 
 -- Suitable for signatures. More secure than MD5.
--- ** 0 and above (integers and decimals) use the cyclic variant (hash = hash * algo + c),
--- except that for values from zero to less than 1, use (algo + 69096). Fast and good to excellent
+-- ** 0 and above (integers and decimals) and non-integers less than zero use
+--  the cyclic variant (hash = hash * algo + c).
+-- This is a fast and good to excellent
 -- dispersion depending on the value of //algo//. Decimals give better dispersion but are
 -- slightly slower.
 --
@@ -100,12 +101,17 @@ constant type_is_map   = "Eu:StdMap"
 --        MD5 returns a 4-element sequence of integers\\
 --        SHA256 returns a 8-element sequence of integers.
 --
+-- Comments:
+-- * For //algo// values from zero to less than 1, that actual value used is (algo + 69096). 
+--
 -- Example 1:
 -- <eucode>
 -- x = hash("The quick brown fox jumps over the lazy dog", 0)
 -- -- x is 242399616
 -- x = hash("The quick brown fox jumps over the lazy dog", 99.94)
 -- -- x is 723158
+-- x = hash("The quick brown fox jumps over the lazy dog", -99.94)
+-- -- x is 4175585990
 -- x = hash("The quick brown fox jumps over the lazy dog", -4)
 -- -- x is 467406810
 -- </eucode>

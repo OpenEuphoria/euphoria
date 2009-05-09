@@ -1,7 +1,9 @@
 -- t_hash.e
 include std/unittest.e
+include std/map.e
 constant s = "Euphoria Programming Language brought to you by Rapid Deployment Software"
-constant hashalgo = {-9.123, -5, -4, -3, -2, -1, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
+constant hashalgo = {-9.123, HSIEH32, FLETCHER32, ADLER32, MD5, SHA256, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
+
 constant expected = {
 {#B7F48C20,#F8C6DB45,#32EE1F21,#E99E6554,#70CA9A7C,#F0CA6A78,#D0FC1278,#A5472C74,#E9FC1361,#BF6F937D,#7C6C3F8F,#339E9365,#A547AC74,#EEE47627,#31046996}, -- (-9.123)
 {#3C0D29F1,#B99D68D8,#B53F7BDB,#3C0D29F0,#6D67AA1D,#27DC0C95,#2F451A8C,#04975F5F,#ABE977C9,#60FD495F,#42A636FF,#D197B438,#F3660E8B,#00000000,#E5E9967B}, -- (-5)
