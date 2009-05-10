@@ -466,6 +466,14 @@ install-generic : .SYMBOLIC
 	if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
 	copy ..\include\* $(PREFIX)\include\
 	copy ..\include\std\* $(PREFIX)\include\std
+	if not exist $(PREFIX)\include\std\net mkdir $(PREFIX)\include\std\net
+	copy ..\include\std\net\* $(PREFIX)\include\std\net
+	if not exist $(PREFIX)\include\std\win32 mkdir $(PREFIX)\include\std\win32
+	copy ..\include\std\win32\* $(PREFIX)\include\std\win32
+	if not exist $(PREFIX)\include\std\unix mkdir $(PREFIX)\include\std\unix
+	copy ..\include\std\unix\* $(PREFIX)\include\std\unix
+	if not exist $(PREFIX)\include\std\dos mkdir $(PREFIX)\include\std\dos
+	copy ..\include\std\dos\* $(PREFIX)\include\std\dos
 	if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
 	copy ..\include\euphoria\* $(PREFIX)\include\euphoria
 	

@@ -412,6 +412,9 @@ install :
 	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/html 
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/unix
+	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/net
+	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/win32
+	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/dos
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/bench
 	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/doc
 	mkdir -p $(DESTDIR)/usr/share/euphoria/tutorial 
@@ -427,6 +430,10 @@ install :
 	install eu.a $(DESTDIR)/usr/lib
 	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
+	install ../include/std/net/*e  $(DESTDIR)/usr/share/euphoria/include/std/net
+	install ../include/std/unix/*e  $(DESTDIR)/usr/share/euphoria/include/std/unix
+	install ../include/std/win32/*e  $(DESTDIR)/usr/share/euphoria/include/std/win32
+	install ../include/std/dos/*e  $(DESTDIR)/usr/share/euphoria/include/std/dos
 	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)/usr/share/euphoria/include
 	-install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
