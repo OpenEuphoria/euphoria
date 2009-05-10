@@ -4,6 +4,7 @@ include std/os.e
 include std/socket.e as sock
 include std/pipeio.e as pipe
 include std/filesys.e as fs
+include std/cmdline.e
 object _ = 0
 
 test_equal("service_by_name echo", { "echo", "tcp", 7 }, service_by_name("echo", "tcp"))
@@ -43,7 +44,8 @@ elsedef
 	end if
 end ifdef
 
-object p = pipe:exec(interpreter & " ../demo/sock_server.ex", pipe:create())
+object p = pipe:exec(interpreter & " " & build_commandline( option_switches() ) & 
+	" ../demo/sock_server.ex", pipe:create())
 if atom(p) then
 	test_fail("could not launch temporary server")
 else
