@@ -897,7 +897,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				idx += 1
 				if idx <= length(cmds) then
 					param = cmds[idx]
-					if length(param) > 1 and find(param[1], "-/") then
+					if length(param) = 2 and find(param[1], "-/") then
 						param = ""
 					end if
 				else

@@ -4,7 +4,7 @@ include std/map.e as map
 
 integer dummy = 0
 function got_dummy(sequence data)
-	test_equal("cmd_parse() #7a", 4, data[OPT_IDX])
+	test_equal("cmd_parse() #7a", 5, data[OPT_IDX])
 	test_equal("cmd_parse() #7b", 1, data[OPT_VAL])
 	test_true("cmd_parse() #7c", data[OPT_CNT] <= 2)
 	if data[OPT_CNT] = 1 then
@@ -21,6 +21,7 @@ sequence option_defs = {
     { "v", "verbose",  "Verbose output",   {MANDATORY,NO_PARAMETER} },
     { 0  , "style",    "Style sheet file", {HAS_PARAMETER,"filename",NO_CASE} },
     { "c", "count",    "Count",            HAS_PARAMETER },
+    { "i", 0,    "Include",            {HAS_PARAMETER,NO_CASE} },
     { "d", "dummy",    "Dummy Test",       {ONCE}, routine_id("got_dummy") },
     { 0,    0,         "At least one file name is also required.", {MANDATORY}}
     
@@ -28,7 +29,7 @@ sequence option_defs = {
 
 -- Parse command line
 
-map:map opts = cmd_parse(option_defs, routine_id("opt_help"), {"exu", "app.ex", "-d", "/v", "-c:50", "--STYLE", "file.css", "-!d", "input.txt", "output.txt"} ) 
+map:map opts = cmd_parse(option_defs, routine_id("opt_help"), {"exu", "app.ex", "-i", "/abc/def/ghi","-d", "/v", "-c:50", "--STYLE", "file.css", "-!d", "input.txt", "output.txt"} ) 
 test_equal("cmd_parse() #1", 1, map:get(opts, "verbose"))
 test_equal("cmd_parse() #2", "50", map:get(opts, "count"))
 test_equal("cmd_parse() #3", "file.css", map:get(opts, "style"))
