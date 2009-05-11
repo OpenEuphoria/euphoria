@@ -294,7 +294,13 @@ object cmds = command_line()
 if match("revget.ex", cmds[2]) then
 	m:map opts = cmd_parse(opt_def)
 	out_file = m:get(opts, "output", "be_rev.c")
-	dat_file = dirname(out_file) & "/" & filebase(out_file) & ".dat"
+	dat_file = filebase(out_file) & ".dat"
+
+	sequence base_dir = dirname(out_file)
+	if length(base_dir) > 0 then
+		dat_file = base_dir & "/" & dat_file
+	end if
+
 	svnentries = m:get(opts, "svnentries", 0)
 
 	interactive = 1
