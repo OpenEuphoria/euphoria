@@ -74,6 +74,17 @@ while idx < 2 do
 end while
 test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
 
+idx = 0
+idx2 = 0
+loop do
+	idx += 1
+	if and_bits( 1, idx ) then
+		continue
+	end if
+	idx2 += 1
+until idx = 3
+test_equal( "loop..until with continue", 1, idx2 )
+
 ifdef EC then
 	function foo( sequence x )
 		for i = 1 to length(x) do if atom(x[i]) then return 0 end if end for

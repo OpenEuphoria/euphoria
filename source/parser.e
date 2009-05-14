@@ -2563,6 +2563,9 @@ procedure Loop_statement()
 	End_block( LOOP )
 	
 	tok_match(UNTIL)
+	if TRANSLATE then
+		emit_op(NOP1)
+	end if
 	PatchNList(next_base)
 	StartSourceLine(TRUE)
 	short_circuit += 1
