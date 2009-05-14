@@ -1891,27 +1891,13 @@ void do_exec(int *start_pc)
 				}
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
 				a = pc[3];
-				pc += 4;
-				if (IS_ATOM_INT(top)) {
-					if (IS_ATOM_INT_NV(*(object_ptr)a)) {
-						*(object_ptr)a = top;
-						thread();
-						BREAK;
-					}
-					else {
-						DeRefDSx(*(object_ptr)a);
-						*(object_ptr)a = top;
-						thread();
-						BREAK;
-					}
-				}
-				else {
-					RefDS(top);
+				if( ((symtab_ptr)a)->mode != M_TEMP )
 					DeRefx(*(object_ptr)a);
-					*(object_ptr)a = top;
-					thread();
-					BREAK;
-				}
+				Ref( top );
+				*(object_ptr)a = top;
+				pc += 4;
+				thread();
+				BREAK;
 
 			case L_RHS_SUBS_I: /* rhs subscript of a known-to-be sequence */
 			deprintf("case L_RHS_SUBS_I:");
