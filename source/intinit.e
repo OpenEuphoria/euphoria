@@ -13,10 +13,9 @@ include pathopen.e
 sequence interpreter_opt_def = {}
 
 export procedure intoptions()
-	if Argc < 3 then
-		Argv &= GetDefaultArgs()
-		Argc = length(Argv)
-	end if
+
+	Argv = splice( Argv, GetDefaultArgs(), 3 )
+	Argc = length(Argv)
 
 	expand_config_options()
 	m:map opts = cmd_parse(common_opt_def & interpreter_opt_def,
