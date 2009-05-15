@@ -1237,7 +1237,7 @@ export procedure emit_op(integer op)
 	elsif op = RETURNF then
 		emit_opcode(op)
 		emit_addr(CurrentSub)
-		emit_addr(top_block())
+		emit_addr(Least_block())
 		emit_addr(Pop())
 		assignable = FALSE
 

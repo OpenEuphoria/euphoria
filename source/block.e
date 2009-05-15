@@ -1,3 +1,4 @@
+include std/map.e as map
 
 include common.e
 include global.e
@@ -25,6 +26,8 @@ enum
 export enum
 	LOOP_BLOCK,
 	CONDITIONAL_BLOCK
+
+map:map map_links = map:new()
 
 sequence block_stack = { repeat( 0, BLOCK_SIZE - 1 ) } -- track nested blocks
 block_stack[1][BLOCK_VARS] = {}
@@ -102,7 +105,7 @@ export procedure push_block( integer opcode, object block_label = 0 )
 		SymTab[block_label][S_BLOCK] = current_block
 		SymTab[current_block][S_NAME] = sprintf("BLOCK: %s", {SymTab[block_label][S_NAME]})
 	elsif current_block then
-		
+		map:put( map_links, last_block, current_block, map:CONCAT )
 		SymTab[current_block][S_BLOCK] = last_block
 		sequence label_name = ""
 		if sequence(block_label) then
@@ -160,6 +163,21 @@ export function pop_block()
 		
 	end for
 	
+	if not length(block_vars) then
+		-- this is an empty block...remove it
+		symtab_index bsym  = sym_block( CurrentSub )
+		symtab_index empty = block[BLOCK_SYM]
+		if bsym = empty then
+			break
+		end if
+		object linked_blocks = map:get( map_links, empty )
+		if sequence(linked_blocks) then
+			for i = 1 to length( linked_blocks ) do
+				SymTab[linked_blocks[i]][S_BLOCK] = bsym
+			end for
+			map:put( map_links, bsym, linked_blocks, map:CONCAT )
+		end if
+	end if
 	current_block = block_stack[$][BLOCK_SYM]
 	return block[BLOCK_SYM]
 end function
@@ -266,7 +284,7 @@ export procedure Pop_block_var()
 	SymTab[block_sym][S_NEXT_IN_BLOCK] = sym_next_in_block( sym )
 	SymTab[sym][S_NEXT_IN_BLOCK] = 0
 	
-	block_stack[$][BLOCK_VARS] = remove( block_stack[$][BLOCK_VARS], 
+	block_stack[$][BLOCK_VARS] = eu:remove( block_stack[$][BLOCK_VARS], 
 		length(block_stack[$][BLOCK_VARS]) )
 end procedure
 
@@ -294,3 +312,16 @@ end procedure
 export procedure blocks_info()
 	? block_stack
 end procedure
+
+--**
+-- Used to find the block that a return statement should
+-- use.  It should disregard empty blocks.
+export function Least_block()
+	integer ix = length( block_stack )
+	symtab_index sub_block = sym_block( CurrentSub )
+	while not length( block_stack[ix][BLOCK_VARS] ) 
+	and block_stack[ix][BLOCK_SYM] != sub_block do
+		ix -= 1	
+	end while
+	return block_stack[ix][BLOCK_SYM]
+end function
