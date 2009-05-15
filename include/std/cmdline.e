@@ -188,7 +188,8 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 		if sequence(opt[SHORTNAME]) then
 			for j = i + 1 to length(opts) do
 				if equal(opt[SHORTNAME], opts[j][SHORTNAME]) then
-					crash("cmd_opts: Duplicate Short Names are not allowed in an option record.\n")
+					crash("cmd_opts: Duplicate Short Names (%s) are not allowed in an option record.\n", 
+						{ opt[SHORTNAME]})
 				end if
 			end for
 		end if
@@ -196,7 +197,8 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 		if sequence(opt[LONGNAME]) then
 			for j = i + 1 to length(opts) do
 				if equal(opt[LONGNAME], opts[j][LONGNAME]) then
-					crash("cmd_opts: Duplicate Long Names are not allowed in an option record.\n")
+					crash("cmd_opts: Duplicate Long Names (%s) are not allowed in an option record.\n",
+						{opt[LONGNAME]})
 				end if
 			end for
 		end if
