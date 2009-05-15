@@ -20,7 +20,7 @@ include platform.e
 export sequence src_name = ""
 export sequence switches = {}
 
-export sequence common_opt_def = {
+constant COMMON_OPTIONS = {
 	{ "c", 0, "Specify a configuration file",
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
 	{ "i", 0, "Add a directory to be searched for include files",
@@ -44,6 +44,29 @@ export sequence common_opt_def = {
 	{ "copyright", 0, "Display all copyright notices",
 				{ NO_CASE } }
 }
+
+sequence options = {}
+add_options( COMMON_OPTIONS )
+
+--**
+-- Add options to be parsed.
+export procedure add_options( sequence new_options )
+	options &= new_options
+end procedure
+
+--**
+-- Get the sequence containing all the command line options
+-- to be parsed.
+export function get_options()
+	return options
+end function
+
+--**
+-- Returns the options that are common to all methods of invoking
+-- euphoria.
+export function get_common_options()
+	return COMMON_OPTIONS
+end function
 
 --**
 -- Get the switches sequence

@@ -63,10 +63,13 @@ sequence trans_opt_def = {
 	{ "o", 0, "Set the output filename", { NO_CASE, HAS_PARAMETER, "filename" } }
 }
 
+
+add_options( trans_opt_def )
+
 procedure translator_help()
 	printf(1, "euc.exe [options] file.ex...\n", {})
 	printf(1, " common options:\n", {})
-	show_help(common_opt_def, NO_HELP)
+	show_help( get_common_options(), NO_HELP)
 	printf(1, "\n", {})
 	printf(1, " translator options:\n", {})
 	show_help(trans_opt_def, NO_HELP)
@@ -80,7 +83,7 @@ export procedure transoptions()
 	Argc = length(Argv)
 
 	expand_config_options()
-	m:map opts = cmd_parse(common_opt_def & trans_opt_def, routine_id("translator_help"), Argv)
+	m:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
 
 	handle_common_options(opts)
 
@@ -194,6 +197,7 @@ export procedure transoptions()
 	if length(m:get(opts, "extras")) = 0 then
 		show_banner()
 		puts(2, "\nERROR: Must specify the file to be translated on the command line\n\n")
+		
 		translator_help()
 
 		abort(1)

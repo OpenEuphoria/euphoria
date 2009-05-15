@@ -18,7 +18,7 @@ export procedure intoptions()
 	Argc = length(Argv)
 
 	expand_config_options()
-	m:map opts = cmd_parse(common_opt_def & interpreter_opt_def,
+	m:map opts = cmd_parse( get_options(),
 		{ NO_VALIDATION_AFTER_FIRST_EXTRA }, Argv)
 
 	handle_common_options(opts)
@@ -26,7 +26,7 @@ export procedure intoptions()
 	if length(m:get(opts, "extras")) = 0 then
 		show_banner()
 		puts(2, "\nERROR: Must specify the file to be interpreted on the command line\n\n")
-		show_help(common_opt_def & interpreter_opt_def)
+		show_help( get_options() )
 
 		abort(1)
 	end if

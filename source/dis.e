@@ -1,8 +1,4 @@
 without trace
-include mode.e as mode
-include intinit.e
-
-include opnames.e
 include std/text.e
 include std/pretty.e
 include std/error.e
@@ -11,16 +7,33 @@ include dot.e
 --include std/os.e
 include std/cmdline.e
 
+include mode.e as mode
+include cominit.e
+include intinit.e
+include traninit.e
+include opnames.e
 include global.e
 include reswords.e
 include symtab.e
-include traninit.e
 include scanner.e
 
 include dox.e as dox
 
 integer out, pc, a, b, c, d, target, len, keep_running
 sequence operation
+
+sequence opts = {
+		{ 0, "html", "html output", {NO_PARAMETER}, routine_id("set_html") },
+		{ 0, "dir", "output directory", {HAS_PARAMETER}, routine_id("set_out_dir") },
+		{ 0, "no-dep", "suppress dependencies", {NO_PARAMETER}, routine_id("suppress_dependencies") },
+		{ 0, "std", "show standard library information", {NO_PARAMETER}, routine_id("suppress_stdlib") },
+		{ "f", "file", "include this file", {HAS_PARAMETER}, routine_id("document_file") },
+		{ "g", "graphs", "suppress call graphs", {NO_PARAMETER}, routine_id("suppress_callgraphs") },
+		{ "t", 0, "translator mode", {NO_PARAMETER}, -1 },
+		{ "b", 0, "binder mode", {NO_PARAMETER}, -1 }
+		}
+
+add_options( opts )	
 
 procedure RTInternal(sequence msg)
 -- Internal errors in back-end
@@ -1679,16 +1692,7 @@ procedure set_html()
 end procedure
 include std/pretty.e
 export procedure BackEnd( object ignore )
-	sequence opts = {
-		{ 0, "html", "html output", NO_PARAMETER, routine_id("set_html") },
-		{ "d", "dir", "output directory", HAS_PARAMETER, routine_id("set_out_dir") },
-		{ "p", "dep", "suppress dependencies", NO_PARAMETER, routine_id("suppress_dependencies") },
-		{ "s", "std", "show standard library information", NO_PARAMETER, routine_id("suppress_stdlib") },
-		{ "f", "file", "include this file", HAS_PARAMETER, routine_id("document_file") },
-		{ "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") },
-		{ "t", 0, "translator mode", NO_PARAMETER, -1 },
-		{ "b", 0, "binder mode", NO_PARAMETER, -1 }
-		}
+	
 --	sequence result = cmd_parse( opts, -1, Argv )
 	
 	save_il( file_name[1] & '.' )

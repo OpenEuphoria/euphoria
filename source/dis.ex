@@ -38,15 +38,6 @@ include traninit.e
 -- Disassembler:
 include dis.e
 
--- global procedure OutputIL()
--- -- dummy routine
--- end procedure
--- 
--- global function extract_options(sequence s)
--- -- dummy routine    
--- 	return s
--- end function
-
 -- main program:
 include main.e
 
