@@ -2,6 +2,7 @@ include std/unittest.e
 include std/primes.e
 
 integer s
+test_equal("primes found #0" , 37, next_prime(32))
 
 sequence list_of_primes = prime_list()
 
@@ -21,6 +22,12 @@ test_true("primes growth #3", s < length(prime_list()))
 s = length(prime_list())
 test_equal("primes missing #2" , -1, next_prime(-1))
 test_true("primes growth #4", s = length(prime_list()))
+
+
+
+
+test_true("primes time out", next_prime(100_000_000, -1, 0.1) = -1)
+
 
 test_report()
 
