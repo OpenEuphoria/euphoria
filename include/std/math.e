@@ -499,7 +499,7 @@ end function
 --   -- s is {0.785398, 1.10715, 1.24905}
 --   </eucode>
 -- See Also:
---		[[:arcsin]], [[arccos]], [[:tan]], [[:flatten]]
+--		[[:arcsin]], [[:arccos]], [[:tan]], [[:flatten]]
 
 --****
 -- Signature:
@@ -553,7 +553,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[:sin]], [[tan]], [[arccos]], [[:PI]], [[:deg2rad]]
+--		[[:sin]], [[:tan]], [[:arccos]], [[:PI]], [[:deg2rad]]
 
 --****
 -- Signature:

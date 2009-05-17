@@ -4,7 +4,7 @@
 -- <<LEVELTOC depth=2>>
 --
 -- === Usage Notes
---
+--@[safe.e]
 -- This file is not normally included directly. The normal approach is to
 -- ##include std/machine.e##, which will automatically include either this file
 -- or ##std/safe.e## if the SAFE symbol has been defined.
@@ -408,7 +408,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- See Also:
 --
 --  [[:poke]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2s]], [[peek]]
+-- [[:free_low]], [[:peek2s]], [[:peek]]
 --
 
 --****
@@ -564,9 +564,9 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Remember that ##peek4s##() takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek4s##() and [[peek4u]]() is how double
+-- The only difference between ##peek4s##() and [[:peek4u]]() is how double
 -- words with the highest bit set are returned. ##peek4s##() assumes them to
--- be negative, while [[peek4u]]() just assumes them to be large and positive.
+-- be negative, while [[:peek4u]]() just assumes them to be large and positive.
 --
 -- Example 1:
 -- <eucode>
@@ -713,7 +713,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- 
 -- See Also:
 -- [[:peek]], [[:peeks]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]],
--- [[[:mem_copy]]], [[:mem_set]]
+-- [[:mem_copy]]], [[:mem_set]]
 --
 
 --****
@@ -932,7 +932,7 @@ integer check_calls = 1
 --
 -- This routine is only meant to be used for debugging purposes. safe.e
 -- tracks the blocks of memory that your program is allowed to 
--- [[:peek]](), [[:poke]](), [[mem_copy]]() etc. These are normally just the
+-- [[:peek]](), [[:poke]](), [[:mem_copy]]() etc. These are normally just the
 -- blocks that you have allocated using Euphoria's [[:allocate]]() or
 -- [[:allocate_low]]() routines, and which you have not yet freed using
 -- Euphoria's [[:free]]() or [[:free_low]](). In some cases, you may acquire
@@ -985,7 +985,7 @@ end procedure
 --  See [[:register_block]]() for further comments and an example.
 -- 
 -- See Also:
---   [[:register_block]], [[safe.e]]
+--   [[:register_block]], [[:safe.e]]
 
 public procedure unregister_block(atom block_addr)
 	-- NOP to avoid strict lint

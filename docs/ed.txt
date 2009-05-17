@@ -187,7 +187,7 @@ You are welcome to make improvements. There is a section at the top of ##ed.ex##
 containing "user-modifiable" configuration parameters that you can adjust. The 
 colors and the cursor size may need adjusting for some operating environments.
 
-=== Platform
+=== Platform Issues
 
 ##euphoria\bin\ed.bat## can be set up to run ##ed.ex## using ##eui.exe## or 
 ##euid.exe##. You are better off running **ed** with ##euid.exe## on Windows 95/98/ME. 

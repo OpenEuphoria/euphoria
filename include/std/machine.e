@@ -62,8 +62,8 @@ include std/dll.e
 -- # Using a sequence of routine id's to make a case (switch) statement. Using the 
 -- [[:switch statement]] is more efficient.
 -- # Setting up an Object-Oriented system.
--- # Getting a routine id so you can pass it to [[:call_back]](). (See [[../docs/platform.txt]])
--- # Getting a routine id so you can pass it to [[:task_create]](). (See [[../docs/tasking.txt]])
+-- # Getting a routine id so you can pass it to [[:call_back]](). (See [[:docs/platform.txt]])
+-- # Getting a routine id so you can pass it to [[:task_create]](). (See [[:docs/tasking.txt]])
 -- # Calling a routine that is defined later in a program. This is no longer needed from v4.0 onward.
 --
 -- Note that C routines, callable by Euphoria, also have ids, but they cannot be used where 
@@ -106,7 +106,7 @@ include std/dll.e
 --  
 -- See Also:
 -- [[:call_proc]], [[:call_func]], [[:call_back]], [[:define_c_func]], [[:define_c_proc]], 
--- [[:task_create]], [[../docs/platform.txt]], [[../docs/dynamic.txt]]
+-- [[:task_create]], [[:docs/platform.txt]], [[:docs/dynamic.txt]]
 
 --****
 -- Signature:
@@ -137,7 +137,7 @@ include std/dll.e
 -- If the function with id ##id## does not take any arguments then ##args## should be ##{}##.
 --
 -- Example 1:
--- [[../demo/csort.ex]]
+-- [[::demo/csort.ex]]
 --
 -- See Also:
 -- [[:call_proc]], [[:routine_id]], [[:c_func]]

@@ -222,9 +222,9 @@ Depending on the platform you are using the interpreter could be called:
 The command-line may contain extra information. Following your program filename
 you may add extra words (known as //arguments//) that can used in your
 program to customize its behavior. These arguments are read within your
-program by the built-in function [[command_line]]().
+program by the built-in function [[:command_line]]().
 
-Optionally, you may also use [[command line switches]] that are typed between
+Optionally, you may also use [[:command line switches]] that are typed between
 the interpreter name and the program name. Command line switches
 customize  how the interpreter itself behaves.
 
@@ -362,7 +362,7 @@ code.
 
 ##ed## is a simple text-mode editor that runs on all platforms and is
 distributed with Euphoria. There are other editors in
-[[The Archive -> http://rapideuphoria.com/edi.htm]]. In addition to that many
+[[http://rapideuphoria.com/edi.htm "The Archive"]]. In addition to that many
 popular editors include syntax highlighting for Euphoria or can be made to.
 
 === Distributing a Program
@@ -413,7 +413,7 @@ with or without your changes.
 The high-speed version of the Euphoria Interpreter back-end is written in ANSI
 C, and can be compiled with many different C compilers. The complete source
 code is in ##euphoria\source##, along with ##execute.e##, the alternate,
-Euphoria-coded back-end. The generous [[../license.txt|Open source License]]
+Euphoria-coded back-end. The generous [[:docs/license.txt|Open source License]]
 allows both personal and commercial use, and unlike many other open source
 licenses, your changes do not have to be made open source.
 

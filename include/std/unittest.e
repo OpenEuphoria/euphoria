@@ -329,7 +329,7 @@ end procedure
 -- reports.
 --
 -- See Also:
--- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_equal(sequence name, object expected, object outcome)
 	integer success
@@ -361,7 +361,7 @@ end procedure
 -- latter is typically a function call, or a variable that was set by some prior action.
 --
 -- See Also:
--- [[:test_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_not_equal(sequence name, object a, object b)
 	integer success
@@ -414,7 +414,7 @@ end procedure
 -- or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_false(sequence name, object outcome)
 	integer success
@@ -433,7 +433,7 @@ end procedure
 --		# ##name##: a string, the name of the test
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_pass]]
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_pass]]
 
 public procedure test_fail(sequence name)
 	record_result(0, name, 1, 0)
@@ -446,7 +446,7 @@ end procedure
 --		# ##name##: a string, the name of the test
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_fail]]
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_fail]]
 
 public procedure test_pass(sequence name)
 	record_result(1, name, 1, 1)

@@ -94,7 +94,7 @@ on a free list, for future use. Adjacent free areas are combined into larger
 free areas. When more space is needed, and no suitable space is found on the
 free list, the file will grow in size.  Currently there is no automatic way
 that a file will shrink in size, but you can use a
-[[db_compress]] to completely rewrite a
+[[:db_compress]] to completely rewrite a
 database, removing the unused spaces.
 
 === Security / Multi-user Access

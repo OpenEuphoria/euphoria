@@ -157,7 +157,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:size]], [[:top]], [[:peek_top]], [[peek_end]]
+-- [[:size]], [[:top]], [[:peek_top]], [[:peek_end]]
 
 public function at(stack sk, integer idx = 1)
 	sequence o = ram_space[sk][data]
@@ -726,7 +726,7 @@ end procedure
 --   The stack contents is emptied.
 --
 -- See Also:
--- [[:new]], [[is_empty]]
+-- [[:new]], [[:is_empty]]
 
 public procedure clear(stack sk)
 	ram_space[sk][data] = {}

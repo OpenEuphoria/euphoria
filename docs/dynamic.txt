@@ -26,7 +26,7 @@ doesn't matter whether the routine is still in scope at the time you make that c
 id is gotten, it's valid.
 
 ==== Calling Euphoria routines by id.
-This is very similar to using [[c_func]]() or [[:c_proc]]() to interface with external code.
+This is very similar to using [[:c_func]]() or [[:c_proc]]() to interface with external code.
 
 ===== Calling a function
 This is done as follows:

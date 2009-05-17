@@ -321,7 +321,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[platform.txt]], [[:ifdef statement]]
+-- [[:Platform-Specific Issues]], [[:ifdef statement]]
 
 
 --****
