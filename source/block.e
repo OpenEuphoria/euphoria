@@ -27,7 +27,11 @@ export enum
 	LOOP_BLOCK,
 	CONDITIONAL_BLOCK
 
-map:map map_links = map:new()
+-- 	TODO: The map usage here ultimately causes a task to be
+--        created, which causes problems, since the be_task
+--        that is linked against the translated version is
+--        meant to be used with interpreted code.
+-- map:map map_links = map:new()
 
 sequence block_stack = { repeat( 0, BLOCK_SIZE - 1 ) } -- track nested blocks
 block_stack[1][BLOCK_VARS] = {}
@@ -105,7 +109,11 @@ export procedure push_block( integer opcode, object block_label = 0 )
 		SymTab[block_label][S_BLOCK] = current_block
 		SymTab[current_block][S_NAME] = sprintf("BLOCK: %s", {SymTab[block_label][S_NAME]})
 	elsif current_block then
-		map:put( map_links, last_block, current_block, map:CONCAT )
+-- 	TODO: The map usage here ultimately causes a task to be
+--        created, which causes problems, since the be_task
+--        that is linked against the translated version is
+--        meant to be used with interpreted code.
+-- 		map:put( map_links, last_block, current_block, map:CONCAT )
 		SymTab[current_block][S_BLOCK] = last_block
 		sequence label_name = ""
 		if sequence(block_label) then
@@ -162,24 +170,27 @@ export function pop_block()
 		end if
 		
 	end for
-	
-	if not length(block_vars) label "empty block" then
-		-- this is an empty block...remove it
-		symtab_index bsym  = sym_block( CurrentSub )
-		symtab_index empty = block[BLOCK_SYM]
-		if bsym = empty then
-			break
-		end if
-		object linked_blocks = map:get( map_links, empty, {} )
-		if atom(linked_blocks) then
-			linked_blocks = {linked_blocks}
-		end if
-		for i = 1 to length( linked_blocks ) do
-			SymTab[linked_blocks[i]][S_BLOCK] = bsym
-		end for
-		map:put( map_links, bsym, linked_blocks, map:CONCAT )
-		
-	end if
+-- 	TODO: The map usage here ultimately causes a task to be
+--        created, which causes problems, since the be_task
+--        that is linked against the translated version is
+--        meant to be used with interpreted code.
+-- 	if not length(block_vars) label "empty block" then
+-- 		-- this is an empty block...remove it
+-- 		symtab_index bsym  = sym_block( CurrentSub )
+-- 		symtab_index empty = block[BLOCK_SYM]
+-- 		if bsym = empty then
+-- 			break
+-- 		end if
+-- 		object linked_blocks = map:get( map_links, empty, {} )
+-- 		if atom(linked_blocks) then
+-- 			linked_blocks = {linked_blocks}
+-- 		end if
+-- 		for i = 1 to length( linked_blocks ) do
+-- 			SymTab[linked_blocks[i]][S_BLOCK] = bsym
+-- 		end for
+-- 		map:put( map_links, bsym, linked_blocks, map:CONCAT )
+-- 		
+-- 	end if
 	current_block = block_stack[$][BLOCK_SYM]
 	return block[BLOCK_SYM]
 end function
