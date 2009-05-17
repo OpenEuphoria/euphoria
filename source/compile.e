@@ -3164,6 +3164,7 @@ end procedure
 
 procedure opFLOOR()
 	CUnaryOp(pc, "e_floor", "FLOOR")
+	SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	pc += 3
 end procedure
 

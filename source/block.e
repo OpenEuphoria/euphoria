@@ -163,20 +163,22 @@ export function pop_block()
 		
 	end for
 	
-	if not length(block_vars) then
+	if not length(block_vars) label "empty block" then
 		-- this is an empty block...remove it
 		symtab_index bsym  = sym_block( CurrentSub )
 		symtab_index empty = block[BLOCK_SYM]
 		if bsym = empty then
 			break
 		end if
-		object linked_blocks = map:get( map_links, empty )
-		if sequence(linked_blocks) then
-			for i = 1 to length( linked_blocks ) do
-				SymTab[linked_blocks[i]][S_BLOCK] = bsym
-			end for
-			map:put( map_links, bsym, linked_blocks, map:CONCAT )
+		object linked_blocks = map:get( map_links, empty, {} )
+		if atom(linked_blocks) then
+			linked_blocks = {linked_blocks}
 		end if
+		for i = 1 to length( linked_blocks ) do
+			SymTab[linked_blocks[i]][S_BLOCK] = bsym
+		end for
+		map:put( map_links, bsym, linked_blocks, map:CONCAT )
+		
 	end if
 	current_block = block_stack[$][BLOCK_SYM]
 	return block[BLOCK_SYM]
