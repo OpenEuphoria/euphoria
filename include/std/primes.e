@@ -67,7 +67,6 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 		return list_of_primes[1..pos_]
 	end if
 	
-	
 	-- Record the largest known prime (so far) and its index.
 	pos_ = length(list_of_primes)
 	candidate_ = list_of_primes[$]
@@ -143,7 +142,8 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 
 	return result_[1..pos_]
 end function
- 
+
+
 --**
 -- Return the next prime number on or after the supplied number
 --

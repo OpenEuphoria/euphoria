@@ -1332,7 +1332,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:mid]], [[replace]]
+-- [[:mid]], [[:replace]]
 
 public function patch(sequence target, sequence source, integer start, object filler = ' ')
 	if start + length(source) <= 0 then
@@ -2264,9 +2264,9 @@ end function
 -- Comments:
 -- The calculation is weighted to give mismatched elements towards the front
 -- of the sequences larger scores. This means that sequences that differ near
--- the begining are considered more un-alike than mismatched towards the end of
--- the sequences. Also, unused elements from the first sequence are weighted more
--- than unused elements from the second sequence.
+-- the begining are considered more un-alike than mismatches towards the end of
+-- the sequences. Also, unmatched elements from the first sequence are weighted more
+-- than unmatched elements from the second sequence.
 --
 -- Two identical sequences return zero. A non-zero means that they are not the same
 -- and larger values indicate a larger differences.
@@ -2283,6 +2283,7 @@ end function
 -- ? sim_index("kitting",  "kitten")   --> 0.09068 
 -- ? sim_index("knitting", "knotting") --> 0.27717 
 -- ? sim_index("knitting", "kitten")   --> 0.35332 
+-- ? sim_index("abacus","zooilogical") --> 0.78898 
 -- </eucode>
 
 public function sim_index(sequence A, sequence B)
