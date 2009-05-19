@@ -2342,3 +2342,65 @@ public function sim_index(sequence A, sequence B)
 
 	return power(accum_score / power(total_elems,2), 0.5)
 end function
+
+--**
+-- Indicates that [[:remove_subseq]]() must not replace removed sub-sequences
+-- with an alternative value.
+public constant SEQ_NOALT = {{1.23456}}
+
+	
+--**
+-- Removes all sub-sequences from the supplied sequence, optionally
+-- replacing them with a supplied alternative value.
+--
+-- Parameters:
+-- # ##pSource##: A sequence from which sub-sequences are removed.
+-- # ##pAltValue##: An object. Use SEQ_NOALT to indicate that sub-sequences
+--                  are to be physically removed, anyother value will be
+--                  used to replace the sub-sequence.
+--
+-- Returns:
+-- A sequence, which contains only the atoms from ##pSource## and optionally
+-- the ##pAltValue## where sub-sequences used to be.
+--
+-- Example:
+--<eucode>
+-- sequence s = remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, SEQ_NOALT)
+-- -- 's' is now {4, 6, 0.1, 4} -- length now 4
+-- s = remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, -1)
+-- -- 's' is now {4, 6, -1, 0.1, -1, 4} -- length unchanged.
+--</eucode>
+--
+
+public function remove_subseq( sequence pSource, object pAltValue)
+	sequence lResult
+	integer lCOW = 0
+
+	for i = 1 to length(pSource) do
+		if atom(pSource[i]) then
+			if lCOW != 0 then
+				if lCOW != i then
+					lResult[lCOW] = pSource[i]
+				end if
+				lCOW += 1
+			end if
+			continue	
+		end if
+		
+		if lCOW = 0 then
+			lResult = pSource
+			lCOW = i
+		end if
+		if not equal(pAltValue, SEQ_NOALT) then
+			lResult[lCOW] = pAltValue
+			lCOW += 1
+		end if
+			
+	end for
+	
+	if lCOW = 0 then
+		return pSource
+	end if
+	return lResult[1.. lCOW - 1]
+end function
+

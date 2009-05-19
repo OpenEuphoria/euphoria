@@ -489,5 +489,11 @@ test_equal("columnize #4", {{2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, 2))
 test_equal("columnize #5", {{2,4,6},{1,3,5}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, {2,1}))
 test_equal("columnize #6", {"adg", "beh", "cfi"}, columnize({"abc", "def", "ghi"}))
 
+
+
+test_equal("remove_subseq #1", {4, 6, 0.1, 4}, remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, SEQ_NOALT))
+test_equal("remove_subseq #2", {4, 6, -1, 0.1, -1, 4}, remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, -1))
+test_equal("remove_subseq #3", {14, 16, 9, 0.1, 1, 2, 3, 4}, remove_subseq({14,16,9,0.1,1,2,3,4}, SEQ_NOALT))
+
 test_report()
 

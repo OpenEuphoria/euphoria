@@ -28,6 +28,7 @@ public enum
 	CS_Whitespace,
 	CS_Punctuation,
 	CS_Printable,
+	CS_Displayable,
 	CS_Lowercase,
 	CS_Uppercase,
 	CS_Alphanumeric,
@@ -130,6 +131,7 @@ public procedure set_default_charsets()
 	Defined_Sets[CS_Uppercase 	] = {{'A', 'Z'}}
 	Defined_Sets[CS_Lowercase 	] = {{'a', 'z'}}
 	Defined_Sets[CS_Printable 	] = {{' ', '~'}}
+	Defined_Sets[CS_Displayable ] = {{' ', '~'}, "  ", "\t\t", "\n\n", "\r\r", {8,8}, {7,7} }
 	Defined_Sets[CS_Whitespace 	] = " \t\n\r" & 11 & 160
 	Defined_Sets[CS_Consonant 	] = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
 	Defined_Sets[CS_Vowel 		] = "aeiouAEIOU"
@@ -570,11 +572,11 @@ public type t_lower(object pVal)
 end type
 
 --** 
--- Returns TRUE if argument is a character that can be displayed or if every element of 
--- the argument is a character that can be displayed.
+-- Returns TRUE if argument is a character that has an ASCII glyph or if every element of 
+-- the argument is a character that has an ASCII glyph.
 --
 -- Returns FALSE if the argument is an empty sequence, or contains sequences,
--- or contains characters that cannot be displayed.
+-- or contains characters that do not have an ASCII glyph.
 --
 -- Example 1:
 -- <eucode>
@@ -588,6 +590,8 @@ end type
 -- t_print("abc")         -- TRUE 
 -- t_print("ab3")         -- TRUE
 -- t_print("123")         -- TRUE
+-- t_print("123 ")        -- FALSE (contains a space)
+-- t_print("123\n")       -- FALSE (contains a new-line)
 -- t_print({1, 2, "abc"}) -- FALSE (contains a sequence)
 -- t_print({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_print({1, 2, 'a')    -- FALSE
@@ -596,6 +600,37 @@ end type
 
 public type t_print(object pVal)
 	return char_test(pVal, Defined_Sets[CS_Printable])
+end type
+
+--** 
+-- Returns TRUE if argument is a character that can be displayed or if every element of 
+-- the argument is a character that can be displayed.
+--
+-- Returns FALSE if the argument is an empty sequence, or contains sequences,
+-- or contains characters that cannot be displayed.
+--
+-- Example 1:
+-- <eucode>
+-- t_display(-1)            -- FALSE
+-- t_display(0)             -- FALSE 
+-- t_display(1)             -- FALSE
+-- t_display(1.234)         -- FALSE
+-- t_display('A')           -- TRUE
+-- t_display('9')           -- TRUE
+-- t_display('?')           -- TRUE
+-- t_display("abc")         -- TRUE 
+-- t_display("ab3")         -- TRUE
+-- t_display("123")         -- TRUE
+-- t_display("123 ")        -- TRUE
+-- t_display("123\n")       -- TRUE
+-- t_display({1, 2, "abc"}) -- FALSE (contains a sequence)
+-- t_display({1, 2, 9.7)    -- FALSE (contains a non-integer)
+-- t_display({1, 2, 'a')    -- FALSE
+-- t_display({})            -- FALSE (empty sequence)
+-- </eucode>
+
+public type t_display(object pVal)
+	return char_test(pVal, Defined_Sets[CS_Displayable])
 end type
 
 --** 

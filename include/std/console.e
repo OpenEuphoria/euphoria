@@ -36,7 +36,7 @@ public constant
 
 --**
 -- Signature:
--- 		global function get_key()
+-- 		<built-in> function get_key()
 --
 -- Description:
 --     Return the key that was pressed by the user, without waiting. Special codes are returned for the function keys, arrow keys etc.
@@ -710,4 +710,74 @@ public procedure free_console()
 	machine_proc(M_FREE_CONSOLE, 0)
 end procedure
 
+include std/text.e
+include std/types.e
+include std/pretty.e
+
+--*
+-- Displays the supplied data on the console screen.
+--
+-- Parameters:
+-- # ##pData## - Any object.
+-- # ##args## - Optional arguments used to format the output. Default is 1.
+-- # ##finalnl## - Optional. Determines if a new line is output after the data. Default is 1.
+--
+-- Comments:
+-- * If ##pData## is an atom or integer, it is simply displayed.
+-- * If ##pData## is a simple text string, then ##args## can be used to
+--   produce a formatted output with ##pData## providing the format string and
+--   ##args## being a sequence containing the data to be formatted.
+-- * If ##pData## is not either the above then it is forwarded on to the
+--  [[:pretty_print]]() to display. In this case, if ##args## is a sequence, it
+--  is assumed to contain the pretty_print formatting options.
+--
+-- After the data is displayed, the routine will normally output a New Line. If you
+-- want to avoid this, ensure that the last parameter is a zero.
+--
+-- Examples:
+--<eucode>
+-- show("Some plain text") -- Displays this string on the console plus a new line.
+-- show("Your answer:",0) -- Displays this string on the console without a new line.
+-- object res
+-- res = somefunc()
+-- show(res) -- Displays the contents of 'res' on the console.
+--
+-- show("The answer to %s was %s", {question[i], answer[x]}) -- formats these with a new line.
+--</eucode>
+--
+public procedure show( object pData, object args = 1, integer finalnl = 1)
+
+	if atom(pData) then
+		if integer(pData) then
+			printf(1, "%d", pData)
+		else
+			puts(1, trim(sprintf("%15.15f", pData), '0'))
+		end if
+	
+	elsif t_display(pData) then
+		if atom(args) or length(args) = 0 then
+			if equal(args, 2) then
+				pretty_print(1, pData, {2})
+			else
+				puts(1, pData)
+			end if
+		else
+			printf(1, pData, args)
+		end if
+	else
+		if atom(args) or length(args) = 0 then
+			pretty_print(1, pData, {2})
+		else
+			pretty_print(1, pData, args)
+		end if
+	end if
+	
+	if equal(args, 1) then
+		puts(1, '\n')
+	elsif sequence(args) and finalnl = 1 then
+		puts(1, '\n')
+	end if
+
+	return
+end procedure
 
