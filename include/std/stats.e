@@ -10,6 +10,8 @@
 
 include std/math.e
 include std/sort.e
+include std/sequence.e
+
 
 --**
 -- Determines the k-th smallest value from the supplied set of numbers. 
@@ -205,107 +207,94 @@ public function range(object pData)
 end function
 
 --**
--- Returns the //estimated// standard deviation based on a random sample of the population. 
+-- Enums used for to influence the results of some of these functions.
+
+public enum
+   --** 
+   -- The supplied data is the entire population.
+   ST_FULLPOP,
+   
+   --**
+   -- The supplied data is only a random sample of the population.
+   ST_SAMPLE
+
+public constant ST_NOALT = SEQ_NOALT
+   
+function massage(sequence pData, object pMassage)
+   	if atom(pMassage) or equal(pMassage, ST_NOALT) then
+		return remove_subseq(pData, pMassage)
+	end if
+	
+	if length(pMassage) > 0 then
+		return remove_subseq(pData, 0)
+	end if
+	
+	return pData
+end function
+
+--**
+-- Returns the standard deviation based of the population. 
 --
 -- Parameters:
 -- # ##pData##: a list of 1 or more numbers for which you want the estimated standard deviation.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
+-- # ##pPop##: an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
+-- sample of the total population. ST_FULLPOP means that ##pData## is the
+-- entire population.
 --
 -- Returns:
 --    An **atom**, the estimated standard deviation.
+--    An empty **sequence** means that there is no meaningful data to calculate from.
 --
 -- Comments:
+-- ##stdev##() is a measure of how values are different from the average. 
 --
--- ##stdev##() is a measure of how values are different from the average. These numbers are
--- assumed to represent a random sample, a subset, of a larger set of numbers.
+-- The numbers in ##pData## can either be the entire population of values or
+-- just a random subset. You indicate which in the ##pPop## parameter. By default
+-- ##pData## represents a sample and not the entire population. When using this
+-- function with sample data, the result is an //estimated// standard deviation.
 --
--- This function differs from [[:stdeva]]() in that this ##stdev##() ignores all elements that are
--- sequences. It differs from [[:stdevp]]() because it assumes that the mean of the sample depends on the sample, so there are only (number of observations)-1 independent data points to compute the deviation amidst.
+-- If the data can contain sub-sequences, such as strings, you need to let the
+-- the function know about this otherwise it assumes every value in ##pData## is
+-- an number. If that is not the case then the function will crash. So it is
+-- important that if it can possibly contain subsequences that you tell this
+-- function what to do with them. Your choices are to ignore them or replace them
+-- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
+-- value otherwise use the replacement value in ##pMassage##. However, if you
+-- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- which is an empty sequence. **Note** It is faster if the data only contains
+-- numbers.
 --
--- The equation for //estimated// average deviation is:
---
+-- The equation for standard deviation is:
 -- {{{
--- stdev(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / (N-1))
+-- stdev(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / (N))
 -- }}}
 --
 -- Example 1:
 --   <eucode>
---   ? stdev( {4,5,6,7,5,4,3,"text"} ) -- Ans: 1.345185418
+--   ? stdev( {4,5,6,7,5,4,3,7} )                             -- Ans: 1.457737974
+--   ? stdev( {4,5,6,7,5,4,3,7} ,, ST_FULLPOP)                -- Ans: 1.363589014
+--   ? stdev( {4,5,6,7,5,4,3,"text"} , ST_NOALT)             -- Ans: 1.345185418
+--   ? stdev( {4,5,6,7,5,4,3,"text"}, ST_NOALT, ST_FULLPOP ) -- Ans: 1.245399698
+--   ? stdev( {4,5,6,7,5,4,3,"text"} , 0)                     -- Ans: 2.121320344
+--   ? stdev( {4,5,6,7,5,4,3,"text"}, 0, ST_FULLPOP )         -- Ans: 1.984313483
 --   </eucode>
 --
 -- See also:
---   [[:average]], [[:avedev]], [[:stdevp]], [[:stdeva]]
+--   [[:average]], [[:avedev]]
 --
 
-public function stdev(sequence pData)
+public function stdev(sequence pData, object pMassage = "", integer pPop = ST_SAMPLE)
 	atom lSum
 	atom lMean
 	integer lCnt
 	
-	lSum = 0
-	lCnt = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += pData[i]
-			lCnt += 1
-		end if
-	end for
-	if lCnt = 0 then
-		return {}
-	end if
-	if lCnt = 1 then
-		return 0
-	end if
-	
-	lMean = lSum / lCnt
-	lSum = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += power(pData[i] - lMean, 2)
-		end if
-	end for
-	
-	return power(lSum / (lCnt - 1), 0.5)
-end function
-
---**
--- Returns the estimated standard deviation based on a random sample of the population. 
---
--- Parameters:
--- # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
---
--- Returns:
---    An **atom**, the estimated standard deviation.
---
--- Comments: 
---
--- ##stdeva##() is a measure of how values are different from the average.
--- This function differs from stdev() in that stdeva() treats all elements that are
--- sequences as having a value of zero.
---
--- The equation for average deviation is:
---
--- {{{
--- stdeva(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / (N-1))
--- }}}
---
--- Note that any sub-sequences elements are assumed to have a value of zero. From that point on,
--- these numbers are assumed to represent a random sample, a subset, of a larger set of numbers.
---
--- Example 1:
---   <eucode>
---   ? stdeva( {4,5,6,7,5,4,3,"text"} ) -- Ans: 2.121320344
---   </eucode>
---
--- See also:
---   [[:average]], [[:avedev]], [[:stdevp]], [[:stdev]]
---
-
-public function stdeva(sequence pData)
-	atom lSum
-	atom lMean
-	integer lCnt
+	pData = massage(pData, pMassage)
 	
 	lCnt = length(pData)
+	
 	if lCnt = 0 then
 		return {}
 	end if
@@ -315,210 +304,112 @@ public function stdeva(sequence pData)
 	
 	lSum = 0
 	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += pData[i]
-		end if
+		lSum += pData[i]
 	end for
 	
 	lMean = lSum / lCnt
 	lSum = 0
 	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += power(pData[i] - lMean, 2)
-		else
-			lSum += power(lMean, 2)
-		end if
+		lSum += power(pData[i] - lMean, 2)
 	end for
 	
-	return power(lSum / (lCnt - 1), 0.5)
-end function
-
---**
--- Returns the standard deviation based of the population. 
---
--- Parameters:
---   # pData = A list of 1 or more numbers for which you want the standard deviation.
---
--- Returns:
---   An **atom**, the standard deviation of the population.
---
--- Comments: 
---
--- ##stdevp##() is a measure of how values are different from the average.
--- This function differs from [[:stdevpa]]() in that ##stdevp##() ignores all elements that are
--- sequences.
---
--- The numbers are assumed to represent the entire population to test. This is how ##stdevp##()
--- differs from [[:stdev]](), as the mean does not depend on anything, and all observations are independent.
---
--- The equation for average deviation is: 
---
--- {{{
--- stdevp(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / N)
--- }}}
---
--- Example 1:
---   <eucode>
---   ? stdevp( {4,5,6,7,5,4,3,"text"} ) -- Ans: 1.245399698
---   </eucode>
---
--- See also:
---   [[:average]], [[:avedev]], [[:stdeva]], [[:stdevpa]], [[:stdev]]
---
-
-public function stdevp(sequence pData)
-	atom lSum
-	atom lMean
-	integer lCnt
-	
-	lSum = 0
-	lCnt = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += pData[i]
-			lCnt += 1
-		end if
-	end for
-	if lCnt = 0 then
-		return {}
+	if pPop = ST_SAMPLE then
+		lCnt -= 1
 	end if
-	if lCnt = 1 then
-		return 0
-	end if
-	
-	lMean = lSum / lCnt
-	lSum = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += power(pData[i] - lMean, 2)
-		end if
-	end for
 	
 	return power(lSum / lCnt, 0.5)
-end function
-
---**
--- Returns the standard deviation based of the population. 
---
--- Parameters:
---   # pData = A list of 1 or more numbers for which you want the estimated standard deviation.
---
--- Returns:
---   An **atom**, the standard deviation of the population.
---
--- Comments:
---
--- ##stdevpa##() is a measure of how values are different from the average.
--- This function differs from [[:stdevp]]() in that stdevpa() treats all elements that are
--- sequences as having a value of zero. The numbers are assumed to represent the entire population to test.
---
--- The equation for average deviation is:
---
--- {{{
--- stdevpa(X) ==> SQRT(SUM(SQ(X{1..N} - MEAN)) / N)
--- }}}
---
--- Example 1:
--- <eucode>
---   ? stdevpa( {4,5,6,7,5,4,3,"text"} ) -- Ans: 1.984313483
--- </eucode>
---
--- See also:
---   [[:average]], [[:avedev]], [[:stdeva]], [[:stdevp]], [[:stdev]]
---
-
-public function stdevpa(sequence pData)
-	atom lSum
-	atom lMean
-	integer lCnt
-	
-	lCnt = length(pData)
-	if lCnt = 0 then
-		return {}
-	end if
-	if lCnt = 1 then
-		return 0
-	end if
-	
-	lSum = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += pData[i]
-		end if
-	end for
-	
-	lMean = lSum / lCnt
-	lSum = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += power(pData[i] - lMean, 2)
-		else
-			lSum += power(lMean, 2)
-		end if
-	end for
-	
-	return power(lSum / lCnt , 0.5)
 end function
 
 --**
 -- Returns the average of the absolute deviations of data points from their mean.
 --
 -- Parameters:
---   # ##pData##: a list of 1 or more numbers for which you want the mean of the absolute deviations.
+-- # ##pData##: a list of 1 or more numbers for which you want the mean of the absolute deviations.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
+-- # ##pPop##: an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
+-- sample of the total population. ST_FULLPOP means that ##pData## is the
+-- entire population.
 --
 -- Returns:
---   An **atom**, the average deviation from the mean.
+--    An **atom**, the deviation from the mean.
+--    An empty **sequence** means that there is no meaningful data to calculate from.
 --
--- Comments: 
+-- Comments:
+-- ##avedev##() is a measure of the variability in a data set. Its statistical
+-- properties are less well behaved than those of the standard deviation, which is
+-- why it is used less. 
 --
---   ##avedev##() is a measure of the variability in a data set. Its statistical properties are well behaved than those of the standard deviation, which is why it is used less.
+-- The numbers in ##pData## can either be the entire population of values or
+-- just a random subset. You indicate which in the ##pPop## parameter. By default
+-- ##pData## represents a sample and not the entire population. When using this
+-- function with sample data, the result is an //estimated// deviation.
 --
--- Note that only atom elements are included, any sub-sequences elements are ignored.
+-- If the data can contain sub-sequences, such as strings, you need to let the
+-- the function know about this otherwise it assumes every value in ##pData## is
+-- an number. If that is not the case then the function will crash. So it is
+-- important that if it can possibly contain subsequences that you tell this
+-- function what to do with them. Your choices are to ignore them or replace them
+-- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
+-- value otherwise use the replacement value in ##pMassage##. However, if you
+-- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- which is an empty sequence. **Note** It is faster if the data only contains
+-- numbers.
 --
 -- The equation for absolute average deviation is~:
---
 -- {{{
 -- avedev(X) ==> SUM( ABS(X{1..N} - MEAN(X)) ) / N
 -- }}}
 --
 -- Example 1:
---   <eucode>
---   ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 1.85777777777778
---   </eucode>
+--<eucode>
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7} ) -- Ans: 1.966666667
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7},, ST_FULLPOP ) -- Ans: 1.84375
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_NOALT  ) -- Ans: 1.99047619
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_NOALT,ST_FULLPOP ) -- Ans: 1.857777778
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0 ) -- Ans: 2.225
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0, ST_FULLPOP ) -- Ans: 2.0859375
+--</eucode>
 --
 -- See also:
 --   [[:average]], [[:stdev]]
 --
 
-public function avedev(sequence pData)
+public function avedev(sequence pData, object pMassage = "", integer pPop = ST_SAMPLE)
 	atom lSum
 	atom lMean
 	integer lCnt
 	
-	lSum = 0
-	lCnt = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			lSum += pData[i]
-			lCnt += 1
-		end if
-	end for
+	pData = massage(pData, pMassage)
+	
+	lCnt = length(pData)
+	
 	if lCnt = 0 then
 		return {}
 	end if
+	if lCnt = 1 then
+		return 0
+	end if
+	lSum = 0
+
+	for i = 1 to length(pData) do
+		lSum += pData[i]
+	end for
 	
 	lMean = lSum / lCnt
 	lSum = 0
 	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			if pData[i] > lMean then
-				lSum += pData[i] - lMean
-			else
-				lSum += lMean - pData[i]
-			end if
+		if pData[i] > lMean then
+			lSum += pData[i] - lMean
+		else
+			lSum += lMean - pData[i]
 		end if
 	end for
 	
+	if pPop = ST_SAMPLE then
+		lCnt -= 1
+	end if
 	return lSum / lCnt
 end function
 
@@ -526,16 +417,27 @@ end function
 -- Returns the sum of all the atoms in an object.
 --
 -- Parameters:
---   # ##pData##: Either an atom or a list.
+-- # ##pData##: Either an atom or a list of numbers to sum.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
 --
 -- Returns:
---   An **atom**,  the sum of the atoms in the set.
+--   An **atom**,  the sum of the set.
 --
 -- Comments: 
---
 --   ##sum##() is used as a measure of the magnitude of a sequence of positive values.
 --
--- If ##pData## is an atom, then it is returned. Otherwise, atomic elements of a sequence are added up. If there are no atoms on ##pData##, the function returns 0.
+-- If the data can contain sub-sequences, such as strings, you need to let the
+-- the function know about this otherwise it assumes every value in ##pData## is
+-- an number. If that is not the case then the function will crash. So it is
+-- important that if it can possibly contain subsequences that you tell this
+-- function what to do with them. Your choices are to ignore them or replace them
+-- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
+-- value otherwise use the replacement value in ##pMassage##. However, if you
+-- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- which is an empty sequence. **Note** It is faster if the data only contains
+-- numbers.
 --
 -- The equation is~:
 --
@@ -545,24 +447,24 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   ? sum( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"} ) -- Ans: 32.041
+--   ? sum( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"}, 0 ) -- Ans: 32.041
 --   </eucode>
 --
 -- See also:
 --   [[:average]]
 
-public function sum(object pData)
+public function sum(object pData, object pMassage = "")
 	atom result_
 	if atom(pData) then
-		result_ = pData
-	else
-		result_ = 0
-		for i = 1 to length(pData) do
-			if atom(pData[i]) then
-				result_ += pData[i]
-			end if
-		end for
+		return pData
 	end if
+	
+	pData = massage(pData, pMassage)
+	result_ = 0
+	for i = 1 to length(pData) do
+		result_ += pData[i]
+	end for
+
 	return result_
 end function
 
@@ -571,10 +473,27 @@ end function
 --
 -- Parameters:
 --   # ##pData##: either an atom or a list.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
+--
+-- Comments: 
+-- This returns the number of numbers in ##pData##
+--
+-- If the data can contain sub-sequences, such as strings, you need to let the
+-- the function know about this otherwise it assumes every value in ##pData## is
+-- an number. If that is not the case then the function will crash. So it is
+-- important that if it can possibly contain subsequences that you tell this
+-- function what to do with them. Your choices are to ignore them or replace them
+-- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
+-- value otherwise use the replacement value in ##pMassage##. However, if you
+-- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- which is an empty sequence. **Note** It is faster if the data only contains
+-- numbers.
 --
 -- Returns:
 --
---    An **integer**, the number of atoms in the set. When ##pData## is an atom, 1 is returned.
+--  An **integer**, the number of atoms in the set. When ##pData## is an atom, 1 is returned.
 --
 -- Example 1:
 --   <eucode>
@@ -584,63 +503,28 @@ end function
 --   </eucode>
 --
 -- See also:
---   [[:average]], [[:sum]], [[:counta]]
+--   [[:average]], [[:sum]]
 
-public function count(object pData)
+public function count(object pData, object pMassage = "")
 	atom result_
 	if atom(pData) then
-		result_ = 1
-	else
-		result_ = 0
-		for i = 1 to length(pData) do
-			if atom(pData[i]) then
-				result_ += 1
-			end if
-		end for
+		return 1
 	end if
-	return result_
+	
+	return length(massage(pData, pMassage))
+
 end function
 
---**
--- Returns the count of all the elements in an object.
---
--- Parameters:
---   # ##pData##: either an atom or a list.
---
--- Returns:
---   An **integer**, the number of elements in the set. When ##pData## is an atom, 1 is returned.
---
--- Comments:
---
--- This routine extends [[:length]]() to atoms by returning 1 on atoms.
---
--- Example 1:
---   <eucode>
---   ? count( {7,2,8.5,6,6,-4.8,6,6,3.341,-8,"text"} ) -- Ans: 11
---   ? count( {"cat", "dog", "lamb", "cow", "rabbit"} ) -- Ans: 5
---   ? count( 5 ) -- Ans: 1
---   </eucode>
---
--- See also:
---   [[:average]], [[:sum]], [[:count]], [[:length]]
-
-public function counta(object pData)
-	atom result_
-	if atom(pData) then
-		result_ = 1
-	else
-		result_ = length(pData)
-	end if
-	return result_
-end function
 
 --**
 -- Returns the average (mean) of the data points.
 --
 -- Parameters:
 --   # pData = A list of 1 or more numbers for which you want the mean.
---             **Note:** that only atom elements are included, any
---             sub-sequences elements are ignored.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
+--
 --
 -- Returns:
 --	An **object**:
@@ -659,162 +543,151 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   ? average( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 5.13333333
+--   ? average( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_NOALT ) -- Ans: 5.13333333
 --   </eucode>
 --
 -- See also:
---   [[:averagea]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
+--   [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
-public function average(object pData)
+public function average(object pData, object pMassage = "")
 	integer lCount
 	if atom(pData) then
 		return pData
 	end if
-	lCount = count(pData)
-	if lCount = 0 then
+	
+	pData = massage(pData, pMassage)
+	
+	if length(pData) = 0 then
 		return {}
 	end if
-	return sum(pData) / lCount
+	return sum(pData) / length(pData)
 end function
 
 --**
 -- Returns the geometric mean of the atoms in a sequence.
 --
 -- Parameters:
---		# ##data##: the values to take the geometric mean of.
+-- # ##pData##: the values to take the geometric mean of.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
 --
 -- Returns:
 --
--- An **atom** not less than zero, representing the geometric mean of the atoms in ##data##.
--- Sequences are ignored.
+-- An **atom**; the geometric mean of the atoms in ##pData##.
 -- If there is no atom to take the mean of, 1 is returned.
 --
 -- Comments:
 --
--- The geometric mean of ##n## atoms is the n-th root of their product. Signs are ignored.
+-- The geometric mean of ##N## atoms is the N-th root of their product. Signs are ignored.
 --
 -- This is useful to compute average growth rates.
 --
 -- Example 1:
 -- <eucode>
--- ?geomean({3, {}, -2, 6}) -- prints out power(36,1/3) = 3,30192724889462669
+-- ? geomean({3, "abc", -2, 6}, ST_NOALT) -- prints out power(36,1/3) = 3,30192724889462669
+-- ? geomean({1,2,3,4,5,6,7,8,9,10}) -- = 4.528728688
 -- </eucode>
 --
 -- See Also:
 -- [[:average]]
 
-public function geomean(sequence data)
-	atom prod = 1.0
-	integer count = length(data)
+public function geomean(object pData, object pMassage = "")
+	atom prod_ = 1.0
+	integer count_
 
-	for i=1 to length(data) do
-		object x = data[i]
-		
-		if sequence(x) then
-			count -= 1
-		else
-		    x *= eu:compare(x,0)
-		    if x=0 then
-		        return 0.0
-			else
-			    prod *= x
-		    end if
-		end if
-	end for
-	if count > 2 then
-		return power(prod, 1/count)
-	elsif count = 2 then
-		return sqrt(prod)
-	else
-		return prod
+	if atom(pData) then
+		return pData
 	end if
+	
+	pData = massage(pData, pMassage)
+	
+	count_ = length(pData)
+	if count_ = 0 then
+		return 1
+	end if
+	if count_ = 1 then
+		return pData[1]
+	end if
+	
+	for i = 1 to length(pData) do
+		atom x = pData[i]
+		
+	    if x = 0 then
+	        return 0
+		else
+		    prod_ *= x
+	    end if
+
+	end for
+
+	if prod_ < 0 then
+		return power(-prod_, 1/count_)
+	else	
+		return power(prod_, 1/count_)
+	end if
+
 end function
 
 --**
 -- Returns the harmonic mean of the atoms in a sequence.
 --
 -- Parameters:
---		# ##data##: the values to take the geometric mean of.
+-- # ##pData##: the values to take the harmonic mean of.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
 --
 -- Returns:
 --
--- An **atom** representing the harmonic mean of the atoms in ##data##.
--- Sequences are ignored.
--- If there is no atom to take the mean of, or if 0 is on ##data##, 0 is returned.
+-- An **atom**; the harmonic mean of the atoms in ##pData##.
 --
 -- Comments:
---
--- The harmonic mean of some atoms is the invers of the average of their inverses.
+-- The harmonic mean is the inverse of the average of their inverses.
 --
 -- This is useful in engineering to compute equivalent capacities and resistances.
 --
 -- Example 1:
 -- <eucode>
--- ?harmean({3, {}, -2, 6}) -- errors out, as the sum of inverses is 0.
--- ?harmean({{2, 3, 4}) -- prints out 36/11 = 3,27272727272727
+-- ?harmean({3, "abc", -2, 6}, ST_NOALT) -- =  0.
+-- ?harmean({{2, 3, 4}) -- 3 / (1/2 + 1/3 + 1/4) = 2.769230769
 -- </eucode>
 --
 -- See Also:
 -- [[:average]]
 
-public function harmean(sequence data)
-	atom sum_inv = 0.0, last_x = 0.0
-	integer count = length(data)
+public function harmean(sequence pData, object pMassage = "")
+	integer count_
 
-	for i=1 to length(data) do
-		object x = data[i]
-		
-		if sequence(x) then
-			count -= 1
-		elsif x=0 then
-	        return 0.0
-		else
-		    sum_inv += 1/x
-		    last_x = x
-		end if
-	end for
-	if count > 1 then
-		return count / sum_inv
-	else
-		return last_x -- avoids double reciprocal
-	end if
-end function
-
---**
--- Returns the average (mean) of the data points.
---
--- Parameters:
---   # ##pData##: a list of 1 or more numbers for which you want the mean.
---
--- Returns:
---    An **object**, either ##{}## if there are no items in the set, or an **atom** (the mean) otherwise.
---
--- Comments:
---
---   ##averagea##() is the theoretical probable value of a randomly selected item from the 
--- set, at least when they follow a unimodal distribution.
---
--- All elements are included; any sequence elements are assumed to have the value zero.
---
--- The equation for average  is:
---
--- {{{
--- average(X) ==> SUM( X{1..N} ) / N
--- }}}
---
--- Example 1:
---   <eucode>
---   ? averagea( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 4.8125
---   </eucode>
---
--- See also:
---   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
---
-public function averagea(object pData)
-	if atom(pData) or length(pData) = 0 then
+	if atom(pData) then
 		return pData
 	end if
-	return sum(pData) / length(pData)
+	
+	pData = massage(pData, pMassage)
+	
+	count_ = length(pData)
+	if count_ = 1 then
+		return pData[1]
+	end if
+
+	atom y = 0
+	atom z = 1
+	for i = 1 to count_ do
+		atom x = 1
+		z *= pData[i]
+		for j = 1 to count_ do
+			if j != i then
+				x *= pData[j]
+			end if
+		end for
+		y += x
+	end for
+			
+ 	if y = 0 then
+ 		return 0
+ 	end if
+
+ 	return count_ * z / y
 end function
  
 --**
@@ -974,3 +847,197 @@ public function emovavg(object pData, atom pFactor)
 	return pData
 end function
 
+
+--**
+-- Returns the mid point of the data points.
+--
+-- Parameters:
+-- # ##pData##: a list of 1 or more numbers for which you want the mean.
+-- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--  gives intructions about how to treat sub-sequences.
+--
+-- Returns:
+--    An **object**, either ##{}## if there are no items in the set, or an **atom** (the median) otherwise.
+--
+-- Comments:
+--
+--   ##median##() is the item for which half the items are below it and half
+--   are above it.
+--
+-- All elements are included; any sequence elements are assumed to have the value zero.
+--
+-- The equation for average  is:
+--
+-- {{{
+-- median(X) ==> sort(X)[N/2]
+-- }}}
+--
+-- Example 1:
+--   <eucode>
+--   ? median( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,4} ) -- Ans: 5
+--   </eucode>
+--
+-- See also:
+--   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
+--
+
+public function median(object pData, object pMassage = "")
+
+	if atom(pData) then
+		return pData
+	end if
+	
+	pData = massage(pData, pMassage)
+	
+	if length(pData) = 0 then
+		return pData[1]
+	end if
+	
+	if length(pData) < 3 then
+		return pData[1]
+	end if
+	pData = sort(pData)
+	return pData[ floor((length(pData) + 1) / 2) ]
+	
+end function
+
+
+public function raw_frequency(object pData, object pMassage = "")
+	
+	sequence lCounts
+	sequence lKeys
+	integer lNew = 0
+	integer lPos
+	integer lMax = -1
+	
+	if atom(pData) then
+		return {{1,pData}}
+	end if
+	
+	pData = massage(pData, pMassage)
+	
+	if length(pData) = 0 then
+		return {{1,pData}}
+	end if
+	lCounts = repeat({0,0}, length(pData))
+	lKeys   = repeat(0, length(pData))
+	for i = 1 to length(pData) do
+		lPos = find(pData[i], lKeys)
+		if lPos = 0 then
+			lNew += 1
+			lPos = lNew
+			lCounts[lPos][2] = pData[i]
+			lKeys[lPos] = pData[i]
+			if lPos > lMax then
+				lMax = lPos
+			end if
+		end if
+		lCounts[lPos][1] += 1
+	end for
+	return lCounts[1..lMax]
+	
+end function
+
+public function mode(object pData, object pMassage = "")
+	
+	sequence lCounts
+	integer lTop
+	integer lTopFreq
+	
+	pData = massage(pData, pMassage)
+
+	lCounts = sort(raw_frequency(pData))
+	lTop = length(lCounts)-1
+	lTopFreq = lCounts[$][1]
+	while lTop > 0 do
+		if lCounts[lTop][1] != lTopFreq then
+			exit
+		end if
+		lTop -= 1
+	end while
+	if lTop = length(lCounts) - 1 then
+		return lCounts[$][2]
+	else
+		sequence lItems
+		integer lPos
+		
+		lItems = repeat(0, length(lCounts) - lTop)
+
+		lPos = 0		
+		while lTop <= length(lCounts) with entry do
+			lPos += 1
+			lItems[lPos] = lCounts[lTop][2]
+		entry
+			lTop += 1
+		end while
+	
+		return lItems
+	end if
+end function
+
+public function central_moment(object pData, atom datum, integer which = 1)
+
+	atom lMean
+	atom lTop
+	atom lRes
+	
+	if atom(pData) or length(pData) = 0 then
+		return 0
+	end if
+	
+	lMean = average(pData)
+	
+	return power( datum - lMean, which)
+
+end function
+ 
+public function sum_central_moments(object pData, integer which = 1)
+
+	atom lMean
+	atom lTop
+	atom lRes
+	
+	if atom(pData) or length(pData) = 0 then
+		return 0
+	end if
+	
+	lMean = average(pData)
+	
+	lTop = 0
+	for i = 1 to length(pData) do
+		lTop += power( pData[i] - lMean, which)
+	end for
+	
+	return lTop
+end function
+ 
+public function kurtosis(object pData, integer norm = 3, object pMassage = "")
+
+	if atom(pData) then
+		return pData
+	end if
+	pData = massage(pData, pMassage)
+	if length(pData) = 0 then
+		return pData
+	end if
+	
+	return (sum_central_moments(pData, 4) / ((length(pData) - 1) * power(stdev(pData), 4))) - norm
+
+end function
+ 
+public function skewness(object pData, object pMassage = "")
+
+	if atom(pData) then
+		return pData
+	end if
+	
+	pData = massage(pData, pMassage)
+	
+	if length(pData) = 0 then
+		return pData
+	end if
+	return sum_central_moments(pData, 3) / ((length(pData) - 1) * power(stdev(pData), 3))
+	
+end function
+ 

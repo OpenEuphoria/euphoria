@@ -707,7 +707,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---		{{:deg2rad]]
+--		[[:deg2rad]]
 
 public function rad2deg (object x)
    return x * RADIANS_TO_DEGREES
@@ -934,7 +934,7 @@ end function
 --
 -- The hyperbolic cosine grows like the exponential function.
 --
--- For all reals, ##poweer(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
+-- For all reals, ##power(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
 --
 -- Example 1:
 -- <eucode>
@@ -960,7 +960,7 @@ end function
 --
 -- The hyperbolic sine grows like the exponential function.
 --
--- For all reals, ##poweer(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
+-- For all reals, ##power(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
 --
 -- Example 1:
 -- <eucode>
@@ -1209,7 +1209,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]
+--		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]]
 
 public function or_all	(object a)
 	atom b
