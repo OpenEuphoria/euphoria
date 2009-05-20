@@ -1891,8 +1891,9 @@ void do_exec(int *start_pc)
 				}
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
 				a = pc[3];
-				if( ((symtab_ptr)a)->mode != M_TEMP )
-					DeRefx(*(object_ptr)a);
+				if( ((symtab_ptr)a)->mode == M_TEMP ){
+					((symtab_ptr)a)->obj = NOVALUE;
+				}
 				Ref( top );
 				*(object_ptr)a = top;
 				pc += 4;
@@ -3885,16 +3886,22 @@ void do_exec(int *start_pc)
 				while(1){
 					obj_ptr = (object_ptr)sym;
 					while( obj_ptr = (object_ptr)((symtab_ptr)obj_ptr)->next_in_block ){
-						if( obj_ptr != result_ptr ){
-							DeRef( *obj_ptr);
-							*obj_ptr = NOVALUE;
-						}
-						
+						DeRef( *obj_ptr);
+						*obj_ptr = NOVALUE;
 					}
 					if( sym == sub->u.subp.block ) break;
 					sym = sym->u.subp.block;
 				} 
 				
+				/* free the temps and set to NOVALUE */
+				sym = sub->u.subp.temps;
+				while (sym != NULL) {
+					
+					DeRef(sym->obj);
+					
+					sym->obj = NOVALUE;
+					sym = sym->next;
+				}
 				// vacating this routine
 				sub->u.subp.resident_task = -1;
 
@@ -4005,6 +4012,9 @@ void do_exec(int *start_pc)
 				
 				if( b != 0 ){
 					RefDS( a );
+				}
+				else if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					*(object_ptr)pc[1] = NOVALUE;
 				}
 				thread4();
 				BREAK;
