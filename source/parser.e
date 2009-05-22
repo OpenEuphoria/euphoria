@@ -3539,6 +3539,8 @@ procedure SubProg(integer prog_type, integer scope)
 					tok[T_ID] = TYPE
 					tok[T_SYM] = object_type
 				end if
+			else
+				CompileErr("a type is expected here")
 			end if
 		end if
 		type_sym = tok[T_SYM]
