@@ -2404,3 +2404,135 @@ public function remove_subseq( sequence pSource, object pAltValue)
 	return lResult[1.. lCOW - 1]
 end function
 
+--**
+-- These are used with the [[:remove_dups]]() function.
+-- ** RD_INPLACE removes items while preserving the original order of the unique items.
+-- ** RD_PRESORTED assumes that the elements in ##pSource## are already sorted. If they
+-- are not already sorted, this option merely removed adjacent duplicate elements.
+-- ** RD_SORT will return the unique elements in ascending sorted order.
+
+public enum
+	RD_INPLACE,
+	RD_PRESORTED,
+	RD_SORT
+	
+--**
+-- Removes duplicate elements
+--
+-- Parameters:
+-- # ##pSource##: A sequence that may contain duplicated elements
+-- # ##pMode##: One of RD_INPLACE, RD_PRESORTED, or RD_SORT. 
+-- ** RD_INPLACE removes items while preserving the original order of the unique items.
+-- ** RD_PRESORTED assumes that the elements in ##pSource## are already sorted. If they
+-- are not already sorted, this option merely removed adjacent duplicate elements.
+-- ** RD_SORT will return the unique elements in ascending sorted order.
+--
+-- Returns:
+-- A sequence that contains only the unique elements from ##pSource##. 
+--
+-- Example 1:
+--<eucode>
+-- sequence s = { 4,7,9,7,2,5,5,9,0,4,4,5,6,5}
+-- ? remove_dups(s, RD_INPLACE) --> {4,7,9,2,5,0,6}
+-- ? remove_dups(s, RD_SORT) --> {0,2,4,5,6,7,9}
+-- ? remove_dups(s, RD_PRESORTED) --> {4,7,9,7,2,5,9,0,4,5,6,5}
+-- ? remove_dups(sort(s), RD_PRESORTED) --> {0,2,4,5,6,7,9}
+--</eucode>
+--
+public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
+	integer lTo
+	integer lFrom
+	
+	if length(pSource) < 2 then
+		return pSource
+	end if
+	
+	if pInPlace = RD_SORT then
+		pSource = sort(pSource)
+		pInPlace = RD_PRESORTED
+	end if
+	if pInPlace = RD_PRESORTED then
+		lTo = 1
+		lFrom = 2
+		
+		while lFrom <= length(pSource) do
+			if not equal(pSource[lFrom], pSource[lTo]) then
+				lTo += 1
+				if lTo != lFrom then
+					pSource[lTo] = pSource[lFrom]
+				end if
+			end if
+			lFrom += 1
+		end while
+		return pSource[1 .. lTo]
+	end if
+	
+	sequence lResult
+	lResult = {}
+	for i = 1 to length(pSource) do
+		if not find(pSource[i], lResult) then
+			lResult = append(lResult, pSource[i])
+		end if
+	end for
+	return lResult
+			
+end function
+
+--**
+-- Combines all the subsequences into a single sorted list
+--
+-- Parameters:
+-- # ##pSource##: A sequence that contains sub-sequences to be merged.
+--
+-- Returns:
+-- A sequence that contains all the elements from all the first-level of
+-- subsequences from ##pSource##. 
+--
+-- Comments:
+-- The elements in the sub-sequences do not have to be pre-sorted.
+--
+-- Only one level of sub-sequence is merged. 
+--
+-- Example 1:
+--<eucode>
+-- sequence s = { {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}
+-- ? merge(s) --> {0,2,4,4,5,5,5,6,7,7,9,9}
+--</eucode>
+--
+-- Example 2:
+--<eucode>
+-- sequence s = { {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}
+-- ? merge(s) --> {"cat","dog","fish","snail","whale","wolf","worm"}
+--</eucode>
+--
+-- Example 3:
+--<eucode>
+-- sequence s = { "cat", "dog","fish", "whale", "wolf", "snail", "worm"}
+-- ? merge(s) --> "aaacdeffghhiilllmnooorsstwww"
+--</eucode>
+--
+public function merge(sequence pSource)
+	sequence lResult
+	integer lTotalSize = 0
+	integer lPos 
+	
+	if length(pSource) = 0 then
+		return {}
+	end if
+	
+	if length(pSource) = 1 then
+		return pSource[1]
+	end if
+	
+	for i = 1 to length(pSource) do
+		lTotalSize += length(pSource[i])
+	end for
+	
+	lResult = repeat(0, lTotalSize)
+	lPos = 1
+	for i = 1 to length(pSource) do
+		lResult[lPos .. length(pSource[i]) + lPos - 1] = pSource[i]
+		lPos += length(pSource[i])
+	end for
+	return sort(lResult)
+end function
