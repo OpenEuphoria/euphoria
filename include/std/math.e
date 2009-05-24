@@ -1603,3 +1603,88 @@ end function
 public function powof2(object p)
 	return not (and_bits(p, p-1))
 end function
+
+
+--**
+-- Test if the supplied integer is a even or odd number.
+--
+-- Parameters:
+--		# ##pData##: an integer. The item to test.
+--
+-- Returns:
+-- * 1 if its even.
+-- * 0 if its odd.
+--
+-- Example 1:
+-- <eucode>
+-- for i = 1 to 10 do
+--   ? {i, is_even(i)}
+-- end for
+-- -- output ... 
+-- -- {1,0}
+-- -- {2,1}
+-- -- {3,0}
+-- -- {4,1}
+-- -- {5,0}
+-- -- {6,1}
+-- -- {7,0}
+-- -- {8,1}
+-- -- {9,0}
+-- -- {10,1}
+-- </eucode>
+--
+public function is_even(integer pData)
+	return (and_bits(pData, 1) = 0)
+end function
+
+--**
+-- Test if the supplied Euphoria object is even or odd.
+--
+-- Parameters:
+--		# ##pData##: any Euphoria object. The item to test.
+--
+-- Returns:
+-- * If ##pData## is an integer...
+-- ** 1 if its even.
+-- ** 0 if its odd.
+-- * If ##pData## is an atom this always returns 0
+-- * If ##pData## is an sequence it tests each element recursively, returning a
+-- sequence of the same structure containing ones and zeros for each element. A
+-- 1 means that the element at this position was even otherwise it was odd.
+--
+-- Example 1:
+-- <eucode>
+-- for i = 1 to 5 do
+--   ? {i, is_even_obj(i)}
+-- end for
+-- -- output ... 
+-- -- {1,0}
+-- -- {2,1}
+-- -- {3,0}
+-- -- {4,1}
+-- -- {5,0}
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- ? is_even_obj(3.4) --> 0 
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- ? is_even_obj({{1,2,3}, {{4,5},6,{7,8}},9}) --> {{0,1,0},{{1,0},1,{0,1}},0}
+-- </eucode>
+--
+public function is_even_obj(object pData)
+	if atom(pData) then
+		if integer(pData) then
+			return (and_bits(pData, 1) = 0)
+		end if
+		return 0
+	end if
+	for i = 1 to length(pData) do
+		pData[i] = is_even_obj(pData[i])
+	end for
+	
+	return pData
+end function
