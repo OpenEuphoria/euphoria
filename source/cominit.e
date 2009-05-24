@@ -212,12 +212,31 @@ export procedure finalize_command_line(m:map opts)
 		prev_OpWarning = OpWarning
 	end if
 
-	-- Split of Argv and switches
+	-- Initialize the option_switches and remove them
+	-- from the command line
 	sequence extras = m:get(opts, "extras")
 	if length(extras) > 0 then
 		integer eufile_pos = find(extras[1], Argv)
+		sequence pairs = m:pairs( opts )
+		for i = 1 to length( pairs ) do
+			sequence pair = pairs[i]
+			if equal( pair[1], "extras" ) then
+				continue
+			end if
+			pair[1] = prepend( pair[1], '-' )
+			if sequence( pair[2] ) then
+				if length( pair[2] ) and sequence( pair[2][1] ) then
+					for j = 1 to length( pair[2] ) do
+						switches &= { pair[1], pair[2][j] }
+					end for
+				else
+					switches &= pair
+				end if
+			else
+				switches = append( switches, pair[1] )
+			end if
+		end for
 		if eufile_pos > 3 then
-			switches = Argv[3..eufile_pos - 1]
 			Argv = Argv[1..2] & Argv[eufile_pos..$]
 			Argc = length(Argv)
 		end if
