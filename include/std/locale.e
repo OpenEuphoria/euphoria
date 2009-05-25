@@ -17,6 +17,7 @@ include std/map.e
 include std/localeconv.e as lcc
 include std/lcid.e as lcid
 include std/convert.e
+include std/filesys.e
 
 ------------------------------------------------------------------------------------------
 --
@@ -32,7 +33,7 @@ constant P = C_POINTER, I = C_INT
 --
 ------------------------------------------------------------------------------------------
 
-map:map lang = map:new()
+object def_lang = 0
 
 object lang_path = 0
 
@@ -73,66 +74,171 @@ end function
 -- Load a language file.
 --
 -- Parameters:
--- 		# ##filename##: a sequence, the //base// name of the fie to load.
+-- 		# ##filename##: a sequence, the name of the file to load. If no file
+--                      extention is supplied, then ".lng" is used.
 --
 -- Returns:
---		An **integer**: 0 on failure, 1 on success.
+--	A language map, if successful. This is to be used when calling [[:translate]]().
+--
+-- If the load fails it returns a zero.
 --
 -- Comments:
--- The language file must be made of lines which either in the form
+-- The language file must be made of lines which are either comments, empty lines
+-- or translations. Note that leading whitespace is ignored on all lines except 
+-- continuation lines.
 --
+-- * **Comments** are lines that begin with a ~# character and extend to the end of the line.
+-- * **Empty Lines** are ignored.
+-- * **Translations** have two forms ...
+-- 
 -- {{{
--- key value
+-- keyword translation_text
 -- }}}
+-- In which the 'keyword' is a word that must not have any spaces in it.
+-- {{{
+-- keyphrase = translation_text
+-- }}}
+-- In which the 'keyphrase' is anything up to the first '=' symbol.
 --
--- without any space in the key part, or else start with a ~#~ character, in which case they are 
--- treated as comments. Leading whitespace does not count.
+-- It is possible to have the translation text span multiple lines. You do this by 
+-- having '&' as the last character of the line. These are placed by newline characters
+-- when loading.
+--
+-- Example:
+--{{{
+--# Example translation file
+--#
+-- 
+-- 
+--hello Hola
+--world Mundo
+--greeting %s, %s!
+-- 
+--help text = &
+--This is an example of some &
+--translation text that spans &
+--multiple lines.
+--
+-- # End of example PO #2
+--}}}
 --
 -- See Also:
---		[[:w]]
+--		[[:translate]]
 
 public function lang_load(sequence filename)
 	object lines
 	sequence line, key, msg
-	integer sp, cont -- continuation
-
+	integer delim
+	integer cont -- continuation
+	map:map keylang
+	map:map altlang
+	
+	keylang = map:new()
+	altlang = map:new()
 	cont = 0
-	filename &= ".lng"
+	filename = defaultext(filename, "lng")
+
+	if sequence(lang_path) and length(lang_path) > 0 then
+		sequence tempname 
+		tempname = locate_file(filename, {lang_path})
+		if equal(tempname, filename) then
+			filename = locate_file(filename)
+		else
+			filename = tempname
+		end if
+	else
+		filename = locate_file(filename)
+	end if
 
 	lines = read_lines(filename)
 	if atom(lines) then
-		return 0  -- TODO: default to English?
+		return 0  -- Language maps unchanged.
 	end if
 
-	lang = map:new() -- clear any old data
-
 	for i = 1 to length(lines) do
-		line = trim(lines[i], " \r\n")
+		
 		if cont then
-			msg &= trim_tail(line, " &")
-			if line[$] != '&' then
-				cont = 0
-				map:put(lang, key, msg)
+
+			line = trim_tail(lines[i])
+			if line[$] = '&' then
+				msg &= line[1..$-1] & '\n'
 			else
-				msg &= '\n'
+				msg &= line
+				map:put(keylang, key, msg)
+				map:put(altlang, msg, key)
+				cont = 0
 			end if
-		elsif length(line) > 0 and line[1] != '#' then
-			sp = find(32, line)
-			if sp then 
-				if line[$] = '&' then
-					cont = 1
-					key = line[1..sp-1]
-					msg = trim_tail(line[sp+1..$], " &") & '\n'
-				else
-					map:put(lang, line[1..sp-1], line[sp+1..$])
+		else
+			line = trim(lines[i])
+			if length(line) = 0 then
+				continue
+			end if
+			if line[1] = '#' then
+				continue
+			end if
+			
+			delim = find('=', line)
+			if delim = 0 then
+				delim = find(' ', line)
+			end if
+			
+			if delim = 0 then
+				-- Ignore lines with missing translation text
+				continue
+			end if
+			
+			key = trim(line[1..delim-1])
+			if line[$] = '&' then
+				cont = 1
+				msg = trim(line[delim+1..$-1])
+				if length(msg) > 0 then
+					msg &= '\n'
 				end if
 			else
-				crash("Malformed Language file %s on line %d", {filename, i})
+				msg = trim(line[delim+1..$])
+				map:put(keylang, key, msg)
+				map:put(altlang, msg, key)
 			end if
 		end if
 	end for
 
-	return 1
+	return {keylang, altlang}
+end function
+
+--**
+-- Sets the default language (translation) map
+--
+-- Parameters:
+-- # ##langmap## - A value returned by [[:lang_load]](), or zero to remove any default map.
+-- 
+-- Example:
+--<eucode>
+--   set_def_lang( lang_load("appmsgs") )
+--</eucode>
+
+public procedure set_def_lang( object langmap )
+	if atom(langmap) and langmap = 0 then
+		def_lang = langmap
+	elsif length(langmap) = 2 then
+		def_lang = langmap
+	end if
+end procedure
+
+--**
+-- Gets the default language (translation) map
+--
+-- Parameters: none.
+--
+-- Returns:
+-- An object; a language map, or zero if there is no default language map yet.
+-- 
+-- Example:
+--<eucode>
+--   object langmap = get_def_lang()
+--</eucode>
+
+public function get_def_lang( )
+	return def_lang
 end function
 
 --**
@@ -140,18 +246,38 @@ end function
 --
 -- Parameters:
 -- 		# ##word##: a sequence, the word to translate.
---
+--      # ##langmap##: Either a value returned by [[:lang_load]]() or zero to use the default language map
+-- 		# ##defval##: a object. The value to return if the word cannot be translated.
+--                              Default is "".
+--      # ##mode##: an integer. If zero (the default) it uses ##word## as the keyword and returns
+--                              the translation text. If not zero it uses ##word##
+--                              as the translation and returns the keyword.
+--                              
 -- Returns:
---		A **sequence**, the value associated to the key ##word##.
---
--- Comments:
--- "" is returned if no translation was found.
+--		A **sequence**, the value associated with ##word##, or ##defval## if there
+--      is no association.
 --
 -- See Also:
 -- 		[[:set]], [[:lang_load]]
 
-public function w(sequence word)
-	return map:get(lang, word, "")
+public function translate(sequence word, object langmap = 0, object defval="", integer mode = 0)
+	if equal(langmap, 0) then
+		if equal(def_lang, 0) then
+			return defval
+		else
+			langmap = def_lang
+		end if
+	end if
+	if atom(langmap) or length(langmap) != 2 then
+		return defval
+	end if
+	
+	if mode = 0 then
+		return map:get(langmap[1], word, defval)
+	else
+		return map:get(langmap[2], word, defval)
+	end if
+
 end function
 
 ------------------------------------------------------------------------------------------
@@ -265,34 +391,29 @@ end ifdef
 -- The optional .xyz part specifies an encoding, like .utf8 or .1252 . This is required in some cases.
 
 public function set(sequence new_locale)
-	atom pLocale, ign
-	ifdef WIN32 then
-		sequence nlocale
-		nlocale = new_locale
-	end ifdef
+	atom lAddr_localename
+	atom ign
+	sequence nlocale
 	
-	new_locale = lcc:decanonical(new_locale)
-	pLocale = allocate_string(new_locale)
-	ign = c_func(f_setlocale, {LC_MONETARY, pLocale})
-	ign = c_func(f_setlocale, {LC_NUMERIC, pLocale})
-	ign = c_func(f_setlocale, {LC_ALL, pLocale})
-
+	nlocale = lcc:decanonical(new_locale)
+	lAddr_localename = allocate_string(nlocale)
+	ign = c_func(f_setlocale, {LC_MONETARY, lAddr_localename})
+	ign = c_func(f_setlocale, {LC_NUMERIC, lAddr_localename})
+	ign = c_func(f_setlocale, {LC_ALL, lAddr_localename})
+	free(lAddr_localename)
+	
 	if sequence(lang_path) then
-		ign = lang_load(new_locale)
-		ifdef WIN32 then
-			if ign then
-				current_locale = nlocale
-			end if
-		end ifdef
-		return ign
+		-- Note: Failure to update language map does not fail this function.
+		def_lang = lang_load(nlocale)
 	end if
 
+	ign = (ign != NULL)
 	ifdef WIN32 then
-		if (ign != NULL) then
-			current_locale = nlocale
+		if ign then
+			current_locale = new_locale
 		end if
 	end ifdef
-	return (ign != NULL)
+	return ign
 end function
 
 --**

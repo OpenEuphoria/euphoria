@@ -54,24 +54,45 @@ test_equal("datetime", "Sunday, May 04, 2008",
 --
 ------------------------------------------------------------------------------------------
 
-l:set_lang_path("") -- current director
+l:set_lang_path("") -- current directory
 test_equal("set_lang_path/get_lang_path", "", l:get_lang_path())
 
-test_true("lang_load() #1", l:lang_load("test"))
-test_equal("w() #1", "Hello", l:w("hello"))
-test_equal("w() #2", "World", l:w("world"))
-test_equal("w() #3", "%s, %s!", l:w("greeting"))
-test_equal("w() sprintf() #1", "Hello, World!",
-    sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
-test_equal("w() long message #1", "Hello %s,\nI hope you enjoy this email!",
-    l:w("long_message"))
+object langmap 
 
-test_true("lang_load() #2", l:lang_load("test2"))
-test_equal("w() #4", "Hola", l:w("hello"))
-test_equal("w() #5", "Mundo", l:w("world"))
-test_equal("w() #6", "%s, %s!", l:w("greeting"))
-test_equal("w() sprintf() #2", "Hola, Mundo!",
-    sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
+langmap =  l:lang_load("test")
+test_true("lang_load() #1", sequence(langmap) and length(langmap) = 2)
+
+test_equal("translate() #1", "Hello", l:translate("hello",langmap))
+
+test_equal("translate() #2a", -1,      l:translate("world",, -1))
+l:set_def_lang(langmap)
+test_equal("translate() #2b", "World", l:translate("world",, -1))
+
+test_equal("translate() #3", "%s, %s!", l:translate("greeting"))
+test_equal("translate() sprintf() #1", "Hello, World!",
+    sprintf(l:translate("greeting"), {l:translate("hello"), l:translate("world")}))
+test_equal("translate() long message #1", "Hello %s,\nI hope you enjoy this email!",
+    l:translate("long_message"))
+
+
+l:set_def_lang(l:lang_load("test2"))
+test_equal("translate() #4a", "Hola", l:translate("hello"))
+
+-- Reverse translation
+test_equal("translate() #4b", "hello", l:translate("Hola",,,1))
+
+test_equal("translate() #5", "Mundo", l:translate("world"))
+test_equal("translate() #6", "%s, %s!", l:translate("greeting"))
+test_equal("translate() sprintf() #2", "Hola, Mundo!",
+    sprintf(l:translate("greeting"), {l:translate("hello"), l:translate("world")}))
+    
+test_equal("translate() #7", -1, l:translate("g'day",, -1))
+test_equal("translate() #8", "", l:translate("g'day"))
+
+test_equal("translate() #9", "This is an example of some \n  translation text that spans \n   multiple lines.", l:translate("help text"))
+
+
+
 end ifdef
 
 test_report()
