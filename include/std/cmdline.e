@@ -41,7 +41,8 @@ public constant
 	--** This option switch triggers the 'help' display. See [[:cmd_parse]]
 	HELP          = 'h'
 	
-constant	NO_HELP       = -2
+public constant
+	NO_HELP       = -2
 
 public enum
 	--**
