@@ -1886,8 +1886,12 @@ public function join(sequence items, object delim=" ")
 	return ret
 end function
 
-public enum -- Style options for breakup()
+-- Style options for breakup()
+ 
+public enum
+	--** Indicates that ##size## parameter is maximum length of sub-sequence. See [[:breakup]]
 	BK_LEN,
+	--** Indicates that ##size## parameter is maximum number of sub-sequence. See [[:breakup]]
 	BK_PIECES
 	
 --**

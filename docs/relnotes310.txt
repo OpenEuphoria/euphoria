@@ -25,7 +25,7 @@ This release adds some new features, fixes some bugs, and improves the documenta
       **ex int.ex** (in euphoria\source) will now work, since the 
       interpreter now supports machine_proc(65,...) which passes IL to 
       the fast C-coded back-end. You can also run
-      int.ex with exw or exu.
+      int.ex with eui.
       This lets you easily modify the front end and get a modified 
       Euphoria interpreter, for all platforms, that runs programs 
       at full speed (much faster than the Euphoria-coded execute.e). You might 

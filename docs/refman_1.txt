@@ -148,9 +148,9 @@ When installed, the ##euphoria## directory will look something like this:
 ** readme.doc
 ** readme.htm
 ** License.txt
-** ##\bin## - Interpreters ##ex.exe## and ##exw.exe##. Translators 
-    ##ec.exe## and ##ecw.exe##. Or on //Linux/FreeBSD//, 
-    Interpreter ##exu## and Translator ##ecu##. There are also utility 
+** ##\bin## - Interpreters ##euid.exe##, ##euiw.exe## and ##eui.exe##. Translators 
+    ##euc.exe## and ##eucd.exe##. Or on //Linux/FreeBSD//, 
+    Interpreter ##eui## and Translator ##euc##. There are also utility 
     programs such as ##ed.bat##, ##guru.bat##, etc.
 ** ##\include## - standard include files
 *** ##\include\std## - the standard Euphoria library include files, e.g.
@@ -190,7 +190,7 @@ and ##EUINC##.
 
 The packaged version installs Euphoria in a more //Unix//-like way, putting the
 executables into ##/usr/bin##, ##/usr/share/euphoria## and
-##/usr/share/doc/euphoria##.  Man pages for ##exu##, ##ecu##, ##eubackend##,
+##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eubackend##,
 ##eushroud## and ##eubind## are also installed.  It will also create
 ##/etc/euphoria/euinc.conf##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
@@ -229,7 +229,7 @@ the interpreter name and the program name. Command line switches
 customize  how the interpreter itself behaves.
 
 Unlike many other compilers and interpreters, there is no obligation for any
-special command-line options for ##ex##, ##exw## or ##exu##. Only the
+special command-line options for ##euid##, ##euiw## or ##eui##. Only the
 name of you Euphoria file is expected, and if you don't supply it, Euphoria
 will display all the command line options available.
 
@@ -413,7 +413,7 @@ with or without your changes.
 The high-speed version of the Euphoria Interpreter back-end is written in ANSI
 C, and can be compiled with many different C compilers. The complete source
 code is in ##euphoria\source##, along with ##execute.e##, the alternate,
-Euphoria-coded back-end. The generous [[:docs/license.txt|Open source License]]
+Euphoria-coded back-end. The generous [[:Euphoria License|Open source License]]
 allows both personal and commercial use, and unlike many other open source
 licenses, your changes do not have to be made open source.
 

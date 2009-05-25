@@ -4,8 +4,7 @@ This release cleans up a number of bugs and documentation errors in 3.0.0.
 === Improved Documentation
 <ul>
 <li>
-     A separate new document on a href=tasking.htm>multitasking</a>
-     was added.
+     A separate new document on [[:multitasking]] was added.
 
 <li>
      Obsolete pre-open-source concepts in the 3.0.0 documentation

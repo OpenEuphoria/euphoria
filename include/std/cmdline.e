@@ -1,6 +1,9 @@
---**
+	-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+--
+--****
 -- == Command Line Handling
 --
+-- <<LEVELTOC depth=2>>
 
 include std/text.e
 include std/sequence.e
@@ -10,29 +13,47 @@ include std/error.e
 --****
 -- == Constants
 
-public constant -- Processing options
+public constant
+	--** This option switch does not have a parameter. See [[:cmd_parse]]
 	NO_PARAMETER  = 'n',
+	
+	--** This option switch does have a parameter. See [[:cmd_parse]]
 	HAS_PARAMETER = 'p',
+	
+	--** This option switch is not case sensitive. See [[:cmd_parse]]
 	NO_CASE       = 'i',
+	
+	--** This option switch is case sensitive. See [[:cmd_parse]]
 	HAS_CASE      = 'c',
+	
+	--** This option switch must be supplied on command line. See [[:cmd_parse]]
 	MANDATORY     = 'm',
+	
+	--** This option switch does not have to be on command line. See [[:cmd_parse]]
 	OPTIONAL      = 'o',
+	
+	--** This option switch must only occur once on the command line. See [[:cmd_parse]]
 	ONCE          = '1',
+	
+	--** This option switch may occur multiple times on a command line. See [[:cmd_parse]]
 	MULTIPLE      = '*',
-	HELP          = 'h',
-	NO_HELP       = -2
+	
+	--** This option switch triggers the 'help' display. See [[:cmd_parse]]
+	HELP          = 'h'
+	
+constant	NO_HELP       = -2
 
 public enum
 	--**
-	-- Additional help routine id
+	-- Additional help routine id. See [[:cmd_parse]]
 	HELP_RID,
 
 	--**
-	-- Validate all parameters (default)
+	-- Validate all parameters (default). See [[:cmd_parse]]
 	VALIDATE_ALL,
 
 	--**
-	-- Do not cause an error for an invalid parameter
+	-- Do not cause an error for an invalid parameter. See [[:cmd_parse]]
 	NO_VALIDATION,
 
 	--**
@@ -45,21 +66,38 @@ public enum
 	-- For instance:
 	-- ##eui -D TEST greet.ex -name John -greeting Bye##
 	-- -D TEST is meant for ##eui##, but -name and -greeting options
-	-- are meant for ##greet.ex##.
+	-- are meant for ##greet.ex##. See [[:cmd_parse]]
 	NO_VALIDATION_AFTER_FIRST_EXTRA,
 
 	--**
 	-- Only display the option list in show_help. Do not display other
-	-- information such as program name, options, etc...
+	-- information such as program name, options, etc... See [[:cmd_parse]]
 	SHOW_ONLY_OPTIONS
+	
+--
 
-public enum -- Record fields in the option call back parameter
+public enum
+	--**
+	--   An index into the ##opts## list. See [[:cmd_parse]]
 	OPT_IDX,
+	
+	--**
+	--   The number of times that the routine has been called
+	--   by cmd_parse for this option. See [[:cmd_parse]]
 	OPT_CNT,
+	
+	--**
+	--  The option's value as found on the command line. See [[:cmd_parse]]
 	OPT_VAL,
+	
+	--**
+	--  The value ##1## if the command line indicates that this option is to remove
+	--  any earlier occurances of it. See [[:cmd_parse]]
 	OPT_REV
 	
-enum -- Record fields in 'opts' argument.
+	
+-- Record fields in 'opts' argument.
+enum
 	SHORTNAME = 1,
 	LONGNAME = 2,
 	DESCRIPTION = 3,
@@ -503,7 +541,6 @@ end procedure
 --        "The analysis includes temperature and rainfall data",
 --        "for the past week."
 --       }
-
 -- show_help({
 --      {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
 --      {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},

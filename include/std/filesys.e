@@ -1146,7 +1146,7 @@ end function
 --
 -- Parameters:
 -- 		# ##path##: the path to check for an extension.
--- 		# ##defext##: the extentsion to add if ##path## does not have one.
+-- 		# ##defext##: the extension to add if ##path## does not have one.
 --
 -- Returns:
 -- 		A **sequence**, the path with an extension.
@@ -1928,17 +1928,19 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 		extra_paths = command_line()
 		extra_paths = canonical_path(dirname(extra_paths[2]), 1)
 		search_list = append(search_list, extra_paths)
-		
-		ifdef LINUX	then
-			extra_paths = getenv("HOME")
-		else
-			extra_paths = getenv("HOMEPATH")
-		end ifdef		
-		
-		if sequence(extra_paths) then
-			search_list = append(search_list, extra_paths & SLASH)
-		end if				
-		
+
+		ifdef not DOS32 then		
+			ifdef LINUX	then
+				extra_paths = getenv("HOME")
+			elsifdef WIN32 then
+				extra_paths = getenv("HOMEDRIVE") & getenv("HOMEPATH")
+			end ifdef		
+			
+			if sequence(extra_paths) then
+				search_list = append(search_list, extra_paths & SLASH)
+			end if				
+		end ifdef
+				
 		search_list = append(search_list, ".." & SLASH)
 		
 		search_list &= include_paths(1)

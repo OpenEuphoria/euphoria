@@ -280,7 +280,7 @@ below.)
  If necessary, in **DOS32**, you can do it much faster by poking into the
  **video memory**, or by using **display_text_image()**. There is a very
  large overhead on each puts() to the screen, and a relatively small
- incremental cost per character. The overhead with  **exw** (WIN32) is
+ incremental cost per character. The overhead with  **euiw** (WIN32) is
   especially high (on Windows 95/98/ME at least). Linux and FreeBSD
   are somewhere between DOS32 and WIN32 in text output speed. It therefore
   makes sense to build up a long string before calling puts(), rather than calling it 

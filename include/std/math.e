@@ -264,7 +264,7 @@ end function
 -- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result has the sign of ##dividend## and lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
 --
 -- The arguments to this function may be atoms or sequences. The rules for
--- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
+-- [[:operations on sequences]] apply, and determine the shape of the returned object.
 --
 -- Example 1:
 -- <eucode>
@@ -306,7 +306,7 @@ end function
 -- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result is nonnegative and has lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
 --
 -- The arguments to this function may be atoms or sequences. The rules for
--- <a href="refman_2.htm#26">operations on sequences</a> apply, and determine the shape of the returned object.
+-- [[:operations on sequences]] apply, and determine the shape of the returned object.
 --
 -- When both arguments are positive numbers, [[:mod]]() and ##remainder##() are the same. They differ by either the ##divisor## or its opposite, when they do.
 --
@@ -596,7 +596,7 @@ end function
 --
 -- Comments:
 --
--- A value between 0 and <a href="lib_math.htm#PI">PI</a> radians will be returned.
+-- A value between 0 and [[:PI]] radians will be returned.
 --
 -- This function may be applied to an atom or to all elements of a sequence.
 --
@@ -855,7 +855,7 @@ end function
 -- Comments:
 --
 -- The arguments to this function may be atoms or sequences. The rules for 
--- <a href="refman_2.htm#26">operations on sequences</a> apply.
+-- [[:operations on sequences]] apply.
 --
 -- Powers of 2 are calculated very efficiently.
 --

@@ -95,12 +95,14 @@ public enum
 	--** Process ID
 	PID
 
+--
 public enum
 	--** Set of pipes that are for the use of the parent
 	PARENT,
 	--** Set of pipes that are given to the child - should not be used by the parent
 	CHILD
 
+--
 atom os_errno = 0
 
 -- Common functions

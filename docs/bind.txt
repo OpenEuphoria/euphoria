@@ -105,10 +105,10 @@ source statements are not there.
   of a //Windows GUI// program. Console programs can access standard input and output, and 
   they work within the current console window, rather than popping up a new one.
 * **-icon filename[.ico]**: **(##bindw## only)** When you bind a program, you can patch in 
-  your own customized icon, overwriting the one in ##exw.exe##. ##exw.exe## contains a 32x32 
+  your own customized icon, overwriting the one in ##euiw.exe##. ##eui.exe## contains a 32x32 
   icon using 256 colors. It resembles an **E)** shape. //Windows// will display this shape 
-  beside ##exw.exe##, and beside your bound program, in file listings. You can also load this 
-  icon as a resource, using the name "exw" (see ##euphoria\demo\win32\window.exw## for an 
+  beside ##euiw.exe##, and beside your bound program, in file listings. You can also load this 
+  icon as a resource, using the name "euiw" (see ##euphoria\demo\win32\window.exw## for an 
   example). When you bind your program, you can substitute your own 32x32 256-color icon file 
   of size 2238 bytes or less. Other dimensions may also work as long as the file is 2238 bytes 
   or less. The file must contain a single icon image (//Windows// will create a smaller or 

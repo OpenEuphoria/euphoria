@@ -5,12 +5,11 @@ Now that you have installed Euphoria, here are some things you can try:
 === Run the Demo Programs
 
 Run each of the demo programs in the ##demo## directory. You just type
-##ex <program name>## if you are on a DOS system or  ##exwc <program name>##
-if you are on Windows or ##exu <program name>## if you are on any unix
-variant. An example of running the demos in a Windows console
-
+##euid <program name>## if you are on a DOS system or  ##eui <program name>##
+if you are on Windows or on any unix variant. 
+An example of running the demos in a Windows console
 {{{
-exwc buzz
+eui buzz
 }}}
 
 This will run the file ##buzz.ex##. Depending on your graphics card you may have to edit a line in

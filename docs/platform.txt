@@ -1,4 +1,4 @@
-== 
+== Platform Specific Issues
 
 === Introduction
 
@@ -41,9 +41,9 @@ portable to other hardware platforms.
 
 The Euphoria for DOS32+WIN32 installation file contains several  
 **.exe** files. 
-The first is called **ex.exe**.
+The first is called **euid.exe**.
 It runs Euphoria programs on the DOS32 platform. The second is
-**exw.exe**.
+**eui.exe**.
 It runs Euphoria programs on the WIN32 platform. 
 Euphoria programs that are
 meant to be run on the WIN32 platform have a **.exw** file type,
@@ -51,7 +51,7 @@ while programs that are meant to be run on the DOS32 platform have a
 **.ex** file type.
 
 The Euphoria for Linux .tar file contains only 
-**exu**. It runs
+**eui**. It runs
 Euphoria programs on the Linux platform.
 Euphoria programs intended for Linux or FreeBSD have a **.exu** file type. 
 
@@ -142,11 +142,11 @@ no swap file will be created.
 
 === The WIN32 Platform
 
-Euphoria for WIN32 (**exw.exe**) has a lot in common with Euphoria for DOS32. 
+Euphoria for WIN32 (**eui.exe**) has a lot in common with Euphoria for DOS32. 
 With WIN32 you also have access to all of the memory on your machine.
 Most library routines work the same way on each platform. Many existing 
 DOS32 text mode programs can be run using
-**exw** without any change. With **exw** you can run programs from the
+**eui** without any change. With **eui** you can run programs from the
 command line, and display text on a standard 
 (typically 25 line x 80 column) DOS window. The DOS window is known as the
 ##//console//## in Windows terminology. Euphoria makes the
@@ -173,7 +173,7 @@ end if
 which will wait for the user enter something.
 
 If you want to run Euphoria programs without popping up a new console
-window use exwc.exe. It uses the current
+window use eui.exe otherwise use euiw.exe. eui.exe uses the current
 console window, just like a DOS program would when using ex.exe.
 
 Under WIN32, long filenames are fully supported for reading and writing and

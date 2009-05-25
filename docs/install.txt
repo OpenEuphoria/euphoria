@@ -3,8 +3,7 @@
 Download and run the latest Euphoria setup program. It will install Euphoria on
 any //Windows// system from //Windows 95// up.
 
-After installing, see [[:docs/what2do.txt | What to do next]] for ideas on how to use this package.
-You should also see [[:docs/readme.txt | the readme file]] if you have not done so already.
+After installing, see [[:What to Do | What to do next]] for ideas on how to use this package.
 
 === Possible Problems
 

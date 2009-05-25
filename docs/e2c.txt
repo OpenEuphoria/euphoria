@@ -67,7 +67,7 @@ faster than the Watcom graphics library in many cases.
 flag in ##emake.bat##. This flag can sometimes add to Lcc's unreliability. If 
 your program 
 doesn't work, try passing
-##-lccopt-off## to the command line of ##ecu/ecw##. This will disable the use of the
+##-lccopt-off## to the command line of ##euc##. This will disable the use of the
 lcc optimization flag.
 * Warnings are turned off when compiling with ##emake.bat##. If you turn them on, you may see some
 harmless messages about variables declared but not used, labels defined but
@@ -90,23 +90,23 @@ Running the **Translator** is similar to running
 the **Interpreter**. On DOS you would type:
 
 {{{
-ec allsorts.ex
+eucd allsorts.ex
 
 -- or  --
 
-ec allsorts
+eucd allsorts
 }}}
 
 On Windows you would type:
 
 {{{
-ecw taskwire.exw
+euc taskwire.exw
 }}}
 
 On Linux/FreeBSD you would type:
 
 {{{
-ecu qsort.exu
+euc qsort.exu
 }}}
 
 but instead of running the ##allsorts.ex## program, the **Translator** will
@@ -173,7 +173,7 @@ select the one you want to use with a command-line option:
 on the command line to **ec** or **ecw**. e.g.
 
 {{{
-ecw -bor pretend.exw
+euc -bor pretend.exw
 }}}
 
 Normally, after building your ##.exe## file, the **emake** batch file will delete
@@ -182,7 +182,7 @@ to keep these files, add the ##-keep## option to the Translator command-line.
 e.g.
 
 {{{
-ec -wat -keep sanity.ex
+euc -wat -keep sanity.ex
 }}}
 
 To make a //Windows// ##.dll## file, or //Linux// or //FreeBSD// ##.so## file, just
@@ -196,7 +196,7 @@ To make a //Windows// console program instead of a //Windows// GUI program,
 add ##-con## to the command line. e.g.
 
 {{{
-ecw -bor -con myprog.exw
+euc -bor -con myprog.exw
 }}}
 
 To increase or decrease the total amount of stack space reserved for your
@@ -222,7 +222,7 @@ disable this optimization by adding ##-lccopt-off## to the command
 line.
 
 {{{
-ecw -lcc -lccopt-off myprog.exw
+euc -lcc -lccopt-off myprog.exw
 }}}
 
 To make a //DOS// program, compiled by WATCOM, that uses fast hardware
@@ -249,7 +249,7 @@ To compile your program with debugging information, usable with a debugger
 compatible with your compiler, use the ##-debug## option:
 
 {{{
-ecu -debug myapp.exu
+euc -debug myapp.exu
 }}}
 
 It is sometimes useful to link your translated code to a Euphoria runtime
@@ -259,7 +259,7 @@ additional debugging information when debugging translated Euphoria code. Note
 that only the default library is supplied. Use the ##-lib {library}## option:
 
 {{{
-ecu -lib decu.a myapp.exu
+euc -lib decu.a myapp.exu
 }}}
 
 {{{
@@ -271,8 +271,8 @@ ecu -lib decu.a myapp.exu
 }}}
 Use one of these options to translate code for the specified platform, even
 if running on a different platform.  The default will always be the native
-platform of the translator that is executed, so ##ec.exe## will default to
-DOS, while ##ecw.exe## will default to windows, and ##ecu## will default
+platform of the translator that is executed, so ##eucd.exe## will default to
+DOS, while ##euc.exe## will default to windows, and ##euc## will default
 to the platform upon which it was built.
 
 The resulting output can be compiled by the appropriate compiler on the 
@@ -550,7 +550,7 @@ of the supported C compilers, and the Translator is now quite stable.
 On //Windows//, if you call a C routine that uses the cdecl calling convention
 (instead of stdcall), you must specify a '##+##' character at the start of the
 routine's name in [[:define_c_proc]]() and [[:define_c_func]](). If you don't,
-the call may work when running the ##exw## Interpreter, but will probably fail
+the call may work when running the ##eui## Interpreter, but will probably fail
 (crash) when you translate and compile with Borland or Lcc.
   
 In some cases a huge Euphoria routine is translated to C, and it proves to be

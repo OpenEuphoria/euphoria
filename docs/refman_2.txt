@@ -767,7 +767,7 @@ The sequence-formation operator is listed at the bottom of the a
 
 Some other important operations that you can perform on sequences have English
 names, rather than special characters. These operations are built-in to
-**ex.exe/exw.exe/exu**, so they'll always be there, and so they'll be fast. They are
+**euid.exe/euiw.exe/eui**, so they'll always be there, and so they'll be fast. They are
 described in detail in the [[:Language Reference]], but are
 important enough to Euphoria programming that we should mention them here before
 proceeding. You call these operations as if they were subroutines, although
@@ -2069,7 +2069,7 @@ without define OTHER_WORD -- undefines
 or by command line:
 
 {{{
-exwc -D MY_WORD myprog.ex
+eui -D MY_WORD myprog.ex
 }}}
 
 This can handle many tasks such as change the behavior of your application
@@ -2651,10 +2651,9 @@ have to type Control-Alt-Delete to either reboot, or (under Windows) terminate
 your DOS prompt session. If the program had files open for writing, it would be
 advisable to run **scandisk** to check your file system integrity.  Only
 when your program is waiting for keyboard input, will control-c abort the
-program (unless a href="lib_file.htm#allow_break">allow_break(0)</a> was
-used).
+program [[:allow_break]](0) was used).
 \\
-With **exw.exe** or **exu**, control-c will always
+With **eui.exe** or **eui**, control-c will always
 stop your program immediately.
 
 === goto statement

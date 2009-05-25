@@ -62,8 +62,8 @@ include std/dll.e
 -- # Using a sequence of routine id's to make a case (switch) statement. Using the 
 -- [[:switch statement]] is more efficient.
 -- # Setting up an Object-Oriented system.
--- # Getting a routine id so you can pass it to [[:call_back]](). (See [[:docs/platform.txt]])
--- # Getting a routine id so you can pass it to [[:task_create]](). (See [[:docs/tasking.txt]])
+-- # Getting a routine id so you can pass it to [[:call_back]](). (See [[:Platform-Specific Issues]])
+-- # Getting a routine id so you can pass it to [[:task_create]](). (See [[:Multitasking in Euphoria]])
 -- # Calling a routine that is defined later in a program. This is no longer needed from v4.0 onward.
 --
 -- Note that C routines, callable by Euphoria, also have ids, but they cannot be used where 
@@ -106,7 +106,7 @@ include std/dll.e
 --  
 -- See Also:
 -- [[:call_proc]], [[:call_func]], [[:call_back]], [[:define_c_func]], [[:define_c_proc]], 
--- [[:task_create]], [[:docs/platform.txt]], [[:docs/dynamic.txt]]
+-- [[:task_create]], [[:Platform-Specific Issues]], [[:Dynamic routine calling]]
 
 --****
 -- Signature:
@@ -137,7 +137,7 @@ include std/dll.e
 -- If the function with id ##id## does not take any arguments then ##args## should be ##{}##.
 --
 -- Example 1:
--- [[::demo/csort.ex]]
+-- Take a look at the sample program called ##demo/csort.ex##
 --
 -- See Also:
 -- [[:call_proc]], [[:routine_id]], [[:c_func]]
@@ -442,8 +442,7 @@ end function
 --**
 -- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
 --
--- See <a href="http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx">Microsoft's Memory Protection Constants<br>
--- http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx</a><p>
+-- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "Microsoft's Memory Protection Constants"]]
 --
 -- Parameters:
 -- The first parameter, data, is the machine code to be put into memory. 
