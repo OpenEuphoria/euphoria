@@ -106,7 +106,7 @@ euc taskwire.exw
 On Linux/FreeBSD you would type:
 
 {{{
-euc qsort.exu
+euc qsort.ex
 }}}
 
 but instead of running the ##allsorts.ex## program, the **Translator** will
@@ -249,7 +249,7 @@ To compile your program with debugging information, usable with a debugger
 compatible with your compiler, use the ##-debug## option:
 
 {{{
-euc -debug myapp.exu
+euc -debug myapp.ex
 }}}
 
 It is sometimes useful to link your translated code to a Euphoria runtime
@@ -259,7 +259,7 @@ additional debugging information when debugging translated Euphoria code. Note
 that only the default library is supplied. Use the ##-lib {library}## option:
 
 {{{
-euc -lib decu.a myapp.exu
+euc -lib decu.a myapp.ex
 }}}
 
 {{{
@@ -268,7 +268,11 @@ euc -lib decu.a myapp.exu
 -plat LINUX
 -plat OSX
 -plat WIN
+-plat NETBSD
+-plat OPENBSD
+-plat SUNOS
 }}}
+
 Use one of these options to translate code for the specified platform, even
 if running on a different platform.  The default will always be the native
 platform of the translator that is executed, so ##eucd.exe## will default to

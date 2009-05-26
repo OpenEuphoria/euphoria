@@ -299,15 +299,16 @@ shells which program to execute the 'script' program with.
 
 e.g.
 <eucode>
-#!/home/rob/euphoria/bin/exu
+#!/home/rob/euphoria/bin/eui
 </eucode>
 
 This informs the Linux shell that your file should be executed by the
 Euphoria interpreter, and gives the full path to the interpreter.  If you make
 your file executable, you can run it, just by typing its name, and without the
-need to type "##exu##". On //DOS// and //Windows// this line is just treated as
-a comment (though Apache Web server on //Windows// does recognize it.). If your
-file is a shrouded ##.il## file, use backendu instead of ##exu##.
+need to type "##exi##". On //DOS// and //Windows// this line is just
+treated as a comment (though Apache Web server on //Windows// does
+recognize it.). If your file is a shrouded ##.il## file, use backendu
+instead of ##eui##.
 
 Line comments are typically used to annotate a single (or small section) of
 code, whereas multi-line comments are typically used to give larger pieces of

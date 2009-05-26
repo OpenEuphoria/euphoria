@@ -448,7 +448,8 @@ end procedure
 -- Comments:
 --
 -- The returned sequence contains the following information:
--- # Tthe path to either the Euphoria executable, ex.exe, exw.exe or exu, or to your bound executable file.
+-- # Tthe path to either the Euphoria executable, (eui, eui.exe, euid.exe euiw.exe) or to your bound
+--   executable file.
 -- # The next word is either the name of your Euphoria main file, or 
 -- (again) the path to your bound executable file.
 -- # Any extra words typed by the user. You can use these words in your program.

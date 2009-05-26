@@ -73,8 +73,8 @@ the desired key to the desired function.
 | C-Right   | Move to the start of the next word. On Unix, use C-r |
 | Home      | Move to the beginning of the current line |
 | End       | Move to the end of the current line |
-| C-Home    | Move to the beginning of the file (ex.exe only, others use C-t |
-| C-End     | Move to the end of the file (ex.exe only, others use C-b |
+| C-Home    | Move to the beginning of the file (euid.exe only, others use C-t |
+| C-End     | Move to the end of the file (euid.exe only, others use C-b |
 | ~PgUp      | Move up one screen. On Unix use C-u |
 | ~PgDn      | Move down one screen. On Unix use C-p |
 | F1..F10   | Select a new window. The windows are numbered from top to bottom with the top window on the screen being //F1// |

@@ -114,7 +114,7 @@ end procedure
 -- ##abort##() is useful when a program is many levels deep in subroutine calls, and execution must end immediately,
 -- perhaps due to a severe error that has been detected.
 --
--- If you don't use ##abort##(), ex.exe/exw.exe/exu will normally return an exit status code of 0. 
+-- If you don't use ##abort##(), the interpreter will normally return an exit status code of 0.
 -- If your program fails with a Euphoria-detected compile-time or run-time error then a code of 1 is returned.
 --  
 -- Example 1:

@@ -2,69 +2,63 @@
 
 === Introduction
 
-Rapid Deployment Software currently supports Euphoria on five different
+Rapid Deployment Software currently supports Euphoria on many different
 //platforms//. More platforms will be added in the future.
 
-The first platform is called **DOS32**, 
-since it depends on the DOS operating system, but with the CPU operating 
-in 32-bit (protected) mode. 
+The first platform is called **DOS32**, since it depends on the DOS
+operating system, but with the CPU operating  in 32-bit (protected)
+mode. 
 
-The second platform is called **WIN32**,
-since the underlying operating system is Microsoft Windows, in particular,
-the 32-bit version of Windows that is used on Windows 95/98/ME, as well as
-NT/2000/XP and later systems. 
+The second platform is called **WIN32**, since the underlying operating
+system is Microsoft Windows, in particular, the 32-bit version of
+Windows that is used on Windows 95/98/ME, as well as NT/2000/XP and
+later systems. 
 
-The third platform is **Linux**. Linux is
-based on the UNIX operating system. It has recently become very popular 
-on PCs. There are many distributors of Linux, including Red Hat, Debian,
-Caldera, etc. Linux can be obtained on a CD for a very low price. Linux 
-is an open-source operating system.
+The third platform is **Linux**. Linux is based on the UNIX operating
+system. It has recently become very popular  on PCs. There are many
+distributors of Linux, including Red Hat, Debian, Caldera, etc. Linux
+can be obtained on a CD for a very low price. Linux  is an open-source
+operating system.
 
-The fourth platform is **FreeBSD**. FreeBSD 
-is also based on the UNIX operating system. It is very popular on 
-Internet server machines. It's also open source.
+The fourth platform is **FreeBSD**. FreeBSD is also based on the UNIX
+operating system. It is very popular on  Internet server machines. It's
+also open source.
 
 The fifth platform is Apple's **OS X**. OS X is also based on the UNIX
-operating system. While it is closed source, it is gaining a wide following
-due to it's ease of use and power.
+operating system. While it is closed source, it is gaining a wide
+following due to it's ease of use and power.
 
-The sixth platform is **Sun OS**.  Sun OS was developed by and is owned by 
-SUN Microsystems Inc.  It is also based on UNIX.
+The sixth platform is **Sun OS**.  Sun OS was developed by and is owned
+by SUN Microsystems Inc.  It is also based on UNIX.
 
-The seventh platform is **Open BSD**.  
-Open BSD is also a UNIX-like Operating System and is developed by volunteers.
+The seventh platform is **Open BSD**. Open BSD is also a UNIX-like
+Operating System and is developed by volunteers.
 
-The eighth platform is **Net BSD**.  
-Net BSD is also a UNIX-like Operating System  and is designed to be easily 
-portable to other hardware platforms.
+The eighth platform is **Net BSD**. Net BSD is also a UNIX-like
+Operating System  and is designed to be easily  portable to other
+hardware platforms.
 
+Euphoria source files use various file extensions. The common
+extensions are:
+
+| .e | Euphoria include file |
+| .ed | Euphoria include file for the DOS platform only |
+| .ew | Euphoria include file for a Windowed (GUI) application only |
+| .ex | Console main program file |
+| .exw | Windowed (GUI) main program file |
+| .exd | DOS main program file |
 
 The Euphoria for DOS32+WIN32 installation file contains several  
-**.exe** files. 
-The first is called **euid.exe**.
-It runs Euphoria programs on the DOS32 platform. The second is
-**eui.exe**.
-It runs Euphoria programs on the WIN32 platform. 
-Euphoria programs that are
-meant to be run on the WIN32 platform have a **.exw** file type,
-while programs that are meant to be run on the DOS32 platform have a
-**.ex** file type.
+**.exe** files. The first is called **euid.exe**. It runs Euphoria
+programs on the DOS32 platform. The second is **eui.exe**. It runs
+Euphoria programs on the WIN32 platform. 
 
-The Euphoria for Linux .tar file contains only 
-**eui**. It runs
+The Euphoria for Linux .tar file contains only **eui**. It runs
 Euphoria programs on the Linux platform.
-Euphoria programs intended for Linux or FreeBSD have a **.exu** file type. 
 
 The FreeBSD version of Euphoria is installed by first installing the Linux
-version of Euphoria, and then replacing exu, by the version of exu 
-for FreeBSD.
-
-Many Euphoria programs can be run on two, three, four or all five platforms
-without change. The file type should indicate the preferred platform 
-for the program. Any Euphoria interpreter can try to run any Euphoria file, but you
-might have to specify the full name of the file, including the type,
-since each interpreter looks for it's own preferred file type 
-(.ex, .exw or .exu).
+version of Euphoria, and then replacing eui, by the version of eui for
+FreeBSD.
 
 Sometimes you'll find that the majority of your code will be the 
 same on all platforms, but some small parts will have to be 
@@ -77,10 +71,10 @@ to warrant it's own identifier.
 === The DOS32 Platform
 
 If you are new to programming, you might want to start with
-**ex.exe** on the DOS32 platform. You should try to understand the 
-essential core of Euphoria, before you leap into Windows GUI programming.
-All versions of Windows (even XP), let you open a Command Prompt
-text window, and run DOS programs.
+**exd.exe** on the DOS32 platform. You should try to understand the
+essential core of Euphoria, before you leap into Windows GUI
+programming. All versions of Windows (even XP), let you open a Command
+Prompt text window, and run DOS programs.
 
 **Euphoria programs run in 32-bit (protected) mode and
 have access to all of the megabytes of memory on the machine.**

@@ -75,7 +75,7 @@ Always keep a copy of your original source. There's no way to recover it from a 
 
 {{{
 bind  [-full_debug] [-list] [-quiet] [-out executable_file] [filename.ex]
-bindu [-full_debug] [-list] [-quiet] [-out executable_file] [filename.exu]
+bindu [-full_debug] [-list] [-quiet] [-out executable_file] [filename.ex]
 bindw [-full_debug] [-list] [-quiet] [-out executable_file] [-con] [-icon filename.ico] [filename.exw]
 }}}
 

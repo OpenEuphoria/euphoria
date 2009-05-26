@@ -1,5 +1,4 @@
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
--- dll.e
 --****
 -- == Dynamic Linking to external code
 --
@@ -167,7 +166,7 @@ end function
 --     and poke() to read or write the value of the variable. You can in the same way obtain 
 -- the address of a C function and pass it to any external routine that requires a callback address.
 --
---     For an example, see ##euphoria/demo/linux/mylib.exu##
+--     For an example, see ##euphoria/demo/linux/mylib.ex##
 --
 -- See Also:
 --     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
@@ -503,7 +502,7 @@ atom page_offset = 0
 --   a non-standard way of handling cdecl floating-point return values.
 --
 -- Example 1: 
---   See: ##demo\win32\window.exw##, ##demo\linux\qsort.exu##
+--   See: ##demo\win32\window.exw##, ##demo\linux\qsort.ex##
 --
 -- See Also:
 --     [[:routine_id]]

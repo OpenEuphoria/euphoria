@@ -87,8 +87,8 @@ a user tries to run your program, a special process on the server actually runs
 your program and it needs to find and have access to your Euphoria files. You
 should probably set your files so anyone can read or execute them, but only you
 can write them.  To change permissions choose the 'Properties' option in the pop-up Window
-or use ##chmod 755 myfile.exu## if ##chmod## is available on the server system. Remember
-also to make eui executable by yourself and others.
+or use ##chmod 755 myfile.ex## if ##chmod## is available on the server
+system. Remember also to make eui executable by yourself and others.
 
 To make your life simple, you may wish to copy all files into cgi-bin that your
 program will need. That includes the standard Euphoria files from
@@ -116,12 +116,12 @@ page.
 If you page-down a few times, you'll see the start of a form:
 
 {{{
-<form method="POST" action="cgi-bin/economy.exu">
-}}} 
+<form method="POST" action="cgi-bin/economy.ex">
+}}}
 
 This creates a form for the user to fill out.  When the user clicks the submit
-button for the form, the CGI program, economy.exu, stored in cgi-bin, will be
-executed on the server.
+button for the form, the CGI program, economy.ex, stored in cgi-bin,
+will be executed on the server.
 
 There are two possible "methods" that you can use.  This form uses the "POST"
 method. The other method is called the "GET" method. 

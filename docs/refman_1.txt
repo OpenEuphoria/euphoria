@@ -273,7 +273,7 @@ Under modern //Unix// variants, you can use ##~#!/usr/bin/env eui## as the
 first line of your script file. On older //Unix// variants, you may need to
 use the full path to ##eui##, ##~#!/usr/local/bin/eui##.
 
-If your program is called ##foo.exu##:
+If your program is called ##foo.ex##:
 <eucode>
 #!/usr/bin/env eui
 
