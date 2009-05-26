@@ -252,9 +252,13 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 			exit
 		end if
 	end for
+
 	if not has_help and add_help_options then
 		opts = append(opts, {"h", "help", "Display the command options", {HELP}, -1})
 		opts = append(opts, {"?", 0, "Display the command options", {HELP}, -1})
+
+		-- We have to standardize the above additions
+		opts = standardize_opts(opts, 0)
 	end if
 	
 	return opts
