@@ -5,7 +5,8 @@ If you get stuck, here are some things you can do:
 # Type: ##guru## followed by some keywords associated with your problem. For example,
   ##guru declare global include##
 # Check the list of common problems ([[:Common Problems and Solutions]]).
-# Read the relevant parts of the documentation, i.e. ##refman.doc## or ##library.doc##
+# Read the relevant parts of the documentation, i.e. [[:Euphoria Programming Language v4.0]] or
+[[:General Routine Reference]].
 # Try running your program with trace:
 <eucode>
 with trace

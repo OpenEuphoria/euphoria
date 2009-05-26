@@ -341,9 +341,8 @@ Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
 the ##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under 
 //Linux/FreeBSD// some keys may not be available, and alternate keys are
-provided. See the file ##euphoria\doc\ed.doc## for a complete description of
-the editing commands. ##Esc h## (help) will let you view ##ed.doc## from your
-editing session.
+provided. See [[:Ed - Euphoria Editor]] for a complete description of
+the editing commands.
 
 If you need to understand or modify any detail of the editor's operation, you
 can edit the file ##ed.ex## in ##euphoria\bin## (be sure to make a backup copy
@@ -379,7 +378,7 @@ Euphoria source code that your program needs to create a single ##.il## file.
 (##eub##, ##eubw##, or ##eubd##) to create a single, stand-alone executable file.
 For example, if your program is called "##myprog.ex##" you can create "##myprog.exe##"
 which will run identically. For more information about shrouding and binding,
-see bind.doc.
+see [[:Binding and Shrouding]].
 
 Finally, with the [[:Euphoria To C Translator]], you can translate your
 Euphoria program into C and then compile it with a C compiler to get an

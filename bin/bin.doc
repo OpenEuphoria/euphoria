@@ -1,13 +1,13 @@
    EUPHORIA\BIN
 
    Euphoria Executables:
-        ex.exe       - the interpreter for DOS
-        exw.exe      - the interpreter for Windows
-        exwc.exe     - the interpreter for Windows (console mode)
-        ec.exe       - the Euphoria to C Translator for DOS
-        ecw.exe      - the Euphoria to C Translator for Windows
-        backend.exe  - the interpreter back-end for DOS
-        backendw.exe - the interpreter back-end for Windows
+        euid.exe     - the interpreter for DOS
+        euiw.exe     - the interpreter for Windows
+        eui.exe      - the interpreter for Windows (console mode)
+        eucd.exe     - the Euphoria to C Translator for DOS
+        euc.exe      - the Euphoria to C Translator for Windows
+        eubd.exe     - the interpreter back-end for DOS
+        eub.exe      - the interpreter back-end for Windows
 
    Binder files:
 	bind.bat     - bind a DOS32 Euphoria program with backend.exe 
@@ -27,11 +27,9 @@
         liballeg.a   - slightly smaller than the standard build of this library
         
    Translator libraries:
-        ec.a         - for DJGPP (DOS)
-        ec.lib       - for Watcom (DOS)
-        ecw.lib      - for Watcom (Windows)
-        ecwb.lib     - for Borland (Windows)
-        ecwl.lib     - for Lcc (Windows)
+        eud.a        - for DJGPP (DOS)
+        eud.lib      - for Watcom (DOS)
+        eu.lib       - for Watcom (Windows)
    
    Utility programs written in Euphoria. You are free to use them
    and modify them. See License.txt.
@@ -60,4 +58,3 @@
    Many of these programs expect to be run from a command line interface.
 
    For more documentation, see the comments at the top of each file.
-   
