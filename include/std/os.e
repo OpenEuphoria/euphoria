@@ -280,16 +280,16 @@ end function
 -- <built-in> function platform()
 --
 -- Description:
--- Indicates the platform that the program is being executed on: DOS32, WIN32, Linux/FreeBSD or OS X.
+-- Indicates the platform that the program is being executed on.
 --
 -- Returns:
--- A small **integer**:
+-- An **integer**:
 -- <eucode>
--- global constant
+-- public constant
 --     DOS32   = 1,
 --     WIN32   = 2,
 --     LINUX   = 3,
---     FREEBSD = 3, -- NOTE: take notices, same as LINUX.
+--     FREEBSD = 3, -- NOTE: same as LINUX.
 --     OSX     = 4,
 --     SUNOS   = 5
 -- </eucode>
@@ -297,11 +297,9 @@ end function
 -- Comments:
 -- The [[:ifdef statement]] is much more versatile and in most cases supersedes ##platform##().
 --
--- When ex.exe is running, the platform is //DOS32//. When exw.exe is running the platform is //WIN32//. 
--- When exu is running the platform is //LINUX//, //FreeBSD//, //OS X// or //SunOS//.
---
---  ##platform##() used to be the way to execute different code depending on which platform the program is running on.
--- Additional platforms will be added as Euphoria is ported to new machines and operating environments.
+-- ##platform##() used to be the way to execute different code depending on which platform the program
+-- is running on. Additional platforms will be added as Euphoria is ported to new machines and
+-- operating environments.
 --
 -- Example 1:
 -- <eucode>
