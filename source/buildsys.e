@@ -295,7 +295,7 @@ procedure write_makefile_srcobj_list(integer fh)
 			puts(fh, " " & generated_files[i])
 		end if
 	end for
-	puts(fh, HOSTNL & HOSTNL)
+	puts(fh, HOSTNL)
 
 	printf(fh, "%s_OBJECTS =", { upper(file0) })
 	for i = 1 to length(generated_files) do
@@ -303,7 +303,7 @@ procedure write_makefile_srcobj_list(integer fh)
 			puts(fh, " " & generated_files[i])
 		end if
 	end for
-	puts(fh, HOSTNL & HOSTNL)
+	puts(fh, HOSTNL)
 
 	printf(fh, "%s_GENERATED_FILES = ", { upper(file0) })
 	for i = 1 to length(generated_files) do
@@ -320,8 +320,6 @@ procedure write_makefile_full()
 
 	ensure_exename(settings[SETUP_EXE_EXT])
 
-	write_objlink_file()
-
 	integer fh = open(output_dir & file0 & ".mak", "wb")
 
 	printf(fh, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
@@ -331,9 +329,10 @@ procedure write_makefile_full()
 	if compiler_type = COMPILER_GCC and not (TDOS or TWINDOWS) then
 		printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
 	else
-		write_makefile_srcobj_list(fh)
+		write_objlink_file()
 	end if
 
+	write_makefile_srcobj_list(fh)
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
