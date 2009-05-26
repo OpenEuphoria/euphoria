@@ -713,7 +713,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- 
 -- See Also:
 -- [[:peek]], [[:peeks]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]],
--- [[:mem_copy]]], [[:mem_set]]
+-- [[:mem_copy]], [[:mem_set]]
 --
 
 --****
