@@ -420,25 +420,22 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## words at ##addr##
+--   # ##addr_n_length##, an object, either of
+--   ** an atom ##addr##, to fetch one word at ##addr##, or
+--   ** a pair ##{ addr, len}##, to fetch ##len## words at ##addr##
 --
 -- Returns:
---
---              An **object**, either an integer if the input was a single address,
+-- An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are double words, in the range -32768..32767.
 --
 -- Errors:
---
---      Peek()ing in memory you don't own may be blocked by the OS, and cause
+-- Peeking in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e i,clude file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
 -- Comments: 
---
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -536,9 +533,9 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one double word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--   # ##addr_n_length##, an object, either of
+--   ** an atom ##addr##, to fetch one double word at ##addr##, or
+--   ** a pair ##{ addr, len }##, to fetch ##len## double words at ##addr##
 --
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
@@ -546,7 +543,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- are double words, in the range 0..power(2,32)-1.
 --
 -- Errors:
--- Peek()ing in memory you don't own may be blocked by the OS, and cause a
+-- Peeking in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e i,clude file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.

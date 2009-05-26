@@ -481,17 +481,18 @@ end function
 --   Return an angle with given tangent.
 --
 -- Parameters:
---		# ##tangent##: an object, each atom of which will be converted, no matter how deeply nested.
+--   # ##tangent##: an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object** of the same shape as ##tangent##. For each atom in ##flatten(tangent)##, the angle with smallest magnitude that has this atom as tangent is computed.
+--   An **object** of the same shape as ##tangent##. For each atom in ##flatten(tangent)##,
+--   the angle with smallest magnitude that has this atom as tangent is computed.
 --
 -- Comments:
 --   All atoms in the returned value lie between -PI/2 and PI/2, exclusive.
 --
 --   This function may be applied to an atom or to all elements of a sequence (of sequence (...)).
 --
---   ##arctan()## is faster than ##arcsin()## or ##arccos()##.
+--   ##arctan()## is faster than ##[[:arcsin]]()## or ##[[:arccos]]()##.
 --
 -- Example 1:
 --   <eucode>
@@ -509,16 +510,19 @@ end function
 --   Return the tangent of an angle, or a sequence of angles.
 --
 -- Parameters:
---		# ##angle##: an object, each atom of which will be converted, no matter how deeply nested.
+--   # ##angle##: an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object** of the same shape as ##angle##. Each atom in the flattened ##angle## is replaced by its tangent.
+--   An **object** of the same shape as ##angle##. Each atom in the flattened ##angle## is
+--   replaced by its tangent.
 --
 -- Errors:
---		If any atom in ##angle## is an odd multiple of PI/2, an error occurs, as its tangent would be infinite.
+--   If any atom in ##angle## is an odd multiple of PI/2, an error occurs, as its tangent
+--   would be infinite.
 --
 -- Comments:
---   This function may be applied to an atom or to all elements of a sequence of arbitrary shape, recursively.
+--   This function may be applied to an atom or to all elements of a sequence of arbitrary
+--   shape, recursively.
 --
 -- Example 1:
 --   <eucode>
@@ -563,15 +567,17 @@ end function
 -- Return the sine of an angle expressed in radians
 --
 -- Parameters:
---		# ##angle##: an object, each atom in which will be acted upon.
+--   # ##angle##: an object, each atom in which will be acted upon.
 --
 -- Returns:
---		An **object** the same shape as ##angle##. When ##angle## is an atom, the result is the sine of ##angle##.
+--   An **object** the same shape as ##angle##. When ##angle## is an atom, the
+--   result is the sine of ##angle##.
 --
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- The sine of an angle is an atom between -1 and 1 inclusive. 0.0 is hit by integer multiples of PI only.
+-- The sine of an angle is an atom between -1 and 1 inclusive. 0.0 is hit by integer
+-- multiples of PI only.
 --
 -- Example 1:
 -- <eucode>
@@ -586,13 +592,15 @@ end function
 -- Return an angle given its cosine.
 --
 -- Parameters:
---		# ##value##: an object, each atom in which will be acted upon.
+--   # ##value##: an object, each atom in which will be acted upon.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is an atom, an angle whose cosine is ##value##.
+--   An **object** the same shape as ##value##. When ##value## is an atom, the result is
+--   an atom, an angle whose cosine is ##value##.
 --
 -- Errors:
---		If any atom in ##value## is not in the -1..1 range, it cannot be the cosine of a real number, and an error occurs.
+--   If any atom in ##value## is not in the -1..1 range, it cannot be the cosine of a real
+--   number, and an error occurs.
 --
 -- Comments:
 --

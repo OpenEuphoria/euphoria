@@ -390,7 +390,7 @@ end procedure
 -- atom is zero or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
 
 public procedure test_true(sequence name, object outcome)
 	integer success
@@ -414,7 +414,7 @@ end procedure
 -- or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_pass]], [[:test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_false(sequence name, object outcome)
 	integer success

@@ -116,21 +116,22 @@ end function
 -- Fetch a value from the stack without removing it from the stack.
 --
 -- Parameters:
---		# ##sk##: the stack being queried
---		# ##idx##: an integer, the place to inspect. The default is 1 (top item).
+--   # ##sk##: the stack being queried
+--   # ##idx##: an integer, the place to inspect. The default is 1 (top item).
 --
 -- Returns:
---		An **object**, the ##idx##-th item of the stack.
+--   An **object**, the ##idx##-th item of the stack.
 --
 -- Errors:
--- If the supplied value of ##idx## does not correspond to an existing element, an error occurs.
+--   If the supplied value of ##idx## does not correspond to an existing element,
+--   an error occurs.
 --
 -- Comments:
--- * For ##FIFO## stacks (queues), the top item is the oldest item in the stack.
--- * For ##FILO## stacks, the top item is the newest item in the stack.
+--   * For ##FIFO## stacks (queues), the top item is the oldest item in the stack.
+--   * For ##FILO## stacks, the top item is the newest item in the stack.
 --
--- ##idx## can be less than 1, in which case it refers relative to the end item.
--- Thus, 0 stands for the end element.
+--   ##idx## can be less than 1, in which case it refers relative to the end item.
+--   Thus, 0 stands for the end element.
 --
 -- Example 1:
 -- <eucode>
@@ -720,7 +721,7 @@ end procedure
 -- Wipe out a stack.
 --
 -- Parameters:
--- 		# ##sk##: the stack to clear.
+--   # ##sk##: the stack to clear.
 --
 -- Side effect:
 --   The stack contents is emptied.
