@@ -45,4 +45,13 @@ test_equal("build_commandline #2", "abc \"def ghi\"", build_commandline({"abc", 
 cmd_parse({}, {}, { "eui", "bug", "-h" })
 test_pass("cmd_parse bug #2790825")
 
+-- Bug #2792895
+integer bug_help_called = 0
+procedure bug_help()
+	bug_help_called = 1
+end procedure
+
+cmd_parse({{"v", "verbose", "Verbose output", {}}}, routine_id("bug_help"), { "eui", "bug", "-h" })
+test_false("cmd_parse bug #2792895", bug_help_called)
+
 test_report()
