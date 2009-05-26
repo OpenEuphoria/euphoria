@@ -327,9 +327,13 @@ procedure write_makefile_full()
 	printf(fh, "CC     = %s" & HOSTNL, { settings[SETUP_CEXE] })
 	printf(fh, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
 	printf(fh, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
-	puts(fh, HOSTNL)
 
-	write_makefile_srcobj_list(fh)
+	if compiler_type = COMPILER_GCC and not (TDOS or TWINDOWS) then
+		printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
+	else
+		write_makefile_srcobj_list(fh)
+	end if
+
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
