@@ -1,5 +1,6 @@
-	-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+-- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
+
 --****
 -- == Command Line Handling
 --
@@ -11,7 +12,7 @@ include std/map.e as map
 include std/error.e
 
 --****
--- == Constants
+-- === Constants
 
 public constant
 	--** This option switch does not have a parameter. See [[:cmd_parse]]
@@ -435,7 +436,7 @@ end procedure
 
 
 --****
--- == Routines
+-- === Routines
 
 --****
 -- Signature:
