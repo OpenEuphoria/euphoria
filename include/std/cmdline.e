@@ -1,6 +1,3 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
-
 --****
 -- == Command Line Handling
 --
@@ -547,21 +544,23 @@ end procedure
 --        "Creates a file containing an analysis of the weather.",
 --        "The analysis includes temperature and rainfall data",
 --        "for the past week."
---       }
+--     }
+--
 -- show_help({
---      {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
---      {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},
---      desc)
+--     {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
+--     {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},
+--     desc)
 -- </eucode>
 -- Outputs:
---{{{
+-- {{{
 -- myfile.ex options:
--- -q, --silent      Suppresses any output to console
--- -r lines          Sets how many lines the console should display
+--   -q, --silent      Suppresses any output to console
+--   -r lines          Sets how many lines the console should display
+--
 -- Creates a file containing an analysis of the weather.
 -- The analysis includes temperature and rainfall data
 -- for the past week.
---}}}
+-- }}}
 --
 
 public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line())
