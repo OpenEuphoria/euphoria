@@ -57,4 +57,7 @@ test_false("cmd_parse bug #2792895", bug_help_called)
 cmd_parse( {{ 0, "html", "html output", { NO_PARAMETER }}}, -1, { "eui", "bug", "--html" })
 test_pass("cmd_parse bug #2792287")
 
+cmd_parse( {{ "i", 0, "include dir", { HAS_PARAMETER }}}, -1, { "eui", "eui", "-i", "/usr/euphoria", "bug.ex" })
+test_pass("cmd_parse bug #2789982")
+
 test_report()

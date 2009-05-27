@@ -574,7 +574,7 @@ function find_opt(sequence opts, sequence typ, object cmd_text)
 	object opt_param
 	integer param_found = 0
 	integer reversed = 0
-	
+
 	if length(cmd_text) >= 2 then
 		-- Strip off any enclosing quotes
 		if cmd_text[1] = '\'' or cmd_text[1] = '"' then
@@ -887,8 +887,8 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		idx += 1
 
 		cmd = cmds[idx]
-		if (opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1) or
-		(find(platform(), {3,4,5,6,7,8})  and length(cmd) > 2 and cmd[1] = '/') then
+
+		if opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1 then
 			map:put(parsed_opts, "extras", cmd, map:APPEND)
 			has_extra = 1
 			continue
