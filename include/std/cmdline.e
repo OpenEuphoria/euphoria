@@ -888,7 +888,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 		cmd = cmds[idx]
 
-		if opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1 then
+		if (opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1) or
+			(find(platform(), {3,4,5,6,7,8}) and length(cmd) > 2 and cmd[1] = '/')
+		then
 			map:put(parsed_opts, "extras", cmd, map:APPEND)
 			has_extra = 1
 			continue
