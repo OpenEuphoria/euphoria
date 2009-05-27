@@ -591,6 +591,7 @@ function find_opt(sequence opts, sequence typ, object cmd_text)
 			cmd_text = cmd_text[2 .. $]
 		end if
 	end if
+
 	if length(cmd_text) < 1 then
 		return {-1, "Empty command text"}
 	end if
@@ -621,12 +622,10 @@ function find_opt(sequence opts, sequence typ, object cmd_text)
 	end for
 
 	if param_found then
-		if typ[1] = SHORTNAME then
-			if find(lower(opt_param), {"1", "on", "yes", "y", "true", "ok", "+"}) then
-				opt_param = 1
-			elsif find(lower(opt_param), {"0", "off", "no", "n", "false", "-"}) then
-				opt_param = 0
-			end if
+		if find(lower(opt_param), {"1", "on", "yes", "y", "true", "ok", "+"}) then
+			opt_param = 1
+		elsif find(lower(opt_param), {"0", "off", "no", "n", "false", "-"}) then
+			opt_param = 0
 		end if
 	end if
 
@@ -650,11 +649,10 @@ function find_opt(sequence opts, sequence typ, object cmd_text)
 		if param_found then
 			return {i, opt_name, reversed, opt_param}
 		else
-			if typ[1] = SHORTNAME then
-				if find(HAS_PARAMETER, opts[i][OPTIONS]) = 0 then
-					return {i, opt_name, reversed, 1 }
-				end if
+			if find(HAS_PARAMETER, opts[i][OPTIONS]) = 0 then
+				return {i, opt_name, reversed, 1 }
 			end if
+
 			return {i, opt_name, reversed}
 		end if
 	end for
