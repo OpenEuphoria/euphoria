@@ -309,27 +309,27 @@ div.LEVELTOC div.toc_4 { padding-left: 60px; }
 
 h1 {
 	margin-top: 5px; margin-bottom: 0px; padding-top: 0px;
-	border-bottom: 3px solid #000000;
+	border-bottom: 0px solid #000000;
 }
 
 h2 {
 	margin-top: 5px; margin-bottom: 0px; padding-top: 0px;
-	border-bottom: 1px solid #000000;
+	border-bottom: 0px solid #000000;
 }
 
 h3 {
 	margin-top: 5px; margin-bottom: 0px; padding-top: 0px;
-	border-bottom: 2px solid #000000;
+	border-bottom: 0px solid #000000;
 }
 
 h4 {
-	margin-top: 5px; margin-bottom: 0px; padding-top: 0px;
-	border-bottom: 1px dashed #000000;
+	margin-top: 5px; margin-top 0px; padding-top: 0.5em;
+	border-top: 1px dashed #0088ff;
 }
 
 h5 {
 	margin-top: 20px; margin-bottom: 0px; padding-top: 0px;
-	border-bottom: 1px dotted #000000;
+	border-bottom: 0px dotted #000000;
 }
 
 h6 {
