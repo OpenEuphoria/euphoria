@@ -335,3 +335,7 @@ h5 {
 h6 {
 	margin-top: 5px; margin-bottom: 0px; padding-top: 0px;
 }
+
+tt {
+	font-size: 110%;
+}
