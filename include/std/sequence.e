@@ -39,7 +39,7 @@ public constant
 --		An **integer**, 1 if an addition (or any of the [[:Relational operators]]) are possible between ##a## and ##b##, else 0.
 --
 -- Example 1:
---   <eucode>
+-- <eucode>
 -- i = can_add({1,2,3},{4,5})
 -- -- i is 0
 --
