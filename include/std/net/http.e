@@ -17,6 +17,9 @@ include std/net/common.e
 include std/net/dns.e
 include std/text.e
 
+--****
+-- === Constants
+
 public constant
 	HTTP_HEADER_HTTPVERSION = 1,
 	HTTP_HEADER_GET = 2,
@@ -569,6 +572,9 @@ end function
 -- Works the same as [[:get_url]](), but maintains an internal
 -- state register based on cookies received.
 --
+-- Warning:
+--   This function is not yet implemented.
+--
 -- Parameters:
 --	 # ##inet_addr##: a sequence holding an address
 --	 # ##hostname##: a string, the name for the host
@@ -581,19 +587,20 @@ end function
 -- <eucode>
 -- addrinfo = getaddrinfo("www.yahoo.com","http",0)
 -- if atom(addrinfo) or length(addrinfo) < 1 or
---	  length(addrinfo[1]) < 5 then
---	  puts(1,"Uh, oh")
---	  return {}
+--     length(addrinfo[1]) < 5 then
+--     puts(1,"Uh, oh")
+--     return {}
 -- else
---	   inet_addr = addrinfo[1][5]
+--     inet_addr = addrinfo[1][5]
 -- end if
 -- data = get_http_use_cookie(inet_addr,"www.yahoo.com","")
 -- </eucode>
 --
 -- See also:
 --	 [[:get_url]]
-/*
+
 public function get_http_use_cookie(sequence inet_addr, sequence hostname, sequence file)
+/*
 	atom socket, success, last_data_len, cpos, offset
 	sequence header, header2, body, data, updata, hline
 	sequence cookielist, request, cookie
@@ -791,8 +798,9 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 	set_sendheader_default()
 
 	return {header,body}
-end function
 */
+	return -1
+end function
 
 --**
 -- Returns data from an http internet site. Other common protocols will be added in future versions.
