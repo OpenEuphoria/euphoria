@@ -176,6 +176,8 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 	end switch
 end function
 
+--****
+-- === Routines
 
 --**
 -- Convert a serialized object in to a standard Euphoria object.
@@ -442,7 +444,7 @@ end function
 -- # ##filename##, the name of the file to restore it from.
 --
 -- Returns:
--- An sequence. The first elemtn is the result code. If the result code is 0 
+-- A sequence. The first element is the result code. If the result code is 0
 -- then it means that the function failed, otherwise the restored data is in the 
 -- second element.
 -- 

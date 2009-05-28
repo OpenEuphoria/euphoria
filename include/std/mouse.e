@@ -57,7 +57,7 @@ constant M_GET_MOUSE = 14,
 -- been a mouse event since the last time ##get_mouse##() was called.
 -- Otherwise, returns a triple ##{event, x, y}##.
 --
--- Constants have been defined in mouse.e for the possible mouse events (the values for ##event##)::
+-- Constants have been defined in mouse.e for the possible mouse events (the values for ##event##):
 -- <eucode>
 -- public constant 
 --     MOVE = 1,
@@ -115,11 +115,10 @@ constant M_GET_MOUSE = 14,
 --
 -- Example 2:
 --   To test for LEFT_DOWN, write something like the following:
---   object event
 --
 -- <eucode>
 -- while 1 do
---     event = get_mouse()
+--     object event = get_mouse()
 --     if sequence(event) then
 --         if and_bits(event[1], LEFT_DOWN) then
 --             -- left button was pressed

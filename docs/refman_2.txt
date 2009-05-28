@@ -2674,7 +2674,8 @@ label "label strng"
 </eucode>
 
 Label names must be double quoted constant strings. Characters that would be illegal in an 
-Euphria identifier may appear in a label name, since it is a regular string.
+Euphoria identifier may appear in a label name, since it is a regular
+string.
 
 [[:Labelled headers -> "Header labels"]] do not count as possible goto targets.
 
