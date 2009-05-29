@@ -10,6 +10,7 @@ include c_out.e
 include error.e
 include global.e
 include platform.e
+include reswords.e
 
 --****
 -- = buildsys.e
@@ -250,6 +251,22 @@ procedure write_objlink_file()
 	end if
 
 	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
+
+	if compiler_type = COMPILER_WATCOM then
+		puts(fh, HOSTNL)
+
+		object s = SymTab[TopLevelSub][S_NEXT]
+		while s do
+			if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
+				if is_exported( s ) then
+					printf(fh, "EXPORT %s='__%d%s@%d'" & HOSTNL,
+						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
+							SymTab[s][S_NAME], SymTab[s][S_NUM_ARGS] * 4})
+				end if
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+	end if
 
 	close(fh)
 

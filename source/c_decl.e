@@ -974,7 +974,7 @@ end procedure
 
 --**
 -- returns 1 if symbol should be exported from dll/so
-function is_exported( symtab_index s )
+export function is_exported( symtab_index s )
 	sequence eentry = SymTab[s]
 	integer scope = eentry[S_SCOPE]
 	if eentry[S_MODE] = M_NORMAL then
