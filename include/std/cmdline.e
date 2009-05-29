@@ -7,6 +7,7 @@ include std/text.e
 include std/sequence.e
 include std/map.e as map
 include std/error.e
+include std/os.e
 
 --****
 -- === Constants
@@ -888,12 +889,20 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 		cmd = cmds[idx]
 
-		if (opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1) or
-			(find(platform(), {3,4,5,6,7,8}) and length(cmd) > 2 and cmd[1] = '/')
+		if (opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1) 
+			or
+			(
+			    find(platform(), {LINUX,OSX,SUNOS,OPENBSD,NETBSD,FREEBSD}) 
+			    and length(cmd) > 2 and cmd[1] = '/'
+			)
 		then
 			map:put(parsed_opts, "extras", cmd, map:APPEND)
 			has_extra = 1
-			continue
+			if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
+				exit
+			else
+				continue
+			end if
 		end if
 
 		if equal(cmd, "--") then
@@ -951,7 +960,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				end if
 				
 				if length(param) = 0 and (validation = VALIDATE_ALL or (
-					validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0))
+					validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
 				then
 					printf(1, "option '%s' must have a parameter\n\n", {find_result[2]})
 					local_help(opts, add_help_rid, cmds, 1)
@@ -978,7 +987,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		else
 			if find(MULTIPLE, opt[OPTIONS]) = 0 then
 				if map:has(parsed_opts, opt[MAPNAME]) and (validation = VALIDATE_ALL or
-					(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0))
+					(validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
 				then
 					printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
 					local_help(opts, add_help_rid, cmds, 1)
