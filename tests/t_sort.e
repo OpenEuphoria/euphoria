@@ -120,52 +120,52 @@ test_equal("sort_reverse() mixed",
                     sort(  {"ABa",3, "", 2.477, {-5}, {1,{2,3},4.5}}, DESCENDING)
           )
 
------  sort_user() ------
-function rsu(object a, object b, object c) -- asc/desc sort
-    if equal(c, 1) then
+function rsu(object a, object b, sequence c) -- asc/desc sort
+    if equal(c, "rev") then
          return -(compare(a, b))
     end if
     return compare(a, b)
 end function
-test_equal("sort_user() empty sequence",         
+integer rid_rsu = routine_id("rsu")
+test_equal("custom_sort() empty sequence",         
                     {}, 
-                    sort_user( routine_id("rsu"), {}, 1)
+                    custom_sort( rid_rsu, {}, {"rev"})
            )
-test_equal("sort_user() one item sequence",
+test_equal("custom_sort() one item sequence",
                     {9}, 
-                    sort_user( routine_id("rsu"), {9}, 1)
+                    custom_sort( rid_rsu, {9}, {"rev"})
           )
-test_equal("sort_user() integer sorted ",
+test_equal("custom_sort() integer sorted ",
                     {3,2,1}, 
-                    sort_user( routine_id("rsu"), {1,2,3}, 1)
+                    custom_sort( rid_rsu, {1,2,3}, {"rev"})
           )
-test_equal("sort_user() integer rev sorted ",
+test_equal("custom_sort() integer rev sorted ",
                     {3,2,1}, 
-                    sort_user( routine_id("rsu"), {3,2,1}, 1)
+                    custom_sort( rid_rsu, {3,2,1}, {"rev"})
            )
-test_equal("sort_user() integer dups ",
+test_equal("custom_sort() integer dups ",
                     {3,2,2,1,1},
-                    sort_user( routine_id("rsu"), {1,2,3,2,1}, 1)
+                    custom_sort( rid_rsu, {1,2,3,2,1}, {"rev"})
            )
-test_equal("sort_user() integer dups asc",
+test_equal("custom_sort() integer dups asc",
                     {1,1,2,2,3},
-                    sort_user( routine_id("rsu"), {1,2,3,2,1}, 0)
+                    custom_sort( rid_rsu, {1,2,3,2,1}, {"norm"})
            )
-test_equal("sort_user() integer sequence",
+test_equal("custom_sort() integer sequence",
                     {3,2,1},
-                    sort_user( routine_id("rsu"), {3,1,2}, 1)
+                    custom_sort( rid_rsu, {3,1,2}, {"rev"})
            )
-test_equal("sort_user() float sequence",
+test_equal("custom_sort() float sequence",
                     {6.5, 5.2, 5.1},
-                    sort_user( routine_id("rsu"), {5.1, 6.5, 5.2}, 1)
+                    custom_sort( rid_rsu, {5.1, 6.5, 5.2}, {"rev"})
           )
-test_equal("sort_user() string", 
+test_equal("custom_sort() string", 
                     "aBA", 
-                    sort_user( routine_id("rsu"), "BaA", 1)
+                    custom_sort( rid_rsu, "BaA", {"rev"})
           )
-test_equal("sort_user() mixed", 
+test_equal("custom_sort() mixed", 
                     {"ABa",  {1,{2,3}, 4.5}, {-5}, "", 3, 2.477},
-                    sort_user( routine_id("rsu"), {"ABa",3, "", 2.477, {-5}, {1,{2,3},4.5}}, 1)
+                    custom_sort( rid_rsu, {"ABa",3, "", 2.477, {-5}, {1,{2,3},4.5}}, {"rev"})
           )
 
 -----  sort_columns() ------

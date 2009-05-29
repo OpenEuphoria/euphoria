@@ -19,9 +19,16 @@ public constant
 	-- is the smallest as per the sort order and its last element is the
 	-- largest
 	ASCENDING = 1,
+	
+	--** The normal sort order used by the custom comparison routine.
+	NORMAL_ORDER = ASCENDING,
+	
 	--**
 	-- descending sort order, which is the reverse of ##ASCENDING##.
-	DESCENDING = -1
+	DESCENDING = -1,
+	
+	--** Reverses the sense of the order returned by a custom comparison routine.
+	REVERSE_ORDER = DESCENDING
 
 include std/text.e -- upper/lower
 
@@ -106,42 +113,42 @@ end function
 -- Parameters:
 --		# ##custom_compare##: an integer, the routine-id of the user defined routine that compares two items which appear in the sequence to sort.
 --		# ##x##: the sequence of items to be sorted.
---		# ##data##: an object, either {} (no custom data, the default), an atom or a sequence of length at least 1.
---		# ##order##: an integer, either ##ASCENDING## (the default) or ##DESCENDING##.
+--		# ##data##: an object, either {} (no custom data, the default), an atom or a non-empty sequence.
+--		# ##order##: an integer, either ##NORMAL_ORDER## (the default) or ##REVERSE_ORDER##.
 --
 -- Returns:
 --     A **sequence**, a copy of the original sequence in sorted order
 --
 -- Errors:
 -- If the user defined routine does not return according to the specifications in the 
--- Comments: section below, an error will occur.
+-- //Comments// section below, an error will occur.
 --
 -- Comments:
--- * Any ##order## value of zero or greater will do an ascending sort, and any value
---  less than zero will do a descending sort.
--- * If some custom data s being provided, it must be either an atom or the first element of a 
--- sequence, in which case the remainder of the sequence is ignored. It is not used or 
--- inspected it in any way other than passing it to the user defined routine and storing it if updated.
+-- * If some user data is being provided, that data must be either an atom or 
+-- a sequence with at least one element. **NOTE** only the first element is passed
+-- to the user defined comparison routine, any other elements are just ignored. 
+-- The user data is not used or inspected it in any way other than passing it
+-- to the user defined routine.
 --
--- * Basically (however, see below), the user defined routine is passed two
---  objects, A and B, and is expected to return a //comparison result//:
+-- * The user defined routine must return an integer //comparison result//
 -- ** a **negative** value if object A must appear before object B
 -- ** a **positive** value if object B must appear before object A
 -- ** 0 if the order does not matter
 -- >
--- *NOTE:** The meaning of the value returned by the user-defined routine is reversed 
--- when ##order = DESCENDING##, so that sorting is in descending order.
--- The default is ##order = ASCENDING##, which sorts in ascending order.
---
+-- **NOTE:** The meaning of the value returned by the user-defined routine is reversed 
+-- when ##order = REVERSE_ORDER##.
+-- The default is ##order = NORMAL_ORDER##, which sorts in order returned by the 
+-- custom comparison routine.
+--<
 -- * When no user data is provided, the user defined routine must accept two
---  objects (A and B) and return a //comparison result//. This is the default case.
+--  objects (A, B) and return just the //comparison result//.
 --
--- * When some user data is provided,
--- the user defined routine must take three objects (A, B and data). It should return either
--- an atom or a sequence of length 2 at least:
--- ** if an integer, it is a //comparison result//;
--- ** if a sequence, the second element is the new value for user data, and the first element 
--- is a //comparison result//.
+-- * When some user data is provided, the user defined routine must take three
+-- objects (A, B , data). It must return either...
+-- ** an integer, which is a //comparison result//
+-- ** a two-element sequence, in which the first element is a //comparison result//
+-- and the second element is the updated user data that is to be used for the next call 
+-- to the user defined routine.
 --
 -- * The elements of ##x## can be atoms or sequences. Each time that the
 -- sort needs to compare two items in the sequence, it calls
@@ -160,6 +167,7 @@ end function
 --                      {"Ian",19}}
 -- sequence sorted_byage
 -- function byage(object a, object b)
+--  ----- If the ages are the same, compare the names othrewise just compare ages.
 --     if equal(a[2], b[2]) then
 --         return compare(upper(a[1]), upper(b[1]))
 --     end if
@@ -172,13 +180,76 @@ end function
 -- --            {"Ian",19},   {"George",20},
 -- --            {"Heidi",20}, {"Bob",21},
 -- --            {"Diane",23}}
+--
+-- sorted_byage = custom_sort( routine_id("byage"), students,, REVERSE_ORDER )
+-- -- result is {{"Diane",23}, {"Bob",21},
+-- --            {"Heidi",20}, {"George",20},
+-- --            {"Ian",19},   {"Anne",18},
+-- --            {"Eddy",17},  {"Freya",16},
+-- --            {"Chris",16}}
+-- --
 -- </eucode>
 --
+-- Example 2:
+-- <eucode>
+-- constant students = {{"Anne","Baxter",18}, {"Bob","Palmer",21},
+--                      {"Chris","du Pont",16},{"Diane","Fry",23},
+--                      {"Eddy","Ammon",17},{"Freya","Brash",16},
+--                      {"George","Gungle",20},{"Heidi","Smith",20},
+--                      {"Ian","Sidebottom",19}}
+-- sequence sorted
+-- function colsort(object a, object b, sequence cols)
+--     integer sign
+--     for i = 1 to length(cols) do
+--         if cols[i] < 0 then
+--             sign = -1
+--             cols[i] = -cols[i]
+--         else
+--             sign = 1
+--         end if
+--         if not equal(a[cols[i]], b[cols[i]]) then
+--             return sign * compare(upper(a[cols[i]]), upper(b[cols[i]]))
+--         end if
+--     end for
+--
+--     return 0
+-- end function
+--
+-- -- Order is age:descending, Surname, Given Name
+-- sequence column_order = {-3,2,1}
+-- sorted = custom_sort( routine_id("colsort"), students, {column_order} )
+-- -- result is 
+-- {
+--     {"Diane","Fry",23},
+--     {"Bob","Palmer",21},
+--     {"George","Gungle",20},
+--     {"Heidi","Smith",20},
+--     {"Ian","Sidebottom",19},
+--     {"Anne", "Baxter", 18 },
+--     {"Eddy","Ammon",17},
+--     {"Freya","Brash",16},
+--     {"Chris","du Pont",16}
+-- }
+--
+-- sorted = custom_sort( routine_id("colsort"), students, {column_order}, REVERSE_ORDER )
+-- -- result is 
+-- {
+--     {"Chris","du Pont",16},
+--     {"Freya","Brash",16},
+--     {"Eddy","Ammon",17},
+--     {"Anne", "Baxter", 18 },
+--     {"Ian","Sidebottom",19},
+--     {"Heidi","Smith",20},
+--     {"George","Gungle",20},
+--     {"Bob","Palmer",21},
+--     {"Diane","Fry",23}
+-- }
+-- </eucode>
 -- See Also:
 --   [[:compare]], [[:sort]], [[:sort_user]]
 
-public function custom_sort(integer custom_compare, sequence x, object data = {}, integer order = ASCENDING)
-	integer gap, j, first, last, comp
+public function custom_sort(integer custom_compare, sequence x, object data = {}, integer order = NORMAL_ORDER)
+	integer gap, j, first, last
 	object tempi, tempj, result
 	sequence args = {0, 0}
 
@@ -208,11 +279,9 @@ public function custom_sort(integer custom_compare, sequence x, object data = {}
 				result = call_func(custom_compare, args)
 				if sequence(result) then
 					args[3] = result[2]
-					comp = eu:compare(result[1], 0)
-				else
-					comp = eu:compare(result, 0)
+					result = result[1]
 				end if
-				if comp != order then
+				if eu:compare(result, 0) != order then
 					j += gap
 					exit
 				end if
@@ -232,85 +301,6 @@ public function custom_sort(integer custom_compare, sequence x, object data = {}
 	end while
 end function
 
---**
--- Sort the elements of a sequence according to a user-defined order.
---
--- Parameters:
---   # ##custom_compare##: an integer, the routine-id of the user defined routine that compares
---     two items in the sequence being sorted.
---   # ##x##: the sequence of items to be sorted.
---   # ##user_data##: an object, anything that is needed by the user defined routine. (defaults to 0)
---	# ##order##: either ##ASCENDING## (the default) or ##DESCENDING##.
---
--- Returns:
---   A **sequence**, a copy of the original sequence in sorted order
---
--- Comments:
---
--- The elements can be atoms or sequences. Each time that the sort needs to compare two
--- items in the sequence, it calls the user-defined function to determine the order.
---
---   The user defined routine must accept three objects (A, B and ##state##) and return
---   an integer. It returns -1 if object A must appear before object B,
---   1 if object B must appear before object A, and 0 if the order
---   does not matter.
---
---   This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
---   change position relative to each other. Actually, this call is equivalent to calling
--- [[:custom_sort]]() with a little twist on ##data##.
---
--- The state  which the user routine is passed on each call is not inspected or used by the routine. It is meant to be used by the user routine in any useful way.
---
--- Example 1:
--- <eucode>
--- constant students = {{"Anne","Baxter",18}, {"Bob","Palmer",21},
---                      {"Chris","du Pont",16},{"Diane","Fry",23},
---                      {"Eddy","Ammon",17},{"Freya","Brash",16},
---                      {"George","Gungle",20},{"Heidi","Smith",20},
---                      {"Ian","Sidebottom",19}}
--- sequence sorted
--- function colsort(object a, object b, object cols)
---     integer sign
---     for i = 1 to length(cols) do
---         if cols[i] < 0 then
---             sign = -1
---             cols[i] = -cols[i]
---         else
---             sign = 1
---         end if
---         if not equal(a[cols[i]], b[cols[i]]) then
---             return sign * compare(upper(a[cols[i]]), upper(b[cols[i]]))
---         end if
---     end for
---
---     return 0
--- end function
---
--- -- Order is age:descending, Surname, Given Name
--- -- sorted = sort_user( routine_id("colsort"), students, {-3,2,1} )
--- -- result is 
--- {
---     {"Diane","Fry",23},
---     {"Bob","Palmer",21},
---     {"George","Gungle",20},
---     {"Heidi","Smith",20},
---     {"Ian","Sidebottom",19},
---     {"Anne", "Baxter", 18 },
---     {"Eddy","Ammon",17},
---     {"Freya","Brash",16},
---     {"Chris","du Pont",16}
--- }
--- </eucode>
---
--- See Also:
---	 [[:compare]], [[:sort]], [[:sort_user]]
-
-public function sort_user(integer custom_compare, sequence x, object user_data=0, integer order = ASCENDING)
-	if sequence(user_data) then
-		user_data = {user_data}
-	end if
-	return custom_sort(custom_compare, x, user_data, order)
-end function
 
 function column_compare(object a, object b, object cols)
 -- Local function used by sort_columns()
