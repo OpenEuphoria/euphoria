@@ -18,6 +18,8 @@ include std/localeconv.e as lcc
 include std/lcid.e as lcid
 include std/convert.e
 include std/filesys.e
+include std/mathcons.e
+include std/search.e
 
 ------------------------------------------------------------------------------------------
 --
@@ -248,7 +250,8 @@ end function
 -- 		# ##word##: a sequence, the word to translate.
 --      # ##langmap##: Either a value returned by [[:lang_load]]() or zero to use the default language map
 -- 		# ##defval##: a object. The value to return if the word cannot be translated.
---                              Default is "".
+--                              Default is "". If ##defval## is ##PINF## then the ##word## is returned
+--                              if it can't be translated.
 --      # ##mode##: an integer. If zero (the default) it uses ##word## as the keyword and returns
 --                              the translation text. If not zero it uses ##word##
 --                              as the translation and returns the keyword.
@@ -257,18 +260,38 @@ end function
 --		A **sequence**, the value associated with ##word##, or ##defval## if there
 --      is no association.
 --
+-- Example #1:
+-- <eucode>
+-- sequence newword
+-- newword = translate(msgtext)
+-- if length(msgtext) = 0 then
+--    error_message(msgtext)
+-- else
+--    error_message(newword)
+-- end if
+-- </eucode>
+-- Example #2:
+-- <eucode>
+-- error_message(translate(msgtext, , PINF))
+-- </eucode>
 -- See Also:
 -- 		[[:set]], [[:lang_load]]
 
 public function translate(sequence word, object langmap = 0, object defval="", integer mode = 0)
+	if equal(defval, PINF) then
+		defval = word
+	end if
+	
 	if equal(langmap, 0) then
 		if equal(def_lang, 0) then
+			-- No default language map loaded yet.
 			return defval
 		else
 			langmap = def_lang
 		end if
 	end if
 	if atom(langmap) or length(langmap) != 2 then
+		-- Not a valid language map passed.
 		return defval
 	end if
 	
@@ -279,6 +302,56 @@ public function translate(sequence word, object langmap = 0, object defval="", i
 	end if
 
 end function
+
+--**
+-- Returns a formatted string with automatic translation performed on the parameters.
+--
+-- Parameters:
+-- # ##fmt##: A sequence. Contains the formatting string. see [[:printf]]() for details.
+-- # ##data##: A sequence. Contains the data that goes into the formatted result. see [[:printf]] for details.
+-- # ##langmap##: An object. Either 0 (the default) to use the default language maps, or
+--                the result returned from [[:lang_load]]() to specify a particular
+--                language map.
+--
+-- Returns:
+-- A sequence. The formatted result.
+--
+-- Comments:
+-- This works very much like the [[:sprintf]]() function. The difference is that the ##fmt## sequence
+-- and sequences contained in the ##data## parameter are [[:translate | translated ]] before 
+-- passing them to [[:sprintf]]. If an item has no translation, it remains unchanged.
+--
+-- Further more, after the translation pass, if the result text begins with "__", the "__" is removed. 
+-- This method can be used when you do not want an item to be translated.
+--
+-- Examples:
+-- <eucode>
+-- -- Assuming a language has been loaded and
+-- --   "greeting" translates as '%s %s, %s'
+-- --   "hello"  translates as "G'day"
+-- --   "how are you today" translates as "How's the family?"
+-- sequence UserName = "Bob"
+-- sequence result = trsprintf( "greeting", {"hello", "__" & UserName, "how are you today"})
+--    --> "G'day Bob, How's the family?"
+-- </eucode>
+-- 
+public function trsprintf(sequence fmt, sequence data, object langmap = 0)
+	for i = 1 to length(data) do
+		if sequence(data[i]) then
+			data[i] = translate(data[i], langmap, PINF)
+			if begins("__", data[i]) then
+				data[i] = data[i][3 .. $]
+			end if
+		end if
+	end for
+	fmt = translate(fmt, langmap, PINF)
+	if begins("__", fmt) then
+		fmt = fmt[3 .. $]
+	end if
+
+	return sprintf(fmt, data)	
+end function
+
 
 ------------------------------------------------------------------------------------------
 --

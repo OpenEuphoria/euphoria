@@ -6,6 +6,7 @@ include std/datetime.e as d
 end ifdef
 
 include std/unittest.e
+include std/mathcons.e
 
 ifdef not DOS32 then
 sequence locale
@@ -88,9 +89,14 @@ test_equal("translate() sprintf() #2", "Hola, Mundo!",
     
 test_equal("translate() #7", -1, l:translate("g'day",, -1))
 test_equal("translate() #8", "", l:translate("g'day"))
+test_equal("translate() #8a", "g'day", l:translate("g'day",, PINF))
 
 test_equal("translate() #9", "This is an example of some \n  translation text that spans \n   multiple lines.", l:translate("help text"))
 
+
+
+test_equal("trsprintf #1", "Hola, Bob!",  trsprintf("greeting", {       "hello", "Bob"}))
+test_equal("trsprintf #2", "hello, Bob!", trsprintf("greeting", {"__" & "hello", "Bob"}))
 
 
 end ifdef
