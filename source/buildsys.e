@@ -252,7 +252,7 @@ procedure write_objlink_file()
 
 	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
 
-	if compiler_type = COMPILER_WATCOM then
+	if compiler_type = COMPILER_WATCOM and dll_option then
 		puts(fh, HOSTNL)
 
 		object s = SymTab[TopLevelSub][S_NEXT]
