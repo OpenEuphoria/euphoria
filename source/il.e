@@ -12,6 +12,8 @@ include std/text.e
 include std/filesys.e
 include std/io.e
 include euphoria/info.e
+include std/cmdline.e
+include std/map.e as m
 include common.e
 include compress.e
 include backend.e
@@ -22,6 +24,21 @@ include mode.e
 include global.e
 include pathopen.e
 include error.e
+
+constant OPTIONS = {
+{ "SHROUD_ONLY", 0, "", { NO_CASE, NO_PARAMETER }  },
+{ "QUIET", 0, "", { NO_CASE, NO_PARAMETER }  },
+{ "LIST", 0, "", { NO_CASE, NO_PARAMETER }  },
+{ "W32", 0, "", { NO_CASE, NO_PARAMETER }  },
+{ "ICON", 0, "", { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "CON", 0, "", { NO_CASE, NO_PARAMETER }  },
+{ "FULL_DEBUG", 0, "", { NO_CASE, NO_PARAMETER }  },
+{ "OUT", 0, "", { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "I", 0, "", { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
+{ "C", 0, "", { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "COPYRIGHT", 0, "", { NO_CASE, NO_PARAMETER }  }
+}
+
 
 -- options for BIND - see also w32 in emit.e
 integer list, quiet, full_debug, con
@@ -244,88 +261,68 @@ ______________usage 1:  bind[w|u] [-full_debug] [-con] [-list] [-quiet]
 
 end procedure
 
-function extract_options(sequence cl)
--- process the command line for any options 
-	sequence option
-	integer op
-
-	cl &= GetDefaultArgs()
-	
-	op = 3
-	while op <= length(cl) do
-		option = upper(cl[op])
-		
-		if length(option) > 1 and option[1] = '-' then
-			option = option[2..$]
-			
-			if equal("SHROUD_ONLY", option) then
-				shroud_only = TRUE
-				cl = cl[1..op-1] & cl[op+1..$]
-			
-			elsif equal("QUIET", option) then
-				quiet = TRUE
-				cl = cl[1..op-1] & cl[op+1..$]
-			
-			elsif equal("LIST", option) then
-				list = TRUE
-				cl = cl[1..op-1] & cl[op+1..$]
-			
-			elsif equal("W32", option) then
-				w32 = TRUE
-				cl = cl[1..op-1] & cl[op+1..$]
-			
-			elsif equal("ICON", option) and op < length(cl) then
-				icon = cl[op+1]
-				cl = cl[1..op-1] & cl[op+2..$]
-			
-			elsif equal("CON", option) then
-				con = TRUE
-				cl = cl[1..op-1] & cl[op+1..$]
-				
-			elsif equal("FULL_DEBUG", option) then
-				full_debug = TRUE
-				cl = cl[1..op-1] & cl[op+1..$]
-			
-			elsif equal("OUT", option) and op < length(cl) then
-				user_out = cl[op+1]
-				cl = cl[1..op-1] & cl[op+2..$]
-			
-			elsif equal("I", option) and op < length(cl) then
-				add_switch( "-i", 0 )
-				add_switch( cl[op+1], 0 )
-				add_include_directory( cl[op+1] )
-				cl = cl[1..op-1] & cl[op+2..$]
-				
-			elsif equal("C", option ) and op < length(cl) then
-				add_switch( "-c", 0 )
-				add_switch( cl[op+1], 0 )
-				cl = cl[1..op-1] & load_euinc_conf( cl[op+1] ) & cl[op+2..$]
-				
-			elsif equal("HELP", option )
-			   or equal("?", option )
-			then
-				usage()
-				cl = cl[1..op-1] & cl[op+2..$]
-				
-			elsif equal("COPYRIGHT", option ) then
-				copyrights()
-				cl = cl[1..op-1] & cl[op+2..$]
-				
-			else
-				fatal("Invalid option: " & cl[op])
-			end if
-		else
-			op += 1
-		end if
-	end while
-	if length(cl) < 3 then
-		usage()
-		abort(0)
-	end if
-	
+function extract_options( sequence cl )
+	m:map opts = cmd_parse(OPTIONS,,cl)
+	handle_options_for_bind( opts )
+	finalize_command_line( opts )
 	return cl
 end function
-set_extract_options( routine_id("extract_options") )
+
+export procedure handle_options_for_bind( m:map opts )
+-- process the command line for any options 
+	sequence option, opt_keys
+	integer op
+
+	opt_keys = m:keys(opts)
+	op = 1
+	while op <= length(opt_keys) do
+		option = opt_keys[op]
+		object val = m:get(opts, option)
+		option = upper(option)
+		
+		
+		if equal("SHROUD_ONLY", option) then
+			shroud_only = TRUE
+		
+		elsif equal("QUIET", option) then
+			quiet = TRUE
+		
+		elsif equal("LIST", option) then
+			list = TRUE
+		
+		elsif equal("W32", option) then
+			w32 = TRUE
+		
+		elsif equal("ICON", option) then				
+			icon = val
+		
+		elsif equal("CON", option) then
+			con = TRUE
+			
+		elsif equal("FULL_DEBUG", option) then
+			full_debug = TRUE
+		
+		elsif equal("OUT", option) then
+			user_out = val
+		
+		elsif equal("I", option)  then
+			for j = 1 to length(val) do
+				add_include_directory( val[j] )
+			end for
+			
+		elsif equal("HELP", option )
+		   or equal("?", option )
+		then
+			usage()						
+		elsif equal("COPYRIGHT", option ) then
+			copyrights()			
+		elsif not equal("EXTRAS", option ) then
+			fatal("Invalid option: " & option)
+		end if
+		op += 1
+	end while
+	
+end procedure
 
 integer check_place -- place where size and checksum are stored
 
@@ -582,3 +579,5 @@ procedure OutputIL()
 	end if
 end procedure
 set_output_il( routine_id("OutputIL") )
+set_extract_options( routine_id("extract_options") )
+

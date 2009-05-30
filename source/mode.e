@@ -15,7 +15,12 @@ integer backend
 integer check_platform_rid = -1
 integer target_plat = platform()
 
-export procedure set_mode( sequence mode, integer extra_check )
+type valid_mode( sequence mode )
+	return find(mode, {"interpret","translate","bind","backend"})
+end type
+
+
+export procedure set_mode( valid_mode mode, integer extra_check )
 	interpret = equal( mode, "interpret" )
 	translate = equal( mode, "translate" )
 	bind      = equal( mode, "bind" )
