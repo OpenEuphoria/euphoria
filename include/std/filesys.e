@@ -162,7 +162,7 @@ public enum
 	D_SECOND
 
 --**
--- Bad path error code
+-- Bad path error code. See [[:walk_dir]]
 
 public constant W_BAD_PATH = -1 -- error code
 
@@ -252,7 +252,7 @@ public constant W_BAD_PATH = -1 -- error code
 -- </eucode>
 --
 -- See Also:
---   ##bin\search.ex##
+--   [[:walk_dir]]
 --
 
 public function dir(sequence name)
@@ -381,20 +381,24 @@ function default_dir(sequence path)
 end function
 
 -- override the dir sorting function with your own routine id
-constant DEFAULT = -2
+constant DEFAULT_DIR_SOURCE = -2
 
 -- it's better not to use routine_id() here,
 -- or else users will have to bind with clear routine names
-public integer my_dir = DEFAULT
+
+public integer my_dir = DEFAULT_DIR_SOURCE  -- Deprecated, so therefore not documented.
 
 --**
 -- Generalized Directory Walker
 --
 -- Parameters:
--- 		# ##path_name##: a sequence, the name of the directory to walk through
--- 		# ##your_function##: an integer, either ##my_dir## or the routine id of a callback 
--- 		  Euphoria function
--- 		# ##scan_subdirs##: an integer, 1 to also walk though subfolders, 0 to skip them all.
+-- 	# ##path_name##: a sequence, the name of the directory to walk through
+-- 	# ##your_function##: the routine id of a function that will receive each path
+--                       returned from the result of ##dir_source##, one at a time.
+-- 	# ##scan_subdirs##: an optional integer, 1 to also walk though subfolders, 0 (the default) to skip them all.
+--  # ##dir_source##: an optional integer. A routine_id of a user-defined routine that 
+--                    returns the list of paths to pass to ##your_function##. If omitted,
+--                    the [[:dir]]() function is used.   
 --
 -- Returns:
 -- An **object**:
@@ -407,7 +411,7 @@ public integer my_dir = DEFAULT
 -- This routine will "walk" through a directory named ##path_name##. For each entry in the 
 -- directory, it will call a function, whose routine_id is ##your_function##.
 -- If ##scan_subdirs## is non-zero (TRUE), then the subdirectories in
--- st will be walked through recursively in the very same way.
+-- ##path_name## will be walked through recursively in the very same way.
 --
 -- The routine that you supply should accept two sequences, the path name and dir() entry for 
 -- each file and subdirectory. It should return 0 to keep going, or non-zero to stop 
@@ -417,40 +421,77 @@ public integer my_dir = DEFAULT
 -- while walk_dir() handles the process of walking through all the files and subdirectories.
 --
 -- By default, the files and subdirectories will be visited in alphabetical order. To use 
--- a different order, set the public integer ##my_dir## to the routine id of your own modified
--- [[:dir]] function that sorts the directory entries differently. See the default ##dir()##
--- function in filesys.e.
+-- a different order, use the ##dir_source## to pass the routine_id of your own modified
+-- [[:dir]] function that sorts the directory entries differently.
 --
 -- The path that you supply to ##walk_dir()## must not contain wildcards (* or ?). Only a 
 -- single directory (and its subdirectories) can be searched at one time.
+--
+-- For non-unix systems, any '/' characters in ##path_name## are replaced with '\'.
+--
+-- All trailing slash and whitespace characters are removed from ##path_name##.
 --
 -- Example 1:
 -- <eucode>
 -- function look_at(sequence path_name, sequence item)
 -- -- this function accepts two sequences as arguments
---     printf(STDOUT, "%s\\%s: %d\n",
---            {path_name, item[D_NAME], item[D_SIZE]})
+-- -- it displays all C/C++ source files and their sizes
+--     if find('d', item[D_ATTRIBUTES]) then
+--         return 0 -- Ignore directories
+--     end if
+--     if not find(fileext(item[D_NAME]), {"c,h,cpp,hpp,cp"}) then
+--         return 0 -- ignore non-C/C++ files
+--     end if
+--     printf(STDOUT, "%s%s%s: %d\n",
+--            {path_name, SLASH, item[D_NAME], item[D_SIZE]})
 --     return 0 -- keep going
 -- end function
 --
--- exit_code = walk_dir("C:\\MYFILES", routine_id("look_at"), TRUE)
+-- function mysort(sequence path)
+-- 	object d
+-- 	
+-- 	d = dir(path)
+-- 	if atom(d) then
+-- 		return d
+-- 	end if
+-- 	-- Sort in descending file size.
+--  return sort_columns(d, {-D_SIZE})
+-- end function
+--
+-- exit_code = walk_dir("C:\\MYFILES\\", routine_id("look_at"), TRUE, routine_id("mysort"))
 -- </eucode>
 --
 -- See Also:
---   ##bin\search.ex##
+--   [[:dir]], [[:sort]], [[:sort_columns]]
 
-public function walk_dir(sequence path_name, object your_function, integer scan_subdirs)
+public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = -1)
 	object d, abort_now
 	object orig_func
-	object user_data
+	sequence user_data = {path_name, 0}
+	object source_orig_func
+	object source_user_data
 	
 	orig_func = your_function
 	if sequence(your_function) then
-		user_data = your_function[2]
+		user_data = append(user_data, your_function[2])
 		your_function = your_function[1]
 	end if
+	
+	source_orig_func = dir_source
+	if sequence(dir_source) then
+		source_user_data = dir_source[2]
+		dir_source = dir_source[1]
+	end if
+
 	-- get the full directory information
-	if my_dir = DEFAULT then
+	if not equal(dir_source, -1) then
+		if atom(source_orig_func) then
+			d = call_func(dir_source, {path_name})
+		else
+			d = call_func(dir_source, {path_name, source_user_data})
+		end if
+		
+	elsif my_dir = DEFAULT_DIR_SOURCE then
 		d = default_dir(path_name)
 	else
 		d = call_func(my_dir, {path_name})
@@ -459,49 +500,41 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 		return W_BAD_PATH
 	end if
 	
-	-- trim any trailing blanks or '\' characters from the path
-	while length(path_name) > 0 and 
-		  eu:find(path_name[$], {' ', SLASH}) do
-		path_name = path_name[1..$-1]
-	end while
+	-- trim any trailing blanks or '\' '/' characters from the path
+	ifdef not UNIX then
+		path_name = replace_all(path_name, '/', '\\')
+	end ifdef
+	path_name = trim_tail(path_name, {' ', SLASH, '\n'})
+	user_data[1] = path_name
 	
 	for i = 1 to length(d) do
+		if eu:find(d[i][D_NAME], {".", ".."}) then
+			continue
+		end if
+		
+		user_data[2] = d[i]
+		abort_now = call_func(your_function, user_data)
+		if not equal(abort_now, 0) then
+			return abort_now
+		end if
+		
 		if eu:find('d', d[i][D_ATTRIBUTES]) then
 			-- a directory
-			if not eu:find(d[i][D_NAME], {".", ".."}) then
-				if atom(orig_func) then
-					abort_now = call_func(your_function, {path_name, d[i]})
-				else
-					abort_now = call_func(your_function, {path_name, d[i], user_data})
-				end if
-				if not equal(abort_now, 0) then
+			if scan_subdirs then
+				abort_now = walk_dir(path_name & SLASH & d[i][D_NAME],
+									 orig_func, scan_subdirs, source_orig_func)
+				
+				if not equal(abort_now, 0) and 
+				   not equal(abort_now, W_BAD_PATH) then
+					-- allow BAD PATH, user might delete a file or directory 
 					return abort_now
 				end if
-				if scan_subdirs then
-					abort_now = walk_dir(path_name & SLASH & d[i][D_NAME],
-										 orig_func, scan_subdirs)
-					
-					if not equal(abort_now, 0) and 
-					   not equal(abort_now, W_BAD_PATH) then
-						-- allow BAD PATH, user might delete a file or directory 
-						return abort_now
-					end if
-				end if
-			end if
-		else
-			-- a file
-			if atom(orig_func) then
-				abort_now = call_func(your_function, {path_name, d[i]})
-			else
-				abort_now = call_func(your_function, {path_name, d[i], user_data})
-			end if
-			if not equal(abort_now, 0) then
-				return abort_now
 			end if
 		end if
 	end for
 	return 0
 end function
+
 
 --**
 -- Create a new directory.
