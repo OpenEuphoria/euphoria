@@ -112,96 +112,167 @@ public function sprint(object x)
 end function
 
 --**
--- Trim any item in a supplied list, starting from the head (start) of a sequence.
+-- Trim all items in the supplied set from the leftmost (start or head) of a sequence.
 --
 -- Parameters:
---   # ##source##: the string to trim.
---   # ##what##: the list of items to trim (defaults to " \t\r\n").
+--   # ##source##: the sequence to trim.
+--   # ##what##: the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##ret_index##: If zero (the default) returns the trimmed sequence, otherwise
+--                    it returns the index of the leftmost item **not** in ##what##.
 --
 -- Returns:
---
---   A **sequence**, the trimmed version of ##source##.
+--   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
+--   A **integer**, if ##ret_index## is not zero, which is index of the leftmost 
+--                  element in ##source## that is not in ##what##.
 --
 -- Example 1:
 -- <eucode>
+-- object s
 -- s = trim_head("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "Sentence read from a file\r\n"
+-- s = trim_head("\r\nSentence read from a file\r\n", "\r\n", TRUE)
+-- -- s is 3
 -- </eucode>
+--
 --
 -- See Also:
 --   [[:trim_tail]], [[:trim]], [[:pad_head]]
 
-public function trim_head(sequence source, object what=" \t\r\n")
+public function trim_head(sequence source, object what=" \t\r\n", integer ret_index = 0)
+	integer lpos
 	if atom(what) then
 		what = {what}
 	end if
 
-	for i = 1 to length(source) do
-		if find(source[i], what) = 0 then
-			return source[i..$]
+	lpos = 1
+	while lpos <= length(source) do
+		if not find(source[lpos], what) then
+			exit
 		end if
-	end for
-
-	return ""
+		lpos += 1
+	end while
+		
+	if ret_index then
+		return lpos
+	else
+		return source[lpos .. $]
+	end if
 end function
 
 --**
--- Trim any item in a supplied list from the end (tail) of a sequence.
+-- Trim all items in the supplied set from the rightmost (end or tail) of a sequence.
 --
 -- Parameters:
---   # ##source##: the string to trim.
---   # ##what##: the list of what to trim (defaults to " \t\r\n").
+--   # ##source##: the sequence to trim.
+--   # ##what##: the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##ret_index##: If zero (the default) returns the trimmed sequence, otherwise
+--                    it returns the index of the rightmost item **not** in ##what##.
 --
 -- Returns:
---
---   A **sequence**, the trimmed version of ##source##
+--   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
+--   A **integer**, if ##ret_index## is not zero, which is index of the rightmost 
+--                  element in ##source## that is not in ##what##.
 --
 -- Example 1:
 -- <eucode>
+-- object s
 -- s = trim_tail("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "\r\nSentence read from a file"
+-- s = trim_tail("\r\nSentence read from a file\r\n", "\r\n", TRUE)
+-- -- s is 27
 -- </eucode>
 --
 -- See Also:
 --   [[:trim_head]], [[:trim]], [[:pad_tail]]
 
-public function trim_tail(sequence source, object what=" \t\r\n")
+public function trim_tail(sequence source, object what=" \t\r\n", integer ret_index = 0)
+	integer rpos
+	
 	if atom(what) then
 		what = {what}
 	end if
 
-	for i = length(source) to 1 by -1 do
-		if find(source[i], what) = 0 then
-			return source[1..i]
+	rpos = length(source)
+	while rpos > 0 do
+		if not find(source[rpos], what) then
+			exit
 		end if
-	end for
-
-	return ""
+		rpos -= 1
+	end while
+		
+	if ret_index then
+		return rpos
+	else
+		return source[1..rpos]
+	end if
 end function
 
 --**
--- Trim any item in a supplied list from both the head (start) and tail (end) of a sequence.
+-- Trim all items in the supplied set from both the left end (head/start) and right end (tail/end)
+-- of a sequence.
 --
 -- Parameters:
---   # ##source## - string to trim.
---   # ##what## - what to trim (defaults to " \t\r\n").
+--   # ##source##: the sequence to trim.
+--   # ##what##: the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##ret_index##: If zero (the default) returns the trimmed sequence, otherwise
+--                    it returns a 2-element sequence containing the index of the
+--                    leftmost item and rightmost item **not** in ##what##.
 --
 -- Returns:
---
---   A **sequence**, the trimmed version of ##source##
+--   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
+--   A **2-element sequence**, if ##ret_index## is not zero, in the form {left_index, right_index}.
 --
 -- Example 1:
 -- <eucode>
+-- object s
 -- s = trim("\r\nSentence read from a file\r\n", "\r\n")
 -- -- s is "Sentence read from a file"
+-- s = trim("\r\nSentence read from a file\r\n", "\r\n", TRUE)
+-- -- s is {3,27}
 -- </eucode>
 --
 -- See Also:
 --   [[:trim_head]], [[:trim_tail]]
 
-public function trim(sequence source, object what=" \t\r\n")
-	return trim_tail(trim_head(source, what), what)
+public function trim(sequence source, object what=" \t\r\n", integer ret_index = 0)
+	integer rpos
+	integer lpos
+	
+	if atom(what) then
+		what = {what}
+	end if
+
+	lpos = 1
+	while lpos <= length(source) do
+		if not find(source[lpos], what) then
+			exit
+		end if
+		lpos += 1
+	end while
+	
+	rpos = length(source)
+	while rpos > lpos do
+		if not find(source[rpos], what) then
+			exit
+		end if
+		rpos -= 1
+	end while
+		
+	if ret_index then
+		return {lpos, rpos}
+	else
+		if lpos = 1 then
+			if rpos = length(source) then
+				return source
+			end if
+		end if
+		if lpos > length(source) then
+			return {}
+		end if
+		return source[lpos..rpos]
+	end if
 end function
+
 
 constant TO_LOWER = 'a' - 'A'
 

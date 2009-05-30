@@ -19,6 +19,8 @@ test_equal("trim() defaults", "John", trim("\r\n\t John \n\r\t"))
 test_equal("trim() specified", "John", trim("abcJohnDEF", "abcDEF"))
 test_equal("trim() integer", "John\t\n", trim(" John\t\n ", 32))
 test_equal("trim() to empty", "", trim("  ", 32))
+test_equal("trim() almost empty", "a", trim(" a ", 32))
+test_equal("trim() nothing", "abcdef", trim("abcdef", 32))
 
 test_equal("lower() atom", 'a', lower('A'))
 test_equal("lower() letters only", "john", lower("JoHN"))
