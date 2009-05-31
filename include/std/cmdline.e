@@ -923,6 +923,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 		if find(cmd[from_..$], help_opts) then
 			local_help(opts, add_help_rid, cmds, 1)
+			ifdef UNITTEST then
+				return 0
+			end ifdef
 			abort(0)
 		end if
 

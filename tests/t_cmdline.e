@@ -51,13 +51,59 @@ procedure bug_help()
 	bug_help_called = 1
 end procedure
 
-cmd_parse({{"v", "verbose", "Verbose output", {}}}, routine_id("bug_help"), { "eui", "bug", "-h" })
-test_false("cmd_parse bug #2792895", bug_help_called)
+sequence validation_types = { VALIDATE_ALL, NO_VALIDATION, NO_VALIDATION_AFTER_FIRST_EXTRA }
+sequence validation_type_names = { "VALIDATE_ALL", "NO_VALIDATION", "NO_VALIDATION_AFTER_FIRST_EXTRA" }
+sequence help_strings = { "-h", "-?" }
+sequence calls_help_rid_cmdl = { "bug", "-h" }
+for validate_i = 1 to 3 do
+	for help_i = 1 to 2 do
+		calls_help_rid_cmdl[2] = help_strings[help_i]
+		for order_i = 1 to 2 do
+			bug_help_called = 0
+			-- here the help routine should get called that will set the flag.
+			cmd_parse({{"v", "verbose", "Verbose output", {}}}, 
+				{ HELP_RID, routine_id("bug_help"), 
+				validation_types[validate_i] }, { "eui" } &
+				{calls_help_rid_cmdl[order_i],calls_help_rid_cmdl[3-order_i]})			
+			-- However, if these parameters are set the help routine should
+			-- not be called.
+			if order_i = 1 and 
+			validation_types[validate_i] = NO_VALIDATION_AFTER_FIRST_EXTRA then
+				continue
+			else
+				
+				test_true(
+					sprintf("cmd_parse calls help routine " &
+					" cmd_parse( ..., { HELP_RID, help_r_id, %s }, { \"eui\", %s, %s } )",
+						{
+						validation_type_names[validate_i],
+						calls_help_rid_cmdl[order_i],calls_help_rid_cmdl[3-order_i]} 
+						), -- end sprintf  
+						bug_help_called 
+				) -- test_true
+			end if
+		end for
+	end for
+end for
+
+-- For these next two calls the help routine should NOT get called.
+bug_help_called = 0
+cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_FIRST_EXTRA ,
+    HELP_RID, routine_id("bug_help")}, { "eui", "bug", "-h" })
+test_false("cmd_parse bug #2792895 ( NO_VAILDATION_AFTER_FIRST_EXTRA, { eui, bug, -h }) calls help",
+	bug_help_called)
+
+bug_help_called = 0
+cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_FIRST_EXTRA , 
+    HELP_RID, routine_id("bug_help")}, { "eui", "bug", "-?" })
+test_false("cmd_parse bug #2792895 ( NO_VAILDATION_AFTER_FIRST_EXTRA, { eui, bug, -? }) calls help",
+	bug_help_called)
 
 cmd_parse( {{ 0, "html", "html output", { NO_PARAMETER }}}, -1, { "eui", "bug", "--html" })
 test_pass("cmd_parse bug #2792287")
 
-cmd_parse( {{ "i", 0, "include dir", { HAS_PARAMETER }}}, -1, { "eui", "eui", "-i", "/usr/euphoria", "bug.ex" })
+cmd_parse( {{ "i", 0, "include dir", { HAS_PARAMETER }}}, -1, { "eui", "eui", "-i",
+	"/usr/euphoria", "bug.ex" })
 test_pass("cmd_parse bug #2789982")
 
 test_report()
