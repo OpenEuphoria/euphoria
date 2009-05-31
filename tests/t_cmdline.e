@@ -1,7 +1,6 @@
 include std/unittest.e
 include std/cmdline.e
 include std/map.e as map
-with trace
 
 integer dummy = 0
 function got_dummy(sequence data)
@@ -56,13 +55,14 @@ sequence validation_types = { VALIDATE_ALL, NO_VALIDATION, NO_VALIDATION_AFTER_F
 sequence validation_type_names = { "VALIDATE_ALL", "NO_VALIDATION", "NO_VALIDATION_AFTER_FIRST_EXTRA" }
 sequence help_strings = { "-h", "-?", "--help" }
 sequence calls_help_rid_cmdl = { "bug", "-h" }
+object map
 for validate_i = 1 to length(validation_types) do
 	for help_i = 1 to length(help_strings) do
 		calls_help_rid_cmdl[2] = help_strings[help_i]
 		for order_i = 1 to 2 do
 			bug_help_called = 0
 			-- here the help routine should get called that will set the flag.
-			cmd_parse({{"v", "verbose", "Verbose output", {}}}, 
+			map = cmd_parse({{"v", "verbose", "Verbose output", {}}}, 
 				{ HELP_RID, routine_id("bug_help"), 
 				validation_types[validate_i] }, { "eui", "prog.ex" } &
 				{calls_help_rid_cmdl[order_i],calls_help_rid_cmdl[3-order_i]})			
@@ -90,13 +90,13 @@ end for
 
 -- For these next two calls the help routine should NOT get called.
 bug_help_called = 0
-cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_FIRST_EXTRA ,
+map = cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_FIRST_EXTRA ,
     HELP_RID, routine_id("bug_help")}, { "eui", "prog.ex", "bug", "-h" })
 test_false("cmd_parse bug #2792895 ( NO_VAILDATION_AFTER_FIRST_EXTRA, { eui, bug, -h }) calls help",
 	bug_help_called)
 
 bug_help_called = 0
-cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_FIRST_EXTRA , 
+map = cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_FIRST_EXTRA , 
     HELP_RID, routine_id("bug_help")}, { "eui", "prog.ex", "bug", "-?" })
 test_false("cmd_parse bug #2792895 ( NO_VAILDATION_AFTER_FIRST_EXTRA, { eui, bug, -? }) calls help",
 	bug_help_called)

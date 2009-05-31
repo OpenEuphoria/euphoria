@@ -821,7 +821,6 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	integer add_help_rid = -1
 	integer validation = VALIDATE_ALL
 	integer has_extra = 0
-	trace( compare( { "eui", "prog.ex", "bug", "-h" }, cmds ) = 0 )
 
 	if sequence(parse_options) then
 		integer i = 1
