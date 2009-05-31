@@ -821,6 +821,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	integer add_help_rid = -1
 	integer validation = VALIDATE_ALL
 	integer has_extra = 0
+	trace( compare( { "eui", "prog.ex", "bug", "-h" }, cmds ) = 0 )
 
 	if sequence(parse_options) then
 		integer i = 1
@@ -867,7 +868,6 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	help_opts = { "h", "?", "help" }
 	for i = 1 to length(opts) do
 		if find(HELP, opts[i][OPTIONS]) then
-			help_opts = {}
 			if sequence(opts[i][SHORTNAME]) then
 				help_opts = append(help_opts, opts[i][SHORTNAME])
 			end if
