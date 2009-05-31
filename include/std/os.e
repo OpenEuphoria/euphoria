@@ -589,7 +589,7 @@ end procedure
 --    that were not validated yet.
 --
 -- Returns:
---	A **sequence** of strings, ach holding a fully qualified include path.
+--	A **sequence** of strings, each holding a fully qualified include path.
 --
 -- Comments:
 --

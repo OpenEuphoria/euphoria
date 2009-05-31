@@ -397,7 +397,7 @@ ifdef WIN32 then
 	--WIN32 version of create()
 
 	--**
-	-- Create pipes for interprocess communication
+	-- Create pipes for inter-process communication
 	--
 	-- Returns:
 	--   Returns process handles { {parent side pipes},{child side pipes} }
@@ -665,7 +665,7 @@ elsedef
 	
 	--See docs above in WIN32 version
 	public function exec(sequence cmd, sequence pipe)
-		--*NIX needs exe and args seperated,
+		--*NIX needs exe and args separated,
 		--but for Windows compatibility, we need to accept a command line
 		
 		--PHP's proc_open() does it this way.

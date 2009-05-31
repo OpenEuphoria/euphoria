@@ -178,7 +178,7 @@ end procedure
 -- Scroll a region of text on the screen.
 --
 -- Parameters:
---		# ##amount##: an integer, the number of lines byy which to scroll. This is >0 to scroll up and <0 to scroll down.
+--		# ##amount##: an integer, the number of lines by which to scroll. This is >0 to scroll up and <0 to scroll down.
 -- 		# ##top_line##: the 1-based number of the topmost line to scroll.
 -- 		# ##bottom_line##: the 1-based number of the bottom-most line to scroll.
 --

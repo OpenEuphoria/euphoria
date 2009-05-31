@@ -280,7 +280,7 @@ end procedure
 -- Parameters:
 -- 		# ##yask_id##: an atom, the id of the task being queried.
 --
--- Retirns:
+-- Returns:
 -- An **integer**:
 -- * -1: task does not exist, or terminated
 -- * 0 : task is suspended

@@ -18,7 +18,7 @@ public constant
 	PROT_WRITE = 2,
 	PROT_NONE = 0
 
--- not public to avoid conflicting with machine.e's constants
+-- not public to avoid conflicting with constants in machine.e
 constant PAGE_EXECUTE = PROT_EXEC,
 	PAGE_EXECUTE_READ = or_bits( PROT_READ, PROT_EXEC ),
 	PAGE_EXECUTE_READWRITE = or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ),

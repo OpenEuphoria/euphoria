@@ -308,8 +308,8 @@ end function
 -- If you are not interested in using the value returned by the C function, you should 
 -- instead define it with [[:define_c_proc]]() and call it with [[:c_proc]]().
 -- 
--- If you use exw to call a cdecl C routine that returns a floating-point value, it might not 
--- work. This is because the Watcom C compiler (used to build exw) has a non-standard way of 
+-- If you use euiw to call a cdecl C routine that returns a floating-point value, it might not 
+-- work. This is because the Watcom C compiler (used to build euiw) has a non-standard way of 
 -- handling cdecl floating-point return values.
 --
 -- Passing floating-point values to a machine code routine will be faster if you use 
@@ -498,7 +498,7 @@ atom page_offset = 0
 --   process that has used too much CPU time.
 --
 --   A call-back routine that uses the cdecl convention and returns a floating-point result,
---   might not work with exw. This is because the Watcom C compiler (used to build exw) has
+--   might not work with euiw. This is because the Watcom C compiler (used to build euiw) has
 --   a non-standard way of handling cdecl floating-point return values.
 --
 -- Example 1: 

@@ -167,7 +167,7 @@ end function
 --                      {"Ian",19}}
 -- sequence sorted_byage
 -- function byage(object a, object b)
---  ----- If the ages are the same, compare the names othrewise just compare ages.
+--  ----- If the ages are the same, compare the names otherwise just compare ages.
 --     if equal(a[2], b[2]) then
 --         return compare(upper(a[1]), upper(b[1]))
 --     end if

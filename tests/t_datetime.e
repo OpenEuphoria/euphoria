@@ -53,10 +53,10 @@ test_equal("new() hour",   15, dt1[HOUR])
 test_equal("new() minute", 38, dt1[MINUTE])
 test_equal("new() second",  0, dt1[SECOND])
 
-test_equal("dow() #1", 4, d:dow(dt1))
-test_equal("dow() #2", 1, d:dow(dt2))
+test_equal("weeks_day() #1", 4, d:weeks_day(dt1))
+test_equal("weeks_day() #2", 1, d:weeks_day(dt2))
 
-test_equal("doy() #1", 114, d:doy(dt1))
+test_equal("years_day() #1", 114, d:years_day(dt1))
 
 d:datetime dt3 = d:new(2008, 2, 1, 0, 0, 0)
 d:datetime dt4 = d:new(2007, 2, 1, 0, 0, 0)
@@ -245,8 +245,8 @@ test_equal("format() %Y", "2008", d:format(dt1, "%Y"))
 
 for i = 1 to 7 do
     dt1[DAY] = i + 19
-    test_equal("format() dow loop #1", day_abbrs[i], d:format(dt1, "%a"))
-    test_equal("format() dow loop #2", day_names[i], d:format(dt1, "%A"))
+    test_equal("format() weeks_day loop #1", day_abbrs[i], d:format(dt1, "%a"))
+    test_equal("format() weeks_day loop #2", day_names[i], d:format(dt1, "%A"))
 end for
 
 for i = 0 to 11 do

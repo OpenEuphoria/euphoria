@@ -115,6 +115,7 @@
 ../include/std/machine.e
 ../include/std/memory.e
 ../include/std/safe.e
+../include/std/unix/mmap.e
 
 ########
 := Graphics

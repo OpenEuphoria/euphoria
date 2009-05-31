@@ -31,7 +31,7 @@ include std/serialize.e
 --		# ##values##: usually, a sequence of values. It should have as many elements as format specifiers in ##format##, as these values will be substituted to the specifiers.
 --
 -- Returns:
--- A **squence** of printable characters, representing ##format## with the values in ##values## spliced in.
+-- A **sequence** of printable characters, representing ##format## with the values in ##values## spliced in.
 --
 -- Comments:
 --
@@ -439,7 +439,7 @@ end function
 -- Parameters:
 --   # ##subject##: Any Euphoria object to be transformed.
 --   # ##from_SET##: A sequence of characters representing the only characters from
---                   ##subect## that are actually transformed.
+--                   ##subject## that are actually transformed.
 --   # ##to_SET##: A sequence of characters representing that transformed equivalents
 --                 of those found in ##from_SET##.
 --
@@ -647,7 +647,7 @@ public function proper(sequence x)
 			end if
 		else
 			-- A non-integer means this is NOT a text sequence, so
-			-- only convert subsequences.
+			-- only convert sub-sequences.
 			if convert then
 				-- Restore any values that might have been converted.
 				for j = 1 to i-1 do
@@ -711,7 +711,7 @@ end function
 -- this enclose the value in parentheses. Nested sets can nested to any level.
 -- See example #4.
 --
--- If a sublist has only data values and not keys, enclose it in either braces
+-- If a sub-list has only data values and not keys, enclose it in either braces
 -- or square brackets. See example #5.
 -- If you need to have a bracket as the first character in a data value, prefix
 -- it with a tilde. Actually a leading tilde will always just be stripped off
@@ -1020,7 +1020,7 @@ end function
 -- Example 4:
 -- <eucode>
 -- s = quote("The (small) man", {"(", ")"}, '~', "#" )
--- -- 's' now contains 'the (small) man'
+-- -- 's' now contains "the (small) man"
 -- -- because the input did not contain a '#' character.
 -- </eucode>
 --
@@ -1076,7 +1076,7 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 	if esc >= 0  then
 		-- If the input already contains a quote, replace them with esc-quote,
 		-- but make sure that if the input already contains esc-quote that all
-		-- embedded esces are replaced with esc-esc first.
+		-- embedded escapes are replaced with esc-esc first.
 		if atom(quote_pair[1]) then
 			quote_pair[1] = {quote_pair[1]}
 		end if
@@ -1124,7 +1124,7 @@ end function
 --              The default is {{"\"", "\""}} which means that the output is
 --              'quoted' if it is enclosed by double-quotation marks.
 --   # ##esc##: A single escape character. If this is not negative (the default), 
---              then this is used to 'escape' any embedded occurances of the
+--              then this is used to 'escape' any embedded occurrences of the
 --              quote characters. In which case the 'escape' character is also
 --              removed.
 --
@@ -1135,14 +1135,14 @@ end function
 -- <eucode>
 -- -- Using the defaults. 
 -- s = quote("\"The small man\"")
--- -- 's' now contains 'The small man'
+-- -- 's' now contains "The small man"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- -- Using the defaults. 
 -- s = quote("(The small ?(?) man)", {{"[","]"}}, '?')
--- -- 's' now contains 'The small () man'
+-- -- 's' now contains "The small () man"
 -- </eucode>
 --
 public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, integer esc = -1)

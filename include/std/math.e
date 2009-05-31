@@ -207,7 +207,7 @@ end function
 -- Parameters:
 --   # ##item##: The object to test for.
 --   # ##range_limits##: A sequence of two or more elements. The first is assumed
---    to be the smallest value and the last is assumed to tbe the highest value.
+--    to be the smallest value and the last is assumed to be the highest value.
 --
 -- Returns:
 --   A **object**: If ##item# is lower than the first item in the ##range_limits##
@@ -251,8 +251,8 @@ end function
 -- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
 --
 -- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
---		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
+--		# ##dividend##: an object, each atom of which is the dividend of an Euclidean division
+--		# ##divisor##: an object, each atom of which is the divisor in an Euclidean division.
 --
 -- Returns:
 --		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by  ##divisor##, with ##dividend##'s sign.
@@ -296,19 +296,24 @@ end function
 -- Compute the remainder of the division of two atoms. The result is not less than zero
 --
 -- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an Euclidian division
---		# ##divisor##: an object, each atom of which is the divisor in an Euclidian division.
+--		# ##dividend##: an object, each atom of which is the dividend of an Euclidean division
+--		# ##divisor##: an object, each atom of which is the divisor in an Euclidean division.
 --
 -- Returns:
---		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by ##divisor##, with ##divisor##'s sign.
+--	An **object**, the shape of which depends on ##dividend##'s and
+-- ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend##
+-- by ##divisor##, with ##divisor##'s sign.
 --
 -- Comments:
--- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result is nonnegative and has lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
+-- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result.
+-- The result is non-negative and has lesser magnitude than ##divisor##.
+-- n needs not fit in an Euphoria integer.
 --
 -- The arguments to this function may be atoms or sequences. The rules for
 -- [[:operations on sequences]] apply, and determine the shape of the returned object.
 --
--- When both arguments are positive numbers, [[:mod]]() and ##remainder##() are the same. They differ by either the ##divisor## or its opposite, when they do.
+-- When both arguments are positive numbers, [[:mod]]() and ##remainder##()
+-- are the same. They differ by either the ##divisor## or its opposite, when they do.
 --
 -- Example 1:
 -- <eucode>
@@ -921,7 +926,7 @@ end function
 -- -- r is 4
 -- </eucode>
 --
--- Se Also:
+-- See Also:
 --		[[:power]], [[:Operations on sequences]]
 --
 
@@ -1160,7 +1165,7 @@ end function
 -- Compute the product of all the atom in the argument, no matter how deeply nested.
 --
 -- Parameters:
---		# ##values##: an object, all atoms of which will be multimlied up, no matter how nested.
+--		# ##values##: an object, all atoms of which will be multiplied up, no matter how nested.
 --
 -- Returns:
 --		An **atom**, the product of all atoms in [[:flatten]](##values##).
@@ -1235,7 +1240,7 @@ public function or_all	(object a)
 	return b
 end function
 --****
--- === Bitwise opreations
+-- === Bitwise operations
 --
 
 --****
@@ -1513,7 +1518,7 @@ end function
 --		# ##p##: an object, one of the sets to consider
 --		# ##q##: an object, the other set.
 --      # ##epsilon##: an atom used to define the amount of inequality allowed.
---           This must be a postive value. Default is 0.005
+--           This must be a positive value. Default is 0.005
 --
 -- Returns:
 -- * 1 when p > (q + epsilon) : P is definitely greater than q.

@@ -447,7 +447,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 		svcport, cpos
 	sequence rtn, val
 	
-	hints = hints -- TODO -- not imlemented.
+	hints = hints -- TODO -- not implemented.
 	addrinfo = allocate(32)
 	poke(addrinfo,repeat(0,32))
 	if sequence(node) then
@@ -578,7 +578,7 @@ end function
 --   A ##sequence## containing
 --   <eucode>
 --   {
---     offical name,
+--     official name,
 --     { alias1, alias2, ... },
 --     { ip1, ip2, ... },
 --     address_type
@@ -617,7 +617,7 @@ end function
 --   A ##sequence## containing
 --   <eucode>
 --   {
---     offical name,
+--     official name,
 --     { alias1, alias2, ... },
 --     { ip1, ip2, ... },
 --     address_type

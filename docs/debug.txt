@@ -62,7 +62,7 @@ with trace
 trace(1)
 </eucode>
 
-However, you cannot dynamically set or free beakpoints while tracing. You must abort program, 
+However, you cannot dynamically set or free breakpoints while tracing. You must abort program, 
 edit, change setting, save and run again.
 
 at the top of your program, so you can start tracing from the beginning of
@@ -106,7 +106,7 @@ so it returns 0 for the strange value (99) instead of 1, you can force a
 diagnostic dump into **ex.err**.
 
 Remember that the argument to ##trace()## does not need to be a constant. It only needs to be 0,
-1, 2 or 3, but these values may be the result from any expression pssed to ##trace##().
+1, 2 or 3, but these values may be the result from any expression passed to ##trace##().
 Other values will cause ##trace()## to fail.
 
 

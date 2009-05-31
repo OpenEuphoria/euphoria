@@ -849,7 +849,7 @@ end type
 -- t_text({1, 2, "abc"}) -- FALSE (contains a sequence)
 -- t_text({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- t_text({1, 2, 'a')    -- TRUE
--- t_text({1, -2, 'a')   -- FALSE (contains a negativce integer)
+-- t_text({1, -2, 'a')   -- FALSE (contains a negative integer)
 -- t_text({})            -- TRUE
 -- </eucode>
 public type t_text( object x )
@@ -935,7 +935,7 @@ end type
 -- ascii_string({1, 2, "abc"}) -- FALSE (contains a sequence)
 -- ascii_string({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- ascii_string({1, 2, 'a')    -- TRUE
--- ascii_string({1, -2, 'a')   -- FALSE (contains a negativce integer)
+-- ascii_string({1, -2, 'a')   -- FALSE (contains a negative integer)
 -- ascii_string({})            -- TRUE
 -- </eucode>
 public type ascii_string( object x )
@@ -971,7 +971,7 @@ end type
 -- string({1, 2, "abc§¶"}) -- FALSE (contains a sequence)
 -- string({1, 2, 9.7)    -- FALSE (contains a non-integer)
 -- string({1, 2, 'a')    -- TRUE
--- string({1, -2, 'a')   -- FALSE (contains a negativce integer)
+-- string({1, -2, 'a')   -- FALSE (contains a negative integer)
 -- string({})            -- TRUE
 -- </eucode>
 public type string( object x )

@@ -18,6 +18,7 @@
 --
 
 include std/error.e
+include std/sequence.e
 
 procedure report_error(sequence s)
 -- Description: Prints an error message on stderr and abort(1)s.
@@ -30,7 +31,7 @@ end procedure
 --
 
 --**
--- A set is a strictly increasing sequence, for the order induced by [[:compare]]().
+-- A set is a sequence in which each item is greater than the previous item.
 --
 -- See Also:
 -- [[:compare]]
@@ -38,17 +39,24 @@ end procedure
 public type set(object s)
     object x,y
 
-    if atom(s) or length(s)<2 then
+    if atom(s) then
         return 1
     end if
-    x=s[1]
-    for i=2 to length(s) do
-        y=s[i]
-        if eu:compare(y,x)<1 then
+    
+    if length(s) < 2 then
+        return 1
+    end if
+    
+    x = s[1]
+    for i = 2 to length(s) do
+        y = s[i]
+        if eu:compare(y, x) < 1 then
             return 0
         end if
-        x=y
+        
+        x = y
     end for
+    
     return 1
 end type
 
@@ -59,23 +67,32 @@ function bounded_integer(object x,integer lbound,integer ubound)
 -- See also: map, is_left_unit, is_right_unit
     if not integer(x) then
         return 0
-    else
-        return x>=lbound and x<=ubound
     end if
+    if x < lbound then
+    	return 0
+    end if
+    
+    if x > ubound then
+    	return 0
+    end if
+    
+    return 1
+    
 end function
 
 --**
 -- Returns 1 if a sequence of integers is a valid map descriptor, else 0.
 --
 -- Comments:
+-- A map is a sequence of indexes. Each index is between 1 and the maximum allowed for the particular map.
 --
---   Actually, what is being called a ##map## is a class of maps, as the elements of the input
---    sequence, except for the last two, are ordinals rather than set elements. A map 
+-- Actually, what is being called a ##map## is a class of maps, as the elements of the input
+-- sequence, except for the last two, are ordinals rather than set elements. A map 
 -- contains the information required to map as expected the elements of a set, given by index,
 -- to another set, where the images are indexes again.  Technically, those are maps of the 
--- category of finite sets quotiented by equality of cradinal.
+-- category of finite sets quotiented by equality of cardinal.
 --
--- The objects map.e handles are completely unrelated to these.
+-- The objects that map.e handle are completely unrelated to these.
 --
 -- Example 1:
 -- <eucode>
@@ -90,19 +107,36 @@ end function
 public type map(sequence s)
     object p,q
 
-    q=s[$-1]
-    p=s[$]
-	if length(s)<=2 or q!=length(s)-2 then
+	if length(s) <= 2 then
 		return 0
-    elsif not integer(p) or p<0 then
-    	return 0
-    else
-        for i=1 to q do
-            if not bounded_integer(s[i],1,p) then
-                return 0
-            end if
-        end for
+	end if
+	
+	-- The 2nd last element contains the number of items in the map.
+    q = s[$-1]
+    if not integer(q) then
+    	return 0    -- Sanity check failed.
     end if
+	if q != length(s)-2 then
+		return 0    -- Sanity check failed.
+	end if
+	
+    -- The last element contains the upper boundary for element values.
+    p = s[$]
+    
+    if not integer(p) then
+    	return 0    -- Sanity check failed.
+    end if
+    
+    if p < 0 then
+    	return 0    -- Sanity check failed.
+    end if
+    
+    -- Check that each element is within the boundaries.
+    for i = 1 to q do
+        if not bounded_integer(s[i], 1, p) then
+            return 0
+        end if
+    end for
 
     return 1
 end type
@@ -157,7 +191,7 @@ function bfind(object x,sequence s,integer startpoint,integer endpoint)
     if c=1 then
         c=eu:compare(x,s[endpoint])
         if c=-1 then
-            while endpoint-startpoint>1 do
+            while endpoint - startpoint>1 do
                 r=floor((endpoint+startpoint)/2)
                 c=eu:compare(x,s[r])
                 if c=-1 then
@@ -204,31 +238,7 @@ include std/sequence.e
 -- [[:set]]
 
 public function sequence_to_set(sequence s)
-    sequence result
-    integer k,ls
-
-    ls=length(s)
-    if ls<2 then
-        return s
-    end if
-    result=sort(s)
-    k=0
-    for i=1 to ls-1 do
-        if eu:compare(result[i],result[i+1])=0 then
-            k=i
-            exit
-        end if
-    end for
-    if k=0 then
-        return result
-    end if
-    for i=k+2 to ls do
-        if eu:compare(result[i],result[k])=1 then
-            k+=1
-            result[k]=result[i]
-        end if
-    end for
-    return result[1..k]
+    return remove_dups(s, RD_SORT)
 end function
 
 --**
@@ -1005,14 +1015,14 @@ end function
 -- See Also:
 --   [[:map]], [[:sequences_to_map]], [[:direct_map]]
 
-public function define_map(sequence mapping,set target)
+public function define_map(sequence mapping, set target)
     sequence result
     integer lt
 
-    lt=length(target)
-    result=mapping&length(mapping)&lt
-    for i=1 to length(mapping) do
-        result[i]=bfind(mapping[i],target,1,lt)
+    lt = length(target)
+    result = mapping & length(mapping) & lt
+    for i = 1 to length(mapping) do
+        result[i] = bfind(mapping[i], target, 1, lt)
     end for
 
     return result
@@ -1139,7 +1149,7 @@ end function
 -- map f = {3, 2, 5, 2, 4, 6}
 -- set s = {"Albert", "Beatrix", "Conrad", "Doris", "Eugene", "Fabiola"}
 -- set s1 = range(f, s)
--- -- s1 is now {"Beatrix", ,"Conrad", "Fabiola"}
+-- -- s1 is now {"Beatrix",  "Conrad", "Eugene"}
 -- </eucode>
 --
 -- See Also:
@@ -1195,7 +1205,7 @@ public function direct_map(map f,set s1,sequence s0,set s2)
 
     ls1=length(s1)
     if f[$-1]>ls1 or f[$]>length(s2) then
-        report_error({"direct_map","The supplied map cannot map the source set intio the target set."})
+        report_error({"direct_map","The supplied map cannot map the source set into the target set."})
     end if
 
     k=1
@@ -1362,7 +1372,7 @@ public function combine_maps(map f1,set source1,set target1,map f2,set source2,s
         if result[p] then
             if result[p]!=f2[i] then
                 report_error({"combine_maps",
-                  "Maps disagree at some point where they are both definde."})
+                  "Maps disagree at some point where they are both defined."})
             else
                 len_result-=1
             end if
@@ -1819,10 +1829,10 @@ end function
 --
 
 --**
--- The ffollowing constants denote orientation of distributivity or unitarity~:
--- * SIDE_NONE: no unuits, or no distributivity
+-- The following constants denote orientation of distributivity or unitarity~:
+-- * SIDE_NONE: no units, or no distributivity
 -- * SIDE_LEFT: property is requested or verified on the left side
--- * SIDE_RIGHT: property is requeste or verified on the right side
+-- * SIDE_RIGHT: property is requested or verified on the right side
 -- * SIDE_BOTH:  property is requested or verified on both sides.
 
 
@@ -2118,7 +2128,7 @@ end function
 --
 -- Parameters: 
 --		# ##f##: the operation to test.
---		# ##flags##: an integer, which says wheher one or two sided units are looked for. Defaults to ##SIDE_BOTH##.
+--		# ##flags##: an integer, which says whether one or two sided units are looked for. Defaults to ##SIDE_BOTH##.
 --
 -- Returns: 
 --		An **integer**. If ##f## has a unit of the requested type, it is returned. Otherwise, 0 is returned..
@@ -2141,11 +2151,13 @@ end function
 
 public function has_unit(operation f, integer flags = SIDE_BOTH)
 	flags = and_bits(flags, SIDE_BOTH)
-    switch flags with fallthru do
+    switch flags do
     	case SIDE_LEFT then
     		return has_left_unit(f)
+    		
     	case SIDE_RIGHT then
     		return has_right_unit(f)
+    		
     	case else
 			return has_unit_(f)
     end switch

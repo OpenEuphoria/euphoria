@@ -208,7 +208,7 @@ end procedure
 --		# ##accumulate##: an integer, zero not to accumulate, nonzero to accumulate.
 --
 -- Comments:
--- The file "unittest.dat" is appened to with {t,f}\\
+-- The file "unittest.dat" is appended to with {t,f}\\
 -- : where
 -- :: //t// is total number of tests run
 -- :: //f// is the total number of tests that failed

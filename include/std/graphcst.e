@@ -113,7 +113,7 @@ constant
 -- Return a description of the current video configuration:
 --
 -- Returns:
--- 		A **sequence** of 8 nonnegative integers, laid out as follows:
+-- 		A **sequence** of 8 non-negative integers, laid out as follows:
 --	# color monitor?: 1 0 if monochrome, 1 otherwise
 --	# current video mode
 -- 	# number of text rows

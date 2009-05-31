@@ -37,7 +37,7 @@ result = call_func(id_of_the_routine,argument_sequence)
 
 where
 * ##id_of_the_routine## is an id you obtained from [[:routine_id]]().
-* ##argument_sequence## is the list of the parameters to opass, enclosed into curly braces.
+* ##argument_sequence## is the list of the parameters to pass, enclosed into curly braces.
 <eucode>
 include get.e
 
@@ -71,7 +71,9 @@ include std/pretty.e
 pretty_print(1, some_object, some_options)
 </eucode>
 
-The difference with [[:c_proc]]() is that you can call n extranal function using [[:c_proc]]() and thus ignore its return value, like in C. You cannot ##call_proc##() an Euphoria function.
+The difference with [[:c_proc]]() is that you can call an external function using
+[[:c_proc]]() and thus ignore its return value, like in C. Note that you cannot
+use ##call_proc##() to invoke a Euphoria function, only C functions.
 
 ==== Why call dynamically?
 
@@ -99,7 +101,7 @@ foo_id = routine_id("foo")
 One of the functions has to be defined before the other, and Euphoria's paradigm of
 define-before-use would prevent crossed calls like above without the dynamic call facility.
 
-One last word: when calling a routine dynamically, its **full** parameter listmust be passed,
+One last word: when calling a routine dynamically, its **full** parameter list must be passed,
 even if some of its parameters are defaulted. This limitation may be overcome in future
 versions.
 

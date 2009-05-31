@@ -206,9 +206,6 @@ A WIN32 API Windows help file (8 Mb) can be downloaded from
 ftp://ftp.borland.com/pub/delphi/techpubs/delphi2/win32.zip, Borland's
 Web site.
 
-See also the http://www.RapidEuphoria.com/doc.htm, Euphoria Archive Web
-page - "documentation".
-
 === The Unix Platforms
 
 Euphoria for Linux, FreeBSD and OS X share certain features
@@ -288,10 +285,9 @@ integer LoadIcon, icon
 user32 = open_dll("user32.dll")
 
 -- The name of the routine in user32.dll is "LoadIconA".
--- It takes a pointer and an int as arguments, 
--- and it returns an int.
-LoadIcon = define_c_func(user32, "LoadIconA",
-{C_POINTER, C_INT}, C_INT)
+-- It takes a pointer and an 32-bit integers as arguments, 
+-- and it returns a 32-bit integer.
+LoadIcon = define_c_func(user32, "LoadIconA", {C_POINTER, C_INT}, C_INT)
 
 icon = c_func(LoadIcon, {NULL, IDI_APPLICATION})
 </eucode>

@@ -209,7 +209,7 @@ end function
 -- Comments:
 --
 -- When ##coords## is a 2-element sequence representing screen coordinates, ##get_pixel##() 
--- only returbn the color of this pixel.
+-- only return the color of this pixel.
 --
 -- When ##coords## is a 3-element sequence of the form ##{x, y, n}##, ##get_pixel##() returns a
 -- sequence of ##n## colors for the points starting at ##{x, y}## and moving to the right 

@@ -92,7 +92,7 @@ public enum
 	
 	--**
 	--  The value ##1## if the command line indicates that this option is to remove
-	--  any earlier occurances of it. See [[:cmd_parse]]
+	--  any earlier occurrences of it. See [[:cmd_parse]]
 	OPT_REV
 	
 	
@@ -450,7 +450,7 @@ end procedure
 -- Comments:
 --
 -- The returned sequence contains the following information:
--- # Tthe path to either the Euphoria executable, (eui, eui.exe, euid.exe euiw.exe) or to your bound
+-- # The path to either the Euphoria executable, (eui, eui.exe, euid.exe euiw.exe) or to your bound
 --   executable file.
 -- # The next word is either the name of your Euphoria main file, or 
 -- (again) the path to your bound executable file.
@@ -512,7 +512,7 @@ end procedure
 -- <built-in> function option_switches()
 --
 -- Description:
--- Retrieves the list of switches passed to the interpreter on the comand line.
+-- Retrieves the list of switches passed to the interpreter on the command line.
 --
 -- Returns:
 -- A **sequence** of strings, each containing a word related to switches.
@@ -522,7 +522,7 @@ end procedure
 -- All switches are recorded in upper case.
 --
 -- Example 1:
--- exw -d helLo will result in ##option_switches##() being ##{"-D","helLo"}##.
+-- euiw -d helLo will result in ##option_switches##() being ##{"-D","helLo"}##.
 --
 -- See Also:
 -- [[:Command line switches]]
@@ -541,7 +541,7 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- -- in myfile.ex
--- constant desc = {
+-- constant description = {
 --        "Creates a file containing an analysis of the weather.",
 --        "The analysis includes temperature and rainfall data",
 --        "for the past week."
@@ -550,7 +550,7 @@ end procedure
 -- show_help({
 --     {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
 --     {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},
---     desc)
+--     description)
 -- </eucode>
 -- Outputs:
 -- {{{
@@ -569,7 +569,7 @@ public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds 
 end procedure
 
 ---
-function find_opt(sequence opts, sequence typ, object cmd_text)
+function find_opt(sequence opts, sequence opt_style, object cmd_text)
 	integer slash
 	sequence opt_name
 	object opt_param
@@ -631,11 +631,11 @@ function find_opt(sequence opts, sequence typ, object cmd_text)
 
 	for i = 1 to length(opts) do
 		if find(NO_CASE,  opts[i][OPTIONS]) then
-			if not equal(lower(opt_name), lower(opts[i][typ[1]])) then
+			if not equal(lower(opt_name), lower(opts[i][opt_style[1]])) then
 				continue
 			end if
 		else
-			if not equal(opt_name, opts[i][typ[1]]) then
+			if not equal(opt_name, opts[i][opt_style[1]]) then
 				continue
 			end if
 		end if
@@ -698,12 +698,12 @@ end function
 -- # a single '-'. Simply added to the 'extras' list
 -- # a single "~-~-". This signals the end of command line options. What remains of the command
 --   line is added to the 'extras' list, and the parsing terminates.
--- # -shortname. The option will be looked up in the short name field of ##opts##.
--- # /shortname. Same as -shortname.
--- # -!shortname. If the 'shortname' has already been found the option is removed.
--- # /!shortname. Same as -!shortname
--- # ~-~-longname. The option will be looked up in the long name field of ##opts##.
--- # ~-~-!longname. If the 'longname' has already been found the option is removed.
+-- # -shortName. The option will be looked up in the short name field of ##opts##.
+-- # /shortName. Same as -shortName.
+-- # -!shortName. If the 'shortName' has already been found the option is removed.
+-- # /!shortName. Same as -!shortName
+-- # ~-~-longName. The option will be looked up in the long name field of ##opts##.
+-- # ~-~-!longName. If the 'longName' has already been found the option is removed.
 -- # anything else. The word is simply added to the 'extras' list.
 --
 -- For those options that require a parameter to also be supplied, the parameter
@@ -745,7 +745,7 @@ end function
 --   ## The number of times that the routine has been called
 --      by cmd_parse for this option
 --   ## The option's value as found on the command line
---   ## 1 if the command line indicates that this option is to remove any earlier occurances of it.
+--   ## 1 if the command line indicates that this option is to remove any earlier occurrences of it.
 --
 -- When assigning a value to the resulting map, the key is the long name if present,
 -- otherwise it uses the short name. For options, you must supply a short name,
@@ -791,7 +791,7 @@ end function
 --     { "v", "verbose", "Verbose output",{NO_PARAMETER}, routine_id("opt_verbose")},
 --     { "h", "hash", "Calculate hash values",{NO_PARAMETER}, -1},
 --     { "o", "output",  "Output filename",{MANDATORY, HAS_PARAMETER, ONCE} , routine_id("opt_output_filename") },
---     { "i", "import",  "An inport path", {HAS_PARAMETER, MULTIPLE}, -1 },
+--     { "i", "import",  "An import path", {HAS_PARAMETER, MULTIPLE}, -1 },
 --     {  0,  0, 0, 0, routine_id("opt_extras")}
 -- }
 --
@@ -810,7 +810,7 @@ end function
 --   [[:show_help]], [[:command_line]]
 
 public function cmd_parse(sequence opts, object parse_options={}, sequence cmds = command_line())
-	integer idx, opts_done
+	integer arg_idx, opts_done
 	sequence cmd
 	object param
 	sequence find_result
@@ -860,7 +860,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 	map:put(parsed_opts, "extras", {})
 
-	idx = 2
+	arg_idx = 2
 	opts_done = 0
 	
 	-- Find if there are any user-defined help options.
@@ -876,18 +876,18 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			end if
 			if find(NO_CASE, opts[i][OPTIONS]) then
 				help_opts = lower(help_opts)
-				idx = length(help_opts)
-				for j = 1 to idx do
+				arg_idx = length(help_opts)
+				for j = 1 to arg_idx do
 					help_opts = append(help_opts, upper(help_opts[j]))
 				end for
 			end if
 		end if
 	end for		
 
-	while idx < length(cmds) do
-		idx += 1
+	while arg_idx < length(cmds) do
+		arg_idx += 1
 
-		cmd = cmds[idx]
+		cmd = cmds[arg_idx]
 
 		if (opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1) 
 			or
@@ -949,9 +949,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		
 		if find(HAS_PARAMETER, opt[OPTIONS]) != 0 then
 			if length(find_result) < 4 then
-				idx += 1
-				if idx <= length(cmds) then
-					param = cmds[idx]
+				arg_idx += 1
+				if arg_idx <= length(cmds) then
+					param = cmds[arg_idx]
 					if length(param) = 2 and find(param[1], "-/") then
 						param = ""
 					end if
@@ -1048,7 +1048,7 @@ end function
 -- </eucode>
 --
 -- Example 2:
---     You can use this to run things that might be diffucult to quote out:
+--     You can use this to run things that might be difficult to quote out:
 --     Suppose you want to run a program that requires quotes on its
 --     command line?  Use this function to pass quotation marks:
 --

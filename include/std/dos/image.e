@@ -60,11 +60,14 @@ end procedure
 --		//DOS32//
 --
 -- Returns
---		An **integer**, the current page number displayed bythe monitor.
+--		An **integer**, the current page number displayed by the monitor.
 --
 -- Comments: 
 --
--- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying another. [[:video_config]]() will tell you how manypages are available in the current graphics mode.
+-- Some graphics modes on most video cards have multiple pages of memory. 
+-- This lets you write screen output to one page while displaying another. 
+-- [[:video_config]]() will tell you how many pages are available in the
+-- current graphics mode.
 --
 -- The active and display pages are both 0 by default.
 --  
@@ -87,12 +90,14 @@ end function
 --
 -- Comments: 
 --
--- With multiple pages you can instantaneously change the entire screen without causing any visible "flicker". You can also save the screen and bring it back quickly.
+-- With multiple pages you can instantaneously change the entire screen without
+-- causing any visible "flicker". You can also save the screen and bring it back quickly.
 -- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
 --
 -- By default, the active page and the display page are both 0. 
 -- 
--- This works under DOS, or in a full-screen DOS window. In a partial-screen window you cannot change the active page. 
+-- This works under DOS, or in a full-screen DOS window. In a partial-screen
+-- window you cannot change the active page. 
 --  
 -- Example 1:
 --   See the [[:set_active_page]] example.
@@ -116,10 +121,12 @@ end procedure
 --
 -- Comments:
 --
--- Some graphics modes on most video cards have multiple pages of memory. This lets you write screen output to one page while displaying a different page. 
+-- Some graphics modes on most video cards have multiple pages of memory. This
+-- lets you write screen output to one page while displaying a different page. 
 --
 -- The active and display pages are both 0 by default.
--- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
+-- [[:video_config]]() will tell you how many pages are available in the current
+-- graphics mode.
 --  
 -- See Also: set_active_page, get_display_page, video_config  
 -- 
@@ -138,12 +145,14 @@ end function
 --
 -- Comments: 
 --
--- With multiple pages you can instantaneously change the entire screen without causing any visible "flicker". You can also save the screen and bring it back quickly.
+-- With multiple pages you can instantaneously change the entire screen without
+-- causing any visible "flicker". You can also save the screen and bring it back quickly.
 -- [[:video_config]]() will tell you how many pages are available in the current graphics mode.
 -- 
 -- By default, the active page and the display page are both 0. 
 -- 
--- This works under DOS, or in a full-screen DOS window. In a partial-screen window you cannot change the active page. 
+-- This works under DOS, or in a full-screen DOS window. In a partial-screen
+-- window you cannot change the active page. 
 --
 -- Example 1:
 -- <eucode>

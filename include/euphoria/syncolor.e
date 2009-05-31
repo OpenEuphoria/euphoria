@@ -116,7 +116,7 @@ procedure seg_flush(integer new_color)
 end procedure
 
 global function SyntaxColor(sequence pline)
--- Break up a '\n'-terminated line into colored text segments identifying the
+-- Break up a new-line terminated line into colored text segments identifying the
 -- various parts of the Euphoria language.
 -- Consecutive characters of the same color are all placed in the
 -- same 'segment' - seg_start..seg_end.

@@ -77,7 +77,7 @@ end function
 --
 -- Parameters:
 -- 		# ##filename##: a sequence, the name of the file to load. If no file
---                      extention is supplied, then ".lng" is used.
+--                      extension is supplied, then ".lng" is used.
 --
 -- Returns:
 --	A language map, if successful. This is to be used when calling [[:translate]]().
@@ -659,8 +659,8 @@ function mk_tm_struct(dt:datetime dtm)
 	poke4(pDtm+12, dtm[DAY])           -- int tm_mday
 	poke4(pDtm+16, dtm[MONTH] - 1)     -- int tm_mon
 	poke4(pDtm+20, dtm[YEAR] - 1900)   -- int tm_year
-	poke4(pDtm+24, dt:dow(dtm) - 1)    -- int tm_wday
-	poke4(pDtm+28, dt:doy(dtm))        -- int tm_yday
+	poke4(pDtm+24, dt:weeks_day(dtm) - 1)    -- int tm_wday
+	poke4(pDtm+28, dt:years_day(dtm))        -- int tm_yday
 	poke4(pDtm+32, 0)                  -- int tm_isdst
 
 	return pDtm

@@ -105,7 +105,7 @@ end procedure
 -- 		# ##error##: an integer, the exit code to return.
 --
 -- Comments:
--- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a succsful completion.
+-- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a successful completion.
 --
 -- Other values can indicate various kinds of errors. DOS batch (.bat) programs can read 
 -- this value using the errorlevel feature. Non integer values are rounded down.
@@ -172,7 +172,7 @@ end procedure
 -- Causes the specified warning message to be displayed as a regular warning.
 --
 -- Parameters:
--- 		# ##message##: a double quoted litteral string, the text to display.
+-- 		# ##message##: a double quoted literal string, the text to display.
 --
 -- Comments:
 --
@@ -181,13 +181,13 @@ end procedure
 -- that code you didn't write.
 -- 
 -- This is what ##warning##(), in a limited way, does. It enables to generate custom warnings in
--- code that will include yours. Of course, you can also geenrate warnings in your own code, for
+-- code that will include yours. Of course, you can also generate warnings in your own code, for
 -- instance as a kind of memo. The [[:On/off options|without warning]] top level statement disables such warnings.
 --
 -- The warning is issued with the ##custom_warning## level. This level is enabled by default, 
 -- but can be turned off any time.
 --
--- Using any kind of expression in ##message## will esult in a blank warning text.
+-- Using any kind of expression in ##message## will result in a blank warning text.
 -- 
 -- Example 1:
 -- 

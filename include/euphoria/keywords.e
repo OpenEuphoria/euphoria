@@ -3,7 +3,7 @@
 
 -- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- Keywords and routines built in to ex, exw and exu
+-- Keywords and routines built in to Euphoria.
 
 --**
 -- Sequence of Euphoria keywords

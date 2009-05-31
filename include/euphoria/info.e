@@ -99,7 +99,7 @@ end function
 -- Get the source code revision of the hosting Euphoria
 --
 -- Returns:
---   A text ##sequence## containing the source code manangement system's
+--   A text ##sequence## containing the source code management system's
 -- revision number that the executing Euphoria was built from.
 --
 

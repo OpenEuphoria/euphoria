@@ -5,7 +5,7 @@ include std/convert.e
 include std/machine.e
 
 --****
--- == Grapihcs - Image Routines
+-- == Graphics - Image Routines
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -154,7 +154,7 @@ end function
 --
 -- Comments:
 -- In the returned value, the first element is a list of mixtures, each of which defines 
--- a color, and the second, a list of point rows. Each pixel in a row is represented by its color ubdex.
+-- a color, and the second, a list of point rows. Each pixel in a row is represented by its color index.
 --
 -- The file should be in the bitmap format. The most common variations of the format are supported. 
 -- You can pass the palette to [[:all_palette]]() (after dividing it by 4 to scale it). 
@@ -189,7 +189,7 @@ end function
 
 public function read_bitmap(sequence file_name)
 	atom Size 
-	integer Type, Xhot, Yhot, Planes, BitCount
+	integer Type, X_hot, Y_hot, Planes, BitCount
 	atom Width, Height, Compression, OffBits, SizeHeader, 
 		 SizeImage, XPelsPerMeter, YPelsPerMeter, ClrUsed,
 		 ClrImportant, NumColors
@@ -202,8 +202,8 @@ public function read_bitmap(sequence file_name)
 	end if
 	Type = get_word()
 	Size = get_dword()
-	Xhot = get_word()
-	Yhot = get_word()
+	X_hot = get_word()
+	Y_hot = get_word()
 	OffBits = get_dword()
 	SizeHeader = get_dword()
 
@@ -437,7 +437,7 @@ end procedure
 -- Comments:
 --   This routine does the opposite of [[:read_bitmap]]().
 -- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each 
--- color in the butmap. The second element is a sequence of sequences of pcolors. The inner 
+-- color in the bitmap. The second element is a sequence of sequences of colors. The inner 
 -- sequences must have the same length.
 --
 -- The result will be one of the following codes: 

@@ -72,8 +72,8 @@ procedure skip_blanks()
 	end while
 end procedure
 
-constant ESCAPE_CHARS = "nt'\"\\r",
-		 ESCAPED_CHARS = "\n\t'\"\\\r"
+constant ESCAPE_CHARS = "n'\"t\\r",
+		 ESCAPED_CHARS = "\n'\"\t\\\r"
 
 function escape_char(char c)
 -- return escape character
@@ -333,8 +333,8 @@ function Get()
 					elsif ch!='-' then 
 						exit
 					else -- comment starts after item and before comma
-						e = get_number() -- reads anything starting witn '-'
-						if e[1] != GET_IGNORE then  -- it wasn't a coment, this is illegal
+						e = get_number() -- reads anything starting with '-'
+						if e[1] != GET_IGNORE then  -- it wasn't a comment, this is illegal
 							return {GET_FAIL, 0}
 						end if
 						-- read next comment or , or }
@@ -514,7 +514,7 @@ end function
 --
 -- Comments:
 -- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
--- elements in thr returned sequence are actually returned.
+-- elements in the returned sequence are actually returned.
 --
 -- The ##GET_NOTHING## return status will not be returned if ##answer## is ##GET_SHORT_ANSWER##.
 --
@@ -631,7 +631,7 @@ end function
 --
 -- Comments:
 -- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
--- elements in thr returned sequence are actually returned.
+-- elements in the returned sequence are actually returned.
 --
 -- This works the same as [[:get]](), but it reads from a string that you supply, rather than
 -- from a file or device.

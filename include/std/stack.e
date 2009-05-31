@@ -331,7 +331,7 @@ end function
 -- * For ##FILO## stacks, the top item is the newest item in the stack.
 --
 -- When ##idx## is omitted the 'top' of the stack is removed and returned. 
--- When ##idx## is supplied, it repesents the N-th item from the top to be
+-- When ##idx## is supplied, it represents the N-th item from the top to be
 -- removed and returned. Thus an ##idx## of 2 returns the 2nd item from the
 -- top, a value of 3 returns the 3rd item from the top, etc ...
 --
@@ -437,7 +437,7 @@ end function
 -- * For ##FILO## stacks, the top item is the newest item in the stack.
 --
 -- When ##idx## is omitted the 'top' of the stack is returned. 
--- When ##idx## is supplied, it repesents the N-th item from the top to be
+-- When ##idx## is supplied, it represents the N-th item from the top to be
 -- returned. Thus an ##idx## of 2 returns the 2nd item from the
 -- top, a value of 3 returns the 3rd item from the top, etc ...
 --
@@ -506,7 +506,7 @@ end function
 -- * For ##FILO## stacks, the end item is the oldest item in the stack.
 --
 -- When ##idx## is omitted the 'end' of the stack is returned. 
--- When ##idx## is supplied, it repesents the N-th item from the endp to be
+-- When ##idx## is supplied, it represents the N-th item from the endp to be
 -- returned. Thus an ##idx## of 2 returns the 2nd item from the
 -- end, a value of 3 returns the 3rd item from the end, etc ...
 --

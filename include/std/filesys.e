@@ -2282,14 +2282,14 @@ end function
 --     A **sequence**, containing four elements; the number of sub-directories [COUNT_DIRS],
 --                     the number of files [COUNT_FILES], 
 --                     the total space used by the directory [COUNT_SIZE], and
---                     breakdown of the file contents by file extention [COUNT_TYPES].
+--                     breakdown of the file contents by file extension [COUNT_TYPES].
 --                  
 -- Comments:
 --  * The total space used by the directory does not include space used by any sub-directories.
 --  * The file breakdown is a sequence of three-element sub-sequences. Each sub-sequence
---    contains the extention [EXT_NAME], the number of files of this extention [EXT_COUNT],
+--    contains the extension [EXT_NAME], the number of files of this extension [EXT_COUNT],
 --    and the space used by these files [EXT_SIZE]. The sub-sequences are presented in
---    extention name order. On Windows and DOS systems, the extentions are all in lowercase.
+--    extension name order. On Windows and DOS systems, the extensions are all in lowercase.
 --
 -- Example 1:
 -- <eucode>

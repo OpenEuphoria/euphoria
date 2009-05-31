@@ -74,7 +74,7 @@ global constant
 		
 		,T_SLICE       = Enum()
 
--- this list of delimiters must match the order of the corresonding T_ codes above
+-- this list of delimiters must match the order of the corresponding T_ codes above
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
 global constant -- T_NUMBER formats
@@ -261,7 +261,7 @@ function scan_multicomment()
 	return TRUE
 end function
 
-constant QFLAGS = "trn\\\'\""
+constant QFLAGS = "t\\r\'n\""
 
 procedure scan_escaped_char()
  integer f
@@ -330,11 +330,11 @@ end function
 
 function hex_val(integer h)
 	if h >= 'a' then
-		return h-'a'+10
+		return h - 'a' + 10
 	elsif h >= 'A' then
-		return h-'A'+10
+		return h - 'A' + 10
 	else
-		return h-'0'
+		return h - '0'
 	end if
 end function
 
@@ -623,6 +623,6 @@ end function
 -- CONSIDER
 
 -- distinguish between full line comments and end of line comments
--- option to specify which end of line char/s are used to indiciate new lines
+-- option to specify which end of line char/s are used to indicate new lines
 
 ---------------------------------------------------------------------------------

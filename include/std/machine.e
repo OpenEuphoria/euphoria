@@ -125,7 +125,7 @@ include std/dll.e
 -- Errors:
 -- If ##id## is negative or otherwise unknown, an error occurs.
 --
--- If the length of ##args## is not the number of patameters the function takes, an error occurs.
+-- If the length of ##args## is not the number of parameters the function takes, an error occurs.
 --
 -- Comments: 
 -- ##id## must be a valid routine id returned by [[:routine_id]]().
@@ -157,7 +157,7 @@ include std/dll.e
 -- Errors:
 -- If ##id## is negative or otherwise unknown, an error occurs.
 --
--- If the length of ##args## is not the number of patameters the function takes, an error occurs.
+-- If the length of ##args## is not the number of parameters the function takes, an error occurs.
 --
 -- Comments: 
 -- ##id## must be a valid routine id returned by [[:routine_id]]().
@@ -356,9 +356,9 @@ elsedef
 end ifdef
 
 ifdef WIN32 then
-	function VirtualAlloc( atom addr, atom size, atom flallocationtype, atom flprotect )
+	function VirtualAlloc( atom addr, atom size, atom allocation_type, atom protect_ )
 		atom r1
-		r1 = c_func( VirtualAlloc_rid, {addr, size, flallocationtype, flprotect } )
+		r1 = c_func( VirtualAlloc_rid, {addr, size, allocation_type, protect_ } )
 		return r1
 	end function
 end ifdef
@@ -375,18 +375,29 @@ end type
 -- === Allocating and Writing to memory:
 
 --**
--- Allocates and copies data into executible memory.
+-- Allocates and copies data into executable memory.
 --
 -- Parameters:
--- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to be put into memory to be later called with [[:call()]]        
+-- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to
+-- be put into memory to be later called with [[:call()]]        
 --
 -- Return Value:
--- The function returns the address in memory of the byte-code that can be safely executed whether DEP is enabled or not or 0 if it fails.  On the other hand, if you try to execute a code address returned by [[:allocate()]] with DEP enabled the program will receive a machine exception.  
+-- The function returns the address in memory of the byte-code that can be
+-- safely executed whether DEP is enabled or not or 0 if it fails.  On the
+-- other hand, if you try to execute a code address returned by [[:allocate()]]
+-- with DEP enabled the program will receive a machine exception.  
 --
 -- Comments:
 -- 
--- Use this for the machine code you want to run in memory.  The copying is done for you and when the routine returns the memory may not be readable or writable but it is guaranteed to be executable.  If you want to also write to this memory **after the machine code has been copied** you should use [[:allocate_protect()]] instead and you should read about having memory executable and writable at the same time is a bad idea.  You mustn't use ##free()## on memory returned from this function.  You may instead
--- use ##free_code()## but since you will probably need the code througout the life of your program's process this normally is not necessary.
+-- Use this for the machine code you want to run in memory.  The copying is
+-- done for you and when the routine returns the memory may not be readable
+-- or writeable but it is guaranteed to be executable.  If you want to also
+-- write to this memory **after the machine code has been copied** you should
+-- use [[:allocate_protect()]] instead and you should read about having memory
+-- executable and writeable at the same time is a bad idea.  You mustn't use
+-- ##free()## on memory returned from this function.  You may instead
+-- use ##free_code()## but since you will probably need the code throughout
+-- the life of your program's process this normally is not necessary.
 -- If you want to put only data in the memory to be read and written use [[:allocate]].
 -- See Also:
 -- [[:allocate]], [[:free_code]], [[:allocate_protect]]
@@ -454,10 +465,10 @@ end function
 -- at least the protection given (but you may get more).
 --
 -- If you want to call ##allocate_protect( data, PAGE_READWRITE )##, you can use 
--- [[:allocate]] instead.  It is more efficient and simplier.
+-- [[:allocate]] instead.  It is more efficient and simpler.
 --
 -- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
--- [[:allocate_code()]] instead.  It is more efficient and simplier.
+-- [[:allocate_code()]] instead.  It is more efficient and simpler.
 --
 -- You mustn't use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
 

@@ -293,7 +293,7 @@ end function
 -- <eucode>
 -- s = columnize({{1, 2}, {3, 4}, {5, 6, 7}})
 -- -- s is { {1,3,5}, {2,4,6}, {0,0,7} }
--- s = columnize({{1, 2}, {3, 4}, {5, 6, 7},,-999}) -- Change 'no available' value.
+-- s = columnize({{1, 2}, {3, 4}, {5, 6, 7},,-999}) -- Change the not-available value.
 -- -- s is { {1,3,5}, {2,4,6}, {-999,-999,7} }
 -- </eucode>
 --
@@ -509,7 +509,7 @@ end function
 --
 -- Comments:
 -- The input sequence does not have to be in any specific order and can
--- contain duplicates. The output will be in an unpredicable order, which
+-- contain duplicates. The output will be in an unpredictable order, which
 -- might even be the same as the input order.
 --
 -- Example 1:
@@ -1293,7 +1293,7 @@ end function
 -- 		# ##target##: a sequence, a modified copy of which will be returned
 --		# ##source##: a sequence, to be patched inside or outside ##target##
 --		# ##start##: an integer, the position at which to patch
---		# ##filler##: an bject, used for filling gaps. Defaults to ' '
+--		# ##filler##: an object, used for filling gaps. Defaults to ' '
 --
 -- Returns:
 -- A **sequence**, which looks like ##target##, but a slice starting at ##start## equals ##source##.
@@ -1363,7 +1363,7 @@ end function
 --		A **sequence** of length at most ##length(haystack)##, and which has the same elements, without any copy of ##needle## left
 --
 -- Comments:
--- This function weeds elements out, not subsequences.
+-- This function weeds elements out, not sub-sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -1505,7 +1505,7 @@ end function
 
 --****
 -- Description:
--- Replaces all occurances of ##olddata## with ##newdata##
+-- Replaces all occurrences of ##olddata## with ##newdata##
 --
 -- Parameters:
 --   # ##source##: the sequence in which replacements will be done.
@@ -1514,11 +1514,11 @@ end function
 --   # ##newdata##: the sequence/item which will be the replacement.
 --
 -- Returns:
---		A **sequence**, which is made of ##source## with all ##olddata## occurances
+--		A **sequence**, which is made of ##source## with all ##olddata## occurrences
 --      replaced by ##newdata##.
 --
 -- Comments:
---   This also removes all ##olddata## occurances when ##newdata## is "".
+--   This also removes all ##olddata## occurrences when ##newdata## is "".
 --
 -- Example:
 -- <eucode>
@@ -1564,10 +1564,10 @@ public function replace_all(sequence source, object olddata, object newdata)
 end function
 
 --**
--- Extracts subvectors from vectors, and returns a list of requested subvectors by vector.
+-- Extracts sub-vectors from vectors, and returns a list of requested sub-vectors by vector.
 --
 -- Parameters:
---		# ##vectors##: a sequence of sequences of objects. Subsequences will be extracted from the inner sequences.
+--		# ##vectors##: a sequence of sequences of objects. Sub-sequences will be extracted from the inner sequences.
 --		# ##coords##: q list of coordinate index lists, ie a sequence of sequences of small positive integers.
 --
 -- Returns:
@@ -1663,7 +1663,7 @@ end function
 --                   trailing and duplicated delimiters are not significant.
 --
 -- Returns:
---		A **sequence** of subsequences of ##source##. Delimiters are removed.
+--		A **sequence** of sub-sequences of ##source##. Delimiters are removed.
 --
 -- Comments:
 -- This function may be applied to a string sequence or a complex sequence.
@@ -1923,8 +1923,8 @@ public enum
 --
 -- **When ##size## is an integer and ##style## is BK_PIECES...**\\
 -- There is exactly ##size## sub-sequences created. If the ##source## is not
--- evenly divisible into that many pieces, then the lefthand subsequences will
--- contain one more element than the righthand subsequences. For example, if
+-- evenly divisible into that many pieces, then the lefthand sub-sequences will
+-- contain one more element than the right-hand sub-sequences. For example, if
 -- source contains 10 items and we break it into 3 pieces, piece #1 gets 4 elements,
 -- piece #2 gets 3 items and piece #3 gets 3 items - a total of 10. If source had
 -- 11 elements then the pieces will have 4,4, and 3 respectively.
@@ -2048,7 +2048,7 @@ end function
 --
 -- Parameters:
 --		# ##s##: the sequence to flatten out.
---      # delim##: An optional delimiter to place after each flattened subsequence (except
+--      # delim##: An optional delimiter to place after each flattened sub-sequence (except
 --                 the last one). 
 --
 -- Returns:
@@ -2174,7 +2174,7 @@ end function
 --        zero, the second element is added to the new list being built (other elements
 --        are ignored) and build_list skips the rest of the transformers and processes
 --        the next element in ##source##.
---   # ##singlton##: An integer. If zero then the transformer functions return multiple
+--   # ##singleton##: An integer. If zero then the transformer functions return multiple
 --                   list elements. If not zero then the transformer functions return
 --                   a single item (which might be a sequence).
 --   # ##user_data##: Any object. This is passed unchanged to each transformer function.
@@ -2201,7 +2201,7 @@ end function
 -- -- s is {0, 1.1, 2, 3}
 -- </eucode>
 
-public function build_list( sequence source, object transformer, integer singlton = 1, object user_data = {})
+public function build_list( sequence source, object transformer, integer singleton = 1, object user_data = {})
 	sequence result = {}
 	sequence x
 	object new_x
@@ -2237,7 +2237,7 @@ public function build_list( sequence source, object transformer, integer singlto
 				new_x = x[1]
 			end if
 						
-			if singlton then
+			if singleton then
 				result = append(result, new_x)
 			else
 				result &= new_x
@@ -2287,7 +2287,7 @@ end function
 -- ? sim_index("kitting",  "kitten")   --> 0.09068 
 -- ? sim_index("knitting", "knotting") --> 0.27717 
 -- ? sim_index("knitting", "kitten")   --> 0.35332 
--- ? sim_index("abacus","zooilogical") --> 0.78898 
+-- ? sim_index("abacus","zoological")  --> 0.76304
 -- </eucode>
 
 public function sim_index(sequence A, sequence B)
@@ -2360,7 +2360,7 @@ public constant SEQ_NOALT = {{1.23456}}
 -- Parameters:
 -- # ##pSource##: A sequence from which sub-sequences are removed.
 -- # ##pAltValue##: An object. Use SEQ_NOALT to indicate that sub-sequences
---                  are to be physically removed, anyother value will be
+--                  are to be physically removed, any other value will be
 --                  used to replace the sub-sequence.
 --
 -- Returns:
@@ -2483,14 +2483,14 @@ public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
 end function
 
 --**
--- Combines all the subsequences into a single sorted list
+-- Combines all the sub-sequences into a single sorted list
 --
 -- Parameters:
 -- # ##pSource##: A sequence that contains sub-sequences to be merged.
 --
 -- Returns:
 -- A sequence that contains all the elements from all the first-level of
--- subsequences from ##pSource##. 
+-- sub-sequences from ##pSource##. 
 --
 -- Comments:
 -- The elements in the sub-sequences do not have to be pre-sorted.

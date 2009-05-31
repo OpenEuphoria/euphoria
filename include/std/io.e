@@ -115,7 +115,7 @@ public constant EOF = (-1)
 -- Errors:
 -- 		If there are less values to show than format specifiers, a run time error will occur.
 --
--- The target fole or device must be open.
+-- The target file or device must be open.
 --
 -- Comments:
 -- A format specifier is a string of characters starting with a percent sign ( ~%~ ) and ending 
@@ -178,7 +178,7 @@ public constant EOF = (-1)
 -- Example 1:
 -- <eucode>
 -- rate = 7.875
--- printf(myfile, "The interest rate is: %8.2f\n", rate)
+-- printf(my_file, "The interest rate is: %8.2f\n", rate)
 --
 -- --      The interest rate is:     7.88
 -- </eucode>
@@ -222,7 +222,7 @@ public constant EOF = (-1)
 --		# ##text##: an object, either a single character or a sequence of characters.
 --
 -- Errors:
--- The target fole or device must be open.
+-- The target file or device must be open.
 --
 -- Comments:
 -- When you output a sequence of bytes it must not have any (sub)sequences within it. It 
@@ -311,9 +311,9 @@ public constant EOF = (-1)
 -- integer fn
 --
 -- -- read a text file into a sequence
--- fn = open("myfile.txt", "r")
+-- fn = open("my_file.txt", "r")
 -- if fn = -1 then
---     puts(1, "Couldn't open myfile.txt\n")
+--     puts(1, "Couldn't open my_file.txt\n")
 --     abort(1)
 -- end if
 --
@@ -748,9 +748,9 @@ end type
 -- sequence first_line
 -- constant ERROR = 2
 --
--- file_num = open("myfile", "r")
+-- file_num = open("my_file", "r")
 -- if file_num = -1 then
---     puts(ERROR, "couldn't open myfile\n")
+--     puts(ERROR, "couldn't open my_file\n")
 -- else
 --     first_line = gets(file_num)
 -- end if
@@ -758,7 +758,7 @@ end type
 -- file_num = open("PRN", "w") -- open printer for output
 --
 -- -- on Windows 95:
--- file_num95 = open("bigdirectoryname\\verylongfilename.abcdefg",
+-- file_num95 = open("big_directory_name\\very_long_file_name.abcdefg",
 --                   "r")
 -- if file_num95 != -1 then
 --     puts(STDOUT, "it worked!\n")
@@ -815,7 +815,7 @@ end type
 -- include std/io.e
 --
 -- integer fn
--- fn = open("mydata", "rb")
+-- fn = open("my.data", "rb")
 -- -- read and display first line of file 3 times:
 -- for i = 1 to 3 do
 --     puts(STDOUT, gets(fn))
@@ -880,12 +880,12 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- f = open("logfile", "w")
+-- f = open("file.log", "w")
 -- puts(f, "Record#1\n")
 -- puts(STDOUT, "Press Enter when ready\n")
 --
--- flush(f)  -- This forces "Record #1" into "logfile" on disk.
---           -- Without this, "logfile" will appear to have 
+-- flush(f)  -- This forces "Record #1" into "file.log" on disk.
+--           -- Without this, "file.log" will appear to have 
 --           -- 0 characters when we stop for keyboard input.
 --
 -- s = gets(0) -- wait for keyboard input
@@ -1028,18 +1028,18 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- data = read_lines("myfile.txt")
--- -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
+-- data = read_lines("my_file.txt")
+-- -- data contains the entire contents of ##my_file.txt##, 1 sequence per line:
 -- -- {"Line 1", "Line 2", "Line 3"}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- fh = open("myfile.txt", "r")
+-- fh = open("my_file.txt", "r")
 -- data = read_lines(fh)
 -- close(fh)
 --
--- -- data contains the entire contents of 'myfile.txt', 1 sequence per line:
+-- -- data contains the entire contents of ##my_file.txt##, 1 sequence per line:
 -- -- {"Line 1", "Line 2", "Line 3"}
 -- </eucode>
 --
@@ -1182,17 +1182,17 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- data = read_file("myfile.txt")
--- -- data contains the entire contents of 'myfile.txt'
+-- data = read_file("my_file.txt")
+-- -- data contains the entire contents of ##my_file.txt##
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- fh = open("myfile.txt", "r")
+-- fh = open("my_file.txt", "r")
 -- data = read_file(fh)
 -- close(fh)
 --
--- -- data contains the entire contents of 'myfile.txt'
+-- -- data contains the entire contents of ##my_file.txt##
 -- </eucode>
 --
 -- See Also:
@@ -1246,7 +1246,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- if write_file("data.txt", "This is important data\nGoodybe") = 0 then
+-- if write_file("data.txt", "This is important data\nGoodbye") = 0 then
 --     puts(STDERR, "Failed to write data\n")
 -- end if
 -- </eucode>

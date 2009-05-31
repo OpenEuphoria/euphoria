@@ -85,11 +85,11 @@ end type
 -- Since ##allocate_string##() allocates memory, you are responsible to
 -- [[:free]]() the block when done with it if ##cleanup## is zero.
 -- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the ponter's reference count drops to zero.
+-- [[:delete]], or when the pointer's reference count drops to zero.
 
 -- When you are finished using the block, you should pass the address of the block to 
 -- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
--- can be freed by calling [[:delete]], or when the ponter's reference count drops to zero.
+-- can be freed by calling [[:delete]], or when the pointer's reference count drops to zero.
 -- This will free the block and make the memory available for other purposes. When 
 -- your program terminates, the operating system will reclaim all memory for use with other 
 -- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
@@ -141,7 +141,7 @@ end function
 -- Since ##allocate_string##() allocates memory, you are responsible to
 -- [[:free]]() the block when done with it if ##cleanup## is zero.
 -- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the ponter's reference count drops to zero.
+-- [[:delete]], or when the pointer's reference count drops to zero.
 --
 -- Example 1:
 -- <eucode>
@@ -323,7 +323,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --
 -- Errors:
 --
---      Peek()ing in memory you don't own may be blocked by the OS, and cause a
+-- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -376,7 +376,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --
 -- Errors:
 --
---      Peek()ing in memory you don't own may be blocked by the OS, and cause
+-- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -431,7 +431,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e i,clude file can catch this sort of issues.
+-- a machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -487,7 +487,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- integers returned are words, in the range 0..65535.
 --
 -- Errors:
---      Peek()ing in memory you don't own may be blocked by the OS, and cause a
+--      Peek() in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -544,7 +544,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e i,clude file can catch this sort of issues.
+-- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -585,7 +585,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- <built-in> function peek4u(object addr_n_length)
 --
 -- Description:
--- Fetches an //unsigned// double word, or some //unsigned// dounle words,
+-- Fetches an //unsigned// double word, or some //unsigned// double words,
 -- from an address in memory.
 --
 -- Parameters:
@@ -600,7 +600,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- -power(2,31)..power(2,31)-1.
 --
 -- Errors:
---      Peek()ing in memory you don't own may be blocked by the OS, and cause
+--      Peek() in memory you don't own may be blocked by the OS, and cause
 -- a machine exception. The safe.e include file can catch this sort of issues.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
@@ -646,13 +646,13 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Read an ASCIZ string in RAM, starting from a supplied address.
 --
 -- Parameters:
---              # ##addr#: an atom, the address at whuich to start reading.
+--              # ##addr#: an atom, the address at which to start reading.
 --
 -- Returns:
 -- A **sequence** of bytes, the string that could be read.
 --
 -- Errors:
--- Further, peek()ing memory that doesn't belong to your process is something the operating
+-- Further, peek() memory that doesn't belong to your process is something the operating
 -- system could prevent, and you'd crash with a machine level exception.
 --
 -- Comments:
@@ -676,7 +676,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --              # ##x##, an object, either a byte or a non empty sequence of bytes.
 --
 -- Errors:
---      Poke()ing in memory you don't own may be blocked by the OS, and cause a
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments:
@@ -725,13 +725,13 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --              # ##x##, an object, either a word or a non empty sequence of words.
 --
 -- Errors:
---      Poke()ing in memory you don't own may be blocked by the OS, and cause a
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments: 
 --
 -- There is no point in having poke2s() or poke2u(). For example, both 32768
--- and -32768 are stored as #F000 when stored as words. It' up to whoever
+-- and -32768 are stored as #F000 when stored as words. It's up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several words at once by poking a sequence of
@@ -776,13 +776,13 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- double words.
 --
 -- Errors:
---      Poke()ing in memory you don't own may be blocked by the OS, and cause a
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
 -- machine exception. The safe.e include file can catch this sort of issues.
 --
 -- Comments: 
 --
 -- There is no point in having poke4s() or poke4u(). For example, both
--- +power(2,31) and -power(2,31) are stored as #F0000000. It' up to whoever
+-- +power(2,31) and -power(2,31) are stored as #F0000000. It's up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several double words at once by poking a sequence
@@ -820,7 +820,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Signature:
 -- <built-in> procedure mem_copy(atom destination, atom origin, integer len)
 --
--- Descripotion:
+-- Description:
 -- Copy a block of memory from an address to another.
 --
 -- Parameters:
@@ -853,7 +853,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- <built-in> procedure mem_set(atom destination, integer byte_value, integer how_many))
 --
 -- Description:
--- Sets a contiguous range of memory ocations to a single value.
+-- Sets a contiguous range of memory locations to a single value.
 --
 -- Parameters:
 --              # ##destination##, an atom, the address starting the range to set.
@@ -924,8 +924,8 @@ integer check_calls = 1
 --
 -- Comments: 
 --
--- In memory.e, this procedure does nothing. It is there simply to simpify
--- switching between the normal and debu version of the library.
+-- In memory.e, this procedure does nothing. It is there to simplify
+-- switching between the normal and debug version of the library.
 --
 -- This routine is only meant to be used for debugging purposes. safe.e
 -- tracks the blocks of memory that your program is allowed to 
@@ -970,7 +970,7 @@ end procedure
 --
 -- Comments: 
 --
--- In memory.e, this procedure does nothing. It is there simply to simpify
+-- In memory.e, this procedure does nothing. It is there to simplify
 -- switching between the normal and debug version of the library.
 --
 -- This routine is only meant to be used for debugging purposes. Use it to

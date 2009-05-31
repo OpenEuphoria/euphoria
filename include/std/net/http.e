@@ -261,7 +261,7 @@ public procedure set_sendheader_default()
 
   -- the following not only puts the default header lines,
   -- it sorts the already-set lines to match the defaultsendheader order
-	for defaultndx = 1 to length(defaultsendheader) do-- loop thru defaultsendheader
+	for defaultndx = 1 to length(defaultsendheader) do-- loop through defaultsendheader
 	   temps = get_sendheader(defaultsendheader[defaultndx][1]) -- see if it was already set to something
 	   if equal(temps[1],"") -- was it defined?
 		 then tempnewheader &= {defaultsendheader[defaultndx]} -- so set the default line
@@ -313,7 +313,7 @@ public procedure set_sendheader(object whatheader, sequence whatdata)
 	-- ok, if we got here, then whatheader isn't in sendheader
 
 	--	you better know what you are doing here!
-	-- ": " is supplied as default, lets hope it's not an abberation like GET or POST
+	-- ": " is supplied as default, lets hope it's not an aberration like GET or POST
 	-- this doesn't put it in any correct order
 	sendheader = append(sendheader,{whatheader, ": ",whatdata})
 end procedure
@@ -430,7 +430,7 @@ end procedure
 --	   0 to return the whole header, or a numerical index.
 --
 -- Returns:
---	 An **ovject**:
+--	 An **object**:
 --	 * -1 on error
 --	 * a sequence in the form, ##{field name, field value}## on success.
 

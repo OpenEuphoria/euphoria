@@ -5,7 +5,7 @@
 === Introduction
 
 The testing system gives you the ability to check if the library,
-interpreter and translator works properly by use of 'unit tests.'  The
+interpreter and translator works properly by use of //unit tests//.  The
 unit tests are **EUPHORIA** include files that ##include unittest.e##
 at the top, several test-routines for comparison between expected value
 and true value and at the end of the program a call to
@@ -59,7 +59,7 @@ itself in the command line and is the option with that requirement.
   djg, or lcc.  Each of these represent the kind of compiler we will
   request the translator to use.
 * -process-log: Is for processing a log created by a previous
-invokation of eutest.ex output is sent to standard output as a report
+invocation of eutest.ex output is sent to standard output as a report
 of how the tests went.  By default this is in ascii format.  Use -html
 to make it HTML format.
 * -html: Is for making the report creation to be in HTML format
@@ -69,7 +69,7 @@ to make it HTML format.
 Unit test files must match a pattern ##t_*.e##.  If the unit test file
 matches ##t_c_*.e## the test program will expect the program to fail,
 if there is an error control file in a directory with its same name and
-'.d' extension it will also expect it to fail according to the control
+'d' extension it will also expect it to fail according to the control
 file's contents.  Found in the said directory.
 
 ==== A trivial example

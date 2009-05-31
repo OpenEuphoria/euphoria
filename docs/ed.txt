@@ -18,7 +18,7 @@ with EUPHORIA.
 If you search for **Editor** in our Archive, you'll find many editors written
 **in** EUPHORIA or **for** EUPHORIA.  Some written **in** EUPHORIA and *for* EUPHORIA.
 In fact, //any// text editor can be used to edit a Euphoria program, 
-such as vi, jEdit, Emacs, and even dinasaur applications like DOS Edit and Windows NotePad.
+such as vi, jEdit, Emacs, and even dinosaur applications like DOS Edit and Windows NotePad.
 
 Among the editors you will find Judith's IDE and wxIDE: Integrated Development Enviroments.
 
@@ -84,20 +84,66 @@ the desired key to the desired function.
 
 Press and release the //Esc// key, then press one of the following keys:
 
-| h | Get help text for the editor, or Euphoria. The screen is split so you can view your program and the help text at the same time. |
-| c | "Clone" the current window, i.e. make a new edit window that is initially viewing the same file at the same position as the current window. The sizes of all windows are adjusted to make room for the new window. You might want to use **Esc l** to get more lines on the screen. Each window that you create can be scrolled independently and each has its own menu bar. The changes that you make to a file will initially appear only in the current window. When you press an **F-key** to select a new window, any changes will appear there as well. You can use **Esc n** to read a new file into any window. |
-| q | Quit (delete) the current window and leave the editor if there are no more windows. You'll be warned if this is the last window used for editing a modified file. Any remaining windows are given more space. |
-| s | Save the file being edited in the current window, then quit the current window as **Esc q** above. |
+| h | Get help text for the editor, or Euphoria. The screen is split so you
+      can view your program and the help text at the same time. |
+| c | "Clone" the current window, i.e. make a new edit window that is initially
+      viewing the same file at the same position as the current window. The
+      sizes of all windows are adjusted to make room for the new window. You
+      might want to use **Esc l** to get more lines on the screen. Each window
+      that you create can be scrolled independently and each has its own menu
+      bar. The changes that you make to a file will initially appear only in
+      the current window. When you press an **F-key** to select a new window,
+      any changes will appear there as well. You can use **Esc n** to read a
+      new file into any window. |
+| q | Quit (delete) the current window and leave the editor if there are no
+      more windows. You'll be warned if this is the last window used for
+      editing a modified file. Any remaining windows are given more space. |
+| s | Save the file being edited in the current window, then quit the current
+      window as **Esc q** above. |
 | w | Save the file but do not quit the window. |
-| e | Save the file, and then execute it with ##euid##, ##euiw## or ##eui##. When the program finishes execution you'll hear a beep. Hit //Enter// to return to the editor. This operation may not work if you are very low on extended memory. You can't supply any command-line arguments to the program. |
-| d | Run an operating system command. After the beep, hit //Enter// to return to the editor. You could also use this command to edit another file and then return, but //Esc c// is probably more convenient. |
-| n | Start editing a new file in the current window. Deleted lines/chars and search strings are available for use in the new file. You must type in the path to the new file. Alternatively, you can drag a file name from a Windows file manager window into the MS-DOS window for ##ed##. This will type the full path for you. |
-| f | Find the next occurrence of a string in the current window. When you type in a new string there is an option to "match case" or not. Press //y// if you require upper/lower case to match. Keep hitting //Enter// to find subsequent occurrences. Any other key stops the search. To search from the beginning, press //C-Home// before //Esc f//. The default string to search for, if you don't type anything, is shown in double quotes. |
-| r | Globally replace one string by another. Operates like //Esc f// command. Keep hitting //Enter// to continue replacing. Be careful - //there is no way to skip over a possible replacement.// |
-| l | Change the number of lines displayed on the screen. Only certain values are allowed, depending on your video card. Many cards will allow 25, 28, 43 and 50 lines. In a Linux/FreeBSD text console you're stuck with the number of lines available (usually 25). In a Linux/FreeBSD xterm window, ##ed## will use the number of lines initially available when ed is started up. Changing the size of the window will have no effect after ed is started. |
-| m | Show the modifications that you've made so far. The current edit buffer is saved as ##editbuff.tmp##, and is compared with the file on disk using the DOS ##fc## command, or the Linux/FreeBSD ##diff## command. //Esc m// is very useful when you want to quit the editor, but you can't remember what changes you made, or whether it's ok to save them. It's also useful when you make an editing mistake and you want to see what the original text looked like. |
-| //ddd// | Move to line number //ddd//. e.g. //Esc 1023 Enter// would move to line 1023 in the file.
-| CR | //Esc Carriage-Return//, i.e. //Esc Enter//, will tell you the name of the current file, as well as the line and character position you are on, and whether the file has been modified since the last save. If you press //Esc// and then change your mind, it is harmless to just hit //Enter// so you can go back to editing. |
+| e | Save the file, and then execute it with ##euid##, ##euiw## or ##eui##.
+      When the program finishes execution you'll hear a beep. Hit //Enter// to
+      return to the editor. This operation may not work if you are very low on
+      extended memory. You can't supply any command-line arguments to the
+      program. |
+| d | Run an operating system command. After the beep, hit //Enter// to return
+      to the editor. You could also use this command to edit another file and
+      then return, but //Esc c// is probably more convenient. |
+| n | Start editing a new file in the current window. Deleted lines/chars and
+      search strings are available for use in the new file. You must type in
+      the path to the new file. Alternatively, you can drag a file name from a
+      Windows file manager window into the MS-DOS window for ##ed##. This
+      will type the full path for you. |
+| f | Find the next occurrence of a string in the current window. When you type
+      in a new string there is an option to "match case" or not. Press //y//
+      if you require upper/lower case to match. Keep hitting //Enter// to find
+      subsequent occurrences. Any other key stops the search. To search from
+      the beginning, press //C-Home// before //Esc f//. The default string to
+      search for, if you don't type anything, is shown in double quotes. |
+| r | Globally replace one string by another. Operates like //Esc f// command.
+      Keep hitting //Enter// to continue replacing. Be careful - //there is no
+      way to skip over a possible replacement.// |
+| l | Change the number of lines displayed on the screen. Only certain values
+      are allowed, depending on your video card. Many cards will allow 25, 28,
+      43 and 50 lines. In a Linux/FreeBSD text console you're stuck with the
+      number of lines available (usually 25). In a Linux/FreeBSD xterm window,
+      ##ed## will use the number of lines initially available when ed is
+      started up. Changing the size of the window will have no effect after
+      ed is started. |
+| m | Show the modifications that you've made so far. The current edit buffer
+      is saved as ##editbuff.tmp##, and is compared with the file on disk
+      using the DOS ##fc## command, or the Linux/FreeBSD ##diff## command.
+      //Esc m// is very useful when you want to quit the editor, but you can't
+      remember what changes you made, or whether it's ok to save them. It's
+      also useful when you make an editing mistake and you want to see what the
+      original text looked like. |
+| //ddd// | Move to line number //ddd//. e.g. //Esc 1023 Enter// would move to
+            line 1023 in the file.
+| CR | //Esc Carriage-Return//, i.e. //Esc Enter//, will tell you the name of
+       the current file, as well as the line and character position you are on,
+       and whether the file has been modified since the last save. If you
+       press //Esc// and then change your mind, it is harmless to just hit
+       //Enter// so you can go back to editing. |
 
 === Recalling Previous Strings
 

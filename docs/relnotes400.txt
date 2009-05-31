@@ -1,7 +1,7 @@
 == Version 4.0
 === Bug Fixes
 
-* $$(bugfix) 1855414. ##open()##'s max path length is now determined by the underlying 
+* $$(bugfix) 1855414. ##open()## max path length is now determined by the underlying 
   operating system and not a generic default. ##open()## also now returns -1 when the 
   filename is too long instead of causing a fatal error.  $$(doneby Jeremy Cowgar)
 * $$(bugfix) 1608870. ##dir()## now handles *.abc correctly, not showing a file ending 
@@ -28,7 +28,7 @@
   $$(doneby C. Cuvier)
 * **Moved**// DOS// specific commands to the **std/dos** directory
   $$(doneby C. Cuvier)
-* **Moved** text mode grapic commands to **console.e**
+* **Moved** text mode graphic commands to **console.e**
   $$(doneby C. Cuvier)
 * Documentation moved to a new format. $$(doneby Jeremy Cowgar and CK Lester)
 * **file.e** deprecated. **filesys.e**, **io.e** and **console.e** created
@@ -68,7 +68,7 @@ $$(doneby C. Cuvier)
 ** **goto**: jump to a label that is in the same scope
   $$(doneby J. Brown.)
 * The **exit**, **break**, **continue** and **retry** keywords now can take an optional 
-  parameter, which enables to xit several blocks at a time, or (re)starting an iteration of 
+  parameter, which enables to exit several blocks at a time, or (re)starting an iteration of
   a loop which is not the innermost one. $$(doneby C. Cuvier.)
 * Block headers now may mention a label. This label can be used as the optional parameter of 
   flow control keywords. $$(doneby C. Cuvier.)
@@ -150,7 +150,7 @@ $$(doneby C. Cuvier)
 * New **sets.e** library to handle sets, set maps and set operations. $$(doneby C. Cuvier)
 * New **stats.e** library for statistical and engineering math routines. $$(doneby Derek Parnell)
 * New routines in **sort.e**:
-  **sort_user()**, **sort_columns()**. All routines can use ascending or descending order.
+  **sort_columns()**. All routines can use ascending or descending order.
 $$(doneby Derek Parnell, C. Cuvier.)
 * New routines in **filesys.e**, **io.e** and **os.e**:
   **read_lines()**, **read_file()**, **write_lines()**, **append_lines**,
@@ -162,7 +162,7 @@ $$(doneby Derek Parnell, C. Cuvier.)
    and Global Constants **SLASH** and **CRLF**. $$(doneby Jeremy Cowgar, Jim Brown)
 * New routines in **datetime.e**:
   **new()**, **from_date()**,
-  **now()**, **dow()**, **doy()**, **to_unix()**,
+  **now()**, **weeks_day()**, **years_day()**, **to_unix()**,
   **from_unix()**, **add()**, **subtract()**,
   **diff()**. Global constants: **DT_YEAR**, **DT_MONTH**,
   **DT_DAY**, **DT_HOUR**, **DT_MINUTE**, **DT_SECOND**, **SECONDS**,
@@ -185,7 +185,7 @@ $$(doneby Derek Parnell, C. Cuvier.)
   **cmd_parse()**. $$(doneby Jeremy Cowgar)
 * New procedure **warning()** enables to specify custom warnings to be
   displayed at compile time, for instance to mark a routine as obsolete. The text of the 
-  warning must be a litteral constant. $$(doneby C. Cuvier.)
+  warning must be a literal constant. $$(doneby C. Cuvier.)
 * Warnings also may be redirected or suppressed using **warning_file()**. 
   $$(doneby C. Cuvier.)
 * New routines in **eds.e** (formerly **database.e**): **db_clear()**, **db_clear_table()**,
@@ -196,7 +196,7 @@ $$(doneby Derek Parnell, C. Cuvier.)
 * New **socket.e** library for network/internet data interchange $$(doneby Mike Sabal, Kathy Smith)
 * New character sets types and routines in **types.e** $$(doneby Derek Parnell)
 * New **unicode.e** for encoding/decoding/storing strings in UTF16 format $$(doneby Matt Lewis)
-* New **task.e** extending the multitasking proitives of Euphoria $$(doneby Ryan Johnson)
+* New **task.e** extending the multitasking capabilities of Euphoria $$(doneby Ryan Johnson)
 * New forward referencing: routines may be used before they are declared, and variables in other 
   files may be referenced before they are declared (such as when two files include each other)
   $$(doneby Matt Lewis)

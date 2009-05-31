@@ -643,10 +643,10 @@ end function
 -- Example 1:
 -- <eucode>
 -- d = new(2008, 5, 2, 0, 0, 0)
--- day = dow(d) -- day is 6 because May 2, 2008 is a Friday.
+-- day = weeks_day(d) -- day is 6 because May 2, 2008 is a Friday.
 -- </eucode>
 
-public function dow(datetime dt)
+public function weeks_day(datetime dt)
 	return remainder(julianDay(dt)-1+4094, 7) + 1
 end function
 
@@ -667,10 +667,10 @@ end function
 -- Example 1:
 -- <eucode>
 -- d = new(2008, 5, 2, 0, 0, 0)
--- day = doy(d) -- day is 123
+-- day = years_day(d) -- day is 123
 -- </eucode>
 
-public function doy(datetime dt)
+public function years_day(datetime dt)
 	return julianDayOfYear({dt[YEAR], dt[MONTH], dt[DAY]})
 end function
 
@@ -856,9 +856,9 @@ public function format(datetime d, wstring format)
 			if ch = '%' then
 				res &= '%'
 			elsif ch = 'a' then
-				res &= day_abbrs[dow(d)]
+				res &= day_abbrs[weeks_day(d)]
 			elsif ch = 'A' then
-				res &= day_names[dow(d)]
+				res &= day_names[weeks_day(d)]
 			elsif ch = 'b' then
 				res &= month_abbrs[d[MONTH]]
 			elsif ch = 'B' then
@@ -910,14 +910,14 @@ public function format(datetime d, wstring format)
 			elsif ch = 'S' then
 				res &= sprintf("%02d", d[SECOND])
 			elsif ch = 'u' then
-				tmp = dow(d)
+				tmp = weeks_day(d)
 				if tmp = 1 then
 					res &= "7" -- Sunday
 				else
-					res &= sprintf("%d", dow(d) - 1)
+					res &= sprintf("%d", weeks_day(d) - 1)
 				end if
 			elsif ch = 'w' then
-				res &= sprintf("%d", dow(d) - 1)
+				res &= sprintf("%d", weeks_day(d) - 1)
 			elsif ch = 'y' then
 			   tmp = floor(d[YEAR] / 100)
 			   res &= sprintf("%02d", d[YEAR] - (tmp * 100))

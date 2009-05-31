@@ -232,7 +232,7 @@ convention, however, main Euphoria files have an extension of ##.ex##
 unless your program is DOS only, then the extension should be ##.exd##.
 Euphoria include files should have the extension ##.e##. The only other
 extension that is used is ##.exw## which should be used for any
-windowed application. This is a GUI application, not necessarly a
+windowed application. This is a GUI application, not necessarily a
 Microsoft Windows (tm) program. A GUI application can exist on Linux,
 OS X, FreeBSD, etc...
 
@@ -541,7 +541,7 @@ When Euphoria starts up, it looks for configuration files in the following order
 ## Command line -C switches
 
 * Euphoria processes every configuration file found, and in the order described above.
-This means that setting specified in earlier configuration files may be overridded by
+This means that setting specified in earlier configuration files may be overridden by
 subsequent configuration files. For example, a configuration file in the current
 directory will override the same settings in a configuration file in the executable's
 directory.

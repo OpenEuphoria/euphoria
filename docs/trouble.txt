@@ -55,13 +55,13 @@ free_console()
 //When I run ##euid.exe## in a DOS Window, it makes my small DOS window go to full
 screen.//
 
-This is only susposed to happen the first time you run ##euid.exe## after creating a new small
+This is only supposed to happen the first time you run ##euid.exe## after creating a new small
 DOS window. This can be prevented by setting the EUCONS environment variable to "1".  
 You can make the window small again by pressing //Alt-Enter//. It may go full-screen again. 
 
 These days, you should only use ##euid.exe## for applications that require it.  This
 interpreter provides routines for full-screen graphics but does so in a way that is 
-not compatable with Windows Vista.  You can have graphics with ##eui.exe## using a
+not compatible with Windows Vista.  You can have graphics with ##eui.exe## using a
 graphics library.  In summary, if you don't want a full-screen application you shouldn't
 use this interpreter!
 
@@ -95,9 +95,9 @@ to run CGI programs, or you may have problems with standard output. With
 Apache Web Server, you can have a first line in your program of:
 #!.\eui.exe to run your program using eui.exe in the current (cgi-bin)
 directory. Be careful that your first line ends with the line breaking characters
-appopriate for your platform, or the ###!## won't be handled correctly. You must also set the
+appropriate for your platform, or the ###!## won't be handled correctly. You must also set the
 execute permissions on your program correctly, and ##ex.err## and ctrace.out
-must be writable by the server process or they won't be updated. 
+must be writeable by the server process or they won't be updated. 
 See [[:CGI (Web) Applications in Euphoria]] for more.
 
 ==== Read/Write Ports?

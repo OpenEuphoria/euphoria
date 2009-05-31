@@ -38,8 +38,8 @@ integer free_rid
 -- 
 -- Example 1:
 -- <eucode>
---  myspot = malloc()
---  ram_space[myspot] = my_data
+--  my_spot = malloc()
+--  ram_space[my_spot] = my_data
 -- </eucode>
 
 export function malloc(object mem_struct_p = 1, integer cleanup_p = 1)
@@ -82,10 +82,10 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  myspot = malloc(1,0)
---  ram_space[myspot] = my_data
+--  my_spot = malloc(1,0)
+--  ram_space[my_spot] = my_data
 --  . . . do some processing  . . 
---  free(myspot)
+--  free(my_spot)
 -- </eucode>
 
 export procedure free(atom mem_p)
@@ -106,7 +106,7 @@ free_rid = routine_id("free")
 -- should be occupying the ram_space location pointed to by ##mem_p##.
 --
 -- Returns:
--- 0 if either the ##mem_p## is invlaid or if the sequence at that location is
+-- 0 if either the ##mem_p## is invalid or if the sequence at that location is
 -- the wrong length.
 -- 1 if the handle and contents is okay.
 --
@@ -116,11 +116,11 @@ free_rid = routine_id("free")
 --
 -- Example 1:
 -- <eucode>
---  myspot = malloc()
---  ram_space[myspot] = my_data
+--  my_spot = malloc()
+--  ram_space[my_spot] = my_data
 --  . . . do some processing  . . 
---  if valid(myspot, length(my_data)) then
---      free(myspot)
+--  if valid(my_spot, length(my_data)) then
+--      free(my_spot)
 --  end if
 -- </eucode>
 

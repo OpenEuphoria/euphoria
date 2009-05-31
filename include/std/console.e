@@ -293,7 +293,7 @@ end function
 --
 -- See Also:
 --
--- 	[[:prompt_string]]
+-- 	[[:prompt_number]]
 
 public function prompt_string(sequence prompt)
 	object answer

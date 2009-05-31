@@ -255,7 +255,14 @@ below.)
 {{{
         **left-hand-side op= expression**
 }}}
- 
+For example:
+<eucode>
+-- Instead of ...
+  some_val = some_val * 3
+-- Use ...
+  some_val *= 3
+</eucode>
+
  whenever left-hand-side contains at least 2 subscripts, or at least
  one subscript and a slice. In all simpler cases the two forms run at 
  the same speed (or very close to the same).

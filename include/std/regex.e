@@ -110,7 +110,7 @@ end type
 -- Return an allocated regular expression
 --
 -- Parameters:
---   # ##pattern##: a sequence representing a human redable regular expression
+--   # ##pattern##: a sequence representing a human readable regular expression
 --   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
@@ -121,7 +121,7 @@ end type
 --   compiled and a [[:regex]] is returned. Analyzing and compiling a regular expression is a
 --   costly operation and should not be done more than necessary. For instance, if your application
 --   looks for an email address among text frequently, you should create the regular expression
---   as a constant accessable to your source code and any files that may use it, thus, the regular
+--   as a constant accessible to your source code and any files that may use it, thus, the regular
 --   expression is analyzed and compiled only once per run of your application.
 --
 --   **Bad Example**
@@ -202,7 +202,7 @@ public function find(regex re, sequence haystack, integer from=1, object options
 end function
 
 --**
--- Find all occurrances of ##re## in ##haystack## optionally starting at the sequence position
+-- Find all occurrences of ##re## in ##haystack## optionally starting at the sequence position
 -- ##from##.
 --
 -- Parameters:
@@ -553,7 +553,7 @@ end function
 --**
 -- Replaces up to ##limit## matches of ##ex## in ##text## with the result of a user
 -- defined callback. The callback should take one sequence which will contain a string
--- representing the entire match and also a string for every group within the regluar
+-- representing the entire match and also a string for every group within the regular
 -- expression.
 --
 -- Parameters:

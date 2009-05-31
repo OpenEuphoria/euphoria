@@ -6,7 +6,7 @@
 --
 -- <<LEVELTOC depth=2>>
 --
--- A map is a special array, often called an associative array or dicionary,
+-- A map is a special array, often called an associative array or dictionary,
 -- in which the index to the data can be any Euphoria object and not just
 -- an integer. These sort of indexes are also called keys.
 -- For example we can code things like this...
@@ -27,7 +27,7 @@
 -- for example, we couldn't have two separate "Name" values in the above //custrec//
 -- map.
 --
--- Maps automatically grow to accomodate all the elements placed into it.
+-- Maps automatically grow to accommodate all the elements placed into it.
 --
 -- Associative arrays can be implemented in many different ways, depending
 -- on what efficiency trade-offs have been made. This implementation allows
@@ -136,7 +136,8 @@ public enum
 	MULTIPLY,
 	DIVIDE,
 	APPEND,
-	CONCAT
+	CONCAT,
+	LEAVE
 
 
 --****
@@ -224,10 +225,10 @@ constant maxInt = #3FFFFFFF
 -- Parameters:
 --   * pData = The data for which you want a hash value calculated.
 --   * max_hash_p = (default = 0) The returned value will be no larger than this value.
---     However, a value of 0 or lower menas that it can grow as large as the maximum integer value.
+--     However, a value of 0 or lower means that it can grow as large as the maximum integer value.
 --
 -- Returns:
---		An **integer**, the value of which depends only on the supplied adata.
+--		An **integer**, the value of which depends only on the supplied data.
 --
 -- Comments:
 -- This is used whenever you need a single number to represent the data you supply.
@@ -253,9 +254,9 @@ public function calc_hash(object key_p, integer max_hash_p = 0)
 end function
 
 --**
--- Gets or Sets the threshold value that deterimes at what point a small map
+-- Gets or Sets the threshold value that determines at what point a small map
 -- converts into a large map structure. Initially this has been set to 50,
--- meaning that maps up to 50 elements use the 'small map' structure.
+-- meaning that maps up to 50 elements use the //small map// structure.
 --
 -- Parameters:
 -- # new_value_p = If this is greater than zero then it **sets** the threshold
@@ -328,7 +329,7 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 		-- grow bucket size_
 		new_size_ = floor(length(ram_space[the_map_p][key_buckets]) * 3.5) + 1
 		if new_size_ > maxInt then
-				return  -- dont do anything. already too large
+				return  -- don't do anything. already too large
 		end if
 		size_ = new_size_
 	else
@@ -632,7 +633,7 @@ end function
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map where an entry is being added or opdated
+--		# ##the_map_p##: the map where an entry is being added or updated
 --		# ##the_key_p##: an object, the the_key_p to look up
 --		# ##the_value_p##: an object, the value to add, or to use for updating.
 --		# ##operation##: an integer, indicating what is to be done with ##the_value_p##. Defaults to PUT.
@@ -651,13 +652,15 @@ end function
 -- ** ##DIVIDE##: Equivalent to using the /= operator 
 -- ** ##APPEND##: Appends the value to the existing data 
 -- ** ##CONCAT##: Equivalent to using the &= operator
+-- ** ##LEAVE##: If it already exists, the current value is left unchanged
+--               otherwise the new value is added to the map.
 --
 -- * The //trigger// parameter is used when you need to keep the average 
 --     number of keys in a hash bucket to a specific maximum. The //trigger// 
 --     value is the maximum allowed. Each time a //put// operation increases
 --     the hash table's average bucket size to be more than the //trigger// value
 --     the table is expanded by a factor 3.5 and the keys are rehashed into the
---     enlarged table. This can be a time intensitive action so set the value
+--     enlarged table. This can be a time intensive action so set the value
 --     to one that is appropriate to your application. 
 --     ** By keeping the average bucket size to a certain maximum, it can
 --        speed up lookup times. 
@@ -711,6 +714,9 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 					
 				case CONCAT then
 					ram_space[the_map_p][value_buckets][bucket_][index_] &= the_value_p
+					
+				case LEAVE then
+					-- Do nothing
 					
 				case else
 					crash("Unknown operation given to map.e:put()")
@@ -812,7 +818,7 @@ end procedure
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map where an entry is being added or opdated
+--		# ##the_map_p##: the map where an entry is being added or updated
 --		# ##the_keys_p##: a sequence of keys for the nested maps
 --		# ##the_value_p##: an object, the value to add, or to use for updating.
 --		# ##operation_p##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
@@ -838,7 +844,7 @@ end procedure
 --     value is the maximum allowed. Each time a //put// operation increases
 --     the hash table's average bucket size to be more than the //trigger// value
 --     the table is expanded by a factor 3.5 and the keys are rehashed into the
---     enlarged table. This can be a time intensitive action so set the value
+--     enlarged table. This can be a time intensive action so set the value
 --     to one that is appropriate to your application. 
 --     ** By keeping the average bucket size to a certain maximum, it can
 --        speed up lookup times. 
@@ -1210,7 +1216,7 @@ end function
 --
 -- Returns:
 --		A **sequence** of all key/value pairs stored in ##the_map_p##. Each pair is a 
--- subsequence in the form {key, value}
+-- sub-sequence in the form {key, value}
 --
 -- Comments:
 --   The order of the values returned may not be the same as the putting order. 
@@ -1487,7 +1493,7 @@ end function
 --
 -- All text after the '=' symbol is assumed to be the map item's value data.
 --
--- The SM_RAW type saves the map in an effecient manner. It is generally smaller
+-- The SM_RAW type saves the map in an efficient manner. It is generally smaller
 -- than the text format and is faster to process, but it is not human readable and
 -- standard text editors can not be used to edit it. In this format, the file will
 -- contain three serialized sequences:

@@ -409,7 +409,7 @@ end function
 --
 -- Comments: 
 --
---   If ##start## is less than 1, ir will be added once to length(##haystack##)
+--   If ##start## is less than 1, it will be added once to length(##haystack##)
 --   to designate a position counted backwards. Thus, if ##start## is -1, the
 --   first element to be queried in ##haystack## will be ##haystack##[$-1],
 --   then ##haystack##[$-2] and so on.
@@ -522,8 +522,8 @@ end function
 -- Parameters:
 --		# ##needle##: an object to look for
 --		# ##haystack##: a sequence to search in
---		# ##startpoint##: an integer, the index at which to start searching. Defaults to 1.
---		# ##endpoint##: an integer, the end point of the search. Defaults to 0, ie search to end.
+--		# ##start_point##: an integer, the index at which to start searching. Defaults to 1.
+--		# ##end_point##: an integer, the end point of the search. Defaults to 0, ie search to end.
 --
 -- Returns:
 --		An **integer**, either:
@@ -536,7 +536,7 @@ end function
 --   is below the start point, or above the end point if ##i## is.
 --
 -- Comments:
--- * If ##endpoint## is not greater than zero, it is added to 
+-- * If ##end_point## is not greater than zero, it is added to 
 --   length(##haystack##) once only. Then, the end point of the search is
 --   adjusted to length(haystack) if out of bounds.
 -- * The start point is adjusted to 1 if below 1.
@@ -551,15 +551,15 @@ end function
 -- See Also:
 -- [[:find]], [[:db_find_key]]
 
-public function binary_search(object needle, sequence haystack, integer startpoint = 1, 
-		integer endpoint = 0)
+public function binary_search(object needle, sequence haystack, integer start_point = 1, 
+		integer end_point = 0)
 	integer lo, hi, mid, c  -- works up to 1.07 billion records
 	
-	lo = startpoint
-	if endpoint <= 0 then
-		hi = length(haystack) + endpoint
+	lo = start_point
+	if end_point <= 0 then
+		hi = length(haystack) + end_point
 	else
-		hi = endpoint
+		hi = end_point
 	end if
 	if lo<1 then
 		lo=1
@@ -567,7 +567,7 @@ public function binary_search(object needle, sequence haystack, integer startpoi
 	if lo > hi and length(haystack) > 0 then
 		hi = length(haystack)
 	end if
-	mid = startpoint
+	mid = start_point
 	c = 0
 	while lo <= hi do
 		mid = floor((lo + hi) / 2)
@@ -600,7 +600,7 @@ end function
 --
 -- Parameters:
 --		# ##needle##: a sequence whose presence as a "substring" is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+--		# ##haystack##: a sequence, which is being looked up for ##needle## as a sub-sequence
 --		# ##start##: an integer, the point from which matching is attempted. Defaults to 1.
 --
 -- Returns:
@@ -627,8 +627,8 @@ end function
 --     Try to match a "needle" against some slice of a "haystack", starting from some index.
 --
 -- Parameters:
---		# ##needle##: an sequence whose presence as a subsequence is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle## as a subsequence
+--		# ##needle##: an sequence whose presence as a sub-sequence is being queried
+--		# ##haystack##: a sequence, which is being looked up for ##needle## as a sub-sequence
 --		# ##start##: an integer, the index in ##haystack## at which to start searching.
 --
 -- Returns:
@@ -712,12 +712,12 @@ end function
 --     [[:rfind]], [[:match]]
 
 public function rmatch(sequence needle, sequence haystack, integer start=length(haystack))
-	integer len, lenx
+	integer len, lenX
 
 	len = length(haystack)
-	lenx = length(needle)
+	lenX = length(needle)
 
-	if lenx = 0 then
+	if lenX = 0 then
 		return 0
 	elsif (start > len) or  (len + start < 1) then
 		return 0
@@ -727,14 +727,14 @@ public function rmatch(sequence needle, sequence haystack, integer start=length(
 		start = len + start
 	end if
 
-	if start + lenx - 1 > len then
-		start = len - lenx + 1
+	if start + lenX - 1 > len then
+		start = len - lenX + 1
 	end if
 
-	lenx -= 1
+	lenX -= 1
 
 	for i=start to 1 by -1 do
-		if equal(needle, haystack[i..i + lenx]) then
+		if equal(needle, haystack[i..i + lenX]) then
 			return i
 		end if
 	end for
@@ -747,11 +747,11 @@ end function
 -- Test whether a sequence is the head of another one.
 -- 
 -- Parameters:
---	# ##subtext##: an object to be looked for
---  # ##fulltext##: a sequence, the head of which is being inspected.
+--	# ##pSubText##: an object to be looked for
+--  # ##pFullText##: a sequence, the head of which is being inspected.
 --
 -- Returns:
---		An **integer**, 1 if ##subtext## begins ##fulltext##, else 0.
+--		An **integer**, 1 if ##pSubText## begins ##pFullText##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -764,24 +764,24 @@ end function
 -- See Also:
 --     [[:ends]], [[:head]]
 
-public function begins(object subtext, sequence fulltext)
-	if length(fulltext) = 0 then
+public function begins(object pSubText, sequence pFullText)
+	if length(pFullText) = 0 then
 		return 0
 	end if
 	
-	if atom(subtext) then
-		if equal(subtext, fulltext[1]) then
+	if atom(pSubText) then
+		if equal(pSubText, pFullText[1]) then
 			return 1
 		else
 			return 0
 		end if
 	end if
 	
-	if length(subtext) > length(fulltext) then
+	if length(pSubText) > length(pFullText) then
 		return 0
 	end if
 	
-	if equal(subtext, fulltext[1.. length(subtext)]) then
+	if equal(pSubText, pFullText[1.. length(pSubText)]) then
 		return 1
 	else
 		return 0
@@ -792,11 +792,11 @@ end function
 -- Test whether a sequence ends another one.
 --
 -- Parameters:
---	# ##subtext##: an object to be looked for
---  # ##fulltext##: a sequence, the head of which is being inspected.
+--	# ##pSubText##: an object to be looked for
+--  # ##pFullText##: a sequence, the head of which is being inspected.
 --
 -- Returns:
---		An **integer**, 1 if ##subtext## ends ##fulltext##, else 0.
+--		An **integer**, 1 if ##pSubText## ends ##pFullText##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -809,24 +809,24 @@ end function
 -- See Also:
 --     [[:begins]], [[:tail]]
 
-public function ends(object subtext, sequence fulltext)
-	if length(fulltext) = 0 then
+public function ends(object pSubText, sequence pFullText)
+	if length(pFullText) = 0 then
 		return 0
 	end if
 	
-	if atom(subtext) then
-		if equal(subtext, fulltext[$]) then
+	if atom(pSubText) then
+		if equal(pSubText, pFullText[$]) then
 			return 1
 		else
 			return 0
 		end if
 	end if
 	
-	if length(subtext) > length(fulltext) then
+	if length(pSubText) > length(pFullText) then
 		return 0
 	end if
 	
-	if equal(subtext, fulltext[length(fulltext) - length(subtext) + 1 .. $]) then
+	if equal(pSubText, pFullText[length(pFullText) - length(pSubText) + 1 .. $]) then
 		return 1
 	else
 		return 0
@@ -839,7 +839,7 @@ end function
 -- Parameters:
 --   # ##item##: The object to test for.
 --   # ##range_limits##: A sequence of two or more elements. The first is assumed
---    to be the smallest value and the last is assumed to tbe the highest value.
+--    to be the smallest value and the last is assumed to be the highest value.
 --
 -- Returns:
 --   A **integer**: 0 if ##item# is lower than the first item in the ##range_limits##
@@ -903,7 +903,7 @@ end function
 --
 -- Comments:
 --
--- If ##default## is set to an invalid index, the first item on the list is returned instea
+-- If ##default## is set to an invalid index, the first item on the list is returned instead
 -- when ##item## is not on the list.
 --
 -- Example 1:

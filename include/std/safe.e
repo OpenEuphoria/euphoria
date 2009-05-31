@@ -35,7 +35,7 @@
 --    There will be a "divide by zero" traceback in ex.err 
 --    so you can find the statement that is making the illegal memory access.
 --
--- 6. To switch between normal and debig bversions, simply comment in or out the 
+-- 6. To switch between normal and debug versions, simply comment in or out the 
 -- "with define SAFE" directive. In means debugging and out means normal.
 -- Alternatively, you can use -D SAFE as a switch on the command line (debug) or not (normal).
 --

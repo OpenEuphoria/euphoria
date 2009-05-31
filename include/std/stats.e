@@ -239,7 +239,7 @@ end function
 -- # ##pData##: a list of 1 or more numbers for which you want the estimated standard deviation.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 -- # ##pPop##: an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
 -- sample of the total population. ST_FULLPOP means that ##pData## is the
 -- entire population.
@@ -259,7 +259,7 @@ end function
 -- If the data can contain sub-sequences, such as strings, you need to let the
 -- the function know about this otherwise it assumes every value in ##pData## is
 -- an number. If that is not the case then the function will crash. So it is
--- important that if it can possibly contain subsequences that you tell this
+-- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
 -- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
 -- value otherwise use the replacement value in ##pMassage##. However, if you
@@ -327,7 +327,7 @@ end function
 -- # ##pData##: a list of 1 or more numbers for which you want the mean of the absolute deviations.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 -- # ##pPop##: an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
 -- sample of the total population. ST_FULLPOP means that ##pData## is the
 -- entire population.
@@ -349,7 +349,7 @@ end function
 -- If the data can contain sub-sequences, such as strings, you need to let the
 -- the function know about this otherwise it assumes every value in ##pData## is
 -- an number. If that is not the case then the function will crash. So it is
--- important that if it can possibly contain subsequences that you tell this
+-- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
 -- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
 -- value otherwise use the replacement value in ##pMassage##. However, if you
@@ -420,7 +420,7 @@ end function
 -- # ##pData##: Either an atom or a list of numbers to sum.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --   An **atom**,  the sum of the set.
@@ -431,7 +431,7 @@ end function
 -- If the data can contain sub-sequences, such as strings, you need to let the
 -- the function know about this otherwise it assumes every value in ##pData## is
 -- an number. If that is not the case then the function will crash. So it is
--- important that if it can possibly contain subsequences that you tell this
+-- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
 -- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
 -- value otherwise use the replacement value in ##pMassage##. However, if you
@@ -475,7 +475,7 @@ end function
 --   # ##pData##: either an atom or a list.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 --
 -- Comments: 
 -- This returns the number of numbers in ##pData##
@@ -483,7 +483,7 @@ end function
 -- If the data can contain sub-sequences, such as strings, you need to let the
 -- the function know about this otherwise it assumes every value in ##pData## is
 -- an number. If that is not the case then the function will crash. So it is
--- important that if it can possibly contain subsequences that you tell this
+-- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
 -- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
 -- value otherwise use the replacement value in ##pMassage##. However, if you
@@ -523,7 +523,7 @@ end function
 --   # pData = A list of 1 or more numbers for which you want the mean.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 --
 --
 -- Returns:
@@ -570,7 +570,7 @@ end function
 -- # ##pData##: the values to take the geometric mean of.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --
@@ -636,7 +636,7 @@ end function
 -- # ##pData##: the values to take the harmonic mean of.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --
@@ -855,7 +855,7 @@ end function
 -- # ##pData##: a list of 1 or more numbers for which you want the mean.
 -- # ##pMassage##: an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
---  gives intructions about how to treat sub-sequences.
+--  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --    An **object**, either ##{}## if there are no items in the set, or an **atom** (the median) otherwise.

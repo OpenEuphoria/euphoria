@@ -14,7 +14,7 @@ value.  A **sequence** is a collection of objects, either atoms or sequences
 themselves. A sequence can contain any mixture of atom and sequences; a sequence
 does not have to contain all the same data type. Because the **objects**
 contained in a sequence can be an arbitrary mix of atoms or sequences, it is
-an extremely versatile data structure, capable of repesenting any sort of data. 
+an extremely versatile data structure, capable of representing any sort of data. 
 
 A sequence is represented by a list of objects in brace brackets **{ }**, 
 separated by commas. Atoms can have any integer or double-precision
@@ -53,7 +53,7 @@ in front of the # character. So for instance #FFFFFFFF is a huge positive number
 Sometimes, and especially with large numbers, it can make reading numeric literals
 easier when they have embedded grouping characters. We are familiar with using
 commas (periods in Europe) to group large numbers by 3-digit subgroups. In Euphoria
-we use the underscore character to acheive the same thing, and we can group them
+we use the underscore character to achieve the same thing, and we can group them
 anyway that is useful to us.
 
 <eucode>
@@ -151,7 +151,7 @@ Bill said
 
 The rules for extended strings are...
 # they begin with a # character, followed immediately by one of ##**#'`~~$^/~\|**##
-# they end with the next occurance of the character that followed the initial # character
+# they end with the next occurrence of the character that followed the initial # character
 # If the resulting string begins with a new-line, the initial new-line is removed
 and any trailing new-line is also removed.
 # A special form is used to automatically trim off leading whitespace from the
@@ -283,7 +283,7 @@ e.g.
 </eucode>
 
 * The //multi-line// format comment is started by ##/*## and extends to the
- next occurance of ##*/##, even if that occurs on a different line.
+ next occurrence of ##*/##, even if that occurs on a different line.
  
 e.g.
 <eucode>
@@ -477,7 +477,7 @@ if "APPLE" = "ORANGE" then  -- ERROR!
 
 '##=##' is treated as an operator, just like '##+##', '##*##' etc., so it is applied to
 corresponding sequence elements, and the sequences must be the same length.
-When they are equal length, the result is a sequence of 1's an 0's. When they
+When they are equal length, the result is a sequence of ones an zeros. When they
 are not equal length, the result is an error. Either way you'll get an error,
 since an if-condition must be an atom, not a sequence.  Instead you should use
 the equal() built-in routine:
@@ -1472,7 +1472,7 @@ the most restrictive scope that you can. Make variables
 **private** to one routine where possible, and where that isn't
 possible, make them **local** to a file, rather than
 **global** to the whole program. And whenever an identifier needs to be known from
- a few files only, make it **public** or **export** so as to hide it from whomever doesn't need to see it
+ a few files only, make it **public** or **export** so as to hide it from whoever doesn't need to see it
  - and might some day define the same identifier.
 
 For example:
@@ -1615,10 +1615,6 @@ lib:sub()
 If a file is included by an application's main file, but needs to see the public or
 exported identifiers in that file, it must include its parent file.
 
-The **public** and **export** qualifiers seem overly rigid, since changing the repartition of identifiers
-among files, perhaps as the result of splitting up one of them, will change the visibility of
-this identifier.
-
 To alleviate this, a variant of the include statement was introduced, called
 **public include**. If a file **public include**s another, it will see all the
 identifiers that the included file sees. This amounts to propagating identifiers marked as
@@ -1633,7 +1629,7 @@ affecting the end user.
 ==== The complete set of resolution rules
 
 **Resolution** is the process by which the interpreter determines what a name means. You
-could say "translate a name to a memory address", but this would be oversimplifying. Let's
+could say "translate a name to a memory address", but this would be over simplifying. Let's
 say "translate an identifier to a symbol" rather. The backend only knows about symbols, and
 the front end's job is to understand which symbols are being used from the names - the
 human readable identifiers - in the program.
@@ -1696,7 +1692,7 @@ normal way.
 
 There are times when it is necessary to replace a global, public or export identifier. Typically, one
 would do this to extend the capabilities of a routine. Or perhaps to supersede the user
-defined type of some publice, export or global variable, since the type itself may not be global.
+defined type of some public, export or global variable, since the type itself may not be global.
 
 This can be achieved by declaring the identifier as **override**:
 <eucode>
@@ -2168,7 +2164,7 @@ while 1 do
 end while
 </eucode>
 
-Do becareful to put the numbers after the platform names for Windows or DOS:
+Do be careful to put the numbers after the platform names for Windows or DOS:
 
 <eucode>
 -- This puts() routine will never be called
@@ -2220,20 +2216,20 @@ Example 3
 while true label "main" do
    res = funcA()
    if res > 5 then
-       if funcB() > somevalue then
+       if funcB() > some_value then
           continue "main" -- go to start of loop
        end if
        procC()
    end if
    procD(res)
    for i = 1 to res do
-       if i > somevalue then
+       if i > some_value then
           exit "main" -- exit the "main" loop, not just this 'for' loop.
        end if
        procF(i,res)
    end if
    
-   res = funcE(res, somevalue)
+   res = funcE(res, some_value)
 end while
 </eucode>
 
@@ -2363,7 +2359,7 @@ from the default order, to get the job done. Euphoria has a number of //flow con
 statements// that you can use to arrange the execution order of statements.
 
 A set of statements that are run in their order of appearance is called a //block//.
-Blocks are good ways to organise code in easily identifiable chunks. However
+Blocks are good ways to organize code in easily identifiable chunks. However
 it can be desirable to leave a block before reaching the end, or slightly alter
 the default course of execution.\\
 
@@ -2670,7 +2666,7 @@ goto "label string"
 
 The target of a ##goto## statement can be any accessible ##label## statement:
 <eucode>
-label "label strng"
+label "label string"
 </eucode>
 
 Label names must be double quoted constant strings. Characters that would be illegal in an 
@@ -2694,7 +2690,7 @@ The following may be situations where ##goto## can help:
 * A routine has several return statements, and some processing must be done before returning, 
 no matter from where. It may be clearer to goto a single return point and perform the 
 processing only at this point.
-* An exit statement in a loop corresponds to an early exxit, and the normal pocessing that 
+* An exit statement in a loop corresponds to an early exit, and the normal processing that 
 immediately follows the loop is not relevant. Replacing an exit statement followed by various 
 flag testing by a single goto can help.
 

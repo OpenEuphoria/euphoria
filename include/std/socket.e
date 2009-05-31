@@ -107,7 +107,7 @@ public enum
 	SELECT_IS_READABLE,
 
 	--**
-	-- Boolean (1/0) value indicating the writability.
+	-- Boolean (1/0) value indicating the writeability.
 	SELECT_IS_WRITABLE,
 
 	--**
@@ -140,7 +140,7 @@ public constant
 -- and [[:set_option]].
 --
 -- These options are highly OS specific and are normally not needed for most
--- socket communication. They are provided here for your convience. If you should
+-- socket communication. They are provided here for your convenience. If you should
 -- need to set socket options, please refer to your OS reference material.
 --
 -- There may be other values that your OS defines and some defined here are not
@@ -396,7 +396,7 @@ end function
 -- Comments:
 --   Three constants are defined that can be sent to ##method##:
 --   * [[:SD_SEND]] - shutdown the send operations.
---   * [[:SD_RECEIVE]] - shutodnw the receive operations.
+--   * [[:SD_RECEIVE]] - shutdown the receive operations.
 --   * [[:SD_BOTH]] - shutdown both send and receive operations.
 --
 --  It may take several minutes for the OS to declare the socket as closed.
@@ -576,7 +576,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- -- Bind to all interfcaes on the default port 80.
+-- -- Bind to all interfaces on the default port 80.
 -- success = bind(socket, "0.0.0.0")
 -- -- Bind to all interfaces on port 8080.
 -- success = bind(socket, "0.0.0.0:8080")
@@ -650,7 +650,7 @@ end function
 --   # ##protocol##: protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A ##sequence## containing { offical protocol name, protocol, port number } or
+--   A ##sequence## containing { official protocol name, protocol, port number } or
 --   an atom indicating the error code.
 --
 -- Example 1:
@@ -674,7 +674,7 @@ end function
 --   # ##protocol##: protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A ##sequence## containing { offical protocol name, protocol, port number } or
+--   A ##sequence## containing { official protocol name, protocol, port number } or
 --   an atom indicating the error code.
 --
 -- Example 1:

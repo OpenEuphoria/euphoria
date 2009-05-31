@@ -16,7 +16,7 @@ sequence list_of_primes  = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 --
 
 --**
--- Returns all the prime numbers below some threshhold, with a cap on computation time.
+-- Returns all the prime numbers below some threshold, with a cap on computation time.
 --
 -- Parameters:
 --		# ##max_p##: an integer, the last prime returned is the next prime after or on this value.
@@ -119,7 +119,7 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 				exit
 			end if
 			
-			-- If it is divisble by any known prime then
+			-- If it is divisible by any known prime then
 			-- we go get another candidate value.
 			if remainder(candidate_, maxp_) = 0 then
 				continue "MW"
@@ -197,7 +197,7 @@ end function
 --**
 -- Returns a list of prime numbers.
 --
--- Paremeters:
+-- Parameters:
 -- 		# ##top_prime_p##: The list will end with the prime less than or equal
 --        to this value. If this is zero, the current list calculated primes
 --        is returned.
@@ -207,8 +207,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- sequence pl = prime_list(1000)
--- -- pl will now contain all the primes from 2 up to the largest less than or
+-- sequence pList = prime_list(1000)
+-- -- pList will now contain all the primes from 2 up to the largest less than or
 -- --    equal to 1000.
 -- </eucode>
 --
