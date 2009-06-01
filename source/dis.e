@@ -957,8 +957,8 @@ procedure opENDFOR_INT_UP1() -- ENDFOR_INT_UP1
 -- exit or go back to the top
 -- (loop var might not be integer, but that doesn't matter here)
     
-    il( sprintf("ENDFOR_INT_UP1: top %04d, lim: %s, lv %s",
-    	Code[pc+1] & names( Code[pc+2..pc+3] )), 4)
+    il( sprintf("ENDFOR_INT_UP1: top %04d, lim: %s, lv %s, inc %s",
+    	Code[pc+1] & names( Code[pc+2..pc+4] )), 4)
     pc += 5
 end procedure
 
