@@ -7219,6 +7219,7 @@ procedure BackEnd(atom ignore)
 	c_hputs("extern struct tcb *tcb;\n")
 	c_hputs("extern int current_task;\n")
 	c_hputs("extern int insert_pos;\n")
+	c_hputs("extern unsigned char *string_ptr;\n")
 	if TWINDOWS then
 		c_hputs("extern void *winInstance;\n\n")
 	end if

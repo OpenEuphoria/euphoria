@@ -408,7 +408,8 @@ testeu :
 
 install :
 	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
-	mkdir -p $(DESTDIR)/usr/share/euphoria/include/std
+	mkdir -p $(DESTDIR)/usr/share/euphoria/include/std/net/dos
+	mkdir -p $(DESTDIR)/usr/share/euphoria/include/std/dos
 	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/html 
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux
 	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/unix
@@ -442,7 +443,6 @@ install :
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar ../demo/langwar/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux ../demo/langwar/Linux/*
 	-install -t $(DESTDIR)/usr/share/euphoria/demo/unix ../demo/unix/*
-	-install -t $(DESTDIR)/usr/share/doc/euphoria/doc ../doc/*
 	-install -t $(DESTDIR)/usr/share/euphoria/tutorial ../tutorial/*
 	install -t $(DESTDIR)/usr/share/euphoria/bin \
 	           ../bin/ed.ex \
