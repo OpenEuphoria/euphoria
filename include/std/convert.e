@@ -28,7 +28,7 @@ atom mem  = machine_func(M_ALLOC,4)
 -- If the atom does not fit into a 32-bit integer, things may still work right:
 -- * If there is a fractional part, the first element in the returned value
 --   will carry it. If you poke the sequence to RAM, that fraction will be discarded anyway.
--- * If ##x## is simply too big, the first three bytes will still be correct, and the 4th 
+-- * If ##x## is simply too big, the first three bytes will still be correct, and the 4th
 --   element will be  ##floor(x/power(2,24))##. If this is not a byte sized integer, some
 --   truncation may occur, but usually no error.
 --
@@ -41,20 +41,20 @@ atom mem  = machine_func(M_ALLOC,4)
 -- s = int_to_bytes(999)
 -- -- s is {231, 3, 0, 0}
 -- </eucode>
---  
--- Example 2:  
--- 
+--
+-- Example 2:
+--
 -- <eucode>
 -- s = int_to_bytes(-999)
 -- -- s is {-231, -4, -1, -1}
 -- </eucode>
--- 
+--
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:atom_to_float64]], [[:poke4]]
 
 public function int_to_bytes(atom x)
 	integer a,b,c,d
-	
+
 	a = remainder(x, #100)
 	x = floor(x / #100)
 	b = remainder(x, #100)
@@ -97,7 +97,7 @@ end type
 -- int32 = bytes_to_int({37,1,0,0})
 -- -- int32 is 37 + 256*1 = 293
 -- </eucode>
--- 
+--
 -- See Also:
 --   [[:bits_to_int]], [[:float64_to_atom]], [[:int_to_bytes]], [[:peek]],
 --   [[:peek4s]], [[:peek4u]], [[:poke4]]
@@ -148,7 +148,7 @@ end function
 public function int_to_bits(atom x, integer nbits)
 	sequence bits
 	integer mask
-	
+
 	bits = repeat(0, nbits)
 	if integer(x) and nbits < 30 then
 		-- faster method
@@ -163,7 +163,7 @@ public function int_to_bits(atom x, integer nbits)
 			x += power(2, nbits) -- for 2's complement bit pattern
 		end if
 		for i = 1 to nbits do
-			bits[i] = remainder(x, 2) 
+			bits[i] = remainder(x, 2)
 			x = floor(x / 2)
 		end for
 	end if
@@ -186,7 +186,7 @@ end function
 -- The first elements in ##bits## represent the bits with the least weight in
 -- the returned value. Only the 52 last bits will matter, as the PC hardware
 -- cannot hold an integer with more digits than this.
--- 
+--
 -- If you print s the bits will appear in "reverse" order, but it is
 -- convenient to have increasing subscripts access bits of increasing
 -- significance.
@@ -196,14 +196,14 @@ end function
 -- a = bits_to_int({1,1,1,0,1})
 -- -- a is 23 (binary 10111)
 -- </eucode>
---  
+--
 -- See Also:
 --		[[:bytes_to_int]], [[:int_to_bits]], [[:operations on sequences]]
 
 public function bits_to_int(sequence bits)
 -- get the (positive) value of a sequence of "bits"
 	atom value, p
-	
+
 	value = 0
 	p = 1
 	for i = 1 to length(bits) do
@@ -235,7 +235,7 @@ end function
 -- fn = open("numbers.dat", "wb")
 -- puts(fn, atom_to_float64(157.82)) -- write 8 bytes to a file
 -- </eucode>
--- 
+--
 -- See Also:
 --     [[:float64_to_atom]], [[:int_to_bytes]], [[:atom_to_float32]]
 
@@ -251,7 +251,7 @@ end function
 -- Returns:
 --		A **sequence** of 4 bytes, which can be poked in memory to represent ##a##.
 --
--- Comments: 
+-- Comments:
 --
 -- Euphoria atoms can have values which are 64-bit IEEE floating-point
 -- numbers, so you may lose precision when you convert to 32-bits
@@ -272,7 +272,7 @@ end function
 -- fn = open("numbers.dat", "wb")
 -- puts(fn, atom_to_float32(157.82)) -- write 4 bytes to a file
 -- </eucode>
--- 
+--
 -- See Also:
 --		[[:float32_to_atom]], [[:int_to_bytes]], [[:atom_to_float64]]
 
@@ -372,18 +372,18 @@ public function hex_text(sequence text)
 	integer pos
 	integer sign
 	integer n
-	
+
 	res = 0
 	fp = 0
 	div = 0
 	sign = 0
 	n = 0
-	
+
 	for i = 1 to length(text) do
 		if text[i] = '_' then
 			continue
 		end if
-		
+
 		if text[i] = '#' then
 			if n = 0 then
 				continue
@@ -391,30 +391,30 @@ public function hex_text(sequence text)
 				exit
 			end if
 		end if
-		
+
 		if text[i] = '.' then
 			if div = 0 then
-				div = 1	
+				div = 1
 				continue
 			else
 				exit
 			end if
 		end if
-		
+
 		if text[i] = '-' then
 			if sign = 0 and n = 0 then
-				sign = -1	
+				sign = -1
 				continue
 			else
 				exit
 			end if
 		end if
-		
+
 		pos = eu:find(text[i], "0123456789abcdefABCDEF")
 		if pos = 0 then
 			exit
 		end if
-		
+
 		if pos > 16 then
 			pos -= 6
 		end if
@@ -426,9 +426,9 @@ public function hex_text(sequence text)
 		    div += 1
 		end if
 		n += 1
-		
+
 	end for
-	
+
 	while div > 1 do
 		fp /= 16
 		div -= 1
@@ -437,44 +437,42 @@ public function hex_text(sequence text)
 	if sign != 0 then
 		res = -res
 	end if
-	
+
 	return res
-		
+
 end function
 
 
 constant vDigits = "0123456789ABCDEFabcdef"
-sequence vCurrencySym = "$£¤¥€"
-sequence vWhitespace = {'\t', ' ', #A0}
 integer decimal_mark = '.'
-    
+
 --**
 -- Gets, and possibly sets, the decimal mark that [[:to_number]]() uses.
 -- Parameters:
 -- # ##new_mark##: An integer: Either a comma (,), a period (.) or any other integer.
 -- Returns:
 -- An integer: The current value, before ##new_mark## changes it.
--- 
+--
 -- Comments:
--- * When ##new_mark## is a //period// it will cause ##to_number()## to interpret a dot ##(.)## 
+-- * When ##new_mark## is a //period// it will cause ##to_number()## to interpret a dot ##(.)##
 -- as the decimal point symbol. The pre-changed value is returned.
--- * When ##new_mark## is a //comma// it will cause ##to_number()## to interpret a comma ##(,)## 
+-- * When ##new_mark## is a //comma// it will cause ##to_number()## to interpret a comma ##(,)##
 -- as the decimal point symbol. The pre-changed value is returned.
 -- * Any other value does not change the current setting. Instead it just returns the current value.
 -- * The initial value of the decimal marker is a period.
 
-global function set_decimal_mark(integer new_mark)
-    integer old_mark
+public function set_decimal_mark(integer new_mark)
+	integer old_mark
 
-    old_mark = decimal_mark
-    switch new_mark do
-        case ',', '.' then
-            decimal_mark = new_mark
-            
-        case else
-        	-- do nothing.
-    end switch
-    return old_mark
+	old_mark = decimal_mark
+	switch new_mark do
+		case ',', '.' then
+			decimal_mark = new_mark
+
+		case else
+			-- do nothing.
+	end switch
+	return old_mark
 end function
 
 --**
@@ -486,7 +484,7 @@ end function
 --     this returns the converted value up to the point of failure (if any) and the
 --     position in ##pText## that caused the failure. If this position is 0 then
 --     there was no failure.
--- 
+--
 -- Returns:
 -- * an atom: If ##pReturnBadPos## is zero, the number represented by ##pText##.
 --  If ##pText## contains invalid characters, zero is returned.
@@ -501,13 +499,13 @@ end function
 -- hexadecimal values, the case of the digits 'A' - 'F' is not important. Also,
 -- any decimal marker embedded in the number is used with the correct base.
 -- # Any underscore characters or thousands separators, that are embedded in the text
--- number are ignored. These can be used to help visual clarity for long numbers. The thousands 
+-- number are ignored. These can be used to help visual clarity for long numbers. The thousands
 -- separator is a ',' when the decimal mark is '.' (the default), or '.' if the
 -- decimal mark is ','. You inspect and set it using [[:set_decimal_mark]]().
 -- # You can supply a single leading or trailing sign. Either a minus (-) or plus (+).
 -- # You can supply one or more trailing adjacent percentage signs. The first one
 -- causes the resulting value to be divided by 100, and each subsequent one divides
--- the result by a further 10. Thus 3845% gives a value of (3845 / 100) ==> 38.45, 
+-- the result by a further 10. Thus 3845% gives a value of (3845 / 100) ==> 38.45,
 -- and 3845%% gives a value of (3845 / 1000) ==> 3.845.
 -- # You can have single currency symbol before the first digit or after the last
 -- digit. A currency symbol is any character of the string: "$£¤¥€".
@@ -515,7 +513,7 @@ end function
 -- after the last digit.
 -- # The currency, sign and base symbols can appear in any order. Thus "$ -21.10" is
 -- the same as " -$21.10 ", which is also the same as "21.10$-", etc.
--- # This function can optionally return information about invalid numbers. If ##pReturnBadPos## 
+-- # This function can optionally return information about invalid numbers. If ##pReturnBadPos##
 -- is not zero, a two-element sequence is returned. The first element is the converted
 -- number value , and the second is the position in the text where conversion stopped.
 -- If no errors were found then the second element is zero.
@@ -539,119 +537,119 @@ end function
 -- </eucode>
 
 
-global function to_number( sequence pText, integer pReturnBadPos = 0)
-    -- get the numeric result of pText
-    integer lDotFound = 0
-    integer lSignFound = 2
-    integer lCharValue
-    integer lBadPos = 0
-    atom    lLeftSize = 0
-    atom    lRightSize = 1
-    atom    lLeftValue = 0
-    atom    lRightValue = 0
-    integer lBase = 10
-    integer lPercent = 1
-    atom    lResult
-    integer lDigitCount = 0
-    integer lCurrencyFound = 0
-    integer lLastDigit = 0
-    integer lChar
+public function to_number( sequence pText, integer pReturnBadPos = 0)
+	-- get the numeric result of pText
+	integer lDotFound = 0
+	integer lSignFound = 2
+	integer lCharValue
+	integer lBadPos = 0
+	atom    lLeftSize = 0
+	atom    lRightSize = 1
+	atom    lLeftValue = 0
+	atom    lRightValue = 0
+	integer lBase = 10
+	integer lPercent = 1
+	atom    lResult
+	integer lDigitCount = 0
+	integer lCurrencyFound = 0
+	integer lLastDigit = 0
+	integer lChar
 
-    for i = 1 to length(pText) do
-    	if not integer(pText[i]) then
-    		exit
-    	end if
-    	
-    	lChar = pText[i]
-    	switch lChar do
-        	case '-' then
-        		if lSignFound = 2 then
-            		lSignFound = -1
-            		lLastDigit = lDigitCount
-            	else
-            		lBadPos = i
-            	end if
-            	
-        	case '+' then
-        		if lSignFound = 2 then
-            		lSignFound = 1
-            		lLastDigit = lDigitCount
-            	else
-            		lBadPos = i
-            	end if
-            	
-        	case '#' then
-            	if lDigitCount = 0 and lBase = 10 then
-            		lBase = 16
-            	else
-            		lBadPos = i
-            	end if
-            	
+	for i = 1 to length(pText) do
+		if not integer(pText[i]) then
+			exit
+		end if
+
+		lChar = pText[i]
+		switch lChar do
+			case '-' then
+				if lSignFound = 2 then
+					lSignFound = -1
+					lLastDigit = lDigitCount
+				else
+					lBadPos = i
+				end if
+
+			case '+' then
+				if lSignFound = 2 then
+					lSignFound = 1
+					lLastDigit = lDigitCount
+				else
+					lBadPos = i
+				end if
+
+			case '#' then
+				if lDigitCount = 0 and lBase = 10 then
+					lBase = 16
+				else
+					lBadPos = i
+				end if
+
 			case '@' then
-            	if lDigitCount = 0  and lBase = 10 then
-            		lBase = 8
-            	else
-            		lBadPos = i
-            	end if
-            	
+				if lDigitCount = 0  and lBase = 10 then
+					lBase = 8
+				else
+					lBadPos = i
+				end if
+
 			case '!' then
-            	if lDigitCount = 0  and lBase = 10 then
-            		lBase = 2
-            	else
-            		lBadPos = i
-            	end if
-            	
+				if lDigitCount = 0  and lBase = 10 then
+					lBase = 2
+				else
+					lBadPos = i
+				end if
+
 			case '$', '£', '¤', '¥', '€' then
-        		if lCurrencyFound = 0 then
-            		lCurrencyFound = 1
-            		lLastDigit = lDigitCount
-            	else
-            		lBadPos = i
-            	end if
-			
-            case '_' then -- grouping character
-            	if lDigitCount = 0 or lLastDigit != 0 then
-            		lBadPos = i
-            	end if
-            	
-            case '.', ',' then
-            	if lLastDigit = 0 then
+				if lCurrencyFound = 0 then
+					lCurrencyFound = 1
+					lLastDigit = lDigitCount
+				else
+					lBadPos = i
+				end if
+
+			case '_' then -- grouping character
+				if lDigitCount = 0 or lLastDigit != 0 then
+					lBadPos = i
+				end if
+
+			case '.', ',' then
+				if lLastDigit = 0 then
 	            	if decimal_mark = lChar then
-    	                if lDotFound = 0 then
-        	                lDotFound = 1
-            	        else
-                	        lBadPos = i
-                    	end if
-                    else
-                    	-- Ignore it
-                    end if
-                else
-                	lBadPos = i
-            	end if
-            	
-            case '%' then 
-            	if lDigitCount >= 0 then
-            		lLastDigit = lDigitCount
-            		if lPercent = 1 then
-            			lPercent = 100
-            		else
-            			if pText[i-1] = '%' then
-            				lPercent *= 10 -- Yes ten not one hundred.
-            			else
-            				lBadPos = i
-            			end if
-            		end if
-            	else
-            		lBadPos = i
-            	end if
-            	
+		                if lDotFound = 0 then
+			                lDotFound = 1
+				        else
+					        lBadPos = i
+						end if
+					else
+						-- Ignore it
+					end if
+				else
+					lBadPos = i
+				end if
+
+			case '%' then
+				if lDigitCount >= 0 then
+					lLastDigit = lDigitCount
+					if lPercent = 1 then
+						lPercent = 100
+					else
+						if pText[i-1] = '%' then
+							lPercent *= 10 -- Yes ten not one hundred.
+						else
+							lBadPos = i
+						end if
+					end if
+				else
+					lBadPos = i
+				end if
+
 			case '\t', ' ', #A0 then
 				if lDigitCount = 0 then
 					-- skip it
 				else
 					lLastDigit = i
 				end if
-						
+
 			case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			      'A', 'B', 'C', 'D', 'E', 'F',
 			      'a', 'b', 'c', 'd', 'e', 'f' then
@@ -659,14 +657,14 @@ global function to_number( sequence pText, integer pReturnBadPos = 0)
 	            if lCharValue > 15 then
 	            	lCharValue -= 6
 	            end if
-	            
+
 	            if lCharValue >= lBase then
 	                lBadPos = i
-	            
-	            elsif lLastDigit != 0 then  -- shouldn't be any more digits
-                    lBadPos = i
 
-                elsif lDotFound = 1 then
+	            elsif lLastDigit != 0 then  -- shouldn't be any more digits
+					lBadPos = i
+
+				elsif lDotFound = 1 then
 					lRightSize *= lBase
 					lRightValue = (lRightValue * lBase) + lCharValue
 					lDigitCount += 1
@@ -675,51 +673,51 @@ global function to_number( sequence pText, integer pReturnBadPos = 0)
 					lLeftValue = (lLeftValue * lBase) + lCharValue
 					lDigitCount += 1
 				end if
-					
+
 			case else
-            	lBadPos = i
-            	
-        end switch
-        
-        if lBadPos != 0 then
-        	exit
-        end if
-    end for
+				lBadPos = i
+
+		end switch
+
+		if lBadPos != 0 then
+			exit
+		end if
+	end for
 
 
-    -- Error if no actual digits where converted.
-    if lBadPos = 0 and lDigitCount = 0 then
-        lBadPos = 1
-    end if
-    
-    if pReturnBadPos = 0 and lBadPos != 0 then
-        return 0
+	-- Error if no actual digits where converted.
+	if lBadPos = 0 and lDigitCount = 0 then
+		lBadPos = 1
 	end if
-	
-    if lRightValue = 0 then
-        -- Common situation optimised for speed.
+
+	if pReturnBadPos = 0 and lBadPos != 0 then
+		return 0
+	end if
+
+	if lRightValue = 0 then
+		-- Common situation optimised for speed.
 	    if lPercent != 1 then
-    		lResult = (lLeftValue / lPercent)
-    	else
+			lResult = (lLeftValue / lPercent)
+		else
 	        lResult = lLeftValue
-    	end if
-    else
+		end if
+	else
 	    if lPercent != 1 then
 	        lResult = (lLeftValue  + (lRightValue / (lRightSize))) / lPercent
 	    else
 	        lResult = lLeftValue + (lRightValue / lRightSize)
 	    end if
-    end if
-    
-    if lSignFound < 0 then
-    	lResult = -lResult
-    end if
-    
-    if pReturnBadPos = 0 then
-        return lResult
-    end if
-    
-    return {lResult, lBadPos}
+	end if
+
+	if lSignFound < 0 then
+		lResult = -lResult
+	end if
+
+	if pReturnBadPos = 0 then
+		return lResult
+	end if
+
+	return {lResult, lBadPos}
 
 end function
 
@@ -727,9 +725,9 @@ end function
 -- Converts an object into a integer.
 -- Parameters:
 -- # ##pData## : Any Euphoria object.
--- # ##pError## : An integer. This is returned if ##pData## cannot be converted 
+-- # ##pError## : An integer. This is returned if ##pData## cannot be converted
 --                into an integer. If omitted, zero is returned.
--- 
+--
 -- Returns:
 -- * an integer: Either the integer rendition of ##pData## or ##pError## if it has
 -- no integer value.
@@ -754,7 +752,7 @@ public function to_integer(object pData, integer pError = 0)
 	if integer(pData) then
 		return pData
 	end if
-	
+
 	if atom(pData) then
 		pData = floor(pData)
 		if not integer(pData) then
