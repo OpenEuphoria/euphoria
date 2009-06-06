@@ -9,6 +9,12 @@ include std/map.e as map
 include std/error.e
 include std/os.e
 
+ifdef UNIX then
+	constant valid_switches = "-"
+elsedef
+	constant valid_switches = "-/"
+end ifdef
+
 --****
 -- === Constants
 
@@ -888,12 +894,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 		cmd = cmds[arg_idx]
 
-		if (opts_done or find(cmd[1], "-/") = 0 or length(cmd) = 1) 
-			or
-			(
-			    find(platform(), {LINUX,OSX,SUNOS,OPENBSD,NETBSD,FREEBSD}) 
-			    and length(cmd) > 2 and cmd[1] = '/'
-			)
+		if (opts_done or find(cmd[1], valid_switches) = 0 or length(cmd) = 1) 
 		then
 			map:put(parsed_opts, "extras", cmd, map:APPEND)
 			has_extra = 1
