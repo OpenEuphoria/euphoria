@@ -6829,8 +6829,13 @@ procedure BackEnd(atom ignore)
 	
 	-- Perform Multiple Passes through the IL
 
-	Pass = 1
-	while Pass < LAST_PASS do
+	Pass = 0
+	LAST_PASS = FALSE
+	integer prev_updsym
+	integer updsym = 0
+	while not LAST_PASS do
+		
+		Pass += 1
 		-- no output to .c files
 		main_temps()
 
@@ -6843,11 +6848,14 @@ procedure BackEnd(atom ignore)
 		DeclareRoutineList() -- forces routine_id target
 							-- parameter type info to TYPE_OBJECT
 
-		PromoteTypeInfo()    -- at very end after each FULL pass:
+		prev_updsym = updsym
+		updsym = PromoteTypeInfo()    -- at very end after each FULL pass:
 							-- promotes seq_elem_new, arg_type_new
 							-- for all symbols
 							-- sets U_DELETED, resets nrefs
-		Pass += 1
+		if updsym = prev_updsym then
+			LAST_PASS = TRUE
+		end if
 	end while
 
 	-- Now, actually emit the C code */

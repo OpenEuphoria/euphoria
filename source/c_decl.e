@@ -30,10 +30,10 @@ export constant MAX_CFILE_SIZE = 2500
 
 --**
 -- number of Translator passes
-export constant LAST_PASS = 7
+export integer LAST_PASS = FALSE
 
 --**
--- the pass number, 1 ... LAST_PASS
+-- the current pass number
 export integer Pass
 
 export enum
@@ -342,45 +342,50 @@ end function
 
 export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 	integer found, i, tn
+	sequence sym, symo
 	
 	if has_delete then
 		p_has_delete = 1
 		g_has_delete = 1
 	end if
 	
-	if find(SymTab[s][S_MODE], {M_TEMP, M_NORMAL}) then
+	sym = SymTab[s]
+	symo = sym
+	if find(sym[S_MODE], {M_TEMP, M_NORMAL}) then
 		found = FALSE
-		if SymTab[s][S_MODE] = M_TEMP then
-			SymTab[s][S_GTYPE] = t
-			SymTab[s][S_SEQ_ELEM] = etype
-			if find(SymTab[s][S_GTYPE], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+		if sym[S_MODE] = M_TEMP then
+			sym[S_GTYPE] = t
+			sym[S_SEQ_ELEM] = etype
+			if find(sym[S_GTYPE], {TYPE_SEQUENCE, TYPE_OBJECT}) then
 				if val[MIN] < 0 then
-					SymTab[s][S_SEQ_LEN] = NOVALUE
+					sym[S_SEQ_LEN] = NOVALUE
 				else    
-					SymTab[s][S_SEQ_LEN] = val[MIN]
+					sym[S_SEQ_LEN] = val[MIN]
 				end if
-				SymTab[s][S_OBJ] = NOVALUE
+				sym[S_OBJ] = NOVALUE
 			else 
-				SymTab[s][S_OBJ_MIN] = val[MIN] 
-				SymTab[s][S_OBJ_MAX] = val[MAX] 
-				SymTab[s][S_SEQ_LEN] = NOVALUE
+				sym[S_OBJ_MIN] = val[MIN] 
+				sym[S_OBJ_MAX] = val[MAX] 
+				sym[S_SEQ_LEN] = NOVALUE
 			end if
 			if not Initializing then
-				integer new_type = or_type(temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW], t)
+				integer new_type = or_type(temp_name_type[sym[S_TEMP_NAME]][T_GTYPE_NEW], t)
 				if new_type = TYPE_NULL then
 					new_type = TYPE_OBJECT
 				end if
-				temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW] = new_type
--- 				   or_type(temp_name_type[SymTab[s][S_TEMP_NAME]][T_GTYPE_NEW], t)
+				temp_name_type[sym[S_TEMP_NAME]][T_GTYPE_NEW] = new_type
+-- 				   or_type(temp_name_type[sym[S_TEMP_NAME]][T_GTYPE_NEW], t)
 				
 			end if
-			tn = SymTab[s][S_TEMP_NAME]
+			tn = sym[S_TEMP_NAME]
 			i = 1
 			while i <= length(BB_info) do
-				if SymTab[BB_info[i][BB_VAR]][S_MODE] = M_TEMP and
-					SymTab[BB_info[i][BB_VAR]][S_TEMP_NAME] = tn then
-					found = TRUE
-					exit
+				sequence bbsym = SymTab[BB_info[i][BB_VAR]]
+				if bbsym[S_MODE] = M_TEMP then
+					if bbsym[S_TEMP_NAME] = tn then
+						found = TRUE
+						exit
+					end if
 				end if
 				i += 1
 			end while
@@ -388,50 +393,50 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 		else   -- M_NORMAL
 			if t != TYPE_NULL then
 				if not Initializing then
-					SymTab[s][S_GTYPE_NEW] = or_type(SymTab[s][S_GTYPE_NEW], t)
+					sym[S_GTYPE_NEW] = or_type(sym[S_GTYPE_NEW], t)
 				end if
 				
 				if t = TYPE_SEQUENCE then
-					SymTab[s][S_SEQ_ELEM_NEW] = 
-							  or_type(SymTab[s][S_SEQ_ELEM_NEW], etype)
+					sym[S_SEQ_ELEM_NEW] = 
+							  or_type(sym[S_SEQ_ELEM_NEW], etype)
 					-- treat val.min as sequence length 
 					if val[MIN] != -1 then
-						if SymTab[s][S_SEQ_LEN_NEW] = -NOVALUE then
+						if sym[S_SEQ_LEN_NEW] = -NOVALUE then
 							if val[MIN] < 0 then
-								SymTab[s][S_SEQ_LEN_NEW] = NOVALUE
+								sym[S_SEQ_LEN_NEW] = NOVALUE
 							else
-								SymTab[s][S_SEQ_LEN_NEW] = val[MIN]
+								sym[S_SEQ_LEN_NEW] = val[MIN]
 							end if
-						elsif val[MIN] != SymTab[s][S_SEQ_LEN_NEW] then
-							SymTab[s][S_SEQ_LEN_NEW] = NOVALUE
+						elsif val[MIN] != sym[S_SEQ_LEN_NEW] then
+							sym[S_SEQ_LEN_NEW] = NOVALUE
 						end if
 					end if
 
 				elsif t = TYPE_INTEGER then
 					-- treat val as integer value */
-					if SymTab[s][S_OBJ_MIN_NEW] = -NOVALUE then
+					if sym[S_OBJ_MIN_NEW] = -NOVALUE then
 						-- first known value assigned in this pass */
-						SymTab[s][S_OBJ_MIN_NEW] = val[MIN]
-						SymTab[s][S_OBJ_MAX_NEW] = val[MAX]
+						sym[S_OBJ_MIN_NEW] = val[MIN]
+						sym[S_OBJ_MAX_NEW] = val[MAX]
 
-					elsif SymTab[s][S_OBJ_MIN_NEW] != NOVALUE then
+					elsif sym[S_OBJ_MIN_NEW] != NOVALUE then
 						-- widen the range */
-						if val[MIN] < SymTab[s][S_OBJ_MIN_NEW] then
-							SymTab[s][S_OBJ_MIN_NEW] = val[MIN]
+						if val[MIN] < sym[S_OBJ_MIN_NEW] then
+							sym[S_OBJ_MIN_NEW] = val[MIN]
 						end if
-						if val[MAX] > SymTab[s][S_OBJ_MAX_NEW] then
-							SymTab[s][S_OBJ_MAX_NEW] = val[MAX]
+						if val[MAX] > sym[S_OBJ_MAX_NEW] then
+							sym[S_OBJ_MAX_NEW] = val[MAX]
 						end if
 					end if
 
 				else 
-					SymTab[s][S_OBJ_MIN_NEW] = NOVALUE
+					sym[S_OBJ_MIN_NEW] = NOVALUE
 					if t = TYPE_OBJECT then
 						-- for objects, we record element type, if provided,
 						-- but we don't try to record integer value or seq len
-						SymTab[s][S_SEQ_ELEM_NEW] = 
-								 or_type(SymTab[s][S_SEQ_ELEM_NEW], etype)
-						SymTab[s][S_SEQ_LEN_NEW] = NOVALUE
+						sym[S_SEQ_ELEM_NEW] = 
+								 or_type(sym[S_SEQ_ELEM_NEW], etype)
+						sym[S_SEQ_LEN_NEW] = NOVALUE
 					end if
 				end if
 			end if
@@ -459,101 +464,58 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 			end if
 			-- don't record anything if the var already exists in this BB
 		else 
-			BB_info[i][BB_VAR] = s
-			BB_info[i][BB_TYPE] = t
-			BB_info[i][BB_DELETE] = has_delete
+			sequence bbi = BB_info[i]
+			bbi[BB_VAR] = s
+			bbi[BB_TYPE] = t
+			bbi[BB_DELETE] = has_delete
 			-- etype shouldn't matter if the var is not a sequence here
 			if t = TYPE_SEQUENCE and val[MIN] = -1 then
 				-- assign to subscript or slice of a sequence
-				if found and BB_info[i][BB_ELEM] != TYPE_NULL then
+				if found and bbi[BB_ELEM] != TYPE_NULL then
 					--kludge:
-					BB_info[i][BB_ELEM] = or_type(BB_info[i][BB_ELEM], etype) 
+					bbi[BB_ELEM] = or_type(bbi[BB_ELEM], etype) 
 				else
-					BB_info[i][BB_ELEM] = TYPE_NULL
+					bbi[BB_ELEM] = TYPE_NULL
 				end if
 				if not found then
-					BB_info[i][BB_SEQLEN] = NOVALUE
+					bbi[BB_SEQLEN] = NOVALUE
 				end if
 			else 
-				BB_info[i][BB_ELEM] = etype
+				bbi[BB_ELEM] = etype
 				if t = TYPE_SEQUENCE or t = TYPE_OBJECT then 
 					if val[MIN] < 0 then
-						BB_info[i][BB_SEQLEN] = NOVALUE
+						bbi[BB_SEQLEN] = NOVALUE
 					else
-						BB_info[i][BB_SEQLEN] = val[MIN]
+						bbi[BB_SEQLEN] = val[MIN]
 					end if
 				else
-					BB_info[i][BB_OBJ] = val
+					bbi[BB_OBJ] = val
 				end if
 			end if
+			BB_info[i] = bbi
 		end if
 		
-	elsif SymTab[s][S_MODE] = M_CONSTANT then
-		SymTab[s][S_GTYPE] = t
-		SymTab[s][S_SEQ_ELEM] = etype
-		if SymTab[s][S_GTYPE] = TYPE_SEQUENCE or 
-		   SymTab[s][S_GTYPE] = TYPE_OBJECT then
+	elsif sym[S_MODE] = M_CONSTANT then
+		sym[S_GTYPE] = t
+		sym[S_SEQ_ELEM] = etype
+		if sym[S_GTYPE] = TYPE_SEQUENCE or 
+		   sym[S_GTYPE] = TYPE_OBJECT then
 			if val[MIN] < 0 then
-				SymTab[s][S_SEQ_LEN] = NOVALUE
+				sym[S_SEQ_LEN] = NOVALUE
 			else    
-				SymTab[s][S_SEQ_LEN] = val[MIN]
+				sym[S_SEQ_LEN] = val[MIN]
 			end if
 		else 
-			SymTab[s][S_OBJ_MIN] = val[MIN] 
-			SymTab[s][S_OBJ_MAX] = val[MAX] 
+			sym[S_OBJ_MIN] = val[MIN] 
+			sym[S_OBJ_MAX] = val[MAX] 
 		end if
-		SymTab[s][S_HAS_DELETE] = has_delete
+		sym[S_HAS_DELETE] = has_delete
+	end if
+	if not equal(symo, sym) then
+		-- The symbol table entry got updated.
+		SymTab[s] = sym
 	end if
 end procedure
-
-
---**
--- return a different name to avoid conflicts with certain C compiler
--- reserved words. Only needed for private variables (no file number attached). 
--- split into two lists for speed 
-
-export function ok_name(sequence name)
-	if name[1] <= 'f' then
-		if    equal(name, "Bool") then
-			return "Bool97531"
-		elsif equal(name, "Seg16") then
-			return "Seg1697531"
-		elsif equal(name, "Packed") then
-			return "Packed97531"
-		elsif equal(name, "Try") then
-			return "Try97531"
-		elsif equal(name, "cdecl") then
-			return "cdecl97531"
-		elsif equal(name, "far") then
-			return "far97531"
-		elsif equal(name, "far16") then
-			return "far1697531"
-		elsif equal(name, "asm") then
-			return "asm97531"
-		else
-			return name
-		end if
-		
-	else 
-		if    equal(name, "stdcall") then
-			return "stdcall97531"
-		elsif equal(name, "fastcall") then
-			return "fastcall97531"
-		elsif equal(name, "pascal") then
-			return "pascal97531"
-		elsif equal(name, "try") then
-			return "try97531"
-		elsif equal(name, "near") then
-			return "near97531"
-		elsif equal(name, "interrupt") then
-			return "interrupt97531"
-		elsif equal(name, "huge") then
-			return "huge97531"
-		else
-			return name
-		end if
-	end if
-end function
 
 --**
 -- display the C name or literal value of an operand 
@@ -572,7 +534,7 @@ export procedure CName(symtab_index s)
 				c_puts(SymTab[s][S_NAME])
 			else 
 				c_puts("_")
-				c_puts(ok_name(SymTab[s][S_NAME]))
+				c_puts(SymTab[s][S_NAME])
 			end if
 		end if
 		if s != CurrentSub and SymTab[s][S_NREFS] < 2 then
@@ -615,7 +577,7 @@ with warning
 export procedure c_stmt(sequence stmt, object arg)
 	integer argcount, i
 	
-	if Pass = LAST_PASS and Initializing = FALSE then
+	if LAST_PASS = TRUE and Initializing = FALSE then
 		cfile_size += 1
 	end if
 		
@@ -715,111 +677,130 @@ integer deleted_routines = 0
 
 --**
 -- at the end of each pass, certain info becomes valid 
-export procedure PromoteTypeInfo()
+export function PromoteTypeInfo()
+	integer updsym
 	symtab_index s
+	sequence sym, symo
 	
+	updsym = 0
 	g_has_delete = p_has_delete
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
-		if SymTab[s][S_TOKEN] = FUNC or SymTab[s][S_TOKEN] = TYPE then
-			if SymTab[s][S_GTYPE_NEW] = TYPE_NULL then
-				SymTab[s][S_GTYPE] = TYPE_OBJECT
+		sym = SymTab[s]
+		symo = sym
+		if sym[S_TOKEN] = FUNC or sym[S_TOKEN] = TYPE then
+			if sym[S_GTYPE_NEW] = TYPE_NULL then
+				sym[S_GTYPE] = TYPE_OBJECT
 			else
-				SymTab[s][S_GTYPE] = SymTab[s][S_GTYPE_NEW]
+				sym[S_GTYPE] = sym[S_GTYPE_NEW]
 			end if
 		else 
 			-- variables: promote gtype_new only if it's better than gtype 
 			-- user may have declared it better than we can determine. 
-			if SymTab[s][S_GTYPE] != TYPE_INTEGER and
-				SymTab[s][S_GTYPE_NEW] != TYPE_OBJECT and
-				SymTab[s][S_GTYPE_NEW] != TYPE_NULL then
-				if SymTab[s][S_GTYPE_NEW] = TYPE_INTEGER or
-				   SymTab[s][S_GTYPE] = TYPE_OBJECT or
-				   (SymTab[s][S_GTYPE] = TYPE_ATOM and 
-					SymTab[s][S_GTYPE_NEW] = TYPE_DOUBLE) then
-						SymTab[s][S_GTYPE] = SymTab[s][S_GTYPE_NEW]
+			if sym[S_GTYPE] != TYPE_INTEGER and
+				sym[S_GTYPE_NEW] != TYPE_OBJECT and
+				sym[S_GTYPE_NEW] != TYPE_NULL then
+				if sym[S_GTYPE_NEW] = TYPE_INTEGER or
+				   sym[S_GTYPE] = TYPE_OBJECT or
+				   (sym[S_GTYPE] = TYPE_ATOM and 
+					sym[S_GTYPE_NEW] = TYPE_DOUBLE) then
+						sym[S_GTYPE] = sym[S_GTYPE_NEW]
 				end if      
 			end if
-			if SymTab[s][S_ARG_TYPE_NEW] = TYPE_NULL then
-				SymTab[s][S_ARG_TYPE] = TYPE_OBJECT
+			if sym[S_ARG_TYPE_NEW] = TYPE_NULL then
+				sym[S_ARG_TYPE] = TYPE_OBJECT
 			else
-				SymTab[s][S_ARG_TYPE] = SymTab[s][S_ARG_TYPE_NEW]
+				sym[S_ARG_TYPE] = sym[S_ARG_TYPE_NEW]
 			end if
-			SymTab[s][S_ARG_TYPE_NEW] = TYPE_NULL
+			sym[S_ARG_TYPE_NEW] = TYPE_NULL
 			
-			if SymTab[s][S_ARG_SEQ_ELEM_NEW] = TYPE_NULL then
-				SymTab[s][S_ARG_SEQ_ELEM] = TYPE_OBJECT
+			if sym[S_ARG_SEQ_ELEM_NEW] = TYPE_NULL then
+				sym[S_ARG_SEQ_ELEM] = TYPE_OBJECT
 			else
-				SymTab[s][S_ARG_SEQ_ELEM] = SymTab[s][S_ARG_SEQ_ELEM_NEW]
+				sym[S_ARG_SEQ_ELEM] = sym[S_ARG_SEQ_ELEM_NEW]
 			end if
-			SymTab[s][S_ARG_SEQ_ELEM_NEW] = TYPE_NULL
+			sym[S_ARG_SEQ_ELEM_NEW] = TYPE_NULL
 		
-			if SymTab[s][S_ARG_MIN_NEW] = -NOVALUE or 
-			   SymTab[s][S_ARG_MIN_NEW] = NOVALUE then
-				SymTab[s][S_ARG_MIN] = MININT
-				SymTab[s][S_ARG_MAX] = MAXINT
+			if sym[S_ARG_MIN_NEW] = -NOVALUE or 
+			   sym[S_ARG_MIN_NEW] = NOVALUE then
+				sym[S_ARG_MIN] = MININT
+				sym[S_ARG_MAX] = MAXINT
 			else 
-				SymTab[s][S_ARG_MIN] = SymTab[s][S_ARG_MIN_NEW]
-				SymTab[s][S_ARG_MAX] = SymTab[s][S_ARG_MAX_NEW]
+				sym[S_ARG_MIN] = sym[S_ARG_MIN_NEW]
+				sym[S_ARG_MAX] = sym[S_ARG_MAX_NEW]
 			end if
-			SymTab[s][S_ARG_MIN_NEW] = -NOVALUE
+			sym[S_ARG_MIN_NEW] = -NOVALUE
 		
-			if SymTab[s][S_ARG_SEQ_LEN_NEW] = -NOVALUE then
-				SymTab[s][S_ARG_SEQ_LEN] = NOVALUE
+			if sym[S_ARG_SEQ_LEN_NEW] = -NOVALUE then
+				sym[S_ARG_SEQ_LEN] = NOVALUE
 			else
-				SymTab[s][S_ARG_SEQ_LEN] = SymTab[s][S_ARG_SEQ_LEN_NEW]
+				sym[S_ARG_SEQ_LEN] = sym[S_ARG_SEQ_LEN_NEW]
 			end if
-			SymTab[s][S_ARG_SEQ_LEN_NEW] = -NOVALUE
+			sym[S_ARG_SEQ_LEN_NEW] = -NOVALUE
 		end if
 		
-		SymTab[s][S_GTYPE_NEW] = TYPE_NULL
+		sym[S_GTYPE_NEW] = TYPE_NULL
 		
-		if SymTab[s][S_SEQ_ELEM_NEW] = TYPE_NULL then
-		   SymTab[s][S_SEQ_ELEM] = TYPE_OBJECT
+		if sym[S_SEQ_ELEM_NEW] = TYPE_NULL then
+		   sym[S_SEQ_ELEM] = TYPE_OBJECT
 		else
-			SymTab[s][S_SEQ_ELEM] = SymTab[s][S_SEQ_ELEM_NEW]
+			sym[S_SEQ_ELEM] = sym[S_SEQ_ELEM_NEW]
 		end if
-		SymTab[s][S_SEQ_ELEM_NEW] = TYPE_NULL
+		sym[S_SEQ_ELEM_NEW] = TYPE_NULL
 		
-		if SymTab[s][S_SEQ_LEN_NEW] = -NOVALUE then
-			SymTab[s][S_SEQ_LEN] = NOVALUE
+		if sym[S_SEQ_LEN_NEW] = -NOVALUE then
+			sym[S_SEQ_LEN] = NOVALUE
 		else
-			SymTab[s][S_SEQ_LEN] = SymTab[s][S_SEQ_LEN_NEW]
+			sym[S_SEQ_LEN] = sym[S_SEQ_LEN_NEW]
 		end if
-		SymTab[s][S_SEQ_LEN_NEW] = -NOVALUE
+		sym[S_SEQ_LEN_NEW] = -NOVALUE
 		
-		if SymTab[s][S_TOKEN] != NAMESPACE 
-		and SymTab[s][S_MODE] != M_CONSTANT then
+		if sym[S_TOKEN] != NAMESPACE 
+		and sym[S_MODE] != M_CONSTANT then
 			
-			if SymTab[s][S_OBJ_MIN_NEW] = -NOVALUE or
-			   SymTab[s][S_OBJ_MIN_NEW] = NOVALUE then
-				SymTab[s][S_OBJ_MIN] = MININT
-				SymTab[s][S_OBJ_MAX] = MAXINT
+			if sym[S_OBJ_MIN_NEW] = -NOVALUE or
+			   sym[S_OBJ_MIN_NEW] = NOVALUE then
+				sym[S_OBJ_MIN] = MININT
+				sym[S_OBJ_MAX] = MAXINT
 			else 
-				SymTab[s][S_OBJ_MIN] = SymTab[s][S_OBJ_MIN_NEW]
-				SymTab[s][S_OBJ_MAX] = SymTab[s][S_OBJ_MAX_NEW]
+				sym[S_OBJ_MIN] = sym[S_OBJ_MIN_NEW]
+				sym[S_OBJ_MAX] = sym[S_OBJ_MAX_NEW]
 			end if
 		end if
-		SymTab[s][S_OBJ_MIN_NEW] = -NOVALUE
+		sym[S_OBJ_MIN_NEW] = -NOVALUE
 		
-		if SymTab[s][S_NREFS] = 1 and 
-		   find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
-			if SymTab[s][S_USAGE] != U_DELETED then
-				SymTab[s][S_USAGE] = U_DELETED
+		if sym[S_NREFS] = 1 and 
+		   find(sym[S_TOKEN], {PROC, FUNC, TYPE}) then
+			if sym[S_USAGE] != U_DELETED then
+				sym[S_USAGE] = U_DELETED
 				deleted_routines += 1
 			end if
 		end if
-		SymTab[s][S_NREFS] = 0
-		s = SymTab[s][S_NEXT]
+		sym[S_NREFS] = 0
+		if not equal(symo, sym) then
+			SymTab[s] = sym
+			updsym += 1
+		end if
+		s = sym[S_NEXT]
 	end while
 	
 	-- global temp information 
 	for i = 1 to length(temp_name_type) do
+		integer upd = 0
 		-- could be TYPE_NULL if temp is never assigned a value, i.e. not used
-		temp_name_type[i][T_GTYPE] = temp_name_type[i][T_GTYPE_NEW]
-		temp_name_type[i][T_GTYPE_NEW] = TYPE_NULL
+		if temp_name_type[i][T_GTYPE] != temp_name_type[i][T_GTYPE_NEW] then
+			temp_name_type[i][T_GTYPE] = temp_name_type[i][T_GTYPE_NEW]
+			upd = 1
+		end if
+		if temp_name_type[i][T_GTYPE_NEW] != TYPE_NULL then
+			temp_name_type[i][T_GTYPE_NEW] = TYPE_NULL	
+			upd = 1
+		end if
+		updsym += upd
 	end for
-end procedure
+	
+	return updsym
+end function
 
 --**
 -- Declare the list of routines for routine_id search 
@@ -1028,7 +1009,7 @@ end procedure
 export procedure new_c_file(sequence name)
 	cfile_size = 0
 
-	if Pass != LAST_PASS then
+	if LAST_PASS = FALSE then
 		return
 	end if
 
@@ -1250,13 +1231,14 @@ export procedure GenerateUserRoutines()
 
 	if not silent then
 		if Pass = 1 then
-			printf(1, "Translating code (%d passes), pass: ",  LAST_PASS)
+			puts(1, "Translating code, pass: ")
 		end if
 
-		printf(1, "%d ", Pass)
 
-		if Pass = LAST_PASS then
-			puts(1, "\n")
+		if LAST_PASS = TRUE then
+			puts(1, " generating\n")
+		else
+			printf(1, "%d ", Pass)
 		end if
 	end if
 
@@ -1286,14 +1268,14 @@ export procedure GenerateUserRoutines()
 				c_file = truncate_to_83(c_file)
 			end ifdef
 
-			if Pass = LAST_PASS then
+			if LAST_PASS = TRUE then
 				c_file = unique_c_name(c_file)
 				add_file(c_file)
 			end if
 
 			if file_no = 1 then
 				-- do the standard top-level files as well
-				if Pass = LAST_PASS then
+				if LAST_PASS = TRUE then
 					add_file("main-")
 					for i = 0 to main_name_num-1 do
 						buff = sprintf("main-%d", i)
@@ -1315,7 +1297,7 @@ export procedure GenerateUserRoutines()
 					-- a referenced routine in this file 
 			  
 					-- Check for oversize C file 
-					if Pass = LAST_PASS and 
+					if LAST_PASS = TRUE and 
 						(cfile_size > MAX_CFILE_SIZE or
 						(s != TopLevelSub and cfile_size > MAX_CFILE_SIZE/4 and
 						length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE))
@@ -1378,7 +1360,7 @@ export procedure GenerateUserRoutines()
 					sp = SymTab[s][S_NEXT]
 					for p = 1 to SymTab[s][S_NUM_ARGS] do
 						c_puts("int _")
-						c_puts(ok_name(SymTab[sp][S_NAME]))  
+						c_puts(SymTab[sp][S_NAME])
 						if p != SymTab[s][S_NUM_ARGS] then
 							c_puts(", ")
 						end if
@@ -1403,7 +1385,7 @@ export procedure GenerateUserRoutines()
 							case SC_PRIVATE then
 								c_stmt0("int ")
 								c_puts("_")
-								c_puts(ok_name(SymTab[sp][S_NAME]))
+								c_puts(SymTab[sp][S_NAME])
 								if SymTab[sp][S_GTYPE] != TYPE_INTEGER then
 									-- avoid DeRef in 1st BB
 									c_puts(" = 0")

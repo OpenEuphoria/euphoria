@@ -249,16 +249,9 @@
    and the better it can produce C code. Type information can gradually
    propagate and become more refined with each pass.
    
-   Currently, in c_decl.e, we have set:
-     
-      global constant LAST_PASS = 7  -- number of Translator passes
-      
-   Experiments showed that after, say, 3 or 4 passes the improvement 
-   in the emitted C code is typically very small or even non-existent. 
-   So we chose 7 passes as a compromise between the possibility of better
-   C code versus the boredom of the person waiting for the Translator to
-   finish its job. Since it is reading the IL on each pass, and not 
-   rescanning or reparsing the source, things go fairly quickly.
+   The translator keeps performing passes through the IL until it cannot
+   find any more refinements to make. Since it is reading the IL on each
+   pass, and not rescanning or reparsing the source, things go fairly quickly.
      
    
  * Propagation of information into subroutines
