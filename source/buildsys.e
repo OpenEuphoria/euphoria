@@ -148,6 +148,8 @@ function setup_build()
 				l_flags &= " -lresolv"
 			elsif TSUNOS then
 				l_flags &= " -lsocket -lresolv -lnsl"
+			elsif TWINDOWS then
+				l_flags &= " -lws2_32"
 			end if
 
 		case COMPILER_DJGPP then
