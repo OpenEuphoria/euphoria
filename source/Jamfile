@@ -22,6 +22,7 @@ else if $(JAM_TOOLSET) = DJGPP
 else if $(JAM_TOOLSET) = MINGW
 {
     CCFLAGS = -w -ffast-math -O2 -Os -DEMINGW -mno-cygwin -mwindows ;
+    EUCFLAGS = -gcc ;
 }
 else
 {
@@ -200,7 +201,7 @@ SOURCE_GRIST = ;
 # Our actual build targets
 #
 
-EUCFLAGS = -con -keep ;
+EUCFLAGS += -con -keep ;
 USER_LIBRARY = ebackend ;
 
 EuMain eui : [ FDirName $(SUBDIR) eu.ex ] ;
