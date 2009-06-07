@@ -619,7 +619,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	sequence prolog = {}
 	sequence epilog = {}
 	
-	push_block( EXIT_BLOCK, sprintf("Inline-%s from %s @ %d", 
+	Start_block( EXIT_BLOCK, sprintf("Inline-%s from %s @ %d", 
 		{SymTab[sub][S_NAME], SymTab[CurrentSub][S_NAME], start} ) )
 	
 	symtab_index s = SymTab[sub][S_NEXT]

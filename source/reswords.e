@@ -2,7 +2,7 @@
 --
 -- IL opcodes, scanner tokens etc.
 
-export constant 
+export constant
 	LESS                = 1,  -- keep relops consecutive LESS..GREATER, NOT
 	GREATEREQ           = 2,
 	EQUALS              = 3,
@@ -216,13 +216,13 @@ export constant
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])
--- be_runtime.c (optable[]), redef.h, and maybe scanner.e, 
+-- be_runtime.c (optable[]), redef.h, and maybe scanner.e,
 -- emit.e, keylist.e and the Translator (compile.e)
--- Also, run makename.ex 
+-- Also, run makename.ex
 
 -- scanner codes
 --
--- codes for characters that are simply returned to the parser 
+-- codes for characters that are simply returned to the parser
 -- without any processing <= -20
 export constant
 	ILLEGAL_CHAR  = -20,
@@ -238,7 +238,7 @@ export constant
 	COMMA         = -30,
 	QUESTION_MARK = -31
 
--- codes for classes of characters that the scanner 
+-- codes for classes of characters that the scanner
 -- has to process in some way
 export constant
 	NUMBER_SIGN  = -11,
@@ -253,13 +253,13 @@ export constant
 	LETTER       = -2,
 	BANG         = -1
 
--- other scanner tokens 
+-- other scanner tokens
 export constant VARIABLE = -100
 
 export constant END_OF_FILE_CHAR = 26 -- use this char to indicate EOF
 
 -- other keywords
-export enum 
+export enum
 	END = 402,
 	TO,
 	BY,
@@ -292,7 +292,7 @@ export enum
 	FALLTHRU,
 	ROUTINE
 
-export enum 
+export enum
 	FUNC = 501,
 	ATOM,
 	STRING,
@@ -339,7 +339,7 @@ export constant token_catname = {
 	"type",
 	"operation",
 	"namespace"
-	}	
+	}
 export constant token_category = {
 	{ILLEGAL_CHAR, TC_ILLCHAR},
 	{END_OF_FILE, TC_EOF},
@@ -361,15 +361,56 @@ export constant token_category = {
 	{INCLUDE_PATHS, TC_PREDEF},
 	{BUILT_IN, TC_PREDEF},
 	{QUALIFIED_VARIABLE, TC_VAR},
+	{VARIABLE, TC_VAR},
 	{SLICE, TC_PREDEF},
 	{PLUS_EQUALS, TC_OPER},
 	{MINUS_EQUALS, TC_OPER},
 	{MULTIPLY_EQUALS, TC_OPER},
 	{DIVIDE_EQUALS, TC_OPER},
 	{CONCAT_EQUALS, TC_OPER},
+	{EQUALS, TC_OPER},
+	{LESS, TC_OPER},
+	{GREATEREQ, TC_OPER},
+	{NOTEQ, TC_OPER},
+	{LESSEQ, TC_OPER},
+	{GREATER, TC_OPER},
+	{NOT, TC_OPER},
+	{AND, TC_OPER},
+	{OR, TC_OPER},
+	{MINUS, TC_OPER},
+	{PLUS, TC_OPER},
+	{UMINUS, TC_OPER},
+	{MULTIPLY, TC_OPER},
+	{DIVIDE, TC_OPER},
+	{CONCAT, TC_OPER},
+	{RIGHT_BRACE_N, TC_OPER},
+	{RIGHT_BRACE_2, TC_OPER},
+	{PLUS1, TC_OPER},
+	{DIV2, TC_OPER},
+	{LESS_IFW, TC_OPER},
+	{GREATEREQ_IFW, TC_OPER},
+	{EQUALS_IFW, TC_OPER},
+	{NOTEQ_IFW, TC_OPER},
+	{LESSEQ_IFW, TC_OPER},
+	{GREATER_IFW, TC_OPER},
+	{NOT_IFW, TC_OPER},
+	{PLUS_I, TC_OPER},
+	{MINUS_I, TC_OPER},
+	{PLUS1_I, TC_OPER},
+	{LESS_IFW_I, TC_OPER},
+	{GREATEREQ_IFW_I, TC_OPER},
+	{EQUALS_IFW_I, TC_OPER},
+	{NOTEQ_IFW_I, TC_OPER},
+	{LESSEQ_IFW_I, TC_OPER},
+	{GREATER_IFW_I, TC_OPER},
 	{QUALIFIED_FUNC, TC_FUNC},
 	{QUALIFIED_PROC, TC_PROC},
 	{QUALIFIED_TYPE, TC_TYPE},
+	{FUNC, TC_FUNC},
+	{FUNCTION, TC_FUNC},
+	{PROC, TC_PROC},
+	{PROCEDURE, TC_PROC},
+	{TYPE, TC_TYPE},
 	{NAMESPACE, TC_NAMESPACE}
 
 }

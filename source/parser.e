@@ -114,7 +114,7 @@ procedure CreateTopLevel()
 	SymTab[TopLevelSub][S_RESIDENT_TASK] = 1
 	SymTab[TopLevelSub][S_SAVED_PRIVATES] = {}
 	
-	push_block( PROC, TopLevelSub )
+	Start_block( PROC, TopLevelSub )
 end procedure
 
 procedure CheckForUndefinedGotoLabels()
@@ -307,7 +307,7 @@ procedure StraightenBranches()
 	end if
 	for i = length(branch_list) to 1 by -1 do
 		target = Code[branch_list[i]]
-		if target <= length(Code) then
+		if target <= length(Code) and target > 0 then
 			br = Code[target]
 			if br = ELSE or br = ENDWHILE or br = EXIT then
 				backpatch(branch_list[i], Code[target+1])
@@ -2005,7 +2005,7 @@ procedure If_statement()
 
 	if_stack &= IF
 
-	push_block( IF )
+	Start_block( IF )
 
 	elist_base = length(break_list)
 	short_circuit += 1
@@ -2133,10 +2133,12 @@ procedure pop_switch( integer break_base )
 --	loop_labels   = loop_labels[1..$-1]
 	PatchEList( break_base )
 	block_index -= 1
+	if length(switch_stack[$][SWITCH_CASES]) > 0 then
+		End_block( CASE )
+	end if
 	if_labels = if_labels[1..$-1]
 	if_stack  = if_stack[1..$-1]
 	switch_stack  = switch_stack[1..$-1]
-	End_block( CASE )
 end procedure
 
 procedure add_case( object sym, integer sign )
@@ -2180,16 +2182,20 @@ procedure Case_statement()
 		CompileErr( "a case must be inside a switch" )
 	end if
 	
-	if length(switch_stack[$][SWITCH_CASES]) then
+	if length(switch_stack[$][SWITCH_CASES]) > 0 then
+		-- Not the first case in this switch so end the current block and start a new one.
 		Sibling_block( CASE )
-		if not switch_stack[$][SWITCH_FALLTHRU] 
-		and not fallthru_case then
+		
+		if not switch_stack[$][SWITCH_FALLTHRU] and 
+		   not fallthru_case then
+			-- This is not a 'fallthru' switch and the previous case did not
+			-- end with a fallthru statement so we must insert a 'break' now.
 			putback( {CASE, 0} )
 			Break_statement()
 			tok = next_token()
 		end if
 	else
-		push_block( CASE )
+		Start_block( CASE )
 	end if
 	
 	StartSourceLine(TRUE)
@@ -2203,34 +2209,46 @@ procedure Case_statement()
 		end if
 		maybe_namespace()
 		tok = next_token()
-		integer sign
+		integer sign = 1
 		if tok[T_ID] = MINUS then
 			sign = -1
 			tok = next_token()
-	
-		else
-			sign = 1
+		elsif tok[T_ID] = PLUS then
+			tok = next_token()
 		end if
 		
-		integer fwd = 0	
+		integer fwd
 		if not find( tok[T_ID], {ATOM, STRING, ELSE} ) then
 
 			integer symi = tok[T_SYM]
-			if symi > 0 and SymTab[symi][S_MODE] = M_CONSTANT then
-				if SymTab[symi][S_CODE] then
-					tok[T_SYM] = SymTab[symi][S_CODE]
+			fwd = -1
+			if symi > 0 then
+				if find(tok[T_ID] , {VARIABLE, QUALIFIED_VARIABLE}) then
+					if SymTab[symi][S_SCOPE] = SC_UNDEFINED then
+						-- forward reference to a variable
+						fwd = symi
+					elsif SymTab[symi][S_MODE] = M_CONSTANT then
+						fwd = 0
+						if SymTab[symi][S_CODE] then
+							tok[T_SYM] = SymTab[symi][S_CODE]
+						end if
+					end if
 				end if
-			elsif tok[T_ID] = VARIABLE and SymTab[symi][S_SCOPE] = SC_UNDEFINED then
-				-- forward reference to a variable
-				fwd = symi
-			else
-				CompileErr( "expected 'else', an atom, string, constant or enum" )
 			end if
+		else
+			fwd = 0
 		end if
-	
+		
+		if fwd < 0 then
+			CompileErr( sprintf("found %s but expected 'else', an atom, string, constant or enum", {find_category(tok[T_ID])}) )
+		end if
+		
 		if tok[T_ID] = ELSE then
 			if sign = -1 then
 				CompileErr( "expected an atom, string or a constant assigned an atom or a string" )
+			end if
+			if length(switch_stack[$][SWITCH_CASES]) = 0 then
+				CompileErr( "case else cannot be first case in switch" )
 			end if
 			case_else()
 			exit
@@ -2385,10 +2403,11 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		opcode = SWITCH_RT
 		
 	elsif all_ints then
-		if not TRANSLATE and  max - min < 1024 then
+		atom delta = max - min
+		if not TRANSLATE and  delta < 1024 and delta >= 0 then
 			opcode = SWITCH_SPI
 			sequence jump = switch_stack[$][SWITCH_JUMP_TABLE]
-			sequence switch_table = repeat( else_target, max - min + 1 )
+			sequence switch_table = repeat( else_target, delta + 1 )
 			integer offset = min - 1
 			for i = 1 to length( values ) do
 				switch_table[values[i] - offset] = jump[i]
@@ -2440,14 +2459,19 @@ procedure Switch_statement()
 	emit_forward_addr()  -- the else
 	else_bp = length( Code )
 	
-	tok_match(CASE)
+	token t
+	t = next_token()
+	if t[T_ID] = CASE then
 	
-	Case_statement()
-
-	Statement_list()
-
+		Case_statement()
+	
+		Statement_list()
+	
+	else
+		putback(t)	
+	end if
+	
 	optimize_switch( switch_pc, else_bp, cases, jump_table )
-
 	tok_match(END)
 	tok_match(SWITCH)
 	if TRANSLATE then
@@ -2469,7 +2493,7 @@ procedure While_statement()
 	integer bp2
 	integer exit_base
 
-	push_block( WHILE )
+	Start_block( WHILE )
 
 	exit_base = length(exit_list)
 	entry_addr &= length(Code)+1
@@ -2537,7 +2561,7 @@ procedure Loop_statement()
 	integer bp1
 	integer exit_base,next_base
 
-	push_block( LOOP )
+	Start_block( LOOP )
 
 	exit_base = length(exit_list)
 	next_base = length(continue_list)
@@ -2796,7 +2820,7 @@ procedure For_statement()
 	token tok, loop_var
 	symtab_index loop_var_sym
 	
-	push_block( FOR )
+	Start_block( FOR )
 	loop_var = next_token()
 	if not find(loop_var[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
 		CompileErr("a loop variable name is expected here")
@@ -3467,7 +3491,7 @@ procedure SubProg(integer prog_type, integer scope)
 		buckets[h] = p
 	end if
 	
-	push_block( pt, p )
+	Start_block( pt, p )
 	
 	CurrentSub = p
 	first_def_arg = 0

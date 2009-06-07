@@ -99,7 +99,7 @@ procedure NewBlock( integer opcode, object block_label )
 end procedure
 
 
-export procedure push_block( integer opcode, object block_label = 0 )
+export procedure Start_block( integer opcode, object block_label = 0 )
 -- creates a new block and pushes it onto the block_stack
 
 	symtab_index last_block = current_block
@@ -141,7 +141,7 @@ export procedure block_label( sequence label_name )
 		{opnames[block_stack[$][BLOCK_OPCODE]], label_name})
 end procedure
 
-export function pop_block()
+function pop_block()
 -- pops the top block off the stack and hides its variables.
 	if not length(block_stack) then
 		return 0
@@ -234,7 +234,7 @@ export procedure Sibling_block( integer opcode )
 -- Ends the current block, and immediately pushes another.
 -- This is intended for if-elsifs or for cases without fallthru.
 	End_block( opcode )
-	push_block( opcode )
+	Start_block( opcode )
 end procedure
 
 
