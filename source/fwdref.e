@@ -260,7 +260,8 @@ procedure patch_forward_variable( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	symtab_index sym = tok[T_SYM]
 	
-	if SymTab[sym][S_FILE_NO] = fr[FR_FILE] then
+	if SymTab[sym][S_FILE_NO] = fr[FR_FILE] 
+	and fr[FR_SUBPROG] = TopLevelSub then
 		return
 	end if
 	
@@ -335,8 +336,17 @@ procedure patch_forward_case( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	
 	integer switch_pc = fr[FR_DATA]
+
+	symtab_index case_sym
+	if fr[FR_SUBPROG] = TopLevelSub then
+		case_sym = Code[switch_pc + 2]
+	else
+		case_sym = SymTab[fr[FR_SUBPROG]][S_CODE][switch_pc + 2]
+	end if
 	
-	symtab_index case_sym = SymTab[fr[FR_SUBPROG]][S_CODE][switch_pc + 2]
+	if current_file_no = fr[FR_FILE] and fr[FR_SUBPROG] = TopLevelSub then
+		return
+	end if
 	
 	sequence case_values = SymTab[case_sym][S_OBJ]
 	
