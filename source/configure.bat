@@ -124,10 +124,10 @@ if not exist %FULL_BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %FULL_BUILDDIR%\dosb
 if not exist %FULL_BUILDDIR%\dostrobj.wat copy dostrobj.dst %FULL_BUILDDIR%\dostrobj.wat
 
 rem ============================================================
-rem Copy the Watcom Makefile to the active Makefile
+rem Make a generic Makefile that simply includes Makefile.wat
 rem ============================================================
 
-copy Makefile.wat Makefile
+echo !include Makefile.wat > Makefile
 
 rem ============================================================
 rem All Done
