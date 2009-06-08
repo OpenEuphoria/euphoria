@@ -128,7 +128,7 @@ function setup_build()
 			end if
 
 			if dll_option then
-				c_flags &= " -fPIC"
+				c_flags &= " -fPIC "
 		   	end if
 
 			c_flags &= sprintf(" -c -w -fsigned-char -O2 -I%s -ffast-math", { get_eudir()  })
@@ -140,7 +140,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = user_library
+			l_flags = user_library & " -shared "
 
 			if TLINUX then
 				l_flags &= " -ldl -lm"
