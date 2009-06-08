@@ -336,16 +336,17 @@ source-tarball : source
 	cp -r $(BUILDDIR)/transobj $(SOURCEDIR)
 	cp -r $(BUILDDIR)/backobj  $(SOURCEDIR)
 	cp -r $(BUILDDIR)/libobj   $(SOURCEDIR)
-	cp be_*.c      $(SOURCEDIR)
-	cp int.ex      $(SOURCEDIR)
-	cp ec.ex       $(SOURCEDIR)
-	cp backend.ex  $(SOURCEDIR)
-	cp *.e         $(SOURCEDIR)
-	cp Makefile    $(SOURCEDIR)
-	cp Makefile.*s $(SOURCEDIR)
-	cp configure   $(SOURCEDIR)
+	cp be_*.c       $(SOURCEDIR)
+	cp int.ex       $(SOURCEDIR)
+	cp ec.ex        $(SOURCEDIR)
+	cp backend.ex   $(SOURCEDIR)
+	cp *.e          $(SOURCEDIR)
+	cp Makefile     $(SOURCEDIR)
+	cp Makefile.gnu $(SOURCEDIR)
+	cp Makefile.*s  $(SOURCEDIR)
+	cp configure    $(SOURCEDIR)
 	cp ../include/euphoria.h $(SOURCEDIR)
-	cp *.h         $(SOURCEDIR)
+	cp *.h          $(SOURCEDIR)
 	
 .PHONY : euisource
 .PHONY : eucsource
@@ -484,7 +485,7 @@ $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 ifneq	"$(HASCHANGEDDIRECTORY)" "1"
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
-	cp Makefile $(CONFIG) revget.ex $(BUILDDIR)/$(OBJDIR)
+	cp Makefile Makefile.gnu $(CONFIG) revget.ex $(BUILDDIR)/$(OBJDIR)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	$(MAKE) translate-here -k -C $(BUILDDIR)/$(OBJDIR) EU_TARGET=$(EU_TARGET) SHELL=$(SHELL) CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 
 endif
