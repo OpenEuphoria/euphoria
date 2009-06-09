@@ -140,7 +140,11 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = user_library & " -shared "
+			l_flags = user_library
+
+			if dll_option then
+				l_flags &= " -shared "
+			end if
 
 			if TLINUX then
 				l_flags &= " -ldl -lm"
