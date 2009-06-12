@@ -90,8 +90,8 @@ procedure InputIL()
 		fatal("not an IL file!")
 	end if
 	
-	if c2 = 10 then
-		fatal("Obsolete .il file. Please recreate it using Euphoria 3.0 later.")
+	if c2 != IL_VERSION then
+		fatal("Obsolete .il file. Please recreate it using Euphoria 4.0.")
 	end if
 	
 	-- read size

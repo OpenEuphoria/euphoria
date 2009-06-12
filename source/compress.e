@@ -7,7 +7,7 @@ export constant IL_MAGIC = 79, -- indicates an IL file
 			  IL_VERSION = -- 10 (2.5 alpha) IL version number
 						   -- 11 -- (2.5 beta)
 						   -- 12 -- 3.0.0 Open Source, no encryption
-						   13 -- 3.2? Added file_include
+						   13 -- 4.0 Added file_include, blocks
   
 export constant IL_START = "YTREWQ\n"
 

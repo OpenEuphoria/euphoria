@@ -161,7 +161,7 @@ procedure OutputSymTab(file f)
 										-- to save space
 		
 		elsif length(SymTab[i]) = SIZEOF_TEMP_ENTRY then
-			SymTab[i] = SymTab[i][1..4]
+			SymTab[i] = SymTab[i][1..4] & SymTab[i][S_NEXT_IN_BLOCK]
 		
 		else
 			if find(SymTab[i][S_TOKEN], {PROC, FUNC, TYPE}) then
@@ -169,9 +169,11 @@ procedure OutputSymTab(file f)
 				if not full_debug then
 					SymTab[i][S_LINETAB] = 0
 				end if
-				SymTab[i] = SymTab[i][1..4] & {SymTab[i][S_FILE_NO], 
+				SymTab[i] = SymTab[i][1..4] & {SymTab[i][S_NEXT_IN_BLOCK], 
+							SymTab[i][S_FILE_NO], 
 							SymTab[i][S_NAME], SymTab[i][S_TOKEN], 
-							SymTab[i][S_CODE], SymTab[i][S_LINETAB], 
+							SymTab[i][S_CODE], SymTab[i][S_BLOCK],
+							SymTab[i][S_LINETAB], 
 							SymTab[i][S_TEMPS],  SymTab[i][S_NUM_ARGS], 
 							SymTab[i][S_FIRSTLINE],
 							SymTab[i][S_STACK_SPACE]}
@@ -189,9 +191,11 @@ procedure OutputSymTab(file f)
 						SymTab[i][S_NAME] = 0
 					end if
 					
-					SymTab[i] = SymTab[i][1..4] & {SymTab[i][S_FILE_NO], 
+					SymTab[i] = SymTab[i][1..4] & {SymTab[i][S_NEXT_IN_BLOCK],
+								SymTab[i][S_FILE_NO], 
 								SymTab[i][S_NAME], 
-								SymTab[i][S_TOKEN]} 
+								SymTab[i][S_TOKEN],{},
+								SymTab[i][S_BLOCK]} 
 				end if
 			end if
 							

@@ -54,12 +54,13 @@ export enum
 	S_MODE,  -- M_NORMAL, M_TEMP or M_CONSTANT
 	S_SCOPE, -- for temps at compile time: FREE or IN_USE,
 	         -- or DELETED (Translator-only)
-	S_USAGE, -- for temps: type T_UNKNOWN or T_INTEGER
+	S_USAGE  -- for temps: type T_UNKNOWN or T_INTEGER
 	         -- for vars, read/written/to be deleted
-	S_NEXT_IN_BLOCK  --  Linked list of vars in a block
+	
 
 -- extra fields for vars (and routines) only but not temps
 export constant
+	S_NEXT_IN_BLOCK = 6 - get_backend(), --  Linked list of vars in a block
 	S_FILE_NO = 7 - get_backend(), -- file number where symbol is defined
 	S_NAME = 8 - get_backend(),    -- name string
 	S_SAMEHASH = 9,                -- index of next symbol with same hash value
@@ -76,7 +77,7 @@ export constant
 	S_VTYPE = 15,     -- variable type or NULL
 	S_VARNUM = 16,    -- local variable number
 	
-	S_BLOCK = 17    -- Either the containing scope for a var or the main scope for a routine
+	S_BLOCK = 17 - get_backend() * 7 -- Either the containing scope for a var or the main scope for a routine
 	
 -- for routines only:
 export constant
