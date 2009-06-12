@@ -67,7 +67,7 @@
 
 // Note: after a PUSH or POP, the stack pointer ESP points at the top element
 
-#ifdef EUNIX
+#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
 #define push_regs() asm("pushal")
 #define pop_regs() asm("popal")
 #define set_esp() asm volatile("movl %0, %%esp" : /* no out */ : "r"(stack_top) )
