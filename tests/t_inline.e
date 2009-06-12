@@ -123,4 +123,22 @@ test_equal( "inlined const init 0", 0, ZERO_INIT )
 test_equal( "inlined const init 1", 1, ONE_INIT )
 test_equal( "inlined const init 2", 4, TWO_INIT )
 
+without inline
+procedure test_it_here( object o, object control )
+	test_equal( "RIGHT_BRACE_N with same temp at multiple places", control, o )
+end procedure
+
+
+with inline
+procedure inline_this(object o, object control )
+	test_it_here( {o, o, o}, control)
+end procedure
+
+procedure test( object o, object control )
+	inline_this( o, control )
+end procedure
+
+object mult_temp = {1}
+test( mult_temp[1], repeat( mult_temp[1], 3 ) )
+
 test_report()
