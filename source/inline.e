@@ -451,11 +451,31 @@ export procedure check_inline( symtab_index sub )
 					end if
 				end for
 				
-			
+			case RIGHT_BRACE_N then
+				-- need to check to see if any temps are duplicated
+				sequence args = inline_code[pc+2..inline_code[pc+1] + pc + 1]
+				
+				for i = 1 to length(args) - 1 do
+					if find( args[i], args, i + 1 ) then
+						defer()
+						restore_code()
+						return
+					end if
+				end for
+				goto "inline op"
+				
+			case RIGHT_BRACE_2 then
+				if equal( inline_code[pc+1], inline_code[pc+2] ) then
+					defer()
+					restore_code()
+					return
+				end if
+				goto "inline op"
+				
 			case EXIT_BLOCK then
 				replace_code( "", pc, pc + 1 )
 				continue
-				
+			
 			case SWITCH_RT then
 				sequence values = SymTab[inline_code[pc+2]][S_OBJ]
 				for i = 1 to length( values ) do
