@@ -1530,7 +1530,11 @@ procedure Assignment(token left_var)
 
 	assign_op = tok[T_ID]
 	if not find(assign_op, ASSIGN_OPS) then
-		CompileErr("Syntax error - expected to see =, +=, -=, *=, /= or &=")
+		if assign_op = COLON then
+			CompileErr(sprintf("Syntax error - Unknown namespace '%s' used", {SymTab[left_var[T_SYM]][S_NAME]}))
+		else
+			CompileErr("Syntax error - expected to see an assignment such as =, +=, -=, *=, /= or &=")
+		end if
 	end if
 
 	if subs = 0 then
