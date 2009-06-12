@@ -27,6 +27,12 @@ object void
 integer ctcfh = 0
 sequence error_list = repeat({},4)
 
+-- moved from do_test:
+integer log = 0
+integer failed = 0
+integer total
+sequence dexe, executable
+
 enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_EUTEST
 
 type error_class(object i)
@@ -213,23 +219,352 @@ function strip_path_junk(sequence path)
 	return ""
 end function
 
-procedure do_test(sequence cmds)
-	atom score
-	integer failed = 0, total, status, comparison
-	object emake_outcome, files = {}
-	sequence filename, dexe, executable, cmd, ddir
-	sequence interpreter_options = ""
-	sequence translator_options = "-emake "
-	sequence test_options = ""
-	sequence translator = "", library = "", compiler = ""
-	sequence directory
-	sequence control_err, interpreter_os_name
-	object ex_err
-	integer log_where = 0 -- keep track of unittest.log
-	integer log_fd = 0
-	sequence silent = ""
-	integer expected_status -- expected status
+function check_errors( sequence filename, sequence control_error_file, sequence fail_list )
+	sequence control_err = read_lines(control_error_file)
+	sequence ex_err = read_lines("ex.err")
+	if sequence(ex_err) then
+		if length(ex_err) > 4 then
+			ex_err = ex_err[1..4]
+		end if
 
+		if length(control_err) > 4 then
+			control_err = control_err[1..4]
+		end if
+
+		ex_err[1] = strip_path_junk(ex_err[1])
+		control_err[1] = strip_path_junk(control_err[1])
+
+		for j = 1 to length(ex_err) do
+			integer mde = match(".e:", ex_err[j]) 
+			integer d32 = match("DOS32", ex_err[j])
+
+			if mde then
+				integer sl = mde
+				while sl > 1 and ex_err[j][sl] != SLASH do
+					sl -= 1
+				end while
+
+				ex_err[j] = dos_lower(ex_err[j][sl..$])
+
+				if sl > 1 then
+					ex_err[j] = "..." & ex_err[j]
+				end if
+			end if
+
+			if d32 then
+				ex_err[j] = ex_err[j][1..d32+4]
+			end if
+		end for
+
+		for j = 1 to length(control_err) do
+			integer mde = match(".e:", control_err[j])
+			integer d32 = match("DOS32", ex_err[j])
+
+			if mde then
+				integer sl = mde
+				while sl > 1 and control_err[j][sl] != SLASH do
+					sl -= 1
+				end while
+
+				control_err[j] = dos_lower(control_err[j][sl..$])
+				if sl > 1 then
+					control_err[j] = "..." & control_err[j]
+				end if
+			end if
+
+			if d32 then
+				control_err[j] = control_err[j][1..d32+4]
+			end if
+		end for
+	end if -- sequence(ex_err)
+			
+	integer comparison = compare(ex_err, control_err)
+	if comparison then
+		failed += 1
+		fail_list = append(fail_list, filename)
+
+		if atom(ex_err) then
+			error(filename, E_INTERPRET, "No ex.err has been generated.", {})
+		elsif length(ex_err) >=4  and length(control_err) >= 4 then
+			error(filename, E_INTERPRET, "Unexpected ex.err expected: " &
+				"\'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n",
+				control_err & ex_err, "ex.err")
+		elsif length(ex_err) then
+			error(filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err)
+		else
+			error(filename, E_INTERPRET, "Unexpected empty ex.err", {})
+		end if
+	end if
+	return fail_list
+end function
+
+function open_error_file( sequence filename )
+	object control_error_file
+	-- try tests/t_test.d/interpreter/UNIX/control.err
+	control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "interpreter" &
+		SLASH & interpreter_os_name & SLASH & "control.err"
+
+	if not file_exists(control_error_file) then
+		-- try tests/t_test/UNIX/control.err
+		control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH &
+			interpreter_os_name & SLASH & "control.err"
+	end if
+
+	if not file_exists(control_error_file) then
+		-- try tests/t_test/control.err
+		control_error_file = filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "control.err"
+	end if
+
+	if not file_exists(control_error_file) then
+		-- don't try anything
+		control_error_file = 0
+	end if
+	return control_error_file
+end function
+
+function interpret_fail( sequence cmd, sequence filename, object control_error_file, sequence fail_list )
+	integer status = system_exec(cmd, 2)
+	integer comparison
+	
+	if sequence(control_error_file) then 
+		-- Now we will compare the control error file to the newly created 
+		-- ex.exe.  If ex.err doesn't exist or there is no match error()
+		-- is called and we add to the failed list.
+		comparison = length( fail_list )
+		fail_list = check_errors( filename, control_error_file, fail_list )
+		comparison = comparison != length( fail_list )
+	else	
+		-- no control_error_file. thus, there is nothing to compare to we go on as
+		-- if the files matched.
+		comparison = 0
+	end if  -- sequence(control_error_file)
+
+	if comparison = 0 then
+		if status = 0 then
+			-- Here, we were expecting the test to fail.  Yet, we recieved a 0
+			-- error status. This is a failure for we should get some other number
+			-- for errors.
+			failed += 1
+			fail_list = append(fail_list, filename)
+			error(filename, E_INTERPRET,
+				"The unit test exited with 0 while we expected a failure.", {})
+		else						
+			error(filename, E_NOERROR, "The unit test failed in the expected manner. " &
+				"Error status %d.", {status})
+		end if
+	else
+		-- error() has been called in the previous block if comparsion != 0
+	end if
+	return fail_list
+end function
+
+function translate( sequence filename, sequence fail_list )
+	printf(1, "translating, compiling, and executing executable: %s\n", {filename})
+	total += 1
+	sequence cmd = sprintf("%s %s %s %s -D UNITTEST -D EC -batch %s",
+		{ translator, library, compiler, translator_options, filename })
+	verbose_printf(1, "CMD '%s'\n", {cmd})
+	integer status = system_exec(cmd, 0)
+
+	filename = filebase(filename)
+	integer log_where
+	if status = 0 then
+		sequence exename = filename & dexe
+
+		void = delete_file(exename)
+		void = delete_file("cw.err")
+		verbose_printf(1, "compiling %s%s\n", {filename, ".c"})
+
+		object emake_outcome = run_emake()
+		if equal(emake_outcome, 0) then
+			verbose_printf(1, "executing %s:\n", {exename})
+			cmd = sprintf("./%s %s", {exename, test_options})
+			status = invoke(cmd, exename,  E_EXECUTE) 
+			if status then
+				failed += 1
+				fail_list = append(fail_list, "translated" & " " & exename)
+			else
+				object token
+				if log then
+					token = check_log(log_where)
+				else
+					token = 0
+				end if
+
+				if sequence(token) then
+					failed += 1
+					fail_list = append(fail_list, "translated" & " " & exename)					
+					error(exename, E_EXECUTE, token, {}, "ex.err")
+				else
+					log_where = token
+					error(exename, E_NOERROR, "all tests successful", {})
+				end if -- sequence(token)
+			end if
+			
+			void = delete_file(exename)
+		else
+			failed += 1
+			fail_list = append(fail_list, "compiling " & filename)					
+			if sequence(emake_outcome) then
+				error(exename, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4])
+				status = emake_outcome[3][1]
+			else
+				error(exename, E_COMPILE, 
+					"program could not be compiled. Compilation process exited with status %d", {emake_outcome})
+			end if
+		end if
+	else
+		failed += 1
+		fail_list = append(fail_list, "translating " & filename)
+		error(filename, E_TRANSLATE, "program translation terminated with a bad status %d", {status})                               
+	end if
+	report_last_error(filename)
+	return fail_list
+end function
+
+function test_file( sequence filename, sequence fail_list )
+
+	integer log_where = 0 -- keep track of unittest.log
+	integer status
+	void = delete_file("ex.err")
+	void = delete_file("cw.err")
+
+	printf(1, "interpreting %s:\n", {filename})
+	sequence cmd = sprintf("%s %s -D UNITTEST -batch %s %s",
+		{ executable, interpreter_options, filename, test_options })
+
+	verbose_printf(1, "CMD '%s'\n", {cmd})
+
+	object control_error_file = open_error_file( filename )
+	
+	integer expected_status = 0
+	if match("t_c_", dos_lower(filename)) = 1 or sequence(control_error_file) then
+		-- We expect this test to fail
+		expected_status = 1
+		fail_list = interpret_fail( cmd, filename, control_error_file, fail_list )
+		
+	else -- not match(t_c_*.e)
+		-- in this branch error() is called once and only once in all sub-branches
+		status = invoke(cmd, filename, E_INTERPRET) -- error() called if status != 0
+		expected_status = 0
+
+		if status then
+			failed += 1
+			fail_list = append(fail_list, filename)
+			-- error() called in invoke()
+		else
+			object token
+			if log then
+				token = check_log(log_where)
+			else
+				token = 0
+			end if
+
+			if sequence(token) then
+				failed += 1
+				fail_list = append(fail_list, filename)					
+				error(filename, E_INTERPRET, token, {}, "ex.err")
+			else
+				log_where = token
+				error(filename, E_NOERROR, "all tests successful", {})
+			end if
+		end if
+	end if
+
+	ifdef REC then
+		if status then
+			if match("t_c_", dos_lower(filename)) != 1 then
+				directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
+			else
+				directory = filename[1..find('.',filename&'.')] & "d"
+			end if
+
+			create_directory(filename[1..find('.',filename&'.')] & "d")
+			create_directory(directory)
+
+			if not move_file("ex.err", directory & SLASH & "control.err") then
+				e:crash("Could not move 'ex.err' to %s", { directory & SLASH & "control.err" })
+			end if
+		end if
+	end ifdef
+	
+	report_last_error(filename)
+	
+	if length(translator) and expected_status = 0 then
+		fail_list = translate( filename, fail_list )
+	end if
+	
+	return fail_list
+end function
+
+sequence interpreter_options = ""
+sequence translator_options = "-emake "
+sequence test_options = ""
+sequence translator = "", library = "", compiler = ""
+sequence interpreter_os_name
+function parse_options( sequence cmds  )
+	-- pass options with arguments passed to eutest to the 
+	-- interpreter or translator...
+	integer outstanding_argument_count = 0
+	integer cci
+	compiler = ""
+	while cci and cci < length(cmds) with entry do
+		if cmds[cci+1][1] != '-' then
+			compiler = "-" & cmds[cci+1]
+		else
+			compiler = cmds[cci+1]
+		end if
+
+		cmds = cmds[1..cci-1] & cmds[cci+2..$]
+	entry
+		cci = find("-cc", cmds)               
+	end while
+	
+	sequence files = {}
+	for i = 3 to length(cmds) do
+		if outstanding_argument_count > 0 then
+			outstanding_argument_count -= 1
+			continue
+
+		elsif cmds[i][1] != '-' then			
+			files = append(files,repeat(0,8))
+			files[$][D_NAME] = cmds[i]
+
+		-- put the options that take arguments in the sequence argument
+		-- to find below.
+		elsif find(cmds[i],{"-i","-D"}) and i < length(cmds) then
+			-- for both interpreter and translator but not test
+			outstanding_argument_count = 1 -- an argument to skip
+			interpreter_options &= " " & cmds[i] & " " & cmds[i+1]
+			translator_options &= " " & cmds[i] & " " & cmds[i+1]
+
+		elsif find(cmds[i],{"-lib"}) and i < length(cmds) then
+			-- for translator only
+			outstanding_argument_count = 1
+			translator_options &= " " & cmds[i] & " " & cmds[i+1]
+
+		else
+			-- for test 
+			test_options &= " " & cmds[i] & " "
+		end if
+	end for
+	
+	
+	
+	if length(files) = 0 then
+		files = dir("t_*.e")
+		if atom(files) then
+			puts(2,"No unit tests supplied or found.\n")
+			abort(1)
+		end if
+
+		files = sort(files)
+	end if
+	
+	return files
+end function
+
+function platform_init( sequence cmds )
 	ifdef UNIX then
 		executable = "eui"
 		dexe = ""
@@ -242,10 +577,6 @@ procedure do_test(sequence cmds)
 		executable = "euid"
 		dexe = ".exe"
 	end ifdef
-
-	integer log    = find("-log", cmds)
-	verbose_switch = find("-verbose", cmds)
-	
 	integer ex
 	while ex and ex < length(cmds) with entry do
 		executable = cmds[ex+1]
@@ -306,64 +637,21 @@ procedure do_test(sequence cmds)
 		puts(2, "eutest is only supported on Unix, MS-DOS, and Windows.\n")
 		abort(1)
 	end ifdef
+	return cmds
+end function
 
-	integer cci
+procedure do_test( sequence cmds )
+	atom score
+	object files = {}
 	
-	compiler = ""
-	while cci and cci < length(cmds) with entry do
-		if cmds[cci+1][1] != '-' then
-			compiler = "-" & cmds[cci+1]
-		else
-			compiler = cmds[cci+1]
-		end if
-
-		cmds = cmds[1..cci-1] & cmds[cci+2..$]
-	entry
-		cci = find("-cc", cmds)               
-	end while
-
-	-- pass options with arguments passed to eutest to the 
-	-- interpreter or translator...
-	integer outstanding_argument_count = 0
+	integer log_fd = 0
+	sequence silent = ""
 	
-	for i = 3 to length(cmds) do
-		if outstanding_argument_count > 0 then
-			outstanding_argument_count -= 1
-			continue
-
-		elsif cmds[i][1] != '-' then			
-			files = append(files,repeat(0,8))
-			files[$][D_NAME] = cmds[i]
-
-		-- put the options that take arguments in the sequence argument
-		-- to find below.
-		elsif find(cmds[i],{"-i","-D"}) and i < length(cmds) then
-			-- for both interpreter and translator but not test
-			outstanding_argument_count = 1 -- an argument to skip
-			interpreter_options &= " " & cmds[i] & " " & cmds[i+1]
-			translator_options &= " " & cmds[i] & " " & cmds[i+1]
-
-		elsif find(cmds[i],{"-lib"}) and i < length(cmds) then
-			-- for translator only
-			outstanding_argument_count = 1
-			translator_options &= " " & cmds[i] & " " & cmds[i+1]
-
-		else
-			-- for test 
-			test_options &= " " & cmds[i] & " "
-		end if
-	end for
+	log    = find("-log", cmds)
+	verbose_switch = find("-verbose", cmds)
 	
-	if length(files) = 0 then
-		files = dir("t_*.e")
-		if atom(files) then
-			puts(2,"No unit tests supplied or found.\n")
-			abort(1)
-		end if
-
-		files = sort(files)
-	end if
-
+	files = parse_options( cmds )
+	
 	total = length(files)
 
 	if verbose_switch <= 0 then
@@ -379,257 +667,7 @@ procedure do_test(sequence cmds)
 	end if
 
 	for i = 1 to length(files) do
-		filename = files[i][D_NAME]
-		void = delete_file("ex.err")
-		void = delete_file("cw.err")
-
-		if 1 label "interpreter" then
-			sequence path_stack		
-			object control_error_file
-
-			printf(1, "interpreting %s:\n", {filename})
-			cmd = sprintf("%s %s -D UNITTEST -batch %s %s",
-				{ executable, interpreter_options, filename, test_options })
-
-			verbose_printf(1, "CMD '%s'\n", {cmd})
-
-			-- try tests/t_test.d/interpreter/UNIX/control.err
-			control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "interpreter" &
-				SLASH & interpreter_os_name & SLASH & "control.err"
-
-			if not file_exists(control_error_file) then
-				-- try tests/t_test/UNIX/control.err
-				control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH &
-					interpreter_os_name & SLASH & "control.err"
-			end if
-
-			if not file_exists(control_error_file) then
-				-- try tests/t_test/control.err
-				control_error_file = filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "control.err"
-			end if
-
-			if not file_exists(control_error_file) then
-				-- don't try anything
-				control_error_file = 0
-			end if
-
-			if match("t_c_", dos_lower(filename)) = 1 or sequence(control_error_file) then
-				expected_status = 1
-				status = system_exec(cmd, 2)
-
-				if sequence(control_error_file) then 
-					-- Now we will compare the control error file to the newly created 
-					-- ex.exe.  If ex.err doesn't exist or there is no match error()
-					-- is called and we add to the failed list.
-					control_err = read_lines(control_error_file)
-					ex_err = read_lines("ex.err")
-					if sequence(ex_err) then
-						if length(ex_err) > 4 then
-							ex_err = ex_err[1..4]
-						end if
-
-						if length(control_err) > 4 then
-							control_err = control_err[1..4]
-						end if
-
-						ex_err[1] = strip_path_junk(ex_err[1])
-						control_err[1] = strip_path_junk(control_err[1])
-
-						for j = 1 to length(ex_err) do
-							integer mde = match(".e:", ex_err[j]) 
-							integer d32 = match("DOS32", ex_err[j])
-
-							if mde then
-								integer sl = mde
-								while sl > 1 and ex_err[j][sl] != SLASH do
-									sl -= 1
-								end while
-
-								ex_err[j] = dos_lower(ex_err[j][sl..$])
-
-								if sl > 1 then
-									ex_err[j] = "..." & ex_err[j]
-								end if
-							end if
-
-							if d32 then
-								ex_err[j] = ex_err[j][1..d32+4]
-							end if
-						end for
-
-						for j = 1 to length(control_err) do
-							integer mde = match(".e:", control_err[j])
-							integer d32 = match("DOS32", ex_err[j])
-
-							if mde then
-								integer sl = mde
-								while sl > 1 and control_err[j][sl] != SLASH do
-									sl -= 1
-								end while
-
-								control_err[j] = dos_lower(control_err[j][sl..$])
-								if sl > 1 then
-									control_err[j] = "..." & control_err[j]
-								end if
-							end if
-
-							if d32 then
-								control_err[j] = control_err[j][1..d32+4]
-							end if
-						end for
-					end if -- sequence(ex_err)
-							
-					comparison = compare(ex_err, control_err)
-					if comparison then
-						failed += 1
-						fail_list = append(fail_list, filename)
-
-						if atom(ex_err) then
-							error(filename, E_INTERPRET, "No ex.err has been generated.", {})
-						elsif length(ex_err) >=4  and length(control_err) >= 4 then
-							error(filename, E_INTERPRET, "Unexpected ex.err expected: " &
-								"\'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n",
-								control_err & ex_err, "ex.err")
-						elsif length(ex_err) then
-							error(filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err)
-						else
-							error(filename, E_INTERPRET, "Unexpected empty ex.err", {})
-						end if
-					end if
-				else	
-					-- no control_error_file. thus, there is nothing to compare to we go on as
-					-- if the files matched.
-					comparison = 0
-				end if  -- sequence(control_error_file)
-
-				if comparison = 0 then
-					if status = 0 then
-						-- Here, we were expecting the test to fail.  Yet, we recieved a 0
-						-- error status. This is a failure for we should get some other number
-						-- for errors.
-						failed += 1
-						fail_list = append(fail_list, filename)
-						error(filename, E_INTERPRET,
-							"The unit test exited with 0 while we expected a failure.", {})
-					else						
-						error(filename, E_NOERROR, "The unit test failed in the expected manner. " &
-							"Error status %d.", {status})
-					end if
-				else
-					-- error() has been called in the previous block if comparsion != 0
-				end if
-
-			else -- not match(t_c_*.e)
-				-- in this branch error() is called once and only once in all sub-branches
-				status = invoke(cmd, filename, E_INTERPRET) -- error() called if status != 0
-				expected_status = 0
-
-				if status then
-					failed += 1
-					fail_list = append(fail_list, filename)
-					-- error() called in invoke()
-				else
-					object token
-					if log then
-						token = check_log(log_where)
-					else
-						token = 0
-					end if
-
-					if sequence(token) then
-						failed += 1
-						fail_list = append(fail_list, filename)					
-						error(filename, E_INTERPRET, token, {}, "ex.err")
-					else
-						log_where = token
-						error(filename, E_NOERROR, "all tests successful", {})
-					end if
-				end if
-			end if
-		end if
-
-		ifdef REC then
-			if status then
-				if match("t_c_", dos_lower(filename)) != 1 then
-					directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
-				else
-					directory = filename[1..find('.',filename&'.')] & "d"
-				end if
-
-				create_directory(filename[1..find('.',filename&'.')] & "d")
-				create_directory(directory)
-
-				if not move_file("ex.err", directory & SLASH & "control.err") then
-					e:crash("Could not move 'ex.err' to %s", { directory & SLASH & "control.err" })
-				end if
-			end if
-		end ifdef
-		
-		report_last_error(filename)
-		
-		if length(translator) and expected_status = 0 then
-			total += 1 -- also account for this translated test
-			printf(1, "translating, compiling, and executing executable: %s\n", {filename})
-
-			cmd = sprintf("%s %s %s %s -D UNITTEST -D EC -batch %s",
-				{ translator, library, compiler, translator_options, filename })
-			verbose_printf(1, "CMD '%s'\n", {cmd})
-			status = system_exec(cmd, 0)
-
-			filename = filebase(filename)
-			if status = 0 and expected_status = 0 then
-				sequence exename = filename & dexe
-
-				void = delete_file(exename)
-				void = delete_file("cw.err")
-				verbose_printf(1, "compiling %s%s\n", {filename, ".c"})
-
-				emake_outcome = run_emake()
-				if equal(emake_outcome, 0) then
-					verbose_printf(1, "executing %s:\n", {exename})
-					cmd = sprintf("./%s %s", {exename, test_options})
-					status = invoke(cmd, exename,  E_EXECUTE) 
-					if status then
-						failed += 1
-						fail_list = append(fail_list, "translated" & " " & exename)
-					else
-						object token
-						if log then
-							token = check_log(log_where)
-						else
-							token = 0
-						end if
-
-						if sequence(token) then
-							failed += 1
-							fail_list = append(fail_list, "translated" & " " & exename)					
-							error(exename, E_EXECUTE, token, {}, "ex.err")
-						else
-							log_where = token
-							error(exename, E_NOERROR, "all tests successful", {})
-						end if -- sequence(token)
-					end if
-					
-					void = delete_file(exename)
-				else
-					failed += 1
-					fail_list = append(fail_list, "compiling " & filename)					
-					if sequence(emake_outcome) then
-						error(exename, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4])
-						status = emake_outcome[3][1]
-					else
-						error(exename, E_COMPILE, 
-							"program could not be compiled. Compilation process exited with status %d", {emake_outcome})
-					end if
-				end if
-			elsif expected_status = 0 then
-				failed += 1
-				fail_list = append(fail_list, "translating " & filename)
-				error(filename, E_TRANSLATE, "program translation terminated with a bad status %d", {status})                               
-			end if
-
-			report_last_error(filename)
-		end if
+		fail_list = test_file( files[i][D_NAME], fail_list )		
 	end for
 	
 	if log and ctcfh != -1 then
@@ -1104,6 +1142,7 @@ procedure main(sequence cmds = command_line())
 	if find("-process-log", cmds) then
 		do_process_log(cmds)
 	else
+		cmds = platform_init( cmds )
 		do_test(cmds)
 	end if
 end procedure
