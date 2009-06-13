@@ -26,17 +26,16 @@ include pathopen.e
 include error.e
 
 constant OPTIONS = {
-{ "SHROUD_ONLY", 0, "", { NO_CASE, NO_PARAMETER }  },
-{ "QUIET", 0, "", { NO_CASE, NO_PARAMETER }  },
-{ "LIST", 0, "", { NO_CASE, NO_PARAMETER }  },
-{ "W32", 0, "", { NO_CASE, NO_PARAMETER }  },
-{ "ICON", 0, "", { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "CON", 0, "", { NO_CASE, NO_PARAMETER }  },
-{ "FULL_DEBUG", 0, "", { NO_CASE, NO_PARAMETER }  },
-{ "OUT", 0, "", { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "I", 0, "", { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
-{ "C", 0, "", { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "COPYRIGHT", 0, "", { NO_CASE, NO_PARAMETER }  }
+{ "SHROUD_ONLY", 0, "Does not create an executable. Just a .IL file for backend to run.", { NO_CASE, NO_PARAMETER }  },
+{ "QUIET", 0, "Does not display binding information", { NO_CASE, NO_PARAMETER }  },
+{ "LIST", 0, "List unused (deleted) symbols in 'deleted.txt'", { NO_CASE, NO_PARAMETER }  },
+{ "W32", 0, "Prepares a file for use on Windows", { NO_CASE, NO_PARAMETER }  },
+{ "ICON", 0, "User supplied icon file used.", { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "CON", 0, "Windows Only: Uses the current console rather than creating a new console", { NO_CASE, NO_PARAMETER }  },
+{ "FULL_DEBUG", 0, "Includes symbol names in IL data", { NO_CASE, NO_PARAMETER }  },
+{ "OUT", 0, "The name of the executable to create. The default is the same basename of the input file.", { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "I", 0, "An 'include' directory to use.", { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
+{ "COPYRIGHT", 0, "Display copyright information", { NO_CASE, NO_PARAMETER }  }
 }
 
 
@@ -141,6 +140,10 @@ procedure OutputSymTab(file f)
 	
 	if list then
 		close(fd)
+		if not quiet then
+			puts(1, "The list of deleted symbols is in 'deleted.txt'\n")
+		end if
+		
 	end if
 	
 	-- strip down to the essential fields
@@ -247,24 +250,6 @@ procedure copyrights()
 	end for
 end procedure
 
-procedure usage()
-	if usage_shown != 0 then
-		return
-	end if
-	usage_shown += 1
-	puts(2, #'
-______________usage 1:  bind[w|u] [-full_debug] [-con] [-list] [-quiet]
-                                  [-out executable_file] [-icon iconfile[.ico]]
-                                  filename
-              
-              
-              usage 2:  shroud[w] [-full_debug] [-con] [-list] [-quiet]
-                                  [-out shrouded_file] filename
-
-              ')
-
-end procedure
-
 function extract_options( sequence cl )
 	m:map opts = cmd_parse(OPTIONS,,cl)
 	handle_options_for_bind( opts )
@@ -284,45 +269,48 @@ export procedure handle_options_for_bind( m:map opts )
 		object val = m:get(opts, option)
 		option = upper(option)
 		
+		switch option do
+			case "SHROUD_ONLY" then
+				shroud_only = TRUE
 		
-		if equal("SHROUD_ONLY", option) then
-			shroud_only = TRUE
+			case "QUIET" then
+				quiet = TRUE
 		
-		elsif equal("QUIET", option) then
-			quiet = TRUE
+			case "LIST" then
+				list = TRUE
 		
-		elsif equal("LIST", option) then
-			list = TRUE
+			case "W32" then
+				w32 = TRUE
 		
-		elsif equal("W32", option) then
-			w32 = TRUE
+			case "ICON" then				
+				icon = val
 		
-		elsif equal("ICON", option) then				
-			icon = val
-		
-		elsif equal("CON", option) then
-			con = TRUE
+			case "CON" then
+				con = TRUE
 			
-		elsif equal("FULL_DEBUG", option) then
-			full_debug = TRUE
+			case "FULL_DEBUG" then
+				full_debug = TRUE
 		
-		elsif equal("OUT", option) then
-			user_out = val
+			case "OUT" then
+				user_out = val
 		
-		elsif equal("I", option)  then
-			for j = 1 to length(val) do
-				add_include_directory( val[j] )
-			end for
+			case "I"  then
+				for j = 1 to length(val) do
+					add_include_directory( val[j] )
+				end for
 			
-		elsif equal("HELP", option )
-		   or equal("?", option )
-		then
-			usage()						
-		elsif equal("COPYRIGHT", option ) then
-			copyrights()			
-		elsif not equal("EXTRAS", option ) then
-			fatal("Invalid option: " & option)
-		end if
+			case "COPYRIGHT" then
+				copyrights()			
+						
+			case "EXTRAS" then
+				if length(val) = 0 then
+					fatal("No file to bind was supplied.")
+				end if
+				
+			case else
+				fatal("Invalid option: " & option)
+		end switch
+		
 		op += 1
 	end while
 	
@@ -497,9 +485,7 @@ procedure OutputIL()
 				last6[6] = c
 				if equal(last6, {'E', 0, 'X', 0, 'W', 0}) then
 					-- found icon marker
-					for i = 1 to 4 do
-						puts(out, getc(be))
-					end for
+
 					-- open icon file
 					if not find('.', icon) then
 						icon &= ".ico"
