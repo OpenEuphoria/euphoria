@@ -64,7 +64,7 @@ easy to loop through the records looking for a particular field value.
 To reduce the number of parameters that you have to pass, there is a notion of
 the **current database**, and **current table**. 
 
-==== The current databse.
+==== The current database.
 
 Any data operation or table operation assumes there is a current database being defined.
 You set the current database by opening, creating or selecting a database. Deleting the current database leaves the current database undefined.

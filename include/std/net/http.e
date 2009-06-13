@@ -376,7 +376,7 @@ function eunet_format_sendheader()
 			set_sendheader("Content-Type","application/x-www-form-urlencoded")
 			temppostdata = sendheader[idx][3]
 			set_sendheader("Content-Length",sprintf("%d",length(temppostdata)))
-			sendheader[idx][3] = "" -- clear it, so it's not accidently sent again
+			sendheader[idx][3] = "" -- clear it, so it's not accidentally sent again
 		end if
 
 		if equal("httpversion",sendheader[idx][1]) and not equal("",sendheader[idx][3]) then

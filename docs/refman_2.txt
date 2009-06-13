@@ -500,7 +500,7 @@ if compare("APPLE", "ORANGE") < 0 then  -- CORRECT
 -- enter here if "APPLE" is less than "ORANGE" (TRUE)
 </eucode>
 
-Specially useful is the idiom ##compare(x, "") = 1## to determine whether ##x## is a non
+Especially useful is the idiom ##compare(x, "") = 1## to determine whether ##x## is a non
 empty sequence. ##compare(x, "") = -1## would test for ##x## being an atom, but
 ##atom(x) = 1## does the same faster and is clearer to read.
 
@@ -1574,13 +1574,13 @@ considered a public symbol in that file.  Namespaces and other symbols (e.g.,
 variables, functions, procedures and types) can have the same name without conflict.
 A namespace declared through an ##include## statement will mask a default namespace
 declared in another file, just like a normal local variable will mask a public 
-variable in anther file.  In this case, rather than using the default namespace,
+variable in another file.  In this case, rather than using the default namespace,
 declare a new namespace through the ##include## statement.
 
 Note that declaring a namespace, either through the include statement or as a
 default namespace does not **require** that every symbol reference must be
 qualified with that namespace.  The namespace simply **allows** the user to
-deconflict between symbols in different files with the same name, or to
+deconflict symbols in different files with the same name, or to
 allow the programmer to be explicit about where symbols are coming from
 for the purposes of clarity, or to avoid possible future conflicts.
 

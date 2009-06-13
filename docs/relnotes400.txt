@@ -45,7 +45,7 @@ $$(doneby C. Cuvier)
 * Enhanced symbol resolution to take into account information regarding which files were 
   included by which files. $$(doneby Matt Lewis)
 * Namespaces for a source file now can be used for identifiers in the specified file and for 
-  global identifierss in all files included by the specified file. $$(doneby Matt Lewis)
+  global identifiers in all files included by the specified file. $$(doneby Matt Lewis)
 * Command line arguments for the translator allow for creating binaries with debugging 
   symbols, and to specify a different runtime library. $$(doneby Matt Lewis)
 * In trace mode, '?' will show the last defined variable of the requested name.

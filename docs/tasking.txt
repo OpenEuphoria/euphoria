@@ -138,7 +138,7 @@ few task_yield() statements so it won't hog the CPU.
 
 When people talk about threads, they are usually referring to a mechanism
 provided by the operating system. That's why we prefer to use the term
-"multitasking".  Threads are generally "pre-emptive", whereas Euphoria
+"multitasking".  Threads are generally "preemptive", whereas Euphoria
 multitasking is "cooperative". With preemptive threads, the operating system
 can force a switch from one thread to another at virtually any time.  With
 cooperative multitasking, each task decides when to give up the CPU and let

@@ -490,7 +490,7 @@ ones by using the ##-C## switch.
 
 The file is a text file. Each line in the file is either a command line switch,
 a section header, an include path or a comment.
-* Comments are lines that begin with a double dash {{{"--"}}}. Everying on the line
+* Comments are lines that begin with a double dash {{{"--"}}}. Everything on the line
 is ignored.
 * A section header is a //name// enclosed in square brackets. eg. ##[interpret]##.
 ** There are a number of predefined sections. 

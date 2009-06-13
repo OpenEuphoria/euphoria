@@ -20,7 +20,7 @@ If you search for **Editor** in our Archive, you'll find many editors written
 In fact, //any// text editor can be used to edit a Euphoria program, 
 such as vi, jEdit, Emacs, and even dinosaur applications like DOS Edit and Windows NotePad.
 
-Among the editors you will find Judith's IDE and wxIDE: Integrated Development Enviroments.
+Among the editors you will find Judith's IDE and wxIDE: Integrated Development Environments.
 
 Do you still want to use this ##ed##?  Then read on...
 

@@ -418,7 +418,7 @@ ifdef WIN32 then
 	  
 	object fnVal
 
-	  -- capture chid process std input
+	  -- capture child process std input
 	    StdInPipe = os_pipe()
 	    if atom(StdInPipe) then return -1 end if
 	    hChildStdInRd = StdInPipe[PIPE_READ_HANDLE]

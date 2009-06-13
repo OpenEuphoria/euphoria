@@ -31,7 +31,7 @@ crowd of conventional languages.
 * multi-platform{{{--}}}Windows, Linux, FreeBSD, OSX, and even Dos
 * provides a choice of multi-platform gui toolkits: IUP, GTK, wxWindows
 * features a Windows IDE and gui library written in Euphoria
-* syntax-colored editors, profiling, and tracing of code
+* colored-syntax editors, profiling, and tracing of code
 * dynamic memory allocation and efficient garbage collection
 * interfacing to existing C libraries and databases
 * well-documented, lots of example source-code, and an enthusiastic forum
