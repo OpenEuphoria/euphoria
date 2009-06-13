@@ -2685,7 +2685,7 @@ unsigned int calc_adler32(object a)
 	return ((lB << 16) | lA);
 }
 
-// hsieh32 hash is © Copyright 2004-2008 by Paul Hsieh , http://www.azillionmonkeys.com/qed/hash.html
+// hsieh32 hash is Copyright 2004-2008 by Paul Hsieh , http://www.azillionmonkeys.com/qed/hash.html
 
 #include "stdint.h"
 #undef get16bits

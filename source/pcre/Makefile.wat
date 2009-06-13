@@ -19,7 +19,7 @@ clean: .SYMBOLIC
 # I wanted to put $(BASEPATH) here as a dependency for .c files but
 # watcom doesn't provide that functionality in inplicit rules... (sigh)
 .c.obj : 
-    wcc386 $(EOSTYPE) -zq -oaxt $< -fo=$@
+    wcc386 $(EOSTYPE) -zq -oaxt  -D NO_RECURSE $< -fo=$@
 	
 $(BASEPATH) : .EXISTSONLY
     mkdir $(BASEPATH)
