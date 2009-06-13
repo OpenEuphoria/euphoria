@@ -22,18 +22,6 @@ include dox.e as dox
 integer out, pc, a, b, c, d, target, len, keep_running
 sequence operation
 
-sequence opts = {
-		{ 0, "html", "html output", {NO_PARAMETER}, routine_id("set_html") },
-		{ 0, "dir", "output directory", {HAS_PARAMETER}, routine_id("set_out_dir") },
-		{ 0, "no-dep", "suppress dependencies", {NO_PARAMETER}, routine_id("suppress_dependencies") },
-		{ 0, "std", "show standard library information", {NO_PARAMETER}, routine_id("suppress_stdlib") },
-		{ "f", "file", "include this file", {HAS_PARAMETER}, routine_id("document_file") },
-		{ "g", "graphs", "suppress call graphs", {NO_PARAMETER}, routine_id("suppress_callgraphs") },
-		{ "t", 0, "translator mode", {NO_PARAMETER}, -1 },
-		{ "b", 0, "binder mode", {NO_PARAMETER}, -1 }
-		}
-
-add_options( opts )	
 
 procedure RTInternal(sequence msg)
 -- Internal errors in back-end
@@ -1488,7 +1476,7 @@ procedure save_il( sequence name )
 	
 	st = open( sprintf("%sline", {name}), "wb" )
 
-	if atom(slist[$]) then
+	if length(slist) and atom(slist[$]) then
 		slist = s_expand( slist )
 	end if
 	
@@ -1687,13 +1675,28 @@ export function extract_options(sequence s)
 end function
 
 integer generate_html = 0
-procedure set_html()
+function set_html( object o )
 	generate_html = 1
-end procedure
+	return 0
+end function
 include std/pretty.e
+
+sequence opts = {
+		{ 0, "html", "html output", {NO_PARAMETER}, routine_id("set_html") },
+		{ 0, "dir", "output directory", {HAS_PARAMETER}, routine_id("set_out_dir") },
+		{ 0, "no-dep", "suppress dependencies", {NO_PARAMETER}, routine_id("suppress_dependencies") },
+		{ 0, "std", "show standard library information", {NO_PARAMETER}, routine_id("suppress_stdlib") },
+		{ "f", "file", "include this file", {HAS_PARAMETER}, routine_id("document_file") },
+		{ "g", "graphs", "suppress call graphs", {NO_PARAMETER}, routine_id("suppress_callgraphs") },
+		{ "t", 0, "translator mode", {NO_PARAMETER}, -1 },
+		{ "b", 0, "binder mode", {NO_PARAMETER}, -1 }
+		}
+
+add_options( opts )
+
 export procedure BackEnd( object ignore )
 	
---	sequence result = cmd_parse( opts, -1, Argv )
+-- 	map:map result = cmd_parse( opts, -1, Argv )
 	
 	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )

@@ -18,28 +18,33 @@ integer  show_callgraphs   = 1
 
 set:set  files             = {}
 
-export procedure set_out_dir( sequence out )
+export function set_out_dir( sequence out )
 	if length( out ) and out[$] != SLASH then
 		out &= SLASH
 	end if
 	out_dir = out
-end procedure
+	return 0
+end function
 
-export procedure suppress_dependencies()
+export function suppress_dependencies( object o )
 	show_dependencies = 0
-end procedure
+	return 0
+end function
 
-export procedure suppress_callgraphs()
+export function suppress_callgraphs( object o )
 	show_callgraphs = 0
-end procedure
+	return 0
+end function
 
-export procedure suppress_stdlib()
+export function suppress_stdlib( object o)
 	show_stdlib = 0
-end procedure
+	return 0
+end function
 
-export procedure document_file( sequence name )
+export function document_file( sequence name )
 	files = set:add_to( name, files )
-end procedure
+	return 0
+end function
 
 function dir_exists( sequence path )
 	return file_type( path ) > 0
