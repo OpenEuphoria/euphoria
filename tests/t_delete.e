@@ -67,6 +67,15 @@ s[1] = delete_routine( 1, CUSTOM_DELETE )
 s[1] = 1.1
 test_equal( "ASSIGN_SUBS release atom by refcount", 1, delete_count() )
 
+enum X, S, T1, T2
+sequence val = repeat( 0, 4 )
+
+val[S] = {3}
+val[X] = delete_routine( 1, CUSTOM_DELETE )
+val[S][1] = val[X]
+val[X] = 0
+val[S][1] = val[X]
+test_equal( "assigning sequence elements release atom by refcount", 1, delete_count() )
 
 test_report()
 
