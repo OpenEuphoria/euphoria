@@ -1493,7 +1493,7 @@ void RTInternal_va(char *msg, va_list ap)
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
 	int i;
-#define CUE_bufflen (1000)
+
 	char *msgtext;
 	char *buf;
 	

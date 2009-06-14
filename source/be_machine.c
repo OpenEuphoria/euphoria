@@ -4142,10 +4142,13 @@ object OpenDll(object x)
 	/* x will be a sequence if called via open_dll() */
 
 	dll_ptr = SEQ_PTR(x);
-	if (dll_ptr->length >= TEMP_SIZE)
-		RTFatal("name for open_dll() is too long");
 	dll_string = TempBuff;
 	MakeCString(dll_string, (object)x, TEMP_SIZE);
+	if (dll_ptr->length >= TEMP_SIZE) {
+		dll_string[20]='\0';
+		RTFatal("name for open_dll() is too long."
+			"  The name started with \"%s\".", dll_string);
+	}
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
 	// add to dll list so we can close it at end of execution

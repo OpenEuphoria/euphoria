@@ -22,14 +22,51 @@ for i = 1 to 10 do
 			-- check explicitly here
 			if not limited_number1000( count ) then
 				-- strange redo like behavior
-				test_equal( "for loops terminating", 1000, count )
-				test_report()
-				abort(1)
+				exit
 			end if
 			append(list,0)
 		end for
 	end for
 end for
 -- this bug is normally causes an infinite loop
-test_equal( "for loops not terminating", 1000, count )
+test_equal( "for loops (not) terminating at", 1000, count )
+
+integer k
+k = 1 
+while k < 1000 do
+	append(list,k)
+	if k > 1000 then
+		-- strange redo like behavior
+		exit
+	end if
+	k += 1
+end while
+
+test_equal( "while loops (not) terminating at ", 1000, k )
+
+
+k = 1
+loop do
+	if k > 1000 then
+		-- strange redo like behavior
+		exit
+	end if
+	k += 1
+until k = 1000
+
+test_equal( "do loops (not) terminating at ", 1000, k )
+
+k = 1
+procedure inner()
+	append(list,0)
+	k += 1
+end procedure
+procedure outer()
+	inner()
+	k += 1
+end procedure
+
+outer()
+test_equal( "procedures terminate properly? ", 3, k )
+
 test_report()

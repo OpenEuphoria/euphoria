@@ -3560,26 +3560,27 @@ object Date()
 	return MAKE_SEQ(result);
 }
 
-void MakeCString(char *s, object obj, int slen)
+void MakeCString(char *s, object pobj, int slen)
 /* make an atom or sequence into a C string */
 /* N.B. caller must allow one extra for the null terminator */
 {
 	object_ptr elem;
 	object x;
 	int seqlen;
+	s1_ptr obj;
 
 #ifdef EXTRA_CHECK
 	if (s == 0) RTInternal("MakeCString null buffer");
 #endif
 	while (slen > 1) {
-		if (IS_ATOM(obj)) {
-			*s++ = Char(obj);
+		if (IS_ATOM(pobj)) {
+			*s++ = Char(pobj);
 			slen = 1;
 		}
 		else {
-			obj = (object)SEQ_PTR(obj);
-			elem = ((s1_ptr)obj)->base;
-			seqlen = ((s1_ptr)obj)->length;
+			obj = (object)SEQ_PTR(pobj);
+			elem = obj->base;
+			seqlen = obj->length;
 			while (seqlen && (slen > 1)) {
 				x = *(++elem);
 				seqlen--;
