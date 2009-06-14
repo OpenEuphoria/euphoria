@@ -89,7 +89,26 @@ function setup_build()
 
 	if length(user_library) = 0 then
 		if TUNIX or compiler_type = COMPILER_GCC or compiler_type = COMPILER_DJGPP then
-			user_library = get_eudir() & "/bin/eu.a"
+			ifdef UNIX then
+				sequence eudir = get_eudir()
+				if match( "/share/euphoria", eudir ) then
+					-- EUDIR probably not set, look in /usr/local/lib or /usr/lib
+					if file_exists( "/usr/lib/eu.a" ) then
+						user_library = "/usr/lib/eu.a"
+						
+					elsif file_exists( "/usr/local/lib/eu.a" ) then
+						user_library = "/usr/local/lib/eu.a"
+					
+					else
+						-- It's not in the 'standard' location, so try EUDIR
+						user_library = eudir & "/bin/eu.a"
+					end if
+				else
+					user_library = eudir & "/bin/eu.a"
+				end if
+			elsedef
+				user_library = get_eudir() & "/bin/eu.a"
+			end ifdef
 		else
 			user_library = get_eudir() & "\\bin\\eu"
 			if TDOS then

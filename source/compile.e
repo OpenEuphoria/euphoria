@@ -2549,7 +2549,7 @@ procedure opASSIGN_SUBS()
 		c_stmt0("_2 = (int)SequenceCopy((s1_ptr)_2);\n")
 		c_stmt0("*(int *)_3 = MAKE_SEQ(_2);\n")
 		c_stmt0("}\n")
-
+		
 	else
 		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
 
@@ -2560,7 +2560,6 @@ procedure opASSIGN_SUBS()
 			c_stmt0("}\n")
 		end if
 		
-
 	end if
 
 	if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
@@ -2588,6 +2587,15 @@ procedure opASSIGN_SUBS()
 			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
 		end if
 		c_stmt0("DeRef(_1);\n")
+		
+		if sym_mode( rhs ) = M_TEMP and equal( sym_obj( rhs ), NOVALUE ) then
+			c_puts( "// DeReference temp in PASSIGN_SUBS!\n")
+			CDeRef( rhs )
+			if not TypeIs( rhs, T_INTEGER ) then
+				c_stmt( "@ = NOVALUE;\n", rhs )
+			end if
+			SetBBType( rhs, TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
+		end if
 
 	else
 		if SeqElem(Code[pc+1]) != TYPE_INTEGER then
@@ -2659,27 +2667,36 @@ procedure opLENGTH()
 end procedure
 
 procedure opASSIGN()
-	CRef(Code[pc+1])
-	SymTab[Code[pc+1]][S_ONE_REF] = FALSE
-	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
-	
-	if SymTab[Code[pc+2]][S_MODE] != M_CONSTANT then
-		CDeRef(Code[pc+2])
+	symtab_index 
+		sourcesym = Code[pc+1],
+		targetsym = Code[pc+2]
+	integer source_is_temp = sym_mode( sourcesym ) = M_TEMP 
+		and equal( sym_obj( sourcesym ), NOVALUE )
+		
+	if not source_is_temp then
+		CRef(sourcesym)
+		SymTab[Code[pc+1]][S_ONE_REF] = FALSE
+		SymTab[Code[pc+2]][S_ONE_REF] = FALSE
 	end if
 	
-	c_stmt("@ = @;\n", {Code[pc+2], Code[pc+1]})
+	if SymTab[targetsym][S_MODE] != M_CONSTANT then
+		CDeRef( targetsym )
+	end if
+	
+	c_stmt("@ = @;\n", {targetsym, sourcesym})
 
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIs(sourcesym, {TYPE_SEQUENCE, TYPE_OBJECT}) then
 		target[MIN] = SeqLen(Code[pc+1])
-		SetBBType(Code[pc+2], GType(Code[pc+1]), target, SeqElem(Code[pc+1]),
-			HasDelete( Code[pc+1] ) )
+		SetBBType(targetsym, GType(sourcesym), target, SeqElem(sourcesym),
+			HasDelete( sourcesym ) )
 	else
-		SetBBType(Code[pc+2], GType(Code[pc+1]), ObjMinMax(Code[pc+1]),
-				  TYPE_OBJECT, HasDelete( Code[pc+1] ) )
+		SetBBType(targetsym, GType(sourcesym), ObjMinMax(sourcesym),
+				  TYPE_OBJECT, HasDelete( sourcesym ) )
 	end if
---	if sym_mode( Code[pc+1] ) = M_TEMP and equal( sym_obj( Code[pc+1] ), NOVALUE ) then
---		c_stmt("@ = NOVALUE;\n", Code[pc+1])
---	end if
+	
+	if source_is_temp then
+		c_stmt("@ = NOVALUE;\n", sourcesym)
+	end if
 	pc += 3
 end procedure
 

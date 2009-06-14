@@ -2000,6 +2000,10 @@ void do_exec(int *start_pc)
 					obj_ptr = (object_ptr)SequenceCopy((s1_ptr)obj_ptr);
 					**(object_ptr *)pc[1] = MAKE_SEQ(obj_ptr);
 				}   
+				if( ((symtab_ptr)pc[3])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[3])->obj );
+					*(object_ptr)pc[3] = NOVALUE;
+				}
 				*(object_ptr)pc[1] = 0; // to preclude DeRef of C pointer
 				goto as;
 				
@@ -2025,7 +2029,7 @@ void do_exec(int *start_pc)
 				if(!IS_ATOM_INT(top) && ((symtab_ptr)pc[3])->mode == M_TEMP ){
 					// Since it's a temp, an extra ref count would prevent it
 					// from ever being freed.
-					DeRef( top );
+					DeRefDS( top );
 					*((object_ptr)pc[3]) = NOVALUE;
 				}
 			  as:   
@@ -2354,7 +2358,14 @@ void do_exec(int *start_pc)
 #endif
 				top = *obj_ptr; 
 				*obj_ptr = *(object_ptr)pc[1];
-				Ref(*obj_ptr);
+				
+				if( ((symtab_ptr)pc[1])->mode != M_TEMP ){
+					Ref(*obj_ptr);
+				}
+				else{
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
+				
 				if (IS_ATOM_INT_NV(top)) {
 					inc3pc();
 					thread();

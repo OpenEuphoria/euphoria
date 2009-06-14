@@ -1393,9 +1393,12 @@ end procedure
 
 procedure opASSIGN()  
 -- ASSIGN, ASSIGN_I 
-	a = Code[pc+1]
+	integer a = Code[pc+1]
 	target = Code[pc+2]
 	val[target] = val[a]
+	if sym_mode( a ) = M_TEMP then
+		val[a] = NOVALUE
+	end if
 	pc += 3
 end procedure
 				
@@ -1413,6 +1416,9 @@ procedure opRIGHT_BRACE_N()
 	for i = pc+len+1 to pc+2 by -1 do
 		-- last one comes first
 		x = append(x, val[Code[i]])
+		if sym_mode( Code[i] ) = M_TEMP then
+			val[Code[i]] = NOVALUE
+		end if
 	end for
 	target = Code[pc+len+2]
 	val[target] = x
@@ -1424,6 +1430,12 @@ procedure opRIGHT_BRACE_2()
 	target = Code[pc+3]
 	-- the second one comes first
 	val[target] = {val[Code[pc+2]], val[Code[pc+1]]}
+	if sym_mode( Code[pc+2] ) = M_TEMP then
+		val[Code[pc+2]] = NOVALUE
+	end if
+	if sym_mode( Code[pc+1] ) = M_TEMP then
+		val[Code[pc+1]] = NOVALUE
+	end if
 	pc += 4
 end procedure
 
@@ -1781,6 +1793,7 @@ procedure opASSIGN_SUBS() -- also ASSIGN_SUBS_CHECK, ASSIGN_SUBS_I
 	if sequence(val[b]) then
 		RTFatal("subscript must be an atom\n(assigning to subscript of a sequence)")        
 	end if
+	
 	c = Code[pc+3]  -- the RHS value
 	x = val[a] -- avoid lingering ref count on val[a]
 	lhs_check_subs(x, val[b])
@@ -1808,6 +1821,9 @@ procedure opPASSIGN_SUBS()
 	val[lhs_seq_index] = assign_subs(val[lhs_seq_index], 
 										 lhs_subs & val[b], 
 										 val[c])
+	if sym_mode( c ) = M_TEMP then
+		val[c] = NOVALUE
+	end if
 	pc += 4
 end procedure
 
@@ -3647,8 +3663,11 @@ procedure opDELETE_ROUTINE()
 		end if
 		user_delete_rid[b] = rid
 	end if
-	object obj = val[a]
-	val[Code[pc+3]] = delete_routine( obj, eu_delete_rid[b] )
+	val[Code[pc+3]] = delete_routine( val[a], eu_delete_rid[b] )
+	if sym_mode( a ) = M_TEMP then
+		val[a] = NOVALUE
+	end if
+	
 	pc += 4
 end procedure
 
