@@ -77,5 +77,12 @@ val[X] = 0
 val[S][1] = val[X]
 test_equal( "assigning sequence elements release atom by refcount", 1, delete_count() )
 
+val = repeat( 4.4, 4 )
+
+val[X] = 3.0
+val[X] = delete_routine( val[X], CUSTOM_DELETE )
+val[X] = 0
+test_equal( "delete routine on seq element reassigned to itself, release atom by refcount", 1, delete_count() )
+
 test_report()
 
