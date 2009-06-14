@@ -389,7 +389,7 @@ end procedure
 -- -- every 1.7 to 1.8 seconds throughout the game.
 -- -- It deducts either 3 units or 13 units of life support energy each time.
 -- 
--- <built-in> procedure task_life()
+-- procedure task_life()
 -- -- independent task: subtract life support energy 
 --     while TRUE do
 --         if shuttle then
