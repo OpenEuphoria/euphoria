@@ -4124,7 +4124,7 @@ object memory_set(object d, object v, object n)
 
 #ifdef EWINDOWS
 HINSTANCE *open_dll_list = NULL;
-int open_dll_size = 20;
+int open_dll_size = 0;
 int open_dll_count = 0;
 #endif
 
@@ -4149,15 +4149,24 @@ object OpenDll(object x)
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
 	// add to dll list so we can close it at end of execution
-	if (open_dll_list == NULL) {
-		open_dll_list = (HINSTANCE *)malloc(open_dll_size * sizeof(HINSTANCE));
+	if (lib != NULL) {
+		if (open_dll_count >= open_dll_size) {
+			size_t newsize;
+			
+			open_dll_size += 20;
+			newsize = open_dll_size * sizeof(HINSTANCE);
+			if (open_dll_list == NULL) {
+				open_dll_list = (HINSTANCE *)malloc(newsize);
+			}
+			else {
+				open_dll_list = (HINSTANCE *)realloc(open_dll_list, newsize);
+			}
+			if (open_dll_list == NULL) {
+				RTFatal("Cannot allocate RAM (%d bytes) for dll list to add %s", newsize, dll_string);
+			}
+		}
+		open_dll_list[open_dll_count++] = lib;
 	}
-	else if (open_dll_count >= open_dll_size) {
-		open_dll_size *= 2;
-		open_dll_list = (HINSTANCE *)realloc(open_dll_list,
-											 open_dll_size * sizeof(HINSTANCE));
-	}
-	open_dll_list[open_dll_count++] = lib;
 #else
 	// Linux
 

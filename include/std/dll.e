@@ -9,6 +9,7 @@ include std/convert.e
 include std/machine.e
 include std/math.e
 include std/error.e
+include std/types.e
 
 --****
 -- === C Type Constants
@@ -132,7 +133,7 @@ constant M_OPEN_DLL  = 50,
 --     [[:define_c_func]], [[:define_c_proc]], [[:define_c_var]], [[:c_func]], [[:c_proc]]
 
 public function open_dll(sequence file_name)
-	if length(file_name) > 0 and atom(file_name[1]) then
+	if length(file_name) > 0 and string(file_name) then
 		return machine_func(M_OPEN_DLL, file_name)
 	end if
 
