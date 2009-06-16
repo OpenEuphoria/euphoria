@@ -1,3 +1,32 @@
+== Licensing
+
+This product is free and open source, and has benefited from the contributions
+of many people. You have complete royalty-free rights to distribute any
+Euphoria programs that you develop. You are also free to distribute the interpreter,
+backend and even translator. You can can ##shroud## or ##bind## your
+program and distribute the resulting files royalty-free.
+
+You may incorporate any Euphoria source files from this package into your
+program, either "as is" or with your modifications. (You will probably need at
+least a few of the standard ##euphoria\include## files  in any large program).
+
+We would appreciate it if you told people that your program was developed using
+Euphoria, and gave them the address: [[http://www.rapideuphoria.com]] of our
+Web page, but we do not require any such acknowledgment.
+
+Icon files, such as ##euphoria.ico## in ##euphoria\bin##, may be distributed
+with or without your changes. 
+
+The high-speed version of the Euphoria Interpreter back-end is written in ANSI
+C, and can be compiled with many different C compilers. The complete source
+code is in ##euphoria\source##, along with ##execute.e##, the alternate,
+Euphoria-coded back-end. The generous [[:Euphoria License|Open source License]]
+allows both personal and commercial use, and unlike many other open source
+licenses, your changes do not have to be made open source.
+
+Some additional 3rd-party legal restrictions might apply when you use the 
+[[:Euphoria To C Translator]].
+
 = Quick Start
 
 <<LEVELTOC depth=2>>
@@ -15,7 +44,7 @@ conventional languages:
    allocating and freeing chunks of memory.  Objects of any size can be assigned
    to an element of a Euphoria sequence (array).
 * Fast
-** a high-performance, state-of-the-art interpreter that's //30 times// faster
+** a high-performance, state-of-the-art interpreter that's significantly faster
    than  conventional interpreters such as Perl and Python.
 * Compiles
 ** an optimizing [[:Euphoria To C Translator]], that can boost your speed
@@ -25,7 +54,7 @@ interpreter.
 ** extensive run-time checking for: out-of-bounds
 subscripts, uninitialized variables, bad parameter values for library
 routines, illegal value assigned to a variable and many more. There are
-no mysterious machine exceptions--you will always get a full English
+no mysterious machine exceptions{{{--}}}you will always get a full English
 description of any problem that occurs with  your program at run-time,
 along with a call-stack trace-back and a dump of all of your variable
 values. Programs can be debugged quickly, easily and  more thoroughly.
@@ -56,56 +85,55 @@ file from your program.
 * Generic 
 ** Euphoria routines are naturally
 generic. The example program below shows a  single routine that will
-sort any type of data--integers, floating-point numbers, strings etc.
+sort any type of data{{{--}}}integers, floating-point numbers, strings etc.
 Euphoria is not an "object-oriented" language, yet it achieves many of
 the benefits of these languages in a much simpler way. 
 * Free 
-**
-Euphoria is completely free and open source.
+** Euphoria is completely free and open source.
 
 === Example Program
 
 The following is an example of a complete Euphoria program.
 
 <eucode>
-sequence list, sorted_list
-
-function merge_sort(sequence x)
--- put x into ascending order using a recursive merge sort
-    integer n, mid
-    sequence merged, a, b
-
-    n = length(x)
-    if n = 0 or n = 1 then
-        return x  -- trivial case
-    end if
-
-    mid = floor(n/2)
-    a = merge_sort(x[1..mid])       -- sort first half of x
-    b = merge_sort(x[mid+1..n])     -- sort second half of x
-
-    -- merge the two sorted halves into one
-    merged = {}
-    while length(a) > 0 and length(b) > 0 do
-        if compare(a[1], b[1]) < 0 then
-            merged = append(merged, a[1])
-            a = a[2..length(a)]
-        else
-            merged = append(merged, b[1])
-            b = b[2..length(b)]
-        end if
-    end while
-    return merged & a & b  -- merged data plus leftovers
-end function
-
-procedure print_sorted_list()
--- generate sorted_list from list
-    list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}
-    sorted_list = merge_sort(list)
-    ? sorted_list
-end procedure
-
-print_sorted_list()     -- this command starts the program
+       sequence list, sorted_list                                  
+                                                                   
+       function merge_sort(sequence x)                             
+       -- put x into ascending order using a recursive merge sort  
+           integer n, mid                                          
+           sequence merged, a, b                                   
+                                                                   
+           n = length(x)                                           
+           if n = 0 or n = 1 then                                  
+               return x  -- trivial case                           
+           end if                                                  
+                                                                   
+           mid = floor(n/2)                                        
+           a = merge_sort(x[1..mid])       -- sort first half of x 
+           b = merge_sort(x[mid+1..n])     -- sort second half of x
+                                                                   
+           -- merge the two sorted halves into one                 
+           merged = {}                                             
+           while length(a) > 0 and length(b) > 0 do                
+               if compare(a[1], b[1]) < 0 then                     
+                   merged = append(merged, a[1])                   
+                   a = a[2..length(a)]                             
+               else                                                
+                   merged = append(merged, b[1])                   
+                   b = b[2..length(b)]                             
+               end if                                              
+           end while                                               
+           return merged & a & b  -- merged data plus leftovers    
+       end function                                                
+                                                                   
+       procedure print_sorted_list()                               
+       -- generate sorted_list from list                           
+           list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}                  
+           sorted_list = merge_sort(list)                          
+           ? sorted_list                                           
+       end procedure                                               
+                                                                   
+       print_sorted_list()     -- this command starts the program  
 </eucode>
 
 The above example contains 4 separate commands that are processed in order. The
@@ -116,22 +144,23 @@ command calls procedure ##print_sorted_list##().
 
 The output from the program will be:
 
-{{{
-{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-}}}
+<eucode>
+       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+</eucode>
 
 ##merge_sort##() will just as easily sort
 
-{{{
-{1.5, -9, 1e6, 100}
-{"oranges", "apples", "bananas"}
-}}}
+<eucode>
+       {1.5, -9, 1e6, 100}
+       {"oranges", "apples", "bananas"}
+</eucode>
 
 This example is stored as ##euphoria\tutorial\example.ex##. This is not the
 fastest way to sort in Euphoria. Go to the ##euphoria\demo## directory and type
-{{{
-ex allsorts
-}}}
+
+<eucode>
+       ex allsorts
+</eucode>
 
 to compare timings on several different sorting algorithms for increasing
 numbers of objects. 
@@ -250,33 +279,33 @@ OS X, FreeBSD, etc...
 
 You can redirect standard input and standard output when you run a Euphoria
  program, for example:
-{{{
-eui filesort.ex < raw.txt > sorted.txt
-}}}
+<eucode>
+       eui filesort.ex < raw.txt > sorted.txt
+</eucode>
 or simply,
-{{{
-eui filesort < raw.txt > sorted.txt
-}}}
+<eucode>
+       eui filesort < raw.txt > sorted.txt
+</eucode>
 
 For frequently-used programs under //DOS/Windows// you might want to make a
 small ##.bat## (batch) file, perhaps called ##myprog.bat##, containing two
 statements like:
-{{{
-@echo off
-eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
-}}}
+<eucode>
+       @echo off
+       eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
+</eucode>
 The first statement turns off echoing of commands to the screen. The second
 runs ##ex myprog.ex## with up to 9 command-line arguments. See
 [[:command_line]]() for an example of how to read these arguments. Having
 a .bat file will save you the minor inconvenience of typing ##eui##
 all the time; i.e., you can just type:
-{{{
-myprog
-}}}
+<eucode>
+       myprog
+</eucode>
 instead of:
-{{{
-eui myprog
-}}}
+<eucode>
+       eui myprog
+</eucode>
 
 Unfortunately //DOS// will not allow redirection of standard input and output
 when you use a ##.bat## file. However, this works in a Windows DOS box.
@@ -287,26 +316,26 @@ use the full path to ##eui##, ##~#!/usr/local/bin/eui##.
 
 If your program is called ##foo.ex##:
 <eucode>
-#!/usr/bin/env eui
-
-procedure foo()
-   ? 2+2
-end procedure
-
-foo()
+       #!/usr/bin/env eui
+                         
+       procedure foo()   
+          ? 2+2          
+       end procedure     
+                         
+       foo()             
 </eucode>
 
 Then if you make your file executable:
 
-{{{
-chmod +x foo.ex
-}}}
+<eucode>
+       chmod +x foo.ex
+</eucode>
 
 You can just type: 
 
-{{{
-foo.ex
-}}}
+<eucode>
+       foo.ex
+</eucode>
 
 to run your program. You could even shorten the name to simply "foo". Euphoria
 ignores the first line when it starts with **#!**.  Be careful though that
@@ -396,34 +425,6 @@ Finally, with the [[:Euphoria To C Translator]], you can translate your
 Euphoria program into C and then compile it with a C compiler to get an
 executable program.
 
-=== Licensing
-
-This product is free and open source, and has benefited from the contributions
-of many people. You have complete royalty-free rights to distribute any
-Euphoria programs that you develop. You are also free to distribute the interpreter,
-backend and even translator. You can can ##shroud## or ##bind## your
-program and distribute the resulting files royalty-free.
-
-You may incorporate any Euphoria source files from this package into your
-program, either "as is" or with your modifications. (You will probably need at
-least a few of the standard ##euphoria\include## files  in any large program).
-
-We would appreciate it if you told people that your program was developed using
-Euphoria, and gave them the address: [[http://www.rapideuphoria.com]] of our
-Web page, but we do not require any such acknowledgment.
-
-Icon files, such as ##euphoria.ico## in ##euphoria\bin##, may be distributed
-with or without your changes. 
-
-The high-speed version of the Euphoria Interpreter back-end is written in ANSI
-C, and can be compiled with many different C compilers. The complete source
-code is in ##euphoria\source##, along with ##execute.e##, the alternate,
-Euphoria-coded back-end. The generous [[:Euphoria License|Open source License]]
-allows both personal and commercial use, and unlike many other open source
-licenses, your changes do not have to be made open source.
-
-Some additional 3rd-party legal restrictions might apply when you use the 
-[[:Euphoria To C Translator]].
 
 == Using the Interpreter
 
