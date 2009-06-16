@@ -1,4 +1,4 @@
-== Quick Start
+= Quick Start
 
 <<LEVELTOC depth=2>>
 
@@ -20,16 +20,21 @@ conventional languages:
 * Compiles
 ** an optimizing [[:Euphoria To C Translator]], that can boost your speed
 even further, often by a factor of 2x to 5x versus the already-fast
-interpreter. * Safe ** extensive run-time checking for: out-of-bounds
+interpreter. 
+* Safe 
+** extensive run-time checking for: out-of-bounds
 subscripts, uninitialized variables, bad parameter values for library
 routines, illegal value assigned to a variable and many more. There are
 no mysterious machine exceptions--you will always get a full English
 description of any problem that occurs with  your program at run-time,
 along with a call-stack trace-back and a dump of all of your variable
 values. Programs can be debugged quickly, easily and  more thoroughly.
-* High level ** features of the underlying hardware are completely
+* High level 
+** features of the underlying hardware are completely
 hidden. Programs are not aware of word-lengths, underlying bit-level
-representation of values, byte-order etc. * Debugger ** a full-screen
+representation of values, byte-order etc. 
+* Debugger 
+** a full-screen
 source debugger and an execution profiler are included, along with a
 full-screen, multi-file editor. On a color monitor, the editor displays
 Euphoria programs in multiple colors, to highlight comments, reserved
@@ -37,18 +42,25 @@ words, built-in functions, strings, and level of nesting of brackets.
 It optionally performs auto-completion of statements, saving you typing
 effort and reducing syntax errors. This editor is written in Euphoria,
 and the source code is provided to you without restrictions. You are
-free to modify it, add features, and redistribute it as you wish. *
-Multi-platform ** Euphoria programs run under Linux, FreeBSD, 32-bit
+free to modify it, add features, and redistribute it as you wish. 
+* Multi-platform 
+** Euphoria programs run under Linux, FreeBSD, 32-bit
 //Windows//, and any //DOS// environment, and are not subject to any
 640K memory limitations. You can create programs that use the full
 multi-gigabyte memory of your computer, and a swap file is
 automatically used when a program needs more memory than exists on your
-machine. * Stand-alone ** You can make a single, stand-alone executable
-file from your program. * Generic ** Euphoria routines are naturally
+machine. 
+* Stand-alone 
+** You can make a single, stand-alone executable
+file from your program. 
+* Generic 
+** Euphoria routines are naturally
 generic. The example program below shows a  single routine that will
 sort any type of data--integers, floating-point numbers, strings etc.
 Euphoria is not an "object-oriented" language, yet it achieves many of
-the benefits of these languages in a much simpler way. * Free **
+the benefits of these languages in a much simpler way. 
+* Free 
+**
 Euphoria is completely free and open source.
 
 === Example Program
