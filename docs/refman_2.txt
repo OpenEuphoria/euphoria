@@ -28,6 +28,8 @@ some Euphoria objects:
 1000
 98.6
 -1e6
+23_100_000
+
 
 -- examples of sequences:
 {2, 3, 5, 7, 11, 13, 17, 19}
@@ -84,15 +86,26 @@ class hierarchies of certain object-oriented languages.
 
 Why do we call them atoms?  Why not just "numbers"? Well, an ##atom## //is//
 just a number, but we wanted to have a distinctive term that emphasizes that
-they are indivisible (that's what "atom" means in Greek). Of course in the
-world of physics, atoms were split into smaller parts many years ago, but in
-Euphoria you can't split them. They are the basic building blocks of all the
+they are indivisible (that's what "atom" means in Greek). In the world of 
+physics you can 'split' an atom into smaller parts, but you no
+longer have an atom{{{--}}}only various particles. You can 'split' a
+number into smaller parts, but you no longer have a number{{{--}}}only various
+digits.
+ 
+Atoms are the basic building blocks of all the
 data that a Euphoria program can manipulate. With this analogy, **sequence**s
 might be thought of as "molecules", made from atoms and other molecules. A
 better analogy would be that sequences are like directories, and atoms are
 like files. Just as a directory on your computer can contain both files and
 other directories, a sequence can contain both atoms and other sequences
 (and //those// sequences can contain atoms and sequences and so on).
+
+{{{
+	object
+	 / \
+	/   \
+     atom   sequence
+}}}
 
 As you will soon discover, sequences make Euphoria very simple //and// very
 powerful.  **Understanding atoms and sequences is the key to understanding
@@ -134,7 +147,7 @@ inside a double-quoted string, you need to enter them in a special manner.
 
 * Use \" for a double-quote character
 * Use \n for a new-line character
-* Use \\ for a back-slash character
+* Use {{{\\}}} for a back-slash character
 * Use \t for a TAB character
 
 e.g.
@@ -233,7 +246,7 @@ Special characters may be entered using a back-slash:
 | \n | newline |
 | \r | carriage return |
 | \t | tab |
-| \\ | backslash |
+| {{{\\}}} | backslash |
 | \" | double quote |
 | \' | single quote |
 
@@ -248,8 +261,8 @@ letters, digits or underscore characters. There is no theoretical limit to how
 large an identifier can be but in practice it should be no more than about 30
 characters. 
 
-Identifiers are case-sensitive. THis means that "Name" is a different identifier
-to "name", or "NAME", etc...
+Identifiers are case-sensitive. THis means that ##"Name"## is a different identifier
+from ##"name"##, or ##"NAME"##, etc...
 
 Examples of valid identifiers...
 {{{
@@ -263,8 +276,8 @@ _alpha
 
 Examples of invalid identifiers...
 {{{
-0n	-- must not start with a digit
-^color26 -- must not start with a punctuation character
+0n	   -- must not start with a digit
+^color26   -- must not start with a punctuation character
 Shell Sort -- Cannot have spaces in identifiers.
 quick-sort -- must only consist of letters, digits or underscore.
 }}}
@@ -454,15 +467,20 @@ two sequences then apply. Some examples:
 
 <eucode>
 y = {4, 5, 6}
-w = 5 * y              -- w is {20, 25, 30}
+w = 5 * y                          -- w is {20, 25, 30}
+
 x = {1, 2, 3}
-z = x + y              -- z is {5, 7, 9}
-z = x < y              -- z is {1, 1, 1}
+z = x + y                          -- z is {5, 7, 9}
+z = x < y                          -- z is {1, 1, 1}
+
 w = {{1, 2}, {3, 4}, {5}}
-w = w * y              -- w is {{4, 8}, {15, 20}, {30}}
-w = {1, 0, 0, 1} and {1, 1, 1, 0}    -- {1, 0, 0, 0}
-w = not {1, 5, -2, 0, 0}     -- w is {0, 0, 0, 1, 1}
-w = {1, 2, 3} = {1, 2, 4}    -- w is {1, 1, 0}
+w = w * y                          -- w is {{4, 8}, {15, 20}, {30}}
+
+w = {1, 0, 0, 1} and {1, 1, 1, 0}  -- {1, 0, 0, 0}
+w = not {1, 5, -2, 0, 0}           -- w is {0, 0, 0, 1, 1}
+
+w = {1, 2, 3} = {1, 2, 4}          -- w is {1, 1, 0}
+
 -- note that the first '=' is assignment, and the
 -- second '=' is a relational operator that tests
 -- equality
@@ -657,7 +675,9 @@ subscripts, you can always assume that the final value of the lhs_var will be
 the value of rhs_expr, regardless of any side-effects that may have changed
 lhs_var.
 
-**Euphoria data structures are almost infinitely flexible.** Arrays in many
+**Euphoria data structures are almost infinitely flexible.** 
+
+Arrays in many
 languages are constrained to have a fixed number of elements, and those
 elements must all be of the same type. Euphoria eliminates both of those
 restrictions by defining all arrays (sequences) as a list of zero or more
@@ -938,18 +958,58 @@ underscores. The following **reserved words** have special meaning
 in Euphoria and may not be used as identifiers:
 
 <eucode>
-and            elsif        function      not          then
-break          elsifdef     global        or           to
-by             end          goto          override     type
-case           entry        if            procedure    until
-constant       enum         ifdef         public       while
-continue       exit         include       retry        with
-do             export       label         return       without
-else           for          loop          switch       xor
-</eucode>
-
-The Euphoria editor displays these words in blue.
-
+ and            export          public    
+ as             fallthru        retry             
+ break          for             return  
+ by             function        routine 
+ case           global          switch  
+ constant       goto            then    
+ continue       if              to      
+ do             ifdef           type    
+ else           include         until   
+ elsedef        label           while   
+ elsif          loop            with    
+ elsifdef       namespace       without 
+ end            not             xor      
+ entry          or        
+ enum           override  
+ exit           procedure 
+</eucode>                                            	
+                                                   	
+The Euphoria editor displays these words in blue	
+                                                   	
+The following are Euphoria built-in routines. It is best if you do
+not use these for your own identifiers:
+                                                                                                         
+<eucode>                                                                                        
+ ?                peek                 peek2u             sprintf                                        
+ abort            peek2s               peek4s             sqrt                                           
+ and_bits         log                  peek4u             system                     	     	     	            
+ append           machine_func         peek_string        system_exec                	     	     	            
+ arctan           machine_proc         peeks              tail                       	     	     	      
+ atom             match                pixel              tan                        	     	     	      
+ c_func           match_from           platform           task_clock_start           	     	     	      
+ c_proc           get_key              poke               task_clock_stop           	 		           	      
+ call             get_pixel            poke2              task_create               	 		           	      
+ call_func        getc                 poke4              task_list                            	 		           	      
+ call_proc        getenv               position           task_schedule                        	 		           	      
+ clear_screen     gets                 power              task_self                            	 		           	      
+ close            hash                 prepend            task_status                          	 		           	      
+ command_line     head                 print              task_suspend                         	 		           	      
+ compare          include_paths        printf             task_yield                               	 		           	      
+ cos              insert               profile            time                                     	 		           	      
+ date             mem_copy             profile_time       trace               	     	     	      
+ delete           mem_set              puts               warning                	     	      
+ delete_routine   not_bits             rand               xor_bits      	       
+ equal            object               remainder        	     	     	      	     	     	      
+ find             open                 remove           	     	     	      
+ find_from        option_switches      routine_id    	     	     	          
+ floor            or_bits              sequence      	     	     	          
+ integer          repeat               sin                            	          
+ length           replace              splice                                            
+</eucode>                                        
+                                 	
+                                                   
 Identifiers can be used in naming the following:
 
 * procedures
@@ -995,9 +1055,7 @@ simply "point" to the same sequence. If we later perform x[3] = 9, then a separa
 will be created for x in memory (although there will still be just one shared copy of 8.5 and
 "ABC"). The same thing applies to "copies" of arguments passed in to subroutines.
 
-
-
-For a number of procedures or functions - see below -, some parameters may have
+For a number of procedures or functions{{{--}}}see below{{{--}}}some parameters may have
 the same value in many cases. The most expected value for any parameter may be
 given a default value. Omitting the value of such a parameter on a given call
 will cause its default value to be passed.
@@ -1018,12 +1076,12 @@ procedure bar(sequence s="abc", integer n, integer p=1)
     ? length(s)+n+p
 end procedure
 
-bar(, 2) -- prints out 6 = 3 + 2 + 1
-bar(2)  -- errors out, as 2 is not a sequence
-bar(, 2,) -- same as bar(,2)
-bar(, 2, 3) -- prints out 8 = 3 + 22 + 3
-bar({}, 2, ) -- prints out 3 = 0 + 2 + 1
-bar()      -- errors out, second parameter is omitted, but doesn't have a default value
+bar(, 2)      -- prints out 6 = 3 + 2 + 1
+bar(2)        -- errors out, as 2 is not a sequence
+bar(, 2,)     -- same as bar(,2)
+bar(, 2, 3)   -- prints out 8 = 3 + 22 + 3
+bar({}, 2, )  -- prints out 3 = 0 + 2 + 1
+bar()         -- errors out, second parameter is omitted, but doesn't have a default value
 </eucode>
 
 Any expression may be used in a default value. Parameters that have been
@@ -1339,7 +1397,7 @@ and will sometimes read the element just //after// the end of the array.
 Whatever garbage is read, the algorithm will still work - this is probably why
 the bug was never caught. But what if there isn't any (virtual) memory just
 before or just after the array? Bentley later modifies the algorithm such that
-this bug goes away -- but he presented this version as being correct.
+this bug goes away{{{--}}}but he presented this version as being correct.
 **//Even the experts need subscript checking!//**
 
 ;**Performance Note~:**
@@ -1501,7 +1559,7 @@ public identifiers from the standard library have **public** scope. **global** s
 parsimoniously, if ever. Because earlier versions of Euphoria didn't have **public** or **export**, it has
 to remain there for a while. One should be very sure of not polluting any foreign file's
 symbol table before using **global** scope - which is what a large part of the Euphoria source
-files do. Built-in identifiers act as if declared as **global** - but they are not declared in any
+files do. Built-in identifiers act as if declared as **global**{{{--}}}but they are not declared in any
 Euphoria coded file.
 
 ==== Using namespaces
@@ -1632,7 +1690,7 @@ affecting the end user.
 could say "translate a name to a memory address", but this would be over simplifying. Let's
 say "translate an identifier to a symbol" rather. The backend only knows about symbols, and
 the front end's job is to understand which symbols are being used from the names - the
-human readable identifiers - in the program.
+human readable identifiers{{{--}}}in the program.
 
 When Euphoria looks up the declaration of an identifier, it first checks the current
 routine, then the current file, then global symbols in other files. Identifiers that are
@@ -1645,7 +1703,7 @@ that was directly or indirectly included from the file which is attempting to us
 identifier. If there is only one matching identifier in this file subset, Euphoria will
 assume this is the intended symbol. This way, third
 party libraries can be used in the same application, even if they have
-conflicting identifiers, as each library will only see the identifier it defined - unless
+conflicting identifiers, as each library will only see the identifier it defined{{{--}}}unless
 they include one another, but this is extremely unlikely.
 
 The same rule applies to public and export identifiers. In the case where identifiers with the
@@ -2090,8 +2148,8 @@ for the unsupported platform as well.
 
 <eucode>
 ifdef DOS32 then
-	include std/error.e
-	crash("socket.e is not supported on the DOS platform")
+     include std/error.e
+     crash("socket.e is not supported on the DOS platform")
 end ifdef
 
 -- define exported and public constants and procedures for 
@@ -2100,7 +2158,8 @@ ifdef WIN32 or DOS32 then
 	-- DOS32 is not supported but we define public symbols for it anyhow.
 </eucode>
 
-The reason for doing this is so that the user that includes your include file sees an OS not supported message instead of an undefined reference message. 
+The reason for doing this is so that the user that includes your include file sees 
+an OS not supported message instead of an undefined reference message. 
 
 
 Defined words must follow the same character set of an identifier, that is,
@@ -2170,7 +2229,7 @@ Do be careful to put the numbers after the platform names for Windows or DOS:
 -- This puts() routine will never be called
 -- even when run by the DOS interpreter!
 ifdef DOS then
-	puts(1,"I am on DOS\n")
+     puts(1,"I am on DOS\n")
 end ifdef
 </eucode>
 
@@ -3020,7 +3079,7 @@ You can also set this option via a [[:batch_command_line "command line parameter
 Any warnings that are issued will appear on your screen after your program
 has finished execution. Warnings indicate minor problems.  A warning will
 never terminate the execution of your program. You will simply have to hit
-the Enter key to keep going - which may stop the program on an unattended
+the Enter key to keep going{{{--}}}which may stop the program on an unattended
 computer.
 
 
