@@ -1334,7 +1334,7 @@ end function
 --
 -- Description:
 -- Perform the logical OR operation on corresponding bits in two objects. A bit in the
--- result will be 1 only if the corresponding bits in both arguments are bot both 0.
+-- result will be 1 only if the corresponding bits in both arguments are both 0.
 --
 -- Parameters:
 -- 		# ##a##: one of the objects involved

@@ -1383,46 +1383,52 @@ public function combine_maps(map f1,set source1,set target1,map f2,set source2,s
     return result[1..len_result]&len_result&f1[$]
 end function
 
-function compose_map_(sequence f2,sequence f1)
+
+function compose_map_(sequence f1,sequence f2)
 -- Description: Wrapped by compose_map(), so as to avoid some type checks.
     sequence result
-    if find(0,f1[1..$-2]<=f2[$]) then
-        report_error({"compose_maps","Range of initial map exceeds definition set of final map."})
+
+    if find(0, f1[1..$-2] <= f2[$-1]) then
+        report_error({"compose_maps","One or more elements in f1 are outside the range of f2."})
     end if
-    result=f1
-    for i=1 to f1[$-1] do
-        result[i]=f2[f1[i]]
+    result = f1
+    for i = 1 to length(f1)-2 do
+        result[i] = f2[ f1[i] ]
     end for
-    result[$]=f2[$]
+    result[$]   = f2[$]
     return result
 end function
 
 --**
--- Computes the compound map f2 o f1.
+-- Creates a new map using elements from ##f2##, mapped against ##f1##
 --
 -- Parameters: 
--- 		# ##f2##: the map to apply second, or left
---		# ##f1##: the map to apply first, or right.
+-- 		# ##f1##: the map containing indexes into ##f2##
+--		# ##f2##: the map containing elements used to build the resulting map.
 --
 -- Returns: 
 --		A **map** ##f## defined by ##f(x)=f2(f1(x))## for all ##x##
+--
+-- Comments:
+-- Each element in ##f1## is an index into the elements of ##f2##. So if
+-- ##f1## contains {3,2,1} the result map contains the 3rd, 2nd and 1st element
+-- from ##f2## in that order.
 --.
 -- Errors:
---
--- ##f2## must be defined on the whole range of ##f1##.
+-- Every element of ##f1## must be a valid index into ##f2##.
 --
 -- Example 1:
 -- <eucode>
 --   map f1,f2,f
 --   f1={2,3,1,1,2,5,3}
 --   f2={4,8,1,2,6,7,6,9}
---   f=compose_ùa^(f2,f1)
+--   f=compose_map(f1,f2)
 --   -- f is now: {8,1,4,4,8,5,9}
 -- </eucode>
 --
 -- See Also:
 -- [[:diagram_commutes]]
-public function compose_map(map f2,map f1)
+public function compose_map(map f1,map f2)
     return compose_map_(f1,f2)
 end function
 

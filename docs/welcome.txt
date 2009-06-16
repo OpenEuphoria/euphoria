@@ -28,7 +28,7 @@ crowd of conventional languages.
 * open source
 * free for personal and commercial use
 * produces royalty-free, stand-alone, programs
-* multi-platform{{{--}}}Windows, Linux, FreeBSD, OSX, and even Dos
+* multi-platform {{{--}}} Windows, Linux, FreeBSD, OSX, and even Dos
 * provides a choice of multi-platform gui toolkits: IUP, GTK, wxWindows
 * features a Windows IDE and gui library written in Euphoria
 * colored-syntax editors, profiling, and tracing of code
@@ -52,26 +52,26 @@ floating point values are not required.
 
 What follows from this design are some advantages over conventional languages:
 
-* the language syntax is smaller{{{--}}}and thus easier to learn
-* the language syntax is consistent{{{--}}}and thus easier to program
-* routines are more generic{{{--}}}a routine used for strings may also be 
+* the language syntax is smaller {{{--}}} and thus easier to learn
+* the language syntax is consistent {{{--}}} and thus easier to program
+* routines are more generic {{{--}}} a routine used for strings may also be 
 applied to any data structure
-* a higher level view of programming{{{--}}}because sequences encompass
+* a higher level view of programming {{{--}}} because sequences encompass
 conventional lists, arrays, tables, tuples, ..., and all other
 data-structures.
-* sequences are dynamic{{{--}}}you may create and destroy at will{{{--}}}and 
+* sequences are dynamic {{{--}}} you may create and destroy at will {{{--}}} and 
 modify them to any size and complexity
 * it supports both //static// data typing and //dynamic// data typing.
 
 === Euphoria has qualities that go beyond the elegance of sequences
 
 * Euphoria programs are considerably faster than conventional interpreted
-languages{{{--}}}Euphoria makes a better website server
-* Euphoria programs can be translated then compiled as C programs{{{--}}}fast
+languages {{{--}}} Euphoria makes a better website server
+* Euphoria programs can be translated then compiled as C programs {{{--}}} fast
 programs become even faster
-* Euphoria lets you write multi-tasking programs{{{--}}}independent of the 
+* Euphoria lets you write multi-tasking programs {{{--}}} independent of the 
 platform you are using
-* Euphoria has a coherent design{{{--}}}Euphoria programmers enjoy programming 
+* Euphoria has a coherent design {{{--}}} Euphoria programmers enjoy programming 
 in Euphoria
 
 === As a first programming language:

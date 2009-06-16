@@ -77,8 +77,8 @@ $$(doneby C. Cuvier)
 * Any routine parameter can be defaulted, i.e. given a default value that is plugged in if 
   omitted on a call. Any expression can be used, and parameters of the same call can even be 
   used. $$(doneby C. Cuvier.)
-* New **switch** ... **end switch** construct, which implements more efficiently a sequence
-  of **elsif**, using the more compact **case** statement. $$(doneby Matt Lewis.)
+* New **switch** ... **end switch** construct, which more efficiently implements a series
+  of **elsif**, using the compact **case** statement. $$(doneby Matt Lewis.)
 * **Unit testing added to Euphoria**. Over 1,000 tests. To run, cd tests and
   type ##eutest##
 * Condition compiling keywords (**ifdef**, **elsifdef**, **end ifdef**) and **with 
@@ -136,7 +136,7 @@ $$(doneby C. Cuvier)
   **ceil()**, **round_to()**, **round()**, **sign()**, **abs()**, **sum()**, **average()**, 
   **min()**, **max()**, **deg2rad()**, **rad2deg()**, **log10()**, **atan2()**, 
   **rand_range()**, **mod()**, **sinh**, cosh**, tanh**, **arcsinh**, **arccosh**, 
-  **arstanh**. Global Constants **E**, **HALFPI**, **TWOPI**, **QUARTPI**,
+  **arctanh**. Global Constants **E**, **HALFPI**, **TWOPI**, **QUARTPI**,
   **LN2**, **INVLOG2**, **EULER_GAMMA**, EULER_NORMAL**. $$(doneby Jeremy Cowgar, C. Cuvier)
 * New routines in **sequence.e** and **search.e**:
    **insert()**, **splice()**, **remove()**, **replace()**, **head()**, **mid()**, 

@@ -1232,7 +1232,7 @@ static void DumpGlobals(IFILE f)
 
 static int screen_err_out;
 
-#define TPTEMP_BUFF_SIZE 400
+#define TPTEMP_BUFF_SIZE (800)
 static char TPTempBuff[TPTEMP_BUFF_SIZE]; // TempBuff might contain the error message
 
 static sf_output(char *string)
@@ -1266,12 +1266,12 @@ static void TracePrint(symtab_ptr proc, int *pc)
 		subtype = "type";
 
 	if (proc == TopLevelSub) {
-		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u", file_name[file], line);
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s:%u", file_name[file], line);
 		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 	else {
-		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u in %s %.99s() ",
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s:%u in %s %s() ",
 				 file_name[file], line, subtype, proc->name);
 		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
@@ -1313,7 +1313,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			else {
 				routine_name = e_routine[tcb[current_task].rid]->name;
 			}
-			snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " TASK ID %.0f %.99s ",
+			snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " TASK ID %.0f %s ",
 					 tcb[current_task].tid, routine_name);
 			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
@@ -1341,13 +1341,13 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// display the error message
 			show_message = FALSE;
 			if (s_ptr == NULL) {
-				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "\n%.99s", msg);
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "\n%s", msg);
 				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 				sf_output(TPTempBuff);
 			}
 			else {
 				sf_output(type_error_msg); // test
-				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.99s is ", s_ptr->name);
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s is ", s_ptr->name);
 				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0;
 				sf_output(TPTempBuff);
 				if (screen_err_out)
