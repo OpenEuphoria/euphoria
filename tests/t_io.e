@@ -1,9 +1,25 @@
 include std/io.e
+include std/filesys.e
 include std/unittest.e
 
 -- TODO: add more tests
 
 object data, tmp
+
+constant test_file_data = ##
+This is a file used for unit tests. Please
+do not alter this file. Tests require this
+file to be of a known content.
+
+Changing it's content will cause unit tests
+to believe they have failed when there may
+in fact be nothing wrong with them.
+
+Thank You!
+
+#
+
+write_file("file.txt", test_file_data, UNIX_TEXT)
 
 data = read_lines("file.txt")
 tmp = set_test_abort(1)
@@ -55,6 +71,27 @@ test_equal("write_lines() filename #2", 1, write_lines("fileb.txt", {"Hello Worl
 test_equal("append_lines() ", 1, append_lines("fileb.txt", {"I'm back"}))
 test_equal("append_lines() read back", {"Hello World", "I'm back"}, read_lines("fileb.txt"))
 
+sequence testdata_dos = "test\r\ndata\r\nfile\r\n"
+sequence testdata_unix = "test\ndata\nfile\n"
+sequence testdata_osx = "test\rdata\rfile\r"
+
+write_file("filec.txt", testdata_dos, BINARY_MODE) -- Write out as raw data.
+test_equal("read file binary #1", testdata_dos, read_file("filec.txt", BINARY_MODE))
+test_equal("read file text #1", testdata_unix, read_file("filec.txt", TEXT_MODE))
+
+write_file("filec.txt", testdata_dos, TEXT_MODE) -- Write out as text data.
+test_equal("read file binary #2", testdata_dos, read_file("filec.txt", BINARY_MODE))
+test_equal("read file text #2", testdata_unix, read_file("filec.txt", TEXT_MODE))
+
+write_file("filec.txt", testdata_dos, UNIX_TEXT) -- Write out as Unix text data.
+test_equal("write/read unix text", testdata_unix, read_file("filec.txt", BINARY_MODE))
+
+write_file("filec.txt", testdata_dos, DOS_TEXT) -- Write out as DOS/Windows text data.
+test_equal("write/read dos text", testdata_dos, read_file("filec.txt", BINARY_MODE))
+
+write_file("filec.txt", testdata_dos, OSX_TEXT) -- Write out as OSX text data.
+test_equal("write/read osx text", testdata_osx, read_file("filec.txt", BINARY_MODE))
+
 -- Types
 test_true("file_number #1", file_number(10))
 test_false("file_number #2", file_number(-32))
@@ -79,6 +116,10 @@ tmp = 0
 tmp = open( "file.txt", "r", 1 )
 test_not_equal( "open file with auto close after deref closing", -1, tmp )
 delete(tmp)
+
+delete_file("file.txt")
+delete_file("fileb.txt")
+delete_file("filec.txt")
 
 test_report()
 

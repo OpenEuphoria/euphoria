@@ -10,6 +10,7 @@ include std/wildcard.e
 include std/types.e
 include std/machine.e
 include std/text.e
+include std/sequence.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -1172,15 +1173,22 @@ public function append_lines(sequence file, sequence lines)
 	return 1
 end function
 
+public enum
+	BINARY_MODE,
+	TEXT_MODE,
+	UNIX_TEXT,
+	DOS_TEXT,
+	OSX_TEXT
+
 --**
 -- Read the contents of a file as a single sequence of bytes.
 --
 -- Parameters:
 --		# ##file#: an object, either a file path or the handle to an open file.
---      # ##as_text##: integer, **0** (the default) assumes //binary mode// that 
+--      # ##as_text##: integer, **BINARY_MODE** (the default) assumes //binary mode// that 
 --                     causes every byte to be read in,
---                     and **1** assumes //text mode// that causes the byte pair
---                     {Carriage-Return, NewLine} to be read in as just NewLine,
+--                     and **TEXT_MODE** assumes //text mode// that ensures that
+--                     lines end with just a Ctrl-J (NewLine) character,
 --                     and the first byte value of 26 (Ctrl-Z) is interpreted as End-Of-File.
 --
 -- Returns:
@@ -1204,14 +1212,14 @@ end function
 -- See Also:
 --     [[:write_file]], [[:read_lines]]
 
-public function read_file(object file, integer as_text = 0)
+public function read_file(object file, integer as_text = BINARY_MODE)
 	integer fn
 	integer len
 	sequence ret
 	integer temp
 
 	if sequence(file) then
-		if as_text then
+		if as_text != BINARY_MODE then
 			fn = open(file, "r")
 		else
 			fn = open(file, "rb")
@@ -1234,7 +1242,7 @@ public function read_file(object file, integer as_text = 0)
 		close(fn)
 	end if
 
-	if as_text then
+	if as_text != BINARY_MODE then
 		-- Just in case we added a few 'eof' chars at the end.
 		ret = trim_tail(ret, -1)
 	end if
@@ -1248,12 +1256,19 @@ end function
 -- Parameters:
 --		# ##file##: an object, either a file path or the handle to an open file.
 --		# ##data##: the sequence of bytes to write
---      # ##as_text##: integer, **0** (the default) assumes //binary mode// that 
+--      # ##as_text##: integer
+--         ** **BINARY_MODE** (the default) assumes //binary mode// that 
 --                     causes every byte to be written out as is,
---                     and **1** assumes //text mode// that causes a NewLine
+--         ** **TEXT_MODE** assumes //text mode// that causes a NewLine
 --                     to be written out according to the operating system's
 --                     end of line convention. In Unix this is Ctrl-J and in
---                     Windows/DOS this is the pair {Ctrl-L, Ctrl-J}
+--                     Windows/DOS this is the pair {Ctrl-L, Ctrl-J}. 
+--         ** **UNIX_TEXT** ensures that lines are written out with unix style
+--                     line endings (Ctrl-J).
+--         ** **DOS_TEXT** ensures that lines are written out with DOS/Windows style
+--                     line endings {Ctrl-L, Ctrl-J}.
+--         ** **OSX_TEXT** ensures that lines are written out with OS-X style
+--                     line endings {Ctrl-L}.
 --
 -- Returns:
 --     An **integer**: 1 on success, -1 on failure.
@@ -1275,14 +1290,27 @@ end function
 -- See Also:
 --    [[:read_file]], [[:write_lines]]
 
-public function write_file(object file, sequence data, integer as_text = 0)
+public function write_file(object file, sequence data, integer as_text = BINARY_MODE)
 	integer fn
 
 	if sequence(file) then
-		if as_text then
+		if as_text = TEXT_MODE then
 			fn = open(file, "w")
+			data = replace_all(data, {13,10}, {10})
+			data = replace_all(data, {13}, {10})
 		else
 			fn = open(file, "wb")
+			if as_text = UNIX_TEXT then
+				data = replace_all(data, {13,10}, {10})
+				
+			elsif as_text = DOS_TEXT then
+				data = replace_all(data, {13,10}, {10})
+				data = replace_all(data, {10}, {13,10})
+				
+			elsif as_text = OSX_TEXT then
+				data = replace_all(data, {13,10}, {10})
+				data = replace_all(data, {10}, {13})
+			end if
 		end if
 	else
 		fn = file
