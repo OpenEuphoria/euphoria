@@ -9,6 +9,7 @@ include std/sort.e
 include std/wildcard.e
 include std/types.e
 include std/machine.e
+include std/text.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -1176,6 +1177,11 @@ end function
 --
 -- Parameters:
 --		# ##file#: an object, either a file path or the handle to an open file.
+--      # ##as_text##: integer, **0** (the default) assumes //binary mode// that 
+--                     causes every byte to be read in,
+--                     and **1** assumes //text mode// that causes the byte pair
+--                     {Carriage-Return, NewLine} to be read in as just NewLine,
+--                     and the first byte value of 26 (Ctrl-Z) is interpreted as End-Of-File.
 --
 -- Returns:
 --		A **sequence** holding all the bytes in the file.
@@ -1198,14 +1204,18 @@ end function
 -- See Also:
 --     [[:write_file]], [[:read_lines]]
 
-public function read_file(object file)
+public function read_file(object file, integer as_text = 0)
 	integer fn
 	integer len
 	sequence ret
 	integer temp
 
 	if sequence(file) then
-		fn = open(file, "rb")
+		if as_text then
+			fn = open(file, "r")
+		else
+			fn = open(file, "rb")
+		end if
 	else
 		fn = file
 	end if
@@ -1224,6 +1234,11 @@ public function read_file(object file)
 		close(fn)
 	end if
 
+	if as_text then
+		-- Just in case we added a few 'eof' chars at the end.
+		ret = trim_tail(ret, -1)
+	end if
+	
 	return ret
 end function
 
@@ -1233,6 +1248,12 @@ end function
 -- Parameters:
 --		# ##file##: an object, either a file path or the handle to an open file.
 --		# ##data##: the sequence of bytes to write
+--      # ##as_text##: integer, **0** (the default) assumes //binary mode// that 
+--                     causes every byte to be written out as is,
+--                     and **1** assumes //text mode// that causes a NewLine
+--                     to be written out according to the operating system's
+--                     end of line convention. In Unix this is Ctrl-J and in
+--                     Windows/DOS this is the pair {Ctrl-J, Ctrl-L}
 --
 -- Returns:
 --     An **integer**: 1 on success, -1 on failure.
@@ -1254,19 +1275,23 @@ end function
 -- See Also:
 --    [[:read_file]], [[:write_lines]]
 
-public function write_file(object f, sequence data)
+public function write_file(object file, sequence data, integer as_text = 0)
 	integer fn
 
-	if sequence(f) then
-		fn = open(f, "wb")
+	if sequence(file) then
+		if as_text then
+			fn = open(file, "w")
+		else
+			fn = open(file, "wb")
+		end if
 	else
-		fn = f
+		fn = file
 	end if
 	if fn < 0 then return -1 end if
 	
 	puts(fn, data)
 
-	if sequence(f) then
+	if sequence(file) then
 		close(fn)
 	end if
 
