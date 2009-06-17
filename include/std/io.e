@@ -1253,7 +1253,7 @@ end function
 --                     and **1** assumes //text mode// that causes a NewLine
 --                     to be written out according to the operating system's
 --                     end of line convention. In Unix this is Ctrl-J and in
---                     Windows/DOS this is the pair {Ctrl-J, Ctrl-L}
+--                     Windows/DOS this is the pair {Ctrl-L, Ctrl-J}
 --
 -- Returns:
 --     An **integer**: 1 on success, -1 on failure.
