@@ -1235,9 +1235,8 @@ plus one, unless they too are assigned a default value.
 <eucode>
 enum ONE, TWO, THREE, ABC=10, DEF, XYZ
 
--- ONE is 1, TWO is TWO, THREE is 3
--- ABC is 10, DEF is 11, XYZ is 12.
--- END_OF_ENUM is 12
+-- ONE is 1, TWO is 2, THREE is 3
+-- ABC is 10, DEF is 11, XYZ is 12
 </eucode>
 
 === Specifying the type of a variable

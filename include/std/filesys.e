@@ -386,7 +386,9 @@ constant DEFAULT_DIR_SOURCE = -2
 -- it's better not to use routine_id() here,
 -- or else users will have to bind with clear routine names
 
-public integer my_dir = DEFAULT_DIR_SOURCE  -- Deprecated, so therefore not documented.
+--**
+-- Deprecated, so therefore not documented.
+public integer my_dir = DEFAULT_DIR_SOURCE  
 
 --**
 -- Generalized Directory Walker

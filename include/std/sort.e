@@ -65,7 +65,7 @@ include std/text.e -- upper/lower
 --   </eucode>
 --
 -- See Also:
---     [[:compare]], [[:sort_user]], [[:custom_sort]]
+--     [[:compare]], [[:custom_sort]]
 
 public function sort(sequence x, integer order = ASCENDING)
 	integer gap, j, first, last
@@ -246,7 +246,7 @@ end function
 -- }
 -- </eucode>
 -- See Also:
---   [[:compare]], [[:sort]], [[:sort_user]]
+--   [[:compare]], [[:sort]]
 
 public function custom_sort(integer custom_compare, sequence x, object data = {}, integer order = NORMAL_ORDER)
 	integer gap, j, first, last
@@ -371,7 +371,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---	 [[:compare]], [[:sort]], [[:sort_user]]
+--	 [[:compare]], [[:sort]]
 
 public function sort_columns(sequence x, sequence column_list)
 	return custom_sort(routine_id("column_compare"), x, {column_list})
