@@ -96,44 +96,44 @@ the benefits of these languages in a much simpler way.
 The following is an example of a complete Euphoria program.
 
 <eucode>
-       sequence list, sorted_list                                  
-                                                                   
-       function merge_sort(sequence x)                             
-       -- put x into ascending order using a recursive merge sort  
-           integer n, mid                                          
-           sequence merged, a, b                                   
-                                                                   
-           n = length(x)                                           
-           if n = 0 or n = 1 then                                  
-               return x  -- trivial case                           
-           end if                                                  
-                                                                   
-           mid = floor(n/2)                                        
-           a = merge_sort(x[1..mid])       -- sort first half of x 
-           b = merge_sort(x[mid+1..n])     -- sort second half of x
-                                                                   
-           -- merge the two sorted halves into one                 
-           merged = {}                                             
-           while length(a) > 0 and length(b) > 0 do                
-               if compare(a[1], b[1]) < 0 then                     
-                   merged = append(merged, a[1])                   
-                   a = a[2..length(a)]                             
-               else                                                
-                   merged = append(merged, b[1])                   
-                   b = b[2..length(b)]                             
-               end if                                              
-           end while                                               
-           return merged & a & b  -- merged data plus leftovers    
-       end function                                                
-                                                                   
-       procedure print_sorted_list()                               
-       -- generate sorted_list from list                           
-           list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}                  
-           sorted_list = merge_sort(list)                          
-           ? sorted_list                                           
-       end procedure                                               
-                                                                   
-       print_sorted_list()     -- this command starts the program  
+sequence list, sorted_list                                  
+                                                            
+function merge_sort(sequence x)                             
+-- put x into ascending order using a recursive merge sort  
+    integer n, mid                                          
+    sequence merged, a, b                                   
+                                                            
+    n = length(x)                                           
+    if n = 0 or n = 1 then                                  
+        return x  -- trivial case                           
+    end if                                                  
+                                                            
+    mid = floor(n/2)                                        
+    a = merge_sort(x[1..mid])       -- sort first half of x 
+    b = merge_sort(x[mid+1..n])     -- sort second half of x
+                                                            
+    -- merge the two sorted halves into one                 
+    merged = {}                                             
+    while length(a) > 0 and length(b) > 0 do                
+        if compare(a[1], b[1]) < 0 then                     
+            merged = append(merged, a[1])                   
+            a = a[2..length(a)]                             
+        else                                                
+            merged = append(merged, b[1])                   
+            b = b[2..length(b)]                             
+        end if                                              
+    end while                                               
+    return merged & a & b  -- merged data plus leftovers    
+end function                                                
+                                                            
+procedure print_sorted_list()                               
+-- generate sorted_list from list                           
+    list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}                  
+    sorted_list = merge_sort(list)                          
+    ? sorted_list                                           
+end procedure                                               
+                                                            
+print_sorted_list()     -- this command starts the program  
 </eucode>
 
 The above example contains 4 separate commands that are processed in order. The
@@ -145,21 +145,21 @@ command calls procedure ##print_sorted_list##().
 The output from the program will be:
 
 <eucode>
-       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 </eucode>
 
 ##merge_sort##() will just as easily sort
 
 <eucode>
-       {1.5, -9, 1e6, 100}
-       {"oranges", "apples", "bananas"}
+{1.5, -9, 1e6, 100}
+{"oranges", "apples", "bananas"}
 </eucode>
 
 This example is stored as ##euphoria\tutorial\example.ex##. This is not the
 fastest way to sort in Euphoria. Go to the ##euphoria\demo## directory and type
 
 <eucode>
-       ex allsorts
+ex allsorts
 </eucode>
 
 to compare timings on several different sorting algorithms for increasing
@@ -243,7 +243,9 @@ is handy for editing and executing Euphoria programs. Take a look at
 To run a Euphoria program you type the name of the interpreter followed by the
 filename of the program you want to run. Such as:
 
-##eui example.ex##
+<eucode>
+eui example.ex
+</eucode>
 
 What you just typed is known as the //command-line//.
 
@@ -254,7 +256,7 @@ Depending on the platform you are using the interpreter could be called:
 | ##euiw##    | Console-less Windows interpreter                 |
 | ##euid##    | DOS only interpreter                             |
 
-The command-line may contain extra information. Following your program filename
+\\The command-line may contain extra information. Following your program filename
 you may add extra words (known as //arguments//) that can used in your
 program to customize its behavior. These arguments are read within your
 program by the built-in function [[:command_line]]().
@@ -280,19 +282,19 @@ OS X, FreeBSD, etc...
 You can redirect standard input and standard output when you run a Euphoria
  program, for example:
 <eucode>
-       eui filesort.ex < raw.txt > sorted.txt
+eui filesort.ex < raw.txt > sorted.txt
 </eucode>
 or simply,
 <eucode>
-       eui filesort < raw.txt > sorted.txt
+eui filesort < raw.txt > sorted.txt
 </eucode>
 
 For frequently-used programs under //DOS/Windows// you might want to make a
 small ##.bat## (batch) file, perhaps called ##myprog.bat##, containing two
 statements like:
 <eucode>
-       @echo off
-       eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
+@echo off
+eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 </eucode>
 The first statement turns off echoing of commands to the screen. The second
 runs ##ex myprog.ex## with up to 9 command-line arguments. See
@@ -300,11 +302,11 @@ runs ##ex myprog.ex## with up to 9 command-line arguments. See
 a .bat file will save you the minor inconvenience of typing ##eui##
 all the time; i.e., you can just type:
 <eucode>
-       myprog
+myprog
 </eucode>
 instead of:
 <eucode>
-       eui myprog
+eui myprog
 </eucode>
 
 Unfortunately //DOS// will not allow redirection of standard input and output
@@ -316,25 +318,25 @@ use the full path to ##eui##, ##~#!/usr/local/bin/eui##.
 
 If your program is called ##foo.ex##:
 <eucode>
-       #!/usr/bin/env eui
-                         
-       procedure foo()   
-          ? 2+2          
-       end procedure     
-                         
-       foo()             
+#!/usr/bin/env eui
+                  
+procedure foo()   
+   ? 2+2          
+end procedure     
+                  
+foo()             
 </eucode>
 
 Then if you make your file executable:
 
 <eucode>
-       chmod +x foo.ex
+chmod +x foo.ex
 </eucode>
 
 You can just type: 
 
 <eucode>
-       foo.ex
+foo.ex
 </eucode>
 
 to run your program. You could even shorten the name to simply "foo". Euphoria
@@ -380,7 +382,7 @@ that you want to edit. Color syntax highlighting is provided for ##.ex##,
 
 Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
-the ##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under 
+the ##Insert/Delete/Home/End/~PageUp/~PageDown## keys are also active. Under 
 //Linux/FreeBSD// some keys may not be available, and alternate keys are
 provided. See [[:Ed - Euphoria Editor]] for a complete description of
 the editing commands.
@@ -402,6 +404,12 @@ popular editors include syntax highlighting for Euphoria or can be made to.
 === Distributing a Program
 
 Euphoria provides you with 4 distinct ways of distributing a program.
+
+* "source-code", with the Euphoria "interpreter"
+* "shroud" into ##.il## code, with Euphoria "backend" 
+* "bind" into a Euphoria executable
+* "translate" into a C-compiled executable
+
 
 In the first method you simply ship your users the interpreter along with your
 Euphoria source files including any Euphoria includes that may be necessary
@@ -434,7 +442,7 @@ You can launch Euphoria with some extra command line switches, in order to add
 or change configuration elements. When running a GUI, there is always some way
 to open a prompt and enter any text with options, arguments and whatever the
 program being launched may need for proper, expected operation. Under //Windows//,
-this is achieved by clicking the Run... start menu entry, or hitting Windows-R.
+this is achieved by clicking the ##Run... start## menu entry, or hitting ##Windows-R##.
 
 The following items may be changed or added, one at a time:
 @[euinc.conf]

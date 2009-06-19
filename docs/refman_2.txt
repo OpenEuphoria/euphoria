@@ -66,7 +66,6 @@ atom salary = 56_110.66 -- Set salary to the value 56110.66
 integer defflags = #0323_F3CD
 
 object phone = 61_3_5536_7733
-
 </eucode>
 
 
@@ -164,7 +163,7 @@ Bill said
 
 The rules for extended strings are...
 # they begin with a # character, followed immediately by one of ##**#'`~~$^/~\|**##
-# they end with the next occurrence of the character that followed the initial # character
+# they end with the next occurrence of the character that followed the initial **#** character
 # If the resulting string begins with a new-line, the initial new-line is removed
 and any trailing new-line is also removed.
 # A special form is used to automatically trim off leading whitespace from the
@@ -250,7 +249,7 @@ Special characters may be entered using a back-slash:
 | \" | double quote |
 | \' | single quote |
 
-For example, "Hello, World!\n", or '~\~\'. The Euphoria editor displays character
+For example, ##"Hello, World!\n"##, or ##'~\~\'##. The Euphoria editor displays character
 strings in green.
 
 === Identifiers
@@ -261,26 +260,26 @@ letters, digits or underscore characters. There is no theoretical limit to how
 large an identifier can be but in practice it should be no more than about 30
 characters. 
 
-Identifiers are case-sensitive. THis means that ##"Name"## is a different identifier
+Identifiers are case-sensitive. This means that ##"Name"## is a different identifier
 from ##"name"##, or ##"NAME"##, etc...
 
 Examples of valid identifiers...
-{{{
+<eucode.
 n
 color26
 ShellSort
 quick_sort
 a_very_long_indentifier_that_is_really_too_long_for_its_own_good
 _alpha
-}}}
+</eucode>
 
 Examples of invalid identifiers...
-{{{
+<eucode>
 0n	   -- must not start with a digit
 ^color26   -- must not start with a punctuation character
 Shell Sort -- Cannot have spaces in identifiers.
 quick-sort -- must only consist of letters, digits or underscore.
-}}}
+</eucode>
 
 === Comments
 Comments are ignored by Euphoria and have no effect on execution speed.
@@ -498,7 +497,7 @@ corresponding sequence elements, and the sequences must be the same length.
 When they are equal length, the result is a sequence of ones an zeros. When they
 are not equal length, the result is an error. Either way you'll get an error,
 since an if-condition must be an atom, not a sequence.  Instead you should use
-the equal() built-in routine:
+the ##equal()## built-in routine:
 
 <eucode>
 if equal("APPLE", "ORANGE") then  -- CORRECT
@@ -610,8 +609,8 @@ employees = {
 -- employees[2][SALARY] would be 57000.
 </eucode>
 
-The length() built-in function will tell you the length of a sequence.  So
-the last element of a sequence s, is:
+The ##length()## built-in function will tell you the length of a sequence.  So
+the last element of a sequence ##s##, is:
 
 <eucode>
 s[length(s)]
@@ -635,15 +634,15 @@ can be simplified to:
 s[$-1]
 </eucode>
 
-The $ symbol equals the length of the sequence. $ may only appear between
+The ##$## symbol equals the length of the sequence. ##$## may only appear between
 square braces. Where there's nesting, e.g.:
 
 <eucode>
 s[$ - t[$-1] + 1]
 </eucode>
 
-The first $ above refers to the length of s, while the second $ refers to
-the length of t (as you'd probably expect).  An example where $ can save a lot
+The first ##$## above refers to the length of ##s##, while the second ##$## refers to
+the length of ##t## (as you'd probably expect).  An example where ##$## can save a lot
 of typing, make your code clearer, and probably even faster is:
 
 <eucode>
@@ -656,7 +655,9 @@ Compare that with the equivalent:
 longname[length(longname)][length(longname[length(longname)])]
 </eucode>
 
-**Subscripting and function side-effects:** In an assignment statement,
+**Subscripting and function side-effects:** 
+
+In an assignment statement,
 with left-hand-side subscripts:
 
 <eucode>
@@ -1239,6 +1240,16 @@ enum ONE, TWO, THREE, ABC=10, DEF, XYZ
 -- ABC is 10, DEF is 11, XYZ is 12
 </eucode>
 
+Euphoria sequences use integer indexes, but with ##enum## you may write code 
+like this:
+
+<eucode>
+enum X, Y
+sequence point = { 0,0 }
+point[X] = 3
+point[Y] = 4
+</eucode>
+
 === Specifying the type of a variable
 
 So far you've already seen some examples of variable types but now we will
@@ -1277,14 +1288,14 @@ are not integers. If your machine doesn't have floating-point
 hardware (this may happen on old 386 or 486 PCs), Euphoria will call software floating-point
 arithmetic routines contained in **ex.exe** (or in Windows).  You can force ex.exe to
 bypass any floating-point hardware, by setting an environment variable:
-{{{
+<eucode>
 SET NO87=1
-}}}
+</eucode>
 The slower software routines will be used, but this could be of some advantage
 if you are worried about the floating-point bug in some early Pentium
 chips.
 
-@[udt]
+@[:udt]
 To augment the [[:predefined types]], you can create **user-defined types**. All you have to
 do is define a single-parameter function, but declare it with **type ...
 end type** instead of **function ... end function**.  For
@@ -1331,10 +1342,11 @@ in an expression. The type just serves as an error check to prevent any
 "corruption" of the variable.    User-defined types can catch unexpected
 logical errors in your program.  They are not designed to catch or correct user
 input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
-@[type_check]
+
+@[[:type_check]]
 Type checking can be turned off or on between subroutines using the with
-type_check or without type_check (see [[:special
-statements]].  It is initially on by default.
+##type_check## or ##without type_check## (see [ @[[:special statements]].  
+It is initially on by default.
 
 ;**Note to Bench markers~:**
 : When comparing the speed of Euphoria programs against programs written in other
@@ -1552,12 +1564,12 @@ foo() -- ok, declared in some_lib.e
 bar() -- error! bar() is not declared here
 </eucode>
 
-Why not declare ##foo##() as global, as it is meant to be used anywhere? Well, one could, but this
+Why not declare ##foo()## as global, as it is meant to be used anywhere? Well, one could, but this
 will increase the risks of name conflicts. This is why, for instance, all
 public identifiers from the standard library have **public** scope. **global** should be used
 parsimoniously, if ever. Because earlier versions of Euphoria didn't have **public** or **export**, it has
 to remain there for a while. One should be very sure of not polluting any foreign file's
-symbol table before using **global** scope - which is what a large part of the Euphoria source
+symbol table before using **global** scope{{{--}}}which is what a large part of the Euphoria source
 files do. Built-in identifiers act as if declared as **global**{{{--}}}but they are not declared in any
 Euphoria coded file.
 
@@ -1688,7 +1700,7 @@ affecting the end user.
 **Resolution** is the process by which the interpreter determines what a name means. You
 could say "translate a name to a memory address", but this would be over simplifying. Let's
 say "translate an identifier to a symbol" rather. The backend only knows about symbols, and
-the front end's job is to understand which symbols are being used from the names - the
+the front end's job is to understand which symbols are being used from the names{{{--}}}the
 human readable identifiers{{{--}}}in the program.
 
 When Euphoria looks up the declaration of an identifier, it first checks the current
@@ -1738,7 +1750,7 @@ variable and may not have the same name as any other **local**
 variable in that file. You can use the same name in many different for-loops as
 long as the loops aren't nested. You do not declare loop variables as you would
 other variables. The range of values specified in the for statement defines the
-legal values of the loop variable - specifying a type would be redundant and is
+legal values of the loop variable{{{--}}}specifying a type would be redundant and is
 not allowed.
 
 Variables defined inside a **loop**, **while**, **if** or **switch** statement behave exactly
@@ -2131,7 +2143,7 @@ when running on //Linux// vs. //Windows//, enable or disable debug style code or
 possibly work differently in demo/shareware applications vs. registered
 applications.
 
-You should surround code that is not portable with ifdefs like:
+You should surround code that is not portable with ##ifdef## like:
 <eucode>
 ifdef WIN32 then  
    -- Windows specific code.
@@ -2158,7 +2170,7 @@ ifdef WIN32 or DOS32 then
 </eucode>
 
 The reason for doing this is so that the user that includes your include file sees 
-an OS not supported message instead of an undefined reference message. 
+an "OS not supported" message instead of an "undefined reference" message. 
 
 
 Defined words must follow the same character set of an identifier, that is,
@@ -2384,10 +2396,10 @@ end for
 </eucode>
 
 However, adding together floating point numbers that are not the ratio of an integer by a
-power of 2 - 0.3 is not such a ratio - leads to some fuzz in the value of the index. In some
+power of 2 {{{--}}}// 0.3 is not such a ratio//{{{--}}}leads to some "fuzz" in the value of the index. In some
 cases, you might get unexpected results because of this fuzz, which arises
-from a common hardware limitation. For instance, floor(10*0.1) is 1 as
-expected, but floor(0.1+0.1+0.1+0.1+0.1+0.1+0.1+0.1+0.1+0.1) is 0.
+from a common hardware limitation. For instance, ##floor(10*0.1)## is ##1## as
+expected, but ##floor(0.1+0.1+0.1+0.1+0.1+0.1+0.1+0.1+0.1+0.1)## is ##0##.
 
 The **loop variable** is declared automatically and exists until
 the end of the loop. Outside of the loop the variable has no value and is not
@@ -2428,6 +2440,7 @@ break retry entry exit continue return goto end
 </eucode>
 
 === exit statement
+
 Exiting a loop is done with the keyword **exit**. This causes flow
 to immediately leave the current loop and recommence with the first statement
 after the end of the loop.
@@ -2451,7 +2464,7 @@ that refers to the depth that you want to exit from.
 
 A block's name is always a string literal and only a string literal. You cannot use
 a variable that contains the block's name on an exit statement. The name comes after
-the ##label## keyword, just before the #do# keyword.\\
+the ##label## keyword, just before the ##do## keyword.\\
 Example:
 <eucode>
 integer b
@@ -2668,8 +2681,8 @@ The same optional parameters that can be used in an **exit** statement can apply
 === with entry statement
 
 It is often the case that the first iteration of a loop is somehow special.
-Some things have to be done before the loop starts - they are done before the
-statement starting the loop -.  Now, the problem is that, just as often, some
+Some things have to be done before the loop starts{{{--}}}they are done before the
+statement starting the loop.  Now, the problem is that, just as often, some
 things do not need to, or should not, be done at this initialisation stage. The
 **entry keyword** is an alternative to setting flags relentlessly
 and forgetting to update them. Just add the **entry** keyword at

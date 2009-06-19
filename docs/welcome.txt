@@ -1,11 +1,3 @@
-@@(title Euphoria v4.0)@
-%%maxnumlevel = 4
-%%splitname = eu400
-%%splitlevel = 2
-%%toclevel = 3
-
-<<TOC level=3>>
-
 = Euphoria Programming Language v4.0
 <<LEVELTOC depth=2>>
 
@@ -39,8 +31,8 @@ crowd of conventional languages.
 
 === Euphoria is unique
 
-What makes Euphoria unique is a design that uses just two basic data-types -
- //atom// and //sequence//, and two 'helper' data-types - //object// and //integer//.
+What makes Euphoria unique is a design that uses just two basic data-types {{[--}}}
+ //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and //integer//.
 
 * An **atom** is single numeric value (either an integer or floating point)
 * A **sequence** is a list of values (atoms, nested sequences)
@@ -147,10 +139,35 @@ You will also find source-code for example programs and library files.
 
 === Conventions used in the manual
 
-Euphoria has multiple interpreters, the main one being ##eui##. If you
-are running on DOS, you should use ##euid## in place of ##eui##. The
-manual will reference ##eui## only in examples and instructions, the
-reader is left to choose the correct interpreter. ##euiw## also exists
-on Windows platforms and it is identical to ##eui## however, it does
-not create a console window, thus can be used for GUI applications.
+Euphoria has multiple interpreters, the main one being **##eui##**. 
 
+* If you are running on DOS, you should use ##euid## in place of ##eui##. 
+
+* On windows platforms you have two choices. If you run ##eui## then a console 
+window is created. If you run ##euiw## then no console is created{{{--}}}making
+it suitable for GUI applications.
+
+The manual will only reference ##eui## in examples and instructions; the
+reader is left to choose the correct interpreter.
+
+Euphoria runs on many platforms. When operating specific issues must be described
+you will see these descriptions:
+
+* "Windows" will be a general reference to a family of operating systems that
+includes WIN/95/ME/98/XP/NT/Vista/7/... You will see the constant ##WIN32## used
+for Windows specific code.
+
+* "Dos" will be a general reference to a family of operating systems that
+include MSDOS/DOS/... You will see the consant ##DOS32## used for Dos
+specific code.
+
+* "Unix" will be a general reference to the family operating systems that
+includes Linux/FreeBSD,Mac OS X/... You will see the constant ##UNIX## used
+for Unix specific code. You may also see "*nix" used to describe this group
+of operating systems.
+
+Directory names in Windows and Dos use ##\## separators, while Unix systems use ##/##.
+Unix users should substitute {{{ / }}} when they examine example code.
+
+Operating system names are often tradmarks. There is no intent to infringe on their
+owner rights.
