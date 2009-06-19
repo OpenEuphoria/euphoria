@@ -1601,12 +1601,66 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 	return length(keys_)
 end function
 
-public function copy(map the_map_)
-	atom temp_map_
-	
- 	temp_map_ = malloc()
- 	ram_space[temp_map_] = ram_space[the_map_]
-	return temp_map_
+--**
+-- Duplicates a map.
+--
+-- Parameters:
+--   # ##source_map##: map to duplicate
+--   # ##dest_map##: optional map to duplicate to
+--
+-- Returns:
+--   If ##dest_map## was not provided, a duplicate of ##source_map## otherwise
+--   ##dest_map## is returned with the new values copied from ##source_map##.
+--
+-- Example 1:
+--   <eucode>
+--   map m1 = new()
+--   put(m1, 1, "one")
+--   put(m1, 2, "two")
+--
+--   map m2 = copy(m1)
+--   printf(1, "%s, %s\n", { get(m2, 1), get(m2, 2) })
+--   -- one, two
+--
+--   put(m1, 1, "one hundred")
+--   printf(1, "%s, %s\n", { get(m1, 1), get(m1, 2) })
+--   -- one hundred, two
+--
+--   printf(1, "%s, %s\n", { get(m2, 1), get(m2, 2) })
+--   -- one, two
+--   </eucode>
+--
+-- Example 2:
+--   <eucode>
+--   map m1 = new()
+--   map m2 = new()
+--
+--   put(m1, 1, "one")
+--   put(m1, 2, "two")
+--
+--   copy(m1, m2)
+--   put(m2, 3, "three")
+--
+--   ? keys(m2)
+--   -- { 1, 2, 3 }
+--   </eucode>
+--
+
+public function copy(map source_map, object dest_map=0)
+	atom temp_map = malloc()
+
+	if map(dest_map) then
+		-- TODO: a better (internal) way of doing this?
+		sequence source_keys = keys(source_map)
+		for i = 1 to length(source_keys) do
+			put(dest_map, source_keys[i], get(source_map, source_keys[i]))
+		end for
+
+		return dest_map
+	else
+	 	ram_space[temp_map] = ram_space[source_map]
+		return temp_map
+	end if
 end function
 
 ---- Local Functions ------------
