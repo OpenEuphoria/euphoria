@@ -59,15 +59,16 @@ include std/serialize.e
 include std/datetime.e
 include std/io.e
 
-constant type_tag      = 1 -- ==> 'tag' for map type
-constant element_count = 2 -- ==> elementCount
-constant in_use        = 3 -- ==> count of non-empty buckets
-constant map_type      = 4  -- ==> Either SMALLMAP or LARGEMAP
-constant key_buckets   = 5 -- ==> bucket[] --> bucket = {key[], value[]}
-constant value_buckets = 6 -- ==> bucket[] --> bucket = {key[], value[]}
-constant key_list      = 5 -- ==> Small map keys
-constant value_list    = 6 -- ==> Small map values
-constant free_list     = 7 -- ==> Small map freespace
+enum
+	 TYPE_TAG,       -- ==> 'tag' for map type
+	 ELEMENT_COUNT,  -- ==> elementCount
+	 IN_USE,         -- ==> count of non-empty buckets
+	 MAP_TYPE,       -- ==> Either SMALLMAP or LARGEMAP
+	 KEY_BUCKETS,    -- ==> bucket[] --> bucket = {key[], value[]}
+	 VALUE_BUCKETS,  -- ==> bucket[] --> bucket = {key[], value[]}
+	 KEY_LIST   = 5, -- ==> Small map keys
+	 VALUE_LIST,     -- ==> Small map values
+	 FREE_LIST       -- ==> Small map freespace
 
 constant type_is_map   = "Eu:StdMap"
 
@@ -191,22 +192,22 @@ public type map(object obj_p)
 	if not sequence(m_) then return 0 end if
 	if length(m_) < 6 then return 0 end if
 	if length(m_) > 7 then return 0 end if
-	if not equal(m_[type_tag], type_is_map) then return 0 end if
-	if not integer(m_[element_count]) then return 0 end if
-	if m_[element_count] < 0 		then return 0 end if
-	if not integer(m_[in_use]) then return 0 end if
-	if m_[in_use] < 0		then return 0 end if
-	if equal(m_[map_type],SMALLMAP) then
-		if atom(m_[key_list]) 		then return 0 end if
-		if atom(m_[value_list]) 		then return 0 end if
-		if atom(m_[free_list]) 		then return 0 end if
-		if length(m_[key_list]) = 0  then return 0 end if
-		if length(m_[key_list]) != length(m_[value_list]) then return 0 end if
-		if length(m_[key_list]) != length(m_[free_list]) then return 0 end if
-	elsif  equal(m_[map_type],LARGEMAP) then
-		if atom(m_[key_buckets]) 		then return 0 end if
-		if atom(m_[value_buckets]) 		then return 0 end if
-		if length(m_[key_buckets]) != length(m_[value_buckets])	then return 0 end if
+	if not equal(m_[TYPE_TAG], type_is_map) then return 0 end if
+	if not integer(m_[ELEMENT_COUNT]) then return 0 end if
+	if m_[ELEMENT_COUNT] < 0 		then return 0 end if
+	if not integer(m_[IN_USE]) then return 0 end if
+	if m_[IN_USE] < 0		then return 0 end if
+	if equal(m_[MAP_TYPE],SMALLMAP) then
+		if atom(m_[KEY_LIST]) 		then return 0 end if
+		if atom(m_[VALUE_LIST]) 		then return 0 end if
+		if atom(m_[FREE_LIST]) 		then return 0 end if
+		if length(m_[KEY_LIST]) = 0  then return 0 end if
+		if length(m_[KEY_LIST]) != length(m_[VALUE_LIST]) then return 0 end if
+		if length(m_[KEY_LIST]) != length(m_[FREE_LIST]) then return 0 end if
+	elsif  equal(m_[MAP_TYPE],LARGEMAP) then
+		if atom(m_[KEY_BUCKETS]) 		then return 0 end if
+		if atom(m_[VALUE_BUCKETS]) 		then return 0 end if
+		if length(m_[KEY_BUCKETS]) != length(m_[VALUE_BUCKETS])	then return 0 end if
 	else
 		return 0
 	end if
@@ -288,7 +289,7 @@ end function
 -- ##integer## Either //SMALLMAP// or //LARGEMAP//
 --
 public function type_of(map the_map_p)
-	return ram_space[the_map_p][map_type]
+	return ram_space[the_map_p][MAP_TYPE]
 end function
 	
 --**
@@ -321,13 +322,13 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	atom new_size_
 	sequence temp_map_
 
-	if ram_space[the_map_p][map_type] = SMALLMAP then
+	if ram_space[the_map_p][MAP_TYPE] = SMALLMAP then
 		return -- small maps are not hashed.
 	end if
 	
 	if requested_bucket_size_p <= 0 then
 		-- grow bucket size_
-		new_size_ = floor(length(ram_space[the_map_p][key_buckets]) * 3.5) + 1
+		new_size_ = floor(length(ram_space[the_map_p][KEY_BUCKETS]) * 3.5) + 1
 		if new_size_ > maxInt then
 				return  -- don't do anything. already too large
 		end if
@@ -340,8 +341,8 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	if size_ < 0 then
 		size_ = -size_	-- Failed to just use given size_.
 	end if
-	old_key_buckets_ = ram_space[the_map_p][key_buckets]
-	old_val_buckets_ = ram_space[the_map_p][value_buckets]
+	old_key_buckets_ = ram_space[the_map_p][KEY_BUCKETS]
+	old_val_buckets_ = ram_space[the_map_p][VALUE_BUCKETS]
 	new_key_buckets_ = repeat({}, size_)
 	new_val_buckets_ = repeat({}, size_)
 	temp_map_ = {type_is_map, 0, 0, LARGEMAP}
@@ -353,9 +354,9 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 			index_2_ = calc_hash(key_, size_)
 			new_key_buckets_[index_2_] = append(new_key_buckets_[index_2_], key_)
 			new_val_buckets_[index_2_] = append(new_val_buckets_[index_2_], value_)
-			temp_map_[element_count] += 1
+			temp_map_[ELEMENT_COUNT] += 1
 			if length(new_key_buckets_[index_2_]) = 1 then
-				temp_map_[in_use] += 1
+				temp_map_[IN_USE] += 1
 			end if
 		end for
 	end for
@@ -483,22 +484,18 @@ public function compare(map map_1_p, map map_2_p, integer scope_p = 'd')
 		return 0
 	end if
 	
-	switch scope_p with fallthru do
-		case 'v' then
-		case 'V' then
+	switch scope_p do
+		case 'v', 'V' then
 			data_set_1_ = sort(values(map_1_p))
 			data_set_2_ = sort(values(map_2_p))
-			break
 			
-		case 'k' then
-		case 'K' then
-			data_set_1_ = sort(keys(map_1_p))
-			data_set_2_ = sort(keys(map_2_p))
-			break
+		case 'k', 'K' then
+			data_set_1_ = keys(map_1_p, 1)
+			data_set_2_ = keys(map_2_p, 1)
 			
 		case else
-			data_set_1_ = sort(pairs(map_1_p))
-			data_set_2_ = sort(pairs(map_2_p))
+			data_set_1_ = pairs(map_1_p, 1)
+			data_set_2_ = pairs(map_2_p, 1)
 
 	end switch
 				
@@ -534,11 +531,11 @@ public function has(map the_map_p, object the_key_p)
 	integer index_
 	integer pos_
 	
-	if ram_space[the_map_p][map_type] = LARGEMAP then
-		index_ = calc_hash(the_key_p, length(ram_space[the_map_p][key_buckets]))
-		pos_ = find(the_key_p, ram_space[the_map_p][key_buckets][index_])
+	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
+		index_ = calc_hash(the_key_p, length(ram_space[the_map_p][KEY_BUCKETS]))
+		pos_ = find(the_key_p, ram_space[the_map_p][KEY_BUCKETS][index_])
 	else
-		pos_ = find(the_key_p, ram_space[the_map_p][key_list])
+		pos_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
 	end if
 	return (pos_  != 0)
 	
@@ -580,21 +577,21 @@ public function get(map the_map_p, object the_key_p, object default_value_p = 0)
 	integer pos_
 	integer from_
 	
-	if ram_space[the_map_p][map_type] = LARGEMAP then
-		bucket_ = calc_hash(the_key_p, length(ram_space[the_map_p][key_buckets]))
-		pos_ = find(the_key_p, ram_space[the_map_p][key_buckets][bucket_])
+	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
+		bucket_ = calc_hash(the_key_p, length(ram_space[the_map_p][KEY_BUCKETS]))
+		pos_ = find(the_key_p, ram_space[the_map_p][KEY_BUCKETS][bucket_])
 		if pos_ > 0 then
-			return ram_space[the_map_p][value_buckets][bucket_][pos_]
+			return ram_space[the_map_p][VALUE_BUCKETS][bucket_][pos_]
 		end if
 		return default_value_p
 	else
 		if equal(the_key_p, init_small_map_key) then
 			from_ = 1
 			while from_ > 0 do
-				pos_ = find_from(the_key_p, ram_space[the_map_p][key_list], from_)
+				pos_ = find_from(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
 				if pos_ then
-					if ram_space[the_map_p][free_list][pos_] = 1 then
-						return ram_space[the_map_p][value_list][pos_]
+					if ram_space[the_map_p][FREE_LIST][pos_] = 1 then
+						return ram_space[the_map_p][VALUE_LIST][pos_]
 					end if
 				else
 					return default_value_p
@@ -602,9 +599,9 @@ public function get(map the_map_p, object the_key_p, object default_value_p = 0)
 				from_ = pos_ + 1
 			end while
 		else
-			pos_ = find(the_key_p, ram_space[the_map_p][key_list])
+			pos_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
 			if pos_  then
-				return ram_space[the_map_p][value_list][pos_]
+				return ram_space[the_map_p][VALUE_LIST][pos_]
 			end if
 		end if
 	end if
@@ -659,7 +656,7 @@ end function
 --     number of keys in a hash bucket to a specific maximum. The //trigger// 
 --     value is the maximum allowed. Each time a //put// operation increases
 --     the hash table's average bucket size to be more than the //trigger// value
---     the table is expanded by a factor 3.5 and the keys are rehashed into the
+--     the table is expanded by a factor of 3.5 and the keys are rehashed into the
 --     enlarged table. This can be a time intensive action so set the value
 --     to one that is appropriate to your application. 
 --     ** By keeping the average bucket size to a certain maximum, it can
@@ -688,32 +685,32 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 	atom average_length_
 	integer from_
 	
-	if ram_space[the_map_p][map_type] = LARGEMAP then
-		bucket_ = calc_hash(the_key_p,  length(ram_space[the_map_p][key_buckets]))
-		index_ = find(the_key_p, ram_space[the_map_p][key_buckets][bucket_])
+	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
+		bucket_ = calc_hash(the_key_p,  length(ram_space[the_map_p][KEY_BUCKETS]))
+		index_ = find(the_key_p, ram_space[the_map_p][KEY_BUCKETS][bucket_])
 		if index_ > 0 then
 			-- The the_value_p already exists.
 			switch operation_p do
 				case PUT then
-					ram_space[the_map_p][value_buckets][bucket_][index_] = the_value_p
+					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] = the_value_p
 					
 				case ADD then
-					ram_space[the_map_p][value_buckets][bucket_][index_] += the_value_p
+					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] += the_value_p
 					
 				case SUBTRACT then
-					ram_space[the_map_p][value_buckets][bucket_][index_] -= the_value_p
+					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] -= the_value_p
 					
 				case MULTIPLY then
-					ram_space[the_map_p][value_buckets][bucket_][index_] *= the_value_p
+					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] *= the_value_p
 					
 				case DIVIDE then
-					ram_space[the_map_p][value_buckets][bucket_][index_] /= the_value_p
+					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] /= the_value_p
 					
 				case APPEND then
-					ram_space[the_map_p][value_buckets][bucket_][index_] = append( ram_space[the_map_p][value_buckets][bucket_][index_], the_value_p )
+					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] = append( ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_], the_value_p )
 					
 				case CONCAT then
-					ram_space[the_map_p][value_buckets][bucket_][index_] &= the_value_p
+					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] &= the_value_p
 					
 				case LEAVE then
 					-- Do nothing
@@ -726,8 +723,8 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		end if
 
 		
-		ram_space[the_map_p][in_use] += (length(ram_space[the_map_p][key_buckets][bucket_]) = 0)
-		ram_space[the_map_p][element_count] += 1 -- elementCount
+		ram_space[the_map_p][IN_USE] += (length(ram_space[the_map_p][KEY_BUCKETS][bucket_]) = 0)
+		ram_space[the_map_p][ELEMENT_COUNT] += 1 -- elementCount
 		
 		
 		-- write new entry
@@ -737,11 +734,11 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		end if
 
 
-		ram_space[the_map_p][key_buckets][bucket_] = append(ram_space[the_map_p][key_buckets][bucket_], the_key_p)
-		ram_space[the_map_p][value_buckets][bucket_] = append(ram_space[the_map_p][value_buckets][bucket_], the_value_p)
+		ram_space[the_map_p][KEY_BUCKETS][bucket_] = append(ram_space[the_map_p][KEY_BUCKETS][bucket_], the_key_p)
+		ram_space[the_map_p][VALUE_BUCKETS][bucket_] = append(ram_space[the_map_p][VALUE_BUCKETS][bucket_], the_value_p)
 				
 		if trigger_p > 0 then
-			average_length_ = ram_space[the_map_p][element_count] / ram_space[the_map_p][in_use]
+			average_length_ = ram_space[the_map_p][ELEMENT_COUNT] / ram_space[the_map_p][IN_USE]
 			if (average_length_ >= trigger_p) then
 				rehash(the_map_p)
 			end if
@@ -752,57 +749,57 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		if equal(the_key_p, init_small_map_key) then
 			from_ = 1
 			while index_ > 0 with entry do
-				if ram_space[the_map_p][free_list][index_] = 0 then
+				if ram_space[the_map_p][FREE_LIST][index_] = 0 then
 					exit
 				end if
 				from_ = index_ + 1
 			  entry
-				index_ = find_from(the_key_p, ram_space[the_map_p][key_list], from_)
+				index_ = find_from(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
 			end while
 		else
-			index_ = find(the_key_p, ram_space[the_map_p][key_list])
+			index_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
 		end if
 		
 		-- Did we find it?
 		if index_ = 0 then
 			-- No, so add it.
-			index_ = find(0, ram_space[the_map_p][free_list])
+			index_ = find(0, ram_space[the_map_p][FREE_LIST])
 			if index_ = 0 then
 				-- No room left, so now it becomes a large map.
 				convert_to_large_map(the_map_p)
 				put(the_map_p, the_key_p, the_value_p, operation_p, trigger_p)
 				return
 			else
-				ram_space[the_map_p][key_list][index_] = the_key_p
-				ram_space[the_map_p][value_list][index_] = the_value_p
-				ram_space[the_map_p][free_list][index_] = 1
-				ram_space[the_map_p][in_use] += 1
-				ram_space[the_map_p][element_count] += 1
+				ram_space[the_map_p][KEY_LIST][index_] = the_key_p
+				ram_space[the_map_p][VALUE_LIST][index_] = the_value_p
+				ram_space[the_map_p][FREE_LIST][index_] = 1
+				ram_space[the_map_p][IN_USE] += 1
+				ram_space[the_map_p][ELEMENT_COUNT] += 1
 				return
 			end if
 		end if
 		
 		switch operation_p do
 			case PUT then
-				ram_space[the_map_p][value_list][index_] = the_value_p
+				ram_space[the_map_p][VALUE_LIST][index_] = the_value_p
 				
 			case ADD then
-				ram_space[the_map_p][value_list][index_] += the_value_p
+				ram_space[the_map_p][VALUE_LIST][index_] += the_value_p
 				
 			case SUBTRACT then
-				ram_space[the_map_p][value_list][index_] -= the_value_p
+				ram_space[the_map_p][VALUE_LIST][index_] -= the_value_p
 				
 			case MULTIPLY then
-				ram_space[the_map_p][value_list][index_] *= the_value_p
+				ram_space[the_map_p][VALUE_LIST][index_] *= the_value_p
 				
 			case DIVIDE then
-				ram_space[the_map_p][value_list][index_] /= the_value_p
+				ram_space[the_map_p][VALUE_LIST][index_] /= the_value_p
 				
 			case APPEND then
-				ram_space[the_map_p][value_list][index_] = append( ram_space[the_map_p][value_list][index_], the_value_p )
+				ram_space[the_map_p][VALUE_LIST][index_] = append( ram_space[the_map_p][VALUE_LIST][index_], the_value_p )
 				
 			case CONCAT then
-				ram_space[the_map_p][value_list][index_] &= the_value_p
+				ram_space[the_map_p][VALUE_LIST][index_] &= the_value_p
 				
 			case else
 				crash("Unknown operation given to map.e:put()")
@@ -909,22 +906,22 @@ public procedure remove(map the_map_p, object the_key_p)
 	
 
 	temp_map_ = ram_space[the_map_p]
-	if temp_map_[map_type] = LARGEMAP then
-		bucket_ = calc_hash(the_key_p, length(temp_map_[key_buckets]))
+	if temp_map_[MAP_TYPE] = LARGEMAP then
+		bucket_ = calc_hash(the_key_p, length(temp_map_[KEY_BUCKETS]))
 	
-		index_ = find(the_key_p, temp_map_[key_buckets][bucket_])
+		index_ = find(the_key_p, temp_map_[KEY_BUCKETS][bucket_])
 		if index_ != 0 then
-			temp_map_[element_count] -= 1
-			if length(temp_map_[key_buckets][bucket_]) = 1 then
-				temp_map_[in_use] -= 1
-				temp_map_[key_buckets][bucket_] = {}
-				temp_map_[value_buckets][bucket_] = {}
+			temp_map_[ELEMENT_COUNT] -= 1
+			if length(temp_map_[KEY_BUCKETS][bucket_]) = 1 then
+				temp_map_[IN_USE] -= 1
+				temp_map_[KEY_BUCKETS][bucket_] = {}
+				temp_map_[VALUE_BUCKETS][bucket_] = {}
 			else
-				temp_map_[value_buckets][bucket_] = temp_map_[value_buckets][bucket_][1 .. index_-1] & temp_map_[value_buckets][bucket_][index_+1 .. $]
-				temp_map_[key_buckets][bucket_] = temp_map_[key_buckets][bucket_][1 .. index_-1] & temp_map_[key_buckets][bucket_][index_+1 .. $]
+				temp_map_[VALUE_BUCKETS][bucket_] = temp_map_[VALUE_BUCKETS][bucket_][1 .. index_-1] & temp_map_[VALUE_BUCKETS][bucket_][index_+1 .. $]
+				temp_map_[KEY_BUCKETS][bucket_] = temp_map_[KEY_BUCKETS][bucket_][1 .. index_-1] & temp_map_[KEY_BUCKETS][bucket_][index_+1 .. $]
 			end if
 			
-			if temp_map_[element_count] < floor(51 * threshold_size / 100) then
+			if temp_map_[ELEMENT_COUNT] < floor(51 * threshold_size / 100) then
 				ram_space[the_map_p] = temp_map_
 				convert_to_small_map(the_map_p)
 				return
@@ -933,14 +930,14 @@ public procedure remove(map the_map_p, object the_key_p)
 	else
 		from_ = 1
 		while from_ > 0 do
-			index_ = find_from(the_key_p, temp_map_[key_list], from_)
+			index_ = find_from(the_key_p, temp_map_[KEY_LIST], from_)
 			if index_ then
-				if temp_map_[free_list][index_] = 1 then
-					temp_map_[free_list][index_] = 0
-					temp_map_[key_list][index_] = init_small_map_key
-					temp_map_[value_list][index_] = 0
-					temp_map_[in_use] -= 1
-					temp_map_[element_count] -= 1
+				if temp_map_[FREE_LIST][index_] = 1 then
+					temp_map_[FREE_LIST][index_] = 0
+					temp_map_[KEY_LIST][index_] = init_small_map_key
+					temp_map_[VALUE_LIST][index_] = 0
+					temp_map_[IN_USE] -= 1
+					temp_map_[ELEMENT_COUNT] -= 1
 				end if
 			else
 				exit
@@ -981,17 +978,17 @@ public procedure clear(map the_map_p)
 	sequence temp_map_
 
 	temp_map_ = ram_space[the_map_p]
-	if temp_map_[map_type] = LARGEMAP then
-		temp_map_[element_count] = 0
-		temp_map_[in_use] = 0
-		temp_map_[key_buckets] = repeat({}, length(temp_map_[key_buckets]))
-		temp_map_[value_buckets] = repeat({}, length(temp_map_[value_buckets]))
+	if temp_map_[MAP_TYPE] = LARGEMAP then
+		temp_map_[ELEMENT_COUNT] = 0
+		temp_map_[IN_USE] = 0
+		temp_map_[KEY_BUCKETS] = repeat({}, length(temp_map_[KEY_BUCKETS]))
+		temp_map_[VALUE_BUCKETS] = repeat({}, length(temp_map_[VALUE_BUCKETS]))
 	else
-		temp_map_[element_count] = 0
-		temp_map_[in_use] = 0
-		temp_map_[key_list] = repeat(0, length(temp_map_[key_list]))
-		temp_map_[value_list] = repeat(0, length(temp_map_[value_list]))
-		temp_map_[free_list] = repeat(0, length(temp_map_[free_list]))
+		temp_map_[ELEMENT_COUNT] = 0
+		temp_map_[IN_USE] = 0
+		temp_map_[KEY_LIST] = repeat(0, length(temp_map_[KEY_LIST]))
+		temp_map_[VALUE_LIST] = repeat(0, length(temp_map_[VALUE_LIST]))
+		temp_map_[FREE_LIST] = repeat(0, length(temp_map_[FREE_LIST]))
 	end if
 	ram_space[the_map_p] = temp_map_
 	return
@@ -1020,7 +1017,7 @@ end procedure
 -- See Also:
 --		[[:statistics]]
 public function size(map the_map_p)
-	return ram_space[the_map_p][element_count]
+	return ram_space[the_map_p][ELEMENT_COUNT]
 end function
 
 --**
@@ -1063,11 +1060,11 @@ public function statistics(map the_map_p)
 	
 	temp_map_ = ram_space[the_map_p]
 
-	if temp_map_[map_type] = LARGEMAP then
-		statistic_set_ = {temp_map_[element_count], temp_map_[in_use], length(temp_map_[key_buckets]), 0, maxInt, 0, 0}
+	if temp_map_[MAP_TYPE] = LARGEMAP then
+		statistic_set_ = {temp_map_[ELEMENT_COUNT], temp_map_[IN_USE], length(temp_map_[KEY_BUCKETS]), 0, maxInt, 0, 0}
 		lengths_ = {}
-		for i = 1 to length(temp_map_[key_buckets]) do
-			length_ = length(temp_map_[key_buckets][i])
+		for i = 1 to length(temp_map_[KEY_BUCKETS]) do
+			length_ = length(temp_map_[KEY_BUCKETS][i])
 			if length_ > 0 then
 				if length_ > statistic_set_[LARGEST_BUCKET] then
 					statistic_set_[LARGEST_BUCKET] = length_
@@ -1081,7 +1078,7 @@ public function statistics(map the_map_p)
 		statistic_set_[AVERAGE_BUCKET] = stats:average(lengths_)
 		statistic_set_[STDEV_BUCKET] = stats:stdev(lengths_)
 	else
-		statistic_set_ = {temp_map_[element_count], temp_map_[in_use], length(temp_map_[key_list]), length(temp_map_[key_list]), length(temp_map_[key_list]), length(temp_map_[key_list]), 0}
+		statistic_set_ = {temp_map_[ELEMENT_COUNT], temp_map_[IN_USE], length(temp_map_[KEY_LIST]), length(temp_map_[KEY_LIST]), length(temp_map_[KEY_LIST]), length(temp_map_[KEY_LIST]), 0}
 	end if
 	return statistic_set_
 end function
@@ -1091,12 +1088,14 @@ end function
 --
 -- Parameters;
 --		# ##the_map_p##: the map being queried
+--      # ##sorted_result##: optional integer. 0 [default] means do not sort the
+--                            output and 1 means to sort the output before returning.
 --
 -- Returns:
 -- 		A **sequence** made of all the keys in the map.
 --
 -- Comments:
---   The order of the keys returned may not be the same as the putting order.
+--   If ##sorted_result## is not used, the order of the keys returned is not predicable. 
 --
 -- Example 1:
 --   <eucode>
@@ -1109,10 +1108,11 @@ end function
 --
 --   sequence keys
 --   keys = keys(the_map_p) -- keys might be {20,40,10,30} or some other order
+--   keys = keys(the_map_p, 1) -- keys will be {10,20,30,40}
 --   </eucode>
 -- See Also:
 --		[[:has]], [[:values]], [[:pairs]]
-public function keys(map the_map_p)
+public function keys(map the_map_p, integer sorted_result = 0)
 	sequence buckets_
 	sequence current_bucket_
 	sequence results_
@@ -1121,11 +1121,11 @@ public function keys(map the_map_p)
 	
 	temp_map_ = ram_space[the_map_p]
 
-	results_ = repeat(0, temp_map_[element_count])
+	results_ = repeat(0, temp_map_[ELEMENT_COUNT])
 	pos_ = 1
 
-	if temp_map_[map_type] = LARGEMAP then
-		buckets_ = temp_map_[key_buckets]
+	if temp_map_[MAP_TYPE] = LARGEMAP then
+		buckets_ = temp_map_[KEY_BUCKETS]
 		for index = 1 to length(buckets_) do
 			current_bucket_ = buckets_[index]
 			if length(current_bucket_) > 0 then
@@ -1134,34 +1134,42 @@ public function keys(map the_map_p)
 			end if
 		end for
 	else
-		for index = 1 to length(temp_map_[free_list]) do
-			if temp_map_[free_list][index] !=  0 then
-				results_[pos_] = temp_map_[key_list][index]
+		for index = 1 to length(temp_map_[FREE_LIST]) do
+			if temp_map_[FREE_LIST][index] !=  0 then
+				results_[pos_] = temp_map_[KEY_LIST][index]
 				pos_ += 1
 			end if
 		end for
 		
 	end if
-	return results_
+	if sorted_result then
+		return sort(results_)
+	else
+		return results_
+	end if
 end function
 
 --**
--- Return all values in a map.
+-- Return values, without their keys, from a map.
 --
 -- Parameters:
 --   # ##the_map##: the map being queried
---   # ##keys##: optional key list of values to return
+--   # ##keys##: optional, key list of values to return. 
 --   # ##default_values##: optional default values for keys list
 --
 -- Returns:
 --   A **sequence** of all values stored in ##the_map##.
 --
 -- Comments:
---   The order of the values returned may not be the same as the putting order. 
---   Duplicate values are not removed.
---
---   If specifying keys, then the return order is that of the keys sequence. If
---   no default values are given and one is needed, 0 will be used.
+--   * The order of the values returned may not be the same as the putting order. 
+--   * Duplicate values are not removed.
+--   * You use the ##keys## parameter to return a specific set of values from
+--     the map. They are returned in the same order as the ##keys## parameter. If
+--     no ##default_values## is given and one is needed, 0 will be used.
+--   * If ##default_values## is an atom, it represents the default value for all
+--     values in ##keys##.
+--   * If ##default_values## is a sequence, and its length is less than ##keys##,
+--     then the last item in ##default_values## is used for the rest of the ##keys##.
 --
 -- Example 1:
 --   <eucode>
@@ -1188,17 +1196,22 @@ end function
 --   put(the_map_p, 40, "forty")
 --
 --   sequence values
---   values = values(the_map_p, { 10, 30, 9000 })
---   -- values WILL be { "ten", "thirty", 0 }
+--   values = values(the_map_p, { 10, 50, 30, 9000 })
+--   -- values WILL be { "ten", 0, "thirty", 0 }
+--   values = values(the_map_p, { 10, 50, 30, 9000 }, {-1,-2,-3,-4})
+--   -- values WILL be { "ten", -2, "thirty", -4 }
 --   </eucode>
 --
 -- See Also:
 --   [[:get]], [[:keys]], [[:pairs]]
 
 public function values(map the_map, object keys=0, object default_values=0)
+
 	if sequence(keys) then
-		if not sequence(default_values) then
-			default_values = repeat(0, length(keys))
+		if atom(default_values) then
+			default_values = repeat(default_values, length(keys))
+		elsif length(default_values) < length(keys) then
+			default_values &= repeat(default_values[$], length(keys) - length(default_values))
 		end if
 
 		for i = 1 to length(keys) do
@@ -1216,11 +1229,11 @@ public function values(map the_map, object keys=0, object default_values=0)
 	
 	temp_map_ = ram_space[the_map]
 
-	results_ = repeat(0, temp_map_[element_count])
+	results_ = repeat(0, temp_map_[ELEMENT_COUNT])
 	pos_ = 1
 
-	if temp_map_[map_type] = LARGEMAP then
-		buckets_ = temp_map_[value_buckets]
+	if temp_map_[MAP_TYPE] = LARGEMAP then
+		buckets_ = temp_map_[VALUE_BUCKETS]
 		for index = 1 to length(buckets_) do
 			bucket_ = buckets_[index]
 			if length(bucket_) > 0 then
@@ -1229,9 +1242,9 @@ public function values(map the_map, object keys=0, object default_values=0)
 			end if
 		end for
 	else
-		for index = 1 to length(temp_map_[free_list]) do
-			if temp_map_[free_list][index] !=  0 then
-				results_[pos_] = temp_map_[value_list][index]
+		for index = 1 to length(temp_map_[FREE_LIST]) do
+			if temp_map_[FREE_LIST][index] !=  0 then
+				results_[pos_] = temp_map_[VALUE_LIST][index]
 				pos_ += 1
 			end if
 		end for
@@ -1246,14 +1259,16 @@ end function
 -- Return all key/value pairs in a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map being queried
+--		# ##the_map_p##: the map to get the data from
+--      # ##sorted_result##: optional integer. 0 [default] means do not sort the
+--                            output and 1 means to sort the output before returning.
 --
 -- Returns:
 --		A **sequence** of all key/value pairs stored in ##the_map_p##. Each pair is a 
 -- sub-sequence in the form {key, value}
 --
 -- Comments:
---   The order of the values returned may not be the same as the putting order. 
+--   If ##sorted_result## is not used, the order of the values returned is not predicable. 
 --
 -- Example 1:
 --   <eucode>
@@ -1266,10 +1281,11 @@ end function
 --
 --   sequence keyvals
 --   keyvals = pairs(the_map_p) -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
+--   keyvals = pairs(the_map_p, 1) -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
 --   </eucode>
  -- See Also:
  --		[[:get]], [[:keys]], [[:values]]
-public function pairs(map the_map_p)
+public function pairs(map the_map_p, integer sorted_result = 0)
 	sequence key_bucket_
 	sequence value_bucket_
 	sequence results_
@@ -1278,13 +1294,13 @@ public function pairs(map the_map_p)
 	
 	temp_map_ = ram_space[the_map_p]
 
-	results_ = repeat({0,0}, temp_map_[element_count])
+	results_ = repeat({0,0}, temp_map_[ELEMENT_COUNT])
 	pos_ = 1
 
-	if temp_map_[map_type] = LARGEMAP then
-		for index = 1 to length(temp_map_[key_buckets]) do
-			key_bucket_ = temp_map_[key_buckets][index]
-			value_bucket_ = temp_map_[value_buckets][index]
+	if temp_map_[MAP_TYPE] = LARGEMAP then
+		for index = 1 to length(temp_map_[KEY_BUCKETS]) do
+			key_bucket_ = temp_map_[KEY_BUCKETS][index]
+			value_bucket_ = temp_map_[VALUE_BUCKETS][index]
 			for j = 1 to length(key_bucket_) do
 				results_[pos_][1] = key_bucket_[j]
 				results_[pos_][2] = value_bucket_[j]
@@ -1292,16 +1308,20 @@ public function pairs(map the_map_p)
 			end for
 		end for
 	else
-		for index = 1 to length(temp_map_[free_list]) do
-			if temp_map_[free_list][index] !=  0 then
-				results_[pos_][1] = temp_map_[key_list][index]
-				results_[pos_][2] = temp_map_[value_list][index]
+		for index = 1 to length(temp_map_[FREE_LIST]) do
+			if temp_map_[FREE_LIST][index] !=  0 then
+				results_[pos_][1] = temp_map_[KEY_LIST][index]
+				results_[pos_][2] = temp_map_[VALUE_LIST][index]
 				pos_ += 1
 			end if
 		end for
 		
 	end if
-	return results_
+	if sorted_result then
+		return sort(results_)
+	else
+		return results_
+	end if
 end function
 
 --**
@@ -1329,7 +1349,7 @@ public procedure optimize(map the_map_p, integer max_p = 25, atom grow_p = 1.333
 	sequence stats_
 	integer next_guess_
 	
-	if ram_space[the_map_p][map_type] = LARGEMAP then
+	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
 		if grow_p < 1 then
 			grow_p = 1.333
 		end if
@@ -1337,7 +1357,7 @@ public procedure optimize(map the_map_p, integer max_p = 25, atom grow_p = 1.333
 			max_p = 3
 		end if
 		
-		next_guess_ = max({1, floor(ram_space[the_map_p][element_count] / max_p)})
+		next_guess_ = max({1, floor(ram_space[the_map_p][ELEMENT_COUNT] / max_p)})
 		while 1 with entry do
 		
 			if stats_[LARGEST_BUCKET] <= max_p then
@@ -1605,12 +1625,15 @@ end function
 -- Duplicates a map.
 --
 -- Parameters:
---   # ##source_map##: map to duplicate
---   # ##dest_map##: optional map to duplicate to
+--   # ##source_map##: map to copy from
+--   # ##dest_map##: optional, map to copy to
+--   # ##put_operation##: optional, operation to use when ##dest##map## is used.
+--                         The default is PUT.
 --
 -- Returns:
---   If ##dest_map## was not provided, a duplicate of ##source_map## otherwise
---   ##dest_map## is returned with the new values copied from ##source_map##.
+--   If ##dest_map## was not provided, an exact duplicate of ##source_map## otherwise
+--   ##dest_map##, which does not have to be empty, is returned with the
+--   new values copied from ##source_map##, according to the ##put_operation## value.
 --
 -- Example 1:
 --   <eucode>
@@ -1637,27 +1660,65 @@ end function
 --
 --   put(m1, 1, "one")
 --   put(m1, 2, "two")
+--   put(m2, 3, "three")
 --
 --   copy(m1, m2)
---   put(m2, 3, "three")
 --
 --   ? keys(m2)
 --   -- { 1, 2, 3 }
 --   </eucode>
 --
+-- Example 3:
+--   <eucode>
+--   map m1 = new()
+--   map m2 = new()
+--
+--   put(m1, "XY", 1)
+--   put(m1, "AB", 2)
+--   put(m2, "XY", 3)
+--
+--   ? pairs(m1)  -- { {"AB", 2}, {"XY", 1} }
+--   ? pairs(m2)  -- { {"XY", 3} }
+--
+--   -- Add same keys' values.
+--   copy(m1, m2, ADD)
+--
+--   ? pairs(m2)
+--   -- { {"AB", 2}, {"XY", 4} }
+--   </eucode>
+--
+-- See Also:
+-- [[:put]]
 
-public function copy(map source_map, object dest_map=0)
-	atom temp_map = malloc()
+public function copy(map source_map, object dest_map=0, integer put_operation = PUT)
 
 	if map(dest_map) then
-		-- TODO: a better (internal) way of doing this?
-		sequence source_keys = keys(source_map)
-		for i = 1 to length(source_keys) do
-			put(dest_map, source_keys[i], get(source_map, source_keys[i]))
-		end for
+		-- Copies the contents of one map to another map.
+		sequence keys_set
+		sequence value_set		
+		sequence source_data
+		
+		source_data = ram_space[source_map]	
+		if source_data[MAP_TYPE] = LARGEMAP then
+			for index = 1 to length(source_data[KEY_BUCKETS]) do
+				keys_set = source_data[KEY_BUCKETS][index]
+				value_set = source_data[VALUE_BUCKETS][index]
+				for j = 1 to length(keys_set) do
+					put(dest_map, keys_set[j], value_set[j], put_operation)
+				end for
+			end for
+		else
+			for index = 1 to length(source_data[FREE_LIST]) do
+				if source_data[FREE_LIST][index] !=  0 then
+					put(dest_map, source_data[KEY_LIST][index], source_data[VALUE_LIST][index], put_operation)
+				end if
+			end for
+			
+		end if
 
 		return dest_map
 	else
+		atom temp_map = malloc()
 	 	ram_space[temp_map] = ram_space[source_map]
 		return temp_map
 	end if
@@ -1669,14 +1730,14 @@ procedure convert_to_large_map(map the_map_)
 	atom map_handle_
 
 	temp_map_ = ram_space[the_map_]
-	if temp_map_[map_type] = LARGEMAP then
+	if temp_map_[MAP_TYPE] = LARGEMAP then
 		return 
 	end if
 	
 	map_handle_ = new()
-	for index = 1 to length(temp_map_[free_list]) do
-		if temp_map_[free_list][index] !=  0 then
-			put(map_handle_, temp_map_[key_list][index], temp_map_[value_list][index])
+	for index = 1 to length(temp_map_[FREE_LIST]) do
+		if temp_map_[FREE_LIST][index] !=  0 then
+			put(map_handle_, temp_map_[KEY_LIST][index], temp_map_[VALUE_LIST][index])
 		end if
 	end for
 
@@ -1688,7 +1749,7 @@ procedure convert_to_small_map(map the_map_)
 	sequence keys_
 	sequence values_
 
-	if ram_space[the_map_][map_type] = SMALLMAP then
+	if ram_space[the_map_][MAP_TYPE] = SMALLMAP then
 		return
 	end if
 	keys_ = keys(the_map_)

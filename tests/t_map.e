@@ -27,7 +27,7 @@ test_equal("map m1 get 8",              999, map:get(m1,  8, 999) )
 test_equal("map m1 get -199999999999",  "abc",  map:get(m1, -199999999999, "abc"))
 test_equal("map m1 get \"XXXXXXXXXX\"", 999,    map:get(m1, "XXXXXXXXXX", 999))
 test_equal("map m1 size#1", 11, map:size(m1))
-test_equal("map m1 keys", {-5,-4,-3,-2,-1,0,1,2,3,4,5}, sort(map:keys(m1)) )
+test_equal("map m1 keys", {-5,-4,-3,-2,-1,0,1,2,3,4,5}, map:keys(m1, 1) )
 
 test_true ("map m1 has #1", map:has(m1, 0))
 test_false("map m1 has #2", map:has(m1, 9999))
@@ -203,7 +203,7 @@ test_equal("nested #4", -1, nested_get(city_population, {"United States", "Calif
 
 map:map m6
 m6 = nested_get(city_population, {"Canada"}, -1)
-test_equal("nested #5", {"Ontario", "Quebec"}, sort(keys(m6)))
+test_equal("nested #5", {"Ontario", "Quebec"}, keys(m6, 1))
 
 
 map:map m7 = new_extra( "TOTAL RUBBISH" )
@@ -253,9 +253,10 @@ map:put(m1, 20, "twenty")
 map:put(m1, 30, "thirty")
 map:put(m1, 40, "forty")
 
-test_equal("values w/key sequence #1", { "ten", "thirty" }, map:values(m1, { 10, 30 }))
-test_equal("values w/key sequence #2",
-	{ 0, 0 }, map:values(m1, { 0, 1 }))
+test_equal("values w/key sequence #1a", { "ten", 0, "thirty", 0 }, map:values(m1, { 10, 50, 30, 9000 }))
+test_equal("values w/key sequence #1b", { "ten", -1, "thirty", -1 }, map:values(m1, { 10, 50, 30, 9000 }, -1))
+test_equal("values w/key sequence #1c", { "ten", -2, "thirty", -3 }, map:values(m1, { 10, 50, 30, 9000 }, {-1,-2,-3}))
+test_equal("values w/key sequence #2",	{ 0, 0 }, map:values(m1, { 2, 1 }))
 test_equal("values w/key sequence and default value sequence #1",
 	{ "ten", "one", "thirty" }, map:values(m1, { 10, 1, 30 }, { "abc", "one", "def" }))
 
@@ -279,6 +280,18 @@ test_equal("copy w/destination #1", "ten", map:get(m2, 10))
 test_equal("copy w/destination #2", "twenty", map:get(m2, 20))
 test_equal("copy w/destination #3", "thirty", map:get(m2, 30))
 test_equal("copy w/destination #4", "forty", map:get(m2, 40))
+
+map cm1 = new()
+map cm2 = new()
+
+put(cm1, "XY", 1)
+put(cm1, "AB", 2)
+put(cm2, "XY", 3)
+
+-- Add same keys' values.
+copy(cm1, cm2, ADD)
+
+test_equal("copy w/destinaion ADD", { {"AB", 2}, {"XY", 4} }, pairs(cm2, 1))
 
 --
 -- Done with testing
