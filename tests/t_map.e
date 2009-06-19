@@ -242,5 +242,18 @@ map:put(m2, 511, 511)
 test_equal("compare inequality #1", -1, map:compare(m2, m1))
 test_equal("compare inequality #2", -1, map:compare(m1, m2))
 
+clear(m1)
+
+map:put(m1, 10, "ten")
+map:put(m1, 20, "twenty")
+map:put(m1, 30, "thirty")
+map:put(m1, 40, "forty")
+
+test_equal("values w/key sequence #1", { "ten", "thirty" }, map:values(m1, { 10, 30 }))
+test_equal("values w/key sequence #2",
+	{ 0, 0 }, map:values(m1, { 0, 1 }))
+test_equal("values w/key sequence and default value sequence #1",
+	{ "ten", "one", "thirty" }, map:values(m1, { 10, 1, 30 }, { "abc", "one", "def" }))
+
 test_report()
 

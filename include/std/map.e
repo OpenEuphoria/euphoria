@@ -1146,18 +1146,22 @@ public function keys(map the_map_p)
 end function
 
 --**
---
 -- Return all values in a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map being queried
+--   # ##the_map##: the map being queried
+--   # ##keys##: optional key list of values to return
+--   # ##default_values##: optional default values for keys list
 --
 -- Returns:
---		A **sequence** of all values stored in ##the_map_p##.
+--   A **sequence** of all values stored in ##the_map##.
 --
 -- Comments:
 --   The order of the values returned may not be the same as the putting order. 
 --   Duplicate values are not removed.
+--
+--   If specifying keys, then the return order is that of the keys sequence. If
+--   no default values are given and one is needed, 0 will be used.
 --
 -- Example 1:
 --   <eucode>
@@ -1169,19 +1173,48 @@ end function
 --   put(the_map_p, 40, "forty")
 --
 --   sequence values
---   values = values(the_map_p) -- values might be {"twenty","forty","ten","thirty"} 
---    or some other order
+--   values = values(the_map_p)
+--   -- values might be {"twenty","forty","ten","thirty"}
+--   -- or some other order
 --   </eucode>
- -- See Also:
- --		[[:get]], [[:keys]], [[:pairs]]
-public function values(map the_map_p)
+--
+-- Example 2:
+--   <eucode>
+--   map the_map_p
+--   the_map_p = new()
+--   put(the_map_p, 10, "ten")
+--   put(the_map_p, 20, "twenty")
+--   put(the_map_p, 30, "thirty")
+--   put(the_map_p, 40, "forty")
+--
+--   sequence values
+--   values = values(the_map_p, { 10, 30, 9000 })
+--   -- values WILL be { "ten", "thirty", 0 }
+--   </eucode>
+--
+-- See Also:
+--   [[:get]], [[:keys]], [[:pairs]]
+
+public function values(map the_map, object keys=0, object default_values=0)
+	if sequence(keys) then
+		if not sequence(default_values) then
+			default_values = repeat(0, length(keys))
+		end if
+
+		for i = 1 to length(keys) do
+			keys[i] = get(the_map, keys[i], default_values[i])
+		end for
+
+		return keys
+	end if
+
 	sequence buckets_
 	sequence bucket_
 	sequence results_
 	integer pos_
 	sequence temp_map_
 	
-	temp_map_ = ram_space[the_map_p]
+	temp_map_ = ram_space[the_map]
 
 	results_ = repeat(0, temp_map_[element_count])
 	pos_ = 1
@@ -1204,6 +1237,7 @@ public function values(map the_map_p)
 		end for
 		
 	end if
+
 	return results_
 end function
 
