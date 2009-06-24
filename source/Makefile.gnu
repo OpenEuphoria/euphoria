@@ -40,6 +40,13 @@
 #   Run Unit Tests            :  make test
 #   Run Unit Tests for DJGPP  :  make test-djgpp
 #   Run Unit Tests with eu.ex :  make testeu
+#
+# In order to achieve compatibility amoung 9 platforms
+# please follow these Code standards:
+# No line may exceed some hard limit (thanks to djgpp tools) I believe it to be around 140.  
+# If you find you are getting error 1 messages that worked in other OSes but not DJGPP that may
+# the reason why.  You may not use && || in the Makefile (also thanks to djgpp tools)
+
 
 ifndef CONFIG
 CONFIG = Makefile.eu
@@ -483,16 +490,18 @@ $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
 
 ifneq	"$(HASCHANGEDDIRECTORY)" "1"
+
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	cp Makefile Makefile.gnu $(CONFIG) revget.ex $(BUILDDIR)/$(OBJDIR)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
-	$(MAKE) translate-here -k -C $(BUILDDIR)/$(OBJDIR) EU_TARGET=$(EU_TARGET) SHELL=$(SHELL) CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 
+	$(MAKE) translate-here -k -C $(BUILDDIR)/$(OBJDIR) EU_TARGET=$(EU_TARGET) SHELL=$(SHELL) CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 EXE=$(EXE)
 endif
 
 ifeq "$(HASCHANGEDDIRECTORY)" "1"
+
 translate-here :
-	$(EXE) $(TRUNKDIR)/source/ec.ex -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT) $(TRUNKDIR)/source/$(EU_TARGET)
+	$(EUBIN)\euc.exe -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) 
 
 .PHONY : translate-here
 	
@@ -510,5 +519,5 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
-	$(MAKE) -C pcre all EOSTYPE=$(EOSTYPE) CONFIG=../$(CONFIG)
+	$(MAKE) -C pcre all EOSTYPE="$(EOSTYPE)" CONFIG=../$(CONFIG)
 endif

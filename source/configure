@@ -33,6 +33,7 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo ELINUX= >> "$PREFIX"Makefile.eu
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
+	echo SHELL=bash >> "$PREFIX"Makefile.eu
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu

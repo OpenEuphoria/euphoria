@@ -2686,8 +2686,9 @@ unsigned int calc_adler32(object a)
 }
 
 // hsieh32 hash is Copyright 2004-2008 by Paul Hsieh , http://www.azillionmonkeys.com/qed/hash.html
-
+#ifndef EDJGPP
 #include "stdint.h"
+#endif
 #undef get16bits
 #if defined(__X86__) || defined(__i386__)
 #define get16bits(d) (*((const uint16_t *) (d)))

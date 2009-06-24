@@ -387,24 +387,25 @@ translate : .SYMBOLIC translate-win translate-dos
 testeu : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUBIN)\eui.exe ..\source\eutest.ex -i ..\include -cc wat -exe "$(FULLBUILDDIR)\eui.exe $(TRUNKDIR)\source\eu.ex"
+	..\bin\eutest.exe -i ..\include -cc wat -exe "$(FULLBUILDDIR)\eui.exe $(TRUNKDIR)\source\eu.ex"
 	cd ..\source
+
+!endif #EUPHORIA
 
 testwin : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUBIN)\eui.exe ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.lib
+	..\bin\eutest.exe -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.lib
 	cd ..\source
 
 testdos : .SYMBOLIC dos
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	$(EUBIN)\euid.exe ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\euid.exe -ec $(FULLBUILDDIR)\eucd.exe -lib $(FULLBUILDDIR)\eud.lib
+	..\bin\eutest.exe -i ..\include -cc wat -exe $(FULLBUILDDIR)\euid.exe -ec $(FULLBUILDDIR)\eucd.exe -lib $(FULLBUILDDIR)\eud.lib
 	cd ..\source
 	
 test : .SYMBOLIC testwin testdos
-
-!endif #EUPHORIA	
+	
 
 !ifdef BUILD_TOOLS
 $(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr\main-.c $(BUILDDIR)\eutestdr.wat $(BUILDDIR)\eu.lib $(BUILDDIR)\eutestdr
