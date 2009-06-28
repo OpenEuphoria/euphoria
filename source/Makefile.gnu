@@ -400,13 +400,12 @@ endif
 
 test :  
 ifeq "$(EDJGPP)" "1"
-ifneq "$(HASCHANGEDDIRECTORY)" "1"
 	cp $(CONFIG) revget.ex ../tests
-	export EUCOMPILEDIR=$(TRUNKDIR)
-	$(MAKE) -k -C ../tests -f ../source/Makefile EUCOMPILEDIR=.. CONFIG=$(CONFIG) HASCHANGEDDIRECTORY=1 test   
-else
-	$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
-endif
+	export EUCOMPILEDIR=$(TRUNKDIR)	
+	export C_INCLUDE_PATH=$(TRUNKDIR):..
+	export LIBRARY_PATH=$(%LIBRARY_PATH)
+	wmake -f makefile.wat testdos CCOM=gcc LIBEXT=a
+	#cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 else # Not DJGPP:
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif

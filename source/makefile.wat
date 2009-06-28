@@ -71,6 +71,14 @@ CONFIG=config.wat
 !endif
 !include $(CONFIG)
 
+!ifndef CCOM
+CCOM=wat
+!endif
+
+!ifndef LIBEXT
+LIBEXT=lib
+!endif
+
 BASEPATH=$(BUILDDIR)\pcre
 !include pcre\objects.wat
 !include $(TRUNKDIR)\source\version.mak
@@ -395,13 +403,13 @@ testeu : .SYMBOLIC
 testwin : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	..\bin\eutest.exe -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.lib
+	$(EXE) ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT)
 	cd ..\source
 
-testdos : .SYMBOLIC dos
+testdos : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	..\bin\eutest.exe -i ..\include -cc wat -exe $(FULLBUILDDIR)\euid.exe -ec $(FULLBUILDDIR)\eucd.exe -lib $(FULLBUILDDIR)\eud.lib
+	$(EXE) ..\source\eutest.ex -i ..\include -cc $(CCOM) -exe $(FULLBUILDDIR)\euid.exe -ec $(FULLBUILDDIR)\eucd.exe -lib $(FULLBUILDDIR)\eud.$(LIBEXT)
 	cd ..\source
 	
 test : .SYMBOLIC testwin testdos

@@ -1,3 +1,4 @@
+INSTALATION:
 
 Get the following packages:
 http://www.delorie.com/pub/djgpp/current/v2gnu/
@@ -8,19 +9,63 @@ shl2011b, bsh204b, grep253b, sed415b, txt20b
 these for debugging:
 gdb611b, faq230b, txi412b,
 
-Make sure an existing 4.0 alpha or higher version of EUPHORIA is the 
-first one in your path then issue the following command line in the source sub 
-directory adjusting your particular paths:
-bash configure --managed-mem --debug --build ../build/djgpp-managed-mem-debug
-set PATH=f:\modbin;e:\djgpp\bin;%PATH%
-f:
-cd \eumod\source
-e:\djgpp\bin\make SHELL=e:\djgpp\bin\sh.exe EXE=/modbin/eui.exe
+Make a directory for the root for these files.  It could be
+c:\djgpp.  Into here you can uncompress each archive contents.
+Many archives will have the same directory names inside.  
+This is normal, allow these directories to merge.
+If you use c:\djgpp for this purpose the binaries will be
+located in c:\djgpp\bin.  This should go into your path.
 
-For configure you can use any combination of --full, --managed-mem, and --debug
-Only the value passed to the variable SHELL and the invocation of make itself 
-can and must use backslashes.  Yet anything else you pass to configure or make 
-must use forward slashes.  I haven't had any success invoking make from sh.exe 
-on djgpp.
+Make sure your djgpp's toolkit, including make, bash and others are in your path.
+That is c:\djgpp\bin should be in your PATH environment variable.  These are
+seperated with semicolons as with any other DOS program.  Inside bash these
+are translated to colons.  Set C_INCLUDE_PATH to include your EUPHORIA checkout
+and the include file in your djgpp hierarchy like this:
 
+set C_INCLUDE_PATH=C:\DJGPP\INCLUDE;C:\EUPHORIA
+set LIBRARY_PATH=C:\DJGPP\LIB
 
+directory that corresponds to 'trunk'.
+Issue:
+
+make -v
+
+at the command line.  If you get an error message there is no make in your path
+and you will need to fix that.  Other utilities you can check in a similar manner.
+You might need to issue something like 'PATH=c:\djgpp\bin;%PATH%' at the command-line.
+
+Make sure the directory containing the binaries from a late alpha of 4.0 is near the
+beginning of your PATH variable.  Issue:  
+
+eui --version
+
+at the command line.  If the version is rather old.  You might need to add the path 
+to the EUPHORIA binaries in a similiar way you did with the djgpp toolkit binaries.
+
+BUILDING
+
+Now change to the source directory from the trunk of your checked out source and issue
+the following two commands:
+
+bash configure
+make
+
+For configure you can use any or all of the options that you have on the UNIX platforms.
+When using options such as --eubin or --build you must use path and filename conventions 
+for djgpp:  ([a-z]:)?(/[a-z_1-9A-Z+]*)+ . Any path information you pass to configure 
+must use forward slashes.  The following are examples valid forms of file paths under djgpp:
+
+c:/euphoria/
+/source/euphoria
+/build/euphoria
+
+Now before you test, run configure.bat with the
+same arguments you used to run configure but with
+using MS-DOS back-slashes instead of forward-slashes.  
+
+Once this is done issue:
+
+make test
+
+this should run the unit tests.  Right now, you need to have Watcom C instelled for the tests to work.
+Please go ahead if you can make it work without-Watcom's help if you are so inclinded.

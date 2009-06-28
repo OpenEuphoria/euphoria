@@ -18,10 +18,12 @@ include std/text.e
 include std/math.e
 include std/search.e  as search
 include std/error.e as e
+
 ifdef DOS32 then
 	include std/text.e
 end ifdef
 
+constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
 object void
 integer ctcfh = 0
@@ -145,9 +147,9 @@ function invoke(sequence cmd, sequence filename, integer err)
 	delete_file("ex.err")
 
 	status = system_exec(cmd, 2)
-	if status = -1073741510 then -- TODO: Status -1073741510 ?!
+	if find(status, USER_BREAK_EXIT_CODES) > 0 then
 		-- user break
-		abort(1)
+		abort(status)
 	end if
 
 	sleep(0.1)

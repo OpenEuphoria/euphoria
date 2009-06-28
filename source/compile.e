@@ -7160,6 +7160,7 @@ procedure BackEnd(atom ignore)
 			c_printf("%d()\n", init_name_num)
 			c_stmt0("{\n")
 			c_stmt0("extern double sqrt();\n")
+			c_stmt0("extern unsigned char *string_ptr;\n")
 			init_name_num += 1
 			tp_count = 0
 		end if

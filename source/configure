@@ -34,6 +34,7 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
 	echo SHELL=bash >> "$PREFIX"Makefile.eu
+	cp Makefile.gnu "$PREFIX"../tests/Makefile.gnu
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
 	echo EOSX= >> "$PREFIX"Makefile.eu
