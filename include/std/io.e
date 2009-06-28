@@ -1219,11 +1219,7 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	integer temp
 
 	if sequence(file) then
-		if as_text != BINARY_MODE then
-			fn = open(file, "r")
-		else
-			fn = open(file, "rb")
-		end if
+		fn = open(file, "rb")
 	else
 		fn = file
 	end if
@@ -1243,8 +1239,23 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	end if
 
 	if as_text != BINARY_MODE then
-		-- Just in case we added a few 'eof' chars at the end.
-		ret = trim_tail(ret, -1)
+		fn = find(26, ret) -- Any Ctrl-Z found?
+		if fn then
+			-- Ok, so truncate the file data
+			ret = ret[1 .. fn - 1]
+		end if
+		
+		-- Convert DOS endings
+		ret = replace_all(ret, {13,10}, {10})
+		-- Convert MAC endings
+		ret = replace_all(ret, {13}, {10})
+		if length(ret) > 0 then
+			if ret[$] != 10 then
+				ret &= 10
+			end if
+		else
+			ret = {10}
+		end if
 	end if
 	
 	return ret
@@ -1277,8 +1288,10 @@ end function
 --		If [[:puts]] cannot write ##data##, a runtime error will occur.
 --
 -- Comments:
--- When ##file## is a file handle, the file is not closed after writing is finished. When ##file## is a
+-- * When ##file## is a file handle, the file is not closed after writing is finished. When ##file## is a
 -- file name, it is opened, written to and then closed.
+-- * Note that when writing the file in ony of the text modes, the file is truncated
+-- at the first Ctrl-Z character in the input data.
 --
 -- Example 1:
 -- <eucode>
@@ -1293,24 +1306,44 @@ end function
 public function write_file(object file, sequence data, integer as_text = BINARY_MODE)
 	integer fn
 
+	if as_text != BINARY_MODE then
+		-- Truncate at first Ctrl-Z
+		fn = find(26, data)
+		if fn then
+			data = data[1 .. fn-1]
+		end if
+		-- Ensure last line has a line-end marker.
+		if length(data) > 0 then
+			if data[$] != 10 then
+				data &= 10
+			end if
+		else
+			data = {10}
+		end if
+		
+		if as_text = TEXT_MODE then
+			-- Standardize all line endings
+			data = replace_all(data, {13,10}, {10})
+			data = replace_all(data, {13}, {10})
+			
+		elsif as_text = UNIX_TEXT then
+			data = replace_all(data, {13,10}, {10})
+				
+		elsif as_text = DOS_TEXT then
+			data = replace_all(data, {13,10}, {10})
+			data = replace_all(data, {10}, {13,10})
+			
+		elsif as_text = OSX_TEXT then
+			data = replace_all(data, {13,10}, {10})
+			data = replace_all(data, {10}, {13})
+		end if
+	end if
+		
 	if sequence(file) then
 		if as_text = TEXT_MODE then
 			fn = open(file, "w")
-			data = replace_all(data, {13,10}, {10})
-			data = replace_all(data, {13}, {10})
 		else
 			fn = open(file, "wb")
-			if as_text = UNIX_TEXT then
-				data = replace_all(data, {13,10}, {10})
-				
-			elsif as_text = DOS_TEXT then
-				data = replace_all(data, {13,10}, {10})
-				data = replace_all(data, {10}, {13,10})
-				
-			elsif as_text = OSX_TEXT then
-				data = replace_all(data, {13,10}, {10})
-				data = replace_all(data, {10}, {13})
-			end if
 		end if
 	else
 		fn = file
