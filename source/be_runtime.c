@@ -624,7 +624,17 @@ static void SimpleRTFatal(char *msg, va_list ap)
 /* Fatal errors for translated code */
 {
 	va_list aq;
-	va_copy (aq, ap);
+#	ifdef va_copy	
+		va_copy(aq, ap);
+#	else
+#		ifdef EDJGPP 		
+			aq = ap;
+#		else
+			/* Syntax error here is on purpose.  We need to handle the case here that 
+			 * va_copy() is missing differently for each compiler. */
+			va_copy(aq, ap);
+#		endif			
+#	endif		
 
 	if (crash_msg == NULL || crash_count > 0) {
 		screen_output(stderr, "\nFatal run-time error:\n");
