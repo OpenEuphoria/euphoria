@@ -83,10 +83,10 @@ test_equal("read file text #1", testdata_unix, read_file("filec.txt", TEXT_MODE)
 write_file("filec.txt", testdata_raw, TEXT_MODE) -- Write out as current o/s text data.
 ifdef DOSFAMILY then
 	test_equal("read file binary #2", testdata_dos, read_file("filec.txt", BINARY_MODE))
-elsifdef UNIX
-	test_equal("read file binary #2", testdata_unix, read_file("filec.txt", BINARY_MODE))
 elsifdef OSX
 	test_equal("read file binary #2", testdata_osx, read_file("filec.txt", BINARY_MODE))
+elsifdef UNIX
+	test_equal("read file binary #2", testdata_unix, read_file("filec.txt", BINARY_MODE))
 end ifdef
 test_equal("read file text #2", testdata_unix, read_file("filec.txt", TEXT_MODE))
 
