@@ -1570,7 +1570,7 @@ export procedure eu_namespace()
 	SymTab[eu_ns][S_SCOPE] = SC_GLOBAL
 end procedure
 
-export function StringToken()
+export function StringToken(sequence pDelims = "")
 -- scans until blank, tab, end of line, or end of file. 
 -- returns a raw string - leading whitespace ignored, 
 -- comment chopped off.
@@ -1584,8 +1584,9 @@ export function StringToken()
 		ch = getch()
 	end while
 
+	pDelims &= {' ', '\t', '\n', '\r', END_OF_FILE_CHAR}
 	gtext = ""
-	while not find(ch,  {' ', '\t', '\n', '\r', END_OF_FILE_CHAR}) do 
+	while not find(ch,  pDelims) do 
 		gtext &= ch
 		ch = getch()
 	end while
@@ -1593,7 +1594,8 @@ export function StringToken()
 	m = match("--", gtext)
 	if m then
 		gtext = gtext[1..m-1]
-		if ch = ' ' or ch = '\t' then
+		if find(ch, pDelims[1..$-3]) then
+			-- Not at end of current line, so eat the rest of the line.
 			read_line()
 		end if
 	end if

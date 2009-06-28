@@ -1503,33 +1503,52 @@ See [[:Dynamic Routine Calling]] for more details.
 
 ==== Defining the scope of an identifier
 
-An identifier is defined from the point where it is declared to
-the end of its scope.  The scope of the variable depends upon where it is
-declared.  If it is within a **for**, **while**, **loop** or **switch**, its scope ends
-at the respective end statement.  In an **if** statement, the scope ends either
-at the next **else**, **elsif** or **end if** statement.  If a variable is declared
-within a routine, but not within one of the structures listed above, the scope of
-the variable ends at the routine's **end** statement.
+The scope of an identifier is a description of what code can 'access' it. Code in
+the same scope of an identifier can access that identifier and code not in the 
+same scope cannot access it. 
 
-The scope of all other variables, constants, procedures, functions and types
-ends at the end of the source file in which they are declared and they are
-referred to as **local**, unless a scope keyword is used before the declaration:
-* If the keyword **global** precedes the declaration,
-the scope of the identifier extends indefinitely;
-* If the keyword **public** or **export** precedes the declaration, the scope extends to any file that
+The scope of a **variable** depends upon where and how it is declared.  
+* If it is declared within a ##**for**##, ##**while**##, ##**loop**## or ##**switch**##, its scope 
+starts at the declaration and ends at the respective ##**end**## statement.  
+* In an ##**if**## statement, the scope starts at the declaration and ends either
+at the next ##**else**##, ##**elsif**## or ##**end if**## statement.  
+* If a variable is declared within a routine (known as a private variable) and outside one of the structures listed above, the scope of
+the variable starts at the declaration and ends at the routine's ##**end**## statement.
+* If a variable is declared outside of a routine (known as a module variable), and does not have a scope modifier, its
+scope starts at the declaration and ends and the end of the file it is declared in.
+
+The scope of a **constant** that does not have a scope modifier, starts at the 
+declaration and ends and the end of the file it is declared in.
+
+The scope of a **enum** that does not have a scope modifier, starts at the 
+declaration and ends and the end of the file it is declared in.
+
+The scope of all **procedures**, **functions** and **types**, which do not have a scope modifier,
+starts at the begining of the source file and ends at the end of the source file
+in which they are declared. In other words, these can be accessed by any code in the
+same file.
+
+Constants, enums, module variables, procedures, functions and types, which do not have a scope modifier
+are referred to as **local**. However, these identifiers can have a scope modifier preceding
+their declaration, which causes their scope to extend beyond the file they are declared in.
+* If the keyword **global** precedes the declaration, the scope of these identifiers
+extends to the whole application. They can be accessed by code anywhere in the application
+files.
+* If the keyword **public** precedes the declaration, the scope extends to any file that
+explicitly includes the file in which the identifier is declared, or to any file that
+includes a file that in turn ##public include##s the file containing the ##public## declaration.
+* If the keyword **export** precedes the declaration, the scope only extends to any file that
 directly includes the file in which the identifier is declared.
 
-When you **[[:include]]** a Euphoria file in another file, only the variables
-and routines declared using the **override**, **global**, **public** or **export** keywords are
-accessible or even visible to the file. The other, non-global, non-exported declarations
-in the included file are forgotten at the end of the included file, and you
-will get an error message, "not declared", if you try to use them in the main
-file. There is one variant of the **include** statement, called **public include**, which
+When you **[[:include]]** a Euphoria file in another file, only the identifiers
+declared using a scope modifier are accessible to the file doing the include. The other declarations
+in the included file are invisible to the file doing the include, and you
+will get an error message, "##Errors resolving the following references##", if you try to use them.
+
+There is a variant of the **include** statement, called **public include**, which
 will be discussed later and behaves differently on **public** symbols.
 
-**Constant** or **enum** declarations must be outside of any subroutine.
-Constants or enums (a concise way of declaring a group of related constants) can be global,
-public, export or local, but not **private**.
+Note that **constant** and **enum** declarations must be outside of any subroutine.
 
 Euphoria encourages you to restrict the scope of identifiers. If all identifiers were
 automatically global to the whole program, you might have a lot of naming
@@ -1567,7 +1586,7 @@ bar() -- error! bar() is not declared here
 Why not declare ##foo()## as global, as it is meant to be used anywhere? Well, one could, but this
 will increase the risks of name conflicts. This is why, for instance, all
 public identifiers from the standard library have **public** scope. **global** should be used
-parsimoniously, if ever. Because earlier versions of Euphoria didn't have **public** or **export**, it has
+rarely, if ever. Because earlier versions of Euphoria didn't have **public** or **export**, it has
 to remain there for a while. One should be very sure of not polluting any foreign file's
 symbol table before using **global** scope{{{--}}}which is what a large part of the Euphoria source
 files do. Built-in identifiers act as if declared as **global**{{{--}}}but they are not declared in any
@@ -1575,18 +1594,22 @@ Euphoria coded file.
 
 ==== Using namespaces
 
-Identifiers marked as ##global##, ##public## or ##export## can be used externally. All other identifiers
-can only be used within their own file. This information is helpful when
-maintaining or enhancing the file, or when learning how to use the file. You
-can make changes to the internal routines and variables, without having to
-examine other files, or notify other users of the include file.
+Identifiers marked as ##global##, ##public## or ##export## are known as //exposed//
+variables because they can be used in files other than the one they were declared
+in. 
+All other identifiers can only be used within their own file. This information
+is helpful when maintaining or enhancing the file, or when learning how to use
+the file. You can make changes to the internal routines and variables, without
+having to examine other files, or notify other users of the include file.
 
 Sometimes, when using include files developed by others, you will encounter
 a naming conflict.  One of the include file authors has used the same name for
-a global identifier as one of the other authors. If you have the source, you can
-simply edit one of the include files to correct the problem, but then you'd
-have repeat this process whenever a new version of the include file was
-released. Euphoria has a simpler way to solve this. Using an extension to the
+a exposed identifier as one of the other authors. One of fixing this, if you
+have the source, you could simply edit one of the include files to correct
+the problem, however then you'd have repeat this process whenever a new version
+of the include file was released. 
+
+Euphoria has a simpler way to solve this. Using an extension to the
 include statement, you can say for example:
 
 <eucode>
@@ -1608,7 +1631,7 @@ identifier has local scope. It is known only within the file that declares it,
 i.e. the file that contains the include statement.  Different files might
 define different namespace identifiers to refer to the same included file.
 
-There is a special, reserved namespace, "eu" for referring to built-in euphoria
+There is a special, reserved namespace, ##**eu**## for referring to built-in euphoria
 routines.  This can be useful when a built-in routine has been overridden:
 
 <eucode>
@@ -1680,82 +1703,236 @@ lib:sub()
 </eucode>
 
 ==== The visibility of public and export identifiers
+When a file needs to see the public or exported identifiers in another file that
+includes the first file, the first file must include that other (including) file.
 
-If a file is included by an application's main file, but needs to see the public or
-exported identifiers in that file, it must include its parent file.
+For example, 
+<eucode>
+-- Parent file: foo.e --
+public integer Foo = 1
+include bar.e -- bar.e needs to see Foo
+showit() -- execute a routine in bar.e
+</eucode>
 
-To alleviate this, a variant of the include statement was introduced, called
-**public include**. If a file **public include**s another, it will see all the
-identifiers that the included file sees. This amounts to propagating identifiers marked as
-public one level up in the file hierarchy. Note that source file systems may not form a true
-hierarchy - they would with a simpler system like older versions were using.
+<eucode>
+-- Included file: bar.e --
+include foo.e -- included so I can see Foo
+constant xyz = Foo + 1
 
-The **public include** mechanism was also meant to be used by libraries that have multiple
-files.  That way, symbols meant for the end user can be declared in files other than the
+public procedure showit()
+? xyz
+end procedure
+</eucode>
+
+//Public// symbols can only be seen by the file that explicitly includes
+the file where those public symbols are declared.
+
+For example,
+<eucode> 
+-- Parent file: foo.e --
+include bar.e 
+showit() -- execute a public routine in bar.e
+</eucode>
+
+If however, a file wants a third file to also see the symbols that it can, it
+needs to do a ##public include##.
+
+For example,
+<eucode> 
+-- Parent file: foo.e --
+public include bar.e 
+showit() -- execute a public routine in bar.e
+
+public procedure fooer()
+   . . .
+end procedure
+</eucode>
+
+<eucode> 
+-- Appl file: runner.ex --
+include foo.e 
+showit() -- execute a public routine that foo.e can see in bar.e
+fooer()  -- execute a public routine in foo.e
+</eucode>
+
+The ##public include## facility is designed to make having a library composed of
+multiple files easy for an application to use. It allows the main library file
+to expose symbols in files that //it// includes as if the application had actually 
+included them. That way, symbols meant for the end user can be declared in files other than the
 main file, and the library can still be organized however the author prefers without
 affecting the end user.
 
+**Another example**\\
+Given that we have two files LIBA.e and LIBB.e ...
+>
+<eucode>
+-- LIBA.e -- 
+public constant 
+    foo1 = 1, 
+    foo2 = 2 
+ 
+export function foobarr1() 
+    return 0 
+end function 
+ 
+export function foobarr2() 
+    return 0 
+end function 
+</eucode>
+<
+ and  
+>
+<eucode>
+-- LIBB.e -- 
+-- I want to pass on just the constants not 
+-- the functions from LIBA.e.   
+public include LIBA.e 
+</eucode>
+<
+The export scope modifier is used to limit the extent that symbols can be accessed.
+It works just like ##public## except that ##export## symbols are only ever passed up
+one level only. In other words, if a file wants to use an ##export## symbol, that
+file must include it explicitly. 
+
+In this example above, code in LIBB.e can see both the public and export symbols
+declared in LIBA.e (##foo1, foo2 foobarr1## and ##foobarr2##) because it explicitly
+includes LIBA.e. And by using the ##public## prefix on the ##include## of LIBA.e, 
+it also allows any file that ##includes## LIBB.e to the ##public## symbols from
+LIBA.e but they will not see any ##export## symbols declared in LIBA.e. 
+
+In short, a ##public include## is used expose ##public## symbols that are 
+included, up one level but not any ##export## symbols that were include.
+
 ==== The complete set of resolution rules
 
-**Resolution** is the process by which the interpreter determines what a name means. You
-could say "translate a name to a memory address", but this would be over simplifying. Let's
-say "translate an identifier to a symbol" rather. The backend only knows about symbols, and
-the front end's job is to understand which symbols are being used from the names{{{--}}}the
-human readable identifiers{{{--}}}in the program.
+**Resolution** is the process by which the interpreter determines which specific symbol
+will actually be used at any given point in the code. This is usually quite easy as most
+symbol names in a given scope are unique and so Euphoria doesn't have to choose between
+them. However, when the same symbol name is used in different but enclosing scopes,
+Euphoria has to make a decision about which symbol the coder is referring to.
 
-When Euphoria looks up the declaration of an identifier, it first checks the current
-routine, then the current file, then global symbols in other files. Identifiers that are
-more local will //override// or //shadow// identifiers that are more global.  At the end of
-the scope of the local identifier, the more global identifier that had been shadowed will be
-visible again.
+When Euphoria sees an identifier name being used, it looks for the name's declaration
+starting from the current scope and moving outwards through the enclosing scopes until
+the name's declaration is found.
 
-If several global identifiers are found, Euphoria will look into any file
-that was directly or indirectly included from the file which is attempting to use the
-identifier. If there is only one matching identifier in this file subset, Euphoria will
-assume this is the intended symbol. This way, third
-party libraries can be used in the same application, even if they have
-conflicting identifiers, as each library will only see the identifier it defined{{{--}}}unless
-they include one another, but this is extremely unlikely.
+The hierarchy of scopes can be viewed like this ...
+{{{
+global/public/export
+  file
+     routine
+        block 1
+           block 2
+           ...
+              block n
+}}}
+So, if a name is used at a ##block## level, Euphoria will first check for its
+declaration in the same block, and if not found will check the enclosing blocks
+until it reaches the routine level, in which case it checks the routine
+(including parameter names), and then check the file that the block is declared
+in and finally check the global/public/export symbols.
 
-The same rule applies to public and export identifiers. In the case where identifiers with the
-public, export and global scopes are found to be visible, they are collectively treated as if
- they were all global.
-
-The application code that uses the libraries and mentions one of the multiply defined
-identifiers will have to use explicit namespaces to tell which identifier, among those with
-the same name, is actually being invoked. But the user of the library does not need to edit
-them simply because of their being used together.
-
-Using a namespace with an identifier, like in
+By the way, Euphoria will not allow a name to be declared if it is already declared
+in the same scope, or enclosing ##block## or enclosing ##routine##. Thus the 
+following examples are illegal...
 <eucode>
+integer a
+if x then
+   integer a -- redefinition not allowed.
+end if
+</eucode>
+
+<eucode>
+if x then
+   integer a
+   if y then
+      integer a -- redefinition not allowed.
+   end if
+end if
+</eucode>
+
+<eucode>
+procedure foo(integer a)
+if x then
+  integer a -- redefinition not allowed.
+end if
+end procedure
+</eucode>
+
+But note that this below is valid ...
+<eucode>
+integer a = 1
+procedure foo()
+    integer a = 2
+    ? a
+end procedure
+? a
+</eucode>
+In this situation, the second declaration of 'a' is said to //shadow// the first
+one. The output from this example will be ...
+>
+{{{
+2
+1
+}}}
+
+
+Symbols all declared in the same file (be they in blocks, routines or at the file level)
+are easy to check by Euphoria for scope clashes. However, a problem can arise when symbol names
+declared as global/public/export in different files are placed in the same scope
+during ##include## processing. As it is quite possible for these files to come from
+independant developers that are not aware of each other's symbol names, the potential
+for name clashes is high. A name clash is just when the same name is declared 
+in the same scope but in different files. Euphoria cannot generally decide which name you were referring
+to when this happens, so it needs you help to resolve it. This is where the
+##namespace## concept is used. 
+
+A namespace is just a name that you assign to an include file so that your code can
+exactly specify where an identifier that your code is using actually comes from. 
+Using a namespace with an identifier, for example ...
+<eucode>
+include somefile.e as my_lib
+include another.e 
 my_lib:foo()
 </eucode>
-causes Euphoria to resolve the identifier as though it were being used from the file associated
-with the namespace. This means that a namespace could be associated with the main
-include file of a multi-file library: using the namespace associated with
-the main file will avoid conflicts with identifiers within the library from
-other identifiers in files independent of the library.  Of course, if there are
-conflicting identifiers within the library that require the use of namespaced
-identifiers from within the library itself, users of the library will not be
-able to avoid conflict between those symbols with the namespace associated with the main
-file of the library. But this circumstance is very unlikely.
+enables Euphoria to resolve the identifier (##foo##) as explicitly coming from the
+file associated with the namespace "my_lib". This means that if ##foo## was also
+declared as global/public/export in //another.e// then that ##foo## would be ignored
+and the ##foo## in //somefile.e// would be used instead. Without that namespace, 
+Euphoria would have complained (##Errors resolving the following references:##)
+
+If you need to use both ##foo## symbols you can still do that by using two different
+namespaces. For example ...
+<eucode>
+include somefile.e as my_lib
+include another.e  as her_ns
+my_lib:foo() -- Calls the one in somefile.e
+her_ns:foo() -- Calls the one in another.e
+</eucode>
+
+Note that there is a reserved namespace name that is always in use. The special
+namespace **##eu##** is used to let Euphoria know that you are accessing a built-in
+symbol rather than one of the same name declared in someone's file. 
+
+For example...
+<eucode>
+include somefile.e as my_lib
+ result = my_lib:find(something) -- Calls the 'find' in somefile.e
+ xy = eu:find(X, Y) -- Calls Euphoria's built-in 'find'
+</eucode>
 
 The controlling variable used in a [[:for statement]] is special. It is automatically declared
-at the beginning of the loop, and its scope ends at the end of the for-loop. If
-the loop is inside a function or procedure, the loop variable is a
-**private** variable and may not have the same name as any other
-**private** variable. When the loop is at the top level, outside
-of any function or procedure, the loop variable is a **local**
-variable and may not have the same name as any other **local**
-variable in that file. You can use the same name in many different for-loops as
-long as the loops aren't nested. You do not declare loop variables as you would
-other variables. The range of values specified in the for statement defines the
-legal values of the loop variable{{{--}}}specifying a type would be redundant and is
-not allowed.
+at the beginning of the loop block, and its scope ends at the end of the for-loop. If
+the loop is inside a function or procedure, the loop variable cannot have the same
+name as any other variable decalred in the routine or enclosing block. When the
+loop is at the top level, outside of any routine, the loop variable cannot have
+the same name as any other file-scoped variable. You can use the same name in
+many different for-loops as long as the loops aren't nested. You do not declare
+loop variables as you would other variables because they are automatically declared as
+atoms. The range of values specified in the for statement defines the
+legal values of the loop variable.
 
-Variables defined inside a **loop**, **while**, **if** or **switch** statement behave exactly
-like for-loop index variables in that respect, apart from the need to declare them in the
-normal way.
+Variables declared inside other types of blocks, such as a **loop**, **while**,
+**if** or **switch** statement use the same scoping rules as a for-loop index.
 
 ==== The override qualifier
 
@@ -1771,7 +1948,7 @@ override procedure puts(integer channel,sequence text)
 end procedure
 </eucode>
 
-A warning will be issued when you do this. It would be very confusing, and would probably
+A warning will be issued when you do this, because it can be very confusing, and would probably
 break code, for the new routine to change the behaviour of the former routine. Code that was
 calling the former routine expects no difference in service, so there shouldn't be any.
 
@@ -2937,23 +3114,85 @@ containing the code. The first form of the include statement is:
 Some Examples:
 
 <eucode>
-include graphics.e
-include \mylib\myroutines.e
+include std/graphics.e
+include /mylib/myroutines.e
 public include library.e
 </eucode>
 
-Any top-level code in the included file will be executed.
+Any top-level code in the included file will be executed at start up time.
 
-Any global identifiers that have already been
-defined in the including file will be visible in the included file.
+Any ##global## identifiers that are declared in the file doing the including will 
+also be visible in the file being included. However the situation is slightly
+different for an identifier declared as **public** or **export**. In these cases
+the file being included will **not** see ##public/export## symbols declared in
+the file doing the including, unless the file being included also explicitly 
+includes the file doing the including. Yes, you'd better read that again because
+its not that obvious. Here's an example...
 
-**N.B.** Only those symbols defined as global
- in the included file will be visible (accessible) in the
+We have two files, a.e and b.e ...
+<eucode>
+-- a.e --
+? c -- declared as global in 'b.e'
+</eucode>
+
+<eucode>
+-- b.e --
+include a.e
+global integer c = 0
+</eucode>
+
+This will work because being ##global## the symbol 'c' in b.e can be seen by all files in this
+//include tree//. 
+
+However ...
+<eucode>
+-- a.e --
+? c -- declared as public in 'b.e'
+</eucode>
+
+<eucode>
+-- b.e --
+include a.e
+public integer c = 0
+</eucode>
+Will not work as public symbols can only be seen when their declaring file is explicitly
+included. So to get this to work you need to write a.e as ...
+<eucode>
+-- a.e --
+include b.e
+? c -- declared as public in 'b.e'
+</eucode>
+
+----
+
+**N.B.** Only those symbols declared as ##global## 
+in the included file will be visible (accessible) in the
 remainder of the including file. Their visibility in other included files or in the main
-program file depends on other factors.
+program file depends on other factors. Specifically, a global symbols can only be 
+accessed by files in the same //include tree//. For example...
 
-An identifier marked as **public** or **export** in the including file is not seen by the included file,
-unless the latter also includes the including file.
+If we have danny.e declare a global symbol called 'foo', and bob.e includes danny.e,
+then code in bob.e can access danny's 'foo'. Now if we also have cathy.e declare
+a global symbol called 'foo', and anne.e includes cathy.e, then code in ann.e can
+access kath's 'foo'. Nothing unusual about that situation. Now, if we have a program
+that includes both bob.e and anne.e, the code in bob.e and anne.e should still
+work even though there are now two global 'foo' symbols available. This is because
+the include tree for bob.e //only// contains danny.e and likewise the include tree
+for anne.e //only// contains cathy.e. So as the two 'foo' symbols are in separate 
+include trees (from bob.e and anne.e perspective) code in those files continues
+to work correctly. A problem can occur if the main program (the one that includes
+both bob.e and anne.e) references 'foo'. In order for Euphoria to know which one
+the code author meant to use, the coder must use the namespace facility.
+<eucode>
+--- mainprog.ex ---
+include anne.e as anne
+include bob.e  as bob
+
+anne:foo() -- Specify the 'foo' from anne.e.
+</eucode>
+If the above code did not use namespaces, Euphoria would not have know which 'foo'
+to use - the one from bob.e or the one in anne.e.
+
 
 If public precedes the include statement, then all public identifiers from the
 included file will also be visible to the including file, and visible to any
@@ -3103,16 +3342,20 @@ The forms available are ...
 ; ##without warning##
 : disables all warnings
 
-; ##with warning (//warning name list//)##
+; ##with warning (//warning name list//)\\
+  with warning = (//warning name list//)##
 : enables only these warnings, and disables all other
 
-; ##without warning (//warning name list//)##
+; ##without warning (//warning name list//)\\
+  without warning = (//warning name list//)##
 : enables all warnings except the warnings listed
 
-; ##with warning &= (//warning name list//)##
+; ##with warning &= (//warning name list//)\\
+  with warning += (//warning name list//)##
 : enables listed warnings in addition to whichever are enabled already
 
-; ##without warning &= (//warning name list//)##
+; ##without warning &= (//warning name list//)\\
+; without warning += (//warning name list//)##
 : disables listed warnings and leaves any not listed in its current state.
 
 ; ##with warning save##

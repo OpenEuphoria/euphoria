@@ -479,16 +479,24 @@ end function
 -- Converts the text into a number.
 -- Parameters:
 -- # ##pText## : A string containing the text representation of a number.
--- # ##pReturnBadPos## : An integer. If 0 (the default) then this will **not** return
---     the position in ##pText## that caused the conversion to fail. If not 0 then
---     this returns the converted value up to the point of failure (if any) and the
---     position in ##pText## that caused the failure. If this position is 0 then
---     there was no failure.
+-- # ##pReturnBadPos## : An integer. 
+--     ** If 0 (the default) then this will return
+--     a number based on the supplied text and it will **not** return
+--     any position in ##pText## that caused an incomplete conversion. 
+--     ** If ##pReturnBadPos## is -1 then if the conversion of ##pText## was
+--        complete the resulting number is returned otherwise a single-element
+--        sequence containing the position within ##pText## where the conversion
+--        stopped. 
+--     ** If not 0 then this returns both the converted value up to the point of failure (if any) and the
+--     position in ##pText## that caused the failure. If that position is 0 then
+--     there was no failure. 
 --
 -- Returns:
 -- * an atom: If ##pReturnBadPos## is zero, the number represented by ##pText##.
 --  If ##pText## contains invalid characters, zero is returned.
--- * a sequence: If ##pReturnBadPos## is non-zero, it returns a 2-element sequence
+-- * a sequence: If ##pReturnBadPos## is non-zero. If ##pReturnBadPos## is -1
+-- it returns a 1-element sequence containing the spot inside ##pText## where
+-- conversion stopped. Otherwise it returns a 2-element sequence
 -- containing the number represented by ##pText## and either 0 or the position in
 -- ##pText## where conversion stopped.
 --
@@ -525,7 +533,9 @@ end function
 -- <eucode>
 --     object val
 --     val = to_number("12.34", 1)  ---> {12.34, 0} -- No errors.
+--     val = to_number("12.34", -1)  ---> 12.34 -- No errors.
 --     val = to_number("12.34a", 1) ---> {12.34, 6} -- Error at position 6
+--     val = to_number("12.34a", -1) ---> {6} -- Error at position 6
 --     val = to_number("12.34a")  ---> 0 because its not a valid number
 --     val = to_number("#f80c") --> 63500
 --     val = to_number("#f80c.7aa") --> 63500.47900390625
@@ -717,6 +727,14 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 		return lResult
 	end if
 
+	if pReturnBadPos = -1 then
+		if lBadPos = 0 then
+			return lResult
+		else
+			return {lBadPos}	
+		end if
+	end if
+	
 	return {lResult, lBadPos}
 
 end function
@@ -769,3 +787,4 @@ public function to_integer(object pData, integer pError = 0)
 	end if
 
 end function
+

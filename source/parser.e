@@ -7,6 +7,7 @@ include euphoria/info.e
 include std/sequence.e
 include std/text.e
 include std/search.e
+include std/convert.e
 
 include global.e
 include platform.e
@@ -3764,8 +3765,8 @@ procedure SetWith(integer on_off)
 	token tok
 	integer reset_flags = 1
 
-	option = StringToken()
-
+	option = StringToken("&+=")
+	
 	if equal(option, "type_check") then
 		OpTypeCheck = on_off
 
@@ -3826,12 +3827,18 @@ procedure SetWith(integer on_off)
 		integer good_sofar = line_number
 		reset_flags = 1
 		tok = next_token()
-		if tok[T_ID] = CONCAT_EQUALS then
+		if find(tok[T_ID], {CONCAT_EQUALS, PLUS_EQUALS}) != 0 then
 			tok = next_token()
 			if tok[T_ID] != LEFT_ROUND then
 				CompileErr("warning names must be enclosed in '(' ')'")
 			end if
 			reset_flags = 0
+		elsif tok[T_ID] = EQUALS then
+			tok = next_token()
+			if tok[T_ID] != LEFT_ROUND then
+				CompileErr("warning names must be enclosed in '(' ')'")
+			end if
+			reset_flags = 1
 		elsif tok[T_ID] = VARIABLE then
 			option = SymTab[tok[T_SYM]][S_NAME]
 			if equal(option, "save") then
@@ -3950,14 +3957,14 @@ procedure SetWith(integer on_off)
 	elsif equal( option, "indirect_includes" ) then
 		OpIndirectInclude = on_off
 
-	elsif on_off and option[1] >= '0' and option[1] <= '9' then
-		-- Ignore numeric stamp - not supported anymore
-
 	elsif equal(option, "batch") then
 		batch_job = on_off
 
+	elsif integer(to_number(option, -1)) then
+		-- ignore security stamp as it is no longer required.
+		
 	else
-		CompileErr("unknown with/without option")
+		CompileErr("unknown with/without option '" & option & "'")
 
 	end if
 end procedure

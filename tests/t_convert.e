@@ -51,6 +51,8 @@ test_equal("set_decimal_mark #5", '.', set_decimal_mark(0))
 
 test_equal( "to_number #1", {12.34, 0}, to_number("12.34", 1))
 test_equal( "to_number #2", {12.34, 6}, to_number("12.34a", 1))
+test_equal( "to_number #1a", 12.34, to_number("12.34", -1))
+test_equal( "to_number #2a", {6}, to_number("12.34a", -1))
 test_equal( "to_number #3", 0, to_number("12.34a"))
 test_equal( "to_number #4", 63500, to_number("#f80c"))
 test_equal( "to_number #5", 63500.47900390625, to_number("#f80c.7aa"))
