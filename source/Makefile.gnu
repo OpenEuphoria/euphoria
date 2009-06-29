@@ -500,7 +500,7 @@ endif
 ifeq "$(HASCHANGEDDIRECTORY)" "1"
 
 translate-here :
-	$(EUBIN)\euc.exe -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) 
+	$(EUBIN)/$(EECU) -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) 
 
 .PHONY : translate-here
 	
