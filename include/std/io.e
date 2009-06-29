@@ -1177,8 +1177,7 @@ public enum
 	BINARY_MODE,
 	TEXT_MODE,
 	UNIX_TEXT,
-	DOS_TEXT,
-	OSX_TEXT
+	DOS_TEXT
 
 --**
 -- Read the contents of a file as a single sequence of bytes.
@@ -1247,8 +1246,6 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 		
 		-- Convert DOS endings
 		ret = replace_all(ret, {13,10}, {10})
-		-- Convert MAC endings
-		ret = replace_all(ret, {13}, {10})
 		if length(ret) > 0 then
 			if ret[$] != 10 then
 				ret &= 10
@@ -1278,8 +1275,6 @@ end function
 --                     line endings (Ctrl-J).
 --         ** **DOS_TEXT** ensures that lines are written out with DOS/Windows style
 --                     line endings {Ctrl-L, Ctrl-J}.
---         ** **OSX_TEXT** ensures that lines are written out with OS-X style
---                     line endings {Ctrl-L}.
 --
 -- Returns:
 --     An **integer**: 1 on success, -1 on failure.
@@ -1324,7 +1319,6 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 		if as_text = TEXT_MODE then
 			-- Standardize all line endings
 			data = replace_all(data, {13,10}, {10})
-			data = replace_all(data, {13}, {10})
 			
 		elsif as_text = UNIX_TEXT then
 			data = replace_all(data, {13,10}, {10})
@@ -1333,9 +1327,6 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 			data = replace_all(data, {13,10}, {10})
 			data = replace_all(data, {10}, {13,10})
 			
-		elsif as_text = OSX_TEXT then
-			data = replace_all(data, {13,10}, {10})
-			data = replace_all(data, {10}, {13})
 		end if
 	end if
 		
