@@ -309,7 +309,9 @@ object SetBColor();
 object compile_pcre();
 object exec_pcre();
 
-#ifndef EDOS
+#ifndef LRESULT
+#define LRESULT long
+#endif
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
 
@@ -328,7 +330,6 @@ LRESULT CALLBACK call_back8(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned);
 LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned, unsigned);
-#endif
 
 #ifdef EMINGW
 #define setenv MySetEnv
@@ -4411,7 +4412,7 @@ object CallBack(object x)
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
 	symtab_ptr routine;
-#ifdef EWINDOWS
+#if defined(EWINDOWS) || defined(EDOS)
 	int bare_flag = 0;
 #endif
 	s1_ptr x_ptr;
@@ -4429,10 +4430,6 @@ object CallBack(object x)
 #endif
 
 
-#ifdef EDOS
-	not_supported("call_back()");
-	return 0;
-#else
 	convention = C_CDECL;
 start:
 	if (IS_SEQUENCE(x)) {
@@ -4440,7 +4437,7 @@ start:
 		/*printf( "x_ptr->length=%d, IS_SEQUENCE(*(obj_ptr=x_ptr->base+1))=%d, SEQ_PTR(*obj_ptr)->length=%d\n",
 		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
 		fflush(stdout);*/
-#ifdef EWINDOWS
+#if defined(EWINDOWS) || defined(EDOS)
 		obj_ptr = x_ptr->base + 1;
 		if ((x_ptr->length == 1) && (!IS_SEQUENCE(*obj_ptr)
 			|| (SEQ_PTR(*obj_ptr)->length == 2))) {
@@ -4458,7 +4455,7 @@ start:
 	}
 	else {
 		routine_id = get_int(x);
-#ifdef EWINDOWS
+#if defined(EWINDOWS) || defined(EDOS)
 		convention = C_STDCALL;
 #endif
 	}
@@ -4504,7 +4501,7 @@ start:
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-#ifdef EWINDOWS
+#if defined(EWINDOWS) || defined(EDOS)
 	if (bare_flag) goto bare;
 #endif
 #ifdef EWINDOWS
@@ -4575,8 +4572,7 @@ start:
 	else
 		return NewDouble((double)addr);
 
-#endif
-#ifdef EWINDOWS
+#if defined(EWINDOWS) || defined(EDOS)
 bare:
 #ifdef ERUNTIME
 	replace_value = routine_id;
