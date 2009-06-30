@@ -39,6 +39,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
+#include "global.h"
 
 #ifndef LOCK_SH
 #define LOCK_SH  1 /* shared lock */
@@ -309,9 +310,6 @@ object SetBColor();
 object compile_pcre();
 object exec_pcre();
 
-#ifndef LRESULT
-#define LRESULT long
-#endif
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
 
@@ -4414,6 +4412,9 @@ object CallBack(object x)
 	symtab_ptr routine;
 #if defined(EWINDOWS) || defined(EDOS)
 	int bare_flag = 0;
+	void * replace_value;
+    s1_ptr result;
+	object_ptr obj_ptr;
 #endif
 	s1_ptr x_ptr;
 	int convention;
@@ -4423,9 +4424,6 @@ object CallBack(object x)
 	BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
 	// Get a handle to the DLL module.
 
-	void * replace_value;
-        s1_ptr result;
-	object_ptr obj_ptr;
 	hinstLib = LoadLibrary(TEXT("kernel32"));
 #endif
 

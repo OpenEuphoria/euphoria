@@ -4,6 +4,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
+#ifndef H_GLOBAL
+#define H_GLOBAL
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
 #if defined(ELINUX)
 	/* use glibc 64bit variants */
@@ -196,3 +198,16 @@ struct rccoord {
 #endif
 
 extern int is_batch;
+
+#ifndef LRESULT
+#define LRESULT long
+#endif
+#ifndef CALLBACK
+#define CALLBACK
+#endif
+#ifndef __cdecl
+#define __cdecl
+#endif
+
+
+#endif // H_GLOBAL

@@ -46,6 +46,7 @@
 #include "alldefs.h"
 #include "alloc.h"
 #include "be_runtime.h"
+#include "global.h"
 
 /******************/
 /* Local defines  */
@@ -5490,8 +5491,6 @@ unsigned general_call_back(
 	}
 }
 
-#ifndef EDOS
-
 unsigned (*general_ptr)() = (void *)&general_call_back;
 
 #pragma off (check_stack);
@@ -5594,7 +5593,6 @@ LRESULT CALLBACK call_back9(unsigned arg1, unsigned arg2, unsigned arg3,
 									 arg6, arg7, arg8, arg9);
 }
 
-#endif  // EDOS
 
 void shift_args(int argc, char *argv[])
 /* insert argv[0] as argv[1] and
