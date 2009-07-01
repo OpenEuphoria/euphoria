@@ -73,25 +73,35 @@ test_equal("append_lines() read back", {"Hello World", "I'm back"}, read_lines("
 
 sequence testdata_raw = "test\r\ndata\r\nfile\r\nLastLine" & 26 & "EOF"
 sequence testdata_dos = "test\r\ndata\r\nfile\r\nLastLine\r\n"
-sequence testdata_unix = "test\ndata\nfile\nLastLine\n"
+sequence testdata_unix = "test\ndata\nfile\nLastLine" & 26 & "EOF"
 
 write_file("filec.txt", testdata_raw, BINARY_MODE) -- Write out as raw data.
 test_equal("read file binary #1", testdata_raw, read_file("filec.txt", BINARY_MODE))
-test_equal("read file text #1", testdata_unix, read_file("filec.txt", TEXT_MODE))
+
+ifdef DOSFAMILY then
+	test_equal("read file text #1", testdata_unix, read_file("filec.txt", TEXT_MODE))
+elsifdef UNIX then
+	test_equal("read file text #1", testdata_raw, read_file("filec.txt", TEXT_MODE))
+end ifdef
 
 write_file("filec.txt", testdata_raw, TEXT_MODE) -- Write out as current o/s text data.
 ifdef DOSFAMILY then
 	test_equal("read file binary #2", testdata_dos, read_file("filec.txt", BINARY_MODE))
-elsifdef UNIX
+elsifdef UNIX then
 	test_equal("read file binary #2", testdata_unix, read_file("filec.txt", BINARY_MODE))
 end ifdef
+
 test_equal("read file text #2", testdata_unix, read_file("filec.txt", TEXT_MODE))
 
 write_file("filec.txt", testdata_raw, UNIX_TEXT) -- Write out as Unix text data.
 test_equal("write/read unix text", testdata_unix, read_file("filec.txt", BINARY_MODE))
 
 write_file("filec.txt", testdata_raw, DOS_TEXT) -- Write out as DOS/Windows text data.
-test_equal("write/read dos text", testdata_dos, read_file("filec.txt", BINARY_MODE))
+ifdef DOSFAMILY then
+	test_equal("write/read dos text", testdata_dos, read_file("filec.txt", BINARY_MODE))
+elsifdef UNIX then
+	test_equal("write/read dos text", testdata_raw, read_file("filec.txt", BINARY_MODE))
+end ifdef
 
 -- Types
 test_true("file_number #1", file_number(10))
