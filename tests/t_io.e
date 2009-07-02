@@ -72,17 +72,20 @@ test_equal("append_lines() ", 1, append_lines("fileb.txt", {"I'm back"}))
 test_equal("append_lines() read back", {"Hello World", "I'm back"}, read_lines("fileb.txt"))
 
 sequence testdata_raw = "test\r\ndata\r\nfile\r\nLastLine" & 26 & "EOF"
+-- The text formats of the above raw data exclude characters from the EOF marker,
+-- and always have a EOL marker on last line.
 sequence testdata_dos = "test\r\ndata\r\nfile\r\nLastLine\r\n"
-sequence testdata_unix = "test\ndata\nfile\nLastLine" & 26 & "EOF"
+sequence testdata_unix = "test\ndata\nfile\nLastLine\n"
 
+-- Data written in binary mode should be unchanged when read back in binary mode.
 write_file("filec.txt", testdata_raw, BINARY_MODE) -- Write out as raw data.
 test_equal("read file binary #1", testdata_raw, read_file("filec.txt", BINARY_MODE))
 
-ifdef DOSFAMILY then
-	test_equal("read file text #1", testdata_unix, read_file("filec.txt", TEXT_MODE))
-elsifdef UNIX then
-	test_equal("read file text #1", testdata_raw, read_file("filec.txt", TEXT_MODE))
-end ifdef
+write_file("filec.txt", testdata_raw) -- Write out as raw data.
+test_equal("read/write file default should be binary", testdata_raw, read_file("filec.txt"))
+
+-- A file read in TEXT_MODE should always be in UNIX format regardless of the current opsys.
+test_equal("read file text #1", testdata_unix, read_file("filec.txt", TEXT_MODE))
 
 write_file("filec.txt", testdata_raw, TEXT_MODE) -- Write out as current o/s text data.
 ifdef DOSFAMILY then
@@ -91,17 +94,16 @@ elsifdef UNIX then
 	test_equal("read file binary #2", testdata_unix, read_file("filec.txt", BINARY_MODE))
 end ifdef
 
+-- A file read in TEXT_MODE should be in UNIX format regardless of the current opsys.
 test_equal("read file text #2", testdata_unix, read_file("filec.txt", TEXT_MODE))
 
+-- Force output to be in UNIX format and use BINARY mode to see if that worked,
 write_file("filec.txt", testdata_raw, UNIX_TEXT) -- Write out as Unix text data.
 test_equal("write/read unix text", testdata_unix, read_file("filec.txt", BINARY_MODE))
 
+-- Force output to be in DOS format and use BINARY mode to see if that worked,
 write_file("filec.txt", testdata_raw, DOS_TEXT) -- Write out as DOS/Windows text data.
-ifdef DOSFAMILY then
-	test_equal("write/read dos text", testdata_dos, read_file("filec.txt", BINARY_MODE))
-elsifdef UNIX then
-	test_equal("write/read dos text", testdata_raw, read_file("filec.txt", BINARY_MODE))
-end ifdef
+test_equal("write/read dos text", testdata_dos, read_file("filec.txt", BINARY_MODE))
 
 -- Types
 test_true("file_number #1", file_number(10))
