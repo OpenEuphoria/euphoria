@@ -1290,7 +1290,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- if write_file("data.txt", "This is important data\nGoodbye") = 0 then
+-- if write_file("data.txt", "This is important data\nGoodbye") = -1 then
 --     puts(STDERR, "Failed to write data\n")
 -- end if
 -- </eucode>

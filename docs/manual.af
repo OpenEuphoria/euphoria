@@ -7,6 +7,14 @@
 # all other non-blank entries are treated as a file
 # name that should be read and inserted into the output
 
+# Output file generation options
+:@@(title Euphoria v4.0)@
+:%%maxnumlevel = 4
+:%%splitname = eu400
+:%%splitlevel = 2
+:%%toclevel = 3
+:<<TOC level=3>>
+
 ########
 # Front-Matter
 ../docs/welcome.txt
