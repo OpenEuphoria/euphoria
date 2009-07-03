@@ -78,25 +78,24 @@ sequence testdata_dos = "test\r\ndata\r\nfile\r\nLastLine\r\n"
 sequence testdata_unix = "test\ndata\nfile\nLastLine\n"
 
 -- Data written in binary mode should be unchanged when read back in binary mode.
-write_file("filec.txt", testdata_raw, BINARY_MODE) -- Write out as raw data.
+tmp = write_file("filec.txt", testdata_raw, BINARY_MODE) -- Write out as raw data.
 test_equal("read file binary #1a", testdata_raw, read_file("filec.txt", BINARY_MODE))
-write_file("filec.txt", testdata_unix, BINARY_MODE) -- Write out as raw data.
+tmp = write_file("filec.txt", testdata_unix, BINARY_MODE) -- Write out as raw data.
 test_equal("read file binary #1b", testdata_unix, read_file("filec.txt", BINARY_MODE))
-write_file("filec.txt", testdata_dos, BINARY_MODE) -- Write out as raw data.
+tmp = write_file("filec.txt", testdata_dos, BINARY_MODE) -- Write out as raw data.
 test_equal("read file binary #1c", testdata_dos, read_file("filec.txt", BINARY_MODE))
 
 -- Test the default mode value, which should be BINARY
-write_file("filec.txt", testdata_raw) -- Write out as raw data.
+tmp = write_file("filec.txt", testdata_raw) -- Write out as raw data.
 test_equal("read/write file default should be binary", testdata_raw, read_file("filec.txt"))
 
 -- A file read in TEXT_MODE should always be in UNIX format regardless of the current opsys.
 test_equal("read file text #1", testdata_unix, read_file("filec.txt", TEXT_MODE))
 
-write_file("filea.txt", testdata_raw, TEXT_MODE) -- Write out as current o/s text data.
-write_file("fileb.txt", testdata_unix, TEXT_MODE) -- Write out as current o/s text data.
-write_file("filec.txt", testdata_dos, TEXT_MODE) -- Write out as current o/s text data.
+tmp = write_file("filea.txt", testdata_raw, TEXT_MODE) -- Write out as current o/s text data.
+tmp = write_file("fileb.txt", testdata_unix, TEXT_MODE) -- Write out as current o/s text data.
+tmp = write_file("filec.txt", testdata_dos, TEXT_MODE) -- Write out as current o/s text data.
 
-integer workaround = 2 -- required to work around an interpreter bug
 ifdef DOSFAMILY then
 sequence res_text = testdata_dos
 elsifdef UNIX then
@@ -112,19 +111,19 @@ test_equal("read file binary #2c", res_text, read_file("filec.txt", BINARY_MODE)
 test_equal("read file text #2", testdata_unix, read_file("filec.txt", TEXT_MODE))
 
 -- Force output to be in UNIX format and use BINARY mode to see if that worked,
-write_file("filec.txt", testdata_raw, UNIX_TEXT) -- Write out as Unix text data.
+tmp = write_file("filec.txt", testdata_raw, UNIX_TEXT) -- Write out as Unix text data.
 test_equal("write/read unix text #1", testdata_unix, read_file("filec.txt", BINARY_MODE))
-write_file("filec.txt", testdata_dos, UNIX_TEXT) -- Write out as Unix text data.
+tmp = write_file("filec.txt", testdata_dos, UNIX_TEXT) -- Write out as Unix text data.
 test_equal("write/read unix text #2", testdata_unix, read_file("filec.txt", BINARY_MODE))
-write_file("filec.txt", testdata_unix, UNIX_TEXT) -- Write out as Unix text data.
+tmp = write_file("filec.txt", testdata_unix, UNIX_TEXT) -- Write out as Unix text data.
 test_equal("write/read unix text #3", testdata_unix, read_file("filec.txt", BINARY_MODE))
 
 -- Force output to be in DOS format and use BINARY mode to see if that worked,
-write_file("filec.txt", testdata_raw, DOS_TEXT) -- Write out as DOS/Windows text data.
+tmp = write_file("filec.txt", testdata_raw, DOS_TEXT) -- Write out as DOS/Windows text data.
 test_equal("write/read dos text #1", testdata_dos, read_file("filec.txt", BINARY_MODE))
-write_file("filec.txt", testdata_unix, DOS_TEXT) -- Write out as DOS/Windows text data.
+tmp = write_file("filec.txt", testdata_unix, DOS_TEXT) -- Write out as DOS/Windows text data.
 test_equal("write/read dos text #2", testdata_dos, read_file("filec.txt", BINARY_MODE))
-write_file("filec.txt", testdata_dos, DOS_TEXT) -- Write out as DOS/Windows text data.
+tmp = write_file("filec.txt", testdata_dos, DOS_TEXT) -- Write out as DOS/Windows text data.
 test_equal("write/read dos text #3", testdata_dos, read_file("filec.txt", BINARY_MODE))
 
 -- Types
