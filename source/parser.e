@@ -3361,6 +3361,7 @@ procedure Statement_list()
 			end if
 			StartSourceLine(TRUE)
 			Procedure_call(tok)
+			clear_op()
 			Pop()
 			
 		elsif id = IF then
@@ -4107,6 +4108,7 @@ export procedure real_parser(integer nested)
 			end if
 
 			Procedure_call(tok)
+			clear_op()
 			Pop()
 			ExecCommand()
 
