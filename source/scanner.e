@@ -1484,20 +1484,34 @@ export function Scanner()
 			if ch = '=' then
 				return {DIVIDE_EQUALS, 0}
 			elsif ch = '*' then
-				cline = line_number
 				-- block comment start
-				while ch = 0 with entry do
-					read_line()
-					if ThisLine[1] = END_OF_FILE_CHAR then
-						exit
-					end if
-				  entry
-					ch = match( "*/", ThisLine[bp .. $])
+				cline = line_number
+				integer cnest = 1
+				while cnest > 0 do
+					ch = getch()
+					switch ch do
+						case  END_OF_FILE_CHAR then
+							exit
+					
+						case '\n' then
+							read_line()
+							
+						case '*' then
+							ch = getch()
+							if ch = '/' then
+								cnest -= 1
+							end if
+							
+						case '/' then
+							ch = getch()
+							if ch = '*' then
+								cnest += 1
+							end if
+					end switch					
+					
 				end while
 				
-				if ch != 0 then
-					bp = ch + bp + 1
-				else
+				if cnest > 0 then
 					CompileErr(sprintf("Block comment from line %d not terminated.", cline))				
 				end if
 			else 
