@@ -69,4 +69,12 @@ end procedure
 outer()
 test_equal( "procedures terminate properly? ", 3, k )
 
+function foo()
+	return 1
+end function
+
+foo()
+integer immediate_assign = 0
+test_equal( "assignment immediately after discarded return value", 0, immediate_assign )
+
 test_report()
