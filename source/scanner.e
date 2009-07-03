@@ -1500,12 +1500,16 @@ export function Scanner()
 							ch = getch()
 							if ch = '/' then
 								cnest -= 1
+							else
+								ungetch()
 							end if
 							
 						case '/' then
 							ch = getch()
 							if ch = '*' then
 								cnest += 1
+							else
+								ungetch()
 							end if
 					end switch					
 					

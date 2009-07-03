@@ -232,7 +232,7 @@ public procedure set_sendheader_default()
 	-- POSTDATA MUST come before Content-Length in this program
 	-- Referer is often used by sites to be sure your fetch was from one of their own pages
 	-- headers with [3] = "" won't be sent
-	-- you can add more [1], and modify [3], [2] is the ' ' or ": " (GET andPOST have no ": ")
+	-- you can add more [1], and modify [3], [2] is the ' ' or ": " (GET and POST have no ": ")
 
 	defaultsendheader = {
 		{"httpversion","","HTTP/1.0"}, -- not a legal http headerline, but to append to GET or POST later on
