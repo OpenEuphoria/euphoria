@@ -1,3 +1,4 @@
+	-- (c) Copyright Rapid Deployment Software - See License.txt
 --****
 -- == Data type conversion
 --

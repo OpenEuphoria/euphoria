@@ -1,4 +1,4 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+-- (c) Copyright Rapid Deployment Software - See License.txt
 
 include std/math.e
 include std/text.e
@@ -15,9 +15,10 @@ include std/text.e
 --
 -- This document will detail the Euphoria interface to Regular Expressions, not really
 -- regular expression syntax. It is a very complex subject that many books have been
--- written on. There are a few good resources online that can help while learning
--- regular expressions:
+-- written on. Here are a few good resources online that can help while learning
+-- regular expressions.
 --
+-- * [[EUForum Article -> http://openeuphoria.org/wiki/euwiki.cgi?EuGuide%20Regular%20Expressions ]]
 -- * [[Perl Regular Expressions Man Page -> http://perldoc.perl.org/perlre.html]]
 -- * [[Regular Expression Library -> http://regexlib.com/]] (user supplied regular
 --   expressions for just about any task).

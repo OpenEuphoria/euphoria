@@ -1,4 +1,4 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+-- (c) Copyright Rapid Deployment Software - See License.txt
 --
 --****
 -- == Serialization of Euphoria Objects

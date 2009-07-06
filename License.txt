@@ -1,7 +1,7 @@
 = Euphoria License =
 ----
 {{{
-Copyright (c) 2008 Rapid Deployment Software (RDS)
+Copyright (c) 1993-2009 Rapid Deployment Software (RDS)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"),
