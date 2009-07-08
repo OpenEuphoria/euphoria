@@ -2,6 +2,7 @@
 --
 
 include std/dll.e
+public include std/memconst.e
 
 --****
 -- == Dynamic Calling
@@ -244,85 +245,14 @@ elsedef
 	end ifdef
 end ifdef
 
-ifdef WIN32 then
-	--****
-	-- === Microsoft's Memory Protection Constants
-	--
-	-- Memory Protection Constants are the same constants
-	-- across all platforms.  The API converts them as
-	-- necessary.  They are only necessary for [[:allocate_protect]]
+type block_aligned( atom a )
+	return remainder(a,4096)=0
+end type
 
-	--**
-	-- You may run the data in this page
-	public constant PAGE_EXECUTE = #10
-
-	--**
-	-- You may read or run the data
-	public constant PAGE_EXECUTE_READ = #20
-
-	--**
-	-- You may run, read or write in this page
-	public constant PAGE_EXECUTE_READWRITE = #40
-
-	--**
-	-- You may run or write in this page
-	public constant PAGE_EXECUTE_WRITECOPY = #80
-
-	--**
-	-- You may write to this page.
-	public constant PAGE_WRITECOPY = #08
-
-	--**
-	-- You may read or write in this page.
-	public constant PAGE_READWRITE = #04
-
-	--**
-	-- You may only read data in this page
-	public constant PAGE_READONLY = #02
-
-	--**
-	-- You have no access to this page
-	public constant PAGE_NOACCESS = #01
-
-
-elsedef
-
-	constant
-		PROT_EXEC = 4,
-		PROT_READ = 1,
-		PROT_WRITE = 2,
-		PROT_NONE = 0
-
-	public constant PAGE_EXECUTE = PROT_EXEC,
-		PAGE_EXECUTE_READ = or_bits( PROT_READ, PROT_EXEC ),
-		PAGE_EXECUTE_READWRITE = or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ),
-		PAGE_EXECUTE_WRITECOPY = or_bits( PROT_READ, or_bits( PROT_EXEC, PROT_WRITE ) ),
-		PAGE_WRITECOPY = or_bits( PROT_READ, PROT_WRITE ),
-		PAGE_READWRITE = or_bits( PROT_READ, PROT_WRITE ),
-		PAGE_READONLY = PROT_READ,
-		PAGE_NOACCESS = PROT_NONE
-
-end ifdef
-
-constant MEMORY_PROTECTION = {
-	PAGE_EXECUTE,
-	PAGE_EXECUTE_READ,
-	PAGE_EXECUTE_READWRITE,
-	PAGE_EXECUTE_WRITECOPY,
-	PAGE_WRITECOPY,
-	PAGE_READWRITE,
-	PAGE_READONLY,
-	PAGE_NOACCESS
-}
 
 ifdef WIN32 then
-	-- Windows constants
-	constant MEM_COMMIT = #1000,
-		MEM_RESERVE = #2000,
-		--MEM_RESET = #8000,
-		MEM_RELEASE = #8000
 
-	atom kernel_dll, memDLL_id, VirtualFree_rid,
+	atom kernel_dll, memDLL_id, 
 		VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid,
 		VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
 
@@ -363,11 +293,16 @@ ifdef WIN32 then
 	end function
 end ifdef
 
-type valid_windows_memory_protection_constant( integer x )
+--***
+-- == Types supporting Memory
+
+--** protection constants type
+public type valid_memory_protection_constant( integer x )
 	return 0 != find( x, MEMORY_PROTECTION )
 end type
 
-type page_aligned_address( atom a )
+--** page aligned address type
+export type page_aligned_address( atom a )
 	return remainder( a, 4096 ) = 0
 end type
 
@@ -378,15 +313,20 @@ end type
 -- Allocates and copies data into executable memory.
 --
 -- Parameters:
--- The parameter, ##a_sequence_of_machine_code_bytes##, is the machine code to
+-- The first parameter, ##a_sequence_of_machine_code##, is the machine code to
 -- be put into memory to be later called with [[:call()]]        
 --
+-- The second parameter is the word length of the said code.  You can specify your
+-- code as 1-byte, 2-byte or 4-byte chunks if you wish.  If your machine code is byte
+-- code specify 1.  The default is 1.
+--
 -- Return Value:
--- The function returns the address in memory of the byte-code that can be
+-- The function returns the address in memory of the code, that can be
 -- safely executed whether DEP is enabled or not or 0 if it fails.  On the
 -- other hand, if you try to execute a code address returned by [[:allocate()]]
 -- with DEP enabled the program will receive a machine exception.  
 --
+
 -- Comments:
 -- 
 -- Use this for the machine code you want to run in memory.  The copying is
@@ -402,53 +342,14 @@ end type
 -- See Also:
 -- [[:allocate]], [[:free_code]], [[:allocate_protect]]
 
-public function allocate_code( sequence data )
-	atom addr, oldprotptr
-	integer size
+public function allocate_code( object data, valid_wordsize wordsize = 1 )
 
-	size = length(data)
+	return allocate_protect( data, wordsize, PAGE_EXECUTE )
 
-	if dep_works() then
-		ifdef WIN32 then
-			addr = VirtualAlloc( 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE )
-			oldprotptr = allocate(4)
-
-			-- Windows 98 has VirtualAlloc but its VirtualAlloc always returns 0
-			-- The following three lines are a kludge for Windows 9x
-			-- Including os.e caused in r1338.
-			if addr = 0 then
-				addr = allocate( size )
-			else
-				register_block( addr, size )
-			end if
-
-			if addr = 0 then
-				return 0
-			end if
-
-			poke( addr, data )
-			if c_func( VirtualProtect_rid, { addr, size, PAGE_EXECUTE , oldprotptr } ) = 0 then
-				-- 0 indicates failure here
-				return 0
-			end if
-
-			free( oldprotptr )
-
-			return addr
-
-		end ifdef
-
-	end if
-
-	addr = allocate( size )
-	if addr = 0 then
-		return 0
-	end if
-
-	poke( addr, data )
-
-	return addr
 end function
+
+
+atom oldprotptr = allocate_data(4)
 
 --**
 -- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
@@ -457,6 +358,9 @@ end function
 --
 -- Parameters:
 -- The first parameter, data, is the machine code to be put into memory. 
+-- The second parameter, wordsize, is the size each element of data will take in 
+-- memory.  Are they 1-byte, 2-bytes or 4-bytes long?  Specify here.  The default is 1.
+-- The third and last parameter is the particular Windows protection.
 --
 -- Returns:
 -- The function returns the address to the required memory
@@ -468,69 +372,81 @@ end function
 -- [[:allocate]] instead.  It is more efficient and simpler.
 --
 -- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
--- [[:allocate_code()]] instead.  It is more efficient and simpler.
+-- [[:allocate_code()]] instead.  It is simpler.
 --
 -- You mustn't use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
 
-public function allocate_protect( sequence data, valid_windows_memory_protection_constant protection )
-	atom addr, oldprotptr
+public function allocate_protect( object data, valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
+	block_aligned iaddr = 0
+	atom eaddr = 0
+	
 	integer size
+	integer first_protection
+	
+	ifdef SAFE then
+		check_all_blocks()
+	end ifdef
 
-	size = length(data)
+	if atom(data) then
+		size = data * wordsize
+		first_protection = protection
+	else
+		size = length(data) * wordsize
+		first_protection = PAGE_READ_WRITE
+	end if
 
 	if dep_works() then
 		ifdef WIN32 then
-			addr = c_func( VirtualAlloc_rid, { 0, size, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE } )
-			if addr = 0 then
-				return 0
-			end if
-
-			register_block( addr, size )
-
-			oldprotptr = allocate(4)
-			if oldprotptr = 0 then
-				return 0
-			end if
-
-			poke( addr, data )
-			if c_func( VirtualProtect_rid, { addr, size, protection , oldprotptr } ) = 0 then
-				-- 0 indicates failure here
-				return 0
-			end if
-
-			free( oldprotptr )
-
-			return addr
-
+			iaddr = eu:c_func( VirtualAlloc_rid, { 0, size+BORDER_SPACE*2, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection } )
 		end ifdef
+		if iaddr != 0 then
+			eaddr = prepare_block( iaddr, size, protection )
+		else
+			eaddr = 0
+		end if
+	else
+		eaddr = allocate_data( size )
 	end if
 
-	addr = allocate( size )
-	if addr = 0 then
-		return 0
+	if eaddr = 0 or atom( data ) then
+		return eaddr 
 	end if
-	poke( addr, data )
 
-	return addr
+	switch wordsize without fallthru do
+		case 1 then
+			eu:poke( eaddr, data )
+		case 2 then
+			eu:poke2( eaddr, data )
+		case 4 then
+			eu:poke4( eaddr, data )
+	end switch
 
-	-- Implementation notes:
-	--    The amount of memory actually allocated on Windows is the lowest
-	--    multiple of the page_size (4kB on Windows XP)
-	--    The C manuals do not guarantee that the memory RETURNED from
-	--    underlying C-functions are page aligned only but they require
-	--    what you pass into them must be page aligned.  I suspect that
-	--    that is the spirit of the work though.
-end function
-
--- Returns 1 if the DEP executing data only memory would cause an exception
-function dep_works()
 	ifdef WIN32 then
-		return VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 and
-		    GetLastError_rid != -1 and GetSystemInfo_rid != -1			
+		if eu:c_func( VirtualProtect_rid, { iaddr, size, protection , oldprotptr } ) = 0 then 
+			-- 0 indicates failure here
+			free_code( eaddr, 1, size )
+			return 0
+		end if
 	end ifdef
 
-	return 0
+	ifdef SAFE then
+		check_all_blocks()
+	end ifdef
+
+	return eaddr
 end function
+
+
+if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
+	and GetLastError_rid != -1 and GetSystemInfo_rid != -1
+	then
+	atom vaa = VirtualAlloc( 0, 1, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE ) != 0 
+	if vaa then
+		DEP_really_works = 1
+		c_func( VirtualFree_rid, { vaa, 1, MEM_RELEASE } )
+		vaa = 0
+	end if
+end if
 
 
 --****
@@ -549,16 +465,4 @@ end function
 --
 -- See Also: [[:allocate_code]], [[:free]]
 
-public procedure free_code( atom addr, integer size )
-	integer free_succeeded
-	if not dep_works() then
-		free( addr )
-		return
-	end if
 
-	ifdef WIN32 then
-		free_succeeded = c_func( VirtualFree_rid, { addr, size, MEM_RELEASE } )
-	end ifdef
-
-	unregister_block( addr )
-end procedure

@@ -143,7 +143,7 @@ ifdef not DOS32 then
 end ifdef
 
 test_message = "allocate readonly memory"
-r_space = allocate_protect( { 5,6,7,8}, PAGE_READONLY )
+r_space = allocate_protect( { 5,6,7,8}, 1, PAGE_READONLY )
 test_not_equal( test_message, 0, r_space )
 test_message = "reading from readonly memory"
 test_equal( test_message, {5,6,7,8}, peek( { r_space, 4 } ) )
@@ -151,7 +151,7 @@ test_message = "free readonly memory"
 free_code( r_space, 4 )
 
 test_message = "allocate read and write memory" -- use allocate() for this
-rw_space = allocate_protect( {1,2,3,4}, PAGE_READWRITE )
+rw_space = allocate_protect( {1,2,3,4}, 1, PAGE_READWRITE )
 test_not_equal( test_message, 0, rw_space )
 test_message = "read from readonly memory"
 test_equal( test_message, {1,2,3,4}, peek( { rw_space, 4 } ) )	
@@ -163,7 +163,7 @@ test_equal( test_message, {5,6,7,8}, peek( { rw_space, 4 } ) )
 test_pass( test_message )
 
 test_message = "allocate read write and execute memory"
-rwx_space = allocate_protect( multiply_code, PAGE_EXECUTE_READWRITE )
+rwx_space = allocate_protect( multiply_code, 1, PAGE_EXECUTE_READWRITE )
 test_not_equal( test_message, 0, rwx_space )
 test_message = ""
 rexec = define_c_func("", code_space, {C_INT, C_DOUBLE}, C_DOUBLE)
@@ -177,7 +177,7 @@ test_message = "read from read write and execute memory"
 test_equal( test_message, {5, #44, #24, #04}, peek( { rwx_space, 4 } ) )	
 
 test_message = "allocate no access memory"
-n_space = allocate_protect( multiply_code, PAGE_NOACCESS )
+n_space = allocate_protect( multiply_code, 1, PAGE_NOACCESS )
 test_not_equal( test_message, 0, n_space )
 -- do nothing
 test_message = ""

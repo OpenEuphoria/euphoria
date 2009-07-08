@@ -37,6 +37,9 @@
 -- file.
 --
 
+public include std/memconst.e
+include std/sequence.e
+
 constant
         M_ALLOC = 16,
         M_FREE = 17
@@ -48,10 +51,11 @@ integer
 	FREE_RID,
 	FREE_ARRAY_RID
 
+
 --**
 -- Positive integer type
 
-public type positive_int(integer x)
+export type positive_int(integer x)
         return x >= 1
 end type
 
@@ -108,7 +112,37 @@ end type
 -- See Also:
 --     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
 
-public function allocate(positive_int n, integer cleanup = 0)
+sequence pointer_hash = repeat({},1999)
+
+ifdef not EXECUTE_DATA then
+	public function allocate(positive_int n, integer cleanup = 0)
+	-- Allocate n bytes of memory and return the address.
+	-- Free the memory using free() below.
+		atom addr = machine_func(M_ALLOC, n )
+		if cleanup then
+			return delete_routine( addr, FREE_RID )
+		else
+			return machine_func(M_ALLOC, n)
+		end if
+	end function
+elsedef
+	public function allocate( integer n, integer cleanup = 0 )		
+		atom addr = allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
+		integer hv = remainder(addr,1999)+1
+		sequence list
+		list = pointer_hash[hv]
+		pointer_hash[hv] = append(list,{addr,n})
+		
+		if cleanup then
+			return delete_routine( addr, FREE_RID )
+		else
+			return allocate_code(n)
+		end if
+	end function
+end ifdef
+
+
+public function allocate_data(positive_int n, integer cleanup = 0)
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
 	if cleanup then
@@ -268,7 +302,19 @@ end function
 --     [[:allocate]], [[:free_low]], [[:free_code]]
 
 public procedure free(machine_addr addr)
-        machine_proc(M_FREE, addr)
+	ifdef not DATA_EXECUTE then
+        	machine_proc(M_FREE, addr)
+	elsedef
+		integer hv = remainder(addr,1999)+1
+		sequence list = pointer_hash[hv]
+		for i = 1 to length(list) do
+			if addr = list[i][1] then
+				free_code(addr, list[i][2])
+				pointer_hash[hv] = remove(list,i)
+				exit
+			end if
+		end for
+	end ifdef
 end procedure
 FREE_RID = routine_id("free")
 
@@ -921,6 +967,9 @@ integer check_calls = 1
 -- Parameters:
 --              # ##block_addr##, an atom, the start address of the block
 --              # ##block_len##, an integer, the size of the block.
+--              # ##protection##, a constant integer, of the memory 
+--                  protection constants found in machine.e, that describes
+--                  what access we have to the memory. 
 --
 -- Comments: 
 --
@@ -954,7 +1003,7 @@ integer check_calls = 1
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
 
-public procedure register_block(atom block_addr, atom block_len)
+public procedure register_block(atom block_addr, atom block_len, integer protection )
 	-- NOP to avoid strict lint
 	block_addr = block_addr
 	block_len = block_len
@@ -1011,6 +1060,15 @@ end procedure
 
 public procedure check_all_blocks()
 end procedure
+
+export function prepare_block( atom addr, integer a, integer protection )
+	return addr
+end function
+
+export constant BORDER_SPACE = 0
+export constant leader = repeat('@', BORDER_SPACE)
+export constant trailer = repeat('%', BORDER_SPACE)
+
 with warning
 
 -- ****
@@ -1065,3 +1123,27 @@ with warning
 -- After the cleanup routines are called, the value of the object is 
 -- unchanged, though the cleanup routine will no longer be associated
 -- with the object.
+
+-- Returns 1 if the DEP executing data only memory would cause an exception
+export function dep_works()
+	ifdef WIN32 then
+		return DEP_really_works		
+	end ifdef
+
+	return 0
+end function
+
+export atom VirtualFree_rid
+
+public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
+	integer free_succeeded
+	if not dep_works() then
+		free( addr )
+		return
+	end if
+
+	ifdef WIN32 then
+		free_succeeded = c_func( VirtualFree_rid, { addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
+	end ifdef
+
+end procedure
