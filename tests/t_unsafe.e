@@ -28,7 +28,7 @@ if addr != 0 then
 	test_pass("PAGE_READ_WRITE memory was allocated by allocate_protect")
 	peek4u(addr)
 	test_pass("PAGE_READ_WRITE memory was read")
-	poke4(addr,{5,6,7,8})
+	poke(addr,{5,6,7,8})
 	test_pass("PAGE_READ_WRITE memory was written to")
 else
 	test_fail("PAGE_READ_WRITE memory could not be allocated by allocate_protect")
@@ -40,7 +40,7 @@ if addr != 0 then
 	test_pass("PAGE_READ_WRITE_EXECUTE memory was allocated by allocate_protect")
 	peek4u(addr)
 	test_pass("PAGE_READ_WRITE memory was read")
-	poke4(addr,{5,6,7,8})
+	poke(addr,{5,6,7,8})
 	test_pass("PAGE_READ_WRITE memory was written to")
 else
 	test_fail("PAGE_READ_WRITE_EXECUTE memory could not be allocated by allocate_protect")
