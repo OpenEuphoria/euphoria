@@ -135,7 +135,13 @@ end procedure
 procedure patch_forward_goto( token tok, integer ref )
 	sequence fr = forward_references[ref]
 	set_code( ref )
+	-- Goto_block may insert code, so we need to remember where we are
+	shifting_sub = fr[FR_SUBPROG]
+	
 	Goto_block(  fr[FR_DATA][1], fr[FR_DATA][2], fr[FR_PC] )
+	
+	shifting_sub = 0
+	
 	reset_code()
 	resolved_reference( ref )
 end procedure

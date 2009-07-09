@@ -1136,14 +1136,14 @@ end function
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	integer free_succeeded
+	
 	if not dep_works() then
 		free( addr )
 		return
 	end if
 
 	ifdef WIN32 then
-		free_succeeded = c_func( VirtualFree_rid, { addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
+		integer free_succeeded = c_func( VirtualFree_rid, { addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
 	end ifdef
 
 end procedure
