@@ -437,6 +437,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 end function
 
 
+ifdef WIN32 then
 if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 	and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 	then
@@ -447,7 +448,7 @@ if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1
 		vaa = 0
 	end if
 end if
-
+end ifdef
 
 --****
 -- === Memory disposal
