@@ -3544,12 +3544,13 @@ procedure SubProg(integer prog_type, integer scope)
 				token temptok = next_token()
 				integer undef_type = 0
 				if temptok[T_ID] != TYPE and temptok[T_ID] != QUALIFIED_TYPE then
-					if temptok[T_ID] = VARIABLE or temptok[T_ID] = QUALIFIED_VARIABLE then
+					if find( temptok[T_ID], {VARIABLE, QUALIFIED_VARIABLE, PROC}) then
 						-- -- So there are two names next to each other.
 						if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 							-- The first name is undefined so it might be a type
 							-- that is declared later on. So for now, let's assume that.
 							undef_type = - new_forward_reference( TYPE, tok[T_SYM] )
+							puts(1,"forward referenced type...\n")
 						else
 							CompileErr("a type is expected here")
 						end if

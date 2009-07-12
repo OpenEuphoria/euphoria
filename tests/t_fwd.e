@@ -63,6 +63,17 @@ type boolean( integer b )
 	return b = 0 or b = 1
 end type
 
+procedure bbar()
+end procedure
+
+procedure ffoo( int bbar, int what )
+end procedure
+
+type int( object i )
+	return integer( i )
+end type
+test_pass( "forward type with param name reused from routine name" )
+
 test_report()
 
 
