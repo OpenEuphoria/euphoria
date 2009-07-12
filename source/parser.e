@@ -3550,7 +3550,6 @@ procedure SubProg(integer prog_type, integer scope)
 							-- The first name is undefined so it might be a type
 							-- that is declared later on. So for now, let's assume that.
 							undef_type = - new_forward_reference( TYPE, tok[T_SYM] )
-							puts(1,"forward referenced type...\n")
 						else
 							CompileErr("a type is expected here")
 						end if
