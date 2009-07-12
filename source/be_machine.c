@@ -4135,18 +4135,25 @@ object OpenDll(object x)
 #else
 	void (FAR WINAPI *proc_address)();
 	s1_ptr dll_ptr;
+	static unsigned char message[81];
 	unsigned char *dll_string;
 	HINSTANCE lib;
+	int message_len;
 
 	/* x will be a sequence if called via open_dll() */
 
 	dll_ptr = SEQ_PTR(x);
 	dll_string = TempBuff;
+	message_len = strlen("name for open_dll() is too long."
+			"  The name started with \"\".")+1;
 	MakeCString(dll_string, (object)x, TEMP_SIZE);
 	if (dll_ptr->length >= TEMP_SIZE) {
-		dll_string[20]='\0';
-		RTFatal("name for open_dll() is too long."
+		dll_string[80 - message_len]='\0';
+		snprintf(message,80,"name for open_dll() is too long."
 			"  The name started with \"%s\".", dll_string);
+		RTFatal(message);
+		/*RTFatal("name for open_dll() is too long."
+			"  The name started with \"%s\".", dll_string);*/
 	}
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);

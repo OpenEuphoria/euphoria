@@ -2,13 +2,10 @@
 with define SAFE
 include std/machine.e
 include std/safe.e
-without define SAFE
 include std/unittest.e
-
-with define SAFE
 edges_only = 0
 
-atom addr
+std_library_address addr
 addr = allocate_protect( {1,2,3,4}, 1, PAGE_NONE )
 
 if addr != 0 then

@@ -39,17 +39,14 @@
 
 public include std/memconst.e
 include std/sequence.e
-
-constant
-        M_ALLOC = 16,
-        M_FREE = 17
+ifdef DATA_EXECUTE then
+	include std/machine.e
+end ifdef
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
-integer 
-	FREE_RID,
-	FREE_ARRAY_RID
+integer FREE_ARRAY_RID
 
 
 --**
@@ -112,34 +109,21 @@ end type
 -- See Also:
 --     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
 
-sequence pointer_hash = repeat({},1999)
-
-ifdef not EXECUTE_DATA then
-	public function allocate(positive_int n, integer cleanup = 0)
+public function allocate(positive_int n, integer cleanup = 0)
+	atom addr
 	-- Allocate n bytes of memory and return the address.
 	-- Free the memory using free() below.
-		atom addr = machine_func(M_ALLOC, n )
-		if cleanup then
-			return delete_routine( addr, FREE_RID )
-		else
-			return machine_func(M_ALLOC, n)
-		end if
-	end function
-elsedef
-	public function allocate( integer n, integer cleanup = 0 )		
-		atom addr = allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
-		integer hv = remainder(addr,1999)+1
-		sequence list
-		list = pointer_hash[hv]
-		pointer_hash[hv] = append(list,{addr,n})
-		
-		if cleanup then
-			return delete_routine( addr, FREE_RID )
-		else
-			return allocate_code(n)
-		end if
-	end function
-end ifdef
+	ifdef not DATA_EXECUTE then
+		addr = machine_func(M_ALLOC, n )
+	elsedef
+		addr = allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
+	end ifdef
+	if cleanup then
+		return delete_routine( addr, FREE_RID )
+	else
+		return addr
+	end if
+end function
 
 
 public function allocate_data(positive_int n, integer cleanup = 0)
@@ -304,19 +288,18 @@ end function
 public procedure free(machine_addr addr)
 	ifdef not DATA_EXECUTE then
         	machine_proc(M_FREE, addr)
-	elsedef
-		integer hv = remainder(addr,1999)+1
-		sequence list = pointer_hash[hv]
-		for i = 1 to length(list) do
-			if addr = list[i][1] then
-				free_code(addr, list[i][2])
-				pointer_hash[hv] = remove(list,i)
-				exit
-			end if
-		end for
+	elsedef	
+		if not dep_works() then
+	        	machine_proc(M_FREE, addr)
+			return
+		end if
+	
+		ifdef WIN32 then
+			c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
+		end ifdef
 	end ifdef
 end procedure
-FREE_RID = routine_id("free")
+
 
 --**
 -- Free a NULL terminated pointers array.
@@ -954,7 +937,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --              [[:allocate_code]], [[:free_code]], [[:c_proc]], [[:define_c_proc]]
 
 without warning
-integer check_calls = 1
+public integer check_calls = 1
 
 --****
 -- === Safe memory access
@@ -1069,6 +1052,11 @@ export constant BORDER_SPACE = 0
 export constant leader = repeat('@', BORDER_SPACE)
 export constant trailer = repeat('%', BORDER_SPACE)
 
+export type bordered_address( atom addr )
+	return 1
+end type
+
+
 with warning
 
 -- ****
@@ -1136,14 +1124,13 @@ end function
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	
-	if not dep_works() then
-		free( addr )
-		return
-	end if
-
 	ifdef WIN32 then
-		integer free_succeeded = c_func( VirtualFree_rid, { addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
+		if dep_works() then
+			c_func(VirtualFree_rid, { addr, size*wordsize, MEM_RELEASE })
+		else
+			machine_proc(M_FREE,addr)
+		end if
+	elsedef
+		machine_proc(M_FREE,addr)
 	end ifdef
-
 end procedure

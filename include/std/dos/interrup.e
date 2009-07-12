@@ -8,6 +8,10 @@
 --**
 -- Length of a register list
 
+ifdef SAFE then
+	include std/machine.e
+	-- needed for check_all_blocks()
+end ifdef
 public constant REG_LIST_SIZE = 10
 
 constant M_INTERRUPT = 34

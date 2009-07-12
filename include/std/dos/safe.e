@@ -41,7 +41,7 @@ public function allocate_low(positive_int n)
 	atom a
 	
 	a = machine_func(M_ALLOC_LOW, n+BORDER_SPACE*2)
-	return prepare_block(a, n)
+	return prepare_block(a, n, PAGE_READ_WRITE_EXECUTE)
 end function
 
 -- Free up a previously allocated block of conventional memory.

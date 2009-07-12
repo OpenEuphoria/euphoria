@@ -81,20 +81,20 @@ public constant PAGE_READ = PAGE_READONLY
 -- An alias to PAGE_EXECUTE_READWRITE
 public constant PAGE_READ_WRITE_EXECUTE = PAGE_EXECUTE_READWRITE
 
-export function test_read( integer protection )
+export function test_read( valid_memory_protection_constant protection )
 	return find( protection, { PAGE_EXECUTE_READ, PAGE_EXECUTE_READWRITE,  
 			PAGE_READWRITE,	PAGE_READONLY } )
 end function
 
 
-export function test_write( integer protection )
+export function test_write( valid_memory_protection_constant protection )
 	return find( protection, { PAGE_EXECUTE_READWRITE,
 		 	PAGE_EXECUTE_WRITECOPY,
 		 PAGE_WRITECOPY,
 	PAGE_READWRITE})
 end function
 
-export function test_exec( integer protection )
+export function test_exec( valid_memory_protection_constant protection )
 	return find(protection,{PAGE_EXECUTE,
 		PAGE_EXECUTE_READ,
 		PAGE_EXECUTE_READWRITE,
@@ -127,4 +127,30 @@ export constant MEM_COMMIT = #1000,
 		MEM_RESERVE = #2000,
 		MEM_RESET = #8000,
 		MEM_RELEASE = #8000
+
+export integer FREE_RID = routine_id("free")		
+
+export constant
+        M_ALLOC = 16,
+        M_FREE = 17
+
+export atom kernel_dll, memDLL_id, 
+	VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid,
+	VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
+
+integer page_size = 0
+
+function get_page_size()
+	if page_size then
+		return page_size
+	end if
+	if GetSystemInfo_rid != -1 then
+		atom system_info_ptr = machine_func(M_ALLOC, 9 * 4)
+		eu:c_proc(GetSystemInfo_rid, { system_info_ptr })
+		page_size = eu:peek4u( system_info_ptr + 4)
+		machine_proc(M_FREE, system_info_ptr)
+	end if
+	return page_size
+end function
+
 

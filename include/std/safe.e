@@ -4,6 +4,9 @@
 -- Machine Level Programming (386/486/Pentium)
 
 public include std/memconst.e
+ifdef DATA_EXECUTE then
+	public include std/machine.e as machine
+end ifdef
 --****
 -- === safe.e
 --
@@ -139,6 +142,35 @@ export constant BORDER_SPACE = 40
 export constant leader = repeat('@', BORDER_SPACE)
 export constant trailer = repeat('%', BORDER_SPACE)
 
+export type bordered_address( atom addr )
+	sequence l
+	for i = 1 to length(safe_address_list) do
+		if safe_address_list[i][BLOCK_ADDRESS] = addr then
+			l = eu:peek( {addr - BORDER_SPACE, BORDER_SPACE} )
+			return equal(l, leader)
+		end if
+	end for
+	return 0
+end type
+
+-- Return true if /action/ is not allowed when memory has /protection/
+function does_not_permit(valid_memory_protection_constant protection, positive_int action)
+	if action = A_READ and not test_read( protection ) then
+		return 1
+	elsif action = A_WRITE and not test_write( protection ) then
+		return 1
+	elsif action = A_EXECUTE and not test_exec( protection ) then
+		return 1
+	else
+		return 0
+	end if
+end function
+
+-- Return true if /action/ is allowed when memory has /protection/
+function permits(valid_memory_protection_constant protection, positive_int action)
+	return not does_not_permit(protection,action)
+end function
+
 export function safe_address(atom start, integer len, positive_int action )
 -- is it ok to read/write all addresses from start to start+len-1?
 	atom block_start, block_upper, upper
@@ -155,7 +187,9 @@ export function safe_address(atom start, integer len, positive_int action )
 		block_start = block[BLOCK_ADDRESS]
 		if edges_only then
 			-- addresses are considered safe as long as 
-			-- they aren't in any block's border zone
+			-- they aren't in any block's border zone and
+			-- if they are in a block, the action is permited
+			-- for that block's protection
 			if start <= 3 then
 				return BAD -- null pointer (or very small address)
 			end if
@@ -179,9 +213,17 @@ export function safe_address(atom start, integer len, positive_int action )
 					return BAD
 				end if
 			end if
+			if ( (block_start <= start and start <= block_upper) or
+				(block_start <= upper and upper <= block_upper)  )
+				and
+				does_not_permit( block[BLOCK_PROT], action )
+				then
+				return BAD
+			end if
 		else
 			-- addresses are considered safe as long as 
 			-- they are inside an allocated or registered block
+			-- whose protection permits the current action.
 			if start >= block_start then 
 				block_upper = block_start + block[BLOCK_LENGTH]
 				if upper <= block_upper then
@@ -195,11 +237,7 @@ export function safe_address(atom start, integer len, positive_int action )
 						end if
 						safe_address_list[1] = block
 					end if
-					if action = A_READ and not test_read( block[BLOCK_PROT] ) then
-						return BAD
-					elsif action = A_WRITE and not test_write( block[BLOCK_PROT] ) then
-						return BAD
-					elsif action = A_EXECUTE and not test_exec( block[BLOCK_PROT] ) then
+					if does_not_permit( block[BLOCK_PROT], action ) then
 						return BAD
 					else
 						return OK
@@ -541,7 +579,7 @@ public procedure check_all_blocks()
 	
 	for i = 1 to length(safe_address_list) do
 		block = safe_address_list[i]
-		if block[3] >= 1 and test_read(block[BLOCK_PROT]) then
+		if block[3] >= 1 then
 			-- a block that we allocated
 			a = block[1]
 			n = block[2]
@@ -551,12 +589,12 @@ public procedure check_all_blocks()
 			elsif not equal(trailer, 
 						 eu:peek({a+n, BORDER_SPACE})) then
 				show_block(block)
-			end if          
+			end if
 		end if
 	end for
 end procedure
 
-override procedure call(atom addr)
+override procedure call(bordered_address addr)
 -- safe call - machine code must start in block that we own
 	if safe_address(addr, 1, A_EXECUTE) then
 		eu:call(addr)
@@ -626,64 +664,60 @@ export function prepare_block(atom a, integer n, positive_int protection)
 	return a
 end function
 
-public function allocate_data(positive_int n)
+public function allocate_data(positive_int n, integer cleanup = 0)
 -- allocate memory block and add it to safe list
 	atom a
-
+	bordered_address sla
 	a = machine_func(M_ALLOC, n+BORDER_SPACE*2)
-	return prepare_block(a, n, PAGE_READ_WRITE )
+	sla = prepare_block(a, n, PAGE_READ_WRITE )
+	if cleanup then
+		return delete_routine( sla, FREE_RID )
+	else
+		return sla
+	end if
 end function
 
-public function allocate(positive_int n)
+public function allocate(positive_int n, integer cleanup = 0)
 -- allocate memory block and add it to safe list
-	ifdef	DATA_EXECUTE then
+	ifdef DATA_EXECUTE then                                   
 		return allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
 	elsedef	
-		atom a
-	
+		atom a	
 		a = machine_func(M_ALLOC, n+BORDER_SPACE*2)
 		return prepare_block(a, n, PAGE_READ_WRITE )
 	end ifdef	
 end function
 
-public procedure free(machine_addr a)
+public procedure free(bordered_address a)
 -- free address a - make sure it was allocated
-	ifdef DATA_EXECUTE then
-		for i = 1 to length(safe_address_list) do
-			if safe_address_list[i][BLOCK_ADDRESS] = a then
-				free_code( a, safe_address_list[i][BLOCK_LENGTH] )
-				safe_address_list = remove(safe_address_list,i)
-				exit
+	for i = 1 to length(safe_address_list) do
+		if safe_address_list[i][BLOCK_ADDRESS] = a then
+			-- check pre and post block areas
+			integer n
+			if safe_address_list[i][ALLOC_NUMBER] <= 0 then
+				die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
 			end if
-		end for
-	elsedef		
-		integer n
-		
-		for i = 1 to length(safe_address_list) do
-			if safe_address_list[i][BLOCK_ADDRESS] = a then
-				-- check pre and post block areas
-				if safe_address_list[i][ALLOC_NUMBER] <= 0 then
-					die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
-				end if
-				n = safe_address_list[i][BLOCK_LENGTH]
-				if not equal(leader, eu:peek({a-BORDER_SPACE, BORDER_SPACE})) then
-					show_block(safe_address_list[i])
-				elsif not equal(trailer, eu:peek({a+n, BORDER_SPACE})) then
-					show_block(safe_address_list[i])
-				end if          
+			n = safe_address_list[i][BLOCK_LENGTH]
+			if not equal(leader, eu:peek({a-BORDER_SPACE, BORDER_SPACE})) then
+				show_block(safe_address_list[i])
+			elsif not equal(trailer, eu:peek({a+n, BORDER_SPACE})) then
+				show_block(safe_address_list[i])
+			end if
+			ifdef DATA_EXECUTE then
+				free_code(a, safe_address_list[i][BLOCK_LENGTH])
+			elsedef
 				if safe_address_list[i][BLOCK_PROT] != PAGE_READ_WRITE then
-					die("ATTEMPT TO FREE WITH free() A BLOCK THAT WAS ALLOCATED BY allocate_protect()!") 
+					die("ATTEMPT TO FREE WITH free() A BLOCK " &
+						"THAT WAS ALLOCATED BY allocate_protect()!") 
 				end if
 				machine_proc(M_FREE, a-BORDER_SPACE)
-				-- remove it from list
-				safe_address_list = 
-							safe_address_list[1..i-1] &
-							safe_address_list[i+1..$]
-				return
-			end if
-		end for
-		die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
-	end ifdef
+			end ifdef
+			-- remove it from list
+			safe_address_list = remove(safe_address_list, i)
+			return
+		end if
+	end for
+	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 end procedure
 
 public function allocate_string(sequence s)
@@ -709,14 +743,9 @@ end function
 
 export atom VirtualFree_rid
 
-public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
+public procedure free_code( bordered_address addr, integer size, valid_wordsize wordsize = 1 )
 	integer free_succeeded
 	sequence block
-
-	if not dep_works() then
-		free( addr )
-		return
-	end if
 
 	for i = 1 to length(safe_address_list) do
 		block = safe_address_list[i] 
@@ -724,13 +753,11 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 			if safe_address_list[i][ALLOC_NUMBER] <= 0 then
 				die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
 			end if
-			if test_read(block[BLOCK_PROT]) then
-				integer n = safe_address_list[i][BLOCK_LENGTH]
-				if not equal(leader, eu:peek({addr-BORDER_SPACE, BORDER_SPACE})) then
-					show_block(safe_address_list[i])
-				elsif not equal(trailer, eu:peek({addr+n, BORDER_SPACE})) then
-					show_block(safe_address_list[i])
-				end if          
+			integer n = safe_address_list[i][BLOCK_LENGTH]
+			if not equal(leader, eu:peek({addr-BORDER_SPACE, BORDER_SPACE})) then
+				show_block(safe_address_list[i])
+			elsif not equal(trailer, eu:peek({addr+n, BORDER_SPACE})) then
+				show_block(safe_address_list[i])
 			end if
 			safe_address_list = remove( safe_address_list, i )
 			exit
@@ -738,7 +765,13 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 	end for
 
 	ifdef WIN32 then
-		free_succeeded = c_func( VirtualFree_rid, { addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
+		if not dep_works() then
+			machine_proc(M_FREE, addr-BORDER_SPACE)
+		else
+			free_succeeded = c_func( VirtualFree_rid, 
+				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
+		end if
+	elsedef
+		machine_proc(M_FREE, addr-BORDER_SPACE)	
 	end ifdef
-
 end procedure
