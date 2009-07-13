@@ -72,6 +72,7 @@ include std/io.e
 include std/pretty.e
 include std/search.e
 include std/filesys.e
+include std/math.e
 
 --
 -- Public Variables
@@ -318,8 +319,7 @@ end procedure
 --
 -- Comments:
 --
--- * For atoms, a fuzz of 1e-9 is used to assess equality.
--- * For sequences, no such fuzz is implemented.
+-- * For floating point numbers, a fuzz of 1e-9 is used to assess equality.
 --
 -- A test is recorded as passed if equality holds between ##expected## and ##outcome##. The latter
 -- is typically a function call, or a variable that was set by some prior action.
@@ -333,15 +333,24 @@ end procedure
 
 public procedure test_equal(sequence name, object expected, object outcome)
 	integer success
-	if sequence(expected) or sequence(outcome) then
-		success = equal(expected,outcome)
-	else
-		if expected > outcome then
-			success = ((expected-outcome) < 1e-9)
+
+	if sequence(expected) then
+		if sequence(outcome) then
+			success = equal(expected, outcome)
+			if not success and length(expected) = length(outcome) then
+				success = not find(0, approx(expected, outcome, 1e-9) = 0)
+			end if
 		else
-			success = ((outcome-expected) < 1e-9)
+			success = not find(0, approx(expected, outcome, 1e-9) = 0)
+		end if
+	else
+		if sequence(outcome) then
+			success = not find(0, approx(expected, outcome, 1e-9) = 0)
+		else
+			success = (approx(expected, outcome, 1e-9) = 0)
 		end if
 	end if
+			
 	record_result(success, name, expected, outcome)
 end procedure
 

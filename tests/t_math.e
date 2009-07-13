@@ -96,6 +96,30 @@ test_equal("mod() #3",   -27, mod(-3627, -3600))
 test_equal("mod() #4", -3573, mod(27, -3600))
 test_equal("mod() #5",     0, mod(10, 2))
 
+atom a = 103.14
+n = 34.961
+atom q = a / n
+atom r = mod(a,n)
+
+test_equal ("mod() #6", a , floor(q)*n + r)
+
+test_equal ("mod() #7",  33.218, mod( a, n))
+test_equal ("mod() #8",   1.743, mod(-a, n))
+test_equal ("mod() #9",   -1.743, mod( a,-n))
+test_equal ("mod() #10", -33.218, mod(-a,-n))
+
+
+test_equal("rem() #1", sign(a)  * 33.218, remainder( a, n))
+test_equal("rem() #2", sign(-a) * 33.218, remainder(-a, n))
+test_equal("rem() #3", sign(a)  * 33.218, remainder( a,-n))
+test_equal("rem() #4", sign(-a) * 33.218, remainder(-a,-n))
+
+
+test_equal("div #1",  sign(a)  * sign(n)  * 2.95014444666915,   a /  n)
+test_equal("div #2",  sign(a)  * sign(-n) * 2.95014444666915,   a / -n)
+test_equal("div #3",  sign(-a) * sign(n)  * 2.95014444666915,  -a /  n)
+test_equal("div #4",  sign(-a) * sign(-n) * 2.95014444666915,  -a / -n)
+
 test_equal("left_shift() #1",  56, left_shift(7, 3))
 test_equal("left_shift() #2",   0, left_shift(0, 9))
 test_equal("left_shift() #3", 512, left_shift(4, 7))
@@ -132,6 +156,22 @@ for i = -2 to 17 do
 	po2 &= powof2(i)
 end for
 test_equal("powof2", {0,0,0,0,0,1,1,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0}, po2)
+
+
+test_equal("frac #1", 0.4, frac(9.4))
+test_equal("frac #2", -0.4, frac(-9.4))
+test_equal("frac #3", {0.1, -0.998, 0}, frac({1.1, -9.998, 88}))
+
+test_equal("trunc #1", 9, trunc(9.4))
+test_equal("trunc #2", -9, trunc(-9.4))
+test_equal("trunc #3", {1, -9, 88}, trunc({1.1, -9.998, 88}))
+
+test_equal("intdiv #1", 21, intdiv(101, 5))
+test_equal("intdiv #2", 19, intdiv(101.5, 5.5))
+test_equal("intdiv #3", {1, -2, 13}, intdiv({1.1, -9.998, 88}, 7))
+test_equal("intdiv #4", {707, 78, 9}, intdiv(777, {1.1, -9.998, 88}))
+test_equal("intdiv #5", {91, 21, -4}, intdiv({100, 200, -300}, {1.1, -9.998, 88}))
+test_equal("intdiv #6", 20, intdiv(100, 5))
 
 test_report()
 

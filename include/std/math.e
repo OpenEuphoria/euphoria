@@ -107,29 +107,8 @@ end function
 --		[[:compare]]
 
 public function sign(object a)
-	object t
-	if atom(a) then
-		if a > 0 then
-			return 1
-		elsif a < 0 then
-			return - 1
-		else
-			return 0
-		end if
-	end if
-	for i = 1 to length(a) do
-			t = a[i]
-		if atom(t) then
-			if t > 0 then
-				a[i] = 1
-			elsif t < 0 then
-				a[i] = - 1
-			end if
-			else
-				a[i] = sign(t)
-		end if
-	end for
-	return a
+	-- small so normally it will be inlined 
+	return (a > 0) - (a < 0)
 end function
 
 
@@ -248,20 +227,30 @@ end function
 --   <built-in> function remainder(object dividend, object divisor)
 --
 -- Description:
--- Compute the remainder of the division of two atoms. The result has the same sign as the dividend.
+-- Compute the remainder of the division of two objects using truncated division.
 --
 -- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an Euclidean division
---		# ##divisor##: an object, each atom of which is the divisor in an Euclidean division.
+--		# ##dividend##: any Euphoria object.
+--		# ##divisor##: any Euphoria object.
 --
 -- Returns:
---		An **object**, the shape of which depends on ##dividend##'s and ##divisor##'s. For two atoms, this is the remainder of dividing ##dividend## by  ##divisor##, with ##dividend##'s sign.
+--		An **object**, the shape of which depends on ##dividend##'s and 
+--      ##divisor##'s. For two atoms, this is the remainder of dividing 
+--      ##dividend## by  ##divisor##, with ##dividend##'s sign.
 --
 -- Errors:
---	If any atom in ##divisor## is 0, this is an error condition as it amounts to an attempt to divide by zero.
+-- # If any atom in ##divisor## is 0, this is an error condition as it 
+--  amounts to an attempt to divide by zero.
+-- # If both ##dividend## and ##divisor## are sequences, they must be the
+--   same length as each other.
 --
 -- Comments:
--- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result. The result has the sign of ##dividend## and lesser magnitude than ##divisor##. n needs not fit in an Euphoria integer.
+-- * There is a integer ##N## such that ##dividend## = ##N## * ##divisor## + result. 
+-- * The result has the sign of ##dividend## and lesser magnitude than ##divisor##.
+-- *  The result has the same sign as the dividend.
+-- * This differs from [[:mod]]() in that when the operands' signs are different
+-- this function rounds ##dividend/divisior## towards zero whereas mod() rounds
+-- away from zero.
 --
 -- The arguments to this function may be atoms or sequences. The rules for
 -- [[:operations on sequences]] apply, and determine the shape of the returned object.
@@ -292,12 +281,13 @@ end function
 -- See Also:
 -- 		[[:mod]], [[:Relational operators]], [[:Operations on sequences]]
 
+
 --**
--- Compute the remainder of the division of two atoms. The result is not less than zero
+-- Compute the remainder of the division of two objects using floored division.
 --
 -- Parameters:
---		# ##dividend##: an object, each atom of which is the dividend of an Euclidean division
---		# ##divisor##: an object, each atom of which is the divisor in an Euclidean division.
+--		# ##dividend##: any Euphoria object.
+--		# ##divisor##: any Euphoria object.
 --
 -- Returns:
 --	An **object**, the shape of which depends on ##dividend##'s and
@@ -305,15 +295,17 @@ end function
 -- by ##divisor##, with ##divisor##'s sign.
 --
 -- Comments:
--- There is a mathematical integer n such that ##dividend## = n * ##divisor## + result.
--- The result is non-negative and has lesser magnitude than ##divisor##.
+-- * There is a integer ##N## such that ##dividend## = N * ##divisor## + result.
+-- * The result is non-negative and has lesser magnitude than ##divisor##.
 -- n needs not fit in an Euphoria integer.
---
--- The arguments to this function may be atoms or sequences. The rules for
+-- *  The result has the same sign as the dividend.
+-- * The arguments to this function may be atoms or sequences. The rules for
 -- [[:operations on sequences]] apply, and determine the shape of the returned object.
---
--- When both arguments are positive numbers, [[:mod]]() and ##remainder##()
--- are the same. They differ by either the ##divisor## or its opposite, when they do.
+-- * When both arguments have the same sign, mod() and [[:remainder]]()
+-- return the same result. 
+-- * This differs from [[:remainder]]() in that when the operands' signs are different
+-- this function rounds ##dividend/divisior## away from zero whereas remainder() rounds
+-- towards zero.
 --
 -- Example 1:
 -- <eucode>
@@ -324,7 +316,7 @@ end function
 -- Example 2:
 -- <eucode>
 -- s = mod({81, -3.5, -9, 5.5}, {8, -1.7, 2, -4})
--- -- s is {1, 1.6, 1, 1.5}
+-- -- s is {1,-0.1,1,-2.5}
 -- </eucode>
 --
 -- Example 3:
@@ -339,10 +331,118 @@ end function
 -- -- s is {0, 1, 1}
 -- </eucode>
 -- See Also:
--- 		[[:mod]], [[:Relational operators]], [[:Operations on sequences]]
+-- 		[[:remainder]], [[:Relational operators]], [[:Operations on sequences]]
 
 public function mod(object x, object y)
+	if equal(sign(x), sign(y)) then
+		return remainder(x,y)
+	end if
 	return x - y * floor(x / y)
+end function
+
+--**
+-- Return the integer portion of a number.
+--
+-- Parameters:
+--		# ##value##: any Euphoria object.
+--
+-- Returns:
+--	An **object**, the shape of which depends on ##values##'s. Each item in the 
+-- returned object will be an integer. These are the same corresponding items
+-- in ##value## except with any fractional portion removed.
+--
+-- Comments:
+-- * This is essentially done by always rounding towards zero. The [[:floor]]() function
+-- rounds towards negative infinity, which means it rounds towards zero for positive
+-- values and away from zero for negative values.
+-- * Note that ##trunc(x) + frac(x) = x##
+--
+--
+-- Example 1:
+-- <eucode>
+-- a = trunc(9.4)
+-- -- a is 9
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = trunc({81, -3.5, -9.999, 5.5})
+-- -- s is {81,-3, -9, 5}
+-- </eucode>
+-- See Also:
+-- 		[[:floor]] [[:frac]]
+public function trunc(object x)
+	return sign(x) * floor(abs(x))
+end function
+
+
+--**
+-- Return the fractional portion of a number.
+--
+-- Parameters:
+--		# ##value##: any Euphoria object.
+--
+-- Returns:
+--	An **object**, the shape of which depends on ##values##'s. Each item in the 
+-- returned object will be the same corresponding items
+-- in ##value## except with the integer portion removed.
+--
+-- Comments:
+-- Note that ##trunc(x) + frac(x) = x##
+--
+-- Example 1:
+-- <eucode>
+-- a = frac(9.4)
+-- -- a is 0.4
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = frac({81, -3.5, -9.999, 5.5})
+-- -- s is {0, -0.5, -0.999, 0.5}
+-- </eucode>
+-- See Also:
+-- 		[[:trunc]]
+
+public function frac(object x)
+	object temp = abs(x)
+	return sign(x) * (temp - floor(temp))
+end function
+
+
+--**
+-- Return an integral division of two objects.
+--
+-- Parameters:
+--		# ##divided##: any Euphoria object.
+--		# ##divisor##: any Euphoria object.
+--
+-- Returns:
+--	An **object**, which will be a sequence if either ##dividend## or ##divisor##
+-- is a sequence. 
+--
+-- Comments:
+-- * This calculates how many non-empty sets when ##dividend## is divided by ##divisor##.
+-- * The result's sign is the same as the ##dividend##'s sign.
+--
+-- Example 1:
+-- <eucode>
+-- object Tokens = 101
+-- object MaxPerEnvelope = 5
+-- integer Envelopes = intdiv( Tokens, MaxPerEnvelope) --> 21
+-- </eucode>
+--
+
+public function intdiv(object a, object b)
+	object x
+	object y
+	
+	x = abs(a)/abs(b)
+	y = floor(x)
+	if not equal(x,y) then
+		y += 1
+	end if
+	return  sign(a) * y
 end function
 
 --****
@@ -350,13 +450,16 @@ end function
 -- <built-in> function floor(object value)
 --
 -- Description:
--- Return the greatest integer less than or equal to some value. This amount to rounding down to an integer.
+-- Rounds ##value## down to the next integer less than or equal to ##value##. It
+-- does not simply truncate the fractional part, but actually rounds towards
+-- negative infinity.
 --
 -- Parameters:
---		# ##value##: an object, each atom in which will be acted upon.
+--		# ##value##: any Euphoria object; each atom in ##value## will be acted upon.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is the atom with no fractional part equal or immediately below ##value##.
+-- An **object** the same shape as ##value## but with each item guarenteed to be
+-- an integer less than or equal to the corresponding item in ##value##.
 --
 -- Example 1:
 -- <eucode>
@@ -1548,7 +1651,6 @@ end function
 -- ? approx(23,32, 10) -> 0 because 23 and 32 are within 10 of each other.
 -- </eucode>
 --
-
 public function approx(object p, object q, atom epsilon = 0.005)
 
 	if sequence(p) then
@@ -1701,3 +1803,4 @@ public function is_even_obj(object pData)
 	
 	return pData
 end function
+
