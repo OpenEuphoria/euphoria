@@ -1825,7 +1825,7 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 		pdestbuf = allocate(stat_buf_size)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
--- 			goto "out"
+ 			goto "out"
 		end if
 		ret = xstat(pdest, pdestbuf)
 		if ret then
@@ -1845,7 +1845,7 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 			if ret then
 				ret = delete_file(src)
 			end if
-			
+			goto "out"
 		end if
 		
 	end ifdef
@@ -1863,11 +1863,14 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 	ret = c_func(xMoveFile, {psrc, pdest})
 	
 	ifdef UNIX then
+		label "out"
+	end ifdef
+	
+	ifdef UNIX then
 		ret = not ret 
 	end ifdef
 	
 	ifdef UNIX then
-		label "out"
 		free(psrcbuf)
 		free(pdestbuf)
 	end ifdef
