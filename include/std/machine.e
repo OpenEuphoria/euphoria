@@ -295,19 +295,16 @@ ifdef WIN32 then
 	end if
 
 	integer page_size = 0
-	function get_page_size()
-		if page_size then
-			return page_size
-		end if
-		if GetSystemInfo_rid != -1 then
-			bordered_address system_info_ptr = allocate( 9 * 4 )
+	if GetSystemInfo_rid != -1 then
+		bordered_address system_info_ptr = allocate( 9 * 4 )
+		if system_info_ptr != 0 then
 			c_proc( GetSystemInfo_rid, { system_info_ptr } )
 			page_size = peek4u( system_info_ptr + 4 )
-			free( system_info_ptr )
+--			free( system_info_ptr )
+			machine_proc(M_FREE, system_info_ptr)
 		end if
-		return page_size
-	end function
-	public constant PAGE_SIZE = get_page_size()
+	end if
+	public constant PAGE_SIZE = page_size
 elsedef
 	public constant PAGE_SIZE = -1
 

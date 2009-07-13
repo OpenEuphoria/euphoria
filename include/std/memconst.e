@@ -59,6 +59,20 @@ elsedef
 		PAGE_NOACCESS = PROT_NONE
 
 end ifdef
+export constant MEMORY_PROTECTION = {
+	PAGE_EXECUTE,
+	PAGE_EXECUTE_READ,
+	PAGE_EXECUTE_READWRITE,
+	PAGE_EXECUTE_WRITECOPY,
+	PAGE_WRITECOPY,
+	PAGE_READWRITE,
+	PAGE_READONLY,
+	PAGE_NOACCESS
+}
+
+export type valid_memory_protection_constant( integer x )
+	return 0 != find( x, MEMORY_PROTECTION )
+end type
 
 
 --** 
@@ -101,20 +115,6 @@ export function test_exec( valid_memory_protection_constant protection )
 		PAGE_EXECUTE_WRITECOPY})
 end function
 
-export type valid_memory_protection_constant( integer x )
-	return 0 != find( x, MEMORY_PROTECTION )
-end type
-
-export constant MEMORY_PROTECTION = {
-	PAGE_EXECUTE,
-	PAGE_EXECUTE_READ,
-	PAGE_EXECUTE_READWRITE,
-	PAGE_EXECUTE_WRITECOPY,
-	PAGE_WRITECOPY,
-	PAGE_READWRITE,
-	PAGE_READONLY,
-	PAGE_NOACCESS
-}
 
 export type valid_wordsize( integer i )
 	return find(i, {1,2,4})!=0
@@ -137,20 +137,3 @@ export constant
 export atom kernel_dll, memDLL_id, 
 	VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid,
 	VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
-
-integer page_size = 0
-
-function get_page_size()
-	if page_size then
-		return page_size
-	end if
-	if GetSystemInfo_rid != -1 then
-		atom system_info_ptr = machine_func(M_ALLOC, 9 * 4)
-		eu:c_proc(GetSystemInfo_rid, { system_info_ptr })
-		page_size = eu:peek4u( system_info_ptr + 4)
-		machine_proc(M_FREE, system_info_ptr)
-	end if
-	return page_size
-end function
-
-
