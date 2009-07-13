@@ -2,6 +2,7 @@ include std/unittest.e
 include std/net/http.e
 include std/search.e
 include std/math.e
+include std/os.e
 
 test_equal("urlencode 1", "Hello+%26+World", urlencode("Hello & World"))
 test_equal("urlencode 2", "Hello%20%26%20World", urlencode("Hello & World", "%20"))
@@ -19,10 +20,15 @@ ifdef not NOINET_TESTS then
     content = get_url("http://openeuphoria.org/tests/post_test.cgi")
 	test_true("get_url post 1", length(content))
 	test_equal("get_url post 2", "success", content[2])
-
+	
+	 set_sendheader("POSTDATA", "")
+	set_sendheader("POST", "")
+	set_sendheader("GET", "")
     content = get_url("http://openeuphoria.org/tests/post_test.txt")
 	test_true("get_url post 3", length(content))
 	test_equal("get_url post 4", data, content[2])
+	printf(1, "header: %s\n", content )
+	
 elsedef
     puts(2, " WARNING: URL tests were not run\n")
 end ifdef

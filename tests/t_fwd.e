@@ -66,7 +66,11 @@ end type
 procedure bbar()
 end procedure
 
-procedure ffoo( int bbar, int what )
+function bbaz()
+	return 0
+end function
+
+procedure ffoo( int bbar, int bbaz )
 end procedure
 
 type int( object i )

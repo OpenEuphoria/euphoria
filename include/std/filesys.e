@@ -1825,7 +1825,7 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 		pdestbuf = allocate(stat_buf_size)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
-			goto "out"
+-- 			goto "out"
 		end if
 		ret = xstat(pdest, pdestbuf)
 		if ret then

@@ -3544,7 +3544,7 @@ procedure SubProg(integer prog_type, integer scope)
 				token temptok = next_token()
 				integer undef_type = 0
 				if temptok[T_ID] != TYPE and temptok[T_ID] != QUALIFIED_TYPE then
-					if find( temptok[T_ID], {VARIABLE, QUALIFIED_VARIABLE, PROC}) then
+					if find( temptok[T_ID], {VARIABLE, QUALIFIED_VARIABLE, PROC, FUNC}) then
 						-- -- So there are two names next to each other.
 						if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 							-- The first name is undefined so it might be a type
