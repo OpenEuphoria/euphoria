@@ -1628,8 +1628,21 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 		integer success = 0
 		
 		if file_exists(src) then
-			if overwrite or not file_exists( dest ) then			
-				success = (write_file(src, dest) = 1)
+			if overwrite or not file_exists( dest ) then
+				integer
+					in  = open( src, "rb" ),
+					out = open( dest, "wb" )
+				if in != -1 and out != -1 then
+					integer byte
+					while byte != -1 with entry do
+						puts( out, byte )
+					entry
+						byte = getc( in )
+					end while
+					success = 1
+					close( in )
+					close( out )
+				end if
 			end if
 		end if
 		
@@ -1785,6 +1798,10 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	sequence tempfile = ""
 
 	if not file_exists(src) then
+		return 0
+	end if
+	
+	if not overwrite and file_exists( dest ) then
 		return 0
 	end if
 	
