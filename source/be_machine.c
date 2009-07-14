@@ -4878,8 +4878,8 @@ object machine(object opcode, object x)
 				break;
 			case M_FREE:
 				addr = get_pos_int("free", x);
-				free((char *)addr);
-				return ATOM_1;
+				if (addr != NULL) free((char *)addr);
+				return ATOM_0;
 				break;
 			case M_SEEK:
 				return Seek(x);

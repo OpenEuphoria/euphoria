@@ -38,6 +38,8 @@
 --
 
 public include std/memconst.e
+include std/types.e
+include std/error.e
 include std/sequence.e
 ifdef DATA_EXECUTE then
 	include std/machine.e
@@ -261,23 +263,22 @@ end function
 -- @[machine:free]
 --
 -- Parameters:
---              # ##addr##, an atom, the address of a block to free.
--- block, i.e. the address that was returned by ##[[:allocate]]()##.
+--  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
 --
 -- Comments:
---   Use ##free()## to recycle blocks of memory during execution. This will reduce the chance of 
---   running out of memory or getting into excessive virtual memory swapping to disk. Do not 
---   reference a block of memory that has been freed. When your program terminates, all 
---   allocated memory will be returned to the system.
--- 
---   Do not use ##free()## to deallocate memory that was allocated using ##[[:allocate_low]]()##. 
+--  * Use ##free()## to return blocks of memory the during execution. This will reduce the chance of 
+--   running out of memory or getting into excessive virtual memory swapping to disk. 
+-- * Do not reference a block of memory that has been freed. 
+-- * When your program terminates, all allocated memory will be returned to the system.
+-- * Do not use ##free()## to deallocate memory that was allocated using ##[[:allocate_low]]()##. 
 --   Use ##[[:free_low]]()## for this purpose.
---
--- ##addr## must have been allocated previously using [[:allocate]](). You
--- cannot use it to relinquish part of a block. Instead, you have to allocate
--- a block of the new size, copy useful contents from old block there and
--- then free() the old block.  If the memory was allocated and automatic cleanup
--- was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
+-- * ##addr## must have been allocated previously using [[:allocate]](). You
+--   cannot use it to relinquish part of a block. Instead, you have to allocate
+--   a block of the new size, copy useful contents from old block there and
+--   then free() the old block.  
+-- * If the memory was allocated and automatic cleanup
+--   was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
+-- * An ##addr## of zero is simply ignored.
 --
 -- Example 1:
 --   ##demo/callmach.ex##
@@ -285,19 +286,43 @@ end function
 -- See Also:
 --     [[:allocate]], [[:free_low]], [[:free_code]]
 
-public procedure free(machine_addr addr)
-	ifdef not DATA_EXECUTE then
-        	machine_proc(M_FREE, addr)
-	elsedef	
-		if not dep_works() then
-	        	machine_proc(M_FREE, addr)
-			return
+public procedure free(object addr)
+
+	if number_array (addr) then
+		if ascii_string(addr) then
+			crash("free(\"%s\") is not a valid address", {addr})
 		end if
+		
+		for i = 1 to length(addr) do
+			free(addr[i])
+		end for
+		return
+	elsif sequence(addr) then
+		crash("free() called with nested sequence")
+	end if
 	
-		ifdef WIN32 then
-			c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
+	if addr = 0 then
+		-- Special case, a zero address is assumed to be an uninitialized pointer,
+		-- so it is ignored.
+		return
+	end if
+	
+	if machine_addr(addr) then
+		ifdef not DATA_EXECUTE then
+	        	machine_proc(M_FREE, addr)
+		elsedef	
+			if not dep_works() then
+		        	machine_proc(M_FREE, addr)
+				return
+			end if
+		
+			ifdef WIN32 then
+				c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
+			end ifdef
 		end ifdef
-	end ifdef
+	else
+		crash("free(%g) is not a valid address", addr)
+	end if
 end procedure
 
 

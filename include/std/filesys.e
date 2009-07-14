@@ -23,6 +23,7 @@ include std/machine.e
 include std/sequence.e
 include std/types.e
 include std/text.e
+include std/io.e
 
 ifdef UNIX then
 	include std/get.e -- for disk_size()
@@ -633,6 +634,55 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 end function
 
 --**
+-- Delete a file.
+--
+-- Parameters:
+-- 		# ##name##: a sequence, the name of the file to delete.
+--
+-- Returns:
+--     An **integer**, 0 on failure, 1 on success.
+
+public function delete_file(sequence name)
+	ifdef DOS32 then
+	    atom low_buff
+	    sequence reg_list
+	    low_buff = allocate_low(length(name) + 1)
+	    if not low_buff then
+	        return 0
+	    end if
+	    poke(low_buff, name & 0)
+	    reg_list = repeat(0,10)
+	    if short_names then
+	        reg_list[REG_AX] = #4100
+	    else
+	        reg_list[REG_AX] = #7141
+	    end if
+	    reg_list[REG_DS] = floor(low_buff / 16)
+	    reg_list[REG_DX] = remainder(low_buff, 16)
+	    reg_list[REG_SI] = #0000
+	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+	    reg_list = dos_interrupt(#21, reg_list)
+	    free_low(low_buff)
+	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
+	        return 0
+	    else
+	        return 1
+	    end if
+	
+	elsedef
+		atom pfilename = allocate_string(name)
+		integer success = c_func(xDeleteFile, {pfilename})
+		
+		ifdef UNIX then
+			success = not success
+		end ifdef
+	
+		free(pfilename)
+		return success
+	end ifdef
+end function
+
+--**
 -- Returns the current directory, with a trailing SLASH
 --
 -- Parameters:
@@ -1043,6 +1093,9 @@ end function
 --
 -- Parameters:
 -- 		# ##path##: the path from which to extract information
+--      # ##pcd##: If not zero and there is no directory name in ##path##
+--                 then "." is returned. The default (0) will just return
+--                 any directory name in ##path##.
 --
 -- Returns:
 -- 		A **sequence**, the full file name part of ##path##.
@@ -1059,9 +1112,14 @@ end function
 -- See Also:
 --   [[:driveid]], [[:filename]], [[:pathinfo]]
 
-public function dirname(sequence path)
+public function dirname(sequence path, integer pcd = 0)
 	sequence data
 	data = pathinfo(path)
+	if pcd then
+		if length(data[1]) = 0 then
+			return "."
+		end if
+	end if
 	return data[1]
 end function
 
@@ -1534,7 +1592,9 @@ end function
 -- Parameters:
 -- 		# ##src##: a sequence, the name of the file or directory to copy
 -- 		# ##dest##: a sequence, the new name or location of the file
--- 		# ##overwrite##: an integer, 0 to prevent overwriting an existing file
+-- 		# ##overwrite##: an integer; 0 (the default) will prevent an existing destination
+--                       file from being overwritten. Non-zero will overwrite the
+--                       destination file.
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
@@ -1546,7 +1606,7 @@ end function
 -- See Also:
 -- [[:move_file]], [[:rename_file]]
 
-public function copy_file(sequence src, sequence dest, atom overwrite)
+public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 	
 	if length(dest) then
 		if file_type( dest ) = FILETYPE_DIRECTORY then
@@ -1562,32 +1622,16 @@ public function copy_file(sequence src, sequence dest, atom overwrite)
 		atom psrc = allocate_string(src)
 		atom pdest = allocate_string(dest)
 		integer success = c_func(xCopyFile, {psrc, pdest, not overwrite})
-		free(pdest)
-		free(psrc)
+		free({pdest, psrc})
 		
 	elsedef
 		integer success = 0
-		integer f = open(src, "rb")
-		if f = -1 then 
-			return success
-		end if
 		
-		if overwrite or not file_exists( dest ) then
-			
-			integer h = open( dest, "wb" )
-			if h != -1 then
-				integer c
-				while c != -1 with entry do
-					puts(h, c)
-				entry
-					c = getc(f)
-				end while
-				
-				close( h )
-				success = 1
+		if file_exists(src) then
+			if overwrite or not file_exists( dest ) then			
+				success = (write_file(src, dest) = 1)
 			end if
 		end if
-		close(f)
 		
 	end ifdef
 
@@ -1601,125 +1645,110 @@ end function
 -- Parameters:
 -- 		# ##src##: a sequence, the name of the file or directory to rename.
 -- 		# ##dest##: a sequence, the new name for the renamed file
+--		# ##overwrite##: an integer, 0 (the default) to prevent renaming if destination file exists,
+--                                   1 to delete existing destination file first
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
--- 		If ##dest## contains a path specification, this is equivalent to moving the file, as 
+-- 	*	If ##dest## contains a path specification, this is equivalent to moving the file, as 
 -- 		well as possibly changing its name. However, the path must be on the same drive for 
 -- 		this to work.
+-- * If ##overwrite## was requested but the rename fails, any existing destination
+--  file is preserved.
 --
 -- See Also:
 -- [[:move_file]], [[:copy_file]]
 
-public function rename_file(sequence src, sequence dest)
+public function rename_file(sequence src, sequence dest, integer overwrite=0)
 	atom psrc, pdest, ret
+	sequence tempfile = ""
+	
+	if not overwrite then
+		if file_exists(dest) then
+			return 0
+		end if
+	else
+		if file_exists(dest) then
+			tempfile = temp_file(dest)
+			ret = move_file(dest, tempfile)
+		end if
+	end if
+	
 	ifdef DOS32 then
 	    atom low_buff_old, low_buff_new
 	    integer i
 	    sequence reg_list
+	    
+	    ret = 1
 	    if length(src) > 3 and length(dest) > 3 then
 	        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
 	            if eu:compare(src[1], dest[1]) then
 			-- renaming a file across drives is not supported
-	                return 0
+	                ret = 0
 	            end if
 	        end if
 	    end if
-	    low_buff_old = allocate_low(length(src) + 1)
-	    if not low_buff_old then
-	        return 0
+	    
+	    if ret != 0 then
+		    low_buff_old = allocate_low(length(src) + 1)
+		    if not low_buff_old then
+	    	    ret = 0
+	    	end if
 	    end if
-	    low_buff_new = allocate_low(length(dest) + 1)
-	    if not low_buff_new then
-	        free_low(low_buff_old)
-	        return 0
+	    
+	    if ret != 0 then
+		    low_buff_new = allocate_low(length(dest) + 1)
+		    if not low_buff_new then
+	    	    free_low(low_buff_old)
+	        	ret = 0
+	        end if
 	    end if
-	    poke(low_buff_old, src & 0)
-	    poke(low_buff_new, dest & 0)
-	    reg_list = repeat(0,10)
-	    if short_names then
-	        reg_list[REG_AX] = #5600
-	    else
-	        reg_list[REG_AX] = #7156
+	    
+	    if ret != 0 then
+		    poke(low_buff_old, src & 0)
+		    poke(low_buff_new, dest & 0)
+		    reg_list = repeat(0,10)
+		    if short_names then
+		        reg_list[REG_AX] = #5600
+		    else
+		        reg_list[REG_AX] = #7156
+		    end if
+		    reg_list[REG_DS] = floor(low_buff_old / 16)
+		    reg_list[REG_DX] = remainder(low_buff_old, 16)
+		    reg_list[REG_ES] = floor(low_buff_new / 16)
+		    reg_list[REG_DI] = remainder(low_buff_new, 16)
+		    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
+		    reg_list = dos_interrupt(#21, reg_list)
+		    free_low(low_buff_old)
+		    free_low(low_buff_new)
+		    ret = (and_bits(reg_list[REG_FLAGS], 1) = 0)
 	    end if
-	    reg_list[REG_DS] = floor(low_buff_old / 16)
-	    reg_list[REG_DX] = remainder(low_buff_old, 16)
-	    reg_list[REG_ES] = floor(low_buff_new / 16)
-	    reg_list[REG_DI] = remainder(low_buff_new, 16)
-	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-	    reg_list = dos_interrupt(#21, reg_list)
-	    free_low(low_buff_old)
-	    free_low(low_buff_new)
-	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-	        return 0
-	    else
-	        return 1
-	    end if
-	end ifdef
-	
-	psrc = allocate_string(src)
-	pdest = allocate_string(dest)
-	ret = c_func(xMoveFile, {psrc, pdest})
-	
-	ifdef UNIX then
-		ret = not ret 
-	end ifdef
-	
-	free(pdest)
-	free(psrc)
-	
-	return ret
-end function
-
---**
--- Delete a file.
---
--- Parameters:
--- 		# ##name##: a sequence, the name of the file to delete.
---
--- Returns:
---     An **integer**, 0 on failure, 1 on success.
-
-public function delete_file(sequence name)
-	ifdef DOS32 then
-	    atom low_buff
-	    sequence reg_list
-	    low_buff = allocate_low(length(name) + 1)
-	    if not low_buff then
-	        return 0
-	    end if
-	    poke(low_buff, name & 0)
-	    reg_list = repeat(0,10)
-	    if short_names then
-	        reg_list[REG_AX] = #4100
-	    else
-	        reg_list[REG_AX] = #7141
-	    end if
-	    reg_list[REG_DS] = floor(low_buff / 16)
-	    reg_list[REG_DX] = remainder(low_buff, 16)
-	    reg_list[REG_SI] = #0000
-	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-	    reg_list = dos_interrupt(#21, reg_list)
-	    free_low(low_buff)
-	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-	        return 0
-	    else
-	        return 1
-	    end if
-	
 	elsedef
-		atom pfilename = allocate_string(name)
-		integer success = c_func(xDeleteFile, {pfilename})
+	
+		psrc = allocate_string(src)
+		pdest = allocate_string(dest)
+		ret = c_func(xMoveFile, {psrc, pdest})
 		
 		ifdef UNIX then
-			success = not success
+			ret = not ret 
 		end ifdef
-	
-		free(pfilename)
-		return success
+		
+		free({pdest, psrc})
 	end ifdef
+	
+	if overwrite then
+		if not ret then
+			if length(tempfile) > 0 then
+				-- rename was unsuccessful so restore from tempfile
+				ret = move_file(tempfile, dest)
+			end if
+		end if
+		delete_file(tempfile)
+	end if
+	
+	return ret
 end function
 
 ifdef LINUX then
@@ -1738,16 +1767,27 @@ end ifdef
 -- Parameters:
 -- 		# ##src##: a sequence, the name of the file or directory to move
 -- 		# ##dest##: a sequence, the new location for the file
---		# ##overwrite##: an integer, 0 to disable overwriting an existing file (the default)
+--		# ##overwrite##: an integer, 0 (the default) to prevent overwriting an existing destination file,
+--                                   1 to overwrite existing destination file
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
 --
+-- Comments:
+-- * If ##overwrite## was requested but the move fails, any existing destination
+--  file is preserved.
+
 -- See Also:
 -- [[:rename_file]], [[:copy_file]]
 
-public function move_file(sequence src, sequence dest, atom overwrite=0)
-	atom psrc, pdest, ret
+public function move_file(sequence src, sequence dest, integer overwrite=0)
+	atom psrc = 0, pdest = 0, ret
+	sequence tempfile = ""
+
+	if not file_exists(src) then
+		return 0
+	end if
+	
 	ifdef DOS32 then
 	    atom low_buff_old, low_buff_new
 	    integer i
@@ -1797,7 +1837,7 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 	    end if
 	end ifdef
 	ifdef UNIX then
-		atom psrcbuf, pdestbuf
+		atom psrcbuf = 0, pdestbuf = 0
 		integer stat_t_offset, dev_t_size, stat_buf_size
 	end ifdef
 	ifdef LINUX then
@@ -1816,19 +1856,22 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 		dev_t_size = 8
 	end ifdef
 	
-	psrc = allocate_string(src)
-	pdest = allocate_string(dest)
 
 	ifdef UNIX then
-		atom pdir
 		psrcbuf = allocate(stat_buf_size)
-		pdestbuf = allocate(stat_buf_size)
+		psrc = allocate_string(src)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
- 			goto "out"
+ 			free({psrcbuf, psrc})
+ 			return 0
 		end if
+		
+		pdestbuf = allocate(stat_buf_size)
+		pdest = allocate_string(dest)
 		ret = xstat(pdest, pdestbuf)
 		if ret then
+			-- Assume destination doesn't exist
+			atom pdir
 			if length(dirname(dest)) = 0 then
 				pdir = allocate_string(current_dir())
 			else
@@ -1845,37 +1888,36 @@ public function move_file(sequence src, sequence dest, atom overwrite=0)
 			if ret then
 				ret = delete_file(src)
 			end if
-			goto "out"
+ 			free({psrcbuf, psrc, pdestbuf, pdest})
+ 			return (not ret)
 		end if
 		
+	elsedef		
+		psrc = allocate_string(src)
+		pdest = allocate_string(dest)
 	end ifdef
 
 	if overwrite then
 		-- return value is ignored, we don't care if it existed or not
-		ret = open(src, "rb")
-		if ret != -1 then
-			-- check to make sure the source exists before copying
-			close(ret)
-			ret = delete_file(dest)
-		end if
+		tempfile = temp_file(dest)
+		move_file(dest, tempfile)
 	end if
 
 	ret = c_func(xMoveFile, {psrc, pdest})
 	
 	ifdef UNIX then
-		label "out"
-	end ifdef
-	
-	ifdef UNIX then
 		ret = not ret 
+		free({psrcbuf, pdestbuf})
 	end ifdef
+	free({pdest, psrc})
 	
-	ifdef UNIX then
-		free(psrcbuf)
-		free(pdestbuf)
-	end ifdef
-	free(pdest)
-	free(psrc)
+	if overwrite then
+		if not ret then
+			-- move was unsuccessful so restore tempfile
+			move_file(tempfile, dest)
+		end if
+		delete_file(tempfile)
+	end if
 	
 	return ret
 end function
@@ -2082,10 +2124,7 @@ public function disk_metrics(object disk_path)
 			result = peek4s({metric_addr, 4}) 
 		end if 
 	 
-		if path_addr != 0 then 
-			free(path_addr) 
-		end if 
-		free(metric_addr) 
+		free({path_addr, metric_addr}) 
 	elsifdef UNIX then
 		sequence disk_size = {0,0,0}
 
@@ -2113,8 +2152,7 @@ public function disk_metrics(object disk_path)
 		psrcbuf = allocate(stat_buf_size)
 		ret = xstat(psrc,psrcbuf)
 		bytes_per_cluster = peek4s(psrcbuf+stat_t_offset)
-		free(psrcbuf)
-		free(psrc)
+		free({psrcbuf, psrc})
 		if ret then
 			-- failure
 			return result 
@@ -2322,4 +2360,100 @@ public function dir_size(sequence dir_path, integer count_all = 0)
 	fc[COUNT_TYPES] = sort(fc[COUNT_TYPES])
 
 	return fc
+end function
+
+--**
+-- Returns a file name that can be used as a temporary file.
+--
+-- Parameters:
+--	# ##pDir## - A sequence. A directory where the temporary file is expected
+--               to be created. 
+--            ** If omitted (the default) the 'temporary' directory
+--               will be used. The temporary directory is defined in the "TEMP" 
+--               environment symbol, or failing that the "TMP" symbol and failing
+--               that "C:\TEMP\" is used in non-Unix systems and "/tmp/" is used
+--               in Unix systems. 
+--            ** If ##pDir## was supplied, 
+--               *** If it is an existing file, that file's directory is used.
+--               *** If it is an existing directory, it is used.
+--               *** If it doesn't exist, the directory name portion is used.
+--  # ##pPrefix## - A sequence: The is prepended to the start of the generated file name.
+--               The default is "".
+--  # ##pExt## - A sequence: The is a file extention used in the generated file. 
+--               The default is "_T_".
+--  # ##pReserve## - An integer: If not zero an empty file is created using the 
+--               generated name. The default is not to reserve (create) the file.
+--
+-- Returns:
+--     A **sequence**: A generated file name.
+--                  
+-- Comments:
+--
+-- Example 1:
+-- <eucode>
+--  ? temp_file("/usr/space", "myapp", "tmp") --> /usr/space/myapp736321.tmp
+--  ? temp_file() --> /tmp/277382._T_
+--  ? temp_file("/users/me/abc.exw") --> /users/me/992831._T_
+-- </eucode>
+
+public function temp_file(sequence pDir = "", sequence pPrefix = "", sequence pExt = "_T_", integer pReserve = 0)
+	sequence  randname
+	
+	if length(pDir) = 0 then
+		object envtmp
+		envtmp = getenv("TEMP")
+		if atom(envtmp) then
+			envtmp = getenv("TMP")
+		end if
+		ifdef WIN32 then			
+			if atom(envtmp) then
+				envtmp = "C:\\temp\\"
+			end if
+		elsedef
+			if atom(envtmp) then
+				envtmp = "/tmp/"
+			end if
+		end ifdef
+		pDir = envtmp
+	else
+		object tdir
+		tdir = dir(pDir)
+		if sequence(tdir) then
+			if not find("d", tdir[1][D_ATTRIBUTES]) then
+				pDir = dirname(pDir, 1)
+			end if
+		else
+			tdir = dirname(pDir, 1)
+			if file_exists(tdir) then
+				pDir = tdir
+			else
+				pDir = "."
+			end if
+		end if
+	end if
+	if pDir[$] != SLASH then
+		pDir &= SLASH
+	end if
+	
+	
+	while 1 do
+		randname = sprintf("%s%s%06d.%s", {pDir, pPrefix, rand(999_999), pExt})
+		if not file_exists( randname ) then
+			exit
+		end if
+	end while
+	
+	if pReserve then
+		integer ret
+		-- Reserve the name by creating an empty file.
+		if not file_exists(pDir) then
+			if create_directory(pDir) = 0 then
+				return ""
+			end if
+		end if
+		ret = write_file(randname, "")
+	end if
+	
+	return randname
+	
 end function

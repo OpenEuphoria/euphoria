@@ -1,4 +1,5 @@
 include std/filesys.e
+include std/io.e
 include std/unittest.e
 
 sequence fullname, pname, fname, fext, eolsep, driveid
@@ -66,6 +67,47 @@ else
 test_false("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
 test_false("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
 end ifdef
+
+-- move_file()
+delete_file("fstesta.txt")
+delete_file("fstestb.txt")
+write_file("fstesta.txt", "move data", TEXT_MODE)
+test_true("move_file #1", move_file("fstesta.txt", "fstestb.txt", 1))
+test_true("move_file #2", sequence( dir("fstestb.txt"))) -- 'b' should now exist
+test_false("move_file #3", sequence( dir("fstesta.txt"))) -- 'a' should now be gone
+write_file("fstesta.txt", "some data", TEXT_MODE)
+test_false("move_file #4", move_file("fstesta.txt", "fstestb.txt")) -- should not overwrite existing file
+test_false("move_file #5", move_file("fstesta.txt", "fstestb.txt", 0)) -- should not overwrite existing file
+test_true("move_file #6", move_file("fstesta.txt", "fstestb.txt", 1)) -- should overwrite existing file
+delete_file("fstesta.txt")
+delete_file("fstestb.txt")
+
+-- rename_file()
+delete_file("fstesta.txt")
+delete_file("fstestb.txt")
+write_file("fstesta.txt", "rename data", TEXT_MODE)
+test_true("rename_file #1", rename_file("fstesta.txt", "fstestb.txt", 1))
+test_true("rename_file #2", sequence( dir("fstestb.txt"))) -- 'b' should now exist
+test_false("rename_file #3", sequence( dir("fstesta.txt"))) -- 'a' should now be gone
+write_file("fstesta.txt", "some data", TEXT_MODE)
+test_false("rename_file #4", rename_file("fstesta.txt", "fstestb.txt")) -- should not overwrite existing file
+test_false("rename_file #5", rename_file("fstesta.txt", "fstestb.txt", 0)) -- should not overwrite existing file
+test_true("rename_file #6", rename_file("fstesta.txt", "fstestb.txt", 1)) -- should overwrite existing file
+delete_file("fstesta.txt")
+delete_file("fstestb.txt")
+
+-- copy_file()
+delete_file("fstesta.txt")
+delete_file("fstestb.txt")
+write_file("fstesta.txt", "copying data", TEXT_MODE)
+test_true("copy_file #1", copy_file("fstesta.txt", "fstestb.txt", 1))
+test_true("copy_file #2", sequence( dir("fstestb.txt"))) -- 'b' should now exist
+test_true("copy_file #3", sequence( dir("fstesta.txt"))) -- 'a' should still exist
+test_false("copy_file #4", copy_file("fstesta.txt", "fstestb.txt")) -- should not overwrite existing file
+test_false("copy_file #5", copy_file("fstesta.txt", "fstestb.txt", 0)) -- should not overwrite existing file
+delete_file("fstesta.txt")
+delete_file("fstestb.txt")
+
 
 test_report()
 
