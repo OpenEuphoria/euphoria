@@ -158,7 +158,7 @@ includes WIN/95/ME/98/XP/NT/Vista/7/... You will see the constant ##WIN32## used
 for Windows specific code.
 
 * "Dos" will be a general reference to a family of operating systems that
-include MSDOS/DOS/... You will see the consant ##DOS32## used for Dos
+include MSDOS/DOS/... You will see the constant ##DOS32## used for Dos
 specific code.
 
 * "Unix" will be a general reference to the family operating systems that
@@ -169,5 +169,5 @@ of operating systems.
 Directory names in Windows and Dos use ##\## separators, while Unix systems use ##/##.
 Unix users should substitute {{{ / }}} when they examine example code.
 
-Operating system names are often tradmarks. There is no intent to infringe on their
+Operating system names are often trademarks. There is no intent to infringe on their
 owner rights.
