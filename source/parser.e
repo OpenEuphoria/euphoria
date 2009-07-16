@@ -929,7 +929,7 @@ end procedure
 procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 	integer args = 0
 	symtab_index proc = tok[T_SYM]
-	
+	integer tok_id = tok[T_ID]
 	remove_symbol( proc )
 	while 1 do
 		tok = next_token()
@@ -964,6 +964,9 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 	emit_opnd( args )
 	
 	op_info1 = proc
+	if tok_id = QUALIFIED_VARIABLE then
+		set_qualified_fwd( SymTab[proc][S_FILE_NO] )
+	end if
 	emit_op( opcode )
 	if not TRANSLATE then
 		if OpTrace then
@@ -1133,7 +1136,6 @@ procedure Factor()
 	end if
 	switch id label "factor" do
 		case VARIABLE, QUALIFIED_VARIABLE then
-		
 			sym = tok[T_SYM]
 			if SymTab[sym][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
@@ -3330,13 +3332,13 @@ procedure Statement_list()
 	while TRUE do
 		tok = next_token()
 		id = tok[T_ID]
-
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
 				switch forward[T_ID] do
 					case LEFT_ROUND then
 						StartSourceLine( TRUE )
+						
 						Forward_call( tok )
 						continue
 						
@@ -4019,7 +4021,6 @@ export procedure real_parser(integer nested)
 		start_index = length(Code)+1
 		tok = next_token()
 		id = tok[T_ID]
-
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
 			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()

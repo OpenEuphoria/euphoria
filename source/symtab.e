@@ -734,7 +734,6 @@ end ifdef
 				-- qualified - must match global symbol in specified file (or be in the file's
 				-- include path)
 				scope = SymTab[tok[T_SYM]][S_SCOPE]
-				
 				if not file_no then
 					-- internal eu namespace was used
 					if scope = SC_PREDEF then
@@ -746,7 +745,7 @@ end ifdef
 				else
 					integer tok_file = SymTab[tok[T_SYM]][S_FILE_NO]
 					integer good = 0
-					if scope = SC_PRIVATE then
+					if scope = SC_PRIVATE or scope = SC_PREDEF then
 						-- ignore this one
 						
 					elsif file_no = tok_file then
@@ -922,7 +921,9 @@ end ifdef
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
-	
+	if file_no != -1 then
+		SymTab[tok[T_SYM]][S_FILE_NO] = file_no
+	end if
 	return tok  -- no ref on newly declared symbol
 end function
 
