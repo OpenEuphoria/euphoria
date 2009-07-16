@@ -184,6 +184,18 @@ export function find_category(integer tokid)
 	end for
 	return catname
 end function
+
+export function find_token_text(integer tokid)
+	sequence token_text = "unknown word"
+	for i = 1 to length(keylist) do
+		if keylist[i][3] = tokid then
+			token_text = keylist[i][1]
+			exit
+		end if
+	end for
+	return token_text
+end function
+
 --===========================================
 -- How to add defaulted parms to builtins
 --===========================================

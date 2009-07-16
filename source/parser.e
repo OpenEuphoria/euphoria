@@ -629,18 +629,25 @@ function Expr_list()
 	return n
 end function
 
-procedure tok_match(integer tok)
+procedure tok_match(integer tok, integer prevtok = 0)
 -- match token or else syntax error
 	token t
-	sequence expected, actual
+	sequence expected, actual, prevname
 
 	t = next_token()
 	if t[T_ID] != tok then
 		expected = LexName(tok)
 		actual = LexName(t[T_ID])
-		CompileErr(sprintf(
+		if prevtok = 0 then
+			CompileErr(sprintf(
 				   "Syntax error - expected to see possibly %s, not %s",
 				   {expected, actual}))
+		else
+			prevname = LexName(prevtok)
+			CompileErr(sprintf(
+				   "Syntax error - expected to see %s after %s, not %s",
+				   {expected, prevname, actual}))
+		end if
 	end if
 end procedure
 
@@ -1531,10 +1538,11 @@ procedure Assignment(token left_var)
 
 	assign_op = tok[T_ID]
 	if not find(assign_op, ASSIGN_OPS) then
+		sequence lname = SymTab[left_var[T_SYM]][S_NAME]
 		if assign_op = COLON then
-			CompileErr(sprintf("Syntax error - Unknown namespace '%s' used", {SymTab[left_var[T_SYM]][S_NAME]}))
+			CompileErr(sprintf("Syntax error - Unknown namespace '%s' used", {lname}))
 		else
-			CompileErr("Syntax error - expected to see an assignment such as =, +=, -=, *=, /= or &=")
+			CompileErr(sprintf("expected to see an assignment after '%s', such as =, +=, -=, *=, /= or &=", {lname}))
 		end if
 	end if
 
@@ -2103,7 +2111,7 @@ procedure If_statement()
 	end if
 
 	tok_match(END)
-	tok_match(IF)
+	tok_match(IF, END)
 	
 	End_block( IF )
 
@@ -2478,7 +2486,7 @@ procedure Switch_statement()
 	
 	optimize_switch( switch_pc, else_bp, cases, jump_table )
 	tok_match(END)
-	tok_match(SWITCH)
+	tok_match(SWITCH, END)
 	if TRANSLATE then
 		emit_op(NOPSWITCH)
 	end if
@@ -2544,7 +2552,7 @@ procedure While_statement()
 	retry_addr &= length(Code)+1
 	call_proc(forward_Statement_list, {})
 	tok_match(END)
-	tok_match(WHILE)
+	tok_match(WHILE, END)
 	
 	End_block( WHILE )
 	
@@ -2621,6 +2629,7 @@ end procedure
 
 integer top_level_parser
 integer live_ifdef = 0
+sequence ifdef_lineno = {}
 
 procedure Ifdef_statement()
 	sequence option
@@ -2628,6 +2637,7 @@ procedure Ifdef_statement()
 	token tok
 
 	live_ifdef += 1
+	ifdef_lineno &= line_number
 
 	integer parser_id
 	if CurrentSub != TopLevelSub or length(if_labels) or length(loop_labels) then
@@ -2726,7 +2736,7 @@ procedure Ifdef_statement()
 		while 1 do
 			tok = next_token()
 			if tok[T_ID] = END_OF_FILE then
-				CompileErr("End of file reached while searching for 'end ifdef'")
+				CompileErr(sprintf("End of file reached while searching for 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$]))
 			elsif tok[T_ID] = END then
 				tok = next_token()
 				if tok[T_ID] = IFDEF then
@@ -2737,7 +2747,7 @@ procedure Ifdef_statement()
 					end if
 				elsif in_matched then
 					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
-					CompileErr("'end' command out of place")
+					CompileErr(sprintf("Expecting 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$]))
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
 				if has_matched then
@@ -2758,8 +2768,9 @@ procedure Ifdef_statement()
 						in_elsedef = 1
 						call_proc(parser_id, {})
 						tok_match(END)
-						tok_match(IFDEF)
+						tok_match(IFDEF, END)
 						live_ifdef -= 1
+						ifdef_lineno = ifdef_lineno[1..$-1]
 						return
 					end if
 				end if
@@ -2772,6 +2783,7 @@ procedure Ifdef_statement()
 	end while
 
 	live_ifdef -= 1
+	ifdef_lineno = ifdef_lineno[1..$-1]
 	No_new_entry = 0
 end procedure
 
@@ -2891,7 +2903,7 @@ procedure For_statement()
 
 	Statement_list()
 	tok_match(END)
-	tok_match(FOR)
+	tok_match(FOR, END)
 	
 	End_block( FOR )
 	
@@ -3440,7 +3452,26 @@ procedure Statement_list()
 				Global_declaration( tok[T_SYM], SC_LOCAL )
 			end if
 
+
 		else
+			if id = ELSE then
+				if length(if_stack) = 0 then
+					if live_ifdef > 0 then
+						CompileErr(sprintf("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$]))
+					else
+						CompileErr("Not expecting 'else'")
+					end if
+				end if
+			elsif id = ELSIF then
+				if length(if_stack) = 0 then
+					if live_ifdef > 0 then
+						CompileErr(sprintf("Should this be 'elsidef' for the ifdef on line %d?", ifdef_lineno[$]))
+					else
+						CompileErr("Not expecting 'elsif'")
+					end if
+				end if
+			end if
+			
 			putback(tok)
 			stmt_nest -= 1
 			InitDelete()
@@ -3691,8 +3722,8 @@ procedure SubProg(integer prog_type, integer scope)
 	
 	-- parse routine end.
 	tok_match(END)
+	tok_match(prog_type, END)
 	
-	tok_match(prog_type)
 	if prog_type != PROCEDURE then
 		if not FuncReturn then
 			if prog_type = FUNCTION then
@@ -4209,7 +4240,12 @@ export procedure real_parser(integer nested)
 				InitDelete()
 				return
 			else
-				CompileErr("unknown command")
+				if id = END then
+					tok = next_token()
+					CompileErr(sprintf("'end' has no matching '%s'", {find_token_text(tok[T_ID])}))
+				else
+					CompileErr(sprintf("Not expecting to see '%s' here", {find_token_text(id)}))
+				end if
 			end if
 
 		end if
