@@ -478,13 +478,16 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		return eaddr
 	end if
 
-	switch wordsize without fallthru do
+	switch wordsize do
 		case 1 then
 			eu:poke( eaddr, data )
+			
 		case 2 then
 			eu:poke2( eaddr, data )
+			
 		case 4 then
 			eu:poke4( eaddr, data )
+			
 	end switch
 	
 
@@ -493,17 +496,16 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 			-- here we can take away write access
 			-- from true_protection if protection doesn't have it.
 			-- true_protection must have read access though.
-			switch protection with fallthru do
+			switch protection do
 				case PAGE_EXECUTE then
 					true_protection = PAGE_EXECUTE_READ
-					break
+					
 				case PAGE_EXECUTE_WRITECOPY  then
 					true_protection = PAGE_EXECUTE_READWRITE
-					break
-				case PAGE_WRITECOPY then
-				case PAGE_NOACCESS then				
+					
+				case PAGE_WRITECOPY, PAGE_NOACCESS then				
 					true_protection = PAGE_READONLY
-					break
+					
 				case else
 					true_protection = protection					
 			end switch

@@ -2433,28 +2433,34 @@ public function temp_file(sequence pDir = "", sequence pPrefix = "", sequence pE
 		end ifdef
 		pDir = envtmp
 	else
-		object tdir
-		tdir = dir(pDir)
-		if sequence(tdir) then
-			if not find("d", tdir[1][D_ATTRIBUTES]) then
+		switch file_type(pDir) do
+			case FILETYPE_FILE then
 				pDir = dirname(pDir, 1)
-			end if
-		else
-			tdir = dirname(pDir, 1)
-			if file_exists(tdir) then
-				pDir = tdir
-			else
+				
+			case FILETYPE_DIRECTORY then
+				-- use pDir
+				
+			case FILETYPE_NOT_FOUND then
+				object tdir = dirname(pDir, 1)
+				if file_exists(tdir) then
+					pDir = tdir
+				else
+					pDir = "."
+				end if
+				
+			case else
 				pDir = "."
-			end if
-		end if
+				
+		end switch
 	end if
+	
 	if pDir[$] != SLASH then
 		pDir &= SLASH
 	end if
 	
 	
 	while 1 do
-		randname = sprintf("%s%s%06d.%s", {pDir, pPrefix, rand(999_999), pExt})
+		randname = sprintf("%s%s%06d.%s", {pDir, pPrefix, rand(1_000_000) - 1, pExt})
 		if not file_exists( randname ) then
 			exit
 		end if

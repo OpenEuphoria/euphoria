@@ -38,8 +38,29 @@ some Euphoria objects:
 {}                        -- the 0-element sequence
 </eucode>
 
-Numbers can also be entered in hexadecimal. For example:
+By default, number literals use //base 10//, but you can have integer literals 
+written in other bases, namely binary //(base 2)//, octal //(base 8)//, and 
+hexadecimal //(base 16)//. To do this, the number is prefixed by a 2-character
+code that lets Euphoria know which base to use. 
+|= Code |= Base                |
+| 0b    | 2 = **B**inary       |
+| 0t    | 8 = Oc**t**al        |
+| 0d    | 10 = **D**ecimal     |
+| 0x    | 16 = He**x**adecimal |
 
+For example:
+<eucode>
+ 0b101 --> decimal 5
+ 0t101 --> decimal 65
+ 0d101 --> decimal 101
+ 0x101 --> decimal 257
+</eucode>
+
+
+Additionally, hexadecimal integers can also be written
+by prefixing the number with the '#' character.
+
+For example:
 <eucode>
 #FE             -- 254
 #A000           -- 40960
@@ -48,7 +69,7 @@ Numbers can also be entered in hexadecimal. For example:
 </eucode>
 
 Only digits and the letters A, B, C, D, E, F, in either uppercase or lowercase, are allowed
-in hex numbers.  Hex numbers are always positive, unless you add a minus sign
+in hexadecimal numbers.  Hexadecimal numbers are always positive, unless you add a minus sign
 in front of the # character. So for instance #FFFFFFFF is a huge positive number
 (4294967295), **not** -1, as some machine-language programmers might expect.
 
@@ -66,6 +87,8 @@ atom salary = 56_110.66 -- Set salary to the value 56110.66
 integer defflags = #0323_F3CD
 
 object phone = 61_3_5536_7733
+
+integer bits = 0b11_00010_1
 </eucode>
 
 
@@ -241,7 +264,7 @@ containing the same value, although there are a few built-in routines that
 choose to treat them similarly.
 
 Special characters may be entered using a back-slash:
-
+|=Code | Meaning|
 | \n | newline |
 | \r | carriage return |
 | \t | tab |

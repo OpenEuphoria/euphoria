@@ -173,7 +173,7 @@ procedure TempInteger(symtab_index x)
 end procedure
 
 
-export function LexName(integer t)
+export function LexName(integer t, sequence defname = "this ...")
 -- returns token name given token number 
 	sequence name
 	for i = 1 to length(token_name) do
@@ -185,7 +185,7 @@ export function LexName(integer t)
 			return name
 		end if
 	end for
-	return "this ..." -- try to avoid this case 
+	return defname -- try to avoid this case 
 	
 end function
 

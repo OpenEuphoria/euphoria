@@ -4,6 +4,7 @@
 
 include global.e
 include reswords.e
+include emit.e
 
 export enum
 	K_NAME,      -- string
@@ -186,14 +187,12 @@ export function find_category(integer tokid)
 end function
 
 export function find_token_text(integer tokid)
-	sequence token_text = "unknown word"
 	for i = 1 to length(keylist) do
 		if keylist[i][3] = tokid then
-			token_text = keylist[i][1]
-			exit
+			return keylist[i][1]
 		end if
 	end for
-	return token_text
+	return LexName(tokid, "unknown word")
 end function
 
 --===========================================

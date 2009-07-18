@@ -3376,7 +3376,7 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Procedure_call(tok)
 			clear_op()
-			Pop()
+			if Pop() then end if
 			
 		elsif id = IF then
 			StartSourceLine(TRUE)
@@ -4141,7 +4141,7 @@ export procedure real_parser(integer nested)
 
 			Procedure_call(tok)
 			clear_op()
-			Pop()
+			if Pop() then end if
 			ExecCommand()
 
 		elsif id = RETURN then
@@ -4245,7 +4245,7 @@ export procedure real_parser(integer nested)
 					tok = next_token()
 					CompileErr(sprintf("'end' has no matching '%s'", {find_token_text(tok[T_ID])}))
 				else
-					CompileErr(sprintf("Not expecting to see '%s' here", {find_token_text(id)}))
+					CompileErr(sprintf("Not expecting to see '%s' here", {replace_all(find_token_text(id), "'", "")}))
 				end if
 			end if
 

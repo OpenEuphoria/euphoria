@@ -311,7 +311,6 @@ end procedure
 export procedure read_line()
 -- read next line of source  
 	integer n
-	
 	line_number += 1
 	gline_number += 1
 	
@@ -325,28 +324,22 @@ export procedure read_line()
 	end if
 	
 	bp = 1
-	n = length(ThisLine)
-	if ThisLine[n] != '\n' then
+	if ThisLine[$] != '\n' then
 		ThisLine = append(ThisLine, '\n') -- add missing \n (might happen at end of file)
 	end if
+	n = find(0, ThisLine)
+	if n != 0 then
+		CompileErr(sprintf("illegal character (ASCII 0) at line:col %d:%d", {line_number, n}))
+	end if
 	AppendSourceLine()
-end procedure
-
-procedure bad_zero()
--- don't allow 0 character in source file   
-	CompileErr("illegal character (ASCII 0)")
 end procedure
 
 function getch()   
 -- return next input character, 1 to 255
 	integer c
-	
 	c = ThisLine[bp]
-	if c = 0 then
-		bad_zero()
-	end if
 	bp += 1
-	return c   
+	return c
 end function
 
 procedure ungetch() 
@@ -877,23 +870,61 @@ export function IncludePop()
 	return TRUE
 end function
 
-
-function MakeInt(sequence text)
+constant common_int_text = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "20", "50", "100", "1000"}
+constant common_ints     = { 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   13,   20,   50,   100,   1000 }
+function MakeInt(sequence text, integer nBase = 10)
 -- make a non-negative integer out of a string of digits  
 	integer num
+	atom fnum
+	integer digit
+	integer maxchk
 
-	if length(text) > 9 then -- ensure no possibility of overflow  
-		return -1            -- use f.p. calculations  
-	end if
-	
+	-- Quick scan for common integers
+	switch nBase do
+		case 2 then
+			maxchk = 536870911
+			
+		case 8 then
+			maxchk = 134217727
+		
+		case 10 then
+			-- Quick scan for common integers
+			num = find(text, common_int_text)
+			if num then 
+				return common_ints[num]
+			end if
+			
+			maxchk = 107374181
+			
+		case 16 then
+			maxchk = 67108863
+			
+	end switch
+
 	num = 0
+	fnum = 0
 	for i = 1 to length(text) do 
-		num = num * 10 + (text[i] - '0')
+		digit = (text[i] - '0')
+		if digit >= nBase or digit < 0 then
+			CompileErr(sprintf("digit '%s' at position %d is outside of number base", {text[i],i}))
+		end if
+		if fnum = 0 then
+			if num <= maxchk then 
+				num = num * nBase + digit
+			else
+				fnum = num * nBase + digit
+			end if
+		else
+			fnum = fnum * nBase + digit
+		end if
 	end for
 
-	return num
+	if fnum = 0 then
+		return num
+	else
+		return fnum
+	end if
 end function        
-
 
 function EscapeChar(integer c)
 -- the escape characters  
@@ -1022,47 +1053,38 @@ export procedure maybe_namespace()
 	might_be_namespace = 1
 end procedure
 
+constant nbase = {2,8,10,16}
+constant nbasecode = "btdxBTDX"
+constant hexasc = {#3A, #3B, #3C, #3D, #3E, #3F} -- equiv to hex digits A to F.
+
 export function Scanner()
 -- The scanner main routine: returns a lexical token  
 	integer ch, i, sp, prev_Nne, ech
 	integer cline
 	integer trimming = 0
 	sequence yytext, namespaces  -- temporary buffer for a token
-	atom d
+	object d
 	token tok
 	integer is_int, class
 	sequence name
 	
 	while TRUE do
-		ch = ThisLine[bp]  -- getch inlined (in all the "hot" spots)
-		bp += 1
+		ch = getch()
 		while ch = ' ' or ch = '\t' do
-			ch = ThisLine[bp]  -- getch inlined
-			bp += 1
+			ch = getch()
 		end while
-		if ch = 0 then
-			bad_zero()
-		end if
 		
 		class = char_class[ch]
 			
 		-- if/elsif cases have been sorted so most common ones come first
 		if class = LETTER or ch = '_' then 
 			sp = bp
-			ch = ThisLine[bp]  -- getch
-			bp += 1 
-			if ch = 0 then
-				bad_zero()
-			end if
+			ch = getch()
 			while id_char[ch] do
-				ch = ThisLine[bp] -- getch
-				bp += 1
-				if ch = 0 then
-					bad_zero()
-				end if
+				ch = getch()
 			end while
 			yytext = ThisLine[sp-1..bp-2]
-			bp -= 1  -- ungetch
+			ungetch()
 			
 			-- is it a namespace?
 			ch = getch()
@@ -1201,6 +1223,7 @@ export function Scanner()
 			return {class, 0}  
 
 		elsif class = DOT or class = DIGIT then
+			integer basetype
 			if class = DOT then
 				if getch() = '.' then
 					return {SLICE, 0}
@@ -1209,24 +1232,46 @@ export function Scanner()
 				end if
 			end if
 			
-			is_int = TRUE
 			yytext = {ch}
-			if ch = '.' then
-				is_int = FALSE
-			end if
-			ch = ThisLine[bp] -- getch
-			if ch = 0 then
-				bad_zero()
-			end if
-			bp += 1
-			while char_class[ch] = DIGIT do 
-				yytext &= ch
-				ch = ThisLine[bp] -- getch
-				if ch = 0 then
-					bad_zero()
+			is_int = (ch != '.')
+			basetype = -1 -- default is decimal
+			while 1 with entry do
+				if char_class[ch] = DIGIT then
+					yytext &= ch
+					
+				elsif equal(yytext, "0") then
+					basetype = find(ch, nbasecode)
+					if basetype > 4 then
+						basetype -= 4
+					end if
+					
+					if basetype = 0 then
+						if char_class[ch] = LETTER then
+							CompileErr(sprintf("Invalid number base specifier '%s'", ch))
+						end if
+						basetype = -1 -- decimal
+						exit
+					end if
+					yytext &= '0'
+
+				elsif basetype = 4 -- hexadecimal
+					integer hdigit
+					hdigit = find(ch, "ABCDEFabcdef")
+					if hdigit = 0 then
+						exit
+					end if
+					if hdigit > 6 then
+						hdigit -= 6
+					end if
+					yytext &= hexasc[hdigit]
+					
+				else
+					exit
 				end if
-				bp += 1
+			entry
+				ch = getch()
 			end while
+			
 			if ch = '.' then
 				ch = getch()
 				if ch = '.' then
@@ -1252,7 +1297,7 @@ export function Scanner()
 				end if
 			end if
 				
-			if ch = 'e' or ch = 'E' then
+			if basetype = -1 and find(ch, "eE") then
 				is_int = FALSE
 				yytext &= ch
 				ch = getch()
@@ -1266,9 +1311,11 @@ export function Scanner()
 					yytext &= ch
 					ch = getch()
 				end while
+			elsif char_class[ch] = LETTER then
+				CompileErr(sprintf("Punctuation missing in between number and '%s'", {ch}))
 			end if
 				
-			bp -= 1  --ungetch
+			ungetch()
 
 			while i != 0 with entry do
 			    yytext = yytext[1 .. i-1] & yytext[i+1 .. $]
@@ -1276,25 +1323,36 @@ export function Scanner()
 			    i = find('_', yytext)
 			end while
 			
-			i = MakeInt(yytext)
-			if is_int and i != -1 then
-				return {ATOM, NewIntSym(i)}
-			else 
-				-- f.p. or large int  
-				d = my_sscanf(yytext)
-				if sequence(d) then
-					CompileErr("number not formed correctly")
-				elsif is_int and d <= MAXINT_DBL then
-					return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
+			if is_int then
+				if basetype = -1 then
+					basetype = 3 -- decimal
+				end if
+				d = MakeInt(yytext, nbase[basetype])
+				if integer(d) then
+					return {ATOM, NewIntSym(d)}
 				else 
 					return {ATOM, NewDoubleSym(d)}
-				end if
+				end if	
+				
+			end if
+			
+			if basetype != -1 then
+				CompileErr(sprintf("Only integer literals can use the '0%s' format", nbasecode[basetype]))
+			end if
+			
+			-- f.p. or large int  
+			d = my_sscanf(yytext)
+			if sequence(d) then
+				CompileErr("number not formed correctly")
+			elsif is_int and d <= MAXINT_DBL then
+				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
+			else 
+				return {ATOM, NewDoubleSym(d)}
 			end if
 		
 						
 		elsif class = MINUS then
-			ch = ThisLine[bp] -- getch
-			bp += 1
+			ch = getch()
 			if ch = '-' then 
 				-- comment
 				if start_include then
@@ -1310,8 +1368,7 @@ export function Scanner()
 			end if
 			
 		elsif class = DOUBLE_QUOTE then  
-			ch = ThisLine[bp]  -- getch
-			bp += 1
+			ch = getch()
 			yytext = ""
 			while ch != '\n' and ch != '\r' do -- can't be EOF
 				if ch = '"' then 
@@ -1320,13 +1377,10 @@ export function Scanner()
 					yytext &= EscapeChar(getch())
 				elsif ch = '\t' then
 					CompileErr("tab character found in string - use \\t instead")
-				elsif ch = 0 then
-					bad_zero()
 				else
 					yytext &= ch
 				end if
-				ch = ThisLine[bp]  -- getch
-				bp += 1
+				ch = getch()
 			end while
 			if ch = '\n' or ch = '\r' then
 				CompileErr("end of line reached with no closing \"")
@@ -1390,8 +1444,7 @@ export function Scanner()
 					yytext = ""
 					trimming = 0
 					ech = ch -- Save the 'end of string character'
-					ch = ThisLine[bp]  -- getch
-					bp += 1
+					ch = getch()
 					if bp > length(ThisLine) then
 						-- Test for 'trimming pattern'
 						read_line()
@@ -1400,8 +1453,7 @@ export function Scanner()
 							bp += 1
 						end while
 						if trimming > 0 then
-							ch = ThisLine[bp]
-							bp += 1
+							ch = getch()
 						end if
 					end if
 					
@@ -1423,8 +1475,7 @@ export function Scanner()
 								end while
 							end if
 						end if
-						ch = ThisLine[bp]  -- getch
-						bp += 1
+						ch = getch()
 					end while
 					if length(yytext) > 0 and find(yytext[1], "\n\r") then
 						yytext = yytext[2 .. $]
