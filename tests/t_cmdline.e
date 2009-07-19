@@ -29,11 +29,11 @@ sequence option_defs = {
 
 -- Parse command line
 
-map:map opts = cmd_parse(option_defs, routine_id("opt_help"), {"exu", "app.ex", "-i", "\\abc\\def\\ghi","-d", "-v", "-c:50", "--STYLE", "file.css", "-!d", "\\usr\\input.txt", "output.txt"} ) 
+map:map opts = cmd_parse(option_defs, routine_id("opt_help"), {"exu", "app.ex", "-i", "\\abc\\def\\ghi","-d", "-v", "-c:50", "--STYLE", "file.css", "-!d", "@numbers1-5.txt", "\\usr\\input.txt", "output.txt"} ) 
 test_equal("cmd_parse() #1", 1, map:get(opts, "verbose"))
 test_equal("cmd_parse() #2", "50", map:get(opts, "count"))
 test_equal("cmd_parse() #3", "file.css", map:get(opts, "style"))
-test_equal("cmd_parse() #4", {"\\usr\\input.txt", "output.txt"}, map:get(opts, "extras"))
+test_equal("cmd_parse() #4", {"1", "2", "3", "4", "5", "\\usr\\input.txt", "output.txt"}, map:get(opts, "extras"))
 test_equal("cmd_parse() #5", 0, map:get(opts, "not_set"))
 test_equal("cmd_parse() #6", 0, map:get(opts, "dummy"))
 test_equal("cmd_parse() #7", 21, dummy)

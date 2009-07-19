@@ -4,10 +4,11 @@
 -- <<LEVELTOC depth=2>>
 
 include std/text.e
-include std/sequence.e
+include std/sequence.e as seq
 include std/map.e as map
 include std/error.e
 include std/os.e
+include std/io.e as io
 
 ifdef UNIX then
 	constant valid_switches = "-"
@@ -67,18 +68,38 @@ public enum
 	-- first extra item has been found. This can be helpful for
 	-- processes such as the Interpreter itself that must deal
 	-- with command line parameters that it is not meant to
-	-- handle.
-	--
+	-- handle.  At expansions after the first extra are also disabled.
+	-- 
 	-- For instance:
 	-- ##eui -D TEST greet.ex -name John -greeting Bye##
 	-- -D TEST is meant for ##eui##, but -name and -greeting options
 	-- are meant for ##greet.ex##. See [[:cmd_parse]]
+	--
+	--
+	-- ##eui @euopts.txt greet.ex @hotmail.com##
+	-- here 'hotmail.com' is not expanded into the command line but
+	-- 'euopts.txt' is.
 	NO_VALIDATION_AFTER_FIRST_EXTRA,
 
 	--**
 	-- Only display the option list in show_help. Do not display other
 	-- information such as program name, options, etc... See [[:cmd_parse]]
-	SHOW_ONLY_OPTIONS
+	SHOW_ONLY_OPTIONS,
+	
+	--**
+	-- Expand arguments that begin with '@' into the command line. (default)
+	-- For example, @filename will expand the contents of file named 'filename' 
+	-- as if the file's contents were passed in on the command line.  Arguments
+	-- that come after the first extra will not be expanded when 
+	-- NO_VALIDATION_AFTER_FIRST_EXTRA is specified.
+	AT_EXPANSION,
+	
+	--**
+	-- Do not expand arguments that begin with '@' into the command line.
+	-- Normally @filename will expand the file names contents as if the
+	-- file's contents were passed in on the command line.  This option 
+	-- supresses this behavior.
+	NO_AT_EXPANSION
 	
 --
 
@@ -678,8 +699,9 @@ end function
 -- Returns:
 -- A map containing the options set. The returned map has one special key named "extras"
 -- which are values passed on the command line that are not part of any option, for instance
--- a list of files ##myprog -verbose file1.txt file2.txt##.
---
+-- a list of files ##myprog -verbose file1.txt file2.txt##.  If any command element begins
+-- with an @ symbol then that file will be opened and its contents used to add to the command line.
+-- 
 -- Parse Options:
 -- ##parse_options## can be a sequence of options that will affect the parsing of
 -- the command line options. Options can be:
@@ -693,6 +715,9 @@ end function
 -- # HELP_RID - Specify a routine id to call in the event of a parse error (invalid option
 --   given, mandatory option not given, no parameter given for an option that requires a
 --   parameter, etc...).
+-- # NO_AT_EXPANSION - Do not expand arguments that begin with '@.'  
+-- # AT_EXPANSION - Expand arguments that begin with '@'.  The name that follows @ will be
+--   opened as a file, read, and the contents will be included as part of the command line.
 --
 -- An example of parse options:
 -- <eucode>
@@ -827,7 +852,8 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	integer add_help_rid = -1
 	integer validation = VALIDATE_ALL
 	integer has_extra = 0
-
+	integer use_at = 1
+	
 	if sequence(parse_options) then
 		integer i = 1
 
@@ -849,8 +875,13 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 				case NO_VALIDATION_AFTER_FIRST_EXTRA then
 					validation = NO_VALIDATION_AFTER_FIRST_EXTRA
+					
+				case NO_AT_EXPANSION then
+					use_at = 0
+					
+				case AT_EXPANSION then
+					use_at = 1
 			end switch
-
 			i += 1
 		end while
 
@@ -894,6 +925,28 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 		cmd = cmds[arg_idx]
 
+		if length(cmd)>0 and cmd[1] = '@' and use_at
+		then
+			integer fd
+			sequence at_file
+			sequence at_cmds
+			fd = open(cmd[2..$],"r")
+			if fd = -1 then
+				printf(1, "Cannot access argument file '%s'", {cmd[2..$]})
+				local_help(opts, add_help_rid, cmds, 1)
+				abort(1)
+			end if	
+			trace(1)
+			at_file = io:read_file(fd)
+			close(fd)
+			at_cmds = seq:split_any(at_file," \n",,1)
+			trace(1)
+			cmds = cmds[1..arg_idx-1] & at_cmds & cmds[arg_idx+1..$]
+			close(fd)
+			arg_idx -= 1
+			continue
+		end if
+		
 		if (opts_done or find(cmd[1], valid_switches) = 0 or length(cmd) = 1) 
 		then
 			map:put(parsed_opts, "extras", cmd, map:APPEND)
