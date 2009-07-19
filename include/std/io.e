@@ -810,7 +810,8 @@ end type
 --
 -- This function is normally used with files opened in binary mode. In text mode, DOS 
 -- converts CR LF to LF on input, and LF to CR LF on output, which can cause great confusion 
--- when you are trying to count bytes. 
+-- when you are trying to count bytes because seek() counts the DOS end of line sequences
+-- as two bytes, even if the file has been opened in text mode.
 --
 -- Example 1:
 -- <eucode>
@@ -851,7 +852,10 @@ end function
 -- Comments:
 -- The file position is is the place in the file where the next byte
 -- will be read from, or written to. It is updated
--- by reads, writes and seeks on the file. 
+-- by reads, writes and seeks on the file.     This procedure
+-- always counts DOS end of line sequences (CR LF) as two bytes even when the file number
+-- has been opened in text mode.
+--
 
 public function where(file_number fn)
 	return machine_func(M_WHERE, fn)
@@ -1224,7 +1228,7 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	end if
 	if fn < 0 then return -1 end if
 	
-	temp = seek(fn, -1) 	
+	temp = seek(fn, -1)
 	len = where(fn)
 	temp = seek(fn, 0)
 
@@ -1235,6 +1239,11 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 		
 	if sequence(file) then
 		close(fn)
+	end if
+	
+	fn = find(-1,ret)
+	if fn then
+		ret = ret[1 .. fn - 1]
 	end if
 
 	ifdef DOSFAMILY then
