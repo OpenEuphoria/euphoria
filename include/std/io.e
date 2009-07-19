@@ -1240,23 +1240,18 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	if sequence(file) then
 		close(fn)
 	end if
-	
-	fn = find(-1,ret)
-	if fn then
-		ret = ret[1 .. fn - 1]
-	end if
 
 	ifdef DOSFAMILY then
-	-- Remove any extra -1 (EOF) characters in case file
-	-- had been opened in Windows/DOS 'text mode'.
-	for i = len to 1 by -1 do
-		if ret[i] != -1 then
-			if i != len then
-				ret = ret[1 .. i]
+		-- Remove any extra -1 (EOF) characters in case file
+		-- had been opened in Windows/DOS 'text mode'.
+		for i = len to 1 by -1 do
+			if ret[i] != -1 then
+				if i != len then
+					ret = ret[1 .. i]
+				end if
+				exit
 			end if
-			exit
-		end if
-	end for
+		end for
 	end ifdef
 
 	if as_text != BINARY_MODE then
