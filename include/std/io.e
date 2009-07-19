@@ -1237,6 +1237,19 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 		close(fn)
 	end if
 
+	ifdef DOSFAMILY then
+	-- Remove any extra -1 (EOF) characters in case file
+	-- had been opened in Windows/DOS 'text mode'.
+	for i = len to 1 by -1 do
+		if ret[i] != -1 then
+			if i != len then
+				ret = ret[1 .. i]
+			end if
+			exit
+		end if
+	end for
+	end ifdef
+
 	if as_text != BINARY_MODE then
 		fn = find(26, ret) -- Any Ctrl-Z found?
 		if fn then
