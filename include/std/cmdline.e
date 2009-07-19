@@ -936,7 +936,6 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				local_help(opts, add_help_rid, cmds, 1)
 				abort(1)
 			end if	
-			trace(1)
 			at_file = io:read_file(fd)
 			close(fd)
 			at_cmds = seq:split_any(at_file," \n",,1)

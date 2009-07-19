@@ -93,6 +93,14 @@ while [ "$1" != "" ]; do
 			export EUPHORIA=0
         ;;
 		--eubin )
+			export LEN=`echo $2/eucd.exe | wc -c`
+			if test $LEN -gt 85; then
+				if test $UNAME_SYSTEM = "MS-DOS"; then
+					echo "Cannot configure with such a long path for DJGPP."
+					rm "$PREFIX"Makefile.eu
+					exit
+				fi
+			fi
 			echo "EUBIN=$2" >> "$PREFIX"Makefile.eu
 			shift
 		;;
@@ -132,8 +140,9 @@ if [ "x$MANAGED_MEM" = "x" ]; then
         if test $UNAME_SYSTEM = "MS-DOS"; then
         	echo "Information: Managed memory always on for DJGPP."
 		echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu 
-	fi
+	fi	
 fi
+
 export PWD=`pwd`
 export PPWD=`cd .. && pwd`
 # The following works around a bug in djgpp's pwd

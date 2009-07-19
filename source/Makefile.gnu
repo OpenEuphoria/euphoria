@@ -398,14 +398,15 @@ ifeq "$(EMINGW)" "1"
 endif
 
 
+test : EUDIR=$(TRUNKDIR)
+test : EUCOMPILEDIR=$(TRUNKDIR)
+test : EUCOMPILEDIR=$(TRUNKDIR)	
+test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
+test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test :  
 ifeq "$(EDJGPP)" "1"
-	cp $(CONFIG) revget.ex ../tests
-	export EUCOMPILEDIR=$(TRUNKDIR)	
-	export C_INCLUDE_PATH=$(TRUNKDIR):..
-	export LIBRARY_PATH=$(%LIBRARY_PATH)
-	wmake -f makefile.wat testdos CCOM=gcc LIBEXT=a
-	#cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
+	echo ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA) > ../tests/test-arguments.txt
+	cd ../tests && $(EXE) @test-arguments.txt
 else # Not DJGPP:
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
 endif
@@ -500,7 +501,8 @@ endif
 ifeq "$(HASCHANGEDDIRECTORY)" "1"
 
 translate-here :
-	$(EUBIN)/$(EECU) -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) 
+	echo -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) > translate-arguments.txt
+	$(EUBIN)/$(EECU) @translate-arguments.txt 
 
 .PHONY : translate-here
 	
