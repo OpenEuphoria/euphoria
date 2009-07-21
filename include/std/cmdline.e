@@ -717,7 +717,10 @@ end function
 --   parameter, etc...).
 -- # NO_AT_EXPANSION - Do not expand arguments that begin with '@.'  
 -- # AT_EXPANSION - Expand arguments that begin with '@'.  The name that follows @ will be
---   opened as a file, read, and the contents will be included as part of the command line.
+--   opened as a file, read, and each trimmed non-empty line that does not begin with a
+--   '#' character will be inserted as arguments in the command line. These lines
+--   replace the original '@' argument as if they had been entered on the original
+--   command line.
 --
 -- An example of parse options:
 -- <eucode>
@@ -924,24 +927,40 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		arg_idx += 1
 
 		cmd = cmds[arg_idx]
+		if length(cmd) = 0 then
+			continue
+		end if
+		
+		if cmd[1] = '@' and use_at then
+			object at_cmds
+			integer j
 
-		if length(cmd)>0 and cmd[1] = '@' and use_at
-		then
-			integer fd
-			sequence at_file
-			sequence at_cmds
-			fd = open(cmd[2..$],"r")
-			if fd = -1 then
-				printf(1, "Cannot access argument file '%s'", {cmd[2..$]})
+			-- Read in the lines from the file.
+			at_cmds = io:read_lines(cmd[2..$])
+			if equal(at_cmds, -1) then
+				printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
 				local_help(opts, add_help_rid, cmds, 1)
 				abort(1)
 			end if	
-			at_file = io:read_file(fd)
-			close(fd)
-			at_cmds = seq:split_any(at_file," \n",,1)
-			trace(1)
+			-- Parse the 'at' commands removing comment lines and empty lines,
+			-- and stripping off any enclosing quotes from lines.
+			j = 0
+			while j < length(at_cmds) do
+				j += 1
+				at_cmds[j] = trim(at_cmds[j])
+				if length(at_cmds[j]) = 0 then
+					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
+					j -= 1
+				elsif at_cmds[j][1] = '#' then
+					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
+					j -= 1
+				elsif at_cmds[j][1] = '"' and at_cmds[j][$] = '"' and length(at_cmds[j]) >= 2 then
+					at_cmds[j] = at_cmds[j][2 .. $-1]
+				end if
+			end while
+			
+			-- Replace the '@' argument with the contents of the file.
 			cmds = cmds[1..arg_idx-1] & at_cmds & cmds[arg_idx+1..$]
-			close(fd)
 			arg_idx -= 1
 			continue
 		end if

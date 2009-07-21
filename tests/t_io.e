@@ -19,7 +19,7 @@ Thank You!
 
 #
 
-write_file("file.txt", test_file_data, UNIX_TEXT)
+write_file("file.txt", test_file_data, DOS_TEXT)
 
 data = read_lines("file.txt")
 tmp = set_test_abort(1)
@@ -40,15 +40,23 @@ test_equal("read_lines() #8", "Thank You!", data[9])
 close(tmp)
 
 data = read_file("file.txt")
-test_equal("read_file() #1", 253, length(data))
-test_equal("read_file() #2", "alter this file", data[51..65])
+test_equal("read_file() #1", 262, length(data))
+test_equal("read_file() #2", "alter this file", data[52..66])
 
-tmp = open("file.txt", "r")
+tmp = open("file.txt", "rb")
 test_equal("where() #1", 0, where(tmp))
 data = read_file(tmp)
-test_equal("read_file() #1", 253, length(data))
-test_equal("read_file() #2", "alter this file", data[51..65])
-test_equal("where() #2", 253, where(tmp))
+test_equal("read_file() #1a", 262, length(data))
+test_equal("read_file() #2a", "alter this file", data[52..66])
+test_equal("where() #2", 262, where(tmp))
+close(tmp)
+
+tmp = open("file.txt", "r")
+test_equal("where() #1b", 0, where(tmp))
+data = read_file(tmp)
+test_equal("read_file() #1b", 253, length(data))
+test_equal("read_file() #2b", "alter this file", data[51..65])
+test_equal("where() #2b", 262, where(tmp))
 close(tmp)
 
 test_equal("write_file() filename", 1, write_file("fileb.txt", "Hello World"))
