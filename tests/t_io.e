@@ -53,9 +53,15 @@ close(tmp)
 
 tmp = open("file.txt", "r")
 test_equal("where() #1b", 0, where(tmp))
-data = read_file(tmp)
+data = read_file(tmp) -- BINARY_MODE even though file was opened in 'text' mode.
+ifdef DOSFAMILY then
 test_equal("read_file() #1b", 253, length(data))
 test_equal("read_file() #2b", "alter this file", data[51..65])
+elsedef
+test_equal("read_file() #1b", 262, length(data))
+test_equal("read_file() #2b", "alter this file", data[52..66])
+end ifdef
+
 test_equal("where() #2b", 262, where(tmp))
 close(tmp)
 
