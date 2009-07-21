@@ -719,18 +719,7 @@ public procedure free(bordered_address a)
 	end for
 	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 end procedure
-
-public function allocate_string(sequence s)
--- create a C-style null-terminated string in memory
-	atom mem
-	
-	mem = allocate(length(s) + 1)
-	if mem then
-		poke(mem, s)
-		poke(mem+length(s), 0)  -- Thanks to Aku
-	end if
-	return mem
-end function
+FREE_RID = routine_id("free")
 
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()

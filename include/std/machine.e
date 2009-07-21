@@ -4,6 +4,146 @@
 include std/dll.e
 public include std/memconst.e
 
+ifdef SAFE then
+	public include std/safe.e
+
+	ifdef DOS32 then
+		public include std/dos/safe.e
+	end ifdef
+elsedef
+	public include std/memory.e
+
+	ifdef DOS32 then
+		public include std/dos/memory.e
+	end ifdef
+end ifdef
+
+integer FREE_ARRAY_RID
+
+type block_aligned( atom a )
+	return remainder(a,4096)=0
+end type
+
+--**
+-- Allocate a C-style null-terminated string in memory
+--
+-- Parameters:
+--              # ##s##, a sequence, the string to store in RAM.
+--              # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--                automatically freed when its reference count drops to zero, or
+--                when passed as a parameter to [[:delete]].  
+--
+-- Returns:
+--              An **atom**, the address of the memory block where the string was
+-- stored, or 0 on failure.
+-- Comments:
+-- Only the 8 lowest bits of each atom in ##s## is stored. Use
+-- ##allocate_wstring##()  for storing double byte encoded strings.
+--
+-- There is no allocate_string_low() function. However, you could easily
+-- craft one by adapting the code for ##allocate_string##.
+--
+-- Since ##allocate_string##() allocates memory, you are responsible to
+-- [[:free]]() the block when done with it if ##cleanup## is zero.
+-- If ##cleanup## is non-zero, then the memory can be freed by calling
+-- [[:delete]], or when the pointer's reference count drops to zero.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate_string("The Wizard of Oz")
+-- </eucode>
+-- 
+-- See Also:
+--              [[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
+
+--**
+-- Allocate a NULL terminated pointer array.
+--
+-- Parameters:
+--   # #pointers# - A sequence of pointers to add to the pointer array.
+--   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--     automatically freed when its reference count drops to zero, or
+--     when passed as a parameter to [[:delete]]
+--
+-- Comments:
+--   This function adds the NULL terminator.
+--
+-- Example 1:
+-- <eucode>
+-- atom pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
+-- </eucode>
+--
+-- See Also:
+--   [[:allocate_string_pointer_array]], [[:free_pointer_array]]
+
+public function allocate_pointer_array(sequence pointers, integer cleanup = 0)
+    atom pList
+
+    if atom(pointers) then
+        return 0
+    end if
+
+    pointers &= 0
+    pList = allocate(length(pointers) * 4)
+    poke4(pList, pointers)
+	if cleanup then
+		return delete_routine( pList, FREE_ARRAY_RID )
+	end if
+    return pList
+end function
+
+public procedure free_pointer_array(atom pointers_array)
+	atom saved = pointers_array,
+		ptr = peek4u(pointers_array)
+
+	while ptr do
+		free(ptr)
+
+		pointers_array+=4
+		ptr = peek4u(pointers_array)
+	end while
+
+	free(saved)
+end procedure
+FREE_ARRAY_RID = routine_id("free_pointer_array")
+
+--**
+-- Allocate a C-style null-terminated array of strings in memory
+--
+-- Parameters:
+--   # #string_list# - sequence of strings to store in RAM.
+--   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--     automatically freed when its reference count drops to zero, or
+--     when passed as a parameter to [[:delete]]
+--
+-- Returns:
+--   An **atom**, the address of the memory block where the string pointer
+--   array was stored.
+--
+-- Example 1:
+-- <eucode>
+-- atom p = allocate_string_pointer_array({ "One", "Two", "Three" })
+-- -- Same as C: char *p = { "One", "Two", "Three", NULL };
+-- </eucode>
+--
+-- See Also:
+--   [[:free_pointer_array]]
+
+public function allocate_string_pointer_array(object string_list, integer cleanup = 0)
+	for i = 1 to length(string_list) do
+		string_list[i] = allocate_string(string_list[i])
+	end for
+
+	if cleanup then
+		return delete_routine( allocate_pointer_array(string_list), FREE_ARRAY_RID )
+	else
+		return allocate_pointer_array(string_list)
+	end if
+end function
+
+
 --****
 -- == Dynamic Calling
 --
@@ -249,24 +389,6 @@ public include std/memconst.e
 -- See Also:
 -- [[:machine_proc]]
 
-ifdef SAFE then
-	public include std/safe.e
-
-	ifdef DOS32 then
-		public include std/dos/safe.e
-	end ifdef
-elsedef
-	public include std/memory.e
-
-	ifdef DOS32 then
-		public include std/dos/memory.e
-	end ifdef
-end ifdef
-
-type block_aligned( atom a )
-	return remainder(a,4096)=0
-end type
-
 
 ifdef WIN32 then
 
@@ -286,7 +408,7 @@ ifdef WIN32 then
 	if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 		and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 		then
-		atom vaa = VirtualAlloc( 0, 1, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READWRITE ) != 0 
+		atom vaa = VirtualAlloc( 0, 1, or_bits( MEM_RESERVE, MEM_COMMIT ), PAGE_READ_WRITE_EXECUTE ) != 0 
 		if vaa then
 			DEP_really_works = 1
 			c_func( VirtualFree_rid, { vaa, 1, MEM_RELEASE } )
@@ -398,6 +520,23 @@ public type std_library_address( atom addr )
 end type
 
 std_library_address oldprotptr = allocate_data(4)
+
+public function allocate_string(sequence s, integer cleanup = 0 )
+	atom mem
+	
+	mem = allocate( length(s) + 1) -- Thanks to Igor
+	
+	if mem then
+		poke(mem, s)
+		poke(mem+length(s), 0)  -- Thanks to Aku
+		if cleanup then
+			mem = delete_routine( mem, FREE_RID )
+		end if
+	end if
+
+	return mem
+end function
+
 
 --**
 -- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.

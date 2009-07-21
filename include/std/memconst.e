@@ -128,7 +128,7 @@ export constant MEM_COMMIT = #1000,
 		MEM_RESET = #80000,
 		MEM_RELEASE = #8000
 
-export integer FREE_RID = routine_id("free")		
+export integer FREE_RID		
 
 export constant
         M_ALLOC = 16,
