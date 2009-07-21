@@ -1,9 +1,0 @@
-# Some 'extra' arguments
-1  2 3
-4 5
-              
-# The style argument and its file
---STYLE
-"file.css"
-
-"# not a comment"

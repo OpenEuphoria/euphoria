@@ -1,6 +1,8 @@
 include std/unittest.e
 include std/cmdline.e
 include std/map.e as map
+include std/io.e
+include std/filesys.e
 
 integer dummy = 0
 function got_dummy(sequence data)
@@ -28,8 +30,42 @@ sequence option_defs = {
 }
 
 -- Parse command line
+constant extra_data = #`
+# Some 'extra' arguments
+1  2 3
+4 5
+              
+# The style argument and its file
+--STYLE
+"file.css"
 
-map:map opts = cmd_parse(option_defs, routine_id("opt_help"), {"exu", "app.ex", "-i", "\\abc\\def\\ghi","-d", "-v", "-c:50", "-!d", "@numbers1-5.txt", "\\usr\\input.txt", "output.txt"} ) 
+"# not a comment"
+`
+constant optional_data = #`
+# Verbose on
+-v
+`
+-- Deliberately using DOS line endings to test Unix's ability to process them correctly.
+write_file("extra.txt", extra_data, DOS_TEXT)
+write_file("optional.txt", optional_data, DOS_TEXT)
+delete_file("nofile.txt") -- Ensure that this does not exist.
+map:map opts = cmd_parse(option_defs, routine_id("opt_help"), 
+				{"exu", 
+				 "app.ex", 
+				 "-i", 
+				 "\\abc\\def\\ghi",
+				 "-d", 
+				 "@@nofile.txt",
+				 "-c:50", 
+				 "@@optional.txt",
+				 "-!d", 
+				 "@extra.txt", 
+				 "\\usr\\input.txt", 
+				 "output.txt"
+				} ) 
+delete_file("extra.txt")
+delete_file("optional.txt")
+
 test_equal("cmd_parse() #1", 1, map:get(opts, "verbose"))
 test_equal("cmd_parse() #2", "50", map:get(opts, "count"))
 test_equal("cmd_parse() #3", "file.css", map:get(opts, "style"))

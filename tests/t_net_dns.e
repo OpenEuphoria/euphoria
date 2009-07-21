@@ -5,6 +5,7 @@ include std/net/dns.e as dns
 ifdef not NO_INET then
 	object _
 	object check_ip = 0
+	sequence check_ip_name
 
 	_ = host_by_name("www.google.com")
 	if sequence(_) then
@@ -15,6 +16,7 @@ ifdef not NO_INET then
 		test_true("host_by_name #5", length(_[HOST_IPS]) > 0)
 		test_true("host_by_name #6", atom(_[HOST_TYPE]))
 
+		check_ip_name = _[HOST_OFFICIAL_NAME]
 		for i = 1 to length(_[HOST_IPS]) do
 			test_true("host_by_name ipcheck", is_inetaddr(_[HOST_IPS][i]))
 
@@ -27,16 +29,20 @@ ifdef not NO_INET then
 
 	if sequence(check_ip) then
 		_ = host_by_addr(check_ip)
-		test_equal("host_by_addr #1", 4, length(_))
-		test_true("host_by_addr #2", sequence(_[HOST_OFFICIAL_NAME]))
-		test_true("host_by_addr #3", sequence(_[HOST_ALIASES]))
-		test_true("host_by_addr #4", sequence(_[HOST_IPS]))
-		test_true("host_by_addr #5", length(_[HOST_IPS]) > 0)
-		test_true("host_by_addr #6", atom(_[HOST_TYPE]))
-
-		for i = 1 to length(_[HOST_IPS]) do
-			test_true("host_by_addr ipcheck", is_inetaddr(_[HOST_IPS][i]))
-		end for
+		if atom(_) then
+			test_fail(sprintf("host_by_addr failed for '%s' - '%s'", {check_ip, check_ip_name}))
+		else
+			test_equal("host_by_addr #1", 4, length(_))
+			test_true("host_by_addr #2", sequence(_[HOST_OFFICIAL_NAME]))
+			test_true("host_by_addr #3", sequence(_[HOST_ALIASES]))
+			test_true("host_by_addr #4", sequence(_[HOST_IPS]))
+			test_true("host_by_addr #5", length(_[HOST_IPS]) > 0)
+			test_true("host_by_addr #6", atom(_[HOST_TYPE]))
+	
+			for i = 1 to length(_[HOST_IPS]) do
+				test_true("host_by_addr ipcheck", is_inetaddr(_[HOST_IPS][i]))
+			end for
+		end if
 	else
 		test_fail("host_by_addr not run due to failing host_by_name")
 	end if

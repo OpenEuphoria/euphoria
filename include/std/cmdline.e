@@ -720,7 +720,12 @@ end function
 --   opened as a file, read, and each trimmed non-empty line that does not begin with a
 --   '#' character will be inserted as arguments in the command line. These lines
 --   replace the original '@' argument as if they had been entered on the original
---   command line.
+--   command line. \\
+--   Note that if the name following the '@' begins with another '@', the extra
+--   '@' is removed and the remainder is the name of the file. However, if that
+--   file cannot be read, it is simply ignored. This allows //optional// files
+--   to be included on the command line. Normally, with just a single '@', if the
+--   file cannot be found the program aborts.
 --
 -- An example of parse options:
 -- <eucode>
@@ -831,7 +836,8 @@ end function
 --
 -- map:map opts = cmd_parse(option_definition)
 --
--- -- When run as: eui myprog.ex -v -o john.txt -i /usr/local -i /etc/app input1.txt input2.txt
+-- -- When run as: eui myprog.ex -v @output.txt -i /usr/local -i /etc/app input1.txt input2.txt
+-- -- and the file "output.txt" contains "--output=john.txt"
 -- --
 -- -- map:get(opts, "verbose") --> 1
 -- -- map:get(opts, "hash") --> 0 (not supplied on command line)
@@ -933,15 +939,28 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		
 		if cmd[1] = '@' and use_at then
 			object at_cmds
+			sequence at_file
 			integer j
 
-			-- Read in the lines from the file.
-			at_cmds = io:read_lines(cmd[2..$])
-			if equal(at_cmds, -1) then
-				printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
-				local_help(opts, add_help_rid, cmds, 1)
-				abort(1)
-			end if	
+			if length(cmd) > 2 and cmd[2] = '@' then
+				-- Read in the lines from the optional file.
+				at_cmds = io:read_lines(cmd[3..$])
+				if equal(at_cmds, -1) then
+					-- File didn't exist but this is not an error, so just
+					-- remove it from the commands.
+					cmds = cmds[1..arg_idx-1] & cmds[arg_idx+1..$]
+					arg_idx -= 1
+					continue
+				end if	
+			else
+				-- Read in the lines from the file.
+				at_cmds = io:read_lines(cmd[2..$])
+				if equal(at_cmds, -1) then
+					printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
+					local_help(opts, add_help_rid, cmds, 1)
+					abort(1)
+				end if	
+			end if
 			-- Parse the 'at' commands removing comment lines and empty lines,
 			-- and stripping off any enclosing quotes from lines.
 			j = 0
