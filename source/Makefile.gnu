@@ -11,7 +11,7 @@
 #   You must run configure
 #   before building
 #
-#  Configue options:
+#  Configure options:
 #
 #     --without-euphoria      Use this option if you are building Euphoria 
 #		     with only a C compiler.
