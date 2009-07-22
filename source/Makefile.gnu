@@ -41,7 +41,7 @@
 #   Run Unit Tests for DJGPP  :  make test-djgpp
 #   Run Unit Tests with eu.ex :  make testeu
 #
-# In order to achieve compatibility amoung 9 platforms
+# In order to achieve compatibility among 9 platforms
 # please follow these Code standards:
 # No line may exceed some hard limit (thanks to djgpp tools) I believe it to be around 140.  
 # If you find you are getting error 1 messages that worked in other OSes but not DJGPP that may
