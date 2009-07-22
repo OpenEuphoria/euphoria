@@ -16,7 +16,7 @@
 #     --without-euphoria      Use this option if you are building Euphoria 
 #		     with only a C compiler.
 # 
-#     --eubin <dir>   Use this option to speuify the location of the interpreter
+#     --eubin <dir>   Use this option to specify the location of the interpreter
 #		     binary to use to translate the front end.  The default
 #		     is ../bin
 #
