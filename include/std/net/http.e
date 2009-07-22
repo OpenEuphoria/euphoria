@@ -261,7 +261,7 @@ public procedure set_sendheader_default()
 
   -- the following not only puts the default header lines,
   -- it sorts the already-set lines to match the defaultsendheader order
-	for defaultndx = 1 to length(defaultsendheader) do-- loop through defaultsendheader
+	for defaultndx = 1 to length(defaultsendheader) do -- loop through defaultsendheader
 	   temps = get_sendheader(defaultsendheader[defaultndx][1]) -- see if it was already set to something
 	   if equal(temps[1],"") -- was it defined?
 		 then tempnewheader &= {defaultsendheader[defaultndx]} -- so set the default line
@@ -327,6 +327,8 @@ end procedure
 --	 websites format their response differently (or simply refuse data)
 --	 depending on the browser, this procedure provides a quick means
 --	 around that.
+--      For example, see:
+--      http://www.missporters.org/podium/nonsupport.aspx
 
 public procedure set_sendheader_useragent_msie()
 	set_sendheader("User-Agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)")
