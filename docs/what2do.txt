@@ -45,7 +45,7 @@ specific question, type at the console:
 guru word
 }}}
 
-The ##guru## program will search all the ##.doc## files, example programs and other files 
+The ##guru## program will search all the ##.doc## files, example programs, and other files, 
 and will present you with a //sorted// list of the most relevant chunks of text that might 
 answer your enquiry.
 

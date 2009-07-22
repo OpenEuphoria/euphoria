@@ -12,7 +12,7 @@ There are now enthusiastic users around the world.
 
 === Yet Another Programming Language?
 
-Euphoria is a very high-level programming language. It is unique amongst a
+Euphoria is a very high-level programming language. It is unique among a
 crowd of conventional languages.
 
 === First, Euphoria delivers the "expected" features of a modern language:
@@ -35,9 +35,8 @@ What makes Euphoria unique is a design that uses just two basic data-types {{[--
  //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and //integer//.
 
 * An **atom** is single numeric value (either an integer or floating point)
-* A **sequence** is a list of values (atoms, nested sequences)
+* A **sequence** is a list of zero or more //objects//.
 * An **object** is a //variant// type in that it can hold an atom or a sequence.
-Actually, a //sequence// is really a list of zero or more //objects//.
 * An //integer// is just a special form of atom that can only hold integers. You
 can use the //integer// type for a performance advantage in situations where
 floating point values are not required.
