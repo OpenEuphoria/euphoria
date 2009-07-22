@@ -82,7 +82,7 @@ end function
 --		If the path cannot be followed to its end, an error about reading a nonexistent element, or subscripting an atom, will occur.
 --
 -- Comments:
--- The last element of ##indexes## may be a pair {lower,upper}, in which case a slice of the innermostly referenced sequence is returned.
+-- The last element of ##indexes## may be a pair {lower,upper}, in which case a slice of the innermost referenced sequence is returned.
 --
 -- Example 1:
 -- <eucode>
