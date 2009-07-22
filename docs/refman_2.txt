@@ -3197,7 +3197,7 @@ accessed by files in the same //include tree//. For example...
 If we have danny.e declare a global symbol called 'foo', and bob.e includes danny.e,
 then code in bob.e can access danny's 'foo'. Now if we also have cathy.e declare
 a global symbol called 'foo', and anne.e includes cathy.e, then code in ann.e can
-access kath's 'foo'. Nothing unusual about that situation. Now, if we have a program
+access cathy's 'foo'. Nothing unusual about that situation. Now, if we have a program
 that includes both bob.e and anne.e, the code in bob.e and anne.e should still
 work even though there are now two global 'foo' symbols available. This is because
 the include tree for bob.e //only// contains danny.e and likewise the include tree
