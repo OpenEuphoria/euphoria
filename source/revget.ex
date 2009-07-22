@@ -87,7 +87,7 @@ function is_current(object rev)
 	return current
 end function
 
--- function attemps to retrieve svnversion program
+-- function attempts to retrieve svnversion program
 -- if the svnversion program is not on the system
 -- or doesn't produce any output it returns 0.  If
 -- svnversion does produce some string and this
