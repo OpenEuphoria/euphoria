@@ -199,7 +199,7 @@ constant SHIFT = 4   -- 1..78 should be ok
 constant TEMPFILE = "editbuff.tmp" 
 
 constant ACCENT = 0  -- Set to 1 enables read accented characters from
-					 -- keyboard. Usefull to write on spanish keyboard, 
+					 -- keyboard. Useful to write on spanish keyboard, 
 					 -- may cause problems on Windows using us-international 
 					 -- keyboard layout
 
