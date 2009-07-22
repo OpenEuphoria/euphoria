@@ -18,7 +18,7 @@ located in c:\djgpp\bin.  This should go into your path.
 
 Make sure your djgpp's toolkit, including make, bash and others are in your path.
 That is c:\djgpp\bin should be in your PATH environment variable.  These are
-seperated with semicolons as with any other DOS program.  Inside bash these
+separated with semicolons as with any other DOS program.  Inside bash these
 are translated to colons.  Set C_INCLUDE_PATH to include your EUPHORIA checkout
 and the include file in your djgpp hierarchy like this:
 
