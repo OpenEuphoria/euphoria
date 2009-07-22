@@ -1946,7 +1946,7 @@ include somefile.e as my_lib
 The controlling variable used in a [[:for statement]] is special. It is automatically declared
 at the beginning of the loop block, and its scope ends at the end of the for-loop. If
 the loop is inside a function or procedure, the loop variable cannot have the same
-name as any other variable decalred in the routine or enclosing block. When the
+name as any other variable declared in the routine or enclosing block. When the
 loop is at the top level, outside of any routine, the loop variable cannot have
 the same name as any other file-scoped variable. You can use the same name in
 many different for-loops as long as the loops aren't nested. You do not declare
@@ -2731,7 +2731,7 @@ preferred. Other forms are variously sensitive to changes in the program
 organisation. Yet, they may prove more convenient in short, short lived
 programs, and are provided mostly for this purpose.
 
-For information on how to associate a string o a block of code, see the section
+For information on how to associate a string to a block of code, see the section
 [[:labelled headers]].
 
 An **exit** without any label or number in a [[:while statement]] or a [[:for statement]]
