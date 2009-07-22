@@ -122,7 +122,7 @@ end function
 --		If the path to storage location cannot be followed to its end, or an index is not what one would expect or is not valid, an error about illegal sequence operations will occur.
 --
 -- Comments:
--- If the last element of ##indexes## is a pair of integers, ##x## will be stored as a slice thee, the bounding indexes being given in the pair as {lower,upper}..
+-- If the last element of ##indexes## is a pair of integers, ##x## will be stored as a slice three, the bounding indexes being given in the pair as {lower,upper}..
 --
 -- In Euphoria, you can never modify an object by passing it to a routine. You have to get a modified copy and then assign it back to the original.
 --
