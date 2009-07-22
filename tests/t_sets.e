@@ -19,8 +19,8 @@ test_equal("add_to(): absent element",{-1,0,3,5,17,"abc","abcd","acb"},add_to(0,
 test_equal("remove_from(): present element", {-1,3,5,17,"abc","acb"},remove_from("abcd",s))
 test_equal("remove_from(): absent element",s,remove_from(1,s))
 
-test_equal("is_inside(): not a subset",0,is_inside(s1,s))
-test_equal("is_inside(): subset",1,is_inside(s1a,s))    --???
+test_equal("is_subset(): not a subset",0,is_subset(s1,s))
+test_equal("is_subset(): subset",1,is_subset(s1a,s))    --???
 
 test_equal("embedding(): success",{2,4,6},embedding(s1a,s)) -- ???
 test_equal("embedding(): failure",0,embedding(s1,s))

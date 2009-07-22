@@ -36,7 +36,8 @@ public constant
 --		# ##b##: the other object
 --
 -- Returns:
---		An **integer**, 1 if an addition (or any of the [[:Relational operators]]) are possible between ##a## and ##b##, else 0.
+--	An **integer**, 1 if an addition (or any of the [[:Relational operators]])
+--  are possible between ##a## and ##b##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -72,17 +73,20 @@ end function
 -- Retrieves an element nested arbitrarily deep into a sequence.
 --
 -- Parameters:
---		# ##source##: the sequence from which to fetch
---		# ##indexes##: a sequence of integers, the path to follow to reach the element to return.
+--	# ##source##: the sequence from which to fetch
+--	# ##indexes##: a sequence of integers, the path to follow to reach the 
+--   element to return.
 --
 -- Returns:
 --		An **object**, which is ##source[indexes[1]][indexes[2]]...[indexes[$]]##
 --
 -- Errors:
---		If the path cannot be followed to its end, an error about reading a nonexistent element, or subscripting an atom, will occur.
+--	If the path cannot be followed to its end, an error about reading a
+--  nonexistent element, or subscripting an atom, will occur.
 --
 -- Comments:
--- The last element of ##indexes## may be a pair {lower,upper}, in which case a slice of the innermost referenced sequence is returned.
+-- The last element of ##indexes## may be a pair {lower,upper}, in which case
+-- a slice of the innermost referenced sequence is returned.
 --
 -- Example 1:
 -- <eucode>
@@ -112,19 +116,25 @@ end function
 --
 -- Parameters:
 --		# ##target##: the sequence in which to store something
---		# ##indexes##: a sequence of integers, the path to follow to reach the place where to store
+--		# ##indexes##: a sequence of integers, the path to follow to reach the
+--                     place where to store
 --		# ##x##: the object to store.
 --
 -- Returns:
---		A **sequence**, a **copy** of ##target## with the specified place ##indexes## modified by storing ##x## into it.
+--		A **sequence**, a **copy** of ##target## with the specified place
+--      ##indexes## modified by storing ##x## into it.
 --
 -- Errors:
---		If the path to storage location cannot be followed to its end, or an index is not what one would expect or is not valid, an error about illegal sequence operations will occur.
+--	If the path to storage location cannot be followed to its end, or an
+--  index is not what one would expect or is not valid, an error about illegal
+--  sequence operations will occur.
 --
 -- Comments:
--- If the last element of ##indexes## is a pair of integers, ##x## will be stored as a slice three, the bounding indexes being given in the pair as {lower,upper}..
+-- If the last element of ##indexes## is a pair of integers, ##x## will be 
+-- stored as a slice three, the bounding indexes being given in the pair as {lower,upper}..
 --
--- In Euphoria, you can never modify an object by passing it to a routine. You have to get a modified copy and then assign it back to the original.
+-- In Euphoria, you can never modify an object by passing it to a routine. 
+-- You have to get a modified copy and then assign it back to the original.
 --
 -- Example 1:
 -- <eucode>
@@ -184,13 +194,16 @@ end function
 --     [[:Subscripting of Sequences]]
 
 public function valid_index(sequence st, object x)
-	if sequence(x) then
+	if not atom(x) then
 		return 0
 	end if
 	if x < 1 then
 		return 0
 	end if
-	return x < length(st)+1
+	if floor(x) > length(st) then
+		return 0
+	end if
+	return 1
 end function
 
 --**
@@ -205,8 +218,8 @@ end function
 -- Comments:
 --
 -- Use ##amount * direction## to specify the shift. direction is either ##ROTATE_LEFT##
--- or ##ROTATE_RIGHT##. This enables to shift multiple places in a single call. For instance,
--- use {{{ROTATE_LEFT * 5}}} to rotate left, 5
+-- or ##ROTATE_RIGHT##. This enables to shift multiple places in a single call.
+--  For instance, use {{{ROTATE_LEFT * 5}}} to rotate left, 5
 --   positions.
 --
 -- A null shift does nothing and returns source unchanged.
@@ -369,41 +382,40 @@ end function
 
 
 --**
--- Apply a function to every element of a sequence returning a new sequence of the same size.
+-- Apply a function to every element of a sequence returning a new sequence of
+-- the same size.
 --
 -- Parameters: 
 -- * ##source##: the sequence to map
 -- * ##rid##: the [[:routine_id]] of function to use as converter
+-- * ##userdata##: an object passed to each invocation of ##rid##. If omitted,
+--                 {} is used.
 --
 -- Returns:
---		A **sequence** the length of ##source##. Each element there is the corresponding element in ##source## mapped using the routine referred to by ##rid##.
+--	A **sequence** the length of ##source##. Each element there is the
+-- corresponding element in ##source## mapped using the routine referred to by ##rid##.
 --
 -- Comments:
--- The supplied routine must take one parameter. The type of this parameter must be compatible with all the elements in ##source##.
+-- The supplied routine must take two parameters. The type of the first parameter must
+-- be compatible with all the elements in ##source##. The second parameter is
+-- an ##object## containing ##userdata##.
 --
 -- Example 1:
 -- <eucode>
--- include std/sequence.e
--- s = apply({1, 2, 3, 4}, routine_id("sprint"))
--- -- s is {"1", "2", "3", "4"}
--- </eucode>
---
--- Example 2:
--- <eucode>
--- function greeter(object o)
---     return o[1] & ", " & o[2] & "!"
+-- function greeter(object o, object d)
+--     return o[1] & ", " & o[2] & d
 -- end function
 --
--- s = apply({{"Hello", "John"}, {"Goodbye", "John"}}, routine_id("greeter"))
+-- s = apply({{"Hello", "John"}, {"Goodbye", "John"}}, routine_id("greeter"), "!")
 -- -- s is {"Hello, John!", "Goodbye, John!"}
 -- </eucode>
 --
 -- See Also:
 --   [[:filter]]
 
-public function apply(sequence source, integer rid)
+public function apply(sequence source, integer rid, object userdata = {})
 	for a = 1 to length(source) do
-		source[a] = call_func(rid, {source[a]})
+		source[a] = call_func(rid, {source[a], userdata})
 	end for
 	return source
 end function
@@ -445,7 +457,9 @@ end function
 --		# ##pTo##: an integer, the end point. Defaults to 0.
 --
 -- Returns:
---		A **sequence** if ##target## is a sequence, the same length as ##target## and the same elements, but those with index between ##pFrom## and ##pTo## appear in reverse order.
+--	A **sequence** if ##target## is a sequence, the same length as ##target##
+-- and the same elements, but those with index between ##pFrom## and ##pTo##
+-- appear in reverse order.
 --
 -- Comments:
 -- In the result sequence, some or all top-level elements appear in reverse order compared
@@ -555,7 +569,10 @@ end function
 --
 -- Comments:
 --
--- If ##count## is negative, or if adding ##start## to  ##increment## would prove to be impossible, then 0 is returned. Otherwise, a sequence, of length ##count+1##, staring with ##start## and whose adjacent elements differ exactly by ##increment##, is returned.
+-- If ##count## is negative, or if adding ##start## to  ##increment## would
+-- prove to be impossible, then 0 is returned. Otherwise, a sequence, of length
+-- ##count+1##, staring with ##start## and whose adjacent elements differ
+-- exactly by ##increment##, is returned.
 --
 -- Example 1:
 -- <eucode>
@@ -588,7 +605,9 @@ end function
 --		# ##count##: an integer, the number of times the pattern is to be repeated.
 --
 -- Returns:
---		A **sequence**, empty on failure, and of length ##count*length(pattern)## otherwise. The first elements of the returned sequence are those of #pattern##. So are those that follow, on to the end.
+--	A **sequence**, empty on failure, and of length ##count*length(pattern)##
+-- otherwise. The first elements of the returned sequence are those of
+-- #pattern##. So are those that follow, on to the end.
 --
 -- Example 1:
 -- <eucode>
@@ -665,18 +684,20 @@ end function
 --      # ##x##: the object to add
 --
 -- Returns:
--- 		A **sequence** whose first elements are those of ##target## and whose last element is ##x##.
+--	A **sequence** whose first elements are those of ##target## and whose
+-- last element is ##x##.
 --
 -- Comments:
 --
--- The length of the resulting sequence will be ##length(target) + 1##, no matter what ##x## is.
+-- The length of the resulting sequence will be ##length(target) + 1##, no
+-- matter what ##x## is.
 --
--- If ##x## is an atom this is equivalent to ##result = target & x##. If ##x## is a sequence it is
--- not equivalent.
+-- If ##x## is an atom this is equivalent to ##result = target & x##. If ##x##
+-- is a sequence it is not equivalent.
 --
--- The extra storage is allocated automatically and very efficiently with Euphoria's dynamic 
--- storage allocation. The case where ##target## itself is append()ed to (as in
--- Example 1 below) is highly optimized.
+-- The extra storage is allocated automatically and very efficiently with
+-- Euphoria's dynamic storage allocation. The case where ##target## itself is
+-- append()ed to (as in Example 1 below) is highly optimized.
 --
 -- Example 1:
 -- <eucode>
@@ -716,12 +737,14 @@ end function
 --      # ##x##: the object to add
 --
 -- Returns:
--- 		A **sequence** whose last elements are those of ##target## and whose first element is ##x##.
+--	A **sequence** whose last elements are those of ##target## and whose
+-- first element is ##x##.
 --
 -- Comments:
 -- The length of the returned sequence will be ##length(target) + 1## always.
 --
--- If ##x## is an atom this is the same as ##result = x & target##. If ##x## is a sequence it is not the same.
+-- If ##x## is an atom this is the same as ##result = x & target##. If ##x## is
+-- a sequence it is not the same.
 --
 -- The case where ##target## itself is prepend()ed to is handled very efficiently.
 --
@@ -755,10 +778,12 @@ end function
 --- Parameters:
 --		# ##target##: the sequence to insert into
 --		# ##what##: the object to insert
---		# ##index##: an integer, the position in ##target## where ##what## should appear
+--		# ##index##: an integer, the position in ##target## where ##what## 
+--                               should appear
 --
 -- Returns:
---		A **sequence**, which is ##target## with one more element at ##index##, which is ##what##.
+-- A **sequence**, which is ##target## with one more element at ##index##, 
+-- which is ##what##.
 --
 -- Comments:
 -- ##target## can be a sequence of any shape, and ##what## any kind of object.
@@ -802,8 +827,8 @@ end function
 -- ##target## can be a sequence of any shape, and ##what## any kind of object.
 --
 -- The length of this new sequence is the sum of the lengths of ##target## and ##what##
--- (atoms are of length 1 for this purpose). ##splice##() is equivalent to [[:insert]]() when ##what## is
---   an atom, but not when it is a sequence.
+-- (atoms are of length 1 for this purpose). ##splice##() is equivalent to
+-- [[:insert]]() when ##what## is an atom, but not when it is a sequence.
 --
 -- Splicing a string into a string results into a new string.
 --
@@ -823,7 +848,8 @@ end function
 --     [[:insert]], [[:remove]], [[:replace]], [[:& -> amp_concat]]
 
 --**
--- Pad the beginning of a sequence with an object so as to meet a minimum length condition.
+-- Pad the beginning of a sequence with an object so as to meet a minimum
+-- length condition.
 --
 -- Parameters:
 --   # ##target##: the sequence to pad.
@@ -831,13 +857,14 @@ end function
 --   # ##padding##: an object, usually the character to pad to (defaults to ' ').
 --
 -- Returns:
---		A **sequence**, either ##target## if it was long enough, or a sequence of length 
--- ##size## whose last elements are those of ##target## and whose first few head elements all
--- equal ##padding##.
+--	A **sequence**, either ##target## if it was long enough, or a sequence of
+-- length ##size## whose last elements are those of ##target## and whose first
+-- few head elements all equal ##padding##.
 --
 -- Comments:
---   ##pad_head##() will not remove characters. If ##length(target)## is greater than ##size##, this
---   function simply returns ##target##. See [[:head]]() if you wish to truncate long sequences.
+-- ##pad_head##() will not remove characters. If ##length(target)## is greater
+-- than ##size##, this function simply returns ##target##. See [[:head]]() 
+-- if you wish to truncate long sequences.
 --
 -- Example 1:
 -- <eucode>
@@ -868,11 +895,14 @@ end function
 --   # ##padding##: an object, usually the character to pad to (defaults to ' ').
 --
 -- Returns:
---		A **sequence**, either ##target## if it was long enough, or a sequence of length ##size## whose first elements are those of ##target## and whose last few head elements all equal ##padding##.
+-- A **sequence**, either ##target## if it was long enough, or a sequence
+-- of length ##size## whose first elements are those of ##target## and whose 
+-- last few head elements all equal ##padding##.
 --
 -- Comments:
---   ##pad_tail##() will not remove characters. If ##length(target)## is greater than ##size##, this
---   function simply returns ##target##. See [[:tail]]() if you wish to truncate long sequences.
+-- ##pad_tail##() will not remove characters. If ##length(target)## is greater
+-- than ##size##, this function simply returns ##target##. See [[:tail]]() if
+-- you wish to truncate long sequences.
 --
 -- Comments:
 --
@@ -990,10 +1020,12 @@ end function
 --
 -- Parameters:
 --		# ##source##: the sequence from which elements will be returned
---		# ##size##: an integer, how many head elements at most will be returned. Defaults to 1.
+--		# ##size##: an integer, how many head elements at most will be returned.
+--                              Defaults to 1.
 --
 -- Returns:
---		A **sequence**, ##source## if its length is not greater than ##size##, or the ##size## first elements of ##source## otherwise.
+-- A **sequence**, ##source## if its length is not greater than ##size##,
+-- or the ##size## first elements of ##source## otherwise.
 --
 -- Example 1:
 -- <eucode>
@@ -1025,10 +1057,13 @@ end function
 --
 -- Parameters:
 --   # ##source##: the sequence to get the tail of.
---   # ##size##: an integer, the number of items to return. (defaults to length(source) - 1)
+--   # ##size##: an integer, the number of items to return. 
+--                           (defaults to length(source) - 1)
 --
 -- Returns:
---		A **sequence** of length at most ##size##. If the length is less than ##size##, then ##source## was returned. Otherwise, the ##size## last elements of ##source## were returned.
+-- A **sequence** of length at most ##size##. If the length is less than 
+-- ##size##, then ##source## was returned. Otherwise, the ##size## last elements
+-- of ##source## were returned.
 --
 -- Comments:
 --   ##source## can be any type of sequence, including nested sequences.
@@ -1063,7 +1098,8 @@ end function
 --		# ##len##: an integer, the length of the slice to return
 --
 -- Returns:
---		A **sequence**, made of at most ##len## elements of ##source##. These elements are at contiguous positions in ##source## starting at ##start##.
+-- A **sequence**, made of at most ##len## elements of ##source##. These 
+-- elements are at contiguous positions in ##source## starting at ##start##.
 --
 -- Errors:
 -- If ##len## is less than ##-length(source)##, an error occurs.
@@ -1127,9 +1163,11 @@ end function
 -- Comments:
 -- ##start## is set to 1 if below.
 --
--- ##stop## is added ##length(source)## once if not positive, and set to ##length(source)## if above.
+-- ##stop## is added ##length(source)## once if not positive, and set to
+-- ##length(source)## if above.
 --
--- After these adjustments, and if ##source[start..stop]## makes sense, it is returned. Otherwise, ##{}## is returned.
+-- After these adjustments, and if ##source[start..stop]## makes sense, it is
+-- returned. Otherwise, ##{}## is returned.
 --
 -- Example 1:
 -- <eucode>
@@ -1177,22 +1215,27 @@ end function
 -- Perform a vertical slice on a nested sequence
 --
 -- Parameters:
---		# ##source##: the sequence to take a vertical slice from
---		# ##colno##: an atom, the column number to extract (rounded down)
---		# ##error_control##: an object which says what to do if some element does not exist. Defaults to 0 (crash in such a circumstance).
+--	# ##source##: the sequence to take a vertical slice from
+--	# ##colno##: an atom, the column number to extract (rounded down)
+--	# ##error_control##: an object which says what to do if some element
+--                       does not exist. Defaults to 0 (crash in such a circumstance).
 --
 -- Returns:
---		A **sequence**, usually of the same length as ##source##, made of all the ##source[x][colno]##.
+-- A **sequence**, usually of the same length as ##source##, made of all
+-- the ##source[x][colno]##.
 --
 -- Errors:
 -- If an element is not defined and ##error_control## is 0, an error occurs.
 -- If ##colno## is less than 1, it cannot be any valid column, and an error occurs.
 --
 -- Comments:
--- If it is not possible to return the sequence of all ##source[x][colno]]## for all available ##x##, the outcome is decided by ##error_control##:
+-- If it is not possible to return the sequence of all ##source[x][colno]]## 
+-- for all available ##x##, the outcome is decided by ##error_control##:
 -- * If 0 (the default), program is aborted.
 -- * If a nonzero atom, the short vertical slice is returned.
--- * Otherwise, elements of ##error_control## will be taken to make for any missing element. A short vertical slice is returned if ##error_control## is exhausted.
+-- * Otherwise, elements of ##error_control## will be taken to make for any 
+--   missing element. A short vertical slice is returned if ##error_control## is
+--   exhausted.
 --
 -- Example 1:
 -- <eucode>
@@ -1254,7 +1297,9 @@ end function
 --   # ##stop##: an atom, the index at which to stop removing (defaults to ##start##)
 --
 -- Returns:
--- 		A **sequence** obtained from ##target## by carving the ##start..stop## slice out of it.
+-- A **sequence** obtained from ##target## by carving the ##start..stop## slice
+-- out of it.
+--
 -- Comments:
 --   A new sequence is created. ##target## can be a string or complex sequence.
 --
@@ -1296,17 +1341,20 @@ end function
 --		# ##filler##: an object, used for filling gaps. Defaults to ' '
 --
 -- Returns:
--- A **sequence**, which looks like ##target##, but a slice starting at ##start## equals ##source##.
+-- A **sequence**, which looks like ##target##, but a slice starting at ##start## 
+--                 equals ##source##.
 --
 -- Comments:
 --
 -- In some cases, this call will result in the same result as [[:replace]]().
 --
--- If ##source## doesn't fit into ##target## because of the lengths and the supplied ##start## value,
--- gaps will be created, and ##filler## is used to fill them in.
+-- If ##source## doesn't fit into ##target## because of the lengths and the
+-- supplied ##start## value, gaps will be created, and ##filler## is used to
+-- fill them in.
 --
--- Notionally, ##target## has an infinite amount of ##filler## on both sides, and ##start## counts 
--- position relative to where ##target## actually starts. Then, notionally, a [[:replace]]() operation is performed.
+-- Notionally, ##target## has an infinite amount of ##filler## on both sides, 
+-- and ##start## counts position relative to where ##target## actually starts.
+-- Then, notionally, a [[:replace]]() operation is performed.
 --
 -- Example 1:
 -- <eucode>
@@ -1360,7 +1408,8 @@ end function
 --   # ##haystack##: the sequence to remove from.
 --
 -- Returns:
---		A **sequence** of length at most ##length(haystack)##, and which has the same elements, without any copy of ##needle## left
+-- A **sequence** of length at most ##length(haystack)##, and which has
+-- the same elements, without any copy of ##needle## left
 --
 -- Comments:
 -- This function weeds elements out, not sub-sequences.
@@ -1432,36 +1481,48 @@ public function remove_all(object needle, sequence haystack)
 end function
 
 --**
--- Filter a sequence based on a user comparator.
+-- Filter a sequence based on a user supplied comparator function.
 --
 -- Parameters:
 -- * ##source## - sequence to filter
 -- * ##rid## - [[:routine_id]] of function to use as comparator
+-- * ##userdata##: an object passed to each invocation of ##rid##. If omitted,
+--                 {} is used.
 --
 -- Returns:
 --		A **sequence** made of the elements in ##source## which passed the test.
 --
 -- Comments:
--- The comparator routine must take one parameter and return an atom. The parameter type must be such that all elements of ##source## have this type. An element is retained if the comparator routine returns a nonzero value.
+-- * The only items from ##source## that are returned are those that pass the test.
+-- Each item in ##source##, along with the ##userdata## is passed to the comparator
+-- routine ##rid##. This function will return a non-zero atom if the item is to
+-- be included in the result sequence, otherwise it should return zero to
+-- exclude it from the result. 
+-- * The comparator must take two parameters and return an atom. 
+-- The first parameter type must be compatible with all elements in ##source##.
+-- The second parameter is an ##object##.
 --
 -- Example 1:
 -- <eucode>
--- function gt_ten(integer a)
---     return a > 10
+-- function gt_select(integer a, object t)
+--     return a > t
 -- end function
 --
--- s = filter({5,8,20,19,3,2}, routine_id("gt_ten"))
+-- constant data = {5,8,20,19,3,2,10}
+-- s = filter(data, routine_id("gt_select"), 10)
 -- -- s is {20, 19}
+-- s = filter(data, routine_id("gt_select"), 5)
+-- -- s is {8, 20, 19, 10}
 -- </eucode>
 --
 -- See Also:
 --   [[:apply]]
 
-public function filter(sequence source, integer rid)
+public function filter(sequence source, integer rid, object userdata = {})
 	sequence dest = {}
 
 	for a = 1 to length(source) do
-		if call_func(rid, {source[a]}) then
+		if call_func(rid, {source[a], userdata}) then
 			dest &= {source[a]}
 		end if
 	end for
@@ -1483,13 +1544,15 @@ end function
 --   # ##stop##: an integer, the stopping index of the slice to replace.
 --
 -- Returns:
---		A **sequence**, which is made of ##target## with the ##start..stop## slice removed 
--- and replaced by ##replacement##, which is [[:splice]]()d in.
+-- A **sequence**, which is made of ##target## with the ##start..stop## slice
+-- removed and replaced by ##replacement##, which is [[:splice]]()d in.
 --
 -- Comments:
---   A new sequence is created. ##target## can be a string or complex sequence of any shape.
+-- * A new sequence is created. ##target## can be a string or complex sequence
+--   of any shape.
 --
---   To replace by just one element, enclose ##replacement## in curly braces, which will be removed at replace time.
+-- * To replace by just one element, enclose ##replacement## in curly braces,
+--    which will be removed at replace time.
 --
 -- Example 1:
 -- <eucode>
@@ -1564,56 +1627,6 @@ public function replace_all(sequence source, object olddata, object newdata)
 end function
 
 --**
--- Extracts sub-vectors from vectors, and returns a list of requested sub-vectors by vector.
---
--- Parameters:
---		# ##vectors##: a sequence of sequences of objects. Sub-sequences will be extracted from the inner sequences.
---		# ##coords##: q list of coordinate index lists, ie a sequence of sequences of small positive integers.
---
--- Returns:
---		A **sequence** the length of ##vectors##. Each of its elements is a sequence,
--- the length of ##coords##, of sequences. Each innermost sequence is made of the
--- coordinates of the vector whose indexes are on the given coordinate list.
---
--- Comments:
---	Another way to describe the output is as follows. For each vector in ##vectors##, and for each coordinate set in ##coords##, the vector is projected on those coordinates. The results are arranged by vector.
---
--- Example 1:
--- <eucode>
--- s = project({{1,-1,-1,0},{2,1,9}},{{1,2},{3,1},{2}})
--- -- s is {{{2,-1},{-1,2},{-1}},{{2,1},{9,2},{1}}}
--- </eucode>
---
--- See Also:
---   [[:vslice]]
-
-public function project(sequence vectors, sequence coords)
-	sequence result, current_vector, coord_set, result_item, projection
-	integer current_index
-
-	result=vectors
-	for i=1 to length(vectors) do
-		current_vector=vectors[i]
-		result_item=coords
-		for j=1 to length(coords) do
-			coord_set=coords[j]
-			projection=coord_set
-			for k=1 to length(coord_set) do
-				current_index=coord_set[k]
-				if current_index<1 or current_index>length(current_vector) then
-					crash("Invalid coordinate %d in set #%d for vector #%d",
-					  {coord_set[k],j,i})
-				end if
-				projection[k]=current_vector[current_index]
-			end for
-			result_item[j]=projection
-		end for
-		result[i]=result_item
-	end for
-	return result
-end function
-
---**
 -- Turns a sequences of indexes into the sequence of elements in a source that have such indexes.
 --
 -- Parameters:
@@ -1635,14 +1648,52 @@ end function
 public function extract(sequence source, sequence indexes)
 	object p
 
-	for i=1 to length(indexes) do
-		p=indexes[i]
+	for i = 1 to length(indexes) do
+		p = indexes[i]
 		if not valid_index(source,p) then
 			crash("%d is not a valid index on the input sequence",p)
-	end if
-		indexes[i]=source[p]
+		end if
+		indexes[i] = source[p]
 	end for
 	return indexes
+end function
+
+--**
+-- Creates a list of sequences based on selected elements from sequences in the source.
+--
+-- Parameters:
+--	# ##source##: a list of sequences.
+--	# ##coords##: a list of index lists.
+--
+-- Returns:
+--	A **sequence** with the same length as ##source##. Each of its elements is a sequence,
+-- the length of ##coords##. Each innermost sequence is made of the
+-- elements from the corresponding source sub-sequence.
+--
+-- Comments:
+-- For each sequence in ##source##, a set of sub-sequences is created; one for
+-- each index list in ##coords##. An index list is just a sequence containing
+-- indexes for items in a sequence.
+--
+-- Example 1:
+-- <eucode>
+-- s = project({ "ABCD",  "789"},  {{1,2}, {3,1}, {2}})
+-- -- s is {{"AB","CA","B"},{"78","97","8"}}
+-- </eucode>
+--
+-- See Also:
+--   [[:vslice]], [[:extract]]
+
+public function project(sequence source, sequence coords)
+	sequence result
+
+	result = repeat( repeat(0, length(coords)), length(source) )
+	for i = 1 to length(source) do
+		for j = 1 to length(coords) do
+			result[i][j] = extract(source[i], coords[j])
+		end for
+	end for
+	return result
 end function
 
 --****

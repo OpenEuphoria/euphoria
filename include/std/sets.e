@@ -10,11 +10,11 @@
 -- Other modules may be built upon them, for instance graph handling or simple topology, finite groups etc.
 --
 -- Notes:
---   * A set is an ordered sequence in ascending order, not more, not less
---   * A map from s1 to s2 is a sequence the length of s1 whose elements are indexes into s2,
---     followed by {length(s1),length(s2)}.
---   * An operation of ExF to G is a two dimensional sequence of elements of G, indexed ny
---     ExF, and the triple {card(E),card(F),card(G)}.
+--   * A //set// is an ordered sequence in ascending order, not more, not less
+--   * A //map// from setA to setB is a sequence the length of setA whose elements are indexes into setB,
+--     followed by {length(setA),length(setB)}.
+--   * An //operation// of E x F ==> G is a two dimensional sequence of elements of G, indexed by
+--     E x F, and the triple {card(E),card(F),card(G)}.
 --
 
 include std/error.e
@@ -40,7 +40,7 @@ public type set(object s)
     object x,y
 
     if atom(s) then
-        return 1
+        return 0
     end if
     
     if length(s) < 2 then
@@ -60,10 +60,12 @@ public type set(object s)
     return 1
 end type
 
-function bounded_integer(object x,integer lbound,integer ubound)
+function bounded_integer(object x, integer lbound, integer ubound)
 -- Description: Returns 0 for a non integer or an out of bounds integer, else 1.
 -- Takes: object to test; lower allowable bound; upper allowable bound.
--- Returns: 1 if x is an integer between lbound and ubound both included, else 0.
+-- Returns: 1 if x is an integer greater or equal to lbound and less than or
+-- equal to ubound, else 0.
+--
 -- See also: map, is_left_unit, is_right_unit
     if not integer(x) then
         return 0
@@ -104,9 +106,13 @@ end function
 --   [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_map]], [[:reverse_map],
 --   [[:is_injective]], [[:is_surjective]], [[:is_bijective]]
 
-public type map(sequence s)
+public type map(object s)
     object p,q
 
+    if atom(s) then
+    	return 0
+    end if
+    
 	if length(s) <= 2 then
 		return 0
 	end if
@@ -160,13 +166,26 @@ end type
 public type operation(object s)
     sequence u
 
-    if atom(s) or length(s)!=2 or length(s[2])!=3 or length(s[1])!=s[2][1] then
+    if atom(s) then
         return 0
     end if
+    
+    if length(s) != 2 then
+        return 0
+    end if
+    
+    if length(s[2]) != 3 then
+        return 0
+    end if
+    
+    if length(s[1]) != s[2][1] then
+        return 0
+    end if
+    
 
-    u=s[2][2..3]
+    u = s[2][2..3]
     for i=1 to length(s[1]) do
-        if not map(s[1][i]&u) then
+        if not map(s[1][i] & u) then
             return 0
         end if
     end for
@@ -177,23 +196,23 @@ end type
 -- === Inclusion and belonging.
 --
 
-function bfind(object x,sequence s,integer startpoint,integer endpoint)
+function bfind(object needle, sequence haystack, integer startpoint = 1, integer endpoint = length(haystack))
     integer r,c
 
-    if endpoint>length(s) then
-        endpoint=length(s)
+    if endpoint > length(haystack) then
+        endpoint = length(haystack)
     end if
-    if startpoint<1 then
-        startpoint=1	
+    if startpoint < 1 then
+        startpoint = 1	
     end if
 	
-    c=eu:compare(x,s[startpoint])
+    c=eu:compare(needle,haystack[startpoint])
     if c=1 then
-        c=eu:compare(x,s[endpoint])
+        c=eu:compare(needle,haystack[endpoint])
         if c=-1 then
             while endpoint - startpoint>1 do
                 r=floor((endpoint+startpoint)/2)
-                c=eu:compare(x,s[r])
+                c=eu:compare(needle,haystack[r])
                 if c=-1 then
                     endpoint=r
                 elsif c=0 then
@@ -259,7 +278,7 @@ public function cardinal(set S)
 end function
 
 --**
--- Decide whether an object is on a set.
+-- Decide whether an object is in a set.
 --
 -- Parameters:
 --		# ##x##: the object inquired about
@@ -276,24 +295,25 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:is_inside]] , [[:intersection]], [[:difference]]
+-- [[:is_subset]] , [[:intersection]], [[:difference]]
 
-public function belongs_to(object x,set s)
+public function belongs_to(object x, set s)
 	if length( s ) then
-		return bfind(x,s,1,length(s))>0
+		return bfind(x, s) > 0
 	else
 		return 0
 	end if
 end function
 
-function add_to_(object x,sequence s)
+function add_to_(object x, sequence s)
     integer p
 
-    if not length(s) then
+    if length(s) = 0 then
         return {x}
     end if
-    p=bfind(x,s,1,length(s))
-    if p<0 then
+    
+    p=bfind(x, s)
+    if p < 0 then
         return insert(s,x,-p)
     end if
     return s
@@ -326,7 +346,11 @@ end function
 function remove_from_(object x,sequence s)
     integer p
 
-    p=bfind(x,s,1,length(s))
+    if length(s) = 0 then
+        return s
+    end if
+    
+    p=bfind(x,s)
     if p>0 then
         return remove(s,p)
     else
@@ -347,8 +371,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0 s0={1,3,5,7}
---   s0=add_to(2,s)   -- s0 is now {1,2,3,5,7}
+--   set s0 s0={1,2,3,5,7}
+--   s0=remove_from(2,s0)   -- s0 is now {1,3,5,7}
 -- </eucode>
 --
 -- See Also: 
@@ -371,7 +395,7 @@ function iota(integer count)
     return result
 end function
 
-function is_inside_(sequence s1,sequence s2,integer mode)
+function is_subset_(sequence s1,sequence s2,integer mode)
     integer p,q,ls1
     sequence result
 
@@ -448,13 +472,13 @@ end function
 -- Example 1:
 -- <eucode>
 --   set s0 s0={1,3,5,7}
---   ?is_inside({3,5},s0)   -- prints out 1
+--   ?is_subset({3,5},s0)   -- prints out 1
 -- </eucode>
 --
 -- See Also: 
 -- [[:subsets]], [[:belongs_to]], [[:difference]], [[:embedding]], [[:embed_union]]
-public function is_inside(set small,set large)
-    return is_inside_(small,large,0)
+public function is_subset(set small,set large)
+    return is_subset_(small,large,0)
 end function
 
 --** 
@@ -466,7 +490,7 @@ end function
 --
 -- Returns:
 --
---		 A **set** of indexes if ##small## [[:is_inside]]() ##large##, else 0. Each element 
+--		 A **set** of indexes if ##small## [[:is_subset]]() ##large##, else 0. Each element 
 -- is the index in ##large## of the corresponding element of ##small##. Its length is ##
 -- length(small)## and the values range from 1 to ##length(large)##.
 --
@@ -477,9 +501,9 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:subsets]], [[:belongs_to]], [[:difference]], [[:is_inside]]
+-- [[:subsets]], [[:belongs_to]], [[:difference]], [[:is_subset]]
 public function embedding(set small,set large)
-    return is_inside_(small,large,1)
+    return is_subset_(small,large,1)
 end function
 
 function abs(integer p)
@@ -607,7 +631,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
---  [[:is_inside]]
+--  [[:is_subset]]
 
 public function subsets(set s)
     integer p,k,L
@@ -717,7 +741,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:is_inside]], [[:subsets]], [[:belongs_to]]
+-- [[:is_subset]], [[:subsets]], [[:belongs_to]]
 
 public function intersection(set S1,set S2)
     return intersection_(S1,S2)
@@ -817,7 +841,7 @@ end function
 -- </eucode>
 --
 -- See Also: 
--- [[:is_inside]], [[:subsets]], [[:belongs_to]]
+-- [[:is_subset]], [[:subsets]], [[:belongs_to]]
 public function union(set S1,set S2)
     return union1(S1,S2)
 end function
@@ -878,7 +902,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [::remove_from,]] [[:is_inside]], [[:delta]]
+-- [::remove_from,]] [[:is_subset]], [[:delta]]
 public function difference(set base,set removed)
     integer k1,k2,k,c,ls1,ls2,k0
     sequence result
@@ -1022,7 +1046,7 @@ public function define_map(sequence mapping, set target)
     lt = length(target)
     result = mapping & length(mapping) & lt
     for i = 1 to length(mapping) do
-        result[i] = bfind(mapping[i], target, 1, lt)
+        result[i] = bfind(mapping[i], target)
     end for
 
     return result
@@ -1124,7 +1148,7 @@ public function image(map f,object x,set input,set output)
         report_error({"image","The map range would not fit into the supplied target set."})
     end if
 
-    p=bfind(x,input,1,length(input))
+    p = bfind(x, input)
 
     if p<0 or p>f[$-1] then
         report_error({"image","The map is not defined for the supplied argument."})
@@ -1201,10 +1225,9 @@ end function
 
 public function direct_map(map f,set s1,sequence s0,set s2)
     sequence result
-    integer k,p,ls1
+    integer k,p
 
-    ls1=length(s1)
-    if f[$-1]>ls1 or f[$]>length(s2) then
+    if f[$-1] > length(s1) or f[$] > length(s2) then
         report_error({"direct_map","The supplied map cannot map the source set into the target set."})
     end if
 
@@ -1212,7 +1235,7 @@ public function direct_map(map f,set s1,sequence s0,set s2)
     result=s0
 
     for i=1 to length(s0) do
-        p=bfind(s0[i],s1,1,ls1)
+        p = bfind(s0[i], s1)
         if p>0 then
             result[k]=s2[f[p]]
             k+=1
@@ -1244,7 +1267,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:is_inside]], [[:direct_map]], [[:difference]]
+-- [[:is_subset]], [[:direct_map]], [[:difference]]
  public function restrict(map f,set source,set restriction)
     sequence result = restriction
     integer p = 1, k = 0
@@ -1274,7 +1297,7 @@ function change_target_(sequence f,sequence s1,sequence s2)
         if p then
             result[i]=p
         else
-            p=bfind(s1[fi],s2,1,length(s2))
+            p=bfind(s1[fi],s2)
             if p<0 then
                 report_error({"change_target","map range not included in new target set."})
             else
@@ -1654,7 +1677,7 @@ public function reverse_map(map f,set s1,sequence s0,set s2)
     done=repeat(0,length(x[2]))
 
     for i=1 to length(s0) do
-        p=find(bfind(s0[i],s1,1,length(s1)),x[2])
+        p=find(bfind(s0[i],s1), x[2])
         if p and not done[p] then
             done[p]=1
             result=union1(result,x[1][p])

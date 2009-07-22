@@ -3298,7 +3298,7 @@ end procedure
 
 procedure Entry_statement()
 -- defines an entry statement
--- must check that it is not in the moddle of an if block
+-- must check that it is not in the middle of an if block
 	integer addr
 
 	if not length(loop_stack) or block_index=0 then
@@ -3307,7 +3307,7 @@ procedure Entry_statement()
 	if block_list[block_index]=IF or block_list[block_index]=SWITCH then
 		CompileErr("the innermost block containing an entry statement must be the loop it defines an entry in.")
 	elsif loop_stack[$] = FOR then  -- not allowed in an innermost for loop
-		CompileErr("the entry statement must apply to a while or loop block")
+		CompileErr("the entry statement can not be used in a 'for' block")
 	end if
 	addr = entry_addr[$]
 	if addr=0  then

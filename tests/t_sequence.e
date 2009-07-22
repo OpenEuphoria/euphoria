@@ -315,12 +315,16 @@ test_equal("pivot #5", {{5}, {}, {}}, pivot( 5, 10 ) )
 test_equal("pivot #6", {{}, {}, {}}, pivot( {}) )
 test_equal("pivot #7", {{"abc", "bcd"}, {}, {"def", "efg", "cdf"}}, pivot( {"abc", "def", "bcd", "efg", "cdf"}, "cat") )
 
-function gt_ten(integer a)
-	return a > 10
+function gt_ten(integer a, object t)
+	return a > t
 end function
+test_equal("filter #1", {20,30,40}, filter({1,2,3,20,4,30,6,40,6}, routine_id("gt_ten"), 10))
 
-test_equal("filter #1", {20,30,40}, filter({1,2,3,20,4,30,6,40,6}, routine_id("gt_ten")))
-test_equal("apply #1", {"1","2","3","4"}, apply({1,2,3,4}, routine_id("sprint")))
+
+function sprinter(object a, object t)
+	return sprint(a + t)
+end function
+test_equal("apply #1", {"8","9","10","11"}, apply({1,2,3,4}, routine_id("sprinter"), 7))
 
 
 test_equal("is_in_range #1", 0, is_in_range(1, {}))
