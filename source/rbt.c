@@ -889,7 +889,7 @@ int RBT_Find_Last(rbt_tree* tree_p, rbt_kv* data_p) {
 Procedure: RBT_Delete 
 
 Argments:
-	tree_p = The tree contianing the node to delete.
+	tree_p = The tree containing the node to delete.
 	data_p = Pointer to the structure which contains the key of the node to
 	         delete.
 Description: If the key's node exists, it is removed from the tree. However, 
