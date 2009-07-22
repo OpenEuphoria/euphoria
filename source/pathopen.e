@@ -95,7 +95,7 @@ end function
 function check_cache(sequence env,sequence inc_path)
 	integer delim,pos
 
-	if not num_var then -- first time the vr is accessed, add cache entry
+	if not num_var then -- first time the var is accessed, add cache entry
 		cache_vars = append(cache_vars,env)
 		cache_strings = append(cache_strings,inc_path)
 		cache_substrings = append(cache_substrings,{})
