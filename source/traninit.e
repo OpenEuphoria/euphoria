@@ -7,7 +7,7 @@
 -- variables.
 -- 
 -- If the user selects the compiler at the command line and it cannot
--- find its envinronment variable the translator will exit with an error.
+-- find its environment variable the translator will exit with an error.
 -- If the user doesn't select it then it will try all of the environment
 -- variables and use the selected platform to determine which compiler must
 -- be used.
