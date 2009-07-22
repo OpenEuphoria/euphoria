@@ -121,8 +121,8 @@ Some feature that is not possible to implement under DOS32 can be put into a uni
 resulting ex.err file can be put into a control file for DOS32.
 This means we do not need to have all of these errors that we expect to get
 drawing our attention away from errors that need our attention just because
-we are leaving inplace partial support for an arguably already dead platform.
-On the otherhand, if an unexpected error message not like ##t_foo.d/DOS32/control.err##
+we are leaving in place partial support for an arguably already dead platform.
+On the other hand, if an unexpected error message not like ##t_foo.d/DOS32/control.err##
 gets generated in the DOS case then eutest will tell us that.
 
 How do we construct these control files?  You don't really need to, you
