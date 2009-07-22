@@ -67,7 +67,7 @@ integer fn
 for i = 1 to length(src_files) do
 	fn = open(src_files[i], "r")
 	if fn = -1 then
-		puts(2, "can't open " & src_files[i] & '\n')
+		printf(2, "can't open '%s'\n", {src_files[i]})
 		abort(1)
 	end if
 	local_sum = 0

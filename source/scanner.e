@@ -361,31 +361,19 @@ end function
 include pathopen.e
 function path_open()
 -- open an include file (new_include_name) according to the include path rules  
-	integer absolute, try
+	integer try
 	sequence full_path
 	sequence errbuff
 		sequence currdir
 	sequence conf_path
 	object scan_result, inc_path
 		
-	absolute = FALSE
-	
 	-- skip whitespace not necessary - String Token does it
-	
-	-- check for leading backslash
-	-- TODO: abstract function to is_absolute_path() or something
-	--     this same method is used elsewhere.
-	ifdef UNIX then
-		absolute = find(new_include_name[1], SLASH_CHARS)
-	elsedef
-		absolute = find(new_include_name[1], SLASH_CHARS) or find(':', new_include_name)
-	end ifdef
-	
-	if absolute then
+	if absolute_path(new_include_name) then
 		-- open new_include_name exactly as it is
 		try = open(new_include_name, "r")
 		if try = -1 then
-			errbuff = sprintf("can't open %s", new_include_name)
+			errbuff = sprintf("can't open '%s'", {new_include_name})
 			CompileErr(errbuff)
 		end if
 		return try
@@ -443,10 +431,10 @@ function path_open()
 	inc_path = getenv("EUINC")
 	conf_path = get_conf_dirs()
 	if atom(inc_path) then
-		errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s\nor in %s%sinclude",
+		errbuff = sprintf("can't find '%s' in %s\nor in %s\nor in %s\nor in %s%sinclude",
 						  {new_include_name, currdir, main_path, conf_path, eudir, SLASH})
 	else
-		errbuff = sprintf("can't find %s in %s\nor in %s\nor in %s\nor in %s\nor in %s%sinclude",
+		errbuff = sprintf("can't find '%s' in %s\nor in %s\nor in %s\nor in %s\nor in %s%sinclude",
 						  {new_include_name, currdir, main_path, conf_path, inc_path, eudir, SLASH})
 	end if
 	CompileErr(errbuff)
