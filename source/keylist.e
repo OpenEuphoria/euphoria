@@ -63,7 +63,7 @@ export sequence keylist = {
 	{"goto",      SC_KEYWORD, GOTO,      0, 0, 0},
 	{"public",    SC_KEYWORD, PUBLIC,    0, 0, 0 },
 	{"fallthru",  SC_KEYWORD, FALLTHRU,  0, 0, 0},
-	-- new ones must go at end to maintain compatib	ility with old shrouded code
+	-- new ones must go at end to maintain compatibility with old shrouded code
 
 	-- PREDEFINED SUBPROGRAMS and TYPEs 
 	{"length",           SC_PREDEF, FUNC, LENGTH,           1, E_PURE},
