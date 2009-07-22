@@ -676,7 +676,7 @@ Arguments:
 
 Description: This removes the entire tree from RAM. However, before doing so,
              it calls the user supplied free_item procedure for each node
-             so that the calling applicaiton can release any resources held
+             so that the calling application can release any resources held
              by any node.
 ------------------------------------------------------------------------------*/
 void* RBT_Destroy(rbt_tree* tree_p) 
@@ -982,7 +982,7 @@ void RBT_Delete(rbt_tree* tree, rbt_kv* data)
 	// Re-balance the tree.
 	fix_rb_state(tree, fixup_child);
 	
-	// Allow the applciation to free up resources.
+	// Allow the application to free up resources.
 	if (tree->free_item != 0)
 		tree->free_item(&(deleted_node_l->data)); // Don't care if user changes node.
 	
