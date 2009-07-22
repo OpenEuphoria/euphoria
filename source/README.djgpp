@@ -1,4 +1,4 @@
-INSTALATION:
+INSTALLATION:
 
 Get the following packages:
 http://www.delorie.com/pub/djgpp/current/v2gnu/
@@ -67,5 +67,5 @@ Once this is done issue:
 
 make test
 
-this should run the unit tests.  Right now, you need to have Watcom C instelled for the tests to work.
-Please go ahead if you can make it work without-Watcom's help if you are so inclinded.
+this should run the unit tests.  Right now, you need to have Watcom C installed for the tests to work.
+Please go ahead if you can make it work without Watcom's help if you are so inclined.
