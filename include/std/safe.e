@@ -188,7 +188,7 @@ export function safe_address(atom start, integer len, positive_int action )
 		if edges_only then
 			-- addresses are considered safe as long as 
 			-- they aren't in any block's border zone and
-			-- if they are in a block, the action is permited
+			-- if they are in a block, the action is permitted
 			-- for that block's protection
 			if start <= 3 then
 				return BAD -- null pointer (or very small address)
