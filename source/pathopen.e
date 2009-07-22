@@ -1,4 +1,4 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 
 include std/machine.e
@@ -594,7 +594,7 @@ export function Include_paths(integer add_converted)
 	end if
 
 	if status then
-		-- some paths are not convrted, how to check them?
+		-- some paths are not converted, how to check them?
 		if cache_complete[num_var] then
 			goto "cache done"
 		end if

@@ -1,4 +1,4 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Change line terminator from \r\n (DOS-style) to \n (Linux style),
 -- or vice versa. On Linux, some lines will get error messages from GNU C

@@ -1,4 +1,4 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Binder
 -- save the Euphoria front-end data structures (IL) to disk 

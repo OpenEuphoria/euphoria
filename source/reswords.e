@@ -1,4 +1,4 @@
--- (c) Copyright 2007,2008 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- IL opcodes, scanner tokens etc.
 

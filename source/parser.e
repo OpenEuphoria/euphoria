@@ -1,4 +1,4 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Euphoria 4.0
 -- Parser

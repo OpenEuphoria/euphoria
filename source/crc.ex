@@ -1,4 +1,4 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Compute a checksum on the source files.
 -- This is useful when you are porting to a new machine.
@@ -10,6 +10,7 @@
 -- reported after that will be wrong.
 --
 -- Differences in line terminators (\r \n) do not affect the numbers.
+include std/io.e
 
 constant src_files = {
 -- front end
@@ -60,32 +61,25 @@ constant src_files = {
 "crc.ex"
 }
 
-integer global_sum, local_sum, c, count
+integer global_sum, local_sum, c
 global_sum = 0
-integer fn
+object fn
 
 for i = 1 to length(src_files) do
-	fn = open(src_files[i], "r")
-	if fn = -1 then
+	fn = read_file(src_files[i], TEXT_MODE)
+	if equal(fn, -1) then
 		printf(2, "can't open '%s'\n", {src_files[i]})
 		abort(1)
 	end if
-	local_sum = 0
-	count = 1
-	while 1 do
-		c = getc(fn)
-		if c = -1 then
-			exit
-		end if
-		if c != '\n' and c != '\r' then
-			local_sum = remainder(local_sum + c * count, 100000000)
-			count += 1
-		end if
-	end while
-	close(fn)
 	
-	global_sum = remainder(global_sum + local_sum, 100000000)
-	printf(1, "%s: %x\n", {src_files[i], global_sum})
+	local_sum = 0
+	for j = 1 to length(fn) do
+		c = fn[j]
+		local_sum = remainder(local_sum + c * j, 1_000_000_003)
+	end for
+	
+	global_sum = remainder(global_sum + local_sum, 1_000_000_003)
+	printf(1, "%-20s: %08x\n", {src_files[i], local_sum})
 end for
 
 printf(1, "\n%d files. Total: %x\n", {length(src_files), global_sum})

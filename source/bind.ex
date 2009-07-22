@@ -1,5 +1,5 @@
 #!/usr/bin/exu -i /usr/share/euphoria/source/
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- The Binder
 -- uses the Euphoria front-end, plus a special Euphoria-coded back-end

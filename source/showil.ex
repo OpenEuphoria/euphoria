@@ -1,4 +1,4 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Display the IL code produced by the front-end.
 -- Fairly crude, used for debugging. You'll be able to check
