@@ -205,7 +205,7 @@ end function
 --	{"equal",            SC_PREDEF, FUNC, EQUAL,            2, E_PURE,
 -- The K_DEF_ARGS field reflects the lists of defaulted and non defaulted params, and 
 -- is just like it were built in a S_DEF_ARGS field of a regular SymTab entry, built in parser:SubProg().
--- So here it reads {2,1,{2}}: param 2 is the first defaulted, pram 1 is the last non defaulted
+-- So here it reads {2,1,{2}}: param 2 is the first defaulted, param 1 is the last non defaulted
 -- and the complete list of defparm indexes is {2}.
 --
 -- Now the K_CODE entry:
