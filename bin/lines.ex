@@ -234,13 +234,13 @@ while 1 do
                                 --not at the beginning of thr line
                                 c = line[match("include", line) - 1]
                                 if c != 0 and c != ' ' and c != '\t' then
-                                        --it must be a non whitespace character not a vilid include line
+                                        --it must be a non whitespace character not a valid include line
                                         ws_ok = 0
                                 end if
                         end if
 
                         if ws_ok = 1 then
-                                --is the inclood between ""s
+                                --is the include between ""s
                                 for i = 1 to length(line) do
                                         if line[i] = '"' then
                                                 if i < match("include", line) then
