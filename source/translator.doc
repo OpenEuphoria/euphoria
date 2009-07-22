@@ -257,7 +257,7 @@
  * Propagation of information into subroutines
      
    The Translator looks at all calls to a routine in an effort to
-   determine the most resticted type and possible values for each parameter,
+   determine the most restricted type and possible values for each parameter,
    as used by the current program. For instance, you might declare
    a subroutine parameter as atom, but if the Translator sees that 
    your program always passes an integer, it will take advantage of
