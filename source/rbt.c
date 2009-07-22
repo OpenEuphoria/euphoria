@@ -272,7 +272,7 @@ Arguments:
 	node_p = The node to delete.
 	
 Description:
-	First it destroys everying on the left then right, then is destroys the
+	First it destroys everything on the left then right, then is destroys the
 	supplied node. If the tree was created with a 'free_item' routine, it is
 	called for each node so that the user program can release any resources
 	that might be attached to the node's key or value.
