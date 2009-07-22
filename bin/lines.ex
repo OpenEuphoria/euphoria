@@ -231,7 +231,7 @@ while 1 do
                         --the beginning
                         --puts(1, line)
                         if match("include", line) > 1 then
-                                --not at the beginning of thr line
+                                --not at the beginning of the line
                                 c = line[match("include", line) - 1]
                                 if c != 0 and c != ' ' and c != '\t' then
                                         --it must be a non whitespace character not a valid include line
