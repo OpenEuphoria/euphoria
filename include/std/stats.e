@@ -805,7 +805,7 @@ end function
 --
 -- Note that only atom elements are included and any sub-sequences elements are ignored.
 --
--- The smoothing factor controls how data is smoothed. 0 smoothes everything to 0, and 1 means no smoothing at all.
+-- The smoothing factor controls how data is smoothed. 0 smooths everything to 0, and 1 means no smoothing at all.
 --
 -- Any value for ##pFactor## outside the 0.0..1.0 range causes ##pFactor## 
 -- to be set to the periodic factor ##(2/(N+1))##.
