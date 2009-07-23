@@ -648,7 +648,7 @@ public procedure unregister_block(machine_addr block_addr)
 	die("ATTEMPT TO UNREGISTER A BLOCK THAT WAS NOT REGISTERED!")
 end procedure
 
-export function prepare_block(atom a, integer n, positive_int protection)
+export function prepare_block(atom a, integer n, natural protection)
 -- set up an allocated block so we can check it for corruption
 	if a = 0 then
 		die("OUT OF MEMORY!")
