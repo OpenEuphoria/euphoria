@@ -384,7 +384,7 @@ end procedure
 --    * OpTrace is on
 export procedure check_inline( symtab_index sub )
 	
-	if OpTrace then
+	if OpTrace or SymTab[sub][S_TOKEN] = TYPE then
 		return
 	end if
 	inline_sub      = sub
