@@ -501,8 +501,13 @@ endif
 ifeq "$(HASCHANGEDDIRECTORY)" "1"
 
 translate-here :
-	echo -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) > translate-arguments.txt
-	$(EUBIN)/$(EECU) @translate-arguments.txt 
+	# This stuff doesn't work:
+	#echo $(INCDIR) > incdir.txt
+	#echo -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) > translate-arguments.txt
+	#$(EXE) @incdir.txt $(TRUNKDIR)/source/ec.ex @translate-arguments.txt
+	
+	$(EXE) $(INCDIR) $(TRUNKDIR)/source/ec.ex -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET)
+	
 
 .PHONY : translate-here
 	
