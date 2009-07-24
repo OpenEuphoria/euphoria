@@ -37,7 +37,7 @@ export function suppress_callgraphs( object o )
 end function
 
 export function suppress_stdlib( object o)
-	show_stdlib = 0
+	show_stdlib = 1
 	return 0
 end function
 

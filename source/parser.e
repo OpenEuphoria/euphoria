@@ -578,6 +578,8 @@ function next_token()
 	        else -- tape ended
 	            s = restore_parser()
 	        end if
+	    else
+	    	InternalErr("error with token playback")
 		end if
 		if t[T_ID] = RECORDED then
 			t=read_recorded_token(t[T_SYM])
@@ -801,12 +803,14 @@ procedure ParseArgs(symtab_index subsym)
 	nested_calls &= subsym
 	lock_scanner = 0
 	on_arg = 0
-
+	
 	short_circuit -= 1
 	for i = 1 to n do
-
+		
 	  	tok = next_token()
-		if tok[T_ID] = COMMA then  -- defaulted arg
+		
+		if tok[T_ID] = COMMA then  
+			-- defaulted arg
 			if SymTab[subsym][S_OPCODE] then
 				if atom(SymTab[subsym][S_CODE]) then
 					var_code = 0
@@ -819,28 +823,35 @@ procedure ParseArgs(symtab_index subsym)
 				var_code = SymTab[s][S_CODE]
 				name = SymTab[s][S_NAME]
 			end if
+			
 			if atom(var_code) then  -- but no default set
 				CompileErr(sprintf("Argument %d is defaulted, but has no default value",i))
 			end if
+			
 			use_private_list = 1
 			start_playback(var_code)
 			lock_scanner=1
-			call_proc(forward_expr, {})
+			
+			-- read the default tokens
+			Expr()
 			lock_scanner=0
 			on_arg += 1
 			private_list = append(private_list,name)
 			private_sym &= Top()
 			backed_up_tok = {tok} -- ????
+			
 		elsif tok[T_ID] != RIGHT_ROUND then
+			-- It's a real arg
 			if SymTab[subsym][S_OPCODE] then
 				name = ""
 			else
 				s = SymTab[s][S_NEXT]
 				name = SymTab[s][S_NAME]
 			end if
+			
 			use_private_list = 0
 			putback(tok)
-			call_proc(forward_expr, {})
+			Expr()
 			on_arg += 1
 			private_list = append(private_list,name)
 			private_sym &= Top()
@@ -852,7 +863,9 @@ procedure ParseArgs(symtab_index subsym)
 			end if
 			tok = next_token()
 			if tok[T_ID] != COMMA then
-		  		if tok[T_ID] = RIGHT_ROUND then -- not as many actual args as formal args
+				-- 
+		  		if tok[T_ID] = RIGHT_ROUND then 
+		  			-- not as many actual args as formal args
 					if fda=0 then
 						WrongNumberArgs(subsym, "")
 					elsif i<lnda then
@@ -860,16 +873,19 @@ procedure ParseArgs(symtab_index subsym)
 					end if
 					lock_scanner = 1
 					use_private_list = 1
-					for j = on_arg + 1 to n do
-
+					
+					-- read as many as are left
+					while on_arg < n do
+						on_arg += 1
 						if SymTab[subsym][S_OPCODE] then
 							if atom(SymTab[subsym][S_CODE]) then
 								var_code = 0
 							else
-								var_code = SymTab[subsym][S_CODE][j]
+								var_code = SymTab[subsym][S_CODE][on_arg]
 							end if
 							name = ""
 						else
+						
 							s = SymTab[s][S_NEXT]
 							var_code = SymTab[s][S_CODE]
 							name = SymTab[s][S_NAME]
@@ -878,22 +894,25 @@ procedure ParseArgs(symtab_index subsym)
 						-- some defaulted arg follows with a default value
 							putback( tok )
 							start_playback(var_code)
-							call_proc(forward_expr, {})
-							if j<n then
+							
+							-- read the recorded tokens
+							Expr()
+							if on_arg < n then
 								private_list = append(private_list,name)
 								private_sym &= Top()
 							end if
-							on_arg += 1
 						else -- just not enough args
-							CompileErr(sprintf("Argument %d is defaulted, but has no default value",j))
+							CompileErr(sprintf("Argument %d is defaulted, but has no default value", on_arg))
 						end if
-		  		    end for
+		  		    end while
 					-- all missing args had default values
 					short_circuit += 1
 					if backed_up_tok[$][T_ID] = PLAYBACK_ENDS then
 						backed_up_tok = {}
 					end if
+					
 					restore_parseargs_states()
+					
 					return
 				else
 					putback(tok)
