@@ -40,6 +40,7 @@ constant extra_data = #`
 "file.css"
 
 "# not a comment"
+'-i \abc\def\ghi'
 `
 constant optional_data = #`
 # Verbose on
@@ -52,8 +53,6 @@ delete_file("nofile.txt") -- Ensure that this does not exist.
 map:map opts = cmd_parse(option_defs, routine_id("opt_help"), 
 				{"exu", 
 				 "app.ex", 
-				 "-i", 
-				 "\\abc\\def\\ghi",
 				 "-d", 
 				 "@@nofile.txt",
 				 "-c:50", 

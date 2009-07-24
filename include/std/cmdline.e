@@ -721,11 +721,20 @@ end function
 --   '#' character will be inserted as arguments in the command line. These lines
 --   replace the original '@' argument as if they had been entered on the original
 --   command line. \\
---   Note that if the name following the '@' begins with another '@', the extra
+--   ** If the name following the '@' begins with another '@', the extra
 --   '@' is removed and the remainder is the name of the file. However, if that
 --   file cannot be read, it is simply ignored. This allows //optional// files
 --   to be included on the command line. Normally, with just a single '@', if the
 --   file cannot be found the program aborts.
+--   ** Lines whose first non-whitespace character is '#' are treated as a comment
+--   and thus ignored.
+--   ** Lines enclosed with double quotes will have the quotes stripped off and the
+--   result is used as an argument. This can be used for arguments that begin with
+--   a '#' character, for example.
+--   ** Lines enclosed with single quotes will have the quotes stripped off and
+--   the line is then further split up use the space character as a delimiter. The
+--   resulting 'words' are then all treated as individual arguments on the command
+--   line.
 --
 -- An example of parse options:
 -- <eucode>
@@ -836,8 +845,10 @@ end function
 --
 -- map:map opts = cmd_parse(option_definition)
 --
--- -- When run as: eui myprog.ex -v @output.txt -i /usr/local -i /etc/app input1.txt input2.txt
--- -- and the file "output.txt" contains "--output=john.txt"
+-- -- When run as: eui myprog.ex -v @output.txt -i /etc/app input1.txt input2.txt
+-- -- and the file "output.txt" contains the two lines ...
+-- --   --output=john.txt
+-- --   '-i /usr/local'
 -- --
 -- -- map:get(opts, "verbose") --> 1
 -- -- map:get(opts, "hash") --> 0 (not supplied on command line)
@@ -970,11 +981,20 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				if length(at_cmds[j]) = 0 then
 					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
 					j -= 1
+					
 				elsif at_cmds[j][1] = '#' then
 					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
 					j -= 1
+					
 				elsif at_cmds[j][1] = '"' and at_cmds[j][$] = '"' and length(at_cmds[j]) >= 2 then
 					at_cmds[j] = at_cmds[j][2 .. $-1]
+					
+				elsif at_cmds[j][1] = '\'' and at_cmds[j][$] = '\'' and length(at_cmds[j]) >= 2 then
+					sequence cmdex = split(at_cmds[j][2 .. $-1], ' ',0, 1) -- Empty words removed.
+					
+					at_cmds = at_cmds[1..j-1] & cmdex & at_cmds[j+1 .. $]
+					j = j + length(cmdex) - 1
+					
 				end if
 			end while
 			
