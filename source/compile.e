@@ -5526,7 +5526,37 @@ end procedure
 
 procedure assign_delete_target( symtab_index target, symtab_index obj )
 	CDeRef( target )
-	c_stmt( "@ = @;\n", {target, obj})
+	
+	if not TypeIsNot( obj, TYPE_INTEGER ) then
+		c_stmt( "if( IS_ATOM_INT(@) ){", obj )
+			promote_integer_delete( obj, target )
+		c_stmt0("}\n")
+		c_stmt0("else {\n")
+	end if
+	
+	c_stmt( "if( !UNIQUE(SEQ_PTR(@)) ){\n", obj )
+		if TypeIs( obj, TYPE_DOUBLE ) then
+			c_stmt( "@ = NewDouble( DBL_PTR(@)->dbl );\n", {target, obj})
+		elsif TypeIs( obj, TYPE_SEQUENCE ) then
+			c_stmt( "@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {target, obj} )
+		else
+			c_stmt( "if( IS_ATOM_DBL( @ ) ){\n", obj )
+				c_stmt( "@ = NewDouble( DBL_PTR(@)->dbl );\n", {target, obj})
+			c_stmt0( "}\n")
+			c_stmt0( "else {\n" )
+				c_stmt("RefDS(@);\n", obj )
+				c_stmt( "@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {target, obj} )
+			c_stmt0( "}\n" )
+		end if
+	c_stmt0( "}\n")
+	c_stmt0( "else {\n" )
+		c_stmt( "@ = @;\n", {target, obj})
+	c_stmt0( "}\n")
+	
+	if not TypeIsNot( obj, TYPE_INTEGER ) then
+		c_stmt0("}\n")
+	end if
+	
 	if TypeIs( obj, {TYPE_SEQUENCE, TYPE_OBJECT}) then
 		SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
 	else
@@ -5553,8 +5583,8 @@ procedure opDELETE_ROUTINE()
 		rid = Code[pc+2],
 		target = Code[pc+3]
 	
-	if SymTab[obj][S_MODE] = M_TEMP 
-	and compare( SymTab[obj][S_OBJ], NOVALUE) then
+	if (sym_mode( obj ) = M_TEMP and compare( sym_obj( obj ), NOVALUE ))
+	then
 		-- make a copy of a literal
 		DeleteRoutine( rid )
 		
@@ -5575,7 +5605,7 @@ procedure opDELETE_ROUTINE()
 			c_stmt("RefDS(@);\n", obj )
 			c_stmt("_2 = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", obj )
 			c_stmt0("SEQ_PTR(_2)->cleanup = (cleanup_ptr)_1;\n")
-			SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
+			SetBBType(target, GType(obj), {SeqLen(obj), 0}, SeqElem(obj), 1)
 		end if
 		
 		c_stmt( "@ = _2;\n", target )

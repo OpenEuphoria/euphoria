@@ -3133,7 +3133,6 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				
 			end if
 			
--- 			valsym = get_assigned_sym()
 			if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				-- need to remember this for select/case statements
 				SymTab[sym][S_CODE] = valsym
@@ -3149,6 +3148,14 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 				end if
 			else
 				SymTab[sym][S_OBJ] = val - 1
+				if TRANSLATE then
+					-- Let the translator know about its value
+					SymTab[sym][S_GTYPE] = TYPE_INTEGER
+					SymTab[sym][S_SEQ_ELEM] = 0
+					SymTab[sym][S_OBJ_MIN] = val - 1
+					SymTab[sym][S_OBJ_MAX] = val - 1
+					SymTab[sym][S_SEQ_LEN] = 0 --SymTab[valsym][S_SEQ_LEN]
+				end if
 			end if
 			valsym = Pop()
 			valsym = Pop()
