@@ -1242,7 +1242,7 @@ export function Scanner()
 					end if
 					yytext &= '0'
 
-				elsif basetype = 4 -- hexadecimal
+				elsif basetype = 4 then -- hexadecimal
 					integer hdigit
 					hdigit = find(ch, "ABCDEFabcdef")
 					if hdigit = 0 then

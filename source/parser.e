@@ -2098,7 +2098,7 @@ procedure If_statement()
 			prev_false2 = SC1_patch
 		end if
 		short_circuit -= 1
-		tok_optional(THEN)
+		tok_match(THEN)
 		call_proc(forward_Statement_list, {})
 		tok = next_token()
 	end while

@@ -453,7 +453,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 					insert_code( { ATOM_CHECK, var }, pc, fr[FR_SUBPROG] )
 					pc += 2
 					
-				elsif SymTab[which_type][S_NEXT]
+				elsif SymTab[which_type][S_NEXT] then
 					integer start_pc = pc
 					
 					

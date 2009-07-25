@@ -2094,11 +2094,43 @@ not initialised when you perform the assignment.
 
 === if statement
 
-An **if statement** tests a condition to see if it is 0 (false) or a
-non-zero (true) atom, and then executes the appropriate series of statements. There
-may be optional **elsif** and **else** clauses.
-e.g.
+An **if statement** tests a condition to see whether it is true or false, and 
+then depending on the result of that test, executes the appropriate set of
+statements. 
 
+The syntax of ##if## is 
+<eucode>
+ IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF 
+ IFTEST  ==:  if ATOMEXPR [ LABEL ] then [ STMTBLOCK ] 
+ ELSIF   ==:  elsif ATOMEXPR then [ STMTBLOCK ] 
+ ELSE    ==:  else [ STMTBLOCK ] 
+ ENDIF   ==:  end if 
+</eucode>
+
+**Description of syntax**\\
+* An //if statement// consists of the keyword ##**if**##, followed by an //expression// that
+evaluates to an atom, optionally followed by a //label// clause, followed by the keyword ##**then**##.
+Next is a set of zero or more statements. This is followed by zero or more //elsif// clauses. 
+Next is an optional //else// clause and finally there is the keyword ##**end**## followed by 
+the keyword ##**if**##.
+* An //elsif// clause consists of the key word ##**elsif**##, followed by  an //expression// that
+evaluates to an atom, followed by the keyword ##**then**##.  Next is a set of zero or
+more statements.
+* An //else// clause consists of the keyword ##**else**## followed by a set of zero or
+more statements.
+
+In Euphoria, //false// is represented by an atom whose value is zero and //true//
+is represented by an atom that has any non-zero value.
+
+* When an //expression// being tested is true, Euphoria executes the statements immediately
+following the ##**then**## keyword after the //expression//, up to the corresponding ##**elsif**##
+or ##**else**##, whichever comes next, then skips down to the corrresponding ##**end if**##.
+* When an //expression// is false, Euphoria skips over any statements until it 
+comes to the next corresponding ##**elsif**## or ##**else**##, whichever comes next. If this
+is and ##**elsif**## then its //expression// is tested otherwise any statements following
+the ##**else**## are executed.
+
+For example:
 <eucode>
 if a < b then
     x = 1
@@ -2122,21 +2154,16 @@ else
 end if
 </eucode>
 
-Notice that elsif is a contraction of else if, but it's cleaner because it
-doesn't require an end if to go with it. There is just one end if for the
-entire **if** statement, even when there are many **elsif** statements
-contained in it.
+Notice that ##**elsif**## is a contraction of //else if//, but it's cleaner because it
+doesn't require an ##**end if**## to go with it. There is just one ##**end if**## for the
+entire //if statement//, even when there are many ##**elsif**## clauses contained in it.
 
-The **if** and **elsif** conditions are tested using
-[[:short-circuit]] evaluation.
+The ##**if**## and ##**elsif**## expressions are tested using [[:short-circuit]] evaluation.
 
-**If** statement headers can have a **label** clause
-right before the **then** closing keyword. See the section on [[:labelled headers]].
-This feature does not apply to **elsif** conditional statements, as they are not
-standalone, just optionally sectioning an if block.
+An //if statement// can have a //label clause// just before the first ##**then**## keyword.
+See the section on [[:labelled headers]]. Note that an //elsif clause// can not have a label.
 
-=== switch statement
-
+=== switch statement ===
 The switch statement is used to run a specific set of statements, depending on
 the value of an expression. It often replaces a set of if-elsif statements due to it's
 ability to be highly optimized, thus much greater performance. There are some key differences,

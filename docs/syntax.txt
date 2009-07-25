@@ -1,0 +1,54 @@
+= Syntax Reference
+
+<<LEVELTOC depth=3>>
+
+== basics ==
+<eucode>
+LABEL       ==:  label STRINGLIT
+LISTDELIM   ==:  ,
+STRINGLIT   ==: SINGLESTRINGLIT | MULTISTRINGLIT
+SINGLESTRINGLIT ==: SSLITSTART [ (CHAR | ESCCHAR) ... ] SSLITEND
+SSLITSTART  ==: "
+SSLITEND    ==: "
+CHAR        ==: {any byte value}
+ESCCHAR     ==: ESCLEAD ( t | n | r | \ | " \ ')
+ESCLEAD     ==: \
+</eucode>
+
+== statements ==
+[[:IFSTMT]]\\
+[[:SWITCHSTMT]]\\
+[[:BREAKSTMT]]\\
+
+== slice == @[SLICE]
+<eucode>
+SLICE      ==: SLICESTART INTEXPRESSION SLICEDELIM INTEXPRESSION SLICEEND
+SLICESTART ==: [
+SLICEDELIM ==: ..
+SLICEEND   ==: ]
+</eucode>
+
+== if == @[IFSTMT]
+<eucode>
+ IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF 
+ IFTEST  ==:  if ATOMEXPR [ LABEL ] then [ STMTBLOCK ] 
+ ELSIF   ==:  elsif ATOMEXPR then [ STMTBLOCK ] 
+ ELSE    ==:  else [ STMTBLOCK ] 
+ ENDIF   ==:  end if 
+</eucode>
+
+== switch == @[SWITCHSTMT]
+<eucode>
+ SWITCHSTMT  ==:  SWITCHTEST CASE [ CASE ...] [ CASEELSE ] [ ENDSWITCH ]
+ SWITCHTEST  ==:  switch EXPRESSION [ WITHFALL ] [ LABEL ] do
+ WITHFALL    ==:  (with | without) fallthru
+ CASE        ==:  case CASELIST then [ STMTBLOCK ]
+ CASELIST    ==:  EXPRESSION [(LISTDELIM EXPRESSION) ...]
+ CASEELSE    ==:  case else
+ ENDSWITCH   ==:  end switch
+</eucode>
+
+== break == @[BREAKSTMT]
+<eucode>
+ BREAK       ==:  break [ STRINGLIT ]
+</eucode>
