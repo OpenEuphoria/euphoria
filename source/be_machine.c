@@ -332,13 +332,21 @@ LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 #ifdef EMINGW
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
-	int len = strlen(name)+strlen(value)+1, real_len;
-	char * str = malloc(len + 1);
+	int len;
+	int real_len;
+	char *str;
+	
 	if (!overwrite && (getenv(name) != NULL))
+		return 0;
+		
+	len = strlen(name) + 1 + strlen(value);
+	str = malloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
+	if (! str)
 		return 0;
 	real_len = snprintf(str, len+1, "%s=%s", name, value);
 	str[len] = '\0'; // ensure NULL
-	return putenv(str);
+	len = putenv(str);
+	return len;
 }
 #endif
 
