@@ -241,6 +241,7 @@ export constant
 -- codes for classes of characters that the scanner
 -- has to process in some way
 export constant
+	BACK_QUOTE   = -12,
 	NUMBER_SIGN  = -11,
 	KEYWORD      = -10,
 	BUILTIN      = -9,

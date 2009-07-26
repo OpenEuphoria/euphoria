@@ -18,14 +18,14 @@ include fwdref.e
 include error.e
 include keylist.e
 
-constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes 
+constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
 constant MAX_FILE = 256       -- maximum number of source files
 
 -- Single-byte codes used by (legacy) binder/shrouder
--- update when keyword or builtin added 
+-- update when keyword or builtin added
 -- see also keylist.e, euphoria\bin\keywords.e
-constant NUM_KEYWORDS = 24 
-constant NUM_BUILTINS = 64 
+constant NUM_KEYWORDS = 24
+constant NUM_BUILTINS = 64
 constant KEYWORD_BASE = 128  -- 129..152  must be one-byte values - no overlap
 constant BUILTIN_BASE = 170  -- 171..234  N.B. can't use: 253,254,255
 							 -- Note: we did not include the latest multitasking
@@ -33,8 +33,8 @@ constant BUILTIN_BASE = 170  -- 171..234  N.B. can't use: 253,254,255
 							 -- binding/shrouding that does not use single-byte
 							 -- codes
 -- global variables
-export sequence main_path         -- path of main file being executed 
-export integer src_file           -- the source file 
+export sequence main_path         -- path of main file being executed
+export integer src_file           -- the source file
 export sequence new_include_name  -- name of file to be included at end of line
 export symtab_index new_include_space -- new namespace qualifier or NULL
 
@@ -44,7 +44,7 @@ start_include = FALSE
 boolean public_include -- TRUE if we should pass along public includes
 
 export integer LastLineNumber  -- last global line number (avoid dups in line tab)
-LastLineNumber = -1     
+LastLineNumber = -1
 
 export object shebang              -- #! line (if any) for Unix
 shebang = 0
@@ -59,10 +59,10 @@ sequence IncludeStk  -- stack of include file info
 -- IncludeStk entry
 constant FILE_NO = 1,           -- file number
 		 LINE_NO = 2,           -- local line number
-		 FILE_PTR = 3,          -- open file number 
+		 FILE_PTR = 3,          -- open file number
 		 FILE_START_SYM = 4,    -- symbol before start of file
 		 OP_WARNING = 5,        -- save/restore with/without options
-		 OP_TRACE = 6,         
+		 OP_TRACE = 6,
 		 OP_TYPE_CHECK = 7,
 		 OP_PROFILE_TIME = 8,
 		 OP_PROFILE_STATEMENT = 9,
@@ -81,10 +81,10 @@ export function get_qualified_fwd()
 	return qualified_fwd
 end function
 
--- list of source lines & execution counts 
+-- list of source lines & execution counts
 
 export procedure InitLex()
--- initialize lexical analyzer 
+-- initialize lexical analyzer
 	gline_number = 0
 	line_number = 0
 	IncludeStk = {}
@@ -108,6 +108,7 @@ export procedure InitLex()
 	char_class['>'] = GREATER
 	char_class['\''] = SINGLE_QUOTE
 	char_class['"'] = DOUBLE_QUOTE
+	char_class['`'] = BACK_QUOTE
 	char_class['.'] = DOT
 	char_class[':'] = COLON
 	char_class['\r'] = NEWLINE
@@ -124,9 +125,9 @@ export procedure InitLex()
 	char_class['&'] = CONCAT
 	char_class['?'] = QUESTION_MARK
 	char_class['#'] = NUMBER_SIGN
-	
+
 	-- 26 character can't appear in a text file
-	char_class[END_OF_FILE_CHAR] = END_OF_FILE 
+	char_class[END_OF_FILE_CHAR] = END_OF_FILE
 
 	-- helps speed up scanner a bit
 	id_char = repeat(FALSE, 255)
@@ -135,12 +136,12 @@ export procedure InitLex()
 			id_char[i] = TRUE
 		end if
 	end for
-	
+
 	default_namespaces = {0}
 end procedure
 
 export procedure ResetTP()
--- turn off all trace/profile flags 
+-- turn off all trace/profile flags
 	OpTrace = FALSE
 	OpProfileStatement = FALSE
 	OpProfileTime = FALSE
@@ -149,7 +150,7 @@ export procedure ResetTP()
 end procedure
 
 -- source line buffers
--- Storing lines of source in memory buffers saves space and 
+-- Storing lines of source in memory buffers saves space and
 -- helps old machines load huge programs more quickly
 -- Anyway, the C-coded back-end wants it in this form.
 constant SOURCE_CHUNK = 10000 -- size of one chunk (many lines) of source, in bytes
@@ -162,7 +163,7 @@ function pack_source(object src)
 -- store the source line (minus \n) in a big block of memory to
 -- save time and space. The offset where the line is stored is returned.
 	integer start
-	
+
 	if equal(src, 0) then
 		return 0
 	end if
@@ -170,7 +171,7 @@ function pack_source(object src)
 	if length(src) >= SOURCE_CHUNK then
 		src = src[1..80] -- enough for trace or profile display
 	end if
-	
+
 	if current_source_next + length(src) >= SOURCE_CHUNK then
 		-- we ran out of space, allocate another chunk
 		current_source = allocate(SOURCE_CHUNK)
@@ -179,10 +180,10 @@ function pack_source(object src)
 		end if
 		all_source = append(all_source, current_source)
 		-- skip first byte, offset 0 means "no source"
-		current_source_next = 1 
+		current_source_next = 1
 	end if
-	
-	start = current_source_next 
+
+	start = current_source_next
 	poke(current_source+current_source_next, src)
 	current_source_next += length(src)-1
 	poke(current_source+current_source_next, 0) -- overwrite \n
@@ -195,7 +196,7 @@ export function fetch_line(integer start)
 	sequence line
 	integer c, chunk
 	atom p
-	
+
 	if start = 0 then
 		return ""
 	end if
@@ -215,14 +216,14 @@ export function fetch_line(integer start)
 end function
 
 export procedure AppendSourceLine()
--- add source line to the list 
+-- add source line to the list
 	sequence new, old
 	integer options
 	object src
-	
+
 	src = 0
 	options = 0
-	
+
 	if TRANSLATE or OpTrace or OpProfileStatement or OpProfileTime then
 		-- record the options and maybe keep the source line too
 		src = ThisLine
@@ -240,17 +241,17 @@ export procedure AppendSourceLine()
 			src = {0,0,0,0} & src
 		end if
 	end if
-	
+
 	if length(slist) then
 		old = slist[$-1]
-		
-		if equal(src, old[SRC]) and 
+
+		if equal(src, old[SRC]) and
 		   current_file_no = old[LOCAL_FILE_NO] and
-		   line_number = old[LINE]+1+slist[$] and  
+		   line_number = old[LINE]+1+slist[$] and
 		   options = old[OPTIONS] then
 			-- Just increment repetition count rather than storing new entry.
 			-- This works well as long as we are not saving the source lines.
-			slist[$] += 1  
+			slist[$] += 1
 		else
 			src = pack_source(src)
 			new = {src, line_number, current_file_no, options}
@@ -270,16 +271,16 @@ end procedure
 export function s_expand(sequence slist)
 -- expand slist to full size if required
 	sequence new_slist
-	
+
 	new_slist = {}
-	
+
 	for i = 1 to length(slist) do
 		if sequence(slist[i]) then
 			new_slist = append(new_slist, slist[i])
 		else
 			for j = 1 to slist[i] do
 				slist[i-1][LINE] += 1
-				new_slist = append(new_slist, slist[i-1]) 
+				new_slist = append(new_slist, slist[i-1])
 			end for
 		end if
 	end for
@@ -289,10 +290,10 @@ end function
 ifdef STDDEBUG then
 procedure fake_include_line()
 	integer n
-	
+
 	line_number += 1
 	gline_number += 1
-	
+
 	ThisLine = "include euphoria/stddebug.e -- injected by the scanner\n"
 	bp = 1
 	n = length(ThisLine)
@@ -309,11 +310,11 @@ export procedure set_dont_read( integer read )
 end procedure
 
 export procedure read_line()
--- read next line of source  
+-- read next line of source
 	integer n
 	line_number += 1
 	gline_number += 1
-	
+
 	if dont_read then
 		ThisLine = -1
 	else
@@ -322,7 +323,7 @@ export procedure read_line()
 	if atom(ThisLine) then
 		ThisLine = {END_OF_FILE_CHAR}
 	end if
-	
+
 	bp = 1
 	if ThisLine[$] != '\n' then
 		ThisLine = append(ThisLine, '\n') -- add missing \n (might happen at end of file)
@@ -334,7 +335,7 @@ export procedure read_line()
 	AppendSourceLine()
 end procedure
 
-function getch()   
+function getch()
 -- return next input character, 1 to 255
 	integer c
 	c = ThisLine[bp]
@@ -342,9 +343,9 @@ function getch()
 	return c
 end function
 
-procedure ungetch() 
--- put input character back 
-	bp -= 1               
+procedure ungetch()
+-- put input character back
+	bp -= 1
 end procedure
 
 function get_file_path(sequence s)
@@ -360,14 +361,14 @@ end function
 
 include pathopen.e
 function path_open()
--- open an include file (new_include_name) according to the include path rules  
+-- open an include file (new_include_name) according to the include path rules
 	integer try
 	sequence full_path
 	sequence errbuff
 		sequence currdir
 	sequence conf_path
 	object scan_result, inc_path
-		
+
 	-- skip whitespace not necessary - String Token does it
 	if absolute_path(new_include_name) then
 		-- open new_include_name exactly as it is
@@ -384,20 +385,20 @@ function path_open()
 	currdir = get_file_path( file_name[current_file_no] )
 	full_path = currdir & new_include_name
 	try = open(full_path, "r")
-	
+
 	if try = -1 then
 		-- relative path name - first try main_path
 		full_path = main_path & new_include_name
 		try = open(full_path,  "r")
 	end if
- 
+
 	if try != -1 then
 		new_include_name = full_path
 		return try
 	end if
-	
+
 	scan_result = ConfPath(new_include_name)
-	
+
 	if atom(scan_result) then
 		scan_result = ScanPath(new_include_name,"EUINC",0)
 	end if
@@ -414,7 +415,7 @@ function path_open()
 			return try
 		end if
 	end if
-	
+
 	if sequence(scan_result) then
 		-- successful
 		new_include_name = scan_result[1]
@@ -456,7 +457,7 @@ end function
 
 function dos_compare(sequence a,sequence b)
 	integer ai,bi,c
-	
+
 	for i=1 to length(a) do
 		ai=a[i]
 		bi=b[i]
@@ -512,22 +513,22 @@ end function
 
 function NameSpace_declaration(symtab_index sym)
 -- add a new namespace symbol to the symbol table.
--- Similar to adding a local constant. 
+-- Similar to adding a local constant.
 	integer h
-	
+
 	DefinedYet(sym)
 	if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_PREDEF}) then
-		-- override the global or predefined symbol 
+		-- override the global or predefined symbol
 		h = SymTab[sym][S_HASHVAL]
-		-- create a new entry at beginning of this hash chain 
-		sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0) 
+		-- create a new entry at beginning of this hash chain
+		sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0)
 		buckets[h] = sym
 	end if
 	SymTab[sym][S_SCOPE] = SC_LOCAL
 	SymTab[sym][S_MODE] = M_CONSTANT
 	SymTab[sym][S_TOKEN] = NAMESPACE -- [S_OBJ] will get the file number referred-to
 	if TRANSLATE then
-		num_routines += 1 -- order of ns declaration relative to routines 
+		num_routines += 1 -- order of ns declaration relative to routines
 						  -- is important
 	end if
 	return sym
@@ -538,7 +539,7 @@ integer scanner_rid
 procedure default_namespace( )
 	token tok
 	symtab_index sym
-	
+
 	tok = call_func( scanner_rid, {} )
 	if tok[T_ID] = VARIABLE and equal( SymTab[tok[T_SYM]][S_NAME], "namespace" ) then
 		-- add the default namespace
@@ -546,21 +547,21 @@ procedure default_namespace( )
 		if tok[T_ID] != VARIABLE then
 			CompileErr("missing default namespace qualifier")
 		end if
-		
+
 		sym = tok[T_SYM]
-		
+
 		SymTab[sym][S_FILE_NO] = current_file_no
 		sym  = NameSpace_declaration( sym )
 		SymTab[sym][S_OBJ] = current_file_no
 		SymTab[sym][S_SCOPE] = SC_PUBLIC
-		
+
 		default_namespaces[current_file_no] = SymTab[sym][S_NAME]
-		
+
 	else
 		-- start over from the beginning of the line
 		bp = 1
 	end if
-	
+
 end procedure
 
 procedure add_exports( integer from_file, integer to_file )
@@ -572,8 +573,8 @@ procedure add_exports( integer from_file, integer to_file )
 		if not find( exports[i], direct ) then
 			if not find( -exports[i], direct ) then
 				direct &= -exports[i]
-				
-				
+
+
 			end if
 			include_matrix[to_file][exports[i]] = or_bits( PUBLIC_INCLUDE, include_matrix[to_file][exports[i]] )
 		end if
@@ -583,12 +584,12 @@ end procedure
 
 procedure patch_exports( integer for_file )
 	integer export_len
-	
+
 	for i = 1 to length(file_include) do
 		if find( for_file, file_include[i] ) or find( -for_file, file_include[i] ) then
 			export_len = length( file_include[i] )
 			add_exports( for_file, i )
-			if length( file_include[i] ) != export_len then	
+			if length( file_include[i] ) != export_len then
 				-- propagate the export up the include stack
 				patch_exports( i )
 			end if
@@ -606,42 +607,42 @@ end procedure
 procedure update_include_matrix( integer included_file, integer from_file )
 
 	include_matrix[from_file][included_file] = or_bits( DIRECT_INCLUDE, include_matrix[from_file][included_file] )
-	
+
 	if public_include then
-	
+
 		-- add PUBLIC_INCLUDE where appropriate
 		sequence add_public = file_include_by[from_file]
 		for i = 1 to length( add_public ) do
 			-- add public to anything that directly included from_file
-			include_matrix[add_public[i]][included_file] = 
+			include_matrix[add_public[i]][included_file] =
 				or_bits( PUBLIC_INCLUDE, include_matrix[add_public[i]][included_file] )
-				
+
 		end for
-		
+
 		-- now we need to walk up the public include tree
 		add_public = file_public_by[from_file]
 		integer px = length( add_public ) + 1
 		while px <= length( add_public ) do
-			include_matrix[add_public[px]][included_file] = 
+			include_matrix[add_public[px]][included_file] =
 				or_bits( PUBLIC_INCLUDE, include_matrix[add_public[px]][included_file] )
-				
+
 			for i = 1 to length( file_public_by[add_public[px]] ) do
 				if not find( file_public[add_public[px]][i], add_public ) then
 					add_public &= file_public[add_public[px]][i]
 				end if
 			end for
-			
+
 			for i = 1 to length( file_include_by[add_public[px]] ) do
-				include_matrix[file_include_by[add_public[px]]][included_file] = 
+				include_matrix[file_include_by[add_public[px]]][included_file] =
 					or_bits( PUBLIC_INCLUDE, include_matrix[file_include_by[add_public[px]]][included_file] )
 			end for
-			
+
 			px += 1
 		end while
 	end if
-	
-	
-	
+
+
+
 	if indirect_include[from_file][included_file] then
 		-- update indirect includes
 		sequence indirect = file_include_by[from_file]
@@ -653,20 +654,20 @@ procedure update_include_matrix( integer included_file, integer from_file )
 		while ix <= length(indirect) do
 			integer indirect_file = indirect[ix]
 			if indirect_include[indirect_file][included_file] then
-				include_matrix[indirect_file] = 
+				include_matrix[indirect_file] =
 					or_bits( mask, include_matrix[indirect_file] )
 				for i = 1 to length( file_include_by[indirect_file] ) do
-				
+
 					if not find( file_include_by[indirect_file][i], indirect ) then
 						indirect &= file_include_by[indirect_file][i]
 					end if
-				
+
 				end for
 			end if
 			ix += 1
 		end while
 	end if
-	
+
 	public_include = FALSE
 end procedure
 
@@ -678,16 +679,16 @@ procedure add_include_by( integer by_file, integer included_file, integer is_pub
 	if not find( by_file, file_include_by[included_file] ) then
 		file_include_by[included_file] &= by_file
 	end if
-	
+
 	if not find( included_file, file_include[by_file] ) then
 		file_include[by_file] &= included_file
 	end if
-	
+
 	if is_public then
 		if not find( by_file, file_public_by[included_file] ) then
 			file_public_by[included_file] &= by_file
 		end if
-		
+
 		if not find( included_file, file_public[by_file] ) then
 			file_public[by_file] &= included_file
 		end if
@@ -695,52 +696,52 @@ procedure add_include_by( integer by_file, integer included_file, integer is_pub
 end procedure
 
 procedure IncludePush()
--- start reading from new source file with given name  
+-- start reading from new source file with given name
 	integer new_file, old_file_no
 	sequence new_name
-	
+
 	start_include = FALSE
 
-	new_file = path_open() -- sets new_include_name to full path 
+	new_file = path_open() -- sets new_include_name to full path
 
 	new_name = name_ext(new_include_name)
-					
+
 	for i = length(file_name) to 1 by -1 do
-		-- compare file names first to reduce calls to dir() 
+		-- compare file names first to reduce calls to dir()
 		if same_name(new_name, name_ext(file_name[i])) and
-			equal(dir(new_include_name), dir(file_name[i])) 
+			equal(dir(new_include_name), dir(file_name[i]))
 		then
 			-- can assume we've included this file already
 			-- (Thanks to Vincent Howell.)
-			-- (currently, in a very rare case, it could be a 
-			--  different file in another directory with the 
+			-- (currently, in a very rare case, it could be a
+			--  different file in another directory with the
 			--  same name, size and time-stamp down to the second)
 			if new_include_space != 0 then
 				SymTab[new_include_space][S_OBJ] = i -- but note any namespace
-				
+
 			end if
 			close(new_file)
-			
+
 			if find( -i, file_include[current_file_no] ) then
 				-- it was included via export before, but we can now mark it as directly included
 				file_include[current_file_no][ find( -i, file_include[current_file_no] ) ] = i
-				
-				
-				
+
+
+
 			elsif not find( i, file_include[current_file_no] ) then
 				-- don't reparse the file, but note that it was included here
 				file_include[current_file_no] &= i
-				
+
 				-- also add anything that file exports
 				add_exports( i, current_file_no )
-				
+
 				if public_include then
-					
+
 					if not find( i, file_public[current_file_no] ) then
 						file_public[current_file_no] &= i
 						patch_exports( current_file_no )
 					end if
-					
+
 				end if
 			end if
 			indirect_include[current_file_no][i] = OpIndirectInclude
@@ -748,15 +749,15 @@ procedure IncludePush()
 			update_include_matrix( i, current_file_no )
 			public_include = FALSE
 			read_line() -- we can't return without reading a line first
-			return -- ignore it  
+			return -- ignore it
 		end if
 	end for
-	
+
 	if length(IncludeStk) >= INCLUDE_LIMIT then
 		CompileErr("includes are nested too deeply")
 	end if
-	
-	IncludeStk = append(IncludeStk, 
+
+	IncludeStk = append(IncludeStk,
 							  {current_file_no,
 							   line_number,
 							   src_file,
@@ -770,8 +771,8 @@ procedure IncludePush()
 							   prev_OpWarning,
 							   OpInline,
 							   OpIndirectInclude})
-	
-	
+
+
 	file_include = append( file_include, {} )
 	file_include_by = append( file_include_by, {} )
 	for i = 1 to length( include_matrix) do
@@ -781,11 +782,11 @@ procedure IncludePush()
 	include_matrix = append( include_matrix, repeat( 0, length( file_include ) ) )
 	include_matrix[$][$] = DIRECT_INCLUDE
 	include_matrix[current_file_no][$] = DIRECT_INCLUDE
-	
+
 	indirect_include = append( indirect_include, repeat( 0, length( file_include ) ) )
 	indirect_include[current_file_no][$] = OpIndirectInclude
 	OpIndirectInclude = 1
-	
+
 	file_public  = append( file_public, {} )
 	file_public_by = append( file_public_by, {} )
 	file_include[current_file_no] &= length( file_include )
@@ -794,7 +795,7 @@ procedure IncludePush()
 		file_public[current_file_no] &= length( file_public )
 		patch_exports( current_file_no )
 	end if
-	
+
 ifdef STDDEBUG then
 	if not match("std/", new_name ) then
 		file_include[$] &= 2 -- include the unexported std library
@@ -812,8 +813,8 @@ end ifdef
 	old_file_no = current_file_no
 	current_file_no = length(file_name)
 	line_number = 0
-	read_line()	
-	
+	read_line()
+
 	if new_include_space != 0 then
 		SymTab[new_include_space][S_OBJ] = current_file_no
 	end if
@@ -825,19 +826,19 @@ end procedure
 
 export function IncludePop()
 -- stop reading from current source file and restore info for previous file
--- (if any)  
-	sequence top	
+-- (if any)
+	sequence top
 	Resolve_forward_references()
 	HideLocals()
-	
+
 	close(src_file)
-	
-	if length(IncludeStk) = 0 then 
-		return FALSE  -- the end  
+
+	if length(IncludeStk) = 0 then
+		return FALSE  -- the end
 	end if
-	
+
 	top = IncludeStk[$]
-	
+
 	current_file_no    = top[FILE_NO]
 	line_number        = top[LINE_NO]
 	src_file           = top[FILE_PTR]
@@ -853,7 +854,7 @@ export function IncludePop()
 	OpIndirectInclude  = top[OP_INDIRECT_INCLUDE]
 
 	IncludeStk = IncludeStk[1..$-1]
-	
+
 	SymTab[TopLevelSub][S_CODE] = Code
 	return TRUE
 end function
@@ -861,7 +862,7 @@ end function
 constant common_int_text = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "20", "50", "100", "1000"}
 constant common_ints     = { 0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   13,   20,   50,   100,   1000 }
 function MakeInt(sequence text, integer nBase = 10)
--- make a non-negative integer out of a string of digits  
+-- make a non-negative integer out of a string of digits
 	integer num
 	atom fnum
 	integer digit
@@ -871,33 +872,33 @@ function MakeInt(sequence text, integer nBase = 10)
 	switch nBase do
 		case 2 then
 			maxchk = 536870911
-			
+
 		case 8 then
 			maxchk = 134217727
-		
+
 		case 10 then
 			-- Quick scan for common integers
 			num = find(text, common_int_text)
-			if num then 
+			if num then
 				return common_ints[num]
 			end if
-			
+
 			maxchk = 107374181
-			
+
 		case 16 then
 			maxchk = 67108863
-			
+
 	end switch
 
 	num = 0
 	fnum = 0
-	for i = 1 to length(text) do 
+	for i = 1 to length(text) do
 		digit = (text[i] - '0')
 		if digit >= nBase or digit < 0 then
 			CompileErr(sprintf("digit '%s' at position %d is outside of number base", {text[i],i}))
 		end if
 		if fnum = 0 then
-			if num <= maxchk then 
+			if num <= maxchk then
 				num = num * nBase + digit
 			else
 				fnum = num * nBase + digit
@@ -912,35 +913,19 @@ function MakeInt(sequence text, integer nBase = 10)
 	else
 		return fnum
 	end if
-end function        
-
-function EscapeChar(integer c)
--- the escape characters  
-	if c = 'n' then
-		return '\n'
-	
-	elsif c = '\\' then
-		return '\\'
-	
-	elsif c = 't' then
-		return '\t'
-	
-	elsif c = '"' then
-		return '"'
-	
-	elsif c = '\''then
-		return '\''
-	
-	elsif c = 'r' then
-		return '\r'
-	
-	else 
-		CompileErr("unknown escape character")
-	
-	end if
 end function
 
-						
+constant gEscCode = "n\\t\"'r0"
+constant gEscVal  = "\n\\\t\"'\r" & 0
+function EscapeChar(integer c)
+-- the escape characters
+	c = find(c, gEscCode)
+	if c = 0 then
+		CompileErr("unknown escape character")
+	end if
+	return gEscVal[c]
+end function
+
 function my_sscanf(sequence yytext)
 -- Converts string to floating-point number
 -- based on code in get.e
@@ -949,19 +934,19 @@ function my_sscanf(sequence yytext)
 	atom mantissa
 	integer c, i
 	atom dec
-	
+
 	if length(yytext) < 2 then
 		CompileErr("number not formed correctly")
 	end if
-	
+
 	if find( 'e', yytext ) or find( 'E', yytext ) then
 		return scientific_to_atom( yytext )
 	end if
 	mantissa = 0.0
 	ndigits = 0
-	
+
 	-- decimal integer or floating point
-	
+
 	yytext &= 0 -- end marker
 	c = yytext[1]
 	i = 2
@@ -971,7 +956,7 @@ function my_sscanf(sequence yytext)
 		c = yytext[i]
 		i += 1
 	end while
-	
+
 	if c = '.' then
 		-- get fraction
 		c = yytext[i]
@@ -987,11 +972,11 @@ function my_sscanf(sequence yytext)
 		end while
 		mantissa += frac / dec
 	end if
-	
+
 	if ndigits = 0 then
 		return {}  -- no digits
 	end if
-	
+
 	if c = 'e' or c = 'E' then
 		-- get exponent sign
 		e_sign = +1
@@ -1003,7 +988,7 @@ function my_sscanf(sequence yytext)
 		elsif c != '+' then
 			i -= 1
 		end if
-		-- get exponent magnitude 
+		-- get exponent magnitude
 		c = yytext[i]
 		i += 1
 		if c >= '0' and c <= '9' then
@@ -1012,13 +997,13 @@ function my_sscanf(sequence yytext)
 			i += 1
 			while c >= '0' and c <= '9' do
 				e_mag = e_mag * 10 + c - '0'
-				c = yytext[i]                          
+				c = yytext[i]
 				i += 1
-				if e_mag > 1000 then -- avoid int overflow. can only have 
+				if e_mag > 1000 then -- avoid int overflow. can only have
 					exit             -- 200-digit mantissa to reduce mag
 				end if
 			end while
-		else 
+		else
 			return {} -- no exponent
 		end if
 		e_mag = e_sign * e_mag
@@ -1029,7 +1014,7 @@ function my_sscanf(sequence yytext)
 				mantissa = mantissa * 10.0 -- Could crash? No we'll get INF.
 				e_mag -= 1
 			end while
-		else   
+		else
 			mantissa = mantissa * power(10.0, e_mag)
 		end if
 	end if
@@ -1045,27 +1030,94 @@ constant nbase = {2,8,10,16}
 constant nbasecode = "btdxBTDX"
 constant hexasc = {#3A, #3B, #3C, #3D, #3E, #3F} -- equiv to hex digits A to F.
 
-export function Scanner()
--- The scanner main routine: returns a lexical token  
-	integer ch, i, sp, prev_Nne, ech
+function ExtendedString(integer ech)
+	integer ch
+	integer fch
 	integer cline
-	integer trimming = 0
+	sequence string_text
+	integer trimming
+
+	cline = line_number
+	string_text = ""
+	trimming = 0
+	ch = getch()
+	if bp > length(ThisLine) then
+		-- Test for 'trimming pattern'
+		read_line()
+		while ThisLine[bp] = '_' do
+			trimming += 1
+			bp += 1
+		end while
+		if trimming > 0 then
+			ch = getch()
+		end if
+	end if
+
+	while 1 do
+		if ch = END_OF_FILE_CHAR then
+			CompileErr(sprintf("Extended string literal from line %d not terminated.", cline))
+		end if
+
+		if ch = ech then
+			if ech != '"' then
+				exit
+			end if
+			fch = getch()
+			if fch = '"' then
+				fch = getch()
+				if fch = '"' then
+					exit
+				end if
+				ungetch()
+			end if
+			ungetch()
+		end if
+
+		string_text &= ch
+
+		if bp > length(ThisLine) then
+			read_line() -- sets bp to 1, btw.
+			if trimming > 0 then
+				while bp <= trimming and bp <= length(ThisLine) do
+					ch = ThisLine[bp]
+					if ch != ' ' and ch != '\t' then
+						exit
+					end if
+					bp += 1
+				end while
+			end if
+		end if
+		ch = getch()
+	end while
+	if length(string_text) > 0 and find(string_text[1], "\n\r") then
+		string_text = string_text[2 .. $]
+		if length(string_text) > 0 and find(string_text[$], "\n\r") then
+			string_text = string_text[1 .. $-1]
+		end if
+	end if
+	return {STRING, NewStringSym(string_text)}
+end function
+
+export function Scanner()
+-- The scanner main routine: returns a lexical token
+	integer ch, i, sp, prev_Nne
+	integer cline
 	sequence yytext, namespaces  -- temporary buffer for a token
 	object d
 	token tok
 	integer is_int, class
 	sequence name
-	
+
 	while TRUE do
 		ch = getch()
 		while ch = ' ' or ch = '\t' do
 			ch = getch()
 		end while
-		
+
 		class = char_class[ch]
-			
+
 		-- if/elsif cases have been sorted so most common ones come first
-		if class = LETTER or ch = '_' then 
+		if class = LETTER or ch = '_' then
 			sp = bp
 			ch = getch()
 			while id_char[ch] do
@@ -1073,14 +1125,14 @@ export function Scanner()
 			end while
 			yytext = ThisLine[sp-1..bp-2]
 			ungetch()
-			
+
 			-- is it a namespace?
 			ch = getch()
 			while ch = ' ' or ch = '\t' do
 				ch = getch()
 			end while
 			integer is_namespace
-			
+
 			if might_be_namespace then
 				tok = keyfind(yytext, -1, , -1 )
 				is_namespace = tok[T_ID] = NAMESPACE
@@ -1089,20 +1141,20 @@ export function Scanner()
 				is_namespace = ch = ':'
 				tok = keyfind(yytext, -1, , is_namespace )
 			end if
-			
-			
+
+
 			if not is_namespace then
 				ungetch()
 			end if
-			
+
 			if is_namespace then
 				-- skip whitespace
 				namespaces = yytext
-				
+
 
 				if tok[T_ID] = NAMESPACE then -- known namespace
 					qualified_fwd = SymTab[tok[T_SYM]][S_OBJ]
-			
+
 					-- skip whitespace
 					ch = getch()
 					while ch = ' ' or ch = '\t' do
@@ -1118,7 +1170,7 @@ export function Scanner()
 						end while
 						ungetch()
 					end if
-					
+
 					if length(yytext) = 0 then
 						CompileErr("an identifier is expected here")
 					end if
@@ -1152,7 +1204,7 @@ export function Scanner()
 						elsif tok[T_ID] = TYPE then
 							tok[T_ID] = QUALIFIED_TYPE
 						end if
-						
+
 					end if
 				else -- not a namespace, but an overriding var
 					ungetch()
@@ -1190,9 +1242,9 @@ export function Scanner()
 	                tok = {RECORDED, length(Recorded)}
 	            end if
 			end if
-			
+
 			return tok
-			
+
 		elsif class < ILLEGAL_CHAR then
 			return {class, 0}  -- brackets, punctuation, eof, illegal char etc.
 
@@ -1205,10 +1257,10 @@ export function Scanner()
 			else
 				read_line()
 			end if
-			
+
 
 		elsif class = EQUALS then
-			return {class, 0}  
+			return {class, 0}
 
 		elsif class = DOT or class = DIGIT then
 			integer basetype
@@ -1219,20 +1271,20 @@ export function Scanner()
 					ungetch()
 				end if
 			end if
-			
+
 			yytext = {ch}
 			is_int = (ch != '.')
 			basetype = -1 -- default is decimal
 			while 1 with entry do
 				if char_class[ch] = DIGIT then
 					yytext &= ch
-					
+
 				elsif equal(yytext, "0") then
 					basetype = find(ch, nbasecode)
 					if basetype > 4 then
 						basetype -= 4
 					end if
-					
+
 					if basetype = 0 then
 						if char_class[ch] = LETTER then
 							CompileErr(sprintf("Invalid number base specifier '%s'", ch))
@@ -1252,20 +1304,20 @@ export function Scanner()
 						hdigit -= 6
 					end if
 					yytext &= hexasc[hdigit]
-					
+
 				else
 					exit
 				end if
 			entry
 				ch = getch()
 			end while
-			
+
 			if ch = '.' then
 				ch = getch()
 				if ch = '.' then
-					-- put back slice  
+					-- put back slice
 					ungetch()
-				else 
+				else
 					is_int = FALSE
 					if yytext[1] = '.' then
 						CompileErr("only one decimal point allowed")
@@ -1279,19 +1331,19 @@ export function Scanner()
 							yytext &= ch
 							ch = getch()
 						end while
-					else 
+					else
 						CompileErr("fractional part of number is missing")
 					end if
 				end if
 			end if
-				
+
 			if basetype = -1 and find(ch, "eE") then
 				is_int = FALSE
 				yytext &= ch
 				ch = getch()
 				if ch = '-' or ch = '+' or char_class[ch] = DIGIT then
 					yytext &= ch
-				else  
+				else
 					CompileErr("exponent not formed correctly")
 				end if
 				ch = getch()
@@ -1302,7 +1354,7 @@ export function Scanner()
 			elsif char_class[ch] = LETTER then
 				CompileErr(sprintf("Punctuation missing in between number and '%s'", {ch}))
 			end if
-				
+
 			ungetch()
 
 			while i != 0 with entry do
@@ -1310,7 +1362,7 @@ export function Scanner()
 			  entry
 			    i = find('_', yytext)
 			end while
-			
+
 			if is_int then
 				if basetype = -1 then
 					basetype = 3 -- decimal
@@ -1318,30 +1370,30 @@ export function Scanner()
 				d = MakeInt(yytext, nbase[basetype])
 				if integer(d) then
 					return {ATOM, NewIntSym(d)}
-				else 
+				else
 					return {ATOM, NewDoubleSym(d)}
-				end if	
-				
+				end if
+
 			end if
-			
+
 			if basetype != -1 then
 				CompileErr(sprintf("Only integer literals can use the '0%s' format", nbasecode[basetype]))
 			end if
-			
-			-- f.p. or large int  
+
+			-- f.p. or large int
 			d = my_sscanf(yytext)
 			if sequence(d) then
 				CompileErr("number not formed correctly")
 			elsif is_int and d <= MAXINT_DBL then
 				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
-			else 
+			else
 				return {ATOM, NewDoubleSym(d)}
 			end if
-		
-						
+
+
 		elsif class = MINUS then
 			ch = getch()
-			if ch = '-' then 
+			if ch = '-' then
 				-- comment
 				if start_include then
 					IncludePush()
@@ -1350,16 +1402,25 @@ export function Scanner()
 				end if
 			elsif ch = '=' then
 				return {MINUS_EQUALS, 0}
-			else 
+			else
 				bp -= 1
 				return {MINUS, 0}
 			end if
-			
-		elsif class = DOUBLE_QUOTE then  
+		elsif class = DOUBLE_QUOTE then
+			integer fch
 			ch = getch()
+			if ch = '"' then
+				fch = getch()
+				if fch = '"' then
+					-- Extended string starting.
+					return ExtendedString( fch )
+				else
+					ungetch()
+				end if
+			end if
 			yytext = ""
 			while ch != '\n' and ch != '\r' do -- can't be EOF
-				if ch = '"' then 
+				if ch = '"' then
 					exit
 				elsif ch = '\\' then
 					yytext &= EscapeChar(getch())
@@ -1374,46 +1435,46 @@ export function Scanner()
 				CompileErr("end of line reached with no closing \"")
 			end if
 			return {STRING, NewStringSym(yytext)}
-				  
+
 		elsif class = PLUS then
 			ch = getch()
 			if ch = '=' then
 				return {PLUS_EQUALS, 0}
-			else 
+			else
 				ungetch()
 				return {PLUS, 0}
 			end if
-			
+
 		elsif class = CONCAT then
 			ch = getch()
 			if ch = '=' then
 				return {CONCAT_EQUALS, 0}
-			else 
+			else
 				ungetch()
 				return {CONCAT, 0}
 			end if
-		
+
 		elsif class = NUMBER_SIGN then
 			i = 0
 			is_int = -1
-			while i < MAXINT_VAL/32 do             
+			while i < MAXINT_VAL/32 do
 				ch = getch()
 				if char_class[ch] = DIGIT then
 					if ch != '_' then
 						i = i * 16 + ch - '0'
 						is_int = TRUE
 					end if
-				elsif ch >= 'A' and ch <= 'F' then   
+				elsif ch >= 'A' and ch <= 'F' then
 					i = (i * 16) + ch - ('A'-10)
 					is_int = TRUE
-				elsif ch >= 'a' and ch <= 'f' then   
+				elsif ch >= 'a' and ch <= 'f' then
 					i = (i * 16) + ch - ('a'-10)
 					is_int = TRUE
 				else
-					exit 
+					exit
 				end if
 			end while
-				
+
 			if is_int = -1 then
 				if ch = '!' then
 					if line_number > 1 then
@@ -1428,96 +1489,53 @@ export function Scanner()
 					read_line()
 				elsif find(ch, "#'`~$^/\\|") != 0 then
 					-- Extended String Literal --
-					cline = line_number
-					yytext = ""
-					trimming = 0
-					ech = ch -- Save the 'end of string character'
-					ch = getch()
-					if bp > length(ThisLine) then
-						-- Test for 'trimming pattern'
-						read_line()
-						while ThisLine[bp] = '_' do
-							trimming += 1
-							bp += 1
-						end while
-						if trimming > 0 then
-							ch = getch()
-						end if
-					end if
-					
-					while ch != ech do
-						if ch = END_OF_FILE_CHAR then
-							CompileErr(sprintf("Extended string literal from line %d not terminated.", cline))
-						else
-							yytext &= ch
-						end if
-						if bp > length(ThisLine) then
-							read_line() -- sets bp to 1, btw.
-							if trimming > 0 then
-								while bp <= trimming and bp <= length(ThisLine) do
-									ch = ThisLine[bp]
-									if ch != ' ' and ch != '\t' then
-										exit
-									end if
-									bp += 1
-								end while
-							end if
-						end if
-						ch = getch()
-					end while
-					if length(yytext) > 0 and find(yytext[1], "\n\r") then
-						yytext = yytext[2 .. $]
-						if length(yytext) > 0 and find(yytext[$], "\n\r") then
-							yytext = yytext[1 .. $-1]
-						end if				
-					end if
-					return {STRING, NewStringSym(yytext)}
+					return ExtendedString( ch )
 				else
 					CompileErr("hex number not formed correctly")
-				end if			
+				end if
 			else
 				if i >= MAXINT_VAL/32 then
 					d = i
 					is_int = FALSE
 					while TRUE do
-						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line 
+						ch = getch()  -- eventually END_OF_FILE_CHAR or new-line
 						if char_class[ch] = DIGIT then
 							if ch != '_' then
 								d = (d * 16) + ch - '0'
 							end if
-						elsif ch >= 'A' and ch <= 'F' then   
+						elsif ch >= 'A' and ch <= 'F' then
 							d = (d * 16) + ch - ('A'- 10)
-						elsif ch >= 'a' and ch <= 'f' then   
+						elsif ch >= 'a' and ch <= 'f' then
 							d = (d * 16) + ch - ('a'-10)
 						elsif ch = '_' then
 							-- ignore spacing character
 						else
-							exit 
+							exit
 						end if
 					end while
 				end if
-				
+
 				ungetch()
 				if is_int then
 					return {ATOM, NewIntSym(i)}
-				else 
+				else
 					if d <= MAXINT_DBL then            -- d is always >= 0
-						return {ATOM, NewIntSym(d)} 
+						return {ATOM, NewIntSym(d)}
 					else
 						return {ATOM, NewDoubleSym(d)}
 					end if
 				end if
 			end if
-			
+
 		elsif class = MULTIPLY then
 			ch = getch()
 			if ch = '=' then
 				return {MULTIPLY_EQUALS, 0}
-			else 
+			else
 				ungetch()
 				return {MULTIPLY, 0}
 			end if
-			
+
 		elsif class = DIVIDE then
 			ch = getch()
 			if ch = '=' then
@@ -1531,10 +1549,10 @@ export function Scanner()
 					switch ch do
 						case  END_OF_FILE_CHAR then
 							exit
-					
+
 						case '\n' then
 							read_line()
-							
+
 						case '*' then
 							ch = getch()
 							if ch = '/' then
@@ -1542,7 +1560,7 @@ export function Scanner()
 							else
 								ungetch()
 							end if
-							
+
 						case '/' then
 							ch = getch()
 							if ch = '*' then
@@ -1550,21 +1568,21 @@ export function Scanner()
 							else
 								ungetch()
 							end if
-					end switch					
-					
+					end switch
+
 				end while
-				
+
 				if cnest > 0 then
-					CompileErr(sprintf("Block comment from line %d not terminated.", cline))				
+					CompileErr(sprintf("Block comment from line %d not terminated.", cline))
 				end if
-			else 
+			else
 				ungetch()
 				return {DIVIDE, 0}
 			end if
-			
+
 		elsif class = SINGLE_QUOTE then
 			ch = getch()
-			if ch = '\\' then 
+			if ch = '\\' then
 				ch = EscapeChar(getch())
 			elsif ch = '\t' then
 				CompileErr("tab character found in string - use \\t instead")
@@ -1579,7 +1597,7 @@ export function Scanner()
 		elsif class = LESS then
 			if getch() = '=' then
 				return {LESSEQ, 0}
-			else 
+			else
 				ungetch()
 				return {LESS, 0}
 			end if
@@ -1587,18 +1605,18 @@ export function Scanner()
 		elsif class = GREATER then
 			if getch() = '=' then
 				return {GREATEREQ, 0}
-			else 
+			else
 				ungetch()
 				return {GREATER, 0}
 			end if
 
 		elsif class = BANG then
-			if getch() = '=' then 
+			if getch() = '=' then
 				return {NOTEQ, 0}
-			else 
+			else
 				ungetch()
 				return {BANG, 0}
-			end if       
+			end if
 
 		elsif class = KEYWORD then
 			return {keylist[ch - KEYWORD_BASE][K_TOKEN], 0}
@@ -1606,10 +1624,13 @@ export function Scanner()
 		elsif class = BUILTIN then
 			name = keylist[ch - BUILTIN_BASE + NUM_KEYWORDS][K_NAME]
 			return keyfind(name, -1)
+
+		elsif class = BACK_QUOTE then
+			return ExtendedString( '`' )
 			
 		else
-			InternalErr("Scanner()")  
-		
+			InternalErr("Scanner()")
+
 		end if
    end while
 end function
@@ -1620,7 +1641,7 @@ export procedure eu_namespace()
 	token eu_tok
 	symtab_index eu_ns
 	eu_tok = keyfind("eu", -1, , 1)
-	
+
 	-- create a new entry at beginning of this hash chain
 	eu_ns  = NameSpace_declaration(eu_tok[T_SYM])
 	SymTab[eu_ns][S_OBJ] = 0
@@ -1628,14 +1649,14 @@ export procedure eu_namespace()
 end procedure
 
 export function StringToken(sequence pDelims = "")
--- scans until blank, tab, end of line, or end of file. 
--- returns a raw string - leading whitespace ignored, 
+-- scans until blank, tab, end of line, or end of file.
+-- returns a raw string - leading whitespace ignored,
 -- comment chopped off.
--- no escape characters are processed 
+-- no escape characters are processed
 	integer ch, m
 	sequence gtext
-	
-	-- skip leading whitespace  
+
+	-- skip leading whitespace
 	ch = getch()
 	while ch = ' ' or ch = '\t' do
 		ch = getch()
@@ -1643,7 +1664,7 @@ export function StringToken(sequence pDelims = "")
 
 	pDelims &= {' ', '\t', '\n', '\r', END_OF_FILE_CHAR}
 	gtext = ""
-	while not find(ch,  pDelims) do 
+	while not find(ch,  pDelims) do
 		gtext &= ch
 		ch = getch()
 	end while
@@ -1662,31 +1683,31 @@ end function
 export procedure IncludeScan( integer is_public )
 -- Special scan for an include statement:
 -- include filename as namespace
-   
+
 -- We need a special scan because include statements:
 --    - have special rules regarding filename syntax
 --    - must fit on one line by themselves (to avoid tricky issues)
 --    - we don't want to introduce "as" as a new scanning keyword
- 
+
 	integer ch
 	sequence gtext
 	token s
-	
-	-- we have just seen the "include" keyword  
-	
-	-- skip leading whitespace  
+
+	-- we have just seen the "include" keyword
+
+	-- skip leading whitespace
 	ch = getch()
 	while ch = ' ' or ch = '\t' do
 		ch = getch()
 	end while
 
-	-- scan required filename into gtext  
+	-- scan required filename into gtext
 	gtext = ""
-	
+
 	if ch = '"' then
-		-- quoted filename  
+		-- quoted filename
 		ch = getch()
-		while not find(ch, {'\n', '\r', '"', END_OF_FILE_CHAR}) do         
+		while not find(ch, {'\n', '\r', '"', END_OF_FILE_CHAR}) do
 			if ch = '\\' then
 				ch = EscapeChar(getch())
 			end if
@@ -1696,44 +1717,44 @@ export procedure IncludeScan( integer is_public )
 		if ch != '"' then
 			CompileErr("missing closing quote on file name")
 		end if
-	else 
-		-- unquoted filename  
-		while not find(ch, {' ', '\t', '\n', '\r', END_OF_FILE_CHAR}) do  
+	else
+		-- unquoted filename
+		while not find(ch, {' ', '\t', '\n', '\r', END_OF_FILE_CHAR}) do
 			gtext &= ch
 			ch = getch()
 		end while
 		ungetch()
 	end if
-	
+
 	if length(gtext) = 0 then
 		CompileErr("file name is missing")
 	end if
-	
-	-- record the new filename  
-	new_include_name = gtext  
 
-	-- skip whitespace  
+	-- record the new filename
+	new_include_name = gtext
+
+	-- skip whitespace
 	ch = getch()
 	while ch = ' ' or ch = '\t' do
 		ch = getch()
-	end while   
-	
+	end while
+
 	new_include_space = 0
-	
+
 	if ch = 'a' then
-		-- scan optional "as" clause  
+		-- scan optional "as" clause
 		ch = getch()
 		if ch = 's' then
 			ch = getch()
 			if ch = ' ' or ch = '\t' then
-				
-				-- skip whitespace  
+
+				-- skip whitespace
 				ch = getch()
 				while ch = ' ' or ch = '\t' do
 					ch = getch()
 				end while
-				
-				-- scan namespace identifier  
+
+				-- scan namespace identifier
 				if char_class[ch] = LETTER or ch = '_' then
 					gtext = {ch}
 					ch = getch()
@@ -1741,26 +1762,26 @@ export procedure IncludeScan( integer is_public )
 						gtext &= ch
 						ch = getch()
 					end while
-					
+
 					ungetch()
 					s = keyfind(gtext, -1, , 1)
 					if not find(s[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
 						CompileErr("a new namespace identifier is expected here")
 					end if
 					new_include_space = NameSpace_declaration(s[T_SYM])
-				else 
+				else
 					CompileErr("missing namespace qualifier")
 				end if
-			else 
+			else
 				CompileErr("improper syntax for include-as")
 			end if
-		else 
+		else
 			CompileErr("improper syntax for include-as")
 		end if
-	else 
+	else
 		ungetch()
 	end if
-	
+
 	start_include = TRUE -- let scanner know
 	public_include = is_public
 end procedure

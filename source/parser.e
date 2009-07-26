@@ -84,6 +84,8 @@ sequence init_stack        -- var init stack
 sequence loop_stack
 sequence if_stack
 
+sequence gListItem = {} 	-- [$] = 1 if just processed an expression in a list otherwise 0.
+
 -- Expression statistics:
 integer side_effect_calls = 0 -- number of calls to functions with side-effects
 							  -- on local/global variables
@@ -619,7 +621,8 @@ function Expr_list()
 		short_circuit -= 1
 		while TRUE do
 			call_proc(forward_expr, {})
-			n += 1
+			n += gListItem[$]
+			gListItem = gListItem[1 .. $-1]
 			tok = next_token()
 			if tok[T_ID] != COMMA then
 				exit
@@ -883,6 +886,7 @@ procedure ParseArgs(symtab_index subsym)
 							else
 								var_code = SymTab[subsym][S_CODE][on_arg]
 							end if
+							
 							name = ""
 						else
 						
@@ -1138,7 +1142,6 @@ procedure Function_call( token tok )
 	end if
 end procedure
 
-
 procedure Factor()
 -- parse a factor in an expression
 	token tok
@@ -1210,19 +1213,22 @@ procedure Factor()
 			current_sequence = current_sequence[1..$-1]
 			putback(tok)
 			short_circuit += 1
-			break
 			
 		case DOLLAR then
 			if length(current_sequence) then
 				emit_op(DOLLAR)
 			else
-				CompileErr("'$' must only appear between '[' and ']'")
+				tok = next_token()
+				if tok[T_ID] = RIGHT_BRACE then
+					gListItem[$] = 0
+					putback(tok)
+				else
+					CompileErr("'$' must only appear between '[' and ']' or as the last item in a sequence literal.")
+				end if
 			end if
-			break
 			
 		case ATOM then
 			emit_opnd(tok[T_SYM])
-			break
 			
 		case LEFT_BRACE then
 			n = Expr_list()
@@ -1230,20 +1236,16 @@ procedure Factor()
 			op_info1 = n
 			emit_op(RIGHT_BRACE_N)
 			
-			
 		case STRING then
 			emit_opnd(tok[T_SYM])
-			break
 
 		case LEFT_ROUND then
 			call_proc(forward_expr, {})
 			tok_match(RIGHT_ROUND)
-			
 		
 		case FUNC, TYPE, QUALIFIED_FUNC, QUALIFIED_TYPE then
 			Function_call( tok )
-			
-			
+									
 		case else
 			CompileErr(sprintf(
 					   "Syntax error - expected to see an expression, not %s",
@@ -1275,7 +1277,7 @@ procedure UFactor()
 	end if
 end procedure
 
-function term()
+function Term()
 -- parse a term in an expression
 	token tok
 
@@ -1294,10 +1296,10 @@ function aexpr()
 	token tok
 	integer id
 
-	tok = term()
+	tok = Term()
 	while tok[T_ID] = PLUS or tok[T_ID] = MINUS do
 		id = tok[T_ID]
-		tok = term()
+		tok = Term()
 		emit_op(id)
 	end while
 	return tok
@@ -1347,6 +1349,7 @@ procedure Expr()
 	integer id
 	integer patch
 
+	gListItem &= 1
 	id = -1
 	patch = 0
 	while TRUE do
@@ -3016,6 +3019,8 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 -- parse a command-level variable or constant declaration
 -- type_ptr is NULL if constant
 	token tok
+	object tsym
+	object prevtok = 0
 	symtab_index sym, valsym
 	integer h, val, count = 0
 	val = 1
@@ -3029,6 +3034,16 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	
 	while TRUE do
 		tok = next_token()
+		if tok[T_ID] = DOLLAR then
+			if not equal(prevtok, 0) then
+				if prevtok[T_ID] = COMMA then
+					-- The source code sequence ",$" signals the end of a list.
+					tok = next_token()
+					exit
+				end if
+			end if
+		end if
+		
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
 			CompileErr("a name is expected here")
 		end if
@@ -3103,29 +3118,34 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 					negate = -1
 					tok = next_token()
 				end if
-
 				if tok[T_ID] = ATOM then
 					valsym = tok[T_SYM]
-
-				elsif SymTab[tok[T_SYM]][S_MODE] = M_CONSTANT then
-					if SymTab[tok[T_SYM]][S_CODE] then
-						valsym = SymTab[tok[T_SYM]][S_CODE]
+				elsif tok[T_SYM] > 0 then
+					
+					tsym = SymTab[tok[T_SYM]]
+					if tsym[S_MODE] = M_CONSTANT then
+						if length(tsym) >= S_CODE and tsym[S_CODE] then
+							valsym = tsym[S_CODE]
+							
+						elsif not equal( tsym[S_OBJ], NOVALUE ) then
+							if integer(tsym[S_OBJ]) then
+								valsym = tok[T_SYM]
+							else
+								CompileErr("An enum constant must be an integer")
+							end if					
+						else
+							CompileErr("enum constants must be assigned an integer")
+						end if
+					elsif valsym < 0 then
+						-- forward reference
 						
-					elsif compare( SymTab[tok[T_SYM]][S_OBJ], NOVALUE ) then
-						valsym = tok[T_SYM]
-					
 					else
-						CompileErr("enum constants must be assigned an integer")
-
+						CompileErr("integer or constant expected")
+	
 					end if
-				elsif valsym < 0 then
-					-- forward reference
-					
 				else
-					CompileErr("integer or constant expected")
-
+						CompileErr("integer or constant expected")					
 				end if
-
 				valsym = tok[T_SYM]
 				if not integer( SymTab[valsym][S_OBJ] ) then
 					CompileErr("enum constants must be integers")
@@ -3205,6 +3225,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 		if tok[T_ID] != COMMA then
 			exit
 		end if
+		prevtok = tok
 	end while
 	putback(tok)
 end procedure

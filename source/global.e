@@ -307,7 +307,7 @@ export constant -- maskable warning flags
 	empty_case_warning_flag     = #0800,
 	no_case_else_warning_flag   = #1000,
 	def_arg_type_warning_flag   = #2000,
-	all_warning_flag            = #2FFF
+	all_warning_flag            = #3FFF
 
 constant default_maskable_warnings =
 	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
