@@ -4418,52 +4418,54 @@ extern struct routine_list *rt00;
 typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection);
 #endif
 object CallBack(object x)
-/* return a call-back address for routine id x
-   x can be the routine id for stdcall, or {'+', routine_id} for cdecl */
+/* return either a call-back address for routine id x
+   x can be the routine id for stdcall, or {'+', routine_id} for cdecl 
+   
+   or return a three element sequence containing a Read-Only machine address, the replace value
+   needed (sym tab pointer), and the call_back size respectively so the caller can make its *own*
+   call-back address.  In this case x must be a sequence containing only a routine_id:   
+   {routine_id} or a sequence containing a two element sequence {{'+',routine_id}} for cdecl.   And
+   the caller must search for the bytes {#78,#56,#34,#12}, allocate enough memory (call_back size)
+   and to copy what is pointed to by the said address and then replace the searched for bytes with
+   the replace value in the allocated memory. 
+   */
 {
 	unsigned addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
 	symtab_ptr routine;
-#if defined(EWINDOWS) || defined(EDOS)
 	int bare_flag = 0;
+	object_ptr obj_ptr;
 	void * replace_value;
     s1_ptr result;
-	object_ptr obj_ptr;
-#endif
 	s1_ptr x_ptr;
 	int convention;
-#ifdef EWINDOWS
-	VirtualAlloc_t VirtualAlloc_ptr;
-	HINSTANCE hinstLib;
-	BOOL fFreeResult, fRunTimeLinkSuccess = FALSE;
-	// Get a handle to the DLL module.
-
-	hinstLib = LoadLibrary(TEXT("kernel32"));
-#endif
-
-
 	convention = C_CDECL;
-start:
+	
+	/* Handle {{'+', routine_id} and {routine_id} case:
+	 *    Set a flag and take the first element of the argument
+	 * to the new value of the argument. */
+	if (IS_SEQUENCE(x) && (x_ptr = SEQ_PTR(x))->length == 1) {
+			bare_flag = 1;
+			obj_ptr = x_ptr->base + 1;
+			x = *obj_ptr;
+	}
+	
+	/* Handle whether it is {'+', routine_id} or {routine_id}:
+	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
 		x_ptr = SEQ_PTR(x);
-		/*printf( "x_ptr->length=%d, IS_SEQUENCE(*(obj_ptr=x_ptr->base+1))=%d, SEQ_PTR(*obj_ptr)->length=%d\n",
+		/*printf( "x_ptr->length=%d, IS_SEQUENCE(*(obj_ptr=x_ptr->base+1))=%d, "
+			"SEQ_PTR(*obj_ptr)->length=%d\n",
 		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
 		fflush(stdout);*/
-#if defined(EWINDOWS) || defined(EDOS)
-		obj_ptr = x_ptr->base + 1;
-		if ((x_ptr->length == 1) && (!IS_SEQUENCE(*obj_ptr)
-			|| (SEQ_PTR(*obj_ptr)->length == 2))) {
-			bare_flag = 1;
-			x = *obj_ptr;
-			goto start;
-		}
-#endif
 		if (x_ptr->length != 2){
-			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}");
+			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}, {routine_id},"
+				"or {{'+', routine_id}}");
 		}
 		if (get_int( x_ptr->base[1] ) != '+')
-			RTFatal("for cdecl, use call_back({'+', routine_id})");
+			RTFatal("for cdecl, use call_back({'+', routine_id}) or "
+				"call_back({{'+', routnine_id}})");
 		routine_id = get_int( x_ptr->base[2] );
 	}
 	else {
@@ -4472,6 +4474,8 @@ start:
 		convention = C_STDCALL;
 #endif
 	}
+	
+	/* Check routine_id value and get the number of arguments */
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
 #else
@@ -4484,6 +4488,7 @@ start:
 	num_args = routine->u.subp.num_args;
 #endif
 
+	/* Get the address of the template to be modified. */
 	if (convention == C_CDECL) {
 		// cdecl allows var args - only one template needed
 		addr = (unsigned)&cdecl_call_back;
@@ -4514,48 +4519,43 @@ start:
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-#if defined(EWINDOWS) || defined(EDOS)
-	if (bare_flag) goto bare;
+	
+	/* Now if the arguments were originally {{'+', routine_id}} or {routine_id} we return the 
+	 * address of the template; a handle for the routine routine_id, which may be the same as 
+	 * the routine id passed in; and the call back size. */
+	if (bare_flag) {
+#ifdef ERUNTIME
+		replace_value = routine_id;
+#else
+		replace_value = e_routine[routine_id];
 #endif
-#ifdef EWINDOWS
-	// If the handle is valid, try to get the function address.
-	copy_addr = NULL;
-	if (hinstLib != NULL)
-	    {
-		VirtualAlloc_ptr = (VirtualAlloc_t) GetProcAddress(hinstLib, "VirtualAlloc");
-
-		// If the function address is valid, call the function.
-
-		if (NULL != VirtualAlloc_ptr)
-		{
-		    copy_addr = (VirtualAlloc_ptr)( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT,
-			PAGE_EXECUTE_READWRITE );
-		    fRunTimeLinkSuccess = TRUE;
-		}
-
-		// Free the DLL module.
-
-		fFreeResult = FreeLibrary(hinstLib);
-	    }
-	else
-	    VirtualAlloc_ptr = 0;
-
-	if (copy_addr == NULL) {
-		RTFatal("Your program has run out of memory.\nOne moment please...");
+		result = NewS1(3);
+		obj_ptr = result->base+1;
+		obj_ptr[0] = NewDouble((double)(unsigned long)addr);
+		obj_ptr[1] = NewDouble((double)(unsigned long)replace_value);
+		obj_ptr[2] = NewDouble((double)(unsigned long)CALLBACK_SIZE);
+		return MAKE_SEQ(result);
 	}
-	if (!fRunTimeLinkSuccess)
-	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
+	
+	/* Now allocate memory that is executable or at least can be made to be ... */
+#ifdef EWINDOWS
+	copy_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT,
+		PAGE_EXECUTE_READWRITE );
+	if (copy_addr == NULL)
+		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
 #else /* ndef EWNIDOWS */
 	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
 #endif /* ndef EWINDOWS */
-#ifdef EUNIX
-#ifndef EBSD
-	mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page
-			 pagesize,  // one page
-			 PROT_READ+PROT_WRITE+PROT_EXEC);
-#endif
-#endif
+
+
+	/* Check if the memory allocation worked. */
+	if (copy_addr == NULL) {
+		RTFatal("Your program has run out of memory.\nOne moment please...");
+	}
+
+	/* copy memory of the template to the newly allocated memory */
 	memcpy(copy_addr, (char *)addr, CALLBACK_SIZE);
+	
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
@@ -4569,36 +4569,22 @@ start:
 			break;
 		}
 	}
-#ifdef EWINDOWS
-        if (
-	    (
-		    addr = (unsigned) VirtualAlloc( copy_addr, CALLBACK_SIZE,
-			    MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE )
-	    )
-	    ==
-	    0 )
+
+	/* Make memory executable. */
+#ifdef EUNIX
+#ifndef EBSD
+	mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page
+			 pagesize,  // one page
+			 PROT_READ+PROT_WRITE+PROT_EXEC);
+#endif
 #endif
 	addr = (unsigned)copy_addr;
 
+	/* Return new address. */
 	if (addr <= (unsigned)MAXINT_VAL)
 		return addr;
 	else
 		return NewDouble((double)addr);
-
-#if defined(EWINDOWS) || defined(EDOS)
-bare:
-#ifdef ERUNTIME
-	replace_value = routine_id;
-#else
-	replace_value = e_routine[routine_id];
-#endif
-	result = NewS1(3);
-	obj_ptr = result->base+1;
-	obj_ptr[0] = NewDouble((double)(unsigned long)addr);
-	obj_ptr[1] = NewDouble((double)(unsigned long)replace_value);
-	obj_ptr[2] = NewDouble((double)(unsigned long)CALLBACK_SIZE);
-	return MAKE_SEQ(result);
-#endif
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
