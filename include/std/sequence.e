@@ -871,7 +871,7 @@ end function
 -- s = pad_head("ABC", 6)
 -- -- s is "   ABC"
 --
--- s = pad_head("ABC", {6, '-'})
+-- s = pad_head("ABC", 6, '-')
 -- -- s is "---ABC"
 -- </eucode>
 --
@@ -914,7 +914,7 @@ end function
 -- s = pad_tail("ABC", 6)
 -- -- s is "ABC   "
 --
--- s = pad_tail("ABC", {6, '-'})
+-- s = pad_tail("ABC", 6, '-')
 -- -- s is "ABC---"
 -- </eucode>
 --
