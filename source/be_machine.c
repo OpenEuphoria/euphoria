@@ -4465,7 +4465,7 @@ object CallBack(object x)
 		}
 		if (get_int( x_ptr->base[1] ) != '+')
 			RTFatal("for cdecl, use call_back({'+', routine_id}) or "
-				"call_back({{'+', routnine_id}})");
+				    "call_back({{'+', routine_id}})");
 		routine_id = get_int( x_ptr->base[2] );
 	}
 	else {
