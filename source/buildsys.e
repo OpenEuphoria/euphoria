@@ -598,7 +598,7 @@ procedure build_direct()
 			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
 
 		case COMPILER_GCC then
-			cmd = sprintf("%s -o%s %s %s", { settings[SETUP_LEXE], exe_name, objs, settings[SETUP_LFLAGS] })
+			cmd = sprintf("%s -o %s %s %s", { settings[SETUP_LEXE], exe_name, objs, settings[SETUP_LFLAGS] })
 
 		case else
 			printf(2, "Unknown compiler type: %d\n", { compiler_type })
