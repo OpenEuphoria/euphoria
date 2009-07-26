@@ -418,8 +418,12 @@ export procedure check_inline( symtab_index sub )
 		s = SymTab[s][S_NEXT]
 	end for
 	
-	while s != 0 and SymTab[s][S_SCOPE] <= SC_PRIVATE do
-		proc_vars &= s
+	while s != 0 and 
+	(sym_scope( s ) <= SC_PRIVATE or sym_scope( s ) = SC_UNDEFINED ) do
+		if sym_scope( s ) != SC_UNDEFINED then
+			proc_vars &= s
+		end if
+		
 		s = SymTab[s][S_NEXT]
 	end while
 	sequence backpatch_op = {}
@@ -653,7 +657,8 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	end for
 	
 	symtab_index last_sym = last_param
-	while last_sym and (SymTab[last_sym][S_SCOPE] <= SC_PRIVATE) do
+	while last_sym and 
+	(sym_scope( last_sym ) <= SC_PRIVATE or sym_scope( last_sym ) = SC_UNDEFINED ) do
 		last_param = last_sym
 		last_sym = SymTab[last_sym][S_NEXT]
 		varnum += 1
@@ -689,15 +694,18 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	end for
 	
 	symtab_index final_target = 0
-	while s and SymTab[s][S_SCOPE] <= SC_PRIVATE do
-		-- make new vars for the privates of the routine
-		varnum += 1
-		symtab_index var = new_inline_var( s )
-		proc_vars &= var
-		if int_sym = 0 then
-			int_sym = NewIntSym( 0 )
+	while s and 
+	(sym_scope( s ) <= SC_PRIVATE or sym_scope( s ) = SC_UNDEFINED) do
+		if sym_scope( s ) != SC_UNDEFINED then
+			
+			-- make new vars for the privates of the routine
+			varnum += 1
+			symtab_index var = new_inline_var( s )
+			proc_vars &= var
+			if int_sym = 0 then
+				int_sym = NewIntSym( 0 )
+			end if
 		end if
-		
 		s = SymTab[s][S_NEXT]
 	end while
 	
@@ -720,7 +728,6 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 				Pop_block_var()
 			else
 				inline_target = NewTempSym()
-				
 			end if
 		end if
 		proc_vars &= inline_target
