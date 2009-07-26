@@ -394,8 +394,8 @@ translate : .SYMBOLIC translate-win translate-dos
 
 testeu : .SYMBOLIC
 	cd ..\tests
-	set EUCOMPILEDIR=$(TRUNKDIR) 
-	..\bin\eutest.exe -i ..\include -cc wat -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex"
+	set EUCOMPILEDIR=$(TRUNKDIR)
+	$(EXE) ..\source\eutest.ex -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex"
 	cd ..\source
 
 !endif #EUPHORIA
