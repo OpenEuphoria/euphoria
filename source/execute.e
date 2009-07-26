@@ -436,7 +436,7 @@ procedure trace_back(sequence msg)
 				end if
 			
 			else
-				both_printf("%s:%d ", find_line(sub, pc)) 
+				both_printf("%s:%d", find_line(sub, pc)) 
 	
 				if not equal(SymTab[sub][S_NAME], "_toplevel_") then
 					switch SymTab[sub][S_TOKEN] do
@@ -464,7 +464,7 @@ procedure trace_back(sequence msg)
 						clear_screen()
 						puts(2, crash_msg)
 					end if
-					both_puts(msg & '\n')
+					both_puts(msg & " \n")
 					show_message = FALSE
 				end if
 	
@@ -590,7 +590,7 @@ procedure RTFatalType(integer x)
 	open_err_file()
 	a = Code[x]
 	vname = SymTab[a][S_NAME]
-	msg = sprintf("type_check error\n%s is ", {vname}) 
+	msg = sprintf("type_check failure, %s is ", {vname}) 
 	v = sprint(val[a])
 	if length(v) > 70 - length(vname) then
 		v = v[1..70 - length(vname)]
@@ -1454,7 +1454,7 @@ procedure opGLOBAL_INIT_CHECK()
 -- GLOBAL_INIT_CHECK, PRIVATE_INIT_CHECK 
 	a = Code[pc+1]
 	if equal(val[a], NOVALUE) then
-		RTFatal(SymTab[a][S_NAME] & " has not been initialized")
+		RTFatal("variable " & SymTab[a][S_NAME] & " has not been assigned a value")
 	end if
 	pc += 2
 end procedure
@@ -3365,8 +3365,10 @@ procedure do_callback(integer b)
 		id = x
 		convention = 0
 	else
+		
 		id = x[2]
 		convention = x[1]
+
 	end if
 		
 	if id < 0 or id >= length(e_routine) then
@@ -3477,6 +3479,7 @@ procedure opINSERT()
 	pc += 5
 end procedure
 
+constant M_CRASH = 67
 procedure opMACHINE_PROC()
 	object v
 	
@@ -3505,7 +3508,11 @@ procedure opMACHINE_PROC()
 				TempWarningName = STDERR
 				display_warnings = (val[b] >= 0)
 			end if
-
+		
+		case M_CRASH then
+			
+			RTFatal( val[b] )
+			
 ifdef DOS32 then
 		case M_TICK_RATE then
 			if val[b] > 18 and val[b] < 10000 then
