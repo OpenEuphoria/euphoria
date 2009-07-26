@@ -168,9 +168,9 @@ sequence e_routine = {} -- list of routines with a routine id assigned to them
 integer err_file
 sequence err_file_name = "ex.err"
 
+
 procedure open_err_file()
 -- open ex.err  
-
 	err_file = open(err_file_name, "w")
 	if err_file = -1 then
 		puts(2, "Can't open " & err_file_name & '\n')
@@ -589,8 +589,13 @@ procedure RTFatalType(integer x)
 
 	open_err_file()
 	a = Code[x]
-	vname = SymTab[a][S_NAME]
-	msg = sprintf("type_check failure, %s is ", {vname}) 
+	if length(SymTab[a]) >= S_NAME then
+		vname = SymTab[a][S_NAME]
+		
+	else
+		vname = "inlined variable"
+	end if
+	msg = sprintf("type_check failure, %s is ", {vname})
 	v = sprint(val[a])
 	if length(v) > 70 - length(vname) then
 		v = v[1..70 - length(vname)]
@@ -3114,7 +3119,7 @@ procedure opCLOSE()
 end procedure
 			  
 procedure opABORT()
-	abort(val[Code[pc+1]])
+	Cleanup(val[Code[pc+1]])
 end procedure
 
 procedure opGETC()  -- read a character from a file 
@@ -3364,8 +3369,10 @@ procedure do_callback(integer b)
 	if atom(x) then
 		id = x
 		convention = 0
+	elsif length(x) = 1 then
+		RTFatal("DEP style callbacks not supported in eu.ex")
+	
 	else
-		
 		id = x[2]
 		convention = x[1]
 
