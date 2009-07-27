@@ -2641,6 +2641,10 @@ void do_exec(int *start_pc)
 				else {
 					top = ATOM_0;
 				}
+				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[1])->obj );
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -2654,6 +2658,10 @@ void do_exec(int *start_pc)
 					top = ATOM_1;
 				else 
 					top = ATOM_0;
+				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[1])->obj );
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -2667,6 +2675,10 @@ void do_exec(int *start_pc)
 					top = ATOM_1;
 				else 
 					top = ATOM_0;
+				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[1])->obj );
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -2679,6 +2691,10 @@ void do_exec(int *start_pc)
 					top = ATOM_1;
 				else 
 					top = ATOM_0;
+				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[1])->obj );
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -3990,7 +4006,8 @@ void do_exec(int *start_pc)
 					b = 0;
 				}
 				else if( IS_ATOM_DBL(a) ){
-					if( ((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+					if( (!UNIQUE(DBL_PTR(a)) && !DBL_PTR(a)->cleanup) || 
+					((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
 						a = NewDouble( DBL_PTR(a)->dbl );
 						b = 0;
 					}
@@ -4003,7 +4020,8 @@ void do_exec(int *start_pc)
 					DBL_PTR(a)->cleanup = (cleanup_ptr) obj_ptr;
 				}
 				else{ // sequence
-					if( ((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+					if( (!UNIQUE(SEQ_PTR(a)) && !DBL_PTR(a)->cleanup) || 
+					((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
 						a = MAKE_SEQ( SequenceCopy( SEQ_PTR(a) ) );
 						b = 0;
 					}
