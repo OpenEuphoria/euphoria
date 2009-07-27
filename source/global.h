@@ -205,9 +205,18 @@ extern int is_batch;
 #ifndef CALLBACK
 #define CALLBACK
 #endif
+
+/*
+ * This breaks Win32 cdecl callbacks.  If DOS doesn't
+ * have __cdecl defined, we should use the pragma
+ * aux method to define it: 
+ * http://www.openwatcom.org/index.php/Calling_Conventions#Specifying_Calling_Conventions_the_Watcom_Way
+ * According to the documentation, however, OW for DOS should 
+ * support cdecl.  If this was for other compilers (DJGPP?),
+ * then we should figure out a better way to handle this:
 #ifndef __cdecl
 #define __cdecl
 #endif
-
+ */
 
 #endif // H_GLOBAL
