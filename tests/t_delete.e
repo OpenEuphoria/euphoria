@@ -28,7 +28,7 @@ x = delete_routine( 2, CUSTOM_DELETE )
 x = delete_routine(x, CUSTOM_DELETE )
 delete( x )
 test_equal( "integer promoted, 2 delete routines and explicitly deleted", 2, delete_count() )
-
+-- 
 x = delete_routine( delete_routine( 3, CUSTOM_DELETE ), CUSTOM_DELETE )
 x = 3
 test_equal( "integer promoted, 2 delete routines and deleted by derefs", 2, delete_count() )
@@ -40,6 +40,11 @@ test_equal( "double explicitly deleted", 1, delete_count() )
 x = delete_routine( x, CUSTOM_DELETE )
 x = 0
 test_equal( "double deleted by derefs", 1, delete_count() )
+
+x = 3.25
+x = delete_routine( x, CUSTOM_DELETE )
+x = 0
+test_equal( "double assigned from literal deleted by derefs", 1, delete_count() )
 
 sequence s
 s = delete_routine( repeat( 0, 1 ), CUSTOM_DELETE )
@@ -84,5 +89,13 @@ val[X] = delete_routine( val[X], CUSTOM_DELETE )
 val[X] = 0
 test_equal( "delete routine on seq element reassigned to itself, release atom by refcount", 1, delete_count() )
 
-test_report()
+val[X] = 9.4
+val[X] = val[X] + val[T1]
+val[X] = delete_routine( val[X], CUSTOM_DELETE )
+if not atom( val[X] ) then
+	
+end if
+val[X] = 0
+test_equal( "simulated eu.ex double deleted by derefs", 1, delete_count() )
 
+test_report()

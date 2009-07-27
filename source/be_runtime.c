@@ -1449,9 +1449,6 @@ void udt_clean( object o, long rid ){
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
 	}
-	else{
-		RefDS( o );
-	}
 	args = MAKE_SEQ( s );
 	code = (int *)EMalloc( 4*sizeof(int*) );
 	code[0] = (int **)opcode(CALL_PROC);
@@ -1472,11 +1469,7 @@ void udt_clean( object o, long rid ){
 	tpc = save_tpc;
 	expr_top -= 2;
 	if( pre_ref == 0 ){
-		SEQ_PTR(o)->ref = pre_ref;
-	}
-	else{
-		DeRefDS( o );
-		
+		SEQ_PTR(o)->ref--;
 	}
 }
 #endif
@@ -1568,6 +1561,11 @@ void de_reference(s1_ptr a)
 		a = (s1_ptr)DBL_PTR(a);
 		if( ((d_ptr)a)->cleanup != 0 ){
 			cleanup_double( (d_ptr)a );
+			
+			// user might have made a reference during cleanup;
+			if( a->ref != 0 ){
+				return;
+			}
 		}
 		FreeD((unsigned char *)a);
 	}
@@ -1577,6 +1575,11 @@ void de_reference(s1_ptr a)
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
 			cleanup_sequence( a );
+			
+			// user might have made a reference during cleanup
+			if( a->ref != 0 ){
+				return;
+			}
 		}
 		p = a->base;
 #ifdef EXTRA_CHECK
@@ -1593,6 +1596,7 @@ void de_reference(s1_ptr a)
 				RTInternal("de_reference: invalid object found!");
 #endif
 			if (!IS_ATOM_INT(t)) {
+			
 				if (t == NOVALUE) {
 					// end of sequence: back up a level
 					p = (object_ptr)a->length;
@@ -1606,6 +1610,10 @@ void de_reference(s1_ptr a)
 					if (IS_ATOM_DBL(t)) {
 						if( DBL_PTR(t)->cleanup != 0 ){
 							cleanup_double( DBL_PTR(t) );
+							// the user might have referenced this somewhere
+							if((DBL_PTR(t)->ref) == 0){
+								continue;
+							}
 						}
 						FreeD((unsigned char *)DBL_PTR(t));
 					}
@@ -1669,6 +1677,11 @@ void de_reference_i(s1_ptr a)
 		a = (s1_ptr)DBL_PTR(a);
 		if( ((d_ptr)a)->cleanup != 0 ){
 			cleanup_double( (d_ptr)a );
+			
+			// user might have made a reference during cleanup
+			if( a->ref != 0 ){
+				return;
+			}
 		}
 		FreeD((unsigned char *)a);
 	}
@@ -1678,6 +1691,11 @@ void de_reference_i(s1_ptr a)
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
 			cleanup_sequence( a );
+			
+			// user might have made a reference during cleanup
+			if( a->ref != 0 ){
+				return;
+			}
 		}
 #ifdef EXTRA_CHECK
 		if (a->ref < 0)

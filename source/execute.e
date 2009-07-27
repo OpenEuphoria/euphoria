@@ -1241,6 +1241,15 @@ procedure exit_block( symtab_index block, integer except = 0 )
 	a = SymTab[block][S_NEXT_IN_BLOCK]
 	while a do
 		if a != except then
+			ifdef DEBUG then
+				sequence name
+				if length( SymTab[a] ) >= S_NAME then
+					name = sym_name( a )
+				else
+					name = "temp"
+				end if
+				printf(2, "\tEXIT_BLOCK[%s] resetting [%d][%s][%s]\n", {sym_name( block ), a, name, pretty_sprint( val[a] )})
+			end ifdef
 			val[a] = NOVALUE
 		end if
 		a = SymTab[a][S_NEXT_IN_BLOCK]
@@ -3544,9 +3553,9 @@ integer delete_advance = 0
 symtab_index delete_sym = 0
 
 procedure do_delete_routine( integer dx, object o )
+	
 	val[t_id] = user_delete_rid[dx]
 	val[t_arglist] = {o}
-	
 	SymTab[delete_code_routine][S_RESIDENT_TASK] = current_task
 	
 	-- create a stack frame
@@ -3557,6 +3566,9 @@ procedure do_delete_routine( integer dx, object o )
 	pc = 1
 	
 	do_exec()
+	
+	-- free up the dangling reference
+	val[t_arglist] = NOVALUE
 	
 	-- remove the stack frame
 	pc = call_stack[$-1]
@@ -3699,9 +3711,9 @@ procedure do_exec()
 		integer op = Code[pc]
 		ifdef DEBUG then
 			if op > 0 and op <= length(opnames) then
-				printf(1,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
+				printf(2,"[%s]:[%d] '%d:%s'\n", {SymTab[call_stack[$]][S_NAME], pc, op, opnames[op]})
 			else
-				printf(1,"[%s]:[%d] %d\n", {SymTab[call_stack[$]][S_NAME], pc, op})
+				printf(2,"[%s]:[%d] %d\n", {SymTab[call_stack[$]][S_NAME], pc, op})
 			end if
 		end ifdef
 		switch op do
