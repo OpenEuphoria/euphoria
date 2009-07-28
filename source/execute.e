@@ -441,13 +441,13 @@ procedure trace_back(sequence msg)
 				if not equal(SymTab[sub][S_NAME], "_toplevel_") then
 					switch SymTab[sub][S_TOKEN] do
 						case PROC then
-							both_puts("in procedure ")
+							both_puts(" in procedure ")
 							
 						case FUNC then
-							both_puts("in function ")
+							both_puts(" in function ")
 							
 						case TYPE then
-							both_puts("in type ")
+							both_puts(" in type ")
 							
 						case else
 							RTInternal("SymTab[sub][S_TOKEN] is not a routine")
@@ -1176,6 +1176,7 @@ procedure opPROC()
 	-- make a procedure or function/type call
 	sub = Code[pc+1] -- subroutine
 	arg = SymTab[sub][S_NEXT] 
+
 	n = SymTab[sub][S_NUM_ARGS]
 	
 	if SymTab[sub][S_RESIDENT_TASK] != 0 then

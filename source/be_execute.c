@@ -76,6 +76,8 @@
 #define deprintf(s) do {  } while (0)
 #endif
 
+#define KILL_TEMP(X) if(((symtab_ptr)X)->mode == M_TEMP ) ((symtab_ptr)X)->obj = NOVALUE;
+
 /* To eliminate type casts for pc[*] you
  would need a union like this:
 union pc_t {
@@ -1891,10 +1893,14 @@ void do_exec(int *start_pc)
 				}
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
 				a = pc[3];
+				Ref( top );
 				if( ((symtab_ptr)a)->mode == M_TEMP ){
 					((symtab_ptr)a)->obj = NOVALUE;
 				}
-				Ref( top );
+				else{
+					DeRef( ((symtab_ptr)a)->obj );
+				}
+				
 				*(object_ptr)a = top;
 				pc += 4;
 				thread();
@@ -3923,7 +3929,6 @@ void do_exec(int *start_pc)
 				/* free the temps and set to NOVALUE */
 				sym = sub->u.subp.temps;
 				while (sym != NULL) {
-					
 					DeRef(sym->obj);
 					
 					sym->obj = NOVALUE;
@@ -4161,6 +4166,10 @@ void do_exec(int *start_pc)
 					RTFatal("Fourth argument to replace() must be an atom");
 				
 				Replace( (replace_ptr)(pc+1) );
+				
+				KILL_TEMP(pc[1])
+				KILL_TEMP(pc[2])
+				KILL_TEMP(pc[3])
 				
 				pc += 6;
 				thread();

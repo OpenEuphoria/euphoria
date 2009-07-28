@@ -72,7 +72,7 @@ s[1] = delete_routine( 1, CUSTOM_DELETE )
 s[1] = 1.1
 test_equal( "ASSIGN_SUBS release atom by refcount", 1, delete_count() )
 
-enum X, S, T1, T2
+enum X, S, T1, T2, L0, L1, LS0
 sequence val = repeat( 0, 4 )
 
 val[S] = {3}
@@ -97,5 +97,28 @@ if not atom( val[X] ) then
 end if
 val[X] = 0
 test_equal( "simulated eu.ex double deleted by derefs", 1, delete_count() )
+
+constant NOVALUE = -1.295837195871e307
+integer a, b, c, target, pc
+sequence Code
+val = repeat( NOVALUE, 10 )
+
+val[S] = {1.3}
+val[L1] = 1
+val[L0] = 0
+val[LS0] = {0}
+val[T1] = CUSTOM_DELETE
+
+
+val[S] = {0}
+val[S][1] = delete_routine( 1, CUSTOM_DELETE )
+
+object vX
+vX = val[S]
+vX = val[L0]
+val[S][1] = vX
+vX = NOVALUE
+
+test_equal( "simulated ASSIGN_SUBS_I", 1, delete_count() )
 
 test_report()
