@@ -2670,8 +2670,7 @@ procedure opASSIGN()
 	symtab_index 
 		sourcesym = Code[pc+1],
 		targetsym = Code[pc+2]
-	integer source_is_temp = sym_mode( sourcesym ) = M_TEMP 
-		and equal( sym_obj( sourcesym ), NOVALUE )
+	integer source_is_temp = is_temp( sourcesym )
 		
 	if not source_is_temp then
 		CRef(sourcesym)
@@ -3082,6 +3081,25 @@ procedure opTYPE_CHECK()
 	pc += 1
 end procedure
 
+function is_temp( symtab_index sym )
+	return sym_mode( sym ) = M_TEMP and equal( sym_obj( sym ), NOVALUE )
+end function
+
+--**
+-- Checks the object referenced at tpc in the Code to see if
+-- it is a temp.  If so, then it DeRefs and sets the object 
+-- to NOVALUE.
+procedure kill_temp( integer tpc )
+	symtab_index sym = Code[tpc]
+	if is_temp( sym ) then
+		if TypeIsNot( sym, TYPE_INTEGER ) then
+			CDeRef( sym )
+			c_stmt("@ = NOVALUE;\n", sym)
+			SetBBType( sym, TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
+		end if
+	end if
+end procedure
+
 procedure opIS_AN_INTEGER()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 	if TypeIs(Code[pc+1], TYPE_INTEGER) then
@@ -3101,6 +3119,7 @@ procedure opIS_AN_INTEGER()
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	kill_temp( pc + 1 )
 	pc += 3
 end procedure
 
@@ -3116,6 +3135,7 @@ procedure opIS_AN_ATOM()
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
+	kill_temp( pc + 1 )
 	pc += 3
 end procedure
 
@@ -3131,6 +3151,7 @@ procedure opIS_A_SEQUENCE()
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	kill_temp( pc + 1 )
 	pc += 3
 end procedure
 
@@ -5509,12 +5530,19 @@ procedure delete_double( symtab_index obj )
 	c_stmt("if(DBL_PTR(@)->cleanup != 0 ){\n", obj )
 		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
 	c_stmt0("}\n")
+	c_stmt("else if( !UNIQUE(DBL_PTR(@)) ){\n", obj )
+		CDeRef( obj )
+		c_stmt("@ = NewDouble( DBL_PTR(@)->dbl );\n", {obj, obj} )
+	c_stmt0("}\n")
 	c_stmt("DBL_PTR(@)->cleanup = (cleanup_ptr)_1;\n", obj )
 end procedure
 
 procedure delete_sequence( symtab_index obj )
 	c_stmt("if(SEQ_PTR(@)->cleanup != 0 ){\n", obj )
 		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
+	c_stmt0("}\n")
+	c_stmt("else if( !UNIQUE(SEQ_PTR(@)) ){\n", obj )
+		c_stmt("@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {obj, obj} )
 	c_stmt0("}\n")
 	c_stmt("SEQ_PTR(@)->cleanup = (cleanup_ptr)_1;\n", obj )
 end procedure
