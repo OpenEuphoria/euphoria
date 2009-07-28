@@ -1958,11 +1958,18 @@ procedure opTYPE_CHECK()
 	end if
 	pc += 1
 end procedure
-			
+
+procedure kill_temp( symtab_index sym )
+	if sym_mode( sym ) = M_TEMP then
+		val[sym] = NOVALUE
+	end if
+end procedure
+
 procedure opIS_AN_INTEGER()
 	a = Code[pc+1]
 	target = Code[pc+2]
 	val[target] = integer(val[a])
+	kill_temp( a )
 	pc += 3
 end procedure
 
@@ -1970,6 +1977,7 @@ procedure opIS_AN_ATOM()
 	a = Code[pc+1]
 	target = Code[pc+2]
 	val[target] = atom(val[a])
+	kill_temp( a )
 	pc += 3
 end procedure
 				
@@ -1977,6 +1985,7 @@ procedure opIS_A_SEQUENCE()
 	a = Code[pc+1]
 	target = Code[pc+2]
 	val[target] = sequence(val[a])
+	kill_temp( a )
 	pc += 3
 end procedure
 			
@@ -1984,6 +1993,7 @@ procedure opIS_AN_OBJECT()
 	a = Code[pc+1]
 	target = Code[pc+2]
 	val[target] = not equal(val[a], NOVALUE)
+	kill_temp( a )
 	pc += 3
 end procedure
 				
@@ -3444,6 +3454,10 @@ procedure opREPLACE()
  	d = Code[pc+4]
  	target = Code[pc+5]
  	val[target] = replace(val[a],val[b],val[c],val[d])
+	kill_temp( a )
+	kill_temp( b )
+	kill_temp( c )
+	kill_temp( d )
  	pc += 6
 end procedure
 
