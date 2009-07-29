@@ -1664,19 +1664,64 @@ export function StringToken(sequence pDelims = "")
 
 	pDelims &= {' ', '\t', '\n', '\r', END_OF_FILE_CHAR}
 	gtext = ""
-	while not find(ch,  pDelims) do
+	while not find(ch,  pDelims) label "top" do
+		if ch = '-' then
+			ch = getch()
+			if ch = '-' then
+				while not find(ch, {'\n', END_OF_FILE_CHAR}) do
+					ch = getch()
+				end while
+				exit
+			else
+				ungetch()
+			end if
+		elsif ch = '/' then
+			ch = getch()
+			if ch = '*' then
+				integer level = 1
+				while level > 0 do
+					ch = getch()
+					if ch = '/' then
+						ch = getch()
+						if ch = '*' then
+							level += 1
+						else
+							ungetch()
+						end if
+					elsif ch = '*' then
+						ch = getch()
+						if ch = '/' then
+							level -= 1
+						else
+							ungetch()
+						end if
+					elsif ch = '\n' then
+						read_line()
+					elsif ch = END_OF_FILE_CHAR then
+						ungetch()
+						exit
+					end if
+				end while
+				ch = getch()
+				if length(gtext) = 0 then
+					while ch = ' ' or ch = '\t' do
+						ch = getch()
+					end while
+					continue "top"
+				end if
+				exit
+
+			else
+				ungetch()
+				ch = '/'
+			end if
+		end if
 		gtext &= ch
 		ch = getch()
 	end while
-	ungetch()
-	m = match("--", gtext)
-	if m then
-		gtext = gtext[1..m-1]
-		if find(ch, pDelims[1..$-3]) then
-			-- Not at end of current line, so eat the rest of the line.
-			read_line()
-		end if
-	end if
+	
+	ungetch() -- put back end-word token.
+	
 	return gtext
 end function
 

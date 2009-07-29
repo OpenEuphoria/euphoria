@@ -2659,6 +2659,7 @@ procedure Ifdef_statement()
 	sequence option
 	integer matched = 0, has_matched = 0,  in_matched = 0, dead_ifdef = 0, in_elsedef = 0
 	token tok
+	sequence keyw ="ifdef"
 
 	live_ifdef += 1
 	ifdef_lineno &= line_number
@@ -2680,49 +2681,53 @@ procedure Ifdef_statement()
 				option = StringToken()
 				if equal(option, "then") then
 					if at_start = 1 then
-						CompileErr("ifdef is missing defined word")
+						CompileErr(keyw & " is missing defined word before 'then'")
 					elsif conjunction = 0 then
 						if negate = 0 then
 							exit "deflist"
 						else
-							CompileErr("ifdef 'then' follows 'not'")
+							CompileErr(keyw & " 'then' follows 'not'")
 						end if
 					else
-						CompileErr("ifdef 'then' follows '" & prev_conj & "'")
+						CompileErr(keyw & " 'then' follows '" & prev_conj & "'")
 					end if
 				elsif equal(option, "not") then
 					if negate = 0 then
 						negate = 1
 						continue "deflist"
 					else
-						CompileErr("ifdef duplicate 'not'")
+						CompileErr(keyw & " duplicate 'not'")
 					end if
 				elsif equal(option, "and") then
 					if at_start = 1 then
-						CompileErr("ifdef is missing defined word")
+						CompileErr(keyw & " is missing defined word before 'and'")
 					elsif conjunction = 0 then
 						conjunction = 1
 						prev_conj = option
 						continue "deflist"
 					else
-						CompileErr("ifdef 'and' follows '" & prev_conj & "'")
+						CompileErr(keyw & " 'and' follows '" & prev_conj & "'")
 					end if
 				elsif equal(option, "or") then
 					if at_start = 1 then
-						CompileErr("ifdef is missing defined word")
+						CompileErr(keyw & " is missing defined word before 'or'")
 					elsif conjunction = 0 then
 						conjunction = 2
 						prev_conj = option
 						continue "deflist"
 					else
-						CompileErr("ifdef 'or' follows '" & prev_conj & "'")
+						CompileErr(keyw & " 'or' follows '" & prev_conj & "'")
 					end if
 				elsif length(option) = 0 then
-					CompileErr("end of file reached while processing ifdef")
+					if at_start = 1 then
+						CompileErr("no 'word' was found following " & keyw)
+					else
+						CompileErr("expecting possibly 'then' not end of line")
+					end if
 				elsif not at_start and length(prev_conj) = 0 then
-					CompileErr("ifdef not understood")
+					CompileErr(keyw & " not understood")
 				elsif t_identifier(option) = 0 then
-					CompileErr("ifdef word must be an identifier")
+					CompileErr(keyw & " word must be an identifier")
 				else
 					at_start = 0
 				end if
@@ -2755,8 +2760,11 @@ procedure Ifdef_statement()
 
 		-- Read to END IFDEF or to the next ELSIFDEF which sets the loop
 		-- up for another comparison.
+		integer gotword = 0
+		integer gotthen = 0
 		No_new_entry = not matched
 		has_matched = has_matched or matched
+		keyw = "elsifdef"
 		while 1 do
 			tok = next_token()
 			if tok[T_ID] = END_OF_FILE then
@@ -2777,11 +2785,37 @@ procedure Ifdef_statement()
 				if has_matched then
 					in_matched = 0
 					No_new_entry = 1
+					gotword = 0
+					gotthen = 0
+					while length(option) > 0 with entry do
+						if equal(option, "then") then
+							gotthen = 1
+							exit
+						else
+							gotword = 1
+						end if
+					entry
+						option = StringToken()
+					end while
+					if gotword = 0 then
+						CompileErr("Expecting a 'word' to follow 'elsifdef'")
+					end if
+					if gotthen = 0 then
+						CompileErr("Expecting 'then' on 'elsifdef' line")
+					end if
 					read_line()
 				else
 					exit
 				end if
 			elsif tok[T_ID] = ELSEDEF then
+				gotword = line_number
+				option = StringToken()
+				if length(option) > 0 then
+					if line_number = gotword then
+						CompileErr("Not expecting anything on same line as 'elsdef'")
+					end if
+					bp -= length(option)
+				end if
 				if not dead_ifdef then
 					if has_matched then
 						in_matched = 0
@@ -4009,8 +4043,12 @@ procedure SetWith(integer on_off)
 		end if
 	elsif equal(option, "define") then
 		option = StringToken()
-		if not t_identifier(option) then
+		if length(option) = 0 then
+			CompileErr("Expecting to find a word to define but reached end of line first.")
+			
+		elsif not t_identifier(option) then
 			CompileErr("defined word must only have alphanumerics and underscore")
+			
 		end if
 		if on_off = 0 then
 			idx = find(option, OpDefines)
