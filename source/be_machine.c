@@ -1482,17 +1482,17 @@ void NewConfig(int raise_console)
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	if (raise_console) {
 		// properly initializes the console when running in eui mode
-	show_console();
+		show_console();
 
-	GetConsoleScreenBufferInfo(console_output, &info);
-//	line_max = info.dwMaximumWindowSize.Y;
-//	col_max = info.dwMaximumWindowSize.X;
-	line_max = info.dwSize.Y;
-	col_max = info.dwSize.X;
+		GetConsoleScreenBufferInfo(console_output, &info);
+	//	line_max = info.dwMaximumWindowSize.Y;
+	//	col_max = info.dwMaximumWindowSize.X;
+		line_max = info.dwSize.Y;
+		col_max = info.dwSize.X;
 	} else {
 		// don't care on startup - this will be initialized later.
-	line_max = 25;
-	col_max = 80;
+		line_max = 25;
+		col_max = 80;
 	}
 
 	config.numtextrows = line_max;

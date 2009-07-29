@@ -25,6 +25,7 @@
 #include <string.h>
 #ifdef EWINDOWS
 #include <windows.h>
+extern HANDLE console_output;
 #endif
 
 #include "alldefs.h"
@@ -39,11 +40,14 @@
 #define MAX_VAR_LINES 7
 #define MAX_VARS_PER_LINE 6
 #define MAX_TRACEBACK 100 /* maximum number of levels of traceback to show */
+
 #ifdef EUNIX
 #define FLIP_TO_MAIN 265  /* F1 */
 #define FLIP_TO_DEBUG 266 /* F2 */
 #define DOWN_ARROW 258
+
 #else
+
 #define FLIP_TO_MAIN 315  /* F1 */
 #define FLIP_TO_DEBUG 316 /* F2 */
 #define DOWN_ARROW 336
@@ -77,8 +81,6 @@ extern unsigned current_fg_color, current_bg_color;
 #endif
 extern int bound;
 extern int print_chars;
-extern int line_max;
-extern int col_max;
 extern int stack_size;
 extern int screen_line, screen_col;
 extern int screen_lin_addr;
@@ -164,10 +166,6 @@ static long trace_line;      /* current traced line */
 
 static long highlight_line;     /* current line on debug screen */
 
-static int num_trace_lines;    /* number of lines for statements */
-static int var_lines;  /* number of lines for variables */
-static int vars_per_line;  /* number of var slots per line */
-static int display_size;   /* number of slots for variables */
 static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
 								/* list of display slots */
 static long tstamp = 1; /* time stamp for deleting vars on display */
@@ -293,9 +291,11 @@ static int OffScreen(long line_num)
 /* return TRUE if line_num is off (or almost off) the TRACE window */
 {
 	long new_highlight_line;
+	struct EuViewPort vp;
 
+	GetViewPort( &vp );
 	new_highlight_line = (long)highlight_line + line_num - trace_line;    
-	if (new_highlight_line >= num_trace_lines + BASE_TRACE_LINE - 1 || 
+	if (new_highlight_line >= vp.num_trace_lines + BASE_TRACE_LINE - 1 || 
 		new_highlight_line <= BASE_TRACE_LINE)
 		return TRUE;
 	else
@@ -357,6 +357,7 @@ static void Refresh(long line_num, int vars_too)
 {
 	long first_line;
 	long i;
+	struct EuViewPort vp;
 	
 #ifdef EDOS
 	short int r1,c1,r2,c2;
@@ -364,6 +365,8 @@ static void Refresh(long line_num, int vars_too)
 #ifdef EWINDOWS
 	int top_attrib, bottom_attrib;
 #endif    
+	GetViewPort( &vp );
+	
 	/* blank trace part of screen only */
 	set_text_color(15);
 	set_bk_color(_WHITE);     
@@ -376,9 +379,9 @@ static void Refresh(long line_num, int vars_too)
 		top_attrib = 0+7;
 		bottom_attrib = 0+7;
 	}
-	EClearLines(2, 1+num_trace_lines, col_max, top_attrib);
+	EClearLines(2, 1 + vp.num_trace_lines, vp.columns, top_attrib);
 	if (vars_too)
-		EClearLines(2+num_trace_lines, line_max, col_max, bottom_attrib); 
+		EClearLines(2 + vp.num_trace_lines, vp.lines, vp.columns, bottom_attrib); 
 #endif
 
 #if defined(EUNIX) || defined(EDJGPP)
@@ -386,15 +389,13 @@ static void Refresh(long line_num, int vars_too)
 		ClearScreen();
 	}
 	else {
-		//_settextwindow(2, c1, 1+num_trace_lines, c2);
-		blank_lines(1, num_trace_lines);
+		blank_lines(1, vp.num_trace_lines);
 	
 		if (vars_too) {
 			if (TEXT_MODE)
 				set_bk_color(_BLUE);
-			//_settextwindow(2+num_trace_lines, c1, r2, c2);
-			blank_lines(1+num_trace_lines, 
-						config.numtextrows-num_trace_lines-1);
+			blank_lines(1 + vp.num_trace_lines, 
+						config.numtextrows - vp.num_trace_lines - 1);
 		}
 	}
 #endif
@@ -405,30 +406,30 @@ static void Refresh(long line_num, int vars_too)
 		ClearScreen();
 	}
 	else {
-		_settextwindow(2, c1, 1+num_trace_lines, c2);
+		_settextwindow(2, c1, 1 + vp.num_trace_lines, c2);
 
 		_clearscreen(_GWINDOW);
 		
 		if (vars_too) {
 			if (TEXT_MODE)
 				set_bk_color(_BLUE);
-			_settextwindow(2+num_trace_lines, c1, r2, c2);
+			_settextwindow(2 + vp.num_trace_lines, c1, r2, c2);
 			_clearscreen(_GWINDOW);
 		}
 	}
 	_settextwindow(r1, c1, r2, c2);
 #endif    
 	if (vars_too) {
-		for (i = 0; i < display_size; i++)
+		for (i = 0; i < vp.display_size; i++)
 			display_list[i].value_on_screen = NOVALUE - 1;
 	}           
-	if (line_num < num_trace_lines)
+	if (line_num < vp.num_trace_lines)
 		first_line = 1;
-	else if (line_num <= gline_number - num_trace_lines + 1) {
-		first_line = line_num - (num_trace_lines / 2);
+	else if (line_num <= gline_number - vp.num_trace_lines + 1) {
+		first_line = line_num - (vp.num_trace_lines / 2);
 	}
 	else
-		first_line = gline_number - num_trace_lines + 1;
+		first_line = gline_number - vp.num_trace_lines + 1;
 
 	if (vars_too || slist[line_num].file_no != prev_file_no) {
 		SetPosition(1, 1);
@@ -442,7 +443,7 @@ static void Refresh(long line_num, int vars_too)
 		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		buffer_screen();
 		screen_output(NULL, TempBuff);
-		screen_blank(NULL, col_max-40);
+		screen_blank(NULL, vp.columns - 40);
 		screen_output(NULL, " \n");
 		flush_screen();
 		prev_file_no = slist[line_num].file_no;
@@ -450,7 +451,7 @@ static void Refresh(long line_num, int vars_too)
 	else
 		SetPosition(2, 1);
 		
-	for (i = first_line; i <= gline_number && i < first_line + num_trace_lines;
+	for (i = first_line; i <= gline_number && i < first_line + vp.num_trace_lines;
 		 i++) {    
 		if (slist[i].options & OP_TRACE) 
 			DisplayLine(i, i == line_num);
@@ -592,10 +593,13 @@ static void SetVarPosition(int slot, int offset)
 /* set cursor position to start of variable display slot */
 {
 	int var_line, var_pos;
+	struct EuViewPort vp;
 
-	var_line = slot / vars_per_line;
-	var_pos = (slot - var_line * vars_per_line) * VAR_WIDTH; 
-	SetPosition(num_trace_lines + BASE_TRACE_LINE + NUM_PROMPT_LINES 
+	GetViewPort( &vp );
+	
+	var_line = slot / vp.vars_per_line;
+	var_pos = (slot - var_line * vp.vars_per_line) * VAR_WIDTH; 
+	SetPosition(vp.num_trace_lines + BASE_TRACE_LINE + NUM_PROMPT_LINES 
 				+ var_line + 1, var_pos + 1 + offset);
 }
 
@@ -618,17 +622,20 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	register int i, already_there;
 	int col, found, inc, len_required;
 	object val, screen_val;
+	struct EuViewPort vp;
+	
 #define DV_len (40)
 	char val_string[DV_len];
 	int add_char, iv;
 		
+	GetViewPort( &vp );
 	add_char = 0;
 	if (TEXT_MODE)
 		set_bk_color(_BLUE);
 
 	val = s_ptr->obj;
 	if (IS_SEQUENCE(val)) {
-		inc = vars_per_line;
+		inc = vp.vars_per_line;
 	}
 	else {
 		if (val == NOVALUE) 
@@ -648,12 +655,12 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		else if (len_required < 2 * VAR_WIDTH)
 			inc = 2;
 		else
-			inc = vars_per_line; /* use whole line, possibly run off the end */
+			inc = vp.vars_per_line; /* use whole line, possibly run off the end */
 	}
 
 	/* is var already on display ? */
 	already_there = FALSE;
-	for (i = 0; i < display_size; i += inc) {
+	for (i = 0; i < vp.display_size; i += inc) {
 		if (display_list[i].sym == s_ptr) { 
 			found = i;
 			already_there = TRUE;
@@ -668,7 +675,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		}
 		else {
 			if (IS_ATOM(val)) {
-				if (found < display_size-1 && 
+				if (found < vp.display_size-1 && 
 					display_list[found+1].sym == s_ptr) {
 					// we might be downsizing this var in-place
 					EraseSymbol(s_ptr);
@@ -679,7 +686,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	else {
 		/* not there - look for the best slot (oldest time stamp) */
 		found = 0;
-		for (i = inc; i < display_size; i += inc) {
+		for (i = inc; i < vp.display_size; i += inc) {
 			if (display_list[i].time_stamp < display_list[found].time_stamp) {
 				found = i;
 			}
@@ -713,9 +720,9 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	display_list[found].value_on_screen = val; 
 	
 	if (IS_SEQUENCE(val)) {
-		Print(NULL, val, 1, vars_per_line*VAR_WIDTH-3, 
+		Print(NULL, val, 1, (vp.vars_per_line * VAR_WIDTH) - 3, 
 			  strlen(s_ptr->name)+1, FALSE);
-		screen_blank(NULL, col_max);
+		screen_blank(NULL, vp.columns);
 		if (user_requested && print_chars == -1) {
 			// not enough room to show whole sequence
 			flush_screen();
@@ -725,7 +732,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #else
 #ifdef EUNIX
 			screen_copy(screen_image, alt_image_debug);
-			blank_lines(0, line_max-1);
+			blank_lines(0, vp.lines - 1);
 #else
 			SaveDebugImage();  // should work for DOS, 
 							   // Linux will need a new window like Windows
@@ -736,7 +743,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
 			TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 			screen_output(NULL, TempBuff);
-			Print(NULL, val, line_max-5, vars_per_line*VAR_WIDTH-3, 
+			Print(NULL, val, vp.lines - 5, (vp.vars_per_line * VAR_WIDTH) - 3, 
 				  strlen(s_ptr->name), TRUE);
 			screen_output(NULL, "\n\n* Press Enter to resume trace\n");
 			if (print_chars != -1)
@@ -770,6 +777,9 @@ void UpdateGlobals()
 {
 	symtab_ptr dsym, proc, sym;
 	int i;
+	struct EuViewPort vp;
+	
+	GetViewPort( &vp );
 	
 	if (TEXT_MODE)
 		set_bk_color(_BLUE);
@@ -777,7 +787,7 @@ void UpdateGlobals()
 	if (proc == NULL)
 		LocateFail();
 	sym = proc->next;
-	for (i = 0; i < display_size; i++) {
+	for (i = 0; i < vp.display_size; i++) {
 		dsym = display_list[i].sym;
 		if (dsym == NULL) {
 			/* fill empty slot with a private. not really optimal but ok */
@@ -791,7 +801,7 @@ void UpdateGlobals()
 			/* skip redundant slots */
 			do {
 				i++;
-			} while (i < display_size && display_list[i].sym == dsym);
+			} while (i < vp.display_size && display_list[i].sym == dsym);
 			i--;
 			/* display up-to-date value */
 			DisplayVar(dsym, FALSE);
@@ -801,18 +811,24 @@ void UpdateGlobals()
 	}
 }
 
+#ifdef EDJGPP
+void ShowDebug()
+{
+	return;    // trace screen not implemented yet for DJGPP
+}
+#endif
+
 void ShowDebug()
 /* switch to debug screen from main screen */
 {
 	int i;
 	long size;
+	struct EuViewPort vp;
 
 	if (current_screen == DEBUG_SCREEN)
 		return;
-
-#ifdef EDJGPP
-	return;    // trace screen not implemented yet for DJGPP
-#endif
+	
+	GetViewPort( &vp );
 	
 	main_screen_col = screen_col;
 	main_screen_line = screen_line;
@@ -860,19 +876,10 @@ void ShowDebug()
 	}
 #endif
 
-	var_lines = (line_max - BASE_TRACE_LINE) / 6;
-	if (var_lines > MAX_VAR_LINES)
-		var_lines = MAX_VAR_LINES;
-	vars_per_line = col_max / VAR_WIDTH;
-	if (vars_per_line > MAX_VARS_PER_LINE)
-		vars_per_line = MAX_VARS_PER_LINE;
-	display_size = var_lines * vars_per_line;
-	num_trace_lines = line_max - var_lines - BASE_TRACE_LINE - NUM_PROMPT_LINES;
-
 	Wrap(ATOM_0);
 
 	if (first_debug) {
-		for (i = 0; i < display_size; i++) 
+		for (i = 0; i < vp.display_size; i++) 
 			ClearSlot(i);
 		init_class();
 #ifndef EUNIX
@@ -1065,15 +1072,17 @@ void EraseSymbol(symtab_ptr sym)
 	int i;
 	symtab_ptr dsym;
 	int prev;
+	struct EuViewPort vp;
 	
+	GetViewPort( &vp );
 	prev = -1;
 	if (TEXT_MODE)
 		set_bk_color(_BLUE);
 	/* clear out any slots with same name */
-	for (i = 0; i < display_size; i++) {
+	for (i = 0; i < vp.display_size; i++) {
 		dsym = display_list[i].sym;
 		if (dsym != NULL && strcmp(dsym->name, sym->name) == 0) {
-			if (i != (prev + 1) || (i % vars_per_line) == 0) {
+			if (i != (prev + 1) || (i % vp.vars_per_line) == 0) {
 				// can't build on previous
 				flush_screen();
 				SetVarPosition(i, 0);
@@ -1094,11 +1103,14 @@ static void ShowName()
 	char name[80];
 	symtab_ptr name_ptr;
 	int prompt, i, j, name_len;
+	struct EuViewPort vp;
 	
+	GetViewPort( &vp );
+
 	set_text_color(0);
 	if (TEXT_MODE)
 		set_bk_color(_YELLOW);
-	prompt = num_trace_lines + BASE_TRACE_LINE + 1;
+	prompt = vp.num_trace_lines + BASE_TRACE_LINE + 1;
 	SetPosition(prompt, 1);
 	buffer_screen();
 #ifdef EWINDOWS
@@ -1106,7 +1118,7 @@ static void ShowName()
 #else
 	screen_output(NULL, "variable name?");
 #endif  
-	screen_blank(NULL, col_max-14);
+	screen_blank(NULL, vp.columns - 14);
 	flush_screen();
 	
 	SetPosition(prompt, 16); 
@@ -1127,7 +1139,7 @@ static void ShowName()
 			set_bk_color(_BLUE);
 		SetPosition(prompt, 1);
 		buffer_screen();
-		screen_blank(NULL, col_max);
+		screen_blank(NULL, vp.columns);
 		flush_screen();
 		return;
 	}
@@ -1669,4 +1681,33 @@ signed int vsnprintf(char * buf, size_t size, char * fmt, va_list list ) {
 	return vsprintf(buf,fmt,list);	
 }
 #endif
+
+extern int line_max;
+extern int col_max;
+
+void GetViewPort(struct EuViewPort *vp)
+{
+	int l_var_lines;
+#ifdef EWINDOWS
+	CONSOLE_SCREEN_BUFFER_INFO info;
+	
+	GetConsoleScreenBufferInfo(console_output, &info);
+	
+	vp->lines    = info.dwSize.Y;
+	vp->columns  = info.dwSize.X;
+
+#else
+	vp->lines    = line_max;
+	vp->columns  = col_max;
+
+#endif
+	l_var_lines = (vp->lines - BASE_TRACE_LINE) / 6;
+	if (l_var_lines > MAX_VAR_LINES)
+		l_var_lines = MAX_VAR_LINES;
+	vp->vars_per_line = vp->columns / VAR_WIDTH;
+	if (vp->vars_per_line > MAX_VARS_PER_LINE)
+		vp->vars_per_line = MAX_VARS_PER_LINE;
+	vp->display_size = l_var_lines * vp->vars_per_line;
+	vp->num_trace_lines = vp->lines - l_var_lines - BASE_TRACE_LINE - NUM_PROMPT_LINES;
+}
 

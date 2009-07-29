@@ -393,11 +393,6 @@ static void trace_command(object x)
 	}
 	else 
 		RTFatal("argument to trace() must be an atom");
-#ifdef EWINDOWS
-		if (i != 3) {
-			show_console();
-		}
-#endif
 
 #ifndef BACKEND
 		if (i == 0) { 
@@ -409,10 +404,16 @@ static void trace_command(object x)
 		else if (i == 1) {
 			TraceOn = trace_enabled;
 			color_trace = TRUE;
+#ifdef EWINDOWS
+			show_console();
+#endif
 		}
 		else if (i == 2) {
 			TraceOn = trace_enabled;
 			color_trace = FALSE;
+#ifdef EWINDOWS
+			show_console();
+#endif
 		}
 		else if (i == 3) {
 			file_trace = TRUE;

@@ -195,6 +195,8 @@ struct rccoord {
 #define malloc(n) HeapAlloc((void *)default_heap, 0, n)
 #define free(p) HeapFree((void *)default_heap, 0, p)
 #define realloc(p, n) HeapReAlloc((void *)default_heap, 0, p, n)
+
+
 #endif
 
 extern int is_batch;
@@ -218,5 +220,14 @@ extern int is_batch;
 #define __cdecl
 #endif
  */
+
+struct EuViewPort
+{
+	int columns;			/* Number of columns visible */
+	int lines;				/* Number if lines visible */
+	int num_trace_lines;    /* number of lines available for statements */
+	int vars_per_line;  	/* number of variables slots per line */
+	int display_size;   	/* number of slots for variables */
+};
 
 #endif // H_GLOBAL
