@@ -675,19 +675,15 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		if ax or is_temp( param ) then
 			-- This param is left alone in the routine, but we don't
 			-- want the parser to re-use it as another temp
-			if not ax then
-				TempKeep( param )
-			else
-				varnum += 1
-				symtab_index var = new_inline_var( s )
-				prolog &= {ASSIGN, param, var}
-				if not int_sym then
-					int_sym = NewIntSym( 0 )
-				end if
-				
-				inline_start += 3
-				passed_params[p] = var
+			varnum += 1
+			symtab_index var = new_inline_var( s )
+			prolog &= {ASSIGN, param, var}
+			if not int_sym then
+				int_sym = NewIntSym( 0 )
 			end if
+			
+			inline_start += 3
+			passed_params[p] = var
 		end if
 		s = SymTab[s][S_NEXT]
 		
