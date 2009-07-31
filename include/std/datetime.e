@@ -82,7 +82,6 @@ end function
 end ifdef
 
 constant
-	XLEAP = 1,
 	Gregorian_Reformation = 1752,
 	Gregorian_Reformation00 = 1700,
 	DaysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
@@ -106,10 +105,8 @@ function isLeap(integer year) -- returns integer (0 or 1)
 
 		if year <= Gregorian_Reformation then
 				return 1 -- ly[1] can't possibly be 0 here so set shortcut as '1'.
-		elsif XLEAP then
+		else
 				return ly[1] - ly[2] + ly[3] - ly[4] + ly[5]
-		else -- Standard Gregorian Calendar
-				return ly[1] - ly[2] + ly[3]
 		end if
 end function
 
@@ -181,11 +178,11 @@ function julianDay(object ymd) -- returns an integer
 		- 11 * (year >= Gregorian_Reformation)
 	)
 
-	if XLEAP then
-		j += (
-			- (year >=  3200) * floor(year/ 3200)
-			+ (year >= 80000) * floor(year/80000)
-		)
+	if year >= 3200 then
+		j -= floor(year/ 3200)
+		if year >= 80000 then
+			j += floor(year/80000)
+		end if
 	end if
 
 	return j
@@ -796,6 +793,7 @@ end function
 -- Parameters:
 --   # ##d##: a datetime which is to be printed out
 --   # ##pattern##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
+--   The default is "%Y-%m-%d %H:%M:%S".
 --
 -- Returns:
 --  A string, with the date ##d## formatted according to the specification in ##pattern##.
@@ -844,7 +842,7 @@ end function
 -- See Also:
 --     [[:to_unix]], [[:parse]]
 
-public function format(datetime d, wstring pattern)
+public function format(datetime d, wstring pattern = "%Y-%m-%d %H:%M:%S")
 	integer in_fmt, ch, tmp
 	sequence res
 
