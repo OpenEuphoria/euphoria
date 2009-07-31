@@ -1,4 +1,4 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Scanner (low-level parser)
 

@@ -1,4 +1,4 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Routines to emit the IL opcode stream
 include std/os.e

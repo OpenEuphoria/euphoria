@@ -1,4 +1,4 @@
--- (c) Copyright Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 
 warning("file.e is deprecated, please see io.e, filesys.e and console.e")

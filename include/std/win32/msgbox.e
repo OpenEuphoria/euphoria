@@ -1,10 +1,11 @@
--- (c) Copyright Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 --****
 -- == Windows Message Box
 --
 -- <<LEVELTOC depth=2>>
 --
+namespace msgbox
 
 include std/dll.e
 include std/machine.e

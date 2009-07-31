@@ -1,5 +1,8 @@
--- (c) Copyright Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
+
+namespace mmap
+
 ifdef not UNIX then
 	crash("Only supported on Unix systems!")
 end ifdef

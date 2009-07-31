@@ -1,4 +1,4 @@
--- (c) Copyright Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 namespace localconv
 
