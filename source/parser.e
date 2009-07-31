@@ -127,7 +127,7 @@ procedure CheckForUndefinedGotoLabels()
 			gline_number = goto_line[i][1] -- tell compiler the correct line number
 			ThisLine = goto_line[i][2] -- tell compiler the correct line number
 			bp = length(ThisLine)
-				CompileErr("Unknown label "&goto_delay[i])
+				CompileErr("Unknown label '%s'", {goto_delay[i]})
 		end if
 	end for
 end procedure
@@ -525,7 +525,7 @@ function read_recorded_token(integer n)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
 	        if p = 0 then
-	        	CompileErr(sprintf("Variable %s has not been declared",{Recorded[n]}))
+	        	CompileErr("Variable %s has not been declared",{Recorded[n]})
 	        end if
 		    t = {SymTab[p][S_TOKEN], p}
 		end if
@@ -544,7 +544,7 @@ function read_recorded_token(integer n)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
 	        if p = 0 then
-	        	CompileErr(sprintf("Variable %s has not been declared",{Recorded[n]}))
+	        	CompileErr("Variable %s has not been declared",{Recorded[n]})
 	        end if
 		    t = {SymTab[p][S_TOKEN], p}
 		end if
@@ -644,14 +644,12 @@ procedure tok_match(integer tok, integer prevtok = 0)
 		expected = LexName(tok)
 		actual = LexName(t[T_ID])
 		if prevtok = 0 then
-			CompileErr(sprintf(
-				   "Syntax error - expected to see possibly %s, not %s",
-				   {expected, actual}))
+			CompileErr("Syntax error - expected to see possibly %s, not %s",
+				   {expected, actual})
 		else
 			prevname = LexName(prevtok)
-			CompileErr(sprintf(
-				   "Syntax error - expected to see %s after %s, not %s",
-				   {expected, prevname, actual}))
+			CompileErr("Syntax error - expected to see %s after %s, not %s",
+				   {expected, prevname, actual})
 		end if
 	end if
 end procedure
@@ -674,12 +672,11 @@ procedure UndefinedVar(symtab_index s)
 	sequence fname
 
 	if SymTab[s][S_SCOPE] = SC_UNDEFINED then
-		CompileErr(sprintf("'%s' has not been declared", {SymTab[s][S_NAME]}))
+		CompileErr("'%s' has not been declared", {SymTab[s][S_NAME]})
 
 	elsif SymTab[s][S_SCOPE] = SC_MULTIPLY_DEFINED then
 		rname = SymTab[s][S_NAME]
-		errmsg = sprintf("A namespace qualifier is needed to resolve '%s'\nbecause '%s' is declared as a global/public symbol in:\n",
-						 {rname, rname})
+		errmsg = ""
 		-- extended error message
 		for i = 1 to length(dup_globals) do
 			dup = dup_globals[i]
@@ -692,7 +689,8 @@ procedure UndefinedVar(symtab_index s)
 			
 		end for
 
-		CompileErr(errmsg)
+		CompileErr("A namespace qualifier is needed to resolve '%s'\nbecause '%s' is declared as a global/public symbol in:\n%s",
+						 {rname, rname, errmsg})
 
 	elsif length(symbol_resolution_warning) then
 		Warning( symbol_resolution_warning[1], resolution_warning_flag, symbol_resolution_warning[2])
@@ -708,9 +706,9 @@ procedure WrongNumberArgs(symtab_index subsym, sequence only)
 	else
 		plural = "s"
 	end if
-	CompileErr(sprintf("'%s' takes %s%d argument%s",
+	CompileErr("'%s' takes %s%d argument%s",
 			   {SymTab[subsym][S_NAME], only,
-				SymTab[subsym][S_NUM_ARGS], plural}))
+				SymTab[subsym][S_NUM_ARGS], plural})
 end procedure
 
 procedure MissingArgs(symtab_index subsym)
@@ -768,8 +766,8 @@ procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_priv
 	private_sym  = fwd_private_sym
 	
 	if atom(SymTab[param][S_CODE]) then  -- but no default set
-		CompileErr(sprintf("Argument %d of %s (%s) is defaulted, but has no default value",
-			{arg, SymTab[subsym][S_NAME], SymTab[param][S_NAME]}))
+		CompileErr("Argument %d of %s (%s) is defaulted, but has no default value",
+			{arg, SymTab[subsym][S_NAME], SymTab[param][S_NAME]})
 	end if
 	
 	use_private_list = 1
@@ -828,7 +826,7 @@ procedure ParseArgs(symtab_index subsym)
 			end if
 			
 			if atom(var_code) then  -- but no default set
-				CompileErr(sprintf("Argument %d is defaulted, but has no default value",i))
+				CompileErr("Argument %d is defaulted, but has no default value",i)
 			end if
 			
 			use_private_list = 1
@@ -906,7 +904,7 @@ procedure ParseArgs(symtab_index subsym)
 								private_sym &= Top()
 							end if
 						else -- just not enough args
-							CompileErr(sprintf("Argument %d is defaulted, but has no default value", on_arg))
+							CompileErr("Argument %d is defaulted, but has no default value", on_arg)
 						end if
 		  		    end while
 					-- all missing args had default values
@@ -1247,9 +1245,8 @@ procedure Factor()
 			Function_call( tok )
 									
 		case else
-			CompileErr(sprintf(
-					   "Syntax error - expected to see an expression, not %s",
-					   {LexName(id)}))
+			CompileErr("Syntax error - expected to see an expression, not %s",
+					   {LexName(id)})
 	end switch
 end procedure
 
@@ -1564,9 +1561,9 @@ procedure Assignment(token left_var)
 	if not find(assign_op, ASSIGN_OPS) then
 		sequence lname = SymTab[left_var[T_SYM]][S_NAME]
 		if assign_op = COLON then
-			CompileErr(sprintf("Syntax error - Unknown namespace '%s' used", {lname}))
+			CompileErr("Syntax error - Unknown namespace '%s' used", {lname})
 		else
-			CompileErr(sprintf("expected to see an assignment after '%s', such as =, +=, -=, *=, /= or &=", {lname}))
+			CompileErr("expected to see an assignment after '%s', such as =, +=, -=, *=, /= or &=", {lname})
 		end if
 	end if
 
@@ -2277,7 +2274,7 @@ procedure Case_statement()
 		end if
 		
 		if fwd < 0 then
-			CompileErr( sprintf("found %s but expected 'else', an atom, string, constant or enum", {find_category(tok[T_ID])}) )
+			CompileErr( "found %s but expected 'else', an atom, string, constant or enum", {find_category(tok[T_ID])})
 		end if
 		
 		if tok[T_ID] = ELSE then
@@ -2321,7 +2318,7 @@ procedure Case_statement()
 			end if
 			
 		elsif tok[T_ID] != COMMA then
-			CompileErr(sprintf("expected 'then' or ',', not %s",{LexName(tok[T_ID])}) )
+			CompileErr("expected 'then' or ',', not %s",{LexName(tok[T_ID])})
 
 		end if
 	end while
@@ -2681,53 +2678,53 @@ procedure Ifdef_statement()
 				option = StringToken()
 				if equal(option, "then") then
 					if at_start = 1 then
-						CompileErr(keyw & " is missing defined word before 'then'")
+						CompileErr("%s is missing defined word before 'then'", {keyw})
 					elsif conjunction = 0 then
 						if negate = 0 then
 							exit "deflist"
 						else
-							CompileErr(keyw & " 'then' follows 'not'")
+							CompileErr("%s 'then' follows 'not'", {keyw})
 						end if
 					else
-						CompileErr(keyw & " 'then' follows '" & prev_conj & "'")
+						CompileErr("%s 'then' follows '%s'", {keyw, prev_conj})
 					end if
 				elsif equal(option, "not") then
 					if negate = 0 then
 						negate = 1
 						continue "deflist"
 					else
-						CompileErr(keyw & " duplicate 'not'")
+						CompileErr("%s duplicate 'not'", {keyw})
 					end if
 				elsif equal(option, "and") then
 					if at_start = 1 then
-						CompileErr(keyw & " is missing defined word before 'and'")
+						CompileErr("%s is missing defined word before 'and'", {keyw})
 					elsif conjunction = 0 then
 						conjunction = 1
 						prev_conj = option
 						continue "deflist"
 					else
-						CompileErr(keyw & " 'and' follows '" & prev_conj & "'")
+						CompileErr("%s 'and' follows '%s'",{keyw,prev_conj})
 					end if
 				elsif equal(option, "or") then
 					if at_start = 1 then
-						CompileErr(keyw & " is missing defined word before 'or'")
+						CompileErr("%s is missing defined word before 'or'", {keyw})
 					elsif conjunction = 0 then
 						conjunction = 2
 						prev_conj = option
 						continue "deflist"
 					else
-						CompileErr(keyw & " 'or' follows '" & prev_conj & "'")
+						CompileErr("%s 'or' follows '%s'", {keyw, prev_conj})
 					end if
 				elsif length(option) = 0 then
 					if at_start = 1 then
-						CompileErr("no 'word' was found following " & keyw)
+						CompileErr("no 'word' was found following %s", {keyw})
 					else
 						CompileErr("expecting possibly 'then' not end of line")
 					end if
 				elsif not at_start and length(prev_conj) = 0 then
-					CompileErr(keyw & " not understood")
+					CompileErr("%s not understood", {keyw})
 				elsif t_identifier(option) = 0 then
-					CompileErr(keyw & " word must be an identifier")
+					CompileErr("%s word must be an identifier", {keyw})
 				else
 					at_start = 0
 				end if
@@ -2769,7 +2766,7 @@ procedure Ifdef_statement()
 		while 1 do
 			tok = next_token()
 			if tok[T_ID] = END_OF_FILE then
-				CompileErr(sprintf("End of file reached while searching for 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$]))
+				CompileErr("End of file reached while searching for 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$])
 			elsif tok[T_ID] = END then
 				tok = next_token()
 				if tok[T_ID] = IFDEF then
@@ -2780,13 +2777,13 @@ procedure Ifdef_statement()
 					end if
 				elsif in_matched then
 					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
-					CompileErr(sprintf("Expecting 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$]))
+					CompileErr("Expecting 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$])
 				else
 					if tok[T_ID] = IF then
 						if if_lvl > 0 then
 							if_lvl -= 1
 						else
-							CompileErr(sprintf("Mismatched 'end if'. Should this be an 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$]))
+							CompileErr("Mismatched 'end if'. Should this be an 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$])
 						end if
 					end if
 				end if
@@ -2795,7 +2792,7 @@ procedure Ifdef_statement()
 			elsif tok[T_ID] = ELSE then
 				if not in_matched then
 					if if_lvl = 0 then
-						CompileErr(sprintf("Mismatched 'else'. Should this be an 'elsedef' to match 'ifdef' on line %d", ifdef_lineno[$]))
+						CompileErr("Mismatched 'else'. Should this be an 'elsedef' to match 'ifdef' on line %d", ifdef_lineno[$])
 					end if
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
@@ -3557,7 +3554,7 @@ procedure Statement_list()
 			if id = ELSE then
 				if length(if_stack) = 0 then
 					if live_ifdef > 0 then
-						CompileErr(sprintf("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$]))
+						CompileErr("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$])
 					else
 						CompileErr("Not expecting 'else'")
 					end if
@@ -3565,7 +3562,7 @@ procedure Statement_list()
 			elsif id = ELSIF then
 				if length(if_stack) = 0 then
 					if live_ifdef > 0 then
-						CompileErr(sprintf("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$]))
+						CompileErr("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$])
 					else
 						CompileErr("Not expecting 'elsif'")
 					end if
@@ -3713,7 +3710,7 @@ procedure SubProg(integer prog_type, integer scope)
 				CompileErr(sprintf("found %s '%s' but was expecting a parameter name instead.",
 							{tokcat, SymTab[tok[T_SYM]][S_NAME]}))
 			else
-				CompileErr(sprintf("found %s but was expecting a parameter name instead.",{LexName(tok[T_ID])}))
+				CompileErr("found %s but was expecting a parameter name instead.",{LexName(tok[T_ID])})
 			end if
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
@@ -3883,8 +3880,8 @@ end procedure
 
 procedure not_supported_compile(sequence feature)
 -- Report that a compile-time feature is not supported in this platform
-	CompileErr(sprintf("%s is not supported in Euphoria for %s",
-				  {feature, version_name}))
+	CompileErr("%s is not supported in Euphoria for %s",
+				  {feature, version_name})
 end procedure
 
 sequence mix_msg
@@ -4234,7 +4231,6 @@ export procedure real_parser(integer nested)
 			ExecCommand()
 
 		elsif id = FUNC or id = QUALIFIED_FUNC then
---	EXPERIMENTAL --<commented this line out>		CompileErr("function result must be assigned or used")
 			StartSourceLine(TRUE)
 			if id = FUNC then
 				-- to check for warning if proc not in include tree
@@ -4341,7 +4337,7 @@ export procedure real_parser(integer nested)
 				if id = ELSE then
 					if length(if_stack) = 0 then
 						if live_ifdef > 0 then
-							CompileErr(sprintf("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$]))
+							CompileErr("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$])
 						else
 							CompileErr("Not expecting 'else'")
 						end if
@@ -4349,7 +4345,7 @@ export procedure real_parser(integer nested)
 				elsif id = ELSIF then
 					if length(if_stack) = 0 then
 						if live_ifdef > 0 then
-							CompileErr(sprintf("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$]))
+							CompileErr("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$])
 						else
 							CompileErr("Not expecting 'elsif'")
 						end if
@@ -4364,10 +4360,10 @@ export procedure real_parser(integer nested)
 			else
 				if id = END then
 					tok = next_token()
-					CompileErr(sprintf("'end' has no matching '%s'", {find_token_text(tok[T_ID])}))
+					CompileErr("'end' has no matching '%s'", {find_token_text(tok[T_ID])})
 				end if
 								
-				CompileErr(sprintf("Not expecting to see '%s' here", {replace_all(find_token_text(id), "'", "")}))
+				CompileErr("Not expecting to see '%s' here", {replace_all(find_token_text(id), "'", "")})
 
 			end if
 

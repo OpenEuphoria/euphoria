@@ -450,7 +450,7 @@ procedure write_emake()
 
 	integer fh = open(output_dir & fname, "wb")
 	if fh = -1 then
-		CompileErr("Couldn't open " & output_dir & fname & " for writing")
+		CompileErr("Couldn't open %s%s for writing", {output_dir, fname})
 	end if
 
 	if compiler_type != COMPILER_GCC then

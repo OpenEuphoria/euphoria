@@ -196,7 +196,7 @@ export procedure DefinedYet(symtab_index sym)
 	if not find(SymTab[sym][S_SCOPE],
 				{SC_UNDEFINED, SC_MULTIPLY_DEFINED, SC_PREDEF}) then
 		if SymTab[sym][S_FILE_NO] = current_file_no then
-			CompileErr(sprintf("attempt to redefine %s.", {SymTab[sym][S_NAME]}))
+			CompileErr("attempt to redefine %s.", {SymTab[sym][S_NAME]})
 		end if
 	end if
 end procedure

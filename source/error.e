@@ -191,9 +191,13 @@ end procedure
 
 --**
 -- Handle fatal compilation errors
-export procedure CompileErr(sequence msg)
+export procedure CompileErr(sequence msg, object args = {})
 	sequence errmsg
 
+	if atom(args) or length(args) != 0 then
+		msg = sprintf(msg, args)
+	end if
+	
 	Errors += 1
 	if length(file_name) then
 		errmsg = sprintf("%s:%d\n%s\n", {file_name[current_file_no],
@@ -226,8 +230,8 @@ end procedure
 --**
 -- report feature not supported
 procedure not_supported_compile(sequence feature)
-	CompileErr(sprintf("%s is not supported in Euphoria for %s",
-					   {feature, version_name}))
+	CompileErr("%s is not supported in Euphoria for %s",
+					   {feature, version_name})
 end procedure
 
 --**

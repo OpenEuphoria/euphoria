@@ -1216,8 +1216,8 @@ export function truncate_to_83( sequence lfn )
 	elsif dl > 9 and dl + 3 <= length(lfn) then
 		return lfn[1..8] & lfn[dl..$]
 	else
-		CompileErr( "Cannot use the filename, " & lfn & ", under DOS. " &
-			"Use the Windows version with -plat DOS instead.\n")
+		CompileErr( "Cannot use the filename, %s, under DOS.\n" &
+			"Use the Windows version with -plat DOS instead.\n", {lfn})
 	end if
 end function
 
@@ -1260,7 +1260,7 @@ export procedure GenerateUserRoutines()
 			end while
 						
 			if find(lower(c_file), {"main-", "init-"})  then
-				CompileErr(base_name & " conflicts with a file name used internally by the Translator")
+				CompileErr("%s conflicts with a file name used internally by the Translator", {base_name})
 			end if
 
 			long_c_file = c_file

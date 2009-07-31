@@ -374,8 +374,7 @@ function path_open()
 		-- open new_include_name exactly as it is
 		try = open(new_include_name, "r")
 		if try = -1 then
-			errbuff = sprintf("can't open '%s'", {new_include_name})
-			CompileErr(errbuff)
+			CompileErr("can't open '%s'", {new_include_name})
 		end if
 		return try
 	end if
@@ -431,14 +430,16 @@ function path_open()
 
 	inc_path = getenv("EUINC")
 	conf_path = get_conf_dirs()
-	if atom(inc_path) then
-		errbuff = sprintf("can't find '%s' in %s\nor in %s\nor in %s\nor in %s%sinclude",
-						  {new_include_name, currdir, main_path, conf_path, eudir, SLASH})
-	else
-		errbuff = sprintf("can't find '%s' in %s\nor in %s\nor in %s\nor in %s\nor in %s%sinclude",
-						  {new_include_name, currdir, main_path, conf_path, inc_path, eudir, SLASH})
+	errbuff  = sprintf("\t%s\n", {new_include_name})
+	errbuff &= sprintf("\t%s\n", {currdir})
+	errbuff &= sprintf("\t%s\n", {main_path})
+	errbuff &= sprintf("\t%s\n", {conf_path})
+	if sequence(inc_path) then
+		errbuff &=  sprintf("\t%s\n", {inc_path})
 	end if
-	CompileErr(errbuff)
+	errbuff &= sprintf("\t%s\n", {eudir & SLASH})
+	
+	CompileErr("can't find '%s' in any of ...\n%s", {errbuff})
 end function
 
 function win_compare(sequence a,sequence b)
@@ -895,7 +896,7 @@ function MakeInt(sequence text, integer nBase = 10)
 	for i = 1 to length(text) do
 		digit = (text[i] - '0')
 		if digit >= nBase or digit < 0 then
-			CompileErr(sprintf("digit '%s' at position %d is outside of number base", {text[i],i}))
+			CompileErr("digit '%s' at position %d is outside of number base", {text[i],i})
 		end if
 		if fnum = 0 then
 			if num <= maxchk then
@@ -1055,7 +1056,7 @@ function ExtendedString(integer ech)
 
 	while 1 do
 		if ch = END_OF_FILE_CHAR then
-			CompileErr(sprintf("Extended string literal from line %d not terminated.", cline))
+			CompileErr("Raw string literal from line %d not terminated.", cline)
 		end if
 
 		if ch = ech then
@@ -1287,7 +1288,7 @@ export function Scanner()
 
 					if basetype = 0 then
 						if char_class[ch] = LETTER then
-							CompileErr(sprintf("Invalid number base specifier '%s'", ch))
+							CompileErr("Invalid number base specifier '%s'", ch)
 						end if
 						basetype = -1 -- decimal
 						exit
@@ -1352,7 +1353,7 @@ export function Scanner()
 					ch = getch()
 				end while
 			elsif char_class[ch] = LETTER then
-				CompileErr(sprintf("Punctuation missing in between number and '%s'", {ch}))
+				CompileErr("Punctuation missing in between number and '%s'", {ch})
 			end if
 
 			ungetch()
@@ -1377,7 +1378,7 @@ export function Scanner()
 			end if
 
 			if basetype != -1 then
-				CompileErr(sprintf("Only integer literals can use the '0%s' format", nbasecode[basetype]))
+				CompileErr("Only integer literals can use the '0%s' format", nbasecode[basetype])
 			end if
 
 			-- f.p. or large int
@@ -1573,7 +1574,7 @@ export function Scanner()
 				end while
 
 				if cnest > 0 then
-					CompileErr(sprintf("Block comment from line %d not terminated.", cline))
+					CompileErr("Block comment from line %d not terminated.", cline)
 				end if
 			else
 				ungetch()

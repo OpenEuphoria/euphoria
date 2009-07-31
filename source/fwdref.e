@@ -228,17 +228,12 @@ procedure patch_forward_call( token tok, integer ref )
 	else
 		routine_type = "procedure"
 	end if
-	sequence err_msg = ""
 	
 	if args != ( supplied_args + extra_default_args ) then
-		err_msg = sprintf( "Wrong number of arguments supplied for forward reference\n\t%s (%d): %s %s.  Expected %d, but found %d.",
-			{ file_name[from_file], line, routine_type, name, args, supplied_args + extra_default_args } )
-	end if
-	
-	if length( err_msg ) then
 		current_file_no = from_file
 		line_number = line
-		CompileErr( err_msg )
+		CompileErr( "Wrong number of arguments supplied for forward reference\n\t%s (%d): %s %s.  Expected %d, but found %d.",
+			{ file_name[from_file], line, routine_type, name, args, supplied_args + extra_default_args }  )
 	end if
 	
 	new_code &= PROC & sub & params
@@ -504,9 +499,9 @@ end procedure
 
 procedure forward_error( token tok, integer ref )
 	prep_forward_error( ref )
-	CompileErr(sprintf("expected %s, not %s", 
+	CompileErr("expected %s, not %s", 
 		{ expected_name( forward_references[ref][FR_TYPE] ),
-			expected_name( tok[T_ID] ) } ) )
+			expected_name( tok[T_ID] ) } ) 
 end procedure
 
 function find_reference( sequence fr )
@@ -675,8 +670,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 	end for
 	
 	if report_errors and length( errors ) then
-		sequence msg = "Errors resolving the following references:\n"
-		integer error_count = 0
+		sequence msg = ""
 		
 		for e = 1 to length( errors ) do
 			sequence ref = forward_references[errors[e]]
@@ -687,14 +681,13 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			else
 				msg &= sprintf("\t%s (%d): %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
 			end if
-			error_count += 1
 			ThisLine    = ref[FR_THISLINE]
 			bp          = ref[FR_BP]
 			CurrentSub  = ref[FR_SUBPROG]
 			line_number = ref[FR_LINE]
 		end for
-		if error_count then
-			CompileErr( msg )
+		if length(msg) > 0 then
+			CompileErr( "Errors resolving the following references:\n%s", {msg} )
 		end if
 	end if
 end procedure
