@@ -21,6 +21,10 @@
 #  include <conio.h>
 #endif
 
+#ifdef EUNIX
+#include <sys/ioctl.h>
+#endif
+
 #include <signal.h>
 #include <string.h>
 #ifdef EWINDOWS
@@ -78,6 +82,7 @@ extern int allow_break;
 extern int control_c_count; 
 #ifdef EUNIX
 extern unsigned current_fg_color, current_bg_color;
+extern int consize_ioctl;
 #endif
 extern int bound;
 extern int print_chars;
@@ -1688,6 +1693,10 @@ extern int col_max;
 void GetViewPort(struct EuViewPort *vp)
 {
 	int l_var_lines;
+#ifdef EUNIX
+	struct winsize ws;
+#endif
+
 #ifdef EWINDOWS
 	CONSOLE_SCREEN_BUFFER_INFO info;
 	
@@ -1696,11 +1705,28 @@ void GetViewPort(struct EuViewPort *vp)
 	vp->lines    = info.dwSize.Y;
 	vp->columns  = info.dwSize.X;
 
-#else
+#endif
+
+#ifdef EUINX
+	if (consize_ioctl != 0 && !ioctl(STDIN_FILENO, TIOCGWINSZ, &ws)) {
+		line_max = ws.ws_row;
+		col_max = ws.ws_col;
+		if (line_max > MAX_LINES)
+			line_max = MAX_LINES;
+		if (col_max > MAX_COLS)
+			col_max = MAX_COLS;
+	}
 	vp->lines    = line_max;
 	vp->columns  = col_max;
 
 #endif
+
+#ifdef EDOS
+	vp->lines    = line_max;
+	vp->columns  = col_max;
+#endif
+
+
 	l_var_lines = (vp->lines - BASE_TRACE_LINE) / 6;
 	if (l_var_lines > MAX_VAR_LINES)
 		l_var_lines = MAX_VAR_LINES;

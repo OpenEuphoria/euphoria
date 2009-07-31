@@ -172,6 +172,10 @@ volatile int sample_next = 0;
 int first_mouse = 1;  /* indicates if mouse function has been set up yet */
 int line_max; /* current number of text lines on screen */
 int col_max;  /* current number of text columns on screen */
+#ifdef EUNIX
+int consize_ioctl = 0;	/* 1 if line_max or col_max came from ioctl */
+#endif
+
 struct videoconfig config;
 int screen_lin_addr; /* screen segment */
 #ifdef EXTRA_STATS
@@ -1518,6 +1522,7 @@ void NewConfig(int raise_console)
 	config.numvideopages = 1;
 	line_max = 0;
 	col_max = 0;
+	consize_ioctl = 0;
 
 	env_lines = getenv("LINES");
 	if (env_lines != NULL) {
@@ -1536,10 +1541,10 @@ void NewConfig(int raise_console)
 		}
 	}
 
-	if ((line_max == 0 || col_max == 0) &&
-		!ioctl(STDIN_FILENO, TIOCGWINSZ, &ws)) {
+	if ( ((col_max == 0) || (line_max == 0)) && !ioctl(STDIN_FILENO, TIOCGWINSZ, &ws))  {
 		line_max = ws.ws_row;
 		col_max = ws.ws_col;
+		consize_ioctl = 1;
 	}
 
 	if (line_max < 5 || line_max > 9999 ||
@@ -1547,6 +1552,7 @@ void NewConfig(int raise_console)
 		// something is wrong - use default pessimistic values
 		line_max = 24;  // default value
 		col_max = 80;   // default value
+		consize_ioctl = 0;
 	}
 
 	if (line_max > MAX_LINES)
