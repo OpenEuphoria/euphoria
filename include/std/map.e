@@ -1598,7 +1598,7 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 	if type_ = SM_RAW then
 		puts(file_handle_, serialize(
 				{1, -- saved map version
-				format(now_gmt(), "%Y%m%d%H%M%S" ), -- date of this saved map
+				datetime:format(now_gmt(), "%Y%m%d%H%M%S" ), -- date of this saved map
 				{4,0,0,0}} -- Euphoria version
 			 	))	
 		puts(file_handle_, serialize(keys_))

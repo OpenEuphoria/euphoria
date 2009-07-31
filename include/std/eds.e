@@ -514,7 +514,7 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 		return
 	end if
 
-	printf(fn, "Database dump as at %s\n", {format(now(), "%Y-%m-%d %H:%M:%S")})
+	printf(fn, "Database dump as at %s\n", {datetime:format(now(), "%Y-%m-%d %H:%M:%S")})
 	safe_seek(0)
 	if length(vLastErrors) > 0 then return end if
 	magic = get1()

@@ -791,15 +791,18 @@ public function from_unix(atom unix)
 end function
 
 --**
--- Format the date according to the format string
+-- Format the date according to the format pattern string
 --
 -- Parameters:
 --   # ##d##: a datetime which is to be printed out
---   # ##format##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
+--   # ##pattern##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
+--
+-- Returns:
+--  A string, with the date ##d## formatted according to the specification in ##pattern##.
 --
 -- Comments:
 --
--- Format string can include the following format specifiers~:
+-- Pattern string can include the following specifiers~:
 --
 -- * ~%%  a literal %
 -- * %a  locale's abbreviated weekday name (e.g., Sun)
@@ -841,15 +844,15 @@ end function
 -- See Also:
 --     [[:to_unix]], [[:parse]]
 
-public function format(datetime d, wstring format)
+public function format(datetime d, wstring pattern)
 	integer in_fmt, ch, tmp
 	sequence res
 
 	in_fmt = 0
 	res = ""
 
-	for i = 1 to length(format) do
-		ch = format[i]
+	for i = 1 to length(pattern) do
+		ch = pattern[i]
 
 		if in_fmt then
 			in_fmt = 0
