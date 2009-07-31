@@ -1709,7 +1709,7 @@ void GetViewPort(struct EuViewPort *vp)
 
 #endif
 
-#ifdef EUINX
+#ifdef EUNIX
 	if (consize_ioctl != 0 && !ioctl(STDIN_FILENO, TIOCGWINSZ, &ws)) {
 		line_max = ws.ws_row;
 		col_max = ws.ws_col;
