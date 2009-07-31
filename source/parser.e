@@ -2762,6 +2762,7 @@ procedure Ifdef_statement()
 		-- up for another comparison.
 		integer gotword = 0
 		integer gotthen = 0
+		integer if_lvl  = 0
 		No_new_entry = not matched
 		has_matched = has_matched or matched
 		keyw = "elsifdef"
@@ -2780,6 +2781,22 @@ procedure Ifdef_statement()
 				elsif in_matched then
 					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
 					CompileErr(sprintf("Expecting 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$]))
+				else
+					if tok[T_ID] = IF then
+						if if_lvl > 0 then
+							if_lvl -= 1
+						else
+							CompileErr(sprintf("Mismatched 'end if'. Should this be an 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$]))
+						end if
+					end if
+				end if
+			elsif tok[T_ID] = IF then
+				if_lvl += 1
+			elsif tok[T_ID] = ELSE then
+				if not in_matched then
+					if if_lvl = 0 then
+						CompileErr(sprintf("Mismatched 'else'. Should this be an 'elsedef' to match 'ifdef' on line %d", ifdef_lineno[$]))
+					end if
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
 				if has_matched then
@@ -3548,7 +3565,7 @@ procedure Statement_list()
 			elsif id = ELSIF then
 				if length(if_stack) = 0 then
 					if live_ifdef > 0 then
-						CompileErr(sprintf("Should this be 'elsidef' for the ifdef on line %d?", ifdef_lineno[$]))
+						CompileErr(sprintf("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$]))
 					else
 						CompileErr("Not expecting 'elsif'")
 					end if
@@ -4320,18 +4337,38 @@ export procedure real_parser(integer nested)
 			CompileErr("illegal character")
 
 		else
-			if nested then
+			if nested then 
+				if id = ELSE then
+					if length(if_stack) = 0 then
+						if live_ifdef > 0 then
+							CompileErr(sprintf("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$]))
+						else
+							CompileErr("Not expecting 'else'")
+						end if
+					end if
+				elsif id = ELSIF then
+					if length(if_stack) = 0 then
+						if live_ifdef > 0 then
+							CompileErr(sprintf("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$]))
+						else
+							CompileErr("Not expecting 'elsif'")
+						end if
+					end if
+				end if
 				putback(tok)
-				stmt_nest -= 1
-				InitDelete()
+				if stmt_nest > 0 then
+					stmt_nest -= 1
+					InitDelete()
+				end if
 				return
 			else
 				if id = END then
 					tok = next_token()
 					CompileErr(sprintf("'end' has no matching '%s'", {find_token_text(tok[T_ID])}))
-				else
-					CompileErr(sprintf("Not expecting to see '%s' here", {replace_all(find_token_text(id), "'", "")}))
 				end if
+								
+				CompileErr(sprintf("Not expecting to see '%s' here", {replace_all(find_token_text(id), "'", "")}))
+
 			end if
 
 		end if

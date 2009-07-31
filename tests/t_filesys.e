@@ -63,7 +63,7 @@ ifdef DOSFAMILY then
 test_true("absolute_path('\\temp\\somefile.doc')", absolute_path("\\temp\\somefile.doc"))
 test_true("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
 test_true("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
-else
+elsedef
 test_false("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
 test_false("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
 end ifdef
