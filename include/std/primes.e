@@ -1,11 +1,12 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 --
+namespace primes
+
 --****
 -- == Prime Numbers
 -- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
-namespace primes
 
 include std/search.e
 

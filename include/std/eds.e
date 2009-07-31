@@ -4,6 +4,7 @@
 -- == Euphoria Database (EDS)
 --
 -- <<LEVELTOC depth=2>>
+namespace eds
 
 include std/error.e
 include std/convert.e

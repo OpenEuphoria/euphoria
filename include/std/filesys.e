@@ -6,6 +6,7 @@
 -- Cross platform file operations for Euphoria
 --
 -- <<LEVELTOC depth=2>>
+namespace filesys
 
 ifdef DOS32 then
 	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
@@ -135,16 +136,25 @@ end ifdef
 -- Description:
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.
 
+--**
+-- Signature:
+-- public constant NULLDEVICE
+--
+-- Description:
+-- Current platform's null device path: ##/dev/null## on //Unix//, else ##NUL:##.
+
 ifdef UNIX then
 	public constant SLASH='/'
 	public constant SLASHES = "/"
 	public constant EOLSEP = "\n"
 	public constant PATHSEP = ':'
-elsedef
+	public constant NULLDEVICE = "/dev/null"
+elsifdef DOSFAMILY then
 	public constant SLASH='\\'
 	public constant SLASHES = "\\/:"
 	public constant EOLSEP = "\r\n"
 	public constant PATHSEP = ';'
+	public constant NULLDEVICE = "NUL:"
 end ifdef
 public constant EOL = '\n'
 

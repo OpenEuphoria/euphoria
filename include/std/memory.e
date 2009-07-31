@@ -1,3 +1,5 @@
+namespace memory
+
 --****
 -- == Memory Management - Low-Level
 --

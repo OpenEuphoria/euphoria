@@ -1,3 +1,5 @@
+namespace pipeio
+
 --****
 -- === Pipe Input/Output
 --
@@ -142,7 +144,7 @@ end type
 --
 -- Example 1:
 -- <eucode>
--- integer status=pipe:close(p[STDIN])
+-- integer status = pipeio:close(p[STDIN])
 -- </eucode>
 --
 
@@ -179,7 +181,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- pipe:kill(p)
+-- kill(p)
 -- </eucode>
 --
 
@@ -246,7 +248,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- sequence data=pipe:read(p[STDOUT],256)
+-- sequence data=read(p[STDOUT],256)
 -- </eucode>
 --
 
@@ -296,7 +298,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- integer bytes_written=pipe:write(p[STDIN],"Hello World!")
+-- integer bytes_written = write(p[STDIN],"Hello World!")
 -- </eucode>
 --
 
@@ -346,7 +348,7 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- integer error=pipe:error_no()
+-- integer error = error_no()
 -- </eucode>
 --
 public function error_no()
@@ -404,7 +406,7 @@ ifdef WIN32 then
 	--
 	-- Example 1:
 	-- <eucode>
-	-- object p=pipe:exec("dir", pipe:create())
+	-- object p = exec("dir", create())
 	-- </eucode>
 	--
 	public function create()
@@ -462,7 +464,7 @@ ifdef WIN32 then
 	--
 	-- Example 1:
 	-- <eucode>
-	-- object p=pipe:exec("dir", pipe:create())
+	-- object p = exec("dir", create())
 	-- </eucode>
 	--
 

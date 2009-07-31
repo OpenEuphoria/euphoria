@@ -1,5 +1,7 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 -- wildcard.e
+namespace wildcard
+
 --****
 -- == Wildcard Matching
 -- **Page Contents**

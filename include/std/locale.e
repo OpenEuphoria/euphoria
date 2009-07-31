@@ -6,6 +6,7 @@
 --
 -- <<LEVELTOC depth=2>>
 -- 
+namespace locale
 
 include std/dll.e
 include std/machine.e

@@ -4,6 +4,7 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+namespace dll
 
 include std/convert.e
 include std/machine.e

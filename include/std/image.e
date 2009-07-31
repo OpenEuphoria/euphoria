@@ -1,5 +1,7 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 --
+namespace image
+
 include std/graphcst.e
 include std/convert.e
 include std/machine.e

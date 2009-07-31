@@ -1,6 +1,8 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 --
 
+namespace map
+
 --****
 -- == Map (hash table)
 --
@@ -40,8 +42,6 @@
 -- **Note~:** If the number of elements placed into a //small// map take it over
 -- the initial size of the map, it is automatically converted to a //large// map.
 --
-
-namespace map
 
 include std/get.e
 include std/primes.e

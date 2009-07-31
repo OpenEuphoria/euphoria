@@ -1,3 +1,5 @@
+namespace pretty
+
 --****
 -- == Pretty Printing
 -- **Page Contents**

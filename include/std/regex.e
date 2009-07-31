@@ -1,4 +1,5 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
+namespace regex
 
 include std/math.e
 include std/text.e

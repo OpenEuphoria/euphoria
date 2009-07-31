@@ -2,6 +2,7 @@
 -- == Command Line Handling
 --
 -- <<LEVELTOC depth=2>>
+namespace cmdline
 
 include std/text.e
 include std/sequence.e as seq

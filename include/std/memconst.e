@@ -1,4 +1,5 @@
---
+
+namespace memconst
 
 ifdef WIN32 then
 	--****

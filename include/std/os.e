@@ -1,3 +1,5 @@
+namespace os
+
 --****
 -- == Operating System Helpers
 --

@@ -1,5 +1,7 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 --
+namespace safe
+
 -- Euphoria 4.0
 -- Machine Level Programming (386/486/Pentium)
 

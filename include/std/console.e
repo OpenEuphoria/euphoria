@@ -4,6 +4,7 @@
 -- == Console 
 --
 -- <<LEVELTOC depth=2>>
+namespace console
 
 include std/types.e
 include std/get.e

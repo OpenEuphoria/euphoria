@@ -6,6 +6,7 @@
 -- <<LEVELTOC depth=2>>
 
 --
+namespace datetime
 
 include std/unicode.e -- needed for parse() and format()
 include std/machine.e

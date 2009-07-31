@@ -4,6 +4,7 @@
 -- == I/O
 --
 -- <<LEVELTOC depth=2>>
+namespace io
 
 include std/sort.e
 include std/wildcard.e

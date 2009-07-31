@@ -1,5 +1,7 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 --
+namespace unittest
+
 --****
 -- == Unit Testing Framework
 --

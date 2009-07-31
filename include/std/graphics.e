@@ -5,6 +5,7 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+namespace graphics
 
 constant
 	M_GRAPHICS_MODE  = 5,

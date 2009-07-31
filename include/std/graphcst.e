@@ -4,6 +4,7 @@
 --****
 -- === Error Code Constants
 --
+namespace graphcst
 
 public enum
 	BMP_SUCCESS,

@@ -7,6 +7,7 @@
 -- <<LEVELTOC depth=2>>
 --
 -- === Routines
+namespace error
 
 constant
 	M_CRASH_MESSAGE = 37,

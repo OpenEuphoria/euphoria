@@ -1,5 +1,6 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 --
+namespace machine
 
 include std/dll.e
 public include std/memconst.e

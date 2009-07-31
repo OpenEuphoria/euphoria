@@ -1,3 +1,5 @@
+namespace lcid
+
 ifdef WIN32 then
 
 constant lcid_hex = {

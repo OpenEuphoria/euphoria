@@ -4,6 +4,7 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+namespace convert
 
 constant
 	M_A_TO_F64 = 46,

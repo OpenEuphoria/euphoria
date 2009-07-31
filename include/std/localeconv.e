@@ -1,5 +1,7 @@
 -- (c) Copyright Rapid Deployment Software - See License.txt
 --
+namespace localconv
+
 --****
 -- === Constants
 -- //Win32// locale names:

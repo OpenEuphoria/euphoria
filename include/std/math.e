@@ -5,6 +5,7 @@
 --
 -- <<LEVELTOC depth=2>>
 --
+namespace math
 
 public include std/rand.e
 public include std/mathcons.e
