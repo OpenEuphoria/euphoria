@@ -3,6 +3,7 @@ include std/map.e
 include std/sort.e
 include std/text.e
 include std/pretty.e
+include std/filesys.e
 
 object o1, o2, o3
 o1 = map:threshold()
@@ -293,6 +294,9 @@ copy(cm1, cm2, ADD)
 
 test_equal("copy w/destinaion ADD", { {"AB", 2}, {"XY", 4} }, pairs(cm2, 1))
 
+delete_file("save_map.txt")
+delete_file("save_map.raw")
+delete_file("save_map.raw2")
 --
 -- Done with testing
 --

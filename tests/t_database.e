@@ -236,6 +236,9 @@ procedure test_db_select()
 	
 	the_data = db_record_data( db_find_key( "MY_DATA" ) )
 	test_equal( "w/caching -> insert, delete, select db/table, insert, get", temp_data, the_data )
+	
+	-- Close the database before deleting it.
+	db_close()
 	ok = delete_file( the_db )
 	
 end procedure
