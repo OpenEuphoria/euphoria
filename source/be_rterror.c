@@ -34,6 +34,8 @@ extern HANDLE console_output;
 
 #include "alldefs.h"
 #include "be_runtime.h"
+void GetViewPort(struct EuViewPort *vp);
+
 
 /******************/
 /* Local defines  */
