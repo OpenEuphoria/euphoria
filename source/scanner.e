@@ -7,6 +7,7 @@ include std/filesys.e
 include std/get.e
 include std/machine.e
 include std/search.e
+include std/sequence.e
 
 include global.e
 include common.e
@@ -378,24 +379,27 @@ function path_open()
 		end if
 		return try
 	end if
-
+	
+	-- We've got a relative path so we need to look into a few places. --
 	-- first try path from current file path
-	-- c.k. lester
 	currdir = get_file_path( file_name[current_file_no] )
 	full_path = currdir & new_include_name
 	try = open(full_path, "r")
-
-	if try = -1 then
-		-- relative path name - first try main_path
-		full_path = main_path & new_include_name
-		try = open(full_path,  "r")
-	end if
-
 	if try != -1 then
 		new_include_name = full_path
 		return try
 	end if
 
+	-- next try main_path
+	if not equal(main_path, currdir) then
+		full_path = main_path & new_include_name
+		try = open(full_path,  "r")
+		if try != -1 then
+			new_include_name = full_path
+			return try
+		end if
+	end if
+	
 	scan_result = ConfPath(new_include_name)
 
 	if atom(scan_result) then
@@ -421,25 +425,71 @@ function path_open()
 		return scan_result[2]
 	end if
 
-	if length(main_path) = 0 then
-		main_path = "."
-	end if
-	if find(main_path[$], SLASH_CHARS) then
-		main_path = main_path[1..$-1]  -- looks better
-	end if
 
-	inc_path = getenv("EUINC")
-	conf_path = get_conf_dirs()
-	errbuff  = sprintf("\t%s\n", {new_include_name})
-	errbuff &= sprintf("\t%s\n", {currdir})
-	errbuff &= sprintf("\t%s\n", {main_path})
-	errbuff &= sprintf("\t%s\n", {conf_path})
-	if sequence(inc_path) then
-		errbuff &=  sprintf("\t%s\n", {inc_path})
+	errbuff = ""
+	full_path = {}
+	if length(currdir) > 0 then
+		if find(currdir[$], SLASH_CHARS) then
+			full_path = append(full_path, currdir[1..$-1])
+		else
+			full_path = append(full_path, currdir)
+		end if
+--		errbuff &= sprintf("\t%s\n", {full_path})
 	end if
-	errbuff &= sprintf("\t%s\n", {eudir & SLASH})
 	
-	CompileErr("can't find '%s' in any of ...\n%s", {errbuff})
+	if find(main_path[$], SLASH_CHARS) then
+		errbuff = main_path[1..$-1]  -- looks better
+	else
+		errbuff = main_path
+	end if
+	if not find(errbuff, full_path) then
+		full_path = append(full_path, errbuff)
+	end if
+	
+	conf_path = get_conf_dirs()
+	if length(conf_path) > 0 then
+		conf_path = split(conf_path, PATHSEP)
+		for i = 1 to length(conf_path) do			
+			if find(conf_path[i][$], SLASH_CHARS) then
+				errbuff = conf_path[i][1..$-1]  -- looks better
+			else
+				errbuff = conf_path[i]
+			end if
+			if not find(errbuff, full_path) then
+				full_path = append(full_path, errbuff)
+			end if
+		end for
+	end if
+	
+	inc_path = getenv("EUINC")
+	if sequence(inc_path) then
+		if length(inc_path) > 0 then
+			inc_path = split(inc_path, PATHSEP)
+			for i = 1 to length(inc_path) do			
+				if find(inc_path[i][$], SLASH_CHARS) then
+					errbuff = inc_path[i][1..$-1]  -- looks better
+				else
+					errbuff = inc_path[i]
+				end if
+				if not find(errbuff, full_path) then
+					full_path = append(full_path, errbuff)
+				end if
+			end for
+		end if
+	end if
+	
+	if length(eudir) > 0 then
+		if not find(eudir, full_path) then
+			full_path = append(full_path, eudir)
+		end if
+	end if
+	
+	errbuff = ""
+	for i = 1 to length(full_path) do
+		errbuff &= sprintf("\t%s\n", {full_path[i]})
+	end for
+	
+	CompileErr("can't find '%s' in any of ...\n%s", {new_include_name, errbuff})
 end function
 
 function win_compare(sequence a,sequence b)

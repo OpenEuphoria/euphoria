@@ -138,6 +138,10 @@ procedure main()
 		Cleanup(1)
 	elsif src_file >= 0 then
 		main_path = full_path(file_name[$])
+		if length(main_path) = 0 then
+			main_path = '.' & SLASH
+		end if
+
 	end if
 
 
