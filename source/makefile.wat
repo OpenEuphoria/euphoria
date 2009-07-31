@@ -306,10 +306,10 @@ LIBTARGET=$(BUILDDIR)\eu.lib
 CC = wcc386
 !ifeq OS DOS
 FE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /i..\
-BE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
+BE_FLAGS = /w0 /zq /j /zp4 /fpc /5r /ol /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
 !else
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
-BE_FLAGS = /ol /zp8 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
 !endif
 	
 library : .SYMBOLIC version.h runtime
