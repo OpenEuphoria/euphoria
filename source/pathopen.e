@@ -651,17 +651,21 @@ label "cache done"
 	return include_Paths
 end function
 
--- open a file by searching the user's PATH
+--**
+-- Find a euphoria file in the users PATH 
+--
+-- Parameters:
+--   # ##name##: filename to search for
+--	 
+-- Returns:
+--   Full path name of the found file or < 0 on error
 
-export function e_path_open(sequence name, sequence mode)
--- follow the search path, if necessary to open the main file
-	integer src_file
+export function e_path_find(sequence name)
 	object scan_result
 
-	-- try opening directly
-	src_file = open(name, mode)
-	if src_file != -1 then
-		return src_file        
+	-- try directly
+	if file_exists(name) then
+		return name
 	end if
 	
 	-- make sure that name is a simple name without '\' in it
@@ -671,13 +675,12 @@ export function e_path_open(sequence name, sequence mode)
 		end if
 	end for
 	
-	scan_result = ScanPath(name,"PATH",0)
-	if atom(scan_result) then
-		return -1
-	else
-		file_name[1] = scan_result[1]
-		return scan_result[2]
+	scan_result = ScanPath(name, "PATH", 0)
+	if sequence(scan_result) then
+		close(scan_result[2])
+		return scan_result[1]
 	end if
-	
+
+	return -1
 end function
 

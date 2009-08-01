@@ -7,7 +7,7 @@ include std/filesys.e
 include std/get.e
 include std/machine.e
 include std/search.e
-include std/datetime.e as dt
+--include std/datetime.e as dt
 include std/sequence.e
 
 include global.e
@@ -19,6 +19,7 @@ include scinot.e
 include fwdref.e
 include error.e
 include keylist.e
+include preproc.e
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
 constant MAX_FILE = 256       -- maximum number of source files
@@ -359,60 +360,6 @@ function get_file_path(sequence s)
 		end for
 		-- if no slashes were found then can't assume it's a directory
 		return "." & SLASH
-end function
-
-function is_file_newer(sequence f1, sequence f2)
-	object d1 = file_timestamp(f1)
-	object d2 = file_timestamp(f2)
-	
-	if atom(d2) then return 1 end if
-
-	if dt:diff(d1, d2) < 0 then
-		return 1
-	end if
-
-	return 0
-end function
-
-function maybe_preprocess(sequence fname)
-	sequence pp = {}
-
-	if length(preprocessors) then
-		sequence fext = fileext(fname)
-
-		for i = 1 to length(preprocessors) do
-			if equal(fext, preprocessors[i][1]) then
-				pp = preprocessors[i]
-				exit
-			end if
-		end for
-	end if
-		
-	if length(pp) = 0 then 
-		return fname
-	end if
-		
-	sequence post_fname = dirname(fname) & SLASH & filebase(fname) & 
-		".post." & fileext(fname)
-
-	if not is_file_newer(fname, post_fname) then
-		return post_fname
-	end if
-	
-	sequence cmd = pp[2]
-	
-	if equal(fileext(cmd), "ex") then
-		cmd = "eui " & cmd
-	end if
-	
-	cmd &= sprintf(" %s %s", { fname, post_fname })
-
-	integer pp_status = system_exec(cmd, 2)
-	if pp_status != 0 then
-		CompileErr(sprintf("Preprocessor command failed: %s\n", { cmd }))
-	end if
-
-	return post_fname
 end function
 
 include pathopen.e

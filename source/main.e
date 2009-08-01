@@ -21,6 +21,7 @@ include emit.e
 include symtab.e
 include scanner.e
 include error.e
+include preproc.e
 
 --**
 -- record command line options, return source file number
@@ -32,27 +33,26 @@ end type
 
 function GetSourceName()
 	integer src_file
-	boolean dot_found
+	object real_name
+	boolean has_extension = FALSE
 
 	if length(src_name) = 0 then
 		show_banner()
-
 		return -2 -- No source file
 	end if
 
 	-- check src_name for last '.'
-	dot_found = FALSE
 	for p = length(src_name) to 1 by -1 do
 		if src_name[p] = '.' then
-		   dot_found = TRUE
+		   has_extension = TRUE
 		   exit
 		elsif find(src_name[p], SLASH_CHARS) then
 		   exit
 		end if
 	end for
 
-	if not dot_found then
-		-- no dot found --
+	if not has_extension then
+		-- no extension was found
 		-- N.B. The list of default extentions must always end with the first one again.
 		-- Add a placeholder in the file list.
 		file_name = append(file_name, "")
@@ -60,17 +60,29 @@ function GetSourceName()
 		-- test each ext until you find the file.
 		for i = 1 to length( DEFAULT_EXTS ) do
 			file_name[$] = src_name & DEFAULT_EXTS[i]
-			src_file = e_path_open(file_name[$], "r")
-			if src_file != -1 then
+			real_name = e_path_find(file_name[$])
+			if sequence(real_name) then
 				exit
 			end if
 		end for
+		
+		if atom(real_name) then
+			return -1
+		end if
 	else
 		file_name = append(file_name, src_name)
-		src_file = e_path_open(src_name, "r")
+		real_name = e_path_find(src_name)
+	end if
+		
+	if file_exists(real_name) then
+		printf(1, "Pre-processor real name: %s\n", { real_name })
+		real_name = maybe_preprocess(real_name)
+
+		printf(1, "Real source name: %s\n", { real_name })
+		return open(real_name, "r")
 	end if
 
-	return src_file
+	return -1
 end function
 
 function full_path(sequence filename)
