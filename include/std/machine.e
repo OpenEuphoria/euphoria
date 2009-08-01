@@ -353,7 +353,7 @@ end function
 
 --****
 -- Signature:
--- <built-in> function machine_func(integer machine_id, object args)
+-- <built-in> function machine_func(integer machine_id, object args={})
 --
 -- Description:
 -- Perform a machine-specific operation that returns a value.
@@ -362,9 +362,9 @@ end function
 -- Depends on the called internal facility.
 --
 -- Comments:
--- This function us mainly used by the standard library files to implement machine dependent operations.
--- such as graphics and sound effects. This routine should normally be called indirectly
--- via one of the library routines in a Euphoria include file.
+-- This function us mainly used by the standard library files to implement machine dependent 
+-- operations such as graphics and sound effects. This routine should normally be called 
+-- indirectly via one of the library routines in a Euphoria include file.
 -- User programs normally do not need to call ##machine_func##.
 --
 -- A direct call might cause a machine exception if done incorrectly.
@@ -374,15 +374,15 @@ end function
 
 --****
 -- Signature:
--- <built-in> procedure machine_proc(integer machine_id, object args)
+-- <built-in> procedure machine_proc(integer machine_id, object args={})
 --
 -- Description:
 -- Perform a machine-specific operation that does not return a value.
 --
 -- Comments:
--- This procedure us mainly used by the standard library files to implement machine dependent operations.
--- such as graphics and sound effects. This routine should normally be called indirectly
--- via one of the library routines in a Euphoria include file.
+-- This procedure us mainly used by the standard library files to implement machine dependent 
+-- operations such as graphics and sound effects. This routine should normally be called
+-- indirectly via one of the library routines in a Euphoria include file.
 -- User programs normally do not need to call ##machine_proc##.
 --
 -- A direct call might cause a machine exception if done incorrectly.
