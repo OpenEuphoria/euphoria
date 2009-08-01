@@ -399,7 +399,7 @@ export function GetDefaultArgs()
 
 	if loaded_config_inc_paths then return "" end if
 	loaded_config_inc_paths = 1
-
+	
 	-- If a unix variant, this loads the config file from the current working directory
 	-- If Windows, this loads the config file from the same path as the binary. This
 	-- can be different, for instance the binary may be C:\euphoria\bin\eui.exe but
@@ -442,6 +442,11 @@ export function GetDefaultArgs()
 	-- From where ever the executable is
 	env = strip_file_from_path( exe_path() )
 	default_args &= load_euinc_conf( env & conf_file )
+
+	env = getenv("EUDIR")
+	if sequence(env) then
+		default_args &= load_euinc_conf(env & "/" & conf_file)
+	end if
 
 	return default_args
 end function
