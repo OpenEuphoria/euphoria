@@ -20,6 +20,7 @@ include reswords.e
 include compress.e
 include cominit.e
 include pathopen.e
+include preproc.e
 
 sequence misc
 integer il_file = 0
@@ -136,7 +137,12 @@ cl = command_line()
 
 -- open our own .exe file
 ifdef UNIX then
-	current_db = e_path_open(cl[1], "rb")
+	sequence tmp_fname = e_path_find(cl[1])
+	if sequence(tmp_fname) then
+		current_db = open(tmp_fname, "rb")
+	else
+		current_db = -1
+	end if
 elsedef
 	current_db = open(cl[1], "rb") 
 end ifdef
@@ -180,8 +186,14 @@ while 1 do
 		(length(cl[$]) > 3 and equal(".IL", upper(cl[$][$-2..$])) ) then
 			filename = cl[3]
 			close(current_db)
-			current_db = e_path_open(filename, "rb")
-			if current_db != -1 then
+			filename = e_path_find(filename)
+			if sequence(filename) then
+				current_db = open(filename, "rb")
+			else
+				current_db = -1
+			end if
+
+			if current_db = -1 then
 				il_file = 1
 				exit
 			end if

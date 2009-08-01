@@ -75,10 +75,7 @@ function GetSourceName()
 	end if
 		
 	if file_exists(real_name) then
-		printf(1, "Pre-processor real name: %s\n", { real_name })
 		real_name = maybe_preprocess(real_name)
-
-		printf(1, "Real source name: %s\n", { real_name })
 		return open(real_name, "r")
 	end if
 
