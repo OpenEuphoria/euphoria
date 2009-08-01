@@ -270,14 +270,14 @@ end function
 
 --****
 -- Signature:
--- <built-in> function call_func(integer id, sequence args)
+-- <built-in> function call_func(integer id, sequence args={})
 --
 -- Description:
 --  Call the user-defined Euphoria function by routine id.
 --
 -- Parameters:
---              # ##id##: an integer, the routine id of the function to call
---              # ##args##: a sequence, the parameters to pass to the function.
+--   # ##id##: an integer, the routine id of the function to call
+--   # ##args##: a sequence, the parameters to pass to the function.
 --
 -- Returns:
 -- The value the called function returns.
@@ -305,14 +305,14 @@ end function
 
 --****
 -- Signature:
--- <built-in> procedure call_proc(integer id, sequence args)
+-- <built-in> procedure call_proc(integer id, sequence args={})
 --
 -- Description:
 -- Call a user-defined Euphoria procedure by routine id.
 --
 -- Parameters:
---              # ##id##: an integer, the routine id of the procedure to call
---              # ##args##: a sequence, the parameters to pass to the function.
+--   # ##id##: an integer, the routine id of the procedure to call
+--   # ##args##: a sequence, the parameters to pass to the function.
 --
 -- Errors:
 -- If ##id## is negative or otherwise unknown, an error occurs.

@@ -330,7 +330,7 @@ end function
 
 --****
 -- Signature:
--- <built-in> procedure system(sequence command, integer mode)
+-- <built-in> procedure system(sequence command, integer mode=0)
 --
 -- Description:
 -- Pass a command string to the operating system command interpreter. 
@@ -394,7 +394,7 @@ end function
 
 --****
 -- Signature:
--- <built-in> function system_exec(sequence command, integer mode)
+-- <built-in> function system_exec(sequence command, integer mode=0)
 --
 -- Description: 
 -- Try to run the a shell executable command
