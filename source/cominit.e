@@ -10,6 +10,7 @@ include std/io.e
 include std/search.e
 include std/text.e
 include std/map.e as m
+include std/sequence.e
 
 include common.e
 include error.e
@@ -27,6 +28,8 @@ constant COMMON_OPTIONS = {
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "dir" } },
 	{ "d", 0, "Define a preprocessor word",
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "p", 0, "Setup a pre-processor",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
 	{ "batch", 0, "Turn on batch processing (do not \"Press Enter\" on error",
 				{ NO_CASE } },
 	{ "test", 0, "Test syntax only, do not execute",
@@ -159,6 +162,11 @@ export procedure handle_common_options(m:map opts)
 
 			case "strict" then
 				Strict_is_on = 1
+			
+			case "p" then
+				for i = 1 to length(val) do
+					preprocessors &= { split(val[i], ":") }
+				end for
 
 			case "w" then
 				integer n = find(val, warning_names)

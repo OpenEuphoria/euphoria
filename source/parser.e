@@ -1722,7 +1722,7 @@ procedure Return_statement()
 	NotReached(tok[T_ID], "return")
 end procedure
 
-function exit_level(token tok,integer flag)
+function exit_level(token tok, integer flag)
 -- determines optional parameter for continue/exit/retry/switch
 	atom arg
 	integer n

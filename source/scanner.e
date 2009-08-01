@@ -7,6 +7,7 @@ include std/filesys.e
 include std/get.e
 include std/machine.e
 include std/search.e
+include std/datetime.e as dt
 include std/sequence.e
 
 include global.e
@@ -289,17 +290,17 @@ export function s_expand(sequence slist)
 end function
 
 ifdef STDDEBUG then
-procedure fake_include_line()
-	integer n
+	procedure fake_include_line()
+		integer n
 
-	line_number += 1
-	gline_number += 1
+		line_number += 1
+		gline_number += 1
 
-	ThisLine = "include euphoria/stddebug.e -- injected by the scanner\n"
-	bp = 1
-	n = length(ThisLine)
-	AppendSourceLine()
-end procedure
+		ThisLine = "include euphoria/stddebug.e -- injected by the scanner\n"
+		bp = 1
+		n = length(ThisLine)
+		AppendSourceLine()
+	end procedure
 end ifdef
 
 -- Flag to avoid reading lines when we don't really want to
@@ -360,69 +361,118 @@ function get_file_path(sequence s)
 		return "." & SLASH
 end function
 
+function is_file_newer(sequence f1, sequence f2)
+	object d1 = file_timestamp(f1)
+	object d2 = file_timestamp(f2)
+	
+	if atom(d2) then return 1 end if
+
+	if dt:diff(d1, d2) < 0 then
+		return 1
+	end if
+
+	return 0
+end function
+
+function maybe_preprocess(sequence fname)
+	sequence pp = {}
+
+	if length(preprocessors) then
+		sequence fext = fileext(fname)
+
+		for i = 1 to length(preprocessors) do
+			if equal(fext, preprocessors[i][1]) then
+				pp = preprocessors[i]
+				exit
+			end if
+		end for
+	end if
+		
+	if length(pp) = 0 then 
+		return fname
+	end if
+		
+	sequence post_fname = dirname(fname) & SLASH & filebase(fname) & 
+		".post." & fileext(fname)
+
+	if not is_file_newer(fname, post_fname) then
+		return post_fname
+	end if
+	
+	sequence cmd = pp[2]
+	
+	if equal(fileext(cmd), "ex") then
+		cmd = "eui " & cmd
+	end if
+	
+	cmd &= sprintf(" %s %s", { fname, post_fname })
+
+	integer pp_status = system_exec(cmd, 2)
+	if pp_status != 0 then
+		CompileErr(sprintf("Preprocessor command failed: %s\n", { cmd }))
+	end if
+
+	return post_fname
+end function
+
 include pathopen.e
-function path_open()
--- open an include file (new_include_name) according to the include path rules
+
+function find_file(sequence fname)
 	integer try
 	sequence full_path
 	sequence errbuff
-		sequence currdir
+	sequence currdir
 	sequence conf_path
 	object scan_result, inc_path
-
+	
 	-- skip whitespace not necessary - String Token does it
-	if absolute_path(new_include_name) then
-		-- open new_include_name exactly as it is
-		try = open(new_include_name, "r")
-		if try = -1 then
+	if absolute_path(fname) then
+		-- open fname exactly as it is
+		if not file_exists(fname) then
 			CompileErr("can't open '%s'", {new_include_name})
 		end if
-		return try
+
+		return fname
 	end if
 	
 	-- We've got a relative path so we need to look into a few places. --
 	-- first try path from current file path
 	currdir = get_file_path( file_name[current_file_no] )
-	full_path = currdir & new_include_name
-	try = open(full_path, "r")
-	if try != -1 then
-		new_include_name = full_path
-		return try
+	full_path = currdir & fname
+	if file_exists(full_path) then
+		return full_path
 	end if
 
 	-- next try main_path
 	if not equal(main_path, currdir) then
 		full_path = main_path & new_include_name
-		try = open(full_path,  "r")
-		if try != -1 then
-			new_include_name = full_path
-			return try
+		if file_exists(full_path) then
+			return full_path
 		end if
 	end if
 	
 	scan_result = ConfPath(new_include_name)
 
 	if atom(scan_result) then
-		scan_result = ScanPath(new_include_name,"EUINC",0)
+		scan_result = ScanPath(fname,"EUINC",0)
 	end if
 
 	if atom(scan_result) then
-		scan_result = ScanPath(new_include_name, "EUDIR",1)
+		scan_result = ScanPath(fname, "EUDIR",1)
 	end if
 
 	if atom(scan_result) then
 		-- eudir path
-		full_path = eudir & SLASH & "include" & SLASH & new_include_name
-		try = open(full_path, "r")
-		if try != -1 then
-			return try
+		full_path = eudir & SLASH & "include" & SLASH & fname
+		if file_exists(full_path) then
+			return full_path
 		end if
 	end if
 
 	if sequence(scan_result) then
 		-- successful
-		new_include_name = scan_result[1]
-		return scan_result[2]
+		close(scan_result[2])
+		return scan_result[1]
 	end if
 
 
@@ -490,6 +540,14 @@ function path_open()
 	end for
 	
 	CompileErr("can't find '%s' in any of ...\n%s", {new_include_name, errbuff})
+end function
+
+-- open an include file (new_include_name) according to the include path rules
+function path_open()
+	new_include_name = find_file(new_include_name)
+	new_include_name = maybe_preprocess(new_include_name)
+
+	return open(new_include_name, "r")
 end function
 
 function win_compare(sequence a,sequence b)
@@ -1776,15 +1834,16 @@ export function StringToken(sequence pDelims = "")
 	return gtext
 end function
 
-export procedure IncludeScan( integer is_public )
+--**
 -- Special scan for an include statement:
 -- include filename as namespace
-
+--
 -- We need a special scan because include statements:
 --    - have special rules regarding filename syntax
 --    - must fit on one line by themselves (to avoid tricky issues)
 --    - we don't want to introduce "as" as a new scanning keyword
 
+export procedure IncludeScan( integer is_public )
 	integer ch
 	sequence gtext
 	token s

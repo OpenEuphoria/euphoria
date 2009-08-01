@@ -25,6 +25,7 @@ include std/sequence.e
 include std/types.e
 include std/text.e
 include std/io.e
+include std/datetime.e as dt
 
 ifdef UNIX then
 	include std/get.e -- for disk_size()
@@ -1216,7 +1217,7 @@ public function fileext(sequence path)
 	data = pathinfo(path)
 	return data[4]
 end function
-
+	
 --**
 -- Return the drive letter of the path on //DOS32// and //WIN32// platforms.
 --
@@ -1594,7 +1595,24 @@ public function file_exists(sequence name)
 	end ifdef
 end function
 
+--**
+-- Get the timestamp of the file
+--
+-- Parameters:
+--   # ##name##: the filename to get the date of
+--	 
+-- Returns:
+--   A valid datetime type representing the files date and time or -1 if the
+--	 file's date and time could not be read.
+-- 
 
+public function file_timestamp(sequence fname)
+	object d = dir(fname)
+	if atom(d) then return -1 end if
+	
+	return dt:new(d[1][D_YEAR], d[1][D_MONTH], d[1][D_DAY],
+		d[1][D_HOUR], d[1][D_MINUTE], d[1][D_SECOND])
+end function
 
 --**
 -- Copy a file.
