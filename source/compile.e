@@ -595,7 +595,7 @@ procedure CDeRefStr(sequence s)
 	end if
 
 	if not equal(s, deref_str) then
-		CompileErr("internal: deref problem")
+		CompileErr(106)
 	end if
 
 	if deref_type != TYPE_INTEGER then
@@ -5767,7 +5767,7 @@ tasks_created = FALSE
 
 procedure dll_tasking()
 	if dll_option then
-		CompileErr("Multitasking operations are not supported in a .dll or .so")
+		CompileErr(112)
 	end if
 end procedure
 
@@ -6938,7 +6938,7 @@ procedure BackEnd(atom ignore)
 
 	c_code = open(output_dir & "main-.c", "w")
 	if c_code = -1 then
-		CompileErr("Can't open main-.c for output\n")
+		CompileErr(54)
 	end if
 
 	version()
@@ -7185,7 +7185,7 @@ procedure BackEnd(atom ignore)
 
 	c_code = open(output_dir & "init-.c", "a")
 	if c_code = -1 then
-		CompileErr("Can't open init-.c for append\n")
+		CompileErr(53)
 	end if
 
 -- declare all *used* constants, and local and global variables as ints

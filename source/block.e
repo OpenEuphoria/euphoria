@@ -55,8 +55,7 @@ end function
 procedure check_block( integer got )
 	integer expected = block_stack[$][BLOCK_OPCODE]
 	if got != expected then
-		CompileErr( "Expected end of %s block, not %s", 
-			{block_type_name( expected ), block_type_name( got)} )
+		CompileErr( 79, {block_type_name( expected ), block_type_name( got)} )
 	end if
 end procedure
 
@@ -198,7 +197,7 @@ end function
 export function top_block( integer offset = 0 )
 -- Returns the sym to the block at $-offset
 	if offset >= length(block_stack) then
-		CompileErr("leaving too many blocks %d > %d",{offset,length(block_stack)})
+		CompileErr(107, {offset,length(block_stack)})
 	else
 		return block_stack[$-offset][BLOCK_SYM]
 	end if

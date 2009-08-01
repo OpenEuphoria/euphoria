@@ -1017,7 +1017,7 @@ export procedure new_c_file(sequence name)
 
 	c_code = open(output_dir & name & ".c", "w")
 	if c_code = -1 then
-		CompileErr("Couldn't open .c file for output")
+		CompileErr(57)
 	end if
 
 	cfile_count += 1
@@ -1061,7 +1061,7 @@ function unique_c_name(sequence name)
 		if equal(generated_files[i], compare_name) then
 			-- name conflict 
 			if next_fc > length(file_chars) then
-				CompileErr("Sorry, too many .c files with the same base name")
+				CompileErr(140)
 			end if
 
 			name[1] = file_chars[next_fc]
@@ -1216,8 +1216,7 @@ export function truncate_to_83( sequence lfn )
 	elsif dl > 9 and dl + 3 <= length(lfn) then
 		return lfn[1..8] & lfn[dl..$]
 	else
-		CompileErr( "Cannot use the filename, %s, under DOS.\n" &
-			"Use the Windows version with -plat DOS instead.\n", {lfn})
+		CompileErr( 48, {lfn})
 	end if
 end function
 
@@ -1260,7 +1259,7 @@ export procedure GenerateUserRoutines()
 			end while
 						
 			if find(lower(c_file), {"main-", "init-"})  then
-				CompileErr("%s conflicts with a file name used internally by the Translator", {base_name})
+				CompileErr(12, {base_name})
 			end if
 
 			long_c_file = c_file

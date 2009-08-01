@@ -11,6 +11,7 @@ include error.e
 include global.e
 include platform.e
 include reswords.e
+include msgtext.e
 
 --****
 -- = buildsys.e
@@ -233,7 +234,7 @@ function setup_build()
 			end if
 
 		case else
-			CompileErr("Compiler is unknown")
+			CompileErr(43)
 	end switch
 
 	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin }
@@ -445,12 +446,12 @@ procedure write_emake()
 	end if
 
 	if not silent then
-		printf(1, "Writing emake file %s%s\n", { output_dir, fname })
+		ShowMsg(1, 162, { output_dir, fname })
 	end if
 
 	integer fh = open(output_dir & fname, "wb")
 	if fh = -1 then
-		CompileErr("Couldn't open %s%s for writing", {output_dir, fname})
+		CompileErr(45, {output_dir, fname})
 	end if
 
 	if compiler_type != COMPILER_GCC then
@@ -548,19 +549,19 @@ procedure build_direct()
 			write_objlink_file()
 
 			if not silent then
-				puts(1, "Compiling with DJGPP\n")
+				ShowMsg(1, 176, {"DJGPP"})
 			end if
 
 		case COMPILER_GCC then
 			if not silent then
-				puts(1, "Compiling with GCC\n")
+				ShowMsg(1, 176, {"GCC"})
 			end if
 
 		case COMPILER_WATCOM then
 			write_objlink_file()
 
 			if not silent then
-				puts(1, "Compiling with Watcom\n")
+				ShowMsg(1, 176, {"Watcom"})
 			end if
 	end switch
 
@@ -571,7 +572,7 @@ procedure build_direct()
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
 			if not silent then
-				printf(1, "Compiling %2.0f%% %s" & HOSTNL, { 100 * (i / length(generated_files)),
+				ShowMsg(1, 163, { 100 * (i / length(generated_files)),
 					generated_files[i] })
 			end if
 
@@ -580,8 +581,8 @@ procedure build_direct()
 
 			status = system_exec(cmd, 0)
 			if status != 0 then
-				printf(2, "Couldn't compile file '%s'\n", { generated_files[i] })
-				printf(2, "Status: %d Command: %s\n", { status, cmd })
+				ShowMsg(2, 164, { generated_files[i] })
+				ShowMsg(2, 165, { status, cmd })
 				abort(1)
 			end if
 		elsif match(".o", generated_files[i]) then
@@ -590,7 +591,7 @@ procedure build_direct()
 	end for
 
 	if not silent then
-		printf(1, "Linking 100%% %s\n", { exe_name })
+		ShowMsg(1, 166, { exe_name })
 	end if
 
 	switch compiler_type do
@@ -601,14 +602,14 @@ procedure build_direct()
 			cmd = sprintf("%s -o %s %s %s", { settings[SETUP_LEXE], exe_name, objs, settings[SETUP_LFLAGS] })
 
 		case else
-			printf(2, "Unknown compiler type: %d\n", { compiler_type })
+			ShowMsg(2, 167, { compiler_type })
 			abort(1)
 	end switch
 
 	status = system_exec(cmd, 0)
 	if status != 0 then
-		printf(2, "Unable to link %s\n", { exe_name })
-		printf(2, "Status: %d Command: %s\n", { status, cmd })
+		ShowMsg(2, 168, { exe_name })
+		ShowMsg(2, 169, { status, cmd })
 		abort(1)
 	end if
 
@@ -634,9 +635,8 @@ export procedure write_buildfile()
 			write_cmake()
 
 			if not silent then
-				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
-				printf(1, "To build your project, include %s.cmake into a parent CMake project\n",
-					{ file0 })
+				ShowMsg(1, 170, { cfile_count + 2 })
+				ShowMsg(1, 171,	{ file0 })
 			end if
 
 		case BUILD_MAKEFILE_FULL then
@@ -650,17 +650,16 @@ export procedure write_buildfile()
 					make_command = "make -f "
 				end if
 
-				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
-				printf(1, "To build your project, type %s%s.mak\n", { make_command, file0 })
+				ShowMsg(1, 170, { cfile_count + 2 })
+				ShowMsg(1, 172, { make_command, file0 })
 			end if
 
 		case BUILD_MAKEFILE then
 			write_makefile()
 
 			if not silent then
-				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
-				printf(1, "To build your project, include %s.mak into a larger Makefile project\n",
-					{ file0 })
+				ShowMsg(1, 170, { cfile_count + 2 })
+				ShowMsg(1, 173, { file0 })
 			end if
 
 		case BUILD_EMAKE then
@@ -672,8 +671,8 @@ export procedure write_buildfile()
 					fname &= ".bat"
 				end if
 
-				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
-				printf(1, "To build your project, type %s\n", { fname })
+				ShowMsg(1, 170, { cfile_count + 2 })
+				ShowMsg(1, 174, { fname })
 			end if
 
 		case BUILD_DIRECT then
@@ -681,17 +680,17 @@ export procedure write_buildfile()
 
 			if not silent then
 				sequence settings = setup_build()
-				printf(1, "\nTo run your project, type %s\n", { exe_name })
+				ShowMsg(1, 175, { exe_name })
 			end if
 
 		case BUILD_NONE then
 			if not silent then
-				printf(1, "\n%d.c files were created.\n", { cfile_count + 2 })
+				ShowMsg(1, 170, { cfile_count + 2 })
 			end if
 
 			-- Do not write any build file
 
 		case else
-			CompileErr("Unknown build file type")
+			CompileErr(151)
 	end switch
 end procedure

@@ -5,6 +5,7 @@ include std/io.e
 
 include global.e
 include reswords.e
+include msgtext.e
 
 integer Errors = 0 -- number of errors detected during compile
 
@@ -191,9 +192,13 @@ end procedure
 
 --**
 -- Handle fatal compilation errors
-export procedure CompileErr(sequence msg, object args = {})
+export procedure CompileErr(object msg, object args = {})
 	sequence errmsg
 
+	if integer(msg) then
+		msg = GetMsgText(msg)
+	end if
+	
 	if atom(args) or length(args) != 0 then
 		msg = sprintf(msg, args)
 	end if
@@ -230,8 +235,7 @@ end procedure
 --**
 -- report feature not supported
 procedure not_supported_compile(sequence feature)
-	CompileErr("%s is not supported in Euphoria for %s",
-					   {feature, version_name})
+	CompileErr(5, {feature, version_name})
 end procedure
 
 --**

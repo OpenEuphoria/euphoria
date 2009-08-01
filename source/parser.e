@@ -127,7 +127,7 @@ procedure CheckForUndefinedGotoLabels()
 			gline_number = goto_line[i][1] -- tell compiler the correct line number
 			ThisLine = goto_line[i][2] -- tell compiler the correct line number
 			bp = length(ThisLine)
-				CompileErr("Unknown label '%s'", {goto_delay[i]})
+				CompileErr(156, {goto_delay[i]})
 		end if
 	end for
 end procedure
@@ -525,7 +525,7 @@ function read_recorded_token(integer n)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
 	        if p = 0 then
-	        	CompileErr("Variable %s has not been declared",{Recorded[n]})
+	        	CompileErr(157,{Recorded[n]})
 	        end if
 		    t = {SymTab[p][S_TOKEN], p}
 		end if
@@ -536,7 +536,7 @@ function read_recorded_token(integer n)
 		if t[T_ID] != NAMESPACE then
 			p = Ns_recorded_sym[n]
 			if p = 0 then
-				CompileErr("Unknown namespace in replayed token")
+				CompileErr(153)
 			end if
 			t = {NAMESPACE, p}
 		end if
@@ -544,7 +544,7 @@ function read_recorded_token(integer n)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
 	        if p = 0 then
-	        	CompileErr("Variable %s has not been declared",{Recorded[n]})
+	        	CompileErr(157,{Recorded[n]})
 	        end if
 		    t = {SymTab[p][S_TOKEN], p}
 		end if
@@ -591,7 +591,7 @@ function next_token()
 					return {VARIABLE, private_sym[parseargs_states[i][PS_POSITION]+t[T_SYM][1]]}
 				end if
 			end for
-			CompileErr("internal nested call parsing error")
+			CompileErr(98)
 		end if
 	elsif lock_scanner then
 		return {PLAYBACK_ENDS,0}
@@ -644,12 +644,10 @@ procedure tok_match(integer tok, integer prevtok = 0)
 		expected = LexName(tok)
 		actual = LexName(t[T_ID])
 		if prevtok = 0 then
-			CompileErr("Syntax error - expected to see possibly %s, not %s",
-				   {expected, actual})
+			CompileErr(132, {expected, actual})
 		else
 			prevname = LexName(prevtok)
-			CompileErr("Syntax error - expected to see %s after %s, not %s",
-				   {expected, prevname, actual})
+			CompileErr(138, {expected, prevname, actual})
 		end if
 	end if
 end procedure
@@ -672,7 +670,7 @@ procedure UndefinedVar(symtab_index s)
 	sequence fname
 
 	if SymTab[s][S_SCOPE] = SC_UNDEFINED then
-		CompileErr("'%s' has not been declared", {SymTab[s][S_NAME]})
+		CompileErr(19, {SymTab[s][S_NAME]})
 
 	elsif SymTab[s][S_SCOPE] = SC_MULTIPLY_DEFINED then
 		rname = SymTab[s][S_NAME]
@@ -689,8 +687,7 @@ procedure UndefinedVar(symtab_index s)
 			
 		end for
 
-		CompileErr("A namespace qualifier is needed to resolve '%s'\nbecause '%s' is declared as a global/public symbol in:\n%s",
-						 {rname, rname, errmsg})
+		CompileErr(23, {rname, rname, errmsg})
 
 	elsif length(symbol_resolution_warning) then
 		Warning( symbol_resolution_warning[1], resolution_warning_flag, symbol_resolution_warning[2])
@@ -706,8 +703,7 @@ procedure WrongNumberArgs(symtab_index subsym, sequence only)
 	else
 		plural = "s"
 	end if
-	CompileErr("'%s' takes %s%d argument%s",
-			   {SymTab[subsym][S_NAME], only,
+	CompileErr(20, {SymTab[subsym][S_NAME], only,
 				SymTab[subsym][S_NUM_ARGS], plural})
 end procedure
 
@@ -766,8 +762,7 @@ procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_priv
 	private_sym  = fwd_private_sym
 	
 	if atom(SymTab[param][S_CODE]) then  -- but no default set
-		CompileErr("Argument %d of %s (%s) is defaulted, but has no default value",
-			{arg, SymTab[subsym][S_NAME], SymTab[param][S_NAME]})
+		CompileErr(26, {arg, SymTab[subsym][S_NAME], SymTab[param][S_NAME]})
 	end if
 	
 	use_private_list = 1
@@ -826,7 +821,7 @@ procedure ParseArgs(symtab_index subsym)
 			end if
 			
 			if atom(var_code) then  -- but no default set
-				CompileErr("Argument %d is defaulted, but has no default value",i)
+				CompileErr(29,i)
 			end if
 			
 			use_private_list = 1
@@ -904,7 +899,7 @@ procedure ParseArgs(symtab_index subsym)
 								private_sym &= Top()
 							end if
 						else -- just not enough args
-							CompileErr("Argument %d is defaulted, but has no default value", on_arg)
+							CompileErr(29, on_arg)
 						end if
 		  		    end while
 					-- all missing args had default values
@@ -976,7 +971,7 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 				end if
 										
 				if id != COMMA then
-						CompileErr("expected ',' or ')'")
+						CompileErr(69)
 				end if
 		end switch
 	end while
@@ -1221,7 +1216,7 @@ procedure Factor()
 					gListItem[$] = 0
 					putback(tok)
 				else
-					CompileErr("'$' must only appear between '[' and ']' or as the last item in a sequence literal.")
+					CompileErr(21)
 				end if
 			end if
 			
@@ -1245,8 +1240,7 @@ procedure Factor()
 			Function_call( tok )
 									
 		case else
-			CompileErr("Syntax error - expected to see an expression, not %s",
-					   {LexName(id)})
+			CompileErr(135, {LexName(id)})
 	end switch
 end procedure
 
@@ -1495,10 +1489,10 @@ procedure Assignment(token left_var)
 		UndefinedVar(left_sym)
 		if SymTab[left_sym][S_SCOPE] = SC_LOOP_VAR or
 		SymTab[left_sym][S_SCOPE] = SC_GLOOP_VAR then
-			CompileErr("may not assign to a for-loop variable")
+			CompileErr(109)
 	
 		elsif SymTab[left_sym][S_MODE] = M_CONSTANT then
-			CompileErr("may not change the value of a constant")
+			CompileErr(110)
 	
 		elsif find(SymTab[left_sym][S_SCOPE], SCOPE_TYPES) then
 			-- this helps us to optimize things below
@@ -1561,9 +1555,9 @@ procedure Assignment(token left_var)
 	if not find(assign_op, ASSIGN_OPS) then
 		sequence lname = SymTab[left_var[T_SYM]][S_NAME]
 		if assign_op = COLON then
-			CompileErr("Syntax error - Unknown namespace '%s' used", {lname})
+			CompileErr(133, {lname})
 		else
-			CompileErr("expected to see an assignment after '%s', such as =, +=, -=, *=, /= or &=", {lname})
+			CompileErr(76, {lname})
 		end if
 	end if
 
@@ -1683,7 +1677,7 @@ procedure Return_statement()
 	token tok
 	integer pop
 	if CurrentSub = TopLevelSub then
-		CompileErr("return must be inside a procedure or function")
+		CompileErr(130)
 	end if
 	
 	integer 
@@ -1743,13 +1737,13 @@ function exit_level(token tok, integer flag)
 			n += num_labels
 		end if
 		if n<=0 or n>num_labels then
-			CompileErr("exit/break argument out of range")
+			CompileErr(87)
 		end if
 		return {n, next_token()}
 	elsif tok[T_ID]=STRING then
 		n = find(SymTab[tok[T_SYM]][S_OBJ],labels)
 		if n = 0 then
-			CompileErr("Unknown block label")
+			CompileErr(152)
 		end if
 		return {num_labels + 1 - n, next_token()}
 	else
@@ -1766,14 +1760,14 @@ procedure GLabel_statement()
 	tok = next_token()
 
 	if tok[T_ID] != STRING then
-		CompileErr("A label clause must be followed by a constant string")
+		CompileErr(35)
 	end if
 
 	labbel = SymTab[tok[T_SYM]][S_OBJ]
 	laddr = length(Code) + 1
 
 	if find(labbel, goto_labels) then
-		CompileErr("Duplicate label name")
+		CompileErr(59)
 	end if
 
 	goto_labels = append(goto_labels, labbel)
@@ -1817,7 +1811,7 @@ procedure Goto_statement()
 		end if
 		tok = next_token()
 	else
-		CompileErr("Goto statement without a string label.")
+		CompileErr(96)
 	end if
 	
 	emit_op(GOTO)
@@ -1837,7 +1831,7 @@ procedure Exit_statement()
 	sequence by_ref
 
 	if not length(loop_stack) then
-		CompileErr("exit statement must be inside a loop")
+		CompileErr(88)
 	end if
 
 	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
@@ -1857,7 +1851,7 @@ procedure Continue_statement()
 	integer loop_level
 
 	if not length(loop_stack) then
-		CompileErr("continue statement must be inside a loop")
+		CompileErr(49)
 	end if
 
 	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
@@ -1869,7 +1863,7 @@ procedure Continue_statement()
 	if continue_addr[$+1-loop_level] then -- address is known for while loops
 		if continue_addr[$+1-loop_level] < 0 then
 			-- it's in a switch statement
-			CompileErr("continue statement must be inside a loop")
+			CompileErr(49)
 		end if
 		emit_addr(continue_addr[$+1-loop_level])
 	else  -- for loop increment code/repeat loop end of loop test
@@ -1891,7 +1885,7 @@ procedure Retry_statement()
 	token tok
 
 	if not length(loop_stack) then
-		CompileErr("retry statement must be inside a loop")
+		CompileErr(131)
 	end if
 
 	by_ref = exit_level(next_token(),0) -- can't pass tok by reference
@@ -1901,7 +1895,7 @@ procedure Retry_statement()
 	else
 		if retry_addr[$+1-by_ref[1]] < 0 then
 			-- it's in a switch statement
-			CompileErr("retry statement must be inside a loop")
+			CompileErr(131)
 		end if
 		emit_op(ELSE)
 	end if
@@ -1925,7 +1919,7 @@ procedure Break_statement()
 	sequence by_ref
 
 	if not length(if_labels) then
-		CompileErr("break statement must be inside a if or a switch block")
+		CompileErr(40)
 	end if
 
 	by_ref = exit_level(next_token(),1)
@@ -1955,20 +1949,20 @@ function finish_block_header(integer opcode)
 		switch tok[T_ID] do
 		    case ENTRY then
 				if not (opcode = WHILE or opcode = LOOP) then
-					CompileErr("'with entry' is only valid on a while or loop statement")
+					CompileErr(14)
 				end if
 
 			    has_entry = 1
 				
 			case FALLTHRU then
 				if not opcode = SWITCH then
-					CompileErr("'with fallthru' is only valid in a switch statement")
+					CompileErr(13)
 				end if
 				
 				switch_stack[$][SWITCH_FALLTHRU] = 1
 				
 			case else
-			    CompileErr("An unknown 'with/without' option has been specified")
+			    CompileErr(27)
         end switch
 
         tok = next_token()
@@ -1976,13 +1970,13 @@ function finish_block_header(integer opcode)
 		tok = next_token()
 		if tok[T_ID] = FALLTHRU then
 			if not opcode = SWITCH then
-				CompileErr("'without fallthru' is only valid in a switch statement")
+				CompileErr(15)
 			end if
 			
 			switch_stack[$][SWITCH_FALLTHRU] = 0
 				
 		else
-			CompileErr("An unknown 'with/without' option has been specified")
+			CompileErr(27)
 		end if		
         tok = next_token()
 	end if
@@ -1991,7 +1985,7 @@ function finish_block_header(integer opcode)
 	if tok[T_ID]=LABEL then
 		tok = next_token()
 		if tok[T_ID] != STRING then
-			CompileErr("A label clause must be followed by a literal string")
+			CompileErr(38)
 		end if
 		labbel = SymTab[tok[T_SYM]][S_OBJ]
 		block_label( labbel )
@@ -2011,13 +2005,13 @@ function finish_block_header(integer opcode)
 	end if
 	if tok[T_ID]=ENTRY then
 	    if has_entry then
-	        CompileErr("duplicate entry clause in a loop header")
+	        CompileErr(64)
 	    end if
 	    has_entry=1
 	    tok=next_token()
 	end if
 	if has_entry and (opcode = IF or opcode = SWITCH) then
-		CompileErr("entry keyword is not supported inside an if or switch block header")
+		CompileErr(80)
 	end if
 	if opcode = IF then
 		opcode = THEN
@@ -2190,7 +2184,7 @@ procedure add_case( object sym, integer sign )
 			emit_addr( length( switch_stack[$][SWITCH_CASES] ) )
 		end if
 	else
-		CompileErr( "duplicate case value used." )		
+		CompileErr( 63 )		
 	end if
 end procedure
 
@@ -2213,7 +2207,7 @@ procedure Case_statement()
 	symtab_index condition
 
 	if not in_switch() then
-		CompileErr( "a case must be inside a switch" )
+		CompileErr( 34 )
 	end if
 	
 	if length(switch_stack[$][SWITCH_CASES]) > 0 then
@@ -2239,7 +2233,7 @@ procedure Case_statement()
 	while 1 do
 	
 		if else_case() then
-			CompileErr( "a case block cannot follow a case else block" )
+			CompileErr( 33 )
 		end if
 		maybe_namespace()
 		tok = next_token()
@@ -2274,15 +2268,15 @@ procedure Case_statement()
 		end if
 		
 		if fwd < 0 then
-			CompileErr( "found %s but expected 'else', an atom, string, constant or enum", {find_category(tok[T_ID])})
+			CompileErr( 91, {find_category(tok[T_ID])})
 		end if
 		
 		if tok[T_ID] = ELSE then
 			if sign = -1 then
-				CompileErr( "expected an atom, string or a constant assigned an atom or a string" )
+				CompileErr( 71 )
 			end if
 			if length(switch_stack[$][SWITCH_CASES]) = 0 then
-				CompileErr( "case else cannot be first case in switch" )
+				CompileErr( 44 )
 			end if
 			case_else()
 			exit
@@ -2318,7 +2312,7 @@ procedure Case_statement()
 			end if
 			
 		elsif tok[T_ID] != COMMA then
-			CompileErr("expected 'then' or ',', not %s",{LexName(tok[T_ID])})
+			CompileErr(66,{LexName(tok[T_ID])})
 
 		end if
 	end while
@@ -2327,7 +2321,7 @@ end procedure
 
 procedure Fallthru_statement()
 	if not in_switch() then
-		CompileErr( "a fallthru must be inside a switch" )
+		CompileErr( 22 )
 	end if
 	tok_match( CASE )
 	fallthru_case = 1
@@ -2678,53 +2672,53 @@ procedure Ifdef_statement()
 				option = StringToken()
 				if equal(option, "then") then
 					if at_start = 1 then
-						CompileErr("%s is missing defined word before 'then'", {keyw})
+						CompileErr(6, {keyw})
 					elsif conjunction = 0 then
 						if negate = 0 then
 							exit "deflist"
 						else
-							CompileErr("%s 'then' follows 'not'", {keyw})
+							CompileErr(11, {keyw})
 						end if
 					else
-						CompileErr("%s 'then' follows '%s'", {keyw, prev_conj})
+						CompileErr(8, {keyw, prev_conj})
 					end if
 				elsif equal(option, "not") then
 					if negate = 0 then
 						negate = 1
 						continue "deflist"
 					else
-						CompileErr("%s duplicate 'not'", {keyw})
+						CompileErr(7, {keyw})
 					end if
 				elsif equal(option, "and") then
 					if at_start = 1 then
-						CompileErr("%s is missing defined word before 'and'", {keyw})
+						CompileErr(2, {keyw})
 					elsif conjunction = 0 then
 						conjunction = 1
 						prev_conj = option
 						continue "deflist"
 					else
-						CompileErr("%s 'and' follows '%s'",{keyw,prev_conj})
+						CompileErr(10,{keyw,prev_conj})
 					end if
 				elsif equal(option, "or") then
 					if at_start = 1 then
-						CompileErr("%s is missing defined word before 'or'", {keyw})
+						CompileErr(6, {keyw})
 					elsif conjunction = 0 then
 						conjunction = 2
 						prev_conj = option
 						continue "deflist"
 					else
-						CompileErr("%s 'or' follows '%s'", {keyw, prev_conj})
+						CompileErr(9, {keyw, prev_conj})
 					end if
 				elsif length(option) = 0 then
 					if at_start = 1 then
-						CompileErr("no 'word' was found following %s", {keyw})
+						CompileErr(122, {keyw})
 					else
-						CompileErr("expecting possibly 'then' not end of line")
+						CompileErr(82)
 					end if
 				elsif not at_start and length(prev_conj) = 0 then
-					CompileErr("%s not understood", {keyw})
+					CompileErr(4, {keyw})
 				elsif t_identifier(option) = 0 then
-					CompileErr("%s word must be an identifier", {keyw})
+					CompileErr(3, {keyw})
 				else
 					at_start = 0
 				end if
@@ -2766,7 +2760,7 @@ procedure Ifdef_statement()
 		while 1 do
 			tok = next_token()
 			if tok[T_ID] = END_OF_FILE then
-				CompileErr("End of file reached while searching for 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$])
+				CompileErr(65, ifdef_lineno[$])
 			elsif tok[T_ID] = END then
 				tok = next_token()
 				if tok[T_ID] = IFDEF then
@@ -2777,13 +2771,13 @@ procedure Ifdef_statement()
 					end if
 				elsif in_matched then
 					-- we hit either an "end if" or some other kind of end statement that we shouldn't have.
-					CompileErr("Expecting 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$])
+					CompileErr(75, ifdef_lineno[$])
 				else
 					if tok[T_ID] = IF then
 						if if_lvl > 0 then
 							if_lvl -= 1
 						else
-							CompileErr("Mismatched 'end if'. Should this be an 'end ifdef' to match 'ifdef' on line %d", ifdef_lineno[$])
+							CompileErr(111, ifdef_lineno[$])
 						end if
 					end if
 				end if
@@ -2792,7 +2786,7 @@ procedure Ifdef_statement()
 			elsif tok[T_ID] = ELSE then
 				if not in_matched then
 					if if_lvl = 0 then
-						CompileErr("Mismatched 'else'. Should this be an 'elsedef' to match 'ifdef' on line %d", ifdef_lineno[$])
+						CompileErr(108, ifdef_lineno[$])
 					end if
 				end if
 			elsif tok[T_ID] = ELSIFDEF then
@@ -2812,10 +2806,10 @@ procedure Ifdef_statement()
 						option = StringToken()
 					end while
 					if gotword = 0 then
-						CompileErr("Expecting a 'word' to follow 'elsifdef'")
+						CompileErr(78)
 					end if
 					if gotthen = 0 then
-						CompileErr("Expecting 'then' on 'elsifdef' line")
+						CompileErr(77)
 					end if
 					read_line()
 				else
@@ -2826,7 +2820,7 @@ procedure Ifdef_statement()
 				option = StringToken()
 				if length(option) > 0 then
 					if line_number = gotword then
-						CompileErr("Not expecting anything on same line as 'elsdef'")
+						CompileErr(116)
 					end if
 					bp -= length(option)
 				end if
@@ -2912,7 +2906,7 @@ procedure For_statement()
 	Start_block( FOR )
 	loop_var = next_token()
 	if not find(loop_var[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
-		CompileErr("a loop variable name is expected here")
+		CompileErr(28)
 	end if
 
 	if BIND then
@@ -2955,7 +2949,7 @@ procedure For_statement()
 	emit_op(FOR)
 	emit_addr(loop_var_sym)
 	if finish_block_header(FOR) then
-		CompileErr("entry is not supported in for loops")
+		CompileErr(83)
 	end if
 	entry_addr &= 0
 	bp1 = length(Code)+1
@@ -3093,7 +3087,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 		end if
 		
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
-			CompileErr("a name is expected here")
+			CompileErr(25)
 		end if
 		sym = tok[T_SYM]
 		DefinedYet(sym)
@@ -3179,24 +3173,24 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 							if integer(tsym[S_OBJ]) then
 								valsym = tok[T_SYM]
 							else
-								CompileErr("An enum constant must be an integer")
+								CompileErr(30)
 							end if					
 						else
-							CompileErr("enum constants must be assigned an integer")
+							CompileErr(70)
 						end if
 					elsif valsym < 0 then
 						-- forward reference
 						
 					else
-						CompileErr("integer or constant expected")
+						CompileErr(99)
 	
 					end if
 				else
-						CompileErr("integer or constant expected")					
+						CompileErr(99)					
 				end if
 				valsym = tok[T_SYM]
 				if not integer( SymTab[valsym][S_OBJ] ) then
-					CompileErr("enum constants must be integers")
+					CompileErr(84)
 				end if
 				val = SymTab[valsym][S_OBJ] * negate
 				Push(NewIntSym(val))
@@ -3291,7 +3285,7 @@ procedure Private_declaration(symtab_index type_sym)
 	while TRUE do
 		tok = next_token()
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC, NAMESPACE}) then
-			CompileErr("a variable name is expected here")
+			CompileErr(24)
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
 		param_num += 1
@@ -3397,18 +3391,18 @@ procedure Entry_statement()
 	integer addr
 
 	if not length(loop_stack) or block_index=0 then
-		CompileErr("the entry statement must appear inside a loop")
+		CompileErr(144)
 	end if
 	if block_list[block_index]=IF or block_list[block_index]=SWITCH then
-		CompileErr("the innermost block containing an entry statement must be the loop it defines an entry in.")
+		CompileErr(143)
 	elsif loop_stack[$] = FOR then  -- not allowed in an innermost for loop
-		CompileErr("the entry statement can not be used in a 'for' block")
+		CompileErr(142)
 	end if
 	addr = entry_addr[$]
 	if addr=0  then
-		CompileErr("the entry statement must appear at most once inside a loop")
+		CompileErr(141)
 	elsif addr<0 then
-		CompileErr("entry statement is being used without a corresponding entry clause in the loop header")
+		CompileErr(73)
 	end if
 	backpatch(addr,ELSE)
 	backpatch(addr+1,length(Code)+1+(TRANSLATE>0))
@@ -3554,17 +3548,17 @@ procedure Statement_list()
 			if id = ELSE then
 				if length(if_stack) = 0 then
 					if live_ifdef > 0 then
-						CompileErr("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$])
+						CompileErr(134, ifdef_lineno[$])
 					else
-						CompileErr("Not expecting 'else'")
+						CompileErr(118)
 					end if
 				end if
 			elsif id = ELSIF then
 				if length(if_stack) = 0 then
 					if live_ifdef > 0 then
-						CompileErr("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$])
+						CompileErr(139, ifdef_lineno[$])
 					else
-						CompileErr("Not expecting 'elsif'")
+						CompileErr(119)
 					end if
 				end if
 			end if
@@ -3591,7 +3585,7 @@ procedure SubProg(integer prog_type, integer scope)
 	LeaveTopLevel()
 	prog_name = next_token()
 	if not find(prog_name[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
-		CompileErr("a name is expected here")
+		CompileErr(25)
 	end if
 	p = prog_name[T_SYM]
 	DefinedYet(p)
@@ -3679,7 +3673,7 @@ procedure SubProg(integer prog_type, integer scope)
 							-- that is declared later on. So for now, let's assume that.
 							undef_type = - new_forward_reference( TYPE, tok[T_SYM] )
 						else
-							CompileErr("a type is expected here")
+							CompileErr(37)
 						end if
 					end if
 				end if
@@ -3699,7 +3693,7 @@ procedure SubProg(integer prog_type, integer scope)
 					tok[T_SYM] = object_type
 				end if
 			else
-				CompileErr("a type is expected here")
+				CompileErr(37)
 			end if
 		end if
 		type_sym = tok[T_SYM]
@@ -3707,10 +3701,9 @@ procedure SubProg(integer prog_type, integer scope)
 		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC, NAMESPACE}) then
 			sequence tokcat = find_category(tok[T_ID])
 			if tok[T_SYM] != 0 and length(SymTab[tok[T_SYM]]) >= S_NAME then
-				CompileErr(sprintf("found %s '%s' but was expecting a parameter name instead.",
-							{tokcat, SymTab[tok[T_SYM]][S_NAME]}))
+				CompileErr(90, {tokcat, SymTab[tok[T_SYM]][S_NAME]})
 			else
-				CompileErr("found %s but was expecting a parameter name instead.",{LexName(tok[T_ID])})
+				CompileErr(92, {LexName(tok[T_ID])})
 			end if
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
@@ -3756,10 +3749,10 @@ procedure SubProg(integer prog_type, integer scope)
 		if tok[T_ID] = COMMA then
 			tok = next_token()
 			if tok[T_ID] = RIGHT_ROUND then
-				CompileErr("expected to see a parameter declaration, not ')'")
+				CompileErr(85)
 			end if
 		elsif tok[T_ID] != RIGHT_ROUND then
-			CompileErr("badly-formed list of parameters - expected ',' or ')'")
+			CompileErr(41)
 		end if
 	end while
 	Code = {} -- removes any spurious code emitted while recording parameters
@@ -3773,7 +3766,7 @@ procedure SubProg(integer prog_type, integer scope)
 		num_routines += 1
 	end if
 	if SymTab[p][S_TOKEN] = TYPE and param_num != 1 then
-		CompileErr("types must have exactly one parameter")
+		CompileErr(148)
 	end if
 	
 	-- code to perform type checks on all the parameters
@@ -3824,9 +3817,9 @@ procedure SubProg(integer prog_type, integer scope)
 	if prog_type != PROCEDURE then
 		if not FuncReturn then
 			if prog_type = FUNCTION then
-				CompileErr("no value returned from function")
+				CompileErr(120)
 			else
-				CompileErr("type must return true / false value")
+				CompileErr(149)
 			end if
 		end if
 		emit_op(BADRETURNF) -- function/type shouldn't reach here
@@ -3880,8 +3873,7 @@ end procedure
 
 procedure not_supported_compile(sequence feature)
 -- Report that a compile-time feature is not supported in this platform
-	CompileErr("%s is not supported in Euphoria for %s",
-				  {feature, version_name})
+	CompileErr(5, {feature, version_name})
 end procedure
 
 sequence mix_msg
@@ -3933,7 +3925,7 @@ procedure SetWith(integer on_off)
 						sample_size = -1
 					end if
 					if sample_size < 1 and OpProfileTime then
-						CompileErr("sample size must be a positive integer")
+						CompileErr(136)
 					end if
 				else
 					putback(tok)
@@ -3959,13 +3951,13 @@ procedure SetWith(integer on_off)
 		if find(tok[T_ID], {CONCAT_EQUALS, PLUS_EQUALS}) != 0 then
 			tok = next_token()
 			if tok[T_ID] != LEFT_ROUND then
-				CompileErr("warning names must be enclosed in '(' ')'")
+				CompileErr(160)
 			end if
 			reset_flags = 0
 		elsif tok[T_ID] = EQUALS then
 			tok = next_token()
 			if tok[T_ID] != LEFT_ROUND then
-				CompileErr("warning names must be enclosed in '(' ')'")
+				CompileErr(160)
 			end if
 			reset_flags = 1
 		elsif tok[T_ID] = VARIABLE then
@@ -4025,7 +4017,7 @@ procedure SetWith(integer on_off)
 					idx = find(option, warning_names)
 					if idx = 0 then
 	 					if good_sofar != line_number then
- 							CompileErr("too many warning errors")
+ 							CompileErr(147)
  						end if
 						Warning(sprintf("%.99s:%d - Unknown warning name %s",
 							{file_name[current_file_no], line_number, option}),
@@ -4058,10 +4050,10 @@ procedure SetWith(integer on_off)
 	elsif equal(option, "define") then
 		option = StringToken()
 		if length(option) = 0 then
-			CompileErr("Expecting to find a word to define but reached end of line first.")
+			CompileErr(81)
 			
 		elsif not t_identifier(option) then
-			CompileErr("defined word must only have alphanumerics and underscore")
+			CompileErr(61)
 			
 		end if
 		if on_off = 0 then
@@ -4097,7 +4089,7 @@ procedure SetWith(integer on_off)
 		-- ignore security stamp as it is no longer required.
 		
 	else
-		CompileErr("unknown with/without option '" & option & "'")
+		CompileErr(154, {option})
 
 	end if
 end procedure
@@ -4181,11 +4173,9 @@ export procedure real_parser(integer nested)
 					UndefinedVar(tok[T_SYM])
 				end if
 				if scope = SC_GLOBAL then
-					CompileErr( "'global' must be followed by:\n" &
-								"<a type>, 'constant', 'enum', 'procedure', 'type' or 'function'")
+					CompileErr( 18 )
 				else
-					CompileErr( "'public' or 'export' must be followed by:\n" &
-								"<a type>, 'constant', 'enum', 'procedure', 'type' or 'function'")
+					CompileErr( 16 )
 				end if
 			end if
 
@@ -4250,7 +4240,7 @@ export procedure real_parser(integer nested)
 			StartSourceLine(TRUE)
 			Exit_statement()
 			else
-			CompileErr("exit must be inside a loop")
+			CompileErr(89)
 			end if
 
 		elsif id = INCLUDE then
@@ -4291,7 +4281,7 @@ export procedure real_parser(integer nested)
 				StartSourceLine(TRUE)
 				Continue_statement()
 			else
-				CompileErr("continue must be inside a loop")
+				CompileErr(50)
 			end if
 
 		elsif id = RETRY then
@@ -4299,7 +4289,7 @@ export procedure real_parser(integer nested)
 				StartSourceLine(TRUE)
 				Retry_statement()
 			else
-				CompileErr("retry must be inside a loop")
+				CompileErr(128)
 			end if
 
 		elsif id = BREAK then
@@ -4307,7 +4297,7 @@ export procedure real_parser(integer nested)
 				StartSourceLine(TRUE)
 				Break_statement()
 			else
-				CompileErr("break must be inside an if block ")
+				CompileErr(39)
 			end if
 
 		elsif id = ENTRY then
@@ -4315,7 +4305,7 @@ export procedure real_parser(integer nested)
 			    StartSourceLine(TRUE)
 			    Entry_statement()
 			else
-				CompileErr("entry must be inside a loop")
+				CompileErr(72)
 			end if
 
 		elsif id = IFDEF then
@@ -4330,24 +4320,24 @@ export procedure real_parser(integer nested)
 			Switch_statement()
 
 		elsif id = ILLEGAL_CHAR then
-			CompileErr("illegal character")
+			CompileErr(102)
 
 		else
 			if nested then 
 				if id = ELSE then
 					if length(if_stack) = 0 then
 						if live_ifdef > 0 then
-							CompileErr("Should this be 'elsedef' for the ifdef on line %d?", ifdef_lineno[$])
+							CompileErr(134, ifdef_lineno[$])
 						else
-							CompileErr("Not expecting 'else'")
+							CompileErr(118)
 						end if
 					end if
 				elsif id = ELSIF then
 					if length(if_stack) = 0 then
 						if live_ifdef > 0 then
-							CompileErr("Should this be 'elsifdef' for the ifdef on line %d?", ifdef_lineno[$])
+							CompileErr(139, ifdef_lineno[$])
 						else
-							CompileErr("Not expecting 'elsif'")
+							CompileErr(119)
 						end if
 					end if
 				end if
@@ -4360,10 +4350,10 @@ export procedure real_parser(integer nested)
 			else
 				if id = END then
 					tok = next_token()
-					CompileErr("'end' has no matching '%s'", {find_token_text(tok[T_ID])})
+					CompileErr(17, {find_token_text(tok[T_ID])})
 				end if
 								
-				CompileErr("Not expecting to see '%s' here", {replace_all(find_token_text(id), "'", "")})
+				CompileErr(117, {replace_all(find_token_text(id), "'", "")})
 
 			end if
 

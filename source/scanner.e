@@ -179,7 +179,7 @@ function pack_source(object src)
 		-- we ran out of space, allocate another chunk
 		current_source = allocate(SOURCE_CHUNK)
 		if current_source = 0 then
-			CompileErr("out of memory - turn off trace and profile")
+			CompileErr(123)
 		end if
 		all_source = append(all_source, current_source)
 		-- skip first byte, offset 0 means "no source"
@@ -333,7 +333,7 @@ export procedure read_line()
 	end if
 	n = find(0, ThisLine)
 	if n != 0 then
-		CompileErr(sprintf("illegal character (ASCII 0) at line:col %d:%d", {line_number, n}))
+		CompileErr(103, {line_number, n})
 	end if
 	AppendSourceLine()
 end procedure
@@ -376,7 +376,7 @@ function find_file(sequence fname)
 	if absolute_path(fname) then
 		-- open fname exactly as it is
 		if not file_exists(fname) then
-			CompileErr("can't open '%s'", {new_include_name})
+			CompileErr(51, {new_include_name})
 		end if
 
 		return fname
@@ -486,7 +486,7 @@ function find_file(sequence fname)
 		errbuff &= sprintf("\t%s\n", {full_path[i]})
 	end for
 	
-	CompileErr("can't find '%s' in any of ...\n%s", {new_include_name, errbuff})
+	CompileErr(52, {new_include_name, errbuff})
 end function
 
 -- open an include file (new_include_name) according to the include path rules
@@ -601,7 +601,7 @@ procedure default_namespace( )
 		-- add the default namespace
 		tok = call_func( scanner_rid, {} )
 		if tok[T_ID] != VARIABLE then
-			CompileErr("missing default namespace qualifier")
+			CompileErr(114)
 		end if
 
 		sym = tok[T_SYM]
@@ -810,7 +810,7 @@ procedure IncludePush()
 	end for
 
 	if length(IncludeStk) >= INCLUDE_LIMIT then
-		CompileErr("includes are nested too deeply")
+		CompileErr(104)
 	end if
 
 	IncludeStk = append(IncludeStk,
@@ -861,7 +861,7 @@ end ifdef
 	src_file = new_file
 	file_start_sym = last_sym
 	if current_file_no >= MAX_FILE then
-		CompileErr("program includes too many files")
+		CompileErr(126)
 	end if
 	file_name = append(file_name, new_include_name)
 	default_namespaces &= 0
@@ -951,7 +951,7 @@ function MakeInt(sequence text, integer nBase = 10)
 	for i = 1 to length(text) do
 		digit = (text[i] - '0')
 		if digit >= nBase or digit < 0 then
-			CompileErr("digit '%s' at position %d is outside of number base", {text[i],i})
+			CompileErr(62, {text[i],i})
 		end if
 		if fnum = 0 then
 			if num <= maxchk then
@@ -977,7 +977,7 @@ function EscapeChar(integer c)
 -- the escape characters
 	c = find(c, gEscCode)
 	if c = 0 then
-		CompileErr("unknown escape character")
+		CompileErr(155)
 	end if
 	return gEscVal[c]
 end function
@@ -992,7 +992,7 @@ function my_sscanf(sequence yytext)
 	atom dec
 
 	if length(yytext) < 2 then
-		CompileErr("number not formed correctly")
+		CompileErr(121)
 	end if
 
 	if find( 'e', yytext ) or find( 'E', yytext ) then
@@ -1111,7 +1111,7 @@ function ExtendedString(integer ech)
 
 	while 1 do
 		if ch = END_OF_FILE_CHAR then
-			CompileErr("Raw string literal from line %d not terminated.", cline)
+			CompileErr(129, cline)
 		end if
 
 		if ch = ech then
@@ -1228,7 +1228,7 @@ export function Scanner()
 					end if
 
 					if length(yytext) = 0 then
-						CompileErr("an identifier is expected here")
+						CompileErr(32)
 					end if
 
 					-- must look in chosen file.
@@ -1305,7 +1305,7 @@ export function Scanner()
 			return {class, 0}  -- brackets, punctuation, eof, illegal char etc.
 
 		elsif class = ILLEGAL_CHAR then
-			CompileErr("illegal character in source")
+			CompileErr(101)
 
 		elsif class = NEWLINE then
 			if start_include then
@@ -1343,7 +1343,7 @@ export function Scanner()
 
 					if basetype = 0 then
 						if char_class[ch] = LETTER then
-							CompileErr("Invalid number base specifier '%s'", ch)
+							CompileErr(105, ch)
 						end if
 						basetype = -1 -- decimal
 						exit
@@ -1376,7 +1376,7 @@ export function Scanner()
 				else
 					is_int = FALSE
 					if yytext[1] = '.' then
-						CompileErr("only one decimal point allowed")
+						CompileErr(124)
 					else
 						yytext &= '.'
 					end if
@@ -1388,7 +1388,7 @@ export function Scanner()
 							ch = getch()
 						end while
 					else
-						CompileErr("fractional part of number is missing")
+						CompileErr(94)
 					end if
 				end if
 			end if
@@ -1400,7 +1400,7 @@ export function Scanner()
 				if ch = '-' or ch = '+' or char_class[ch] = DIGIT then
 					yytext &= ch
 				else
-					CompileErr("exponent not formed correctly")
+					CompileErr(86)
 				end if
 				ch = getch()
 				while char_class[ch] = DIGIT do
@@ -1408,7 +1408,7 @@ export function Scanner()
 					ch = getch()
 				end while
 			elsif char_class[ch] = LETTER then
-				CompileErr("Punctuation missing in between number and '%s'", {ch})
+				CompileErr(127, {ch})
 			end if
 
 			ungetch()
@@ -1433,13 +1433,13 @@ export function Scanner()
 			end if
 
 			if basetype != -1 then
-				CompileErr("Only integer literals can use the '0%s' format", nbasecode[basetype])
+				CompileErr(125, nbasecode[basetype])
 			end if
 
 			-- f.p. or large int
 			d = my_sscanf(yytext)
 			if sequence(d) then
-				CompileErr("number not formed correctly")
+				CompileErr(121)
 			elsif is_int and d <= MAXINT_DBL then
 				return {ATOM, NewIntSym(d)}  -- 1 to 1.07 billion
 			else
@@ -1481,14 +1481,14 @@ export function Scanner()
 				elsif ch = '\\' then
 					yytext &= EscapeChar(getch())
 				elsif ch = '\t' then
-					CompileErr("tab character found in string - use \\t instead")
+					CompileErr(145)
 				else
 					yytext &= ch
 				end if
 				ch = getch()
 			end while
 			if ch = '\n' or ch = '\r' then
-				CompileErr("end of line reached with no closing \"")
+				CompileErr(67)
 			end if
 			return {STRING, NewStringSym(yytext)}
 
@@ -1534,8 +1534,7 @@ export function Scanner()
 			if is_int = -1 then
 				if ch = '!' then
 					if line_number > 1 then
-						CompileErr(
-						"#! may only be on the first line of a program")
+						CompileErr(161)
 					end if
 					-- treat as a comment (Linux command interpreter line)
 					shebang = ThisLine
@@ -1547,7 +1546,7 @@ export function Scanner()
 					-- Extended String Literal --
 					return ExtendedString( ch )
 				else
-					CompileErr("hex number not formed correctly")
+					CompileErr(97)
 				end if
 			else
 				if i >= MAXINT_VAL/32 then
@@ -1629,7 +1628,7 @@ export function Scanner()
 				end while
 
 				if cnest > 0 then
-					CompileErr("Block comment from line %d not terminated.", cline)
+					CompileErr(42, cline)
 				end if
 			else
 				ungetch()
@@ -1641,12 +1640,12 @@ export function Scanner()
 			if ch = '\\' then
 				ch = EscapeChar(getch())
 			elsif ch = '\t' then
-				CompileErr("tab character found in string - use \\t instead")
+				CompileErr(145)
 			elsif ch = '\'' then
-				CompileErr("single-quote character is empty")
+				CompileErr(137)
 			end if
 			if getch() != '\'' then
-				CompileErr("character constant is missing a closing '")
+				CompileErr(56)
 			end if
 			return {ATOM, NewIntSym(ch)}
 
@@ -1817,7 +1816,7 @@ export procedure IncludeScan( integer is_public )
 			ch = getch()
 		end while
 		if ch != '"' then
-			CompileErr("missing closing quote on file name")
+			CompileErr(115)
 		end if
 	else
 		-- unquoted filename
@@ -1829,7 +1828,7 @@ export procedure IncludeScan( integer is_public )
 	end if
 
 	if length(gtext) = 0 then
-		CompileErr("file name is missing")
+		CompileErr(95)
 	end if
 
 	-- record the new filename
@@ -1868,17 +1867,17 @@ export procedure IncludeScan( integer is_public )
 					ungetch()
 					s = keyfind(gtext, -1, , 1)
 					if not find(s[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
-						CompileErr("a new namespace identifier is expected here")
+						CompileErr(36)
 					end if
 					new_include_space = NameSpace_declaration(s[T_SYM])
 				else
-					CompileErr("missing namespace qualifier")
+					CompileErr(113)
 				end if
 			else
-				CompileErr("improper syntax for include-as")
+				CompileErr(100)
 			end if
 		else
-			CompileErr("improper syntax for include-as")
+			CompileErr(100)
 		end if
 	else
 		ungetch()

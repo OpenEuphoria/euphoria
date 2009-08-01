@@ -232,7 +232,7 @@ procedure patch_forward_call( token tok, integer ref )
 	if args != ( supplied_args + extra_default_args ) then
 		current_file_no = from_file
 		line_number = line
-		CompileErr( "Wrong number of arguments supplied for forward reference\n\t%s (%d): %s %s.  Expected %d, but found %d.",
+		CompileErr( 158,
 			{ file_name[from_file], line, routine_type, name, args, supplied_args + extra_default_args }  )
 	end if
 	
@@ -268,7 +268,7 @@ procedure patch_forward_variable( token tok, integer ref )
 	
 	if fr[FR_OP] = ASSIGN and SymTab[sym][S_MODE] = M_CONSTANT then
 		prep_forward_error( ref )
-		CompileErr( "may not change the value of a constant" )
+		CompileErr( 110 )
 	end if
 	
 	if fr[FR_OP] = ASSIGN then
@@ -499,8 +499,7 @@ end procedure
 
 procedure forward_error( token tok, integer ref )
 	prep_forward_error( ref )
-	CompileErr("expected %s, not %s", 
-		{ expected_name( forward_references[ref][FR_TYPE] ),
+	CompileErr(68, { expected_name( forward_references[ref][FR_TYPE] ),
 			expected_name( tok[T_ID] ) } ) 
 end procedure
 
@@ -687,7 +686,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			line_number = ref[FR_LINE]
 		end for
 		if length(msg) > 0 then
-			CompileErr( "Errors resolving the following references:\n%s", {msg} )
+			CompileErr( 74, {msg} )
 		end if
 	end if
 end procedure

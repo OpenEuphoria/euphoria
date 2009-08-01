@@ -215,7 +215,7 @@ procedure OpenCFiles()
 
 	c_code = open(output_dir & "init-.c", "w")
 	if c_code = -1 then
-		CompileErr("Can't open init-.c for output\n")
+		CompileErr(55)
 	end if
 
 	add_file("init-.c")
@@ -232,7 +232,7 @@ procedure OpenCFiles()
 	c_puts("#include \"main-.h\"\n\n")
 	c_h = open(output_dir & "main-.h", "w")
 	if c_h = -1 then
-		CompileErr("Can't open main-.h file for output\n")
+		CompileErr(47)
 	end if
 
 	add_file("main-.h")
@@ -275,11 +275,11 @@ procedure InitBackEnd(integer c)
 			end if
 
 			if atom(dj_path) then
-				CompileErr("DJGPP environment variable is not set")
+				CompileErr(60)
 			end if
 
 			if not TDOS then
-				CompileErr( "DJGPP option only available for DOS." )
+				CompileErr(58 )
 			end if
 
 		case COMPILER_WATCOM then
@@ -290,7 +290,7 @@ procedure InitBackEnd(integer c)
 			end if
 		
 			if atom(wat_path) then
-				CompileErr("WATCOM environment variable is not set")
+				CompileErr(159)
 			elsif find(' ', wat_path) then
 				Warning( "Watcom cannot build translated files when there is a space in its parent folders",
 					translator_warning_flag)
@@ -306,16 +306,16 @@ procedure InitBackEnd(integer c)
 			end if
 
 		case else
-			CompileErr("Unknown compiler")
+			CompileErr(150)
 
 	end switch
 
 	if dll_option and TDOS then
-		CompileErr("cannot build a dll for DOS")
+		CompileErr(46)
 	end if
 	
 	if fastfp and not TDOS then
-		CompileErr("Fast FP option only available for DOS")
+		CompileErr(93)
 	end if
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )

@@ -26,11 +26,6 @@ include preproc.e
 --**
 -- record command line options, return source file number
 
-type watched_object( object x )
-	trace(1)
-	return 1
-end type
-
 function GetSourceName()
 	integer src_file
 	object real_name
