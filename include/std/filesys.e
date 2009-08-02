@@ -38,13 +38,16 @@ constant
 
 ifdef WIN32 then
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG}, C_LONG)
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG},
+		C_LONG)
 	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_LONG)
 	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_LONG)
-	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", {C_POINTER, C_POINTER}, C_LONG)
+	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
+		{C_POINTER, C_POINTER}, C_LONG)
 	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_LONG)
 	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT)
-	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", {C_CHAR, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_INT)	 
+	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
+		{C_CHAR, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_INT)	 
 
 elsifdef LINUX then
 	constant lib = open_dll("")
@@ -144,18 +147,32 @@ end ifdef
 -- Description:
 -- Current platform's null device path: ##/dev/null## on //Unix//, else ##NUL:##.
 
+--**
+-- Segnature:
+-- public constant SHARED_LIB_EXT
+-- 
+-- Description:
+-- Current platform's shared library extension. For instance it can be ##dll##, 
+-- ##so## or ##dylib## depending on the platform.
+
 ifdef UNIX then
 	public constant SLASH='/'
 	public constant SLASHES = "/"
 	public constant EOLSEP = "\n"
 	public constant PATHSEP = ':'
 	public constant NULLDEVICE = "/dev/null"
+	ifdef OSX then
+		public constant SHARED_LIB_EXT = "dylib"
+	elsedef
+		public constant SHARED_LIB_EXT = "so"
+	end ifdef
 elsifdef DOSFAMILY then
 	public constant SLASH='\\'
 	public constant SLASHES = "\\/:"
 	public constant EOLSEP = "\r\n"
 	public constant PATHSEP = ';'
 	public constant NULLDEVICE = "NUL:"
+	public constant SHARED_LIB_EXT = "dll"
 end ifdef
 public constant EOL = '\n'
 

@@ -17,6 +17,7 @@ include error.e
 include global.e
 include pathopen.e
 include platform.e
+include preproc.e
 
 export sequence src_name = ""
 export sequence switches = {}
@@ -170,7 +171,8 @@ export procedure handle_common_options(m:map opts)
 			
 			case "p" then
 				for i = 1 to length(val) do
-					preprocessors &= { split(val[i], ":") }
+					sequence pp = split(val[i], ":")
+					add_preprocessor(pp[1], pp[2])
 				end for
 
 			case "l" then

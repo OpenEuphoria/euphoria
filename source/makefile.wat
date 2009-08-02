@@ -100,6 +100,7 @@ EU_CORE_FILES = &
 	parser.e &
 	pathopen.e &
 	platform.e &
+	preproc.e &
 	reswords.e &
 	scanner.e &
 	scinot.e &
@@ -112,8 +113,8 @@ EU_INTERPRETER_FILES = &
 	c_out.e &
 	cominit.e &
 	compress.e &
-	int.ex &
-	intinit.e
+	intinit.e &
+	int.ex 
 
 EU_TRANSLATOR_FILES = &
 	buildsys.e &
@@ -122,8 +123,8 @@ EU_TRANSLATOR_FILES = &
 	cominit.e &
 	compile.e &
 	compress.e &
-	ec.ex &
-	traninit.e
+	traninit.e &
+	ec.ex
 	
 !include $(BUILDDIR)\transobj.wat
 !include $(BUILDDIR)\intobj.wat

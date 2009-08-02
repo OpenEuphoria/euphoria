@@ -176,31 +176,32 @@ FE_FLAGS =  -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS
 BE_FLAGS =  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS)
 
 EU_CORE_FILES = \
+	block.e \
 	common.e \
+	emit.e \
+	error.e \
+	fwdref.e \
+	inline.e \
+	keylist.e \
 	main.e \
 	mode.e \
+	opnames.e \
+	parser.e \
 	pathopen.e \
 	platform.e \
-	error.e \
-	symtab.e \
+	preproc.e \
+	reswords.e \
 	scanner.e \
 	scinot.e \
-	emit.e \
-	parser.e \
-	opnames.e \
-	reswords.e \
-	keylist.e \
-	fwdref.e \
 	shift.e \
-	inline.e \
-	block.e
+	symtab.e 
 
 EU_INTERPRETER_FILES = \
-	global.e \
-	compress.e \
 	backend.e \
 	c_out.e \
 	cominit.e \
+	compress.e \
+	global.e \
 	intinit.e \
 	int.ex
 
@@ -211,20 +212,20 @@ EU_TRANSLATOR_FILES = \
 	cominit.e \
 	compile.e \
 	compress.e \
-	ec.ex \
 	global.e \
-	traninit.e
+	traninit.e \
+	ec.ex
 
 EU_BACKEND_RUNNER_FILES = \
-	intinit.e \
+	backend.e \
+	backend.e \
 	cominit.e \
-	backend.e \
-	pathopen.e \
-	backend.ex \
 	compress.e \
-	backend.e \
 	error.e \
-	mode.e
+	intinit.e \
+	mode.e \
+	pathopen.e \
+	backend.ex
 
 PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre/,$(PCRE_OBJECTS))
 	
