@@ -1554,9 +1554,7 @@ end function
 -- </eucode>
 --
 
-public constant STDFLTR_ALPHA
-
-STDFLTR = routine_id("filter_alpha")
+public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 
 --****
 -- Signature:
