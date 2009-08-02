@@ -1108,20 +1108,25 @@ end function
 -- Choose a new, already open, database to be the current database.
 --
 -- Parameters:
---		# ##path##: a sequence, the path to the database to be the new current database.
+--	# ##path##: a sequence, the path to the database to be the new current database.
+--  # ##lock_method##: an integer. Optional locking method. 
 --
 -- Returns:
 -- 		An **integer**, DB_OK on success or an error code.
 --
 -- Comments:
--- Subsequent database operations will apply to this database. path is the
+-- * Subsequent database operations will apply to this database. path is the
 -- path of the database file as it was originally opened with db_open()
 -- or db_create().\\
--- When you create (db_create) or open (db_open) a database, it automatically
+-- * When you create (db_create) or open (db_open) a database, it automatically
 -- becomes the current database. Use db_select() when you want to switch back
 -- and forth between open databases, perhaps to copy records from one to the
 -- other. After selecting a new database, you should select a table within
 -- that database using db_select_table().
+-- * If the ##lock_method## is omitted and the database has not already been opened,
+-- this function will fail. However, if ##lock_method## is a valid lock type for
+-- [[:db_open]]  and the database is not open yet, this function will attempt to
+-- open it. It may still fail if the database cannot be opened.
 --
 -- Example 1:
 -- <eucode>
@@ -1130,10 +1135,17 @@ end function
 -- end if
 -- </eucode>
 --
+-- Example 2:
+-- <eucode>
+-- if db_select("customer", DB_LOCK_SHARED) != DB_OK then
+--     puts(2, "Could not open or select Customer database\n")
+-- end if
+-- </eucode>
+--
 -- See Also:
 --   [[:db_open]], [[:db_select]]
 
-public function db_select(sequence path)
+public function db_select(sequence path, integer lock_method = -1)
 	integer index
 
 	if not eu:find('.', path) then
@@ -1142,7 +1154,14 @@ public function db_select(sequence path)
 
 	index = eu:find(path, db_names)
 	if index = 0 then
-		return DB_OPEN_FAIL
+		if lock_method = -1 then
+			return DB_OPEN_FAIL
+		end if
+		index = db_open(path, lock_method)
+		if index != DB_OK then
+			return index
+		end if
+		index = eu:find(path, db_names)
 	end if
 	save_keys()
 	current_db = db_file_nums[index]
@@ -1191,7 +1210,7 @@ function table_find(sequence name)
 -- find a table, given its name
 -- return table pointer
 	atom tables
-	integer nt
+	atom nt
 	atom t_header, name_ptr
 
 	safe_seek(TABLE_HEADERS)
