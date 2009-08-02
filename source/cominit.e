@@ -22,30 +22,35 @@ export sequence src_name = ""
 export sequence switches = {}
 
 constant COMMON_OPTIONS = {
+	{ "batch", 0, "Turn on batch processing (do not \"Press Enter\" on error",
+				{ NO_CASE } },
 	{ "c", 0, "Specify a configuration file",
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
-	{ "i", 0, "Add a directory to be searched for include files",
-				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "dir" } },
+	{ "copyright", 0, "Display all copyright notices",
+				{ NO_CASE } },
 	{ "d", 0, "Define a preprocessor word",
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "i", 0, "Add a directory to be searched for include files",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "dir" } },
+	{ "l", 0, "Defines a localization qualifier",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "local" } },
+	{ "ldb", 0, "Defines the base name for localization databases",
+				{ NO_CASE, HAS_PARAMETER, "localdb" } },
 	{ "p", 0, "Setup a pre-processor",
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
-	{ "batch", 0, "Turn on batch processing (do not \"Press Enter\" on error",
+	{ "strict", 0, "Enable all warnings",
 				{ NO_CASE } },
 	{ "test", 0, "Test syntax only, do not execute",
 				{ NO_CASE } },
-	{ "strict", 0, "Enable all warnings",
+	{ "version", 0, "Display the version number",
 				{ NO_CASE } },
 	{ "w", 0, "Defines warning level",
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
-	{ "x", 0, "Defines warning level by exclusion",
-				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
 	{ "wf", 0, "Write all warnings to the given file instead of STDOUT",
 				{ NO_CASE, HAS_PARAMETER, "filename" } },
-	{ "version", 0, "Display the version number",
-				{ NO_CASE } },
-	{ "copyright", 0, "Display all copyright notices",
-				{ NO_CASE } }
+	{ "x", 0, "Defines warning level by exclusion",
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
+	$
 }
 
 sequence options = {}
@@ -167,6 +172,14 @@ export procedure handle_common_options(m:map opts)
 				for i = 1 to length(val) do
 					preprocessors &= { split(val[i], ":") }
 				end for
+
+			case "l" then
+				for i = 1 to length(val) do
+					LocalizeQual = append(LocalizeQual, (filter(lower(val[i]), STDFLTR_ALPHA)))
+				end for
+
+			case "ldb" then
+				LocalDB = val
 
 			case "w" then
 				integer n = find(val, warning_names)

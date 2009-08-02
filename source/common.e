@@ -24,6 +24,8 @@ public sequence file_public = {{}}  -- also remember which files are "public inc
 public sequence file_include_by = {{}}
 public sequence file_public_by = {{}}
 public sequence preprocessors = {}
+public sequence LocalizeQual = {}
+public sequence LocalDB = "teksto"
 
 public integer AnyTimeProfile      -- time profile option was ever selected 
 public integer AnyStatementProfile -- statement profile option was ever selected 

@@ -1,3 +1,8 @@
+include std/filesys.e
+include std/locale.e
+
+include common.e
+
 constant StdErrMsgs = {
 	{  0, "Unknown message code"},
 	{  1, "%s is missing defined word before 'or'"},
@@ -181,18 +186,26 @@ constant StdErrMsgs = {
 
 public function GetMsgText( integer MsgNum, integer WithNum = 1)
 	integer idx = 1
+	object lMsgText
 	
-	for i = 1 to length(StdErrMsgs) do
-		if StdErrMsgs[i][1] = MsgNum then
-			idx = i
-			exit
-		end if
-	end for
+	-- First check localization databases
+	lMsgText = get_text( MsgNum, LocalizeQual, LocalDB )
+	
+	-- If not found, scan through hard-coded messages
+	if atom(lMsgText) then
+		for i = 1 to length(StdErrMsgs) do
+			if StdErrMsgs[i][1] = MsgNum then
+				idx = i
+				exit
+			end if
+		end for
+		lMsgText = StdErrMsgs[idx][2]
+	end if
 	
 	if WithNum != 0 then
-		return sprintf("[%04d]:: %s", {MsgNum, StdErrMsgs[idx][2]})
+		return sprintf("[%04d]:: %s", {MsgNum, lMsgText})
 	else
-		return StdErrMsgs[idx][2]
+		return lMsgText
 	end if
 end function
 
