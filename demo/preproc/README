@@ -1,0 +1,35 @@
+There are two examples of simple, yet useful, pre-processors. The first is
+literate.ex. It implements literate programming in Euphoria. See literate.ex
+and hello.lex for more information about literate programming. To run this
+example, at the command prompt, simply type:
+
+eui hello.lex
+
+The second is an ASP type pre-processor for Euphoria. It will take a HTML file
+with Euphoria code intermixed in <% ... %> style tags and convert it to a 
+legitimate Euphoria function that can be included from any parent program. 
+
+* etml.ex - the actual pre-processor
+* etmltest.ex - a test program that outputs the results of an ETML file
+* hello.etml - a "Hello, World!" style ETML example file
+
+To run this example, at the command prompt type:
+
+eui etmltest.ex
+
+Now, how does Euphoria know how to process these files? Look in the 
+euinc.conf file in this directory. You will notice that there are lines
+that look similar to:
+
+-p le,lex:literate.ex
+
+This tells Euphoria that a pre-processor exists for the extensions le and
+lex. When it comes across one of these files, it knows that it can translate
+the source file into a legitimate Euphoria file by calling literate.ex.
+
+literate.ex and etml.ex adhere to a simple standard for being able to interface
+with Euphoria. They must take 2 parameters, in_filename out_filename. They
+must read the input from in_filename and write the resulting file to 
+out_filename. If an error occurs while processing the input file, the pre-processor
+should return a non-zero error code. This will tell Euphoria that the 
+pre-processing has failed and it should cease trying any more to run the program.
