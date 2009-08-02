@@ -1,0 +1,12 @@
+This is an example pre-processor. The idea is to create a version of ASP
+tags that supports the Euphoria language. Notice the configuration given
+in the euinc.conf file is the linking magic between etml.ex and it's conversion
+of example.wc.
+
+To run this example, simply type:
+
+eui test.ex "your name"
+
+With the pre-processor we are able to create a fully functional template language
+supporting all Euphoria syntax and use it directly in our Euphoria source via the
+include command in only 47 lines of code.
