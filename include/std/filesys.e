@@ -1574,7 +1574,11 @@ public enum
 -- end if
 -- </eucode>
 
-public function file_exists(sequence name)
+public function file_exists(object name)
+	if atom(name) then
+		return 0
+	end if
+	
 	ifdef WIN32 then
 		atom pName = allocate_string(name)
 		integer r = c_func(xGetFileAttributes, {pName})
