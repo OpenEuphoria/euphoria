@@ -12,6 +12,7 @@ include std/search.e
 include std/text.e
 include std/sort.e
 include std/math.e
+include std/types.e
 
 --****
 -- === Constants
@@ -1531,6 +1532,31 @@ public function filter(sequence source, integer rid, object userdata = {})
 
 	return dest
 end function
+
+function filter_alpha(object elem, object ud)
+	return t_alpha(elem)
+end function
+
+--**
+-- Signature:
+-- public constant STDFLTR_ALPHA
+--
+-- Description:
+-- Predefined routine_id for use with [[:filter]](). 
+--
+-- Comments:
+-- Used to filter out non-alohabetic characters from a string.
+--
+-- Example:
+-- <eucode>
+-- -- Collect only the alphabetic characters from 'text'
+--  result = filter(text, STDFLTR_ALPHA)
+-- </eucode>
+--
+
+public constant STDFLTR_ALPHA
+
+STDFLTR = routine_id("filter_alpha")
 
 --****
 -- Signature:
