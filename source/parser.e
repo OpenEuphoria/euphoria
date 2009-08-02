@@ -3456,7 +3456,6 @@ procedure Statement_list()
 			StartSourceLine(TRUE)
 			Procedure_call(tok)
 
-		-- EXPERIMENTAL: Ignoring function returns.
 		elsif id = FUNC or id = QUALIFIED_FUNC then
 			if id = FUNC then
 				-- possibly warn for non-inclusion
@@ -3574,7 +3573,7 @@ end procedure
 forward_Statement_list = routine_id("Statement_list")
 
 procedure SubProg(integer prog_type, integer scope)
--- parse a function, type or procedure
+-- parse a function, type or procedure declaration
 -- global is 1 if it's global
 	integer h, pt
 	symtab_index p, type_sym, sym
@@ -3682,15 +3681,7 @@ procedure SubProg(integer prog_type, integer scope)
 					-- The name is assumed to be a forward declared type.
 					tok[T_SYM] = undef_type
 				else
-					-- The name is assumed to be an argument id.
-					putback(tok) -- put the name back onto the token stream
-					-- Convert the current token so it looks like "object" was found.
-					Warning(sprintf("%s:%d - argument '%s' is assumed to be an 'object'",
-								{name_ext(file_name[current_file_no]), line_number,
-								 SymTab[tok[T_SYM]][S_NAME]}),
-							def_arg_type_warning_flag, {})
-					tok[T_ID] = TYPE
-					tok[T_SYM] = object_type
+					CompileErr(37)
 				end if
 			else
 				CompileErr(37)
