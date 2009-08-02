@@ -129,6 +129,24 @@ export function ShowWarnings(integer errfile)
 	return length(warning_list)
 end function
 
+export procedure ShowDefines(integer errfile)
+	integer c
+
+	if errfile=0 then
+		errfile = STDERR
+	end if
+
+	puts(errfile, "\n--- Defined Words ---\n")
+
+	for i = 1 to length(OpDefines) do
+		if find(OpDefines[i], {"_PLAT_START", "_PLAT_STOP"}) = 0 then 
+			printf(errfile, "%s\n", {OpDefines[i]})
+		end if
+	end for
+	puts(errfile, "-------------------\n")
+
+end procedure
+
 --**
 -- clean things up before quitting
 export procedure Cleanup(integer status)
@@ -223,11 +241,10 @@ export procedure CompileErr(object msg, object args = {})
 
 	ShowErr(TempErrFile)
 
-	if ShowWarnings(TempErrFile) then
-	end if
+	ShowWarnings(TempErrFile)
 
-	puts(TempErrFile, "\n")
-
+	ShowDefines(TempErrFile)
+	
 	close(TempErrFile)
 	Cleanup(1)
 end procedure

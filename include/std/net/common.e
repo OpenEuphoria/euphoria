@@ -9,9 +9,9 @@ include std/get.e
 
 constant
 	DEFAULT_PORT=80,
-	re_ip = re:new(#/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\:[0-9]+)?$/),
-	re_http_url = re:new(#`(http|https|ftp|ftps|gopher|gophers)://([^/]+)(/[^?]+)?(\?.*)?`, re:CASELESS),
-	re_mail_url = re:new(#`(mailto):(([^@]+)@([^?]+))(\?.*)?`)
+	re_ip = re:new("""^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\:[0-9]+)?$"""),
+	re_http_url = re:new("""(http|https|ftp|ftps|gopher|gophers)://([^/]+)(/[^?]+)?(\?.*)?""", re:CASELESS),
+	re_mail_url = re:new("""(mailto):(([^@]+)@([^?]+))(\?.*)?""")
 
 --****
 -- === IP Address Handling

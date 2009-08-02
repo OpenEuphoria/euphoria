@@ -6,7 +6,7 @@ include std/unittest.e
 
 object data, tmp
 
-constant test_file_data = ##
+constant test_file_data = `
 This is a file used for unit tests. Please
 do not alter this file. Tests require this
 file to be of a known content.
@@ -17,7 +17,7 @@ in fact be nothing wrong with them.
 
 Thank You!
 
-#
+`
 
 write_file("file.txt", test_file_data, DOS_TEXT)
 

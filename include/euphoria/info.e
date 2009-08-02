@@ -199,12 +199,12 @@ end function
 public function euphoria_copyright()
 	return {
 		"Euphoria v" & version_string_long(),
-		#'
+		`
 ________
 		Copyright (c) 2007-2009 by OpenEuphoria Group.
 		Copyright (c) 1993-2006 by Rapid Deployment Software.
 		All Rights Reserved.
-		'
+		`
 	}
 end function
 
@@ -221,10 +221,10 @@ end function
 public function pcre_copyright()
 	return {
 		"PCRE v7.8",
-		#'
+		`
 ________Copyright (c) 1997-2008 University of Cambridge
 		All Rights Reserved
-		'
+		`
 	}
 end function
 

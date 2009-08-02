@@ -1542,9 +1542,6 @@ export function Scanner()
 						IncludePush()
 					end if
 					read_line()
-				elsif find(ch, "#'`~$^/\\|") != 0 then
-					-- Extended String Literal --
-					return ExtendedString( ch )
 				else
 					CompileErr(97)
 				end if

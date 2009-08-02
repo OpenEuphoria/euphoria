@@ -30,7 +30,7 @@ sequence option_defs = {
 }
 
 -- Parse command line
-constant extra_data = #`
+constant extra_data = `
 # Some 'extra' arguments
 1  2 3
 4 5
@@ -42,7 +42,7 @@ constant extra_data = #`
 "# not a comment"
 '-i \abc\def\ghi'
 `
-constant optional_data = #`
+constant optional_data = `
 # Verbose on
 -v
 `

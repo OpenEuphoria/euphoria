@@ -17,11 +17,11 @@ test_equal("find() #3", {{1,3}}, regex:find(re, "the dog is happy", 1))
 test_equal("find() #4", {{5,7}}, regex:find(re, "the dog is happy", 4))
 test_equal("find() #5", {{9,10}}, regex:find(re, "the dog is happy", 8))
 
-re = regex:new(#/[A-Z][a-z]+\s/, { regex:CASELESS })
+re = regex:new(`[A-Z][a-z]+\s`, { regex:CASELESS })
 test_equal("find() #6", {{1,4}}, regex:find(re, "and John ran"))
 test_equal("find() #7", -1, regex:find(re, "15 dogs ran", regex:ANCHORED))
 
-re = regex:new(#/[A-Z][a-z]+\s/, { regex:CASELESS, regex:ANCHORED })
+re = regex:new(`[A-Z][a-z]+\s`, { regex:CASELESS, regex:ANCHORED })
 test_equal("find() #8", {{1,4}}, regex:find(re, "and John ran"))
 test_equal("find() #9", -1, regex:find(re, "15 dogs ran"))
 
@@ -66,7 +66,7 @@ test_equal("all_matches() STRING_OFFSET #1",
 	regex:all_matches(re, "John Doe and Jane Doe", 1, regex:STRING_OFFSETS))
 test_equal("all_matches() no match #1", ERROR_NOMATCH, regex:all_matches(re, "12"))
 
-re = regex:new(#/,\s/)
+re = regex:new(`,\s`)
 test_equal("split() #1", { "euphoria programming", "source code", "reference manual" },
 	regex:split(re, "euphoria programming, source code, reference manual"))
 
@@ -83,14 +83,14 @@ re = regex:new("$")
 test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
 
 re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
-test_equal("find_replace() #1", "hello Doe, John!", regex:find_replace(re, "hello John Doe!", #/\2, \1/))
-test_equal("find_replace() #2", "hello DOE, john!", regex:find_replace(re, "hello John Doe!", #/\U\2\e, \L\1\e/))
-test_equal("find_replace() #3", "hello \nDoe, John!", regex:find_replace(re, "hello John Doe!", #/\n\2, \1/))
-test_equal("find_replace() #4", "hello John\tDoe!", regex:find_replace(re, "hello John Doe!", #/\1\t\2/))
-test_equal("find_replace() #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", #/Mr. \1 \2/))
+test_equal("find_replace() #1", "hello Doe, John!", regex:find_replace(re, "hello John Doe!", `\2, \1`))
+test_equal("find_replace() #2", "hello DOE, john!", regex:find_replace(re, "hello John Doe!", `\U\2\e, \L\1\e`))
+test_equal("find_replace() #3", "hello \nDoe, John!", regex:find_replace(re, "hello John Doe!", `\n\2, \1`))
+test_equal("find_replace() #4", "hello John\tDoe!", regex:find_replace(re, "hello John Doe!", `\1\t\2`))
+test_equal("find_replace() #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", `Mr. \1 \2`))
 
 test_equal("find_replace_limit() #1", "JOHN DOE Jane Doe", 
-	regex:find_replace_limit(re, "John Doe Jane Doe", #/\U\1 \2\e/, 1))
+	regex:find_replace_limit(re, "John Doe Jane Doe", `\U\1 \2\e`, 1))
 
 function myupper(sequence params)
 	return upper(params[1])

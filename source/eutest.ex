@@ -228,10 +228,22 @@ function check_errors( sequence filename, sequence control_error_file, sequence 
 		if length(ex_err) > 4 then
 			ex_err = ex_err[1..4]
 		end if
+		for i = 1 to length(ex_err) do
+			if equal(ex_err[i], "--- Defined Words ---") then
+				ex_err = ex_err[1 .. i-1]
+				exit
+			end if
+		end for
 
 		if length(control_err) > 4 then
 			control_err = control_err[1..4]
 		end if
+		for i = 1 to length(control_err) do
+			if equal(control_err[i], "--- Defined Words ---") then
+				control_err = control_err[1 .. i-1]
+				exit
+			end if
+		end for
 
 		ex_err[1] = strip_path_junk(ex_err[1])
 		control_err[1] = strip_path_junk(control_err[1])
@@ -797,20 +809,20 @@ function text2html(sequence t)
 	return t
 end function
 
-sequence html_table_head = #~
+sequence html_table_head = `
 <table width=100%%>
 <tr bgcolor=#dddddd>
 <th colspan=3 align=left><a name='%s'>%s</a></th>
 <td><a href='#summary'>all file summary</a></th>
-</tr>~
+</tr>`
 
-sequence html_table_error_row = #~
+sequence html_table_error_row = `
 <tr bgcolor="%s">
 <th align="left" width="50%%">%s</td>
 <td colspan="3">%s</td>
-</tr>~
+</tr>`
 
-sequence html_table_error_content_begin = #~
+sequence html_table_error_content_begin = `
 <tr bgcolor="#ffaaaa">
   <th colspan="4" align="left" width="50%">
     Error file contents follows below
@@ -819,42 +831,42 @@ sequence html_table_error_content_begin = #~
 <tr bgcolor="#ffaaaa">
   <td colspan="4" align="left" width="100%">
     <pre>
-~
+`
 
-sequence html_table_error_content_end = #~
+sequence html_table_error_content_end = `
 	</pre>
   </td>
 </tr>
-~
+`
 
-sequence html_table_failed_row = #~
+sequence html_table_failed_row = `
 <tr bgcolor="#ffaaaa">
   <th align=left width=50%%>%s</th>
   <td>%f</td>
   <td>%s</td>
   <td>%s</td>
 </tr>
-~
+`
 
-sequence html_table_passed_row = #~
+sequence html_table_passed_row = `
 <tr bgcolor="#aaffaa">
   <th align=left width=50%%>%s</th>
   <td>%s</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
 </tr>
-~
+`
 
-sequence html_table_summary = #~
+sequence html_table_summary = `
 </table>
 <p>
 <strong>Tests:</strong> %04d
 <strong>Failed:</strong> %04d
 <strong>Passed:</strong> %04d
 <strong>Time:</strong> %f
-</p>~
+</p>`
 
-sequence html_table_final_summary = #~
+sequence html_table_final_summary = `
 <a name="summary"></a>
 <table style="font-size: 1.5em">
   <tr>
@@ -878,7 +890,7 @@ sequence html_table_final_summary = #~
   </tr>
 </table>
 </body>
-</html>~
+</html>`
 
 procedure html_out(sequence data)
 	switch data[1] do
