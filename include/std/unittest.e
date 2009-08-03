@@ -75,6 +75,7 @@ include std/pretty.e
 include std/search.e
 include std/filesys.e
 include std/math.e
+include std/types.e
 
 --
 -- Public Variables
@@ -340,14 +341,16 @@ public procedure test_equal(sequence name, object expected, object outcome)
 		if sequence(outcome) then
 			success = equal(expected, outcome)
 			if not success and length(expected) = length(outcome) then
-				success = not find(0, approx(expected, outcome, 1e-9) = 0)
+				if number_array(expected) and number_array(outcome) then
+					success = not find(0, approx(expected, outcome, 1e-9) = 0)
+				end if
 			end if
 		else
-			success = not find(0, approx(expected, outcome, 1e-9) = 0)
+			success = 0
 		end if
 	else
 		if sequence(outcome) then
-			success = not find(0, approx(expected, outcome, 1e-9) = 0)
+			success = 0
 		else
 			success = (approx(expected, outcome, 1e-9) = 0)
 		end if
