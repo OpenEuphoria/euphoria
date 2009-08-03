@@ -607,6 +607,10 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 	atom pname, ret
 	integer pos
 
+	if length(name) = 0 then
+		return 1
+	end if
+	
 	-- Remove any trailing slash.
 	if name[$] = SLASH then
 		name = name[1 .. $-1]
