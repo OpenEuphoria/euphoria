@@ -509,5 +509,8 @@ test_equal("remove_dups presorted #2", {0,2,4,5,6,7,9}, remove_dups(sort(rds), R
 test_equal("merge #1", {"cat","dog","fish","snail","whale","wolf","worm"}, merge({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}))
 test_equal("merge #2", {0,2,4,4,5,5,5,6,7,7,9,9}, merge({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}))
 
+
+test_equal("transform", "HELLA", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper"), {routine_id("replace_all"), "O", "A"}}))
+
 test_report()
 

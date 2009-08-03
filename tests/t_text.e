@@ -129,4 +129,129 @@ test_equal("quote #3", "(The ~(small~) man)", quote("The (small) man", {"(", ")"
 test_equal("quote #4", "The (small) man", quote("The (small) man", {"(", ")"}, '~', "#" ))
 test_equal("quote #5", "(The #1 ~(small~) man)", quote("The #1 (small) man", {"(", ")"}, '~', "#" ))
 
+
+-- format()
+sequence res
+sequence exp
+res = format("Cannot open file '[]' - code []", {"/usr/temp/work.dat", 32})
+exp = "Cannot open file '/usr/temp/work.dat' - code 32"
+test_equal("format 'A'", exp, res)
+
+res = format("Err-[2], Cannot open file '[1]'", {"/usr/temp/work.dat", 32})
+exp = "Err-32, Cannot open file '/usr/temp/work.dat'"
+test_equal("format 'B'", exp, res)
+
+res = format("[4w] [3z:2] [6] [5l] [2z:2], [1:4]", {2009,4,21,"DAY","MONTH","of"})
+exp = "Day 21 of month 04, 2009"
+test_equal("format 'C'", exp, res)
+
+res = format("The answer is [:6.2]%", {35.22341})
+exp = "The answer is  35.22%"
+test_equal("format 'D'", exp, res)
+
+res = format("The answer is [.2]", {0})
+exp = "The answer is 0.00"
+test_equal("format 'E'", exp, res)
+
+res = format("The answer is [.6]", {1.2345})
+exp = "The answer is 1.234500"
+test_equal("format 'F'", exp, res)
+
+res = format("The answer is [.2]", {1.2345})
+exp = "The answer is 1.23"
+test_equal("format 'G'", exp, res)
+
+res = format("The answer is [.0]", {1.2345})
+exp = "The answer is 1"
+test_equal("format 'H'", exp, res)
+
+res = format("The answer is [.4]", {1.2345e17})
+exp = "The answer is 1.2345e+17"
+test_equal("format 'I'", exp, res)
+
+res = format("The answer is [b.2]", {0})
+exp = "The answer is "
+test_equal("format 'J'", exp, res)
+
+res = format("The answer is [tb.2]", {0})
+exp = "The answer is"
+test_equal("format 'K'", exp, res)
+
+res = format("[] [] []", {"one", "two", "three"})
+exp = "one two three"
+test_equal("format 'L'", exp, res)
+
+res = format("[] [] []", {"one", "", "three"})
+exp = "one  three" -- extra whitespace stripped out.
+test_equal("format 'M'", exp, res)
+
+res = format("[] [s] []", {"one", "", "three"})
+exp = "one   three"
+test_equal("format 'N'", exp, res)
+
+res = format("[] [?]", {5, {"cats", "cat"}})
+exp = "5 cats"
+test_equal("format 'O'", exp, res)
+
+res = format("[] [?]", {1, {"cats", "cat"}})
+exp = "1 cat"
+test_equal("format 'P'", exp, res)
+
+res = format("don't eat [t] [?]", {"", {"worms", "worm"}})
+exp = "don't eat worms"
+test_equal("format 'Q'", exp, res)
+
+res = format("don't eat [t] [?]", {"the", {"worms", "worm"}})
+exp = "don't eat the worm"
+test_equal("format 'R'", exp, res)
+
+res = format("Array[[323:.323f][]]", {2})
+exp = "Array[2]"
+test_equal("format 'S'", exp, res)
+
+res = format("[c:3]", {"abcdef"})
+exp = "bcd"
+test_equal("format 'T'", exp, res)
+
+res = format("[c:4]", {"abcdef"})
+exp = "bcde"
+test_equal("format 'U'", exp, res)
+
+res = format("[<:4]", {"abcdef"})
+exp = "abcd"
+test_equal("format 'V'", exp, res)
+
+res = format("[>:4]", {"abcdef"})
+exp = "cdef"
+test_equal("format 'W'", exp, res)
+
+res = format("[c:8]", {"abcdef"})
+exp = " abcdef "
+test_equal("format 'X'", exp, res)
+
+res = format("[<:8]", {"abcdef"})
+exp = "abcdef  "
+test_equal("format 'Y'", exp, res)
+
+res = format("[>:8]", {"abcdef"})
+exp = "  abcdef"
+test_equal("format 'Z'", exp, res)
+
+res = format("seq is []", {{1.2, 5, "abcdef", {3}}})
+exp = `seq is {1.2,5,"abcdef",{3}}`
+test_equal("format 'AA'", exp, res)
+
+res = format("hex is #[xz:8]", {1715004})
+exp = "hex is #001a2b3c"
+test_equal("format 'AB'", exp, res)
+
+res = format("hex is #[:08X]", {1715004})
+exp = "hex is #001A2B3C"
+test_equal("format 'AC'", exp, res)
+
+test_equal("change A", "ThE CAt In thE HAt", change("The Cat in the Hat", "aeiou", "AEIOU"))
+test_equal("change B", "u cut out this brewn nat", change("a cat eat this brown nut", "aeiou", "uoiea"))
+test_equal("change C", "a23456789", change("123456789", "123", "a"))
+test_equal("change D", {'a','b',{'c',4},5}, change({1,2,{3,4},5}, {1,2,3}, "abc"))
+
 test_report()

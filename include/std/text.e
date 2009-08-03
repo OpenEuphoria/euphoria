@@ -19,6 +19,7 @@ include std/io.e
 include std/search.e
 include std/convert.e
 include std/serialize.e
+include std/pretty.e
 
 --****
 -- Signature:
@@ -435,7 +436,7 @@ public function get_encoding_properties( )
 end function
 
 --**
--- Each character from ##subject## found in ##from_SET## is transformed into the
+-- Each character from ##subject## found in ##from_SET## is changed into the
 -- corresponding character in ##to_SET##
 --
 -- Parameters:
@@ -450,27 +451,27 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   res = transform("The Cat in the Hat", "aeiou", "AEIOU")
+--   res = change("The Cat in the Hat", "aeiou", "AEIOU")
 --   -- res is now "ThE CAt In thE HAt"
 --   </eucode>
 
-public function transform(object subject, sequence from_SET, sequence to_SET)
+public function change(object subject, sequence from_SET, sequence to_SET)
 	integer pos
 
 	if atom(subject) then
 		pos = find(subject, from_SET)
-		if pos != 0 then
+		if pos >= 1  and pos <= length(to_SET) then
 			subject = to_SET[pos]
 		end if
 	else
 		for i = 1 to length(subject) do
 			if atom(subject[i]) then
 				pos = find(subject[i], from_SET)
-				if pos != 0 then
+				if pos >= 1  and pos <= length(to_SET) then
 					subject[i] = to_SET[pos]
 				end if
 			else
-				subject[i] = transform(subject[i], from_SET, to_SET)
+				subject[i] = change(subject[i], from_SET, to_SET)
 			end if
 		end for
 	end if
@@ -515,7 +516,7 @@ end function
 public function lower(object x)
 -- convert atom or sequence to lower case
 	if length(lower_case_SET) != 0 then
-		return transform(x, upper_case_SET, lower_case_SET)
+		return change(x, upper_case_SET, lower_case_SET)
 	end if
 	return x + (x >= 'A' and x <= 'Z') * TO_LOWER
 end function
@@ -557,7 +558,7 @@ end function
 public function upper(object x)
 -- convert atom or sequence to upper case
 	if length(upper_case_SET) != 0 then
-		return transform(x, lower_case_SET, upper_case_SET)
+		return change(x, lower_case_SET, upper_case_SET)
 	end if
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
@@ -1195,5 +1196,411 @@ public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, i
 	end for
 
 	return text_in
+end function
+
+--** 
+-- Formats a set of arguments in to a string based on a supplied pattern.
+--
+-- Parameters:
+--   # ##pFormat##: A sequence: the pattern string that contains zero or more tokens.
+--   # ##pArgs##: An object: Zero or more arguments used in token replacement.
+--
+-- Returns:
+-- A string sequence. The original ##pFormat## but with tokens replaced by
+-- corresponding arguments.
+--
+-- Comments:
+-- The ##pFormat## string contains text and argument tokens. The resulting string
+-- is the same as the format string except that each token is replaced by an
+-- item from the argument list.
+--
+-- A token has the form **##[<Q>]##**, where <Q> is are optional qualifier codes.
+--
+-- The qualifier. ##<Q>## is a set of zero or more codes that modify the default
+-- way that the argument is used to replace the token. The default replacement
+-- method is to convert the argument to its shortest string representation and
+-- use that to replace the token. This may be modified by the following codes,
+-- which can occur in any order.
+-- |= Qualifier |= Usage                                              |
+-- |  A         | ('A' is an integer) The index of the argument to use|
+-- |  w         | For string arguments, if capitalizes the first\\
+--                letter in each word                                 |
+-- |  u         | For string arguments, it converts it to upper case. |
+-- |  l         | For string arguments, it converts it to lower case. |
+-- |  <         | For numeric arguments, it left justifies it.        |
+-- |  >         | For string arguments, it right justifies it.        |
+-- |  c         | Centers the argument.                               |
+-- |  0         | For numbers, it zero fills the left side.           |
+-- |  :S        | ('S' is an integer) The maximum size of the\\
+--                resulting field. Also, if 'S' begins with '0' the\\
+--                field will be zero-filled if the argument is an integer|
+-- |  .N        | ('N' is an integer) The number of digits after\\
+--                 the  decimal point                                 |
+-- |  +         | For positive numbers, show a leading plus sign      |
+-- |  b         | For numbers, causes zero to be all blanks           |
+-- |  s         | If the resulting field would otherwise be zero\\
+--                length, this ensures that at least one space occurs\\
+--                between this token's field                          |
+-- |  t         | After token replacement, the resulting string up to this point is trimmed. |
+-- |  x         | Outputs integer arguments using hexadecimal digits. |
+-- |  ?         | The corresponding argument is a set of two strings. This\\
+--                uses the first string if the previous token's argument is\\
+--                not the value 1 or a zero-length string, otherwise it\\
+--                uses the second string.                             |
+-- |  [         | Does not use any argument. Outputs a left-square-bracket symbol |
+--
+-- Clearly, certain combinations of these qualifier codes do not make sense and in
+-- those situations, the rightmost clashing code is used and the others are ignored.
+--
+-- Any tokens in the format that have no corresponding argument are simply removed
+-- from the result. Any arguments that are not used in the result are ignored.
+--
+-- Any sequence argument that is not a string will be converted to its
+-- //pretty// format before being used in token replacement.
+--
+-- If a token is going to be replaced by a zero-length argument, all white space
+-- following the token until the next non-whitespace character is not copied to
+-- the result string.
+-- 
+-- Examples:
+
+public function format(sequence pFormat, object pArgs)
+	sequence result
+	integer in_token
+	integer tch
+	integer i
+	integer tstart
+	integer tend
+	integer cap
+	integer align
+	integer signer
+	integer zfill
+	integer bwz
+	integer spacer
+	integer alt
+	integer width
+	integer decs
+	integer pos
+	integer argn
+	integer argl
+	integer trimming
+	integer hexout
+	object prevargv
+	
+	result = ""
+	in_token = 0
+	
+	i = 0
+	tstart = 0
+	tend = 0
+	argl = 0
+	spacer = 0
+	prevargv = 0
+    while i < length(pFormat) do
+    	i += 1
+    	tch = pFormat[i]
+    	if not in_token then
+    		if tch = '[' then
+    			in_token = 1
+    			tstart = i
+    			tend = 0
+				cap = 0
+				align = 0
+				signer = 0
+				zfill = 0
+				bwz = 0
+				spacer = 0
+				alt = 0
+    			width = 0
+    			decs = -1
+    			argn = 0
+    			hexout = 0
+    			trimming = 0
+    		else
+    			result &= tch
+    		end if
+    	else
+			switch tch do
+    			case ']' then
+    				in_token = 0
+    				tend = i
+    				
+    			case '[' then
+	    			result &= tch
+	    			while i < length(pFormat) do
+	    				i += 1
+	    				if pFormat[i] = ']' then
+	    					in_token = 0
+	    					tstart = 0
+	    					tend = 0
+	    					exit
+	    				end if	
+	    			end while
+	    			
+	    		case 'w', 'W' then
+	    			cap = 'w'
+	    		
+	    		case 'u', 'U' then
+	    			cap = 'u'
+	    		
+	    		case 'l', 'L' then
+	    			cap = 'l'
+	    		
+	    		case 'b', 'B' then
+	    			bwz = 'b'
+	    		
+	    		case 's', 'S' then
+	    			spacer = 's'
+	    		
+	    		case 't', 'T' then
+	    			trimming = 't'
+	    		
+	    		case 'c', 'C' then
+	    			align = 'c'
+	    		
+	    		case 'z', 'Z' then
+	    			zfill = 'z'
+	    		
+	    		case 'x', 'X' then
+	    			hexout = tch
+	    		
+	    		case '<' then
+	    			align = tch
+	    		
+	    		case '>' then
+	    			align = tch
+	    		
+	    		case '+' then
+	    			signer = tch
+	    		
+	    		case '?' then
+	    			alt = tch
+	    		
+	    		case ':' then
+	    			while i < length(pFormat) do
+	    				i += 1
+	    				tch = pFormat[i]
+	    				pos = find(tch, "0123456789")
+	    				if pos = 0 then
+	    					i -= 1
+	    					exit
+	    				end if
+	    				width = width * 10 + pos - 1
+	    				if width = 0 then
+	    					zfill = '0'
+	    				end if
+	    			end while
+	    			
+	    		case '.' then
+	    			decs = 0
+	    			while i < length(pFormat) do
+	    				i += 1
+	    				tch = pFormat[i]
+	    				pos = find(tch, "0123456789")
+	    				if pos = 0 then
+	    					i -= 1
+	    					exit
+	    				end if
+	    				decs = decs * 10 + pos - 1
+	    			end while
+	    		
+	    		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' then
+	    			i -= 1
+	    			while i < length(pFormat) do
+	    				i += 1
+	    				tch = pFormat[i]
+	    				pos = find(tch, "0123456789")
+	    				if pos = 0 then
+	    					i -= 1
+	    					exit
+	    				end if
+	    				argn = argn * 10 + pos - 1
+	    			end while
+	    		
+	    		case else
+	    			-- ignore it
+    		end switch
+    		
+    		if tend > 0 then
+    			-- Time to replace the token.
+    			sequence argtext = ""
+    			
+    			if argn = 0 then
+    				argn = argl + 1
+    			end if
+    			argl = argn
+    			
+    			if argn < 1 or argn > length(pArgs) then
+    				argtext = ""
+				else
+					if string(pArgs[argn]) then
+						argtext = pArgs[argn]
+					elsif integer(pArgs[argn]) then
+						if bwz != 0 and pArgs[argn] = 0 then
+							argtext = ""
+						elsif hexout = 0 then
+							argtext = sprintf("%d", pArgs[argn])
+						else
+							argtext = sprintf("%x", pArgs[argn])
+							if hexout = 'x' then
+								argtext = lower(argtext)
+							else
+								argtext = upper(argtext)
+							end if
+						end if
+					
+					elsif atom(pArgs[argn]) then
+						if bwz != 0 and pArgs[argn] = 0 then
+							argtext = ""
+						else
+							argtext = trim(sprintf("%15.15g", pArgs[argn]))
+						end if
+					
+					else
+						if alt != 0 and length(pArgs[argn]) = 2 then
+							object tempv
+							if atom(prevargv) then
+								if prevargv != 1 then
+									tempv = pArgs[argn][1]
+								else
+									tempv = pArgs[argn][2]
+								end if
+							else
+								if length(prevargv) = 0 then
+									tempv = pArgs[argn][1]
+								else
+									tempv = pArgs[argn][2]
+								end if
+							end if
+							
+							if string(tempv) then
+								argtext = tempv
+							elsif integer(tempv) then
+								if bwz != 0 and tempv = 0 then
+									argtext = ""
+								else
+									argtext = sprintf("%d", tempv)
+								end if
+							
+							elsif atom(tempv) then
+								if bwz != 0 and tempv = 0 then
+									argtext = ""
+								else
+									argtext = trim(sprintf("%15.15g", tempv))
+								end if
+							else
+								argtext = pretty_sprint( tempv,
+											{2,0,1,1000,"%d","%.15g",32,127,1,0}
+											)
+							end if
+						else
+							argtext = pretty_sprint( pArgs[argn],
+										{2,0,1,1000,"%d","%.15g",32,127,1,0}
+										)
+						end if
+					end if
+    			end if
+    			
+    			prevargv = pArgs[argn]
+    			
+    			if length(argtext) > 0 then
+    				switch cap do
+    					case 'u' then
+    						argtext = upper(argtext)
+    					case 'l' then
+    						argtext = lower(argtext)
+    					case 'w' then
+    						argtext = proper(argtext)    						
+    				end switch
+    				
+					if atom(pArgs[argn]) then
+						if find('e', argtext) = 0 then
+							-- Only applies to non-scientific notation.
+							if decs != -1 then
+								pos = find('.', argtext)
+								if pos then
+									if decs = 0 then
+										argtext = argtext [1 .. pos-1 ]
+									else
+										pos = length(argtext) - pos 
+										if pos > decs then
+											argtext = argtext[ 1 .. $ - pos + decs ]
+										elsif pos < decs then
+											argtext = argtext & repeat('0', decs - pos)
+										end if
+									end if
+								else
+									argtext = argtext & '.' & repeat('0', decs)
+								end if
+							end if
+							
+							if zfill != 0 then
+								argtext = repeat('0', width - length(argtext)) & argtext
+							end if
+						end if						
+					end if
+					
+    				if align = 0 then
+    					if atom(pArgs[argn]) then
+    						align = '>'
+    					else
+    						align = '<'
+    					end if
+    				end if
+    				
+    				if width = 0 then
+    					width = length(argtext)
+    				end if
+    				
+    				if width < length(argtext) then
+    					if align = '>' then
+    						argtext = argtext[ length(argtext) - width + 1 .. $]
+    					elsif align = 'c' then
+    						pos = length(argtext) - width 
+    						if remainder(pos, 2) = 0 then
+    							pos = pos / 2
+    							argtext = argtext[ pos + 1 .. $ - pos ]
+    						else
+    							pos = floor(pos / 2)
+    							argtext = argtext[ pos + 1 .. $ - pos - 1]
+    						end if
+    					else
+    						argtext = argtext[ 1 .. width]
+    					end if
+    				elsif width > length(argtext) then
+						if align = '>' then
+							argtext = repeat(' ', width - length(argtext)) & argtext
+    					elsif align = 'c' then
+    						pos = width - length(argtext)
+    						if remainder(pos, 2) = 0 then
+    							pos = pos / 2
+    							argtext = repeat(' ', pos) & argtext & repeat(' ', pos)
+    						else
+    							pos = floor(pos / 2)
+    							argtext = repeat(' ', pos) & argtext & repeat(' ', pos + 1)
+    						end if
+    						
+    					else
+							argtext = argtext & repeat(' ', width - length(argtext))
+						end if    					
+    				end if		
+    				result &= argtext
+    				
+    			else
+    				if spacer then
+    					result &= ' '
+    				end if
+    			end if
+    			
+   				if trimming then
+   					result = trim(result)
+   				end if
+   				
+    			tend = 0
+    		end if
+    	end if
+    end while
+    	
+	return result
 end function
 

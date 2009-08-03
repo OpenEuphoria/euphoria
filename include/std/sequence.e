@@ -2331,6 +2331,57 @@ public function build_list( sequence source, object transformer, integer singlet
 	return result
 end function
 
+--**
+-- Transforms the input sequence by using one or more user-supplied transformers.
+--
+-- Parameters:
+-- # ##pSource## - A sequence to be transformed.
+-- # ##pTransformer## - An object. One or more routine_ids used to transform the input.
+--
+-- Returns:
+-- The source sequence that has been transformed.
+--
+-- Comments:
+-- * This works by calling each transformer in order, passing to it the result
+-- of the previous transformation. Of course, the first transformer gets the
+-- original sequence as passed to this routine.
+-- * Each transformer routine takes one or more parameters. The first is a source sequence
+-- to be transformed and others are any user data that may have been supplied
+-- to the ##transform## routine.
+-- * Each transformer routine returns a transformed sequence.
+-- * The ##pTransformer## parameters is either a single routine_id or a sequence
+-- of routine_ids. In this second case, the routine_id may actually be a 
+-- multi-element sequence containing the real routine_id and some user data to
+-- pass to the transformer routine. If there is no user data then the transformer
+-- is called with only one parameter.
+--
+-- Examples:
+-- <eucode>
+-- res = transform(" hello    ", {
+--                       {routine_id("trim"), " ",0},
+--                       routine_id("upper"), 
+--                       {routine_id("replace_all"), "O", "A"}
+--                   })
+-- --> "HELLA"
+
+public function transform( sequence pSource, object pTransformer)
+	sequence lResult
+
+	lResult = pSource
+	if atom(pTransformer) then
+		pTransformer = {pTransformer}
+	end if
+	
+	for i = 1 to length(pTransformer) do
+		if atom(pTransformer[i]) then
+			lResult = call_func(pTransformer[i], {lResult})
+		else
+			lResult = call_func(pTransformer[i][1], {lResult} & pTransformer[i][2..$])
+		end if
+	end for
+	return lResult
+	
+end function
 
 --**
 -- Calculates the similarity between two sequences.
