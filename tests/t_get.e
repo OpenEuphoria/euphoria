@@ -12,5 +12,9 @@ test_equal("value_from() integer", {GET_SUCCESS, 10, 2, 0}, value("Data: 10", 7,
 test_equal("value_from() integer with leading whitespace",
     {GET_SUCCESS, 10, 3, 1}, value("Data: 10", 6,GET_LONG_ANSWER))
 
+test_equal("defaulted_value() #1", 0, defaulted_value("abc", 0))
+test_equal("defaulted_value() #2", 10, defaulted_value("10", 0))
+test_equal("defaulted_value() #1", 10.5, defaulted_value("10.5", 0))
+
 test_report()
 

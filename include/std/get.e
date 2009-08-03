@@ -91,7 +91,7 @@ function get_qchar()
 -- get a single-quoted character
 -- ch is "live" at exit
 	char c
-	
+
 	get_ch()
 	c = ch
 	if ch = '\\' then
@@ -204,7 +204,7 @@ function get_number()
 					return {GET_FAIL, 0}
 				end if
 			end if
-		end while       
+		end while
 	end if
 
 	-- decimal integer or floating point
@@ -213,7 +213,7 @@ function get_number()
 		mantissa = mantissa * 10 + (ch - '0')
 		get_ch()
 	end while
-	
+
 	if ch = '.' then
 		-- get fraction
 		get_ch()
@@ -225,11 +225,11 @@ function get_number()
 			get_ch()
 		end while
 	end if
-	
+
 	if ndigits = 0 then
 		return {GET_FAIL, 0}
 	end if
-	
+
 	mantissa = sign * mantissa
 
 	if ch = 'e' or ch = 'E' then
@@ -249,17 +249,17 @@ function get_number()
 			get_ch()
 			while ch >= '0' and ch <= '9' do
 				e_mag = e_mag * 10 + ch - '0'
-				get_ch()                          
+				get_ch()
 			end while
 		else
 			return {GET_FAIL, 0} -- no exponent
 		end if
-		e_mag *= e_sign 
+		e_mag *= e_sign
 		if e_mag > 308 then
 			-- rare case: avoid power() overflow
 			mantissa *= power(10, 308)
 			if e_mag > 1000 then
-				e_mag = 1000 
+				e_mag = 1000
 			end if
 			for i = 1 to e_mag - 308 do
 				mantissa *= 10
@@ -268,7 +268,7 @@ function get_number()
 			mantissa *= power(10, e_mag)
 		end if
 	end if
-	
+
 	return {GET_SUCCESS, mantissa}
 end function
 
@@ -308,7 +308,7 @@ function Get()
 				get_ch()
 				return {GET_SUCCESS, s} -- empty sequence
 			end if
-			
+
 			while TRUE do -- read: comment(s), element, comment(s), comma and so on till it terminates or errors out
 				while 1 do -- read zero or more comments and an element
 					e = Get() -- read next element, using standard function
@@ -324,13 +324,13 @@ function Get()
 						return {GET_SUCCESS, s} -- empty sequence
 					end if
 				end while
-				
+
 				while 1 do -- now read zero or more post element comments
 					skip_blanks()
 					if ch = '}' then
 						get_ch()
 					return {GET_SUCCESS, s}
-					elsif ch!='-' then 
+					elsif ch!='-' then
 						exit
 					else -- comment starts after item and before comma
 						e = get_number() -- reads anything starting with '-'
@@ -354,7 +354,7 @@ function Get()
 			return {GET_FAIL, 0}
 
 		end if
-		
+
 	end while
 
 end function
@@ -419,7 +419,7 @@ function Get2()
 						return {GET_SUCCESS, s, string_next-1-offset-(ch!=-1),leading_whitespace} -- empty sequence
 					end if
 				end while
-				
+
 				while 1 do -- now read zero or more post element comments
 					skip_blanks()
 					if ch = '}' then
@@ -451,7 +451,7 @@ function Get2()
 			return {GET_FAIL, 0, string_next-1-offset-(ch!=-1), leading_whitespace}
 
 		end if
-		
+
 	end while
 
 end function
@@ -492,7 +492,7 @@ end function
 
 --**
 -- Input, from an open file, a human-readable string of characters representing a Euphoria object.
--- Convert the string into the numeric value of that object. 
+-- Convert the string into the numeric value of that object.
 --
 -- Parameters:
 -- # ##file##: an integer, the handle to an open file from which to read
@@ -508,12 +508,12 @@ end function
 -- ** ##GET_FAIL##:    object is not syntactically correct
 -- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
 -- * an object, the value that was read. This is valid only if return status is ##GET_SUCCESS##.
--- * an integer, the number of characters read. On an error, this is the point at which the 
+-- * an integer, the number of characters read. On an error, this is the point at which the
 --   error was detected.
 -- * an integer, the amount of initial whitespace read before the first active character was found
 --
 -- Comments:
--- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
+-- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two
 -- elements in the returned sequence are actually returned.
 --
 -- The ##GET_NOTHING## return status will not be returned if ##answer## is ##GET_SHORT_ANSWER##.
@@ -521,9 +521,9 @@ end function
 -- ##get()## can read arbitrarily complicated Euphoria objects. You
 -- could have a long sequence of values in braces and separated by
 -- commas and comments, e.g. ##{23, {49, 57}, 0.5, -1, 99, 'A', "john"}##.
--- A single call to get() will read in this entire sequence and return its value as a result, 
+-- A single call to get() will read in this entire sequence and return its value as a result,
 -- as well as complementary information.
--- 
+--
 -- If a nonzero offset is supplied, it is interpreted as an offset to the current file
 -- position, and the file will be seek()ed there first.
 --
@@ -538,39 +538,39 @@ end function
 -- Using the default value for answer, or setting it to ##GET_SHORT_ANSWER##, returns 2 elements.
 -- Setting it to ##GET_LONG_ANSWER## causes 4 elements to be returned.
 --
--- Each call to ##get()## picks up where the previous call left off. For instance, a series of 5 
+-- Each call to ##get()## picks up where the previous call left off. For instance, a series of 5
 -- calls to ##get()## would be needed to read in
--- 
+--
 -- {{{
 -- "99 5.2 {1, 2, 3} "Hello" -1"
 -- }}}
--- 
--- On the sixth and any subsequent call to ##get()## you would see a ##GET_EOF## status. If you had 
+--
+-- On the sixth and any subsequent call to ##get()## you would see a ##GET_EOF## status. If you had
 -- something like
--- 
+--
 -- {{{
 -- {1, 2, xxx}
 -- }}}
--- 
--- in the input stream you would see a ##GET_FAIL## error status because xxx is not a Euphoria 
+--
+-- in the input stream you would see a ##GET_FAIL## error status because xxx is not a Euphoria
 -- object. And seeing
--- 
+--
 -- {{{
 -- -- something\nBut no value
 -- }}}
 --
 -- and the input stream stops right there, you'll receive a status code of ##GET_NOTHING##,
--- because nothing but whitespace or comments was read. If you had opted for a short answer, 
+-- because nothing but whitespace or comments was read. If you had opted for a short answer,
 -- you'd get ##GET_EOF## instead.
--- 
+--
 -- Multiple "top-level" objects in the input stream must be
 -- separated from each other with one or more "whitespace"
 -- characters (blank, tab, \r or \n). At the very least, a top
 -- level number must be followed by a white space from the following object.
--- Whitespace is not necessary //within// a top-level object. Comments, terminated by either 
+-- Whitespace is not necessary //within// a top-level object. Comments, terminated by either
 -- '\n' or '\r', are allowed anywhere inside sequences, and ignored if at the top level.
 -- A call to ##get()## will read one entire top-level object, plus possibly one additional
--- (whitespace) character, after a top level number, even though the next object may have an 
+-- (whitespace) character, after a top level number, even though the next object may have an
 -- identifiable starting point.
 --
 -- The combination of ##[[:print]]()## and ##get()## can be used to save a
@@ -581,7 +581,7 @@ end function
 -- each series of transactions is complete. Remember to write out
 -- a whitespace character (using ##[[:puts]]()##) after each call to ##[[:print]]()##,
 -- at least when a top level number was just printed.
--- 
+--
 -- The value returned is not meaningful unless you have a ##GET_SUCCESS## status.
 --
 -- Example 1:
@@ -608,7 +608,7 @@ public function get(integer file, integer offset=0, integer answer=GET_SHORT_ANS
 end function
 
 --**
--- Read, from a string, a human-readable string of characters representing a Euphoria object. 
+-- Read, from a string, a human-readable string of characters representing a Euphoria object.
 -- Convert the string into the numeric value of that object.
 --
 -- Parameters:
@@ -625,24 +625,24 @@ end function
 -- ** ##GET_FAIL##:    object is not syntactically correct
 -- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
 -- * an object, the value that was read. This is valid only if return status is ##GET_SUCCESS##.
--- * an integer, the number of characters read. On an error, this is the point at which the 
+-- * an integer, the number of characters read. On an error, this is the point at which the
 --   error was detected.
 -- * an integer, the amount of initial whitespace read before the first active character was found
 --
 -- Comments:
--- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two 
+-- When ##answer## is not specified, or explicitly ##GET_SHORT_ANSWER##, only the first two
 -- elements in the returned sequence are actually returned.
 --
 -- This works the same as [[:get]](), but it reads from a string that you supply, rather than
 -- from a file or device.
 --
 -- After reading one valid representation of a Euphoria object, ##value()## will stop reading
--- and ignore any additional characters in the string. For example, "36" and "36P" will 
+-- and ignore any additional characters in the string. For example, "36" and "36P" will
 -- both give you ##{GET_SUCCESS, 36}##.
 --
--- The function returns ##{return_status, value}## if the answer type is not passed or set to 
+-- The function returns ##{return_status, value}## if the answer type is not passed or set to
 -- ##GET_SHORT_ANSWER##. If set to ##GET_LONG_ANSWER##, the number of characters read and the
--- amount of leading whitespace are returned in 3rd and 4th position. The ##GET_NOTHING## return 
+-- amount of leading whitespace are returned in 3rd and 4th position. The ##GET_NOTHING## return
 -- status can occur only on a long answer.
 --
 -- Example 1:
@@ -658,7 +658,7 @@ end function
 -- </eucode>
 --
 -- Example 3:
--- <eucode> 	
+-- <eucode>
 -- s = value("+++")
 -- -- s is {GET_FAIL, 0}
 -- </eucode>
@@ -675,3 +675,42 @@ public function value(sequence st, integer start_point=1, integer answer=GET_SHO
 	return get_value(st, start_point, answer)
 end function
 
+--**
+-- Perform a value() operation on a sequence returning the value on success or
+-- the default specified by `def` if value call failed.
+--
+-- Parameters:
+--   # ##st##: sequence to retrieve value from
+--	 # ##def##: default value if value() fails
+--	 # ##start_point##: an integer, the position at which to start reading. Defaults to 1
+--
+-- Returns:
+--   If value() call is a success, then value()[2], otherwise it will return
+--	 the parameter `def`.
+--
+-- Examples:
+-- <eucode>
+-- object i = defaulted_value("10", 0)
+-- -- i is 10
+--
+-- i = defaulted_value("abc", 39)
+-- -- i is 39
+-- </eucode>
+--
+-- See Also:
+--   [[:value]]
+--
+
+public function defaulted_value(object st, object def, integer start_point=1)
+	if atom(st) then
+		return def
+	end if
+
+	object result = value(st)
+
+	if result[1] = GET_SUCCESS then
+		return result[2]
+	end if
+
+	return def
+end function
