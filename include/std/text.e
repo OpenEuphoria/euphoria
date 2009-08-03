@@ -28,6 +28,7 @@ include std/pretty.e
 -- Description:
 -- This is exactly the same as [[:printf]](), except that the output is returned as a sequence
 -- of characters, rather than being sent to a file or device. 
+-- of characters, rather than being sent to a file or device.
 --
 -- Parameters:
 --		# ##format##: a sequence, the text to print. This text may contain format specifiers.
@@ -46,14 +47,14 @@ include std/pretty.e
 -- # Creating strings to pass to system().
 -- # Creating formatted error messages that can be passed to a common error message handler.
 --
--- Example 1: 	
+-- Example 1:
 -- <eucode>
 -- s = sprintf("%08d", 12345)
 -- -- s is "00012345"
 -- </eucode>
 --
 -- See Also:
---   [[:printf]], [[:sprint]]
+--   [[:printf]], [[:sprint]], [[:format]]
 
 --**
 -- Returns the representation of any Euphoria object as a string of characters.
@@ -78,7 +79,7 @@ include std/pretty.e
 -- -- s is "12345"
 -- </eucode>
 --
--- Example 2: 	
+-- Example 2:
 -- <eucode>
 -- s = sprint({10,20,30}+5)
 -- -- s is "{15,25,35}"
@@ -88,7 +89,7 @@ include std/pretty.e
 --    [[:sprintf]], [[:printf]]
 
 public function sprint(object x)
--- Return the string representation of any Euphoria data object. 
+-- Return the string representation of any Euphoria data object.
 -- This is the same as the output from print(1, x) or '?', but it's
 -- returned as a string sequence rather than printed.
 	sequence s
@@ -125,7 +126,7 @@ end function
 --
 -- Returns:
 --   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
---   A **integer**, if ##ret_index## is not zero, which is index of the leftmost 
+--   A **integer**, if ##ret_index## is not zero, which is index of the leftmost
 --                  element in ##source## that is not in ##what##.
 --
 -- Example 1:
@@ -154,7 +155,7 @@ public function trim_head(sequence source, object what=" \t\r\n", integer ret_in
 		end if
 		lpos += 1
 	end while
-		
+
 	if ret_index then
 		return lpos
 	else
@@ -173,7 +174,7 @@ end function
 --
 -- Returns:
 --   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
---   A **integer**, if ##ret_index## is not zero, which is index of the rightmost 
+--   A **integer**, if ##ret_index## is not zero, which is index of the rightmost
 --                  element in ##source## that is not in ##what##.
 --
 -- Example 1:
@@ -190,7 +191,7 @@ end function
 
 public function trim_tail(sequence source, object what=" \t\r\n", integer ret_index = 0)
 	integer rpos
-	
+
 	if atom(what) then
 		what = {what}
 	end if
@@ -202,7 +203,7 @@ public function trim_tail(sequence source, object what=" \t\r\n", integer ret_in
 		end if
 		rpos -= 1
 	end while
-		
+
 	if ret_index then
 		return rpos
 	else
@@ -240,7 +241,7 @@ end function
 public function trim(sequence source, object what=" \t\r\n", integer ret_index = 0)
 	integer rpos
 	integer lpos
-	
+
 	if atom(what) then
 		what = {what}
 	end if
@@ -252,7 +253,7 @@ public function trim(sequence source, object what=" \t\r\n", integer ret_index =
 		end if
 		lpos += 1
 	end while
-	
+
 	rpos = length(source)
 	while rpos > lpos do
 		if not find(source[rpos], what) then
@@ -260,7 +261,7 @@ public function trim(sequence source, object what=" \t\r\n", integer ret_index =
 		end if
 		rpos -= 1
 	end while
-		
+
 	if ret_index then
 		return {lpos, rpos}
 	else
@@ -292,10 +293,10 @@ function load_code_page(sequence cpname)
 
 	cp_source = defaultext(cpname, ".ecp")
 	cp_source = locate_file(cp_source)
-	
+
 	cpdata = read_lines(cp_source)
 	if sequence(cpdata) then
-	
+
 		pos = 0
 		while pos < length(cpdata) do
 			pos += 1
@@ -309,7 +310,7 @@ function load_code_page(sequence cpname)
 			if begins("--CASE--", cpdata[pos]) then
 				exit
 			end if
-			
+
 			kv = keyvalues(cpdata[pos],,,,"")
 			if equal(lower(kv[1][1]), "title") then
 				encoding_NAME = kv[1][2]
@@ -318,7 +319,7 @@ function load_code_page(sequence cpname)
 		if pos > length(cpdata) then
 			return -2 -- No Case Conversion table found.
 		end if
-		
+
 		upper_case_SET = ""
 		lower_case_SET = ""
 		while pos < length(cpdata) do
@@ -333,12 +334,12 @@ function load_code_page(sequence cpname)
 			if cpdata[pos][1] = '-' then
 				exit
 			end if
-	
-			kv = keyvalues(cpdata[pos])		
+
+			kv = keyvalues(cpdata[pos])
 			upper_case_SET &= hex_text(kv[1][1])
 			lower_case_SET &= hex_text(kv[1][2])
 		end while
-			
+
 	else
 		-- See if its in the database.
 		cp_db = locate_file("ecp.dat")
@@ -362,14 +363,14 @@ function load_code_page(sequence cpname)
 			end if
 		end if
 		close(fh)
-				
+
 	end if
 	return 0
 end function
 
 --**
 -- Sets the table of lowercase and uppercase characters that is used by
--- [[:lower]] and [[:upper]] 
+-- [[:lower]] and [[:upper]]
 --
 -- Parameters:
 --   # ##en## - The name of the encoding represented by these character sets
@@ -396,7 +397,7 @@ end function
 
 public procedure set_encoding_properties(sequence en = "", sequence lc = "", sequence uc = "")
 	integer res
-	
+
 	if length(en) > 0 and length(lc) = 0 and length(uc) = 0 then
 		res = load_code_page(en)
 		if res != 0 then
@@ -404,7 +405,7 @@ public procedure set_encoding_properties(sequence en = "", sequence lc = "", seq
 		end if
 		return
 	end if
-	
+
 	if length(lc) = length(uc) then
 		if length(lc) = 0 and length(en) = 0 then
 			en = "ASCII"
@@ -417,7 +418,7 @@ end procedure
 
 --**
 -- Gets the table of lowercase and uppercase characters that is used by
--- [[:lower]] and [[:upper]] 
+-- [[:lower]] and [[:upper]]
 --
 -- Parameters: none
 --
@@ -436,7 +437,7 @@ public function get_encoding_properties( )
 end function
 
 --**
--- Convert an atom or sequence to lower case. 
+-- Convert an atom or sequence to lower case.
 --
 -- Parameters:
 --   # ##x## - Any Euphoria object.
@@ -532,9 +533,9 @@ end function
 -- A text sequence is one in which all elements are either characters or
 -- text sequences. This means that if a non-character is found in the input,
 -- it is not converted. However this rule only applies to elements on the
--- same level, meaning that sub-sequences could be converted if they are 
+-- same level, meaning that sub-sequences could be converted if they are
 -- actually text sequences.
--- 
+--
 --
 -- Example 1:
 -- <eucode>
@@ -561,7 +562,7 @@ public function proper(sequence x)
 	integer inword
 	integer convert
 	sequence res
-	
+
 	inword = 0	-- Initially not in a word
 	convert = 1	-- Initially convert text
 	res = x		-- Work on a copy of the original, in case we need to restore.
@@ -617,10 +618,10 @@ public function proper(sequence x)
 				-- Turn conversion off for the rest of this level.
 				convert = 0
 			end if
-			
+
 			if sequence(res[i]) then
 				res[i] = proper(res[i])	-- recursive conversion
-			end if			
+			end if
 		end if
 	end for
 	return res
@@ -646,7 +647,7 @@ end function
 --                and carriage-return.
 -- # ##haskeys##: an integer containing true or false. The default is true. When
 -- ##true##, the ##kv_delim## values are used to separate keys from values, but
--- when ##false## it is assumed that each 'pair' is actually just a value. 
+-- when ##false## it is assumed that each 'pair' is actually just a value.
 --
 -- Returns:
 -- 		A **sequence** of pairs. Each pair is in the form {key, value}.
@@ -655,15 +656,15 @@ end function
 --
 -- String representations of atoms are not converted, either in the key or value part, but returned as any regular string instead.
 --
--- If ##haskeys## is ##true##, but a substring only holds what appears to be a value, the key 
+-- If ##haskeys## is ##true##, but a substring only holds what appears to be a value, the key
 -- is synthesized as ##p[n]##, where ##n## is the number of the pair. See example #2.
 --
 -- By default, pairs can be delimited by either a comma or semi-colon ",;" and
--- a key is delimited from its value by either an equal or a colon "=:". 
+-- a key is delimited from its value by either an equal or a colon "=:".
 -- Whitespace between pairs, and between delimiters is ignored.
 --
 -- If you need to have one of the delimiters in the value data, enclose it in
--- quotation marks. You can use any of single, double and back quotes, which 
+-- quotation marks. You can use any of single, double and back quotes, which
 -- also means you can quote quotation marks themselves. See example #3.
 --
 -- It is possible that the value data itself is a nested set of pairs. To do
@@ -717,10 +718,10 @@ end function
 -- -- s is { {"colors", "[black, blue, red]"}  } }
 -- </eucode>
 
-public function keyvalues(sequence source, object pair_delim = ";,", 
-                          object kv_delim = ":=", object quotes =  "\"'`", 
+public function keyvalues(sequence source, object pair_delim = ";,",
+                          object kv_delim = ":=", object quotes =  "\"'`",
                           object whitespace = " \t\n\r", integer haskeys = 1)
-                          
+
 	sequence lKeyValues
 	sequence value_
 	sequence key_
@@ -739,25 +740,25 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 	if length(source) = 0 then
 		return {}
 	end if
-	
+
 	if atom(pair_delim) then
 		pair_delim = {pair_delim}
-	end if		
+	end if
 	if atom(kv_delim) then
 		kv_delim = {kv_delim}
 	end if
 	if atom(quotes) then
 		quotes = {quotes}
-	end if		
+	end if
 	if atom(whitespace) then
 		whitespace = {whitespace}
-	end if		
-	
+	end if
+
 	lAllDelim = whitespace & pair_delim & kv_delim
 	lWhitePair = whitespace & pair_delim
 	lStartBracket = "{[("
 	lEndBracket   = "}])"
-	
+
 	lKeyValues = {}
 	pos_ = 1
 	while pos_ <= length(source) do
@@ -766,7 +767,7 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 			if find(source[pos_], whitespace) = 0 then
 				exit
 			end if
-			pos_ +=1 
+			pos_ +=1
 		end while
 
 		-- Get key. Ends at any of unquoted whitespace or unquoted delimiter
@@ -787,17 +788,17 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 						lQuote = lChar
 						lChar = -1
 					end if
-									
+
 				elsif lQuote = 0 and find(lChar, lAllDelim) != 0 then
 					exit
-					
+
 				end if
 				if lChar > 0 then
-					key_ &= lChar			
+					key_ &= lChar
 				end if
 				pos_ += 1
 			end while
-			
+
 			-- ignore next whitespace
 			if find(lChar, whitespace) != 0 then
 				pos_ += 1
@@ -806,20 +807,20 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 					if find(lChar, whitespace) = 0 then
 						exit
 					end if
-					pos_ +=1 
+					pos_ +=1
 				end while
 			end if
 		else
 			pos_ -= 1	-- Put back the last char.
 		end if
-						
+
 		value_ = ""
 		if find(lChar, kv_delim) != 0  or not haskeys then
-		
+
 			if find(lChar, kv_delim) != 0 then
 				lWasKV = 1
 			end if
-			
+
 			-- ignore next whitespace
 			pos_ += 1
 			while pos_ <= length(source) do
@@ -827,9 +828,9 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 				if find(lChar, whitespace) = 0 then
 					exit
 				end if
-				pos_ +=1 
+				pos_ +=1
 			end while
-			
+
 			-- Get value. Ends at any of unquoted whitespace or unquoted delimiter
 			lQuote = 0
 			lChar = 0
@@ -840,35 +841,35 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 					if lChar = lQuote then
 						-- End of quoted span
 						lQuote = 0
-						lChar = -1		
+						lChar = -1
 					elsif lQuote = 0 then
 						-- Start of quoted span
 						lQuote = lChar
-						lChar = -1		
+						lChar = -1
 					end if
 				elsif find(lChar, lStartBracket) > 0 then
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
-				
+
 				elsif length(value_) = 1 and value_[1] = '~' and find(lChar, lStartBracket) > 0 then
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
-				
+
 				elsif length(lBracketed) != 0 and lChar = lBracketed[$] then
 					lBracketed = lBracketed[1..$-1]
-					
+
 				elsif length(lBracketed) = 0 and lQuote = 0 and find(lChar, lWhitePair) != 0 then
 					exit
-					
+
 				end if
-				
+
 				if lChar > 0 then
-					value_ &= lChar			
+					value_ &= lChar
 				end if
 				pos_ += 1
 			end while
-			
-			if find(lChar, whitespace) != 0  then			
+
+			if find(lChar, whitespace) != 0  then
 				-- ignore next whitespace
 				pos_ += 1
 				while pos_ <= length(source) do
@@ -876,10 +877,10 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 					if find(lChar, whitespace) = 0 then
 						exit
 					end if
-					pos_ +=1 
+					pos_ +=1
 				end while
 			end if
-			
+
 			if find(lChar, pair_delim) != 0  then
 				pos_ += 1
 				if pos_ <= length(source) then
@@ -891,27 +892,27 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 		if find(lChar, pair_delim) != 0  then
 			pos_ += 1
 		end if
-		
+
 		if length(value_) = 0 then
 			if length(key_) = 0 then
 				lKeyValues = append(lKeyValues, {})
 				continue
 			end if
-			
+
 			if not lWasKV then
 				value_ = key_
 				key_ = ""
 			end if
 		end if
-		
+
 		if length(key_) = 0 then
-			if haskeys then			
+			if haskeys then
 				key_ =  sprintf("p[%d]", length(lKeyValues) + 1)
 			end if
 		end if
-		
+
 		if length(value_) > 0 then
-			lChar = value_[1]					
+			lChar = value_[1]
 			lBPos = find(lChar, lStartBracket)
 			if lBPos > 0 and value_[$] = lEndBracket[lBPos] then
 				if lChar = '(' then
@@ -919,11 +920,11 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 				else
 					value_ = keyvalues(value_[2..$-1], pair_delim, kv_delim, quotes, whitespace, 0)
 				end if
-			elsif lChar = '~' then	
+			elsif lChar = '~' then
 				value_ = value_[2 .. $]
 			end if
 		end if
-		
+
 		key_ = trim(key_)
 		value_ = trim(value_)
 		if length(key_) = 0 then
@@ -931,9 +932,9 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 		else
 			lKeyValues = append(lKeyValues, {key_, value_})
 		end if
-		
+
 	end while
-		
+
 	return lKeyValues
 end function
 
@@ -947,8 +948,8 @@ end function
 --              quote to use, and the second string is the closing quote to use.
 --              The default is {"\"", "\""} which means that the output will be
 --              enclosed by double-quotation marks.
---   # ##esc##: A single escape character. If this is not negative (the default), 
---              then this is used to 'escape' any embedded quote characters and 
+--   # ##esc##: A single escape character. If this is not negative (the default),
+--              then this is used to 'escape' any embedded quote characters and
 --              'esc' characters already in the ##text_in## string.
 --   # ##sp##: A list of zero or more special characters. The ##text_in## is only
 --             quoted if it contains any of the special characters. The default
@@ -1001,7 +1002,7 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 	if length(text_in) = 0 then
 		return text_in
 	end if
-	
+
 	if atom(quote_pair) then
 		quote_pair = {{quote_pair}, {quote_pair}}
 	elsif length(quote_pair) = 1 then
@@ -1009,29 +1010,29 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 	elsif length(quote_pair) = 0 then
 		quote_pair = {"\"", "\""}
 	end if
-	
+
 	if sequence(text_in[1]) then
 		for i = 1 to length(text_in) do
 			if sequence(text_in[i]) then
 				text_in[i] = quote(text_in[i], quote_pair, esc, sp)
 			end if
 		end for
-		
+
 		return text_in
 	end if
-	
-	-- Only quote the input if it contains any of the items in 'sp'	
+
+	-- Only quote the input if it contains any of the items in 'sp'
 	for i = 1 to length(sp) do
 		if find(sp[i], text_in) then
 			exit
 		end if
-		
+
 		if i = length(sp) then
 			-- Contains none of them, so just return the input untouched.
 			return text_in
 		end if
 	end for
-	
+
 	if esc >= 0  then
 		-- If the input already contains a quote, replace them with esc-quote,
 		-- but make sure that if the input already contains esc-quote that all
@@ -1042,11 +1043,11 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 		if atom(quote_pair[2]) then
 			quote_pair[2] = {quote_pair[2]}
 		end if
-		
+
 		if equal(quote_pair[1], quote_pair[2]) then
 			-- Simple case where both open and close quote are the same.
 			if match(quote_pair[1], text_in) then
-				if match(esc & quote_pair[1], text_in) then	
+				if match(esc & quote_pair[1], text_in) then
 					text_in = replace_all(text_in, esc, esc & esc)
 				end if
 				text_in = replace_all(text_in, quote_pair[1], esc & quote_pair[1])
@@ -1054,35 +1055,35 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 		else
 			if match(quote_pair[1], text_in) or
 			   match(quote_pair[2], text_in) then
-				if match(esc & quote_pair[1], text_in) then	
+				if match(esc & quote_pair[1], text_in) then
 					text_in = replace_all(text_in, esc & quote_pair[1], esc & esc & esc & quote_pair[1])
 				end if
 				text_in = replace_all(text_in, quote_pair[1], esc & quote_pair[1])
 			end if
-			
+
 			if match(quote_pair[2], text_in) then
-				if match(esc & quote_pair[2], text_in) then	
+				if match(esc & quote_pair[2], text_in) then
 					text_in = replace_all(text_in, esc & quote_pair[2], esc & esc & esc & quote_pair[2])
 				end if
 				text_in = replace_all(text_in, quote_pair[2], esc & quote_pair[2])
 			end if
 		end if
 	end if
-		
+
 	return quote_pair[1] & text_in & quote_pair[2]
 
 end function
 
---** 
+--**
 -- Removes 'quotation' text from the argument.
 -- Parameters:
 --   # ##text_in##: The string or set of strings to de-quote.
---   # ##quote_pairs##: A set of one or more sub-sequences of two strings. 
+--   # ##quote_pairs##: A set of one or more sub-sequences of two strings.
 --              The first string in each sub-sequence is the opening
 --              quote to look for, and the second string is the closing quote.
 --              The default is {{"\"", "\""}} which means that the output is
 --              'quoted' if it is enclosed by double-quotation marks.
---   # ##esc##: A single escape character. If this is not negative (the default), 
+--   # ##esc##: A single escape character. If this is not negative (the default),
 --              then this is used to 'escape' any embedded occurrences of the
 --              quote characters. In which case the 'escape' character is also
 --              removed.
@@ -1092,14 +1093,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- -- Using the defaults. 
+-- -- Using the defaults.
 -- s = quote("\"The small man\"")
 -- -- 's' now contains "The small man"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- -- Using the defaults. 
+-- -- Using the defaults.
 -- s = quote("(The small ?(?) man)", {{"[","]"}}, '?')
 -- -- 's' now contains "The small () man"
 -- </eucode>
@@ -1109,7 +1110,7 @@ public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, i
 	if length(text_in) = 0 then
 		return text_in
 	end if
-	
+
 	if atom(quote_pairs) then
 		quote_pairs = {{quote_pairs}, {quote_pairs}}
 	elsif length(quote_pairs) = 1 then
@@ -1117,17 +1118,17 @@ public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, i
 	elsif length(quote_pairs) = 0 then
 		quote_pairs = {"\"", "\""}
 	end if
-	
+
 	if sequence(text_in[1]) then
 		for i = 1 to length(text_in) do
 			if sequence(text_in[i]) then
 				text_in[i] = dequote(text_in[i], quote_pairs, esc)
 			end if
 		end for
-		
+
 		return text_in
 	end if
-	
+
 	-- If the text begins and ends with a quote-pair then strip them off and
 	-- remove the 'escape' from any 'escaped' quote_pairs within the text.
 	for i = 1 to length(quote_pairs) do
@@ -1154,7 +1155,7 @@ public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, i
 	return text_in
 end function
 
---** 
+--**
 -- Formats a set of arguments in to a string based on a supplied pattern.
 --
 -- Parameters:
@@ -1217,8 +1218,46 @@ end function
 -- If a token is going to be replaced by a zero-length argument, all white space
 -- following the token until the next non-whitespace character is not copied to
 -- the result string.
--- 
+--
 -- Examples:
+-- <eucode>
+-- format("Cannot open file '[]' - code []", {"/usr/temp/work.dat", 32})
+-- -- "Cannot open file '/usr/temp/work.dat' - code 32"
+--
+-- format("Err-[2], Cannot open file '[1]'", {"/usr/temp/work.dat", 32})
+-- -- "Err-32, Cannot open file '/usr/temp/work.dat'"
+--
+-- format("[4w] [3z:2] [6] [5l] [2z:2], [1:4]", {2009,4,21,"DAY","MONTH","of"})
+-- -- "Day 21 of month 04, 2009"
+--
+-- format("The answer is [:6.2]%", {35.22341})
+-- -- "The answer is  35.22%"
+--
+-- format("The answer is [.6]", {1.2345})
+-- -- "The answer is 1.234500"
+--
+-- format("[] [?]", {5, {"cats", "cat"}})
+-- -- "5 cats"
+--
+-- format("[] [?]", {1, {"cats", "cat"}})
+-- -- "1 cat"
+--
+-- format("[<:4]", {"abcdef"})
+-- -- "abcd"
+--
+-- format("[>:4]", {"abcdef"})
+-- -- "cdef"
+--
+-- format("[>:8]", {"abcdef"})
+-- -- "  abcdef"
+--
+-- format("seq is []", {{1.2, 5, "abcdef", {3}}})
+-- -- `seq is {1.2,5,"abcdef",{3}}`
+-- </eucode>
+--
+-- See Also:
+--   [[:sprintf]]
+--
 
 public function format(sequence pFormat, object pArgs)
 	sequence result
@@ -1242,14 +1281,14 @@ public function format(sequence pFormat, object pArgs)
 	integer trimming
 	integer hexout
 	object prevargv
-	
+
 	if atom(pArgs) then
 		pArgs = {pArgs}
 	end if
 	
 	result = ""
 	in_token = 0
-	
+
 	
 	i = 0
 	tstart = 0
@@ -1285,7 +1324,7 @@ public function format(sequence pFormat, object pArgs)
     			case ']' then
     				in_token = 0
     				tend = i
-    				
+
     			case '[' then
 	    			result &= tch
 	    			while i < length(pFormat) do
@@ -1295,48 +1334,48 @@ public function format(sequence pFormat, object pArgs)
 	    					tstart = 0
 	    					tend = 0
 	    					exit
-	    				end if	
+	    				end if
 	    			end while
-	    			
+
 	    		case 'w', 'W' then
 	    			cap = 'w'
-	    		
+
 	    		case 'u', 'U' then
 	    			cap = 'u'
-	    		
+
 	    		case 'l', 'L' then
 	    			cap = 'l'
-	    		
+
 	    		case 'b', 'B' then
 	    			bwz = 'b'
-	    		
+
 	    		case 's', 'S' then
 	    			spacer = 's'
-	    		
+
 	    		case 't', 'T' then
 	    			trimming = 't'
-	    		
+
 	    		case 'c', 'C' then
 	    			align = 'c'
-	    		
+
 	    		case 'z', 'Z' then
 	    			zfill = 'z'
-	    		
+
 	    		case 'x', 'X' then
 	    			hexout = tch
-	    		
+
 	    		case '<' then
 	    			align = tch
-	    		
+
 	    		case '>' then
 	    			align = tch
-	    		
+
 	    		case '+' then
 	    			signer = tch
-	    		
+
 	    		case '?' then
 	    			alt = tch
-	    		
+
 	    		case ':' then
 	    			while i < length(pFormat) do
 	    				i += 1
@@ -1351,7 +1390,7 @@ public function format(sequence pFormat, object pArgs)
 	    					zfill = '0'
 	    				end if
 	    			end while
-	    			
+
 	    		case '.' then
 	    			decs = 0
 	    			while i < length(pFormat) do
@@ -1364,7 +1403,7 @@ public function format(sequence pFormat, object pArgs)
 	    				end if
 	    				decs = decs * 10 + pos - 1
 	    			end while
-	    		
+
 	    		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' then
 	    			i -= 1
 	    			while i < length(pFormat) do
@@ -1377,20 +1416,20 @@ public function format(sequence pFormat, object pArgs)
 	    				end if
 	    				argn = argn * 10 + pos - 1
 	    			end while
-	    		
+
 	    		case else
 	    			-- ignore it
     		end switch
-    		
+
     		if tend > 0 then
     			-- Time to replace the token.
     			sequence argtext = ""
-    			
+
     			if argn = 0 then
     				argn = argl + 1
     			end if
     			argl = argn
-    			
+
     			if argn < 1 or argn > length(pArgs) then
     				argtext = ""
 				else
@@ -1409,14 +1448,14 @@ public function format(sequence pFormat, object pArgs)
 								argtext = upper(argtext)
 							end if
 						end if
-					
+
 					elsif atom(pArgs[argn]) then
 						if bwz != 0 and pArgs[argn] = 0 then
 							argtext = ""
 						else
 							argtext = trim(sprintf("%15.15g", pArgs[argn]))
 						end if
-					
+
 					else
 						if alt != 0 and length(pArgs[argn]) = 2 then
 							object tempv
@@ -1433,7 +1472,7 @@ public function format(sequence pFormat, object pArgs)
 									tempv = pArgs[argn][2]
 								end if
 							end if
-							
+
 							if string(tempv) then
 								argtext = tempv
 							elsif integer(tempv) then
@@ -1442,7 +1481,7 @@ public function format(sequence pFormat, object pArgs)
 								else
 									argtext = sprintf("%d", tempv)
 								end if
-							
+
 							elsif atom(tempv) then
 								if bwz != 0 and tempv = 0 then
 									argtext = ""
@@ -1461,9 +1500,9 @@ public function format(sequence pFormat, object pArgs)
 						end if
 					end if
     			end if
-    			
+
     			prevargv = pArgs[argn]
-    			
+
     			if length(argtext) > 0 then
     				switch cap do
     					case 'u' then
@@ -1471,9 +1510,9 @@ public function format(sequence pFormat, object pArgs)
     					case 'l' then
     						argtext = lower(argtext)
     					case 'w' then
-    						argtext = proper(argtext)    						
+    						argtext = proper(argtext)
     				end switch
-    				
+
 					if atom(pArgs[argn]) then
 						if find('e', argtext) = 0 then
 							-- Only applies to non-scientific notation.
@@ -1483,7 +1522,7 @@ public function format(sequence pFormat, object pArgs)
 									if decs = 0 then
 										argtext = argtext [1 .. pos-1 ]
 									else
-										pos = length(argtext) - pos 
+										pos = length(argtext) - pos
 										if pos > decs then
 											argtext = argtext[ 1 .. $ - pos + decs ]
 										elsif pos < decs then
@@ -1494,13 +1533,13 @@ public function format(sequence pFormat, object pArgs)
 									argtext = argtext & '.' & repeat('0', decs)
 								end if
 							end if
-							
+
 							if zfill != 0 then
 								argtext = repeat('0', width - length(argtext)) & argtext
 							end if
-						end if						
+						end if
 					end if
-					
+
     				if align = 0 then
     					if atom(pArgs[argn]) then
     						align = '>'
@@ -1508,16 +1547,16 @@ public function format(sequence pFormat, object pArgs)
     						align = '<'
     					end if
     				end if
-    				
+
     				if width = 0 then
     					width = length(argtext)
     				end if
-    				
+
     				if width < length(argtext) then
     					if align = '>' then
     						argtext = argtext[ length(argtext) - width + 1 .. $]
     					elsif align = 'c' then
-    						pos = length(argtext) - width 
+    						pos = length(argtext) - width
     						if remainder(pos, 2) = 0 then
     							pos = pos / 2
     							argtext = argtext[ pos + 1 .. $ - pos ]
@@ -1540,28 +1579,28 @@ public function format(sequence pFormat, object pArgs)
     							pos = floor(pos / 2)
     							argtext = repeat(' ', pos) & argtext & repeat(' ', pos + 1)
     						end if
-    						
+
     					else
 							argtext = argtext & repeat(' ', width - length(argtext))
-						end if    					
-    				end if		
+						end if
+    				end if
     				result &= argtext
-    				
+
     			else
     				if spacer then
     					result &= ' '
     				end if
     			end if
-    			
+
    				if trimming then
    					result = trim(result)
    				end if
-   				
+
     			tend = 0
     		end if
     	end if
     end while
-    	
+
 	return result
 end function
 
