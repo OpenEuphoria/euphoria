@@ -28,7 +28,6 @@ include std/pretty.e
 -- Description:
 -- This is exactly the same as [[:printf]](), except that the output is returned as a sequence
 -- of characters, rather than being sent to a file or device. 
--- of characters, rather than being sent to a file or device.
 --
 -- Parameters:
 --		# ##format##: a sequence, the text to print. This text may contain format specifiers.
