@@ -436,50 +436,6 @@ public function get_encoding_properties( )
 end function
 
 --**
--- Each character from ##subject## found in ##from_SET## is changed into the
--- corresponding character in ##to_SET##
---
--- Parameters:
---   # ##subject##: Any Euphoria object to be transformed.
---   # ##from_SET##: A sequence of characters representing the only characters from
---                   ##subject## that are actually transformed.
---   # ##to_SET##: A sequence of characters representing that transformed equivalents
---                 of those found in ##from_SET##.
---
--- Returns:
---   An **object**: The transformed version of ##subject##.
---
--- Example 1:
---   <eucode>
---   res = change("The Cat in the Hat", "aeiou", "AEIOU")
---   -- res is now "ThE CAt In thE HAt"
---   </eucode>
-
-public function change(object subject, sequence from_SET, sequence to_SET)
-	integer pos
-
-	if atom(subject) then
-		pos = find(subject, from_SET)
-		if pos >= 1  and pos <= length(to_SET) then
-			subject = to_SET[pos]
-		end if
-	else
-		for i = 1 to length(subject) do
-			if atom(subject[i]) then
-				pos = find(subject[i], from_SET)
-				if pos >= 1  and pos <= length(to_SET) then
-					subject[i] = to_SET[pos]
-				end if
-			else
-				subject[i] = change(subject[i], from_SET, to_SET)
-			end if
-		end for
-	end if
-	
-	return subject
-end function
-
---**
 -- Convert an atom or sequence to lower case. 
 --
 -- Parameters:
@@ -516,7 +472,7 @@ end function
 public function lower(object x)
 -- convert atom or sequence to lower case
 	if length(lower_case_SET) != 0 then
-		return change(x, upper_case_SET, lower_case_SET)
+		return mapping(x, upper_case_SET, lower_case_SET)
 	end if
 	return x + (x >= 'A' and x <= 'Z') * TO_LOWER
 end function
@@ -558,7 +514,7 @@ end function
 public function upper(object x)
 -- convert atom or sequence to upper case
 	if length(upper_case_SET) != 0 then
-		return change(x, lower_case_SET, upper_case_SET)
+		return mapping(x, lower_case_SET, upper_case_SET)
 	end if
 	return x - (x >= 'a' and x <= 'z') * TO_LOWER
 end function
@@ -1287,8 +1243,13 @@ public function format(sequence pFormat, object pArgs)
 	integer hexout
 	object prevargv
 	
+	if atom(pArgs) then
+		pArgs = {pArgs}
+	end if
+	
 	result = ""
 	in_token = 0
+	
 	
 	i = 0
 	tstart = 0

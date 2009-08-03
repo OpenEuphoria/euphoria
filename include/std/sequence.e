@@ -423,6 +423,67 @@ public function apply(sequence source, integer rid, object userdata = {})
 	return source
 end function
 
+--**
+-- Each item from ##source_arg## found in ##from_set## is changed into the
+-- corresponding item in ##to_set##
+--
+-- Parameters:
+--   # ##source_arg##: Any Euphoria object to be transformed.
+--   # ##from_set##: A sequence of objects representing the only items from
+--                   ##source_arg## that are actually transformed.
+--   # ##to_set##: A sequence of objects representing the transformed equivalents
+--                 of those found in ##from_set##.
+--   # ##one_level##: An integer. 0 (the default) means that mapping applies to 
+--                    every atom in every level of sub-sequences. 1 means that
+--                    mapping only applies to the items at the first level
+--                    in ##source_arg##. 
+--
+-- Returns:
+--   An **object**: The transformed version of ##source_arg##.
+--
+-- Comments:
+-- * When ##one_level## is zero or omitted, for each item in ##source_arg##, 
+--  ** if it is an atom then it may be transformed
+--  ** if it is a sequence, then the mapping is performed recursively on the
+--     sequence.
+--  ** This option required ##from_set## to only contain atoms and contain no
+--     sub-sequences.
+-- * When ##one_level## is not zero, for each item in ##source_arg##, 
+--  ** regardless of whether it is an atom or sequence, if it is found in ##from_set##
+--     then it is mapped to the corresponding object in ##to_set##..
+-- * Mapping occurs when an item in ##source_arg## is found in ##from_set##, 
+--  then it is replaced by the corresponding object in ##to_set##.
+--
+-- Example 1:
+--   <eucode>
+--   res = mapping("The Cat in the Hat", "aeiou", "AEIOU")
+--   -- res is now "ThE CAt In thE HAt"
+--   </eucode>
+
+public function mapping(object source_arg, sequence from_set, sequence to_set, integer one_level = 0)
+	integer pos
+
+	if atom(source_arg) then
+		pos = find(source_arg, from_set)
+		if pos >= 1  and pos <= length(to_set) then
+			source_arg = to_set[pos]
+		end if
+	else
+		for i = 1 to length(source_arg) do
+			if atom(source_arg[i]) or one_level then
+				pos = find(source_arg[i], from_set)
+				if pos >= 1  and pos <= length(to_set) then
+					source_arg[i] = to_set[pos]
+				end if
+			else
+				source_arg[i] = mapping(source_arg[i], from_set, to_set)
+			end if
+		end for
+	end if
+	
+	return source_arg
+end function
+
 --****
 -- Signature:
 -- <built-in> function length(sequence target)

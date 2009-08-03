@@ -509,8 +509,15 @@ test_equal("remove_dups presorted #2", {0,2,4,5,6,7,9}, remove_dups(sort(rds), R
 test_equal("merge #1", {"cat","dog","fish","snail","whale","wolf","worm"}, merge({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}))
 test_equal("merge #2", {0,2,4,4,5,5,5,6,7,7,9,9}, merge({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}))
 
-
+-- transforming
 test_equal("transform", "HELLA", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper"), {routine_id("replace_all"), "O", "A"}}))
+
+-- mapping
+test_equal("mapping A", "ThE CAt In thE HAt", mapping("The Cat in the Hat", "aeiou", "AEIOU"))
+test_equal("mapping B", "u cut uto this brewn nat", mapping("a cat ate this brown nut", "aeiou", "uoiea"))
+test_equal("mapping C", "a23456789", mapping("123456789", "123", "a"))
+test_equal("mapping D", {'a','b',{'c',4},5}, mapping({1,2,{3,4},5}, {1,2,3}, "abc"))
+test_equal("mapping E", "312", mapping({"one", "two", "three"}, {"two", "three", "one"}, "123", 1))
 
 test_report()
 

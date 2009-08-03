@@ -249,9 +249,4 @@ res = format("hex is #[:08X]", {1715004})
 exp = "hex is #001A2B3C"
 test_equal("format 'AC'", exp, res)
 
-test_equal("change A", "ThE CAt In thE HAt", change("The Cat in the Hat", "aeiou", "AEIOU"))
-test_equal("change B", "u cut out this brewn nat", change("a cat eat this brown nut", "aeiou", "uoiea"))
-test_equal("change C", "a23456789", change("123456789", "123", "a"))
-test_equal("change D", {'a','b',{'c',4},5}, change({1,2,{3,4},5}, {1,2,3}, "abc"))
-
 test_report()
