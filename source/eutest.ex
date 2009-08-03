@@ -222,8 +222,8 @@ function strip_path_junk(sequence path)
 end function
 
 function check_errors( sequence filename, sequence control_error_file, sequence fail_list )
-	sequence control_err = read_lines(control_error_file)
-	sequence ex_err = read_lines("ex.err")
+	object control_err = read_lines(control_error_file)
+	object ex_err = read_lines("ex.err")
 	if sequence(ex_err) then
 		if length(ex_err) > 4 then
 			ex_err = ex_err[1..4]
