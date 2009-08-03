@@ -670,6 +670,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 	
 	if report_errors and length( errors ) then
 		sequence msg = ""
+		sequence errloc
 		
 		for e = 1 to length( errors ) do
 			sequence ref = forward_references[errors[e]]
@@ -678,7 +679,10 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				continue
 
 			else
-				msg &= sprintf("\t%s (%d): %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
+				errloc = sprintf("\t%s (%d): %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
+				if not match(errloc, msg) then
+					msg &= errloc
+				end if
 			end if
 			ThisLine    = ref[FR_THISLINE]
 			bp          = ref[FR_BP]

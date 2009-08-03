@@ -2,6 +2,7 @@
 -- == error.e: Compile-time Error Handling
 
 include std/io.e
+include std/text.e
 
 include global.e
 include reswords.e
@@ -217,9 +218,7 @@ export procedure CompileErr(object msg, object args = {})
 		msg = GetMsgText(msg)
 	end if
 	
-	if atom(args) or length(args) != 0 then
-		msg = sprintf(msg, args)
-	end if
+	msg = format(msg, args)
 	
 	Errors += 1
 	if length(file_name) then
