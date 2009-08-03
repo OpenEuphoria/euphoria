@@ -676,17 +676,19 @@ public function value(sequence st, integer start_point=1, integer answer=GET_SHO
 end function
 
 --**
--- Perform a value() operation on a sequence returning the value on success or
--- the default specified by `def` if value call failed.
+-- Perform a value() operation on a sequence, returning the value on success or
+-- the default on failure.
 --
 -- Parameters:
---   # ##st##: sequence to retrieve value from
---	 # ##def##: default value if value() fails
---	 # ##start_point##: an integer, the position at which to start reading. Defaults to 1
+--   # ##st##: object to retrieve value from. 
+--	 # ##def##: the value returned if ##st## is an atom or ##value(st)## fails.
+--	 # ##start_point##: an integer, the position in ##st## at which to start 
+--          getting the value from. Defaults to 1
 --
 -- Returns:
---   If value() call is a success, then value()[2], otherwise it will return
---	 the parameter `def`.
+-- * If ##st## is an atom then ##def## is returned.
+-- * If ##value(st)## call is a success, then ##value()[2]##, otherwise it will return
+--	 the parameter #def#.
 --
 -- Examples:
 -- <eucode>
@@ -695,6 +697,12 @@ end function
 --
 -- i = defaulted_value("abc", 39)
 -- -- i is 39
+--
+-- i = defaulted_value(12, 42)
+-- -- i is 42
+--
+-- i = defaulted_value("{1,2}", 42)
+-- -- i is {1,2}
 -- </eucode>
 --
 -- See Also:
@@ -706,7 +714,7 @@ public function defaulted_value(object st, object def, integer start_point=1)
 		return def
 	end if
 
-	object result = value(st)
+	object result = get_value(st,start_point, GET_SHORT_ANSWER)
 
 	if result[1] = GET_SUCCESS then
 		return result[2]

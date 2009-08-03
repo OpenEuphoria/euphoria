@@ -14,7 +14,10 @@ test_equal("value_from() integer with leading whitespace",
 
 test_equal("defaulted_value() #1", 0, defaulted_value("abc", 0))
 test_equal("defaulted_value() #2", 10, defaulted_value("10", 0))
-test_equal("defaulted_value() #1", 10.5, defaulted_value("10.5", 0))
+test_equal("defaulted_value() #3", 10.5, defaulted_value("10.5", 0))
+test_equal("defaulted_value() #4", 0, defaulted_value(10.5, 0))
+test_equal("defaulted_value() #5", {1,2,3}, defaulted_value("123={1,2,3}", 0, 5))
+test_equal("defaulted_value() #6", 0, defaulted_value("123={1,2,3}", 0, 4))
 
 test_report()
 
