@@ -1,5 +1,6 @@
 include std/filesys.e
 include std/locale.e
+include std/text.e
 
 include common.e
 
@@ -216,7 +217,7 @@ public procedure ShowMsg(integer Cons, object Msg, object Args = {}, integer NL 
 	end if
 	
 	if atom(Args) or length(Args) != 0 then
-		Msg = sprintf(Msg, Args)
+		Msg = format(Msg, Args)
 	end if
 	
 	puts(Cons, Msg)
