@@ -9,7 +9,7 @@ if [ "$1" = "" ]; then
         exit
 fi
 
-rm -f euphoria-4.0a3.tar.gz
+rm -f euphoria-$1.tar.gz
 rm -rf cleanbranch
 svn co https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/$1 cleanbranch
 
@@ -27,6 +27,6 @@ cd ..
 
 find cleanbranch -name .svn -exec rm -rf {} \;
 
-mv cleanbranch euphoria-4.0a3
+mv cleanbranch euphoria-$1
 
-tar czf euphoria-4.0a3.tar.gz euphoria-4.0a3
+tar czf euphoria-$1.tar.gz euphoria-$1

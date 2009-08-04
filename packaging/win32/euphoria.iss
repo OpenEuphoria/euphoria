@@ -2,20 +2,20 @@
 
 [Setup]
 AppName=Euphoria
-AppVersion=4.0a3
-AppVerName=Euphoria v4.0a3
+AppVersion=4.0
+AppVerName=Euphoria v4.0
 AppPublisher=Rapid Deployment Software
 AppPublisherURL=http://www.rapideuphoria.com
 AppSupportURL=http://www.rapideuphoria.com
 AppUpdatesURL=http://www.rapideuphoria.com
-DefaultDirName=C:\euphoria40
+DefaultDirName=C:\euphoria
 DefaultGroupName=Euphoria 4.0
 AllowNoIcons=yes
 LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria_40a3
+OutputBaseFilename=euphoria_40
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes

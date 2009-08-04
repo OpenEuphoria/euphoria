@@ -56,6 +56,16 @@ REM -- Build our installer
 REM --
 
 :DoBuild
+echo Ensuring binaries are compressed
+upx ..\..\bin\eub.exe
+upx ..\..\bin\eubd.exe
+upx ..\..\bin\eubw.exe
+upx ..\..\bin\euc.exe
+upx ..\..\bin\eucd.exe
+upx ..\..\bin\eui.exe
+upx ..\..\bin\euid.exe
+upx ..\..\bin\euiw.exe
+
 echo Building our installer...
 "C:\Program Files\Inno Setup 5\ISCC.exe" /Q euphoria.iss
 
