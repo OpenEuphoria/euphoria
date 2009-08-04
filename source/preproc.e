@@ -109,7 +109,8 @@ public function maybe_preprocess(sequence fname)
 					{ pp[PP_COMMAND] }))
 			end if
 
-			rid = define_c_func(dll_id, "preprocess", { E_SEQUENCE, E_SEQUENCE }, E_INTEGER)
+			rid = define_c_func(dll_id, "preprocess", { E_SEQUENCE, E_SEQUENCE, E_SEQUENCE }, 
+				E_INTEGER)
 			if rid = -1 then
 				CompileErr("Preprocessor entry point cound not be found\n")
 			end if
