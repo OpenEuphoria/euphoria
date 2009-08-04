@@ -39,6 +39,8 @@ constant COMMON_OPTIONS = {
 				{ NO_CASE, HAS_PARAMETER, "localdb" } },
 	{ "p", 0, "Setup a pre-processor",
 				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
+	{ "pf", 0, "Force pre-processing regardless of cache state",
+				{ NO_CASE } },
 	{ "strict", 0, "Enable all warnings",
 				{ NO_CASE } },
 	{ "test", 0, "Test syntax only, do not execute",
@@ -174,6 +176,9 @@ export procedure handle_common_options(m:map opts)
 					sequence pp = split(val[i], ":")
 					add_preprocessor(pp[1], pp[2])
 				end for
+				
+			case "pf" then
+				force_preprocessor = 1
 
 			case "l" then
 				for i = 1 to length(val) do

@@ -74,8 +74,10 @@ public function maybe_preprocess(sequence fname)
 		post_fname = dirname(fname) & SLASH & post_fname
 	end if
 
-	if not is_file_newer(fname, post_fname) then
-		return post_fname
+	if not force_preprocessor then
+		if not is_file_newer(fname, post_fname) then
+			return post_fname
+		end if
 	end if
 	
 	sequence cmd = pp[PP_COMMAND]

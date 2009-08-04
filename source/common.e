@@ -24,6 +24,7 @@ public sequence file_public = {{}}  -- also remember which files are "public inc
 public sequence file_include_by = {{}}
 public sequence file_public_by = {{}}
 public sequence preprocessors = {}
+public integer force_preprocessor = 0
 public sequence LocalizeQual = {}
 public sequence LocalDB = "teksto"
 
