@@ -1724,6 +1724,82 @@ public function copy(map source_map, object dest_map=0, integer put_operation = 
 	end if
 end function
 
+
+--**
+-- Converts a set of Key-Value pairs to a map.
+--
+-- Parameters:
+--   # ##kv_pairs##: A seqeuence containing any number of subsequences that
+--                   have the format {KEY, VALUE}. These are loaded into a
+--                   new map which is then returned by this function.
+--
+-- Returns:
+--   A map containing the data from ##kv_pairs##
+--
+-- Example 1:
+--   <eucode>
+--   map m1 = new_from_kvpairs( {
+--           {"application", "Euphoria"},
+--           {"version", "4.0"},
+--           {"genre", "programming language"},
+--           {"crc", 0x4F71AE10}
+--              })
+--
+--   v = map:get(m1, "application") --> "Euphoria"
+-- </eucode>
+--
+public function new_from_kvpairs(sequence kv_pairs)
+	object new_map
+	
+	new_map = new( floor(7 * length(kv_pairs) / 2) )
+	for i = 1 to length(kv_pairs) do
+		if length(kv_pairs[i]) = 2 then
+			put(new_map, kv_pairs[i][1], kv_pairs[i][2])
+		end if
+	end for
+	
+	return new_map
+	
+end function
+
+
+--**
+-- Converts a set of Key-Value pairs contained in a string to a map.
+--
+-- Parameters:
+--   # ##kv_string##: A string containing any number of lines that
+--                   have the format KEY=VALUE. These are loaded into a
+--                   new map which is then returned by this function.
+--
+-- Returns:
+--   A map containing the data from ##kv_string##
+--
+-- Comment:
+-- This function actually calls ##[[:keyvalues]]()## to convert the string to
+-- key-value pairs, which are then used to create the map.
+--
+-- Example 1:
+-- Given that a file called "xyz.config" contains the lines ...
+-- {{{
+-- 	application = Euphoria,
+-- 	version     = 4.0,
+-- 	genre       = "programming language",
+-- 	crc         = 4F71AE10
+-- }}}
+--   <eucode>
+--   map m1 = new_from_string( read_file("xyz.config", TEXT_MODE))
+-- 
+--   printf(1, "%s\n", {map:get(m1, "application")}) --> "Euphoria"
+--   printf(1, "%s\n", {map:get(m1, "genre")})       --> "programming language"
+--   printf(1, "%s\n", {map:get(m1, "version")})     --> "4.0"
+--   printf(1, "%s\n", {map:get(m1, "crc")})         --> "4F71AE10"
+--   
+-- </eucode>
+--
+public function new_from_string(sequence kv_string)
+	return new_from_kvpairs( keyvalues (kv_string) )
+end function
+
 ---- Local Functions ------------
 procedure convert_to_large_map(map the_map_)
 	sequence temp_map_

@@ -4,6 +4,7 @@ include std/sort.e
 include std/text.e
 include std/pretty.e
 include std/filesys.e
+include std/io.e
 
 object o1, o2, o3
 o1 = map:threshold()
@@ -294,9 +295,43 @@ copy(cm1, cm2, ADD)
 
 test_equal("copy w/destinaion ADD", { {"AB", 2}, {"XY", 4} }, pairs(cm2, 1))
 
+
+write_file("xyz.cfg", `
+application = Euphoria,
+version     = 4.0,
+genre       = "programming language",
+crc         = 4F71AE10
+`)
+
+m1 = new_from_string( read_file("xyz.cfg", TEXT_MODE))
+ 
+test_equal("from string A", "Euphoria", map:get(m1, "application"))
+test_equal("from string B", "programming language", map:get(m1, "genre"))
+test_equal("from string C", "4.0", map:get(m1, "version"))
+test_equal("from string D", "4F71AE10", map:get(m1, "crc"))
+
+
+m1 = new_from_string(`name="John" children=["Jim", "Jane", "Judy"]`)
+test_equal("from string E", "John", map:get(m1, "name"))
+test_equal("from string F", {"Jim", "Jane", "Judy"}, map:get(m1, "children"))
+ 
+m1 = new_from_kvpairs( {
+{"application" , "Euphoria"},
+{"version"     , "4.0"},
+{"genre"       , "programming language"},
+{"crc"         , 0x4F71AE10}
+})
+ 
+test_equal("from kvpairs A", "Euphoria", map:get(m1, "application"))
+test_equal("from kvpairs B", "programming language", map:get(m1, "genre"))
+test_equal("from kvpairs C", "4.0", map:get(m1, "version"))
+test_equal("from kvpairs D", 0x4F71AE10, map:get(m1, "crc"))
+
+
 delete_file("save_map.txt")
 delete_file("save_map.raw")
 delete_file("save_map.raw2")
+delete_file("xyz.cfg")
 --
 -- Done with testing
 --
