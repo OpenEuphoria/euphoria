@@ -4286,7 +4286,7 @@ procedure opRETURNP()
 		sym = SymTab[sym][S_NEXT]
 	end while
 	FlushDeRef()
-	c_stmt0("return 0;\n")
+	c_stmt0("return;\n")
 	pc += 3
 end procedure
 

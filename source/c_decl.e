@@ -651,8 +651,11 @@ export procedure DeclareFileVars()
 			eentry[S_USAGE] != U_UNUSED and eentry[S_USAGE] != U_DELETED and
 			not find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
 			
-			
-			c_puts("int ")
+			if eentry[S_TOKEN] = PROC then
+				c_puts( "void ")
+			else
+				c_puts("int ")
+			end if
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
 			if integer( eentry[S_OBJ] ) then
@@ -816,14 +819,21 @@ export procedure DeclareRoutineList()
 		if SymTab[s][S_USAGE] != U_DELETED and
 			find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE})
 		then
+			sequence ret_type
+			if sym_token( s ) = PROC then
+				ret_type = "void "
+			else
+				ret_type ="int "
+			end if
+			
 			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } ) and dll_option then
 				-- declare the global routine as an exported DLL function
 				if TWINDOWS then            
 				 -- c_hputs("int __declspec (dllexport) __stdcall\n")
-					c_hputs("int __stdcall\n")
+					c_hputs(ret_type & "__stdcall\n")
 				end if
 			else
-				c_hputs("int ")
+				c_hputs(ret_type)
 			end if
 			c_hprintf("_%d", SymTab[s][S_FILE_NO])
 			c_hputs(SymTab[s][S_NAME])
@@ -1336,7 +1346,7 @@ export procedure GenerateUserRoutines()
 					
 					sequence ret_type
 					if SymTab[s][S_TOKEN] = PROC then
-						ret_type = ""
+						ret_type = "void "
 					else
 						ret_type = "int "
 					end if
@@ -1344,12 +1354,14 @@ export procedure GenerateUserRoutines()
 						-- declare the global routine as an exported DLL function
 						if TWINDOWS then      
 							-- c_stmt0("int __declspec (dllexport) __stdcall\n")
-							c_stmt0( ret_type & "__stdcall\n")
+							c_stmt(ret_type & " __stdcall @(", s)
+						else
+							c_stmt(ret_type & "@(", s)
 						end if                  
 						-- mark it as a routine_id target, so it won't be deleted
 						SymTab[s][S_RI_TARGET] = TRUE
 						LeftSym = TRUE
-						c_stmt(ret_type & "@(", s)
+						
 					else 
 						LeftSym = TRUE
 						c_stmt( ret_type & "@(", s)
