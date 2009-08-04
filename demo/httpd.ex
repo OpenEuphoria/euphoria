@@ -24,22 +24,20 @@ include std/filesys.e
 include std/map.e as m
 
 enum LOG_FATAL, LOG_WARN, LOG_INFO, LOG_DEBUG
-object
-	_ = 0,
-	LogLevel = LOG_INFO
+object LogLevel = LOG_INFO
 
 m:map mime_types = m:new()
 
-constant RESPONSE_STRING = #$
+constant RESPONSE_STRING = """
 HTTP/1.0 %d
 Content-Type: %s
 Connection: close
 Content-length: %d
 
 
-$
+"""
 
-constant ERROR_404 = #$
+constant ERROR_404 = """
 <html>
 <head><title>404 Not Found</title></head>
 <body>
@@ -49,7 +47,7 @@ constant ERROR_404 = #$
 </p>
 </body>
 </html>
-$
+"""
 
 procedure usage_message()
 	puts(1, "  Usage: httpd.ex [-bind ip_address:port] [-root document_root]\n\n")
@@ -93,7 +91,8 @@ end function
 procedure handle_request(sock:socket server, sequence client, sequence doc_root=".")
 	sock:socket client_sock = client[1]
 	sequence client_addr = client[2]
-	sequence request = split(trim(sock:receive(client_sock, 0)))
+	sequence req_text = trim(sock:receive(client_sock, 0))
+	sequence request = split(req_text)
 	sequence command = "", path = "/", version = ""
 
 	if length(request) >= 1 then
@@ -105,7 +104,7 @@ procedure handle_request(sock:socket server, sequence client, sequence doc_root=
 	if length(request) >= 3 then
 		version = request[3]
 	end if
-
+		
 	sequence fname = doc_root & path
 	if fname[$] = '/' and file_exists(fname & "index.html") then
 		fname &= "index.html"
@@ -132,10 +131,10 @@ procedure handle_request(sock:socket server, sequence client, sequence doc_root=
 	log(LOG_INFO, "%s %s %d %s", { client_addr, command, result_code,
 		path })
 
-	_ = sock:send(client_sock, sprintf(RESPONSE_STRING, {
-		result_code, content_type, length(data)
-	}), 0)
-	_ = sock:send(client_sock, data, 0)
+	sock:send(client_sock, sprintf(RESPONSE_STRING, {
+			result_code, content_type, length(data)
+		}), 0)
+	sock:send(client_sock, data, 0)
 end procedure
 
 procedure server()
@@ -173,11 +172,11 @@ procedure server()
 		object client = sock:accept(server)
 		if sequence(client) then
 			handle_request(server, client, doc_root)
-			_ = sock:close(client[1])
+			sock:close(client[1])
 		end if
 	end while
 
-	_ = sock:close(server)
+	sock:close(server)
 end procedure
 
 sequence typs = {
