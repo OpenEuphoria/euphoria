@@ -33,4 +33,6 @@ order by their last name.
   * Ryan Johnson
   * Christopher Lester
   * Marco Antonio Achury Palma
+  * Michael Sabal
   * Kathy Smith
+  * Yuku (Aku)
