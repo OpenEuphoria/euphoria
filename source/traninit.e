@@ -33,6 +33,7 @@ include buildsys.e
 include pathopen.e
 include error.e
 include platform.e
+include buildsys.e
 
 function extract_options(sequence s)
 	return s
@@ -53,6 +54,7 @@ sequence trans_opt_def = {
 	{ "fastfp", 0, "Enable hardware FPU (DOS option only)", { NO_CASE } },
 	{ "stack", 0, "Set the stack size (Watcom)", { NO_CASE, HAS_PARAMETER, "size" } },
 	{ "debug", 0, "Enable debug mode for generated code", { NO_CASE } },
+	{ "maxsize", 0, "Set the maximum C file size before splitting", { NO_CASE, HAS_PARAMETER, "size" } },
 	{ "keep", 0, "Keep the generated files", { NO_CASE } },
 	{ "makefile", 0, "Generate a project Makefile", { NO_CASE } },
 	{ "makefile-full", 0, "Generate a full project Makefile", { NO_CASE } },
@@ -164,6 +166,15 @@ export procedure transoptions()
 			case "debug" then
 				debug_option = TRUE
 				keep = TRUE -- you'll need the sources to debug
+			
+			case "maxsize" then
+				sequence tmp = value(val)
+				if tmp[1] = GET_SUCCESS then
+					max_cfile_size = tmp[2]
+				else
+					puts(2, "Invalid maximum file size\n")
+					abort(1)
+				end if
 
 			case "keep" then
 				keep = TRUE

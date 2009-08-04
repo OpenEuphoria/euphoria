@@ -143,7 +143,7 @@ end function
 function savespace()
 -- should try to save space and reduce complexity
    return length(loop_stack) = 0 and (CurrentSub = TopLevelSub or
-		  length(SymTab[CurrentSub][S_CODE]) > (MAX_CFILE_SIZE/2))
+		  length(SymTab[CurrentSub][S_CODE]) > (max_cfile_size/2))
 end function
 
 function BB_temp_type(integer var)
@@ -2907,7 +2907,7 @@ end procedure
 
 procedure opRETURNT()
 -- return from top-level "procedure"
-	if cfile_size > MAX_CFILE_SIZE then
+	if cfile_size > max_cfile_size then
 		c_stmt0("main")
 		c_printf("%d();\n", main_name_num)
 		c_stmt0("}\n")

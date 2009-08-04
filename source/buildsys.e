@@ -76,6 +76,11 @@ export sequence compiler_dir = ""
 -- Resulting executable name
 export sequence exe_name = ""
 
+--**
+-- Maximum C file size before splitting the file into multiple chunks
+
+export integer max_cfile_size = 100_000
+
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
 	SETUP_LFLAGS_BEGIN
 

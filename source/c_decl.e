@@ -25,10 +25,6 @@ include c_out.e
 with type_check
 
 --**
--- desired max size of created C files
-export constant MAX_CFILE_SIZE = 2500
-
---**
 -- number of Translator passes
 export integer LAST_PASS = FALSE
 
@@ -541,7 +537,6 @@ export procedure CName(symtab_index s)
 			SymTab[s][S_NREFS] += 1
 		end if
 		SetBBType(s, TYPE_NULL, novalue, TYPE_OBJECT, 0) -- record that this var was referenced in this BB
-	
 	
 	elsif SymTab[s][S_MODE] = M_CONSTANT then
 		-- literal integers, or declared constants 
@@ -1307,9 +1302,9 @@ export procedure GenerateUserRoutines()
 			  
 					-- Check for oversize C file 
 					if LAST_PASS = TRUE and 
-						(cfile_size > MAX_CFILE_SIZE or
-						(s != TopLevelSub and cfile_size > MAX_CFILE_SIZE/4 and
-						length(SymTab[s][S_CODE]) > MAX_CFILE_SIZE))
+						(cfile_size > max_cfile_size or
+						(s != TopLevelSub and cfile_size > max_cfile_size/4 and
+						length(SymTab[s][S_CODE]) > max_cfile_size))
 					then
 						-- start a new C file 
 						-- (we generate about 1 line of C per element of CODE)
