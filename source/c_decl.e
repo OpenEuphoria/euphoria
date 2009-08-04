@@ -826,14 +826,14 @@ export procedure DeclareRoutineList()
 				ret_type ="int "
 			end if
 			
-			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } ) and dll_option then
+			c_hputs(ret_type)
+			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } ) 
+			and dll_option and TWINDOWS then
 				-- declare the global routine as an exported DLL function
-				if TWINDOWS then            
-				 -- c_hputs("int __declspec (dllexport) __stdcall\n")
-					c_hputs(ret_type & "__stdcall\n")
-				end if
+				c_hputs("__stdcall ")
+				
 			else
-				c_hputs(ret_type)
+				
 			end if
 			c_hprintf("_%d", SymTab[s][S_FILE_NO])
 			c_hputs(SymTab[s][S_NAME])
@@ -845,7 +845,7 @@ export procedure DeclareRoutineList()
 					c_hputs(", int")
 				end if
 			end for
-			c_hputs(");\n")
+			c_hputs("); // main-.h?\n")
 		end if
 		s = SymTab[s][S_NEXT]
 	end while

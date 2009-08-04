@@ -7026,7 +7026,7 @@ procedure BackEnd(atom ignore)
 
 	elsif TUNIX then
 	if dll_option then
-		c_stmt0("\nvoid _init()\n")
+		c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
 	else
 		c_stmt0("\nvoid main(int argc, char *argv[])\n")
 	end if
