@@ -6,7 +6,7 @@ include std/dll.e
 include common.e
 include error.e
 
-enum PP_EXTENSION, PP_COMMAND, PP_RID
+enum PP_EXTENSION, PP_COMMAND, PP_PARAMS, PP_RID
 
 function is_file_newer(sequence f1, sequence f2)
 	object d1 = file_timestamp(f1)
@@ -25,14 +25,32 @@ end function
 -- Add a pre-processor
 -- 
 -- Parameters:
---   # ##file_extension##: file extension of this pre-processor
+--   # ##file_ext##: file extension of this pre-processor -or- if command
+--	   is zero, file_ext is the pre-processor definition string, i.e.
+--	   de,dex:dot4.ex
 --	 # ##command##: pre-processor command name
+--	 # ##params##: parameters to send to the pre-processor
 --	 
 
-public procedure add_preprocessor(sequence file_ext, sequence command)
+public procedure add_preprocessor(sequence file_ext, object command=0, object params=0)
+	if atom(command) then
+		sequence tmp = split(file_ext, ":")
+		file_ext = tmp[1]
+		command = tmp[2]
+		if length(tmp) >= 3 then
+			params = tmp[3]
+		end if
+	end if
+
+	sequence file_exts = split(file_ext, ",")
+	
+	if atom(params) then
+		params = ""
+	end if
+	
 	sequence exts = split(file_ext, ",")
 	for i = 1 to length(exts) do
-		preprocessors &= { { exts[i], command, -1 } }
+		preprocessors &= { { exts[i], command, params, -1 } }
 	end for
 end procedure 
 
@@ -99,13 +117,13 @@ public function maybe_preprocess(sequence fname)
 			preprocessors[pp_id][PP_RID] = rid
 		end if
 		
-		if c_func(rid, { fname, post_fname }) = 0 then
+		if c_func(rid, { fname, post_fname, pp[PP_PARAMS] }) = 0 then
 			CompileErr("Preprocessor call failed\n")
 		end if
 	else
 		if equal(fileext(cmd), "ex") then
 			cmd = "eui " & cmd
-			cmd &= sprintf(" %s %s", { fname, post_fname })
+			cmd &= sprintf(" -i %s -o %s %s", { fname, post_fname, pp[PP_PARAMS] })
 			
 			if system_exec(cmd, 2) then
 				CompileErr(sprintf("Preprocessor command failed: %s\n", { cmd }))

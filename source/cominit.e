@@ -173,8 +173,7 @@ export procedure handle_common_options(m:map opts)
 			
 			case "p" then
 				for i = 1 to length(val) do
-					sequence pp = split(val[i], ":")
-					add_preprocessor(pp[1], pp[2])
+					add_preprocessor(val[i])
 				end for
 				
 			case "pf" then

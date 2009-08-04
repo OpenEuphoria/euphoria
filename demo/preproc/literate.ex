@@ -4,15 +4,30 @@
 -- http://www.literateprogramming.com/
 -- 
 
+include std/cmdline.e
 include std/io.e
+include std/map.e
 
 constant 
 	BEGIN_TAG = "<eucode>",
 	END_TAG = "</eucode>"
 
-sequence cmds = command_line()
+constant cmd_params = {
+	{ "i", 0, "Input filename", { NO_CASE, HAS_PARAMETER } },
+	{ "o", 0, "Output filename", { NO_CASE, HAS_PARAMETER } }
+}
 
-sequence in = read_file(cmds[3])
+map:map params = cmd_parse(cmd_params)
+
+object input_filename=map:get(params, "i"), 
+	output_filename=map:get(params, "o")
+
+if atom(input_filename) or atom(output_filename) then
+	puts(1, "Usage: literate.ex -i input_file -o output_file\n")
+	abort(1)
+end if
+
+sequence in = read_file(input_filename)
 integer next_tag, pos = 1
 sequence out = ""
 
@@ -30,4 +45,4 @@ end while
 
 out &= "/*\n" & in[pos..$] & "\n*/\n"
 
-write_file(cmds[4], out)
+write_file(output_filename, out)
