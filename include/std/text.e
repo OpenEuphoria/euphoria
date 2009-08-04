@@ -1516,7 +1516,7 @@ public function format(sequence pFormat, object pArgs)
 						if find('e', argtext) = 0 then
 							-- Only applies to non-scientific notation.
 							if decs != -1 then
-								pos = find('.', argtext)
+								pos = find('.', argtext)								
 								if pos then
 									if decs = 0 then
 										argtext = argtext [1 .. pos-1 ]
@@ -1528,12 +1528,12 @@ public function format(sequence pFormat, object pArgs)
 											argtext = argtext & repeat('0', decs - pos)
 										end if
 									end if
-								else
+								elsif decs > 0 then
 									argtext = argtext & '.' & repeat('0', decs)
 								end if
 							end if
 
-							if zfill != 0 then
+							if zfill != 0 and width > 0 then
 								argtext = repeat('0', width - length(argtext)) & argtext
 							end if
 						end if
@@ -1546,10 +1546,11 @@ public function format(sequence pFormat, object pArgs)
     						align = '<'
     					end if
     				end if
-
-    				if width = 0 then
+    				
+    				if width <= 0 then
     					width = length(argtext)
     				end if
+    			
 
     				if width < length(argtext) then
     					if align = '>' then

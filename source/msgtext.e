@@ -168,7 +168,7 @@ constant StdErrMsgs = {
 	{160, "warning names must be enclosed in '(' ')'"},
 	{161, "#! may only be on the first line of a program"},
 	{162, "Writing emake file [1][2]"},
-	{163, "Compiling [1:5.1]% [2]"},
+	{163, "Compiling [1:3.0]% [2]"},
 	{164, "Couldn't compile file '[1]'"},
 	{165, "Status: [1] Command: [2]"},
 	{166, "Linking 100% [1]"},
