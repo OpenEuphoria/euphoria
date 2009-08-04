@@ -28,13 +28,9 @@ order by their last name.
   * Jiri Babor
   * Chris Bensler
   * Tom Ciplijauskas
+  * CoJaBo
   * Jason Gade
   * Ryan Johnson
   * Christopher Lester
   * Marco Antonio Achury Palma
   * Kathy Smith
-  
-=== Need Names
-
-  * CoJaBo
-  * yukuku
