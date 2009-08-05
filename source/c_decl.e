@@ -1346,16 +1346,16 @@ export procedure GenerateUserRoutines()
 						ret_type = "int "
 					end if
 					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
+						-- mark it as a routine_id target, so it won't be deleted
+						SymTab[s][S_RI_TARGET] = TRUE
+						LeftSym = TRUE
+						
 						-- declare the global routine as an exported DLL function
 						if TWINDOWS then      
-							-- c_stmt0("int __declspec (dllexport) __stdcall\n")
 							c_stmt(ret_type & " __stdcall @(", s)
 						else
 							c_stmt(ret_type & "@(", s)
 						end if                  
-						-- mark it as a routine_id target, so it won't be deleted
-						SymTab[s][S_RI_TARGET] = TRUE
-						LeftSym = TRUE
 						
 					else 
 						LeftSym = TRUE
