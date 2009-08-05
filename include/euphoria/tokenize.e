@@ -84,37 +84,39 @@ global constant -- T_NUMBER formats
 
 ---------------------------------------------------------------------------------
 
-global constant
-		 TTYPE = Enum_Start(1,1)
-		,TDATA = Enum()
-		,TLNUM = Enum()
-		,TLPOS = Enum()
-		,TFORM = Enum()
+public enum
+		TTYPE,
+		TDATA,
+		TLNUM,
+		TLPOS,
+		TFORM,
+		$
 
-sequence Token         Token = {T_EOF,"",0,0,0}
+sequence Token = {T_EOF,"",0,0,0}
 
-sequence input     input = ""
-integer  in        in = 0
-integer  LNum      LNum = 0
-integer  LPos      LPos = 0
-integer  Look      Look = EOL
+sequence source_text = ""
+integer  sti  = 0
+integer  LNum = 0
+integer  LPos = 0
+integer  Look = EOL
 
 ---------------------------------------------------------------------------------
 
-integer ERR         ERR       = 0
-integer ERR_LNUM    ERR_LNUM  = 0
-integer ERR_LPOS    ERR_LPOS  = 0
+integer ERR       = 0
+integer ERR_LNUM  = 0
+integer ERR_LPOS  = 0
 
-global constant -- et error codes
-		 ERR_OPEN       = Enum_Start(1,1)
-		,ERR_ESCAPE     = Enum()
-		,ERR_EOL_CHAR   = Enum()
-		,ERR_CLOSE_CHAR = Enum()
-		,ERR_EOL_STRING = Enum()
-		,ERR_HEX        = Enum()
-		,ERR_DECIMAL    = Enum()
-		,ERR_UNKNOWN    = Enum()
-		,ERR_EOF        = Enum()
+public enum -- et error codes
+		ERR_OPEN,
+		ERR_ESCAPE,
+		ERR_EOL_CHAR,
+		ERR_CLOSE_CHAR,
+		ERR_EOL_STRING,
+		ERR_HEX,
+		ERR_DECIMAL,
+		ERR_UNKNOWN,
+		ERR_EOF,
+		$
 
 constant ERROR_STRING = { -- use et_error_string(code) to retrieve these
 		 "Failed to open file"
@@ -145,9 +147,9 @@ end function
 
 ---------------------------------------------------------------------------------
 
-integer IGNORE_BLANKS       IGNORE_BLANKS 	= TRUE
-integer IGNORE_COMMENTS     IGNORE_COMMENTS = TRUE
-integer STRING_NUMBERS      STRING_NUMBERS 	= FALSE
+integer IGNORE_BLANKS 	= TRUE
+integer IGNORE_COMMENTS = TRUE
+integer STRING_NUMBERS 	= FALSE
 
 -- return blank lines as tokens
 -- default is FALSE
@@ -226,8 +228,8 @@ procedure scan_char()
 		end if
 	end if
 	LPos += 1
-	in += 1
-	Look = input[in]
+	sti += 1
+	Look = source_text[sti]
 end procedure
 
 ---------------------------------------------------------------------------------
@@ -253,7 +255,7 @@ function scan_multicomment()
 	while 1 do
 		if (Look = EOF) then report_error(ERR_EOF) return TRUE end if
 		if (Look = '*') then
-			if (input[in+1] = '/') then
+			if (source_text[sti+1] = '/') then
 				exit
 			end if
 		end if
@@ -293,7 +295,33 @@ function scan_qchar()
 end function
 
 function scan_string()
-	if (Look != '\"') then return FALSE end if
+	if (Look != '"') then return FALSE end if
+	if sti + 3 < length(source_text) then
+		if equal(source_text[sti .. sti + 2], "\"\"\"") then
+			-- Got a raw string 
+			Token[TTYPE] = T_STRING
+			Token[TDATA] = ""
+			sti += 2
+			scan_char()
+			while (sti < length(source_text) - 2) and not equal(source_text[sti .. sti +2], "\"\"\"") do
+				if (Look = EOF) then 
+					report_error(ERR_EOF) 
+					return TRUE 
+				end if
+		
+				Token[TDATA] &= Look
+				scan_char()
+			end while
+			if sti > length(source_text) - 2 then
+				report_error(ERR_EOF) 
+				return TRUE 
+			end if
+			sti += 2
+			scan_char()
+			return TRUE
+		end if
+	end if
+	
 	scan_char()
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
@@ -309,11 +337,10 @@ end function
 function scan_multistring()
 	integer end_of_string
 
-	if (Look != '#') then return FALSE end if
-	if not find(input[in+1], "#'`~$^/\\|") then return FALSE end if
+	if (Look != '`') then return FALSE end if
 
 	scan_char()
-	end_of_string = Look
+	end_of_string = '`'
 	scan_char()
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
@@ -546,7 +573,7 @@ procedure next_token()
 	elsif scan_identifier() then
 	elsif scan_qchar() then
 	elsif scan_string() then
-	elsif scan_multistring() then -- must be before scan_hex()
+	elsif scan_multistring() then
 	elsif scan_hex() then
 	elsif scan_number() then
 	else -- error or end of file
@@ -574,18 +601,18 @@ global function et_tokenize_string(sequence code)
 
 	tokens = {}
 		
-	input = code & EOL & EOF
+	source_text = code & EOL & EOF
 	LNum = 1
 	LPos = 1
-	in = 1
-	Look = input[in]
+	sti = 1
+	Look = source_text[sti]
 	Token[TTYPE] = EOF
 	Token[TDATA] = ""
 	Token[TLNUM] = 1
 	Token[TLPOS] = 1
 
-  if (Look = '#') and (input[in+1] = '!') then
-    in += 1
+  if (Look = '#') and (source_text[sti+1] = '!') then
+    sti += 1
     scan_char()
     if scan_white() then end if
     Token[TTYPE] = T_SHBANG
