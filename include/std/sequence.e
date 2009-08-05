@@ -2424,6 +2424,7 @@ end function
 --                       {routine_id("replace_all"), "O", "A"}
 --                   })
 -- --> "HELLA"
+-- </eucode>
 
 public function transform( sequence pSource, object pTransformer)
 	sequence lResult
