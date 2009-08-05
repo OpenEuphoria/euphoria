@@ -131,7 +131,7 @@ export procedure expand_config_options()
 	while idx < length(Argv) do
 		if equal(upper(Argv[idx]), "-C") then
 			idx += 1
-			sequence new_args = load_euinc_conf(Argv[idx])
+			sequence new_args = load_euphoria_config(Argv[idx])
 			Argv = Argv[1..idx] & new_args & Argv[idx + 1..$]
 		end if
 

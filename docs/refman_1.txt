@@ -220,14 +220,14 @@ distribution specific package, if available.
 
 The gzipped tarball is laid out similarly to the windows directory structure.
 You'll need to manually edit ##/etc/profile## so the ##PATH## contains
-##euphoria\bin##, and either create a ##euinc.conf## file or set up ##EUDIR##
+##euphoria\bin##, and either create a ##eu.cfg## file or set up ##EUDIR##
 and ##EUINC##.
 
 The packaged version installs Euphoria in a more //Unix//-like way, putting the
 executables into ##/usr/bin##, ##/usr/share/euphoria## and
 ##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eubackend##,
 ##eushroud## and ##eubind## are also installed.  It will also create
-##/etc/euphoria/euinc.conf##, which will point to the standard euphoria include
+##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
 
 === Euphoria programs
@@ -445,10 +445,10 @@ program being launched may need for proper, expected operation. Under //Windows/
 this is achieved by clicking the ##Run... start## menu entry, or hitting ##Windows-R##.
 
 The following items may be changed or added, one at a time:
-@[euinc.conf]
+@[eu.cfg]
 ; ##-C config_file##:
 : Specifies either a file name or the path for where the default file called
-  euinc.conf exists. The configuration file which holds a set of additional
+  eu.cfg exists. The configuration file which holds a set of additional
   command line switches.
 
 ; ##-I include_path##:
@@ -501,10 +501,10 @@ The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 ## Paths listed in the ##EUDIR## environment variable, in the order in which they appear
 ## The interpreter's path
 
-=== euinc.conf
+=== eu.cfg
 
 Euphoria supports reading command line switches from configuration files. The default
-name for the configuration file is ##euinc.conf##. However you can specify different
+name for the configuration file is ##eu.cfg##. However you can specify different
 ones by using the ##-C## switch. 
 
 ==== Configuration file format
@@ -544,21 +544,24 @@ is prepended to the line and then it is added to the command line.
 
 When Euphoria starts up, it looks for configuration files in the following order ...
 * for UNIX systems
-## /etc/euphoria/euinc.conf
-## ${HOME}/.euinc.conf
-## From where ever the executable is run from "<exepath>/euinc.conf"
-## Current working directory - "./euinc.conf"
+## /etc/euphoria/eu.cfg
+## ${EUDIR}/eu.cfg
+## ${HOME}/.eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
 ## Command line -C switches
 * for WINDOWS systems
-## ~%ALLUSERSPROFILE~%\euphoria\euinc.conf
-## ~%APPDATA~%\euphoria\euinc.conf
-## ~%HOMEDRIVE~%\~%HOMEPATH~%\euinc.conf
-## From where ever the executable is run from "<exepath>/euinc.conf"
-## Current working directory - "./euinc.conf"
+## ~%ALLUSERSPROFILE~%\euphoria\eu.cfg
+## ~%APPDATA~%\euphoria\eu.cfg
+## ~%EUDIR~%\eu.cfg
+## ~%HOMEDRIVE~%\~%HOMEPATH~%\eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
 ## Command line -C switches
 * for DOS systems
-## From where ever the executable is run from "<exepath>/euinc.conf"
-## Current working directory - "./euinc.conf"
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## ~%EUDIR~%\eu.cfg
+## Current working directory - "./eu.cfg"
 ## Command line -C switches
 
 * Euphoria processes every configuration file found, and in the order described above.

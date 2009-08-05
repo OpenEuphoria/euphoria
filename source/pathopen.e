@@ -219,7 +219,7 @@ export procedure add_include_directory( sequence path )
 end procedure
 
 sequence seen_conf = {}
-export function load_euinc_conf( sequence file )
+export function load_euphoria_config( sequence file )
 	integer fn
 	object in
 	integer spos, epos
@@ -229,12 +229,12 @@ export function load_euinc_conf( sequence file )
 	sequence parm
 	sequence section
 
-	-- If supplied 'file' is actually a directory name, look for 'euinc.conf' in that directory
+	-- If supplied 'file' is actually a directory name, look for 'eu.cfg' in that directory
 	if file_type(file) = FILETYPE_DIRECTORY then
 		if file[$] != SLASH then
 			file &= SLASH
 		end if
-		file &= "euinc.conf"
+		file &= "eu.cfg"
 	end if
 	
 	conf_path = canonical_path( file )
@@ -374,7 +374,7 @@ export function load_euinc_conf( sequence file )
 				arg = upper(arg)
 				if equal(arg, "-C") then
 					if length(parm) > 0 then
-						new_args &= load_euinc_conf(parm)
+						new_args &= load_euphoria_config(parm)
 					end if
 				else
 					new_args = append(new_args, arg)
@@ -395,7 +395,7 @@ end function
 export function GetDefaultArgs()
 	object env
 	sequence default_args = {}
-	sequence conf_file = "euinc.conf"
+	sequence conf_file = "eu.cfg"
 
 	if loaded_config_inc_paths then return "" end if
 	loaded_config_inc_paths = 1
@@ -404,32 +404,32 @@ export function GetDefaultArgs()
 	-- If Windows, this loads the config file from the same path as the binary. This
 	-- can be different, for instance the binary may be C:\euphoria\bin\eui.exe but
 	-- you are loading it such as: C:\euphoria\demo> eui demo.ex ... In this case
-	-- this command loads C:\euphoria\bin\euinc.conf not C:\euphoria\demo\euinc.conf
+	-- this command loads C:\euphoria\bin\eu.cfg not C:\euphoria\demo\eu.cfg
 	-- as it would under unix variants.
 	
 	-- platform specific
 	ifdef UNIX then
-		default_args &= load_euinc_conf( "/etc/euphoria/" & conf_file )
+		default_args &= load_euphoria_config( "/etc/euphoria/" & conf_file )
 		
 		env = getenv( "HOME" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( env & "/." & conf_file )
+			default_args &= load_euphoria_config( env & "/." & conf_file )
 		end if
 		
 	elsifdef WIN32 then
 		env = getenv( "ALLUSERSPROFILE" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( expand_path( "euphoria", env ) & conf_file )
+			default_args &= load_euphoria_config( expand_path( "euphoria", env ) & conf_file )
 		end if
 		
 		env = getenv( "APPDATA" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( expand_path( "euphoria", env ) & conf_file )
+			default_args &= load_euphoria_config( expand_path( "euphoria", env ) & conf_file )
 		end if
 
 		env = getenv( "HOMEPATH" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( getenv( "HOMEDRIVE" ) & env & "\\" & conf_file )
+			default_args &= load_euphoria_config( getenv( "HOMEDRIVE" ) & env & "\\" & conf_file )
 		end if
 		
 	elsedef
@@ -437,15 +437,15 @@ export function GetDefaultArgs()
 	end ifdef
 	
 	-- From current working directory
-	default_args &= load_euinc_conf("./" & conf_file)
+	default_args &= load_euphoria_config("./" & conf_file)
 	
 	-- From where ever the executable is
 	env = strip_file_from_path( exe_path() )
-	default_args &= load_euinc_conf( env & conf_file )
+	default_args &= load_euphoria_config( env & conf_file )
 
 	env = getenv("EUDIR")
 	if sequence(env) then
-		default_args &= load_euinc_conf(env & "/" & conf_file)
+		default_args &= load_euphoria_config(env & "/" & conf_file)
 	end if
 
 	return default_args
