@@ -73,8 +73,8 @@ Source: "{app}\license.txt"; DestDir: "{code:GetBackupPath}"; Flags: external sk
 Source: "{app}\file_id.diz"; DestDir: "{code:GetBackupPath}"; Flags: external skipifsourcedoesntexist;
 
 ; Temporary Programs used to update AUTOEXEC.BAT in Windows 95, 98 and ME,
-; create the docs, and exwc.exe (see [Run] section below)
-Source: "..\..\bin\exw.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+; create the docs, and euiw.exe (see [Run] section below)
+Source: "..\..\bin\euiw.exe"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; We temporarily need these includes as well, but EUDIR will not have been set.
 Source: "cleanbranch\include\wildcard.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
@@ -93,13 +93,13 @@ Source: "cleanbranch\file_id.diz"; DestDir: {app}; Flags: ignoreversion;
 Source: "cleanbranch\license.txt"; DestDir: {app}; Flags: ignoreversion;
 
 ; DOS Binaries
-Source: "..\..\bin\ex.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
-Source: "..\..\bin\backend.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
-Source: "..\..\bin\ec.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
+Source: "..\..\bin\euid.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
+Source: "..\..\bin\eubd.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
+Source: "..\..\bin\eucd.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
 Source: "..\..\bin\le23p.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
 Source: "..\..\bin\cwc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
 Source: "..\..\bin\cwstub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
-Source: "..\..\bin\ec.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
+Source: "..\..\bin\eud.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
 Source: "cleanbranch\bin\bind.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
 Source: "cleanbranch\bin\shroud.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_dos
 
@@ -108,11 +108,12 @@ Source: "cleanbranch\bin\eutestd.bat"; DestDir: {app}\bin\; Flags: ignoreversion
 Source: "cleanbranch\bin\ed.bat"; DestDir: {app}\bin\; Flags: ignoreversion; MinVersion: 0,4.0; Components: comp_dos and comp_tools
 
 ; Windows Binaries
-Source: "..\..\bin\ecw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
-Source: "..\..\bin\exw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
-Source: "..\..\bin\exwc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
-Source: "..\..\bin\backendw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
-Source: "..\..\bin\ecw.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
+Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
+Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
+Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
+Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
+Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
+Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
 Source: "cleanbranch\bin\bindw.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
 Source: "cleanbranch\bin\shroudw.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
 Source: "cleanbranch\bin\euinc.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_win
@@ -140,7 +141,7 @@ Source: "cleanbranch\bin\search.bat"; DestDir: {app}\bin\; Flags: ignoreversion;
 Source: "cleanbranch\bin\ascii.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\where.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\key.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\eutest.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "cleanbranch\source\eutest.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\make31.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 ;Source: "cleanbranch\bin\ecp.dat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\buildcpdb.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
@@ -179,9 +180,6 @@ Filename: {app}\EuphoriaManual.url; Section: InternetShortcut; Key: URL; String:
 Name: {group}\Euphoria Manual; Filename: {app}\EuphoriaManual.url
 Name: {group}\Euphoria on the Web; Filename: {app}\RapidEuphoria.url
 Name: {group}\Euphoria User Community (Forums and Wiki); Filename: {app}\OpenEuphoria.url
-Name: {group}\Euphoria (Win); Filename: {app}\bin\exw.exe; Components: comp_win
-Name: {group}\Euphoria (Win Console); Filename: {app}\bin\exwc.exe; Components: comp_win
-Name: {group}\Euphoria (Dos); Filename: {app}\bin\ex.exe; Components: comp_dos
 Name: {group}\Euphoria Editor; Filename: {app}\bin\ed.bat
 Name: "{group}\{cm:UninstallProgram,Euphoria}"; Filename: "{uninstallexe}"
 
@@ -195,23 +193,23 @@ Type: files; Name: {app}\EuphoriaManual.url
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "EUDIR"; ValueData: "{app}"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
 
-;associate .exw files to be called by EXW.exe
+;associate .exw files to be called by euiw.exe
 Root: HKCR; Subkey: ".exw"; ValueType: string; ValueName: ""; ValueData: "EUWinApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUWinApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Windows App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUWinApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\exw.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUWinApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\exw.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUWinApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euiw.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUWinApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euiw.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
-;associate .ex files to be called by EXWC.exe
+;associate .ex files to be called by eui.exe
 Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUConsoleApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Console App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\exw.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\exwc.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eui.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
-;associate .exd files to be called by EX.exe
+;associate .exd files to be called by euid.exe
 Root: HKCR; Subkey: ".exd"; ValueType: string; ValueName: ""; ValueData: "EUDosApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUDosApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Console App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUDosApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\exw.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUDosApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\ex.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUDosApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euid.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUDosApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euid.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 ;associate .e, .ew files to be called by ED.bat
 Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUCodeFile"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
@@ -225,7 +223,7 @@ FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can 
 
 [Run]
 ;Update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME
-Filename: "{tmp}\exw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
+Filename: "{tmp}\euiw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
 
 [Code]
 var
@@ -242,4 +240,3 @@ begin
     backupDir := ExpandConstant('{app}\backup.' + GetDateTimeString('yyyymmddhhnn', #0, #0));
   Result := backupDir;
 end;
-
