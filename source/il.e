@@ -272,6 +272,7 @@ export procedure handle_options_for_bind( m:map opts )
 		switch option do
 			case "SHROUD_ONLY" then
 				shroud_only = TRUE
+				OpDefines &= { "EUB_SHROUD" }
 		
 			case "QUIET" then
 				quiet = TRUE
@@ -281,12 +282,14 @@ export procedure handle_options_for_bind( m:map opts )
 		
 			case "W32" then
 				w32 = TRUE
+				OpDefines &= { "EUB_WIN32" }
 		
 			case "ICON" then				
 				icon = val
 		
 			case "CON" then
 				con = TRUE
+				OpDefines &= { "EUB_CON" }
 			
 			case "FULL_DEBUG" then
 				full_debug = TRUE
@@ -314,6 +317,8 @@ export procedure handle_options_for_bind( m:map opts )
 		op += 1
 	end while
 	
+	OpDefines &= { "EUB" }
+
 end procedure
 
 integer check_place -- place where size and checksum are stored

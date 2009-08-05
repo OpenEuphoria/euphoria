@@ -114,9 +114,11 @@ export procedure transoptions()
 
 			case "con" then
 				con_option = TRUE
+				OpDefines &= { "EUC_CON" }
 
 			case "dll", "so" then
 				dll_option = TRUE
+				OpDefines &= { "EUC_DLL" }
 
 			case "plat" then
 				switch upper(val) do
@@ -213,6 +215,8 @@ export procedure transoptions()
 
 		abort(1)
 	end if
+
+	OpDefines &= { "EUC" }
 
 	finalize_command_line(opts)
 end procedure

@@ -123,9 +123,9 @@ other directories, a sequence can contain both atoms and other sequences
 (and //those// sequences can contain atoms and sequences and so on).
 
 {{{
-	object
-	 / \
-	/   \
+    object
+     / \
+    /   \
      atom   sequence
 }}}
 
@@ -298,7 +298,7 @@ _alpha
 
 Examples of invalid identifiers...
 <eucode>
-0n	   -- must not start with a digit
+0n     -- must not start with a digit
 ^color26   -- must not start with a punctuation character
 Shell Sort -- Cannot have spaces in identifiers.
 quick-sort -- must only consist of letters, digits or underscore.
@@ -998,9 +998,9 @@ in Euphoria and may not be used as identifiers:
  entry          or        
  enum           override  
  exit           procedure 
-</eucode>                                            	
+</eucode>                                               
                                                    	
-The Euphoria editor displays these words in blue	
+The Euphoria editor displays these words in blue    
                                                    	
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
@@ -1008,31 +1008,31 @@ not use these for your own identifiers:
 <eucode>                                                                                        
  ?                peek                 peek2u             sprintf                                        
  abort            peek2s               peek4s             sqrt                                           
- and_bits         log                  peek4u             system                     	     	     	            
- append           machine_func         peek_string        system_exec                	     	     	            
- arctan           machine_proc         peeks              tail                       	     	     	      
- atom             match                pixel              tan                        	     	     	      
- c_func           match_from           platform           task_clock_start           	     	     	      
- c_proc           get_key              poke               task_clock_stop           	 		           	      
- call             get_pixel            poke2              task_create               	 		           	      
- call_func        getc                 poke4              task_list                            	 		           	      
- call_proc        getenv               position           task_schedule                        	 		           	      
- clear_screen     gets                 power              task_self                            	 		           	      
- close            hash                 prepend            task_status                          	 		           	      
- command_line     head                 print              task_suspend                         	 		           	      
- compare          include_paths        printf             task_yield                               	 		           	      
- cos              insert               profile            time                                     	 		           	      
- date             mem_copy             profile_time       trace               	     	     	      
- delete           mem_set              puts               warning                	     	      
- delete_routine   not_bits             rand               xor_bits      	       
- equal            object               remainder        	     	     	      	     	     	      
- find             open                 remove           	     	     	      
- find_from        option_switches      routine_id    	     	     	          
- floor            or_bits              sequence      	     	     	          
- integer          repeat               sin                            	          
+ and_bits         log                  peek4u             system                                                    
+ append           machine_func         peek_string        system_exec                                               
+ arctan           machine_proc         peeks              tail                                                
+ atom             match                pixel              tan                                                 
+ c_func           match_from           platform           task_clock_start                                    
+ c_proc           get_key              poke               task_clock_stop                                         
+ call             get_pixel            poke2              task_create                                             
+ call_func        getc                 poke4              task_list                                                       
+ call_proc        getenv               position           task_schedule                                                   
+ clear_screen     gets                 power              task_self                                                       
+ close            hash                 prepend            task_status                                                     
+ command_line     head                 print              task_suspend                                                    
+ compare          include_paths        printf             task_yield                                                          
+ cos              insert               profile            time                                                                
+ date             mem_copy             profile_time       trace                                       
+ delete           mem_set              puts               warning                                 
+ delete_routine   not_bits             rand               xor_bits                 
+ equal            object               remainder                                                          
+ find             open                 remove                                     
+ find_from        option_switches      routine_id                                 
+ floor            or_bits              sequence                                   
+ integer          repeat               sin                                        
  length           replace              splice                                            
 </eucode>                                        
-                                 	
+                                    
                                                    
 Identifiers can be used in naming the following:
 
@@ -2350,6 +2350,28 @@ but ##EU5## will be defined.
 * **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, SunOS and OS X)
 * **UNIX** - Platform is any Unix
 
+==== Runtime Definitions
+
+* **EUI** - Application is running interpreted with eui.
+* **EUC** - Application is translated by euc.
+* **EUC_CON** - Application is translated by euc as a console application.
+* **EUC_DLL** - Application is translated by euc to a DLL file.
+* **EUB** - Application is running as a bound program.
+* **EUB_SHROUD** - Application is running as a bound program that has been shrouded.
+* **EUB_CON** - Application is running as a bound console program.
+* **EUB_WIN32** - Application is running as a bound WIN32 program.
+
+It is possible for one or more of the above definitions to be true at the same
+time. For instance, ##EUC## and ##EUC_DLL## will both be true when the source
+file has been translated to a DLL. If you wish to know if your source file is
+translated and not a DLL, then you can 
+
+<eucode>
+ifdef EUC and not EUC_DLL then
+    -- translated to an application
+end ifdef
+</eucode>
+ 
 ==== Using ifdef
 
 Further, you can define your own words either in source:
@@ -2393,7 +2415,7 @@ end ifdef
 -- define exported and public constants and procedures for 
 -- DOS32 as well
 ifdef WIN32 or DOS32 then
-	-- DOS32 is not supported but we define public symbols for it anyhow.
+    -- DOS32 is not supported but we define public symbols for it anyhow.
 </eucode>
 
 The reason for doing this is so that the user that includes your include file sees 

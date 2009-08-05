@@ -51,5 +51,7 @@ export procedure intoptions()
 		abort(1)
 	end if
 	
+	OpDefines &= { "EUI" }
+
 	finalize_command_line(opts)
 end procedure
