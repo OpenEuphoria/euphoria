@@ -1285,7 +1285,7 @@ end ifdef
 -- Get canonical name for a locale.
 --
 -- Parameters:
---			# ##new_locale##: a sequence, the string for the locale.
+--			# ##new_locale## : a sequence, the string for the locale.
 -- Returns:
 --		A **sequence**, either the translated locale on success or ##new_locale## on failure.
 --

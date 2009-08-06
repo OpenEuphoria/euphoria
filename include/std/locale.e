@@ -49,7 +49,7 @@ object lang_path = 0
 -- Set the language path.
 --
 -- Parameters:
--- 		# ##pp##: an object, either an actual path or an atom.
+-- 		# ##pp## : an object, either an actual path or an atom.
 --
 -- Comments:
 --	When the language path is not set, and it is unset by default, [[:set]]() does not load any language file.
@@ -78,11 +78,11 @@ end function
 -- Load a language file.
 --
 -- Parameters:
--- 		# ##filename##: a sequence, the name of the file to load. If no file
+-- 		# ##filename## : a sequence, the name of the file to load. If no file
 --                      extension is supplied, then ".lng" is used.
 --
 -- Returns:
---	A language map, if successful. This is to be used when calling [[:translate]]().
+--	A language **map**, if successful. This is to be used when calling [[:translate]]().
 --
 -- If the load fails it returns a zero.
 --
@@ -213,7 +213,7 @@ end function
 -- Sets the default language (translation) map
 --
 -- Parameters:
--- # ##langmap## - A value returned by [[:lang_load]](), or zero to remove any default map.
+-- # ##langmap## : A value returned by [[:lang_load]](), or zero to remove any default map.
 -- 
 -- Example:
 --<eucode>
@@ -231,10 +231,11 @@ end procedure
 --**
 -- Gets the default language (translation) map
 --
--- Parameters: none.
+-- Parameters: 
+-- none.
 --
 -- Returns:
--- An object; a language map, or zero if there is no default language map yet.
+-- An **object**, a language map, or zero if there is no default language map yet.
 -- 
 -- Example:
 --<eucode>
@@ -249,12 +250,12 @@ end function
 -- Translates a word, using the current language file.
 --
 -- Parameters:
--- 		# ##word##: a sequence, the word to translate.
---      # ##langmap##: Either a value returned by [[:lang_load]]() or zero to use the default language map
--- 		# ##defval##: a object. The value to return if the word cannot be translated.
+-- 		# ##word## : a sequence, the word to translate.
+--      # ##langmap## : Either a value returned by [[:lang_load]]() or zero to use the default language map
+-- 		# ##defval## : a object. The value to return if the word cannot be translated.
 --                              Default is "". If ##defval## is ##PINF## then the ##word## is returned
 --                              if it can't be translated.
---      # ##mode##: an integer. If zero (the default) it uses ##word## as the keyword and returns
+--      # ##mode## : an integer. If zero (the default) it uses ##word## as the keyword and returns
 --                              the translation text. If not zero it uses ##word##
 --                              as the translation and returns the keyword.
 --                              
@@ -309,14 +310,14 @@ end function
 -- Returns a formatted string with automatic translation performed on the parameters.
 --
 -- Parameters:
--- # ##fmt##: A sequence. Contains the formatting string. see [[:printf]]() for details.
--- # ##data##: A sequence. Contains the data that goes into the formatted result. see [[:printf]] for details.
--- # ##langmap##: An object. Either 0 (the default) to use the default language maps, or
+-- # ##fmt## : A sequence. Contains the formatting string. see [[:printf]]() for details.
+-- # ##data## : A sequence. Contains the data that goes into the formatted result. see [[:printf]] for details.
+-- # ##langmap## : An object. Either 0 (the default) to use the default language maps, or
 --                the result returned from [[:lang_load]]() to specify a particular
 --                language map.
 --
 -- Returns:
--- A sequence. The formatted result.
+-- A **sequence**, the formatted result.
 --
 -- Comments:
 -- This works very much like the [[:sprintf]]() function. The difference is that the ##fmt## sequence
@@ -451,7 +452,7 @@ end ifdef
 -- Set the computer locale, and possibly load appropriate translation file.
 --
 -- Parameters:
---		# ##new_locale##: a sequence representing a new locale.
+--		# ##new_locale## : a sequence representing a new locale.
 --
 -- Returns:
 --		An **integer**, either 0 on failure or 1 on success.
@@ -527,7 +528,7 @@ end function
 -- Converts an amount of currency into a string representing that amount.
 --
 -- Parameters:
---		# ##amount##: an atom, the value to write out.
+--		# ##amount## : an atom, the value to write out.
 --
 -- Returns:
 -- 		A **sequence**, a string that writes out ##amount## of current currency.
@@ -568,7 +569,7 @@ end function
 -- Converts a number into a string representing that number.
 --
 -- Parameters:
---   # ##num##: an atom, the value to write out.
+--   # ##num## : an atom, the value to write out.
 --
 -- Returns:
 --   A **sequence**, a string that writes out ##num##.
@@ -675,8 +676,8 @@ end function
 -- Formats a date according to current locale.
 --
 -- Parameters:
---   # ##fmt##: A format string, as described in [[:format]]
---   # ##dtm##: the datetime to write out.
+--   # ##fmt## : A format string, as described in [[:format]]
+--   # ##dtm## : the datetime to write out.
 --
 -- Returns:
 --   A **sequence**, representing the formatted date.

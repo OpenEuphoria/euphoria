@@ -26,13 +26,13 @@ public include std/console.e
 -- <built-in> procedure position(integer row, integer column)
 --
 -- Parameters:
--- 		# ##row##: an integer, the index of the row to position the cursor on.
--- 		# ##column##: an integer, the index of the column to position the cursor on.
+-- 		# ##row## : an integer, the index of the row to position the cursor on.
+-- 		# ##column## : an integer, the index of the column to position the cursor on.
 --
 -- Description:
 --   Set the cursor to line ##row##, column ##column##, where the top left corner of the screen is line 1,
 --   column 1 in text mode, row 0 and column 0 in graphic mode. The next character displayed on the screen will be printed at this location.
---   position() will report an error if the location is off the screen. The //Windows// console does not check for rows, as the physical height of the console may be vastly less than its logical height.
+--   ##position##() will report an error if the location is off the screen. The //Windows// console does not check for rows, as the physical height of the console may be vastly less than its logical height.
 --
 -- Comments:
 --   ##position##() works in both text and pixel-graphics modes.
@@ -56,17 +56,17 @@ public include std/console.e
 -- Return the current line and column position of the cursor 
 --
 -- Returns:
--- 		A **sequence** ##{line, column}##, the current position of the text mode cursor.
+-- 		A **sequence**, ##{line, column}##, the current position of the text mode cursor.
 --
 -- Comments:
---   ##get_position()## works in both text and pixel-graphics modes. In pixel-graphics 
---   modes no cursor will be displayed, but ##get_position()## will return the line and 
+--   ##get_position##() works in both text and pixel-graphics modes. In pixel-graphics 
+--   modes no cursor will be displayed, but ##get_position##() will return the line and 
 --   column where the next character will be displayed.
 --	
 --   The coordinate system for displaying text is different from the one for displaying pixels. 
 --   Pixels are displayed such that the top-left is (x=0,y=0) and the first coordinate controls 
 --   the horizontal, left-right location. In pixel-graphics modes you can display both text and 
---   pixels. ##get_position()## returns the current line and column for the text that you are 
+--   pixels. ##get_position##() returns the current line and column for the text that you are 
 --   displaying, not the pixels that you may be plotting. There is no corresponding routine for 
 --   getting the current pixel position, because there is not such a thing.
 --
@@ -83,10 +83,10 @@ public include std/graphcst.e
 -- Set the foreground text color. 
 --
 -- Parameters:
--- 		# ##c##: the new text color. Add ##BLINKING## to get blinking text in some modes.
+-- 		# ##c## : the new text color. Add ##BLINKING## to get blinking text in some modes.
 --
 -- Comments:
--- Text that you print after calling ##[[:text_color]]()## will have the desired color.
+-- Text that you print after calling ##[[:text_color]]##() will have the desired color.
 --
 -- When your program terminates, the last color that you selected and actually printed on the 
 -- screen will remain in effect. Thus you may have to print something, maybe just ##'\n'##, 
@@ -111,7 +111,8 @@ end procedure
 -- Set the background color to one of the 16 standard colors. 
 --
 -- Parameters:
--- 		# ##c##: the new text color. Add ##BLINKING## to get blinking text in some modes.
+-- 		# ##c## : the new text color. Add ##BLINKING## to get blinking text in some modes.
+--
 -- Comments:
 -- 		In pixel-graphics modes the
 -- whole screen is affected immediately. In text modes any new characters that you print 
@@ -151,12 +152,12 @@ end type
 -- Determine whether text will wrap when hitting the rightmost column.
 --
 -- Parameters:
--- 		# ##on##: a boolean, 0 to truncate text, nonzero to wrap.
+-- 		# ##on## : a boolean, 0 to truncate text, nonzero to wrap.
 --
 -- Comments:
 -- By default text will wrap.
 --
--- Use ##wrap()## in text modes or pixel-graphics modes when you are displaying long 
+-- Use ##wrap##() in text modes or pixel-graphics modes when you are displaying long 
 -- lines of text.
 --
 -- Example:
@@ -179,16 +180,16 @@ end procedure
 -- Scroll a region of text on the screen.
 --
 -- Parameters:
---		# ##amount##: an integer, the number of lines by which to scroll. This is >0 to scroll up and <0 to scroll down.
--- 		# ##top_line##: the 1-based number of the topmost line to scroll.
--- 		# ##bottom_line##: the 1-based number of the bottom-most line to scroll.
+--		# ##amount## : an integer, the number of lines by which to scroll. This is >0 to scroll up and <0 to scroll down.
+-- 		# ##top_line## : the 1-based number of the topmost line to scroll.
+-- 		# ##bottom_line## : the 1-based number of the bottom-most line to scroll.
 --
 -- Comments:
 -- inclusive. New blank lines will
 -- appear at the top or bottom.
 --
 -- You could perform the scrolling operation using a series of calls to ##[:puts]]()##, 
--- but ##scroll()## is much faster.
+-- but ##scroll##() is much faster.
 --
 -- The position of the cursor after scrolling is not defined.
 --
@@ -215,7 +216,7 @@ end type
 -- Attempt to set up a new graphics mode.
 --
 -- Parameters:
--- 		# ##m##: an integer, the new graphic mode
+-- 		# ##m## : an integer, the new graphic mode
 --
 -- Returns:
 -- 		An **integer**, 0 on success, 1 on failure.

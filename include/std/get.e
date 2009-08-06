@@ -495,18 +495,18 @@ end function
 -- Convert the string into the numeric value of that object.
 --
 -- Parameters:
--- # ##file##: an integer, the handle to an open file from which to read
--- # ##offset##: an integer, an offset to apply to file position before reading. Defaults to 0.
--- # ##answer##: an integer, either ##GET_SHORT_ANSWER## (the default) or ##GET_LONG_ANSWER##.
+-- # ##file## : an integer, the handle to an open file from which to read
+-- # ##offset## : an integer, an offset to apply to file position before reading. Defaults to 0.
+-- # ##answer## : an integer, either ##GET_SHORT_ANSWER## (the default) or ##GET_LONG_ANSWER##.
 --
 -- Returns:
--- A **sequence** of length 2 (##GET_SHORT_ANSWER##) or 4 (##GET_LONG_ANSWER##), made of
+-- A **sequence**, of length 2 (##GET_SHORT_ANSWER##) or 4 (##GET_LONG_ANSWER##), made of
 --
 -- * an integer, the return status. This is any of:
--- ** ##GET_SUCCESS##: object was read successfully
--- ** ##GET_EOF##:     end of file before object was read completely
--- ** ##GET_FAIL##:    object is not syntactically correct
--- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
+-- ** ##GET_SUCCESS## ~-- object was read successfully
+-- ** ##GET_EOF## ~--     end of file before object was read completely
+-- ** ##GET_FAIL## ~--    object is not syntactically correct
+-- ** ##GET_NOTHING## ~-- nothing was read, even a partial object string, before end of input
 -- * an object, the value that was read. This is valid only if return status is ##GET_SUCCESS##.
 -- * an integer, the number of characters read. On an error, this is the point at which the
 --   error was detected.
@@ -612,18 +612,18 @@ end function
 -- Convert the string into the numeric value of that object.
 --
 -- Parameters:
--- # ##st##: a sequence, from which to read text
--- # ##offset##: an integer, the position at which to start reading. Defaults to 1.
--- # ##answer##: an integer, either GET_SHORT_ANSWER (the default) or GET_LONG_ANSWER.
+-- # ##st## : a sequence, from which to read text
+-- # ##offset## : an integer, the position at which to start reading. Defaults to 1.
+-- # ##answer## : an integer, either GET_SHORT_ANSWER (the default) or GET_LONG_ANSWER.
 --
 -- Returns:
--- A **sequence** of length 2 (GET_SHORT_ANSWER) or 4 (GET_LONG_ANSWER), made of
+-- A **sequence**, of length 2 (GET_SHORT_ANSWER) or 4 (GET_LONG_ANSWER), made of
 --
 -- * an integer, the return status. This is any of
--- ** ##GET_SUCCESS##: object was read successfully
--- ** ##GET_EOF##:     end of file before object was read completely
--- ** ##GET_FAIL##:    object is not syntactically correct
--- ** ##GET_NOTHING##: nothing was read, even a partial object string, before end of input
+-- ** ##GET_SUCCESS## ~-- object was read successfully
+-- ** ##GET_EOF## ~--     end of file before object was read completely
+-- ** ##GET_FAIL## ~--    object is not syntactically correct
+-- ** ##GET_NOTHING## ~-- nothing was read, even a partial object string, before end of input
 -- * an object, the value that was read. This is valid only if return status is ##GET_SUCCESS##.
 -- * an integer, the number of characters read. On an error, this is the point at which the
 --   error was detected.
@@ -680,14 +680,14 @@ end function
 -- the default on failure.
 --
 -- Parameters:
---   # ##st##: object to retrieve value from. 
---	 # ##def##: the value returned if ##st## is an atom or ##value(st)## fails.
---	 # ##start_point##: an integer, the position in ##st## at which to start 
+--   # ##st## : object to retrieve value from. 
+--	 # ##def## : the value returned if ##st## is an atom or ##value(st)## fails.
+--	 # ##start_point## : an integer, the position in ##st## at which to start 
 --          getting the value from. Defaults to 1
 --
 -- Returns:
--- * If ##st## is an atom then ##def## is returned.
--- * If ##value(st)## call is a success, then ##value()[2]##, otherwise it will return
+-- * If ##st##, is an atom then ##def## is returned.
+-- * If ##value(st)##, call is a success, then ##value()[2]##, otherwise it will return
 --	 the parameter #def#.
 --
 -- Examples:

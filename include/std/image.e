@@ -149,10 +149,10 @@ end function
 -- Read a bitmap (.BMP) file into a 2-d sequence of sequences (image)
 --
 -- Parameters:
---		# ##file_name##: a sequence, the path to a .bmp file to read from. The extension is not assumed if missing.
+--		# ##file_name## : a sequence, the path to a .bmp file to read from. The extension is not assumed if missing.
 --
 -- Returns:
---   An **object**: on success, a sequence of the form ##{palette,image}##. On failure, an error code is returned.
+--   An **object**, on success, a sequence of the form ##{palette,image}##. On failure, an error code is returned.
 --
 -- Comments:
 -- In the returned value, the first element is a list of mixtures, each of which defines 
@@ -181,7 +181,8 @@ end function
 -- x = read_bitmap("c:\\windows\\arcade.bmp")
 -- </eucode>
 --
--- note: double backslash needed to get single backslash in a string
+-- Note: 
+-- double backslash needed to get single backslash in a string
 --
 -- Example 2: 
 --	##demo/dos32/bitmap.ex##
@@ -430,8 +431,8 @@ end procedure
 -- Create a .BMP bitmap file, given a palette and a 2-d sequence of sequences of colors.
 --
 -- Parameters:
--- 		# ##palette_n_image##: a {palette, image} pair, like [[:read_bitmap()]] returns
--- 		# ##file_name##: a sequence, the name of the file to save to.
+-- 		# ##palette_n_image## : a {palette, image} pair, like [[:read_bitmap()]] returns
+-- 		# ##file_name## : a sequence, the name of the file to save to.
 --
 -- Returns:
 -- 		An **integer**, 0 on success.
@@ -455,8 +456,8 @@ end procedure
 -- multiply the returned intensity values by 4 before calling [[:save_bitmap]](). You might use
 -- [[:save_image]]() to get the 2-d image.
 --
--- save_bitmap() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with 
--- read_bitmap(). Windows Paintbrush and some other tools do not support 4-color bitmaps.
+-- ##save_bitmap##() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with 
+-- ##read_bitmap##(). Windows Paintbrush and some other tools do not support 4-color bitmaps.
 --
 -- Example 1:
 -- <eucode>
@@ -503,9 +504,9 @@ ifdef DOS32 then
 --		//DOS32//
 --
 -- Parameters:
--- 		# ##r##: an object, either 0 (whole screen) or a {top left, bottom right} pair
+-- 		# ##r## : an object, either 0 (whole screen) or a {top left, bottom right} pair
 --        of {x,y} pairs of coordinates.
---		# ##file_name##: a sequence, the name of the save file.
+--		# ##file_name## : a sequence, the name of the save file.
 --
 -- Returns:
 --		An **integer**, which is BMP_SUCCESS on success.

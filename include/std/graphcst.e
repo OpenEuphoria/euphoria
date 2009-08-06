@@ -114,8 +114,8 @@ constant
 -- Return a description of the current video configuration:
 --
 -- Returns:
--- 		A **sequence** of 8 non-negative integers, laid out as follows:
---	# color monitor?: 1 0 if monochrome, 1 otherwise
+-- 		A **sequence**, of 8 non-negative integers, laid out as follows:
+--	# color monitor? ~-- 1 0 if monochrome, 1 otherwise
 --	# current video mode
 -- 	# number of text rows
 -- 	# number of text columns
@@ -129,14 +129,14 @@ constant
 -- A public enum is available for convenient access to the returned configuration data:
 -- <eucode>
 -- public constant
---     VC_COLOR   = 1,
---     VC_MODE    = 2,
---     VC_LINES   = 3,
---     VC_COLUMNS = 4,
---     VC_XPIXELS = 5,
---     VC_YPIXELS = 6,
---     VC_NCOLORS = 7,
---     VC_PAGES   = 8
+--     ##VC_COLOR##   = 1,
+--     ##VC_MODE##    = 2,
+--     ##VC_LINES##   = 3,
+--     ##VC_COLUMNS## = 4,
+--     ##VC_XPIXELS## = 5,
+--     ##VC_YPIXELS## = 6,
+--     ##VC_NCOLORS## = 7,
+--     ##VC_PAGES##   = 8
 -- </eucode>
 -- This routine makes it easy for you to parameterize a program so it will work in many
 -- different graphics modes.

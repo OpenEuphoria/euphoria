@@ -30,14 +30,15 @@ end type
 -- Allocate a C-style null-terminated string in memory
 --
 -- Parameters:
---              # ##s##, a sequence, the string to store in RAM.
---              # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--              # ##s## : a sequence, the string to store in RAM.
+--              # ##cleanup## : an integer, if non-zero, then the returned pointer will be
 --                automatically freed when its reference count drops to zero, or
 --                when passed as a parameter to [[:delete]].  
 --
 -- Returns:
 --              An **atom**, the address of the memory block where the string was
 -- stored, or 0 on failure.
+--
 -- Comments:
 -- Only the 8 lowest bits of each atom in ##s## is stored. Use
 -- ##allocate_wstring##()  for storing double byte encoded strings.
@@ -64,8 +65,8 @@ end type
 -- Allocate a NULL terminated pointer array.
 --
 -- Parameters:
---   # #pointers# - A sequence of pointers to add to the pointer array.
---   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--   # #pointers# : A sequence of pointers to add to the pointer array.
+--   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
 --     automatically freed when its reference count drops to zero, or
 --     when passed as a parameter to [[:delete]]
 --
@@ -115,8 +116,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Allocate a C-style null-terminated array of strings in memory
 --
 -- Parameters:
---   # #string_list# - sequence of strings to store in RAM.
---   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--   # #string_list# : sequence of strings to store in RAM.
+--   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
 --     automatically freed when its reference count drops to zero, or
 --     when passed as a parameter to [[:delete]]
 --
@@ -193,7 +194,7 @@ end function
 -- Return an integer id number for a user-defined Euphoria procedure or function.
 --
 -- Parameters:
---              # ##routine_name##: a string, the name of the procedure or function.
+--              # ##routine_name## : a string, the name of the procedure or function.
 --
 -- Returns:
 -- An **integer**, known as a routine id, -1  if the named routine can't be found, else zero or more.
@@ -217,7 +218,7 @@ end function
 -- a routine indirectly via [[:call_proc]]()/[[:call_func]](), including at places where
 -- the routine is no longer in scope.
 --
--- Some typical uses of routine_id() are:
+-- Some typical uses of ##routine_id##() are:
 --
 -- # Creating a subroutine that takes another routine as a parameter. (See Example 2 below)
 -- # Using a sequence of routine id's to make a case (switch) statement. Using the 
@@ -277,11 +278,11 @@ end function
 --  Call the user-defined Euphoria function by routine id.
 --
 -- Parameters:
---   # ##id##: an integer, the routine id of the function to call
---   # ##args##: a sequence, the parameters to pass to the function.
+--   # ##id## : an integer, the routine id of the function to call
+--   # ##args## : a sequence, the parameters to pass to the function.
 --
 -- Returns:
--- The value the called function returns.
+-- The **value**, the called function returns.
 --
 -- Errors:
 -- If ##id## is negative or otherwise unknown, an error occurs.
@@ -312,8 +313,8 @@ end function
 -- Call a user-defined Euphoria procedure by routine id.
 --
 -- Parameters:
---   # ##id##: an integer, the routine id of the procedure to call
---   # ##args##: a sequence, the parameters to pass to the function.
+--   # ##id## : an integer, the routine id of the procedure to call
+--   # ##args## : a sequence, the parameters to pass to the function.
 --
 -- Errors:
 -- If ##id## is negative or otherwise unknown, an error occurs.
@@ -463,14 +464,14 @@ end type
 -- Allocates and copies data into executable memory.
 --
 -- Parameters:
--- The first parameter, ##a_sequence_of_machine_code##, is the machine code to
+-- # ##a_sequence_of_machine_code## : is the machine code to
 -- be put into memory to be later called with [[:call()]]        
---
--- The second parameter is the word length of the said code.  You can specify your
+-- # the ##word length## : of the said code.  You can specify your
 -- code as 1-byte, 2-byte or 4-byte chunks if you wish.  If your machine code is byte
 -- code specify 1.  The default is 1.
 --
 -- Return Value:
+-- An **address**,
 -- The function returns the address in memory of the code, that can be
 -- safely executed whether DEP is enabled or not or 0 if it fails.  On the
 -- other hand, if you try to execute a code address returned by [[:allocate()]]
@@ -507,6 +508,7 @@ end function
 -- or allocate_code() or the value 0.
 --
 -- Return Value:
+-- An **integer**, 
 -- The type will return 1 if the parameter was returned
 -- from one of these functions (and has not yet been freeed)
 --
@@ -514,6 +516,7 @@ end function
 -- This type is equivalent to atom unless SAFE is defined.
 -- Only values that satisfy this type may be passed into
 -- free or free_code.
+--
 public type std_library_address( atom addr ) 
 	ifdef not SAFE then
 		return 1
@@ -547,12 +550,13 @@ end function
 -- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "Microsoft's Memory Protection Constants"]]
 --
 -- Parameters:
--- The first parameter, data, is the machine code to be put into memory. 
--- The second parameter, wordsize, is the size each element of data will take in 
+-- # ##data## : is the machine code to be put into memory. 
+-- # ##wordsize## : is the size each element of data will take in 
 -- memory.  Are they 1-byte, 2-bytes or 4-bytes long?  Specify here.  The default is 1.
--- The third and last parameter is the particular Windows protection.
+-- # ##protection## : is the particular Windows protection.
 --
 -- Returns:
+-- An **address**,
 -- The function returns the address to the required memory
 -- or 0 if it fails.  This function is guaranteed to return memory on 
 -- the 4 byte boundary.  It also guarantees that the memory returned with 
@@ -677,8 +681,8 @@ end function
 -- Frees up allocated code memory
 --
 -- Parameters:
--- ##addr## must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here!   
--- The ##size## is the length of the sequence passed to ##alllocate_code()## or the size you specified when you called allocate_protect().                           
+-- # ##addr## : must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here!   
+-- # ##size## : is the length of the sequence passed to ##alllocate_code()## or the size you specified when you called allocate_protect().                           
 --
 -- Comments:
 -- Chances are you will not need to call this function because code allocations are typically public scope operations that you want to have available until your process exits.
