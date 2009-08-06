@@ -9,11 +9,11 @@ namespace mouse
 --
 -- === Requirements
 --
--- * //DOS32// - you need a mouse driver
--- * //Linux// - you need GPM server to be running
--- * //Windows// - not implemented yet for the text console
--- * //FreeBSD// - not implemented
--- * //OS X// - not implemented
+-- * //DOS32// ~-- you need a mouse driver
+-- * //Linux// ~-- you need GPM server to be running
+-- * //Windows// ~-- not implemented yet for the text console
+-- * //FreeBSD// ~-- not implemented
+-- * //OS X// ~-- not implemented
 --
 
 --****
@@ -79,7 +79,7 @@ constant M_GET_MOUSE = 14,
 -- not too serious, as the next MOVE will tell you where the mouse pointer is. 
 --
 -- Sometimes multiple events will be reported. For example, if the mouse is moving when the
--- left button is clicked, get_mouse() will report an event value of LEFT_DOWN+MOVE, i.e.
+-- left button is clicked, ##get_mouse##() will report an event value of LEFT_DOWN+MOVE, i.e.
 -- 2+1 or 3. For this reason you should test for a particular event using [[:and_bits]](). See
 -- examples below. Further, you can determine which events will be reported using [[:mouse_events]].
 --
@@ -172,7 +172,7 @@ end procedure
 -- Turn mouse pointer on or off.
 --
 -- Parameters:
---   # ##show_it##: an integer, 0 to hide and 1 to show.
+--   # ##show_it## : an integer, 0 to hide and 1 to show.
 --
 -- Comments:
 -- Multiple calls to hide

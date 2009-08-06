@@ -34,14 +34,13 @@ end type
 -- Returns the absolute value of numbers.
 --
 -- Parameters:
---		# ##value##: an object, each atom is processed, no matter how deeply nested.
+--		# ##value## : an object, each atom is processed, no matter how deeply nested.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom,
+--		An **object**, the same shape as ##value##. When ##value## is an atom,
 -- the result is the same if not less than zero, and the opposite value otherwise.
 --
 -- Comments:
---
 --   This function may be applied to an atom or to all elements of a sequence
 --
 -- Example 1:
@@ -82,16 +81,16 @@ end function
 -- Return -1, 0 or 1 for each element according to it being negative, zero or positive
 --
 -- Parameters:
---		# ##value##: an object, each atom of which will be acted upon, no matter how deeply nested.
+--		# ##value## : an object, each atom of which will be acted upon, no matter how deeply nested.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is -1 if ##value## is less than zero, 1 if greater and 0 if equal.
+--		An **object**, the same shape as ##value##. When ##value## is an atom, the result is -1 if ##value## is less than zero, 1 if greater and 0 if equal.
 --
 -- Comments:
---
 -- This function may be applied to an atom or to all elements of a sequence.
 --
 -- For an atom, ##sign##(x) is the same as [[:compare]](x,0).
+--
 -- Example 1:
 -- <eucode>
 -- i = sign(5)
@@ -117,7 +116,7 @@ end function
 -- Computes the maximum value among all the argument's elements
 --
 -- Parameters:
---		# ##values##: an object, all atoms of which will be inspected, no matter how deeply nested.
+--		# ##values## : an object, all atoms of which will be inspected, no matter how deeply nested.
 --
 -- Returns:
 --		An **atom**, the maximum of all atoms in [[:flatten]](##values##).
@@ -130,6 +129,7 @@ end function
 -- a = max({10,15.4,3})
 -- -- a is 15.4
 -- </eucode>
+--
 -- See Also:
 --		[[:min]], [[:compare]], [[:flatten]]
 
@@ -152,7 +152,7 @@ end function
 -- Computes the minimum value among all the argument's elements
 --
 -- Parameters:
---		# ##values##: an object, all atoms of which will be inspected, no matter how deeply nested.
+--		# ##values## : an object, all atoms of which will be inspected, no matter how deeply nested.
 --
 -- Returns:
 --		An **atom**, the minimum of all atoms in [[:flatten]](##values##).
@@ -185,12 +185,12 @@ end function
 -- Ensures that the ##item## is in a range of values supplied by ##range_limits##
 --
 -- Parameters:
---   # ##item##: The object to test for.
---   # ##range_limits##: A sequence of two or more elements. The first is assumed
+--   # ##item## : The object to test for.
+--   # ##range_limits## : A sequence of two or more elements. The first is assumed
 --    to be the smallest value and the last is assumed to be the highest value.
 --
 -- Returns:
---   A **object**: If ##item# is lower than the first item in the ##range_limits##
+--   A **object**, If ##item# is lower than the first item in the ##range_limits##
 --                 it returns the first item. 
 --                 If  ##item# is higher than the last element in the ##range_limits##
 --                 it returns the last item.
@@ -231,8 +231,8 @@ end function
 -- Compute the remainder of the division of two objects using truncated division.
 --
 -- Parameters:
---		# ##dividend##: any Euphoria object.
---		# ##divisor##: any Euphoria object.
+--		# ##dividend## : any Euphoria object.
+--		# ##divisor## : any Euphoria object.
 --
 -- Returns:
 --		An **object**, the shape of which depends on ##dividend##'s and 
@@ -287,8 +287,8 @@ end function
 -- Compute the remainder of the division of two objects using floored division.
 --
 -- Parameters:
---		# ##dividend##: any Euphoria object.
---		# ##divisor##: any Euphoria object.
+--		# ##dividend## : any Euphoria object.
+--		# ##divisor## : any Euphoria object.
 --
 -- Returns:
 --	An **object**, the shape of which depends on ##dividend##'s and
@@ -345,7 +345,7 @@ end function
 -- Return the integer portion of a number.
 --
 -- Parameters:
---		# ##value##: any Euphoria object.
+--		# ##value## : any Euphoria object.
 --
 -- Returns:
 --	An **object**, the shape of which depends on ##values##'s. Each item in the 
@@ -357,7 +357,6 @@ end function
 -- rounds towards negative infinity, which means it rounds towards zero for positive
 -- values and away from zero for negative values.
 -- * Note that ##trunc(x) + frac(x) = x##
---
 --
 -- Example 1:
 -- <eucode>
@@ -381,7 +380,7 @@ end function
 -- Return the fractional portion of a number.
 --
 -- Parameters:
---		# ##value##: any Euphoria object.
+--		# ##value## : any Euphoria object.
 --
 -- Returns:
 --	An **object**, the shape of which depends on ##values##'s. Each item in the 
@@ -402,6 +401,7 @@ end function
 -- s = frac({81, -3.5, -9.999, 5.5})
 -- -- s is {0, -0.5, -0.999, 0.5}
 -- </eucode>
+--
 -- See Also:
 -- 		[[:trunc]]
 
@@ -415,8 +415,8 @@ end function
 -- Return an integral division of two objects.
 --
 -- Parameters:
---		# ##divided##: any Euphoria object.
---		# ##divisor##: any Euphoria object.
+--		# ##divided## : any Euphoria object.
+--		# ##divisor## : any Euphoria object.
 --
 -- Returns:
 --	An **object**, which will be a sequence if either ##dividend## or ##divisor##
@@ -456,10 +456,10 @@ end function
 -- negative infinity.
 --
 -- Parameters:
---		# ##value##: any Euphoria object; each atom in ##value## will be acted upon.
---
+--		# ##value## : any Euphoria object; each atom in ##value## will be acted upon.
+-- 
 -- Returns:
--- An **object** the same shape as ##value## but with each item guarenteed to be
+-- An **object**, the same shape as ##value## but with each item guarenteed to be
 -- an integer less than or equal to the corresponding item in ##value##.
 --
 -- Example 1:
@@ -475,7 +475,7 @@ end function
 -- Computes the next integer equal or greater than the argument. 
 --
 -- Parameters:
---		# ##value##: an object, each atom of which processed, no matter how deeply nested.
+--		# ##value## : an object, each atom of which processed, no matter how deeply nested.
 --
 -- Returns:
 --		An **object**, the same shape as ##value##. Each atom in ##value## 
@@ -505,11 +505,11 @@ end function
 -- Return the argument's elements rounded to some precision
 --
 -- Parameters:
---		# ##value##: an object, each atom of which will be acted upon, no matter how deeply nested.
---		# ##precision##: an object, the rounding precision(s). If not passed, this defaults to 1.
+--		# ##value## : an object, each atom of which will be acted upon, no matter how deeply nested.
+--		# ##precision## : an object, the rounding precision(s). If not passed, this defaults to 1.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is that atom rounded to the nearest integer multiple of 1/##precision##.
+--		An **object**, the same shape as ##value##. When ##value## is an atom, the result is that atom rounded to the nearest integer multiple of 1/##precision##.
 --
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
@@ -590,10 +590,10 @@ end function
 --   Return an angle with given tangent.
 --
 -- Parameters:
---   # ##tangent##: an object, each atom of which will be converted, no matter how deeply nested.
+--   # ##tangent## : an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---   An **object** of the same shape as ##tangent##. For each atom in ##flatten(tangent)##,
+--   An **object**, of the same shape as ##tangent##. For each atom in ##flatten(tangent)##,
 --   the angle with smallest magnitude that has this atom as tangent is computed.
 --
 -- Comments:
@@ -601,7 +601,7 @@ end function
 --
 --   This function may be applied to an atom or to all elements of a sequence (of sequence (...)).
 --
---   ##arctan()## is faster than ##[[:arcsin]]()## or ##[[:arccos]]()##.
+--   ##arctan##() is faster than ##[[:arcsin]]()## or ##[[:arccos]]()##.
 --
 -- Example 1:
 --   <eucode>
@@ -619,10 +619,10 @@ end function
 --   Return the tangent of an angle, or a sequence of angles.
 --
 -- Parameters:
---   # ##angle##: an object, each atom of which will be converted, no matter how deeply nested.
+--   # ##angle## : an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---   An **object** of the same shape as ##angle##. Each atom in the flattened ##angle## is
+--   An **object**, of the same shape as ##angle##. Each atom in the flattened ##angle## is
 --   replaced by its tangent.
 --
 -- Errors:
@@ -649,7 +649,7 @@ end function
 -- Return the cosine of an angle expressed in radians
 --
 -- Parameters:
---		# ##angle##: an object, each atom of which will be converted, no matter how deeply nested.
+--		# ##angle## : an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
 --		An **object**, the same shape as ##angle##. Each atom in ##angle## is turned into its cosine.
@@ -676,10 +676,10 @@ end function
 -- Return the sine of an angle expressed in radians
 --
 -- Parameters:
---   # ##angle##: an object, each atom in which will be acted upon.
+--   # ##angle## : an object, each atom in which will be acted upon.
 --
 -- Returns:
---   An **object** the same shape as ##angle##. When ##angle## is an atom, the
+--   An **object**, the same shape as ##angle##. When ##angle## is an atom, the
 --   result is the sine of ##angle##.
 --
 -- Comments:
@@ -701,10 +701,10 @@ end function
 -- Return an angle given its cosine.
 --
 -- Parameters:
---   # ##value##: an object, each atom in which will be acted upon.
+--   # ##value## : an object, each atom in which will be acted upon.
 --
 -- Returns:
---   An **object** the same shape as ##value##. When ##value## is an atom, the result is
+--   An **object**, the same shape as ##value##. When ##value## is an atom, the result is
 --   an atom, an angle whose cosine is ##value##.
 --
 -- Errors:
@@ -737,10 +737,10 @@ end function
 -- Return an angle given its sine.
 --
 -- Parameters:
---		# ##value##: an object, each atom in which will be acted upon.
+--		# ##value## : an object, each atom in which will be acted upon.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is an atom, an angle whose sine is ##value##.
+--		An **object**, the same shape as ##value##. When ##value## is an atom, the result is an atom, an angle whose sine is ##value##.
 --
 -- Errors:
 --		If any atom in ##value## is not in the -1..1 range, it cannot be the sine of a real number, and an error occurs.
@@ -770,8 +770,8 @@ end function
 -- Calculate the arctangent of a ratio.
 --
 -- Parameters:
---		# ##y##: an atom, the numerator of the ratio
---		# ##x##: an atom, the denominator of the ratio
+--		# ##y## : an atom, the numerator of the ratio
+--		# ##x## : an atom, the denominator of the ratio
 --
 -- Returns:
 --		An **atom**, which is equal to [[:arctan]](##y##/##x##), except that it can handle zero denominator and is more accurate.
@@ -807,10 +807,10 @@ end function
 -- Convert an angle measured in radians to an angle measured in degrees
 --
 -- Parameters:
---		# ##angle##: an object, all atoms of which will be converted, no matter how deeply nested.
+--		# ##angle## : an object, all atoms of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object** the same shape as ##angle##, all atoms of which were multiplied by 180/PI.
+--		An **object**, the same shape as ##angle##, all atoms of which were multiplied by 180/PI.
 --
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
@@ -834,10 +834,10 @@ end function
 -- Convert an angle measured in degrees to an angle measured in radians
 --
 -- Parameters:
---		# ##angle##: an object, all atoms of which will be converted, no matter how deeply nested.
+--		# ##angle## : an object, all atoms of which will be converted, no matter how deeply nested.
 --
 -- Returns:
---		An **object** the same shape as ##angle##, all atoms of which were multiplied by PI/180.
+--		An **object**, the same shape as ##angle##, all atoms of which were multiplied by PI/180.
 --
 -- Comments:
 -- This function may be applied to an atom or sequence. A flat angle is PI radians and 180 degrees.
@@ -867,7 +867,7 @@ end function
 -- Return the natural logarithm of a positive number.
 --
 -- Parameters:
---		# ##value##: an object, any atom of which ##log##() acts upon.
+--		# ##value## : an object, any atom of which ##log##() acts upon.
 --
 -- Returns:
 --		An **object**, the same shape as ##value##. For an atom, the returned atom is its logarithm of base E.
@@ -895,7 +895,7 @@ end function
 -- Return the base 10 logarithm of a number.
 --
 -- Parameters:
---		# ##value##: an object, each atom of which will be converted, no matter how deeply nested.
+--		# ##value## : an object, each atom of which will be converted, no matter how deeply nested.
 --
 -- Returns:
 --		An **object**, the same shape as ##value##. When ##value## is an atom, raising 10 to the returned atom yields ##value## back.
@@ -907,7 +907,8 @@ end function
 -- This function may be applied to an atom or to all elements
 -- of a sequence. 
 --
--- log10() is proportional to log() by a factor of 1/log(10), which is about .435 .
+-- ##log10##() is proportional to ##log##() by a factor of ##1/log(10)##, 
+-- which is about ##0.435## .
 --
 -- Example 1:
 -- <eucode>
@@ -926,10 +927,10 @@ end function
 -- Computes some power of E.
 --
 -- Parameters:
---		# ##value##: an object, all atoms of which will be acted upon, no matter how deeply nested.
+--		# ##value## : an object, all atoms of which will be acted upon, no matter how deeply nested.
 --
 --Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, its exponential is being returned.
+--		An **object**, the same shape as ##value##. When ##value## is an atom, its exponential is being returned.
 --
 --	Comments:
 --	This function can be applied to a single atom or to a sequence of any shape.
@@ -956,8 +957,8 @@ end function
 -- Raise a base value to some power.
 --
 -- Parameters:
---		# ##base##: an object, the value(s) to raise to some power.
---		# ##exponent##: an object, the exponent(s) to apply to ##base##.
+--		# ##base## : an object, the value(s) to raise to some power.
+--		# ##exponent## : an object, the exponent(s) to apply to ##base##.
 --
 -- Returns:
 --		An **object**, the shape of which depends on ##base##'s and ##exponent##'s. For two atoms, this will be ##base## raised to the power ##exponent##.
@@ -967,7 +968,7 @@ end function
 --
 --		If 0 is raised to any negative power, this is the same as a zero divide and causes an error.
 --
--- 		power(0,0) is illegal, because there is not an unique value that can be assigned to that quantity.
+-- 		##power(0,0)## is illegal, because there is not an unique value that can be assigned to that quantity.
 --
 -- Comments:
 --
@@ -1013,10 +1014,10 @@ end function
 -- Calculate the square root of a number.
 --
 -- Parameters:
---		# ##value##: an object, each atom in which will be acted upon.
+--		# ##value## : an object, each atom in which will be acted upon.
 --
 -- Returns:
---		An **object** the same shape as ##value##. When ##value## is an atom, the result is the positive atom whose square is ##value##.
+--		An **object**, the same shape as ##value##. When ##value## is an atom, the result is the positive atom whose square is ##value##.
 --
 -- Errors:
 --		If any atom in ##value## is less than zero, an error will occur, as no squared real can be less than zero.
@@ -1042,7 +1043,7 @@ end function
 -- Computes the hyperbolic cosine of an object.
 --
 -- Parameters:
---		# ##x##: the object to process.
+--		# ##x## : the object to process.
 --
 -- Returns:
 -- An **object**, the same shape as ##x##, each atom of which was acted upon.
@@ -1068,7 +1069,7 @@ end function
 -- Computes the hyperbolic sine of an object.
 --
 -- Parameters:
---		# ##x##: the object to process.
+--		# ##x## : the object to process.
 --
 -- Returns:
 -- An **object**, the same shape as ##x##, each atom of which was acted upon.
@@ -1081,7 +1082,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ?sinh(LN2) -- prints out 0.75
+-- ? sinh(LN2) -- prints out 0.75
 -- </eucode>
 -- See Also:
 -- [[:cosh]], [[:sin]], [[:arcsinh]]
@@ -1094,7 +1095,7 @@ end function
 -- Computes the hyperbolic tangent of an object.
 --
 -- Parameters:
---		# ##x##: the object to process.
+--		# ##x## : the object to process.
 --
 -- Returns:
 -- An **object**, the same shape as ##x##, each atom of which was acted upon.
@@ -1107,7 +1108,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ?tanh(LN2) -- prints out 0.6
+-- ? tanh(LN2) -- prints out 0.6
 -- </eucode>
 --
 -- See Also:
@@ -1121,7 +1122,7 @@ end function
 -- Computes the reverse hyperbolic sine of an object.
 --
 -- Parameters:
---		# ##x##: the object to process.
+--		# ##x## : the object to process.
 --
 -- Returns:
 -- An **object**, the same shape as ##x##, each atom of which was acted upon.
@@ -1132,7 +1133,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ?arcsinh(1) -- prints out 0,4812118250596034
+-- ? arcsinh(1) -- prints out 0,4812118250596034
 -- </eucode>
 --
 -- See Also:
@@ -1158,7 +1159,7 @@ end type
 -- Computes the reverse hyperbolic cosine of an object.
 --
 -- Parameters:
---		# ##x##: the object to process.
+--		# ##x## : the object to process.
 --
 -- Returns:
 -- An **object**, the same shape as ##x##, each atom of which was acted upon.
@@ -1172,7 +1173,7 @@ end type
 --
 -- Example 1:
 -- <eucode>
--- ?arccosh(1) -- prints out 0
+-- ? arccosh(1) -- prints out 0
 -- </eucode>
 --
 -- See Also:
@@ -1198,7 +1199,7 @@ end type
 -- Computes the reverse hyperbolic tangent of an object.
 --
 -- Parameters:
---		# ##x##: the object to process.
+--		# ##x## : the object to process.
 --
 -- Returns:
 -- An **object**, the same shape as ##x##, each atom of which was acted upon.
@@ -1212,7 +1213,7 @@ end type
 --
 -- Example 1:
 -- <eucode>
--- ?arctanh(1/2) -- prints out 0,5493061443340548456976
+-- ? arctanh(1/2) -- prints out 0,5493061443340548456976
 -- </eucode>
 --
 -- See Also:
@@ -1230,7 +1231,7 @@ end function
 -- Compute the sum of all atoms in the argument, no matter how deeply nested
 --
 -- Parameters:
---		# ##values##: an object, all atoms of which will be added up, no matter how nested.
+--		# ##values## : an object, all atoms of which will be added up, no matter how nested.
 --
 -- Returns:
 --		An **atom**, the sum of all atoms in [[:flatten]](##values##).
@@ -1246,6 +1247,7 @@ end function
 --   a = sum({10.5, {11.2} , 8.1})
 --   -- a is 29.8
 --   </eucode>
+--
 -- See Also:
 --		[[:can_add]], [[:product]], [[:or_all]]
 
@@ -1269,7 +1271,7 @@ end function
 -- Compute the product of all the atom in the argument, no matter how deeply nested.
 --
 -- Parameters:
---		# ##values##: an object, all atoms of which will be multiplied up, no matter how nested.
+--		# ##values## : an object, all atoms of which will be multiplied up, no matter how nested.
 --
 -- Returns:
 --		An **atom**, the product of all atoms in [[:flatten]](##values##).
@@ -1310,7 +1312,7 @@ end function
 -- Or's together all atoms in the argument, no matter how deeply nested.
 --
 -- Parameters:
---		# ##values##: an object, all atoms of which will be added up, no matter how nested.
+--		# ##values## : an object, all atoms of which will be added up, no matter how nested.
 --
 -- Returns:
 --		An **atom**, the result of or'ing all atoms in [[:flatten]](##values##).
@@ -1343,6 +1345,7 @@ public function or_all	(object a)
 	end for
 	return b
 end function
+
 --****
 -- === Bitwise operations
 --
@@ -1356,11 +1359,11 @@ end function
 -- result will be 1 only if the corresponding bits in both arguments are 1.
 --
 -- Parameters:
--- 		# ##a##: one of the objects involved
--- 		# ##b##: the second object
+-- 		# ##a## : one of the objects involved
+-- 		# ##b## : the second object
 --
 -- Returns:
--- An **object** whose shape depends on the shape of both arguments. Each atom in this object 
+-- An **object**, whose shape depends on the shape of both arguments. Each atom in this object 
 -- is obtained by logical AND between atoms on both objects.
 --
 -- Comments: 
@@ -1409,11 +1412,11 @@ end function
 -- result will be 1 only if the corresponding bits in both arguments are different.
 --
 -- Parameters:
--- 		# ##a##: one of the objects involved
--- 		# ##b##: the second object
+-- 		# ##a## : one of the objects involved
+-- 		# ##b## : the second object
 --
 -- Returns:
--- An **object** whose shape depends on the shape of both arguments. Each atom in this object 
+-- An **object**, whose shape depends on the shape of both arguments. Each atom in this object 
 -- is obtained by logical XOR between atoms on both objects.
 --
 -- Comments:
@@ -1441,11 +1444,11 @@ end function
 -- result will be 1 only if the corresponding bits in both arguments are both 0.
 --
 -- Parameters:
--- 		# ##a##: one of the objects involved
--- 		# ##b##: the second object
+-- 		# ##a## : one of the objects involved
+-- 		# ##b## : the second object
 --
 -- Returns:
--- An **object** whose shape depends on the shape of both arguments. Each atom in this object 
+-- An **object**, whose shape depends on the shape of both arguments. Each atom in this object 
 -- is obtained by logical XOR between atoms on both objects.
 --
 -- Comments:
@@ -1479,7 +1482,7 @@ end function
 -- when the corresponding bit in x1 is 0, and will be 0 when the corresponding bit in x1 is 1.
 --
 -- Parameters:
--- 		# ##a##: the object to invert the bits of.
+-- 		# ##a## : the object to invert the bits of.
 --
 -- Returns:
 -- An **object**, the same shape as ##a##. Each bit in an atom of the result is the reverse of the corresponding bit inside ##a##.
@@ -1529,8 +1532,8 @@ end function
 -- Right shift moves a right by b bits
 --
 -- Parameters:
---   # ##a## - value to be moved
---   # ##b## - number of bits to be moved right by
+--   # ##a## : value to be moved
+--   # ##b## : number of bits to be moved right by
 --
 -- Example 1:
 -- <eucode>
@@ -1554,11 +1557,11 @@ end function
 -- Returns the greater common divisor of to atoms
 --
 -- Parameters:
---		# ##p##: one of the atoms to consider
---		# ##q##: the other atom.
+--		# ##p## : one of the atoms to consider
+--		# ##q## : the other atom.
 --
 -- Returns:
--- A positive **atom** without a fractional part, evenly dividing both parameters, and is the 
+-- A positive **atom**, without a fractional part, evenly dividing both parameters, and is the 
 -- greatest value with those properties.
 --
 -- Comments:
@@ -1619,12 +1622,13 @@ end function
 -- Compares two (sets of) numbers based on approximate equality.
 --
 -- Parameters:
---		# ##p##: an object, one of the sets to consider
---		# ##q##: an object, the other set.
---      # ##epsilon##: an atom used to define the amount of inequality allowed.
+--		# ##p## : an object, one of the sets to consider
+--		# ##q## : an object, the other set.
+--      # ##epsilon## : an atom used to define the amount of inequality allowed.
 --           This must be a positive value. Default is 0.005
 --
 -- Returns:
+-- An **integer**,
 -- * 1 when p > (q + epsilon) : P is definitely greater than q.
 -- * -1 when p < (q - epsilon) : P is definitely less than q.
 -- * 0 when p >= (q - epsilon) and p <= (q + epsilon) : p and q are approximately equal.
@@ -1691,9 +1695,10 @@ end function
 -- Tests for power of 2
 --
 -- Parameters:
---		# ##p##: an object. The item to test. This can be an integer, atom or sequence.
+--		# ##p## : an object. The item to test. This can be an integer, atom or sequence.
 --
 -- Returns:
+-- An **integer**,
 -- * 1 for each item in ##p## that is a power of two, eg. 2,4,8,16,32, ...
 -- * 0 for each item in ##p## that is **not** a power of two, eg. 3, 54.322, -2
 --
@@ -1725,9 +1730,10 @@ end function
 -- Test if the supplied integer is a even or odd number.
 --
 -- Parameters:
---		# ##pData##: an integer. The item to test.
+--		# ##pData## : an integer. The item to test.
 --
 -- Returns:
+** An **integer**,
 -- * 1 if its even.
 -- * 0 if its odd.
 --
@@ -1757,9 +1763,10 @@ end function
 -- Test if the supplied Euphoria object is even or odd.
 --
 -- Parameters:
---		# ##pData##: any Euphoria object. The item to test.
+--		# ##pData## : any Euphoria object. The item to test.
 --
 -- Returns:
+-- An **object**,
 -- * If ##pData## is an integer...
 -- ** 1 if its even.
 -- ** 0 if its odd.

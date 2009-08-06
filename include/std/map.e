@@ -80,8 +80,8 @@ constant type_is_map   = "Eu:StdMap"
 --     Calculates a hash value from //key// using the algorithm //algo//
 --
 -- Parameters:
---		# ##source##: Any Euphoria object
---		# ##algo##: A code indicating which algorithm to use.
+--		# ##source## : Any Euphoria object
+--		# ##algo## : A code indicating which algorithm to use.
 -- ** -5 uses Hsieh. Fastest and good dispersion
 -- ** -4 uses Fletcher. Very fast and good dispersion
 -- ** -3 uses Adler. Very fast and reasonable dispersion, especially for small strings
@@ -96,9 +96,9 @@ constant type_is_map   = "Eu:StdMap"
 -- slightly slower.
 --
 -- Returns:
---     An **integer**:
---        Except for the MD5 and SHA256 algorithms, this is a 32-bit integer.
---     A **sequence**:
+--     An **integer**,
+--        Except for the MD5 and SHA256 algorithms, this is a 32-bit integer.\\
+--     A **sequence**,
 --        MD5 returns a 4-element sequence of integers\\
 --        SHA256 returns a 8-element sequence of integers.
 --
@@ -224,8 +224,8 @@ constant maxInt = #3FFFFFFF
 -- Calculate a Hashing value from the supplied data.
 --
 -- Parameters:
---   * pData = The data for which you want a hash value calculated.
---   * max_hash_p = (default = 0) The returned value will be no larger than this value.
+--   # ##pData## : The data for which you want a hash value calculated.
+--   # ##max_hash_p## :  (default = 0) The returned value will be no larger than this value.
 --     However, a value of 0 or lower means that it can grow as large as the maximum integer value.
 --
 -- Returns:
@@ -260,11 +260,11 @@ end function
 -- meaning that maps up to 50 elements use the //small map// structure.
 --
 -- Parameters:
--- # new_value_p = If this is greater than zero then it **sets** the threshold
+-- # ##new_value_p## : If this is greater than zero then it **sets** the threshold
 -- value.
 --
 -- Returns:
--- ##integer## The current value (when ##new_value_p## is less than 1) or the
+--  An **integer**, the current value (when ##new_value_p## is less than 1) or the
 -- old value prior to setting it to ##new_value_p##.
 --
 public function threshold(integer new_value_p = 0)
@@ -283,10 +283,10 @@ end function
 -- Determines the type of the map.
 --
 -- Parameters:
--- # m = A map
+-- # ##m## : A map
 --
 -- Returns:
--- ##integer## Either //SMALLMAP// or //LARGEMAP//
+-- An **integer**, Either //SMALLMAP// or //LARGEMAP//
 --
 public function type_of(map the_map_p)
 	return ram_space[the_map_p][MAP_TYPE]
@@ -297,11 +297,11 @@ end function
 -- //large// maps.
 --
 -- Parameters:
---   # ##m##: the map to resize
---   # ##requested_bucket_size_p##: a lower limit for the new size.
+--   # ##m## : the map to resize
+--   # ##requested_bucket_size_p## : a lower limit for the new size.
 --
 -- Returns:
---		A **map** with the same data in, but more evenly dispatched and hence faster to use.
+--		A **map**, with the same data in, but more evenly dispatched and hence faster to use.
 --
 -- Comment:
 -- If ##requested_bucket_size_p## is not greater than zero, a new width is automatically derived from the current one.
@@ -371,7 +371,7 @@ end procedure
 -- Create a new map data structure
 --
 -- Parameters:
---		# ##initial_size_p##: An estimate of how many initial elements will be stored
+--		# ##initial_size_p## : An estimate of how many initial elements will be stored
 --   in the map. If this value is less than the [[:threshold]] value, the map
 --   will initially be a //small// map otherwise it will be a //large// map.
 --
@@ -424,12 +424,13 @@ end function
 -- Returns either the supplied map or a new map.
 --
 -- Parameters:
---      # ##the_map_p##: An object, that could be an existing map
---		# ##initial_size_p##: An estimate of how many initial elements will be stored
+--      # ##the_map_p## : An object, that could be an existing map
+--		# ##initial_size_p## : An estimate of how many initial elements will be stored
 --   in a new map.
 --
 -- Returns:
---		If #m# is an existing map then it is returned otherwise this 
+-- A **map**,
+--		If ##m## is an existing map then it is returned otherwise this 
 --      returns a new empty **map**.
 --
 -- Comments:
@@ -455,15 +456,15 @@ end function
 -- Compares two maps to test equality.
 --
 -- Parameters:
---		# ##map_1_p##: A map
---		# ##map_2_p##: A map
---      # ##scope_p##: An integer that specifies what to compare.
+--		# ##map_1_p## : A map
+--		# ##map_2_p## : A map
+--      # ##scope_p## : An integer that specifies what to compare.
 --        ** 'k' or 'K' to only compare keys.
 --        ** 'v' or 'V' to only compare values.
 --        ** 'd' or 'D' to compare both keys and values. This is the default.
 --
 -- Returns:
---   An integer...
+--   An **integer**,
 --   * -1 if they are not equal.
 --   * 0 if they are literally the same map.
 --   * 1 if they contain the same keys and/or values.
@@ -511,8 +512,8 @@ end function
 -- Check whether map has a given key.
 --
 -- Parameters:
--- 		# ##the_map_p##: the map to inspect
---		# ##the_key_p##: an object to be looked up
+-- 		# ##the_map_p## : the map to inspect
+--		# ##the_key_p## : an object to be looked up
 --
 -- Returns:
 --		An **integer**, 0 if not present, 1 if present.
@@ -545,9 +546,9 @@ end function
 -- Retrieves the value associated to a key in a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map to inspect
---		# ##the_key_p##: an object, the the_key_p being looked tp
---		# ##default_value_p##: an object, a default value returned if ##the_key_p## not found.
+--		# ##the_map_p## : the map to inspect
+--		# ##the_key_p## : an object, the the_key_p being looked tp
+--		# ##default_value_p## : an object, a default value returned if ##the_key_p## not found.
 --                         The default is 0.
 --
 -- Returns:
@@ -630,11 +631,11 @@ end function
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map where an entry is being added or updated
---		# ##the_key_p##: an object, the the_key_p to look up
---		# ##the_value_p##: an object, the value to add, or to use for updating.
---		# ##operation##: an integer, indicating what is to be done with ##the_value_p##. Defaults to PUT.
---		# ##trigger_p##: an integer. Default is 100. See Comments for details.
+--		# ##the_map_p## : the map where an entry is being added or updated
+--		# ##the_key_p## : an object, the the_key_p to look up
+--		# ##the_value_p## : an object, the value to add, or to use for updating.
+--		# ##operation## : an integer, indicating what is to be done with ##the_value_p##. Defaults to PUT.
+--		# ##trigger_p## : an integer. Default is 100. See Comments for details.
 --
 -- Returns:
 --		The updated **map**.
@@ -642,14 +643,14 @@ end function
 -- Comments:
 -- * The operation parameter can be used to modify the existing value.  Valid operations are: 
 -- 
--- ** ##PUT##:  This is the default, and it replaces any value in there already
--- ** ##ADD##:  Equivalent to using the += operator 
--- ** ##SUBTRACT##:  Equivalent to using the -= operator 
--- ** ##MULTIPLY##:  Equivalent to using the *= operator
--- ** ##DIVIDE##: Equivalent to using the /= operator 
--- ** ##APPEND##: Appends the value to the existing data 
--- ** ##CONCAT##: Equivalent to using the &= operator
--- ** ##LEAVE##: If it already exists, the current value is left unchanged
+-- ** ##PUT## ~--  This is the default, and it replaces any value in there already
+-- ** ##ADD## ~--  Equivalent to using the += operator 
+-- ** ##SUBTRACT## ~--  Equivalent to using the -= operator 
+-- ** ##MULTIPLY## ~--  Equivalent to using the *= operator
+-- ** ##DIVIDE## ~-- Equivalent to using the /= operator 
+-- ** ##APPEND## ~-- Appends the value to the existing data 
+-- ** ##CONCAT## ~-- Equivalent to using the &= operator
+-- ** ##LEAVE## ~--  If it already exists, the current value is left unchanged
 --               otherwise the new value is added to the map.
 --
 -- * The //trigger// parameter is used when you need to keep the average 
@@ -816,24 +817,24 @@ end procedure
 -- Adds or updates an entry on a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map where an entry is being added or updated
---		# ##the_keys_p##: a sequence of keys for the nested maps
---		# ##the_value_p##: an object, the value to add, or to use for updating.
---		# ##operation_p##: an integer, indicating what is to be done with ##value##. Defaults to PUT.
---		# ##trigger_p##: an integer. Default is 51. See Comments for details.
+--		# ##the_map_p## : the map where an entry is being added or updated
+--		# ##the_keys_p## : a sequence of keys for the nested maps
+--		# ##the_value_p## : an object, the value to add, or to use for updating.
+--		# ##operation_p## : an integer, indicating what is to be done with ##value##. Defaults to PUT.
+--		# ##trigger_p## : an integer. Default is 51. See Comments for details.
 --
 -- Valid operations are: 
 -- 
--- * ##PUT##:  This is the default, and it replaces any value in there already
--- * ##ADD##:  Equivalent to using the += operator 
--- * ##SUBTRACT##:  Equivalent to using the -= operator 
--- * ##MULTIPLY##:  Equivalent to using the *= operator 
--- * ##DIVIDE##: Equivalent to using the /= operator 
--- * ##APPEND##: Appends the value to the existing data 
--- * ##CONCAT##: Equivalent to using the &= operator
+-- * ##PUT## ~--  This is the default, and it replaces any value in there already
+-- * ##ADD## ~--  Equivalent to using the += operator 
+-- * ##SUBTRACT## ~--  Equivalent to using the -= operator 
+-- * ##MULTIPLY## ~--  Equivalent to using the *= operator 
+-- * ##DIVIDE## ~-- Equivalent to using the /= operator 
+-- * ##APPEND## ~-- Appends the value to the existing data 
+-- * ##CONCAT## ~-- Equivalent to using the &= operator
 --
 -- Returns:
---   The modified map.
+--   The modified **map**.
 --
 -- Comments:
 --   * If existing entry with the same key is already in the map, the value of the entry is updated.
@@ -877,8 +878,8 @@ end procedure
 -- Remove an entry with given key from a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map to operate on
---		# ##key##: an object, the key to remove.
+--		# ##the_map_p## : the map to operate on
+--		# ##key## : an object, the key to remove.
 --
 -- Returns:
 --		 The modified **map**.
@@ -954,7 +955,7 @@ end procedure
 -- Remove all entries in a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map to operate on
+--		# ##the_map_p## : the map to operate on
 --
 -- Comments:
 --   * This is much faster than removing each entry individually.
@@ -999,7 +1000,7 @@ end procedure
 -- Return the number of entries in a map.
 --
 -- Parameters:
---		##the_map_p##: the map being queried
+--		##the_map_p## : the map being queried
 --
 -- Returns:
 --		An **integer**, the number of entries it has.
@@ -1025,17 +1026,17 @@ end function
 -- Retrieves characteristics of a map.
 --
 -- Parameters:
--- 		# ##the_map_p##: the map being queried
+-- 		# ##the_map_p## : the map being queried
 --
 -- Returns:
---		A  **sequence** of 7 integers:
--- * NUM_ENTRIES: number of entries
--- * NUM_IN_USE: number of buckets in use
--- * NUM_BUCKETS: number of buckets
--- * LARGEST_BUCKET: size of largest bucket
--- * SMALLEST_BUCKET: size of smallest bucket
--- * AVERAGE_BUCKET: average size for a bucket
--- * STDEV_BUCKET: standard deviation for the bucket length series
+--		A  **sequence**, of 7 integers:
+-- * ##NUM_ENTRIES## ~-- number of entries
+-- * ##NUM_IN_USE## ~-- number of buckets in use
+-- * ##NUM_BUCKETS## ~-- number of buckets
+-- * ##LARGEST_BUCKET## ~-- size of largest bucket
+-- * ##SMALLEST_BUCKET## ~-- size of smallest bucket
+-- * ##AVERAGE_BUCKET## ~-- average size for a bucket
+-- * ##STDEV_BUCKET## ~-- standard deviation for the bucket length series
 --
 -- Example 1:
 --   <eucode>
@@ -1111,8 +1112,10 @@ end function
 --   keys = keys(the_map_p) -- keys might be {20,40,10,30} or some other order
 --   keys = keys(the_map_p, 1) -- keys will be {10,20,30,40}
 --   </eucode>
+--
 -- See Also:
 --		[[:has]], [[:values]], [[:pairs]]
+--
 public function keys(map the_map_p, integer sorted_result = 0)
 	sequence buckets_
 	sequence current_bucket_
@@ -1154,12 +1157,12 @@ end function
 -- Return values, without their keys, from a map.
 --
 -- Parameters:
---   # ##the_map##: the map being queried
---   # ##keys##: optional, key list of values to return. 
---   # ##default_values##: optional default values for keys list
+--   # ##the_map## : the map being queried
+--   # ##keys## : optional, key list of values to return. 
+--   # ##default_values## : optional default values for keys list
 --
 -- Returns:
---   A **sequence** of all values stored in ##the_map##.
+--   A **sequence**, of all values stored in ##the_map##.
 --
 -- Comments:
 --   * The order of the values returned may not be the same as the putting order. 
@@ -1260,12 +1263,12 @@ end function
 -- Return all key/value pairs in a map.
 --
 -- Parameters:
---		# ##the_map_p##: the map to get the data from
---      # ##sorted_result##: optional integer. 0 [default] means do not sort the
+--		# ##the_map_p## : the map to get the data from
+--      # ##sorted_result## : optional integer. 0 [default] means do not sort the
 --                            output and 1 means to sort the output before returning.
 --
 -- Returns:
---		A **sequence** of all key/value pairs stored in ##the_map_p##. Each pair is a 
+--		A **sequence**, of all key/value pairs stored in ##the_map_p##. Each pair is a 
 -- sub-sequence in the form {key, value}
 --
 -- Comments:
@@ -1284,8 +1287,10 @@ end function
 --   keyvals = pairs(the_map_p) -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
 --   keyvals = pairs(the_map_p, 1) -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
 --   </eucode>
+--
  -- See Also:
  --		[[:get]], [[:keys]], [[:values]]
+ --
 public function pairs(map the_map_p, integer sorted_result = 0)
 	sequence key_bucket_
 	sequence value_bucket_
@@ -1329,10 +1334,10 @@ end function
 -- Widens a map to increase performance.
 --
 -- Parameters:
---		# ##the_map_p##: the map being optimized
---		# ##max_p##: an integer, the maximum desired size of a bucket. Default is 25.
+--		# ##the_map_p## : the map being optimized
+--		# ##max_p## : an integer, the maximum desired size of a bucket. Default is 25.
 --                  This must be 3 or higher.
---      # ##grow_p##: an atom, the factor to grow the number of buckets for each
+--      # ##grow_p## : an atom, the factor to grow the number of buckets for each
 --                   iteration of rehashing. Default is 1.333. This must be 
 --                   greater than 1.
 --
@@ -1346,6 +1351,7 @@ end function
 --
 -- See Also:
 --		[[:statistics]], [[:rehash]]
+--
 public procedure optimize(map the_map_p, integer max_p = 25, atom grow_p = 1.333)
 	sequence stats_
 	integer next_guess_
@@ -1383,12 +1389,12 @@ end procedure
 -- Loads a map from a file
 --
 -- Parameters:
---		# ##file_name_p##: The file to load from. This file may have been created
+--		# ##file_name_p## : The file to load from. This file may have been created
 --                          by the [[:save_map]] function. This can either be a
 --                          name of a file or an already opened file handle.
 --
 -- Returns:
---		Either a **map** with all the entries found in ##file_name_p##, or **-1**
+--		Either a **map**, with all the entries found in ##file_name_p##, or **-1**
 --      if the file failed to open.
 --
 -- Comments:
@@ -1417,8 +1423,10 @@ end procedure
 --        ShowIntructions()
 --    end if
 -- </eucode>
+--
 -- See Also:
 --		[[:new]], [[:save_map]]
+--
 public function load_map(object file_name_p)
 	integer file_handle_
 	object line_
@@ -1515,14 +1523,14 @@ end function
 -- Saves a map to a file.
 --
 -- Parameters:
---		# ##m##: a map.
---		# ##file_name_p##: Either a sequence, the name of the file to save to,
+--		# ##m## : a map.
+--		# ##file_name_p## : Either a sequence, the name of the file to save to,
 --                         or an open file handle as returned by [[:open]]().
---		# ##type##: an integer. SM_TEXT for a human-readable format (default),
+--		# ##type## : an integer. SM_TEXT for a human-readable format (default),
 --                SM_RAW for a smaller and faster format, but not human-readable.
 --
 -- Returns:
---		##integer## = The number of keys saved to the file, or -1 if the
+--	An **integer**, the number of keys saved to the file, or -1 if the
 --                    save failed.
 --
 -- Comments:
@@ -1567,6 +1575,7 @@ end function
 --        Error("Failed to save application options")
 --    end if
 -- </eucode>
+--
 -- See Also:
 --		[[:load_map]]
 
@@ -1626,13 +1635,13 @@ end function
 -- Duplicates a map.
 --
 -- Parameters:
---   # ##source_map##: map to copy from
---   # ##dest_map##: optional, map to copy to
---   # ##put_operation##: optional, operation to use when ##dest##map## is used.
+--   # ##source_map## : map to copy from
+--   # ##dest_map## : optional, map to copy to
+--   # ##put_operation## : optional, operation to use when ##dest##map## is used.
 --                         The default is PUT.
 --
 -- Returns:
---   If ##dest_map## was not provided, an exact duplicate of ##source_map## otherwise
+--   If ##dest_map##  was not provided, an exact duplicate of ##source_map## otherwise
 --   ##dest_map##, which does not have to be empty, is returned with the
 --   new values copied from ##source_map##, according to the ##put_operation## value.
 --
@@ -1730,12 +1739,12 @@ end function
 -- Converts a set of Key-Value pairs to a map.
 --
 -- Parameters:
---   # ##kv_pairs##: A seqeuence containing any number of subsequences that
+--   # ##kv_pairs## : A seqeuence containing any number of subsequences that
 --                   have the format {KEY, VALUE}. These are loaded into a
 --                   new map which is then returned by this function.
 --
 -- Returns:
---   A map containing the data from ##kv_pairs##
+--   A **map**, containing the data from ##kv_pairs##
 --
 -- Example 1:
 --   <eucode>
@@ -1768,12 +1777,12 @@ end function
 -- Converts a set of Key-Value pairs contained in a string to a map.
 --
 -- Parameters:
---   # ##kv_string##: A string containing any number of lines that
+--   # ##kv_string## : A string containing any number of lines that
 --                   have the format KEY=VALUE. These are loaded into a
 --                   new map which is then returned by this function.
 --
 -- Returns:
---   A map containing the data from ##kv_string##
+--   A **map**, containing the data from ##kv_string##
 --
 -- Comment:
 -- This function actually calls ##[[:keyvalues]]()## to convert the string to

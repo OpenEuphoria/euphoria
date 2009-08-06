@@ -38,14 +38,14 @@ public constant
 --****
 -- These constants are returned by the [[:platform]] function.
 --
--- * DOS32   - Host operating system is DOS
--- * WIN32   - Host operating system is Windows
--- * LINUX   - Host operating system is Linux **or** FreeBSD
--- * FREEBSD - Host operating system is Linux **or** FreeBSD
--- * OSX     - Host operating system is Mac OS X
--- * SUNOS   - Host operating system is Sun's OpenSolaris
--- * OPENBSD - Host operating system is OpenBSD
--- * NETBSD  - Host operating system is NetBSD
+-- * ##DOS32##   ~-- Host operating system is DOS
+-- * ##WIN32##   ~-- Host operating system is Windows
+-- * ##LINUX##   ~-- Host operating system is Linux **or** FreeBSD
+-- * ##FREEBSD## ~-- Host operating system is Linux **or** FreeBSD
+-- * ##OSX##     ~-- Host operating system is Mac OS X
+-- * ##SUNOS##   ~-- Host operating system is Sun's OpenSolaris
+-- * ##OPENBSD## ~-- Host operating system is OpenBSD
+-- * ##NETBSD##  ~-- Host operating system is NetBSD
 --
 -- Note:
 --   Via the [[:platform]] call, there is no way to determine if you are on Linux
@@ -218,7 +218,7 @@ end function
 -- Return the value of an environment variable. 
 --
 -- Parameters:
--- 		# ##var_name##: a string, the name of the variable being queried.
+-- 		# ##var_name## : a string, the name of the variable being queried.
 --
 -- Returns:
 --		An **object**, -1 if the variable does not exist, else a sequence holding its value.
@@ -241,9 +241,9 @@ end function
 --
 -- Parameters:
 --
--- # ##name##: a string, the environment variable name
--- # ##val##: a string, the value to set to
--- # ##overwrite##: an integer, nonzero to overwrite an existing variable, 0 to disallow this.
+-- # ##name## : a string, the environment variable name
+-- # ##val## : a string, the value to set to
+-- # ##overwrite## : an integer, nonzero to overwrite an existing variable, 0 to disallow this.
 --
 -- Example 1:
 -- <eucode>
@@ -263,7 +263,7 @@ end function
 -- Unset an environment variable
 --
 -- Parameters:
--- * ##name## - name of environment variable to unset
+-- # ##name## : name of environment variable to unset
 --
 -- Example 1:
 -- <eucode>
@@ -285,7 +285,7 @@ end function
 -- Indicates the platform that the program is being executed on.
 --
 -- Returns:
--- An **integer**:
+-- An **integer**,
 -- <eucode>
 -- public constant
 --     DOS32   = 1,
@@ -336,8 +336,8 @@ end function
 -- Pass a command string to the operating system command interpreter. 
 --
 -- Parameters:
---		# ##command##: a string to be passed to the shell
---		# ##mode##: an integer, indicating the manner in which to return from the call.
+--		# ##command## : a string to be passed to the shell
+--		# ##mode## : an integer, indicating the manner in which to return from the call.
 --
 -- Errors:
 -- ##command## should not exceed 1,024 characters.
@@ -400,8 +400,8 @@ end function
 -- Try to run the a shell executable command
 --
 -- Parameters:
---		# ##command##: a string to be passed to the shell, representing an executable command
---		# ##mode##: an integer, indicating the manner in which to return from the call.
+--		# ##command## : a string to be passed to the shell, representing an executable command
+--		# ##mode## : an integer, indicating the manner in which to return from the call.
 --
 -- Returns:
 -- An **integer**, basically the exit/return code from the called process.
@@ -412,9 +412,9 @@ end function
 -- Comments:
 --
 -- Allowable values for ##mode## are:
--- * 0: the previous graphics mode is restored and the screen is cleared.
--- * 1: a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
--- * 2: the graphics mode is not restored and the screen is not cleared.
+-- * 0 ~-- the previous graphics mode is restored and the screen is cleared.
+-- * 1 ~-- a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
+-- * 2 ~-- the graphics mode is not restored and the screen is not cleared.
 --
 -- If it is not possible to run the program, ##system_exec##() will return -1.
 --
@@ -464,7 +464,7 @@ end function
 -- Suspend thread execution. for ##t## seconds.
 --
 -- Parameters:
--- # ##t##: an atom, the number of seconds for which to sleep.
+-- # ##t## : an atom, the number of seconds for which to sleep.
 --
 -- Comments:
 -- On //Windows// and //Unix//, the operating system will suspend your process and
@@ -510,7 +510,7 @@ end type
 -- Turn on the PC speaker at a specified frequency 
 --
 -- Parameters:
--- 		# ##f##: frequency of sound. If ##f## is 0 the speaker will be turned off.
+-- 		# ##f## : frequency of sound. If ##f## is 0 the speaker will be turned off.
 --
 -- Comments:
 --
@@ -531,7 +531,7 @@ end procedure
 -- Specify the number of clock-tick interrupts per second.
 --
 -- Parameters:
--- 		# ##rate##, an atom, the number of ticks by seconds.
+-- 		# ##rate## : an atom, the number of ticks by seconds.
 --
 -- Errors:
 -- The rate must not be greater than the inverse frequency of the motherboard clock, at 1193181 2/3 Hz.
@@ -549,11 +549,11 @@ end procedure
 -- special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
 --
 -- If a program runs in a DOS window with a tick rate other than 18.2, the
--- time() function will not advance unless the window is the active window. 
+-- ##time##() function will not advance unless the window is the active window. 
 --
--- With a tick rate other than 18.2, the time() function on DOS takes about
+-- With a tick rate other than 18.2, the ##time##() function on DOS takes about
 -- 1/100 the usual time that it needs to execute. On Windows and FreeBSD,
--- time() normally executes very quickly.
+-- ##time##() normally executes very quickly.
 -- 
 -- While ex.exe is running, the system will maintain the correct time of day.
 -- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
@@ -587,11 +587,11 @@ end procedure
 -- Returns the list of include paths, in the order in which they are searched
 --
 -- Parameters:
---    # ##convert##: an integer, nonzero to include converted path entries
+--    # ##convert## : an integer, nonzero to include converted path entries
 --    that were not validated yet.
 --
 -- Returns:
---	A **sequence** of strings, each holding a fully qualified include path.
+--	A **sequence**, of strings, each holding a fully qualified include path.
 --
 -- Comments:
 --

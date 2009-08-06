@@ -31,9 +31,9 @@ namespace memory
 -- a bit of overhead) you *must* pass valid arguments or Euphoria could crash.
 --
 -- Some example programs to look at:
---   * ##demo/callmach.ex##      - calling a machine language routine
---   * ##demo/dos32/hardint.ex## - setting up a hardware interrupt handler
---   * ##demo/dos32/dosint.ex##  - calling a DOS software interrupt
+--   * ##demo/callmach.ex##      ~-- calling a machine language routine
+--   * ##demo/dos32/hardint.ex## ~-- setting up a hardware interrupt handler
+--   * ##demo/dos32/dosint.ex##  ~-- calling a DOS software interrupt
 --
 -- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.
@@ -75,8 +75,8 @@ end type
 -- Allocate a contiguous block of data memory.
 --
 -- Parameters:
---              # ##n##, a positive integer, the size of the requested block.
---              # ##cleanup##, an integer, if non-zero, then the returned pointer will be
+--              # ##n## : a positive integer, the size of the requested block.
+--              # ##cleanup## : an integer, if non-zero, then the returned pointer will be
 --                automatically freed when its reference count drops to zero, or
 --                when passed as a parameter to [[:delete]].
 --
@@ -147,7 +147,7 @@ end function
 --  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
 --
 -- Comments:
---  * Use ##free()## to return blocks of memory the during execution. This will reduce the chance of 
+--  * Use ##free##() to return blocks of memory the during execution. This will reduce the chance of 
 --   running out of memory or getting into excessive virtual memory swapping to disk. 
 -- * Do not reference a block of memory that has been freed. 
 -- * When your program terminates, all allocated memory will be returned to the system.
@@ -156,7 +156,7 @@ end function
 -- * ##addr## must have been allocated previously using [[:allocate]](). You
 --   cannot use it to relinquish part of a block. Instead, you have to allocate
 --   a block of the new size, copy useful contents from old block there and
---   then free() the old block.  
+--   then ##free##() the old block.  
 -- * If the memory was allocated and automatic cleanup
 --   was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
 -- * An ##addr## of zero is simply ignored.
@@ -211,11 +211,11 @@ FREE_RID = routine_id("free")
 -- Free a NULL terminated pointers array.
 --
 -- Parameters:
---   # #pointers_array# - memory address of where the NULL terminated array exists at.
+--   # ##pointers_array## : memory address of where the NULL terminated array exists at.
 --
 -- Comments:
 --   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
---   Do not call ##free_pointer_array()## for a pointer that was allocated to be cleaned
+--   Do not call ##free_pointer_array##() for a pointer that was allocated to be cleaned
 --   up automatically.  Instead, use [[:delete]].
 --
 -- See Also:
@@ -233,9 +233,9 @@ FREE_RID = routine_id("free")
 -- Fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one byte at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one byte at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## bytes at ##addr##
 --
 -- Returns:
 --              An **object**, either an integer if the input was a single address,
@@ -285,9 +285,9 @@ FREE_RID = routine_id("free")
 -- Fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one byte at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## : to fetch one byte at ##addr##, or
+--              ** a pair {##addr,len}## : to fetch ##len## bytes at ##addr##
 --
 -- Returns:
 --
@@ -308,7 +308,7 @@ FREE_RID = routine_id("free")
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
--- It is faster to read several bytes at once using the second form of peek()
+-- It is faster to read several bytes at once using the second form of ##peek##()
 -- than it is to read one byte at a time in a loop. The returned sequence has
 -- the length you asked for on input.
 -- 
@@ -341,8 +341,8 @@ FREE_RID = routine_id("free")
 -- in memory.
 --
 -- Parameters:
---   # ##addr_n_length##, an object, either of
---   ** an atom ##addr##, to fetch one word at ##addr##, or
+--   # ##addr_n_length## : an object, either of
+--   ** an atom ##addr## ~-- to fetch one word at ##addr##, or
 --   ** a pair ##{ addr, len}##, to fetch ##len## words at ##addr##
 --
 -- Returns:
@@ -398,9 +398,9 @@ FREE_RID = routine_id("free")
 -- in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one double word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
 --
 -- Returns:
 --              An **object**, either an integer if the input was a single address,
@@ -454,9 +454,9 @@ FREE_RID = routine_id("free")
 -- from an address in memory.
 --
 -- Parameters:
---   # ##addr_n_length##, an object, either of
---   ** an atom ##addr##, to fetch one double word at ##addr##, or
---   ** a pair ##{ addr, len }##, to fetch ##len## double words at ##addr##
+--   # ##addr_n_length## : an object, either of
+--   ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--   ** a pair ##{ addr, len }## ~-- to fetch ##len## double words at ##addr##
 --
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
@@ -476,7 +476,7 @@ FREE_RID = routine_id("free")
 -- therefore be declared as atoms.
 --
 -- It is faster to read several double words at once using the second form
--- of peek() than it is to read one double word at a time in a loop. The
+-- of ##peek##() than it is to read one double word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 -- 
 -- Remember that ##peek4s##() takes just one argument, which in the second
@@ -510,9 +510,9 @@ FREE_RID = routine_id("free")
 -- from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one double word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
 --
 -- Returns:
 --              An **object**, either an atom if the input was a single address, or
@@ -533,7 +533,7 @@ FREE_RID = routine_id("free")
 -- therefore be declared as atoms.
 --
 -- It is faster to read several double words at once using the second form 
--- of peek() than it is to read one double word at a time in a loop. The
+-- of ##peek##() than it is to read one double word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 -- 
 -- Remember that ##peek4u##() takes just one argument, which in the second
@@ -567,13 +567,13 @@ FREE_RID = routine_id("free")
 -- Read an ASCIZ string in RAM, starting from a supplied address.
 --
 -- Parameters:
---              # ##addr#: an atom, the address at which to start reading.
+--              # ##addr# : an atom, the address at which to start reading.
 --
 -- Returns:
--- A **sequence** of bytes, the string that could be read.
+-- A **sequence**, of bytes, the string that could be read.
 --
 -- Errors:
--- Further, peek() memory that doesn't belong to your process is something the operating
+-- Further, ##peek##() memory that doesn't belong to your process is something the operating
 -- system could prevent, and you'd crash with a machine level exception.
 --
 -- Comments:
@@ -593,8 +593,8 @@ FREE_RID = routine_id("free")
 -- Stores one or more bytes, starting at a memory location.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to store
---              # ##x##, an object, either a byte or a non empty sequence of bytes.
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either a byte or a non empty sequence of bytes.
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
@@ -608,10 +608,10 @@ FREE_RID = routine_id("free")
 -- It is faster to write several bytes at once by poking a sequence of values,
 -- than it is to write one byte at a time in a loop. 
 -- 
--- Writing to the screen memory with poke() can be much faster than using
--- puts() or printf(), but the programming is more difficult. In most cases
--- the speed is not needed. For example, the Euphoria editor, ed, never uses
--- poke().
+-- Writing to the screen memory with ##poke##() can be much faster than using
+-- ##puts##() or ##printf##(), but the programming is more difficult. In most cases
+-- the speed is not needed. For example, the Euphoria editor, ##ed##, never uses
+-- ##poke##().
 --  
 -- Example 1:
 -- <eucode>
@@ -642,8 +642,8 @@ FREE_RID = routine_id("free")
 -- Stores one or more words, starting at a memory location.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to store
---              # ##x##, an object, either a word or a non empty sequence of words.
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either a word or a non empty sequence of words.
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
@@ -651,15 +651,15 @@ FREE_RID = routine_id("free")
 --
 -- Comments: 
 --
--- There is no point in having poke2s() or poke2u(). For example, both 32768
+-- There is no point in having ##poke2s##() or ##poke2u##(). For example, both 32768
 -- and -32768 are stored as #F000 when stored as words. It's up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several words at once by poking a sequence of
 -- values, than it is to write one words at a time in a loop.
 -- 
--- Writing to the screen memory with poke2() can be much faster than using
--- puts() or printf(), but the programming is more difficult. In most cases
+-- Writing to the screen memory with ##poke2##() can be much faster than using
+-- ##puts##() or ##printf##(), but the programming is more difficult. In most cases
 -- the speed is not needed. For example, the Euphoria editor, ed, never uses
 -- poke2().
 --  
@@ -692,8 +692,8 @@ FREE_RID = routine_id("free")
 -- Stores one or more double words, starting at a memory location.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to store
---              # ##x##, an object, either a double word or a non empty sequence of
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either a double word or a non empty sequence of
 -- double words.
 --
 -- Errors:
@@ -745,9 +745,9 @@ FREE_RID = routine_id("free")
 -- Copy a block of memory from an address to another.
 --
 -- Parameters:
---              # ##destination##, an atom, the address at which data is to be copied
---              # ##origin##, an atom, the address from which data is to be copied
---              # ##len##, an integer, how many bytes are to be copied.
+--              # ##destination## : an atom, the address at which data is to be copied
+--              # ##origin## : an atom, the address from which data is to be copied
+--              # ##len## : an integer, how many bytes are to be copied.
 --
 -- Comments: 
 --
@@ -777,9 +777,9 @@ FREE_RID = routine_id("free")
 -- Sets a contiguous range of memory locations to a single value.
 --
 -- Parameters:
---              # ##destination##, an atom, the address starting the range to set.
---              # ##byte_value##, an integer, the value to copy at all addresses in the range.
---              # ##how_many##, an integer, how many bytes are to be set.
+--              # ##destination## : an atom, the address starting the range to set.
+--              # ##byte_value## : an integer, the value to copy at all addresses in the range.
+--              # ##how_many## : an integer, how many bytes are to be set.
 --
 -- Comments:
 --
@@ -807,7 +807,7 @@ FREE_RID = routine_id("free")
 --  Call a machine language routine which was stored in memory prior.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to transfer execution control.
+--              # ##addr## : an atom, the address at which to transfer execution control.
 --
 -- Comments:
 --
@@ -816,8 +816,8 @@ FREE_RID = routine_id("free")
 -- The routine should save and restore any registers that it uses.
 --
 -- You can allocate a block of memory for the routine and then poke in the
--- bytes of machine code using ##allocate_code()##. You might allocate other blocks of memory for data
--- and parameters that the machine code can operate on using ##allocate()##. The addresses of these
+-- bytes of machine code using ##allocate_code##(). You might allocate other blocks of memory for data
+-- and parameters that the machine code can operate on using ##allocate##(). The addresses of these
 -- blocks could be part of the machine code.
 --
 -- If your machine code uses the stack, use ##c_proc##() instead of ##call##().
@@ -840,9 +840,9 @@ public integer check_calls = 1
 -- The length of the block is i bytes.
 --
 -- Parameters:
---              # ##block_addr##, an atom, the start address of the block
---              # ##block_len##, an integer, the size of the block.
---              # ##protection##, a constant integer, of the memory 
+--              # ##block_addr## : an atom, the start address of the block
+--              # ##block_len## : an integer, the size of the block.
+--              # ##protection## : a constant integer, of the memory 
 --                  protection constants found in machine.e, that describes
 --                  what access we have to the memory. 
 --
@@ -890,7 +890,7 @@ end procedure
 -- (the debug version of machine.e).
 --
 -- Parameters:
---              # ##block_addr##, an atom, the start address of the block
+--              # ##block_addr## : an atom, the start address of the block
 --
 -- Comments: 
 --
