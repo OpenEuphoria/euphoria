@@ -47,9 +47,9 @@ public constant
 --
 -- Comments:
 --     The operating system can hold a small number of key-hits in its keyboard buffer. 
---     get_key() will return the next one from the buffer, or -1 if the buffer is empty.
+--     ##get_key##() will return the next one from the buffer, or -1 if the buffer is empty.
 --
---     Run the key.bat program to see what key code is generated for each key on your 
+--     Run the ##key.bat## program to see what key code is generated for each key on your 
 --     keyboard.
 --
 -- Example 1:
@@ -67,7 +67,7 @@ public constant
 -- Set behavior of CTRL+C/CTRL+Break
 --
 -- Parameters:
--- 	# ##b##, a boolean: TRUE ( != 0 ) to enable the trapping of
+-- 	# ##b## : a boolean,  TRUE ( != 0 ) to enable the trapping of
 -- Ctrl-C/Ctrl-Break, FALSE ( 0 ) to disable it.
 --
 -- Comments:
@@ -80,7 +80,7 @@ public constant
 -- Initially your program can be terminated at any point where
 --  it tries to read from the keyboard. It could also be terminated
 --  by other input/output operations depending on options the user
---  has set in his **config.sys** file: consult an MS-DOS manual for the BREAK
+--  has set the **config.sys** file~: consult an MS-DOS manual for the BREAK
 --  command. For some types of program this sudden termination could leave
 --  things in a messy state and might result in loss of data.
 --  ##allow_break##(0) lets you avoid this situation.
@@ -94,7 +94,6 @@ public constant
 -- </eucode>
 --
 -- See Also:
---
 -- 		[[:check_break]]
 
 public procedure allow_break(boolean b)
@@ -107,11 +106,10 @@ end procedure
 --
 -- Returns:
 -- 		An **integer**, the number of times that CTRL+C or CTRL+Break have
---  been pressed since the last call to check_break(), or since the
+--  been pressed since the last call to ##check_break##(), or since the
 --  beginning of the program if this is the first call.
 --
 -- Comments:
---
 -- This is useful after you have called [[:allow_break]](0) which
 --  prevents CTRL+C or CTRL+Break from terminating your
 --  program. You can use ##check_break##() to find out if the user
@@ -134,7 +132,6 @@ end procedure
 -- </eucode>
 --
 -- See Also:
---
 -- 		[[:allow_break]]
 
 public function check_break()
@@ -150,8 +147,8 @@ end function
 --
 -- Comments:
 --     You could achieve the same result using [[:get_key]]() as in the example.
--- 	   However, on multi-tasking systems, that is, all except //DOS//, this "busy waiting"
---     would tend to slow the system down. wait_key() lets the operating system do other
+-- 	   However, on multi-tasking systems, (that is, all except //DOS//), this "busy waiting"
+--     would tend to slow the system down. ##wait_key##() lets the operating system do other
 --     useful work while your program is waiting for the user to press a key.
 --
 --     You could also use [[:getc]](0), assuming file number 0 was input from the keyboard, except
@@ -179,11 +176,11 @@ end function
 -- Display a prompt to the user and wait for any key.
 --
 -- Parameters:
--- 		# ##prompt## - Prompt to display, defaults to "Press Any Key to continue..."
---      # ##con## - Either 1 (stdout), or 2 (stderr). Defaults to 1.
+-- 		# ##prompt## : Prompt to display, defaults to "Press Any Key to continue..."
+--      # ##con## : Either 1 (stdout), or 2 (stderr). Defaults to 1.
 --
 -- Comments:
--- This wraps [[:wait_key]] by giving a clue to user that s/he should press a key, and 
+-- This wraps [[:wait_key]] by giving a clue that the user should press a key, and 
 -- perhaps do some other things as well.
 --
 -- Example 1:
@@ -197,7 +194,6 @@ end function
 -- </eucode>
 --
 -- See Also:
---
 -- 	[[:wait_key]]
 
 public procedure any_key(object prompt="Press Any Key to continue...", integer con = 1)
@@ -216,12 +212,12 @@ end procedure
 -- 		Prompts the user to enter a number, and returns only validated input.
 --
 -- Parameters:
---		# ##st## is a string of text that will be displayed on the screen.
---		# ##s## is a sequence of two values {lower, upper} which determine the range of values
+--		# ##st## : is a string of text that will be displayed on the screen.
+--		# ##s## : is a sequence of two values {lower, upper} which determine the range of values
 -- that the user may enter. s can be empty, {}, if there are no restrictions.
 --
 -- Returns:
--- 		An **atom** in the assigned range which the user typed in.
+-- 		An **atom**, in the assigned range which the user typed in.
 --
 -- Errors:
 -- 		If [[:puts]]() cannot display ##st## on standard output, or if the first or second element
@@ -232,7 +228,7 @@ end procedure
 --
 -- Comments:
 -- 		As long as the user enters a number that is less than lower or greater
--- than upper, he will be prompted again.
+-- than upper, the user will be prompted again.
 --
 --   If this routine is too simple for your needs, feel free to copy it and make your
 --   own more specialized version.
@@ -248,8 +244,8 @@ end procedure
 --   </eucode>
 --
 -- See Also:
---
 -- 	[[:puts]], [[:prompt_string]]
+--
 public function prompt_number(sequence prompt, sequence range)
 	object answer
 
@@ -279,7 +275,7 @@ end function
 -- Prompt the user to enter a string of text. 
 --
 -- Parameters:
---		# ##st## is a string that will be displayed on the screen.
+--		# ##st## : is a string that will be displayed on the screen.
 --
 -- Returns:
 -- 		A **sequence**, the string that the user typed in, stripped of any new-line character.
@@ -293,7 +289,6 @@ end function
 --     </eucode>
 --
 -- See Also:
---
 -- 	[[:prompt_number]]
 
 public function prompt_string(sequence prompt)
@@ -365,15 +360,12 @@ end ifdef
 -- <built-in> procedure clear_screen()
 --
 -- Description:
---
--- Clear the screen using the current background color (may be set by [[:bk_color]]()).
+-- Clear the screen using the current background color (may be set by [[:bk_color]]() ).
 --
 -- Comments: 
---
 -- This works in all text and pixel-graphics modes.
 --
 -- See Also: 
---
 -- [[:bk_color]], [[:graphics_mode]]
 --
 
@@ -381,14 +373,13 @@ end ifdef
 -- Get the value and attribute of the character at a given screen location.
 --
 -- Parameters:
--- 		# ##line##: the 1-base line number of the location
--- 		# ##column##: the 1-base column number of the location
+-- 		# ##line## : the 1-base line number of the location
+-- 		# ##column## : the 1-base column number of the location
 --
 -- Returns:
 -- 		A **sequence**, the pair ##{character, attributes}## for the specified location.
 --
 -- Comments:
---
 -- This function inspects a single character on the //active page//.
 --
 -- The attribute is an atom that contains the foreground and background color of the character, and possibly other information describing the appearance of the character on the screen.
@@ -426,9 +417,9 @@ end function
 -- Stores/displays a sequence of characters with attributes at a given location.
 --
 -- Parameters:
--- 		# ##line##: the 1-based line at which to start writing
--- 		# ##column##: the 1-based column at which to start writing
--- 		# ##char_attr##: a sequence of alternated characters and attributes.
+-- 		# ##line## : the 1-based line at which to start writing
+-- 		# ##column## : the 1-based column at which to start writing
+-- 		# ##char_attr## : a sequence of alternated characters and attributes.
 --
 -- Comments:
 --
@@ -440,8 +431,8 @@ end function
 -- Comments:
 --
 -- The attributes atom contains the foreground color, background color, and possibly other platform-dependent information controlling how the character is displayed on the screen.
--- If ##char_attr## has 0 length, nothing will be written to the screen. The characters are written to the //active page//.
--- It's faster to write several characters to the screen with a single call to put_screen_char() than it is to write one character at a time. 
+-- If ##char_attr## has ##0## length, nothing will be written to the screen. The characters are written to the //active page//.
+-- It's faster to write several characters to the screen with a single call to ##put_screen_char##() than it is to write one character at a time. 
 --  
 -- Example 1:
 -- <eucode>
@@ -478,8 +469,8 @@ end procedure
 -- Display a text image in any text mode.
 --
 -- Parameters:
--- 		# ##xy##: a pair of 1-based coordinates representing the point at which to start writing
---		# ##text##: a list of sequences of alternated character and attribute.
+-- 		# ##xy## : a pair of 1-based coordinates representing the point at which to start writing
+--		# ##text## : a list of sequences of alternated character and attribute.
 --
 -- Comments:
 -- This routine displays to the active text page, and only works in text modes.
@@ -555,11 +546,11 @@ end procedure
 -- Copy a rectangular block of text out of screen memory
 --
 -- Parameters:
--- 		# ##top_left##: the coordinates, given as a pair, of the upper left corner of the area to save.
--- 		# ##bottom_right##: the coordinates, given as a pair, of the lower right corner of the area to save.
+-- 		# ##top_left## : the coordinates, given as a pair, of the upper left corner of the area to save.
+-- 		# ##bottom_right## : the coordinates, given as a pair, of the lower right corner of the area to save.
 --
 -- Returns:
--- 		A **sequence** of {character, attribute, character, ...} lists.
+-- 		A **sequence**, of {character, attribute, character, ...} lists.
 -- Comments:
 --
 -- The returned value is appropriately handled by [[:display_text_image]].
@@ -622,7 +613,7 @@ end function
 -- Set the number of lines on a text-mode screen.
 --
 -- Parameters:
--- 		# ##rows##: an integer, the desired number of rows.
+-- 		# ##rows## : an integer, the desired number of rows.
 --
 -- Platforms:
 --		Not //Unix//
@@ -645,7 +636,7 @@ end function
 -- Select a style of cursor.
 --
 -- Parameters:
--- 		# ##style##: an integer defining the cursor shape.
+-- 		# ##style## : an integer defining the cursor shape.
 --
 -- Platform:
 --		Not //Unix//
@@ -658,16 +649,15 @@ end function
 -- cursor(BLOCK_CURSOR)
 -- </eucode>
 --
--- See Also:
---
---   [[:graphics_mode]], [[:text_rows]]
---
--- *Cursor Type Constants*
+-- Cursor Type Constants:
 -- * [[:NO_CURSOR]]
 -- * [[:UNDERLINE_CURSOR]]
 -- * [[:THICK_UNDERLINE_CURSOR]]
 -- * [[:HALF_BLOCK_CURSOR]]
 -- * [[:BLOCK_CURSOR]]
+--
+-- See Also:
+--   [[:graphics_mode]], [[:text_rows]]
 --
 
 public procedure cursor(integer style)
@@ -686,22 +676,22 @@ end procedure
 --     there, but an xterm window will disappear after Euphoria issues a "Press Enter" prompt 
 --     at the end of execution.
 --
---     On Unix-style systems, free_console() will set the terminal parameters back to normal,
+--     On Unix-style systems, ##free_console##() will set the terminal parameters back to normal,
 --     undoing the effect that curses has on the screen.
 --
---     In an xterm window, a call to free_console(), without any further
+--     In an xterm window, a call to ##free_console##(), without any further
 --     printing to the screen or reading from the keyboard, will eliminate the 
 --     "Press Enter" prompt that Euphoria normally issues at the end of execution.
 --
 --     After freeing the console window, you can create a new console window by printing 
---     something to the screen, or simply calling clear_screen(), position() or any other 
+--     something to the screen, or simply calling ##clear_screen##(), ##position##() or any other 
 --     routine that needs a console.
 --
 --     When you use the trace facility, or when your program has an error, Euphoria will 
 --     automatically create a console window to display trace information, error messages etc.
 --
 --     There's a WIN32 API routine, FreeConsole() that does something similar to 
---     free_console(). You should use free_console() instead, because it lets the interpreter know
+--     free_console(). You should use ##free_console##() instead, because it lets the interpreter know
 --     that there is no longer a console to write to or read from.
 --
 -- See Also:
@@ -719,9 +709,9 @@ include std/pretty.e
 -- Displays the supplied data on the console screen.
 --
 -- Parameters:
--- # ##pData## - Any object.
--- # ##args## - Optional arguments used to format the output. Default is 1.
--- # ##finalnl## - Optional. Determines if a new line is output after the data. Default is 1.
+-- # ##pData## : Any object.
+-- # ##args## : Optional arguments used to format the output. Default is 1.
+-- # ##finalnl## : Optional. Determines if a new line is output after the data. Default is 1.
 --
 -- Comments:
 -- * If ##pData## is an atom or integer, it is simply displayed.
@@ -736,7 +726,7 @@ include std/pretty.e
 -- want to avoid this, ensure that the last parameter is a zero.
 --
 -- Examples:
---<eucode>
+-- <eucode>
 -- show("Some plain text") -- Displays this string on the console plus a new line.
 -- show("Your answer:",0) -- Displays this string on the console without a new line.
 -- object res
@@ -744,7 +734,7 @@ include std/pretty.e
 -- show(res) -- Displays the contents of 'res' on the console.
 --
 -- show("The answer to %s was %s", {question[i], answer[x]}) -- formats these with a new line.
---</eucode>
+-- </eucode>
 --
 public procedure show( object pData, object args = 1, integer finalnl = 1)
 

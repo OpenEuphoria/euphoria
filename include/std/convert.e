@@ -22,10 +22,11 @@ atom mem  = machine_func(M_ALLOC,4)
 -- Converts an atom that represents an integer to a sequence of 4 bytes.
 --
 -- Parameters:
---		# ##x##, an atom, the value to convert.
+--		# ##x## : an atom, the value to convert.
 --
 -- Returns:
---		A **sequence** of 4 bytes, lowest significant byte first.
+--		A **sequence**, of 4 bytes, lowest significant byte first.
+--
 -- Comments:
 -- If the atom does not fit into a 32-bit integer, things may still work right:
 -- * If there is a fractional part, the first element in the returned value
@@ -81,7 +82,7 @@ end type
 -- Converts a sequence of at most 4 bytes into an atom.
 --
 -- Parameters:
---		# ##s##, the sequence to convert
+--		# ##s## : the sequence to convert
 -- Returns:
 --		An **atom**, the value of the concatenated bytes of ##s##.
 --
@@ -119,11 +120,11 @@ end function
 -- Extracts the lower bits from an integer.
 --
 -- Parameters:
---		# ##x##, the atom to convert
--- 		# ##nbits##, the number of bits requested.
+--		# ##x## : the atom to convert
+-- 		# ##nbits## : the number of bits requested.
 --
 -- Returns:
---		A **sequence** of length ##nbits##, made of 1's and 0's.
+--		A **sequence**, of length ##nbits##, made of 1's and 0's.
 --
 -- Comments:
 -- ##x## should have no fractional part. If it does, then the first "bit"
@@ -176,7 +177,7 @@ end function
 -- Converts a sequence of bits to an atom that has no fractional part.
 --
 -- Parameters:
--- 		# ##bits##, the sequence to convert.
+-- 		# ##bits## : the sequence to convert.
 --
 -- Returns:
 --		A positive **atom**, whose machine representation was given by ##bits##.
@@ -220,10 +221,10 @@ end function
 --**
 -- Convert an atom to a sequence of 8 bytes in IEEE 64-bit format
 -- Parameters:
--- 		# ##a##, the atom to convert:
+-- 		# ##a## : the atom to convert:
 --
 -- Returns:
---		A **sequence** of 8 bytes, which can be poked in memory to represent ##a##.
+--		A **sequence**, of 8 bytes, which can be poked in memory to represent ##a##.
 --
 -- Comments:
 -- All Euphoria atoms have values which can be represented as 64-bit IEEE
@@ -248,10 +249,10 @@ end function
 --**
 -- Convert an atom to a sequence of 4 bytes in IEEE 32-bit format
 -- Parameters:
--- 		# ##a##, the atom to convert:
+-- 		# ##a## : the atom to convert:
 --
 -- Returns:
---		A **sequence** of 4 bytes, which can be poked in memory to represent ##a##.
+--		A **sequence**, of 4 bytes, which can be poked in memory to represent ##a##.
 --
 -- Comments:
 --
@@ -284,8 +285,9 @@ end function
 
 --**
 -- Convert a sequence of 8 bytes in IEEE 64-bit format to an atom
+--
 -- Parameters:
--- 		# ##ieee64##, the sequence to convert:
+-- 		# ##ieee64## : the sequence to convert:
 --
 -- Returns:
 --		An **atom**, the same value as the FPU would see by peeking
@@ -315,7 +317,7 @@ end function
 --**
 -- Convert a sequence of 4 bytes in IEEE 32-bit format to an atom
 -- Parameters:
--- 		# ##ieee32##, the sequence to convert:
+-- 		# ##ieee32## : the sequence to convert:
 --
 -- Returns:
 --		An **atom**, the same value as the FPU would see by peeking
@@ -345,7 +347,7 @@ end function
 --**
 -- Convert a text representation of a hexadecimal number to an atom
 -- Parameters:
--- 		# ##text##, the text to convert.
+-- 		# ##text## : the text to convert.
 --
 -- Returns:
 --		An **atom**, the numeric equivalent to ##text##
@@ -450,10 +452,12 @@ integer decimal_mark = '.'
 
 --**
 -- Gets, and possibly sets, the decimal mark that [[:to_number]]() uses.
+--
 -- Parameters:
--- # ##new_mark##: An integer: Either a comma (,), a period (.) or any other integer.
+-- # ##new_mark## : An integer: Either a comma (,), a period (.) or any other integer.
+--
 -- Returns:
--- An integer: The current value, before ##new_mark## changes it.
+-- An **integer**, The current value, before ##new_mark## changes it.
 --
 -- Comments:
 -- * When ##new_mark## is a //period// it will cause ##to_number()## to interpret a dot ##(.)##
@@ -479,6 +483,7 @@ end function
 
 --**
 -- Converts the text into a number.
+--
 -- Parameters:
 -- # ##pText## : A string containing the text representation of a number.
 -- # ##pReturnBadPos## : An integer. 
@@ -494,9 +499,9 @@ end function
 --     there was no failure. 
 --
 -- Returns:
--- * an atom: If ##pReturnBadPos## is zero, the number represented by ##pText##.
---  If ##pText## contains invalid characters, zero is returned.
--- * a sequence: If ##pReturnBadPos## is non-zero. If ##pReturnBadPos## is -1
+-- * an **atom**, If ##pReturnBadPos## is zero, the number represented by ##pText##.
+--  If ##pText## contains invalid characters, zero is returned.\\
+-- * a **sequence**, If ##pReturnBadPos## is non-zero. If ##pReturnBadPos## is -1
 -- it returns a 1-element sequence containing the spot inside ##pText## where
 -- conversion stopped. Otherwise it returns a 2-element sequence
 -- containing the number represented by ##pText## and either 0 or the position in
@@ -743,13 +748,14 @@ end function
 
 --**
 -- Converts an object into a integer.
+--
 -- Parameters:
 -- # ##pData## : Any Euphoria object.
 -- # ##pError## : An integer. This is returned if ##pData## cannot be converted
 --                into an integer. If omitted, zero is returned.
 --
 -- Returns:
--- * an integer: Either the integer rendition of ##pData## or ##pError## if it has
+-- * an **integer**, either the integer rendition of ##pData## or ##pError## if it has
 -- no integer value.
 --
 -- Comments:

@@ -473,16 +473,14 @@ end procedure
 -- <built-in> function command_line()
 --
 -- Description:
--- A **sequence** of strings, where each string is a word from the command-line that started your program.
+-- A **sequence**, of strings, where each string is a word from the command-line that started your program.
 --
--- Comments:
---
--- The returned sequence contains the following information:
--- # The path to either the Euphoria executable, (eui, eui.exe, euid.exe euiw.exe) or to your bound
+-- Returns:
+-- # The ##path##, to either the Euphoria executable, (eui, eui.exe, euid.exe euiw.exe) or to your bound
 --   executable file.
--- # The next word is either the name of your Euphoria main file, or 
+-- # The ##next word##, is either the name of your Euphoria main file, or 
 -- (again) the path to your bound executable file.
--- # Any extra words typed by the user. You can use these words in your program.
+-- # Any ##extra words##, typed by the user. You can use these words in your program.
 --
 -- There are as many entries as words, plus the two mentioned above.
 --
@@ -493,11 +491,11 @@ end procedure
 --
 -- If you convert your program into an executable file, either by binding it, or translating it to C, 
 -- you will find that all command-line arguments remain the same, except for the first two, 
--- even though your user no longer types "ex" on the command-line (see examples below).
+-- even though your user no longer types "eui" on the command-line (see examples below).
 --  
 -- Example 1:
 -- <eucode>  
---  -- The user types:  ex myprog myfile.dat 12345 "the end"
+--  -- The user types:  eui myprog myfile.dat 12345 "the end"
 -- 
 -- cmd = command_line()
 -- 
@@ -511,7 +509,7 @@ end procedure
 --
 -- Example 2:  
 -- <eucode>  
---  -- Your program is bound with the name "myprog.exe"
+-- -- Your program is bound with the name "myprog.exe"
 -- -- and is stored in the directory c:\myfiles
 -- -- The user types:  myprog myfile.dat 12345 "the end"
 -- 
@@ -543,14 +541,18 @@ end procedure
 -- Retrieves the list of switches passed to the interpreter on the command line.
 --
 -- Returns:
--- A **sequence** of strings, each containing a word related to switches.
+-- A **sequence**, of strings, each containing a word related to switches.
 --
 -- Comments:
 --
 -- All switches are recorded in upper case.
 --
 -- Example 1:
--- euiw -d helLo will result in ##option_switches##() being ##{"-D","helLo"}##.
+-- <eucode>
+-- euiw -d helLo 
+-- -- will result in 
+-- -- option_switches() being {"-D","helLo"}
+-- </eucode>
 --
 -- See Also:
 -- [[:Command line switches]]
@@ -559,8 +561,8 @@ end procedure
 -- Show help message for the given opts.
 --
 -- Parameters:
--- # ##opts##: a sequence of options. See the [[:cmd_parse]] for details.
--- # ##add_help_rid##: an object. See the [[:cmd_parse]] for details.
+-- # ##opts## : a sequence of options. See the [[:cmd_parse]] for details.
+-- # ##add_help_rid## : an object. See the [[:cmd_parse]] for details.
 --
 -- Comments:
 -- The parameters ##opts## and ##add_help_rid## are identical to the same ones
@@ -692,13 +694,13 @@ end function
 -- Parse command line options, and optionally call procedures that relate to these options
 --
 -- Parameters:
--- # ##opts## - a sequence of valid option records: See Comments: section for details
--- # ##parse_options##: an optional sequence of parse options: See Parse Options section for details
--- # ##cmds## - an optional sequence of command line arguments. If omitted the output from 
---              command_line() is used.
+-- # ##opts## : a sequence of valid option records: See Comments: section for details
+-- # ##parse_options## : an optional sequence of parse options: See Parse Options section for details
+-- # ##cmds## : an optional sequence of command line arguments. If omitted the output from 
+--              ##command_line##() is used.
 --
 -- Returns:
--- A map containing the options set. The returned map has one special key named "extras"
+-- A **map**, containing the options set. The returned map has one special key named "extras"
 -- which are values passed on the command line that are not part of any option, for instance
 -- a list of files ##myprog -verbose file1.txt file2.txt##.  If any command element begins
 -- with an @ symbol then that file will be opened and its contents used to add to the command line.
@@ -707,17 +709,17 @@ end function
 -- ##parse_options## can be a sequence of options that will affect the parsing of
 -- the command line options. Options can be:
 --
--- # VALIDATE_ALL - The default. All options will be validated for all possible errors.
--- # NO_VALIDATION - Do not validate any parameter.
--- # NO_VALIDATION_AFTER_FIRST_EXTRA - Do not validate any parameter after the first extra
+-- # ##VALIDATE_ALL## ~-- The default. All options will be validated for all possible errors.
+-- # ##NO_VALIDATION## ~-- Do not validate any parameter.
+-- # ##NO_VALIDATION_AFTER_FIRST_EXTRA## ~-- Do not validate any parameter after the first extra
 --   was encountered. This is helpful for programs such as the Interpreter itself:
 --   ##eui -D TEST greet.ex -name John##. -D TEST should be validated but anything after
 --   "greet.ex" should not as it is meant for greet.ex to handle, not eui.
--- # HELP_RID - Specify a routine id to call in the event of a parse error (invalid option
+-- # ##HELP_RID## ~-- Specify a routine id to call in the event of a parse error (invalid option
 --   given, mandatory option not given, no parameter given for an option that requires a
 --   parameter, etc...).
--- # NO_AT_EXPANSION - Do not expand arguments that begin with '@.'  
--- # AT_EXPANSION - Expand arguments that begin with '@'.  The name that follows @ will be
+-- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'  
+-- # ##AT_EXPANSION## ~-- Expand arguments that begin with '@'.  The name that follows @ will be
 --   opened as a file, read, and each trimmed non-empty line that does not begin with a
 --   '#' character will be inserted as arguments in the command line. These lines
 --   replace the original '@' argument as if they had been entered on the original
@@ -800,11 +802,11 @@ end function
 -- otherwise it uses the short name. For options, you must supply a short name,
 -- a long name or both.
 --
--- If you want cmd_parse to call a user routine for the extra command line values,
+-- If you want ##cmd_parse##() to call a user routine for the extra command line values,
 -- you need to specify an Option Record that has neither a short name or a long name,
 -- in which case only the routine_id field is used.
 --
--- For more details on how the command line is being pre parsed, see [[:command_line]].
+-- For more details on how the command line is being pre-parsed, see [[:command_line]].
 --
 -- Example:
 -- <eucode>
@@ -1143,10 +1145,10 @@ end function
 -- before submitting it to the shell.
 --
 -- Parameters:
---   # ##cmds##: A sequence. Contains zero or more strings.
+--   # ##cmds## : A sequence. Contains zero or more strings.
 --
 -- Returns:
---	A **sequence** which is a text string. Each of the strings in ##cmds## is
+--	A **sequence**, which is a text string. Each of the strings in ##cmds## is
 --  quoted if they contain spaces, and then concatenated to form a single
 --  string.
 --
@@ -1183,10 +1185,10 @@ end function
 -- options.
 -- 
 -- Parameters:
---   # ##cmdline##: Command line sequence (string)
+--   # ##cmdline## : Command line sequence (string)
 -- 
 -- Returns:
---   A sequence of command line options
+--   A **sequence**, of command line options
 --	 
 -- Example 1:
 -- <eucode>
