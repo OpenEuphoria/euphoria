@@ -53,8 +53,8 @@ public enum
 -- Determine whether one or more characters are in a given character set.
 --
 -- Parameters:
--- 		# ##pVal##: an object, either a character or a string
---		# ##pCharSet##: a sequence, either a list of allowable characters, or a list of pairs representing allowable ranges.
+-- 		# ##pVal## : an object, either a character or a string
+--		# ##pCharSet## : a sequence, either a list of allowable characters, or a list of pairs representing allowable ranges.
 --
 -- Returns:
 --		An **integer**, 1 if all characters are allowed, else 0.
@@ -152,7 +152,7 @@ end procedure
 -- Gets the definition for each of the defined character sets.
 --
 -- Returns:
--- A **sequence** of pairs. The first element of each pair
+-- A **sequence**, of pairs. The first element of each pair
 -- is the character set id , eg. CS_Whitespace, and the second is the definition
 -- of that character set.
 --
@@ -183,7 +183,7 @@ end function
 -- Sets the definition for one or more defined character sets.
 --
 -- Parameters:
---		# ##pSets##: a sequence of zero or more character set definitions.
+--		# ##pSets## : a sequence of zero or more character set definitions.
 --
 -- Comments:
 -- ##pSets## must be a sequence of pairs. The first element of each pair

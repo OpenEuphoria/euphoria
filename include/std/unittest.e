@@ -48,7 +48,7 @@ namespace unittest
 -- In this example, we use the ##test_equal## function to record the result of
 -- a test. The first parameter is the name of the test, which can be anything
 -- and is displayed if the test fails. The second parameter is the expected
--- result - what we expect the function being tested to return. The third
+-- result ~-- what we expect the function being tested to return. The third
 -- parameter is the actual result returned by the function being tested. This
 -- is usually written as a call to the function itself.
 --
@@ -62,7 +62,7 @@ namespace unittest
 -- display each test run, regardless of whether it fails or not.
 --
 -- After running a series of tests, you can get a summary displayed by calling
--- the ##test_report()## procedure. To get a better feel for unit testing, have
+-- the ##test_report##() procedure. To get a better feel for unit testing, have
 -- a look at the provided test cases for the standard library in the //tests//
 -- directory.
 
@@ -159,16 +159,16 @@ end procedure
 -- Set the amount of information that is returned about passed and failed tests.
 --
 -- Parameters:
--- # ##verbosity##: an atom which takes predefined values for verbosity levels.
+-- # ##verbosity## : an atom which takes predefined values for verbosity levels.
 --
 -- Comments:
 -- The following values are allowable for ##verbosity##:
--- * TEST_QUIET = 0,
--- * TEST_SHOW_FAILED_ONLY = 1
--- * TEST_SHOW_ALL = 2
+-- * ##TEST_QUIET## ~--  0,
+-- * ##TEST_SHOW_FAILED_ONLY## ~--  1
+-- * ##TEST_SHOW_ALL## ~-- 2
 --
--- However, anything less than TEST_SHOW_FAILED_ONLY is treated as TEST_QUIET, and everything
--- above TEST_SHOW_ALL is treated as TEST_SHOW_ALL.
+-- However, anything less than ##TEST_SHOW_FAILED_ONLY## is treated as ##TEST_QUIET##, and everything
+-- above ##TEST_SHOW_ALL## is treated as ##TEST_SHOW_ALL##.
 --
 -- * At the lowest verbosity level, only the score is shown, ie the ratio passed tests/total tests.
 -- * At the medium level, in addition, failed tests display their name, the expected outcome and
@@ -191,7 +191,7 @@ end procedure
 -- Request the test report to pause before exiting.
 --
 -- Parameters:
---		# ##to_wait##: an integer, zero not to wait, nonzero to wait.
+--		# ##to_wait## : an integer, zero not to wait, nonzero to wait.
 --
 -- Comments:
 -- Depending on the environment, the test results may be invisible if
@@ -209,7 +209,7 @@ end procedure
 -- Request the test report to save run stats in "unittest.dat" before exiting.
 --
 -- Parameters:
---		# ##accumulate##: an integer, zero not to accumulate, nonzero to accumulate.
+--		# ##accumulate## : an integer, zero not to accumulate, nonzero to accumulate.
 --
 -- Comments:
 -- The file "unittest.dat" is appended to with {t,f}\\
@@ -226,7 +226,7 @@ end procedure
 -- Set behavior on test failure, and return previous value.
 --
 -- Parameters:
---		# ##abort_test##: an integer, the new value for this setting.
+--		# ##abort_test## : an integer, the new value for this setting.
 --
 -- Returns:
 -- 		An **integer**, the previous value for the setting.
@@ -316,9 +316,9 @@ end procedure
 -- Records whether a test passes by comparing two values.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##expected##: an object, the expected outcome of some action
---		# ##outcome##: an object, some actual value that should equal the reference ##expected##.
+--		# ##name## : a string, the name of the test
+--		# ##expected## : an object, the expected outcome of some action
+--		# ##outcome## : an object, some actual value that should equal the reference ##expected##.
 --
 -- Comments:
 --
@@ -363,9 +363,9 @@ end procedure
 -- Records whether a test passes by comparing two values.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##expected##: an object, the expected outcome of some action
---		# ##outcome##: an object, some actual value that should equal the reference ##expected##.
+--		# ##name## : a string, the name of the test
+--		# ##expected## : an object, the expected outcome of some action
+--		# ##outcome## : an object, some actual value that should equal the reference ##expected##.
 --
 -- Comments:
 -- * For atoms, a fuzz of 1e-9 is used to assess equality.
@@ -396,8 +396,8 @@ end procedure
 -- Records whether a test passes by comparing two values.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##outcome##: an object, some actual value that should not be zero.
+--		# ##name## : a string, the name of the test
+--		# ##outcome## : an object, some actual value that should not be zero.
 --
 -- Comments:
 -- This assumes an expected value different from 0. No fuzz is applied when checking whether an
@@ -420,8 +420,8 @@ end procedure
 -- Records whether a test passes by comparing two values.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##outcome##: an object, some actual value that should be zero
+--		# ##name## : a string, the name of the test
+--		# ##outcome## : an object, some actual value that should be zero
 --
 -- Comments:
 -- This assumes an expected value of 0. No fuzz is applied when checking whether an atom is zero
@@ -444,7 +444,7 @@ end procedure
 -- Records that a test failed.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
+--		# ##name## : a string, the name of the test
 --
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_pass]]
@@ -457,7 +457,7 @@ end procedure
 -- Records that a test passed.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
+--		# ##name## : a string, the name of the test
 --
 -- See Also:
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_fail]]

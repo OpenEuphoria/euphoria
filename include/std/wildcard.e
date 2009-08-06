@@ -45,8 +45,8 @@ constant END_MARKER = -1
 -- Determine whether a string matches a pattern. The pattern may contain * and ? wildcards.
 --
 -- Parameters:
---		# ##pattern##: a string, the pattern to match
---		# ##string##: the string to be matched against
+--		# ##pattern## : a string, the pattern to match
+--		# ##string## : the string to be matched against
 --
 -- Returns 
 --		An **integer**, TRUE if ##string## matches ##pattern##, else FALSE.
@@ -138,8 +138,8 @@ end function
 -- Determine whether a file name matches a wildcard pattern.
 --
 -- Parameters:
---		# ##pattern##: a string, the pattern to match
---		# ##filename##: the string to be matched against
+--		# ##pattern## : a string, the pattern to match
+--		# ##filename## : the string to be matched against
 --
 -- Returns 
 --		An **integer**, TRUE if ##filename## matches ##pattern##, else FALSE.

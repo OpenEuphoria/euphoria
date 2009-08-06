@@ -1056,7 +1056,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ?cosh(LN2) -- prints out 1.25
+-- ? cosh(LN2) -- prints out 1.25
 -- </eucode>
 -- See Also:
 -- [[:cos]], [[:sinh]], [[:arccosh]]
@@ -1104,7 +1104,7 @@ end function
 --
 -- The hyperbolic tangent takes values from -1 to +1.
 --
--- ##tanh##() is he ratio ##sinh() / cosh()##. Compare with ordinary trigonometry.
+-- ##tanh##() is the ratio ##sinh() / cosh()##. Compare with ordinary trigonometry.
 --
 -- Example 1:
 -- <eucode>
@@ -1511,8 +1511,8 @@ end function
 -- Left shift moves a left by b bits
 --
 -- Parameters
---   # ##a## - value to be moved
---   # ##b## - number of bits to be moved left by
+--   # ##a## : value to be moved
+--   # ##b## : number of bits to be moved left by
 --
 -- Example 1:
 -- <eucode>

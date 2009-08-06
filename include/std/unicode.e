@@ -61,13 +61,14 @@ end type
 -- Encode wstring to astring using utf-8
 --
 -- Parameters:
---		# ##src##: the wide character string to convert.
+--		# ##src## : the wide character string to convert.
 --
 -- Returns:
---		A **sequence** of characters in the 0.255 range.
+--		A **sequence**, of characters in the 0.255 range.
 --
 -- See Also:
 -- [[:utf8_decode]]
+--
 public function utf8_encode(wstring src)
 	sequence tmp
 	integer pos
@@ -103,10 +104,10 @@ end function
 -- Decode astring in utf-8 to wstring
 --
 -- Parameters:
---		# ##src##: the ASCII string to convert.
+--		# ##src## : the ASCII string to convert.
 --
 -- Returns:
---		A **sequence** of wide characters in the 0.65535 range.
+--		A **sequence**, of wide characters in the 0.65535 range.
 --
 -- See Also:
 -- [[:utf8_encode]]
@@ -152,13 +153,14 @@ end function
 -- Create a C-style null-terminated wchar_t string in memory
 --
 -- Parameters:
---   # ##s##: a unicode (utf16) string
+--   # ##s## : a unicode (utf16) string
 --
 -- Returns:
 --   An **atom**, the address of the allocated string, or 0 on failure.
 --
 -- See Also:
 -- [[:allocate_string]]
+--
 public function allocate_wstring(wstring s)
 		atom mem
 
@@ -175,10 +177,10 @@ end function
 -- Return a unicode (utf16) string that are stored at machine address a.
 --
 -- Parameters:
---   # ##addr##: an atom, the address of the string in memory
+--   # ##addr## : an atom, the address of the string in memory
 --
 -- Returns:
---   The string at the memory position.  The terminator is the null word (two bytes equal to 0).
+--   The **string**, at the memory position.  The terminator is the null word (two bytes equal to 0).
 --
 -- See Also:
 -- [[:peek_string]]
