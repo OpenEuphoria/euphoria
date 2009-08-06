@@ -13,7 +13,11 @@
 -- which uses the same Euphoria-coded front-end, combined 
 -- with a high-performance back-end carefully hand-coded in C.
 
-without type_check -- FASTER
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 
 

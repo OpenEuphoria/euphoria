@@ -1,5 +1,12 @@
+-- (c) Copyright - See License.txt
 --****
 -- == c_out.e: Translator Routines for outputting C code
+
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include global.e
 
@@ -31,6 +38,16 @@ export constant
 	-- could be unknown or anything
 	TYPE_OBJECT = 16  
 
+export constant
+	TYPES_DS = {TYPE_DOUBLE, TYPE_SEQUENCE},
+	TYPES_AO = {TYPE_ATOM, TYPE_OBJECT},
+	TYPES_IAO = {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT},
+	TYPES_SO = {TYPE_SEQUENCE, TYPE_OBJECT},
+	TYPES_IAD = {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE},
+	TYPES_AS = {TYPE_ATOM, TYPE_SEQUENCE},
+	TYPES_IS = {TYPE_INTEGER, TYPE_SEQUENCE},
+	$
+	
 export boolean emit_c_output = FALSE
 export file c_code=-1, c_h
 export integer main_name_num = 0, init_name_num = 0

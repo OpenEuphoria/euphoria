@@ -1,5 +1,11 @@
+-- (c) Copyright - See License.txt
 --****
 -- == error.e: Compile-time Error Handling
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include std/io.e
 include std/text.e

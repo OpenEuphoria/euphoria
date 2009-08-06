@@ -1,3 +1,4 @@
+-- (c) Copyright - See License.txt
 --****
 -- == findjmp.ex: Find jumptab from be_execute.obj
 --

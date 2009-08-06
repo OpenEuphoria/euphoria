@@ -1,3 +1,4 @@
+-- (c) Copyright - See License.txt
 -- writes html dox
 
 include std/error.e

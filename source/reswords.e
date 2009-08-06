@@ -1,6 +1,11 @@
 -- (c) Copyright - See License.txt
 --
 -- IL opcodes, scanner tokens etc.
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 export constant
 	LESS                = 1,  -- keep relops consecutive LESS..GREATER, NOT

@@ -6,6 +6,11 @@
 --                                                                        -- 
 ----------------------------------------------------------------------------
 
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 include euphoria/info.e
 
 include std/text.e
@@ -23,7 +28,6 @@ include error.e
 include c_out.e
 include msgtext.e
 
-with type_check
 
 --**
 -- number of Translator passes
@@ -151,20 +155,27 @@ end procedure
 
 --**
 -- Return the local min/max value of an integer, based on BB info.
+constant BB_def_values = {NOVALUE, NOVALUE}
 export function BB_var_obj(integer var)
-	sequence fail
+	object bbi
 	
-	fail = {NOVALUE, NOVALUE}
 	for i = length(BB_info) to 1 by -1 do
-		if BB_info[i][BB_VAR] = var and
-		   SymTab[BB_info[i][BB_VAR]][S_MODE] = M_NORMAL then
-				if BB_info[i][BB_TYPE] != TYPE_INTEGER then
-					return fail
-				end if
-				return BB_info[i][BB_OBJ]
+		bbi = BB_info[i]
+		if bbi[BB_VAR] != var then
+			continue
 		end if
+
+		if SymTab[var][S_MODE] != M_NORMAL then
+			continue
+		end if
+		
+		if bbi[BB_TYPE] != TYPE_INTEGER then
+			exit
+		end if
+		
+		return bbi[BB_OBJ]
 	end for
-	return fail
+	return BB_def_values
 end function
 
 --**
@@ -173,10 +184,13 @@ export function BB_var_type(integer var)
 	for i = length(BB_info) to 1 by -1 do
 		if BB_info[i][BB_VAR] = var and
 		   SymTab[BB_info[i][BB_VAR]][S_MODE] = M_NORMAL then
+			ifdef DEBUG then
 			if BB_info[i][BB_TYPE] < 0 or
 			   BB_info[i][BB_TYPE] > TYPE_OBJECT then
 				InternalErr(256)
 			end if
+			end ifdef
+			
 			if BB_info[i][BB_TYPE] = TYPE_NULL then  -- var has only been read
 				return TYPE_OBJECT
 			else
@@ -193,9 +207,12 @@ export function GType(symtab_index s)
 	integer t, local_t
 	
 	t = SymTab[s][S_GTYPE]
+	ifdef DEBUG then
 	if t < 0 or t > TYPE_OBJECT then
 		InternalErr(257)
 	end if
+	end ifdef
+	
 	if SymTab[s][S_MODE] != M_NORMAL then
 		return t
 	end if
@@ -234,41 +251,50 @@ end function
 --**
 -- the value of an integer constant or variable 
 export function ObjValue(symtab_index s) 
-	sequence t, local_t
+	sequence local_t
+	object st
+	atom tmin
+	atom tmax
 
-	t = {SymTab[s][S_OBJ_MIN], SymTab[s][S_OBJ_MAX]}
+	st = SymTab[s]
+	tmin = st[S_OBJ_MIN]
+	tmax = st[S_OBJ_MAX]
 	
-	if t[MIN] != t[MAX] then
-		t[MIN] = NOVALUE
+	if tmin != tmax then
+		tmin = NOVALUE
 	end if
-	if SymTab[s][S_MODE] != M_NORMAL then
-		return t[MIN]
+	if st[S_MODE] != M_NORMAL then
+		return tmin
 	end if
 	
 	-- check local BB info for vars only 
 	local_t = BB_var_obj(s)
-	if local_t[MIN] = NOVALUE or 
-	   local_t[MIN] != local_t[MAX] then
-		return t[MIN]
-	else
-		return local_t[MIN]
+	if local_t[MIN] = NOVALUE then
+		return tmin
 	end if
+	
+	if local_t[MIN] != local_t[MAX] then
+		return tmin
+	end if
+	
+	return local_t[MIN]
+	
 end function
 
-export function TypeIs(integer x, object types) 
-	if atom(types) then
-		return GType(x) = types
-	else
-		return find(GType(x), types)
-	end if
+export function TypeIs(integer x, integer typei) 
+	return GType(x) = typei
 end function
 
-export function TypeIsNot(integer x, object types) 
-	if atom(types) then
-		return GType(x) != types
-	else
-		return not find(GType(x), types)
-	end if
+export function TypeIsIn(integer x, sequence types) 
+	return find(GType(x), types)
+end function
+
+export function TypeIsNot(integer x, integer typei) 
+	return GType(x) != typei
+end function
+
+export function TypeIsNotIn(integer x, sequence types) 
+	return not find(GType(x), types)
 end function
 
 --**
@@ -319,7 +345,7 @@ export function or_type(integer t1, integer t2)
 	
 	else
 		InternalErr(258, {t1, t2})
-			
+	
 	end if
 end function
 

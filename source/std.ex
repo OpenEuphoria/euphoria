@@ -1,3 +1,4 @@
+-- (c) Copyright - See License.txt
 -- std.ex: Tool for helping with standard library migration.
 --
 -- Useful for finding where symbols may have changed from

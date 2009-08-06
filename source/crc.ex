@@ -36,6 +36,7 @@ constant src_files = {
 "c_decl.e",
 "opnames.e",
 "traninit.e",
+"msgtext.e",
 -- back end
 "be_main.c",
 "be_symtab.c",

@@ -1,3 +1,10 @@
+-- (c) Copyright - See License.txt
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
+
 include std/map.e as map
 
 include common.e

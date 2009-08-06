@@ -3,6 +3,12 @@
 -- Common definitions for backend.ex and other *.ex.
 -- backend.ex does not include global.e
 
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
+
 include std/os.e
 public include std/types.e
 

@@ -1,5 +1,12 @@
+-- (c) Copyright - See License.txt
 --****
 -- == cominit.e: Common command line initialization
+
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include euphoria/info.e
 
@@ -52,8 +59,9 @@ constant COMMON_OPTIONS = {
 	{ "wf", 0, "Write all warnings to the given file instead of STDOUT",
 				{ NO_CASE, HAS_PARAMETER, "filename" } },
 	{ "x", 0, "Defines warning level by exclusion",
-				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
-	$
+				{ NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } }
+-- 				,
+-- 	$
 }
 
 sequence options = {}

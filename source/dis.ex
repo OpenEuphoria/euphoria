@@ -1,3 +1,4 @@
+-- (c) Copyright - See License.txt
 -- Outputs IL code and symbol table
 -- To generate doxygen-like html output use option:
 --   --html
@@ -9,7 +10,11 @@
 -- { "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") }
 -- default output dir: eudox
 -- stdlib suppressed by default
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
 without type_check
+end ifdef
 include mode.e
 sequence cmd = command_line()
 if find( "-t", cmd ) then

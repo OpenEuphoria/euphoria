@@ -1,5 +1,11 @@
+-- (c) Copyright - See License.txt
 --****
 -- == intinit.e: Common command line initialization of interpreter
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include std/cmdline.e
 include std/text.e

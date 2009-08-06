@@ -2,6 +2,11 @@
 --
 -- Forward reference resolution
 namespace fwd
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include global.e
 include parser.e
@@ -355,10 +360,13 @@ procedure patch_forward_case( token tok, integer ref )
 	if not cx then
 		cx = find( { -ref }, case_values )
 	end if
-	
+
+	ifdef DEBUG then	
 	if not cx then
 		InternalErr( 261, { fr[FR_NAME] } )
 	end if
+	end ifdef
+	
 	
 	integer negative = 0
 	if case_values[cx][1] < 0 then

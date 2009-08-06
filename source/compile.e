@@ -9,6 +9,12 @@
 -- is more precise and efficient. It doesn't actually emit the C code
 -- until the final pass.
 
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
+
 include std/filesys.e
 include std/io.e
 include std/sort.e
@@ -149,21 +155,35 @@ end function
 function BB_temp_type(integer var)
 -- return the local type for a temp *name*, based on BB info */
 	integer t, tn
+	object bbi
+	object st
 
 	tn = SymTab[var][S_TEMP_NAME]
 	for i = length(BB_info) to 1 by -1 do
-		if SymTab[BB_info[i][BB_VAR]][S_MODE] = M_TEMP and
-		   SymTab[BB_info[i][BB_VAR]][S_TEMP_NAME] = tn then
-			t = BB_info[i][BB_TYPE]
-			if t <= 0 or t > TYPE_OBJECT then
-				InternalErr(250)
-			end if
-			return t
+		bbi = BB_info[i]
+		st = SymTab[bbi[BB_VAR]]
+		if st[S_MODE] != M_TEMP then
+			continue
 		end if
+		
+		if st[S_TEMP_NAME] != tn then
+			continue
+		end if
+		
+		t = bbi[BB_TYPE]
+		
+		ifdef DEBUG then
+		if t <= 0 or t > TYPE_OBJECT then
+			InternalErr(250)
+		end if
+		end ifdef
+		
+		return t
+		
 	end for
 	-- no info in BB, so fall back to global temp name info
 	return or_type(TYPE_INTEGER,   -- for initialization = 0
-				   temp_name_type[SymTab[var][S_TEMP_NAME]][T_GTYPE])
+				   temp_name_type[tn][T_GTYPE])
 end function
 
 function BB_temp_elem(integer var)
@@ -178,9 +198,13 @@ function BB_temp_elem(integer var)
 			if t = TYPE_NULL then
 				t = TYPE_OBJECT
 			end if
+			
+			ifdef DEBUG then
 			if t <= 0 or t > TYPE_OBJECT then
 				InternalErr(251)
 			end if
+			end ifdef
+			
 			return t
 		end if
 	end for
@@ -196,9 +220,13 @@ function BB_var_elem(integer var)
 		if SymTab[BB_info[i][BB_VAR]][S_MODE] = M_NORMAL and
 			BB_info[i][BB_VAR] = var then
 			t = BB_info[i][BB_ELEM]
+			
+			ifdef DEBUG then
 			if t < 0 or t > TYPE_OBJECT then
 				InternalErr(252)
 			end if
+			end ifdef
+			
 			if t = TYPE_NULL then   -- var has only been read
 				return TYPE_OBJECT
 			else
@@ -231,9 +259,13 @@ function SeqElem(integer x)
 
 	s = x
 	t = SymTab[s][S_SEQ_ELEM]
+	
+	ifdef DEBUG then
 	if t < 0 or t > TYPE_OBJECT then
 		InternalErr(253)
 	end if
+	end ifdef
+	
 	if SymTab[s][S_MODE] != M_NORMAL then
 		return t
 	end if
@@ -466,7 +498,7 @@ procedure CRef(integer v)
 	if TypeIs(v, TYPE_INTEGER) then
 		return
 	end if
-	if TypeIs(v, {TYPE_DOUBLE, TYPE_SEQUENCE}) then
+	if TypeIsIn(v, TYPES_DS) then
 		c_stmt0("RefDS(")
 	else
 		c_stmt0("Ref(") -- TYPE_ATOM, TYPE_OBJECT
@@ -482,7 +514,7 @@ procedure CRefn(integer v, integer n)
 		return
 	end if
 
-	if TypeIs(v, {TYPE_DOUBLE, TYPE_SEQUENCE}) then
+	if TypeIsIn(v, TYPES_DS) then
 		c_stmt0("RefDSn(")
 	else
 		c_stmt0("Refn(") -- TYPE_ATOM, TYPE_OBJECT
@@ -659,7 +691,7 @@ procedure CDeRef(integer v)
 			c_stmt0("DeRef1(")  -- less machine code
 
 		else
-			if TypeIs(v, {TYPE_DOUBLE, TYPE_SEQUENCE}) and
+			if TypeIsIn(v, TYPES_DS) and
 				(IsParameter(v) or BB_exist(v)) then
 				-- safe: parameters are always initialized
 				if elem_type = TYPE_INTEGER then
@@ -696,12 +728,12 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		-- test for integer
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIsNot(Code[pc+1], {TYPE_DOUBLE, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_DS) then
 		-- handle integer
 		c_stmt("@ = ", Code[pc+2])
 		c_puts(op_int)
@@ -709,7 +741,7 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 		c_stmt("(@);\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("else\n")
 	end if
 
@@ -1466,16 +1498,16 @@ procedure unary_div(integer pc, integer target_type, sequence intcode,
 -- unary divide ops
 	CSaveStr("_0", Code[pc+3], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		-- handle integer
 		c_stmt(intcode, {Code[pc+3], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -1485,7 +1517,7 @@ procedure unary_div(integer pc, integer target_type, sequence intcode,
 		c_stmt(gencode, {Code[pc+3], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -1498,11 +1530,11 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 -- handle a few special unary ops
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		-- handle integer
 		if Code[pc] = UMINUS then
 			if (target_type = TYPE_INTEGER or
@@ -1521,7 +1553,7 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 		c_stmt(intcode, {Code[pc+2], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -1531,7 +1563,7 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 		c_stmt(gencode, {Code[pc+2], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -1737,7 +1769,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		return pc + 4
 
 	elsif TypeIs(Code[pc+2], TYPE_INTEGER) and
-		  TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+		  TypeIsIn(Code[pc+1], TYPES_AO) then
 		-- uncertain about Code[pc+1] only
 		check = 1
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
@@ -1763,7 +1795,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		close_brace = TRUE
 
 	elsif TypeIs(Code[pc+1], TYPE_INTEGER) and
-		  TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+		  TypeIsIn(Code[pc+2], TYPES_AO) then
 		-- uncertain about Code[pc+2] only
 		check = 2
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
@@ -1786,8 +1818,8 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		c_stmt0("else {\n")
 		close_brace = TRUE
 
-	elsif TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) and
-		  TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+	elsif TypeIsIn(Code[pc+1], TYPES_AO) and
+		  TypeIsIn(Code[pc+2], TYPES_AO) then
 		-- uncertain about both types being TYPE_INTEGER or not
 		c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)) {\n", {Code[pc+1], Code[pc+2]})
 
@@ -1813,18 +1845,18 @@ function binary_op(integer pc, integer iii, sequence target_val,
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) or
 	   TypeIsNot(Code[pc+2], TYPE_INTEGER) then
 		if Code[pc] != FLOOR_DIV and
-		   TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-		   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+		   TypeIsNotIn(Code[pc+1], TYPES_SO) and
+		   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 			-- both are known to be atoms and integer:integer
 			-- possibility has been handled - do it in-line
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+			   TypeIsIn(Code[pc+1], TYPES_AO) then
 				c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 			end if
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+			   TypeIsIn(Code[pc+1], TYPES_IAO) then
 				if length(dblfn) > 2 then
 					c_stmt("temp_d.dbl = (double)@;\n", Code[pc+1])
 					c_stmt("@ = ", Code[pc+3])
@@ -1846,19 +1878,19 @@ function binary_op(integer pc, integer iii, sequence target_val,
 			end if
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+			   TypeIsIn(Code[pc+1], TYPES_AO) then
 				c_stmt0("}\n")
 				c_stmt0("else {\n")
 			end if
 
 			if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
 				if check != 2 and
-				   TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+				   TypeIsIn(Code[pc+2], TYPES_AO) then
 					c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
 				end if
 
 				if check != 2 and
-				   TypeIs(Code[pc+2], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+				   TypeIsIn(Code[pc+2], TYPES_IAO) then
 					if length(dblfn) > 2 then
 						c_stmt("temp_d.dbl = (double)@;\n", Code[pc+2])
 						c_stmt("@ = ", Code[pc+3])
@@ -1880,7 +1912,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 				end if
 
 				if check != 2 and
-				   TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+				   TypeIsIn(Code[pc+2], TYPES_AO) then
 					c_stmt0("}\n")
 					c_stmt0("else\n")
 				end if
@@ -1908,7 +1940,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 			end if
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+			   TypeIsIn(Code[pc+1], TYPES_AO) then
 				c_stmt0("}\n")
 			end if
 
@@ -2047,6 +2079,8 @@ procedure opPROC()
 -- generate code for a procedure/function call
 	symtab_index sub
 	integer n, t, p
+	object stnext
+	integer eltype
 
 	sub = Code[pc+1]
 
@@ -2055,43 +2089,48 @@ procedure opPROC()
 	-- update argument types
 	p = SymTab[sub][S_NEXT]
 	for i = 1 to SymTab[sub][S_NUM_ARGS] do
+		stnext = SymTab[p]
 		t = Code[pc+1+i]
 		CRef(t)
 		SymTab[t][S_ONE_REF] = FALSE
-		SymTab[p][S_ARG_TYPE_NEW] = or_type(SymTab[p][S_ARG_TYPE_NEW], GType(t))
+		stnext[S_ARG_TYPE_NEW] = or_type(stnext[S_ARG_TYPE_NEW], GType(t))
 
-		if TypeIs(t, {TYPE_SEQUENCE, TYPE_OBJECT}) then
-			SymTab[p][S_ARG_MIN_NEW] = NOVALUE
-			SymTab[p][S_ARG_SEQ_ELEM_NEW] =
-								or_type(SymTab[p][S_ARG_SEQ_ELEM_NEW], SeqElem(t))
-			if SymTab[p][S_ARG_SEQ_LEN_NEW] = -NOVALUE then
-				SymTab[p][S_ARG_SEQ_LEN_NEW] = SeqLen(t)
-			elsif SymTab[p][S_ARG_SEQ_LEN_NEW] != SeqLen(t) then
-				SymTab[p][S_ARG_SEQ_LEN_NEW] = NOVALUE
+		if TypeIsIn(t, TYPES_SO) then
+			stnext[S_ARG_MIN_NEW] = NOVALUE
+			eltype = SeqElem(t)
+			if eltype != stnext[S_ARG_SEQ_ELEM_NEW] then
+				eltype = or_type(stnext[S_ARG_SEQ_ELEM_NEW], eltype)
+				stnext[S_ARG_SEQ_ELEM_NEW] = eltype
+			end if
+			 
+			if stnext[S_ARG_SEQ_LEN_NEW] = -NOVALUE then
+				stnext[S_ARG_SEQ_LEN_NEW] = SeqLen(t)
+			elsif stnext[S_ARG_SEQ_LEN_NEW] != SeqLen(t) then
+				stnext[S_ARG_SEQ_LEN_NEW] = NOVALUE
 			end if
 
 		elsif TypeIs(t, TYPE_INTEGER) then
 			target = ObjMinMax(t)
-			if SymTab[p][S_ARG_MIN_NEW] = -NOVALUE then
+			if stnext[S_ARG_MIN_NEW] = -NOVALUE then
 				-- first value in this pass
-				SymTab[p][S_ARG_MIN_NEW] = target[MIN]
-				SymTab[p][S_ARG_MAX_NEW] = target[MAX]
+				stnext[S_ARG_MIN_NEW] = target[MIN]
+				stnext[S_ARG_MAX_NEW] = target[MAX]
 
-			elsif SymTab[p][S_ARG_MIN_NEW] != NOVALUE then
+			elsif stnext[S_ARG_MIN_NEW] != NOVALUE then
 				-- widen the range
-				if target[MIN] < SymTab[p][S_ARG_MIN_NEW] then
-					SymTab[p][S_ARG_MIN_NEW] = target[MIN]
+				if target[MIN] < stnext[S_ARG_MIN_NEW] then
+					stnext[S_ARG_MIN_NEW] = target[MIN]
 				end if
-				if target[MAX] > SymTab[p][S_ARG_MAX_NEW] then
-					SymTab[p][S_ARG_MAX_NEW] = target[MAX]
+				if target[MAX] > stnext[S_ARG_MAX_NEW] then
+					stnext[S_ARG_MAX_NEW] = target[MAX]
 				end if
 			end if
 
 		else
-			SymTab[p][S_ARG_MIN_NEW] = NOVALUE
+			stnext[S_ARG_MIN_NEW] = NOVALUE
 
 		end if
-
+		SymTab[p] = stnext
 		p = SymTab[p][S_NEXT]
 	end for
 
@@ -2641,7 +2680,7 @@ procedure opLENGTH()
 -- LENGTH / PLENGTH
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 	if opcode = LENGTH and
-	   TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	   TypeIsIn(Code[pc+1], TYPES_SO) then
 		if SeqLen(Code[pc+1]) != NOVALUE then
 			-- we know the length
 			c_stmt("@ = ", Code[pc+2])
@@ -2684,7 +2723,7 @@ procedure opASSIGN()
 	
 	c_stmt("@ = @;\n", {targetsym, sourcesym})
 
-	if TypeIs(sourcesym, {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(sourcesym, TYPES_SO) then
 		target[MIN] = SeqLen(Code[pc+1])
 		SetBBType(targetsym, GType(sourcesym), target, SeqElem(sourcesym),
 			HasDelete( sourcesym ) )
@@ -2831,13 +2870,13 @@ procedure opPLUS1()
 		target_type = TYPE_ATOM
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
 	np = pc + 4
 	target_val = novalue
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if TypeIs(Code[pc+1], TYPE_INTEGER) then
 			target_val = ObjMinMax(Code[pc+1])
 		end if
@@ -2886,7 +2925,7 @@ procedure opPLUS1()
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else\n")
 	end if
@@ -3125,7 +3164,7 @@ end procedure
 
 procedure opIS_AN_ATOM()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAD) then
 		c_stmt("@ = 1;\n", Code[pc+2])
 	elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		c_stmt("@ = 0;\n", Code[pc+2])
@@ -3141,7 +3180,7 @@ end procedure
 
 procedure opIS_A_SEQUENCE()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAD) then
 		c_stmt("@ = 0;\n", Code[pc+2])
 	elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		c_stmt("@ = 1;\n", Code[pc+2])
@@ -3209,7 +3248,7 @@ end procedure
 		-- more unary ops - better optimization
 
 procedure opNOT_IFW()
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
@@ -3231,13 +3270,13 @@ procedure opNOT_IFW()
 			return
 		end if
 
-	elsif TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	elsif TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (@ != 0)\n", Code[pc+1])
 		Goto(Code[pc+2])
 
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -3247,7 +3286,7 @@ procedure opNOT_IFW()
 		Goto(Code[pc+2])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -3257,7 +3296,7 @@ end procedure
 procedure opNOT()
 	gencode = "@ = unary_op(NOT, @);\n"
 	intcode = "@ = (@ == 0);\n"
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
 		target_type = GType(Code[pc+1])
 	else
 		target_type = TYPE_INTEGER
@@ -3289,7 +3328,7 @@ end procedure
 procedure opRAND()
 	gencode = "@ = unary_op(RAND, @);\n"
 	intcode = "@ = good_rand() % ((unsigned)@) + 1;\n"
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
 		target_type = GType(Code[pc+1])
 	else
 		target_type = TYPE_INTEGER
@@ -3325,7 +3364,7 @@ procedure opFLOOR_DIV2()
 			  "@1 = unary_op(FLOOR, _1);\n" &
 			  "DeRef(_1);\n"
 	intcode = "@ = @ >> 1;\n"
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
 		target_type = GType(Code[pc+1])
 	elsif GType(Code[pc+1]) = TYPE_INTEGER then
 		target_type = TYPE_INTEGER
@@ -3596,8 +3635,8 @@ procedure opLESS()
 	gencode = "@ = binary_op(LESS, @, @);\n"
 	intcode = "@ = (@ < @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
 	iii = TRUE
@@ -3610,8 +3649,8 @@ procedure opGREATER()
 	gencode = "@ = binary_op(GREATER, @, @);\n"
 	intcode = "@ = (@ > @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
 	iii = TRUE
@@ -3624,8 +3663,8 @@ procedure opEQUALS()
 	gencode = "@ = binary_op(EQUALS, @, @);\n"
 	intcode = "@ = (@ == @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
 	iii = TRUE
@@ -3638,8 +3677,8 @@ procedure opNOTEQ()
 	gencode = "@ = binary_op(NOTEQ, @, @);\n"
 	intcode = "@ = (@ != @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
 	iii = TRUE
@@ -3652,8 +3691,8 @@ procedure opLESSEQ()
 	gencode = "@ = binary_op(LESSEQ, @, @);\n"
 	intcode = "@ = (@ <= @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
 	iii = TRUE
@@ -3666,8 +3705,8 @@ procedure opGREATEREQ()
 	gencode = "@ = binary_op(GREATEREQ, @, @);\n"
 	intcode = "@ = (@ >= @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
 	iii = TRUE
@@ -3682,11 +3721,11 @@ end procedure
 procedure opSC1_AND()
 -- SC1_AND / SC1_AND_IF
 -- no need to store ATOM_0
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("if (@ == 0) {\n", Code[pc+1])
 		if Code[pc] = SC1_AND then
 			CDeRef(Code[pc+2])
@@ -3696,7 +3735,7 @@ procedure opSC1_AND()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -3711,7 +3750,7 @@ procedure opSC1_AND()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -3726,11 +3765,11 @@ end procedure
 procedure opSC1_OR()
 -- SC1_OR / SC1_OR_IF
 -- no need to store ATOM_1
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("if (@ != 0) {\n", Code[pc+1]) -- optimize this???
 		if Code[pc] = SC1_OR then
 			CDeRef(Code[pc+2])
@@ -3740,7 +3779,7 @@ procedure opSC1_OR()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -3755,7 +3794,7 @@ procedure opSC1_OR()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -3773,15 +3812,15 @@ procedure opSC2_OR()
 -- SC2_OR / SC2_AND
 	CDeRef(Code[pc+2])
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("@ = (@ != 0);\n", {Code[pc+2], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("else\n", Code[pc+1])
 	end if
 
@@ -3949,7 +3988,7 @@ procedure opENDFOR_GENERAL()
 		c_stmt("@1 = @2 + @3;\n", {Code[pc+3], Code[pc+3], Code[pc+4]})
 
 	elsif TypeIs(Code[pc+3], TYPE_INTEGER) and
-		  TypeIs(Code[pc+4], {TYPE_ATOM, TYPE_OBJECT}) then
+		  TypeIsIn(Code[pc+4], TYPES_AO) then
 			-- target and one operand are integers
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+4])
 		c_stmt("@1 = @2 + @3;\n", {Code[pc+3], Code[pc+3], Code[pc+4]})
@@ -3958,7 +3997,7 @@ procedure opENDFOR_GENERAL()
 		close_brace = TRUE
 
 	elsif TypeIs(Code[pc+4], TYPE_INTEGER) and
-		  TypeIs(Code[pc+3], {TYPE_ATOM, TYPE_OBJECT}) then
+		  TypeIsIn(Code[pc+3], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+3])
 		c_stmt(intcode, {Code[pc+3], Code[pc+3], Code[pc+4]})
 		c_stmt0("}\n")
@@ -3966,8 +4005,8 @@ procedure opENDFOR_GENERAL()
 		close_brace = TRUE
 	end if
 
-	if TypeIs(Code[pc+3], {TYPE_ATOM, TYPE_OBJECT}) and
-	   TypeIs(Code[pc+4], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+3], TYPES_AO) and
+	   TypeIsIn(Code[pc+4], TYPES_AO) then
 		-- uncertain about both types being TYPE_INTEGER or not
 		c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)) {\n",
 			   {Code[pc+3], Code[pc+4]})
@@ -4109,43 +4148,51 @@ procedure opRETURNF()
 	symtab_index sym, sub, ret
 	boolean doref
 	sequence x
-
+	object stsub
+	integer eltype
+	
 	sub = Code[pc+1]
 	ret = Code[pc+3]
 	
 	-- update function return type, and sequence element type
-	SymTab[sub][S_GTYPE_NEW] = or_type(SymTab[sub][S_GTYPE_NEW],
+	stsub = SymTab[sub]
+	stsub[S_GTYPE_NEW] = or_type(stsub[S_GTYPE_NEW],
 									   GType(Code[pc+2]))
-	SymTab[sub][S_SEQ_ELEM_NEW] = or_type(SymTab[sub][S_SEQ_ELEM_NEW],
-											 SeqElem(Code[pc+2]))
+	eltype = SeqElem(Code[pc+2])
+	if eltype != stsub[S_SEQ_ELEM_NEW] then
+		eltype = or_type(stsub[S_SEQ_ELEM_NEW], eltype)
+		stsub[S_SEQ_ELEM_NEW] = eltype
+	end if
 
 	if GType(ret) = TYPE_INTEGER then
 		x = ObjMinMax(ret)
-		if SymTab[sub][S_OBJ_MIN_NEW] = -NOVALUE then
-			SymTab[sub][S_OBJ_MIN_NEW] = x[MIN]
-			SymTab[sub][S_OBJ_MAX_NEW] = x[MAX]
+		if stsub[S_OBJ_MIN_NEW] = -NOVALUE then
+			stsub[S_OBJ_MIN_NEW] = x[MIN]
+			stsub[S_OBJ_MAX_NEW] = x[MAX]
 
-		elsif SymTab[sub][S_OBJ_MIN_NEW] != NOVALUE then
-			if x[MIN] < SymTab[sub][S_OBJ_MIN_NEW] then
-				SymTab[sub][S_OBJ_MIN_NEW] = x[MIN]
+		elsif stsub[S_OBJ_MIN_NEW] != NOVALUE then
+			if x[MIN] < stsub[S_OBJ_MIN_NEW] then
+				stsub[S_OBJ_MIN_NEW] = x[MIN]
 			end if
-			if x[MAX] > SymTab[sub][S_OBJ_MAX_NEW] then
-				SymTab[sub][S_OBJ_MAX_NEW] = x[MAX]
+			if x[MAX] > stsub[S_OBJ_MAX_NEW] then
+				stsub[S_OBJ_MAX_NEW] = x[MAX]
 			end if
 		end if
 
 	elsif GType(ret) = TYPE_SEQUENCE then
-		if SymTab[sub][S_SEQ_LEN_NEW] = -NOVALUE then
-			SymTab[sub][S_SEQ_LEN_NEW] = SeqLen(ret)
-		elsif SymTab[sub][S_SEQ_LEN_NEW] != SeqLen(ret) then
-			SymTab[sub][S_SEQ_LEN_NEW] = NOVALUE
+		if stsub[S_SEQ_LEN_NEW] = -NOVALUE then
+			stsub[S_SEQ_LEN_NEW] = SeqLen(ret)
+		elsif stsub[S_SEQ_LEN_NEW] != SeqLen(ret) then
+			stsub[S_SEQ_LEN_NEW] = NOVALUE
 		end if
 
 	else
-		SymTab[sub][S_OBJ_MIN_NEW] = NOVALUE
-		SymTab[sub][S_SEQ_LEN_NEW] = NOVALUE
+		stsub[S_OBJ_MIN_NEW] = NOVALUE
+		stsub[S_SEQ_LEN_NEW] = NOVALUE
 
 	end if
+	SymTab[sub] = stsub
+	
 
 	doref = TRUE
 
@@ -4376,7 +4423,7 @@ procedure opCONCAT()
 		c_stmt("if (IS_SEQUENCE(@) && IS_ATOM(@)) {\n", {Code[pc+1], Code[pc+2]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_OBJECT, TYPE_SEQUENCE}) and
+	if TypeIsIn(Code[pc+1], TYPES_SO) and
 	   TypeIsNot(Code[pc+2], TYPE_SEQUENCE) then
 		CRef(Code[pc+2])
 		c_stmt("Append(&@, @, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
@@ -4389,7 +4436,7 @@ procedure opCONCAT()
 					  {Code[pc+1], Code[pc+2]})
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_OBJECT, TYPE_SEQUENCE}) and
+	if TypeIsIn(Code[pc+2], TYPES_SO) and
 	   TypeIsNot(Code[pc+1], TYPE_SEQUENCE) then
 		CRef(Code[pc+1])
 		c_stmt("Prepend(&@, @, @);\n", {Code[pc+3], Code[pc+2], Code[pc+1]})
@@ -4418,8 +4465,8 @@ procedure opCONCAT()
 
 	target = {0, 0}
 	-- compute length of result
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_ATOM}) and
-	   TypeIs(Code[pc+2], {TYPE_SEQUENCE, TYPE_ATOM}) then
+	if TypeIsIn(Code[pc+1], TYPES_AS) and
+	   TypeIsIn(Code[pc+2], TYPES_AS) then
 		if TypeIs(Code[pc+1], TYPE_ATOM) then
 			target[MIN] = 1
 		else
@@ -4840,11 +4887,11 @@ procedure opMATCH_FROM()
 end procedure
 
 procedure opPEEK_STRING()
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = PEEK then
 			seg_peek1(Code[pc+2], Code[pc+1], 0)
 		elsif Code[pc] = PEEKS then
@@ -4892,11 +4939,11 @@ procedure opPEEK()
 -- PEEK / PEEKS / PEEK2S / PEEK2U / PEEK4U / PEEK4S
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = PEEK then
 			seg_peek1(Code[pc+2], Code[pc+1], 0)
 		elsif Code[pc] = PEEKS then
@@ -4939,7 +4986,7 @@ procedure opPEEK()
 		c_stmt("else if (IS_ATOM(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIsNot(Code[pc+1], {TYPE_INTEGER, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
 		if find( Code[pc], { PEEK, PEEKS } ) then
 			seg_peek1(Code[pc+2], Code[pc+1], 1)
 		elsif find( Code[pc], {PEEK2S, PEEK2S}) then
@@ -4965,7 +5012,7 @@ procedure opPEEK()
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -4973,7 +5020,7 @@ procedure opPEEK()
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
 		-- sequence {start, length} */
 		c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+1])
 		if find( Code[pc], { PEEK, PEEKS })  then
@@ -5070,7 +5117,7 @@ procedure opPEEK()
 
 	CDeRefStr("_0")
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAD) then
 		if Code[pc] = PEEK then
 			target = {0, 255}
 			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT,0 )
@@ -5112,11 +5159,11 @@ procedure opPOKE()
 -- generate code for poke and poke4
 -- should optimize constant address
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = POKE4 then
 			c_stmt("poke4_addr = (unsigned long *)@;\n", Code[pc+1])
 		elsif Code[pc] = POKE2 then
@@ -5126,11 +5173,11 @@ procedure opPOKE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("else\n")
 	end if
 
-	if TypeIsNot(Code[pc+1], {TYPE_INTEGER, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
 		if Code[pc] = POKE4 then
 			c_stmt("poke4_addr = (unsigned long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
 						   Code[pc+1])
@@ -5143,11 +5190,11 @@ procedure opPOKE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+2], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+2], TYPES_IAO) then
 		if Code[pc] = POKE4 then
 			seg_poke4(Code[pc+2], 0)
 		elsif Code[pc] = POKE2 then
@@ -5165,7 +5212,7 @@ procedure opPOKE()
 		c_stmt("else if (IS_ATOM(@)) {\n", Code[pc+2])
 	end if
 
-	if TypeIsNot(Code[pc+2], {TYPE_INTEGER, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+2], TYPES_IS) then
 		if Code[pc] = POKE4 then
 			seg_poke4(Code[pc+2], 1)
 		else
@@ -5173,7 +5220,7 @@ procedure opPOKE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+2], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -5181,7 +5228,7 @@ procedure opPOKE()
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+2], TYPES_SO) then
 		c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+2])
 		c_stmt0("_1 = (int)((s1_ptr)_1)->base;\n")
 
@@ -5349,11 +5396,11 @@ end procedure
 
 procedure opCLOSE()
 -- CLOSE / ABORT
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = ABORT then
 			c_stmt("UserCleanup(@);\n", Code[pc+1])
 		else
@@ -5361,7 +5408,7 @@ procedure opCLOSE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("else\n")
 	end if
 
@@ -5585,7 +5632,7 @@ procedure assign_delete_target( symtab_index target, symtab_index obj )
 		c_stmt0("}\n")
 	end if
 	
-	if TypeIs( obj, {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn( obj, TYPES_SO) then
 		SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
 	else
 		SetBBType(target, GType(obj), ObjMinMax(obj), TYPE_OBJECT, 1)
@@ -5730,15 +5777,15 @@ procedure opC_PROC()
 end procedure
 
 procedure opTRACE()
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("TraceOn = @;\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("else\n")
 	end if
 
@@ -6746,9 +6793,11 @@ export procedure init_opcodes()
 				operation[i] = -1
 		end switch
 
+		ifdef DEBUG then
 		if operation[i] = -1 then
 			InternalErr(255, { name })
 		end if
+		end ifdef
 		
 	end for
 end procedure

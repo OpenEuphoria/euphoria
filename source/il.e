@@ -6,6 +6,11 @@
 -- Note: be careful not to make changes in the IL format 
 -- that are not upwardly compatible. Otherwise, 
 -- change the format number. (IL_VERSION)
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include std/machine.e
 include std/text.e
@@ -108,9 +113,12 @@ procedure OutputSymTab(file f)
 								SymTab[r][S_SCOPE] = SC_UNDEFINED 
 							end if
 							SymTab[r][S_NREFS] -= 1
+							ifdef DEBUG then
 							if SymTab[r][S_NREFS] < 0 then
 								InternalErr(264, { SymTab[r][S_NAME] })
 							end if
+							end ifdef
+							
 							still_changing = TRUE
 						end for
 						decorate = "()"

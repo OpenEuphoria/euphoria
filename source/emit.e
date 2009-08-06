@@ -1,6 +1,11 @@
 -- (c) Copyright - See License.txt
 --
 -- Routines to emit the IL opcode stream
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 include std/os.e
 
 include global.e
@@ -430,6 +435,14 @@ export procedure clear_inline_targets()
 	inlined_targets = {}
 end procedure
 
+constant opZeroZero = {
+	NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
+	STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE, GOTO, GLABEL,
+	ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS,
+	DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
+	TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP, NOPSWITCH,
+	$
+	}
 export procedure emit_op(integer op)
 -- Emit a postfix operator.
 -- The cases have been sorted according to profile frequency.
@@ -629,11 +642,7 @@ export procedure emit_op(integer op)
 	    emit_addr(b)
 
 	-- 0 inputs, 0 outputs - note: parser may emit an extra word
-	elsif find(op, {NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
-				STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE, GOTO, GLABEL,
-				ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS,
-				DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
-				TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP, NOPSWITCH}) then
+	elsif find(op, opZeroZero) then
 		emit_opcode(op)
 		assignable = FALSE
 	
@@ -1387,7 +1396,7 @@ export procedure emit_op(integer op)
 
 	else
 		InternalErr(259, {op})
-
+	
 	end if
 
 	previous_op = op 

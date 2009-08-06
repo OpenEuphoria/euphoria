@@ -1,6 +1,12 @@
 -- (c) Copyright - See License.txt
 --
 -- Global declarations
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
+
 public include std/types.e 
 public include common.e
 include mode.e as mode

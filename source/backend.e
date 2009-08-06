@@ -4,6 +4,12 @@
 -- Called from (a) interpreter front-end
 --          or (b) backend.ex (using different s.t. offsets)
 
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
+
 include std/machine.e
 
 include global.e

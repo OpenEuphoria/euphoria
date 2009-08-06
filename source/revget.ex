@@ -1,3 +1,4 @@
+-- (c) Copyright - See License.txt
 include std/get.e
 include std/filesys.e
 include std/os.e

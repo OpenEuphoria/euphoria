@@ -1,3 +1,4 @@
+-- (c) Copyright - See License.txt
 --****
 -- == traninit.e: Initialize the translator
 --
@@ -11,6 +12,11 @@
 -- If the user doesn't select it then it will try all of the environment
 -- variables and use the selected platform to determine which compiler must
 -- be used.
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include std/cmdline.e
 include std/error.e

@@ -2,6 +2,11 @@
 --
 -- Modularizes the code, while allowing files to explicitly include the
 -- files they need.
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 integer interpret
 integer translate

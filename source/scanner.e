@@ -1,6 +1,11 @@
 -- (c) Copyright - See License.txt
 --
 -- Scanner (low-level parser)
+ifdef ETYPE_CHECK then
+with type_check
+elsedef
+without type_check
+end ifdef
 
 include std/error.e
 include std/filesys.e
@@ -172,7 +177,7 @@ function pack_source(object src)
 	end if
 
 	if length(src) >= SOURCE_CHUNK then
-		src = src[1..80] -- enough for trace or profile display
+		src = src[1..100] -- enough for trace or profile display
 	end if
 
 	if current_source_next + length(src) >= SOURCE_CHUNK then
@@ -199,11 +204,14 @@ export function fetch_line(integer start)
 	sequence line
 	integer c, chunk
 	atom p
+	integer n
+	
 
 	if start = 0 then
 		return ""
 	end if
-	line = ""
+	line = repeat(0, 400)
+	n = 0
 	chunk = 1+floor(start / SOURCE_CHUNK)
 	start = remainder(start, SOURCE_CHUNK)
 	p = all_source[chunk] + start
@@ -212,10 +220,14 @@ export function fetch_line(integer start)
 		if c = 0 then
 			exit
 		end if
-		line &= c
+		n += 1
+		if n > length(line) then
+			line &= repeat(0, 400)
+		end if
+		line[n] = c
 		p += 1
 	end while
-	return line
+	return line[1..n]
 end function
 
 export procedure AppendSourceLine()
