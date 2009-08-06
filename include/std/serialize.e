@@ -185,14 +185,14 @@ end function
 -- Convert a serialized object in to a standard Euphoria object.
 --
 -- Parameters:
--- # ##sdata##, either a sequence containing one or more concatenated serialized objects or
+-- # ##sdata## : either a sequence containing one or more concatenated serialized objects or
 -- an open file handle. If this is a file handle, the current position in the
 -- file is assumed to be at a serialized object in the file.
--- # ##pos##, optional index into ##sdata##. If omitted 1 is assumed. The index must
+-- # ##pos## : optional index into ##sdata##. If omitted 1 is assumed. The index must
 -- point to the start of a serialized object.
 --
 -- Returns:
--- The return value depends on the input type. 
+-- The return **value**, depends on the input type. 
 -- * If ##sdata## is a file handle then
 -- this function returns a Euphoria object that had been stored in the file, and
 -- moves the current file to the first byte after the stored object.
@@ -299,10 +299,10 @@ end function
 -- Convert a standard Euphoria object in to a serialized version of it.
 --
 -- Parameters:
--- # ##euobj##, any Euphoria object.
+-- # ##euobj## : any Euphoria object.
 --
 -- Returns:
--- A sequence. This is the serialized version of the input object.
+-- A **sequence**, this is the serialized version of the input object.
 -- 
 -- Comments:
 -- A serialized object is one that has been converted to a set of byte values. This
@@ -399,11 +399,11 @@ end function
 -- Saves a Euphoria object to disk in a binary format.
 --
 -- Parameters:
--- # ##data##, any Euphoria object.
--- # ##filename##, the name of the file to save it to.
+-- # ##data## : any Euphoria object.
+-- # ##filename## : the name of the file to save it to.
 --
 -- Returns:
--- An integer. 0 if the function fails, otherwise the number of bytes in the
+-- An **integer**, 0 if the function fails, otherwise the number of bytes in the
 -- created file.
 -- 
 -- Comments:
@@ -443,10 +443,10 @@ end function
 -- Restores a Euphoria object that has been saved to disk by [[:dump]].
 --
 -- Parameters:
--- # ##filename##, the name of the file to restore it from.
+-- # ##filename## : the name of the file to restore it from.
 --
 -- Returns:
--- A sequence. The first element is the result code. If the result code is 0
+-- A **sequence**, the first element is the result code. If the result code is 0
 -- then it means that the function failed, otherwise the restored data is in the 
 -- second element.
 -- 

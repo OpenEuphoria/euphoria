@@ -11,8 +11,8 @@ include std/text.e
 --
 -- === Introduction
 --
--- Regular expressions in Euphoria are based on the Perl Compatible Regular Expressions
--- library created by Philip Hazel. 
+-- Regular expressions in Euphoria are based on the PCRE (Perl Compatible Regular Expressions)
+-- library created by Philip Hazel.  
 --
 -- This document will detail the Euphoria interface to Regular Expressions, not really
 -- regular expression syntax. It is a very complex subject that many books have been
@@ -112,11 +112,11 @@ end type
 -- Return an allocated regular expression
 --
 -- Parameters:
---   # ##pattern##: a sequence representing a human readable regular expression
---   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##pattern## : a sequence representing a human readable regular expression
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   A [[:regex]] which other regular expression routines can work on or < 0 indicates an error.
+--   A **regex**, which other regular expression routines can work on or < 0 indicates an error.
 --
 -- Comments:
 --   This is the only routine that accepts a human readable regular expression. The string is
@@ -126,8 +126,9 @@ end type
 --   as a constant accessible to your source code and any files that may use it, thus, the regular
 --   expression is analyzed and compiled only once per run of your application.
 --
---   **Bad Example**
 --   <eucode>
+--   -- Bad Example
+--  
 --   while sequence(line) do
 --       re:regex proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
 --       if re:match(line) then
@@ -136,8 +137,8 @@ end type
 --   end while
 --   </eucode>
 --
---   **Good Example**
 --   <eucode>
+--   -- Good Example
 --   constant re_proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
 --   while sequence(line) do
 --       if re:match(line) then
@@ -174,13 +175,13 @@ end function
 -- ##from##.
 --
 -- Parameters:
---   # ##re##: a regex for a subject to be matched against
---   # ##haystack##: a string in which to searched
---   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##re## : a regex for a subject to be matched against
+--   # ##haystack## : a string in which to searched
+--   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   An object which is either an atom of 0, meaning nothing found or a sequence of matched pairs.
+--   An **object**, which is either an atom of 0, meaning nothing found or a sequence of matched pairs.
 --   For the explanation of the returned sequence, please see the first example.
 --
 -- Example 1:
@@ -208,13 +209,13 @@ end function
 -- ##from##.
 --
 -- Parameters:
---   # ##re##: a regex for a subject to be matched against
---   # ##haystack##: a string in which to searched
---   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##re## : a regex for a subject to be matched against
+--   # ##haystack## : a string in which to searched
+--   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   Returns a sequence of matches. Please see [[:find]] for a detailed description of the return
+--   A **sequence**, of matches. Please see [[:find]] for a detailed description of the return
 --   value.
 --
 -- Example 1:
@@ -254,13 +255,13 @@ end function
 -- Determine if ##re## matches any portion of ##haystack##.
 --
 -- Parameters:
---   # ##re##: a regex for a subject to be matched against
---   # ##haystack##: a string in which to searched
---   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##re## : a regex for a subject to be matched against
+--   # ##haystack## : a string in which to searched
+--   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   An atom. 1 if ##re## matches any portion of ##haystack## or 0 if not.
+--   An **atom**, 1 if ##re## matches any portion of ##haystack## or 0 if not.
 --
 
 public function has_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
@@ -271,13 +272,13 @@ end function
 -- Determine if the entire ##haystack## matches ##re##.
 --
 -- Parameters:
---   # ##re##: a regex for a subject to be matched against
---   # ##haystack##: a string in which to searched
---   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##re## : a regex for a subject to be matched against
+--   # ##haystack## : a string in which to searched
+--   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   An atom. 1 if ##re## matches the entire ##haystack## or 0 if not.
+--   An **atom**,  1 if ##re## matches the entire ##haystack## or 0 if not.
 --
 
 public function is_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
@@ -294,13 +295,13 @@ end function
 -- Get the matched text only.
 --
 -- Parameters:
---   # ##re##: a regex for a subject to be matched against
---   # ##haystack##: a string in which to searched
---   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##re## : a regex for a subject to be matched against
+--   # ##haystack## : a string in which to searched
+--   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   Returns a sequence of strings, the first being the entire match and subsequent
+--   Returns a **sequence**, of strings, the first being the entire match and subsequent
 --   items being each of the captured groups. The size of the sequence is the number
 --   of groups in the expression plus one (for the entire match).
 --
@@ -354,13 +355,13 @@ end function
 -- Get the text of all matches
 -- 
 -- Parameters:
---   # ##re##: a regex for a subject to be matched against
---   # ##haystack##: a string in which to searched
---   # ##from##: an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options##: options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##re## : a regex for a subject to be matched against
+--   # ##haystack## : a string in which to searched
+--   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
+--   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
 --
 -- Returns:
---   Returns a sequence of a sequence of strings, the first being the entire match and
+--   Returns a **sequence**, of a sequence of strings, the first being the entire match and
 --   subsequent items being each of the captured groups. The size of the sequence is
 --   the number of groups in the expression plus one (for the entire match).
 --
@@ -432,13 +433,13 @@ end function
 -- Split a string based on a regex as a delimiter
 --
 -- Parameters:
---   # ##re##: a regex which will be used for matching
---   # ##text##: a string on which search and replace will apply
---   # ##from##: optional start position
---   # ##options##: options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##re## : a regex which will be used for matching
+--   # ##text## : a string on which search and replace will apply
+--   # ##from## : optional start position
+--   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
 --
 -- Returns:
---   A sequence of string values split at the delimiter.
+--   A **sequence**, of string values split at the delimiter.
 --   
 -- Example 1:
 -- <eucode>
@@ -487,28 +488,28 @@ end function
 -- Replaces all matches of a regex with the replacement text.
 --
 -- Parameters:
---   # ##re##: a regex which will be used for matching
---   # ##text##: a string on which search and replace will apply
---   # ##replacement##: a string, used to replace each of the full matches found
---   # ##from##: optional start position
---   # ##options##: options, defaults to [[:DEFAULT]]
+--   # ##re## : a regex which will be used for matching
+--   # ##text## : a string on which search and replace will apply
+--   # ##replacement## : a string, used to replace each of the full matches found
+--   # ##from## : optional start position
+--   # ##options## : options, defaults to [[:DEFAULT]]
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
 --
 -- ===== Special replacement operators
 -- 
--- * **##\##** Causes the next character to lose its special meaning. 
--- * **##\n##** Inserts a 0x0A (LF) character. 
--- * **##\r##** Inserts a 0x0D (CR) character. 
--- * **##\t##** Inserts a 0x09 (TAB) character. 
--- * **##\1##** to **##\9##** Recalls stored substrings from registers (\1, \2, \3, to \9).
--- * **##\0##** Recalls entire matched pattern. 
--- * **##\u##** Convert next character to uppercase 
--- * **##\l##** Convert next character to lowercase 
--- * **##\U##** Convert to uppercase till ##\E## or ##\e## 
--- * **##\L##** Convert to lowercase till ##\E## or ##\e##
--- * **##\E##** or **##\e##** Terminate a ##\\U## or ##\L## conversion
+-- * **##\##**  ~-- Causes the next character to lose its special meaning. 
+-- * **##\n##** ~ -- Inserts a 0x0A (LF) character. 
+-- * **##\r##** ~-- Inserts a 0x0D (CR) character. 
+-- * **##\t##** ~-- Inserts a 0x09 (TAB) character. 
+-- * **##\1##** to **##\9##** ~-- Recalls stored substrings from registers (\1, \2, \3, to \9).
+-- * **##\0##** ~-- Recalls entire matched pattern. 
+-- * **##\u##** ~-- Convert next character to uppercase 
+-- * **##\l##** ~-- Convert next character to lowercase 
+-- * **##\U##** ~-- Convert to uppercase till ##\E## or ##\e## 
+-- * **##\L##** ~-- Convert to lowercase till ##\E## or ##\e##
+-- * **##\E##** or **##\e##** ~-- Terminate a ##\\U## or ##\L## conversion
 --
 -- Example 1:
 -- <eucode>
@@ -531,12 +532,12 @@ end function
 -- details.
 --
 -- Parameters:
---   # ##re##: a regex which will be used for matching
---   # ##text##: a string on which search and replace will apply
---   # ##replacement##: a string, used to replace each of the full matches found
---   # ##limit##: the number of matches to process
---   # ##from##: optional start position
---   # ##options##: options, defaults to [[:DEFAULT]]
+--   # ##re## : a regex which will be used for matching
+--   # ##text## : a string on which search and replace will apply
+--   # ##replacement## : a string, used to replace each of the full matches found
+--   # ##limit## : the number of matches to process
+--   # ##from## : optional start position
+--   # ##options## : options, defaults to [[:DEFAULT]]
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
@@ -559,12 +560,12 @@ end function
 -- expression.
 --
 -- Parameters:
---   # ##re##: a regex which will be used for matching
---   # ##text##: a string on which search and replace will apply
---   # ##rid##: routine id to execute for each match
---   # ##limit##: the number of matches to process
---   # ##from##: optional start position
---   # ##options##: options, defaults to [[:DEFAULT]]
+--   # ##re## : a regex which will be used for matching
+--   # ##text## : a string on which search and replace will apply
+--   # ##rid## : routine id to execute for each match
+--   # ##limit## : the number of matches to process
+--   # ##from## : optional start position
+--   # ##options## : options, defaults to [[:DEFAULT]]
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.

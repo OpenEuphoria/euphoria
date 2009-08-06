@@ -35,8 +35,8 @@ public constant
 -- Checks whether two objects can be legally added together.
 --
 -- Parameters:
---		# ##a##: one of the objects to test for compatible shape
---		# ##b##: the other object
+--		# ##a## : one of the objects to test for compatible shape
+--		# ##b## : the other object
 --
 -- Returns:
 --	An **integer**, 1 if an addition (or any of the [[:Relational operators]])
@@ -76,8 +76,8 @@ end function
 -- Retrieves an element nested arbitrarily deep into a sequence.
 --
 -- Parameters:
---	# ##source##: the sequence from which to fetch
---	# ##indexes##: a sequence of integers, the path to follow to reach the 
+--	# ##source## : the sequence from which to fetch
+--	# ##indexes## : a sequence of integers, the path to follow to reach the 
 --   element to return.
 --
 -- Returns:
@@ -118,10 +118,10 @@ end function
 -- Stores something at a location nested arbitrarily deep into a sequence.
 --
 -- Parameters:
---		# ##target##: the sequence in which to store something
---		# ##indexes##: a sequence of integers, the path to follow to reach the
+--		# ##target## : the sequence in which to store something
+--		# ##indexes## : a sequence of integers, the path to follow to reach the
 --                     place where to store
---		# ##x##: the object to store.
+--		# ##x## : the object to store.
 --
 -- Returns:
 --		A **sequence**, a **copy** of ##target## with the specified place
@@ -181,8 +181,8 @@ end function
 -- Checks whether an index exists on a sequence.
 --
 -- Parameters:
---		# ##s##: the sequence for which to check
---		# ##x##: an object, the index to check.
+--		# ##s## : the sequence for which to check
+--		# ##x## : an object, the index to check.
 --
 -- Returns:
 -- 		An **integer**, 1 if ##s[x]## makes sense, else 0.
@@ -213,10 +213,10 @@ end function
 -- Rotates a slice of a sequence.
 --
 -- Parameters:
--- # ##source##: sequence to be rotated
--- # ##shift##: direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
--- # ##start##: starting position for shift, defaults o 1
--- # ##stop##: stopping position for shift, defaults to ##length(source)##
+-- # ##source## : sequence to be rotated
+-- # ##shift## : direction and count to be shifted (##ROTATE_LEFT## or ##ROTATE_RIGHT##)
+-- # ##start## : starting position for shift, defaults o 1
+-- # ##stop## : stopping position for shift, defaults to ##length(source)##
 --
 -- Comments:
 --
@@ -291,10 +291,10 @@ end function
 -- Converts a set of sub sequences into a set of 'columns'.
 --
 -- Parameters:
--- # ##source##: sequence containing the sub-sequences
--- # ##cols##: either a specific column number or a set of column numbers. 
+-- # ##source## : sequence containing the sub-sequences
+-- # ##cols## : either a specific column number or a set of column numbers. 
 --             Default is 0, which returns the maximum number of columns.
--- # ##defval##: an object. Used when a column value is not available. Default is 0
+-- # ##defval## : an object. Used when a column value is not available. Default is 0
 --
 -- Comments:
 -- Any atoms found in ##source## are treated as if they are a 1-element sequence.
@@ -389,13 +389,13 @@ end function
 -- the same size.
 --
 -- Parameters: 
--- * ##source##: the sequence to map
--- * ##rid##: the [[:routine_id]] of function to use as converter
--- * ##userdata##: an object passed to each invocation of ##rid##. If omitted,
+-- * ##source## : the sequence to map
+-- * ##rid## : the [[:routine_id]] of function to use as converter
+-- * ##userdata## : an object passed to each invocation of ##rid##. If omitted,
 --                 {} is used.
 --
 -- Returns:
---	A **sequence** the length of ##source##. Each element there is the
+--	A **sequence**, the length of ##source##. Each element there is the
 -- corresponding element in ##source## mapped using the routine referred to by ##rid##.
 --
 -- Comments:
@@ -428,18 +428,18 @@ end function
 -- corresponding item in ##to_set##
 --
 -- Parameters:
---   # ##source_arg##: Any Euphoria object to be transformed.
---   # ##from_set##: A sequence of objects representing the only items from
+--   # ##source_arg## : Any Euphoria object to be transformed.
+--   # ##from_set## : A sequence of objects representing the only items from
 --                   ##source_arg## that are actually transformed.
---   # ##to_set##: A sequence of objects representing the transformed equivalents
+--   # ##to_set## : A sequence of objects representing the transformed equivalents
 --                 of those found in ##from_set##.
---   # ##one_level##: An integer. 0 (the default) means that mapping applies to 
+--   # ##one_level## : An integer. 0 (the default) means that mapping applies to 
 --                    every atom in every level of sub-sequences. 1 means that
 --                    mapping only applies to the items at the first level
 --                    in ##source_arg##. 
 --
 -- Returns:
---   An **object**: The transformed version of ##source_arg##.
+--   An **object**, The transformed version of ##source_arg##.
 --
 -- Comments:
 -- * When ##one_level## is zero or omitted, for each item in ##source_arg##, 
@@ -492,7 +492,7 @@ end function
 -- Return the length of a sequence.
 --
 -- Parameters:
---		# ##target##: the sequence being queried
+--		# ##target## : the sequence being queried
 --
 -- Returns:
 --		An **integer**, the number of elements ##target## has.
@@ -516,12 +516,12 @@ end function
 -- Reverse the order of elements in a sequence.
 --
 -- Parameters:
---		# ##target##: the sequence to reverse.
---		# ##pFrom##: an integer, the starting point. Defaults to 1.
---		# ##pTo##: an integer, the end point. Defaults to 0.
+--		# ##target## : the sequence to reverse.
+--		# ##pFrom## : an integer, the starting point. Defaults to 1.
+--		# ##pTo## : an integer, the end point. Defaults to 0.
 --
 -- Returns:
---	A **sequence** if ##target## is a sequence, the same length as ##target##
+--	A **sequence**, if ##target## is a sequence, the same length as ##target##
 -- and the same elements, but those with index between ##pFrom## and ##pTo##
 -- appear in reverse order.
 --
@@ -623,9 +623,9 @@ end function
 -- Returns a sequence in arithmetic progression.
 --
 -- Parameters:
---		# ##start##: the initial value from which to start
---		# ##increment##: the value to recursively add to ##start## to get new elements
---		# ##count##:  an integer, the number of additions to perform.
+--		# ##start## : the initial value from which to start
+--		# ##increment## : the value to recursively add to ##start## to get new elements
+--		# ##count## :  an integer, the number of additions to perform.
 --
 -- Returns:
 --		An **object**, either 0 on failure or
@@ -665,8 +665,8 @@ end function
 -- Returns a periodic sequence, given a pattern and a count.
 --
 -- Parameters:
---		# ##pattern##: the sequence whose elements are to be repeated
---		# ##count##: an integer, the number of times the pattern is to be repeated.
+--		# ##pattern## : the sequence whose elements are to be repeated
+--		# ##count## : an integer, the number of times the pattern is to be repeated.
 --
 -- Returns:
 --	A **sequence**, empty on failure, and of length ##count*length(pattern)##
@@ -706,11 +706,11 @@ end function
 -- Create a sequence whose all elements are identical, with given length.
 --
 -- Parameters:
---		# ##item##: an object, to which all elements of the result will be equal
---		# ##count##: an integer, the requested length of the result sequence.
+--		# ##item## : an object, to which all elements of the result will be equal
+--		# ##count## : an integer, the requested length of the result sequence.
 --
 -- Returns:
---		A **sequence** of length ##count## each element of which is ##item##.
+--		A **sequence**, of length ##count## each element of which is ##item##.
 --
 -- Errors:
 --	If ##count## is negative, it cannot be a length, which is an error condition.
@@ -744,11 +744,11 @@ end function
 -- Adds an object as the last element of a sequence.
 --
 -- Parameters:
---		# ##source##: the sequence to add to
---      # ##x##: the object to add
+--		# ##source## : the sequence to add to
+--      # ##x## : the object to add
 --
 -- Returns:
---	A **sequence** whose first elements are those of ##target## and whose
+--	A **sequence**, whose first elements are those of ##target## and whose
 -- last element is ##x##.
 --
 -- Comments:
@@ -797,11 +797,11 @@ end function
 -- Adds an object as the first element of a sequence.
 --
 -- Parameters:
---		# ##source##: the sequence to add to
---      # ##x##: the object to add
+--		# ##source## : the sequence to add to
+--      # ##x## : the object to add
 --
 -- Returns:
---	A **sequence** whose last elements are those of ##target## and whose
+--	A **sequence**, whose last elements are those of ##target## and whose
 -- first element is ##x##.
 --
 -- Comments:
@@ -840,9 +840,9 @@ end function
 --   Insert an object into a sequence as a new element at a given location.
 --
 --- Parameters:
---		# ##target##: the sequence to insert into
---		# ##what##: the object to insert
---		# ##index##: an integer, the position in ##target## where ##what## 
+--		# ##target## : the sequence to insert into
+--		# ##what## : the object to insert
+--		# ##index## : an integer, the position in ##target## where ##what## 
 --                               should appear
 --
 -- Returns:
@@ -879,9 +879,9 @@ end function
 -- Inserts an object as a new slice in a sequence at a given position.
 --
 -- Parameters:
---		# ##target##: the sequence to insert into
---		# ##what##: the object to insert
---		# ##index##: an integer, the position in ##target## where ##what## should appear
+--		# ##target## : the sequence to insert into
+--		# ##what## : the object to insert
+--		# ##index## : an integer, the position in ##target## where ##what## should appear
 --
 -- Returns:
 --		A **sequence**, which is ##target## with one or more elements, those of ##what##, 
@@ -916,9 +916,9 @@ end function
 -- length condition.
 --
 -- Parameters:
---   # ##target##: the sequence to pad.
---   # ##size##: an integer, the target minimum size for ##target##
---   # ##padding##: an object, usually the character to pad to (defaults to ' ').
+--   # ##target## : the sequence to pad.
+--   # ##size## : an integer, the target minimum size for ##target##
+--   # ##padding## : an object, usually the character to pad to (defaults to ' ').
 --
 -- Returns:
 --	A **sequence**, either ##target## if it was long enough, or a sequence of
@@ -954,9 +954,9 @@ end function
 -- Pad the end of a sequence with an object so as to meet a minimum length condition.
 --
 -- Parameters:
---   # ##target##: the sequence to pad.
---   # ##size##: an integer, the target minimum size for ##target##
---   # ##padding##: an object, usually the character to pad to (defaults to ' ').
+--   # ##target## : the sequence to pad.
+--   # ##size## : an integer, the target minimum size for ##target##
+--   # ##padding## : an object, usually the character to pad to (defaults to ' ').
 --
 -- Returns:
 -- A **sequence**, either ##target## if it was long enough, or a sequence
@@ -970,7 +970,7 @@ end function
 --
 -- Comments:
 --
---   pad_tail() will not remove characters. If length(str) is greater than params, this
+--   ##pad_tail##() will not remove characters. If ##length(str)## is greater than params, this
 --   function simply returns str. see tail() if you wish to truncate long sequences.
 --
 -- Example 1:
@@ -998,9 +998,9 @@ end function
 -- in the list, the list is returned unchanged.
 --
 -- Parameters:
--- # ##needle##:   object to add.
--- # ##haystack##: sequence to add it to.
--- # ##order##:    an integer; determines how the ##needle## affects the ##haystack##.
+-- # ##needle## :   object to add.
+-- # ##haystack## : sequence to add it to.
+-- # ##order## :    an integer; determines how the ##needle## affects the ##haystack##.
 --                 It can be added to the front (prepended), to the back (appended), 
 --                 or sorted after adding. The default is to prepend it.
 --
@@ -1012,10 +1012,10 @@ end function
 --   An error occurs if an invalid ##order## argument is supplied.
 --
 -- The following enum is provided for specifying ##order##:
--- * ADD_PREPEND   : prepend ##needle## to ##haystack##. This is the default option.
--- * ADD_APPEND    : append ##needle## to ##haystack##.
--- * ADD_SORT_UP   : sort ##haystack## in ascending order after inserting ##needle##
--- * ADD_SORT_DOWN : sort ##haystack## in descending order after inserting ##needle##
+-- * ##ADD_PREPEND## ~--  prepend ##needle## to ##haystack##. This is the default option.
+-- * ##ADD_APPEND## ~--  append ##needle## to ##haystack##.
+-- * ##ADD_SORT_UP## ~-- sort ##haystack## in ascending order after inserting ##needle##
+-- * ##ADD_SORT_DOWN## ~-- sort ##haystack## in descending order after inserting ##needle##
 --
 -- Example 1:
 -- <eucode>
@@ -1083,8 +1083,8 @@ end function
 -- Return the first item(s) of a sequence.
 --
 -- Parameters:
---		# ##source##: the sequence from which elements will be returned
---		# ##size##: an integer, how many head elements at most will be returned.
+--		# ##source## : the sequence from which elements will be returned
+--		# ##size## : an integer, how many head elements at most will be returned.
 --                              Defaults to 1.
 --
 -- Returns:
@@ -1120,12 +1120,12 @@ end function
 -- Return the last items of a sequence.
 --
 -- Parameters:
---   # ##source##: the sequence to get the tail of.
---   # ##size##: an integer, the number of items to return. 
+--   # ##source## : the sequence to get the tail of.
+--   # ##size## : an integer, the number of items to return. 
 --                           (defaults to length(source) - 1)
 --
 -- Returns:
--- A **sequence** of length at most ##size##. If the length is less than 
+-- A **sequence**, of length at most ##size##. If the length is less than 
 -- ##size##, then ##source## was returned. Otherwise, the ##size## last elements
 -- of ##source## were returned.
 --
@@ -1157,9 +1157,9 @@ end function
 -- Returns a slice of a sequence, given by a starting point and a length.
 --
 -- Parameters:
---		# ##source##: the sequence some elements of which will be returned
---		# ##start##: an integer, the lower index of the slice to return
---		# ##len##: an integer, the length of the slice to return
+--		# ##source## : the sequence some elements of which will be returned
+--		# ##start## : an integer, the lower index of the slice to return
+--		# ##len## : an integer, the length of the slice to return
 --
 -- Returns:
 -- A **sequence**, made of at most ##len## elements of ##source##. These 
@@ -1217,9 +1217,9 @@ end function
 -- Return a slice from a sequence, after adjusting its bounds.
 --
 -- Parameters:
---		# ##source##: the sequence from which to get a slice
---		# ##start##: an integer, normally the lower index of the slice to return
---		# ##stop##: an integer, normally the upper index of the slice to return
+--		# ##source## : the sequence from which to get a slice
+--		# ##start## : an integer, normally the lower index of the slice to return
+--		# ##stop## : an integer, normally the upper index of the slice to return
 --
 -- Returns:
 --		A **sequence**, as close as possible from ##source[start..stop]]##.
@@ -1279,9 +1279,9 @@ end function
 -- Perform a vertical slice on a nested sequence
 --
 -- Parameters:
---	# ##source##: the sequence to take a vertical slice from
---	# ##colno##: an atom, the column number to extract (rounded down)
---	# ##error_control##: an object which says what to do if some element
+--	# ##source## : the sequence to take a vertical slice from
+--	# ##colno## : an atom, the column number to extract (rounded down)
+--	# ##error_control## : an object which says what to do if some element
 --                       does not exist. Defaults to 0 (crash in such a circumstance).
 --
 -- Returns:
@@ -1356,12 +1356,12 @@ end function
 -- Remove an item, or a range of items from a sequence.
 --
 -- Parameters:
---   # ##target##: the sequence to remove from.
---   # ##start##: an atom, the (starting) index at which to remove
---   # ##stop##: an atom, the index at which to stop removing (defaults to ##start##)
+--   # ##target## : the sequence to remove from.
+--   # ##start## : an atom, the (starting) index at which to remove
+--   # ##stop## : an atom, the index at which to stop removing (defaults to ##start##)
 --
 -- Returns:
--- A **sequence** obtained from ##target## by carving the ##start..stop## slice
+-- A **sequence**, obtained from ##target## by carving the ##start..stop## slice
 -- out of it.
 --
 -- Comments:
@@ -1399,10 +1399,10 @@ end function
 -- Changes a sequence slice, possibly with padding
 --
 -- Parameters:
--- 		# ##target##: a sequence, a modified copy of which will be returned
---		# ##source##: a sequence, to be patched inside or outside ##target##
---		# ##start##: an integer, the position at which to patch
---		# ##filler##: an object, used for filling gaps. Defaults to ' '
+-- 		# ##target## : a sequence, a modified copy of which will be returned
+--		# ##source## : a sequence, to be patched inside or outside ##target##
+--		# ##start## : an integer, the position at which to patch
+--		# ##filler## : an object, used for filling gaps. Defaults to ' '
 --
 -- Returns:
 -- A **sequence**, which looks like ##target##, but a slice starting at ##start## 
@@ -1468,11 +1468,11 @@ end function
 -- Removes all occurrences of some object from a sequence.
 --
 -- Parameters:
---   # ##needle##: the object to remove.
---   # ##haystack##: the sequence to remove from.
+--   # ##needle## : the object to remove.
+--   # ##haystack## : the sequence to remove from.
 --
 -- Returns:
--- A **sequence** of length at most ##length(haystack)##, and which has
+-- A **sequence**, of length at most ##length(haystack)##, and which has
 -- the same elements, without any copy of ##needle## left
 --
 -- Comments:
@@ -1548,13 +1548,13 @@ end function
 -- Filter a sequence based on a user supplied comparator function.
 --
 -- Parameters:
--- * ##source## - sequence to filter
--- * ##rid## - [[:routine_id]] of function to use as comparator
--- * ##userdata##: an object passed to each invocation of ##rid##. If omitted,
+-- * ##source## : sequence to filter
+-- * ##rid## : [[:routine_id]] of function to use as comparator
+-- * ##userdata## : an object passed to each invocation of ##rid##. If omitted,
 --                 {} is used.
 --
 -- Returns:
---		A **sequence** made of the elements in ##source## which passed the test.
+--		A **sequence**, made of the elements in ##source## which passed the test.
 --
 -- Comments:
 -- * The only items from ##source## that are returned are those that pass the test.
@@ -1625,10 +1625,10 @@ public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 -- Replace a slice in a sequence by an object.
 --
 -- Parameters:
---   # ##target##: the sequence in which replacement will be done.
---   # ##replacement##: an object, the item to replace with.
---   # ##start##: an integer, the starting index of the slice to replace.
---   # ##stop##: an integer, the stopping index of the slice to replace.
+--   # ##target## : the sequence in which replacement will be done.
+--   # ##replacement## : an object, the item to replace with.
+--   # ##start## : an integer, the starting index of the slice to replace.
+--   # ##stop## : an integer, the stopping index of the slice to replace.
 --
 -- Returns:
 -- A **sequence**, which is made of ##target## with the ##start..stop## slice
@@ -1658,10 +1658,10 @@ public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 -- Replaces all occurrences of ##olddata## with ##newdata##
 --
 -- Parameters:
---   # ##source##: the sequence in which replacements will be done.
---   # ##olddata##: the sequence/item which is going to be replaced. If this
+--   # ##source## : the sequence in which replacements will be done.
+--   # ##olddata## : the sequence/item which is going to be replaced. If this
 --                 is an empty sequence, the ##source## is returned as is.
---   # ##newdata##: the sequence/item which will be the replacement.
+--   # ##newdata## : the sequence/item which will be the replacement.
 --
 -- Returns:
 --		A **sequence**, which is made of ##source## with all ##olddata## occurrences
@@ -1717,11 +1717,11 @@ end function
 -- Turns a sequences of indexes into the sequence of elements in a source that have such indexes.
 --
 -- Parameters:
---		# ##source##: the sequence from which to extract elements
---		# ##indexes##: a sequence of atoms, the indexes of the elements to be fetched in ##source##.
+--		# ##source## : the sequence from which to extract elements
+--		# ##indexes## : a sequence of atoms, the indexes of the elements to be fetched in ##source##.
 --
 -- Returns:
---		A **sequence** of length at most ##length(indexes)##. If ##p## is the r-th element of ##indexes## which is valid on ##source##, then ##result[r]## is ##source[p]##.
+--		A **sequence**, of length at most ##length(indexes)##. If ##p## is the r-th element of ##indexes## which is valid on ##source##, then ##result[r]## is ##source[p]##.
 --
 -- Example 1:
 -- <eucode>
@@ -1749,11 +1749,11 @@ end function
 -- Creates a list of sequences based on selected elements from sequences in the source.
 --
 -- Parameters:
---	# ##source##: a list of sequences.
---	# ##coords##: a list of index lists.
+--	# ##source## : a list of sequences.
+--	# ##coords## : a list of index lists.
 --
 -- Returns:
---	A **sequence** with the same length as ##source##. Each of its elements is a sequence,
+--	A **sequence**, with the same length as ##source##. Each of its elements is a sequence,
 -- the length of ##coords##. Each innermost sequence is made of the
 -- elements from the corresponding source sub-sequence.
 --
@@ -1791,17 +1791,17 @@ end function
 -- Split a sequence on separator delimiters into a number of sub-sequences.
 --
 -- Parameters:
---   # ##source##: the sequence to split.
---   # ##delim##: an object (default is ' '). The delimiter that separates items
+--   # ##source## : the sequence to split.
+--   # ##delim## : an object (default is ' '). The delimiter that separates items
 --                in ##source##.
---   # ##limit##: an integer (default is 0). The maximum number of sub-sequences
+--   # ##limit## : an integer (default is 0). The maximum number of sub-sequences
 --                to create. If zero, there is no limit.
---   # ##no_empty##: an integer (default is 0). If not zero then all zero-length sub-sequences
+--   # ##no_empty## : an integer (default is 0). If not zero then all zero-length sub-sequences
 --                   removed from the returned sequence. Use this when leading,
 --                   trailing and duplicated delimiters are not significant.
 --
 -- Returns:
---		A **sequence** of sub-sequences of ##source##. Delimiters are removed.
+--		A **sequence**, of sub-sequences of ##source##. Delimiters are removed.
 --
 -- Comments:
 -- This function may be applied to a string sequence or a complex sequence.
@@ -1910,11 +1910,11 @@ end function
 -- If limit is > 0 then limit the number of tokens that will be split to limit.
 --
 -- Parameters:
--- # ##source##: the sequence to split.
--- # ##delim##: a list of delimiters to split by.
--- # ##limit##: an integer (default is 0). The maximum number of sub-sequences
+-- # ##source## : the sequence to split.
+-- # ##delim## : a list of delimiters to split by.
+-- # ##limit## : an integer (default is 0). The maximum number of sub-sequences
 --              to create. If zero, there is no limit.
--- # ##no_empty##: an integer (default is 0). If not zero then all zero-length sub-sequences
+-- # ##no_empty## : an integer (default is 0). If not zero then all zero-length sub-sequences
 --                   removed from the returned sequence. Use this when leading,
 --                   trailing and duplicated delimiters are not significant.
 --
@@ -1988,8 +1988,8 @@ end function
 -- Join sequences together using a delimiter.
 --
 -- Parameters:
---   # ##items##: the sequence of items to join.
---   # ##delim##: an object, the delimiter to join by. Defaults to " ".
+--   # ##items## : the sequence of items to join.
+--   # ##delim## : an object, the delimiter to join by. Defaults to " ".
 --
 -- Comments:
 --   This function may be applied to a string sequence or a complex sequence
@@ -2036,19 +2036,19 @@ public enum
 -- Breaks up a sequence into multiple sequences of a given length.
 --
 -- Parameters:
--- 		# ##source##: the sequence to be broken up into sub-sequences.
---		# ##size##: an object, if an integer it is either the maximum length of
+-- 		# ##source## : the sequence to be broken up into sub-sequences.
+--		# ##size## : an object, if an integer it is either the maximum length of
 --                  each resulting sub-sequence or the maximum number of 
 --                  sub-sequences to break ##source## into. \\
 --                  If ##size## is a sequence, it is a list of element counts
 --                  for the sub-sequences it creates.
---		# ##style##: an integer, Either BK_LEN if ##size## integer represents
+--		# ##style## : an integer, Either BK_LEN if ##size## integer represents
 --                   the sub-sequences' maximum length, or BK_PIECES if
 --                   the ##size## integer represents the maximum number of
 --                   sub-sequences (pieces) to break ##source## into.
 --
 -- Returns:
---	A **sequence** of sequences.
+--	A **sequence**, of sequences.
 --
 -- Comments:
 -- **When ##size## is an integer and ##style## is BK_LEN...**\\
@@ -2185,12 +2185,12 @@ end function
 -- Remove all nesting from a sequence.
 --
 -- Parameters:
---		# ##s##: the sequence to flatten out.
---      # delim##: An optional delimiter to place after each flattened sub-sequence (except
+--		# ##s## : the sequence to flatten out.
+--      # delim## : An optional delimiter to place after each flattened sub-sequence (except
 --                 the last one). 
 --
 -- Returns:
---		A **sequence** of atoms, all the atoms in ##s## enumerated.
+--		A **sequence**, of atoms, all the atoms in ##s## enumerated.
 --
 -- Comments:
 -- * If you consider a sequence as a tree, then the enumeration is performed
@@ -2259,11 +2259,11 @@ end function
 -- and greater than the pivot.
 --
 -- Parameters:
---   # ##data_p##: Either an atom or a list. An atom is treated as if it is one-element sequence.
---   # ##pivot_p##: An object. Default is zero.
+--   # ##data_p## : Either an atom or a list. An atom is treated as if it is one-element sequence.
+--   # ##pivot_p## : An object. Default is zero.
 --
 -- Returns:
---   A **sequence**: { {less than pivot}, {equal to pivot}, {greater than pivot} }
+--   A **sequence**, { {less than pivot}, {equal to pivot}, {greater than pivot} }
 --
 -- Comments: 
 -- ##pivot()## is used as a split up a sequence relative to a specific value.
@@ -2301,8 +2301,8 @@ end function
 -- Implements "List Comprehension" or building a list based on the contents of another list.
 --
 -- Parameters:
---   # ##source##: A sequence. The list of items to base the new list upon.
---   # ##transformer##: One or more routine_ids. These are [[:routine_id | routine ids]]
+--   # ##source## : A sequence. The list of items to base the new list upon.
+--   # ##transformer## : One or more routine_ids. These are [[:routine_id | routine ids]]
 --        of functions that must receive three parameters (object x, sequence i, object u)
 --        where 'x' is an item in the ##source## list, 'i' contains the position that 'x' is
 --        found in the ##source## list and the length of ##source##, and 'u' 
@@ -2312,13 +2312,13 @@ end function
 --        zero, the second element is added to the new list being built (other elements
 --        are ignored) and build_list skips the rest of the transformers and processes
 --        the next element in ##source##.
---   # ##singleton##: An integer. If zero then the transformer functions return multiple
+--   # ##singleton## : An integer. If zero then the transformer functions return multiple
 --                   list elements. If not zero then the transformer functions return
 --                   a single item (which might be a sequence).
---   # ##user_data##: Any object. This is passed unchanged to each transformer function.
+--   # ##user_data## : Any object. This is passed unchanged to each transformer function.
 --
 -- Returns:
---   A **sequence**: The new list of items.
+--   A **sequence**, The new list of items.
 --
 -- Comments:
 -- * If the transformer is -1, then the source item is just copied.
@@ -2396,11 +2396,11 @@ end function
 -- Transforms the input sequence by using one or more user-supplied transformers.
 --
 -- Parameters:
--- # ##pSource## - A sequence to be transformed.
--- # ##pTransformer## - An object. One or more routine_ids used to transform the input.
+-- # ##pSource## : A sequence to be transformed.
+-- # ##pTransformer## : An object. One or more routine_ids used to transform the input.
 --
 -- Returns:
--- The source sequence that has been transformed.
+-- The source **sequence**, that has been transformed.
 --
 -- Comments:
 -- * This works by calling each transformer in order, passing to it the result
@@ -2449,11 +2449,11 @@ end function
 -- Calculates the similarity between two sequences.
 --
 -- Parameters:
---   # ##A##: A sequence.
---   # ##B##: A sequence.
+--   # ##A## : A sequence.
+--   # ##B## : A sequence.
 --
 -- Returns:
---   An **atom**: The closer to zero, the more the two sequences are alike.
+--   An **atom**, the closer to zero, the more the two sequences are alike.
 --
 -- Comments:
 -- The calculation is weighted to give mismatched elements towards the front
@@ -2548,13 +2548,13 @@ public constant SEQ_NOALT = {{1.23456}}
 -- replacing them with a supplied alternative value.
 --
 -- Parameters:
--- # ##pSource##: A sequence from which sub-sequences are removed.
--- # ##pAltValue##: An object. Use SEQ_NOALT to indicate that sub-sequences
+-- # ##pSource## : A sequence from which sub-sequences are removed.
+-- # ##pAltValue## : An object. Use SEQ_NOALT to indicate that sub-sequences
 --                  are to be physically removed, any other value will be
 --                  used to replace the sub-sequence.
 --
 -- Returns:
--- A sequence, which contains only the atoms from ##pSource## and optionally
+-- A **sequence**, which contains only the atoms from ##pSource## and optionally
 -- the ##pAltValue## where sub-sequences used to be.
 --
 -- Example:
@@ -2622,16 +2622,16 @@ public enum
 -- ** RD_SORT will return the unique elements in ascending sorted order.
 --
 -- Returns:
--- A sequence that contains only the unique elements from ##pSource##. 
+-- A **sequence**, that contains only the unique elements from ##pSource##. 
 --
 -- Example 1:
---<eucode>
+-- <eucode>
 -- sequence s = { 4,7,9,7,2,5,5,9,0,4,4,5,6,5}
 -- ? remove_dups(s, RD_INPLACE) --> {4,7,9,2,5,0,6}
 -- ? remove_dups(s, RD_SORT) --> {0,2,4,5,6,7,9}
 -- ? remove_dups(s, RD_PRESORTED) --> {4,7,9,7,2,5,9,0,4,5,6,5}
 -- ? remove_dups(sort(s), RD_PRESORTED) --> {0,2,4,5,6,7,9}
---</eucode>
+-- </eucode>
 --
 public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
 	integer lTo
@@ -2676,10 +2676,10 @@ end function
 -- Combines all the sub-sequences into a single sorted list
 --
 -- Parameters:
--- # ##pSource##: A sequence that contains sub-sequences to be merged.
+-- # ##pSource## : A sequence that contains sub-sequences to be merged.
 --
 -- Returns:
--- A sequence that contains all the elements from all the first-level of
+-- A **sequence**, that contains all the elements from all the first-level of
 -- sub-sequences from ##pSource##. 
 --
 -- Comments:
@@ -2688,22 +2688,22 @@ end function
 -- Only one level of sub-sequence is merged. 
 --
 -- Example 1:
---<eucode>
+-- <eucode>
 -- sequence s = { {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}
 -- ? merge(s) --> {0,2,4,4,5,5,5,6,7,7,9,9}
---</eucode>
+-- </eucode>
 --
 -- Example 2:
---<eucode>
+-- <eucode>
 -- sequence s = { {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}
 -- ? merge(s) --> {"cat","dog","fish","snail","whale","wolf","worm"}
---</eucode>
+-- </eucode>
 --
 -- Example 3:
---<eucode>
+-- <eucode>
 -- sequence s = { "cat", "dog","fish", "whale", "wolf", "snail", "worm"}
 -- ? merge(s) --> "aaacdeffghhiilllmnooorsstwww"
---</eucode>
+-- </eucode>
 --
 public function merge(sequence pSource)
 	sequence lResult

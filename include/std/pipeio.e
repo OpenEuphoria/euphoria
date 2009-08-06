@@ -140,7 +140,7 @@ end type
 -- Close handle fd
 --
 -- Returns:
---   0 on success, -1 on failure
+--   An **integer**, 0 on success, -1 on failure
 --
 -- Example 1:
 -- <eucode>
@@ -243,7 +243,7 @@ end function
 -- Read ##bytes## bytes from handle ##fd##
 --
 -- Returns:
---   sequence containing data, an empty sequence on EOF or an error code.
+--   A **sequence**, containing data, an empty sequence on EOF or an error code.
 --   Similar to [[:get_bytes]].
 --
 -- Example 1:
@@ -294,7 +294,7 @@ end function
 -- Write ##bytes## to handle ##fd##
 --
 -- Returns:
---   number of bytes written, or -1 on error
+--   A **integer**, number of bytes written, or -1 on error
 --
 -- Example 1:
 -- <eucode>
@@ -402,7 +402,7 @@ ifdef WIN32 then
 	-- Create pipes for inter-process communication
 	--
 	-- Returns:
-	--   Returns process handles { {parent side pipes},{child side pipes} }
+	--   A **handle**, process handles { {parent side pipes},{child side pipes} }
 	--
 	-- Example 1:
 	-- <eucode>
@@ -460,7 +460,7 @@ ifdef WIN32 then
 	-- Open process with command line cmd
 	--
 	-- Returns:
-	--   Returns process handles { [[:PID]], [[:STDIN]], [[:STDOUT]], [[:STDERR]] }
+	--   A **handle**, process handles { [[:PID]], [[:STDIN]], [[:STDOUT]], [[:STDERR]] }
 	--
 	-- Example 1:
 	-- <eucode>

@@ -219,29 +219,29 @@ end procedure
 -- to show the structure.
 --
 -- Parameters:
--- # ##fn##: an integer, the file/device number to write to
--- # ##x##: the object to display/convert to printable form
--- # ##options## is an (up to) 10-element options sequence.
+-- # ##fn## : an integer, the file/device number to write to
+-- # ##x## : the object to display/convert to printable form
+-- # ##options## : is an (up to) 10-element options sequence.
 --
 -- Comments:
 --
 --  Pass {} in ##options## to select the defaults, or set options as below:
 --   # display ASCII characters:
---     ** 0: never
---     ** 1: alongside any integers in printable ASCII range (default)
---     ** 2: display as "string" when all integers of a sequence
+--     ** 0 ~-- never
+--     ** 1 ~-- alongside any integers in printable ASCII range (default)
+--     ** 2 ~--  display as "string" when all integers of a sequence
 --             are in ASCII range
---     ** 3: show strings, and quoted characters (only) for any integers
+--     ** 3 ~-- show strings, and quoted characters (only) for any integers
 --             in ASCII range as well as the characters: \t \r \n
---   # amount to indent for each level of sequence nesting - default: 2
---   # column we are starting at - default: 1
---   # approximate column to wrap at - default: 78
---   # format to use for integers - default: "%d"
---   # format to use for floating-point numbers - default: "%.10g"
---   # minimum value for printable ASCII - default 32
---   # maximum value for printable ASCII - default 127
+--   # amount to indent for each level of sequence nesting ~-- default: 2
+--   # column we are starting at ~-- default: 1
+--   # approximate column to wrap at ~-- default: 78
+--   # format to use for integers ~-- default: "%d"
+--   # format to use for floating-point numbers ~-- default: "%.10g"
+--   # minimum value for printable ASCII ~-- default 32
+--   # maximum value for printable ASCII ~-- default 127
 --   # maximum number of lines to output 
---   # line breaks between elements   - default 1 (0 = no line breaks, -1 = line breaks to wrap only)
+--   # line breaks between elements   ~-- default 1 (0 = no line breaks, -1 = line breaks to wrap only)
 -- 
 -- If the length is less than 10, unspecified options at
 -- the end of the sequence will keep the default values.    
@@ -251,20 +251,20 @@ end procedure
 -- The default options can be applied using the public constant ##PRETTY_DEFAULT##, and the
 -- elements may be accessed using the following public enum~:
 --
--- # DISPLAY_ASCII
--- # INDENT
--- # START_COLUMN
--- # WRAP
--- # INT_FORMAT
--- # FP_FORMAT
--- # MIN_ASCII
--- # MAX_ASCII
--- # MAX_LINES
--- # LINE_BREAKS
+-- # ##DISPLAY_ASCII##
+-- # ##INDENT##
+-- # ##START_COLUMN##
+-- # ##WRAP##
+-- # ##INT_FORMAT##
+-- # ##FP_FORMAT##
+-- # ##MIN_ASCII##
+-- # ##MAX_ASCII##
+-- # ##MAX_LINES##
+-- # ##LINE_BREAKS##
 --
 -- The display will start at the current cursor position. Normally you will want to call 
--- pretty_print() when the cursor is in column 1 (after printing a <code>\n</code> character). 
--- If you want to start in a different column, you should call position() and specify a value 
+-- ##pretty_print##() when the cursor is in column 1 (after printing a <code>\n</code> character). 
+-- If you want to start in a different column, you should call ##position##() and specify a value 
 -- for option [3]. This will ensure that the first and last braces in a sequence line up 
 -- vertically.
 --
@@ -329,6 +329,7 @@ end procedure
 --
 -- See Also:
 -- [[:print]], [[:sprint]], [[:printf]], [[:sprintf]], [[:pretty_sprint]]
+--
 public procedure pretty_print(integer fn, object x, sequence options = PRETTY_DEFAULT )
 	pretty_printing = 1
 	pretty_file = fn
@@ -340,12 +341,12 @@ end procedure
 -- Format an object using braces { , , , }, indentation, and multiple lines to show the structure.
 --
 -- Parameters:
---   # ##x##: the object to display
---   # ##options## is an (up to) 10-element options sequence: Pass {} to select the defaults, or
+--   # ##x## : the object to display
+--   # ##options## : is an (up to) 10-element options sequence: Pass {} to select the defaults, or
 --     set options 
 --
 -- Returns:
---		A **sequence** of printable characters, representing ##x## in an human-readable form.
+--		A **sequence**, of printable characters, representing ##x## in an human-readable form.
 --
 -- Comments:
 --

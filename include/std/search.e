@@ -22,14 +22,14 @@ include std/error.e
 --     Compare two items returning less than, equal or greater than.
 --
 -- Parameters:
---		# ##compared##: the compared object
---		# ##reference##: the reference object
+--		# ##compared## : the compared object
+--		# ##reference## : the reference object
 --
 -- Returns:
---     An **integer**:
---	*  0 if objects are identical
---	*  1 if ##compared## is greater than ##reference##
---	* -1 if ##compared## is less than ##reference##
+--     An **integer**,
+--	*  0 ~-- if objects are identical
+--	*  1 ~-- if ##compared## is greater than ##reference##
+--	* -1 ~-- if ##compared## is less than ##reference##
 --
 -- Comments:
 --     Atoms are considered to be less than sequences. Sequences are compared alphabetically 
@@ -66,8 +66,8 @@ include std/error.e
 --     Compare two Euphoria objects to see if they are the same. 
 --
 -- Parameters:
---			# ##left##: one of the objects to test
---			# ##right##: the other object
+--			# ##left## : one of the objects to test
+--			# ##right## : the other object
 --
 -- Returns:
 --   An **integer**, 1 if the two objects are identical, else 0.
@@ -107,9 +107,9 @@ include std/error.e
 --     Find the first occurrence of a "needle" as an element of a "haystack", starting from position "start"..
 --
 -- Parameters:
---		# ##needle##: an object whose presence is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle##
---		# ##start##: an integer, the position at which to start searching. Defaults to 1.
+--		# ##needle## : an object whose presence is being queried
+--		# ##haystack## : a sequence, which is being looked up for ##needle##
+--		# ##start## : an integer, the position at which to start searching. Defaults to 1.
 --
 -- Returns:
 --     An **integer**, 0 if ##needle## is not on ##haystack##, else the smallest index of an 
@@ -143,9 +143,9 @@ include std/error.e
 --     Find the first occurrence of a "needle" as an element of a "haystack". Search starts at a specified index.
 --
 --Parameters:
---		# ##needle##: an object whose presence is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle##
---		# ##start##: an integer, the index in ##haystack## at which to start searching.
+--		# ##needle## : an object whose presence is being queried
+--		# ##haystack## : a sequence, which is being looked up for ##needle##
+--		# ##start## : an integer, the index in ##haystack## at which to start searching.
 --
 -- Returns:
 --     An **integer**, 0 if ##needle## is not on ##haystack## past position ##start##, else the smallest index, not less than ##start##, of an element of ##haystack## that equals ##needle##.
@@ -176,9 +176,9 @@ include std/error.e
 -- Find any element from a list inside a sequence. Returns the location of the first hit.
 --
 -- Parameters:
---		# ##needles##: a sequence, the list of items to look for
---		# ##haystack##: a sequence, in which "needles" are looked for
---		# ##start##: an integer, the starting point of the search. Defaults to 1.
+--		# ##needles## : a sequence, the list of items to look for
+--		# ##haystack## : a sequence, in which "needles" are looked for
+--		# ##start## : an integer, the starting point of the search. Defaults to 1.
 --
 -- Returns:
 --		An **integer**, the smallest index in ##haystack## of an element of ##needles##, or 0 if no needle is found.
@@ -216,9 +216,9 @@ end function
 -- Find all occurrences of an object inside a sequence, starting at some specified point.
 --
 -- Parameters:
---     # ##needle##: an object, what to look for
---     # ##haystack##: a sequence to search in
---     # ##start##: an integer, the starting index position (defaults to 1)
+--     # ##needle## : an object, what to look for
+--     # ##haystack## : a sequence to search in
+--     # ##start## : an integer, the starting index position (defaults to 1)
 --
 -- Returns:
 --		A **sequence**, the list of all indexes no less than ##start## of elements of ##haystack## that equal ##needle##. This sequence is empty if no match found.
@@ -255,22 +255,22 @@ public constant
 -- Find any object (among a list) in a sequence of arbitrary shape at arbitrary nesting.
 --
 -- Parameters:
---		# ##needle##: an object, either what to look up, or a list of items to look up
---		# ##haystack##: a sequence, where to look up
---		# ##flags##: options to the function, see Comments section.  Defaults to 0.
---		# ##routine##: an integer, the routine_id of an user supplied equal function. Defaults to -1.
+--		# ##needle## : an object, either what to look up, or a list of items to look up
+--		# ##haystack## : a sequence, where to look up
+--		# ##flags## : options to the function, see Comments section.  Defaults to 0.
+--		# ##routine## : an integer, the routine_id of an user supplied equal function. Defaults to -1.
 --
 -- Returns:
--- A possibly empty **sequence** of results, one for each hit.
+-- A possibly empty **sequence**, of results, one for each hit.
 --
 -- Comments:
 -- Each item in the returned sequence is either a sequence of indexes, or a pair {sequence of indexes, index in ##needle##}.
 --
 -- The following flags are available to fine tune the search:
--- * NESTED_BACKWARD: if on ##flags##, search is performed backward. Default is forward.
--- * NESTED_ALL: if on ##flags##, all occurrences are looked for. Default is one hit only.
--- * NESTED_ANY: if present on ##flags##, ##needle## is a list of items to look for. Not the default.
--- * NESTED_INDEXES: if present on ##flags##, an individual result is a pair {position, index 
+-- * ##NESTED_BACKWARD## ~--  if on ##flags##, search is performed backward. Default is forward.
+-- * ##NESTED_ALL## ~-- if on ##flags##, all occurrences are looked for. Default is one hit only.
+-- * ##NESTED_ANY## ~-- if present on ##flags##, ##needle## is a list of items to look for. Not the default.
+-- * ##NESTED_INDEXES## ~-- if present on ##flags##, an individual result is a pair {position, index 
 --   in ##needle##}. Default is just return the position.
 --
 -- If ##s## is a single index list, or position, from the returned sequence, then ##fetch(haystack, s) = needle##.
@@ -280,7 +280,7 @@ public constant
 -- ##haystack## item and ##needle##. The returned integer is interpreted as if returned by
 -- [[:equal]]() or [[:find]]().
 --
--- If the NESTED_ANY flag is specified, and ##needle## is an atom, then the flag is removed.
+-- If the ##NESTED_ANY## flag is specified, and ##needle## is an atom, then the flag is removed.
 --
 -- Example 1:
 -- <eucode>
@@ -401,9 +401,9 @@ end function
 -- Find a needle in a haystack in reverse order.
 --
 -- Parameters:
---   # ##needle##: an object to search for
---   # ##haystack##: a sequence to search in
---   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
+--   # ##needle## : an object to search for
+--   # ##haystack## : a sequence to search in
+--   # ##start## : an integer, the starting index position (defaults to length(##haystack##))
 --     
 -- Returns:
 --   An **integer**, 0 if no instance of ##needle## can be found on ##haystack## before
@@ -460,10 +460,10 @@ end function
 --
 -- Parameters:
 --
---		# ##needle##: an object to search and perhaps replace
---		# ##haystack##: a sequence to be inspected
---		# ##replacement##: an object to substitute for any (first) instance of ##needle##
---		# ##max##: an integer, 0 to replace all occurrences
+--		# ##needle## : an object to search and perhaps replace
+--		# ##haystack## : a sequence to be inspected
+--		# ##replacement## : an object to substitute for any (first) instance of ##needle##
+--		# ##max## : an integer, 0 to replace all occurrences
 --
 -- Returns:
 --		A **sequence**, the modified ##haystack##.
@@ -522,10 +522,10 @@ end function
 -- Finds a "needle" in an ordered "haystack". Star and end point can be given for the search.
 --
 -- Parameters:
---		# ##needle##: an object to look for
---		# ##haystack##: a sequence to search in
---		# ##start_point##: an integer, the index at which to start searching. Defaults to 1.
---		# ##end_point##: an integer, the end point of the search. Defaults to 0, ie search to end.
+--		# ##needle## : an object to look for
+--		# ##haystack## : a sequence to search in
+--		# ##start_point## : an integer, the index at which to start searching. Defaults to 1.
+--		# ##end_point## : an integer, the end point of the search. Defaults to 0, ie search to end.
 --
 -- Returns:
 --		An **integer**, either:
@@ -601,9 +601,9 @@ end function
 --     Try to match a "needle" against some slice of a "haystack", starting at position "start".
 --
 -- Parameters:
---		# ##needle##: a sequence whose presence as a "substring" is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle## as a sub-sequence
---		# ##start##: an integer, the point from which matching is attempted. Defaults to 1.
+--		# ##needle## : a sequence whose presence as a "substring" is being queried
+--		# ##haystack## : a sequence, which is being looked up for ##needle## as a sub-sequence
+--		# ##start## : an integer, the point from which matching is attempted. Defaults to 1.
 --
 -- Returns:
 --     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
@@ -629,9 +629,9 @@ end function
 --     Try to match a "needle" against some slice of a "haystack", starting from some index.
 --
 -- Parameters:
---		# ##needle##: an sequence whose presence as a sub-sequence is being queried
---		# ##haystack##: a sequence, which is being looked up for ##needle## as a sub-sequence
---		# ##start##: an integer, the index in ##haystack## at which to start searching.
+--		# ##needle## : an sequence whose presence as a sub-sequence is being queried
+--		# ##haystack## : a sequence, which is being looked up for ##needle## as a sub-sequence
+--		# ##start## : an integer, the index in ##haystack## at which to start searching.
 --
 -- Returns:
 --     An **integer**, 0 if no slice of ##haystack## with lower index at least ##start## is ##needle##, else the smallest such index.
@@ -655,12 +655,12 @@ end function
 -- Match all items of haystack in needle.
 --
 -- Parameters:
---     # ##needle##: a sequence, what to look for
---     # ##haystack##: a sequence to search in
---     # ##start##: an integer, the starting index position (defaults to 1)
+--     # ##needle## : a sequence, what to look for
+--     # ##haystack## : a sequence to search in
+--     # ##start## : an integer, the starting index position (defaults to 1)
 --
 -- Returns:
---   A **sequence** of integers, the list of all lower indexes, not less than ##start##, of all slices in ##haystack## that equal ##needle##. The list may be empty.
+--   A **sequence**, of integers, the list of all lower indexes, not less than ##start##, of all slices in ##haystack## that equal ##needle##. The list may be empty.
 --
 -- Example 1:
 -- <eucode>
@@ -688,9 +688,9 @@ end function
 -- Try to match a needle against some slice of a haystack in reverse order.
 --
 -- Parameters:
---   # ##needle##: a sequence to search for
---   # ##haystack##: a sequence to search in
---   # ##start##: an integer, the starting index position (defaults to length(##haystack##))
+--   # ##needle## : a sequence to search for
+--   # ##haystack## : a sequence to search in
+--   # ##start## : an integer, the starting index position (defaults to length(##haystack##))
 --
 -- Returns:
 --   An **integer**, either 0 if no slice of ##haystack## starting before 
@@ -749,8 +749,8 @@ end function
 -- Test whether a sequence is the head of another one.
 -- 
 -- Parameters:
---	# ##pSubText##: an object to be looked for
---  # ##pFullText##: a sequence, the head of which is being inspected.
+--	# ##pSubText## : an object to be looked for
+--  # ##pFullText## : a sequence, the head of which is being inspected.
 --
 -- Returns:
 --		An **integer**, 1 if ##pSubText## begins ##pFullText##, else 0.
@@ -794,8 +794,8 @@ end function
 -- Test whether a sequence ends another one.
 --
 -- Parameters:
---	# ##pSubText##: an object to be looked for
---  # ##pFullText##: a sequence, the head of which is being inspected.
+--	# ##pSubText## : an object to be looked for
+--  # ##pFullText## : a sequence, the head of which is being inspected.
 --
 -- Returns:
 --		An **integer**, 1 if ##pSubText## ends ##pFullText##, else 0.
@@ -839,12 +839,12 @@ end function
 -- Tests to see if the ##item## is in a range of values supplied by ##range_limits##
 --
 -- Parameters:
---   # ##item##: The object to test for.
---   # ##range_limits##: A sequence of two or more elements. The first is assumed
+--   # ##item## : The object to test for.
+--   # ##range_limits## : A sequence of two or more elements. The first is assumed
 --    to be the smallest value and the last is assumed to be the highest value.
 --
 -- Returns:
---   A **integer**: 0 if ##item# is lower than the first item in the ##range_limits##
+--   An **integer**, 0 if ##item# is lower than the first item in the ##range_limits##
 --                  or higher than the last element in the ##range_limits##. Otherwise
 --                  it returns 1.
 --
@@ -873,11 +873,11 @@ end function
 -- Tests to see if the ##item## is in a list of values supplied by ##list##
 --
 -- Parameters:
---   # ##item##: The object to test for.
---   # ##list##: A sequence of elements that ##item## could be a member of.
+--   # ##item## : The object to test for.
+--   # ##list## : A sequence of elements that ##item## could be a member of.
 --
 -- Returns:
---   A **integer**: 0 if ##item# is not in the ##list##, otherwise
+--   An **integer**,  0 if ##item# is not in the ##list##, otherwise
 --                  it returns 1.
 --
 -- Example 1:
@@ -895,12 +895,12 @@ end function
 -- Ensures that the ##item## is in a list of values supplied by ##list##
 --
 -- Parameters:
---   # ##item##: The object to test for.
---   # ##list##: A sequence of elements that ##item## should be a member of.
---	# ##default##: an integer, the index of the list item to return if ##item## is not found. Defaults to 1.
+--   # ##item## : The object to test for.
+--   # ##list## : A sequence of elements that ##item## should be a member of.
+--	# ##default## : an integer, the index of the list item to return if ##item## is not found. Defaults to 1.
 --
 -- Returns:
---   A **object**: If ##item# is not in the list, it returns the list item of index ##default##,
+--   An **object**, if ##item# is not in the list, it returns the list item of index ##default##,
 --                 otherwise it returns ##item##.
 --
 -- Comments:

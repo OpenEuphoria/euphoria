@@ -20,12 +20,12 @@ sequence list_of_primes  = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 -- Returns all the prime numbers below some threshold, with a cap on computation time.
 --
 -- Parameters:
---		# ##max_p##: an integer, the last prime returned is the next prime after or on this value.
---		# ##time_out_p##: an atom, the maximum number of seconds that this function can run for.
+--		# ##max_p## : an integer, the last prime returned is the next prime after or on this value.
+--		# ##time_out_p## : an atom, the maximum number of seconds that this function can run for.
 --                        The default is 10 (ten) seconds.
 --
 -- Returns:
---		A **sequence** made of prime numbers in increasing order. The last value is 
+--		A **sequence**, made of prime numbers in increasing order. The last value is 
 --      the next prime number that falls on or after the value of ##max_p##.
 --
 -- Comments:
@@ -39,7 +39,7 @@ sequence list_of_primes  = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 --
 -- Example 1:
 -- <eucode>
--- ?calc_primes(1000, 5)
+-- ? calc_primes(1000, 5)
 -- -- On a very slow computer, you may only get all primes up to say 719. 
 -- -- On a faster computer, the last element printed out will be 997. 
 -- -- This call will never take longer than 5 seconds.
@@ -149,8 +149,8 @@ end function
 -- Return the next prime number on or after the supplied number
 --
 -- Parameters:
--- 		# ##n##: an integer, the starting point for the search
---		# ##fail_signal_p##: an integer, used to signal error. Defaults to -1.
+-- 		# ##n## : an integer, the starting point for the search
+--		# ##fail_signal_p## : an integer, used to signal error. Defaults to -1.
 --
 -- Returns:
 --		An **integer**, which is prime only if it took less than 1 second 
@@ -163,7 +163,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ?next_prime(997)
+-- ? next_prime(997)
 -- -- On a very slow computer, you might get -997, but 1003 is expected.
 -- </eucode>
 --
@@ -199,7 +199,7 @@ end function
 -- Returns a list of prime numbers.
 --
 -- Parameters:
--- 		# ##top_prime_p##: The list will end with the prime less than or equal
+-- 		# ##top_prime_p## : The list will end with the prime less than or equal
 --        to this value. If this is zero, the current list calculated primes
 --        is returned.
 --
@@ -215,6 +215,7 @@ end function
 --
 -- See Also:
 -- [[:calc_primes]], [[:next_prime]]
+--
 public function prime_list(integer top_prime_p = 0)
 	integer index_
 	

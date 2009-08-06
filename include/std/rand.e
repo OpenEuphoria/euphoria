@@ -17,10 +17,10 @@ namespace random
 --   Return a random positive integer.
 --
 -- Parameters:
--- 		# ##maximum##: an atom, a cap on the value to return.
+-- 		# ##maximum## : an atom, a cap on the value to return.
 --
 -- Returns:
---		An **integer** from 1 to ##maximum##.
+--		An **integer**, from 1 to ##maximum##.
 --
 -- Errors:
 --		If [[:ceil]](##maximum##) is not a positive integer <= 1073741823,
@@ -45,11 +45,11 @@ namespace random
 -- Return a random integer from a specified inclusive integer range.
 --
 -- Parameters:
---		# ##lo##: an integer, the lower bound of the range
---		# ##hi##: an integer, the upper bound of the range.
+--		# ##lo## : an integer, the lower bound of the range
+--		# ##hi## : an integer, the upper bound of the range.
 --
 -- Returns:
---		An **integer** randomly drawn between ##lo## and ##hi## inclusive.
+--		An **integer**, randomly drawn between ##lo## and ##hi## inclusive.
 --
 -- Errors:
 --		If ##lo## is not less than ##hi##, an error will occur.
@@ -64,6 +64,7 @@ namespace random
 -- s = rand_range(18, 24)
 -- -- s could be any of: 18, 19, 20, 21, 22, 23 or 24
 -- </eucode>
+--
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rnd]]
 
@@ -90,7 +91,7 @@ constant M_SET_RAND = 35
 --		None.
 --
 -- Returns:
---		An **atom** randomly drawn between 0.0 and 1.0 inclusive.
+--		An **atom**, randomly drawn between 0.0 and 1.0 inclusive.
 --
 -- Comments:
 --	 In order to get reproducible results from this function, you should
@@ -102,6 +103,7 @@ constant M_SET_RAND = 35
 -- s = rnd()
 --   -- s is 0.2634879318
 -- </eucode>
+--
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rand_range]]
 
@@ -128,7 +130,7 @@ end function
 --		None.
 --
 -- Returns:
---		An **atom** randomly drawn between 0.0 and a number less than 1.0 
+--		An **atom**, randomly drawn between 0.0 and a number less than 1.0 
 --
 -- Comments:
 --	 In order to get reproducible results from this function, you should
@@ -140,6 +142,7 @@ end function
 -- s = rnd_1()
 --   -- s is 0.2634879318
 -- </eucode>
+--
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rand_range]]
 
@@ -157,12 +160,12 @@ end function
 -- Reset the random number generator.
 --
 -- Parameters:
--- 		# ##seed##, an integer, which the generator uses to initialize itself
+-- 		# ##seed## : an integer, which the generator uses to initialize itself
 --
 -- Comments:
--- 		Starting from a ##seed##, the values returned by rand() are
+-- 		Starting from a ##seed##, the values returned by ##rand##() are
 -- reproducible. This is useful for demos and stress tests based on random
--- data. Normally the numbers returned by the rand() function are totally
+-- data. Normally the numbers returned by the ##rand##() function are totally
 -- unpredictable, and will be different each time you run your program.
 -- Sometimes however you may wish to repeat the same series of numbers,
 -- perhaps because you are trying to debug your program, or maybe you want
