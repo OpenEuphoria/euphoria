@@ -118,7 +118,7 @@ public function maybe_preprocess(sequence fname)
 			preprocessors[pp_id][PP_RID] = rid
 		end if
 		
-		if c_func(rid, { fname, post_fname, pp[PP_PARAMS] }) = 0 then
+		if c_func(rid, { fname, post_fname, pp[PP_PARAMS] }) != 0 then
 			CompileErr("Preprocessor call failed\n")
 		end if
 	else
