@@ -1733,7 +1733,7 @@ end function
 --		# ##pData## : an integer. The item to test.
 --
 -- Returns:
-** An **integer**,
+-- ** An **integer**,
 -- * 1 if its even.
 -- * 0 if its odd.
 --
