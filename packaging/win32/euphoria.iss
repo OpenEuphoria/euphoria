@@ -37,6 +37,7 @@ Name: comp_tools; Description: "Euphoria related tools"; Types: full standard wi
 Name: comp_demos; Description: "Demonstration programs"; Types: full standard windows dos;
 Name: comp_source; Description: "Source code"; Types: full;
 Name: comp_tests; Description: "Unit tests"; Types: full standard windows dos;
+Name: comp_tuts; Description: "Tutorials"; Types: full standard windows dos;
 
 [Tasks]
 Name: associate; Description: "&Associate file extensions"; Flags: unchecked
@@ -151,6 +152,7 @@ Source: "cleanbranch\demo\*.ex"; DestDir: {app}\demo\; Flags: ignoreversion recu
 Source: "cleanbranch\demo\*.exw"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist; Components: comp_demos
 Source: "cleanbranch\demo\*.exd"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist; Components: comp_demos
 Source: "cleanbranch\demo\*.doc"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
+Source: "cleanbranch\demo\*.txt"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
 
 ; Includes
 Source: "cleanbranch\include\*.e"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs;
@@ -164,7 +166,7 @@ Source: "cleanbranch\source\codepage\*.*"; DestDir: {app}\bin\codepage; Flags: i
 Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
 
 ; Tutorial
-Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion; Components: comp_demos
+Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion; Components: comp_tuts
 
 ; Others
 Source: "cleanbranch\packaging\win32\setenv.bat"; DestDir: {app}; Flags: ignoreversion; Tasks: not update_env; AfterInstall: CreateEnvBatchFile()
