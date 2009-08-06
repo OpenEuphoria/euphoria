@@ -15,7 +15,7 @@ order by their last name.
   * Jeremy Cowgar
   * Matthew Lewis
   * Derek Parnell
-  * Shaw Pringle
+  * Shawn Pringle
 
 === Past Authors
 
