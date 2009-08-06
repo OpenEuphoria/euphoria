@@ -508,7 +508,6 @@ end function
 --   [[:average]], [[:sum]]
 
 public function count(object pData, object pMassage = "")
-	atom result_
 	if atom(pData) then
 		return 1
 	end if
@@ -552,7 +551,7 @@ end function
 --   [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 public function average(object pData, object pMassage = "")
-	integer lCount
+	
 	if atom(pData) then
 		return pData
 	end if
@@ -981,8 +980,6 @@ end function
 public function central_moment(object pData, atom datum, integer which = 1)
 
 	atom lMean
-	atom lTop
-	atom lRes
 	
 	if atom(pData) or length(pData) = 0 then
 		return 0
@@ -998,7 +995,6 @@ public function sum_central_moments(object pData, integer which = 1)
 
 	atom lMean
 	atom lTop
-	atom lRes
 	
 	if atom(pData) or length(pData) = 0 then
 		return 0

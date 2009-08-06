@@ -362,8 +362,11 @@ end function
 ------------------------------------------------------------------------------------------
 
 atom lib, lib2
-integer LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC,
-	LC_TIME, LC_MESSAGES, f_strfmon, f_strfnum
+integer LC_ALL, 
+	-- LC_COLLATE, LC_CTYPE, 
+	LC_MONETARY, LC_NUMERIC,
+	-- LC_TIME, LC_MESSAGES, 
+	f_strfmon, f_strfnum
 
 ifdef WIN32 then
 	lib = open_dll("MSVCRT.DLL")
@@ -371,12 +374,12 @@ ifdef WIN32 then
 	f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I)
 	f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I)
 	LC_ALL      = 0
-	LC_COLLATE  = 1
-	LC_CTYPE    = 2
+--	LC_COLLATE  = 1
+--	LC_CTYPE    = 2
 	LC_MONETARY = 3
 	LC_NUMERIC  = 4
-	LC_TIME     = 5
-	LC_MESSAGES = 6
+--	LC_TIME     = 5
+--	LC_MESSAGES = 6
 	
 -- 	constant FORMAT_SIZE = 6 * 4
 -- 	constant NUM_DIGITS = 0
@@ -392,12 +395,12 @@ elsifdef LINUX then
 	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)
 	f_strfnum = -1
 	LC_ALL      = 6
-	LC_CTYPE    = 0
+--	LC_CTYPE    = 0
 	LC_NUMERIC  = 1
-	LC_TIME     = 2
-	LC_COLLATE  = 3
+--	LC_TIME     = 2
+--	LC_COLLATE  = 3
 	LC_MONETARY = 4
-	LC_MESSAGES = 5
+--	LC_MESSAGES = 5
 
 elsifdef FREEBSD or SUNOS then
 
@@ -406,12 +409,12 @@ elsifdef FREEBSD or SUNOS then
 	f_strfnum = -1
 
 	LC_ALL      = 0
-	LC_COLLATE  = 1
-	LC_CTYPE    = 2
+--	LC_COLLATE  = 1
+--	LC_CTYPE    = 2
 	LC_MONETARY = 3
 	LC_NUMERIC  = 4
-	LC_TIME     = 5
-	LC_MESSAGES = 6
+--	LC_TIME     = 5
+--	LC_MESSAGES = 6
 
 elsifdef OSX then
 
@@ -420,12 +423,12 @@ elsifdef OSX then
 	f_strfnum = -1
 
 	LC_ALL      = 0
-	LC_COLLATE  = 1
-	LC_CTYPE    = 2
+--	LC_COLLATE  = 1
+-- 	LC_CTYPE    = 2
 	LC_MONETARY = 3
 	LC_NUMERIC  = 4
-	LC_TIME     = 5
-	LC_MESSAGES = 6
+--	LC_TIME     = 5
+--	LC_MESSAGES = 6
   
 elsedef
 

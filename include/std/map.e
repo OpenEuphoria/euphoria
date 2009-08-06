@@ -714,6 +714,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 					
 				case LEAVE then
 					-- Do nothing
+					operation_p = operation_p
 					
 				case else
 					crash("Unknown operation given to map.e:put()")

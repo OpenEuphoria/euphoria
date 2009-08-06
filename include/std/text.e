@@ -20,6 +20,7 @@ include std/search.e
 include std/convert.e
 include std/serialize.e
 include std/pretty.e
+include std/error.e
 
 --****
 -- Signature:
@@ -1510,6 +1511,13 @@ public function format(sequence pFormat, object pArgs)
     						argtext = lower(argtext)
     					case 'w' then
     						argtext = proper(argtext)
+    					case 0 then
+    						-- do nothing
+							cap = cap
+							    						
+    					case else
+    						crash("logic error: 'cap' mode in format.")
+    						
     				end switch
 
 					if atom(pArgs[argn]) then

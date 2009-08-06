@@ -1854,8 +1854,10 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		return 0
 	end if
 	
-	if not overwrite and file_exists( dest ) then
-		return 0
+	if not overwrite then
+		if file_exists( dest ) then
+			return 0
+		end if
 	end if
 	
 	ifdef DOS32 then
@@ -2492,7 +2494,8 @@ public function temp_file(sequence pDir = "", sequence pPrefix = "", sequence pE
 				
 			case FILETYPE_DIRECTORY then
 				-- use pDir
-				
+				pDir = pDir
+								
 			case FILETYPE_NOT_FOUND then
 				object tdir = dirname(pDir, 1)
 				if file_exists(tdir) then

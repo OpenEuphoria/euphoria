@@ -3,6 +3,7 @@
 namespace machine
 
 include std/dll.e
+include std/error.e
 public include std/memconst.e
 
 ifdef SAFE then
@@ -394,15 +395,16 @@ end function
 ifdef WIN32 then
 
 	atom kernel_dll, memDLL_id, 
-		VirtualAlloc_rid, VirtualLock_rid, VirtualUnlock_rid,
+		VirtualAlloc_rid, 
+		-- VirtualLock_rid, VirtualUnlock_rid,
 		VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
 
 	memDLL_id = open_dll( "kernel32.dll" )
 	kernel_dll = memDLL_id
 	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
 	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
-	VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
-	VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
+	-- VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
+	-- VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
 	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
 	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
 	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
@@ -628,6 +630,9 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		case 4 then
 			eu:poke4( eaddr, data )
 			
+		case else
+			crash("logic error: Wrong word size %d in allocate_protect", wordsize)
+			
 	end switch
 	
 
@@ -650,10 +655,12 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 					true_protection = protection					
 			end switch
 		end ifdef
-		if dep_works() and eu:c_func( VirtualProtect_rid, { iaddr, size, true_protection , oldprotptr } ) = 0 then
-			-- 0 indicates failure here
-			c_proc(VirtualFree_rid, { iaddr, size, MEM_RELEASE })
-			return 0
+		if dep_works() then
+			if eu:c_func( VirtualProtect_rid, { iaddr, size, true_protection , oldprotptr } ) = 0 then
+				-- 0 indicates failure here
+				c_proc(VirtualFree_rid, { iaddr, size, MEM_RELEASE })
+				return 0
+			end if
 		end if
 	end ifdef
 
