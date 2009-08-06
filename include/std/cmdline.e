@@ -1172,8 +1172,32 @@ end function
 -- </eucode>
 --     
 -- See Also:
---   [[:system]], [[:system_exec]], [[:command_line]]
+--   [[:parse_commandline]], [[:system]], [[:system_exec]], [[:command_line]]
 
 public function build_commandline(sequence cmds)
 	return flatten(quote( cmds,,'\\'," " ), " ") 		
+end function
+
+--**
+-- Parse a command line string breaking it into a sequence of command line
+-- options.
+-- 
+-- Parameters:
+--   # ##cmdline##: Command line sequence (string)
+-- 
+-- Returns:
+--   A sequence of command line options
+--	 
+-- Example 1:
+-- <eucode>
+-- sequence opts = parse_commandline("-v -f '%Y-%m-%d %H:%M')
+-- -- opts = { "-v", "-f", "%Y-%m-%d %H:%M" }
+-- </eucode>
+-- 
+-- See Also:
+--   [[:build_commandline]]
+--	 
+
+public function parse_commandline(sequence cmdline)
+	return keyvalues(cmdline, " ", ":=", "\"'`", " \t\r\n", 0)
 end function

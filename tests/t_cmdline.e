@@ -76,6 +76,8 @@ test_equal("cmd_parse() #7", 21, dummy)
 test_equal("build_commandline #1", "abc def ghi", build_commandline({"abc", "def", "ghi"}))
 test_equal("build_commandline #2", "abc \"def ghi\"", build_commandline({"abc", "def ghi"}))
 
+test_equal("parse_commandline #1", { "-v", "-f", "%Y-%m-%d %H:%M" }, parse_commandline("-v -f '%Y-%m-%d %H:%M'"))
+
 -- Reported bugs:
 cmd_parse({}, {}, { "eui", "prog.ex", "bug", "-h" })
 test_pass("cmd_parse bug #2790825")
