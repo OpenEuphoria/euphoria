@@ -33,3 +33,6 @@ must read the input from in_filename and write the resulting file to
 out_filename. If an error occurs while processing the input file, the pre-processor
 should return a non-zero error code. This will tell Euphoria that the 
 pre-processing has failed and it should cease trying any more to run the program.
+
+The last pre-processor here is datesub.ex which is described in the Euphoria
+mini-guide about the pre-processor. Please see that for more information.
