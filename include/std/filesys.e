@@ -200,10 +200,10 @@ public constant W_BAD_PATH = -1 -- error code
 -- Return directory information for the specified file or directory.
 --
 -- Parameters:
---     # ##name##: a sequence, the name to be looked up in the file system.
+--     # ##name## : a sequence, the name to be looked up in the file system.
 --
 -- Returns:
---     An **object**: -1 if no match found, else a sequence of sequence entries
+--     An **object**,  -1 if no match found, else a sequence of sequence entries
 --
 -- Errors:
 -- The length of ##name## should not exceed 1,024 characters.
@@ -361,7 +361,7 @@ end function
 -- Set a new value for the current directory 
 --
 -- Parameters:
--- 		##newdir##: a sequence, the name for the new working directory.
+-- 		##newdir## : a sequence, the name for the new working directory.
 --
 -- Returns:
 -- 		An **integer**, 0 on failure, 1 on success.
@@ -416,29 +416,28 @@ constant DEFAULT_DIR_SOURCE = -2
 -- or else users will have to bind with clear routine names
 
 --**
--- Deprecated, so therefore not documented.
+-- **Deprecated**, so therefore not documented.
 public integer my_dir = DEFAULT_DIR_SOURCE  
 
 --**
 -- Generalized Directory Walker
 --
 -- Parameters:
--- 	# ##path_name##: a sequence, the name of the directory to walk through
--- 	# ##your_function##: the routine id of a function that will receive each path
+-- 	# ##path_name## : a sequence, the name of the directory to walk through
+-- 	# ##your_function## : the routine id of a function that will receive each path
 --                       returned from the result of ##dir_source##, one at a time.
--- 	# ##scan_subdirs##: an optional integer, 1 to also walk though subfolders, 0 (the default) to skip them all.
---  # ##dir_source##: an optional integer. A routine_id of a user-defined routine that 
+-- 	# ##scan_subdirs## : an optional integer, 1 to also walk though subfolders, 0 (the default) to skip them all.
+--  # ##dir_source## : an optional integer. A routine_id of a user-defined routine that 
 --                    returns the list of paths to pass to ##your_function##. If omitted,
 --                    the [[:dir]]() function is used.   
 --
 -- Returns:
--- An **object**:
+-- An **object**,
 -- * 0 on success
 -- * W_BAD_PATH: an error occurred
 -- * anything else: the custom function returned something to stop [[:walk_dir]]().
 --
 -- Comments:
---
 -- This routine will "walk" through a directory named ##path_name##. For each entry in the 
 -- directory, it will call a function, whose routine_id is ##your_function##.
 -- If ##scan_subdirs## is non-zero (TRUE), then the subdirectories in
@@ -446,10 +445,10 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 --
 -- The routine that you supply should accept two sequences, the path name and dir() entry for 
 -- each file and subdirectory. It should return 0 to keep going, or non-zero to stop 
--- walk_dir(). Returning ##W_BAD_PATH## is taken as denoting some error.
+-- ##walk_dir##(). Returning ##W_BAD_PATH## is taken as denoting some error.
 --
 -- This mechanism allows you to write a simple function that handles one file at a time, 
--- while walk_dir() handles the process of walking through all the files and subdirectories.
+-- while ##walk_dir##() handles the process of walking through all the files and subdirectories.
 --
 -- By default, the files and subdirectories will be visited in alphabetical order. To use 
 -- a different order, use the ##dir_source## to pass the routine_id of your own modified
@@ -571,10 +570,10 @@ end function
 -- Create a new directory.
 --
 -- Parameters:
--- 		# ##name##: a sequence, the name of the new directory to create
---		# ##mode##: on //Unix// systems, permissions for the new directory. Default is 
+-- 		# ##name## : a sequence, the name of the new directory to create
+--		# ##mode## : on //Unix// systems, permissions for the new directory. Default is 
 --		  448 (all rights for owner, none for others).
---      # ##mkparent## If true (default) the parent directories are also created
+--      # ##mkparent## : If true (default) the parent directories are also created
 --        if needed. 
 --
 -- Returns:
@@ -669,7 +668,7 @@ end function
 -- Delete a file.
 --
 -- Parameters:
--- 		# ##name##: a sequence, the name of the file to delete.
+-- 		# ##name## : a sequence, the name of the file to delete.
 --
 -- Returns:
 --     An **integer**, 0 on failure, 1 on success.
@@ -718,7 +717,7 @@ end function
 -- Returns the current directory, with a trailing SLASH
 --
 -- Parameters:
---		# ##drive_id##: For non-Unix systems only. This is the Drive letter to
+--		# ##drive_id## : For non-Unix systems only. This is the Drive letter to
 --      to get the current directory of. If omitted, the current drive is used.
 --
 -- Returns:
@@ -732,7 +731,8 @@ end function
 --  For Unix systems, this is simply ignored because there is only one current
 --  directory at any time on Unix.
 --
---  **Note**: This always ensures that the returned value has a trailing SLASH
+-- Note: 
+-- This always ensures that the returned value has a trailing SLASH
 -- character.
 --
 -- Example 1:
@@ -783,7 +783,7 @@ sequence InitCurDir = curdir() -- Capture the original PWD
 -- Returns the original current directory
 --
 -- Parameters:
---		None.
+--		# None.
 --
 -- Returns:
 --     A **sequence**, the current directory at the time the program started running.
@@ -792,7 +792,8 @@ sequence InitCurDir = curdir() -- Capture the original PWD
 -- You would use this if the program might change the current directory during
 -- its processing and you wanted to return to the original directory.
 --
---  **Note**: This always ensures that the returned value has a trailing SLASH
+-- Note: 
+-- This always ensures that the returned value has a trailing SLASH
 -- character.
 --
 -- Example 1:
@@ -811,8 +812,8 @@ end function
 -- Clear (delete) a directory of all files, but retaining sub-directories.
 --
 -- Parameters:
---		# ##name##: a sequence, the name of the directory whose files you want to remove.
---		# ##recurse##: an integer, whether or not to remove files in the 
+--		# ##name## : a sequence, the name of the directory whose files you want to remove.
+--		# ##recurse## : an integer, whether or not to remove files in the 
 --        directory's sub-directories. If 0 then this function is identical
 --        to remove_directory(). If 1, then we recursively delete the
 --        directory and its contents. Defaults to 1.
@@ -897,8 +898,8 @@ end function
 -- Remove a directory.
 --
 -- Parameters:
---		# ##name##: a sequence, the name of the directory to remove.
---      # ##force##: an integer, if 1 this will also remove files and
+--		# ##name## : a sequence, the name of the directory to remove.
+--      # ##force## : an integer, if 1 this will also remove files and
 --                    sub-directories in the directory. The default is
 --                   0, which means that it will only remove the
 --                   directory if it is already empty.
@@ -1019,10 +1020,10 @@ public enum
 --**
 -- Parse a fully qualified pathname.
 -- Parameters:
--- 		# ##path##: a sequence, the path to parse
+-- 		# ##path## : a sequence, the path to parse
 --
 -- Returns:
--- 		A **sequence** of length 5. Each of these elements is a string:
+-- 		A **sequence**, of length 5. Each of these elements is a string:
 -- 		* The path name
 --		* The full unqualified file name
 --		* the file name, without extension
@@ -1124,8 +1125,8 @@ end function
 -- Return the directory name of a fully qualified filename
 --
 -- Parameters:
--- 		# ##path##: the path from which to extract information
---      # ##pcd##: If not zero and there is no directory name in ##path##
+-- 		# ##path## : the path from which to extract information
+--      # ##pcd## : If not zero and there is no directory name in ##path##
 --                 then "." is returned. The default (0) will just return
 --                 any directory name in ##path##.
 --
@@ -1159,7 +1160,7 @@ end function
 -- Return the file name portion of a fully qualified filename
 --
 -- Parameters:
--- 		# ##path##: the path from which to extract information
+-- 		# ##path## : the path from which to extract information
 --
 -- Returns:
 -- 		A **sequence**, the file name part of ##path##.
@@ -1188,7 +1189,7 @@ end function
 -- Return the base filename of path.
 --
 -- Parameters:
--- 		# ##path##: the path from which to extract information
+-- 		# ##path## : the path from which to extract information
 --
 -- Returns:
 -- 		A **sequence**, the base file name part of ##path##.
@@ -1216,7 +1217,7 @@ end function
 -- Return the file extension of a fully qualified filename
 --
 -- Parameters:
--- 		# ##path##: the path from which to extract information
+-- 		# ##path## : the path from which to extract information
 --
 -- Returns:
 -- 		A **sequence**, the file extension part of ##path##.
@@ -1243,7 +1244,7 @@ end function
 -- Return the drive letter of the path on //DOS32// and //WIN32// platforms.
 --
 -- Parameters:
--- 		# ##path##: the path from which to extract information
+-- 		# ##path## : the path from which to extract information
 --
 -- Returns:
 -- 		A **sequence**, the file extension part of ##path##.
@@ -1270,8 +1271,8 @@ end function
 -- the filepath does not have an extension already.
 --
 -- Parameters:
--- 		# ##path##: the path to check for an extension.
--- 		# ##defext##: the extension to add if ##path## does not have one.
+-- 		# ##path## : the path to check for an extension.
+-- 		# ##defext## : the extension to add if ##path## does not have one.
 --
 -- Returns:
 -- 		A **sequence**, the path with an extension.
@@ -1317,7 +1318,7 @@ end function
 -- Determine if the supplied string is an absolute path or a relative path.
 --
 -- Parameters:
---		# ##filename##: a sequence, the name of the file path
+--		# ##filename## : a sequence, the name of the file path
 --
 -- Returns:
 --     An **integer**, 0 if ##filename## is a relative path or 1 otherwise.
@@ -1583,10 +1584,10 @@ public enum
 -- Check to see if a file exists
 --
 -- Parameters:
---   * name - filename to check existence of
+--   # ##name## :  filename to check existence of
 --
 -- Returns:
---   1 on yes, 0 on no
+--   An **integer**, 1 on yes, 0 on no
 --
 -- Example 1:
 -- <eucode>
@@ -1624,10 +1625,10 @@ end function
 -- Get the timestamp of the file
 --
 -- Parameters:
---   # ##name##: the filename to get the date of
+--   # ##name## : the filename to get the date of
 --	 
 -- Returns:
---   A valid datetime type representing the files date and time or -1 if the
+--   A valid **datetime type**, representing the files date and time or -1 if the
 --	 file's date and time could not be read.
 -- 
 
@@ -1643,9 +1644,9 @@ end function
 -- Copy a file.
 --
 -- Parameters:
--- 		# ##src##: a sequence, the name of the file or directory to copy
--- 		# ##dest##: a sequence, the new name or location of the file
--- 		# ##overwrite##: an integer; 0 (the default) will prevent an existing destination
+-- 		# ##src## : a sequence, the name of the file or directory to copy
+-- 		# ##dest## : a sequence, the new name or location of the file
+-- 		# ##overwrite## : an integer; 0 (the default) will prevent an existing destination
 --                       file from being overwritten. Non-zero will overwrite the
 --                       destination file.
 --
@@ -1709,9 +1710,9 @@ end function
 -- Rename a file.
 -- 
 -- Parameters:
--- 		# ##src##: a sequence, the name of the file or directory to rename.
--- 		# ##dest##: a sequence, the new name for the renamed file
---		# ##overwrite##: an integer, 0 (the default) to prevent renaming if destination file exists,
+-- 		# ##src## : a sequence, the name of the file or directory to rename.
+-- 		# ##dest## : a sequence, the new name for the renamed file
+--		# ##overwrite## : an integer, 0 (the default) to prevent renaming if destination file exists,
 --                                   1 to delete existing destination file first
 --
 -- Returns:
@@ -1831,9 +1832,9 @@ end ifdef
 -- Move a file to another location.
 --
 -- Parameters:
--- 		# ##src##: a sequence, the name of the file or directory to move
--- 		# ##dest##: a sequence, the new location for the file
---		# ##overwrite##: an integer, 0 (the default) to prevent overwriting an existing destination file,
+-- 		# ##src## : a sequence, the name of the file or directory to move
+-- 		# ##dest## : a sequence, the new location for the file
+--		# ##overwrite## : an integer, 0 (the default) to prevent overwriting an existing destination file,
 --                                   1 to overwrite existing destination file
 --
 -- Returns:
@@ -2022,17 +2023,17 @@ end function
 -- Locates a file by looking in a set of directories for it.
 --
 -- Parameters:
---		# ##filename##: a sequence, the name of the file to search for.
---		# ##search_list##: a sequence, the list of directories to look in. By
+--		# ##filename## : a sequence, the name of the file to search for.
+--		# ##search_list## : a sequence, the list of directories to look in. By
 --        default this is "", meaning that a predefined set of directories
 --        is scanned. See comments below.
---      # ##subdir##: a sequence, the sub directory within the search directories
+--      # ##subdir## : a sequence, the sub directory within the search directories
 --        to check. This is optional. 
 --
 -- Returns:
 --     A **sequence**, the located file path if found, else the original file name.
 --
--- Comment:
+-- Comments:
 -- If ##filename## is an absolute path, it is just returned and no searching
 -- takes place.
 --
@@ -2250,7 +2251,7 @@ end function
 -- Returns the amount of space for a disk drive.
 --
 -- Parameters:
---	# ##disk_path## - A sequence. This is the path that identifies the disk to inquire upon.
+--	# ##disk_path## : A sequence. This is the path that identifies the disk to inquire upon.
 --
 -- Returns:
 --     A **sequence**, containing TOTAL_BYTES, USED_BYTES, FREE_BYTES, and a string which represents the filesystem name
@@ -2388,8 +2389,8 @@ end function
 -- Returns the amount of space used by a directory.
 --
 -- Parameters:
---	# ##dir_path## - A sequence. This is the path that identifies the directory to inquire upon.
---  # ##count_all## - An integer. Used by Windows systems. If zero (the default) 
+--	# ##dir_path## : A sequence. This is the path that identifies the directory to inquire upon.
+--  # ##count_all## : An integer. Used by Windows systems. If zero (the default) 
 --                    it will not include //system// or //hidden// files in the
 --                    count, otherwise they are included.
 --
@@ -2438,7 +2439,7 @@ end function
 -- Returns a file name that can be used as a temporary file.
 --
 -- Parameters:
---	# ##pDir## - A sequence. A directory where the temporary file is expected
+--	# ##pDir## : A sequence. A directory where the temporary file is expected
 --               to be created. 
 --            ** If omitted (the default) the 'temporary' directory
 --               will be used. The temporary directory is defined in the "TEMP" 
@@ -2449,15 +2450,15 @@ end function
 --               *** If it is an existing file, that file's directory is used.
 --               *** If it is an existing directory, it is used.
 --               *** If it doesn't exist, the directory name portion is used.
---  # ##pPrefix## - A sequence: The is prepended to the start of the generated file name.
+--  # ##pPrefix## : A sequence: The is prepended to the start of the generated file name.
 --               The default is "".
---  # ##pExt## - A sequence: The is a file extention used in the generated file. 
+--  # ##pExt## : A sequence: The is a file extention used in the generated file. 
 --               The default is "_T_".
---  # ##pReserve## - An integer: If not zero an empty file is created using the 
+--  # ##pReserve## : An integer: If not zero an empty file is created using the 
 --               generated name. The default is not to reserve (create) the file.
 --
 -- Returns:
---     A **sequence**: A generated file name.
+--     A **sequence**, A generated file name.
 --                  
 -- Comments:
 --

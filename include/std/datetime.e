@@ -298,25 +298,25 @@ public sequence ampm = { "AM", "PM" }
 
 --**
 -- Accessors
--- * YEAR
--- * MONTH
--- * DAY
--- * HOUR
--- * MINUTE
--- * SECOND
+-- * ##YEAR##
+-- * ##MONTH##
+-- * ##DAY##
+-- * ##HOUR##
+-- * ##MINUTE##
+-- * ##SECOND##
 
 public enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 
 --**
 -- Intervals
--- * YEARS
--- * MONTHS
--- * WEEKS
--- * DAYS
--- * HOURS
--- * MINUTES
--- * SECONDS
--- * DATE
+-- * ##YEARS##
+-- * ##MONTHS##
+-- * ##WEEKS##
+-- * ##DAYS##
+-- * ##HOURS##
+-- * ##MINUTES##
+-- * ##SECONDS##
+-- * ##DATE##
 
 public enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 
@@ -327,12 +327,15 @@ public enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- datetime type
 --
 -- Parameters:
---              # ##obj##: any object, so no crash takes place.
+--              # ##obj## : any object, so no crash takes place.
 --
 -- Comments:
 -- A datetime type consists of a sequence of length 6 in the form
 -- ##{year, month, day_of_month, hour, minute, second}##. Checks are made to guarantee
--- those values are in range. **Note:** All components must be integers except
+-- those values are in range. 
+-- 
+-- Note:
+-- All components must be integers except
 -- seconds, as those can also be floating point values.
 
 public type datetime(object o)
@@ -443,7 +446,7 @@ end type
 -- Return a sequence with information on the current date.
 --
 -- Returns:
--- A **sequence** of length 8, laid out as follows:
+-- A **sequence**, of length 8, laid out as follows:
 -- # year,  ~-- since 1900
 -- # month, ~-- January = 1
 -- # day,   ~-- day of month, starting at 1
@@ -469,11 +472,11 @@ end type
 --  [[:time]], [[:now]]
 
 --**
--- Convert a sequence formatted according to the built-in date() function to a valid datetime
+-- Convert a sequence formatted according to the built-in ##date##() function to a valid datetime
 -- sequence.
 --
 -- Parameters:
---              # ##src##: a sequence which date() might have returned
+--              # ##src## : a sequence which date() might have returned
 --
 -- Returns:
 --              A **sequence**, more precisely a **datetime** corresponding to the same moment in time.
@@ -573,18 +576,19 @@ elsedef
 	return {t1[TM_YEAR]+1900, t1[TM_MON]+1, t1[TM_MDAY], t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]}
 end ifdef
 end function
+
 --**
 -- Create a new datetime value.
 --
 -- !! TODO: test default parameter usage
 --
 -- Parameters:
---     # ##year##: the full year.
---     # ##month##: the month (1-12).
---     # ##day##: the day of the month (1-31).
---     # ##hour##: the hour (0-23) (defaults to 0)
---     # ##minute##: the minute (0-59) (defaults to 0)
---     # ##second##: the second (0-59) (defaults to 0)
+--     # ##year## ~-- the full year.
+--     # ##month## ~-- the month (1-12).
+--     # ##day## ~-- the day of the month (1-31).
+--     # ##hour## ~-- the hour (0-23) (defaults to 0)
+--     # ##minute## ~-- the minute (0-59) (defaults to 0)
+--     # ##second## ~-- the second (0-59) (defaults to 0)
 --
 -- Example 1:
 -- <eucode>
@@ -612,9 +616,9 @@ end function
 -- !! TODO: test
 --
 -- Parameters:
---     hour is the hour (0-23)
---     minute is the minute (0-59)
---     second is the second (0-59)
+--     # ##hour## : is the hour (0-23)
+--     # ##minute## : is the minute (0-59)
+--     # ##second## : is the second (0-59)
 --
 -- Example 1:
 -- <eucode>
@@ -633,10 +637,10 @@ end function
 -- Get the day of week of the datetime dt.
 --
 -- Parameters:
---              # ##dt##: a datetime to be queried.
+--              # ##dt## : a datetime to be queried.
 --
 -- Returns:
---              An **integer** between 1 (Sunday) and 7 (Saturday).
+--              An **integer**, between 1 (Sunday) and 7 (Saturday).
 --
 -- Example 1:
 -- <eucode>
@@ -652,10 +656,10 @@ end function
 -- Get the Julian day of year of the supplied date.
 --
 -- Parameters:
---              # ##dt##: a datetime to be queried.
+--              # ##dt## : a datetime to be queried.
 --
 -- Returns:
---      An **integer** between 1 and 366.
+--      An **integer**, between 1 and 366.
 --
 -- Comments:
 --              For dates earlier than 1800, this routine may give inaccurate results if the date
@@ -676,10 +680,10 @@ end function
 -- Determine if ##dt## falls within leap year.
 --
 -- Parameters:
---              # ##dt##: a datetime to be queried.
+--              # ##dt## : a datetime to be queried.
 --
 -- Returns:
---     An **integer** of 1 if leap year, otherwise 0.
+--     An **integer**, of 1 if leap year, otherwise 0.
 --
 -- Example 1:
 -- <eucode>
@@ -702,7 +706,7 @@ end function
 -- This takes into account leap year.
 --
 -- Parameters:
---              # ##dt##: a datetime to be queried.
+--              # ##dt## : a datetime to be queried.
 --
 -- Example 1:
 -- <eucode>
@@ -725,7 +729,7 @@ end function
 -- This takes into account leap year.
 --
 -- Parameters:
---     # ##dt##: a datetime to be queried.
+--     # ##dt## : a datetime to be queried.
 --
 -- Example 1:
 -- <eucode>
@@ -746,7 +750,7 @@ end function
 -- Convert a datetime value to the unix numeric format (seconds since ##EPOCH_1970##)
 --
 -- Parameters:
---              # ##dt##: a datetime to be queried.
+--              # ##dt## : a datetime to be queried.
 --
 -- Returns:
 --              An **atom**, so this will not overflow during the winter 2038-2039.
@@ -769,7 +773,7 @@ end function
 -- Create a datetime value from the unix numeric format (seconds since EPOCH)
 --
 -- Parameters:
---   # ##unix##: an atom, counting seconds elapsed since EPOCH.
+--   # ##unix## : an atom, counting seconds elapsed since EPOCH.
 --
 -- Returns:
 --   A **sequence**, more precisely a **datetime** representing the same moment in time.
@@ -791,39 +795,39 @@ end function
 -- Format the date according to the format pattern string
 --
 -- Parameters:
---   # ##d##: a datetime which is to be printed out
---   # ##pattern##: a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
+--   # ##d## : a datetime which is to be printed out
+--   # ##pattern## : a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
 --   The default is "%Y-%m-%d %H:%M:%S".
 --
 -- Returns:
---  A string, with the date ##d## formatted according to the specification in ##pattern##.
+--  A **string**, with the date ##d## formatted according to the specification in ##pattern##.
 --
 -- Comments:
 --
 -- Pattern string can include the following specifiers~:
 --
--- * ~%%  a literal %
--- * %a  locale's abbreviated weekday name (e.g., Sun)
--- * %A  locale's full weekday name (e.g., Sunday)
--- * %b  locale's abbreviated month name (e.g., Jan)
--- * %B  locale's full month name (e.g., January)
--- * %C  century; like %Y, except omit last two digits (e.g., 21)
--- * %d  day of month (e.g, 01)
--- * %H  hour (00..23)
--- * %I  hour (01..12)
--- * %j  day of year (001..366)
--- * %k  hour ( 0..23)
--- * %l  hour ( 1..12)
--- * %m  month (01..12)
--- * %M  minute (00..59)
--- * %p  locale's equivalent of either AM or PM; blank if not known
--- * %P  like %p, but lower case
--- * %s  seconds since 1970-01-01 00:00:00 UTC
--- * %S  second (00..60)
--- * %u  day of week (1..7); 1 is Monday
--- * %w  day of week (0..6); 0 is Sunday
--- * %y  last two digits of year (00..99)
--- * %Y  year
+-- * ##~%%## ~--  a literal %
+-- * ##%a## ~--  locale's abbreviated weekday name (e.g., Sun)
+-- * ##%A## ~--  locale's full weekday name (e.g., Sunday)
+-- * ##%b## ~--  locale's abbreviated month name (e.g., Jan)
+-- * ##%B## ~--  locale's full month name (e.g., January)
+-- * ##%C## ~--  century; like %Y, except omit last two digits (e.g., 21)
+-- * ##%d## ~--  day of month (e.g, 01)
+-- * ##%H## ~--  hour (00..23)
+-- * ##%I## ~--  hour (01..12)
+-- * ##%j## ~-- day of year (001..366)
+-- * ##%k## ~--  hour ( 0..23)
+-- * ##%l## ~--  hour ( 1..12)
+-- * ##%m## ~--  month (01..12)
+-- * ##%M## ~-- minute (00..59)
+-- * ##%p## ~-- locale's equivalent of either AM or PM; blank if not known
+-- * ##%P## ~--  like %p, but lower case
+-- * ##%s## ~--  seconds since 1970-01-01 00:00:00 UTC
+-- * ##%S## ~--  second (00..60)
+-- * ##%u## ~--  day of week (1..7); 1 is Monday
+-- * ##%w## ~--  day of week (0..6); 0 is Sunday
+-- * ##%y## ~--  last two digits of year (00..99)
+-- * ##%Y## ~--  year
 --
 -- Example 1:
 -- <eucode>
@@ -941,21 +945,21 @@ end function
 -- Parse a datetime string according to the given format.
 --
 -- Parameters:
---   # ##val## - string datetime value
---   # ##fmt## - datetime format. Default is "%Y-%m-%d %H:%M:%S"
+--   # ##val## : string datetime value
+--   # ##fmt## : datetime format. Default is "%Y-%m-%d %H:%M:%S"
 --
 -- Returns:
---	A datetime value.
+--	A **datetime**, value.
 -- 
 -- Comments:
 --   Only a subset of the format specification is currently supported:
 --
---   * %d  day of month (e.g, 01)
---   * %H  hour (00..23)
---   * %m  month (01..12)
---   * %M  minute (00..59)
---   * %S  second (00..60)
---   * %Y  year
+--   * ##%d## ~--  day of month (e.g, 01)
+--   * ##%H## ~--  hour (00..23)
+--   * ##%m## ~--  month (01..12)
+--   * ##%M## ~--  minute (00..59)
+--   * ##%S## ~--  second (00..60)
+--   * ##%Y## ~--  year
 --
 --   More format codes will be added in future versions.
 --  
@@ -1063,9 +1067,9 @@ end function
 -- Add a number of //intervals// to a datetime.
 --
 -- Parameters:
---   # ##dt##: the base datetime
---   # ##qty##: the number of //intervals// to add. It should be positive.
---   # ##interval##: which kind of interval to add.
+--   # ##dt## : the base datetime
+--   # ##qty## : the number of //intervals// to add. It should be positive.
+--   # ##interval## : which kind of interval to add.
 --
 -- Returns:
 --   A **sequence**, more precisely a **datetime** representing the new moment in time.
@@ -1145,9 +1149,9 @@ end function
 -- Subtract a number of //intervals// to a base datetime.
 --
 -- Parameters:
---   # ##dt##: the base datetime
---   # ##qty##: the number of //intervals// to subtract. It should be positive.
---   # ##interval##: which kind of interval to subtract.
+--   # ##dt## : the base datetime
+--   # ##qty## : the number of //intervals// to subtract. It should be positive.
+--   # ##interval## : which kind of interval to subtract.
 --
 -- Returns:
 --   A **sequence**, more precisely a **datetime** representing the new moment
@@ -1156,7 +1160,7 @@ end function
 -- Comments:
 --   Please see Constants for Date/Time for a reference of valid intervals.
 --
---   See the function add() for more information on adding and subtracting date
+--   See the function ##add##() for more information on adding and subtracting date
 --   intervals
 --
 -- Example 1:
@@ -1177,14 +1181,14 @@ end function
 -- Compute the difference, in seconds, between two dates.
 --
 -- Parameters:
---              # ##dt1##: the end datetime
---              # ##dt2##: the start datetime
+--              # ##dt1## : the end datetime
+--              # ##dt2## : the start datetime
 --
 -- Returns:
 --              An **atom**, the number of seconds elapsed from ##dt2## to ##dt1##.
 --
 -- Comments:
---     dt2 is subtracted from dt1, therefore, you can come up with a negative value.
+--     ##dt2## is subtracted from ##dt1##, therefore, you can come up with a negative value.
 --
 -- Example 1:
 -- <eucode>

@@ -84,7 +84,7 @@ constant M_OPEN_DLL  = 50,
 -- (.so) file. 
 --
 -- Parameters:
---   # ##file_name##: a sequence, the name of the shared library to open or a sequence of filename's
+--   # ##file_name## : a sequence, the name of the shared library to open or a sequence of filename's
 --     to try to open.
 --
 -- Returns:
@@ -104,8 +104,8 @@ constant M_OPEN_DLL  = 50,
 --   file names to try, the first successful library loaded will be returned. If no library
 --   could be loaded, 0 will be returned after exhausting the entire list of file names.
 --
---   The value returned by open_dll() can be passed to define_c_proc(), define_c_func(),
---   or define_c_var().
+--   The value returned by ##open_dll##() can be passed to ##define_c_proc##(), ##define_c_func##(),
+--   or ##define_c_var##().
 -- 
 --   You can open the same .dll or .so file multiple times. No extra memory is used and you'll
 --   get the same number returned each time.
@@ -157,18 +157,19 @@ end function
 --	not //DOS//
 --
 -- Parameters:
--- 		 # ##lib##: an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
--- 		# ##variable_name##: a sequence, the name of a public C variable defined within the library.
+-- 		 # ##lib## : an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
+-- 		# ##variable_name## : a sequence, the name of a public C variable defined within the library.
 --
 -- Returns:
 --		An **atom**, the memory address of ##variable_name##.
 --
 -- Comments:
---     Once you have the address of a C variable, and you know its type, you can use peek()
---     and poke() to read or write the value of the variable. You can in the same way obtain 
+--     Once you have the address of a C variable, and you know its type, you can use ##peek##()
+--     and ##poke##() to read or write the value of the variable. You can in the same way obtain 
 -- the address of a C function and pass it to any external routine that requires a callback address.
 --
---     For an example, see ##euphoria/demo/linux/mylib.ex##
+-- Example:
+-- see ##euphoria/demo/linux/mylib.ex##
 --
 -- See Also:
 --     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
@@ -182,9 +183,9 @@ end function
 -- wish to call as a procedure from your Euphoria program. 
 --
 -- Parameters:
--- 		# ##lib##: an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
--- 		# ##routine_name##: an object, either the name of a procedure in a shared object or the machine address of the procedure.
--- 		# ##argtypes##: a sequence of type constants.
+-- 		# ##lib## : an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
+-- 		# ##routine_name## : an object, either the name of a procedure in a shared object or the machine address of the procedure.
+-- 		# ##argtypes## : a sequence of type constants.
 --
 -- Returns:
 -- 		A small **integer**, known as a routine id, will be returned.
@@ -259,10 +260,10 @@ end function
 -- a value. 
 --
 -- Parameters:
--- 		# ##lib##: an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
--- 		# ##routine_name##: an object, either the name of a procedure in a shared object or the machine address of the procedure.
--- 		# ##argtypes##: a sequence of type constants.
--- 		# ##return_type##: an atom, indicating what type the function will return.
+-- 		# ##lib## : an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
+-- 		# ##routine_name## : an object, either the name of a procedure in a shared object or the machine address of the procedure.
+-- 		# ##argtypes## : a sequence of type constants.
+-- 		# ##return_type## : an atom, indicating what type the function will return.
 --
 -- Returns:
 -- 		A small **integer**, known as a routine id, will be returned.
@@ -283,7 +284,7 @@ end function
 -- 
 -- When defining a machine code routine, x1 must be the empty sequence, "" or {}, and x2
 -- indicates the address of the machine code routine. You can poke the bytes of machine code
--- into a block of memory reserved using allocate(). On Windows, the machine code routine is
+-- into a block of memory reserved using ##allocate##(). On Windows, the machine code routine is
 -- normally expected to follow the stdcall calling convention, but if you wish to use the
 -- cdecl convention instead, you can code {'+', address} instead of address for x2.
 --
@@ -315,8 +316,8 @@ end function
 -- handling cdecl floating-point return values.
 --
 -- Passing floating-point values to a machine code routine will be faster if you use 
--- c_func() rather than call() to call the routine, since you won't have to use 
--- atom_to_float64() and poke() to get the floating-point values into memory.
+-- ##c_func##() rather than ##call##() to call the routine, since you won't have to use 
+-- ##atom_to_float64##() and ##poke##() to get the floating-point values into memory.
 -- 
 -- ex.exe (DOS) uses calls to WATCOM floating-point routines (which then use hardware 
 -- floating-point instructions if available), so floating-point values are generally passed 
@@ -361,8 +362,8 @@ end function
 -- Call a C function, or machine code function, or translated/compiled Euphoria function by routine id. 
 --
 -- Parameters:
---		# ##rid##: an integer, the routine_id of the external function being called.
---		# ##args##: a sequence, the list of parameters to pass to the function
+--		# ##rid## : an integer, the routine_id of the external function being called.
+--		# ##args## : a sequence, the list of parameters to pass to the function
 --
 -- Returns:
 --	An **object**, whose type and meaning was defined on calling [[:define_c_func]]().
@@ -415,8 +416,8 @@ end function
 -- Call a C void function, or machine code function, or translated/compiled Euphoria procedure by routine id.
 --
 -- Parameters:
---		# ##rid##: an integer, the routine_id of the external function being called.
---		# ##args##: a sequence, the list of parameters to pass to the function
+--		# ##rid## : an integer, the routine_id of the external function being called.
+--		# ##args## : a sequence, the list of parameters to pass to the function
 --
 -- Errors:
 -- If ##rid## is not a valid routine id, or the arguments do not match the prototype of
@@ -467,7 +468,7 @@ atom page_offset = 0
 --   not //DOS//
 --
 -- Parameters:
---   # ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
+--   # ##id## : an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
 --
 -- Returns:
 --   An **atom**, the address of the machine code of the routine. It can be

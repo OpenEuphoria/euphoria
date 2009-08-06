@@ -17,11 +17,11 @@ constant
 	M_WARNING_FILE = 72
 
 --**
--- Crash running program, displaying a formatted error message the way printf() does.
+-- Crash running program, displaying a formatted error message the way ##printf##() does.
 --
 -- Parameters:
--- 		# ##fmt##: a sequence representing the message text. It may have format specifiers in it
---		# ##data##: an object, defaulted to {}.
+-- 		# ##fmt## : a sequence representing the message text. It may have format specifiers in it
+--		# ##data## : an object, defaulted to {}.
 --
 -- Comments:
 -- 		The actual message being shown, both on standard error and in ex.err (or whatever 
@@ -56,7 +56,7 @@ end procedure
 -- that Euphoria has to shut down your program due to an error.
 --
 -- Parameters:
---     # ##msg##: a sequence to display. It must only contain printable characters.
+--     # ##msg## : a sequence to display. It must only contain printable characters.
 --
 -- Comments:
 --     There can be as many calls to ##crash_message##() as needed in a program. Whatever was defined
@@ -82,7 +82,7 @@ end procedure
 -- any diagnostic information to be written.
 --
 -- Parameters:
--- 		# ##file_path##: a sequence, the new error and traceback file path.
+-- 		# ##file_path## : a sequence, the new error and traceback file path.
 --
 -- Comments:
 -- 		There can be as many calls to ##crash_file##() as needed. Whatever was defined last will be used
@@ -103,7 +103,7 @@ end procedure
 -- Abort execution of the program. 
 --
 -- Parameters:
--- 		# ##error##: an integer, the exit code to return.
+-- 		# ##error## : an integer, the exit code to return.
 --
 -- Comments:
 -- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a successful completion.
@@ -135,7 +135,7 @@ end procedure
 -- Specify a file path where to output warnings. 
 --
 -- Parameters:
--- 		# ##file_path##: an object indicating where to dump any warning that were produced.
+-- 		# ##file_path## : an object indicating where to dump any warning that were produced.
 --
 -- Comments:
 --   By default, warnings are displayed on the standard error, and require pressing the 
@@ -173,7 +173,7 @@ end procedure
 -- Causes the specified warning message to be displayed as a regular warning.
 --
 -- Parameters:
--- 		# ##message##: a double quoted literal string, the text to display.
+-- 		# ##message## : a double quoted literal string, the text to display.
 --
 -- Comments:
 --
@@ -221,13 +221,13 @@ end procedure
 -- Specify a function to be called when an error takes place at run time.
 --
 -- Parameters:
--- 		# ##func##: an integer, the routine_id of the function to link in.
+-- 		# ##func## : an integer, the routine_id of the function to link in.
 --
 -- Comments:
 --   The supplied function must have only one parameter, which should be integer or more general. 
 --   Defaulted parameters in crash routines are not supported yet.
 --
---   Euphoria maintains a linked list of routines to execute upon a crash. crash_routine() adds 
+--   Euphoria maintains a linked list of routines to execute upon a crash. ##crash_routine##() adds 
 --   a new function to the list. The routines defined first are executed last. You cannot unlink
 --   a routine once it is linked, nor inspect the crash routine chain.
 --
