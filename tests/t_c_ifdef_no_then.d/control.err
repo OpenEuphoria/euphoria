@@ -1,5 +1,5 @@
 t_c_ifdef_no_then.e:3
-[0082]:: expecting possibly 'then' not end of line
+<0082>:: expecting possibly 'then' not end of line
 ifdef NOT_DEFINED
                 ^
 

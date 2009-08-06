@@ -581,7 +581,7 @@ extern long get_int(object x)
 	}
 }
 
-/* Warning: side effects could happen from double eval of x */
+/* Note: side effects could happen from double eval of x */
 #define Get_Int(x) (IS_ATOM_INT(x) ? INT_VAL(x) : get_int(x))
 
 #ifdef EUNIX

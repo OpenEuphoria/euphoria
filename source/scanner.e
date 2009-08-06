@@ -1681,7 +1681,7 @@ export function Scanner()
 			return ExtendedString( '`' )
 			
 		else
-			InternalErr("Scanner()")
+			InternalErr(268, {class})
 
 		end if
    end while
@@ -1829,7 +1829,11 @@ export procedure IncludeScan( integer is_public )
 	end if
 
 	-- record the new filename
-	new_include_name = gtext
+	ifdef DOSFAMILY then
+		new_include_name = find_replace(`/`, gtext, `\`)
+	elsedef
+		new_include_name = gtext
+	end ifdef
 
 	-- skip whitespace
 	ch = getch()

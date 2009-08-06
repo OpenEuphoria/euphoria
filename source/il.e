@@ -14,6 +14,7 @@ include std/io.e
 include euphoria/info.e
 include std/cmdline.e
 include std/map.e as m
+
 include common.e
 include compress.e
 include backend.e
@@ -24,6 +25,7 @@ include mode.e
 include global.e
 include pathopen.e
 include error.e
+include msgtext.e
 
 constant OPTIONS = {
 { "SHROUD_ONLY", 0, "Does not create an executable. Just a .IL file for backend to run.", { NO_CASE, NO_PARAMETER }  },
@@ -60,7 +62,7 @@ procedure fatal(sequence msg)
 	ifdef not UNIX then
 		-- TODO: Should we check for batch_job?
 		-- we run bind and bindw using eubw.exe, so this is needed
-		puts(2, "\nPress Enter\n")
+		ShowMsg(2, 242)
 		getc(0)
 	end ifdef
 
@@ -78,10 +80,9 @@ procedure OutputSymTab(file f)
 	if list then
 		fd = open("deleted.txt", "w")
 		if fd = -1 then
-			fatal("Couldn't open deleted.txt")
+			fatal(GetMsgText(243,0))
 		end if
-		puts(fd, "Deleted Symbols\n")
-		puts(fd, "---------------\n\n")
+		puts(fd, GetMsgText(244, 0))
 	end if
 	
 	still_changing = TRUE
@@ -108,8 +109,7 @@ procedure OutputSymTab(file f)
 							end if
 							SymTab[r][S_NREFS] -= 1
 							if SymTab[r][S_NREFS] < 0 then
-								InternalErr("negative ref count for " & 
-											 SymTab[r][S_NAME])
+								InternalErr(264, { SymTab[r][S_NAME] })
 							end if
 							still_changing = TRUE
 						end for
@@ -141,7 +141,7 @@ procedure OutputSymTab(file f)
 	if list then
 		close(fd)
 		if not quiet then
-			puts(1, "The list of deleted symbols is in 'deleted.txt'\n")
+			ShowMsg(1, 245)
 		end if
 		
 	end if
@@ -546,30 +546,31 @@ procedure OutputIL()
 	store_checksum(out_name)
 	
 	if not quiet then
-		printf(1, "deleted %d unused routines and %d unused variables.\n",
-				{del_routines, del_vars})
+		ShowMsg(1, 248, {del_routines, del_vars})
 		ifdef UNIX then
 			system("chmod +x " & out_name, 2)
 		end ifdef
+		
 		if shroud_only then
-			puts(1, "You may now use backend")
+			filename = "backend"
 			ifdef UNIX then
-				puts(1, "u")
+				filename &= "u"
 			elsedef
 				if w32 then
-					puts(1, "w.exe")
+					filename &= "w.exe"
 				else
-					puts(1, ".exe")
+					filename &= ".exe"
 				end if
 			end ifdef
-			printf(1, " to run %s\n", {out_name})        
+			ShowMsg(1, 246, {filename, out_name})
 		else
 			ifdef UNIX then
 				out_name = "./" & out_name
 			end ifdef
-			puts(1, "You may now run " & out_name & '\n')
+			
+			ShowMsg(1, 247, {out_name})
 		end if
-		puts(1, "\nPress Enter\n")
+		ShowMsg(1, 242)
 		getc(0)
 	end if
 end procedure

@@ -171,11 +171,13 @@ export enum
 
 -- USAGE values          -- how symbol has been used (1,2 can be OR'd)
 export enum
-	U_UNUSED=0,
-	U_READ,
-	U_WRITTEN,
+	U_UNUSED  = 0,
+	U_READ    = 1,
+	U_WRITTEN = 2,
+	U_USED    = 3,
 	U_FORWARD = 4,
-	U_DELETED=99   -- we've decided to delete this symbol
+	U_DELETED = 99   -- we've decided to delete this symbol
+
 
 -- Does a routine have an effect other than just returning a value?
 -- We use 30 bits of information (to keep it in integer range).

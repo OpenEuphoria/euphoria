@@ -226,6 +226,10 @@ export procedure handle_common_options(m:map opts)
 				abort(0)
 		end switch
 	end for
+	
+	if length(LocalizeQual) = 0 then
+		LocalizeQual = {"en"}
+	end if
 end procedure
 
 --**

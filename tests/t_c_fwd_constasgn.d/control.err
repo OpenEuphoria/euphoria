@@ -1,5 +1,5 @@
 .\fwd_constasgn.e:3
-[0110]:: may not change the value of a constant
+<0110>:: may not change the value of a constant
 foo = 2
     ^
 

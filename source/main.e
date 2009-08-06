@@ -7,6 +7,7 @@ include std/io.e
 include std/get.e
 include std/error.e
 include std/console.e
+include std/search.e
 
 include euphoria/info.e
 
@@ -36,6 +37,9 @@ function GetSourceName()
 		return -2 -- No source file
 	end if
 
+	ifdef DOSFAMILY then
+		src_name = find_replace(`/`, src_name, `\`)
+	end ifdef
 	-- check src_name for last '.'
 	for p = length(src_name) to 1 by -1 do
 		if src_name[p] = '.' then

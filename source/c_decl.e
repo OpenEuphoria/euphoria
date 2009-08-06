@@ -21,6 +21,7 @@ include symtab.e
 include compile.e
 include error.e
 include c_out.e
+include msgtext.e
 
 with type_check
 
@@ -174,7 +175,7 @@ export function BB_var_type(integer var)
 		   SymTab[BB_info[i][BB_VAR]][S_MODE] = M_NORMAL then
 			if BB_info[i][BB_TYPE] < 0 or
 			   BB_info[i][BB_TYPE] > TYPE_OBJECT then
-				InternalErr("Bad BB_var_type")
+				InternalErr(256)
 			end if
 			if BB_info[i][BB_TYPE] = TYPE_NULL then  -- var has only been read
 				return TYPE_OBJECT
@@ -193,7 +194,7 @@ export function GType(symtab_index s)
 	
 	t = SymTab[s][S_GTYPE]
 	if t < 0 or t > TYPE_OBJECT then
-		InternalErr("Bad GType")
+		InternalErr(257)
 	end if
 	if SymTab[s][S_MODE] != M_NORMAL then
 		return t
@@ -317,7 +318,7 @@ export function or_type(integer t1, integer t2)
 		return TYPE_INTEGER
 	
 	else
-		InternalErr(sprintf("or_type: t1 is %d, t2 is %d\n", {t1, t2}))
+		InternalErr(258, {t1, t2})
 			
 	end if
 end function
@@ -1235,14 +1236,14 @@ export procedure GenerateUserRoutines()
 
 	if not silent then
 		if Pass = 1 then
-			puts(1, "Translating code, pass: ")
+			ShowMsg(1, 239,,0)
 		end if
 
 
 		if LAST_PASS = TRUE then
-			puts(1, " generating\n")
+			ShowMsg(1, 240)
 		else
-			printf(1, "%d ", Pass)
+			ShowMsg(1, 241, Pass, 0)
 		end if
 	end if
 

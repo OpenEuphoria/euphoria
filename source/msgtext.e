@@ -25,16 +25,16 @@ constant StdErrMsgs = {
 	{ 17, "'end' has no matching '[1]'"},
 	{ 18, "'global' must be followed by:\n<a type>, 'constant', 'enum', 'procedure', 'type' or 'function'"},
 	{ 19, "'[1]' has not been declared"},
-	{ 20, "'[1]' takes [2][3] argument[4]"},
+	{ 20, "'[1]' needs [2] argument"},
 	{ 21, "'$' must only appear between '[[]' and ']' or as the last item in a sequence literal."},
 	{ 22, "a fallthru must be inside a switch"},
 	{ 23, "A namespace qualifier is needed to resolve '[1]'\nbecause '[2]' is declared as a global/public symbol in:\n[3]"},
 	{ 24, "a variable name is expected here"},
 	{ 25, "a name is expected here"},
-	{ 26, "Argument [1] of [2] ([3]) is defaulted, but has no default value"},
+	{ 26, "Argument [1] of [2] ([3]) was omitted, but there is no default value defined"},
 	{ 27, "An unknown 'with/without' option has been specified"},
 	{ 28, "a loop variable name is expected here"},
-	{ 29, "Argument [1] is defaulted, but has no default value"},
+	{ 29, "Argument [1] was omitted but there is no default value defined"},
 	{ 30, "An enum constant must be an integer"},
 	{ 31, "attempt to redefine [1]."},
 	{ 32, "an identifier is expected here"},
@@ -182,31 +182,129 @@ constant StdErrMsgs = {
 	{174, "To build your project, type [1]"},
 	{175, "\nTo run your project, type [1]"},
 	{176, "Compiling with [1]"},
+	{177, "Do not display status messages" },
+	{178, "Set the compiler to Watcom"},
+	{179, "Set the compiler to DJGPP"},
+	{180, "Set the compiler to GCC" },
+	{181, "Set the compiler directory"},
+	{182, "Create a console application"},
+	{183, "Create a shared library"},
+	{184, "Create a shared library"},
+	{185, "Set the platform for the translated code"},
+	{186, "Use a non-standard library"},
+	{187, "Enable hardware FPU (DOS option only)"},
+	{188, "Set the stack size (Watcom)"},
+	{189, "Enable debug mode for generated code"},
+	{190, "Set the number of C statements per generated file before splitting."},
+	{191, "Keep the generated files"},
+	{192, "Generate a project Makefile"},
+	{193, "Generate a full project Makefile"},
+	{194, "Generate a project CMake file"},
+	{195, "Generate a emake/emake.bat file to build project"},
+	{196, "Do not build the project nor write a build file"},
+	{197, "Generate/compile all files in 'builddir'"},
+	{198, "Set the output filename"},
+	{199, "euc.exe [options] file.ex...\n common options:"},
+	{200, "\n translator options:"},
+	{201, "Unknown platform: %s"},
+	{202, "Invalid maximum file size"},
+	{203, "\nERROR: Must specify the file to be translated on the command line\n"},
+	{204, "Warning [1]:\n\t[2]\n"},
+	{205, "\nUnable to create warning file [1]"},
+	{206, "\nPress Enter to continue, q to quit\n"},
+	{207, "Defined Words"},
+	{208, "\nPress Enter\n"},
+	{209, "Can't create error message file: [1]\n"},
+	{210, "<end-of-file>\n"},
+	{211, "Internal Error:\n\t[1]\n"},
+	{212, "Internal Error at [1]:[2]\n\t[3]\n"},
+	{213, "Failed due to internal error."},
+	{214, "Watcom cannot build translated files when there is a space in its parent folders"},
+	{215, "Watcom needs to have an INCLUDE variable set to its included directories"},
+	{216, "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable."},
+	{217, "Statements have been inserted to trace execution of your program."},
+	{218, "[1]:[2] - statement after [3] will never be executed"},
+	{219, "[1]:[2] - call to [3]() might be short-circuited"},
+	{220, "[1]:[2] - empty case block without fallthru"},
+	{221, "[1]:[2] - no 'case else' supplied."},
+	{222, "[1]:[2] - built-in routine [3]() overridden"},
+	{223, "[1]:[2] - built-in routine [3]() overridden again"},
+	{224, "can't mix profile and profile_time"},
+	{225, "[1]:[2] - Unknown warning name [3]"},
+	{226, "[1] - local variable '[2]' is never assigned a value"},
+	{227, "[1] - private variable '[2]' of [3] is never assigned a value"},
+	{228, "[1] - local constant '[2]' is not used"},
+	{229, "[1] - local variable '[2]' is not used"},
+	{230, "[1] - parameter '[2]' of [3] is not used"},
+	{231, "[1] - private variable '[2]' of [3] is not used"},
+	{232, "File '[1]' uses public symbols from '[2]', but does not include that file."},
+	{233, "[1]:[2] - identifier '[3]' in '[4]' is not included"},
+	{234, "The built-in [1]() in [2] overrides the global/public [1]() in:[3]"},
+	{235, "[1]() needs at least [2] parameters, but some non-defaultable arguments are missing."},
+	{236, "'[1]' needs [2] arguments"},
+	{237, "'[1]' only needs [2] argument"},
+	{238, "'[1]' only needs [2] arguments"},
+	{239, "Translating code, pass: "},
+	{240, " generating"},
+	{241, "[1] "},
+	{242, "\nPress Enter"},
+	{243, "Couldn't open deleted.txt"},
+	{244, "Deleted Symbols\n---------------\n\n"},
+	{245, "The list of deleted symbols is in 'deleted.txt'"},
+	{246, "You may now use [1] to run [2]"},
+	{247, "You may now run [1]"},
+	{248, "deleted [1] unused routines and [2] unused variables."},
+	{249, "\nERROR: Must specify the file to be interpreted on the command line\n"},
+	{250, "Bad BB_temp_type"},
+	{251, "Bad BB_elem type"},
+	{252, "Bad BB_elem"},
+	{253, "Bad seq_elem"},
+	{254, "This opcode ([1]) should never be emitted!  SubProg '[2]'"},	
+	{255, "no routine id for [1]"},
+	{256, "Bad BB_var_type"},
+	{257, "Bad GType"},
+	{258, "or_type: t1 is [1], t2 is [2]\n"},
+	{259, "unknown opcode: [1]"},
+	{260, "Attempted to remove invalid forward reference"},
+	{261, "Error resolving forward reference in case for '[1]'"},
+	{262, "Bad operation.  Expected TYPE_CHECK ([1]) or TYPE_CHECK_FORWARD ([2]) , not [3]"},
+	{263, "unrecognized forward reference type: [1] ([2])"},
+	{264, "negative ref count for [1]"},
+	{265, "Unhandled inline type: [1]"},
+	{266, "error with token playback"},
+	{267, "Set Private Scope - unhandled scope [1]"},
+	{268, "Scanner unhandled class [1]"},
+	{269, "Unknown op found when shifting code: [1]"},
+	
 	$
 }
 
-public function GetMsgText( integer MsgNum, integer WithNum = 1)
+public function GetMsgText( integer MsgNum, integer WithNum = 1, object Args = {})
 	integer idx = 1
-	object lMsgText
+	object msgtext
 	
 	-- First check localization databases
-	lMsgText = get_text( MsgNum, LocalizeQual, LocalDB )
+	msgtext = get_text( MsgNum, LocalizeQual, LocalDB )
 	
 	-- If not found, scan through hard-coded messages
-	if atom(lMsgText) then
+	if atom(msgtext) then
 		for i = 1 to length(StdErrMsgs) do
 			if StdErrMsgs[i][1] = MsgNum then
 				idx = i
 				exit
 			end if
 		end for
-		lMsgText = StdErrMsgs[idx][2]
+		msgtext = StdErrMsgs[idx][2]
+	end if
+	
+	if atom(Args) or length(Args) != 0 then
+		msgtext = format(msgtext, Args)
 	end if
 	
 	if WithNum != 0 then
-		return sprintf("[[]%04d]:: %s", {MsgNum, lMsgText})
+		return sprintf("<%04d>:: %s", {MsgNum, msgtext})
 	else
-		return lMsgText
+		return msgtext
 	end if
 end function
 

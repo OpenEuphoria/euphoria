@@ -21,6 +21,8 @@ include std/os.e
 include std/sort.e
 include std/text.e
 
+
+
 -- Translator initialization
 include global.e
 include platform.e
@@ -34,6 +36,7 @@ include pathopen.e
 include error.e
 include platform.e
 include buildsys.e
+include msgtext.e
 
 function extract_options(sequence s)
 	return s
@@ -41,39 +44,37 @@ end function
 set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
-	{ "silent", 0, "Do not display status messages", { NO_CASE } },
-	{ "wat", 0, "Set the compiler to Watcom", { NO_CASE } },
-	{ "djg", 0, "Set the compiler to DJGPP", { NO_CASE } },
-	{ "gcc", 0, "Set the compiler to GCC", { NO_CASE } },
-	{ "com", 0, "Set the compiler directory", { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "con", 0, "Create a console application", { NO_CASE } },
-	{ "dll", 0, "Create a shared library", { NO_CASE } },
-	{ "so", 0, "Create a shared library", { NO_CASE } },
-	{ "plat", 0, "Set the platform for the translated code", { NO_CASE, HAS_PARAMETER, "platform" } },
-	{ "lib", 0, "Use a non-standard library", { NO_CASE, HAS_PARAMETER, "filename" } },
-	{ "fastfp", 0, "Enable hardware FPU (DOS option only)", { NO_CASE } },
-	{ "stack", 0, "Set the stack size (Watcom)", { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "debug", 0, "Enable debug mode for generated code", { NO_CASE } },
-	{ "maxsize", 0, "Set the maximum C file size before splitting", { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "keep", 0, "Keep the generated files", { NO_CASE } },
-	{ "makefile", 0, "Generate a project Makefile", { NO_CASE } },
-	{ "makefile-full", 0, "Generate a full project Makefile", { NO_CASE } },
-	{ "cmakefile", 0, "Generate a project CMake file", { NO_CASE } },
-	{ "emake", 0, "Generate a emake/emake.bat file to build project", { NO_CASE } },
-	{ "nobuild", 0, "Do not build the project nor write a build file", { NO_CASE } },
-	{ "builddir", 0, "Generate/compile all files in 'builddir'", { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "o", 0, "Set the output filename", { NO_CASE, HAS_PARAMETER, "filename" } }
+	{ "silent",        0, GetMsgText(177,0), { NO_CASE } },
+	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
+	{ "djg",           0, GetMsgText(179,0), { NO_CASE } },
+	{ "gcc",           0, GetMsgText(180,0), { NO_CASE } },
+	{ "com",           0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
+	{ "con",           0, GetMsgText(182,0), { NO_CASE } },
+	{ "dll",           0, GetMsgText(183,0), { NO_CASE } },
+	{ "so",            0, GetMsgText(184,0), { NO_CASE } },
+	{ "plat",          0, GetMsgText(185,0), { NO_CASE, HAS_PARAMETER, "platform" } },
+	{ "lib",           0, GetMsgText(186,0), { NO_CASE, HAS_PARAMETER, "filename" } },
+	{ "fastfp",        0, GetMsgText(187,0), { NO_CASE } },
+	{ "stack",         0, GetMsgText(188,0), { NO_CASE, HAS_PARAMETER, "size" } },
+	{ "debug",         0, GetMsgText(189,0), { NO_CASE } },
+	{ "maxsize",       0, GetMsgText(190,0), { NO_CASE, HAS_PARAMETER, "size" } },
+	{ "keep",          0, GetMsgText(191,0), { NO_CASE } },
+	{ "makefile",      0, GetMsgText(192,0), { NO_CASE } },
+	{ "makefile-full", 0, GetMsgText(193,0), { NO_CASE } },
+	{ "cmakefile",     0, GetMsgText(194,0), { NO_CASE } },
+	{ "emake",         0, GetMsgText(195,0), { NO_CASE } },
+	{ "nobuild",       0, GetMsgText(196,0), { NO_CASE } },
+	{ "builddir",      0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
+	{ "o",             0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
 }
 
 
 add_options( trans_opt_def )
 
 procedure translator_help()
-	printf(1, "euc.exe [options] file.ex...\n", {})
-	printf(1, " common options:\n", {})
+	ShowMsg(1, 199)
 	show_help( get_common_options(), NO_HELP)
-	printf(1, "\n", {})
-	printf(1, " translator options:\n", {})
+	ShowMsg(1, 200)
 	show_help(trans_opt_def, NO_HELP)
 end procedure
 
@@ -147,7 +148,7 @@ export procedure transoptions()
 						set_host_platform( UNETBSD )
 
 					case else
-						printf(2, "Unknown platform: %s\n", { val })
+						ShowMsg(2, 201, { val })
 						abort(1)
 				end switch
 
@@ -174,7 +175,7 @@ export procedure transoptions()
 				if tmp[1] = GET_SUCCESS then
 					max_cfile_size = tmp[2]
 				else
-					puts(2, "Invalid maximum file size\n")
+					ShowMsg(2, 202)
 					abort(1)
 				end if
 
@@ -209,7 +210,7 @@ export procedure transoptions()
 
 	if length(m:get(opts, "extras")) = 0 then
 		show_banner()
-		puts(2, "\nERROR: Must specify the file to be translated on the command line\n\n")
+		ShowMsg(2, 203)
 		
 		translator_help()
 
@@ -307,16 +308,13 @@ procedure InitBackEnd(integer c)
 			if atom(wat_path) then
 				CompileErr(159)
 			elsif find(' ', wat_path) then
-				Warning( "Watcom cannot build translated files when there is a space in its parent folders",
-					translator_warning_flag)
+				Warning( 214, translator_warning_flag)
 			elsif atom(getenv("INCLUDE")) then
-				Warning( "Watcom needs to have an INCLUDE variable set to its included directories",
-					translator_warning_flag )
+				Warning( 215, translator_warning_flag )
 			elsif match(upper(wat_path & "\\H;" & getenv("WATCOM") & "\\H\\NT"),
 				upper(getenv("INCLUDE"))) != 1
 			then
-				Warning( "Watcom should have the H and the H\\NT includes at the front " &
-					"of the INCLUDE variable.", translator_warning_flag )
+				Warning( 216, translator_warning_flag )
 				--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
 			end if
 

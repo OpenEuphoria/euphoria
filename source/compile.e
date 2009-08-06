@@ -156,7 +156,7 @@ function BB_temp_type(integer var)
 		   SymTab[BB_info[i][BB_VAR]][S_TEMP_NAME] = tn then
 			t = BB_info[i][BB_TYPE]
 			if t <= 0 or t > TYPE_OBJECT then
-				InternalErr("Bad BB_temp_type")
+				InternalErr(250)
 			end if
 			return t
 		end if
@@ -179,7 +179,7 @@ function BB_temp_elem(integer var)
 				t = TYPE_OBJECT
 			end if
 			if t <= 0 or t > TYPE_OBJECT then
-				InternalErr("Bad BB_elem type")
+				InternalErr(251)
 			end if
 			return t
 		end if
@@ -197,7 +197,7 @@ function BB_var_elem(integer var)
 			BB_info[i][BB_VAR] = var then
 			t = BB_info[i][BB_ELEM]
 			if t < 0 or t > TYPE_OBJECT then
-				InternalErr("Bad BB_elem")
+				InternalErr(252)
 			end if
 			if t = TYPE_NULL then   -- var has only been read
 				return TYPE_OBJECT
@@ -232,7 +232,7 @@ function SeqElem(integer x)
 	s = x
 	t = SymTab[s][S_SEQ_ELEM]
 	if t < 0 or t > TYPE_OBJECT then
-		InternalErr("Bad seq_elem")
+		InternalErr(253)
 	end if
 	if SymTab[s][S_MODE] != M_NORMAL then
 		return t
@@ -2247,8 +2247,8 @@ procedure opNOP1()
 end procedure
 
 procedure opINTERNAL_ERROR()
-	InternalErr(sprintf("This opcode (%d) should never be emitted!  SubProg [%s]", 
-		{ Code[pc], SymTab[CurrentSub][S_NAME] } ))
+	InternalErr(254, 
+		{ Code[pc], SymTab[CurrentSub][S_NAME] } )
 end procedure
 
 sequence switch_stack = {}
@@ -6747,7 +6747,7 @@ export procedure init_opcodes()
 		end switch
 
 		if operation[i] = -1 then
-			InternalErr("no routine id for " & name)
+			InternalErr(255, { name })
 		end if
 		
 	end for

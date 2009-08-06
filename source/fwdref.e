@@ -78,7 +78,7 @@ procedure resolved_reference( integer ref )
 		active_refnames   = remove( active_refnames, ix, ix )
 		inactive_references &= ref
 	else
-		InternalErr( "Attempted to remove invalid forward reference" )
+		InternalErr( 260 )
 	end if
 end procedure
 
@@ -357,7 +357,7 @@ procedure patch_forward_case( token tok, integer ref )
 	end if
 	
 	if not cx then
-		InternalErr( sprintf("Error resolving forward reference in case for '%s'", { fr[FR_NAME] } ) )
+		InternalErr( 261, { fr[FR_NAME] } )
 	end if
 	
 	integer negative = 0
@@ -397,8 +397,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 	
 	else 
 		prep_forward_error( ref )
-		InternalErr( sprintf( "Bad operation.  Expected TYPE_CHECK (%d) or TYPE_CHECK_FORWARD (%d) , not %d", 
-			{ TYPE_CHECK, TYPE_CHECK_FORWARD, fr[FR_OP] }) )
+		InternalErr( 262, { TYPE_CHECK, TYPE_CHECK_FORWARD, fr[FR_OP] })
 	end if
 	
 	set_code( ref )
@@ -660,7 +659,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				break
 			case else
 				-- ?? what is it?
-				InternalErr( sprintf("unrecognized forward reference type: %d (%s)", {fr[FR_TYPE], fr[FR_NAME]} ))
+				InternalErr( 263, {fr[FR_TYPE], fr[FR_NAME]})
 		end switch
 		if sequence( forward_references[ref] ) then
 			errors &= ref

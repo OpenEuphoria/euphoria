@@ -264,7 +264,7 @@ export function advance( integer pc, sequence code = Code )
 			case CONCAT_N then
 				return pc + 3 + code[pc+1]
 			case else
-				InternalErr( sprintf("Unknown op found when shifting code: ", op ) )
+				InternalErr( 269, {op} )
 		end switch
 	end if
 end function

@@ -1,5 +1,5 @@
 t_c_ns_builtin.e:3
-[0074]:: Errors resolving the following references:
+<0074>:: Errors resolving the following references:
 	t_c_ns_builtin.e (3): puts
 
 ut:puts( 1, "This should crash\n" )

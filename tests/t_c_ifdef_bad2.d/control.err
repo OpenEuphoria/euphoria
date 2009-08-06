@@ -1,5 +1,5 @@
 t_c_ifdef_bad2.e:4
-[0111]:: Mismatched 'end if'. Should this be an 'end ifdef' to match 'ifdef' on line 3
+<0111>:: Mismatched 'end if'. Should this be an 'end ifdef' to match 'ifdef' on line 3
 	end if
 	     ^
 

@@ -618,7 +618,7 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 				param_num += 1
 			end if
 		end if
-		SymTab[var][S_USAGE] = U_READ + U_WRITTEN
+		SymTab[var][S_USAGE] = U_USED
 		if reuse then
 			map:nested_put( inline_var_map, {CurrentSub, s }, var )
 		end if
@@ -810,7 +810,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					break
 				
 				case else
-					InternalErr( sprintf("Unhandled inline type: %d", inline_type) )
+					InternalErr( 265, {inline_type} )
 			end switch
 		end if
 	end for

@@ -95,6 +95,7 @@ integer factors = 0           -- number of factors parsed
 integer lhs_subs_level = -1   -- number of levels of subscripting of lhs var on RHS
 symtab_index left_sym = 0     -- var used on LHS of assignment
 
+integer subs_depth = 0       -- nesting level of slice expression.
 sequence canned_tokens = {}   -- recording stack when parser is in recording mode
 					          -- this sequence will be saved and the tape played back whenever needed
 
@@ -230,9 +231,10 @@ procedure NotReached(integer tok, sequence keyword)
 		if equal(keyword, "goto") and find(tok, {LOOP, LABEL, WHILE}) then
 			return
 		end if
-		Warning(sprintf("%s:%d - statement after %%s will never be executed",
-					{name_ext(file_name[current_file_no]), line_number}),
-					not_reached_warning_flag, {keyword})
+		Warning(218, not_reached_warning_flag, 
+					{name_ext(file_name[current_file_no]), 
+					 line_number,
+					 keyword})
 	end if
 end procedure
 
@@ -581,7 +583,7 @@ function next_token()
 	            s = restore_parser()
 	        end if
 	    else
-	    	InternalErr("error with token playback")
+	    	InternalErr(266)
 		end if
 		if t[T_ID] = RECORDED then
 			t=read_recorded_token(t[T_SYM])
@@ -620,6 +622,7 @@ function Expr_list()
 		n = 0
 		short_circuit -= 1
 		while TRUE do
+			gListItem &= 1
 			call_proc(forward_expr, {})
 			n += gListItem[$]
 			gListItem = gListItem[1 .. $-1]
@@ -678,11 +681,7 @@ procedure UndefinedVar(symtab_index s)
 		-- extended error message
 		for i = 1 to length(dup_globals) do
 			dup = dup_globals[i]
-			ifdef UNIX then
-				fname = file_name[SymTab[dup][S_FILE_NO]]
-			elsedef
-				fname = find_replace("/", file_name[SymTab[dup][S_FILE_NO]], "\\")
-			end ifdef
+			fname = file_name[SymTab[dup][S_FILE_NO]]
 			errmsg &= "    " & fname & "\n"
 			
 		end for
@@ -690,61 +689,65 @@ procedure UndefinedVar(symtab_index s)
 		CompileErr(23, {rname, rname, errmsg})
 
 	elsif length(symbol_resolution_warning) then
-		Warning( symbol_resolution_warning[1], resolution_warning_flag, symbol_resolution_warning[2])
+		Warning( symbol_resolution_warning, resolution_warning_flag)
 	end if
 end procedure
 
 procedure WrongNumberArgs(symtab_index subsym, sequence only)
 -- issue message for wrong number of arguments
-	sequence plural
+	integer msgno
 
 	if SymTab[subsym][S_NUM_ARGS] = 1 then
-		plural = ""
+		if length(only) = 0 then
+			msgno = 20
+		else
+			msgno = 237
+		end if
 	else
-		plural = "s"
+		if length(only) = 0 then
+			msgno = 236
+		else
+			msgno = 238
+		end if
+
 	end if
-	CompileErr(20, {SymTab[subsym][S_NAME], only,
-				SymTab[subsym][S_NUM_ARGS], plural})
+	CompileErr(msgno, {SymTab[subsym][S_NAME], SymTab[subsym][S_NUM_ARGS]})
 end procedure
 
 procedure MissingArgs(symtab_index subsym)
 	sequence eentry = SymTab[subsym], name=eentry[S_NAME], def_args=eentry[S_DEF_ARGS]
-	sequence msg
+--	sequence msg
 
-	if eentry[S_TOKEN] = FUNC or eentry[S_TOKEN] = QUALIFIED_FUNC then
-		msg = "function "
-	else
-		msg = "procedure "
-	end if
-	msg &= sprintf("%s() takes at least %d parameters.", {name, def_args[2]})
-	if length(def_args[3]) then
-		def_args = def_args[3]
-		if length(def_args)=1 then 
-			if integer(def_args[1]) then
-				msg &= sprintf(" Parameter %d", def_args[1])
-			else
-				msg &= sprintf(" Parameters %d-%d", def_args[1])
-			end if
-		else
-			msg &= " Parameters"
-			integer n = length(msg)+1 -- plac to patch a 's'
-			for i=1 to length(def_args)-1 do
-				if integer(def_args[i]) then
-					msg &= sprintf(", %d", def_args[i])
-				else
-					msg &= sprintf(", %d-%d", def_args[i])
-				end if
-			end for
-			if integer(def_args[$]) then
-				msg &= sprintf(" and %d", def_args[$])
-			else
-				msg &= sprintf(" and %d-%d", def_args[$])
-			end if
-			msg[n] = 's'
-		end if
-		msg &= " may be defaulted."
-	end if
-	CompileErr(msg)
+-- 	msg &= sprintf("%s() takes at least %d parameters.", {name, def_args[2]})
+-- 	if length(def_args[3]) then
+-- 		def_args = def_args[3]
+-- 		if length(def_args)=1 then 
+-- 			if integer(def_args[1]) then
+-- 				msg &= sprintf(" Parameter %d", def_args[1])
+-- 			else
+-- 				msg &= sprintf(" Parameters %d-%d", def_args[1])
+-- 			end if
+-- 		else
+-- 			msg &= " Parameters"
+-- 			integer n = length(msg)+1 -- place to patch a 's'
+-- 			for i=1 to length(def_args)-1 do
+-- 				if integer(def_args[i]) then
+-- 					msg &= sprintf(", %d", def_args[i])
+-- 				else
+-- 					msg &= sprintf(", %d-%d", def_args[i])
+-- 				end if
+-- 			end for
+-- 			if integer(def_args[$]) then
+-- 				msg &= sprintf(" and %d", def_args[$])
+-- 			else
+-- 				msg &= sprintf(" and %d-%d", def_args[$])
+-- 			end if
+-- 			msg[n] = 's'
+-- 		end if
+-- 		msg &= " may be defaulted."
+-- 	end if
+-- 	CompileErr(msg)
+	CompileErr(235, {name, def_args[2]})
 end procedure
 
 procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_private_list, sequence fwd_private_sym )
@@ -1047,7 +1050,8 @@ procedure Object_call( token tok )
 			tok2 = tok3
 			current_sequence = append(current_sequence, sym)
 			while tok2[T_ID] = LEFT_SQUARE do
-					if lhs_subs_level >= 0 then
+				subs_depth += 1
+				if lhs_subs_level >= 0 then
 					lhs_subs_level += 1
 				end if
 				save_factors = factors
@@ -1063,6 +1067,7 @@ procedure Object_call( token tok )
 				else
 					putback(tok2)
 					tok_match(RIGHT_SQUARE)
+					subs_depth -= 1
 					current_sequence = current_sequence[1..$-1]
 					emit_op(RHS_SUBS)
 					-- current_sequence will be updated
@@ -1105,9 +1110,8 @@ procedure Function_call( token tok )
 
 		if short_circuit > 0 and short_circuit_B and
 				  find(id, {FUNC, QUALIFIED_FUNC}) then
-			Warning(sprintf("%.99s:%d - call to %%s() might be short-circuited",
-					{file_name[current_file_no], line_number}),
-					short_circuit_warning_flag, {SymTab[tok[T_SYM]][S_NAME]})
+			Warning(219, short_circuit_warning_flag, 
+				{file_name[current_file_no], line_number,SymTab[tok[T_SYM]][S_NAME]})
 		end if
 	end if
 	tok_match(LEFT_ROUND)
@@ -1168,9 +1172,6 @@ procedure Factor()
 				InitCheck(sym, TRUE)
 				emit_opnd(sym)
 			end if
-			
-
-			
 
 			if sym = left_sym then
 				lhs_subs_level = 0 -- start counting subscripts
@@ -1180,6 +1181,7 @@ procedure Factor()
 			tok = next_token()
 			current_sequence = append(current_sequence, sym)
 			while tok[T_ID] = LEFT_SQUARE do
+				subs_depth += 1
 				if lhs_subs_level >= 0 then
 					lhs_subs_level += 1
 				end if
@@ -1196,6 +1198,7 @@ procedure Factor()
 				else
 					putback(tok)
 					tok_match(RIGHT_SQUARE)
+					subs_depth -= 1
 					current_sequence = current_sequence[1..$-1]
 					emit_op(RHS_SUBS) -- current_sequence will be updated
 				end if
@@ -1208,17 +1211,17 @@ procedure Factor()
 			short_circuit += 1
 			
 		case DOLLAR then
-			if length(current_sequence) then
-				emit_op(DOLLAR)
+			tok = next_token()
+			putback(tok)
+			if tok[T_ID] = RIGHT_BRACE then
+				gListItem[$] = 0
 			else
-				tok = next_token()
-				if tok[T_ID] = RIGHT_BRACE then
-					gListItem[$] = 0
-					putback(tok)
+				if subs_depth > 0 and length(current_sequence) then
+					emit_op(DOLLAR)
 				else
 					CompileErr(21)
 				end if
-			end if
+ 			end if
 			
 		case ATOM then
 			emit_opnd(tok[T_SYM])
@@ -1333,6 +1336,7 @@ function rexpr()
 	return tok
 end function
 
+constant boolOps = {OR, AND, XOR}
 procedure Expr()
 -- Parse a general expression
 -- Use either short circuit or full evaluation.
@@ -1340,45 +1344,52 @@ procedure Expr()
 	integer id
 	integer patch
 
-	gListItem &= 1
 	id = -1
 	patch = 0
 	while TRUE do
-		if id != -1 and id != XOR and short_circuit > 0 then
-			if id = OR then
-				emit_op(SC1_OR)
-			else
-				emit_op(SC1_AND)
+		if id != -1 then
+			if id != XOR then
+				if short_circuit > 0 then
+					if id = OR then
+						emit_op(SC1_OR)
+					else
+						emit_op(SC1_AND)
+					end if
+					patch = length(Code)+1
+					emit_forward_addr()
+					short_circuit_B = TRUE
+				end if
 			end if
-			patch = length(Code)+1
-			emit_forward_addr()
-			short_circuit_B = TRUE
 		end if
 
 		tok = rexpr()
 
 		if id != -1 then
-			if id != XOR and short_circuit > 0 then
-				if tok[T_ID] != THEN and tok[T_ID] != DO then
-					if id = OR then
-						emit_op(SC2_OR)
+			if id != XOR then
+				if short_circuit > 0 then
+					if tok[T_ID] != THEN and tok[T_ID] != DO then
+						if id = OR then
+							emit_op(SC2_OR)
+						else
+							emit_op(SC2_AND)
+						end if
 					else
-						emit_op(SC2_AND)
+						SC1_type = id -- if/while/elsif must patch
+						emit_op(SC2_NULL)
 					end if
+					if TRANSLATE then
+						emit_op(NOP1)   -- to get label here
+					end if
+					backpatch(patch, length(Code)+1)
 				else
-					SC1_type = id -- if/while/elsif must patch
-					emit_op(SC2_NULL)
+					emit_op(id)
 				end if
-				if TRANSLATE then
-					emit_op(NOP1)   -- to get label here
-				end if
-				backpatch(patch, length(Code)+1)
 			else
 				emit_op(id)
 			end if
 		end if
 		id = tok[T_ID]
-		if id != OR and id != AND and id != XOR then
+		if not find(id, boolOps) then
 			exit
 		end if
 	end while
@@ -1517,6 +1528,7 @@ procedure Assignment(token left_var)
 	current_sequence = append(current_sequence, left_sym)
 
 	while tok[T_ID] = LEFT_SQUARE do
+		subs_depth += 1
 		if lhs_ptr then
 			-- multiple lhs subscripts, evaluate first n-1 of them with this
 			current_sequence = current_sequence[1..$-1]
@@ -1544,6 +1556,7 @@ procedure Assignment(token left_var)
 		else
 			putback(tok)
 			tok_match(RIGHT_SQUARE)
+			subs_depth -= 1
 		end if
 		tok = next_token()
 		lhs_ptr = TRUE
@@ -2301,9 +2314,8 @@ procedure Case_statement()
 					start_line = line_number
 				else
 					putback( tok )
-					Warning(sprintf("%.99s:%d - empty case block without fallthru",
-						{file_name[current_file_no], start_line}),
-						empty_case_warning_flag )
+					Warning(220, empty_case_warning_flag,
+						{file_name[current_file_no], start_line} )
 					exit
 				end if
 			else
@@ -2507,9 +2519,8 @@ procedure Switch_statement()
 	end if
 
 	if not else_case() then
-		Warning(sprintf("%.99s:%d - no 'case else' supplied.",
-				{file_name[current_file_no], line_number}),
-				no_case_else_warning_flag )
+		Warning(221, no_case_else_warning_flag,
+				{file_name[current_file_no], line_number})
 	end if
 	
 	pop_switch( break_base )
@@ -2889,7 +2900,7 @@ function SetPrivateScope(symtab_index s, symtab_index type_sym, integer n)
 			return buckets[hashval]
 		
 		case else
-			InternalErr("SetPS")
+			InternalErr(267, {scope})
 			
 	end switch
 
@@ -2942,8 +2953,7 @@ procedure For_statement()
 		SymTab[loop_var_sym][S_SCOPE] = SC_LOOP_VAR
 		Pop_block_var()
 	end if
-	SymTab[loop_var_sym][S_USAGE] = or_bits(SymTab[loop_var_sym][S_USAGE],
-										  or_bits(U_READ, U_WRITTEN))
+	SymTab[loop_var_sym][S_USAGE] = or_bits(SymTab[loop_var_sym][S_USAGE], U_USED)
 	
 	op_info1 = loop_var_sym
 	emit_op(FOR)
@@ -3579,7 +3589,7 @@ procedure SubProg(integer prog_type, integer scope)
 	symtab_index p, type_sym, sym
 	token tok, prog_name
 	integer first_def_arg
-	sequence again
+	integer again
 
 	LeaveTopLevel()
 	prog_name = next_token()
@@ -3602,13 +3612,12 @@ procedure SubProg(integer prog_type, integer scope)
 		if scope = SC_OVERRIDE then
 			if SymTab[p][S_SCOPE] = SC_PREDEF or SymTab[p][S_SCOPE] = SC_OVERRIDE then
 					if SymTab[p][S_SCOPE] = SC_OVERRIDE then
-						again = " again"
+						again = 223
 					else
-						again = ""
+						again = 222
 					end if
-					Warning(sprintf("built-in routine %%s() overridden%s in %s:%d",
-									{ again, file_name[current_file_no],line_number}),
-									override_warning_flag, {SymTab[p][S_NAME]})
+					Warning(again, override_warning_flag,
+								{file_name[current_file_no],line_number, SymTab[p][S_NAME]})
 			end if
 		end if
 
@@ -3867,9 +3876,6 @@ procedure not_supported_compile(sequence feature)
 	CompileErr(5, {feature, version_name})
 end procedure
 
-sequence mix_msg
-mix_msg = "can't mix profile and profile_time"
-
 procedure SetWith(integer on_off)
 -- set a with/without option
 	sequence option
@@ -3887,7 +3893,7 @@ procedure SetWith(integer on_off)
 			OpProfileStatement = on_off
 			if OpProfileStatement then
 				if AnyTimeProfile then
-					Warning(mix_msg, mixed_profile_warning_flag)
+					Warning(224, mixed_profile_warning_flag)
 					OpProfileStatement = FALSE
 				else
 					AnyStatementProfile = TRUE
@@ -3905,7 +3911,7 @@ procedure SetWith(integer on_off)
 			OpProfileTime = on_off
 			if OpProfileTime then
 				if AnyStatementProfile then
-					Warning(mix_msg,mixed_profile_warning_flag)
+					Warning(224,mixed_profile_warning_flag)
 					OpProfileTime = FALSE
 				end if
 				tok = next_token()
@@ -4010,10 +4016,8 @@ procedure SetWith(integer on_off)
 	 					if good_sofar != line_number then
  							CompileErr(147)
  						end if
-						Warning(sprintf("%.99s:%d - Unknown warning name %s",
-							{file_name[current_file_no], line_number, option}),
-							0 -- unmaskable 
-							)
+						Warning(225, 0,
+							{file_name[current_file_no], line_number, option})
 						tok = next_token()	
 						continue
 					end if

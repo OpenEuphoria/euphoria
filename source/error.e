@@ -27,7 +27,7 @@ end procedure
 
 --**
 -- add a warning message to the list
-export procedure Warning(sequence msg, integer mask, sequence args = {})
+export procedure Warning(object msg, integer mask, sequence args = {})
 	integer p
 	sequence text, w_name
 
@@ -56,11 +56,10 @@ export procedure Warning(sequence msg, integer mask, sequence args = {})
 			w_name = "" -- not maskable
 		end if
 
-		if length(args) then
-			msg = sprintf(msg,args)
+		if atom(msg) then
+			msg = GetMsgText(msg, 1, args)
 		end if
-
-		text = sprintf("Warning %s:\n\t%s\n", {w_name,msg})
+		text = GetMsgText(204, 0, {w_name, msg})
 		if find(text, warning_list) then
 			return -- duplicate
 		end if
@@ -100,7 +99,7 @@ export function ShowWarnings(integer errfile)
 		else
 			errfile = open(TempWarningName,"w")
 			if errfile = -1 then
-				puts(STDERR,"\nUnable to create warning file " & TempWarningName&'\n')
+				ShowMsg(STDERR, 205, {TempWarningName})
 				return length(warning_list)
 			end if
 		end if
@@ -112,7 +111,7 @@ export function ShowWarnings(integer errfile)
 		if errfile = STDERR then
 			screen_output(STDERR, warning_list[i])
 			if remainder(i, 20) = 0 and batch_job = 0 then
-				puts(STDERR, "\nPress Enter to continue, q to quit\n\n")
+				ShowMsg(STDERR, 206)
 				c = getc(0)
 				if c = 'q' then
 					exit
@@ -137,7 +136,7 @@ export procedure ShowDefines(integer errfile)
 		errfile = STDERR
 	end if
 
-	puts(errfile, "\n--- Defined Words ---\n")
+	puts(errfile, format("\n--- [1] ---\n", {GetMsgText(207,0)}))
 
 	for i = 1 to length(OpDefines) do
 		if find(OpDefines[i], {"_PLAT_START", "_PLAT_STOP"}) = 0 then 
@@ -160,7 +159,7 @@ export procedure Cleanup(integer status)
 	w = ShowWarnings(status)
 	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
 		if not batch_job then
-			screen_output(STDERR, "\nPress Enter\n")
+			screen_output(STDERR, GetMsgText(208,0))
 			getc(0) -- wait
 		end if
 	end if
@@ -177,9 +176,7 @@ export procedure OpenErrFile()
 
 	if TempErrFile = -1 then
 		if length(TempErrName) > 0 then
-			screen_output(STDERR, "Can't create error message file: ")
-			screen_output(STDERR, TempErrName)
-			screen_output(STDERR, "\n")
+			screen_output(STDERR, GetMsgText(209, 0, {TempErrName}))
 		end if
 		abort(1) --Cleanup(1)
 	end if
@@ -193,7 +190,7 @@ procedure ShowErr(integer f)
 	end if
 
 	if ThisLine[1] = END_OF_FILE_CHAR then
-		screen_output(f, "<end-of-file>\n")
+		screen_output(f, GetMsgText(210,0))
 	else
 		screen_output(f, ThisLine)
 	end if
@@ -257,19 +254,26 @@ end procedure
 --**
 -- Handles internal compile-time errors
 -- see RTInternal() for run-time internal errors
-export procedure InternalErr(sequence msg)
+export procedure InternalErr(integer  msgno, object args = {})
+
+	sequence msg
+	if atom(args) then
+		args = {args}
+	end if
+	
+	msg = GetMsgText(msgno, 1, args)
 	if TRANSLATE then
-		screen_output(STDERR, sprintf("Internal Error: %s\n", {msg}))
+		screen_output(STDERR, GetMsgText(211, 1, {msg}))
 	else
-		screen_output(STDERR, sprintf("Internal Error at %s:%d - %s\n",
-		   {file_name[current_file_no], line_number, msg}))
+		screen_output(STDERR, GetMsgText(212, 1, {file_name[current_file_no], line_number, msg}))
 	end if
 
 	if not batch_job then
-		screen_output(STDERR, "\nPress Enter\n")
+		screen_output(STDERR, GetMsgText(208, 0))
 		getc(0)
 	end if
 	
     -- M_CRASH = 67
-	machine_proc(67, "Failed due to internal error.")
+	machine_proc(67, GetMsgText(213))
 end procedure
+

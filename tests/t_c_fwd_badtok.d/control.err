@@ -1,5 +1,5 @@
 t_c_fwd_badtok.e:3
-[0068]:: expected a procedure, not a function
+<0068>:: expected a procedure, not a function
 foo()
    ^
 

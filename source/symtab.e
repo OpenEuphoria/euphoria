@@ -11,6 +11,7 @@ include error.e
 include fwdref.e
 include reswords.e
 include block.e
+include msgtext.e
 
 constant NBUCKETS = 2003  -- prime helps
 
@@ -698,11 +699,10 @@ ifdef STDDEBUG then
 							export_warnings = prepend( export_warnings,
 								{ scanning_file, SymTab[tok[T_SYM]][S_FILE_NO] })
 							
-							symbol_resolution_warning = {
-								sprintf("File '%s' uses public symbols from '%s', but does not include that file.",
-									{ name_ext(file_name[scanning_file]),
-									name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])  })
-								,{word}}
+							symbol_resolution_warning = GetMsgText(232, 0, 
+										{name_ext(file_name[scanning_file]),
+										 name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])})
+
 						end if
 						
 						
@@ -803,28 +803,19 @@ end ifdef
 			
 			b_name = SymTab[st_builtin][S_NAME]
 			builtin_warnings = append(builtin_warnings, b_name)
-			msg = "The built-in %s() in %s over rides the global/public %s() in:"
+			
 			if length(dup_globals) > 1 then
-				msg &= '\n'
+				msg = "\n"
+			else
+				msg = ""
 			end if
 			-- Get list of files...
 			for i = 1 to length(dup_globals) do
-				ifdef UNIX then
-					msg_file = file_name[SymTab[dup_globals[i]][S_FILE_NO]]
-				elsedef
-					msg_file = find_replace("/", file_name[SymTab[dup_globals[i]][S_FILE_NO]], '\\')
-				end ifdef
-				
-				msg_file = find_replace("%", msg_file, "%%")
-				if length(dup_globals) > 1 then
-					msg &= "    "
-				else
-					msg &= " "
-				end if
-				msg &= msg_file & "\n"
+				msg_file = file_name[SymTab[dup_globals[i]][S_FILE_NO]]
+				msg &= "    " & msg_file & "\n"
 			end for
 
-			Warning(msg, builtin_chosen_warning_flag, {b_name, file_name[scanning_file], b_name})
+			Warning(234, builtin_chosen_warning_flag, {b_name, file_name[scanning_file], msg})
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -895,9 +886,12 @@ ifdef STDDEBUG then
 					return gtok
 				end if
 end ifdef
-				symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included",
-					{ name_ext(file_name[scanning_file]), line_number,
-					name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]])}),{word}}
+				symbol_resolution_warning = GetMsgText(233,0,
+									{name_ext(file_name[scanning_file]), 
+									 line_number,
+									 word,
+									 name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]])
+									 })
 		end if
 		return gtok
 	end if
@@ -987,56 +981,66 @@ end procedure
 
 export procedure LintCheck(symtab_index s)
 -- do some lint-like checks on s
-	integer u, n, warn_level
-	sequence vtype, place, problem, file
+	integer warn_level
+	sequence file
 
-	u = SymTab[s][S_USAGE]
-	ifdef UNIX then
-		file = file_name[current_file_no]
-	elsedef
-		file = find_replace("/", file_name[current_file_no], "\\")
-	end ifdef
+	switch SymTab[s][S_USAGE] do
 
-	if SymTab[s][S_SCOPE] = SC_LOCAL then
-		if SymTab[s][S_MODE] = M_CONSTANT then
-			vtype = "local constant"
-		else
-			vtype = "local variable"
-		end if
-		place = ""
-
-	else
-		n = SymTab[CurrentSub][S_NUM_ARGS]
-		if SymTab[s][S_VARNUM] < n then
-			vtype = "parameter"
-		else
-			vtype = "private variable"
-		end if
-		place = " of " & SymTab[CurrentSub][S_NAME] & "()"
-
-	end if
-
-	if u != or_bits(U_READ, U_WRITTEN) then
-		warn_level = 0
-		if u = U_UNUSED or
-			 (u = U_WRITTEN and
-				(equal(vtype, "local constant")
-               or (equal(vtype, "parameter") and Strict_is_on) -- this is rarely a real problem
-				 ))
-				 then
-			problem = ""
+		case U_UNUSED then
 			warn_level = not_used_warning_flag
+		
+		case U_WRITTEN then -- Never accessed
+			warn_level = not_used_warning_flag
+			if SymTab[s][S_SCOPE] != SC_LOCAL then
+				-- Non-local vars/consts can be read by other files.
+				warn_level = 0 
+			
+			elsif SymTab[s][S_MODE] = M_CONSTANT then
+				if not Strict_is_on then
+					-- Unused local constants are fairly common, so only report
+					-- on them if explictly required to.
+					warn_level = 0 
+				end if
+			end if
+		
+		case U_READ then -- never assigned
+	    	warn_level = no_value_warning_flag
+	    	
+	    case else
+	    	warn_level = 0
+	end switch
 
-		elsif u = U_READ then
-			problem = " is never assigned a value"
-		    warn_level = no_value_warning_flag
-		end if
-
-		if warn_level then
-			Warning(sprintf("%s '%%s'%s in file %s%s", {vtype, place, file, problem}),
-								warn_level,{SymTab[s][S_NAME]})
+	if warn_level = 0 then
+		return
+	end if
+	
+	file = file_name[current_file_no]
+	if warn_level = no_value_warning_flag then
+		if SymTab[s][S_SCOPE] = SC_LOCAL then
+			if current_file_no = SymTab[s][S_FILE_NO] then
+				Warning(226, warn_level, {file,  SymTab[s][S_NAME]})
+			end if
+		else
+			Warning(227, warn_level, {file,  SymTab[s][S_NAME], SymTab[CurrentSub][S_NAME]})
+		end if			
+	else
+		if SymTab[s][S_SCOPE] = SC_LOCAL then
+			if current_file_no = SymTab[s][S_FILE_NO] then
+				if SymTab[s][S_MODE] = M_CONSTANT then
+					Warning(228, warn_level, {file,  SymTab[s][S_NAME]})
+				else
+					Warning(229, warn_level, {file,  SymTab[s][S_NAME]})
+				end if
+			end if	
+		else
+			if SymTab[s][S_VARNUM] < SymTab[CurrentSub][S_NUM_ARGS] then
+				Warning(230, warn_level, {file,  SymTab[s][S_NAME], SymTab[CurrentSub][S_NAME]})
+			else
+				Warning(231, warn_level, {file,  SymTab[s][S_NAME], SymTab[CurrentSub][S_NAME]})
+			end if		
 		end if
 	end if
+
 end procedure
 
 export procedure HideLocals()

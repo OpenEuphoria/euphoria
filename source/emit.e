@@ -1378,7 +1378,7 @@ export procedure emit_op(integer op)
 			emit_addr(a)       
 			if TRANSLATE then
 				if not trace_called then
-					Warning("Statements have been inserted to trace execution of your program.",0)
+					Warning(217,0)
 				end if
 				trace_called = TRUE
 			end if          
@@ -1386,7 +1386,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	else
-		InternalErr(sprintf("unknown opcode: %d", op))
+		InternalErr(259, {op})
 
 	end if
 

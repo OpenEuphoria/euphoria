@@ -9,6 +9,7 @@ include global.e
 include cominit.e
 include error.e
 include pathopen.e
+include msgtext.e
 
 sequence interpreter_opt_def = {}
 
@@ -45,7 +46,7 @@ export procedure intoptions()
 	
 	if length(m:get(opts, "extras")) = 0 then
 		show_banner()
-		puts(2, "\nERROR: Must specify the file to be interpreted on the command line\n\n")
+		ShowMsg(2, 249)
 		show_help( get_options() )
 
 		abort(1)
