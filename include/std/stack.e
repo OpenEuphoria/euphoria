@@ -57,11 +57,11 @@ end type
 -- Create a new stack.
 --
 -- Parameters:
---		# ##stack_type##: an integer, defining the semantics of the stack. The
+--		# ##stack_type## : an integer, defining the semantics of the stack. The
 --                        default is FILO.
 --
 -- Returns:
---		An empty **stack**.  Note that the variable storing the stack must
+--		An empty **stack**, note that the variable storing the stack must
 --      not be an integer.  The resources allocated for the stack will
 --      be automatically cleaned up if the reference count of the returned value drops
 --      to zero, or if passed in a call to [[:delete]].
@@ -89,7 +89,7 @@ end function
 -- Determine whether a stack is empty.
 --
 -- Parameters:
---		# ##sk##: the stack being queried.
+--		# ##sk## : the stack being queried.
 --
 -- Returns:
 --		An **integer**, 1 if the stack is empty, else 0.
@@ -105,7 +105,7 @@ end function
 -- Returns how many elements a stack has.
 --
 -- Parameters:
---		# ##sk##: the stack being queried.
+--		# ##sk## : the stack being queried.
 --
 -- Returns:
 --		An **integer**, the number of elements in ##sk##.
@@ -118,8 +118,8 @@ end function
 -- Fetch a value from the stack without removing it from the stack.
 --
 -- Parameters:
---   # ##sk##: the stack being queried
---   # ##idx##: an integer, the place to inspect. The default is 1 (top item).
+--   # ##sk## : the stack being queried
+--   # ##idx## : an integer, the place to inspect. The default is 1 (top item).
 --
 -- Returns:
 --   An **object**, the ##idx##-th item of the stack.
@@ -184,8 +184,8 @@ end function
 -- Adds something to a stack.
 --
 -- Parameters:
---		# ##sk##: the stack to augment
---		# ##value##: an object, the value to push.
+--		# ##sk## : the stack to augment
+--		# ##value## : an object, the value to push.
 --
 -- Comments:
 -- ##value## appears at the end of ##FIFO## stacks and the top of ##FILO## stacks.
@@ -236,7 +236,7 @@ end procedure
 -- Retrieve the top element on a stack.
 --
 -- Parameters:
---		# ##sk##: the stack to inspect.
+--		# ##sk## : the stack to inspect.
 --
 -- Returns:
 --		An **object**, the top element on a stack.
@@ -277,7 +277,7 @@ end function
 -- Retrieve the end element on a stack.
 --
 -- Parameters:
---		# ##sk##: the stack to inspect.
+--		# ##sk## : the stack to inspect.
 --
 -- Returns:
 --		An **object**, the end element on a stack.
@@ -318,11 +318,11 @@ end function
 -- Removes an object from a stack.
 --
 -- Parameters:
---		# ##sk##: the stack to pop
---      # ##idx##: integer. The n-th item to pick from the stack. The default is 1.
+--		# ##sk## : the stack to pop
+--      # ##idx## : integer. The n-th item to pick from the stack. The default is 1.
 --
 -- Returns:
---   An item from the stack, which is also removed from the stack.
+--   An **item**, from the stack, which is also removed from the stack.
 --
 -- Errors:
 -- * If the stack is empty, an error occurs. 
@@ -422,11 +422,11 @@ end function
 -- Gets an object, relative to the top, from a stack.
 --
 -- Parameters:
---		# ##sk##: the stack to get from.
---      # ##idx##: integer. The n-th item to get from the stack. The default is 1.
+--		# ##sk## : the stack to get from.
+--      # ##idx## : integer. The n-th item to get from the stack. The default is 1.
 --
 -- Returns:
---   An item from the stack, which is **not** removed from the stack.
+--   An **item**, from the stack, which is **not** removed from the stack.
 --
 -- Errors:
 -- * If the stack is empty, an error occurs. 
@@ -493,11 +493,11 @@ end function
 -- Gets an object, relative to the end, from a stack.
 --
 -- Parameters:
---		# ##sk##: the stack to get from.
---      # ##idx##: integer. The n-th item from the end to get from the stack. The default is 1.
+--		# ##sk## : the stack to get from.
+--      # ##idx## : integer. The n-th item from the end to get from the stack. The default is 1.
 --
 -- Returns:
---   An item from the stack, which is **not** removed from the stack.
+--   An **item**, from the stack, which is **not** removed from the stack.
 --
 -- Errors:
 -- * If the stack is empty, an error occurs. 
@@ -562,10 +562,10 @@ end function
 -- Swap the top two elements of a stack
 --
 -- Parameters:
---		# ##sk##: the stack to swap.
+--		# ##sk## : the stack to swap.
 --
 -- Returns:
--- A copy of the original **stack**, with the top two elements swapped.
+-- A **copy**, of the original **stack**, with the top two elements swapped.
 --
 -- Comments:
 -- * For ##FIFO## stacks (queues), the top item is the oldest item in the stack.
@@ -621,7 +621,7 @@ end procedure
 -- Repeat the top element of a stack.
 --
 -- Parameters:
---		# ##sk##: the stack.
+--		# ##sk## : the stack.
 --
 -- Side effects:
 --   The value of top() is pushed onto the stack, thus
@@ -684,9 +684,9 @@ end procedure
 -- Update a value on the stack
 --
 -- Parameters:
---   # ##sk##: the stack being queried
---   # ##val##: an object, the value to place on the stack
---   # ##idx##: an integer, the place to inspect. The default is 1 (the top item)
+--   # ##sk## : the stack being queried
+--   # ##val## : an object, the value to place on the stack
+--   # ##idx## : an integer, the place to inspect. The default is 1 (the top item)
 --
 -- Errors:
 -- If the supplied value of ##idx## does not correspond to an existing element, an error occurs.
@@ -723,7 +723,7 @@ end procedure
 -- Wipe out a stack.
 --
 -- Parameters:
---   # ##sk##: the stack to clear.
+--   # ##sk## : the stack to clear.
 --
 -- Side effect:
 --   The stack contents is emptied.

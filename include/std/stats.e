@@ -19,11 +19,11 @@ include std/sequence.e
 -- Determines the k-th smallest value from the supplied set of numbers. 
 --
 -- Parameters:
--- # ##pData## - The list of values from which the smallest value is chosen.
--- # ##pIndex## - The relative index of the desired smallest value.
+-- # ##pData## : The list of values from which the smallest value is chosen.
+-- # ##pIndex## : The relative index of the desired smallest value.
 --
 -- Returns:
--- ##sequence##: {The k-th smallest value, its index in the set}
+-- A **sequence**, {The k-th smallest value, its index in the set}
 --
 -- Comments: 
 -- ##small##() is used to return a value based on its size relative to
@@ -61,7 +61,7 @@ end function
 -- Returns the largest of the data points that are atoms.
 --
 -- Parameters:
---   # ##pData##: a list of 1 or more numbers among which you want the largest.
+--   # ##pData## : a list of 1 or more numbers among which you want the largest.
 --
 -- Returns:
 --   An **object**, either of:
@@ -110,7 +110,7 @@ end function
 -- Returns the smallest of the data points. 
 --
 -- Parameters:
---   # pData = A list of 1 or more numbers for which you want the smallest.
+--   # ##pData## : A list of 1 or more numbers for which you want the smallest.
 --             **Note:** only atom elements are included and any sub-sequences
 --             elements are ignored.
 --
@@ -160,7 +160,7 @@ end function
 -- Determines a number of //range// statistics for the data set. 
 --
 -- Parameters:
---   # ##pData##: a list of 1 or more numbers for which you want the range data.
+--   # ##pData## : a list of 1 or more numbers for which you want the range data.
 --
 -- Returns:
 --  A **sequence**, empty if no atoms were found, else like {Lowest, Highest, Range, Mid-range}
@@ -238,11 +238,11 @@ end function
 -- Returns the standard deviation based of the population. 
 --
 -- Parameters:
--- # ##pData##: a list of 1 or more numbers for which you want the estimated standard deviation.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+-- # ##pData## : a list of 1 or more numbers for which you want the estimated standard deviation.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
--- # ##pPop##: an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
+-- # ##pPop## : an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
 -- sample of the total population. ST_FULLPOP means that ##pData## is the
 -- entire population.
 --
@@ -419,8 +419,8 @@ end function
 -- Returns the sum of all the atoms in an object.
 --
 -- Parameters:
--- # ##pData##: Either an atom or a list of numbers to sum.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+-- # ##pData## : Either an atom or a list of numbers to sum.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
@@ -474,8 +474,8 @@ end function
 -- Returns the count of all the atoms in an object.
 --
 -- Parameters:
---   # ##pData##: either an atom or a list.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--   # ##pData## : either an atom or a list.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
@@ -521,14 +521,14 @@ end function
 -- Returns the average (mean) of the data points.
 --
 -- Parameters:
---   # pData = A list of 1 or more numbers for which you want the mean.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+--   # ##pData## : A list of 1 or more numbers for which you want the mean.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 --
 -- Returns:
---	An **object**:
+--	An **object**,
 -- * ##{}## (the empty sequence) if there are no atoms in the set.
 -- * an atom (the mean) if there are one or more atoms in the set.
 --
@@ -568,14 +568,14 @@ end function
 -- Returns the geometric mean of the atoms in a sequence.
 --
 -- Parameters:
--- # ##pData##: the values to take the geometric mean of.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+-- # ##pData## : the values to take the geometric mean of.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --
--- An **atom**; the geometric mean of the atoms in ##pData##.
+-- An **atom**, the geometric mean of the atoms in ##pData##.
 -- If there is no atom to take the mean of, 1 is returned.
 --
 -- Comments:
@@ -634,14 +634,14 @@ end function
 -- Returns the harmonic mean of the atoms in a sequence.
 --
 -- Parameters:
--- # ##pData##: the values to take the harmonic mean of.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+-- # ##pData## : the values to take the harmonic mean of.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --
--- An **atom**; the harmonic mean of the atoms in ##pData##.
+-- An **atom**, the harmonic mean of the atoms in ##pData##.
 --
 -- Comments:
 -- The harmonic mean is the inverse of the average of their inverses.
@@ -650,8 +650,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ?harmean({3, "abc", -2, 6}, ST_NOALT) -- =  0.
--- ?harmean({{2, 3, 4}) -- 3 / (1/2 + 1/3 + 1/4) = 2.769230769
+-- ? harmean({3, "abc", -2, 6}, ST_NOALT) -- =  0.
+-- ? harmean({{2, 3, 4}) -- 3 / (1/2 + 1/3 + 1/4) = 2.769230769
 -- </eucode>
 --
 -- See Also:
@@ -696,8 +696,8 @@ end function
 -- can be either a simple or weighted moving average.
 --
 -- Parameters:
---   # ##pData##: a list of 1 or more numbers for which you want a moving average.
---   # ##pPeriod##: an object, either 
+--   # ##pData## : a list of 1 or more numbers for which you want a moving average.
+--   # ##pPeriod## : an object, either 
 -- * an integer representing the size of the period, or
 -- * a list of weightings to apply to the respective period positions.
 --
@@ -790,11 +790,11 @@ end function
 -- Returns the exponential moving average of a set of data points.
 --
 -- Parameters:
---   # ##pData##: a list of 1 or more numbers for which you want a moving average.
---   # ##pFactor##: an atom, the smoothing factor, typically between 0 and 1.
+--   # ##pData## : a list of 1 or more numbers for which you want a moving average.
+--   # ##pFactor## : an atom, the smoothing factor, typically between 0 and 1.
 --
 -- Returns:
---   A **sequence** made of the requested averages, or ##{}## if ##pData## is empty or
+--   A **sequence**, made of the requested averages, or ##{}## if ##pData## is empty or
 -- the supplied period is less than one.
 --
 -- Comments: 
@@ -853,8 +853,8 @@ end function
 -- Returns the mid point of the data points.
 --
 -- Parameters:
--- # ##pData##: a list of 1 or more numbers for which you want the mean.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+-- # ##pData## : a list of 1 or more numbers for which you want the mean.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --

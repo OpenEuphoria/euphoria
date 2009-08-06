@@ -31,11 +31,11 @@ include std/error.e
 -- of characters, rather than being sent to a file or device. 
 --
 -- Parameters:
---		# ##format##: a sequence, the text to print. This text may contain format specifiers.
---		# ##values##: usually, a sequence of values. It should have as many elements as format specifiers in ##format##, as these values will be substituted to the specifiers.
+--		# ##format## : a sequence, the text to print. This text may contain format specifiers.
+--		# ##values## : usually, a sequence of values. It should have as many elements as format specifiers in ##format##, as these values will be substituted to the specifiers.
 --
 -- Returns:
--- A **sequence** of printable characters, representing ##format## with the values in ##values## spliced in.
+-- A **sequence**, of printable characters, representing ##format## with the values in ##values## spliced in.
 --
 -- Comments:
 --
@@ -60,7 +60,7 @@ include std/error.e
 -- Returns the representation of any Euphoria object as a string of characters.
 --
 -- Parameters:
---   # ##x## - Any Euphoria object.
+--   # ##x## : Any Euphoria object.
 --
 -- Returns:
 --   A **sequence**, a string representation of ##x##.
@@ -119,13 +119,13 @@ end function
 -- Trim all items in the supplied set from the leftmost (start or head) of a sequence.
 --
 -- Parameters:
---   # ##source##: the sequence to trim.
---   # ##what##: the set of item to trim from ##source## (defaults to " \t\r\n").
---   # ##ret_index##: If zero (the default) returns the trimmed sequence, otherwise
+--   # ##source## : the sequence to trim.
+--   # ##what## : the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##ret_index## : If zero (the default) returns the trimmed sequence, otherwise
 --                    it returns the index of the leftmost item **not** in ##what##.
 --
 -- Returns:
---   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
+--   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##\\
 --   A **integer**, if ##ret_index## is not zero, which is index of the leftmost
 --                  element in ##source## that is not in ##what##.
 --
@@ -167,13 +167,13 @@ end function
 -- Trim all items in the supplied set from the rightmost (end or tail) of a sequence.
 --
 -- Parameters:
---   # ##source##: the sequence to trim.
---   # ##what##: the set of item to trim from ##source## (defaults to " \t\r\n").
---   # ##ret_index##: If zero (the default) returns the trimmed sequence, otherwise
+--   # ##source## : the sequence to trim.
+--   # ##what## : the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##ret_index## : If zero (the default) returns the trimmed sequence, otherwise
 --                    it returns the index of the rightmost item **not** in ##what##.
 --
 -- Returns:
---   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
+--   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##\\
 --   A **integer**, if ##ret_index## is not zero, which is index of the rightmost
 --                  element in ##source## that is not in ##what##.
 --
@@ -216,14 +216,14 @@ end function
 -- of a sequence.
 --
 -- Parameters:
---   # ##source##: the sequence to trim.
---   # ##what##: the set of item to trim from ##source## (defaults to " \t\r\n").
---   # ##ret_index##: If zero (the default) returns the trimmed sequence, otherwise
+--   # ##source## : the sequence to trim.
+--   # ##what## : the set of item to trim from ##source## (defaults to " \t\r\n").
+--   # ##ret_index## : If zero (the default) returns the trimmed sequence, otherwise
 --                    it returns a 2-element sequence containing the index of the
 --                    leftmost item and rightmost item **not** in ##what##.
 --
 -- Returns:
---   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##
+--   A **sequence**, if ##ret_index## is zero, which is the trimmed version of ##source##\\
 --   A **2-element sequence**, if ##ret_index## is not zero, in the form {left_index, right_index}.
 --
 -- Example 1:
@@ -373,9 +373,9 @@ end function
 -- [[:lower]] and [[:upper]]
 --
 -- Parameters:
---   # ##en## - The name of the encoding represented by these character sets
---   # ##lc## - The set of lowercase characters
---   # ##uc## - The set of upper case characters
+--   # ##en## : The name of the encoding represented by these character sets
+--   # ##lc## : The set of lowercase characters
+--   # ##uc## : The set of upper case characters
 --
 --
 -- Comments:
@@ -420,9 +420,11 @@ end procedure
 -- Gets the table of lowercase and uppercase characters that is used by
 -- [[:lower]] and [[:upper]]
 --
--- Parameters: none
+-- Parameters: 
+-- none
 --
--- Returns: A sequence containing three items.\\
+-- Returns: 
+-- A **sequence**, containing three items.\\
 --   {Encoding_Name, LowerCase_Set, UpperCase_Set}
 --
 -- Example 1:
@@ -432,6 +434,7 @@ end procedure
 --
 -- See Also:
 --   [[:lower]], [[:upper]], [[:set_encoding_properties]]
+--
 public function get_encoding_properties( )
 	return {encoding_NAME, lower_case_SET, upper_case_SET}
 end function
@@ -440,7 +443,7 @@ end function
 -- Convert an atom or sequence to lower case.
 --
 -- Parameters:
---   # ##x## - Any Euphoria object.
+--   # ##x## : Any Euphoria object.
 --
 -- Returns:
 --   A **sequence**, the lowercase version of ##x##
@@ -482,7 +485,7 @@ end function
 -- Convert an atom or sequence to upper case.
 --
 -- Parameters:
---   # ##x## - Any Euphoria object.
+--   # ##x## : Any Euphoria object.
 --
 -- Returns:
 --   A **sequence**, the uppercase version of ##x##
@@ -524,7 +527,7 @@ end function
 -- Convert a text sequence to capitalized words.
 --
 -- Parameters:
---   # ##x## - A text sequence.
+--   # ##x## : A text sequence.
 --
 -- Returns:
 --   A **sequence**, the Capitalized Version of ##x##
@@ -632,25 +635,25 @@ end function
 -- sequences, one per K/V pair.
 --
 -- Parameters:
--- # ##source##: a text sequence, containing the representation of the key/values.
--- # ##pair_delim##: an object containing a list of elements that delimit one
+-- # ##source## : a text sequence, containing the representation of the key/values.
+-- # ##pair_delim## : an object containing a list of elements that delimit one
 --                   key/value pair from the next. The defaults are semi-colon (;)
 --                   and comma (,).
--- # ##kv_delim##: an object containing a list of elements that delimit the
+-- # ##kv_delim## : an object containing a list of elements that delimit the
 --                key from its value. The defaults are colon (:) and equal (=).
--- # ##quotes##: an object containing a list of elements that can be used to
+-- # ##quotes## : an object containing a list of elements that can be used to
 --                enclose either keys or values that contain delimiters or
 --                whitespace. The defaults are double-quote ("), single-quote (')
 --                and back-quote (`)
--- # ##whitespace##: an object containing a list of elements that are regarded
+-- # ##whitespace## : an object containing a list of elements that are regarded
 --                as whitespace characters. The defaults are space, tab, new-line,
 --                and carriage-return.
--- # ##haskeys##: an integer containing true or false. The default is true. When
+-- # ##haskeys## : an integer containing true or false. The default is true. When
 -- ##true##, the ##kv_delim## values are used to separate keys from values, but
 -- when ##false## it is assumed that each 'pair' is actually just a value.
 --
 -- Returns:
--- 		A **sequence** of pairs. Each pair is in the form {key, value}.
+-- 		A **sequence**, of pairs. Each pair is in the form {key, value}.
 --
 -- Comments:
 --
@@ -943,15 +946,15 @@ end function
 -- Return a quoted version of the first argument.
 --
 -- Parameters:
---   # ##text_in##: The string or set of strings to quote.
---   # ##quote_pair##: A sequence of two strings. The first string is the opening
+--   # ##text_in## : The string or set of strings to quote.
+--   # ##quote_pair## : A sequence of two strings. The first string is the opening
 --              quote to use, and the second string is the closing quote to use.
 --              The default is {"\"", "\""} which means that the output will be
 --              enclosed by double-quotation marks.
---   # ##esc##: A single escape character. If this is not negative (the default),
+--   # ##esc## : A single escape character. If this is not negative (the default),
 --              then this is used to 'escape' any embedded quote characters and
 --              'esc' characters already in the ##text_in## string.
---   # ##sp##: A list of zero or more special characters. The ##text_in## is only
+--   # ##sp##  : A list of zero or more special characters. The ##text_in## is only
 --             quoted if it contains any of the special characters. The default
 --             is "" which means that the ##text_in## is always quoted.
 --
@@ -997,6 +1000,7 @@ end function
 -- s = quote({"a b c", "def", "g hi"},)
 -- -- 's' now contains three quoted strings: '"a b c"', '"def"', and '"g hi"'
 -- </eucode>
+--
 public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integer esc = -1, t_text sp = "" )
 
 	if length(text_in) = 0 then
@@ -1076,20 +1080,21 @@ end function
 
 --**
 -- Removes 'quotation' text from the argument.
+--
 -- Parameters:
---   # ##text_in##: The string or set of strings to de-quote.
---   # ##quote_pairs##: A set of one or more sub-sequences of two strings.
+--   # ##text_in## : The string or set of strings to de-quote.
+--   # ##quote_pairs## : A set of one or more sub-sequences of two strings.
 --              The first string in each sub-sequence is the opening
 --              quote to look for, and the second string is the closing quote.
 --              The default is {{"\"", "\""}} which means that the output is
 --              'quoted' if it is enclosed by double-quotation marks.
---   # ##esc##: A single escape character. If this is not negative (the default),
+--   # ##esc## : A single escape character. If this is not negative (the default),
 --              then this is used to 'escape' any embedded occurrences of the
 --              quote characters. In which case the 'escape' character is also
 --              removed.
 --
 -- Returns:
--- A sequence. The original text but with 'quote' strings stripped of quotes.
+-- A **sequence**, the original text but with 'quote' strings stripped of quotes.
 --
 -- Example 1:
 -- <eucode>
@@ -1159,11 +1164,11 @@ end function
 -- Formats a set of arguments in to a string based on a supplied pattern.
 --
 -- Parameters:
---   # ##pFormat##: A sequence: the pattern string that contains zero or more tokens.
---   # ##pArgs##: An object: Zero or more arguments used in token replacement.
+--   # ##pFormat## : A sequence: the pattern string that contains zero or more tokens.
+--   # ##pArgs## : An object: Zero or more arguments used in token replacement.
 --
 -- Returns:
--- A string sequence. The original ##pFormat## but with tokens replaced by
+-- A string **sequence**, the original ##pFormat## but with tokens replaced by
 -- corresponding arguments.
 --
 -- Comments:

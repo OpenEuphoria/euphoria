@@ -389,8 +389,8 @@ end function
 -- Partially or fully close a socket. 
 --
 -- Parameters:
---   # ##sock##: the socket to shutdown
---   # ##method##: the method used to close the socket
+--   # ##sock## : the socket to shutdown
+--   # ##method## : the method used to close the socket
 --
 -- Returns:
 --   An **integer**, 0 on success and -1 on error.
@@ -416,11 +416,11 @@ end function
 -- an error status.
 --
 -- Parameters:
---   # ##sockets##: either one socket or a sequence of sockets.
---   # ##timeout##: maximum time to wait to determine a sockets status
+--   # ##sockets## : either one socket or a sequence of sockets.
+--   # ##timeout## : maximum time to wait to determine a sockets status
 --
 -- Returns:
---   A sequence of the same size of sockets containing
+--   A **sequence**, of the same size of sockets containing
 --   { socket, read_status, write_status, error_status } for each socket passed
 --  2 to the function.
 --
@@ -437,9 +437,9 @@ end function
 -- Send TCP data to a socket connected remotely.
 --
 -- Parameters:
---   # ##sock##: the socket to send data to
---   # ##data##: a sequence of atoms, what to send
---   # ##flags##: flags (see [[:Send Flags]])
+--   # ##sock## : the socket to send data to
+--   # ##data## : a sequence of atoms, what to send
+--   # ##flags## : flags (see [[:Send Flags]])
 --
 -- Returns:
 --   An **integer**, the number of characters sent, or -1 for an error.
@@ -453,8 +453,8 @@ end function
 -- Receive data from a bound socket. 
 --
 -- Parameters:
---   # ##sock##: the socket to get data from
---   # ##flags##: flags (see [[:Send Flags]])
+--   # ##sock## : the socket to get data from
+--   # ##flags## : flags (see [[:Send Flags]])
 --
 -- Returns:     
 --   A **sequence**, either a full string of data on success, or an atom indicating
@@ -477,9 +477,9 @@ end function
 -- Get options for a socket.
 -- 
 -- Parameters:
---   # ##sock##: the socket
---   # ##level##: an integer, the option level
---   # ##optname##: requested option (See [[:Socket Options]])
+--   # ##sock## : the socket
+--   # ##level## : an integer, the option level
+--   # ##optname## : requested option (See [[:Socket Options]])
 --
 -- Returns:
 --   An **object**, either:
@@ -493,7 +493,8 @@ end function
 --   [[:SOL_SOCKET]].
 --
 -- Returns:
---   On error, an atom indicating the error code.  On success, either an atom or
+--   An **atom**, On error, an atom indicating the error code.\\
+--  A **sequence** or **atome**,   On success, either an atom or
 --   a sequence containing the option value.
 --
 -- See also:
@@ -508,10 +509,10 @@ end function
 -- Set options for a socket.
 -- 
 -- Parameters:
---   # ##sock##: an atom, the socket id
---   # ##level##: an integer, the option level
---   # ##optname##: requested option (See [[:Socket Options]])
---   # ##val##: an object, the new value for the option
+--   # ##sock## : an atom, the socket id
+--   # ##level## : an integer, the option level
+--   # ##optname## : requested option (See [[:Socket Options]])
+--   # ##val## : an object, the new value for the option
 --
 -- Returns:
 --   An **integer**, 0 on success, -1 on error.
@@ -536,9 +537,9 @@ end function
 -- Establish an outgoing connection to a remote computer. Only works with TCP sockets.
 --
 -- Parameters:
---   # ##sock##: the socket
---   # ##address##: ip address to connect, optionally with :PORT at the end
---   # ##port##: port number
+--   # ##sock## : the socket
+--   # ##address## : ip address to connect, optionally with :PORT at the end
+--   # ##port## : port number
 --
 -- Returns 
 --   An **integer**, 0 for success and -1 on failure.
@@ -568,9 +569,9 @@ end function
 -- later calls only need to provide the socket. 
 --
 -- Parameters:
---   # ##sock##: the socket
---   # ##address##: the address to bind the socket to
---   # ##port##: optional, if not specified you must include :PORT in
+--   # ##sock## : the socket
+--   # ##address## : the address to bind the socket to
+--   # ##port## : optional, if not specified you must include :PORT in
 --     the address parameter.
 --
 -- Returns 
@@ -596,8 +597,8 @@ end function
 -- Start monitoring a connection. Only works with TCP sockets.
 --
 -- Parameters:
---   # ##sock##: the socket
---   # ##backlog##: the number of connection requests that
+--   # ##sock## : the socket
+--   # ##backlog## : the number of connection requests that
 --     can be kept waiting before the OS refuses to hear any more.
 --
 -- Returns:
@@ -625,7 +626,8 @@ end function
 --   # ##sock##: the server socket
 --
 -- Returns:
---   An atom on error or a sequence
+--   An **atom**, on error\\
+--  A **sequence**,
 --   ##{socket client, sequence client_ip_address}##
 --   on success.
 --
@@ -648,11 +650,11 @@ end function
 -- Get service information by name.
 --
 -- Parameters
---   # ##name##: service name.
---   # ##protocol##: protocol. Default is not to search by protocol.
+--   # ##name## : service name.
+--   # ##protocol## : protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A ##sequence## containing { official protocol name, protocol, port number } or
+--   A ##sequence##, containing { official protocol name, protocol, port number } or
 --   an atom indicating the error code.
 --
 -- Example 1:
@@ -672,11 +674,11 @@ end function
 -- Get service information by port number.
 --
 -- Parameters
---   # ##port##: port number.
---   # ##protocol##: protocol. Default is not to search by protocol.
+--   # ##port## : port number.
+--   # ##protocol## : protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A ##sequence## containing { official protocol name, protocol, port number } or
+--   A ##sequence##, containing { official protocol name, protocol, port number } or
 --   an atom indicating the error code.
 --
 -- Example 1:

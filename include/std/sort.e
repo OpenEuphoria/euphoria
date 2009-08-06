@@ -41,8 +41,8 @@ include std/text.e -- upper/lower
 -- Sort the elements of a sequence into ascending order.
 --
 -- Parameters:
---	 # ##x##: The sequence to be sorted.
---   # ##order##: the sort order. Default is ##ASCENDING##.
+--	 # ##x## : The sequence to be sorted.
+--   # ##order## : the sort order. Default is ##ASCENDING##.
 --
 -- Returns:
 --	 A **sequence**, a copy of the original sequence in ascending order
@@ -51,7 +51,7 @@ include std/text.e -- upper/lower
 --
 -- The elements can be atoms or sequences. 
 --
---	 The standard compare()
+--	 The standard ##compare##()
 -- routine is used to compare elements. This means that "##y## is greater than ##x##" is defined by ##compare(y, x)=1##.
 --
 -- This function uses the "Shell" sort algorithm. This sort is not "stable", i.e. elements that are considered equal might
@@ -112,10 +112,10 @@ end function
 -- Sort the elements of a sequence according to a user-defined order.
 --
 -- Parameters:
---		# ##custom_compare##: an integer, the routine-id of the user defined routine that compares two items which appear in the sequence to sort.
---		# ##x##: the sequence of items to be sorted.
---		# ##data##: an object, either {} (no custom data, the default), an atom or a non-empty sequence.
---		# ##order##: an integer, either ##NORMAL_ORDER## (the default) or ##REVERSE_ORDER##.
+--		# ##custom_compare## : an integer, the routine-id of the user defined routine that compares two items which appear in the sequence to sort.
+--		# ##x## : the sequence of items to be sorted.
+--		# ##data## : an object, either {} (no custom data, the default), an atom or a non-empty sequence.
+--		# ##order## : an integer, either ##NORMAL_ORDER## (the default) or ##REVERSE_ORDER##.
 --
 -- Returns:
 --     A **sequence**, a copy of the original sequence in sorted order
@@ -140,7 +140,7 @@ end function
 -- when ##order = REVERSE_ORDER##.
 -- The default is ##order = NORMAL_ORDER##, which sorts in order returned by the 
 -- custom comparison routine.
---<
+-- <
 -- * When no user data is provided, the user defined routine must accept two
 --  objects (A, B) and return just the //comparison result//.
 --
@@ -340,8 +340,8 @@ end function
 -- column order.
 --
 -- Parameters:
--- # ##x##: a sequence, holding the sequences to be sorted.
--- # ##column_list##: a list of columns indexes ##x## is to be sorted by.
+-- # ##x## : a sequence, holding the sequences to be sorted.
+-- # ##column_list## : a list of columns indexes ##x## is to be sorted by.
 --
 -- Returns:
 --	 A **sequence**, a copy of the original sequence in sorted order.

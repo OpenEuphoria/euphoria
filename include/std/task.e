@@ -16,7 +16,7 @@ constant M_SLEEP = 64
 -- Suspends a task for a short period, allowing other tasks to run in the meantime.
 --
 -- Parameters:
---		# ##delaytime##: an atom, the duration of the delay in seconds.
+--		# ##delaytime## : an atom, the duration of the delay in seconds.
 --
 -- Comments:
 --
@@ -100,8 +100,8 @@ end procedure
 -- Create a new task, given a home procedure and the arguments passed to it.
 --
 -- Parameters:
--- 		# ##rid##: an integer, the routine_id of a user-defined Euphoria procedure.
--- 		# ##args##: a sequence, the list of arguments that will be passed to this procedure when the task starts executing.
+-- 		# ##rid## : an integer, the routine_id of a user-defined Euphoria procedure.
+-- 		# ##args## : a sequence, the list of arguments that will be passed to this procedure when the task starts executing.
 --
 -- Returns:
 -- An **atom**, a task identifier, created by the system. It can be used to identify this task to the other Euphoria multitasking routines.
@@ -141,7 +141,7 @@ end procedure
 -- Get a sequence containing the task id's for all active or suspended tasks.
 --
 -- Returns:
--- A **sequence** of atoms, the list of all task that are or may be scheduled.
+-- A **sequence**, of atoms, the list of all task that are or may be scheduled.
 --
 -- Comments: 
 --
@@ -172,8 +172,8 @@ end procedure
 -- Schedule a task to run using a scheduling parameter. 
 --
 -- Parameters:
---		# ##task_id##: an atom, the identifier of a task that did not terminate yet.
---		# ##schedule##: an object, describing when and how often to run the task.
+--		# ##task_id## : an atom, the identifier of a task that did not terminate yet.
+--		# ##schedule## : an object, describing when and how often to run the task.
 --
 -- Comments:
 --
@@ -280,13 +280,13 @@ end procedure
 -- Return the status of a task.
 --
 -- Parameters:
--- 		# ##yask_id##: an atom, the id of the task being queried.
+-- 		# ##yask_id## : an atom, the id of the task being queried.
 --
 -- Returns:
--- An **integer**:
--- * -1: task does not exist, or terminated
--- * 0 : task is suspended
--- * 1 : task is active
+-- An **integer**,
+-- * -1 ~-- task does not exist, or terminated
+-- * 0 ~-- task is suspended
+-- * 1 ~-- task is active
 --
 -- Comments:
 --
@@ -318,7 +318,7 @@ end procedure
 -- Suspend execution of a task.
 --
 -- Parameters:
--- 		# ##task_id##: an atom, the id of the task to suspend.
+-- 		# ##task_id## : an atom, the id of the task to suspend.
 --
 -- Comments:
 --

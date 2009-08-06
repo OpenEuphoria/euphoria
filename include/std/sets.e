@@ -243,11 +243,11 @@ include std/sequence.e
 -- Makes a set out of a sequence by sorting it and removing duplicate elements.
 --
 -- Parameters: 
--- 		# ##s##: the sequence to transform.
+-- 		# ##s## : the sequence to transform.
 --
 -- Returns:
 --
--- 		A **set** which is the ordered list of distinct elements in ##s##.
+-- 		A **set**, which is the ordered list of distinct elements in ##s##.
 --
 -- Example 1:
 -- <eucode>
@@ -266,7 +266,7 @@ end function
 -- Return the cardinal of a set
 --
 -- Parameters:
---		# ##S##: the set being queried.
+--		# ##S## : the set being queried.
 --
 -- Returns:
 --
@@ -283,8 +283,8 @@ end function
 -- Decide whether an object is in a set.
 --
 -- Parameters:
---		# ##x##: the object inquired about
---		# ##S##: the set being queried
+--		# ##x## : the object inquired about
+--		# ##S## : the set being queried
 --
 -- Returns:
 --
@@ -325,12 +325,12 @@ end function
 -- Add an object to a set.
 --
 -- Parameters:
---	# ##x##: the object to add
---		# ##S##: the set to augment
+--	# ##x## : the object to add
+--		# ##S## : the set to augment
 --
 -- Returns:
 --
--- A **set** which is a **copy** of ##S##, with the addition of ##x## if it was not there already.
+-- A **set**, which is a **copy** of ##S##, with the addition of ##x## if it was not there already.
 --
 -- Example 1:
 -- <eucode>
@@ -364,12 +364,12 @@ end function
 -- Remove an object from a set.
 --
 -- Parameters:
---		# ##x##: the object to add
---		# ##S##: the set to remove from
+--		# ##x## : the object to add
+--		# ##S## : the set to remove from
 --
 -- Returns:
 --
---A **set** which is a **copy** of ##S##, with ##x## removed if it was there.
+--A **set**, which is a **copy** of ##S##, with ##x## removed if it was there.
 --
 -- Example 1:
 -- <eucode>
@@ -464,8 +464,8 @@ end function
 -- Checks whether a set is a subset of another.
 --
 -- Parameters: 
--- 		# ##small##: the set to test
---		# ##large##:  the supposedly larger set.
+-- 		# ##small## : the set to test
+--		# ##large## :  the supposedly larger set.
 --
 -- Returns: 
 --
@@ -474,7 +474,7 @@ end function
 -- Example 1:
 -- <eucode>
 --   set s0 s0={1,3,5,7}
---   ?is_subset({3,5},s0)   -- prints out 1
+--   ? is_subset({3,5},s0)   -- prints out 1
 -- </eucode>
 --
 -- See Also: 
@@ -487,12 +487,12 @@ end function
 --   Returns the set of indexes of the elements of a set in a larger set, or 0 if not applicable
 --
 -- Parameters: 
---		# ##small##: the set to embed
---		# ##large##: the supposedly larger set
+--		# ##small## : the set to embed
+--		# ##large## : the supposedly larger set
 --
 -- Returns:
 --
---		 A **set** of indexes if ##small## [[:is_subset]]() ##large##, else 0. Each element 
+--		 A **set**, of indexes if ##small## [[:is_subset]]() ##large##, else 0. Each element 
 -- is the index in ##large## of the corresponding element of ##small##. Its length is ##
 -- length(small)## and the values range from 1 to ##length(large)##.
 --
@@ -504,6 +504,7 @@ end function
 --
 -- See Also: 
 -- [[:subsets]], [[:belongs_to]], [[:difference]], [[:is_subset]]
+--
 public function embedding(set small,set large)
     return is_subset_(small,large,1)
 end function
@@ -591,18 +592,19 @@ end function
 --   Returns the embedding of a set into its union with another.
 --
 -- Parameters: 
--- 		# ##S1##: the set to embed
---		# ##S2##: the other set
+-- 		# ##S1## : the set to embed
+--		# ##S2## : the other set
 --
 -- Returns:
 --
---		A **set** of indexes representing S1 inside ##union(S1,S2)##. Its length is ##length(S1)##, and the values range from 1 to ##length(S1) + length(S2)##.
+--		A **set**, of indexes representing S1 inside ##union(S1,S2)##. Its length is ##length(S1)##, and the values range from 1 to ##length(S1) + length(S2)##.
 --
 -- Example 1:
 -- <eucode>
 -- set s1 = {2, 5, 7}, s2 = {1, 3, 4}
 -- sequence s = embed_union(s1,s2) -- s is now {2, 5, 6}
 -- </eucode>
+--
 -- See Also:
 --		[[:embedding]], [[:union]]
 
@@ -614,10 +616,10 @@ end function
 -- Returns the list of all subsets of the input set.
 --
 -- Parameters: 
--- 		# ##s##: the set to enumerate the subsets of.
+-- 		# ##s## : the set to enumerate the subsets of.
 --
 -- Returns: 
---		A **sequence** containing all the subsets of the input set.
+--		A **sequence**, containing all the subsets of the input set.
 --
 -- Comments:
 --
@@ -728,12 +730,12 @@ end function
 -- Returns the set of elements belonging to both s1 and s2.
 --
 -- Parameters: 
---		# ##S1##: One of the sets to intersect
---		# ##S2##: the other set.
+--		# ##S1## : One of the sets to intersect
+--		# ##S2## : the other set.
 --
 -- Returns: 
 --
---		A **set** made of all elements belonging to both ##S1## and ##S2##.
+--		A **set**, made of all elements belonging to both ##S1## and ##S2##.
 --
 -- Example 1:
 -- <eucode>
@@ -844,6 +846,7 @@ end function
 --
 -- See Also: 
 -- [[:is_subset]], [[:subsets]], [[:belongs_to]]
+--
 public function union(set S1,set S2)
     return union1(S1,S2)
 end function
@@ -852,12 +855,12 @@ end function
 -- Returns the set of elements belonging to either of two sets.
 --
 -- Parameters: 
---		# ##s1##: One of the sets to take a symmetrical difference with
---		# ##s2##: the other set.
+--		# ##s1## : One of the sets to take a symmetrical difference with
+--		# ##s2## : the other set.
 --
 -- Returns: 
 --
---		The **set** of all elements belonging to either ##s1## or ##s2##.
+--		The **set**, of all elements belonging to either ##s1## or ##s2##.
 --
 -- Example 1:
 -- <eucode>
@@ -868,6 +871,7 @@ end function
 --
 -- See Also: 
 --		[[:intersection]], [[:union]], [[:difference]]
+--
 public function delta(set s1,set s2)
     integer ls1,ls2
 
@@ -889,12 +893,12 @@ end function
 -- Returns the set of elements belonging to some set and not to another.
 --
 -- Parameters: 
--- 		# ##base##: the set from which a difference is to be taken
---		# ##removed##: the set of elements to remove from ##base##.
+-- 		# ##base## : the set from which a difference is to be taken
+--		# ##removed## : the set of elements to remove from ##base##.
 --
 -- Returns:
 --
---		The **set** of elements belonging to ##base## but not to ##removed##.
+--		The **set**, of elements belonging to ##base## but not to ##removed##.
 --
 -- Example 1:
 -- <eucode>
@@ -905,6 +909,7 @@ end function
 --
 -- See Also:
 -- [::remove_from,]] [[:is_subset]], [[:delta]]
+--
 public function difference(set base,set removed)
     integer k1,k2,k,c,ls1,ls2,k0
     sequence result
@@ -994,12 +999,12 @@ end function
 -- Returns the set of all pairs made of an element of a set and an element of another set.
 --
 -- Parameters: 
---		# ##S1##: The set where the first coordinate lives
---		# ##S2##: The set where the second coordinate lives
+--		# ##S1## : The set where the first coordinate lives
+--		# ##S2## : The set where the second coordinate lives
 --
 -- Returns:
 --
---		The **set** of all pairs made of an element of ##S1## and an element of ##S2##.
+--		The **set**, of all pairs made of an element of ##S1## and an element of ##S2##.
 --
 -- Example 1:
 -- <eucode>
@@ -1023,12 +1028,12 @@ end function
 --    one in a list.
 --
 -- Parameters: 
---		# ##mapping##: the sequence mapped to
---		# ##target##: the target set that contains the elements ##mapping## refers to by index
+--		# ##mapping## : the sequence mapped to
+--		# ##target## : the target set that contains the elements ##mapping## refers to by index
 --
 -- Returns:
 --
---   	The requested **map** descriptor.
+--   	The requested **map**, descriptor.
 --
 -- Example 1:
 -- <eucode>
@@ -1058,12 +1063,12 @@ end function
 --   Returns a map which sends each element of some sequence to the corresponding one in another sequence.
 --
 -- Parameters:
---		# ##mapped##: the source sequence
---		# ##mapped_to##:  the sequence it must map to.
---		# ##mode##: an integer, nonzero to also return the minimal sets the result map maps.
+--		# ##mapped## : the source sequence
+--		# ##mapped_to## :  the sequence it must map to.
+--		# ##mode## : an integer, nonzero to also return the minimal sets the result map maps.
 --
 -- Returns:
---		A **sequence**:
+--		A **sequence**,
 -- * If ##mode## is 0, a map which maps ##mapped## to ##mapped_to##, between the smallest possible sets.
 -- * If mode is not zero, the sequence has length 3. The first element is the map above. The other two elements are the sets derived from the input sequences.
 --
@@ -1118,10 +1123,10 @@ end function
 -- If an object is in some input set, returns how it is mapped to a set.
 --
 -- Parameters: 
---		# ##f##: the map to apply
---		# ##x##: the object to apply ##f## to
---		# ##input##: the source set
---		# ##output##: the target set.
+--		# ##f## : the map to apply
+--		# ##x## : the object to apply ##f## to
+--		# ##input## : the source set
+--		# ##output## : the target set.
 --
 -- Returns: 
 --		An **object**, f(x) if it can be reckoned.
@@ -1163,12 +1168,12 @@ end function
 -- Returns the set of all values taken by a map in some output set.
 --
 -- Parameters:
---		# ##f##: the map to inspect
---		# ##the output set
+--		# ##f## : the map to inspect
+--		# ##set## : the output set
 --
 -- Returns:
 --
---		The **set** of all ##f(x)##.
+--		The **set**, of all ##f(x)##.
 --
 -- Example 1:
 -- <eucode>
@@ -1196,13 +1201,13 @@ end function
 --   Returns the image of a list by a map, given the input and output sets.
 --
 -- Parameters: 
---		# ##f##: the map to apply
---		# ##input##: the source set
---		# ##elements##:  the sequence to map
---		# ##output##:  the target set.
+--		# ##f## : the map to apply
+--		# ##input## : the source set
+--		# ##elements## :  the sequence to map
+--		# ##output## :  the target set.
 --
 -- Returns: 
---   A **sequence** of elements of ##output## obtained by applying ##f## to the corresponding
+--   A **sequence**, of elements of ##output## obtained by applying ##f## to the corresponding
 --    element of ##input##.
 --
 -- Errors:
@@ -1210,7 +1215,7 @@ end function
 --
 -- Comments:
 --
---If ##elements## has items which are not on ##input##, they are ignored. Items may appear in any order any number of times.
+-- If ##elements## has items which are not on ##input##, they are ignored. Items may appear in any order any number of times.
 --
 -- Example:
 -- <eucode>
@@ -1251,13 +1256,13 @@ end function
 -- Restricts f to the intersection of an input set and another set
 --
 -- Parameters: 
---		# ##f##: the map to restrict
---		# ##source##: the initial source set for ##f##
---		# ##restriction##: the set which will help forming a restricted source set.
+--		# ##f## : the map to restrict
+--		# ##source## : the initial source set for ##f##
+--		# ##restriction## : the set which will help forming a restricted source set.
 --
 -- Returns:
 --
---		A **map** defined on ##difference(source,restriction)## which agrees with ##f##.
+--		A **map**, defined on ##difference(source,restriction)## which agrees with ##f##.
 --
 -- Example 1:
 -- <eucode>
@@ -1270,6 +1275,7 @@ end function
 --
 -- See Also:
 -- [[:is_subset]], [[:direct_map]], [[:difference]]
+--
  public function restrict(map f,set source,set restriction)
     sequence result = restriction
     integer p = 1, k = 0
@@ -1317,13 +1323,13 @@ end function
 -- Converts a map by changing its output set.
 --
 -- Parameters: 
---		# ##f##: the map to retarget
---		# ##old_target## the initial target set for ##f##
---		# ##new_target##: the new target set.
+--		# ##f## : the map to retarget
+--		# ##old_target## : the initial target set for ##f##
+--		# ##new_target## : the new target set.
 --
 -- Returns:
 --
---   A **map** which agrees with ##f## and has values in ##new_target## instead of ##
+--   A **map**, which agrees with ##f## and has values in ##new_target## instead of ##
 -- old_target##, or "" if ##f## hits something outside ##new_target##.
 --
 -- Example 1:
@@ -1347,15 +1353,15 @@ end function
 --    of target sets.
 --
 -- Parameters:
---		# ##f1##: the first map
---		# ##source1##: its source set
---		# ##target1##: its target set
---		# ##f2##: the second map
---		# ##source2##: its source set
---		# ##target2##: its target set
+--		# ##f1## : the first map
+--		# ##source1## : its source set
+--		# ##target1## : its target set
+--		# ##f2## : the second map
+--		# ##source2## : its source set
+--		# ##target2## : its target set
 --
 -- Returns:
---   A **map** from ##union(source1,source2)## to ##union(target1,target2) which agrees with ##f1## and ##f2##, or "" if ##f1##
+--   A **map**, from ##union(source1,source2)## to ##union(target1,target2) which agrees with ##f1## and ##f2##, or "" if ##f1##
 --    and ##f2## disagree at any point of ##intersection(s11,s21)##.
 --
 -- Errors:
@@ -1363,7 +1369,6 @@ end function
 --   If f1 and f2 are both defined for some point, they must have the same value at this point..
 --
 -- Example 1:
---
 -- <eucode>
 --   set s11,s12,s21,s22
 --   s11={2,3,5,7,11,13,17,19} s21={7,13,19,23,29}
@@ -1428,17 +1433,17 @@ end function
 -- Creates a new map using elements from ##f2##, mapped against ##f1##
 --
 -- Parameters: 
--- 		# ##f1##: the map containing indexes into ##f2##
---		# ##f2##: the map containing elements used to build the resulting map.
+-- 		# ##f1## : the map containing indexes into ##f2##
+--		# ##f2## : the map containing elements used to build the resulting map.
 --
 -- Returns: 
---		A **map** ##f## defined by ##f(x)=f2(f1(x))## for all ##x##
+--		A **map**, ##f## defined by ##f(x)=f2(f1(x))## for all ##x##
 --
 -- Comments:
 -- Each element in ##f1## is an index into the elements of ##f2##. So if
 -- ##f1## contains {3,2,1} the result map contains the 3rd, 2nd and 1st element
 -- from ##f2## in that order.
---.
+--
 -- Errors:
 -- Every element of ##f1## must be a valid index into ##f2##.
 --
@@ -1453,6 +1458,7 @@ end function
 --
 -- See Also:
 -- [[:diagram_commutes]]
+--
 public function compose_map(map f1,map f2)
     return compose_map_(f1,f2)
 end function
@@ -1461,10 +1467,10 @@ end function
 -- Decide whether taking two different paths along a square map diagrams results in the same map.
 --
 -- Parameters: 
---		# ##from_base_path_1##: the outgoing map along path 1
---		# ##from_base_path_2##: the outgoing map along path 2
---		# ##to_target_path_1##: the incoming map along path 1
---		# ##to_target_path_2##: the incoming map along path 2
+--		# ##from_base_path_1## : the outgoing map along path 1
+--		# ##from_base_path_2## : the outgoing map along path 2
+--		# ##to_target_path_1## : the incoming map along path 1
+--		# ##to_target_path_2## : the incoming map along path 2
 --
 -- Returns: 
 --
@@ -1482,6 +1488,7 @@ end function
 --
 -- See Also:
 -- [[:compose_map]]
+--
 public function diagram_commutes(sequence f12a,sequence f12b,sequence f2a3,sequence f2b3)
     return not eu:compare(compose_map_(f2a3,f12a),compose_map_(f2b3,f12b))
 end function
@@ -1490,7 +1497,7 @@ end function
 -- Determines whether there is a point in an output set hit twice or more by a map.
 --
 -- Parameters: 
---		# ##f##: the map being queried.
+--		# ##f## : the map being queried.
 --
 -- Returns:
 --
@@ -1504,6 +1511,7 @@ end function
 --
 -- See Also: 
 -- [[:is_surjective]], [[:is_bijective]], [[:reverse_map]], [[:fiber_over]]
+--
 public function is_injective(map f)
     sequence s
     integer p
@@ -1540,7 +1548,7 @@ end function
 -- Determine whether all points in the output set are hit by a map.
 --
 -- Parameters: 
---		# ##f##: the map to test.
+--		# ##f## : the map to test.
 --
 -- Returns:
 --
@@ -1554,6 +1562,7 @@ end function
 --
 -- See Also: 
 -- [[:is_surjective]], [[:is_bijective]], [[:direct_map]], [[:section]]
+--
 public function is_surjective(map f)
     return is_surjective_(f)
 end function
@@ -1562,7 +1571,7 @@ end function
 -- Determine whether a map is one-to-one.
 --
 -- Parameters:
---		# ##f##: the map to test.
+--		# ##f## : the map to test.
 --
 -- Returns:
 --
@@ -1571,11 +1580,12 @@ end function
 -- Example 1:
 -- <eucode>
 --   map f f={2,3,1,1,2,5,3}
---   ?is_surjective(f)  -- prints out 0
+--   ? is_surjective(f)  -- prints out 0
 -- </eucode>
 --
 -- See Also: 
 -- [[:is_surjective]], [[:is_bijective]], [[:direct_map]], [[:has_inverse]]
+--
 public function is_bijective(map f)
     if f[$]!=f[$-1] then
         return 0
@@ -1607,13 +1617,13 @@ end function
 -- Given a map between two sets, returns {list of antecedents of elements in target, effective target}.
 --
 -- Parameters: 
---		# ##f##: the inspected map
---		# ##source##: the source set
---		# ##target##: the target set.
+--		# ##f## : the inspected map
+--		# ##source## : the source set
+--		# ##target## : the target set.
 --
 -- Returns:
 --
---   A **sequence** which is empty on failure. On success, it has two elements:
+--   A **sequence**, which is empty on failure. On success, it has two elements:
 -- * A sequence of sets; each of these sets is included in ##source## and is mapped to a single point by ##f##.
 -- * A set, the points in ##target## hit by ##f##.
 --
@@ -1637,6 +1647,7 @@ end function
 --
 -- See Also: 
 -- [[:reverse_map]], [[:fiber_product]]
+--
 public function fiber_over(map f,set source,set target)
     return fiber_over_(f,source,target)
 end function
@@ -1645,13 +1656,13 @@ end function
 --   Given a map between two sets, returns the smallest subset whose image contains the set of elements in a list.
 --
 -- Parameters: 
---		# ##f##: the map relative to which reverse images are to be taken
---		# ##source##: the source set
---		# ##elements##: the list of elements in ##target## to lift to ##source##
---		# ##target##: the target set
+--		# ##f## : the map relative to which reverse images are to be taken
+--		# ##source## : the source set
+--		# ##elements## : the list of elements in ##target## to lift to ##source##
+--		# ##target## : the target set
 --
 -- Returns: 
---		A **set** which is included in ##source## and contains all antecedents of elements in ##elements## by ##f##.
+--		A **set**, which is included in ##source## and contains all antecedents of elements in ##elements## by ##f##.
 --
 --Comments:
 --
@@ -1692,10 +1703,10 @@ end function
 -- Return a right, and left is possible, inverse of a map over its [[:range]].
 --
 -- Parameters:
---		# ##f##: the map to invert.
+--		# ##f## : the map to invert.
 --
 -- Returns:
---   A **map** ##g## such that ##f(g(y)) = y## whenever ##y## is hit by ##f##. and  If f is 
+--   A **map**, ##g## such that ##f(g(y)) = y## whenever ##y## is hit by ##f##. and  If f is 
 -- injective, it also holds that ##g(f(x))=x##.
 --
 -- Example 1:
@@ -1744,12 +1755,12 @@ end function
 -- Builds a map to a product from a map to each of its components.
 --
 -- Parameters: 
---		# ##f1##: the map going to the first component
---		# ##f2##: the map going to the second component
+--		# ##f1## : the map going to the first component
+--		# ##f2## : the map going to the second component
 --
 -- Returns: 
 --
---   A **map** ##f=f1 x f2## defined by ##f(x,y)={f1(x),f2(y)}## wherever this makes sense.
+--   A **map**, ##f=f1 x f2## defined by ##f(x,y)={f1(x),f2(y)}## wherever this makes sense.
 --
 -- Example 1:
 -- <eucode>
@@ -1761,6 +1772,7 @@ end function
 --
 -- See Also: 
 -- [[:product]], [[:amalgamated_sum]], [[:fiber_product]]
+--
 public function product_map(map f1,map f2)
     sequence result,s
     integer k ,p
@@ -1779,15 +1791,15 @@ end function
 -- Returns all pairs in a product that come from applying two maps to the same element in a base set.
 --
 -- Parameters:
---		# ##first##: one of the sets to involved in the sum
---		# ##second##: the other set
---		# ##base##: the base set
---		# ##base_to_1##: the map from ##base## to ##first##
---		# ##base_to_2##: the map from ##base## to ##second##
+--		# ##first## : one of the sets to involved in the sum
+--		# ##second## : the other set
+--		# ##base## : the base set
+--		# ##base_to_1## : the map from ##base## to ##first##
+--		# ##base_to_2## : the map from ##base## to ##second##
 --
 -- Returns:
 --
---   A set of pairs obtained by applying f01Xf02 to s0.
+--   A **set**, of pairs obtained by applying f01Xf02 to s0.
 --
 -- Example 1:
 -- <eucode>
@@ -1817,15 +1829,15 @@ end function
 -- Returns the set of all pairs in a product on which two given componentwise maps agree.
 --
 -- Parameters:
---		# ##first##: the first product component
---		# ##second##: the second product component
---		# ##base##: the base set the fiber product is built on
---		# ##from_1_to_base##: the map from ##first## to ##base##.
---		# ##from_2_to_base##: the map from ##second## to ##base##.
+--		# ##first## : the first product component
+--		# ##second## : the second product component
+--		# ##base## : the base set the fiber product is built on
+--		# ##from_1_to_base## : the map from ##first## to ##base##.
+--		# ##from_2_to_base## : the map from ##second## to ##base##.
 --
 -- Returns: 
 --
---		The **set** of pairs whose coordinates are mapped consistently to ##base## by ##
+--		The **set**, of pairs whose coordinates are mapped consistently to ##base## by ##
 -- from_1_to_base## and ##from_2_to_base## respectively.
 --
 -- Example 1:
@@ -1840,6 +1852,7 @@ end function
 --
 -- See Also: 
 -- [[:reverse_map]], {{:amalgamated_sum]], [[:fiber_over]]
+--
 public function fiber_product(set first,set second,set base,map from_1_to_base,map from_2_to_base)
     sequence result,x1,x2,x0
 
@@ -1861,10 +1874,10 @@ end function
 
 --**
 -- The following constants denote orientation of distributivity or unitarity~:
--- * SIDE_NONE: no units, or no distributivity
--- * SIDE_LEFT: property is requested or verified on the left side
--- * SIDE_RIGHT: property is requested or verified on the right side
--- * SIDE_BOTH:  property is requested or verified on both sides.
+-- * ##SIDE_NONE## ~-- no units, or no distributivity
+-- * ##SIDE_LEFT## ~-- property is requested or verified on the left side
+-- * ##SIDE_RIGHT## ~-- property is requested or verified on the right side
+-- * ##SIDE_BOTH## ~--  property is requested or verified on both sides.
 
 
 public enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
@@ -1877,10 +1890,10 @@ public enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
 -- Returns an operation that splits by left action into the supplied mappings.
 --
 -- Parameters: 
---		# ##left_actions##: a sequence of maps, the left actions of each element in the left hand set.
+--		# ##left_actions## : a sequence of maps, the left actions of each element in the left hand set.
 --
 -- Returns:
---   An operation ##F## realizing the conditions above, with minimal cardinal values, or "" if
+--   An operation ##F##, realizing the conditions above, with minimal cardinal values, or "" if
 --   the maps are not defined on the same set.
 --
 -- Errors: 
@@ -1927,7 +1940,7 @@ end function
 -- Determine whether f(x,y) always equals f(y,x).
 --
 -- Parameters: 
---		# ##f##: the operation to test.
+--		# ##f## : the operation to test.
 --
 -- Returns: 
 --
@@ -1965,7 +1978,7 @@ end function
 -- Determine whether the identity f(f(x,y),z)=f(x,f(y,z)) always makes sense and holds.
 --
 -- Parameters: 
---		# ##f##: the operation to test.
+--		# ##f## : the operation to test.
 --
 -- Returns:
 -- An **integer**, 1 if ##f## is an internal operation on a set and is associative, else 0.
@@ -2035,7 +2048,7 @@ end function
 -- Finds all left units for an operation.
 --
 -- Parameters: 
---		# ##f##: the operation to test.
+--		# ##f## : the operation to test.
 --
 -- Returns: 
 --
@@ -2088,11 +2101,11 @@ end function
 -- Finds all right units for an operation.
 --
 -- Parameters: 
---		# ##f##: the operation to test.
+--		# ##f## : the operation to test.
 --
 -- Returns: 
 --
---		 A possibly empty **sequence** of all ##y## such that ##f(.,y)## is the identity map..
+--		 A possibly empty **sequence**,  of all ##y## such that ##f(.,y)## is the identity map..
 --
 -- Example 1:
 -- <eucode>
@@ -2158,11 +2171,11 @@ end function
 -- Returns an unit of a given kind for an operation if there is any, else 0.
 --
 -- Parameters: 
---		# ##f##: the operation to test.
---		# ##flags##: an integer, which says whether one or two sided units are looked for. Defaults to ##SIDE_BOTH##.
+--		# ##f## : the operation to test.
+--		# ##flags## : an integer, which says whether one or two sided units are looked for. Defaults to ##SIDE_BOTH##.
 --
 -- Returns: 
---		An **integer**. If ##f## has a unit of the requested type, it is returned. Otherwise, 0 is returned..
+--		An **integer**, if ##f## has a unit of the requested type, it is returned. Otherwise, 0 is returned..
 --
 -- Comments:
 --
@@ -2174,7 +2187,7 @@ end function
 -- Example 1:
 -- <eucode>
 --   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
---   ?has_unit(f)  -- prints out 1.
+--   ? has_unit(f)  -- prints out 1.
 -- </eucode>
 --
 -- See Also: 
@@ -2198,8 +2211,8 @@ end function
 -- Determines if an element is a (one sided) unit for an operation.
 --
 -- Parameters:
---		# ##x##: an integer, the element to test
---		# ##f##: the operation involved
+--		# ##x## : an integer, the element to test
+--		# ##f## : the operation involved
 --
 -- Returns:
 --
@@ -2217,16 +2230,17 @@ end function
 public function is_unit(integer x, operation f)
 	return is_left_unit(x, f) + SIDE_RIGHT * is_right_unit_(x, f)
 end function
+
 --**
 -- Returns the bilateral inverse of an element by a operation if it exists and the operation has a unit.
 --
 -- Parameters: 
---		# ##x##: the element to test
---		# ##f##:  the operation involved.
+--		# ##x## : the element to test
+--		# ##f## :  the operation involved.
 --
 -- Returns:
 --
---   If ##f## has a bilateral unit ##e## and there is a (necessarily unique) ##y## such that ##f(x,y)=e##,
+--   If ##f##, has a bilateral unit ##e## and there is a (necessarily unique) ##y## such that ##f(x,y)=e##,
 --   ##y## is returned. Otherwise, 0 is returned..
 --
 -- Example 1:
@@ -2334,10 +2348,10 @@ end function
 -- Returns:
 --
 --		An **integer**, either of
--- * SIDE_NONE    : ##product## does not distribute either way over ##sum##
--- * SIDE_LEFT    : ##product## distributes over ##sum## on the left only
--- * SIDE_RIGHT   : ##product## distributes over ##sum## on the right only
--- * SIDE_BOTH    : ##product## distributes over ##sum## o(both ways)
+-- * ##SIDE_NONE##  ~-- ##product## does not distribute either way over ##sum##
+-- * ##SIDE_LEFT## ~--  ##product## distributes over ##sum## on the left only
+-- * ##SIDE_RIGHT## ~--  ##product## distributes over ##sum## on the right only
+-- * ##SIDE_BOTH## ~-- ##product## distributes over ##sum## o(both ways)
 --
 -- Example 1:
 -- <eucode>
