@@ -362,7 +362,7 @@ end function
 --     and its element type can be used.
 --   # ##has_delete##: is 1 if the object might have a delete routine attached,
 -- 	   or 0 if not if has_delete then ? 1/0 end if
-
+constant dummy_bb = {0, TYPE_NULL, TYPE_OBJECT, NOVALUE, {MININT, MAXINT}, 0}
 export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
 	integer found, i, tn
 	sequence sym, symo
@@ -374,12 +374,13 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 	
 	sym = SymTab[s]
 	symo = sym
-	if find(sym[S_MODE], {M_TEMP, M_NORMAL}) then
+	if find(sym[S_MODE], M_VARS) then
+		-- A variable of some sort.
 		found = FALSE
 		if sym[S_MODE] = M_TEMP then
 			sym[S_GTYPE] = t
 			sym[S_SEQ_ELEM] = etype
-			if find(sym[S_GTYPE], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+			if find(sym[S_GTYPE], TYPES_SO) then
 				if val[MIN] < 0 then
 					sym[S_SEQ_LEN] = NOVALUE
 				else    
@@ -483,7 +484,8 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 		if t = TYPE_NULL then
 			if not found then
 				-- add read-only dummy reference
-				BB_info[i] = {s, t, TYPE_OBJECT, NOVALUE, {MININT, MAXINT}, 0}
+				BB_info[i] = dummy_bb
+				BB_info[i][BB_VAR] = s
 			end if
 			-- don't record anything if the var already exists in this BB
 		else 
@@ -603,7 +605,9 @@ export procedure c_stmt(sequence stmt, object arg)
 		cfile_size += 1
 	end if
 		
-	adjust_indent_before(stmt)
+	if emit_c_output then
+		adjust_indent_before(stmt)
+	end if
 	
 	if atom(arg) then 
 		arg = {arg}
@@ -638,16 +642,22 @@ export procedure c_stmt(sequence stmt, object arg)
 		end if
 		
 		if stmt[i] = '\n' and i < length(stmt) then
-			adjust_indent_after(stmt)
+			if emit_c_output then
+				adjust_indent_after(stmt)
+			end if
 			stmt = stmt[i+1..$]
 			i = 0
-			adjust_indent_before(stmt)
+			if emit_c_output then
+				adjust_indent_before(stmt)
+			end if
 		end if
 		
 		i += 1
 	end while
 	
-	adjust_indent_after(stmt)
+	if emit_c_output then
+		adjust_indent_after(stmt)
+	end if
 end procedure
 
 --**
@@ -671,7 +681,7 @@ export procedure DeclareFileVars()
 		if eentry[S_SCOPE] >= SC_LOCAL and (eentry[S_SCOPE] <= SC_GLOBAL 
 			or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC) and
 			eentry[S_USAGE] != U_UNUSED and eentry[S_USAGE] != U_DELETED and
-			not find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
+			not find(eentry[S_TOKEN], RTN_TOKS) then
 			
 			if eentry[S_TOKEN] = PROC then
 				c_puts( "void ")
@@ -795,7 +805,7 @@ export function PromoteTypeInfo()
 		sym[S_OBJ_MIN_NEW] = -NOVALUE
 		
 		if sym[S_NREFS] = 1 and 
-		   find(sym[S_TOKEN], {PROC, FUNC, TYPE}) then
+		   find(sym[S_TOKEN], RTN_TOKS) then
 			if sym[S_USAGE] != U_DELETED then
 				sym[S_USAGE] = U_DELETED
 				deleted_routines += 1
@@ -839,7 +849,7 @@ export procedure DeclareRoutineList()
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		if SymTab[s][S_USAGE] != U_DELETED and
-			find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE})
+			find(SymTab[s][S_TOKEN], RTN_TOKS)
 		then
 			sequence ret_type
 			if sym_token( s ) = PROC then
@@ -880,7 +890,7 @@ export procedure DeclareRoutineList()
 	
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
-		if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE, NAMESPACE}) then
+		if find(SymTab[s][S_TOKEN], NAMED_TOKS) then
 			if SymTab[s][S_TOKEN] != NAMESPACE and SymTab[s][S_RI_TARGET] then
 				if not first then
 					c_puts(",\n")
@@ -960,7 +970,7 @@ export procedure DeclareNameSpaceList()
 	
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
-		if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE, NAMESPACE}) then
+		if find(SymTab[s][S_TOKEN], NAMED_TOKS) then
 			if SymTab[s][S_TOKEN] = NAMESPACE then
 				if not first then
 					c_puts(",\n")
@@ -1014,7 +1024,7 @@ procedure Write_def_file(integer def_file)
 	
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
-		if find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
+		if find(SymTab[s][S_TOKEN], RTN_TOKS) then
 			if is_exported( s ) then
 				if sequence(wat_path) then
 					printf(def_file, "EXPORT %s='__%d%s@%d'\n", 
@@ -1146,7 +1156,7 @@ function any_code(integer file_no)
 	while s do
 		if SymTab[s][S_FILE_NO] = file_no and 
 		   SymTab[s][S_USAGE] != U_DELETED and
-		   find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE}) then
+		   find(SymTab[s][S_TOKEN], RTN_TOKS) then
 			return TRUE -- found a non-deleted routine in this file
 		end if
 		s = SymTab[s][S_NEXT]
@@ -1323,7 +1333,7 @@ export procedure GenerateUserRoutines()
 			while s do
 				if SymTab[s][S_FILE_NO] = file_no and 
 					SymTab[s][S_USAGE] != U_DELETED and
-					find(SymTab[s][S_TOKEN], {PROC, FUNC, TYPE})
+					find(SymTab[s][S_TOKEN], RTN_TOKS)
 				then
 					-- a referenced routine in this file 
 			  

@@ -46,6 +46,7 @@ export constant
 	TYPES_IAD = {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE},
 	TYPES_AS = {TYPE_ATOM, TYPE_SEQUENCE},
 	TYPES_IS = {TYPE_INTEGER, TYPE_SEQUENCE},
+	TYPES_OBNL = {TYPE_OBJECT, TYPE_NULL},
 	$
 	
 export boolean emit_c_output = FALSE
@@ -160,44 +161,49 @@ export integer indent = 0
 --**
 -- just for next statement
 export integer temp_indent = 0
-
+constant big_blanks = "                                                        "
 --**
 -- Adjust indent before a statement
 export procedure adjust_indent_before(sequence stmt)
-	integer p, i
+	integer i
 	boolean lb, rb
-	
-	if not emit_c_output then
-		return
-	end if
-	
-	p = 1
+		
 	lb = FALSE
 	rb = FALSE
 
-	while p <= length(stmt) and stmt[p] != '\n' do
-		if stmt[p] = '}' then
-			rb = TRUE
-		elsif stmt[p] = '{' then
-			lb = TRUE
-		end if
-		p += 1
-	end while
+	for p = 1 to length(stmt) do
+		switch stmt[p] do
+			case '\n' then
+				exit
+				
+			case  '}' then
+				rb = TRUE
+				if lb then
+					exit
+				end if
+				
+			case '{' then
+				lb = TRUE
+				if rb then 
+					exit
+				end if
+				
+		end switch
+	end for
 
-	if rb and not lb then
-		indent -= 4
+	if rb then
+		if not lb then
+			indent -= 4
+		end if
 	end if
 	
 	i = indent + temp_indent
-	while i >= 4 do
-		c_puts("    ")
-		i -= 4
+	while i >= length(big_blanks) do
+		c_puts(big_blanks)
+		i -= length(big_blanks)
 	end while
 
-	while i > 0 do 
-		c_putc(' ')
-		i -= 1
-	end while
+	c_putc(big_blanks[1..i])
 
 	temp_indent = 0    
 end procedure
@@ -205,27 +211,38 @@ end procedure
 --**
 -- Adjust indent after a statement
 export procedure adjust_indent_after(sequence stmt)
-	integer p
 	
-	if not emit_c_output then
+	for p = 1 to length(stmt) do
+		switch stmt[p] do
+			case '\n' then
+				exit
+		
+			case '{' then
+				indent += 4
+				return
+		end switch
+	end for
+	
+	if length(stmt) < 3 then
 		return
 	end if
 	
-	p = 1
-	while p <= length(stmt) and stmt[p] != '\n' do
-		if stmt[p] = '{' then
-			indent += 4
-			return
-		end if
-
-		p += 1
-	end while
-
-	if length(stmt) >= 3 and equal("if ", stmt[1..3]) then
-		temp_indent = 4
-	elsif length(stmt) >= 5 and equal("else", stmt[1..4]) and
-		(stmt[5] = ' ' or stmt[5] = '\n')
-	then
-		temp_indent = 4
+	if not equal("if ", stmt[1..3]) then
+		return
 	end if
+
+	if length(stmt) < 5 then
+		return
+	end if
+	
+	if not equal("else", stmt[1..4]) then
+		return
+	end if
+	
+	if not find(stmt[5], {" \n"}) then
+		return
+	end if
+	
+	temp_indent = 4
+	
 end procedure

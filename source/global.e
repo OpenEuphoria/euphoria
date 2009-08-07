@@ -160,6 +160,8 @@ export enum
 	M_TEMP,      -- temporaries
 	M_BLOCK      -- code block for scoping variables
 
+export constant M_VARS = {M_TEMP, M_NORMAL}
+	
 -- SCOPE values:
 export enum
 	SC_LOOP_VAR=2,    -- "private" loop vars known within a single loop

@@ -2776,7 +2776,7 @@ procedure opROUTINE_ID()
 	end if
 	
 	p = RTLookup(name, fn, sub, stlen)
-	if p = 0 or not find(SymTab[p][S_TOKEN], {PROC, FUNC, TYPE}) then
+	if p = 0 or not find(SymTab[p][S_TOKEN], RTN_TOKS) then
 		val[target] = -1  -- name is not a routine
 		return
 	end if

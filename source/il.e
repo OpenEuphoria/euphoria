@@ -102,7 +102,7 @@ procedure OutputSymTab(file f)
 				   SymTab[i][S_NREFS] = 0 and 
 				   SymTab[i][S_SCOPE] > SC_PRIVATE then -- tricky to delete privates
 					-- delete this symbol
-					if find(SymTab[i][S_TOKEN], {PROC, FUNC, TYPE}) then
+					if find(SymTab[i][S_TOKEN], RTN_TOKS) then
 						-- a routine
 						reflist = SymTab[i][S_REFLIST]
 						for j = 1 to length(reflist) do
@@ -175,7 +175,7 @@ procedure OutputSymTab(file f)
 			SymTab[i] = SymTab[i][1..4] & SymTab[i][S_NEXT_IN_BLOCK]
 		
 		else
-			if find(SymTab[i][S_TOKEN], {PROC, FUNC, TYPE}) then
+			if find(SymTab[i][S_TOKEN], RTN_TOKS) then
 				-- routine
 				if not full_debug then
 					SymTab[i][S_LINETAB] = 0

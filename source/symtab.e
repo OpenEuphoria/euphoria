@@ -175,7 +175,7 @@ export function tmp_alloc()
 			-- don't use _8087 - it conflicts with WATCOM
 			temp_name_type = append(temp_name_type, {0, 0})
 		end if
-		temp_name_type = append(temp_name_type, {TYPE_OBJECT, TYPE_NULL})
+		temp_name_type = append(temp_name_type, TYPES_OBNL)
 		SymTab[new][S_TEMP_NAME] = length(temp_name_type)
 	end if
 
@@ -416,7 +416,7 @@ export procedure InitSymTab()
 							keylist[k][K_SCOPE],
 							keylist[k][K_TOKEN],
 							hashval, 0, 0)
-		if find(keylist[k][K_TOKEN], {PROC, FUNC, TYPE}) then
+		if find(keylist[k][K_TOKEN], RTN_TOKS) then
 			SymTab[st_index] = SymTab[st_index] &
 						repeat(0, SIZEOF_ROUTINE_ENTRY -
 								  length(SymTab[st_index]))

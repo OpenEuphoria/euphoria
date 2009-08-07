@@ -1114,7 +1114,7 @@ procedure Function_call( token tok )
 		SymTab[CurrentSub][S_EFFECT] = or_bits(SymTab[CurrentSub][S_EFFECT], e)
 
 		if short_circuit > 0 and short_circuit_B and
-				  find(id, {FUNC, QUALIFIED_FUNC}) then
+				  find(id, FUNC_TOKS) then
 			Warning(219, short_circuit_warning_flag, 
 				{file_name[current_file_no], line_number,SymTab[tok[T_SYM]][S_NAME]})
 		end if
@@ -2269,7 +2269,7 @@ procedure Case_statement()
 			integer symi = tok[T_SYM]
 			fwd = -1
 			if symi > 0 then
-				if find(tok[T_ID] , {VARIABLE, QUALIFIED_VARIABLE}) then
+				if find(tok[T_ID] , VAR_TOKS) then
 					if SymTab[symi][S_SCOPE] = SC_UNDEFINED then
 						-- forward reference to a variable
 						fwd = symi
@@ -2921,7 +2921,7 @@ procedure For_statement()
 	
 	Start_block( FOR )
 	loop_var = next_token()
-	if not find(loop_var[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
+	if not find(loop_var[T_ID], ADDR_TOKS) then
 		CompileErr(28)
 	end if
 
@@ -3101,7 +3101,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			end if
 		end if
 		
-		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
+		if not find(tok[T_ID], ADDR_TOKS) then
 			CompileErr(25)
 		end if
 		sym = tok[T_SYM]
@@ -3299,7 +3299,7 @@ procedure Private_declaration(symtab_index type_sym)
 	
 	while TRUE do
 		tok = next_token()
-		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC, NAMESPACE}) then
+		if not find(tok[T_ID], ID_TOKS) then
 			CompileErr(24)
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
@@ -3598,7 +3598,7 @@ procedure SubProg(integer prog_type, integer scope)
 
 	LeaveTopLevel()
 	prog_name = next_token()
-	if not find(prog_name[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
+	if not find(prog_name[T_ID], ADDR_TOKS) then
 		CompileErr(25)
 	end if
 	p = prog_name[T_SYM]
@@ -3679,7 +3679,7 @@ procedure SubProg(integer prog_type, integer scope)
 				token temptok = next_token()
 				integer undef_type = 0
 				if temptok[T_ID] != TYPE and temptok[T_ID] != QUALIFIED_TYPE then
-					if find( temptok[T_ID], {VARIABLE, QUALIFIED_VARIABLE, PROC, FUNC}) then
+					if find( temptok[T_ID], FULL_ID_TOKS) then
 						-- -- So there are two names next to each other.
 						if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
 							-- The first name is undefined so it might be a type
@@ -3703,7 +3703,7 @@ procedure SubProg(integer prog_type, integer scope)
 		end if
 		type_sym = tok[T_SYM]
 		tok = next_token()
-		if not find(tok[T_ID], {VARIABLE, FUNC, TYPE, PROC, NAMESPACE}) then
+		if not find(tok[T_ID], ID_TOKS) then
 			sequence tokcat = find_category(tok[T_ID])
 			if tok[T_SYM] != 0 and length(SymTab[tok[T_SYM]]) >= S_NAME then
 				CompileErr(90, {tokcat, SymTab[tok[T_SYM]][S_NAME]})

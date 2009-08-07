@@ -106,7 +106,7 @@ procedure BackEnd(integer il_file)
 			if eentry[S_MODE] = M_NORMAL then
 				-- vars and routines
 				
-				if find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
+				if find(eentry[S_TOKEN], RTN_TOKS) then
 					-- routines only
 					if sequence(eentry[S_CODE]) and (get_backend() or eentry[S_OPCODE]=0) then  
 						-- routines with code

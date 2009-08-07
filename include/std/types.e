@@ -904,7 +904,7 @@ end type
 -- <eucode>
 -- sequence_array(-1)            -- FALSE (not a sequence)
 -- sequence_array("abc")         -- FALSE (all single characters)
--- sequence_array({1, 2, "abc"}) -- TRUE (contains a sequence)
+-- sequence_array({1, 2, "abc"}) -- FALSE (contains some atoms)
 -- sequence_array(1, 2, 9.7)     -- FALSE
 -- sequence_array(1, 2, 'a')     -- FALSE
 -- sequence_array({"abc", {3.4, 99182.78737}}) -- TRUE

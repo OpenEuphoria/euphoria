@@ -1879,7 +1879,7 @@ export procedure IncludeScan( integer is_public )
 
 					ungetch()
 					s = keyfind(gtext, -1, , 1)
-					if not find(s[T_ID], {VARIABLE, FUNC, TYPE, PROC}) then
+					if not find(s[T_ID], ADDR_TOKS) then
 						CompileErr(36)
 					end if
 					new_include_space = NameSpace_declaration(s[T_SYM])

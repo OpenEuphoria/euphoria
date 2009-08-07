@@ -255,7 +255,7 @@ procedure showSymTab(integer f, integer flist)
 			
 		elsif length(eentry) >= NAME then
 			printf(flist, "%s", {eentry[NAME]})
-			if find(eentry[TOKEN], {PROC, FUNC, TYPE}) then
+			if find(eentry[TOKEN], RTN_TOKS) then
 				puts(flist, "()\n     ")
 				if eentry[TOKEN] = PROC then
 					puts(flist, "procedure\n     ")

@@ -111,7 +111,7 @@ export procedure Start_block( integer opcode, object block_label = 0 )
 	symtab_index last_block = current_block
 	NewBlock( opcode, block_label )
 	
-	if opcode = PROC or opcode = FUNC or opcode = TYPE then
+	if find(opcode, RTN_TOKS) then
 		SymTab[block_label][S_BLOCK] = current_block
 		SymTab[current_block][S_NAME] = sprintf("BLOCK: %s", {SymTab[block_label][S_NAME]})
 	elsif current_block then
@@ -130,7 +130,7 @@ export procedure Start_block( integer opcode, object block_label = 0 )
 	end if
 	
 	ifdef BDEBUG then
-		if find( opcode, {PROC,FUNC,TYPE}) then
+		if find( opcode, RTN_TOKS) then
 			printf(1,"Entering block for routine %s[%d]\n", {SymTab[block_label][S_NAME],current_block})
 		elsif opcode then
 			printf(1,"Entering block for %s block %s[%d]\n", {opnames[opcode], block_label, current_block})
@@ -312,7 +312,7 @@ export procedure Goto_block( symtab_index from_block, symtab_index to_block, int
 	symtab_index next_block = sym_block( from_block )
 	while next_block 
 	and from_block != to_block 
-	and not find( sym_token( next_block ), { PROC, FUNC, TYPE } ) do
+	and not find( sym_token( next_block ), RTN_TOKS ) do
 		code &= { EXIT_BLOCK, from_block }
 		from_block = next_block
 		next_block = sym_block( next_block )
