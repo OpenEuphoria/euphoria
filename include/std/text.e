@@ -21,6 +21,7 @@ include std/convert.e
 include std/serialize.e
 include std/pretty.e
 include std/error.e
+include std/eds.e
 
 --****
 -- Signature:
@@ -1617,3 +1618,74 @@ public function format(sequence pFormat, object pArgs)
 	return result
 end function
 
+--**
+-- Get the text associated with the message number in the requested locale.
+--
+-- Parameters:
+--   # ##MsgNum## : An integer. The message number whose text you are trying to get.
+--   # ##LocalQuals## : A sequence. Zero or more locale codes. Default is {}.
+--   # ##DBBase##: A sequence. The base name for the database files containing the
+--                 locale text strings. The default is "teksto".
+--
+-- Returns:
+-- * A string **sequence**, the text associated with the message number and locale.
+-- * An integer, if not associated text can be found.
+--
+-- Comments:
+-- * This first scans the database(s) linked to the locale codes supplied. 
+-- * The database name for each locale takes the format of "<DBBase>_<Locale>.edb"
+-- so if the default DBBase is used, and the locales supplied are {"enus", "enau"}
+-- the databases scanned are "teksto_enus.edb" and "teksto_enau.edb".
+-- The database table name searched is "1" with the key being the message number,
+-- and the text is the record data.
+-- * If the message is not found in these databases (or the databases don't exist)
+-- a database called "<DBBase>.edb" is searched. Again the table name is "1" but
+-- it first looks for keys with the format {<locale>,msgnum} and failing that it
+-- looks for keys in the format {"", msgnum}, and if that fails it looks for a
+-- key of just the msgnum. 
+-- 
+public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
+	integer idx = 1
+	integer db_res
+	object lMsgText
+
+	db_res = -1
+	lMsgText = 0
+	-- First, scan through the specialized local dbs
+	for i = 1 to length(LocalQuals) do
+		db_res = db_select(	locate_file( DBBase & "_" & LocalQuals[i] & ".edb" ), DB_LOCK_NO)
+		if db_res = DB_OK then
+			db_res = db_select_table("1")
+			if db_res = DB_OK then
+				lMsgText = db_fetch_record(MsgNum)
+				if sequence(lMsgText) then
+					exit
+				end if
+			end if
+		end if
+	end for
+	
+	-- Next, scan through the generic db
+	if atom(lMsgText) then
+		db_res = db_select(	locate_file( DBBase & ".edb" ), DB_LOCK_NO)
+		if db_res = DB_OK then
+			db_res = db_select_table("1")
+			if db_res = DB_OK then
+				for i = 1 to length(LocalQuals) do
+					lMsgText = db_fetch_record({LocalQuals[i],MsgNum})
+					if sequence(lMsgText) then
+						exit
+					end if
+				end for
+				if atom(lMsgText) then
+					lMsgText = db_fetch_record({"",MsgNum})
+				end if
+				if atom(lMsgText) then
+					lMsgText = db_fetch_record(MsgNum)
+				end if
+			end if
+		end if		
+	end if
+
+	return lMsgText
+end function

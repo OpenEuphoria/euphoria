@@ -21,7 +21,6 @@ include std/convert.e
 include std/filesys.e
 include std/mathcons.e
 include std/search.e
-include std/eds.e
 
 ------------------------------------------------------------------------------------------
 --
@@ -707,48 +706,3 @@ public function datetime(sequence fmt, dt:datetime dtm)
 	return res
 end function
 
-public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
-	integer idx = 1
-	integer db_res
-	object lMsgText
-
-	db_res = -1
-	lMsgText = 0
-	-- First, scan through the specialized local dbs
-	for i = 1 to length(LocalQuals) do
-		db_res = db_select(	locate_file( DBBase & "_" & LocalQuals[i] & ".edb" ), DB_LOCK_NO)
-		if db_res = DB_OK then
-			db_res = db_select_table("1")
-			if db_res = DB_OK then
-				lMsgText = db_fetch_record(MsgNum)
-				if sequence(lMsgText) then
-					exit
-				end if
-			end if
-		end if
-	end for
-	
-	-- Next, scan through the generic db
-	if atom(lMsgText) then
-		db_res = db_select(	locate_file( DBBase & ".edb" ), DB_LOCK_NO)
-		if db_res = DB_OK then
-			db_res = db_select_table("1")
-			if db_res = DB_OK then
-				for i = 1 to length(LocalQuals) do
-					lMsgText = db_fetch_record({LocalQuals[i],MsgNum})
-					if sequence(lMsgText) then
-						exit
-					end if
-				end for
-				if atom(lMsgText) then
-					lMsgText = db_fetch_record({"",MsgNum})
-				end if
-				if atom(lMsgText) then
-					lMsgText = db_fetch_record(MsgNum)
-				end if
-			end if
-		end if		
-	end if
-
-	return lMsgText
-end function
