@@ -2,7 +2,10 @@
 --
 namespace machine
 
-include std/dll.e
+ifdef not DOS32 then
+	include std/dll.e
+end ifdef
+
 include std/error.e
 public include std/memconst.e
 
@@ -525,7 +528,9 @@ public type std_library_address( atom addr )
 	end ifdef
 end type
 
+ifdef WIN32 then
 std_library_address oldprotptr = allocate_data(4)
+end ifdef
 
 public function allocate_string(sequence s, integer cleanup = 0 )
 	atom mem

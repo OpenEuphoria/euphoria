@@ -6,10 +6,9 @@ namespace stdseq
 -- == Sequence Manipulation
 --
 -- <<LEVELTOC depth=2>>
-
 include std/error.e
 include std/search.e
-include std/text.e
+
 include std/sort.e
 include std/math.e
 include std/types.e
@@ -27,7 +26,7 @@ public constant
 	ROTATE_LEFT  = 1,
 	ROTATE_RIGHT = -1
 
---****	
+--****
 -- === Basic routines
 --
 
@@ -77,7 +76,7 @@ end function
 --
 -- Parameters:
 --	# ##source## : the sequence from which to fetch
---	# ##indexes## : a sequence of integers, the path to follow to reach the 
+--	# ##indexes## : a sequence of integers, the path to follow to reach the
 --   element to return.
 --
 -- Returns:
@@ -133,10 +132,10 @@ end function
 --  sequence operations will occur.
 --
 -- Comments:
--- If the last element of ##indexes## is a pair of integers, ##x## will be 
+-- If the last element of ##indexes## is a pair of integers, ##x## will be
 -- stored as a slice three, the bounding indexes being given in the pair as {lower,upper}..
 --
--- In Euphoria, you can never modify an object by passing it to a routine. 
+-- In Euphoria, you can never modify an object by passing it to a routine.
 -- You have to get a modified copy and then assign it back to the original.
 --
 -- Example 1:
@@ -292,7 +291,7 @@ end function
 --
 -- Parameters:
 -- # ##source## : sequence containing the sub-sequences
--- # ##cols## : either a specific column number or a set of column numbers. 
+-- # ##cols## : either a specific column number or a set of column numbers.
 --             Default is 0, which returns the maximum number of columns.
 -- # ##defval## : an object. Used when a column value is not available. Default is 0
 --
@@ -341,7 +340,7 @@ public function columnize(sequence source, object cols = {}, object defval = 0)
 	else
 		collist = {cols}
 	end if
-	
+
 	if length(collist) = 0 then
 		cols = 0
 		for i = 1 to length(source) do
@@ -379,7 +378,7 @@ public function columnize(sequence source, object cols = {}, object defval = 0)
 			end if
 		end for
 	end for
-	
+
 	return result
 end function
 
@@ -388,7 +387,7 @@ end function
 -- Apply a function to every element of a sequence returning a new sequence of
 -- the same size.
 --
--- Parameters: 
+-- Parameters:
 -- * ##source## : the sequence to map
 -- * ##rid## : the [[:routine_id]] of function to use as converter
 -- * ##userdata## : an object passed to each invocation of ##rid##. If omitted,
@@ -433,25 +432,25 @@ end function
 --                   ##source_arg## that are actually transformed.
 --   # ##to_set## : A sequence of objects representing the transformed equivalents
 --                 of those found in ##from_set##.
---   # ##one_level## : An integer. 0 (the default) means that mapping applies to 
+--   # ##one_level## : An integer. 0 (the default) means that mapping applies to
 --                    every atom in every level of sub-sequences. 1 means that
 --                    mapping only applies to the items at the first level
---                    in ##source_arg##. 
+--                    in ##source_arg##.
 --
 -- Returns:
 --   An **object**, The transformed version of ##source_arg##.
 --
 -- Comments:
--- * When ##one_level## is zero or omitted, for each item in ##source_arg##, 
+-- * When ##one_level## is zero or omitted, for each item in ##source_arg##,
 --  ** if it is an atom then it may be transformed
 --  ** if it is a sequence, then the mapping is performed recursively on the
 --     sequence.
 --  ** This option required ##from_set## to only contain atoms and contain no
 --     sub-sequences.
--- * When ##one_level## is not zero, for each item in ##source_arg##, 
+-- * When ##one_level## is not zero, for each item in ##source_arg##,
 --  ** regardless of whether it is an atom or sequence, if it is found in ##from_set##
 --     then it is mapped to the corresponding object in ##to_set##..
--- * Mapping occurs when an item in ##source_arg## is found in ##from_set##, 
+-- * Mapping occurs when an item in ##source_arg## is found in ##from_set##,
 --  then it is replaced by the corresponding object in ##to_set##.
 --
 -- Example 1:
@@ -480,7 +479,7 @@ public function mapping(object source_arg, sequence from_set, sequence to_set, i
 			end if
 		end for
 	end if
-	
+
 	return source_arg
 end function
 
@@ -550,7 +549,7 @@ public function reverse(object target, integer pFrom = 1, integer pTo = 0)
 	if atom(target) or length(target) < 2 then
 		return target
 	end if
-	
+
 	n = length(target)
 	if pFrom < 1 then
 		pFrom = 1
@@ -564,7 +563,7 @@ public function reverse(object target, integer pFrom = 1, integer pTo = 0)
 	if pTo > n then
 		pTo = n
 	end if
-	
+
 	lLimit = floor((pFrom+pTo-1)/2)
 	t = target
 	uppr = pTo
@@ -603,13 +602,13 @@ public function shuffle(sequence seq)
 	for toIdx = length(seq) to 2 by -1 do
 		-- Get a random spot in the remaining items
 		integer fromIdx = rand(toIdx)
-		
+
 		-- Swap the newly picked item with whatever is at the receiving spot
 		object swapValue = seq[fromIdx]
 
 		seq[fromIdx] = seq[toIdx]
 		seq[toIdx] = swapValue
-		
+
 	end for
 
 	return seq
@@ -842,11 +841,11 @@ end function
 -- Parameters:
 --		# ##target## : the sequence to insert into
 --		# ##what## : the object to insert
---		# ##index## : an integer, the position in ##target## where ##what## 
+--		# ##index## : an integer, the position in ##target## where ##what##
 --                               should appear
 --
 -- Returns:
--- A **sequence**, which is ##target## with one more element at ##index##, 
+-- A **sequence**, which is ##target## with one more element at ##index##,
 -- which is ##what##.
 --
 -- Comments:
@@ -884,7 +883,7 @@ end function
 --		# ##index## : an integer, the position in ##target## where ##what## should appear
 --
 -- Returns:
---		A **sequence**, which is ##target## with one or more elements, those of ##what##, 
+--		A **sequence**, which is ##target## with one or more elements, those of ##what##,
 -- inserted at locations starting at ##index##.
 --
 -- Comments:
@@ -927,7 +926,7 @@ end function
 --
 -- Comments:
 -- ##pad_head##() will not remove characters. If ##length(target)## is greater
--- than ##size##, this function simply returns ##target##. See [[:head]]() 
+-- than ##size##, this function simply returns ##target##. See [[:head]]()
 -- if you wish to truncate long sequences.
 --
 -- Example 1:
@@ -960,7 +959,7 @@ end function
 --
 -- Returns:
 -- A **sequence**, either ##target## if it was long enough, or a sequence
--- of length ##size## whose first elements are those of ##target## and whose 
+-- of length ##size## whose first elements are those of ##target## and whose
 -- last few head elements all equal ##padding##.
 --
 -- Comments:
@@ -984,12 +983,12 @@ end function
 --
 -- See Also:
 --   [[:trim_tail]], [[:pad_head]], [[:tail]]
-	
+
 public function pad_tail(sequence target, integer size, object ch=' ')
 	if size <= length(target) then
 		return target
 	end if
-	
+
 	return target & repeat(ch, size - length(target))
 end function
 
@@ -1001,7 +1000,7 @@ end function
 -- # ##needle## :   object to add.
 -- # ##haystack## : sequence to add it to.
 -- # ##order## :    an integer; determines how the ##needle## affects the ##haystack##.
---                 It can be added to the front (prepended), to the back (appended), 
+--                 It can be added to the front (prepended), to the back (appended),
 --                 or sorted after adding. The default is to prepend it.
 --
 -- Returns:
@@ -1054,20 +1053,20 @@ public function add_item(object needle, sequence haystack, integer pOrder = 1)
 	switch pOrder do
 		case ADD_PREPEND then
 			return prepend(haystack, needle)
-			
+
 		case ADD_APPEND then
 			return append(haystack, needle)
-			
+
 		case ADD_SORT_UP then
 			return sort(append(haystack, needle))
-			
+
 		case ADD_SORT_DOWN then
 			return sort(append(haystack, needle), DESCENDING)
 
 		case else
 			crash("sequence.e:add_item() invalid Order argument '%d'", pOrder)
 	end switch
-	
+
 	return haystack
 end function
 
@@ -1121,11 +1120,11 @@ end function
 --
 -- Parameters:
 --   # ##source## : the sequence to get the tail of.
---   # ##size## : an integer, the number of items to return. 
+--   # ##size## : an integer, the number of items to return.
 --                           (defaults to length(source) - 1)
 --
 -- Returns:
--- A **sequence**, of length at most ##size##. If the length is less than 
+-- A **sequence**, of length at most ##size##. If the length is less than
 -- ##size##, then ##source## was returned. Otherwise, the ##size## last elements
 -- of ##source## were returned.
 --
@@ -1162,7 +1161,7 @@ end function
 --		# ##len## : an integer, the length of the slice to return
 --
 -- Returns:
--- A **sequence**, made of at most ##len## elements of ##source##. These 
+-- A **sequence**, made of at most ##len## elements of ##source##. These
 -- elements are at contiguous positions in ##source## starting at ##start##.
 --
 -- Errors:
@@ -1293,11 +1292,11 @@ end function
 -- If ##colno## is less than 1, it cannot be any valid column, and an error occurs.
 --
 -- Comments:
--- If it is not possible to return the sequence of all ##source[x][colno]]## 
+-- If it is not possible to return the sequence of all ##source[x][colno]]##
 -- for all available ##x##, the outcome is decided by ##error_control##:
 -- * If 0 (the default), program is aborted.
 -- * If a nonzero atom, the short vertical slice is returned.
--- * Otherwise, elements of ##error_control## will be taken to make for any 
+-- * Otherwise, elements of ##error_control## will be taken to make for any
 --   missing element. A short vertical slice is returned if ##error_control## is
 --   exhausted.
 --
@@ -1405,7 +1404,7 @@ end function
 --		# ##filler## : an object, used for filling gaps. Defaults to ' '
 --
 -- Returns:
--- A **sequence**, which looks like ##target##, but a slice starting at ##start## 
+-- A **sequence**, which looks like ##target##, but a slice starting at ##start##
 --                 equals ##source##.
 --
 -- Comments:
@@ -1416,7 +1415,7 @@ end function
 -- supplied ##start## value, gaps will be created, and ##filler## is used to
 -- fill them in.
 --
--- Notionally, ##target## has an infinite amount of ##filler## on both sides, 
+-- Notionally, ##target## has an infinite amount of ##filler## on both sides,
 -- and ##start## counts position relative to where ##target## actually starts.
 -- Then, notionally, a [[:replace]]() operation is performed.
 --
@@ -1495,20 +1494,20 @@ end function
 
 public function remove_all(object needle, sequence haystack)
 	integer ts, te, ss, se
-	
+
 	-- See if we have to do anything at all.
 	se = find(needle, haystack)
 	if se = 0 then
 		return haystack
 	end if
-	
+
 	-- Now we know there is at least one occurrence and because
 	-- it's the first one, we don't have to move anything yet.
 	-- So pretend we have and set up the 'end' variables
 	-- as if we had moved stuff.
 	se -= 1
 	te = se
-	
+
 	while se > 0 with entry do
 		-- Shift elements down the sequence.
 		haystack[ts .. te] = haystack[ss .. se]
@@ -1516,20 +1515,20 @@ public function remove_all(object needle, sequence haystack)
 	entry
 		-- Calc where the next target start is (1 after the previous end)
 		ts = te + 1
-		
+
 		-- Calc where to start the next search (2 after the previous end)
 		ss = se + 2
-		
+
 		-- See if we got another one.
 		se = find_from(needle, haystack, ss)
-		
+
 		-- We have another one, so calculate the source end(1 before the needle)
 		se = se - 1
-		
+
 		-- Calc the target end (start + length of what we are moving)
-		te = ts + se - ss 
+		te = ts + se - ss
 	end while
-	
+
 	-- Check to see if there is anything after the final needle
 	-- and move it.
 	if ss <= length(haystack) then
@@ -1539,7 +1538,7 @@ public function remove_all(object needle, sequence haystack)
 		-- Need to backtrack one needle.
 		te = ts - 1
 	end if
-	
+
 	-- Return only the stuff we moved.
 	return haystack[1 .. te]
 end function
@@ -1561,8 +1560,8 @@ end function
 -- Each item in ##source##, along with the ##userdata## is passed to the comparator
 -- routine ##rid##. This function will return a non-zero atom if the item is to
 -- be included in the result sequence, otherwise it should return zero to
--- exclude it from the result. 
--- * The comparator must take two parameters and return an atom. 
+-- exclude it from the result.
+-- * The comparator must take two parameters and return an atom.
 -- The first parameter type must be compatible with all elements in ##source##.
 -- The second parameter is an ##object##.
 --
@@ -1603,7 +1602,7 @@ end function
 -- public constant STDFLTR_ALPHA
 --
 -- Description:
--- Predefined routine_id for use with [[:filter]](). 
+-- Predefined routine_id for use with [[:filter]]().
 --
 -- Comments:
 -- Used to filter out non-alohabetic characters from a string.
@@ -1688,19 +1687,19 @@ public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 public function replace_all(sequence source, object olddata, object newdata)
 	integer startpos
 	integer endpos
-	
+
 	if atom(olddata) then
 		olddata = {olddata}
 	end if
-	
+
 	if atom(newdata) then
 		newdata = {newdata}
 	end if
-	
+
 	if length(olddata) = 0 then
 		return source
 	end if
-	
+
 	endpos = 1
 	while startpos != 0 with entry do
 		endpos = startpos + length(olddata) - 1
@@ -1709,7 +1708,7 @@ public function replace_all(sequence source, object olddata, object newdata)
 	entry
 		startpos = match_from(olddata, source, endpos)
 	end while
-	
+
 	return source
 end function
 
@@ -1806,7 +1805,7 @@ end function
 -- Comments:
 -- This function may be applied to a string sequence or a complex sequence.
 --
--- If ##limit## is > 0, this is the maximum number of sub-sequences that will 
+-- If ##limit## is > 0, this is the maximum number of sub-sequences that will
 -- created, otherwise there is no limit.
 --
 -- Example 1:
@@ -1828,13 +1827,13 @@ public function split(sequence st, object delim=' ', integer limit=0, integer no
 	sequence ret = {}
 	integer start
 	integer pos
-	
+
 	if length(st) = 0 then
 		return ret
 	end if
 
 
-	if sequence(delim) then	
+	if sequence(delim) then
 		-- Handle the simple case of split("123", ""), opposite is join({"1","2","3"}, "") -- "123"
 		if equal(delim, "") then
 			for i = 1 to length(st) do
@@ -1845,10 +1844,10 @@ public function split(sequence st, object delim=' ', integer limit=0, integer no
 					exit
 				end if
 			end for
-	
+
 			return st
 		end if
-		
+
 		start = 1
 		while start <= length(st) do
 			pos = match_from(delim, st, start)
@@ -1856,7 +1855,7 @@ public function split(sequence st, object delim=' ', integer limit=0, integer no
 			if pos = 0 then
 				exit
 			end if
-			
+
 			ret = append(ret, st[start..pos-1])
 			start = pos+length(delim)
 			limit -= 1
@@ -1868,11 +1867,11 @@ public function split(sequence st, object delim=' ', integer limit=0, integer no
 		start = 1
 		while start <= length(st) do
 			pos = find_from(delim, st, start)
-	
+
 			if pos = 0 then
 				exit
 			end if
-			
+
 			ret = append(ret, st[start..pos-1])
 			start = pos + 1
 			limit -= 1
@@ -1881,7 +1880,7 @@ public function split(sequence st, object delim=' ', integer limit=0, integer no
 			end if
 		end while
 	end if
-	
+
 	ret = append(ret, st[start..$])
 
 	integer k = length(ret)
@@ -1896,8 +1895,8 @@ public function split(sequence st, object delim=' ', integer limit=0, integer no
 			end if
 		end for
 	end if
-		
-	if k < length(ret) then		
+
+	if k < length(ret) then
 		return ret[1 .. k]
 	else
 		return ret
@@ -1976,8 +1975,8 @@ public function split_any(sequence source, object delim, integer limit=0, intege
 			end if
 		end for
 	end if
-		
-	if k < length(ret) then		
+
+	if k < length(ret) then
 		return ret[1 .. k]
 	else
 		return ret
@@ -2025,20 +2024,20 @@ public function join(sequence items, object delim=" ")
 end function
 
 -- Style options for breakup()
- 
+
 public enum
 	--** Indicates that ##size## parameter is maximum length of sub-sequence. See [[:breakup]]
 	BK_LEN,
 	--** Indicates that ##size## parameter is maximum number of sub-sequence. See [[:breakup]]
 	BK_PIECES
-	
+
 --**
 -- Breaks up a sequence into multiple sequences of a given length.
 --
 -- Parameters:
 -- 		# ##source## : the sequence to be broken up into sub-sequences.
 --		# ##size## : an object, if an integer it is either the maximum length of
---                  each resulting sub-sequence or the maximum number of 
+--                  each resulting sub-sequence or the maximum number of
 --                  sub-sequences to break ##source## into. \\
 --                  If ##size## is a sequence, it is a list of element counts
 --                  for the sub-sequences it creates.
@@ -2052,7 +2051,7 @@ public enum
 --
 -- Comments:
 -- **When ##size## is an integer and ##style## is BK_LEN...**\\
--- The sub-sequences have length ##size##, except possibly the last one, 
+-- The sub-sequences have length ##size##, except possibly the last one,
 -- which may be shorter. For example if ##source## has 11 items and ##size## is
 -- 3, then the first three sub-sequences will get 3 items each and the remaining
 -- 2 items will go into the last sub-sequence. If ##size## is less than 1 or
@@ -2068,7 +2067,7 @@ public enum
 -- 11 elements then the pieces will have 4,4, and 3 respectively.
 --
 -- **When ##size## is a sequence...**\\
--- The style parameter is ignored in this case. The source will be broken up 
+-- The style parameter is ignored in this case. The source will be broken up
 -- according to the counts contained in the size parameter. For example, if
 -- ##size## was {3,4,0,1} then piece #1 gets 3 items, #2 gets 4 items, #3 gets
 -- 0 items, and #4 gets 1 item. Note that if not all items from source are
@@ -2111,7 +2110,7 @@ public function breakup(sequence source, object size, integer style = BK_LEN)
 	if atom(size) and not integer(size) then
 		size = floor(size)
 	end if
-	
+
 	-- Convert simple integer size into the 'customized' size format.
 	if integer(size) then
 		integer len
@@ -2148,7 +2147,7 @@ public function breakup(sequence source, object size, integer style = BK_LEN)
 			end for
 		end if
 	end if
-		
+
 
 	-- Allocate the top level sequence.
 	sequence ns = repeat(0, length(size))
@@ -2172,7 +2171,7 @@ public function breakup(sequence source, object size, integer style = BK_LEN)
 			ns[i] = {}
 		end if
 	end for
-	
+
 	--Handle any leftover data from source.
 	if source_idx <= length(source) then
 		ns = append(ns, source[source_idx .. $])
@@ -2187,7 +2186,7 @@ end function
 -- Parameters:
 --		# ##s## : the sequence to flatten out.
 --      # ##delim## : An optional delimiter to place after each flattened sub-sequence (except
---                 the last one). 
+--                 the last one).
 --
 -- Returns:
 --		A **sequence**, of atoms, all the atoms in ##s## enumerated.
@@ -2223,10 +2222,10 @@ public function flatten(sequence s, object delim = "")
 	object x
 	integer len
 	integer pos
-		
+
 	if atom(delim) then
 		delim = {delim}
-	end if	
+	end if
 	ret = s
 	pos = 1
 	len = length(ret)
@@ -2248,7 +2247,7 @@ public function flatten(sequence s, object delim = "")
 			pos += 1
 		end if
 	end while
-	
+
 	return ret
 end function
 
@@ -2265,29 +2264,29 @@ end function
 -- Returns:
 --   A **sequence**, { {less than pivot}, {equal to pivot}, {greater than pivot} }
 --
--- Comments: 
+-- Comments:
 -- ##pivot()## is used as a split up a sequence relative to a specific value.
 --
 -- Example 1:
 --   <eucode>
---   ? pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 ) 
+--   ? pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 )
 --     -- Ans: {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}
---   ? pivot( {4, 1, -4, 6, -1, -7, 9, 10} ) 
+--   ? pivot( {4, 1, -4, 6, -1, -7, 9, 10} )
 --     -- Ans: {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}
---   ? pivot( 5 ) 
+--   ? pivot( 5 )
 --     -- Ans: {{}, {}, {5}}
 --   </eucode>
 
 public function pivot(object data_p, object pivot_p = 0)
 	sequence result_
 	integer pos_
-	
+
 	result_ = {{}, {}, {}}
-	
+
 	if atom(data_p) then
 		data_p = {data_p}
 	end if
-	
+
 	for i = 1 to length(data_p) do
 		pos_ = eu:compare(data_p[i], pivot_p) + 2
 		result_[pos_] = append(result_[pos_], data_p[i])
@@ -2305,7 +2304,7 @@ end function
 --   # ##transformer## : One or more routine_ids. These are [[:routine_id | routine ids]]
 --        of functions that must receive three parameters (object x, sequence i, object u)
 --        where 'x' is an item in the ##source## list, 'i' contains the position that 'x' is
---        found in the ##source## list and the length of ##source##, and 'u' 
+--        found in the ##source## list and the length of ##source##, and 'u'
 --        is the ##user_data## value. Each transformer
 --        must return a two-element sequence. If the first element is zero, then build_list() continues
 --        on with the next transformer function for the same 'x'. If the first element is not
@@ -2332,7 +2331,7 @@ end function
 -- 		return {1,x} -- copy 'x'
 -- 	end if
 -- end function
--- 
+--
 -- sequence s
 -- -- Remove negative elements (x < 0)
 -- s = build_list({-3, 0, 1.1, -2, 2, 3, -1.5}, routine_id("remitem"), , 0)
@@ -2348,12 +2347,12 @@ public function build_list( sequence source, object transformer, integer singlet
 	if integer(transformer) then
 		transformer = {transformer}
 	end if
-	
+
 	for i = 1 to length(source) do
 		x = {source[i], {i, length(source)}, user_data}
-		
+
 		for j = 1 to length(transformer) do
-		
+
 			if transformer[j] >= 0 then
 				new_x = call_func(transformer[j], x)
 				if length(new_x) = 0 then
@@ -2368,25 +2367,25 @@ public function build_list( sequence source, object transformer, integer singlet
 					-- This didn't return anything and skip other transformers.
 					exit
 				end if
-				
+
 				new_x = new_x[2]
 			else
 				-- Just copy the input.
 				new_x = x[1]
 			end if
-						
+
 			if singleton then
 				result = append(result, new_x)
 			else
 				result &= new_x
 			end if
-			
+
 			-- Stop calling any more transformers for this input item.
 			exit
-			
+
 		end for
-		
-		
+
+
 	end for
 
 	return result
@@ -2411,7 +2410,7 @@ end function
 -- to the ##transform## routine.
 -- * Each transformer routine returns a transformed sequence.
 -- * The ##pTransformer## parameters is either a single routine_id or a sequence
--- of routine_ids. In this second case, the routine_id may actually be a 
+-- of routine_ids. In this second case, the routine_id may actually be a
 -- multi-element sequence containing the real routine_id and some user data to
 -- pass to the transformer routine. If there is no user data then the transformer
 -- is called with only one parameter.
@@ -2420,7 +2419,7 @@ end function
 -- <eucode>
 -- res = transform(" hello    ", {
 --                       {routine_id("trim"), " ",0},
---                       routine_id("upper"), 
+--                       routine_id("upper"),
 --                       {routine_id("replace_all"), "O", "A"}
 --                   })
 -- --> "HELLA"
@@ -2433,7 +2432,7 @@ public function transform( sequence pSource, object pTransformer)
 	if atom(pTransformer) then
 		pTransformer = {pTransformer}
 	end if
-	
+
 	for i = 1 to length(pTransformer) do
 		if atom(pTransformer[i]) then
 			lResult = call_func(pTransformer[i], {lResult})
@@ -2442,7 +2441,7 @@ public function transform( sequence pSource, object pTransformer)
 		end if
 	end for
 	return lResult
-	
+
 end function
 
 --**
@@ -2467,16 +2466,16 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? sim_index("sit",      "sin")      --> 0.08784 
--- ? sim_index("sit",      "sat")      --> 0.32394 
--- ? sim_index("sit",      "skit")     --> 0.34324 
--- ? sim_index("sit",      "its")      --> 0.68293 
--- ? sim_index("sit",      "kit")      --> 0.86603 
+-- ? sim_index("sit",      "sin")      --> 0.08784
+-- ? sim_index("sit",      "sat")      --> 0.32394
+-- ? sim_index("sit",      "skit")     --> 0.34324
+-- ? sim_index("sit",      "its")      --> 0.68293
+-- ? sim_index("sit",      "kit")      --> 0.86603
 --
--- ? sim_index("knitting", "knitting") --> 0.00000 
--- ? sim_index("kitting",  "kitten")   --> 0.09068 
--- ? sim_index("knitting", "knotting") --> 0.27717 
--- ? sim_index("knitting", "kitten")   --> 0.35332 
+-- ? sim_index("knitting", "knitting") --> 0.00000
+-- ? sim_index("kitting",  "kitten")   --> 0.09068
+-- ? sim_index("knitting", "knotting") --> 0.27717
+-- ? sim_index("knitting", "kitten")   --> 0.35332
 -- ? sim_index("abacus","zoological")  --> 0.76304
 -- </eucode>
 
@@ -2491,7 +2490,7 @@ public function sim_index(sequence A, sequence B)
 	-- First pass scores only matching runs of elements.
 	accum_score = 0
 	indx_a = 1
-	used_A = repeat(0, length(A))	
+	used_A = repeat(0, length(A))
 	used_B = repeat(0, length(B))
 	while indx_a <= length(A) label "DoA" do
 		pos_factor = power((1 + length(A) - indx_a) / length(A),2)
@@ -2515,7 +2514,7 @@ public function sim_index(sequence A, sequence B)
 		end while
 		indx_a += 1
 	end while
-	
+
 	-- Now score the unused elements from A.
  	for i = 1 to length(A) do
  		if used_A[i] = 0 then
@@ -2542,7 +2541,7 @@ end function
 -- with an alternative value.
 public constant SEQ_NOALT = {{1.23456}}
 
-	
+
 --**
 -- Removes all sub-sequences from the supplied sequence, optionally
 -- replacing them with a supplied alternative value.
@@ -2578,9 +2577,9 @@ public function remove_subseq( sequence pSource, object pAltValue)
 				end if
 				lCOW += 1
 			end if
-			continue	
+			continue
 		end if
-		
+
 		if lCOW = 0 then
 			lResult = pSource
 			lCOW = i
@@ -2589,9 +2588,9 @@ public function remove_subseq( sequence pSource, object pAltValue)
 			lResult[lCOW] = pAltValue
 			lCOW += 1
 		end if
-			
+
 	end for
-	
+
 	if lCOW = 0 then
 		return pSource
 	end if
@@ -2609,20 +2608,20 @@ public enum
 	RD_INPLACE,
 	RD_PRESORTED,
 	RD_SORT
-	
+
 --**
 -- Removes duplicate elements
 --
 -- Parameters:
 -- # ##pSource## : A sequence that may contain duplicated elements
--- # ##pMode## : One of RD_INPLACE, RD_PRESORTED, or RD_SORT. 
+-- # ##pMode## : One of RD_INPLACE, RD_PRESORTED, or RD_SORT.
 -- ** RD_INPLACE removes items while preserving the original order of the unique items.
 -- ** RD_PRESORTED assumes that the elements in ##pSource## are already sorted. If they
 -- are not already sorted, this option merely removed adjacent duplicate elements.
 -- ** RD_SORT will return the unique elements in ascending sorted order.
 --
 -- Returns:
--- A **sequence**, that contains only the unique elements from ##pSource##. 
+-- A **sequence**, that contains only the unique elements from ##pSource##.
 --
 -- Example 1:
 -- <eucode>
@@ -2636,11 +2635,11 @@ public enum
 public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
 	integer lTo
 	integer lFrom
-	
+
 	if length(pSource) < 2 then
 		return pSource
 	end if
-	
+
 	if pInPlace = RD_SORT then
 		pSource = sort(pSource)
 		pInPlace = RD_PRESORTED
@@ -2648,7 +2647,7 @@ public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
 	if pInPlace = RD_PRESORTED then
 		lTo = 1
 		lFrom = 2
-		
+
 		while lFrom <= length(pSource) do
 			if not equal(pSource[lFrom], pSource[lTo]) then
 				lTo += 1
@@ -2660,7 +2659,7 @@ public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
 		end while
 		return pSource[1 .. lTo]
 	end if
-	
+
 	sequence lResult
 	lResult = {}
 	for i = 1 to length(pSource) do
@@ -2669,7 +2668,7 @@ public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
 		end if
 	end for
 	return lResult
-			
+
 end function
 
 --**
@@ -2680,12 +2679,12 @@ end function
 --
 -- Returns:
 -- A **sequence**, that contains all the elements from all the first-level of
--- sub-sequences from ##pSource##. 
+-- sub-sequences from ##pSource##.
 --
 -- Comments:
 -- The elements in the sub-sequences do not have to be pre-sorted.
 --
--- Only one level of sub-sequence is merged. 
+-- Only one level of sub-sequence is merged.
 --
 -- Example 1:
 -- <eucode>
@@ -2708,20 +2707,20 @@ end function
 public function merge(sequence pSource)
 	sequence lResult
 	integer lTotalSize = 0
-	integer lPos 
-	
+	integer lPos
+
 	if length(pSource) = 0 then
 		return {}
 	end if
-	
+
 	if length(pSource) = 1 then
 		return pSource[1]
 	end if
-	
+
 	for i = 1 to length(pSource) do
 		lTotalSize += length(pSource[i])
 	end for
-	
+
 	lResult = repeat(0, lTotalSize)
 	lPos = 1
 	for i = 1 to length(pSource) do

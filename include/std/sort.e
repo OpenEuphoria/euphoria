@@ -20,18 +20,18 @@ public constant
 	-- is the smallest as per the sort order and its last element is the
 	-- largest
 	ASCENDING = 1,
-	
+
 	--** The normal sort order used by the custom comparison routine.
 	NORMAL_ORDER = ASCENDING,
-	
+
 	--**
 	-- descending sort order, which is the reverse of ##ASCENDING##.
 	DESCENDING = -1,
-	
+
 	--** Reverses the sense of the order returned by a custom comparison routine.
 	REVERSE_ORDER = DESCENDING
 
-include std/text.e -- upper/lower
+include std/text.e -- upper()
 
 --****
 -- === Routines
@@ -49,7 +49,7 @@ include std/text.e -- upper/lower
 --
 -- Comments:
 --
--- The elements can be atoms or sequences. 
+-- The elements can be atoms or sequences.
 --
 --	 The standard ##compare##()
 -- routine is used to compare elements. This means that "##y## is greater than ##x##" is defined by ##compare(y, x)=1##.
@@ -77,8 +77,8 @@ public function sort(sequence x, integer order = ASCENDING)
 	else
 		order = 1
 	end if
-	
-	
+
+
 	last = length(x)
 	gap = floor(last / 10) + 1
 	while 1 do
@@ -121,13 +121,13 @@ end function
 --     A **sequence**, a copy of the original sequence in sorted order
 --
 -- Errors:
--- If the user defined routine does not return according to the specifications in the 
+-- If the user defined routine does not return according to the specifications in the
 -- //Comments// section below, an error will occur.
 --
 -- Comments:
--- * If some user data is being provided, that data must be either an atom or 
+-- * If some user data is being provided, that data must be either an atom or
 -- a sequence with at least one element. **NOTE** only the first element is passed
--- to the user defined comparison routine, any other elements are just ignored. 
+-- to the user defined comparison routine, any other elements are just ignored.
 -- The user data is not used or inspected it in any way other than passing it
 -- to the user defined routine.
 --
@@ -136,9 +136,9 @@ end function
 -- ** a **positive** value if object B must appear before object A
 -- ** 0 if the order does not matter
 -- >
--- **NOTE:** The meaning of the value returned by the user-defined routine is reversed 
+-- **NOTE:** The meaning of the value returned by the user-defined routine is reversed
 -- when ##order = REVERSE_ORDER##.
--- The default is ##order = NORMAL_ORDER##, which sorts in order returned by the 
+-- The default is ##order = NORMAL_ORDER##, which sorts in order returned by the
 -- custom comparison routine.
 -- <
 -- * When no user data is provided, the user defined routine must accept two
@@ -148,14 +148,14 @@ end function
 -- objects (A, B , data). It must return either...
 -- ** an integer, which is a //comparison result//
 -- ** a two-element sequence, in which the first element is a //comparison result//
--- and the second element is the updated user data that is to be used for the next call 
+-- and the second element is the updated user data that is to be used for the next call
 -- to the user defined routine.
 --
 -- * The elements of ##x## can be atoms or sequences. Each time that the
 -- sort needs to compare two items in the sequence, it calls
 -- the user-defined function to determine the order.
 --
--- * This function uses the "Shell" sort algorithm. This sort is not "stable", 
+-- * This function uses the "Shell" sort algorithm. This sort is not "stable",
 --  i.e. elements that are considered equal might change position relative to
 --  each other.
 --
@@ -219,7 +219,7 @@ end function
 -- -- Order is age:descending, Surname, Given Name
 -- sequence column_order = {-3,2,1}
 -- sorted = custom_sort( routine_id("colsort"), students, {column_order} )
--- -- result is 
+-- -- result is
 -- {
 --     {"Diane","Fry",23},
 --     {"Bob","Palmer",21},
@@ -233,7 +233,7 @@ end function
 -- }
 --
 -- sorted = custom_sort( routine_id("colsort"), students, {column_order}, REVERSE_ORDER )
--- -- result is 
+-- -- result is
 -- {
 --     {"Chris","du Pont",16},
 --     {"Freya","Brash",16},
@@ -259,7 +259,7 @@ public function custom_sort(integer custom_compare, sequence x, object data = {}
 	else
 		order = 1
 	end if
-	
+
 	if atom(data) then
 		args &= data
 	elsif length(data) then
@@ -307,7 +307,7 @@ function column_compare(object a, object b, object cols)
 -- Local function used by sort_columns()
 	integer sign
 	integer column
-	
+
 	for i = 1 to length(cols) do
 		if cols[i] < 0 then
 			sign = -1

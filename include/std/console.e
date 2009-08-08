@@ -1,18 +1,29 @@
 	-- (c) Copyright - See License.txt
 --
 --****
--- == Console 
+-- == Console
 --
 -- <<LEVELTOC depth=2>>
 namespace console
 
 include std/types.e
 include std/get.e
+include std/text.e
+include std/types.e
+include std/pretty.e
+include std/graphcst.e
 
+-- machine() commands
 constant
 	M_WAIT_KEY    = 26,
 	M_ALLOW_BREAK = 42,
-	M_CHECK_BREAK = 43
+	M_CHECK_BREAK = 43,
+	M_CURSOR      = 6,
+	M_TEXTROWS    = 12,
+	M_FREE_CONSOLE = 54,
+	M_GET_SCREEN_CHAR = 58,
+	M_PUT_SCREEN_CHAR = 59,
+	$
 
 --****
 -- === Cursor Style Constants
@@ -25,7 +36,7 @@ constant
 -- See Also:
 --   [[:cursor]]
 
-public constant 
+public constant
 	NO_CURSOR              = #2000,
 	UNDERLINE_CURSOR       = #0607,
 	THICK_UNDERLINE_CURSOR = #0507,
@@ -46,10 +57,10 @@ public constant
 --		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
 --
 -- Comments:
---     The operating system can hold a small number of key-hits in its keyboard buffer. 
+--     The operating system can hold a small number of key-hits in its keyboard buffer.
 --     ##get_key##() will return the next one from the buffer, or -1 if the buffer is empty.
 --
---     Run the ##key.bat## program to see what key code is generated for each key on your 
+--     Run the ##key.bat## program to see what key code is generated for each key on your
 --     keyboard.
 --
 -- Example 1:
@@ -76,7 +87,7 @@ public constant
 -- i is 0 (false) your program will not be terminated by CTRL+C or CTRL+Break.
 --
 -- //DOS// will display ^C on the screen, even when your program cannot be terminated.
--- 
+--
 -- Initially your program can be terminated at any point where
 --  it tries to read from the keyboard. It could also be terminated
 --  by other input/output operations depending on options the user
@@ -115,7 +126,7 @@ end procedure
 --  program. You can use ##check_break##() to find out if the user
 --  has pressed one of these keys. You might then perform some action
 --  such as a graceful shutdown of your program.
--- 
+--
 -- Neither CTRL+C or CTRL+Break will be returned as input
 --  characters when you read the keyboard. You can only detect
 --  them by calling ##check_break##().
@@ -180,7 +191,7 @@ end function
 --      # ##con## : Either 1 (stdout), or 2 (stderr). Defaults to 1.
 --
 -- Comments:
--- This wraps [[:wait_key]] by giving a clue that the user should press a key, and 
+-- This wraps [[:wait_key]] by giving a clue that the user should press a key, and
 -- perhaps do some other things as well.
 --
 -- Example 1:
@@ -272,7 +283,7 @@ public function prompt_number(sequence prompt, sequence range)
 end function
 
 --**
--- Prompt the user to enter a string of text. 
+-- Prompt the user to enter a string of text.
 --
 -- Parameters:
 --		# ##st## : is a string that will be displayed on the screen.
@@ -293,7 +304,7 @@ end function
 
 public function prompt_string(sequence prompt)
 	object answer
-	
+
 	puts(1, prompt)
 	answer = gets(0)
 	puts(1, '\n')
@@ -307,20 +318,12 @@ end function
 --****
 -- === Cross Platform Text Graphics
 
--- machine() commands
-
-constant M_CURSOR         = 6,
-		 M_TEXTROWS       = 12,
-		 M_FREE_CONSOLE = 54,
-		 M_GET_SCREEN_CHAR = 58,
-		 M_PUT_SCREEN_CHAR = 59
-
 type positive_atom(atom x)
 	return x >= 1
 end type
 
 type text_point(sequence p)
-	return length(p) = 2 and p[1] >= 1 and p[2] >= 1 
+	return length(p) = 2 and p[1] >= 1 and p[2] >= 1
 		   and p[1] <= 200 and p[2] <= 500 -- rough sanity check
 end type
 
@@ -332,14 +335,13 @@ ifdef DOS32 then
 	include std/dos/image.e
 end ifdef
 
-include std/graphcst.e
 
 ifdef DOS32 then
 	function DOS_scr_addr(sequence vc, text_point xy)
 	-- calculate address in DOS screen memory for a given line, column
 		atom screen_memory
 		integer page_size
-	
+
 		if vc[VC_MODE] = 7 then
 			screen_memory = MONO_TEXT_MEMORY
 		else
@@ -350,7 +352,7 @@ ifdef DOS32 then
 		page_size = 1024 * floor((page_size + 1023) / 1024)
 		screen_memory = screen_memory + get_active_page() * page_size
 
-		return screen_memory + ((xy[1]-1) * vc[VC_COLUMNS] + (xy[2]-1)) 
+		return screen_memory + ((xy[1]-1) * vc[VC_COLUMNS] + (xy[2]-1))
 		   * BYTES_PER_CHAR
 	end function
 end ifdef
@@ -362,10 +364,10 @@ end ifdef
 -- Description:
 -- Clear the screen using the current background color (may be set by [[:bk_color]]() ).
 --
--- Comments: 
+-- Comments:
 -- This works in all text and pixel-graphics modes.
 --
--- See Also: 
+-- See Also:
 -- [[:bk_color]], [[:graphics_mode]]
 --
 
@@ -388,12 +390,12 @@ end ifdef
 -- Example 1:
 -- <eucode>
 -- -- read character and attributes at top left corner
--- s = get_screen_char(1,1) 
+-- s = get_screen_char(1,1)
 -- -- store character and attributes at line 25, column 10
 -- put_screen_char(25, 10, {s})
 -- </eucode>
--- 
--- See Also: 
+--
+-- See Also:
 --   [[:put_screen_char]], [[:save_text_image]]
 
 public function get_screen_char(positive_atom line, positive_atom column)
@@ -425,26 +427,26 @@ end function
 --
 -- ##char_attr## must be in the form  ##{character, attributes, character, attributes, ...}##.
 --
--- Errors: 
+-- Errors:
 -- 		The length of ##char_attr## must be a multiple of 2.
 --
 -- Comments:
 --
 -- The attributes atom contains the foreground color, background color, and possibly other platform-dependent information controlling how the character is displayed on the screen.
 -- If ##char_attr## has ##0## length, nothing will be written to the screen. The characters are written to the //active page//.
--- It's faster to write several characters to the screen with a single call to ##put_screen_char##() than it is to write one character at a time. 
---  
+-- It's faster to write several characters to the screen with a single call to ##put_screen_char##() than it is to write one character at a time.
+--
 -- Example 1:
 -- <eucode>
 -- -- write AZ to the top left of the screen
 -- -- (attributes are platform-dependent)
 -- put_screen_char(1, 1, {'A', 152, 'Z', 131})
 -- </eucode>
--- 
--- See Also: 
+--
+-- See Also:
 --   [[:get_screen_char]], [[:display_text_image]]
 
-public procedure put_screen_char(positive_atom line, positive_atom column, 
+public procedure put_screen_char(positive_atom line, positive_atom column,
 								 sequence char_attr)
 	ifdef DOS32 then
 		atom scr_addr
@@ -455,7 +457,7 @@ public procedure put_screen_char(positive_atom line, positive_atom column,
 			scr_addr = DOS_scr_addr(vc, {line, column})
 			overflow = length(char_attr) - 2 * (vc[VC_COLUMNS] - column + 1)
 			if overflow > 0 then
-				poke(scr_addr, char_attr[1..$ - overflow])  
+				poke(scr_addr, char_attr[1..$ - overflow])
 			else
 				poke(scr_addr, char_attr)
 			end if
@@ -474,14 +476,14 @@ end procedure
 --
 -- Comments:
 -- This routine displays to the active text page, and only works in text modes.
---   
+--
 -- On //DOS32//, the attribute should consist of the foreground color plus 16 times the background color.
 -- ##text## may result from a previous call to [[:save_text_image]](), although you could construct it yourself. The sequences of the text image do not have to all be the same length.
--- 
--- You might use [[:save_text_image]]()/[[:display_text_image]]() in a text-mode graphical 
+--
+-- You might use [[:save_text_image]]()/[[:display_text_image]]() in a text-mode graphical
 -- user interface, to allow "pop-up" dialog boxes, and drop-down menus to appear and disappear
 -- without losing what was previously on the screen.
--- 
+--
 -- Example 1:
 -- <eucode>
 -- clear_screen()
@@ -494,11 +496,11 @@ end procedure
 -- --     D
 -- -- at the top left corner of the screen.
 -- -- 'A' will be white with black (0) background color,
--- -- 'B' will be green on black, 
+-- -- 'B' will be green on black,
 -- -- 'C' will be red on white, and
 -- -- 'D' will be blue on black.
 -- </eucode>
--- 
+--
 -- See Also:
 --   [[:save_text_image]], [[:display_image]], [[:put_screen_char]]
 --
@@ -506,7 +508,7 @@ end procedure
 public procedure display_text_image(text_point xy, sequence text)
 	integer extra_col2, extra_lines
 	sequence vc, one_row
-	
+
 	vc = video_config()
 	ifdef DOS32 then
 		atom scr_addr
@@ -517,7 +519,7 @@ public procedure display_text_image(text_point xy, sequence text)
 	if xy[1] < 1 or xy[2] < 1 then
 		return -- bad starting point
 	end if
-	extra_lines = vc[VC_LINES] - xy[1] + 1 
+	extra_lines = vc[VC_LINES] - xy[1] + 1
 	if length(text) > extra_lines then
 		if extra_lines <= 0 then
 			return -- nothing to display
@@ -557,9 +559,9 @@ end procedure
 -- On //DOS32//, an attribute byte is made up of two 4-bit fields that encode the foreground and background color of a character. The high-order 4 bits determine the background color, while the low-order 4 bits determine the foreground color.
 --
 -- This routine reads from the active text page, and only works in text modes.
--- 
--- You might use this function in a text-mode graphical user interface to save a portion of the screen before displaying a drop-down menu, dialog box, alert box etc. 
--- 
+--
+-- You might use this function in a text-mode graphical user interface to save a portion of the screen before displaying a drop-down menu, dialog box, alert box etc.
+--
 -- Example 1:
 -- <eucode>
 -- -- Top 2 lines are: Hello and World
@@ -588,8 +590,8 @@ public function save_text_image(text_point top_left, text_point bottom_right)
 		page_size = vc[VC_LINES] * screen_width
 		page_size = 1024 * floor((page_size + 1023) / 1024)
 		screen_memory = screen_memory + get_active_page() * page_size
-		scr_addr = screen_memory + 
-				(top_left[1]-1) * screen_width + 
+		scr_addr = screen_memory +
+				(top_left[1]-1) * screen_width +
 				(top_left[2]-1) * BYTES_PER_CHAR
 	end ifdef
 	image = {}
@@ -668,29 +670,29 @@ end procedure
 -- Free (delete) any console window associated with your program.
 --
 -- Comments:
---     Euphoria will create a console text window for your program the first time that your 
---     program prints something to the screen, reads something from the keyboard, or in some 
---     way needs a console (similar to a DOS-prompt window). On WIN32 this window will 
+--     Euphoria will create a console text window for your program the first time that your
+--     program prints something to the screen, reads something from the keyboard, or in some
+--     way needs a console (similar to a DOS-prompt window). On WIN32 this window will
 --     automatically disappear when your program terminates, but you can call free_console()
---     to make it disappear sooner. On Linux or FreeBSD, the text mode console is always 
---     there, but an xterm window will disappear after Euphoria issues a "Press Enter" prompt 
+--     to make it disappear sooner. On Linux or FreeBSD, the text mode console is always
+--     there, but an xterm window will disappear after Euphoria issues a "Press Enter" prompt
 --     at the end of execution.
 --
 --     On Unix-style systems, ##free_console##() will set the terminal parameters back to normal,
 --     undoing the effect that curses has on the screen.
 --
 --     In an xterm window, a call to ##free_console##(), without any further
---     printing to the screen or reading from the keyboard, will eliminate the 
+--     printing to the screen or reading from the keyboard, will eliminate the
 --     "Press Enter" prompt that Euphoria normally issues at the end of execution.
 --
---     After freeing the console window, you can create a new console window by printing 
---     something to the screen, or simply calling ##clear_screen##(), ##position##() or any other 
+--     After freeing the console window, you can create a new console window by printing
+--     something to the screen, or simply calling ##clear_screen##(), ##position##() or any other
 --     routine that needs a console.
 --
---     When you use the trace facility, or when your program has an error, Euphoria will 
+--     When you use the trace facility, or when your program has an error, Euphoria will
 --     automatically create a console window to display trace information, error messages etc.
 --
---     There's a WIN32 API routine, FreeConsole() that does something similar to 
+--     There's a WIN32 API routine, FreeConsole() that does something similar to
 --     free_console(). You should use ##free_console##() instead, because it lets the interpreter know
 --     that there is no longer a console to write to or read from.
 --
@@ -701,9 +703,6 @@ public procedure free_console()
 	machine_proc(M_FREE_CONSOLE, 0)
 end procedure
 
-include std/text.e
-include std/types.e
-include std/pretty.e
 
 --*
 -- Displays the supplied data on the console screen.
@@ -744,7 +743,7 @@ public procedure show( object pData, object args = 1, integer finalnl = 1)
 		else
 			puts(1, trim(sprintf("%15.15f", pData), '0'))
 		end if
-	
+
 	elsif t_display(pData) then
 		if atom(args) or length(args) = 0 then
 			if equal(args, 2) then
@@ -762,7 +761,7 @@ public procedure show( object pData, object args = 1, integer finalnl = 1)
 			pretty_print(1, pData, args)
 		end if
 	end if
-	
+
 	if equal(args, 1) then
 		puts(1, '\n')
 	elsif sequence(args) and finalnl = 1 then

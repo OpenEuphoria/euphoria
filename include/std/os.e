@@ -16,6 +16,14 @@ elsedef
 	include std/dll.e
 end ifdef
 
+ifdef UNIX then
+	public constant CMD_SWITCHES = "-"
+end ifdef
+
+ifdef DOSFAMILY then
+	public constant CMD_SWITCHES = "-/"
+end ifdef
+
 constant
 	M_SLEEP     = 64,
 	M_SET_ENV   = 73,
@@ -187,7 +195,7 @@ public function uname()
 	    reg_list = repeat(0,10)
     	reg_list[REG_AX] = #3000
 	    reg_list = dos_interrupt(#21,reg_list)
-		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) + 
+		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) +
 			floor(reg_list[REG_AX]/256)/100)}
 	elsedef
 		return {"UNKNOWN"} --TODO
@@ -215,7 +223,7 @@ end function
 -- <built-in> function getenv(sequence var_name)
 --
 -- Description:
--- Return the value of an environment variable. 
+-- Return the value of an environment variable.
 --
 -- Parameters:
 -- 		# ##var_name## : a string, the name of the variable being queried.
@@ -223,7 +231,7 @@ end function
 -- Returns:
 --		An **object**, -1 if the variable does not exist, else a sequence holding its value.
 --
--- Comments: 
+-- Comments:
 --
 -- Both the argument and the return value, may, or may not be, case sensitive. You might need to test this on your own system.
 --
@@ -232,8 +240,8 @@ end function
 --  e = getenv("EUDIR")
 -- -- e will be "C:\EUPHORIA" -- or perhaps D:, E: etc.
 -- </eucode>
--- 
--- See Also:   
+--
+-- See Also:
 -- [[:setenv]], [[:command_line]]
 
 --**
@@ -320,7 +328,7 @@ end function
 -- end if
 -- </eucode>
 --
--- See Also: 
+-- See Also:
 -- [[:Platform-Specific Issues]], [[:ifdef statement]]
 
 
@@ -333,7 +341,7 @@ end function
 -- <built-in> procedure system(sequence command, integer mode=0)
 --
 -- Description:
--- Pass a command string to the operating system command interpreter. 
+-- Pass a command string to the operating system command interpreter.
 --
 -- Parameters:
 --		# ##command## : a string to be passed to the shell
@@ -351,22 +359,22 @@ end function
 -- ##mode## = 2 should only be used when it is known that the command executed by ##system##() will not change the graphics mode.
 --
 -- You can use Euphoria as a sophisticated "batch" (.bat) language by making calls to ##system##() and ##system_exec##().
--- 
+--
 -- ##system##() will start a new DOS or Linux/FreeBSD shell.
--- 
--- ##system##() allows you to use command-line redirection of standard input and output in  
+--
+-- ##system##() allows you to use command-line redirection of standard input and output in
 -- ##command##.
 --
--- Under //DOS32//, a Euphoria program will start off using extended memory. 
--- If extended memory runs out the program will consume conventional memory. 
--- If conventional memory runs out it will use virtual memory, i.e. swap space on disk. 
+-- Under //DOS32//, a Euphoria program will start off using extended memory.
+-- If extended memory runs out the program will consume conventional memory.
+-- If conventional memory runs out it will use virtual memory, i.e. swap space on disk.
 -- The //DOS// command run by ##system##() will fail if there is not enough conventional memory available.
 -- To avoid this situation you can reserve some conventional (low) memory by typing:
 --  {{{
 --      SET CAUSEWAY=LOWMEM:xxx
 --  }}}
---  
---  where ##xxx## is the number of K of conventional memory to reserve. Type this before running your program. 
+--
+--  where ##xxx## is the number of K of conventional memory to reserve. Type this before running your program.
 -- You can also put this in autoexec.bat, or in a .bat file that runs your program. For example:
 -- {{{
 --      SET CAUSEWAY=LOWMEM:80
@@ -380,14 +388,14 @@ end function
 -- -- note use of double backslash in literal string to get
 -- -- single backslash
 -- </eucode>
--- 
--- Example 2:  
+--
+-- Example 2:
 -- <eucode>
 --  system("ex \\test\\myprog.ex < indata > outdata", 2)
 -- -- executes myprog by redirecting standard input and
 -- -- standard output
 -- </eucode>
--- 
+--
 -- See Also:
 -- [[:system_exec]], [[:command_line]], [[:current_dir]], [[:getenv]]
 --
@@ -396,7 +404,7 @@ end function
 -- Signature:
 -- <built-in> function system_exec(sequence command, integer mode=0)
 --
--- Description: 
+-- Description:
 -- Try to run the a shell executable command
 --
 -- Parameters:
@@ -418,24 +426,24 @@ end function
 --
 -- If it is not possible to run the program, ##system_exec##() will return -1.
 --
--- On //DOS32// or //WIN32//, ##system_exec##() will only run .exe and .com programs. 
--- To run .bat files, or built-in DOS commands, you need [[:system]](). Some commands, 
+-- On //DOS32// or //WIN32//, ##system_exec##() will only run .exe and .com programs.
+-- To run .bat files, or built-in DOS commands, you need [[:system]](). Some commands,
 -- such as DEL, are not programs, they are actually built-in to the command interpreter.
 --
 -- On //DOS32// and //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
 -- Nor does it allow you to quote strings that contain blanks, such as file names.
 --
--- exit codes from DOS or Windows programs are normally in the range 0 to 255, with 0 indicating "success". 
--- 
+-- exit codes from DOS or Windows programs are normally in the range 0 to 255, with 0 indicating "success".
+--
 -- You can run a Euphoria program using ##system_exec##(). A Euphoria program can return an exit code using [[:abort]]().
--- 
+--
 -- ##system_exec##() does not start a new //DOS// shell.
---  
--- Example 1:  
+--
+-- Example 1:
 -- <eucode>
 --  integer exit_code
 -- exit_code = system_exec("xcopy temp1.dat temp2.dat", 2)
--- 
+--
 -- if exit_code = -1 then
 --     puts(2, "\n couldn't run xcopy.exe\n")
 -- elsif exit_code = 0 then
@@ -444,8 +452,8 @@ end function
 --     printf(2, "\n xcopy failed with code %d\n", exit_code)
 -- end if
 -- </eucode>
---  
--- Example 2:  
+--
+-- Example 2:
 -- <eucode>
 --  -- executes myprog with two file names as arguments
 -- if system_exec("ex \\test\\myprog.ex indata outdata", 2) then
@@ -507,7 +515,7 @@ public type frequency(integer x)
 end type
 
 --**
--- Turn on the PC speaker at a specified frequency 
+-- Turn on the PC speaker at a specified frequency
 --
 -- Parameters:
 -- 		# ##f## : frequency of sound. If ##f## is 0 the speaker will be turned off.
@@ -549,12 +557,12 @@ end procedure
 -- special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
 --
 -- If a program runs in a DOS window with a tick rate other than 18.2, the
--- ##time##() function will not advance unless the window is the active window. 
+-- ##time##() function will not advance unless the window is the active window.
 --
 -- With a tick rate other than 18.2, the ##time##() function on DOS takes about
 -- 1/100 the usual time that it needs to execute. On Windows and FreeBSD,
 -- ##time##() normally executes very quickly.
--- 
+--
 -- While ex.exe is running, the system will maintain the correct time of day.
 -- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
 -- while the tick rate is high, you (or your user) may need to reboot the
@@ -562,16 +570,16 @@ end procedure
 -- advance too quickly. This problem does not occur on Windows 95/98/NT,
 -- only on DOS or Windows 3.1. You will always get back the correct time
 -- of day from the battery-operated clock in your system when you boot up
--- again. 
---  
+-- again.
+--
 -- Example 1:
 -- <eucode>
 -- tick_rate(100)
 -- -- time() will now advance in steps of .01 seconds
 -- -- instead of the usual .055 seconds
 -- </eucode>
--- 
--- See Also: 
+--
+-- See Also:
 --		[[:time]], [[:Debugging and profiling]]
 --
 
@@ -595,12 +603,12 @@ end procedure
 --
 -- Comments:
 --
--- ##convert## is checked only under //Windows//. If a path has accented characters in it, then 
+-- ##convert## is checked only under //Windows//. If a path has accented characters in it, then
 -- it may or may not be valid to convert those to the OEM code page. Setting ##convert## to a nonzero value
 -- will force conversion for path entries that have accents and which have not been checked to be valid yet.
 -- The extra entries, if any, are returned at the end of the returned sequence.
 --
--- The paths are ordered in the order they are searched: 
+-- The paths are ordered in the order they are searched:
 -- # current directory
 -- # configuration file,
 -- # command line switches,

@@ -22,6 +22,7 @@ include std/filesys.e
 include std/mathcons.e
 include std/search.e
 
+
 ------------------------------------------------------------------------------------------
 --
 -- Local Constants
@@ -364,91 +365,104 @@ end function
 --
 ------------------------------------------------------------------------------------------
 
-atom lib, lib2
-integer LC_ALL, 
-	-- LC_COLLATE, LC_CTYPE, 
-	LC_MONETARY, LC_NUMERIC,
-	-- LC_TIME, LC_MESSAGES, 
-	f_strfmon, f_strfnum
-
 ifdef WIN32 then
-	lib = open_dll("MSVCRT.DLL")
-	lib2 = open_dll("KERNEL32.DLL")
-	f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I)
-	f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I)
-	LC_ALL      = 0
---	LC_COLLATE  = 1
---	LC_CTYPE    = 2
-	LC_MONETARY = 3
-	LC_NUMERIC  = 4
---	LC_TIME     = 5
---	LC_MESSAGES = 6
-	
--- 	constant FORMAT_SIZE = 6 * 4
--- 	constant NUM_DIGITS = 0
--- 	constant LEADING_ZERO = 4
--- 	constant GROUPING = 8
--- 	constant DECIMAL_SEP = 12
--- 	constant THOUSANDS_SEP = 16
--- 	constant NEGATIVE_ORDER = 20
+constant
+	lib = open_dll("MSVCRT.DLL"),
+	lib2 = open_dll("KERNEL32.DLL"),
+	f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I),
+	f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I),
+	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
+	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+	LC_ALL         = 0,
+--	LC_COLLATE     = 1,
+--	LC_CTYPE       = 2,
+	LC_MONETARY    = 3,
+	LC_NUMERIC     = 4,
+--	LC_TIME        = 5,
+--	LC_MESSAGES    = 6,
+	$
+
+/* constant
+	FORMAT_SIZE    = 6 * 4,
+	NUM_DIGITS     = 0,
+	LEADING_ZERO   = 4,
+	GROUPING       = 8,
+	DECIMAL_SEP    = 12,
+	THOUSANDS_SEP  = 16,
+	NEGATIVE_ORDER = 20
+*/
+	sequence current_locale = ""
 
 elsifdef LINUX then
-
-	lib = open_dll("")
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)
-	f_strfnum = -1
-	LC_ALL      = 6
---	LC_CTYPE    = 0
-	LC_NUMERIC  = 1
---	LC_TIME     = 2
---	LC_COLLATE  = 3
-	LC_MONETARY = 4
---	LC_MESSAGES = 5
+constant
+	lib = open_dll(""),
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
+	f_strfnum = -1,
+	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
+	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+	LC_ALL      = 6,
+--	LC_CTYPE    = 0,
+	LC_NUMERIC  = 1,
+--	LC_TIME     = 2,
+--	LC_COLLATE  = 3,
+	LC_MONETARY = 4,
+--	LC_MESSAGES = 5,
+	$
 
 elsifdef FREEBSD or SUNOS then
-
-	lib = open_dll("libc.so")
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)
-	f_strfnum = -1
-
-	LC_ALL      = 0
---	LC_COLLATE  = 1
---	LC_CTYPE    = 2
-	LC_MONETARY = 3
-	LC_NUMERIC  = 4
---	LC_TIME     = 5
---	LC_MESSAGES = 6
+constant
+	lib = open_dll("libc.so"),
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
+	f_strfnum = -1,
+	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
+	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+	LC_ALL      = 0,
+--	LC_COLLATE  = 1,
+--	LC_CTYPE    = 2,
+	LC_MONETARY = 3,
+	LC_NUMERIC  = 4,
+--	LC_TIME     = 5,
+--	LC_MESSAGES = 6,
+	$
 
 elsifdef OSX then
-
-	lib = open_dll("libc.dylib")
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I)
-	f_strfnum = -1
-
-	LC_ALL      = 0
---	LC_COLLATE  = 1
--- 	LC_CTYPE    = 2
-	LC_MONETARY = 3
-	LC_NUMERIC  = 4
---	LC_TIME     = 5
---	LC_MESSAGES = 6
-  
+constant
+	lib = open_dll("libc.dylib"),
+	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
+	f_strfnum = -1,
+	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
+	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+	LC_ALL      = 0,
+--	LC_COLLATE  = 1,
+-- 	LC_CTYPE    = 2,
+	LC_MONETARY = 3,
+	LC_NUMERIC  = 4,
+--	LC_TIME     = 5,
+--	LC_MESSAGES = 6,
+	$
+	
 elsedef
 
-	crash("locale.e requires Windows, Linux, FreeBSD or OS X", {})
+constant
+	lib = -1
+	lib2 = -1
+	f_strfmon = -1
+	f_strfnum = -1
+	f_setlocale = -1
+	f_strftime = -1
+	LC_ALL         = -1,
+--	LC_COLLATE     = -1,
+--	LC_CTYPE       = -1,
+	LC_MONETARY    = -1,
+	LC_NUMERIC     = -1,
+--	LC_TIME        = -1,
+--	LC_MESSAGES    = -1,
+	$
 
 end ifdef
 
 --****
 -- === Time/Number Translation
-
-constant
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I)
-
-ifdef WIN32 then
-	sequence current_locale = ""
-end ifdef
 
 --**
 -- Set the computer locale, and possibly load appropriate translation file.
@@ -549,22 +563,25 @@ public function money(object amount)
 	integer size
 	atom pResult, pTmp
 
-	ifdef UNIX then
-		pResult = allocate(4 * 160)
-		pTmp = allocate_string("%n")
-		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
-	elsifdef WIN32 then
-		pResult = allocate(4 * 160)
-		pTmp = allocate_string(sprintf("%.8f", {amount}))
-		size = c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
-	-- else doesn't work under DOS
-	end ifdef
-
-	result = peek_string(pResult)
-	free(pResult)
-	free(pTmp)
-
-	return result
+	if f_strfmon != -1 then
+		ifdef UNIX then
+			pResult = allocate(4 * 160)
+			pTmp = allocate_string("%n")
+			size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+		elsifdef WIN32 then
+			pResult = allocate(4 * 160)
+			pTmp = allocate_string(sprintf("%.8f", {amount}))
+			size = c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
+		end ifdef
+	
+		result = peek_string(pResult)
+		free(pResult)
+		free(pTmp)
+	
+		return result
+	else
+		return text:format("$[,,.2]", amount)
+	end if
 end function
 
 --**
@@ -591,27 +608,38 @@ public function number(object num)
 	atom pResult, pTmp
 
 	ifdef UNIX then
-		pResult = allocate(4 * 160)
-		if integer(num) then
-			pTmp = allocate_string("%!.0n")
+		if f_strfmon != -1 then
+			pResult = allocate(4 * 160)
+			if integer(num) then
+				pTmp = allocate_string("%!.0n")
+			else
+				pTmp = allocate_string("%!n")
+			end if
+			size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
 		else
-			pTmp = allocate_string("%!n")
+			return text:format("[,,]", num)
 		end if
-		size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+		
 	elsifdef WIN32 then
 		atom lpFormat
-		pResult = allocate(4 * 160)
-		if integer(num) then
-			pTmp = allocate_string(sprintf("%d", {num}))
-			-- lpFormat must not only be allocated but completely populated
-			-- with values from the current locale.
-			lpFormat = NULL
+		if f_strfnum != -1 then
+			pResult = allocate(4 * 160)
+			if integer(num) then
+				pTmp = allocate_string(sprintf("%d", {num}))
+				-- lpFormat must not only be allocated but completely populated
+				-- with values from the current locale.
+				lpFormat = NULL
+			else
+				lpFormat = NULL
+				pTmp = allocate_string(sprintf("%.15f", {num}))
+			end if
+			size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
 		else
-			lpFormat = NULL
-			pTmp = allocate_string(sprintf("%.15f", {num}))
+			return text:format("[,,]", num)
 		end if
-		size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
-	-- else doesn't work under DOS
+
+	elsedef
+		return text:format("[,,]", num)
 	end ifdef
 
 	result = peek_string(pResult)
@@ -678,7 +706,7 @@ end function
 -- Formats a date according to current locale.
 --
 -- Parameters:
---   # ##fmt## : A format string, as described in [[:format]]
+--   # ##fmt## : A format string, as described in datetime:[[:format]]
 --   # ##dtm## : the datetime to write out.
 --
 -- Returns:
@@ -690,22 +718,28 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:format]]
+--   datetime:[[:format]]
 
 public function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm
 	integer size
 	sequence res
 
-	pDtm = mk_tm_struct(dtm)
-	pFmt = allocate_string(fmt)
-	pRes = allocate(1024)
-	size = c_func(f_strftime, {pRes, 256, pFmt, pDtm})
-	res = peek_string(pRes)
-	free(pRes)
-	free(pFmt)
-	free(pDtm)
-
+	if f_strftime != -1 then
+		pDtm = mk_tm_struct(dtm)
+		pFmt = allocate_string(fmt)
+		pRes = allocate(1024)
+		size = c_func(f_strftime, {pRes, 256, pFmt, pDtm})
+		res = peek_string(pRes)
+		free(pRes)
+		free(pFmt)
+		free(pDtm)
+	else
+		res = date()
+		res[1] += 1900
+		res = dt:format(res[1..6], fmt)
+	end if
+	
 	return res
 end function
 

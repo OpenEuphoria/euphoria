@@ -11,43 +11,37 @@ include std/error.e
 include std/os.e
 include std/io.e as io
 
-ifdef UNIX then
-	constant valid_switches = "-"
-elsedef
-	constant valid_switches = "-/"
-end ifdef
-
 --****
 -- === Constants
 
 public constant
 	--** This option switch does not have a parameter. See [[:cmd_parse]]
 	NO_PARAMETER  = 'n',
-	
+
 	--** This option switch does have a parameter. See [[:cmd_parse]]
 	HAS_PARAMETER = 'p',
-	
+
 	--** This option switch is not case sensitive. See [[:cmd_parse]]
 	NO_CASE       = 'i',
-	
+
 	--** This option switch is case sensitive. See [[:cmd_parse]]
 	HAS_CASE      = 'c',
-	
+
 	--** This option switch must be supplied on command line. See [[:cmd_parse]]
 	MANDATORY     = 'm',
-	
+
 	--** This option switch does not have to be on command line. See [[:cmd_parse]]
 	OPTIONAL      = 'o',
-	
+
 	--** This option switch must only occur once on the command line. See [[:cmd_parse]]
 	ONCE          = '1',
-	
+
 	--** This option switch may occur multiple times on a command line. See [[:cmd_parse]]
 	MULTIPLE      = '*',
-	
+
 	--** This option switch triggers the 'help' display. See [[:cmd_parse]]
 	HELP          = 'h'
-	
+
 public constant
 	NO_HELP       = -2
 
@@ -70,7 +64,7 @@ public enum
 	-- processes such as the Interpreter itself that must deal
 	-- with command line parameters that it is not meant to
 	-- handle.  At expansions after the first extra are also disabled.
-	-- 
+	--
 	-- For instance:
 	-- ##eui -D TEST greet.ex -name John -greeting Bye##
 	-- -D TEST is meant for ##eui##, but -name and -greeting options
@@ -86,44 +80,44 @@ public enum
 	-- Only display the option list in show_help. Do not display other
 	-- information such as program name, options, etc... See [[:cmd_parse]]
 	SHOW_ONLY_OPTIONS,
-	
+
 	--**
 	-- Expand arguments that begin with '@' into the command line. (default)
-	-- For example, @filename will expand the contents of file named 'filename' 
+	-- For example, @filename will expand the contents of file named 'filename'
 	-- as if the file's contents were passed in on the command line.  Arguments
-	-- that come after the first extra will not be expanded when 
+	-- that come after the first extra will not be expanded when
 	-- NO_VALIDATION_AFTER_FIRST_EXTRA is specified.
 	AT_EXPANSION,
-	
+
 	--**
 	-- Do not expand arguments that begin with '@' into the command line.
 	-- Normally @filename will expand the file names contents as if the
-	-- file's contents were passed in on the command line.  This option 
+	-- file's contents were passed in on the command line.  This option
 	-- supresses this behavior.
 	NO_AT_EXPANSION
-	
+
 --
 
 public enum
 	--**
 	--   An index into the ##opts## list. See [[:cmd_parse]]
 	OPT_IDX,
-	
+
 	--**
 	--   The number of times that the routine has been called
 	--   by cmd_parse for this option. See [[:cmd_parse]]
 	OPT_CNT,
-	
+
 	--**
 	--  The option's value as found on the command line. See [[:cmd_parse]]
 	OPT_VAL,
-	
+
 	--**
 	--  The value ##1## if the command line indicates that this option is to remove
 	--  any earlier occurrences of it. See [[:cmd_parse]]
 	OPT_REV
-	
-	
+
+
 -- Record fields in 'opts' argument.
 enum
 	SHORTNAME = 1,
@@ -137,26 +131,26 @@ enum
 -- Local routine to validate and reformat option records if they are not in the standard format.
 function standardize_opts(sequence opts, integer add_help_options=1)
 	integer lExtras = 0 -- Ensure that there is zero or one 'extras' record only.
-	
+
 	for i = 1 to length(opts) do
 		sequence opt = opts[i]
 		integer updated = 0
-		
+
 		if length(opt) < MAPNAME then
 			opt &= repeat(-1, MAPNAME - length(opt))
 			updated = 1
 		end if
-		
+
 		if sequence(opt[SHORTNAME]) and length(opt[SHORTNAME]) = 0 then
 			opt[SHORTNAME] = 0
 			updated = 1
 		end if
-		
+
 		if sequence(opt[LONGNAME]) and length(opt[LONGNAME]) = 0 then
 			opt[LONGNAME] = 0
 			updated = 1
 		end if
-		
+
 		if atom(opt[LONGNAME]) and atom(opt[SHORTNAME]) then
 			if lExtras != 0 then
 				crash("cmd_opts: There must be less than two 'extras' option records.\n")
@@ -168,12 +162,12 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 				end if
 			end if
 		end if
-		
+
 		if atom(opt[DESCRIPTION]) then
 			opt[DESCRIPTION] = ""
 			updated = 1
 		end if
-		
+
 
 		if atom(opt[OPTIONS]) then
 			if equal(opt[OPTIONS], HAS_PARAMETER) then
@@ -188,7 +182,7 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 					crash("cmd_opts: Duplicate processing options are not allowed in an option record.\n")
 				end if
 			end for
-			
+
 			if find(HAS_PARAMETER, opt[OPTIONS]) then
 				if find(NO_PARAMETER, opt[OPTIONS]) then
 					crash("cmd_opts: Cannot have both HAS_PARAMETER and NO_PARAMETER in an option record.\n")
@@ -206,15 +200,15 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 					crash("cmd_opts: Cannot have both MANDATORY and OPTIONAL in an option record.\n")
 				end if
 			end if
-			
+
 			if find(ONCE, opt[OPTIONS]) then
 				if find(MULTIPLE, opt[OPTIONS]) then
 					crash("cmd_opts: Cannot have both ONCE and MULTIPLE in an option record.\n")
 				end if
 			end if
-			
+
 		end if
-		
+
 		if sequence(opt[CALLBACK]) then
 			opt[CALLBACK] = -1
 			updated = 1
@@ -225,12 +219,12 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 			opt[CALLBACK] = -1
 			updated = 1
 		end if
-		
+
 		if sequence(opt[MAPNAME]) and length(opt[MAPNAME]) = 0 then
 			opt[MAPNAME] = 0
 			updated = 1
 		end if
-		
+
 		if atom(opt[MAPNAME]) then
 			if sequence(opt[LONGNAME]) then
 				opt[MAPNAME] = opt[LONGNAME]
@@ -241,12 +235,12 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 			end if
 			updated = 1
 		end if
-		
+
 		if updated then
 			opts[i] = opt
 		end if
 	end for
-	
+
 	-- Check for duplicate option records.
 	for i = 1 to length(opts) do
 		sequence opt
@@ -254,12 +248,12 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 		if sequence(opt[SHORTNAME]) then
 			for j = i + 1 to length(opts) do
 				if equal(opt[SHORTNAME], opts[j][SHORTNAME]) then
-					crash("cmd_opts: Duplicate Short Names (%s) are not allowed in an option record.\n", 
+					crash("cmd_opts: Duplicate Short Names (%s) are not allowed in an option record.\n",
 						{ opt[SHORTNAME]})
 				end if
 			end for
 		end if
-		
+
 		if sequence(opt[LONGNAME]) then
 			for j = i + 1 to length(opts) do
 				if equal(opt[LONGNAME], opts[j][LONGNAME]) then
@@ -286,7 +280,7 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 		-- We have to standardize the above additions
 		opts = standardize_opts(opts, 0)
 	end if
-	
+
 	return opts
 end function
 
@@ -308,7 +302,7 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 	if std = 0 then
 		opts = standardize_opts(opts, add_help_rid != NO_HELP)
 	end if
-	
+
 	-- Calculate the size of the padding required to keep option text aligned.
 	pad_size = 0
 	for i = 1 to length(opts) do
@@ -323,26 +317,26 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 			-- Ignore 'extras' record
 			continue
 		end if
-		
+
 		if sequence(opts[i][SHORTNAME]) then
 			this_size += length(opts[i][SHORTNAME]) + 1 -- Allow for "-"
 			if find(MANDATORY, opts[i][OPTIONS]) = 0 then
 				this_size += 2 -- Allow for '[' ']'
 			end if
 		end if
-		
+
 		if sequence(opts[i][LONGNAME]) then
 			this_size += length(opts[i][LONGNAME]) + 2 -- Allow for "--"
 			if find(MANDATORY, opts[i][OPTIONS]) = 0 then
 				this_size += 2 -- Allow for '[' ']'
 			end if
 		end if
-		
+
 		if sequence(opts[i][SHORTNAME]) and sequence(opts[i][LONGNAME]) then
 			this_size += 2 -- Allow for ", " between short and long names
 		end if
 
-		has_param = find(HAS_PARAMETER, opts[i][OPTIONS]) 
+		has_param = find(HAS_PARAMETER, opts[i][OPTIONS])
 		if has_param != 0 then
 			this_size += 1 -- Allow for " "
 			if has_param < length(opts[i][OPTIONS]) then
@@ -373,7 +367,7 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 			-- Ignore 'extras' record
 			continue
 		end if
-		
+
 		has_param    = find(HAS_PARAMETER, opts[i][OPTIONS])
 		if has_param != 0 then
 			if has_param < length(opts[i][OPTIONS]) then
@@ -389,7 +383,7 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 		end if
 		is_mandatory = (find(MANDATORY,     opts[i][OPTIONS]) != 0)
 		cmd = ""
-		
+
 		if sequence(opts[i][SHORTNAME]) then
 			if not is_mandatory then
 				cmd &= '['
@@ -402,7 +396,7 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 				cmd &= ']'
 			end if
 		end if
-		
+
 		if sequence(opts[i][LONGNAME]) then
 			if length(cmd) > 0 then cmd &= ", " end if
 			if not is_mandatory then
@@ -435,7 +429,7 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 			puts(1, "One or more additional arguments can be supplied.\n")
 		end if
 	end if
-	
+
 	if atom(add_help_rid) then
 		if add_help_rid >= 0 then
 			puts(1, "\n")
@@ -455,13 +449,13 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 					puts(1, add_help_rid[i])
 					if add_help_rid[i][$] != '\n' then
 						puts(1, '\n')
-					end if		
+					end if
 				end for
 			end if
 			puts(1, "\n")
 		end if
 	end if
-	
+
 end procedure
 
 
@@ -478,7 +472,7 @@ end procedure
 -- Returns:
 -- # The ##path##, to either the Euphoria executable, (eui, eui.exe, euid.exe euiw.exe) or to your bound
 --   executable file.
--- # The ##next word##, is either the name of your Euphoria main file, or 
+-- # The ##next word##, is either the name of your Euphoria main file, or
 -- (again) the path to your bound executable file.
 -- # Any ##extra words##, typed by the user. You can use these words in your program.
 --
@@ -489,16 +483,16 @@ end procedure
 --
 -- The user can put quotes around a series of words to make them into a single argument.
 --
--- If you convert your program into an executable file, either by binding it, or translating it to C, 
--- you will find that all command-line arguments remain the same, except for the first two, 
+-- If you convert your program into an executable file, either by binding it, or translating it to C,
+-- you will find that all command-line arguments remain the same, except for the first two,
 -- even though your user no longer types "eui" on the command-line (see examples below).
---  
+--
 -- Example 1:
--- <eucode>  
+-- <eucode>
 --  -- The user types:  eui myprog myfile.dat 12345 "the end"
--- 
+--
 -- cmd = command_line()
--- 
+--
 -- -- cmd will be:
 --       {"C:\EUPHORIA\BIN\EX.EXE",
 --        "myprog",
@@ -507,14 +501,14 @@ end procedure
 --        "the end"}
 -- </eucode>
 --
--- Example 2:  
--- <eucode>  
+-- Example 2:
+-- <eucode>
 -- -- Your program is bound with the name "myprog.exe"
 -- -- and is stored in the directory c:\myfiles
 -- -- The user types:  myprog myfile.dat 12345 "the end"
--- 
+--
 -- cmd = command_line()
--- 
+--
 -- -- cmd will be:
 --        {"C:\MYFILES\MYPROG.EXE",
 --         "C:\MYFILES\MYPROG.EXE", -- place holder
@@ -522,7 +516,7 @@ end procedure
 --         "12345",
 --         "the end"
 --         }
--- 
+--
 -- -- Note that all arguments remain the same as example 1
 -- -- except for the first two. The second argument is always
 -- -- the same as the first and is inserted to keep the numbering
@@ -549,8 +543,8 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- euiw -d helLo 
--- -- will result in 
+-- euiw -d helLo
+-- -- will result in
 -- -- option_switches() being {"-D","helLo"}
 -- </eucode>
 --
@@ -614,7 +608,7 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 			end if
 		end if
 	end if
-	
+
 	if length(cmd_text) > 0 then
 		if find(cmd_text[1], "!-") then
 			reversed = 1
@@ -625,7 +619,7 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 	if length(cmd_text) < 1 then
 		return {-1, "Empty command text"}
 	end if
-	
+
 	opt_name = repeat(' ', length(cmd_text))
 	opt_param = 0
 	for i = 1 to length(cmd_text) do
@@ -640,11 +634,11 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 					end if
 				end if
 			end if
-			
+
 			if length(opt_param) > 0 then
 				param_found = 1
 			end if
-			
+
 			exit
 		else
 			opt_name[i] = cmd_text[i]
@@ -669,13 +663,13 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 				continue
 			end if
 		end if
-		
+
 		if find(HAS_PARAMETER,  opts[i][OPTIONS]) = 0 then
 			if param_found then
 				return {0, "Option should not have a parameter"}
 			end if
 		end if
-		
+
 		if param_found then
 			return {i, opt_name, reversed, opt_param}
 		else
@@ -696,7 +690,7 @@ end function
 -- Parameters:
 -- # ##opts## : a sequence of valid option records: See Comments: section for details
 -- # ##parse_options## : an optional sequence of parse options: See Parse Options section for details
--- # ##cmds## : an optional sequence of command line arguments. If omitted the output from 
+-- # ##cmds## : an optional sequence of command line arguments. If omitted the output from
 --              ##command_line##() is used.
 --
 -- Returns:
@@ -704,7 +698,7 @@ end function
 -- which are values passed on the command line that are not part of any option, for instance
 -- a list of files ##myprog -verbose file1.txt file2.txt##.  If any command element begins
 -- with an @ symbol then that file will be opened and its contents used to add to the command line.
--- 
+--
 -- Parse Options:
 -- ##parse_options## can be a sequence of options that will affect the parsing of
 -- the command line options. Options can be:
@@ -718,7 +712,7 @@ end function
 -- # ##HELP_RID## ~-- Specify a routine id to call in the event of a parse error (invalid option
 --   given, mandatory option not given, no parameter given for an option that requires a
 --   parameter, etc...).
--- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'  
+-- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'
 -- # ##AT_EXPANSION## ~-- Expand arguments that begin with '@'.  The name that follows @ will be
 --   opened as a file, read, and each trimmed non-empty line that does not begin with a
 --   '#' character will be inserted as arguments in the command line. These lines
@@ -788,7 +782,7 @@ end function
 -- # an integer; a [[:routine_id]]. This function will be called when the option is located
 --   on the command line and before it updates the map. \\
 --   Use -1 if cmd_parse is not to invoke a function for this option.\\
---   The user defined function must accept a single sequence parameter containing four values. 
+--   The user defined function must accept a single sequence parameter containing four values.
 --   If the function returns ##1## then the command option does not update the map.
 --   You can use the predefined index values OPT_IDX, OPT_CNT, OPT_VAL, OPT_REV when
 --   referencing the function's parameter elements.
@@ -876,7 +870,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	integer validation = VALIDATE_ALL
 	integer has_extra = 0
 	integer use_at = 1
-	
+
 	if sequence(parse_options) then
 		integer i = 1
 
@@ -898,10 +892,10 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 				case NO_VALIDATION_AFTER_FIRST_EXTRA then
 					validation = NO_VALIDATION_AFTER_FIRST_EXTRA
-					
+
 				case NO_AT_EXPANSION then
 					use_at = 0
-					
+
 				case AT_EXPANSION then
 					use_at = 1
 			end switch
@@ -915,14 +909,14 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	opts = standardize_opts(opts)
 
 	call_count = repeat(0, length(opts))
-	
+
 	map:map parsed_opts = map:new()
 
 	map:put(parsed_opts, "extras", {})
 
 	arg_idx = 2
 	opts_done = 0
-	
+
 	-- Find if there are any user-defined help options.
 	help_opts = { "h", "?", "help" }
 	for i = 1 to length(opts) do
@@ -941,7 +935,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				end for
 			end if
 		end if
-	end for		
+	end for
 
 	while arg_idx < length(cmds) do
 		arg_idx += 1
@@ -950,7 +944,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		if length(cmd) = 0 then
 			continue
 		end if
-		
+
 		if cmd[1] = '@' and use_at then
 			object at_cmds
 			sequence at_file
@@ -965,7 +959,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					cmds = cmds[1..arg_idx-1] & cmds[arg_idx+1..$]
 					arg_idx -= 1
 					continue
-				end if	
+				end if
 			else
 				-- Read in the lines from the file.
 				at_cmds = io:read_lines(cmd[2..$])
@@ -973,7 +967,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
 					local_help(opts, add_help_rid, cmds, 1)
 					abort(1)
-				end if	
+				end if
 			end if
 			-- Parse the 'at' commands removing comment lines and empty lines,
 			-- and stripping off any enclosing quotes from lines.
@@ -984,30 +978,30 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				if length(at_cmds[j]) = 0 then
 					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
 					j -= 1
-					
+
 				elsif at_cmds[j][1] = '#' then
 					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
 					j -= 1
-					
+
 				elsif at_cmds[j][1] = '"' and at_cmds[j][$] = '"' and length(at_cmds[j]) >= 2 then
 					at_cmds[j] = at_cmds[j][2 .. $-1]
-					
+
 				elsif at_cmds[j][1] = '\'' and at_cmds[j][$] = '\'' and length(at_cmds[j]) >= 2 then
 					sequence cmdex = split(at_cmds[j][2 .. $-1], ' ',0, 1) -- Empty words removed.
-					
+
 					at_cmds = at_cmds[1..j-1] & cmdex & at_cmds[j+1 .. $]
 					j = j + length(cmdex) - 1
-					
+
 				end if
 			end while
-			
+
 			-- Replace the '@' argument with the contents of the file.
 			cmds = cmds[1..arg_idx-1] & at_cmds & cmds[arg_idx+1..$]
 			arg_idx -= 1
 			continue
 		end if
-		
-		if (opts_done or find(cmd[1], valid_switches) = 0 or length(cmd) = 1) 
+
+		if (opts_done or find(cmd[1], CMD_SWITCHES) = 0 or length(cmd) = 1)
 		then
 			map:put(parsed_opts, "extras", cmd, map:APPEND)
 			has_extra = 1
@@ -1047,7 +1041,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		if find_result[1] < 0 then
 			continue -- Couldn't use this command argument for anything.
 		end if
-		
+
 		if find_result[1] = 0 then
 			if validation = VALIDATE_ALL or
 				(validation = NO_VALIDATION_AFTER_FIRST_EXTRA and has_extra = 0)
@@ -1060,9 +1054,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 			continue
 		end if
-		
+
 		sequence opt = opts[find_result[1]]
-		
+
 		if find(HAS_PARAMETER, opt[OPTIONS]) != 0 then
 			if length(find_result) < 4 then
 				arg_idx += 1
@@ -1074,7 +1068,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				else
 					param = ""
 				end if
-				
+
 				if length(param) = 0 and (validation = VALIDATE_ALL or (
 					validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
 				then
@@ -1097,7 +1091,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				continue
 			end if
 		end if
-		
+
 		if find_result[3] = 1 then
 			map:remove(parsed_opts, opt[MAPNAME])
 		else
@@ -1135,7 +1129,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			end if
 		end if
 	end for
-	
+
 	return parsed_opts
 end function
 
@@ -1160,7 +1154,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- s = build_commandline( { "-d", "/usr/my docs/"} )
--- -- s now contains '-d "/usr/my docs/"' 
+-- -- s now contains '-d "/usr/my docs/"'
 -- </eucode>
 --
 -- Example 2:
@@ -1172,33 +1166,33 @@ end function
 -- s = build_commandline( { "awk", "-e", "'{ print $1"x"$2; }'" } )
 -- system(s,0)
 -- </eucode>
---     
+--
 -- See Also:
 --   [[:parse_commandline]], [[:system]], [[:system_exec]], [[:command_line]]
 
 public function build_commandline(sequence cmds)
-	return flatten(quote( cmds,,'\\'," " ), " ") 		
+	return flatten(quote( cmds,,'\\'," " ), " ")
 end function
 
 --**
 -- Parse a command line string breaking it into a sequence of command line
 -- options.
--- 
+--
 -- Parameters:
 --   # ##cmdline## : Command line sequence (string)
--- 
+--
 -- Returns:
 --   A **sequence**, of command line options
---	 
+--
 -- Example 1:
 -- <eucode>
 -- sequence opts = parse_commandline("-v -f '%Y-%m-%d %H:%M')
 -- -- opts = { "-v", "-f", "%Y-%m-%d %H:%M" }
 -- </eucode>
--- 
+--
 -- See Also:
 --   [[:build_commandline]]
---	 
+--
 
 public function parse_commandline(sequence cmdline)
 	return keyvalues(cmdline, " ", ":=", "\"'`", " \t\r\n", 0)

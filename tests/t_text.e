@@ -30,7 +30,7 @@ test_equal("upper() atom", 'A', upper('a'))
 test_equal("upper() letters only", "JOHN", upper("joHn"))
 test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))
 
-					
+
 test_equal("sprint() integer", "10", sprint(10))
 test_equal("sprint() float", "5.5", sprint(5.5))
 test_equal("sprint() sequence #1", "{1,{2},3,{}}", sprint({1,{2},3,{}}))
@@ -77,7 +77,7 @@ s = keyvalues("colors=(black=[0,0,0], blue=[0,0,FF], red=[FF,0,0])")
 test_equal("keyvalues #5", { {"colors", {{"black",{"0", "0", "0"}}, {"blue",{"0", "0", "FF"}},{"red", {"FF","0","0"}}}} }, s)
 
 s = keyvalues("colors=(black=(r=0,g=0,b=0), blue={r=0,g=0,b=FF}, red=['F`F',0,0])")
-test_equal("keyvalues #5a", { {"colors", {{"black",{{"r","0"}, {"g","0"}, {"b","0"}}}, 
+test_equal("keyvalues #5a", { {"colors", {{"black",{{"r","0"}, {"g","0"}, {"b","0"}}},
               {"blue",{"r=0", "g=0", "b=FF"}},{"red", {"F`F","0","0"}}}} }, s)
 
 s = keyvalues("colors=[black, blue, red]")
@@ -248,5 +248,17 @@ test_equal("format 'AB'", exp, res)
 res = format("hex is #[:08X]", {1715004})
 exp = "hex is #001A2B3C"
 test_equal("format 'AC'", exp, res)
+
+res = format("The answer is [,,.2]", {1234.56})
+exp = "The answer is 1,234.56"
+test_equal("format 'AD'", exp, res)
+
+res = format("The answer is [,..2]", {1234.56})
+exp = "The answer is 1.234,56"
+test_equal("format 'AE'", exp, res)
+
+res = format("The answer is [,:.2]", {1234.56})
+exp = "The answer is 1:234.56"
+test_equal("format 'AF'", exp, res)
 
 test_report()

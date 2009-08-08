@@ -42,7 +42,7 @@ namespace memory
 public include std/memconst.e
 include std/types.e
 include std/error.e
-include std/sequence.e
+
 ifdef DATA_EXECUTE then
 	include std/machine.e
 end ifdef

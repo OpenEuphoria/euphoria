@@ -29,7 +29,7 @@ include std/eds.e
 --
 -- Description:
 -- This is exactly the same as [[:printf]](), except that the output is returned as a sequence
--- of characters, rather than being sent to a file or device. 
+-- of characters, rather than being sent to a file or device.
 --
 -- Parameters:
 --		# ##format## : a sequence, the text to print. This text may contain format specifiers.
@@ -421,10 +421,10 @@ end procedure
 -- Gets the table of lowercase and uppercase characters that is used by
 -- [[:lower]] and [[:upper]]
 --
--- Parameters: 
+-- Parameters:
 -- none
 --
--- Returns: 
+-- Returns:
 -- A **sequence**, containing three items.\\
 --   {Encoding_Name, LowerCase_Set, UpperCase_Set}
 --
@@ -1211,6 +1211,9 @@ end function
 --                not the value 1 or a zero-length string, otherwise it\\
 --                uses the second string.                             |
 -- |  [         | Does not use any argument. Outputs a left-square-bracket symbol |
+-- |  ,X        | Insert thousands separators. The <X> is the character\\
+--                to use. If this is a dot "." then the decimal point\\
+--                is rendered using a comma.                          |
 --
 -- Clearly, certain combinations of these qualifier codes do not make sense and in
 -- those situations, the rightmost clashing code is used and the others are ignored.
@@ -1241,6 +1244,15 @@ end function
 --
 -- format("The answer is [.6]", {1.2345})
 -- -- "The answer is 1.234500"
+--
+-- format("The answer is [,,.2]", {1234.56})
+-- -- "The answer is 1,234.56"
+--
+-- format("The answer is [,..2]", {1234.56})
+-- -- "The answer is 1.234,56"
+--
+-- format("The answer is [,:.2]", {1234.56})
+-- -- "The answer is 1:234.56"
 --
 -- format("[] [?]", {5, {"cats", "cat"}})
 -- -- "5 cats"
@@ -1286,16 +1298,17 @@ public function format(sequence pFormat, object pArgs)
 	integer argl
 	integer trimming
 	integer hexout
+	integer tsep
 	object prevargv
 
 	if atom(pArgs) then
 		pArgs = {pArgs}
 	end if
-	
+
 	result = ""
 	in_token = 0
 
-	
+
 	i = 0
 	tstart = 0
 	tend = 0
@@ -1322,6 +1335,7 @@ public function format(sequence pFormat, object pArgs)
     			argn = 0
     			hexout = 0
     			trimming = 0
+    			tsep = 0
     		else
     			result &= tch
     		end if
@@ -1423,6 +1437,12 @@ public function format(sequence pFormat, object pArgs)
 	    				argn = argn * 10 + pos - 1
 	    			end while
 
+	    		case ',' then
+	    			if i < length(pFormat) then
+	    				i +=1
+	    				tsep = pFormat[i]
+	    			end if
+
 	    		case else
 	    			-- ignore it
     		end switch
@@ -1520,17 +1540,17 @@ public function format(sequence pFormat, object pArgs)
     					case 0 then
     						-- do nothing
 							cap = cap
-							    						
+
     					case else
     						crash("logic error: 'cap' mode in format.")
-    						
+
     				end switch
 
 					if atom(pArgs[argn]) then
 						if find('e', argtext) = 0 then
 							-- Only applies to non-scientific notation.
 							if decs != -1 then
-								pos = find('.', argtext)								
+								pos = find('.', argtext)
 								if pos then
 									if decs = 0 then
 										argtext = argtext [1 .. pos-1 ]
@@ -1560,11 +1580,33 @@ public function format(sequence pFormat, object pArgs)
     						align = '<'
     					end if
     				end if
-    				
+
+    				if atom(pArgs[argn]) then
+	    				if tsep != 0 then
+	    					integer dpos
+
+	    					dpos = find('.', argtext)
+	    					if dpos = 0 then
+	    						dpos = length(argtext) + 1
+	    					else
+	    						if tsep = '.' then
+	    							argtext[dpos] = ','
+	    						end if
+	    					end if
+	    					while dpos > 3 do
+	    						dpos -= 3
+	    						if dpos > 1 then
+	    							argtext = argtext[1.. dpos - 1] & tsep & argtext[dpos .. $]
+--	    							dpos -=1
+	    						end if
+	    					end while
+	    				end if
+					end if
+
     				if width <= 0 then
     					width = length(argtext)
     				end if
-    			
+
 
     				if width < length(argtext) then
     					if align = '>' then
@@ -1618,6 +1660,7 @@ public function format(sequence pFormat, object pArgs)
 	return result
 end function
 
+
 --**
 -- Get the text associated with the message number in the requested locale.
 --
@@ -1632,7 +1675,7 @@ end function
 -- An **integer**, if not associated text can be found.
 --
 -- Comments:
--- * This first scans the database(s) linked to the locale codes supplied. 
+-- * This first scans the database(s) linked to the locale codes supplied.
 -- * The database name for each locale takes the format of "<DBBase>_<Locale>.edb"
 -- so if the default DBBase is used, and the locales supplied are {"enus", "enau"}
 -- the databases scanned are "teksto_enus.edb" and "teksto_enau.edb".
@@ -1642,8 +1685,8 @@ end function
 -- a database called "<DBBase>.edb" is searched. Again the table name is "1" but
 -- it first looks for keys with the format {<locale>,msgnum} and failing that it
 -- looks for keys in the format {"", msgnum}, and if that fails it looks for a
--- key of just the msgnum. 
--- 
+-- key of just the msgnum.
+--
 public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
 	integer idx = 1
 	integer db_res
@@ -1664,7 +1707,7 @@ public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBB
 			end if
 		end if
 	end for
-	
+
 	-- Next, scan through the generic db
 	if atom(lMsgText) then
 		db_res = db_select(	locate_file( DBBase & ".edb" ), DB_LOCK_NO)
@@ -1684,8 +1727,10 @@ public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBB
 					lMsgText = db_fetch_record(MsgNum)
 				end if
 			end if
-		end if		
+		end if
 	end if
 
 	return lMsgText
+
 end function
+
