@@ -6,7 +6,6 @@ with type_check
 elsedef
 without type_check
 end ifdef
-with profile_time
 
 include mode.e
 set_mode("translate", 0 )
