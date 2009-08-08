@@ -1578,7 +1578,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? 76.3, -114) -- prints out gcd(76,114), which is 38
+-- ? gcd(76.3, -114) -- prints out gcd(76,114), which is 38
 -- </eucode>
 --
 

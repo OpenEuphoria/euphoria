@@ -187,7 +187,7 @@ end procedure
 --
 -- ##schedule## is being interpreted as follows:
 --
--- **##schedule## is an integer**
+-- ##schedule## is an integer:
 --
 -- This defines ##task_id## as time shared, and tells the task scheduler how many times it
 -- should the task in one burst before it considers running other tasks. ##schedule## must be greater than zero then.
@@ -196,8 +196,8 @@ end procedure
 -- while decreasing the percentage given to other time-shared tasks. Use trial and error to find the optimal trade off. 
 -- It will also increase the efficiency of the program, since each actual task switch wastes a bit of time.
 --
--- ** ##schedule is a sequence **
--- -
+-- ##schedule## is a sequence:
+-- 
 -- In this case, it must be a pair of positive atoms, the first one not being less than the second one.
 -- This defines ##task_id## as a real time task.
 -- The pair states the minimum and maximum times, in seconds, to wait before running the task. 

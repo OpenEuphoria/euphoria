@@ -567,7 +567,7 @@ FREE_RID = routine_id("free")
 -- Read an ASCIZ string in RAM, starting from a supplied address.
 --
 -- Parameters:
---              # ##addr# : an atom, the address at which to start reading.
+--              # ##addr## : an atom, the address at which to start reading.
 --
 -- Returns:
 -- A **sequence**, of bytes, the string that could be read.

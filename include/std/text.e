@@ -1628,8 +1628,8 @@ end function
 --                 locale text strings. The default is "teksto".
 --
 -- Returns:
--- * A string **sequence**, the text associated with the message number and locale.
--- * An integer, if not associated text can be found.
+-- A string **sequence**, the text associated with the message number and locale.\\
+-- An **integer**, if not associated text can be found.
 --
 -- Comments:
 -- * This first scans the database(s) linked to the locale codes supplied. 

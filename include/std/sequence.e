@@ -2067,7 +2067,7 @@ public enum
 -- piece #2 gets 3 items and piece #3 gets 3 items - a total of 10. If source had
 -- 11 elements then the pieces will have 4,4, and 3 respectively.
 --
--- **When ##size## is a sequence...\\
+-- **When ##size## is a sequence...**\\
 -- The style parameter is ignored in this case. The source will be broken up 
 -- according to the counts contained in the size parameter. For example, if
 -- ##size## was {3,4,0,1} then piece #1 gets 3 items, #2 gets 4 items, #3 gets
