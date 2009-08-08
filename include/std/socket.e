@@ -494,7 +494,7 @@ end function
 --
 -- Returns:
 --   An **atom**, On error, an atom indicating the error code.\\
---  A **sequence** or **atome**,   On success, either an atom or
+--  A **sequence** or **atom**,   On success, either an atom or
 --   a sequence containing the option value.
 --
 -- See also:
@@ -541,7 +541,7 @@ end function
 --   # ##address## : ip address to connect, optionally with :PORT at the end
 --   # ##port## : port number
 --
--- Returns 
+-- Returns: 
 --   An **integer**, 0 for success and -1 on failure.
 --
 -- Comments:
@@ -574,7 +574,7 @@ end function
 --   # ##port## : optional, if not specified you must include :PORT in
 --     the address parameter.
 --
--- Returns 
+-- Returns: 
 --   An **integer**, 0 on success and -1 on failure.
 --
 -- Example 1:
@@ -649,12 +649,12 @@ end function
 --**
 -- Get service information by name.
 --
--- Parameters
+-- Parameters:
 --   # ##name## : service name.
 --   # ##protocol## : protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A ##sequence##, containing { official protocol name, protocol, port number } or
+--   A **sequence**, containing { official protocol name, protocol, port number } or
 --   an atom indicating the error code.
 --
 -- Example 1:
@@ -673,12 +673,12 @@ end function
 --**
 -- Get service information by port number.
 --
--- Parameters
+-- Parameters:
 --   # ##port## : port number.
 --   # ##protocol## : protocol. Default is not to search by protocol.
 --
 -- Returns:
---   A ##sequence##, containing { official protocol name, protocol, port number } or
+--   A **sequence**, containing { official protocol name, protocol, port number } or
 --   an atom indicating the error code.
 --
 -- Example 1:

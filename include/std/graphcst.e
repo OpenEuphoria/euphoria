@@ -127,17 +127,15 @@ constant
 -- Comments:
 --
 -- A public enum is available for convenient access to the returned configuration data:
--- <eucode>
--- public constant
---     ##VC_COLOR##   = 1,
---     ##VC_MODE##    = 2,
---     ##VC_LINES##   = 3,
---     ##VC_COLUMNS## = 4,
---     ##VC_XPIXELS## = 5,
---     ##VC_YPIXELS## = 6,
---     ##VC_NCOLORS## = 7,
---     ##VC_PAGES##   = 8
--- </eucode>
+--     * ##VC_COLOR##   = 1,
+--     * ##VC_MODE##    = 2,
+--     * ##VC_LINES##   = 3,
+--     * ##VC_COLUMNS## = 4,
+--     * ##VC_XPIXELS## = 5,
+--     * ##VC_YPIXELS## = 6,
+--     * ##VC_NCOLORS## = 7,
+--     * ##VC_PAGES##   = 8
+--
 -- This routine makes it easy for you to parameterize a program so it will work in many
 -- different graphics modes.
 --

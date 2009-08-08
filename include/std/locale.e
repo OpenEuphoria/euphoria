@@ -215,9 +215,9 @@ end function
 -- # ##langmap## : A value returned by [[:lang_load]](), or zero to remove any default map.
 -- 
 -- Example:
---<eucode>
+-- <eucode>
 --   set_def_lang( lang_load("appmsgs") )
---</eucode>
+-- </eucode>
 
 public procedure set_def_lang( object langmap )
 	if atom(langmap) and langmap = 0 then
@@ -237,9 +237,9 @@ end procedure
 -- An **object**, a language map, or zero if there is no default language map yet.
 -- 
 -- Example:
---<eucode>
+-- <eucode>
 --   object langmap = get_def_lang()
---</eucode>
+-- </eucode>
 
 public function get_def_lang( )
 	return def_lang
@@ -262,7 +262,7 @@ end function
 --		A **sequence**, the value associated with ##word##, or ##defval## if there
 --      is no association.
 --
--- Example #1:
+-- Example 1:
 -- <eucode>
 -- sequence newword
 -- newword = translate(msgtext)
@@ -272,10 +272,12 @@ end function
 --    error_message(newword)
 -- end if
 -- </eucode>
--- Example #2:
+--
+-- Example 2:
 -- <eucode>
 -- error_message(translate(msgtext, , PINF))
 -- </eucode>
+--
 -- See Also:
 -- 		[[:set]], [[:lang_load]]
 
@@ -323,7 +325,8 @@ end function
 -- and sequences contained in the ##data## parameter are [[:translate | translated ]] before 
 -- passing them to [[:sprintf]]. If an item has no translation, it remains unchanged.
 --
--- Further more, after the translation pass, if the result text begins with "__", the "__" is removed. 
+-- Further more, after the translation pass, if the result text begins with {{{"__"}}},
+--  the {{{"__"}}} is removed. 
 -- This method can be used when you do not want an item to be translated.
 --
 -- Examples:
@@ -576,7 +579,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ?number(1020.5) -- returns"1,020.50"
+-- ? number(1020.5) -- returns "1,020.50"
 -- </eucode>
 --
 -- See Also:

@@ -908,7 +908,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [::remove_from,]] [[:is_subset]], [[:delta]]
+-- [[::remove_from,]] [[:is_subset]], [[:delta]]
 --
 public function difference(set base,set removed)
     integer k1,k2,k,c,ls1,ls2,k0
@@ -1361,12 +1361,13 @@ end function
 --		# ##target2## : its target set
 --
 -- Returns:
---   A **map**, from ##union(source1,source2)## to ##union(target1,target2) which agrees with ##f1## and ##f2##, or "" if ##f1##
+--   A **map**, from ##union(source1,source2)## to ##union(target1,target2)##
+--  which agrees with ##f1## and ##f2##, or "" if ##f1##
 --    and ##f2## disagree at any point of ##intersection(s11,s21)##.
 --
 -- Errors:
---
---   If f1 and f2 are both defined for some point, they must have the same value at this point..
+--   If f1 and f2 are both defined for some point, they must have the 
+-- same value at this point..
 --
 -- Example 1:
 -- <eucode>

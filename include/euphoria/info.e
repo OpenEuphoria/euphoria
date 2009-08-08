@@ -21,7 +21,7 @@ constant version_info = machine_func(M_EU_INFO, {})
 -- Get the platform name
 --
 -- Returns:
---   A ##sequence## containing the platform name, i.e. Windows, Linux, DOS, FreeBSD or OS X.
+--   A **sequence**, containing the platform name, i.e. Windows, Linux, DOS, FreeBSD or OS X.
 --
 
 public function platform_name()
@@ -48,7 +48,7 @@ end function
 -- Get the version, as an integer, of the host Euphoria
 --
 -- Returns:
---   An ##integer## representing Major, Minor and Patch versions. Version
+--   An **integer**, representing Major, Minor and Patch versions. Version
 --   4.0.0 will return 40000, 4.0.1 will return 40001, 
 --   5.6.2 will return 50602, 5.12.24 will return 512624, etc...
 --
@@ -63,7 +63,7 @@ end function
 -- Get the major version of the host Euphoria
 --
 -- Returns:
---   An ##integer## representing the Major version number. Version 4.0.0 will
+--   An **integer**, representing the Major version number. Version 4.0.0 will
 --   return 4, version 5.6.2 will return 5, etc...
 --
 
@@ -75,7 +75,7 @@ end function
 -- Get the minor version of the hosting Euphoria
 --
 -- Returns:
---   An ##integer## representing the Minor version number. Version 4.0.0
+--   An **integer**, representing the Minor version number. Version 4.0.0
 --   will return 0, 4.1.0 will return 1, 5.6.2 will return 6, etc...
 --
 
@@ -87,7 +87,7 @@ end function
 -- Get the patch version of the hosting Euphoria
 --
 -- Returns:
---   An ##integer## representing the Path version number. Version 4.0.0
+--   An **integer**, representing the Path version number. Version 4.0.0
 --   will return 0, 4.0.1 will return 1, 5.6.2 will return 2, etc...
 --
 
@@ -99,7 +99,7 @@ end function
 -- Get the source code revision of the hosting Euphoria
 --
 -- Returns:
---   A text ##sequence## containing the source code management system's
+--   A text **sequence**, containing the source code management system's
 -- revision number that the executing Euphoria was built from.
 --
 
@@ -115,7 +115,7 @@ end function
 -- Get the type version of the hosting Euphoria
 --
 -- Returns:
---   A ##sequence## representing the Type version string. Version 4.0.0 alpha 1
+--   A **sequence**, representing the Type version string. Version 4.0.0 alpha 1
 --   will return ##alpha 1##. 4.0.0 beta 2 will return ##beta 2##. 4.0.0 final,
 --   or release, will return ##release##.
 --
@@ -128,7 +128,7 @@ end function
 -- Get a normal version string
 --
 -- Returns:
---   A ##sequence## representing the Major, Minor, Patch, Type and Revision all in
+--   A **#sequence**, representing the Major, Minor, Patch, Type and Revision all in
 --   one string.
 --
 --   Example return values:
@@ -145,7 +145,7 @@ end function
 -- Get a short version string
 --
 -- Returns:
---   A ##sequence## representing the Major, Minor and Patch all in
+--   A **sequence**, representing the Major, Minor and Patch all in
 --   one string.
 --
 --   Example return values:
@@ -162,7 +162,7 @@ end function
 -- Get a long version string
 --
 -- Returns:
---   Same value as [[:version_string]] with the addition of the platform
+--   Same **value**, as [[:version_string]] with the addition of the platform
 --   name.
 --
 --   Example return values:
@@ -183,7 +183,7 @@ end function
 -- Get the copyright statement for Euphoria
 --
 -- Returns:
---   A ##sequence## containing 2 sequences: product name and copyright message
+--   A **sequence**, containing 2 sequences: product name and copyright message
 --
 -- Example 1:
 -- <eucode>
@@ -212,7 +212,7 @@ end function
 -- Get the copyright statement for PCRE.
 --
 -- Returns:
---   A ##sequence## containing 2 sequences: product name and copyright message.
+--   A **sequence**, containing 2 sequences: product name and copyright message.
 --
 -- See Also:
 --   [[:euphoria_copyright()]]
@@ -232,7 +232,7 @@ end function
 -- Get all copyrights associated with this version of Euphoria.
 --
 -- Returns:
---   A ##sequence## of product names and copyright messages.
+--   A **sequence**, of product names and copyright messages.
 -- <eucode>
 -- {
 --     { ProductName, CopyrightMessage },

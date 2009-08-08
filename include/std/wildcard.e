@@ -48,7 +48,7 @@ constant END_MARKER = -1
 --		# ##pattern## : a string, the pattern to match
 --		# ##string## : the string to be matched against
 --
--- Returns 
+-- Returns: 
 --		An **integer**, TRUE if ##string## matches ##pattern##, else FALSE.
 --
 -- Comments:
@@ -141,7 +141,7 @@ end function
 --		# ##pattern## : a string, the pattern to match
 --		# ##filename## : the string to be matched against
 --
--- Returns 
+-- Returns: 
 --		An **integer**, TRUE if ##filename## matches ##pattern##, else FALSE.
 --
 -- Comments:

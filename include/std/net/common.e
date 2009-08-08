@@ -20,7 +20,7 @@ constant
 -- Checks if x is an IP address in the form (#.#.#.#[:#])
 --
 -- Parameters:
---   # ##address##: the address to check
+--   # ##address## : the address to check
 --
 -- Returns:
 --   An **integer**, 1 if x is an inetaddr, 0 if it is not
@@ -42,16 +42,16 @@ end function
 -- Converts a text "address:port" into {"address", port} format.
 --
 -- Parameters:
---   # ##address##: ip address to connect, optionally with :PORT at the end
---   # ##port##: optional, if not specified you may include :PORT in
+--   # ##address## : ip address to connect, optionally with :PORT at the end
+--   # ##port## : optional, if not specified you may include :PORT in
 --     the address parameter otherwise the default port 80 is used.
 --
 -- Comments:
 --   If ##port## is supplied, it overrides any ":PORT" value in the input
 --   address.
 --
--- Returns 
---   A sequence of two elements: "address" and integer port number.
+-- Returns: 
+--   A **sequence**, of two elements: "address" and integer port number.
 --
 -- Example 1:
 -- <eucode>
@@ -104,10 +104,10 @@ public constant
 -- Parse a common URL. Currently supported URL's are http(s), ftp(s), gopher(s) and mailto.
 --
 -- Parameters:
---   # ##url##: url to be parsed
+--   # ##url## : url to be parsed
 --
 -- Returns:
---   A sequence containing the URL details. You should use the ##URL_## constants
+--   A **sequence**, containing the URL details. You should use the ##URL_## constants
 --   to access the values of the returned sequence. You should first check the
 --   protocol ([[:URL_PROTOCOL]]) that was returned as the data contained in the
 --   return value can be of different lengths.

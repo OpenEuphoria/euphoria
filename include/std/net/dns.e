@@ -321,9 +321,9 @@ end function
 -- Query DNS info.
 --
 -- Parameters:
---		# ##dname##: a string, the name to look up
---		# ##q_type##: an integer, the type of lookup requested
---		# ##options##: an atom,
+--		# ##dname## : a string, the name to look up
+--		# ##q_type## : an integer, the type of lookup requested
+--		# ##options## : an atom,
 --
 -- Returns:
 --     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
@@ -370,8 +370,8 @@ end function
 -- domain_name.
 --
 -- Parameters:
---		# ##dname##: a string, the name to look up
---		# ##options##: an atom,
+--		# ##dname## : a string, the name to look up
+--		# ##options## : an atom,
 --
 -- Returns:
 --
@@ -408,8 +408,8 @@ end function
 -- domain_name.
 --
 -- Parameters:
---		# ##dname##: a string, the name to look up
---		# ##options##: an atom,
+--		# ##dname## : a string, the name to look up
+--		# ##options## : an atom,
 --
 -- Returns:
 --     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
@@ -527,12 +527,12 @@ end function
 -- Retrieve information about a given server name and named service.
 --
 -- Parameters:
---   # ##node##: an object, ???
---   # ##service##: an object, ???
---   # ##hints##: an object, currently not used
+--   # ##node## : an object, ???
+--   # ##service## : an object, ???
+--   # ##hints## : an object, currently not used
 --
 -- Returns:
---   A **sequence** of sequences containing the requested information.
+--   A **sequence**, of sequences containing the requested information.
 --   The inner sequences have fields that can be accessed with public constants
 --
 -- * ADDR_FLAGS
@@ -572,10 +572,10 @@ end function
 -- Get the host information by name.
 --
 -- Parameters:
---   # ##name##: host name
+--   # ##name## : host name
 --
 -- Returns:
---   A ##sequence## containing
+--   A ##sequence##, containing
 --   <eucode>
 --   {
 --     official name,
@@ -611,10 +611,10 @@ end function
 -- Get the host information by address.
 --
 -- Parameters:
---   # ##address##: host address
+--   # ##address## : host address
 --
 -- Returns:
---   A ##sequence## containing
+--   A ##sequence##, containing
 --   <eucode>
 --   {
 --     official name,

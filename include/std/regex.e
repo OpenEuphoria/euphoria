@@ -497,7 +497,7 @@ end function
 -- Returns:
 --   A **sequence**, the modified ##text##.
 --
--- ===== Special replacement operators
+-- Special replacement operators:
 -- 
 -- * **##\##**  ~-- Causes the next character to lose its special meaning. 
 -- * **##\n##** ~ -- Inserts a 0x0A (LF) character. 
@@ -509,7 +509,7 @@ end function
 -- * **##\l##** ~-- Convert next character to lowercase 
 -- * **##\U##** ~-- Convert to uppercase till ##\E## or ##\e## 
 -- * **##\L##** ~-- Convert to lowercase till ##\E## or ##\e##
--- * **##\E##** or **##\e##** ~-- Terminate a ##\\U## or ##\L## conversion
+-- * **##\E##** or **##\e##** ~-- Terminate a ##{{{\\}}}U## or ##\L## conversion
 --
 -- Example 1:
 -- <eucode>

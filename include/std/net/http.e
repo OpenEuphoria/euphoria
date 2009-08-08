@@ -122,8 +122,8 @@ constant
 -- spaces.
 --
 -- Parameters:
---	 # ##what##: the string to encode
---	 # ##spacecode##: what to insert in place of a space
+--	 # ##what## : the string to encode
+--	 # ##spacecode## : what to insert in place of a space
 --
 -- Returns:
 --	 A **sequence**, the encoded string.
@@ -169,7 +169,7 @@ end function
 -- field.
 --
 -- Parameters:
---	 # ##field##: an object indicating which part is being requested, see Comments section.
+--	 # ##field## : an object indicating which part is being requested, see Comments section.
 --
 -- Returns:
 --	 An **object**, either:
@@ -277,8 +277,8 @@ end procedure
 -- Set an individual header field.
 --
 -- Parameters:
---	 # ##whatheader##: an object, either an explicit name string or a HTTP_HEADER_xxx constant
---	 # ##whatdata##: a string, the associated data
+--	 # ##whatheader## : an object, either an explicit name string or a HTTP_HEADER_xxx constant
+--	 # ##whatdata## : a string, the associated data
 --
 -- Comments:
 --	 If the requested field is not one of the default header fields,
@@ -398,7 +398,7 @@ end function
 -- Populates the internal sequence recvheader from the flat string header.
 --
 -- Parameters:
---	 # ##header##: a string, the header data
+--	 # ##header## : a string, the header data
 --
 -- Comments:
 --	 This must be called prior to calling [[:get_recvheader]]().
@@ -428,11 +428,11 @@ end procedure
 -- returned by the most recent call to [[:get_http]].
 --
 -- Parameters:
---	 # ##field##: an object, either a string holding a field name (case insensitive),
+--	 # ##field## : an object, either a string holding a field name (case insensitive),
 --	   0 to return the whole header, or a numerical index.
 --
 -- Returns:
---	 An **object**:
+--	 An **object**,
 --	 * -1 on error
 --	 * a sequence in the form, ##{field name, field value}## on success.
 
@@ -478,9 +478,9 @@ end function
 -- Returns data from an http internet site.
 --
 -- Parameters:
---	 # ##inet_addr##: a sequence holding an address
---	 # ##hostname##: a string, the name for the host
---	 # ##file##: a file name to transmit
+--	 # ##inet_addr## : a sequence holding an address
+--	 # ##hostname## : a string, the name for the host
+--	 # ##file## : a file name to transmit
 --
 -- Returns:
 --	 A **sequence**, empty sequence on error, of length 2 on success,
@@ -578,12 +578,12 @@ end function
 --   This function is not yet implemented.
 --
 -- Parameters:
---	 # ##inet_addr##: a sequence holding an address
---	 # ##hostname##: a string, the name for the host
---	 # ##file##: a file name to transmit
+--	 # ##inet_addr## : a sequence holding an address
+--	 # ##hostname## : a string, the name for the host
+--	 # ##file## : a file name to transmit
 --
 -- Returns:
---	 A **sequence** {header, body} on success, or an empty sequence on error.
+--	 A **sequence**, {header, body} on success, or an empty sequence on error.
 --
 -- Example 1:
 -- <eucode>

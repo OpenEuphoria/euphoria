@@ -65,7 +65,7 @@ end type
 -- Allocate a NULL terminated pointer array.
 --
 -- Parameters:
---   # #pointers# : A sequence of pointers to add to the pointer array.
+--   # ##pointers## : a sequence of pointers to add to the pointer array.
 --   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
 --     automatically freed when its reference count drops to zero, or
 --     when passed as a parameter to [[:delete]]
@@ -116,7 +116,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Allocate a C-style null-terminated array of strings in memory
 --
 -- Parameters:
---   # #string_list# : sequence of strings to store in RAM.
+--   # ##string_list## : sequence of strings to store in RAM.
 --   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
 --     automatically freed when its reference count drops to zero, or
 --     when passed as a parameter to [[:delete]]
