@@ -13,14 +13,16 @@ end if
 
 while 1 do
 	sequence data = prompt_string("What do you want to say to the server or quit? ")
+
+	sock:send(sock, data & "\n", 0)
+
 	if equal(data, "quit") then
 		exit
+	else
+		printf(1, "The server says: %s", { sock:receive(sock, 0) })
 	end if
-
-	_ = sock:send(sock, data & "\n", 0)
-
-	printf(1, "The server says: %s", { sock:receive(sock, 0) })
+	
 end while
 
-_ = sock:close(sock)
+sock:close(sock)
 

@@ -22,6 +22,10 @@ object client
 
 while sock:listen(server, 10) label "MAIN" do
 	printf(1, "Waiting for connections on %s\n", { addr })
+	
+	-- what do we do if we want to shut down the server?
+	-- do we have to use Ctrl+Break?! Is there no other way?
+	
 	client = sock:accept(server)
 	if sequence(client) then
 		puts(1, "Connection from " & client[2] & "\n")
@@ -33,15 +37,16 @@ while sock:listen(server, 10) label "MAIN" do
 			end if
 
 			printf(1, "Client sent: %s\n", { trim(got_data) })
-			_ = sock:send(client[1], got_data, 0)
-			if match("quit\n", got_data) then
-				_ = sock:close(client[1])
-				exit "MAIN"
+			if equal("quit\n", got_data) then
+				sock:close(client[1])
+				exit
+			else
+				sock:send(client[1], got_data, 0)
 			end if
 		end while
 	end if
 end while
 
-_ = sock:shutdown(server)
+sock:shutdown(server)
 puts(1, "Server closed\n")
 
