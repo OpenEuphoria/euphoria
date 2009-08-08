@@ -19,7 +19,7 @@ while 1 do
 
 	_ = sock:send(sock, data & "\n", 0)
 
-	printf(1, "The server says: %s", { sock:recv(sock, 0) })
+	printf(1, "The server says: %s", { sock:receive(sock, 0) })
 end while
 
 _ = sock:close(sock)
