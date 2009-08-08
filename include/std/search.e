@@ -844,7 +844,7 @@ end function
 --    to be the smallest value and the last is assumed to be the highest value.
 --
 -- Returns:
---   An **integer**, 0 if ##item# is lower than the first item in the ##range_limits##
+--   An **integer**, 0 if ##item## is lower than the first item in the ##range_limits##
 --                  or higher than the last element in the ##range_limits##. Otherwise
 --                  it returns 1.
 --
@@ -877,7 +877,7 @@ end function
 --   # ##list## : A sequence of elements that ##item## could be a member of.
 --
 -- Returns:
---   An **integer**,  0 if ##item# is not in the ##list##, otherwise
+--   An **integer**,  0 if ##item## is not in the ##list##, otherwise
 --                  it returns 1.
 --
 -- Example 1:
@@ -900,7 +900,7 @@ end function
 --	# ##default## : an integer, the index of the list item to return if ##item## is not found. Defaults to 1.
 --
 -- Returns:
---   An **object**, if ##item# is not in the list, it returns the list item of index ##default##,
+--   An **object**, if ##item## is not in the list, it returns the list item of index ##default##,
 --                 otherwise it returns ##item##.
 --
 -- Comments:

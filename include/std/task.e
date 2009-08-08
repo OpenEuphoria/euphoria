@@ -179,13 +179,15 @@ end procedure
 --
 -- ##task_id## must have been returned by [[:task_create]]().
 --
--- The task scheduler, which is built-in to the Euphoria run-time system, will use ##schedule 
+-- The task scheduler, which is built-in to the Euphoria run-time system, 
+-- will use ##schedule## 
 -- as a guide when scheduling this task. It may not always be possible to achieve the desired 
 -- number of consecutive runs, or the desired time frame. For instance, a task might take so 
 -- long before yielding control, that another task misses its desired time window.
 --
 -- ##schedule## is being interpreted as follows:
--- ===== ##schedule## is an integer
+--
+-- **##schedule## is an integer**
 --
 -- This defines ##task_id## as time shared, and tells the task scheduler how many times it
 -- should the task in one burst before it considers running other tasks. ##schedule## must be greater than zero then.
@@ -194,7 +196,7 @@ end procedure
 -- while decreasing the percentage given to other time-shared tasks. Use trial and error to find the optimal trade off. 
 -- It will also increase the efficiency of the program, since each actual task switch wastes a bit of time.
 --
--- ===== ##schedule is a sequence
+-- ** ##schedule is a sequence **
 -- -
 -- In this case, it must be a pair of positive atoms, the first one not being less than the second one.
 -- This defines ##task_id## as a real time task.

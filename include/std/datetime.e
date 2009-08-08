@@ -446,14 +446,14 @@ end type
 -- Return a sequence with information on the current date.
 --
 -- Returns:
--- A **sequence**, of length 8, laid out as follows:
--- # year,  ~-- since 1900
--- # month, ~-- January = 1
--- # day,   ~-- day of month, starting at 1
--- # hour,  ~-- 0 to 23
--- # minute,~-- 0 to 59
--- # second,~-- 0 to 59
--- # day of the week, ~-- Sunday = 1
+-- A **sequence** of length 8, laid out as follows:
+-- # year  ~-- since 1900
+-- # month ~-- January = 1
+-- # day   ~-- day of month, starting at 1
+-- # hour  ~-- 0 to 23
+-- # minute ~-- 0 to 59
+-- # second ~-- 0 to 59
+-- # day of the week ~-- Sunday = 1
 -- # day of the year ~-- January 1st = 1
 --
 -- Comments:
@@ -518,7 +518,7 @@ end function
 -- This function will return a datetime that is GMT, no matter what timezone the system
 -- is running under.
 --
---- Platform:
+-- Platform:
 -- Under //DOS// this requires a parameter that gives the difference in hours
 -- between your local timezone and GMT. This can either be a number of hours difference
 -- or the name of an environment variable that holds the hours difference.

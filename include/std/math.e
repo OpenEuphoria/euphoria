@@ -89,7 +89,7 @@ end function
 -- Comments:
 -- This function may be applied to an atom or to all elements of a sequence.
 --
--- For an atom, ##sign##(x) is the same as [[:compare]](x,0).
+-- For an atom, ##sign(x)## is the same as [[:compare]](x,0).
 --
 -- Example 1:
 -- <eucode>
@@ -190,9 +190,9 @@ end function
 --    to be the smallest value and the last is assumed to be the highest value.
 --
 -- Returns:
---   A **object**, If ##item# is lower than the first item in the ##range_limits##
+--   A **object**, If ##item## is lower than the first item in the ##range_limits##
 --                 it returns the first item. 
---                 If  ##item# is higher than the last element in the ##range_limits##
+--                 If  ##item## is higher than the last element in the ##range_limits##
 --                 it returns the last item.
 --                 Otherwise it returns ##item##.
 --
@@ -1052,12 +1052,14 @@ end function
 --
 -- The hyperbolic cosine grows like the exponential function.
 --
--- For all reals, ##power(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
+-- For all reals, ##power(cosh(x), 2) - power(sinh(x), 2) = 1##. Compare 
+-- with ordinary trigonometry.
 --
 -- Example 1:
 -- <eucode>
 -- ? cosh(LN2) -- prints out 1.25
 -- </eucode>
+--
 -- See Also:
 -- [[:cos]], [[:sinh]], [[:arccosh]]
 
@@ -1078,12 +1080,14 @@ end function
 --
 -- The hyperbolic sine grows like the exponential function.
 --
--- For all reals, ##power(cosh(x), 2) - power(sinh(x), 2) = 1. Compare with ordinary trigonometry.
+-- For all reals, ##power(cosh(x), 2) - power(sinh(x), 2) = 1##. Compare 
+-- with ordinary trigonometry.
 --
 -- Example 1:
 -- <eucode>
 -- ? sinh(LN2) -- prints out 0.75
 -- </eucode>
+--
 -- See Also:
 -- [[:cosh]], [[:sin]], [[:arcsinh]]
 
@@ -1574,7 +1578,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ?gcd(76.3, -114) -- prints out gcd(76,114), which is 38
+-- ? 76.3, -114) -- prints out gcd(76,114), which is 38
 -- </eucode>
 --
 
@@ -1733,7 +1737,7 @@ end function
 --		# ##pData## : an integer. The item to test.
 --
 -- Returns:
--- ** An **integer**,
+-- An **integer**,
 -- * 1 if its even.
 -- * 0 if its odd.
 --

@@ -839,7 +839,7 @@ end function
 -- Description:
 --   Insert an object into a sequence as a new element at a given location.
 --
---- Parameters:
+-- Parameters:
 --		# ##target## : the sequence to insert into
 --		# ##what## : the object to insert
 --		# ##index## : an integer, the position in ##target## where ##what## 
@@ -2056,7 +2056,7 @@ public enum
 -- which may be shorter. For example if ##source## has 11 items and ##size## is
 -- 3, then the first three sub-sequences will get 3 items each and the remaining
 -- 2 items will go into the last sub-sequence. If ##size## is less than 1 or
--- greater than the length of the ##source##, the ##source is returned as the
+-- greater than the length of the ##source##, the ##source## is returned as the
 -- only sub-sequence.
 --
 -- **When ##size## is an integer and ##style## is BK_PIECES...**\\
@@ -2186,7 +2186,7 @@ end function
 --
 -- Parameters:
 --		# ##s## : the sequence to flatten out.
---      # delim## : An optional delimiter to place after each flattened sub-sequence (except
+--      # ##delim## : An optional delimiter to place after each flattened sub-sequence (except
 --                 the last one). 
 --
 -- Returns:
@@ -2558,12 +2558,12 @@ public constant SEQ_NOALT = {{1.23456}}
 -- the ##pAltValue## where sub-sequences used to be.
 --
 -- Example:
---<eucode>
+-- <eucode>
 -- sequence s = remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, SEQ_NOALT)
 -- -- 's' is now {4, 6, 0.1, 4} -- length now 4
 -- s = remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, -1)
 -- -- 's' is now {4, 6, -1, 0.1, -1, 4} -- length unchanged.
---</eucode>
+-- </eucode>
 --
 
 public function remove_subseq( sequence pSource, object pAltValue)
@@ -2614,8 +2614,8 @@ public enum
 -- Removes duplicate elements
 --
 -- Parameters:
--- # ##pSource##: A sequence that may contain duplicated elements
--- # ##pMode##: One of RD_INPLACE, RD_PRESORTED, or RD_SORT. 
+-- # ##pSource## : A sequence that may contain duplicated elements
+-- # ##pMode## : One of RD_INPLACE, RD_PRESORTED, or RD_SORT. 
 -- ** RD_INPLACE removes items while preserving the original order of the unique items.
 -- ** RD_PRESORTED assumes that the elements in ##pSource## are already sorted. If they
 -- are not already sorted, this option merely removed adjacent duplicate elements.

@@ -56,7 +56,7 @@ public constant EOF = (-1)
 -- <built-in> procedure ? (no parentheses around the unique parameter)
 --
 -- Description:
--- Shorthand way of saying: **pretty_print(STDOUT, x, {})** - i.e. printing the value of an 
+-- Shorthand way of saying: ##pretty_print(STDOUT, x, {})## ~-- i.e. printing the value of an 
 -- expression to the standard output, with braces and indentation to show the structure.
 --
 -- Example 1:
@@ -73,7 +73,8 @@ public constant EOF = (-1)
 --
 -- Description:
 -- Writes out a **text** representation of an object to a file or device. 
--- If the object ##x## is a sequence, it uses braces { , , , } to show the structure.
+-- If the object ##x## is a sequence, it uses braces **##{ , , , }##** to 
+-- show the structure.
 --
 -- Parameters:
 --		# ##fn## : an integer, the handle to a file or device to output to
@@ -173,10 +174,10 @@ public constant EOF = (-1)
 -- printf(STDOUT, "%s", {name})   -- correct
 -- </eucode>
 --
--- Now, the third argument of printf() is a one-element sequence containing the 
+-- Now, the third argument of ##printf##() is a one-element sequence containing the 
 -- item to be formatted.
 --
--- If there is only one % format specifier, and if the value it stands for is an atom, then ##values## may be simply that atom.
+-- If there is only one ##%## format specifier, and if the value it stands for is an atom, then ##values## may be simply that atom.
 --
 -- Example 1:
 -- <eucode>
@@ -305,8 +306,8 @@ public constant EOF = (-1)
 --     When your program reads from the keyboard, the user can type control-Z, which the operating 
 --     system treats as "end of file". [[:EOF]] will be returned.
 --
---     In SVGA modes, DOS might set the wrong cursor position, after a call to gets(0) to read the
---     keyboard. You should set it yourself using ##position()##.
+--     In SVGA modes, DOS might set the wrong cursor position, after a call to ##gets(0)## to read the
+--     keyboard. You should set it yourself using ##position##().
 --
 -- Example 1:
 -- <eucode>
@@ -1098,7 +1099,7 @@ end function
 --     An **integer**, 1 on success, -1 on failure.
 --
 -- Errors:
---		If [[:puts]] cannot write some line of text, a runtime error will occur.
+--		If [[:puts]]() cannot write some line of text, a runtime error will occur.
 --
 -- Comments:
 --	If ##file## was a sequence, the file will be closed on completion. Otherwise, it will remain open, but at end of file.
@@ -1148,7 +1149,7 @@ end function
 --     An **integer**, 1 on success, -1 on failure.
 --
 -- Errors:
---		If [[:puts]] cannot write some line of text, a runtime error will occur.
+--		If [[:puts]]() cannot write some line of text, a runtime error will occur.
 --
 -- Comments:
 -- ##file## is opened, written to and then closed.
@@ -1189,7 +1190,7 @@ public enum
 -- Read the contents of a file as a single sequence of bytes.
 --
 -- Parameters:
---		# ##file# : an object, either a file path or the handle to an open file.
+--		# ##file## : an object, either a file path or the handle to an open file.
 --      # ##as_text## : integer, **BINARY_MODE** (the default) assumes //binary mode// that 
 --                     causes every byte to be read in,
 --                     and **TEXT_MODE** assumes //text mode// that ensures that

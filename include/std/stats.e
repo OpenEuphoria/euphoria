@@ -326,17 +326,17 @@ end function
 -- Returns the average of the absolute deviations of data points from their mean.
 --
 -- Parameters:
--- # ##pData##: a list of 1 or more numbers for which you want the mean of the absolute deviations.
--- # ##pMassage##: an object. When this is an empty sequence (the default) it 
+-- # ##pData## : a list of 1 or more numbers for which you want the mean of the absolute deviations.
+-- # ##pMassage## : an object. When this is an empty sequence (the default) it 
 --  means that ##pData## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
--- # ##pPop##: an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
+-- # ##pPop## : an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
 -- sample of the total population. ST_FULLPOP means that ##pData## is the
 -- entire population.
 --
 -- Returns:
---    An **atom**, the deviation from the mean.
---    An empty **sequence** means that there is no meaningful data to calculate from.
+--    An **atom** , the deviation from the mean.\\
+--    An empty **sequence**, means that there is no meaningful data to calculate from.
 --
 -- Comments:
 -- ##avedev##() is a measure of the variability in a data set. Its statistical
@@ -365,14 +365,14 @@ end function
 -- }}}
 --
 -- Example 1:
---<eucode>
+-- <eucode>
 -- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7} ) -- Ans: 1.966666667
 -- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7},, ST_FULLPOP ) -- Ans: 1.84375
 -- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_NOALT  ) -- Ans: 1.99047619
 -- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_NOALT,ST_FULLPOP ) -- Ans: 1.857777778
 -- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0 ) -- Ans: 2.225
 -- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0, ST_FULLPOP ) -- Ans: 2.0859375
---</eucode>
+-- </eucode>
 --
 -- See also:
 --   [[:average]], [[:stdev]]

@@ -755,7 +755,7 @@ end function
 --                into an integer. If omitted, zero is returned.
 --
 -- Returns:
--- * an **integer**, either the integer rendition of ##pData## or ##pError## if it has
+-- An **integer**, either the integer rendition of ##pData## or ##pError## if it has
 -- no integer value.
 --
 -- Comments:

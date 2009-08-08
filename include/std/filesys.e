@@ -1376,8 +1376,8 @@ end function
 -- Returns the full path and file name of the supplied file name.
 --
 -- Parameters:
---	# ##path_in## - A sequence. This is the file name whose full path you want.
---  # ##directory_given## - An integer. This is zero if ##path_in## is 
+--	# ##path_in## : A sequence. This is the file name whose full path you want.
+--  # ##directory_given## : An integer. This is zero if ##path_in## is 
 --  to be interpreted as a file specification otherwise it is assumed to be a
 --  directory specification. The default is zero.
 --
@@ -1521,10 +1521,10 @@ public enum
 -- Get the type of a file.
 --
 -- Parameters:
---  		# ##filename##: the name of the file to query. It must not have wildcards.
+--  		# ##filename## : the name of the file to query. It must not have wildcards.
 -- 
 -- Returns:
---		An **integer**:
+--		An **integer**,
 --		* -1 if file could be multiply defined
 --      *  0 if filename does not exist
 --      *  1 if filename is a file
@@ -2000,7 +2000,7 @@ end function
 -- Return the size of a file.
 --
 -- Parameters:
--- 		# ##filename##: the name of the queried file
+-- 		# ##filename## : the name of the queried file
 --
 -- Returns:
 -- 		An **atom**, the file size, or -1 if file is not found.
@@ -2162,11 +2162,11 @@ end function
 -- Returns some information about a disk drive.
 --
 -- Parameters:
---	# ##disk_path## - A sequence. This is the path that identifies the disk to inquire upon.
+--	# ##disk_path## : A sequence. This is the path that identifies the disk to inquire upon.
 --
 -- Returns:
---     A **sequence**, containing SECTORS_PER_CLUSTER, BYTES_PER_SECTOR, 
---                     NUMBER_OF_FREE_CLUSTERS, and TOTAL_NUMBER_OF_CLUSTERS
+--     A **sequence**, containing ##SECTORS_PER_CLUSTER##, ##BYTES_PER_SECTOR##, 
+--                     ##NUMBER_OF_FREE_CLUSTERS##, and ##TOTAL_NUMBER_OF_CLUSTERS##
 --
 -- Example 1:
 -- <eucode>
