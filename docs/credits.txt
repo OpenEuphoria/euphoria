@@ -12,6 +12,7 @@ order by their last name.
 === Current Authors
 
   * Jim Brown
+  * Tom Ciplijauskas
   * Jeremy Cowgar
   * Matthew Lewis
   * Derek Parnell
@@ -27,7 +28,6 @@ order by their last name.
 
   * Jiri Babor
   * Chris Bensler
-  * Tom Ciplijauskas
   * CoJaBo
   * Jason Gade
   * Ryan Johnson
