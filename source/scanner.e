@@ -162,6 +162,7 @@ end procedure
 -- helps old machines load huge programs more quickly
 -- Anyway, the C-coded back-end wants it in this form.
 constant SOURCE_CHUNK = 10000 -- size of one chunk (many lines) of source, in bytes
+constant LINE_BUFLEN  = 400   -- Performance improvement. Reads lines up to 400 bytes at once.
 atom current_source  -- current place to store source lines
 integer current_source_next -- next position to store lines into
 all_source = {}
@@ -182,7 +183,7 @@ function pack_source(object src)
 
 	if current_source_next + length(src) >= SOURCE_CHUNK then
 		-- we ran out of space, allocate another chunk
-		current_source = allocate(SOURCE_CHUNK)
+		current_source = allocate(SOURCE_CHUNK + LINE_BUFLEN)
 		if current_source = 0 then
 			CompileErr(123)
 		end if
@@ -202,30 +203,40 @@ end function
 export function fetch_line(integer start)
 -- get the line of source stored at offset start (without \n)
 	sequence line
+	sequence memdata
 	integer c, chunk
 	atom p
 	integer n
-	
+	integer m
+
 
 	if start = 0 then
 		return ""
 	end if
-	line = repeat(0, 400)
+	line = repeat(0, LINE_BUFLEN)
 	n = 0
 	chunk = 1+floor(start / SOURCE_CHUNK)
 	start = remainder(start, SOURCE_CHUNK)
 	p = all_source[chunk] + start
+	memdata = peek({p, LINE_BUFLEN})
+	p += LINE_BUFLEN
+	m = 0
 	while TRUE do
-		c = peek(p)
+		m += 1
+		if m > length(memdata) then
+			memdata = peek({p, LINE_BUFLEN})
+			p += LINE_BUFLEN
+			m = 1
+		end if
+		c = memdata[m]
 		if c = 0 then
 			exit
 		end if
 		n += 1
 		if n > length(line) then
-			line &= repeat(0, 400)
+			line &= repeat(0, LINE_BUFLEN)
 		end if
 		line[n] = c
-		p += 1
 	end while
 	return line[1..n]
 end function
@@ -383,7 +394,7 @@ function find_file(sequence fname)
 	sequence currdir
 	sequence conf_path
 	object scan_result, inc_path
-	
+
 	-- skip whitespace not necessary - String Token does it
 	if absolute_path(fname) then
 		-- open fname exactly as it is
@@ -393,7 +404,7 @@ function find_file(sequence fname)
 
 		return fname
 	end if
-	
+
 	-- We've got a relative path so we need to look into a few places. --
 	-- first try path from current file path
 	currdir = get_file_path( file_name[current_file_no] )
@@ -409,7 +420,7 @@ function find_file(sequence fname)
 			return full_path
 		end if
 	end if
-	
+
 	scan_result = ConfPath(new_include_name)
 
 	if atom(scan_result) then
@@ -445,7 +456,7 @@ function find_file(sequence fname)
 		end if
 --		errbuff &= sprintf("\t%s\n", {full_path})
 	end if
-	
+
 	if find(main_path[$], SLASH_CHARS) then
 		errbuff = main_path[1..$-1]  -- looks better
 	else
@@ -454,11 +465,11 @@ function find_file(sequence fname)
 	if not find(errbuff, full_path) then
 		full_path = append(full_path, errbuff)
 	end if
-	
+
 	conf_path = get_conf_dirs()
 	if length(conf_path) > 0 then
 		conf_path = split(conf_path, PATHSEP)
-		for i = 1 to length(conf_path) do			
+		for i = 1 to length(conf_path) do
 			if find(conf_path[i][$], SLASH_CHARS) then
 				errbuff = conf_path[i][1..$-1]  -- looks better
 			else
@@ -469,12 +480,12 @@ function find_file(sequence fname)
 			end if
 		end for
 	end if
-	
+
 	inc_path = getenv("EUINC")
 	if sequence(inc_path) then
 		if length(inc_path) > 0 then
 			inc_path = split(inc_path, PATHSEP)
-			for i = 1 to length(inc_path) do			
+			for i = 1 to length(inc_path) do
 				if find(inc_path[i][$], SLASH_CHARS) then
 					errbuff = inc_path[i][1..$-1]  -- looks better
 				else
@@ -486,18 +497,18 @@ function find_file(sequence fname)
 			end for
 		end if
 	end if
-	
+
 	if length(eudir) > 0 then
 		if not find(eudir, full_path) then
 			full_path = append(full_path, eudir)
 		end if
 	end if
-	
+
 	errbuff = ""
 	for i = 1 to length(full_path) do
 		errbuff &= sprintf("\t%s\n", {full_path[i]})
 	end for
-	
+
 	CompileErr(52, {new_include_name, errbuff})
 end function
 
@@ -1691,7 +1702,7 @@ export function Scanner()
 
 		elsif class = BACK_QUOTE then
 			return ExtendedString( '`' )
-			
+
 		else
 			InternalErr(268, {class})
 
@@ -1783,9 +1794,9 @@ export function StringToken(sequence pDelims = "")
 		gtext &= ch
 		ch = getch()
 	end while
-	
+
 	ungetch() -- put back end-word token.
-	
+
 	return gtext
 end function
 
