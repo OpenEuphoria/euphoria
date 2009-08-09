@@ -25,6 +25,7 @@ include global.e
 include pathopen.e
 include platform.e
 include preproc.e
+include msgtext.e
 
 export sequence src_name = ""
 export sequence switches = {}
@@ -107,25 +108,25 @@ end procedure
 --**
 export procedure show_banner()
 	if INTERPRET and not BIND then
-		screen_output(STDERR, "Euphoria Interpreter ")
+		screen_output(STDERR, GetMsgText(270,0))
 
 	elsif TRANSLATE then
-		screen_output(STDERR, "Euphoria to C Translator ")
+		screen_output(STDERR, GetMsgText(271,0))
 
 	elsif BIND then
-		screen_output(STDERR, "Euphoria Binder ")
+		screen_output(STDERR, GetMsgText(272,0))
 	end if
 	screen_output(STDERR, version_string_long() & "\n")
 
 	ifdef EU_MANAGED_MEM then
-		screen_output(STDERR, "Using Managed Memory")
+		screen_output(STDERR, GetMsgText(273,0))
 	elsedef
-		screen_output(STDERR, "Using System Memory")
+		screen_output(STDERR, GetMsgText(274,0))
 	end ifdef
 
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
-		screen_output(STDERR, ", EuConsole")
+		screen_output(STDERR, GetMsgText(275,0))
 	end if
 	screen_output(STDERR, "\n")
 end procedure
@@ -178,12 +179,12 @@ export procedure handle_common_options(m:map opts)
 
 			case "strict" then
 				Strict_is_on = 1
-			
+
 			case "p" then
 				for i = 1 to length(val) do
 					add_preprocessor(val[i])
 				end for
-				
+
 			case "pf" then
 				force_preprocessor = 1
 
@@ -234,7 +235,7 @@ export procedure handle_common_options(m:map opts)
 				abort(0)
 		end switch
 	end for
-	
+
 	if length(LocalizeQual) = 0 then
 		LocalizeQual = {"en"}
 	end if

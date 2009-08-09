@@ -265,7 +265,7 @@ constant StdErrMsgs = {
 	{251, "Bad BB_elem type"},
 	{252, "Bad BB_elem"},
 	{253, "Bad seq_elem"},
-	{254, "This opcode ([1]) should never be emitted!  SubProg '[2]'"},	
+	{254, "This opcode ([1]) should never be emitted!  SubProg '[2]'"},
 	{255, "no routine id for [1]"},
 	{256, "Bad BB_var_type"},
 	{257, "Bad GType"},
@@ -281,17 +281,25 @@ constant StdErrMsgs = {
 	{267, "Set Private Scope - unhandled scope [1]"},
 	{268, "Scanner unhandled class [1]"},
 	{269, "Unknown op found when shifting code: [1]"},
-	
+	{270, "Euphoria Interpreter "},
+	{271, "Euphoria to C Translator "},
+	{272, "Euphoria Binder "},
+	{273, "Using Managed Memory"},
+	{274, "Using System Memory"},
+	{275, ", EuConsole"},
+	{276, "Can't open [1]\n"},
+	{277, "\nPaused: press any key ..."},
+	{278, "(press any key and window will close ...)"},
 	$
 }
 
 public function GetMsgText( integer MsgNum, integer WithNum = 1, object Args = {})
 	integer idx = 1
 	object msgtext
-	
+
 	-- First check localization databases
 	msgtext = get_text( MsgNum, LocalizeQual, LocalDB )
-	
+
 	-- If not found, scan through hard-coded messages
 	if atom(msgtext) then
 		for i = 1 to length(StdErrMsgs) do
@@ -302,11 +310,11 @@ public function GetMsgText( integer MsgNum, integer WithNum = 1, object Args = {
 		end for
 		msgtext = StdErrMsgs[idx][2]
 	end if
-	
+
 	if atom(Args) or length(Args) != 0 then
 		msgtext = format(msgtext, Args)
 	end if
-	
+
 	if WithNum != 0 then
 		return sprintf("<%04d>:: %s", {MsgNum, msgtext})
 	else
@@ -319,15 +327,15 @@ public procedure ShowMsg(integer Cons, object Msg, object Args = {}, integer NL 
 	if atom(Msg) then
 		Msg = GetMsgText(floor(Msg), 0)
 	end if
-	
+
 	if atom(Args) or length(Args) != 0 then
 		Msg = format(Msg, Args)
 	end if
-	
+
 	puts(Cons, Msg)
-	
+
 	if NL then
 		puts(Cons, '\n')
 	end if
-	
+
 end procedure

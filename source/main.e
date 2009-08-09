@@ -28,6 +28,7 @@ include symtab.e
 include scanner.e
 include error.e
 include preproc.e
+include msgtext.e
 
 --**
 -- record command line options, return source file number
@@ -69,7 +70,7 @@ function GetSourceName()
 				exit
 			end if
 		end for
-		
+
 		if atom(real_name) then
 			return -1
 		end if
@@ -77,7 +78,7 @@ function GetSourceName()
 		file_name = append(file_name, src_name)
 		real_name = e_path_find(src_name)
 	end if
-		
+
 	if file_exists(real_name) then
 		real_name = maybe_preprocess(real_name)
 		return open(real_name, "r")
@@ -104,7 +105,7 @@ procedure main()
 
 	-- we have our own, possibly different, idea of argc and argv
 	argv = command_line()
-	
+
 	if BIND then
 		argv = extract_options(argv)
 	end if
@@ -138,6 +139,8 @@ procedure main()
 	TempWarningName = STDERR
 	display_warnings = 1
 
+	InitGlobals()
+
 	if TRANSLATE or BIND or INTERPRET then
 		InitBackEnd(0)
 	end if
@@ -146,9 +149,12 @@ procedure main()
 
 	if src_file = -1 then
 		-- too early for normal error processing
-		screen_output(STDERR, sprintf("Can't open %s\n", {file_name[$]}))
-		any_key("\nPress any key", STDERR)
+		screen_output(STDERR, GetMsgText(276, 0, {file_name[$]}))
+		if not batch_job then
+			any_key(GetMsgText(277,0), STDERR)
+		end if
 		Cleanup(1)
+
 	elsif src_file >= 0 then
 		main_path = full_path(file_name[$])
 		if length(main_path) = 0 then
@@ -162,33 +168,23 @@ procedure main()
 		InitBackEnd(1)
 	end if
 
-	InitGlobals()
 	CheckPlatform()
-	
+
 	InitSymTab()
 	InitEmit()
 	InitParser()
 	InitLex()
-	
+
 	-- sets up the internal namespace
 	eu_namespace()
 
-	/* TODO: cmd_parse finish
-	if src_file = -2 then	
-		-- No source supplied on command line
-		show_usage()
-		if find("WIN32_GUI", OpDefines) then
-			any_key("(press any key and window will close ...)", STDERR)
-		end if
-		Cleanup(1)
-	end if
-	*/
-	
+
+
 	-- starts reading and checks for a default namespace
 	main_file()
 
 	parser()
-	
+
 	-- we've parsed successfully
 	-- now run the appropriate back-end
 	if TRANSLATE then

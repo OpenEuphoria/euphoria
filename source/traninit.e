@@ -2,11 +2,11 @@
 --****
 -- == traninit.e: Initialize the translator
 --
--- This module sets one of wat_path, or dj_path or none at all 
+-- This module sets one of wat_path, or dj_path or none at all
 -- to indicate gcc.  Using the command line options or environment variables
 -- as hints it checks for command line sanity and sets the said environment
 -- variables.
--- 
+--
 -- If the user selects the compiler at the command line and it cannot
 -- find its environment variable the translator will exit with an error.
 -- If the user doesn't select it then it will try all of the environment
@@ -131,25 +131,25 @@ export procedure transoptions()
 				switch upper(val) do
 					case "WIN" then
 						set_host_platform( WIN32 )
-					
+
 					case "DOS" then
 						set_host_platform( DOS32 )
-						
+
 					case "LINUX" then
 						set_host_platform( ULINUX )
-						
+
 					case "FREEBSD" then
 						set_host_platform( UFREEBSD )
-						
+
 					case "OSX" then
 						set_host_platform( UOSX )
-						
+
 					case "SUNOS" then
 						set_host_platform( USUNOS )
-						
+
 					case "OPENBSD" then
 						set_host_platform( UOPENBSD )
-						
+
 					case "NETBSD" then
 						set_host_platform( UNETBSD )
 
@@ -175,7 +175,7 @@ export procedure transoptions()
 			case "debug" then
 				debug_option = TRUE
 				keep = TRUE -- you'll need the sources to debug
-			
+
 			case "maxsize" then
 				sequence tmp = value(val)
 				if tmp[1] = GET_SUCCESS then
@@ -215,9 +215,9 @@ export procedure transoptions()
 	end for
 
 	if length(m:get(opts, "extras")) = 0 then
+		-- No source supplied on command line
 		show_banner()
 		ShowMsg(2, 203)
-		
 		translator_help()
 
 		abort(1)
@@ -310,7 +310,7 @@ procedure InitBackEnd(integer c)
 			else
 				wat_path = getenv("WATCOM")
 			end if
-		
+
 			if atom(wat_path) then
 				CompileErr(159)
 			elsif find(' ', wat_path) then
@@ -332,7 +332,7 @@ procedure InitBackEnd(integer c)
 	if dll_option and TDOS then
 		CompileErr(46)
 	end if
-	
+
 	if fastfp and not TDOS then
 		CompileErr(93)
 	end if
