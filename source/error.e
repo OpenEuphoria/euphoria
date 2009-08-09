@@ -22,7 +22,7 @@ export integer display_warnings
 export object ThisLine = ""   -- current line of source (or -1)
 export object ForwardLine     -- remember the line when a possible forward reference occurs
 export integer bp = 0         -- input line index of next character
-export integer forward_bp     -- cached line index for a possible forward reference   
+export integer forward_bp     -- cached line index for a possible forward reference
 export sequence warning_list = {}
 
 --**
@@ -45,7 +45,7 @@ export procedure Warning(object msg, integer mask, sequence args = {})
 			return
 		end if
 	end if
-	
+
 	p = mask -- =0 for non maskable warnings - none implemented so far
 	if Strict_is_on and Strict_Override = 0 then
 		mask = 0
@@ -92,44 +92,50 @@ end procedure
 
 --**
 -- print the warnings to the screen (or ex.err)
-export function ShowWarnings(integer errfile)
+export function ShowWarnings()
 	integer c
+	integer errfile
+	integer twf
 
-	if errfile=0 then
-		if display_warnings = 0 then
-			return length(warning_list)
-		end if
+	if display_warnings = 0 or length(warning_list) = 0 then
+		return length(warning_list)
+	end if
 
-		if integer(TempWarningName) then
-			errfile = STDERR
-		else
-			errfile = open(TempWarningName,"w")
-			if errfile = -1 then
-				ShowMsg(STDERR, 205, {TempWarningName})
-				return length(warning_list)
-			end if
-		end if
+	if TempErrFile > 0 then
+		errfile = TempErrFile
 	else
 		errfile = STDERR
 	end if
 
-	for i = 1 to length(warning_list) do
-		if errfile = STDERR then
-			screen_output(STDERR, warning_list[i])
-			if remainder(i, 20) = 0 and batch_job = 0 then
-				ShowMsg(STDERR, 206)
-				c = getc(0)
-				if c = 'q' then
-					exit
-				end if
+	if not integer(TempWarningName) then
+		twf = open(TempWarningName,"w")
+		if twf = -1 then
+			ShowMsg(errfile, 205, {TempWarningName})
+			if errfile != STDERR then
+				ShowMsg(STDERR, 205, {TempWarningName})
 			end if
 		else
-			puts(errfile, warning_list[i])
+			for i = 1 to length(warning_list) do
+				puts(twf, warning_list[i])
+			end for
+		    close(twf)
 		end if
-	end for
+		TempWarningName = 99 -- Flag that we have done this already.
+	end if
 
-	if errfile > STDERR then
-	    close(errfile)
+	if batch_job = 0 or errfile != STDERR then
+		for i = 1 to length(warning_list) do
+			puts(errfile, warning_list[i])
+			if errfile = STDERR then
+				if remainder(i, 20) = 0 then
+					ShowMsg(errfile, 206)
+					c = getc(0)
+					if c = 'q' then
+						exit
+					end if
+				end if
+			end if
+		end for
 	end if
 
 	return length(warning_list)
@@ -145,7 +151,7 @@ export procedure ShowDefines(integer errfile)
 	puts(errfile, format("\n--- [1] ---\n", {GetMsgText(207,0)}))
 
 	for i = 1 to length(OpDefines) do
-		if find(OpDefines[i], {"_PLAT_START", "_PLAT_STOP"}) = 0 then 
+		if find(OpDefines[i], {"_PLAT_START", "_PLAT_STOP"}) = 0 then
 			printf(errfile, "%s\n", {OpDefines[i]})
 		end if
 	end for
@@ -162,7 +168,7 @@ export procedure Cleanup(integer status)
 		show_error = 1
 	end ifdef
 
-	w = ShowWarnings(status)
+	w = ShowWarnings()
 	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
 		if not batch_job then
 			screen_output(STDERR, GetMsgText(208,0))
@@ -184,7 +190,7 @@ export procedure OpenErrFile()
 		if length(TempErrName) > 0 then
 			screen_output(STDERR, GetMsgText(209, 0, {TempErrName}))
 		end if
-		abort(1) --Cleanup(1)
+		abort(1) -- with no clean up
 	end if
 end procedure
 
@@ -220,9 +226,9 @@ export procedure CompileErr(object msg, object args = {})
 	if integer(msg) then
 		msg = GetMsgText(msg)
 	end if
-	
+
 	msg = format(msg, args)
-	
+
 	Errors += 1
 	if length(file_name) then
 		errmsg = sprintf("%s:%d\n%s\n", {file_name[current_file_no],
@@ -243,11 +249,12 @@ export procedure CompileErr(object msg, object args = {})
 
 	ShowErr(TempErrFile)
 
-	ShowWarnings(TempErrFile)
+	ShowWarnings()
 
 	ShowDefines(TempErrFile)
-	
+
 	close(TempErrFile)
+	TempErrFile = -2
 	Cleanup(1)
 end procedure
 
@@ -266,7 +273,7 @@ export procedure InternalErr(integer  msgno, object args = {})
 	if atom(args) then
 		args = {args}
 	end if
-	
+
 	msg = GetMsgText(msgno, 1, args)
 	if TRANSLATE then
 		screen_output(STDERR, GetMsgText(211, 1, {msg}))
@@ -278,7 +285,7 @@ export procedure InternalErr(integer  msgno, object args = {})
 		screen_output(STDERR, GetMsgText(208, 0))
 		getc(0)
 	end if
-	
+
     -- M_CRASH = 67
 	machine_proc(67, GetMsgText(213))
 end procedure

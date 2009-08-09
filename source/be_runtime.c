@@ -388,7 +388,7 @@ int con_was_opened = FALSE; /* TRUE if CON device was ever opened */
 int current_screen = MAIN_SCREEN;
 
 int EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console support
-                      for euid running on Windows systems that do not support 
+                      for euid running on Windows systems that do not support
                       'full screen DOS' mode; eg. Vista.
                    */
 
@@ -426,12 +426,12 @@ int wingetch();
 /*********************/
 /* Defined functions */
 /*********************/
-/* Copies character from one buffer (source) to another (target). 
+/* Copies character from one buffer (source) to another (target).
    It copies a maximum of the smaller of 'source_chars' and strlen(source) from source.
    It adds a null character at the end of the copied characters in target but only
    if it can fit it in.
-   
-   It returns the number of remaining characters positions in target. If this is 
+
+   It returns the number of remaining characters positions in target. If this is
    less than 1 then the target buffer was not big enough to hold the source and
    the target buffer is not terminated with a null character.
 */
@@ -439,7 +439,7 @@ int charcopy(char *target, int target_len, char *source, int source_len)
 {
 	int source_remaining = source_len;
 	int target_remaining = target_len;
-	
+
 	while ((source_remaining > 0) && (target_remaining > 0) && (*source != '\0'))
 	{
 		*target = *source;
@@ -448,10 +448,10 @@ int charcopy(char *target, int target_len, char *source, int source_len)
 		source_remaining--;
 		target_remaining--;
 	}
-	
+
 	if (target_remaining > 0)
 		*target = '\0';
-		
+
 	return target_remaining;
 }
 
@@ -625,17 +625,17 @@ static void SimpleRTFatal(char *msg, va_list ap)
 /* Fatal errors for translated code */
 {
 	va_list aq;
-#	ifdef va_copy	
+#	ifdef va_copy
 		va_copy(aq, ap);
 #	else
-#		ifdef EDJGPP 		
+#		ifdef EDJGPP
 			aq = ap;
 #		else
-			/* Syntax error here is on purpose.  We need to handle the case here that 
+			/* Syntax error here is on purpose.  We need to handle the case here that
 			 * va_copy() is missing differently for each compiler. */
 			va_copy(aq, ap);
-#		endif			
-#	endif		
+#		endif
+#	endif
 
 	if (crash_msg == NULL || crash_count > 0) {
 		screen_output(stderr, "\nFatal run-time error:\n");
@@ -664,7 +664,7 @@ static void SimpleRTFatal(char *msg, va_list ap)
 		TempErrFile = NULL;
 	}
 
-	
+
 	call_crash_routines();
 	gameover = TRUE;
 	Cleanup(1);
@@ -803,10 +803,10 @@ void Append(object_ptr target, object s1, object a)
 							   (char *)(base + new_len + 2) - (char *)s1p);
 			new_s1p->base = (object_ptr)new_s1p +
 							 ((object_ptr)base - (object_ptr)s1p);
-			
+
 			s1p = new_s1p;
 			s1p->postfill = new_len - len;
-			
+
 			*target = MAKE_SEQ(s1p);
 		/* OPTIMIZE: we may have more space in the malloc'd block
 		   than we think, due to power of 2 round up etc. Can
@@ -1392,12 +1392,12 @@ object Repeat(object item, object repcount)
 }
 
 /**
- * Calls the specified translated routine id for cleaning up the 
+ * Calls the specified translated routine id for cleaning up the
  * UDT object.
  */
 void udt_clean_rt( object o, long rid ){
 	int pre_ref;
-	
+
 	pre_ref = SEQ_PTR( o )->ref;
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
@@ -1415,7 +1415,7 @@ void udt_clean_rt( object o, long rid ){
 	{ // cdecl
 		(*(int ( *)())rt00[rid].addr)( o );
 	}
-	
+
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref = pre_ref;;
 	}
@@ -1433,7 +1433,7 @@ void udt_clean( object o, long rid ){
 	object args;
 	int pre_ref;
 	int *save_tpc;
-	
+
 	// Need to make sure that s is 8-byte aligned
 	s = (s1_ptr)( (int)&seq + ( 8 - ( ((int)&seq) & 7 ) ));
 	s->base = (long*)&(s->cleanup);
@@ -1443,9 +1443,9 @@ void udt_clean( object o, long rid ){
 	s->base[0] = 0;
 	s->base[1] = o;
 	s->base[2] = NOVALUE;
-	
+
 	pre_ref = SEQ_PTR(o)->ref;
-	
+
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
 	}
@@ -1458,14 +1458,14 @@ void udt_clean( object o, long rid ){
 	if (expr_top >= expr_limit) {
 		expr_max = BiggerStack();
 		expr_limit = expr_max - 3;
-	} 
+	}
 	*expr_top++ = (object)tpc;    // needed for traceback
 	*expr_top++ = *(expr_top-2);  // prevents restore_privates()
 
 	save_tpc = tpc;
 	do_exec(code);  // execute routine without setting up new stack
 	EFree(code);
-	
+
 	tpc = save_tpc;
 	expr_top -= 2;
 	if( pre_ref == 0 ){
@@ -1476,7 +1476,7 @@ void udt_clean( object o, long rid ){
 
 void cleanup_sequence( s1_ptr seq ){
 	cleanup_ptr cp, next;
-	
+
 	cp = seq->cleanup;
 	seq->cleanup = 0;
 	while( cp ){
@@ -1489,7 +1489,7 @@ void cleanup_sequence( s1_ptr seq ){
 			}
 		}
 		else
-#endif 
+#endif
 		if( cp->type == CLEAN_UDT_RT ){
 			udt_clean_rt( MAKE_SEQ(seq), cp->func.rid );
 			if( next ){
@@ -1508,7 +1508,7 @@ void cleanup_double( d_ptr dbl ){
 	cleanup_ptr cp, next;
 	cp = dbl->cleanup;
 	dbl->cleanup = 0;
-	
+
 	while( cp ){
 		next = cp->next;
 #ifndef ERUNTIME
@@ -1519,7 +1519,7 @@ void cleanup_double( d_ptr dbl ){
 			}
 		}
 		else
-#endif 
+#endif
 		if( cp->type == CLEAN_UDT_RT ){
 			udt_clean_rt( MAKE_DBL(dbl), cp->func.rid );
 			if( next ){
@@ -1530,7 +1530,7 @@ void cleanup_double( d_ptr dbl ){
 			(cp->func.builtin)( MAKE_DBL( dbl ) );
 			EFree( cp );
 		}
-		
+
 		cp = next;
 	}
 }
@@ -1554,14 +1554,14 @@ void de_reference(s1_ptr a)
 	if (IS_ATOM_DBL(a)) {
 #ifdef EXTRA_CHECK
 		a1 = (s1_ptr)DBL_PTR(a);
-		
+
 		if (a1->ref < 0)
 			RTInternal("f.p. reference count less than 0");
 #endif
 		a = (s1_ptr)DBL_PTR(a);
 		if( ((d_ptr)a)->cleanup != 0 ){
 			cleanup_double( (d_ptr)a );
-			
+
 			// user might have made a reference during cleanup;
 			if( a->ref != 0 ){
 				return;
@@ -1575,7 +1575,7 @@ void de_reference(s1_ptr a)
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
 			cleanup_sequence( a );
-			
+
 			// user might have made a reference during cleanup
 			if( a->ref != 0 ){
 				return;
@@ -1596,7 +1596,7 @@ void de_reference(s1_ptr a)
 				RTInternal("de_reference: invalid object found!");
 #endif
 			if (!IS_ATOM_INT(t)) {
-			
+
 				if (t == NOVALUE) {
 					// end of sequence: back up a level
 					p = (object_ptr)a->length;
@@ -1677,7 +1677,7 @@ void de_reference_i(s1_ptr a)
 		a = (s1_ptr)DBL_PTR(a);
 		if( ((d_ptr)a)->cleanup != 0 ){
 			cleanup_double( (d_ptr)a );
-			
+
 			// user might have made a reference during cleanup
 			if( a->ref != 0 ){
 				return;
@@ -1691,7 +1691,7 @@ void de_reference_i(s1_ptr a)
 		a = SEQ_PTR(a);
 		if( a->cleanup != 0 ){
 			cleanup_sequence( a );
-			
+
 			// user might have made a reference during cleanup
 			if( a->ref != 0 ){
 				return;
@@ -2772,7 +2772,7 @@ static unsigned int hsieh32(char *data, int len, unsigned int starthash)
     hash += hash >> 17;
     hash ^= hash << 25;
     hash += hash >> 6;
-    
+
     return hash;
 }
 
@@ -2795,7 +2795,7 @@ static unsigned int calc_hsieh32(object a)
  	unsigned int lHashVal;
  	int len;
  	char *data;
- 	
+
  	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
 	 	lHashVal = hsieh32(tf.tfc, 4, a*2 - 1);
@@ -2808,7 +2808,7 @@ static unsigned int calc_hsieh32(object a)
 		slen = SEQ_PTR(a)->length;
 		if (slen == 0)
 			return 0;
-			
+
 		lHashVal = slen;
 		ap = SEQ_PTR(a)->base;
 		// Check for a byte array first.
@@ -2859,7 +2859,7 @@ static unsigned int calc_hsieh32(object a)
 				if (av == NOVALUE) {
 					break;  // we hit the end marker
 				}
-	
+
 				if (IS_ATOM_INT(av)) {
 				 	tf.integer = av;
 				 	lHashVal = hsieh32(tf.tfc, 4, lHashVal);
@@ -2874,11 +2874,11 @@ static unsigned int calc_hsieh32(object a)
 			}
 		}
 	}
- 		
+
 
 	return lHashVal;
 }
- 
+
 
 unsigned int calc_fletcher32(object a)
 {
@@ -5009,23 +5009,23 @@ char **make_arg_cv(char *cmdline, int *argc)
 			i++;
 		}
 		if (cmdline[i] == '\0')
-			break;		
+			break;
 		if (cmdline[i] == '\"') {
 			i++; // skip leading double-quote
 			argv[w++] = &cmdline[i]; // start of new quoted word
 			while (cmdline[i] != '\"' &&
 				   cmdline[i] != '\0') {
-			
+
 				/* allow a quote after a backslash,
 				   then we copy over the backslash */
 				if (cmdline[i] == '\\' && cmdline[i+1] == '\"') {
 					/* copy the rest of the string over the backslash */
-					for (j = ++i;cmdline[j-1] = cmdline[j]; ++j) /* do nothing */; 
+					for (j = ++i;cmdline[j-1] = cmdline[j]; ++j) /* do nothing */;
 				}
-					
-				i++;  
+
+				i++;
 			}
-			
+
 		}
 		else {
 			argv[w++] = &cmdline[i]; // start of new unquoted word
@@ -5035,7 +5035,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 				cmdline[i] != '\t' &&
 				cmdline[i] != '\n' &&
 				cmdline[i] != '\0') {
-			
+
 				i++;
 			}
 		}
@@ -5079,7 +5079,7 @@ void system_call(object command, object wait)
 		string_ptr = TempBuff;
 		len_used = TEMP_SIZE;
 	}
-	
+
 	MakeCString(string_ptr, command, len_used);
 	system(string_ptr);
 	if (len > TEMP_SIZE)
@@ -5129,7 +5129,7 @@ object system_exec_call(object command, object wait)
 		string_ptr = TempBuff;
 		len_used = TEMP_SIZE;
 	}
-	
+
 	MakeCString(string_ptr, command, len_used);
 
 	exit_code = 0;
@@ -5634,7 +5634,7 @@ object Command_Line()
 	if (Executing && il_file) {
 #else
 	if (Executing) {
-#endif		
+#endif
 		SEQ_PTR(fe.argv)->ref++;
 		return fe.argv;
 	}
@@ -5706,8 +5706,14 @@ void Cleanup(int status)
 	if (warning_count && display_warnings) {
 		if (TempWarningName) {
 			wrnf = iopen(TempWarningName,"w");
-			for (i = 0; i < warning_count; i++) iprintf(wrnf,"%s",warning_list[i]);
-			close(wrnf);
+			if (wrnf > 0) {
+				for (i = 0; i < warning_count; i++) iprintf(wrnf,"%s",warning_list[i]);
+				close(wrnf);
+			}
+			else
+				screen_output(stderr, "\nUnable to open warning file!\n");
+			free(TempWarningName);
+			TempWarningName = NULL;
 		}
 		else {
 			screen_output(stderr, "\n");
