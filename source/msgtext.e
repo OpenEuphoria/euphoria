@@ -290,6 +290,22 @@ constant StdErrMsgs = {
 	{276, "Can't open [1]\n"},
 	{277, "\nPaused: press any key ..."},
 	{278, "(press any key and window will close ...)"},
+	{279, "Turn on batch processing (do not \"Press Enter\" on error)"},
+	{280, "Specify a configuration file"},
+	{281, "Display all copyright notices"},
+	{282, "Define a preprocessor word"},
+	{283, "Add a directory to be searched for include files"},
+	{284, "Defines a localization qualifier"},
+	{285, "Defines the base name for localization databases"},
+	{286, "Setup a pre-processor"},
+	{287, "Force pre-processing regardless of cache state"},
+	{288, "Enable all warnings"},
+	{289, "Test syntax only, do not execute. Implies batch mode."},
+	{290, "Display the version number"},
+	{291, "Defines warning level"},
+	{292, "Write all warnings to the given file instead of STDOUT"},
+	{293, "Defines warning level by exclusion"},
+
 	$
 }
 
