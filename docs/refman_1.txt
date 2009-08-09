@@ -486,7 +486,7 @@ The following items may be changed or added, one at a time:
 : Resets, or adds to, the list of warnings that will not be issued. This is symmetric of
   the ##-W## switch.
 
-; ##-WF##:
+; ##-WF file_name##:
 : Sets the file where the warnings should go instead of the standard error. Warnings are written
  to that file regardless of whether or not there are errors in the source. If there are no
  warnings, the -wf file is not created. If the -wf file cannot be created, a suitable message
