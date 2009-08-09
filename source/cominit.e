@@ -18,6 +18,7 @@ include std/search.e
 include std/text.e
 include std/map.e as m
 include std/sequence.e
+include std/console.e
 
 include common.e
 include error.e
@@ -228,10 +229,21 @@ export procedure handle_common_options(m:map opts)
 
 			case "version" then
 				show_banner()
+				if find("WIN32_GUI", OpDefines) then
+					if not batch_job then
+						any_key(GetMsgText(278,0), 2)
+					end if
+				end if
+
 				abort(0)
 
 			case "copyright" then
 				show_copyrights()
+				if find("WIN32_GUI", OpDefines) then
+					if not batch_job then
+						any_key(GetMsgText(278,0), 2)
+					end if
+				end if
 				abort(0)
 		end switch
 	end for

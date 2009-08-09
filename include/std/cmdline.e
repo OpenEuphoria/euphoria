@@ -10,6 +10,7 @@ include std/map.e as map
 include std/error.e
 include std/os.e
 include std/io.e as io
+include std/console.e
 
 --****
 -- === Constants
@@ -94,7 +95,13 @@ public enum
 	-- Normally @filename will expand the file names contents as if the
 	-- file's contents were passed in on the command line.  This option
 	-- supresses this behavior.
-	NO_AT_EXPANSION
+	NO_AT_EXPANSION,
+
+	--**
+	-- Supply a message to display and pause just prior to abort() being called.
+	PAUSE_MSG,
+
+	$
 
 --
 
@@ -127,6 +134,15 @@ enum
 	CALLBACK = 5,
 	MAPNAME = 6
 
+sequence pause_msg = ""
+
+procedure local_abort(integer lvl)
+	if length(pause_msg) != 0 then
+		any_key(pause_msg, 1)
+	end if
+
+	abort(lvl)
+end procedure
 
 -- Local routine to validate and reformat option records if they are not in the standard format.
 function standardize_opts(sequence opts, integer add_help_options=1)
@@ -898,6 +914,15 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 				case AT_EXPANSION then
 					use_at = 1
+
+				case PAUSE_MSG then
+					if i < length(parse_options) then
+						i += 1
+						pause_msg = parse_options[i]
+					else
+						crash("PAUSE_MSG was given to cmd_parse with no actually message text")
+					end if
+
 			end switch
 			i += 1
 		end while
@@ -966,7 +991,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				if equal(at_cmds, -1) then
 					printf(2, "Cannot access '@' argument file '%s'\n", {cmd[2..$]})
 					local_help(opts, add_help_rid, cmds, 1)
-					abort(1)
+					local_abort(1)
 				end if
 			end if
 			-- Parse the 'at' commands removing comment lines and empty lines,
@@ -1033,7 +1058,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			ifdef UNITTEST then
 				return 0
 			end ifdef
-			abort(0)
+			local_abort(0)
 		end if
 
 		find_result = find_opt(opts, type_, cmd[from_..$])
@@ -1049,7 +1074,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				-- something is wrong with the option
 				printf(1, "option '%s': %s\n\n", {cmd, find_result[2]})
 				local_help(opts, add_help_rid, cmds, 1)
-				abort(1)
+				local_abort(1)
 			end if
 
 			continue
@@ -1074,7 +1099,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				then
 					printf(1, "option '%s' must have a parameter\n\n", {find_result[2]})
 					local_help(opts, add_help_rid, cmds, 1)
-					abort(1)
+					local_abort(1)
 				end if
 			else
 				param = find_result[4]
@@ -1101,7 +1126,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				then
 					printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
 					local_help(opts, add_help_rid, cmds, 1)
-					abort(1)
+					local_abort(1)
 				else
 					map:put(parsed_opts, opt[MAPNAME], param)
 				end if
@@ -1118,13 +1143,13 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				if length(map:get(parsed_opts, opts[i][MAPNAME])) = 0 then
 					puts(1, "Additional arguments were expected.\n\n")
 					local_help(opts, add_help_rid, cmds, 1)
-					abort(1)
+					local_abort(1)
 				end if
 			else
 				if not map:has(parsed_opts, opts[i][MAPNAME]) then
 					printf(1, "option '%s' is mandatory but was not supplied.\n\n", {opts[i][MAPNAME]})
 					local_help(opts, add_help_rid, cmds, 1)
-					abort(1)
+					local_abort(1)
 				end if
 			end if
 		end if

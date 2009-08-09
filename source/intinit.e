@@ -34,10 +34,17 @@ sequence pretty_opt = PRETTY_DEFAULT
 pretty_opt[DISPLAY_ASCII] = 2
 export procedure intoptions()
 
+	sequence pause_msg = ""
+
+	if find("WIN32_GUI", OpDefines) then
+		if not batch_job then
+			pause_msg = GetMsgText(278,0)
+		end if
+	end if
 
 	expand_config_options()
 	m:map opts = cmd_parse( get_options(),
-		{ NO_VALIDATION_AFTER_FIRST_EXTRA }, Argv)
+		{ NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, Argv)
 
 	sequence tmp_Argv = Argv
 	Argv = Argv[1..2] & GetDefaultArgs()
@@ -57,7 +64,7 @@ export procedure intoptions()
 		show_help( get_options() )
 		if find("WIN32_GUI", OpDefines) then
 			if not batch_job then
-				any_key(GetMsgText(278,0), 2)
+				any_key(pause_msg, 2)
 			end if
 		end if
 
