@@ -15,7 +15,7 @@ Euphoria, and gave them the address: [[http://www.rapideuphoria.com]] of our
 Web page, but we do not require any such acknowledgment.
 
 Icon files, such as ##euphoria.ico## in ##euphoria\bin##, may be distributed
-with or without your changes. 
+with or without your changes.
 
 The high-speed version of the Euphoria Interpreter back-end is written in ANSI
 C, and can be compiled with many different C compilers. The complete source
@@ -24,7 +24,7 @@ Euphoria-coded back-end. The generous [[:Euphoria License|Open source License]]
 allows both personal and commercial use, and unlike many other open source
 licenses, your changes do not have to be made open source.
 
-Some additional 3rd-party legal restrictions might apply when you use the 
+Some additional 3rd-party legal restrictions might apply when you use the
 [[:Euphoria To C Translator]].
 
 = Quick Start
@@ -37,9 +37,9 @@ Some additional 3rd-party legal restrictions might apply when you use the
 conventional languages:
 
 * Euphoric
-** A remarkably simple, flexible, powerful language definition that is easy to 
+** A remarkably simple, flexible, powerful language definition that is easy to
    learn and use.
-* Dynamic 
+* Dynamic
 ** Variables grow or shrink without the programmer having to worry about
    allocating and freeing chunks of memory.  Objects of any size can be assigned
    to an element of a Euphoria sequence (array).
@@ -49,8 +49,8 @@ conventional languages:
 * Compiles
 ** an optimizing [[:Euphoria To C Translator]], that can boost your speed
 even further, often by a factor of 2x to 5x versus the already-fast
-interpreter. 
-* Safe 
+interpreter.
+* Safe
 ** extensive run-time checking for: out-of-bounds
 subscripts, uninitialized variables, bad parameter values for library
 routines, illegal value assigned to a variable and many more. There are
@@ -58,11 +58,11 @@ no mysterious machine exceptions{{{--}}}you will always get a full English
 description of any problem that occurs with  your program at run-time,
 along with a call-stack trace-back and a dump of all of your variable
 values. Programs can be debugged quickly, easily and  more thoroughly.
-* High level 
+* High level
 ** features of the underlying hardware are completely
 hidden. Programs are not aware of word-lengths, underlying bit-level
-representation of values, byte-order etc. 
-* Debugger 
+representation of values, byte-order etc.
+* Debugger
 ** a full-screen
 source debugger and an execution profiler are included, along with a
 full-screen, multi-file editor. On a color monitor, the editor displays
@@ -71,24 +71,24 @@ words, built-in functions, strings, and level of nesting of brackets.
 It optionally performs auto-completion of statements, saving you typing
 effort and reducing syntax errors. This editor is written in Euphoria,
 and the source code is provided to you without restrictions. You are
-free to modify it, add features, and redistribute it as you wish. 
-* Multi-platform 
+free to modify it, add features, and redistribute it as you wish.
+* Multi-platform
 ** Euphoria programs run under Linux, FreeBSD, 32-bit
 //Windows//, and any //DOS// environment, and are not subject to any
 640K memory limitations. You can create programs that use the full
 multi-gigabyte memory of your computer, and a swap file is
 automatically used when a program needs more memory than exists on your
-machine. 
-* Stand-alone 
+machine.
+* Stand-alone
 ** You can make a single, stand-alone executable
-file from your program. 
-* Generic 
+file from your program.
+* Generic
 ** Euphoria routines are naturally
 generic. The example program below shows a  single routine that will
 sort any type of data{{{--}}}integers, floating-point numbers, strings etc.
 Euphoria is not an "object-oriented" language, yet it achieves many of
-the benefits of these languages in a much simpler way. 
-* Free 
+the benefits of these languages in a much simpler way.
+* Free
 ** Euphoria is completely free and open source.
 
 === Example Program
@@ -96,50 +96,50 @@ the benefits of these languages in a much simpler way.
 The following is an example of a complete Euphoria program.
 
 <eucode>
-sequence list, sorted_list                                  
-                                                            
-function merge_sort(sequence x)                             
--- put x into ascending order using a recursive merge sort  
-    integer n, mid                                          
-    sequence merged, a, b                                   
-                                                            
-    n = length(x)                                           
-    if n = 0 or n = 1 then                                  
-        return x  -- trivial case                           
-    end if                                                  
-                                                            
-    mid = floor(n/2)                                        
-    a = merge_sort(x[1..mid])       -- sort first half of x 
+sequence list, sorted_list
+
+function merge_sort(sequence x)
+-- put x into ascending order using a recursive merge sort
+    integer n, mid
+    sequence merged, a, b
+
+    n = length(x)
+    if n = 0 or n = 1 then
+        return x  -- trivial case
+    end if
+
+    mid = floor(n/2)
+    a = merge_sort(x[1..mid])       -- sort first half of x
     b = merge_sort(x[mid+1..n])     -- sort second half of x
-                                                            
-    -- merge the two sorted halves into one                 
-    merged = {}                                             
-    while length(a) > 0 and length(b) > 0 do                
-        if compare(a[1], b[1]) < 0 then                     
-            merged = append(merged, a[1])                   
-            a = a[2..length(a)]                             
-        else                                                
-            merged = append(merged, b[1])                   
-            b = b[2..length(b)]                             
-        end if                                              
-    end while                                               
-    return merged & a & b  -- merged data plus leftovers    
-end function                                                
-                                                            
-procedure print_sorted_list()                               
--- generate sorted_list from list                           
-    list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}                  
-    sorted_list = merge_sort(list)                          
-    ? sorted_list                                           
-end procedure                                               
-                                                            
-print_sorted_list()     -- this command starts the program  
+
+    -- merge the two sorted halves into one
+    merged = {}
+    while length(a) > 0 and length(b) > 0 do
+        if compare(a[1], b[1]) < 0 then
+            merged = append(merged, a[1])
+            a = a[2..length(a)]
+        else
+            merged = append(merged, b[1])
+            b = b[2..length(b)]
+        end if
+    end while
+    return merged & a & b  -- merged data plus leftovers
+end function
+
+procedure print_sorted_list()
+-- generate sorted_list from list
+    list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}
+    sorted_list = merge_sort(list)
+    ? sorted_list
+end procedure
+
+print_sorted_list()     -- this command starts the program
 </eucode>
 
 The above example contains 4 separate commands that are processed in order. The
 first declares two variables: ##list## and ##sorted_list## to be a [[:sequence]]
-(flexible arrays). The second defines a [[:"function"-> functions]], ##merge_sort##(). 
-The third defines a [[:"procedure" -> procedures]], ##print_sorted_list##(). The final 
+(flexible arrays). The second defines a [[:"function"-> functions]], ##merge_sort##().
+The third defines a [[:"procedure" -> procedures]], ##print_sorted_list##(). The final
 command calls procedure ##print_sorted_list##().
 
 The output from the program will be:
@@ -163,7 +163,7 @@ ex allsorts
 </eucode>
 
 to compare timings on several different sorting algorithms for increasing
-numbers of objects. 
+numbers of objects.
 
 For a quick tutorial example of Euphoria programming, see
 ##euphoria\demo\bench\filesort.ex##.
@@ -171,9 +171,9 @@ For a quick tutorial example of Euphoria programming, see
 === Installation
 
 
-To install Euphoria on your machine, first read the file ##install.txt##. 
+To install Euphoria on your machine, first read the file ##install.txt##.
 
-Installation simply involves copying the //euphoria// files to your hard disk 
+Installation simply involves copying the //euphoria// files to your hard disk
 under a directory named ##euphoria##, and then appending the search path of your
 operating system to this directory.
 
@@ -183,9 +183,9 @@ When installed, the ##euphoria## directory will look something like this:
 ** readme.doc
 ** readme.htm
 ** License.txt
-** ##\bin## - Interpreters ##euid.exe##, ##euiw.exe## and ##eui.exe##. Translators 
-    ##euc.exe## and ##eucd.exe##. Or on //Linux/FreeBSD//, 
-    Interpreter ##eui## and Translator ##euc##. There are also utility 
+** ##\bin## - Interpreters ##euid.exe##, ##euiw.exe## and ##eui.exe##. Translators
+    ##euc.exe## and ##eucd.exe##. Or on //Linux/FreeBSD//,
+    Interpreter ##eui## and Translator ##euc##. There are also utility
     programs such as ##ed.bat##, ##guru.bat##, etc.
 ** ##\include## - standard include files
 *** ##\include\std## - the standard Euphoria library include files, e.g.
@@ -203,7 +203,7 @@ When installed, the ##euphoria## directory will look something like this:
 
 The //Linux// subdirectory is not included in the //DOS/Windows// distribution,
 and the ##dos32## and ##win32## subdirectories are not included in the
- //Linux/FreeBSD// distribution. In this manual, directory names are shown 
+ //Linux/FreeBSD// distribution. In this manual, directory names are shown
  using backslash (**\**). //Linux/FreeBSD// users should substitute forward
  slash (**/**).
 
@@ -211,12 +211,12 @@ and the ##dos32## and ##win32## subdirectories are not included in the
 
 The installer copies the required files, and modifies the ##autoexec.bat## for
  you. The ##euphoria\bin## is then on your search path, and the environment
-  variable **EUDIR** is set to the euphoria directory. 
+  variable **EUDIR** is set to the euphoria directory.
 
 ==== Linux and FreeBSD
 
-Euphoria may be installed using either the gzipped tarball, or from a 
-distribution specific package, if available.  
+Euphoria may be installed using either the gzipped tarball, or from a
+distribution specific package, if available.
 
 The gzipped tarball is laid out similarly to the windows directory structure.
 You'll need to manually edit ##/etc/profile## so the ##PATH## contains
@@ -232,7 +232,7 @@ directory in ##/usr/share/euphoria/include##.
 
 === Euphoria programs
 
-Euphoria programs can be written with //any// plain text editor. As a 
+Euphoria programs can be written with //any// plain text editor. As a
 convenience Euphoria comes with ##ed##, an editor written in Euphoria, that
 is handy for editing and executing Euphoria programs. Take a look at
 ##\euphoria\demo## and ##euphoria\tutorial## to see many example programs.
@@ -319,12 +319,12 @@ use the full path to ##eui##, ##~#!/usr/local/bin/eui##.
 If your program is called ##foo.ex##:
 <eucode>
 #!/usr/bin/env eui
-                  
-procedure foo()   
-   ? 2+2          
-end procedure     
-                  
-foo()             
+
+procedure foo()
+   ? 2+2
+end procedure
+
+foo()
 </eucode>
 
 Then if you make your file executable:
@@ -333,7 +333,7 @@ Then if you make your file executable:
 chmod +x foo.ex
 </eucode>
 
-You can just type: 
+You can just type:
 
 <eucode>
 foo.ex
@@ -382,7 +382,7 @@ that you want to edit. Color syntax highlighting is provided for ##.ex##,
 
 Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
-the ##Insert/Delete/Home/End/~PageUp/~PageDown## keys are also active. Under 
+the ##Insert/Delete/Home/End/~PageUp/~PageDown## keys are also active. Under
 //Linux/FreeBSD// some keys may not be available, and alternate keys are
 provided. See [[:Ed - Euphoria Editor]] for a complete description of
 the editing commands.
@@ -390,7 +390,7 @@ the editing commands.
 If you need to understand or modify any detail of the editor's operation, you
 can edit the file ##ed.ex## in ##euphoria\bin## (be sure to make a backup copy
 so you don't lose your ability to edit).  If the name ##ed## conflicts with
-some other command on your system, simply rename the file 
+some other command on your system, simply rename the file
 ##euphoria\bin\ed.bat## to something else. Because this editor is written in
 Euphoria, it is remarkably concise and easy to understand. The same
 functionality implemented in a language like C, would take far more lines of
@@ -406,7 +406,7 @@ popular editors include syntax highlighting for Euphoria or can be made to.
 Euphoria provides you with 4 distinct ways of distributing a program.
 
 * "source-code", with the Euphoria "interpreter"
-* "shroud" into ##.il## code, with Euphoria "backend" 
+* "shroud" into ##.il## code, with Euphoria "backend"
 * "bind" into a Euphoria executable
 * "translate" into a C-compiled executable
 
@@ -487,7 +487,10 @@ The following items may be changed or added, one at a time:
   the ##-W## switch.
 
 ; ##-WF##:
-: Sets the file where the warnings should go instead of the standard error.
+: Sets the file where the warnings should go instead of the standard error. Warnings are written
+ to that file regardless of whether or not there are errors in the source. If there are no
+ warnings, the -wf file is not created. If the -wf file cannot be created, a suitable message
+ is displayed on STDERR and written to ex.err.
 
 The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 
@@ -496,7 +499,7 @@ The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 * Included files are searched for in all included paths, in the following order:
 ## The current path
 ## Paths specified in a ##-I## command line switch, which can also come from any
-   configuration files found. 
+   configuration files found.
 ## Paths listed in the ##EUINC## environment variable, in the order in which they appear
 ## Paths listed in the ##EUDIR## environment variable, in the order in which they appear
 ## The interpreter's path
@@ -505,7 +508,7 @@ The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 
 Euphoria supports reading command line switches from configuration files. The default
 name for the configuration file is ##eu.cfg##. However you can specify different
-ones by using the ##-C## switch. 
+ones by using the ##-C## switch.
 
 ==== Configuration file format
 
@@ -514,7 +517,7 @@ a section header, an include path or a comment.
 * Comments are lines that begin with a double dash {{{"--"}}}. Everything on the line
 is ignored.
 * A section header is a //name// enclosed in square brackets. eg. ##[interpret]##.
-** There are a number of predefined sections. 
+** There are a number of predefined sections.
 ** The lines in a section are only added to the command line switches if they
  apply to the mode that Euphoria is running in.
 *** [win32] Applies to Windows platform only.
