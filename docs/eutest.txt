@@ -55,7 +55,7 @@ itself in the command line and is the option with that requirement.
 * -i: is for specify the include path which will be passed to both the
   interpreter and the translator when interpreting and translating the
   test.
-* -cc: is for specifying the compiler.  This can be any one of -wat, 
+* -cc: is for specifying the compiler.  This can be any one of -wat,
   djg, or lcc.  Each of these represent the kind of compiler we will
   request the translator to use.
 * -process-log: Is for processing a log created by a previous
@@ -81,22 +81,20 @@ include std/unittest.e
 test_report()
 }}}
 
-Please see "Unit Test Framework", currently 13.5, for information on how to 
+Please see "Unit Test Framework", currently 13.5, for information on how to
 construct these files.
 
 
-==== You can generate these files by 
+==== You can generate these files by
 
 === The Error Control Files
 
 There are times when we expect something to fail.  We want good
 EUPHORIA code to do the correct thing and there is a correct thing to
 do also for *bad* code.  The interpreter must return with an error message
-of why it failed and the error must be correct and it must get written to ex.err.  
+of why it failed and the error must be correct and it must get written to ex.err.
 We must thus check the ex.err file to see if it has
-the correct error message.  In the DOS case, we expect tests for things
-that are not for DOS to fail and we want them to fail in a specific
-way.  Often, this will be to say this feature is not available under DOS.
+the correct error message.
 
 If the unit test is ##t_foo.e## then the location for its control file
 can be in the following locations:
@@ -106,24 +104,23 @@ can be in the following locations:
 * ##t_foo.d/control.err##
 
 The //OSNAME// is the name of the operating system.  Which is either
-UNIX, DOS32 or Win32.
+UNIX or Win32.
 
-Now, if ##t_foo.d/DOS32/control.err## exists, then the testing program
-eutest.ex expects t_foo.e to fail when run with the DOS32 interpreter. 
-However, this is not necessarily true for other platforms.  In DOS32,
+Now, if ##t_foo.d/Win32/control.err## exists, then the testing program
+eutest.ex expects t_foo.e to fail when run with the WIN32 interpreter.
+However, this is not necessarily true for other platforms.  In WIN32,
 eutest runs it, watches it fail, then compares the ex.err file to
-##t_foo.d/DOS32/control.err##.  If they ex.err is different from
+##t_foo.d/Win32/control.err##.  If they ex.err is different from
 control.err an error message is written to the log.  Now on, say NetBSD,
 t_file.e is tested with the expectation it will return 0 and the tests
 will all pass unless ##t_foo.d/UNIX/control.err## or ##t_foo.d/control.err## also exist.
-Thus you can have different expectations for differing platforms.  
-Some feature that is not possible to implement under DOS32 can be put into a unit test and the
-resulting ex.err file can be put into a control file for DOS32.
+Thus you can have different expectations for differing platforms.
+Some feature that is not possible to implement under WIN32 can be put into a unit test and the
+resulting ex.err file can be put into a control file for WIN32.
 This means we do not need to have all of these errors that we expect to get
-drawing our attention away from errors that need our attention just because
-we are leaving in place partial support for an arguably already dead platform.
-On the other hand, if an unexpected error message not like ##t_foo.d/DOS32/control.err##
-gets generated in the DOS case then eutest will tell us that.
+drawing our attention away from errors that need our attention.
+On the other hand, if an unexpected error message not like ##t_foo.d/Win32/control.err##
+gets generated in the Windows case then eutest will tell us that.
 
 How do we construct these control files?  You don't really need to, you
 can take an ex.err file that results from running a stable interpreter

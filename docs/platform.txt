@@ -2,39 +2,34 @@
 
 === Introduction
 
-Rapid Deployment Software currently supports Euphoria on many different
+OpenEuphoria currently supports Euphoria on many different
 //platforms//. More platforms will be added in the future.
 
-The first platform is called **DOS32**, since it depends on the DOS
-operating system, but with the CPU operating  in 32-bit (protected)
-mode. 
-
-The second platform is called **WIN32**, since the underlying operating
-system is Microsoft Windows, in particular, the 32-bit version of
+**Windows ,,(tm),,** in particular, the 32-bit version of
 Windows that is used on Windows 95/98/ME, as well as NT/2000/XP and
-later systems. 
+later systems.
 
-The third platform is **Linux**. Linux is based on the UNIX operating
+**Linux**. Linux is based on the UNIX operating
 system. It has recently become very popular  on PCs. There are many
 distributors of Linux, including Red Hat, Debian, Caldera, etc. Linux
 can be obtained on a CD for a very low price. Linux  is an open-source
 operating system.
 
-The fourth platform is **FreeBSD**. FreeBSD is also based on the UNIX
+**FreeBSD**. FreeBSD is also based on the UNIX
 operating system. It is very popular on  Internet server machines. It's
 also open source.
 
-The fifth platform is Apple's **OS X**. OS X is also based on the UNIX
+Apple's **OS X**. OS X is also based on the UNIX
 operating system. While it is closed source, it is gaining a wide
 following due to it's ease of use and power.
 
-The sixth platform is **Sun OS**.  Sun OS was developed by and is owned
+**Sun OS**.  Sun OS was developed by and is owned
 by SUN Microsystems Inc.  It is also based on UNIX.
 
-The seventh platform is **Open BSD**. Open BSD is also a UNIX-like
+**Open BSD**. Open BSD is also a UNIX-like
 Operating System and is developed by volunteers.
 
-The eighth platform is **Net BSD**. Net BSD is also a UNIX-like
+**Net BSD**. Net BSD is also a UNIX-like
 Operating System  and is designed to be easily  portable to other
 hardware platforms.
 
@@ -42,16 +37,12 @@ Euphoria source files use various file extensions. The common
 extensions are:
 
 | .e | Euphoria include file |
-| .ed | Euphoria include file for the DOS platform only |
 | .ew | Euphoria include file for a Windowed (GUI) application only |
 | .ex | Console main program file |
 | .exw | Windowed (GUI) main program file |
-| .exd | DOS main program file |
 
-The Euphoria for DOS32+WIN32 installation file contains several  
-**.exe** files. The first is called **euid.exe**. It runs Euphoria
-programs on the DOS32 platform. The second is **eui.exe**. It runs
-Euphoria programs on the WIN32 platform. 
+The Euphoria for Windows installation file contains **eui.exe**. It runs
+Euphoria programs on the Windows 32bit platform.
 
 The Euphoria for Linux .tar file contains only **eui**. It runs
 Euphoria programs on the Linux platform.
@@ -60,88 +51,21 @@ The FreeBSD version of Euphoria is installed by first installing the Linux
 version of Euphoria, and then replacing eui, by the version of eui for
 FreeBSD.
 
-Sometimes you'll find that the majority of your code will be the 
-same on all platforms, but some small parts will have to be 
-written differently for each platform. Use the [[:platform]] built-in function to 
+Sometimes you'll find that the majority of your code will be the
+same on all platforms, but some small parts will have to be
+written differently for each platform. Use the [[:platform]] built-in function to
 tell you which platform you are currently running on. Note that
 platform() returns the same value (3) on both Linux and FreeBSD,
 since those systems are so similar. OS X returns (4) as it is different enough
 to warrant it's own identifier.
 
-=== The DOS32 Platform
-
-If you are new to programming, you might want to start with
-**exd.exe** on the DOS32 platform. You should try to understand the
-essential core of Euphoria, before you leap into Windows GUI
-programming. All versions of Windows (even XP), let you open a Command
-Prompt text window, and run DOS programs.
-
-**Euphoria programs run in 32-bit (protected) mode and
-have access to all of the megabytes of memory on the machine.**
-
-Many programming languages for DOS limit 
-you to 16-bit //real// mode. This makes it impossible to
-access more than 640K 
-of memory at one time. Your machine might have 256Mb of memory, but your 
-program will run out of memory after using just 640K. QBasic is even worse. It 
-limits you to just 160K.
-
-DOS32 programs can flip the screen into either
-//text// mode or //pixel graphics// mode, and Euphoria provides
-you with library routines for both modes.
-There is rarely any need to call DOS directly, but you can do 
-this using the a [[:dos_interrupt]] routine. You can also use [[:peek]] and
-[[:poke]] to access special memory locations to achieve high-speed graphics
-and get access to low-level details of the system.
-
-Under **DOS32 for Windows 95 and later systems**,
-Euphoria files can have long filenames, and 
-programs can open long filename files for reading and writing, but not for 
-creating a new file.
-
-==== Swap File
-
-Under **pure DOS, outside of Windows**,
-there is no system a swap file so the
-DOS-extender built in to **ex.exe** will
-create one for possible use by your program. 
-This file is created when your Euphoria program starts up under DOS,
-and is deleted when your program terminates. It starts as a 0-byte file and 
-grows only if actual swapping is needed. It is created in the directory on 
-your hard disk pointed to by the TEMP or TMP environment variable. If neither
-of these variables have been set, it is created in the directory containing 
-either **ex.exe** or your ##bound## Euphoria **.exe** file.
-
-You can force it to be created in a particular directory by setting the
-CAUSEWAY environment variable as follows:
-
-{{{
-SET CAUSEWAY=SWAP:path
-}}}
-
-where **path** is the full path to the directory. You can
-prevent the creation of a DOS swap file with:
-
-{{{
-SET CAUSEWAY=NOVM
-}}}
-
-When disk swapping activity occurs, your program will run correctly but will 
-slow down. A better approach might be to free up more extended memory by 
-cutting back on SMARTDRV and other programs that reserve large amounts of 
-extended memory for themselves.
-
-When your free disk space is less than the amount of RAM in your machine,
-no swap file will be created.
-
 === The WIN32 Platform
 
-Euphoria for WIN32 (**eui.exe**) has a lot in common with Euphoria for DOS32. 
 With WIN32 you also have access to all of the memory on your machine.
-Most library routines work the same way on each platform. Many existing 
-DOS32 text mode programs can be run using
+Most library routines work the same way on each platform. Many existing
+text mode programs written for MS-DOS can be run using
 **eui** without any change. With **eui** you can run programs from the
-command line, and display text on a standard 
+command line, and display text on a standard
 (typically 25 line x 80 column) DOS window. The DOS window is known as the
 ##//console//## in Windows terminology. Euphoria makes the
 transition from DOS32 text mode programming, to WIN32 console programming, trivial.
@@ -150,10 +74,10 @@ transition from DOS32 text mode programming, to WIN32 console programming, trivi
 if desired, you can create real Windows GUI windows.**
 
 A console window will be created automatically when a WIN32 Euphoria program
-first outputs something to the screen or reads from the keyboard. 
-You will also see a console window when you read standard input or write to 
+first outputs something to the screen or reads from the keyboard.
+You will also see a console window when you read standard input or write to
 standard output, even when these have been redirected to files. The console
-will disappear when your program finishes execution, or via a call to 
+will disappear when your program finishes execution, or via a call to
 [[:free_console]].
 If there is something on the console that you want your
 user to read, you should prompt him and wait for his input before terminating.
@@ -168,18 +92,18 @@ which will wait for the user enter something.
 
 If you want to run Euphoria programs without popping up a new console
 window use eui.exe otherwise use euiw.exe. eui.exe uses the current
-console window, just like a DOS program would when using ex.exe.
+console window.
 
 Under WIN32, long filenames are fully supported for reading and writing and
 creating.
 
 ==== High-Level WIN32 Programming
 
-Thanks to **David Cuny**, **Derek Parnell**, **Judith Evans** 
+Thanks to **David Cuny**, **Derek Parnell**, **Judith Evans**
 and many others, there's a package called **Win32Lib** that
 you can use to develop Windows GUI applications in Euphoria. It's
 remarkably easy to learn and use, and comes with good documentation and
-many small example programs. You can download Win32Lib and Judith's IDE 
+many small example programs. You can download Win32Lib and Judith's IDE
 from the [[http://www.RapidEuphoria.com | Euphoria Web site]].
 **Andrea Cini** has also developed a similar, somewhat smaller package
 called **EuWinGUI**. It's also available from our site.
@@ -194,8 +118,8 @@ Euphoria routines. Call-backs are necessary when you create a graphical
 user interface.
 
 To make full use of the WIN32 platform, you need documentation on 32-bit
-Windows programming, in particular the WIN32 Application Program Interface 
-(API), including the C structures defined by the API. There is a large 
+Windows programming, in particular the WIN32 Application Program Interface
+(API), including the C structures defined by the API. There is a large
 WIN32.HLP file (c) Microsoft that is available with many programming tools
 for Windows. There are numerous books available on the
 subject of WIN32 programming for {{{C/C++}}}. You can adapt most of what you find
@@ -208,39 +132,34 @@ Web site.
 
 === The Unix Platforms
 
-Euphoria for Linux, FreeBSD and OS X share certain features
-with Euphoria for DOS32, and share other features with Euphoria for WIN32. 
+As with WIN32, you can write text on a console, or xterm window,
+in multiple colors and at any line or column position.
 
-As with WIN32 and DOS32, you can write text on a console, or xterm window, 
-in multiple colors and at any line or column position. 
-
-Just as in WIN32, you can call C routines in shared libraries 
+Just as in WIN32, you can call C routines in shared libraries
 and C code can call back to your Euphoria routines.
 
 Euphoria for Unix does not have integrated support for
-pixel graphics like DOS32, but Pete Eberlein has created a 
-Euphoria interface to **svgalib**. 
+pixel graphics, but Pete Eberlein has created a
+Euphoria interface to **svgalib**.
 
-Easy X windows GUI programming is available using either Irv Mullin's 
+Easy X windows GUI programming is available using either Irv Mullin's
 EuGTK interface to the GTK GUI library, or wxEuphoria developed by
 Matt Lewis. wxEuphoria also runs on Windows.
 
-When porting code from DOS or Windows to Unix, you'll notice the following differences:
+When porting code from Windows to Unix, you'll notice the following differences:
 
-* Some of the numbers assigned to the 16 main colors in graphics.e 
+* Some of the numbers assigned to the 16 main colors in graphics.e
 are different. If you use the constants defined in graphics.e you won't
 have a problem. If you hard-code your color numbers you will see
 that blue and red have been switched etc.
 * The key codes for special keys such as Home, End, arrow keys
 are different, and there are some additional differences when you run
 under XTERM.
-* The Enter key is code 10 (line-feed) on Linux, where on DOS/Windows
+* The Enter key is code 10 (line-feed) on Linux, where on Windows
 it was 13 (carriage-return).
-* Linux and FreeBSD use '/' (slash) on file paths. DOS and Windows use '\' (backslash).
-* Highly specialized things such as dos_interrupt() obviously won't work on
-Linux or FreeBSD.
-* Calls to system() and system_exec() that contain DOS commands
-will obviously have to be changed to the corresponding Linux or FreeBSD 
+* Linux and FreeBSD use '/' (slash) on file paths. Windows use '\' (backslash).
+* Calls to system() and system_exec() that contain Windows commands
+will obviously have to be changed to the corresponding Linux or FreeBSD
 command. e.g. "DEL" becomes "rm", and "MOVE" becomes "mv".
 
 === Interfacing with C Code (WIN32, Linux, FreeBSD)
@@ -265,15 +184,15 @@ To call a C function in a shared library file you must perform the following ste
 # Define the C function, by calling [[:define_c_func]] or [[:define_c_proc]].
 This tells Euphoria the number and type of the arguments as well as the
 type of value returned.\\
-Euphoria currently supports all C integer and pointer types as 
-arguments and return values. It also supports floating-point arguments 
-and return values (C double type). It is currently not possible to 
-pass C structures by value or receive a structure as a function 
+Euphoria currently supports all C integer and pointer types as
+arguments and return values. It also supports floating-point arguments
+and return values (C double type). It is currently not possible to
+pass C structures by value or receive a structure as a function
 result, although you can certainly pass a pointer to a structure
 and get a pointer to a structure as a return value. Passing C
 structures by value is rarely required for operating system calls.\\
 Euphoria also supports all forms of Euphoria data - atoms and
-arbitrarily-complex sequences, as arguments to translated/compiled 
+arbitrarily-complex sequences, as arguments to translated/compiled
 Euphoria routines.
 # Call the C function by calling [[:c_func]] or [[:c_proc]]
 <eucode>
@@ -285,7 +204,7 @@ integer LoadIcon, icon
 user32 = open_dll("user32.dll")
 
 -- The name of the routine in user32.dll is "LoadIconA".
--- It takes a pointer and an 32-bit integers as arguments, 
+-- It takes a pointer and an 32-bit integers as arguments,
 -- and it returns a 32-bit integer.
 LoadIcon = define_c_func(user32, "LoadIconA", {C_POINTER, C_INT}, C_INT)
 
@@ -327,8 +246,8 @@ You can read and write members of C structures using [[:peek]] and [[:poke]], or
 [[:peek4u]], [[:peek4s]], and [[:poke4]]. You can allocate space for
 structures using [[:allocate]].\\
 You must calculate the offset of a member of a C structure. This is usually
-easy, because anything in C that needs 4 bytes will be assigned 4 
-bytes in the structure. Thus C int's, char's, unsigned int's, pointers to 
+easy, because anything in C that needs 4 bytes will be assigned 4
+bytes in the structure. Thus C int's, char's, unsigned int's, pointers to
 anything, etc. will all take 4 bytes. If the C declaration looks like:
 
 {{{
@@ -348,9 +267,9 @@ atom p = allocate(16) -- size of "struct example"
 </eucode>
 
 The address that you get from [[:allocate]] is always at least 4-byte aligned.
-This is useful, since WIN32 structures are supposed to start on a 
-4-byte boundary. Fields within a C structure that are 4-bytes or more in size 
-must start on a 4-byte boundary in memory. 2-byte fields must start on a 
+This is useful, since WIN32 structures are supposed to start on a
+4-byte boundary. Fields within a C structure that are 4-bytes or more in size
+must start on a 4-byte boundary in memory. 2-byte fields must start on a
 2-byte boundary. To achieve this you may have to leave small gaps within
 the structure. In practice it is not hard to align most structures since
 90% of the fields are 4-byte pointers or 4-byte integers.
@@ -395,25 +314,23 @@ end if
 
 The Euphoria code that accesses C routines and data structures
 may look a bit ugly, but it will typically form just a small
-part of your program, especially if you use Win32Lib, 
-EuWinGUI, or Irv Mullin's X Windows library. 
+part of your program, especially if you use Win32Lib,
+EuWinGUI, or Irv Mullin's X Windows library.
 Most of your program will be written in pure Euphoria,
 which will give you a big advantage over those forced to code in C.
 
 ==== Call-backs to your Euphoria routines
 
-When you create a window, the Windows operating system will need to call your 
-Euphoria routine. This is a strange concept for DOS programmers who are used
-to calling operating system routines, but are not used to having the operating
-system call //their// routine.
-To set this up, you must get a 32-bit "call-back" 
-address for your routine and give it to Windows. For example (taken from 
+When you create a window, the Windows operating system will need to call your
+Euphoria routine.
+To set this up, you must get a 32-bit "call-back"
+address for your routine and give it to Windows. For example (taken from
 **demo\win32\window.exw**):
 <eucode>
 integer id
 atom WndProcAddress
 
-id = routine_id("WndProc") 
+id = routine_id("WndProc")
 
 WndProcAddress = call_back(id)
 </eucode>
@@ -423,7 +340,7 @@ Euphoria procedure or function by returning an integer value. This
 value can be used later to call the routine. You can also use it as an
 argument to the [[:call_back]] function.
 
-In the example above, The 32-bit //call-back address//, ##~WndProcAddress##, 
+In the example above, The 32-bit //call-back address//, ##~WndProcAddress##,
 can be stored in a C structure and passed to Windows via the
 ~RegisterClass() C API function.\\
 **This gives Windows the ability to call the Euphoria routine, ~WndProc(),
@@ -449,8 +366,8 @@ The values that are passed to your Euphoria routine can be any 32-bit
 choose to interpret large positive numbers as negative if that is desirable.
 For instance,
 if a C routine tried to pass you -1, it would appear as hex FFFFFFFF.
-If a value is passed that does not fit the type you have chosen for a 
-given parameter, a Euphoria type-check error may occur (depending on 
+If a value is passed that does not fit the type you have chosen for a
+given parameter, a Euphoria type-check error may occur (depending on
 [[:type_check]]) \\
 No error will occur if you declare all parameters as ##atom##.
 
@@ -458,9 +375,9 @@ Normally, as in the case of ~WndProc() above, Windows initiates these
 call-backs to your routines. **It is also
 possible for a C routine in any .dll to call one of your Euphoria
 routines.** You just have to declare the C routine properly,
-and pass it the call-back address. 
+and pass it the call-back address.
 
-Here's an example of a WATCOM C routine that takes your call-back address as 
+Here's an example of a WATCOM C routine that takes your call-back address as
 its only parameter, and then calls your 3-parameter Euphoria routine:
 
 {{{
@@ -476,14 +393,14 @@ unsigned EXPORT APIENTRY test1(
 }
 }}}
 
-The C declaration above declares test1 as an externally-callable C 
-routine that takes a single parameter. The single parameter is a pointer 
+The C declaration above declares test1 as an externally-callable C
+routine that takes a single parameter. The single parameter is a pointer
 to a routine that takes 3 unsigned parameters - i.e. your Euphoria routine.
 
 In WATCOM C, "CALLBACK" is the same as "{{{__stdcall}}}".
 This is the calling convention that's used to call WIN32 API routines,
 and the C pointer to your Euphoria routine should be declared this way too,
-or you'll get an error when your Euphoria routine tries to return to 
+or you'll get an error when your Euphoria routine tries to return to
 your .DLL.
 
 If you need your Euphoria routine to be called using the {{{__cdecl}}}
@@ -497,9 +414,9 @@ The plus sign and braces indicate the {{{__cdecl}}} convention. The simple case,
 with no braces, is {{{__stdcall}}}.
 
 In the example above, your Euphoria routine will be passed the
-three values 111, 222 and 333 
-as arguments. Your routine will return a value to test1. That value will then 
-be immediately returned to the caller of test1 (which could be at some 
+three values 111, 222 and 333
+as arguments. Your routine will return a value to test1. That value will then
+be immediately returned to the caller of test1 (which could be at some
 other place in your Euphoria program).
 
 A call-back address can be passed to the Linux or FreeBSD signal()

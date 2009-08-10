@@ -4,9 +4,9 @@
 
 * If your program is fast enough, forget about speeding it up.
    Just make it simple and readable.
-* If your program is way too slow, the tips below will probably not solve 
+* If your program is way too slow, the tips below will probably not solve
    your problem. You should find a better overall algorithm.
-* The easiest way to gain a bit of speed is to turn off run-time 
+* The easiest way to gain a bit of speed is to turn off run-time
  type-checking. Insert the line:
 <eucode>
            without type_check
@@ -17,7 +17,7 @@
    Most of the standard include files do some user-defined type-checking.
    A program that is completely without user-defined type-checking
    might still be speeded up slightly.
-\\ 
+\\
    Also, be //sure// to remove, or comment-out, any
 <eucode>
            with trace
@@ -59,15 +59,15 @@
    The "y = 0" test will only be made when "x > 20" is true.
 \\
    For maximum speed, you can order your tests. Do "x > 20" first if it is
-   more likely to be false than "y = 0". 
-\\ 
-   In general, with a condition "A and B", Euphoria will not evaluate the 
-   expression B, when A is false (zero). Similarly, with a condition like 
+   more likely to be false than "y = 0".
+\\
+   In general, with a condition "A and B", Euphoria will not evaluate the
+   expression B, when A is false (zero). Similarly, with a condition like
    "A or B", B will not be evaluated when A is true (non-zero).
-\\ 
-   Simple if-statements are highly optimized. 
-   With the current version of the interpreter, 
-   nested simple if's that compare integers are usually a bit faster 
+\\
+   Simple if-statements are highly optimized.
+   With the current version of the interpreter,
+   nested simple if's that compare integers are usually a bit faster
    than a single short-circuit if-statement e.g.:
 <eucode>
        if x > 20 then
@@ -91,14 +91,14 @@
 <eucode>
            constant MAX = 1000
 </eucode>
-* There is no performance penalty for having lots of comments in your 
+* There is no performance penalty for having lots of comments in your
    program. Comments are completely ignored. They are not executed in any way.
    It might take a few milliseconds longer for the initial load of your
    program, but that's a very small price to pay for future maintainability,
-   and when you **bind** your program, 
+   and when you **bind** your program,
    or **translate** your program to C,
    all comments are stripped out, so the cost becomes absolute zero.
-   
+
 === Measuring Performance
 
  In any programming language, and especially in Euphoria,
@@ -106,7 +106,7 @@
  drawing conclusions about performance**.
 
  Euphoria provides both **execution-count profiling**, as well as
- **time profiling** (**DOS32** only). 
+ **time profiling**.
  You will often be surprised by the results of these profiles. Concentrate
  your efforts on the places in your program that are using a high percentage
  of the total time (or at least are executed a large number of times.)
@@ -123,7 +123,7 @@
         end for
         ? time() - t
 </eucode>
- You might rewrite the small chunk of code in different ways to see which way 
+ You might rewrite the small chunk of code in different ways to see which way
  is faster.
 
 === How to Speed-Up Loops
@@ -141,20 +141,20 @@
         for i = 0 to 199 do
             poke(screen_memory+i*320, 0)
         end for
-</eucode>  
+</eucode>
   becomes:
 <eucode>
         x = screen_memory
         for i = 0 to 199 do
             poke(x, 0)
-            x = x + 320 
+            x = x + 320
         end for
 </eucode>
 
 === Saving Results in Variables
 
 * It's faster to save the result of a calculation in a variable, than it is to
-   recalculate it later. Even something as simple as a subscript operation, 
+   recalculate it later. Even something as simple as a subscript operation,
    or adding 1 to a variable is worth saving.
 * When you have a sequence with multiple levels of subscripting,
    it is faster to change code like:
@@ -171,16 +171,16 @@
            end for
            y[a] = ya
 </eucode>
-    So you are doing 2 subscript operations per iteration of the loop, rather 
+    So you are doing 2 subscript operations per iteration of the loop, rather
     than 4. The operations, ya = y[a] and y[a] = ya are very cheap.
     **They just copy a pointer.** They don't copy a whole sequence.
 * There is a slight cost when you create a new sequence using **{a,b,c}**.
-   If possible, move this operation out of a critical loop by storing it 
+   If possible, move this operation out of a critical loop by storing it
    in a variable before the loop, and referencing the variable inside the
    loop.
 
 === In-lining of Routine Calls
- If you have a routine that is rather small and fast, but is called a huge 
+ If you have a routine that is rather small and fast, but is called a huge
  number of times, you will save time by doing the operation
  //in-line//, rather than calling the routine. Your code may
  become less readable, so it might be better to in-line only at places that
@@ -202,19 +202,19 @@
             z[i] = x[i] + y[i]
         end for
 </eucode>
- In most interpreted languages, it is much faster to process a whole sequence 
+ In most interpreted languages, it is much faster to process a whole sequence
  (array) in one statement, than it is to perform scalar operations
  in a loop. This is because the interpreter has a large amount of overhead
  for each statement it executes.\\
- Euphoria is different. Euphoria is very lean, with little 
- interpretive overhead, so operations on sequences don't always win. 
+ Euphoria is different. Euphoria is very lean, with little
+ interpretive overhead, so operations on sequences don't always win.
  The only solution is to time it both ways. The per-element cost is usually
- lower when you process a sequence in one statement, but there are overheads 
- associated with allocation and deallocation of sequences that 
+ lower when you process a sequence in one statement, but there are overheads
+ associated with allocation and deallocation of sequences that
  may tip the scale the other way.
 
 === Some Special Case Optimizations
- Euphoria automatically optimizes certain special cases. ##x## and ##y## 
+ Euphoria automatically optimizes certain special cases. ##x## and ##y##
  below could  be variables or arbitrary expressions.
 <eucode>
         x + 1      -- faster than general x + y
@@ -226,7 +226,7 @@
         floor(x/2) -- faster than floor(x/y)
 </eucode>
 
- x below is a simple variable, y is any variable or expression:  
+ x below is a simple variable, y is any variable or expression:
 <eucode>
         x = append(x, y)   -- faster than general z = append(x, y)
         x = prepend(x, y)  -- faster than general z = prepend(x, y)
@@ -264,7 +264,7 @@ For example:
 </eucode>
 
  whenever left-hand-side contains at least 2 subscripts, or at least
- one subscript and a slice. In all simpler cases the two forms run at 
+ one subscript and a slice. In all simpler cases the two forms run at
  the same speed (or very close to the same).
 
 === Pixel-Graphics Tips
@@ -282,23 +282,9 @@ For example:
 * When plotting pixels, you may find that modes 257 and higher are fast near
    the top of the screen, but slow near the bottom.
 
-=== Text-Mode Tips
- Writing text to the screen using **puts()** or **printf()** is rather slow.
- If necessary, in **DOS32**, you can do it much faster by poking into the
- **video memory**, or by using **display_text_image()**. There is a very
- large overhead on each puts() to the screen, and a relatively small
- incremental cost per character. The overhead with  **euiw** (WIN32) is
-  especially high (on Windows 95/98/ME at least). Linux and FreeBSD
-  are somewhere between DOS32 and WIN32 in text output speed. It therefore
-  makes sense to build up a long string before calling puts(), rather than calling it 
- for each character. There is no advantage to building up a string 
- longer than one line however. 
-   
- The slowness of text output is mainly due to operating system overhead. 
-
 === Library Routines
- Some common routines are extremely fast. You probably couldn't do the job 
- faster any other way, even if you used C or assembly language. Some of these 
+ Some common routines are extremely fast. You probably couldn't do the job
+ faster any other way, even if you used C or assembly language. Some of these
  are:
 * ##mem_copy()##
 * ##mem_set()##
@@ -347,33 +333,33 @@ For example:
 
 === Sorting
 
- In most cases you can just use the //shell sort// routine in ##sort.e##. 
+ In most cases you can just use the //shell sort// routine in ##sort.e##.
 
- If you have a huge amount of data to sort, you might try one of the sorts 
+ If you have a huge amount of data to sort, you might try one of the sorts
  in **demo\allsorts.e** (e.g.
- //great sort//). If your data is too big to fit in 
- memory, don't rely on Euphoria's automatic memory swapping capability. 
- Instead, sort a few thousand records at a time, and write them out to a 
- series of temporary files. Then merge all the sorted temporary files into 
- one big sorted file. 
+ //great sort//). If your data is too big to fit in
+ memory, don't rely on Euphoria's automatic memory swapping capability.
+ Instead, sort a few thousand records at a time, and write them out to a
+ series of temporary files. Then merge all the sorted temporary files into
+ one big sorted file.
 
- If your data consists of integers only, and they are all in a fairly 
+ If your data consists of integers only, and they are all in a fairly
  narrow range, try the //bucket sort// in **demo\allsorts.e**.
 
 === Taking Advantage of Cache Memory
- As CPU speeds increase, the gap between the speed of the on-chip cache 
+ As CPU speeds increase, the gap between the speed of the on-chip cache
  memory and the speed of the main memory or DRAM (dynamic random access memory)
- becomes ever greater. You might have 256 Mb of DRAM on your computer, but the 
- on-chip cache is likely to be only 8K (data) plus 8K (instructions) on a 
+ becomes ever greater. You might have 256 Mb of DRAM on your computer, but the
+ on-chip cache is likely to be only 8K (data) plus 8K (instructions) on a
  Pentium, or 16K (data) plus 16K (instructions) on a Pentium with MMX or a
  Pentium II/III. Most machines will also have a "level-2" cache of 256K or 512K.
 
  An algorithm that steps through a long sequence of a couple of thousand
- elements or more, many times, from beginning to end, performing one 
- small operation on each element, will not make good use of the on-chip data 
- cache. It might be better to go through once, applying several operations to 
- each element, before moving on to the next element. The same argument holds 
- when your program starts swapping, and the least-recently-used data is moved 
+ elements or more, many times, from beginning to end, performing one
+ small operation on each element, will not make good use of the on-chip data
+ cache. It might be better to go through once, applying several operations to
+ each element, before moving on to the next element. The same argument holds
+ when your program starts swapping, and the least-recently-used data is moved
  out to disk.
 
  These cache effects aren't as noticeable in Euphoria as they are in
@@ -386,9 +372,9 @@ For example:
  You might need to call C or machine code because of something that can't be
  done directly in Euphoria, or you might do it for improved speed.
 
- To boost speed, the machine code or C routine needs to do a significant 
- amount of work on each call, otherwise the overhead of setting up the 
- arguments and making the call will dominate the time, and it might not 
+ To boost speed, the machine code or C routine needs to do a significant
+ amount of work on each call, otherwise the overhead of setting up the
+ arguments and making the call will dominate the time, and it might not
  gain you much.
 
  Many programs have some inner core operation that consumes most of the
@@ -399,7 +385,7 @@ For example:
 === Using The Euphoria To C Translator
 From version 3.0, the full Euphoria To C Translator is included in the installation package.
 It will translate any Euphoria program into a set of C source files that you
-can compile using a C compiler. 
+can compile using a C compiler.
 
 The executable file that you get using the Translator should run the same,
 but faster than when you use the interpreter. The speed-up can be anywhere

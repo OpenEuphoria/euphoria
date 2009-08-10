@@ -45,7 +45,7 @@ these routines after each assignment to a variable.  At other times, you may
 know exactly which routine or routines you are interested in tracing, and you
 will want to select only these ones. Of course, once you are in the trace
 window, you can  skip viewing the execution of any routine by pressing
-down-arrow on the keyboard rather than Enter. However, once inside a routine, you must step 
+down-arrow on the keyboard rather than Enter. However, once inside a routine, you must step
 through till it returns, even if stepping in was an mistake.
 
 Only traceable lines can appear in **ctrace.out** or in **ex.err** as "Traced
@@ -62,7 +62,7 @@ with trace
 trace(1)
 </eucode>
 
-However, you cannot dynamically set or free breakpoints while tracing. You must abort program, 
+However, you cannot dynamically set or free breakpoints while tracing. You must abort program,
 edit, change setting, save and run again.
 
 at the top of your program, so you can start tracing from the beginning of
@@ -116,7 +116,7 @@ When a ##trace(1)## or ##trace(2)## statement is
 executed by the interpreter, your main output screen is saved and a **trace
 screen** appears.  It shows a view of your program with the statement that will
 be executed next highlighted, and several statements before and after showing
-as well. You cannot scroll the window further up or down though. Several lines at the bottom 
+as well. You cannot scroll the window further up or down though. Several lines at the bottom
 of the screen are reserved for displaying variable names and values. The top line shows the commands that you can enter at this point:
 
 |= Command |= Action |
@@ -180,9 +180,9 @@ The source code for a statement is written to **ctrace.out**, and flushed, just
 //before// the statement is performed, so the crash will likely have happened
 //during// execution of the final statement that you see in **ctrace.out**.
 
-=== Profiling 
+=== Profiling
 
-If you specify a ##with profile## or ##with profile_time## (DOS32/Windows only) directive,
+If you specify a ##with profile## or ##with profile_time## (Windows only) directive,
 then a special listing of your program, called a
 //profile//, will be produced by the interpreter when your program finishes
 execution.  This listing is written to the file **ex.pro** in the current
@@ -202,7 +202,7 @@ Execution-count profiling shows precisely how many times each statement in your
 program was executed. If the statement was never executed the count field will
 be blank.
 
-Time profiling (//DOS32// only) shows an estimate of the total time spent executing
+Time profiling shows an estimate of the total time spent executing
 each statement. This estimate is expressed as a percentage of the time spent
 profiling your program. If a statement was never sampled, the percentage field
 will be blank. If you see 0.00 it means the statement was sampled, but not
@@ -215,18 +215,18 @@ this file with the Euphoria editor to see a color display.
 
 Profiling can help you in many ways:
 
-* it lets you see which statements are heavily executed, as a clue to speeding up your 
+* it lets you see which statements are heavily executed, as a clue to speeding up your
   program
 * it lets you verify that your program is actually working the way you intended
 * it can provide you with statistics about the input data
-* it lets you see which sections of code were never tested - don't let your users be the 
+* it lets you see which sections of code were never tested - don't let your users be the
   first!
 
 Sometimes you will want to focus on a particular action performed by your
 program. For example, in the **Language War** game, we found that the game in
 general was fast enough, but when a planet exploded, shooting 2500 pixels off
 in all directions, the game slowed down. We wanted to speed up the explosion
-routine. We didn't care about the rest of the code. The solution was to call ##profile(0)## 
+routine. We didn't care about the rest of the code. The solution was to call ##profile(0)##
 at the beginning of Language War,
 just after ##with profile_time##, to turn off profiling, and then to call
 ##profile(1)## at the beginning of the explosion routine and ##profile(0)## at the end

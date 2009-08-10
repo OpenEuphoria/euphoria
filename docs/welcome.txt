@@ -3,7 +3,7 @@
 
 == Introduction
 
-Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical 
+Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical
 **O**bjects for **R**obust **I**nterpreted **A**pplications//.
 
 Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
@@ -20,7 +20,7 @@ crowd of conventional languages.
 * open source
 * free for personal and commercial use
 * produces royalty-free, stand-alone, programs
-* multi-platform {{{--}}} Windows, Linux, FreeBSD, OSX, and even Dos
+* multi-platform {{{--}}} Windows, Linux, FreeBSD, and OSX
 * provides a choice of multi-platform gui toolkits: IUP, GTK, wxWindows
 * features a Windows IDE and gui library written in Euphoria
 * colored-syntax editors, profiling, and tracing of code
@@ -45,12 +45,12 @@ What follows from this design are some advantages over conventional languages:
 
 * the language syntax is smaller {{{--}}} and thus easier to learn
 * the language syntax is consistent {{{--}}} and thus easier to program
-* routines are more generic {{{--}}} a routine used for strings may also be 
+* routines are more generic {{{--}}} a routine used for strings may also be
 applied to any data structure
 * a higher level view of programming {{{--}}} because sequences encompass
 conventional lists, arrays, tables, tuples, ..., and all other
 data-structures.
-* sequences are dynamic {{{--}}} you may create and destroy at will {{{--}}} and 
+* sequences are dynamic {{{--}}} you may create and destroy at will {{{--}}} and
 modify them to any size and complexity
 * it supports both //static// data typing and //dynamic// data typing.
 
@@ -60,9 +60,9 @@ modify them to any size and complexity
 languages {{{--}}} Euphoria makes a better website server
 * Euphoria programs can be translated then compiled as C programs {{{--}}} fast
 programs become even faster
-* Euphoria lets you write multi-tasking programs {{{--}}} independent of the 
+* Euphoria lets you write multi-tasking programs {{{--}}} independent of the
 platform you are using
-* Euphoria has a coherent design {{{--}}} Euphoria programmers enjoy programming 
+* Euphoria has a coherent design {{{--}}} Euphoria programmers enjoy programming
 in Euphoria
 
 === As a first programming language:
@@ -82,7 +82,7 @@ You will find that Euphoria programmers are also knowledgeable in other
 languages. I find that the more tools you have (saws and hammers, or programming
 languages) the richer you are. Picking the correct tool is part of the art of
 programming. It will remain true that some people can program better in their
-favorite language rather than an arguably superior language. 
+favorite language rather than an arguably superior language.
 
 Give Euphoria a try, and discover why it has enthusiastic supporters.
 
@@ -93,8 +93,8 @@ to use.
 
 Using the //Euphoria// **Binder** is used to create stand-alone programs.
 
-The //Euphoria// **Translator** converts Euphoria-source into C-source. This 
-allows Euphoria programs to be compiled by a standard C compiler to make even 
+The //Euphoria// **Translator** converts Euphoria-source into C-source. This
+allows Euphoria programs to be compiled by a standard C compiler to make even
 faster stand-alone programs.
 
 You can freely distribute the Euphoria interpreter, and any other files
@@ -107,17 +107,12 @@ Euphoria programs that you write.
 To run the //WIN32// version of Euphoria, you need Windows 95 or any later
 version of Windows.  It runs fine on XP and Vista.
 
-The //DOS32// version will run on any version of Windows, and will also run on
-plain DOS on any 386 or higher processor. Contrary to popular opinion, DOS is
-not dead. You can run DOS Euphoria programs on Windows XP in a command prompt
-window.
-
 To run the //Linux// version of Euphoria you need any reasonably up-to-date
 Linux distribution, that has libc6 or later. For example, Red Hat 5.2 or later
 will work fine.
 
 To run the //FreeBSD// version of Euphoria you need any reasonably up-to-date
-FreeBSD distribution. 
+FreeBSD distribution.
 
 To run the //Mac OS X// version of Euphoria, you need any reasonably up-to-date
 Intel based Mac.
@@ -131,18 +126,16 @@ of, or inability to use, this product.
 === Discover Euphoria
 
 More information on Euphoria may be found at [[http://www.OpenEuphoria.org | OpenEuphoria.org]],
-along with an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]]. 
+along with an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]].
 
-Download Euphoria from the [[http://www.rapideuphoria.com|Euphoria Web site]]. 
+Download Euphoria from the [[http://www.rapideuphoria.com|Euphoria Web site]].
 You will also find source-code for example programs and library files.
 
 === Conventions used in the manual
 
-Euphoria has multiple interpreters, the main one being **##eui##**. 
+Euphoria has multiple interpreters, the main one being **##eui##**.
 
-* If you are running on DOS, you should use ##euid## in place of ##eui##. 
-
-* On windows platforms you have two choices. If you run ##eui## then a console 
+* On windows platforms you have two choices. If you run ##eui## then a console
 window is created. If you run ##euiw## then no console is created{{{--}}}making
 it suitable for GUI applications.
 
@@ -156,16 +149,12 @@ you will see these descriptions:
 includes WIN/95/ME/98/XP/NT/Vista/7/... You will see the constant ##WIN32## used
 for Windows specific code.
 
-* "Dos" will be a general reference to a family of operating systems that
-include MSDOS/DOS/... You will see the constant ##DOS32## used for Dos
-specific code.
-
 * "Unix" will be a general reference to the family operating systems that
 includes Linux/FreeBSD,Mac OS X/... You will see the constant ##UNIX## used
 for Unix specific code. You may also see "*nix" used to describe this group
 of operating systems.
 
-Directory names in Windows and Dos use ##\## separators, while Unix systems use ##/##.
+Directory names in Windows use ##\## separators, while Unix systems use ##/##.
 Unix users should substitute {{{ / }}} when they examine example code.
 
 Operating system names are often trademarks. There is no intent to infringe on their

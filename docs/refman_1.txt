@@ -73,12 +73,7 @@ effort and reducing syntax errors. This editor is written in Euphoria,
 and the source code is provided to you without restrictions. You are
 free to modify it, add features, and redistribute it as you wish.
 * Multi-platform
-** Euphoria programs run under Linux, FreeBSD, 32-bit
-//Windows//, and any //DOS// environment, and are not subject to any
-640K memory limitations. You can create programs that use the full
-multi-gigabyte memory of your computer, and a swap file is
-automatically used when a program needs more memory than exists on your
-machine.
+** Euphoria programs run under Linux, FreeBSD, 32-bit //Windows//
 * Stand-alone
 ** You can make a single, stand-alone executable
 file from your program.
@@ -194,20 +189,18 @@ When installed, the ##euphoria## directory will look something like this:
 ** ##\docs## - plain text, man pages, html documentation files
 ** ##\tutorial## - small tutorial programs to help you learn Euphoria
 ** ##\demo## - generic demo programs that run on all platforms
-*** ##\dos32## - //DOS32//-specific demo programs (optional)
 *** ##\win32## - //WIN32//-specific demo programs (optional)
 *** ##\unix## - //Linux/FreeBSD/OS X//-specific demo programs (optional)
-*** ##\langwar## - language war game (pixel-graphics version for //DOS//,
-    or text version for //Linux/FreeBSD/OS X//)
+*** ##\langwar## - language war game for //Linux/FreeBSD/OS X//
 *** ##\bench## - benchmark programs
 
-The //Linux// subdirectory is not included in the //DOS/Windows// distribution,
-and the ##dos32## and ##win32## subdirectories are not included in the
+The //Linux// subdirectory is not included in the //Windows// distribution,
+and the ##win32## subdirectories are not included in the
  //Linux/FreeBSD// distribution. In this manual, directory names are shown
  using backslash (**\**). //Linux/FreeBSD// users should substitute forward
  slash (**/**).
 
-==== DOS/Windows
+==== Windows
 
 The installer copies the required files, and modifies the ##autoexec.bat## for
  you. The ##euphoria\bin## is then on your search path, and the environment
@@ -254,7 +247,6 @@ Depending on the platform you are using the interpreter could be called:
 || Executable || Purpose                                        ||
 | ##eui##     | General interpreter on Windows and *nix variants |
 | ##euiw##    | Console-less Windows interpreter                 |
-| ##euid##    | DOS only interpreter                             |
 
 \\The command-line may contain extra information. Following your program filename
 you may add extra words (known as //arguments//) that can used in your
@@ -271,11 +263,9 @@ name of you Euphoria file is expected, and if you don't supply it, Euphoria
 will display all the command line options available.
 
 Euphoria doesn't care about your choice of file extensions. By
-convention, however, main Euphoria files have an extension of ##.ex##
-unless your program is DOS only, then the extension should be ##.exd##.
-Euphoria include files should have the extension ##.e##. The only other
-extension that is used is ##.exw## which should be used for any
-windowed application. This is a GUI application, not necessarily a
+convention, however, console-based applications have an extension of ##.ex##,
+GUI-based applications have an extension of ##.exw## and include files have an
+extension of ##.e##. Note that a GUI application is not necessarily a
 Microsoft Windows (tm) program. A GUI application can exist on Linux,
 OS X, FreeBSD, etc...
 
@@ -289,7 +279,7 @@ or simply,
 eui filesort < raw.txt > sorted.txt
 </eucode>
 
-For frequently-used programs under //DOS/Windows// you might want to make a
+For frequently-used programs under //Windows// you might want to make a
 small ##.bat## (batch) file, perhaps called ##myprog.bat##, containing two
 statements like:
 <eucode>
@@ -308,9 +298,6 @@ instead of:
 <eucode>
 eui myprog
 </eucode>
-
-Unfortunately //DOS// will not allow redirection of standard input and output
-when you use a ##.bat## file. However, this works in a Windows DOS box.
 
 Under modern //Unix// variants, you can use ##~#!/usr/bin/env eui## as the
 first line of your script file. On older //Unix// variants, you may need to
@@ -342,10 +329,10 @@ foo.ex
 to run your program. You could even shorten the name to simply "foo". Euphoria
 ignores the first line when it starts with **#!**.  Be careful though that
 your first line ends with the unix-style ##\n##, and not the
-//DOS/Windows//-style ##\r\n##, or the unix shell might get confused. If your
+//Windows//-style ##\r\n##, or the unix shell might get confused. If your
 file is shrouded, you must give the path to ##eub##, not ##eui##.
 
-You can also run ##bind## or ##bindd## (//DOS//) to combine your Euphoria program
+You can also run ##bind## to combine your Euphoria program
 with ##eui## interpreter, to make a stand-alone executable file. With a
 stand-alone executable, you //can// redirect standard input and output. Binding
 is discussed further in [[:Distributing a Program]].
@@ -356,8 +343,8 @@ executable file, and it will normally run much faster than a bound program.
 === Running under Windows
 
 You can run Euphoria programs directly from the //Windows// environment, or
-from a //DOS// shell that you have opened from //Windows//. By "associating"
-##.ex## files with ##eui.exe##, ##.exd## files with ##euid.exe## and ##.exw##
+from a console shell that you have opened from //Windows//. By "associating"
+##.ex## files with ##eui.exe## and ##.exw##
 files with ##euiw.exe##. You will then be able to double click a Euphoria source
 file to run it. The installer will perform this operation for you, if you wish.
 
@@ -521,19 +508,15 @@ is ignored.
 ** The lines in a section are only added to the command line switches if they
  apply to the mode that Euphoria is running in.
 *** [win32] Applies to Windows platform only.
-*** [dos32] Applies to DOS platform only.
 *** [unix] Applies to any Unix platform only.
 *** [interpret] Applies to the interpreter running in any platform.
 *** [translate] Applies to the translator running in any platform.
 *** [bind] Applies to the binder running in any platform.
 *** [interpret:win32] Applies to the interpreter when running under Windows only.
-*** [interpret:dos32] Applies to the interpreter when running under DOS only.
 *** [interpret:unix] Applies to the interpreter when running under Unix only.
 *** [translate:win32] Applies to the translator when running under Windows only.
-*** [translate:dos32] Applies to the translator when running under DOS only.
 *** [translate:unix] Applies to the translator when running under Unix only.
 *** [bind:win32] Applies to the binder when running under Windows only.
-*** [bind:dos32] Applies to the binder when running under DOS only.
 *** [bind:unix] Applies to the binder when running under Unix only.
 *** [all] Applies to all running modes.
 ** All configuration lines before the first section header are assumed to be the
@@ -559,11 +542,6 @@ When Euphoria starts up, it looks for configuration files in the following order
 ## ~%EUDIR~%\eu.cfg
 ## ~%HOMEDRIVE~%\~%HOMEPATH~%\eu.cfg
 ## From where ever the executable is run from "<exepath>/eu.cfg"
-## Current working directory - "./eu.cfg"
-## Command line -C switches
-* for DOS systems
-## From where ever the executable is run from "<exepath>/eu.cfg"
-## ~%EUDIR~%\eu.cfg
 ## Current working directory - "./eu.cfg"
 ## Command line -C switches
 

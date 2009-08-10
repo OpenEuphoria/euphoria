@@ -14,9 +14,9 @@ value.  A **sequence** is a collection of objects, either atoms or sequences
 themselves. A sequence can contain any mixture of atom and sequences; a sequence
 does not have to contain all the same data type. Because the **objects**
 contained in a sequence can be an arbitrary mix of atoms or sequences, it is
-an extremely versatile data structure, capable of representing any sort of data. 
+an extremely versatile data structure, capable of representing any sort of data.
 
-A sequence is represented by a list of objects in brace brackets **{ }**, 
+A sequence is represented by a list of objects in brace brackets **{ }**,
 separated by commas. Atoms can have any integer or double-precision
 floating point value. They can range from approximately -1e300 (minus one times
 10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
@@ -38,10 +38,10 @@ some Euphoria objects:
 {}                        -- the 0-element sequence
 </eucode>
 
-By default, number literals use //base 10//, but you can have integer literals 
-written in other bases, namely binary //(base 2)//, octal //(base 8)//, and 
+By default, number literals use //base 10//, but you can have integer literals
+written in other bases, namely binary //(base 2)//, octal //(base 8)//, and
 hexadecimal //(base 16)//. To do this, the number is prefixed by a 2-character
-code that lets Euphoria know which base to use. 
+code that lets Euphoria know which base to use.
 |= Code |= Base                |
 | 0b    | 2 = **B**inary       |
 | 0t    | 8 = Oc**t**al        |
@@ -108,12 +108,12 @@ class hierarchies of certain object-oriented languages.
 
 Why do we call them atoms?  Why not just "numbers"? Well, an ##atom## //is//
 just a number, but we wanted to have a distinctive term that emphasizes that
-they are indivisible (that's what "atom" means in Greek). In the world of 
+they are indivisible (that's what "atom" means in Greek). In the world of
 physics you can 'split' an atom into smaller parts, but you no
 longer have an atom{{{--}}}only various particles. You can 'split' a
 number into smaller parts, but you no longer have a number{{{--}}}only various
 digits.
- 
+
 Atoms are the basic building blocks of all the
 data that a Euphoria program can manipulate. With this analogy, **sequence**s
 might be thought of as "molecules", made from atoms and other molecules. A
@@ -143,7 +143,7 @@ floating-point format happens automatically.
 ==== Character Strings and Individual Characters
 
 A **character string** is just a ##sequence## of characters.  It may be
-entered in one of two ways ... 
+entered in one of two ways ...
 
 * using double-quotes e.g.
 
@@ -165,7 +165,7 @@ The rules for double-quote strings are...
 # they cannot contain the back-slash '\' character
 
 If you need to include double-quote, end-of-line, back-slash, or TAB characters
-inside a double-quoted string, you need to enter them in a special manner. 
+inside a double-quoted string, you need to enter them in a special manner.
 
 * Use \" for a double-quote character
 * Use \n for a new-line character
@@ -224,9 +224,9 @@ Bill said
     "This is a back-slash \ character".
 }}}
 
-Extended string literals are useful when the string contains new-lines, tabs, 
+Extended string literals are useful when the string contains new-lines, tabs,
 double-quotes or back-slash characters because they do not have to be entered
-in the special manner. 
+in the special manner.
 
 Character strings may be manipulated and operated upon just like any other
 sequences. For example the above string is entirely equivalent to the
@@ -276,12 +276,12 @@ For example, ##"Hello, World!\n"##, or ##'~\~\'##. The Euphoria editor displays 
 strings in green.
 
 === Identifiers
-An identifier is just the name you give something in your program. This can be 
+An identifier is just the name you give something in your program. This can be
 a variable, constant, function, procedure, parameter, or namespace. An identifier
-must begin with either a letter or an underscore, then followed by zero or more 
-letters, digits or underscore characters. There is no theoretical limit to how 
+must begin with either a letter or an underscore, then followed by zero or more
+letters, digits or underscore characters. There is no theoretical limit to how
 large an identifier can be but in practice it should be no more than about 30
-characters. 
+characters.
 
 Identifiers are case-sensitive. This means that ##"Name"## is a different identifier
 from ##"name"##, or ##"NAME"##, etc...
@@ -308,10 +308,10 @@ quick-sort -- must only consist of letters, digits or underscore.
 Comments are ignored by Euphoria and have no effect on execution speed.
 The editor displays comments in red.
 
-There are three forms of comment text. 
+There are three forms of comment text.
 * The //line// format comment is started by two dashes and extends to the
  end of the current line.
- 
+
 e.g.
 <eucode>
 -- This is a comment which extends to the end of this line only.
@@ -319,7 +319,7 @@ e.g.
 
 * The //multi-line// format comment is started by ##/*## and extends to the
  next occurrence of ##*/##, even if that occurs on a different line.
- 
+
 e.g.
 <eucode>
 /* This is a comment which
@@ -340,7 +340,7 @@ e.g.
 This informs the Linux shell that your file should be executed by the
 Euphoria interpreter, and gives the full path to the interpreter.  If you make
 your file executable, you can run it, just by typing its name, and without the
-need to type "##exi##". On //DOS// and //Windows// this line is just
+need to type "##exi##". On //Windows// this line is just
 treated as a comment (though Apache Web server on //Windows// does
 recognize it.). If your file is a shrouded ##.il## file, use backendu
 instead of ##eui##.
@@ -678,7 +678,7 @@ Compare that with the equivalent:
 longname[length(longname)][length(longname[length(longname)])]
 </eucode>
 
-**Subscripting and function side-effects:** 
+**Subscripting and function side-effects:**
 
 In an assignment statement,
 with left-hand-side subscripts:
@@ -699,7 +699,7 @@ subscripts, you can always assume that the final value of the lhs_var will be
 the value of rhs_expr, regardless of any side-effects that may have changed
 lhs_var.
 
-**Euphoria data structures are almost infinitely flexible.** 
+**Euphoria data structures are almost infinitely flexible.**
 
 Arrays in many
 languages are constrained to have a fixed number of elements, and those
@@ -714,7 +714,7 @@ retrieve a sequence element, it is not guaranteed to be of any type. You, as a
 programmer, need to check that the retrieved data is of the type you'd expect, Euphoria will
 not. The only thing it will check is whether an assignment is legal. For example,
 if you try to assign a sequence to an integer variable, Euphoria will complain
-at the time your code does the assignment. 
+at the time your code does the assignment.
 
 Not only can a Euphoria program represent all conventional data
 structures but you can create very useful, flexible structures that would be
@@ -982,58 +982,58 @@ underscores. The following **reserved words** have special meaning
 in Euphoria and may not be used as identifiers:
 
 <eucode>
- and            export          public    
- as             fallthru        retry             
- break          for             return  
- by             function        routine 
- case           global          switch  
- constant       goto            then    
- continue       if              to      
- do             ifdef           type    
- else           include         until   
- elsedef        label           while   
- elsif          loop            with    
- elsifdef       namespace       without 
- end            not             xor      
- entry          or        
- enum           override  
- exit           procedure 
-</eucode>                                               
-                                                   	
-The Euphoria editor displays these words in blue    
-                                                   	
+ and            export          public
+ as             fallthru        retry
+ break          for             return
+ by             function        routine
+ case           global          switch
+ constant       goto            then
+ continue       if              to
+ do             ifdef           type
+ else           include         until
+ elsedef        label           while
+ elsif          loop            with
+ elsifdef       namespace       without
+ end            not             xor
+ entry          or
+ enum           override
+ exit           procedure
+</eucode>
+
+The Euphoria editor displays these words in blue
+
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
-                                                                                                         
-<eucode>                                                                                        
- ?                peek                 peek2u             sprintf                                        
- abort            peek2s               peek4s             sqrt                                           
- and_bits         log                  peek4u             system                                                    
- append           machine_func         peek_string        system_exec                                               
- arctan           machine_proc         peeks              tail                                                
- atom             match                pixel              tan                                                 
- c_func           match_from           platform           task_clock_start                                    
- c_proc           get_key              poke               task_clock_stop                                         
- call             get_pixel            poke2              task_create                                             
- call_func        getc                 poke4              task_list                                                       
- call_proc        getenv               position           task_schedule                                                   
- clear_screen     gets                 power              task_self                                                       
- close            hash                 prepend            task_status                                                     
- command_line     head                 print              task_suspend                                                    
- compare          include_paths        printf             task_yield                                                          
- cos              insert               profile            time                                                                
- date             mem_copy             profile_time       trace                                       
- delete           mem_set              puts               warning                                 
- delete_routine   not_bits             rand               xor_bits                 
- equal            object               remainder                                                          
- find             open                 remove                                     
- find_from        option_switches      routine_id                                 
- floor            or_bits              sequence                                   
- integer          repeat               sin                                        
- length           replace              splice                                            
-</eucode>                                        
-                                    
-                                                   
+
+<eucode>
+ ?                peek                 peek2u             sprintf
+ abort            peek2s               peek4s             sqrt
+ and_bits         log                  peek4u             system
+ append           machine_func         peek_string        system_exec
+ arctan           machine_proc         peeks              tail
+ atom             match                pixel              tan
+ c_func           match_from           platform           task_clock_start
+ c_proc           get_key              poke               task_clock_stop
+ call             get_pixel            poke2              task_create
+ call_func        getc                 poke4              task_list
+ call_proc        getenv               position           task_schedule
+ clear_screen     gets                 power              task_self
+ close            hash                 prepend            task_status
+ command_line     head                 print              task_suspend
+ compare          include_paths        printf             task_yield
+ cos              insert               profile            time
+ date             mem_copy             profile_time       trace
+ delete           mem_set              puts               warning
+ delete_routine   not_bits             rand               xor_bits
+ equal            object               remainder
+ find             open                 remove
+ find_from        option_switches      routine_id
+ floor            or_bits              sequence
+ integer          repeat               sin
+ length           replace              splice
+</eucode>
+
+
 Identifiers can be used in naming the following:
 
 * procedures
@@ -1263,7 +1263,7 @@ enum ONE, TWO, THREE, ABC=10, DEF, XYZ
 -- ABC is 10, DEF is 11, XYZ is 12
 </eucode>
 
-Euphoria sequences use integer indexes, but with ##enum## you may write code 
+Euphoria sequences use integer indexes, but with ##enum## you may write code
 like this:
 
 <eucode>
@@ -1368,7 +1368,7 @@ input errors. In particular, they cannot adjust a wrong value to some other, pre
 
 @[[:type_check]]
 Type checking can be turned off or on between subroutines using the with
-##type_check## or ##without type_check## (see [ @[[:special statements]].  
+##type_check## or ##without type_check## (see [ @[[:special statements]].
 It is initially on by default.
 
 ;**Note to Bench markers~:**
@@ -1527,23 +1527,23 @@ See [[:Dynamic Routine Calling]] for more details.
 ==== Defining the scope of an identifier
 
 The scope of an identifier is a description of what code can 'access' it. Code in
-the same scope of an identifier can access that identifier and code not in the 
-same scope cannot access it. 
+the same scope of an identifier can access that identifier and code not in the
+same scope cannot access it.
 
-The scope of a **variable** depends upon where and how it is declared.  
-* If it is declared within a ##**for**##, ##**while**##, ##**loop**## or ##**switch**##, its scope 
-starts at the declaration and ends at the respective ##**end**## statement.  
+The scope of a **variable** depends upon where and how it is declared.
+* If it is declared within a ##**for**##, ##**while**##, ##**loop**## or ##**switch**##, its scope
+starts at the declaration and ends at the respective ##**end**## statement.
 * In an ##**if**## statement, the scope starts at the declaration and ends either
-at the next ##**else**##, ##**elsif**## or ##**end if**## statement.  
+at the next ##**else**##, ##**elsif**## or ##**end if**## statement.
 * If a variable is declared within a routine (known as a private variable) and outside one of the structures listed above, the scope of
 the variable starts at the declaration and ends at the routine's ##**end**## statement.
 * If a variable is declared outside of a routine (known as a module variable), and does not have a scope modifier, its
 scope starts at the declaration and ends and the end of the file it is declared in.
 
-The scope of a **constant** that does not have a scope modifier, starts at the 
+The scope of a **constant** that does not have a scope modifier, starts at the
 declaration and ends and the end of the file it is declared in.
 
-The scope of a **enum** that does not have a scope modifier, starts at the 
+The scope of a **enum** that does not have a scope modifier, starts at the
 declaration and ends and the end of the file it is declared in.
 
 The scope of all **procedures**, **functions** and **types**, which do not have a scope modifier,
@@ -1619,7 +1619,7 @@ Euphoria coded file.
 
 Identifiers marked as ##global##, ##public## or ##export## are known as //exposed//
 variables because they can be used in files other than the one they were declared
-in. 
+in.
 All other identifiers can only be used within their own file. This information
 is helpful when maintaining or enhancing the file, or when learning how to use
 the file. You can make changes to the internal routines and variables, without
@@ -1630,7 +1630,7 @@ a naming conflict.  One of the include file authors has used the same name for
 a exposed identifier as one of the other authors. One of fixing this, if you
 have the source, you could simply edit one of the include files to correct
 the problem, however then you'd have repeat this process whenever a new version
-of the include file was released. 
+of the include file was released.
 
 Euphoria has a simpler way to solve this. Using an extension to the
 include statement, you can say for example:
@@ -1688,7 +1688,7 @@ where the ##include## statement is.  A default namespace declared in a file is
 considered a public symbol in that file.  Namespaces and other symbols (e.g.,
 variables, functions, procedures and types) can have the same name without conflict.
 A namespace declared through an ##include## statement will mask a default namespace
-declared in another file, just like a normal local variable will mask a public 
+declared in another file, just like a normal local variable will mask a public
 variable in another file.  In this case, rather than using the default namespace,
 declare a new namespace through the ##include## statement.
 
@@ -1729,7 +1729,7 @@ lib:sub()
 When a file needs to see the public or exported identifiers in another file that
 includes the first file, the first file must include that other (including) file.
 
-For example, 
+For example,
 <eucode>
 -- Parent file: foo.e --
 public integer Foo = 1
@@ -1751,9 +1751,9 @@ end procedure
 the file where those public symbols are declared.
 
 For example,
-<eucode> 
+<eucode>
 -- Parent file: foo.e --
-include bar.e 
+include bar.e
 showit() -- execute a public routine in bar.e
 </eucode>
 
@@ -1761,9 +1761,9 @@ If however, a file wants a third file to also see the symbols that it can, it
 needs to do a ##public include##.
 
 For example,
-<eucode> 
+<eucode>
 -- Parent file: foo.e --
-public include bar.e 
+public include bar.e
 showit() -- execute a public routine in bar.e
 
 public procedure fooer()
@@ -1771,16 +1771,16 @@ public procedure fooer()
 end procedure
 </eucode>
 
-<eucode> 
+<eucode>
 -- Appl file: runner.ex --
-include foo.e 
+include foo.e
 showit() -- execute a public routine that foo.e can see in bar.e
 fooer()  -- execute a public routine in foo.e
 </eucode>
 
 The ##public include## facility is designed to make having a library composed of
 multiple files easy for an application to use. It allows the main library file
-to expose symbols in files that //it// includes as if the application had actually 
+to expose symbols in files that //it// includes as if the application had actually
 included them. That way, symbols meant for the end user can be declared in files other than the
 main file, and the library can still be organized however the author prefers without
 affecting the end user.
@@ -1789,41 +1789,41 @@ affecting the end user.
 Given that we have two files LIBA.e and LIBB.e ...
 >
 <eucode>
--- LIBA.e -- 
-public constant 
-    foo1 = 1, 
-    foo2 = 2 
- 
-export function foobarr1() 
-    return 0 
-end function 
- 
-export function foobarr2() 
-    return 0 
-end function 
+-- LIBA.e --
+public constant
+    foo1 = 1,
+    foo2 = 2
+
+export function foobarr1()
+    return 0
+end function
+
+export function foobarr2()
+    return 0
+end function
 </eucode>
 <
- and  
+ and
 >
 <eucode>
--- LIBB.e -- 
--- I want to pass on just the constants not 
--- the functions from LIBA.e.   
-public include LIBA.e 
+-- LIBB.e --
+-- I want to pass on just the constants not
+-- the functions from LIBA.e.
+public include LIBA.e
 </eucode>
 <
 The export scope modifier is used to limit the extent that symbols can be accessed.
 It works just like ##public## except that ##export## symbols are only ever passed up
 one level only. In other words, if a file wants to use an ##export## symbol, that
-file must include it explicitly. 
+file must include it explicitly.
 
 In this example above, code in LIBB.e can see both the public and export symbols
 declared in LIBA.e (##foo1, foo2 foobarr1## and ##foobarr2##) because it explicitly
-includes LIBA.e. And by using the ##public## prefix on the ##include## of LIBA.e, 
+includes LIBA.e. And by using the ##public## prefix on the ##include## of LIBA.e,
 it also allows any file that ##includes## LIBB.e to the ##public## symbols from
-LIBA.e but they will not see any ##export## symbols declared in LIBA.e. 
+LIBA.e but they will not see any ##export## symbols declared in LIBA.e.
 
-In short, a ##public include## is used expose ##public## symbols that are 
+In short, a ##public include## is used expose ##public## symbols that are
 included, up one level but not any ##export## symbols that were include.
 
 ==== The complete set of resolution rules
@@ -1855,7 +1855,7 @@ until it reaches the routine level, in which case it checks the routine
 in and finally check the global/public/export symbols.
 
 By the way, Euphoria will not allow a name to be declared if it is already declared
-in the same scope, or enclosing ##block## or enclosing ##routine##. Thus the 
+in the same scope, or enclosing ##block## or enclosing ##routine##. Thus the
 following examples are illegal...
 <eucode>
 integer a
@@ -1904,23 +1904,23 @@ are easy to check by Euphoria for scope clashes. However, a problem can arise wh
 declared as global/public/export in different files are placed in the same scope
 during ##include## processing. As it is quite possible for these files to come from
 independant developers that are not aware of each other's symbol names, the potential
-for name clashes is high. A name clash is just when the same name is declared 
+for name clashes is high. A name clash is just when the same name is declared
 in the same scope but in different files. Euphoria cannot generally decide which name you were referring
 to when this happens, so it needs you help to resolve it. This is where the
-##namespace## concept is used. 
+##namespace## concept is used.
 
 A namespace is just a name that you assign to an include file so that your code can
-exactly specify where an identifier that your code is using actually comes from. 
+exactly specify where an identifier that your code is using actually comes from.
 Using a namespace with an identifier, for example ...
 <eucode>
 include somefile.e as my_lib
-include another.e 
+include another.e
 my_lib:foo()
 </eucode>
 enables Euphoria to resolve the identifier (##foo##) as explicitly coming from the
 file associated with the namespace "my_lib". This means that if ##foo## was also
 declared as global/public/export in //another.e// then that ##foo## would be ignored
-and the ##foo## in //somefile.e// would be used instead. Without that namespace, 
+and the ##foo## in //somefile.e// would be used instead. Without that namespace,
 Euphoria would have complained (##Errors resolving the following references:##)
 
 If you need to use both ##foo## symbols you can still do that by using two different
@@ -1934,7 +1934,7 @@ her_ns:foo() -- Calls the one in another.e
 
 Note that there is a reserved namespace name that is always in use. The special
 namespace **##eu##** is used to let Euphoria know that you are accessing a built-in
-symbol rather than one of the same name declared in someone's file. 
+symbol rather than one of the same name declared in someone's file.
 
 For example...
 <eucode>
@@ -2094,24 +2094,24 @@ not initialised when you perform the assignment.
 
 === if statement
 
-An **if statement** tests a condition to see whether it is true or false, and 
+An **if statement** tests a condition to see whether it is true or false, and
 then depending on the result of that test, executes the appropriate set of
-statements. 
+statements.
 
-The syntax of ##if## is 
+The syntax of ##if## is
 <eucode>
- IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF 
- IFTEST  ==:  if ATOMEXPR [ LABEL ] then [ STMTBLOCK ] 
- ELSIF   ==:  elsif ATOMEXPR then [ STMTBLOCK ] 
- ELSE    ==:  else [ STMTBLOCK ] 
- ENDIF   ==:  end if 
+ IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF
+ IFTEST  ==:  if ATOMEXPR [ LABEL ] then [ STMTBLOCK ]
+ ELSIF   ==:  elsif ATOMEXPR then [ STMTBLOCK ]
+ ELSE    ==:  else [ STMTBLOCK ]
+ ENDIF   ==:  end if
 </eucode>
 
 **Description of syntax**\\
 * An //if statement// consists of the keyword ##**if**##, followed by an //expression// that
 evaluates to an atom, optionally followed by a //label// clause, followed by the keyword ##**then**##.
-Next is a set of zero or more statements. This is followed by zero or more //elsif// clauses. 
-Next is an optional //else// clause and finally there is the keyword ##**end**## followed by 
+Next is a set of zero or more statements. This is followed by zero or more //elsif// clauses.
+Next is an optional //else// clause and finally there is the keyword ##**end**## followed by
 the keyword ##**if**##.
 * An //elsif// clause consists of the key word ##**elsif**##, followed by  an //expression// that
 evaluates to an atom, followed by the keyword ##**then**##.  Next is a set of zero or
@@ -2125,7 +2125,7 @@ is represented by an atom that has any non-zero value.
 * When an //expression// being tested is true, Euphoria executes the statements immediately
 following the ##**then**## keyword after the //expression//, up to the corresponding ##**elsif**##
 or ##**else**##, whichever comes next, then skips down to the corrresponding ##**end if**##.
-* When an //expression// is false, Euphoria skips over any statements until it 
+* When an //expression// is false, Euphoria skips over any statements until it
 comes to the next corresponding ##**elsif**## or ##**else**##, whichever comes next. If this
 is and ##**elsif**## then its //expression// is tested otherwise any statements following
 the ##**else**## are executed.
@@ -2182,7 +2182,7 @@ switch <expr> [with fallthru] [label "<label name>"] do
         [code block]
         [[break [label]]|fallthru]
     ...
- 
+
     [case else]
         [code block]
         [[break [label]]|fallthru]
@@ -2231,7 +2231,7 @@ switch x with fallthru do
 end switch
 </eucode>
 Note that when ##with fallthru## is used, the ##break## statement can be used
-to jump out of the ##switch## block.  The behavior of individual ##case##s can 
+to jump out of the ##switch## block.  The behavior of individual ##case##s can
 be changed by using the ##fallthru## statement:
 <eucode>
 switch x do
@@ -2244,7 +2244,7 @@ switch x do
         ? 0
 end switch
 </eucode>
-Note that the ##break## statement before ##case else## was omitted, because 
+Note that the ##break## statement before ##case else## was omitted, because
 the equivalent action is taken automatically by default.
 <eucode>
 switch length(x) do
@@ -2255,7 +2255,7 @@ switch length(x) do
         -- do something extra
     case 3 then
         -- do something usual
-        
+
     case else
         -- do something else
 end switch
@@ -2269,7 +2269,7 @@ Example:
 switch opt label "LBLa" do
     case 1, 5, 8 then
         FuncA()
-        
+
 
     case 4, 2, 7 then
         FuncB()
@@ -2280,7 +2280,7 @@ switch opt label "LBLa" do
 
            case "Y" then
                 FuncD()
-                
+
            case else
                 FuncE()
        end switch
@@ -2323,25 +2323,24 @@ set or unset at parse time as well. Euphoria defines some common words itself:
 ==== Euphoria Version Definitions
 
 * **EU4** - Major Euphoria Version
-* **EU40** - Major and Minor Euphoria Version
-* **EU400** - Major, Minor and Release Euphoria Version
+* **EU400** - Major and Minor Euphoria Version
+* **EU40000** - Major, Minor and Release Euphoria Version
 
 Euphoria is release with the common version scheme of Major, Minor and Release
 version identifiers in the form of major.minor.release. When 4.0.1 is
-released, ##EU400## will no longer be defined, but ##EU401## will be defined.
-When 4.1 is release, ##EU40## will no longer be defined, but ##EU41## will
+released, ##EU40000## will no longer be defined, but ##EU40001## will be defined.
+When 4.1 is release, ##EU400## will no longer be defined, but ##EU401## will
 be defined. Finally, when 5.0 is released, ##EU4## will no longer be defined,
 but ##EU5## will be defined.
 
 ==== Platform Definitions
 
-* **DOS32** - Platform is DOS
 * **WIN32_CONSOLE** - Platform is Windows and is being executed
   with the Console version of the interpreter (eui.exe)
 * **WIN32_GUI** - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
 * **WIN32** - Platform is Windows (GUI or Console)
-* **DOSFAMILY** - Platform is any DOS or DOS-related platform (DOS32, WIN32)
+* **DOSFAMILY** - Platform is any platform that was derived from MS-DOS (eg. Windows)
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
 * **SUNOS** - Platform is SunOS (Open Solaris)
@@ -2364,14 +2363,14 @@ but ##EU5## will be defined.
 It is possible for one or more of the above definitions to be true at the same
 time. For instance, ##EUC## and ##EUC_DLL## will both be true when the source
 file has been translated to a DLL. If you wish to know if your source file is
-translated and not a DLL, then you can 
+translated and not a DLL, then you can
 
 <eucode>
 ifdef EUC and not EUC_DLL then
     -- translated to an application
 end ifdef
 </eucode>
- 
+
 ==== Using ifdef
 
 Further, you can define your own words either in source:
@@ -2394,7 +2393,7 @@ applications.
 
 You should surround code that is not portable with ##ifdef## like:
 <eucode>
-ifdef WIN32 then  
+ifdef WIN32 then
    -- Windows specific code.
 elsedef
    include std/error.e
@@ -2407,19 +2406,18 @@ call in the **include file**. **Yet** make sure that public constants and proced
 for the unsupported platform as well.
 
 <eucode>
-ifdef DOS32 then
-     include std/error.e
-     crash("socket.e is not supported on the DOS platform")
+ifdef UNIX then
+     include std/bash.e
 end ifdef
 
--- define exported and public constants and procedures for 
--- DOS32 as well
-ifdef WIN32 or DOS32 then
-    -- DOS32 is not supported but we define public symbols for it anyhow.
+-- define exported and public constants and procedures for
+-- OSX as well
+ifdef WIN32 or OSX then
+    -- OSX is not supported but we define public symbols for it anyhow.
 </eucode>
 
-The reason for doing this is so that the user that includes your include file sees 
-an "OS not supported" message instead of an "undefined reference" message. 
+The reason for doing this is so that the user that includes your include file sees
+an "OS not supported" message instead of an "undefined reference" message.
 
 
 Defined words must follow the same character set of an identifier, that is,
@@ -2483,13 +2481,13 @@ while 1 do
 end while
 </eucode>
 
-Do be careful to put the numbers after the platform names for Windows or DOS:
+Do be careful to put the numbers after the platform names for Windows:
 
 <eucode>
 -- This puts() routine will never be called
--- even when run by the DOS interpreter!
-ifdef DOS then
-     puts(1,"I am on DOS\n")
+-- even when run by the Windows interpreter!
+ifdef WIN then
+     puts(1,"I am on Windows\n")
 end ifdef
 </eucode>
 
@@ -2547,7 +2545,7 @@ while true label "main" do
        end if
        procF(i,res)
    end if
-   
+
    res = funcE(res, some_value)
 end while
 </eucode>
@@ -2962,21 +2960,14 @@ The entry statement is not supported for ##for## loops, because they have a more
 rigid nature structure than while or loop constructs.
 
 ; Note on infinite loops.
-: With **ex.exe**, if you happen to create a real infinite loop,
-with no input/output taking place, there is no easy way to stop it. You will
-have to type Control-Alt-Delete to either reboot, or (under Windows) terminate
-your DOS prompt session. If the program had files open for writing, it would be
-advisable to run **scandisk** to check your file system integrity.  Only
-when your program is waiting for keyboard input, will control-c abort the
-program [[:allow_break]](0) was used).
-\\
-With **eui.exe** or **eui**, control-c will always
-stop your program immediately.
+: With **eui.exe** or **eui**, control-c will always stop your program immediately, but
+with the euiw.exe that has not produced any console output, you will have to use the
+Windows process monitor to end the application.
 
 === goto statement
 
 ##goto## instructs the computer to resume code execution at a place which does not follow the statement.
-The place to resume execution is called the //target// of the statement. It is restricted to 
+The place to resume execution is called the //target// of the statement. It is restricted to
 lie in the current routine, or the current file if outside any routine.
 
 Syntax is:
@@ -2989,7 +2980,7 @@ The target of a ##goto## statement can be any accessible ##label## statement:
 label "label string"
 </eucode>
 
-Label names must be double quoted constant strings. Characters that would be illegal in an 
+Label names must be double quoted constant strings. Characters that would be illegal in an
 Euphoria identifier may appear in a label name, since it is a regular
 string.
 
@@ -3001,24 +2992,24 @@ Use ##goto## in production code when all the following applies:
 * you contemplate a significant gain in speed/reliability from such a direct move;
 * the code flow remains understandable for an outsider nevertheless.
 
-During early development, it may be nice to have while the code isn't firmly structured. But 
-most instances of ##goto## should melt into structured constructs as soon as possible as code 
-matures. You may find out that modifying a program that has goto statements is usually 
+During early development, it may be nice to have while the code isn't firmly structured. But
+most instances of ##goto## should melt into structured constructs as soon as possible as code
+matures. You may find out that modifying a program that has goto statements is usually
 trickier than if it had not had them.
 
 The following may be situations where ##goto## can help:
-* A routine has several return statements, and some processing must be done before returning, 
-no matter from where. It may be clearer to goto a single return point and perform the 
+* A routine has several return statements, and some processing must be done before returning,
+no matter from where. It may be clearer to goto a single return point and perform the
 processing only at this point.
-* An exit statement in a loop corresponds to an early exit, and the normal processing that 
-immediately follows the loop is not relevant. Replacing an exit statement followed by various 
+* An exit statement in a loop corresponds to an early exit, and the normal processing that
+immediately follows the loop is not relevant. Replacing an exit statement followed by various
 flag testing by a single goto can help.
 
-Explicit label names will tremendously help maintenance. Remember that there is no limit to 
+Explicit label names will tremendously help maintenance. Remember that there is no limit to
 their contents.
 
-goto-ing into a scope (like an if block, a for loop,...) will just do that. Some variables 
-may be defined only in that scope, and they may or may not have sensible values. It is up to 
+goto-ing into a scope (like an if block, a for loop,...) will just do that. Some variables
+may be defined only in that scope, and they may or may not have sensible values. It is up to
 the programmer to take appropriate action in this respect.
 
 
@@ -3193,11 +3184,11 @@ public include library.e
 
 Any top-level code in the included file will be executed at start up time.
 
-Any ##global## identifiers that are declared in the file doing the including will 
+Any ##global## identifiers that are declared in the file doing the including will
 also be visible in the file being included. However the situation is slightly
 different for an identifier declared as **public** or **export**. In these cases
 the file being included will **not** see ##public/export## symbols declared in
-the file doing the including, unless the file being included also explicitly 
+the file doing the including, unless the file being included also explicitly
 includes the file doing the including. Yes, you'd better read that again because
 its not that obvious. Here's an example...
 
@@ -3214,7 +3205,7 @@ global integer c = 0
 </eucode>
 
 This will work because being ##global## the symbol 'c' in b.e can be seen by all files in this
-//include tree//. 
+//include tree//.
 
 However ...
 <eucode>
@@ -3237,10 +3228,10 @@ include b.e
 
 ----
 
-**N.B.** Only those symbols declared as ##global## 
+**N.B.** Only those symbols declared as ##global##
 in the included file will be visible (accessible) in the
 remainder of the including file. Their visibility in other included files or in the main
-program file depends on other factors. Specifically, a global symbols can only be 
+program file depends on other factors. Specifically, a global symbols can only be
 accessed by files in the same //include tree//. For example...
 
 If we have danny.e declare a global symbol called 'foo', and bob.e includes danny.e,
@@ -3250,7 +3241,7 @@ access cathy's 'foo'. Nothing unusual about that situation. Now, if we have a pr
 that includes both bob.e and anne.e, the code in bob.e and anne.e should still
 work even though there are now two global 'foo' symbols available. This is because
 the include tree for bob.e //only// contains danny.e and likewise the include tree
-for anne.e //only// contains cathy.e. So as the two 'foo' symbols are in separate 
+for anne.e //only// contains cathy.e. So as the two 'foo' symbols are in separate
 include trees (from bob.e and anne.e perspective) code in those files continues
 to work correctly. A problem can occur if the main program (the one that includes
 both bob.e and anne.e) references 'foo'. In order for Euphoria to know which one
@@ -3283,8 +3274,7 @@ the file relative to the following directories, in the following order:
   ##EUINC## should be a list of directories, separated by semicolons
   (colons on //Linux// / //FreeBSD//), similar
   in form to your ##PATH## variable. ##EUINC## can be added to your
-  set of //Linux// / //FreeBSD// or
-  //DOS// / //Windows// environment  variables.
+  set of //Linux// / //FreeBSD// or //Windows// environment  variables.
   (Via ##Control Panel / Performance & Maintenance / System / Advanced##
   on //XP//, or ##AUTOEXEC.BAT## on older versions of
   //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB##
@@ -3303,10 +3293,13 @@ intended for use with //Windows// or //Unix//).  This is just a convention. It i
 required.
 
 If your filename (or path) contains blanks, you must enclose it in double-quotes, otherwise
-quotes are optional.  Also, be sure to double-up your backslashes under DOS/Windows.  For example:
+quotes are optional.  Note that under Windows, you can also use the forward slash '/' instead
+of the usually back-slash '\'. By doing this, the file paths are compatible with Unix
+systems and it means you don't have to 'escape' the back-slashes. \\
+For example:
 
 <eucode>
-include "c:\\\\program files\\\\myfile.e"
+include "c:/program files/myfile.e"
 </eucode>
 
 Other than possibly defining a new namespace identifier (see below), an include
@@ -3376,7 +3369,7 @@ resolve a usage of a global symbol.  If ##without indirect_includes## is
 in effect, then only direct includes are considered when resolving global
 symbols.
 
-This option is especially useful when a program uses some code that was 
+This option is especially useful when a program uses some code that was
 developed for a prior version of Euphoria that uses the pre-4.0 standard
 library, when all exposed symbols were global.  These can often clash
 with symbols in the new standard library.  Using ##without indirect_includes##
@@ -3433,13 +3426,13 @@ The forms available are ...
 ; ##with warning save##
 : saves the current warning state, i.e. the list of all enabled
   warnings. This destroys any previously saved state.
-  
+
 ; ##with warning restore##
 : causes the previously saved state to be restored.
 
 ; ##without warning strict##
 : overrides the -strict command line option, but only until the end of the
-  next function or procedure. 
+  next function or procedure.
 
 The **with/without warnings** directives will have no effect if the
 ##-STRICT## command line switch is used. The latter turns on all warnings
@@ -3449,14 +3442,14 @@ affected by the "##without warning strict##" directive.
 ----
 
  **Warning Names**
- 
+
 ----
 
-|= Name |= Meaning 
+|= Name |= Meaning
 | ##none##     | When used with the ##with## option, this turns off all
                  warnings. When used with the ##without## option, this turns on
-                 all warnings. 
-| ##resolution## | an identifier was used in a file, but was defined in 
+                 all warnings.
+| ##resolution## | an identifier was used in a file, but was defined in
                    a file this file doesn't (recursively) include.
 | ##short_circuit## | a routine call may not take place because of short circuit
                        evaluation in a conditional clause.
@@ -3469,13 +3462,13 @@ affected by the "##without warning strict##" directive.
 | ##custom## |  Any warning that was defined using the warning() procedure.
 | ##not_reached## | After a keyword that branches unconditionally, the only
                     thing that should appear is an end of block keyword, or
-                    possibly a label that a goto statement can target. 
+                    possibly a label that a goto statement can target.
                     Otherwise, there is no way that the statement can be
                     reached at all. This warning notifies this condition.
 | ##translator## | An option was given to the translator, but this option is
                    not recognised as valid for the C  compiler being used.
 | ##cmdline## | A command line option was not recognised.
-| ##mixed_profile## | For technical reasons, it is not possible to use 
+| ##mixed_profile## | For technical reasons, it is not possible to use
                       both ##with profile## and ##with profile_time## in the
                       same section of code. The profile statement read
                       last is ignored, and this warning is issued.
@@ -3514,15 +3507,17 @@ define/undefine tags which the ifdef statement may use.
 
 The following tags have a predefined meaning in Euphoria:
 
-* DOS32:    platform is 32 bit DOS
 * WIN32:    platform is any version of Windows (tm) from '95 on to Vista and beyond
+* DOSFAMILY: Any platform derived from MS-DOS.
 * UNIX:     platform is any kind of Unix style system
 * LINUX:    platform is Linux
 * FREEBSD:  platform is FreeBSD
 * OSX:      platform is OS X for Macintosh
 * SAFE:     turns on a slower debugging version of ##memory.e## called
             ##safe.e## when defined. Switching mode by renaming files **//no longer works//**.
-* EU400:    defined on all versions of the interpreter above 4.0
+* EU4:      defined on all versions of the version 4 interpreter
+* EU400:    defined on all versions of the interpreter from 4.0.0 to 4.0.X
+* EU40000:  defined only for version 4.0.0 of the interpreter
 
 The name of a tag may contain any character that is a valid
 identifier character, that is ##A-Za-z0-9_##. It is not required, but
@@ -3532,7 +3527,7 @@ by convention defined words are upper case.
 ==== with / without inline
 
 This directive allows coders some flexibility with inlined routines.  The default is
-for inlining to be on.  Any routine that is defined when ##without inline## is in 
+for inlining to be on.  Any routine that is defined when ##without inline## is in
 effect will never be inlined.
 
 ##with inline## takes an optional integer parameter that defines the largest routine

@@ -10,31 +10,31 @@ execute.  Euphoria's task scheduler decides which task should be active at any
 given time.
 
 === Why Multitask?
- 
+
 Most programs do not need to use multitasking and would not benefit from it.
 However it is very useful in some cases:
 
-* Action games where numerous characters, projectiles etc. need to be displayed in a 
+* Action games where numerous characters, projectiles etc. need to be displayed in a
   realistic way, as if they are all independent of one another. Language War is a good example.
-* Situations where your program must sometimes wait for input from a human or other computer. 
-  While one task in your program is waiting, another separate task could be doing some 
+* Situations where your program must sometimes wait for input from a human or other computer.
+  While one task in your program is waiting, another separate task could be doing some
   computation, disk search, etc.
-* Windows, Linux and FreeBSD all have special API routines that let you initiate some I/O, 
-  and then proceed without waiting for it to finish. A task could check periodically to 
-  see if the I/O is finished, while another task is performing some useful computation, or 
+* Windows, Linux and FreeBSD all have special API routines that let you initiate some I/O,
+  and then proceed without waiting for it to finish. A task could check periodically to
+  see if the I/O is finished, while another task is performing some useful computation, or
   is perhaps starting another I/O operation.
-* Situations where your program might be called upon to serve many users simultaneously. 
-  With multiple tasks, it's easy to keep track of the state of your interaction with 
+* Situations where your program might be called upon to serve many users simultaneously.
+  With multiple tasks, it's easy to keep track of the state of your interaction with
   all these separate users.
 * Perhaps you can divide your program into two logical processes, and have a task for each.
-  One produces data and stores it, while the other reads the data and processes it. Maybe 
-  the first process is time-critical, since it interacts with the user, while the second 
-  process can be executed during lulls in the action, where the user is thinking or doing 
+  One produces data and stores it, while the other reads the data and processes it. Maybe
+  the first process is time-critical, since it interacts with the user, while the second
+  process can be executed during lulls in the action, where the user is thinking or doing
   something that doesn't require quick response.
 
 === Types of Tasks
- 
-Euphoria supports two types of tasks: real-time tasks, and time-share tasks. 
+
+Euphoria supports two types of tasks: real-time tasks, and time-share tasks.
 
 **Real-time tasks** are scheduled at intervals, specified by a number of
 seconds or fractions of a second. You might schedule one real-time task to be
@@ -43,15 +43,14 @@ Language War, when the Euphoria ship moves at warp 4, or a torpedo flies across
 the screen, it's important that they move at a steady, timed pace.
 
 **Time-share tasks** need a share of the CPU but they needn't be rigidly
-scheduled according to any clock. The 4 sorting tasks in the ##demo\dos32\tasksort.ex## 
-demo, share the CPU, but it isn't important that they be scheduled at a particular time. 
+scheduled according to any clock.
 
 It's possible to reschedule a task at any time, changing its timing or its
 slice of the CPU. You can even convert a task from one type to the other
 dynamically.
 
 === A Small Example
- 
+
 This example shows the main task (which all Euphoria programs start off
 with) creating two additional real-time tasks. We call them real-time because
 they are scheduled to get control every few seconds.
@@ -102,7 +101,7 @@ t2_running = TRUE
 while t1_running or t2_running do
 	if get_key() = 'q' then
 		exit
-	end if  
+	end if
 	task_yield()
 end while
 
@@ -118,7 +117,7 @@ multitasking schemes. These were all implemented using plain Euphoria code,
 whereas this new multitasking feature is built into the interpreter. Under the
 old Language War tasking scheme a scheduler would *call* a task, which would
 eventually have to *return* to the scheduler, so it could then dispatch the
-next task. 
+next task.
 
 In the new system, a task can call the built-in procedure task_yield() at any
 point, perhaps many levels deep in subroutine calls, and the scheduler, which
@@ -168,7 +167,7 @@ and the other also has:
 <eucode>
 x = x + 1
 </eucode>
- 
+
 At the machine level, the first task loads the value of x into a register, then
 loses control to the second task which increments x and stores the result back
 into x in memory. Eventually control goes back to the first task which also
@@ -191,8 +190,8 @@ Cooperative multitasking is much safer, and requires far fewer expensive
 locking operations. Tasks relinquish control at safe points once they have
 completed a logical operation.
 
-=== Summary 
- 
+=== Summary
+
 For a complete function reference, refer to the Library Documentation
 [[:Multitasking]].
 

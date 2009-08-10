@@ -3,23 +3,41 @@
 Introduced in 4.0 beta 1, the user defined pre-processor opens a world
 of possibilities to the Euphoria programmer. In a sentence, it allows
 one to create (or use) a translation process that occurs transparently
-when a program is run. This mini-guide is going to explore the pre-processor
-interface by first giving a quick example, then explaining it in detail and 
-finally by writing a few useful pre-processors that can be put immediately to work.
+when a program is run. This mini-guide is going to explore the
+pre-processor interface by first giving a quick example, then
+explaining it in detail and finally by writing a few useful
+pre-processors that can be put immediately to work.
 
-Any program can be used as a pre-processor. It must, however, adhere to a simple specification:
+Any program can be used as a pre-processor. It must, however, adhere to a
+simple specification:
 
-# Accept a parameter "-i filename" which specifies which file to read and process.
-# Accept a parameter "-o filename" which specifies which file to write the result to.
-# Exit with a zero error code on success or a non-zero error code on failure.
+# Accept a parameter "-i filename" which specifies which file to read and
+process.
+# Accept a parameter "-o filename" which specifies which file to write
+the result to.
+# Exit with a zero error code on success or a non-zero error code on
+failure.
 
-It does not matter what type of program it is. It can be a Euphoria script, an executable written in the C programming language, a DOS batch file or anything else that can read one file and write to another file. As Euphoria programmers, however, we are going to focus on writing pre-processors in the Euphoria programming language. As a benefit, we will describe later on how you can easily convert your pre-processor to a shared library that Euphoria can make use of directly thus improving performance. 
+It does not matter what type of program it is. It can be a Euphoria script,
+an executable written in the C programming language, a script/batch file or
+anything else that can read one file and write to another file. As Euphoria
+programmers, however, we are going to focus on writing pre-processors in
+the Euphoria programming language. As a benefit, we will describe later
+on how you can easily convert your pre-processor to a shared library that
+Euphoria can make use of directly thus improving performance.
 
 === A Quick Example
 
-The problem in this case is that you want the copyright statement and the about screen to show what date the program was compiled on but you do not want to manually maintain this date. So, we are going to create a simple pre-processor that will read a source file, replace all instances of @DATE@ with the current date and then write the output back out.
+The problem in this case is that you want the copyright statement and the
+about screen to show what date the program was compiled on but you do not
+want to manually maintain this date. So, we are going to create a simple
+pre-processor that will read a source file, replace all instances of
+@DATE@ with the current date and then write the output back out.
 
-Before we get started, let me say that we will expand on this example later on. Up front, we are going to do almost no error checking for the purpose of showing off the pre-processor not for the sake of making a production quality application.
+Before we get started, let me say that we will expand on this example
+later on. Up front, we are going to do almost no error checking for
+the purpose of showing off the pre-processor not for the sake of
+making a production quality application.
 
 We are going to name this file ##datesub.ex##.
 
@@ -47,11 +65,14 @@ content = find_replace("@DATE@", content, format(now()))
 
 write_file(outFileName, content)
 
--- programs automatically exit with ZERO error code, if you want 
--- non-zero, you exit with abort(1), for example. 
+-- programs automatically exit with ZERO error code, if you want
+-- non-zero, you exit with abort(1), for example.
 </eucode>
 
-So, that is our pre-processor. Now, how do we make use of it? First let's create a simple test program that we can watch it work with. Name this file ##thedate.ex##. 
+So, that is our pre-processor. Now, how do we make use of it? First let's
+create a
+simple test program that we can watch it work with. Name this file
+##thedate.ex##.
 
 <eucode>
 -- thedate.ex
@@ -59,46 +80,87 @@ So, that is our pre-processor. Now, how do we make use of it? First let's create
 puts(1, "The date this was run is @DATE@\n")
 </eucode>
 
-Rather simple, but it shows off the pre-processor we have created. Now, let's run it, but first without a pre-processor hook defined. 
+Rather simple, but it shows off the pre-processor we have created. Now,
+let's
+run it, but first without a pre-processor hook defined.
 
-NOTE: Through this document I am going to assume that you are working in Windows. If not, you can make the appropriate changes to the shell type examples.
+NOTE: Through this document I am going to assume that you are working in
+Windows.
+If not, you can make the appropriate changes to the shell type examples.
 
 {{{
 C:\MyProjects\datesub> eui thedate.ex
 The date this was run is @DATE@
 }}}
 
-Not very helpful? Ok, let's tell Euphoria how to use the pre-processor that we just created and then see what happens.
+Not very helpful? Ok, let's tell Euphoria how to use the pre-processor
+that we just
+created and then see what happens.
 
 {{{
 C:\MyProjects\datesub> eui -p ex:datesub.ex thedate.ex
 The date this was run is 2009-08-05 19:36:22
 }}}
 
-If you got something similar to the above output, good job, it worked! If not, go back up and check your code for syntax errors or differences from the examples above.
+If you got something similar to the above output, good job, it worked! If
+not,
+go back up and check your code for syntax errors or differences from the
+examples
+above.
 
-What is this -p paramater? In short, -p tells eui or euc that there is a pre-processor. The definition of the pre-processor comes next and can be broken into 2 required sections and 1 optional section. Each section is divided by a colon (:). For example, -p e,ex:datesub.ex
+What is this -p paramater? In short, -p tells eui or euc that there is a
+pre-processor. The definition of the pre-processor comes next and can
+be broken into 2 required sections and 1 optional section. Each section
+is divided by a colon (:). \\
+For example, ##-p e,ex:datesub.ex##
 
-# ##e,ex## tells Euphoria that when it comes across a file with the extension ##e## or ##ex## that it should run a pre-processor
-# ##datesub.ex## tells Euphoria which pre-processor should be run. This can be a ##.ex## file or any other executable command.
-# An optional section exists to pass options to the pre-processor but we will go into this later.
+# ##e,ex## tells Euphoria that when it comes across a file with the
+extension ##e## or ##ex## that it should run a pre-processor
+# ##datesub.ex## tells Euphoria which pre-processor should be run. This
+can be a ##.ex## file or any other executable command.
+# An optional section exists to pass options to the pre-processor but we
+will go into this later.
 
-That's it for the quick introduction. I hope that the wheels are turning in your head already as to what can be accomplished with such a system. If you are interested, please continue reading and see where things will get very interesting!
+That's it for the quick introduction. I hope that the wheels are turning
+in your head already as to what can be accomplished with such a system.
+If you are interested, please continue reading and see where things
+will get very interesting!
 
 === Pre-process Details
 
-Euphoria manages when the pre-processor should be called and with what arguments. The pre-processor does not need to concern itself as to if it should run, what filename it is reading or what filename it will be writing to. It should simply do as Euphoria tells it to do. This is because Euphoria monitors what the modification time is on the source file and what time the last pre-process call was made on the file. If nothing has changed in the source file then the pre-processor is not called again. Pre-processing does have a slight penalty in speed as the file is processed twice. For example, the ##datesub.ex## pre-processor read the entire file, searched for ##@DATE@##, wrote the file and then Euphoria picked up from there reading the output file, parsing it and finally executing it. To minimize the time taken, Euphoria caches the output of the pre-processor so that the interim process is not normally needed after it has been run once.
+Euphoria manages when the pre-processor should be called and with what
+arguments. The pre-processor does not need to concern itself as to if it
+should run, what filename it is reading or what filename it will be
+writing to. It should simply do as Euphoria tells it to do. This is
+because Euphoria monitors what the modification time is on the source
+file and what time the last pre-process call was made on the file. If
+nothing has changed in the source file then the pre-processor is not
+called again. Pre-processing does have a slight penalty in speed as the
+file is processed twice. For example, the ##datesub.ex## pre-processor
+read the entire file, searched for ##@DATE@##, wrote the file and then
+Euphoria picked up from there reading the output file, parsing it and
+finally executing it. To minimize the time taken, Euphoria caches the
+output of the pre-processor so that the interim process is not normally
+needed after it has been run once.
 
 === Command Line Options
 
 ==== -p - Define a pre-processor
 
-The primary command line option that you will use is the ##-p## option which defines the pre-processor. It is a two or three section option. The first section is a comma delimited list of file extensions to associate with the pre-processor, the second is the actual pre-processor script/command and the optional third is parameters to send to the pre-processor in addition to the ##-i## and ##-o## parameters.
+The primary command line option that you will use is the ##-p## option
+which defines the pre-processor. It is a two or three section option. The
+first section is a comma delimited list of file extensions to associate
+with the pre-processor, the second is the actual pre-processor
+script/command and the optional third is parameters to send to the
+pre-processor in addition to the ##-i## and ##-o## parameters.
 
 Let's go over some examples:
 
-* ##-p e:datesub.ex## - This will be executed for every ##.e## file and the command to call is ##datesub.ex##.
-* ##-p "de,dex,dew:dot4.dll:-verbose -no-dbc"## - Files with ##de, dex, dew## extensions will be passed to the ##dot4.dll## process. ##dot4.dll## will get the optional parameters ##-verbose -no-dbc## passed to it. 
+* ##-p e:datesub.ex## - This will be executed for every ##.e## file and
+the command to call is ##datesub.ex##.
+* ##-p "de,dex,dew:dot4.dll:-verbose -no-dbc"## - Files with ##de, dex,
+dew## extensions will be passed to the ##dot4.dll## process. ##dot4.dll##
+will get the optional parameters ##-verbose -no-dbc## passed to it.
 
 Multiple pre-processors can be defined at the same time. For instance,
 
@@ -107,15 +169,28 @@ C:\MyProjects\datesub> eui -p e,ex:datesub.ex -p de,dex:dot4.dll \
         -p le,lex:literate.ex hello.ex
 }}}
 
-is a valid command line. It's possible that ##hello.ex## may include a file named ##greeter.le## and that file may include a file named ##person.de##. Thus, all three pre-processors will be called upon even though the main file is only processed by ##datesub.ex##
+is a valid command line. It's possible that ##hello.ex## may include a
+file named ##greeter.le## and that file may include a file named
+##person.de##. Thus, all three pre-processors will be called upon even
+though the main file is only processed by ##datesub.ex##
 
 ==== -pf - Force pre-processing
 
-When writing a pre-processor you may run into the problem that your source file did not change, therefore, Euphoria is not calling your pre-processor. However, your pre-processor has changed and you want Euphoria to re-process your unchanged source file. This is where ##-pf## comes into play. ##-pf## causes Euphoria to force the pre-processing, regardless of the cached state of any file. When used, Euphoria will always call the pre-processor for all files with a matching pre-processor definition.
+When writing a pre-processor you may run into the problem that your
+source file did not change, therefore, Euphoria is not calling your
+pre-processor. However, your pre-processor has changed and you want
+Euphoria to re-process your unchanged source file. This is where ##-pf##
+comes into play. ##-pf## causes Euphoria to force the pre-processing,
+regardless of the cached state of any file. When used, Euphoria will
+always call the pre-processor for all files with a matching pre-processor
+definition.
 
 ==== Use of a configuration file
 
-Ok, so who wants to type these pre-processor definitions in all the time? I don't either. That's where the standard Euphoria configuration file comes into play. You can simply create a file named ##eu.cfg## and place something like this into it.
+Ok, so who wants to type these pre-processor definitions in all the time?
+I don't either. That's where the standard Euphoria configuration file
+comes into play. You can simply create a file named ##eu.cfg## and place
+something like this into it.
 
 {{{
 -p le,lex:literate.ex
@@ -123,13 +198,28 @@ Ok, so who wants to type these pre-processor definitions in all the time? I don'
 ... etc ...
 }}}
 
-Then you can execute any of those files directly without the ##-p## parameters on the command line. This ##eu.cfg## file can be local to a project, local to a user or global on a system. Please read about the [[:eu.cfg] file for more information.
+Then you can execute any of those files directly without the ##-p##
+parameters on the command line. This ##eu.cfg## file can be local to a
+project, local to a user or global on a system. Please read about the
+[[:eu.cfg] file for more information.
 
 === DLL/Shared Library Interface
 
-A pre-processor may be a Euphoria file, ending with an extension of ##.ex##, a compiled Euphoria program, ##.exe## or even a compiled Euphoria DLL file, ##.dll##. The only requirements are that it must accept the two command line options, -i and -o described above and exit with a ZERO status code on success or non-ZERO on failure. 
+A pre-processor may be a Euphoria file, ending with an extension of
+##.ex##, a compiled Euphoria program, ##.exe## or even a compiled
+Euphoria DLL file, ##.dll##. The only requirements are that it must
+accept the two command line options, -i and -o described above and exit
+with a ZERO status code on success or non-ZERO on failure.
 
-The DLL file (or shared library on Unixes) has a real benefit in that with each file that needs to be pre-processed does not require a new process to be spawned as with an executable or a Euphoria script. Once you have the pre-processor written and functioning, it's easy to convert your script to use the more advanced, better performing shared library method. Let's do that now with our ##datesub.ex## pre-processor. Take a moment to review the code above for the ##datesub.ex## program before continuing. This will allow you to more easily see the changes that we make here.
+The DLL file (or shared library on Unixes) has a real benefit in that
+with each file that needs to be pre-processed does not require a new
+process to be spawned as with an executable or a Euphoria script. Once
+you have the pre-processor written and functioning, it's easy to convert
+your script to use the more advanced, better performing shared library
+method. Let's do that now with our ##datesub.ex## pre-processor. Take a
+moment to review the code above for the ##datesub.ex## program before
+continuing. This will allow you to more easily see the changes that we
+make here.
 
 <eucode>
 -- datesub.ex
@@ -145,7 +235,7 @@ public function preprocess(sequence inFileName, sequence outFileName,
     content = find_replace("@DATE@", content, format(now()))
 
     write_file(outFileName, content)
-    
+
     return 0
 end function
 
@@ -166,13 +256,21 @@ ifdef not EUC_DLL then
 end ifdef
 </eucode>
 
-It's beginning to look a little more like a well structured program. You'll notice that we took the actual pre-processing functionality out the the top level program making it into an exported function named ##preprocess##. That function takes three parameters:
+It's beginning to look a little more like a well structured program.
+You'll notice that we took the actual pre-processing functionality out
+the the top level program making it into an exported function named
+##preprocess##. That function takes three parameters:
 
 # ##inFileName## - filename to read from
 # ##outFileName## - filename to write to
-# ##options## - options that the user may wish to pass on verbatim to the pre-processor
+# ##options## - options that the user may wish to pass on verbatim to the
+pre-processor
 
-It should return 0 on no error and non-zero on an error. This is to keep a standard with the way error levels from executables function. In that convention, it's suggested that 0 be OK and 1, 2, 3, etc... indicate different types of error conditions. Although the function could return a negative number, the main routine cannot exit with a negative number.
+It should return 0 on no error and non-zero on an error. This is to keep
+a standard with the way error levels from executables function. In that
+convention, it's suggested that 0 be OK and 1, 2, 3, etc... indicate
+different types of error conditions. Although the function could return a
+negative number, the main routine cannot exit with a negative number.
 
 To use this new process, we simply translate it through ##euc##,
 
@@ -180,23 +278,31 @@ To use this new process, we simply translate it through ##euc##,
 C:\MyProjects\datesub> euc -dll datesub.ex
 }}}
 
-If all went correctly, you now have a datesub.dll file. I'm sure you can guess on how it should be used, but for the sake of being complete,
+If all went correctly, you now have a datesub.dll file. I'm sure you can
+guess on how it should be used, but for the sake of being complete,
 
 {{{
 C:\MyProjects\datesub> eui -p e,ex:datesub.dll thedate.ex
 }}}
 
-On such a simple file and such a simple pre-processor, you probably are not going to notice a speed difference but as things grow and as the pre-processor gets more complicated, compiling to a shared library is your best option.
+On such a simple file and such a simple pre-processor, you probably are
+not going to notice a speed difference but as things grow and as the
+pre-processor gets more complicated, compiling to a shared library is
+your best option.
 
 === Advanced Examples
 
 ==== Finish datesub.ex
 
-Before we move totally away from our ##datesub.ex## example, let's finish it off by adding some finishing touches and making use of optional parameters. Again, please go back and look at the Shared Library version of ##datesub.ex## before continuning so that you can see how we have changed things.
+Before we move totally away from our ##datesub.ex## example, let's finish
+it off by adding some finishing touches and making use of optional
+parameters. Again, please go back and look at the Shared Library version
+of ##datesub.ex## before continuning so that you can see how we have
+changed things.
 
 <eucode>
 -- datesub.ex
-include std/cmdline.e  -- command line parsing 
+include std/cmdline.e  -- command line parsing
 include std/datetime.e -- now() and format()
 include std/io.e       -- read_file() and write_file()
 include std/map.e      -- map accessor functions (get())
@@ -211,48 +317,74 @@ public function preprocess(sequence inFileName, sequence outFileName,
     map opts = cmd_parse(cmdopts, options)
     sequence content = read_file(inFileName)
 
-    content = find_replace("@DATE@", content, format(now(), map:get(opts, "f")))
+    content = find_replace("@DATE@", content, format(now(), map:get(opts,
+"f")))
 
     write_file(outFileName, content)
-    
+
     return 0
 end function
 
 ifdef not EUC_DLL then
     cmdopts = {
-        { "i", 0, "Input filename", { NO_CASE, MANDATORY, HAS_PARAMETER, "filename"} },
-        { "o", 0, "Output filename", { NO_CASE, MANDATORY, HAS_PARAMETER, "filename"} }
+        { "i", 0, "Input filename", { NO_CASE, MANDATORY, HAS_PARAMETER,
+"filename"} },
+        { "o", 0, "Output filename", { NO_CASE, MANDATORY, HAS_PARAMETER,
+"filename"} }
     } & cmdopts
-    
+
     map opts = cmd_parse(cmdopts)
     preprocess(map:get(opts, "i"), map:get(opts, "o"),
         "-f " & map:get(opts, "f", "%Y-%m-%d"))
 end ifdef
 </eucode>
 
-Here we simply used ##cmdline.e## to handle the command line parsing for us giving out command line program a nice interface, such as parameter validation and an automatic help screen. At the same time we also added a parameter for the date format to use. This is optional and if not supplied, ##%Y-%m-%d## is used.
+Here we simply used ##cmdline.e## to handle the command line parsing for
+us giving out command line program a nice interface, such as parameter
+validation and an automatic help screen. At the same time we also added a
+parameter for the date format to use. This is optional and if not
+supplied, ##%Y-%m-%d## is used.
 
-The final version of ##datesub.ex## and ##thedate.ex## are located in the ##demo/preproc## directory of your Euphoria installation.
+The final version of ##datesub.ex## and ##thedate.ex## are located in the
+##demo/preproc## directory of your Euphoria installation.
 
 ==== Others
 
 TODO: this needs done still.
 
-Euphoria includes two more demos of pre-processors. They are ETML and literate. Please explore ##demo/preproc## for these examples and explanations.
+Euphoria includes two more demos of pre-processors. They are ETML and
+literate. Please explore ##demo/preproc## for these examples and
+explanations.
 
 ===== Other examples of pre-processors include:
 
-* eSQL - Allows you to include a ##.sql## file directly. It parses ##CREATE TABLE## and ##CREATE INDEX## statements building common methods to create, destroy, get by id, find by any index, add, remove and save entities.
-* make40 - Will process any 3.x script on the fly making sure that it will run in 4.x. It does this by converting variables, constants and routine names that are the same as new 4.x keywords into something acceptable to 4.x. Thus, 3.x programs can run in the 4.x interpreter and translator with out any user intervention.
-* dot4 - Adds all sorts of syntax goodies to Euphoria such as structured sequence access, one line if statements, DOT notation for any function/routine call, design by contract and more.
+* eSQL - Allows you to include a ##.sql## file directly. It parses
+##CREATE TABLE## and ##CREATE INDEX## statements building common methods
+to create, destroy, get by id, find by any index, add, remove and save
+entities.
+* make40 - Will process any 3.x script on the fly making sure that it
+will run in 4.x. It does this by converting variables, constants and
+routine names that are the same as new 4.x keywords into something
+acceptable to 4.x. Thus, 3.x programs can run in the 4.x interpreter and
+translator with out any user intervention.
+* dot4 - Adds all sorts of syntax goodies to Euphoria such as structured
+sequence access, one line if statements, DOT notation for any
+function/routine call, design by contract and more.
 
 ===== Other Ideas
 
-* Include a Windows .RC file that defines a dialog layout and generate code that will create the dialog and interact with it.
-* Object Oriented system for Euphoria that translates into pure Euphoria code, thus has the raw speed of Euphoria.
-* Include a Yacc, Lex, ANTLR parser definition directly that then generates a Euphoria parser for the given syntax.
-* Instead of writing interpreters such as a QBasic clone, simply write a pre-processor that converts QBasic code into Euphoria code, thus you can run eui -p bas:qbasic.ex hello.bas directly.
-* Include a XML specification, which in turn, gives you nice accessory functions for working with XML files
+* Include a Windows .RC file that defines a dialog layout and generate
+code that will create the dialog and interact with it.
+* Object Oriented system for Euphoria that translates into pure Euphoria
+code, thus has the raw speed of Euphoria.
+* Include a Yacc, Lex, ANTLR parser definition directly that then
+generates a Euphoria parser for the given syntax.
+* Instead of writing interpreters such as a QBasic clone, simply write a
+pre-processor that converts QBasic code into Euphoria code, thus you can
+run eui -p bas:qbasic.ex hello.bas directly.
+* Include a XML specification, which in turn, gives you nice accessory
+functions for working with XML files
 matching that schema.
 
-If you have ideas of helpful pre-processors, please put the idea out on the forum for discussion.
+If you have ideas of helpful pre-processors, please put the idea out on
+the forum for discussion.
