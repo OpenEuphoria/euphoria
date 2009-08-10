@@ -126,10 +126,6 @@ atom next_task_id = 1 -- for multitasking
 next_task_id = 1
 
 atom clock_period = 0.01 -- Non DOS
-ifdef DOS32 then
-	clock_period = 0.055  -- DOS default (can change)
-end ifdef
-
 -- TCB fields
 constant TASK_RID = 1,      -- routine id
 		 TASK_TID = 2,      -- external task id
@@ -3549,13 +3545,6 @@ procedure opMACHINE_PROC()
 			
 			RTFatal( val[b] )
 			
-ifdef DOS32 then
-		case M_TICK_RATE then
-			if val[b] > 18 and val[b] < 10000 then
-				clock_period = 1 / val[b]
-				machine_proc(v, val[b]) 
-			end if
-end ifdef
 
 		case else
 			machine_proc(v, val[b]) 

@@ -20,10 +20,6 @@ include std/math.e
 include std/search.e  as search
 include std/error.e as e
 
-ifdef DOS32 then
-	include std/text.e
-end ifdef
-
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
 object void
@@ -64,14 +60,6 @@ procedure verbose_printf(integer fh, sequence fmt, sequence data={})
 		printf(fh, fmt, data)
 	end if
 end procedure
-
-function dos_lower(sequence s)
-	ifdef DOS32 then
-		return lower(s)
-	elsedef
-		return s
-	end ifdef
-end function
 
 function run_emake()
 	-- parse and run the commands in emake.bat.
@@ -251,7 +239,6 @@ function check_errors( sequence filename, sequence control_error_file, sequence 
 
 		for j = 1 to length(ex_err) do
 			integer mde = match(".e:", ex_err[j]) 
-			integer d32 = match("DOS32", ex_err[j])
 
 			if mde then
 				integer sl = mde
@@ -259,21 +246,17 @@ function check_errors( sequence filename, sequence control_error_file, sequence 
 					sl -= 1
 				end while
 
-				ex_err[j] = dos_lower(ex_err[j][sl..$])
+				ex_err[j] = ex_err[j][sl..$]
 
 				if sl > 1 then
 					ex_err[j] = "..." & ex_err[j]
 				end if
 			end if
 
-			if d32 then
-				ex_err[j] = ex_err[j][1..d32+4]
-			end if
 		end for
 
 		for j = 1 to length(control_err) do
 			integer mde = match(".e:", control_err[j])
-			integer d32 = match("DOS32", ex_err[j])
 
 			if mde then
 				integer sl = mde
@@ -281,15 +264,12 @@ function check_errors( sequence filename, sequence control_error_file, sequence 
 					sl -= 1
 				end while
 
-				control_err[j] = dos_lower(control_err[j][sl..$])
+				control_err[j] = control_err[j][sl..$]
 				if sl > 1 then
 					control_err[j] = "..." & control_err[j]
 				end if
 			end if
 
-			if d32 then
-				control_err[j] = control_err[j][1..d32+4]
-			end if
 		end for
 	end if -- sequence(ex_err)
 			
@@ -453,7 +433,7 @@ function test_file( sequence filename, sequence fail_list )
 	object control_error_file = open_error_file( filename )
 	
 	integer expected_status = 0
-	if match("t_c_", dos_lower(filename)) = 1 or sequence(control_error_file) then
+	if match("t_c_", filename) = 1 or sequence(control_error_file) then
 		-- We expect this test to fail
 		expected_status = 1
 		fail_list = interpret_fail( cmd, filename, control_error_file, fail_list )
@@ -488,7 +468,7 @@ function test_file( sequence filename, sequence fail_list )
 
 	ifdef REC then
 		if status then
-			if match("t_c_", dos_lower(filename)) != 1 then
+			if match("t_c_", filename) != 1 then
 				directory = filename[1..find('.',filename&'.')] & "d" & SLASH & interpreter_os_name
 			else
 				directory = filename[1..find('.',filename&'.')] & "d"
@@ -586,11 +566,7 @@ function platform_init( sequence cmds )
 		
 	elsifdef WIN32 then
 		executable = "eui"
-		dexe = ".exe"
-		
-	elsedef
-		executable = "euid"
-		dexe = ".exe"
+		dexe = ".exe"		
 	end ifdef
 	integer ex
 	while ex and ex < length(cmds) with entry do
@@ -624,9 +600,6 @@ function platform_init( sequence cmds )
 		
 		elsifdef WIN32 then
 			translator = "euc.exe"
-		
-		elsedef
-			translator = "eucd.exe"
 		end ifdef
 	end if	
 
@@ -637,19 +610,15 @@ function platform_init( sequence cmds )
 	ifdef UNIX then
 		interpreter_os_name = "UNIX"
 
-	elsifdef WIN32 or DOS32 then
+	elsifdef WIN32 then
 		if length(translator) > 0 then
 			translator_options &= " -CON"
 		end if
 		
-		if equal("euid", lower(filebase(executable))) then
-			interpreter_os_name = "DOS32"
-		else
-			interpreter_os_name = "WIN32"
-		end if
+		interpreter_os_name = "WIN32"
 
 	elsedef
-		puts(2, "eutest is only supported on Unix, MS-DOS, and Windows.\n")
+		puts(2, "eutest is only supported on Unix and Windows.\n")
 		abort(1)
 	end ifdef
 	return cmds

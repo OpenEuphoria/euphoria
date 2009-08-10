@@ -157,10 +157,8 @@ end if
 
 -- Must be less than or equal to actual backend size.
 -- We seek to this position and then search for the marker.
-ifdef DOS32 then
-	constant OUR_SIZE = 170000 -- backend.exe (Causeway compression)
 
-elsifdef FREEBSD or OSX or SUNOS then
+ifdef FREEBSD or OSX or SUNOS then
 	constant OUR_SIZE = 150000 -- backendu for FreeBSD (not compressed)
 
 elsifdef LINUX then

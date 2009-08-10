@@ -305,6 +305,7 @@ constant StdErrMsgs = {
 	{291, "Defines warning level"},
 	{292, "Write all warnings to the given file instead of STDOUT"},
 	{293, "Defines warning level by exclusion"},
+	{294, "'[1]' is not supported in this platform"},
 
 	$
 }

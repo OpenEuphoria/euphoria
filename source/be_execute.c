@@ -5131,11 +5131,7 @@ void do_exec(int *start_pc)
 					BREAK;
 
 			default:
-#ifdef INT_CODES
-				RTFatal("Unsupported Op Code %d", (int)*pc);
-#else
-				RTFatal("Unsupported Op Code %d", (int)pc);
-#endif
+				RTFatal("Unsupported Op Code ");
 		
 #ifdef INT_CODES
 		}

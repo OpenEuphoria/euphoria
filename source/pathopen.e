@@ -11,11 +11,6 @@ include std/os.e
 include std/filesys.e
 include std/text.e
 
-ifdef DOS32 then
-	public include std\dos\memory.e
-	include std\dos\interrup.e
-end ifdef
-
 include global.e
 include common.e
 include platform.e
@@ -32,23 +27,6 @@ ifdef WIN32 then
 	convert_length=64
 	convert_buffer=allocate(convert_length)
 
-elsifdef DOS32 then
-	sequence regs
-	regs=repeat(0,10)
-	fc_table=allocate_low(5)
-	-- query filename country dependent capitalisation table pointer
-	regs[REG_DX]=and_bits(fc_table,15)
-	regs[REG_DS]=floor(fc_table/16)
-	regs[REG_AX]=#6504
-	regs=dos_interrupt(#21,regs)
-	if and_bits(regs[REG_FLAGS],1) then -- DOS earlier than 4.0, or something very wrong
-		free_low(fc_table)
-		fc_table=0
-	else -- turn received dword into a 32 bit address, altered so as to access it faster
-		regs=peek({fc_table+1,4})
-		free_low(fc_table)
-		fc_table=regs[1]+256*regs[2]+16*regs[3]+4096*regs[4]-126
-	end if
 end ifdef
 
 function convert_from_OEM(sequence s)

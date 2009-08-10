@@ -34,11 +34,7 @@ public integer
 	INETBSD  = 0, TNETBSD  = 0
 
 -- operating system:
-ifdef DOS32 then
-	IDOS = 1
-	TDOS = 1
-
-elsifdef WIN32 then
+ifdef WIN32 then
 	IWINDOWS = 1
 	TWINDOWS = 1
 
@@ -100,7 +96,6 @@ public procedure set_host_platform( atom plat )
 
 	TUNIX    = (find(ihost_platform, unices) != 0) 
 	TWINDOWS = (ihost_platform = WIN32)
-	TDOS     = (ihost_platform = DOS32)
 	TBSD     = (ihost_platform = UFREEBSD)
 	TOSX     = (ihost_platform = UOSX)
 	TLINUX   = (ihost_platform = ULINUX)
@@ -109,7 +104,6 @@ public procedure set_host_platform( atom plat )
 	TNETBSD  = (ihost_platform = UNETBSD)
 	IUNIX    = TUNIX
 	IWINDOWS = TWINDOWS
-	IDOS     = TDOS
 	IBSD     = TBSD
 	IOSX     = TOSX
 	ILINUX   = TLINUX
@@ -179,8 +173,6 @@ public function GetPlatformDefines(integer for_translator = 0)
 			end if
 			close(fh)
 		end if
-	elsif (IDOS and not for_translator) or (TDOS and for_translator) then
-		local_defines &= {"DOSFAMILY", "DOS32"}
 	elsif (ILINUX and not for_translator) or (TLINUX and for_translator) then
 		local_defines &= {"UNIX", "LINUX"}
 	elsif (IOSX and not for_translator) or (TOSX and for_translator) then

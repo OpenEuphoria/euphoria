@@ -1305,10 +1305,6 @@ export procedure GenerateUserRoutines()
 			end if
 
 			long_c_file = c_file
-			ifdef DOS32 then
-				c_file = truncate_to_83(c_file)
-			end ifdef
-
 			if LAST_PASS = TRUE then
 				c_file = unique_c_name(c_file)
 				add_file(c_file)

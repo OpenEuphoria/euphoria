@@ -30,9 +30,7 @@ export constant EGPM = 0     -- GPM mouse support on Linux
 export boolean w32 -- Windows option for BIND
 
 export sequence version_name
-ifdef DOS32 then
-	version_name = "DOS32"
-elsifdef WIN32 then
+ifdef WIN32 then
 	version_name = "WIN32"
 elsifdef LINUX then
 	version_name = "Linux"

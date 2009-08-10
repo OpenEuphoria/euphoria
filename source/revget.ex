@@ -111,23 +111,9 @@ function rev_with_svnversion()
 		dexe = ".exe"
 	end ifdef
 
-	line = locate_file("svnversion"&dexe, path)
-	if eu:compare(line, "svnversion"&dexe) = 0 then
+	line = locate_file("svnversion" & dexe, path)
+	if eu:compare(line, "svnversion" & dexe) = 0 then
 		return 0
-	else
-		-- avoid having the rev.e string change from NNNNM to NNNN.
-
-		-- If svnversion is found under DOS it will not be able to run
-		-- it successfully if there is a space in its path.
-		ifdef DOS32 then
-			if find(' ',line) then
-				if interactive then
-					puts(2,"This program must be interpreted using eui.exe.")
-				end if
-
-				abort(0)
-			end if
-		end ifdef
 	end if
 
 	-- run svnversion with .. argument to include support directories

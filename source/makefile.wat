@@ -83,6 +83,7 @@ EU_CORE_FILES = &
 	inline.e &
 	keylist.e &
 	main.e &
+	msgtext.e &
 	mode.e &
 	opnames.e &
 	parser.e &

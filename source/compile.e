@@ -5332,27 +5332,11 @@ procedure opMEM_SET()
 end procedure
 
 procedure opPIXEL()
-	c_stmt("Pixel(@, @);\n", {Code[pc+1], Code[pc+2]})
-	pc += 3
+	CompileErr(294, {"pixel"})
 end procedure
 
 procedure opGET_PIXEL()
-	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	c_stmt("@ = Get_Pixel(@);\n", {Code[pc+2], Code[pc+1]})
-	CDeRefStr("_0")
-	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
-		if SeqLen(Code[pc+1]) = 2 then
-			target = {0, 255}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
-		elsif SeqLen(Code[pc+1]) = 3 then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
-		else
-			SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
-		end if
-	else
-		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
-	end if
-	pc += 3
+	CompileErr(294, {"get_pixel"})
 end procedure
 
 procedure opCALL()
@@ -5893,901 +5877,556 @@ export procedure init_opcodes()
 	for i = 1 to length(opnames) do
 		name = opnames[i]
 		-- some similar ops are handled by a common routine
-		switch name with fallthru do
+		switch name do
 			case "AND_BITS" then
 				operation[i] = routine_id("opAND_BITS")
-				break
-				
 			
 			case "AND" then
 				operation[i] = routine_id("opAND")
-				break
-				
 			
 			case "APPEND" then
 				operation[i] = routine_id("opAPPEND")
-				break
-				
 			
 			case "ARCTAN" then
 				operation[i] = routine_id("opARCTAN")
-				break
-				
 			
 			case "ASSIGN_I" then
 				operation[i] = routine_id("opASSIGN_I")
-				break
-				
 			
 			case "ASSIGN_OP_SLICE" then
 				operation[i] = routine_id("opASSIGN_OP_SLICE")
-				break
-				
 			
 			case "ASSIGN_SLICE" then
 				operation[i] = routine_id("opASSIGN_SLICE")
-				break
-				
 			
 			case "ASSIGN_SUBS" then
 				operation[i] = routine_id("opASSIGN_SUBS")
-				break
-				
 			
 			case "ASSIGN" then
 				operation[i] = routine_id("opASSIGN")
-				break
-				
 			
 			case "ATOM_CHECK" then
 				operation[i] = routine_id("opATOM_CHECK")
-				break
-				
 			
 			case "BADRETURNF" then
 				operation[i] = routine_id("opBADRETURNF")
-				break
-				
 			
 			case "C_FUNC" then
 				operation[i] = routine_id("opC_FUNC")
-				break
-				
 			
 			case "C_PROC" then
 				operation[i] = routine_id("opC_PROC")
-				break
-				
 			
 			case "CALL_BACK_RETURN" then
 				operation[i] = routine_id("opCALL_BACK_RETURN")
-				break
-				
 			
 			case "CALL_PROC" then
 				operation[i] = routine_id("opCALL_PROC")
-				break
-				
 			
 			case "CALL" then
 				operation[i] = routine_id("opCALL")
-				break
-				
 			
 			case "CASE" then
 				operation[i] = routine_id("opCASE")
-				break
-				
 			
 			case "CLEAR_SCREEN" then
 				operation[i] = routine_id("opCLEAR_SCREEN")
-				break
-				
 			
 			case "CLOSE" then
 				operation[i] = routine_id("opCLOSE")
-				break
-				
 			
 			case "COMMAND_LINE" then
 				operation[i] = routine_id("opCOMMAND_LINE")
-				break
-				
 			
 			case "COMPARE" then
 				operation[i] = routine_id("opCOMPARE")
-				break
-				
 			
 			case "CONCAT_N" then
 				operation[i] = routine_id("opCONCAT_N")
-				break
-				
 			
 			case "CONCAT" then
 				operation[i] = routine_id("opCONCAT")
-				break
-				
 			
 			case "COS" then
 				operation[i] = routine_id("opCOS")
-				break
-				
 			
 			case "DATE" then
 				operation[i] = routine_id("opDATE")
-				break
-				
 			
 			case "DIV2" then
 				operation[i] = routine_id("opDIV2")
-				break
-				
 			
 			case "DIVIDE" then
 				operation[i] = routine_id("opDIVIDE")
-				break
-				
 			
 			case "ENDFOR_GENERAL" then
 				operation[i] = routine_id("opENDFOR_GENERAL")
-				break
-				
 			
 			case "EQUAL" then
 				operation[i] = routine_id("opEQUAL")
-				break
-				
 			
 			case "EQUALS_IFW_I" then
 				operation[i] = routine_id("opEQUALS_IFW_I")
-				break
-				
 			
 			case "EQUALS_IFW" then
 				operation[i] = routine_id("opEQUALS_IFW")
-				break
-				
 			
 			case "EQUALS" then
 				operation[i] = routine_id("opEQUALS")
-				break
-				
 			
 			case "EXIT" then
 				operation[i] = routine_id("opEXIT")
-				break
-				
 			
 			case "FIND_FROM" then
 				operation[i] = routine_id("opFIND_FROM")
-				break
-				
-			
+
 			case "FIND" then
 				operation[i] = routine_id("opFIND")
-				break
-				
 			
 			case "FLOOR_DIV" then
 				operation[i] = routine_id("opFLOOR_DIV")
-				break
-				
 			
 			case "FLOOR_DIV2" then
 				operation[i] = routine_id("opFLOOR_DIV2")
-				break
-				
 			
 			case "FLOOR" then
 				operation[i] = routine_id("opFLOOR")
-				break
-				
 			
 			case "FOR" then
 				operation[i] = routine_id("opFOR")
-				break
-				
 			
 			case "GET_KEY" then
 				operation[i] = routine_id("opGET_KEY")
-				break
-				
 			
 			case "GET_PIXEL" then
 				operation[i] = routine_id("opGET_PIXEL")
-				break
-				
 			
 			case "GETC" then
 				operation[i] = routine_id("opGETC")
-				break
-				
 			
 			case "GETENV" then
 				operation[i] = routine_id("opGETENV")
-				break
-				
 			
 			case "GETS" then
 				operation[i] = routine_id("opGETS")
-				break
-				
 			
 			case "GLABEL" then
 				operation[i] = routine_id("opGLABEL")
-				break
-				
 			
 			case "GLOBAL_INIT_CHECK" then
 				operation[i] = routine_id("opGLOBAL_INIT_CHECK")
-				break
-				
 			
 			case "GOTO" then
 				operation[i] = routine_id("opGOTO")
-				break
-				
 			
 			case "GREATER_IFW_I" then
 				operation[i] = routine_id("opGREATER_IFW_I")
-				break
-				
 			
 			case "GREATER_IFW" then
 				operation[i] = routine_id("opGREATER_IFW")
-				break
-				
 			
 			case "GREATER" then
 				operation[i] = routine_id("opGREATER")
-				break
-				
 			
 			case "GREATEREQ_IFW_I" then
 				operation[i] = routine_id("opGREATEREQ_IFW_I")
-				break
-				
 			
 			case "GREATEREQ_IFW" then
 				operation[i] = routine_id("opGREATEREQ_IFW")
-				break
-				
 			
 			case "GREATEREQ" then
 				operation[i] = routine_id("opGREATEREQ")
-				break
-				
 			
 			case "HASH" then
 				operation[i] = routine_id("opHASH")
-				break
-				
 			
 			case "HEAD" then
 				operation[i] = routine_id("opHEAD")
-				break
-				
 			
 			case "IF" then
 				operation[i] = routine_id("opIF")
-				break
-				
 			
 			case "INSERT" then
 				operation[i] = routine_id("opINSERT")
-				break
-				
 			
 			case "INTEGER_CHECK" then
 				operation[i] = routine_id("opINTEGER_CHECK")
-				break
-				
 			
 			case "IS_A_SEQUENCE" then
 				operation[i] = routine_id("opIS_A_SEQUENCE")
-				break
-				
 			
 			case "IS_AN_ATOM" then
 				operation[i] = routine_id("opIS_AN_ATOM")
-				break
-				
 			
 			case "IS_AN_INTEGER" then
 				operation[i] = routine_id("opIS_AN_INTEGER")
-				break
-				
 			
 			case "IS_AN_OBJECT" then
 				operation[i] = routine_id("opIS_AN_OBJECT")
-				break
-				
 			
 			case "LENGTH" then
 				operation[i] = routine_id("opLENGTH")
-				break
-				
-			
+
 			case "LESS_IFW_I" then
 				operation[i] = routine_id("opLESS_IFW_I")
-				break
-				
 			
 			case "LESS_IFW" then
 				operation[i] = routine_id("opLESS_IFW")
-				break
-				
 			
 			case "LESS" then
 				operation[i] = routine_id("opLESS")
-				break
-				
 			
 			case "LESSEQ_IFW_I" then
 				operation[i] = routine_id("opLESSEQ_IFW_I")
-				break
-				
 			
 			case "LESSEQ_IFW" then
 				operation[i] = routine_id("opLESSEQ_IFW")
-				break
-				
 			
 			case "LESSEQ" then
 				operation[i] = routine_id("opLESSEQ")
-				break
-				
 			
 			case "LHS_SUBS" then
 				operation[i] = routine_id("opLHS_SUBS")
-				break
 				
-			
 			case "LOG" then
 				operation[i] = routine_id("opLOG")
-				break
-				
 			
 			case "MACHINE_FUNC" then
 				operation[i] = routine_id("opMACHINE_FUNC")
-				break
-				
 			
 			case "MACHINE_PROC" then
 				operation[i] = routine_id("opMACHINE_PROC")
-				break
-				
 			
 			case "MATCH_FROM" then
 				operation[i] = routine_id("opMATCH_FROM")
-				break
-				
 			
 			case "MATCH" then
 				operation[i] = routine_id("opMATCH")
-				break
-				
 			
 			case "MEM_COPY" then
 				operation[i] = routine_id("opMEM_COPY")
-				break
-				
 			
 			case "MEM_SET" then
 				operation[i] = routine_id("opMEM_SET")
-				break
-				
 			
 			case "MINUS" then
 				operation[i] = routine_id("opMINUS")
-				break
-				
 			
 			case "MULTIPLY" then
 				operation[i] = routine_id("opMULTIPLY")
-				break
-				
 			
 			case "NOP1" then
 				operation[i] = routine_id("opNOP1")
-				break
-				
 			
 			case "NOPSWITCH" then
 				operation[i] = routine_id("opNOPSWITCH")
-				break
-				
 			
 			case "NOT_BITS" then
 				operation[i] = routine_id("opNOT_BITS")
-				break
-				
 			
 			case "NOT_IFW" then
 				operation[i] = routine_id("opNOT_IFW")
-				break
-				
 			
 			case "NOT" then
 				operation[i] = routine_id("opNOT")
-				break
-				
 			
 			case "NOTEQ_IFW_I" then
 				operation[i] = routine_id("opNOTEQ_IFW_I")
-				break
-				
 			
 			case "NOTEQ_IFW" then
 				operation[i] = routine_id("opNOTEQ_IFW")
-				break
-				
 			
 			case "NOTEQ" then
 				operation[i] = routine_id("opNOTEQ")
-				break
-				
 			
 			case "OPEN" then
 				operation[i] = routine_id("opOPEN")
-				break
-				
 			
 			case "OPTION_SWITCHES" then
 				operation[i] = routine_id("opOPTION_SWITCHES")
-				break
-				
 			
 			case "OR_BITS" then
 				operation[i] = routine_id("opOR_BITS")
-				break
-				
 			
 			case "OR" then
 				operation[i] = routine_id("opOR")
-				break
-				
 			
 			case "PEEK" then
 				operation[i] = routine_id("opPEEK")
-				break
-				
 			
 			case "PIXEL" then
 				operation[i] = routine_id("opPIXEL")
-				break
-				
 			
 			case "PLUS" then
 				operation[i] = routine_id("opPLUS")
-				break
-				
 			
 			case "PLUS1" then
 				operation[i] = routine_id("opPLUS1")
-				break
-				
 			
 			case "POKE" then
 				operation[i] = routine_id("opPOKE")
-				break
-				
 			
 			case "POSITION" then
 				operation[i] = routine_id("opPOSITION")
-				break
-				
 			
 			case "POWER" then
 				operation[i] = routine_id("opPOWER")
-				break
-				
 			
 			case "PREPEND" then
 				operation[i] = routine_id("opPREPEND")
-				break
-				
 			
 			case "PRINT" then
 				operation[i] = routine_id("opPRINT")
-				break
-				
 			
 			case "PRINTF" then
 				operation[i] = routine_id("opPRINTF")
-				break
-				
 			
 			case "PROC_TAIL" then
 				operation[i] = routine_id("opPROC_TAIL")
-				break
-				
 			
 			case "PROC" then
 				operation[i] = routine_id("opPROC")
-				break
-				
 			
 			case "PROFILE" then
 				operation[i] = routine_id("opPROFILE")
-				break
-				
-			
+
 			case "PUTS" then
 				operation[i] = routine_id("opPUTS")
-				break
-				
 			
 			case "RAND" then
 				operation[i] = routine_id("opRAND")
-				break
-				
 			
 			case "REMAINDER" then
 				operation[i] = routine_id("opREMAINDER")
-				break
-				
 			
 			case "REMOVE" then
 				operation[i] = routine_id("opREMOVE")
-				break
-				
 			
 			case "REPEAT" then
 				operation[i] = routine_id("opREPEAT")
-				break
-				
 			
 			case "REPLACE" then
 				operation[i] = routine_id("opREPLACE")
-				break
-				
 			
 			case "RETURNF" then
 				operation[i] = routine_id("opRETURNF")
-				break
-				
 			
 			case "RETURNP" then
 				operation[i] = routine_id("opRETURNP")
-				break
-				
 			
 			case "RETURNT" then
 				operation[i] = routine_id("opRETURNT")
-				break
-				
 			
 			case "RHS_SLICE" then
 				operation[i] = routine_id("opRHS_SLICE")
-				break
-				
 			
 			case "RHS_SUBS" then
 				operation[i] = routine_id("opRHS_SUBS")
-				break
-				
 			
 			case "RIGHT_BRACE_2" then
 				operation[i] = routine_id("opRIGHT_BRACE_2")
-				break
-				
 			
 			case "RIGHT_BRACE_N" then
 				operation[i] = routine_id("opRIGHT_BRACE_N")
-				break
-				
 			
 			case "ROUTINE_ID" then
 				operation[i] = routine_id("opROUTINE_ID")
-				break
-				
 			
 			case "SC1_AND" then
 				operation[i] = routine_id("opSC1_AND")
-				break
-				
 			
 			case "SC1_OR" then
 				operation[i] = routine_id("opSC1_OR")
-				break
-				
 			
 			case "SC2_OR" then
 				operation[i] = routine_id("opSC2_OR")
-				break
-				
 			
 			case "SIN" then
 				operation[i] = routine_id("opSIN")
-				break
-				
 			
 			case "SPACE_USED" then
 				operation[i] = routine_id("opSPACE_USED")
-				break
-				
 			
 			case "SPLICE" then
 				operation[i] = routine_id("opSPLICE")
-				break
-				
 			
 			case "SPRINTF" then
 				operation[i] = routine_id("opSPRINTF")
-				break
-				
 			
 			case "SQRT" then
 				operation[i] = routine_id("opSQRT")
-				break
-				
 			
 			case "STARTLINE" then
 				operation[i] = routine_id("opSTARTLINE")
-				break
-				
 			
 			case "SWITCH_RT" then
 				operation[i] = routine_id("opSWITCH_RT")
-				break
-				
 			
 			case "SWITCH" then
 				operation[i] = routine_id("opSWITCH")
-				break
-				
 			
 			case "SYSTEM_EXEC" then
 				operation[i] = routine_id("opSYSTEM_EXEC")
-				break
-				
 			
 			case "SYSTEM" then
 				operation[i] = routine_id("opSYSTEM")
-				break
-				
 			
 			case "TAIL" then
 				operation[i] = routine_id("opTAIL")
-				break
-				
 			
 			case "TAN" then
 				operation[i] = routine_id("opTAN")
-				break
-				
 			
 			case "TASK_CLOCK_START" then
 				operation[i] = routine_id("opTASK_CLOCK_START")
-				break
-				
 			
 			case "TASK_CLOCK_STOP" then
 				operation[i] = routine_id("opTASK_CLOCK_STOP")
-				break
-				
 			
 			case "TASK_CREATE" then
 				operation[i] = routine_id("opTASK_CREATE")
-				break
-				
 			
 			case "TASK_LIST" then
 				operation[i] = routine_id("opTASK_LIST")
-				break
-				
 			
 			case "TASK_SCHEDULE" then
 				operation[i] = routine_id("opTASK_SCHEDULE")
-				break
-				
 			
 			case "TASK_SELF" then
 				operation[i] = routine_id("opTASK_SELF")
-				break
-				
 			
 			case "TASK_STATUS" then
 				operation[i] = routine_id("opTASK_STATUS")
-				break
-				
 			
 			case "TASK_SUSPEND" then
 				operation[i] = routine_id("opTASK_SUSPEND")
-				break
-				
 			
 			case "TASK_YIELD" then
 				operation[i] = routine_id("opTASK_YIELD")
-				break
-				
 			
 			case "TIME" then
 				operation[i] = routine_id("opTIME")
-				break
-				
 			
 			case "TRACE" then
 				operation[i] = routine_id("opTRACE")
-				break
-				
 			
 			case "TYPE_CHECK" then
 				operation[i] = routine_id("opTYPE_CHECK")
-				break
-				
 			
 			case "UMINUS" then
 				operation[i] = routine_id("opUMINUS")
-				break
-				
 			
 			case "UPDATE_GLOBALS" then
 				operation[i] = routine_id("opUPDATE_GLOBALS")
-				break
-				
 			
 			case "XOR_BITS" then
 				operation[i] = routine_id("opXOR_BITS")
-				break
-				
 			
 			case "XOR" then
 				operation[i] = routine_id("opXOR")
-				break
-						
-			case "ASSIGN_OP_SUBS" then
-			case "PASSIGN_OP_SUBS" then
-			case "RHS_SUBS_CHECK" then
-			case "RHS_SUBS_I" then
+
+			case "ASSIGN_OP_SUBS", "PASSIGN_OP_SUBS", "RHS_SUBS_CHECK", "RHS_SUBS_I" then
 				operation[i] = routine_id("opRHS_SUBS")
-				break
 			
 			case "NOPWHILE" then
 				operation[i] = routine_id("opNOP1")
-				break
 				
 			case "WHILE" then
 				operation[i] = routine_id("opIF")
-				break
 				
 			case "SEQUENCE_CHECK" then
 				operation[i] = routine_id("opATOM_CHECK")
-				break
 				
-			case "ASSIGN_SUBS_CHECK" then
-			case "ASSIGN_SUBS_I" then
-            case "PASSIGN_SUBS" then
+			case "ASSIGN_SUBS_CHECK", "ASSIGN_SUBS_I", "PASSIGN_SUBS" then
 				operation[i] = routine_id("opASSIGN_SUBS")
-				break
 				
 			case "PLENGTH" then
 				operation[i] = routine_id("opLENGTH")
-				break
 				
-			case "ELSE" then
-			case "ENDWHILE" then
-			case "RETRY" then
+			case "ELSE", "ENDWHILE", "RETRY" then
 				operation[i] = routine_id("opEXIT")
-				break
 				
 			case "PLUS1_I" then
 				operation[i] = routine_id("opPLUS1")
-				break
 				
 			case "PRIVATE_INIT_CHECK" then
 				operation[i] = routine_id("opGLOBAL_INIT_CHECK")
-				break
 				
-			case "LHS_SUBS1" then
-			case "LHS_SUBS1_COPY" then
+			case "LHS_SUBS1", "LHS_SUBS1_COPY" then
 				operation[i] = routine_id("opLHS_SUBS")
-				break
 				
 			case "PASSIGN_OP_SLICE" then
 				operation[i] = routine_id("opASSIGN_OP_SLICE")
-				break
 				
 			case "PASSIGN_SLICE" then
 				operation[i] = routine_id("opASSIGN_SLICE")
-				break
 				
 			case "PLUS_I" then
 				operation[i] = routine_id("opPLUS")
-				break
 				
 			case "MINUS_I" then
 				operation[i] = routine_id("opMINUS")
-				break
 				
 			case "SC1_AND_IF" then
 				operation[i] = routine_id("opSC1_AND")
-				break
 				
 			case "SC1_OR_IF" then
 				operation[i] = routine_id("opSC1_OR")
-				break
 				
 			case "SC2_AND" then
 				operation[i] = routine_id("opSC2_OR")
-				break
 				
 			case "FOR_I" then
 				operation[i] = routine_id("opFOR")
-				break
 				
 			-- assume only these two ENDFORs are emitted by the front end
 			case "ENDFOR_INT_UP1" then
 				operation[i] = routine_id("opENDFOR_GENERAL")
-				break
 				
 			case "CALL_FUNC" then
 				operation[i] = routine_id("opCALL_PROC")
-				break
 				
-			case "PEEK4U" then
-			case "PEEK4S" then
-			case "PEEKS" then
-			case "PEEK2U" then
-			case "PEEK2S" then
-			case "PEEK_STRING" then
+			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING" then
 				operation[i] = routine_id("opPEEK")
-				break
 				
-			case "POKE4" then
-			case "POKE2" then
+			case "POKE4", "POKE2" then
 				operation[i] = routine_id("opPOKE")
-				break
 				
 			case "ABORT" then
 				operation[i] = routine_id("opCLOSE")
-				break
 				
 			case "QPRINT" then
 				operation[i] = routine_id("opPRINT")
-				break
 				
-			case "DISPLAY_VAR" then
-			case "ERASE_PRIVATE_NAMES" then
-			case "ERASE_SYMBOL" then
-			case "NOP2" then
+			case "DISPLAY_VAR", "ERASE_PRIVATE_NAMES", "ERASE_SYMBOL", "NOP2" then
 				operation[i] = routine_id("opPROFILE")
-				break
 				
-			case "SWITCH_SPI" then
-			case "SWITCH_I" then
+			case "SWITCH_SPI", "SWITCH_I" then
 				operation[i] = routine_id("opSWITCH_I")
-				break
 				
-			case "ENDFOR_INT_UP" then
-			case "ENDFOR_UP" then
-			case "SC2_NULL" then
-			case "ENDFOR_DOWN" then
-			case "ENDFOR_INT_DOWN1" then
-			case "ASSIGN_SUBS2" then
-			case "PLATFORM" then
-			case "ENDFOR_INT_DOWN" then
-			case "END_PARAM_CHECK" then
-			case "PROC_FORWARD" then
-			case "FUNC_FORWARD" then
-			case "TYPE_CHECK_FORWARD" then
+			case "ENDFOR_INT_UP",
+			     "ENDFOR_UP",
+			     "SC2_NULL",
+			     "ENDFOR_DOWN",
+			     "ENDFOR_INT_DOWN1",
+			     "ASSIGN_SUBS2",
+			     "PLATFORM",
+			     "ENDFOR_INT_DOWN",
+			     "END_PARAM_CHECK",
+			     "PROC_FORWARD",
+			     "FUNC_FORWARD",
+			     "TYPE_CHECK_FORWARD" then
 				-- never emitted
 				operation[i] = routine_id("opINTERNAL_ERROR")
-				break
 			
 			case "DELETE_ROUTINE" then
 				operation[i] = routine_id("opDELETE_ROUTINE")
-				break
 			
 			case "DELETE_OBJECT" then
 				operation[i] = routine_id("opDELETE_OBJECT")
-				break
 			
 			case "EXIT_BLOCK" then
-				operation[i] = routine_id("opEXIT_BLOCK" )
-				break
+				operation[i] = routine_id("opEXIT_BLOCK" )			
 			
 			case else
 				operation[i] = -1

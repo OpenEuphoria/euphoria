@@ -132,9 +132,6 @@ export procedure transoptions()
 					case "WIN" then
 						set_host_platform( WIN32 )
 
-					case "DOS" then
-						set_host_platform( DOS32 )
-
 					case "LINUX" then
 						set_host_platform( ULINUX )
 

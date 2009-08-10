@@ -406,12 +406,8 @@ integer OUR_SIZE
 il_file = match(".il", cl[3])
 
 if not il_file then
-	if platform() = DOS32 then
-		OUR_SIZE = 170000 -- roughly,
-						  -- but must be less or equal to size of backend[w].exe
-	else
-		OUR_SIZE = 61500 
-	end if
+	-- roughly, but must be less or equal to size of backend[w].exe
+	OUR_SIZE = 61500 
 
 	if seek(f, OUR_SIZE) then
 		error("initial seek failed")
