@@ -1667,9 +1667,9 @@ void do_exec(int *start_pc)
   &&L_GREATEREQ_IFW_I, 
 /* 120 (previous) */  
   &&L_EQUALS_IFW_I, &&L_NOTEQ_IFW_I, &&L_LESSEQ_IFW_I, &&L_GREATER_IFW_I,
-  &&L_FOR_I, &&L_ABORT, &&L_PEEK, &&L_POKE, &&L_CALL, &&L_PIXEL,
+  &&L_FOR_I, &&L_ABORT, &&L_PEEK, &&L_POKE, &&L_CALL, NULL/*&&L_PIXEL*/,
 /* 130 (previous) */  
-  &&L_GET_PIXEL, &&L_MEM_COPY, &&L_MEM_SET, &&L_C_PROC, &&L_C_FUNC,
+  NULL /*&&L_GET_PIXEL*/, &&L_MEM_COPY, &&L_MEM_SET, &&L_C_PROC, &&L_C_FUNC,
   &&L_ROUTINE_ID, &&L_CALL_BACK_RETURN, &&L_CALL_PROC, &&L_CALL_FUNC,
   &&L_POKE4,
 /* 140 (previous) */  
@@ -1747,9 +1747,7 @@ void do_exec(int *start_pc)
 			return;
 		}
 		thread();
-#if !defined(EUNIX) && !defined(EMINGW)
 		switch((int)pc) {                                       
-#endif
 
 #endif
 			case L_RHS_SUBS_CHECK:
@@ -5133,13 +5131,7 @@ void do_exec(int *start_pc)
 			default:
 				RTFatal("Unsupported Op Code ");
 		
-#ifdef INT_CODES
 		}
-#else
-#if !defined(EUNIX) && !defined(EMINGW)
-		}
-#endif
-#endif
 	} while(TRUE);
 
 subsfail:
