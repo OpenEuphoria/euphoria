@@ -119,9 +119,6 @@ rem ============================================================
 if not exist %FULL_BUILDDIR%\transobj.wat copy transobj.dst %FULL_BUILDDIR%\transobj.wat
 if not exist %FULL_BUILDDIR%\intobj.wat copy intobj.dst %FULL_BUILDDIR%\intobj.wat
 if not exist %FULL_BUILDDIR%\backobj.wat copy backobj.dst %FULL_BUILDDIR%\backobj.wat
-if not exist %FULL_BUILDDIR%\dosobj.wat copy dosobj.dst %FULL_BUILDDIR%\dosobj.wat
-if not exist %FULL_BUILDDIR%\dosbkobj.wat copy dosbkobj.dst %FULL_BUILDDIR%\dosbkobj.wat
-if not exist %FULL_BUILDDIR%\dostrobj.wat copy dostrobj.dst %FULL_BUILDDIR%\dostrobj.wat
 
 rem ============================================================
 rem Make a generic Makefile that simply includes Makefile.wat

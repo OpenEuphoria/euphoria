@@ -1,3 +1,3 @@
 @echo off
-euid key.ex
+eui key.ex
 
