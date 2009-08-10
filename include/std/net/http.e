@@ -800,16 +800,19 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 end function
 
 --**
--- Returns data from an http internet site. Other common protocols will be added in future versions.
+-- Returns data from an http internet site.
 --
 -- Parameters:
---	 # ##inet_addr##: a sequence holding an address
---	 # ##hostname##: a string, the name for the host
---	 # ##file##: a file name to transmit
+--	 # ##url##: URL to access
+--	 # ##post_data##: Optional post data
 --
 -- Returns:
 --	 A **sequence** {header, body} on success, or an empty sequence on error.
 --
+-- Comments:
+--   If ##post_data## is empty, then a normal GET request is done. If ##post_data## is non-empty
+--	 then ##get_url## will perform a POST request and supply ##post_data## during the request.
+--	 
 -- Example 1:
 -- <eucode>
 -- url = "http://banners.wunderground.com/weathersticker/mini" &
@@ -823,8 +826,7 @@ end function
 -- end if
 -- </eucode>
 
-
-public function get_url(sequence url)
+public function get_url(sequence url, sequence post_data="")
 	object addrinfo, url_data
 
 	url_data = parse_url(url)
@@ -834,6 +836,8 @@ public function get_url(sequence url)
 	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
 		return 0
 	end if
+
+	set_sendheader("POSTDATA", post_data)
 
 	sequence data = {"",""}
 	if eu:compare(lower(url_data[URL_PROTOCOL]),"http") = 0 then
