@@ -2,9 +2,9 @@
 #
 # You must first run configure.bat, supplying any options you might need:
 #
-#     --without-euphoria      Use this option if you are building Euphoria
+#     --without-euphoria      Use this option if you are building Euphoria 
 #		     with only a C compiler.
-#
+# 
 #     --prefix <dir>  Use this option to specify the location for euphoria to
 #		     be installed.  The default is EUDIR, or c:\euphoria,
 #		     if EUDIR is not set.
@@ -31,18 +31,18 @@
 #		             	    		  wmake all
 #           Make all Win32 Binaries:  wmake winall
 #
-#   Make C sources so this tree
-#   can be built with just a
+#   Make C sources so this tree      
+#   can be built with just a	 
 #   compiler.
 #   			                   :  wmake translate
 #
-# Install binaries, source and
+# Install binaries, source and 
 #		    		 include files : wmake install
 #
 #					 Run unit tests: wmake test
 #						Using eu.ex: wmake testeu
 #
-# The source targets will create a subdirectory called euphoria-r$(SVN_REV).
+# The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
 # The default for SVN_REV is 'xxx'.
 #
 #
@@ -102,7 +102,7 @@ EU_INTERPRETER_FILES = &
 	cominit.e &
 	compress.e &
 	intinit.e &
-	int.ex
+	int.ex 
 
 EU_TRANSLATOR_FILES = &
 	buildsys.e &
@@ -113,7 +113,7 @@ EU_TRANSLATOR_FILES = &
 	compress.e &
 	traninit.e &
 	ec.ex
-
+	
 !include $(BUILDDIR)\transobj.wat
 !include $(BUILDDIR)\intobj.wat
 !include $(BUILDDIR)\backobj.wat
@@ -121,7 +121,7 @@ EU_TRANSLATOR_FILES = &
 EU_BACKEND_OBJECTS = &
 !ifneq INT_CODES 1
 	$(BUILDDIR)\$(OBJDIR)\back\be_magic.obj &
-!endif
+!endif	
 	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
@@ -203,7 +203,7 @@ MEMFLAG = $(MEMFLAG) /dINT_CODES
 !endif
 
 !ifeq DEBUG 1
-DEBUGFLAG = /d2 /dEDEBUG
+DEBUGFLAG = /d2 /dEDEBUG 
 #DEBUGFLAG = /d2 /dEDEBUG /dDEBUG_OPCODE_TRACE
 DEBUGLINK = debug all
 TRANSDEBUG= -debug
@@ -242,9 +242,9 @@ distclean : .SYMBOLIC clean
 	cd pcre
 	wmake -f makefile.wat CONFIG=..\$(CONFIG) distclean
 	cd ..
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\back\*.*
+	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\back\*.*	
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i\back
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*
+	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*	
 	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i.wat
 	-$(RM) $(CONFIG)
@@ -276,7 +276,7 @@ LIBTARGET=$(BUILDDIR)\eu.lib
 CC = wcc386
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
 BE_FLAGS = /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
-
+	
 library : .SYMBOLIC version.h runtime
     @echo ------- LIBRARY -----------
 	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj $(VARS) MANAGED_MEM=$(MANAGED_MEM)
@@ -285,7 +285,7 @@ winlibrary : .SYMBOLIC
     @echo ------- WINDOWS LIBRARY -----------
 	wmake -h OS=WIN library  $(VARS)
 
-runtime: .SYMBOLIC
+runtime: .SYMBOLIC 
     @echo ------- RUNTIME -----------
 	set ERUNTIME=/dERUNTIME
 
@@ -299,7 +299,7 @@ $(BUILDDIR)\eu.lib : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
 
 objlist : .SYMBOLIC
 	wmake -h $(VARS) OS=$(OS) EU_NAME_OBJECT=$(EU_NAME_OBJECT) OBJDIR=$(OBJDIR) $(BUILDDIR)\$(OBJDIR).wat EX=$(EUBIN)\eui.exe
-
+    
 $(BUILDDIR)\$(OBJDIR)\back : .EXISTSONLY $(BUILDDIR)\$(OBJDIR)
     -mkdir $(BUILDDIR)\$(OBJDIR)\back
 
@@ -315,9 +315,9 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 	@cd $(BUILDDIR)\objtmp
 	ren *.c *.obj
 	%create $(OBJDIR).wat
-	%append $(OBJDIR).wat $(EU_NAME_OBJECT) = &
-	for %i in (*.obj) do @%append $(OBJDIR).wat $(BUILDDIR)\$(OBJDIR)\%i &
-	%append $(OBJDIR).wat
+	%append $(OBJDIR).wat $(EU_NAME_OBJECT) = &  
+	for %i in (*.obj) do @%append $(OBJDIR).wat $(BUILDDIR)\$(OBJDIR)\%i & 
+	%append $(OBJDIR).wat    
 	del *.obj
 	cd $(TRUNKDIR)\source
 	move $(BUILDDIR)\objtmp\$(OBJDIR).wat $(BUILDDIR)
@@ -334,7 +334,7 @@ exsource : .SYMBOLIC version.h $(BUILDDIR)\$(OBJDIR)\main-.c
 # OBJDIR
 
 !ifdef EUPHORIA
-translate : .SYMBOLIC
+translate : .SYMBOLIC  
     @echo ------- TRANSLATE WIN -----------
 	$wmake -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
@@ -350,10 +350,10 @@ testeu : .SYMBOLIC
 
 test : .SYMBOLIC
 	cd ..\tests
-	set EUCOMPILEDIR=$(TRUNKDIR)
+	set EUCOMPILEDIR=$(TRUNKDIR) 
 	$(EXE) ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT)
 	cd ..\source
-
+	
 
 !ifdef BUILD_TOOLS
 $(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr\main-.c $(BUILDDIR)\eutestdr.wat $(BUILDDIR)\eu.lib $(BUILDDIR)\eutestdr
@@ -371,9 +371,9 @@ $(BUILDDIR)\eutestdr.wat : $(BUILDDIR)\eutestdr\main-.c
 	@cd $(BUILDDIR)\objtmp
 	ren *.c *.obj
 	%create eutestdr.wat
-	%append eutestdr.wat $(EU_NAME_OBJECT) = &
-	for %i in (*.obj) do @%append eutestdr.wat $(BUILDDIR)\eutestdr\%i &
-	%append eutestdr.wat
+	%append eutestdr.wat $(EU_NAME_OBJECT) = &  
+	for %i in (*.obj) do @%append eutestdr.wat $(BUILDDIR)\eutestdr\%i & 
+	%append eutestdr.wat    
 	del *.obj
 	cd $(TRUNKDIR)\source
 	move $(BUILDDIR)\objtmp\eutestdr.wat $(BUILDDIR)
@@ -391,7 +391,7 @@ $(BUILDDIR)\eutestdr :
 
 !endif #BUILD_TOOLS
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) 
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
@@ -429,18 +429,16 @@ install : .SYMBOLIC
 	@if exist $(BUILDDIR)\eui.exe copy $(BUILDDIR)\eui.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eubw.exe copy $(BUILDDIR)\eubw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
-	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\
+	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
 
 installbin : .SYMBOLIC
-	@echo --------- installbin $(PREFIX) ------------
-	if /I $(PWD)==$(PREFIX)\source exit
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\euiw.exe copy $(BUILDDIR)\euiw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eui.exe copy $(BUILDDIR)\eui.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eubw.exe copy $(BUILDDIR)\eubw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
-	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\
-
+	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
+	
 $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
@@ -512,9 +510,9 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)
 !endif
 
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
-.c.obj:
+.c.obj: 
 	$(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
-
+	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
 
@@ -529,21 +527,21 @@ $(BUILDDIR)\$(OBJDIR)\back\be_magic.obj : $(BUILDDIR)\$(OBJDIR)\back\be_magic.c
 !endif
 
 $(BUILDDIR)\$(OBJDIR)\back\be_execute.obj : be_execute.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj : be_decompress.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_task.obj : be_task.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_main.obj : be_main.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj : be_alloc.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj : be_callc.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : be_inline.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : be_machine.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_rterror.obj : be_rterror.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj : be_syncolor.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj : be_runtime.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG)
+$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj : be_decompress.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_task.obj : be_task.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_main.obj : be_main.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj : be_alloc.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj : be_callc.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : be_inline.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : be_machine.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_rterror.obj : be_rterror.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj : be_syncolor.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj : be_runtime.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG)
-$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG)
+$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
+$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG) 
 
 version.h: version.mak
     @echo ------- VERSION.H -----------
@@ -553,7 +551,7 @@ version.h: version.mak
 	@echo $#define PAT_VER $(PAT_VER) >> version.h
 	@echo $#define REL_TYPE "$(REL_TYPE)" >> version.h
 
-!ifdef PCRE_OBJECTS
+!ifdef PCRE_OBJECTS	
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
     @echo ------- REG EXP -----------
 	cd pcre
