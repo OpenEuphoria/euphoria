@@ -35,17 +35,13 @@
 #   Everything                :  make
 #   Interpreter          (eui):  make interpreter
 #   Translator           (euc):  make translator
-#   Translator Library (eu.a):  make library
+#   Translator Library  (eu.a):  make library
 #   Backend              (eub):  make eub
 #   Run Unit Tests            :  make test
-#   Run Unit Tests for DJGPP  :  make test-djgpp
 #   Run Unit Tests with eu.ex :  make testeu
 #
 # In order to achieve compatibility among 9 platforms
 # please follow these Code standards:
-# No line may exceed some hard limit (thanks to djgpp tools) I believe it to be around 140.  
-# If you find you are getting error 1 messages that worked in other OSes but not DJGPP that may
-# the reason why.  You may not use && || in the Makefile (also thanks to djgpp tools)
 
 
 ifndef CONFIG
@@ -116,21 +112,6 @@ ifeq "$(EMINGW)" "1"
 		MEM_FLAGS=-DESIMPLE_MALLOC
 	endif
 else
-ifeq "$(EDJGPP)" "1"
-	EOSTYPE=-DEDOS -DEDJGPP
-	EOSFLAGS=
-	EOSFLAGSCONSOLE=
-	EOSMING=-O2
-	EBACKENDU=eubd.exe
-	EBACKENDC=eubd.exe
-	EECU=euc.exe
-	EEXU=eui.exe
-	EECUA=eud.a
-	PLAT=DOS
-	MEM_FLAGS=
-	LDLFLAG=-lalleg
-	ECHO=echo
-else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
@@ -141,7 +122,6 @@ else
 	EEXU=eui
 	EECUA=eu.a
 	MEM_FLAGS=-DESIMPLE_MALLOC
-endif
 endif
 
 ifdef EDEBUG
@@ -405,12 +385,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test :  
-ifeq "$(EDJGPP)" "1"
-	echo '../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)' > ../tests/test-arguments.txt
-	cd ../tests && $(EXE) @test-arguments.txt
-else # Not DJGPP:
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
-endif
 
 testeu :
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
