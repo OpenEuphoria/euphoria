@@ -35,8 +35,6 @@ REM --
 
 echo Performing a SVN checkout...
 svn co -q http://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/%1 cleanbranch
-copy ..\..\bin\edw.bat cleanbranch\bin
-copy ..\..\bin\shroudw.bat cleanbranch\bin
 
 GOTO DoBuild
 
@@ -58,12 +56,9 @@ REM --
 :DoBuild
 echo Ensuring binaries are compressed
 upx ..\..\bin\eub.exe
-upx ..\..\bin\eubd.exe
 upx ..\..\bin\eubw.exe
 upx ..\..\bin\euc.exe
-upx ..\..\bin\eucd.exe
 upx ..\..\bin\eui.exe
-upx ..\..\bin\euid.exe
 upx ..\..\bin\euiw.exe
 
 echo Building our installer...
