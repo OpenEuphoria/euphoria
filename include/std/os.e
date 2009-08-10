@@ -10,18 +10,16 @@ include std/sequence.e
 include std/text.e
 include std/machine.e
 
-ifdef DOS32 then
-	include std/dos/interrup.e
-elsedef
-	include std/dll.e
-end ifdef
+include std/dll.e
 
 ifdef UNIX then
-	public constant CMD_SWITCHES = "-"
-end ifdef
 
-ifdef DOSFAMILY then
+	public constant CMD_SWITCHES = "-"
+
+elsifdef DOSFAMILY then
+
 	public constant CMD_SWITCHES = "-/"
+
 end ifdef
 
 constant
@@ -33,20 +31,19 @@ constant
 -- === Operating System Constants
 --
 
-public constant
-	DOS32	= 1,
-	WIN32	= 2,
-	LINUX	= 3,
-	OSX	    = 4,
-	SUNOS	= 5,
-	OPENBSD = 6,
-	NETBSD  = 7,
-	FREEBSD = 8
+public enum
+	DOS32 = 1, -- Required for traninit.e and platform.e, remove once DOS32 is removed from backend.
+	WIN32 = 2,
+	LINUX,
+	OSX,
+	SUNOS,
+	OPENBSD,
+	NETBSD,
+	FREEBSD
 
 --****
 -- These constants are returned by the [[:platform]] function.
 --
--- * ##DOS32##   ~-- Host operating system is DOS
 -- * ##WIN32##   ~-- Host operating system is Windows
 -- * ##LINUX##   ~-- Host operating system is Linux **or** FreeBSD
 -- * ##FREEBSD## ~-- Host operating system is Linux **or** FreeBSD
@@ -70,7 +67,7 @@ public constant
 constant M_INSTANCE = 55
 
 --**
--- Return ##hInstance## on //Windows//, Process ID (pid) on //Unix// and 0 on //DOS//
+-- Return ##hInstance## on //Windows// and Process ID (pid) on //Unix//.
 --
 -- Comments:
 -- On //Windows// the ##hInstance## can be passed around to various
@@ -92,9 +89,6 @@ end ifdef
 -- Returns:
 --    A **sequence**, starting with the OS name. If identification fails, returns
 --    an OS name of UNKNOWN. Extra information depends on the OS.
---
---    On DOS, returns an OS name of "DOS" as well as a string representing the
---    DOS version number (e.g. "5.0").
 --
 --    On Unix, returns the same information as the uname() syscall in the same
 --    order as the struct utsname. This information is:
@@ -190,13 +184,6 @@ public function uname()
 		else
 			return o
 		end if
-	elsifdef DOS32 then
-    	sequence reg_list
-	    reg_list = repeat(0,10)
-    	reg_list[REG_AX] = #3000
-	    reg_list = dos_interrupt(#21,reg_list)
-		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) +
-			floor(reg_list[REG_AX]/256)/100)}
 	elsedef
 		return {"UNKNOWN"} --TODO
 	end ifdef
@@ -296,7 +283,6 @@ end function
 -- An **integer**,
 -- <eucode>
 -- public constant
---     DOS32   = 1,
 --     WIN32   = 2,
 --     LINUX   = 3,
 --     FREEBSD = 3, -- NOTE: same as LINUX.
@@ -313,17 +299,10 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  if platform() = WIN32 then
+--  ifdef WIN32 then
 --     -- call system Beep routine
 --     err = c_func(Beep, {0,0})
--- elsif platform() = DOS32 then
---     -- make beep
---     sound(500)
---     t = time()
---     while time() < t + 0.5 do
---     end while
---     sound(0)
--- else
+-- elsedef
 --     -- do nothing (Linux/FreeBSD)
 -- end if
 -- </eucode>
@@ -360,27 +339,10 @@ end function
 --
 -- You can use Euphoria as a sophisticated "batch" (.bat) language by making calls to ##system##() and ##system_exec##().
 --
--- ##system##() will start a new DOS or Linux/FreeBSD shell.
+-- ##system##() will start a new command shell.
 --
 -- ##system##() allows you to use command-line redirection of standard input and output in
 -- ##command##.
---
--- Under //DOS32//, a Euphoria program will start off using extended memory.
--- If extended memory runs out the program will consume conventional memory.
--- If conventional memory runs out it will use virtual memory, i.e. swap space on disk.
--- The //DOS// command run by ##system##() will fail if there is not enough conventional memory available.
--- To avoid this situation you can reserve some conventional (low) memory by typing:
---  {{{
---      SET CAUSEWAY=LOWMEM:xxx
---  }}}
---
---  where ##xxx## is the number of K of conventional memory to reserve. Type this before running your program.
--- You can also put this in autoexec.bat, or in a .bat file that runs your program. For example:
--- {{{
---      SET CAUSEWAY=LOWMEM:80
---     ex myprog.ex
--- }}}
---  This will reserve 80K of conventional memory, which should be enough to run simple //DOS //commands like COPY, MOVE, MKDIR etc.
 --
 -- Example 1:
 -- <eucode>
@@ -426,18 +388,18 @@ end function
 --
 -- If it is not possible to run the program, ##system_exec##() will return -1.
 --
--- On //DOS32// or //WIN32//, ##system_exec##() will only run .exe and .com programs.
--- To run .bat files, or built-in DOS commands, you need [[:system]](). Some commands,
+-- On //WIN32//, ##system_exec##() will only run .exe and .com programs.
+-- To run .bat files, or built-in shell commands, you need [[:system]](). Some commands,
 -- such as DEL, are not programs, they are actually built-in to the command interpreter.
 --
--- On //DOS32// and //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
+-- On //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
 -- Nor does it allow you to quote strings that contain blanks, such as file names.
 --
--- exit codes from DOS or Windows programs are normally in the range 0 to 255, with 0 indicating "success".
+-- exit codes from Windows programs are normally in the range 0 to 255, with 0 indicating "success".
 --
 -- You can run a Euphoria program using ##system_exec##(). A Euphoria program can return an exit code using [[:abort]]().
 --
--- ##system_exec##() does not start a new //DOS// shell.
+-- ##system_exec##() does not start a new command shell.
 --
 -- Example 1:
 -- <eucode>
@@ -476,9 +438,7 @@ end function
 --
 -- Comments:
 -- On //Windows// and //Unix//, the operating system will suspend your process and
--- schedule other processes. On //DOS//, your program will go into a busy loop for
--- ##t## seconds, during which time other processes may run, but they will compete
--- with your process for the CPU.
+-- schedule other processes.
 --
 -- With multiple tasks, the whole program sleeps, not just the current task. To make
 -- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
@@ -533,58 +493,6 @@ public procedure sound(frequency f)
 -- turn on speaker at frequency f
 -- turn off speaker if f is 0
 	machine_proc(M_SOUND, f)
-end procedure
-
---**
--- Specify the number of clock-tick interrupts per second.
---
--- Parameters:
--- 		# ##rate## : an atom, the number of ticks by seconds.
---
--- Errors:
--- The rate must not be greater than the inverse frequency of the motherboard clock, at 1193181 2/3 Hz.
---
--- Comments:
---
--- This setting determines the precision of the time() library routine.
--- It also affects the sampling rate for time profiling.
---
--- ##tick_rate## is effective under //DOS// only, and is a no-op elsewhere.
--- Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//,
--- it is always 100 ticks per second.
---
--- ##tick_rate##() can increase the setting above the default value. As a
--- special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
---
--- If a program runs in a DOS window with a tick rate other than 18.2, the
--- ##time##() function will not advance unless the window is the active window.
---
--- With a tick rate other than 18.2, the ##time##() function on DOS takes about
--- 1/100 the usual time that it needs to execute. On Windows and FreeBSD,
--- ##time##() normally executes very quickly.
---
--- While ex.exe is running, the system will maintain the correct time of day.
--- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
--- while the tick rate is high, you (or your user) may need to reboot the
--- machine to restore the proper rate. If you don't, the system time may
--- advance too quickly. This problem does not occur on Windows 95/98/NT,
--- only on DOS or Windows 3.1. You will always get back the correct time
--- of day from the battery-operated clock in your system when you boot up
--- again.
---
--- Example 1:
--- <eucode>
--- tick_rate(100)
--- -- time() will now advance in steps of .01 seconds
--- -- instead of the usual .055 seconds
--- </eucode>
---
--- See Also:
---		[[:time]], [[:Debugging and profiling]]
---
-
-public procedure tick_rate(atom rate)
-	machine_proc(M_TICK_RATE, rate)
 end procedure
 
 --****

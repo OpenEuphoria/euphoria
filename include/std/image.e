@@ -184,11 +184,8 @@ end function
 -- Note: 
 -- double backslash needed to get single backslash in a string
 --
--- Example 2: 
---	##demo/dos32/bitmap.ex##
---
 -- See Also: 
---		[[:palette]], [[:all_palette]], [[:display_image]], [[:save_bitmap]]
+--   [[:palette]], [[:all_palette]], [[:display_image]], [[:save_bitmap]]
 
 public function read_bitmap(sequence file_name)
 	atom Size 
@@ -269,30 +266,6 @@ end type
 type positive_atom(atom x)
 	return x >= 1
 end type
-
-ifdef DOS32 then
-public include std/dos/image.e
-
-function DOS_scr_addr(sequence vc, text_point xy)
--- calculate address in DOS screen memory for a given line, column
-	atom screen_memory
-	integer page_size
-	
-	if vc[VC_MODE] = 7 then
-		screen_memory = MONO_TEXT_MEMORY
-	else
-		screen_memory = COLOR_TEXT_MEMORY
-	end if
-	page_size = vc[VC_LINES] * vc[VC_COLUMNS] * BYTES_PER_CHAR
-	page_size = 1024 * floor((page_size + 1023) / 1024)
-	screen_memory = screen_memory + get_active_page() * page_size
-	return screen_memory + ((xy[1]-1) * vc[VC_COLUMNS] + (xy[2]-1)) 
-						   * BYTES_PER_CHAR
-end function
-end ifdef
-
--- save_screen() and related functions were written by 
--- Junko C. Miura of Rapid Deployment Software.  
 
 integer numXPixels, numYPixels, bitCount, numRowBytes
 integer startXPixel =0, startYPixel = 0, endYPixel = 0
@@ -494,99 +467,4 @@ public function save_bitmap(two_seq palette_n_image, sequence file_name)
 	close(fn)
 	return error_code
 end function
-
-ifdef DOS32 then
---**
--- Capture the whole screen or a region of the screen, and create a Windows
--- bitmap (.BMP) file. 
---
--- Platform:
---		//DOS32//
---
--- Parameters:
--- 		# ##r## : an object, either 0 (whole screen) or a {top left, bottom right} pair
---        of {x,y} pairs of coordinates.
---		# ##file_name## : a sequence, the name of the save file.
---
--- Returns:
---		An **integer**, which is BMP_SUCCESS on success.
---
--- Comments:
--- The result will be one of the following codes:
--- <eucode>
--- public constant
---     BMP_SUCCESS = 0,
---     BMP_OPEN_FAILED = 1,
---     BMP_INVALID_MODE = 4 -- invalid graphics mode
---                          -- or invalid argument
--- </eucode>
---  
--- [[:save_screen]]() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with
--- [[:read_bitmap]](). Windows Paintbrush and some other tools do not support 4-color bitmaps.
---
--- save_screen() only works in pixel-graphics modes, not text modes.
---  
--- Example 1: 
--- <eucode> 
--- -- save whole screen:
--- code = save_screen(0, "c:\\example\\a1.bmp")
--- </eucode>
--- 
--- Example 2:  
--- <eucode>  
--- -- save part of screen:
--- err = save_screen({{0,0},{200, 15}}, "b1.bmp")
--- </eucode>
--- 
--- See Also:
---   [[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
-
-public function save_screen(region r, sequence file_name)
-	sequence vc
-	integer numColors
-
-	error_code = BMP_SUCCESS
-	fn = open(file_name, "wb")
-	if fn = -1 then
-		return BMP_OPEN_FAILED
-	end if
-
-	vc = video_config()
-	if sequence(r) then
-		numXPixels = r[2][1] - r[1][1] + 1
-		numYPixels = r[2][2] - r[1][2] + 1
-		if r[2][1] >= vc[VC_XPIXELS] or r[2][2] >= vc[VC_YPIXELS] then
-			close(fn)
-			return BMP_INVALID_MODE   -- not a valid argument 
-		end if
-		startXPixel = r[1][1]
-		startYPixel = r[1][2]
-		endYPixel   = r[2][2]
-	else
-		numXPixels = vc[VC_XPIXELS]
-		numYPixels = vc[VC_YPIXELS]
-		startXPixel = 0
-		startYPixel = 0
-		endYPixel   = numYPixels - 1
-	end if
-	
-	if numXPixels <= 0 or numYPixels <= 0 then
-		-- not a valid graphics mode or not a valid argument
-		close(fn)
-		return BMP_INVALID_MODE
-	end if
-	
-	numColors = vc[VC_NCOLORS]
-	putBmpFileHeader(numColors)
-	
-	if error_code = BMP_SUCCESS then
-		putColorTable(numColors, get_all_palette()*4)
-	end if
-	if error_code = BMP_SUCCESS then
-		putImage()
-	end if
-	close(fn)
-	return error_code
-end function    
-end ifdef
 

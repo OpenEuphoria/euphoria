@@ -7,11 +7,6 @@
 --
 -- <<LEVELTOC depth=2>>
 
-ifdef DOS32 then
-	include std/error.e
-	crash("http.e is not supported on the DOS platform")
-end ifdef
-
 include std/socket.e as sock
 include std/net/common.e
 include std/net/dns.e

@@ -146,20 +146,15 @@ end function
 --
 -- Comments:
 --
---   Similar to DOS wild card matching but better. For example, 
---   "*ABC.*" in DOS will match *all* files, where this function will 
---   only match when the file name part has "ABC" at the end.
---  
--- * matches any 0 or more characters, ? matches any single character. On //Unix// the character comparisons are case sensitive. On DOS and Windows they are not.
+-- ~* matches any 0 or more characters, ? matches any single character. On //Unix// the 
+-- character comparisons are case sensitive. On Windows they are not.
 --
 -- You might use this function to check the output of the [[:dir]]() routine for file names that match a pattern supplied by the user of your program.
---
--- In //DOS// "*ABC.*" will match all files. ##wildcard_file("*ABC.*", s)## will only match when the file name part has "ABC" at the end (as you would expect).
 --  
 -- Example 1: 
 -- <eucode> 
 --  i = wildcard_file("AB*CD.?", "aB123cD.e")
--- -- i is set to 1 on DOS or Windows, 0 on Linux or FreeBSD
+-- -- i is set to 1 on Windows, 0 on Linux or FreeBSD
 -- </eucode>
 --
 -- Example 2:  

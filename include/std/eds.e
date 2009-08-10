@@ -1019,15 +1019,12 @@ end function
 -- </eucode>
 --
 -- Comments:
---   ##DB_LOCK_SHARED## is only
----  supported on Unix platforms. It allows you to read the database, but not
---   write anything to it. If you request ##DB_LOCK_SHARED## on //WIN32// or
---   //DOS32// it will be treated as if you had asked for DB_LOCK_EXCLUSIVE.
+--   ##DB_LOCK_SHARED## is only supported on Unix platforms. It allows you to read the database, 
+--   but not write anything to it. If you request ##DB_LOCK_SHARED## on //WIN32// it will be 
+--   treated as if you had asked for DB_LOCK_EXCLUSIVE.
 --
 --   If the lock fails, your program should wait a few seconds and try again.
 --   Another process might be currently accessing the database.
---   //DOS// programs will typically get a "critical error" message if they
---   try to access a database that is currently locked.
 --
 -- Example 1:
 -- <eucode>
@@ -2521,9 +2518,6 @@ public function db_compress()
 		system( "mv \"" & new_path & "\" \"" & old_path & '"', 2)
 	elsifdef WIN32 then
 		system("ren \"" & new_path & "\" \"" & filename(old_path) & '"', 2)
-	elsedef
-		-- DOS
-		system("ren " & new_path & " " & filename(old_path), 2)
 	end ifdef
 
 	-- create a new database
@@ -2534,9 +2528,6 @@ public function db_compress()
 			system( "mv \"" & old_path & "\" \"" & new_path & '"', 2)
 		elsifdef WIN32 then
 			system("ren \"" & old_path & "\" \"" & filename(new_path) & '"', 2)
-		elsedef
-			-- DOS
-			system("ren " & old_path & " " & filename(new_path), 2)
 		end ifdef
 
 		return index

@@ -108,7 +108,7 @@ end procedure
 -- Comments:
 -- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a successful completion.
 --
--- Other values can indicate various kinds of errors. DOS batch (.bat) programs can read 
+-- Other values can indicate various kinds of errors. Windows batch (.bat) programs can read 
 -- this value using the errorlevel feature. Non integer values are rounded down.
 -- A Euphoria program can read this value using [[:system_exec]]().
 --

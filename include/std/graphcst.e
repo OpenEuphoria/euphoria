@@ -70,12 +70,6 @@ public constant BLINKING = 16
 
 public constant BYTES_PER_CHAR = 2
 
-ifdef DOS32 then
-	public constant
-		COLOR_TEXT_MEMORY = #B8000,
-		MONO_TEXT_MEMORY = #B0000
-end ifdef
-
 public type color(integer x)
 	return x >= 0 and x <= 255
 end type

@@ -6,11 +6,6 @@ namespace sockets
 -- <<LEVELTOC depth=2>>
 --
  
-ifdef DOS32 then
-	include std/error.e
-	crash("socket.e is not supported on the DOS platform")
-end ifdef
-
 include std/get.e
 include std/regex.e as re
 include std/memory.e as mem
@@ -28,7 +23,7 @@ enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLO
 -- the [[:create]] function.
 --
 
-ifdef WIN32 or DOS32 then
+ifdef WIN32 then
 	public constant
 		--**
 		-- Address family is unspecified

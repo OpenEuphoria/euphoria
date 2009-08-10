@@ -10,28 +10,13 @@ namespace pipeio
 -- so that they can be used directly alongside other file/socket/other-streams with a
 -- stream_select() function.
 --
--- DOS support is limited to writing data in one large chunk, then reading
--- data back from stdout. You cannot mix read/write calls in DOS.
---
 
 --Includes
 include std/dll.e
 include std/machine.e
 include std/error.e
 
-ifdef DOS32 then
-	include std/io.e
-
-	constant FAIL = 0
-	enum
-		READ,
-		WRITE,
-		CLOSE,
-		PIPE,
-		KILL,
-		ERRNO
-
-elsifdef WIN32 then
+ifdef WIN32 then
 	constant
 		kernel32 = open_dll("kernel32.dll"),
 		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
@@ -111,8 +96,6 @@ atom os_errno = 0
 function get_errno()
 	ifdef WIN32 then
 		return c_func(iGetLastError,{})
-	elsifdef DOS32 then
-		return 1
 	elsedef
 		return peek4u(ERRNO)
 	end ifdef
@@ -151,14 +134,6 @@ end type
 public function close(atom fd)
 	atom ret
 
-	ifdef DOS32 then
-		if fd = -2 then
-			return 0
-		end if
-		eu:close(fd)
-		return 0
-	end ifdef
-
 	ifdef WIN32 then
 		ret=c_func(iCloseHandle,{fd})
 	elsedef
@@ -188,10 +163,6 @@ end function
 public procedure kill(process p, atom signal=15)
 	atom ret
 
-	ifdef DOS32 then
-		return -- nop
-	end ifdef
-	
 	--Close the pipes
 	--If any fail its probably just because they were already closed, so that is ignored
 	ret=close(p[STDIN])
@@ -253,13 +224,6 @@ end function
 --
 
 public function read(atom fd, integer bytes)
-	ifdef DOS32 then
-		if fd = -2 then
-			return ""
-		end if
-		return get_bytes(fd, bytes)
-	end ifdef
-
 	if bytes=0 then return "" end if
 
 	sequence data
@@ -303,14 +267,6 @@ end function
 --
 
 public function write(atom fd, sequence str)
-	ifdef DOS32 then
-		if fd = -2 then
-			return length(str)
-		end if
-		puts(fd, str)
-		return length(str)
-	end ifdef
-
 	atom
 	--	fd = p[2],
 		buf = allocate_string(str),
@@ -500,17 +456,9 @@ ifdef WIN32 then
 	  return {hChildStdInWr,hChildStdOutRd,hChildStdErrRd,hChildProcess}
 	
 	end function
-elsifdef DOS32 then
-	public function create()
-		return {{open("tempfile.tmp", "wb"),-2,-2},{-2,-2,-2}}
-	end function
 
-	public function exec(sequence cmd, sequence pipe)
-		close(pipe[1][1])
-		system(cmd&" < tempfile.tmp > tempfil2.tmp", 2)
-		return {-2,open("tempfil2.tmp", "rb"),-2,0}
-	end function
 elsedef
+
 	--*NIX-specific functions
 	function os_dup2(atom oldfd, atom newfd)
 		atom r = c_func(DUP2, {oldfd, newfd})

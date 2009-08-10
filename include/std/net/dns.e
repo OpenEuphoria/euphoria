@@ -6,12 +6,6 @@
 -- <<LEVELTOC depth=2>>
 --
 
-ifdef DOS32 then
-	include std/error.e
-
-	crash("net/dns is not supported on the DOS platform")
-end ifdef
-
 include std/socket.e
 include std/get.e
 

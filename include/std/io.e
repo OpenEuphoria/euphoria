@@ -234,9 +234,8 @@ public constant EOF = (-1)
 --
 -- Avoid outputting 0's to the screen or to standard output. Your output might get truncated.
 --
--- Remember that if the output file was opened in text mode, //DOS// and
--- //Windows// will change ##\n## (10) to ##\r\n## (13 10). Open the file in binary mode if
--- this is not what you want.
+-- Remember that if the output file was opened in text mode, //Windows// will change ##\n## (10) 
+-- to ##\r\n## (13 10). Open the file in binary mode if this is not what you want.
 --
 -- Example 1:
 -- <eucode>
@@ -306,9 +305,6 @@ public constant EOF = (-1)
 --     When your program reads from the keyboard, the user can type control-Z, which the operating
 --     system treats as "end of file". [[:EOF]] will be returned.
 --
---     In SVGA modes, DOS might set the wrong cursor position, after a call to ##gets(0)## to read the
---     keyboard. You should set it yourself using ##position##().
---
 -- Example 1:
 -- <eucode>
 -- sequence buffer
@@ -376,12 +372,13 @@ constant CHUNK = 100
 --		A **sequence**, of length at most ##n##, made of the bytes that could be read from the file.
 --
 -- Comments:
---     When ##n## > 0 and the function returns a sequence of length less than ##n## you know
---     you've reached the end of file. Eventually, an
---     empty sequence will be returned.
+--   When ##n## > 0 and the function returns a sequence of length less than ##n## you know
+--  you've reached the end of file. Eventually, an
+--  empty sequence will be returned.
 --
---     This function is normally used with files opened in binary mode, "rb".
---     This avoids the confusing situation in text mode where //DOS// or //Windows// will convert CR LF pairs to LF.
+--  This function is normally used with files opened in binary mode, "rb".
+--  This avoids the confusing situation in text mode where //Windows// will convert CR LF 
+--  pairs to LF.
 --
 -- Example 1:
 --     <eucode>
@@ -712,17 +709,15 @@ end type
 -- be created if necessary. A file opened for write will be set to 0 bytes. Output to a
 -- file opened for append will start at the end of file.
 --
--- On //DOS// or //Windows//, output to text files will have carriage-return characters automatically
+-- On //Windows//, output to text files will have carriage-return characters automatically
 -- added before linefeed characters. On input, these carriage-return characters are removed.
--- A control-Z character (ASCII 26) will signal an immediate end of file. Note: on some
--- versions of DOS, a control-Z typed by the user might cause standard input to permanently
--- appear to be at the end-of-file, until the DOS window is closed.
+-- A control-Z character (ASCII 26) will signal an immediate end of file.
 --
 -- I/O to binary files is not modified in any way. Any byte values from 0 to 255 can be
 -- read or written. On //Unix//, all files are binary files, so "r" mode and "rb"
 -- mode are equivalent, as are "w" and "wb", "u" and "ub", and "a" and "ab".
 --
--- Some typical devices that you can open on DOS or Windows are:
+-- Some typical devices that you can open on Windows are:
 --
 -- * ##"CON"## ~-- the console (screen)
 -- * ##"AUX"## ~-- the serial auxiliary port
@@ -733,17 +728,10 @@ end type
 --
 -- Close a file or device when done with it, flushing out any still-buffered characters prior.
 --
--- //DOS32//: When running under //Windows 95// or later, you can open any existing file that has a
--- long file or directory name in its path (i.e. greater than the standard DOS 8.3 format)
--- using any open mode - read, write etc. However, if you try to create a new file (open
--- with "w" or "a" and the file does not already exist) then the name will be truncated if
--- necessary to an 8.3 style name. We hope to support creation of new long-filename files in
--- a future release.
---
 -- //WIN32// and //Unix//: Long filenames are fully supported for reading and writing and
 -- creating.
 --
--- //DOS32//: Be careful not to use the special device names in a file name, even if you add an
+-- //WIN32//: Be careful not to use the special device names in a file name, even if you add an
 -- extension. e.g. ##CON.TXT##, ##CON.DAT##, ##CON.JPG## etc. all refer to the ##CON## device,
 -- **not a file**.
 --
@@ -811,9 +799,9 @@ end type
 -- explicitly before you switch to writing (reading) bytes, even though the file position
 -- should already be what you want.
 --
--- This function is normally used with files opened in binary mode. In text mode, DOS
+-- This function is normally used with files opened in binary mode. In text mode, Windows
 -- converts CR LF to LF on input, and LF to CR LF on output, which can cause great confusion
--- when you are trying to count bytes because seek() counts the DOS end of line sequences
+-- when you are trying to count bytes because seek() counts the Windows end of line sequences
 -- as two bytes, even if the file has been opened in text mode.
 --
 -- Example 1:
@@ -853,11 +841,10 @@ end function
 --
 --
 -- Comments:
--- The file position is is the place in the file where the next byte
--- will be read from, or written to. It is updated
--- by reads, writes and seeks on the file.     This procedure
--- always counts DOS end of line sequences (CR LF) as two bytes even when the file number
--- has been opened in text mode.
+-- The file position is is the place in the file where the next byte will be read from, or 
+-- written to. It is updated by reads, writes and seeks on the file. This procedure always 
+-- counts Windows end of line sequences (CR LF) as two bytes even when the file number has 
+-- been opened in text mode.
 --
 
 public function where(file_number fn)
@@ -929,7 +916,7 @@ end procedure
 -- or writing it.
 --
 -- Under //Unix//, there are two types of locks that
--- you can request using the ##t## parameter. (Under //DOS32// and //WIN32// the
+-- you can request using the ##t## parameter. (Under //WIN32// the
 -- parameter ##t## is ignored, but should be an integer.)
 -- Ask for a **shared** lock when you intend to read a file, and you want to
 -- temporarily block other processes from writing it. Ask for an
@@ -945,7 +932,7 @@ end procedure
 --     LOCK_EXCLUSIVE
 -- </eucode>
 --
--- On //DOS32// and //WIN32// you can lock a specified portion of a file using the ##r##  parameter.
+-- On ///WIN32// you can lock a specified portion of a file using the ##r##  parameter.
 -- ##r## is a sequence of the form: ##{first_byte, last_byte}##. It indicates the first byte and
 -- last byte in the file,  that the lock applies to. Specify the empty sequence ##{}##,
 -- if you want to lock the whole file, or don't specify it at all, as this is the default. In the current release for //Unix//, locks
@@ -958,10 +945,7 @@ end procedure
 -- On //Unix//, these locks are called advisory locks, which means they aren't enforced
 -- by the operating system. It is up to the processes that use a particular file to cooperate
 -- with each other. A process can access a file without first obtaining a lock on it. On
--- //WIN32// and //DOS32//, locks are enforced by the operating system.
---
--- On //DOS32//, ##lock_file##() is more useful when file sharing is enabled. It will
--- typically return 0 (unsuccessful) under plain MS-DOS, outside of Windows.
+-- //WIN32// locks are enforced by the operating system.
 --
 -- Example 1:
 -- <eucode>
@@ -1001,7 +985,7 @@ end function
 --
 -- Comments:
 -- You must have previously locked the
--- file using ##lock_file##(). On //DOS32// and //WIN32// you can unlock a range of bytes within a
+-- file using ##lock_file##(). On //WIN32// you can unlock a range of bytes within a
 -- file by specifying the ##r## as {first_byte, last_byte}. The same range of bytes
 -- must have been locked by a previous call to [[:lock_file]](). On //Unix// you can
 -- currently only lock or unlock an entire file. ##r## should be {} when you
@@ -1246,7 +1230,7 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 
 	ifdef DOSFAMILY then
 		-- Remove any extra -1 (EOF) characters in case file
-		-- had been opened in Windows/DOS 'text mode'.
+		-- had been opened in Windows 'text mode'.
 		for i = len to 1 by -1 do
 			if ret[i] != -1 then
 				if i != len then
@@ -1264,7 +1248,7 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 			ret = ret[1 .. fn - 1]
 		end if
 
-		-- Convert DOS endings
+		-- Convert Windows endings
 		ret = replace_all(ret, {13,10}, {10})
 		if length(ret) > 0 then
 			if ret[$] != 10 then
@@ -1290,10 +1274,10 @@ end function
 --         ** **TEXT_MODE** assumes //text mode// that causes a NewLine
 --                     to be written out according to the operating system's
 --                     end of line convention. In Unix this is Ctrl-J and in
---                     Windows/DOS this is the pair {Ctrl-L, Ctrl-J}.
+--                     Windows this is the pair {Ctrl-L, Ctrl-J}.
 --         ** **UNIX_TEXT** ensures that lines are written out with unix style
 --                     line endings (Ctrl-J).
---         ** **DOS_TEXT** ensures that lines are written out with DOS/Windows style
+--         ** **DOS_TEXT** ensures that lines are written out with Windows style
 --                     line endings {Ctrl-L, Ctrl-J}.
 --
 -- Returns:

@@ -228,8 +228,7 @@ end type
 -- 
 -- As a convenience to your users, it is usually a good idea to switch back from a pixel-graphics 
 -- mode to the standard text mode before your program terminates. You can do this with 
--- [[:graphics_mode]](-1). If a pixel-graphics program leaves your screen in a mess, you can clear 
--- it up with the DOS CLS command, or by running ex or ed.
+-- [[:graphics_mode]](-1).
 --
 -- Some graphics cards will be unable to enter some SVGA modes, under some conditions. You can't 
 -- always tell from the returned value, whether the graphics mode was set up successfully.

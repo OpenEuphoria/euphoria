@@ -32,8 +32,6 @@ namespace memory
 --
 -- Some example programs to look at:
 --   * ##demo/callmach.ex##      ~-- calling a machine language routine
---   * ##demo/dos32/hardint.ex## ~-- setting up a hardware interrupt handler
---   * ##demo/dos32/dosint.ex##  ~-- calling a DOS software interrupt
 --
 -- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.

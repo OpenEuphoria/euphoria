@@ -153,20 +153,17 @@ end function
 --**
 -- Gets the address of a symbol in a shared library or in RAM.
 --
--- Platform:
---	not //DOS//
---
 -- Parameters:
--- 		 # ##lib## : an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
--- 		# ##variable_name## : a sequence, the name of a public C variable defined within the library.
+--   # ##lib## : an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
+--   # ##variable_name## : a sequence, the name of a public C variable defined within the library.
 --
 -- Returns:
---		An **atom**, the memory address of ##variable_name##.
+--   An **atom**, the memory address of ##variable_name##.
 --
 -- Comments:
---     Once you have the address of a C variable, and you know its type, you can use ##peek##()
---     and ##poke##() to read or write the value of the variable. You can in the same way obtain 
--- the address of a C function and pass it to any external routine that requires a callback address.
+--   Once you have the address of a C variable, and you know its type, you can use ##peek##()
+--   and ##poke##() to read or write the value of the variable. You can in the same way obtain 
+--   the address of a C function and pass it to any external routine that requires a callback address.
 --
 -- Example:
 -- see ##euphoria/demo/linux/mylib.ex##
@@ -319,11 +316,6 @@ end function
 -- ##c_func##() rather than ##call##() to call the routine, since you won't have to use 
 -- ##atom_to_float64##() and ##poke##() to get the floating-point values into memory.
 -- 
--- ex.exe (DOS) uses calls to WATCOM floating-point routines (which then use hardware 
--- floating-point instructions if available), so floating-point values are generally passed 
--- and returned in integer register-pairs rather than floating-point registers. You'll have 
--- to disassemble some Watcom code to see how it works.
---
 -- Example 1:
 -- <eucode>
 -- atom user32
@@ -463,9 +455,6 @@ atom page_offset = 0
 
 --**
 -- Get a machine address for an Euphoria procedure.
---
--- Platform:
---   not //DOS//
 --
 -- Parameters:
 --   # ##id## : an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.

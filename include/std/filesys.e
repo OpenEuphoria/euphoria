@@ -8,13 +8,7 @@
 -- <<LEVELTOC depth=2>>
 namespace filesys
 
-ifdef DOS32 then
-	-- constant short_names = dosver() < 7 or atom(getenv("windir"))
-	constant short_names = 1 -- make this 0 if not using an LFN driver/TSR
-	include std/dos/interrup.e
-elsedef
-	include std/dll.e
-end ifdef
+include std/dll.e
 
 include std/machine.e
 include std/wildcard.e
@@ -95,7 +89,7 @@ end ifdef
 -- Current platform's path separator character
 --
 -- Comments:
--- When on //DOS// or //Windows//, '~\\'. When on //Unix//, '/'.
+-- When on //Windows//, '~\\'. When on //Unix//, '/'.
 --
 
 --**
@@ -104,7 +98,7 @@ end ifdef
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
--- in that on //Windows// and //DOS// the path separators variable contains
+-- in that on //Windows// the path separators variable contains
 -- ##~\~\## as well as ##~:## and ##/## as newer //Windows// versions support
 -- ##/## as a path separator. On //Unix// systems, it only contains ##/##.
 
@@ -114,7 +108,7 @@ end ifdef
 --
 -- Description:
 -- Current platform's possible path separators. This is slightly different
--- in that on //Windows// and //DOS// the path separators variable contains
+-- in that on //Windows// the path separators variable contains
 -- ##~\~\## as well as ##~:## and ##/## as newer //Windows// versions support
 -- ##/## as a path separator. On //Unix// systems, it only contains ##/##.
 
@@ -174,6 +168,7 @@ elsifdef DOSFAMILY then
 	public constant NULLDEVICE = "NUL:"
 	public constant SHARED_LIB_EXT = "dll"
 end ifdef
+
 public constant EOL = '\n'
 
 --****
@@ -209,16 +204,15 @@ public constant W_BAD_PATH = -1 -- error code
 -- The length of ##name## should not exceed 1,024 characters.
 --
 -- Comments:
---     ##name## can also contain * and ? wildcards to select multiple
--- files.
+--     ##name## can also contain * and ? wildcards to select multiple files.
 --
--- The returned information is similar to what you would get from the DOS DIR command. A sequence
+-- The returned information is similar to what you would get from the DIR command. A sequence
 -- is returned where each element is a sequence that describes one file or subdirectory.
 -- 
--- If ##name## refers to a **directory** you may have entries for "." and "..",
--- just as with the DOS DIR command. If it refers to an existing **file**, and has no wildcards, 
--- then the returned sequence will have just one entry, i.e. its length will be 1. If ##name## 
--- contains wildcards you may have multiple entries.
+-- If ##name## refers to a **directory** you may have entries for "." and "..", just as with the 
+-- DIR command. If it refers to an existing **file**, and has no wildcards, then the returned 
+-- sequence will have just one entry, i.e. its length will be 1. If ##name## contains wildcards 
+-- you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
 -- the year, month, day, hour, minute and second of the last modification.
@@ -258,10 +252,6 @@ public constant W_BAD_PATH = -1 -- error code
 -- the path.
 -- 
 -- Under //Unix//, the only attribute currently available is 'd'.
--- 
--- //DOS32//: The file name returned in D_NAME will be a standard DOS 8.3 name. (See 
--- [[http://www.rapideuphoria.com/cgi-bin/asearch.exu?dos=on&keywords=dir|Archive Web page]]
--- for a better solution).
 -- 
 -- //WIN32//: The file name returned in D_NAME will be a long file name.
 --
@@ -340,7 +330,7 @@ end function
 --
 -- Comments:
 -- There will be no slash or backslash on the end of the current directory, except under
--- //DOS/Windows//, at the top-level of a drive, e.g. C:\
+-- //Windows//, at the top-level of a drive, e.g. C:\
 --
 -- Example 1:
 -- <eucode>
@@ -372,7 +362,7 @@ end function
 -- 
 -- The [[:current_dir]]() function will return the name of the current directory.
 -- 
--- On //DOS32// and //WIN32// the current directory is a public property shared
+-- On //WIN32// the current directory is a public property shared
 -- by all the processes running under one shell. On //Unix// a subprocess
 -- can change the current directory for itself, but this won't
 -- affect the current directory of its parent process.
@@ -622,37 +612,7 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 		end if
 	end if
 	
-	ifdef DOS32 then
-		atom low_buff
-		sequence reg_list
-		mode = mode -- get rid of not used warning
-		low_buff = allocate_low(length (name) + 1)
-		if not low_buff then
-			return 0
-		end if
-
-		poke(low_buff, name & 0)
-		reg_list = repeat(0,10)
-		if short_names then
-			reg_list[REG_AX] = #3900
-		else
-			reg_list[REG_AX] = #7139
-		end if
-
-		reg_list[REG_DS] = floor(low_buff / 16)
-		reg_list[REG_DX] = remainder(low_buff, 16)
-		reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-		reg_list = dos_interrupt(#21, reg_list)
-		free_low(low_buff)
-
-		if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-			return 0
-		else
-			return 1
-		end if
-	elsedef
-		pname = allocate_string(name)
-	end ifdef
+	pname = allocate_string(name)
 
 	ifdef UNIX then
 		ret = not c_func(xCreateDirectory, {pname, mode})
@@ -674,43 +634,16 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 
 public function delete_file(sequence name)
-	ifdef DOS32 then
-	    atom low_buff
-	    sequence reg_list
-	    low_buff = allocate_low(length(name) + 1)
-	    if not low_buff then
-	        return 0
-	    end if
-	    poke(low_buff, name & 0)
-	    reg_list = repeat(0,10)
-	    if short_names then
-	        reg_list[REG_AX] = #4100
-	    else
-	        reg_list[REG_AX] = #7141
-	    end if
-	    reg_list[REG_DS] = floor(low_buff / 16)
-	    reg_list[REG_DX] = remainder(low_buff, 16)
-	    reg_list[REG_SI] = #0000
-	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-	    reg_list = dos_interrupt(#21, reg_list)
-	    free_low(low_buff)
-	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-	        return 0
-	    else
-	        return 1
-	    end if
-	
-	elsedef
-		atom pfilename = allocate_string(name)
-		integer success = c_func(xDeleteFile, {pfilename})
+	atom pfilename = allocate_string(name)
+	integer success = c_func(xDeleteFile, {pfilename})
 		
-		ifdef UNIX then
-			success = not success
-		end ifdef
-	
-		free(pfilename)
-		return success
+	ifdef UNIX then
+		success = not success
 	end ifdef
+	
+	free(pfilename)
+
+	return success
 end function
 
 --**
@@ -724,7 +657,7 @@ end function
 --     A **sequence**, the current directory.
 --
 -- Comment:
---  Windows and MS-DOS maintain a current directory for each disk drive. You
+--  Windows maintain a current directory for each disk drive. You
 --  would use this routine if you wanted the current directory for a drive that
 --  may not be the current drive.
 --
@@ -971,32 +904,6 @@ public function remove_directory(sequence dir_name, integer force=0)
 		end if
 	end for
 	
-	ifdef DOS32 then
-	    atom low_buff
-	    sequence reg_list
-	    low_buff = allocate_low(length(dir_name) + 1)
-	    if not low_buff then
-	        return 0
-	    end if
-	    poke(low_buff, dir_name & 0)
-	    reg_list = repeat(0,10)
-	    if short_names then
-	        reg_list[REG_AX] = #3A00
-	    else
-	        reg_list[REG_AX] = #713A
-	    end if
-	    reg_list[REG_DS] = floor(low_buff / 16)
-	    reg_list[REG_DX] = remainder(low_buff, 16)
-	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-	    reg_list = dos_interrupt(#21, reg_list)
-	    free_low(low_buff)
-	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-	        return 0
-	    else
-	        return 1
-	    end if
-	end ifdef
-	
 	pname = allocate_string(dir_name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
@@ -1036,7 +943,7 @@ public enum
 --
 -- Example 1:
 -- <eucode>
--- -- DOS32/WIN32
+-- -- WIN32
 -- info = pathinfo("C:\\euphoria\\docs\\readme.txt")
 -- -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt", "C"}
 -- </eucode>
@@ -1241,7 +1148,7 @@ public function fileext(sequence path)
 end function
 	
 --**
--- Return the drive letter of the path on //DOS32// and //WIN32// platforms.
+-- Return the drive letter of the path on //WIN32// platforms.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
@@ -1409,7 +1316,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 		lPath = path_in
 	elsedef
 	    sequence lDrive = ""
-	    -- Replace unix style separators with DOS style
+	    -- Replace unix style separators with Windows style
 	    lPath = find_replace("/", path_in, SLASH)
 	end ifdef
 
@@ -1743,67 +1650,16 @@ public function rename_file(sequence src, sequence dest, integer overwrite=0)
 		end if
 	end if
 	
-	ifdef DOS32 then
-	    atom low_buff_old, low_buff_new
-	    integer i
-	    sequence reg_list
-	    
-	    ret = 1
-	    if length(src) > 3 and length(dest) > 3 then
-	        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
-	            if eu:compare(src[1], dest[1]) then
-			-- renaming a file across drives is not supported
-	                ret = 0
-	            end if
-	        end if
-	    end if
-	    
-	    if ret != 0 then
-		    low_buff_old = allocate_low(length(src) + 1)
-		    if not low_buff_old then
-	    	    ret = 0
-	    	end if
-	    end if
-	    
-	    if ret != 0 then
-		    low_buff_new = allocate_low(length(dest) + 1)
-		    if not low_buff_new then
-	    	    free_low(low_buff_old)
-	        	ret = 0
-	        end if
-	    end if
-	    
-	    if ret != 0 then
-		    poke(low_buff_old, src & 0)
-		    poke(low_buff_new, dest & 0)
-		    reg_list = repeat(0,10)
-		    if short_names then
-		        reg_list[REG_AX] = #5600
-		    else
-		        reg_list[REG_AX] = #7156
-		    end if
-		    reg_list[REG_DS] = floor(low_buff_old / 16)
-		    reg_list[REG_DX] = remainder(low_buff_old, 16)
-		    reg_list[REG_ES] = floor(low_buff_new / 16)
-		    reg_list[REG_DI] = remainder(low_buff_new, 16)
-		    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-		    reg_list = dos_interrupt(#21, reg_list)
-		    free_low(low_buff_old)
-		    free_low(low_buff_new)
-		    ret = (and_bits(reg_list[REG_FLAGS], 1) = 0)
-	    end if
-	elsedef
 	
-		psrc = allocate_string(src)
-		pdest = allocate_string(dest)
-		ret = c_func(xMoveFile, {psrc, pdest})
+	psrc = allocate_string(src)
+	pdest = allocate_string(dest)
+	ret = c_func(xMoveFile, {psrc, pdest})
 		
-		ifdef UNIX then
-			ret = not ret 
-		end ifdef
-		
-		free({pdest, psrc})
+	ifdef UNIX then
+		ret = not ret 
 	end ifdef
+		
+	free({pdest, psrc})
 	
 	if overwrite then
 		if not ret then
@@ -1861,54 +1717,6 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		end if
 	end if
 	
-	ifdef DOS32 then
-	    atom low_buff_old, low_buff_new
-	    integer i
-	    sequence reg_list
-	    if length(src) > 3 and length(dest) > 3 then
-	        if not eu:compare(src[2],":") and not eu:compare(dest[2],":") then
-	            if eu:compare(src[1], dest[1]) then
-	                i = copy_file(src,dest,overwrite)
-	                if not i then
-	                    return i
-	                end if
-	                i = delete_file(src)
-	                return i
-	            end if
-	        end if
-	    end if
-	    low_buff_old = allocate_low(length(src) + 1)
-	    if not low_buff_old then
-	        return 0
-	    end if
-	    low_buff_new = allocate_low(length(dest) + 1)
-	    if not low_buff_new then
-	        free_low(low_buff_old)
-	        return 0
-	    end if
-	    poke(low_buff_old, src & 0)
-	    poke(low_buff_new, dest & 0)
-	    reg_list = repeat(0,10)
-	    if short_names then
-	        reg_list[REG_AX] = #5600
-	    else
-	        reg_list[REG_AX] = #7156
-	    end if
-	    reg_list[REG_DS] = floor(low_buff_old / 16)
-	    reg_list[REG_DX] = remainder(low_buff_old, 16)
-	    reg_list[REG_ES] = floor(low_buff_new / 16)
-	    reg_list[REG_DI] = remainder(low_buff_new, 16)
-	    reg_list[REG_FLAGS] = or_bits(reg_list[REG_FLAGS], 1)
-	--TODO double check that this honors the overwrite flag, and manually add a check if not
-	    reg_list = dos_interrupt(#21, reg_list)
-	    free_low(low_buff_old)
-	    free_low(low_buff_new)
-	    if and_bits(reg_list[REG_FLAGS], 1) != 0 then
-	        return 0
-	    else
-	        return 1
-	    end if
-	end ifdef
 	ifdef UNIX then
 		atom psrcbuf = 0, pdestbuf = 0
 		integer stat_t_offset, dev_t_size, stat_buf_size
@@ -2082,17 +1890,15 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 		extra_paths = canonical_path(dirname(extra_paths[2]), 1)
 		search_list = append(search_list, extra_paths)
 
-		ifdef not DOS32 then		
-			ifdef LINUX	then
-				extra_paths = getenv("HOME")
-			elsifdef WIN32 then
-				extra_paths = getenv("HOMEDRIVE") & getenv("HOMEPATH")
-			end ifdef		
+		ifdef LINUX	then
+			extra_paths = getenv("HOME")
+		elsifdef WIN32 then
+			extra_paths = getenv("HOMEDRIVE") & getenv("HOMEPATH")
+		end ifdef		
 			
-			if sequence(extra_paths) then
-				search_list = append(search_list, extra_paths & SLASH)
-			end if				
-		end ifdef
+		if sequence(extra_paths) then
+			search_list = append(search_list, extra_paths & SLASH)
+		end if				
 				
 		search_list = append(search_list, ".." & SLASH)
 		
@@ -2405,7 +2211,7 @@ end function
 --  * The file breakdown is a sequence of three-element sub-sequences. Each sub-sequence
 --    contains the extension [EXT_NAME], the number of files of this extension [EXT_COUNT],
 --    and the space used by these files [EXT_SIZE]. The sub-sequences are presented in
---    extension name order. On Windows and DOS systems, the extensions are all in lowercase.
+--    extension name order. On Windows the extensions are all in lowercase.
 --
 -- Example 1:
 -- <eucode>

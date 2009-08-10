@@ -2,25 +2,19 @@
 --
 namespace machine
 
-ifdef not DOS32 then
-	include std/dll.e
-end ifdef
+include std/dll.e
 
 include std/error.e
 public include std/memconst.e
 
 ifdef SAFE then
+
 	public include std/safe.e
 
-	ifdef DOS32 then
-		public include std/dos/safe.e
-	end ifdef
 elsedef
+
 	public include std/memory.e
 
-	ifdef DOS32 then
-		public include std/dos/memory.e
-	end ifdef
 end ifdef
 
 integer FREE_ARRAY_RID
