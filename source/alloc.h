@@ -50,14 +50,10 @@ struct block_list {
 #endif
 
 #else
-#ifdef EDJGPP
-#define block_size(p) (((*(unsigned long *)((char *)(p) - 4)) & ~3))
-#else
 #ifdef EWINDOWS
 #define block_size(p) HeapSize((void *)default_heap, 0, p)
 #else
 #define block_size(p) (_msize(p))
-#endif
 #endif
 #endif
 

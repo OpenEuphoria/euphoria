@@ -76,14 +76,6 @@
 #define read_esp_tc() asm("movl %%esp, %0" : "=r"(stack_top) : /* no in */ : "%esp" )
 #endif
 
-#ifdef EDJGPP
-#define push_regs() asm("pushal")
-#define pop_regs() asm("popal")
-#define set_esp() asm("movl 60(%esp), %esp")
-#define read_esp() asm("movl %esp, 60(%esp)")
-#define read_esp_tc() asm("movl %esp, 36(%esp)")
-#endif
-
 #ifdef EWATCOM
 #pragma aux push_regs = \
 		"PUSHAD" \
@@ -118,12 +110,8 @@ long wread_esp(void);
 struct tcb *tcb;
 int tcb_size;
 int current_task;
-#ifdef EDOS
-double clock_period = 0.055; // DOS default - tick_rate() can change this
-#else
 // Windows/Linux/FreeBSD
 double clock_period = 0.01;  // should check this at run-time
-#endif
 
 /**********************/
 /* Imported variables */

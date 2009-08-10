@@ -27,11 +27,7 @@
 #  if !defined(EMINGW)
 #    include <bios.h>
 #  endif
-#  ifdef EDJGPP
-#    include <go32.h>
-#    include <allegro.h>
-#  endif
-#  if !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(EMINGW)
 #    include <graph.h>
 #  endif
 #  include <dos.h>
@@ -87,10 +83,8 @@ extern int first_mouse;
 extern int in_from_keyb;
 extern char *collect;
 extern int have_console;
-#ifndef EDOS
 extern int in_from_keyb;
 extern int screen_col;
-#endif
 extern symtab_ptr *e_routine;
 extern cleanup_ptr *e_cleanup;
 extern struct routine_list *rt00;
@@ -525,7 +519,7 @@ void MainScreen()
 extern int color_trace;
 #endif
 
-#if !defined(EDJGPP) && !defined(EBSD62)
+#if !defined(EBSD62)
 #undef matherr // avoid OpenWATCOM problem
 #if (defined(EWATCOM) || defined(EUNIX)) && !defined(EOW)
 int matherr(struct exception *err)   // 10.6 wants this
@@ -628,13 +622,10 @@ static void SimpleRTFatal(char *msg, va_list ap)
 #	ifdef va_copy
 		va_copy(aq, ap);
 #	else
-#		ifdef EDJGPP
-			aq = ap;
-#		else
-			/* Syntax error here is on purpose.  We need to handle the case here that
-			 * va_copy() is missing differently for each compiler. */
-			va_copy(aq, ap);
-#		endif
+		/* Syntax error here is on purpose.  We need to handle the case here that
+		 * va_copy() is missing differently for each compiler. */
+		va_copy(aq, ap);
+
 #	endif
 
 	if (crash_msg == NULL || crash_count > 0) {
@@ -2279,9 +2270,6 @@ void setran()
 	struct tm *local;
 	int garbage;
 
-#ifdef EDOS
-	_bios_timeofday(_TIME_GETCLOCK, &seed1);
-#endif
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
 	seed2 = local->tm_yday * 86400 + local->tm_hour * 3600 +
@@ -2715,9 +2703,8 @@ unsigned int calc_adler32(object a)
 }
 
 // hsieh32 hash is Copyright 2004-2008 by Paul Hsieh , http://www.azillionmonkeys.com/qed/hash.html
-#ifndef EDJGPP
+
 #include "stdint.h"
-#endif
 #undef get16bits
 #if defined(__X86__) || defined(__i386__)
 #define get16bits(d) (*((const uint16_t *) (d)))
@@ -3846,7 +3833,6 @@ object EGets(object file_no)
 
 	/* read first character */
 
-#ifndef EDOS
 	if (f == stdin) {
 #ifdef EWINDOWS
 		show_console();
@@ -3868,9 +3854,7 @@ object EGets(object file_no)
 		}
 	}
 	else
-#endif  //EDOS
-
-	c = getc(f);
+		c = getc(f);
 
 	if (c == EOF)
 		result_line = ATOM_M1;
@@ -3896,7 +3880,6 @@ object EGets(object file_no)
 					break;
 
 				/* read next character */
-#ifndef EDOS
 				if (in_from_keyb)
 #ifdef EUNIX
 #ifdef EGPM
@@ -3908,8 +3891,7 @@ object EGets(object file_no)
 					c = wingetch();
 #endif
 				else
-#endif
-				c = getc(f);
+					c = getc(f);
 
 			} while (TRUE);
 		}
@@ -3947,7 +3929,6 @@ object EGets(object file_no)
 			/* long line -- more coming */
 			while (TRUE) {
 				/* read next character */
-#ifndef EDOS
 				if (f == stdin) {
 					if (in_from_keyb)
 #ifdef EUNIX
@@ -3963,8 +3944,7 @@ object EGets(object file_no)
 						c = getc(f);
 				}
 				else
-#endif  //EDOS
-				c = getc(f);
+					c = getc(f);
 
 				if (c == '\n' || c == EOF)
 					break;
@@ -3987,26 +3967,10 @@ void set_text_color(int c)
 	if (color_trace && COLOR_DISPLAY) {
 		if (c == 0 && !TEXT_MODE)
 			c = 8; /* graphics mode can't handle black (0) */
-#ifdef EDOS
-#ifdef EDJGPP
-		textcolor(c);
-#else
-		_settextcolor(c);
-#endif
-#else
 		SetTColor(MAKE_INT(c));
-#endif
 	}
 	else {
-#ifdef EDOS
-#ifdef EDJGPP
-		textcolor(15);
-#else
-		_settextcolor(7);
-#endif
-#else
 		SetTColor(MAKE_INT(7));
-#endif
 	}
 }
 
@@ -4630,42 +4594,6 @@ int get_key(int wait)
    a key is typed, otherwise return -1 if no key is available. */
 {
 	unsigned a, ascii;
-#ifdef EDOS
-	short *p1;
-	short *p2;
-
-	if (!wait) {
-		// see if a key is there
-		p1 = (short *)1050;
-		p2 = (short *)1052;
-#ifdef EDJGPP
-		if (_farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)p1) ==
-			_farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)p2)
-		   )
-#else
-		if (*p1 == *p2)
-#endif
-			return -1;
-		if (in_from_keyb && !kbhit())
-			return -1;
-	}
-	// wait for the key
-	if (in_from_keyb) {
-		a = getch();
-		if (a == 0)
-			return 256 + getch();     // DJGPP too?
-		else
-			return a;
-	}
-	else {
-		a = _bios_keybrd(_NKEYBRD_READ);
-		ascii = a & 0xFF;
-		if (ascii > 0 && ascii < 128)
-			return ascii;
-		else
-			return 256 + (a >> 8);
-	}
-#endif
 
 #ifdef EWINDOWS
 #if defined(EMINGW)
@@ -4681,18 +4609,19 @@ int get_key(int wait)
 			SetConsoleMode(console_input, ENABLE_LINE_INPUT |
 									ENABLE_ECHO_INPUT |
 									ENABLE_PROCESSED_INPUT);
+									
+			return a;
+		}
 #else
 		if (wait || kbhit()) {
 			a = getch();
 			if (a == 0) {
 				a = 256 + getch();
 			}
-#endif
 			return a;
 		}
-		else {
-			return -1;
-		}
+#endif
+		return -1;
 #endif
 
 #ifdef EUNIX
@@ -5086,13 +5015,6 @@ void system_call(object command, object wait)
 		free(string_ptr);
 
 	if (w == 1) {
-#ifdef EDOS
-		sound(1000);
-		c = clock();
-		while (clock() < c + clocks_per_sec/4)
-			;
-		nosound();
-#endif
 		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
 	}
 	if (w != 2)
@@ -5146,13 +5068,6 @@ object system_exec_call(object command, object wait)
 		free(string_ptr);
 
 	if (w == 1) {
-#ifdef EDOS
-		sound(1000);
-		c = clock();
-		while (clock() < c + clocks_per_sec/4)
-			;
-		nosound();
-#endif
 		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
 	}
 	if (w != 2)
@@ -5685,10 +5600,6 @@ void Cleanup(int status)
 	Executing = FALSE;
 #endif
 
-#ifdef EDOS
-	tick_rate(0);
-#endif
-
 	if (current_screen != MAIN_SCREEN)
 		MainScreen();
 
@@ -5861,19 +5772,7 @@ void key_gets(unsigned char *input_string)
 	cursor.col = console_info.dwCursorPosition.X+1;
 #else
 
-#ifdef EDJGPP
-	if (TEXT_MODE) {
-		ScreenGetCursor(&cursor.row, &cursor.col);
-	}
-	else {
-		cursor.row = config.y / text_height(font);
-		cursor.col = config.x / text_length(font, "m");
-	}
-	cursor.row += 1;
-	cursor.col += 1;
-#else
 	cursor = GetTextPositionP();
-#endif
 
 #endif
 	line = cursor.row;

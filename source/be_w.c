@@ -23,16 +23,8 @@
 #    include <sys\types.h>
 #    include <sys\stat.h>
 #  endif
-#  ifdef EDJGPP
-#    include <pc.h>
-#    include <sys/farptr.h>
-#    include <dpmi.h>
-#    include <go32.h>
-#    include <allegro.h>
-#  else
-#    if !defined(EMINGW)
+#  if !defined(EMINGW)
 #      include <graph.h>
-#    endif
 #  endif
 #endif
 #include <string.h>
@@ -40,11 +32,6 @@
 #  include <windows.h>
 #endif
 #include "alldefs.h"
-#ifdef EWATCOM
-#  ifdef EDOS
-#    include <i86.h>
-#  endif
-#endif
 
 /******************/
 /* Local defines  */
@@ -132,34 +119,16 @@ void RTInternal();
 /*********************/
 struct rccoord GetTextPositionP()
 {
-#if defined(EDOS) && !defined(EDJGPP)
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-#endif
         struct rccoord p;
 
         p.row = screen_line;
         p.col = screen_col;
         return p;
-#if defined(EDOS) && !defined(EDJGPP)
-} else {
-        return _gettextposition();
-} //endif EUVISTA
-#endif
 }
 void OutTextP(const char * c)
 {
-#if defined(EDOS) && !defined(EDJGPP)
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-#endif
     printf(c);
     fflush(stdout);
-#if defined(EDOS) && !defined(EDJGPP)
-} else {
-    _outtext(c);
-} //endif EUVISTA
-#endif
 }
 
 #ifdef EUNIX
@@ -200,11 +169,6 @@ void InitInOut()
 {
     struct rccoord position;
     int i, j;
-#ifdef EDOS
-    struct stat buf;
-    int rc;
-#endif
-
 #ifdef EWINDOWS
     position.col = 1;   // should do these 2 properly
     position.row = 1;
@@ -214,8 +178,8 @@ void InitInOut()
     buff_size.Y = 1;
     buff_start.X = 0;
     buff_start.Y = 0;
-#else
-#if defined(EUNIX) || defined(EDJGPP)
+#endif
+#if defined(EUNIX)
     position.col = 1;
     position.row = 1;
     in_from_keyb  = isatty(0);
@@ -223,7 +187,7 @@ void InitInOut()
     err_to_screen = isatty(2);
     screen_line = position.row;
     screen_col = position.col;
-#ifdef EUNIX
+
     for (i = 0; i < line_max; i++) {
         for (j = 0; j < col_max; j++) {
             screen_image[i][j].ascii = ' ';
@@ -231,28 +195,6 @@ void InitInOut()
             screen_image[i][j].bg_color = 0;
         }
     }
-#endif
-
-#else
-    //DOS
-    position = GetTextPositionP();  // causes OpenWatcom 1.4 to go full-screen
-
-    screen_col = position.col;
-    err_to_screen = TRUE;  /* stderr always goes to screen in DOS */
-    rc = fstat(1, &buf);
-    if (rc == -1 || ((buf.st_atime == 0 || buf.st_mtime == 0)
-                     && (buf.st_dev < 0 || buf.st_dev > 9)))
-        out_to_screen = TRUE; /* what about printer ? */
-    else
-        out_to_screen = FALSE;
-
-    rc = fstat(0, &buf);
-    if (rc == -1 || ((buf.st_atime == 0 || buf.st_mtime == 0)
-                     && (buf.st_dev < 0 || buf.st_dev > 9)))
-        in_from_keyb = TRUE;
-    else
-        in_from_keyb = FALSE;
-#endif
 #endif
 }
 
@@ -500,95 +442,6 @@ void flush_screen()
 }
 
 
-#ifdef EDJGPP
-
-#define COLOR_TEXT_MEMORY 0x000B8000
-#define MONO_TEXT_MEMORY 0x000B0000
-
-static void graphic_puts(char *text)
-// use Allegro to write text in graphics modes
-{
-    int n, last;
-
-    n = strlen(text);
-    if (n == 0)
-        return;
-    last = text[n-1];
-    textout(screen, font, text, config.x, config.y, current_fg_color);
-    config.x += text_length(font, text);
-    if (last == '\n') {
-        config.x = 0;
-        config.y += text_height(font);
-    }
-    else if (last == '\r') {
-        config.x = 0;
-    }
-}
-
-static char *DOS_scr_addr(int line, int col)
-// calculate address in DOS screen memory for a given line, column
-{
-    char *screen_memory;
-    int page_size;
-
-    if (config.mode == 7)
-        screen_memory = (char *)MONO_TEXT_MEMORY;
-    else
-        screen_memory = (char *)COLOR_TEXT_MEMORY;
-    // take out until we support pages:
-    // page_size = config.numtextrows * config.numtextcols * 2;
-    // page_size = 1024 * ((page_size + 1023) / 1024);
-    // screen_memory = screen_memory + get_active_page() * page_size;
-    return screen_memory + (line * config.numtextcols + col) * 2;
-}
-
-mem_cputs(char *text)
-/* write a string directly to screen memory */
-{
-    char *screen_memory;
-    int line, col, c;
-
-    if (TEXT_MODE) {
-        if (wrap_around) {
-            cputs(text);
-        }
-        else {
-            /* do it this way to avoid the scroll when the
-               last line is written */
-            ScreenGetCursor(&line, &col);
-            while ((c = *text++) != 0) {
-                if (c == '\n') {
-                    if (line < config.numtextrows-1)
-                        line++;
-                    else {
-                        ScreenSetCursor(line, col);
-                        cputs("\n"); // only time we want to scroll
-                    }
-                    col = 0;
-                }
-                else if (c == '\r') {
-                    col = 0;
-                }
-                else if (col < config.numtextcols) {
-                    screen_memory = DOS_scr_addr(line, col);
-                    _farpokeb(_go32_info_block.selector_for_linear_memory,
-                            (unsigned)screen_memory++,
-                            c);
-                    _farpokeb(_go32_info_block.selector_for_linear_memory,
-                            (unsigned)screen_memory,
-                            ScreenAttrib);
-                    col++;
-                }
-            }
-            ScreenSetCursor(line, col);
-        }
-    }
-    else {
-        graphic_puts(text); // graphics modes
-    }
-}
-#endif
-
 #ifdef EUNIX
 void update_screen_string(char *s)
 // record that a string of characters was written to the screen
@@ -653,21 +506,13 @@ static void expand_tabs(char *raw_string)
                 MyWriteConsole(expanded_string,
                                expanded_ptr - expanded_string);
                 end_of_line('\n');
-#else
+#endif // EWINDOWS
 #ifdef EUNIX
                 iputs(expanded_string, stdout);
                 iflush(stdout);
                 update_screen_string(expanded_string);
-#else
-//DOS
-#ifdef EDJGPP
-                mem_cputs(expanded_string); //critical function
-#else
-                OutTextP(expanded_string); //critical function
-#endif
 #endif // EUNIX
 
-#endif // EWINDOWS
                 screen_col = 1;
                 expanded_ptr = expanded_string; // make it empty
             }
@@ -712,19 +557,6 @@ static void expand_tabs(char *raw_string)
             iflush(stdout);
 #endif
 
-#ifdef EDOS
-#ifdef EDJGPP
-            if (c == '\n')
-                *expanded_ptr++ = '\r';
-            *expanded_ptr++ = c;
-            *expanded_ptr = '\0';
-            mem_cputs(expanded_string);
-#else
-            *expanded_ptr++ = c;
-            *expanded_ptr = '\0';
-            OutTextP(expanded_string);
-#endif
-#endif
             screen_col = 1;
             if (c == '\n' && screen_line < config.numtextrows-1)
                 screen_line += 1;
@@ -752,19 +584,11 @@ static void expand_tabs(char *raw_string)
         *expanded_ptr = '\0';
 #ifdef EWINDOWS
         MyWriteConsole(expanded_string, expanded_ptr - expanded_string);
-#else
+#endif
 #ifdef EUNIX
         iputs(expanded_string, stdout);
         iflush(stdout);
         update_screen_string(expanded_string);
-#else
-// DOS
-#ifdef EDJGPP
-        mem_cputs(expanded_string);
-#else
-        OutTextP(expanded_string);
-#endif
-#endif
 #endif
         screen_col += expanded_ptr - expanded_string;
         expanded_ptr = expanded_string;
@@ -886,90 +710,6 @@ void EClearLines(int first_line, int last_line, int len, WORD attributes)
 }
 #endif
 
-#ifdef EDOS
-#ifdef EWATCOM
-void SetPosInt(char x, char y)
-{
-/* Perform a DOS software interrupt. */
-    int int_no;
-    object_ptr obj_ptr;
-
-#ifdef EDJGPP
-    __dpmi_regs reglist;
-#else
-    // register list for Causeway IntXX
-    struct xx {
-        unsigned int edi;
-        unsigned int esi;
-        unsigned int ebp;
-        unsigned int z0;
-        unsigned int ebx;
-        unsigned int edx;
-        unsigned int ecx;
-        unsigned int eax;
-        unsigned short flags;
-        unsigned short es;
-        unsigned short ds;
-        unsigned short fs;
-        unsigned short gs;
-        unsigned short z1;
-        unsigned short z2;
-        unsigned short z3;
-        unsigned short z4;
-    } reglist;
-    union REGS regs;
-    struct SREGS seg_regs;
-#endif
-
-    int_no =       0x10;
-
-    // fill up reglist
-#ifdef EDJGPP
-    reglist.x.di = 0;
-    reglist.x.si = 0;
-    reglist.x.bp = 0;
-    reglist.x.bx = 0;
-    reglist.x.dx = y*256+x;
-    reglist.x.cx = 0;
-    reglist.x.ax = 0x0200;
-    reglist.x.flags = 0;
-    reglist.x.es = 0;
-    reglist.x.ds = 0;
-
-    __dpmi_int(int_no, &reglist);
-
-#else
-    reglist.edi = 0;
-    reglist.esi = 0;
-    reglist.ebp = 0;
-    reglist.z0 = 0;
-    reglist.ebx = 0;
-    reglist.edx = y*256+x;
-    reglist.ecx = 0;
-    reglist.eax = 0x0200;
-    reglist.flags = 0;
-    reglist.es = 0;
-    reglist.ds = 0;
-
-    reglist.fs = 0;
-    reglist.gs = 0;
-    reglist.z1 = 0;
-    reglist.z2 = 0;
-    reglist.z3 = 0;
-    reglist.z4 = 0;
-
-    segread(&seg_regs);
-    memset(&regs, 0, sizeof(regs));
-    regs.x.edi = (unsigned int)&reglist;
-    regs.x.ebx = (unsigned int)int_no; // The user's interrupt number
-    regs.x.eax = 0x0ff01; // Causeway Simulate real mode interrupt
-
-    int386x(0x31, &regs, &regs, &seg_regs);
-#endif
-}
-#endif // EWATCOM
-#endif // EDOS
-
 void ClearScreen()
 {
 #ifdef EWINDOWS
@@ -987,23 +727,6 @@ void ClearScreen()
     SetPosition(1,1);
 #endif
 
-#ifdef EDOS
-#ifdef EDJGPP
-    if (TEXT_MODE)
-        ScreenClear(); // text modes
-    else
-        clear_to_color(screen, current_bg_color);
-    SetPosition(1,1);
-#else
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-    system("CLS");
-    SetPosInt(0,0);
-} else {
-    _clearscreen(_GCLEARSCREEN);
-} //endif EUVISTA
-#endif
-#endif
     screen_line = 1;
     screen_col = 1;
 }
@@ -1014,25 +737,6 @@ void SetPosition(int line, int col)
 #define SP_buflen (20)
     char lbuff[SP_buflen];
     char cbuff[SP_buflen];
-#endif
-
-#ifdef EDOS
-#ifdef EDJGPP
-    if (TEXT_MODE)
-        ScreenSetCursor(line-1, col-1);
-    else {
-        config.x = (col-1) * text_length(font, "m");
-        config.y = (line-1) * text_height(font);
-    }
-
-#else
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-    SetPosInt((char)(line-1), (char)(col-1));
-} else {
-    _settextposition(line, col);
-} //endif EUVISTA
-#endif
 #endif
 
 #ifdef EUNIX

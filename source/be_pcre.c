@@ -8,7 +8,7 @@ extern int default_heap;
 #ifdef EMINGW
 #include "pcre/pcre_internal.h"
 #endif
-#if defined(EWINDOWS) || defined(EDOS)
+#if defined(EWINDOWS)
 #include "pcre/config.h" /* cannot make it link w/o it */
 #endif
 

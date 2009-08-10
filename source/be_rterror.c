@@ -14,7 +14,7 @@
 #include <setjmp.h>
 
 #ifndef EUNIX
-#  if !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(EMINGW)
 #    include <graph.h>
 #    include <bios.h>
 #  endif
@@ -153,14 +153,6 @@ static int MainBkCol; /* Main background color */
 //static WINDOW *debug_scr = NULL;    // debug screen
 //static WINDOW *main_scr  = NULL;    // main screen
 //#endif
-#ifdef EDOS
-static char *MainScreenSave = NULL;     /* place to save main screen */
-static int MainScreenSize = 0;
-static int DebugScreenSize = 0;
-static int DebugCol;   /* Debug foreground color */
-static int DebugBkCol; /* Debug background color */
-static struct rccoord DebugPos; /* Debug text position save area */
-#endif
 static char *DebugScreenSave = NULL;   /* place to save debug screen */
 static struct rccoord MainPos; /* text position save area */
 static int MainWrap;  /* Main wrap mode */
@@ -192,7 +184,6 @@ static void SaveDebugImage();
 static void RestoreDebugImage();
 struct rccoord GetTextPositionP();
 static void ShowName();
-static int screen_size();
 void UpdateGlobals();
 void EraseSymbol();
 symtab_ptr RTLookup();
@@ -257,11 +248,6 @@ static void set_bk_color(int c)
 	else {
 		col = _BLACK;
 	}
-#ifdef EDOS
-#ifndef EDJGPP
-	_setbkcolor(col);
-#endif
-#else
 	if (col == _WHITE)
 		col = 7;
 	else if (col == _BLACK)
@@ -290,7 +276,6 @@ static void set_bk_color(int c)
 		RTInternal("bad color!");
 #endif
 	SetBColor(MAKE_INT(col));
-#endif
 }
 
 #ifndef BACKEND
@@ -366,9 +351,6 @@ static void Refresh(long line_num, int vars_too)
 	long i;
 	struct EuViewPort vp;
 	
-#ifdef EDOS
-	short int r1,c1,r2,c2;
-#endif
 #ifdef EWINDOWS
 	int top_attrib, bottom_attrib;
 #endif    
@@ -391,7 +373,7 @@ static void Refresh(long line_num, int vars_too)
 		EClearLines(2 + vp.num_trace_lines, vp.lines, vp.columns, bottom_attrib); 
 #endif
 
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX)
 	if (vars_too && !(TEXT_MODE)) {
 		ClearScreen();
 	}
@@ -407,25 +389,6 @@ static void Refresh(long line_num, int vars_too)
 	}
 #endif
 
-#if defined(EDOS) && defined(EWATCOM)
-	_gettextwindow(&r1, &c1, &r2, &c2);
-	if (vars_too && !(TEXT_MODE)) {
-		ClearScreen();
-	}
-	else {
-		_settextwindow(2, c1, 1 + vp.num_trace_lines, c2);
-
-		_clearscreen(_GWINDOW);
-		
-		if (vars_too) {
-			if (TEXT_MODE)
-				set_bk_color(_BLUE);
-			_settextwindow(2 + vp.num_trace_lines, c1, r2, c2);
-			_clearscreen(_GWINDOW);
-		}
-	}
-	_settextwindow(r1, c1, r2, c2);
-#endif    
 	if (vars_too) {
 		for (i = 0; i < vp.display_size; i++)
 			display_list[i].value_on_screen = NOVALUE - 1;
@@ -529,18 +492,6 @@ void MainScreen()
 		screen_copy(alt_image_main, screen_image); // restore main screen
 		screen_show();
 #endif
-#ifdef EDOS
-		puttextimage(MainScreenSave, MainScreenSize);
-#endif
-	}
-	else {
-		/* graphics mode */
-#ifdef EDOS
-#ifndef EDJGPP
-		/* TO BE COMPLETED FOR DJGPP */
-		_putimage(0, 0, MainScreenSave, _GPSET);
-#endif
-#endif
 	}
 	SetPosition(MainPos.row, MainPos.col);
 	debug_screen_col = screen_col;
@@ -548,15 +499,6 @@ void MainScreen()
 	screen_col = main_screen_col;
 	screen_line = main_screen_line;
 
-#ifdef EDOS
-#ifdef EDJGPP
-	SetTColor(MainCol);
-	SetBColor(MainBkCol);
-#else   
-	_settextcolor(MainCol);
-	_setbkcolor(MainBkCol);
-#endif
-#endif
 #ifdef EUNIX
 	SetTColor(MainCol);
 	SetBColor(MainBkCol);
@@ -818,13 +760,6 @@ void UpdateGlobals()
 	}
 }
 
-#ifdef EDJGPP
-void ShowDebug()
-{
-	return;    // trace screen not implemented yet for DJGPP
-}
-#endif
-
 void ShowDebug()
 /* switch to debug screen from main screen */
 {
@@ -855,34 +790,6 @@ void ShowDebug()
 	screen_show();
 #endif
 
-#ifdef EDOS   
-#ifndef EDJGPP   // for now
-	MainPos = GetTextPositionP();
-	MainCol = _gettextcolor();
-	MainBkCol = _getbkcolor(); 
-#endif  
-	size = screen_size();
-	if (MainScreenSave == NULL) {
-		MainScreenSave = EMalloc(size);
-	}
-	else {
-		if (MainScreenSize != size) {
-			EFree(MainScreenSave);
-			MainScreenSave = EMalloc(size);
-		} 
-	}
-	MainScreenSize = size;
-
-	if (TEXT_MODE) {
-		gettextimage(MainScreenSave, size); /* save text */
-	}
-	else {
-#ifndef EDJGPP  // for now
-		_getimage(0, 0, config.numxpixels-1, config.numypixels-1, MainScreenSave);
-#endif  
-	}
-#endif
-
 	Wrap(ATOM_0);
 
 	if (first_debug) {
@@ -900,51 +807,11 @@ void ShowDebug()
 	first_debug = FALSE;
 }
 
-#ifndef EWINDOWS
-static int screen_size()
-// return number of bytes needed to save text or graphics mode screen
-{
-	if (TEXT_MODE) {
-		/* text mode */
-		return config.numtextrows * config.numtextcols * 2; /* text mode */
-	}
-#ifdef EDOS
-	else {
-		/* graphics mode */
-#ifndef EDJGPP  // for now      
-		return _imagesize(0, 0, config.numxpixels-1, config.numypixels-1);
-#endif  
-	}    
-#endif
-}
-#endif
-
 static void SaveDebugImage()
 /* save image of debug screen (if there's enough memory) */
 {
 #ifdef EWINDOWS
 	DebugScreenSave = (char *)1;
-#endif
-#ifdef EDOS
-	DebugScreenSize = screen_size();
-	DebugScreenSave = malloc(DebugScreenSize);  // N.B. *not* EMalloc
-	if (DebugScreenSave == NULL)
-		return;
-	if (TEXT_MODE) {
-		gettextimage(DebugScreenSave, DebugScreenSize); /* save text */
-	}
-	else {
-#ifndef EDJGPP  // for now
-		_getimage(0, 0, config.numxpixels-1, config.numypixels-1, 
-				  DebugScreenSave);
-#endif  
-	}
-	/* save other aspects of display */
-#ifndef EDJGPP  // for now  
-	DebugCol = _gettextcolor();
-	DebugBkCol = _getbkcolor();
-	DebugPos = GetTextPositionP();  //EUNIX too?
-#endif
 #endif
 }
 
@@ -954,27 +821,6 @@ static void RestoreDebugImage()
 #ifdef EWINDOWS
 	SaveNormal();
 	RestoreTrace();
-#endif
-#ifdef EDOS
-	/* restore various aspects of the display */
-	if (TEXT_MODE) {
-		puttextimage(DebugScreenSave, DebugScreenSize);
-	}
-	else {
-#ifndef EDJGPP
-		/* TO BE COMPLETED FOR DJGPP */
-		_putimage(0, 0, DebugScreenSave, _GPSET);
-#endif  
-	}
-	free(DebugScreenSave);
-#ifdef EDJGPP   
-	SetTColor(DebugCol);
-	SetBColor(DebugBkCol);
-#else   
-	_settextcolor(DebugCol);
-	_setbkcolor(DebugBkCol);
-#endif  
-	SetPosition(DebugPos.row, DebugPos.col);
 #endif
 	screen_col = debug_screen_col;
 	Wrap(0);
@@ -1061,9 +907,6 @@ static void DebugCommand()
 void DebugScreen()
 /* Display the debug screen, if it is not already there */
 {
-#ifdef EDJGPP
-	return;    // trace screen not implemented yet for DJGPP
-#endif
 	/* set up the debug screen */
 	if (current_screen == DEBUG_SCREEN)
 		ShowTraceLine(start_line);
@@ -1534,13 +1377,7 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	}
 
 	if (crash_msg != NULL) {
-#ifdef EDOS
-#ifndef EDJGPP
-		_setvideomode((short)-1);       
-#endif
-#else
 		ClearScreen();
-#endif
 		screen_output(stderr, crash_msg);
 	}
 	OpenErrFile();
@@ -1722,13 +1559,6 @@ void GetViewPort(struct EuViewPort *vp)
 	vp->columns  = col_max;
 
 #endif
-
-#ifdef EDOS
-	vp->lines    = line_max;
-	vp->columns  = col_max;
-#endif
-
-
 	l_var_lines = (vp->lines - BASE_TRACE_LINE) / 6;
 	if (l_var_lines > MAX_VAR_LINES)
 		l_var_lines = MAX_VAR_LINES;

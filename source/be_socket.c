@@ -3,8 +3,6 @@
  * See License.txt
  */
 
-#ifndef EDOS
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -779,5 +777,3 @@ object eusock_setsockopt(object x)
 
 	return optval;
 }
-
-#endif // ifndef EDOS

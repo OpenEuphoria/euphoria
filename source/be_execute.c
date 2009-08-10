@@ -42,9 +42,6 @@
 #ifdef EUNIX
 #	include <sys/times.h>
 #else
-#	ifdef EDJGPP
-#		include <go32.h>
-#	endif
 #	ifdef EWATCOM
 #		include <graph.h>
 #	endif
@@ -223,38 +220,11 @@ union pc_t {
 							DeRef(a);             \
 						}
 
-#ifdef EDJGPP                       
-#define peek4(peek4_addr)	(((unsigned)peek4_addr <= LOW_MEMORY_MAX) ? \
-					_farpeekl(_go32_info_block.selector_for_linear_memory, \ 
-									   (unsigned)peek4_addr)\
-					:                       \
-					*peek4_addr)
-
-#define peek1(peek1_addr)	(((unsigned)peek1_addr <= LOW_MEMORY_MAX) ?\
-							 _farpeekb(_go32_info_block.selector_for_linear_memory,\ 
-												   (unsigned)peek1_addr)\
-							 :    *peek1_addr )
-
-#define	poke4(addr,long_value)   			{if ((unsigned)addr <= LOW_MEMORY_MAX) \
-			_farpokel(_go32_info_block.selector_for_linear_memory,\
-				(unsigned long)addr, ((unsigned long)long_value));\
-				else *addr = ((unsigned long)long_value);}
-
-#define poke1(addr,char_value)	{\      
-					if ((unsigned)addr <= LOW_MEMORY_MAX)\
-						_farpokeb(_go32_info_block.selector_for_linear_memory,\
-						   (unsigned long)addr, (unsigned char)char_value);\
-					else\
-						*poke_addr = (unsigned char)b;\
-				}
-			
-#else
-
 #define peek4(peek4_addr)	*peek4_addr
 #define peek1(peek1_addr)	*peek1_addr
 #define	poke4(peek4_addr,long_value)	*peek4_addr = ((unsigned long)long_value)
 #define poke1(addr,char_value)  *addr = char_value
-#endif
+
 
 
 /**********************/
@@ -471,12 +441,6 @@ static object do_peek2(object a, int b, int *pc)
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
 		peek2_addr = (unsigned short *)get_pos_int("peek2s/peek2u", *(s1->base+1));
-#ifdef EDOS                    
-		if (current_screen != MAIN_SCREEN && 
-			(unsigned)peek2_addr >= (unsigned)0xA0000 && 
-			(unsigned)peek2_addr < (unsigned)0xC0000) 
-			MainScreen();
-#endif                  
 		i = get_pos_int("peek2s/peek2u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");
@@ -504,12 +468,6 @@ static object do_peek2(object a, int b, int *pc)
 		}
 		return (object)MAKE_SEQ(s1);
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)peek2_addr >= (unsigned)0xA0000 && 
-		(unsigned)peek2_addr < (unsigned)0xC0000) 
-		MainScreen();
-#endif              
 	if (b) {
 		// unsigned
 		top = (object)peek4(peek2_addr);
@@ -552,12 +510,6 @@ static object do_peek4(object a, int b, int *pc)
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
 		peek4_addr = (unsigned long *)get_pos_int("peek4s/peek4u", *(s1->base+1));
-#ifdef EDOS                    
-		if (current_screen != MAIN_SCREEN && 
-			(unsigned)peek4_addr >= (unsigned)0xA0000 && 
-			(unsigned)peek4_addr < (unsigned)0xC0000) 
-			MainScreen();
-#endif                  
 		i = get_pos_int("peek4s/peek4u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");
@@ -585,12 +537,6 @@ static object do_peek4(object a, int b, int *pc)
 		}
 		return (object)MAKE_SEQ(s1);
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)peek4_addr >= (unsigned)0xA0000 && 
-		(unsigned)peek4_addr < (unsigned)0xC0000) 
-		MainScreen();
-#endif   
 	top = peek4(peek4_addr);
 	if (b) {
 		// unsigned
@@ -624,12 +570,6 @@ static void do_poke2(object a, object top)
 	else {
 		RTFatal("first argument to poke2 must be an atom");
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)poke2_addr >= (unsigned)0xA0000 && 
-		(unsigned)poke2_addr < (unsigned)0xC0000)
-		MainScreen();
-#endif
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
 		poke4(poke2_addr,INT_VAL(top));
@@ -684,12 +624,6 @@ static void do_poke4(object a, object top)
 	else {
 		RTFatal("first argument to poke4 must be an atom");
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)poke4_addr >= (unsigned)0xA0000 && 
-		(unsigned)poke4_addr < (unsigned)0xC0000)
-		MainScreen();
-#endif
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
 		poke4(poke4_addr,INT_VAL(top));
@@ -748,7 +682,7 @@ static void do_poke4(object a, object top)
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
 #if !defined(EMINGW)
-#if defined(EWINDOWS) || (defined(EDOS) && defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
+#if defined(EWINDOWS) || (defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
 // #pragma aux thread aborts; does nothing
 
 #define thread() do { wcthread(pc); } while (0)
@@ -805,59 +739,7 @@ void threadpc3(void);
 #endif
 #endif // !defined(EMINGW)
 
-#if defined(EDOS) && defined(EWATCOM) && defined(FP_EMULATION_NEEDED)
-// WATCOM:
-// #pragma aux thread aborts; does nothing
-// modify [...] seems to do very little, works no matter what regs are
-// specified or even if modify is removed
-
-#define thread() do { wcthread(pc); } while (0)
-void wcthread(long x);
-#pragma aux wcthread = \
-		"jmp [ESI]" \
-		modify [EAX EBX EDX] \
-		parm [ESI];
-
-long wcinc2pc(long x);
-#pragma aux wcinc2pc = \
-		"ADD ESI, 8" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-long wcinc4pc(long x);
-#pragma aux wcinc4pc = \
-		"ADD ESI, 16" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-long wcinc5pc(long x);
-#pragma aux wcinc5pc = \
-		"ADD ESI, 20" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-#define thread2() do { pc = wcinc2pc(pc); wcthread(pc); } while (0)
-#define thread4() do { pc = wcinc4pc(pc); wcthread(pc); } while (0)
-#define thread5() do { pc = wcinc5pc(pc); wcthread(pc); } while (0)
-
-/* have to hide this from WATCOM or it will generate stupid code
-   at the top of the switch */
-#define inc3pc() do { pc = wcinc3pc(pc); } while (0)
-long wcin3pc(long x);
-#pragma aux wcinc3pc = \
-		"ADD ESI, 12" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-#define BREAK break
-#include "redef.h"
-#endif
-
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
@@ -951,12 +833,10 @@ void InitExecute()
 	// a bit of cleanup - tick rate, profile, active page etc.
 #endif
 
-#ifndef EDOS      // doesn't work on DOS
 #ifndef ERUNTIME  // dll shouldn't take handler away from main program
 #ifndef EDEBUG
 	signal(SIGILL,  Machine_Handler);
 	signal(SIGSEGV, Machine_Handler);
-#endif
 #endif
 #endif
 
@@ -975,7 +855,7 @@ void InitExecute()
 void Execute(int *);
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 int **jumptab; // initialized in do_exec() 
 #else
 #ifdef EWATCOM
@@ -1556,13 +1436,7 @@ void fe_set_pointers()
 	AnyStatementProfile= fe.misc[2];
 	sample_size        = fe.misc[3];
 	
-#ifdef EDOS
-	if (sample_size > 0) {
-		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
-		lock_region(profile_sample, sample_size * sizeof(int));
-		tick_rate(100);
-	}
-#elif defined(EWINDOWS)
+#if defined(EWINDOWS)
 	if (sample_size > 0) {
 		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
 		//lock_region(profile_sample, sample_size * sizeof(int));
@@ -1705,7 +1579,7 @@ void Execute(int *start_index)
 }
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 // don't use switch/case - use special jump to label feature
 #define case
 #endif 
@@ -1748,7 +1622,7 @@ void do_exec(int *start_pc)
 	s1_ptr s1,s2;
 	object *block;
 	
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
   &&L_LESS, &&L_GREATEREQ, &&L_EQUALS, &&L_NOTEQ, &&L_LESSEQ, &&L_GREATER,
@@ -1838,7 +1712,7 @@ void do_exec(int *start_pc)
 #endif
 #endif
 	if (start_pc == NULL) {
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
 		jumptab = (int **)localjumptab;
 #endif
@@ -1873,7 +1747,7 @@ void do_exec(int *start_pc)
 			return;
 		}
 		thread();
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
+#if !defined(EUNIX) && !defined(EMINGW)
 		switch((int)pc) {                                       
 #endif
 
@@ -4562,12 +4436,6 @@ void do_exec(int *start_pc)
 				  "argument to peek() must be an atom or a 2-element sequence");
 					}
 					poke_addr = (unsigned char *)get_pos_int("peek", *(s1->base+1));
-#ifdef EDOS                    
-					if (current_screen != MAIN_SCREEN && 
-						(unsigned)poke_addr >= (unsigned)0xA0000 && 
-						(unsigned)poke_addr < (unsigned)0xC0000) 
-						MainScreen();
-#endif                  
 					i = get_pos_int("peek", *((s1->base)+2)); /* length */
 					if (i < 0)
 						RTFatal("number of bytes to peek is less than 0");
@@ -4575,12 +4443,6 @@ void do_exec(int *start_pc)
 					obj_ptr = s1->base;
 					while (--i >= 0) {
 						obj_ptr++;
-#ifdef EDJGPP                       
-						if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-							*obj_ptr = _farpeekb(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)poke_addr);
-						else    
-#endif                      
 						if(b)
 							*obj_ptr = (signed char)*poke_addr; 
 						else
@@ -4592,19 +4454,7 @@ void do_exec(int *start_pc)
 					inc3pc();
 					thread();
 				}
-#ifdef EDOS
-				if (current_screen != MAIN_SCREEN && 
-					(unsigned)poke_addr >= (unsigned)0xA0000 && 
-					(unsigned)poke_addr < (unsigned)0xC0000) 
-					MainScreen();
-#endif              
 				DeRefx(*(object_ptr)pc[2]);
-#ifdef EDJGPP                       
-				if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-					*(object_ptr)pc[2] = _farpeekb(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)poke_addr);
-				else    
-#endif              
 				{
 					if(b)        
 						*(object_ptr)pc[2] = (signed char)*poke_addr;               
@@ -4653,12 +4503,6 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					RTFatal("first argument to poke must be an atom");
 				}
-#ifdef EDOS
-				if (current_screen != MAIN_SCREEN && 
-					(unsigned)poke_addr >= (unsigned)0xA0000 && 
-					(unsigned)poke_addr < (unsigned)0xC0000)
-					MainScreen();
-#endif              
 				/* the following 6 lines bumped top out of a register */
 				b = top;
 				
@@ -4713,26 +4557,7 @@ void do_exec(int *start_pc)
 				pc += 4;                
 				thread();
 				BREAK;
-			
-			case L_PIXEL:
-			deprintf("case L_PIXEL:");
-				tpc = pc;
-				Pixel(*(object_ptr)pc[1],
-					  *(object_ptr)pc[2]);
-				inc3pc();
-				thread();
-				BREAK;
-			
-			case L_GET_PIXEL:
-			deprintf("case L_GET_PIXEL:");
-				tpc = pc;
-				a = Get_Pixel(*(object_ptr)pc[1]);
-				DeRef(*(object_ptr)pc[2]);
-				*(object_ptr)pc[2] = a;
-				inc3pc();
-				thread();
-				BREAK;
-		  
+						
 			case L_CALL:
 			deprintf("case L_CALL:");
 				a = *(object_ptr)pc[1];
@@ -4813,7 +4638,6 @@ void do_exec(int *start_pc)
 					else
 						last_r_file_no = NOVALUE;
 				}
-#ifndef EDOS
 				if (last_r_file_ptr == stdin) {
 #ifdef EWINDOWS
 					// In WIN32 this is needed before 
@@ -4841,7 +4665,6 @@ void do_exec(int *start_pc)
 					}
 				}
 				else
-#endif
 #ifdef EUNIX
 					b = getc(last_r_file_ptr);
 #else
@@ -4866,6 +4689,7 @@ void do_exec(int *start_pc)
 			case L_PLATFORM: // only shrouded code needs this (for portability)
 			deprintf("case L_PLATFORM:");
 				DeRef(*(object_ptr)pc[1]);
+				top = 1;  // Unknown platform
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
 #endif
@@ -4886,9 +4710,6 @@ void do_exec(int *start_pc)
 #endif
 #ifdef EWINDOWS
 				top = 2;  // WIN32
-#endif
-#ifdef EDOS
-				top = 1;  // DOS32
 #endif
 				
 				*(object_ptr)pc[1] = top;
@@ -5287,32 +5108,39 @@ void do_exec(int *start_pc)
 				UserCleanup(i);  
 				BREAK;
 				
-				case L_FIND_FROM:
-				deprintf("case L_FIND_FROM:");
-						tpc = pc;
-						a = find_from(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2], *(object_ptr)pc[3]);
-						top = MAKE_INT(a);
-						DeRef(*(object_ptr)pc[4]);
-						*(object_ptr)pc[4] = top;               
-						thread5();
-						BREAK;
+			case L_FIND_FROM:
+			deprintf("case L_FIND_FROM:");
+					tpc = pc;
+					a = find_from(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2], *(object_ptr)pc[3]);
+					top = MAKE_INT(a);
+					DeRef(*(object_ptr)pc[4]);
+					*(object_ptr)pc[4] = top;               
+					thread5();
+					BREAK;
 						
-				case L_MATCH_FROM:
-				deprintf("case L_MATCH_FROM:");
-						tpc = pc;
-						a = e_match_from((s1_ptr)*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2],
-								*(object_ptr) pc[3]);
-						top = MAKE_INT(a);
-						DeRef(*(object_ptr)pc[4]);
-						*(object_ptr)pc[4] = top;
+			case L_MATCH_FROM:
+			deprintf("case L_MATCH_FROM:");
+					tpc = pc;
+					a = e_match_from((s1_ptr)*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2],
+							*(object_ptr) pc[3]);
+					top = MAKE_INT(a);
+					DeRef(*(object_ptr)pc[4]);
+					*(object_ptr)pc[4] = top;
 						
-						thread5();
-						BREAK;
-						
+					thread5();
+					BREAK;
+
+			default:
+#ifdef INT_CODES
+				RTFatal("Unsupported Op Code %d", (int)*pc);
+#else
+				RTFatal("Unsupported Op Code %d", (int)pc);
+#endif
+		
 #ifdef INT_CODES
 		}
 #else
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
+#if !defined(EUNIX) && !defined(EMINGW)
 		}
 #endif
 #endif

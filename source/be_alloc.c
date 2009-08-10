@@ -555,7 +555,6 @@ void EFree(unsigned char *p)
 }
 #endif // !ESIMPLE_MALLOC
 
-#ifndef EDJGPP
 #ifndef EUNIX
 #ifndef EWINDOWS
 #ifdef EXTRA_CHECK
@@ -600,7 +599,6 @@ int heap_dump(char *ptr)
 #endif // EXTRA_CHECK
 #endif // EWINDOWS
 #endif // EUNIX
-#endif // EDJGPP
 
 #ifndef ESIMPLE_MALLOC
 char *ERealloc(unsigned char *orig, unsigned long newsize)
@@ -626,11 +624,6 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 	oldsize = block_size(p);
 	newsize += 8;
 
-#if defined(EWATCOM) && defined(EDOS)
-	// only available with WATCOM on DOS
-	q = _expand(p, newsize);
-
-#else
 	if (newsize <= oldsize) {
 		// make a smaller block
 		q = realloc(p, newsize);
@@ -638,7 +631,6 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 	else {
 		q = NULL;
 	}
-#endif
 
 	if (q == NULL) {
 		/*
@@ -709,11 +701,7 @@ unsigned char *p;
 	DeAllocated(nbytes);
 	if ((long)p % 8 != 0)
 		RTInternal("freeS1: misaligned pointer returned");
-	if (nbytes < D_SIZE
-#ifdef EDJGPP
-	- 8
-#endif
-	|| nbytes > 1024)
+	if (nbytes < D_SIZE	|| nbytes > 1024)
 		RTInternal("FreeD - bad nbytes ");
 	Trash(p, D_SIZE);
 	AlreadyFree((free_block_ptr)d_list, (free_block_ptr)p);
@@ -797,7 +785,7 @@ char *TransAlloc(unsigned long size){
 	return EMalloc( size );
 }
 
-#if defined(ELINUX) || defined(EMINGW) || defined(EDJGPP)
+#if defined(ELINUX) || defined(EMINGW)
 size_t strlcpy(char *dest, char *src, size_t maxlen)
 {
 	strncpy(dest, src, maxlen);
