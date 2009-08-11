@@ -31,10 +31,10 @@ program without waiting for a re-compile/re-link.
 ==== The with/without trace directive
 
 The interpreter provides you with additional powerful tools for debugging.
-Using trace(1) you can **//trace//** the execution of your program on one
-screen while you witness the output of your program on another.  trace(2) is
-the same as trace(1) but the trace screen will be in monochrome. Finally, using
-trace(3), you can log all executed statements to a file called **ctrace.out**.
+Using ##trace(1)## you can **//trace//** the execution of your program on one
+screen while you witness the output of your program on another.  ##trace(2)## is
+the same as ##trace(1)## but the trace screen will be in monochrome. Finally, using
+##trace(3)##, you can log all executed statements to a file called **ctrace.out**.
 
 The **with/without trace** special statements select the parts
 of your program that are available for tracing. Often you will simply insert a
@@ -52,7 +52,7 @@ Only traceable lines can appear in **ctrace.out** or in **ex.err** as "Traced
 lines leading up to the failure", should a run-time error occur.  If you want
 this information and didn't get it, you should insert a with trace and then
 rerun your program.  Execution will be slower when lines compiled with trace
-are executed, especially when trace(3) is used.
+are executed, especially when ##trace(3)## is used.
 
 After you have predetermined the lines that are traceable, your program must
 then dynamically cause the trace facility to be activated by executing a [[:trace]]() statement.  You could simply say:
@@ -98,7 +98,7 @@ type positive_int(integer x)
 end type
 </eucode>
 
-When positive_int() returns, you will see the exact statement that caused your
+When ##positive_int()## returns, you will see the exact statement that caused your
 variable to be set to the strange value, and you will be able to check the
 values of other variables.  You will also be able to check the output screen to
 see what has happened up to this precise moment. If you define positive_int()
@@ -182,7 +182,7 @@ The source code for a statement is written to **ctrace.out**, and flushed, just
 
 === Profiling
 
-If you specify a ##with profile## or ##with profile_time## (Windows only) directive,
+If you specify a ##with profile## or ##with profile_time## (//Windows// only) directive,
 then a special listing of your program, called a
 //profile//, will be produced by the interpreter when your program finishes
 execution.  This listing is written to the file **ex.pro** in the current
@@ -190,7 +190,7 @@ directory.
 
 There are two types of profiling available: **execution-count profiling**, and
 **time profiling**.  You get execution-count profiling when you specify with
-profile. You get time profiling when you specify with profile_time.  You can't
+profile. You get time profiling when you specify with ##profile_time##.  You can't
 mix the two types of profiling in a single run of your program.  You need to
 make two separate runs.
 
@@ -219,7 +219,7 @@ Profiling can help you in many ways:
   program
 * it lets you verify that your program is actually working the way you intended
 * it can provide you with statistics about the input data
-* it lets you see which sections of code were never tested - don't let your users be the
+* it lets you see which sections of code were never tested ~-- don't let your users be the
   first!
 
 Sometimes you will want to focus on a particular action performed by your
@@ -247,7 +247,7 @@ statement is being executed at the exact moment that each interrupt occurs.
 These interrupts normally occur 18.2 times per second, but if you call
 [[:tick_rate]]() you can choose a much higher rate
 and thus get a more accurate time profile, since it will be based on more
-samples. By default, if you haven't called tick_rate(), then tick_rate(100)
+samples. By default, if you haven't called ##tick_rate##(), then ##tick_rate(100)##
 will be called automatically when you start profiling. You can set it even
 higher (up to say 1000) but you may start to affect your program's performance.
 

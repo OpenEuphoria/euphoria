@@ -66,7 +66,7 @@ directory. Be careful that your first line ends with the line breaking character
 appropriate for your platform, or the ###!## won't be handled correctly. You must also set the
 execute permissions on your program correctly, and ##ex.err## and ctrace.out
 must be writeable by the server process or they won't be updated.
-See [[:CGI (Web) Applications in Euphoria]] for more.
+!!See [[:CGI (Web) Applications in Euphoria]] for more.
 
 ==== Read/Write Ports?
 
@@ -104,7 +104,7 @@ If not, the routine is not visible outside of its own file.
 
 ==== After user input, left margin problem
 
-//After inputting a string from the user with ##gets()##, the next line that comes
+//After inputting a string from the user with ##gets##(), the next line that comes
 out on the screen does not start at the left margin.//
 
 Your program should output a //new-line// character e.g.
