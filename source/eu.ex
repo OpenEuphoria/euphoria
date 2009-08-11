@@ -14,16 +14,13 @@
 -- with a high-performance back-end carefully hand-coded in C.
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
-
-
 
 include mode.e
 set_mode( "interpret", 1 )		
-
 
 -- standard Euphoria includes
 include std/os.e
@@ -48,4 +45,3 @@ include execute.e
    
 -- main program:
 include main.e
-
