@@ -263,6 +263,7 @@ BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/
 distclean : clean
 	-rm -f $(CONFIG)
 	-rm -fr $(BUILD_DIRS)
+	-rm -f Makefile
 
 clean : 	
 	-rm -fr $(BUILDDIR)/intobj
@@ -276,8 +277,10 @@ endif
 	-rm -f version.h
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
 	
+clobber : distclean
+	-rm -fr $(BUILDDIR)
 
-.PHONY : clean distclean all
+.PHONY : clean distclean clobber all
 
 library : version.h builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG)

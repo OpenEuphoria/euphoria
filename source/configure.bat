@@ -1,6 +1,10 @@
 @echo off
 
-set BUILDDIR=.
+rem ============================================================
+rem	Default the build directory to build, not the current dir
+rem	============================================================
+
+SET BUILDDIR=build
 
 rem ============================================================
 rem Be sure to start with a blank config.wat
@@ -125,6 +129,8 @@ rem Make a generic Makefile that simply includes Makefile.wat
 rem ============================================================
 
 echo !include Makefile.wat > Makefile
+
+echo Build directory is %BUILDDIR%
 
 rem ============================================================
 rem All Done

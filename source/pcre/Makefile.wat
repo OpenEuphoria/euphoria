@@ -16,9 +16,6 @@ all: config.h pcre.h $(BASEPATH) $(PCRE_OBJECTS)
 
 distclean : .SYMBOLIC clean
 
-clean: .SYMBOLIC 
-	-del /f/q $(PCRE_OBJECTS)
-
 # I wanted to put $(BASEPATH) here as a dependency for .c files but
 # watcom doesn't provide that functionality in inplicit rules... (sigh)
 .c.obj : 
@@ -26,4 +23,3 @@ clean: .SYMBOLIC
 	
 $(BASEPATH) : .EXISTSONLY
     mkdir $(BASEPATH)
-	

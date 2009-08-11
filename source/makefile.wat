@@ -231,7 +231,6 @@ all :  .SYMBOLIC
 	wmake -h translator $(VARS)
 	wmake -h winlibrary $(VARS)
 	wmake -h backend $(VARS)
-# TODO: remove	wmake -h winall $(VARS)
 
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj
 
@@ -240,31 +239,22 @@ distclean : .SYMBOLIC clean
 	@ECHO Please run configure
 	error
 !endif
-	cd pcre
-	wmake -f makefile.wat CONFIG=..\$(CONFIG) distclean
-	cd ..
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\back\*.*	
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i\back
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*	
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RMDIR) %i
-	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i.wat
 	-$(RM) $(CONFIG)
 	-$(RM) version.h
+	-$(RM) Makefile
 
 clean : .SYMBOLIC pcre
 !ifndef DELTREE
 	@ECHO Please run configure
 	error
 !endif
-	-$(RM) &
-	$(BUILDDIR)\euiw.exe $(BUILDDIR)\eui.exe $(BUILDDIR)\euc.exe $(BUILDDIR)\eu.lib $(BUILDDIR)\eubw.exe $(BUILDDIR)\eub.exe $(BUILDDIR)\main-.h $(BUILDDIR)\*.sym
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\back\*.obj
-	-@for %i in ($(BUILDDIR)\libobj $(BUILDDIR)\winlibobj do -$(RMDIR) %i\back
-	-@for %i in ($(BUILD_DIRS) $(BUILDDIR)\libobj) do -$(RM) %i\*.*
-	-@for %i in ($(BUILDDIR)\libobj $(BUILDDIR)\winlibobj do -$(RMDIR) %i
-	cd pcre
-	-wmake -f makefile.wat CONFIG=..\$(CONFIG) clean
-	cd ..
+	-@for %i in ($(BUILD_DIRS)) do -$(RMDIR) %i
+	-$(RM) $(BUILDDIR)\pcre\*.obj
+	-$(RM) $(BUILDDIR)\eu*.exe
+	-$(RM) $(BUILDDIR)\eu*.lib
+
+clobber : .SYMBOLIC distclean
+	-$(RMDIR) $(BUILDDIR)
 
 $(BUILD_DIRS) : .existsonly
 	mkdir $@

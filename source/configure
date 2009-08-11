@@ -85,7 +85,7 @@ else
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
 fi
 
-export BUILDDIR=.
+export BUILDDIR=build
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
