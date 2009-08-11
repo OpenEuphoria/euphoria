@@ -17,10 +17,6 @@ if $(UNIX) {
     MANAGED_MEMORY_DEFAULT = on ;
 }
 
-DEBUG          ?= no ;
-MANAGED_MEMORY ?= $(MANAGED_MEMORY_DEFAULT) ;
-BUILD_DIR      ?= [ FDirName $(TOP) build ] ;
-
 if [ FileExists $(CONFIG) ]
 {
     include $(CONFIG) ;
@@ -67,7 +63,7 @@ rule WriteConfig
     # value and left the others alone.
 
     Echo "" ;
-    Echo "New configuration settings:" ;
+    Echo "Configuration settings:" ;
     Echo "" ;
     Echo "   BUILD_DIR=$(BUILD_DIR)" ;
     Echo "   DEBUG=$(DEBUG)" ;
@@ -82,6 +78,10 @@ actions WriteConfig
     echo DEBUG ?= $(DEBUG) ; >> $(CONFIG)
     echo MANAGED_MEMORY ?= $(MANAGED_MEMORY) ; >> $(CONFIG)
 }
+
+DEBUG          ?= no ;
+MANAGED_MEMORY ?= $(MANAGED_MEMORY_DEFAULT) ;
+BUILD_DIR      ?= [ FDirName $(TOP) build ] ;
 
 WriteConfig config ;
 
