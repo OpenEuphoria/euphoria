@@ -8,8 +8,8 @@ include [ FDirName $(SUBDIR) version.jam ] ;
 
 if $(JAM_TOOLSET) = WATCOM
 {
-    CCFLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /ol /zp8 /s /I.. /Ipcre
-        -DMANAGED_MEM -DEOW -DEWATCOM ;
+    CCFLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /ol /zp4 /dEWATCOM /dEOW ;
+    EUCFLAGS = -wat ;
 }
 else if $(JAM_TOOLSET) = VISUALC
 {
@@ -70,6 +70,26 @@ else
 {
     Echo $(OS) is not supported by Euphoria ;
     Exit ;
+}
+
+#
+# Special flags for PCRE
+#
+
+CCFLAGS += -DNO_RECURSE ;
+
+#
+# Configuration Flags
+#
+
+if $(MANAGED_MEMORY) = "on" {
+    EUCFLAGS +=  -D EU_MANAGED_MEM ;
+    CCFLAGS += -dMANAGED_MEM ;
+}
+
+if $(DEBUG) = "on" {
+    EUCFLAGS += -D DEBUG ;
+    CCFLAGS += -dDEBUG ;
 }
 
 #
@@ -189,7 +209,7 @@ MagicGet <ebackend>be_magic.c : <ebackend>be_execute$(SUFOBJ) ;
 # files and cause our targets to recompile when they change.
 #
 
-SEARCH_SOURCE = [ FDirName $(TOP) include ] ;
+SEARCH_SOURCE += [ FDirName $(TOP) include ] ;
 
 SOURCE_GRIST = ;
 
@@ -197,12 +217,22 @@ SOURCE_GRIST = ;
 # Our actual build targets
 #
 
-EUCFLAGS += -con -keep ;
+EUCFLAGS += -con ;
 USER_LIBRARY = ebackend ;
 
-EuMain eui : [ FDirName $(SUBDIR) eu.ex ] ;
+EuMain eui : [ FDirName $(SUBDIR) int.ex ] ;
 
 USER_LIBRARY = eu ;
 
 EuMain euc : [ FDirName $(SUBDIR) ec.ex ] ;
 EuMain eutest : [ FDirName $(SUBDIR) eutest.ex ] ;
+
+if $(EUDOC_SOURCE) 
+{
+    EuMain eudoc : $(EUDOC_SOURCE) ;
+}
+
+if $(CREOLEHTML_SOURCE)
+{
+    EuMain creolehtml : $(CREOLEHTML_SOURCE) ;
+}

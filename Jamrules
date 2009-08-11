@@ -107,7 +107,7 @@ rule EuMain
 
     # Add our resulting executable to the clean target
     Clean clean : $(_t) ;
-
+    
     MakeLocate $(_t) : $(BUILD_DIR) ;
 
     Depends all : $(<) ;
