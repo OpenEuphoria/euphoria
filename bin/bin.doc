@@ -1,35 +1,20 @@
    EUPHORIA\BIN
 
    Euphoria Executables:
-        euid.exe     - the interpreter for DOS
         euiw.exe     - the interpreter for Windows
         eui.exe      - the interpreter for Windows (console mode)
-        eucd.exe     - the Euphoria to C Translator for DOS
         euc.exe      - the Euphoria to C Translator for Windows
-        eubd.exe     - the interpreter back-end for DOS
         eub.exe      - the interpreter back-end for Windows
 
    Binder files:
-	bind.bat     - bind a DOS32 Euphoria program with backend.exe 
-	               to make a stand-alone .exe file
-	bindw.bat    - bind a WIN32 Euphoria program with backendw.exe
-	               to make a stand-alone .exe file
+	bind.bat     - bind a Euphoria program with the backend making 
+	               it a stand-alone .exe file
 	shroud.bat   - source code shrouder, makes a .il file that can be
 	               run with backend.exe or backendw.exe
    	euphoria.ico - default icon for binding .exe's
    
-   Public Domain Causeway executables for Translator using Watcom (DOS):
-        le23p.exe
-        cwc.exe
-        cwstub.exe
-   
-   Free "giftware" Allegro graphics library for Translator using DJGPP (DOS):
-        liballeg.a   - slightly smaller than the standard build of this library
-        
    Translator libraries:
-        eud.a        - for DJGPP (DOS)
-        eud.lib      - for Watcom (DOS)
-        eu.lib       - for Watcom (Windows)
+        eu.lib       - for Watcom
    
    Utility programs written in Euphoria. You are free to use them
    and modify them. See License.txt.
