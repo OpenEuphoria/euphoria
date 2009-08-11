@@ -29,7 +29,6 @@
 #   Backend 	 eub.exe, eubw.exe):  wmake backend
 #	        	   Make all targets:  wmake
 #		             	    		  wmake all
-#           Make all Win32 Binaries:  wmake winall
 #
 #   Make C sources so this tree      
 #   can be built with just a	 
