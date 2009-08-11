@@ -1260,7 +1260,7 @@ export function Scanner()
 				    if Parser_mode = PAM_RECORD then
 		                Recorded = append(Recorded,yytext)
 		                Ns_recorded = append(Ns_recorded,namespaces)
-		                Ns_recorded_sym &= SymTab[tok[T_SYM]][S_OBJ]
+		                Ns_recorded_sym &= tok[T_SYM]
 		                prev_Nne = No_new_entry
 						No_new_entry = 1
 						tok = keyfind(yytext, SymTab[tok[T_SYM]][S_OBJ])
