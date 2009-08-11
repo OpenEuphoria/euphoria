@@ -542,10 +542,15 @@ function read_recorded_token(integer n)
 		t = keyfind(Ns_recorded[n],-1, , 1)
 		if t[T_ID] != NAMESPACE then
 			p = Ns_recorded_sym[n]
-			if p = 0 then
-				CompileErr(153)
+			if p = 0 or sym_token( p ) != NAMESPACE then
+				CompileErr(153, {Ns_recorded[n]})
 			end if
 			t = {NAMESPACE, p}
+		end if
+		if not integer(SymTab[t[T_SYM]][S_OBJ]) then
+			? SymTab[t[T_SYM]]
+			printf(1, "Name: '%s' (%d)\n", {sym_name(t[T_SYM]), t[T_SYM]})
+			puts(1, ThisLine )
 		end if
 		t = keyfind(Recorded[n],SymTab[t[T_SYM]][S_OBJ])
 		if t[T_ID] = IGNORED then

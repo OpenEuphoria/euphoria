@@ -164,7 +164,7 @@ constant StdErrMsgs = {
 	{150, "Unknown compiler"},
 	{151, "Unknown build file type"},
 	{152, "Unknown block label"},
-	{153, "Unknown namespace in replayed token"},
+	{153, "Unknown namespace \"[1]\" in default argument"},
 	{154, "unknown with/without option '[1]'"},
 	{155, "unknown escape character"},
 	{156, "Unknown label '[1]'"},
