@@ -2,9 +2,9 @@
 --
 -- the official C back-end interpreter
 ifdef ETYPE_CHECK then
-with type_check
+    with type_check
 elsedef
-without type_check
+    without type_check
 end ifdef
 
 include mode.e
@@ -29,7 +29,7 @@ include compress.e
 include backend.e
 
 global procedure OutputIL()
--- dummy routine
+    -- dummy routine
 end procedure
 
 -- main program:
