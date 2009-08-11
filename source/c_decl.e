@@ -674,7 +674,7 @@ export procedure DeclareFileVars()
 	symtab_index s
 	symtab_entry eentry
 	
-	c_puts("\n")
+	c_puts("// Declaring file vars\n")
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		eentry = SymTab[s]
@@ -1283,6 +1283,7 @@ export procedure GenerateUserRoutines()
 		end if
 	end if
 
+	c_puts("// GenerateUserRoutines\n")
 	for file_no = 1 to length(file_name) do
 		if file_no = 1 or any_code(file_no) then 
 			-- generate a .c file for this Euphoria file

@@ -1421,19 +1421,24 @@ constant USAGE_VALUES = {
 	U_UNUSED,
 	U_READ,
 	U_WRITTEN,
+	U_DELETED,
+	U_USED,
+	U_FORWARD,
 	U_DELETED} -- we've decided to delete this symbol
 
 constant USAGES = {
 	"U_UNUSED",
 	"U_READ",
 	"U_WRITTEN",
-	"U_DELETED"} -- we've decided to delete this symbol
+	"U_DELETED",
+	"U_USED"} -- we've decided to delete this symbol
 
 constant TEMP_USAGES = {
 	"T_INTEGER",
 	"T_SEQUENCE",
 	"T_ATOM",
-	"T_UNKNOWN"
+	"T_UNKNOWN",
+	"T_USED"
 	}
 function format_symbol( sequence symbol )
 	if symbol[S_MODE] = M_TEMP then

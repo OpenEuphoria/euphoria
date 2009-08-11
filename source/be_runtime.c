@@ -1151,7 +1151,6 @@ void Concat(object_ptr target, object a_obj, object b_obj)
 			/* try to update in-place */
 			int insert;
 			object temp;
-
 			q = b->base+1;
 			while (nb > 0) {
 				insert = (nb <= a->postfill) ? nb : a->postfill;
@@ -1176,7 +1175,6 @@ void Concat(object_ptr target, object a_obj, object b_obj)
 			}
 			return;
 		}
-
 		c = NewS1(na + nb);
 		p = c->base;
 		q = a->base;

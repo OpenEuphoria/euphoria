@@ -250,29 +250,32 @@ end procedure
 
 init_op_info()
 
-export function advance( integer pc, sequence code = Code )
-
+function op_size( integer pc, sequence code = Code )
 	integer op = code[pc]
 	sequence info = op_info[op]
 	
 	if info[OP_SIZE_TYPE] = FIXED_SIZE then
-		return pc + info[OP_SIZE]
+		return info[OP_SIZE]
 	else
 		switch op with fallthru do
 			case PROC then
 			case PROC_TAIL then
-				return pc + SymTab[code[pc+1]][S_NUM_ARGS] + 2 + (SymTab[code[pc+1]][S_TOKEN] != PROC)
+				return SymTab[code[pc+1]][S_NUM_ARGS] + 2 + (SymTab[code[pc+1]][S_TOKEN] != PROC)
 			case PROC_FORWARD then
-				return pc + code[pc+2] + 3
+				return code[pc+2] + 3
 			case FUNC_FORWARD then
-				return pc + code[pc+2] + 4
+				return code[pc+2] + 4
 			case RIGHT_BRACE_N then
 			case CONCAT_N then
-				return pc + 3 + code[pc+1]
+				return 3 + code[pc+1]
 			case else
 				InternalErr( 269, {op} )
 		end switch
 	end if
+end function
+
+export function advance( integer pc, sequence code = Code )
+	return pc + op_size( pc, code )
 end function
 
 procedure shift_switch( integer pc, integer start, integer amount )
@@ -380,3 +383,35 @@ export procedure replace_code( sequence code, integer start, integer finish )
 	Code = replace( Code, code, start, finish )
 	shift( start , length( code ) - (finish - start + 1), finish )
 end procedure
+
+--**
+-- Returns a sequence of the current op and all of its operands.
+export function current_op( integer pc, sequence code = Code )
+	if pc > length(Code) or pc < 1 then
+		return {}
+	end if
+	return Code[pc..pc-1+op_size( pc, code )]
+end function
+
+--**
+-- Returns a sequence of ops and all of their operands.  The
+-- offset describes the offset of the number of ops from the current.
+export function get_ops( integer pc, integer offset, integer num_ops = 1, sequence code=Code )
+	sequence ops = {}
+	integer sign = offset >= 0
+	if not sign then
+		offset = -offset
+		sign = -1
+	end if
+	
+	while offset do
+		pc = advance( pc )
+		offset -= sign
+	end while
+	
+	while num_ops and pc <= length(code) do
+		ops = append( ops, current_op( pc ) )
+		pc += length( ops[$] )
+	end while
+	return ops
+end function

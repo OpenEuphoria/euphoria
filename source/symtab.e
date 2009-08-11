@@ -1096,3 +1096,7 @@ end function
 export function sym_next_in_block( symtab_index sym )
 	return SymTab[sym][S_NEXT_IN_BLOCK]
 end function
+
+export function sym_usage( symtab_index sym )
+	return SymTab[sym][S_USAGE]
+end function
