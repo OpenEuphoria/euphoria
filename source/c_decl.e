@@ -570,7 +570,7 @@ export procedure CName(symtab_index s)
 	elsif SymTab[s][S_MODE] = M_CONSTANT then
 		-- literal integers, or declared constants 
 
-		if LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE then
+		if integer( sym_obj( s ) ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
 			-- integer: either literal, or 
 			-- declared constant rvalue with integer value
 			c_printf("%d", v) 
