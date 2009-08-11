@@ -121,14 +121,11 @@ function setup_build()
 			end ifdef
 		else
 			user_library = get_eudir() & "\\bin\\eu"
-			if TDOS then
-				user_library &= "d"
-			end if
 			user_library &= ".lib"
 		end if
 	end if
 
-	if TDOS or TWINDOWS then
+	if TWINDOWS then
 		if dll_option then
 			exe_ext = ".dll"
 		else
@@ -214,33 +211,20 @@ function setup_build()
 			l_flags &= sprintf(" COMMIT STACK=%d ", { total_stack_size })
 			l_flags &= " OPTION QUIET OPTION ELIMINATE OPTION CASEEXACT"
 
-			if TDOS then
-				l_flags &= " option osname='CauseWay'"
-				l_flags &= sprintf(" libpath %s\\lib386", { wat_path })
-				l_flags &= sprintf(" libpath %s\\lib386\\dos", { wat_path })
-				l_flags &= sprintf(" OPTION stub=%s\\bin\\cwstub.exe", { shrink_to_83(get_eudir()) })
-				l_flags &= " format os2 le ^"
-				if fastfp then
-					c_flags &= " /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s"
-				else
-					c_flags &= " /w0 /zq /j /zp4 /fpc /5r /otimra /s"
-				end if
+			if dll_option then
+				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eudir()
+				l_flags &= " SYSTEM NT_DLL initinstance terminstance"
 			else
-				if dll_option then
-					c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eudir()
-					l_flags &= " SYSTEM NT_DLL initinstance terminstance"
+				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eudir()
+				if con_option then
+					-- SYSTEM NT *MUST* come first, otherwise memory dump
+					l_flags = " SYSTEM NT" & l_flags
 				else
-					c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eudir()
-					if con_option then
-						-- SYSTEM NT *MUST* come first, otherwise memory dump
-						l_flags = " SYSTEM NT" & l_flags
-					else
-						l_flags = " SYSTEM NT_WIN RUNTIME WINDOWS=4.0" & l_flags
-					end if
+					l_flags = " SYSTEM NT_WIN RUNTIME WINDOWS=4.0" & l_flags
 				end if
-
-				l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 			end if
+
+			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 
 		case else
 			CompileErr(43)
@@ -378,7 +362,7 @@ procedure write_makefile_full()
 	printf(fh, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
 	printf(fh, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
 
-	if compiler_type = COMPILER_GCC and not (TDOS or TWINDOWS) then
+	if compiler_type = COMPILER_GCC and not TWINDOWS then
 		printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
 	else
 		write_objlink_file()
@@ -450,7 +434,7 @@ procedure write_emake()
 
 	ensure_exename(settings[SETUP_EXE_EXT])
 
-	if TWINDOWS or TDOS then
+	if TWINDOWS then
 		fname &= ".bat"
 	end if
 
@@ -521,7 +505,7 @@ procedure write_emake()
 
 	if not keep then
 		for i = 1 to length(generated_files) do
-			if TWINDOWS or TDOS then
+			if TWINDOWS then
 				puts(fh, "del ")
 			else
 				puts(fh, "rm ")
@@ -676,7 +660,7 @@ export procedure write_buildfile()
 
 			if not silent then
 				sequence fname = "emake"
-				if TWINDOWS or TDOS then
+				if TWINDOWS then
 					fname &= ".bat"
 				end if
 

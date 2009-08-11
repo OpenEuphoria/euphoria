@@ -56,7 +56,7 @@ end type
 -- </eucode>
 -- 
 -- See Also:
---              [[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
+--              [[:allocate]], [[:allocate_wstring]]
 
 --**
 -- Allocate a NULL terminated pointer array.

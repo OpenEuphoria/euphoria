@@ -24,7 +24,6 @@ public constant
 -- For cross-translation:
 public integer
 	IWINDOWS = 0, TWINDOWS = 0,
-	IDOS     = 0, TDOS     = 0,
 	ILINUX   = 0, TLINUX   = 0,
 	IUNIX    = 0, TUNIX    = 0,
 	IBSD     = 0, TBSD     = 0,

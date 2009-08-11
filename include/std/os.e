@@ -437,8 +437,7 @@ end function
 -- # ##t## : an atom, the number of seconds for which to sleep.
 --
 -- Comments:
--- On //Windows// and //Unix//, the operating system will suspend your process and
--- schedule other processes.
+-- The operating system will suspend your process and schedule other processes.
 --
 -- With multiple tasks, the whole program sleeps, not just the current task. To make
 -- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
@@ -452,7 +451,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:task_schedule]], [[:tick_rate]], [[:task_yield]], [[:task_delay]]
+--     [[:task_schedule]], [[:task_yield]], [[:task_delay]]
 
 public procedure sleep(atom t)
 -- go to sleep for t seconds
@@ -460,39 +459,6 @@ public procedure sleep(atom t)
 	if t >= 0 then
 		machine_proc(M_SLEEP, t)
 	end if
-end procedure
-
-constant
- 	M_SOUND      = 1,
-	M_TICK_RATE = 38
-
-
---**
--- Frequency Type
-
-public type frequency(integer x)
-	return x >= 0
-end type
-
---**
--- Turn on the PC speaker at a specified frequency
---
--- Parameters:
--- 		# ##f## : frequency of sound. If ##f## is 0 the speaker will be turned off.
---
--- Comments:
---
--- On //Windows// and //Unix// platforms, no sound will be made.
---
--- Example 1:
--- <eucode>
--- sound(1000) -- starts a fairly high pitched sound
--- </eucode>
-
-public procedure sound(frequency f)
--- turn on speaker at frequency f
--- turn off speaker if f is 0
-	machine_proc(M_SOUND, f)
 end procedure
 
 --****

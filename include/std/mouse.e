@@ -89,13 +89,10 @@ constant M_GET_MOUSE = 14,
 --
 -- In //Linux//, LEFT_UP, RIGHT_UP and MIDDLE_UP are not distinguishable from one another.
 --
--- You can use ##get_mouse##() in most text and pixel-graphics modes.
---
 -- The first call that you make to ##get_mouse##() will turn on a mouse pointer, or a highlighted character.
 --
 -- The x,y coordinate returned could be that of the very tip of the mouse pointer or might refer to
--- the pixel pointed-to by the mouse pointer. Test this if you are trying to read the pixel color
--- using [[:get_pixel]](). You may have to read x-1,y-1 instead.
+-- the pixel pointed-to by the mouse pointer.
 --
 -- Example 1:
 --   a return value of:

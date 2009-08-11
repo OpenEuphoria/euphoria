@@ -311,11 +311,8 @@ end type
 -- Description:
 -- Clear the screen using the current background color (may be set by [[:bk_color]]() ).
 --
--- Comments:
--- This works in all text and pixel-graphics modes.
---
 -- See Also:
--- [[:bk_color]], [[:graphics_mode]]
+-- [[:bk_color]]
 --
 
 --**
@@ -416,7 +413,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
---   [[:save_text_image]], [[:display_image]], [[:put_screen_char]]
+--   [[:save_text_image]], [[:put_screen_char]]
 --
 
 public procedure display_text_image(text_point xy, sequence text)
@@ -476,7 +473,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
---   [[:display_text_image]], [[:save_image]], [[:set_active_page]], [[:get_screen_char]]
+--   [[:display_text_image]], [[:get_screen_char]]
 
 public function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc

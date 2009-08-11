@@ -29,7 +29,7 @@ end ifdef
 -- 3. If necessary, call register_block(address, length) to add additional
 --    "external" blocks of memory to the safe_address_list. These are blocks 
 --    of memory that are safe to read/write but which you did not acquire 
---    through Euphoria's allocate() or allocate_low(). Call 
+--    through Euphoria's allocate(). Call 
 --    unregister_block(address) when you want to prevent further access to
 --    an external block.
 --
@@ -51,7 +51,7 @@ end ifdef
 -- routines: 
 --     poke, peek, poke4, peek4s, peek4u, call, mem_copy, and mem_set
 -- and it provides alternate versions of:
---     allocate, allocate_low, free, free_low
+--     allocate, free
 --
 -- Your program will only be allowed to read/write areas of memory
 -- that it allocated (and hasn't freed), as well as areas in low memory
@@ -65,7 +65,7 @@ end ifdef
 -- Comments:
 --
 -- If this integer is 1, (the default), check all blocks for edge corruption after each
--- [[:call]](), [[:dos_interrupt]](), [[:c_proc]]() or [[:c_func]]().
+-- [[:call]](), [[:c_proc]]() or [[:c_func]]().
 -- To save time, your program can turn off this checking by setting check_calls to 0.
 
 public integer check_calls = 1

@@ -241,10 +241,6 @@ procedure OpenCFiles()
 
 	emit_c_output = TRUE
 
-	if TDOS and sequence(dj_path) then
-		c_puts("#include <go32.h>\n")
-	end if
-
 	c_puts("#include \"")
 	c_puts("include" & SLASH & "euphoria.h\"\n")
 
@@ -270,36 +266,17 @@ procedure InitBackEnd(integer c)
 	end if
 
 	if compiler_type = COMPILER_UNKNOWN then
-		if TWINDOWS or TDOS then
+		if TWINDOWS then
 			compiler_type = COMPILER_WATCOM
 		elsif TUNIX then
 			compiler_type = COMPILER_GCC
 		end if
 	end if
 
-	if TDOS and compiler_type = COMPILER_GCC then
-		compiler_type = COMPILER_DJGPP
-	end if
-
 	switch compiler_type do
 	  	case COMPILER_GCC then
 			-- Nothing special we have to do for gcc
 			break -- to avoid empty block warning
-
-		case COMPILER_DJGPP then
-			if length(compiler_dir) then
-				dj_path = compiler_dir
-			else
-				dj_path = getenv("DJGPP")
-			end if
-
-			if atom(dj_path) then
-				CompileErr(60)
-			end if
-
-			if not TDOS then
-				CompileErr(58 )
-			end if
 
 		case COMPILER_WATCOM then
 			if length(compiler_dir) then
@@ -326,11 +303,7 @@ procedure InitBackEnd(integer c)
 
 	end switch
 
-	if dll_option and TDOS then
-		CompileErr(46)
-	end if
-
-	if fastfp and not TDOS then
+	if fastfp then
 		CompileErr(93)
 	end if
 end procedure

@@ -418,7 +418,7 @@ end type
 -- </eucode>
 --
 -- See Also: 
--- [[:date]], [[:tick_rate]], [[:now]]
+-- [[:date]], [[:now]]
  
 --****
 -- Signature:

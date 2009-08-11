@@ -5719,32 +5719,31 @@ procedure opGETC()
 	end if
 
 	c_stmt0("}\n")
-	if not TDOS then
-		c_stmt0("if (last_r_file_ptr == xstdin) {\n")
-		if TWINDOWS then
-			c_stmt0("show_console();\n")
-		end if
-		c_stmt0("if (in_from_keyb) {\n")
-		if TUNIX then
-			if EGPM then
-				c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
-			else
-				-- c_stmt("@ = getch(1);\n", Code[pc+2])   -- echo the character
-				c_stmt("@ = getc(xstdin);\n", Code[pc+2])   -- echo the character
-			end if
-		else
-			c_stmt("@ = wingetch();\n", Code[pc+2])
-		end if
-		c_stmt0("}\n")
-		c_stmt0("else\n")
-
-		-- don't bother with mygetc() - it might not be portable
-		-- to other DOS C compilers
-		c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
-
-		c_stmt0("}\n")
-		c_stmt0("else\n")
+	c_stmt0("if (last_r_file_ptr == xstdin) {\n")
+	if TWINDOWS then
+		c_stmt0("show_console();\n")
 	end if
+	c_stmt0("if (in_from_keyb) {\n")
+	if TUNIX then
+		if EGPM then
+			c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
+		else
+			-- c_stmt("@ = getch(1);\n", Code[pc+2])   -- echo the character
+			c_stmt("@ = getc(xstdin);\n", Code[pc+2])   -- echo the character
+		end if
+	else
+		c_stmt("@ = wingetch();\n", Code[pc+2])
+	end if
+	c_stmt0("}\n")
+	c_stmt0("else\n")
+
+	-- don't bother with mygetc() - it might not be portable
+	-- to other DOS C compilers
+	c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
+
+	c_stmt0("}\n")
+	c_stmt0("else\n")
+
 	c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
 
 	CDeRefStr("_0")
@@ -5767,7 +5766,7 @@ end procedure
 
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1
-	if not TDOS and TWINDOWS then
+	if TWINDOWS then
 		c_stmt0("show_console();\n")
 	end if
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
@@ -5784,7 +5783,7 @@ procedure opCLEAR_SCREEN()
 end procedure
 
 procedure opPUTS()
-	c_stmt("EPuts(@, @);\n", {Code[pc+1], Code[pc+2]})
+	c_stmt("EPuts(@, @); // DJP \n", {Code[pc+1], Code[pc+2]})
 	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
@@ -6066,9 +6065,7 @@ procedure opC_FUNC()
 end procedure
 
 procedure opC_PROC()
-	if not TDOS then
-		c_stmt("call_c(0, @, @);\n", {Code[pc+1], Code[pc+2]})
-	end if
+	c_stmt("call_c(0, @, @);\n", {Code[pc+1], Code[pc+2]})
 	-- [3] not used
 	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
 	NewBB(1, E_ALL_EFFECT, 0) -- Windows call-back to Euphoria routine could occur
@@ -6955,11 +6952,6 @@ procedure BackEnd(atom ignore)
 
 	version()
 
-	if TDOS then
-		if sequence(dj_path) then
-			c_puts("#include <go32.h>\n")
-		end if
-	end if
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
@@ -6980,10 +6972,6 @@ procedure BackEnd(atom ignore)
 		else
 		c_puts("unsigned __stdcall GetProcessHeap(void);\n")
 	end if
-	end if
-
-	if TDOS and sequence(dj_path) then
-		c_hputs("extern __Go32_Info_Block _go32_info_block;\n")
 	end if
 
 	c_puts("unsigned long *peek4_addr;\n")
@@ -7015,9 +7003,6 @@ procedure BackEnd(atom ignore)
 			total_stack_size = (248 + 8) * 1024
 		end if
 	end if
-	if TDOS and sequence(dj_path) then
-		c_printf("unsigned _stklen=%d;\n", total_stack_size)
-	end if
 	c_printf("int total_stack_size = %d;\n", total_stack_size)
 	c_hputs("extern int total_stack_size;\n")
 
@@ -7026,27 +7011,22 @@ procedure BackEnd(atom ignore)
 	end if
 
 	if TWINDOWS then
-	if dll_option then
-		if sequence(wat_path) then
-			c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
-			c_stmt0("\n")
+		if dll_option then
+			if sequence(wat_path) then
+				c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
+				c_stmt0("\n")
+			end if
+			c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
+		else
+			c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
 		end if
-		c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
-	else
-		c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
-	end if
 
-	elsif TUNIX then
-	if dll_option then
-		c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
-	else
-		c_stmt0("\nvoid main(int argc, char *argv[])\n")
-	end if
-
-	else
-	-- TDOS
-	c_stmt0("\nvoid main(int argc, char *argv[])\n")
-
+	else -- TUNIX
+		if dll_option then
+			c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
+		else
+			c_stmt0("\nvoid main(int argc, char *argv[])\n")
+		end if
 	end if
 	c_stmt0("{\n")
 
@@ -7055,21 +7035,20 @@ procedure BackEnd(atom ignore)
 	main_temps()
 
 	if TWINDOWS then
-	if dll_option then
-		c_stmt0("\nArgc = 0;\n")
-		c_stmt0("default_heap = GetProcessHeap();\n")
-		--c_stmt0("Backlink = bl;\n")
-	else
-		c_stmt0("int argc;\n")
-		c_stmt0("char **argv;\n\n")
-		c_stmt0("default_heap = GetProcessHeap();\n")
-		c_stmt0("argc = 1;\n")
-		c_stmt0("Argc = 1;\n")
-		c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
-		c_stmt0("winInstance = hInstance;\n")
-	end if
-
-	elsif TUNIX then
+		if dll_option then
+			c_stmt0("\nArgc = 0;\n")
+			c_stmt0("default_heap = GetProcessHeap();\n")
+			--c_stmt0("Backlink = bl;\n")
+		else
+			c_stmt0("int argc;\n")
+			c_stmt0("char **argv;\n\n")
+			c_stmt0("default_heap = GetProcessHeap();\n")
+			c_stmt0("argc = 1;\n")
+			c_stmt0("Argc = 1;\n")
+			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
+			c_stmt0("winInstance = hInstance;\n")
+		end if
+	else --TUNIX 
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 		else
@@ -7077,10 +7056,6 @@ procedure BackEnd(atom ignore)
 			c_stmt0("Argv = argv;\n")
 		end if
 
-	else
-		-- TDOS
-		c_stmt0("Argc = argc;\n")
-		c_stmt0("Argv = argv;\n")
 	end if
 
 	if not dll_option then

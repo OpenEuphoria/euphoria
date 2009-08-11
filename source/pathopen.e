@@ -311,9 +311,6 @@ export function load_euphoria_config( sequence file )
 				case "unix" then
 					needed = TUNIX
 			
-				case "dos32" then
-					needed = TDOS
-			
 				case "translate" then
 					needed = TRANSLATE
 					
@@ -323,9 +320,6 @@ export function load_euphoria_config( sequence file )
 				case "translate:unix", "unix:translate" then
 					needed = TRANSLATE and TUNIX
 					
-				case "translate:dos32", "dos32:translate" then
-					needed = TRANSLATE and TDOS
-			
 				case "interpret" then
 					needed = INTERPRET
 					
@@ -335,9 +329,6 @@ export function load_euphoria_config( sequence file )
 				case "interpret:unix", "unix:interpret" then
 					needed = INTERPRET and TUNIX
 					
-				case "interpret:dos32", "dos32:interpret" then
-					needed = INTERPRET and TDOS
-			
 				case "bind" then
 					needed = BIND
 					
@@ -347,10 +338,6 @@ export function load_euphoria_config( sequence file )
 				case "bind:unix", "unix:bind" then
 					needed = BIND and TUNIX
 			
-				case "bind:dos32", "dos32:bind" then
-					needed = BIND and TDOS
-		
-					
 			end switch
 			
 			if needed then

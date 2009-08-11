@@ -107,7 +107,7 @@ end type
 -- </eucode>
 --                  
 -- See Also:
---     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
+--     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
 
 public function allocate(positive_int n, integer cleanup = 0)
 	atom addr
@@ -149,8 +149,6 @@ end function
 --   running out of memory or getting into excessive virtual memory swapping to disk. 
 -- * Do not reference a block of memory that has been freed. 
 -- * When your program terminates, all allocated memory will be returned to the system.
--- * Do not use ##free()## to deallocate memory that was allocated using ##[[:allocate_low]]()##. 
---   Use ##[[:free_low]]()## for this purpose.
 -- * ##addr## must have been allocated previously using [[:allocate]](). You
 --   cannot use it to relinquish part of a block. Instead, you have to allocate
 --   a block of the new size, copy useful contents from old block there and
@@ -163,7 +161,7 @@ end function
 --   ##demo/callmach.ex##
 --
 -- See Also:
---     [[:allocate]], [[:free_low]], [[:free_code]]
+--     [[:allocate]], [[:free_code]]
 
 public procedure free(object addr)
 
@@ -271,8 +269,8 @@ FREE_RID = routine_id("free")
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2u]]
+--  [[:poke]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]],
+--  [[:peek2u]]
 --
 
 --****
@@ -326,8 +324,8 @@ FREE_RID = routine_id("free")
 -- 
 -- See Also:
 --
---  [[:poke]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2s]], [[:peek]]
+--  [[:poke]], [[:peek4s]], [[:allocate]], [[:free]], 
+--  [[:peek2s]], [[:peek]]
 --
 
 --****
@@ -383,8 +381,8 @@ FREE_RID = routine_id("free")
 -- 
 -- See Also:
 --
---  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2u]]
+--  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]]
+--  [[:peek2u]]
 --
 
 --****
@@ -439,8 +437,8 @@ FREE_RID = routine_id("free")
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek4u]]
+--  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]]
+--  [[:peek4u]]
 --
 
 --****
@@ -495,8 +493,8 @@ FREE_RID = routine_id("free")
 -- </eucode>
 -- 
 -- See Also: 
--- [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2s]]
+-- [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]],
+-- [[:peek2s]]
 --
 
 --****
@@ -553,8 +551,7 @@ FREE_RID = routine_id("free")
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2u]]
+--  [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]]
 --
 
 --****
@@ -852,9 +849,9 @@ public integer check_calls = 1
 -- This routine is only meant to be used for debugging purposes. safe.e
 -- tracks the blocks of memory that your program is allowed to 
 -- [[:peek]](), [[:poke]](), [[:mem_copy]]() etc. These are normally just the
--- blocks that you have allocated using Euphoria's [[:allocate]]() or
--- [[:allocate_low]]() routines, and which you have not yet freed using
--- Euphoria's [[:free]]() or [[:free_low]](). In some cases, you may acquire
+-- blocks that you have allocated using Euphoria's [[:allocate]]() 
+-- routine, and which you have not yet freed using
+-- Euphoria's [[:free]](). In some cases, you may acquire
 -- additional, external, blocks of memory, perhaps as a result of calling a
 -- C routine. 
 --
@@ -917,7 +914,7 @@ end procedure
 -- Comments:
 --
 -- safe.e maintains a list of acquired memory blocks. Those gained through
--- allocate() or allocate_low() are automatically included. Any other block,
+-- allocate() are automatically included. Any other block,
 -- for debugging purposes, must be registered by [[:register_block]]()
 -- and unregistered by [[:unregister_block]]().
 --

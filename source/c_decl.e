@@ -1065,9 +1065,6 @@ export procedure new_c_file(sequence name)
 	cfile_count += 1
 	version()
 
-	if TDOS and sequence(dj_path) then
-		c_puts("#include <go32.h>\n")
-	end if
 	c_puts("#include \"include/euphoria.h\"\n")
 	
 	c_puts("#include \"main-.h\"\n\n")

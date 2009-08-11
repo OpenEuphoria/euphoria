@@ -159,8 +159,6 @@ end function
 -- a color, and the second, a list of point rows. Each pixel in a row is represented by its color index.
 --
 -- The file should be in the bitmap format. The most common variations of the format are supported. 
--- You can pass the palette to [[:all_palette]]() (after dividing it by 4 to scale it). 
--- The image can be passed to [[:display_image]]().
 --
 -- Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is not in a good format, an error
 -- code (atom) is returned instead
@@ -185,7 +183,7 @@ end function
 -- double backslash needed to get single backslash in a string
 --
 -- See Also: 
---   [[:palette]], [[:all_palette]], [[:display_image]], [[:save_bitmap]]
+--   [[:save_bitmap]]
 
 public function read_bitmap(sequence file_name)
 	atom Size 
@@ -351,20 +349,6 @@ procedure putOneRowImage(sequence x, integer numPixelsPerByte, integer shift)
 	end for
 end procedure
 
-procedure putImage()
--- Write image data packed according to the bitCount information, in the order
--- last row ... first row. Data for each row is padded to a 4-byte boundary.
-	sequence x
-	integer  numPixelsPerByte, shift
-	
-	numPixelsPerByte = 8 / bitCount
-	shift = power(2, bitCount)
-	for i = endYPixel to startYPixel by -1 do
-		x = get_pixel({startXPixel, i, numXPixels})
-		putOneRowImage(x, numPixelsPerByte, shift)
-	end for
-end procedure
-
 procedure putColorTable(integer numColors, sequence pal)
 -- Write color table information to the .BMP file. 
 -- palette data is given as a sequence {{r,g,b},..,{r,g,b}}, where each
@@ -425,22 +409,18 @@ end procedure
 --                          -- or invalid argument
 -- </eucode>
 --
--- If you use ##get_all_palette##() to get the palette before calling this function, you must 
--- multiply the returned intensity values by 4 before calling [[:save_bitmap]](). You might use
--- [[:save_image]]() to get the 2-d image.
---
+-- 
 -- ##save_bitmap##() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with 
 -- ##read_bitmap##(). Windows Paintbrush and some other tools do not support 4-color bitmaps.
 --
 -- Example 1:
 -- <eucode>
--- paletteData = get_all_palette() * 4
 -- code = save_bitmap({paletteData, imageData},
 --                    "c:\\example\\a1.bmp")
 -- </eucode>
 --
 -- See Also:
---   [[:read_bitmap]], [[:save_image]], [[:save_screen]], [[:get_all_palette]]
+--   [[:read_bitmap]]
 
 public function save_bitmap(two_seq palette_n_image, sequence file_name)
 	sequence color, image
