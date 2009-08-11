@@ -105,7 +105,7 @@ ifeq "$(EMINGW)" "1"
 	EECU=euc.exe
 	EEXU=eui.exe
 	EEXUW=euiw.exe
-	EECUA=ecw.a
+	EECUA=eu.a
 	ifeq "$(MANAGED_MEM)" "1"
 		MEM_FLAGS=
 	else
