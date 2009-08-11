@@ -11,7 +11,7 @@ include std/get.e
 include std/text.e
 include std/types.e
 include std/pretty.e
-include std/graphcst.e
+public include std/graphcst.e
 
 -- machine() commands
 constant

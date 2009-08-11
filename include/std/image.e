@@ -2,7 +2,7 @@
 --
 namespace image
 
-include std/graphcst.e
+public include std/graphcst.e
 include std/convert.e
 include std/machine.e
 
