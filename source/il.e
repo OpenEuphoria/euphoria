@@ -441,6 +441,7 @@ procedure OutputIL()
 		end for
 				
 		be = -1
+		backend_name = "eub.exe"
 		if w32 then
 			backend_name = "eubw.exe"
 		else
@@ -448,8 +449,6 @@ procedure OutputIL()
 				backend_name = "eub"
 				-- try to get the installed backend, if it exists:
 				be = open( "/usr/bin/eub", "r" )
-			elsedef
-				backend_name = "eubd.exe"
 			end ifdef
 		end if
 		sequence ondisk_name = locate_file( backend_name, 
@@ -560,7 +559,7 @@ procedure OutputIL()
 		end ifdef
 		
 		if shroud_only then
-			filename = "backend"
+			sequence filename = "backend"
 			ifdef UNIX then
 				filename &= "u"
 			elsedef
