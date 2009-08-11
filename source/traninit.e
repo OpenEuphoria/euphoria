@@ -52,7 +52,6 @@ set_extract_options( routine_id("extract_options") )
 sequence trans_opt_def = {
 	{ "silent",        0, GetMsgText(177,0), { NO_CASE } },
 	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
-	{ "djg",           0, GetMsgText(179,0), { NO_CASE } },
 	{ "gcc",           0, GetMsgText(180,0), { NO_CASE } },
 	{ "com",           0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
 	{ "con",           0, GetMsgText(182,0), { NO_CASE } },
@@ -109,9 +108,6 @@ export procedure transoptions()
 
 			case "wat" then
 				compiler_type = COMPILER_WATCOM
-
-			case "djg" then
-				compiler_type = COMPILER_DJGPP
 
 			case "gcc" then
 				compiler_type = COMPILER_GCC

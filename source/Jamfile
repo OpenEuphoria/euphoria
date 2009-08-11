@@ -15,10 +15,6 @@ else if $(JAM_TOOLSET) = VISUALC
 {
     CCFLAGS = -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DEMSVC ;
 }
-else if $(JAM_TOOLSET) = DJGPP
-{
-    CCFLAGS = -w -ffast-math -O2 -Os ;
-}
 else if $(JAM_TOOLSET) = MINGW
 {
     CCFLAGS = -w -ffast-math -O2 -Os -DEMINGW -mno-cygwin -mwindows ;

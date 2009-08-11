@@ -65,7 +65,6 @@ export integer build_system_type = BUILD_DIRECT
 export enum
 	COMPILER_UNKNOWN = 0,
 	COMPILER_GCC,
-	COMPILER_DJGPP,
 	COMPILER_WATCOM
 
 --**
@@ -98,7 +97,7 @@ function setup_build()
 		exe_ext = "", l_flags_begin = ""
 
 	if length(user_library) = 0 then
-		if TUNIX or compiler_type = COMPILER_GCC or compiler_type = COMPILER_DJGPP then
+		if TUNIX or compiler_type = COMPILER_GCC then
 			ifdef UNIX then
 				sequence eudir = get_eudir()
 				if match( "/share/euphoria", eudir ) then
@@ -182,21 +181,6 @@ function setup_build()
 				l_flags &= " -lws2_32"
 			end if
 
-		case COMPILER_DJGPP then
-			c_exe = "gcc"
-			l_exe = "gcc"
-			obj_ext = "o"
-
-			if debug_option then
-				c_flags = " -g3"
-			else
-				c_flags = " -fomit-frame-pointer -g0"
-			end if
-
-			c_flags &= " -c -w -fsigned-char -O2 -ffast-math"
-
-			l_flags = user_library
-
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
 			l_exe = "wlink"
@@ -229,6 +213,20 @@ function setup_build()
 		case else
 			CompileErr(43)
 	end switch
+	
+	if sequence(getenv("EUC_CFLAGS")) then
+		c_flags = getenv("EUC_CFLAGS")
+	end if
+	if sequence(getenv("EUC_LFLAGS")) then
+		l_flags = getenv("EUC_LFLAGS")
+		l_flags_begin = ""
+	end if
+	if sequence(getenv("EUC_COMPILER")) then
+		c_exe = getenv("EUC_COMPILER")
+	end if
+	if sequence(getenv("EUC_LINKER")) then
+		l_exe = getenv("EUC_LINKER")
+	end if
 
 	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin }
 end function
@@ -453,9 +451,6 @@ procedure write_emake()
 	end if
 
 	switch compiler_type do
-		case COMPILER_DJGPP then
-			write_objlink_file()
-			puts(fh, "echo Compiling with DJGPP" & HOSTNL)
 		case COMPILER_GCC then
 			puts(fh, "echo Compiling with GCC" & HOSTNL)
 		case COMPILER_WATCOM then
@@ -478,9 +473,6 @@ procedure write_emake()
 	switch compiler_type do
 		case COMPILER_WATCOM then
 			printf(fh, " @%s.lnk" & HOSTNL, { file0 })
-
-		case COMPILER_DJGPP then
-			printf(fh, " -o%s @%s.lnk" & HOSTNL, { exe_name, file0 })
 
 		case else
 			printf(fh, " -o %s ", { exe_name })
@@ -538,13 +530,6 @@ procedure build_direct()
 	ensure_exename(settings[SETUP_EXE_EXT])
 
 	switch compiler_type do
-		case COMPILER_DJGPP then
-			write_objlink_file()
-
-			if not silent then
-				ShowMsg(1, 176, {"DJGPP"})
-			end if
-
 		case COMPILER_GCC then
 			if not silent then
 				ShowMsg(1, 176, {"GCC"})
@@ -588,7 +573,7 @@ procedure build_direct()
 	end if
 
 	switch compiler_type do
-		case COMPILER_WATCOM, COMPILER_DJGPP then
+		case COMPILER_WATCOM then
 			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
 
 		case COMPILER_GCC then
