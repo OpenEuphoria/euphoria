@@ -2509,7 +2509,7 @@ A **while statement** tests a condition to see if it is non-zero
 (true), and while it is true a loop is executed.
 
 Syntax Format:
->##**while** //expr// //[//**label** //"name"// //]// //[//**with entry**//]// **do**##
+>##**while** //expr// //[//**with entry**//]// //[//**label** //"name"// //]// **do**##
 
 Example 1
 <eucode>
@@ -2556,7 +2556,7 @@ A **loop until** statement tests a condition to see if it is
 non-zero (true), and until it is true a loop is executed.
 
 Syntax Format:
->##**loop** //[//**label** //"name"// //]// //[//**with entry**//]// **do**##
+>##**loop** //[//**with entry**//]// //[//**label** //"name"// //]// **do**##
 >>##//statements//##
 >##**until** //expr//##
 
