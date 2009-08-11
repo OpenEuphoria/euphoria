@@ -1,4 +1,6 @@
+--
 -- (c) Copyright - See License.txt
+-- 
 --****
 -- == traninit.e: Initialize the translator
 --
@@ -13,9 +15,9 @@
 -- variables and use the selected platform to determine which compiler must
 -- be used.
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/cmdline.e
@@ -26,8 +28,6 @@ include std/map.e as m
 include std/os.e
 include std/sort.e
 include std/text.e
-
-
 
 -- Translator initialization
 include global.e
