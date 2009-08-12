@@ -32,6 +32,7 @@
 --   not even "aware" that there can be multiple-windows.
 
 without type_check -- makes it a bit faster
+without warning
 
 include std/graphics.e
 include std/graphcst.e
@@ -520,7 +521,6 @@ procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 	end if
 end procedure
 
-without warning
 procedure DisplayWindow(positive_int bline, window_line sline)
 -- print a series of buffer lines, starting at sline on screen
 -- and continue until the end of screen, or end of buffer
@@ -546,7 +546,6 @@ procedure DisplayWindow(positive_int bline, window_line sline)
 		ClearLine(s)
 	end for
 end procedure
-with warning
 
 procedure set_position(natural window_line, positive_int column)
 -- Move cursor to a logical screen position within the window.
@@ -573,7 +572,7 @@ procedure set_position(natural window_line, positive_int column)
 	end if
 end procedure
 
-without warning
+
 function clean(sequence line)
 -- replace control characters with a graphics character
 -- Linux: replace CR-LF with LF (for now)
@@ -600,7 +599,7 @@ function clean(sequence line)
 	end for
 	return line
 end function
-with warning
+
 
 function add_line(file_number file_no)
 -- add a new line to the buffer
@@ -1370,7 +1369,7 @@ procedure new_screen_length()
 	if nlines then
 		screen_length = text_rows(nlines)
 		if screen_length != nlines then
-			sound(500)
+			--sound(500)
 		end if
 		w = window_number
 		save_state()
@@ -1378,7 +1377,7 @@ procedure new_screen_length()
 		refresh_other_windows(w)
 		restore_state(w)
 		if screen_length != nlines then
-			sound(0)
+			--sound(0)
 		end if
 	end if
 end procedure
@@ -1818,13 +1817,13 @@ procedure get_escape(boolean help)
 			end ifdef
 		end if
 		ifdef UNIX then
-			shell("exu \"" & file_name & "\"")
+			shell("eui \"" & file_name & "\"")
 		elsedef
 			if match(".exw", lower(file_name)) or 
 				  match(".ew",  lower(file_name)) then
-				shell("exw \"" & file_name & "\"")
+				shell("euiw \"" & file_name & "\"")
 			else
-				shell("ex \"" & file_name & "\"")
+				shell("eui \"" & file_name & "\"")
 			end if
 		end ifdef
 		goto_line(0, b_col)
@@ -1859,31 +1858,21 @@ procedure get_escape(boolean help)
 		self_command = getenv("EUDIR")
 		if atom(self_command) then
 			-- Euphoria hasn't been installed yet 
-			set_top_line("EUDIR not set. See install.doc")
+			set_top_line("EUDIR not set. See installation documentation.")
 		else    
-			if HOT_KEYS then
-				self_command = {ESCAPE, 'c', ESCAPE, 'n'} & self_command 
-			else
-				self_command = {ESCAPE, 'c', '\n', ESCAPE, 'n', '\n'} & self_command 
-			end if
-			self_command &= SLASH & "doc"
+			self_command &= SLASH & "docs"
 			if help then
 				set_top_line(
 				"That key does nothing - do you want to view the help text? ")
 				answer = key_gets("yn", {}) & ' '
-				if answer[1] != 'n' and answer[1] != 'N' then
-					answer = "e"
+				if answer[1] = 'n' or answer[1] = 'N' then
+					set_top_line("")
+				else
+					answer = "yes"
 				end if
-			else
-				set_top_line("ed.doc, refman.doc, or library.doc? (e, r or l): ")
-				answer = key_gets("erl", {}) & ' '
 			end if
-			if answer[1] = 'r' then
-				add_queue(self_command & SLASH & "refman.doc" & CR)
-			elsif answer[1] = 'e' then
-				add_queue(self_command & SLASH & "ed.doc" & CR)
-			elsif answer[1] = 'l' then
-				add_queue(self_command & SLASH & "library.doc" & CR)
+			if answer[1] = 'y' then
+				system(self_command & SLASH & "html" & SLASH & "index.html")
 			else
 				normal_video()
 			end if
@@ -2019,7 +2008,7 @@ procedure try_auto_complete(char key)
 				 leading_white &= '\t'
 			
 			elsif wordnum > 0 then
-				sound(1000)
+				--sound(1000)
 				-- expandable word (only word on line)
 
 				begin = expand_text[wordnum] & CR & leading_white
@@ -2036,8 +2025,8 @@ procedure try_auto_complete(char key)
 								  leading_white &
 								  "end " & expand_word[wordnum])
 				end if
-				delay(0.07) -- or beep is too short
-				sound(0)
+				--delay(0.07) -- or beep is too short
+				--sound(0)
 			end if
 		end if
 	end if
@@ -2440,8 +2429,6 @@ procedure ed_main()
 	config = video_config()
 
 	if config[VC_XPIXELS] > 0 then
-		if graphics_mode(3) then
-		end if
 		config = video_config()
 	end if
 
@@ -2466,13 +2453,7 @@ procedure ed_main()
 	if screen_length != FINAL_LINES then
 		screen_length = text_rows(FINAL_LINES)
 	end if
-	cursor(UNDERLINE_CURSOR)
-	bk_color(BLACK)
-	text_color(WHITE)
-	position(screen_length, 1)
-	puts(SCREEN, BLANK_LINE)
-	position(screen_length, 1)
-	puts(SCREEN, "\n")
+	clear_screen()
 	ifdef UNIX then
 		free_console()
 	end ifdef
