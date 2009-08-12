@@ -3,14 +3,14 @@
 --****
 -- == Pseudo Memory
 --
--- <<LEVELTOC depth=2>>
 --
 -- One use is to emulate PBR, such as Euphoria's map and stack types.
 --
+-- <<LEVELTOC depth=2>>
 
 namespace eumem
 
---****
+--**
 -- The (pseudo) RAM heap space. Use [[:malloc]] to gain ownership to a heap location
 -- and [[:free]] to release it back to the system.
 export sequence ram_space = {}
@@ -18,7 +18,7 @@ export sequence ram_space = {}
 integer ram_free_list = 0
 integer free_rid
 
---****
+--**
 -- Allocate a block of (pseudo) memory
 --
 -- Parameters:
@@ -68,7 +68,7 @@ export function malloc(object mem_struct_p = 1, integer cleanup_p = 1)
 	end if
 end function
 
---****
+--**
 -- Deallocate a block of (pseudo) memory
 --
 -- Parameters:
@@ -97,7 +97,7 @@ export procedure free(atom mem_p)
 end procedure
 free_rid = routine_id("free")
 
---****
+--**
 -- Validates a block of (pseudo) memory
 --
 -- Parameters:
