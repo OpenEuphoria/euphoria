@@ -131,11 +131,12 @@ public function maybe_preprocess(sequence fname)
 	else
 		if equal(fileext(cmd), "ex") then
 			cmd = "eui " & cmd
-			cmd &= sprintf(" -i %s -o %s %s", { fname, post_fname, pp[PP_PARAMS] })
+		end if
+
+		cmd &= sprintf(" -i %s -o %s %s", { fname, post_fname, pp[PP_PARAMS] })
 			
-			if system_exec(cmd, 2) then
-				CompileErr(sprintf("Preprocessor command failed: %s\n", { cmd }))
-			end if
+		if system_exec(cmd, 2) then
+			CompileErr(sprintf("Preprocessor command failed: %s\n", { cmd }))
 		end if
 	end if
 	
