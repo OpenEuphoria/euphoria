@@ -34,7 +34,7 @@ REM -- and was automatically removed for us.
 REM --
 
 echo Performing a SVN checkout...
-svn co -q http://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/%1 cleanbranch
+svn co -q http://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tags/%1 cleanbranch
 
 GOTO DoBuild
 
