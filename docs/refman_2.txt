@@ -154,7 +154,9 @@ entered in one of two ways ...
 * using extended string notation e.g.
 
 <eucode>
-#'ABCDEFG'
+`ABCDEFG`
+ or
+"""ABCDEFG"""
 </eucode>
 
 The rules for double-quote strings are...
@@ -185,8 +187,7 @@ Bill said
 
 
 The rules for extended strings are...
-# they begin with a # character, followed immediately by one of ##**#'`~~$^/~\|**##
-# they end with the next occurrence of the character that followed the initial **#** character
+# enclose with triple double-quotes  {{{"""..."""}}} or backtick. {{{`...`}}}
 # If the resulting string begins with a new-line, the initial new-line is removed
 and any trailing new-line is also removed.
 # A special form is used to automatically trim off leading whitespace from the
@@ -200,10 +201,10 @@ left margin. Also, the underscores do not form part of the extended string text.
 e.g.
 
 <eucode>
-##
+`
 Bill said
     "This is a back-slash \ character".
-#
+`
 </eucode>
 Which, when displayed should look like ...
 {{{
@@ -213,10 +214,10 @@ Bill said
 
 
 <eucode>
-##
+`
 _____Bill said
          "This is a back-slash \ character".
-#
+`
 </eucode>
 Which, when displayed should look like ...
 {{{
@@ -225,8 +226,8 @@ Bill said
 }}}
 
 Extended string literals are useful when the string contains new-lines, tabs,
-double-quotes or back-slash characters because they do not have to be entered
-in the special manner.
+or back-slash characters because they do not have to be entered
+in the special manner. The backtick form can be used with double-quotes.
 
 Character strings may be manipulated and operated upon just like any other
 sequences. For example the above string is entirely equivalent to the

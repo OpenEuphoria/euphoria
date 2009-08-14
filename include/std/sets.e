@@ -908,7 +908,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[::remove_from,]] [[:is_subset]], [[:delta]]
+-- [[:remove_from]], [[:is_subset]], [[:delta]]
 --
 public function difference(set base,set removed)
     integer k1,k2,k,c,ls1,ls2,k0
