@@ -31,7 +31,7 @@ crowd of conventional languages.
 
 === Euphoria is unique
 
-What makes Euphoria unique is a design that uses just two basic data-types {{[--}}}
+What makes Euphoria unique is a design that uses just two basic data-types {{{--}}}
  //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and //integer//.
 
 * An **atom** is single numeric value (either an integer or floating point)
