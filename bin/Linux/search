@@ -1,1 +1,1 @@
-eui search.ex $1
+eui search.ex $@

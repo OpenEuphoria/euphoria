@@ -1,2 +1,2 @@
-eui eprint.ex $1
+eui eprint.ex $@
 
