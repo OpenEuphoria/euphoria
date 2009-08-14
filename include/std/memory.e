@@ -559,7 +559,7 @@ FREE_RID = routine_id("free")
 -- <built-in> procedure peek_string(atom addr)
 --
 -- Description:
--- Read an ASCIZ string in RAM, starting from a supplied address.
+-- Read an ASCII string in RAM, starting from a supplied address.
 --
 -- Parameters:
 --              # ##addr## : an atom, the address at which to start reading.
@@ -573,7 +573,7 @@ FREE_RID = routine_id("free")
 --
 -- Comments:
 --
--- An ASCIZ string is any sequence of bytes and ends with a 0 byte.
+-- An ASCII string is any sequence of bytes and ends with a 0 byte.
 -- If you ##peek_string##() at some place where there is no string, you will get a sequence of garbage.
 --
 -- See Also:

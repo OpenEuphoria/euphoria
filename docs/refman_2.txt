@@ -287,7 +287,7 @@ Identifiers are case-sensitive. This means that ##"Name"## is a different identi
 from ##"name"##, or ##"NAME"##, etc...
 
 Examples of valid identifiers...
-<eucode.
+<eucode>
 n
 color26
 ShellSort

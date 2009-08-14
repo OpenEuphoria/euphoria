@@ -225,7 +225,7 @@ routine name in define_c_proc() and define_c_func(). In the
 example above, you would have "+LoadIconA", instead of "LoadIconA".
 
 You can examine a ##dll## file by right-clicking on it, and choosing
-"~QuickView" (if it's on your system). You will see a list of all the C
+"QuickView" (if it's on your system). You will see a list of all the C
 routines that the ##dll## exports.
 
 To find out which **.**dll file contains a particular WIN32 C function,

@@ -369,7 +369,7 @@ that you want to edit. Color syntax highlighting is provided for ##.ex##,
 
 Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and
-the ##Insert/Delete/Home/End/~PageUp/~PageDown## keys are also active. Under
+the ##Insert/Delete/Home/End/PageUp/PageDown## keys are also active. Under
 //Linux/FreeBSD// some keys may not be available, and alternate keys are
 provided. See [[:Ed - Euphoria Editor]] for a complete description of
 the editing commands.
