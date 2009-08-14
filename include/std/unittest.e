@@ -493,3 +493,16 @@ for i = 3 to length(cmd) do
 		add_log({"file", filename})
 	end if
 end for
+
+ifdef not CRASH then
+
+include std/error.e
+
+function test_crash( object o )
+	test_fail( "unittesting crashed" )
+	test_report()
+	return 0
+end function
+crash_routine( routine_id( "test_crash" ) )
+
+end ifdef

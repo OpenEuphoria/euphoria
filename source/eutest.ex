@@ -423,14 +423,18 @@ function test_file( sequence filename, sequence fail_list )
 	integer status
 	void = delete_file("ex.err")
 	void = delete_file("cw.err")
-
+	
+	object control_error_file = open_error_file( filename )
+	sequence crash_option = ""
+	if match("t_c_", filename) = 1 or sequence(control_error_file) then
+		crash_option = " -D CRASH "
+	end if
+	
 	printf(1, "interpreting %s:\n", {filename})
-	sequence cmd = sprintf("%s %s -D UNITTEST -batch %s %s",
-		{ executable, interpreter_options, filename, test_options })
+	sequence cmd = sprintf("%s %s -D UNITTEST -batch %s%s %s",
+		{ executable, interpreter_options, crash_option, filename, test_options })
 
 	verbose_printf(1, "CMD '%s'\n", {cmd})
-
-	object control_error_file = open_error_file( filename )
 	
 	integer expected_status = 0
 	if match("t_c_", filename) = 1 or sequence(control_error_file) then
