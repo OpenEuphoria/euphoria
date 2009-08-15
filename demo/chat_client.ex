@@ -11,12 +11,12 @@ procedure lost_server()
 end procedure
 
 function get_nick()
-	puts(1, #/
+	puts(1, `
 ________1. You must first enter your nick name.
 	    2. When you want to say something, press the "s" key for speak.
 	    3. When you want to leave, press the "l" key for leave.
 
-        /)
+        `)
 	return trim(prompt_string("Enter your nickname please: "))
 end function
 

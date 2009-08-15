@@ -21,5 +21,5 @@ r = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 show_matches(re:find_all(r, str), str)
 printf(1, "\nConverting First Name Last Name to Last, First in:\n%s\n", { str })
 
-puts(1, re:find_replace(r, str, #/\2, \1/) & "\n")
+puts(1, re:find_replace(r, str, `\2, \1`) & "\n")
 
