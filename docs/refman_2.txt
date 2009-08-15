@@ -151,15 +151,19 @@ entered in one of two ways ...
 "ABCDEFG"
 </eucode>
 
-* using extended string notation e.g.
+* using raw string notation e.g.
 
 <eucode>
+-- Using back-quotes
 `ABCDEFG`
+</eucode>
  or
+<eucode>
+-- Using three double-quotes
 """ABCDEFG"""
 </eucode>
 
-The rules for double-quote strings are...
+**The rules for double-quote strings are...**
 # they begin and end with a double-quote character
 # they cannot contain a double-quote
 # they must be only on a single line
@@ -186,21 +190,23 @@ Bill said
 }}}
 
 
-The rules for extended strings are...
-# enclose with triple double-quotes  {{{"""..."""}}} or backtick. {{{`...`}}}
+**The rules for raw strings are...**
+# enclose with three double-quotes  {{{"""..."""}}} or back-quote. {{{`...`}}}
 # If the resulting string begins with a new-line, the initial new-line is removed
 and any trailing new-line is also removed.
-# A special form is used to automatically trim off leading whitespace from the
+# A special form is used to automatically remove leading whitespace from the
 source code text. You might code this form to align the source text for ease of
-reading. If the first line after the extended string start token begins
-with one or more underscore characters, it signifies the maximum number of
-whitespace characters that will be trimmed off each line of the extended string
-text. The number of underscores present is used as the measure of an assumed
-left margin. Also, the underscores do not form part of the extended string text.
+reading. If the first line after the raw string start token begins
+with one or more underscore characters, the number of consequtive underscores
+signifies the maximum number of whitespace characters that will be removed from
+each line of the raw string text. The underscores represent an assumed left
+margin width. **Note**, these leading underscores do not form part of the raw
+string text.
 
 e.g.
 
 <eucode>
+-- No leading underscores and no leading whitespace
 `
 Bill said
     "This is a back-slash \ character".
@@ -212,8 +218,20 @@ Bill said
     "This is a back-slash \ character".
 }}}
 
-
 <eucode>
+-- No leading underscores and but leading whitespace
+`
+   Bill said
+      "This is a back-slash \ character".
+`
+</eucode>
+Which, when displayed should look like ...
+{{{
+   Bill said
+      "This is a back-slash \ character".
+}}}
+<eucode>
+-- Leading underscores and leading whitespace
 `
 _____Bill said
          "This is a back-slash \ character".
@@ -227,7 +245,17 @@ Bill said
 
 Extended string literals are useful when the string contains new-lines, tabs,
 or back-slash characters because they do not have to be entered
-in the special manner. The backtick form can be used with double-quotes.
+in the special manner. The back-quote form can be used when the string literal
+contains a set of three double-quote characters, and the triple quote form can
+be used when the text literal contains back-quote characters. If a literal
+contains both a back quote and a set of three double-quotes, you will need to
+concatenate two literals.
+
+<eucode>
+constant TQ = `This text contains """ for some reason.`
+constant BQ = """This text contains a back quote ` for some reason."""
+constant QQ = """This text contains a back quote ` """ & `and """ for some reason.`
+</eucode>
 
 Character strings may be manipulated and operated upon just like any other
 sequences. For example the above string is entirely equivalent to the
