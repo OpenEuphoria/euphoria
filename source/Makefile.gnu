@@ -203,15 +203,17 @@ EU_TRANSLATOR_FILES = \
 
 EU_BACKEND_RUNNER_FILES = \
 	backend.e \
-	backend.e \
+	il.e \
 	cominit.e \
 	compress.e \
 	error.e \
 	intinit.e \
 	mode.e \
+	reswords.e \
 	pathopen.e \
+	common.e \
 	backend.ex
-
+	
 PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre/,$(PCRE_OBJECTS))
 	
 EU_BACKEND_OBJECTS = \

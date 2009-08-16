@@ -33,16 +33,16 @@ include error.e
 include msgtext.e
 
 constant OPTIONS = {
-{ "SHROUD_ONLY", 0, "Does not create an executable. Just a .IL file for backend to run.", { NO_CASE, NO_PARAMETER }  },
-{ "QUIET", 0, "Does not display binding information", { NO_CASE, NO_PARAMETER }  },
-{ "LIST", 0, "List unused (deleted) symbols in 'deleted.txt'", { NO_CASE, NO_PARAMETER }  },
-{ "W32", 0, "Prepares a file for use on Windows", { NO_CASE, NO_PARAMETER }  },
-{ "ICON", 0, "User supplied icon file used.", { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "CON", 0, "Windows Only: Uses the current console rather than creating a new console", { NO_CASE, NO_PARAMETER }  },
-{ "FULL_DEBUG", 0, "Includes symbol names in IL data", { NO_CASE, NO_PARAMETER }  },
-{ "OUT", 0, "The name of the executable to create. The default is the same basename of the input file.", { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "I", 0, "An 'include' directory to use.", { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
-{ "COPYRIGHT", 0, "Display copyright information", { NO_CASE, NO_PARAMETER }  }
+{ "SHROUD_ONLY", 0, GetMsgText(303, 0), { NO_CASE, NO_PARAMETER }  },
+{ "QUIET", 0, GetMsgText(304, 0), { NO_CASE, NO_PARAMETER }  },
+{ "LIST", 0, GetMsgText(305, 0), { NO_CASE, NO_PARAMETER }  },
+{ "W32", 0, GetMsgText(306, 0), { NO_CASE, NO_PARAMETER }  },
+{ "ICON", 0, GetMsgText(307,0), { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "CON", 0, GetMsgText(308, 0), { NO_CASE, NO_PARAMETER }  },
+{ "FULL_DEBUG", 0, GetMsgText(309, 0), { NO_CASE, NO_PARAMETER }  },
+{ "OUT", 0, GetMsgText(310,0), { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "I", 0, GetMsgText(311, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
+{ "COPYRIGHT", 0, GetMsgText(312, 0), { NO_CASE, NO_PARAMETER }  }
 }
 
 
@@ -269,6 +269,8 @@ export procedure handle_options_for_bind( m:map opts )
 -- process the command line for any options 
 	sequence option, opt_keys
 	integer op
+	integer file_supplied = 0
+	
 
 	opt_keys = m:keys(opts)
 	op = 1
@@ -314,17 +316,20 @@ export procedure handle_options_for_bind( m:map opts )
 				copyrights()			
 						
 			case "EXTRAS" then
-				if length(val) = 0 then
-					fatal("No file to bind was supplied.")
+				if length(val) != 0 then
+					file_supplied = 1
 				end if
 				
 			case else
-				fatal("Invalid option: " & option)
+				fatal(GetMsgText(314, , {option}))
 		end switch
 		
 		op += 1
 	end while
-	
+
+	if file_supplied = 0 then	
+		fatal(GetMsgText(313))
+	end if
 	OpDefines &= { "EUB" }
 
 end procedure
@@ -352,7 +357,7 @@ procedure store_checksum(sequence backend_name)
 	bound_file = open(backend_name, "ub") -- update mode
 	
 	if seek(bound_file, check_place+8) then
-		fatal("seek failed!")
+		fatal(GetMsgText(315))
 	end if
 	
 	checksum = 11352 -- magic starting point
@@ -375,7 +380,7 @@ procedure store_checksum(sequence backend_name)
 	end while
 	
 	if seek(bound_file, check_place) then
-		fatal("seek failed!")
+		fatal(GetMsgText(316))
 	end if
 	
 	puts(bound_file, base200(size))
@@ -417,7 +422,7 @@ procedure OutputIL()
 	
 	out = open(out_name, "wb")
 	if out = -1 then
-		fatal("couldn't open " & out_name & "!")
+		fatal(GetMsgText(317, , {out_name}))
 	end if
 
 	if not shroud_only then
@@ -459,7 +464,7 @@ procedure OutputIL()
 			backend_name = ondisk_name
 		end if
 		elsedef
-		-- do case-insensitive check on DOS/WIN
+		-- do case-insensitive check on WIN
 		if not equal( lower(backend_name),  lower(ondisk_name)) then
 			backend_name = ondisk_name
 		end if
@@ -469,7 +474,7 @@ procedure OutputIL()
 			be = open(backend_name, "rb")
 		end if
 		if be = -1 then
-			fatal("couldn't open " & backend_name & "!")
+			fatal(GetMsgText(317, , {backend_name}))
 		end if
 	
 		-- copy eub[w].exe to output .exe file
@@ -504,7 +509,7 @@ procedure OutputIL()
 					end if
 					ic = open(icon, "rb")
 					if ic = -1 then
-						fatal("Couldn't open icon file: " & icon)
+						fatal(GetMsgText(317,, {icon}))
 					end if
 					-- skip icon file header
 					for i = 1 to 22 do
@@ -521,7 +526,7 @@ procedure OutputIL()
 						
 						c = getc(be) -- skip over our icon
 						if c = -1 then
-							fatal("Your custom icon file is too large.\n")
+							fatal(GetMsgText(318))
 						end if
 					end while
 					close(ic)
@@ -559,10 +564,8 @@ procedure OutputIL()
 		end ifdef
 		
 		if shroud_only then
-			sequence filename = "backend"
-			ifdef UNIX then
-				filename &= "u"
-			elsedef
+			sequence filename = "eub"
+			ifdef WIN32 then
 				if w32 then
 					filename &= "w.exe"
 				else

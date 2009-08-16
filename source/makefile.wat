@@ -157,13 +157,17 @@ EU_LIB_OBJECTS = &
 	$(PCRE_OBJECTS)
 
 EU_BACKEND_RUNNER_FILES = &
-	.\backend.ex &
-	.\compress.e &
-	.\reswords.e &
-	.\common.e &
+	.\backend.e &
+	.\il.e &
 	.\cominit.e &
-	.\pathopen.e
-
+	.\compress.e &
+	.\error.e &
+	.\intinit.e &
+	.\mode.e &
+	.\reswords.e &
+	.\pathopen.e &
+	.\common.e &
+	.\backend.ex
 
 EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
 		$(TRUNKDIR)\include\euphoria\*.e
