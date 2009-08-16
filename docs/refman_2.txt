@@ -1737,7 +1737,7 @@ symbols in that library are not declared in the main file:
 
 <eucode>
 -- lib.e
-namespace lib.e
+namespace lib
 
 public include sublib.e
 
