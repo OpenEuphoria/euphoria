@@ -1006,9 +1006,10 @@ it's just part of the syntax of the language.
 
 **Identifiers**, which encompass all explicitly declared variable, constant
 or routine names, may be of any length. Upper and lower case are distinct.
-Identifiers must start with a letter and then be followed by letters, digits or
-underscores. The following **reserved words** have special meaning
-in Euphoria and may not be used as identifiers:
+Identifiers must start with a letter or underscore and then be followed by 
+any combination of letters, digits and underscores. The following 
+**reserved words** have special meaning in Euphoria and cannot be used
+as identifiers:
 
 <eucode>
  and            export          public
@@ -2450,9 +2451,9 @@ an "OS not supported" message instead of an "undefined reference" message.
 
 
 Defined words must follow the same character set of an identifier, that is,
-it must start with a letter and contain only letters, numbers and/or an
-underscore. It is common for defined words to be in all upper case, however,
-it is not required.
+it must start with either a letter or underscore and contain any mixture of 
+letters, numbers and underscores. It is common for defined words to be in
+all upper case, however, it is not required.
 
 A few examples:
 
