@@ -2344,11 +2344,11 @@ rather than the switch called "LBLb".
 
 === ifdef statement
 
-The ifdef statement is unlike all of the other statements in that it is
-executed at parse time not runtime. This allows you to change the way your
-program operates in a very efficient manner. Since the ifdef statement works at
-parse time, runtime values cannot be checked, instead special definitions can be
-set or unset at parse time as well. Euphoria defines some common words itself:
+The ifdef statement is executed at parse time not runtime. This allows you to
+change the way your program operates in a very efficient manner. Since the ifdef
+statement works at parse time, runtime values cannot be checked, instead special
+definitions can be set or unset at parse time as well. Euphoria defines some
+common words itself:
 
 ==== Euphoria Version Definitions
 
@@ -2379,16 +2379,53 @@ but ##EU5## will be defined.
 * **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, SunOS and OS X)
 * **UNIX** - Platform is any Unix
 
-==== Runtime Definitions
+==== Application Definitions
 
-* **EUI** - Application is running interpreted with eui.
-* **EUC** - Application is translated by euc.
-* **EUC_CON** - Application is translated by euc as a console application.
-* **EUC_DLL** - Application is translated by euc to a DLL file.
-* **EUB** - Application is running as a bound program.
-* **EUB_SHROUD** - Application is running as a bound program that has been shrouded.
-* **EUB_CON** - Application is running as a bound console program.
-* **EUB_WIN32** - Application is running as a bound WIN32 program.
+* **EUI** - Application is being interpreted by ##eui##.
+* **EUC** - Application is being translated by ##euc##.
+* **EUC_CON** - Application is being translated by ##euc## as a //console// application.
+* **EUC_DLL** - Application is being translated by ##euc## into a //DLL// file.
+* **EUB** - Application is being converted to a bound program by ##eub##.
+* **EUB_SHROUD** - Application is being converted to a shrouded program by ##eub##.
+* **EUB_CON** - Application is being converted to a bound //console// program by ##eub##.
+* **EUB_WIN32** - Application is being converted to a bound //MS-Windows// program by ##eub##.
+
+Example:
+<eucode>
+-- file: myproj.ex
+puts(1, "Hello, I am ") 
+ifdef EUC then 
+    puts(1, "a translated") 
+end ifdef 
+ifdef EUI then 
+    puts(1, "an interpreted") 
+end ifdef 
+ifdef EUB then 
+    puts(1, "a bound") 
+end ifdef 
+ifdef EUB_SHROUD then 
+    puts(1, ", shrouded") 
+end ifdef 
+puts(1, " program.\n") 
+</eucode>
+
+{{{ 
+C:\myproj> eui myproj.ex 
+Hello, I am an interpreted program.
+C:\myproj> euc -con myprog.ex
+... translating ... 
+... compiling ... 
+C:\myproj> myprog.exe 
+Hello, I am a translated program.
+C:\myproj> bind myprog.ex
+...
+C:\myproj> myprog.exe 
+Hello, I am a bound program.
+C:\myproj> shroud myprog.ex
+...
+C:\myproj> eub myprog.il
+Hello, I am a bound, shrouded program.
+}}}
 
 It is possible for one or more of the above definitions to be true at the same
 time. For instance, ##EUC## and ##EUC_DLL## will both be true when the source
@@ -2400,6 +2437,8 @@ ifdef EUC and not EUC_DLL then
     -- translated to an application
 end ifdef
 </eucode>
+
+ 
 
 ==== Using ifdef
 
