@@ -90,5 +90,6 @@ WriteConfig config ;
 #
 
 SubInclude TOP source ;
+SubInclude TOP demo ;
 SubInclude TOP docs ;
 SubInclude TOP tests ;

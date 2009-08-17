@@ -224,17 +224,23 @@ EuWinMain euiw : [ FDirName $(SUBDIR) int.ex ] ;
 EuMain eub : [ FDirName $(SUBDIR) backend.ex ] ;
 EuWinMain eubw : [ FDirName $(SUBDIR) backend.ex ] ;
 
+InstallBin bin : eui euiw eub eubw ;
+
 USER_LIBRARY = eu ;
 
 EuMain euc : [ FDirName $(SUBDIR) ec.ex ] ;
 EuMain eutest : [ FDirName $(SUBDIR) eutest.ex ] ;
 
+InstallBin bin : euc eutest ;
+
 if $(EUDOC_SOURCE) 
 {
     EuMain eudoc : $(EUDOC_SOURCE) ;
+    InstallBin bin : eudoc ;
 }
 
 if $(CREOLEHTML_SOURCE)
 {
     EuMain creolehtml : $(CREOLEHTML_SOURCE) ;
+    InstallBin bin : creolehtml ;
 }
