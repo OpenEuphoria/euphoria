@@ -292,14 +292,15 @@ Keep in mind that an atom is //not// equivalent to a one-element sequence
 containing the same value, although there are a few built-in routines that
 choose to treat them similarly.
 
+====Escaped Characters====
 Special characters may be entered using a back-slash:
-|=Code | Meaning|
-| \n | newline |
-| \r | carriage return |
-| \t | tab |
+|=Code     | Meaning|
+| \n       | newline |
+| \r       | carriage return |
+| \t       | tab |
 | {{{\\}}} | backslash |
-| \" | double quote |
-| \' | single quote |
+| \"       | double quote |
+| \'       | single quote |
 
 For example, ##"Hello, World!\n"##, or ##'~\~\'##. The Euphoria editor displays character
 strings in green.

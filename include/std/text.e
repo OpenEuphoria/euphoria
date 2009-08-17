@@ -1277,7 +1277,7 @@ end function
 --   [[:sprintf]]
 --
 
-public function format(sequence pFormat, object pArgs)
+public function format(sequence pFormat, object pArgs = {})
 	sequence result
 	integer in_token
 	integer tch
@@ -1659,7 +1659,6 @@ public function format(sequence pFormat, object pArgs)
 
 	return result
 end function
-
 
 --**
 -- Get the text associated with the message number in the requested locale.

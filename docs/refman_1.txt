@@ -86,13 +86,19 @@ the benefits of these languages in a much simpler way.
 * Free
 ** Euphoria is completely free and open source.
 
-=== Example Program
+=== Example Programs
+==== Hello, World ====
+The //mandatory// 'hello world' program is a one-liner in Euphoria.
+<eucode>
+----------
+puts(1, "Hello, World\n")
+</eucode>
 
-The following is an example of a complete Euphoria program.
+The following is an example of a more useful Euphoria program.
 
 <eucode>
-sequence list, sorted_list
-
+----------
+sequence original_list
 function merge_sort(sequence x)
 -- put x into ascending order using a recursive merge sort
     integer n, mid
@@ -122,10 +128,16 @@ function merge_sort(sequence x)
 end function
 
 procedure print_sorted_list()
--- generate sorted_list from list
-    list = {9, 10, 3, 1, 4, 5, 8, 7, 6, 2}
-    sorted_list = merge_sort(list)
-    ? sorted_list
+-- generate sorted_list from original_list
+    sequence sorted_list
+    
+    original_list = {19, 10, 23, 41, 84, 55, 98, 67, 76, 32}
+    sorted_list = merge_sort(original_list)
+    for i = 1 to length(sorted_list) do
+    	display("Number [] was at position [:2], now at [:2]", 
+    	        {sorted_list[i], find(sorted_list[i], original_list), i}
+    	    )
+    end for
 end procedure
 
 print_sorted_list()     -- this command starts the program

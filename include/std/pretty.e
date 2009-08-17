@@ -62,21 +62,27 @@ procedure indent()
 	
 end procedure
 
-function show(integer a)
+function esc_char(integer a)
 -- show escaped characters
-	if a = '\t' then
-		return "\\t"
-	elsif a = '\n' then
-		return "\\n"
-	elsif a = '\r' then
-		return "\\r"
-	elsif a = '\\' then
-		return "\\\\"
-	elsif a = '"' then
-		return "\\\""
-	else
-		return a
-	end if
+	switch a do
+		case'\t' then
+			return `\t`
+			
+		case'\n' then
+			return `\n`
+			
+		case'\r' then
+			return `\r`
+			
+		case'\\' then
+			return `\\`
+			
+		case'"' then
+			return `\"`
+			
+		case else
+			return a
+	end switch
 end function
 
 procedure rPrint(object a)
@@ -94,7 +100,7 @@ procedure rPrint(object a)
 						sbuff = '\'' & a & '\''  -- display char only
 					
 					elsif find(a, "\t\n\r\\") then
-						sbuff = '\'' & show(a) & '\''  -- display char only
+						sbuff = '\'' & esc_char(a) & '\''  -- display char only
 					
 					end if
 				else -- pretty ascii 1 or 2
@@ -139,7 +145,7 @@ procedure rPrint(object a)
 				indent()
 			end if
 			if all_ascii then
-				pretty_out(show(a[i]))
+				pretty_out(esc_char(a[i]))
 			else    
 				rPrint(a[i])
 			end if

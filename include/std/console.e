@@ -587,37 +587,66 @@ end procedure
 
 
 --*
--- Displays the supplied data on the console screen.
+-- Displays the supplied data on the console screen at the current cursor position.
 --
 -- Parameters:
 -- # ##pData## : Any object.
 -- # ##args## : Optional arguments used to format the output. Default is 1.
--- # ##finalnl## : Optional. Determines if a new line is output after the data. Default is 1.
+-- # ##finalnl## : Optional. Determines if a new line is output after the data.
+-- Default is to output a new line.
 --
 -- Comments:
 -- * If ##pData## is an atom or integer, it is simply displayed.
 -- * If ##pData## is a simple text string, then ##args## can be used to
---   produce a formatted output with ##pData## providing the format string and
+--   produce a formatted output with ##pData## providing the [[:format]] string and
 --   ##args## being a sequence containing the data to be formatted.
--- * If ##pData## is not either the above then it is forwarded on to the
---  [[:pretty_print]]() to display. In this case, if ##args## is a sequence, it
---  is assumed to contain the pretty_print formatting options.
+-- ** If the last character of ##pData## is an underscore character then it
+-- is stripped off and ##finalnl## is set to zero. Thus ensuring that a new line
+-- is **not** output.
+-- ** The formatting codes expected in ##pData## are the ones used by [[:format]].
+-- It is not mandatory to use formatting codes, and if ##pData## does not contain
+-- any then it is simply displayed and anything in ##args## is ignored.
+-- * If ##pData## is a sequence containing floating-point numbers, sub-sequences 
+-- or integers that are not characters, then ##pData## is forwarded on to the
+--  [[:pretty_print]]() to display. 
+-- ** If ##args## is a non-empty sequence, it is assumed to contain the pretty_print formatting options.
+-- ** if ##args## is an atom or an empty sequence, the assumed pretty_print formatting
+-- options are assumed to be {2}.
 --
 -- After the data is displayed, the routine will normally output a New Line. If you
 -- want to avoid this, ensure that the last parameter is a zero.
 --
 -- Examples:
 -- <eucode>
--- show("Some plain text") -- Displays this string on the console plus a new line.
--- show("Your answer:",0) -- Displays this string on the console without a new line.
--- object res
--- res = somefunc()
--- show(res) -- Displays the contents of 'res' on the console.
---
--- show("The answer to %s was %s", {question[i], answer[x]}) -- formats these with a new line.
+-- display("Some plain text") -- Displays this string on the console plus a new line.
+-- display("Your answer:",0)  -- Displays this string on the console without a new line.
+-- display("cat")
+-- display("Your answer:",,0) -- Displays this string on the console without a new line.
+-- display("")
+-- display("Your answer:_")   -- Displays this string, except the '_', on the console without a new line.
+-- display("dog")
+-- display({"abc", 3.44554}) -- Displays the contents of 'res' on the console.
+-- display("The answer to [1] was [2]", {"'why'", 42}) -- formats these with a new line.
+-- display("",2)
+-- display({51,362,71}, {1})
 -- </eucode>
+-- Output would be ...
+-- {{{
+-- Some plain text
+-- Your answer:cat
+-- Your answer:
+-- Your answer:dog
+-- {
+--   "abc",
+--   3.44554
+-- }
+-- The answer to 'why' was 42
+-- ""
+-- {51'3',362,71'G'}
+-- }}}
 --
-public procedure show( object pData, object args = 1, integer finalnl = 1)
+
+public procedure display( object pData, object args = 1, integer finalnl = -918_273_645)
 
 	if atom(pData) then
 		if integer(pData) then
@@ -626,30 +655,35 @@ public procedure show( object pData, object args = 1, integer finalnl = 1)
 			puts(1, trim(sprintf("%15.15f", pData), '0'))
 		end if
 
-	elsif t_display(pData) then
-		if atom(args) or length(args) = 0 then
-			if equal(args, 2) then
+	elsif length(pData) > 0 then
+		if t_display(pData) then
+			if pData[$] = '_' then
+				pData = pData[1..$-1]
+				finalnl = 0
+			end if
+			
+			puts(1, format(pData, args))
+			
+		else
+			if atom(args) or length(args) = 0 then
 				pretty_print(1, pData, {2})
 			else
-				puts(1, pData)
+				pretty_print(1, pData, args)
 			end if
-		else
-			printf(1, pData, args)
 		end if
 	else
-		if atom(args) or length(args) = 0 then
-			pretty_print(1, pData, {2})
-		else
-			pretty_print(1, pData, args)
+		if equal(args, 2) then
+			puts(1, `""`)
 		end if
 	end if
-
-	if equal(args, 1) then
-		puts(1, '\n')
-	elsif sequence(args) and finalnl = 1 then
+	
+	if finalnl = 0 then
+		-- no new line
+	elsif equal(args,0) then
+		-- no new line
+	else
 		puts(1, '\n')
 	end if
 
 	return
 end procedure
-
