@@ -14,20 +14,23 @@
 without type_check
 
 include std/machine.e
-
-ifdef DOS32 then
-tick_rate(100) -- get better clock resolution on DOS32
-end ifdef
-
 include std/math.e
+include std/console.e
+include std/error.e
+
 set_rand(9999)
 
 constant MAX = 50000
 constant TRUE = 1, FALSE = 0
 
-constant CHECK_RESULTS = FALSE -- TRUE for debugging new sorting algorithms
+constant CHECK_RESULTS = TRUE 
 
 integer hybrid_limit
+integer iterations
+sequence data
+sequence expected
+
+file_number printer
 
 type natural(integer x)
     return x >= 0
@@ -308,41 +311,40 @@ function bucket_sort(sequence s)
     return sorted 
 end function
 
-procedure check_results(sequence sdata, sequence data)
+procedure check_results(sequence sdata, integer iter, sequence sname)
 -- compare results with another sort to make sure they are correct
     if CHECK_RESULTS then
-	if not equal(sdata, shell_sort(data)) then
-	    puts(2, "\nabort!\n")
-	    print(2, 1/0)
-	end if
+		if not equal(sdata, expected[iter]) then
+		    crash("Output from %s is invalid", {sname})
+		end if
     end if
 end procedure
 
-integer nsquared_ok
-nsquared_ok = TRUE -- do N-squared sorts
-
-integer iterations
-sequence data
-file_number printer
 
 procedure measure(sequence name)
 -- time one sort    
     integer id
     atom t0, t
     sequence sdata
+    integer cntr
+    integer i
 
     id = routine_id(name)
-    t0 = time()
-    for i = 1 to iterations do
-	sdata = call_func(id, {data[i]})
+    t0 = time() + 1
+    cntr = 0
+    i = 0
+    while t0 > time() do
+    	i += 1
+    	if i > length(data) then
+    		i = 1
+    	end if
+		sdata = call_func(id, {data[i]})
 	
-	check_results(sdata, data[i])
-    end for
+		check_results(sdata, i, name)
+		cntr += 1
+    end while
     t = time() - t0
-    if t > 6 then
-	nsquared_ok = FALSE -- time to give up on the slow ones!
-    end if
-    printf(printer, "%15s %9.4f\n", {name, t/iterations})
+    printf(printer, "%15s %9d\n", {name, cntr})
 end procedure
 
 procedure all_sorts()
@@ -353,25 +355,24 @@ procedure all_sorts()
     printer = 1  -- open("PRN", "w")
     hybrid_limit = 20
     
-    nitems = 5
+    nitems = 500
     iterations = floor(MAX/nitems)
     
-    while TRUE do
 	-- get several sets of data of length nitems
-	printf(printer, "\ntime (sec.) to sort %d items (averaged over %d trials)\n",
-			{nitems, iterations})
+	printf(printer, "\nNumber of completed sorts for %d items\n", nitems)
 
-	data = rand(repeat(repeat(nitems, nitems), iterations))
+	data = rand(repeat(repeat(100, nitems), 17))
+	expected = data
+	for i = 1 to length(data) do
+		expected[i] = shell_sort(expected[i])
+	end for
+	
 	min_value = 1
-	max_value = nitems
+	max_value = 100
 
-	if nsquared_ok then
-	    -- do the really slow ones
-	    measure("bubble_sort")
-	    measure("simple_sort")
-	    measure("insertion_sort")
-	end if
-
+    measure("bubble_sort")
+    measure("simple_sort")
+    measure("insertion_sort")
 	measure("merge_sort")
 	measure("quick_sort")
 	measure("hybrid_sort")  
@@ -379,17 +380,8 @@ procedure all_sorts()
 	measure("shell_sort")
 	measure("bucket_sort")      
 
-	nitems *= 2
-	iterations = floor(MAX/nitems)
-	if iterations < 1 then
-	    exit
-	end if
-	
-	puts(1, "\nPress Enter to continue. Press q to quit: ")
-	if find('q', gets(0)) then
-	    abort(0)
-	end if
-    end while
+	any_key()
+
 end procedure
 
 all_sorts()
