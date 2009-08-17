@@ -188,6 +188,7 @@ Library eu : $(EU_BACKEND_SOURCE) $(PCRE_SOURCES:BS) ;
 MakeLocate eu$(SUFLIB) : $(BUILD_DIR) ;
 RevGet <eu>be_rev.c ;
 MagicGet <eu>be_magic.c : <eu>be_execute$(SUFOBJ) ;
+InstallLib bin : eu$(SUFLIB) ;
 
 #
 # Build a utility library of the backend. This saves us compiling
