@@ -217,10 +217,12 @@ SOURCE_GRIST = ;
 # Our actual build targets
 #
 
-EUCFLAGS += -con ;
 USER_LIBRARY = ebackend ;
 
 EuMain eui : [ FDirName $(SUBDIR) int.ex ] ;
+EuWinMain euiw : [ FDirName $(SUBDIR) int.ex ] ;
+EuMain eub : [ FDirName $(SUBDIR) backend.ex ] ;
+EuWinMain eubw : [ FDirName $(SUBDIR) backend.ex ] ;
 
 USER_LIBRARY = eu ;
 

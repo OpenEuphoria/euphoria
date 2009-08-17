@@ -77,7 +77,7 @@ rule FileExists
 #   EuMain hello : hello.ex ;
 #
 
-rule EuMain
+rule EuWinMain
 {
     local _s _t ;
 
@@ -120,12 +120,19 @@ rule EuMain
 
     Clean clean : $(FINAL_BUILD_DIR) ;
 
-    EuMain1 $(<) : $(>)  ;
+    EuWinMain1 $(<) : $(>)  ;
 }
 
-actions EuMain1
+actions EuWinMain1
 {
     $(EUC_EXE) $(EUCFLAGS) -o $(FINAL_OUTPUT) -builddir $(FINAL_BUILD_DIR) -lib $(FINAL_USER_LIBRARY) $(>)
+}
+
+rule EuMain
+{
+    EUCFLAGS on $(<) = $(EUCFLAGS) -con ;
+
+    EuWinMain $(<) : $(>) ;
 }
 
 #
