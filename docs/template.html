@@ -17,102 +17,83 @@
 	<script src="/js/scriptaculous.js" type="text/javascript"></script>
 </head>
 <body>
-
-<div id="header">
-
-	<div id="header_inner" class="fluid">
-
-		<div id="logo">
-			<h1><span>Open</span>Euphoria</h1>
-			<h2>{ title }</h2>
-		</div>
-		
-		<div id="menu">
-			<ul>
-				<li><a href="/index.wc"
-					>Home</a></li>
-				<li><a href="/forum/index.wc" 
-				  >Forum</a></li>
-				<li><a href="/wiki/wiki.cgi" 
-				  >Wiki</a></li>
-				<li><a href="/docs/eu400_0001.html" class="active" 
-				  >Manual</a></li>
-				<li><a href="http://sourceforge.net/projects/rapideuphoria/files/"
-				  >Download</a></li>
-				<li><a href="http://sourceforge.net/tracker/?group_id=182827&atid=902782">Bug Tracker</a></li>
-			</ul>
-		</div>
-		
-	</div>
-</div>
-
-<div id="main">
-
-	<div id="main_inner" class="fluid">
-
-		<div id="primaryContent_2columns">
-
-			<div id="columnA_2columns">
-
-				<div id="docs">
-					{$nav.html}
-
-					<div class="body">
-						{body}
-					</div>
-
-					{$nav.html}
-				</div>
-
-
+	<div id="header">
+		<div id="header_inner" class="fluid">
+			<div id="logo">
+				<h1><span>Open</span>Euphoria</h1>
+				<h2>{ title }</h2>
 			</div>
-	
-		</div>
-		
-		<div id="secondaryContent_2columns">
-		
-			<div id="columnC_2columns">
-
-				<h4><span>Search</span></h4>
-				
-				<form method="post" action="/search.wc">
-					<div id="search">
-						<input type="text" name="keywords" />
-						<input type="submit" class="button" value="Go" />
-						<br class="clear" />
-					</div>
-				</form>
-					
-				<h4><span>Quick</span> Links</h4>
-				<ul class="links">
-					<li class="first"><a href="/manual/eu400_0001.html">Table of Contents</a></li>
-					<li><a href="/manual/eu400_0010.html">Quick Start</a></li>
-					<li><a href="/manual/eu400_0012.html">Language Reference</a></li>
-					<li><a href="/manual/eu400_0028.html">Mini Guides</a></li>
-					<li><a href="/manual/eu400_0040.html">Included Tools</a></li>
-					<li><a href="/manual/eu400_0044.html">General Routines</a></li>
-					<li><a href="/manual/eu400_0059.html">Sequence Routines</a></li>
-					<li><a href="/manual/eu400_0066.html">String Routines</a></li>
-					<li><a href="/manual/eu400_0072.html">Data Structures</a></li>
-					<li><a href="/manual/eu400_0078.html">Networking</a></li>
+			<div id="menu">
+				<ul>
+					<li><a href="/index.wc"
+						>Home</a></li>
+					<li><a href="/forum/index.wc" 
+					  >Forum</a></li>
+					<li><a href="/wiki/wiki.cgi" 
+					  >Wiki</a></li>
+					<li><a href="/docs/eu400_0001.html" class="active" 
+					  >Manual</a></li>
+					<li><a href="http://sourceforge.net/projects/rapideuphoria/files/"
+					  >Download</a></li>
+					<li><a href="http://sourceforge.net/tracker/?group_id=182827&atid=902782">Bug Tracker</a></li>
 				</ul>
 			</div>
-
 		</div>
-
-		<br class="clear" />
-
 	</div>
 
-</div>
+	<div id="main">
+		<div id="main_inner" class="fluid">
+			<div id="primaryContent_2columns">
+				<div id="columnA_2columns">
+					<div id="docs">
+						{$nav.html}
 
-<div id="footer" class="fluid">
-	Copyright &copy; 2009 by The OpenEuphoria Group. All rights reserved.
-	<br />
- 	<a href="http://www.openeuphoria.org/"><img src="/images/poweredby-euphoria.png" /></a>
-	<br />
-	<a href="/about.wc">About Website</a>
-</div>
+						<div class="body">
+							{body}
+						</div>
+
+						{$nav.html}
+					</div>
+				</div>
+			</div>
+		
+			<div id="secondaryContent_2columns">
+				<div id="columnC_2columns">
+					<h4><span>Search</span></h4>
+				
+					<form method="post" action="/search.wc">
+						<div id="search">
+							<input type="text" name="keywords" />
+							<input type="submit" class="button" value="Go" />
+							<br class="clear" />
+						</div>
+					</form>
+					
+					<h4><span>Quick</span> Links</h4>
+					<ul class="links">
+						<li class="first"><a href="/manual/eu400_0001.html">Table of Contents</a></li>
+						<li><a href="/manual/eu400_0010.html">Quick Start</a></li>
+						<li><a href="/manual/eu400_0012.html">Language Reference</a></li>
+						<li><a href="/manual/eu400_0028.html">Mini Guides</a></li>
+						<li><a href="/manual/eu400_0040.html">Included Tools</a></li>
+						<li><a href="/manual/eu400_0044.html">General Routines</a></li>
+						<li><a href="/manual/eu400_0059.html">Sequence Routines</a></li>
+						<li><a href="/manual/eu400_0066.html">String Routines</a></li>
+						<li><a href="/manual/eu400_0072.html">Data Structures</a></li>
+						<li><a href="/manual/eu400_0078.html">Networking</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="footer" class="fluid">
+		Copyright &copy; 2009 by The OpenEuphoria Group. All rights reserved.
+		<br />
+	 	<a href="http://www.openeuphoria.org/"><img src="/images/poweredby-euphoria.png" /></a>
+		<br />
+		<a href="/about.wc">About Website</a>
+	</div>
 
 </body>
 </html>
