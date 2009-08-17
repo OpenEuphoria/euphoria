@@ -400,45 +400,47 @@ test :
 testeu :
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
 
+ifeq "$(PREFIX)" ""
+PREFIX=/usr/local
+endif
+
 install :
-	mkdir -p $(DESTDIR)/usr/share/euphoria/include/euphoria
-	mkdir -p $(DESTDIR)/usr/share/euphoria/include/std/net/dos
-	mkdir -p $(DESTDIR)/usr/share/euphoria/include/std/dos
-	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/html 
-	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux
-	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/unix
-	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/net
-	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/win32
-	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/dos
-	mkdir -p $(DESTDIR)/usr/share/euphoria/demo/bench
-	mkdir -p $(DESTDIR)/usr/share/doc/euphoria/doc
-	mkdir -p $(DESTDIR)/usr/share/euphoria/tutorial 
-	mkdir -p $(DESTDIR)/usr/share/euphoria/bin 
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net/dos
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/dos
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/html 
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar/Linux
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/win32
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/doc
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/tutorial 
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/bin 
 	mkdir -p $(DESTDIR)/etc/euphoria 
-	mkdir -p $(DESTDIR)/usr/share/euphoria/source 
-	mkdir -p $(DESTDIR)/usr/bin 
-	mkdir -p $(DESTDIR)/usr/lib
-	mkdir -p $(DESTDIR)/usr/include/euphoria
-	install $(EECUA) $(DESTDIR)/usr/lib
-	install eui $(DESTDIR)/usr/bin
-	install euc $(DESTDIR)/usr/bin
-	install eu.a $(DESTDIR)/usr/lib
-	install ../include/*e  $(DESTDIR)/usr/share/euphoria/include
-	install ../include/std/*e  $(DESTDIR)/usr/share/euphoria/include/std
-	install ../include/std/net/*e  $(DESTDIR)/usr/share/euphoria/include/std/net
-	install ../include/std/unix/*e  $(DESTDIR)/usr/share/euphoria/include/std/unix
-	install ../include/std/win32/*e  $(DESTDIR)/usr/share/euphoria/include/std/win32
-	install ../include/std/dos/*e  $(DESTDIR)/usr/share/euphoria/include/std/dos
-	install ../include/euphoria/*  $(DESTDIR)/usr/share/euphoria/include/euphoria
-	install ../include/euphoria.h $(DESTDIR)/usr/share/euphoria/include
-	-install -t $(DESTDIR)/usr/share/doc/euphoria/html ../html/*
-	-install -t $(DESTDIR)/usr/share/euphoria/demo ../demo/*
-	-install -t $(DESTDIR)/usr/share/euphoria/demo/bench ../demo/bench/*
-	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar ../demo/langwar/*
-	-install -t $(DESTDIR)/usr/share/euphoria/demo/langwar/Linux ../demo/langwar/Linux/*
-	-install -t $(DESTDIR)/usr/share/euphoria/demo/unix ../demo/unix/*
-	-install -t $(DESTDIR)/usr/share/euphoria/tutorial ../tutorial/*
-	install -t $(DESTDIR)/usr/share/euphoria/bin \
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/source 
+	mkdir -p $(DESTDIR)$(PREFIX)/bin 
+	mkdir -p $(DESTDIR)$(PREFIX)/lib
+	mkdir -p $(DESTDIR)$(PREFIX)/include/euphoria
+	install $(EECUA) $(DESTDIR)$(PREFIX)/lib
+	install $(EEXU) $(DESTDIR)$(PREFIX)/bin
+	install $(EECU) $(DESTDIR)$(PREFIX)/bin
+	install $(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
+	install ../include/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include
+	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
+	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
+	install ../include/std/unix/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/unix
+	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
+	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
+	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
+	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html ../html/*
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo ../demo/*
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench ../demo/bench/*
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar ../demo/langwar/*
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar/Linux ../demo/langwar/Linux/*
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix ../demo/unix/*
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/tutorial ../tutorial/*
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/bin \
 	           ../bin/ed.ex \
 	           ../bin/ascii.ex \
 	           ../bin/eprint.ex \
@@ -447,7 +449,7 @@ install :
 	           ../bin/lines.ex \
 	           ../bin/search.ex \
 	           ../bin/where.ex
-	-install -t $(DESTDIR)/usr/share/euphoria/source \
+	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
 	           *.ex \
 	           *.e \
 	           be_*.c \
@@ -455,10 +457,9 @@ install :
 
 # This doesn't seem right. What about eub or eushroud ?
 uninstall :
-	-rm /usr/bin/$(EEXU) /usr/bin/$(EECU) /usr/lib/$(EECUA)
-	-rm -r /usr/share/euphoria
-	-rm -r /usr/share/doc/euphoria
-	-rm -r /etc/euphoria
+	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EBACKENDU)
+	-rm -r $(PREFIX)/share/euphoria
+	-rm -r $(PREFIX)/share/doc/euphoria
 
 .PHONY : install
 .PHONY : uninstall
