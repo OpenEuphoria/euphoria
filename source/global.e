@@ -21,8 +21,7 @@ export constant
 
 -- specific C compiler used (one may be TRUE)
 export constant
-	EWATCOM  = TRUE,
-	EDJGPP   = FALSE
+	EWATCOM  = TRUE
 	-- (assume GNU C for Unix variants)
 
 export constant EGPM = 0     -- GPM mouse support on Linux

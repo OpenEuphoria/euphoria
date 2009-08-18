@@ -266,8 +266,6 @@ Platforms:
    
 Compilers:
    EWATCOM
-   EDJGPP
-   EMSVC
 
 Translator:
    TRANSLATE (in Euphoria front end)

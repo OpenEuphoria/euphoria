@@ -53,7 +53,7 @@ extern int clk_tck;
 extern unsigned default_heap;
 #endif
 extern int have_console;
-extern struct videoconfig config;
+
 extern int gameover;
 #ifdef EXTRA_STATS
 extern int mouse_ints;

@@ -148,6 +148,8 @@ int consize_ioctl = 0;	/* 1 if line_max or col_max came from ioctl */
 #endif
 
 struct videoconfig config;
+struct videoconfigEx configEx;
+
 int screen_lin_addr; /* screen segment */
 #ifdef EXTRA_STATS
 int mouse_ints = 0;  /* number of unused mouse interrupts */
@@ -441,14 +443,16 @@ void NewConfig(int raise_console)
 		show_console();
 
 		GetConsoleScreenBufferInfo(console_output, &info);
-	//	line_max = info.dwMaximumWindowSize.Y;
-	//	col_max = info.dwMaximumWindowSize.X;
+ 		configEx.screenrows = info.srWindow.Bottom - info.srWindow.Top + 1;
+ 		configEx.screencols = info.srWindow.Right - info.srWindow.Left + 1;
 		line_max = info.dwSize.Y;
 		col_max = info.dwSize.X;
 	} else {
 		// don't care on startup - this will be initialized later.
 		line_max = 25;
 		col_max = 80;
+		configEx.screenrows = 25;
+		configEx.screencols = 80;
 	}
 
 	config.numtextrows = line_max;
@@ -516,6 +520,8 @@ void NewConfig(int raise_console)
 	config.numcolors = 16;
 	config.numtextrows = line_max;
 	config.numtextcols = col_max;
+	configEx.screenrows = line_max;
+	configEx.screencols = col_max;
 #endif
 
 	screen_col = 1;
@@ -544,7 +550,7 @@ static object Video_config()
 #if defined(EWINDOWS)
 	NewConfig(TRUE); // Windows size might have changed since last call.
 #endif
-	result = NewS1((long)8);
+	result = NewS1((long)10);
 	obj_ptr = result->base;
 
 	obj_ptr[1] = (config.monitor != _MONO) &&
@@ -556,6 +562,8 @@ static object Video_config()
 	obj_ptr[6] = config.numypixels;
 	obj_ptr[7] = config.numcolors;
 	obj_ptr[8] = config.numvideopages;
+	obj_ptr[9] = configEx.screenrows;
+	obj_ptr[10] = configEx.screencols;
 	return MAKE_SEQ(result);
 }
 

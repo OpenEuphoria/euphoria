@@ -553,11 +553,13 @@ procedure build_direct()
 				generated_files[i] })
 
 			if not silent then
-				ShowMsg(1, 163, { 100 * (i / length(generated_files)),
-					generated_files[i] })
-			end if
-			if verbose then
-				printf(1, "%s\n", { cmd })
+				atom pdone = 100 * (i / length(generated_files))
+				if not verbose then
+					ShowMsg(1, 163, { pdone, generated_files[i] })
+				else
+					ShowMsg(1, 163, { pdone, cmd })
+				end if
+					
 			end if
 
 			status = system_exec(cmd, 0)
@@ -584,11 +586,11 @@ procedure build_direct()
 	end switch
 
 	if not silent then
-		ShowMsg(1, 166, { exe_name })
-	end if
-
-	if verbose then
-		printf(1, "%s\n", { cmd })
+		if not verbose then
+			ShowMsg(1, 166, { exe_name })
+		else
+			ShowMsg(1, 166, { cmd })
+		end if
 	end if
 
 	status = system_exec(cmd, 0)

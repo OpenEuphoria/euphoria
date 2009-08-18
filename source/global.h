@@ -108,10 +108,6 @@
 
 #define MAX_LONG 0x7fffffffL /* largest positive long integer */
 
-#if defined(EDJGPP)
-#  define PATH_MAX 512
-#endif
-
 struct time_info {
 	char *name;
 	long start_ticks;
@@ -119,7 +115,7 @@ struct time_info {
 	long tot_ticks;
 };
 
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 #  define KEYBUFF_SIZE 50
 #  define __far
 #  define FAR
@@ -130,7 +126,7 @@ typedef int (*FARPROC)();
 #  endif // EMINGW
 #  define __interrupt
 #  define LRESULT long
-#  if !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(EMINGW)
 #    define O_TEXT 0
 #    define HINSTANCE int
 #  endif
@@ -146,11 +142,6 @@ struct videoconfig {
 	int numtextrows;
 	int numtextcols;
 	int numvideopages;
-#  ifdef EDJGPP
-	int mask; // mask pixel values for compatibility
-	int x;    // pixel coordinate for text in graphics modes
-	int y;    // pixel coordinate for text in graphics modes
-#  endif
 };
 #  define _WHITE 7
 #  define _BLACK 0
@@ -164,6 +155,11 @@ struct rccoord {
 };
 #endif
 
+struct videoconfigEx {
+	int screenrows;
+	int screencols;
+};
+
 #ifdef EUNIX
 #define PATH_SEPARATOR ':'
 #define SLASH '/'
@@ -172,7 +168,7 @@ struct rccoord {
 #define SLASH '\\'
 #endif
 
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX)
 #define WORD unsigned short
 #define __stdcall
 #define __cdecl

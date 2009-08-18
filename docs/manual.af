@@ -150,6 +150,7 @@
 : <<LEVELTOC depth=3>>
 
 ../include/std/win32/msgbox.e
+../include/std/win32/sounds.e
 
 ########
 := Release Notes

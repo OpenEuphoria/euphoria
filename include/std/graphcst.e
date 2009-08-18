@@ -24,7 +24,9 @@ public enum
 	VC_XPIXELS,
 	VC_YPIXELS,
 	VC_NCOLORS,
-	VC_PAGES
+	VC_PAGES,
+	VC_SCRNLINES,
+	VC_SCRNCOLS
 
 --****
 -- ==== Colors
@@ -108,35 +110,41 @@ constant
 -- Return a description of the current video configuration:
 --
 -- Returns:
--- 		A **sequence**, of 8 non-negative integers, laid out as follows:
+-- 		A **sequence**, of 10 non-negative integers, laid out as follows:
 --	# color monitor? ~-- 1 0 if monochrome, 1 otherwise
 --	# current video mode
--- 	# number of text rows
--- 	# number of text columns
+-- 	# number of text rows in console buffer
+-- 	# number of text columns in console buffer
 --	# screen width in pixels
 --	# screen height in pixels
 --	# number of colors
 --	# number of display pages
+-- 	# number of text rows for current screen size
+-- 	# number of text columns for current screen size
 --
 -- Comments:
 --
 -- A public enum is available for convenient access to the returned configuration data:
---     * ##VC_COLOR##   = 1,
---     * ##VC_MODE##    = 2,
---     * ##VC_LINES##   = 3,
---     * ##VC_COLUMNS## = 4,
---     * ##VC_XPIXELS## = 5,
---     * ##VC_YPIXELS## = 6,
---     * ##VC_NCOLORS## = 7,
---     * ##VC_PAGES##   = 8
+--     * ##VC_COLOR##
+--     * ##VC_MODE##
+--     * ##VC_LINES##
+--     * ##VC_COLUMNS##
+--     * ##VC_XPIXELS##
+--     * ##VC_YPIXELS##
+--     * ##VC_NCOLORS##
+--     * ##VC_PAGES##
+--     * ##VC_LINES##
+--     * ##VC_COLUMNS##
+--     * ##VC_SCRNLINES##
+--     * ##VC_SCRNCOLS##
 --
 -- This routine makes it easy for you to parameterize a program so it will work in many
 -- different graphics modes.
 --
 -- Example:
 -- <eucode>
--- -- vc = video_config()  -- in mode 3 with 25-lines of text:
--- -- vc is {1, 3, 25, 80, 0, 0, 32, 8}
+-- vc = video_config()
+-- -- vc could be {1, 3, 300, 132, 0, 0, 32, 8, 37, 90}
 -- </eucode>
 --
 -- See Also:
