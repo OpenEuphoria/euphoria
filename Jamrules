@@ -20,9 +20,13 @@ if ! $(EUDIR)
 # Setup some common executable names
 #
 
-EUI_EXE = [ FDirName $(EUDIR) bin eui$(SUFEXE) ] ;
-EUC_EXE = [ FDirName $(EUDIR) bin euc$(SUFEXE) ] ;
-EUTEST_EXE = [ FDirName $(EUDIR) bin eutest$(SUFEXE) ] ;
+OUR_EUI_EXE = [ FDirName $(EUDIR) bin eui$(SUFEXE) ] ;
+OUR_EUC_EXE = [ FDirName $(EUDIR) bin euc$(SUFEXE) ] ;
+OUR_EUTEST_EXE = [ FDirName $(EUDIR) bin eutest$(SUFEXE) ] ;
+
+PATH_EUI_EXE = eui ;
+PATH_EUC_EXE = euc ;
+PATH_EUTEST_EXE = eutest ;
 
 #
 # Setup our build commands
@@ -125,7 +129,7 @@ rule EuWinMain
 
 actions EuWinMain1
 {
-    $(EUC_EXE) $(EUCFLAGS) -o $(FINAL_OUTPUT) -builddir $(FINAL_BUILD_DIR) -lib $(FINAL_USER_LIBRARY) $(>)
+    $(BUILD_EUC_CMD) $(EUCFLAGS) -o $(FINAL_OUTPUT) -builddir $(FINAL_BUILD_DIR) -lib $(FINAL_USER_LIBRARY) $(>)
 }
 
 rule EuMain
