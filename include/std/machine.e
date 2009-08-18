@@ -725,7 +725,7 @@ public constant
 ifdef WIN32 then
 integer xMessageBeep
 atom xUser32
-public procedure sound( atom pStyle = -1 )
+public procedure sound( atom pStyle = SND_DEFAULT )
 	if not object(xMessageBeep) then
 		xUser32 = open_dll("user32.dll")
 		xMessageBeep   = define_c_proc(xUser32, "MessageBeep", {C_INT})
@@ -735,7 +735,7 @@ end procedure
 end ifdef
 
 ifdef UNIX then
-public procedure sound( atom pStyle = -1 )
+public procedure sound( atom pStyle = SND_DEFAULT )
 -- No effect (yet) in unix platforms.
 end procedure
 end ifdef

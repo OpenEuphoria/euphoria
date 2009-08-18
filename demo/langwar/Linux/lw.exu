@@ -6,7 +6,7 @@
 -- See lw.sum for a brief summary of the commands.
 
 -- There's a VGA graphics version of this program in the Euphoria package
--- for WIN32 and DOS32.
+-- for WIN32.
 
 -- This is based on a space war game developed in 1979 for the TRS-80 by 
 -- David A. Craig with assistance from Robert H. Craig. 

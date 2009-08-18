@@ -24,9 +24,6 @@ include std/os.e
 include std/text.e
 include std/error.e
 include std/convert.e
-ifdef DOS32 then
-include std/dos/pixels.e
-end ifdef
 constant msg = 1 -- place to send messages
 constant generic_msg = "sanity tests failed at line number shown in ex.err"
 atom t
@@ -41,18 +38,6 @@ procedure the_end()
     end if
     abort(0)
 end procedure
-
-procedure make_sound()
--- test sound() built-in
-
-    for i = 400 to 4000 by 400 do
-	sound(i)
-	for j = 1 to 100000 do
-	end for
-	sound(0)
-    end for
-end procedure
-
 
 constant epsilon = 1e-10 -- allow for small floating point inaccuracy
 
@@ -822,35 +807,6 @@ without type_check
 integer color
 color = 1
 sequence v
-ifdef DOS32 then
-procedure testgr()
--- test basic VGA graphics operations
-    sequence x
-    
-    if v[VC_XPIXELS] < 100 or v[VC_YPIXELS] < 100 then
-	crash(generic_msg)
-    end if
-    draw_line(BLUE, {{20, 100}, {600, 100}})
-
-    for i = 1 to 200 by 5 do
-	pixel(WHITE, {3*i, i})
-	if get_pixel({3*i, i}) != 7 then
-	    crash(generic_msg)
-	end if
-    end for
-
-    polygon(color, 0, {{20,350}, {40, 250}, {80, 400}})
-    ellipse(color+5, 1, {350, 350}, {440,440})
-    color = color + 1
-    x = {}
-    for i = 0 to 63 do
-	x = x & repeat(i, 2)
-    end for
-    for p = 220 to 320 by 4 do
-	display_image({p,p}, repeat(x+color, 2))
-    end for
-end procedure
-end ifdef
 with type_check
 
 constant TRUE = 1/1, FALSE = 0, junk=-TRUE
@@ -1010,7 +966,7 @@ end type
 procedure win32_tests()
 -- tests that require WIN32 platform (exw sanity.ex)
     atom lib
-    integer Sleep, Beep
+    integer Sleep
     
     if instance() < 0 then
 	crash(generic_msg)
@@ -1020,24 +976,16 @@ procedure win32_tests()
     if lib = 0 then
 	crash(generic_msg)
     end if
-    Beep = define_c_func(lib, "Beep", {C_INT, C_INT}, C_INT)
-    if Beep = -1 then
-	crash(generic_msg)
-    end if
     Sleep = define_c_proc(lib, "Sleep", {C_INT})
     if Sleep = -1 then
 	crash(generic_msg)
     end if
-    for i = 1 to 3 do
-	if c_func(Beep, {0, 0}) = 0 then
-	    crash(generic_msg)
-	end if
 	t = time()
 	c_proc(Sleep, {1000}) -- 1000 milliseconds
 	if time() - t < .5 then
 	    crash(generic_msg)
 	end if
-    end for
+
 end procedure
 
 integer last_sum
@@ -1141,7 +1089,7 @@ procedure check_install(integer doit)
     temp_eudir = upper(eudir)
     slash = find(PATHSEP, temp_eudir)
     if slash then
-	-- safer to ignore C:\ on WinDOS
+	-- safer to ignore C:\ on Windows
 	temp_eudir = temp_eudir[slash+1..$]
     end if
     
@@ -1164,7 +1112,7 @@ procedure check_install(integer doit)
 --           corrupt("exu") -- could be FreeBSD
 --      end if
     elsedef
-	-- DOS & Windows
+	-- Windows
 		eudir &= "\\BIN\\"
 		ex_sum = checksum(eudir & "ex.exe")
 		if ex_sum = SUM_EX then
@@ -1235,12 +1183,6 @@ global procedure sanity()
 	if length(dir(".")) < 2 then
 	    crash(generic_msg)
 	end if
-	if vga then
-		ifdef DOS32 then
-			testgr()
-		end ifdef
-	end if
-	make_sound()
 	same(built_in(), 1)
 	atomic_ops()
 	overflow()
@@ -1280,21 +1222,7 @@ global procedure sanity()
 		system("del sanityio.tst", 2)
     end ifdef  
     save_colors = {}
-    ifdef DOS32 then
-      for i = 0 to v[VC_NCOLORS]-1 do
-	  save_colors = append(save_colors, palette(i, {0,0,0}))
-      end for
-      for i = 1 to 200 do
-	  sound(i*15)
-	  all_palette(rand(repeat({63,63,63}, v[VC_NCOLORS])))
-      end for
-      sound(0)
-      all_palette(save_colors)
-      clear_screen()
-
-      puts(msg, "\nPASSED (100%)\n")
-      the_end()    
-    elsifdef WIN32 then
+    ifdef WIN32 then
 		ok = message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
     elsedef
 		puts(msg, "\nPASSED (100%)\n")

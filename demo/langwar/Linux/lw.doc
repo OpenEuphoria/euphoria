@@ -6,10 +6,8 @@
       
       exu lw.ex 
  
- There's a *much* better version of this game in the WIN32+DOS32 package. 
- This Linux version only uses character-based graphics. The DOS version
- uses pixel-graphics and has fine-grain task scheduling.
-       
+ There's a *much* better version of this game in the WIN32 package. 
+ This Linux version only uses character-based graphics.        
  Much better games await you on the Euphoria Web page:
       
       http://www.RapidEuphoria.com

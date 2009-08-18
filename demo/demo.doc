@@ -6,11 +6,11 @@
  written in Euphoria. You are encouraged to modify and redistribute any of 
  these programs. See License.txt for the details.
  
- Programs in the DOS32 subdirectory will only run using ex.exe. Programs
+ Programs
  in the WIN32 subdirectory will only run using exw.exe. Programs in the 
  Linux subdirectory will only using exu. All other demo programs
- can be run with any interpreter. You will have either DOS32 and WIN32
- subdirectories, or a Linux subdirectory depending on which distribution
+ can be run with any interpreter. You will have either Win32 or a 
+ Linux subdirectory depending on which distribution
  of Euphoria you have downloaded.
  
  Be sure that you have restarted your computer after installing Euphoria.
