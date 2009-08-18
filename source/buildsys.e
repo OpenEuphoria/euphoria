@@ -549,13 +549,16 @@ procedure build_direct()
 
 	for i = 1 to length(generated_files) do
 		if generated_files[i][$] = 'c' then
+			cmd = sprintf("%s %s %s", { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
+				generated_files[i] })
+
 			if not silent then
 				ShowMsg(1, 163, { 100 * (i / length(generated_files)),
 					generated_files[i] })
 			end if
-
-			cmd = sprintf("%s %s %s", { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
-				generated_files[i] })
+			if verbose then
+				printf(1, "%s\n", { cmd })
+			end if
 
 			status = system_exec(cmd, 0)
 			if status != 0 then
@@ -568,10 +571,6 @@ procedure build_direct()
 		end if
 	end for
 
-	if not silent then
-		ShowMsg(1, 166, { exe_name })
-	end if
-
 	switch compiler_type do
 		case COMPILER_WATCOM then
 			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
@@ -583,6 +582,14 @@ procedure build_direct()
 			ShowMsg(2, 167, { compiler_type })
 			abort(1)
 	end switch
+
+	if not silent then
+		ShowMsg(1, 166, { exe_name })
+	end if
+
+	if verbose then
+		printf(1, "%s\n", { cmd })
+	end if
 
 	status = system_exec(cmd, 0)
 	if status != 0 then

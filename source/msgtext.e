@@ -330,7 +330,7 @@ constant StdErrMsgs = {
 	{316, "Internal error; Binding seek to checksum area failed!"},
 	{317, "couldn't open [1]!"},
 	{318, "Your custom icon file is too large."},
-
+	{319, "Verbose output"},
 	$
 }
 

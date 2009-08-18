@@ -427,3 +427,4 @@ export sequence private_sym = {}
 export integer use_private_list = 0
 
 export boolean silent = FALSE
+export boolean verbose = FALSE

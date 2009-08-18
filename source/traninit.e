@@ -37,7 +37,6 @@ include c_out.e
 include c_decl.e
 include compile.e
 include cominit.e
-include buildsys.e
 include pathopen.e
 include error.e
 include platform.e
@@ -51,6 +50,7 @@ set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
 	{ "silent",        0, GetMsgText(177,0), { NO_CASE } },
+	{ "verbose",	   0, GetMsgText(319,0), { NO_CASE } },
 	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
 	{ "gcc",           0, GetMsgText(180,0), { NO_CASE } },
 	{ "com",           0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
@@ -72,7 +72,6 @@ sequence trans_opt_def = {
 	{ "builddir",      0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
 	{ "o",             0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
 }
-
 
 add_options( trans_opt_def )
 
@@ -105,6 +104,9 @@ export procedure transoptions()
 		switch key do
 			case "silent" then
 				silent = TRUE
+			
+			case "verbose" then
+				verbose = TRUE
 
 			case "wat" then
 				compiler_type = COMPILER_WATCOM
