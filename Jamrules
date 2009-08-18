@@ -32,9 +32,9 @@ PATH_EUTEST_EXE = eutest ;
 # Setup our build commands
 #
 
-BUILD_EUI_CMD = $(EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
+BUILD_EUI_CMD = $(PATH_EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
     [ FDirName $(ROOT_DIR) source eu.ex ] ;
-BUILD_EUC_CMD = $(EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
+BUILD_EUC_CMD = $(PATH_EUI_EXE) -i [ FDirName $(ROOT_DIR) include ]
     [ FDirName $(ROOT_DIR) source ec.ex ] ;
 
 #
