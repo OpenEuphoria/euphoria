@@ -20,6 +20,7 @@ include reswords.e
 include error.e
 include cominit.e
 include compress.e
+include symtab.e
 
 procedure InitBackEnd(integer x)
 	if not BIND then
@@ -53,7 +54,14 @@ constant
 	ST_SAVED_PRIVATES = 48,
 	ST_STACK_SPACE    = 52,
 	ST_BLOCK          = 56
-	
+
+function get_next( symtab_index sym )
+	while sym and sym_scope( sym ) = SC_UNDEFINED do
+		sym = SymTab[sym][S_NEXT]
+	end while
+	return sym
+end function
+
 procedure BackEnd(integer il_file)
 -- Store the required front-end data structures in memory.
 -- Offsets are used in some places rather than pointers.
@@ -85,13 +93,13 @@ procedure BackEnd(integer il_file)
 		-- "constant" variables are initialized with executable code
 		if atom(eentry) then
 			-- deleted
-			poke4(addr + ST_NEXT, eentry) -- NEXT
+			poke4(addr + ST_NEXT, get_next( eentry) ) -- NEXT
 			poke(addr + ST_MODE, M_TEMP) -- MODE
 			poke(addr + ST_SCOPE, SC_UNDEFINED)  -- SCOPE, must be > S_PRIVATE 
 			
 		
 		else
-			poke4(addr + ST_NEXT, eentry[S_NEXT])
+			poke4(addr + ST_NEXT, get_next( eentry[S_NEXT]) )
 			poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK])
 			poke(addr + ST_MODE, eentry[S_MODE])
 			poke(addr + ST_SCOPE, eentry[S_SCOPE])
