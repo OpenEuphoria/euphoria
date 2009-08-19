@@ -321,29 +321,71 @@ end type
 -- Parameters:
 -- 		# ##line## : the 1-base line number of the location
 -- 		# ##column## : the 1-base column number of the location
+--      # ##fgbg## : an integer, if 0 (the default) you get an attribute_code
+--                   returned otherwise you get a foreground and background color
+--                   number returned.
 --
 -- Returns:
--- 		A **sequence**, the pair ##{character, attributes}## for the specified location.
+-- * If fgbg is zero then a **sequence** of //two// elements, ##{character, attribute_code}##
+-- for the specified location.
+-- * If fgbg is not zero then a **sequence** of //three// elements, ##{characterfg_color, bg_color}##
 --
 -- Comments:
--- This function inspects a single character on the //active page//.
+-- * This function inspects a single character on the //active page//.
+-- * The attribute_code is an atom that contains the foreground and background
+-- color of the character, and possibly other operating-system dependant 
+-- information describing the appearance of the character on the screen.
+-- * The fg_color and bg_color are integers in the range 0 to 15, which correspond
+-- to...
+-- |= color number |= name |
+-- |       0       | black      |
+-- |       1       | dark blue      |
+-- |       2       | green      |
+-- |       3       | cyan      |
+-- |       4       | crimson      |
+-- |       5       | purple      |
+-- |       6       | brown      |
+-- |       7       | light gray      |
+-- |       8       | dark gray      |
+-- |       9       | blue      |
+-- |       10      | bright green      |
+-- |       11      | light blue      |
+-- |       12      | red      |
+-- |       13      | magenta      |
+-- |       14      | yellow      |
+-- |       15      | white      |
 --
--- The attribute is an atom that contains the foreground and background color of the character, and possibly other information describing the appearance of the character on the screen.
---  With get_screen_char() and [[:put_screen_char]]() you can save and restore a character on the screen along with its attributes.
+-- * With get_screen_char() and [[:put_screen_char]]() you can save and restore
+-- a character on the screen along with its attribute_code.
 --
 -- Example 1:
 -- <eucode>
 -- -- read character and attributes at top left corner
 -- s = get_screen_char(1,1)
+-- -- s could be {'A', 92}
 -- -- store character and attributes at line 25, column 10
--- put_screen_char(25, 10, {s})
+-- put_screen_char(25, 10, s)
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- -- read character and colors at line 25, column 10.
+-- s = get_screen_char(25,10, 1)
+-- -- s could be {'A', 12, 5}
 -- </eucode>
 --
 -- See Also:
 --   [[:put_screen_char]], [[:save_text_image]]
 
-public function get_screen_char(positive_atom line, positive_atom column)
-	return machine_func(M_GET_SCREEN_CHAR, {line, column})
+public function get_screen_char(positive_atom line, positive_atom column, integer fgbg = 0)
+	sequence ca
+	
+	ca = machine_func(M_GET_SCREEN_CHAR, {line, column})
+	if fgbg then
+		ca = ca[1] & and_bits({ca[2], ca[2]/16}, 0x0F)
+	end if
+	
+	return ca
 end function
 
 --**
@@ -352,11 +394,11 @@ end function
 -- Parameters:
 -- 		# ##line## : the 1-based line at which to start writing
 -- 		# ##column## : the 1-based column at which to start writing
--- 		# ##char_attr## : a sequence of alternated characters and attributes.
+-- 		# ##char_attr## : a sequence of alternated characters and attribute codes.
 --
 -- Comments:
 --
--- ##char_attr## must be in the form  ##{character, attributes, character, attributes, ...}##.
+-- ##char_attr## must be in the form  ##{character, attribute code, character, attribute code, ...}##.
 --
 -- Errors:
 -- 		The length of ##char_attr## must be a multiple of 2.
@@ -380,6 +422,55 @@ end function
 public procedure put_screen_char(positive_atom line, positive_atom column, sequence char_attr)
 	machine_proc(M_PUT_SCREEN_CHAR, {line, column, char_attr})
 end procedure
+
+
+--**
+-- Converts an attribute code to its foreground and background color components.
+--
+-- Parameters:
+-- 		# ##attr_code## : integer, an attribute code.
+--
+-- Returns:
+-- A sequence of two elements - {fgcolor, bgcolor}
+--
+-- Example 1:
+-- <eucode>
+-- ? attr_to_colors(92) --> {12, 5}
+-- </eucode>
+--
+-- See Also:
+--   [[:get_screen_char]], [[:colors_to_attr]]
+
+public function attr_to_colors(integer attr_code)
+    return and_bits({attr_code, attr_code/16}, 0x0F)
+end function
+
+--**
+-- Converts a foreground and background color set to its attribute code format.
+--
+-- Parameters:
+-- 		# ##fgbg## : Either a sequence of {fgcolor, bgcolor} or just an integer fgcolor.
+--      # ##bg## : An integer bgcolor. Only used when ##fgbg## is an integer.
+--
+-- Returns:
+-- An integer attribute code.
+--
+-- Example 1:
+-- <eucode>
+-- ? colors_to_attr({12, 5}) --> 92
+-- ? colors_to_attr(12, 5) --> 92
+-- </eucode>
+--
+-- See Also:
+--   [[:get_screen_char]], [[:put_screen_char]], [[:attr_to_colors]]
+
+public function colors_to_attr(object fgbg, integer bg = 0)
+	if sequence(fgbg) then
+		return fgbg[1] + fgbg[2] * 16
+	else
+		return fgbg + bg * 16
+	end if
+end function
 
 --**
 -- Display a text image in any text mode.
