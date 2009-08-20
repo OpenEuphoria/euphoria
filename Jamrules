@@ -235,6 +235,6 @@ rule EuDoc
 
 actions EuDoc
 {
-    $(EUI_EXE) $(EUDOC_SOURCE) -v -a $(ASSEMBLY_FILE) -o $(CREOLE_FILE)
-    $(EUI_EXE) $(CREOLEHTML_SOURCE) -A=ON -t=$(TEMPLATE) -ohtml $(CREOLE_FILE)
+    $(PATH_EUI_EXE) $(EUDOC_SOURCE) -v -a $(ASSEMBLY_FILE) -o $(CREOLE_FILE)
+    $(PATH_EUI_EXE) $(CREOLEHTML_SOURCE) -A=ON -t=$(TEMPLATE) -ohtml $(CREOLE_FILE)
 }
