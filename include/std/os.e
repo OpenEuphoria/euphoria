@@ -502,5 +502,5 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- [[:euinc.conf]], [[:include]], [[:option_switches]]
+-- [[:eu.cfg]], [[:include]], [[:option_switches]]
 
