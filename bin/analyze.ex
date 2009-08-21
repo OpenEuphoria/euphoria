@@ -52,7 +52,7 @@ procedure parse_include(sequence path_name, sequence item)
 			idx += 1
 			if find(tokens[idx][TDATA], { "procedure", "function", "type" }) then
 				idx += 1
-				inc_funcs = m:put(inc_funcs, tokens[idx][TDATA], { normalize_inc(fname) }, m:CONCAT)
+				m:put(inc_funcs, tokens[idx][TDATA], { normalize_inc(fname) }, m:CONCAT)
 				ifdef VERBOSE then
 					printf(1, "... item: %s\n", { tokens[idx][TDATA] })
 				end ifdef
@@ -132,7 +132,7 @@ procedure main(sequence args=command_line())
 				else
 					if m:has(missed_inc, tok[TDATA]) = 0 then
 						printf(1, "  Not included and not found anywhere: %s\n", { tok[TDATA] })
-						missed_inc = m:put(missed_inc, tok[TDATA], 1)
+						m:put(missed_inc, tok[TDATA], 1)
 					end if
 				end if
 			elsif tok[TTYPE] = T_KEYWORD then
