@@ -2923,6 +2923,7 @@ procedure For_statement()
 	integer exit_base,next_base,end_op
 	token tok, loop_var
 	symtab_index loop_var_sym
+	sequence save_syms
 	
 	Start_block( FOR )
 	loop_var = next_token()
@@ -2975,7 +2976,7 @@ procedure For_statement()
 	bp1 = length(Code)+1
 	emit_addr(0) -- will be patched - don't straighten
 	
-	sequence save_syms = Code[$-5..$-3] -- could be temps, but can't get rid of them yet
+	save_syms = Code[$-5..$-3] -- could be temps, but can't get rid of them yet
 	for i = 1 to 3 do
 		clear_temp( save_syms[i] )
 	end for
