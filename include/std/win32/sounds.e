@@ -1,3 +1,10 @@
+-- (c) Copyright - See License.txt
+--
+--****
+-- == Windows Sound
+--
+-- <<LEVELTOC depth=2>>
+--
 include std/dll.e
 
 
@@ -10,6 +17,8 @@ public constant
 	$
 
 
+integer xMessageBeep
+atom xUser32
 --**
 -- Makes a sound.
 --
@@ -28,12 +37,10 @@ public constant
 -- via the Control Panel.
 --
 --Example:
---<eucode>
+-- <eucode>
 --  sound( SND_EXCLAMATION )
---</eucode>
+-- </eucode>
 
-integer xMessageBeep
-atom xUser32
 public procedure sound( atom pStyle = SND_DEFAULT )
 	if not object(xMessageBeep) then
 		xUser32 = open_dll("user32.dll")
