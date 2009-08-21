@@ -7,6 +7,10 @@ elsedef
 	without type_check
 end ifdef
 
+ifdef EPROFILE then
+	with profile
+end ifdef
+
 include mode.e
 set_mode("translate", 0 )
 

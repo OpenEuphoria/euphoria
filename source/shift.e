@@ -108,9 +108,9 @@ procedure init_op_info()
 	op_info[LESSEQ_IFW_I        ] = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[LESS_IFW            ] = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[LESS_IFW_I          ] = { FIXED_SIZE, 4, {3}, {}, {} }
-	op_info[LHS_SUBS            ] = { FIXED_SIZE, 5, {}, {3}, {} }
-	op_info[LHS_SUBS1           ] = { FIXED_SIZE, 5, {}, {3}, {} }
-	op_info[LHS_SUBS1_COPY      ] = { FIXED_SIZE, 5, {}, {3}, {} }
+	op_info[LHS_SUBS            ] = { FIXED_SIZE, 5, {}, {3,4}, {} }
+	op_info[LHS_SUBS1           ] = { FIXED_SIZE, 5, {}, {3,4}, {} }
+	op_info[LHS_SUBS1_COPY      ] = { FIXED_SIZE, 5, {}, {3,4}, {} }
 	op_info[LOG                 ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[MACHINE_FUNC        ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[MACHINE_PROC        ] = { FIXED_SIZE, 3, {}, {}, {} }
@@ -150,7 +150,7 @@ procedure init_op_info()
 	op_info[PEEK4U              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK4S              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEKS               ] = { FIXED_SIZE, 3, {}, {2}, {} }
-	op_info[PEEK                ] = { FIXED_SIZE, 3, {}, {3}, {} }
+	op_info[PEEK                ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PIXEL               ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[PLENGTH             ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PLUS                ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -179,11 +179,11 @@ procedure init_op_info()
 	op_info[RETURNF             ] = { FIXED_SIZE, 4, {}, {}, {} }
 	op_info[RETURNP             ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[RETURNT             ] = { FIXED_SIZE, 1, {}, {}, {} }
-	op_info[RHS_SLICE           ] = { FIXED_SIZE, 5, {}, {}, {} }
+	op_info[RHS_SLICE           ] = { FIXED_SIZE, 5, {}, {4}, {} }
 	op_info[RHS_SUBS            ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[RHS_SUBS_I          ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[RHS_SUBS_CHECK      ] = { FIXED_SIZE, 4, {}, {3}, {} }
-	op_info[RIGHT_BRACE_2       ] = { FIXED_SIZE, 4, {}, {}, {} }
+	op_info[RIGHT_BRACE_2       ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	
 	op_info[ROUTINE_ID          ] = { FIXED_SIZE, 6 - TRANSLATE, {}, { 4 + not TRANSLATE }, {} }
 	op_info[SC2_OR              ] = { FIXED_SIZE, 3, {}, {}, {} }
@@ -238,6 +238,10 @@ procedure init_op_info()
 	op_info[IS_AN_OBJECT        ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	
 	op_info[CALL_BACK_RETURN    ] = { FIXED_SIZE, 1, {}, {}, {} }
+	
+	op_info[REF_TEMP            ] = { FIXED_SIZE, 2, {}, {}, {} }
+	op_info[DEREF_TEMP          ] = { FIXED_SIZE, 2, {}, {}, {} }
+	op_info[NOVALUE_TEMP        ] = { FIXED_SIZE, 2, {}, {}, {} }
 	
 	op_info[PROC_FORWARD        ] = { VARIABLE_SIZE, 0, {}, {}, {} }
 	op_info[FUNC_FORWARD        ] = { VARIABLE_SIZE, 0, {}, {}, {} }
@@ -387,17 +391,17 @@ end procedure
 --**
 -- Returns a sequence of the current op and all of its operands.
 export function current_op( integer pc, sequence code = Code )
-	if pc > length(Code) or pc < 1 then
+
+	if pc > length(code) or pc < 1 then
 		return {}
 	end if
-	return Code[pc..pc-1+op_size( pc, code )]
+	return code[pc..pc-1+op_size( pc, code )]
 end function
 
 --**
 -- Returns a sequence of ops and all of their operands.  The
 -- offset describes the offset of the number of ops from the current.
 export function get_ops( integer pc, integer offset, integer num_ops = 1, sequence code=Code )
-	sequence ops = {}
 	integer sign = offset >= 0
 	if not sign then
 		offset = -offset
@@ -409,9 +413,66 @@ export function get_ops( integer pc, integer offset, integer num_ops = 1, sequen
 		offset -= sign
 	end while
 	
+	sequence ops = repeat( 0, num_ops )
+	integer opx = 1
 	while num_ops and pc <= length(code) do
-		ops = append( ops, current_op( pc ) )
-		pc += length( ops[$] )
+		ops[opx] = current_op( pc )
+		pc += length( ops[opx] )
+		opx += 1
+		num_ops -= 1
 	end while
+	if num_ops then
+		ops = ops[1..$-num_ops]
+	end if
 	return ops
+end function
+
+--**
+-- Pass in the result of [:current_op].  The return value will be
+-- zero if there is no target, or the sym of the target for the op,
+-- or a sequence of syms if the op has multiple targets 
+-- (e.g., LHS_SUBS).
+export function get_target_sym( sequence opseq )
+	if not length( opseq ) then
+		return 0
+	end if
+	integer op = opseq[1]
+	sequence info = op_info[op]
+	
+	if info[OP_SIZE_TYPE] = FIXED_SIZE then
+		switch length( info[OP_TARGET] ) do
+			case 0 then
+				break
+			
+			case 1 then
+				return opseq[info[OP_TARGET][1]+1]
+			
+			case else
+				sequence targets = info[OP_TARGET]
+				for i = 1 to length( targets ) do
+					targets[i] = opseq[targets[i]] + 1
+				end for
+				
+				return targets
+				
+		end switch
+		
+	else
+	
+		switch op do
+			case PROC, PROC_TAIL then
+				symtab_index sub = opseq[2]
+				if sym_token( sub ) = FUNC then
+					return opseq[$]
+				end if
+			
+			case FUNC_FORWARD then
+				return opseq[$]
+			
+			case RIGHT_BRACE_N, CONCAT_N then
+				return opseq[opseq[2]+2]
+			
+		end switch
+	end if
+	return 0
 end function

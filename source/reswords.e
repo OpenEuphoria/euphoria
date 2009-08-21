@@ -216,7 +216,10 @@ export constant
 	DELETE_ROUTINE      = 206,
 	DELETE_OBJECT       = 207,
 	EXIT_BLOCK          = 208,
-	MAX_OPCODE          = 208
+	REF_TEMP            = 209,  -- Interpreter only?
+	DEREF_TEMP          = 210,  -- Interpreter only?
+	NOVALUE_TEMP        = 211,  -- Interpreter only?
+	MAX_OPCODE          = 211
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

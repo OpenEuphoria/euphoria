@@ -128,6 +128,10 @@ extern object_ptr expr_max;    // top limit of call stack
 extern object_ptr expr_limit;  // don't start a new routine above this
 extern int *tpc;
 
+#ifndef ERUNTIME
+extern symtab_ptr TopLevelSub;
+#endif
+
 /**********************/
 /* Exported variables */
 /**********************/
@@ -1071,8 +1075,7 @@ object Remove_elements(int start, int stop, int in_place )
 		for ( i = 1; i < start; i++) {
 			temp = *(++src);
 			*(++trg) = temp;
-		  	if (!IS_ATOM_INT(temp))
-		  		RefDS(temp);
+			Ref(temp);
 		}
         src = s1->base+stop;
 		while (TRUE) {
@@ -5679,7 +5682,23 @@ void Cleanup(int status)
 #ifdef EXTRA_STATS
 	Stats();
 #endif
-
+	{
+		symtab_ptr sym = TopLevelSub;
+		while( sym ){
+			if( sym->mode = M_NORMAL && 
+				(sym->token == PROC ||
+				sym->token == FUNC || 
+				sym->token == TYPE)){
+					
+// 				EFree( sym->u.subp.code );
+				EFree( sym->u.subp.linetab );
+			}
+			sym = sym->next;
+		}
+	}
+	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
+	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
+	EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
 #endif
 
 #ifdef EWINDOWS
@@ -6169,7 +6188,7 @@ void Replace( replace_ptr rb ){
 		}
 		else { // remove any extra elements, and then assign a regular slice
 			long c;
-			if( (target != copy_to) || ( SEQ_PTR( copy_to )->ref != 1 ) ){
+			if( target != copy_to ){
 				// ensures that Add_internal_space will make a copy
 				RefDS( copy_to );
 				c = 1;
@@ -6193,7 +6212,7 @@ void Replace( replace_ptr rb ){
 				s1 = Copy_elements( start_pos, s2, 1 );
 			}
 			else {
-				if( IS_DBL_OR_SEQUENCE( target ) && target != copy_to ){
+				if( target != copy_to ){
 					DeRef( target );
 				}
 				s1 = Copy_elements( start_pos, s2, (target == copy_to));

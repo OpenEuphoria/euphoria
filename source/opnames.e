@@ -214,5 +214,8 @@ export constant opnames = {
 	"PROC_TAIL",
 	"DELETE_ROUTINE",
 	"DELETE_OBJECT",
-	"EXIT_BLOCK"
+	"EXIT_BLOCK",
+	"REF_TEMP",
+	"DEREF_TEMP",
+	"NOVALUE_TEMP"
 }

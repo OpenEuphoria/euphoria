@@ -161,7 +161,7 @@ enum
 -- Otherwise, ##referenced## should be NO_REFERENCE.
 procedure create_temp( symtab_index sym, integer referenced )
 	if is_temp( sym ) then
-		map:put( dead_temp_walking, sym, referenced, map:ADD )
+		map:put( dead_temp_walking, sym, referenced )
 	end if
 end procedure
 
@@ -182,7 +182,7 @@ procedure dispose_temp( symtab_index sym, integer keep, integer remove_from_map 
 		and keep = DISCARD_TEMP then
 			CDeRef( sym )
 		end if
-		c_stmt(sprintf("@ = NOVALUE;\n", sym ), sym)
+		c_stmt("@ = NOVALUE;\n", sym)
 		SetBBType( sym, TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
 	end if
 end procedure
@@ -1782,6 +1782,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 	boolean close_brace
 
 	target_elem = TYPE_OBJECT
+	create_temp( Code[pc+3], NEW_REFERENCE )
 
 	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
@@ -1833,6 +1834,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 				CDeRefStr("_0")
 				SetBBType(Code[pc+3], TYPE_INTEGER, target,
 									  TYPE_OBJECT, 0)
+				dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 				return np
 
 			elsif SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
@@ -1845,6 +1847,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 					target = novalue
 				end if
 				SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+				dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 				return np
 			end if
 		end if
@@ -1865,7 +1868,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 
 		CDeRefStr("_0")
 
-		dispose_temps( pc+1, 2, DISCARD_TEMP, KEEP_IN_MAP )
+		dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 		return pc + 4
 
 	elsif TypeIs(Code[pc+2], TYPE_INTEGER) and
@@ -2057,8 +2060,8 @@ function binary_op(integer pc, integer iii, sequence target_val,
 
 	CDeRefStr("_0")
 	SetBBType(Code[pc+3], target_type, target_val, target_elem, 0)
-	dispose_temps( pc+1, 2, DISCARD_TEMP, KEEP_IN_MAP )
-	create_temp( Code[pc+3], NEW_REFERENCE )
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	
 	return pc + 4
 end function
 
@@ -2114,7 +2117,11 @@ procedure opSTARTLINE()
 		c_puts("\");\n")
 
 	else
-		c_stmt0("// ")
+		if not match("*/", line ) then
+			c_stmt0("/** ")
+		else
+			c_stmt0("//")
+		end if
 		for i = length(line) to 1 by -1 do
 			if not find(line[i], " \t\r\n") then
 				if line[i] = '\\' then
@@ -2125,7 +2132,7 @@ procedure opSTARTLINE()
 			end if
 		end for
 		c_puts(line)
-		c_puts("\n")
+		c_puts("*/\n")
 	end if
 	pc += 2
 end procedure
@@ -2839,37 +2846,7 @@ procedure opLENGTH()
 		CDeRefStr("_0")
 		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 	end if
--- 	if pc + 3 < length(Code) and is_temp( Code[pc+1] ) label "dispose" then
--- 		integer dispose = 1
--- 		
--- 		if find( Code[pc+3], {RHS_SUBS, RHS_SUBS_I, RHS_SUBS_CHECK, RHS_SLICE, PROC/*, ASSIGN_SUBS, PASSIGN_SUBS*/}) then
--- 		---- RHS_SUBS / RHS_SUBS_CHECK / RHS_SUBS_I / ASSIGN_SUBS / PASSIGN_SUBS
--- 			if Code[pc+4] = Code[pc+1] then
--- 				dispose = 0
--- 			end if
--- 		
--- 		elsif Code[pc+3] = PROC then
--- 			-- see if the temp is being used in the call
--- 			integer args = SymTab[Code[pc+4]][S_NUM_ARGS]
--- 			for arg = pc + 5 to pc + 4 + args do
--- 				if Code[arg] = Code[pc+1] then
--- 					dispose = 0
--- 					exit
--- 				end if
--- 			end for
--- 		elsif find( Code[pc+3],  {MINUS, PLUS}) and Code[pc+4] = Code[pc+1] then
--- 			-- [$-x]
--- 			dispose = 0
--- 		end if
--- 		
--- 		if dispose then
--- 			dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
--- 		end if
--- 		
--- 		create_temp( Code[pc+1], NO_REFERENCE )
--- 	else
--- 		dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
--- 	end if
+	
 	if dispose_length() then
 		dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	end if
@@ -4374,7 +4351,6 @@ end procedure
 procedure opRETURNF()
 -- generate code for return from function
 	symtab_index sym, sub, ret
-	boolean doref
 	sequence x
 	object stsub
 	integer eltype
@@ -4382,7 +4358,8 @@ procedure opRETURNF()
 	sub = Code[pc+1]
 	ret = Code[pc+3]
 	
-	if is_temp( ret ) and not map:get( dead_temp_walking, ret, 1 ) then
+	if is_temp( ret ) 
+	or map:get( dead_temp_walking, ret, NO_REFERENCE ) != NEW_REFERENCE then
 		CRef( ret )
 	end if
 	
@@ -4424,17 +4401,12 @@ procedure opRETURNF()
 
 	end if
 	SymTab[sub] = stsub
-	
-
-	doref = TRUE
 
 	-- deref any active for-loop vars
 	for i = 1 to length(loop_stack) do
 		if loop_stack[i][LOOP_VAR] != 0 then
 			-- active for-loop var
-			if loop_stack[i][LOOP_VAR] = ret then
-				doref = FALSE
-			else
+			if loop_stack[i][LOOP_VAR] != ret then
 				CDeRef(loop_stack[i][LOOP_VAR])
 			end if
 		end if
@@ -4447,7 +4419,6 @@ procedure opRETURNF()
 		while sym != 0 do
 			if SymTab[sym][S_SCOPE] != DELETED and
 			   SymTab[sym][S_TEMP_NAME] = SymTab[ret][S_TEMP_NAME] then
-				doref = FALSE
 				exit
 			end if
 			sym = SymTab[sym][S_NEXT]
@@ -4460,16 +4431,11 @@ procedure opRETURNF()
 			if SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
 			   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
 				if sym = ret then
-					doref = FALSE
 					exit
 				end if
 			end if
 			sym = SymTab[sym][S_NEXT]
 		end while
-	end if
-
-	if doref then
-		CRef(ret)
 	end if
 
 	SymTab[ret][S_ONE_REF] = FALSE
@@ -6736,7 +6702,10 @@ export procedure init_opcodes()
 			     "END_PARAM_CHECK",
 			     "PROC_FORWARD",
 			     "FUNC_FORWARD",
-			     "TYPE_CHECK_FORWARD" then
+			     "TYPE_CHECK_FORWARD",
+				 "REF_TEMP",
+				 "DEREF_TEMP",
+				 "NOVALUE_TEMP" then
 				-- never emitted
 				operation[i] = routine_id("opINTERNAL_ERROR")
 			

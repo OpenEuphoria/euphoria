@@ -219,7 +219,10 @@
 #define DELETE_ROUTINE      206
 #define DELETE_OBJECT       207
 #define EXIT_BLOCK          208
-#define MAX_OPCODE          208
+#define REF_TEMP            209
+#define DEREF_TEMP          210
+#define NOVALUE_TEMP        211
+#define MAX_OPCODE          211
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

@@ -7,11 +7,12 @@ elsedef
 without type_check
 end ifdef
 include std/os.e
+include std/map.e
 
 include global.e
 include platform.e
 include pathopen.e
-include reswords.e
+include reswords.e as rw
 include symtab.e
 include scanner.e
 include fwdref.e
@@ -19,6 +20,7 @@ include parser.e
 include error.e
 include c_out.e
 include block.e
+include shift.e
 
 export integer op_info1, op_info2
 export integer optimized_while
@@ -50,11 +52,11 @@ constant token_name =
 	{CASE, "case"},
 	{COLON, ":"},
 	{COMMA, ","},
-	{CONCAT, "&"},
+	{rw:CONCAT, "&"},
 	{CONCAT_EQUALS,"&="},
 	{CONSTANT, "constant"},
 	{CONTINUE, "continue"},
-	{DIVIDE, "/"},
+	{rw:DIVIDE, "/"},
 	{DIVIDE_EQUALS,"/="},
 	{DO, "do"},
 	{DOLLAR, "$"},
@@ -88,7 +90,7 @@ constant token_name =
 	{LOOP, "loop"},
 	{MINUS, "-"},
 	{MINUS_EQUALS,"-="},
-	{MULTIPLY, "*"},
+	{rw:MULTIPLY, "*"},
 	{MULTIPLY_EQUALS,"*="},
 	{NAMESPACE, "a namespace qualifier"},
 	{NEWLINE, "the end of a line"},
@@ -268,6 +270,112 @@ procedure emit_opcode(integer op)
 	Code = append(Code, op)
 end procedure
 
+export constant
+	NO_REFERENCE = 0,
+	NEW_REFERENCE = 1,
+	DISCARD_TEMP = 0,
+	SAVE_TEMP = 1
+map:map emitted_temps = map:new()
+export procedure emit_temp( object tempsym, integer referenced )
+	if INTERPRET  then -- translator has its own way of handling temps
+		if sequence(tempsym) then
+			for i = 1 to length(tempsym) do
+				emit_temp( tempsym[i], referenced )
+			end for
+		elsif tempsym > 0
+		and sym_mode( tempsym ) = M_TEMP 
+		and not IsInteger( tempsym ) then
+			-- don't really care about integer temps
+			map:put( emitted_temps, tempsym, referenced )
+		end if
+	end if
+end procedure
+
+map:map disposed_temps = map:new()
+procedure dispose_temp( object temps, integer keep )
+	if TRANSLATE then
+		return
+	end if
+	if atom( temps ) then
+		temps = {temps}
+	end if
+	for i = 1 to length( temps ) do
+		symtab_index tempsym = temps[i]
+		map:put( disposed_temps, tempsym, DISCARD_TEMP ) -- keep
+	end for
+end procedure
+
+	
+--**
+-- Called by the parser after a complete statement.  Emits appropriate
+-- opcode + temp sym to clean up after a temp.
+export procedure flush_temps( sequence except_for = {} )
+	if TRANSLATE then
+		return
+	end if
+	sequence syms = map:keys( emitted_temps )
+	sequence
+		refs = {},
+		derefs = {},
+		novalues = {}
+		
+	for i = 1 to length( syms ) do
+		symtab_index sym = syms[i]
+		
+		if find( sym, except_for ) then
+			continue
+		end if
+		
+		integer reference = map:get( emitted_temps, sym, NO_REFERENCE )
+		integer keep      = map:get( disposed_temps, sym, DISCARD_TEMP )
+		clear_temp( sym )
+		if keep = SAVE_TEMP and reference = NO_REFERENCE then
+			refs &= sym
+			
+		elsif keep = DISCARD_TEMP and reference = NEW_REFERENCE then
+			derefs &= sym
+			
+		else
+			novalues &= sym
+			
+		end if
+	end for
+	
+	if not length( except_for ) then
+		clear_last()
+	end if
+	
+	for i = 1 to length( refs ) do
+		emit( REF_TEMP )
+		emit( refs[i] )
+	end for
+	
+	for i = 1 to length( derefs ) do
+		emit( DEREF_TEMP )
+		emit( derefs[i] )
+	end for
+	
+	for i = 1 to length( novalues ) do
+		emit( NOVALUE_TEMP )
+		emit( novalues[i] )
+	end for
+	
+end procedure
+
+procedure check_for_temps()
+	if TRANSLATE or last_op < 1 or last_pc < 1 then
+		return
+	end if
+	
+	emit_temp( get_target_sym( current_op( last_pc ) ), op_temp_ref[last_op] )
+	
+end procedure
+
+export procedure clear_temp( symtab_index tempsym )
+	map:remove( emitted_temps, tempsym )
+	map:remove( disposed_temps, tempsym )
+end procedure
+
 export procedure backpatch(integer index, integer val)
 -- back patch a word of code 
 		Code[index] = val
@@ -279,9 +387,9 @@ op_result = repeat(T_UNKNOWN, MAX_OPCODE)
 op_result[RIGHT_BRACE_N] = T_SEQUENCE
 op_result[RIGHT_BRACE_2] = T_SEQUENCE
 op_result[REPEAT] = T_SEQUENCE
-op_result[APPEND] = T_SEQUENCE
+op_result[rw:APPEND] = T_SEQUENCE
 op_result[RHS_SLICE] = T_SEQUENCE
-op_result[CONCAT] = T_SEQUENCE
+op_result[rw:CONCAT] = T_SEQUENCE
 op_result[CONCAT_N] = T_SEQUENCE
 op_result[PREPEND] = T_SEQUENCE
 op_result[COMMAND_LINE] = T_SEQUENCE
@@ -323,6 +431,85 @@ op_result[TAIL] = T_SEQUENCE
 op_result[REMOVE] = T_SEQUENCE
 op_result[REPLACE] = T_SEQUENCE
 
+sequence op_temp_ref = repeat( NO_REFERENCE, MAX_OPCODE )
+op_temp_ref[RIGHT_BRACE_N]    = NEW_REFERENCE
+op_temp_ref[RIGHT_BRACE_2]    = NEW_REFERENCE
+op_temp_ref[PLUS1]            = NEW_REFERENCE
+op_temp_ref[ASSIGN]           = NEW_REFERENCE
+op_temp_ref[ASSIGN_OP_SLICE]  = NEW_REFERENCE
+op_temp_ref[PASSIGN_OP_SLICE] = NEW_REFERENCE
+op_temp_ref[ASSIGN_SLICE]     = NEW_REFERENCE
+op_temp_ref[PASSIGN_SLICE]    = NEW_REFERENCE
+op_temp_ref[PASSIGN_SUBS]     = NEW_REFERENCE
+op_temp_ref[ASSIGN_SUBS]      = NEW_REFERENCE
+op_temp_ref[RHS_SLICE]        = NEW_REFERENCE
+op_temp_ref[RHS_SUBS]         = NEW_REFERENCE
+op_temp_ref[RHS_SUBS_CHECK]   = NEW_REFERENCE
+op_temp_ref[RIGHT_BRACE_N]    = NEW_REFERENCE
+op_temp_ref[RIGHT_BRACE_2]    = NEW_REFERENCE
+op_temp_ref[rw:APPEND]        = NEW_REFERENCE
+op_temp_ref[rw:PREPEND]       = NEW_REFERENCE
+op_temp_ref[rw:CONCAT]        = NEW_REFERENCE
+op_temp_ref[INSERT]           = NEW_REFERENCE
+op_temp_ref[HEAD]             = NEW_REFERENCE
+op_temp_ref[REMOVE]           = NEW_REFERENCE
+op_temp_ref[REPLACE]          = NEW_REFERENCE
+op_temp_ref[TAIL]             = NEW_REFERENCE
+op_temp_ref[CONCAT_N]         = NEW_REFERENCE
+op_temp_ref[REPEAT]           = NEW_REFERENCE
+op_temp_ref[HASH]             = NEW_REFERENCE
+op_temp_ref[PEEK_STRING]      = NEW_REFERENCE
+op_temp_ref[PEEK]             = NEW_REFERENCE
+op_temp_ref[PEEK2U]           = NEW_REFERENCE
+op_temp_ref[PEEK2S]           = NEW_REFERENCE
+op_temp_ref[PEEK4U]           = NEW_REFERENCE
+op_temp_ref[PEEK4S]           = NEW_REFERENCE
+op_temp_ref[OPEN]             = NEW_REFERENCE
+op_temp_ref[GETS]             = NEW_REFERENCE
+op_temp_ref[SPRINTF]          = NEW_REFERENCE
+op_temp_ref[COMMAND_LINE]     = NEW_REFERENCE
+op_temp_ref[OPTION_SWITCHES]  = NEW_REFERENCE
+op_temp_ref[GETENV]           = NEW_REFERENCE
+op_temp_ref[MACHINE_FUNC]     = NEW_REFERENCE
+op_temp_ref[DELETE_ROUTINE]   = NEW_REFERENCE
+op_temp_ref[C_FUNC]           = NEW_REFERENCE
+op_temp_ref[TASK_CREATE]      = NEW_REFERENCE
+op_temp_ref[TASK_SELF]        = NEW_REFERENCE
+op_temp_ref[TASK_LIST]        = NEW_REFERENCE
+op_temp_ref[TASK_STATUS]      = NEW_REFERENCE
+op_temp_ref[rw:MULTIPLY]      = NEW_REFERENCE
+op_temp_ref[PLUS1]            = NEW_REFERENCE
+op_temp_ref[DIV2]             = NEW_REFERENCE
+op_temp_ref[FLOOR_DIV2]       = NEW_REFERENCE
+op_temp_ref[PLUS]             = NEW_REFERENCE
+op_temp_ref[MINUS]            = NEW_REFERENCE
+op_temp_ref[OR]               = NEW_REFERENCE
+op_temp_ref[XOR]              = NEW_REFERENCE
+op_temp_ref[AND]              = NEW_REFERENCE
+op_temp_ref[rw:DIVIDE]        = NEW_REFERENCE
+op_temp_ref[REMAINDER]        = NEW_REFERENCE
+op_temp_ref[FLOOR_DIV]        = NEW_REFERENCE
+op_temp_ref[AND_BITS]         = NEW_REFERENCE
+op_temp_ref[OR_BITS]          = NEW_REFERENCE
+op_temp_ref[XOR_BITS]         = NEW_REFERENCE
+op_temp_ref[POWER]            = NEW_REFERENCE
+op_temp_ref[LESS]             = NEW_REFERENCE
+op_temp_ref[GREATER]          = NEW_REFERENCE
+op_temp_ref[EQUALS]           = NEW_REFERENCE
+op_temp_ref[NOTEQ]            = NEW_REFERENCE
+op_temp_ref[LESSEQ]           = NEW_REFERENCE
+op_temp_ref[GREATEREQ]        = NEW_REFERENCE
+op_temp_ref[FOR]              = NEW_REFERENCE
+op_temp_ref[ENDFOR_GENERAL]   = NEW_REFERENCE
+op_temp_ref[LHS_SUBS1]        = NEW_REFERENCE
+op_temp_ref[LHS_SUBS1_COPY]   = NEW_REFERENCE
+op_temp_ref[LHS_SUBS]         = NEW_REFERENCE
+op_temp_ref[UMINUS]           = NEW_REFERENCE
+op_temp_ref[TIME]             = NEW_REFERENCE
+op_temp_ref[SPLICE]           = NEW_REFERENCE
+op_temp_ref[PROC]             = NEW_REFERENCE
+
+
 procedure cont11ii(integer op, boolean ii)
 -- if ii is TRUE then integer arg always produces integer result
 	integer t, source, c
@@ -343,6 +530,7 @@ procedure cont11ii(integer op, boolean ii)
 
 	Push(c)
 	emit_addr(c)
+	dispose_temp( source, DISCARD_TEMP )
 end procedure
 
 procedure cont21d(integer op, integer a, integer b, boolean ii)    
@@ -358,9 +546,10 @@ procedure cont21d(integer op, integer a, integer b, boolean ii)
 		TempInteger(c)
 	else 
 		c = NewTempSym() -- allocate *after* checking opnd types
-	end if   
+	end if
 	Push(c)
 	emit_addr(c)
+	dispose_temp( a & b, DISCARD_TEMP )
 end procedure
 		
 procedure cont21ii(integer op, boolean ii)
@@ -414,6 +603,11 @@ export function Last_pc()
 	return last_pc
 end function
 
+export procedure clear_last()
+	last_op = 0
+	last_pc = 0
+end procedure
+
 export procedure clear_op()
 	previous_op = -1
 	assignable = FALSE
@@ -433,6 +627,12 @@ end procedure
 
 export procedure clear_inline_targets()
 	inlined_targets = {}
+end procedure
+
+export procedure emit_inline( sequence code )
+	last_pc = 0
+	last_op = 0
+	Code &= code
 end procedure
 
 constant opZeroZero = {
@@ -456,6 +656,10 @@ export procedure emit_op(integer op)
 	sequence elements
 	object element_vals
 
+	check_for_temps()
+	integer last_pc_backup = last_pc
+	integer last_op_backup = last_op
+	
 	last_op = op
 	last_pc = length(Code) + 1
 	-- 1 input, 0 outputs, can combine with previous op
@@ -474,9 +678,11 @@ export procedure emit_op(integer op)
 					
 				end if
 				assignable = FALSE
+				clear_last()
 				break "EMIT"
 			end if
 			-- replace previous op (temp) target with ASSIGN target 
+			clear_temp( Code[$] )
 			Code = Code[1..$-1] -- drop previous target
 			op = previous_op -- keep same previous op 
 			if IsInteger(target) then
@@ -507,7 +713,8 @@ export procedure emit_op(integer op)
 					end if
 				end if
 			end if
-		
+			last_op = last_op_backup
+			last_pc = last_pc_backup
 		else 
 			if IsInteger(source) and IsInteger(target) then
 				op = ASSIGN_I
@@ -522,7 +729,7 @@ export procedure emit_op(integer op)
 
 			emit_opcode(op)
 			emit_addr(source)
-		
+			last_op = op
 		end if
 		
 		assignable = FALSE
@@ -571,6 +778,7 @@ export procedure emit_op(integer op)
 					emit_addr(cg_stack[i])
 					cg_stack[i] = NewTempSym()
 					emit_addr(cg_stack[i])
+					check_for_temps()
 				end if
 			end for
 		end if
@@ -579,6 +787,7 @@ export procedure emit_op(integer op)
 		for i = length(cg_stack)-n+1 to length(cg_stack) do 
 			emit_addr(cg_stack[i])
 			TempFree(cg_stack[i])
+			dispose_temp( cg_stack[i], DISCARD_TEMP )
 		end for
 		
 		cg_stack = cg_stack[1..$-n]
@@ -609,6 +818,7 @@ export procedure emit_op(integer op)
 		for i = length(cg_stack)-n+1 to length(cg_stack) do 
 			emit_addr(cg_stack[i])
 			TempFree(cg_stack[i])
+			dispose_temp( cg_stack[i], DISCARD_TEMP )
 		end for
 		cg_stack = cg_stack[1..$-n]
 		
@@ -636,10 +846,12 @@ export procedure emit_op(integer op)
 	    for i=length(paths) to 1 by -1 do
 	        c = NewStringSym(paths[i])
 	        emit_addr(c)
+			dispose_temp( c, SAVE_TEMP )
 	    end for
 	    b = NewTempSym()
 	    Push(b)
 	    emit_addr(b)
+		last_op = RIGHT_BRACE_N
 
 	-- 0 inputs, 0 outputs - note: parser may emit an extra word
 	elsif find(op, opZeroZero) then
@@ -652,11 +864,15 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 		-- AND and OR will have been short-circuited:
 		if previous_op >= LESS and previous_op <= NOT then
+			clear_temp( Code[$] )
 			Code = Code[1..$-1] 
 			if previous_op = NOT then
 				op = NOT_IFW
 				backpatch(length(Code) - 1, op)
-			
+				sequence if_code = Code[$-1..$]
+				Code = Code[1..$-2]
+				flush_temps( { if_code[2] } )
+				Code &= if_code
 			else 
 				if IsInteger(Code[$-1]) and
 				   IsInteger(Code[$]) then 
@@ -664,19 +880,32 @@ export procedure emit_op(integer op)
 				else
 					op = previous_op + LESS_IFW - LESS
 				end if
+				
 				backpatch(length(Code) - 2, op)
+				
+				sequence if_code = Code[$-2..$]
+				Code = Code[1..$-3]
+				flush_temps( if_code[2..3] )
+				Code &= if_code
+				
 			end if
-		
+			
+			last_pc = last_pc_backup
+			last_op = op
+			
 		elsif op = WHILE and    
 				-- need extra code in parser to optimize IF/ELSIF too 
 			  a > 0 and SymTab[a][S_MODE] = M_CONSTANT and
 			  integer(SymTab[a][S_OBJ]) and 
 			  not equal(SymTab[a][S_OBJ], 0) then
 			optimized_while = TRUE   -- while TRUE ... emit nothing
-		
+			last_pc = last_pc_backup
+			last_op = last_op_backup
 		else 
+			flush_temps( {a} )
 			emit_opcode(op)
-			emit_addr(a)       
+			emit_addr(a)
+			
 		 
 		end if
 
@@ -687,11 +916,17 @@ export procedure emit_op(integer op)
 			if not IsInteger(c) then
 				emit_opcode(op)
 				emit_addr(op_info1)
+			else
+				last_op = last_op_backup
+				last_pc = last_pc_backup
 			end if
 		elsif previous_op = -1 or 
 			  op_result[previous_op] != T_INTEGER then  -- includes ASSIGN_I
 			emit_opcode(op)
 			emit_addr(op_info1)
+		else
+			last_op = last_op_backup
+			last_pc = last_pc_backup
 		end if  
 
 	elsif op = SEQUENCE_CHECK then
@@ -703,11 +938,17 @@ export procedure emit_op(integer op)
 			   not sequence(SymTab[c][S_OBJ]) then
 				emit_opcode(op)
 				emit_addr(op_info1)
+			else
+				last_op = last_op_backup
+				last_pc = last_pc_backup
 			end if
 		elsif previous_op = -1 or 
 			  op_result[previous_op] != T_SEQUENCE then
 			emit_opcode(op)
 			emit_addr(op_info1)
+		else
+			last_op = last_op_backup
+			last_pc = last_pc_backup
 		end if
 
 	elsif op = ATOM_CHECK then
@@ -718,12 +959,18 @@ export procedure emit_op(integer op)
 			   and not IsInteger(c)) then
 				emit_opcode(op)
 				emit_addr(op_info1)
+			else
+				last_op = last_op_backup
+				last_pc = last_pc_backup
 			end if
 		elsif previous_op = -1 or 
 			  (op_result[previous_op] != T_INTEGER and
 			   op_result[previous_op] != T_ATOM) then
 			emit_opcode(op)
 			emit_addr(op_info1)
+		else
+			last_op = last_op_backup
+			last_pc = last_pc_backup
 		end if
 
 	elsif op = RIGHT_BRACE_N then -- form a sequence of n items
@@ -738,9 +985,12 @@ export procedure emit_op(integer op)
 		if sequence(element_vals) then
 			c = NewStringSym(element_vals)  -- make a string literal
 			assignable = FALSE
+			last_op = last_op_backup
+			last_pc = last_pc_backup
 		else
 			if n = 2 then
 				emit_opcode(RIGHT_BRACE_2) -- faster op for two items
+				last_op = RIGHT_BRACE_2
 			else 
 				emit_opcode(op)
 				emit(n)
@@ -749,7 +999,7 @@ export procedure emit_op(integer op)
 			for i = 1 to n do
 				emit_addr(elements[i])
 			end for
-			
+			dispose_temp( elements, DISCARD_TEMP )
 			c = NewTempSym()
 			emit_addr(c)
 			assignable = TRUE
@@ -792,6 +1042,7 @@ export procedure emit_op(integer op)
 		emit_addr(a) -- subscript 
 		emit_addr(b) -- rhs value
 		assignable = FALSE
+		dispose_temp( c & b, SAVE_TEMP )
 
 	elsif op = LHS_SUBS or op = LHS_SUBS1 or op = LHS_SUBS1_COPY then  
 		-- left hand side multiple subscripts, one step
@@ -821,7 +1072,8 @@ export procedure emit_op(integer op)
 	elsif find(op, {RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, 
 					TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING}) then
 		cont11ii(op, TRUE)
-			
+		dispose_temp( Code[$-1], DISCARD_TEMP )
+		
 	elsif op = UMINUS then
 		-- check for constant folding 
 		a = Pop()
@@ -835,12 +1087,18 @@ export procedure emit_op(integer op)
 					else
 						Push(NewIntSym(-obj))
 					end if
+					last_pc = last_pc_backup
+					last_op = last_op_backup
+					
 				elsif atom(obj) and obj != NOVALUE then
 					-- N.B. a constant won't have its value set until
 					-- the end of the  constant var=xxx, var=xxx, ...
 					-- statement. Be careful in the future if we
 					-- add any more constant folding besides unary minus. 
 					Push(NewDoubleSym(-obj)) 
+					last_pc = last_pc_backup
+					last_op = last_op_backup
+					
 				else
 					Push(a)
 					cont11ii(op, FALSE)   
@@ -891,6 +1149,7 @@ export procedure emit_op(integer op)
 		TempInteger(c) -- result will always be an integer
 		Push(c)
 		emit_addr(c)
+		dispose_temp( source, DISCARD_TEMP )
 			
 	-- 1 input, 1 outputs with jump address that might be patched.
 	-- Output value is not used by the next op, but same temp must
@@ -912,6 +1171,7 @@ export procedure emit_op(integer op)
 		b = Pop()
 		emit_addr(Pop())
 		emit_addr(b)
+		dispose_temp( Code[$-1..$], DISCARD_TEMP )
 		if op = C_PROC then
 			emit_addr(CurrentSub)
 		end if
@@ -949,7 +1209,7 @@ export procedure emit_op(integer op)
 			cont21ii(op, FALSE)
 		end if
 		
-	elsif op = MULTIPLY then
+	elsif op = rw:MULTIPLY then
 			-- result could overflow int
 		b = Pop()
 		a = Pop()
@@ -980,7 +1240,7 @@ export procedure emit_op(integer op)
 			
 		end if
 			
-	elsif op = DIVIDE then
+	elsif op = rw:DIVIDE then
 		b = Pop()
 		if b > 0 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
 			op = DIV2
@@ -995,10 +1255,12 @@ export procedure emit_op(integer op)
 		end if
 		
 	elsif op = FLOOR then
-		if previous_op = DIVIDE then
+		if previous_op = rw:DIVIDE then
 			op = FLOOR_DIV
 			backpatch(length(Code) - 3, op)
 			assignable = TRUE
+			last_op = op
+			last_pc = last_pc_backup
 		
 		elsif previous_op = DIV2 then
 			op = FLOOR_DIV2
@@ -1007,6 +1269,8 @@ export procedure emit_op(integer op)
 			if IsInteger(Code[$-2]) then
 				TempInteger(Top()) --mark temp as integer type
 			end if
+			last_op = op
+			last_pc = last_pc_backup
 		else
 			cont11ii(op, TRUE)
 		end if
@@ -1014,10 +1278,30 @@ export procedure emit_op(integer op)
 		-- but not FLOOR_DIV (x/-1)
 
 	-- 2 inputs, 1 output   
-	elsif find(op, {MINUS, APPEND, PREPEND, COMPARE, EQUAL, 
-					SYSTEM_EXEC, CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
+	elsif find(op, {MINUS, rw:APPEND, PREPEND, COMPARE, EQUAL, 
+					SYSTEM_EXEC, rw:CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
 					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE}) then
 		cont21ii(op, FALSE)
+		switch op do
+			case
+				DELETE_ROUTINE
+			then
+				dispose_temp( Code[$-1..$], SAVE_TEMP )
+			
+			case
+				SPRINTF,
+				MINUS,
+				HASH,
+				HEAD,
+				TAIL,
+				rw:CONCAT,
+				REPEAT
+			then
+				dispose_temp( Code[$-2..$-1], DISCARD_TEMP )
+				
+			case else
+				dispose_temp( Code[$-2..$-1], SAVE_TEMP )
+		end switch
 
 	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything
 		c = Pop()
@@ -1025,6 +1309,8 @@ export procedure emit_op(integer op)
 		b = Pop()  -- remove SC1's temp
 		Push(c)
 		assignable = FALSE
+		last_op = last_op_backup
+		last_pc = last_pc_backup
 			
 	-- Same temp must be used by SC2 ops and SC1 ops. 
 	elsif op = SC2_AND or op = SC2_OR then
@@ -1045,6 +1331,7 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		emit_addr(c)
+		dispose_temp( Code[$-2..$], DISCARD_TEMP )
 		assignable = FALSE
 
 	-- 3 inputs, 1 output 
@@ -1055,6 +1342,7 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		emit_addr(c)
+		dispose_temp( Code[$-2..$], DISCARD_TEMP )
 		c = NewTempSym()
 		assignable = TRUE
 		Push(c)
@@ -1066,7 +1354,9 @@ export procedure emit_op(integer op)
 		emit_opcode(CONCAT_N)
 		emit(n)
 		for i = 1 to n do 
-			emit_addr(Pop())  -- reverse order
+			symtab_index element = Pop()
+			emit_addr( element )  -- reverse order
+			dispose_temp( element, SAVE_TEMP )
 		end for
 		c = NewTempSym()
 		emit_addr(c)
@@ -1132,9 +1422,11 @@ export procedure emit_op(integer op)
 		-- for x[i] op= expr 
 		b = Pop()      -- rhs value, keep on stack 
 		TempKeep(b)
+		dispose_temp( b, SAVE_TEMP )
 		
 		a = Pop()      -- subscript, keep on stack
 		TempKeep(a)
+		dispose_temp( a, DISCARD_TEMP )
 		
 		c = Pop()      -- lhs sequence, keep on stack
 		TempKeep(c)
@@ -1163,6 +1455,8 @@ export procedure emit_op(integer op)
 		emit_addr(a)  
 		emit_addr(b)
 		assignable = FALSE
+		dispose_temp( b, SAVE_TEMP )
+		dispose_temp( a & c, DISCARD_TEMP )
 
 	-- 4 inputs, 1 output
 	elsif op = REPLACE then
@@ -1180,7 +1474,7 @@ export procedure emit_op(integer op)
 		c = NewTempSym()
 		Push(c)
 		emit_addr(c)     -- place to store result
-		
+		dispose_temp( a & b & c & d, DISCARD_TEMP )
 		assignable = TRUE
 
 	-- 4 inputs, 1 output
@@ -1223,6 +1517,7 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		assignable = FALSE
+		dispose_temp( Code[$-1..$], SAVE_TEMP )
 			
 	elsif op = CALL_FUNC then
 		emit_opcode(op)
@@ -1230,6 +1525,7 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		assignable = TRUE
+		dispose_temp( Code[$-1..$], SAVE_TEMP )
 		c = NewTempSym() 
 		Push(c)
 		emit_addr(c)
@@ -1246,6 +1542,14 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	elsif op = RETURNF then
+		
+		if not TRANSLATE and last_op_backup = PROC 
+		and sym_mode( Top() ) = M_TEMP then
+			emit_opcode( REF_TEMP )
+			emit_addr( Top() )
+		end if
+		clear_temp( Top() )
+		flush_temps()
 		emit_opcode(op)
 		emit_addr(CurrentSub)
 		emit_addr(Least_block())
@@ -1269,7 +1573,8 @@ export procedure emit_op(integer op)
 
 	elsif find(op, {CLOSE, ABORT, CALL, DELETE_OBJECT}) then
 		emit_opcode(op)
-		emit_addr(Pop())       
+		emit_addr(Pop())
+		dispose_temp( Code[$], DISCARD_TEMP )
 		assignable = FALSE
 	
 	elsif op = POWER then
@@ -1278,7 +1583,7 @@ export procedure emit_op(integer op)
 		a = Pop()
 		if b > 0 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then 
 			-- convert power(x,2) to x*x 
-			op = MULTIPLY
+			op = rw:MULTIPLY
 			emit_opcode(op)
 			emit_addr(a)
 			emit_addr(a)
@@ -1378,6 +1683,7 @@ export procedure emit_op(integer op)
 		emit_opcode(op)
 		emit_addr(a)       
 		assignable = FALSE
+		dispose_temp( a, DISCARD_TEMP )
 
 	elsif op = TRACE then
 		a = Pop()
@@ -1392,6 +1698,7 @@ export procedure emit_op(integer op)
 				trace_called = TRUE
 			end if          
 		end if
+		dispose_temp( a, DISCARD_TEMP )
 		assignable = FALSE
 
 	else
@@ -1411,11 +1718,11 @@ export procedure emit_assign_op(integer op)
 	elsif op = MINUS_EQUALS then
 		emit_op(MINUS)
 	elsif op = MULTIPLY_EQUALS then 
-		emit_op(MULTIPLY)
+		emit_op(rw:MULTIPLY)
 	elsif op = DIVIDE_EQUALS then 
-		emit_op(DIVIDE)
+		emit_op(rw:DIVIDE)
 	elsif op = CONCAT_EQUALS then
-		emit_op(CONCAT)
+		emit_op(rw:CONCAT)
 	end if
 end procedure
 

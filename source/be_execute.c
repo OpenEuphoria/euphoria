@@ -73,7 +73,7 @@
 #define deprintf(s) do {  } while (0)
 #endif
 
-#define KILL_TEMP(X) if(((symtab_ptr)X)->mode == M_TEMP ) ((symtab_ptr)X)->obj = NOVALUE;
+#define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
 
 /* To eliminate type casts for pc[*] you
  would need a union like this:
@@ -933,6 +933,9 @@ void code_set_pointers(int **code)
 			case TASK_LIST:
 			case DELETE_OBJECT:
 			case EXIT_BLOCK:
+			case DEREF_TEMP:
+			case REF_TEMP:
+			case NOVALUE_TEMP:
 				// one operand
 				code[i+1] = SET_OPERAND(code[i+1]);
 				i += 2;
@@ -1706,8 +1709,10 @@ void do_exec(int *start_pc)
  NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TYPE_CHECK_FORWARD not emitted */
   &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT,
 /* 204 (previous) */
-  &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT, &&L_EXIT_BLOCK
+  &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT, &&L_EXIT_BLOCK,
 /* 208 (previous) */
+  &&L_REF_TEMP, &&L_DEREF_TEMP, &&L_NOVALUE_TEMP
+/* 211 (previous) */
   };
 #endif
 #endif
@@ -1766,13 +1771,9 @@ void do_exec(int *start_pc)
 				}
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
 				a = pc[3];
+				
 				Ref( top );
-				if( ((symtab_ptr)a)->mode == M_TEMP ){
-					((symtab_ptr)a)->obj = NOVALUE;
-				}
-				else{
-					DeRef( ((symtab_ptr)a)->obj );
-				}
+				DeRef( ((symtab_ptr)a)->obj );
 				
 				*(object_ptr)a = top;
 				pc += 4;
@@ -1878,10 +1879,6 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					obj_ptr = (object_ptr)SequenceCopy((s1_ptr)obj_ptr);
 					**(object_ptr *)pc[1] = MAKE_SEQ(obj_ptr);
-				}   
-				if( ((symtab_ptr)pc[3])->mode == M_TEMP ){
-					DeRef( ((symtab_ptr)pc[3])->obj );
-					*(object_ptr)pc[3] = NOVALUE;
 				}
 				*(object_ptr)pc[1] = 0; // to preclude DeRef of C pointer
 				goto as;
@@ -1905,12 +1902,7 @@ void do_exec(int *start_pc)
 					obj_ptr = (object_ptr)SequenceCopy((s1_ptr)obj_ptr);
 					*(object_ptr)pc[1] = MAKE_SEQ(obj_ptr);
 				}
-				if(!IS_ATOM_INT(top) && ((symtab_ptr)pc[3])->mode == M_TEMP ){
-					// Since it's a temp, an extra ref count would prevent it
-					// from ever being freed.
-					DeRefDS( top );
-					*((object_ptr)pc[3]) = NOVALUE;
-				}
+				
 			  as:   
 				a = *(object_ptr)pc[2]; /* the subscript */
 				if ((unsigned long)(a-1) >= ((s1_ptr)obj_ptr)->length) { 
@@ -2238,12 +2230,7 @@ void do_exec(int *start_pc)
 				top = *obj_ptr; 
 				*obj_ptr = *(object_ptr)pc[1];
 				
-				if( ((symtab_ptr)pc[1])->mode != M_TEMP ){
-					Ref(*obj_ptr);
-				}
-				else{
-					((symtab_ptr)pc[1])->obj = NOVALUE;
-				}
+				Ref(*obj_ptr);
 				
 				if (IS_ATOM_INT_NV(top)) {
 					inc3pc();
@@ -2370,12 +2357,7 @@ void do_exec(int *start_pc)
 				for (a = 1; a <= nvars; a++) {
 					/* the last one comes first */
 					*obj_ptr = *((object_ptr)pc[0]);
-					if( ((symtab_ptr)pc[0])->mode != M_TEMP ){
-						Ref(*obj_ptr);
-					}
-					else{
-						*((object_ptr)pc[0]) = NOVALUE;
-					}
+					Ref(*obj_ptr);
 					pc++;
 					obj_ptr--;
 				}
@@ -2392,19 +2374,9 @@ void do_exec(int *start_pc)
 				obj_ptr = s1->base;
 				/* the second one comes first */
 				obj_ptr[1] = *((object_ptr)pc[2]);
-				if( ((symtab_ptr)(pc[2]))->mode != M_TEMP ){
-					Ref(obj_ptr[1]);
-				}
-				else{
-					*((object_ptr)pc[2]) = NOVALUE;
-				}
+				Ref(obj_ptr[1]);
 				obj_ptr[2] = *((object_ptr)pc[1]);
-				if( ((symtab_ptr)(pc[1]))->mode != M_TEMP ){
-					Ref(obj_ptr[2]);
-				}
-				else{
-					*((object_ptr)pc[1]) = NOVALUE;
-				}
+				Ref(obj_ptr[2]);
 				DeRef(*(object_ptr)pc[3]);  
 				*(object_ptr)pc[3] = MAKE_SEQ(s1);
 				pc += 4;
@@ -2519,10 +2491,6 @@ void do_exec(int *start_pc)
 				}
 				else {
 					top = ATOM_0;
-				}
-				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
-					DeRef( ((symtab_ptr)pc[1])->obj );
-					((symtab_ptr)pc[1])->obj = NOVALUE;
 				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
@@ -3601,7 +3569,7 @@ void do_exec(int *start_pc)
 					
 					/* save the remaining privates and loop-vars & 
 					   set to NOVALUE */
-					while (sym && sym->scope <= S_PRIVATE) {
+					while (sym && sym->scope <= S_PRIVATE ) {
 						*block++ = sym->obj;
 						sym->obj = NOVALUE;
 						sym = sym->next;
@@ -3663,16 +3631,15 @@ void do_exec(int *start_pc)
 					/* someone is using the sub - save the privates and temps */
 	
 					tpc = pc;
-					
 					block = save_private_block(sub);
 					
 					/* save & copy the args */
-					while (obj_ptr < (object_ptr)a) {
+					while ( obj_ptr < (object_ptr)a) {
 						*block++ = sym->obj;
 						sym->obj = *(object_ptr)obj_ptr[0];
 						Ref(sym->obj);
 						sym = sym->next;
-						obj_ptr++;                      
+						obj_ptr++;
 					}
 	
 					/* save the remaining privates and loop-vars & 
@@ -3761,6 +3728,10 @@ void do_exec(int *start_pc)
 			case L_RETURNT: /* end of execution - falling off the end */
 			deprintf("case L_RETURNT:");
 				tpc = pc;  /* we need this to be different from CALL_BACK_RETURN */
+				sym = TopLevelSub->u.subp.block;
+				while( sym = sym->next_in_block ){
+						DeRef(sym->obj);
+				}
 				Cleanup(0);
 				return;
 				
@@ -3774,9 +3745,9 @@ void do_exec(int *start_pc)
 			deprintf("case L_RETURNF:");
 				result_val = *(object_ptr)pc[3]; /* the return value */
 				Ref(result_val);
+				
 				// record the place to put the return value 
 				result_ptr = (object_ptr)*((int *)expr_top[-2] - 1);
-				
 				goto return_p;
 				
 			case L_RETURNP: /* return from procedure */
@@ -3799,14 +3770,6 @@ void do_exec(int *start_pc)
 					sym = sym->u.subp.block;
 				} 
 				
-				/* free the temps and set to NOVALUE */
-				sym = sub->u.subp.temps;
-				while (sym != NULL) {
-					DeRef(sym->obj);
-					
-					sym->obj = NOVALUE;
-					sym = sym->next;
-				}
 				// vacating this routine
 				sub->u.subp.resident_task = -1;
 
@@ -3824,6 +3787,13 @@ void do_exec(int *start_pc)
 						top = *result_ptr;
 						*result_ptr = result_val; //was important not to use "a"
 						DeRef(top);
+						if( ((symtab_ptr)tpc[3])->mode == M_TEMP ){
+							DeRef( result_val );
+							
+							// Watch for recursion:
+							if( tpc[3] != result_ptr )
+								((symtab_ptr)tpc[3])->obj = NOVALUE;
+						}
 						result_ptr = NULL;
 					}
 				}
@@ -3939,6 +3909,24 @@ void do_exec(int *start_pc)
 				pc += 2;
 				thread();
 				BREAK;
+			
+			case L_REF_TEMP:
+				deprintf("case L_REF_TEMP:");
+				Ref( ((symtab_ptr)pc[1])->obj );
+				pc += 2;
+				thread();
+				BREAK;
+				
+			case L_DEREF_TEMP:
+				deprintf("case L_DEREF_TEMP:");
+				DeRef( ((symtab_ptr)pc[1])->obj );
+				
+			case L_NOVALUE_TEMP:
+				deprintf("case L_NOVALUE_TEMP:");
+				((symtab_ptr)pc[1])->obj = NOVALUE;
+				pc += 2;
+				thread();
+				BREAK;
 
 			case L_APPEND:
 			deprintf("case L_APPEND:");
@@ -4040,10 +4028,6 @@ void do_exec(int *start_pc)
 				
 				Replace( (replace_ptr)(pc+1) );
 				
-				KILL_TEMP(pc[1])
-				KILL_TEMP(pc[2])
-				KILL_TEMP(pc[3])
-				
 				pc += 6;
 				thread();
 				BREAK;
@@ -4064,7 +4048,7 @@ void do_exec(int *start_pc)
 				if (nvars < 0) 
 					RTFatal("Second argument to head() must not be negative");
 				obj_ptr = (object_ptr)pc[3];
-//				top = *obj_ptr;
+				
 				// get first elements
 				if (nvars == 0) {
 					// Nothing to get so return an empty sequence.
@@ -4308,9 +4292,6 @@ void do_exec(int *start_pc)
 				tpc = pc;
 				DeRef(*(object_ptr)pc[3]);
 				*(object_ptr)pc[3] = calc_hash(*(object_ptr)pc[1], *(object_ptr)pc[2]);
-//				top = MAKE_INT(a);
-//				DeRef(*(object_ptr)pc[3]);
-//				*(object_ptr)pc[3] = top;               
 				pc += 4;
 				thread();
 				BREAK;
@@ -5104,6 +5085,10 @@ void do_exec(int *start_pc)
 				else 
 					RTFatal("argument to abort() must be an atom");
 				UserCleanup(i);  
+				sym = TopLevelSub->u.subp.block;
+				while( sym = sym->next_in_block ){
+						DeRef(sym->obj);
+				}
 				BREAK;
 				
 			case L_FIND_FROM:

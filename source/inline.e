@@ -278,6 +278,12 @@ function returnf( integer pc )
 		
 		if ret_pc and eu:compare( inline_code[ret_pc-1], PRIVATE_INIT_CHECK ) then
 			inline_code[ret_pc] = {INLINE_TARGET}
+			
+			if equal( inline_code[ret_pc-1], REF_TEMP ) then
+				-- when returning a temp, a REF_TEMP is injected between the generating
+				-- expression and the return op
+				inline_code[ret_pc-2] = {INLINE_TARGET}
+			end if
 		else
 			code = {ASSIGN, generic_symbol( retsym ), {INLINE_TARGET}}
 		end if
@@ -355,6 +361,9 @@ function inline_op( integer pc )
 		
 	else
 		switch op with fallthru do
+			case REF_TEMP then
+				inline_code[pc+1] = {INLINE_TARGET}
+				
 			case CONCAT_N then
 			case RIGHT_BRACE_N then
 				
@@ -892,7 +901,8 @@ export procedure emit_or_inline()
 	
 	end if
 	sequence code = get_inlined_code( sub, length(Code) )
-	Code &= code
+	emit_inline( code )
+	clear_last()
 	
 end procedure
 

@@ -3552,6 +3552,11 @@ procedure opMACHINE_PROC()
 	pc += 3
 end procedure
 
+procedure opDEREF_TEMP()
+	val[Code[pc+1]] = NOVALUE
+	pc += 2
+end procedure
+
 constant MAX_USER_DELETE = 20
 
 sequence
@@ -4235,6 +4240,11 @@ procedure do_exec()
 			case DELETE_OBJECT then
 				opDELETE_OBJECT()
 				
+			case REF_TEMP then
+				pc += 2
+			case DEREF_TEMP, NOVALUE_TEMP then
+				opDEREF_TEMP()
+			
 			case else
 				RTFatal( sprintf("Unknown opcode: %d", op ) )
 		end switch

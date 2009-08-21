@@ -175,6 +175,7 @@ procedure EnterTopLevel()
 	Code = SymTab[TopLevelSub][S_CODE]
 	previous_op = -1
 	CurrentSub = TopLevelSub
+	clear_last()
 end procedure
 
 procedure LeaveTopLevel()
@@ -186,6 +187,7 @@ procedure LeaveTopLevel()
 	LineTable = {}
 	Code = {}
 	previous_op = -1
+	clear_last()
 end procedure
 
 export procedure InitParser()
@@ -351,7 +353,6 @@ procedure PatchEList(integer base)
 	end if
 
 	break_top = 0
-
 	for i=length(break_list) to base+1 by -1 do
 		n=break_delay[i]
 		break_delay[i] -= (n>0)
@@ -450,6 +451,7 @@ procedure start_recording()
 	tok_stack = append(tok_stack,backed_up_tok)
 	canned_tokens = {}
 	Parser_mode = PAM_RECORD
+	clear_last()
 end procedure
 
 function restore_parser()
@@ -467,6 +469,7 @@ function restore_parser()
 	psm_stack     = psm_stack[1..$-1]
 	tok 		  = tok_stack[$]
 	tok_stack 	  = tok_stack[1..$-1]
+	clear_last()
 	if n=PAM_PLAYBACK then
 		return {}
 	end if
@@ -547,11 +550,7 @@ function read_recorded_token(integer n)
 			end if
 			t = {NAMESPACE, p}
 		end if
-		if not integer(SymTab[t[T_SYM]][S_OBJ]) then
-			? SymTab[t[T_SYM]]
-			printf(1, "Name: '%s' (%d)\n", {sym_name(t[T_SYM]), t[T_SYM]})
-			puts(1, ThisLine )
-		end if
+		
 		t = keyfind(Recorded[n],SymTab[t[T_SYM]][S_OBJ])
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
@@ -2135,6 +2134,7 @@ procedure If_statement()
 		if prev_false2 != 0 then
 			backpatch(prev_false2, length(Code)+1)
 		end if
+		
 		Statement_list()
 
 	else
@@ -2919,7 +2919,7 @@ end function
 
 procedure For_statement()
 -- Parse a for statement
-	integer bp1
+	integer bp1, bp2
 	integer exit_base,next_base,end_op
 	token tok, loop_var
 	symtab_index loop_var_sym
@@ -2974,7 +2974,15 @@ procedure For_statement()
 	entry_addr &= 0
 	bp1 = length(Code)+1
 	emit_addr(0) -- will be patched - don't straighten
-	retry_addr &= bp1+1
+	
+	sequence save_syms = Code[$-5..$-3] -- could be temps, but can't get rid of them yet
+	for i = 1 to 3 do
+		clear_temp( save_syms[i] )
+	end for
+	flush_temps()
+	
+	bp2 = length(Code)
+	retry_addr &= bp2 + 1
 	continue_addr &= 0
 
 	loop_stack &= FOR
@@ -2986,7 +2994,6 @@ procedure For_statement()
 		end if
 	end if
 	
-
 	Statement_list()
 	tok_match(END)
 	tok_match(FOR, END)
@@ -2995,7 +3002,7 @@ procedure For_statement()
 	
 	StartSourceLine(TRUE)
 	op_info1 = loop_var_sym
-	op_info2 = bp1 + 1
+	op_info2 = bp2 + 1
 	PatchNList(next_base)
 	emit_op(end_op)
 	backpatch(bp1, length(Code)+1)
@@ -3008,6 +3015,10 @@ procedure For_statement()
 	
 	Hide(loop_var_sym)
 	exit_loop(exit_base)
+	for i = 1 to 3 do
+		emit_temp( save_syms[i], NEW_REFERENCE )
+	end for
+	flush_temps()
 end procedure
 
 export function CompileType(symtab_index type_ptr)
@@ -3449,6 +3460,7 @@ procedure Statement_list()
 						StartSourceLine( TRUE )
 						
 						Forward_call( tok )
+						flush_temps()
 						continue
 						
 					case VARIABLE then
@@ -3460,6 +3472,7 @@ procedure Statement_list()
 						else
 							Global_declaration( tok[T_SYM], SC_LOCAL )
 						end if
+						flush_temps()
 						continue
 						
 				end switch
@@ -3585,9 +3598,11 @@ procedure Statement_list()
 			putback(tok)
 			stmt_nest -= 1
 			InitDelete()
+			flush_temps()
 			return
 
 		end if
+		flush_temps()
 	end while
 end procedure
 forward_Statement_list = routine_id("Statement_list")
@@ -4363,10 +4378,11 @@ export procedure real_parser(integer nested)
 			end if
 
 		end if
-
+		flush_temps()
 	end while
 
 	emit_op(RETURNT)
+	clear_last()
 	StraightenBranches()
 	SymTab[TopLevelSub][S_CODE] = Code
 	EndLineTable()
@@ -4379,6 +4395,8 @@ export procedure parser()
 	Resolve_forward_references( 1 )
 	inline_deferred_calls()
 	End_block( PROC )
+	Code = {}
+	LineTable = {}
 end procedure
 
 export procedure nested_parser()

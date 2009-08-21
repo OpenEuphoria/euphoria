@@ -99,6 +99,7 @@ procedure set_code( integer ref )
 		patch_linetab_temp = LineTable
 		
 		Code = SymTab[patch_code_sub][S_CODE]
+		SymTab[patch_code_sub][S_CODE] = 0
 		LineTable = SymTab[patch_code_sub][S_LINETAB]
 		
 		patch_current_sub = CurrentSub
@@ -117,6 +118,8 @@ procedure reset_code( )
 		Code = patch_code_temp
 		LineTable = patch_linetab_temp
 	end if
+	patch_code_temp = {}
+	patch_linetab_temp = {}
 end procedure
 
 export procedure set_data( integer ref, object data )

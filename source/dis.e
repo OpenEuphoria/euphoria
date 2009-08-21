@@ -213,6 +213,18 @@ procedure opSTARTLINE()
 	pc += 2
 end procedure
 
+procedure opREF_TEMP()
+	punary()
+end procedure
+
+procedure opDEREF_TEMP()
+	punary()
+end procedure
+
+procedure opNOVALUE_TEMP()
+	punary()
+end procedure
+
 procedure opTASK_YIELD()
 -- temporarily stop running this task, and give the scheduler a chance
 -- to pick a new task
@@ -490,7 +502,7 @@ procedure opLHS_SUBS()
     b = Code[pc+2] -- subscript
     target = Code[pc+3] -- temp for storing result
     
-    il( sprintf("LHS_SUBS: %s, %s => %s", names( Code[pc+1..pc+3] )), 4 )
+    il( sprintf("LHS_SUBS: %s, %s => %s", names( Code[pc+1..pc+3] )), 5 )
     -- a is a "pointer" to the result of previous subscripting
 --    val[target] = append(val[a], val[b])
     pc += 5
@@ -1018,7 +1030,7 @@ procedure opCONCAT_N()
     n = Code[pc+1] -- number of items
     -- operands are in reverse order
     x = sprintf("CONCAT_N: %d", Code[pc+1] )
-    for i = pc+3 to pc+n+1 do
+    for i = pc+2 to pc+n+1 do
 		x &= sprintf(", %s", {name_or_literal(Code[i])})
     end for
     target = Code[pc+n+2]
