@@ -10,7 +10,7 @@ include std/pretty.e
 include std/error.e
 include std/map.e
 include dot.e
---include std/os.e
+include std/sort.e
 include std/cmdline.e
 
 include mode.e as mode
@@ -1485,6 +1485,9 @@ end function
 procedure save_il( sequence name )
 	integer st, max_width
 	sequence line_format, pretty_options = PRETTY_DEFAULT
+	integer used_buckets
+	integer symcnt
+	sequence bucket_usage
 	
 	st = open( sprintf("%ssym", { name }), "wb" )
 	pretty_options[DISPLAY_ASCII] = 2
@@ -1527,6 +1530,9 @@ procedure save_il( sequence name )
 	
 	st = open( sprintf("%shash", { name }), "wb" )
 	sequence bucket = repeat( "", length( buckets ) )
+	used_buckets = 0
+	symcnt = 0
+	bucket_usage = {}
 	for i = 1 to length( SymTab ) do
 		if length( SymTab[i] ) >= S_HASHVAL and SymTab[i][S_HASHVAL] then
 			if not find( SymTab[i][S_NAME], bucket[SymTab[i][S_HASHVAL]] ) then
@@ -1536,15 +1542,36 @@ procedure save_il( sequence name )
 	end for
 	
 	for i = 1 to length( bucket ) do
-		printf( st, "%03d %05d: ", { length( bucket[i] ), i } )
-		for j = 1 to length( bucket[i] ) do
-			if j > 1 then
-				puts( st, ", " )
-			end if
-			puts( st, bucket[i][j] )
-		end for
-		puts( st, '\n' )
+		bucket[i] = length(bucket[i]) & i & bucket[i]
 	end for
+	bucket = sort(bucket, DESCENDING)
+	bucket_usage = repeat(0, bucket[1][1])
+	for i = 1 to length( bucket ) do
+		if bucket[i][1] > 0 then
+			used_buckets += 1
+			symcnt += bucket[i][1]
+			bucket_usage[bucket[i][1]] += 1
+			printf( st, "%03d %05d: ", bucket[i][1..2] )
+			for j = 3 to length( bucket[i] ) do
+				if j > 3 then
+					puts( st, ", " )
+				end if
+				puts( st, bucket[i][j] )
+			end for
+			puts( st, '\n' )
+		end if
+	end for
+	puts( st, '\n' )
+	printf( st, "Symbols         : %d\n", symcnt )
+	printf( st, "Used buckets    : %d (%3.1f%%)\n", {used_buckets, 100 * used_buckets / length(bucket)})
+	printf( st, "Empty buckets   : %d (%3.1f%%)\n", {length(bucket) - used_buckets, 100 * (length(bucket) - used_buckets) / length(bucket)})
+	if used_buckets > 0 then
+		printf( st, "Symbols / bucket: %4.2f\n", symcnt / used_buckets)
+		for i = 1 to length(bucket_usage) do
+			printf( st, "Len %2d : %d\n", {i, bucket_usage[i]})
+		end for
+	end if
+	
 	close( st )
 	
 end procedure
