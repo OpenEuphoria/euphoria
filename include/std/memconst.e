@@ -3,7 +3,7 @@ namespace memconst
 
 ifdef WIN32 then
 	--****
-	-- === Microsoft's Memory Protection Constants
+	-- === Microsoft's Memory Protection Constants === @[microsoftsmemoryprotectionconstants]
 	--
 	-- Memory Protection Constants are the same constants
 	-- across all platforms.  The API converts them as

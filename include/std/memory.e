@@ -955,7 +955,7 @@ with warning
 -- handles, allocated memory, or other euphoria objects.  There are two built-in
 -- routines for managing these external resources.
 
---**
+--****
 -- Signature:
 -- <built-in>function delete_routine( object x, integer rid )
 -- 
@@ -982,7 +982,7 @@ with warning
 -- In this case, the routines are called in reverse order compared to
 -- how they were associated.
 
---**
+--****
 -- Signature:
 -- <built-in>procedure delete( object x )
 -- 

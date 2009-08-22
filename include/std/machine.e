@@ -159,7 +159,6 @@ end function
 -- To define the word ##SAFE## run your application with the ##-D SAFE## command line
 -- option, or add to the top of your main file ##with define SAFE##.
 --
-
 -- 
 -- === Data Execute mode
 -- 
@@ -369,7 +368,7 @@ end function
 -- A direct call might cause a machine exception if done incorrectly.
 --
 -- See Also:
--- [[:machine_func]]
+-- [[:machine_proc]]
 
 --****
 -- Signature:
@@ -387,7 +386,7 @@ end function
 -- A direct call might cause a machine exception if done incorrectly.
 --
 -- See Also:
--- [[:machine_proc]]
+-- [[:machine_func]]
 
 
 ifdef WIN32 then
@@ -546,7 +545,7 @@ end function
 --**
 -- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
 --
--- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "Microsoft's Memory Protection Constants"]]
+-- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "MSDN: Microsoft's Memory Protection Constants"]]
 --
 -- Parameters:
 -- # ##data## : is the machine code to be put into memory. 
@@ -676,12 +675,18 @@ end function
 -- === Memory disposal
 --
 
---**
+--****
+-- Signature:
+-- include std/machine.e
+-- public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
+--
+-- Description:
 -- Frees up allocated code memory
 --
 -- Parameters:
--- # ##addr## : must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here!   
--- # ##size## : is the length of the sequence passed to ##alllocate_code()## or the size you specified when you called allocate_protect().                           
+-- # ##addr## : must be an address returned by [[:allocate_code()]] or [[:allocate_protect()]].  Do **not** pass memory returned from [[:allocate()]] here! 
+-- # ##size## : is the length of the sequence passed to ##alllocate_code()## or the size you specified when you called allocate_protect().  
+-- # ##wordsize##: valid_wordsize  default = 1
 --
 -- Comments:
 -- Chances are you will not need to call this function because code allocations are typically public scope operations that you want to have available until your process exits.
