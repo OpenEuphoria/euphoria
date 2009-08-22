@@ -11,6 +11,7 @@ include std/socket.e as sock
 include std/net/common.e
 include std/net/dns.e
 include std/text.e
+include euphoria/info.e
 
 --****
 -- === Constants
@@ -219,6 +220,7 @@ end function
 public procedure set_sendheader_default()
 	sequence tempnewheader = {}
 	sequence temps = ""
+	sequence whoami = "OpenEuphoria " & version_string_long()
 
 	-- this sets some defaults, if not previously set to something by the user
 	-- if a header line was previously set by the user, do not change it here
@@ -235,7 +237,7 @@ public procedure set_sendheader_default()
 		{"POST"," ",""}, -- [3] = the filename you want
 		{"Host",": ",""}, -- the domain. You might think this was obvious, but for vhosting sites it's necessary.
 		{"Referer",": ",""}, -- i know it's misspelled, but that's official! , the site that sent you to this one
-		{"User-Agent",": ","Opera/5.02 (Windows 98; U) [en]"}, --</joke> pick your own :-)
+		{"User-Agent",": ", whoami & " [en]"}, --</joke> pick your own :-)
 		{"Accept",": ","*/*"}, -- what your browser or apps knows how to process
 		{"Accept-Charset",": ","ISO-8859-1,utf-8;q=0.7,*;q=0.7"},
 		{"Accept-Encoding",": ","identity"}, -- "identity" = no decoder in eunet so far
@@ -850,4 +852,3 @@ end function
 
 -- set the lines in the "proper" order for sending, not that the defaults will get sent.
 set_sendheader_default()
-
