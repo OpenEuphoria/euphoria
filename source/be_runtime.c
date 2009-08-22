@@ -5682,6 +5682,7 @@ void Cleanup(int status)
 #ifdef EXTRA_STATS
 	Stats();
 #endif
+#if 0
 	{
 		symtab_ptr sym = TopLevelSub;
 		while( sym ){
@@ -5699,6 +5700,7 @@ void Cleanup(int status)
 	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
 	EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
+#endif
 #endif
 
 #ifdef EWINDOWS
