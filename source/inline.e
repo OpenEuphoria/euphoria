@@ -593,6 +593,7 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 		var = 0, 
 		vtype
 	sequence name
+	integer hashval
 	
 	if reuse then
 		var = map:nested_get( inline_var_map, { CurrentSub, s } )
@@ -600,26 +601,30 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 	
 	if not var then
 		if s > 0 then
+			name = sprintf( "%s_%s", {SymTab[inline_sub][S_NAME], SymTab[s][S_NAME]})
+			hashval = hashfn(name)
 			if reuse then
-				name = sprintf( "pvt_%s_%s", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME]})
+				name &= "__inl"
 			else
-				name = sprintf( "pvt_%s_at%d_%s", {SymTab[s][S_NAME], inline_start, SymTab[inline_sub][S_NAME]})
+				name &= sprintf( "__inl_at%d", inline_start)
 			end if
 			
 			vtype = SymTab[s][S_VTYPE]
 		else
+			name = sprintf( "%s_%d", {SymTab[inline_sub][S_NAME], -s})
+			hashval = hashfn(name)
 			if reuse then
-				name = sprintf( "tmp_%d_%s", {-s, SymTab[inline_sub][S_NAME]})
+				name &= "__tmp"
 			else
-				name = sprintf( "tmp_%d_at%d_%s", {-s, inline_start, SymTab[inline_sub][S_NAME]})
+				name &= sprintf( "__tmp_at%d", inline_start)
 			end if
 			vtype = object_type
 		end if
 		if CurrentSub = TopLevelSub then
-			var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, 1, 0, vtype )
+			var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, hashval, 0, vtype )
 			
 		else
-			var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, 1, 0, vtype )
+			var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, hashval, 0, vtype )
 			SymTab[var][S_NEXT] = SymTab[last_param][S_NEXT]
 			SymTab[last_param][S_NEXT] = var
 			if last_param = last_sym then

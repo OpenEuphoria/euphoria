@@ -49,18 +49,18 @@ elsedef
 		test_equal("with warning += #3","Warning ( not_used ):\n", gets(fn))
 		ifdef DOS32 then
 			if find(gets(fn), {
-				"\t<0229>:: t_declasgn.e - local variable 'n0' is not used\n",
-				"\t<0229>:: t_declas.e - local variable 'n0' is not used\n",
-				"\t<0229>:: T_DECLAS.E - local variable 'n0' is not used\n",
-				"\t<0229>:: T_DECL~1.E - local variable 'n0' is not used\n",
-				"\t<0229>:: T_DECL~2.E - local variable 'n0' is not used\n"
+				"\t<0229>:: t_declasgn.e - module variable 'n0' is not used\n",
+				"\t<0229>:: t_declas.e - module variable 'n0' is not used\n",
+				"\t<0229>:: T_DECLAS.E - module variable 'n0' is not used\n",
+				"\t<0229>:: T_DECL~1.E - module variable 'n0' is not used\n",
+				"\t<0229>:: T_DECL~2.E - module variable 'n0' is not used\n"
 			}) then
 				test_pass("with warning += #4")
 			else
 				test_fail("with warning += #4")
 			end if
 		elsedef
-			test_equal("with warning += #4","\t<0229>:: t_declasgn.e - local variable 'n0' is not used\n", gets(fn))
+			test_equal("with warning += #4","\t<0229>:: t_declasgn.e - module variable 'n0' is not used\n", gets(fn))
 		end ifdef
 		test_equal("with warning -=", -1, gets(fn))
 		

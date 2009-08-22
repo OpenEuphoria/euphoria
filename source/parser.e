@@ -724,39 +724,9 @@ procedure WrongNumberArgs(symtab_index subsym, sequence only)
 end procedure
 
 procedure MissingArgs(symtab_index subsym)
-	sequence eentry = SymTab[subsym], name=eentry[S_NAME], def_args=eentry[S_DEF_ARGS]
---	sequence msg
-
--- 	msg &= sprintf("%s() takes at least %d parameters.", {name, def_args[2]})
--- 	if length(def_args[3]) then
--- 		def_args = def_args[3]
--- 		if length(def_args)=1 then 
--- 			if integer(def_args[1]) then
--- 				msg &= sprintf(" Parameter %d", def_args[1])
--- 			else
--- 				msg &= sprintf(" Parameters %d-%d", def_args[1])
--- 			end if
--- 		else
--- 			msg &= " Parameters"
--- 			integer n = length(msg)+1 -- place to patch a 's'
--- 			for i=1 to length(def_args)-1 do
--- 				if integer(def_args[i]) then
--- 					msg &= sprintf(", %d", def_args[i])
--- 				else
--- 					msg &= sprintf(", %d-%d", def_args[i])
--- 				end if
--- 			end for
--- 			if integer(def_args[$]) then
--- 				msg &= sprintf(" and %d", def_args[$])
--- 			else
--- 				msg &= sprintf(" and %d-%d", def_args[$])
--- 			end if
--- 			msg[n] = 's'
--- 		end if
--- 		msg &= " may be defaulted."
--- 	end if
--- 	CompileErr(msg)
-	CompileErr(235, {name, def_args[2]})
+	sequence eentry = SymTab[subsym]
+	
+	CompileErr(235, {eentry[S_NAME], eentry[S_DEF_ARGS][2]})
 end procedure
 
 procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_private_list, sequence fwd_private_sym )
@@ -3746,7 +3716,7 @@ procedure SubProg(integer prog_type, integer scope)
 			SymTab[sym][S_GTYPE] = CompileType(type_sym)
 		end if
 
-		SymTab[sym][S_USAGE] = U_WRITTEN
+--		SymTab[sym][S_USAGE] = U_WRITTEN
 		tok = next_token()
 		if tok[T_ID] = EQUALS then -- defaulted parameter
 		    start_recording()

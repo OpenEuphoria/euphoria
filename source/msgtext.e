@@ -237,12 +237,12 @@ constant StdErrMsgs = {
 	{223, "[1]:[2] - built-in routine [3]() overridden again"},
 	{224, "can't mix profile and profile_time"},
 	{225, "[1]:[2] - Unknown warning name [3]"},
-	{226, "[1] - local variable '[2]' is never assigned a value"},
+	{226, "[1] - module variable '[2]' is never assigned a value"},
 	{227, "[1] - private variable '[2]' of [3] is never assigned a value"},
-	{228, "[1] - local constant '[2]' is not used"},
-	{229, "[1] - local variable '[2]' is not used"},
-	{230, "[1] - parameter '[2]' of [3] is not used"},
-	{231, "[1] - private variable '[2]' of [3] is not used"},
+	{228, "[1] - module constant '[2]' is not used"},
+	{229, "[1] - module variable '[2]' is not used"},
+	{230, "[1] - parameter '[2]' of [3]() is not used"},
+	{231, "[1] - private variable '[2]' of [3]() is not used"},
 	{232, "File '[1]' uses public symbols from '[2]', but does not include that file."},
 	{233, "[1]:[2] - identifier '[3]' in '[4]' is not included"},
 	{234, "The built-in [1]() in [2] overrides the global/public [1]() in:[3]"},
@@ -331,6 +331,10 @@ constant StdErrMsgs = {
 	{317, "couldn't open [1]!"},
 	{318, "Your custom icon file is too large."},
 	{319, "Verbose output"},
+	{320, "[1] - module variable '[2]' is assigned but never used"},
+	{321, "[1] - parameter '[2]' of [3]() is assigned but never used"},
+	{322, "[1] - private variable '[2]' of [3]() is assigned but never used"},
+
 	$
 }
 

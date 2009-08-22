@@ -32,18 +32,18 @@ export integer last_sym = 0
 sequence lastintval = {}, lastintsym = {}
 sequence e_routine  = {}  -- sequence of symbol table pointers for routine_id
 
-function hashfn(sequence name)
+export function hashfn(sequence name)
 -- hash function for symbol table
 	integer len
 	integer val -- max is 268,448,190+len
 
 	len = length(name)
-	val = name[len] * 256 + name[1]*2 + len
-	if len >= 4 then
-		val = val * 64 + name[2]
-		val = val * 64 + name[3]
-	elsif len >= 3 then
-		val = val * 64 + name[2]
+	val = name[1] * 2 + name[$] * 256 +  len
+	if len = 3 then
+		val = val * 32 + name[2]
+	elsif len > 3 then
+		val = val * 32 + name[2]
+		val = val * 32 + name[$-1]
 	end if
 	return remainder(val, NBUCKETS) + 1
 end function
@@ -988,16 +988,24 @@ export procedure LintCheck(symtab_index s)
 -- do some lint-like checks on s
 	integer warn_level
 	sequence file
-
-	switch SymTab[s][S_USAGE] do
+	integer vscope
+	sequence vname
+	integer vusage 
+	
+	vusage = SymTab[s][S_USAGE]
+	vscope = SymTab[s][S_SCOPE]
+	vname = SymTab[s][S_NAME]
+	
+	switch vusage do
 
 		case U_UNUSED then
-			warn_level = not_used_warning_flag
+			warn_level = 1
 		
-		case U_WRITTEN then -- Never accessed
-			warn_level = not_used_warning_flag
-			if SymTab[s][S_SCOPE] != SC_LOCAL then
-				-- Non-local vars/consts can be read by other files.
+		case U_WRITTEN then -- Set but never read
+			warn_level = 2
+			
+			if vscope > SC_LOCAL then
+				-- Exposed vars/consts can be read by other files.
 				warn_level = 0 
 			
 			elsif SymTab[s][S_MODE] = M_CONSTANT then
@@ -1008,8 +1016,13 @@ export procedure LintCheck(symtab_index s)
 				end if
 			end if
 		
-		case U_READ then -- never assigned
-	    	warn_level = no_value_warning_flag
+		case U_READ then -- Read but never set
+			if SymTab[s][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS] then
+		    	warn_level = 3
+		    else
+		    	-- Assume parameters have been assigned on entry.
+		    	warn_level = 0
+		    end if
 	    	
 	    case else
 	    	warn_level = 0
@@ -1019,29 +1032,50 @@ export procedure LintCheck(symtab_index s)
 		return
 	end if
 	
+
 	file = file_name[current_file_no]
-	if warn_level = no_value_warning_flag then
-		if SymTab[s][S_SCOPE] = SC_LOCAL then
+	if warn_level = 3 then
+		if vscope = SC_LOCAL then
 			if current_file_no = SymTab[s][S_FILE_NO] then
-				Warning(226, warn_level, {file,  SymTab[s][S_NAME]})
+				Warning(226, no_value_warning_flag, {file,  vname})
 			end if
 		else
-			Warning(227, warn_level, {file,  SymTab[s][S_NAME], SymTab[CurrentSub][S_NAME]})
+			Warning(227, no_value_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
 		end if			
 	else
-		if SymTab[s][S_SCOPE] = SC_LOCAL then
+		if vscope = SC_LOCAL then
 			if current_file_no = SymTab[s][S_FILE_NO] then
 				if SymTab[s][S_MODE] = M_CONSTANT then
-					Warning(228, warn_level, {file,  SymTab[s][S_NAME]})
+					Warning(228, not_used_warning_flag, {file,  vname})
+					
+				elsif warn_level = 1 then
+					Warning(229, not_used_warning_flag, {file,  vname})
+					
 				else
-					Warning(229, warn_level, {file,  SymTab[s][S_NAME]})
+					Warning(320, not_used_warning_flag, {file,  vname})
 				end if
 			end if	
 		else
 			if SymTab[s][S_VARNUM] < SymTab[CurrentSub][S_NUM_ARGS] then
-				Warning(230, warn_level, {file,  SymTab[s][S_NAME], SymTab[CurrentSub][S_NAME]})
+				-- Parameters
+				if warn_level = 1 then
+					if Strict_is_on then
+						-- Only issue this warning if -strict is in play.
+						Warning(230, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+					end if
+				else
+					Warning(321, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+				end if
 			else
-				Warning(231, warn_level, {file,  SymTab[s][S_NAME], SymTab[CurrentSub][S_NAME]})
+				-- Private Vars
+				if warn_level = 1 then
+					if Strict_is_on then
+						-- Only issue this warning if -strict is in play.
+						Warning(231, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+					end if
+				else
+					Warning(322, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+				end if
 			end if		
 		end if
 	end if

@@ -34,30 +34,31 @@ end procedure
 --**
 -- add a warning message to the list
 export procedure Warning(object msg, integer mask, sequence args = {})
-	integer p
+	integer orig_mask
 	sequence text, w_name
 
-	if display_warnings=0 then
+	if display_warnings = 0 then
 		return
 	end if
+	
 	if not Strict_is_on or Strict_Override then
 		if find(mask, strict_only_warnings) then
 			return
 		end if
 	end if
 
-	p = mask -- =0 for non maskable warnings - none implemented so far
+	orig_mask = mask -- =0 for non maskable warnings - none implemented so far
 	if Strict_is_on and Strict_Override = 0 then
 		mask = 0
 	end if
 
 	if mask = 0 or and_bits(OpWarning, mask) then
-		if p then
-			p = find(p,warning_flags)
+		if orig_mask != 0 then
+			orig_mask = find(orig_mask,warning_flags)
 		end if
 
-		if p then
-			w_name = "( " & warning_names[p] & " )"
+		if orig_mask != 0 then
+			w_name = "( " & warning_names[orig_mask] & " )"
 		else
 			w_name = "" -- not maskable
 		end if
@@ -65,6 +66,7 @@ export procedure Warning(object msg, integer mask, sequence args = {})
 		if atom(msg) then
 			msg = GetMsgText(msg, 1, args)
 		end if
+		
 		text = GetMsgText(204, 0, {w_name, msg})
 		if find(text, warning_list) then
 			return -- duplicate
