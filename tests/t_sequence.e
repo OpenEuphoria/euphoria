@@ -1,4 +1,3 @@
-with profile
 include std/text.e
 include std/sequence.e as seq
 include std/search.e as srch
