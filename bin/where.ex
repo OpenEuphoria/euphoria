@@ -4,13 +4,15 @@
 
 include std/filesys.e
 include std/os.e
-include std/os.e
+include std/map.e
+include std/text.e
 
 constant TRUE = 1
 constant SCREEN = 1, ERROR = 2
 
 sequence path
 integer p
+map found_files = map:new()
 
 function next_dir()
 -- get the next directory name from the path sequence   
@@ -34,22 +36,21 @@ function next_dir()
     return dir
 end function
 
-ifdef DOS32 then
-   	constant exe_name ="ex"
-elsifdef WIN32 then
-   	constant exe_name ="exwc"
-elsedef
-	constant exe_name ="exu"
-end ifdef
 
 procedure search_path()
 -- main routine
     sequence file, cmd, full_path
     object dir_name, dir_info
+    sequence exe_name
+    
+    exe_name = command_line()
+    if not equal(exe_name[1], exe_name[2]) then
+    	exe_name = "eui " & exe_name[2]
+    end if
     
     cmd = command_line()
     if length(cmd) < 3 then
-		puts(ERROR, "usage: " & exe_name &"where file\n")
+		puts(ERROR, "usage: " & exe_name &" <filename>\n")
 		abort(1)
     end if
     
@@ -66,23 +67,31 @@ procedure search_path()
     file = cmd[3]
     p = 1
     while TRUE do
-	dir_name = next_dir()
-	if atom(dir_name) then
-	    exit
-	end if
-	
-	full_path = dir_name & SLASH & file
-	dir_info = dir(full_path) 
-	if sequence(dir_info) then
-	    -- file or directory exists
-	    if length(dir_info) = 1 then
-		-- must be a file
-		printf(SCREEN, "%4d-%02d-%02d %2d:%02d",
-			  dir_info[1][D_YEAR..D_MINUTE])
-		printf(SCREEN, "  %d  %s\n", 
-		   {dir_info[1][D_SIZE], dir_name & SLASH & dir_info[1][D_NAME]})
-	    end if
-	end if
+		dir_name = next_dir()
+		if atom(dir_name) then
+		    exit
+		end if
+		
+		full_path = dir_name & SLASH & file
+		dir_info = dir(full_path) 
+		if sequence(dir_info) then
+			
+		    -- file or directory exists
+		    if length(dir_info) = 1 then
+				sequence new_name = canonical_path(dir_name & SLASH & dir_info[1][D_NAME])
+				ifdef DOSFAMILY then
+					new_name = lower(new_name)
+				end ifdef
+				if not map:has(found_files, new_name) then
+					-- must be a file
+					printf(SCREEN, "%4d-%02d-%02d %2d:%02d",
+						  dir_info[1][D_YEAR..D_MINUTE])
+					printf(SCREEN, "  %d  %s\n", 
+					   {dir_info[1][D_SIZE], new_name})
+					map:put(found_files, new_name, 1)
+				end if
+		    end if
+		end if
     end while
 end procedure
 

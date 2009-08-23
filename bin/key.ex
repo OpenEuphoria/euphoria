@@ -6,16 +6,14 @@ integer code
 
 puts(1, "Testing keyboard codes on ")
 
-if platform() = 1 then
-	puts (1, "DOS32 interpreter.\n")
-elsif platform() = 2 then
+if platform() = 2 then
 	puts (1, "WIN32 interpreter.\n")
 elsif platform() = 3 then
 	puts (1, "LINUX or BSD interpreter.\n")
 elsif platform() = 4 then
 	puts (1, "OS X interpreter.\n")
 else 
-	puts (1, "unknow interpreter.\n")
+	puts (1, "unknown interpreter.\n")
 end if
 	
 
