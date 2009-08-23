@@ -879,15 +879,6 @@ procedure defer_call()
 	end if
 end procedure
 
-function forward_params()
-	for i = length(cg_stack) - (SymTab[inline_sub][S_NUM_ARGS]-1) to length(cg_stack) do
-		if cg_stack[i] < 0 then
-			return 1
-		end if
-	end for
-	return 0
-end function
-
 -- Either emits an inline routine or emits a call to the routine
 -- if that can't be done.
 export procedure emit_or_inline()
@@ -899,7 +890,7 @@ export procedure emit_or_inline()
 		emit_op( PROC )
 		return
 		
-	elsif atom( SymTab[sub][S_INLINE] ) or forward_params() then
+	elsif atom( SymTab[sub][S_INLINE] ) or has_forward_params(sub) then
 		defer_call()
 		emit_op( PROC )
 		return

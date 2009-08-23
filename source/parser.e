@@ -729,7 +729,7 @@ procedure MissingArgs(symtab_index subsym)
 	CompileErr(235, {eentry[S_NAME], eentry[S_DEF_ARGS][2]})
 end procedure
 
-procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_private_list, sequence fwd_private_sym )
+export procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_private_list, sequence fwd_private_sym )
 	symtab_index param = subsym
 	on_arg = arg
 	parseargs_states = append(parseargs_states,
@@ -756,7 +756,7 @@ procedure Parse_default_arg( symtab_index subsym, integer arg, sequence fwd_priv
 	lock_scanner = 0
 	restore_parseargs_states()
 end procedure
-parse_arg_rid = routine_id("Parse_default_arg")
+--parse_arg_rid = routine_id("Parse_default_arg")
 
 procedure ParseArgs(symtab_index subsym)
 -- parse arguments for a function, type or procedure call
@@ -1690,7 +1690,7 @@ procedure Return_statement()
 	if SymTab[CurrentSub][S_TOKEN] != PROC then
 		Expr()
 		if is_tail then
-			pop = Pop() -- prevent cg_stack leakage
+			pop = Pop() -- prevent code gen stack leakage
 			Code[Last_pc()] = PROC_TAIL
 		else
 			FuncReturn = TRUE

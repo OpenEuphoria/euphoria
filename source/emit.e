@@ -33,7 +33,9 @@ export  boolean lhs_ptr = FALSE  -- are we parsing multiple LHS subscripts?
 -- temps needed for LHS subscripting
 export symtab_index lhs_subs1_copy_temp, lhs_target_temp      
 -- Code generation Stack 
-export  sequence cg_stack -- expression stack 
+sequence cg_stack -- expression stack 
+integer cgi -- expression stack top-of-stack index
+
 boolean assignable  = FALSE  -- did previous op have a re-assignable result?
 
 constant LEX_NUMBER = 1
@@ -128,20 +130,25 @@ constant token_name =
 
 export procedure Push(symtab_index x)
 -- Push element onto code gen stack 
-	cg_stack = append(cg_stack, x)
+	cgi += 1
+	if cgi > length(cg_stack) then
+		cg_stack &= repeat(0, 400)
+	end if
+	cg_stack[cgi] = x
+	
 end procedure
 
 export function Top()
 -- return top element on code gen stack 
-	return cg_stack[$]
+	return cg_stack[cgi]
 end function
 
 export function Pop()
 -- Pop top element from code gen stack 
 	symtab_index t
 
-	t = cg_stack[$]
-	cg_stack = cg_stack[1..$-1]
+	t = cg_stack[cgi]
+	cgi -= 1
 	if t > 0 then
 		if SymTab[t][S_MODE] = M_TEMP then 
 			if use_private_list = 0 then  -- no problem with reusing the temp
@@ -157,7 +164,6 @@ export function Pop()
 	end if
 	return t    
 end function
-pop_rid = routine_id("Pop")
 
 export procedure TempKeep(symtab_index x)
 	if x > 0 and SymTab[x][S_MODE] = M_TEMP then
@@ -198,7 +204,8 @@ end function
 
 export procedure InitEmit()
 -- initialize code emission 
-	cg_stack = {}
+	cg_stack = repeat(0, 400)
+	cgi = 0
 end procedure
 
 function IsInteger(symtab_index sym)
@@ -769,7 +776,7 @@ export procedure emit_op(integer op)
 		if subsym = CurrentSub then
 			-- calling ourself - parameter values may 
 			-- get overwritten before we can use them 
-			for i = length(cg_stack)-n+1 to length(cg_stack) do
+			for i = cgi-n+1 to cgi do
 				if cg_stack[i] > 0 and -- if it's a forward reference, it's not a private
 				   SymTab[cg_stack[i]][S_SCOPE] = SC_PRIVATE and 
 				   SymTab[cg_stack[i]][S_VARNUM] < i then
@@ -784,13 +791,13 @@ export procedure emit_op(integer op)
 		end if
 		emit_opcode(op)
 		emit_addr(subsym)
-		for i = length(cg_stack)-n+1 to length(cg_stack) do 
+		for i = cgi-n+1 to cgi do 
 			emit_addr(cg_stack[i])
 			TempFree(cg_stack[i])
 			dispose_temp( cg_stack[i], DISCARD_TEMP )
 		end for
 		
-		cg_stack = cg_stack[1..$-n]
+		cgi -= n
 		
 		if SymTab[subsym][S_TOKEN] != PROC then
 			assignable = TRUE
@@ -815,12 +822,12 @@ export procedure emit_op(integer op)
 		emit_opcode(op)
 		emit_addr(ref)
 		emit_addr( n ) -- this changes to be the "next" instruction
-		for i = length(cg_stack)-n+1 to length(cg_stack) do 
+		for i = cgi-n+1 to cgi do 
 			emit_addr(cg_stack[i])
 			TempFree(cg_stack[i])
 			dispose_temp( cg_stack[i], DISCARD_TEMP )
 		end for
-		cg_stack = cg_stack[1..$-n]
+		cgi -= n
 		
 		if op != PROC_FORWARD then
 			assignable = TRUE
@@ -1651,8 +1658,8 @@ export procedure emit_op(integer op)
 	elsif op = CASE then
 		-- only for translator
 		emit_opcode( op )
-		emit( cg_stack[$] )  -- the case index
-		cg_stack = cg_stack[1..$-1]
+		emit( cg_stack[cgi] )  -- the case index
+		cgi -= 1
 		
 	-- 0 inputs, 1 output 
 	elsif op = PLATFORM then
@@ -1754,4 +1761,13 @@ export procedure StartSourceLine(integer sl)
 		emit_addr(gline_number)
 	end if
 end procedure
+
+export function has_forward_params(integer sym)
+	for i = cgi - (SymTab[sym][S_NUM_ARGS]-1) to cgi do
+		if cg_stack[i] < 0 then
+			return 1
+		end if
+	end for
+	return 0
+end function
 

@@ -16,6 +16,7 @@ include scanner.e
 include shift.e
 include reswords.e
 include block.e
+include emit.e
 
 -- Tracking forward references
 sequence 
@@ -46,8 +47,7 @@ export constant FORWARD_DEFAULT_PADDING = 5
 
 
 -- TODO: update side effects tracking for routines
-export integer parse_arg_rid
-export integer pop_rid
+--export integer parse_arg_rid
 integer shifting_sub = 0
 integer fwdref_count = 0
 
@@ -211,9 +211,9 @@ procedure patch_forward_call( token tok, integer ref )
 			
 			show_params( sub )
 			set_error_info( ref )
-			call_proc( parse_arg_rid, { sub, defarg, fwd_private_name, fwd_private_sym } )
+			Parse_default_arg(sub, defarg, fwd_private_name, fwd_private_sym) --call_proc( parse_arg_rid, { sub, defarg, fwd_private_name, fwd_private_sym } )
 			hide_params( sub )
-			params[defarg] = call_func( pop_rid, {} )
+			params[defarg] = Pop()
 		else
 			extra_default_args = 0
 			add_private_symbol( code[i], SymTab[param_sym][S_NAME] )
