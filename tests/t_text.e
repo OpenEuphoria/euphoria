@@ -261,4 +261,25 @@ res = format("The answer is [,:.2]", {1234.56})
 exp = "The answer is 1:234.56"
 test_equal("format 'AF'", exp, res)
 
+res = format("[B]", 177)
+exp = "10110001"
+test_equal("format 'AG'", exp, res)
+
+res = format("[B]", -177)
+exp = "11111111111111111111111101001111"
+test_equal("format 'AH'", exp, res)
+
+res = format("[B:16]", 177)
+exp = "        10110001"
+test_equal("format 'AI'", exp, res)
+
+res = format("[, zB]", 177)
+exp = "1011 0001"
+test_equal("format 'AJ'", exp, res)
+
+res = format("[, zX]", 0x123456ab)
+exp = "1234 56AB"
+test_equal("format 'AK'", exp, res)
+
+
 test_report()

@@ -22,6 +22,7 @@ include std/serialize.e
 include std/pretty.e
 include std/error.e
 include std/eds.e
+include std/convert.e
 
 --****
 -- Signature:
@@ -1205,7 +1206,9 @@ end function
 --                length, this ensures that at least one space occurs\\
 --                between this token's field                          |
 -- |  t         | After token replacement, the resulting string up to this point is trimmed. |
--- |  x         | Outputs integer arguments using hexadecimal digits. |
+-- |  x, X      | Outputs integer arguments using hexadecimal digits. \\
+--                'x' gives lowercase digits and 'X' gives uppercase. |
+-- |  B         | Outputs integer arguments using binary digits.      |
 -- |  ?         | The corresponding argument is a set of two strings. This\\
 --                uses the first string if the previous token's argument is\\
 --                not the value 1 or a zero-length string, otherwise it\\
@@ -1213,7 +1216,10 @@ end function
 -- |  [         | Does not use any argument. Outputs a left-square-bracket symbol |
 -- |  ,X        | Insert thousands separators. The <X> is the character\\
 --                to use. If this is a dot "." then the decimal point\\
---                is rendered using a comma.                          |
+--                is rendered using a comma.                         \\
+--                N.B. if hex or binary output was specified, the \\
+--                separators are every 4 digits otherwise they are \\
+--                every three digits. |
 --
 -- Clearly, certain combinations of these qualifier codes do not make sense and in
 -- those situations, the rightmost clashing code is used and the others are ignored.
@@ -1298,6 +1304,7 @@ public function format(sequence pFormat, object pArgs = {})
 	integer argl
 	integer trimming
 	integer hexout
+	integer binout
 	integer tsep
 	object prevargv
 
@@ -1334,6 +1341,7 @@ public function format(sequence pFormat, object pArgs = {})
     			decs = -1
     			argn = 0
     			hexout = 0
+    			binout = 0
     			trimming = 0
     			tsep = 0
     		else
@@ -1366,7 +1374,7 @@ public function format(sequence pFormat, object pArgs = {})
 	    		case 'l', 'L' then
 	    			cap = 'l'
 
-	    		case 'b', 'B' then
+	    		case 'b' then
 	    			bwz = 'b'
 
 	    		case 's', 'S' then
@@ -1384,6 +1392,9 @@ public function format(sequence pFormat, object pArgs = {})
 	    		case 'x', 'X' then
 	    			hexout = tch
 
+	    		case 'B' then
+	    			binout = 1
+	    			
 	    		case '<' then
 	    			align = tch
 
@@ -1464,6 +1475,15 @@ public function format(sequence pFormat, object pArgs = {})
 					elsif integer(pArgs[argn]) then
 						if bwz != 0 and pArgs[argn] = 0 then
 							argtext = ""
+						elsif binout = 1 then
+							argtext = reverse(int_to_bits(pArgs[argn], 32)) + '0'
+							for ib = 1 to length(argtext) do
+								if argtext[ib] = '1' then
+									argtext = argtext[ib .. $]
+									exit
+								end if
+							end for
+
 						elsif hexout = 0 then
 							argtext = sprintf("%d", pArgs[argn])
 						else
@@ -1584,7 +1604,13 @@ public function format(sequence pFormat, object pArgs = {})
     				if atom(pArgs[argn]) then
 	    				if tsep != 0 then
 	    					integer dpos
+	    					integer dist
 
+	    					if binout or hexout then
+	    						dist = 4
+	    					else
+	    						dist = 3
+	    					end if
 	    					dpos = find('.', argtext)
 	    					if dpos = 0 then
 	    						dpos = length(argtext) + 1
@@ -1593,8 +1619,8 @@ public function format(sequence pFormat, object pArgs = {})
 	    							argtext[dpos] = ','
 	    						end if
 	    					end if
-	    					while dpos > 3 do
-	    						dpos -= 3
+	    					while dpos > dist do
+	    						dpos -= dist
 	    						if dpos > 1 then
 	    							argtext = argtext[1.. dpos - 1] & tsep & argtext[dpos .. $]
 --	    							dpos -=1
