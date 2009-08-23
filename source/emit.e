@@ -284,7 +284,7 @@ export constant
 	SAVE_TEMP = 1
 map:map emitted_temps = map:new()
 export procedure emit_temp( object tempsym, integer referenced )
-	if INTERPRET  then -- translator has its own way of handling temps
+	if not TRANSLATE  then -- translator has its own way of handling temps
 		if sequence(tempsym) then
 			for i = 1 to length(tempsym) do
 				emit_temp( tempsym[i], referenced )
@@ -755,7 +755,7 @@ export procedure emit_op(integer op)
 			   SymTab[source][S_MODE] = M_CONSTANT and 
 			   SymTab[target][S_MODE] = M_CONSTANT then
 				-- record: constant var=literal 
-				-- for interpreter
+				-- for interpreter				
 				SymTab[target][S_OBJ] = SymTab[source][S_OBJ]
 			end if          
 
