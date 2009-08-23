@@ -303,7 +303,7 @@ end function
 
 -- variables and routines used in safe.e
 without warning
-integer check_calls
+global integer check_calls
 check_calls = 1
 
 global procedure register_block(atom block_addr, atom block_len)
