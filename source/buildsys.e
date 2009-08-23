@@ -156,7 +156,8 @@ function setup_build()
 				c_flags &= " -fPIC "
 		   	end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -I%s -ffast-math", { get_eudir()  })
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math", 
+				{ get_eudir()  })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
