@@ -241,7 +241,7 @@ res = format("seq is []", {{1.2, 5, "abcdef", {3}}})
 exp = `seq is {1.2,5,"abcdef",{3}}`
 test_equal("format 'AA'", exp, res)
 
-res = format("hex is #[xz:8]", {1715004})
+res = format("hex is #[Xlz:8]", {1715004})
 exp = "hex is #001a2b3c"
 test_equal("format 'AB'", exp, res)
 
@@ -280,6 +280,46 @@ test_equal("format 'AJ'", exp, res)
 res = format("[, zX]", 0x123456ab)
 exp = "1234 56AB"
 test_equal("format 'AK'", exp, res)
+
+res = format("[+z:8]", 117)
+exp  = "+0000117"
+test_equal("format 'AL'", exp, res)
+
+res = format("[+z:8]", -117)
+exp  = "-0000117"
+test_equal("format 'AM'", exp, res)
+
+res = format("[+z:8]", 0)
+exp  = "00000000"
+test_equal("format 'AN'", exp, res)
+
+res = format("[+z:8]", 117.2)
+exp  = "+00117.2"
+test_equal("format 'AO'", exp, res)
+
+res = format("[+z:8]", -117.2)
+exp  = "-00117.2"
+test_equal("format 'AP'", exp, res)
+
+res = format("[+]", 117)
+exp  = "+117"
+test_equal("format 'AQ'", exp, res)
+
+res = format("[+]", -117)
+exp  = "-117"
+test_equal("format 'AR'", exp, res)
+
+res = format("[+]", 0)
+exp  = "0"
+test_equal("format 'AS'", exp, res)
+
+res = format("[+]", 117.2)
+exp  = "+117.2"
+test_equal("format 'AT'", exp, res)
+
+res = format("[+]", -117.2)
+exp  = "-117.2"
+test_equal("format 'AU'", exp, res)
 
 
 test_report()

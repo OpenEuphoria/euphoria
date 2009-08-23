@@ -705,7 +705,8 @@ end procedure
 -- options are assumed to be {2}.
 --
 -- After the data is displayed, the routine will normally output a New Line. If you
--- want to avoid this, ensure that the last parameter is a zero.
+-- want to avoid this, ensure that the last parameter is a zero. Or to put this
+-- another way, if the last parameter is zero then a New Line will **not** be output.
 --
 -- Examples:
 -- <eucode>
@@ -770,7 +771,7 @@ public procedure display( object pData, object args = 1, integer finalnl = -918_
 	
 	if finalnl = 0 then
 		-- no new line
-	elsif equal(args,0) then
+	elsif finalnl = -918_273_645 and equal(args,0) then
 		-- no new line
 	else
 		puts(1, '\n')

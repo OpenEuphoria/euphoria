@@ -12,6 +12,7 @@ include std/types.e
 include std/machine.e
 include std/text.e
 include std/sequence.e
+include std/error.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -1353,3 +1354,110 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 
 	return 1
 end function
+
+
+--**
+-- Write formatted text to a file..
+--
+-- Parameters:
+--		# ##fm## : sequence, Format pattern.
+--		# ##data## : sequence, The data that will be formatted,
+--      # ##fn## : object, The file to receive the formatted output. Default is
+--      to the STDOUT device (console).
+--
+-- Comments:
+-- * When ##fn## is a file name string, it is opened for output, 
+--   written to and then closed.
+-- * When ##fn## is a two-element sequence containing a file name string and 
+--   an output type ("a" for append, "w" for write), it is opened accordingly, 
+--   written to and then closed.
+-- * When ##fn## is a file handle, it is written to only
+-- * The ##fm## uses the formatting codes defined in [[:format]].
+--
+-- Example 1:
+-- <eucode>
+-- -- To console
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName})
+-- -- To "sample.txt"
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, "sample.txt")
+-- -- To "sample.dat"
+-- integer dat = open("sample.dat", "w")
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, dat)
+-- -- Appended to "sample.log"
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, {"sample.log", "a"})
+-- </eucode>
+--
+-- See Also:
+--    [[:format]], [[:writefln]], [[:write_lines]]
+
+public procedure writef(sequence fm, sequence data={}, object fn = 1)
+	integer real_fn = 0
+	integer close_fn = 0
+	sequence out_style = "w"
+	
+	if sequence(fn) then
+		if length(fn) = 2 then
+			if sequence(fn[1]) then
+				if equal(fn[2], 'a') then
+					out_style = "a"
+				elsif not equal(fn[2], "a") then
+					out_style = "w"
+				else
+					out_style = "a"
+				end if
+				fn = fn[1]
+			end if
+		end if
+		real_fn = open(fn, out_style)
+		
+		if real_fn = -1 then
+			crash("Unable to write to '%s'", {fn})
+		end if
+		close_fn = 1
+	else
+		real_fn = fn
+	end if
+	
+    puts(real_fn, format(fm, data))
+    if close_fn then
+    	close(real_fn)
+    end if
+end procedure
+
+--**
+-- Write formatted text to a file, ensuring that a new line is also output.
+--
+-- Parameters:
+--		# ##fm## : sequence, Format pattern.
+--		# ##data## : sequence, The data that will be formatted,
+--      # ##fn## : object, The file to receive the formatted output. Default is
+--      to the STDOUT device (console).
+--
+-- Comments:
+-- * This is the same as [[:writef]], except that it always adds a New Line to 
+--   the output.
+-- * When ##fn## is a file name string, it is opened for output, 
+--   written to and then closed.
+-- * When ##fn## is a two-element sequence containing a file name string and 
+--   an output type ("a" for append, "w" for write), it is opened accordingly, 
+--   written to and then closed.
+-- * When ##fn## is a file handle, it is written to only
+-- * The ##fm## uses the formatting codes defined in [[:format]].
+--
+-- Example 1:
+-- <eucode>
+-- -- To console
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName})
+-- -- To "sample.txt"
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, "sample.txt")
+-- -- Appended to "sample.log"
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, {"sample.log", "a"})
+-- </eucode>
+--
+-- See Also:
+--    [[:format]], [[:writef]], [[:write_lines]]
+public procedure writefln(sequence fm, sequence data={}, object fn = 1)
+	writef(fm & '\n', data, fn)
+end procedure
+
+ 

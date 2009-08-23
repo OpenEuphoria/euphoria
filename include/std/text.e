@@ -1186,7 +1186,7 @@ end function
 -- use that to replace the token. This may be modified by the following codes,
 -- which can occur in any order.
 -- |= Qualifier |= Usage                                              |
--- |  A         | ('A' is an integer) The index of the argument to use|
+-- |  N         | ('N' is an integer) The index of the argument to use|
 -- |  w         | For string arguments, if capitalizes the first\\
 --                letter in each word                                 |
 -- |  u         | For string arguments, it converts it to upper case. |
@@ -1206,8 +1206,7 @@ end function
 --                length, this ensures that at least one space occurs\\
 --                between this token's field                          |
 -- |  t         | After token replacement, the resulting string up to this point is trimmed. |
--- |  x, X      | Outputs integer arguments using hexadecimal digits. \\
---                'x' gives lowercase digits and 'X' gives uppercase. |
+-- |  X         | Outputs integer arguments using hexadecimal digits. |
 -- |  B         | Outputs integer arguments using binary digits.      |
 -- |  ?         | The corresponding argument is a set of two strings. This\\
 --                uses the first string if the previous token's argument is\\
@@ -1365,47 +1364,35 @@ public function format(sequence pFormat, object pArgs = {})
 	    				end if
 	    			end while
 
-	    		case 'w', 'W' then
-	    			cap = 'w'
-
-	    		case 'u', 'U' then
-	    			cap = 'u'
-
-	    		case 'l', 'L' then
-	    			cap = 'l'
+	    		case 'w', 'u', 'l' then
+	    			cap = tch
 
 	    		case 'b' then
-	    			bwz = 'b'
+	    			bwz = 1
 
-	    		case 's', 'S' then
-	    			spacer = 's'
+	    		case 's' then
+	    			spacer = 1
 
-	    		case 't', 'T' then
-	    			trimming = 't'
+	    		case 't' then
+	    			trimming = 1
 
-	    		case 'c', 'C' then
-	    			align = 'c'
+	    		case 'z' then
+	    			zfill = 1
 
-	    		case 'z', 'Z' then
-	    			zfill = 'z'
-
-	    		case 'x', 'X' then
-	    			hexout = tch
+	    		case 'X' then
+	    			hexout = 1
 
 	    		case 'B' then
 	    			binout = 1
 	    			
-	    		case '<' then
-	    			align = tch
-
-	    		case '>' then
+	    		case 'c', '<', '>' then
 	    			align = tch
 
 	    		case '+' then
-	    			signer = tch
+	    			signer = 1
 
 	    		case '?' then
-	    			alt = tch
+	    			alt = 1
 
 	    		case ':' then
 	    			while i < length(pFormat) do
@@ -1468,10 +1455,11 @@ public function format(sequence pFormat, object pArgs = {})
     			argl = argn
 
     			if argn < 1 or argn > length(pArgs) then
-    				argtext = ""
+    				argtext = "?"
 				else
 					if string(pArgs[argn]) then
 						argtext = pArgs[argn]
+						
 					elsif integer(pArgs[argn]) then
 						if bwz != 0 and pArgs[argn] = 0 then
 							argtext = ""
@@ -1486,13 +1474,11 @@ public function format(sequence pFormat, object pArgs = {})
 
 						elsif hexout = 0 then
 							argtext = sprintf("%d", pArgs[argn])
+							if signer and pArgs[argn] > 0 then
+								argtext = '+' & argtext
+							end if
 						else
 							argtext = sprintf("%x", pArgs[argn])
-							if hexout = 'x' then
-								argtext = lower(argtext)
-							else
-								argtext = upper(argtext)
-							end if
 						end if
 
 					elsif atom(pArgs[argn]) then
@@ -1500,6 +1486,9 @@ public function format(sequence pFormat, object pArgs = {})
 							argtext = ""
 						else
 							argtext = trim(sprintf("%15.15g", pArgs[argn]))
+							if signer and pArgs[argn] > 0 then
+								argtext = '+' & argtext
+							end if
 						end if
 
 					else
@@ -1588,7 +1577,11 @@ public function format(sequence pFormat, object pArgs = {})
 							end if
 
 							if zfill != 0 and width > 0 then
-								argtext = repeat('0', width - length(argtext)) & argtext
+								if length(argtext) > 0 and find(argtext[1], "-+") then
+									argtext = argtext[1] & repeat('0', width - length(argtext)) & argtext[2..$]
+								else
+									argtext = repeat('0', width - length(argtext)) & argtext
+								end if
 							end if
 						end if
 					end if
