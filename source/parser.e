@@ -756,7 +756,6 @@ export procedure Parse_default_arg( symtab_index subsym, integer arg, sequence f
 	lock_scanner = 0
 	restore_parseargs_states()
 end procedure
---parse_arg_rid = routine_id("Parse_default_arg")
 
 procedure ParseArgs(symtab_index subsym)
 -- parse arguments for a function, type or procedure call
@@ -1690,7 +1689,7 @@ procedure Return_statement()
 	if SymTab[CurrentSub][S_TOKEN] != PROC then
 		Expr()
 		if is_tail then
-			pop = Pop() -- prevent code gen stack leakage
+			pop = Pop() -- prevent cg_stack leakage
 			Code[Last_pc()] = PROC_TAIL
 		else
 			FuncReturn = TRUE
@@ -2048,6 +2047,8 @@ procedure If_statement()
 	end if
 	short_circuit -= 1
 	
+	sequence temps = pop_temps()
+	
 	Statement_list()
 	tok = next_token()
 
@@ -2085,7 +2086,7 @@ procedure If_statement()
 		end if
 		short_circuit -= 1
 		tok_match(THEN)
-		call_proc(forward_Statement_list, {})
+		Statement_list()
 		tok = next_token()
 	end while
 
@@ -2132,6 +2133,8 @@ procedure If_statement()
 	if_labels = if_labels[1..$-1]
 	block_index -= 1
 	if_stack = if_stack[1..$-1]
+	
+	push_temps( temps )
 end procedure
 
 procedure exit_loop(integer exit_base)
@@ -2556,7 +2559,12 @@ procedure While_statement()
 		exit_delay &= 1
 	end if
 	retry_addr &= length(Code)+1
-	call_proc(forward_Statement_list, {})
+	
+	sequence temps = pop_temps()
+	
+	push_temps( temps )
+	
+	Statement_list()
 	tok_match(END)
 	tok_match(WHILE, END)
 	
@@ -2572,7 +2580,7 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
-	
+	push_temps( temps )
 end procedure
 
 procedure Loop_statement()

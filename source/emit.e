@@ -289,12 +289,15 @@ export procedure emit_temp( object tempsym, integer referenced )
 			for i = 1 to length(tempsym) do
 				emit_temp( tempsym[i], referenced )
 			end for
+		
 		elsif tempsym > 0
 		and sym_mode( tempsym ) = M_TEMP 
-		and not IsInteger( tempsym ) then
+		and not IsInteger( tempsym ) 
+		then
 			-- don't really care about integer temps
 			map:put( emitted_temps, tempsym, referenced )
 		end if
+			
 	end if
 end procedure
 
@@ -381,6 +384,28 @@ end procedure
 export procedure clear_temp( symtab_index tempsym )
 	map:remove( emitted_temps, tempsym )
 	map:remove( disposed_temps, tempsym )
+end procedure
+
+--**
+-- Returns a sequence containing maps holding the current knowledge
+-- about temps.
+export function pop_temps()
+	map:map new_emitted  = emitted_temps
+	map:map new_disposed = disposed_temps
+	
+	emitted_temps  = map:new()
+	disposed_temps = map:new()
+	return { new_emitted, new_disposed }
+end function
+
+--**
+-- temps is a sequence of two maps that was passed by pop_temps().
+-- Flushes any temps waiting to be flushed, then flushes all of the
+-- temps in the maps contained in the ##temps## sequence.
+export procedure push_temps( sequence temps )
+	map:copy( temps[1], emitted_temps )
+	map:copy( temps[2], disposed_temps )
+	flush_temps()
 end procedure
 
 export procedure backpatch(integer index, integer val)
@@ -878,7 +903,6 @@ export procedure emit_op(integer op)
 				backpatch(length(Code) - 1, op)
 				sequence if_code = Code[$-1..$]
 				Code = Code[1..$-2]
-				flush_temps( { if_code[2] } )
 				Code &= if_code
 			else 
 				if IsInteger(Code[$-1]) and
@@ -892,7 +916,6 @@ export procedure emit_op(integer op)
 				
 				sequence if_code = Code[$-2..$]
 				Code = Code[1..$-3]
-				flush_temps( if_code[2..3] )
 				Code &= if_code
 				
 			end if

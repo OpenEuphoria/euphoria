@@ -502,7 +502,7 @@ procedure opLHS_SUBS()
     b = Code[pc+2] -- subscript
     target = Code[pc+3] -- temp for storing result
     
-    il( sprintf("LHS_SUBS: %s, %s => %s", names( Code[pc+1..pc+3] )), 5 )
+    il( sprintf("LHS_SUBS: %s, %s => %s (UNUSED - %s)", names( Code[pc+1..pc+4] )), 4 )
     -- a is a "pointer" to the result of previous subscripting
 --    val[target] = append(val[a], val[b])
     pc += 5
@@ -515,7 +515,7 @@ procedure opLHS_SUBS1()
 		   -- {base index, subs1, subs2... so far}
     b = Code[pc+2] -- subscript
     target = Code[pc+3] -- temp for storing result
-    il( sprintf("LHS_SUBS1: %s, %s => %s", names( Code[pc+1..pc+3] )), 4 )
+    il( sprintf("LHS_SUBS1: %s, %s => %s (UNUSED - %s)", names( Code[pc+1..pc+4] )), 4 )
     -- a is the base var
 --    val[target] = {a, val[b]}
     pc += 5

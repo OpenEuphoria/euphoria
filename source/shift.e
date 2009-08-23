@@ -108,8 +108,8 @@ procedure init_op_info()
 	op_info[LESSEQ_IFW_I        ] = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[LESS_IFW            ] = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[LESS_IFW_I          ] = { FIXED_SIZE, 4, {3}, {}, {} }
-	op_info[LHS_SUBS            ] = { FIXED_SIZE, 5, {}, {3,4}, {} }
-	op_info[LHS_SUBS1           ] = { FIXED_SIZE, 5, {}, {3,4}, {} }
+	op_info[LHS_SUBS            ] = { FIXED_SIZE, 5, {}, {3}, {} }
+	op_info[LHS_SUBS1           ] = { FIXED_SIZE, 5, {}, {3}, {} }
 	op_info[LHS_SUBS1_COPY      ] = { FIXED_SIZE, 5, {}, {3,4}, {} }
 	op_info[LOG                 ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[MACHINE_FUNC        ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -450,7 +450,7 @@ export function get_target_sym( sequence opseq )
 			case else
 				sequence targets = info[OP_TARGET]
 				for i = 1 to length( targets ) do
-					targets[i] = opseq[targets[i]] + 1
+					targets[i] = opseq[targets[i] + 1]
 				end for
 				
 				return targets
