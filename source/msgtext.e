@@ -334,7 +334,8 @@ constant StdErrMsgs = {
 	{320, "[1] - module variable '[2]' is assigned but never used"},
 	{321, "[1] - parameter '[2]' of [3]() is assigned but never used"},
 	{322, "[1] - private variable '[2]' of [3]() is assigned but never used"},
-
+	{323, "Flags to pass to compiler (overrides internal compiler flags)"},
+	{324, "Flags to pass to linker (overrides internal linker flags)"},
 	$
 }
 
