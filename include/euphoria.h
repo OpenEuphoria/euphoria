@@ -9,16 +9,25 @@
 /***************************************************************************
 *
 *
- 32 bit number range:
+ 32 bit number ranges:
   0X8      0XA      0XC      0XE      0X0      0X2      0X4      0X6      0X8
 -4*2^29  -3*2^29  -2*2^29-1  -2^29   0*2^29   1*2^29   2*2^29   3*2^29 4*2^29 
    *--------*--------*--------*--------*--------*--------*--------*--------o
-                     o NOVALUE = -2*2^29-1
-		     o<-----------ATOM_INT---------[-2*2^29..4*2^29)------>o
-	    |<----------------ATOM_DBL-------[-3*2^29..4*2^29)------------>o
--->|        |<-- IS_SEQUENCE [-4*2^29..-3*2^29)
+The meanings are these:   
+                    * NOVALUE = -2*2^29-1
+                  -->|                                   o<-- ATOM_INT-[-2*2^29..2*2^29)
+            |<----->oo A double [-3*2^29..-2*2^29-1)
+-->|        o<-- a sequence  [-4*2^29..-3*2^29)
+
+
+However, the macros mean these:
+                     o<--------------- IS_ATOM_INT ------------------------>o
+            |<--------------------- IS_ATOM_DBL --------------------------->o
+            |<--------------------- IS_ATOM ------------------------------->o
 -->|                 o<--- IS_DBL_OR_SEQUENCE [-4*2^29..-2*2^29-1)
-*
+-->|        o<--- IS_SEQUENCE
+
+
 ****************************************************************************/
 
 #define NOVALUE      ((long)0xbfffffffL)
@@ -192,12 +201,11 @@ int binary_op_a(int, int, int);
 int binary_op(int, int, int);
 void *which_file(int, int);
 int unary_op(int, int);
-int NewS1(int);
+s1_ptr NewS1(long);
 int compare(int, int);
 unsigned long get_pos_int(char *, int);
 int memory_set(int, int, int);
 int memory_copy(int, int, int);
-int getc(void *);
 int EOpen(int, int,int);
 void EClose(int);
 int EPrintf(int, int, int);
@@ -223,9 +231,7 @@ int Pixel(int, int);
 int Get_Pixel(int);
 void shift_args(int, char**);
 int NewString(char *);
-char *malloc(int);
 void eu_startup();
-void exit(int);
 int CRoutineId(int, int, int);
 int e_sqrt(int);
 int e_arctan(int);

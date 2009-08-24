@@ -19,7 +19,7 @@ distclean : .SYMBOLIC clean
 # I wanted to put $(BASEPATH) here as a dependency for .c files but
 # watcom doesn't provide that functionality in inplicit rules... (sigh)
 .c.obj : 
-    wcc386 $(EOSTYPE) /zp4 /w0 /5r /ol $(PCREDEBUG) -zq -oaxt  -DNO_RECURSE $< -fo=$@
+    wcc386 $(EOSTYPE) /zp4 /w0 $(CPU_FLAG) /ol $(PCREDEBUG) -zq -oaxt  -DNO_RECURSE $< -fo=$@
 	
 $(BASEPATH) : .EXISTSONLY
     mkdir $(BASEPATH)

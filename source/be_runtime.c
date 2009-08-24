@@ -4863,6 +4863,9 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	clocks_per_sec = cps;
 	clk_tck = clk;
 	xstdin = (void *)stdin;
+#	if SSE2	
+		sse2_variable_init();
+#	endif		
 	InitInOut();
 	InitGraphics();
 	InitEMalloc();

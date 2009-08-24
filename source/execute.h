@@ -31,7 +31,7 @@
 /* NO VALUE objects can occur only in a few well-defined places,
    so we can simplify some tests. For speed we first check for ATOM-INT
    since that's what most objects are. */ 
-
+#include <stdio.h>
 #define NOVALUE      ((long)0xbfffffffL)
 #define TOO_BIG_INT  ((long)0x40000000L)
 #define HIGH_BITS    ((long)0xC0000000L)
@@ -221,7 +221,7 @@ typedef int *opcode_type;
 #define EF_APPEND 4
 
 struct file_info {
-	IFILE fptr;  // C FILE pointer
+	FILE * fptr;  // C FILE pointer
 	int mode;    // file mode
 }; 
 

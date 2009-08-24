@@ -17,6 +17,9 @@ rem ============================================================
 rem Read command line parameters
 rem ============================================================
 
+SET DISABLED_MANAGED_MEM=
+SET SSE2_ENABLED=
+
 :Loop
 IF "%1"=="" GOTO Continue
 
@@ -53,6 +56,13 @@ IF "%1" =="--debug" (
 	GOTO EndLoop
 )
 
+IF "%1" =="--sse2" (
+	echo SSE2=-DSSE2=1 >> config.wat
+	echo CPU_FLAG=/6r  >> config.wat
+	SET SSE2_ENABLED=1
+	GOTO EndLoop
+)
+
 echo Unknown option '%1'
 GOTO Help
 
@@ -71,6 +81,9 @@ IF "%NOEU%" == "" (
 )
 IF "%DISABLED_MANAGED_MEM%" == "" (
 	echo MANAGED_MEM=1 >> config.wat
+)
+IF "%SSE2_ENABLED%" == "" (
+	echo CPU_FLAG=/5r >> config.wat
 )
 IF not exist %WINDIR%\command\deltree.exe (
 	echo DELTREE=del /Q /S >> config.wat

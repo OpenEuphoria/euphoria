@@ -122,6 +122,9 @@ EU_BACKEND_OBJECTS = &
 !ifneq INT_CODES 1
 	$(BUILDDIR)\$(OBJDIR)\back\be_magic.obj &
 !endif	
+!ifeq	SSE2 -DSSE2=1
+	$(BUILDDIR)\$(OBJDIR)\back\be_sse2.obj &
+!endif	
 	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
@@ -143,6 +146,9 @@ EU_BACKEND_OBJECTS = &
 #       $(BUILDDIR)\$(OBJDIR)\memory.obj
 
 EU_LIB_OBJECTS = &
+!ifeq	SSE2 -DSSE2=1
+	$(BUILDDIR)\$(OBJDIR)\back\be_sse2.obj &
+!endif	
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
@@ -256,6 +262,12 @@ clean : .SYMBOLIC pcre
 	-$(RM) $(BUILDDIR)\eu*.exe
 	-$(RM) $(BUILDDIR)\eu*.lib
 
+nearlyclean mostlyclean : .SYMBOLIC	
+	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
+	-$(RM) $(BUILDDIR)\pcre\*.obj
+	-$(RM) $(BUILDDIR)\eu*.exe
+	-$(RM) $(BUILDDIR)\eu*.lib
+	
 clobber : .SYMBOLIC distclean
 	-$(RMDIR) $(BUILDDIR)
 
@@ -268,8 +280,8 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\eu.lib
 
 CC = wcc386
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
-BE_FLAGS = /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 $(CPU_FLAG) /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) $(CPU_FLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) $(SSE2)
 	
 library : .SYMBOLIC version.h runtime
     @echo ------- LIBRARY -----------
@@ -377,7 +389,7 @@ $(BUILDDIR)\eutestdr.wat : $(BUILDDIR)\eutestdr\main-.c
 $(BUILDDIR)\eutestdr\main-.c : $(TRUNKDIR)\source\eutest.ex $(BUILDDIR)\eutestdr
 	-$(RM) $(BUILDDIR)\eutestdr\*.*
 	cd  $(BUILDDIR)\eutestdr
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -nobuild -wat -plat $(TRANSDEBUG) $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
+	e:\build\watcom\theirs\euc.exe -nobuild -wat -plat $(TRANSDEBUG) $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\eutestdr :
@@ -483,14 +495,14 @@ $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_T
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	e:\build\watcom\theirs\euc.exe $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	e:\build\watcom\theirs\euc.exe  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !endif
 !endif
