@@ -1306,6 +1306,7 @@ public function format(sequence pFormat, object pArgs = {})
 	integer binout
 	integer tsep
 	object prevargv
+	object currargv
 
 	if atom(pArgs) then
 		pArgs = {pArgs}
@@ -1456,6 +1457,7 @@ public function format(sequence pFormat, object pArgs = {})
 
     			if argn < 1 or argn > length(pArgs) then
     				argtext = "?"
+	    			currargv ="?"
 				else
 					if string(pArgs[argn]) then
 						argtext = pArgs[argn]
@@ -1534,9 +1536,9 @@ public function format(sequence pFormat, object pArgs = {})
 										)
 						end if
 					end if
+	    			currargv = pArgs[argn]
     			end if
 
-    			prevargv = pArgs[argn]
 
     			if length(argtext) > 0 then
     				switch cap do
@@ -1555,7 +1557,7 @@ public function format(sequence pFormat, object pArgs = {})
 
     				end switch
 
-					if atom(pArgs[argn]) then
+					if atom(currargv) then
 						if find('e', argtext) = 0 then
 							-- Only applies to non-scientific notation.
 							if decs != -1 then
@@ -1587,14 +1589,14 @@ public function format(sequence pFormat, object pArgs = {})
 					end if
 
     				if align = 0 then
-    					if atom(pArgs[argn]) then
+    					if atom(currargv) then
     						align = '>'
     					else
     						align = '<'
     					end if
     				end if
 
-    				if atom(pArgs[argn]) then
+    				if atom(currargv) then
 	    				if tsep != 0 then
 	    					integer dpos
 	    					integer dist
@@ -1672,6 +1674,7 @@ public function format(sequence pFormat, object pArgs = {})
    				end if
 
     			tend = 0
+		    	prevargv = currargv
     		end if
     	end if
     end while

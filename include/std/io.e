@@ -1360,19 +1360,29 @@ end function
 -- Write formatted text to a file..
 --
 -- Parameters:
---		# ##fm## : sequence, Format pattern.
---		# ##data## : sequence, The data that will be formatted,
---      # ##fn## : object, The file to receive the formatted output. Default is
+-- There are two ways to pass arguments to this function,
+-- # Traditional way with first arg being a file handle.
+--		## : integer, The file handle.
+--		## : sequence, The format pattern.
+--      ## : object, The data that will be formatted.
+-- # Alternative way with first argument being the format pattern.
+--		# : sequence, Format pattern.
+--		# : sequence, The data that will be formatted,
+--      # : object, The file to receive the formatted output. Default is
 --      to the STDOUT device (console).
---
+-- 
 -- Comments:
--- * When ##fn## is a file name string, it is opened for output, 
---   written to and then closed.
--- * When ##fn## is a two-element sequence containing a file name string and 
---   an output type ("a" for append, "w" for write), it is opened accordingly, 
---   written to and then closed.
--- * When ##fn## is a file handle, it is written to only
--- * The ##fm## uses the formatting codes defined in [[:format]].
+-- * With the traditional arguments, the first argument must be an integer file handle.
+-- * With the alternative arguments, the thrid argument can be a file name string, 
+--   in which case it is opened for output, written to and then closed.
+-- * With the alternative arguments, the third argument can be a two-element sequence
+--   containing a file name string and an output type ("a" for append, "w" for write),
+--   in which case it is opened accordingly, written to and then closed.
+-- * With the alternative arguments, the third argument can a file handle, 
+--   in which case it is written to only
+-- * The format pattern uses the formatting codes defined in [[:format]].
+-- * When the data to be formatted is a single text string, it does not have to
+--   be enclosed in braces, 
 --
 -- Example 1:
 -- <eucode>
@@ -1385,15 +1395,28 @@ end function
 -- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, dat)
 -- -- Appended to "sample.log"
 -- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, {"sample.log", "a"})
+-- -- Simple message to console
+-- writef("A message")
+-- -- Another console message
+-- writef(STDERR, "This is a []", "message")
 -- </eucode>
 --
 -- See Also:
 --    [[:format]], [[:writefln]], [[:write_lines]]
 
-public procedure writef(sequence fm, sequence data={}, object fn = 1)
+public procedure writef(object fm, object data={}, object fn = 1)
 	integer real_fn = 0
 	integer close_fn = 0
 	sequence out_style = "w"
+	
+	if integer(fm) then
+		object ts
+		-- File Handle in first arguement so rotate the arguments.
+		ts = fm
+		fm = data
+		data = fn
+		fn = ts
+	end if
 	
 	if sequence(fn) then
 		if length(fn) = 2 then
@@ -1418,6 +1441,9 @@ public procedure writef(sequence fm, sequence data={}, object fn = 1)
 		real_fn = fn
 	end if
 	
+	if t_display(data) then
+		data = {data}
+	end if
     puts(real_fn, format(fm, data))
     if close_fn then
     	close(real_fn)
@@ -1456,8 +1482,11 @@ end procedure
 --
 -- See Also:
 --    [[:format]], [[:writef]], [[:write_lines]]
-public procedure writefln(sequence fm, sequence data={}, object fn = 1)
-	writef(fm & '\n', data, fn)
+public procedure writefln(object fm, object data={}, object fn = 1)
+	if integer(fm) then
+		writef(data & '\n', fn, fm)
+	else
+		writef(fm & '\n', data, fn)
+	end if
 end procedure
 
- 
