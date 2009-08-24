@@ -1652,7 +1652,7 @@ public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 -- See Also:
 --     [[:splice]], [[:remove]], [[:remove_all]]
 
---****
+--**
 -- Description:
 -- Replaces all occurrences of ##olddata## with ##newdata##
 --
