@@ -889,6 +889,10 @@ export procedure emit_op(integer op)
 	elsif find(op, opZeroZero) then
 		emit_opcode(op)
 		assignable = FALSE
+		if op = UPDATE_GLOBALS then
+			last_op = last_op_backup
+			last_pc = last_pc_backup
+		end if
 	
 	-- 1 input, 0 outputs - special 
 	elsif op = IF or op = WHILE then
