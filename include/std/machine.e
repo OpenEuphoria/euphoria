@@ -23,40 +23,7 @@ type block_aligned( atom a )
 	return remainder(a,4096)=0
 end type
 
---**
--- Allocate a C-style null-terminated string in memory
---
--- Parameters:
---              # ##s## : a sequence, the string to store in RAM.
---              # ##cleanup## : an integer, if non-zero, then the returned pointer will be
---                automatically freed when its reference count drops to zero, or
---                when passed as a parameter to [[:delete]].  
---
--- Returns:
---              An **atom**, the address of the memory block where the string was
--- stored, or 0 on failure.
---
--- Comments:
--- Only the 8 lowest bits of each atom in ##s## is stored. Use
--- ##allocate_wstring##()  for storing double byte encoded strings.
---
--- There is no allocate_string_low() function. However, you could easily
--- craft one by adapting the code for ##allocate_string##.
---
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
--- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the pointer's reference count drops to zero.
---
--- Example 1:
--- <eucode>
---  atom title
---
--- title = allocate_string("The Wizard of Oz")
--- </eucode>
--- 
--- See Also:
---              [[:allocate]], [[:allocate_wstring]]
+
 
 --**
 -- Allocate a NULL terminated pointer array.
@@ -473,7 +440,6 @@ end type
 -- other hand, if you try to execute a code address returned by [[:allocate()]]
 -- with DEP enabled the program will receive a machine exception.  
 --
-
 -- Comments:
 -- 
 -- Use this for the machine code you want to run in memory.  The copying is
@@ -524,6 +490,41 @@ end type
 ifdef WIN32 then
 std_library_address oldprotptr = allocate_data(4)
 end ifdef
+
+--**
+-- Allocate a C-style null-terminated string in memory
+--
+-- Parameters:
+--              # ##s## : a sequence, the string to store in RAM.
+--              # ##cleanup## : an integer, if non-zero, then the returned pointer will be
+--                automatically freed when its reference count drops to zero, or
+--                when passed as a parameter to [[:delete]].  
+--
+-- Returns:
+--              An **atom**, the address of the memory block where the string was
+-- stored, or 0 on failure.
+--
+-- Comments:
+-- Only the 8 lowest bits of each atom in ##s## is stored. Use
+-- ##allocate_wstring##()  for storing double byte encoded strings.
+--
+-- There is no allocate_string_low() function. However, you could easily
+-- craft one by adapting the code for ##allocate_string##.
+--
+-- Since ##allocate_string##() allocates memory, you are responsible to
+-- [[:free]]() the block when done with it if ##cleanup## is zero.
+-- If ##cleanup## is non-zero, then the memory can be freed by calling
+-- [[:delete]], or when the pointer's reference count drops to zero.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate_string("The Wizard of Oz")
+-- </eucode>
+-- 
+-- See Also:
+--              [[:allocate]], [[:allocate_wstring]]
 
 public function allocate_string(sequence s, integer cleanup = 0 )
 	atom mem

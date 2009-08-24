@@ -87,7 +87,6 @@ end type
 -- [[:free]]() the block when done with it if ##cleanup## is zero.
 -- If ##cleanup## is non-zero, then the memory can be freed by calling
 -- [[:delete]], or when the pointer's reference count drops to zero.
-
 -- When you are finished using the block, you should pass the address of the block to 
 -- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
 -- can be freed by calling [[:delete]], or when the pointer's reference count drops to zero.
