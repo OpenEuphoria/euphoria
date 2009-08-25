@@ -344,7 +344,7 @@ integer delete_socket_rid = routine_id("delete_socket")
 --   * [[:SOCK_SEQPACKET]]
 --
 -- Returns:
---   An **atom**, -1 on failure, else a supposedly valid socket id.
+--   An **object**, -1 on failure, else a supposedly valid socket id.
 --
 -- Example 1:
 -- <eucode>
