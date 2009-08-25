@@ -61,6 +61,20 @@ public function allocate_pointer_array(sequence pointers, integer cleanup = 0)
     return pList
 end function
 
+--**
+-- Free a NULL terminated pointers array.
+--
+-- Parameters:
+--   # ##pointers_array## : memory address of where the NULL terminated array exists at.
+--
+-- Comments:
+--   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
+--   Do not call ##free_pointer_array##() for a pointer that was allocated to be cleaned
+--   up automatically.  Instead, use [[:delete]].
+--
+-- See Also:
+--   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
+
 public procedure free_pointer_array(atom pointers_array)
 	atom saved = pointers_array,
 		ptr = peek4u(pointers_array)
@@ -407,15 +421,17 @@ ifdef WIN32 then
 	end function
 end ifdef
 
---***
+--****
 -- == Types supporting Memory
 
---** protection constants type
+--**
+-- protection constants type
 public type valid_memory_protection_constant( integer x )
 	return 0 != find( x, MEMORY_PROTECTION )
 end type
 
---** page aligned address type
+--**
+-- page aligned address type
 export type page_aligned_address( atom a )
 	return remainder( a, 4096 ) = 0
 end type

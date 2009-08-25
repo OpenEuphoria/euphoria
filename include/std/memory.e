@@ -202,20 +202,6 @@ public procedure free(object addr)
 end procedure
 FREE_RID = routine_id("free")
 
---**
--- Free a NULL terminated pointers array.
---
--- Parameters:
---   # ##pointers_array## : memory address of where the NULL terminated array exists at.
---
--- Comments:
---   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
---   Do not call ##free_pointer_array##() for a pointer that was allocated to be cleaned
---   up automatically.  Instead, use [[:delete]].
---
--- See Also:
---   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
-
 
 --****
 -- === Reading from, Writing to, and Calling into Memory

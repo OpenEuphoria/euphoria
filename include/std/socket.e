@@ -42,27 +42,21 @@ ifdef WIN32 then
 		AF_APPLETALK=17,
 		--**
 		-- Bluetooth
-		AF_BTH=32
-
-	public constant
+		AF_BTH=32,
 		--**
 		-- Provides sequenced, reliable, two-way, connection-based byte streams.
 		-- An out-of-band data transmission mechanism may be supported.
 		SOCK_STREAM=1,
-
 		--**
 		-- Supports datagrams (connectionless, unreliable messages of a
 		-- fixed maximum length).
 		SOCK_DGRAM=2,
-
 		--**
 		-- Provides raw network protocol access.
 		SOCK_RAW=3,
-
 		--**
 		-- Provides a reliable datagram layer that does not guarantee ordering.
 		SOCK_RDM=4,
-
 		--**
 		-- Obsolete and should not be used in new programs
 		SOCK_SEQPACKET=5

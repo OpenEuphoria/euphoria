@@ -208,7 +208,7 @@ public function range(object pData)
 	return result_
 end function
 
---**
+--****
 -- Enums used for to influence the results of some of these functions.
 
 public enum

@@ -81,7 +81,7 @@ end ifdef
 --****
 -- === Constants
 
---**
+--****
 -- Signature:
 -- public constant SLASH
 --
@@ -92,7 +92,7 @@ end ifdef
 -- When on //Windows//, '~\\'. When on //Unix//, '/'.
 --
 
---**
+--****
 -- Signature:
 -- public constant SLASHES
 --
@@ -102,7 +102,7 @@ end ifdef
 -- ##~\~\## as well as ##~:## and ##/## as newer //Windows// versions support
 -- ##/## as a path separator. On //Unix// systems, it only contains ##/##.
 
---**
+--****
 -- Signature:
 -- public constant SLASHES
 --
@@ -112,14 +112,14 @@ end ifdef
 -- ##~\~\## as well as ##~:## and ##/## as newer //Windows// versions support
 -- ##/## as a path separator. On //Unix// systems, it only contains ##/##.
 
---**
+--****
 -- Signature:
 -- public constant EOLSEP
 --
 -- Description:
 -- Current platform's newline string: ##"\n"## on //Unix//, else ##"\r\n"##.
 
---**
+--****
 -- Signature:
 -- public constant EOL
 --
@@ -127,22 +127,22 @@ end ifdef
 -- All platform's newline character: ##'\n'##. When text lines are read the native
 -- platform's EOLSEP string is replaced by a single character EOL.
 
---**
+--****
 -- Signature:
 -- public constant PATHSEP
 --
 -- Description:
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.
 
---**
+--****
 -- Signature:
 -- public constant NULLDEVICE
 --
 -- Description:
 -- Current platform's null device path: ##/dev/null## on //Unix//, else ##NUL:##.
 
---**
--- Segnature:
+--****
+-- Signature:
 -- public constant SHARED_LIB_EXT
 -- 
 -- Description:
@@ -1699,7 +1699,6 @@ end ifdef
 -- Comments:
 -- * If ##overwrite## was requested but the move fails, any existing destination
 --  file is preserved.
-
 -- See Also:
 -- [[:rename_file]], [[:copy_file]]
 

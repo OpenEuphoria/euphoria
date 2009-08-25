@@ -47,7 +47,7 @@ global constant
 		,T_GTEQ        = Enum()
 		,T_NOTEQ       = Enum()
 		,T_CONCATEQ    = Enum()
-		
+
 		,T_DELIMITER   = Enum() -- marks the start of the delimiter codes
 		,T_PLUS        = Enum_Start(Enum()-1,1)
 		,T_MINUS       = Enum()
@@ -77,7 +77,8 @@ global constant
 -- this list of delimiters must match the order of the corresponding T_ codes above
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
-global constant -- T_NUMBER formats
+-- T_NUMBER formats
+global constant 
 		 TF_HEX        = Enum()
 		,TF_INT        = Enum()
 		,TF_ATOM       = Enum()
@@ -151,18 +152,21 @@ integer IGNORE_BLANKS 	= TRUE
 integer IGNORE_COMMENTS = TRUE
 integer STRING_NUMBERS 	= FALSE
 
+--**
 -- return blank lines as tokens
 -- default is FALSE
 global procedure et_keep_blanks(integer toggle)
 	IGNORE_BLANKS = not toggle
 end procedure
 
+--**
 -- return comments as tokens
 -- default is FALSE
 global procedure et_keep_comments(integer toggle)
 	IGNORE_COMMENTS = not toggle
 end procedure
 
+--**
 -- return TDATA for all T_NUMBER tokens in "string" format
 -- by default:
 -- 		T_NUMBER tokens return atoms
