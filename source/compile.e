@@ -2789,7 +2789,7 @@ procedure opASSIGN_SUBS()
 		end if
 
 		if Code[pc+1] = rhs then
-			c_stmt0("*(int *)_2 = _0;n")
+			c_stmt0("*(int *)_2 = _0;")
 		else
 			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
 		end if
