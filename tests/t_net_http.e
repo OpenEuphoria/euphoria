@@ -15,16 +15,13 @@ ifdef not NOINET_TESTS then
 
     sequence data = sprintf("%d", { rand_range(1000,10000) })
 
---    set_sendheader_useragent_msie()
-    set_sendheader("POSTDATA","data=" & data)
-    content = get_url("http://openeuphoria.org/tests/post_test.cgi")
+    content = get_url("http://openeuphoria.org/tests/post_test.cgi", "data=" & data)
 	test_true("get_url post 1", length(content))
 	test_equal("get_url post 2", "success", content[2])
 	
     content = get_url("http://openeuphoria.org/tests/post_test.txt")
 	test_true("get_url post 3", length(content))
 	test_equal("get_url post 4", data, content[2])
-	printf(1, "header: %s\n", content )
 	
 elsedef
     puts(2, " WARNING: URL tests were not run\n")
