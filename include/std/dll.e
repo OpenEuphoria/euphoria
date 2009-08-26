@@ -397,7 +397,7 @@ end function
 --
 -- See Also: 
 --
--- [[:c_func]], [[:define_c_proc]], [[:open_dll]], [[:Platform-Specific Issues]]
+-- [[:c_proc]], [[:define_c_proc]], [[:open_dll]], [[:Platform-Specific Issues]]
 --        
 
 --****
@@ -442,7 +442,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:c_proc]], [[:define_c_func]], [[:open_dll]], [[:Platform-Specific Issues]]
+-- [[:c_func]], [[:define_c_func]], [[:open_dll]], [[:Platform-Specific Issues]]
 -- 
 
 constant M_CALL_BACK = 52
