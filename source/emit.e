@@ -7,7 +7,6 @@ elsedef
 without type_check
 end ifdef
 include std/os.e
-include std/map.e
 
 include global.e
 include platform.e
@@ -282,7 +281,9 @@ export constant
 	NEW_REFERENCE = 1,
 	DISCARD_TEMP = 0,
 	SAVE_TEMP = 1
-map:map emitted_temps = map:new()
+
+sequence emitted_temps = {}
+sequence emitted_temp_referenced = {}
 export procedure emit_temp( object tempsym, integer referenced )
 	if not TRANSLATE  then -- translator has its own way of handling temps
 		if sequence(tempsym) then
@@ -295,24 +296,11 @@ export procedure emit_temp( object tempsym, integer referenced )
 		and not IsInteger( tempsym ) 
 		then
 			-- don't really care about integer temps
-			map:put( emitted_temps, tempsym, referenced )
+			emitted_temps &= tempsym
+			emitted_temp_referenced &= referenced
 		end if
 			
 	end if
-end procedure
-
-map:map disposed_temps = map:new()
-procedure dispose_temp( object temps, integer keep )
-	if TRANSLATE then
-		return
-	end if
-	if atom( temps ) then
-		temps = {temps}
-	end if
-	for i = 1 to length( temps ) do
-		symtab_index tempsym = temps[i]
-		map:put( disposed_temps, tempsym, DISCARD_TEMP ) -- keep
-	end for
 end procedure
 
 	
@@ -323,42 +311,30 @@ export procedure flush_temps( sequence except_for = {} )
 	if TRANSLATE then
 		return
 	end if
-	sequence syms = map:keys( emitted_temps )
+-- 	sequence syms = map:keys( emitted_temps )
 	sequence
 		refs = {},
 		derefs = {},
 		novalues = {}
 		
-	for i = 1 to length( syms ) do
-		symtab_index sym = syms[i]
+	for i = 1 to length( emitted_temps ) do
+		symtab_index sym = emitted_temps[i]
 		
 		if find( sym, except_for ) then
 			continue
 		end if
 		
-		integer reference = map:get( emitted_temps, sym, NO_REFERENCE )
-		integer keep      = map:get( disposed_temps, sym, DISCARD_TEMP )
-		clear_temp( sym )
-		if keep = SAVE_TEMP and reference = NO_REFERENCE then
-			refs &= sym
-			
-		elsif keep = DISCARD_TEMP and reference = NEW_REFERENCE then
+-- 		integer reference = emitted_temp_referenced[i] -- map:get( emitted_temps, sym, NO_REFERENCE )
+		if emitted_temp_referenced[i] then
 			derefs &= sym
-			
 		else
 			novalues &= sym
-			
 		end if
 	end for
 	
 	if not length( except_for ) then
 		clear_last()
 	end if
-	
-	for i = 1 to length( refs ) do
-		emit( REF_TEMP )
-		emit( refs[i] )
-	end for
 	
 	for i = 1 to length( derefs ) do
 		emit( DEREF_TEMP )
@@ -370,6 +346,8 @@ export procedure flush_temps( sequence except_for = {} )
 		emit( novalues[i] )
 	end for
 	
+	emitted_temps = {}
+	emitted_temp_referenced = {}
 end procedure
 
 procedure check_for_temps()
@@ -382,20 +360,23 @@ procedure check_for_temps()
 end procedure
 
 export procedure clear_temp( symtab_index tempsym )
-	map:remove( emitted_temps, tempsym )
-	map:remove( disposed_temps, tempsym )
+	integer ix = find( tempsym, emitted_temps )
+	if ix then
+		emitted_temps = remove( emitted_temps, ix )
+		emitted_temp_referenced = remove( emitted_temp_referenced, ix )
+	end if
 end procedure
 
 --**
 -- Returns a sequence containing maps holding the current knowledge
 -- about temps.
 export function pop_temps()
-	map:map new_emitted  = emitted_temps
-	map:map new_disposed = disposed_temps
+	sequence new_emitted  = emitted_temps
+	sequence new_referenced = emitted_temp_referenced
 	
-	emitted_temps  = map:new()
-	disposed_temps = map:new()
-	return { new_emitted, new_disposed }
+	emitted_temps  = {}
+	emitted_temp_referenced = {}
+	return { new_emitted, new_referenced }
 end function
 
 --**
@@ -403,8 +384,8 @@ end function
 -- Flushes any temps waiting to be flushed, then flushes all of the
 -- temps in the maps contained in the ##temps## sequence.
 export procedure push_temps( sequence temps )
-	map:copy( temps[1], emitted_temps )
-	map:copy( temps[2], disposed_temps )
+	emitted_temps &= temps[1]
+	emitted_temp_referenced &= temps[2]
 	flush_temps()
 end procedure
 
@@ -562,7 +543,6 @@ procedure cont11ii(integer op, boolean ii)
 
 	Push(c)
 	emit_addr(c)
-	dispose_temp( source, DISCARD_TEMP )
 end procedure
 
 procedure cont21d(integer op, integer a, integer b, boolean ii)    
@@ -581,7 +561,6 @@ procedure cont21d(integer op, integer a, integer b, boolean ii)
 	end if
 	Push(c)
 	emit_addr(c)
-	dispose_temp( a & b, DISCARD_TEMP )
 end procedure
 		
 procedure cont21ii(integer op, boolean ii)
@@ -819,7 +798,6 @@ export procedure emit_op(integer op)
 		for i = cgi-n+1 to cgi do 
 			emit_addr(cg_stack[i])
 			TempFree(cg_stack[i])
-			dispose_temp( cg_stack[i], DISCARD_TEMP )
 		end for
 		
 		cgi -= n
@@ -850,7 +828,6 @@ export procedure emit_op(integer op)
 		for i = cgi-n+1 to cgi do 
 			emit_addr(cg_stack[i])
 			TempFree(cg_stack[i])
-			dispose_temp( cg_stack[i], DISCARD_TEMP )
 		end for
 		cgi -= n
 		
@@ -878,7 +855,6 @@ export procedure emit_op(integer op)
 	    for i=length(paths) to 1 by -1 do
 	        c = NewStringSym(paths[i])
 	        emit_addr(c)
-			dispose_temp( c, SAVE_TEMP )
 	    end for
 	    b = NewTempSym()
 	    Push(b)
@@ -1033,7 +1009,6 @@ export procedure emit_op(integer op)
 			for i = 1 to n do
 				emit_addr(elements[i])
 			end for
-			dispose_temp( elements, DISCARD_TEMP )
 			c = NewTempSym()
 			emit_addr(c)
 			assignable = TRUE
@@ -1076,7 +1051,6 @@ export procedure emit_op(integer op)
 		emit_addr(a) -- subscript 
 		emit_addr(b) -- rhs value
 		assignable = FALSE
-		dispose_temp( c & b, SAVE_TEMP )
 
 	elsif op = LHS_SUBS or op = LHS_SUBS1 or op = LHS_SUBS1_COPY then  
 		-- left hand side multiple subscripts, one step
@@ -1106,7 +1080,6 @@ export procedure emit_op(integer op)
 	elsif find(op, {RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, 
 					TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING}) then
 		cont11ii(op, TRUE)
-		dispose_temp( Code[$-1], DISCARD_TEMP )
 		
 	elsif op = UMINUS then
 		-- check for constant folding 
@@ -1183,7 +1156,6 @@ export procedure emit_op(integer op)
 		TempInteger(c) -- result will always be an integer
 		Push(c)
 		emit_addr(c)
-		dispose_temp( source, DISCARD_TEMP )
 			
 	-- 1 input, 1 outputs with jump address that might be patched.
 	-- Output value is not used by the next op, but same temp must
@@ -1205,7 +1177,6 @@ export procedure emit_op(integer op)
 		b = Pop()
 		emit_addr(Pop())
 		emit_addr(b)
-		dispose_temp( Code[$-1..$], DISCARD_TEMP )
 		if op = C_PROC then
 			emit_addr(CurrentSub)
 		end if
@@ -1316,26 +1287,6 @@ export procedure emit_op(integer op)
 					SYSTEM_EXEC, rw:CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
 					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE}) then
 		cont21ii(op, FALSE)
-		switch op do
-			case
-				DELETE_ROUTINE
-			then
-				dispose_temp( Code[$-1..$], SAVE_TEMP )
-			
-			case
-				SPRINTF,
-				MINUS,
-				HASH,
-				HEAD,
-				TAIL,
-				rw:CONCAT,
-				REPEAT
-			then
-				dispose_temp( Code[$-2..$-1], DISCARD_TEMP )
-				
-			case else
-				dispose_temp( Code[$-2..$-1], SAVE_TEMP )
-		end switch
 
 	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything
 		c = Pop()
@@ -1365,7 +1316,6 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		emit_addr(c)
-		dispose_temp( Code[$-2..$], DISCARD_TEMP )
 		assignable = FALSE
 
 	-- 3 inputs, 1 output 
@@ -1376,7 +1326,6 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		emit_addr(c)
-		dispose_temp( Code[$-2..$], DISCARD_TEMP )
 		c = NewTempSym()
 		assignable = TRUE
 		Push(c)
@@ -1390,7 +1339,6 @@ export procedure emit_op(integer op)
 		for i = 1 to n do 
 			symtab_index element = Pop()
 			emit_addr( element )  -- reverse order
-			dispose_temp( element, SAVE_TEMP )
 		end for
 		c = NewTempSym()
 		emit_addr(c)
@@ -1456,11 +1404,9 @@ export procedure emit_op(integer op)
 		-- for x[i] op= expr 
 		b = Pop()      -- rhs value, keep on stack 
 		TempKeep(b)
-		dispose_temp( b, SAVE_TEMP )
 		
 		a = Pop()      -- subscript, keep on stack
 		TempKeep(a)
-		dispose_temp( a, DISCARD_TEMP )
 		
 		c = Pop()      -- lhs sequence, keep on stack
 		TempKeep(c)
@@ -1489,8 +1435,6 @@ export procedure emit_op(integer op)
 		emit_addr(a)  
 		emit_addr(b)
 		assignable = FALSE
-		dispose_temp( b, SAVE_TEMP )
-		dispose_temp( a & c, DISCARD_TEMP )
 
 	-- 4 inputs, 1 output
 	elsif op = REPLACE then
@@ -1508,7 +1452,6 @@ export procedure emit_op(integer op)
 		c = NewTempSym()
 		Push(c)
 		emit_addr(c)     -- place to store result
-		dispose_temp( a & b & c & d, DISCARD_TEMP )
 		assignable = TRUE
 
 	-- 4 inputs, 1 output
@@ -1551,7 +1494,6 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		assignable = FALSE
-		dispose_temp( Code[$-1..$], SAVE_TEMP )
 			
 	elsif op = CALL_FUNC then
 		emit_opcode(op)
@@ -1559,7 +1501,6 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		emit_addr(b)
 		assignable = TRUE
-		dispose_temp( Code[$-1..$], SAVE_TEMP )
 		c = NewTempSym() 
 		Push(c)
 		emit_addr(c)
@@ -1608,7 +1549,6 @@ export procedure emit_op(integer op)
 	elsif find(op, {CLOSE, ABORT, CALL, DELETE_OBJECT}) then
 		emit_opcode(op)
 		emit_addr(Pop())
-		dispose_temp( Code[$], DISCARD_TEMP )
 		assignable = FALSE
 	
 	elsif op = POWER then
@@ -1717,7 +1657,6 @@ export procedure emit_op(integer op)
 		emit_opcode(op)
 		emit_addr(a)       
 		assignable = FALSE
-		dispose_temp( a, DISCARD_TEMP )
 
 	elsif op = TRACE then
 		a = Pop()
@@ -1732,7 +1671,6 @@ export procedure emit_op(integer op)
 				trace_called = TRUE
 			end if          
 		end if
-		dispose_temp( a, DISCARD_TEMP )
 		assignable = FALSE
 
 	else
