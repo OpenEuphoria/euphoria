@@ -3180,6 +3180,7 @@ procedure opLHS_SUBS()
 
 	else
 		-- LHS_SUBS1_COPY
+		c_stmt("Ref(@)\n", Code[pc+1])
 		c_stmt("DeRef(@);\n", Code[pc+4])
 		c_stmt("@ = @;\n", {Code[pc+4], Code[pc+1]})
 		if not is_temp( Code[pc+4] ) then
@@ -3187,6 +3188,7 @@ procedure opLHS_SUBS()
 		end if
 		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+4])
 		target[MIN] = SeqLen(Code[pc+1])
+		create_temp( Code[pc+4], NEW_REFERENCE )
 		SetBBType(Code[pc+4], TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete( Code[pc+1] ) )
 	end if
 
