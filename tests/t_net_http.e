@@ -19,6 +19,7 @@ ifdef not NOINET_TESTS then
 	test_true("get_url post 1", length(content))
 	test_equal("get_url post 2", "success", content[2])
 	
+	set_sendheader("Cache-Control", "no-cache" )
     content = get_url("http://openeuphoria.org/tests/post_test.txt")
 	test_true("get_url post 3", length(content))
 	test_equal("get_url post 4", data, content[2])
