@@ -294,6 +294,7 @@ export procedure emit_temp( object tempsym, integer referenced )
 		elsif tempsym > 0
 		and sym_mode( tempsym ) = M_TEMP 
 		and not IsInteger( tempsym ) 
+		and not find( tempsym, emitted_temps )
 		then
 			-- don't really care about integer temps
 			emitted_temps &= tempsym
@@ -324,8 +325,7 @@ export procedure flush_temps( sequence except_for = {} )
 			continue
 		end if
 		
--- 		integer reference = emitted_temp_referenced[i] -- map:get( emitted_temps, sym, NO_REFERENCE )
-		if emitted_temp_referenced[i] then
+		if emitted_temp_referenced[i] = NEW_REFERENCE then
 			derefs &= sym
 		else
 			novalues &= sym
