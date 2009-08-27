@@ -181,13 +181,11 @@ end function
 -- 	[[:wait_key]]
 
 public procedure any_key(object prompt="Press Any Key to continue...", integer con = 1)
-	object ignore
-
 	if not find(con, {1,2}) then
 		con = 1
 	end if
 	puts(con, prompt)
-	ignore = wait_key()
+	wait_key()
 	puts(con, "\n")
 end procedure
 
@@ -568,12 +566,8 @@ end procedure
 
 public function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
-	integer screen_width, image_width
 
-	vc = video_config()
-	screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
 	image = {}
-	image_width = (bottom_right[2] - top_left[2] + 1) * BYTES_PER_CHAR
 	for row = top_left[1] to bottom_right[1] do
 		row_chars = {}
 		for col = top_left[2] to bottom_right[2] do
