@@ -108,7 +108,7 @@ rule RevGet
 
 actions RevGet
 {
-    eui $(REV_GET) -output $(<)
+    eui $(REV_GET) -output $(<) -root ./
 }
 
 #

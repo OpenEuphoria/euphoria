@@ -7,4 +7,4 @@
 VERSION_MAJOR = 4 ;
 VERSION_MINOR = 0 ;
 VERSION_PATCH = 0 ;
-RELEASE_TYPE  = "alpha" ;
+RELEASE_TYPE  = "development" ;
