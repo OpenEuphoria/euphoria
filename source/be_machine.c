@@ -2968,6 +2968,12 @@ object machine(object opcode, object x)
 
 			case M_SOCK_SELECT:
 				return eusock_select(x);
+                
+            case M_SOCK_SENDTO:
+                return eusock_sendto(x);
+            
+            case M_SOCK_RECVFROM:
+                return eusock_recvfrom(x);
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
