@@ -847,6 +847,7 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 	else
 		target_type = GType(Code[pc+1])
 	end if
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	create_temp( Code[pc+2], 1 )
 end procedure
@@ -1665,6 +1666,7 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 
 	CDeRefStr("_0")
 	SetBBType(Code[pc+2], target_type, target_val, TYPE_OBJECT, HasDelete( Code[pc+2] ) )
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	create_temp( Code[pc+2], 1 )
 	return pc + 3
 end function
@@ -4361,7 +4363,7 @@ procedure opRETURNF()
 	ret = Code[pc+3]
 	
 	if is_temp( ret ) 
-	or map:get( dead_temp_walking, ret, NO_REFERENCE ) != NEW_REFERENCE then
+	and map:get( dead_temp_walking, ret, NO_REFERENCE ) != NEW_REFERENCE then
 		CRef( ret )
 	end if
 	
