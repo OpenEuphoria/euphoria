@@ -643,8 +643,9 @@ end function
 -- Parameters:
 --   # ##sock##: the server socket
 --   # ##data##: the data to be sent
---   # ##ip##: the ip where the data is to be sent to
---   # ##port##: the port where the data is to be sent on
+--   # ##ip##: the ip where the data is to be sent to (ip:port) 
+--     is acceptable
+--   # ##port##: the port where the data is to be sent on (if not supplied with the ip)
 --   # ##flags## : flags (see [[:Send Flags]])
 --
 -- Returns:
@@ -654,8 +655,11 @@ end function
 --   [[:receive_from]]
 --   
 
-public function send_to(socket sock, sequence data, sequence ip, integer port, atom flags=0)
-    return machine_func(M_SOCK_SENDTO, { sock, data, flags, ip, port })
+public function send_to(socket sock, sequence data, sequence address, integer port=-1, 
+    	atom flags=0)
+	object sock_data = parse_ip_address(address, port)
+
+    return machine_func(M_SOCK_SENDTO, { sock, data, flags, sock_data[1], sock_data[2] })
 end function
 
 --**
