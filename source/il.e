@@ -454,6 +454,10 @@ procedure OutputIL()
 				backend_name = "eub"
 				-- try to get the installed backend, if it exists:
 				be = open( "/usr/bin/eub", "r" )
+				if be = -1 then
+					-- try an obvious other path
+					be = open( "/usr/local/bin/eub", "r" )
+				end if
 			end ifdef
 		end if
 		sequence ondisk_name = locate_file( backend_name, 

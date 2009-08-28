@@ -116,6 +116,11 @@ export function get_eudir()
 	ifdef UNIX then
 		if equal(x, -1) then
 			x = "/usr/share/euphoria"
+			if not file_exists( x ) then
+				-- somewhat hacky, but covers the default (and obvious)
+				-- other place to look
+				x = "/usr/local/share/euphoria"
+			end if
 		end if
 	end ifdef
 

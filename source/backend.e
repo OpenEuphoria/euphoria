@@ -56,9 +56,21 @@ constant
 	ST_BLOCK          = 56
 
 function get_next( symtab_index sym )
-	while sym and sym_scope( sym ) = SC_UNDEFINED do
-		sym = SymTab[sym][S_NEXT]
-	end while
+	if get_backend() then
+		while sym and 
+		((sequence(SymTab[sym]) and sym_scope( sym ) = SC_UNDEFINED) or atom( SymTab[sym] ) ) do
+			if sequence(SymTab[sym]) then
+				sym = SymTab[sym][S_NEXT]
+			else
+				sym = SymTab[sym]
+			end if
+		end while
+	else
+		while sym and sym_scope( sym ) = SC_UNDEFINED do
+			sym = SymTab[sym][S_NEXT]
+			
+		end while
+	end if
 	return sym
 end function
 
