@@ -594,8 +594,7 @@ object eusock_recv(object x)
 
 	result = recv(s, buf, BUFF_SIZE, flags);
 
-	if (result > 0)
-	{
+	if (result > 0) {
 		buf[result] = 0;
 		return NewString(buf);
 	} else if (result == 0) {
@@ -613,32 +612,44 @@ object eusock_recv(object x)
 
 object eusock_sendto(object x)
 {
-	SOCKET s, s_to;
-	int flags, result;
+	SOCKET s;
+	struct sockaddr_in addr;
+	int flags, port, result;
 
 	s1_ptr buf_s;
-	char *buf;
+    s1_ptr ip_s;
+	char *buf, *ip;
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
-		RTFatal("first argument to send must be a socket");
+		RTFatal("first argument to sendto must be a socket");
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
-		RTFatal("second argument to send must be a sequence");
+		RTFatal("second argument to sendto must be a sequence");
 	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
-		RTFatal("third argument to send must be an integer");
-	if (!IS_SOCKET(SEQ_PTR(x)->base[4]))
-		RTFatal("fourth argument to send must be a socket");
+		RTFatal("third argument to sendto must be an integer");
+	if (!IS_SEQUENCE(SEQ_PTR(x)->base[4]))
+		RTFatal("fourth argument to sendto must be a sequence");
+	if (!IS_ATOM_INT(SEQ_PTR(x)->base[5]))
+		RTFatal("fifth argument to sendto must be an integer");
 
 	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-    s_to  = SEQ_PTR(SEQ_PTR(x)->base[4])->base[SOCK_SOCKET];
 	flags = SEQ_PTR(x)->base[3];
+    ip_s  = SEQ_PTR(SEQ_PTR(x)->base[4]);
+    port  = SEQ_PTR(x)->base[5];
 
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	buf   = EMalloc(buf_s->length+1);
 	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length+1);
+	ip = EMalloc(ip_s->length + 1);
+    MakeCString(ip, SEQ_PTR(x)->base[4], ip_s->length+1);
 
-	result = sendto(s, buf, buf_s->length, flags, s_to, sizeof(SOCKADDR *));
+	addr.sin_family = AF_INET;
+	addr.sin_port   = htons(port);
+    addr.sin_addr.s_addr = inet_addr(ip);
+
+	result = sendto(s, buf, buf_s->length, flags, (SOCKADDR *) &addr, sizeof(addr));
 
 	EFree(buf);
+    EFree(ip);
 
 	if (result == SOCKET_ERROR)
 	{
@@ -650,26 +661,34 @@ object eusock_sendto(object x)
 
 object eusock_recvfrom(object x)
 {
-	SOCKET s, s_from;
-	int flags, result;
+	SOCKET s;
+	struct sockaddr_in addr;
+	int flags, addr_size, result;
 	char buf[BUFF_SIZE];
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to recvfrom must be a socket");
 	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
 		RTFatal("second argument to recvfrom must be an integer");
-	if (!IS_SOCKET(SEQ_PTR(x)->base[3]))
-		RTFatal("third argument to recvfrom must be a socket");
 
-	s      = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	s_from = SEQ_PTR(SEQ_PTR(x)->base[3])->base[SOCK_SOCKET];
-	flags  = SEQ_PTR(x)->base[2];
-	result = recvfrom(s, buf, BUFF_SIZE, flags, s_from, sizeof(SOCKADDR *));
+	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	flags = SEQ_PTR(x)->base[2];
+    addr_size = sizeof(addr);
 
-	if (result > 0)
-	{
+	result = recvfrom(s, buf, BUFF_SIZE, flags, (SOCKADDR *) &addr, &addr_size);
+
+	if (result > 0) {
+        s1_ptr r;
+        object o;
 		buf[result] = 0;
-		return NewString(buf);
+
+        r = NewS1(3);
+        r->base[1] = NewString(inet_ntoa(addr.sin_addr));
+        r->base[2] = addr.sin_port;
+        r->base[3] = NewString(buf);
+        
+
+        return MAKE_SEQ(r);
 	} else if (result == 0) {
 		return ATOM_0;
 	} else {

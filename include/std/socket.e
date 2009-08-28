@@ -643,7 +643,8 @@ end function
 -- Parameters:
 --   # ##sock##: the server socket
 --   # ##data##: the data to be sent
---   # ##to_sock##: where the data is to be sent to
+--   # ##ip##: the ip where the data is to be sent to
+--   # ##port##: the port where the data is to be sent on
 --   # ##flags## : flags (see [[:Send Flags]])
 --
 -- Returns:
@@ -653,8 +654,8 @@ end function
 --   [[:receive_from]]
 --   
 
-public function send_to(socket sock, sequence data, socket to_sock, atom flags=0)
-    return machine_func(M_SOCK_SENDTO, { sock, data, flags, to_sock })
+public function send_to(socket sock, sequence data, sequence ip, integer port, atom flags=0)
+    return machine_func(M_SOCK_SENDTO, { sock, data, flags, ip, port })
 end function
 
 --**
@@ -662,18 +663,17 @@ end function
 --
 -- Parameters:
 --   # ##sock##: the server socket
---   # ##to_sock##: where the data is to be received from
 --   # ##flags## : flags (see [[:Send Flags]])
 --
 -- Returns:
---   A ##sequence## containing the received data or an ##atom## error code.
+--   A ##sequence## containing { client_ip, client_port, data } or an ##atom## error code.
 --   
 -- See Also:
 --   [[:send_to]]
 --   
 
-public function receive_from(socket sock, socket from_sock, atom flags=0)
-    return machine_func(M_SOCK_RECVFROM, { sock, flags, from_sock })
+public function receive_from(socket sock, atom flags=0)
+    return machine_func(M_SOCK_RECVFROM, { sock, flags })
 end function
 
 --****
