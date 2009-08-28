@@ -4362,8 +4362,8 @@ procedure opRETURNF()
 	sub = Code[pc+1]
 	ret = Code[pc+3]
 	
-	if is_temp( ret ) 
-	and map:get( dead_temp_walking, ret, NO_REFERENCE ) != NEW_REFERENCE then
+	if not is_temp( ret ) 
+	or map:get( dead_temp_walking, ret, NO_REFERENCE ) != NEW_REFERENCE then
 		CRef( ret )
 	end if
 	
