@@ -10,7 +10,7 @@ procedure main(sequence args = command_line())
 	object data = get_url(url)
 
 	if atom(data) or length(data) = 0 then
-		puts(1, "Could not download " & url & "\n")
+	--	puts(1, "Could not download " & url & "\n")
 		abort(2)
 	end if
 
