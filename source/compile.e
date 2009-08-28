@@ -4362,8 +4362,8 @@ procedure opRETURNF()
 	sub = Code[pc+1]
 	ret = Code[pc+3]
 	
-	if not is_temp( ret ) 
-	or map:get( dead_temp_walking, ret, NO_REFERENCE ) != NEW_REFERENCE then
+	if (not is_temp( ret ) and sym_scope( ret ) != SC_PRIVATE)
+	or map:get( dead_temp_walking, ret, NEW_REFERENCE ) != NEW_REFERENCE then
 		CRef( ret )
 	end if
 	
