@@ -89,9 +89,9 @@ end procedure
 
 export procedure transoptions()
 	Argv &= GetDefaultArgs()
-	Argc = length(Argv)
 
-	expand_config_options()
+	Argv = expand_config_options(Argv)
+	Argc = length(Argv)
 	m:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
 
 	handle_common_options(opts)

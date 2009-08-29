@@ -42,7 +42,7 @@ export procedure intoptions()
 		end if
 	end if
 
-	expand_config_options()
+	Argv = expand_config_options(Argv)
 	m:map opts = cmd_parse( get_options(),
 		{ NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, Argv)
 
