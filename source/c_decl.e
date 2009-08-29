@@ -1005,16 +1005,19 @@ end procedure
 export function is_exported( symtab_index s )
 	sequence eentry = SymTab[s]
 	integer scope = eentry[S_SCOPE]
+
 	if eentry[S_MODE] = M_NORMAL then
-		if eentry[S_FILE_NO] = 1 or scope = SC_GLOBAL then
+		if (eentry[S_FILE_NO] = 1 and (scope = SC_EXPORT or scope = SC_PUBLIC)) or scope = SC_GLOBAL then
 			return 1
 		end if
 		
-		if scope = SC_PUBLIC 
-		and and_bits( include_matrix[1][eentry[S_FILE_NO]], PUBLIC_INCLUDE ) then
+		if eentry[S_FILE_NO] = 1 and scope = SC_PUBLIC and 
+			and_bits( include_matrix[1][eentry[S_FILE_NO]], PUBLIC_INCLUDE ) 
+		then
 			return 1
 		end if
 	end if
+
 	return 0
 end function
 
