@@ -77,6 +77,37 @@ public function instance()
 	return machine_func(M_INSTANCE, 0)
 end function
 
+--**
+-- Return Process ID (pid)
+--
+-- Returns: 
+-- An atom: The process id.
+--
+-- Example:
+-- <eucode>
+-- mypid = get_pid()
+-- </eucode>
+
+ifdef WINDOWS then
+atom gpid = -1
+end ifdef
+public function get_pid()
+	ifdef UNIX then
+		return machine_func(M_INSTANCE, 0)
+	end ifdef
+	ifdef WINDOWS then
+		if gpid = -1 then
+			gpid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_INT)
+			if gpid >= 0 then
+				gpid = c_func(gpid, {})
+			end if
+		end if
+		
+		return gpid
+	end ifdef
+end function
+
+
 ifdef WIN32 then
 	constant M_UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
 elsifdef UNIX then

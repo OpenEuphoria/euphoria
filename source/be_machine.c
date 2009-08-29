@@ -2791,22 +2791,21 @@ object machine(object opcode, object x)
 				break;
 
 			case M_INSTANCE:
+			{
+				unsigned int inst = 0;
 #ifdef EUNIX
-				if ((unsigned)getpid() <= (unsigned)MAXINT)
-					return (unsigned)getpid();
-				else
-					return NewDouble((double)(unsigned)getpid());
-#else
+				inst = (unsigned)getpid();
+#endif
 #ifdef EWINDOWS
-				if ((unsigned)winInstance <= (unsigned)MAXINT)
-					return (unsigned)winInstance;
+				inst = (unsigned)winInstance;
+#endif
+
+				if (inst <= (unsigned)MAXINT)
+					return inst;
 				else
-					return NewDouble((double)(unsigned)winInstance);
-#else
-				return 0;
-#endif //EWINDOWS
-#endif //EUNIX
+					return NewDouble((double)inst);
 				break;
+			}
 
 			case M_FREE_CONSOLE:
 				if (current_screen != MAIN_SCREEN)
