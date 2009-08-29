@@ -1007,7 +1007,7 @@ export function is_exported( symtab_index s )
 	integer scope = eentry[S_SCOPE]
 
 	if eentry[S_MODE] = M_NORMAL then
-		if (eentry[S_FILE_NO] = 1 and (scope = SC_EXPORT or scope = SC_PUBLIC)) or scope = SC_GLOBAL then
+		if eentry[S_FILE_NO] = 1 and find(scope, { SC_EXPORT, SC_PUBLIC, SC_GLOBAL }) then
 			return 1
 		end if
 		
