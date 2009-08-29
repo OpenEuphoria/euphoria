@@ -4,9 +4,6 @@ include std/search.e
 include std/math.e
 include std/os.e
 
-test_equal("urlencode 1", "Hello+%26+World", urlencode("Hello & World"))
-test_equal("urlencode 2", "Hello%20%26%20World", urlencode("Hello & World", "%20"))
-
 ifdef not NOINET_TESTS then
 	sequence content = get_url("http://example.com")
 	test_true("get_url 1", length(content))
