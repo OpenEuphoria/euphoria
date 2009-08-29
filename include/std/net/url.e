@@ -7,6 +7,172 @@ namespace url
 include std/get.e
 
 --****
+-- === URL parsing
+-- 
+
+--**
+-- Parse a URL returning it's various elements.
+-- 
+-- Parameters:
+--   # ##url##: URL to parse
+--   
+-- Returns: 
+--   A multi-element sequence containing:
+--   # protocol
+--   # host name
+--   # port
+--   # path
+--   # user name
+--   # password
+--   # query string
+--   
+--   Or, zero if the URL could not be parsed.
+-- 
+-- Notes:
+--   If the host name, port, path, username, password or query string are not part of the 
+--   URL they will be returned as an integer value of zero.
+--   
+-- Example 1:
+-- <eucode>
+-- sequence parsed = parse("http://user:pass@www.debian.org:80/index.html?name=John&age=39")
+-- -- parsed is
+-- -- { 
+-- --     "http",
+-- --     "www.debian.org",
+-- --     80,
+-- --     "/index.html",
+-- --     "user",
+-- --     "pass",
+-- --     "name=John&age=39"
+-- -- }
+-- </eucode>
+-- 
+
+public function parse(sequence url)
+    sequence protocol = ""
+    object host_name, path, user_name, password, query_string
+    integer port
+    
+    -- Set the defaults for some optional values
+    host_name = 0
+    port = 0
+    path = 0
+    user_name = 0
+    password  = 0
+    query_string = 0
+
+	integer pos = find(':', url)
+    if not pos then
+        return 0
+    end if
+
+	protocol = url[1..pos - 1]
+    pos += 1
+
+	-- Can have a maximum of 2 // before we move into the hostname or possibly 
+    -- the path (http://john.com) or (file:///home/jeremy/hello.txt)
+    if url[pos] = '/' then
+        pos += 1
+    end if
+    if url[pos] = '/' then
+        pos += 1
+    end if
+	if url[pos] = '/' then
+        -- We do not have a username, password, host or port, we have moved right into 
+        -- the path area of the URL. Let's jump ahead
+        goto "parse_path"
+    end if
+
+	integer at = find('@', url)
+    if not at then
+        -- We do not have a user or password, skip ahead to parsing the domain
+        goto "parse_domain"
+    end if
+    
+    integer password_colon = find(':', url, pos)
+    if password_colon > 0 and password_colon < at then
+        -- We have a password too!
+        user_name = url[pos..password_colon-1]
+        password = url[password_colon+1..at-1]
+    else
+    	-- Just a user name
+    	user_name = url[pos..at-1]
+    end if
+    
+    pos = at + 1
+
+label "parse_domain"
+	
+    integer qs_start = find('?', url, pos)
+	integer first_slash = find('/', url, pos)
+    integer port_colon = find(':', url, pos)
+    
+    if port_colon then
+        -- We can easily read the host until the port colon
+        host_name = url[pos..port_colon-1]
+    else
+    	-- Gotta go through a bit more complex way of getting the path
+        if not first_slash then
+            -- there is no path, thus we must parse to either the query string begin
+            -- or the string end
+            if not qs_start then
+                host_name = url[pos..$]
+            else
+            	host_name = url[pos..qs_start-1]
+            end if
+        else
+        	-- Ok, we can read up to the first slash
+        	host_name = url[pos..first_slash-1]
+        end if
+    end if
+    
+    if port_colon then
+        integer port_end = 0
+
+		if first_slash then
+            port_end = first_slash - 1
+        elsif qs_start then
+            port_end = qs_start - 1
+        else
+        	port_end = length(url)
+        end if
+
+		port = defaulted_value(url[port_colon+1..port_end], 0)
+    end if
+    
+    -- Increment the position to the next element to parse
+    if first_slash then
+        pos = first_slash
+    elsif qs_start then
+        pos = qs_start
+    else
+    	-- Nothing more to parse
+        goto "parse_done"
+    end if
+    
+label "parse_path"
+	
+    if not qs_start then
+        path = url[pos..$]
+        goto "parse_done"
+    end if
+
+	-- Avoid getting a path when there is none.
+    if pos != qs_start then
+        path = url[pos..qs_start - 1]
+    end if
+
+    pos = qs_start
+
+label "parse_query_string"
+
+	query_string = url[qs_start + 1..$]
+
+label "parse_done"
+    return { protocol, host_name, port, path, user_name, password, query_string }
+end function
+
+--****
 -- === URL encoding and decoding
 --
 
