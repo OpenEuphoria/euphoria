@@ -1,5 +1,11 @@
+include std/map.e
 include std/unittest.e
 include std/net/url.e
+
+object o = parse_querystring("name=John&age=18&location=Small+Town%20Ohio")
+test_equal("parse_querystring #1", "John", map:get(o, "name"))
+test_equal("parse_querystring #2", "18", map:get(o, "age"))
+test_equal("parse_querystring #3", "Small Town Ohio", map:get(o, "location"))
 
 test_equal("encode 1", "Hello+%26+World", url:encode("Hello & World"))
 test_equal("encode 2", "Hello%20%26%20World", url:encode("Hello & World", "%20"))
@@ -50,5 +56,9 @@ test_equal("parse #4", {
     	0
 	},
     parse("ftp://anonymous@ftp.debian.org:33/file.txt"))
+
+o = parse("http://example.com?name=John&age=18", 1)
+test_equal("parse #5", "John", map:get(o[URL_QUERY_STRING], "name"))
+test_equal("parse #6", "18", map:get(o[URL_QUERY_STRING], "age"))
 
 test_report()

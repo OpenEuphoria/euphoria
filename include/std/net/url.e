@@ -5,16 +5,81 @@
 namespace url
 
 include std/get.e
+include std/map.e
 
 --****
--- === URL parsing
+-- === Parsing
 -- 
+
+constant PAIR_SEP = {'&', ';'}, HEX_SIG = '%', WHITESPACE = '+', VALUE_SEP = '='
+
+--**
+-- Parse a query string into a map
+-- 
+-- Parameters:
+--   # ##query_string##: Query string to parse
+-- 
+-- Returns:
+--   [[:map]] containing the key/value pairs
+--
+-- Example 1:
+-- <eucode>
+-- map qs = parse_querystring("name=John&age=18")
+-- printf(1, "%s is %s years old\n", { map:get(qs, "name"), map:get(qs, "age) })
+-- </eucode>
+-- 
+
+public function parse_querystring(object query_string)
+	atom i, char
+	object tmp
+	sequence charbuf, fieldbuf, fname=""
+	map:map the_map = map:new()
+
+	if atom(query_string) then
+		return the_map
+	end if
+
+	charbuf = {}  fieldbuf = {}  i = 1
+	while i <= length(query_string) do
+		char = query_string[i]  -- character we're working on
+		if equal(char, HEX_SIG) then
+			tmp = value("#" & query_string[i+1] & query_string[i+2])
+			charbuf &= tmp[2]
+			i += 3
+		elsif equal(char, WHITESPACE) then
+			charbuf &= " "
+			i += 1
+		elsif equal(char, VALUE_SEP) then
+			fname = charbuf
+			charbuf = {}
+			i += 1
+		elsif find(char, PAIR_SEP) then
+			map:put(the_map, fname, charbuf)
+			fname = {}
+			charbuf = {}
+			i += 1
+		else
+			charbuf &= char
+			i += 1
+		end if
+	end while
+
+	if length(fname) then
+		map:put(the_map, fname, charbuf)
+	end if
+
+	return the_map
+end function
+
+public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWORD, 
+	URL_QUERY_STRING
 
 --**
 -- Parse a URL returning it's various elements.
 -- 
 -- Parameters:
 --   # ##url##: URL to parse
+--   # ##querystring_also##: Parse the query string into a map also?
 --   
 -- Returns: 
 --   A multi-element sequence containing:
@@ -48,7 +113,7 @@ include std/get.e
 -- </eucode>
 -- 
 
-public function parse(sequence url)
+public function parse(sequence url, integer querystring_also=0)
     sequence protocol = ""
     object host_name, path, user_name, password, query_string
     integer port
@@ -167,6 +232,10 @@ label "parse_path"
 label "parse_query_string"
 
 	query_string = url[qs_start + 1..$]
+    
+    if querystring_also and length(query_string) then
+        query_string = parse_querystring(query_string)
+    end if
 
 label "parse_done"
     return { protocol, host_name, port, path, user_name, password, query_string }
