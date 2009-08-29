@@ -78,10 +78,10 @@ public function instance()
 end function
 
 --**
--- Return Process ID (pid)
+-- Return the ID of the current Process (pid)
 --
 -- Returns: 
--- An atom: The process id.
+-- An atom: The current process' id.
 --
 -- Example:
 -- <eucode>
@@ -89,21 +89,21 @@ end function
 -- </eucode>
 
 ifdef WINDOWS then
-atom gpid = -1
+atom cur_pid = -1
 end ifdef
 public function get_pid()
 	ifdef UNIX then
 		return machine_func(M_INSTANCE, 0)
 	end ifdef
 	ifdef WINDOWS then
-		if gpid = -1 then
-			gpid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_INT)
-			if gpid >= 0 then
-				gpid = c_func(gpid, {})
+		if cur_pid = -1 then
+			cur_pid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_INT)
+			if cur_pid >= 0 then
+				cur_pid = c_func(cur_pid, {})
 			end if
 		end if
 		
-		return gpid
+		return cur_pid
 	end ifdef
 end function
 
