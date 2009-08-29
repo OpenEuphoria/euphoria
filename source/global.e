@@ -427,3 +427,7 @@ export integer use_private_list = 0
 
 export boolean silent = FALSE
 export boolean verbose = FALSE
+
+export sequence main_path         -- path of main file being executed
+export integer src_file           -- the source file
+export sequence new_include_name  -- name of file to be included at end of line

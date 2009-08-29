@@ -41,9 +41,6 @@ constant BUILTIN_BASE = 170  -- 171..234  N.B. can't use: 253,254,255
 							 -- binding/shrouding that does not use single-byte
 							 -- codes
 -- global variables
-export sequence main_path         -- path of main file being executed
-export integer src_file           -- the source file
-export sequence new_include_name  -- name of file to be included at end of line
 export symtab_index new_include_space -- new namespace qualifier or NULL
 
 boolean start_include   -- TRUE if we should start a new file at end of line
@@ -343,11 +340,17 @@ export procedure read_line()
 
 	if dont_read then
 		ThisLine = -1
+	elsif src_file < 0 then
+		ThisLine = -1
 	else
 		ThisLine = gets(src_file)
 	end if
 	if atom(ThisLine) then
 		ThisLine = {END_OF_FILE_CHAR}
+		if src_file >= 0 then
+			close(src_file)
+		end if
+		src_file = -1
 	end if
 
 	bp = 1
@@ -910,7 +913,10 @@ export function IncludePop()
 	Resolve_forward_references()
 	HideLocals()
 
-	close(src_file)
+	if src_file >= 0 then
+		close(src_file)
+		src_file = -1
+	end if
 
 	if length(IncludeStk) = 0 then
 		return FALSE  -- the end
@@ -1431,7 +1437,7 @@ export function Scanner()
 					ch = getch()
 				end while
 			elsif char_class[ch] = LETTER then
-				CompileErr(127, {ch})
+				CompileErr(127, {{ch}})
 			end if
 
 			ungetch()

@@ -34,7 +34,6 @@ include msgtext.e
 -- record command line options, return source file number
 
 function GetSourceName()
-	integer src_file
 	object real_name
 	boolean has_extension = FALSE
 
