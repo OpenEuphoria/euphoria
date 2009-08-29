@@ -1,9 +1,15 @@
+
+
+
 --****
 -- == HTTP
 --
 -- Based on EuNet project, version 1.3.2, at SourceForge.
 -- http://www.sourceforge.net/projects/eunet. Many modifications
 -- for POST support by Kathy Smith <katsmeow@centurytel.net>
+-- 9-28-09 added Content-Length check and exiting for faster returns, no timeout waits
+-- 9-28-09 added error returns for sock:connect and sock:send
+-- 9-28-09 added socket status checks in get_url()
 --
 -- <<LEVELTOC depth=2>>
 
@@ -11,7 +17,7 @@ include std/socket.e as sock
 include std/net/common.e
 include std/net/dns.e
 include std/text.e
-include euphoria/info.e
+include get.e as val
 
 --****
 -- === Constants
@@ -220,7 +226,6 @@ end function
 public procedure set_sendheader_default()
 	sequence tempnewheader = {}
 	sequence temps = ""
-	sequence whoami = "OpenEuphoria " & version_string_long()
 
 	-- this sets some defaults, if not previously set to something by the user
 	-- if a header line was previously set by the user, do not change it here
@@ -237,7 +242,7 @@ public procedure set_sendheader_default()
 		{"POST"," ",""}, -- [3] = the filename you want
 		{"Host",": ",""}, -- the domain. You might think this was obvious, but for vhosting sites it's necessary.
 		{"Referer",": ",""}, -- i know it's misspelled, but that's official! , the site that sent you to this one
-		{"User-Agent",": ", whoami & " [en]"}, --</joke> pick your own :-)
+		{"User-Agent",": ","Opera/5.02 (Windows 98; U) [en]"}, --</joke> pick your own :-)
 		{"Accept",": ","*/*"}, -- what your browser or apps knows how to process
 		{"Accept-Charset",": ","ISO-8859-1,utf-8;q=0.7,*;q=0.7"},
 		{"Accept-Encoding",": ","identity"}, -- "identity" = no decoder in eunet so far
@@ -484,9 +489,9 @@ end function
 --	 like ##{sequence header, sequence data}##.
 
 public function get_http(sequence inet_addr, sequence hostname, sequence file)
-	object junk
+	object junk, junk2
 	sock:socket sock
-	atom success, last_data_len
+	atom success, last_data_len, gotheader, contentlen
 	sequence header, data, hline
 
 	-- Notes for future additions:
@@ -524,40 +529,67 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		set_sendheader("Referer",hostname)
 	end if
 
-	data = {}
+
+	
 	last_data_len = 0
 
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
+ 	
 	success = sock:connect(sock,inet_addr)
+ 	
 	if success = 1 then
 		-- eunet_format_sendheader sets up the header to sent,
 		-- putting the POST data at the end,
-		-- filling in the CONTENT_LENGTH,
+		-- filling in the CONTENT-LENGTH,
 		-- and avoiding sending empty fields for any field
         success = sock:send(sock,eunet_format_sendheader(),0)
-
+ 
 		-- } end version 1.3.0 mod
 		data = ""
-		while sequence(junk) with entry do
-			data = data & junk
-		entry
-			junk = sock:receive(sock, 0)
-		end while
-	end if
+		header= {}
+		contentlen = 0
+		gotheader = 0
+                if success 
+                	then		
+			       while sequence(junk) with entry do
+					data = data & junk
+					if gotheader and equal(contentlen,length(data)) then 
+					   exit  -- we got all the server said it had
+					end if
+					if not gotheader and match({13,10,13,10},data) then -- we got the header in there
+		                              header = data[1..match({13,10,13,10},data)-1] -- split off the header
+				              data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
+				              parse_recvheader(header) -- sets up recvheader -- global var
+				              junk = get_recvheader("Content-Length")
+				              if not equal(junk,-1) then
+					              junk = val:value(junk[2])
+					              contentlen = junk[2]
+					              if equal(contentlen,0) then exit end if -- there's no more
+					              if equal(contentlen,length(data)) then exit end if -- there's no more
+					       end if       
+				              gotheader = 1 -- we got what we came for here
+					end if
+				entry
+
+ 				        junk2 = sock:select(sock) -- status check
+ 				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) -- got readable data?
+ 				          then junk = sock:receive(sock, 0) -- then recieve it
+ 				          else junk = ""      -- add nothing to data
+ 				                 task_yield()  -- are we a task?
+					end if
+				end while
+			else
+				header = -1
+				data = "could not send or recieve using socket"
+		end if -- if success -- sock:send
+ 		else 
+ 		      header = -1
+		      data = "could not connect to socket"
+	end if -- if success = 1 then -- sock:connect
 	if sock:close(sock) then end if
 
-	success = match({13,10,13,10},data)
-	if success > 0 then
-		header = data[1..success-1]
-		parse_recvheader(header)
-		data = data[success+4..length(data)]
-	else
-		header = data
-		data = {}
-	end if
-
     -- clear any POSTDATA
-    set_sendheader("POSTDATA", "")
+        set_sendheader("POSTDATA", "")
 	set_sendheader("POST", "")
 	set_sendheader("GET", "")
 	set_sendheader("Content-Type", "")
@@ -676,27 +708,35 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		--	  success = sock:send(socket,request,0)
 		success = sock:send(socket,eunet_format_sendheader(),0)
 		-- } end version 1.3.0 modification
-		while success > 0 do
-			data = data & sock:receive(socket,0)
-			success = length(data)-last_data_len
-			last_data_len = length(data)
-		end while
+		if success > 0 then
+                	junk = sock:receive(sock, 0)
+			while sequence(junk) do
+				data = data & junk
+				if gotheader and equal(contentlen,length(data)) then 
+				   exit  -- we got all the server said it had
+				end if
+				if not gotheader and match({13,10,13,10},data) then -- we got the header in there
+	                              header = data[1..match({13,10,13,10},data)-1] -- split off the header
+			              data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
+			              parse_recvheader(header) -- sets up recvheader -- global var
+			              junk = get_recvheader("Content-Length")
+			              if not equal(junk,-1) then
+				              junk = val:value(junk[2])
+				              contentlen = junk[2]
+				              if equal(contentlen,0) then exit end if -- there's no more
+				              if equal(contentlen,length(data)) then exit end if -- there's no more
+				       end if       
+			              gotheader = 1 -- we got what we came for here
+				end if
+				junk = sock:receive(sock, 0)
+			end while
+		 end if
 	end if
 	if close_socket(socket) then end if
 
-	success = match({13,10,13,10},data)
-	if success > 0 then
-		header = data[1..success-1]
-		parse_recvheader(header)
-		body = data[success+4..length(data)]
-	else
-		header = data
-		body = {}
-		data = {}
-	end if
 
 	header2 = header
-	cpos = match("SET-COOKIE",upper(header2))
+	cpos = match("SET-COOKIE",upper(header2)) -- this should be using get_recvheader() etc
 	while cpos > 0 do
 		header2 = header2[cpos+10..length(header2)]
 		data = header2
@@ -852,3 +892,4 @@ end function
 
 -- set the lines in the "proper" order for sending, not that the defaults will get sent.
 set_sendheader_default()
+
