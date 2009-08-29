@@ -1,5 +1,6 @@
 include std/net/http.e
 
+
 procedure main(sequence args = command_line())
 	if length(args) = 2 then
 		puts(1, "Usage: wget.ex URL\n")
