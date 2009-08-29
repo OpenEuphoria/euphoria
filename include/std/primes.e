@@ -97,7 +97,9 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 	while time_out_ >= time()  label "MW" do
 		-- As this could run for a significant amount of time,
 		-- yield to any other tasks that might be ready.
-		task_yield()
+		ifdef not EUC_DLL then
+			task_yield()
+		end ifdef
 
 		-- Get the next candidate value to examine.		
 		candidate_ = candidate_ + 2
