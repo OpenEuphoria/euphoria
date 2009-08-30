@@ -7,10 +7,11 @@
 ----------------------------------------------------------------------------
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
+
 include euphoria/info.e
 
 include std/text.e
@@ -27,7 +28,6 @@ include compile.e
 include error.e
 include c_out.e
 include msgtext.e
-
 
 --**
 -- number of Translator passes
@@ -1011,7 +1011,7 @@ export function is_exported( symtab_index s )
 			return 1
 		end if
 		
-		if eentry[S_FILE_NO] = 1 and scope = SC_PUBLIC and 
+		if scope = SC_PUBLIC and 
 			and_bits( include_matrix[1][eentry[S_FILE_NO]], PUBLIC_INCLUDE ) 
 		then
 			return 1
