@@ -76,30 +76,3 @@ void * malloc_aligned(unsigned long size, unsigned long alignment_size) {
 	
 	return outptr;
 }
-#if 0
-s1_ptr NewS1(long size)
-/* make a new s1 sequence block with a single reference count */
-/* size is number of elements, NOVALUE is added as an end marker */
-{
-		unsigned long address;
-		register s1_ptr s1;
-		if (size > 1073741800) {
-				// multiply by 4 could overflow 32 bits
-				// SpaceMessage();
-		}
-		address = (unsigned long)EMalloc(sizeof(struct s1) + (size) * sizeof(object) + BASE_ALIGN_SIZE);
-		s1 = (struct s1*)(address);			
-			
-		s1->ref = 1;
-		s1->base = (object_ptr)(s1 + 1);
-		s1->length = size;
-		s1->postfill = 0; /* there may be some available but don't waste time */
-										  /* prepend assumes this is set to 0 */
-		s1->cleanup = 0;
-		for (; ((unsigned int)s1->base) % BASE_ALIGN_SIZE; s1->base++);
-		s1->base -= 1;  // point to "0th" element
-		s1->base[size+1] = NOVALUE;
-		return(s1);
-}
-#endif
-

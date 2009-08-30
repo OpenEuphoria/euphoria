@@ -848,17 +848,17 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	object temp;
 	int i;
 	int new_len;
-	object_ptr p,q;
+	object_ptr p,q, old_base;
 	s1_ptr seq = SEQ_PTR(a);
 	int nseq = seq->length;
 	if (seq->ref == 1 ){
 		if( len >= seq->postfill ){
 			new_len = EXTRA_EXPAND(nseq + len);
-			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 3)*4);
-			new_seq->base = ((object_ptr)new_seq) + 4;
+			old_base = seq->base;
+			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 3)*4+BASE_ALIGN_SIZE-4);
+			new_seq->base = ((object_ptr)new_seq) + ( old_base - ((object_ptr)seq) );
 			seq = new_seq;
 			seq->postfill = new_len - (len + nseq) - 1;
-
 		}
 		else{
 			seq->postfill -= len;

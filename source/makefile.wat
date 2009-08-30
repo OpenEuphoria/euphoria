@@ -389,7 +389,7 @@ $(BUILDDIR)\eutestdr.wat : $(BUILDDIR)\eutestdr\main-.c
 $(BUILDDIR)\eutestdr\main-.c : $(TRUNKDIR)\source\eutest.ex $(BUILDDIR)\eutestdr
 	-$(RM) $(BUILDDIR)\eutestdr\*.*
 	cd  $(BUILDDIR)\eutestdr
-	e:\build\watcom\theirs\euc.exe -nobuild -wat -plat $(TRANSDEBUG) $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
+	$(EUBIN)\euc.exe -nobuild -wat -plat $(TRANSDEBUG) $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\eutestdr :
@@ -495,14 +495,14 @@ $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_T
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd  $(BUILDDIR)\$(OBJDIR)
-	e:\build\watcom\theirs\euc.exe $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EUBIN)\euc.exe $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	e:\build\watcom\theirs\euc.exe  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EUBIN)\euc.exe  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !endif
 !endif

@@ -101,5 +101,10 @@ extern long max_bytes_allocated;   /* high water mark */
 extern s1_ptr d_list;
 extern struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size desired 
                                                                      to appropriate list */
+#if SSE2
+#define BASE_ALIGN_SIZE 16
+#else
+#define BASE_ALIGN_SIZE 4
+#endif
 
 #endif
