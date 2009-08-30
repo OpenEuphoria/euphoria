@@ -1,6 +1,6 @@
 -- Search news pages
 
--- Based on Jeremy's news.ex
+
 -- It's SOOO much faster than news.ex because :
 --  1) i use http.e (which i also sped up).
 --  2) i am therefore using no system() calls, which block.
@@ -105,7 +105,6 @@ procedure search_url(sequence url, sequence string) -- this is the do-nearly-all
 	    return
 	end if
     
-	task_schedule(task_self(), 1) -- wait this task one sec so the internet has time to reply
 	task_yield() -- give it up to other tasks
     end while
     
@@ -139,16 +138,16 @@ procedure search_url(sequence url, sequence string) -- this is the do-nearly-all
 	position(task_self()*2+2, 1)
 	text_color(BRIGHT_GREEN)
 	printf(1, "         matched %d lines out of %d   ", {hits, line_count}) -- print it out in pretty colors
-	task_schedule(task_self(), 1) -- reschedule this task for one second
-	task_yield()  -- see if the internet has any more data coming in
+	task_yield()  -- see if the internet has any more data coming in for other tasks
     end for
 end procedure -- and this task is DONE !
 
-for i = 1 to length(URLs) do
-    t = task_create(routine_id("search_url"), {URLs[i], search_phrase})
-    task_schedule(t, 1) -- launch all the web fetchers and word searchers with 1 sec timing
-end for
 
+
+for i = 1 to length(URLs) do
+    t = task_create(routine_id("search_url"), {URLs[i], search_phrase}) -- create the tasks
+    task_schedule(t, 1) -- launch the tasks with 1 sec timing
+end for
 
 if text_rows(43) then end if
 puts(1, "Looking for lines containing \"" & search_phrase & "\"")
@@ -157,9 +156,10 @@ time_out = time() + 45 -- global time for all urls to have arrived and been sear
 
 quit = 0
 
+task_schedule(task_self(), {1, 2})  -- check this timeout loop every 1 to 2 seconds, it's not critical
+
 -- main loop for this main parent task --
 while length(task_list()) > 1 do -- are there any tasks running besides this one main task?
-    task_schedule(task_self(), {1, 2})  -- check the time every 1 to 2 seconds, it's not critical
     task_yield() -- give them some time 
     if time() > time_out then -- are they stalled? running over the time limit?
        quit = 1 -- the flag for all tasks to report any final results and terminate    
