@@ -33,6 +33,7 @@
 #include "alldefs.h"
 #include "alloc.h"
 #include "be_runtime.h"
+#include "global.h"
 
 /******************/
 /* Local defines  */
@@ -612,6 +613,7 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 	char *p;
 	char *q;
 	unsigned long oldsize;
+	int res;
 
 #if defined(EUNIX) || defined(ESIMPLE_MALLOC)
 
@@ -666,7 +668,10 @@ char *ERealloc(unsigned char *orig, unsigned long newsize)
 	q = EMalloc(newsize);
 	/* copy the data to it's new location */
 	/* OPTIMIZE? we may be copying more than the actual live data */
-	memcpy(q, orig, oldsize - (orig - (unsigned char *)p));
+    res = memcopy(q, newsize, orig, oldsize - (orig - (unsigned char *)p));
+	if (res != 0) {
+		RTFatal("Internal error: ERealloc memcopy failed (%d).", res);
+	}
 	EFree(orig);
 	return q;
 #endif

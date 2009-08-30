@@ -2266,6 +2266,7 @@ object CallBack(object x)
     s1_ptr result;
 	s1_ptr x_ptr;
 	int convention;
+	int res;
 	convention = C_CDECL;
 	
 	/* Handle {{'+', routine_id} and {routine_id} case:
@@ -2380,7 +2381,11 @@ object CallBack(object x)
 	}
 
 	/* copy memory of the template to the newly allocated memory */
-	memcpy(copy_addr, (char *)addr, CALLBACK_SIZE);
+    res = memcopy(copy_addr, CALLBACK_SIZE, (char *)addr, CALLBACK_SIZE);
+	if (res != 0) {
+		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
+	}
+
 	
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
