@@ -177,8 +177,10 @@ Type: files; Name: {app}\EuphoriaManual.url
 
 [Registry]
 ;set EUDIR environment variable and add to PATH on NT/2000/XP machines
+Root: HKCU; SubKey: "Environment"; ValueType: string; ValueName: "INCLUDE"; ValueData "{app}\watcom\h;{app}\watcom\h\nt"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env; Components: comp_ow;
+Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "WATCOM"; ValueData: "{app}\watcom"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env; Components: comp_ow;
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "EUDIR"; ValueData: "{app}"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env
-Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
+Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{app}\watcom\binnt;{app}\watcom\binw;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
 
 ;associate .exw files to be called by euiw.exe
 Root: HKCR; Subkey: ".exw"; ValueType: string; ValueName: ""; ValueData: "EUWinApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
