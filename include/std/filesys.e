@@ -32,16 +32,16 @@ constant
 
 ifdef WIN32 then
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG},
-		C_LONG)
-	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_LONG)
-	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_LONG)
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
+		C_BOOL)
+	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
+	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
 	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
-		{C_POINTER, C_POINTER}, C_LONG)
-	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_LONG)
-	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT)
+		{C_POINTER, C_POINTER}, C_BOOL)
+	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
+	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
 	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
-		{C_CHAR, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_INT)	 
+		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
 
 elsifdef LINUX then
 	constant lib = open_dll("")
@@ -1510,14 +1510,14 @@ public function file_exists(object name)
 	
 	ifdef WIN32 then
 		atom pName = allocate_string(name)
-		integer r = c_func(xGetFileAttributes, {pName})
+		atom r = c_func(xGetFileAttributes, {pName})
 		free(pName)
 
 		return r > 0
 
 	elsifdef UNIX then
 		atom pName = allocate_string(name)
-		integer r = c_func(xGetFileAttributes, {pName, 0})
+		atom r = c_func(xGetFileAttributes, {pName, 0})
 		free(pName)
 
 		return r = 0

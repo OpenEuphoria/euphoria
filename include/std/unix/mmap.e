@@ -8,12 +8,7 @@ ifdef not UNIX then
 end ifdef
 
 include std/dll.e
-
-ifdef SAFE then
-	public include std/safe.e
-elsedef
-	public include std/memory.e
-end ifdef
+include std/machine.e
 
 public constant
 	PROT_EXEC = 4,

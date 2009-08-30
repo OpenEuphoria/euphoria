@@ -117,7 +117,7 @@ constant MAX_ADDR = power(2, 32)-1
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
 
-type positive_int(integer x)
+public type positive_int(integer x)
 	return x >= 1
 end type
 
@@ -125,7 +125,7 @@ type natural(integer x)
 	return x >= 0
 end type
 
-type machine_addr(atom a)
+public type machine_addr(atom a)
 -- a 32-bit non-null machine address 
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type

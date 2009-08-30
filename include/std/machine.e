@@ -379,13 +379,13 @@ ifdef WIN32 then
 
 	memDLL_id = open_dll( "kernel32.dll" )
 	kernel_dll = memDLL_id
-	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
-	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
-	-- VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
-	-- VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
-	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
+	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_SIZE_T, C_DWORD, C_DWORD }, C_POINTER )
+	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_SIZE_T, C_DWORD, C_POINTER }, C_BOOL )
+	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_SIZE_T, C_DWORD }, C_BOOL )
+	-- VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_SIZE_T }, C_BOOL )
+	-- VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_SIZE_T }, C_BOOL )
+	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_DWORD )
 	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
-	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
 	if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 		and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 		then

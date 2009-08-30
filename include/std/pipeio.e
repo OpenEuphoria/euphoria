@@ -20,16 +20,16 @@ ifdef WIN32 then
 	constant
 		kernel32 = open_dll("kernel32.dll"),
 		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
-		iCreatePipe = define_c_func(kernel32,"CreatePipe",{C_POINTER,C_POINTER,C_POINTER,C_INT},C_INT),
-		iReadFile = define_c_func(kernel32,"ReadFile",{C_UINT,C_POINTER,C_UINT,C_POINTER,C_POINTER},C_INT),
-		iWriteFile = define_c_func(kernel32,"WriteFile",{C_INT,C_POINTER,C_INT,C_POINTER,C_POINTER},C_INT),
-		iCloseHandle = define_c_func(kernel32,"CloseHandle",{C_INT},C_INT),
-		iTerminateProcess=define_c_func(kernel32,"TerminateProcess",{C_UINT,C_UINT},C_INT),
-		iGetLastError = define_c_func(kernel32,"GetLastError",{},C_INT),
-		iGetStdHandle = define_c_func(kernel32,"GetStdHandle",{C_INT},C_INT),
-		iSetHandleInformation = define_c_func(kernel32,"SetHandleInformation",{C_UINT,C_UINT,C_UINT},C_INT),
+		iCreatePipe = define_c_func(kernel32,"CreatePipe",{C_POINTER,C_POINTER,C_POINTER,C_DWORD},C_BOOL),
+		iReadFile = define_c_func(kernel32,"ReadFile",{C_UINT,C_POINTER,C_DWORD,C_POINTER,C_POINTER},C_BOOL),
+		iWriteFile = define_c_func(kernel32,"WriteFile",{C_UINT,C_POINTER,C_DWORD,C_POINTER,C_POINTER},C_BOOL),
+		iCloseHandle = define_c_func(kernel32,"CloseHandle",{C_UINT},C_BOOL),
+		iTerminateProcess=define_c_func(kernel32,"TerminateProcess",{C_UINT,C_UINT},C_BOOL),
+		iGetLastError = define_c_func(kernel32,"GetLastError",{},C_DWORD),
+		iGetStdHandle = define_c_func(kernel32,"GetStdHandle",{C_DWORD},C_UINT),
+		iSetHandleInformation = define_c_func(kernel32,"SetHandleInformation",{C_UINT,C_DWORD,C_DWORD},C_BOOL),
 		iCreateProcess = define_c_func(kernel32,"CreateProcessA",{C_POINTER,C_POINTER,C_POINTER,
-			C_POINTER,C_UINT,C_UINT,C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_UINT)
+			C_POINTER,C_BOOL,C_DWORD,C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_BOOL)
 	
 	constant
 -- 		STD_INPUT_HANDLE = -10,
