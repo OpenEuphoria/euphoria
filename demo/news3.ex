@@ -1,7 +1,7 @@
 -- news3.ex
 -- Search news pages
 
--- Based on Jeremy's news.ex
+
 -- It's SOOO much faster than news.ex because :
 --  1) i use http.e (which i also sped up).
 --  2) i am therefore using no system() calls, which block.
@@ -109,8 +109,7 @@ procedure search_url(sequence url, sequence string) -- this is the do-nearly-all
 	if quit then
 	    return
 	end if
-    
-	task_schedule(task_self(), {1,2}) -- wait this task 1..2 sec until the internet has time to reply
+
 	task_yield() -- give it up to other tasks
     end while
     
@@ -145,8 +144,8 @@ procedure search_url(sequence url, sequence string) -- this is the do-nearly-all
 end procedure -- and this task is DONE ALREADY !
 
 for i = 1 to length(URLs) do
-    t = task_create(routine_id("search_url"), {URLs[i], search_phrase})
-    task_schedule(t, 1)
+    t = task_create(routine_id("search_url"), {URLs[i], search_phrase}) -- create the tasks
+    task_schedule(t, 1) -- schedule them for every one sec 
 end for
 
 if text_rows(43) then end if
@@ -156,9 +155,10 @@ time_out = time() + 45 -- global time for all urls to have arrived and been sear
 
 quit = 0
 
+task_schedule(task_self(), {1, 2})  -- check the time every 1 to 2 seconds, it's not critical
+
 -- the main loop for this main parent task --
 while length(task_list()) > 1 do -- are there still any tasks running besides this one main task?
-    task_schedule(task_self(), {1, 2})  -- check the time every 1 to 2 seconds, it's not critical
     task_yield() -- give them some time 
     if time() > time_out then -- are they stalled? running over the time limit?
        quit = 1 -- the flag for all tasks to report any final results and terminate    
