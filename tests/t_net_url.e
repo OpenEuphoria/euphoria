@@ -57,6 +57,17 @@ test_equal("parse #4", {
 	},
     parse("ftp://anonymous@ftp.debian.org:33/file.txt"))
 
+test_equal("parse #5", {
+		"mysql",
+		"localhost",
+		0,
+		"/listfilt",
+		0,
+		0,
+		"user=hello&password=goodbye"
+	},
+	parse("mysql://localhost/listfilt?user=hello&password=goodbye"))
+
 o = parse("http://example.com?name=John&age=18", 1)
 test_equal("parse #5", "John", map:get(o[URL_QUERY_STRING], "name"))
 test_equal("parse #6", "18", map:get(o[URL_QUERY_STRING], "age"))
