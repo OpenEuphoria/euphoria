@@ -3085,31 +3085,42 @@ the programmer to take appropriate action in this respect.
 
 === Header Labels == @[Labelled headers]
 
-As shown in the above section on control flow statements, most of them may take
-a string referencing a block of code. In order to do so, it is enough to do
-this:
+As shown in the above section on control flow statements, most can have their
+own label. To label a flow control statement, use a ##label## clause immediately
+preceding the flow control's terminator keyword (##then## / ##do##). 
 
+A ##label## clause consists of the keyword **##label##** followed by a string literal.
+The string is the label name.
+
+Examples:
 <eucode>
 if n=0 label "an_if_block" then
     ...
 end if
+
+while TRUE label "a_while_block" do
+    ...
+end while
+
+loop label "a_loop_block" do
+    ...
+until TRUE
+
+switch x label "a_switch_block" do
+   ...
+end switch
 </eucode>
 
-The label clause precedes the closing then keyword.
-
-If a header has both an entry clause and a label clause, they have to be both
-before the closing keyword, in any order:
+**Note**: If a flow control statement has both an ##entry## clause and a 
+##label## clause, the ##entry## clause must come before the ##label## clause:
 
 <eucode>
-while 1 label "top" entry do
--- or
-while 1 entry label "top" do
+while 1 label "top" with entry do -- WRONG
+
+while 1 with entry label "top" do -- CORRECT
 </eucode>
 
-are both correct and equivalent.
-
-@[short-circuit]
-== Short-Circuit Evaluation
+== Short-Circuit Evaluation == @[short-circuit]
 
 When the condition tested by if, elsif, until, or while contains ##and## or ##or##
 operators, [[:short-circuit]] evaluation will be used.  For example,
