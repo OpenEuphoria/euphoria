@@ -298,7 +298,7 @@ builddirs : svn_rev
 	mkdir -p $(BUILD_DIRS) 
 
 svn_rev : 
-	-$(EXE) -i ../include revget.ex -svnentries ../.svn/entries
+	-$(EXE) -i ../include revget.ex -root ..
 
 interpreter : version.h builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
