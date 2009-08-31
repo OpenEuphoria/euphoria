@@ -517,10 +517,12 @@ end function
 
 -- open an include file (new_include_name) according to the include path rules
 function path_open()
+	integer fh
 	new_include_name = find_file(new_include_name)
 	new_include_name = maybe_preprocess(new_include_name)
 
-	return open(new_include_name, "r")
+	fh = open_locked(new_include_name)
+	return fh
 end function
 
 function win_compare(sequence a,sequence b)

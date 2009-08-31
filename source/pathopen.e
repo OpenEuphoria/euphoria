@@ -464,7 +464,7 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 		for i=1 to length(strings) do
 			full_path = strings[i]
 			file_path = full_path & file_name
-			try = open(file_path, "r")    
+			try = open_locked(file_path)    
 			if try != -1 then
 				return {file_path,try}
 			end if
@@ -474,7 +474,7 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 					-- after conversion
 					full_path = cache_converted[num_var][i]
 					file_path = full_path & file_name
-					try = open(file_path, "r")
+					try = open_locked(file_path)
 					if try != -1 then
 						cache_converted[num_var][i] = 0
 						cache_substrings[num_var][i] = full_path
@@ -509,7 +509,7 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 				cache_starts[num_var] &= start_path
 				cache_ends[num_var] &= end_path
 				file_path = full_path & file_name  
-				try = open(file_path, "r")
+				try = open_locked(file_path)
 				if try != -1 then -- valid path, no point trying to convert
 					ifdef WIN32 then
 						cache_converted[num_var] &= 0
@@ -521,7 +521,7 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 						-- accented characters, try converting them
 						full_path = convert_from_OEM(full_path)
 						file_path = full_path & file_name
-						try = open(file_path, "r")
+						try = open_locked(file_path)
 						if try != -1 then -- that was it; record translation as the valid path
 							cache_converted[num_var] &= 0
 							cache_substrings[num_var] = append(cache_substrings[num_var],full_path)

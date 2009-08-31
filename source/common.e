@@ -40,3 +40,16 @@ public integer AnyStatementProfile -- statement profile option was ever selected
 public sequence all_source = {} -- pointers to chunks
 
 public integer usage_shown = 0 -- Indicates if the help/usage text has shown yet.
+
+export function open_locked(sequence file_path)
+	integer fh
+	
+	fh = open(file_path, "u")
+	
+	if fh = -1 then
+		fh = open(file_path, "r")
+	end if
+	
+	return fh
+end function
+

@@ -35,6 +35,7 @@ include msgtext.e
 
 function GetSourceName()
 	object real_name
+	integer fh
 	boolean has_extension = FALSE
 
 	if length(src_name) = 0 then
@@ -80,7 +81,8 @@ function GetSourceName()
 
 	if file_exists(real_name) then
 		real_name = maybe_preprocess(real_name)
-		return open(real_name, "r")
+		fh = open_locked(real_name)
+		return fh
 	end if
 
 	return -1
