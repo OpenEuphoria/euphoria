@@ -106,10 +106,12 @@ procedure seg_flush(integer new_color)
 -- add the current color segment to the sequence
 -- and start a new segment
 	if new_color != current_color then
-		if current_color != DONT_CARE then
-			color_segments = append(color_segments,
-					{current_color, line[seg_start..seg_end]})
-			seg_start = seg_end + 1
+		if seg_start <= seg_end then
+			if current_color != DONT_CARE then
+				color_segments = append(color_segments,
+						{current_color, line[seg_start..seg_end]})
+				seg_start = seg_end + 1
+			end if
 		end if
 		current_color = new_color
 	end if
@@ -125,6 +127,15 @@ global function SyntaxColor(sequence pline)
 	integer class, last, i, c, bracket_level
 	sequence word
 
+	-- Ensure we have a new-line to end this one.
+	if length(pline) > 0 and pline[$] != '\n' then
+		pline &= '\n'
+	end if
+	-- Don't bother if the line is empty
+	if length(pline) < 2 then
+		return {}
+	end if
+	
 	line = pline
 	current_color = DONT_CARE
 	bracket_level = 0

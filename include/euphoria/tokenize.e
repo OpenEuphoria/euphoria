@@ -643,7 +643,7 @@ end function
 
 global function et_tokenize_file(sequence fname)
 	object txt
-	txt = read_file(fname, 1)
+	txt = read_file(fname, TEXT_MODE)
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
