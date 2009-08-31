@@ -75,7 +75,7 @@ public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWO
 	URL_QUERY_STRING
 
 --**
--- Parse a URL returning it's various elements.
+-- Parse a URL returning its various elements.
 -- 
 -- Parameters:
 --   # ##url##: URL to parse

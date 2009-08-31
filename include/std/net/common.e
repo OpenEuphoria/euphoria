@@ -101,7 +101,7 @@ public constant
 	URL_MAIL_QUERY    = 6
 
 --**
--- Parse a common URL. Currently supported URL's are http(s), ftp(s), gopher(s) and mailto.
+-- Parse a common URL. Currently supported URLs are http(s), ftp(s), gopher(s) and mailto.
 --
 -- Parameters:
 --   # ##url## : url to be parsed
