@@ -1,13 +1,6 @@
 --****
 -- == HTTP
 --
--- Based on EuNet project, version 1.3.2, at SourceForge.
--- http://www.sourceforge.net/projects/eunet. Many modifications
--- for POST support by Kathy Smith <katsmeow@centurytel.net>
--- 9-28-09 added Content-Length check and exiting for faster returns, no timeout waits
--- 9-28-09 added error returns for sock:connect and sock:send
--- 9-28-09 added socket status checks in get_url()
---
 -- <<LEVELTOC depth=2>>
 
 include std/socket.e as sock
@@ -80,6 +73,7 @@ function eunet_parse(sequence s, object c)
 			flag = 1
 		end if
 	end for
+
 	if flag = 1 then
 		parsed = append(parsed,s[spt..slen])
 	end if
@@ -151,7 +145,7 @@ end function
 public procedure set_sendheader_default()
 	sequence tempnewheader = {}
 	sequence temps = ""
-    sequence whoami = "OpenEuphoria " & version_string_long()
+	sequence whoami = "OpenEuphoria " & version_string_long()
 
 	-- this sets some defaults, if not previously set to something by the user
 	-- if a header line was previously set by the user, do not change it here
@@ -187,18 +181,18 @@ public procedure set_sendheader_default()
 	}
 
 
-  -- the following not only puts the default header lines,
-  -- it sorts the already-set lines to match the defaultsendheader order
+	-- the following not only puts the default header lines,
+	-- it sorts the already-set lines to match the defaultsendheader order
 	for defaultndx = 1 to length(defaultsendheader) do -- loop through defaultsendheader
-	   temps = get_sendheader(defaultsendheader[defaultndx][1]) -- see if it was already set to something
-	   if equal(temps[1],"") -- was it defined?
-		 then tempnewheader &= {defaultsendheader[defaultndx]} -- so set the default line
-		 else tempnewheader &= {temps} -- use the pre-definition
+		temps = get_sendheader(defaultsendheader[defaultndx][1]) -- see if it was already set to something
+		if equal(temps[1],"") then
+			tempnewheader &= {defaultsendheader[defaultndx]} -- so set the default line
+		else
+			tempnewheader &= {temps} -- use the pre-definition
 	   end if
 	end for
 
 	sendheader = tempnewheader
-
 end procedure
 
 --**
@@ -455,12 +449,8 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		set_sendheader("Referer",hostname)
 	end if
 
-
-	
 	last_data_len = 0
-
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
- 	
 	success = sock:connect(sock,inet_addr)
  	
 	if success = 1 then
@@ -468,40 +458,44 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		-- putting the POST data at the end,
 		-- filling in the CONTENT-LENGTH,
 		-- and avoiding sending empty fields for any field
-        success = sock:send(sock,eunet_format_sendheader(),0)
+		success = sock:send(sock,eunet_format_sendheader(),0)
  
 		-- } end version 1.3.0 mod
 		data = ""
 		header= {}
 		contentlen = 0
 		gotheader = 0
-                if success 
-                	then		
-			       while sequence(junk) with entry do
+				if success 
+					then		
+				   while sequence(junk) with entry do
 					data = data & junk
 					if gotheader and equal(contentlen,length(data)) then 
 					   exit  -- we got all the server said it had
 					end if
 					if not gotheader and match({13,10,13,10},data) then -- we got the header in there
-		                              header = data[1..match({13,10,13,10},data)-1] -- split off the header
-				              data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
-				              parse_recvheader(header) -- sets up recvheader -- global var
-				              junk = get_recvheader("Content-Length")
-				              if not equal(junk,-1) then
-					              junk = val:value(junk[2])
-					              contentlen = junk[2]
-					              if equal(contentlen,0) then exit end if -- there's no more
-					              if equal(contentlen,length(data)) then exit end if -- there's no more
-					       end if       
-				              gotheader = 1 -- we got what we came for here
+									  header = data[1..match({13,10,13,10},data)-1] -- split off the header
+							  data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
+							  parse_recvheader(header) -- sets up recvheader -- global var
+							  junk = get_recvheader("Content-Length")
+							  if not equal(junk,-1) then
+								  junk = val:value(junk[2])
+								  contentlen = junk[2]
+								  if equal(contentlen,0) then exit end if -- there's no more
+								  if equal(contentlen,length(data)) then exit end if -- there's no more
+						   end if       
+							  gotheader = 1 -- we got what we came for here
 					end if
 				entry
 
  				        junk2 = sock:select(sock) -- status check
- 				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) -- got readable data?
- 				          then junk = sock:receive(sock, 0) -- then recieve it
- 				          else junk = ""      -- add nothing to data
- 				                 task_yield()  -- are we a task?
+ 						-- Do we have readable data?
+ 				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) then
+							junk = sock:receive(sock, 0) -- then recieve it
+						else
+							junk = ""      -- add nothing to data
+							ifdef not EUC_DLL then
+								task_yield()
+							end ifdef
 					end if
 				end while
 			else
@@ -510,12 +504,12 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		end if -- if success -- sock:send
  		else 
  		      header = -1
-		      data = "could not connect to socket"
+			  data = "could not connect to socket"
 	end if -- if success = 1 then -- sock:connect
 	if sock:close(sock) then end if
 
-    -- clear any POSTDATA
-        set_sendheader("POSTDATA", "")
+	-- clear any POSTDATA
+		set_sendheader("POSTDATA", "")
 	set_sendheader("POST", "")
 	set_sendheader("GET", "")
 	set_sendheader("Content-Type", "")
@@ -635,24 +629,24 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		success = sock:send(socket,eunet_format_sendheader(),0)
 		-- } end version 1.3.0 modification
 		if success > 0 then
-                	junk = sock:receive(sock, 0)
+					junk = sock:receive(sock, 0)
 			while sequence(junk) do
 				data = data & junk
 				if gotheader and equal(contentlen,length(data)) then 
 				   exit  -- we got all the server said it had
 				end if
 				if not gotheader and match({13,10,13,10},data) then -- we got the header in there
-	                              header = data[1..match({13,10,13,10},data)-1] -- split off the header
-			              data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
-			              parse_recvheader(header) -- sets up recvheader -- global var
-			              junk = get_recvheader("Content-Length")
-			              if not equal(junk,-1) then
-				              junk = val:value(junk[2])
-				              contentlen = junk[2]
-				              if equal(contentlen,0) then exit end if -- there's no more
-				              if equal(contentlen,length(data)) then exit end if -- there's no more
-				       end if       
-			              gotheader = 1 -- we got what we came for here
+								  header = data[1..match({13,10,13,10},data)-1] -- split off the header
+						  data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
+						  parse_recvheader(header) -- sets up recvheader -- global var
+						  junk = get_recvheader("Content-Length")
+						  if not equal(junk,-1) then
+							  junk = val:value(junk[2])
+							  contentlen = junk[2]
+							  if equal(contentlen,0) then exit end if -- there's no more
+							  if equal(contentlen,length(data)) then exit end if -- there's no more
+					   end if       
+						  gotheader = 1 -- we got what we came for here
 				end if
 				junk = sock:receive(sock, 0)
 			end while
@@ -754,8 +748,8 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		cpos = match("SET-COOKIE",upper(header2))
 	end while
 
-    -- clear any POSTDATA
-    set_sendheader("POSTDATA", "")
+	-- clear any POSTDATA
+	set_sendheader("POSTDATA", "")
 	set_sendheader("POST", "")
 	set_sendheader("GET", "")
 	set_sendheader("Content-Type", "")
