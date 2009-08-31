@@ -4,18 +4,18 @@
 AppName=Euphoria
 AppVersion=4.0
 AppVerName=Euphoria v4.0
-AppPublisher=Rapid Deployment Software
-AppPublisherURL=http://www.rapideuphoria.com
-AppSupportURL=http://www.rapideuphoria.com
-AppUpdatesURL=http://www.rapideuphoria.com
-DefaultDirName=C:\euphoria
+AppPublisher=OpenEuphoria Group
+AppPublisherURL=http://openeuphoria.org
+AppSupportURL=http://openeuphoria.org
+AppUpdatesURL=http://openeuphoria.org
+DefaultDirName=C:\euphoria-40
 DefaultGroupName=Euphoria 4.0
 AllowNoIcons=yes
 LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria_40_ow
+OutputBaseFilename=euphoria-40-ow
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -177,7 +177,7 @@ Type: files; Name: {app}\EuphoriaManual.url
 
 [Registry]
 ;set EUDIR environment variable and add to PATH on NT/2000/XP machines
-Root: HKCU; SubKey: "Environment"; ValueType: string; ValueName: "INCLUDE"; ValueData "{app}\watcom\h;{app}\watcom\h\nt"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env; Components: comp_ow;
+Root: HKCU; SubKey: "Environment"; ValueType: string; ValueName: "INCLUDE"; ValueData: "{app}\watcom\h;{app}\watcom\h\nt"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env; Components: comp_ow;
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "WATCOM"; ValueData: "{app}\watcom"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env; Components: comp_ow;
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "EUDIR"; ValueData: "{app}"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{app}\watcom\binnt;{app}\watcom\binw;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
@@ -214,7 +214,7 @@ var
 
 procedure CreateEnvBatchFile();
 begin
-  SaveStringToFile(ExpandConstant('{app}\setenv.bat'), #13#10 + ExpandConstant('SET EUDIR={app}') + #13#10 + 'SET PATH=%EUDIR%\bin;%PATH%' + #13#10, True);
+  SaveStringToFile(ExpandConstant('{app}\setenv-ow.bat'), #13#10 + ExpandConstant('SET EUDIR={app}') + #13#10 + ExpandConstant('SET WATCOM={app}\watcom') + #13#10 + 'SET PATH=%EUDIR%\bin;%WATCOM\binw;%WATCOM%\binnt;%PATH%' + #13#10 + 'SET INCLUDE=%WATCOM%\h;%WATCOM%\h\nt' + #13#10, True);
 end;
 
 function GetBackupPath(Param: String) : String;
