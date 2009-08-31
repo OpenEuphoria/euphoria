@@ -4,9 +4,7 @@
 -- A quick test of most of the features --
 ------------------------------------------
 -- Usage:
---        ex sanity
---       exw sanity.ex
---       exu sanity.ex
+--   eui sanity.ex
 
 with type_check
 include std/get.e
@@ -26,8 +24,7 @@ include std/error.e
 include std/convert.e
 constant msg = 1 -- place to send messages
 constant generic_msg = "sanity tests failed at line number shown in ex.err"
-atom t
-t = time()
+atom t = time()
 object y
 
 procedure the_end()
@@ -1102,7 +1099,7 @@ procedure check_install(integer doit)
     ifdef UNIX then
     	return
 --      eudir &= "/bin/"
---      ex_sum = checksum(eudir & "exu")
+--      ex_sum = checksum(eudir & "eui")
 --      if ex_sum = SUM_EXU then
 --          if checksum(eudir & "pdexu") != SUM_PDEXU then
 --              corrupt("pdexu")

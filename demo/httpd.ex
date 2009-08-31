@@ -12,7 +12,7 @@
 -- You can change what IP and Port are bound to for the server
 -- by specifying it on the command line:
 --
---   exu/exwc httpd.ex 0.0.0.0:9090
+--   eui httpd.ex 0.0.0.0:9090
 --
 
 include std/error.e

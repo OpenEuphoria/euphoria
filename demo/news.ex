@@ -7,9 +7,9 @@
 -- in parallel with several other tasks.
 --
 -- Usage:
---	  eui news.exu string
+--	  eui news.ex string
 -- or:
---	  eui news.exu "a multi-word phrase"
+--	  eui news.ex "a multi-word phrase"
 --
 -- Search is case insensitive.
 --
