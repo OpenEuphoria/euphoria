@@ -244,13 +244,6 @@ With each click of the system clock, an interrupt is generated. When you
 specify ##with profile_time## Euphoria will sample your program to see which
 statement is being executed at the exact moment that each interrupt occurs.
 
-These interrupts normally occur 18.2 times per second, but if you call
-[[:tick_rate]]() you can choose a much higher rate
-and thus get a more accurate time profile, since it will be based on more
-samples. By default, if you haven't called ##tick_rate##(), then ##tick_rate(100)##
-will be called automatically when you start profiling. You can set it even
-higher (up to say 1000) but you may start to affect your program's performance.
-
 Each sample requires 4 bytes of memory and buffer space is normally reserved
 for 25000 samples. If you need more than 25000 samples you can request it:
 
