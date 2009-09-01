@@ -15,10 +15,10 @@ include std/io.e
 public constant
 	ULINUX = LINUX + 0.3,
 	UFREEBSD = FREEBSD + 0.4,
-	UOSX = OSX + 0.5,
-	USUNOS = SUNOS + 0.6,
-	UOPENBSD = OPENBSD + 0.7,
-	UNETBSD = NETBSD + 0.8,
+	UOSX = OSX,
+	USUNOS = SUNOS,
+	UOPENBSD = OPENBSD,
+	UNETBSD = NETBSD,
 	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
 
 -- For cross-translation:
