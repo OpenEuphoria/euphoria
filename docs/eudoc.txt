@@ -72,7 +72,7 @@ write after this tag.
 
 procedure hello( sequence name )
    printf(1, "Hello %s!", {name} )
-   end procedure
+end procedure
 	
 </eucode>
 
@@ -143,7 +143,7 @@ Wiki, and for documenting source-code.
 -- euphoria code is colorized
 for i=1 to 5 do	 
    ? i
-   end for
+end for
 </eucode>
 }}}
 
@@ -167,7 +167,7 @@ for i=1 to 5 do
 -- euphoria code is colorized
 for i=1 to 5 do	 
    ? i
-   end for
+end for
 </eucode>
 
 * More choices are described at the Euphoria Wiki.
