@@ -24,6 +24,9 @@
 #ifdef EUNIX
 #include <sys/ioctl.h>
 #endif
+#ifdef EOSX
+#include <unistd.h>
+#endif
 
 #include <signal.h>
 #include <string.h>

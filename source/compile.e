@@ -6926,7 +6926,7 @@ procedure BackEnd(atom ignore)
 	version()
 
 	c_puts("#include <time.h>\n")
-	c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
+	c_puts("#include \"include/euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
 
 	if TUNIX then
