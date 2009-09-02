@@ -1,10 +1,11 @@
 -- (c) Copyright - See License.txt
 --
 -- IL opcodes, scanner tokens etc.
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 export constant

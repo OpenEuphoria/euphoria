@@ -5,9 +5,9 @@
 -- uses the Euphoria front-end, plus a special Euphoria-coded back-end
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 -- Disable SVN Revision banner

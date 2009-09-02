@@ -1,10 +1,13 @@
 -- (c) Copyright - See License.txt
+--
 -- shift IL code to dynamically insert, delete or replace previously emitted  IL code
+
 namespace shift
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include reswords.e

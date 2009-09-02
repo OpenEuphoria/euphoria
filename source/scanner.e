@@ -1,10 +1,11 @@
 -- (c) Copyright - See License.txt
 --
 -- Scanner (low-level parser)
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/error.e
@@ -12,7 +13,6 @@ include std/filesys.e
 include std/get.e
 include std/machine.e
 include std/search.e
---include std/datetime.e as dt
 include std/sequence.e
 
 include global.e

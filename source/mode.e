@@ -2,6 +2,7 @@
 --
 -- Modularizes the code, while allowing files to explicitly include the
 -- files they need.
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef

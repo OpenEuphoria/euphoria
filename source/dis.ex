@@ -10,12 +10,15 @@
 -- { "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") }
 -- default output dir: eudox
 -- stdlib suppressed by default
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
+
 include mode.e
+
 sequence cmd = command_line()
 if find( "-t", cmd ) then
 	set_mode( "translate", 0 )

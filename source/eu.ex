@@ -1,7 +1,5 @@
 -- (c) Copyright - See License.txt
 --
--- Euphoria 3.1 
---
 -- A Euphoria Interpreter written 100% in Euphoria
 --
 -- usage:

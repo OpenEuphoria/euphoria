@@ -1,9 +1,11 @@
 -- (c) Copyright - See License.txt
+--
 -- Names of the IL opcodes
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 export constant opnames = {

@@ -1,4 +1,5 @@
 -- (c) Copyright - See License.txt
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef

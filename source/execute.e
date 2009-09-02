@@ -13,10 +13,11 @@
 -- will boost its speed considerably, though it will still be slower 
 -- than the official RDS interpreter. The official interpreter has a 
 -- carefully hand-coded back-end written in C.
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/os.e

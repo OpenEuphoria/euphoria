@@ -6,10 +6,11 @@
 -- Note: be careful not to make changes in the IL format 
 -- that are not upwardly compatible. Otherwise, 
 -- change the format number. (IL_VERSION)
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/machine.e

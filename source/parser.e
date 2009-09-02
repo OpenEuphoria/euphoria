@@ -1,12 +1,13 @@
 -- (c) Copyright - See License.txt
 --
--- Euphoria 4.0
 -- Parser
+
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
+
 include euphoria/info.e
 
 include std/sequence.e

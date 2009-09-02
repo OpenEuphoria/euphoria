@@ -14,6 +14,7 @@
 -- If the user doesn't select it then it will try all of the environment
 -- variables and use the selected platform to determine which compiler must
 -- be used.
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
@@ -24,7 +25,7 @@ include std/cmdline.e
 include std/error.e
 include std/filesys.e
 include std/get.e
-include std/map.e as m
+include std/map.e
 include std/os.e
 include std/sort.e
 include std/text.e
@@ -92,16 +93,16 @@ export procedure transoptions()
 
 	Argv = expand_config_options(Argv)
 	Argc = length(Argv)
-	m:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
+	map:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
 
 	handle_common_options(opts)
 
-	sequence opt_keys = m:keys(opts)
+	sequence opt_keys = map:keys(opts)
 	integer option_w = 0
 
 	for idx = 1 to length(opt_keys) do
 		sequence key = opt_keys[idx]
-		object val = m:get(opts, key)
+		object val = map:get(opts, key)
 
 		switch key do
 			case "silent" then
@@ -217,7 +218,7 @@ export procedure transoptions()
 		end switch
 	end for
 
-	if length(m:get(opts, "extras")) = 0 then
+	if length(map:get(opts, "extras")) = 0 then
 		-- No source supplied on command line
 		show_banner()
 		ShowMsg(2, 203)
