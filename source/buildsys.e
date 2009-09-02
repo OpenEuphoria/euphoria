@@ -1,9 +1,9 @@
 -- (c) Copyright - See License.txt
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/filesys.e
@@ -176,7 +176,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = user_library
+			l_flags = user_library & " -m32 "
 
 			if dll_option then
 				l_flags &= " -shared "
@@ -398,8 +398,13 @@ procedure write_makefile_full()
 
 	else
 		printf(fh, "%s: $(%s_OBJECTS)" & HOSTNL, { exe_name, upper(file0) })
-		printf(fh, "\t$(LINKER) -o %s%s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
-			file0, settings[SETUP_EXE_EXT], upper(file0) })
+		if TWINDOWS then
+			printf(fh, "\t$(LINKER) -o %s%s @%s.lnk" & HOSTNL, {
+				file0, settings[SETUP_EXE_EXT], file0 })
+		else
+			printf(fh, "\t$(LINKER) -o %s%s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
+				file0, settings[SETUP_EXE_EXT], upper(file0) })
+		end if
 		puts(fh, HOSTNL)
 		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
 		puts(fh, HOSTNL)
