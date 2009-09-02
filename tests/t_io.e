@@ -54,12 +54,12 @@ close(tmp)
 tmp = open("file.txt", "r")
 test_equal("where() #1b", 0, where(tmp))
 data = read_file(tmp) -- BINARY_MODE even though file was opened in 'text' mode.
-ifdef DOSFAMILY then
-test_equal("read_file() #1b", 253, length(data))
-test_equal("read_file() #2b", "alter this file", data[51..65])
+ifdef WINDOWS then
+	test_equal("read_file() #1b", 253, length(data))
+	test_equal("read_file() #2b", "alter this file", data[51..65])
 elsedef
-test_equal("read_file() #1b", 262, length(data))
-test_equal("read_file() #2b", "alter this file", data[52..66])
+	test_equal("read_file() #1b", 262, length(data))
+	test_equal("read_file() #2b", "alter this file", data[52..66])
 end ifdef
 
 test_equal("where() #2b", 262, where(tmp))
@@ -110,12 +110,12 @@ write_file("filea.txt", testdata_raw, TEXT_MODE) -- Write out as current o/s tex
 write_file("fileb.txt", testdata_unix, TEXT_MODE) -- Write out as current o/s text data.
 write_file("filec.txt", testdata_dos, TEXT_MODE) -- Write out as current o/s text data.
 
-ifdef DOSFAMILY then
-sequence res_text = testdata_dos
+ifdef WINDOWS then
+	sequence res_text = testdata_dos
 elsifdef UNIX then
-sequence res_text = testdata_unix
+	sequence res_text = testdata_unix
 elsedef
-sequence res_text = "unsupported op sys"
+	sequence res_text = "unsupported op sys"
 end ifdef
 test_equal("read file binary #2a", res_text, read_file("filea.txt", BINARY_MODE))
 test_equal("read file binary #2b", res_text, read_file("fileb.txt", BINARY_MODE))

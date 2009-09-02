@@ -43,7 +43,7 @@ function GetSourceName()
 		return -2 -- No source file
 	end if
 
-	ifdef DOSFAMILY then
+	ifdef WINDOWS then
 		src_name = find_replace(`/`, src_name, `\`)
 	end ifdef
 	-- check src_name for last '.'

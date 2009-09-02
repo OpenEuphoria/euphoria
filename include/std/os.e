@@ -16,7 +16,7 @@ ifdef UNIX then
 
 	public constant CMD_SWITCHES = "-"
 
-elsifdef DOSFAMILY then
+elsifdef WINDOWS then
 
 	public constant CMD_SWITCHES = "-/"
 
@@ -77,6 +77,10 @@ public function instance()
 	return machine_func(M_INSTANCE, 0)
 end function
 
+ifdef WINDOWS then
+	atom cur_pid = -1
+end ifdef
+
 --**
 -- Return the ID of the current Process (pid)
 --
@@ -88,14 +92,10 @@ end function
 -- mypid = get_pid()
 -- </eucode>
 
-ifdef WINDOWS then
-atom cur_pid = -1
-end ifdef
 public function get_pid()
 	ifdef UNIX then
 		return machine_func(M_INSTANCE, 0)
-	end ifdef
-	ifdef WINDOWS then
+	elsifdef WINDOWS then
 		if cur_pid = -1 then
 			cur_pid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_INT)
 			if cur_pid >= 0 then
@@ -106,7 +106,6 @@ public function get_pid()
 		return cur_pid
 	end ifdef
 end function
-
 
 ifdef WIN32 then
 	constant M_UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)

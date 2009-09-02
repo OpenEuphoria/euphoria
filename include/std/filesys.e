@@ -160,7 +160,9 @@ ifdef UNIX then
 	elsedef
 		public constant SHARED_LIB_EXT = "so"
 	end ifdef
-elsifdef DOSFAMILY then
+
+elsifdef WINDOWS then
+
 	public constant SLASH='\\'
 	public constant SLASHES = "\\/:"
 	public constant EOLSEP = "\r\n"
@@ -1258,7 +1260,7 @@ public function absolute_path(sequence filename)
 		return 1
 	end if
 	
-	ifdef DOSFAMILY then
+	ifdef WINDOWS then
 		if length(filename) = 1 then
 			return 0
 		end if

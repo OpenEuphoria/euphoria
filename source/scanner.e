@@ -1860,7 +1860,7 @@ export procedure IncludeScan( integer is_public )
 	end if
 
 	-- record the new filename
-	ifdef DOSFAMILY then
+	ifdef WINDOWS then
 		new_include_name = find_replace(`/`, gtext, `\`)
 	elsedef
 		new_include_name = gtext

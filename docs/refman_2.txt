@@ -2371,7 +2371,7 @@ but ##EU5## will be defined.
 * **WIN32_GUI** - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
 * **WIN32** - Platform is Windows (GUI or Console)
-* **DOSFAMILY** - Platform is any platform that was derived from MS-DOS (eg. Windows)
+* **WINDOWS** - Platform is any platform that was derived from Windows
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
 * **SUNOS** - Platform is SunOS (Open Solaris)
@@ -3589,7 +3589,7 @@ define/undefine tags which the ifdef statement may use.
 The following tags have a predefined meaning in Euphoria:
 
 * WIN32:    platform is any version of Windows (tm) from '95 on to Vista and beyond
-* DOSFAMILY: Any platform derived from MS-DOS.
+* WINDOWS:  platform is any kind of Windows system
 * UNIX:     platform is any kind of Unix style system
 * LINUX:    platform is Linux
 * FREEBSD:  platform is FreeBSD

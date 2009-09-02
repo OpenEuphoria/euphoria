@@ -60,13 +60,13 @@ test_false("absolute_path('local/abc.txt')", absolute_path("local/abc.txt"))
 test_false("absolute_path('abc.txt')", absolute_path("abc.txt"))
 test_false("absolute_path('c:..\\abc')", absolute_path("c:..\\abc"))
 
-ifdef DOSFAMILY then
-test_true("absolute_path('\\temp\\somefile.doc')", absolute_path("\\temp\\somefile.doc"))
-test_true("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
-test_true("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
+ifdef WINDOWS then
+	test_true("absolute_path('\\temp\\somefile.doc')", absolute_path("\\temp\\somefile.doc"))
+	test_true("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
+	test_true("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
 elsedef
-test_false("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
-test_false("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
+	test_false("absolute_path('c:\\windows\\system32\\abc')", absolute_path("c:\\windows\\system32\\abc"))
+	test_false("absolute_path('c:/windows/system32/abc')", absolute_path("c:/windows/system32/abc"))
 end ifdef
 
 -- move_file()
@@ -108,7 +108,6 @@ test_false("copy_file #4", copy_file("fstesta.txt", "fstestb.txt")) -- should no
 test_false("copy_file #5", copy_file("fstesta.txt", "fstestb.txt", 0)) -- should not overwrite existing file
 delete_file("fstesta.txt")
 delete_file("fstestb.txt")
-
 
 test_report()
 
