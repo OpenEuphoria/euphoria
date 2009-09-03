@@ -227,8 +227,8 @@ When installed, the ##euphoria## directory will look something like this:
 ** readme.doc
 ** readme.htm
 ** License.txt
-** ##\bin## - Interpreters ##euid.exe##, ##euiw.exe## and ##eui.exe##. Translators
-    ##euc.exe## and ##eucd.exe##. Or on //Linux/FreeBSD//,
+** ##\bin## - Interpreters ##eui.exe## and ##euiw.exe##. Translator
+    ##euc.exe##. Or on //Linux/FreeBSD//,
     Interpreter ##eui## and Translator ##euc##. There are also utility
     programs such as ##ed.bat##, ##guru.bat##, etc.
 ** ##\include## - standard include files
@@ -307,7 +307,7 @@ the interpreter name and the program name. Command line switches
 customize  how the interpreter itself behaves.
 
 Unlike many other compilers and interpreters, there is no obligation for any
-special command-line options for ##euid##, ##euiw## or ##eui##. Only the
+special command-line options for ##eui## or ##euiw##. Only the
 name of you Euphoria file is expected, and if you don't supply it, Euphoria
 will display all the command line options available.
 
@@ -460,7 +460,7 @@ The Binder gives you two more methods of distribution. You can ##shroud## your
 program, or you can ##bind## your program. **Shrouding** combines all of the
 Euphoria source code that your program needs to create a single ##.il## file.
 **Binding** combines your shrouded program with the Euphoria backend
-(##eub##, ##eubw##, or ##eubd##) to create a single, stand-alone executable file.
+(##eub## or ##eubw##) to create a single, stand-alone executable file.
 For example, if your program is called "##myprog.ex##" you can create "##myprog.exe##"
 which will run identically. For more information about shrouding and binding,
 see [[:Binding and Shrouding]].

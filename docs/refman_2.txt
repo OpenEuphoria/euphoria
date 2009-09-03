@@ -842,7 +842,7 @@ The sequence-formation operator is listed at the bottom of the a
 
 Some other important operations that you can perform on sequences have English
 names, rather than special characters. These operations are built-in to
-**euid.exe/euiw.exe/eui**, so they'll always be there, and so they'll be fast. They are
+**eui.exe/euiw**, so they'll always be there, and so they'll be fast. They are
 described in detail in the [[:Language Reference]], but are
 important enough to Euphoria programming that we should mention them here before
 proceeding. You call these operations as if they were subroutines, although
