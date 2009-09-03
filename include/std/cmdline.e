@@ -11,6 +11,7 @@ include std/error.e
 include std/os.e
 include std/io.e as io
 include std/console.e
+include std/types.e
 
 --****
 -- === Constants
@@ -145,7 +146,7 @@ procedure local_abort(integer lvl)
 end procedure
 
 -- Local routine to validate and reformat option records if they are not in the standard format.
-function standardize_opts(sequence opts, integer add_help_options=1)
+function standardize_opts(sequence opts, integer add_help_options = 1)
 	integer lExtras = 0 -- Ensure that there is zero or one 'extras' record only.
 
 	for i = 1 to length(opts) do
@@ -300,12 +301,7 @@ function standardize_opts(sequence opts, integer add_help_options=1)
 	return opts
 end function
 
-procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = command_line(), integer std = 0)
-	if add_help_rid > -1 then
-		call_proc(add_help_rid, {})
-		return
-	end if
-
+procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = command_line(), integer std = 0)
 	integer pad_size
 	integer this_size
 	sequence cmd
@@ -316,7 +312,7 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 	integer extras_opt = 0
 
 	if std = 0 then
-		opts = standardize_opts(opts, add_help_rid != NO_HELP)
+		opts = standardize_opts(opts, not equal(add_help_rid, NO_HELP))
 	end if
 
 	-- Calculate the size of the padding required to keep option text aligned.
@@ -374,7 +370,7 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 	end for
 	pad_size += 3 -- Allow for minimum gap between cmd and its description
 
-	if add_help_rid != NO_HELP then
+	if not equal(add_help_rid, NO_HELP) then
 		printf(1, "%s options:\n", {cmds[2]})
 	end if
 
@@ -455,19 +451,17 @@ procedure local_help(sequence opts, object add_help_rid=-1, sequence cmds = comm
 	else
 		if length(add_help_rid) > 0 then
 			puts(1, "\n")
-			if atom(add_help_rid[1]) then
-				puts(1, add_help_rid)
-				if add_help_rid[$] != '\n' then
+			if t_display(add_help_rid) then
+				add_help_rid = {add_help_rid}
+			end if
+			
+			for i = 1 to length(add_help_rid) do
+				puts(1, add_help_rid[i])
+				if add_help_rid[i][$] != '\n' then
 					puts(1, '\n')
 				end if
-			else
-				for i = 1 to length(add_help_rid) do
-					puts(1, add_help_rid[i])
-					if add_help_rid[i][$] != '\n' then
-						puts(1, '\n')
-					end if
-				end for
-			end if
+			end for
+
 			puts(1, "\n")
 		end if
 	end if
@@ -572,11 +566,17 @@ end procedure
 --
 -- Parameters:
 -- # ##opts## : a sequence of options. See the [[:cmd_parse]] for details.
--- # ##add_help_rid## : an object. See the [[:cmd_parse]] for details.
+-- # ##add_help_rid## : an object. Either a routine_id or a set of text strings.
+-- The default is -1 meaning that no additional help text will be used.
+-- # ##cmds## : a sequence of strings. By default this is the output from [[:command_line]]()
 --
 -- Comments:
--- The parameters ##opts## and ##add_help_rid## are identical to the same ones
--- used by [[:cmd_parse]]
+-- * ##opts## is identical to the one used by [[:cmd_parse]]
+-- * ##add_help_rid## can be used to provide additional help text. By default, just
+-- the option switches and their descriptions will be displayed. However you can
+-- provide additional text by either supplying a routine_id of a procedure that
+-- accepts no parameters; this procedure is expected to write text to the stdout
+-- device. Or you can supply one or more lines of text that will be displayed.
 --
 -- Example 1:
 -- <eucode>
@@ -601,6 +601,36 @@ end procedure
 -- Creates a file containing an analysis of the weather.
 -- The analysis includes temperature and rainfall data
 -- for the past week.
+-- }}}
+--
+-- Example 2:
+-- <eucode>
+-- -- in myfile.ex
+-- constant description = {
+--        "Creates a file containing an analysis of the weather.",
+--        "The analysis includes temperature and rainfall data",
+--        "for the past week."
+--     }
+-- procedure sh()
+--   for i = 1 to length(description) do
+--      printf(1, " >> %s <<\n", {description[i]})
+--   end for
+-- end procedure
+--
+-- show_help({
+--     {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
+--     {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},
+--     routine_id("sh"))
+-- </eucode>
+-- Outputs:
+-- {{{
+-- myfile.ex options:
+--   -q, --silent      Suppresses any output to console
+--   -r lines          Sets how many lines the console should display
+--
+--   >> Creates a file containing an analysis of the weather. <<
+--   >> The analysis includes temperature and rainfall data  <<
+--   >> for the past week.  <<
 -- }}}
 --
 
@@ -727,7 +757,12 @@ end function
 --   "greet.ex" should not as it is meant for greet.ex to handle, not eui.
 -- # ##HELP_RID## ~-- Specify a routine id to call in the event of a parse error (invalid option
 --   given, mandatory option not given, no parameter given for an option that requires a
---   parameter, etc...).
+--   parameter, etc...) or a set of text strings. This can be used to provide additional
+--   help text. By default, just the option switches and their descriptions will be
+--   displayed. However you can provide additional text by either supplying a
+--   routine_id of a procedure that accepts no parameters; this procedure is expected
+--   to write text to the stdout device. Or you can supply one or more lines of text
+--   that will be displayed.
 -- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'
 -- # ##AT_EXPANSION## ~-- Expand arguments that begin with '@'.  The name that follows @ will be
 --   opened as a file, read, and each trimmed non-empty line that does not begin with a
