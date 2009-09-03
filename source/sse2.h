@@ -20,13 +20,23 @@ extern struct _128b_uint_st MININT_128bit;
 extern struct _128b_uint_st overunder_128bit;
 extern struct _128b_uint_st integer_128bit, intermediate_128bit;
 extern unsigned long iterate_over_double_words;
+	void see2_load_registers(int * dest, object_ptr ptr1, object_ptr ptr2 );
 	void sse2_padd_euphoria_values4(int * dest, int * ptr1, int * ptr2 );
 #	ifdef EWATCOM	
-		#pragma aux  sse2_padd_euphoria_values4 = \
+#		if SSE2_ALIGNED
+			#pragma aux sse2_load_registers = \
 				"MOVAPS XMM0, [EAX]"\             
+				"MOVAPS XMM4, [ECX]"\
+				parm [EDX] [EAX] [ECX];
+#		else
+			#pragma aux sse2_load_registers = \
+				"MOVUPS XMM0, [EAX]"\             
+				"MOVUPS XMM4, [ECX]"\
+				parm [EDX] [EAX] [ECX];
+#		endif
+		#pragma aux  sse2_padd_euphoria_values4 = \
 				"MOVAPS XMM1, XMM0"\
 				"MOVAPS XMM2, XMM0"/*MASK1*/\
-				"MOVAPS XMM4, [ECX]"\
 				"MOVAPS XMM5, XMM4"/*MASK2*/\
 				"MOVAPS XMM6, NOVALUE_128bit"\
 				"MOVAPS XMM7, XMM6"\

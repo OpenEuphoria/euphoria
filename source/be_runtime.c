@@ -1420,15 +1420,15 @@ void udt_clean_rt( object o, long rid ){
 void udt_clean( object o, long rid ){
 
 	int *code;
-	int seq[9]; // seq struct on the stack
+	// seq struct on the stack
+	object seq[(sizeof(struct s1))/sizeof(object)+2/*alignment*/+2/*base elements*/];
 	s1_ptr s;
 	object args;
 	int pre_ref;
 	int *save_tpc;
-
-	// Need to make sure that s is 8-byte aligned
 	s = (s1_ptr)( (int)&seq + ( 8 - ( ((int)&seq) & 7 ) ));
-	s->base = (long*)&(s->cleanup);
+	s->base = (object_ptr)(s + 1);
+	s->base--;
 	s->ref = 2;
 	s->length = 1;
 	s->cleanup = 0;
