@@ -515,11 +515,12 @@ The following items may be changed or added, one at a time:
 ; ##-W warning_name##:
 : Resets, or adds to, the current list of warnings that may be emitted. The list of known names
   is to be found in the subsection [[:with/without warning]]. A name should appear without quotes.
-  The first ##-W## switch resets the list to the warning being introduced, and each subsequent
-  switch adds to the list.
+  If the ##warning_name## begins with a plus symbol '##+##', this warning is added to the current
+  set of warnings checked for, otherwise the first usage resets the list 
+  to the warning being introduced, and each subsequent ##-W## warning_name adds to the list.
 
 ; ##-X##;
-: Resets, or adds to, the list of warnings that will not be issued. This is symmetric of
+: Resets, or adds to, the list of warnings that will not be issued. This is opposite of
   the ##-W## switch.
 
 ; ##-WF file_name##:

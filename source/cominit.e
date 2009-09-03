@@ -137,7 +137,6 @@ end function
 
 --**
 -- Process options that are common to the Interpreter and Translator.
-
 export procedure handle_common_options(m:map opts)
 	sequence opt_keys = m:keys(opts)
 	integer option_w = 0
@@ -182,30 +181,46 @@ export procedure handle_common_options(m:map opts)
 				LocalDB = val
 
 			case "w" then
-				integer n = find(val, warning_names)
-				if n != 0 then
-					if option_w = 1 then
-						OpWarning = or_bits(OpWarning, warning_flags[n])
-					else
-						option_w = 1
-						OpWarning = warning_flags[n]
+				for i = 1 to length(val) do
+					sequence this_warn = val[i]
+					integer auto_add_warn = 0
+					if this_warn[1] = '+' then
+						auto_add_warn = 1
+						this_warn = this_warn[2 .. $]
 					end if
-
-					prev_OpWarning = OpWarning
-				end if
-
+					integer n = find(this_warn, warning_names)
+					if n != 0 then
+						if auto_add_warn or option_w = 1 then
+							OpWarning = or_bits(OpWarning, warning_flags[n])
+						else
+							option_w = 1
+							OpWarning = warning_flags[n]
+						end if
+	
+						prev_OpWarning = OpWarning
+					end if
+				end for
+				
 			case "x" then
-				integer n = find(val, warning_names)
-				if n != 0 then
-					if option_w = -1 then
-						OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
-					else
-						option_w = -1
-						OpWarning = all_warning_flag - warning_flags[n]
+				for i = 1 to length(val) do
+					sequence this_warn = val[i]
+					integer auto_add_warn = 0
+					if this_warn[1] = '+' then
+						auto_add_warn = 1
+						this_warn = this_warn[2 .. $]
 					end if
-
-					prev_OpWarning = OpWarning
-				end if
+					integer n = find(this_warn, warning_names)
+					if n != 0 then
+						if auto_add_warn or option_w = -1 then
+							OpWarning = and_bits(OpWarning, not_bits(warning_flags[n]))
+						else
+							option_w = -1
+							OpWarning = all_warning_flag - warning_flags[n]
+						end if
+	
+						prev_OpWarning = OpWarning
+					end if
+				end for
 
 			case "wf" then
 				TempWarningName = val
