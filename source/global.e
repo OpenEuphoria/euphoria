@@ -318,9 +318,14 @@ export constant -- maskable warning flags
 	all_warning_flag            = #3FFF
 
 constant default_maskable_warnings =
-	resolution_warning_flag + override_warning_flag + builtin_chosen_warning_flag +
-	translator_warning_flag + cmdline_warning_flag + not_reached_warning_flag +
-	mixed_profile_warning_flag + custom_warning_flag
+	resolution_warning_flag + 
+	override_warning_flag + 
+	translator_warning_flag + 
+	cmdline_warning_flag + 
+	not_reached_warning_flag +
+	mixed_profile_warning_flag + 
+	custom_warning_flag +
+	0
 
 export constant warning_flags = {
 	no_warning_flag,
