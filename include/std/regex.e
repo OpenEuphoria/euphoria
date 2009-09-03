@@ -116,7 +116,8 @@ end type
 --   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   A **regex**, which other regular expression routines can work on or < 0 indicates an error.
+--   A **regex**, which other regular expression routines can work on or an atom to indicate an 
+--   error. If an error, you can call [[:error_message]] to get a detailed error message.
 --
 -- Comments:
 --   This is the only routine that accepts a human readable regular expression. The string is
@@ -159,7 +160,7 @@ end type
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
 -- See Also:
---   [[:find]], [[:find_all]]
+--   [[:error_message]], [[:find]], [[:find_all]]
 
 public function new(sequence pattern, object options=DEFAULT)
 	if sequence(options) then options = or_all(options) end if
