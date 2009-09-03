@@ -5,8 +5,15 @@ include std/unittest.e
 
 object ignore = 0
 
-object re = regex:new("[A-Z][a-z]+")
-test_true("new()", regex(re))
+object re 
+
+re = regex:new("[e][x]press.?*")
+test_equal("new() on bad expression", 0, re)
+test_true("error_message() on bad expression", sequence(regex:error_message(re)))
+
+re = regex:new("[A-Z][a-z]+")
+test_true("new() on good expression", regex(re))
+test_false("error_message() on good expression", regex:error_message(re))
 test_equal("exec() #1", {{5,8}}, regex:find(re, "and John ran"))
 
 re = regex:new("([a-z]+) ([A-Z][a-z]+) ([a-z]+)")
@@ -102,6 +109,5 @@ test_equal("find_replace_callback() #2", "JOHN DOE Jane Doe",
 	regex:find_replace_callback(re, "John Doe Jane Doe", routine_id("myupper"), 1))
 test_equal("find_replace_callback() #3", "John Doe JANE DOE",
 	regex:find_replace_callback(re, "John Doe Jane Doe", routine_id("myupper"), 0, 9))
-
 
 test_report()

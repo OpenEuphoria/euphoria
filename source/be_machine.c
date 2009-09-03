@@ -2919,6 +2919,9 @@ object machine(object opcode, object x)
 			case M_PCRE_REPLACE:
 				return find_replace_pcre(x);
 
+			case M_PCRE_ERROR_MESSAGE:
+				return pcre_error_message(x);
+
 			case M_EU_INFO:
 				return eu_info();
 

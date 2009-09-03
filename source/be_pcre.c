@@ -2,14 +2,14 @@
 #include <stdlib.h>
 
 #ifdef EWINDOWS
-#include <windows.h>
-extern int default_heap;
+	#include <windows.h>
+	extern int default_heap;
 #endif
 #ifdef EMINGW
-#include "pcre/pcre_internal.h"
+	#include "pcre/pcre_internal.h"
 #endif
 #if defined(EWINDOWS)
-#include "pcre/config.h" /* cannot make it link w/o it */
+	#include "pcre/config.h" /* cannot make it link w/o it */
 #endif
 
 #include <string.h>
@@ -22,6 +22,7 @@ extern int default_heap;
 struct pcre_cleanup {
 	struct cleanup cleanup;
 	pcre *re;
+	object errmsg;
 };
 typedef struct pcre_cleanup *pcre_cleanup_ptr;
 
@@ -30,6 +31,9 @@ void pcre_deref(object re) {
 	if (rcp->re) {
 		(*pcre_free)(rcp->re);
 		rcp->re = 0;
+	}
+	if (rcp->errmsg) {
+		EFree(rcp->errmsg);
 	}
 }
 
@@ -71,9 +75,22 @@ object compile(object pattern, object eflags) {
 object compile_pcre(object x, object flags) {
 	pcre *re;
 	pcre_cleanup_ptr rcp;
+	object compiled_regex;
 
-	RefDS(x);
+	compiled_regex = compile(x, flags);
+	if (IS_SEQUENCE(compiled_regex)) {
+		x = NewDouble((double) 0);
+		rcp = EMalloc(sizeof(struct pcre_cleanup));
+		rcp->cleanup.func.builtin = &pcre_deref;
+		rcp->cleanup.type = CLEAN_PCRE;
+		rcp->errmsg = compiled_regex;
+		rcp->re = 0;
+		DBL_PTR(x)->cleanup = (cleanup_ptr) rcp;
+		return x;
+	}
+
 	rcp = SEQ_PTR(x)->cleanup;
+
 	if (rcp != 0) {
 		(*pcre_free)(rcp->re);
 	} else {
@@ -83,9 +100,30 @@ object compile_pcre(object x, object flags) {
 		SEQ_PTR(x)->cleanup = (cleanup_ptr) rcp;
 	}
 
-	rcp->re = compile(x, flags);
+	rcp->re = compiled_regex;
+	rcp->errmsg = 0;
+
+	RefDS(x);
 
 	return x;
+}
+
+object pcre_error_message(object x) {
+	pcre_cleanup_ptr rcp;
+	object x1 = SEQ_PTR(x)->base[1];
+
+	if (!IS_ATOM_DBL(x1)) {
+		return 0;
+	}
+
+	rcp = DBL_PTR(x1)->cleanup;
+	if (rcp->errmsg == 0) {
+		return 0;
+	}
+
+	RefDS(rcp->errmsg);
+
+	return rcp->errmsg;
 }
 
 pcre *get_re(object x) {

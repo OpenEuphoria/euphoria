@@ -33,7 +33,7 @@ include std/text.e
 -- care of ensuring the are or'ed together correctly.
 --
 
-enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE
+enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_MESSAGE=95
 
 --****
 -- === Option Constants
@@ -165,6 +165,29 @@ public function new(sequence pattern, object options=DEFAULT)
 	if sequence(options) then options = or_all(options) end if
 
 	return machine_func(M_PCRE_COMPILE, { pattern, options })
+end function
+
+--**
+-- If ##[[:new]]()## returns an atom, this function will return a text error message
+-- as to the reason.
+--
+-- Parameters:
+--   # ##re##: Regular expression to get the error message from
+--
+-- Returns:
+--   An atom (0) when no error message exists, otherwise a sequence describing the error.
+--
+-- Example 1:
+-- <eucode>
+-- object r = regex:new("[A-Z[a-z]*")
+-- if atom(r) then
+--   printf(1, "Regex failed to compile: %s\n", { regex:error_message(r) })
+-- end if
+-- </eucode>
+--
+
+public function error_message(object re)
+	return machine_func(M_PCRE_ERROR_MESSAGE, { re })
 end function
 
 --****
