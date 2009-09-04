@@ -2638,7 +2638,7 @@ until x<=0
 </eucode>
 
 <eucode>
-loop entry do
+loop with entry do
     a = a * 2
   entry
     x = x - 1
