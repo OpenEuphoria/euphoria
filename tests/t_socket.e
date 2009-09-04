@@ -14,8 +14,10 @@ ifdef UNIX then
 		-- TODO: these two values are specific to linux!
 		SIGPIPE = 13,
 		SIG_IGN = 1,
+		setsid_ = define_c_func(open_dll(""), "setsid", {}, C_INT),
 		$
 	_ = c_func(signal_, {SIGPIPE,SIG_IGN})
+	_ = c_func(setsid_, {})
 end ifdef
 
 test_equal("service_by_name echo", { "echo", "tcp", 7 }, service_by_name("echo", "tcp"))
