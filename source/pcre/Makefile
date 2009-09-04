@@ -15,8 +15,8 @@ $(BUILDDIR)/pcre :
 	-mkdir $(BUILDDIR)/pcre
 
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,%.c,$(PCRE_OBJECTS))
-	$(CC) $(CFLAGS) -c $(patsubst $(BUILDDIR)/pcre/%,%,$*).c -o $*.o
-	
+	$(PCRE_CC) $(CFLAGS) -c $(patsubst $(BUILDDIR)/pcre/%,%,$*).c -o $*.o
+
 .PHONY: clean distclean
 
 distclean : clean

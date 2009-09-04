@@ -48,6 +48,8 @@ ifndef CONFIG
 CONFIG = Makefile.eu
 endif
 
+PCRE_CC=$(CC)
+
 include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
 include $(TRUNKDIR)/source/version.mak
@@ -111,6 +113,7 @@ ifeq "$(EMINGW)" "1"
 	else
 		MEM_FLAGS=-DESIMPLE_MALLOC
 	endif
+	PCRE_CC=gcc
 else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
@@ -512,5 +515,5 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
-	$(MAKE) -C pcre all EOSTYPE="$(EOSTYPE)" CONFIG=../$(CONFIG)
+	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" CONFIG=../$(CONFIG)
 endif
