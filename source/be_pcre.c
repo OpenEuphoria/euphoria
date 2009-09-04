@@ -27,13 +27,24 @@ struct pcre_cleanup {
 typedef struct pcre_cleanup *pcre_cleanup_ptr;
 
 void pcre_deref(object re) {
-	pcre_cleanup_ptr rcp = SEQ_PTR(re)->cleanup;
-	if (rcp->re) {
-		(*pcre_free)(rcp->re);
-		rcp->re = 0;
-	}
-	if (rcp->errmsg) {
-		EFree(rcp->errmsg);
+	pcre_cleanup_ptr rcp;
+
+	if (IS_ATOM_DBL(re)) {
+		rcp = DBL_PTR(re)->cleanup;
+		if (rcp != 0) {
+			if (rcp->errmsg) {
+				EFree(rcp->errmsg);
+				rcp->errmsg = 0;
+			}
+		}
+	} else if (IS_SEQUENCE(re)) { 
+		rcp = SEQ_PTR(re)->cleanup;
+		if (rcp->re) {
+			(*pcre_free)(rcp->re);
+			rcp->re = 0;
+		}
+	} else {
+		RTFatal("Object is being de-referenced as a regex variable but is not.");
 	}
 }
 
@@ -78,6 +89,9 @@ object compile_pcre(object x, object flags) {
 	object compiled_regex;
 
 	compiled_regex = compile(x, flags);
+
+	// Check to see if a sequence was returned. If so, the compile failed and the return
+	// value is actually an error message.
 	if (IS_SEQUENCE(compiled_regex)) {
 		x = NewDouble((double) 0);
 		rcp = EMalloc(sizeof(struct pcre_cleanup));
@@ -86,25 +100,22 @@ object compile_pcre(object x, object flags) {
 		rcp->errmsg = compiled_regex;
 		rcp->re = 0;
 		DBL_PTR(x)->cleanup = (cleanup_ptr) rcp;
-		return x;
-	}
-
-	rcp = SEQ_PTR(x)->cleanup;
-
-	if (rcp != 0) {
-		(*pcre_free)(rcp->re);
 	} else {
-		rcp = EMalloc(sizeof(struct pcre_cleanup));
-		rcp->cleanup.func.builtin = &pcre_deref;
-		rcp->cleanup.type = CLEAN_PCRE;
-		SEQ_PTR(x)->cleanup = (cleanup_ptr) rcp;
+		rcp = SEQ_PTR(x)->cleanup;
+
+		if (rcp != 0) {
+			(*pcre_free)(rcp->re);
+		} else {
+			rcp = EMalloc(sizeof(struct pcre_cleanup));
+			rcp->cleanup.func.builtin = &pcre_deref;
+			rcp->cleanup.type = CLEAN_PCRE;
+			SEQ_PTR(x)->cleanup = (cleanup_ptr) rcp;
+		}
+
+		rcp->re = compiled_regex;
+		rcp->errmsg = 0;
 	}
-
-	rcp->re = compiled_regex;
-	rcp->errmsg = 0;
-
-	RefDS(x);
-
+	
 	return x;
 }
 
