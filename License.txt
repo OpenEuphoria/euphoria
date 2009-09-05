@@ -1,6 +1,3 @@
-= Euphoria License =
-----
-{{{
 Copyright (c) 2009 by OpenEuphoria Group
 Copyright (c) 1993-2008 Rapid Deployment Software (RDS)
 
@@ -24,6 +21,3 @@ RDS requests, but does not require, that you:
 
 1. Acknowledge RDS and others who contribute to this software,
 2. Provide a link to www.RapidEuphoria.com, if possible, from your Web site.
-
-}}}
-----

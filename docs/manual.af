@@ -22,7 +22,11 @@
 ../docs/install.txt
 ../docs/what2do.txt
 #TODO: other release notes
-../License.txt
+:= Euphoria License =
+:----
+../License.txt <nowiki
+:----
+
 ../docs/credits.txt
 
 ########
