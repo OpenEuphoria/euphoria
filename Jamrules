@@ -129,7 +129,7 @@ rule EuWinMain
 
 actions EuWinMain1
 {
-    $(BUILD_EUC_CMD) $(EUCFLAGS) -o $(FINAL_OUTPUT) -builddir $(FINAL_BUILD_DIR) -lib $(FINAL_USER_LIBRARY) $(>)
+    $(BUILD_EUC_CMD) $(EUCFLAGS) -o $(FINAL_OUTPUT) -builddir $(FINAL_BUILD_DIR) -keep -lib $(FINAL_USER_LIBRARY) $(>)
 }
 
 rule EuMain
