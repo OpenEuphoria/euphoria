@@ -362,7 +362,7 @@ function translate( sequence filename, sequence fail_list )
 	integer status = system_exec(cmd, 0)
 
 	filename = filebase(filename)
-	integer log_where
+	integer log_where = 0
 	if status = 0 then
 		sequence exename = filename & dexe
 
