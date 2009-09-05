@@ -1134,7 +1134,7 @@ function unique_c_name(sequence name)
 	return name
 end function
 
-function is_file_newer(sequence f1, sequence f2)
+export function is_file_newer(sequence f1, sequence f2)
 	object d1 = file_timestamp(f1)
 	object d2 = file_timestamp(f2)
 

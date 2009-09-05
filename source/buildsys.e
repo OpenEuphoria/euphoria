@@ -6,6 +6,7 @@ elsedef
 	without type_check
 end ifdef
 
+include std/datetime.e
 include std/filesys.e
 include std/io.e
 include std/regex.e
@@ -50,6 +51,27 @@ function find_all_includes(sequence fname, sequence includes = {})
 	end for
 	
 	return includes
+end function
+
+export function quick_has_changed(sequence fname)
+	object d1 = file_timestamp(output_dir & filebase(fname) & ".bld")
+
+	if atom(d1) then
+		return 1
+	end if
+
+	sequence all_files = append(find_all_includes(fname), fname)
+	for i = 1 to length(all_files) do
+		object d2 = file_timestamp(all_files[i])
+		if atom(d2) then
+			return 1
+		end if
+		if datetime:diff(d1, d2) > 0 then
+			return 1
+		end if
+	end for
+
+	return 0
 end function
 
 --****
@@ -574,60 +596,80 @@ end procedure
 --**
 -- Build the translated code directly from this process
 
-procedure build_direct()
+export procedure build_direct(integer link_only=0, sequence the_file0="")
+	if length(the_file0) then
+		file0 = filebase(the_file0)
+	end if
 	sequence cmd, objs = "", settings = setup_build(), cwd = current_dir()
 	integer status
 
 	ensure_exename(settings[SETUP_EXE_EXT])
 
-	switch compiler_type do
-		case COMPILER_GCC then
-			if not silent then
-				ShowMsg(1, 176, {"GCC"})
-			end if
+	if not link_only then
+		switch compiler_type do
+			case COMPILER_GCC then
+				if not silent then
+					ShowMsg(1, 176, {"GCC"})
+				end if
 
-		case COMPILER_WATCOM then
-			write_objlink_file()
+			case COMPILER_WATCOM then
+				write_objlink_file()
 
-			if not silent then
-				ShowMsg(1, 176, {"Watcom"})
-			end if
-	end switch
+				if not silent then
+					ShowMsg(1, 176, {"Watcom"})
+				end if
+		end switch
+	end if
 
 	if sequence(output_dir) and length(output_dir) > 0 then
 		chdir(output_dir)
 	end if
 
-	for i = 1 to length(generated_files) do
-		if generated_files[i][$] = 'c' then
-			cmd = sprintf("%s %s %s", { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
-				generated_files[i] })
+	sequence link_files = {}
 
-			if not silent then
-				atom pdone = 100 * (i / length(generated_files))
-				if not verbose then
-					if outdated_files[i] = 0 and force_build = 0 then
-						ShowMsg(1, 325, { pdone, generated_files[i] })
-						continue
+	if not link_only then
+		for i = 1 to length(generated_files) do
+			if generated_files[i][$] = 'c' then
+				cmd = sprintf("%s %s %s", { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
+					generated_files[i] })
+
+				link_files = append(link_files, generated_files[i])
+
+				if not silent then
+					atom pdone = 100 * (i / length(generated_files))
+					if not verbose then
+						if outdated_files[i] = 0 and force_build = 0 then
+							ShowMsg(1, 325, { pdone, generated_files[i] })
+							continue
+						else
+							ShowMsg(1, 163, { pdone, generated_files[i] })
+						end if
 					else
-						ShowMsg(1, 163, { pdone, generated_files[i] })
+						ShowMsg(1, 163, { pdone, cmd })
 					end if
-				else
-					ShowMsg(1, 163, { pdone, cmd })
+						
 				end if
-					
-			end if
 
-			status = system_exec(cmd, 0)
-			if status != 0 then
-				ShowMsg(2, 164, { generated_files[i] })
-				ShowMsg(2, 165, { status, cmd })
-				abort(1)
+				status = system_exec(cmd, 0)
+				if status != 0 then
+					ShowMsg(2, 164, { generated_files[i] })
+					ShowMsg(2, 165, { status, cmd })
+					abort(1)
+				end if
+			elsif match(".o", generated_files[i]) then
+				objs &= " " & generated_files[i]
 			end if
-		elsif match(".o", generated_files[i]) then
-			objs &= " " & generated_files[i]
-		end if
-	end for
+		end for
+	else
+		object files = read_lines(file0 & ".bld")
+		for i = 1 to length(files) do
+			objs &= " " & filebase(files[i]) & settings[SETUP_OBJ_EXT]
+		end for
+	end if
+
+	if not link_only and length(link_files) then
+		write_lines(file0 & ".bld", link_files)
+	end if
 
 	switch compiler_type do
 		case COMPILER_WATCOM then
