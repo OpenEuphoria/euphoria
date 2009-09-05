@@ -855,7 +855,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 		if( len >= seq->postfill ){
 			new_len = EXTRA_EXPAND(nseq + len);
 			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 3)*4);
-			new_seq->base = ((object_ptr)new_seq) + 4;
+			new_seq->base = ((object_ptr)(new_seq+1)) - 1;
 			seq = new_seq;
 			seq->postfill = new_len - (len + nseq) - 1;
 
@@ -1428,7 +1428,7 @@ void udt_clean( object o, long rid ){
 
 	// Need to make sure that s is 8-byte aligned
 	s = (s1_ptr)( (int)&seq + ( 8 - ( ((int)&seq) & 7 ) ));
-	s->base = (long*)&(s->cleanup);
+	s->base = (((object_ptr)(s+1))-1);
 	s->ref = 2;
 	s->length = 1;
 	s->cleanup = 0;
