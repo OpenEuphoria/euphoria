@@ -364,7 +364,12 @@ public function matches(regex re, sequence haystack, integer from=1, object opti
 	if atom(match_data) then return ERROR_NOMATCH end if
 
 	for i = 1 to length(match_data) do
-		sequence tmp = haystack[match_data[i][1]..match_data[i][2]]
+		sequence tmp 
+		if match_data[i][1] = 0 then
+			tmp = ""
+		else
+			tmp = haystack[match_data[i][1]..match_data[i][2]]
+		end if
 		if str_offsets then
 			match_data[i] = { tmp, match_data[i][1], match_data[i][2] }
 		else

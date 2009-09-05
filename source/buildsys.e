@@ -7,6 +7,8 @@ elsedef
 end ifdef
 
 include std/filesys.e
+include std/io.e
+include std/regex.e
 include std/text.e
 
 include c_decl.e
@@ -16,6 +18,39 @@ include global.e
 include platform.e
 include reswords.e
 include msgtext.e
+
+constant 
+	re_include = regex:new(`^[ ]*(public)*[ \t]*include[ \t]+([A-Za-z0-9_/.]+)`),
+	inc_dirs = { "." } & include_paths(0)
+
+function find_file(sequence fname)
+	for i = 1 to length(inc_dirs) do
+		if file_exists(inc_dirs[i] & "/" & fname) then
+			return inc_dirs[i] & "/" & fname
+		end if
+	end for
+
+	return 0
+end function
+
+function find_all_includes(sequence fname, sequence includes = {})
+	sequence lines = read_lines(fname)
+
+	for i = 1 to length(lines) do
+		object m = regex:matches(re_include, lines[i])
+		if sequence(m) then
+			object full_fname = find_file(m[3])
+			if sequence(full_fname) then
+				if find(full_fname, includes) = 0 then
+					includes &= { full_fname }
+					includes = find_all_includes(full_fname, includes)
+				end if
+			end if
+		end if
+	end for
+	
+	return includes
+end function
 
 --****
 -- = buildsys.e
@@ -93,6 +128,11 @@ export sequence cflags = ""
 -- Optional flags to pass to the linker
 
 export sequence lflags = ""
+
+--**
+-- Force the build of even up-to-date source files
+
+export integer force_build = 0
 
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
 	SETUP_LFLAGS_BEGIN
@@ -566,7 +606,12 @@ procedure build_direct()
 			if not silent then
 				atom pdone = 100 * (i / length(generated_files))
 				if not verbose then
-					ShowMsg(1, 163, { pdone, generated_files[i] })
+					if outdated_files[i] = 0 and force_build = 0 then
+						ShowMsg(1, 325, { pdone, generated_files[i] })
+						continue
+					else
+						ShowMsg(1, 163, { pdone, generated_files[i] })
+					end if
 				else
 					ShowMsg(1, 163, { pdone, cmd })
 				end if

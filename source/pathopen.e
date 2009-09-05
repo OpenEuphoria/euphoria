@@ -557,7 +557,6 @@ export function Include_paths(integer add_converted)
 		return include_Paths
 	end if
 
-
 	include_Paths = append(config_inc_paths, current_dir())
 	num_var = find("EUINC", cache_vars)
 	inc_path = getenv("EUINC")
@@ -567,6 +566,10 @@ export function Include_paths(integer add_converted)
 	status = check_cache("EUINC", inc_path)
 	if length(inc_path) then
 		inc_path = append(inc_path, PATH_SEPARATOR)
+	end if
+	object eudir_path = getenv("EUDIR")
+	if sequence(eudir_path) then
+		include_Paths = append(include_Paths, sprintf("%s/include", { eudir_path }))
 	end if
 
 	if status then

@@ -72,6 +72,7 @@ sequence trans_opt_def = {
 	{ "cmakefile",     0, GetMsgText(194,0), { NO_CASE } },
 	{ "emake",         0, GetMsgText(195,0), { NO_CASE } },
 	{ "nobuild",       0, GetMsgText(196,0), { NO_CASE } },
+	{ "force-build",   0, GetMsgText(326,0), { NO_CASE } },
 	{ "builddir",      0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
 	{ "o",             0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
 }
@@ -212,6 +213,9 @@ export procedure transoptions()
 				if find(output_dir[$], "/\\") = 0 then
 					output_dir &= '/'
 				end if
+
+			case "force-build" then
+				force_build = 1
 
 			case "o" then
 				exe_name = val

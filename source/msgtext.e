@@ -337,6 +337,8 @@ constant StdErrMsgs = {
 	{322, "[1] - private variable '[2]' of [3]() is assigned but never used"},
 	{323, "Flags to pass to compiler (overrides internal compiler flags)"},
 	{324, "Flags to pass to linker (overrides internal linker flags)"},
+	{325, "Skipping  [1:3.0]% [2] (up-to-date)"},
+	{326, "Force building, even if file is up-to-date"},
 	$
 }
 

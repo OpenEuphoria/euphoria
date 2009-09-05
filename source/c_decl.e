@@ -14,10 +14,11 @@ end ifdef
 
 include euphoria/info.e
 
-include std/text.e
+include std/datetime.e
+include std/filesys.e
 include std/math.e
 include std/os.e
-include std/filesys.e
+include std/text.e
 
 include buildsys.e
 include global.e
@@ -80,6 +81,11 @@ export boolean
 -- Sequence to contain files that are generated and should be delt with
 -- when creating a build file and/or removed when done compiling.
 export sequence generated_files = {}
+
+--**
+-- Sequence to contain a boolean flag for each generated file to indicate
+-- if the file is out of date or current.
+export sequence outdated_files = {}
 
 --**
 -- Flag to determine if the source files should be kept or deleted
@@ -1128,14 +1134,30 @@ function unique_c_name(sequence name)
 	return name
 end function
 
+function is_file_newer(sequence f1, sequence f2)
+	object d1 = file_timestamp(f1)
+	object d2 = file_timestamp(f2)
+
+	if atom(d1) or atom(d2) then return 1 end if
+
+	if datetime:diff(d1, d2) < 0 then
+		return 1
+	end if
+
+	return 0
+end function
+
 --**
 -- Add a file to the generated files list that will later be used for
 -- writing build files (emake, makefile, etc...)
-export procedure add_file(sequence filename)
+export procedure add_file(sequence filename, sequence eu_filename = "")
 	if match(".c", filename) then
 		filename = filename[1..$-2]
 	elsif find('.', filename) then
 		generated_files = append(generated_files, filename)
+		if build_system_type = BUILD_DIRECT then
+			outdated_files  = append(outdated_files, 0)
+		end if
 		return
 	end if
 
@@ -1146,9 +1168,13 @@ export procedure add_file(sequence filename)
 	else
 		obj_fname &= ".o"
 	end if
-
+	
 	generated_files = append(generated_files, src_fname)
 	generated_files = append(generated_files, obj_fname)
+	if build_system_type = BUILD_DIRECT then
+		outdated_files  = append(outdated_files, is_file_newer(eu_filename, output_dir & src_fname))
+		outdated_files  = append(outdated_files, 0)
+	end if
 end procedure
 
 --**
@@ -1313,7 +1339,7 @@ export procedure GenerateUserRoutines()
 			long_c_file = c_file
 			if LAST_PASS = TRUE then
 				c_file = unique_c_name(c_file)
-				add_file(c_file)
+				add_file(c_file, file_name[file_no])
 			end if
 
 			if file_no = 1 then

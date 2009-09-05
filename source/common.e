@@ -33,6 +33,7 @@ public sequence preprocessors = {}
 public integer force_preprocessor = 0
 public sequence LocalizeQual = {}
 public sequence LocalDB = "teksto"
+public sequence outdated = {}
 
 public integer AnyTimeProfile      -- time profile option was ever selected 
 public integer AnyStatementProfile -- statement profile option was ever selected 
