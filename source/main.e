@@ -32,7 +32,7 @@ include error.e
 include preproc.e
 include msgtext.e
 
-ifdef TRANSLATE then
+ifdef TRANSLATOR then
 	include buildsys.e
 end ifdef
 
@@ -187,7 +187,7 @@ procedure main()
 	-- sets up the internal namespace
 	eu_namespace()
 
-	ifdef TRANSLATE then
+	ifdef TRANSLATOR then
 		if build_system_type = BUILD_DIRECT then
 			if not quick_has_changed(file_name[$]) then
 				build_direct(1, file_name[$])
@@ -211,9 +211,9 @@ procedure main()
 		OutputIL()
 
 	elsif INTERPRET and not test_only then
-ifdef not STDDEBUG then
-		BackEnd(0) -- execute IL using Euphoria-coded back-end
-end ifdef
+		ifdef not STDDEBUG then
+			BackEnd(0) -- execute IL using Euphoria-coded back-end
+		end ifdef
 	end if
 
 	Cleanup(0) -- does warnings
