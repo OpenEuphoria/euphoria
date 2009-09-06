@@ -114,6 +114,7 @@
 ../include/std/net/common.e
 ../include/std/net/dns.e
 ../include/std/net/http.e
+../include/std/net/url.e
 
 ########
 := Low Level Routines

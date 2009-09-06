@@ -33,16 +33,18 @@ include error.e
 include msgtext.e
 
 constant OPTIONS = {
-{ "SHROUD_ONLY", 0, GetMsgText(303, 0), { NO_CASE, NO_PARAMETER }  },
-{ "QUIET", 0, GetMsgText(304, 0), { NO_CASE, NO_PARAMETER }  },
-{ "LIST", 0, GetMsgText(305, 0), { NO_CASE, NO_PARAMETER }  },
-{ "W32", 0, GetMsgText(306, 0), { NO_CASE, NO_PARAMETER }  },
-{ "ICON", 0, GetMsgText(307,0), { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "CON", 0, GetMsgText(308, 0), { NO_CASE, NO_PARAMETER }  },
-{ "FULL_DEBUG", 0, GetMsgText(309, 0), { NO_CASE, NO_PARAMETER }  },
-{ "OUT", 0, GetMsgText(310,0), { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "I", 0, GetMsgText(311, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
-{ "COPYRIGHT", 0, GetMsgText(312, 0), { NO_CASE, NO_PARAMETER }  }
+{ "shroud_only", 0, GetMsgText(303, 0), { NO_CASE, NO_PARAMETER }  },
+{ "quiet",       0, GetMsgText(304, 0), { NO_CASE, NO_PARAMETER }  },
+{ "list",        0, GetMsgText(305, 0), { NO_CASE, NO_PARAMETER }  },
+{ "w32",         0, GetMsgText(306, 0), { NO_CASE, NO_PARAMETER }  },
+{ "icon",        0, GetMsgText(307, 0), { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "con",         0, GetMsgText(308, 0), { NO_CASE, NO_PARAMETER }  },
+{ "full_debug",  0, GetMsgText(309, 0), { NO_CASE, NO_PARAMETER }  },
+{ "out",         0, GetMsgText(310, 0), { NO_CASE, HAS_PARAMETER, "file" }  },
+{ "i",           0, GetMsgText(311, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
+{ "copyright",   0, GetMsgText(312, 0), { NO_CASE, NO_PARAMETER }  },
+{ "c",           0, GetMsgText(280, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
+$
 }
 
 
@@ -454,6 +456,10 @@ procedure OutputIL()
 				backend_name = "eub"
 				-- try to get the installed backend, if it exists:
 				be = open( "/usr/bin/eub", "r" )
+				if be = -1 then
+					-- try an obvious other path
+					be = open( "/usr/local/bin/eub", "r" )
+				end if
 			end ifdef
 		end if
 		sequence ondisk_name = locate_file( backend_name, 

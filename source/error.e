@@ -169,7 +169,11 @@ export procedure Cleanup(integer status)
 	ifdef WIN32 or UNIX then
 		show_error = 1
 	end ifdef
-
+	if src_file >= 0 then
+		close(src_file)
+		src_file = -1
+	end if
+	
 	w = ShowWarnings()
 	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
 		if not batch_job then

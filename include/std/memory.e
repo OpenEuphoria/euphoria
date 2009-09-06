@@ -73,14 +73,14 @@ end type
 -- Allocate a contiguous block of data memory.
 --
 -- Parameters:
---              # ##n## : a positive integer, the size of the requested block.
---              # ##cleanup## : an integer, if non-zero, then the returned pointer will be
---                automatically freed when its reference count drops to zero, or
---                when passed as a parameter to [[:delete]].
+--   # ##n## : a positive integer, the size of the requested block.
+--   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
+--     automatically freed when its reference count drops to zero, or
+--     when passed as a parameter to [[:delete]].
 --
 -- Return:
---              An **atom**, the address of the allocated memory or 0 if the memory
--- can't be allocated.
+--   An **atom**, the address of the allocated memory or 0 if the memory
+--   can't be allocated.
 --
 -- Comments:
 -- Since ##allocate_string##() allocates memory, you are responsible to
@@ -124,10 +124,11 @@ public function allocate(positive_int n, integer cleanup = 0)
 	end if
 end function
 
-
-public function allocate_data(positive_int n, integer cleanup = 0)
+--**
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
+
+public function allocate_data(positive_int n, integer cleanup = 0)
 	if cleanup then
 		return delete_routine( machine_func(M_ALLOC, n ), FREE_RID )
 	else
@@ -163,7 +164,6 @@ end function
 --     [[:allocate]], [[:free_code]]
 
 public procedure free(object addr)
-
 	if number_array (addr) then
 		if ascii_string(addr) then
 			crash("free(\"%s\") is not a valid address", {addr})
@@ -201,20 +201,6 @@ public procedure free(object addr)
 	end if
 end procedure
 FREE_RID = routine_id("free")
-
---**
--- Free a NULL terminated pointers array.
---
--- Parameters:
---   # ##pointers_array## : memory address of where the NULL terminated array exists at.
---
--- Comments:
---   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
---   Do not call ##free_pointer_array##() for a pointer that was allocated to be cleaned
---   up automatically.  Instead, use [[:delete]].
---
--- See Also:
---   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
 
 
 --****

@@ -226,4 +226,6 @@ struct EuViewPort
 	int display_size;   	/* number of slots for variables */
 };
 
+int memcopy( void *dest, size_t avail, void *src, size_t len);
+
 #endif // H_GLOBAL

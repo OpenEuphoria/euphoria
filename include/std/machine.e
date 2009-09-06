@@ -61,6 +61,20 @@ public function allocate_pointer_array(sequence pointers, integer cleanup = 0)
     return pList
 end function
 
+--**
+-- Free a NULL terminated pointers array.
+--
+-- Parameters:
+--   # ##pointers_array## : memory address of where the NULL terminated array exists at.
+--
+-- Comments:
+--   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
+--   Do not call ##free_pointer_array##() for a pointer that was allocated to be cleaned
+--   up automatically.  Instead, use [[:delete]].
+--
+-- See Also:
+--   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
+
 public procedure free_pointer_array(atom pointers_array)
 	atom saved = pointers_array,
 		ptr = peek4u(pointers_array)
@@ -365,13 +379,13 @@ ifdef WIN32 then
 
 	memDLL_id = open_dll( "kernel32.dll" )
 	kernel_dll = memDLL_id
-	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_UINT, C_UINT, C_UINT }, C_POINTER )
-	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_UINT, C_INT, C_POINTER }, C_INT )
-	-- VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_UINT }, C_UINT )
-	-- VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_UINT }, C_UINT )
-	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_UINT )
+	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_SIZE_T, C_DWORD, C_DWORD }, C_POINTER )
+	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_SIZE_T, C_DWORD, C_POINTER }, C_BOOL )
+	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_SIZE_T, C_DWORD }, C_BOOL )
+	-- VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_SIZE_T }, C_BOOL )
+	-- VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_SIZE_T }, C_BOOL )
+	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_DWORD )
 	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
-	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_UINT, C_INT }, C_UINT )
 	if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 		and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 		then
@@ -407,15 +421,17 @@ ifdef WIN32 then
 	end function
 end ifdef
 
---***
+--****
 -- == Types supporting Memory
 
---** protection constants type
+--**
+-- protection constants type
 public type valid_memory_protection_constant( integer x )
 	return 0 != find( x, MEMORY_PROTECTION )
 end type
 
---** page aligned address type
+--**
+-- page aligned address type
 export type page_aligned_address( atom a )
 	return remainder( a, 4096 ) = 0
 end type

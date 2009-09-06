@@ -118,22 +118,21 @@ end procedure
 
 --**
 -- Expand any config file options on the command line adding
--- their content to Argv
+-- their content to the supplied arguments.
 
-export procedure expand_config_options()
+export function expand_config_options(sequence args)
 	integer idx = 1
-	while idx < length(Argv) do
-		if equal(upper(Argv[idx]), "-C") then
-			idx += 1
-			sequence new_args = load_euphoria_config(Argv[idx])
-			Argv = Argv[1..idx] & new_args & Argv[idx + 1..$]
+	while idx < length(args) do
+		if equal(upper(args[idx]), "-C") then
+			sequence new_args = load_euphoria_config(args[idx+1])
+			args = args[1..idx-1] & new_args & args[idx + 2..$]
 		end if
 
 		idx += 1
 	end while
 
-	Argc = length(Argv)
-end procedure
+	return args
+end function
 
 --**
 -- Process options that are common to the Interpreter and Translator.

@@ -1,4 +1,6 @@
+include std/console.e
 include std/net/http.e
+
 
 procedure main(sequence args = command_line())
 	if length(args) = 2 then
@@ -9,13 +11,14 @@ procedure main(sequence args = command_line())
 	sequence url = args[3]
 	object data = get_url(url)
 
-	if length(data) = 0 then
-		puts(1, "Could not download " & url & "\n")
+	if atom(data) or length(data) = 0 then
+		printf(1, "Could not download %s\n", { url })
 		abort(2)
 	end if
 
-	puts(1, data[1] & "\n\n")
-	puts(1, data[2] & "\n")
+	printf(1, "%s\n\n%s\n", data)
+
+	maybe_any_key()
 end procedure
 
 main()

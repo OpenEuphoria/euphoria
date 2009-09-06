@@ -3728,10 +3728,6 @@ void do_exec(int *start_pc)
 			case L_RETURNT: /* end of execution - falling off the end */
 			deprintf("case L_RETURNT:");
 				tpc = pc;  /* we need this to be different from CALL_BACK_RETURN */
-				sym = TopLevelSub->u.subp.block;
-				while( sym = sym->next_in_block ){
-						DeRef(sym->obj);
-				}
 				Cleanup(0);
 				return;
 				

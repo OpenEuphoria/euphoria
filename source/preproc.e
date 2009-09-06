@@ -1,8 +1,8 @@
 -- (c) Copyright - See License.txt
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
 
 include std/filesys.e
@@ -94,7 +94,7 @@ public function maybe_preprocess(sequence fname)
 		return fname
 	end if
 		
-	sequence post_fname = filebase(fname) & "_post." & fileext(fname)
+	sequence post_fname = filebase(fname) & ".pp." & fileext(fname)
 	if length(dirname(fname)) > 0 then
 		post_fname = dirname(fname) & SLASH & post_fname
 	end if

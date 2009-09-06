@@ -53,6 +53,8 @@ sequence trans_opt_def = {
 	{ "verbose",	   0, GetMsgText(319,0), { NO_CASE } },
 	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
 	{ "gcc",           0, GetMsgText(180,0), { NO_CASE } },
+	{ "cflags", 	   0, GetMsgText(323,0), { NO_CASE, HAS_PARAMETER, "flags" } },
+	{ "lflags", 	   0, GetMsgText(324,0), { NO_CASE, HAS_PARAMETER, "flags" } },
 	{ "com",           0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
 	{ "con",           0, GetMsgText(182,0), { NO_CASE } },
 	{ "dll",           0, GetMsgText(183,0), { NO_CASE } },
@@ -87,9 +89,9 @@ end procedure
 
 export procedure transoptions()
 	Argv &= GetDefaultArgs()
-	Argc = length(Argv)
 
-	expand_config_options()
+	Argv = expand_config_options(Argv)
+	Argc = length(Argv)
 	m:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
 
 	handle_common_options(opts)
@@ -107,6 +109,12 @@ export procedure transoptions()
 			
 			case "verbose" then
 				verbose = TRUE
+			
+			case "cflags" then
+				cflags = val
+			
+			case "lflags" then
+				lflags = val
 
 			case "wat" then
 				compiler_type = COMPILER_WATCOM

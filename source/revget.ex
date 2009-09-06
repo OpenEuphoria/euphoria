@@ -7,10 +7,10 @@ include std/map.e as m
 
 sequence out_file = "be_rev.c"
 sequence dat_file = "be_rev.dat"
-object svnentries
+sequence root_project_path = "../"
 
 sequence opt_def = {
-	{ "svnentries", 0, "Subversion directory", { HAS_PARAMETER, "dir" } },
+	{ "root", 0, "Root SVN checkout path", { HAS_PARAMETER, "path" } },
 	{ "output", 0, "Output file", { HAS_PARAMETER, "filename" } }
 }
 
@@ -116,8 +116,7 @@ function rev_with_svnversion()
 		return 0
 	end if
 
-	-- run svnversion with .. argument to include support directories
-	system("svnversion ..>rev.tmp", 0)
+	system("svnversion " & root_project_path & " > rev.tmp", 0)
 
 	x = open("rev.tmp", "r")
 	if x > -1 then
@@ -153,13 +152,9 @@ procedure rev_1_4()
 	sequence g
 	integer n
 
-	if atom(svnentries)then
-		h = open("../.svn/entries", "r")
-		if h = -1 then
-			h = open("../svn~1/entries", "r")
-		end if
-	else
-		h = open(svnentries, "r")
+	h = open(root_project_path & ".svn/entries", "r")
+	if h = -1 then
+		h = open(root_project_path & "svn~1/entries", "r")
 	end if
 
 	if h = -1 then
@@ -222,13 +217,9 @@ procedure rev_1_3()
 	sequence f
 	object x
 
-	if atom(svnentries) then
-		h = open("../.svn/entries", "r")
-		if h = -1 then
-			h = open("../svn~1/entries", "r")
-		end if
-	else
-		h = open(svnentries, "r")
+	h = open(root_project_path & ".svn/entries", "r")
+	if h = -1 then
+		h = open(root_project_path & "svn~1/entries", "r")
 	end if
 
 	if h = -1 then
@@ -288,9 +279,8 @@ if match("revget.ex", cmds[2]) then
 		dat_file = base_dir & "/" & dat_file
 	end if
 
-	svnentries = m:get(opts, "svnentries", 0)
+	root_project_path = m:get(opts, "root", "../")
 
 	interactive = 1
 	write_be_rev()
 end if
-

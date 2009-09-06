@@ -160,8 +160,8 @@ end function
 -- Display a prompt to the user and wait for any key.
 --
 -- Parameters:
--- 		# ##prompt## : Prompt to display, defaults to "Press Any Key to continue..."
---      # ##con## : Either 1 (stdout), or 2 (stderr). Defaults to 1.
+--   # ##prompt## : Prompt to display, defaults to "Press Any Key to continue..."
+--   # ##con## : Either 1 (stdout), or 2 (stderr). Defaults to 1.
 --
 -- Comments:
 -- This wraps [[:wait_key]] by giving a clue that the user should press a key, and
@@ -180,39 +180,76 @@ end function
 -- See Also:
 -- 	[[:wait_key]]
 
-public procedure any_key(object prompt="Press Any Key to continue...", integer con = 1)
-	object ignore
-
+public procedure any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
 	if not find(con, {1,2}) then
 		con = 1
 	end if
 	puts(con, prompt)
-	ignore = wait_key()
+	wait_key()
 	puts(con, "\n")
 end procedure
 
+ifdef WIN32_GUI then
+
 --**
 -- Description:
--- 		Prompts the user to enter a number, and returns only validated input.
---
+--   Display a prompt to the user and wait for any key **only** if the user is
+--   running under a GUI environment.
+--   
 -- Parameters:
---		# ##st## : is a string of text that will be displayed on the screen.
---		# ##s## : is a sequence of two values {lower, upper} which determine the range of values
--- that the user may enter. s can be empty, {}, if there are no restrictions.
---
--- Returns:
--- 		An **atom**, in the assigned range which the user typed in.
---
--- Errors:
--- 		If [[:puts]]() cannot display ##st## on standard output, or if the first or second element
---      of ##s## is a sequence, a runtime error will be raised.
---
---		If user tries cancelling the prompt by hitting Ctrl-Z, the program will abort as well,
--- issuing a type check error.
+--   # ##prompt## : Prompt to display, defaults to "Press Any Key to continue..."
+--   # ##con## : Either 1 (stdout), or 2 (stderr). Defaults to 1.
 --
 -- Comments:
--- 		As long as the user enters a number that is less than lower or greater
--- than upper, the user will be prompted again.
+-- This wraps [[:wait_key]] by giving a clue that the user should press a key, and
+-- perhaps do some other things as well.
+--
+-- Example 1:
+-- <eucode>
+-- any_key() -- "Press Any Key to continue..."
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- any_key("Press Any Key to quit")
+-- </eucode>
+--
+-- See Also:
+-- 	[[:wait_key]]
+
+    public procedure maybe_any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
+        any_key(prompt, con)
+    end procedure
+
+elsedef
+
+	public procedure maybe_any_key(sequence prompt="", integer con=1)
+    end procedure
+
+end ifdef
+
+--**
+-- Description:
+--   Prompts the user to enter a number, and returns only validated input.
+--
+-- Parameters:
+--   # ##st## : is a string of text that will be displayed on the screen.
+--   # ##s## : is a sequence of two values {lower, upper} which determine the range of values
+--  		   that the user may enter. s can be empty, {}, if there are no restrictions.
+--
+-- Returns:
+--   An **atom**, in the assigned range which the user typed in.
+--
+-- Errors:
+--   If [[:puts]]() cannot display ##st## on standard output, or if the first or second element
+--   of ##s## is a sequence, a runtime error will be raised.
+--
+--   If user tries cancelling the prompt by hitting Ctrl-Z, the program will abort as well,
+--   issuing a type check error.
+--
+-- Comments:
+--   As long as the user enters a number that is less than lower or greater
+--   than upper, the user will be prompted again.
 --
 --   If this routine is too simple for your needs, feel free to copy it and make your
 --   own more specialized version.
@@ -230,6 +267,7 @@ end procedure
 -- See Also:
 -- 	[[:puts]], [[:prompt_string]]
 --
+
 public function prompt_number(sequence prompt, sequence range)
 	object answer
 
@@ -568,12 +606,8 @@ end procedure
 
 public function save_text_image(text_point top_left, text_point bottom_right)
 	sequence image, row_chars, vc
-	integer screen_width, image_width
 
-	vc = video_config()
-	screen_width = vc[VC_COLUMNS] * BYTES_PER_CHAR
 	image = {}
-	image_width = (bottom_right[2] - top_left[2] + 1) * BYTES_PER_CHAR
 	for row = top_left[1] to bottom_right[1] do
 		row_chars = {}
 		for col = top_left[2] to bottom_right[2] do

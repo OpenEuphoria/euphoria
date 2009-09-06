@@ -281,7 +281,7 @@ end procedure
 -- Return the status of a task.
 --
 -- Parameters:
--- 		# ##yask_id## : an atom, the id of the task being queried.
+-- 		# ##task_id## : an atom, the id of the task being queried.
 --
 -- Returns:
 -- An **integer**,

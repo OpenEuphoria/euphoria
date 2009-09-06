@@ -1,16 +1,13 @@
 --****
 -- == HTTP
 --
--- Based on EuNet project, version 1.3.2, at SourceForge.
--- http://www.sourceforge.net/projects/eunet. Many modifications
--- for POST support by Kathy Smith <katsmeow@centurytel.net>
---
 -- <<LEVELTOC depth=2>>
 
 include std/socket.e as sock
 include std/net/common.e
 include std/net/dns.e
 include std/text.e
+include std/get.e as val
 include euphoria/info.e
 
 --****
@@ -76,84 +73,12 @@ function eunet_parse(sequence s, object c)
 			flag = 1
 		end if
 	end for
+
 	if flag = 1 then
 		parsed = append(parsed,s[spt..slen])
 	end if
 
 	return parsed
-end function
-
-
---****
--- === URL encoding
---
-
--- TODO: This is causing a creole parsing problem
--- HTML form data is usually URL-encoded to package it into a GET or POST submission.
--- In a nutshell, here's how you URL-encode the name-value pairs of the form data:
--- # Convert all "unsafe" characters in the names and values to "%xx", where "xx" is the ascii
---	 value of the character, in hex. "Unsafe" characters include =, &, %, +, non-printable
---	 characters, and any others you want to encode-- there's no danger in encoding too many
---	 characters. For simplicity, you might encode all non-alphanumeric characters.
---	 A big nono is \n and \r chars in POST data.
--- # Change all spaces to pluses.
--- # String the names and values together with = and &, like
---	 name1=value1&name2=value2&name3=value3
--- # This string is your message body for POST submissions, or the query string for GET submissions.
---
--- For example, if a form has a field called "name" that's set to "Lucy", and a field called "neighbors"
--- that's set to "Fred & Ethel", the URL-encoded form data would be:
---
---	  name=Lucy&neighbors=Fred+%26+Ethel <<== note no \n or \r
---
--- with a length of 34.
-
-constant
-	alphanum = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890",
-	hexnums = "0123456789ABCDEF"
-
---**
--- Converts all non-alphanumeric characters in a string to their
--- percent-sign hexadecimal representation, or plus sign for
--- spaces.
---
--- Parameters:
---	 # ##what## : the string to encode
---	 # ##spacecode## : what to insert in place of a space
---
--- Returns:
---	 A **sequence**, the encoded string.
---
--- Comments:
---	 ##spacecode## defaults to ##+## as it is more correct, however, some sites
---	 want ##%20## as the space encoding.
---
--- Example 1:
--- <eucode>
--- puts(1,urlencode("Fred & Ethel"))
--- -- Prints "Fred+%26+Ethel"
--- </eucode>
-
-public function urlencode(sequence what, sequence spacecode="+")
-	sequence encoded = ""
-	object junk = "", junk1, junk2
-
-	for idx = 1 to length(what) do
-		if find(what[idx],alphanum) then
-			encoded &= what[idx]
-
-		elsif equal(what[idx],' ') then
-			encoded &= spacecode
-
-		elsif 1 then
-			junk = what[idx]
-			junk1 = floor(junk / 16)
-			junk2 = floor(junk - (junk1 * 16))
-			encoded &= "%" & hexnums[junk1+1] & hexnums[junk2+1]
-		end if
-	end for
-
-	return encoded
 end function
 
 --****
@@ -237,7 +162,7 @@ public procedure set_sendheader_default()
 		{"POST"," ",""}, -- [3] = the filename you want
 		{"Host",": ",""}, -- the domain. You might think this was obvious, but for vhosting sites it's necessary.
 		{"Referer",": ",""}, -- i know it's misspelled, but that's official! , the site that sent you to this one
-		{"User-Agent",": ", whoami & " [en]"}, --</joke> pick your own :-)
+		{"User-Agent",": ", whoami & " [en]"},
 		{"Accept",": ","*/*"}, -- what your browser or apps knows how to process
 		{"Accept-Charset",": ","ISO-8859-1,utf-8;q=0.7,*;q=0.7"},
 		{"Accept-Encoding",": ","identity"}, -- "identity" = no decoder in eunet so far
@@ -256,18 +181,18 @@ public procedure set_sendheader_default()
 	}
 
 
-  -- the following not only puts the default header lines,
-  -- it sorts the already-set lines to match the defaultsendheader order
+	-- the following not only puts the default header lines,
+	-- it sorts the already-set lines to match the defaultsendheader order
 	for defaultndx = 1 to length(defaultsendheader) do -- loop through defaultsendheader
-	   temps = get_sendheader(defaultsendheader[defaultndx][1]) -- see if it was already set to something
-	   if equal(temps[1],"") -- was it defined?
-		 then tempnewheader &= {defaultsendheader[defaultndx]} -- so set the default line
-		 else tempnewheader &= {temps} -- use the pre-definition
+		temps = get_sendheader(defaultsendheader[defaultndx][1]) -- see if it was already set to something
+		if equal(temps[1],"") then
+			tempnewheader &= {defaultsendheader[defaultndx]} -- so set the default line
+		else
+			tempnewheader &= {temps} -- use the pre-definition
 	   end if
 	end for
 
 	sendheader = tempnewheader
-
 end procedure
 
 --**
@@ -484,9 +409,9 @@ end function
 --	 like ##{sequence header, sequence data}##.
 
 public function get_http(sequence inet_addr, sequence hostname, sequence file)
-	object junk
+	object junk, junk2
 	sock:socket sock
-	atom success, last_data_len
+	atom success, last_data_len, gotheader, contentlen
 	sequence header, data, hline
 
 	-- Notes for future additions:
@@ -524,40 +449,67 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 		set_sendheader("Referer",hostname)
 	end if
 
-	data = {}
 	last_data_len = 0
-
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
 	success = sock:connect(sock,inet_addr)
+ 	
 	if success = 1 then
 		-- eunet_format_sendheader sets up the header to sent,
 		-- putting the POST data at the end,
-		-- filling in the CONTENT_LENGTH,
+		-- filling in the CONTENT-LENGTH,
 		-- and avoiding sending empty fields for any field
-        success = sock:send(sock,eunet_format_sendheader(),0)
-
+		success = sock:send(sock,eunet_format_sendheader(),0)
+ 
 		-- } end version 1.3.0 mod
 		data = ""
-		while sequence(junk) with entry do
-			data = data & junk
-		entry
-			junk = sock:receive(sock, 0)
-		end while
-	end if
+		header= {}
+		contentlen = 0
+		gotheader = 0
+				if success 
+					then		
+				   while sequence(junk) with entry do
+					data = data & junk
+					if gotheader and equal(contentlen,length(data)) then 
+					   exit  -- we got all the server said it had
+					end if
+					if not gotheader and match({13,10,13,10},data) then -- we got the header in there
+									  header = data[1..match({13,10,13,10},data)-1] -- split off the header
+							  data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
+							  parse_recvheader(header) -- sets up recvheader -- global var
+							  junk = get_recvheader("Content-Length")
+							  if not equal(junk,-1) then
+								  junk = val:value(junk[2])
+								  contentlen = junk[2]
+								  if equal(contentlen,0) then exit end if -- there's no more
+								  if equal(contentlen,length(data)) then exit end if -- there's no more
+						   end if       
+							  gotheader = 1 -- we got what we came for here
+					end if
+				entry
+
+ 				        junk2 = sock:select(sock) -- status check
+ 						-- Do we have readable data?
+ 				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) then
+							junk = sock:receive(sock, 0) -- then recieve it
+						else
+							junk = ""      -- add nothing to data
+							ifdef not EUC_DLL then
+								task_yield()
+							end ifdef
+					end if
+				end while
+			else
+				header = -1
+				data = "could not send or recieve using socket"
+		end if -- if success -- sock:send
+ 		else 
+ 		      header = -1
+			  data = "could not connect to socket"
+	end if -- if success = 1 then -- sock:connect
 	if sock:close(sock) then end if
 
-	success = match({13,10,13,10},data)
-	if success > 0 then
-		header = data[1..success-1]
-		parse_recvheader(header)
-		data = data[success+4..length(data)]
-	else
-		header = data
-		data = {}
-	end if
-
-    -- clear any POSTDATA
-    set_sendheader("POSTDATA", "")
+	-- clear any POSTDATA
+		set_sendheader("POSTDATA", "")
 	set_sendheader("POST", "")
 	set_sendheader("GET", "")
 	set_sendheader("Content-Type", "")
@@ -676,27 +628,35 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		--	  success = sock:send(socket,request,0)
 		success = sock:send(socket,eunet_format_sendheader(),0)
 		-- } end version 1.3.0 modification
-		while success > 0 do
-			data = data & sock:receive(socket,0)
-			success = length(data)-last_data_len
-			last_data_len = length(data)
-		end while
+		if success > 0 then
+					junk = sock:receive(sock, 0)
+			while sequence(junk) do
+				data = data & junk
+				if gotheader and equal(contentlen,length(data)) then 
+				   exit  -- we got all the server said it had
+				end if
+				if not gotheader and match({13,10,13,10},data) then -- we got the header in there
+								  header = data[1..match({13,10,13,10},data)-1] -- split off the header
+						  data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
+						  parse_recvheader(header) -- sets up recvheader -- global var
+						  junk = get_recvheader("Content-Length")
+						  if not equal(junk,-1) then
+							  junk = val:value(junk[2])
+							  contentlen = junk[2]
+							  if equal(contentlen,0) then exit end if -- there's no more
+							  if equal(contentlen,length(data)) then exit end if -- there's no more
+					   end if       
+						  gotheader = 1 -- we got what we came for here
+				end if
+				junk = sock:receive(sock, 0)
+			end while
+		 end if
 	end if
 	if close_socket(socket) then end if
 
-	success = match({13,10,13,10},data)
-	if success > 0 then
-		header = data[1..success-1]
-		parse_recvheader(header)
-		body = data[success+4..length(data)]
-	else
-		header = data
-		body = {}
-		data = {}
-	end if
 
 	header2 = header
-	cpos = match("SET-COOKIE",upper(header2))
+	cpos = match("SET-COOKIE",upper(header2)) -- this should be using get_recvheader() etc
 	while cpos > 0 do
 		header2 = header2[cpos+10..length(header2)]
 		data = header2
@@ -788,8 +748,8 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		cpos = match("SET-COOKIE",upper(header2))
 	end while
 
-    -- clear any POSTDATA
-    set_sendheader("POSTDATA", "")
+	-- clear any POSTDATA
+	set_sendheader("POSTDATA", "")
 	set_sendheader("POST", "")
 	set_sendheader("GET", "")
 	set_sendheader("Content-Type", "")
@@ -852,3 +812,4 @@ end function
 
 -- set the lines in the "proper" order for sending, not that the defaults will get sent.
 set_sendheader_default()
+

@@ -34,6 +34,7 @@ extern HANDLE console_output;
 
 #include "alldefs.h"
 #include "be_runtime.h"
+#include "global.h"
 void GetViewPort(struct EuViewPort *vp);
 
 
@@ -460,17 +461,6 @@ static void ShowTraceLine(long line_num)
 	}
 }
 
-static void gettextimage(char *buff, long size)
-/* save a text screen into buff */
-{
-	memcpy(buff, (char *)screen_lin_addr, size);
-}
-
-static void puttextimage(char *buff, long size)
-/* restore a text screen */
-{
-	memcpy((char *)screen_lin_addr, buff, size);
-}
 #endif //not BACKEND
 
 void MainScreen()

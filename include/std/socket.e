@@ -14,7 +14,8 @@ include std/net/common.e
 
 enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
-	M_SOCK_ACCEPT, M_SOCK_SETSOCKOPT, M_SOCK_GETSOCKOPT, M_SOCK_SELECT
+	M_SOCK_ACCEPT, M_SOCK_SETSOCKOPT, M_SOCK_GETSOCKOPT, M_SOCK_SELECT, M_SOCK_SENDTO, 
+    M_SOCK_RECVFROM
 
 --****
 -- === Socket Type Constants
@@ -42,27 +43,21 @@ ifdef WIN32 then
 		AF_APPLETALK=17,
 		--**
 		-- Bluetooth
-		AF_BTH=32
-
-	public constant
+		AF_BTH=32,
 		--**
 		-- Provides sequenced, reliable, two-way, connection-based byte streams.
 		-- An out-of-band data transmission mechanism may be supported.
 		SOCK_STREAM=1,
-
 		--**
 		-- Supports datagrams (connectionless, unreliable messages of a
 		-- fixed maximum length).
 		SOCK_DGRAM=2,
-
 		--**
 		-- Provides raw network protocol access.
 		SOCK_RAW=3,
-
 		--**
 		-- Provides a reliable datagram layer that does not guarantee ordering.
 		SOCK_RDM=4,
-
 		--**
 		-- Obsolete and should not be used in new programs
 		SOCK_SEQPACKET=5
@@ -350,7 +345,7 @@ integer delete_socket_rid = routine_id("delete_socket")
 --   * [[:SOCK_SEQPACKET]]
 --
 -- Returns:
---   An **atom**, -1 on failure, else a supposedly valid socket id.
+--   An **object**, -1 on failure, else a supposedly valid socket id.
 --
 -- Example 1:
 -- <eucode>
@@ -636,6 +631,53 @@ end function
 
 public function accept(socket sock)
 	return machine_func(M_SOCK_ACCEPT, { sock })
+end function
+
+--****
+-- === UDP only
+-- 
+
+--**
+-- Send a UDP packet to a given socket
+-- 
+-- Parameters:
+--   # ##sock##: the server socket
+--   # ##data##: the data to be sent
+--   # ##ip##: the ip where the data is to be sent to (ip:port) 
+--     is acceptable
+--   # ##port##: the port where the data is to be sent on (if not supplied with the ip)
+--   # ##flags## : flags (see [[:Send Flags]])
+--
+-- Returns:
+--   An ##integer## status code.
+--   
+-- See Also:
+--   [[:receive_from]]
+--   
+
+public function send_to(socket sock, sequence data, sequence address, integer port=-1, 
+    	atom flags=0)
+	object sock_data = parse_ip_address(address, port)
+
+    return machine_func(M_SOCK_SENDTO, { sock, data, flags, sock_data[1], sock_data[2] })
+end function
+
+--**
+-- Receive a UDP packet from a given socket
+--
+-- Parameters:
+--   # ##sock##: the server socket
+--   # ##flags## : flags (see [[:Send Flags]])
+--
+-- Returns:
+--   A ##sequence## containing { client_ip, client_port, data } or an ##atom## error code.
+--   
+-- See Also:
+--   [[:send_to]]
+--   
+
+public function receive_from(socket sock, atom flags=0)
+    return machine_func(M_SOCK_RECVFROM, { sock, flags })
 end function
 
 --****

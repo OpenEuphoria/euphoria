@@ -67,7 +67,8 @@ elsedef
 	YELLOW      = 14
 end ifdef
 
---** Add to color to get blinking text
+--** 
+-- Add to color to get blinking text
 public constant BLINKING = 16
 
 public constant BYTES_PER_CHAR = 2

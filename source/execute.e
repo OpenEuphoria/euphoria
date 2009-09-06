@@ -1240,7 +1240,7 @@ result = 0
 object result_val
 
 procedure exit_block( symtab_index block, integer except = 0 )
-	a = SymTab[block][S_NEXT_IN_BLOCK]
+	integer a = SymTab[block][S_NEXT_IN_BLOCK]
 	while a do
 		if a != except then
 			ifdef DEBUG then

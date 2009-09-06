@@ -1427,8 +1427,7 @@ void udt_clean( object o, long rid ){
 	int pre_ref;
 	int *save_tpc;
 	s = (s1_ptr)( (int)&seq + ( 8 - ( ((int)&seq) & 7 ) ));
-	s->base = (object_ptr)(s + 1);
-	s->base--;
+	s->base = (((object_ptr)(s+1))-1);
 	s->ref = 2;
 	s->length = 1;
 	s->cleanup = 0;
@@ -6272,15 +6271,31 @@ cleanup_ptr DeleteRoutine( int e_index ){
 	return cup;
 }
 
-cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev ){
-	cleanup_ptr new_cup;
-	new_cup = (cleanup_ptr)EMalloc( sizeof(struct cleanup) );
-	memcpy( new_cup, old, sizeof(struct cleanup) );
-	new_cup->next = prev;
-	return new_cup;
+int memcopy( void *dest, size_t avail, void *src, size_t len)
+{
+	// Only copies memory if both dest and source are valid addresses, and
+	// all of the source can be copied.
+	
+	if (dest == 0) return -1; // No destination supplied
+	if (src == 0) return -2; // No source supplied
+	if (len > avail) return -3; // Source is too large;
+	if ((char *)dest + len <= (char *)dest) return -4; // Writing outside of RAM
+	if ((char *)src + len <= (char *)src) return -5; // Reading outside of RAM
+	memcpy(dest, src, len);
+	return 0;
 }
 
-#ifdef ERUNTIME
-
-#endif
-
+cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev ){
+	cleanup_ptr new_cup;
+	int res;
+	
+	new_cup = (cleanup_ptr)EMalloc( sizeof(struct cleanup) );
+	res = memcopy( new_cup, sizeof(struct cleanup), old, sizeof(struct cleanup) );
+	if (res != 0) {
+		RTFatal("Internal error: ChainDeleteRoutine memcopy failed (%d).", res);
+	}
+	
+	new_cup->next = prev;
+	
+	return new_cup;
+}

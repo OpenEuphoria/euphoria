@@ -1688,9 +1688,12 @@ procedure Return_statement()
 	end if
 	if SymTab[CurrentSub][S_TOKEN] != PROC then
 		Expr()
-		if is_tail then
-			pop = Pop() -- prevent cg_stack leakage
+		last_op = Last_op()
+		last_pc = Last_pc()
+		if last_op = PROC and length(Code) > last_pc and Code[last_pc+1] = CurrentSub then
+			pop = Pop() -- prevent cg_stack (code generation stack) leakage
 			Code[Last_pc()] = PROC_TAIL
+			if object(pop_temps()) then end if
 		else
 			FuncReturn = TRUE
 			emit_op(RETURNF)

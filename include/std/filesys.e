@@ -32,16 +32,16 @@ constant
 
 ifdef WIN32 then
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_LONG},
-		C_LONG)
-	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_LONG)
-	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_LONG)
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
+		C_BOOL)
+	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
+	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
 	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
-		{C_POINTER, C_POINTER}, C_LONG)
-	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_LONG)
-	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT)
+		{C_POINTER, C_POINTER}, C_BOOL)
+	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
+	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
 	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
-		{C_CHAR, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_INT)	 
+		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
 
 elsifdef LINUX then
 	constant lib = open_dll("")
@@ -81,7 +81,7 @@ end ifdef
 --****
 -- === Constants
 
---**
+--****
 -- Signature:
 -- public constant SLASH
 --
@@ -92,7 +92,7 @@ end ifdef
 -- When on //Windows//, '~\\'. When on //Unix//, '/'.
 --
 
---**
+--****
 -- Signature:
 -- public constant SLASHES
 --
@@ -102,7 +102,7 @@ end ifdef
 -- ##~\~\## as well as ##~:## and ##/## as newer //Windows// versions support
 -- ##/## as a path separator. On //Unix// systems, it only contains ##/##.
 
---**
+--****
 -- Signature:
 -- public constant SLASHES
 --
@@ -112,14 +112,14 @@ end ifdef
 -- ##~\~\## as well as ##~:## and ##/## as newer //Windows// versions support
 -- ##/## as a path separator. On //Unix// systems, it only contains ##/##.
 
---**
+--****
 -- Signature:
 -- public constant EOLSEP
 --
 -- Description:
 -- Current platform's newline string: ##"\n"## on //Unix//, else ##"\r\n"##.
 
---**
+--****
 -- Signature:
 -- public constant EOL
 --
@@ -127,22 +127,22 @@ end ifdef
 -- All platform's newline character: ##'\n'##. When text lines are read the native
 -- platform's EOLSEP string is replaced by a single character EOL.
 
---**
+--****
 -- Signature:
 -- public constant PATHSEP
 --
 -- Description:
 -- Current platform's path separator character: ##:## on //Unix//, else ##;##.
 
---**
+--****
 -- Signature:
 -- public constant NULLDEVICE
 --
 -- Description:
 -- Current platform's null device path: ##/dev/null## on //Unix//, else ##NUL:##.
 
---**
--- Segnature:
+--****
+-- Signature:
 -- public constant SHARED_LIB_EXT
 -- 
 -- Description:
@@ -1510,14 +1510,14 @@ public function file_exists(object name)
 	
 	ifdef WIN32 then
 		atom pName = allocate_string(name)
-		integer r = c_func(xGetFileAttributes, {pName})
+		atom r = c_func(xGetFileAttributes, {pName})
 		free(pName)
 
 		return r > 0
 
 	elsifdef UNIX then
 		atom pName = allocate_string(name)
-		integer r = c_func(xGetFileAttributes, {pName, 0})
+		atom r = c_func(xGetFileAttributes, {pName, 0})
 		free(pName)
 
 		return r = 0
@@ -1699,7 +1699,6 @@ end ifdef
 -- Comments:
 -- * If ##overwrite## was requested but the move fails, any existing destination
 --  file is preserved.
-
 -- See Also:
 -- [[:rename_file]], [[:copy_file]]
 

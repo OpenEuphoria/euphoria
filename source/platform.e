@@ -121,7 +121,7 @@ public function GetPlatformDefines(integer for_translator = 0)
 	sequence local_defines = {}
 
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
-		local_defines &= {"DOSFAMILY", "WIN32"}
+		local_defines &= {"DOSFAMILY", "WINDOWS", "WIN32"}
 		sequence lcmds = command_line()
 		
 		-- Examine the executable's image file to determine subsystem.

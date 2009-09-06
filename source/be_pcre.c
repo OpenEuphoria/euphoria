@@ -17,6 +17,7 @@ extern int default_heap;
 #include "alloc.h"
 #include "be_runtime.h"
 #include "pcre/pcre.h"
+#include "global.h"
 
 struct pcre_cleanup {
 	struct cleanup cleanup;
@@ -152,6 +153,7 @@ object exec_pcre(object x ){
 static int add(int *len, char **s, const char *a, int alen, int *flag) {
     int NewLen = *len + alen;
     int i;
+    int res;
 
     NewLen = NewLen * 2;
 
@@ -160,12 +162,17 @@ static int add(int *len, char **s, const char *a, int alen, int *flag) {
 
     if (*s) {
         *s = (char *) realloc(*s, NewLen);
-        //assert(*s);
-        memcpy(*s + *len, a, alen);
+        res = memcopy(*s + *len, NewLen, a, alen);
+		if (res != 0) {
+			RTFatal("Internal error: be_pcre:add#1 memcopy failed (%d).", res);
+		}
     } else {
         *s = (char *) malloc(NewLen);
-        //assert(*s);
-        memcpy(*s, a, alen);
+        res = memcopy(*s, NewLen, a, alen);
+		if (res != 0) {
+			RTFatal("Internal error: be_pcre:add#2 memcopy failed (%d).", res);
+		}
+        
         *len = 0;
     }
     if (*flag & FLAG_UP_CASE) {

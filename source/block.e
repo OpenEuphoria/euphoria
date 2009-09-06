@@ -61,6 +61,9 @@ end function
 
 procedure check_block( integer got )
 	integer expected = block_stack[$][BLOCK_OPCODE]
+	if got = FUNC then
+		got = PROC
+	end if
 	if got != expected then
 		CompileErr( 79, {block_type_name( expected ), block_type_name( got)} )
 	end if
@@ -109,6 +112,9 @@ export procedure Start_block( integer opcode, object block_label = 0 )
 -- creates a new block and pushes it onto the block_stack
 
 	symtab_index last_block = current_block
+	if opcode = FUNC then
+		opcode = PROC
+	end if
 	NewBlock( opcode, block_label )
 	
 	if find(opcode, RTN_TOKS) then
@@ -213,6 +219,9 @@ end function
 export procedure End_block( integer opcode )
 -- Emits an EXIT_BLOCK if the block is not empty, and
 -- pops the top block from the stack.
+	if opcode = FUNC then
+		opcode = PROC
+	end if
 	check_block( opcode )
 	if not length(block_stack[$][BLOCK_VARS]) then
 		integer ix = 1
@@ -227,6 +236,9 @@ end procedure
 export function End_inline_block( integer opcode )
 -- returns code to be emitted in the epilog of an inlined
 -- routine, and pops the block for the routine
+	if opcode = FUNC then
+		opcode = PROC
+	end if
 	if length(block_stack[$][BLOCK_VARS]) then
 		return { EXIT_BLOCK, pop_block() }
 	else

@@ -95,14 +95,14 @@ integer msgbox_id, get_active_id
 
 ifdef WIN32 then
 	lib = open_dll("user32.dll")
-	msgbox_id = define_c_func(lib, "MessageBoxA", {C_POINTER, C_POINTER, 
-												   C_POINTER, C_INT}, C_INT)
+	msgbox_id = define_c_func(lib, "MessageBoxA", {C_UINT, C_POINTER, 
+												   C_POINTER, C_UINT}, C_INT)
 	if msgbox_id = -1 then
 		puts(2, "couldn't find MessageBoxA\n")
 		abort(1)
 	end if
 
-	get_active_id = define_c_func(lib, "GetActiveWindow", {}, C_LONG)
+	get_active_id = define_c_func(lib, "GetActiveWindow", {}, C_UINT)
 	if get_active_id = -1 then
 		puts(2, "couldn't find GetActiveWindow\n")
 		abort(1)

@@ -847,6 +847,7 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 	else
 		target_type = GType(Code[pc+1])
 	end if
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	create_temp( Code[pc+2], 1 )
 end procedure
@@ -1665,6 +1666,7 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 
 	CDeRefStr("_0")
 	SetBBType(Code[pc+2], target_type, target_val, TYPE_OBJECT, HasDelete( Code[pc+2] ) )
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	create_temp( Code[pc+2], 1 )
 	return pc + 3
 end function
@@ -2789,7 +2791,7 @@ procedure opASSIGN_SUBS()
 		end if
 
 		if Code[pc+1] = rhs then
-			c_stmt0("*(int *)_2 = _0;n")
+			c_stmt0("*(int *)_2 = _0;")
 		else
 			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
 		end if
@@ -3180,6 +3182,7 @@ procedure opLHS_SUBS()
 
 	else
 		-- LHS_SUBS1_COPY
+		c_stmt("Ref(@)\n", Code[pc+1])
 		c_stmt("DeRef(@);\n", Code[pc+4])
 		c_stmt("@ = @;\n", {Code[pc+4], Code[pc+1]})
 		if not is_temp( Code[pc+4] ) then
@@ -3187,6 +3190,7 @@ procedure opLHS_SUBS()
 		end if
 		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+4])
 		target[MIN] = SeqLen(Code[pc+1])
+		create_temp( Code[pc+4], NEW_REFERENCE )
 		SetBBType(Code[pc+4], TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete( Code[pc+1] ) )
 	end if
 
@@ -4358,8 +4362,8 @@ procedure opRETURNF()
 	sub = Code[pc+1]
 	ret = Code[pc+3]
 	
-	if is_temp( ret ) 
-	or map:get( dead_temp_walking, ret, NO_REFERENCE ) != NEW_REFERENCE then
+	if (not is_temp( ret ) and sym_scope( ret ) != SC_PRIVATE)
+	or map:get( dead_temp_walking, ret, NEW_REFERENCE ) != NEW_REFERENCE then
 		CRef( ret )
 	end if
 	

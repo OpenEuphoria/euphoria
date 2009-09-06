@@ -7,33 +7,33 @@
 #include <stdlib.h>
 
 #ifdef EWINDOWS
-#include <windows.h>
+    #include <windows.h>
 
-#ifndef AF_INET
-// Support older version of Watcom < 1.8
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif // AF_INET
+    #ifndef AF_INET
+        // Support older version of Watcom < 1.8
+    	#include <winsock2.h>
+        #include <ws2tcpip.h>
+    #endif // AF_INET
 
-extern int default_heap;
+    extern int default_heap;
 #else // ifdef EWINDOWS
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netdb.h>
 
-#ifdef EUNIX
-#include <unistd.h>
+	#ifdef EUNIX
+        #include <unistd.h>
 
-#ifdef EBSD
-#include <netinet/in.h>
-#endif // EFREEBSD
+		#ifdef EBSD
+    		#include <netinet/in.h>
+		#endif // EFREEBSD
 
-#define SOCKET int
-#define SOCKET_ERROR -1
-#define INVALID_SOCKET -1
-#define SOCKADDR struct sockaddr_in
-#define closesocket close
-#endif // UNIX
+		#define SOCKET int
+		#define SOCKET_ERROR -1
+		#define INVALID_SOCKET -1
+		#define SOCKADDR struct sockaddr_in
+		#define closesocket close
+	#endif // UNIX
 #endif // ifdef EWINDOWS else
 
 #include "alldefs.h"
@@ -52,45 +52,45 @@ extern int default_heap;
 	IS_ATOM(SEQ_PTR(sock)->base[SOCK_SOCKADDR]))
 
 #ifdef EWINDOWS
-int eusock_wsastarted = 0;
+    int eusock_wsastarted = 0;
 
-void eusock_wsastart()
-{
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	int err;
+    void eusock_wsastart()
+    {
+    	WORD wVersionRequested;
+    	WSADATA wsaData;
+    	int err;
 
-	wVersionRequested = MAKEWORD(2,2);
-	err = WSAStartup(wVersionRequested, &wsaData);
-	if (err != 0)
-	{
-		RTFatal("WSAStartup failed with error: %d", err);
-		return;
-	}
+    	wVersionRequested = MAKEWORD(2,2);
+    	err = WSAStartup(wVersionRequested, &wsaData);
+    	if (err != 0)
+    	{
+    		RTFatal("WSAStartup failed with error: %d", err);
+    		return;
+    	}
 
-	eusock_wsastarted = 1;
-}
+    	eusock_wsastarted = 1;
+    }
 
-void eusock_wsacleanup()
-{
-	WSACleanup();
-}
+    void eusock_wsacleanup()
+    {
+    	WSACleanup();
+    }
 
-int eusock_geterror()
-{
-	return WSAGetLastError();
-}
+    int eusock_geterror()
+    {
+    	return WSAGetLastError();
+    }
 
-#define eusock_ensure_init() if (eusock_wsastarted == 0) eusock_wsastart();
+    #define eusock_ensure_init() if (eusock_wsastarted == 0) eusock_wsastart();
 
 #else // ifdef EWINDOWS
-#include <errno.h>
-int eusock_geterror()
-{
-	return errno;
-}
+    #include <errno.h>
+    int eusock_geterror()
+    {
+    	return errno;
+    }
 
-#define eusock_ensure_init()
+    #define eusock_ensure_init()
 #endif // ifdef EWINDOWS else
 
 /* ============================================================================
@@ -594,10 +594,101 @@ object eusock_recv(object x)
 
 	result = recv(s, buf, BUFF_SIZE, flags);
 
-	if (result > 0)
-	{
+	if (result > 0) {
 		buf[result] = 0;
 		return NewString(buf);
+	} else if (result == 0) {
+		return ATOM_0;
+	} else {
+		return eusock_geterror();
+	}
+}
+
+/* ============================================================================
+ *
+ * UDP functions
+ *
+ * ========================================================================== */
+
+object eusock_sendto(object x)
+{
+	SOCKET s;
+	struct sockaddr_in addr;
+	int flags, port, result;
+
+	s1_ptr buf_s;
+    s1_ptr ip_s;
+	char *buf, *ip;
+
+	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
+		RTFatal("first argument to sendto must be a socket");
+	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
+		RTFatal("second argument to sendto must be a sequence");
+	if (!IS_ATOM_INT(SEQ_PTR(x)->base[3]))
+		RTFatal("third argument to sendto must be an integer");
+	if (!IS_SEQUENCE(SEQ_PTR(x)->base[4]))
+		RTFatal("fourth argument to sendto must be a sequence");
+	if (!IS_ATOM_INT(SEQ_PTR(x)->base[5]))
+		RTFatal("fifth argument to sendto must be an integer");
+
+	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	flags = SEQ_PTR(x)->base[3];
+    ip_s  = SEQ_PTR(SEQ_PTR(x)->base[4]);
+    port  = SEQ_PTR(x)->base[5];
+
+	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
+	buf   = EMalloc(buf_s->length+1);
+	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length+1);
+	ip = EMalloc(ip_s->length + 1);
+    MakeCString(ip, SEQ_PTR(x)->base[4], ip_s->length+1);
+
+	addr.sin_family = AF_INET;
+	addr.sin_port   = htons(port);
+    addr.sin_addr.s_addr = inet_addr(ip);
+
+	result = sendto(s, buf, buf_s->length, flags, (SOCKADDR *) &addr, sizeof(addr));
+
+	EFree(buf);
+    EFree(ip);
+
+	if (result == SOCKET_ERROR)
+	{
+		return eusock_geterror();
+	}
+
+	return result;
+}
+
+object eusock_recvfrom(object x)
+{
+	SOCKET s;
+	struct sockaddr_in addr;
+	int flags, addr_size, result;
+	char buf[BUFF_SIZE];
+
+	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
+		RTFatal("first argument to recvfrom must be a socket");
+	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
+		RTFatal("second argument to recvfrom must be an integer");
+
+	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
+	flags = SEQ_PTR(x)->base[2];
+    addr_size = sizeof(addr);
+
+	result = recvfrom(s, buf, BUFF_SIZE, flags, (SOCKADDR *) &addr, &addr_size);
+
+	if (result > 0) {
+        s1_ptr r;
+        object o;
+		buf[result] = 0;
+
+        r = NewS1(3);
+        r->base[1] = NewString(inet_ntoa(addr.sin_addr));
+        r->base[2] = addr.sin_port;
+        r->base[3] = NewString(buf);
+        
+
+        return MAKE_SEQ(r);
 	} else if (result == 0) {
 		return ATOM_0;
 	} else {

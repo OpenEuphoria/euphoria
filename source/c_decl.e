@@ -7,10 +7,11 @@
 ----------------------------------------------------------------------------
 
 ifdef ETYPE_CHECK then
-with type_check
+	with type_check
 elsedef
-without type_check
+	without type_check
 end ifdef
+
 include euphoria/info.e
 
 include std/text.e
@@ -27,7 +28,6 @@ include compile.e
 include error.e
 include c_out.e
 include msgtext.e
-
 
 --**
 -- number of Translator passes
@@ -116,6 +116,11 @@ export function get_eudir()
 	ifdef UNIX then
 		if equal(x, -1) then
 			x = "/usr/share/euphoria"
+			if not file_exists( x ) then
+				-- somewhat hacky, but covers the default (and obvious)
+				-- other place to look
+				x = "/usr/local/share/euphoria"
+			end if
 		end if
 	end ifdef
 
@@ -1000,16 +1005,19 @@ end procedure
 export function is_exported( symtab_index s )
 	sequence eentry = SymTab[s]
 	integer scope = eentry[S_SCOPE]
+
 	if eentry[S_MODE] = M_NORMAL then
-		if eentry[S_FILE_NO] = 1 or scope = SC_GLOBAL then
+		if eentry[S_FILE_NO] = 1 and find(scope, { SC_EXPORT, SC_PUBLIC, SC_GLOBAL }) then
 			return 1
 		end if
 		
-		if scope = SC_PUBLIC 
-		and and_bits( include_matrix[1][eentry[S_FILE_NO]], PUBLIC_INCLUDE ) then
+		if scope = SC_PUBLIC and 
+			and_bits( include_matrix[1][eentry[S_FILE_NO]], PUBLIC_INCLUDE ) 
+		then
 			return 1
 		end if
 	end if
+
 	return 0
 end function
 

@@ -84,6 +84,16 @@ export sequence exe_name = ""
 
 export integer max_cfile_size = 100_000
 
+--**
+-- Optional flags to pass to the compiler
+
+export sequence cflags = ""
+
+--**
+-- Optional flags to pass to the linker
+
+export sequence lflags = ""
+
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
 	SETUP_LFLAGS_BEGIN
 
@@ -215,20 +225,15 @@ function setup_build()
 			CompileErr(43)
 	end switch
 	
-	if sequence(getenv("EUC_CFLAGS")) then
-		c_flags = getenv("EUC_CFLAGS")
+	if length(cflags) then
+		c_flags = cflags
 	end if
-	if sequence(getenv("EUC_LFLAGS")) then
-		l_flags = getenv("EUC_LFLAGS")
+	
+	if length(lflags) then
+		l_flags = lflags
 		l_flags_begin = ""
 	end if
-	if sequence(getenv("EUC_COMPILER")) then
-		c_exe = getenv("EUC_COMPILER")
-	end if
-	if sequence(getenv("EUC_LINKER")) then
-		l_exe = getenv("EUC_LINKER")
-	end if
-
+	
 	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin }
 end function
 

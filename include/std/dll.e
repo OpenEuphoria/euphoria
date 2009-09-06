@@ -24,29 +24,54 @@ include std/types.e
 --   [[:define_c_proc]], [[:define_c_func]], [[:define_c_var]]
 
 public constant
-	--** char
+	--** char  8-bits
 	C_CHAR    = #01000001,
-	--** unsigned char
+	--** byte  8-bits
+	C_BYTE    = #01000001,
+	--** unsigned char 8-bits
 	C_UCHAR   = #02000001,
-	--** short
+	--** ubyte 8-bits
+	C_UBYTE   = #02000001,
+	--** short 16-bits
 	C_SHORT   = #01000002,
-	--** unsigned short
+	--** word 16-bits
+	C_WORD   = #01000002,
+	--** unsigned short 16-bits
 	C_USHORT  = #02000002,
-	--** int
+	--** int 32-bits
 	C_INT     = #01000004,
-	--** unsigned int
+	--** bool 32-bits
+	C_BOOL    = C_INT,
+	--** unsigned int 32-bits
 	C_UINT    = #02000004,
-	--** long
+	--** size_t 32-bits
+	C_SIZE_T  = C_UINT,
+	--** long 32-bits
 	C_LONG    = C_INT,
-	--** unsigned long
+	--** unsigned long 32-bits
 	C_ULONG   = C_UINT,
-	--** any valid pointer
-	C_POINTER = C_ULONG,
-	--** float
+	--** any valid pointer 32-bits
+	C_POINTER = C_UINT,
+	--** handle 32-bits
+	C_HANDLE  = C_UINT,
+	--** hwnd 32-bits
+	C_HWND    = C_UINT,
+	--** dword 32-bits
+	C_DWORD   = C_UINT,
+	--** wparam 32-bits
+	C_WPARAM  = C_LONG,
+	--** lparam 32-bits
+	C_LPARAM  = C_LONG,
+	--** hresult 32-bits
+	C_HRESULT = C_LONG,
+	--** float 32-bits
 	C_FLOAT   = #03000004,
-	--** double
-	C_DOUBLE  = #03000008
-
+	--** double 64-bits
+	C_DOUBLE  = #03000008,
+	--** dwordlong 64-bits
+	C_DWORDLONG  = #03000008,
+	$
+	
 --****
 -- === External Euphoria Type Constants
 -- These are used for arguments to and the return value from a Euphoria shared
@@ -397,7 +422,7 @@ end function
 --
 -- See Also: 
 --
--- [[:c_func]], [[:define_c_proc]], [[:open_dll]], [[:Platform-Specific Issues]]
+-- [[:c_proc]], [[:define_c_proc]], [[:open_dll]], [[:Platform-Specific Issues]]
 --        
 
 --****
@@ -442,7 +467,7 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:c_proc]], [[:define_c_func]], [[:open_dll]], [[:Platform-Specific Issues]]
+-- [[:c_func]], [[:define_c_func]], [[:open_dll]], [[:Platform-Specific Issues]]
 -- 
 
 constant M_CALL_BACK = 52

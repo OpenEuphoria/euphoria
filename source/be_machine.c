@@ -2266,6 +2266,7 @@ object CallBack(object x)
     s1_ptr result;
 	s1_ptr x_ptr;
 	int convention;
+	int res;
 	convention = C_CDECL;
 	
 	/* Handle {{'+', routine_id} and {routine_id} case:
@@ -2380,7 +2381,11 @@ object CallBack(object x)
 	}
 
 	/* copy memory of the template to the newly allocated memory */
-	memcpy(copy_addr, (char *)addr, CALLBACK_SIZE);
+    res = memcopy(copy_addr, CALLBACK_SIZE, (char *)addr, CALLBACK_SIZE);
+	if (res != 0) {
+		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
+	}
+
 	
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
@@ -2791,22 +2796,21 @@ object machine(object opcode, object x)
 				break;
 
 			case M_INSTANCE:
+			{
+				unsigned int inst = 0;
 #ifdef EUNIX
-				if ((unsigned)getpid() <= (unsigned)MAXINT)
-					return (unsigned)getpid();
-				else
-					return NewDouble((double)(unsigned)getpid());
-#else
+				inst = (unsigned)getpid();
+#endif
 #ifdef EWINDOWS
-				if ((unsigned)winInstance <= (unsigned)MAXINT)
-					return (unsigned)winInstance;
+				inst = (unsigned)winInstance;
+#endif
+
+				if (inst <= (unsigned)MAXINT)
+					return inst;
 				else
-					return NewDouble((double)(unsigned)winInstance);
-#else
-				return 0;
-#endif //EWINDOWS
-#endif //EUNIX
+					return NewDouble((double)inst);
 				break;
+			}
 
 			case M_FREE_CONSOLE:
 				if (current_screen != MAIN_SCREEN)
@@ -2968,6 +2972,12 @@ object machine(object opcode, object x)
 
 			case M_SOCK_SELECT:
 				return eusock_select(x);
+                
+            case M_SOCK_SENDTO:
+                return eusock_sendto(x);
+            
+            case M_SOCK_RECVFROM:
+                return eusock_recvfrom(x);
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

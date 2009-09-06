@@ -39,6 +39,7 @@ test_equal("filename() filename no extension", fname, filename(fname))
 test_equal("fileext() full path", fext, fileext(fullname))
 test_equal("fileext() filename only", fext, fileext(fullname))
 test_equal("fileext() filename no extension", "", fileext(fname))
+test_equal("fileext() with period in the filename", "txt", fileext("hello.world.txt"))
 
 test_equal("defaultext #1", "abc.def", defaultext("abc", "def"))
 test_equal("defaultext #2", "abc.xyz", defaultext("abc.xyz", "def"))
