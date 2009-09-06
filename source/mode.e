@@ -35,16 +35,10 @@ export procedure set_mode( valid_mode mode, integer extra_check )
 end procedure
 
 export procedure set_backend( integer rid )
-	if backend_rid != -1 then
-		return
-	end if
 	backend_rid = rid
 end procedure
 
 export procedure set_init_backend( integer rid )
-	if init_backend_rid != -1 then
-		return
-	end if
 	init_backend_rid = rid
 end procedure
 
