@@ -31,7 +31,10 @@ include scanner.e
 include error.e
 include preproc.e
 include msgtext.e
-include buildsys.e
+
+ifdef TRANSLATE then
+	include buildsys.e
+end ifdef
 
 --**
 -- record command line options, return source file number
@@ -184,7 +187,7 @@ procedure main()
 	-- sets up the internal namespace
 	eu_namespace()
 
-	if TRANSLATE then
+	ifdef TRANSLATE then
 		if build_system_type = BUILD_DIRECT then
 			if not quick_has_changed(file_name[$]) then
 				build_direct(1, file_name[$])
@@ -192,7 +195,7 @@ procedure main()
 				return
 			end if
 		end if
-	end if
+	end ifdef
 
 	-- starts reading and checks for a default namespace
 	main_file()

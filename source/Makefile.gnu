@@ -58,6 +58,10 @@ ifeq "$(RELEASE)" "1"
 RELEASE_FLAG = -D EU_FULL_RELEASE
 endif
 
+ifndef BACK_DEF
+BACK_DEF=UNKNOWN_BACKEND
+endif
+
 ifdef ERUNTIME
 RUNTIME_FLAGS = -DERUNTIME
 endif
@@ -304,12 +308,12 @@ svn_rev :
 	-$(EXE) -i ../include revget.ex -root ..
 
 interpreter : version.h builddirs
-	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE) BACK_DEF=INTERPRETER
+	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE) BACK_DEF=INTERPRETER
 
 translator : version.h builddirs
-	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE) BACK_DEF=TRANSLATOR
+	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE) BACK_DEF=TRANSLATOR
 
 .PHONY : library
 .PHONY : builddirs
@@ -496,7 +500,7 @@ translate-here :
 	#echo -nobuild $(INCDIR) -gcc $(EC_DEBUG) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) > translate-arguments.txt
 	#$(EXE) @incdir.txt $(TRUNKDIR)/source/ec.ex @translate-arguments.txt
 	
-	$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex -nobuild $(INCDIR) -gcc $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET)
+	$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex -D $(BACK_DEF) -nobuild $(INCDIR) -gcc $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET)
 	
 
 .PHONY : translate-here
