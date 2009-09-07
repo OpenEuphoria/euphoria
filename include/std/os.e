@@ -97,7 +97,7 @@ public function get_pid()
 		return machine_func(M_INSTANCE, 0)
 	elsifdef WINDOWS then
 		if cur_pid = -1 then
-			cur_pid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_INT)
+			cur_pid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_DWORD)
 			if cur_pid >= 0 then
 				cur_pid = c_func(cur_pid, {})
 			end if
