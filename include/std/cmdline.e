@@ -6,10 +6,10 @@ namespace cmdline
 
 include std/text.e
 include std/sequence.e as seq
-include std/map.e as map
+include std/map.e
 include std/error.e
 include std/os.e
-include std/io.e as io
+include std/io.e
 include std/console.e
 include std/types.e
 

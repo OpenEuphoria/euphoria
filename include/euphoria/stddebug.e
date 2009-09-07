@@ -3,12 +3,6 @@ include std/console.e
 include std/convert.e
 include std/datetime.e
 include std/dll.e
-include std/dos/base_mem.e
-include std/dos/image.e
-include std/dos/interrup.e
-include std/dos/memory.e
-include std/dos/pixels.e
-include std/dos/safe.e
 include std/eds.e
 include std/error.e
 include std/eumem.e
