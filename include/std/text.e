@@ -1194,13 +1194,14 @@ end function
 -- |  <         | For numeric arguments, it left justifies it.        |
 -- |  >         | For string arguments, it right justifies it.        |
 -- |  c         | Centers the argument.                               |
--- |  0         | For numbers, it zero fills the left side.           |
+-- |  z         | For numbers, it zero fills the left side.           |
 -- |  :S        | ('S' is an integer) The maximum size of the\\
 --                resulting field. Also, if 'S' begins with '0' the\\
 --                field will be zero-filled if the argument is an integer|
 -- |  .N        | ('N' is an integer) The number of digits after\\
 --                 the  decimal point                                 |
 -- |  +         | For positive numbers, show a leading plus sign      |
+-- |  (         | For negative numbers, enclose them in parentheses   |
 -- |  b         | For numbers, causes zero to be all blanks           |
 -- |  s         | If the resulting field would otherwise be zero\\
 --                length, this ensures that at least one space occurs\\
@@ -1215,7 +1216,8 @@ end function
 -- |  [         | Does not use any argument. Outputs a left-square-bracket symbol |
 -- |  ,X        | Insert thousands separators. The <X> is the character\\
 --                to use. If this is a dot "." then the decimal point\\
---                is rendered using a comma.                         \\
+--                is rendered using a comma. Does not apply to zero-filled\\
+--                fields.                         \\
 --                N.B. if hex or binary output was specified, the \\
 --                separators are every 4 digits otherwise they are \\
 --                every three digits. |
@@ -1291,7 +1293,8 @@ public function format(sequence pFormat, object pArgs = {})
 	integer tend
 	integer cap
 	integer align
-	integer signer
+	integer psign
+	integer msign
 	integer zfill
 	integer bwz
 	integer spacer
@@ -1332,7 +1335,8 @@ public function format(sequence pFormat, object pArgs = {})
     			tend = 0
 				cap = 0
 				align = 0
-				signer = 0
+				psign = 0
+				msign = 0
 				zfill = 0
 				bwz = 0
 				spacer = 0
@@ -1390,7 +1394,10 @@ public function format(sequence pFormat, object pArgs = {})
 	    			align = tch
 
 	    		case '+' then
-	    			signer = 1
+	    			psign = 1
+
+	    		case '(' then
+	    			msign = 1
 
 	    		case '?' then
 	    			alt = 1
@@ -1476,11 +1483,44 @@ public function format(sequence pFormat, object pArgs = {})
 
 						elsif hexout = 0 then
 							argtext = sprintf("%d", pArgs[argn])
-							if signer and pArgs[argn] > 0 then
-								argtext = '+' & argtext
+							if zfill != 0 and width > 0 then
+								if length(argtext) > 0 then
+									if argtext[1] = '-' then
+										argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+									else
+										argtext = repeat('0', width - length(argtext)) & argtext
+									end if
+								else
+									argtext = repeat('0', width - length(argtext)) & argtext
+								end if
+							end if
+							
+							if pArgs[argn] > 0 then
+								if psign then
+									if zfill = 0 then
+										argtext = '+' & argtext
+									elsif argtext[1] = '0' then
+										argtext[1] = '+'
+									end if
+								end if
+							elsif pArgs[argn] < 0 then
+								if msign then
+									if zfill = 0 then
+										argtext = '(' & argtext[2..$] & ')'
+									else
+										if argtext[2] = '0' then
+											argtext = '(' & argtext[3..$] & ')'
+										else
+											argtext = argtext[2..$] & ')'
+										end if
+									end if
+								end if
 							end if
 						else
 							argtext = sprintf("%x", pArgs[argn])
+							if zfill != 0 and width > 0 then
+								argtext = repeat('0', width - length(argtext)) & argtext
+							end if
 						end if
 
 					elsif atom(pArgs[argn]) then
@@ -1488,8 +1528,37 @@ public function format(sequence pFormat, object pArgs = {})
 							argtext = ""
 						else
 							argtext = trim(sprintf("%15.15g", pArgs[argn]))
-							if signer and pArgs[argn] > 0 then
-								argtext = '+' & argtext
+							if zfill != 0 and width > 0 then
+								if length(argtext) > 0 then
+									if argtext[1] = '-' then
+										argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+									else
+										argtext = repeat('0', width - length(argtext)) & argtext
+									end if
+								else
+									argtext = repeat('0', width - length(argtext)) & argtext
+								end if
+							end if
+							if pArgs[argn] > 0 then
+								if psign  then
+									if zfill = 0 then
+										argtext = '+' & argtext
+									elsif argtext[1] = '0' then
+										argtext[1] = '+'
+									end if
+								end if
+							elsif pArgs[argn] < 0 then
+								if msign then
+									if zfill = 0 then
+										argtext = '(' & argtext[2..$] & ')'
+									else
+										if argtext[2] = '0' then
+											argtext = '(' & argtext[3..$] & ')'
+										else
+											argtext = argtext[2..$] & ')'
+										end if
+									end if
+								end if
 							end if
 						end if
 
@@ -1578,13 +1647,6 @@ public function format(sequence pFormat, object pArgs = {})
 								end if
 							end if
 
-							if zfill != 0 and width > 0 then
-								if length(argtext) > 0 and find(argtext[1], "-+") then
-									argtext = argtext[1] & repeat('0', width - length(argtext)) & argtext[2..$]
-								else
-									argtext = repeat('0', width - length(argtext)) & argtext
-								end if
-							end if
 						end if
 					end if
 
@@ -1597,14 +1659,19 @@ public function format(sequence pFormat, object pArgs = {})
     				end if
 
     				if atom(currargv) then
-	    				if tsep != 0 then
+	    				if tsep != 0 and zfill = 0 then
 	    					integer dpos
 	    					integer dist
+	    					integer bracketed
 
 	    					if binout or hexout then
 	    						dist = 4
 	    					else
 	    						dist = 3
+	    					end if
+	    					bracketed = (argtext[1] = '(')
+	    					if bracketed then
+	    						argtext = argtext[2 .. $-1]
 	    					end if
 	    					dpos = find('.', argtext)
 	    					if dpos = 0 then
@@ -1618,9 +1685,11 @@ public function format(sequence pFormat, object pArgs = {})
 	    						dpos -= dist
 	    						if dpos > 1 then
 	    							argtext = argtext[1.. dpos - 1] & tsep & argtext[dpos .. $]
---	    							dpos -=1
 	    						end if
 	    					end while
+	    					if bracketed then
+	    						argtext = '(' & argtext & ')'
+	    					end if
 	    				end if
 					end if
 

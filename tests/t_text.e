@@ -273,11 +273,11 @@ res = format("[B:16]", 177)
 exp = "        10110001"
 test_equal("format 'AI'", exp, res)
 
-res = format("[, zB]", 177)
+res = format("[, B]", 177)
 exp = "1011 0001"
 test_equal("format 'AJ'", exp, res)
 
-res = format("[, zX]", 0x123456ab)
+res = format("[, X]", 0x123456ab)
 exp = "1234 56AB"
 test_equal("format 'AK'", exp, res)
 
@@ -320,6 +320,30 @@ test_equal("format 'AT'", exp, res)
 res = format("[+]", -117.2)
 exp  = "-117.2"
 test_equal("format 'AU'", exp, res)
+
+res = format("[(]", -117.2)
+exp  = "(117.2)"
+test_equal("format 'AV'", exp, res)
+
+res = format("[(z:8]", -117.2)
+exp  = "(0117.2)"
+test_equal("format 'AW'", exp, res)
+
+res = format("[(]", -117)
+exp  = "(117)"
+test_equal("format 'AX'", exp, res)
+
+res = format("[(z:8]", -117)
+exp  = "(000117)"
+test_equal("format 'AY'", exp, res)
+
+res = format("[(]", 117)
+exp  = "117"
+test_equal("format 'AZ'", exp, res)
+
+res = format("[(]", 117.2)
+exp  = "117.2"
+test_equal("format 'BA'", exp, res)
 
 
 test_report()
