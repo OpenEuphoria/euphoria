@@ -12,14 +12,10 @@ struct _128b_uint_st {
 	unsigned int high;
 };
 void sse2_variable_init();
-extern struct _128b_uint_st NOVALUE_128bit;
-extern struct _128b_uint_st ONES_128bit;
-extern struct _128b_uint_st ZEROS_128bit;
-extern struct _128b_uint_st MAXINT_128bit;
-extern struct _128b_uint_st MININT_128bit;
-extern struct _128b_uint_st overunder_128bit;
-extern struct _128b_uint_st integer_128bit, intermediate_128bit;
-extern unsigned long iterate_over_double_words;
+extern object_ptr NOVALUE_128bit, ONES_128bit, ZEROS_128bit;
+extern object_ptr MAXINT_128bit, MININT_128bit;
+extern object_ptr overunder_128bit, integer_128bit, intermediate_128bit; 
+extern signed long iterate_over_double_words;
 #ifdef EWATCOM
 void emms();
 #pragma aux emms = \

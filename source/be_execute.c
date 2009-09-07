@@ -77,71 +77,57 @@
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
 
-void sse2_set_up_registers( void *, void * );
-#pragma aux sse2_set_up_registers = \
+unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
+#pragma aux sse2_paddo3 = \
                 "MOVDQA XMM0, [EAX]"\
 				"MOVDQA XMM1, XMM0"\
 				"MOVDQA XMM2, XMM0"\
 				"MOVDQA XMM4, [ECX]"\
 				"MOVDQA XMM5, XMM4"\
-				"MOVDQU XMM6, NOVALUE_128bit"\
+				"MOVDQU XMM6, [NOVALUE_128bit]"\
 				"MOVDQA XMM7, XMM6"\
-				parm [EAX] [ECX];
-
-#pragma aux sse2_both_sequences = \
                 /*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
-                /*XMM2[i] = 0 where ptr1[i] is a sequence   */\
+                /*XMM2[i] = -1 where ptr1[i] is an atom integer  */\
                 "PCMPGTD XMM2, XMM6"\
                 \
                 /* XMM5 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
-                /*   XMM5[i] = 0 where ptr1[i] is a sequence */\
+                /*   XMM5[i] = -1 where ptr2[i] is an atom integer*/\
                 "PCMPGTD XMM5, XMM7"\
 				/* Combine masks XMM5[i] is true iff ptr1[i] + ptr2[i] is a sum of two integers */\
 				"ANDPS XMM5, XMM2"\
-				"MOVDQU integer_128bit, XMM5";
-
-void sse2_padd();
-#pragma aux sse2_padd = \
-                \
-		/* Sum vectors before masking: */\
+				/* XMM5[i] = 0 if either ptr2[i] or ptr1[i] is an encoded pointer */\
+		"MOVDQU [integer_128bit], XMM5"\
+		/* Sum vectors before masking: Now XMM1[i] = ptr1[i] + ptr2[i] iff both are ATOM_INTs */\
 		\
-		"PADDD XMM1, XMM4";
-
-unsigned int sse2_unload_registers(object_ptr ptr);		
-#pragma aux sse2_unload_registers = \		
+		"PADDD XMM1, XMM4"\
 		/* Then apply mask to the sum of values */\
         "ANDPS XMM1, XMM5"\
+		/* Put the result into memory */\
+		"MOVDQU [EDX], XMM1"\
 		/* Now check for overflow and underflow*/\
-		"MOVDQA XMM6, XMM1"\
-		"MOVDQA XMM2, XMM5"\
-		"MOVDQU XMM3, ONES_128bit"\
+		"MOVDQU XMM6, [MAXINT_128bit]"\
+		"MOVDQA XMM7, XMM1"\
+		/* XMM7[i] = -1 iff XMM1[i] > MAXINT */\ 
+		"PCMPGTD XMM7, XMM6"\
+		"MOVDQU XMM2, [MININT_128bit]"\
+		/* XMM2[i] = -1 iff MININT[i] > XMM1[i] */\
+		"PCMPGTD XMM2, XMM1"\
+		"ORPS XMM2, XMM7"\
+		"MOVDQU [overunder_128bit], XMM2"\
+		"MOVDQU XMM3, [ONES_128bit]"\
 		"ANDNPS XMM5, XMM3"\
-		"ORPS XMM3, XMM5"\
-		"MOVDQU intermediate_128bit, XMM3"\
-		"MOVDQU XMM7, ZEROS_128bit"\
+		"ORPS XMM2, XMM5"\		
+		"MOVDQU [intermediate_128bit], XMM2"\
+		"MOVDQU XMM3, XMM2"\
+		"MOVDQU XMM7, [ZEROS_128bit]"\
 		"PSADBW XMM3, XMM7"\
 		"PEXTRW EBX, XMM3, 0"\
 		"MOV iterate_over_double_words, EBX"\
-		"EMMS"\		
-		modify [EBX] \
-		parm [EDX] \
-		value [EBX];
-#if 0
-		\
-		 /* Now apply these masks negatively to ptr1  mmx2 = (~xmm2) & ptr1 */\
-		"ANDNPS XMM2, XMM0"\
-		\
-		/* Here XMM2 is a component-wise EUPHORIA style sum with the \
-		 * non-integer values set to 0.  XMM5 is the mask for these values.\
-		 * XMM1 is the original value of ptr1[0..3] with the integer values set to 0. */\
-		/* Finally "or" the two possibilities together.  Sequences will be handled */\
-		/* in the C code. */\
-		"ORPS XMM2, XMM1"\
-		"MOVAPS [EDX], XMM2"\
 		"EMMS"\
 		modify [EBX] \
+		parm [EDX] [EAX] [ECX]\
 		value [EBX];
-#endif
+
 /* To eliminate type casts for pc[*] you
  would need a union like this:
 union pc_t {
@@ -2796,18 +2782,24 @@ void do_exec(int *start_pc)
 							IS_SEQUENCE(top) && 
 							(int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0) {
 								struct s1 * dest;
-								sse2_set_up_registers( &SEQ_PTR(a)->base[1], &SEQ_PTR(top)
-									->base[1] ); 
-								sse2_padd();
-								sse2_both_sequences();
-								//emms();
-								sse2_unload_registers(&(dest = NewS1(4))->base[1]);
+								dest = NewS1(4);
+								!sse2_paddo3( dest->base + 1, &SEQ_PTR(a)->base[1], &SEQ_PTR(top)
+									->base[1] );					
 								printf("[%4ld %4ld %4ld %4ld]=[%4ld %4ld %4ld %4ld]+[%4ld %4ld %4ld %4ld]\n",
 									dest->base[1], dest->base[2], dest->base[3], dest->base[4],
 									SEQ_PTR(a)->base[1], SEQ_PTR(a)->base[2], SEQ_PTR(a)->base[3],
 									SEQ_PTR(a)->base[4],
 									SEQ_PTR(top)->base[1], SEQ_PTR(top)->base[2], 
-									SEQ_PTR(top)->base[3], SEQ_PTR(top)->base[4] );
+									SEQ_PTR(top)->base[3], SEQ_PTR(top)->base[4] );		
+#if 0								
+								printf("IsIntegerF [0x%8x 0x%8x 0x%8x 0x%8x]\n",
+									integer_128bit[0], integer_128bit[1], 
+									integer_128bit[2], integer_128bit[3] );
+						
+								printf("OUF [0x%8x 0x%8x 0x%8x 0x%8x]\n",
+									overunder_128bit[0], overunder_128bit[1], 
+									overunder_128bit[2], overunder_128bit[3] );
+#endif								
 							}
 #					endif
 #					if SSE2 && 0
