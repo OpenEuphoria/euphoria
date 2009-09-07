@@ -830,6 +830,9 @@ end function
 --   *** ##NO_CASE## to indicate that the case of the supplied option is not significant.
 --   *** ##ONCE## to indicate that the option must only occur once on the command line.
 --   *** ##MULTIPLE## to indicate that the option can occur any number of times on the command line.
+--  ** If both ##ONCE## and ##MULTIPLE## are omitted then switches that also have
+--     ##HAS_PARAMETER## are only allowed once but switches without ##HAS_PARAMETER##
+--     can have multuple occurances but only one is recorded in the output map.
 -- # an integer; a [[:routine_id]]. This function will be called when the option is located
 --   on the command line and before it updates the map. \\
 --   Use -1 if cmd_parse is not to invoke a function for this option.\\
@@ -1159,9 +1162,11 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				if map:has(parsed_opts, opt[MAPNAME]) and (validation = VALIDATE_ALL or
 					(validation = NO_VALIDATION_AFTER_FIRST_EXTRA))
 				then
-					printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
-					local_help(opts, add_help_rid, cmds, 1)
-					local_abort(1)
+					if find(HAS_PARAMETER, opt[OPTIONS]) or find(ONCE, opt[OPTIONS]) then
+						printf(1, "option '%s' must not occur more than once in the command line.\n\n", {find_result[2]})
+						local_help(opts, add_help_rid, cmds, 1)
+						local_abort(1)
+					end if
 				else
 					map:put(parsed_opts, opt[MAPNAME], param)
 				end if
