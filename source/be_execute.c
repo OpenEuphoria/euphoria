@@ -59,7 +59,9 @@
 #include "alldefs.h"
 #include "alloc.h"
 #include "be_runtime.h"
-
+#if SSE2
+#	include "sse2.h"
+#endif
 
 /******************/
 /* Local defines  */
@@ -75,6 +77,71 @@
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
 
+void sse2_set_up_registers( void *, void * );
+#pragma aux sse2_set_up_registers = \
+                "MOVDQA XMM0, [EAX]"\
+				"MOVDQA XMM1, XMM0"\
+				"MOVDQA XMM2, XMM0"\
+				"MOVDQA XMM4, [ECX]"\
+				"MOVDQA XMM5, XMM4"\
+				"MOVDQU XMM6, NOVALUE_128bit"\
+				"MOVDQA XMM7, XMM6"\
+				parm [EAX] [ECX];
+
+#pragma aux sse2_both_sequences = \
+                /*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
+                /*XMM2[i] = 0 where ptr1[i] is a sequence   */\
+                "PCMPGTD XMM2, XMM6"\
+                \
+                /* XMM5 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
+                /*   XMM5[i] = 0 where ptr1[i] is a sequence */\
+                "PCMPGTD XMM5, XMM7"\
+				/* Combine masks XMM5[i] is true iff ptr1[i] + ptr2[i] is a sum of two integers */\
+				"ANDPS XMM5, XMM2"\
+				"MOVDQU integer_128bit, XMM5";
+
+void sse2_padd();
+#pragma aux sse2_padd = \
+                \
+		/* Sum vectors before masking: */\
+		\
+		"PADDD XMM1, XMM4";
+
+unsigned int sse2_unload_registers(object_ptr ptr);		
+#pragma aux sse2_unload_registers = \		
+		/* Then apply mask to the sum of values */\
+        "ANDPS XMM1, XMM5"\
+		/* Now check for overflow and underflow*/\
+		"MOVDQA XMM6, XMM1"\
+		"MOVDQA XMM2, XMM5"\
+		"MOVDQU XMM3, ONES_128bit"\
+		"ANDNPS XMM5, XMM3"\
+		"ORPS XMM3, XMM5"\
+		"MOVDQU intermediate_128bit, XMM3"\
+		"MOVDQU XMM7, ZEROS_128bit"\
+		"PSADBW XMM3, XMM7"\
+		"PEXTRW EBX, XMM3, 0"\
+		"MOV iterate_over_double_words, EBX"\
+		"EMMS"\		
+		modify [EBX] \
+		parm [EDX] \
+		value [EBX];
+#if 0
+		\
+		 /* Now apply these masks negatively to ptr1  mmx2 = (~xmm2) & ptr1 */\
+		"ANDNPS XMM2, XMM0"\
+		\
+		/* Here XMM2 is a component-wise EUPHORIA style sum with the \
+		 * non-integer values set to 0.  XMM5 is the mask for these values.\
+		 * XMM1 is the original value of ptr1[0..3] with the integer values set to 0. */\
+		/* Finally "or" the two possibilities together.  Sequences will be handled */\
+		/* in the C code. */\
+		"ORPS XMM2, XMM1"\
+		"MOVAPS [EDX], XMM2"\
+		"EMMS"\
+		modify [EBX] \
+		value [EBX];
+#endif
 /* To eliminate type casts for pc[*] you
  would need a union like this:
 union pc_t {
@@ -2724,7 +2791,71 @@ void do_exec(int *start_pc)
 						}
 					}
 					/* a is a sequence */
-					top = binary_op(PLUS, a, top);
+#					if SSE2					
+						if ((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0 && 
+							IS_SEQUENCE(top) && 
+							(int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0) {
+								struct s1 * dest;
+								sse2_set_up_registers( &SEQ_PTR(a)->base[1], &SEQ_PTR(top)
+									->base[1] ); 
+								sse2_padd();
+								sse2_both_sequences();
+								//emms();
+								sse2_unload_registers(&(dest = NewS1(4))->base[1]);
+								printf("[%4ld %4ld %4ld %4ld]=[%4ld %4ld %4ld %4ld]+[%4ld %4ld %4ld %4ld]\n",
+									dest->base[1], dest->base[2], dest->base[3], dest->base[4],
+									SEQ_PTR(a)->base[1], SEQ_PTR(a)->base[2], SEQ_PTR(a)->base[3],
+									SEQ_PTR(a)->base[4],
+									SEQ_PTR(top)->base[1], SEQ_PTR(top)->base[2], 
+									SEQ_PTR(top)->base[3], SEQ_PTR(top)->base[4] );
+							}
+#					endif
+#					if SSE2 && 0
+						if ((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0 && 
+							IS_SEQUENCE(top) && 
+							(int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0) {
+							struct s1 * dest;
+							struct s1 * sa, * sb;
+							object_ptr dp,ap,bp;
+							sa = SEQ_PTR(a);
+							sb = SEQ_PTR(top);
+							emms();
+							if (sa->length != sb->length) {
+								RTFatal(
+								"Sequences are of differing lenghts can not be added together.");
+							}
+							dest = NewS1(sa->length);
+							ap = &sa->base[1];
+							bp = &sb->base[1];
+							dp = &dest->base[1];
+							while ((ap - sa->base) < sa->length) {
+								signed long int * ou;
+								signed long int * in, j;
+								sse2_padd_euphoria_values4( dp, ap, bp );
+								if (iterate_over_double_words) {
+									ou = ((unsigned long int*)&overunder_128bit);
+									in = ((unsigned long int*)&integer_128bit);									
+									for (j = 0;*ap != NOVALUE && j < 4; ++j, ++dp, ++ap, ++bp ) {
+										if (*ou) 
+											*dp = NewDouble(*dp);
+										else if (!*in)
+											*dp = binary_op(PLUS, *ap, *bp );
+									}			
+								} else {
+									ap += 4;
+									bp += 4;
+									dp += 4;
+								}
+								
+							}
+						
+						}
+						else {
+							top = binary_op(PLUS, a, top);
+						}
+#					else						
+						top = binary_op(PLUS, a, top);
+#					endif					
 
 				aresult:
 					/* store result and DeRef */
