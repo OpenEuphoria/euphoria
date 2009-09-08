@@ -48,7 +48,6 @@ end ifdef
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
-
 --**
 -- Positive integer type
 
@@ -59,9 +58,9 @@ end type
 --**
 -- Machine address type
 
-public type machine_addr(atom a)
+public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-        return a > 0 and a <= MAX_ADDR and floor(a) = a
+	return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
 
 
@@ -183,22 +182,18 @@ public procedure free(object addr)
 		return
 	end if
 	
-	if machine_addr(addr) then
-		ifdef not DATA_EXECUTE then
-	        	machine_proc(M_FREE, addr)
-		elsedef	
-			if not dep_works() then
-		        	machine_proc(M_FREE, addr)
-				return
-			end if
-		
-			ifdef WIN32 then
-				c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
-			end ifdef
+	ifdef not DATA_EXECUTE then
+        	machine_proc(M_FREE, addr)
+	elsedef	
+		if not dep_works() then
+        	machine_proc(M_FREE, addr)
+			return
+		end if
+	
+		ifdef WIN32 then
+			c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
 		end ifdef
-	else
-		crash("free(%g) is not a valid address", addr)
-	end if
+	end ifdef
 end procedure
 FREE_RID = routine_id("free")
 
