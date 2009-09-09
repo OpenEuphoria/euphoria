@@ -1782,90 +1782,94 @@ function binary_op(integer pc, integer iii, sequence target_val,
 -- handle the completion of many binary ops
 	integer target_elem, target_type, np, check
 	boolean close_brace
+	symtab_index rhs1  = Code[pc+1]
+	symtab_index rhs2 = Code[pc+2]
+	symtab_index lhs = Code[pc+3]
 
 	target_elem = TYPE_OBJECT
-	create_temp( Code[pc+3], NEW_REFERENCE )
+	create_temp( lhs, NEW_REFERENCE )
 
-	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
+	if TypeIs(rhs1, TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
 		if iii and
-			SeqElem(Code[pc+1]) = TYPE_INTEGER and
-			(TypeIs(Code[pc+2], TYPE_INTEGER) or
-			(TypeIs(Code[pc+2], TYPE_SEQUENCE) and
-			SeqElem(Code[pc+2]) = TYPE_INTEGER)) then
+			SeqElem(rhs1) = TYPE_INTEGER and
+			(TypeIs(rhs2, TYPE_INTEGER) or
+			(TypeIs(rhs2, TYPE_SEQUENCE) and
+			SeqElem(rhs2) = TYPE_INTEGER)) then
 			target_elem = TYPE_INTEGER
 		end if
 
-	elsif TypeIs(Code[pc+2], TYPE_SEQUENCE) then
+	elsif TypeIs(rhs2, TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
 		if iii and
-			  SeqElem(Code[pc+2]) = TYPE_INTEGER and
-			  TypeIs(Code[pc+1], TYPE_INTEGER) then
+			  SeqElem(rhs2) = TYPE_INTEGER and
+			  TypeIs(rhs1, TYPE_INTEGER) then
 			target_elem = TYPE_INTEGER
 		end if
-
-	elsif TypeIs(Code[pc+1], TYPE_OBJECT) then
+		
+	elsif TypeIs(rhs1, TYPE_OBJECT) then
 		target_type = TYPE_OBJECT
 
-	elsif TypeIs(Code[pc+2], TYPE_OBJECT) then
+	elsif TypeIs(rhs2, TYPE_OBJECT) then
 		target_type = TYPE_OBJECT
 
 	else
 		target_type = atom_type
 
+c_stmt0(sprintf("// Using atom_type: %d\n", atom_type ))
 	end if
 
-	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
+	CSaveStr("_0", lhs, rhs1, rhs2, 0)
 
 	close_brace = FALSE
 
 	check = 0
 
-	if TypeIs(Code[pc+1], TYPE_INTEGER) and
-	   TypeIs(Code[pc+2], TYPE_INTEGER) then
+	if TypeIs(rhs1, TYPE_INTEGER) and
+	   TypeIs(rhs2, TYPE_INTEGER) then
 		-- uncertain about neither
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
 						   rw:MULTIPLY, FLOOR_DIV, POWER}) then
 
 			np = pc + 4 + 2 * (Code[pc+4] = INTEGER_CHECK)
-			target = FoldInteger(Code[pc], Code[pc+3], Code[pc+1], Code[pc+2])
+			target = FoldInteger(Code[pc], lhs, rhs1, rhs2)
 			if target[MIN] != NOVALUE and
 			   target[MIN] = target[MAX] then
 				-- constant folding code was emitted
 				CDeRefStr("_0")
-				SetBBType(Code[pc+3], TYPE_INTEGER, target,
+				SetBBType(lhs, TYPE_INTEGER, target,
 									  TYPE_OBJECT, 0)
 				dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 				return np
 
-			elsif SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
-				  IntegerSize(np, Code[pc+3]) or
+			elsif SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
+				  IntegerSize(np, lhs) or
 				  target[MIN] != NOVALUE then
 				-- result will be an integer
-				c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode2, {lhs, rhs1, rhs2})
 				CDeRefStr("_0")
 				if target[MIN] = NOVALUE then
 					target = novalue
 				end if
-				SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+				SetBBType(lhs, TYPE_INTEGER, target, TYPE_OBJECT, 0)
 				dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 				return np
 			end if
 		end if
 
-		c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+		c_stmt(intcode, {lhs, rhs1, rhs2})
 
 		if iii then
 			-- int operands => int result
-			SetBBType(Code[pc+3], TYPE_INTEGER, target_val, TYPE_OBJECT, 0)
+			SetBBType(lhs, TYPE_INTEGER, target_val, TYPE_OBJECT, 0)
 		else
-			SetBBType(Code[pc+3], TYPE_ATOM, novalue, TYPE_OBJECT, 0 )
+			SetBBType(lhs, TYPE_ATOM, novalue, TYPE_OBJECT, 0 )
 		end if
 
 		-- now that Code[pc+3]'s type and value have been updated:
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-			c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode_extra, {lhs, rhs1, rhs2})
 		end if
 
 		CDeRefStr("_0")
@@ -1873,24 +1877,24 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 		return pc + 4
 
-	elsif TypeIs(Code[pc+2], TYPE_INTEGER) and
-		  TypeIsIn(Code[pc+1], TYPES_AO) then
+	elsif TypeIs(rhs2, TYPE_INTEGER) and
+		  TypeIsIn(rhs1, TYPES_AO) then
 		-- uncertain about Code[pc+1] only
 		check = 1
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
 						   rw:MULTIPLY, FLOOR_DIV}) and
-				(SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
-					IntegerSize(pc+4, Code[pc+3])) then
-			c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				(SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
+					IntegerSize(pc+4, lhs)) then
+			c_stmt(intcode2, {lhs, rhs1, rhs2})
 
 		else
-			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode, {lhs, rhs1, rhs2})
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem, 0)
+				SetBBType(lhs, GType(lhs), target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2})
 			end if
 
 		end if
@@ -1899,47 +1903,47 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		c_stmt0("else {\n")
 		close_brace = TRUE
 
-	elsif TypeIs(Code[pc+1], TYPE_INTEGER) and
-		  TypeIsIn(Code[pc+2], TYPES_AO) then
+	elsif TypeIs(rhs1, TYPE_INTEGER) and
+		  TypeIsIn(rhs2, TYPES_AO) then
 		-- uncertain about Code[pc+2] only
 		check = 2
-		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
+		c_stmt("if (IS_ATOM_INT(@)) {\n", rhs2 )
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
 						   rw:MULTIPLY, FLOOR_DIV}) and
 						(SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
 						 IntegerSize(pc+4, Code[pc+3])) then
-			c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode2, {lhs, rhs1, rhs2})
 		else
-			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode, {lhs, rhs1, rhs2})
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]),
+				SetBBType(Code[pc+3], GType(lhs),
 									  target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2})
 			end if
 		end if
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 		close_brace = TRUE
 
-	elsif TypeIsIn(Code[pc+1], TYPES_AO) and
-		  TypeIsIn(Code[pc+2], TYPES_AO) then
+	elsif TypeIsIn(rhs1, TYPES_AO) and
+		  TypeIsIn(rhs2, TYPES_AO) then
 		-- uncertain about both types being TYPE_INTEGER or not
-		c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)) {\n", {Code[pc+1], Code[pc+2]})
+		c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)) {\n", {rhs1, rhs2})
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
 						   rw:MULTIPLY, FLOOR_DIV}) and
-						(SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
-						 IntegerSize(pc+4, Code[pc+3])) then
-			c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+						(SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
+						 IntegerSize(pc+4, lhs)) then
+			c_stmt(intcode2, {lhs, rhs1, rhs2})
 
 		else
-			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode, {lhs, rhs1, rhs2})
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem,0)
+				SetBBType(lhs, GType(lhs), target_val, target_elem,0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2})
 			end if
 		end if
 		c_stmt0("}\n")
@@ -1947,111 +1951,111 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		close_brace = TRUE
 	end if
 
-	if TypeIsNot(Code[pc+1], TYPE_INTEGER) or
-	   TypeIsNot(Code[pc+2], TYPE_INTEGER) then
+	if TypeIsNot(rhs1, TYPE_INTEGER) or
+	   TypeIsNot(rhs2, TYPE_INTEGER) then
 		if Code[pc] != FLOOR_DIV and
-		   TypeIsNotIn(Code[pc+1], TYPES_SO) and
-		   TypeIsNotIn(Code[pc+2], TYPES_SO) then
+		   TypeIsNotIn(rhs1, TYPES_SO) and
+		   TypeIsNotIn(rhs2, TYPES_SO) then
 			-- both are known to be atoms and integer:integer
 			-- possibility has been handled - do it in-line
 
 			if check != 1 and
-			   TypeIsIn(Code[pc+1], TYPES_AO) then
-				c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
+			   TypeIsIn(rhs1, TYPES_AO) then
+				c_stmt("if (IS_ATOM_INT(@)) {\n", rhs1)
 			end if
 
 			if check != 1 and
-			   TypeIsIn(Code[pc+1], TYPES_IAO) then
+			   TypeIsIn(rhs1, TYPES_IAO) then
 				if length(dblfn) > 2 then
-					c_stmt("temp_d.dbl = (double)@;\n", Code[pc+1])
-					c_stmt("@ = ", Code[pc+3])
+					c_stmt("temp_d.dbl = (double)@;\n", rhs1)
+					c_stmt("@ = ", lhs)
 					c_puts(dblfn)
 					temp_indent = -indent
-					c_stmt("(&temp_d, DBL_PTR(@));\n", Code[pc+2])
+					c_stmt("(&temp_d, DBL_PTR(@));\n", rhs2)
 				else
-					c_stmt("@ = ", Code[pc+3])
+					c_stmt("@ = ", lhs)
 					temp_indent = -indent
 					if atom_type = TYPE_INTEGER then
-						c_stmt("((double)@ ", Code[pc+1])
+						c_stmt("((double)@ ", rhs1)
 					else
-						c_stmt("NewDouble((double)@ ", Code[pc+1])
+						c_stmt("NewDouble((double)@ ", rhs1)
 					end if
 					c_puts(dblfn)
 					temp_indent = -indent
-					c_stmt(" DBL_PTR(@)->dbl);\n", Code[pc+2])
+					c_stmt(" DBL_PTR(@)->dbl);\n", rhs2)
 				end if
 			end if
 
 			if check != 1 and
-			   TypeIsIn(Code[pc+1], TYPES_AO) then
+			   TypeIsIn(rhs1, TYPES_AO) then
 				c_stmt0("}\n")
 				c_stmt0("else {\n")
 			end if
 
-			if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
+			if TypeIsNot(rhs1, TYPE_INTEGER) then
 				if check != 2 and
-				   TypeIsIn(Code[pc+2], TYPES_AO) then
-					c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
+				   TypeIsIn(rhs2, TYPES_AO) then
+					c_stmt("if (IS_ATOM_INT(@)) {\n", rhs2)
 				end if
 
 				if check != 2 and
-				   TypeIsIn(Code[pc+2], TYPES_IAO) then
+				   TypeIsIn(rhs2, TYPES_IAO) then
 					if length(dblfn) > 2 then
-						c_stmt("temp_d.dbl = (double)@;\n", Code[pc+2])
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("temp_d.dbl = (double)@;\n", rhs2)
+						c_stmt("@ = ", lhs)
 						c_puts(dblfn)
 						temp_indent = -indent
-						c_stmt("(DBL_PTR(@), &temp_d);\n", Code[pc+1])
+						c_stmt("(DBL_PTR(@), &temp_d);\n", rhs1)
 					else
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("@ = ", lhs)
 						temp_indent = -indent
 						if atom_type = TYPE_INTEGER then
-							c_stmt("(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("(DBL_PTR(@)->dbl ", rhs1)
 						else
-							c_stmt("NewDouble(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("NewDouble(DBL_PTR(@)->dbl ", rhs1)
 						end if
 						c_puts(dblfn)
 						temp_indent = -indent
-						c_stmt(" (double)@);\n", Code[pc+2])
+						c_stmt(" (double)@);\n", rhs2)
 					end if
 				end if
 
 				if check != 2 and
-				   TypeIsIn(Code[pc+2], TYPES_AO) then
+				   TypeIsIn(rhs2, TYPES_AO) then
 					c_stmt0("}\n")
 					c_stmt0("else\n")
 				end if
 
-				if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
+				if TypeIsNot(rhs2, TYPE_INTEGER) then
 					if length(dblfn) > 2 then
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("@ = ", lhs)
 						c_puts(dblfn)
 						temp_indent = -indent
 						c_stmt("(DBL_PTR(@), DBL_PTR(@));\n",
-											{Code[pc+1], Code[pc+2]})
+											{rhs1, rhs2})
 					else
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("@ = ", lhs)
 						temp_indent = -indent
 						if atom_type = TYPE_INTEGER then
-							c_stmt("(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("(DBL_PTR(@)->dbl ", rhs1)
 						else
-							c_stmt("NewDouble(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("NewDouble(DBL_PTR(@)->dbl ", rhs1)
 						end if
 						c_puts(dblfn)
 						temp_indent = -indent
-						c_stmt(" DBL_PTR(@)->dbl);\n", Code[pc+2])
+						c_stmt(" DBL_PTR(@)->dbl);\n", rhs2)
 					end if
 				end if
 			end if
 
 			if check != 1 and
-			   TypeIsIn(Code[pc+1], TYPES_AO) then
+			   TypeIsIn(rhs1, TYPES_AO) then
 				c_stmt0("}\n")
 			end if
 
 		else
 			-- one might be a sequence - use general call
-			c_stmt(gencode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(gencode, {lhs, rhs1, rhs2})
 
 		end if
 	end if
@@ -2061,7 +2065,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 	end if
 
 	CDeRefStr("_0")
-	SetBBType(Code[pc+3], target_type, target_val, target_elem, 0)
+	SetBBType(lhs, target_type, target_val, target_elem, 0)
 	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	
 	return pc + 4
@@ -3403,34 +3407,49 @@ procedure opIS_AN_OBJECT()
 end procedure
 
 		-- ---------- start of unary ops -----------------
+procedure unary_type()
+	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) then
+		SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_OBJECT, 0 )
+		
+	elsif TypeIsIn( Code[pc+2], TYPES_IAD ) then
+		SetBBType(Code[pc+2], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0 )
+		
+	end if
+end procedure
 
 procedure opSQRT()
 	CUnaryOp(pc, "e_sqrt", "SQRT")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opSIN()
 	CUnaryOp(pc, "e_sin", "SIN")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opCOS()
 	CUnaryOp(pc, "e_cos", "COS")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opTAN()
 	CUnaryOp(pc, "e_tan", "TAN")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opARCTAN()
 	CUnaryOp(pc, "e_arctan", "ARCTAN")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opLOG()
 	CUnaryOp(pc, "e_log", "LOG")
+	unary_type()
 	pc += 3
 end procedure
 
@@ -3654,6 +3673,7 @@ end procedure
 
 procedure opPLUS()
 -- PLUS / PLUS_I
+
 	gencode = "@ = binary_op(PLUS, @, @);\n"
 	intcode2= "@1 = @2 + @3;\n"
 	intcode = "@1 = @2 + @3;\n"
@@ -3665,6 +3685,7 @@ procedure opPLUS()
 	end if
 	iii = FALSE
 	dblfn="+"
+	
 	pc = binary_op(pc, iii, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
@@ -4072,7 +4093,11 @@ procedure opFOR()
 			SymTab[Code[pc+5]][S_GTYPE] = TYPE_INTEGER
 		else
 			range1 = {NOVALUE, NOVALUE}
-			SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
+			if TypeIs(Code[pc+3], TYPE_DOUBLE) then
+				SymTab[Code[pc+5]][S_GTYPE] = TYPE_DOUBLE
+			else
+				SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
+			end if
 			SymTab[Code[pc+5]][S_OBJ] = NOVALUE
 		end if
 
