@@ -1816,7 +1816,6 @@ function binary_op(integer pc, integer iii, sequence target_val,
 	else
 		target_type = atom_type
 
-c_stmt0(sprintf("// Using atom_type: %d\n", atom_type ))
 	end if
 
 	CSaveStr("_0", lhs, rhs1, rhs2, 0)
