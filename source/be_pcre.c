@@ -98,6 +98,7 @@ object compile_pcre(object x, object flags) {
 		rcp = EMalloc(sizeof(struct pcre_cleanup));
 		rcp->cleanup.func.builtin = &pcre_deref;
 		rcp->cleanup.type = CLEAN_PCRE;
+		rcp->cleanup.next = 0;
 		rcp->errmsg = compiled_regex;
 		rcp->re = 0;
 		DBL_PTR(x)->cleanup = (cleanup_ptr) rcp;
