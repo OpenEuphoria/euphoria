@@ -8,7 +8,7 @@ object_ptr NOVALUE_128bit, ONES_128bit, ZEROS_128bit;
 object_ptr MAXINT_128bit, MININT_128bit;
 object_ptr overunder_128bit, integer_128bit, intermediate_128bit; 
 signed long iterate_over_double_words;
-object sse_data[8*4+BASE_ALIGN_SIZE/sizeof(object)];
+object_ptr sse_data;
 
 struct mem_list {
 	struct mem_list * next;
@@ -16,15 +16,20 @@ struct mem_list {
 	void * outptr;
 } * mem_list;
 
-void sse2_variable_init() {
+void sse2_variable_init() { 
 	int j, i = 0;
 	
+	sse_data = (object_ptr)malloc((8*4)*sizeof(object)+BASE_ALIGN_SIZE);
 	while (((unsigned int)&sse_data[i]) % BASE_ALIGN_SIZE != 0)
 		++i;
 #	define VSET( VN, VV )	do {VN = &sse_data[i];\
-	for (j = 0; j < 4; ++j ) sse_data[i++] = VV;} while (0)
+	for (j = 0; j < 4; ++j ) sse_data[++i] = VV;} while (0)
 	
 	VSET(NOVALUE_128bit, NOVALUE);
+	NOVALUE_128bit[0] = NOVALUE;
+	NOVALUE_128bit[3] = NOVALUE;
+	NOVALUE_128bit[2] = NOVALUE;
+	NOVALUE_128bit[1] = NOVALUE;
 	VSET(ONES_128bit, 0xffffffff);
 	VSET(ZEROS_128bit, 0);
 	VSET(MAXINT_128bit, MAXINT);
