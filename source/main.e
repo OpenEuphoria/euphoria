@@ -34,6 +34,7 @@ include msgtext.e
 
 ifdef TRANSLATOR then
 	include buildsys.e
+	include c_decl.e
 end ifdef
 
 --**
@@ -188,7 +189,7 @@ procedure main()
 	eu_namespace()
 
 	ifdef TRANSLATOR then
-		if build_system_type = BUILD_DIRECT then
+		if keep and build_system_type = BUILD_DIRECT then
 			if not quick_has_changed(file_name[$]) then
 				build_direct(1, file_name[$])
 				Cleanup(0)

@@ -667,8 +667,11 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		end for
 	end if
 
-	if not link_only and length(link_files) then
+	if keep and not link_only and length(link_files) then
 		write_lines(file0 & ".bld", link_files)
+	elsif keep = 0 then
+		-- Delete a .bld file that may be left over from a previous -keep invocation
+		delete_file(file0 & ".bld")
 	end if
 
 	switch compiler_type do
