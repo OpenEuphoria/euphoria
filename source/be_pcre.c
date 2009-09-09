@@ -28,12 +28,12 @@ typedef struct pcre_cleanup *pcre_cleanup_ptr;
 
 void pcre_deref(object re) {
 	pcre_cleanup_ptr rcp;
-
+	object errmsg;
 	if (IS_ATOM_DBL(re)) {
 		rcp = DBL_PTR(re)->cleanup;
 		if (rcp != 0) {
-			if (rcp->errmsg) {
-				EFree(rcp->errmsg);
+			if (errmsg = rcp->errmsg) {
+				DeRefDS(errmsg);
 				rcp->errmsg = 0;
 			}
 		}
@@ -69,11 +69,12 @@ object compile(object pattern, object eflags) {
 	str = EMalloc( SEQ_PTR(pattern)->length + 1);
 	MakeCString( str, pattern, SEQ_PTR(pattern)->length + 1 );
 	re = pcre_compile( str, pflags, &error, &erroffset, NULL );
+	EFree( str );
 	if( re == NULL ){
 		// error, so pass the error string to caller
 		return NewString( error );
 	}
-	EFree( str );
+	
 
 	if ((unsigned) re > (unsigned)MAXINT)
 		ret = NewDouble((double)(unsigned long)re);
@@ -85,7 +86,7 @@ object compile(object pattern, object eflags) {
 
 object compile_pcre(object x, object flags) {
 	pcre *re;
-	pcre_cleanup_ptr rcp;
+	pcre_cleanup_ptr rcp, prev;
 	object compiled_regex;
 
 	compiled_regex = compile(x, flags);
@@ -101,19 +102,30 @@ object compile_pcre(object x, object flags) {
 		rcp->re = 0;
 		DBL_PTR(x)->cleanup = (cleanup_ptr) rcp;
 	} else {
-		rcp = SEQ_PTR(x)->cleanup;
-
-		if (rcp != 0) {
-			(*pcre_free)(rcp->re);
-		} else {
+		// There could be some other cleanup attached
+		prev = SEQ_PTR(x)->cleanup;
+		
+		if( prev == 0 || prev->cleanup.type != CLEAN_PCRE ){
 			rcp = EMalloc(sizeof(struct pcre_cleanup));
+			if( prev ){
+				rcp->cleanup.next = prev;
+			}
+			else{
+				rcp->cleanup.next = 0;
+			}
+			
 			rcp->cleanup.func.builtin = &pcre_deref;
 			rcp->cleanup.type = CLEAN_PCRE;
-			SEQ_PTR(x)->cleanup = (cleanup_ptr) rcp;
+			rcp->errmsg = 0;
 		}
-
+		else {
+			(*pcre_free)(prev->re);
+			rcp = prev;
+		}
+		
+		SEQ_PTR(x)->cleanup = (cleanup_ptr) rcp;
 		rcp->re = compiled_regex;
-		rcp->errmsg = 0;
+		RefDS(x);
 	}
 	
 	return x;

@@ -1470,7 +1470,6 @@ void cleanup_sequence( s1_ptr seq ){
 	cleanup_ptr cp, next;
 
 	cp = seq->cleanup;
-	seq->cleanup = 0;
 	while( cp ){
 		next = cp->next;
 #ifndef ERUNTIME
@@ -1494,13 +1493,12 @@ void cleanup_sequence( s1_ptr seq ){
 		}
 		cp = next;
 	}
+	seq->cleanup = 0;
 }
 
 void cleanup_double( d_ptr dbl ){
 	cleanup_ptr cp, next;
 	cp = dbl->cleanup;
-	dbl->cleanup = 0;
-
 	while( cp ){
 		next = cp->next;
 #ifndef ERUNTIME
@@ -1525,6 +1523,7 @@ void cleanup_double( d_ptr dbl ){
 
 		cp = next;
 	}
+	dbl->cleanup = 0;
 }
 
 /* non-recursive - no chance of stack overflow */
