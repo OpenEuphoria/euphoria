@@ -280,8 +280,9 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\eu.lib
 
 CC = wcc386
+.ERASE
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 $(CPU_FLAG) /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
-BE_FLAGS = /ol /zp4 /d$(OSFLAG) $(CPU_FLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) $(SSE2)
+BE_FLAGS = /e4 /ol /zp4 /d$(OSFLAG) $(CPU_FLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) $(SSE2)
 	
 library : .SYMBOLIC version.h runtime
     @echo ------- LIBRARY -----------
