@@ -3028,23 +3028,21 @@ end procedure
 
 procedure opRIGHT_BRACE_2()
 -- form a sequence of length 2
+	for i = pc + 1 to pc + 2 do
+		if not is_temp( Code[i] ) 
+		or map:get( dead_temp_walking, Code[i], NO_REFERENCE ) = NO_REFERENCE then
+			CRef(Code[i])
+		end if
+	end for
+	
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt0("_1 = NewS1(2);\n")
 	c_stmt0("_2 = (int)((s1_ptr)_1)->base;\n")
 	c_stmt("((int *)_2)[1] = @;\n", Code[pc+2])
 	
-	if not is_temp( Code[pc+2] ) 
-	or map:get( dead_temp_walking, Code[pc+2], NO_REFERENCE ) = NO_REFERENCE then
-		CRef(Code[pc+2])
-	end if
-	
 	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
 	c_stmt("((int *)_2)[2] = @;\n", Code[pc+1])
 	
-	if not is_temp( Code[pc+1] ) 
-	or map:get( dead_temp_walking, Code[pc+1], NO_REFERENCE ) = NO_REFERENCE then
-		CRef(Code[pc+1])
-	end if
 	SymTab[Code[pc+1]][S_ONE_REF] = FALSE
 	c_stmt("@ = MAKE_SEQ(_1);\n", Code[pc+3])
 	CDeRefStr("_0")
