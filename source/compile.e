@@ -19,6 +19,7 @@ include std/filesys.e
 include std/io.e
 include std/sort.e
 include std/map.e as map
+include std/search.e
 
 include buildsys.e
 include c_decl.e
@@ -5612,12 +5613,24 @@ procedure opMEM_SET()
 	pc += 4
 end procedure
 
+function file_and_line()
+	integer ix = rfind( STARTLINE, Code, pc )
+	integer line = Code[ix+1]
+	return {file_name[slist[line][LOCAL_FILE_NO]], slist[line][LINE]}
+end function
+
 procedure opPIXEL()
-	CompileErr(294, {"pixel"})
+	if LAST_PASS then
+		Warning( 327, deprecated_warning_flag, {"pixel"} & file_and_line() )
+	end if
+	pc += 3
 end procedure
 
 procedure opGET_PIXEL()
-	CompileErr(294, {"get_pixel"})
+	if LAST_PASS then
+		Warning( 327, deprecated_warning_flag, {"get_pixel"}  & file_and_line() )
+	end if
+	pc += 3
 end procedure
 
 procedure opCALL()
@@ -6127,8 +6140,9 @@ procedure opTASK_SCHEDULE()
 end procedure
 
 procedure opTASK_YIELD()
-	dll_tasking()
-	c_stmt0("task_yield();\n")
+	if not dll_option then
+		c_stmt0("task_yield();\n")
+	end if
 	pc += 1
 end procedure
 

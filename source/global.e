@@ -315,7 +315,8 @@ export constant -- maskable warning flags
 	empty_case_warning_flag     = #0800,
 	no_case_else_warning_flag   = #1000,
 	def_arg_type_warning_flag   = #2000,
-	all_warning_flag            = #3FFF
+	deprecated_warning_flag     = #4000,
+	all_warning_flag            = #7FFF
 
 constant default_maskable_warnings =
 	resolution_warning_flag + 
@@ -342,6 +343,7 @@ export constant warning_flags = {
 	mixed_profile_warning_flag,
 	empty_case_warning_flag,
 	no_case_else_warning_flag,
+	deprecated_warning_flag,
 	all_warning_flag
 }
 
@@ -364,6 +366,7 @@ export constant warning_names = {
 	"mixed_profile",
 	"empty_case",
 	"default_case",
+	"deprecated",
 	"all"
 }
 
