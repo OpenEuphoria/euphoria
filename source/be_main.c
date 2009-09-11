@@ -227,6 +227,9 @@ void be_init()
 		;
 	*(p+1) = '\0'; /* keep the path, truncate off the final name */    
 
+#	if SSE2	
+		sse2_variable_init();
+#	endif		
 	InitExecute();
 	InitDebug();
 	InitTraceWindow();

@@ -76,57 +76,56 @@
 #endif
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
-
+/* can't move a variable value directly to MMX */
 unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 #pragma aux sse2_paddo3 = \
-                "MOVDQA XMM0, [EAX]"\
-				"MOVDQA XMM1, XMM0"\
-				"MOVDQA XMM2, XMM0"\
-				"MOVDQA XMM4, [ECX]"\
-				"MOVDQA XMM5, XMM4"\
-				"MOVDQU XMM6, [NOVALUE_128bit]"\
-				"MOVDQA XMM7, XMM6"\
-                /*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
-                /*XMM2[i] = -1 where ptr1[i] is an atom integer  */\
-                "PCMPGTD XMM2, XMM6"\
-                \
-                /* XMM5 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
-                /*   XMM5[i] = -1 where ptr2[i] is an atom integer*/\
-                "PCMPGTD XMM5, XMM7"\
-				/* Combine masks XMM5[i] is true iff ptr1[i] + ptr2[i] is a sum of two integers */\
-				"ANDPS XMM5, XMM2"\
-				/* XMM5[i] = 0 if either ptr2[i] or ptr1[i] is an encoded pointer */\
-		"MOVDQU [integer_128bit], XMM5"\
-		/* Sum vectors before masking: Now XMM1[i] = ptr1[i] + ptr2[i] iff both are ATOM_INTs */\
-		\
-		"PADDD XMM1, XMM4"\
-		/* Then apply mask to the sum of values */\
-        "ANDPS XMM1, XMM5"\
-		/* Put the result into memory */\
-		"MOVDQU [EDX], XMM1"\
-		/* Now check for overflow and underflow*/\
-		"MOVDQU XMM6, [MAXINT_128bit]"\
-		"MOVDQA XMM7, XMM1"\
-		/* XMM7[i] = -1 iff XMM1[i] > MAXINT */\ 
-		"PCMPGTD XMM7, XMM6"\
-		"MOVDQU XMM2, [MININT_128bit]"\
-		/* XMM2[i] = -1 iff MININT[i] > XMM1[i] */\
-		"PCMPGTD XMM2, XMM1"\
-		"ORPS XMM2, XMM7"\
-		"MOVDQU [overunder_128bit], XMM2"\
-		"MOVDQU XMM3, [ONES_128bit]"\
-		"ANDNPS XMM5, XMM3"\
-		"ORPS XMM2, XMM5"\		
-		"MOVDQU [intermediate_128bit], XMM2"\
-		"MOVDQU XMM3, XMM2"\
-		"MOVDQU XMM7, [ZEROS_128bit]"\
-		"PSADBW XMM3, XMM7"\
-		"PEXTRW EBX, XMM3, 0"\
-		"MOV iterate_over_double_words, EBX"\
-		"EMMS"\
-		modify [EBX] \
-		parm [EDX] [EAX] [ECX]\
-		value [EBX];
+    /* edx = dest, eax = ptr1, ecx = ptr2 */\
+	"movdqa xmm0, [eax]"\
+	"movdqa xmm1, xmm0"\
+	"MOVDQA XMM2, XMM0"\
+	"MOVDQA XMM4, [ECX]"\
+	"MOVDQA XMM5, XMM4"\
+	"movdqa xmm6, xmm5"\
+	"mov ebx, NOVALUE_128bit"\
+	"movdqa xmm7, [ebx]"\
+	"pcmpgtd xmm2, xmm7"\
+    /*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
+    /*XMM2[i] = -1 where ptr1[i] is an atom integer  */\ 	
+	"pcmpgtd xmm6, xmm7"\
+    /* XMM6 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
+    /* XMM6[i] = -1 where ptr2[i] is an atom integer*/\
+	"andps xmm2, xmm6"\
+	"mov ebx, integer_128bit"\
+	"movdqa [ebx], xmm2"\
+	"paddd xmm1, xmm5"\
+	"andps xmm1, xmm2"\
+	"movdqa [edx], xmm1"\
+	"mov ebx, MININT_128bit"\
+	"movdqa xmm6, [ebx]"\
+	/* xmm6 = MININT, XMM2 is our int mask, XMM0 and XMM4 are *ptr1 and *ptr2 repectively.*/\
+	/* xmm1 is the sum.*/\
+	"movdqa xmm3, xmm1"\
+	"pcmpgtd xmm6, xmm1"\
+	"mov ebx, MAXINT_128bit"\
+	"movdqa xmm5, [ebx]"\
+	"pcmpgtd xmm3, xmm5"\
+	"orps xmm6, xmm3"\
+	"mov ebx, overunder_128bit"\
+	"movdqa [ebx], xmm6"\
+	/* Here xmm0, xmm4 are *ptr[12], xmm2 is our int mask, xmm3 is our over under mask */\
+	"mov ebx, ONES_128bit"\
+	"andnps xmm2, [ebx]"\
+	/* Here xmm2 is our negated int mask */\
+	"mov ebx, ZEROS_128bit"\
+	"MOVDQU XMM7, [ebx]"\
+	"orps xmm3, xmm2"\
+	"PSADBW XMM3, XMM7"\
+	"PEXTRW EBX, XMM3, 0"\
+	"MOV iterate_over_double_words, EBX"\
+	"EMMS"\
+	modify [EBX]\
+	parm [EDX] [EAX] [ECX]\
+	value [EBX];
 
 /* To eliminate type casts for pc[*] you
  would need a union like this:
@@ -1678,6 +1677,7 @@ void do_exec(int *start_pc)
 	s1_ptr s1,s2;
 	object *block;
 	
+	sse2_variable_init();
 #if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
@@ -2778,29 +2778,31 @@ void do_exec(int *start_pc)
 					}
 					/* a is a sequence */
 #					if SSE2					
-						if ((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0 && 
+						if (((unsigned int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 
 							IS_SEQUENCE(top) && 
-							(int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0) {
+							((unsigned int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
 								struct s1 * dest;
 								dest = NewS1(4);
-								!sse2_paddo3( dest->base + 1, &SEQ_PTR(a)->base[1], &SEQ_PTR(top)
-									->base[1] );					
-								printf("[%4ld %4ld %4ld %4ld]=[%4ld %4ld %4ld %4ld]+[%4ld %4ld %4ld %4ld]\n",
+								sse2_paddo3( dest->base + 1, &SEQ_PTR(a)->base[1], &SEQ_PTR(top)
+									->base[1] );
+								printf("NOVALUE_128bit[1]=%08x (%d)\n", NOVALUE_128bit[1]
+									, NOVALUE_128bit[1] ); 
+								printf("[%08x %08x %08x %08x]=[%4ld %4ld %4ld %4ld]+[%4ld %4ld %4ld %4ld]\n",
 									dest->base[1], dest->base[2], dest->base[3], dest->base[4],
 									SEQ_PTR(a)->base[1], SEQ_PTR(a)->base[2], SEQ_PTR(a)->base[3],
 									SEQ_PTR(a)->base[4],
 									SEQ_PTR(top)->base[1], SEQ_PTR(top)->base[2], 
 									SEQ_PTR(top)->base[3], SEQ_PTR(top)->base[4] );		
-#if 0								
 								printf("IsIntegerF [0x%8x 0x%8x 0x%8x 0x%8x]\n",
 									integer_128bit[0], integer_128bit[1], 
 									integer_128bit[2], integer_128bit[3] );
-						
 								printf("OUF [0x%8x 0x%8x 0x%8x 0x%8x]\n",
 									overunder_128bit[0], overunder_128bit[1], 
 									overunder_128bit[2], overunder_128bit[3] );
-#endif								
+								fflush( stdout );
+								EFree(dest);
 							}
+								
 #					endif
 #					if SSE2 && 0
 						if ((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0 && 
@@ -2823,7 +2825,7 @@ void do_exec(int *start_pc)
 							while ((ap - sa->base) < sa->length) {
 								signed long int * ou;
 								signed long int * in, j;
-								sse2_padd_euphoria_values4( dp, ap, bp );
+								sse2_paddo3( dp, ap, bp );
 								if (iterate_over_double_words) {
 									ou = ((unsigned long int*)&overunder_128bit);
 									in = ((unsigned long int*)&integer_128bit);									

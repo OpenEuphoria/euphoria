@@ -24,13 +24,13 @@ void sse2_variable_init() {
 		++i;
 #	define VSET( VN, VV )	do {VN = &sse_data[i];\
 	for (j = 0; j < 4; ++j ) sse_data[i++] = VV;} while (0)
-	
+
 	NOVALUE_128bit = &sse_data[i];
 	NOVALUE_128bit[0] = NOVALUE;
 	NOVALUE_128bit[3] = NOVALUE;
 	NOVALUE_128bit[2] = NOVALUE;
 	NOVALUE_128bit[1] = NOVALUE;
-	
+	i += 4;
 	VSET(ONES_128bit, 0xffffffff);
 	VSET(ZEROS_128bit, 0);
 	VSET(MAXINT_128bit, MAXINT);
