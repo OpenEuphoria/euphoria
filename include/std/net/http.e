@@ -493,9 +493,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 							junk = sock:receive(sock, 0) -- then recieve it
 						else
 							junk = ""      -- add nothing to data
-							ifdef not EUC_DLL then
-								task_yield()
-							end ifdef
+							task_yield()
 					end if
 				end while
 			else
