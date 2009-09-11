@@ -6,8 +6,20 @@ namespace task
 --
 -- <<LEVELTOC depth=2>>
 --
-
---****
+-- === General Notes
+--
+-- For a complete overview of the task system, please see the mini-guide 
+-- [[:Multitasking in Euphoria]].
+-- 
+-- === Warning
+-- 
+-- The task system does not yet function in a shared library. Task routine
+-- calls that are compiled into a shared library are emitted as a NOP (no
+-- operation) and will therefore have no effect.
+-- 
+-- It is planned to allow the task system to function in shared libraries
+-- in future versions of OpenEuphoria.
+-- 
 -- === Routines
 
 constant M_SLEEP = 64
