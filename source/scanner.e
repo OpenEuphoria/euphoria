@@ -1160,7 +1160,11 @@ function ExtendedString(integer ech)
 			ungetch()
 		end if
 
-		string_text &= ch
+		if ch != '\r' then
+			-- Ok, so its not a perfect 'raw' literal string. 
+			-- All carriage returns are removed.
+			string_text &= ch
+		end if
 
 		if bp > length(ThisLine) then
 			read_line() -- sets bp to 1, btw.
@@ -1176,9 +1180,9 @@ function ExtendedString(integer ech)
 		end if
 		ch = getch()
 	end while
-	if length(string_text) > 0 and find(string_text[1], "\n\r") then
+	if length(string_text) > 0 and string_text[1] = '\n' then
 		string_text = string_text[2 .. $]
-		if length(string_text) > 0 and find(string_text[$], "\n\r") then
+		if length(string_text) > 0 and string_text[$] = '\n' then
 			string_text = string_text[1 .. $-1]
 		end if
 	end if

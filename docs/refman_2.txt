@@ -192,6 +192,7 @@ Bill said
 
 **The rules for raw strings are...**
 # enclose with three double-quotes  {{{"""..."""}}} or back-quote. {{{`...`}}}
+# The resulting string will never have any carriage-return characters in it. 
 # If the resulting string begins with a new-line, the initial new-line is removed
 and any trailing new-line is also removed.
 # A special form is used to automatically remove leading whitespace from the
