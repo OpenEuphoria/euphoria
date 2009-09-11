@@ -2777,7 +2777,7 @@ void do_exec(int *start_pc)
 						}
 					}
 					/* a is a sequence */
-#					if SSE2					
+#					if SSE2 && 0					
 						if (((unsigned int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 
 							IS_SEQUENCE(top) && 
 							((unsigned int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
@@ -2804,7 +2804,7 @@ void do_exec(int *start_pc)
 							}
 								
 #					endif
-#					if SSE2 && 0
+#					if SSE2
 						if ((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0 && 
 							IS_SEQUENCE(top) && 
 							(int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0) {
@@ -2834,15 +2834,19 @@ void do_exec(int *start_pc)
 											*dp = NewDouble(*dp);
 										else if (!*in)
 											*dp = binary_op(PLUS, *ap, *bp );
-									}			
+									}									
 								} else {
 									ap += 4;
 									bp += 4;
 									dp += 4;
-								}
-								
+								}								
 							}
-						
+							dest->base[dest->length+1] = NOVALUE;
+							if (compare(MAKE_SEQ(dest),binary_op(PLUS,a,top))) {
+								RTFatal("SSE code descrephancy:"
+									"results not consistent with old version.");																
+							}
+							top = MAKE_SEQ(dest);
 						}
 						else {
 							top = binary_op(PLUS, a, top);
