@@ -6019,7 +6019,16 @@ procedure opDELETE_ROUTINE()
 		end if
 		
 		if obj != target and sym_mode( obj ) = M_NORMAL then
-			c_stmt("RefDS(@);\n", target )
+			if not TypeIs( obj, TYPE_INTEGER ) then
+				if TypeIsNotIn( obj, TYPES_DS ) then
+					c_stmt( "if( !IS_ATOM_INT(@) ){\n", obj )
+						c_stmt("RefDS(@);\n", target )
+					c_stmt0("}\n")
+				else
+					c_stmt("RefDS(@);\n", target )
+				end if
+				
+			end if
 		end if
 	end if
 	dispose_temps( pc+1, 2, SAVE_TEMP, REMOVE_FROM_MAP )

@@ -1409,7 +1409,7 @@ void udt_clean_rt( object o, long rid ){
 	}
 
 	if( pre_ref == 0 ){
-		SEQ_PTR( o )->ref = pre_ref;;
+		SEQ_PTR( o )->ref -= 2;
 	}
 }
 
@@ -1441,6 +1441,10 @@ void udt_clean( object o, long rid ){
 	if( pre_ref == 0 ){
 		SEQ_PTR( o )->ref += 2;
 	}
+	else{
+		RefDS( o );
+	}
+	
 	args = MAKE_SEQ( s );
 	code = (int *)EMalloc( 4*sizeof(int*) );
 	code[0] = (int **)opcode(CALL_PROC);
@@ -1457,11 +1461,14 @@ void udt_clean( object o, long rid ){
 	save_tpc = tpc;
 	do_exec(code);  // execute routine without setting up new stack
 	EFree(code);
-
+	
 	tpc = save_tpc;
 	expr_top -= 2;
 	if( pre_ref == 0 ){
-		SEQ_PTR(o)->ref--;
+		SEQ_PTR(o)->ref -= 2;
+	}
+	else{
+		DeRefDS( o );
 	}
 }
 #endif
