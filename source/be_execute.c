@@ -76,57 +76,58 @@
 #endif
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
-/* can't move a variable value directly to MMX */
-unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
-#pragma aux sse2_paddo3 = \
-    /* edx = dest, eax = ptr1, ecx = ptr2 */\
-	"movdqa xmm0, [eax]"\
-	"movdqa xmm1, xmm0"\
-	"MOVDQA XMM2, XMM0"\
-	"MOVDQA XMM4, [ECX]"\
-	"MOVDQA XMM5, XMM4"\
-	"movdqa xmm6, xmm5"\
-	"mov ebx, NOVALUE_128bit"\
-	"movdqa xmm7, [ebx]"\
-	"pcmpgtd xmm2, xmm7"\
-    /*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
-    /*XMM2[i] = -1 where ptr1[i] is an atom integer  */\ 	
-	"pcmpgtd xmm6, xmm7"\
-    /* XMM6 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
-    /* XMM6[i] = -1 where ptr2[i] is an atom integer*/\
-	"andps xmm2, xmm6"\
-	"mov ebx, integer_128bit"\
-	"movdqa [ebx], xmm2"\
-	"paddd xmm1, xmm5"\
-	"andps xmm1, xmm2"\
-	"movdqa [edx], xmm1"\
-	"mov ebx, MININT_128bit"\
-	"movdqa xmm6, [ebx]"\
-	/* xmm6 = MININT, XMM2 is our int mask, XMM0 and XMM4 are *ptr1 and *ptr2 repectively.*/\
-	/* xmm1 is the sum.*/\
-	"movdqa xmm3, xmm1"\
-	"pcmpgtd xmm6, xmm1"\
-	"mov ebx, MAXINT_128bit"\
-	"movdqa xmm5, [ebx]"\
-	"pcmpgtd xmm3, xmm5"\
-	"orps xmm6, xmm3"\
-	"mov ebx, overunder_128bit"\
-	"movdqa [ebx], xmm6"\
-	/* Here xmm0, xmm4 are *ptr[12], xmm2 is our int mask, xmm3 is our over under mask */\
-	"mov ebx, ONES_128bit"\
-	"andnps xmm2, [ebx]"\
-	/* Here xmm2 is our negated int mask */\
-	"mov ebx, ZEROS_128bit"\
-	"MOVDQU XMM7, [ebx]"\
-	"orps xmm3, xmm2"\
-	"PSADBW XMM3, XMM7"\
-	"PEXTRW EBX, XMM3, 0"\
-	"MOV iterate_over_double_words, EBX"\
-	"EMMS"\
-	modify [EBX]\
-	parm [EDX] [EAX] [ECX]\
-	value [EBX];
-
+#if SSE2
+	/* can't move a variable value directly to MMX */
+	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
+	#pragma aux sse2_paddo3 = \
+		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+		"movdqa xmm0, [eax]"\
+		"movdqa xmm1, xmm0"\
+		"MOVDQA XMM2, XMM0"\
+		"MOVDQA XMM4, [ECX]"\
+		"MOVDQA XMM5, XMM4"\
+		"movdqa xmm6, xmm5"\
+		"mov ebx, NOVALUE_128bit"\
+		"movdqa xmm7, [ebx]"\
+		"pcmpgtd xmm2, xmm7"\
+		/*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
+		/*XMM2[i] = -1 where ptr1[i] is an atom integer  */\ 	
+		"pcmpgtd xmm6, xmm7"\
+		/* XMM6 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
+		/* XMM6[i] = -1 where ptr2[i] is an atom integer*/\
+		"andps xmm2, xmm6"\
+		"mov ebx, integer_128bit"\
+		"movdqa [ebx], xmm2"\
+		"paddd xmm1, xmm5"\
+		"andps xmm1, xmm2"\
+		"movdqa [edx], xmm1"\
+		"mov ebx, MININT_128bit"\
+		"movdqa xmm6, [ebx]"\
+		/* xmm6 = MININT, XMM2 is our int mask, XMM0 and XMM4 are *ptr1 and *ptr2 repectively.*/\
+		/* xmm1 is the sum.*/\
+		"movdqa xmm3, xmm1"\
+		"pcmpgtd xmm6, xmm1"\
+		"mov ebx, MAXINT_128bit"\
+		"movdqa xmm5, [ebx]"\
+		"pcmpgtd xmm3, xmm5"\
+		"orps xmm6, xmm3"\
+		"mov ebx, overunder_128bit"\
+		"movdqa [ebx], xmm6"\
+		/* Here xmm0, xmm4 are *ptr[12], xmm2 is our int mask, xmm3 is our over under mask */\
+		"mov ebx, ONES_128bit"\
+		"andnps xmm2, [ebx]"\
+		/* Here xmm2 is our negated int mask */\
+		"mov ebx, ZEROS_128bit"\
+		"MOVDQU XMM7, [ebx]"\
+		"orps xmm3, xmm2"\
+		"PSADBW XMM3, XMM7"\
+		"PEXTRW EBX, XMM3, 0"\
+		"MOV iterate_over_double_words, EBX"\
+		"EMMS"\
+		modify [EBX]\
+		parm [EDX] [EAX] [ECX]\
+		value [EBX];
+#endif
 /* To eliminate type casts for pc[*] you
  would need a union like this:
 union pc_t {
@@ -1677,7 +1678,9 @@ void do_exec(int *start_pc)
 	s1_ptr s1,s2;
 	object *block;
 	
-	sse2_variable_init();
+#	if SSE2	
+		sse2_variable_init();
+#	endif		
 #if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
@@ -2818,32 +2821,34 @@ void do_exec(int *start_pc)
 								RTFatal(
 								"Sequences are of differing lenghts can not be added together.");
 							}
-							dest = NewS1(sa->length);
+							/* Allocate more so as to not overwrite other objects */
+							dest = NewS1(sa->length+BASE_ALIGN_SIZE/sizeof(object));
 							ap = &sa->base[1];
 							bp = &sb->base[1];
 							dp = &dest->base[1];
-							while ((ap - sa->base) < sa->length) {
+							while ((ap - sa->base) <= sa->length) {
 								signed long int * ou;
 								signed long int * in, j;
 								sse2_paddo3( dp, ap, bp );
 								if (iterate_over_double_words) {
-									ou = ((unsigned long int*)&overunder_128bit);
-									in = ((unsigned long int*)&integer_128bit);									
-									for (j = 0;*ap != NOVALUE && j < 4; ++j, ++dp, ++ap, ++bp ) {
+									ou = overunder_128bit;
+									in = integer_128bit;		
+									for (j = 0;*ap != NOVALUE && j < BASE_ALIGN_SIZE/sizeof(object); ++j, ++dp, ++ap, ++bp ) {
 										if (*ou) 
 											*dp = NewDouble(*dp);
 										else if (!*in)
 											*dp = binary_op(PLUS, *ap, *bp );
-									}									
+									}						
 								} else {
 									ap += 4;
 									bp += 4;
 									dp += 4;
-								}								
+								}
 							}
+							dest->length -= BASE_ALIGN_SIZE/sizeof(object);
 							dest->base[dest->length+1] = NOVALUE;
 							if (compare(MAKE_SEQ(dest),binary_op(PLUS,a,top))) {
-								RTFatal("SSE code descrephancy:"
+								RTFatal("SSE code discrepancy:"
 									"results not consistent with old version.");																
 							}
 							top = MAKE_SEQ(dest);

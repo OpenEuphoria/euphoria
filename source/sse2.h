@@ -1,5 +1,5 @@
 #define ALIGN_SIZE 8
-#define BASE_ALIGN_SIZE 16
+#define BASE_ALIGN_SIZE 16 /* alignment memory must be at to call the SSE instructions */
 #if defined( ESIMPLE_MALLOC )
 #	define EMalloc(size) malloc_aligned(size,16)
 #	define ERealloc(orig,newsize) realloc_aligned(orig,newsize,16)
