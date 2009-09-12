@@ -2,9 +2,37 @@
 
 <makefile>
 	<set var="BUILDDIR">.$(DIRSEP)bake</set>
+	<include file="euphoria.bkl" />
 	
 	<subproject id="source">
 	  <dir>source</dir>
 	  <installable>yes</installable>
 	</subproject>
+
+	<option name="NIGHTLY">
+		<desc>Version string to use for the nightly build</desc>
+	</option>
+
+	<action id="nightly">
+		<is-phony />
+		<if cond="TOOLSET=='win32'">
+			<set var="__cp">copy</set>
+			<set var="__rmdir">rmdir /s/q</set>
+			<set var="__arcext">.zip</set>
+			<set var="__arccmd">7z a</set>
+		</if>
+		<if cond="TOOLSET!='win32'">
+			<set var="__cp">cp</set>
+			<set var="__rmdir">rm -rf</set>
+			<set var="__arcext">.tar.gz</set>
+			<set var="__arccmd">tar czf</set>
+		</if>
+		<command>
+			svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/trunk nightly-$(NIGHTLY)
+			$(__cp) bake$(DIRSEP)eu*$(EXEEXT) nightly-$(NIGHTLY)$(DIRSEP)bin$(DIRSEP)
+			$(__cp) bake$(DIRSEP)eu$(LIBEXT) nightly-$(NIGHTLY)$(DIRSEP)bin$(DIRSEP)
+			$(__arccmd) nightly-$(NIGHTLY)$(__arcext) nightly-$(NIGHTLY)
+			$(__rmdir) nightly-$(NIGHTLY)
+		</command>
+	</action>
 </makefile>
