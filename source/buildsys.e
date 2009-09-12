@@ -768,7 +768,7 @@ export procedure write_buildfile()
 
 			if not silent then
 				sequence settings = setup_build()
-				ShowMsg(1, 175, { exe_name })
+				--ShowMsg(1, 175, { exe_name })
 			end if
 
 		case BUILD_NONE then
