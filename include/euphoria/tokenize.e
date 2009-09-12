@@ -23,65 +23,66 @@ function Enum()
 end function
 
 ---------------------------------------------------------------------------------
-
 global constant
-		 T_EOF        = Enum_Start(EOF,1)
-		,T_NULL       = Enum() -- 
-		,T_SHBANG     = Enum()
-		,T_BLANK      = Enum()
-		,T_COMMENT    = Enum()
-		,T_NUMBER     = Enum()
-		,T_CHAR       = Enum() -- quoted character
-		,T_STRING     = Enum() -- string
-		,T_IDENTIFIER = Enum()
-		,T_KEYWORD    = Enum()
+		T_EOF        = Enum_Start(EOF,1),
+		T_NULL       = Enum(), -- 
+		T_SHBANG     = Enum(),
+		T_BLANK      = Enum(),
+		T_COMMENT    = Enum(),
+		T_NUMBER     = Enum(),
+		T_CHAR       = Enum(), -- quoted character
+		T_STRING     = Enum(), -- string
+		T_IDENTIFIER = Enum(),
+		T_KEYWORD    = Enum(),
 		
 		-- must not alter the following list of token codes from T_DOUBLE_OPS
 		-- up to and including T_DOLLAR
-		,T_DOUBLE_OPS  = Enum() -- marks the start of the double-op delimiter codes
-		,T_PLUSEQ      = Enum_Start(Enum()-1,1)
-		,T_MINUSEQ     = Enum()
-		,T_MULTIPLYEQ  = Enum()
-		,T_DIVIDEEQ    = Enum()
-		,T_LTEQ        = Enum()
-		,T_GTEQ        = Enum()
-		,T_NOTEQ       = Enum()
-		,T_CONCATEQ    = Enum()
+		T_DOUBLE_OPS  = Enum(), -- marks the start of the double-op delimiter codes
+		T_PLUSEQ      = Enum_Start(Enum()-1,1),
+		T_MINUSEQ     = Enum(),
+		T_MULTIPLYEQ  = Enum(),
+		T_DIVIDEEQ    = Enum(),
+		T_LTEQ        = Enum(),
+		T_GTEQ        = Enum(),
+		T_NOTEQ       = Enum(),
+		T_CONCATEQ    = Enum(),
 
-		,T_DELIMITER   = Enum() -- marks the start of the delimiter codes
-		,T_PLUS        = Enum_Start(Enum()-1,1)
-		,T_MINUS       = Enum()
-		,T_MULTIPLY    = Enum()
-		,T_DIVIDE      = Enum()
-		,T_LT          = Enum()
-		,T_GT          = Enum()
-		,T_NOT         = Enum()
-		,T_CONCAT      = Enum()
+		T_DELIMITER   = Enum(), -- marks the start of the delimiter codes
+		T_PLUS        = Enum_Start(Enum()-1,1),
+		T_MINUS       = Enum(),
+		T_MULTIPLY    = Enum(),
+		T_DIVIDE      = Enum(),
+		T_LT          = Enum(),
+		T_GT          = Enum(),
+		T_NOT         = Enum(),
+		T_CONCAT      = Enum(),
 		
-		,T_SINGLE_OPS  = Enum() -- marks the start of the single-op delimiter codes
-		,T_EQ          = Enum_Start(Enum()-1,1)
-		,T_LPAREN      = Enum()
-		,T_RPAREN      = Enum()
-		,T_LBRACE      = Enum()
-		,T_RBRACE      = Enum()
-		,T_LBRACKET    = Enum()
-		,T_RBRACKET    = Enum()
-		,T_QPRINT      = Enum() -- quick print ( ? x )
-		,T_COMMA       = Enum()
-		,T_PERIOD      = Enum()
-		,T_COLON       = Enum()   
-		,T_DOLLAR      = Enum()
+		T_SINGLE_OPS  = Enum(), -- marks the start of the single-op delimiter codes
+		T_EQ          = Enum_Start(Enum()-1,1),
+		T_LPAREN      = Enum(),
+		T_RPAREN      = Enum(),
+		T_LBRACE      = Enum(),
+		T_RBRACE      = Enum(),
+		T_LBRACKET    = Enum(),
+		T_RBRACKET    = Enum(),
+		T_QPRINT      = Enum(), -- quick print ( ? x )
+		T_COMMA       = Enum(),
+		T_PERIOD      = Enum(),
+		T_COLON       = Enum(),  
+		T_DOLLAR      = Enum(),
 		
-		,T_SLICE       = Enum()
+		T_SLICE       = Enum(),
+		$
 
 -- this list of delimiters must match the order of the corresponding T_ codes above
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
 -- T_NUMBER formats
 global constant 
-		 TF_HEX        = Enum()
-		,TF_INT        = Enum()
-		,TF_ATOM       = Enum()
+		TF_HEX        = Enum(),
+		TF_INT        = Enum(),
+		TF_ATOM       = Enum(),
+		$
 
 ---------------------------------------------------------------------------------
 
