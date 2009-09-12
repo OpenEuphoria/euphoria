@@ -3,6 +3,8 @@
 -- mini Euphoria front-end for stand-alone back-end
 -- we redundantly declare some things to keep the size down
 
+with define BACKEND
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef

@@ -2,6 +2,8 @@
 --
 -- the official C back-end interpreter
 
+with define INTERPRETER
+
 ifdef ETYPE_CHECK then
     with type_check
 elsedef

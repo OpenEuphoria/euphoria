@@ -1,6 +1,8 @@
 -- (c) Copyright - See License.txt
 -- Translator main file
 
+with define TRANSLATOR
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
