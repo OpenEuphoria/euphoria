@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<makefile>
+	<set var="BUILDDIR">..$(DIRSEP)bake</set>
+	<include file="..$(DIRSEP)euphoria.bkl" />
+
+	<eudoc id="manual">
+		<assembly-file>manual.af</assembly-file>
+		<output-directory>html</output-directory>
+		<template-file>template.html</template-file>
+	</eudoc>
+	
+	<action id="get-eudoc">
+		<is-phony />
+		<command>
+			cd ..
+			mkdir tools
+			cd tools
+			svn co https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk eudoc
+			svn co https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk eudoc/creole
+		</command>
+	</action>
+</makefile>

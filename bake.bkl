@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<makefile>
+	<set var="BUILDDIR">.$(DIRSEP)bake</set>
+	
+	<subproject id="source">
+	  <dir>source</dir>
+	  <installable>yes</installable>
+	</subproject>
+</makefile>

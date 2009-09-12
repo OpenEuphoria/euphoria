@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<makefile>
+	<set var="BUILDDIR">..$(DIRSEP)bake</set>
+	<include file="..$(DIRSEP)euphoria.bkl" />
+
+	<eutest id="eui" />
+	
+	<eutest id="full">
+		<set var="__translator">$(BUILDDIR)$(DIRSEP)euc$(EXEEXT)</set>
+		<depends-on-file>$(__translator)</depends-on-file>
+		<translator>$(__translator)</translator>
+	</eutest>
+
+	<eutest id="regex">
+		<tests>t_regex.e</tests>
+	</eutest>
+</makefile>
