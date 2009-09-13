@@ -12,6 +12,7 @@
 	</eudoc>
 	
 	<action id="upload">
+		<is-phony />
 		<command>
 			cd html
 			scp *.html listfilt@openeuphoria.org:public_html/docs
