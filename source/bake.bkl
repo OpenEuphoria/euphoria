@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
 <makefile>
-	<set var="BUILDDIR">..$(DIRSEP)bake</set>
-	<include file="..$(DIRSEP)euphoria.bkl" />
+	<set var="BUILDDIR">../bake</set>
+	<include file="../euphoria.bkl" />
 
 	<set var="LOCAL_CFLAGS">
 		<if cond="FORMAT=='watcom'">
@@ -10,7 +10,7 @@
 			/dEWINDOWS
 		</if>
 		<if cond="FORMAT=='msvc'">-D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DEMSVC</if>
-		<if cond="FORMAT=='gnu'">-w -ffast-math -O2 -Os</if>
+		<if cond="FORMAT=='gnu'">-w -ffast-math -O2 -Os -DELINUX -DEUNIX</if>
 		<if cond="FORMAT=='mingw'">
 			-w -ffast-math -O2 -Os -mno-cygwin -mwindows -DEMINGW -DEWINDOWS
 		</if>

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
 <makefile>
-	<set var="BUILDDIR">..$(DIRSEP)bake</set>
-	<include file="..$(DIRSEP)euphoria.bkl" />
+	<set var="BUILDDIR">../bake</set>
+	<include file="../euphoria.bkl" />
 
 	<eutest id="eui" />
 	
