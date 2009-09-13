@@ -9,7 +9,7 @@
 		<if cond="PLATFORM_WIN32=='0'">rm -rf</if>
 	</set>
 	
-	<if cond="FORMAT=='watcom'">
+	<if cond="FORMAT in ['watcom','mingw']">
 		<option name="MANAGED_MEMORY">
 	        <values>no,yes</values>
 			<default-value>yes</default-value>
@@ -24,7 +24,7 @@
 			<if cond="MANAGED_MEMORY=='yes'">-DMANAGED_MEM</if>
 		</set>
 	</if>
-	<if cond="FORMAT!='watcom'">
+	<if cond="FORMAT not in ['watcom','mingw']">
 		<set var="EU_MANAGED_MEMORY" />
 		<set var="C_MANAGED_MEMORY" />
 	</if>

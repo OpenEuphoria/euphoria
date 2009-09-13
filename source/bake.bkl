@@ -11,7 +11,9 @@
 		</if>
 		<if cond="FORMAT=='msvc'">-D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DEMSVC</if>
 		<if cond="FORMAT=='gnu'">-w -ffast-math -O2 -Os</if>
-		<if cond="FORMAT=='mingw'">-w -ffast-math -O2 -Os -DEMINGW -mno-cygwin -mwindows</if>
+		<if cond="FORMAT=='mingw'">
+			-w -ffast-math -O2 -Os -mno-cygwin -mwindows -DEMINGW -DEWINDOWS
+		</if>
 		<if cond="BUILD=='debug'">-dDEBUG</if>
 	</set>
 	<set var="LOCAL_CFLAGS" append="1">$(C_MANAGED_MEMORY) $(C_DEBUG)</set>
@@ -85,13 +87,13 @@
 	</if>
 
 	<lib id="ebackend">
-		<libname>$(LIBPREFIX)ebackend</libname>
+		<libname>ebackend</libname>
 		<sources>$(EU_BACKEND_LIB_SOURCES)</sources>
 		<cflags>$(LOCAL_CFLAGS) -DEBACKEND=1 -DNO_RECURSE=1</cflags>
 	</lib>
 
 	<lib id="eu">
-		<libname>$(LIBPREFIX)eu</libname>
+		<libname>eu</libname>
 		<sources>$(EU_LIB_SOURCES)</sources>
 		<cflags>$(LOCAL_CFLAGS) -DERUNTIME=1 -DNO_RECURSE=1</cflags>
 	</lib>
