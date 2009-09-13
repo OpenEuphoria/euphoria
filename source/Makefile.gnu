@@ -52,7 +52,6 @@ PCRE_CC=$(CC)
 
 include $(CONFIG)
 include $(TRUNKDIR)/source/pcre/objects.mak
-include $(TRUNKDIR)/source/version.mak
 
 ifeq "$(RELEASE)" "1"
 RELEASE_FLAG = -D EU_FULL_RELEASE
@@ -259,14 +258,6 @@ EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : interpreter translator library backend
 
-version.h: version.mak
-	echo // DO NOT EDIT, EDIT version.mak INSTEAD > version.h
-	echo \#define MAJ_VER $(MAJ_VER) >> version.h
-	echo \#define MAJ_VER $(MAJ_VER) > version.h
-	echo \#define MIN_VER $(MIN_VER) >> version.h
-	echo \#define PAT_VER $(PAT_VER) >> version.h
-	echo \#define REL_TYPE \"$(REL_TYPE)\" >> version.h
-
 BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
 
 distclean : clean
@@ -283,7 +274,6 @@ clean :
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
 endif
-	-rm -f version.h
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
 	
 clobber : distclean
@@ -291,7 +281,7 @@ clobber : distclean
 
 .PHONY : clean distclean clobber all
 
-library : version.h builddirs
+library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 $(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(EECUA) $(EU_LIB_OBJECTS)
@@ -303,11 +293,11 @@ builddirs : svn_rev
 svn_rev : 
 	-$(EXE) -i ../include revget.ex -root ..
 
-interpreter : version.h builddirs
+interpreter : builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) $(BUILDDIR)/$(EEXU) OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-translator : version.h builddirs
+translator : builddirs
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
@@ -376,7 +366,7 @@ $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EECU)
 
-backend : version.h builddirs
+backend : builddirs
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) $(BUILDDIR)/$(EBACKENDU) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 

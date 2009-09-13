@@ -1,7 +1,5 @@
 SubDir TOP source ;
 
-include [ FDirName $(SUBDIR) version.jam ] ;
-
 #
 # Setup compiler specific flags
 #
@@ -146,23 +144,6 @@ if $(JAM_TOOLSET) = WATCOM
 {
     EU_BACKEND_SOURCE += be_magic.c ;
 }
-
-rule WriteVersionHeader
-{
-}
-
-actions WriteVersionHeader
-{
-    echo // DO NOT EDIT, EDIT Jamfile INSTEAD > $(1)
-    echo #define MAJ_VER $(VERSION_MAJOR) >> $(1)
-    echo #define MIN_VER $(VERSION_MINOR) >> $(1)
-    echo #define PAT_VER $(VERSION_PATCH) >> $(1)
-    echo #define REL_TYPE "$(RELEASE_TYPE)" >> $(1)
-}
-
-WriteVersionHeader version.h ;
-MakeLocate version.h : $(BUILD_DIR) ;
-Clean clean : version.h ;
 
 #
 # SOURCE_GRIST enables us to use the same source file
