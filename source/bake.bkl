@@ -100,7 +100,7 @@
 		<source>int.ex</source>
 		<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
 	</euc>
-	
+
 	<euc id="euc">
 		<source>ec.ex</source>
 	</euc>
@@ -110,9 +110,17 @@
 		<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
 	</euc>
 
-	<euc id="eubw">
-		<source>backend.ex</source>
-		<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
-		<windowed />
-	</euc>
+	<if cond="TOOLSET=='win32'">
+		<euc id="euiw">
+			<source>int.ex</source>
+			<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
+			<windowed />
+		</euc>
+	
+		<euc id="eubw">
+			<source>backend.ex</source>
+			<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
+			<windowed />
+		</euc>
+	</if>
 </makefile>

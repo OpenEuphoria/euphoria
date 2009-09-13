@@ -4,24 +4,31 @@
     <using module="datafiles"/>
     <include file="presets/simple.bkl"/>
 	
-	<option name="MANAGED_MEMORY" category="path">
-        <values>no,yes</values>
-		<if cond="PLATFORM_WIN32=='1'">
-			<default-value>yes</default-value>
-		</if>
-		<if cond="PLATFORM=='0'">
-			<default-value>no</default-value>
-		</if>
-        <values-description>No,Yes</values-description>
-		<description>Enable or disable managed memory by using yes/no values</description>
-	</option>
+	<set var="RMDIR">
+		<if cond="PLATFORM_WIN32=='1'">-rmdir /s/q</if>
+		<if cond="PLATFORM_WIN32=='0'">rm -rf</if>
+	</set>
 	
-	<set var="EU_MANAGED_MEMORY">
-		<if cond="MANAGED_MEMORY=='yes'">-D EU_MANAGED_MEMORY</if>
-	</set>
-	<set var="C_MANAGED_MEMORY">
-		<if cond="MANAGED_MEMORY=='yes'">-DMANAGED_MEM</if>
-	</set>
+	<if cond="FORMAT=='watcom'">
+		<option name="MANAGED_MEMORY">
+	        <values>no,yes</values>
+			<default-value>yes</default-value>
+	        <values-description>No,Yes</values-description>
+			<description>Enable or disable managed memory by using yes/no values</description>
+		</option>
+	
+		<set var="EU_MANAGED_MEMORY">
+			<if cond="MANAGED_MEMORY=='yes'">-D EU_MANAGED_MEMORY</if>
+		</set>
+		<set var="C_MANAGED_MEMORY">
+			<if cond="MANAGED_MEMORY=='yes'">-DMANAGED_MEM</if>
+		</set>
+	</if>
+	<if cond="FORMAT!='watcom'">
+		<set var="EU_MANAGED_MEMORY" />
+		<set var="C_MANAGED_MEMORY" />
+	</if>
+
 	<set var="EU_DEBUG">
 		<if cond="DEBUG=='1'">-D DEBUG</if>
 	</set>
@@ -47,6 +54,20 @@
 			</set>
 			<command>$(__translate_cmd)</command>
 			<dependency-of>all</dependency-of>
+			<modify-target target="clean">
+				<if cond="FORMAT in ['watcom','mingw']">
+					<command>
+						-if exist $(BUILDDIR)$(DIRSEP)$(id)$(EXEEXT) del $(BUILDDIR)$(DIRSEP)$(id)$(EXEEXT)
+						-if exist $(BUILDDIR)$(DIRSEP)$(id)_dir rmdir /s/q $(BUILDDIR)$(DIRSEP)$(id)_dir
+					</command>
+				</if>
+				<if cond="FORMAT not in ['watcom','mingw']">
+					<command>
+						rm -f $(BUILDDIR)$(DIRSEP)$(id)$(EXEEXT)
+						rm -rf $(BUILDDIR)$(DIRSEP)$(id)_dir
+					</command>
+				</if>
+			</modify-target>
 		</template>
 		<define-tag name="source">
 			<set var="__source">$(value)</set>
