@@ -98,28 +98,29 @@
 	
 	<euc id="eui">
 		<source>int.ex</source>
-		<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
+		<library>ebackend</library>
 	</euc>
-
+	
 	<euc id="euc">
 		<source>ec.ex</source>
+		<library>eu</library>
 	</euc>
 
 	<euc id="eub">
 		<source>backend.ex</source>
-		<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
+		<library>ebackend</library>
 	</euc>
 
 	<if cond="TOOLSET=='win32'">
 		<euc id="euiw">
 			<source>int.ex</source>
-			<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
+			<library>ebackend</library>
 			<windowed />
 		</euc>
 	
 		<euc id="eubw">
 			<source>backend.ex</source>
-			<library>..$(DIRSEP)$(LIBPREFIX)ebackend$(LIBEXT)</library>
+			<library>ebackend</library>
 			<windowed />
 		</euc>
 	</if>

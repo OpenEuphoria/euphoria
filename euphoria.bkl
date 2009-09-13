@@ -18,7 +18,7 @@
 		</option>
 	
 		<set var="EU_MANAGED_MEMORY">
-			<if cond="MANAGED_MEMORY=='yes'">-D EU_MANAGED_MEMORY</if>
+			<if cond="MANAGED_MEMORY=='yes'">-D EU_MANAGED_MEM</if>
 		</set>
 		<set var="C_MANAGED_MEMORY">
 			<if cond="MANAGED_MEMORY=='yes'">-DMANAGED_MEM</if>
@@ -49,10 +49,10 @@
 			<set var="__build_dir">$(BUILDDIR)$(DIRSEP)$(id)_dir</set>
 			<set var="__output">..$(DIRSEP)$(id)$(EXEEXT)</set>
 			<set var="__lib">..$(DIRSEP)$(LIBPREFIX)eu$(LIBEXT)</set>
-			<set var="__translate_cmd" eval="0">
+			<set var="__cmd" eval="0">
 				eui ec.ex $(EU_MANAGED_MEMORY) $(__console) $(EUC_FLAGS) -builddir $(__build_dir) -keep -o $(__output) -lib $(__lib) $(__source)
 			</set>
-			<command>$(__translate_cmd)</command>
+			<command>$(__cmd)</command>
 			<dependency-of>all</dependency-of>
 			<modify-target target="clean">
 				<if cond="FORMAT in ['watcom','mingw']">
@@ -76,7 +76,8 @@
 			<set var="__console"></set>
 		</define-tag>
 		<define-tag name="library">
-			<set var="__lib">$(value)</set>
+			<set var="__lib">..$(DIRSEP)$(LIBPREFIX)$(value)$(LIBEXT)</set>
+			<depends>$(value)</depends>
 		</define-tag>
 	</define-rule>
 	
@@ -85,13 +86,17 @@
 			<is-phony />
 			<set var="__cd_cmd" />
 			<set var="__translator" />
+			<set var="__interpreter">-exe $(BUILDDIR)$(DIRSEP)eui$(EXEEXT)</set>
 			<set var="__tests" />
 			<set var="__cmd" eval="0">
 				$(__cd_cmd)
-				eutest $(__translator) $(__tests)
+				eutest $(__interpreter) $(__translator) $(__tests)
 			</set>
 			<command>$(__cmd)</command>
 		</template>
+		<define-tag name="interpreter">
+			<set var="__interpreter">-exe $(value)</set>
+		</define-tag>
 		<define-tag name="translator">
 			<set var="__translator">-ec $(value)</set>
 		</define-tag>
