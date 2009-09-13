@@ -7,12 +7,15 @@
 	<set var="LOCAL_CFLAGS">
 		<if cond="FORMAT=='watcom'">
 			/bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /ol /zp4 /dEWATCOM /dEOW
-			/dEWINDOWS /dMANAGED_MEM
+			/dEWINDOWS
 		</if>
 		<if cond="FORMAT=='msvc'">-D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DEMSVC</if>
 		<if cond="FORMAT=='gnu'">-w -ffast-math -O2 -Os</if>
 		<if cond="FORMAT=='mingw'">-w -ffast-math -O2 -Os -DEMINGW -mno-cygwin -mwindows</if>
 		<if cond="BUILD=='debug'">-dDEBUG</if>
+	</set>
+	<set var="LOCAL_CFLAGS" append="1">
+		$(C_MANAGED_MEMORY)
 	</set>
 
 	<set var="BE_MAGIC">

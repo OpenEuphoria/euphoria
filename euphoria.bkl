@@ -4,9 +4,28 @@
     <using module="datafiles"/>
     <include file="presets/simple.bkl"/>
 	
+	<option name="MANAGED_MEMORY" category="path">
+        <values>no,yes</values>
+		<if cond="PLATFORM_WIN32=='1'">
+			<default-value>yes</default-value>
+		</if>
+		<if cond="PLATFORM=='0'">
+			<default-value>no</default-value>
+		</if>
+        <values-description>No,Yes</values-description>
+		<description>Enable or disable managed memory by using yes/no values</description>
+	</option>
+	
+	<set var="EU_MANAGED_MEMORY">
+		<if cond="MANAGED_MEMORY=='yes'">-D EU_MANAGED_MEMORY</if>
+	</set>
+	<set var="C_MANAGED_MEMORY">
+		<if cond="MANAGED_MEMORY=='yes'">-DMANAGED_MEM</if>
+	</set>
+
 	<set var="EUC_FLAGS">
 		<if cond="FORMAT=='watcom'">
-			-wat -D EU_MANAGED_MEM
+			-wat
 		</if>
 		<if cond="FORMAT=='mingw'">-gcc</if>
 	</set>
@@ -19,7 +38,7 @@
 			<set var="__output">..$(DIRSEP)$(id)$(EXEEXT)</set>
 			<set var="__lib">..$(DIRSEP)$(LIBPREFIX)eu$(LIBEXT)</set>
 			<set var="__translate_cmd" eval="0">
-				eui ec.ex $(__console) $(EUC_FLAGS) -builddir $(__build_dir) -keep -o $(__output) -lib $(__lib) $(__source)
+				eui ec.ex $(EU_MANAGED_MEMORY) $(__console) $(EUC_FLAGS) -builddir $(__build_dir) -keep -o $(__output) -lib $(__lib) $(__source)
 			</set>
 			<command>$(__translate_cmd)</command>
 			<dependency-of>all</dependency-of>
