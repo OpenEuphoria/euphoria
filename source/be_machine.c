@@ -2892,6 +2892,18 @@ object machine(object opcode, object x)
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
 #else
+#ifdef EMINGW
+				dest = malloc(strlen(src) + 2);
+				strcpy(dest, src);
+				strcat(dest, "=");
+				/* on MinGW, putenv("var=") will unset the
+				 * variable. On any other system, use unsetenv()
+				 * as putenv("var=") will create an empty
+				 * environment variable.MinGW() lacks unsetenv()
+				 */
+				temp = putenv(dest);
+				free(dest);
+#else
 #ifdef EUNIX
 #ifdef ELINUX
 				temp = unsetenv(src);
@@ -2900,6 +2912,7 @@ object machine(object opcode, object x)
 				temp = 0;
 #endif /* ELINUX */
 #endif /* EUNIX */
+#endif /* EMINGW */
 #endif /* EWATCOM */
 
 				EFree(src);
