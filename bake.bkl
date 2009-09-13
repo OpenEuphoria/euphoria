@@ -9,6 +9,16 @@
 	  <installable>yes</installable>
 	</subproject>
 
+	<subproject id="docs">
+	  <dir>docs</dir>
+	  <installable>no</installable>
+	</subproject>
+
+	<subproject id="tests">
+	  <dir>tests</dir>
+	  <installable>no</installable>
+	</subproject>
+
 	<option name="NIGHTLY">
 		<desc>Version string to use for the nightly build</desc>
 	</option>
