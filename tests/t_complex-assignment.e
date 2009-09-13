@@ -14,41 +14,35 @@ end function
 
 constant platform_names = 
 		putm(  
-	        putm( 
-		        putm( 
-		        	putm( 
-	    	    		putm( 
-	        				putm( 
-						      putm(  
-	        						putm( 
-        								putm( 
-        									putm( 
-        										putm( map:new( 12 ), 
-        											os:DOS32, {}, ), 
-        										os:WIN32, {}, ), 
-        									os:LINUX, {}, ), 
-	        							os:FREEBSD, {}, ), 
-							      os:OSX, {}, ),  
-	    	    				os:DOS32,  "DOS32" , map:APPEND, 100 ), 
-	        				os:WIN32,  "WIN32" , map:APPEND, 100 ), 
-	        			os:LINUX, "LINUX", map:APPEND, 100 ), 
-	        		os:LINUX,    "UNIX", map:APPEND, 100 ), 
-	        	os:FREEBSD,  "FREEBSD" , map:APPEND, 100 ), 
-	      os:OSX,  "OSX" , map:APPEND, 100 ) 
+			putm( 
+				putm( 
+					putm( 
+						putm( 
+							putm( 
+								putm( 
+									putm( 
+										putm( map:new( 12 ), 
+											os:WIN32, {}, ), 
+										os:LINUX, {}, ), 
+									os:FREEBSD, {}, ), 
+								os:OSX, {}, ),  
+							os:WIN32,  "WIN32" , map:APPEND, 100 ), 
+						os:LINUX, "LINUX", map:APPEND, 100 ), 
+					os:LINUX,    "UNIX", map:APPEND, 100 ), 
+				os:FREEBSD,  "FREEBSD" , map:APPEND, 100 ), 
+	      os:OSX,  "OSX" , map:APPEND, 100 )
 
 constant platform_values = 
 	putm(  
 		putm( 
 			putm( 
 				putm( 
-					putm( 
-						putm( map:new(10), 
-							"DOS32", os:DOS32 ), 
-						"WIN32", os:WIN32 ), 
-					"LINUX", os:LINUX ), 
-				"FREEBSD", os:FREEBSD ), 
-			"UNIX", os:LINUX ), 
-	"OSX",  os:OSX ) 
+					putm( map:new(10), 
+					"WIN32", os:WIN32 ), 
+				"LINUX", os:LINUX ), 
+			"FREEBSD", os:FREEBSD ), 
+		"UNIX", os:LINUX ), 
+	"OSX",  os:OSX )
 
 constant compile_flags = 
 	putm( 
