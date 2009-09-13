@@ -32,7 +32,6 @@ constant
 --
 
 public enum
-	DOS32 = 1, -- Required for traninit.e and platform.e, remove once DOS32 is removed from backend.
 	WIN32 = 2,
 	LINUX,
 	OSX,

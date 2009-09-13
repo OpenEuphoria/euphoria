@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <makefile>
-	<set var="BUILDDIR">../bake</set>
+	<set var="BUILDDIR">..$(DIRSEP)bake</set>
 	<include file="../euphoria.bkl" />
 
 	<eudoc id="manual">
