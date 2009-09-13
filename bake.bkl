@@ -3,7 +3,14 @@
 <makefile>
 	<set var="BUILDDIR">.$(DIRSEP)bake</set>
 	<include file="euphoria.bkl" />
-	
+
+    <if cond="PLATFORM_WIN32=='1'">
+        <!-- We need to have these variables defined when calling the subproject makefiles ! -->
+        <set var="VARS_DONT_ELIMINATE" append="1">
+            CC CXX CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+		</set>
+	</if>
+
 	<subproject id="source">
 	  <dir>source</dir>
 	  <installable>yes</installable>
