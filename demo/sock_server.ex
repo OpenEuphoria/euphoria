@@ -39,7 +39,7 @@ while sock:listen(server, 10) label "MAIN" do
 			printf(1, "Client sent: %s\n", { trim(got_data) })
 			if equal("quit\n", got_data) then
 				sock:close(client[1])
-				exit
+				exit "MAIN"
 			else
 				sock:send(client[1], got_data, 0)
 			end if
