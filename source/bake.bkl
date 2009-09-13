@@ -14,9 +14,7 @@
 		<if cond="FORMAT=='mingw'">-w -ffast-math -O2 -Os -DEMINGW -mno-cygwin -mwindows</if>
 		<if cond="BUILD=='debug'">-dDEBUG</if>
 	</set>
-	<set var="LOCAL_CFLAGS" append="1">
-		$(C_MANAGED_MEMORY)
-	</set>
+	<set var="LOCAL_CFLAGS" append="1">$(C_MANAGED_MEMORY) $(C_DEBUG)</set>
 
 	<set var="BE_MAGIC">
 		<if cond="FORMAT=='watcom'">
@@ -89,13 +87,13 @@
 	<lib id="ebackend">
 		<libname>$(LIBPREFIX)ebackend</libname>
 		<sources>$(EU_BACKEND_LIB_SOURCES)</sources>
-		<cflags>$(LOCAL_CFLAGS) -DEBACKEND=1</cflags>
+		<cflags>$(LOCAL_CFLAGS) -DEBACKEND=1 -DNO_RECURSE=1</cflags>
 	</lib>
 
 	<lib id="eu">
 		<libname>$(LIBPREFIX)eu</libname>
 		<sources>$(EU_LIB_SOURCES)</sources>
-		<cflags>$(LOCAL_CFLAGS) -DERUNTIME=1</cflags>
+		<cflags>$(LOCAL_CFLAGS) -DERUNTIME=1 -DNO_RECURSE=1</cflags>
 	</lib>
 	
 	<euc id="eui">

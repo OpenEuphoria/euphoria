@@ -22,13 +22,18 @@
 	<set var="C_MANAGED_MEMORY">
 		<if cond="MANAGED_MEMORY=='yes'">-DMANAGED_MEM</if>
 	</set>
+	<set var="EU_DEBUG">
+		<if cond="DEBUG=='1'">-D DEBUG</if>
+	</set>
+	<set var="C_DEBUG">
+		<if cond="DEBUG=='1'">-DDEBUG</if>
+	</set>
 
 	<set var="EUC_FLAGS">
-		<if cond="FORMAT=='watcom'">
-			-wat
-		</if>
+		<if cond="FORMAT=='watcom'">-wat</if>
 		<if cond="FORMAT=='mingw'">-gcc</if>
 	</set>
+	<set var="EUC_FLAGS" append="1">$(EU_DEBUG)</set>
 
 	<define-rule name="euc" extends="action">
 		<template>
