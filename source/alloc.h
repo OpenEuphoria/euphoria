@@ -24,8 +24,16 @@ struct block_list {
 #ifdef HEAP_CHECK 
 #define FreeD(p) freeD(p)
 #else
-#if defined(EUNIX) || defined(ESIMPLE_MALLOC)
-#define FreeD(p) free(p);
+#ifdef ESIMPLE_MALLOC
+#define FreeD(p){ if (eu_dll_exists && cache_size > CACHE_LIMIT) { \
+					  free((char *)p); \
+				  } \
+				  else { \
+					  ((free_block_ptr)p)->next = (free_block_ptr)d_list; \
+					  d_list = (d_ptr)p; \
+					  cache_size += 1; } \
+				  }
+
 #else
 #define FreeD(p){ if (eu_dll_exists && cache_size > CACHE_LIMIT) { \
 					  if (align4 && *(int *)((char *)p-4) == MAGIC_FILLER) \

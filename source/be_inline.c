@@ -48,10 +48,6 @@ object NewDouble(double d)
 {
 	register d_ptr new;
 
-#ifdef EUNIX
-
-   new = EMalloc((long)D_SIZE);
-#else
 #ifdef HEAP_CHECK  
 	char *q;
 	int align;
@@ -80,8 +76,7 @@ object NewDouble(double d)
 		RTInternal("NewDouble returns misaligned pointer");
 #endif
 
-#endif
-	new->ref = 1;
+new->ref = 1;
 	new->dbl = d;
 	new->cleanup = 0;
 	return MAKE_DBL(new);
