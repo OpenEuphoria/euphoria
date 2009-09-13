@@ -663,7 +663,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 	else
 		object files = read_lines(file0 & ".bld")
 		for i = 1 to length(files) do
-			objs &= " " & filebase(files[i]) & settings[SETUP_OBJ_EXT]
+			objs &= " " & filebase(files[i]) & "." & settings[SETUP_OBJ_EXT]
 		end for
 	end if
 
