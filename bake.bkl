@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <makefile>
+	<requires version="0.2.6"/>
 	<set var="BUILDDIR">.$(DIRSEP)bake</set>
 	<include file="euphoria.bkl" />
 
