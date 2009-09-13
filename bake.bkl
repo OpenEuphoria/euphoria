@@ -18,7 +18,25 @@
 	  <dir>tests</dir>
 	  <installable>no</installable>
 	</subproject>
-
+	
+	<if cond="PLATFORM_WIN32=='1'">
+		<modify-target target="install">
+			<is-phony />
+			<set var="__makefile">
+				<if cond="FORMAT=='watcom'">makefile.wat</if>
+				<if cond="FORMAT=='mingw'">makefile.gcc</if>
+			</set>
+			<set var="__make">
+				<if cond="FORMAT=='watcom'">wmake /f</if>
+				<if cond="FORMAT=='mingw'">make -f</if>
+			</set>
+			<command>
+				cd source
+				$(__make) $(__makefile) install
+			</command>
+		</modify-target>
+	</if>
+	
 	<option name="NIGHTLY">
 		<desc>Version string to use for the nightly build</desc>
 	</option>

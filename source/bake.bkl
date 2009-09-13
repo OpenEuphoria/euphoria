@@ -96,7 +96,17 @@
 		<libname>eu</libname>
 		<sources>$(EU_LIB_SOURCES)</sources>
 		<cflags>$(LOCAL_CFLAGS) -DERUNTIME=1 -DNO_RECURSE=1</cflags>
+		<install-to>$(BINDIR)</install-to>
 	</lib>
+	
+	<if cond="PLATFORM_WIN32=='1'">
+		<modify-target target="install">
+			<is-phony />
+			<command>
+				-copy /Y $(BUILDDIR)$(DIRSEP)$(LIBPREFIX)eu$(LIBEXT) $(DESTDIR)$(BINDIR)
+			</command>
+		</modify-target>
+	</if>
 	
 	<euc id="eui">
 		<source>int.ex</source>

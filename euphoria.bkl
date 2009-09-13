@@ -8,6 +8,10 @@
 		<if cond="PLATFORM_WIN32=='1'">-rmdir /s/q</if>
 		<if cond="PLATFORM_WIN32=='0'">rm -rf</if>
 	</set>
+	<set var="CP">
+		<if cond="PLATFORM_WIN32=='1'">-copy /y</if>
+		<if cond="PLATFORM_WIN32=='0'">cp -f</if>
+	</set>
 	
 	<if cond="FORMAT in ['watcom','mingw']">
 		<option name="MANAGED_MEMORY">
@@ -41,6 +45,13 @@
 		<if cond="FORMAT=='mingw'">-gcc</if>
 	</set>
 	<set var="EUC_FLAGS" append="1">$(EU_DEBUG)</set>
+	
+	<if cond="PLATFORM_WIN32=='1'">
+		<set var="DESTDIR">..$(DIRSEP)</set>
+		<set var="BINDIR">bin</set>
+		<action id="install">
+		</action>
+	</if>
 
 	<define-rule name="euc" extends="action">
 		<template>
@@ -65,6 +76,18 @@
 					<command>
 						rm -f $(BUILDDIR)$(DIRSEP)$(id)$(EXEEXT)
 						rm -rf $(BUILDDIR)$(DIRSEP)$(id)_dir
+					</command>
+				</if>
+			</modify-target>
+			<modify-target target="install">
+				<if cond="PLATFORM_WIN32=='1'">
+					<command>
+						-$(INSTALL_PROGRAM) $(BUILDDIR)$(DIRSEP)$(id)$(EXEEXT) $(DESTDIR)$(BINDIR)
+					</command>
+				</if>
+				<if cond="PLATFORM_WIN32=='0'">
+					<command>
+						install -m 755 $(BUILDDIR)$(DIRSEP)$(id)$(EXEEXT) $(DESTDIR)$(BINDIR)
 					</command>
 				</if>
 			</modify-target>
