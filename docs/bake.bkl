@@ -8,6 +8,7 @@
 		<assembly-file>manual.af</assembly-file>
 		<output-directory>html</output-directory>
 		<template-file>template.html</template-file>
+		<dependency-of>all</dependency-of>
 	</eudoc>
 	
 	<action id="get-eudoc">

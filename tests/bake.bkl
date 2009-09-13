@@ -10,6 +10,7 @@
 		<set var="__translator">$(BUILDDIR)$(DIRSEP)euc$(EXEEXT)</set>
 		<depends-on-file>$(__translator)</depends-on-file>
 		<translator>$(__translator)</translator>
+		<dependency-of>all</dependency-of>
 	</eutest>
 
 	<eutest id="regex">
