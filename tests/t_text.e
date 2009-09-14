@@ -30,6 +30,8 @@ test_equal("upper() atom", 'A', upper('a'))
 test_equal("upper() letters only", "JOHN", upper("joHn"))
 test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))
 
+test_equal("escape() default", "John \\\"Mc\\\" Doe", escape("John \"Mc\" Doe"))
+test_equal("escape() non-standard", "\\$100\\.50", escape("$100.50", "$."))
 
 test_equal("sprint() integer", "10", sprint(10))
 test_equal("sprint() float", "5.5", sprint(5.5))

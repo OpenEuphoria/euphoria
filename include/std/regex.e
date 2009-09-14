@@ -192,6 +192,37 @@ public function error_message(object re)
 end function
 
 --****
+-- === Utility Routines
+-- 
+
+--**
+-- Escape special regular expression characters that may be entered into a search
+-- string from user input.
+--
+-- Notes:
+--   Special regex characters are:
+--	 {{{
+--   . \ + * ? [ ^ ] $ ( ) { } = ! < > | : -
+--	 }}}
+--	 
+-- Parameters:
+--   # ##s##: string sequence to escape
+--	 
+-- Returns:
+--   An escaped ##sequence## representing ##s##.
+--	 
+-- Example 1:
+-- <eucode>
+-- sequence search_s = escape("Payroll is $***15.00")
+-- -- search_s = "Payroll is \\$\\*\\*\\*15\\.00"
+-- </eucode>
+--
+
+public function escape(sequence s)
+	return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
+end function
+
+--****
 -- === Find/Match
 
 --**

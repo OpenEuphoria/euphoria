@@ -943,6 +943,41 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 	return lKeyValues
 end function
 
+--**
+-- Escape special characters in a string
+--
+-- Parameters:
+--   # ##s##: string to escape
+--   # ##what##: sequence of characters to escape
+--     defaults to escaping a double quote.
+--
+-- Returns:
+--   An escaped ##sequence## representing ##s##.
+--
+-- Example 1:
+-- <eucode>
+-- sequence s = escape("John \"Mc\" Doe")
+-- puts(1, s)
+-- -- output is: John \"Mc\" Doe
+-- </eucode>
+--
+-- See Also:
+--  [[:quote]]
+--
+
+public function escape(sequence s, sequence what="\"")
+	sequence r = ""
+
+	for i = 1 to length(s) do
+		if find(s[i], what) then
+			r &= "\\"
+		end if
+		r &= s[i]
+	end for
+
+	return r
+end function
+
 
 --**
 -- Return a quoted version of the first argument.
@@ -1003,8 +1038,12 @@ end function
 -- -- 's' now contains three quoted strings: '"a b c"', '"def"', and '"g hi"'
 -- </eucode>
 --
-public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integer esc = -1, t_text sp = "" )
+-- See Also:
+--   [[:escape]]
+--
 
+public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integer esc = -1, 
+		t_text sp = "" )
 	if length(text_in) = 0 then
 		return text_in
 	end if

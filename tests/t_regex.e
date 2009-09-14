@@ -110,4 +110,6 @@ test_equal("find_replace_callback() #2", "JOHN DOE Jane Doe",
 test_equal("find_replace_callback() #3", "John Doe JANE DOE",
 	regex:find_replace_callback(re, "John Doe Jane Doe", routine_id("myupper"), 0, 9))
 
+test_equal("escape #1", "Payroll is \\$\\*\\*\\*15\\.00", regex:escape("Payroll is $***15.00"))
+
 test_report()
