@@ -67,7 +67,7 @@ else
 
 	for i = 1 to 4 do
 		_ = sock:connect(socket, "127.0.0.1:5000")
-		if _ != -1 then
+		if _ != 1 then
 			exit
 		end if
 		if i = 4 then

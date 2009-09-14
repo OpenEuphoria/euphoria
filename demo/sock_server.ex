@@ -13,14 +13,14 @@ end ifdef
 sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
 integer result = sock:bind(server, addr)
 
-if not result then
+if result != 1 then
 	printf(1, "Could not bind server to %s, error=%d\n", { addr, result })
 	abort(1)
 end if
 
 object client
 
-while sock:listen(server, 10) label "MAIN" do
+while sock:listen(server, 10) = 1 label "MAIN" do
 	printf(1, "Waiting for connections on %s\n", { addr })
 	
 	-- what do we do if we want to shut down the server?
