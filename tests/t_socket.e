@@ -7,7 +7,7 @@ include std/filesys.e as fs
 include std/cmdline.e
 object _ = 0
 
-ifdef EUNIX then
+ifdef UNIX then
 	include std/dll.e
 	constant signal_ = define_c_func(open_dll(""), "signal",
 		{C_INT, C_POINTER}, C_POINTER),
