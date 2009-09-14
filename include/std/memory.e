@@ -437,7 +437,7 @@ FREE_RID = routine_id("free")
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
--- are double words, in the range 0..power(2,32)-1.
+-- are double words, in the range -power(2,31)..power(2,31)-1.
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
@@ -493,8 +493,7 @@ FREE_RID = routine_id("free")
 -- Returns:
 --              An **object**, either an atom if the input was a single address, or
 -- a sequence of atoms if a sequence was passed. In both cases, atoms
--- returned are double words, in the range 
--- -power(2,31)..power(2,31)-1.
+-- returned are double words, in the range 0..power(2,32)-1. 
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause
