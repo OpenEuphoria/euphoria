@@ -4395,7 +4395,7 @@ object_ptr v_elem;
 					dval = (long)uval;
 				}
 				else
-					RTFatal("number is too big for %x or %o format");
+					RTFatal("number is too big for %%x or %%o format");
 			}
 			else {
 				/* convert to positive or negative long integer */
