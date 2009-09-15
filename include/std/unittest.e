@@ -65,6 +65,9 @@ namespace unittest
 -- the ##test_report##() procedure. To get a better feel for unit testing, have
 -- a look at the provided test cases for the standard library in the //tests//
 -- directory.
+--
+-- When included in your program, unittest.e sets a crash handler to log a crash 
+-- as a failure.
 
 --****
 -- === Constants
