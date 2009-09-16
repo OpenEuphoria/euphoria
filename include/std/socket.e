@@ -21,36 +21,170 @@ enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLO
 -- === Error Code Constants
 --
 
+--**
+-- No error occurred.
+
+public constant OK                      = 0
+
+--** 
+-- Socket system is not initialized (Windows only)
+
 public constant ERR_NOTINITIALISED      = -1
+
+--**
+-- The network subsystem is down or has failed
+
 public constant ERR_NETDOWN             = -2
+
+--**
+-- Address family not supported by the protocol family.
+
 public constant ERR_AFNOSUPPORT         = -3
+
+--**
+-- A blocking call is inprogress.
+
 public constant ERR_INPROGRESS          = -4
+
+--**
+-- The queue is not empty upon routine call.
+
 public constant ERR_MFILE               = -5
+
+--**
+-- No buffer space is available.
+
 public constant ERR_NOBUFS              = -6
+
+--**
+-- Protocol not supported.
+
 public constant ERR_PROTONOSUPPORT      = -7
+
+--**
+-- Protocol is the wrong type for the socket.
+
 public constant ERR_PROTOTYPE           = -8
+
+--**
+-- Socket type is not supported.
+
 public constant ERR_SOCKTNOSUPPORT      = -9
+
+--**
+-- The descriptor is not a socket.
+
 public constant ERR_NOTSOCK             = -10
+
+--**
+-- A blocking call was cancelled or interrupted.
+
 public constant ERR_INTR                = -11
+
+--**
+-- The operation would block on a socket marked as non-blocking.
+
 public constant ERR_WOULDBLOCK          = -12
+
+--**
+-- An invalid sequence of command calls were made, for instance trying to ##accept##
+-- before an actual ##listen## was called.
+
 public constant ERR_INVAL               = -13
+
+--**
+-- Socket is not connected.
+
 public constant ERR_NOTCONN             = -14
+
+--**
+-- Address creation has failed internally.
+
 public constant ERR_FAULT               = -15
+
+--**
+-- Permission has been denied. This can happen when using a send_to call on a broadcast
+-- address without setting the socket option SO_BROADCAST. Another, possibly more common,
+-- reason is you have tried to bind an address that is already exclusively bound by
+-- another application.
+
 public constant ERR_ACCESS              = -16
+
+--**
+-- Network has dropped it's connection on reset.
+
 public constant ERR_NETRESET            = -17
+
+--**
+-- Operation is not supported on this type of socket.
+
 public constant ERR_OPNOTSUPP           = -18
+
+--**
+-- The socket has been shutdown. Possibly a send/receive call after a shutdown took 
+-- place.
+
 public constant ERR_SHUTDOWN            = -19
+
+--**
+-- Message is too long for buffer size. This would indicate an internal error to 
+-- Euphoria as Euphoria sets a dynamic buffer size.
+
 public constant ERR_MSGSIZE             = -20
+
+--**
+-- No route to the host specified could be found.
+
 public constant ERR_HOSTUNREACH         = -21
+
+--**
+-- Software has caused a connection to be aborted.
+
 public constant ERR_CONNABORTED         = -22
+
+--**
+-- An incomming connection was supplied however it was terminated by the remote peer.
+
 public constant ERR_CONNRESET           = -23
+
+--**
+-- Connection has timed out.
+
 public constant ERR_TIMEDOUT            = -24
+
+--**
+-- Address is already in use.
+
 public constant ERR_ADDRINUSE           = -25
+
+--**
+-- Operation is already in progress.
+
 public constant ERR_ALREADY             = -26
+
+--**
+-- The specified address is not a valid local IP address on this computer.
+
 public constant ERR_ADDRNOTAVAIL        = -27
+
+--**
+-- Connection was refused.
+
 public constant ERR_CONNREFUSED         = -28
+
+--**
+-- Socket is already connected.
+
 public constant ERR_ISCONN              = -29
+
+--**
+-- Network is unreachable.
+
 public constant ERR_NETUNREACH          = -30
+
+--**
+-- Destination address required.
+
 public constant ERR_DESTADDRREQ         = -31
 
 --****
