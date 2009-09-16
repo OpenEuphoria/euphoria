@@ -2823,7 +2823,7 @@ void do_exec(int *start_pc)
 										S, I, ((struct d*)(8*V1->base[I]))->dbl, k, CV1);\
 								 } 0
 #					if SSE2
-						else if (IS_SEQUENCE(a) &&
+						if (IS_SEQUENCE(a) &&
 							IS_SEQUENCE(top) &&
 							(int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0 && 							 
 							(int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0) {
@@ -2833,7 +2833,6 @@ void do_exec(int *start_pc)
 							object_ptr dp,ap,bp;
 							sa = SEQ_PTR(a);
 							sb = SEQ_PTR(top);
-							emms();
 							if (sa->length != sb->length) {
 								RTFatal(
 								"Sequences are of differing lenghts can not be added together.");
@@ -2870,8 +2869,8 @@ void do_exec(int *start_pc)
 									k += 4;
 								}
 							}
-							dest->length -= BASE_ALIGN_SIZE/sizeof(object);
-							dest->base[dest->length+1] = NOVALUE;
+							dest->length = sa->length;
+							dest->base[sa->length+1] = NOVALUE;
 							if (compare(MAKE_SEQ(dest),top = binary_op(PLUS,a,top))) {
 								struct s1 * control = SEQ_PTR(top);
 								int j;
@@ -2883,23 +2882,20 @@ void do_exec(int *start_pc)
 									"results not consistent with old version. Index %d\n", j);																
 							}
 							top = MAKE_SEQ(dest);
+							goto aresult;
 						}
-						else {
-							top = binary_op(PLUS, a, top);
-						}
-#					else						
-						top = binary_op(PLUS, a, top);
-#					endif					
+#					endif				
+					top = binary_op(PLUS, a, top);
 
 				aresult:
 					/* store result and DeRef */
-					a = *obj_ptr; 
+					a = *obj_ptr;
 					*obj_ptr = top; 
-					pc += 4; 
+					pc += 4;
 					if (IS_ATOM_INT_NV(a)) 
 						thread(); 
 					
-					else {  
+					else {
 						DeRefDS(a);  
 					}
 				}    
