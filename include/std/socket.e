@@ -444,13 +444,6 @@ public constant
 	MSG_MORE      = #8000
 
 --****
--- === Error Constants
-
-public enum
-	--** No error, call was a success.
-	OK = 0
-
---****
 -- === Server and Client sides
 --
 
