@@ -311,7 +311,7 @@ constant StdErrMsgs = {
 	{296, "not an IL file!"},
 	{297, "Obsolete .il file. Please recreate it using Euphoria 4.0 or later."},
 	{298, "Internal error; seek to IL start failed!"},
-	{299, "Can't open executable file"},
+	{299, "Can't open executable file '[1]'"},
 	{300, "Internal error; Bound file may have been corrupted."},
 	{301, "Couldn't open '[1]'"},
 	{302, "no Euphoria IL code to execute"},

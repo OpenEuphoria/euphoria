@@ -149,18 +149,20 @@ cl = command_line()
 
 -- open our own .exe file
 ifdef UNIX then
-	sequence tmp_fname = e_path_find(cl[1])
-	if sequence(tmp_fname) then
-		current_db = open(tmp_fname, "rb")
+	filename = e_path_find(cl[1])
+	if sequence(filename) then
+		current_db = open(filename, "rb")
 	else
+		filename = cl[1]
 		current_db = -1
 	end if
 elsedef
-	current_db = open(cl[1], "rb") 
+	filename = cl[1]
+	current_db = open(filename, "rb") 
 end ifdef
 
 if current_db = -1 then
-	fatal( GetMsgText(299) )
+	fatal( GetMsgText(299, 1, {filename}) )
 end if
 
 -- Must be less than or equal to actual backend size.
