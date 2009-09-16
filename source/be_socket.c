@@ -51,6 +51,39 @@
 	IS_ATOM_INT(SEQ_PTR(sock)->base[SOCK_SOCKET]) && \
 	IS_ATOM(SEQ_PTR(sock)->base[SOCK_SOCKADDR]))
 
+#define ERR_NOTINITIALISED        -1
+#define ERR_NETDOWN               -2
+#define ERR_AFNOSUPPORT           -3
+#define ERR_INPROGRESS            -4
+#define ERR_MFILE                 -5
+#define ERR_NOBUFS                -6
+#define ERR_PROTONOSUPPORT        -7
+#define ERR_PROTOTYPE             -8
+#define ERR_SOCKTNOSUPPORT        -9
+#define ERR_NOTSOCK               -10
+#define ERR_INTR                  -11
+#define ERR_WOULDBLOCK            -12
+#define ERR_INVAL                 -13
+#define ERR_NOTCONN               -14
+#define ERR_FAULT                 -15
+#define ERR_ACCESS                -16
+#define ERR_NETRESET              -17
+#define ERR_OPNOTSUPP             -18
+#define ERR_SHUTDOWN              -19
+#define ERR_MSGSIZE               -20
+#define ERR_HOSTUNREACH           -21
+#define ERR_CONNABORTED           -22
+#define ERR_CONNRESET             -23
+#define ERR_TIMEDOUT              -24
+#define ERR_ADDRINUSE             -25
+#define ERR_ALREADY               -26
+#define ERR_ADDRNOTAVAIL          -27
+#define ERR_CONNREFUSED           -28
+#define ERR_ISCONN                -29
+#define ERR_NETUNREACH            -30
+#define ERR_DESTADDRREQ           -31
+
+
 #ifdef EWINDOWS
     int eusock_wsastarted = 0;
 
@@ -78,7 +111,72 @@
 
     int eusock_geterror()
     {
-    	return WSAGetLastError();
+		int code = WSAGetLastError();
+
+		switch (WSAGetLastError()) {
+			case WSANOTINITIALISED:
+				return ERR_NOTINITIALISED;
+			case WSAENETDOWN:
+				return ERR_NETDOWN;
+			case WSAEAFNOSUPPORT:
+				return ERR_AFNOSUPPORT;
+			case WSAEINPROGRESS:
+				return ERR_INPROGRESS;
+			case WSAEMFILE:
+				return ERR_MFILE;
+			case WSAENOBUFS:
+				return ERR_NOBUFS;
+			case WSAEPROTONOSUPPORT:
+				return ERR_PROTONOSUPPORT;
+			case WSAEPROTOTYPE:
+				return ERR_PROTOTYPE;
+			case WSAESOCKTNOSUPPORT:
+				return ERR_SOCKTNOSUPPORT;
+			case WSAENOTSOCK:
+				return ERR_NOTSOCK;
+			case WSAEINTR:
+				return ERR_INTR;
+			case WSAEWOULDBLOCK:
+				return ERR_WOULDBLOCK;
+			case WSAEINVAL:
+				return ERR_INVAL;
+			case WSAENOTCONN:
+				return ERR_NOTCONN;
+			case WSAEFAULT:
+				return ERR_FAULT;
+			case WSAENETRESET:
+				return ERR_NETRESET;
+			case WSAEOPNOTSUPP:
+				return ERR_OPNOTSUPP;
+			case WSAESHUTDOWN:
+				return ERR_SHUTDOWN;
+			case WSAEMSGSIZE:
+				return ERR_MSGSIZE;
+			case WSAEHOSTUNREACH:
+				return ERR_HOSTUNREACH;
+			case WSAECONNABORTED:
+				return ERR_CONNABORTED;
+			case WSAECONNRESET:
+				return ERR_CONNRESET;
+			case WSAETIMEDOUT:
+				return ERR_TIMEDOUT;
+			case WSAEADDRINUSE:
+				return ERR_ADDRINUSE;
+			case WSAEALREADY:
+				return ERR_ALREADY;
+			case WSAEADDRNOTAVAIL:
+				return ERR_ADDRNOTAVAIL;
+			case WSAECONNREFUSED:
+				return ERR_CONNREFUSED;
+			case WSAEISCONN:
+				return ERR_ISCONN;
+			case WSAENETUNREACH:
+				return ERR_NETUNREACH;
+			case WSAEDESTADDRREQ:
+				return ERR_DESTADDRREQ;
+			default:
+				return -code;
+		};
     }
 
     #define eusock_ensure_init() if (eusock_wsastarted == 0) eusock_wsastart();

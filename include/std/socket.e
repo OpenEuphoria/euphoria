@@ -18,6 +18,42 @@ enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLO
     M_SOCK_RECVFROM
 
 --****
+-- === Error Code Constants
+--
+
+public constant ERR_NOTINITIALISED      = -1
+public constant ERR_NETDOWN             = -2
+public constant ERR_AFNOSUPPORT         = -3
+public constant ERR_INPROGRESS          = -4
+public constant ERR_MFILE               = -5
+public constant ERR_NOBUFS              = -6
+public constant ERR_PROTONOSUPPORT      = -7
+public constant ERR_PROTOTYPE           = -8
+public constant ERR_SOCKTNOSUPPORT      = -9
+public constant ERR_NOTSOCK             = -10
+public constant ERR_INTR                = -11
+public constant ERR_WOULDBLOCK          = -12
+public constant ERR_INVAL               = -13
+public constant ERR_NOTCONN             = -14
+public constant ERR_FAULT               = -15
+public constant ERR_ACCESS              = -16
+public constant ERR_NETRESET            = -17
+public constant ERR_OPNOTSUPP           = -18
+public constant ERR_SHUTDOWN            = -19
+public constant ERR_MSGSIZE             = -20
+public constant ERR_HOSTUNREACH         = -21
+public constant ERR_CONNABORTED         = -22
+public constant ERR_CONNRESET           = -23
+public constant ERR_TIMEDOUT            = -24
+public constant ERR_ADDRINUSE           = -25
+public constant ERR_ALREADY             = -26
+public constant ERR_ADDRNOTAVAIL        = -27
+public constant ERR_CONNREFUSED         = -28
+public constant ERR_ISCONN              = -29
+public constant ERR_NETUNREACH          = -30
+public constant ERR_DESTADDRREQ         = -31
+
+--****
 -- === Socket Type Constants
 --
 -- These values are passed as the ##family## and ##sock_type## parameters of
@@ -278,7 +314,7 @@ public constant
 
 public enum
 	--** No error, call was a success.
-	EOK = 1
+	OK = 0
 
 --****
 -- === Server and Client sides
