@@ -1322,11 +1322,11 @@ void RTInternal_va(char *msg, va_list ap)
 	char *buf;
 	
     msgtext = (char *)malloc(RTI_bufflen);
-	if (msgtext)
+	if (msgtext) {
 	    buf = msgtext;
 		vsnprintf(msgtext, RTI_bufflen, msg, ap);
 		msgtext[RTI_bufflen - 1] = 0;
-	else {
+	} else {
 		msgtext = "RTI malloc failed\n";
 		buf = 0;
 	}

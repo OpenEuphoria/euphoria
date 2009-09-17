@@ -217,6 +217,14 @@ EUDEBUG=-D DEBUG
 HEAPCHECKFLAG=/dHEAP_CHECK
 !endif
 
+!ifeq EXTRA_STATS 1
+EXTRASTATSFLAG=/dEXTRA_STATS
+!endif
+
+!ifeq EXTRA_CHECK 1
+EXTRACHECKFLAG=/dEXTRA_CHECK
+!endif
+
 !ifndef EX
 EX=$(EUBIN)\eui.exe
 !endif
@@ -254,6 +262,12 @@ clean : .SYMBOLIC pcre
 	-$(RM) $(BUILDDIR)\eu*.exe
 	-$(RM) $(BUILDDIR)\eu*.lib
 
+nearlyclean mostlyclean : .SYMBOLIC	
+	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
+	-$(RM) $(BUILDDIR)\pcre\*.obj
+	-$(RM) $(BUILDDIR)\eu*.exe
+	-$(RM) $(BUILDDIR)\eu*.lib
+	
 clobber : .SYMBOLIC distclean
 	-$(RMDIR) $(BUILDDIR)
 
@@ -266,8 +280,9 @@ OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\eu.lib
 
 CC = wcc386
+.ERASE
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
-BE_FLAGS = /ol /zp4 /d$(OSFLAG) /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG)
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)
 	
 library : .SYMBOLIC runtime
     @echo ------- LIBRARY -----------

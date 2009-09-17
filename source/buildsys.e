@@ -42,7 +42,7 @@ function find_all_includes(sequence fname, sequence includes = {})
 		if sequence(m) then
 			object full_fname = find_file(m[3])
 			if sequence(full_fname) then
-				if find(full_fname, includes) = 0 then
+				if eu:find(full_fname, includes) = 0 then
 					includes &= { full_fname }
 					includes = find_all_includes(full_fname, includes)
 				end if
@@ -342,7 +342,7 @@ procedure write_objlink_file()
 
 		object s = SymTab[TopLevelSub][S_NEXT]
 		while s do
-			if find(SymTab[s][S_TOKEN], RTN_TOKS) then
+			if eu:find(SymTab[s][S_TOKEN], RTN_TOKS) then
 				if is_exported( s ) then
 					printf(fh, "EXPORT %s='__%d%s@%d'" & HOSTNL,
 						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
