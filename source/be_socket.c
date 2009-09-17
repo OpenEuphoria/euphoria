@@ -51,38 +51,46 @@
 	IS_ATOM_INT(SEQ_PTR(sock)->base[SOCK_SOCKET]) && \
 	IS_ATOM(SEQ_PTR(sock)->base[SOCK_SOCKADDR]))
 
-#define ERR_NOTINITIALISED        -1
-#define ERR_NETDOWN               -2
-#define ERR_AFNOSUPPORT           -3
-#define ERR_INPROGRESS            -4
-#define ERR_MFILE                 -5
-#define ERR_NOBUFS                -6
-#define ERR_PROTONOSUPPORT        -7
-#define ERR_PROTOTYPE             -8
-#define ERR_SOCKTNOSUPPORT        -9
-#define ERR_NOTSOCK               -10
-#define ERR_INTR                  -11
-#define ERR_WOULDBLOCK            -12
-#define ERR_INVAL                 -13
-#define ERR_NOTCONN               -14
-#define ERR_FAULT                 -15
-#define ERR_ACCESS                -16
-#define ERR_NETRESET              -17
-#define ERR_OPNOTSUPP             -18
-#define ERR_SHUTDOWN              -19
-#define ERR_MSGSIZE               -20
-#define ERR_HOSTUNREACH           -21
-#define ERR_CONNABORTED           -22
-#define ERR_CONNRESET             -23
-#define ERR_TIMEDOUT              -24
-#define ERR_ADDRINUSE             -25
-#define ERR_ALREADY               -26
-#define ERR_ADDRNOTAVAIL          -27
-#define ERR_CONNREFUSED           -28
-#define ERR_ISCONN                -29
-#define ERR_NETUNREACH            -30
-#define ERR_DESTADDRREQ           -31
-
+#define ERR_ACCESS                -1
+#define ERR_ADDRINUSE             -2
+#define ERR_ADDRNOTAVAIL          -3
+#define ERR_AFNOSUPPORT           -4
+#define ERR_AGAIN                 -5
+#define ERR_ALREADY               -6
+#define ERR_CONNABORTED           -7
+#define ERR_CONNREFUSED           -8
+#define ERR_CONNRESET             -9
+#define ERR_DESTADDRREQ           -10
+#define ERR_FAULT                 -11
+#define ERR_HOSTUNREACH           -12
+#define ERR_INPROGRESS            -13
+#define ERR_INTR                  -14
+#define ERR_INVAL                 -15
+#define ERR_IO                    -16
+#define ERR_ISCONN                -17
+#define ERR_ISDIR                 -18
+#define ERR_LOOP                  -19
+#define ERR_MFILE                 -20
+#define ERR_MSGSIZE               -21
+#define ERR_NAMETOOLONG           -22
+#define ERR_NETDOWN               -23
+#define ERR_NETRESET              -24
+#define ERR_NETUNREACH            -25
+#define ERR_NFILE                 -26
+#define ERR_NOBUFS                -27
+#define ERR_NOENT                 -28
+#define ERR_NOTCONN               -29
+#define ERR_NOTDIR                -30
+#define ERR_NOTINITIALISED        -31
+#define ERR_NOTSOCK               -32
+#define ERR_OPNOTSUPP             -33
+#define ERR_PROTONOSUPPORT        -34
+#define ERR_PROTOTYPE             -35
+#define ERR_ROFS                  -36
+#define ERR_SHUTDOWN              -37
+#define ERR_SOCKTNOSUPPORT        -38
+#define ERR_TIMEDOUT              -39
+#define ERR_WOULDBLOCK            -40
 
 #ifdef EWINDOWS
     int eusock_wsastarted = 0;
@@ -174,6 +182,8 @@
 				return ERR_NETUNREACH;
 			case WSAEDESTADDRREQ:
 				return ERR_DESTADDRREQ;
+			case WSAEACCES:
+				return ERR_ACCESS;
 			default:
 				return -code;
 		};
@@ -185,7 +195,92 @@
     #include <errno.h>
     int eusock_geterror()
     {
-    	return errno;
+		switch (errno) {
+			case ENOTDIR:
+				return ERR_NOTDIR;
+			case ENAMETOOLONG:
+				return ERR_NAMETOOLONG;
+			case ENOENT:
+				return ERR_NOENT;
+			case ELOOP:
+				return ERR_LOOP;
+			case ENETDOWN:
+				return ERR_NETDOWN;
+			case EAFNOSUPPORT:
+				return ERR_AFNOSUPPORT;
+			case EINPROGRESS:
+				return ERR_INPROGRESS;
+			case EMFILE:
+				return ERR_MFILE;
+			case ENFILE:
+				return ERR_NFILE;
+			case ENOBUFS:
+				return ERR_NOBUFS;
+			case EPROTONOSUPPORT:
+				return ERR_PROTONOSUPPORT;
+			case EPROTOTYPE:
+				return ERR_PROTOTYPE;
+			case ESOCKTNOSUPPORT:
+				return ERR_SOCKTNOSUPPORT;
+			case ENOTSOCK:
+			case EBADF:
+				return ERR_NOTSOCK;
+			case EINTR:
+				return ERR_INTR;
+			case EWOULDBLOCK:
+				return ERR_WOULDBLOCK;
+			case EINVAL:
+				return ERR_INVAL;
+			case ENOTCONN:
+				return ERR_NOTCONN;
+			case EFAULT:
+				return ERR_FAULT;
+			case ENETRESET:
+				return ERR_NETRESET;
+			case EOPNOTSUPP:
+				return ERR_OPNOTSUPP;
+			case ESHUTDOWN:
+				return ERR_SHUTDOWN;
+			case EMSGSIZE:
+				return ERR_MSGSIZE;
+			case EHOSTUNREACH:
+				return ERR_HOSTUNREACH;
+			case ECONNABORTED:
+				return ERR_CONNABORTED;
+			case ECONNRESET:
+				return ERR_CONNRESET;
+			case ETIMEDOUT:
+				return ERR_TIMEDOUT;
+			case EADDRINUSE:
+				return ERR_ADDRINUSE;
+			case EALREADY:
+				return ERR_ALREADY;
+			case EADDRNOTAVAIL:
+				return ERR_ADDRNOTAVAIL;
+			case ECONNREFUSED:
+				return ERR_CONNREFUSED;
+			case EISCONN:
+				return ERR_ISCONN;
+			case ENETUNREACH:
+				return ERR_NETUNREACH;
+			case EDESTADDRREQ:
+				return ERR_DESTADDRREQ;
+#if 0
+			// EAGAIN is the same as EWOULDBLOCK on Linux
+			case EAGAIN:
+				return ERR_AGAIN;
+#endif /* if 0 */
+			case EIO:
+				return ERR_IO;
+			case EROFS:
+				return ERR_ROFS;
+			case EISDIR:
+				return ERR_ISDIR;
+			default:
+				if (errno < 0)
+					return errno;
+				return -errno;
+		};
     }
 
     #define eusock_ensure_init()

@@ -26,166 +26,216 @@ enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLO
 
 public constant OK                      = 0
 
---** 
--- Socket system is not initialized (Windows only)
-
-public constant ERR_NOTINITIALISED      = -1
-
---**
--- The network subsystem is down or has failed
-
-public constant ERR_NETDOWN             = -2
-
---**
--- Address family not supported by the protocol family.
-
-public constant ERR_AFNOSUPPORT         = -3
-
---**
--- A blocking call is inprogress.
-
-public constant ERR_INPROGRESS          = -4
-
---**
--- The queue is not empty upon routine call.
-
-public constant ERR_MFILE               = -5
-
---**
--- No buffer space is available.
-
-public constant ERR_NOBUFS              = -6
-
---**
--- Protocol not supported.
-
-public constant ERR_PROTONOSUPPORT      = -7
-
---**
--- Protocol is the wrong type for the socket.
-
-public constant ERR_PROTOTYPE           = -8
-
---**
--- Socket type is not supported.
-
-public constant ERR_SOCKTNOSUPPORT      = -9
-
---**
--- The descriptor is not a socket.
-
-public constant ERR_NOTSOCK             = -10
-
---**
--- A blocking call was cancelled or interrupted.
-
-public constant ERR_INTR                = -11
-
---**
--- The operation would block on a socket marked as non-blocking.
-
-public constant ERR_WOULDBLOCK          = -12
-
---**
--- An invalid sequence of command calls were made, for instance trying to ##accept##
--- before an actual ##listen## was called.
-
-public constant ERR_INVAL               = -13
-
---**
--- Socket is not connected.
-
-public constant ERR_NOTCONN             = -14
-
---**
--- Address creation has failed internally.
-
-public constant ERR_FAULT               = -15
-
 --**
 -- Permission has been denied. This can happen when using a send_to call on a broadcast
 -- address without setting the socket option SO_BROADCAST. Another, possibly more common,
 -- reason is you have tried to bind an address that is already exclusively bound by
 -- another application.
+--
+-- May occur on a Unix Domain Socket when the socket directory or file could not be 
+-- accessed due to security.
 
-public constant ERR_ACCESS              = -16
-
---**
--- Network has dropped it's connection on reset.
-
-public constant ERR_NETRESET            = -17
+public constant ERR_ACCESS              = -1
 
 --**
--- Operation is not supported on this type of socket.
+-- Address is already in use.
 
-public constant ERR_OPNOTSUPP           = -18
+public constant ERR_ADDRINUSE           = -2
 
 --**
--- The socket has been shutdown. Possibly a send/receive call after a shutdown took 
--- place.
+-- The specified address is not a valid local IP address on this computer.
 
-public constant ERR_SHUTDOWN            = -19
+public constant ERR_ADDRNOTAVAIL        = -3
+
+--**
+-- Address family not supported by the protocol family.
+
+public constant ERR_AFNOSUPPORT         = -4
+
+--**
+-- Kernel resources to complete the request are temporarly unavailable.
+
+public constant ERR_AGAIN               = -5
+
+--**
+-- Operation is already in progress.
+
+public constant ERR_ALREADY             = -6
+
+--**
+-- Software has caused a connection to be aborted.
+
+public constant ERR_CONNABORTED         = -7
+
+--**
+-- Connection was refused.
+
+public constant ERR_CONNREFUSED         = -8
+
+--**
+-- An incomming connection was supplied however it was terminated by the remote peer.
+
+public constant ERR_CONNRESET           = -9
+
+--**
+-- Destination address required.
+
+public constant ERR_DESTADDRREQ         = -10
+
+--**
+-- Address creation has failed internally.
+
+public constant ERR_FAULT               = -11
+
+--**
+-- No route to the host specified could be found.
+
+public constant ERR_HOSTUNREACH         = -12
+
+--**
+-- A blocking call is inprogress.
+
+public constant ERR_INPROGRESS          = -13
+
+--**
+-- A blocking call was cancelled or interrupted.
+
+public constant ERR_INTR                = -14
+
+--**
+-- An invalid sequence of command calls were made, for instance trying to ##accept##
+-- before an actual ##listen## was called.
+
+public constant ERR_INVAL = -15
+
+--**
+-- An I/O error occurred while making the directory entry or allocating the
+-- inode. (Unix Domain Socket).
+
+public constant ERR_IO = -16
+
+--**
+-- Socket is already connected.
+
+public constant ERR_ISCONN              = -17
+
+--**
+-- An empty pathname was specified. (Unix Domain Socket).
+
+public constant ERR_ISDIR = -18
+
+--**
+-- Too many symbolic links were encountered. (Unix Domain Socket).
+
+public constant ERR_LOOP = -19
+
+--**
+-- The queue is not empty upon routine call.
+
+public constant ERR_MFILE               = -20
 
 --**
 -- Message is too long for buffer size. This would indicate an internal error to 
 -- Euphoria as Euphoria sets a dynamic buffer size.
 
-public constant ERR_MSGSIZE             = -20
+public constant ERR_MSGSIZE             = -21
 
 --**
--- No route to the host specified could be found.
+-- Component of the path name exceeded 255 characters or the entire path
+-- exceeded 1023 characters. (Unix Domain Socket).
 
-public constant ERR_HOSTUNREACH         = -21
-
---**
--- Software has caused a connection to be aborted.
-
-public constant ERR_CONNABORTED         = -22
+public constant ERR_NAMETOOLONG = -22
 
 --**
--- An incomming connection was supplied however it was terminated by the remote peer.
+-- The network subsystem is down or has failed
 
-public constant ERR_CONNRESET           = -23
-
---**
--- Connection has timed out.
-
-public constant ERR_TIMEDOUT            = -24
+public constant ERR_NETDOWN             = -23
 
 --**
--- Address is already in use.
+-- Network has dropped it's connection on reset.
 
-public constant ERR_ADDRINUSE           = -25
-
---**
--- Operation is already in progress.
-
-public constant ERR_ALREADY             = -26
-
---**
--- The specified address is not a valid local IP address on this computer.
-
-public constant ERR_ADDRNOTAVAIL        = -27
-
---**
--- Connection was refused.
-
-public constant ERR_CONNREFUSED         = -28
-
---**
--- Socket is already connected.
-
-public constant ERR_ISCONN              = -29
+public constant ERR_NETRESET            = -24
 
 --**
 -- Network is unreachable.
 
-public constant ERR_NETUNREACH          = -30
+public constant ERR_NETUNREACH          = -25
 
 --**
--- Destination address required.
+-- Not a file. (Unix Domain Sockets).
 
-public constant ERR_DESTADDRREQ         = -31
+public constant ERR_NFILE = -26
+
+--**
+-- No buffer space is available.
+
+public constant ERR_NOBUFS              = -27
+
+--**
+-- Named socket does not exist. (Unix Domain Socket).
+
+public constant ERR_NOENT = -28
+
+--**
+-- Socket is not connected.
+
+public constant ERR_NOTCONN             = -29
+
+--**
+-- Component of the path prefix is not a directory. (Unix Domain Socket).
+
+public constant ERR_NOTDIR  = -30
+
+--** 
+-- Socket system is not initialized (Windows only)
+
+public constant ERR_NOTINITIALISED      = -31
+
+--**
+-- The descriptor is not a socket.
+
+public constant ERR_NOTSOCK             = -32
+
+--**
+-- Operation is not supported on this type of socket.
+
+public constant ERR_OPNOTSUPP           = -33
+
+--**
+-- Protocol not supported.
+
+public constant ERR_PROTONOSUPPORT      = -34
+
+--**
+-- Protocol is the wrong type for the socket.
+
+public constant ERR_PROTOTYPE           = -35
+
+--**
+-- The name would reside on a read-only file system. (Unix Domain Socket).
+
+public constant ERR_ROFS = -36
+
+--**
+-- The socket has been shutdown. Possibly a send/receive call after a shutdown took 
+-- place.
+
+public constant ERR_SHUTDOWN            = -37
+
+--**
+-- Socket type is not supported.
+
+public constant ERR_SOCKTNOSUPPORT      = -38
+
+--**
+-- Connection has timed out.
+
+public constant ERR_TIMEDOUT            = -39
+
+--**
+-- The operation would block on a socket marked as non-blocking.
+
+public constant ERR_WOULDBLOCK          = -40
 
 --****
 -- === Socket Type Constants
