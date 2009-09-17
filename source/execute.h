@@ -449,6 +449,7 @@ struct char_cell {
 #define M_SOCK_SENDTO   	 93
 #define M_SOCK_RECVFROM 	 94
 #define M_PCRE_ERROR_MESSAGE 95
+#define M_SOCK_ERROR_CODE    96
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

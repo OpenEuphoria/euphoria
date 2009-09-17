@@ -4,10 +4,10 @@ include std/console.e
 include std/socket.e as sock
 
 sock:socket sock = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
-integer result = sock:connect(sock, "127.0.0.1:5000")
 
-if not result then
-	printf(1, "Could not connect to server, is it running?\nError = %d\n", { result })
+if sock:connect(sock, "127.0.0.1:5000") != sock:OK then
+	printf(1, "Could not connect to server, is it running?\nError = %d\n", 
+		{ sock:error_code() })
 	abort(1)
 end if
 
@@ -25,4 +25,3 @@ while 1 do
 end while
 
 sock:close(sock)
-

@@ -2952,6 +2952,9 @@ object machine(object opcode, object x)
 
 			case M_SOCK_GETHOSTBYADDR:
 				return eusock_gethostbyaddr(x);
+				
+			case M_SOCK_ERROR_CODE:
+				return eusock_error_code();
 
 			case M_SOCK_SOCKET:
 				return eusock_socket(x);

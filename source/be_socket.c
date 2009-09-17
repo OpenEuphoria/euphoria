@@ -51,6 +51,7 @@
 	IS_ATOM_INT(SEQ_PTR(sock)->base[SOCK_SOCKET]) && \
 	IS_ATOM(SEQ_PTR(sock)->base[SOCK_SOCKADDR]))
 
+#define ERR_OK                     0
 #define ERR_ACCESS                -1
 #define ERR_ADDRINUSE             -2
 #define ERR_ADDRNOTAVAIL          -3
@@ -502,8 +503,7 @@ object eusock_gethostbyaddr(object x)
 	addr.s_addr = inet_addr(address);
 	if (addr.s_addr == INADDR_NONE)
 	{
-		// TODO: Give a real error message
-		return ATOM_0;
+		return ERR_FAULT;
 	}
 
 	// ent is static data, do not free
@@ -512,6 +512,17 @@ object eusock_gethostbyaddr(object x)
 	EFree(address);
 
 	return eusock_build_hostent(ent);
+}
+
+/* ============================================================================
+ *
+ * Error Information
+ *
+ * ========================================================================= */
+ 
+object eusock_error_code()
+{
+	return eusock_geterror();
 }
 
 /* ============================================================================
@@ -586,7 +597,7 @@ object eusock_close(object x)
 		return eusock_geterror();
 	}
 
-	return ATOM_1;
+	return ERR_OK;
 }
 
 /*
@@ -609,7 +620,7 @@ object eusock_shutdown(object x)
 		return eusock_geterror();
 	}
 
-	return ATOM_1;
+	return ERR_OK;
 }
 
 /*
@@ -646,8 +657,7 @@ object eusock_connect(object x)
 	addr->sin_addr.s_addr = inet_addr(address);
 	if (addr->sin_addr.s_addr == INADDR_NONE)
 	{
-		// TODO: Give a real error message
-		return ATOM_0;
+		return ERR_FAULT;
 	}
 
 	result = connect(s, addr, sizeof(SOCKADDR));
@@ -659,7 +669,7 @@ object eusock_connect(object x)
 		return eusock_geterror();
 	}
 
-	return ATOM_1;
+	return ERR_OK;
 }
 
 /*
@@ -937,7 +947,7 @@ object eusock_bind(object x)
 	  return eusock_geterror();
 	}
 
-	return ATOM_1;
+	return ERR_OK;
 }
 
 /*
@@ -962,7 +972,7 @@ object eusock_listen(object x)
 		return eusock_geterror();
 	}
 
-	return ATOM_1;
+	return ERR_OK;
 }
 
 /*
@@ -1061,3 +1071,4 @@ object eusock_setsockopt(object x)
 
 	return optval;
 }
+

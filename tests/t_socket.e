@@ -100,6 +100,6 @@ else
 	pipe:kill(p)
 end if
 
-test_equal("close", 1, sock:close(socket))
+test_equal("close", sock:OK, sock:close(socket))
 
 test_report()

@@ -15,11 +15,24 @@ include std/net/common.e
 enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
 	M_SOCK_ACCEPT, M_SOCK_SETSOCKOPT, M_SOCK_GETSOCKOPT, M_SOCK_SELECT, M_SOCK_SENDTO, 
-    M_SOCK_RECVFROM
+    M_SOCK_RECVFROM, M_SOCK_ERROR_CODE=96
 
 --****
--- === Error Code Constants
+-- === Error Information
 --
+
+--**
+-- Get the error code.
+--
+-- Returns:
+--   Integer [[:OK]] on no error, otherwise any one of the ##ERR_## constants to
+--   follow.
+--
+
+public function error_code()
+	return machine_func(M_SOCK_ERROR_CODE, {})
+end function
+
 
 --**
 -- No error occurred.
