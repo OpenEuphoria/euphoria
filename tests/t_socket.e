@@ -28,9 +28,13 @@ test_equal("service_by_port ftp", { "ftp", "tcp", 21 }, service_by_port(21, "tcp
 test_equal("service_by_port telnet", { "telnet", "tcp", 23}, service_by_port(23, "tcp"))
 
 sock:socket socket = sock:create(AF_INET, SOCK_STREAM, 0)
-test_equal("get_option #1", 0, get_option(socket, SOL_SOCKET, SO_DEBUG))
-test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_DEBUG, 1))
-test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
+-- Windows supports SO_DEBUG, but on Unix variants it is only supported when running as the
+-- root user.
+ifdef WINDOWS then
+	test_equal("get_option #1", 0, get_option(socket, SOL_SOCKET, SO_DEBUG))
+	test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_DEBUG, 1))
+	test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
+end ifdef
 
 --
 -- testing both client and server in this case as the sever
