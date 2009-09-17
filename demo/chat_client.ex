@@ -30,9 +30,8 @@ procedure main(sequence args)
 
 	printf(1, "Connecting to %s\n", { addr })
 
-	integer result = slib:connect(sock, "127.0.0.1:5000")
-	if not result then
-		printf(1, "Could not connect to server %s, is it running?\nError = %d\n", { addr, result })
+	if slib:connect(sock, "127.0.0.1:5000") != slib:OK then
+		printf(1, "Could not connect to server %s, is it running?\nError = %d\n", { addr, slib:error_code() })
 		puts(1, "Maybe try connecting to a different IP/Port?\n")
 		puts(1, "   Usage: exwc chat_client.ex [IP:PORT]\n")
 		abort(1)

@@ -161,14 +161,12 @@ procedure server()
 	end for
 
 	sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
-	atom result = sock:bind(server, bind_addr)
-	  
-	if not result then
-		crash("Could not bind %s, error=%d", { bind_addr, result })
+	if sock:bind(server, bind_addr) != sock:OK then
+		crash("Could not bind %s, error=%d", { bind_addr, sock:error_code() })
 	end if
 
 	log(LOG_INFO, "Waiting for connections on %s", { bind_addr })
-	while sock:listen(server, 10) do
+	while sock:listen(server, 10) = sock:OK do
 		object client = sock:accept(server)
 		if sequence(client) then
 			handle_request(server, client, doc_root)

@@ -35,17 +35,15 @@ procedure main(sequence args)
 
 	sequence remove_sockets = {}
 	sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
-	atom result = sock:bind(server, addr)
-
-	if not result then
-		printf(1, "Could not bind server to %s, error=%d\n", { addr, result })
+	if sock:bind(server, addr) != sock:OK then
+		printf(1, "Could not bind server to %s, error=%d\n", { addr, sock:error_code() })
 		puts(1, "You may try another IP and/or port:\n")
 		puts(1, "  Usage: exwc chat_sever.ex [IP:PORT]\n")
 		abort(1)
 	end if
 
 	printf(1, "Waiting for connections on %s\n", { addr })
-	while sock:listen(server, 0) label "MAIN" do
+	while sock:listen(server, 0) = sock:OK label "MAIN" do
 		-- get socket states
 		object sock_data = sock:select({ server } & clients, 0)
 

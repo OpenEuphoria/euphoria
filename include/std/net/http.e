@@ -453,7 +453,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
 	success = sock:connect(sock,inet_addr)
  	
-	if success = 1 then
+	if success = sock:OK then
 		-- eunet_format_sendheader sets up the header to sent,
 		-- putting the POST data at the end,
 		-- filling in the CONTENT-LENGTH,
