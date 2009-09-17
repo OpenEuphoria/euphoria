@@ -4920,14 +4920,28 @@ char **make_arg_cv(char *cmdline, int *argc)
 {
 	int i, w, j;
 	char **argv;
+	int ns;
+	int bs;
 
 	// don't use EMalloc yet:
 	argv = (char **)malloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
 	if (*argc == 1) {
-		argv[0] = malloc(130);
-		if (GetModuleFileName(NULL, (LPTSTR)argv[0], 128) == 0)
-			argv[0] = "EXW.EXE";
+		argv[0] = 0;
+		bs = 32;
+		ns = bs;
+		/* If ns equals bs it means that we have not gotten 
+		   the complete path string yet */
+		while (ns == bs) {
+			bs += 32;
+			if (argv[0] != 0)
+				free((void *)argv[0]);
+				
+			argv[0] = (char *)malloc(bs + 2);
+			ns = GetModuleFileName(NULL, (LPTSTR)argv[0], bs);
+		}
+		if (ns == 0)
+			argv[0] = "eui.exe";
 		w = 1;
 	}
 	else
