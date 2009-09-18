@@ -94,8 +94,11 @@ end procedure
 -- output C source code with (one) 4-byte formatted value (should allow multiple values later)
 export procedure c_printf(sequence format, object value)
 	if emit_c_output then
-		printf(c_code, format, value)
-		update_checksum( length(format) )
+		sequence text = sprintf( format, value )
+		puts(c_code, text)
+		for i = 1 to length( text ) do
+			update_checksum( text[i] )
+		end for
 	end if
 end procedure
 

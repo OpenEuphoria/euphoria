@@ -143,7 +143,7 @@ export integer max_cfile_size = 100_000
 
 --**
 -- Calculated value for detecting when c files have changed
-export integer cfile_check = 0
+integer cfile_check = 0
 
 --**
 -- Optional flags to pass to the compiler
@@ -168,6 +168,13 @@ enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EX
 export procedure update_checksum( integer len )
 	cfile_check = xor_bits( (and_bits( cfile_check, #40000000) != 0 ) + and_bits( cfile_check * 2, 0x3FFFFFFF ), 
 			remainder( len * (1+cfile_size), 1_000_000_003 ) )
+end procedure
+
+--**
+-- Writes the checksum to the file and resets the checksum to zero.
+export procedure write_checksum( integer file )
+	printf( file, "\n// 0x%08x\n", cfile_check )
+	cfile_check = 0
 end procedure
 
 --**

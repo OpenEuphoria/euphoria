@@ -1072,9 +1072,8 @@ export procedure new_c_file(sequence name)
 		return
 	end if
 
-	printf(c_code, "// 0x%08x\n", cfile_check )
+	write_checksum( c_code )
 	close(c_code)
-	cfile_check = 0
 	
 	c_code = open(output_dir & name & ".c", "w")
 	if c_code = -1 then
