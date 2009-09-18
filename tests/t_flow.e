@@ -112,5 +112,19 @@ while 1 do
 end while
 test_equal("while 1", {11,10}, {idx,idx2})
 
+idx = 0
+for i = 1 to 10 do
+	for j = 1 to 10 do
+		for k = 1 to 10 do
+			idx += 1
+			exit -1
+		end for
+		idx += 1
+	end for
+	idx += 1
+	exit
+end for
+test_equal( "exit negative index", 2, idx )
+
 test_report()
 

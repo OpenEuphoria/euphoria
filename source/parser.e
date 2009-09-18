@@ -1716,6 +1716,7 @@ function exit_level(token tok, integer flag)
 	atom arg
 	integer n
 	integer num_labels
+	integer negative = 0
 	sequence labels
 
 	if flag then
@@ -1725,11 +1726,18 @@ function exit_level(token tok, integer flag)
 	end if
 	num_labels = length(labels)
 
+	if tok[T_ID] = MINUS then
+		tok = next_token()
+		negative = 1
+	end if
+	
 	if tok[T_ID]=ATOM then
 		arg = SymTab[tok[T_SYM]][S_OBJ]
 		n = floor(arg)
-		if arg<=0 then
-			n += num_labels
+		if negative then
+			n = num_labels - n
+		elsif n = 0 then
+			n = num_labels
 		end if
 		if n<=0 or n>num_labels then
 			CompileErr(87)
