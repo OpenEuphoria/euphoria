@@ -142,6 +142,10 @@ export sequence exe_name = ""
 export integer max_cfile_size = 100_000
 
 --**
+-- Calculated value for detecting when c files have changed
+export integer cfile_check = 0
+
+--**
 -- Optional flags to pass to the compiler
 
 export sequence cflags = ""
@@ -158,6 +162,13 @@ export integer force_build = 0
 
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
 	SETUP_LFLAGS_BEGIN
+
+--**
+-- Calculate a checksum to be used for detecting changes to generated c files.
+export procedure update_checksum( integer len )
+	cfile_check = xor_bits( (and_bits( cfile_check, #40000000) != 0 ) + and_bits( cfile_check * 2, 0x3FFFFFFF ), 
+			remainder( len * (1+cfile_size), 1_000_000_003 ) )
+end procedure
 
 --**
 -- Setup the build environment. This includes things such as the

@@ -10,6 +10,7 @@ elsedef
 end ifdef
 
 include global.e
+include buildsys.e
 
 --****
 -- === gtype values, TRANSLATOR
@@ -60,6 +61,7 @@ export sequence novalue = {MININT, MAXINT} --, target= {0, 0}
 export procedure c_putc(integer c)
 	if emit_c_output then
 		puts(c_code, c)
+		update_checksum( c )
 	end if
 end procedure
 
@@ -76,6 +78,7 @@ end procedure
 export procedure c_puts(sequence c_source)
 	if emit_c_output then
 		puts(c_code, c_source)
+		update_checksum( length(c_source) )
 	end if
 end procedure
 
@@ -92,6 +95,7 @@ end procedure
 export procedure c_printf(sequence format, object value)
 	if emit_c_output then
 		printf(c_code, format, value)
+		update_checksum( length(format) )
 	end if
 end procedure
 
@@ -204,7 +208,7 @@ export procedure adjust_indent_before(sequence stmt)
 		i -= length(big_blanks)
 	end while
 
-	c_putc(big_blanks[1..i])
+	c_puts(big_blanks[1..i])
 
 	temp_indent = 0    
 end procedure

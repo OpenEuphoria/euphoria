@@ -614,6 +614,8 @@ export procedure c_stmt(sequence stmt, object arg)
 	
 	if LAST_PASS = TRUE and Initializing = FALSE then
 		cfile_size += 1
+		update_checksum( length(stmt) )
+		
 	end if
 		
 	if emit_c_output then
@@ -1065,12 +1067,15 @@ end procedure
 export procedure new_c_file(sequence name)
 	cfile_size = 0
 
+
 	if LAST_PASS = FALSE then
 		return
 	end if
 
+	printf(c_code, "// 0x%08x\n", cfile_check )
 	close(c_code)
-
+	cfile_check = 0
+	
 	c_code = open(output_dir & name & ".c", "w")
 	if c_code = -1 then
 		CompileErr(57)

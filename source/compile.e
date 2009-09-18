@@ -6916,6 +6916,7 @@ procedure BackEnd(atom ignore)
 	integer tp_count, slash_ix
 	integer max_len
 	
+	printf(c_code, "// 0x%08x\n", cfile_check )
 	close(c_code)
 
 	emit_c_output = FALSE
@@ -7186,6 +7187,7 @@ procedure BackEnd(atom ignore)
 	-- Final walk through user-defined routines, generating C code
 	GenerateUserRoutines()  -- needs init_name_num
 
+	printf(c_code, "// 0x%08x\n", cfile_check )
 	close(c_code)
 
 	c_code = open(output_dir & "init-.c", "a")
