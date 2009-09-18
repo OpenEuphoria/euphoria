@@ -78,7 +78,7 @@ end procedure
 export procedure c_puts(sequence c_source)
 	if emit_c_output then
 		puts(c_code, c_source)
-		update_checksum( length(c_source) )
+		update_checksum( c_source )
 	end if
 end procedure
 
@@ -96,9 +96,7 @@ export procedure c_printf(sequence format, object value)
 	if emit_c_output then
 		sequence text = sprintf( format, value )
 		puts(c_code, text)
-		for i = 1 to length( text ) do
-			update_checksum( text[i] )
-		end for
+		update_checksum( text )
 	end if
 end procedure
 

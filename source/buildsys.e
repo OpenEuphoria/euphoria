@@ -11,6 +11,7 @@ include std/filesys.e
 include std/io.e
 include std/regex.e
 include std/text.e
+include std/map.e
 
 include c_decl.e
 include c_out.e
@@ -143,7 +144,7 @@ export integer max_cfile_size = 100_000
 
 --**
 -- Calculated value for detecting when c files have changed
-integer cfile_check = 0
+atom cfile_check = 0
 
 --**
 -- Optional flags to pass to the compiler
@@ -165,9 +166,10 @@ enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EX
 
 --**
 -- Calculate a checksum to be used for detecting changes to generated c files.
-export procedure update_checksum( integer len )
-	cfile_check = xor_bits( (and_bits( cfile_check, #40000000) != 0 ) + and_bits( cfile_check * 2, 0x3FFFFFFF ), 
-			remainder( len * (1+cfile_size), 1_000_000_003 ) )
+export procedure update_checksum( object raw_data )
+	
+	cfile_check = xor_bits(cfile_check, hash( raw_data, HSIEH32))
+
 end procedure
 
 --**

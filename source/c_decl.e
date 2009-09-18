@@ -614,7 +614,7 @@ export procedure c_stmt(sequence stmt, object arg)
 	
 	if LAST_PASS = TRUE and Initializing = FALSE then
 		cfile_size += 1
-		update_checksum( length(stmt) )
+		update_checksum( stmt )
 		
 	end if
 		
@@ -1143,7 +1143,6 @@ export function is_file_newer(sequence f1, sequence f2)
 	object d2 = file_timestamp(f2)
 
 	if atom(d1) or atom(d2) then return 1 end if
-
 	if datetime:diff(d1, d2) < 0 then
 		return 1
 	end if
