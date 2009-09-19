@@ -280,7 +280,7 @@ procedure write_objlink_file()
 
 		object s = SymTab[TopLevelSub][S_NEXT]
 		while s do
-			if find(SymTab[s][S_TOKEN], RTN_TOKS) then
+			if eu:find(SymTab[s][S_TOKEN], RTN_TOKS) then
 				if is_exported( s ) then
 					printf(fh, "EXPORT %s='__%d%s@%d'" & HOSTNL,
 						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 

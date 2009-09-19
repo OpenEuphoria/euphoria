@@ -4685,11 +4685,11 @@ void ctrace(char *line)
 }
 
 #ifdef EXTRA_CHECK
-void RTInternal(char *msg, ...)
+static void RTInternal(char *msg, ...)
 {
 	va_list ap;
 	va_start(ap, msg);
-	vprintf(stderr, msg, ap);
+	vfprintf(stderr, msg, ap);
 	va_end(ap);
 	exit(1);
 }

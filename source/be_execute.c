@@ -2871,16 +2871,18 @@ void do_exec(int *start_pc)
 							}
 							dest->length = sa->length;
 							dest->base[sa->length+1] = NOVALUE;
-							if (compare(MAKE_SEQ(dest),top = binary_op(PLUS,a,top))) {
-								struct s1 * control = SEQ_PTR(top);
-								int j;
-								for (j=1;j<=dest->length;++j)
-									if (dest->base[j] != control->base[j] && 
-										compare(dest->base[j],control->base[j]))
-										break;
-								RTFatal("SSE code discrepancy:"
-									"results not consistent with old version. Index %d\n", j);																
-							}
+#                           ifdef EXTRA_CHECK							
+								if (compare(MAKE_SEQ(dest),top = binary_op(PLUS,a,top))) {
+									struct s1 * control = SEQ_PTR(top);
+									int j;
+									for (j=1;j<=dest->length;++j)
+										if (dest->base[j] != control->base[j] && 
+											compare(dest->base[j],control->base[j]))
+											break;
+									RTFatal("SSE code discrepancy:"
+										"results not consistent with old version. Index %d\n", j);																
+								}
+#							endif								
 							top = MAKE_SEQ(dest);
 							goto aresult;
 						}

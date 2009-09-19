@@ -56,6 +56,21 @@ IF "%1" =="--debug" (
 	GOTO EndLoop
 )
 
+IF "%1" =="--heapcheck" (
+	echo HEAP_CHECK=1 >> config.wat
+	GOTO EndLoop
+)
+
+IF "%1" == "--extrastats" (
+	echo EXTRA_STATS=1 >> config.wat
+	GOTO EndLoop
+)
+
+IF "%1" == "--extracheck" (
+	echo EXTRA_CHECK=1 >> config.wat
+	GOTO EndLoop
+)
+
 IF "%1" =="--sse2" (
 	echo SSE2=-DSSE2=1 >> config.wat
 	echo CPU_FLAG=/6r  >> config.wat
@@ -167,7 +182,12 @@ echo     --no-managed-mem    disable managed memory
 echo     --eubin value
 echo     --build value       set the build directory
 echo     --full
+echo.
+echo Developer Options:
 echo     --debug             turn debugging on
+echo     --heapcheck         check memory management system
+echo     --extracheck        check for when data corruption
+echo     --extrastats        generates statistics
 echo.
 
 rem ============================================================
