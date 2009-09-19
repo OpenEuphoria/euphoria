@@ -1,9 +1,10 @@
-== Dynamic routine calling
+== Indirect routine calling
 
-Euphoria does not have function pointers. However, it enables you to call about any routine, including some internal to the interpreter, in a dynamic way, using two different sets of
-identifiers.
+Euphoria does not have function pointers. However, it enables you to call
+any routine, including some internal to the interpreter, in an indirect way, 
+using two different sets of identifiers.
 
-=== Dynamically calling a routine coded in Euphoria
+=== Indirect calling a routine coded in Euphoria
 
 The following applies to any routine coded in Euphoria that your program uses, whether it is
 defined in the standard library, any third party library or your own code. It does not apply to
@@ -75,33 +76,50 @@ The difference with [[:c_proc]]() is that you can call an external function usin
 [[:c_proc]]() and thus ignore its return value, like in C. Note that you cannot
 use ##call_proc##() to invoke a Euphoria function, only C functions.
 
-==== Why call dynamically?
+==== Why call indirectly?
 
-The above examples do not look quite convincing, because it seems that calling dynamically is
+The above examples do not look quite convincing, because it seems that calling indirectly is
 a more complicated way to call routines. And slower.
 
-There are two main situations where calling dynamically is the thing to do:
-# When you really want a routine you choose at call time to be called. You could have a table
-of routine_ids and perform a call to an indexed entry in the table.
-# Because the name of the routine you want to call is not defined yet, or would resolve to the wrong routine. In pre 4.0 versions, this was the main use of the facility:
+However, when the name of the routine you want to call might not be known until run-time,
+the indirect method will solve the issue for you.
+
 
 <eucode>
 integer foo_id
 
-function bar()
-    return call_func(foo_id,{bar()})
+function bar(integer x)
+    return call_func(foo_id,{x})
 end function
 
-function bar()
-   return something() + bar()
+function foo_dev1(integer y)
+	return y + 1
 end function
-foo_id = routine_id("foo")
+
+function foo_dev2(integer y)
+	return y - 1
+end function
+
+function foo_dev3(integer y)
+	return y * y - 3
+end function
+
+function user_opt(object x)
+	 ... 
+end function
+
+-- Initialize foo ID
+switch user_opt("dev") do
+	case 1 then
+		foo_id = routine_id("foo_dev1")
+	case 2 then
+		foo_id = routine_id("foo_dev2")
+	case else
+		foo_id = routine_id("foo_dev3")
+end switch
 </eucode>
 
-One of the functions has to be defined before the other, and Euphoria's paradigm of
-define-before-use would prevent crossed calls like above without the dynamic call facility.
-
-One last word: when calling a routine dynamically, its **full** parameter list must be passed,
+One last word: when calling a routine indirectly, its **full** parameter list must be passed,
 even if some of its parameters are defaulted. This limitation may be overcome in future
 versions.
 
