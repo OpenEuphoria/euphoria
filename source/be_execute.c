@@ -81,6 +81,7 @@
 	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	#pragma aux sse2_paddo3 = \
 		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+		"push ebx"\
 		"movdqa xmm0, [eax]"\
 		"movdqa xmm1, xmm0"\
 		"MOVDQA XMM2, XMM0"\
@@ -122,6 +123,7 @@
 		"PACKSSDW XMM6, XMM6"\
 		"PACKSSWB XMM6, XMM6"\
 		"MOVD [iterate_over_double_words], XMM6"\
+		"pop ebx"\
 		"EMMS"\
 		modify [EBX]\
 		parm [EDX] [EAX] [ECX]\
@@ -2758,6 +2760,7 @@ void do_exec(int *start_pc)
 					STORE_TOP_I
 				}
 				else {
+					static int runs = 0; 
 					/* non INT:INT cases */
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) { 
@@ -2778,6 +2781,7 @@ void do_exec(int *start_pc)
 							goto aresult;
 						}
 					}
+					++runs;
 					/* a is a sequence */
 #					if SSE2 && 0					
 						if (((unsigned int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 
@@ -2830,51 +2834,62 @@ void do_exec(int *start_pc)
 							struct s1 * dest;
 							struct s1 * sa, * sb;
 							int k;
-							object_ptr dp,ap,bp;
+							object_ptr dp,ap,bp, tempa, tempb, tempc;
+							struct s1 * control;
+							object controlobj;
+							signed long int * ou;
+							signed long int * in;
+							signed long int j;
 							sa = SEQ_PTR(a);
 							sb = SEQ_PTR(top);
 							if (sa->length != sb->length) {
 								RTFatal(
 								"Sequences are of differing lenghts can not be added together.");
 							}
+							tempc = tempa = (object_ptr)EMalloc(BASE_ALIGN_SIZE*2);
+							while (((unsigned int)tempc) % BASE_ALIGN_SIZE != 0) ++tempc;
 							/* Allocate more so as to not overwrite other objects */
-							dest = NewS1(sa->length+BASE_ALIGN_SIZE/sizeof(object));
+							dest = NewS1(sa->length+100);
 							ap = &sa->base[1];
 							bp = &sb->base[1];
 							dp = &dest->base[1];
-							k = 1;
-							while ((ap - sa->base) <= sa->length) {
-								signed long int * ou;
-								signed long int * in, j;
+							k = 0;
+							while (k < sa->length & (~3)) {
 								
 								sse2_paddo3( dp, ap, bp );
 
 								if (iterate_over_double_words) {
-									ou = overunder_128bit;
-									in = integer_128bit;		
-									for (j = 0;*ap != NOVALUE && j < BASE_ALIGN_SIZE/sizeof(object);
-										++j, ++dp, ++ap, ++bp ) {
-										if (*ou) 
-											*dp = NewDouble(*dp);
-										else if (!*in)
-											*dp = binary_op(PLUS, *ap, *bp );
-										++ou;
-										++in;
-										++k;
-									}						
+#									define handle_non_integers(dp) \		
+										ou = overunder_128bit;\
+										in = integer_128bit;\	
+										for (j = 0;*ap != NOVALUE && *bp != NOVALUE && \
+											j < BASE_ALIGN_SIZE/sizeof(object);\
+											++j, ++dp, ++ap, ++bp ) {\
+											if (*ou)\
+												*dp = NewDouble(*dp);\
+											else if (!*in)\
+												*dp = binary_op(PLUS, *ap, *bp );\
+											++ou;\
+											++in;\
+											++k;\
+										}		0
+									handle_non_integers(dp);									
 								} else {
 									ap += 4;
 									bp += 4;
 									dp += 4;
 									k += 4;
 								}
-							}
+							} // while 
+							//printf("Crashing just because dest is of length %d.", dest->length);
+							fflush(stdout);
+							EFree( tempa );
 							dest->length = sa->length;
 							dest->base[sa->length+1] = NOVALUE;
-#                           ifdef EXTRA_CHECK							
-								if (compare(MAKE_SEQ(dest),top = binary_op(PLUS,a,top))) {
-									struct s1 * control = SEQ_PTR(top);
+#                           ifdef EXTRA_CHECK					
+								if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
 									int j;
+									control = SEQ_PTR(controlobj);
 									for (j=1;j<=dest->length;++j)
 										if (dest->base[j] != control->base[j] && 
 											compare(dest->base[j],control->base[j]))
@@ -2882,7 +2897,7 @@ void do_exec(int *start_pc)
 									RTFatal("SSE code discrepancy:"
 										"results not consistent with old version. Index %d\n", j);																
 								}
-#							endif								
+#							endif
 							top = MAKE_SEQ(dest);
 							goto aresult;
 						}
