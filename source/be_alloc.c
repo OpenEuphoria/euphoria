@@ -724,12 +724,13 @@ s1_ptr NewS1(long size)
 /* size is number of elements, NOVALUE is added as an end marker */
 {
         unsigned long address;
+		int i;
         register s1_ptr s1;
         if (size > 1073741800) {
                 // multiply by 4 could overflow 32 bits
                 SpaceMessage();
         }
-        address = (unsigned long)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object) + BASE_ALIGN_SIZE-4);
+        address = (unsigned long)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object) + 2*BASE_ALIGN_SIZE-4);
         s1 = (struct s1*)(address);           
            
         s1->ref = 1;
@@ -739,8 +740,10 @@ s1_ptr NewS1(long size)
                                           /* prepend assumes this is set to 0 */
         s1->cleanup = 0;      
         // set such that s1->base is a multiple of BASE_ALIGN_SIZE
-        for (; ((unsigned int)s1->base) % BASE_ALIGN_SIZE; s1->base++);
+        for (; ((unsigned int)s1->base) % BASE_ALIGN_SIZE; s1->base++) *s1->base = MAKE_SEQ(NULL);		
         s1->base -= 1;  // point to "0th" element.  So now s1->base[1] is BASE_ALIGN_SIZE aligned.
+		for (i = 1; i <= size; ++i )
+			s1->base[i] = MAKE_SEQ(NULL);
         s1->base[size+1] = NOVALUE;
         return(s1);
 }
