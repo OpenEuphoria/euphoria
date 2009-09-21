@@ -1809,6 +1809,8 @@ procedure Goto_statement()
 			goto_list &= length(Code)+2 --not 1???
 			goto_line &= {{line_number,ThisLine}}
 			goto_ref &= new_forward_reference( GOTO, top_block() )
+			add_data( goto_ref[$], sym_obj( tok[T_SYM] ) )
+			set_line( goto_ref[$], line_number, ThisLine, bp )
 		else
 			Goto_block( top_block(), label_block[n] )
 		end if

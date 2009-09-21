@@ -128,6 +128,16 @@ export procedure set_data( integer ref, object data )
 	forward_references[ref][FR_DATA] = data
 end procedure
 
+export procedure add_data( integer ref, object data )
+	forward_references[ref][FR_DATA] = append( forward_references[ref][FR_DATA], data )
+end procedure
+
+export procedure set_line( integer ref, integer line_no, sequence this_line, integer bp )
+	forward_references[ref][FR_LINE] = line_no
+	forward_references[ref][FR_THISLINE] = this_line
+	forward_references[ref][FR_BP] = bp
+end procedure
+
 sequence fwd_private_sym  = {}
 sequence fwd_private_name = {}
 export procedure add_private_symbol( symtab_index sym, sequence name )
@@ -148,7 +158,13 @@ procedure patch_forward_goto( token tok, integer ref )
 	-- Goto_block may insert code, so we need to remember where we are
 	shifting_sub = fr[FR_SUBPROG]
 	
-	Goto_block(  fr[FR_DATA][1], fr[FR_DATA][2], fr[FR_PC] )
+	if length( fr[FR_DATA] ) = 2 then
+		? fr
+		prep_forward_error( ref )
+		
+		CompileErr( 156, { fr[FR_DATA][2] })
+	end if
+	Goto_block(  fr[FR_DATA][1], fr[FR_DATA][3], fr[FR_PC] )
 	
 	shifting_sub = 0
 	
