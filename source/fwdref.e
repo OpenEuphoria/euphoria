@@ -159,11 +159,10 @@ procedure patch_forward_goto( token tok, integer ref )
 	shifting_sub = fr[FR_SUBPROG]
 	
 	if length( fr[FR_DATA] ) = 2 then
-		? fr
 		prep_forward_error( ref )
-		
 		CompileErr( 156, { fr[FR_DATA][2] })
 	end if
+	
 	Goto_block(  fr[FR_DATA][1], fr[FR_DATA][3], fr[FR_PC] )
 	
 	shifting_sub = 0
