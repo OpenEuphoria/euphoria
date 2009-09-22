@@ -239,6 +239,11 @@ procedure NotReached(integer tok, sequence keyword)
 		if equal(keyword, "goto") and find(tok, {LOOP, LABEL, WHILE}) then
 			return
 		end if
+		if equal(keyword, "abort()") and tok = LABEL then
+			-- If a label follows abort() then assume the label could be the target
+			-- of a goto some where.
+			return
+		end if
 		Warning(218, not_reached_warning_flag, 
 					{name_ext(file_name[current_file_no]), 
 					 line_number,
