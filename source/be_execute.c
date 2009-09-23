@@ -77,11 +77,17 @@
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
 #if SSE2
-	/* can't move a variable value directly to MMX */
+/* The following operates on two 4-element arrays of objects and places the result in the array 
+   pointed to by dest.  Repective elements of ptr1[i], and ptr2[i] both are ATOM_INT() type, they are 
+   added and the sum is stored into dest[i].  If there is overflow overunder_128bit[i] is set to a
+   non-zero number.  If either of the elements ptr1[i] or ptr2[i] are not integers the 
+   integer_128bit[i] variable is set to a non-zero number.  If all four elements were added without
+   overflow and were all integers then and only then will iterate_over_double_words be false.
+   
+	NB: can't move a variable value directly to MMX */
 	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	#pragma aux sse2_paddo3 = \
 		/* edx = dest, eax = ptr1, ecx = ptr2 */\
-		"push ebx"\
 		"movdqa xmm0, [eax]"\
 		"movdqa xmm1, xmm0"\
 		"MOVDQA XMM2, XMM0"\
@@ -123,7 +129,6 @@
 		"PACKSSDW XMM6, XMM6"\
 		"PACKSSWB XMM6, XMM6"\
 		"MOVD [iterate_over_double_words], XMM6"\
-		"pop ebx"\
 		"EMMS"\
 		modify [EBX]\
 		parm [EDX] [EAX] [ECX]\
@@ -2846,46 +2851,51 @@ void do_exec(int *start_pc)
 								RTFatal(
 								"Sequences are of differing lenghts can not be added together.");
 							}
-							tempc = tempa = (object_ptr)EMalloc(BASE_ALIGN_SIZE*2);
+							tempc = tempa = (object_ptr)EMalloc(BASE_ALIGN_SIZE+sizeof(vreg));
 							while (((unsigned int)tempc) % BASE_ALIGN_SIZE != 0) ++tempc;
 							/* Allocate more so as to not overwrite other objects */
-							dest = NewS1(sa->length+100);
+							dest = NewS1(sa->length);
 							ap = &sa->base[1];
 							bp = &sb->base[1];
 							dp = &dest->base[1];
 							k = 0;
-							while (k < sa->length & (~3)) {
+							while (k < (sa->length & (~3))) {
 								
 								sse2_paddo3( dp, ap, bp );
 
 								if (iterate_over_double_words) {
-#									define handle_non_integers(dp) \		
-										ou = overunder_128bit;\
-										in = integer_128bit;\	
-										for (j = 0;*ap != NOVALUE && *bp != NOVALUE && \
-											j < BASE_ALIGN_SIZE/sizeof(object);\
-											++j, ++dp, ++ap, ++bp ) {\
-											if (*ou)\
-												*dp = NewDouble(*dp);\
-											else if (!*in)\
-												*dp = binary_op(PLUS, *ap, *bp );\
-											++ou;\
-											++in;\
-											++k;\
-										}		0
-									handle_non_integers(dp);									
+										ou = overunder_128bit;
+										in = integer_128bit;	
+										for (j = 0;*ap != NOVALUE && *bp != NOVALUE && 
+											j < sizeof(vreg)/sizeof(object);
+											++j, ++dp, ++ap, ++bp ) {
+											if (*ou)
+												*dp = NewDouble(*dp);
+											else if (!*in)
+												*dp = binary_op(PLUS, *ap, *bp );
+											++ou;
+											++in;
+											++k;
+										}
 								} else {
-									ap += 4;
-									bp += 4;
-									dp += 4;
-									k += 4;
+									ap += sizeof(vreg)/sizeof(object);
+									bp += sizeof(vreg)/sizeof(object);
+									dp += sizeof(vreg)/sizeof(object);
+									k += sizeof(vreg)/sizeof(object);
 								}
-							} // while 
-							//printf("Crashing just because dest is of length %d.", dest->length);
-							fflush(stdout);
-							EFree( tempa );
+							} // while
+							sse2_paddo3(tempb = tempc, ap, bp );
 							dest->length = sa->length;
 							dest->base[sa->length+1] = NOVALUE;
+							for (++k,j = 0; k <= dest->length; ++k,++j ) {
+									if (overunder_128bit[j]) 
+										dest->base[k] = NewDouble( tempb[j] );
+									else if (integer_128bit[j])
+										dest->base[k] = tempb[j];
+									else
+										dest->base[k] = binary_op(PLUS, sa->base[k], sb->base[k]);
+							}
+							EFree( tempa );
 #                           ifdef EXTRA_CHECK					
 								if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
 									int j;

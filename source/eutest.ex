@@ -19,6 +19,7 @@ include std/text.e
 include std/math.e
 include std/search.e  as search
 include std/error.e as e
+include std/types.e
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
@@ -895,12 +896,15 @@ procedure html_out(sequence data)
 			end if
 
 		case "failed" then
-			printf(1, html_table_failed_row, {
+			if ascii_string(pretty_sprint(data[5])) and ascii_string(pretty_sprint(data[3]))
+			then printf(1, html_table_failed_row, {
 				data[2],
 				pretty_sprint(data[5]),
 				pretty_sprint(data[3]),
 				data[4]
-			})
+			}) else 
+				printf(1, "Cannot display", {} )
+			end if
 
 		case "passed" then
 			sequence anum

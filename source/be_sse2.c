@@ -19,11 +19,11 @@ struct mem_list {
 void sse2_variable_init() { 
 	int j, i = 0;
 	
-	sse_data = (object_ptr)malloc((8*4)*sizeof(object)+BASE_ALIGN_SIZE);
+	sse_data = (object_ptr)malloc(8*sizeof(vreg)+BASE_ALIGN_SIZE);
 	while (((unsigned int)&sse_data[i]) % BASE_ALIGN_SIZE != 0)
 		++i;
 #	define VSET( VN, VV )	do {VN = &sse_data[i];\
-	for (j = 0; j < 4; ++j ) sse_data[i++] = VV;} while (0)
+	for (j = 0; j < sizeof(vreg)/sizeof(object); ++j ) sse_data[i++] = VV;} while (0)
 
 	NOVALUE_128bit = &sse_data[i];
 	NOVALUE_128bit[0] = NOVALUE;

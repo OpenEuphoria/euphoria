@@ -573,3 +573,8 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 	wmake -h -f makefile.wat CONFIG=..\$(CONFIG) EOSTYPE=-D$(OSFLAG)
 	cd ..
 !endif
+
+
+sse2_test.exe: $(BUILDDIR)\intobj\back\be_sse2.obj $(BUILDDIR)\sse2_test.obj
+	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el file $(BUILDDIR)\intobj\back\be_sse2.obj file $(BUILDDIR)\sse2_test.obj name sse2_test.exe	
+	
