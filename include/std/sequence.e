@@ -2614,7 +2614,7 @@ public enum
 --
 -- Parameters:
 -- # ##pSource## : A sequence that may contain duplicated elements
--- # ##pMode## : One of RD_INPLACE, RD_PRESORTED, or RD_SORT.
+-- # ##pInPlace## : One of RD_INPLACE, RD_PRESORTED, or RD_SORT.
 -- ** RD_INPLACE removes items while preserving the original order of the unique items.
 -- ** RD_PRESORTED assumes that the elements in ##pSource## are already sorted. If they
 -- are not already sorted, this option merely removed adjacent duplicate elements.
