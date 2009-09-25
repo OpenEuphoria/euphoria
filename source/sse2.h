@@ -29,6 +29,7 @@ extern object_ptr MAXINT_128bit, MININT_128bit;
 extern object_ptr overunder_128bit, integer_128bit, intermediate_128bit;
 /* iterate flag */
 extern signed long iterate_over_double_words;
+extern object_ptr vregs_temp;
 #ifndef EWATCOM
 #	error	SSE2 instructions not defined for this compiler
 #endif

@@ -77,6 +77,14 @@
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
 #if SSE2
+/* routine saves the mmx register values intoa variable */
+void save_vector_registers();
+#pragma aux save_vector_registers = \
+	"mov ebx, vregs_temp"\
+	"fxsave [ebx]"\
+	modify [ebx];
+
+
 /* The following operates on two 4-element arrays of objects and places the result in the array 
    pointed to by dest.  Repective elements of ptr1[i], and ptr2[i] both are ATOM_INT() type, they are 
    added and the sum is stored into dest[i].  If there is overflow overunder_128bit[i] is set to a
@@ -88,7 +96,9 @@
 	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	#pragma aux sse2_paddo3 = \
 		/* edx = dest, eax = ptr1, ecx = ptr2 */\
-		"movdqa xmm0, [eax]"\
+		"mov ebx, vregs_temp"\
+		"fxsave [ebx]"\
+ 		"movdqa xmm0, [eax]"\
 		"movdqa xmm1, xmm0"\
 		"MOVDQA XMM2, XMM0"\
 		"MOVDQA XMM4, [ECX]"\
@@ -129,8 +139,10 @@
 		"PACKSSDW XMM6, XMM6"\
 		"PACKSSWB XMM6, XMM6"\
 		"MOVD [iterate_over_double_words], XMM6"\
+		"mov ebx, vregs_temp"\
+        "FXRSTOR [ebx]"\
 		"EMMS"\
-		modify [EBX]\
+		modify [EBX ESI EBP]\
 		parm [EDX] [EAX] [ECX]\
 		value [EBX];
 #endif
