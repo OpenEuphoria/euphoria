@@ -1554,7 +1554,7 @@ For example, procedures, functions and types can call themselves or one another
 recursion, where routine A calls routine B which directly or indirectly calls
 routine A, implies one of A or B being called before it is defined. This is perhaps
 the most frequent situation which requires using the [[:routine_id]]() mechanism.
-See [[:Dynamic Routine Calling]] for more details.
+See [[:Indirect Routine Calling]] for more details.
 
 ==== Defining the scope of an identifier
 

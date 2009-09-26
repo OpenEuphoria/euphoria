@@ -126,7 +126,7 @@ end function
 
 
 --****
--- == Dynamic Calling
+-- == Indirect Routine Calling
 --
 -- <<LEVELTOC depth=2>>
 --
@@ -245,7 +245,7 @@ end function
 --  
 -- See Also:
 -- [[:call_proc]], [[:call_func]], [[:call_back]], [[:define_c_func]], [[:define_c_proc]], 
--- [[:task_create]], [[:Platform-Specific Issues]], [[:Dynamic routine calling]]
+-- [[:task_create]], [[:Platform-Specific Issues]], [[:Indirect routine calling]]
 
 --****
 -- Signature:
@@ -271,7 +271,7 @@ end function
 --
 -- ##args## must be a sequence of argument values of length n, where n is the number of
 -- arguments required by the called function. Defaulted parameters currently cannot be
--- synthesized while making a dynamic call.
+-- synthesized while making a indirect call.
 --
 -- If the function with id ##id## does not take any arguments then ##args## should be ##{}##.
 --
@@ -303,7 +303,7 @@ end function
 --
 -- ##args## must be a sequence of argument values of length n, where n is the number of
 -- arguments required by the called procedure. Defaulted parameters currently cannot be
--- synthesized while making a dynamic call.
+-- synthesized while making a indirect call.
 --
 -- If the procedure with id ##id## does not take any arguments then ##args## should be ##{}##.
 --
@@ -328,7 +328,7 @@ end function
 --   [[:call_func]], [[:routine_id]], [[:c_proc]]
 
 --****
--- === Accessing Euphoria internals dynamically
+-- === Accessing Euphoria internals
 
 --****
 -- Signature:
