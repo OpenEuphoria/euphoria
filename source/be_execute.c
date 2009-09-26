@@ -2482,7 +2482,7 @@ void do_exec(int *start_pc)
 				if (IS_ATOM_INT(top))
 					top = ATOM_1;
 				else if (IS_ATOM_DBL(top)) {
-					tpc = pc;
+					/* tpc = pc; */
 					top = DoubleToInt(top);
 					if (IS_ATOM_INT(top))
 						top = ATOM_1;
@@ -2534,10 +2534,22 @@ void do_exec(int *start_pc)
 			case L_IS_AN_OBJECT:
 			deprintf("case L_IS_AN_OBJECT:");
 				top = *(object_ptr)pc[1];
-				if (top != NOVALUE) 
-					top = ATOM_1;
+				if (top != NOVALUE) {
+					if (IS_ATOM_INT(top))
+						top = 1;
+					else if (IS_ATOM_DBL(top)) {
+						top = DoubleToInt(top);
+						if (IS_ATOM_INT(top))
+							top = 1;
+						else
+							top = 2;
+					}
+					else if (IS_SEQUENCE(top)) 
+						top = 3;
+				}	
 				else 
 					top = ATOM_0;
+					
 				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
 					DeRef( ((symtab_ptr)pc[1])->obj );
 					((symtab_ptr)pc[1])->obj = NOVALUE;

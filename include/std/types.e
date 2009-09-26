@@ -6,18 +6,125 @@ namespace types
 -- == Types - Extended
 --
 -- <<LEVELTOC depth=2>>
+
+--**
+-- Object not assigned
+public constant OBJ_UNASSIGNED = 0
+
+--**
+-- Object is integer
+public constant OBJ_INTEGER = 1
+
+--**
+-- Object is atom
+public constant OBJ_ATOM = 2
+
+--**
+-- Object is sequence
+public constant OBJ_SEQUENCE = 3
+
+
+--****
+-- Signature:
+-- <built-in> function object(object x)
 --
--- === Constants
+-- Description:
+-- Returns information about the object type of the supplied argument ##x##.
 --
+-- Returns:
+-- # An integer. 
+-- ** OBJ_UNASSIGNED if ##x## has not been assigned anything yet.
+-- ** OBJ_INTEGER if ##x## holds an integer value.
+-- ** OBJ_ATOM if ##x## holds a number that is not an integer.
+-- ** OBJ_SEQUENCE if ##x## holds a sequence value.
+--
+-- Example 1:
+-- <eucode>
+-- ? object(1) --> OBJ_INTEGER
+-- ? object(1.1) --> OBJ_ATOM
+-- ? object("1") --> OBJ_SEQUENCE
+-- object x
+-- ? object(x) --> OBJ_UNASSIGNED
+-- </eucode>
+--
+-- See Also:
+-- [[:sequence]](), [[:integer]](), [[:atom]]()
+
+
+--****
+-- Signature:
+-- <built-in> function integer(object x)
+--
+-- Description:
+-- Tests the supplied argument ##x## to see if it is an integer or not.
+--
+-- Returns:
+-- # An integer. 
+-- ** 1 if ##x## is an integer.
+-- ** 0 if ##x## is not an integer.
+--
+-- Example 1:
+-- <eucode>
+-- ? integer(1) --> 1
+-- ? integer(1.1) --> 0
+-- ? integer("1") --> 0
+-- </eucode>
+--
+-- See Also:
+-- [[:sequence]](), [[:object]](), [[:atom]]()
+
+
+--****
+-- Signature:
+-- <built-in> function atom(object x)
+--
+-- Description:
+-- Tests the supplied argument ##x## to see if it is an atom or not.
+--
+-- Returns:
+-- # An integer. 
+-- ** 1 if ##x## is an atom.
+-- ** 0 if ##x## is not an atom.
+--
+-- Example 1:
+-- <eucode>
+-- ? atom(1) --> 1
+-- ? atom(1.1) --> 1
+-- ? atom("1") --> 0
+-- </eucode>
+--
+-- See Also:
+-- [[:sequence]](), [[:object]](), [[:integer]]()
+
+
+--****
+-- Signature:
+-- <built-in> function sequence( object x)
+--
+-- Description:
+-- Tests the supplied argument ##x## to see if it is a sequence or not.
+--
+-- Returns:
+-- # An integer. 
+-- ** 1 if ##x## is a sequence.
+-- ** 0 if ##x## is not an sequence.
+--
+-- Example 1:
+-- <eucode>
+-- ? integer(1) --> 0
+-- ? integer(1.1) --> 0
+-- ? integer("1") --> 1
+-- </eucode>
+--
+-- See Also:
+-- [[:integer]](), [[:object]](), [[:atom]]()
 
 --**
 -- Boolean FALSE value
-
 public constant FALSE = 0
 
 --**
 -- Boolean TRUE value
-
 public constant TRUE = 1
 
 --**
