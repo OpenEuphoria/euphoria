@@ -151,7 +151,7 @@ export procedure block_label( sequence label_name )
 -- sets the label for the current block
 	block_stack[$][BLOCK_LABEL] = label_name
 	SymTab[current_block][S_NAME] = sprintf( "BLOCK: %s-%s", 
-		{opnames[block_stack[$][BLOCK_OPCODE]], label_name})
+		{ block_type_name(block_stack[$][BLOCK_OPCODE]), label_name})
 end procedure
 
 function pop_block()
