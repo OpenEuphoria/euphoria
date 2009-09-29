@@ -12,4 +12,9 @@ end function
 
 test_equal( "convert FUNC block to PROC block", 1, abc() )
 
+loop label "loop label" do
+
+until 1
+test_pass( "don't crash on label for loop" )
+
 test_report()
