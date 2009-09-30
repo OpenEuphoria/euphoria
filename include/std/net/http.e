@@ -409,10 +409,10 @@ end function
 --	 like ##{sequence header, sequence data}##.
 
 public function get_http(sequence inet_addr, sequence hostname, sequence file)
-	object junk, junk2
+	object junk, junk2, header
 	sock:socket sock
 	atom success, last_data_len, gotheader, contentlen
-	sequence header, data, hline
+	sequence data, hline
 
 	-- Notes for future additions:
 	-- HUGE differences in HTTP/1.1 vs HTTP/1.0
@@ -500,9 +500,9 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 				header = -1
 				data = "could not send or recieve using socket"
 		end if -- if success -- sock:send
- 		else 
- 		      header = -1
-			  data = "could not connect to socket"
+	else 
+		header = -1
+		data = "could not connect to socket"
 	end if -- if success = 1 then -- sock:connect
 	if sock:close(sock) then end if
 
