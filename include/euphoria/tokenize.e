@@ -23,7 +23,7 @@ function Enum()
 end function
 
 ---------------------------------------------------------------------------------
-global constant
+public constant
 		T_EOF        = Enum_Start(EOF,1),
 		T_NULL       = Enum(), -- 
 		T_SHBANG     = Enum(),
@@ -78,7 +78,7 @@ global constant
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
 -- T_NUMBER formats
-global constant 
+public constant 
 		TF_HEX        = Enum(),
 		TF_INT        = Enum(),
 		TF_ATOM       = Enum(),
@@ -139,7 +139,7 @@ procedure report_error(integer err)
 	ERR_LPOS = Token[TLPOS]
 end procedure
 
-global function et_error_string(integer err)
+public function et_error_string(integer err)
 	if err >= ERR_OPEN and err <= ERR_EOF then
 		return ERROR_STRING[err]
 	else
@@ -156,14 +156,14 @@ integer STRING_NUMBERS 	= FALSE
 --**
 -- return blank lines as tokens
 -- default is FALSE
-global procedure et_keep_blanks(integer toggle)
+public procedure et_keep_blanks(integer toggle)
 	IGNORE_BLANKS = not toggle
 end procedure
 
 --**
 -- return comments as tokens
 -- default is FALSE
-global procedure et_keep_comments(integer toggle)
+public procedure et_keep_comments(integer toggle)
 	IGNORE_COMMENTS = not toggle
 end procedure
 
@@ -174,7 +174,7 @@ end procedure
 -- 		T_CHAR tokens return single integer chars
 --		T_EOF tokens return undefined data
 --		all other tokens return strings
-global procedure et_string_numbers(integer toggle)
+public procedure et_string_numbers(integer toggle)
 	STRING_NUMBERS = toggle
 end procedure
 
@@ -590,14 +590,14 @@ end procedure
 
 ---------------------------------------------------------------------------------
 
-global constant
+public constant
 		 ET_TOKENS			= Enum_Start(1,1)
 		,ET_ERROR				= Enum()
 		,ET_ERR_LINE		= Enum()
 		,ET_ERR_COLUMN	= Enum()
 
 
-global function et_tokenize_string(sequence code)
+public function et_tokenize_string(sequence code)
  sequence tokens
 
 	ERR = FALSE
@@ -642,7 +642,7 @@ global function et_tokenize_string(sequence code)
 	return {tokens,ERR,ERR_LNUM, ERR_LPOS}
 end function
 
-global function et_tokenize_file(sequence fname)
+public function et_tokenize_file(sequence fname)
 	object txt
 	txt = read_file(fname, TEXT_MODE)
 	if atom(txt) and txt = -1 then

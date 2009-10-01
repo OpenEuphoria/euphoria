@@ -42,7 +42,7 @@ enum
 
 sequence char_class
 
-global procedure set_colors(sequence pColorList)
+public procedure set_colors(sequence pColorList)
 	sequence lColorName
 	for i = 1 to length(pColorList) do
 		lColorName = upper(pColorList[i][1])
@@ -63,7 +63,7 @@ global procedure set_colors(sequence pColorList)
 	end for
 end procedure
 
-global procedure init_class()
+public procedure init_class()
 -- set default color scheme
 	NORMAL_COLOR  = #330033
 	COMMENT_COLOR = #FF0055
@@ -117,7 +117,7 @@ procedure seg_flush(integer new_color)
 	end if
 end procedure
 
-global function SyntaxColor(sequence pline)
+public function SyntaxColor(sequence pline)
 -- Break up a new-line terminated line into colored text segments identifying the
 -- various parts of the Euphoria language.
 -- Consecutive characters of the same color are all placed in the
