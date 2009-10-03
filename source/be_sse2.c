@@ -1,6 +1,7 @@
 #include <conio.h>
 #include <malloc.h>
 #include "execute.h"
+#include "reswords.h"
 typedef int symtab_ptr;
 #include "alloc.h"
 #include "sse2.h"
@@ -93,4 +94,185 @@ void * malloc_aligned(unsigned long size, unsigned long alignment_size) {
 }
 
 
+
+void load_vector_registers();
+#pragma aux load_vector_registers = \
+	"mov ebx, vregs_temp"\
+	"movdqa xmm0, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm1, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm2, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm3, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm4, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm5, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm6, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm7, [ebx]"\
+	modify [ebx];
+
+/* routine saves the mmx register values intoa variable */
+void save_vector_registers();
+#pragma aux save_vector_registers = \
+	"mov ebx, vregs_temp"\
+	"movdqa [ebx], xmm0"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm1"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm2"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm3"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm4"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm5"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm6"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm7"\
+	modify [ebx];
+
+
+/* The following operates on two 4-element arrays of objects and places the result in the array 
+   pointed to by dest.  Repective elements of ptr1[i], and ptr2[i] both are ATOM_INT() type, they are 
+   added and the sum is stored into dest[i].  If there is overflow overunder_128bit[i] is set to a
+   non-zero number.  If either of the elements ptr1[i] or ptr2[i] are not integers the 
+   integer_128bit[i] variable is set to a non-zero number.  If all four elements were added without
+   overflow and were all integers then and only then will iterate_over_double_words be false.
+   
+	NB: can't move a variable value directly to MMX */
+	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
+	#pragma aux sse2_paddo3 = \
+		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+ 		"movdqa xmm0, [eax]"\
+		"movdqa xmm1, xmm0"\
+		"MOVDQA XMM2, XMM0"\
+		"MOVDQA XMM4, [ECX]"\
+		"MOVDQA XMM5, XMM4"\
+		"movdqa xmm6, xmm5"\
+		"mov ebx, NOVALUE_128bit"\
+		"movdqa xmm7, [ebx]"\
+		"pcmpgtd xmm2, xmm7"\
+		/*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
+		/*XMM2[i] = -1 where ptr1[i] is an atom integer  */\ 	
+		"pcmpgtd xmm6, xmm7"\
+		/* XMM6 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
+		/* XMM6[i] = -1 where ptr2[i] is an atom integer*/\
+		"andps xmm2, xmm6"\
+		"mov ebx, integer_128bit"\
+		"movdqa [ebx], xmm2"\
+		"paddd xmm1, xmm5"\
+		"andps xmm1, xmm2"\
+		"movdqa [edx], xmm1"\
+		"mov ebx, MININT_128bit"\
+		"movdqa xmm6, [ebx]"\
+		/* xmm6 = MININT, XMM2 is our int mask, XMM0 and XMM4 are *ptr1 and *ptr2 repectively.*/\
+		/* xmm1 is the sum.*/\
+		"movdqa xmm3, xmm1"\
+		"pcmpgtd xmm6, xmm1"\
+		"mov ebx, MAXINT_128bit"\
+		"movdqa xmm5, [ebx]"\
+		"pcmpgtd xmm3, xmm5"\
+		"orps xmm6, xmm3"\
+		"mov ebx, overunder_128bit"\
+		"movdqa [ebx], xmm6"\
+		/* Here xmm0, xmm4 are *ptr[12], xmm2 is our int mask, xmm6 is our over under mask */\
+		"mov ebx, ONES_128bit"\
+		"andnps xmm2, [ebx]"\
+		/* Here xmm2 is our negated int mask */\
+		"orps xmm6, xmm2"\
+		/* Here xmm6 is a mask that if it is true it needs to be handled in a DQ word loop 	*/\
+		"PACKSSDW XMM6, XMM6"\
+		"PACKSSWB XMM6, XMM6"\
+		"MOVD iterate_over_double_words, XMM6"\
+		"MOV ebx, iterate_over_double_words"\
+		"EMMS"\
+		modify [EBX]\
+		parm [EDX] [EAX] [ECX]\
+		value [EBX];
+
+
+object * paddo3(object a, object top) {
+	struct s1 * dest;
+	struct s1 * sa, * sb;
+	int k;
+	object_ptr dp,ap,bp, tempa, tempb, tempc;
+	struct s1 * control;
+	object controlobj;
+	signed long int * ou;
+	signed long int * in;
+	signed long int j;
+	sa = SEQ_PTR(a);
+	sb = SEQ_PTR(top);
+	if (sa->length != sb->length) {
+		RTFatal(
+		"Sequences are of differing lenghts can not be added together.");
+	}
+	tempc = tempa = (object_ptr)malloc(BASE_ALIGN_SIZE+sizeof(vreg));
+	tempc = (object_ptr)(((((unsigned int)tempc) - 1) | (BASE_ALIGN_SIZE-1)) + 1);
+	tempc = ((unsigned int)tempc) + BASE_ALIGN_SIZE - 
+		( (((unsigned int)tempc) - 1) % BASE_ALIGN_SIZE + 1 );
+	
+	dest = NewS1(sa->length);
+	dest->base[sa->length+1] = NOVALUE;
+	top = MAKE_SEQ(dest);
+	ap = &sa->base[1];
+	bp = &sb->base[1];
+	dp = &dest->base[1];
+	k = 0;
+	save_vector_registers();
+	iterate_over_double_words = 0;
+	while (k < (sa->length & -4)) {			
+		sse2_paddo3( dp, ap, bp );
+		if (iterate_over_double_words) {
+				for (j = 0;	j < sizeof(vreg)/sizeof(object);
+					++j ) {
+						if (overunder_128bit[j] != 0) {
+								dp[j] = NewDouble((double)INT_VAL(dp[j]));
+						}	else								
+						if (!integer_128bit[j]) {
+								dp[j] = binary_op(PLUS, ap[j], bp[j] );
+						}
+				}
+		}
+		ap += sizeof(vreg)/sizeof(object);
+		bp += sizeof(vreg)/sizeof(object);
+		dp += sizeof(vreg)/sizeof(object);
+		k  += sizeof(vreg)/sizeof(object);
+		// problem is after this
+
+	} // while
+	// but before this...
+	sse2_paddo3(tempb = tempc, ap, bp );
+	dest->length = sa->length;
+	dest->base[sa->length+1] = NOVALUE;
+	for (++k,j = 0; k <= dest->length; ++k,++j ) {
+			if (overunder_128bit[j]) 
+				dest->base[k] = NewDouble( tempb[j] );
+			else if (integer_128bit[j])
+				dest->base[k] = tempb[j];
+			else
+				dest->base[k] = binary_op(PLUS, sa->base[k], sb->base[k]);
+	}
+	EFree( tempa );
+#   ifdef EXTRA_CHECK					
+		if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
+			int j;
+			control = SEQ_PTR(controlobj);
+			for (j=1;j<=dest->length;++j)
+				if (dest->base[j] != control->base[j] && 
+					compare(dest->base[j],control->base[j]))
+					break;
+			RTFatal("SSE code discrepancy:"
+				"results not consistent with old version. Index %d\n", j);																
+		}
+#	endif
+sse_result:
+	load_vector_registers();
+	return top;
+}
 

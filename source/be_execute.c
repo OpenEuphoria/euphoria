@@ -77,11 +77,45 @@
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
 #if SSE2
+void load_vector_registers();
+#pragma aux load_vector_registers = \
+	"mov ebx, vregs_temp"\
+	"movdqa xmm0, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm1, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm2, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm3, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm4, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm5, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm6, [ebx]"\
+	"add ebx, 16"\
+	"movdqa xmm7, [ebx]"\
+	modify [ebx];
+
 /* routine saves the mmx register values intoa variable */
 void save_vector_registers();
 #pragma aux save_vector_registers = \
 	"mov ebx, vregs_temp"\
-	"fxsave [ebx]"\
+	"movdqa [ebx], xmm0"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm1"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm2"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm3"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm4"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm5"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm6"\
+	"add ebx, 16"\
+	"movdqa [ebx], xmm7"\
 	modify [ebx];
 
 
@@ -96,8 +130,6 @@ void save_vector_registers();
 	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	#pragma aux sse2_paddo3 = \
 		/* edx = dest, eax = ptr1, ecx = ptr2 */\
-		"mov ebx, vregs_temp"\
-		"fxsave [ebx]"\
  		"movdqa xmm0, [eax]"\
 		"movdqa xmm1, xmm0"\
 		"MOVDQA XMM2, XMM0"\
@@ -138,11 +170,10 @@ void save_vector_registers();
 		/* Here xmm6 is a mask that if it is true it needs to be handled in a DQ word loop 	*/\
 		"PACKSSDW XMM6, XMM6"\
 		"PACKSSWB XMM6, XMM6"\
-		"MOVD [iterate_over_double_words], XMM6"\
-		"mov ebx, vregs_temp"\
-        "FXRSTOR [ebx]"\
+		"MOVD iterate_over_double_words, XMM6"\
+		"MOV ebx, iterate_over_double_words"\
 		"EMMS"\
-		modify [EBX ESI EBP]\
+		modify [EBX]\
 		parm [EDX] [EAX] [ECX]\
 		value [EBX];
 #endif
@@ -766,21 +797,21 @@ void wcthread(long x);
 long wcinc2pc(long x);
 #pragma aux wcinc2pc = \
 		"ADD ECX, 8" \
-		modify [] \
+		modify [ECX] \
 		value [ECX] \
 		parm [ECX];
 
 long wcinc4pc(long x);
 #pragma aux wcinc4pc = \
 		"ADD ECX, 16" \
-		modify [] \
+		modify [ECX] \
 		value [ECX] \
 		parm [ECX];
 
 long wcinc5pc(long x);
 #pragma aux wcinc5pc = \
 		"ADD ECX, 20" \
-		modify [] \
+		modify [ECX] \
 		value [ECX] \
 		parm [ECX];
 
@@ -794,7 +825,7 @@ long wcinc5pc(long x);
 long wcin3pc(long x);
 #pragma aux wcinc3pc = \
 		"ADD ECX, 12" \
-		modify [] \
+		modify [ECX] \
 		value [ECX] \
 		parm [ECX];
 
@@ -803,7 +834,7 @@ void threadpc3(void);
 #pragma aux threadpc3 = \
 		"MOV ECX, EDI" \
 		"jmp [ECX]"    \
-		modify [EAX EBX ECX EDX];
+		modify [ECX];
 		
 #define BREAK break
 #include "redef.h"
@@ -2843,87 +2874,15 @@ void do_exec(int *start_pc)
 										"%s  V1->base[%d] = %10.10g when k = %d.  Should be %d\n",\
 										S, I, ((struct d*)(8*V1->base[I]))->dbl, k, CV1);\
 								 } 0
-#					if SSE2
+#					if SSE2 
 						if (IS_SEQUENCE(a) &&
 							IS_SEQUENCE(top) &&
-							(int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0 && 							 
-							(int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0) {
-							struct s1 * dest;
-							struct s1 * sa, * sb;
-							int k;
-							object_ptr dp,ap,bp, tempa, tempb, tempc;
-							struct s1 * control;
-							object controlobj;
-							signed long int * ou;
-							signed long int * in;
-							signed long int j;
-							sa = SEQ_PTR(a);
-							sb = SEQ_PTR(top);
-							if (sa->length != sb->length) {
-								RTFatal(
-								"Sequences are of differing lenghts can not be added together.");
-							}
-							tempc = tempa = (object_ptr)EMalloc(BASE_ALIGN_SIZE+sizeof(vreg));
-							while (((unsigned int)tempc) % BASE_ALIGN_SIZE != 0) ++tempc;
-							/* Allocate more so as to not overwrite other objects */
-							dest = NewS1(sa->length);
-							ap = &sa->base[1];
-							bp = &sb->base[1];
-							dp = &dest->base[1];
-							k = 0;
-							while (k < (sa->length & (~3))) {
-								
-								sse2_paddo3( dp, ap, bp );
-
-								if (iterate_over_double_words) {
-										ou = overunder_128bit;
-										in = integer_128bit;	
-										for (j = 0;*ap != NOVALUE && *bp != NOVALUE && 
-											j < sizeof(vreg)/sizeof(object);
-											++j, ++dp, ++ap, ++bp ) {
-											if (*ou)
-												*dp = NewDouble(*dp);
-											else if (!*in)
-												*dp = binary_op(PLUS, *ap, *bp );
-											++ou;
-											++in;
-											++k;
-										}
-								} else {
-									ap += sizeof(vreg)/sizeof(object);
-									bp += sizeof(vreg)/sizeof(object);
-									dp += sizeof(vreg)/sizeof(object);
-									k += sizeof(vreg)/sizeof(object);
-								}
-							} // while
-							sse2_paddo3(tempb = tempc, ap, bp );
-							dest->length = sa->length;
-							dest->base[sa->length+1] = NOVALUE;
-							for (++k,j = 0; k <= dest->length; ++k,++j ) {
-									if (overunder_128bit[j]) 
-										dest->base[k] = NewDouble( tempb[j] );
-									else if (integer_128bit[j])
-										dest->base[k] = tempb[j];
-									else
-										dest->base[k] = binary_op(PLUS, sa->base[k], sb->base[k]);
-							}
-							EFree( tempa );
-#                           ifdef EXTRA_CHECK					
-								if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
-									int j;
-									control = SEQ_PTR(controlobj);
-									for (j=1;j<=dest->length;++j)
-										if (dest->base[j] != control->base[j] && 
-											compare(dest->base[j],control->base[j]))
-											break;
-									RTFatal("SSE code discrepancy:"
-										"results not consistent with old version. Index %d\n", j);																
-								}
-#							endif
-							top = MAKE_SEQ(dest);
+							((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 							 
+							((int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
+							top = paddo3(a,top);
 							goto aresult;
 						}
-#					endif				
+#					endif // SSE				
 					top = binary_op(PLUS, a, top);
 
 				aresult:

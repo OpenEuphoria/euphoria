@@ -730,7 +730,7 @@ s1_ptr NewS1(long size)
                 // multiply by 4 could overflow 32 bits
                 SpaceMessage();
         }
-        address = (unsigned long)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object) + 2*BASE_ALIGN_SIZE-4);
+        address = (unsigned long)EMalloc(sizeof(struct s1) + (size+1) * sizeof(object) + BASE_ALIGN_SIZE);
         s1 = (struct s1*)(address);           
            
         s1->ref = 1;
