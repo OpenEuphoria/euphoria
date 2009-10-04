@@ -24,7 +24,7 @@ typedef union {
 #endif
 void sse2_variable_init();
 /* The following are pointers to aligned register sized values */
-extern object_ptr NOVALUE_128bit, ONES_128bit, ZEROS_128bit;
+extern object_ptr NOVALUE_128bit, MINUSONES_128bit, ZEROS_128bit;
 extern object_ptr MAXINT_128bit, MININT_128bit;
 extern object_ptr overunder_128bit, integer_128bit, intermediate_128bit;
 /* iterate flag */

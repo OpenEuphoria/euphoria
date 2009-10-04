@@ -76,107 +76,6 @@
 #endif
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
-#if SSE2
-void load_vector_registers();
-#pragma aux load_vector_registers = \
-	"mov ebx, vregs_temp"\
-	"movdqa xmm0, [ebx]"\
-	"add ebx, 16"\
-	"movdqa xmm1, [ebx]"\
-	"add ebx, 16"\
-	"movdqa xmm2, [ebx]"\
-	"add ebx, 16"\
-	"movdqa xmm3, [ebx]"\
-	"add ebx, 16"\
-	"movdqa xmm4, [ebx]"\
-	"add ebx, 16"\
-	"movdqa xmm5, [ebx]"\
-	"add ebx, 16"\
-	"movdqa xmm6, [ebx]"\
-	"add ebx, 16"\
-	"movdqa xmm7, [ebx]"\
-	modify [ebx];
-
-/* routine saves the mmx register values intoa variable */
-void save_vector_registers();
-#pragma aux save_vector_registers = \
-	"mov ebx, vregs_temp"\
-	"movdqa [ebx], xmm0"\
-	"add ebx, 16"\
-	"movdqa [ebx], xmm1"\
-	"add ebx, 16"\
-	"movdqa [ebx], xmm2"\
-	"add ebx, 16"\
-	"movdqa [ebx], xmm3"\
-	"add ebx, 16"\
-	"movdqa [ebx], xmm4"\
-	"add ebx, 16"\
-	"movdqa [ebx], xmm5"\
-	"add ebx, 16"\
-	"movdqa [ebx], xmm6"\
-	"add ebx, 16"\
-	"movdqa [ebx], xmm7"\
-	modify [ebx];
-
-
-/* The following operates on two 4-element arrays of objects and places the result in the array 
-   pointed to by dest.  Repective elements of ptr1[i], and ptr2[i] both are ATOM_INT() type, they are 
-   added and the sum is stored into dest[i].  If there is overflow overunder_128bit[i] is set to a
-   non-zero number.  If either of the elements ptr1[i] or ptr2[i] are not integers the 
-   integer_128bit[i] variable is set to a non-zero number.  If all four elements were added without
-   overflow and were all integers then and only then will iterate_over_double_words be false.
-   
-	NB: can't move a variable value directly to MMX */
-	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
-	#pragma aux sse2_paddo3 = \
-		/* edx = dest, eax = ptr1, ecx = ptr2 */\
- 		"movdqa xmm0, [eax]"\
-		"movdqa xmm1, xmm0"\
-		"MOVDQA XMM2, XMM0"\
-		"MOVDQA XMM4, [ECX]"\
-		"MOVDQA XMM5, XMM4"\
-		"movdqa xmm6, xmm5"\
-		"mov ebx, NOVALUE_128bit"\
-		"movdqa xmm7, [ebx]"\
-		"pcmpgtd xmm2, xmm7"\
-		/*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
-		/*XMM2[i] = -1 where ptr1[i] is an atom integer  */\ 	
-		"pcmpgtd xmm6, xmm7"\
-		/* XMM6 = (ptr2[0..3] > NOVALUE_128bit[0..3])*/\
-		/* XMM6[i] = -1 where ptr2[i] is an atom integer*/\
-		"andps xmm2, xmm6"\
-		"mov ebx, integer_128bit"\
-		"movdqa [ebx], xmm2"\
-		"paddd xmm1, xmm5"\
-		"andps xmm1, xmm2"\
-		"movdqa [edx], xmm1"\
-		"mov ebx, MININT_128bit"\
-		"movdqa xmm6, [ebx]"\
-		/* xmm6 = MININT, XMM2 is our int mask, XMM0 and XMM4 are *ptr1 and *ptr2 repectively.*/\
-		/* xmm1 is the sum.*/\
-		"movdqa xmm3, xmm1"\
-		"pcmpgtd xmm6, xmm1"\
-		"mov ebx, MAXINT_128bit"\
-		"movdqa xmm5, [ebx]"\
-		"pcmpgtd xmm3, xmm5"\
-		"orps xmm6, xmm3"\
-		"mov ebx, overunder_128bit"\
-		"movdqa [ebx], xmm6"\
-		/* Here xmm0, xmm4 are *ptr[12], xmm2 is our int mask, xmm6 is our over under mask */\
-		"mov ebx, ONES_128bit"\
-		"andnps xmm2, [ebx]"\
-		/* Here xmm2 is our negated int mask */\
-		"orps xmm6, xmm2"\
-		/* Here xmm6 is a mask that if it is true it needs to be handled in a DQ word loop 	*/\
-		"PACKSSDW XMM6, XMM6"\
-		"PACKSSWB XMM6, XMM6"\
-		"MOVD iterate_over_double_words, XMM6"\
-		"MOV ebx, iterate_over_double_words"\
-		"EMMS"\
-		modify [EBX]\
-		parm [EDX] [EAX] [ECX]\
-		value [EBX];
-#endif
 /* To eliminate type casts for pc[*] you
  would need a union like this:
 union pc_t {
@@ -1727,9 +1626,6 @@ void do_exec(int *start_pc)
 	s1_ptr s1,s2;
 	object *block;
 	
-#	if SSE2	
-		sse2_variable_init();
-#	endif		
 #if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
@@ -2808,7 +2704,6 @@ void do_exec(int *start_pc)
 					STORE_TOP_I
 				}
 				else {
-					static int runs = 0; 
 					/* non INT:INT cases */
 					tpc = pc;
 					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) { 
@@ -2829,54 +2724,9 @@ void do_exec(int *start_pc)
 							goto aresult;
 						}
 					}
-					++runs;
 					/* a is a sequence */
-#					if SSE2 && 0					
-						if (((unsigned int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 
-							IS_SEQUENCE(top) && 
-							((unsigned int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
-								struct s1 * dest;
-								dest = NewS1(4);
-								sse2_paddo3( dest->base + 1, &SEQ_PTR(a)->base[1], &SEQ_PTR(top)
-									->base[1] );
-								printf("NOVALUE_128bit[1]=%08x (%d)\n", NOVALUE_128bit[1]
-									, NOVALUE_128bit[1] ); 
-								printf("[%08x %08x %08x %08x]=[%4ld %4ld %4ld %4ld]+[%4ld %4ld %4ld %4ld]\n",
-									dest->base[1], dest->base[2], dest->base[3], dest->base[4],
-									SEQ_PTR(a)->base[1], SEQ_PTR(a)->base[2], SEQ_PTR(a)->base[3],
-									SEQ_PTR(a)->base[4],
-									SEQ_PTR(top)->base[1], SEQ_PTR(top)->base[2], 
-									SEQ_PTR(top)->base[3], SEQ_PTR(top)->base[4] );		
-								printf("IsIntegerF [0x%8x 0x%8x 0x%8x 0x%8x]\n",
-									integer_128bit[0], integer_128bit[1], 
-									integer_128bit[2], integer_128bit[3] );
-								printf("OUF [0x%8x 0x%8x 0x%8x 0x%8x]\n",
-									overunder_128bit[0], overunder_128bit[1], 
-									overunder_128bit[2], overunder_128bit[3] );
-								fflush( stdout );
-								EFree(dest);
-							}
-								
-#					endif
-#define CHECK_VALUE(V1,I,CV1, S)								if (V1->length == 100000 &&\ 
-									( \
-										(IS_ATOM_INT(V1->base[I]) && V1->base[I] != CV1) ||\
-										(!IS_ATOM_INT(V1->base[I]) && \
-											((struct d*)(8*V1->base[I]))->dbl != CV1)\
-									) )\
-									 {\
-									if (IS_ATOM_INT(V1->base[I]))\
-										RTFatal(\
-										"%s  V1->base[%d]	= %d when k = %d.  Should be %d\n",\ 
-										S, I, V1->base[I], k, CV1 );\
-									else\
-										RTFatal(\
-										"%s  V1->base[%d] = %10.10g when k = %d.  Should be %d\n",\
-										S, I, ((struct d*)(8*V1->base[I]))->dbl, k, CV1);\
-								 } 0
 #					if SSE2 
-						if (IS_SEQUENCE(a) &&
-							IS_SEQUENCE(top) &&
+						if (IS_SEQUENCE(top) &&
 							((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 							 
 							((int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
 							top = paddo3(a,top);

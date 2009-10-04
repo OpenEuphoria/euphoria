@@ -10,11 +10,11 @@ typedef int symtab_ptr;
  For example:
  NOVALUE_128bit[0..3] = { NOVALUE, NOVALUE, NOVALUE, NOVALUE }
  */
-object_ptr NOVALUE_128bit, ONES_128bit, ZEROS_128bit;
+object_ptr NOVALUE_128bit, MINUSONES_128bit, ZEROS_128bit;
 object_ptr MAXINT_128bit, MININT_128bit;
 object_ptr overunder_128bit, integer_128bit, intermediate_128bit;
 /* variable for temporary storage */
-object_ptr vregs_temp;
+object_ptr vreg_temp, vregs_temp;
 signed long iterate_over_double_words;
 object_ptr sse_data;
 
@@ -31,26 +31,23 @@ struct mem_list {
 void sse2_variable_init() { 
 	int j, i = 0;
 	
-	sse_data = (object_ptr)malloc(8*sizeof(vreg)+BASE_ALIGN_SIZE+512);
+	sse_data = (object_ptr)malloc(9*sizeof(vreg)+BASE_ALIGN_SIZE+512);
 	while (((unsigned int)&sse_data[i]) % BASE_ALIGN_SIZE != 0)
 		++i;
 #	define VSET( VN, VV )	do {VN = &sse_data[i];\
 	for (j = 0; j < sizeof(vreg)/sizeof(object); ++j ) sse_data[i++] = VV;} while (0)
 
-	NOVALUE_128bit = &sse_data[i];
-	NOVALUE_128bit[0] = NOVALUE;
-	NOVALUE_128bit[3] = NOVALUE;
-	NOVALUE_128bit[2] = NOVALUE;
-	NOVALUE_128bit[1] = NOVALUE;
-	i += 4;
-	VSET(ONES_128bit, 0xffffffff);
+	VSET(NOVALUE_128bit,NOVALUE);
+	VSET(MINUSONES_128bit, 0xffffffff);
 	VSET(ZEROS_128bit, 0);
 	VSET(MAXINT_128bit, MAXINT);
 	VSET(MININT_128bit, MININT);
 	VSET(overunder_128bit, 0);
 	VSET(integer_128bit, 0);
 	VSET(intermediate_128bit, 0);
+	VSET(vreg_temp,0);
 	VSET(vregs_temp,0);
+	i+=512-16;
 	
 	mem_list = NULL;
 #	undef VSET
@@ -148,9 +145,8 @@ void save_vector_registers();
 	unsigned long sse2_paddo3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
 	#pragma aux sse2_paddo3 = \
 		/* edx = dest, eax = ptr1, ecx = ptr2 */\
- 		"movdqa xmm0, [eax]"\
-		"movdqa xmm1, xmm0"\
-		"MOVDQA XMM2, XMM0"\
+ 		"movdqa xmm1, [eax]"\
+		"MOVDQA XMM2, XMM1"\
 		"MOVDQA XMM4, [ECX]"\
 		"MOVDQA XMM5, XMM4"\
 		"movdqa xmm6, xmm5"\
@@ -180,8 +176,8 @@ void save_vector_registers();
 		"orps xmm6, xmm3"\
 		"mov ebx, overunder_128bit"\
 		"movdqa [ebx], xmm6"\
-		/* Here xmm0, xmm4 are *ptr[12], xmm2 is our int mask, xmm6 is our over under mask */\
-		"mov ebx, ONES_128bit"\
+		/* Here xmm1, xmm4 are *ptr[12], xmm2 is our int mask, xmm6 is our over under mask */\
+		"mov ebx, MINUSONES_128bit"\
 		"andnps xmm2, [ebx]"\
 		/* Here xmm2 is our negated int mask */\
 		"orps xmm6, xmm2"\
@@ -199,8 +195,8 @@ void save_vector_registers();
 object * paddo3(object a, object top) {
 	struct s1 * dest;
 	struct s1 * sa, * sb;
-	int k;
-	object_ptr dp,ap,bp, tempa, tempb, tempc;
+	int k, length;
+	object_ptr dp,ap,bp, tempb;
 	struct s1 * control;
 	object controlobj;
 	signed long int * ou;
@@ -212,11 +208,7 @@ object * paddo3(object a, object top) {
 		RTFatal(
 		"Sequences are of differing lenghts can not be added together.");
 	}
-	tempc = tempa = (object_ptr)malloc(BASE_ALIGN_SIZE+sizeof(vreg));
-	tempc = (object_ptr)(((((unsigned int)tempc) - 1) | (BASE_ALIGN_SIZE-1)) + 1);
-	tempc = ((unsigned int)tempc) + BASE_ALIGN_SIZE - 
-		( (((unsigned int)tempc) - 1) % BASE_ALIGN_SIZE + 1 );
-	
+	tempb = vreg_temp;	
 	dest = NewS1(sa->length);
 	dest->base[sa->length+1] = NOVALUE;
 	top = MAKE_SEQ(dest);
@@ -224,9 +216,9 @@ object * paddo3(object a, object top) {
 	bp = &sb->base[1];
 	dp = &dest->base[1];
 	k = 0;
-	save_vector_registers();
 	iterate_over_double_words = 0;
-	while (k < (sa->length & -4)) {			
+	length = sa->length  & -(sizeof(vreg)/sizeof(object));
+	while (k < length) {			
 		sse2_paddo3( dp, ap, bp );
 		if (iterate_over_double_words) {
 				for (j = 0;	j < sizeof(vreg)/sizeof(object);
@@ -243,14 +235,11 @@ object * paddo3(object a, object top) {
 		bp += sizeof(vreg)/sizeof(object);
 		dp += sizeof(vreg)/sizeof(object);
 		k  += sizeof(vreg)/sizeof(object);
-		// problem is after this
-
 	} // while
-	// but before this...
-	sse2_paddo3(tempb = tempc, ap, bp );
-	dest->length = sa->length;
+	sse2_paddo3(tempb, ap, bp );
+	length = dest->length = sa->length;
 	dest->base[sa->length+1] = NOVALUE;
-	for (++k,j = 0; k <= dest->length; ++k,++j ) {
+	for (++k,j = 0; k <= length; ++k,++j ) {
 			if (overunder_128bit[j]) 
 				dest->base[k] = NewDouble( tempb[j] );
 			else if (integer_128bit[j])
@@ -258,7 +247,6 @@ object * paddo3(object a, object top) {
 			else
 				dest->base[k] = binary_op(PLUS, sa->base[k], sb->base[k]);
 	}
-	EFree( tempa );
 #   ifdef EXTRA_CHECK					
 		if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
 			int j;
@@ -271,8 +259,6 @@ object * paddo3(object a, object top) {
 				"results not consistent with old version. Index %d\n", j);																
 		}
 #	endif
-sse_result:
-	load_vector_registers();
 	return top;
 }
 
