@@ -2998,7 +2998,7 @@ procedure For_statement()
 	
 	End_block( FOR )
 	
-	StartSourceLine(TRUE)
+	StartSourceLine(TRUE, TRANSLATE)
 	op_info1 = loop_var_sym
 	op_info2 = bp2 + 1
 	PatchNList(next_base)

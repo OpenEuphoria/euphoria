@@ -1706,7 +1706,7 @@ export procedure emit_assign_op(integer op)
 	end if
 end procedure
 
-export procedure StartSourceLine(integer sl)
+export procedure StartSourceLine(integer sl, integer dup_ok = 0)
 -- record code offset at start of new source statement, 
 -- optionally emit start of line op
 -- sl is true if we want a STARTLINE emitted as well
@@ -1714,7 +1714,12 @@ export procedure StartSourceLine(integer sl)
 
 	if gline_number = LastLineNumber then
 		if length(LineTable) then
+			if dup_ok then
+				emit_op( STARTLINE )
+				emit_addr( gline_number )
+			end if
 			return -- ignore duplicates 
+			
 		else
 			sl = FALSE -- top-level new statement to execute on same line
 		end if
