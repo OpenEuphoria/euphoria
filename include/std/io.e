@@ -1365,11 +1365,15 @@ end function
 --		## : integer, The file handle.
 --		## : sequence, The format pattern.
 --      ## : object, The data that will be formatted.
+--      ## ##data_not_string##: object, If not 0 then the ##data## is not a string.
+--        By default this is 0 meaning that ##data## could be a single string.
 -- # Alternative way with first argument being the format pattern.
---		# : sequence, Format pattern.
---		# : sequence, The data that will be formatted,
---      # : object, The file to receive the formatted output. Default is
+--		## : sequence, Format pattern.
+--		## : sequence, The data that will be formatted,
+--      ## : object, The file to receive the formatted output. Default is
 --      to the STDOUT device (console).
+--      ## ##data_not_string##: object, If not 0 then the ##data## is not a string.
+--        By default this is 0 meaning that ##data## could be a single string.
 -- 
 -- Comments:
 -- * With the traditional arguments, the first argument must be an integer file handle.
@@ -1399,12 +1403,14 @@ end function
 -- writef("A message")
 -- -- Another console message
 -- writef(STDERR, "This is a []", "message")
+-- -- Outputs two numbers
+-- writef(STDERR, "First [], second []", {65, 100},, 1) -- Note that {65, 100} is also "Ad"
 -- </eucode>
 --
 -- See Also:
 --    [[:format]], [[:writefln]], [[:write_lines]]
 
-public procedure writef(object fm, object data={}, object fn = 1)
+public procedure writef(object fm, object data={}, object fn = 1, object data_not_string = 0)
 	integer real_fn = 0
 	integer close_fn = 0
 	sequence out_style = "w"
@@ -1441,8 +1447,10 @@ public procedure writef(object fm, object data={}, object fn = 1)
 		real_fn = fn
 	end if
 	
-	if t_display(data) then
-		data = {data}
+	if equal(data_not_string, 0) then
+		if t_display(data) then
+			data = {data}
+		end if
 	end if
     puts(real_fn, format(fm, data))
     if close_fn then
@@ -1458,6 +1466,8 @@ end procedure
 --		# ##data## : sequence, The data that will be formatted,
 --      # ##fn## : object, The file to receive the formatted output. Default is
 --      to the STDOUT device (console).
+--      # ##data_not_string##: object, If not 0 then the ##data## is not a string.
+--        By default this is 0 meaning that ##data## could be a single string.
 --
 -- Comments:
 -- * This is the same as [[:writef]], except that it always adds a New Line to 
@@ -1482,11 +1492,11 @@ end procedure
 --
 -- See Also:
 --    [[:format]], [[:writef]], [[:write_lines]]
-public procedure writefln(object fm, object data={}, object fn = 1)
+public procedure writefln(object fm, object data={}, object fn = 1, object data_not_string = 0)
 	if integer(fm) then
-		writef(data & '\n', fn, fm)
+		writef(data & '\n', fn, fm, data_not_string)
 	else
-		writef(fm & '\n', data, fn)
+		writef(fm & '\n', data, fn, data_not_string)
 	end if
 end procedure
 
