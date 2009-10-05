@@ -412,7 +412,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 	object junk, junk2, header
 	sock:socket sock
 	atom success, last_data_len, gotheader, contentlen
-	sequence data, hline
+	sequence data
 
 	-- Notes for future additions:
 	-- HUGE differences in HTTP/1.1 vs HTTP/1.0
@@ -441,13 +441,6 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 	-- you can http to the ip, and GET/POST is enough to deal with it. Setting it is
 	-- safe, either way.
 	set_sendheader("HOST",hostname)
-
-	-- if the user didn't set this to something,
-	hline = get_sendheader("Referer")
-	if equal(hline[3],"") then
-		-- set it to a "default" setting
-		set_sendheader("Referer",hostname)
-	end if
 
 	last_data_len = 0
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
@@ -551,7 +544,7 @@ end function
 public function get_http_use_cookie(sequence inet_addr, sequence hostname, sequence file)
 /*
 	atom socket, success, last_data_len, cpos, offset
-	sequence header, header2, body, data, updata, hline
+	sequence header, header2, body, data, updata
 	sequence cookielist, request, cookie
 	object junk -- a general throwaway temp var
 
@@ -580,11 +573,6 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 	-- you can http to the ip, and GET/POST is enough to deal with it.
 	-- Setting it is safe, either way.
 	set_sendheader("HOST",hostname)
-
-	hline = get_sendheader("Referer")
-	if equal(hline[3],"") then
-		set_sendheader("Referer",hostname)
-	end if
 
 	for ctr = 1 to length(this_cookiejar) do
 		if sequence(this_cookiejar[ctr]) and length(this_cookiejar[ctr])>=2 and
