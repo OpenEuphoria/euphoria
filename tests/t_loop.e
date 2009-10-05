@@ -93,7 +93,13 @@ ifdef EC then
 	
 	test_equal( "translated for loop with if on one line #1", 0, foo("abc") )
 	test_equal( "translated for loop with if on one line #2", 1, foo( {{2}, {3}} ) )
-
+	
+	idx = 0
+	for i = 1 to 5 do
+		for j = 1 to 5 do
+			idx += 1
+	end for	end for
+	test_equal( "translated for loop with two 'end for's on one line", 25, idx )
 end ifdef
 
 test_report()
