@@ -76,6 +76,7 @@
 #endif
 
 #define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
+
 /* To eliminate type casts for pc[*] you
  would need a union like this:
 union pc_t {
@@ -2732,7 +2733,7 @@ void do_exec(int *start_pc)
 							top = paddo3(a,top);
 							goto aresult;
 						}
-#					endif // SSE				
+#					endif // SSE2				
 					top = binary_op(PLUS, a, top);
 
 				aresult:

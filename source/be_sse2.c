@@ -218,7 +218,7 @@ object * paddo3(object a, object top) {
 	k = 0;
 	iterate_over_double_words = 0;
 	length = sa->length  & -(sizeof(vreg)/sizeof(object));
-	while (k < length) {			
+	while (k < length) {
 		sse2_paddo3( dp, ap, bp );
 		if (iterate_over_double_words) {
 				for (j = 0;	j < sizeof(vreg)/sizeof(object);
