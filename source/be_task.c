@@ -117,7 +117,7 @@ void InitTask()
 #ifdef EWINDOWS
 	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
-// TODO: pthreads initialization here:
+	tcb[0].impl.translated.task = pthread_self();
 
 #endif
 
@@ -1003,6 +1003,9 @@ void init_task( int tx ){
 #else
 void init_task( int tx ){
 	// pthreads...
+	pthread_t * task = &(tcb[tx].impl.translated.task);
+	int ret = pthread_create(task, NULL, exec_task, &tcb[tx]);
+	// TODO error handling
 }
 
 #endif
