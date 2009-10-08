@@ -67,6 +67,10 @@ static int clock_stopped = FALSE;
 static int id_wrap = FALSE; // have task id's wrapped around? (very rare)
 static double next_task_id = 1.0;
 
+#ifdef ERUNTIME
+pthread_mutex_t mutex;
+#endif
+
 extern int total_stack_size; // total amount of stack available 
 							 // OPTION STACK will be 8k higher than this)
 
@@ -118,6 +122,8 @@ void InitTask()
 	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
 	tcb[0].impl.translated.task = pthread_self();
+	pthread_mutex_init(&global_mutex, NULL); // TODO error handling
+	pthread_mutex_lock(&global_mutex);
 
 #endif
 
@@ -1001,6 +1007,21 @@ void init_task( int tx ){
 }
 
 #else
+
+void run_current_task(){
+	int ret = pthread_mutex_unlock(&global_mutex);
+	// TODO error handling
+	sleep(0); // allow other thread to start running.
+	ret = pthread_mutex_lock(&global_mutex);
+	// TODO error handling
+}
+
+void * exec_task (void *task) {
+	int ret = pthread_mutex_lock(&global_mutex);
+	// TODO error handling
+	call_task( ((struct tcb*)task)->rid, ((struct tcb*)task)->args );
+}
+
 void init_task( int tx ){
 	// pthreads...
 	pthread_t * task = &(tcb[tx].impl.translated.task);
