@@ -72,10 +72,6 @@ static int clock_stopped = FALSE;
 static int id_wrap = FALSE; // have task id's wrapped around? (very rare)
 static double next_task_id = 1.0;
 
-#ifdef ERUNTIME
-pthread_mutex_t mutex;
-#endif
-
 extern int total_stack_size; // total amount of stack available 
 							 // OPTION STACK will be 8k higher than this)
 
@@ -994,7 +990,6 @@ void run_task( int tx ){
 	else
 #endif // !ERUNTIME 
 	{ // TRANSLATED_TASK
-	puts("translated!");
 		
 		if (tcb[current_task].impl.translated.task == NULL) {
 			// first time we are running this task
