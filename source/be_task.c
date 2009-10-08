@@ -28,7 +28,12 @@
 /*********************/
 /* Local definitions */
 /*********************/
+#ifndef EWINDOWS
 
+pthread_mutex_t task_mutex;
+pthread_cond_t  task_condition;
+pthread_t       task_thread;
+#endif
 
 /**********************/
 /* Exported variables */
@@ -117,17 +122,22 @@ void InitTask()
 	tcb[0].args = 0;
 	
 #ifdef ERUNTIME 
-	tcb[0].mode = TRANSLATED_TASK
+	tcb[0].mode = TRANSLATED_TASK;
 #ifdef EWINDOWS
 	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
 	tcb[0].impl.translated.task = pthread_self();
-	pthread_mutex_init(&global_mutex, NULL); // TODO error handling
-	pthread_mutex_lock(&global_mutex);
-
+	pthread_mutex_init( &task_mutex, NULL );
+	pthread_cond_init(  &task_condition, NULL );
+	task_thread = 0;
 #endif
-
 #else
+	// I don't think this is correct (unless we're assuming this for the front end to use).
+	// I'm trying to leave this prospect open, but not worrying too much about it right now.
+	//tcb[0].impl.translated.task = pthread_self();
+	//pthread_mutex_init(&global_mutex, NULL); // TODO error handling
+	//pthread_mutex_lock(&global_mutex);
+
 	tcb[0].mode = INTERPRETED_TASK;
 	// these things will be set when task 0 yields for the first time
 	tcb[0].impl.interpreted.pc = (int *)1; 
@@ -137,6 +147,9 @@ void InitTask()
 	tcb[0].impl.interpreted.expr_stack = NULL;
 	tcb[0].impl.interpreted.stack_size = 0; 
 #endif  
+
+
+
 	tcb_size = 1;
 	
 	ts_first = 0;    // this ts task only
@@ -182,6 +195,14 @@ void terminate_task(int task)
 		ts_first = task_delete(ts_first, task);
 	}
 	tcb[task].status = ST_DEAD; // its tcb entry will be recycled later
+	if( tcb[task].mode == TRANSLATED_TASK ){
+		#ifdef EWINDOWS
+		DeleteFiber( tcb[task].impl.translated.task );
+		#else
+		pthread_cancel( tcb[task].impl.translated.task );
+		#endif
+		tcb[task].impl.translated.task = (TASK_HANDLE) 0;
+	}
 }
 
 extern double Wait(double t);
@@ -694,7 +715,7 @@ void task_clock_start()
 	}
 }
 
-
+#ifndef ERUNTIME
 object task_create(object r_id, object args)
 // Create a new task for the interpreter - return a double task id - assumed by Translator
 {
@@ -814,7 +835,7 @@ object task_create(object r_id, object args)
 	
 	return NewDouble(id);
 }
-
+#endif
 
 object ctask_create(object r_id, object args)
 // Create a new task for translated code - return a double task id - assumed by Translator
@@ -926,8 +947,6 @@ static int earliest_task;
 void run_task( int tx ){
 #ifndef ERUNTIME
 	static int **code[3];
-	//int stack_size;
-	
 	if( tcb[tx].mode == INTERPRETED_TASK ){
 		struct tcb *tp;
 		
@@ -973,18 +992,17 @@ void run_task( int tx ){
 		}
 	}
 	else
-#endif // ERUNTIME 
+#endif // !ERUNTIME 
 	{ // TRANSLATED_TASK
 	puts("translated!");
-		current_task = earliest_task;
 		
 		if (tcb[current_task].impl.translated.task == NULL) {
 			// first time we are running this task
-			init_task( current_task );
+			init_task( earliest_task );
 			
 		}
 		
-		run_current_task();
+		run_current_task( earliest_task );
 	}
 }
 
@@ -992,7 +1010,8 @@ void run_task( int tx ){
 
 #ifdef EWINDOWS
 
-void run_current_task(){
+void run_current_task( int task ){
+	current_task = task;
 	SwitchToFiber( tcb[current_task].impl.translated.task );
 }
 
@@ -1008,27 +1027,48 @@ void init_task( int tx ){
 
 #else
 
-void run_current_task(){
-	int ret = pthread_mutex_unlock(&global_mutex);
-	// TODO error handling
-	sleep(0); // allow other thread to start running.
-	ret = pthread_mutex_lock(&global_mutex);
-	// TODO error handling
+/**
+ * Only allows the current thread to continue if it belongs to the current task.
+ */
+void wait_for_task( int task ){
+	pthread_mutex_lock( &task_mutex );
+	while( current_task != task ){
+		pthread_cond_wait( &task_condition, &task_mutex );
+	}
 }
 
-void * exec_task (void *task) {
-	int ret = pthread_mutex_lock(&global_mutex);
-	// TODO error handling
-	call_task( ((struct tcb*)task)->rid, ((struct tcb*)task)->args );
+/**
+ * This is where a new thread/task starts.  It waits for its turn before
+ * calling the task's procedure.
+ */
+void start_task( void *task ){
+	wait_for_task( (int) task );
+	call_task( tcb[(int)task].rid, tcb[(int)task].args );
+	tcb[(int)task].impl.translated.task = (TASK_HANDLE) 0;
+	tcb[(int)task].status = ST_DEAD;
+	pthread_exit( NULL );
 }
+
+/**
+ * Creates the thread where the new task will run.
+ */
 
 void init_task( int tx ){
-	// pthreads...
-	pthread_t * task = &(tcb[tx].impl.translated.task);
-	int ret = pthread_create(task, NULL, exec_task, &tcb[tx]);
+	int ret;
+	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, tx );
 	// TODO error handling
 }
 
+/**
+ * Changes the value of the current_task to @task, then signals the waiting 
+ * threads to see if they should be running, after which it calls wait_for_task().
+ */
+void run_current_task( int task ){
+	int this_task = current_task;
+	current_task = task;
+	pthread_cond_signal( &task_condition );
+	wait_for_task( this_task );
+}
 #endif
 
 void scheduler(double now)
