@@ -13,12 +13,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+
 #ifdef EWINDOWS
 #include <windows.h> /* for Sleep(), Fibers */
 #endif
-#if defined(ESIMPLE_MALLOC) && defined(EWINDOWS)
-#include <windows.h>
-#endif
+
 #include "global.h"
 #include "execute.h"
 #include "symtab.h"
@@ -114,6 +113,7 @@ void InitTask()
 	tcb[0].args = 0;
 	
 #ifdef ERUNTIME 
+	tcb[0].mode = TRANSLATED_TASK
 #ifdef EWINDOWS
 	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
@@ -122,6 +122,7 @@ void InitTask()
 #endif
 
 #else
+	tcb[0].mode = INTERPRETED_TASK;
 	// these things will be set when task 0 yields for the first time
 	tcb[0].impl.interpreted.pc = (int *)1; 
 	tcb[0].impl.interpreted.expr_max = NULL;
@@ -766,6 +767,7 @@ object task_create(object r_id, object args)
 	new_entry->runs_left = 1;
 	new_entry->runs_max = 1;
 	new_entry->next = -1; 
+	new_entry->mode = INTERPRETED_TASK;
 	
 	new_entry->args = args;
 	Ref(args);
@@ -873,7 +875,8 @@ object ctask_create(object r_id, object args)
 	new_entry->max_time = TASK_NEVER;
 	new_entry->runs_left = 1;
 	new_entry->runs_max = 1;
-	new_entry->next = -1; 
+	new_entry->next = -1;
+	new_entry->mode = TRANSLATED_TASK;
 	
 	new_entry->args = args;
 	Ref(args);
@@ -917,7 +920,7 @@ static int earliest_task;
 void run_task( int tx ){
 #ifndef ERUNTIME
 	static int **code[3];
-	int stack_size;
+	//int stack_size;
 	
 	if( tcb[tx].mode == INTERPRETED_TASK ){
 		struct tcb *tp;
@@ -926,9 +929,9 @@ void run_task( int tx ){
 		tp = &tcb[current_task];
 		tp->impl.interpreted.pc = tpc; 
 		tp->impl.interpreted.expr_stack = expr_stack;
-		tp->impl.interpreted.expr_max = expr_max; 
+		tp->impl.interpreted.expr_max   = expr_max; 
 		tp->impl.interpreted.expr_limit = expr_limit;
-		tp->impl.interpreted.expr_top = expr_top;   
+		tp->impl.interpreted.expr_top   = expr_top;   
 		tp->impl.interpreted.stack_size = stack_size;
 		
 		// load new task 
@@ -966,6 +969,7 @@ void run_task( int tx ){
 	else
 #endif // ERUNTIME 
 	{ // TRANSLATED_TASK
+	puts("translated!");
 		current_task = earliest_task;
 		
 		if (tcb[current_task].impl.translated.task == NULL) {
