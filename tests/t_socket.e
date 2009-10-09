@@ -16,8 +16,8 @@ ifdef UNIX then
 		SIG_IGN = 1,
 		setsid_ = define_c_func(open_dll(""), "setsid", {}, C_INT),
 		$
-	_ = c_func(signal_, {SIGPIPE,SIG_IGN})
-	_ = c_func(setsid_, {})
+	--_ = c_func(signal_, {SIGPIPE,SIG_IGN})
+	--_ = c_func(setsid_, {})
 end ifdef
 
 test_equal("service_by_name echo", { "echo", "tcp", 7 }, service_by_name("echo", "tcp"))
@@ -106,4 +106,7 @@ end if
 
 test_equal("close", sock:OK, sock:close(socket))
 
+system("ps -ef | grep eui", 0)
+
 test_report()
+

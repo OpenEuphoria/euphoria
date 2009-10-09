@@ -408,7 +408,7 @@ end function
 --	 A **sequence**, empty sequence on error, of length 2 on success,
 --	 like ##{sequence header, sequence data}##.
 
-public function get_http(sequence inet_addr, sequence hostname, sequence file)
+public function get_http(sequence inet_addr, sequence hostname, sequence file, integer timeout = 300)
 	object junk, junk2, header
 	sock:socket sock
 	atom success, last_data_len, gotheader, contentlen
@@ -480,13 +480,13 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file)
 					end if
 				entry
 
- 				        junk2 = sock:select(sock) -- status check
+ 				        junk2 = sock:select(sock, timeout) -- status check
  						-- Do we have readable data?
  				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) then
 							junk = sock:receive(sock, 0) -- then recieve it
 						else
-							junk = ""      -- add nothing to data
-							task_yield()
+							-- assume server has hung, abort
+							exit
 					end if
 				end while
 			else
