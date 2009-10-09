@@ -94,26 +94,46 @@ struct ns_list {
 	int file_num;
 };
 
+
+#define TASK_HANDLE int
+
+struct interpreted_task{
+	int *pc;         // program counter for this task
+	object_ptr expr_stack; // call stack for this task
+	object_ptr expr_max;   // current top limit of stack
+	object_ptr expr_limit; // don't start a new routine above this
+	object_ptr expr_top;   // stack pointer
+	int stack_size;        // current size of stack
+};
+
+struct translated_task{
+	TASK_HANDLE task;
+	
+};
+
+// Task Control Block - sync with euphoria\include\euphoria.h
 struct tcb {
-	int rid;
-	double tid;
-	int type;
-	int status;
-	double start;
-	double min_inc;
-	double max_inc;
-	double min_time;
-	double max_time;
-	int runs_left;
-	int runs_max;
-	int next;
-	object args;
-	int *pc;
-	object_ptr expr_stack;
-	object_ptr expr_max;
-	object_ptr expr_limit;
-	object_ptr expr_top;
-	int stack_size;
+	int rid;         // routine id
+	double tid;      // external task id
+	int type;        // type of task: T_REAL_TIME or T_TIME_SHARED
+	int status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
+	double start;    // start time of current run
+	double min_inc;  // time increment for min
+	double max_inc;  // time increment for max 
+	double min_time; // minimum activation time
+					 // or number of executions remaining before sharing
+	double max_time; // maximum activation time (determines task order)
+	int runs_left;   // number of executions left in this burst
+	int runs_max;    // maximum number of executions in one burst
+	int next;        // index of next task of the same kind
+	object args;     // args to call task procedure with at startup
+	
+	int mode;  // TRANSLATED_TASK or INTERPRETED_TASK
+	union task_impl {
+		struct interpreted_task interpreted;
+		struct translated_task translated;
+	} impl;
+	
 };
 
 typedef struct d  *d_ptr;

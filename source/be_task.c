@@ -193,7 +193,7 @@ void terminate_task(int task)
 	tcb[task].status = ST_DEAD; // its tcb entry will be recycled later
 	if( tcb[task].mode == TRANSLATED_TASK ){
 		#ifdef EWINDOWS
-		DeleteFiber( tcb[task].impl.translated.task );
+		//DeleteFiber( tcb[task].impl.translated.task );
 		#else
 		pthread_cancel( tcb[task].impl.translated.task );
 		#endif
@@ -420,7 +420,6 @@ static void call_task(int rid, object args)
 		default:
 			RTFatal("the Translator supports a maximum of 12 arguments for tasks"); 
 	}
-	
 	
 	// task returns (i.e. it's finished and should now be terminated)
 	terminate_task(current_task);
@@ -833,6 +832,23 @@ object task_create(object r_id, object args)
 }
 #endif
 
+TASK_HANDLE stale_task = 0;
+
+void release_task( TASK_HANDLE task ){
+	#ifdef EWINDOWS
+	DeleteFiber( task );
+	#else
+	pthread_cancel( task );
+	#endif
+}
+
+void release_task_later( TASK_HANDLE task ){
+	if( stale_task != 0 ){
+		release_task( stale_task );
+	}
+	stale_task = task;
+}
+
 object ctask_create(object r_id, object args)
 // Create a new task for translated code - return a double task id - assumed by Translator
 {
@@ -883,6 +899,15 @@ object ctask_create(object r_id, object args)
 		// found a ST_DEAD task
 		DeRef(tcb[recycle].args);
 		new_entry = &tcb[recycle];
+		if( new_entry->mode == TRANSLATED_TASK && new_entry->impl.translated.task != 0 ){
+			if( recycle == current_task ){
+				// we can't free it from itself, or the entire proces would die
+				release_task_later( new_entry->impl.translated.task );
+			}
+			else{
+				release_task( new_entry->impl.translated.task );
+			}
+		}
 	}
 	
 	// initially it's suspended
@@ -905,10 +930,8 @@ object ctask_create(object r_id, object args)
 	Ref(args);
 	
 	// interpreter sets these things when the task executes for the first time
-	new_entry->impl.interpreted.pc = NULL;
+	new_entry->impl.translated.task = (TASK_HANDLE) NULL;
 
-	init_task( recycle );
-		
 	id = next_task_id;
 	
 	// choose task id for next time
@@ -932,7 +955,7 @@ object ctask_create(object r_id, object args)
 		}
 		// must have found one - couldn't have trillions of non-dead tasks!
 	}
-	
+	init_task( recycle );
 	return NewDouble(id);
 }
 
@@ -991,7 +1014,7 @@ void run_task( int tx ){
 #endif // !ERUNTIME 
 	{ // TRANSLATED_TASK
 		
-		if (tcb[current_task].impl.translated.task == NULL) {
+		if (tcb[earliest_task].impl.translated.task == NULL) {
 			// first time we are running this task
 			init_task( earliest_task );
 			
@@ -1011,13 +1034,14 @@ void run_current_task( int task ){
 }
 
 void WINAPI exec_task( void *task ){
-	
-	call_task( ((struct tcb*)task)->rid, ((struct tcb*)task)->args );
+	struct tcb *t = &tcb[(int)task];
+
+	call_task( t->rid, t->args );
 }
 
 void init_task( int tx ){
 	// fibers...
-	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, &tcb[tx] );
+	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, tx );
 }
 
 #else
