@@ -192,11 +192,6 @@ void terminate_task(int task)
 	}
 	tcb[task].status = ST_DEAD; // its tcb entry will be recycled later
 	if( tcb[task].mode == TRANSLATED_TASK ){
-		#ifdef EWINDOWS
-		//DeleteFiber( tcb[task].impl.translated.task );
-		#else
-		pthread_cancel( tcb[task].impl.translated.task );
-		#endif
 		tcb[task].impl.translated.task = (TASK_HANDLE) 0;
 	}
 }
@@ -1063,9 +1058,6 @@ void wait_for_task( int task ){
 void start_task( void *task ){
 	wait_for_task( (int) task );
 	call_task( tcb[(int)task].rid, tcb[(int)task].args );
-	tcb[(int)task].impl.translated.task = (TASK_HANDLE) 0;
-	tcb[(int)task].status = ST_DEAD;
-	pthread_exit( NULL );
 }
 
 /**
@@ -1085,7 +1077,8 @@ void init_task( int tx ){
 void run_current_task( int task ){
 	int this_task = current_task;
 	current_task = task;
-	pthread_cond_signal( &task_condition );
+	pthread_cond_broadcast( &task_condition );
+	pthread_mutex_unlock( &task_mutex );
 	wait_for_task( this_task );
 }
 #endif
