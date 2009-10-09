@@ -1226,6 +1226,9 @@ end function
 -- which can occur in any order.
 -- |= Qualifier |= Usage                                              |
 -- |  N         | ('N' is an integer) The index of the argument to use|
+-- | {id}       | Uses the argument that begins with "id=" where "id" \\
+--                is an identifier name.                              |
+-- | %envvar%   | Uses the Environment Symbol 'envar' as an argument  |
 -- |  w         | For string arguments, if capitalizes the first\\
 --                letter in each word                                 |
 -- |  u         | For string arguments, it converts it to upper case. |
@@ -1319,6 +1322,9 @@ end function
 -- -- `seq is {1.2,5,"abcdef",{3}}`
 -- </eucode>
 --
+-- format("Today is [{day}], the [{date}]", {"date=10/Oct/2012", "day=Wednesday"})
+-- -- "Today is Wednesday, the 10/Oct/2012"
+--
 -- See Also:
 --   [[:sprintf]]
 --
@@ -1349,6 +1355,8 @@ public function format(sequence pFormat, object pArgs = {})
 	integer tsep
 	object prevargv
 	object currargv
+	sequence idname
+	object envvar
 
 	if atom(pArgs) then
 		pArgs = {pArgs}
@@ -1387,6 +1395,8 @@ public function format(sequence pFormat, object pArgs = {})
     			binout = 0
     			trimming = 0
     			tsep = 0
+    			idname = ""
+    			envvar = ""
     		else
     			result &= tch
     		end if
@@ -1469,18 +1479,79 @@ public function format(sequence pFormat, object pArgs = {})
 	    				decs = decs * 10 + pos - 1
 	    			end while
 
-	    		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' then
-	    			i -= 1
+	    		case '{' then
+	    			-- Use a named argument.
+	    			integer sp
+
+	    			sp = i + 1
+	    			i = sp
 	    			while i < length(pFormat) do
-	    				i += 1
-	    				tch = pFormat[i]
-	    				pos = find(tch, "0123456789")
-	    				if pos = 0 then
-	    					i -= 1
+	    				if pFormat[i] = '}' then
 	    					exit
 	    				end if
-	    				argn = argn * 10 + pos - 1
+	    				if pFormat[i] = ']' then
+	    					exit
+	    				end if
+	    				i += 1
 	    			end while
+	    			idname = trim(pFormat[sp .. i-1]) & '='
+    				if pFormat[i] = ']' then
+    					i -= 1
+    				end if
+
+    				for j = 1 to length(pArgs) do
+    					if begins(idname, pArgs[j]) then
+    						if argn = 0 then
+    							argn = j
+    							exit
+    						end if
+    					end if
+    					if j = length(pArgs) then
+    						idname = ""
+    						argn = -1
+    					end if
+    				end for
+	    		case '%' then
+	    			-- Use the environment symbol
+	    			integer sp
+
+	    			sp = i + 1
+	    			i = sp
+	    			while i < length(pFormat) do
+	    				if pFormat[i] = '%' then
+	    					exit
+	    				end if
+	    				if pFormat[i] = ']' then
+	    					exit
+	    				end if
+	    				i += 1
+	    			end while
+	    			envvar = trim(pFormat[sp .. i-1])
+    				if pFormat[i] = ']' then
+    					i -= 1
+    				end if
+
+    				envvar = getenv(envvar)
+    				argn = -1
+    				if atom(envvar) then
+    					envvar = ""
+    				end if
+	    			
+	    		
+	    		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' then
+	    			if argn = 0 then
+		    			i -= 1
+		    			while i < length(pFormat) do
+		    				i += 1
+		    				tch = pFormat[i]
+		    				pos = find(tch, "0123456789")
+		    				if pos = 0 then
+		    					i -= 1
+		    					exit
+		    				end if
+		    				argn = argn * 10 + pos - 1
+		    			end while
+		    		end if
 
 	    		case ',' then
 	    			if i < length(pFormat) then
@@ -1502,11 +1573,20 @@ public function format(sequence pFormat, object pArgs = {})
     			argl = argn
 
     			if argn < 1 or argn > length(pArgs) then
-    				argtext = "?"
-	    			currargv ="?"
+    				if length(envvar) > 0 then
+    					argtext = envvar
+	    				currargv = envvar
+    				else
+    					argtext = ""
+	    				currargv =""
+	    			end if
 				else
 					if string(pArgs[argn]) then
-						argtext = pArgs[argn]
+						if length(idname) > 0 then
+							argtext = pArgs[argn][length(idname) + 1 .. $]
+						else
+							argtext = pArgs[argn]
+						end if
 						
 					elsif integer(pArgs[argn]) then
 						if bwz != 0 and pArgs[argn] = 0 then

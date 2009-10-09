@@ -347,5 +347,14 @@ res = format("[(]", 117.2)
 exp  = "117.2"
 test_equal("format 'BA'", exp, res)
 
+res = format("Today is [u{day}:9], the [{date}]", {"date=09/Oct/2012", "day=Tuesday"})
+exp = "Today is TUESDAY  , the 09/Oct/2012"
+test_equal("format 'BB'", exp, res)
+
+include std/os.e
+setenv("testenv", "AbCdEf")
+res = format("([lc%testenv%:20])")
+exp = "(       abcdef       )"
+test_equal("format 'BC'", exp, res)
 
 test_report()
