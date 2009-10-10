@@ -411,7 +411,7 @@ end function
 public function get_http(sequence inet_addr, sequence hostname, sequence file, integer timeout = 300)
 	object junk, junk2, header
 	sock:socket sock
-	atom success, last_data_len, gotheader, contentlen
+	atom success, last_data_len, gotheader, contentlen, last
 	sequence data
 
 	-- Notes for future additions:
@@ -460,6 +460,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 		gotheader = 0
 				if success 
 					then		
+				   last = time()
 				   while sequence(junk) with entry do
 					data = data & junk
 					if gotheader and equal(contentlen,length(data)) then 
@@ -480,13 +481,17 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 					end if
 				entry
 
- 				        junk2 = sock:select(sock, timeout) -- status check
+ 				        junk2 = sock:select(sock) -- status check
  						-- Do we have readable data?
  				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) then
+							last = time()
 							junk = sock:receive(sock, 0) -- then recieve it
-						else
+					elsif time() >= (last + timeout) then
 							-- assume server has hung, abort
 							exit
+					else
+							junk = ""      -- add nothing to data
+							task_yield()
 					end if
 				end while
 			else
