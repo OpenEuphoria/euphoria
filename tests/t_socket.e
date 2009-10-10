@@ -7,19 +7,6 @@ include std/filesys.e as fs
 include std/cmdline.e
 object _ = 0
 
-ifdef UNIX then
-	include std/dll.e
-	constant signal_ = define_c_func(open_dll(""), "signal",
-		{C_INT, C_POINTER}, C_POINTER),
-		-- TODO: these two values are specific to linux!
-		SIGPIPE = 13,
-		SIG_IGN = 1,
-		setsid_ = define_c_func(open_dll(""), "setsid", {}, C_INT),
-		$
-	_ = c_func(signal_, {SIGPIPE,SIG_IGN})
-	_ = c_func(setsid_, {})
-end ifdef
-
 test_equal("service_by_name echo", { "echo", "tcp", 7 }, service_by_name("echo", "tcp"))
 test_equal("service_by_name ftp", { "ftp", "tcp", 21 }, service_by_name("ftp", "tcp"))
 test_equal("service_by_name telnet", { "telnet", "tcp", 23}, service_by_name("telnet", "tcp"))
