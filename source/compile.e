@@ -5844,7 +5844,7 @@ procedure opOPTION_SWITCHES()
 end procedure
 
 procedure opGETENV()
-	CSaveStr("_0", Code[pc+2], 0, 0, 0)
+	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 	c_stmt("@ = EGetEnv(@);\n", {Code[pc+2], Code[pc+1]})
 	CDeRefStr("_0")
 	SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER, 0) -- N.B.
