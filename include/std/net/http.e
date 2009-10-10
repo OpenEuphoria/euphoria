@@ -162,11 +162,8 @@ public procedure set_sendheader_default()
 		{"POST"," ",""}, -- [3] = the filename you want
 		{"Host",": ",""}, -- the domain. You might think this was obvious, but for vhosting sites it's necessary.
 		{"Referer",": ",""}, -- i know it's misspelled, but that's official! , the site that sent you to this one
-		{"User-Agent",": ", whoami & " [en]"},
-		{"Accept",": ","*/*"}, -- what your browser or apps knows how to process
+		{"User-Agent",": ", whoami},
 		{"Accept-Charset",": ","ISO-8859-1,utf-8;q=0.7,*;q=0.7"},
-		{"Accept-Encoding",": ","identity"}, -- "identity" = no decoder in eunet so far
-		{"Accept-Language",": ","en-us"}, -- pick your own language abbr here
 		{"Accept-Ranges",": ",""},
 		{"Authorization",": ",""},
 		{"Date",": ",""}, -- who cares if the server has my time? Except for cookie timeouts, that is.
