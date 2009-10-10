@@ -353,8 +353,13 @@ test_equal("format 'BB'", exp, res)
 
 include std/os.e
 setenv("testenv", "AbCdEf")
+object gv
+gv = getenv("testenv")
+test_equal("env", "AbCdEf", "AbCdEf")
+
 res = format("([lc%testenv%:20])")
 exp = "(       abcdef       )"
 test_equal("format 'BC'", exp, res)
 
 test_report()
+

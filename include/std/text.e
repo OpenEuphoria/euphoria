@@ -1356,6 +1356,7 @@ public function format(sequence pFormat, object pArgs = {})
 	object prevargv
 	object currargv
 	sequence idname
+	object envsym
 	object envvar
 
 	if atom(pArgs) then
@@ -1397,6 +1398,7 @@ public function format(sequence pFormat, object pArgs = {})
     			tsep = 0
     			idname = ""
     			envvar = ""
+    			envsym = ""
     		else
     			result &= tch
     		end if
@@ -1526,12 +1528,13 @@ public function format(sequence pFormat, object pArgs = {})
 	    				end if
 	    				i += 1
 	    			end while
-	    			envvar = trim(pFormat[sp .. i-1])
+	    			envsym = trim(pFormat[sp .. i-1])
     				if pFormat[i] = ']' then
     					i -= 1
     				end if
 
-    				envvar = getenv(envvar)
+    				envvar = getenv(envsym)
+
     				argn = -1
     				if atom(envvar) then
     					envvar = ""
