@@ -795,7 +795,7 @@ end function
 --
 -- Parameters:
 --	# ##pSubText## : an object to be looked for
---  # ##pFullText## : a sequence, the head of which is being inspected.
+--  # ##pFullText## : a sequence, the tail of which is being inspected.
 --
 -- Returns:
 --		An **integer**, 1 if ##pSubText## ends ##pFullText##, else 0.

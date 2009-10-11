@@ -1127,7 +1127,7 @@ end function
 --   # ##quote_pairs## : A set of one or more sub-sequences of two strings.
 --              The first string in each sub-sequence is the opening
 --              quote to look for, and the second string is the closing quote.
---              The default is {{"\"", "\""}} which means that the output is
+--              The default is {{{"\"", "\""}}} which means that the output is
 --              'quoted' if it is enclosed by double-quotation marks.
 --   # ##esc## : A single escape character. If this is not negative (the default),
 --              then this is used to 'escape' any embedded occurrences of the
