@@ -37,6 +37,7 @@ constant COMMON_OPTIONS = {
 	{ "c",         0, GetMsgText(280,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
 	{ "copyright", 0, GetMsgText(281,0), { NO_CASE } },
 	{ "d",         0, GetMsgText(282,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "eudir",     0, GetMsgText(328,0), { NO_CASE, HAS_PARAMETER, "dir" } },
 	{ "i",         0, GetMsgText(283,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir" } },
 	{ "l",         0, GetMsgText(284,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "local" } },
 	{ "ldb",       0, GetMsgText(285,0), { NO_CASE, HAS_PARAMETER, "localdb" } },
@@ -244,6 +245,10 @@ export procedure handle_common_options(m:map opts)
 					end if
 				end if
 				abort(0)
+			
+			case "eudir" then
+				set_eudir( val )
+				
 		end switch
 	end for
 

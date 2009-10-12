@@ -470,7 +470,7 @@ Euphoria program into C and then compile it with a C compiler to get an
 executable program.
 
 
-== Using the Interpreter
+== Using Euphoria
 
 === Command line switches
 
@@ -480,54 +480,86 @@ to open a prompt and enter any text with options, arguments and whatever the
 program being launched may need for proper, expected operation. Under //Windows//,
 this is achieved by clicking the ##Run... start## menu entry, or hitting ##Windows-R##.
 
-The following items may be changed or added, one at a time:
+Command line switches may be changed or added, one at a time.
+
+@[batch_command_line]
+; ##-BATCH## (all)
+: Executes the program but if any error occurs, the "Press Enter" prompt is
+  not presented. The exit code will be set to 1 on error, 0 on success. This
+  option can also be set via the [[:with_batch "with batch"]] directive.
+
+; ##-COPYRIGHT## (all)
+: Displays the copyright banner for euphoria.
+
 @[eu.cfg]
-; ##-C config_file##:
+; ##-C config_file## (all)
 : Specifies either a file name or the path for where the default file called
   eu.cfg exists. The configuration file which holds a set of additional
   command line switches.
 
-; ##-I include_path##:
-: Specifies an extra include path.
+; ##-CON## (translator)
+: Windows only.  Specifies that the translated program should be a console
+  application.  The default is to build a windowed application.
 
-; ##-D word##:
+; ##-D word## (all)
 : Defines a word as being set. Words are processed by the [[:ifdef statement]].
   Words can also be defined via the [[:with / without define]] directive.
 
-; ##-TEST##:
+; ##-DEBUG## (translator)
+: The translated euphoria code will include 
+
+; ##-DLL, -SO## (translator)
+: Compiles and links the translated euphoria code into a DLL, SO or DYLIB (depending
+  on the platform).
+
+; ##-EUDIR dir## (all)
+: This overrides the environment variable EUDIR.
+
+; ##-H, --HELP, -?## (all)
+: Displays the list of available command line options.
+
+; ##-I include_path## (all)
+: Specifies an extra include path.
+
+; ##-LIB file## (translator)
+: Specifies the run-time library to use when translating euphoria programs.
+
+; ##-PLAT word## (translator)
+: Specify the target platform for translation.  This allows euphoria code to
+  be translated for any supported platform from any other supported platform.
+  Supported platforms: FREEBSD, LINUX, NETBSD, OPENBSD, OSX, SUNOS, WIN
+
+; ##-STRICT## (all)
+: This turns on all warnings, overriding any with/without warning statement
+  found in the source. This option can also be set via the
+  [[:with/without warning]] directive.
+
+; ##-TEST## (all)
 : Parses the code only and issues any warnings or errors to ##STDOUT##. On
   error the exit code will be 1, otherwise 0. If an error was found, the
   normal "Press Enter" prompt will not be presented when using the ##-TEST##
   parameter which enables many editor/IDE programs to test the syntax of your
   Euphoria source in real time.
 
-@[batch_command_line]
-; ##-BATCH##:
-: Executes the program but if any error occurs, the "Press Enter" prompt is
-  not presented. The exit code will be set to 1 on error, 0 on success. This
-  option can also be set via the [[:with_batch "with batch"]] directive.
+; ##-VERSION## (all)
+: Displays the version of euphoria that is running.
 
-; ##-STRICT##:
-: This turns on all warnings, overriding any with/without warning statement
-  found in the source. This option can also be set via the
-  [[:with/without warning]] directive.
-
-; ##-W warning_name##:
+; ##-W warning_name## (all)
 : Resets, or adds to, the current list of warnings that may be emitted. The list of known names
   is to be found in the subsection [[:with/without warning]]. A name should appear without quotes.
   If the ##warning_name## begins with a plus symbol '##+##', this warning is added to the current
   set of warnings checked for, otherwise the first usage resets the list 
   to the warning being introduced, and each subsequent ##-W## warning_name adds to the list.
 
-; ##-X##;
-: Resets, or adds to, the list of warnings that will not be issued. This is opposite of
-  the ##-W## switch.
-
-; ##-WF file_name##:
+; ##-WF file_name## (all)
 : Sets the file where the warnings should go instead of the standard error. Warnings are written
  to that file regardless of whether or not there are errors in the source. If there are no
  warnings, the -wf file is not created. If the -wf file cannot be created, a suitable message
  is displayed on STDERR and written to ex.err.
+ 
+; ##-X##;
+: Resets, or adds to, the list of warnings that will not be issued. This is opposite of
+  the ##-W## switch.
 
 The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 

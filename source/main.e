@@ -125,26 +125,6 @@ procedure main()
 	Argv = argv
 	Argc = argc
 
-	eudir = getenv("EUDIR")
-	if atom(eudir) then
-		ifdef UNIX then
-			-- should check search PATH for euphoria/bin ?
-			eudir = getenv("HOME")
-			if atom(eudir) then
-				eudir = "euphoria"
-			else
-				eudir = eudir & "/euphoria"
-			end if
-		elsedef
-			eudir = getenv("HOMEPATH")
-			if atom(eudir) then
-				eudir = "\\EUPHORIA"
-			else
-				eudir = getenv("HOMEDRIVE") & eudir & "EUPHORIA"
-			end if
-		end ifdef
-	end if
-
 	TempErrName = "ex.err"
 	TempWarningName = STDERR
 	display_warnings = 1

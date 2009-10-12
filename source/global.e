@@ -281,7 +281,6 @@ end type
 
 ---------------- Global Variables ----------------------
 
-export object eudir                     -- path to Euphoria directory
 export sequence file_name_entered = ""  -- interactively entered file name
 export integer shroud_only = FALSE      -- making an unbound .il file
 export integer current_file_no = 1      -- current file number

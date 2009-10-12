@@ -113,10 +113,10 @@ export integer total_stack_size = -1 -- default size for OPTION STACK
 -- first check ##EUCOMPILEDIR##, to allow the user to override and use a
 -- different directory than ##EUDIR##. THen use ##EUDIR##, then default
 -- to ##/usr/share/euphoria##
-export function get_eudir()
+export function get_eucompiledir()
 	object x = getenv("EUCOMPILEDIR")
 	if equal(x, -1) then
-		x = getenv("EUDIR")
+		x = get_eudir()
 	end if
 
 	ifdef UNIX then

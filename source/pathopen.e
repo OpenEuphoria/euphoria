@@ -414,7 +414,7 @@ export function GetDefaultArgs()
 	env = strip_file_from_path( exe_path() )
 	default_args &= load_euphoria_config( env & conf_file )
 
-	env = getenv("EUDIR")
+	env = get_eudir()
 	if sequence(env) then
 		default_args &= load_euphoria_config(env & "/" & conf_file)
 	end if
@@ -567,7 +567,7 @@ export function Include_paths(integer add_converted)
 	if length(inc_path) then
 		inc_path = append(inc_path, PATH_SEPARATOR)
 	end if
-	object eudir_path = getenv("EUDIR")
+	object eudir_path = get_eudir()
 	if sequence(eudir_path) then
 		include_Paths = append(include_Paths, sprintf("%s/include", { eudir_path }))
 	end if

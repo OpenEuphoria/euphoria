@@ -41,6 +41,8 @@ public sequence all_source = {} -- pointers to chunks
 
 public integer usage_shown = 0 -- Indicates if the help/usage text has shown yet.
 
+object eudir = 0
+
 export function open_locked(sequence file_path)
 	integer fh
 	
@@ -53,3 +55,32 @@ export function open_locked(sequence file_path)
 	return fh
 end function
 
+public function get_eudir()
+	if sequence(eudir) then
+		return eudir
+	end if
+	eudir = getenv("EUDIR")
+	if atom(eudir) then
+		ifdef UNIX then
+			-- should check search PATH for euphoria/bin ?
+			eudir = getenv("HOME")
+			if atom(eudir) then
+				eudir = "euphoria"
+			else
+				eudir = eudir & "/euphoria"
+			end if
+		elsedef
+			eudir = getenv("HOMEPATH")
+			if atom(eudir) then
+				eudir = "\\EUPHORIA"
+			else
+				eudir = getenv("HOMEDRIVE") & eudir & "EUPHORIA"
+			end if
+		end ifdef
+	end if
+	return eudir
+end function
+
+public procedure set_eudir( sequence new_eudir )
+	eudir = new_eudir
+end procedure

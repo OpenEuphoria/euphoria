@@ -236,7 +236,7 @@ procedure OutputHeader(file f)
 		if sequence(shebang) then
 			puts(f, shebang)
 		else
-			puts(f, "#!" & eudir & SLASH & "bin" & SLASH)
+			puts(f, "#!" & get_eudir() & SLASH & "bin" & SLASH)
 			ifdef UNIX then
 				puts(f, "eub\n")
 			elsedef
@@ -432,10 +432,7 @@ procedure OutputIL()
 		-- binding:
 		-- first, copy eub[w].exe
 		
-		eu_dir = getenv("EUDIR")
-		if atom(eu_dir) then
-			eu_dir = SLASH & "euphoria" -- Unix?
-		end if
+		eu_dir = get_eudir()
 
 		source_dir = command_line()
 		source_dir = source_dir[2]

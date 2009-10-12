@@ -436,7 +436,7 @@ function find_file(sequence fname)
 
 	if atom(scan_result) then
 		-- eudir path
-		full_path = eudir & SLASH & "include" & SLASH & fname
+		full_path = get_eudir() & SLASH & "include" & SLASH & fname
 		if file_exists(full_path) then
 			return full_path
 		end if
@@ -501,9 +501,9 @@ function find_file(sequence fname)
 		end if
 	end if
 
-	if length(eudir) > 0 then
-		if not find(eudir, full_path) then
-			full_path = append(full_path, eudir)
+	if length(get_eudir()) > 0 then
+		if not find(get_eudir(), full_path) then
+			full_path = append(full_path, get_eudir())
 		end if
 	end if
 

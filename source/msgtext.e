@@ -340,6 +340,7 @@ constant StdErrMsgs = {
 	{325, "Skipping  [1:3.0]% [2] (up-to-date)"},
 	{326, "Force building, even if file is up-to-date"},
 	{327, "[1] is deprecated ([2]:[3])"},
+	{328, "Overrides the value of EUDIR"},
 	$
 }
 

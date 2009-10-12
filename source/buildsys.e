@@ -191,7 +191,7 @@ function setup_build()
 	if length(user_library) = 0 then
 		if TUNIX or compiler_type = COMPILER_GCC then
 			ifdef UNIX then
-				sequence eudir = get_eudir()
+				sequence eudir = get_eucompiledir()
 				if match( "/share/euphoria", eudir ) then
 					-- EUDIR probably not set, look in /usr/local/lib or /usr/lib
 					if file_exists( "/usr/lib/eu.a" ) then
@@ -208,10 +208,10 @@ function setup_build()
 					user_library = eudir & "/bin/eu.a"
 				end if
 			elsedef
-				user_library = get_eudir() & "/bin/eu.a"
+				user_library = get_eucompiledir() & "/bin/eu.a"
 			end ifdef
 		else
-			user_library = get_eudir() & "\\bin\\eu"
+			user_library = get_eucompiledir() & "\\bin\\eu"
 			user_library &= ".lib"
 		end if
 	end if
@@ -249,7 +249,7 @@ function setup_build()
 		   	end if
 
 			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math", 
-				{ get_eudir()  })
+				{ get_eucompiledir()  })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
@@ -289,10 +289,10 @@ function setup_build()
 			l_flags &= " OPTION QUIET OPTION ELIMINATE OPTION CASEEXACT"
 
 			if dll_option then
-				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eudir()
+				c_flags &= " /bd /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eucompiledir()
 				l_flags &= " SYSTEM NT_DLL initinstance terminstance"
 			else
-				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eudir()
+				c_flags &= " /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s /I" & get_eucompiledir()
 				if con_option then
 					-- SYSTEM NT *MUST* come first, otherwise memory dump
 					l_flags = " SYSTEM NT" & l_flags
