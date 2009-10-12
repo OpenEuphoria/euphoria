@@ -658,7 +658,9 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 				if not silent then
 					atom pdone = 100 * (i / length(generated_files))
 					if not verbose then
-						if outdated_files[i] = 0 and force_build = 0 then
+						-- disabled until ticket:59 can be fixed
+						-- results in longer build times, but output is correct
+						if 0 and outdated_files[i] = 0 and force_build = 0 then
 							ShowMsg(1, 325, { pdone, generated_files[i] })
 							continue
 						else
