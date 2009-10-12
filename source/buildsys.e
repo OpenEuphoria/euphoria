@@ -78,7 +78,7 @@ end function
 --****
 -- = buildsys.e
 --
--- Deals with writting files for various build systems:
+-- Deals with writing files for various build systems:
 --   * emake/emake.bat
 --   * Makefile - full
 --   * Makefile - partial (for inclusion into a parent Makefile)
@@ -458,7 +458,7 @@ procedure write_makefile_full()
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "%s: $(%s_OBJECTS)" & HOSTNL, { exe_name, upper(file0) })
+		printf(fh, "%s: $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean: .SYMBOLIC" & HOSTNL, { file0 })
@@ -479,7 +479,7 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s: $(%s_OBJECTS)" & HOSTNL, { exe_name, upper(file0) })
+		printf(fh, "%s: $(%s_OBJECTS) $s" & HOSTNL, { exe_name, upper(file0), user_library })
 		if TWINDOWS then
 			printf(fh, "\t$(LINKER) -o %s%s @%s.lnk" & HOSTNL, {
 				file0, settings[SETUP_EXE_EXT], file0 })
