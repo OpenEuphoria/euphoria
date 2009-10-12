@@ -232,6 +232,10 @@ export procedure transoptions()
 	end if
 
 	OpDefines &= { "EUC" }
+	
+	if host_platform() = WIN32 and not con_option then
+		OpDefines = append( OpDefines, "WIN32_GUI" )
+	end if
 
 	finalize_command_line(opts)
 end procedure
