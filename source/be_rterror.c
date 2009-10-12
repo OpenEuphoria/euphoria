@@ -38,6 +38,8 @@ extern HANDLE console_output;
 #include "alldefs.h"
 #include "be_runtime.h"
 #include "global.h"
+#include "task.h"
+
 void GetViewPort(struct EuViewPort *vp);
 
 
@@ -1282,11 +1284,11 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 		task = current_task;
 		for (i = 0; i < tcb_size; i++) {
 			if (tcb[i].status != ST_DEAD && 
-				tcb[i].expr_top > tcb[i].expr_stack+2-(tcb[i].tid == 0.0)) {
+				tcb[i].impl.interpreted.expr_top > tcb[i].impl.interpreted.expr_stack+2-(tcb[i].tid == 0.0)) {
 				current_task = i;
-				expr_stack = tcb[i].expr_stack;
-				expr_top = tcb[i].expr_top;
-				tpc = tcb[i].pc;
+				expr_stack = tcb[i].impl.interpreted.expr_stack;
+				expr_top = tcb[i].impl.interpreted.expr_top;
+				tpc = tcb[i].impl.interpreted.pc;
 				screen_err_out = FALSE; // only show offending task on screen
 				break;
 			}

@@ -59,7 +59,7 @@
 #include "alldefs.h"
 #include "alloc.h"
 #include "be_runtime.h"
-
+#include "task.h"
 
 /******************/
 /* Local defines  */

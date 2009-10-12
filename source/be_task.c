@@ -13,96 +13,27 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+
 #ifdef EWINDOWS
-#include <windows.h> /* for Sleep() */
+#include <windows.h> /* for Sleep(), Fibers */
 #endif
-#if defined(ESIMPLE_MALLOC) && defined(EWINDOWS)
-#include <windows.h>
-#endif
+
 #include "global.h"
 #include "execute.h"
 #include "symtab.h"
 #include "reswords.h"
 #include "be_runtime.h"
+#include "task.h"
 
 /*********************/
 /* Local definitions */
 /*********************/
-#define T_REAL_TIME 1
-#define T_TIME_SHARE 2
-#define TASK_NEVER 1e300
-#define TASK_ID_MAX 9e15 // wrap to 0 after this (and avoid in-use ones)
-#ifdef ERUNTIME
-#define STACK_MARKER 0x0F1D2A3F // so we'll know if stack boundary was crossed
+#ifndef EWINDOWS
+
+pthread_mutex_t task_mutex;
+pthread_cond_t  task_condition;
+pthread_t       task_thread;
 #endif
-
-// !!! Special machine code is inserted into scheduler() and task_create() !!!
-
-// The stack offsets below have to be adjusted from time to time
-// as the source code changes. You need to generate an assembly listing of
-// be_task.obj to see what's going on. We are trying to copy the value of the
-// hardware stack pointer to/from a C variable called "stack_top". 
-// To do this we need to know the offset where the "stack_top" variable 
-// is kept on the stack. The C compiler can sometimes change this offset for
-// reasons known only to itself.
-
-// For Watcom, run watlib.bat (or watlibw.bat as appropriate).
-// This will create be_task.obj. Then run:
-//    wdis be_task.obj > be_task.asm
-// (use "wdisasm" on older versions of Watcom)
-// Look at the code for scheduler() and task_create(). That's where the
-// machine code is inserted. In task_create() there's a C statement that
-// sets stack_top to zero. Find that place in the asm code.
-// (xor ebx,ebx creates the zero). Make sure
-// that the C compiler's offset for stack_top matches the one used in
-// the read_esp_tc() macro. If not, fix the macro. Then move on to scheduler
-// and check that the C compiler's offset for "stack_top" matches the macros.
-
-// For GNU C (Linux, FreeBSD), use the -S flag in gnulib (or bsdlib) 
-// when compiling be_task.c. That will give you an assembly listing .s file 
-// instead of a .obj file. Look for the #APP ... #NO_APP sections in the 
-// .s file. See if the %esp stack offsets match what the C compiler uses 
-// in the surrounding sections of code for the "stack_top" variable. 
-// Remove the -S flag when you are done.
-
-// Note: after a PUSH or POP, the stack pointer ESP points at the top element
-
-#if defined(EUNIX) || defined(EMINGW)
-#define push_regs() asm("pushal")
-#define pop_regs() asm("popal")
-#define set_esp() asm volatile("movl %0, %%esp" : /* no out */ : "r"(stack_top) )
-#define read_esp() asm volatile("movl %%esp, %0" : "=r"(stack_top)  )
-// this strictly speaking isnt needed anymore but is here for historical reasons ("hysterical raisins", anyone?)
-#define read_esp_tc() asm("movl %%esp, %0" : "=r"(stack_top) : /* no in */ : "%esp" )
-#endif
-
-#ifdef EWATCOM
-#pragma aux push_regs = \
-		"PUSHAD" \
-		modify[ESP];
-
-#pragma aux pop_regs = \
-		"POPAD" \
-		modify[ESP];
-
-#define set_esp() wset_esp(stack_top)
-void wset_esp(long);
-#pragma aux wset_esp = \
-		"MOV ESP, ECX" \
-		parm [ECX] \
-		modify[ESP];
-
-#define read_esp() stack_top = wread_esp()
-long wread_esp(void);
-#pragma aux wread_esp = \
-		"MOV ECX, ESP" \
-		value [ECX] \
-		modify[ESP];
-
-// this strictly speaking isnt needed anymore but is here for historical reasons ("hysterical raisins", anyone?)
-#define read_esp_tc() stack_top = wread_esp()
-#endif
-
 
 /**********************/
 /* Exported variables */
@@ -117,10 +48,10 @@ double clock_period = 0.01;  // should check this at run-time
 /* Imported variables */
 /**********************/
 extern unsigned char TempBuff[];
-#ifdef ERUNTIME
+
 extern struct routine_list *rt00;
-extern char *stack_base;
-#else
+
+#ifndef ERUNTIME
 extern object_ptr expr_stack;
 extern object_ptr expr_max;  
 extern object_ptr expr_limit;
@@ -159,31 +90,12 @@ extern unsigned default_heap;
 #endif
 extern void debug_dbl(double);
 void scheduler(double);
-#ifdef ERUNTIME
 extern struct routine_list _00[]; 
-#endif
+
 
 /*********************/
 /* Defined functions */
 /*********************/
-#ifdef ERUNTIME
-#ifdef EUNIX
-#ifndef EBSD
-static void grow_stack(int x)
-// we need this because there seems to be no way to commit stack space
-{
-	volatile char a[1024];
-	a[1] = x;
-	if (x == 1)
-		return;
-	else
-		grow_stack(x-1);
-
-	a[10] = &a; // gcc 4.1 seems to need this to avoid segfaulting
-}
-#endif
-#endif
-#endif
 
 void InitTask()
 // initialize the first (top-level) task - task id 0
@@ -205,36 +117,35 @@ void InitTask()
 	tcb[0].next = -1; // end marker
 	tcb[0].args = 0;
 	
-	// these things will be set when task 0 yields for the first time
-	tcb[0].pc = (int *)1; 
-	tcb[0].expr_max = NULL;
-	tcb[0].expr_limit = NULL;
 #ifdef ERUNTIME 
-#ifdef EUNIX   
-#ifndef EBSD    
-	grow_stack(total_stack_size / 1024);
-#endif
-#endif  
-	total_stack_size -= 8192; // some is reserved for top-level start-up
-		
-	tcb[0].expr_stack = (object_ptr)(stack_base - total_stack_size);
-	tcb[0].stack_size = total_stack_size;
-	
-	//debug_msg("about to store STACK_MARKER");
-	*(tcb[0].expr_stack) = STACK_MARKER;
-	//debug_msg("finished storing STACK_MARKER");
-	
-	word = (object_ptr)
-		   (((char *)(tcb[0].expr_stack)) + tcb[0].stack_size/2);
-
-	*word = (object)STACK_MARKER; // mid marker 
-	
-	tcb[0].expr_top = (object_ptr)stack_base;
+	tcb[0].mode = TRANSLATED_TASK;
+#ifdef EWINDOWS
+	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
-	tcb[0].expr_top = NULL;
-	tcb[0].expr_stack = NULL;
-	tcb[0].stack_size = 0; 
+	tcb[0].impl.translated.task = pthread_self();
+	pthread_mutex_init( &task_mutex, NULL );
+	pthread_cond_init(  &task_condition, NULL );
+	task_thread = 0;
+#endif
+#else
+	// I don't think this is correct (unless we're assuming this for the front end to use).
+	// I'm trying to leave this prospect open, but not worrying too much about it right now.
+	//tcb[0].impl.translated.task = pthread_self();
+	//pthread_mutex_init(&global_mutex, NULL); // TODO error handling
+	//pthread_mutex_lock(&global_mutex);
+
+	tcb[0].mode = INTERPRETED_TASK;
+	// these things will be set when task 0 yields for the first time
+	tcb[0].impl.interpreted.pc = (int *)1; 
+	tcb[0].impl.interpreted.expr_max = NULL;
+	tcb[0].impl.interpreted.expr_limit = NULL;
+	tcb[0].impl.interpreted.expr_top = NULL;
+	tcb[0].impl.interpreted.expr_stack = NULL;
+	tcb[0].impl.interpreted.stack_size = 0; 
 #endif  
+
+
+
 	tcb_size = 1;
 	
 	ts_first = 0;    // this ts task only
@@ -280,6 +191,9 @@ void terminate_task(int task)
 		ts_first = task_delete(ts_first, task);
 	}
 	tcb[task].status = ST_DEAD; // its tcb entry will be recycled later
+	if( tcb[task].mode == TRANSLATED_TASK ){
+		tcb[task].impl.translated.task = (TASK_HANDLE) 0;
+	}
 }
 
 extern double Wait(double t);
@@ -333,7 +247,7 @@ double Wait(double t)
 	return now;
 }
 
-#ifdef ERUNTIME
+
 static void call_task(int rid, object args) 
 /* translated code: call a task for the first time, passing its arguments */
 {
@@ -502,14 +416,11 @@ static void call_task(int rid, object args)
 			RTFatal("the Translator supports a maximum of 12 arguments for tasks"); 
 	}
 	
-	
 	// task returns (i.e. it's finished and should now be terminated)
 	terminate_task(current_task);
 	
 	scheduler(current_time()); // this call stack is going to die soon
 }
-#endif
-
 
 void task_yield()
 // temporarily stop running this task, and give the scheduler a chance
@@ -794,41 +705,32 @@ void task_clock_start()
 	}
 }
 
+#ifndef ERUNTIME
 object task_create(object r_id, object args)
-// Create a new task - return a double task id - assumed by Translator
+// Create a new task for the interpreter - return a double task id - assumed by Translator
 {
-	volatile int stack_top;  // magic variable set/read via ASM code
-							 // force it to not be kept in a register
 	symtab_ptr sub;
 	struct tcb *new_entry;
 	int recycle, recycle_size, i, j, proc_args;
 	double id, t;
-	int biggest, biggest_size, size;
+	int size;
 	object_ptr word;
 	
 	r_id = (object)get_pos_int("task_create", r_id);
 
-#ifdef ERUNTIME
-	if ((unsigned)(r_id) >= 0xFFFFFF00) // small negatives will be caught
-		RTFatal("invalid routine id");
-#else   
+  
 	if ((unsigned)(r_id) >= e_routine_next)
 		RTFatal("invalid routine id");
 	sub = e_routine[r_id];
 	
 	if (sub->token != PROC) {
 		RTFatal("specify the routine id of a procedure, not a function or type");
-	}
-#endif  
+	} 
 	
 	if (!IS_SEQUENCE(args))
 		RTFatal("Argument list must be a sequence");
 
-#ifdef ERUNTIME
-	proc_args = _00[r_id].num_args;
-#else
-	proc_args = sub->u.subp.num_args;
-#endif  
+	proc_args = sub->u.subp.num_args; 
 	
 	if (SEQ_PTR(args)->length != proc_args) {
 		RTFatal("Incorrect number of arguments (passing %d where %d are expected)",
@@ -837,38 +739,15 @@ object task_create(object r_id, object args)
 	
 	recycle = -1;
 	recycle_size = -1;
-#ifdef ERUNTIME 
-	biggest = -1;
-	biggest_size = -1;
-#endif  
-	for (i = 0; i < tcb_size; i++) { 
-#ifdef ERUNTIME 
-		if (tcb[i].status == ST_DEAD) {
-			size = tcb[i].stack_size;
-		}
-		else {
-			size = tcb[i].expr_top - tcb[i].expr_stack;
-			word = (object_ptr)
-				   (((char *)(tcb[i].expr_stack)) + tcb[i].stack_size/2);
-			if (*word != STACK_MARKER) { 
-				// high-water mark exceeds half its space
-				// dangerous to split in half
-				size = tcb[i].stack_size / 16; // try hard to avoid this block
-			}
-		}
-		
-		if (size > biggest_size) {
-			biggest = i;
-			biggest_size = size; // not real size
-		}
-#endif      
+ 
+	for (i = 0; i < tcb_size; i++) {  
 		if (tcb[i].status == ST_DEAD) {
 			// this task is dead, can recycle its entry 
 			// (but not its external task id)
 			// try to pick ST_DEAD task with biggest stack space
 			// (this mainly helps translated code, but also helps interpeter)
-			if (tcb[i].stack_size > recycle_size) {
-				recycle_size = tcb[i].stack_size;
+			if (tcb[i].impl.interpreted.stack_size > recycle_size) {
+				recycle_size = tcb[i].impl.interpreted.stack_size;
 				recycle = i;
 			}
 		}
@@ -883,12 +762,10 @@ object task_create(object r_id, object args)
 	}
 	else {
 		// found a ST_DEAD task
-#ifndef ERUNTIME
 		// free the call stack 
-		if (tcb[recycle].expr_stack != NULL) {
-			EFree(tcb[recycle].expr_stack);
+		if (tcb[recycle].impl.interpreted.expr_stack != NULL) {
+			EFree(tcb[recycle].impl.interpreted.expr_stack);
 		}
-#endif          
 		DeRef(tcb[recycle].args);
 		new_entry = &tcb[recycle];
 	}
@@ -907,85 +784,20 @@ object task_create(object r_id, object args)
 	new_entry->runs_left = 1;
 	new_entry->runs_max = 1;
 	new_entry->next = -1; 
+	new_entry->mode = INTERPRETED_TASK;
 	
 	new_entry->args = args;
 	Ref(args);
 	
 	// interpreter sets these things when the task executes for the first time
-	new_entry->pc = NULL;
+	new_entry->impl.interpreted.pc = NULL;
 
-#ifdef ERUNTIME
-	if (recycle != -1) {
-		// take over an existing tcb entry and its stack space
-		// reset the mid-point stack marker, and stack top
-		// full stack marker will have been checked even when task terminates
-		word = (object_ptr)
-			   (((char *)(tcb[recycle].expr_stack)) + tcb[recycle].stack_size/2);
-		*word = (object)STACK_MARKER;
-		tcb[recycle].expr_top = (object_ptr)
-								(((char *)(tcb[recycle].expr_stack)) + 
-										   tcb[recycle].stack_size);
-	}
-	else {  
-		// we expanded the tcb, need a new stack space, 
-		// take half of "biggest" space among ST_DEAD or not
-		size = tcb[biggest].stack_size >> 3;
-		size <<= 2; // half size, rounded down, 4-byte aligned
 
-		new_entry->expr_stack = tcb[biggest].expr_stack; 
-		// STACK_MARKER will still be there
-		
-		new_entry->stack_size = size;
-		
-		new_entry->expr_top = (object_ptr)
-							  (((char *)(new_entry->expr_stack)) + size);
-		
-		word = (object_ptr)
-			   (((char *)(new_entry->expr_stack)) + size/2);
-		
-		*word = (object)STACK_MARKER; // mid-point marker
-		
-		tcb[biggest].expr_stack = (object_ptr)
-								(((char *)tcb[biggest].expr_stack) + size);
-		
-		*(tcb[biggest].expr_stack) = (object)STACK_MARKER; 
-		
-		tcb[biggest].stack_size = size; 
-		
-		word = (object_ptr)
-			   (((char *)(tcb[biggest].expr_stack)) + size/2);
-		
-		
-		// make sure current stack pointer is up-to-date for next two if's
-		stack_top = 0; // try to force error if read_esp_tc is not right
-		
-		read_esp_tc(); // *** machine code *** 
-		
-		tcb[current_task].expr_top = (object_ptr)stack_top; 
-		
-		// will be updated again when current task yields
-		
-		if (tcb[biggest].expr_stack > tcb[biggest].expr_top) {
-			RTFatal("Task %.0f (%.40s) no longer has enough stack space (%d bytes)",
-					tcb[biggest].tid,
-					(tcb[biggest].tid == 0.0) ? "initial task" :
-					_00[tcb[biggest].rid].name,
-					size);
-		}
-		
-		if (tcb[biggest].expr_top > word) // don't overwrite live stack data
-			*word = (object)STACK_MARKER; // mid-point marker
-		
-		// we might lose a word of high-memory stack due to rounding,
-		// but I don't think it will matter
-	}
-#else
-	new_entry->expr_max = NULL;
-	new_entry->expr_limit = NULL;
-	new_entry->expr_top = NULL;
-	new_entry->expr_stack = NULL;
-	new_entry->stack_size = 0;
-#endif  
+	new_entry->impl.interpreted.expr_max = NULL;
+	new_entry->impl.interpreted.expr_limit = NULL;
+	new_entry->impl.interpreted.expr_top = NULL;
+	new_entry->impl.interpreted.expr_stack = NULL;
+	new_entry->impl.interpreted.stack_size = 0;
 	
 	id = next_task_id;
 	
@@ -1013,10 +825,263 @@ object task_create(object r_id, object args)
 	
 	return NewDouble(id);
 }
+#endif
+
+TASK_HANDLE stale_task = 0;
+
+void release_task( TASK_HANDLE task ){
+	#ifdef EWINDOWS
+	DeleteFiber( task );
+	#else
+	pthread_cancel( task );
+	#endif
+}
+
+void release_task_later( TASK_HANDLE task ){
+	if( stale_task != 0 ){
+		release_task( stale_task );
+	}
+	stale_task = task;
+}
+
+object ctask_create(object r_id, object args)
+// Create a new task for translated code - return a double task id - assumed by Translator
+{
+	
+	symtab_ptr sub;
+	struct tcb *new_entry;
+	int recycle, i, j, proc_args;
+	double id, t;
+	object_ptr word;
+	
+	r_id = (object)get_pos_int("task_create", r_id);
+
+	if ((unsigned)(r_id) >= 0xFFFFFF00) // small negatives will be caught
+		RTFatal("invalid routine id");
+
+	if (!IS_SEQUENCE(args))
+		RTFatal("Argument list must be a sequence");
+
+	proc_args = _00[r_id].num_args;
+
+	
+	if (SEQ_PTR(args)->length != proc_args) {
+		RTFatal("Incorrect number of arguments (passing %d where %d are expected)",
+				SEQ_PTR(args)->length, proc_args);
+	}
+	
+	recycle = -1;
+
+	for (i = 0; i < tcb_size; i++) { 
+    
+		if (tcb[i].status == ST_DEAD) {
+			// this task is dead, can recycle its entry 
+			// (but not its external task id)
+			recycle = i;
+			break;
+		}
+	}
+	
+	if (recycle == -1) {
+		// nothing is ST_DEAD, must expand the tcb
+		tcb_size++;
+		// n.b. tcb could get moved because of this:
+		tcb = (struct tcb *)ERealloc(tcb, sizeof(struct tcb) * tcb_size);
+		new_entry = &tcb[tcb_size-1];
+		recycle = tcb_size-1;
+	}
+	else {
+		// found a ST_DEAD task
+		DeRef(tcb[recycle].args);
+		new_entry = &tcb[recycle];
+		if( new_entry->mode == TRANSLATED_TASK && new_entry->impl.translated.task != 0 ){
+			if( recycle == current_task ){
+				// we can't free it from itself, or the entire proces would die
+				release_task_later( new_entry->impl.translated.task );
+			}
+			else{
+				release_task( new_entry->impl.translated.task );
+			}
+		}
+	}
+	
+	// initially it's suspended
+	new_entry->rid = r_id;  // always an integer - no Ref()
+	
+	new_entry->tid = next_task_id;
+	new_entry->type = T_REAL_TIME;
+	new_entry->status = ST_SUSPENDED;
+	new_entry->start = 0.0;
+	new_entry->min_inc = 0.0;
+	new_entry->max_inc = 0.0;
+	new_entry->min_time = 0.0;
+	new_entry->max_time = TASK_NEVER;
+	new_entry->runs_left = 1;
+	new_entry->runs_max = 1;
+	new_entry->next = -1;
+	new_entry->mode = TRANSLATED_TASK;
+	
+	new_entry->args = args;
+	Ref(args);
+	
+	// interpreter sets these things when the task executes for the first time
+	new_entry->impl.translated.task = (TASK_HANDLE) NULL;
+
+	id = next_task_id;
+	
+	// choose task id for next time
+	if (!id_wrap && next_task_id < TASK_ID_MAX) {
+		next_task_id += 1.0;
+	}
+	else {
+		// extremely rare
+		id_wrap = TRUE;  // id's have wrapped
+		for (t = 1.0; t <= TASK_ID_MAX; t += 1.0) { 
+			next_task_id = t;
+			for (j = 0; j < tcb_size; j++) {
+				if (next_task_id == tcb[j].tid) {
+					next_task_id = 0.0;
+					break;  // this id is still in use
+				}
+			}
+			if (next_task_id > 0) {
+				break;   // found unused id for next time
+			}
+		}
+		// must have found one - couldn't have trillions of non-dead tasks!
+	}
+	init_task( recycle );
+	return NewDouble(id);
+}
 
 // put these scheduler vars here for translated code, to avoid register 
 // and/or stack corruption complications
 static int earliest_task; 
+
+void run_task( int tx ){
+#ifndef ERUNTIME
+	static int **code[3];
+	if( tcb[tx].mode == INTERPRETED_TASK ){
+		struct tcb *tp;
+		
+		// save current stack info
+		tp = &tcb[current_task];
+		tp->impl.interpreted.pc = tpc; 
+		tp->impl.interpreted.expr_stack = expr_stack;
+		tp->impl.interpreted.expr_max   = expr_max; 
+		tp->impl.interpreted.expr_limit = expr_limit;
+		tp->impl.interpreted.expr_top   = expr_top;   
+		tp->impl.interpreted.stack_size = stack_size;
+		
+		// load new task 
+		
+		current_task = earliest_task;
+	
+		if (tcb[current_task].impl.interpreted.pc == NULL) {
+			// first time we are running this task - no stack to restore
+			// call its procedure, passing the args from task_create
+
+			InitStack(EXPR_SIZE, 0); // create its call stack
+			
+			// re-entrant? - ok, we use code right away
+			// infinite calls to scheduler?
+			code[0] = (int **)opcode(CALL_PROC);
+			code[1] = (int **)&tcb[current_task].rid;
+			code[2] = (int **)&tcb[current_task].args;
+			tpc = (int *)&code;
+		}
+		else {
+			// Resuming an already-started task after a task_yield().
+			// Must restore its stack.
+			// set up stack
+			tp = &tcb[earliest_task];
+			tpc = tp->impl.interpreted.pc;
+			expr_stack = tp->impl.interpreted.expr_stack;
+			expr_max = tp->impl.interpreted.expr_max;
+			expr_limit = tp->impl.interpreted.expr_limit;
+			expr_top = tp->impl.interpreted.expr_top;
+			stack_size = tp->impl.interpreted.stack_size;
+			restore_privates((symtab_ptr)expr_top[-1]);
+			tpc += 1;    
+		}
+	}
+	else
+#endif // !ERUNTIME 
+	{ // TRANSLATED_TASK
+		
+		if (tcb[earliest_task].impl.translated.task == NULL) {
+			// first time we are running this task
+			init_task( earliest_task );
+			
+		}
+		
+		run_current_task( earliest_task );
+	}
+}
+
+
+
+#ifdef EWINDOWS
+
+void run_current_task( int task ){
+	current_task = task;
+	SwitchToFiber( tcb[current_task].impl.translated.task );
+}
+
+void WINAPI exec_task( void *task ){
+	struct tcb *t = &tcb[(int)task];
+
+	call_task( t->rid, t->args );
+}
+
+void init_task( int tx ){
+	// fibers...
+	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, tx );
+}
+
+#else
+
+/**
+ * Only allows the current thread to continue if it belongs to the current task.
+ */
+void wait_for_task( int task ){
+	pthread_mutex_lock( &task_mutex );
+	while( current_task != task ){
+		pthread_cond_wait( &task_condition, &task_mutex );
+	}
+}
+
+/**
+ * This is where a new thread/task starts.  It waits for its turn before
+ * calling the task's procedure.
+ */
+void start_task( void *task ){
+	wait_for_task( (int) task );
+	call_task( tcb[(int)task].rid, tcb[(int)task].args );
+}
+
+/**
+ * Creates the thread where the new task will run.
+ */
+
+void init_task( int tx ){
+	int ret;
+	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, tx );
+	// TODO error handling
+}
+
+/**
+ * Changes the value of the current_task to @task, then signals the waiting 
+ * threads to see if they should be running, after which it calls wait_for_task().
+ */
+void run_current_task( int task ){
+	int this_task = current_task;
+	current_task = task;
+	pthread_cond_broadcast( &task_condition );
+	pthread_mutex_unlock( &task_mutex );
+	wait_for_task( this_task );
+}
+#endif
 
 void scheduler(double now)
 // pick the next task to run
@@ -1027,10 +1092,7 @@ void scheduler(double now)
 	int ts_found;
 	struct tcb *tp;
 	int p;
-#ifndef ERUNTIME    
-	static int **code[3];
-	int stack_size;
-#endif  
+
 	// first check the real-time tasks
 	
 	// find the task with the earliest MAX_TIME
@@ -1121,104 +1183,6 @@ void scheduler(double now)
 #endif  
 	}
 	else {
-#ifdef ERUNTIME     
-		// switch to a new task
-		//debug_msg("switching from");
-		//if (tcb[current_task].rid == -1)
-			//debug_msg("top_level");
-		//else
-			//debug_msg(_00[tcb[current_task].rid].name);
-		//debug_msg("to");
-		//if (tcb[earliest_task].rid == -1)
-			//debug_msg("top_level");
-		//else
-			//debug_msg(_00[tcb[earliest_task].rid].name);
-#endif      
-		// save old task state
-		
-		//tp = &tcb[current_task];
-		
-#ifdef ERUNTIME     
-		// save regs and current stack top
-		push_regs(); // save regs onto stack
-		read_esp();  // sets stack_top var
-		
-		tcb[current_task].expr_top = (object_ptr)stack_top;
-		
-		if ((object_ptr)stack_top < tcb[current_task].expr_stack ||
-			*(tcb[current_task].expr_stack) != (object)STACK_MARKER) {
-			RTFatal("Task %.0f (%.40s) exceeded its stack size limit of %d bytes",
-					tcb[current_task].tid,
-					(tcb[current_task].tid == 0.0) ? "initial task" :
-					_00[tcb[current_task].rid].name,
-					tcb[current_task].stack_size);
-		}
-#else       
-		// save current stack info
-		tp = &tcb[current_task];
-		tp->pc = tpc; 
-		tp->expr_stack = expr_stack;
-		tp->expr_max = expr_max; 
-		tp->expr_limit = expr_limit;
-		tp->expr_top = expr_top;   
-		tp->stack_size = stack_size;
-#endif      
-		
-		// load new task 
-		
-		current_task = earliest_task;
-	
-		if (tcb[current_task].pc == NULL) {
-			// first time we are running this task - no stack to restore
-			// call its procedure, passing the args from task_create
-#ifdef ERUNTIME
-			// 1. Set the stack pointer to the task base level
-			// 2. call the task routine, passing any number of args
-
-			tcb[current_task].pc = (int *)1;  // i.e. not NULL
-			
-			stack_top = (int)(((char *)tcb[current_task].expr_stack) + 
-									  (tcb[current_task].stack_size));
-			// first word pushed by call will go at first word below the
-			// next stack in memory
-			set_esp(); 
-			
-			call_task(tcb[current_task].rid, tcb[current_task].args);
-			// won't return here
-
-#else
-			InitStack(EXPR_SIZE, 0); // create its call stack
-			
-			// re-entrant? - ok, we use code right away
-			// infinite calls to scheduler?
-			code[0] = (int **)opcode(CALL_PROC);
-			code[1] = (int **)&tcb[current_task].rid;
-			code[2] = (int **)&tcb[current_task].args;
-			tpc = (int *)&code;
-#endif      
-		}
-		else {
-			// Resuming an already-started task after a task_yield().
-			// Must restore its stack.
-#ifdef ERUNTIME
-			// set stack top
-			stack_top = (int)tcb[earliest_task].expr_top;
-			set_esp(); // reads stack_top var
-			
-			pop_regs(); // restore saved regs (especially EBP)
-			
-#else
-			// set up stack
-			tp = &tcb[earliest_task];
-			tpc = tp->pc;
-			expr_stack = tp->expr_stack;
-			expr_max = tp->expr_max;
-			expr_limit = tp->expr_limit;
-			expr_top = tp->expr_top;
-			stack_size = tp->stack_size;
-			restore_privates((symtab_ptr)expr_top[-1]);
-			tpc += 1; 
-#endif      
-		}
+		run_task( earliest_task );
 	}
 }

@@ -3,6 +3,8 @@
 /*                    INCLUDE FILE FOR RUN TIME DATA TYPES                   */
 /*                                                                           */
 /*****************************************************************************/
+#ifndef EXECUTE_H_
+#define EXECUTE_H_
 
 		  /* Euphoria object format v1.2 and later */
 
@@ -250,30 +252,6 @@ struct IL {
 	object argv;
 };
 
-// Task Control Block - sync with euphoria\include\euphoria.h
-struct tcb {
-	int rid;         // routine id
-	double tid;      // external task id
-	int type;        // type of task: T_REAL_TIME or T_TIME_SHARED
-	int status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
-	double start;    // start time of current run
-	double min_inc;  // time increment for min
-	double max_inc;  // time increment for max 
-	double min_time; // minimum activation time
-					 // or number of executions remaining before sharing
-	double max_time; // maximum activation time (determines task order)
-	int runs_left;   // number of executions left in this burst
-	int runs_max;    // maximum number of executions in one burst
-	int next;        // index of next task of the same kind
-	object args;     // args to call task procedure with at startup
-	int *pc;         // program counter for this task
-	object_ptr expr_stack; // call stack for this task
-	object_ptr expr_max;   // current top limit of stack
-	object_ptr expr_limit; // don't start a new routine above this
-	object_ptr expr_top;   // stack pointer
-	int stack_size;        // current size of stack
-};
-
 // saved private blocks
 struct private_block {
    int task_number;            // internal task number
@@ -457,3 +435,5 @@ enum CLEANUP_TYPES {
 	CLEAN_PCRE,
 	CLEAN_FILE
 };
+
+#endif

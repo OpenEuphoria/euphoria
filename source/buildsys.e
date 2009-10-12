@@ -265,7 +265,7 @@ function setup_build()
 			end if
 
 			if TLINUX then
-				l_flags &= " -ldl -lm"
+				l_flags &= " -ldl -lm -lpthread"
 			elsif TOSX then
 				l_flags &= " -lresolv"
 			elsif TSUNOS then

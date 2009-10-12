@@ -6132,7 +6132,7 @@ end procedure
 procedure opTASK_CREATE()
 	dll_tasking()
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
-	c_stmt("@ = task_create(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
+	c_stmt("@ = ctask_create(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	SetBBType(Code[pc+3], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0) -- always TYPE_DOUBLE
 	tasks_created = TRUE
