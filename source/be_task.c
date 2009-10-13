@@ -91,6 +91,8 @@ extern unsigned default_heap;
 extern void debug_dbl(double);
 void scheduler(double);
 extern struct routine_list _00[]; 
+void run_current_task( int );
+void init_task( int );
 
 
 /*********************/
