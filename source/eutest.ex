@@ -685,7 +685,7 @@ procedure do_test( sequence cmds )
 		printf(1, "    FAIL: %s\n", {fail_list[i]})
 	end for
 
-	printf(1, "Files run: %d, failed: %d (%.1f%% success)\n", {total, failed, score})
+	printf(1, "Files (run: %d) (failed: %d) (%.1f%% success)\n", {total, failed, score})
 
 	object temps, ln = read_lines("unittest.dat")
 	if sequence(ln) then
@@ -706,7 +706,7 @@ procedure do_test( sequence cmds )
 			score = ((total - failed) / total) * 100
 		end if
 
-		printf(1, "Tests run: %d, failed: %d (%.1f%% success)\n", {total, failed, score})
+		printf(1, "Tests (run: %d) (failed: %d) (%.1f%% success)\n", {total, failed, score})
 	end if
 
 	abort(failed > 0)
@@ -757,7 +757,7 @@ procedure ascii_out(sequence data)
 				status = "ok"
 			end if
 
-			printf(1, "  Tests: %04d Status: %3s Failed: %04d Passed: %04d Time: %f\n\n", {
+			printf(1, "  (Tests: %04d) (Status: %3s) (Failed: %04d) (Passed: %04d) (Time: %f)\n\n", {
 				data[2], status, data[3], data[4], data[5]
 			})
 	end switch

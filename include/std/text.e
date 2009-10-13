@@ -1610,7 +1610,9 @@ public function format(sequence pFormat, object pArgs = {})
 									if argtext[1] = '-' then
 										argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
 									else
-										argtext = repeat('0', width - length(argtext)) & argtext
+										if width > length(argtext) then
+											argtext = repeat('0', width - length(argtext)) & argtext
+										end if
 									end if
 								else
 									argtext = repeat('0', width - length(argtext)) & argtext
@@ -1641,7 +1643,9 @@ public function format(sequence pFormat, object pArgs = {})
 						else
 							argtext = sprintf("%x", pArgs[argn])
 							if zfill != 0 and width > 0 then
-								argtext = repeat('0', width - length(argtext)) & argtext
+								if width > length(argtext) then
+									argtext = repeat('0', width - length(argtext)) & argtext
+								end if
 							end if
 						end if
 
@@ -1649,35 +1653,46 @@ public function format(sequence pFormat, object pArgs = {})
 						if bwz != 0 and pArgs[argn] = 0 then
 							argtext = ""
 						else
-							argtext = trim(sprintf("%15.15g", pArgs[argn]))
-							if zfill != 0 and width > 0 then
-								if length(argtext) > 0 then
-									if argtext[1] = '-' then
-										argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+							if hexout then
+								argtext = sprintf("%x", pArgs[argn])
+								if zfill != 0 and width > 0 then
+									if width > length(argtext) then
+										argtext = repeat('0', width - length(argtext)) & argtext
+									end if
+								end if
+							else
+								argtext = trim(sprintf("%15.15g", pArgs[argn]))
+								if zfill != 0 and width > 0 then
+									if length(argtext) > 0 then
+										if width > length(argtext) then
+											if argtext[1] = '-' then
+												argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+											else
+												argtext = repeat('0', width - length(argtext)) & argtext
+											end if
+										end if
 									else
 										argtext = repeat('0', width - length(argtext)) & argtext
 									end if
-								else
-									argtext = repeat('0', width - length(argtext)) & argtext
 								end if
-							end if
-							if pArgs[argn] > 0 then
-								if psign  then
-									if zfill = 0 then
-										argtext = '+' & argtext
-									elsif argtext[1] = '0' then
-										argtext[1] = '+'
+								if pArgs[argn] > 0 then
+									if psign  then
+										if zfill = 0 then
+											argtext = '+' & argtext
+										elsif argtext[1] = '0' then
+											argtext[1] = '+'
+										end if
 									end if
-								end if
-							elsif pArgs[argn] < 0 then
-								if msign then
-									if zfill = 0 then
-										argtext = '(' & argtext[2..$] & ')'
-									else
-										if argtext[2] = '0' then
-											argtext = '(' & argtext[3..$] & ')'
+								elsif pArgs[argn] < 0 then
+									if msign then
+										if zfill = 0 then
+											argtext = '(' & argtext[2..$] & ')'
 										else
-											argtext = argtext[2..$] & ')'
+											if argtext[2] = '0' then
+												argtext = '(' & argtext[3..$] & ')'
+											else
+												argtext = argtext[2..$] & ')'
+											end if
 										end if
 									end if
 								end if

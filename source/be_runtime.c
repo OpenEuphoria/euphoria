@@ -1813,16 +1813,16 @@ object Dremainder(d_ptr a, d_ptr b)
    bits the same - both 0 or both 1, and this fact can't change
    due to a bitwise op. */
 
-static void check32(d_ptr a, d_ptr b)
-/* check for doubles that are greater than 32-bits */
-{
-	if (a->dbl < MIN_BITWISE_DBL ||
-		a->dbl > MAX_BITWISE_DBL ||
-		b->dbl < MIN_BITWISE_DBL ||
-		b->dbl > MAX_BITWISE_DBL)
-		RTFatal("bitwise operations are limited to 32-bit numbers");
-}
-
+// static void check32(d_ptr a, d_ptr b)
+// /* check for doubles that are greater than 32-bits */
+// {
+// 	if (a->dbl < MIN_BITWISE_DBL ||
+// 		a->dbl > MAX_BITWISE_DBL ||
+// 		b->dbl < MIN_BITWISE_DBL ||
+// 		b->dbl > MAX_BITWISE_DBL)
+// 		RTFatal("bitwise operations are limited to 32-bit numbers");
+// }
+// 
 object and_bits(long a, long b)
 /* integer a AND b */
 {
@@ -1835,9 +1835,9 @@ object Dand_bits(d_ptr a, d_ptr b)
 	unsigned long longa, longb;
 	long c;
 
-	check32(a, b);
-	longa = a->dbl;
-	longb = b->dbl;
+	//check32(a, b);
+	longa = (unsigned long)(a->dbl);
+	longb = (unsigned long)(b->dbl);
 	c = longa & longb;
 	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
@@ -1857,9 +1857,9 @@ object Dor_bits(d_ptr a, d_ptr b)
 	unsigned long longa, longb;
 	long c;
 
-	check32(a, b);
-	longa = a->dbl;
-	longb = b->dbl;
+	// check32(a, b);
+	longa = (unsigned long)(a->dbl);
+	longb = (unsigned long)(b->dbl);
 	c = longa | longb;
 	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
@@ -1879,9 +1879,9 @@ object Dxor_bits(d_ptr a, d_ptr b)
 	unsigned long longa, longb;
 	long c;
 
-	check32(a, b);
-	longa = a->dbl;
-	longb = b->dbl;
+	// check32(a, b);
+	longa = (unsigned long)(a->dbl);
+	longb = (unsigned long)(b->dbl);
 	c = longa ^ longb;
 	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
@@ -1898,14 +1898,13 @@ object not_bits(long a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-	unsigned long longa;
-	long c;
+	unsigned long c;
 
-	if (a->dbl < MIN_BITWISE_DBL ||
-		a->dbl > MAX_BITWISE_DBL)
-		 check32(a, a);  // error msg
-	longa = a->dbl;
-	c = ~longa;
+// 	if (a->dbl < MIN_BITWISE_DBL ||
+// 		a->dbl > MAX_BITWISE_DBL)
+// 		 check32(a, a);  // error msg
+	c = ~((unsigned long)(a->dbl));
+
 	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
 	else

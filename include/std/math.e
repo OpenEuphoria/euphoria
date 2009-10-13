@@ -1512,45 +1512,146 @@ end function
 --   [[:and_bits]], [[:or_bits]], [[:xor_bits]], [[:int_to_bits]]
 
 --**
--- Left shift moves a left by b bits
+-- Moves the bits in the input value by the specified distance.
 --
--- Parameters
---   # ##a## : value to be moved
---   # ##b## : number of bits to be moved left by
+-- Parameters:
+--   # ##pNumber## : object: The value(s) whose bits will be be moved.
+--   # ##pDistance## : integer: number of bits to be moved by. 
+-- Comments:
+-- * If ##pNumber## is a sequence, each element is shifted.
+-- * The value(s) in ##pNumber## are first truncated to a 32-bit integer.
+-- * The output is truncated to a 32-bit integer.
+-- * Vacated bits are replaced with zero.
+-- * If ##pDistance## is negative, the bits in ##pNumber## are moved left.
+-- * If ##pDistance## is positive, the bits in ##pNumber## are moved right.
+-- * If ##pDistance## is zero, the bits in ##pNumber## are not moved.
+--
+-- Returns:
+-- Atom(s) containing a 32-bit integer. A single atom in ##pNumber## is an atom, or
+-- a sequence in the same form as ##pNumber## containing 32-bit integers.
 --
 -- Example 1:
 -- <eucode>
--- ? left_shift(2, 2) -- 8
--- ? left_shift(4, 2) -- 16
--- ? left_shift(4, 4) -- 64
+-- ? shift_bits((7, -3) --> 56
+-- ? shift_bits((0, -9) --> 0
+-- ? shift_bits((4, -7) --> 512
+-- ? shift_bits((8, -4) --> 128
+-- ? shift_bits((0xFE427AAC, -7) --> 0x213D5600
+-- ? shift_bits((-7, -3) --> -56  which is 0xFFFFFFC8 
+-- ? shift_bits((131, 0) --> 131
+-- ? shift_bits((184.464, 0) --> 184
+-- ? shift_bits((999_999_999_999_999, 0) --> -1530494977 which is 0xA4C67FFF
+-- ? shift_bits((184, 3) -- 23
+-- ? shift_bits((48, 2) --> 12
+-- ? shift_bits((121, 3) --> 15
+-- ? shift_bits((0xFE427AAC, 7) -->  0x01FC84F5
+-- ? shift_bits((-7, 3) --> 0x1FFFFFFF
+-- ? shift_bits({48, 121}, 2) --> {12, 30}
 -- </eucode>
 --
 -- See Also:
---   [[:right_shift]]
+--   [[:rotate_bits]]
 
-public function left_shift(integer a, integer b)
-	return round(a * power(2, b))
+public function shift_bits(object pNumber, integer pDistance)
+
+	if sequence(pNumber) then
+		for i = 1 to length(pNumber) do
+			pNumber[i] = shift_bits(pNumber[i], pDistance)
+		end for
+		return pNumber
+	end if
+	pNumber = and_bits(pNumber, 0xFFFFFFFF)
+	if pDistance = 0 then
+		return pNumber
+	end if
+	
+	if pDistance < 0 then
+		pNumber *= power(2, -pDistance)
+	else
+		integer lSigned = 0
+		-- Check for the sign bit so we don't propagate it.
+		if and_bits(pNumber, 0x80000000) then
+			lSigned = 1
+			pNumber = and_bits(pNumber, 0x7FFFFFFF)
+		end if
+		pNumber /= power(2, pDistance)
+		if lSigned and pDistance < 32 then
+			-- Put back the sign bit now shifted
+			pNumber = or_bits(pNumber, power(2, 31-pDistance))
+		end if
+	end if
+	
+	return and_bits(pNumber, 0xFFFFFFFF)
 end function
 
 --**
--- Right shift moves a right by b bits
+-- Rotates the bits in the input value by the specified distance.
 --
 -- Parameters:
---   # ##a## : value to be moved
---   # ##b## : number of bits to be moved right by
+--   # ##pNumber## : object: value(s) whose bits will be be rotated.
+--   # ##pDistance## : integer: number of bits to be moved by. 
+-- Comments:
+-- * If ##pNumber## is a sequence, each element is rotated.
+-- * The value(s) in ##pNumber## are first truncated to a 32-bit integer.
+-- * The output is truncated to a 32-bit integer.
+-- * If ##pDistance## is negative, the bits in ##pNumber## are rotated left.
+-- * If ##pDistance## is positive, the bits in ##pNumber## are rotated right.
+-- * If ##pDistance## is zero, the bits in ##pNumber## are not rotated.
+--
+-- Returns:
+-- Atom(s) containing a 32-bit integer. A single atom in ##pNumber## is an atom, or
+-- a sequence in the same form as ##pNumber## containing 32-bit integers.
 --
 -- Example 1:
 -- <eucode>
--- ? right_shift(2, 2) -- 0
--- ? right_shift(4, 2) -- 1
--- ? right_shift(40, 2) -- 10
+-- ? rotate_bits(7, -3) --> 56
+-- ? rotate_bits(0, -9) --> 0
+-- ? rotate_bits(4, -7) --> 512
+-- ? rotate_bits(8, -4) --> 128
+-- ? rotate_bits(0xFE427AAC, -7) --> 0x213D567F
+-- ? rotate_bits(-7, -3) --> -49  which is 0xFFFFFFCF 
+-- ? rotate_bits(131, 0) --> 131
+-- ? rotate_bits(184.464, 0) --> 184
+-- ? rotate_bits(999_999_999_999_999, 0) --> -1530494977 which is 0xA4C67FFF
+-- ? rotate_bits(184, 3) -- 23
+-- ? rotate_bits(48, 2) --> 12
+-- ? rotate_bits(121, 3) --> 536870927
+-- ? rotate_bits(0xFE427AAC, 7) -->  0x59FC84F5
+-- ? rotate_bits(-7, 3) --> 0x3FFFFFFF
+-- ? rotate_bits({48, 121}, 2) --> {12, 1073741854}
 -- </eucode>
 --
 -- See Also:
---   [[:left_shift]]
+--   [[:shift_bits]]
 
-public function right_shift(integer a, integer b)
-	return round(a / power(2, b))
+public function rotate_bits(object pNumber, integer pDistance)
+	atom lTemp
+	atom lSave
+	integer lRest
+	
+	if sequence(pNumber) then
+		for i = 1 to length(pNumber) do
+			pNumber[i] = rotate_bits(pNumber[i], pDistance)
+		end for
+		return pNumber
+	end if
+	
+	pNumber = and_bits(pNumber, 0xFFFFFFFF)
+	if pDistance = 0 then
+		return pNumber
+	end if
+
+	if pDistance < 0 then
+		lSave = not_bits(power(2, 32 + pDistance) - 1) 	
+		lRest = 32 + pDistance
+	else
+		lSave = power(2, pDistance) - 1
+		lRest = pDistance - 32
+	end if
+	
+	lTemp = shift_bits(and_bits(pNumber, lSave), lRest)
+	pNumber = shift_bits(pNumber, pDistance)
+	return or_bits(pNumber, lTemp)
 end function
 
 --****

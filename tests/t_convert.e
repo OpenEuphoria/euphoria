@@ -14,6 +14,9 @@ test_equal("bytes_to_int #2", 293, bytes_to_int({37, 1, 0, 0}))
 
 test_equal("int_to_bits #1", {1,0,0,0,1,1,0,1}, int_to_bits(177, 8))
 test_equal("int_to_bits #2", {1,1,1,0,1},       int_to_bits(23, 5))
+test_equal("int_to_bits #3", {},                int_to_bits(0xFFEEDDCC, 0))
+test_equal("int_to_bits #4", {0,0,1,1,0,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1},  int_to_bits(0xFFEEDDCC, 32))
+test_equal("int_to_bits #5", {0,0,1,1,0,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0},int_to_bits(0xFFEEDDCC, 33))
 
 test_equal("bits_to_int #1",  23, bits_to_int({1,1,1,0,1}))
 test_equal("bits_to_int #2", 177, bits_to_int({1,0,0,0,1,1,0,1}))

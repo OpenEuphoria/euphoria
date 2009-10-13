@@ -615,21 +615,44 @@ end procedure
 
 function target_differs(integer target, integer opnd1, integer opnd2,
 						integer opnd3)
+	integer tmode
+	integer tname
+	
 -- see if target is not used as an operand - it can be DeRef'd early
-	if SymTab[target][S_MODE] = M_NORMAL then
-		return target != opnd1 and target != opnd2 and target != opnd3
-
-	elsif SymTab[target][S_MODE] = M_TEMP then
-		if (opnd1 = 0 or
-			SymTab[target][S_TEMP_NAME] != SymTab[opnd1][S_TEMP_NAME]) and
-		   (opnd2 = 0 or
-			SymTab[target][S_TEMP_NAME] != SymTab[opnd2][S_TEMP_NAME]) and
-		   (opnd3 = 0 or
-			SymTab[target][S_TEMP_NAME] != SymTab[opnd3][S_TEMP_NAME]) then
-			return TRUE
-		else
+	tmode = SymTab[target][S_MODE]
+	if tmode = M_NORMAL then
+		if target = opnd1 then
 			return FALSE
 		end if
+		if target = opnd2 then
+			return FALSE
+		end if
+		if target = opnd3 then
+			return FALSE
+		end if
+		return TRUE
+
+	elsif tmode = M_TEMP then
+		tname = SymTab[target][S_TEMP_NAME]
+		if opnd1 then
+			if tname = SymTab[opnd1][S_TEMP_NAME] then
+				return FALSE
+			end if
+		end if
+		
+		if opnd2 then
+			if tname = SymTab[opnd2][S_TEMP_NAME] then
+				return FALSE
+			end if
+		end if
+		
+		if opnd3 then
+			if tname = SymTab[opnd3][S_TEMP_NAME] then
+				return FALSE
+			end if
+		end if
+		
+		return TRUE
 
 	else
 		return FALSE
@@ -652,7 +675,6 @@ procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
 
 	if SymTab[v][S_MODE] = M_TEMP then
 		deref_type = TYPE_INTEGER
--- 		deref_type = BB_temp_type(v)
 		deref_elem_type = BB_temp_elem(v)
 
 	elsif SymTab[v][S_MODE] = M_NORMAL then

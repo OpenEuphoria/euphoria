@@ -121,7 +121,7 @@ end function
 --
 -- Parameters:
 --		# ##x## : the atom to convert
--- 		# ##nbits## : the number of bits requested.
+-- 		# ##nbits## : the number of bits requested. The default is 32.
 --
 -- Returns:
 --		A **sequence**, of length ##nbits##, made of 1's and 0's.
@@ -148,12 +148,15 @@ end function
 --	[[:bits_to_int]], [[:int_to_bytes]], [[:Relational operators]],
 --  [[:operations on sequences]]
 
-public function int_to_bits(atom x, integer nbits)
+public function int_to_bits(atom x, integer nbits = 32)
 	sequence bits
-	integer mask
+	atom mask
 
+	if nbits < 1 then
+		return {}
+	end if
 	bits = repeat(0, nbits)
-	if integer(x) and nbits < 30 then
+	if nbits <= 32 then
 		-- faster method
 		mask = 1
 		for i = 1 to nbits do
