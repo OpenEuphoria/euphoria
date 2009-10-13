@@ -42,6 +42,7 @@ public sequence all_source = {} -- pointers to chunks
 public integer usage_shown = 0 -- Indicates if the help/usage text has shown yet.
 
 object eudir = 0
+integer cmdline_eudir = 0
 
 export function open_locked(sequence file_path)
 	integer fh
@@ -83,4 +84,9 @@ end function
 
 public procedure set_eudir( sequence new_eudir )
 	eudir = new_eudir
+	cmdline_eudir = 1
 end procedure
+
+public function is_eudir_from_cmdline()
+	return cmdline_eudir
+end function

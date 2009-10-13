@@ -115,10 +115,10 @@ export integer total_stack_size = -1 -- default size for OPTION STACK
 -- to ##/usr/share/euphoria##
 export function get_eucompiledir()
 	object x = getenv("EUCOMPILEDIR")
-	if equal(x, -1) then
+	if is_eudir_from_cmdline() then
 		x = get_eudir()
 	end if
-
+	
 	ifdef UNIX then
 		if equal(x, -1) then
 			x = "/usr/share/euphoria"
@@ -126,10 +126,17 @@ export function get_eucompiledir()
 				-- somewhat hacky, but covers the default (and obvious)
 				-- other place to look
 				x = "/usr/local/share/euphoria"
+				if not file_exists( x ) then
+					x = -1
+				end if
 			end if
 		end if
 	end ifdef
-
+	
+	if equal(x, -1) then
+		x = get_eudir()
+	end if
+	
 	return x
 end function
 
