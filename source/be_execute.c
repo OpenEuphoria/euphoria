@@ -2725,9 +2725,8 @@ void do_exec(int *start_pc)
 							goto aresult;
 						}
 					}
-					/* a is a sequence */
 #					if SSE2 
-						if (IS_SEQUENCE(top) &&
+						if (IS_SEQUENCE(top) && IS_SEQUENCE(a) &&
 							((int)&(SEQ_PTR(a)->base[1]) % BASE_ALIGN_SIZE == 0) && 							 
 							((int)&(SEQ_PTR(top)->base[1]) % BASE_ALIGN_SIZE == 0)) {
 							top = paddo3(a,top);
