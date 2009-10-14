@@ -170,7 +170,7 @@ procedure main()
 
 	ifdef TRANSLATOR then
 		if keep and build_system_type = BUILD_DIRECT then
-			if not quick_has_changed(file_name[$]) then
+			if 0 and not quick_has_changed(file_name[$]) then
 				build_direct(1, file_name[$])
 				Cleanup(0)
 				return
