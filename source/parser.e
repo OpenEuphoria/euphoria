@@ -2860,8 +2860,15 @@ procedure Ifdef_statement()
 				end if
 			elsif tok[T_ID] = IFDEF then
 				dead_ifdef += 1
-			else
+			
+			elsif tok[T_ID] = INCLUDE then
+				-- Skip whatever is on rest of current line.
 				read_line()
+				
+			elsif tok[T_ID] = CASE then
+				-- Skip over whatever is next token. It could be 'else' which would confuse things.
+				tok = next_token()
+				
 			end if
 		end while
 	end while

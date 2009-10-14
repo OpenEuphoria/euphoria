@@ -2346,11 +2346,65 @@ rather than the switch called "LBLb".
 
 === ifdef statement
 
-The ifdef statement is executed at parse time not runtime. This allows you to
-change the way your program operates in a very efficient manner. Since the ifdef
-statement works at parse time, runtime values cannot be checked, instead special
-definitions can be set or unset at parse time as well. Euphoria defines some
-common words itself:
+The ##ifdef## statement has a similar syntax to the ##if## statement.
+<eucode>
+ifdef SOME_WORD then
+ --... zero or more statements
+elsifdef SOME_OTHER_WORD then
+ --... zero or more statments
+elsdef
+ --... zero or more statments
+end ifdef
+</eucode>
+Of course, the ##elsifdef## and ##elsdef## clauses are optional, just like 
+##elsif## and ##else## are option in an ##if## statement.
+
+The major differences between and ##if## and ##ifdef## statement are that ##ifdef##
+is executed at parse time not runtime, and ##ifdef## can only test for the
+existance of a defined word whereas ##if## can test any boolean expression.
+
+**Note** that since the ##ifdef## statement executes at parse time, run-time
+values cannot be checked, only words defined by the ##-D## command line switch, or
+by the ##with define## directive, or one of the special predefined words.
+
+The purpose of ##ifdef## is to allow you to change the way your program operates
+in a very efficient manner. Rather than testing for a specific condition repeatedly
+during the running of a program, ##ifdef## tests for it once during parsing and 
+then generates the precise IL code to handle the condition.
+
+For example, assume you have some debugging code in your application that displays
+information to the screen. Normally you would not want to see this display so you
+set a condition so it only displays during a 'debug' session. The first example
+below shows how would could do this just using the ##if## statement, and the second
+example shows the same thing but using the ##idef## statement.
+<eucode>
+-- Example 1. --
+if find("-DEBUG", command_line()) then
+    writefln("Debug x=[], y=[]", {x,y})
+end if
+</eucode>
+
+<eucode>
+-- Example 1. --
+ifdef DEBUG then
+    writefln("Debug x=[], y=[]", {x,y})
+end ifdef
+</eucode>
+
+As you can see, they are almost identical. However, in the first example, everytime
+the program gets to this point in the code, it tests the command line for the -DEBUG
+switch before deciding to display the information or not. But in the second example,
+the existance of DEBUG is tested //once// at parse time, and if it exists then, Euphoria
+generates the IL code to do the display. Thus when the program is running then everytime
+it gets to this point in the code, it does **not** check that DEBUG exists, instead it 
+already knows it does so it just does the display. If however, DEBUG did not exist
+at parse time, then the IL code for the display would simply be omitted, meaning that
+during the running of the program, when it gets to this point in the code, it does not
+recheck for DEBUG, instead it already knows it doesn't exist and the IL code to
+do the display also doesn't exist so nothing is displayed. This can be a much needed
+performance boost for a program.
+
+Euphoria predefines some words itself:
 
 ==== Euphoria Version Definitions
 
@@ -2392,7 +2446,7 @@ but ##EU5## will be defined.
 * **EUB_CON** - Application is being converted to a bound //console// program by ##eub##.
 * **EUB_WIN32** - Application is being converted to a bound //MS-Windows// program by ##eub##.
 
-Example:
+More examples
 <eucode>
 -- file: myproj.ex
 puts(1, "Hello, I am ") 
@@ -2444,7 +2498,7 @@ end ifdef
 
 ==== Using ifdef
 
-Further, you can define your own words either in source:
+You can define your own words either in source:
 
 <eucode>
 with define MY_WORD       -- defines
