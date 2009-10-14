@@ -5922,7 +5922,7 @@ end procedure
 procedure assign_delete_target( symtab_index target, symtab_index obj )
 	CDeRef( target )
 	
-	if TypeIs( obj, TYPE_ATOM ) then
+	if TypeIsIn( obj, TYPES_AO ) then
 		c_stmt( "if( IS_ATOM_INT(@) ){\n", obj )
 			promote_integer_delete( obj, target )
 		c_stmt0("}\n")
@@ -5948,7 +5948,7 @@ procedure assign_delete_target( symtab_index target, symtab_index obj )
 		c_stmt( "@ = @;\n", {target, obj})
 	c_stmt0( "}\n")
 	
-	if TypeIs( obj, TYPE_ATOM ) then
+	if TypeIsIn( obj, TYPES_AO ) then
 		c_stmt0("}\n")
 	end if
 	
