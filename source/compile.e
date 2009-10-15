@@ -7183,10 +7183,11 @@ procedure BackEnd(atom ignore)
 	Execute(TopLevelSub)
 
 	indent = 4
-	exit_block( SymTab[TopLevelSub][S_BLOCK], 0, , 0 )
+	
 	if dll_option then
 		c_stmt0(";\n")
 	else
+		exit_block( SymTab[TopLevelSub][S_BLOCK], 0, , 0 )
 		c_stmt0("Cleanup(0);\n")
 	end if
 
