@@ -631,28 +631,7 @@ end function
 -- is read to be read, if a socket can be written to and if a socket has
 -- an error status.
 --
--- Parameters:
---   # ##sockets## : either one socket or a sequence of sockets.
---   # ##timeout## : maximum time to wait to determine a sockets status in microseconds
---
--- Returns:
---   A **sequence**, of the same size of sockets containing
---   { socket, read_status, write_status, error_status } for each socket passed
---  2 to the function.
---
-
-public function select(object sockets, integer timeout=0)
-	if socket(sockets) then
-		sockets = { sockets }
-	end if
-	return machine_func(M_SOCK_SELECT, { sockets, sockets, sockets, sockets,
-		timeout, 0 })
-end function
-
---**
--- Determine the read, write and error status of one or more sockets.
---
--- select_ex allows for fine-grained control over your sockets, allow you
+-- select allows for fine-grained control over your sockets, allow you
 -- to specify that a given socket only be checked for reading or for only
 -- reading and writing, etc.
 --
@@ -664,12 +643,13 @@ end function
 --   # ##timeout_micro## : maximum time to wait to determine a sockets status, microsecond part
 --
 -- Returns:
---   A **sequence**, of the same size of sockets containing
+--   A **sequence**, of the same size of all unique sockets containing
 --   { socket, read_status, write_status, error_status } for each socket passed
 --  2 to the function.
+--   Note that the sockets returned are not guaranteed to be in any particular order.
 --
 
-public function select_ex(object sockets_read, object sockets_write,
+public function select(object sockets_read, object sockets_write,
 		object sockets_err, integer timeout=0,
 		integer timeout_micro=0)
 	if length(sockets_read) and socket(sockets_read) then

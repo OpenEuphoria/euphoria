@@ -478,7 +478,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 					end if
 				entry
 
- 				        junk2 = sock:select_ex(sock, {}, {}, timeout) -- status check
+ 				        junk2 = sock:select(sock, {}, {}, timeout) -- status check
  						-- Do we have readable data?
  				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) then
 							last = time()
