@@ -633,7 +633,7 @@ end function
 --
 -- Parameters:
 --   # ##sockets## : either one socket or a sequence of sockets.
---   # ##timeout## : maximum time to wait to determine a sockets status
+--   # ##timeout## : maximum time to wait to determine a sockets status in microseconds
 --
 -- Returns:
 --   A **sequence**, of the same size of sockets containing
@@ -645,8 +645,48 @@ public function select(object sockets, integer timeout=0)
 	if socket(sockets) then
 		sockets = { sockets }
 	end if
+	return machine_func(M_SOCK_SELECT, { sockets, sockets, sockets, sockets,
+		timeout, 0 })
+end function
 
-	return machine_func(M_SOCK_SELECT, { sockets, timeout })
+--**
+-- Determine the read, write and error status of one or more sockets.
+--
+-- select_ex allows for fine-grained control over your sockets, allow you
+-- to specify that a given socket only be checked for reading or for only
+-- reading and writing, etc.
+--
+-- Parameters:
+--   # ##sockets_read## : either one socket or a sequence of sockets to check for reading.
+--   # ##sockets_write## : either one socket or a sequence of sockets to check for writing.
+--   # ##sockets_err## : either one socket or a sequence of sockets to check for errors.
+--   # ##timeout## : maximum time to wait to determine a sockets status, seconds part
+--   # ##timeout_micro## : maximum time to wait to determine a sockets status, microsecond part
+--
+-- Returns:
+--   A **sequence**, of the same size of sockets containing
+--   { socket, read_status, write_status, error_status } for each socket passed
+--  2 to the function.
+--
+
+public function select_ex(object sockets_read, object sockets_write,
+		object sockets_err, integer timeout=0,
+		integer timeout_micro=0)
+	if length(sockets_read) and socket(sockets_read) then
+		sockets_read = { sockets_read }
+	end if
+	if length(sockets_write) and socket(sockets_write) then
+		sockets_write = { sockets_write }
+	end if
+	if length(sockets_err) and socket(sockets_err) then
+		sockets_err = { sockets_err }
+	end if
+
+	sequence sockets_all = remove_dups(sockets_read & sockets_write
+		& sockets_err, RD_SORT)
+
+	return machine_func(M_SOCK_SELECT, { sockets_read, sockets_write,
+		sockets_err, sockets_all, timeout_micro, timeout })
 end function
 
 --**

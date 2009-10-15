@@ -679,19 +679,33 @@ object eusock_connect(object x)
 object eusock_select(object x)
 {
 	SOCKET tmp_socket;
-	int i, timeout, result, max_sock;
+	int i, timeout_microsecs, timeout_sec, result, max_sock;
 	fd_set readable, writable, errd;
 	struct timeval tv_timeout;
 
-	s1_ptr socks_p, result_p, tmp_sp;
+	s1_ptr socks_pread, socks_pwrite, socks_perr, socks_pall,
+	result_p, tmp_sp;
 
 	if (!IS_SEQUENCE(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to select must be a sequence of sockets");
-	if (!IS_ATOM_INT(SEQ_PTR(x)->base[2]))
-		RTFatal("second argument to select must be an integer");
+	if (!IS_SEQUENCE(SEQ_PTR(x)->base[2]))
+		RTFatal("second argument to select must be a sequence of sockets");
+	if (!IS_SEQUENCE(SEQ_PTR(x)->base[3]))
+		RTFatal("third argument to select must be a sequence of sockets");
+	if (!IS_SEQUENCE(SEQ_PTR(x)->base[4]))
+		RTFatal("fourth argument to select must be a sequence of sockets");
+	if (!IS_ATOM_INT(SEQ_PTR(x)->base[5]))
+		RTFatal("fiftth argument to select must be an integer");
 
-	socks_p = SEQ_PTR(SEQ_PTR(x)->base[1]);
-	timeout = SEQ_PTR(x)->base[2];
+	if (!IS_ATOM_INT(SEQ_PTR(x)->base[6]))
+		RTFatal("sixth argument to select must be an integer");
+
+	socks_pread = SEQ_PTR(SEQ_PTR(x)->base[1]);
+	socks_pwrite = SEQ_PTR(SEQ_PTR(x)->base[2]);
+	socks_perr = SEQ_PTR(SEQ_PTR(x)->base[3]);
+	socks_pall = SEQ_PTR(SEQ_PTR(x)->base[4]);
+	timeout_microsecs = SEQ_PTR(x)->base[5];
+	timeout_sec = SEQ_PTR(x)->base[6];
 	max_sock = 0;
 
 	// prepare our fd_set
@@ -699,20 +713,38 @@ object eusock_select(object x)
 	FD_ZERO(&writable);
 	FD_ZERO(&errd);
 
-	for (i=1; i <= socks_p->length; i++) {
-		if (!IS_SOCKET(socks_p->base[i]))
+	for (i=1; i <= socks_pread->length; i++) {
+		if (!IS_SOCKET(socks_pread->base[i]))
 			RTFatal("first argument to select must be a sequence of sockets");
-		tmp_socket = SEQ_PTR(socks_p->base[i])->base[SOCK_SOCKET];
+		tmp_socket = SEQ_PTR(socks_pread->base[i])->base[SOCK_SOCKET];
 
 		FD_SET(tmp_socket, &readable);
+
+		max_sock = (max_sock > tmp_socket) ? max_sock : tmp_socket;
+	}
+
+	for (i=1; i <= socks_pwrite->length; i++) {
+		if (!IS_SOCKET(socks_pwrite->base[i]))
+			RTFatal("first argument to select must be a sequence of sockets");
+		tmp_socket = SEQ_PTR(socks_pwrite->base[i])->base[SOCK_SOCKET];
+
 		FD_SET(tmp_socket, &writable);
+
+		max_sock = (max_sock > tmp_socket) ? max_sock : tmp_socket;
+	}
+
+	for (i=1; i <= socks_perr->length; i++) {
+		if (!IS_SOCKET(socks_perr->base[i]))
+			RTFatal("first argument to select must be a sequence of sockets");
+		tmp_socket = SEQ_PTR(socks_perr->base[i])->base[SOCK_SOCKET];
+
 		FD_SET(tmp_socket, &errd);
 
 		max_sock = (max_sock > tmp_socket) ? max_sock : tmp_socket;
 	}
 
-	tv_timeout.tv_sec = 0;
-	tv_timeout.tv_usec = timeout;
+	tv_timeout.tv_sec = timeout_sec;
+	tv_timeout.tv_usec = timeout_microsecs;
 
 	result = select(max_sock + 1, &readable, &writable, &errd, &tv_timeout);
 
@@ -720,14 +752,14 @@ object eusock_select(object x)
 		return eusock_geterror();
 	}
 
-	result_p = NewS1(socks_p->length);
-	for (i=1; i <= socks_p->length; i++) {
-		tmp_socket = SEQ_PTR(socks_p->base[i])->base[SOCK_SOCKET];
+	result_p = NewS1(socks_pall->length);
+	for (i=1; i <= socks_pall->length; i++) {
+		tmp_socket = SEQ_PTR(socks_pall->base[i])->base[SOCK_SOCKET];
 
-		RefDS(socks_p->base[i]);
+		RefDS(socks_pall->base[i]);
 
 		tmp_sp = NewS1(4);
-		tmp_sp->base[1] = socks_p->base[i];
+		tmp_sp->base[1] = socks_pall->base[i];
 		tmp_sp->base[2] = FD_ISSET(tmp_socket, &readable) != 0;
 		tmp_sp->base[3] = FD_ISSET(tmp_socket, &writable) != 0;
 		tmp_sp->base[4] = FD_ISSET(tmp_socket, &errd) != 0;
