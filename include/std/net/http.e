@@ -478,17 +478,14 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 					end if
 				entry
 
- 				        junk2 = sock:select(sock) -- status check
+ 				        junk2 = sock:select_ex(sock, {}, {}, timeout) -- status check
  						-- Do we have readable data?
  				        if (length(junk2[1]) > 2)  and equal(junk2[1][2],1) then
 							last = time()
 							junk = sock:receive(sock, 0) -- then recieve it
-					elsif time() >= (last + timeout) then
+					else
 							-- assume server has hung, abort
 							exit
-					else
-							junk = ""      -- add nothing to data
-							task_yield()
 					end if
 				end while
 			else
