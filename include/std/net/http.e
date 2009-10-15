@@ -163,7 +163,7 @@ public procedure set_sendheader_default()
 		{"Host",": ",""}, -- the domain. You might think this was obvious, but for vhosting sites it's necessary.
 		{"Referer",": ",""}, -- i know it's misspelled, but that's official! , the site that sent you to this one
 		{"User-Agent",": ", whoami},
-		{"Accept-Charset",": ","ISO-8859-1,utf-8;q=0.7,*;q=0.7"},
+		{"Accept-Charset",": ","utf-8,ISO-8859-1;q=0.7,*;q=0.5"},
 		{"Accept-Ranges",": ",""},
 		{"Authorization",": ",""},
 		{"Date",": ",""}, -- who cares if the server has my time? Except for cookie timeouts, that is.
