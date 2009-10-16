@@ -1320,10 +1320,10 @@ end function
 --
 -- format("seq is []", {{1.2, 5, "abcdef", {3}}})
 -- -- `seq is {1.2,5,"abcdef",{3}}`
--- </eucode>
 --
 -- format("Today is [{day}], the [{date}]", {"date=10/Oct/2012", "day=Wednesday"})
 -- -- "Today is Wednesday, the 10/Oct/2012"
+-- </eucode>
 --
 -- See Also:
 --   [[:sprintf]]
