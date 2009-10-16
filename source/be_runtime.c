@@ -1334,52 +1334,48 @@ object Repeat(object item, object repcount)
 	s1_ptr s1;
 
 	if (IS_ATOM_INT(repcount)) {
-		if (repcount < 0)
-			RTFatal("repetition count must not be negative");
 		count = repcount;
 	}
 
 	else if (IS_ATOM_DBL(repcount)) {
-		d = DBL_PTR(repcount)->dbl;
-		if (d > MAXINT_DBL)
-			RTFatal("repetition count is too large");
-		if (d < 0.0L)
-			RTFatal("repetition count must not be negative");
-		count = (long)d;
+		count = (long)(DBL_PTR(repcount)->dbl);
 	}
 
 	else
 		RTFatal("repetition count must be an atom");
 
+	if (count < 0)
+		RTFatal("repetition count must not be less than 0");
+	if (count > MAXINT_DBL)
+		RTFatal("repetition count must not be more than 1073741823");
+
 
 	s1 = NewS1(count);
 	obj_ptr = s1->base+1;
 
-	if (IS_ATOM_INT(item)) {
-		while (count >= 10) {
-			*obj_ptr++   = item; // 1
-			*obj_ptr++   = item; // 2
-			*obj_ptr++   = item; // 3
-			*obj_ptr++   = item; // 4
-			*obj_ptr++   = item; // 5
-			*obj_ptr++   = item; // 6
-			*obj_ptr++   = item; // 7
-			*obj_ptr++   = item; // 8
-			*obj_ptr++   = item; // 9
-			*obj_ptr++   = item; // 10
-			count -= 10;
-		};
-		while (count > 0) {
-			*obj_ptr++ = item;
-			count--;
-		};
-	}
-	else {
+	if (! IS_ATOM_INT(item)) {
 		(DBL_PTR(item)->ref) += count;
-		while (--count >= 0) {
-			*obj_ptr++ = item;
-		};
 	}
+	
+	while (count >= 10) {
+		*obj_ptr++   = item; // 1
+		*obj_ptr++   = item; // 2
+		*obj_ptr++   = item; // 3
+		*obj_ptr++   = item; // 4
+		*obj_ptr++   = item; // 5
+		*obj_ptr++   = item; // 6
+		*obj_ptr++   = item; // 7
+		*obj_ptr++   = item; // 8
+		*obj_ptr++   = item; // 9
+		*obj_ptr++   = item; // 10
+		count -= 10;
+	};
+	
+	while (count > 0) {
+		*obj_ptr++ = item;
+		count--;
+	};
+	
 	return MAKE_SEQ(s1);
 }
 
