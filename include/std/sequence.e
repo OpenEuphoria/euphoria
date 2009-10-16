@@ -670,7 +670,7 @@ end function
 -- Returns:
 --	A **sequence**, empty on failure, and of length ##count*length(pattern)##
 -- otherwise. The first elements of the returned sequence are those of
--- #pattern##. So are those that follow, on to the end.
+-- ##pattern##. So are those that follow, on to the end.
 --
 -- Example 1:
 -- <eucode>
