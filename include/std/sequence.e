@@ -706,13 +706,15 @@ end function
 --
 -- Parameters:
 --		# ##item## : an object, to which all elements of the result will be equal
---		# ##count## : an integer, the requested length of the result sequence.
+--		# ##count## : an atom, the requested length of the result sequence. This must
+--                   be a value from zero to 0x3FFFFFFF. Any floating point values
+--                   are first floored.
 --
 -- Returns:
 --		A **sequence**, of length ##count## each element of which is ##item##.
 --
 -- Errors:
---	If ##count## is negative, it cannot be a length, which is an error condition.
+--	##count## cannot be less than zero and cannot be greater than 1,073,741,823.
 --
 -- Comments:
 -- When you repeat() a sequence or a floating-point number the
@@ -725,7 +727,7 @@ end function
 --
 -- repeat("JOHN", 4)  -- {"JOHN", "JOHN", "JOHN", "JOHN"}
 -- -- The interpreter will create only one copy of "JOHN"
--- -- in memory
+-- -- in memory and create a sequence containing four references to it.
 -- </eucode>
 --
 -- See Also:
