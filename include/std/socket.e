@@ -652,6 +652,8 @@ end function
 public function select(object sockets_read, object sockets_write,
 		object sockets_err, integer timeout=0,
 		integer timeout_micro=0)
+	sequence sockets_all
+
 	if length(sockets_read) and socket(sockets_read) then
 		sockets_read = { sockets_read }
 	end if
@@ -662,8 +664,16 @@ public function select(object sockets_read, object sockets_write,
 		sockets_err = { sockets_err }
 	end if
 
-	sequence sockets_all = remove_dups(sockets_read & sockets_write
-		& sockets_err, RD_SORT)
+	-- if the user has passed in one socket (or set of sockets) for
+	-- all three lists, then save time by not bothering to sort the list
+	-- or remove duplicates
+	if equal(sockets_err, sockets_read) and
+			equal(sockets_write, sockets_read) then
+		sockets_all = sockets_read
+	else
+		sockets_all = remove_dups(sockets_read & sockets_write
+			& sockets_err, RD_SORT)
+	end if
 
 	return machine_func(M_SOCK_SELECT, { sockets_read, sockets_write,
 		sockets_err, sockets_all, timeout_micro, timeout })
