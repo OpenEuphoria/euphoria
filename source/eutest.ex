@@ -79,10 +79,12 @@ function run_emake()
 		sequence line = file[i]
 
 		if length(line) < 4 or
+			match("rem ", line) = 1 or
 			match("echo ", line) or
 			equal("if ", line[1..3]) or
 			match("@echo", line) = 1 or
 			match("goto ", line) or
+			line[1] = '#' or
 			line[1] = ':'
 		then
 
