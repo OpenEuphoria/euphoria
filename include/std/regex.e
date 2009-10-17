@@ -389,7 +389,7 @@ end function
 --   [[:all_matches]]
 
 public function matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	integer str_offsets = and_bits(STRING_OFFSETS, options)
+	object str_offsets = and_bits(STRING_OFFSETS, options)
 	object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
 	if atom(match_data) then return ERROR_NOMATCH end if
@@ -467,7 +467,7 @@ end function
 --   [[:matches]]
 
 public function all_matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	integer str_offsets = and_bits(STRING_OFFSETS, options)
+	object str_offsets = and_bits(STRING_OFFSETS, options)
 	object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
 	if length(match_data) = 0 then return ERROR_NOMATCH end if
