@@ -1096,7 +1096,7 @@ object eusock_setsockopt(object x)
 	optname = SEQ_PTR(x)->base[3];
 	optval  = SEQ_PTR(x)->base[4];
 
-	if (setsockopt(s, level, optname, (char *) &optval, &optlen) == SOCKET_ERROR)
+	if (setsockopt(s, level, optname, (char *) &optval, optlen) == SOCKET_ERROR)
 	{
 		return eusock_geterror();
 	}
