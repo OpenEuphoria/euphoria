@@ -10,6 +10,11 @@ ifdef not NOINET_TESTS then
 	test_true("get_url 2", match("HTTP/", "" & content[1]) = 1)
 	test_true("get_url 3", match("<TITLE>Example Web Page</TITLE>", "" & content[2]))
 
+	content = get_url("http://example.com:80/")
+	test_true("get_url 4", length(content))
+	test_true("get_url 5", match("HTTP/", "" & content[1]) = 1)
+	test_true("get_url 6", match("<TITLE>Example Web Page</TITLE>", "" & content[2]))
+
     sequence data = sprintf("%d", { rand_range(1000,10000) })
 
     content = get_url("http://openeuphoria.org/tests/post_test.cgi", "data=" & data)
