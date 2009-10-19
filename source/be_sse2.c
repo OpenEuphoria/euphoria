@@ -191,8 +191,112 @@ void save_vector_registers();
 		parm [EDX] [EAX] [ECX]\
 		value [EBX];
 
+	unsigned long sse2_are_all_atom_ints( object_ptr ptr1 );
+	#pragma aux sse2_are_all_atom_ints = \
+		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+ 		"movdqa xmm1, [eax]"\
+		"mov ebx, NOVALUE_128bit"\
+		"movdqa xmm7, [ebx]"\
+		"pcmpgtd xmm1, xmm7"\
+		/*XMM2 = ((signed)ptr1[0..3] > (signed)NOVALUE_128bit[0..3])*/\
+		/*XMM2[i] = -1 where ptr1[i] is an atom integer  */\ 	
+		"PACKSSDW XMM1, XMM1"\
+		"PACKSSWB XMM1, XMM1"\
+		"MOVD ebx, XMM1"\
+		"EMMS"\
+		modify [EBX]\
+		parm [EAX]\
+		value [EBX];
 
-object * paddo3(object a, object top) {
+	unsigned long sse2_paddi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
+	#pragma aux sse2_paddi3 = \
+		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+ 		"movdqa xmm1, [eax]"\
+		"movdqa xmm5, [ecx]"\
+		"paddd xmm1, xmm5"\
+		"movdqa [edx], xmm1"\
+		/* write sum to memory location */\
+		"mov eax, MAXINT_128bit"\
+		"mov ecx, MININT_128bit"\
+		"movdqa xmm2, xmm1"\
+		"movdqa xmm3, [ecx]"\
+		"pcmpgtd xmm3, xmm1"\
+		"pcmpgtd xmm1, [eax]"\
+		"orps xmm1, xmm3"\
+		"packssdw xmm1, xmm1"\
+		"packsswb xmm1, xmm1"\
+		"movd ebx, xmm1"\
+		"EMMS"\
+		modify [ebx]\
+		parm [EDX] [EAX] [ECX]\
+		value [ebx];
+		
+	 unsigned long sse2_pori3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
+	 #pragma aux sse2_pori3 = \
+		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+ 		"movdqa xmm1, [eax]"\
+		"por xmm1, [ecx]"\
+		"movdqa [edx], xmm1"\
+		/* write result to memory location */\
+		"xor ebx, ebx"\
+		"EMMS"\
+		modify [ebx]\
+		parm [EDX] [EAX] [ECX]\
+		value [ebx];
+	 
+	 unsigned long sse2_pandi3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
+	 #pragma aux sse2_pori3 = \
+		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+ 		"movdqa xmm1, [eax]"\
+		"movdqa xmm5, [ecx]"\
+		"pand xmm1, xmm5"\
+		"movdqa [edx], xmm1"\
+		/* write result to memory location */\
+		"xor ebx, ebx"\
+		"EMMS"\
+		modify [ebx]\
+		parm [EDX] [EAX] [ECX]\
+		value [ebx];
+		
+	unsigned long sse2_pxori3( object_ptr dest, object_ptr ptr1, object_ptr ptr2);
+	 #pragma aux sse2_pxori3 = \
+		/* edx = dest, eax = ptr1, ecx = ptr2 */\
+ 		"movdqa xmm1, [eax]"\
+		"movdqa xmm5, [ecx]"\
+		"pxor xmm1, xmm5"\
+		"movdqa [edx], xmm1"\
+		/* write result to memory location */\
+		"xor ebx, ebx"\
+		"EMMS"\
+		modify [ebx]\
+		parm [EDX] [EAX] [ECX]\
+		value [ebx];
+		
+	unsigned long sse2_psli3( object_ptr dest, object_ptr ptr1, object ecx);
+	 #pragma aux sse2_psli3 = \
+		/* edx = dest, eax = ptr1, ecx = shift value */\
+ 		"movdqa xmm1, [eax]"\
+		"mov ebx, ecx"\
+		"pslld xmm1, bl"\
+		"movdqa [edx], xmm1"\
+		/* write result to memory location */\
+		"mov eax, MAXINT_128bit"\
+		"mov ecx, MININT_128bit"\
+		"movdqa xmm2, xmm1"\
+		"movdqa xmm3, [ecx]"\
+		"pcmpgtd xmm3, xmm1"\
+		"pcmpgtd xmm1, [eax]"\
+		"orps xmm1, xmm3"\
+		"packssdw xmm1, xmm1"\
+		"packsswb xmm1, xmm1"\
+		"movd ebx, xmm1"\
+		"EMMS"\
+		modify [ebx]\
+		parm [EDX] [EAX] [ECX]\
+		value [ebx];
+
+	
+object * padds2(object a, object top) {
 	struct s1 * dest;
 	struct s1 * sa, * sb;
 	int k, length;
@@ -202,6 +306,7 @@ object * paddo3(object a, object top) {
 	signed long int * ou;
 	signed long int * in;
 	signed long int j;
+	unsigned long which_int_a, which_int_b;
 	sa = SEQ_PTR(a);
 	sb = SEQ_PTR(top);
 	if (sa->length != sb->length) {
@@ -211,7 +316,6 @@ object * paddo3(object a, object top) {
 	tempb = vreg_temp;	
 	dest = NewS1(sa->length);
 	dest->base[sa->length+1] = NOVALUE;
-	top = MAKE_SEQ(dest);
 	ap = &sa->base[1];
 	bp = &sb->base[1];
 	dp = &dest->base[1];
@@ -219,22 +323,47 @@ object * paddo3(object a, object top) {
 	iterate_over_double_words = 0;
 	length = sa->length  & -(sizeof(vreg)/sizeof(object));
 	while (k < length) {
-		sse2_paddo3( dp, ap, bp );
-		if (iterate_over_double_words) {
-				for (j = 0;	j < sizeof(vreg)/sizeof(object);
-					++j ) {
-						if (overunder_128bit[j] != 0) {
-								dp[j] = NewDouble((double)INT_VAL(dp[j]));
-						}	else								
-						if (!integer_128bit[j]) {
-								dp[j] = binary_op(PLUS, ap[j], bp[j] );
-						}
+		which_int_a = sse2_are_all_atom_ints(ap);
+		if ( which_int_a == (unsigned int)-1 && 
+			((which_int_b = sse2_are_all_atom_ints(bp)) == (unsigned int)-1) ) {
+			if (sse2_paddi3( dp, ap, bp )) {
+				do {
+					*dp = NewDouble(*dp);
+					++dp;
+					++k;
+				} while (k%4);
+			} else {
+				dp += sizeof(vreg)/sizeof(object);
+				k  += sizeof(vreg)/sizeof(object);
+			}
+			ap += sizeof(vreg)/sizeof(object);
+			bp += sizeof(vreg)/sizeof(object);
+		} else {
+			do {
+				if (((char*)&which_int_a)[k%4]) { // is atom_int(*ap)?
+					if (IS_ATOM_INT(*bp))
+						*dp = INT_VAL(*ap) + INT_VAL(*bp);
+					else if (IS_ATOM(*bp))
+						*dp = NewDouble(INT_VAL(*ap) + DBL_PTR(*bp)->dbl);
+					else 
+						*dp = binary_op(PLUS,*ap,*bp);
+				} else if (IS_ATOM(*ap)) {
+					if (IS_ATOM_INT(*bp))
+						*dp = NewDouble(DBL_PTR(*ap)->dbl + INT_VAL(*bp));
+					else if (IS_ATOM(*bp))
+						*dp = NewDouble(DBL_PTR(*ap)->dbl + DBL_PTR(*bp)->dbl);
+					else
+						*dp = binary_op(PLUS,*ap,*bp);
+				} else {
+					if (IS_SEQUENCE(*bp) && (((unsigned int)SEQ_PTR(*bp)->base) % 16 == 12)
+						&& (((unsigned int)SEQ_PTR(*ap)->base) % 16 == 12)) 
+							*dp = padds2(*ap,*bp);
+					else
+							*dp = binary_op(PLUS,*ap,*bp);
 				}
-		}
-		ap += sizeof(vreg)/sizeof(object);
-		bp += sizeof(vreg)/sizeof(object);
-		dp += sizeof(vreg)/sizeof(object);
-		k  += sizeof(vreg)/sizeof(object);
+				++ap, ++bp, ++dp, ++k;
+			} while (k % 4);
+		} // else 
 	} // while
 	sse2_paddo3(tempb, ap, bp );
 	length = dest->length = sa->length;
@@ -251,14 +380,17 @@ object * paddo3(object a, object top) {
 		if (compare(MAKE_SEQ(dest),controlobj = binary_op(PLUS,a,top))) {
 			int j;
 			control = SEQ_PTR(controlobj);
-			for (j=1;j<=dest->length;++j)
-				if (dest->base[j] != control->base[j] && 
-					compare(dest->base[j],control->base[j]))
+			for (j=1;j<=dest->length;++j) {
+				if (dest->base[j] != control->base[j] &&
+					(  (IS_ATOM_INT(dest->base[j]) && IS_ATOM_INT(control->base[j])) ||
+						compare(dest->base[j],control->base[j])   )  )
 					break;
+			}
 			RTFatal("SSE code discrepancy:"
 				"results not consistent with old version. Index %d\n", j);																
 		}
 #	endif
-	return top;
+	return top = MAKE_SEQ(dest);
+;
 }
 
