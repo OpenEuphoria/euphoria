@@ -779,7 +779,14 @@ public function get_url(sequence url, sequence post_data="")
 	url_data = parse_url(url)
 	if atom(url_data) then return 0 end if
 
-	addrinfo = host_by_name(url_data[URL_HTTP_DOMAIN])
+	-- strip the port number off when doing a lookup
+	if find(':', url_data[URL_HTTP_DOMAIN]) then
+		addrinfo = url_data[URL_HTTP_DOMAIN]
+		addrinfo = addrinfo[1..find(':', addrinfo)-1]
+		addrinfo = host_by_name(addrinfo)
+	else
+		addrinfo = host_by_name(url_data[URL_HTTP_DOMAIN])
+	end if
 	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
 		return 0
 	end if
