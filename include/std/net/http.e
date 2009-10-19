@@ -4,7 +4,7 @@
 -- <<LEVELTOC depth=2>>
 
 include std/socket.e as sock
-include std/net/common.e
+include std/net/url.e
 include std/net/dns.e
 include std/text.e
 include std/get.e as val
@@ -269,18 +269,30 @@ function eunet_format_sendheader()
 			if not equal("",sendheader[idx][3]) then
 				switch sendheader[idx][1] with fallthru do
 					case "GET" then
+						-- remove any trailing nulls
+						while find(0, sendheader[idx][3]) do
+							sendheader[idx][3][find(0, sendheader[idx][3])] = ' '
+						end while
 						-- append the http version
 						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
 							sendheader[idx][3] & " " & httpversion & "\r\n"
 						break
 
 					case "POST" then
+						-- remove any trailing nulls
+						while find(0, sendheader[idx][3]) do
+							sendheader[idx][3][find(0, sendheader[idx][3])] = ' '
+						end while
 						-- append the http version
 						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
 							sendheader[idx][3] & " " & httpversion & "\r\n"
 						break
 
 					case else
+						-- remove any trailing nulls
+						while find(0, sendheader[idx][3]) do
+							sendheader[idx][3][find(0, sendheader[idx][3])] = ' '
+						end while
 						-- else just flatten the sequence
 						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
 							sendheader[idx][3] & "\r\n"
@@ -405,7 +417,7 @@ end function
 --	 A **sequence**, empty sequence on error, of length 2 on success,
 --	 like ##{sequence header, sequence data}##.
 
-public function get_http(sequence inet_addr, sequence hostname, sequence file, integer timeout = 300)
+public function get_http(sequence inet_addr, sequence hostname, sequence file, integer timeout = 300, integer port = 80)
 	object junk, junk2, header
 	sock:socket sock
 	atom success, last_data_len, gotheader, contentlen, last
@@ -440,9 +452,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 
 	last_data_len = 0
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
-	--success = sock:connect(sock,inet_addr,port)
-	success = sock:connect(sock,inet_addr)
-	--success = sock:connect(sock,inet_addr&sprintf(":%d", {port}))
+	success = sock:connect(sock,inet_addr,port)
  	
 	if success = sock:OK then
 		-- eunet_format_sendheader sets up the header to sent,
@@ -777,31 +787,25 @@ end function
 public function get_url(sequence url, sequence post_data="")
 	object addrinfo, url_data
 
-	url_data = parse_url(url)
+	url_data = parse(url)
 	if atom(url_data) then return 0 end if
 
-	-- strip the port number off when doing a lookup
-	if find(':', url_data[URL_HTTP_DOMAIN]) then
-		addrinfo = url_data[URL_HTTP_DOMAIN]
-		addrinfo = addrinfo[1..find(':', addrinfo)-1]
-		addrinfo = host_by_name(addrinfo)
-	else
-		addrinfo = host_by_name(url_data[URL_HTTP_DOMAIN])
-	end if
+	addrinfo = host_by_name(url_data[URL_HOSTNAME])
 	if atom(addrinfo) or length(addrinfo) < 3 or length(addrinfo[3]) = 0 then
 		return 0
 	end if
 
 	set_sendheader("POSTDATA", post_data)
 
-	if find(':', url_data[URL_HTTP_DOMAIN]) then
-		addrinfo[3][1] &= url_data[URL_HTTP_DOMAIN][find(':', url_data[URL_HTTP_DOMAIN])..length(url_data[URL_HTTP_DOMAIN])]
+	if url_data[URL_PORT] = 0 then
+		-- url didn't specify a port, so default to 80
+		url_data[URL_PORT] = 80
 	end if
 
 	sequence data = {"",""}
 	if eu:compare(lower(url_data[URL_PROTOCOL]),"http") = 0 then
-		data = get_http(addrinfo[3][1],  url_data[URL_HTTP_DOMAIN],
-			url_data[URL_HTTP_PATH] & url_data[URL_HTTP_QUERY])
+		data = get_http(addrinfo[3][1],  url_data[URL_HOSTNAME],
+			url_data[URL_PATH] & url_data[URL_QUERY_STRING], , url_data[URL_PORT])
 	end if
 
 	return data
