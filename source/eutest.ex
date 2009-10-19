@@ -790,6 +790,11 @@ sequence html_table_head = `
 <tr bgcolor=#dddddd>
 <th colspan=3 align=left><a name='%s'>%s</a></th>
 <td><a href='#summary'>all file summary</a></th>
+</tr>
+<tr><th>test name</th>
+<th>test time</th>
+<th>expected</th>
+<th>outcome</th>
 </tr>`
 
 sequence html_table_error_row = `
@@ -899,9 +904,9 @@ procedure html_out(sequence data)
 		case "failed" then
 			printf(1, html_table_failed_row, {
 				data[2],
-				pretty_sprint(data[5]),
-				pretty_sprint(data[3]),
-				data[4]
+				sprint(data[5]),
+				sprint(data[3]),
+				sprint(data[4])
 			})
 
 		case "passed" then

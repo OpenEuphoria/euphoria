@@ -40,7 +40,10 @@ test_equal("abs() sequence", {0, 10.5, 11, 12}, abs({0, -10.5, 11, -12}))
 
 test_equal("sum() integer", 10, sum(10))
 test_equal("sum() sequence", 10, sum({1, 2, 2, 4, 1}))
-
+test_equal("sum() two sequences", 
+    {2,4,5,6,    2,2.2,{6.3},    1.1,0.4,{3.6},   {2},{2.2},{6.3},  {6},#C000001}, 
+    {1,4,2,3,    1,2  ,3    ,    0.1,0.2, 0.3,    {1},{2},  {3},    {2},#C000000} 
+  + {1,0,3,3,    1,0.2,{3.3},      1,0.2,{3.3},    1, 0.2,  {3.3},  {4},       1} ) 
 test_equal("min() integer", 5, min(5))
 test_equal("min() sequence", 3, min({5,8,3,100,32}))
 
