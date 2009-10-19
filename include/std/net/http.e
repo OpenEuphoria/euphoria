@@ -423,6 +423,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 	if length(file)=0 or file[1]!='/' then
 		file = '/' & file
 	end if
+	printf(1, "%s %s %s", {inet_addr, hostname, file})
 
 	junk = get_sendheader("POSTDATA")
 	-- was the POSTDATA set?
@@ -441,7 +442,10 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 
 	last_data_len = 0
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
+	--success = sock:connect(sock,inet_addr,port)
+	puts(1, inet_addr)
 	success = sock:connect(sock,inet_addr)
+	--success = sock:connect(sock,inet_addr&sprintf(":%d", {port}))
  	
 	if success = sock:OK then
 		-- eunet_format_sendheader sets up the header to sent,
@@ -466,6 +470,12 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 					if not gotheader and match({13,10,13,10},data) then -- we got the header in there
 									  header = data[1..match({13,10,13,10},data)-1] -- split off the header
 							  data = data[match({13,10,13,10},data)+4..$] -- and the data is what's left, we keep using data in the sock loop
+							  if length(data) = 0 then
+							  ? -9
+							  end if
+							  if length(header) = 0 then
+							  ? -7
+							  end if
 							  parse_recvheader(header) -- sets up recvheader -- global var
 							  junk = get_recvheader("Content-Length")
 							  if not equal(junk,-1) then
@@ -506,6 +516,8 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 	set_sendheader("Content-Length", "0")
 	set_sendheader_default()
 
+	? length(header)
+	? length(data)
 	return {header,data}
 end function
 
@@ -792,6 +804,10 @@ public function get_url(sequence url, sequence post_data="")
 	end if
 
 	set_sendheader("POSTDATA", post_data)
+
+	if find(':', url_data[URL_HTTP_DOMAIN]) then
+		addrinfo[3][1] &= url_data[URL_HTTP_DOMAIN][find(':', url_data[URL_HTTP_DOMAIN])..length(url_data[URL_HTTP_DOMAIN])]
+	end if
 
 	sequence data = {"",""}
 	if eu:compare(lower(url_data[URL_PROTOCOL]),"http") = 0 then
