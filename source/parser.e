@@ -1140,7 +1140,7 @@ procedure Factor()
 	switch id label "factor" do
 		case VARIABLE, QUALIFIED_VARIABLE then
 			sym = tok[T_SYM]
-			if SymTab[sym][S_SCOPE] = SC_UNDEFINED then
+			if sym < 0 or SymTab[sym][S_SCOPE] = SC_UNDEFINED then
 				token forward = next_token()
 				if forward[T_ID] = LEFT_ROUND then
 					Forward_call( tok, FUNC_FORWARD )
