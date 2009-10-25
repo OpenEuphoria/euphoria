@@ -455,6 +455,7 @@ installbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
 	
 $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+	$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%create $(BUILDDIR)\$(OBJDIR)\euc.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc option caseexact

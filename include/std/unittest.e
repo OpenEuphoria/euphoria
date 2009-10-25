@@ -337,23 +337,14 @@ end procedure
 public procedure test_equal(sequence name, object expected, object outcome)
 	integer success
 
-	if sequence(expected) then
-		if sequence(outcome) then
-			success = equal(expected, outcome)
-			if not success and length(expected) = length(outcome) then
-				if number_array(expected) and number_array(outcome) then
-					success = not find(0, approx(expected, outcome, 1e-9) = 0)
-				end if
-			end if
-		else
-			success = 0
-		end if
+	if equal(expected, outcome ) then
+		-- for inf and -inf simple values
+		success = 1	
+	elsif equal(0*expected, 0*outcome) then
+		-- for complicated sequences values
+		success = max(abs(expected-outcome)) < 1e-9
 	else
-		if sequence(outcome) then
-			success = 0
-		else
-			success = (approx(expected, outcome, 1e-9) = 0)
-		end if
+		success = 0
 	end if
 			
 	record_result(success, name, expected, outcome)
