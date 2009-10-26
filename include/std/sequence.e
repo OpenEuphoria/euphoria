@@ -1215,63 +1215,55 @@ public function mid(sequence source, atom start, atom len)
 end function
 
 --**
--- Return a slice from a sequence, after adjusting its bounds.
+-- Return a portion of the supplied sequence.
 --
 -- Parameters:
---		# ##source## : the sequence from which to get a slice
---		# ##start## : an integer, normally the lower index of the slice to return
---		# ##stop## : an integer, normally the upper index of the slice to return
+--		# ##source## : the sequence from which to get a portion
+--		# ##start## : an integer, the starting point of the portion. Default is 1.
+--		# ##stop## : an integer, the ending point of the portion. Default is length(source).
 --
 -- Returns:
---		A **sequence**, as close as possible from ##source[start..stop]]##.
+--		A **sequence**.
 --
 -- Comments:
--- ##start## is set to 1 if below.
+-- * If the supplied ##start## is less than 1 then it set to 1.
+-- * If the supplied ##stop## is less than 1 then ##length(source)## is added to it.
+-- In this way, 0 represents the end of ##source##, -1 represents one element
+-- in from the end of ##source## and so on.
+-- * If the supplied ##stop## is greater than ##length(source)## then it is set to the end.
+-- * After these adjustments, and if ##source[start..stop]## makes sense, it is
+-- returned, otherwise, ##{}## is returned.
 --
--- ##stop## is added ##length(source)## once if not positive, and set to
--- ##length(source)## if above.
---
--- After these adjustments, and if ##source[start..stop]## makes sense, it is
--- returned. Otherwise, ##{}## is returned.
---
--- Example 1:
+-- Examples:
 -- <eucode>
--- s2 = slice("John Doe", 6, 8)
--- -- s2 is Doe
--- </eucode>
---
--- Example 2:
--- <eucode>
--- s2 = slice("John Doe", 6, 50)
--- -- s2 is Doe
--- </eucode>
---
--- Example 3:
--- <eucode>
--- s2 = slice({1, 5.4, "John", 30}, 2, 3)
--- -- s2 is {5.4, "John"}
--- </eucode>
---
--- Example 4:
--- <eucode>
--- s2 = slice({1,2,3,4,5}, 2, -1)
--- -- s2 is {2,3,4}
--- </eucode>
---
--- Example 5:
--- <eucode>
--- s2 = slice({1,2,3,4,5}, 2, 0)
--- -- s2 is {2,3,4,5}
+-- s2 = slice("John Doe", 6, 8)--> "Doe"
+-- s2 = slice("John Doe", 6, 50) --> "Doe"
+-- s2 = slice({1, 5.4, "John", 30}, 2, 3) --> {5.4, "John"}
+-- s2 = slice({1,2,3,4,5}, 2, -1) --> {2,3,4}
+-- s2 = slice({1,2,3,4,5}, 2) --> {2,3,4,5}
+-- s2 = slice({1,2,3,4,5}, , 4) --> {1,2,3,4}
 -- </eucode>
 --
 -- See Also:
 --   [[:head]], [[:mid]], [[:tail]]
 
-public function slice(sequence source, atom start, atom stop)
-	if stop <= 0 then stop += length(source) end if
-	if start < 1 then start = 1 end if
-	if stop > length(source) then stop = length(source) end if
-	if start > stop then return "" end if
+public function slice(sequence source, atom start = 1, atom stop = 0)
+		
+	if stop < 1 then 
+		stop += length(source) 
+		
+	elsif stop > length(source) then 
+		stop = length(source) 
+		
+	end if
+		
+	if start < 1 then 
+		start = 1 
+	end if
+	
+	if start > stop then
+		return ""
+	end if
 
 	return source[start..stop]
 end function
@@ -1543,6 +1535,58 @@ public function remove_all(object needle, sequence haystack)
 
 	-- Return only the stuff we moved.
 	return haystack[1 .. te]
+end function
+
+--**
+-- Keeps all occurrences of a set of objects from a sequence and removes all others.
+--
+-- Parameters:
+--   # ##needles## : the set of objects to retain.
+--   # ##haystack## : the sequence to remove items not in ##needles##.
+--
+-- Returns:
+-- A **sequence** containing only those objects from ##haystack## that are also in ##needles##.
+--
+-- Example:
+-- <eucode>
+-- s = retain_all( {1,3,5}, {1,2,4,1,3,2,4,1,2,3} ) --> {1,1,3,1,3}
+-- s = retain_all("0123456789", "+34 (04) 555-44392") -> "34045554492"
+-- </eucode>
+--
+-- See Also:
+--   [[:remove]], [[:replace]], [[:remove_all]]
+
+public function retain_all(object needles, sequence haystack)
+	integer lp
+	integer np
+	sequence result
+
+	if atom(needles) then
+		needles = {needles}
+	end if
+	if length(needles) = 0 then
+		return {}
+	end if
+	if length(haystack) = 0 then
+		return {}
+	end if
+
+	result = haystack
+	lp = length(haystack)
+	np = 1
+	for i = 1 to length(haystack) do
+		if find(haystack[i], needles) then
+			if np < i then
+				result[np .. lp] = haystack[i..$]
+			end if
+			np += 1
+		else
+			lp -= 1
+		end if
+	end for
+	
+	return result[1 .. lp]
+	
 end function
 
 --**

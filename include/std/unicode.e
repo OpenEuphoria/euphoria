@@ -29,7 +29,13 @@ public type wstring(object s)
 	end if
 
 	for i = 1 to length(s) do
-		if not integer(s[i]) or s[i] < 0 or s[i] > 65535 then
+		if not integer(s[i]) then
+			return 0
+		end if
+		if s[i] < 0 then
+			return 0
+		end if
+		if s[i] > 65535 then
 			return 0
 		end if
 	end for
@@ -38,14 +44,20 @@ public type wstring(object s)
 end type
 
 --**
--- ASCII string (0-255), or UTF-8 string. In C known as char* (but \0's are allowed)
+-- ANSI string (0-255). In C known as char* (but \0's are allowed)
 public type astring(object s)
 	if not sequence(s) then 
 		return 0
 	end if
 
 	for i = 1 to length(s) do
-		if not integer(s[i]) or s[i] < 0 or s[i] > 255 then
+		if not integer(s[i]) then
+			return 0
+		end if
+		if s[i] < 0 then
+			return 0
+		end if
+		if s[i] > 255 then
 			return 0
 		end if
 	end for

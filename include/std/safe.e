@@ -690,6 +690,23 @@ public function allocate(positive_int n, integer cleanup = 0)
 	end ifdef	
 end function
 
+public function allocate_string(sequence s, integer cleanup = 0 )
+	atom mem
+	
+	mem = allocate( length(s) + 1) -- Thanks to Igor
+	
+	if mem then
+		poke(mem, s)
+		poke(mem+length(s), 0)  -- Thanks to Aku
+		if cleanup then
+			mem = delete_routine( mem, FREE_RID )
+		end if
+	end if
+
+	return mem
+end function
+
+
 public procedure free(bordered_address a)
 -- free address a - make sure it was allocated
 	for i = 1 to length(safe_address_list) do

@@ -40,6 +40,7 @@ namespace memory
 public include std/memconst.e
 include std/types.e
 include std/error.e
+include std/unicode.e
 
 ifdef DATA_EXECUTE then
 	include std/machine.e
@@ -133,6 +134,165 @@ public function allocate_data(positive_int n, integer cleanup = 0)
 	else
 		return machine_func(M_ALLOC, n)
 	end if
+end function
+
+--**
+-- Stores a C-style null-terminated ANSI string in memory
+--
+-- Parameters:
+-- # ##buffaddr##: an atom, the RAM address to to the string at.
+-- # ##buffsize##: an integer, the number of bytes available, starting from ##buffaddr##.
+-- # ##s## : a sequence, the string to store at address ##buffaddr##.
+--
+-- Comments:
+-- * This does not allocate an RAM. You must supply the preallocated area.
+-- * This can only be used on ANSI strings. It cannot be used for double-byte strings.
+-- * If ##s## is not a string, nothing is stored and a zero is returned.
+--
+-- Returns:
+-- An atom. If this is zero, then nothing was stored, otherwise it is the
+-- address of the first byte after the stored string.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate(1000)
+-- if poke_string(title, 1000, "The Wizard of Oz") then
+--     -- successful
+-- else
+--     -- failed
+-- end if
+-- </eucode>
+-- 
+-- See Also:
+-- [[:allocate]], [[:allocate_string]]
+
+public function poke_string(atom buffaddr, integer buffsize, sequence s)
+	
+	if buffaddr <= 0 then
+		return 0
+	end if
+	
+	if not string(s) then
+		return 0
+	end if
+	
+	if buffsize <= length(s) then
+		return 0
+	end if
+
+	poke(buffaddr, s)
+	buffaddr += length(s)
+	poke(buffaddr, 0)
+
+	return buffaddr
+end function
+
+--**
+-- Stores a C-style null-terminated Double-Byte string in memory
+--
+-- Parameters:
+-- # ##buffaddr##: an atom, the RAM address to to the string at.
+-- # ##buffsize##: an integer, the number of bytes available, starting from ##buffaddr##.
+-- # ##s## : a sequence, the string to store at address ##buffaddr##.
+--
+-- Comments:
+-- * This does not allocate an RAM. You must supply the preallocated area.
+-- * This uses two bytes per string character. **Note** that ##buffsize## 
+-- is the number of //bytes// available in the buffer and not the number
+-- of //characters// available.
+-- * If ##s## is not a double-byte string, nothing is stored and a zero is returned.
+--
+-- Returns:
+-- An atom. If this is zero, then nothing was stored, otherwise it is the
+-- address of the first byte after the stored string.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate(1000)
+-- if poke_wstring(title, 1000, "The Wizard of Oz") then
+--     -- successful
+-- else
+--     -- failed
+-- end if
+-- </eucode>
+-- 
+-- See Also:
+-- [[:allocate]], [[:allocate_wstring]]
+
+public function poke_wstring(atom buffaddr, integer buffsize, sequence s)
+	
+	if buffaddr <= 0 then
+		return 0
+	end if
+	
+	if not wstring(s) then
+		return 0
+	end if
+	
+	if buffsize <= 2 * length(s) then
+		return 0
+	end if
+
+	poke2(buffaddr, s)
+	buffaddr += 2 * length(s)
+	poke2(buffaddr, 0)
+
+	return buffaddr
+end function
+
+--**
+-- Allocate a C-style null-terminated string in memory
+--
+-- Parameters:
+--              # ##s## : a sequence, the string to store in RAM.
+--              # ##cleanup## : an integer, if non-zero, then the returned pointer will be
+--                automatically freed when its reference count drops to zero, or
+--                when passed as a parameter to [[:delete]].  
+--
+-- Returns:
+--              An **atom**, the address of the memory block where the string was
+-- stored, or 0 on failure.
+--
+-- Comments:
+-- Only the 8 lowest bits of each atom in ##s## is stored. Use
+-- ##allocate_wstring##()  for storing double byte encoded strings.
+--
+-- There is no allocate_string_low() function. However, you could easily
+-- craft one by adapting the code for ##allocate_string##.
+--
+-- Since ##allocate_string##() allocates memory, you are responsible to
+-- [[:free]]() the block when done with it if ##cleanup## is zero.
+-- If ##cleanup## is non-zero, then the memory can be freed by calling
+-- [[:delete]], or when the pointer's reference count drops to zero.
+--
+-- Example 1:
+-- <eucode>
+--  atom title
+--
+-- title = allocate_string("The Wizard of Oz")
+-- </eucode>
+-- 
+-- See Also:
+--              [[:allocate]], [[:allocate_wstring]]
+
+public function allocate_string(sequence s, integer cleanup = 0 )
+	atom mem
+	
+	mem = allocate( length(s) + 1) -- Thanks to Igor
+	
+	if mem then
+		poke(mem, s)
+		poke(mem+length(s), 0)  -- Thanks to Aku
+		if cleanup then
+			mem = delete_routine( mem, FREE_RID )
+		end if
+	end if
+
+	return mem
 end function
 
 

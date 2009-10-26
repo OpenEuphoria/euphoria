@@ -49,6 +49,8 @@ test_equal("slice() string, neg end", "Middle", slice("John Middle Doe", 6, -4))
 test_equal("slice() sequence", {2,3}, slice({1,2,3,4}, 2, 3))
 test_equal("slice() nested sequence", {{3,4},{5,6}}, slice({{1,2},{3,4},{5,6},{7,8}}, 2, 3))
 test_equal("slice() bounds", "Middle Doe", slice("John Middle Doe", 6, 50))
+test_equal("slice() def start", "John ", slice("John Middle Doe", , 5))
+test_equal("slice() def end", "Middle Doe", slice("John Middle Doe", 6))
 
 test_equal("tail() string default", "ohn Middle Doe", tail("John Middle Doe"))
 test_equal("tail() string", "Doe", tail("John Middle Doe", 3))
@@ -97,6 +99,11 @@ test_equal("remove_all() 1", {2,3,4,3,2}, remove_all(1,{1,2,3,1,4,3,1,2,1}))
 test_equal("remove_all() 2", "Ask what you can do for your country.", 
            remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
 
+test_equal("retain_all", {1,1,3,1,3}, retain_all( {1,3,5}, {1,2,4,1,3,2,4,1,2,3} ))
+test_equal("retain_all no match", {}, retain_all( 7, {1,2,4,1,3,2,4,1,2,3} ))
+test_equal("retain_all all match",{1,2,4,1,3,2,4,1,2,3} , retain_all( {1,2,3,4}, {1,2,4,1,3,2,4,1,2,3} ))
+test_equal("retain_all no objects",{} , retain_all( {}, {1,2,4,1,3,2,4,1,2,3} ))
+           
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
