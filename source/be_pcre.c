@@ -195,7 +195,7 @@ object exec_pcre(object x ){
 	rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
 				   start_from, options, ovector, ovector_size );
 	EFree( str );
-	if( rc <= 0 ) return rc;
+	if( rc <= 0 ) { free(ovector); return rc; }
 
 	// put the substrings into sequences
 	s = NewS1( rc );
@@ -208,6 +208,7 @@ object exec_pcre(object x ){
 		s->base[i] = MAKE_SEQ( sub );
 	}
 
+	free(ovector);
 	return MAKE_SEQ( s );
 }
 
