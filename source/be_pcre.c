@@ -163,7 +163,7 @@ pcre *get_re(object x) {
 
 object exec_pcre(object x ){
 	int rc;
-	int ovector[30];
+	int ovector_size;
 	pcre* re;
 	char* str;
 	s1_ptr s;
@@ -177,6 +177,7 @@ object exec_pcre(object x ){
 	// x[2] = string to search
 	// x[3] = options
 	// x[4] = start_from
+	// x[5] = ovector size
 
 	pcre_ptr = SEQ_PTR(x)->base[1];
 	re = get_re(pcre_ptr);
@@ -187,9 +188,11 @@ object exec_pcre(object x ){
 
 	options    = get_int( SEQ_PTR(x)->base[3] );
 	start_from = get_int( SEQ_PTR(x)->base[4] ) - 1;
+	ovector_size = get_int( SEQ_PTR(x)->base[5] );
+	int ovector[ovector_size];
 
 	rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
-				   start_from, options, ovector, 30 );
+				   start_from, options, ovector, ovector_size );
 	EFree( str );
 	if( rc <= 0 ) return rc;
 

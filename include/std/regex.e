@@ -234,6 +234,7 @@ end function
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
 --   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in rare cases this number may need to be increased in order to accomodate complex regex expressions.
 --
 -- Returns:
 --   An **object**, which is either an atom of 0, meaning nothing found or a sequence of matched pairs.
@@ -253,10 +254,10 @@ end function
 --   </eucode>
 --
 
-public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size=90)
 	if sequence(options) then options = or_all(options) end if
 
-	return machine_func(M_PCRE_EXEC, { re, haystack, options, from })
+	return machine_func(M_PCRE_EXEC, { re, haystack, options, from, size })
 end function
 
 --**
