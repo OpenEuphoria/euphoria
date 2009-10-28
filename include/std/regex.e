@@ -235,8 +235,6 @@ end function
 
 public function get_ovector_size(regex ex, integer maxsize=-1)
 	integer m = machine_func(M_PCRE_GET_OVECTOR_SIZE, {ex})
-	? m
-	? maxsize
 	if (m > maxsize) then
 		return maxsize
 	end if
