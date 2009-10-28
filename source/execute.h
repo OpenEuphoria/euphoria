@@ -428,6 +428,7 @@ struct char_cell {
 #define M_SOCK_RECVFROM 	 94
 #define M_PCRE_ERROR_MESSAGE 95
 #define M_SOCK_ERROR_CODE    96
+#define M_PCRE_GET_OVECTOR_SIZE 97
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

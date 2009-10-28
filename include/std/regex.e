@@ -33,7 +33,7 @@ include std/text.e
 -- care of ensuring the are or'ed together correctly.
 --
 
-enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_MESSAGE=95
+enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_MESSAGE=95, M_PCRE_GET_OVECTOR_SIZE=97
 
 --****
 -- === Option Constants
@@ -222,6 +222,27 @@ public function escape(sequence s)
 	return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
 end function
 
+--**
+-- Returns the number of capturing subpatterns (the ovector size) for a regex
+--
+-- Parameters:
+--   # ##ex## : a regex
+--   # ##maxsize## : optional maximum size
+--
+-- Returns:
+--   An **integer**
+--
+
+public function get_ovector_size(regex ex, integer maxsize=-1)
+	integer m = machine_func(M_PCRE_GET_OVECTOR_SIZE, {ex})
+	? m
+	? maxsize
+	if (m > maxsize) then
+		return maxsize
+	end if
+	return m
+end function
+
 --****
 -- === Find/Match
 
@@ -254,7 +275,7 @@ end function
 --   </eucode>
 --
 
-public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size=90)
+public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size=get_ovector_size(re, 90))
 	if sequence(options) then options = or_all(options) end if
 
 	return machine_func(M_PCRE_EXEC, { re, haystack, options, from, size })

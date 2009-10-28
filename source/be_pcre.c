@@ -161,6 +161,19 @@ pcre *get_re(object x) {
 	return rcp->re;
 }
 
+object get_ovector_size(object x ){
+	object pcre_ptr;
+	pcre* re;
+	int where, rc;
+
+	pcre_ptr = SEQ_PTR(x)->base[1];
+	re = get_re(pcre_ptr);
+
+	rc = pcre_fullinfo(re, NULL, PCRE_INFO_CAPTURECOUNT, &where);
+	if (rc == 0) return (where+1)*3;
+	return rc;
+}
+
 object exec_pcre(object x ){
 	int rc;
 	int ovector_size;

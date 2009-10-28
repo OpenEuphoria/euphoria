@@ -253,6 +253,7 @@ object SetBColor();
 
 object compile_pcre();
 object exec_pcre();
+int get_ovector_size(object);
 
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
@@ -2935,6 +2936,9 @@ object machine(object opcode, object x)
 			case M_PCRE_ERROR_MESSAGE:
 				return pcre_error_message(x);
 
+			case M_PCRE_GET_OVECTOR_SIZE:
+				return get_ovector_size(x);
+				break;
 			case M_EU_INFO:
 				return eu_info();
 
