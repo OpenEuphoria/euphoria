@@ -172,6 +172,7 @@ object exec_pcre(object x ){
 	object pcre_ptr;
 	int options;
 	int start_from;
+	int * ovector;
 
 	// x[1] = pcre ptr
 	// x[2] = string to search
@@ -189,7 +190,7 @@ object exec_pcre(object x ){
 	options    = get_int( SEQ_PTR(x)->base[3] );
 	start_from = get_int( SEQ_PTR(x)->base[4] ) - 1;
 	ovector_size = get_int( SEQ_PTR(x)->base[5] );
-	int ovector[ovector_size];
+	ovector = malloc(sizeof(int)*ovector_size);
 
 	rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
 				   start_from, options, ovector, ovector_size );
