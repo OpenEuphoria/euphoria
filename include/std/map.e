@@ -1772,7 +1772,6 @@ public function new_from_kvpairs(sequence kv_pairs)
 	
 end function
 
-
 --**
 -- Converts a set of Key-Value pairs contained in a string to a map.
 --
@@ -1808,6 +1807,109 @@ end function
 --
 public function new_from_string(sequence kv_string)
 	return new_from_kvpairs( keyvalues (kv_string) )
+end function
+
+
+--**
+-- Calls a user-defined routine for each of the items in a map.
+--
+-- Parameters:
+--   # ##pMap## :
+--
+-- Returns:
+-- An integer: 0 means that all the items were processed, and anything else is whatever
+-- was returned by the user routine to abort the ##for_each()## process.
+--
+-- Comment:
+-- * The user defined routine is a function that must accept four parameters.
+-- ## Object: an Item Key
+-- ## Object: an Item Value
+-- ## Object: The ##pData## value. This is never used by ##for_each()## itself, 
+-- merely passed to the user routine.
+-- ## Integer: Progress code.
+-- *** The ##abs()## value of the progress code is the ordinal call number. That
+-- is 1 means the first call, 2 means the second call, etc ...
+-- *** If the progress code is negative, it is also the call to the routine.
+-- *** If the progress code is zero, it means that the map is empty and thus the
+-- item key and value cannot be used.
+-- * The user routine must return 0 to get the next map item. Anything else will
+-- cause ##for_each()## to stop running, and is returned to whatever called 
+-- ##for_each()##.
+--
+-- Example 1:
+-- include std/io.e
+--   function Process_A(object k, object v, object d, integer pc)
+--     writefln("[] = []", {k, v})
+--     return 0
+--   end function
+--
+--   function Process_B(object k, object v, object d, integer pc)
+--     if pc = 0 then
+--       writefln("The map is empty)
+--     else
+--       integer c
+--       c = abs(pc)
+--       if c = 1 then
+--           writefln("---[]---", {d}) -- Write the report title.
+--       end if
+--       writefln("[]: [:15] = []", {c, k, v})
+--       if pc < 0 then
+--           writefln(repeat('-', length(d) + 6), {}) -- Write the report end.
+--       end if
+--     end if
+--     return 0
+--   end function
+--
+--   map m1 = new()
+--   map:put(m1, "application", "Euphoria")
+--   map:put(m1, "version", "4.0")
+--   map:put(m1, "genre", "programming language")
+--   map:put(m1, "crc", "4F71AE10")
+--
+--   -- Unsorted 
+--   map:for_each(m1, routine_id("Process_A"))
+--   -- Sorted
+--   map:for_each(m1, routine_id("Process_B"), "List of Items", 1)
+--   
+-- </eucode>
+-- The output from the first call should be...
+-- {{{
+-- application = Euphoria
+-- version = 4.0
+-- genre = programming language
+-- crc = 4F71AE10
+-- }}}
+--
+-- The output from the second call should be...
+-- {{{
+-- ---List of Items---
+-- 1: application     = Euphoria
+-- 2: crc             = 4F71AE10
+-- 3: genre           = programming language
+-- 4: version         = 4.0
+-- -------------------
+-- }}}
+--
+public function for_each(map pMap, integer pRID, object pData = 0, integer pSorted = 0)
+	sequence lKV
+	object lRes
+	
+	lKV = pairs(pMap, pSorted)	
+	if length(lKV) = 0 then
+		return call_func(pRID, {0,0,pData,0} )
+	end if
+	
+	for i = 1 to length(lKV) do
+		if i = length(lKV) then
+			lRes = call_func(pRID, {lKV[i][1], lKV[i][2], pData, -i})
+		else
+			lRes = call_func(pRID, {lKV[i][1], lKV[i][2], pData, i})
+		end if
+		if not equal(lRes, 0) then
+			return lRes
+		end if
+	end for
+	return 0
 end function
 
 ---- Local Functions ------------

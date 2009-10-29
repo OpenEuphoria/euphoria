@@ -5,6 +5,7 @@ include std/text.e
 include std/pretty.e
 include std/filesys.e
 include std/io.e
+include std/math.e
 
 object o1, o2, o3
 o1 = map:threshold()
@@ -303,7 +304,7 @@ genre       = "programming language",
 crc         = 4F71AE10
 `)
 
-m1 = new_from_string( read_file("xyz.cfg", TEXT_MODE))
+m1 = map:new_from_string( read_file("xyz.cfg", TEXT_MODE))
  
 test_equal("from string A", "Euphoria", map:get(m1, "application"))
 test_equal("from string B", "programming language", map:get(m1, "genre"))
@@ -311,7 +312,7 @@ test_equal("from string C", "4.0", map:get(m1, "version"))
 test_equal("from string D", "4F71AE10", map:get(m1, "crc"))
 
 
-m1 = new_from_string(`name="John" children=["Jim", "Jane", "Judy"]`)
+m1 = map:new_from_string(`name="John" children=["Jim", "Jane", "Judy"]`)
 test_equal("from string E", "John", map:get(m1, "name"))
 test_equal("from string F", {"Jim", "Jane", "Judy"}, map:get(m1, "children"))
  
@@ -328,12 +329,68 @@ test_equal("from kvpairs C", "4.0", map:get(m1, "version"))
 test_equal("from kvpairs D", 0x4F71AE10, map:get(m1, "crc"))
 
 
+sequence fer = {}
+function Process_A(object k, object v, object d, integer pc)
+	fer = append(fer, {k,v,d,pc})
+	return 0
+end function
+
+function Process_B(object k, object v, object d, integer pc)
+	if pc = 0 then
+		fer = append(fer, {"The map is empty",k,v,d,pc})
+	else
+		integer c
+		c = abs(pc)
+		if c = 1 then
+			fer = append(fer, {"START",k,v,d,pc }) -- Write the report title.
+		end if
+		fer = append(fer, {k,v,d,pc})
+		if pc < 0 then
+			fer = append(fer, {"END",k,v,d,pc} )
+		end if
+	end if
+	return 0
+end function
+
+clear(m1)
+-- Empty
+map:for_each(m1, routine_id("Process_B"))
+
+map:put(m1, "application", "Euphoria")
+map:put(m1, "version", "4.0")
+map:put(m1, "genre", "programming language")
+map:put(m1, "crc", "4F71AE10")
+
+-- Unsorted 
+map:for_each(m1, routine_id("Process_A"))
+-- Sorted
+map:for_each(m1, routine_id("Process_B"), "List of Items", 1)
+
+sequence efer = {
+	{"The map is empty",0,0,0,0},
+	{"application", "Euphoria", 0, 1},
+	{"version", "4.0", 0, 2},
+	{"genre", "programming language", 0, 3},
+	{"crc", "4F71AE10", 0, -4},
+	{"START", "application", "Euphoria", "List of Items", 1},
+	{"application", "Euphoria", "List of Items", 1},
+	{"crc", "4F71AE10", "List of Items", 2},
+	{"genre", "programming language", "List of Items", 3},
+	{"version", "4.0", "List of Items", -4},
+	{"END", "version", "4.0", "List of Items", -4},
+	$
+}
+
+test_equal("for_each", efer, fer)
+
+--
+-- Done with testing
+--
+
 delete_file("save_map.txt")
 delete_file("save_map.raw")
 delete_file("save_map.raw2")
 delete_file("xyz.cfg")
---
--- Done with testing
---
+
 
 test_report()

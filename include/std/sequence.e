@@ -1072,6 +1072,44 @@ public function add_item(object needle, sequence haystack, integer pOrder = 1)
 	return haystack
 end function
 
+--**
+-- Removes an item from the sequence.
+--
+-- Parameters:
+-- # ##needle## :   object to remove.
+-- # ##haystack## : sequence to remove it from.
+--
+-- Returns:
+--   A **sequence**, which is ##haystack## with ##needle## removed from it.
+--
+-- Comments:
+-- If ##needle## is not in ##haystack## then ##haystack## is returned unchanged.
+--
+-- Example 1:
+-- <eucode>
+-- s = remove_item( 1, {3,4,2,1} ) --> {3,4,2}
+-- s = remove_item( 5, {3,4,2,1} ) --> {3,4,2,1}
+-- </eucode>
+
+public function remove_item(object needle, sequence haystack)
+	integer lIdx
+	
+	lIdx = find(needle, haystack)
+	if not lIdx then
+		return haystack
+	end if
+	
+	if lIdx = 1 then
+		return haystack[2 .. $]
+		
+	elsif lIdx = length(haystack) then
+		return haystack[1 .. $-1]
+		
+	else
+		return haystack[1 .. lIdx - 1] & haystack[lIdx + 1 .. $]
+	end if
+end function
+
 --****
 -- === Extracting, removing, replacing from/into a sequence
 --
@@ -2775,3 +2813,35 @@ public function merge(sequence pSource)
 	end for
 	return sort(lResult)
 end function
+
+--/desc Pads /i pList to the right until its length reaches /i pMinSize using /i pNewData as filler.
+--/ret The padded sequence, unchanged if its size was not less than /i pMinSize on input.
+--**
+-- Ensures that the supplied sequence is at least the supplied minimum length.
+--
+-- Parameters:
+-- # ##pList## : A sequence that might need extending.
+-- # ##pMinSize##: An integer. The minimum length that ##pList## must be.
+-- # ##pNewData##: An object. This used to when ##pList## needs to be extended,
+-- in which case it is appended as many times as required to make the length
+-- equal to ##pMinSize##.
+--
+-- Returns:
+-- A **sequence**. 
+--
+-- Example:
+-- <eucode>
+-- sequence s
+-- s = minsize({4,3,6,2,7,1,2}, 10, -1) --> {4,3,6,2,7,1,2,-1,-1,-1}
+-- s = minsize({4,3,6,2,7,1,2},  5, -1) --> {4,3,6,2,7,1,2}
+-- </eucode>
+--
+public function minsize(sequence pList, integer pMinSize, object pNewData)
+
+    if length(pList) < pMinSize then
+        pList &= repeat(pNewData, pMinSize - length(pList))
+    end if
+    
+    return pList
+end function
+

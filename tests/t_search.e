@@ -73,5 +73,24 @@ test_equal("ends #2", 0, ends("txt", "hello.doc"))
 test_equal("ends #3", 1, ends("exe", "hello.exe"))
 test_equal("ends #4", 0, ends("ex", "hello.exe"))
 
+test_equal("lookup #1", 'o', lookup('a', "cat", "dog"))
+test_equal("lookup #1", 'x', lookup('d', "cat", "dogx"))
+test_equal("lookup #1", 0, lookup('d', "cat", "dog"))
+test_equal("lookup #1", -1, lookup('d', "cat", "dog", -1))
+test_equal("lookup #1", "spider", lookup("ant", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}))
+test_equal("lookup #1", "unknown", lookup("dog", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}))
+
+sequence grid = {
+       {"ant", "spider", "mortein"},
+       {"bear", "seal", "gun"},
+       {"cat", "dog", "ranger"},
+       $
+}
+
+test_equal("vlookup #1", "spider", vlookup("ant", grid, 1, 2, "?"))
+test_equal("vlookup #2", "mortein", vlookup("ant", grid, 1, 3, "?"))
+test_equal("vlookup #3", "gun", vlookup("seal", grid, 2, 3, "?"))
+test_equal("vlookup #4", "?", vlookup("mouse", grid, 2, 3, "?"))
+
 test_report()
 

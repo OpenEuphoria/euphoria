@@ -931,3 +931,102 @@ public function set_in_list(object item, sequence list, integer default=1)
 	return item
 end function
 
+--**
+-- If the supplied item is in the source list, this returns the corresponding
+-- element from the target list.
+-- Parameters:
+-- # ##pItem##: an object that might exist in ##pSource##.
+-- # ##pSource##: a sequence that might contain ##pITem##.
+-- # ##pTarget##: a sequence from which the corresponding item will be returned.
+-- # ##pDefault##: an object (defaults to zero). This is returned when ##pItem## 
+-- is not in ##pSource## **and** ##pTarget## is not longer than ##pSource##.
+--
+-- Returns:
+-- an object
+-- * If ##pItem## is found in ##pSource## then this is the corresponding element
+-- from ##pTarget##
+-- * If ##pItem## is not in ##pSource## then if ##pTarget## is longer than ##pSource##
+-- then the last item in ##pTarget## is returned otherwise ##pDefault## is returned.
+--
+--Examples:
+--<eucode>
+-- lookup('a', "cat", "dog") --> 'o'
+-- lookup('d', "cat", "dogx") --> 'x'
+-- lookup('d', "cat", "dog") --> 0
+-- lookup('d', "cat", "dog", -1) --> -1
+-- lookup("ant", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "spider"
+-- lookup("dog", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "unknown"
+--</eucode>
+public function lookup(object pItem, sequence pSource, sequence pTarget, object pDefault = 0)
+    integer lPosn
+
+    lPosn = find(pItem, pSource)
+    if lPosn then
+        if lPosn <= length(pTarget) then
+            return pTarget[lPosn]
+        else
+        	return pDefault
+        end if
+        
+    elsif length(pTarget) > length(pSource) then
+    	-- Return the default built into the target list
+        return pTarget[$]
+        
+    else
+    	-- Return the supplied default
+    	return pDefault
+    end if
+
+end function
+
+--**
+-- If the supplied item is in a source grid column, this returns the corresponding
+-- element from the target column.
+-- Parameters:
+-- # ##pItem##: an object that might exist in ##pSource##.
+-- # ##pGrid##: a 2D grid sequence that might contain ##pITem##.
+-- # ##pSource##: an integer. The column number to look for ##pItem##.
+-- # ##pTarget##: an integer. The column number from which the corresponding
+-- item will be returned.
+-- # ##pDefault##: an object (defaults to zero). This is returned when ##pItem## 
+-- is not in ##pSource## column, or ##pSource## or ##pTarget## are invalid columns.
+--
+-- Returns:
+-- an object
+-- * If ##pItem## is found in the ##pSource## column then this is the corresponding element
+-- from the ##pTarget## column.
+--
+--Examples:
+--<eucode>
+-- sequence grid
+-- grid = {
+--        {"ant", "spider", "mortein"},
+--        {"bear", "seal", "gun"},
+--        {"cat", "dog", "ranger"},
+--        $
+--  }
+-- vlookup("ant", grid, 1, 2, "?") --> "spider"
+-- vlookup("ant", grid, 1, 3, "?") --> "mortein"
+-- vlookup("seal", grid, 2, 3, "?") --> "gun"
+-- vlookup("mouse", grid, 2, 3, "?") --> "?"
+--</eucode>
+public function vlookup(object pItem, sequence pGrid, integer pSource, integer pTarget, object pDefault = 0)
+    integer lPosn
+
+    for i = 1 to length(pGrid) do
+    	if length(pGrid[i]) < pSource then
+    		return pDefault
+    	end if
+    	
+    	if equal(pItem, pGrid[i][pSource]) then
+	    	if length(pGrid[i]) < pTarget then
+    			return pDefault
+    		end if
+    		return pGrid[i][pTarget]
+    	end if
+    end for
+    
+    return pDefault
+
+end function
+

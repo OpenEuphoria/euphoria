@@ -526,5 +526,9 @@ test_equal("mapping C", "a23456789", mapping("123456789", "123", "a"))
 test_equal("mapping D", {'a','b',{'c',4},5}, mapping({1,2,{3,4},5}, {1,2,3}, "abc"))
 test_equal("mapping E", "312", mapping({"one", "two", "three"}, {"two", "three", "one"}, "123", 1))
 
+-- remove_item
+test_equal("remove_item #1", {3,4,2}, remove_item( 1, {3,4,2,1} ))
+test_equal("remove_item #2", {3,4,2,1}, remove_item( 5, {3,4,2,1} ))
+
 test_report()
 
