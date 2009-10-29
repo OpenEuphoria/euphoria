@@ -456,6 +456,7 @@ atom
 function change_case(object x, object api)
 	sequence changed_text
 	integer single_char = 0
+	integer len
 
 	if not string(x) then
 		if atom(x) then
@@ -480,9 +481,11 @@ function change_case(object x, object api)
 		temp_mem = allocate(tm_size)
 	end if
 	poke(temp_mem, x)
-	poke(temp_mem + length(x), 0)
-	c_func(api, {temp_mem, length(x)} )
-	changed_text = peek_string(temp_mem)
+	len = c_func(api, {temp_mem, length(x)} )
+	if len < 1 then
+		len = length(x)
+	end if
+	changed_text = peek({temp_mem, len})
 	if single_char then
 		return changed_text[1]
 	else
