@@ -39,64 +39,64 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- === Option Constants
 
 public constant 
-	DEFAULT            = #00000000,
-	CASELESS           = #00000001,
-	MULTILINE          = #00000002,
-	DOTALL             = #00000004,
-	EXTENDED           = #00000008,
-	ANCHORED           = #00000010,
-	DOLLAR_ENDONLY     = #00000020,
-	EXTRA              = #00000040,
-	NOTBOL             = #00000080,
-	NOTEOL             = #00000100,
-	UNGREEDY           = #00000200,
-	NOTEMPTY           = #00000400,
-	UTF8               = #00000800,
-	NO_AUTO_CAPTURE    = #00001000,
-	NO_UTF8_CHECK      = #00002000,
-	AUTO_CALLOUT       = #00004000,
-	PARTIAL            = #00008000,
-	DFA_SHORTEST       = #00010000,
-	DFA_RESTART        = #00020000,
-	FIRSTLINE          = #00040000,
-	DUPNAMES           = #00080000,
-	NEWLINE_CR         = #00100000,
-	NEWLINE_LF         = #00200000,
-	NEWLINE_CRLF       = #00300000,
-	NEWLINE_ANY        = #00400000,
-	NEWLINE_ANYCRLF    = #00500000,
-	BSR_ANYCRLF        = #00800000,
-	BSR_UNICODE        = #01000000,
-	STRING_OFFSETS     = #0C000000
+        DEFAULT            = #00000000,
+        CASELESS           = #00000001,
+        MULTILINE          = #00000002,
+        DOTALL             = #00000004,
+        EXTENDED           = #00000008,
+        ANCHORED           = #00000010,
+        DOLLAR_ENDONLY     = #00000020,
+        EXTRA              = #00000040,
+        NOTBOL             = #00000080,
+        NOTEOL             = #00000100,
+        UNGREEDY           = #00000200,
+        NOTEMPTY           = #00000400,
+        UTF8               = #00000800,
+        NO_AUTO_CAPTURE    = #00001000,
+        NO_UTF8_CHECK      = #00002000,
+        AUTO_CALLOUT       = #00004000,
+        PARTIAL            = #00008000,
+        DFA_SHORTEST       = #00010000,
+        DFA_RESTART        = #00020000,
+        FIRSTLINE          = #00040000,
+        DUPNAMES           = #00080000,
+        NEWLINE_CR         = #00100000,
+        NEWLINE_LF         = #00200000,
+        NEWLINE_CRLF       = #00300000,
+        NEWLINE_ANY        = #00400000,
+        NEWLINE_ANYCRLF    = #00500000,
+        BSR_ANYCRLF        = #00800000,
+        BSR_UNICODE        = #01000000,
+        STRING_OFFSETS     = #0C000000
 
 --****
 -- === Error Constants
 
 public constant
-	ERROR_NOMATCH        =  (-1),
-	ERROR_NULL           =  (-2),
-	ERROR_BADOPTION      =  (-3),
-	ERROR_BADMAGIC       =  (-4),
-	ERROR_UNKNOWN_OPCODE =  (-5),
-	ERROR_UNKNOWN_NODE   =  (-5),
-	ERROR_NOMEMORY       =  (-6),
-	ERROR_NOSUBSTRING    =  (-7),
-	ERROR_MATCHLIMIT     =  (-8),
-	ERROR_CALLOUT        =  (-9),
-	ERROR_BADUTF8        = (-10),
-	ERROR_BADUTF8_OFFSET = (-11),
-	ERROR_PARTIAL        = (-12),
-	ERROR_BADPARTIAL     = (-13),
-	ERROR_INTERNAL       = (-14),
-	ERROR_BADCOUNT       = (-15),
-	ERROR_DFA_UITEM      = (-16),
-	ERROR_DFA_UCOND      = (-17),
-	ERROR_DFA_UMLIMIT    = (-18),
-	ERROR_DFA_WSSIZE     = (-19),
-	ERROR_DFA_RECURSE    = (-20),
-	ERROR_RECURSIONLIMIT = (-21),
-	ERROR_NULLWSLIMIT    = (-22),
-	ERROR_BADNEWLINE     = (-23)
+        ERROR_NOMATCH        =  (-1),
+        ERROR_NULL           =  (-2),
+        ERROR_BADOPTION      =  (-3),
+        ERROR_BADMAGIC       =  (-4),
+        ERROR_UNKNOWN_OPCODE =  (-5),
+        ERROR_UNKNOWN_NODE   =  (-5),
+        ERROR_NOMEMORY       =  (-6),
+        ERROR_NOSUBSTRING    =  (-7),
+        ERROR_MATCHLIMIT     =  (-8),
+        ERROR_CALLOUT        =  (-9),
+        ERROR_BADUTF8        = (-10),
+        ERROR_BADUTF8_OFFSET = (-11),
+        ERROR_PARTIAL        = (-12),
+        ERROR_BADPARTIAL     = (-13),
+        ERROR_INTERNAL       = (-14),
+        ERROR_BADCOUNT       = (-15),
+        ERROR_DFA_UITEM      = (-16),
+        ERROR_DFA_UCOND      = (-17),
+        ERROR_DFA_UMLIMIT    = (-18),
+        ERROR_DFA_WSSIZE     = (-19),
+        ERROR_DFA_RECURSE    = (-20),
+        ERROR_RECURSIONLIMIT = (-21),
+        ERROR_NULLWSLIMIT    = (-22),
+        ERROR_BADNEWLINE     = (-23)
 
 --****
 -- === Create/Destroy
@@ -105,7 +105,7 @@ public constant
 -- Regular expression type
 
 public type regex(object o)
-	return sequence(o)
+        return sequence(o)
 end type
 
 --**
@@ -163,9 +163,9 @@ end type
 --   [[:error_message]], [[:find]], [[:find_all]]
 
 public function new(sequence pattern, object options=DEFAULT)
-	if sequence(options) then options = or_all(options) end if
+        if sequence(options) then options = or_all(options) end if
 
-	return machine_func(M_PCRE_COMPILE, { pattern, options })
+        return machine_func(M_PCRE_COMPILE, { pattern, options })
 end function
 
 --**
@@ -188,7 +188,7 @@ end function
 --
 
 public function error_message(object re)
-	return machine_func(M_PCRE_ERROR_MESSAGE, { re })
+        return machine_func(M_PCRE_ERROR_MESSAGE, { re })
 end function
 
 --****
@@ -201,16 +201,16 @@ end function
 --
 -- Notes:
 --   Special regex characters are:
---	 {{{
+--       {{{
 --   . \ + * ? [ ^ ] $ ( ) { } = ! < > | : -
---	 }}}
---	 
+--       }}}
+--       
 -- Parameters:
 --   # ##s##: string sequence to escape
---	 
+--       
 -- Returns:
 --   An escaped ##sequence## representing ##s##.
---	 
+--       
 -- Example 1:
 -- <eucode>
 -- sequence search_s = escape("Payroll is $***15.00")
@@ -219,7 +219,7 @@ end function
 --
 
 public function escape(sequence s)
-	return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
+        return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
 end function
 
 --**
@@ -234,11 +234,11 @@ end function
 --
 
 public function get_ovector_size(regex ex, integer maxsize=-1)
-	integer m = machine_func(M_PCRE_GET_OVECTOR_SIZE, {ex})
-	if (m > maxsize) then
-		return maxsize
-	end if
-	return m
+        integer m = machine_func(M_PCRE_GET_OVECTOR_SIZE, {ex})
+        if (m > maxsize) then
+                return maxsize
+        end if
+        return m
 end function
 
 --****
@@ -273,10 +273,11 @@ end function
 --   </eucode>
 --
 
-public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size=get_ovector_size(re, 90))
-	if sequence(options) then options = or_all(options) end if
+public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size=30)
+        if sequence(options) then options = or_all(options) end if
+        size = get_ovector_size(re, size*3)
 
-	return machine_func(M_PCRE_EXEC, { re, haystack, options, from, size })
+        return machine_func(M_PCRE_EXEC, { re, haystack, options, from, size })
 end function
 
 --**
@@ -308,22 +309,22 @@ end function
 --
 
 public function find_all(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	if sequence(options) then options = or_all(options) end if
+        if sequence(options) then options = or_all(options) end if
 
-	object result
-	sequence results = {}
-	while sequence(result) with entry do
-		results = append(results, result)
-		from = max(result) + 1
+        object result
+        sequence results = {}
+        while sequence(result) with entry do
+                results = append(results, result)
+                from = max(result) + 1
 
-		if from > length(haystack) then
-			exit
-		end if
-	entry
-		result = find(re, haystack, from, options)
-	end while
-	
-	return results
+                if from > length(haystack) then
+                        exit
+                end if
+        entry
+                result = find(re, haystack, from, options)
+        end while
+        
+        return results
 end function
 
 --**
@@ -340,7 +341,7 @@ end function
 --
 
 public function has_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	return sequence(find(re, haystack, from, options))
+        return sequence(find(re, haystack, from, options))
 end function
 
 --**
@@ -357,13 +358,13 @@ end function
 --
 
 public function is_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	object m = find(re, haystack, from, options)
+        object m = find(re, haystack, from, options)
 
-	if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
-		return 1
-	end if
+        if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
+                return 1
+        end if
 
-	return 0
+        return 0
 end function
 
 --**
@@ -409,26 +410,26 @@ end function
 --   [[:all_matches]]
 
 public function matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	object str_offsets = and_bits(STRING_OFFSETS, options)
-	object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
+        object str_offsets = and_bits(STRING_OFFSETS, options)
+        object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
-	if atom(match_data) then return ERROR_NOMATCH end if
+        if atom(match_data) then return ERROR_NOMATCH end if
 
-	for i = 1 to length(match_data) do
-		sequence tmp 
-		if match_data[i][1] = 0 then
-			tmp = ""
-		else
-			tmp = haystack[match_data[i][1]..match_data[i][2]]
-		end if
-		if str_offsets then
-			match_data[i] = { tmp, match_data[i][1], match_data[i][2] }
-		else
-			match_data[i] = tmp
-		end if
-	end for
+        for i = 1 to length(match_data) do
+                sequence tmp 
+                if match_data[i][1] = 0 then
+                        tmp = ""
+                else
+                        tmp = haystack[match_data[i][1]..match_data[i][2]]
+                end if
+                if str_offsets then
+                        match_data[i] = { tmp, match_data[i][1], match_data[i][2] }
+                else
+                        match_data[i] = tmp
+                end if
+        end for
 
-	return match_data
+        return match_data
 end function
 
 --**
@@ -487,23 +488,23 @@ end function
 --   [[:matches]]
 
 public function all_matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-	object str_offsets = and_bits(STRING_OFFSETS, options)
-	object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
+        object str_offsets = and_bits(STRING_OFFSETS, options)
+        object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
-	if length(match_data) = 0 then return ERROR_NOMATCH end if
+        if length(match_data) = 0 then return ERROR_NOMATCH end if
 
-	for i = 1 to length(match_data) do
-		for j = 1 to length(match_data[i]) do
-			sequence tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
-			if str_offsets then
-				match_data[i][j] = { tmp, match_data[i][j][1], match_data[i][j][2] }
-			else
-				match_data[i][j] = tmp
-			end if
-		end for
-	end for
+        for i = 1 to length(match_data) do
+                for j = 1 to length(match_data[i]) do
+                        sequence tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
+                        if str_offsets then
+                                match_data[i][j] = { tmp, match_data[i][j][1], match_data[i][j][2] }
+                        else
+                                match_data[i][j] = tmp
+                        end if
+                end for
+        end for
 
-	return match_data
+        return match_data
 end function
 
 --****
@@ -535,29 +536,29 @@ end function
 -- 
 
 public function split(regex re, sequence text, integer from=1, object options=DEFAULT)
-	return split_limit(re, text, 0, from, options)
+        return split_limit(re, text, 0, from, options)
 end function
 
 public function split_limit(regex re, sequence text, integer limit=0, integer from=1, object options=DEFAULT)
-	sequence match_data = find_all(re, text, from, options), result
-	integer last = 1
+        sequence match_data = find_all(re, text, from, options), result
+        integer last = 1
 
-	if limit = 0 then
-		limit = length(match_data)
-	end if
+        if limit = 0 then
+                limit = length(match_data)
+        end if
 
-	result = repeat(0, limit)
+        result = repeat(0, limit)
 
-	for i = 1 to limit do
-		result[i] = text[last..match_data[i][1][1] - 1]
-		last = match_data[i][1][2] + 1
-	end for
+        for i = 1 to limit do
+                result[i] = text[last..match_data[i][1][1] - 1]
+                last = match_data[i][1][2] + 1
+        end for
 
-	if last < length(text) then
-		result &= { text[last..$] }
-	end if
+        if last < length(text) then
+                result &= { text[last..$] }
+        end if
 
-	return result
+        return result
 end function
 
 --****
@@ -600,8 +601,8 @@ end function
 --
 
 public function find_replace(regex ex, sequence text, sequence replacement, integer from=1,
-		object options=DEFAULT)
-	return find_replace_limit(ex, text, replacement, -1, from, options)
+                object options=DEFAULT)
+        return find_replace_limit(ex, text, replacement, -1, from, options)
 end function
 
 --**
@@ -627,10 +628,10 @@ end function
 --
 
 public function find_replace_limit(regex ex, sequence text, sequence replacement, 
-			integer limit, integer from=1, object options=DEFAULT)
-	if sequence(options) then options = or_all(options) end if
+                        integer limit, integer from=1, object options=DEFAULT)
+        if sequence(options) then options = or_all(options) end if
 
-	return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from, limit })
+        return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from, limit })
 end function
 
 --**
@@ -670,26 +671,26 @@ end function
 --
 
 public function find_replace_callback(regex ex, sequence text, integer rid, integer limit=0, 
-		integer from=1, object options=DEFAULT)
-	sequence match_data = find_all(ex, text, from, options), replace_data
+                integer from=1, object options=DEFAULT)
+        sequence match_data = find_all(ex, text, from, options), replace_data
 
-	if limit = 0 then
-		limit = length(match_data)
-	end if
-	replace_data = repeat(0, limit)
+        if limit = 0 then
+                limit = length(match_data)
+        end if
+        replace_data = repeat(0, limit)
 
-	for i = 1 to limit do
-		sequence params = repeat(0, length(match_data[i]))
-		for j = 1 to length(match_data[i]) do
-			params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
-		end for
+        for i = 1 to limit do
+                sequence params = repeat(0, length(match_data[i]))
+                for j = 1 to length(match_data[i]) do
+                        params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
+                end for
 
-		replace_data[i] = call_func(rid, { params })
-	end for
+                replace_data[i] = call_func(rid, { params })
+        end for
 
-	for i = limit to 1 by -1 do
-		text = replace(text, replace_data[i], match_data[i][1][1], match_data[i][1][2])
-	end for
+        for i = limit to 1 by -1 do
+                text = replace(text, replace_data[i], match_data[i][1][1], match_data[i][1][2])
+        end for
 
-	return text
+        return text
 end function
