@@ -170,7 +170,7 @@ object get_ovector_size(object x ){
         re = get_re(pcre_ptr);
 
         rc = pcre_fullinfo(re, NULL, PCRE_INFO_CAPTURECOUNT, &where);
-        if (rc == 0) return (where+1)*3;
+        if (rc == 0) return where;
         return rc;
 }
 
