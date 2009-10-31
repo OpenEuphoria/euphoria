@@ -203,8 +203,8 @@ object exec_pcre(object x ){
 
         options    = get_int( SEQ_PTR(x)->base[3] );
         start_from = get_int( SEQ_PTR(x)->base[4] ) - 1;
-        ovector_size = get_int( SEQ_PTR(x)->base[5] );
-        ovector_elements = ovector_size/3;
+        ovector_elements = get_int( SEQ_PTR(x)->base[5] );
+        ovector_size = (ovector_elements+1) * 3;
         ovector = malloc(sizeof(int)*ovector_size);
 
         rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
@@ -212,11 +212,12 @@ object exec_pcre(object x ){
         EFree( str );
 
         if( rc < 0 ) { free(ovector); return rc; }
+        if( rc == 0 ) { rc = ovector_elements+1; }
 
         // put the substrings into sequences
-        s = NewS1( ovector_elements );
+        s = NewS1( rc );
 
-        for( i = 1, j=0; i <= ovector_elements; i++ ) {
+        for( i = 1, j=0; i <= rc; i++ ) {
                 sub = NewS1( 2 );
                 sub->base[1] = ovector[j++] + 1;
                 sub->base[2] = ovector[j] > 0 ? ovector[j] : 0;

@@ -237,9 +237,9 @@ public function get_ovector_size(regex ex, integer maxsize=0)
         
         integer m = machine_func(M_PCRE_GET_OVECTOR_SIZE, {ex})
         if (m > maxsize) then
-                return (maxsize+1) * 3
+                return maxsize
         end if
-        return (m+1) * 3
+        return m+1
 end function
 
 --****
@@ -274,10 +274,12 @@ end function
 --   </eucode>
 --
 
-public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size=30)
+public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size = get_ovector_size(re, 30))
         if sequence(options) then options = or_all(options) end if
-        size = get_ovector_size(re, size)
-
+        if size < 0 then
+            size = 0
+        end if
+        
         return machine_func(M_PCRE_EXEC, { re, haystack, options, from, size })
 end function
 
