@@ -275,7 +275,7 @@ end function
 
 public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size=30)
         if sequence(options) then options = or_all(options) end if
-        size = get_ovector_size(re, size*3)
+        size = get_ovector_size(re, size*3 + 3)
 
         return machine_func(M_PCRE_EXEC, { re, haystack, options, from, size })
 end function
