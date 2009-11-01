@@ -25,10 +25,12 @@ test_equal("trim() nothing", "abcdef", trim("abcdef", 32))
 test_equal("lower() atom", 'a', lower('A'))
 test_equal("lower() letters only", "john", lower("JoHN"))
 test_equal("lower() mixed text", "john 55 &%.", lower("JoHN 55 &%."))
+test_equal("lower() with \\0", "abc" & 0 & "def", lower("abc" & 0 & "DEF"))
 
 test_equal("upper() atom", 'A', upper('a'))
 test_equal("upper() letters only", "JOHN", upper("joHn"))
 test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))
+test_equal("upper() with \\0", "ABC" & 0 & "DEF", upper("abc" & 0 & "DEF"))
 
 test_equal("escape() default", "John \\\"Mc\\\" Doe", escape("John \"Mc\" Doe"))
 test_equal("escape() non-standard", "\\$100\\.50", escape("$100.50", "$."))

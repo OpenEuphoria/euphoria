@@ -582,7 +582,7 @@ public function upper(object x)
 	ifdef WINDOWS then
 		return change_case(x, api_CharUpperBuff)
 	elsedef	
-		return x - (x >= 'A' and x <= 'Z') * TO_LOWER
+		return x - (x >= 'a' and x <= 'z') * TO_LOWER
 	end ifdef
 
 end function
