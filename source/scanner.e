@@ -1234,10 +1234,10 @@ function ExtendedString(integer ech)
 	return {STRING, NewStringSym(string_text)}
 end function
 
-function GetHexString()
+function GetHexString(integer maxnibbles = 2)
 	integer ch
 	integer digit
-	integer val
+	atom val
 	integer cline
 	integer nibble
 	sequence string_text
@@ -1245,6 +1245,7 @@ function GetHexString()
 	cline = line_number
 	string_text = ""
 	nibble = 1
+	val = -1
 	ch = getch()
 	while not find(ch, "\n\r") do
 		if ch = END_OF_FILE_CHAR then
@@ -1263,18 +1264,23 @@ function GetHexString()
 			if digit > 16 then
 				digit -= 6
 			end if
-			if nibble then
+			if nibble = 1 then
 				val = digit - 1
 			else
 				val = val * 16 + digit - 1
-				string_text &= val
-				
+				if nibble = maxnibbles then
+					string_text &= val
+					val = -1
+					nibble = 0
+				end if
 			end if
-			nibble = (not nibble)
+			nibble += 1
+
 		else
-			if not nibble then
+			if val >= 0 then
 				-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
 				string_text &= val
+				val = -1
 			end if
 			nibble = 1
 		end if
@@ -1285,7 +1291,7 @@ function GetHexString()
 		CompileErr(67)
 	end if
 
-	if not nibble then	
+	if val >= 0 then	
 		-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
 		string_text &= val
 	end if
@@ -1317,8 +1323,16 @@ export function Scanner()
 			sp = bp
 			pch = ch
 			ch = getch()
-			if ch = '"' and pch = 'x' then
-				return {STRING, NewStringSym(GetHexString())}
+			if ch = '"' then
+				if pch = 'x' then
+					return {STRING, NewStringSym(GetHexString(2))}
+				end if
+				if pch = 'u' then
+					return {STRING, NewStringSym(GetHexString(4))}
+				end if
+				if pch = 'U' then
+					return {STRING, NewStringSym(GetHexString(8))}
+				end if
 			end if
 			
 			while id_char[ch] do
