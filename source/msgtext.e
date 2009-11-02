@@ -341,6 +341,7 @@ constant StdErrMsgs = {
 	{326, "Force building, even if file is up-to-date"},
 	{327, "[1] is deprecated ([2]:[3])"},
 	{328, "Overrides the value of EUDIR"},
+	{329, "Invalid character in HEX string"},
 	$
 }
 

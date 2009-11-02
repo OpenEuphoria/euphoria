@@ -94,4 +94,31 @@ t = `if ( strcmp( "foo", "bar" ) == 1 ) {
 `
 test_equal("Extended string literal E", t, _s)
 
+test_equal("Escaped strings - newline",         {10}, "\n")
+test_equal("Escaped strings - tab",             {09}, "\t")
+test_equal("Escaped strings - carriage return", {13}, "\r")
+test_equal("Escaped strings - back slash",      {92}, "\\")  
+test_equal("Escaped strings - dbl quote",       {34}, "\"")
+test_equal("Escaped strings - sgl quote",       {39}, "\'")
+test_equal("Escaped strings - null",            {00}, "\0")
+
+test_equal("Escaped strings - hex", {0xAB, 0xDF, 0x01, 0x2E}, "\xab\xDF\x01\x2E")
+test_equal("Escaped strings - u16", {0xABDF, 0x012E}, "\uabDF\u012E")
+test_equal("Escaped strings - U32", {0xABDF012E}, "\UabDF012E")
+
+test_equal("Escaped characters - newline",         10, '\n')
+test_equal("Escaped characters - tab",             09, '\t')
+test_equal("Escaped characters - carriage return", 13, '\r')
+test_equal("Escaped characters - back slash",      92, '\\')  
+test_equal("Escaped characters - dbl quote",       34, '\"')
+test_equal("Escaped characters - sgl quote",       39, '\'')
+test_equal("Escaped characters - null",            00, '\0')
+
+test_equal("Escaped characters - hex", {0xAB, 0xDF, 0x01, 0x2E}, {'\xab','\xDF','\x01','\x2E'})
+test_equal("Escaped characters - u16", {0xABDF, 0x012E}, {'\uabDF','\u012E'})
+test_equal("Escaped characters - U32", {0xABDF012E}, {'\UabDF012E'})
+
+test_equal("Hex strings - no punc", {0xAB,0xDF,0x01,0x2E}, x"abDF012E")
+test_equal("Hex strings - with punc", {0xAB,0x0D,0xF0,0x12,0xEF,0x03}, x"ab D F0__12Ef3")
+
 test_report()

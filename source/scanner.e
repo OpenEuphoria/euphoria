@@ -1002,15 +1002,60 @@ function MakeInt(sequence text, integer nBase = 10)
 	end if
 end function
 
-constant gEscCode = "n\\t\"'r0"
-constant gEscVal  = "\n\\\t\"'\r" & 0
-function EscapeChar(integer c)
+function GetHexChar( integer cnt, integer errno)
+	atom val
+	integer d
+	val = 0
+	for i = 1 to cnt do
+		d = find(getch(), "0123456789ABCDEFabcdef")
+		if d = 0 then
+			CompileErr( errno )
+		end if
+		val = val * 16 + d - 1
+		if d > 16 then
+			val -= 6
+		end if
+	end for
+	
+	return val
+end function
+
+function EscapeChar()
+	atom c
+	
+	-- The cursor is currently at the next byte after the back-slash.
 -- the escape characters
-	c = find(c, gEscCode)
-	if c = 0 then
-		CompileErr(155)
-	end if
-	return gEscVal[c]
+	c = getch()
+	switch c do
+		case 'n' then
+			c = 10 -- Newline
+		case 't' then
+			c = 9 -- Tabulator
+		case '"', '\\', '\'' then
+			-- Double Quote
+			-- Back slash
+			-- Single Quote
+		case 'r' then
+			c = 13 -- Carriage Return
+		case '0' then
+			c = 0 -- Null
+		case 'x' then
+			-- Two Hex digits follow
+			c = GetHexChar(2, 155)
+			
+		case 'u' then
+			-- Four Hex digits follow
+			c = GetHexChar(4, 155)
+			
+		case 'U' then
+			-- Eight Hex digits follow
+			c = GetHexChar(8, 155)
+			
+		case else
+			CompileErr(155)
+	end switch
+	
+	return c
 end function
 
 function my_sscanf(sequence yytext)
@@ -1189,9 +1234,69 @@ function ExtendedString(integer ech)
 	return {STRING, NewStringSym(string_text)}
 end function
 
+function GetHexString()
+	integer ch
+	integer digit
+	integer val
+	integer cline
+	integer nibble
+	sequence string_text
+
+	cline = line_number
+	string_text = ""
+	nibble = 1
+	ch = getch()
+	while not find(ch, "\n\r") do
+		if ch = END_OF_FILE_CHAR then
+			CompileErr(129, cline)
+		end if
+				
+		if ch = '"' then
+			exit
+		end if
+
+		digit = find(ch, "0123456789ABCDEFabcdef _\t")
+		if digit = 0 then
+			CompileErr(329)
+		end if
+		if digit < 23 then
+			if digit > 16 then
+				digit -= 6
+			end if
+			if nibble then
+				val = digit - 1
+			else
+				val = val * 16 + digit - 1
+				string_text &= val
+				
+			end if
+			nibble = (not nibble)
+		else
+			if not nibble then
+				-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
+				string_text &= val
+			end if
+			nibble = 1
+		end if
+		ch = getch()
+	end while
+	
+	if find(ch, "\n\r") then
+		CompileErr(67)
+	end if
+
+	if not nibble then	
+		-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
+		string_text &= val
+	end if
+	
+	return string_text
+end function
+
 export function Scanner()
 -- The scanner main routine: returns a lexical token
 	integer ch, i, sp, prev_Nne
+	integer pch
 	integer cline
 	sequence yytext, namespaces  -- temporary buffer for a token
 	object d
@@ -1210,13 +1315,17 @@ export function Scanner()
 		-- if/elsif cases have been sorted so most common ones come first
 		if class = LETTER or ch = '_' then
 			sp = bp
+			pch = ch
 			ch = getch()
+			if ch = '"' and pch = 'x' then
+				return {STRING, NewStringSym(GetHexString())}
+			end if
+			
 			while id_char[ch] do
 				ch = getch()
 			end while
 			yytext = ThisLine[sp-1..bp-2]
 			ungetch()
-
 			-- is it a namespace?
 			ch = getch()
 			while ch = ' ' or ch = '\t' do
@@ -1514,7 +1623,7 @@ export function Scanner()
 				if ch = '"' then
 					exit
 				elsif ch = '\\' then
-					yytext &= EscapeChar(getch())
+					yytext &= EscapeChar()
 				elsif ch = '\t' then
 					CompileErr(145)
 				else
@@ -1668,18 +1777,22 @@ export function Scanner()
 			end if
 
 		elsif class = SINGLE_QUOTE then
-			ch = getch()
-			if ch = '\\' then
-				ch = EscapeChar(getch())
-			elsif ch = '\t' then
+			atom ach = getch()
+			if ach = '\\' then
+				ach = EscapeChar()
+			elsif ach = '\t' then
 				CompileErr(145)
-			elsif ch = '\'' then
+			elsif ach = '\'' then
 				CompileErr(137)
 			end if
 			if getch() != '\'' then
 				CompileErr(56)
 			end if
-			return {ATOM, NewIntSym(ch)}
+			if integer(ach) then
+				return {ATOM, NewIntSym(ach)}
+			else
+				return {ATOM, NewDoubleSym(ach)}
+			end if
 
 		elsif class = LESS then
 			if getch() = '=' then
@@ -1842,9 +1955,10 @@ export procedure IncludeScan( integer is_public )
 		ch = getch()
 		while not find(ch, {'\n', '\r', '"', END_OF_FILE_CHAR}) do
 			if ch = '\\' then
-				ch = EscapeChar(getch())
+				gtext &= EscapeChar()
+			else
+				gtext &= ch
 			end if
-			gtext &= ch
 			ch = getch()
 		end while
 		if ch != '"' then
