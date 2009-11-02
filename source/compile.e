@@ -6860,7 +6860,7 @@ end function
 
 export function is_string( sequence s )
 	for i = 1 to length(s) do
-		if sequence(s[i]) or s[i] > 255  or s[i] < 0 then
+		if sequence(s[i]) or s[i] > 255  or s[i] <= 0 then
 			return 0
 		end if
 	end for
