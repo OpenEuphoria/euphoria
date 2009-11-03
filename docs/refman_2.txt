@@ -143,7 +143,7 @@ floating-point format happens automatically.
 ==== Character Strings and Individual Characters
 
 A **character string** is just a ##sequence## of characters.  It may be
-entered in one of two ways ...
+entered in a number of ways ...
 
 * using double-quotes e.g.
 
@@ -162,6 +162,20 @@ entered in one of two ways ...
 -- Using three double-quotes
 """ABCDEFG"""
 </eucode>
+
+* using hexadecimal strings e.g.
+
+<eucode>
+x"65 66 67 AE"
+</eucode>
+
+* using unicode strings e.g.
+
+<eucode>
+u"65 66 67 AE"  -- utf-16
+U"65 66 67 AE"  -- utf-32
+</eucode>
+
 
 **The rules for double-quote strings are...**
 # they begin and end with a double-quote character
@@ -257,6 +271,43 @@ constant TQ = `This text contains """ for some reason.`
 constant BQ = """This text contains a back quote ` for some reason."""
 constant QQ = """This text contains a back quote ` """ & `and """ for some reason.`
 </eucode>
+
+**The rules for hexadecimal strings are...**
+# they begin with the pair ##x"## and end with a double-quote (##"##) character
+# they can only contain hexadecimal digits (0-9 A-F a-f), and space, underscore,
+ tab, newline, carriage-return. Anything else is invalid.
+# each pair of contiguous hex digits represent a single sequence element with a
+ value from 0 to 255
+# they can span multiple lines
+# The non-hex digits are treated as punctuation and used to delimit individual 
+  values.
+# Hexadecimal strings can be used to encode UTF-8 strings, even though the resulting
+ string does not have to be a valid UTF-8 string.
+ 
+<eucode>
+x"1 2 34 5678_AbC" == {0x01, 0x02, 0x34, 0x56, 0x78, 0xAB, 0x0C}
+</eucode>
+
+**The rules for unicode strings are...**
+# they begin with the pair ##u"## for UTF-16 and ##U"## for UTF-32 strings, and
+ end with a double-quote (##"##) character
+# they can only contain hexadecimal digits (0-9 A-F a-f), and space, underscore,
+ tab, newline, carriage-return. Anything else is invalid.
+# For UTF-16 strings, each set of four contiguous hex digits represent a single sequence element with a
+ value from 0x0000 to 0xFFFF
+# For UTF-32 strings, each set of eight contiguous hex digits represent a single sequence element with a
+ value from 0x0000 to 0xFFFFFFFF
+# they can span multiple lines
+# The non-hex digits are treated as punctuation and used to delimit individual 
+  values.
+# The resulting string does not have to be a valid UTF-16/UTF-32 string.
+
+<eucode>
+u"1 2 34 5678AbC" == {0x0001, 0x0002, 0x0034, 0x5678, 0x0ABC}
+u"1 2 34 5678AbC" == {0x0000_0001, 0x0000_0002, 0x0000_0034, 0x05678ABC}
+</eucode>
+
+----
 
 Character strings may be manipulated and operated upon just like any other
 sequences. For example the above string is entirely equivalent to the
