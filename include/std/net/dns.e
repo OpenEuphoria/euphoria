@@ -89,7 +89,7 @@ function _socket_trim(sequence s)
 	while c <= length(s) and rs[c] <= 32 do
 		c = c + 1
 	end while
-	rs = rs[c..length(rs)]
+	rs = rs[c .. $]
 	c = length(rs)
 	while c > 0 and rs[c] <= 32 do
 		c = c - 1
@@ -499,7 +499,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 	elsif svcport > 0 then
 		cpos = find(':',rtn[1][5])
 		if cpos = 0 or cpos = length(rtn[1][5]) or
-				eu:compare(rtn[1][5][length(rtn[1][5])-1..length(rtn[1][5])],":0")=0 then
+				eu:compare(rtn[1][5][$ - 1 .. $],":0")=0 then
 			if cpos = 0 then
 				rtn[1][5] = rtn[1][5] & sprintf(":%d",svcport)
 			else

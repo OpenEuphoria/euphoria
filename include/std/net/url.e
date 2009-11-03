@@ -345,15 +345,15 @@ public function decode(sequence what)
     elsif what[k] = '%' then
       if k = length(what) then
         -- strip empty percent sign
-        what = what[1..k-1] & what[k+1..length(what)]
+        what = what[1..k-1] & what[k+1 .. $]
       elsif k+1 = length(what) then
         what[k] = value("#0" & what[k+1])
         what[k] = what[k][2]
-        what = what[1..k] & what[k+2..length(what)]
+        what = what[1..k] & what[k+2 .. $]
       else
         what[k] = value("#" & what[k+1..k+2])
         what[k] = what[k][2]
-        what = what[1..k] & what[k+3..length(what)]
+        what = what[1..k] & what[k+3 .. $]
       end if
     else
         -- do nothing if it is a regular char ('0' or 'A' or etc)

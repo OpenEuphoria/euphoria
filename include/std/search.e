@@ -505,7 +505,7 @@ public function find_replace(object needle, sequence haystack, object replacemen
 	posn = match(needle, haystack)
 	while posn do
 		haystack = haystack[1..posn-1] & replacement & 
-			haystack[posn+needle_len .. length(haystack)]
+			haystack[posn + needle_len .. $]
 		posn = match_from(needle, haystack, posn + replacement_len)
 
 		max -= 1
@@ -828,7 +828,7 @@ public function ends(object pSubText, sequence pFullText)
 		return 0
 	end if
 	
-	if equal(pSubText, pFullText[length(pFullText) - length(pSubText) + 1 .. $]) then
+	if equal(pSubText, pFullText[$ - length(pSubText) + 1 .. $]) then
 		return 1
 	else
 		return 0

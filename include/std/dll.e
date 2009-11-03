@@ -542,12 +542,12 @@ public function call_back(object id)
 			crash("Cannot generate call_back address.")
 		end if
 		if page_addr = 0 or page_addr + page_offset + call_back_size >= PAGE_SIZE then
-			page_addr = allocate_protect( code[1..repi-1] & rep & code[repi+4..length(code)], 1, PAGE_EXECUTE_READWRITE )
+			page_addr = allocate_protect( code[1..repi-1] & rep & code[repi+4..$], 1, PAGE_EXECUTE_READWRITE )
 			page_offset = 0
 		else
 			-- align for execution (need 8-byte?) and put after the previous call back
 			page_offset += EXECUTABLE_ALIGNMENT* ceil( size / EXECUTABLE_ALIGNMENT )
-			poke( page_addr + page_offset, code[1..repi-1] & rep & code[repi+4..length(code)] )
+			poke( page_addr + page_offset, code[1..repi-1] & rep & code[repi+4..$] )
 		end if
 		return page_offset + page_addr
 	end ifdef

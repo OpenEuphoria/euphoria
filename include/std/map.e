@@ -1080,7 +1080,13 @@ public function statistics(map the_map_p)
 		statistic_set_[AVERAGE_BUCKET] = stats:average(lengths_)
 		statistic_set_[STDEV_BUCKET] = stats:stdev(lengths_)
 	else
-		statistic_set_ = {temp_map_[ELEMENT_COUNT], temp_map_[IN_USE], length(temp_map_[KEY_LIST]), length(temp_map_[KEY_LIST]), length(temp_map_[KEY_LIST]), length(temp_map_[KEY_LIST]), 0}
+		statistic_set_ = {temp_map_[ELEMENT_COUNT], 
+						  temp_map_[IN_USE], 
+						  length(temp_map_[KEY_LIST]), 
+						  length(temp_map_[KEY_LIST]), 
+						  length(temp_map_[KEY_LIST]), 
+						  length(temp_map_[KEY_LIST]),
+						  0}
 	end if
 	return statistic_set_
 end function

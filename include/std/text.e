@@ -1899,7 +1899,7 @@ public function format(sequence pFormat, object pArgs = {})
 
     				if width < length(argtext) then
     					if align = '>' then
-    						argtext = argtext[ length(argtext) - width + 1 .. $]
+    						argtext = argtext[ $ - width + 1 .. $]
     					elsif align = 'c' then
     						pos = length(argtext) - width
     						if remainder(pos, 2) = 0 then

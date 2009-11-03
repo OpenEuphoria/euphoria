@@ -344,7 +344,7 @@ public procedure parse_recvheader(sequence header)
 		place = match(": ",recvheader[idx])
 		if place then
 			junk[1] = recvheader[idx][1..place-1]
-			junk[2] = recvheader[idx][place+2..length(recvheader[idx])]
+			junk[2] = recvheader[idx][place+2 .. $]
 			recvheader[idx] = junk
 		else
 			if match("HTTP/",upper(recvheader[idx])) then
@@ -654,17 +654,17 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 	header2 = header
 	cpos = match("SET-COOKIE",upper(header2)) -- this should be using get_recvheader() etc
 	while cpos > 0 do
-		header2 = header2[cpos+10..length(header2)]
+		header2 = header2[cpos+10 .. $]
 		data = header2
 		cpos = find(':',data)
 		if cpos > 0 then
-			data = data[cpos+1..length(data)]
+			data = data[cpos+1..$]
 		end if
 		offset = 0
 		cpos = match(13&10,data)
 		while cpos > 1 and data[offset+cpos-1]=';' do
 			offset = offset + cpos + 2
-			cpos = match(13&10,data[offset..length(data)])
+			cpos = match(13&10,data[offset..$])
 		end while
 		offset = offset + cpos - 1
 		data = data[1..offset]
@@ -672,7 +672,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		cookie = {"","","","","N",""}
 		offset = match("PATH=",updata)
 		if offset > 0 then
-			cpos = find(';',data[offset..length(data)])
+			cpos = find(';',data[offset .. $])
 			if cpos = 0 then cpos = length(data)-offset+2 end if
 			cookie[3] = data[offset+5..offset+cpos-2]
 		end if
@@ -683,12 +683,12 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 			data = ""
 			updata = ""
 		else
-			data = data[cpos+1..length(data)]
+			data = data[cpos+1 .. $]
 			updata = updata[cpos+1..length(data)]
 		end if
 		offset = match("DOMAIN=",updata)
 		if offset > 0 then
-			cpos = find(';',data[offset..length(data)])
+			cpos = find(';',data[offset .. $])
 			if cpos = 0 then cpos = length(data)-offset+2 end if
 			cookie[2] = data[offset+7..offset+cpos-2]
 			-- Offset is base 1.  If the semicolon is in the first position, cpos
@@ -701,19 +701,19 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 		end if
 		offset = match("EXPIRES=",updata)
 		if offset > 0 then
-			cpos = find(';',data[offset..length(data)])
+			cpos = find(';',data[offset .. $])
 			if cpos = 0 then cpos = length(data)-offset+2 end if
 			cookie[4] = data[offset+8..offset+cpos-2]
 		end if
 		offset = match("VERSION=",updata)
 		if offset > 0 then
-			cpos = find(';',data[offset..length(data)])
+			cpos = find(';',data[offset..$])
 			if cpos = 0 then cpos = length(data)-offset+2 end if
 			cookie[6] = data[offset+8..offset+cpos-2]
 		end if
 		offset = match("MAX-AGE=",updata)
 		if offset > 0 then
-			cpos = find(';',data[offset..length(data)])
+			cpos = find(';',data[offset..$])
 			if cpos = 0 then cpos = length(data)-offset+2 end if
 			cookie[4] = data[offset+8..offset+cpos-2]
 		end if
