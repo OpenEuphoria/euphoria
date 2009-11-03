@@ -1247,7 +1247,7 @@ function GetHexString(integer maxnibbles = 2)
 	nibble = 1
 	val = -1
 	ch = getch()
-	while not find(ch, "\n\r") do
+	while 1 do
 		if ch = END_OF_FILE_CHAR then
 			CompileErr(129, cline)
 		end if
@@ -1256,7 +1256,7 @@ function GetHexString(integer maxnibbles = 2)
 			exit
 		end if
 
-		digit = find(ch, "0123456789ABCDEFabcdef _\t")
+		digit = find(ch, "0123456789ABCDEFabcdef _\t\n\r")
 		if digit = 0 then
 			CompileErr(329)
 		end if
@@ -1283,14 +1283,13 @@ function GetHexString(integer maxnibbles = 2)
 				val = -1
 			end if
 			nibble = 1
+			if ch = '\n' then
+				read_line()
+			end if
 		end if
 		ch = getch()
 	end while
 	
-	if find(ch, "\n\r") then
-		CompileErr(67)
-	end if
-
 	if val >= 0 then	
 		-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
 		string_text &= val
