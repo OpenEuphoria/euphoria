@@ -3388,11 +3388,17 @@ procedure do_callback(integer b)
 
 	-- val[b] is:  routine id or {'+', routine_id}
 	x = val[b]
+	if length(x) = 1 then
+		-- for now we do not handle DEP
+		-- therefore, just pass this up as a normal callback request
+		-- instead of a bare callback request
+		x = x[1]
+	end if
 	if atom(x) then
 		id = x
 		convention = 0
-	elsif length(x) = 1 then
-		RTFatal("DEP style callbacks not supported in eu.ex")
+	--elsif length(x) = 1 then
+		--RTFatal("DEP style callbacks not supported in eu.ex")
 	
 	else
 		id = x[2]
