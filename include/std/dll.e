@@ -529,10 +529,17 @@ public function call_back(object id)
 		-- save speed for OSes that do not have DEP.
 		return machine_func(M_CALL_BACK, id)
 	elsedef
-		sequence s, code, rep
+		object s
+		sequence code, rep
 		atom addr, size, repi
 
 		s = machine_func(M_CALL_BACK, {id})
+		if not sequence(s) then
+			-- running under eu.ex or DEP-style callbacks disabled
+			-- for some other reason. Just return the machine_func()
+			-- in this case.
+			return s
+		end if
 		addr = s[1]
 		rep =  int_to_bytes( s[2] )
 		size = s[3]
