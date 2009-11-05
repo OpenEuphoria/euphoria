@@ -444,7 +444,7 @@ public function is_using_DEP()
 	return use_DEP
 end function
 
-public procedure use_DEP(integer value)
+public procedure DEP_on(integer value)
 	use_DEP = value
 end procedure
 

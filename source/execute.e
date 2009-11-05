@@ -35,6 +35,10 @@ include scanner.e
 include mode.e as mode
 include intinit.e
 
+ifdef WIN32 then
+	include std/machine.e
+end ifdef
+
 -- Note: In several places we omit checking for bad arguments to
 -- built-in routines. Those errors will be caught by the underlying 
 -- interpreter or Euphoria run-time system, and an error will be raised 
@@ -3379,20 +3383,30 @@ cb_cdecl= {
 constant 
 	M_ALLOC = 16
 
+function alloc(integer size, integer depq)
+	ifdef WIN32 then
+		if depq then
+			return allocate_protect(size, 1, PAGE_EXECUTE_READWRITE)
+		end if
+	end ifdef
+	return machine_func(M_ALLOC, size)
+end function
 procedure do_callback(integer b)
 -- handle callback()
 	symtab_index r
 	atom asm
-	integer id, convention
+	integer id, convention, depq
 	object x
 
+	depq = 0
 	-- val[b] is:  routine id or {'+', routine_id}
 	x = val[b]
-	if length(x) = 1 then
+	if sequence(x) and length(x) = 1 then
 		-- for now we do not handle DEP
 		-- therefore, just pass this up as a normal callback request
 		-- instead of a bare callback request
 		x = x[1]
+		depq = 1
 	end if
 	if atom(x) then
 		id = x
@@ -3414,7 +3428,7 @@ procedure do_callback(integer b)
 
 	if platform() = WIN32 and convention = 0 then
 		-- stdcall
-		asm = machine_func(M_ALLOC, length(cb_std) )
+		asm = alloc( length(cb_std), depq )
 		poke( asm, cb_std ) 
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 20 )
@@ -3423,7 +3437,7 @@ procedure do_callback(integer b)
 		
 	else
 		-- cdecl
-		asm = machine_func(M_ALLOC, length(cb_cdecl) )
+		asm = alloc( length(cb_cdecl), depq )
 		poke( asm, cb_cdecl )
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 23 )
