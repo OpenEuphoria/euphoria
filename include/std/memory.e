@@ -1141,7 +1141,7 @@ with warning
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()
 	ifdef WIN32 then
-		return DEP_really_works		
+		return (DEP_really_works and use_DEP)
 	end ifdef
 
 	return 0

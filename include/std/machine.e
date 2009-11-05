@@ -436,6 +436,18 @@ export type page_aligned_address( atom a )
 	return remainder( a, 4096 ) = 0
 end type
 
+public function is_DEP_supported()
+	return DEP_really_works
+end function
+
+public function is_using_DEP()
+	return use_DEP
+end function
+
+public procedure use_DEP(integer value)
+	use_DEP = value
+end procedure
+
 --****
 -- === Allocating and Writing to memory:
 

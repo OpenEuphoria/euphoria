@@ -122,6 +122,7 @@ export type valid_wordsize( integer i )
 end type
 
 export integer DEP_really_works = 0
+export integer use_DEP = 1
 
 -- Windows constants
 export constant MEM_COMMIT = #1000,
