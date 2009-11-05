@@ -534,12 +534,14 @@ public function call_back(object id)
 		atom addr, size, repi
 
 		s = machine_func(M_CALL_BACK, {id})
-		if not sequence(s) then
+		ifdef not EUC then
+		    if not sequence(s) then
 			-- running under eu.ex or DEP-style callbacks disabled
 			-- for some other reason. Just return the machine_func()
 			-- in this case.
 			return s
-		end if
+		    end if
+		end ifdef
 		addr = s[1]
 		rep =  int_to_bytes( s[2] )
 		size = s[3]
