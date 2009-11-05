@@ -36,7 +36,7 @@ include mode.e as mode
 include intinit.e
 
 ifdef WIN32 then
-	include std/machine.e
+	include std/machine.e as dep
 end ifdef
 
 -- Note: In several places we omit checking for bad arguments to
@@ -3386,10 +3386,22 @@ constant
 function alloc(integer size, integer depq)
 	ifdef WIN32 then
 		if depq then
-			return allocate_protect(size, 1, PAGE_EXECUTE_READWRITE)
+			return dep:allocate_protect(size, 1, PAGE_EXECUTE_READWRITE)
 		end if
 	end ifdef
 	return machine_func(M_ALLOC, size)
+end function
+function callback(object a, integer depq)
+	ifdef WIN32 then
+		if depq then
+			-- this is necessary because machine_func() doesn't
+			-- handle the DEP support required to make call_back()
+			-- work when DEP is on, so we need to call the full
+			-- front end
+			return dep:call_back({a})
+		end if
+	end ifdef
+	return machine_func(M_CALL_BACK, a)
 end function
 procedure do_callback(integer b)
 -- handle callback()
@@ -3433,7 +3445,7 @@ procedure do_callback(integer b)
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 20 )
 		poke( asm + 18, SymTab[r][S_NUM_ARGS] * 4 )
-		poke4( asm + 20, machine_func(M_CALL_BACK, routine_id("machine_callback") ) )
+		poke4( asm + 20, callback( routine_id("machine_callback"), depq ) )
 		
 	else
 		-- cdecl
@@ -3441,7 +3453,7 @@ procedure do_callback(integer b)
 		poke( asm, cb_cdecl )
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 23 )
-		poke4( asm + 23, machine_func(M_CALL_BACK, ( '+' & routine_id("machine_callback") )))
+		poke4( asm + 23, callback( ( '+' & routine_id("machine_callback") ), depq))
 	end if
 
 	val[target] = asm
