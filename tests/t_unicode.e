@@ -65,6 +65,14 @@ test_false(`isUChar(0xFFFF, strict)`, isUChar(0xFFFF, 1))
 test_true(`isUChar(0x1FFFF)`, isUChar(0x1FFFF))
 test_false(`isUChar(0x1FFFF, strict)`, isUChar(0x1FFFF, 1))
 
+test_equal( "chars_before utf8",  3, chars_before(x"7a C2A9 E6B0B4 F09d849e 0 F09d849e E6B0B4 C2A9 7a", 7, utf_8))
+test_equal( "chars_before utf16", 4, chars_before(u"7a A9 6c34 d834dd1e 0 d834dd1e 6c34 a9 7a", 6, utf_16))
+test_equal( "chars_before utf32", 5, chars_before(U"7a A9 6c34 1d11e 0 1d11e 6c34 a9 7A", 6, utf_32))
+
+test_equal( "char_count utf8",  9, char_count(x"7a C2A9 E6B0B4 F09d849e 0 F09d849e E6B0B4 C2A9 7a", utf_8))
+test_equal( "char_count utf16", 9, char_count(u"7a A9 6c34 d834dd1e 0 d834dd1e 6c34 a9 7a", utf_16))
+test_equal( "char_count utf32", 9, char_count(U"7a A9 6c34 1d11e 0 1d11e 6c34 a9 7A", utf_32))
+
 procedure ut1()
 	object c
 	

@@ -315,15 +315,24 @@ public enum
 -- ? get_seqlen("abc", 2) --> 1
 -- </eucode>
 public function get_seqlen(sequence pString, integer pIdx, integer pEncoding=utf_8)
-	atom lChar = pString[pIdx]
+	object lChar = pString[pIdx]
+	
+	if not integer(lChar) or
+	   lChar < 0 then
+		return 0xFF
+	end if
+	
 	switch pEncoding do
     	case utf_8 then
-    		return utf8_seqlen[lChar]
+    		if lChar > 255 then
+    			return 0xFF
+    		end if
+    		return utf8_seqlen[lChar + 1]
     		
     	case utf_16 then
-			if lChar < 0x0000 then return 0xFF end if
 			if lChar < 0xD800 then return 1 end if
 			if lChar < 0xDC00 then return 2 end if
+			if lChar < 0xE000 then return 0xFF end if
 			if lChar < 0x1_0000 then return 1 end if
     		return 0xFF 
     	
@@ -346,7 +355,8 @@ end function
 --
 -- Returns:
 --   An integer. The number of UCS characters in ##pSource## that occur before
--- ##pIdx##.
+-- ##pIdx##. However, if ##pIdx## is invalid it returns -1, and if an invalid
+-- UTF sequence is found, it returns -2.
 --
 -- Example:
 -- <eucode>
@@ -355,10 +365,6 @@ end function
 public function chars_before(sequence pSource, integer pIdx, integer pEncoding = utf_8)
 	if pIdx < 1 or pIdx > length(pSource) then
 		return -1
-	end if
-	
-	if pEncoding = utf_32 then
-		return pIdx - 1
 	end if
 	
 	integer cnt = 0
@@ -377,6 +383,38 @@ public function chars_before(sequence pSource, integer pIdx, integer pEncoding =
 	
 end function
 
+--**
+-- Returns the number of UCS characters in a UTF string.
+--
+-- Parameters:
+-- # ##pSource## : a sequence. Contains a UTF encoded string.
+-- # ##pEncoding##: One of ##utf_8##, ##utf_16##, or ##utf_32##. The default is ##utf_8##.
+--
+-- Returns:
+--   An integer. The number of UCS characters in ##pSource##. However, if an 
+-- invalid UTF sequence is found it returns -2.
+--
+-- Example:
+-- <eucode>
+-- ? char_count(x"7a C2A9 E6B0B4 F09d849e") --> 4
+-- </eucode>
+
+public function char_count(sequence pSource, integer pEncoding = utf_8)
+	integer cnt = 0
+	integer i = 1
+	while i <= length(pSource) do
+		atom nxt
+		cnt += 1
+		nxt = get_seqlen(pSource, i, pEncoding)
+		if nxt = 0xFF then
+			return -2
+		end if
+		i += nxt
+	end while
+	
+	return cnt
+	
+end function
 
 --**
 -- Returns the UCS character from a specific location in a UTF string
