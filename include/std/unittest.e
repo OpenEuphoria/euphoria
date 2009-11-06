@@ -79,7 +79,7 @@ include std/search.e
 include std/filesys.e
 include std/math.e
 include std/types.e
-
+include std/error.e
 --
 -- Public Variables
 --
@@ -120,12 +120,28 @@ procedure add_log(object data)
 	flush(log_fh)
 end procedure
 
-procedure test_failed(sequence name, object a, object b)
+procedure test_failed(sequence name, object a, object b, integer TF = 0)
 	if verbose >= TEST_SHOW_FAILED_ONLY then
 		printf(2, "  failed: %s, expected: ", {name})
-		pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
+		if TF then
+			if not equal(a,0) then
+				puts(2, "TRUE")
+			else
+				puts(2, "FALSE")
+			end if
+		else
+			pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
+		end if
 		puts(2, " but got: ")
-		pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
+		if TF and integer(b) then
+			if not equal(b,0) then
+				puts(2, "TRUE")
+			else
+				puts(2, "FALSE")
+			end if
+		else
+			pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
+		end if
 		puts(2, "\n")
 	end if
 
@@ -301,13 +317,13 @@ public procedure test_report()
 	end if
 end procedure
 
-procedure record_result(integer success, sequence name, object a, object b)
+procedure record_result(integer success, sequence name, object a, object b, integer TF = 0)
 	test_count += 1
 
 	if success then
 		test_passed(name)
 	else
-		test_failed(name, a, b)
+		test_failed(name, a, b, TF)
 	end if
 end procedure
 
@@ -387,7 +403,7 @@ public procedure test_not_equal(sequence name, object a, object b)
 end procedure
 
 --**
--- Records whether a test passes by comparing two values.
+-- Records whether a test passes.
 --
 -- Parameters:
 --		# ##name## : a string, the name of the test
@@ -401,13 +417,35 @@ end procedure
 -- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
 
 public procedure test_true(sequence name, object outcome)
-	integer success
-	if sequence(outcome) then
-		success = 0
+	record_result(not equal(outcome,0), name, 1, outcome, 1 )
+end procedure
+
+--**
+-- Records whether a test passes. If it fails, the program also fails.
+--
+-- Parameters:
+--		# ##name## : a string, the name of the test
+--		# ##outcome## : an object, some actual value that should not be zero.
+--
+-- Comments:
+-- This is identical to ##test_true()## except that if the test fails, the
+-- program will also be forced to fail at this point.
+--
+-- See Also:
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
+
+public procedure assert(object name, object outcome)
+	if sequence(name) then
+		test_true(name, outcome)
+		if equal(outcome,0) then
+			crash(name)
+		end if
 	else
-		success = (outcome != 0)
+		test_true(outcome, name)
+		if equal(name,0) then
+			crash(outcome)
+		end if
 	end if
-	record_result(success, name, 1, outcome )
 end procedure
 
 --**
@@ -425,13 +463,7 @@ end procedure
 -- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_false(sequence name, object outcome)
-	integer success
-	if not integer(outcome) then
-		success = 0
-	else
-		success = (outcome = 0)
-	end if
-	record_result(success, name, 0, outcome)
+	record_result(equal(outcome, 0), name, 0, outcome, 1)
 end procedure
 
 --**
@@ -444,7 +476,7 @@ end procedure
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_pass]]
 
 public procedure test_fail(sequence name)
-	record_result(0, name, 1, 0)
+	record_result(0, name, 1, 0, 1)
 end procedure
 
 --**
@@ -457,7 +489,7 @@ end procedure
 -- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_fail]]
 
 public procedure test_pass(sequence name)
-	record_result(1, name, 1, 1)
+	record_result(1, name, 1, 1, 1)
 end procedure
 
 sequence cmd = command_line()
