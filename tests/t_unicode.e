@@ -1,61 +1,65 @@
 include std/unittest.e
 include std/unicode.e
+include std/machine.e
 
-wstring s1, s2, s3
+sequence s1, s2, s3
 s1 = "abcd"
 s2 = ""
 s3 = {#FFFF, #0001, #1000, #8080}
 
-test_equal("peek_wstring and allocate_wstring#1", s1, peek_wstring(allocate_wstring(s1)))
-test_equal("peek_wstring and allocate_wstring#2", s2, peek_wstring(allocate_wstring(s2)))
-test_equal("peek_wstring and allocate_wstring#3", s3, peek_wstring(allocate_wstring(s3)))
-
+test_equal("peek_wstring and allocate_wstring#1", s1, peek_wstring(allocate_wstring(s1,1)))
+test_equal("peek_wstring and allocate_wstring#2", s2, peek_wstring(allocate_wstring(s2,1)))
+test_equal("peek_wstring and allocate_wstring#3", s3, peek_wstring(allocate_wstring(s3,1)))
+-- 
+-- atom adr
+-- adr = allocate(length(s3) * 2 + 2,1)
+-- poke_wstring(adr, (length(s3) + 1)*2, s3)
+-- test_equal("peek_wstring and poke_wstring#3", s3, peek_wstring(adr))
+-- 
+-- free(adr)
 
 -- type tests
-object a1, a2, a3, a4, a5, a6, a7
-a1 = "this is ascii string \t \n \r " & #FF & #00
-a2 = 123
-a3 = {{"not", "string", 999}}
-a4 = "this is unicode string " & #100
-a5 = "this is unicode string " & #FFFF
-a6 = "this is not unicode string " & #10000
-a7 = "this is not unicode string " & #FFFFFFFF
+object a = {
+	"this is ascii string \t \n \r " & #FF & #00,
+	123,
+	{{"not", "string", 999}},
+	"this is unicode string " & #100,
+	"this is unicode string " & #FFFF,
+	"this is not unicode string " & #10000,
+	"this is not unicode string " & #FFFFFFFF,
+	$
+	}
 
-test_equal("astring type#1", 1, astring(a1))
-test_equal("astring type#2", 0, astring(a2))
-test_equal("astring type#3", 0, astring(a3))
-test_equal("astring type#4", 0, astring(a4))
-test_equal("astring type#5", 0, astring(a5))
-
-test_equal("wstring type#1", 1, wstring(a1))
-test_equal("wstring type#2", 0, wstring(a2))
-test_equal("wstring type#3", 0, wstring(a3))
-test_equal("wstring type#4", 1, wstring(a4))
-test_equal("wstring type#5", 1, wstring(a5))
-test_equal("wstring type#6", 0, wstring(a6))
-test_equal("wstring type#7", 0, wstring(a7))
-
+for i = 1 to length(a) do
+	a[i] = validate(a[i], utf_16, 0)
+end for
+test_equal("validate utfs", {0,-1,1,0,0,28, 28}, a)
 
 -- utf8 tests -- taken from rfc 2279
 
-wstring e1, e2, e3
-astring f1, f2, f3
+sequence e1, e2, e3
+sequence f1, f2, f3
+sequence g1, g2, g3
 
-e1 = {#0041, #2262, #0391, #002E} -- "A<NOT IDENTICAL TO><ALPHA>."
-e2 = {#D55C, #AD6D, #C5B4} -- "hangugo" in Hangul
-e3 = {#65E5, #672C, #8A9E} -- "nihongo" in Kanji
+e1 = u"0041 2262 0391 002E" -- "A<NOT IDENTICAL TO><ALPHA>."
+e2 = u"D55C AD6D C5B4" -- "hangugo" in Hangul
+e3 = u"65E5 672C 8A9E" -- "nihongo" in Kanji
 
-f1 = utf8_encode(e1)
-f2 = utf8_encode(e2)
-f3 = utf8_encode(e3)
+f1 = toUTF(e1, utf_16, utf_8)
+f2 = toUTF(e2, utf_16, utf_8)
+f3 = toUTF(e3, utf_16, utf_8)
 
-test_equal("utf8_encode#1", {#41, #E2, #89, #A2, #CE, #91, #2E}, f1)
-test_equal("utf8_encode#2", {#ED, #95, #9C, #EA, #B5, #AD, #EC, #96, #B4}, f2)
-test_equal("utf8_encode#3", {#E6, #97, #A5, #E6, #9C, #AC, #E8, #AA, #9E}, f3)
+test_equal("utf8_encode#1", x"41E289A2CE912E", f1)
+test_equal("utf8_encode#2", x"ED959CEAB5ADEC96B4", f2)
+test_equal("utf8_encode#3", x"E697A5E69CACE8AA9E", f3)
 
-test_equal("utf8_decode#1", e1, utf8_decode({#41, #E2, #89, #A2, #CE, #91, #2E}))
-test_equal("utf8_decode#2", e2, utf8_decode({#ED, #95, #9C, #EA, #B5, #AD, #EC, #96, #B4}))
-test_equal("utf8_decode#3", e3, utf8_decode({#E6, #97, #A5, #E6, #9C, #AC, #E8, #AA, #9E}))
+g1 = toUTF(f1, utf_8, utf_16)
+g2 = toUTF(f2, utf_8, utf_16)
+g3 = toUTF(f3, utf_8, utf_16)
+
+test_equal("utf8_decode#1", e1, g1)
+test_equal("utf8_decode#2", e2, g2)
+test_equal("utf8_decode#3", e3, g3)
 
 
 test_true(`isUChar('a')`, isUChar('a'))

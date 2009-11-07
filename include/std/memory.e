@@ -229,10 +229,6 @@ public function poke_wstring(atom buffaddr, integer buffsize, sequence s)
 		return 0
 	end if
 	
-	if not wstring(s) then
-		return 0
-	end if
-	
 	if buffsize <= 2 * length(s) then
 		return 0
 	end if
@@ -293,6 +289,55 @@ public function allocate_string(sequence s, integer cleanup = 0 )
 	end if
 
 	return mem
+end function
+
+--**
+-- Create a C-style null-terminated wchar_t string in memory
+--
+-- Parameters:
+--   # ##s## : a unicode (utf16) string
+--
+-- Returns:
+--   An **atom**, the address of the allocated string, or 0 on failure.
+--
+-- See Also:
+-- [[:allocate_string]]
+--
+public function allocate_wstring(sequence s, integer cleanup = 0 )
+	atom mem
+	
+	mem = allocate( 2 * (length(s) + 1) )
+	if mem then
+		poke2(mem, s)
+		poke2(mem + length(s)*2, 0)
+		if cleanup then
+			mem = delete_routine( mem, FREE_RID )
+		end if
+	end if
+	
+	return mem
+end function
+
+--**
+-- Return a unicode (utf16) string that are stored at machine address a.
+--
+-- Parameters:
+--   # ##addr## : an atom, the address of the string in memory
+--
+-- Returns:
+--   The **string**, at the memory position.  The terminator is the null word (two bytes equal to 0).
+--
+-- See Also:
+-- [[:peek_string]]
+
+public function peek_wstring(atom addr)
+	atom ptr = addr
+	
+	while peek2u(ptr) do
+		ptr += 2
+	end while
+	
+	return peek2u({addr, (ptr - addr) / 2})
 end function
 
 
@@ -570,9 +615,11 @@ FREE_RID = routine_id("free")
 -- <eucode>
 -- -- The following are equivalent:
 -- -- method 1
+-- Get 4 2-byte numbers starting address 100.
 -- s = {peek2u(100), peek2u(102), peek2u(104), peek2u(106)}
 --
 -- -- method 2
+-- Get 4 2-byte numbers starting address 100.
 -- s = peek2u({100, 4})
 -- </eucode>
 -- 

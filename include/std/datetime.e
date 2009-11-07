@@ -8,7 +8,7 @@
 --
 namespace datetime
 
-include std/unicode.e -- needed for parse() and format()
+
 include std/machine.e
 include std/dll.e
 include std/sequence.e
@@ -785,7 +785,7 @@ end function
 -- See Also:
 --     [[:to_unix]], [[:parse]]
 
-public function format(datetime d, wstring pattern = "%Y-%m-%d %H:%M:%S")
+public function format(datetime d, sequence pattern = "%Y-%m-%d %H:%M:%S")
 	integer in_fmt, ch, tmp
 	sequence res
 
