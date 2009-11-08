@@ -121,11 +121,11 @@ public constant OBJ_SEQUENCE = 3
 
 --**
 -- Boolean FALSE value
-public constant FALSE = 0
+public constant FALSE = (1=0)
 
 --**
 -- Boolean TRUE value
-public constant TRUE = 1
+public constant TRUE = (1=1)
 
 --**
 -- Predefined character sets:
