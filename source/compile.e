@@ -5290,7 +5290,7 @@ procedure opPEEK()
 	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
 		if find( Code[pc], { PEEK, PEEKS } ) then
 			seg_peek1(Code[pc+2], Code[pc+1], 1)
-		elsif find( Code[pc], {PEEK2S, PEEK2S}) then
+		elsif find( Code[pc], {PEEK2U, PEEK2S}) then
 			seg_peek2(Code[pc+2], Code[pc+1], 1)
 		elsif find( Code[pc], {PEEK4U, PEEK4S}) then
 
