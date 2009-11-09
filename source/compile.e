@@ -1195,7 +1195,7 @@ function machine_func_type(integer x)
 					range = {-1, 1000}
 					return {TYPE_INTEGER, range}
 
-				elsif find(func_num, {M_WHERE, M_OPEN_DLL, M_CALLBACK,
+				elsif find(func_num, {M_WHERE, M_OPEN_DLL,
 									  M_DEFINE_VAR, M_INSTANCE, M_ALLOC,
 									  M_F64_TO_A, M_F32_TO_A}) then
 					return {TYPE_ATOM, novalue}
