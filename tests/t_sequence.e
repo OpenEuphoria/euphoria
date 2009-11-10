@@ -322,10 +322,59 @@ test_equal("pivot #5", {{5}, {}, {}}, pivot( 5, 10 ) )
 test_equal("pivot #6", {{}, {}, {}}, pivot( {}) )
 test_equal("pivot #7", {{"abc", "bcd"}, {}, {"def", "efg", "cdf"}}, pivot( {"abc", "def", "bcd", "efg", "cdf"}, "cat") )
 
-function gt_ten(integer a, object t)
-	return a > t
+
+function mask_nums(atom a, object t)
+    if sequence(t) then
+        return 0
+    end if
+    return and_bits(a, t) != 0
 end function
-test_equal("filter #1", {20,30,40}, filter({1,2,3,20,4,30,6,40,6}, routine_id("gt_ten"), 10))
+
+function even_nums(atom a, object t)
+    return and_bits(a,1) = 0
+end function
+
+constant data = {5,8,20,19,3,2,10}
+test_equal("filter #1", {5,19,3}, filter(data, routine_id("mask_nums"), 1))
+test_equal("filter #2", {19, 3, 2, 10}, filter(data, routine_id("mask_nums"), 2))
+test_equal("filter #3", {8, 20, 2, 10}, filter(data, routine_id("even_nums")))
+
+test_equal("filter in lt", {5,3,2}, filter(data, "lt", 8))
+test_equal("filter in <", {5,3,2}, filter(data, "<", 8))
+test_equal("filter in le", {5,8,3,2}, filter(data, "le", 8))
+test_equal("filter in <=", {5,8,3,2}, filter(data, "<=", 8))
+test_equal("filter in eq", {8}, filter(data, "eq", 8))
+test_equal("filter in =", {8}, filter(data, "=", 8))
+test_equal("filter in ==", {8}, filter(data, "==", 8))
+test_equal("filter in ne", {5,20,19,3,2,10}, filter(data, "ne", 8))
+test_equal("filter in !=", {5,20,19,3,2,10}, filter(data, "!=", 8))
+test_equal("filter in gt", {20,19,10}, filter(data, "gt", 8))
+test_equal("filter in >", {20,19,10}, filter(data, ">", 8))
+test_equal("filter in ge", {8,20,19,10}, filter(data, "ge", 8))
+test_equal("filter in >=", {8,20,19,10}, filter(data, ">=", 8))
+
+-- Using 'in' and 'out' with sets.
+test_equal("filter in set", {5,8,3}, filter(data, "in", {3,4,5,6,7,8}))
+test_equal("filter out set", {20,19,2,10}, filter(data, "out", {3,4,5,6,7,8}))
+
+-- Using 'in' and 'out' with ranges.
+test_equal("filter in [] range", {5,8,3}, filter(data, "in",  {3,8}, "[]"))
+test_equal("filter in [) range", {5,3}, filter(data, "in",  {3,8}, "[)")) 
+test_equal("filter in (] range", {5,8}, filter(data, "in",  {3,8}, "(]")) 
+test_equal("filter in () range", {5}, filter(data, "in",  {3,8}, "()")) 
+test_equal("filter out [] range", {20,19,2,10}, filter(data, "out", {3,8}, "[]")) 
+test_equal("filter out [) range", {8,20,19,2,10}, filter(data, "out", {3,8}, "[)")) 
+test_equal("filter out (] range", {20,19,3,2,10}, filter(data, "out", {3,8}, "(]")) 
+test_equal("filter out () range", {8,20,19,3,2,10}, filter(data, "out", {3,8}, "()")) 
+
+function quiksort(sequence s)
+	if length(s) < 2 then
+		return s
+	end if
+	return quiksort( filter(s[2..$], "<=", s[1]) ) & s[1] & quiksort(filter(s[2..$], ">", s[1]))
+end function
+test_equal("qs", {0,1,2,2,4,4,4,5,5,7,7,8,9,32,54,67,445}, 
+				quiksort( {5,4,7,2,4,9,1,0,4,32,7,54,2,5,8,445,67} ))
 
 
 function sprinter(object a, object t)

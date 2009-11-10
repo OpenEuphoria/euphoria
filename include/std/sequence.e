@@ -1632,49 +1632,266 @@ end function
 --
 -- Parameters:
 -- * ##source## : sequence to filter
--- * ##rid## : [[:routine_id]] of function to use as comparator
+-- * ##rid## : Either a [[:routine_id]] of function to use as comparator or one
+-- of the predefined comparitors.
 -- * ##userdata## : an object passed to each invocation of ##rid##. If omitted,
 --                 {} is used.
+-- * ##rangetype##: A sequence. Only used when ##rid## is "in" or "out". This is
+-- used to let the function know how to interpret ##userdata##. When ##rangetype##
+-- is an empty string (which is the default), then ##userdata## is treated as a set of zero or more
+-- discrete items such that "in" will only return items from ##source## that are
+-- in the set of item in ##userdata## and "out" returns those not in ##userdata##.
+-- The other values for ##rangetype## mean that ##userdata## must be a set of
+-- exactly two items, that represent the lower and upper limits of a range of
+-- values. 
 --
 -- Returns:
---		A **sequence**, made of the elements in ##source## which passed the test.
+--		A **sequence**, made of the elements in ##source## which passed the 
+-- comparitor test.
 --
 -- Comments:
 -- * The only items from ##source## that are returned are those that pass the test.
--- Each item in ##source##, along with the ##userdata## is passed to the comparator
--- routine ##rid##. This function will return a non-zero atom if the item is to
--- be included in the result sequence, otherwise it should return zero to
--- exclude it from the result.
--- * The comparator must take two parameters and return an atom.
--- The first parameter type must be compatible with all elements in ##source##.
--- The second parameter is an ##object##.
+-- * When ##rid## is a routine_id, that user defined routine must be a function.
+-- Each item in ##source##, along with the ##userdata## is passed to the function.
+-- The function must return a non-zero atom if the item is to be included in the
+-- result sequence, otherwise it should return zero to exclude it from the result.
+-- * The predefined comparitors are...
+--
+-- | "<"  or "lt" | return items in ##source## that are less than ##userdata## |
+-- | "<=" or "le" | return items in ##source## that are less than or equal to ##userdata## |
+-- | "="  or "==" or "eq" | return items in ##source## that are equal to ##userdata## |
+-- | "!=" or "ne" | return items in ##source## that are not equal to ##userdata## |
+-- | ">"  or "gt" | return items in ##source## that are greater than ##userdata## |
+-- | ">=" or "ge" | return items in ##source## that are greater than or equal to ##userdata## |
+-- | "in" | return items in ##source## that are in ##userdata## |
+-- | "out" | return items in ##source## that are not in ##userdata## |
+--
+-- * Range Type Usage
+-- |= Range Type  |= Meaning |
+-- | "[]"         | Inclusive range. Lower and upper are in the range. |
+-- | "[)"         | Low Inclusive range. Lower is in the range but upper is not. |
+-- | "(]"         | High Inclusive range. Lower is not in the range but upper is. |
+-- | "()"         | Exclusive range. Lower and upper are not in the range. |
 --
 -- Example 1:
 -- <eucode>
--- function gt_select(integer a, object t)
---     return a > t
+-- function mask_nums(atom a, object t)
+--     if sequence(t) then
+--         return 0
+--     end if
+--     return and_bits(a, t) != 0
+-- end function
+--
+-- function even_nums(atom a, atom t)
+--     return and_bits(a,1) = 0
 -- end function
 --
 -- constant data = {5,8,20,19,3,2,10}
--- s = filter(data, routine_id("gt_select"), 10)
--- -- s is {20, 19}
--- s = filter(data, routine_id("gt_select"), 5)
--- -- s is {8, 20, 19, 10}
+-- filter(data, routine_id("mask_nums"), 1) --> {5,19,3}
+-- filter(data, routine_id("mask_nums"), 2) -->{19, 3, 2, 10}
+-- filter(data, routine_id("even_nums")) -->{8, 20, 2, 10}
+--
+-- -- Using 'in' and 'out' with sets.
+-- filter(data, "in", {3,4,5,6,7,8}) -->{5,8,3}
+-- filter(data, "out", {3,4,5,6,7,8}) -->{20,19,2,10}
+--
+-- -- Using 'in' and 'out' with ranges.
+-- filter(data, "in",  {3,8}, "[]") --> {5,8,3}
+-- filter(data, "in",  {3,8}, "[)") --> {5,3}
+-- filter(data, "in",  {3,8}, "(]") --> {5,8}
+-- filter(data, "in",  {3,8}, "()") --> {5}
+-- filter(data, "out", {3,8}, "[]") --> {20,19,2,10}
+-- filter(data, "out", {3,8}, "[)") --> {8,20,19,2,10}
+-- filter(data, "out", {3,8}, "(]") --> {20,19,3,2,10}
+-- filter(data, "out", {3,8}, "()") --> {8,20,19,3,2,10}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- function quiksort(sequence s)
+-- 	if length(s) < 2 then
+-- 		return s
+-- 	end if
+-- 	return quiksort( filter(s[2..$], "<=", s[1]) ) & s[1] & quiksort(filter(s[2..$], ">", s[1]))
+-- end function
+-- ? quiksort( {5,4,7,2,4,9,1,0,4,32,7,54,2,5,8,445,67} )
+-- --> {0,1,2,2,4,4,4,5,5,7,7,8,9,32,54,67,445}
 -- </eucode>
 --
 -- See Also:
 --   [[:apply]]
 
-public function filter(sequence source, integer rid, object userdata = {})
-	sequence dest = {}
+public function filter(sequence source, object rid, object userdata = {}, object rangetype = "")
+	sequence dest
+	integer idx
 
-	for a = 1 to length(source) do
-		if call_func(rid, {source[a], userdata}) then
-			dest &= {source[a]}
-		end if
-	end for
-
-	return dest
+	if length(source) = 0 then
+		return source
+	end if
+	dest = repeat(0, length(source))
+	idx = 0
+	switch rid do
+		case "<", "lt" then
+			for a = 1 to length(source) do
+				if compare(source[a], userdata) < 0 then
+					idx += 1
+					dest[idx] = source[a]
+				end if
+			end for
+		
+		case "<=", "le" then
+			for a = 1 to length(source) do
+				if compare(source[a], userdata) <= 0 then
+					idx += 1
+					dest[idx] = source[a]
+				end if
+			end for
+		
+		case "=", "==", "eq" then
+			for a = 1 to length(source) do
+				if compare(source[a], userdata) = 0 then
+					idx += 1
+					dest[idx] = source[a]
+				end if
+			end for
+		
+		case "!=", "ne" then
+			for a = 1 to length(source) do
+				if compare(source[a], userdata) != 0 then
+					idx += 1
+					dest[idx] = source[a]
+				end if
+			end for
+		
+		case ">", "gt" then
+			for a = 1 to length(source) do
+				if compare(source[a], userdata) > 0 then
+					idx += 1
+					dest[idx] = source[a]
+				end if
+			end for
+		
+		case ">=", "ge" then
+			for a = 1 to length(source) do
+				if compare(source[a], userdata) >= 0 then
+					idx += 1
+					dest[idx] = source[a]
+				end if
+			end for
+		
+		case "in" then
+			switch rangetype do
+				case "" then
+					for a = 1 to length(source) do
+						if find(source[a], userdata)  then
+							idx += 1
+							dest[idx] = source[a]
+						end if
+					end for
+					
+				case "[]" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) >= 0 then
+							if compare(source[a], userdata[2]) <= 0 then
+								idx += 1
+								dest[idx] = source[a]
+							end if
+						end if
+					end for
+					
+				case "[)" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) >= 0 then
+							if compare(source[a], userdata[2]) < 0 then
+								idx += 1
+								dest[idx] = source[a]
+							end if
+						end if
+					end for
+				case "(]" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) > 0 then
+							if compare(source[a], userdata[2]) <= 0 then
+								idx += 1
+								dest[idx] = source[a]
+							end if
+						end if
+					end for
+				case "()" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) > 0 then
+							if compare(source[a], userdata[2]) < 0 then
+								idx += 1
+								dest[idx] = source[a]
+							end if
+						end if
+					end for
+					
+			end switch
+		
+		case "out" then
+			switch rangetype do
+				case "" then
+					for a = 1 to length(source) do
+						if not find(source[a], userdata)  then
+							idx += 1
+							dest[idx] = source[a]
+						end if
+					end for
+					
+				case "[]" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) < 0 then
+							idx += 1
+							dest[idx] = source[a]
+						elsif compare(source[a], userdata[2]) > 0 then
+							idx += 1
+							dest[idx] = source[a]
+						end if
+					end for
+					
+				case "[)" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) < 0 then
+							idx += 1
+							dest[idx] = source[a]
+						elsif compare(source[a], userdata[2]) >= 0 then
+							idx += 1
+							dest[idx] = source[a]
+						end if
+					end for
+				case "(]" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) <= 0 then
+							idx += 1
+							dest[idx] = source[a]
+						elsif compare(source[a], userdata[2]) > 0 then
+							idx += 1
+							dest[idx] = source[a]
+						end if
+					end for
+				case "()" then
+					for a = 1 to length(source) do
+						if compare(source[a], userdata[1]) <= 0 then
+							idx += 1
+							dest[idx] = source[a]
+						elsif compare(source[a], userdata[2]) >= 0 then
+							idx += 1
+							dest[idx] = source[a]
+						end if
+					end for
+					
+			end switch
+		
+		case else
+			for a = 1 to length(source) do
+				if call_func(rid, {source[a], userdata}) then
+					idx += 1
+					dest[idx] = source[a]
+				end if
+			end for
+	end switch
+	return dest[1..idx]
 end function
 
 function filter_alpha(object elem, object ud)
@@ -2360,6 +2577,23 @@ end function
 --   ? pivot( 5 )
 --     -- Ans: {{}, {}, {5}}
 --   </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- function quiksort(sequence s)
+-- 	if length(s) < 2 then
+-- 		return s
+-- 	end if
+-- 	sequence k
+-- 	
+-- 	k = pivot(s, s[rand(length(s))])
+-- 	
+-- 	return quiksort(k[1]) & k[2] & quiksort(k[3])
+-- end function
+-- sequence t2 = {5,4,7,2,4,9,1,0,4,32,7,54,2,5,8,445,67}
+-- ? quiksort(t2) --> {0,1,2,2,4,4,4,5,5,7,7,8,9,32,54,67,445}
+-- </eucode>
+
 
 public function pivot(object data_p, object pivot_p = 0)
 	sequence result_
