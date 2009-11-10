@@ -18,19 +18,15 @@ procedure get_answer(object correct)
 	if answer[1] = GET_SUCCESS then
 	    if equal(answer[2], correct) then
 		puts(SCREEN, "Correct!\n\n")
-		sound(2000)
 		t = time()
 		while time() < t+0.1 do
 		end while
-		sound(0)
 		return
 	    elsif i < NTRYS then
 		puts(SCREEN, "Try again\n")
-		sound(200)
 		t = time()
 		while time() < t+0.4 do
 		end while
-		sound(0)
 	    end if
 	else
 	    puts(SCREEN, "syntax error - a Euphoria object is expected\n")
