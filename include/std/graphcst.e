@@ -33,47 +33,65 @@ public enum
 --
 
 -- COLOR values -- for characters and pixels
-public constant
-	--** in graphics modes this is "transparent"
-	BLACK = 0,
-	GREEN = 2,
-	MAGENTA = 5,
-	WHITE = 7,
-	GRAY  = 8,
-	BRIGHT_GREEN = 10,
-	BRIGHT_MAGENTA = 13,
-	BRIGHT_WHITE = 15
+	--** in graphics modes BLACK is "transparent"
 
 ifdef OSX then
 public constant
-	BLUE        =  4,
-	CYAN        =  3,
-	RED         =  1,
-	BROWN       =  6,
-	BRIGHT_BLUE = 12,
-	BRIGHT_CYAN = 14,
-	BRIGHT_RED  =  9,
-	YELLOW      = 11
+	BLACK          =  0,
+	RED            =  1,
+	GREEN          =  2,
+	BROWN          =  3,
+	BLUE           =  4,
+	MAGENTA        =  5,
+	CYAN           =  6,
+	WHITE          =  7,
+	GRAY           =  8,
+	BRIGHT_RED     =  9,
+	BRIGHT_GREEN   = 10,
+	YELLOW         = 11,
+	BRIGHT_BLUE    = 12,
+	BRIGHT_MAGENTA = 13,
+	BRIGHT_CYAN    = 14,
+	BRIGHT_WHITE   = 15,
+	$
 elsifdef UNIX then
 public constant
-	BLUE        =  4,
-	CYAN        =  6,
-	RED         =  1,
-	BROWN       =  3,
-	BRIGHT_BLUE = 12,
-	BRIGHT_CYAN = 14,
-	BRIGHT_RED  =  9,
-	YELLOW      = 11
+	BLACK          =  0,
+	RED            =  1,
+	GREEN          =  2,
+	BROWN          =  3,
+	BLUE           =  4,
+	MAGENTA        =  5,
+	CYAN           =  6,
+	WHITE          =  7,
+	GRAY           =  8,
+	BRIGHT_RED     =  9,
+	BRIGHT_GREEN   = 10,
+	YELLOW         = 11,
+	BRIGHT_BLUE    = 12,
+	BRIGHT_MAGENTA = 13,
+	BRIGHT_CYAN    = 14,
+	BRIGHT_WHITE   = 15,
+	$
 elsedef
 public constant
-	BLUE        =  1,
-	CYAN        =  3,
-	RED         =  4,
-	BROWN       =  6,
-	BRIGHT_BLUE =  9,
-	BRIGHT_CYAN = 11,
-	BRIGHT_RED  = 12,
-	YELLOW      = 14
+	BLACK          =  0,
+	BLUE           =  1,
+	GREEN          =  2,
+	CYAN           =  3,
+	RED            =  4,
+	MAGENTA        =  5,
+	BROWN          =  6,
+	WHITE          =  7,
+	GRAY           =  8,
+	BRIGHT_BLUE    =  9,
+	BRIGHT_GREEN   = 10,
+	BRIGHT_CYAN    = 11,
+	BRIGHT_RED     = 12,
+	BRIGHT_MAGENTA = 13,
+	YELLOW         = 14,
+	BRIGHT_WHITE   = 15,
+	$
 end ifdef
 
 --** 
