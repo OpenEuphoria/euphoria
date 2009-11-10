@@ -44,35 +44,35 @@ public constant
 	BRIGHT_MAGENTA = 13,
 	BRIGHT_WHITE = 15
 
-public integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN,
-	BRIGHT_RED, YELLOW
-
 ifdef OSX then
-	BLUE        =  1
-	CYAN        = 11
-	RED         =  4
-	BROWN       =  3
-	BRIGHT_BLUE =  9
-	BRIGHT_CYAN = 14
-	BRIGHT_RED  = 12
-	YELLOW      =  6
+public constant
+	BLUE        =  4,
+	CYAN        =  3,
+	RED         =  1,
+	BROWN       =  6,
+	BRIGHT_BLUE = 12,
+	BRIGHT_CYAN = 14,
+	BRIGHT_RED  =  9,
+	YELLOW      = 11
 elsifdef UNIX then
-	BLUE        =  4
-	CYAN        =  6
-	RED         =  1
-	BROWN       =  3
-	BRIGHT_BLUE = 12
-	BRIGHT_CYAN = 14
-	BRIGHT_RED  =  9
+public constant
+	BLUE        =  4,
+	CYAN        =  6,
+	RED         =  1,
+	BROWN       =  3,
+	BRIGHT_BLUE = 12,
+	BRIGHT_CYAN = 14,
+	BRIGHT_RED  =  9,
 	YELLOW      = 11
 elsedef
-	BLUE        =  1
-	CYAN        =  3
-	RED         =  4
-	BROWN       =  6
-	BRIGHT_BLUE =  9
-	BRIGHT_CYAN = 11
-	BRIGHT_RED  = 12
+public constant
+	BLUE        =  1,
+	CYAN        =  3,
+	RED         =  4,
+	BROWN       =  6,
+	BRIGHT_BLUE =  9,
+	BRIGHT_CYAN = 11,
+	BRIGHT_RED  = 12,
 	YELLOW      = 14
 end ifdef
 
