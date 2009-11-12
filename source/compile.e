@@ -3418,9 +3418,31 @@ procedure opIS_A_SEQUENCE()
 end procedure
 
 procedure opIS_AN_OBJECT()
-	CDeRef(Code[pc+2])
-	c_stmt("@ = 1;\n", Code[pc+2])
-	target = {1, 1}
+	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
+	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
+		c_stmt("@ = 3;\n", Code[pc+2])
+	elsif TypeIs(Code[pc+1], TYPE_INTEGER) then
+		c_stmt("@ = 1;\n", Code[pc+2])
+	elsif TypeIs(Code[pc+1], TYPE_DOUBLE) then
+		c_stmt("if (IS_ATOM_INT(DoubleToInt(@)))\n", Code[pc+1])
+		c_stmt("@ = 1;\n", Code[pc+2])
+		c_stmt0("else\n")
+		c_stmt("@ = 2;\n", Code[pc+2])
+	else
+		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
+		c_stmt("@ = 1;\n", Code[pc+2])
+		c_stmt("else if (IS_ATOM_DBL(@)) {\n", Code[pc+1])
+		c_stmt(" if (IS_ATOM_INT(DoubleToInt(@))) {\n", Code[pc+1])
+		c_stmt(" @ = 1;\n", Code[pc+2])
+		c_stmt0(" } else {\n")
+		c_stmt(" @ = 2;\n", Code[pc+2])
+		c_stmt("} } else if (IS_SEQUENCE(@))\n", Code[pc+1])
+		c_stmt("@ = 3;\n", Code[pc+2])
+		c_stmt0("else\n")
+		c_stmt("@ = 0;\n", Code[pc+2])
+	end if
+	CDeRefStr("_0")
+	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
