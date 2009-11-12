@@ -13,6 +13,7 @@ include std/machine.e
 include std/text.e
 include std/sequence.e
 include std/error.e
+public include std/unicode.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -1171,6 +1172,18 @@ public enum
 	UNIX_TEXT,
 	DOS_TEXT
 
+public enum
+	ANSI,
+	UTF,
+	UTF_8,
+	UTF_16,
+	UTF_16BE,
+	UTF_16LE,
+	UTF_32,
+	UTF_32BE,
+	UTF_32LE,
+	$
+	
 --**
 -- Read the contents of a file as a single sequence of bytes.
 --
@@ -1181,9 +1194,47 @@ public enum
 --                     and **TEXT_MODE** assumes //text mode// that ensures that
 --                     lines end with just a Ctrl-J (NewLine) character,
 --                     and the first byte value of 26 (Ctrl-Z) is interpreted as End-Of-File.
+--		# ##encoding##: An integer. One of 	ANSI, UTF, UTF_8, UTF_16, UTF_16BE,
+--                     UTF_16LE, UTF_32, UTF_32BE, UTF_32LE. The default is ANSI.
 --
 -- Returns:
---		A **sequence**, holding all the bytes in the file.
+--		A **sequence**, holding the entire file. 
+--
+-- Comments
+-- * When using BINARY_MODE, each byte in the file is returned as an element in
+--   the return sequence.
+-- * When not using BINARY_MODE, the file will be interpreted as a text file. This
+-- means that all line endings will be transformed to a single 0x0A character and
+-- the first 0x1A character (Ctrl-Z) will indicate the end of file (all data after this 
+-- will not be returned to the caller.)
+-- * Text files are always returned as UTF_32 encoded files.
+-- * Encoding ...
+-- ** ANSI: no interpretation of the file data is done. All bytes are simply returned
+-- as characters.
+-- ** UTF: The file data is examined to work out which UTF encoding method was used
+-- to create the file. If the file starts with a valid Byte Order Marker (BOM) it can
+-- quickly decide between UTF_8, UTF_16 and UTF_32. For files without a BOM, 
+-- if the file is completely valid UTF_8 encoding then that is what is used. Failing
+-- that, if there are no null bytes, the ANSI is assumed. Failing that, it is tested
+-- for being a valid UTF_16 or UTF_32 format. As a last resort, it will be assumed to
+-- be an ANSI file.
+-- ** UTF_8: Any valid UTF_8 BOM is removed and the data is converted to UTF_32 
+-- format before returning. This means that if it contains any invalidly encoded
+-- Unicode characters, they will be ignored.
+-- ** UTF_16: Any valid UTF_16 BOM is removed and the data is converted to UTF_32 
+-- format before returning. This means that if it contains any invalidly encoded
+-- Unicode characters, they will be ignored.
+-- ** UTF_16LE: Any valid little-endian UTF_16 BOM is removed and the data is converted to UTF_32 
+-- format before returning. This means that if it contains any invalidly encoded
+-- Unicode characters, they will be ignored.
+-- ** UTF_16BE: Any valid big-endian UTF_16 BOM is removed and the data is converted to UTF_32 
+-- format before returning. This means that if it contains any invalidly encoded
+-- Unicode characters, they will be ignored.
+-- ** UTF_32: Any valid UTF_32 BOM is removed.
+-- ** UTF_32LE: Any valid little-endian UTF_32 BOM is removed.
+-- ** UTF_32BE: Any valid big-endian UTF_32 BOM is removed.
+-- * If one of the UTF_32 encodings is supplied, invalid Unicode characters are 
+-- not stripped out but are returned in the file data.
 --
 -- Example 1:
 -- <eucode>
@@ -1200,14 +1251,22 @@ public enum
 -- -- data contains the entire contents of ##my_file.txt##
 -- </eucode>
 --
+-- Example 3:
+-- <eucode>
+-- data = read_file("my_file.txt", TEXT_MODE, UTF_8)
+-- -- The UTF encoded contents of ##my_file.txt## is stored in 'data' as UTF_32
+-- </eucode>
+--
+--
 -- See Also:
 --     [[:write_file]], [[:read_lines]]
 
-public function read_file(object file, integer as_text = BINARY_MODE)
+public function read_file(object file, integer as_text = BINARY_MODE, integer encoding = ANSI)
 	integer fn
 	integer len
 	sequence ret
-	integer temp
+	object temp
+	atom adr
 
 	if sequence(file) then
 		fn = open(file, "rb")
@@ -1242,22 +1301,221 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 		end for
 	end ifdef
 
-	if as_text != BINARY_MODE then
-		fn = find(26, ret) -- Any Ctrl-Z found?
-		if fn then
-			-- Ok, so truncate the file data
-			ret = ret[1 .. fn - 1]
-		end if
+	if as_text = BINARY_MODE then
+		return ret
+	end if
+	
+	-- Treat as a text file.
+	while 1 label "ChkEnc" do
+		switch encoding do
+			case ANSI then
+				break
+				
+			case UTF_8 then
+				if length(ret) >= 3 then
+					if equal(ret[1..3], x"ef bb bf") then
+						-- strip out any BOM that might be present.
+						ret = ret[4..$]
+					end if
+				end if
+				ret = toUTF(ret, utf_8, utf_32)
+				
+			case UTF_16 then
+				if length(ret) >= 2 then
+					if equal(ret[1 .. 2], x"fe ff") then
+						encoding = UTF_16BE
+						
+					elsif equal(ret[1 .. 2], x"ff fe") then
+						encoding = UTF_16LE
+						
+					else
+						if validate(ret, utf_16) = 0 then -- is valid
+							encoding = UTF_16BE
+						else
+							encoding = UTF_16LE -- assume little-endian and retest.
+						end if
+					end if
+				else
+					break
+				end if
+				retry "ChkEnc"
+			
+			case UTF_16BE then
+				if length(ret) >= 2 then
+					if equal(ret[1 .. 2], x"fe ff") then
+						ret = ret[3..$]
+					end if
+				end if
+				for i = 1 to length(ret) - 1 by 2 do
+					temp = ret[i]
+					ret[i] = ret[i+1]
+					ret[i+1] = temp
+				end for
+				
+				fallthru
+				
+			case UTF_16LE then
+				if length(ret) >= 2 then
+					if equal(ret[1 .. 2], x"ff fe") then
+						ret = ret[3..$]
+					end if
+				end if
+				
+				adr = allocate(length(ret),1)
+				poke(adr, ret)
+				ret = peek2u({adr, length(ret) / 2})
 
-		-- Convert Windows endings
-		ret = replace_all(ret, {13,10}, {10})
-		if length(ret) > 0 then
-			if ret[$] != 10 then
-				ret &= 10
-			end if
-		else
-			ret = {10}
+				ret = toUTF(ret, utf_16, utf_32)
+				
+			case UTF_32 then
+				if length(ret) >= 4 then
+					if equal(ret[1 .. 4], x"00 00 fe ff") then
+						encoding = UTF_32BE
+						
+					elsif equal(ret[1 .. 4], x"ff fe 00 00") then
+						encoding = UTF_32LE
+						
+					else
+						if validate(ret, utf_32) = 0 then -- is valid
+							encoding = UTF_32BE
+						else
+							encoding = UTF_32LE -- assume little-endian and retest.
+						end if
+					end if
+				else
+					break
+				end if
+				retry "ChkEnc"
+			
+			case UTF_32BE then
+				if length(ret) >= 4 then
+					if equal(ret[1 .. 4], x"00 00 fe ff") then
+						ret = ret[5..$]
+					end if
+				end if
+				for i = 1 to length(ret) - 3 by 4 do
+					temp = ret[i]
+					ret[i] = ret[i+3]
+					ret[i+3] = temp
+					temp = ret[i+1]
+					ret[i+1] = ret[i+2]
+					ret[i+2] = temp
+				end for
+				
+				fallthru
+				
+			case UTF_32LE then
+				if length(ret) >= 4 then
+					if equal(ret[1 .. 2], x"ff fe 00 00") then
+						ret = ret[5..$]
+					end if
+				end if
+				
+				adr = allocate(length(ret),1)
+				poke(adr, ret)
+				ret = peek4u({adr, length(ret) / 4})
+
+			case UTF then
+				if length(ret) >= 4 then
+					if equal(ret[1 .. 4], x"ff fe 00 00") then
+						encoding = UTF_32LE
+						retry "ChkEnc"
+					end if
+					if equal(ret[1 .. 4], x"00 00 fe ff") then
+						encoding = UTF_32BE
+						retry "ChkEnc"
+					end if
+				end if
+				if length(ret) >= 2 then
+					if equal(ret[1 .. 2], x"ff fe") then
+						encoding = UTF_16LE
+						retry "ChkEnc"
+					end if
+					if equal(ret[1 .. 2], x"fe ff") then
+						encoding = UTF_16BE
+						retry "ChkEnc"
+					end if
+				end if
+				if length(ret) >= 3 then
+					if equal(ret[1 .. 3], x"ef bb bf") then
+						encoding = UTF_8
+						retry "ChkEnc"
+					end if
+				end if
+				
+				if validate(ret, utf_8) = 0 then
+					encoding = UTF_8
+					retry "ChkEnc"
+				end if
+								
+				if find(0, ret) = 0 then
+					-- No nulls, so assume ANSI
+					exit "ChkEnc"
+				end if
+				
+				adr = allocate(length(ret), 1)
+				poke(adr, ret)
+				
+				temp = peek2u({adr, length(ret) / 2})
+				if validate(temp, utf_16) = 0 then
+					encoding = UTF_16LE
+					retry "ChkEnc"
+				end if
+				temp = peek4u({adr, length(ret) / 4})
+				if validate(temp, utf_32) = 0 then
+					encoding = UTF_32LE
+					retry "ChkEnc"
+				end if
+				
+				temp = ret
+				for i = 1 to length(temp) - 1 by 2 do
+					integer tmp = tmp[i]
+					tmp[i] = tmp[i+1]
+					tmp[i+1] = tmp
+				end for
+				poke(adr, temp)
+				temp = peek2u({adr, length(ret) / 2})
+				if validate(temp, utf_16) = 0 then
+					encoding = UTF_16LE
+					retry "ChkEnc"
+				end if
+				
+				temp = ret
+				for i = 1 to length(temp) - 3 by 4 do
+					integer tmp = tmp[i]
+					tmp[i] = tmp[i+3]
+					tmp[i+3] = tmp
+					tmp = tmp[i+1]
+					tmp[i+1] = tmp[i+2]
+					tmp[i+2] = tmp
+				end for
+				poke(adr, temp)
+				temp = peek4u({adr, length(ret) / 4})
+				if validate(temp, utf_32) = 0 then
+					encoding = UTF_32LE
+					retry "ChkEnc"
+				end if
+				
+				-- assume ANSI at this point.				
+		end switch	
+		
+		exit
+	end while
+		
+	fn = find(26, ret) -- Any Ctrl-Z found?
+	if fn then
+		-- Ok, so truncate the file data
+		ret = ret[1 .. fn - 1]
+	end if
+
+	-- Convert Windows endings
+	ret = replace_all(ret, {13,10}, {10})
+	if length(ret) > 0 then
+		if ret[$] != 10 then
+			ret &= 10
 		end if
+	else
+		ret = {10}
 	end if
 
 	return ret
