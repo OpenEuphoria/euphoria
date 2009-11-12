@@ -1469,9 +1469,9 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 				
 				temp = ret
 				for i = 1 to length(temp) - 1 by 2 do
-					integer tmp = tmp[i]
-					tmp[i] = tmp[i+1]
-					tmp[i+1] = tmp
+					integer tmp = temp[i]
+					temp[i] = temp[i+1]
+					temp[i+1] = tmp
 				end for
 				poke(adr, temp)
 				temp = peek2u({adr, length(ret) / 2})
@@ -1482,12 +1482,12 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 				
 				temp = ret
 				for i = 1 to length(temp) - 3 by 4 do
-					integer tmp = tmp[i]
-					tmp[i] = tmp[i+3]
-					tmp[i+3] = tmp
-					tmp = tmp[i+1]
-					tmp[i+1] = tmp[i+2]
-					tmp[i+2] = tmp
+					integer tmp = temp[i]
+					temp[i] = temp[i+3]
+					temp[i+3] = tmp
+					tmp = temp[i+1]
+					temp[i+1] = temp[i+2]
+					temp[i+2] = tmp
 				end for
 				poke(adr, temp)
 				temp = peek4u({adr, length(ret) / 4})
@@ -1538,9 +1538,18 @@ end function
 --                     line endings (Ctrl-J).
 --         ** **DOS_TEXT** ensures that lines are written out with Windows style
 --                     line endings {Ctrl-L, Ctrl-J}.
+--		# ##encoding##: an integer. One of ANSI, UTF_8, UTF_16LE, UTF_16BE,
+--                      UTF_32LE, UTF_32BE. The default is ANSI.
+--		# ##with_bom##: an integer. Either 0 or 1. If 1 then when encoding as a UTF
+--                      file, this will prepend a Byte Order Marker (BOM) to the
+--                      file output.
 --
 -- Returns:
 --     An **integer**, 1 on success, -1 on failure.
+--
+-- Comments:
+-- * UTF_16LE, and UTF_32LE create little-endian files, which are the normal ones
+--  for Intel based CPUs. Big-endian files are more commonly found on Motorola CPUs.
 --
 -- Errors:
 --		If [[:puts]] cannot write ##data##, a runtime error will occur.
@@ -1561,8 +1570,9 @@ end function
 -- See Also:
 --    [[:read_file]], [[:write_lines]]
 
-public function write_file(object file, sequence data, integer as_text = BINARY_MODE)
+public function write_file(object file, sequence data, integer as_text = BINARY_MODE, integer encoding = ANSI, integer with_bom = 1)
 	integer fn
+	atom adr
 
 	if as_text != BINARY_MODE then
 		-- Truncate at first Ctrl-Z
@@ -1593,6 +1603,73 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 		end if
 	end if
 
+	switch encoding do
+		case ANSI then
+			break
+			
+		case UTF_8 then
+			data = toUTF(data, utf_32, utf_8)
+			if with_bom = 1 then
+				data = x"ef bb bf" & data
+			end if
+			as_text = BINARY_MODE
+			
+		case UTF_16LE then
+			data = toUTF(data, utf_32, utf_16)
+			adr = allocate( length(data) * 2, 1)
+			poke2(adr, data)
+			data = peek({adr, length(data) * 2})
+			if with_bom = 1 then
+				data = x"ff fe" & data
+			end if
+			as_text = BINARY_MODE
+			
+		case UTF_16BE then
+			data = toUTF(data, utf_32, utf_16)
+			adr = allocate( length(data) * 2, 1)
+			poke2(adr, data)
+			data = peek({adr, length(data) * 2})
+			for i = 1 to length(data) - 1 by 2 do
+				integer tmp = data[i]
+				data[i] = data[i+1]
+				data[i+1] = tmp
+			end for
+			if with_bom = 1 then
+				data = x"fe ff" & data
+			end if
+			as_text = BINARY_MODE
+			
+		case UTF_32LE then
+			adr = allocate( length(data) * 4, 1)
+			poke4(adr, data)
+			data = peek({adr, length(data) * 4})
+			if with_bom = 1 then
+				data = x"ff fe 00 00" & data
+			end if
+			as_text = BINARY_MODE
+			
+		case UTF_32BE then
+			adr = allocate( length(data) * 4, 1)
+			poke4(adr, data)
+			data = peek({adr, length(data) * 4})
+			for i = 1 to length(data) - 3 by 4 do
+				integer tmp = data[i]
+				data[i] = data[i+3]
+				data[i+3] = tmp
+				tmp = data[i+1]
+				data[i+1] = data[i+2]
+				data[i+2] = tmp
+			end for
+			if with_bom = 1 then
+				data = x"00 00 fe ff" & data
+			end if
+			as_text = BINARY_MODE
+			
+		case else
+			-- Assume ANSI
+	end switch
+			
+			
 	if sequence(file) then
 		if as_text = TEXT_MODE then
 			fn = open(file, "w")
