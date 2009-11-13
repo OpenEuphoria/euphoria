@@ -36,7 +36,8 @@ public enum
 	--** in graphics modes BLACK is "transparent"
 
 ifdef OSX then
-export constant true_color = {0,4,2,6,1,5,3,7,8,12,10,14,9,13,11,15}
+export constant true_color = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
+                              16,20,18,22,17,21,19,23,24,28,26,28,25,29,17,31}
 -- 	BLACK          =  0,
 -- 	RED            =  1,
 -- 	GREEN          =  2,
@@ -54,7 +55,8 @@ export constant true_color = {0,4,2,6,1,5,3,7,8,12,10,14,9,13,11,15}
 -- 	BRIGHT_CYAN    = 14,
 -- 	BRIGHT_WHITE   = 15,
 elsifdef UNIX then
-export constant true_color = {0,4,2,6,1,5,3,7,8,12,10,14,9,13,11,15}
+export constant true_color = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
+                              16,20,18,22,17,21,19,23,24,28,26,28,25,29,17,31}
 -- 	BLACK          =  0,
 -- 	RED            =  1,
 -- 	GREEN          =  2,
