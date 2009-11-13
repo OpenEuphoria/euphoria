@@ -92,6 +92,11 @@ public include std/graphcst.e
 public procedure text_color(color c)
 -- set the foreground text color to c - text or graphics modes
 -- add 16 to get blinking
+ifdef OSX then
+	c = true_color[c+1]
+elsifdef UNIX then
+	c = true_color[c+1]
+end ifdef
 	machine_proc(M_SET_T_COLOR, c)
 end procedure
 
@@ -117,6 +122,11 @@ end procedure
 
 public procedure bk_color(color c)
 -- set the background color to c - text or graphics modes
+ifdef OSX then
+	c = true_color[c+1]
+elsifdef UNIX then
+	c = true_color[c+1]
+end ifdef
 	machine_proc(M_SET_B_COLOR, c)
 end procedure
 

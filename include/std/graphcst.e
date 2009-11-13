@@ -36,44 +36,42 @@ public enum
 	--** in graphics modes BLACK is "transparent"
 
 ifdef OSX then
-public constant
-	BLACK          =  0,
-	RED            =  1,
-	GREEN          =  2,
-	BROWN          =  3,
-	BLUE           =  4,
-	MAGENTA        =  5,
-	CYAN           =  6,
-	WHITE          =  7,
-	GRAY           =  8,
-	BRIGHT_RED     =  9,
-	BRIGHT_GREEN   = 10,
-	YELLOW         = 11,
-	BRIGHT_BLUE    = 12,
-	BRIGHT_MAGENTA = 13,
-	BRIGHT_CYAN    = 14,
-	BRIGHT_WHITE   = 15,
-	$
+export constant true_color = {0,4,2,6,1,5,3,7,8,12,10,14,9,13,11,15}
+-- 	BLACK          =  0,
+-- 	RED            =  1,
+-- 	GREEN          =  2,
+-- 	BROWN          =  3,
+-- 	BLUE           =  4,
+-- 	MAGENTA        =  5,
+-- 	CYAN           =  6,
+-- 	WHITE          =  7,
+-- 	GRAY           =  8,
+-- 	BRIGHT_RED     =  9,
+-- 	BRIGHT_GREEN   = 10,
+-- 	YELLOW         = 11,
+-- 	BRIGHT_BLUE    = 12,
+-- 	BRIGHT_MAGENTA = 13,
+-- 	BRIGHT_CYAN    = 14,
+-- 	BRIGHT_WHITE   = 15,
 elsifdef UNIX then
-public constant
-	BLACK          =  0,
-	RED            =  1,
-	GREEN          =  2,
-	BROWN          =  3,
-	BLUE           =  4,
-	MAGENTA        =  5,
-	CYAN           =  6,
-	WHITE          =  7,
-	GRAY           =  8,
-	BRIGHT_RED     =  9,
-	BRIGHT_GREEN   = 10,
-	YELLOW         = 11,
-	BRIGHT_BLUE    = 12,
-	BRIGHT_MAGENTA = 13,
-	BRIGHT_CYAN    = 14,
-	BRIGHT_WHITE   = 15,
-	$
-elsedef
+export constant true_color = {0,4,2,6,1,5,3,7,8,12,10,14,9,13,11,15}
+-- 	BLACK          =  0,
+-- 	RED            =  1,
+-- 	GREEN          =  2,
+-- 	BROWN          =  3,
+-- 	BLUE           =  4,
+-- 	MAGENTA        =  5,
+-- 	CYAN           =  6,
+-- 	WHITE          =  7,
+-- 	GRAY           =  8,
+-- 	BRIGHT_RED     =  9,
+-- 	BRIGHT_GREEN   = 10,
+-- 	YELLOW         = 11,
+-- 	BRIGHT_BLUE    = 12,
+-- 	BRIGHT_MAGENTA = 13,
+-- 	BRIGHT_CYAN    = 14,
+-- 	BRIGHT_WHITE   = 15,
+end ifdef
 public constant
 	BLACK          =  0,
 	BLUE           =  1,
@@ -92,7 +90,7 @@ public constant
 	YELLOW         = 14,
 	BRIGHT_WHITE   = 15,
 	$
-end ifdef
+
 
 --** 
 -- Add to color to get blinking text
