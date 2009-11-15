@@ -182,7 +182,7 @@ public function min(object a)
 end function
 
 --**
--- Ensures that the ##item## is in a range of values supplied by ##range_limits##
+-- Ensures that the ##item## is in a range of values supplied by inclusive ##range_limits##
 --
 -- Parameters:
 --   # ##item## : The object to test for.
@@ -198,14 +198,14 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   object valid_data = set_in_range(user_data, {2, 75})
+--   object valid_data = ensure_in_range(user_data, {2, 75})
 --   if not equal(valid_data, user_data) then
 --       errmsg("Invalid input supplied. Using %d instead.", valid_data)
 --   end if
 --   procA(valid_data)
 --   </eucode>
 
-public function set_in_range(object item, sequence range_limits)
+public function ensure_in_range(object item, sequence range_limits)
 	if length(range_limits) < 2 then
 		return item
 	end if
@@ -215,6 +215,46 @@ public function set_in_range(object item, sequence range_limits)
 	end if
 	if eu:compare(item, range_limits[$]) > 0 then
 		return range_limits[$]
+	end if
+	return item
+end function
+
+--**
+-- Ensures that the ##item## is in a list of values supplied by ##list##
+--
+-- Parameters:
+--   # ##item## : The object to test for.
+--   # ##list## : A sequence of elements that ##item## should be a member of.
+--	# ##default## : an integer, the index of the list item to return if ##item## is not found. Defaults to 1.
+--
+-- Returns:
+--   An **object**, if ##item## is not in the list, it returns the list item of index ##default##,
+--                 otherwise it returns ##item##.
+--
+-- Comments:
+--
+-- If ##default## is set to an invalid index, the first item on the list is returned instead
+-- when ##item## is not on the list.
+--
+-- Example 1:
+--   <eucode>
+--   object valid_data = ensure_in_list(user_data, {100, 45, 2, 75, 121})
+--   if not equal(valid_data, user_data) then
+--       errmsg("Invalid input supplied. Using %d instead.", valid_data)
+--   end if
+--   procA(valid_data)
+--   </eucode>
+
+public function ensure_in_list(object item, sequence list, integer default=1)
+	if length(list) = 0 then
+		return item
+	end if
+	if find(item, list) = 0 then
+		if default>=1 and default<=length(list) then
+		    return list[default]
+		else
+			return list[1]
+		end if
 	end if
 	return item
 end function

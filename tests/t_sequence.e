@@ -383,38 +383,6 @@ end function
 test_equal("apply #1", {"8","9","10","11"}, apply({1,2,3,4}, routine_id("sprinter"), 7))
 
 
-test_equal("is_in_range #1", 0, is_in_range(1, {}))
-test_equal("is_in_range #2", 0, is_in_range(1, {1}))
-test_equal("is_in_range #3", 0, is_in_range(1, {2,9}))
-test_equal("is_in_range #4", 0, is_in_range(10, {2,9}))
-test_equal("is_in_range #5", 1, is_in_range(2, {2,9}))
-test_equal("is_in_range #6", 1, is_in_range(9, {2,9}))
-test_equal("is_in_range #7", 1, is_in_range(5, {2,9}))
-
-test_equal("set_in_range #1", 1, set_in_range(1, {}))
-test_equal("set_in_range #2", 1, set_in_range(1, {1}))
-test_equal("set_in_range #3", 2, set_in_range(1, {2,9}))
-test_equal("set_in_range #4", 9, set_in_range(10, {2,9}))
-test_equal("set_in_range #5", 2, set_in_range(2, {2,9}))
-test_equal("set_in_range #6", 9, set_in_range(9, {2,9}))
-test_equal("set_in_range #7", 5, set_in_range(5, {2,9}))
-
-test_equal("is_in_list #1", 0, is_in_list(1, {}))
-test_equal("is_in_list #2", 1, is_in_list(1, {1}))
-test_equal("is_in_list #3", 0, is_in_list(1, {100, 2, 45, 9, 17, -6}))
-test_equal("is_in_list #4", 1, is_in_list(100, {100, 2, 45, 9, 17, -6}))
-test_equal("is_in_list #5", 1, is_in_list(-6, {100, 2, 45, 9, 17, -6}))
-test_equal("is_in_list #6", 1, is_in_list(9, {100, 2, 45, 9, 17, -6}))
-
-test_equal("set_in_list #1", 1, set_in_list(1, {}))
-test_equal("set_in_list #2", 1, set_in_list(1, {1}))
-test_equal("set_in_list #3", 100, set_in_list(1, {100, 2, 45, 9, 17, -6}))
-test_equal("set_in_list #4", 100, set_in_list(100, {100, 2, 45, 9, 17, -6}))
-test_equal("set_in_list #5", -6, set_in_list(-6, {100, 2, 45, 9, 17, -6}))
-test_equal("set_in_list #6", 9, set_in_list(9, {100, 2, 45, 9, 17, -6}))
-
-
-
 include std/math.e
 include std/search.e
 

@@ -198,5 +198,21 @@ test_equal("intdiv #4", {707, 78, 9}, intdiv(777, {1.1, -9.998, 88}))
 test_equal("intdiv #5", {91, 21, -4}, intdiv({100, 200, -300}, {1.1, -9.998, 88}))
 test_equal("intdiv #6", 20, intdiv(100, 5))
 
+test_equal("ensure_in_range #1", 1, ensure_in_range(1, {}))
+test_equal("ensure_in_range #2", 1, ensure_in_range(1, {1}))
+test_equal("ensure_in_range #3", 2, ensure_in_range(1, {2,9}))
+test_equal("ensure_in_range #4", 9, ensure_in_range(10, {2,9}))
+test_equal("ensure_in_range #5", 2, ensure_in_range(2, {2,9}))
+test_equal("ensure_in_range #6", 9, ensure_in_range(9, {2,9}))
+test_equal("ensure_in_range #7", 5, ensure_in_range(5, {2,9}))
+
+test_equal("ensure_in_list #1", 1, ensure_in_list(1, {}))
+test_equal("ensure_in_list #2", 1, ensure_in_list(1, {1}))
+test_equal("ensure_in_list #3", 100, ensure_in_list(1, {100, 2, 45, 9, 17, -6}))
+test_equal("ensure_in_list #4", 100, ensure_in_list(100, {100, 2, 45, 9, 17, -6}))
+test_equal("ensure_in_list #5", -6, ensure_in_list(-6, {100, 2, 45, 9, 17, -6}))
+test_equal("ensure_in_list #6", 9, ensure_in_list(9, {100, 2, 45, 9, 17, -6}))
+
+
 test_report()
 

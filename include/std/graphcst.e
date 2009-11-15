@@ -28,12 +28,32 @@ public enum
 	VC_SCRNLINES,
 	VC_SCRNCOLS
 
+-- COLOR values -- for characters and pixels
+	--** in graphics modes BLACK is "transparent"
+
+
 --****
 -- ==== Colors
 --
 
--- COLOR values -- for characters and pixels
-	--** in graphics modes BLACK is "transparent"
+public constant
+	BLACK          =  0,
+	BLUE           =  1,
+	GREEN          =  2,
+	CYAN           =  3,
+	RED            =  4,
+	MAGENTA        =  5,
+	BROWN          =  6,
+	WHITE          =  7,
+	GRAY           =  8,
+	BRIGHT_BLUE    =  9,
+	BRIGHT_GREEN   = 10,
+	BRIGHT_CYAN    = 11,
+	BRIGHT_RED     = 12,
+	BRIGHT_MAGENTA = 13,
+	YELLOW         = 14,
+	BRIGHT_WHITE   = 15,
+	$
 
 ifdef OSX then
 export constant true_color = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
@@ -74,25 +94,6 @@ export constant true_color = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
 -- 	BRIGHT_CYAN    = 14,
 -- 	BRIGHT_WHITE   = 15,
 end ifdef
-public constant
-	BLACK          =  0,
-	BLUE           =  1,
-	GREEN          =  2,
-	CYAN           =  3,
-	RED            =  4,
-	MAGENTA        =  5,
-	BROWN          =  6,
-	WHITE          =  7,
-	GRAY           =  8,
-	BRIGHT_BLUE    =  9,
-	BRIGHT_GREEN   = 10,
-	BRIGHT_CYAN    = 11,
-	BRIGHT_RED     = 12,
-	BRIGHT_MAGENTA = 13,
-	YELLOW         = 14,
-	BRIGHT_WHITE   = 15,
-	$
-
 
 --** 
 -- Add to color to get blinking text

@@ -842,30 +842,68 @@ end function
 --   # ##item## : The object to test for.
 --   # ##range_limits## : A sequence of two or more elements. The first is assumed
 --    to be the smallest value and the last is assumed to be the highest value.
+--   # ##boundries##: a sequence. This determines if the range limits are inclusive
+--                    or not. Must be one of "[]" (the default), "[)", "(]", or
+--                    "()".
 --
 -- Returns:
---   An **integer**, 0 if ##item## is lower than the first item in the ##range_limits##
---                  or higher than the last element in the ##range_limits##. Otherwise
---                  it returns 1.
+--   An **integer**, 0 if ##item## is not in the ##range_limits## otherwise it returns 1.
+--
+-- Comments:
+-- * In ##boundries###, square brackets mean //inclusive// and round brackets
+--   mean //exclusive//. Thus "[]" includes both limits in the range, while
+--   "()" excludes both limits. And, "[)" includes the lower limit and excludes
+--   the upper limits while "(]" does the reverse.
 --
 -- Example 1:
 --   <eucode>
---   if is_in_range(user_data, {2, 75}) then
---       procA(user_data)
+--   if is_in_range(2, {2, 75}) then
+--       procA(user_data) -- Gets run (both limits included)
+--   end if
+--   if is_in_range(2, {2, 75}, "(]") then
+--       procA(user_data) -- Does not get run
 --   end if
 --   </eucode>
 
-public function is_in_range(object item, sequence range_limits)
+public function is_in_range(object item, sequence range_limits, sequence boundries = "[]")
 	if length(range_limits) < 2 then
 		return 0
 	end if
 	
-	if eu:compare(item, range_limits[1]) < 0 then
-		return 0
-	end if
-	if eu:compare(item, range_limits[$]) > 0 then
-		return 0
-	end if
+	switch boundries do
+		case "()" then
+			if eu:compare(item, range_limits[1]) <= 0 then
+				return 0
+			end if
+			if eu:compare(item, range_limits[$]) >= 0 then
+				return 0
+			end if
+		
+		case "[)" then
+			if eu:compare(item, range_limits[1]) < 0 then
+				return 0
+			end if
+			if eu:compare(item, range_limits[$]) >= 0 then
+				return 0
+			end if
+		
+		case "(]" then
+			if eu:compare(item, range_limits[1]) <= 0 then
+				return 0
+			end if
+			if eu:compare(item, range_limits[$]) > 0 then
+				return 0
+			end if
+		
+		case else
+			if eu:compare(item, range_limits[1]) < 0 then
+				return 0
+			end if
+			if eu:compare(item, range_limits[$]) > 0 then
+				return 0
+			end if
+	end switch
+	
 	return 1
 end function
 
@@ -889,46 +927,6 @@ end function
 
 public function is_in_list(object item, sequence list)
 	return (find(item, list) != 0)
-end function
-
---**
--- Ensures that the ##item## is in a list of values supplied by ##list##
---
--- Parameters:
---   # ##item## : The object to test for.
---   # ##list## : A sequence of elements that ##item## should be a member of.
---	# ##default## : an integer, the index of the list item to return if ##item## is not found. Defaults to 1.
---
--- Returns:
---   An **object**, if ##item## is not in the list, it returns the list item of index ##default##,
---                 otherwise it returns ##item##.
---
--- Comments:
---
--- If ##default## is set to an invalid index, the first item on the list is returned instead
--- when ##item## is not on the list.
---
--- Example 1:
---   <eucode>
---   object valid_data = set_in_list(user_data, {100, 45, 2, 75, 121})
---   if not equal(valid_data, user_data) then
---       errmsg("Invalid input supplied. Using %d instead.", valid_data)
---   end if
---   procA(valid_data)
---   </eucode>
-
-public function set_in_list(object item, sequence list, integer default=1)
-	if length(list) = 0 then
-		return item
-	end if
-	if find(item, list) = 0 then
-		if default>=1 and default<=length(list) then
-		    return list[default]
-		else
-			return list[1]
-		end if
-	end if
-	return item
 end function
 
 --**

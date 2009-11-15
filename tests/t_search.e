@@ -92,5 +92,30 @@ test_equal("vlookup #2", "mortein", vlookup("ant", grid, 1, 3, "?"))
 test_equal("vlookup #3", "gun", vlookup("seal", grid, 2, 3, "?"))
 test_equal("vlookup #4", "?", vlookup("mouse", grid, 2, 3, "?"))
 
+
+test_equal("is_in_range #1", 0, is_in_range(1, {}))
+test_equal("is_in_range #2", 0, is_in_range(1, {1}))
+test_equal("is_in_range #3", 0, is_in_range(1, {2,9}))
+test_equal("is_in_range #4", 0, is_in_range(10, {2,9}))
+test_equal("is_in_range #5", 1, is_in_range(2, {2,9}))
+test_equal("is_in_range #6", 1, is_in_range(9, {2,9}))
+test_equal("is_in_range #7", 1, is_in_range(5, {2,9}))
+test_equal("is_in_range l[]", 1, is_in_range(2, {2,9}, "[]"))
+test_equal("is_in_range u[]", 1, is_in_range(9, {2,9}, "[]"))
+test_equal("is_in_range l[)", 1, is_in_range(2, {2,9}, "[)"))
+test_equal("is_in_range u[)", 0, is_in_range(9, {2,9}, "[)"))
+test_equal("is_in_range l(]", 0, is_in_range(2, {2,9}, "(]"))
+test_equal("is_in_range u(]", 1, is_in_range(9, {2,9}, "(]"))
+test_equal("is_in_range l()", 0, is_in_range(2, {2,9}, "()"))
+test_equal("is_in_range u()", 0, is_in_range(9, {2,9}, "()"))
+
+test_equal("is_in_list #1", 0, is_in_list(1, {}))
+test_equal("is_in_list #2", 1, is_in_list(1, {1}))
+test_equal("is_in_list #3", 0, is_in_list(1, {100, 2, 45, 9, 17, -6}))
+test_equal("is_in_list #4", 1, is_in_list(100, {100, 2, 45, 9, 17, -6}))
+test_equal("is_in_list #5", 1, is_in_list(-6, {100, 2, 45, 9, 17, -6}))
+test_equal("is_in_list #6", 1, is_in_list(9, {100, 2, 45, 9, 17, -6}))
+
+
 test_report()
 
