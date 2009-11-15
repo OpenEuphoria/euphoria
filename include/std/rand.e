@@ -160,10 +160,13 @@ end function
 -- Reset the random number generator.
 --
 -- Parameters:
--- 		# ##seed## : an integer, which the generator uses to initialize itself
+-- 		# ##seed## : an object. The generator uses this initialize itself for the next
+--                    random number generated. This can be a single integer or atom,
+--                    or a sequence of two integers, or an empty sequence or any
+--                    other sort of sequence.
 --
 -- Comments:
--- 		Starting from a ##seed##, the values returned by ##rand##() are
+-- * Starting from a ##seed##, the values returned by ##rand##() are
 -- reproducible. This is useful for demos and stress tests based on random
 -- data. Normally the numbers returned by the ##rand##() function are totally
 -- unpredictable, and will be different each time you run your program.
@@ -171,6 +174,18 @@ end function
 -- perhaps because you are trying to debug your program, or maybe you want
 -- the ability to generate the same output (e.g. a random picture) for your
 -- user upon request.  
+-- * Internally there are actually two seed values. 
+-- ** When ##set_rand()## is called with a single integer or atom, the two 
+--   internal seeds are derived from the parameter. 
+-- ** When ##set_rand()## is called with a sequence of exactly two integers/atoms
+--    the internal seeds are set to the parameter values.
+-- ** When ##set_rand()## is called with an empty sequence, the internal seeds are
+--   set to random values and are unpredictable. This is how to reset the generator.
+-- ** When ##set_rand()## is called with any other sequence, the internal seeds are
+-- set based on the length of the sequence and the hashed value of the sequence.
+-- * Aside from an empty ##seed## parameter, this sets the generator to a known state
+-- and the random numbers generated after come in a predicable order, though they still
+-- appear to be random.
 --
 -- Example 1:
 -- <eucode>
@@ -188,15 +203,94 @@ end function
 -- t[2] = rand(100)
 -- t[3] = rand(1000)
 -- -- at this point s and t will be identical
+-- set_rand("") -- Reset the generator to an unknown seed.
+-- t[1] = rand(10)  -- Could be anything now, no way to predict it.
 --  </eucode>
 -- 
 -- See Also:
 --		[[:rand]]
 
-public procedure set_rand(integer seed)
+public procedure set_rand(object seed)
 -- A given value of seed will cause the same series of
 -- random numbers to be generated from the rand() function
 	machine_proc(M_SET_RAND, seed)
 end procedure
+
+--**
+-- Simulates the probability of a desired outcome.
+--
+-- Parameters:
+-- # ##my_limit## : an atom. The desired chance of something happening.
+-- # ##top_limit##: an atom. The maximum chance of something happening. The
+--                   default is 100.
+--
+-- Returns:
+--    an integer. 1 if the desired chance happened otherwise 0.
+--
+-- Comments:
+-- This simulates the chance of something happening. For example, if you
+-- wnat something to happen with a probablity of 25 times out of 100 times then you code ##chance(25)##
+-- and if you want something to (most likely) occur 345 times out of 999 times, you code
+-- ##chance(345, 999)###.
+--
+-- Example 1:
+-- <eucode>
+--  -- 65% of the days are sunny, so ...
+--  if chance(65) then
+--      puts(1, "Today will be a sunny day")
+--  elsif chance(40) then
+--      -- And 40% of non-sunny days it will rain.
+--      puts(1, "It will rain today")
+--  else
+--      puts(1, "Today will be a overcast day")
+--  end if
+-- </eucode>
+-- 
+-- See Also:
+--		[[:rnd]], [[:roll]]
+public function chance(atom my_limit, atom top_limit = 100)
+	return (rnd_1() * top_limit) <= my_limit
+end function
+
+
+--**
+-- Simulates the probability of a dice throw.
+--
+-- Parameters:
+-- # ##desired## : an object. One or more desired outcomes.
+-- # ##sides##: an integer. The number of sides on the dice. Default is 6.
+--
+-- Returns:
+--    an integer. 0 if none of the desired outcomes occured, otherwise
+--    the face number that was rolled.
+--
+-- Comments:
+-- The minimum number of sides is 2 and there is no maximum.
+--
+-- Example 1:
+-- <eucode>
+-- res = roll(1,2) -- Simulate a coin toss.
+-- res = roll( {1,6} ) -- Try for a 1 or a 6 from a standard die toss.
+-- res = roll( {1,2,3,4}, 20) -- Looking for any number under 5 from a 20-sided die.
+-- </eucode>
+-- 
+-- See Also:
+--		[[:rnd]], [[:chance]]
+public function roll(object desired, integer sides = 6)
+	integer rolled
+	if sides < 2 then
+		return 0
+	end if
+	if atom(desired) then
+		desired = {desired}
+	end if
+	
+	rolled =  find( rand(sides), desired)
+	if rolled then
+		return desired[rolled]
+	else
+		return 0
+	end if
+end function
 
 

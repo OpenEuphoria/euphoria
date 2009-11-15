@@ -1,5 +1,6 @@
 include std/unittest.e
 include std/rand.e
+include std/math.e
 
 object s
 object t
@@ -35,6 +36,41 @@ set_rand(1002)
 atom B = rnd()
 
 test_true( "rnd() #2", A != B)
+
+set_rand({34, 100919})
+test_equal("set_rand explicit", 0.734853451398937, rnd())
+
+set_rand("some text string as a seed generator")
+test_equal("set_rand explicit", 0.652952084646423, rnd())
+
+set_rand("") -- Reset generator.
+integer y = 0
+integer n = 0
+integer c = 10000
+for i = 1 to c do
+	if chance(50) then
+		y += 1
+	else
+		n += 1
+	end if
+end for
+
+test_equal("chance()",0, approx(y,n, c * 0.025))
+
+y = 0
+n = 0
+c = 10000
+integer sides = 20
+sequence ls = {1,5,11}
+for i = 1 to c do
+	if roll(ls, sides) then
+		y += 1
+	else
+		n += 1
+	end if
+end for
+test_equal("roll()",0, approx(y, c * length(ls) / sides, c * 0.025))
+
 
 test_report()
 
