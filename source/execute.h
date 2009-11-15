@@ -51,6 +51,8 @@
 #define IS_ATOM(ob)             (((long)(ob)) >= (long)0xA0000000)
 #define IS_SEQUENCE(ob)         (((long)(ob))  < (long)0xA0000000)
 
+#define ASEQ(s) (((unsigned long)s & (unsigned long)0xE0000000) == (unsigned long)0x80000000)
+
 #define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
 
 #undef MININT

@@ -1695,11 +1695,33 @@ static object set_rand(object x)
 /* set random number generator */
 {
 	int r;
+	s1_ptr x_ptr;
+	int slen;
 
-	r = get_int(x);
+	if (!ASEQ(x)) {
+		r = get_int(x);
 
-	seed1 = INT_VAL(r)+1;
-	seed2 = ~(INT_VAL(r)) + 999;
+		seed1 = INT_VAL(r)+1;
+		seed2 = ~(INT_VAL(r)) + 999;
+	} else {
+		// We got a sequence given to us.
+		x_ptr = SEQ_PTR(x);
+		slen = x_ptr->length;
+		if (slen == 0) {
+			// Empty sequence means randimze the generator.
+			setran();
+		} else 
+			// A sequence of two atoms explictly supplies seed1 and seed2 values.
+			if ((slen == 2) && !ASEQ(x_ptr->base[1]) && !ASEQ(x_ptr->base[2])) {
+				r = get_int(x_ptr->base[1]);
+				seed1 = get_int(x_ptr->base[1]);
+				seed2 = get_int(x_ptr->base[2]);
+		}
+		else {
+			seed1 = slen;
+			seed2 = get_int(calc_hash(x, -5));
+		}
+	}
 
 	rand_was_set = TRUE;
 
