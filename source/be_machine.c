@@ -348,17 +348,19 @@ char *name_ext(char *s)
 }
 
 extern long get_int(object x)
-/* return an integer value if possible */
-/* Note: uses (long) conversion of doubles
-   - NOT CORRECT for 32-bit addresses */
+/* return an integer value if possible, truncated to 32 bits. */
 {
 	if (IS_ATOM_INT(x))
 		return x;
-	else if (IS_ATOM(x))
-		return (long)(DBL_PTR(x)->dbl);
-	else {
-		RTFatal("an integer was expected, not a sequence");
-	}
+
+	if (IS_ATOM(x))
+		if (DBL_PTR(x)->dbl <= 0.0)
+			return (long)(DBL_PTR(x)->dbl);
+		else
+			return (unsigned long)(DBL_PTR(x)->dbl);
+
+	RTFatal("an integer was expected, not a sequence");
+
 }
 
 /* Note: side effects could happen from double eval of x */
@@ -1694,41 +1696,40 @@ static object unlock_file(object x)
 static object set_rand(object x)
 /* set random number generator */
 {
-	int r;
+	long r;
 	s1_ptr x_ptr;
-	int slen;
+	long slen;
+	object_ptr obp;
 
 	if (!ASEQ(x)) {
+		// Simple case - just a single value supplied.
 		r = get_int(x);
 
-		seed1 = INT_VAL(r)+1;
-		seed2 = ~(INT_VAL(r)) + 999;
+		seed1 = r+1;
+		seed2 = ~(r) + 999;
 	} else {
 		// We got a sequence given to us.
 		x_ptr = SEQ_PTR(x);
 		slen = x_ptr->length;
 		if (slen == 0) {
-			// Empty sequence means randimze the generator.
+			// Empty sequence means randomize the generator.
 			setran();
-		} else 
+		} else {
+			obp = x_ptr->base;
 			// A sequence of two atoms explictly supplies seed1 and seed2 values.
-			if ((slen == 2) && !ASEQ(x_ptr->base[1]) && !ASEQ(x_ptr->base[2])) {
-				r = get_int(x_ptr->base[1]);
-				seed1 = get_int(x_ptr->base[1]);
-				seed2 = get_int(x_ptr->base[2]);
-		}
-		else {
-			seed1 = slen;
-			seed2 = get_int(calc_hash(x, -5));
+			if ((slen == 2) && !ASEQ(obp[1]) && !ASEQ(obp[2])) {
+				seed1 = get_int(obp[1]);
+				seed2 = get_int(obp[2]);
+			}
+			else {
+				// Complex case - an arbitary sequence supplied.
+				seed1 = get_int(calc_hash(x, slen));
+				seed2 = get_int(calc_hash(slen, make_atom32(seed1)));
+			}
 		}
 	}
 
 	rand_was_set = TRUE;
-
-	if (seed1 == 0)
-		seed1 = 1;
-	if (seed2 == 0)
-		seed2 = 1;
 
 	return ATOM_1;
 }

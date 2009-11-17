@@ -2265,24 +2265,26 @@ object De_floor(d_ptr a)
 #define rem1 ((long)12211L)  /* prim1 % root1 */
 #define rem2 ((long)3791L)   /* prim2 % root2 */
 
-void setran()
 /* set random seed1 and seed2 - neither can be 0 */
+void setran()
 {
 	time_t time_of_day;
 	struct tm *local;
-	int garbage;
+#if !defined( EWINDOWS )
+	long garbage;
+#endif
+	static src = prim1 ^ prim2;
 
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
 	seed2 = local->tm_yday * 86400 + local->tm_hour * 3600 +
 			local->tm_min * 60 +     local->tm_sec;
 #ifdef EWINDOWS
-	seed1 = GetTickCount();  // milliseconds since Windows started
+	seed1 = GetTickCount() + src;  // milliseconds since Windows started
+#else
+	seed1 = (unsigned long)(&garbage) + garbage + src;
 #endif
-	if (seed1 == 0)
-		seed1 = 1;
-	if (seed2 == 0)
-		seed2 = 1;
+	src += 1;
 	good_rand();  // skip first one, second will be more random-looking
 }
 
@@ -2305,38 +2307,37 @@ unsigned long good_rand()
 /* Public Domain random number generator from USENET posting */
 {
 	ldiv_t temp;
-	long alpha, beta;
+	long remval, quotval;
 
-	if ((seed1 == 0L) || (seed2 == 0L)) {
-		if (rand_was_set) {
-			/* need repeatable sequence of numbers */
-			seed1 = 123456;
-			seed2 = 9999;
-		}
-		else
-			setran();
+	if (!rand_was_set && seed1 == 0 && seed2 == 0) {
+		// First time thru.
+		setran();
 	}
-	/* seed = seed * PROOT % PRIME */
+	
+	/* seed = seed * ROOT % PRIME */
 	temp = my_ldiv(seed1, quo1);
-	alpha = root1 * temp.rem;
-	beta = rem1 * temp.quot;
+	remval = root1 * temp.rem;
+	quotval = rem1 * temp.quot;
 
 	/* normalize */
-
-	if (alpha > beta)
-		seed1 = alpha - beta;
-	else
-		seed1 = alpha - beta + prim1;
+	seed1 = remval - quotval;
+	if (remval <= quotval) 
+		seed1 += prim1;
 
 	temp = my_ldiv(seed2, quo2);
-	alpha = root2 * temp.rem;
-	beta = rem2 * temp.quot;
+	remval = root2 * temp.rem;
+	quotval = rem2 * temp.quot;
 
-	if (alpha > beta)
-		seed2 = alpha - beta;
-	else
-		seed2 = alpha - beta + prim2;
+	seed2 = remval - quotval;
+	if (remval <= quotval) 
+		seed2 += prim2;
 
+	if (seed1 == 0) {
+		seed1 = prim2;
+	}
+	if (seed2 == 0)
+		seed2 = prim1;
+		
 	return V(seed1, seed2);
 }
 
@@ -4867,7 +4868,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	InitInOut();
 	InitGraphics();
 	InitEMalloc();
-	setran();
+	//setran();
 	InitFiles();
 #define TempErrName_len (16)
 	TempErrName = (char *)malloc(TempErrName_len);  // malloc, not EMalloc

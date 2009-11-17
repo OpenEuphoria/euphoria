@@ -293,4 +293,90 @@ public function roll(object desired, integer sides = 6)
 	end if
 end function
 
+--**
+-- Selects a random sample sub-set of items from a population set.
+--
+-- Parameters:
+-- # ##pPopulation## : a sequence. The set of items from which to take a sample.
+-- # ##pSampleSize##: an integer. The number of samples to take.
+-- # ##pRemainder##: an integer. If non-zero, the sub-set not selected is also returned.
+-- If zero, the default, only the sampled set is returned.
+--
+-- Returns:
+--    a sequence. When ##pRemainder## = 0 then this is the set of samples, otherwise
+--   it returns a two-element sequence; the first is the samples, and the second
+--   is the remainder of the population (in the original order).
+--
+-- Comments:
+-- * If ##pSampleSize## is less than 1, an empty set is returned.
+-- * If ##pSampleSize## is greater than or equal to the population count, 
+--   the entire population set is returned, but in a random order.
+--
+-- Example 1:
+-- <eucode>
+-- set_rand("example")
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1)})  --> "t"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 5)})  --> "flukq"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", -1)}) --> ""
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 26)}) --> "kghrsxmjoeubaywlzftcpivqnd"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 25)}) --> "omntrqsbjguaikzywvxflpedc"
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- -- Deal 4 hands of 5 cards from a standard deck of cards.
+-- sequence theDeck
+-- sequence hands = {}
+-- sequence rt
+-- function new_deck()
+-- 	sequence nd = {}
+-- 	for i = 1 to 4 do
+-- 		for j = 1 to 13 do
+-- 			nd = append(nd, {i,j})
+-- 		end for
+-- 	end for
+-- 	return nd
+-- end function
+-- theDeck = new_deck()
+-- for i = 1 to 4 do
+-- 	rt = sample(theDeck, 5, 1)
+-- 	theDeck = rt[2]
+-- 	hands = append(hands, rt[1])
+-- end for
+--
+-- </eucode>
+public function sample(sequence pPopulation, integer pSampleSize, integer pRemainder = 0)
+	sequence lResult
+	integer lIdx
+	integer lChoice
+	integer lLen
+	
+	if pSampleSize < 1 then
+		if pRemainder then
+			return {{}, pPopulation}	
+		else
+			return {}
+		end if
+	end if
+	
+	if pSampleSize >= length(pPopulation) then
+		pSampleSize = length(pPopulation)
+	end if
+	
+	lResult = repeat(0, pSampleSize)
+	lIdx = 0
+	lLen = length(pPopulation)
+	while lIdx < pSampleSize do
+		lChoice = rand(lLen)
+		lIdx += 1
+		lResult[lIdx] = pPopulation[lChoice]
+		lLen -= 1
+		pPopulation[lChoice .. $-1] = pPopulation[lChoice+1 .. $]
+	end while
 
+	if pRemainder then
+		return {lResult, pPopulation[1 .. $ - pSampleSize]}	
+	else
+		return lResult
+	end if
+end function
