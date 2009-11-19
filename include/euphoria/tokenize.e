@@ -118,18 +118,23 @@ public enum -- et error codes
 		ERR_DECIMAL,
 		ERR_UNKNOWN,
 		ERR_EOF,
+		ERR_EOF_STRING,
+		ERR_HEX_STRING,
 		$
 
 constant ERROR_STRING = { -- use et_error_string(code) to retrieve these
-		 "Failed to open file"
-		,"Expected an escape character"
-		,"End of line reached without closing \' char"
-		,"Expected a closing \' char"
-		,"End of line reached without closing \" char"
-		,"Expected a hex value"
-		,"Expected a decimal value"
-		,"Unknown token type"
-		,"Expected EOF"
+		"Failed to open file",
+		"Expected an escape character",
+		"End of line reached without closing \' char",
+		"Expected a closing \' char",
+		"End of line reached without closing \" char",
+		"Expected a hex value",
+		"Expected a decimal value",
+		"Unknown token type",
+		"Expected EOF",
+		"End of file reached without closing \" char",
+		"Invalid hexadecimal or unicode string",
+		$
 }
 
 procedure report_error(integer err)
@@ -236,6 +241,16 @@ procedure scan_char()
 	sti += 1
 	Look = source_text[sti]
 end procedure
+
+---------------------------------------------------------------------------------
+
+function lookahead(integer dist = 1)
+	if sti + dist <= length(source_text) then
+		return source_text[sti + dist]
+	else
+		return EOF
+	end if
+end function
 
 ---------------------------------------------------------------------------------
 
@@ -472,12 +487,111 @@ function scan_number()
 	end if
 	return TRUE
 end function
-
+with trace
 ---------------------------------------------------------------------------------
+function hex_string(sequence textdata, integer string_type)
+	integer ch
+	integer digit
+	atom val
+	integer nibble
+	integer maxnibbles
+	sequence string_text
+
+	switch string_type do
+		case 'x' then
+			maxnibbles = 2
+		case 'u' then
+			maxnibbles = 4
+		case 'U' then
+			maxnibbles = 8
+	end switch
+	
+	string_text = ""
+	nibble = 1
+	val = -1
+	for cpos = 1 to length(textdata) do
+		ch = textdata[cpos]
+		
+		digit = find(ch, "0123456789ABCDEFabcdef _\t\n\r")
+		if digit = 0 then
+			return 0
+		end if
+		
+		if digit < 23 then
+			if digit > 16 then
+				digit -= 6
+			end if
+			if nibble = 1 then
+				val = digit - 1
+			else
+				val = val * 16 + digit - 1
+				if nibble = maxnibbles then
+					string_text &= val
+					val = -1
+					nibble = 0
+				end if
+			end if
+			nibble += 1
+
+		else
+			if val >= 0 then
+				-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
+				string_text &= val
+				val = -1
+			end if
+			nibble = 1
+		end if
+	end for
+	
+	if val >= 0 then	
+		-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
+		string_text &= val
+	end if
+	
+	return string_text
+end function
 
 integer INCLUDE_NEXT	INCLUDE_NEXT = FALSE
 function scan_identifier()
-	if not Alpha_Char(Look) and Look != '_' then return FALSE end if
+	integer nextch
+	integer startpos
+	object textdata
+	
+	if not Alpha_Char(Look) and Look != '_' then
+		return FALSE
+	end if
+	
+	if find(Look, "xuU") then
+		nextch = lookahead()
+		if nextch = '"' then
+			trace(1)
+			-- A special string token
+			textdata = ""
+			scan_char()	-- Skip over starting quote
+			scan_char() -- First char of string
+			startpos = sti
+			while not find(Look, {'"', EOF}) do
+				scan_char()
+			end while
+			if Look = EOF then
+				-- No matching end-quote
+				report_error(ERR_EOF_STRING)
+				return TRUE
+			end if
+			
+			textdata = hex_string(source_text[startpos .. sti-1], source_text[startpos - 2])
+			if atom(textdata) then
+				-- Invalid hex string
+				report_error(ERR_HEX_STRING)
+				return TRUE
+			end if
+			Token[TTYPE] = T_STRING
+			Token[TDATA] = textdata
+			scan_char()	-- go to next char after end of string
+			return TRUE
+		end if
+	end if
+	
 	Token[TTYPE] = T_IDENTIFIER
 	Token[TDATA] = ""
 	while Identifier_Char(Look) do
