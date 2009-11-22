@@ -739,7 +739,10 @@ void ClearScreen()
 
 #ifdef EUNIX
     // ANSI code
-    iputs("\033[2J", stdout);  // clear screen
+    SetTColor(current_fg_color);
+    SetBColor(current_bg_color);
+    iputs("\E[2J", stdout);  // clear screen
+    iflush(stdout);
     SetPosition(1,1);
     Set_Image(screen_image, ' ', current_fg_color, current_bg_color);
 #endif
@@ -756,7 +759,7 @@ void SetPosition(int line, int col)
 #endif
 
 #ifdef EUNIX
-    snprintf(buff, SP_buflen, "\033[%d;%dH", line, col);
+    snprintf(buff, SP_buflen, "\E[%d;%dH", line, col);
     iputs(buff, stdout);
     iflush(stdout);
 #endif
