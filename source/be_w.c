@@ -162,6 +162,7 @@ void screen_show()
 }
 #endif
 
+#if defined (EUNIX)
 void Set_Image(struct char_cell image[MAX_LINES][MAX_COLS], char vch, char fg, char bg)
 {
   int i, j;
@@ -174,6 +175,7 @@ void Set_Image(struct char_cell image[MAX_LINES][MAX_COLS], char vch, char fg, c
         }
     }
 }
+#endif
 
 void InitInOut()
 /* Set up stdout and stderr. In EWINDOWS some stuff
