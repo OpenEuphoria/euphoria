@@ -103,7 +103,7 @@ int emul_flock(fd, cmd)
 
 #include "alldefs.h"
 #include "alloc.h"
-
+#include "execute.h"
 #include "version.h"
 #include "be_runtime.h"
 
@@ -658,7 +658,14 @@ void do_scroll(int top, int bottom, int amount)
 {
 	short r1, c1, r2, c2;
 	int i, j;
+	int newl;
 	int fg, bg, b, t, prev_t, prev_b;
+#if defined(EUNIX)
+	char c;
+	char linebuff[200 + 1];
+	int lbi;
+#endif
+
 #ifdef EWINDOWS
 	SMALL_RECT src, clip;
 	COORD dest;
@@ -707,21 +714,41 @@ void do_scroll(int top, int bottom, int amount)
 		// copy some lines up
 		for (i = top; i <= bottom - amount; i++) {
 			SetPosition(i, 1);
+			newl = i - 1;
+			lbi = 0;
 			for (j = 0; j < col_max; j++) {
-				screen_image[i-1][j] = screen_image[i+amount-1][j];
-				t = screen_image[i+amount-1][j].fg_color;
-				b = screen_image[i+amount-1][j].bg_color;
+				screen_image[newl][j] = screen_image[newl+amount][j];
+				t = screen_image[newl][j].fg_color;
+				b = screen_image[newl][j].bg_color;
 				if (t != prev_t) {
+					if (lbi) {
+					  linebuff[lbi] = 0;
+					  iputs(linebuff , stdout);
+					  iflush(stdout);
+					  lbi = 0;
+					} 
 					SetTColor(t);
 					prev_t = t;
 				}
 				if (b != prev_b) {
+					if (lbi) {
+					  linebuff[lbi] = 0;
+					  iputs(linebuff , stdout);
+					  iflush(stdout);
+					  lbi = 0;
+					} 
 					SetBColor(b);
 					prev_b = b;
 				}
-				iputc(screen_image[i+amount-1][j].ascii, stdout);
+				c = screen_image[newl][j].ascii;
+				if (c == 0)
+				  c = ' ';
+                                linebuff[lbi] = c;
+				lbi++;
 			}
-			//screen_line++;
+			linebuff[lbi] = 0;
+			iputs(linebuff , stdout);
+			iflush(stdout);
 		}
 		// put blank lines at bottom
 		SetBColor(bg);
@@ -732,21 +759,41 @@ void do_scroll(int top, int bottom, int amount)
 		// copy some lines down
 		for (i = bottom; i >= top-amount; i--) {
 			SetPosition(i, 1);
+			newl = i - 1;
+			lbi = 0;
 			for (j = 0; j < col_max; j++) {
-				screen_image[i-1][j] = screen_image[i+amount-1][j];
-				t = screen_image[i+amount-1][j].fg_color;
-				b = screen_image[i+amount-1][j].bg_color;
+				screen_image[newl][j] = screen_image[newl+amount][j];
+				t = screen_image[newl][j].fg_color;
+				b = screen_image[newl][j].bg_color;
 				if (t != prev_t) {
+					if (lbi) {
+					  linebuff[lbi] = 0;
+					  iputs(linebuff , stdout);
+					  iflush(stdout);
+					  lbi = 0;
+					} 
 					SetTColor(t);
 					prev_t = t;
 				}
 				if (b != prev_b) {
+					if (lbi) {
+					  linebuff[lbi] = 0;
+					  iputs(linebuff , stdout);
+					  iflush(stdout);
+					  lbi = 0;
+					} 
 					SetBColor(b);
 					prev_b = b;
 				}
-				iputc(screen_image[i+amount-1][j].ascii, stdout);
+				c = screen_image[newl][j].ascii;
+				if (c == 0)
+				  c = ' ';
+                                linebuff[lbi] = c;
+				lbi++;
 			}
-			//screen_line--;
+			linebuff[lbi] = 0;
+			iputs(linebuff , stdout);
+			iflush(stdout);
 		}
 		// put blanks lines at top
 		SetBColor(bg);
@@ -780,7 +827,12 @@ object SetTColor(object x)
 /* SET TEXT COLOR */
 {
 	short c;
-	char digits[20];
+#if defined(EUNIX)
+#define STC_buflen (20)
+	char buff[STC_buflen];
+	int bold;
+#endif
+
 #ifdef EWINDOWS
 	WORD attribute;
 	CONSOLE_SCREEN_BUFFER_INFO con_info;
@@ -789,21 +841,24 @@ object SetTColor(object x)
 	c = get_int(x);
 #if defined(EWINDOWS)
 	show_console();
-#endif
-#ifdef EWINDOWS
 	GetConsoleScreenBufferInfo(console_output, &con_info);
 	attribute = (c & 0x0f) | (con_info.wAttributes & 0xf0);
 	SetConsoleTextAttribute(console_output, attribute);
 #endif
+
 #ifdef EUNIX
 	current_fg_color = c & 15;
-	if (current_fg_color > 7)
-		iputs("\033[1m", stdout); // BOLD ON (BRIGHT)
-	else
-		iputs("\033[22m", stdout); // BOLD OFF
-	iputs("\033[3", stdout);
-	iputc('0' + (current_fg_color & 7), stdout);
-	iputc('m', stdout);
+	if (current_fg_color > 7) {
+		bold = 1; // BOLD ON (BRIGHT)
+		c = 30 + (current_fg_color & 7);
+	}
+	else {
+		bold = 22; // BOLD OFF
+		c = 30 + current_fg_color;
+	}
+	snprintf(buff, STC_buflen, "\E[%dm\E[%dm", bold, c);
+	iputs(buff, stdout);
+	iflush(stdout);
 #endif
 
 	return ATOM_1;
@@ -827,6 +882,11 @@ object SetBColor(object x)
 /* SET BACKGROUND COLOR */
 {
 	int c;
+#if defined(EUNIX)
+#define SBC_buflen (20)
+        char buff[SBC_buflen];
+#endif
+
 #ifdef EWINDOWS
 	WORD attribute;
 	CONSOLE_SCREEN_BUFFER_INFO con_info;
@@ -835,18 +895,16 @@ object SetBColor(object x)
 	c = get_int(x);
 #if defined(EWINDOWS)
 	show_console();
-#endif
-#ifdef EWINDOWS
 	GetConsoleScreenBufferInfo(console_output, &con_info);
 	attribute = ((c & 0x0f) << 4) | (con_info.wAttributes & 0x0f);
 	SetConsoleTextAttribute(console_output, attribute);
 #endif
+
 #ifdef EUNIX
-	current_bg_color = c & 7;
-	// ANSI code
-	iputs("\033[4", stdout);
-	iputc('0' + current_bg_color, stdout);
-	iputc('m', stdout);
+	current_bg_color = 40 + (c & 7);
+	snprintf(buff, SBC_buflen, "\E[%dm", current_bg_color);
+	iputs(buff, stdout);
+	iflush(stdout);
 #endif
 
 	return ATOM_1;

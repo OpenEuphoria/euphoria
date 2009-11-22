@@ -162,6 +162,19 @@ void screen_show()
 }
 #endif
 
+void Set_Image(struct char_cell image[MAX_LINES][MAX_COLS], char vch, char fg, char bg)
+{
+  int i, j;
+  
+    for (i = 0; i < line_max; i++) {
+        for (j = 0; j < col_max; j++) {
+            image[i][j].ascii = vch;
+            image[i][j].fg_color = fg;
+            image[i][j].bg_color = bg;
+        }
+    }
+}
+
 void InitInOut()
 /* Set up stdout and stderr. In EWINDOWS some stuff
    is initialized right away. The rest is done later if necesssary on first
@@ -188,13 +201,14 @@ void InitInOut()
     screen_line = position.row;
     screen_col = position.col;
 
-    for (i = 0; i < line_max; i++) {
-        for (j = 0; j < col_max; j++) {
-            screen_image[i][j].ascii = ' ';
-            screen_image[i][j].fg_color = 15;
-            screen_image[i][j].bg_color = 0;
-        }
-    }
+//    for (i = 0; i < line_max; i++) {
+//        for (j = 0; j < col_max; j++) {
+//            screen_image[i][j].ascii = ' ';
+//            screen_image[i][j].fg_color = 15;
+//            screen_image[i][j].bg_color = 0;
+//        }
+//    }
+	Set_Image(screen_image, ' ', 15, 0);
 #endif
 }
 
@@ -725,6 +739,7 @@ void ClearScreen()
     // ANSI code
     iputs("\033[2J", stdout);  // clear screen
     SetPosition(1,1);
+    Set_Image(screen_image, ' ', current_fg_color, current_bg_color);
 #endif
 
     screen_line = 1;
@@ -735,19 +750,12 @@ void SetPosition(int line, int col)
 {
 #ifdef EUNIX
 #define SP_buflen (20)
-    char lbuff[SP_buflen];
-    char cbuff[SP_buflen];
+    char buff[SP_buflen];
 #endif
 
 #ifdef EUNIX
-    snprintf(lbuff, SP_buflen, "%d", line); lbuff[SP_buflen - 1] = '\0'; // ensure NULL
-    snprintf(cbuff, SP_buflen, "%d", col); cbuff[SP_buflen - 1] = '\0'; // ensure NULL
-    // ANSI code
-    iputs("\033[", stdout);
-    iputs(lbuff, stdout);
-    iputc(';', stdout);
-    iputs(cbuff, stdout);
-    iputc('H', stdout);
+    snprintf(buff, SP_buflen, "\033[%d;%dH", line, col);
+    iputs(buff, stdout);
     iflush(stdout);
 #endif
 
