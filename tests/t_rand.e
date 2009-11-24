@@ -38,10 +38,10 @@ atom B = rnd()
 test_true( "rnd() #2", A != B)
 
 set_rand({34, 100919})
-test_equal("set_rand explicit", 0.734853451398937, rnd())
+test_equal("set_rand explicit ", 0.734853451398937, rnd())
 
 set_rand("some text string as a seed generator")
-test_equal("set_rand explicit", 0.652952084646423, rnd())
+test_equal("set_rand string", 0.46610033177015, rnd())
 
 set_rand("") -- Reset generator.
 integer y = 0
