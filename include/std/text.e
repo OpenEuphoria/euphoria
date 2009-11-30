@@ -1670,7 +1670,9 @@ public function format(sequence pFormat, object pArgs = {})
 							if zfill != 0 and width > 0 then
 								if length(argtext) > 0 then
 									if argtext[1] = '-' then
-										argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+										if width > length(argtext) then
+											argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+										end if
 									else
 										if width > length(argtext) then
 											argtext = repeat('0', width - length(argtext)) & argtext

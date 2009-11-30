@@ -1,6 +1,8 @@
 include std/io.e
 include std/filesys.e
 include std/unittest.e
+include std/text.e
+include std/sequence.e
 
 -- TODO: add more tests
 
@@ -165,10 +167,31 @@ tmp = open( "file.txt", "r", 1 )
 test_not_equal( "open file with auto close after deref closing", -1, tmp )
 delete(tmp)
 
+tmp = {}
+
+sequence alt_tmp = {}
+
+function test_proc(sequence aLine, integer line_no, object data)
+	tmp &= aLine
+	tmp &= '\n'
+	
+	alt_tmp = append(alt_tmp, format(data[1], {line_no, aLine}))
+	
+	return 0
+end function
+
+test_equal( "process lines #1", 0, process_lines("file.txt", routine_id("test_proc"), {"[1z:4] : [2]", 0}))
+test_equal( "process lines #2", test_file_data, tmp)
+tmp = split(test_file_data, '\n')
+tmp = tmp[1..$-1] -- Strip off final empty sequence.
+for i = 1 to length(tmp) do
+	tmp[i] = sprintf("%04d : %s", {i, tmp[i]})
+end for
+test_equal( "process lines #3", tmp, alt_tmp)
+
 delete_file("file.txt")
 delete_file("filea.txt")
 delete_file("fileb.txt")
 delete_file("filec.txt")
-
 test_report()
 

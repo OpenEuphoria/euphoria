@@ -1075,6 +1075,90 @@ public function read_lines(object file)
 end function
 
 --**
+-- Process the contents of a file, one line at a time.
+--
+-- Parameters:
+-- # ##file## : an object. Either a file path or the handle to an open file.
+-- # ##proc## : an integer. The routine_id of a function that will process the line.
+-- # ##user_data## : on object. This is passed untouched to ##proc## for each line.
+--
+-- Returns:
+--	An object. If 0 then all the file was processed successfully. Anything else
+--  means that something went wrong and this is whatever value was returned by ##proc##.
+--
+-- Comments:
+--  * The function ##proc## must accept three parameters ...
+--    ** A sequence: The line to process. It will **not** contain an end-of-line character.
+--    ** An integer: The line number.
+--    ** An object : This is the ##user_data## that was passed to ##process_lines##.
+--	* If ##file## was a sequence, the file will be closed on completion. 
+--  Otherwise, it will remain open, and be positioned where ever reading stopped.
+--
+-- Example:
+-- <eucode>
+-- -- Format each supplied line according to the format pattern supplied as well.
+-- function show(sequence aLine, integer line_no, object data)
+--   writefln( data[1], {line_no, aLine})
+--   if data[2] > 0 and line_no = data[2] then
+--   	return 1
+--   else
+--   	return 0
+--   end if
+-- end function
+-- -- Show the first 20 lines.
+-- process_lines("sample.txt", routine_id("show"), {"[1z:4] : [2]", 20})
+-- </eucode>
+--
+-- See Also:
+--		[[:gets]], [[:read_lines]], [[:read_file]]
+
+public function process_lines(object file, integer proc, object user_data = 0)
+	integer fh
+	object aLine
+	object res
+	integer line_no = 0
+	
+	res = 0
+	if sequence(file) then
+		fh = open(file, "r")
+	else
+		fh = file
+	end if
+	if fh < 0 then 
+		return -1 
+	end if
+	
+	while sequence(aLine) with entry do
+		line_no += 1
+		if length(aLine) then
+			if aLine[$] = '\n' then
+				aLine = aLine[1 .. $-1]
+				ifdef UNIX then
+					if length(aLine) then
+						if aLine[$] = '\r' then
+							aLine = aLine[1 .. $-1]
+						end if
+					end if
+				end ifdef
+			end if
+		end if
+		res = call_func(proc, {aLine, line_no, user_data})
+		if not equal(res, 0) then
+			exit
+		end if
+		
+	entry
+		aLine = gets(fh)
+	end while
+
+	if sequence(file) then
+		close(fh)
+	end if
+
+	return res
+end function
+
+--**
 -- Write a sequence of lines to a file.
 --
 -- Parameters:
@@ -1834,4 +1918,3 @@ public procedure writefln(object fm, object data={}, object fn = 1, object data_
 		writef(fm & '\n', data, fn, data_not_string)
 	end if
 end procedure
-
