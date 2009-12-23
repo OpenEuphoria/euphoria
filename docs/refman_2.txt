@@ -1304,6 +1304,26 @@ point[X] = 3
 point[Y] = 4
 </eucode>
 
+You can even associate a group of enumerated values as a type: 
+
+<eucode>
+enum type weekday
+	MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
+end type
+</eucode>
+
+Now you can define variables with the **user-defined type** weekday and the variable will only accept values that are in the defining list.
+
+<eucode>
+weekday garbageday -- The day of the week the garbage collector comes.
+garbageday = SATURDAY -- good
+garbageday = MONDAY -- also good
+</eucode>
+
+This is a convenient way to restrict a variables value to a set of acceptable values.  You will
+see a more flexible method in the next section. 
+
+
 === Specifying the type of a variable
 
 So far you've already seen some examples of variable types but now we will
@@ -1396,6 +1416,32 @@ in an expression. The type just serves as an error check to prevent any
 "corruption" of the variable.    User-defined types can catch unexpected
 logical errors in your program.  They are not designed to catch or correct user
 input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
+
+As you have seen in the section of the @[[:enum]] statement, types can also be defined 
+by a an enumerated list.  You can write either <eucode>enum type</eucode> or 
+<eucode>type enum</eucode> with no change of functionality.
+
+<eucode>
+weekday garbageday
+garbageday = 9 -- an error is raised at this line.
+</eucode>
+
+You can use the type as a function to check if a value is okay.  Suppose your program reads a 
+value from disk, a network or from user input.  You can use weekday() or hour() as a function to
+test if a value is valid for a variable.
+
+<eucode>
+hour h1
+sequence s
+puts(1, "Please enter the hour you have dinner:")
+s = gets(0)
+s = value(s)
+if s[1] = GET_SUCCESS and hour(s[2]) then
+	h1 = s[2]
+else
+	puts(2, "Error:  Your hour is an invalid value.\n")
+end if
+</eucode>
 
 @[[:type_check]]
 Type checking can be turned off or on between subroutines using the with

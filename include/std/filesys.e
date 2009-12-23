@@ -160,7 +160,7 @@ ifdef UNIX then
 	elsedef
 		public constant SHARED_LIB_EXT = "so"
 	end ifdef
-elsifdef DOSFAMILY then
+elsifdef DOSFAMILY or WINDOWS then
 	public constant SLASH='\\'
 	public constant SLASHES = "\\/:"
 	public constant EOLSEP = "\r\n"
