@@ -242,7 +242,7 @@ all :  .SYMBOLIC
 	wmake -h winlibrary $(VARS)
 	wmake -h backend $(VARS)
 
-BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj
+BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
 !ifndef RM
@@ -358,43 +358,27 @@ testeu : .SYMBOLIC
 test : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EXE) ..\source\eutest.ex -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT)
+	$(EXE) -i $(%EUDIR)\include $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT)
 	cd ..\source
 	
+report: .SYMBOLIC
+	$(MAKE) ..\reports\report.html
+	
+..\reports\report.html: $(EU_ALL_FILES)
+	cd ..\tests
+	set EUCOMPILEDIR=$(TRUNKDIR) 
+	-$(EXE) $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log
+	$(EXE) $(%EUDIR)\source\eutest.ex -process-log -html > ..\reports\report.html
+	cd ..\source
 
+tester: .SYMBOLIC 
+	wmake $(BUILDDIR)\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
+
+	
 !ifdef BUILD_TOOLS
-$(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr\main-.c $(BUILDDIR)\eutestdr.wat $(BUILDDIR)\eu.lib $(BUILDDIR)\eutestdr
-	@%create $(BUILDDIR)\eutestdr\eutestdr.lbc
-	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc option quiet
-	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc option caseexact
-	@%append $(BUILDDIR)\eutestdr\eutestdr.lbc library ws2_32
-	@for %i in ($(EUTEST_OBJECTS)) do @%append $(BUILDDIR)\eutestdr\eutest.lbc file %i
-	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\eutestdr\eutestdr.lbc name $(BUILDDIR)\eutest.exe
-
-$(BUILDDIR)\eutestdr.wat : $(BUILDDIR)\eutestdr\main-.c
-	@if exist $(BUILDDIR)\objtmp rmdir /Q /S $(BUILDDIR)\objtmp
-	@mkdir $(BUILDDIR)\objtmp
-	@copy $(BUILDDIR)\eutestdr\*.c $(BUILDDIR)\objtmp
-	@cd $(BUILDDIR)\objtmp
-	ren *.c *.obj
-	%create eutestdr.wat
-	%append eutestdr.wat $(EU_NAME_OBJECT) = &  
-	for %i in (*.obj) do @%append eutestdr.wat $(BUILDDIR)\eutestdr\%i & 
-	%append eutestdr.wat    
-	del *.obj
-	cd $(TRUNKDIR)\source
-	move $(BUILDDIR)\objtmp\eutestdr.wat $(BUILDDIR)
-	rmdir $(BUILDDIR)\objtmp
-
-
-$(BUILDDIR)\eutestdr\main-.c : $(TRUNKDIR)\source\eutest.ex $(BUILDDIR)\eutestdr
-	-$(RM) $(BUILDDIR)\eutestdr\*.*
-	cd  $(BUILDDIR)\eutestdr
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex -nobuild -wat -plat $(TRANSDEBUG) $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\eutest.ex
-	cd $(TRUNKDIR)\source
-
-$(BUILDDIR)\eutestdr :
-	mkdir $(BUILDDIR)\eutestdr
+$(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
+	cd $(BUILDDIR)\eutestdr	
+	$(EUBIN)\euc -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
 
 !endif #BUILD_TOOLS
 
@@ -470,9 +454,9 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option caseexact
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\eub.lbc file %i
-	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
+	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
 	wrc -q -ad exw.res $(BUILDDIR)\eubw.exe
-	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
+	wlink $(DEBUGLINK) SYS nt op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
 	wrc -q -ad exw.res $(BUILDDIR)\eub.exe
 
 backend : .SYMBOLIC backendflag
@@ -496,6 +480,9 @@ be_rev.c : .recheck .always
 $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
+	-$(RM) $(TRUNKDIR)\source\main-.h
+	-$(RM) $(TRUNKDIR)\source\init-.c
+	-$(RM) $(TRUNKDIR)\source\main-.c
 	cd  $(BUILDDIR)\$(OBJDIR)
 	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source

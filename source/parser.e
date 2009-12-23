@@ -3093,9 +3093,13 @@ procedure Assign_Constant( symtab_index sym )
 	end if
 end procedure
 
-procedure Global_declaration(symtab_index type_ptr, integer scope)
+function Global_declaration(symtab_index type_ptr, integer scope)
 -- parse a command-level variable or constant declaration
--- type_ptr is NULL if constant
+-- type_ptr is NULL if a list of constants (where each must be assigned to something)
+-- type_ptr is -1 if it is an enumerated list of constants (where the first is assigned one and
+-- each value is assumed to be one greater than the previous one unless assigned )
+-- type_ptr otherwise must point to a valid symbol index of a variable.
+	sequence new_symbols
 	token tok
 	object tsym
 	object prevtok = 0
@@ -3103,12 +3107,23 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 	integer h, val, count = 0
 	val = 1
 	
+	new_symbols = {}
 	integer is_fwd_ref = 0
 	if type_ptr > 0 and SymTab[type_ptr][S_SCOPE] = SC_UNDEFINED then
 		is_fwd_ref = 1
 		Hide(type_ptr)
 		type_ptr = -new_forward_reference( TYPE, type_ptr )
 	end if
+	
+	sequence ptok = next_token()
+	if ptok[T_ID] = TYPE_DECL then
+		putback(keyfind("enum",-1))
+		SubProg(TYPE_DECL, scope)
+		return {}
+	else
+		putback(ptok)
+	end if
+
 	
 	while TRUE do
 		tok = next_token()
@@ -3126,6 +3141,7 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 			CompileErr(25)
 		end if
 		sym = tok[T_SYM]
+		new_symbols = append(new_symbols, sym)
 		DefinedYet(sym)
 		if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF, SC_PUBLIC, SC_EXPORT}) then
 			h = SymTab[sym][S_HASHVAL]
@@ -3306,7 +3322,8 @@ procedure Global_declaration(symtab_index type_ptr, integer scope)
 		prevtok = tok
 	end while
 	putback(tok)
-end procedure
+	return new_symbols
+end function
 
 procedure Private_declaration(symtab_index type_sym)
 -- parse a private declaration of one or more variables
@@ -3620,9 +3637,39 @@ procedure SubProg(integer prog_type, integer scope)
 	token tok, prog_name
 	integer first_def_arg
 	integer again
+	integer type_enum
 
 	LeaveTopLevel()
 	prog_name = next_token()
+	type_enum = prog_type = TYPE_DECL and equal(sym_name(prog_name[T_SYM]),"enum")
+	if type_enum then
+		sequence i1_sym
+		sequence symbols, seq_symbol
+		prog_name = next_token()
+		symbols = Global_declaration(-1, scope)
+		seq_symbol = symbols
+		for i = 1 to length(symbols) do
+			seq_symbol[i] = sym_obj(symbols[i])
+		end for
+		-- boot strap in a type routine
+		-- so that anything falling in the
+		-- range of the enum is accepted
+		-- as valid.
+		i1_sym = keyfind("i1",-1)
+		p = NewStringSym(seq_symbol)
+		putback(keyfind("end",-1))
+		putback({RIGHT_ROUND,0})
+		putback({VARIABLE,p})
+		putback({COMMA,0})
+		putback(i1_sym)
+		putback({LEFT_ROUND,0})
+		putback(keyfind("find",-1))
+		putback(keyfind("return",-1))
+		putback({RIGHT_ROUND,0})
+		putback(i1_sym)
+		putback(keyfind("object",-1))
+		putback({LEFT_ROUND,0})
+	end if
 	if not find(prog_name[T_ID], ADDR_TOKS) then
 		CompileErr(25)
 	end if
@@ -3753,9 +3800,9 @@ procedure SubProg(integer prog_type, integer scope)
 --		SymTab[sym][S_USAGE] = U_WRITTEN
 		tok = next_token()
 		if tok[T_ID] = EQUALS then -- defaulted parameter
-		    start_recording()
-		    Expr()
-		    SymTab[sym][S_CODE] = restore_parser()
+			start_recording()
+			Expr()
+			SymTab[sym][S_CODE] = restore_parser()
 			if Pop() then end if -- don't leak the default argument
 			tok = next_token()
 			if first_def_arg = 0 then
@@ -3841,8 +3888,10 @@ procedure SubProg(integer prog_type, integer scope)
 	Statement_list()
 	
 	-- parse routine end.
-	tok_match(END)
-	tok_match(prog_type, END)
+	if not type_enum then
+		tok_match(END)
+	end if
+	tok_match(prog_type)
 	
 	if prog_type != PROCEDURE then
 		if not FuncReturn then
@@ -4204,7 +4253,7 @@ export procedure real_parser(integer nested)
 				end if
 			end if
 
-		elsif id = TYPE or id = QUALIFIED_TYPE then
+		elsif id = TYPE or id = QUALIFIED_TYPE then		
 			Global_declaration(tok[T_SYM], SC_LOCAL)
 
 		elsif id = CONSTANT then
