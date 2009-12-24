@@ -637,7 +637,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		if dep_works() then
 			if eu:c_func( VirtualProtect_rid, { iaddr, size, true_protection , oldprotptr } ) = 0 then
 				-- 0 indicates failure here
-				c_proc(VirtualFree_rid, { iaddr, size, MEM_RELEASE })
+				c_func(VirtualFree_rid, { iaddr, size, MEM_RELEASE })
 				return 0
 			end if
 		end if
