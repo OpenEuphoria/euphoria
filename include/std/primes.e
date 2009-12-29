@@ -10,7 +10,7 @@ namespace primes
 
 include std/search.e
 
-sequence list_of_primes  = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
+sequence list_of_primes  = {2,3} -- Initial seedings.
 
 --****
 -- === Routines
@@ -47,7 +47,6 @@ sequence list_of_primes  = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61}
 --
 -- See Also:
 --		[[:next_prime]] [[:prime_list]]
-
 public function calc_primes(integer max_p, atom time_limit_p = 10)
 	sequence result_
 	integer candidate_
@@ -80,7 +79,8 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 		maxf_ = list_of_primes[maxf_idx]
 	end if
 	-- Calculate what the trigger is for when we need to go to the next maximum factor value.
-	next_trigger = list_of_primes[maxf_idx+1] * list_of_primes[maxf_idx+1]
+	next_trigger = list_of_primes[maxf_idx+1]
+	next_trigger *= next_trigger
 	
 	-- Pre-allocate space for the new values. This allocates more than we will
 	-- need so the return value takes a slice up to the last stored prime.
@@ -100,7 +100,7 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 		task_yield()
 
 		-- Get the next candidate value to examine.		
-		candidate_ = candidate_ + 2
+		candidate_ += 2
 		
 		-- If this is at or past the factor trigger point
 		-- pluck out the next maximum factor and calculate
@@ -108,7 +108,8 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 		if candidate_ >= next_trigger then
 			maxf_idx += 1
 			maxf_ = result_[maxf_idx]
-			next_trigger = result_[maxf_idx+1] * result_[maxf_idx+1]
+			next_trigger = result_[maxf_idx+1]
+			next_trigger *= next_trigger
 		end if
 		
 		-- Examine the candidate.
