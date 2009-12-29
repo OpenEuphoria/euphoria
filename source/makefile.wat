@@ -1,4 +1,4 @@
-# OpenWatcom makefile for Euphoria (Win32/DOS32)
+# OpenWatcom makefile for Euphoria (Win32)
 #
 # You must first run configure.bat, supplying any options you might need:
 #
@@ -21,6 +21,11 @@
 #
 #     --full	  Use this option to so EUPHORIA doesn't report itself
 #		     as a development version.
+#
+#     --align4    Use this on systems in which 'malloc' may return addresses
+#            that are 4-byte aligned. Win95 for example.
+#
+#     --noassert  Use this to remove 'assert()' processing in the C code.
 #
 # Syntax:
 #   Interpreter (euiw.exe, eui.exe):  wmake interpreter
@@ -178,10 +183,24 @@ EU_ALL_FILES = *.e $(EU_INCLUDES) &
 MEMFLAG = /dESIMPLE_MALLOC
 !else
 MANAGED_FLAG = -D EU_MANAGED_MEM
+# heap check only valid if using managed memory.
+!ifeq HEAP_CHECK 1
+HEAPCHECKFLAG=/dHEAP_CHECK
+!endif
+
 !endif
 
 !ifeq RELEASE 1
 RELEASE_FLAG = -D EU_FULL_RELEASE
+NOASSERT = /dNDEBUG
+!endif
+
+!ifneq ASSERT 1
+NOASSERT = /dNDEBUG
+!endif
+
+!ifeq ALIGN4 1
+SETALIGN4 = /dEALIGN4
 !endif
 
 !ifndef EUBIN
@@ -211,10 +230,6 @@ DEBUGFLAG = /d2 /dEDEBUG
 DEBUGLINK = debug all
 TRANSDEBUG= -debug
 EUDEBUG=-D DEBUG
-!endif
-
-!ifeq HEAP_CHECK 1
-HEAPCHECKFLAG=/dHEAP_CHECK
 !endif
 
 !ifeq EXTRA_STATS 1
@@ -281,8 +296,8 @@ LIBTARGET=$(BUILDDIR)\eu.lib
 
 CC = wcc386
 .ERASE
-FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) /I..\
-BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)
+FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\
+BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) $(EXTRACHECKFLAG) $(EXTRASTATSFLAG)
 	
 library : .SYMBOLIC runtime
     @echo ------- LIBRARY -----------
@@ -382,7 +397,7 @@ $(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 
 !endif #BUILD_TOOLS
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) 
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG)
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
@@ -465,9 +480,9 @@ backend : .SYMBOLIC backendflag
 	wmake -h objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS $(VARS)
 	wmake -h $(BUILDDIR)\eubw.exe EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
-$(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES)
-$(BUILDDIR)\backobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES)
+$(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES) $(CONFIG)
+$(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES) $(CONFIG)
+$(BUILDDIR)\backobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES) $(CONFIG)
 
 !ifdef EUPHORIA
 # We should have ifdef EUPHORIA so that make doesn't decide

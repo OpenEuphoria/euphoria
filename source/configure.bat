@@ -68,6 +68,17 @@ IF "%1" == "--extracheck" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--align4" (
+	echo ALIGN4=1 >> config.wat
+	GOTO EndLoop
+)
+
+echo ASSERT=1 >> config.wat
+IF "%1" == "--noassert" (
+	echo ASSERT=0 >> config.wat
+	GOTO EndLoop
+)
+
 echo Unknown option '%1'
 GOTO Help
 
