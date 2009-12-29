@@ -403,8 +403,7 @@ ifdef WIN32 then
 		if system_info_ptr != 0 then
 			c_proc( GetSystemInfo_rid, { system_info_ptr } )
 			page_size = peek4u( system_info_ptr + 4 )
---			free( system_info_ptr )
-			machine_proc(M_FREE, system_info_ptr)
+			free( system_info_ptr )
 		end if
 	end if
 	public constant PAGE_SIZE = page_size
