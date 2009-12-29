@@ -30,7 +30,6 @@ extern unsigned char TempBuff[];
 extern int gline_number;
 extern struct IL fe;
 extern int SymTabLen; // avoid > 3 args
-extern unsigned default_heap;
 extern char **file_name;
 /**********************/
 /* Exported variables */
@@ -50,11 +49,7 @@ static int e_routine_size = 0;   /* number of symbol table pointers allocated */
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-#else
 #include "alloc.h"
-#endif
 /*********************/
 /* Defined functions */
 /*********************/

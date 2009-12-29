@@ -15,7 +15,6 @@
         #include <ws2tcpip.h>
     #endif // AF_INET
 
-    extern int default_heap;
 #else // ifdef EWINDOWS
     #include <sys/types.h>
     #include <sys/socket.h>
@@ -324,7 +323,7 @@ object eusock_getservbyname(object x)
 		proto = 0;
 	}
 
-	// ent is static data, do not free
+	// ent is static data, do not release
 	ent = getservbyname(name, proto);
 
 	EFree(name);
@@ -376,7 +375,7 @@ object eusock_getservbyport(object x)
 		proto = 0;
 	}
 
-	// ent is static data, do not free
+	// ent is static data, do not release
 	ent = getservbyport(ntohs(port), proto);
 
 	if (proto != 0)
@@ -471,7 +470,7 @@ object eusock_gethostbyname(object x)
 	name   = EMalloc(name_s->length+1);
 	MakeCString(name, SEQ_PTR(x)->base[1], name_s->length+1 );
 
-	// ent is static data, do not free
+	// ent is static data, do not release
 	ent = gethostbyname(name);
 
 	EFree(name);
@@ -506,7 +505,7 @@ object eusock_gethostbyaddr(object x)
 		return ERR_FAULT;
 	}
 
-	// ent is static data, do not free
+	// ent is static data, do not release
 	ent = gethostbyaddr((char *) &addr, 4, AF_INET);
 
 	EFree(address);
@@ -564,7 +563,7 @@ object eusock_socket(object x)
 		return eusock_geterror();
 	}
 
-	addr = EMalloc(sizeof(struct sockaddr_in));
+	addr = (struct sockaddr_in *)EMalloc((unsigned long)sizeof(struct sockaddr_in));
 	addr->sin_family = af;
 	addr->sin_port   = 0;
 

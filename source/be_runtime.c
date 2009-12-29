@@ -33,16 +33,14 @@
 #  include <dos.h>
 #  include <process.h>
 #endif
-//#include <malloc.h>
+
 #include <string.h>
 #ifdef EWINDOWS
-#include <windows.h>
+	#include <windows.h>
 #endif
 
 #include "alldefs.h"
-#include "alloc.h"
 #include "be_runtime.h"
-#include "global.h"
 
 /******************/
 /* Local defines  */
@@ -75,9 +73,6 @@
 /**********************/
 extern int **jumptab;
 extern char *last_traced_line;
-extern unsigned cache_size;
-extern int eu_dll_exists;
-extern int align4;
 extern int AnyStatementProfile;
 extern int first_mouse;
 extern int in_from_keyb;
@@ -110,7 +105,7 @@ extern struct videoconfig config;
 extern int il_file;
 extern struct IL fe;
 IFILE TempErrFile = 0;
-char *TempErrName; // "ex.err" - but must be malloc'd
+char *TempErrName; // "ex.err" - but must be on the heap
 char *TempWarningName;
 int display_warnings;
 extern int Executing;
@@ -120,7 +115,6 @@ extern HINSTANCE *open_dll_list;
 extern int open_dll_count;
 extern HANDLE console_input;
 extern HANDLE console_output;
-extern unsigned default_heap;
 #endif
 
 extern object_ptr expr_top;
@@ -410,10 +404,6 @@ s1_ptr NewS1();
 object NewString();
 object machine();
 s1_ptr SequenceCopy();
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-char *ERealloc();
-#endif
 char *getenv();
 IFILE long_iopen();
 void Cleanup();
@@ -571,14 +561,13 @@ void call_crash_routines()
 {
 	int i, r;
 	object quit;
-
 	if (crash_count > 0)
 		return;
 	crash_count++;
 
-	if (TempErrName) free(TempErrName);
+	if (TempErrName) EFree(TempErrName);
 #define CCR_len (16)
-	TempErrName = (char *)malloc(CCR_len);
+	TempErrName = (char *)EMalloc(CCR_len);
 	strlcpy(TempErrName, "ex_crash.err", CCR_len);
 
 #ifndef ERUNTIME
@@ -739,7 +728,7 @@ void Prepend(object_ptr target, object s1, object a)
 	s1p = SEQ_PTR(s1);
 	len = s1p->length;
 	if ((s1_ptr)s1 == t && s1p->ref == 1) {
-		/* we're free to prepend in-place */
+		/* we can to prepend in-place */
 		/* Check for room at beginning */
 		if (s1p->base >= (object_ptr)(s1p+1)) {
 			s1p->length++;
@@ -748,7 +737,7 @@ void Prepend(object_ptr target, object s1, object a)
 			return;
 		}
 		/* OPTIMIZE: check for postfill & copy down */
-		/* OPTIMIZE: check for extra room in malloc'd area? */
+		/* OPTIMIZE: check for extra room in current allocation? */
 		/* OPTIMIZE: Do an _expand() if possible */
 	}
 	/* make a new sequence */
@@ -787,7 +776,7 @@ void Append(object_ptr target, object s1, object a)
 	len = s1p->length;
 
 	if ((s1_ptr)s1 == t && s1p->ref == 1) {
-		/* we're free to append in-place */
+		/* we can to append in-place */
 		if (s1p->postfill == 0) {
 			/* make some more postfill space */
 			new_len = EXTRA_EXPAND(len);
@@ -803,7 +792,7 @@ void Append(object_ptr target, object s1, object a)
 			s1p->postfill = new_len - len;
 
 			*target = MAKE_SEQ(s1p);
-		/* OPTIMIZE: we may have more space in the malloc'd block
+		/* OPTIMIZE: we may have more space in the current allocation
 		   than we think, due to power of 2 round up etc. Can
 		   we find out what we have and increment postfill
 		   accordingly? Then we can usually avoid memcopying too much
@@ -1456,7 +1445,7 @@ void udt_clean( object o, long rid ){
 
 	save_tpc = tpc;
 	do_exec(code);  // execute routine without setting up new stack
-	EFree(code);
+	EFree((char *)code);
 	
 	tpc = save_tpc;
 	expr_top -= 2;
@@ -1479,7 +1468,7 @@ void cleanup_sequence( s1_ptr seq ){
 		if( cp->type == CLEAN_UDT ){
 			udt_clean( MAKE_SEQ(seq), cp->func.rid );
 			if( next ){
-				EFree( cp );
+				EFree( (char *)cp );
 			}
 		}
 		else
@@ -1487,12 +1476,12 @@ void cleanup_sequence( s1_ptr seq ){
 		if( cp->type == CLEAN_UDT_RT ){
 			udt_clean_rt( MAKE_SEQ(seq), cp->func.rid );
 			if( next ){
-				EFree( cp );
+				EFree( (char *)cp );
 			}
 		}
 		else{
 			(cp->func.builtin)( MAKE_SEQ( seq ) );
-			EFree( cp );
+			EFree( (char *)cp );
 		}
 		cp = next;
 	}
@@ -1508,7 +1497,7 @@ void cleanup_double( d_ptr dbl ){
 		if( cp->type == CLEAN_UDT ){
 			udt_clean( MAKE_DBL(dbl), cp->func.rid );
 			if( next ){
-				EFree( cp );
+				EFree( (char *)cp );
 			}
 		}
 		else
@@ -1516,12 +1505,12 @@ void cleanup_double( d_ptr dbl ){
 		if( cp->type == CLEAN_UDT_RT ){
 			udt_clean_rt( MAKE_DBL(dbl), cp->func.rid );
 			if( next ){
-				EFree( cp );
+				EFree( (char *)cp );
 			}
 		}
 		else{
 			(cp->func.builtin)( MAKE_DBL( dbl ) );
-			EFree( cp );
+			EFree( (char *)cp );
 		}
 
 		cp = next;
@@ -2813,7 +2802,7 @@ static unsigned int calc_hsieh32(object a)
 			if (IS_ATOM_INT(av)) {
 				if (av >= 0 && av <= 255) {
 					if (tempstr == 0) {
-						tempstr = malloc(SEQ_PTR(a)->length + 4);
+						tempstr = EMalloc(SEQ_PTR(a)->length + 4);
 						sp = tempstr;
 					}
 					*sp = (char)av;
@@ -2821,7 +2810,7 @@ static unsigned int calc_hsieh32(object a)
 				}
 				else {
 					if (tempstr != 0) {
-						free(tempstr);
+						EFree(tempstr);
 						tempstr = 0;
 					}
 					break;
@@ -2829,7 +2818,7 @@ static unsigned int calc_hsieh32(object a)
 			}
 			else {
 				if (tempstr != 0) {
-					free(tempstr);
+					EFree(tempstr);
 					tempstr = 0;
 				}
 				break;
@@ -2837,7 +2826,7 @@ static unsigned int calc_hsieh32(object a)
 		}
 		if (tempstr != 0) {
 			lHashVal = hsieh32(tempstr, SEQ_PTR(a)->length, lHashVal);
-			free(tempstr);
+			EFree(tempstr);
 			tempstr = 0;
 		}
 		else {
@@ -4859,6 +4848,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {
+
 	rt00 = rl;
 	rt01 = nl;
 	rt02 = ip;
@@ -4868,10 +4858,9 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	InitInOut();
 	InitGraphics();
 	InitEMalloc();
-	//setran();
 	InitFiles();
 #define TempErrName_len (16)
-	TempErrName = (char *)malloc(TempErrName_len);  // malloc, not EMalloc
+	TempErrName = (char *)EMalloc(TempErrName_len);
 	strlcpy(TempErrName, "ex.err", TempErrName_len);
 	TempWarningName = NULL;
 	display_warnings = 1;
@@ -4918,9 +4907,9 @@ char **make_arg_cv(char *cmdline, int *argc)
 	char **argv;
 	int ns;
 	int bs;
-
-	// don't use EMalloc yet:
-	argv = (char **)malloc((strlen(cmdline)/2+3) * sizeof(char *));
+	
+	InitEMalloc();
+	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
 	if (*argc == 1) {
 		argv[0] = 0;
@@ -4931,9 +4920,9 @@ char **make_arg_cv(char *cmdline, int *argc)
 		while (ns == bs) {
 			bs += 32;
 			if (argv[0] != 0)
-				free((void *)argv[0]);
+				EFree((void *)argv[0]);
 				
-			argv[0] = (char *)malloc(bs + 2);
+			argv[0] = (char *)EMalloc(bs + 2);
 			ns = GetModuleFileName(NULL, (LPTSTR)argv[0], bs);
 		}
 		if (ns == 0)
@@ -5018,7 +5007,7 @@ void system_call(object command, object wait)
 
 	len = SEQ_PTR(command)->length + 1;
 	if (len > TEMP_SIZE) {
-		string_ptr = (char *)malloc(len);
+		string_ptr = (char *)EMalloc(len);
 		len_used = len;
 	}
 	else {
@@ -5029,7 +5018,7 @@ void system_call(object command, object wait)
 	MakeCString(string_ptr, command, len_used);
 	system(string_ptr);
 	if (len > TEMP_SIZE)
-		free(string_ptr);
+		EFree(string_ptr);
 
 	if (w == 1) {
 		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
@@ -5043,6 +5032,7 @@ object system_exec_call(object command, object wait)
 /* Run a .exe or .com file, then restore the graphics mode.
    Will wait for user to hit key if desired. */
 {
+
 	char *string_ptr;
 	char **argv;
 	int len, w, exit_code;
@@ -5061,7 +5051,7 @@ object system_exec_call(object command, object wait)
 
 	len = SEQ_PTR(command)->length + 1;
 	if (len > TEMP_SIZE) {
-		string_ptr = (char *)malloc(len);
+		string_ptr = (char *)EMalloc(len);
 		len_used = len;
 	}
 	else {
@@ -5079,10 +5069,10 @@ object system_exec_call(object command, object wait)
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], argv);
-	free(argv);
+	EFree(argv);
 #endif
 	if (len > TEMP_SIZE)
-		free(string_ptr);
+		EFree(string_ptr);
 
 	if (w == 1) {
 		get_key(TRUE); //getch(); bug: doesn't pick up next byte of F-keys, arrows etc.
@@ -5107,7 +5097,7 @@ object EGetEnv(s1_ptr name)
 		RTFatal("argument to getenv must be a sequence");
 	len = SEQ_PTR(name)->length+1;
 	if (len > TEMP_SIZE) {
-		string = (char *)malloc(len);
+		string = (char *)EMalloc(len);
 		len_used = len;
 	}
 	else {
@@ -5117,7 +5107,7 @@ object EGetEnv(s1_ptr name)
 	MakeCString(string, (object)name, len_used);
 	result = getenv(string);
 	if (len > TEMP_SIZE)
-		free(string);
+		EFree(string);
 	if (result == NULL)
 		return ATOM_M1;
 	else
@@ -5214,9 +5204,6 @@ void ProfileCommand()
 		iprintf(f,
 			   "-- Left margin shows the percentage of total execution time\n");
 		iprintf(f, "-- consumed by the statement(s) on that line.\n\n");
-#ifdef EXTRA_CHECK
-		//iprintf(f, "%d BAD SAMPLES!\n", bad_samples);  //DEBUG!
-#endif
 	}
 	else {
 		iprintf(f, "-- Execution-count profile.\n");
@@ -5561,6 +5548,11 @@ void shift_args(int argc, char *argv[])
 
 object Command_Line()
 {
+	int i;
+	object_ptr obj_ptr;
+	char **argv;
+	s1_ptr result;
+	
 #ifndef ERUNTIME
 #ifdef BACKEND
 	if (Executing && il_file) {
@@ -5572,10 +5564,6 @@ object Command_Line()
 	}
 	else {
 #endif
-	int i;
-	object_ptr obj_ptr;
-	char **argv;
-	s1_ptr result;
 		argv = Argv;
 		result = NewS1((long)Argc);
 		obj_ptr = result->base;
@@ -5588,13 +5576,13 @@ object Command_Line()
 			ssize_t len;
 			// We try to get the actual path of the executable on *nix
 			// systems using readlink()
-			buff = malloc( 2049 );
+			buff = EMalloc( 2049 );
 			len = readlink( "/proc/self/exe\0", buff, 2048 );
 			if( len != -1 ){
 				buff[len] = 0;
 				result->base[1] = NewString( buff );
 			}
-			free( buff );
+			EFree( buff );
 		}
 #endif
 		return MAKE_SEQ(result);
@@ -5640,7 +5628,7 @@ void Cleanup(int status)
 			}
 			else
 				screen_output(stderr, "\nUnable to open warning file!\n");
-			free(TempWarningName);
+			EFree(TempWarningName);
 			TempWarningName = NULL;
 		}
 		else {
@@ -6266,6 +6254,7 @@ void Replace( replace_ptr rb ){
 
 cleanup_ptr DeleteRoutine( int e_index ){
 	cleanup_ptr cup;
+	
 #ifdef ERUNTIME
 	cup = rt00[e_index].cleanup;
 #else

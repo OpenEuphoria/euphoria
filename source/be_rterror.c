@@ -126,7 +126,6 @@ extern void SaveNormal();
 extern void SaveTrace();
 extern void RestoreNormal();
 extern void RestoreTrace();
-extern unsigned default_heap;
 #endif
 
 #ifdef EUNIX
@@ -180,11 +179,7 @@ static IFILE conin;
 /* Declared functions */
 /**********************/
 symtab_ptr Locate();
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-#else
 #include "alloc.h"
-#endif
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();
@@ -512,7 +507,7 @@ static void LocateFail()
 
 #ifndef BACKEND
 static void ClearSlot(int i)
-/* mark a display slot as free */
+/* mark a display slot as available */
 {
 	display_list[i].sym = NULL;
 	display_list[i].time_stamp = 0;
@@ -1323,13 +1318,13 @@ void RTInternal_va(char *msg, va_list ap)
 	char *msgtext;
 	char *buf;
 	
-    msgtext = (char *)malloc(RTI_bufflen);
+    msgtext = (char *)EMalloc(RTI_bufflen);
 	if (msgtext) {
 	    buf = msgtext;
 		vsnprintf(msgtext, RTI_bufflen, msg, ap);
 		msgtext[RTI_bufflen - 1] = 0;
 	} else {
-		msgtext = "RTI malloc failed\n";
+		msgtext = "RTI memory allocation failed\n";
 		buf = 0;
 	}
 	gameover = TRUE;
@@ -1342,27 +1337,31 @@ void RTInternal_va(char *msg, va_list ap)
 	
 	iflush(TempErrFile);
 
-	if (buf) free(msgtext);
+	if (buf) EFree(msgtext);
 	Cleanup(1);
 }
 #endif
 
+#define CUE_bufflen (200)
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
-	int i;
+	long i;
 
 	char *msgtext;
 	char *buf;
 	
 	if (msg) {
-	    msgtext = (char *)malloc(CUE_bufflen);
+	    msgtext = (char *)EMalloc(CUE_bufflen);
 		if (msgtext) {
 		    buf = msgtext;
-			vsnprintf(msgtext, CUE_bufflen, msg, ap);
-			msgtext[CUE_bufflen - 1] = 0;
+			i = vsnprintf(msgtext, CUE_bufflen - 1, msg, ap);
+			if (i < 0 ) {
+				i = CUE_bufflen - 1;
+			}
+			msgtext[i] = 0;
 		}
 		else {
-			msgtext = "CleanUpError malloc failed\n";
+			msgtext = "CleanUpError memory allocation failed\n";
 			buf = 0;
 		}
 	}
@@ -1396,7 +1395,7 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	
 	gameover = TRUE;
 
-	if (buf) free(msgtext);
+	if (buf) EFree(msgtext);
 	Cleanup(1);
 }
 

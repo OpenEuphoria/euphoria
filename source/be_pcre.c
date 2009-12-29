@@ -3,7 +3,6 @@
 
 #ifdef EWINDOWS
         #include <windows.h>
-        extern int default_heap;
 #endif
 #ifdef EMINGW
         #include "pcre/pcre_internal.h"
@@ -95,7 +94,7 @@ object compile_pcre(object x, object flags) {
         // value is actually an error message.
         if (IS_SEQUENCE(compiled_regex)) {
                 x = NewDouble((double) 0);
-                rcp = EMalloc(sizeof(struct pcre_cleanup));
+                rcp = (pcre_cleanup_ptr)EMalloc(sizeof(struct pcre_cleanup));
                 rcp->cleanup.func.builtin = &pcre_deref;
                 rcp->cleanup.type = CLEAN_PCRE;
                 rcp->cleanup.next = 0;
@@ -107,7 +106,7 @@ object compile_pcre(object x, object flags) {
                 prev = SEQ_PTR(x)->cleanup;
                 
                 if( prev == 0 || prev->cleanup.type != CLEAN_PCRE ){
-                        rcp = EMalloc(sizeof(struct pcre_cleanup));
+                        rcp = (pcre_cleanup_ptr)EMalloc(sizeof(struct pcre_cleanup));
                         if( prev ){
                                 rcp->cleanup.next = prev;
                         }
@@ -205,13 +204,13 @@ object exec_pcre(object x ){
         start_from = get_int( SEQ_PTR(x)->base[4] ) - 1;
         ovector_elements = get_int( SEQ_PTR(x)->base[5] );
         ovector_size = (ovector_elements+1) * 3;
-        ovector = malloc(sizeof(int)*ovector_size);
+        ovector = (int *)EMalloc(sizeof(int)*ovector_size);
 
         rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
                                    start_from, options, ovector, ovector_size );
         EFree( str );
 
-        if( rc < 0 ) { free(ovector); return rc; }
+        if( rc < 0 ) { EFree((char *)ovector); return rc; }
         if( rc == 0 ) { rc = ovector_elements+1; }
 
         // put the substrings into sequences
@@ -225,7 +224,7 @@ object exec_pcre(object x ){
                 s->base[i] = MAKE_SEQ( sub );
         }
 
-        free(ovector);
+        EFree((char *)ovector);
         return MAKE_SEQ( s );
 }
 
@@ -251,7 +250,7 @@ static int add(int *len, char **s, const char *a, int alen, int *flag) {
                         RTFatal("Internal error: be_pcre:add#1 memcopy failed (%d).", res);
                 }
     } else {
-        *s = (char *) malloc(NewLen);
+        *s = (char *) EMalloc(NewLen);
         res = memcopy(*s, NewLen, a, alen);
                 if (res != 0) {
                         RTFatal("Internal error: be_pcre:add#2 memcopy failed (%d).", res);
@@ -338,7 +337,7 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
                                 }
                                 break;
             case 0:
-                if (dest) free(dest);
+                if (dest) EFree(dest);
                 return -1; // error
             case 'r':
                 Ch = '\r';
@@ -381,7 +380,7 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
                 int A = 0;
 
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
@@ -390,7 +389,7 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
                 rep++;
                 A = N << 4;
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
@@ -407,34 +406,34 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
                 int A = 0;
 
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
                 if (N > 9) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 rep++;
                 A = N * 100;
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
                 if (N > 9) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 rep++;
                 A = N * 10;
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
                 if (N > 9) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 rep++;
@@ -448,34 +447,34 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
                 int A = 0;
 
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
                 if (N > 7) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 rep++;
                 A = N * 64;
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
                 if (N > 7) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 rep++;
                 A = N * 8;
                 if (*rep == 0) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 N = toupper(*rep) - 48;
                 if (N > 7) {
-                    free(dest);
+                    EFree(dest);
                     return 0;
                 }
                 rep++;

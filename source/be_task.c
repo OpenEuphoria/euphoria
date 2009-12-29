@@ -80,14 +80,8 @@ extern int total_stack_size; // total amount of stack available
 /* Declared functions */
 /*********************/
 extern double current_time();
-#ifndef ESIMPLE_MALLOC
-extern char *EMalloc();
-#else
-#include "alloc.h"
-#ifdef EWINDOWS
-extern unsigned default_heap;
-#endif
-#endif
+#include "alldefs.h"
+
 extern void debug_dbl(double);
 void scheduler(double);
 extern struct routine_list _00[]; 
@@ -759,14 +753,14 @@ object task_create(object r_id, object args)
 		// nothing is ST_DEAD, must expand the tcb
 		tcb_size++;
 		// n.b. tcb could get moved because of this:
-		tcb = (struct tcb *)ERealloc(tcb, sizeof(struct tcb) * tcb_size);
+		tcb = (struct tcb *)ERealloc((char *)tcb, sizeof(struct tcb) * tcb_size);
 		new_entry = &tcb[tcb_size-1];
 	}
 	else {
 		// found a ST_DEAD task
-		// free the call stack 
+		// release the call stack 
 		if (tcb[recycle].impl.interpreted.expr_stack != NULL) {
-			EFree(tcb[recycle].impl.interpreted.expr_stack);
+			EFree((char *)tcb[recycle].impl.interpreted.expr_stack);
 		}
 		DeRef(tcb[recycle].args);
 		new_entry = &tcb[recycle];
@@ -888,7 +882,7 @@ object ctask_create(object r_id, object args)
 		// nothing is ST_DEAD, must expand the tcb
 		tcb_size++;
 		// n.b. tcb could get moved because of this:
-		tcb = (struct tcb *)ERealloc(tcb, sizeof(struct tcb) * tcb_size);
+		tcb = (struct tcb *)ERealloc((char *)tcb, sizeof(struct tcb) * tcb_size);
 		new_entry = &tcb[tcb_size-1];
 		recycle = tcb_size-1;
 	}
@@ -898,7 +892,7 @@ object ctask_create(object r_id, object args)
 		new_entry = &tcb[recycle];
 		if( new_entry->mode == TRANSLATED_TASK && new_entry->impl.translated.task != 0 ){
 			if( recycle == current_task ){
-				// we can't free it from itself, or the entire proces would die
+				// we can't release it from itself, or the entire proces would die
 				release_task_later( new_entry->impl.translated.task );
 			}
 			else{

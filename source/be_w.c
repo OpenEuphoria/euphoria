@@ -100,16 +100,7 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-char *ERealloc();
-#else
 #include "alloc.h"
-#endif
-// TODO: This is required due to a bug in global.h that Jim discovered.
-#ifdef EWINDOWS
-extern unsigned default_heap;
-#endif
 static void expand_tabs();
 void SetPosition();
 void RTInternal();
@@ -380,7 +371,7 @@ static void MyWriteConsole(char *string, int nchars)
 	    ch.Y = screen_loc.Top;
 		if (old_string == 0) {
 			oldstr_len = max(nchars + 3, 256);
-			old_string = (char *)malloc(oldstr_len);
+			old_string = (char *)EMalloc(oldstr_len);
 			if (old_string == 0) return;
 		}
 	
@@ -411,7 +402,7 @@ static void MyWriteConsole(char *string, int nchars)
 // 	    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
 	    if( line_buffer_size < console_info.dwSize.X || line_buffer == NULL){
 	        if (line_buffer != 0) {
-	            EFree(line_buffer);
+	            EFree((char *)line_buffer);
 	        }
 //	        line_buffer_size = console_info.dwMaximumWindowSize.X;
 	        line_buffer_size = console_info.dwSize.X;
@@ -506,7 +497,7 @@ static void expand_tabs(char *raw_string)
 
     if (expanded_string == 0) {
 	    screen_width = 200;
-	    expanded_string = (char *)malloc(screen_width + 3); // Extra 3 for \n\r\0
+	    expanded_string = (char *)EMalloc(screen_width + 3); // Extra 3 for \n\r\0
 	    expanded_ptr = expanded_string;
 	    expanded_end = expanded_string + screen_width;
     }
@@ -695,11 +686,11 @@ void screen_output_va(IFILE f, char *out_string, va_list ap)
 	// figure out how long the string will be
 	nsize = vsnprintf(0, 0, out_string, ap);
 
-	buf = malloc(nsize+1); // add one for the trailing '\0'
+	buf = EMalloc(nsize+1); // add one for the trailing '\0'
 	vsnprintf(buf, nsize+1, out_string, ap);
 
 	screen_output(f, buf);
-	free(buf);
+	EFree(buf);
 }
 
 void screen_output_vararg(IFILE f, char *out_string, ...)

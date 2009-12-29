@@ -48,10 +48,6 @@
 extern int EuConsole;
 extern int clocks_per_sec;
 extern int clk_tck;
-#ifdef EWINDOWS
-//extern HINSTANCE winInstance;
-extern unsigned default_heap;
-#endif
 extern int have_console;
 
 extern int gameover;
@@ -68,8 +64,6 @@ extern int bad_samples;
 extern char show_cursor[];
 extern char hide_cursor[];
 extern char wrap[];
-extern long bytes_allocated;
-extern long max_bytes_allocated;
 extern char **file_name;
 extern unsigned char TempBuff[];
 extern char *TempErrName;
@@ -91,14 +85,7 @@ static int src_file;
 /* Declared functions */
 /**********************/
 extern char *getenv();
-#ifndef ESIMPLE_MALLOC
-extern char *EMalloc();
-#else
 #include "alloc.h"
-#endif
-#ifndef EWINDOWS 
-extern void *malloc();
-#endif
 
 /*********************/
 /* Defined functions */
@@ -193,7 +180,7 @@ void be_init()
 #endif
 
 #define TempErrName_len (30)
-	TempErrName = (char *)malloc(TempErrName_len); // uses malloc, not EMalloc
+	TempErrName = (char *)EMalloc(TempErrName_len);
 	strlcpy(TempErrName, "ex.err", TempErrName_len); // can change
 	
 	eudir = getenv("EUDIR");
@@ -206,7 +193,7 @@ void be_init()
 		}
 		else {
 			int p_size = strlen(eudir) + 12;
-			p = (char *)malloc(p_size + 1);
+			p = (char *)EMalloc(p_size + 1);
 			snprintf(p, p_size+1, "%s/euphoria", eudir);
 			p[p_size] = 0; // ensure NULL
 			eudir = p;

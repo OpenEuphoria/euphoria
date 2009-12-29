@@ -4,6 +4,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
+#ifndef _SYMTAB_H_
+#define _SYMTAB_H_ 1
 // N.B.!!! fields and size of backend symtab_entry is assumed in backend.e 
 
 // for literal constants and temporaries 
@@ -77,3 +79,4 @@ struct symtab_entry {
 typedef struct symtab_entry *symtab_ptr; 
 typedef struct temp_entry *temp_ptr;
 
+#endif // _SYMTAB_H_

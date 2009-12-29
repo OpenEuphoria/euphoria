@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include "global.h"
+#include "alloc.h"
 
 #ifndef LOCK_SH
 #define LOCK_SH  1 /* shared lock */
@@ -85,10 +86,6 @@ int emul_flock(fd, cmd)
 
 #include <time.h>
 #include <string.h>
-
-#ifdef EXTRA_CHECK
-#include <malloc.h>
-#endif
 
 #ifdef EWINDOWS
 #include <windows.h>
@@ -201,7 +198,6 @@ extern symtab_ptr *e_routine;
 
 #ifdef EWINDOWS
 extern HANDLE console_output;
-extern unsigned default_heap;
 #endif
 
 extern int have_console;
@@ -237,9 +233,6 @@ char *version_name =
 /**********************/
 /* Declared Functions */
 /**********************/
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-#endif
 IFILE which_file();
 void NewConfig();
 s1_ptr NewS1();
@@ -285,7 +278,7 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 		return 0;
 		
 	len = strlen(name) + 1 + strlen(value);
-	str = malloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
+	str = EMalloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
 	if (! str)
 		return 0;
 	real_len = snprintf(str, len+1, "%s=%s", name, value);
@@ -1167,7 +1160,7 @@ static object user_allocate(object x)
 #endif
 
 	nbytes = get_int(x);
-	addr = malloc(nbytes);
+	addr = EMalloc(nbytes);
 #ifdef EUNIX
 #ifndef EBSD
 	// make it executable
@@ -1185,54 +1178,6 @@ static object user_allocate(object x)
 		return (unsigned long)addr;
 	else
 		return NewDouble((double)(unsigned long)addr);
-}
-
-static struct ss {
-	unsigned short int segment;
-	unsigned short int selector;
-} *ss_list = NULL;
-static int ss_next = 0;
-static int ss_size;
-
-static void save_selector(unsigned short segment, unsigned short selector)
-/* save segment and selector combination for lookup later */
-{
-	int i;
-
-	if (ss_list == NULL) {
-		ss_size = 10;
-		ss_list = (struct ss *)EMalloc(ss_size * sizeof(struct ss));
-	}
-	else if (ss_next >= ss_size) {
-		ss_size = ss_size * 2;
-		ss_list = (struct ss *)ERealloc((char *)ss_list,
-											 ss_size * sizeof(struct ss));
-	}
-	for (i = 0; i < ss_next; i++) {
-		if (ss_list[i].segment == 0) {
-			/* fill empty slot */
-			ss_list[i].segment = segment;
-			ss_list[i].selector = selector;
-			return;
-		}
-	}
-	ss_list[ss_next].segment = segment;
-	ss_list[ss_next].selector = selector;
-	ss_next++;
-}
-
-static int get_selector(int segment)
-/* find the selector to free, given the segment */
-{
-	int i;
-
-	for (i = 0; i < ss_next; i++) {
-		if (ss_list[i].segment == segment) {
-			ss_list[i].segment = 0;
-			return (unsigned int)ss_list[i].selector;
-		}
-	}
-	return -1;
 }
 
 static object Where(object x)
@@ -1498,13 +1443,13 @@ static object CurrentDir()
 	object result;
 	char *buff;
 
-	buff = malloc(MAX_FILE_NAME+1);
+	buff = EMalloc(MAX_FILE_NAME+1);
 	cwd = getcwd(buff, MAX_FILE_NAME+1);
 	if (cwd == NULL)
 		RTFatal("current directory not available");
 	else {
 		result = NewString(cwd);
-		free(buff);
+		EFree(buff);
 	}
 	return result;
 }
@@ -1811,8 +1756,9 @@ static object use_vesa(object x)
 static object crash_message(object x)
 /* record user's message in case of a crash */
 {
-	if (crash_msg != NULL)
+	if (crash_msg != NULL) {
 		EFree(crash_msg);
+	}
 
 	if (!IS_SEQUENCE(x) || SEQ_PTR(x)->length == 0) {
 		crash_msg = NULL;
@@ -1828,9 +1774,10 @@ static object crash_file(object x)
 /* record user's alternate path for ex.err */
 /* assume x is a sequence */
 {
-	// use malloc/free
-	free(TempErrName);
-	TempErrName = malloc(SEQ_PTR(x)->length + 1);
+	if (TempErrName) {
+		EFree(TempErrName);
+	}
+	TempErrName = EMalloc(SEQ_PTR(x)->length + 1);
 	MakeCString(TempErrName, x, SEQ_PTR(x)->length + 1);
 	return ATOM_1;
 }
@@ -1838,15 +1785,16 @@ static object crash_file(object x)
 static object warning_file(object x)
 /* record user's alternate path for a warning file log */
 {
-	// use malloc/free
-	if (TempWarningName != NULL) free(TempWarningName);
+	if (TempWarningName != NULL) {
+		EFree(TempWarningName);
+	}
 	if IS_ATOM(x) {
 		TempWarningName = NULL;
 		if (!IS_ATOM_INT(x)) x = (long)(DBL_PTR(x)->dbl);
 		display_warnings = (INT_VAL(x) >= 0)?1:0;
 	}
 	else {
-		TempWarningName = malloc(SEQ_PTR(x)->length + 1);
+		TempWarningName = EMalloc(SEQ_PTR(x)->length + 1);
 		MakeCString(TempWarningName, x, SEQ_PTR(x)->length + 1);
 	}
 	return ATOM_1;
@@ -1856,10 +1804,11 @@ static object do_crash(object x)
 {
 	char *message;
 
-	message = malloc(SEQ_PTR(x)->length + 1);
+	message = EMalloc(SEQ_PTR(x)->length + 1);
 	MakeCString(message, x, SEQ_PTR(x)->length + 1);
 	RTFatal(message);
-	free(message);
+
+	EFree(message);
 
 	return ATOM_1;
 }
@@ -1871,10 +1820,10 @@ static object change_dir(object x)
 	char *new_dir;
 	int r;
 
-	new_dir = malloc(SEQ_PTR(x)->length + 1);
+	new_dir = EMalloc(SEQ_PTR(x)->length + 1);
 	MakeCString(new_dir, x, SEQ_PTR(x)->length + 1);
 	r = chdir(new_dir);
-	free(new_dir);
+	EFree(new_dir);
 	if (r == 0)
 		return ATOM_1;
 	else
@@ -2102,7 +2051,7 @@ object OpenDll(object x)
 			open_dll_size += 20;
 			newsize = open_dll_size * sizeof(HINSTANCE);
 			if (open_dll_list == NULL) {
-				open_dll_list = (HINSTANCE *)malloc(newsize);
+				open_dll_list = (HINSTANCE *)EMalloc(newsize);
 			}
 			else {
 				open_dll_list = (HINSTANCE *)realloc(open_dll_list, newsize);
@@ -2548,7 +2497,7 @@ static object crash_routine(object x)
 	}
 	else if (crash_routines >= crash_size) {
 		crash_size += 10;
-		crash_list = (int *)ERealloc(crash_list, sizeof(int) * crash_size);
+		crash_list = (int *)ERealloc((char *)crash_list, sizeof(int) * crash_size);
 	}
 	crash_list[crash_routines++] = r;
 
@@ -2658,7 +2607,6 @@ object start_backend(object x)
 		if (stricmp(w, "-batch") == 0) {
 			is_batch = 1;
 		}
-
 		EFree(w);
 	}
 
@@ -2762,7 +2710,9 @@ object machine(object opcode, object x)
 				break;
 			case M_FREE:
 				addr = get_pos_int("free", x);
-				if (addr != NULL) free((char *)addr);
+				if (addr != NULL) {
+					EFree((char *)addr);
+				}
 				return ATOM_0;
 				break;
 			case M_SEEK:
@@ -2984,7 +2934,7 @@ object machine(object opcode, object x)
 				temp = setenv(src, NULL, 1);
 #else
 #ifdef EMINGW
-				dest = malloc(strlen(src) + 2);
+				dest = EMalloc(strlen(src) + 2);
 				strcpy(dest, src);
 				strcat(dest, "=");
 				/* on MinGW, putenv("var=") will unset the
@@ -2993,7 +2943,7 @@ object machine(object opcode, object x)
 				 * environment variable.MinGW() lacks unsetenv()
 				 */
 				temp = putenv(dest);
-				free(dest);
+				EFree(dest);
 #else
 #ifdef EUNIX
 #ifdef ELINUX

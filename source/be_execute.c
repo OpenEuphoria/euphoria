@@ -48,16 +48,12 @@
 #	include <conio.h>
 #endif
 #include <math.h>
-#ifdef EXTRA_CHECK
-#	include <malloc.h>
-#endif
 #ifdef EWINDOWS
 #	include <windows.h>
 #endif
 #include <signal.h>
 
 #include "alldefs.h"
-#include "alloc.h"
 #include "be_runtime.h"
 #include "task.h"
 
@@ -238,8 +234,6 @@ extern struct tcb *tcb;
 extern char *file_name_entered;
 extern int traced_lines;
 extern struct op_info optable[];
-extern unsigned cache_size;
-extern int align4;
 extern int clocks_per_sec;
 extern unsigned char TempBuff[];
 extern int TraceOn;
@@ -253,7 +247,6 @@ extern object last_w_file_no;
 extern IFILE last_w_file_ptr;
 extern object last_r_file_no;
 extern IFILE last_r_file_ptr;
-extern long bytes_allocated;
 extern int current_screen;
 extern int color_trace;
 extern int file_trace;
@@ -263,9 +256,6 @@ extern char *type_error_msg;
 extern object_ptr rhs_slice_target;  /* avoids 4th arg for RHS_Slice() */
 extern s1_ptr *assign_slice_seq;
 extern int *profile_sample;
-#ifdef EWINDOWS
-extern unsigned default_heap;
-#endif
 
 /**********************/
 /* Imported functions */
@@ -309,9 +299,6 @@ symtab_ptr PrivateVar();
 long find(), e_match();
 object calc_hash();
 IFILE which_file();
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-#endif
 object_ptr BiggerStack();
 void do_exec();
 s1_ptr NewS1();
@@ -1456,7 +1443,7 @@ void fe_set_pointers()
 	warning_list = (char **)&fe.misc[9+fe.misc[7]];
 	
 	// string containing all literals and constants in compressed form:
-	free(fe.lit); 
+	EFree(fe.lit); 
 }
 
 static object *save_private_block(symtab_ptr routine)
@@ -1523,7 +1510,7 @@ static load_private_block(symtab_ptr routine, int task)
 				sym = sym->next;
 			}
 			
-			EFree(p); 
+			EFree((char *)p); 
 			return;
 		}
 		prev_p = p;
@@ -3714,14 +3701,14 @@ void do_exec(int *start_pc)
 					obj_ptr++;                      
 				}
 				
-				/* free the privates and set to NOVALUE */
+				/* release the privates and set to NOVALUE */
 				while (sym && sym->scope <= S_PRIVATE) {
 					DeRef(sym->obj);
 					sym->obj = NOVALUE; // not actually needed for params
 					sym = sym->next;
 				}
 					
-				/* free the temps and set to NOVALUE */ 
+				/* release the temps and set to NOVALUE */ 
 				sym = sub->u.subp.temps;
 				while (sym != NULL) {
 					DeRef(sym->obj);
@@ -3765,7 +3752,7 @@ void do_exec(int *start_pc)
 			
 			return_p:
 				sub = ((symtab_ptr)pc[1]);
-				/* free the privates and set to NOVALUE */
+				/* release the privates and set to NOVALUE */
 				sym = (symtab_ptr)pc[2];
 				
 				while(1){

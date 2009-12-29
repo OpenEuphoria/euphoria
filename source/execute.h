@@ -109,13 +109,6 @@ struct d {                         /* a double precision number */
   always be the same. This offset is assumed to be the same by the RefDS() macro.
 */
 
-struct free_block {                /* a free storage block */
-	struct free_block *next;       /* pointer to next free block */
-	long filler;
-	long ref;                      /* reference count */
-	long filler2;
-}; /* 16 bytes */
-
 struct symtab_entry;
 
 
@@ -141,7 +134,6 @@ struct ns_list {
 
 typedef struct d  *d_ptr;
 typedef struct s1 *s1_ptr;
-typedef struct free_block *free_block_ptr;
 
 struct sline {      /* source line table entry */
 	char *src;               /* text of line, 
@@ -180,18 +172,12 @@ typedef int *opcode_type;
 
 #define EXPR_SIZE 200  /* initial size of call stack */
 
-#ifdef EBSD
-#define MAX_CACHED_SIZE 0        /* don't use storage cache at all */
-#else
-#define MAX_CACHED_SIZE 1024     /* this size (in bytes) or less are cached 
-									Note: other vars must change if this does */
-#endif
 
 /* MACROS */
 #define MAKE_DBL(x) ( (object) (((unsigned long)(x) >> 3) + (long)0xA0000000) )
-#define DBL_PTR(ob) ( (d_ptr)  (((long)(ob)) << 3) )
+#define DBL_PTR(ob) ( (d_ptr)  (((unsigned long)(ob)) << 3) )
 #define MAKE_SEQ(x) ( (object) (((unsigned long)(x) >> 3) + (long)0x80000000) )
-#define SEQ_PTR(ob) ( (s1_ptr) (((long)(ob)) << 3) ) 
+#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) ) 
 
 /* ref a double or a sequence (both need same 3 bit shift) */
 #define RefDS(a) ++(DBL_PTR(a)->ref)    
@@ -200,9 +186,9 @@ typedef int *opcode_type;
 #define Ref(a) if (IS_DBL_OR_SEQUENCE(a)) { RefDS(a); }
 
 /* de-ref a double or a sequence */
-#define DeRefDS(a) if (--(DBL_PTR(a)->ref) == 0 ) { de_reference((s1_ptr)(a)); }
+#define DeRefDS(a) if (--(SEQ_PTR(a)->ref) == 0 ) { de_reference((s1_ptr)(a)); }
 /* de-ref a double or a sequence in x.c and set tpc (for time-profile) */
-#define DeRefDSx(a) if (--(DBL_PTR(a)->ref) == 0 ) {tpc=pc; de_reference((s1_ptr)(a)); }
+#define DeRefDSx(a) if (--(SEQ_PTR(a)->ref) == 0 ) {tpc=pc; de_reference((s1_ptr)(a)); }
 
 /* de_ref a sequence already in pointer form */
 #define DeRefSP(a) if (--((s1_ptr)(a))->ref == 0 ) { de_reference((s1_ptr)MAKE_SEQ(a)); }

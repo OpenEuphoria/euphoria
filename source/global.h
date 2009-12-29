@@ -187,7 +187,7 @@ struct videoconfigEx {
 
 #ifdef EWINDOWS
 // Use Heap functions for everything.
-// Avoid using strdup() or other functions that return malloc'd blocks
+extern unsigned default_heap;
 #define malloc(n) HeapAlloc((void *)default_heap, 0, n)
 #define free(p) HeapFree((void *)default_heap, 0, p)
 #define realloc(p, n) HeapReAlloc((void *)default_heap, 0, p, n)
