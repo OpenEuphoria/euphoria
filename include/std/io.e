@@ -1014,6 +1014,7 @@ end procedure
 --
 -- Parameters:
 --		##file## : an object, either a file path or the handle to an open file.
+--                 If this is an empty string, STDIN (the console) is used.
 --
 -- Returns:
 --		A **sequence**, made of lines from the file, as [[:gets]] could read them.
@@ -1044,7 +1045,11 @@ end procedure
 public function read_lines(object file)
 	object fn, ret, y
 	if sequence(file) then
-		fn = open(file, "r")
+		if length(file) = 0 then
+			fn = 0
+		else
+			fn = open(file, "r")
+		end if
 	else
 		fn = file
 	end if
@@ -1063,11 +1068,14 @@ public function read_lines(object file)
 			end ifdef
 		end if
 		ret = append(ret, y)
+		if fn = 0 then
+			puts(2, '\n')
+		end if
 	entry
 		y = gets(fn)
 	end while
 
-	if sequence(file) then
+	if sequence(file) and length(file) != 0 then
 		close(fn)
 	end if
 
@@ -1078,7 +1086,8 @@ end function
 -- Process the contents of a file, one line at a time.
 --
 -- Parameters:
--- # ##file## : an object. Either a file path or the handle to an open file.
+-- # ##file## : an object. Either a file path or the handle to an open file. An 
+-- empty string signifies STDIN - the console keyboard.
 -- # ##proc## : an integer. The routine_id of a function that will process the line.
 -- # ##user_data## : on object. This is passed untouched to ##proc## for each line.
 --
@@ -1120,7 +1129,11 @@ public function process_lines(object file, integer proc, object user_data = 0)
 	
 	res = 0
 	if sequence(file) then
-		fh = open(file, "r")
+		if length(file) = 0 then
+			fh = 0
+		else
+			fh = open(file, "r")
+		end if
 	else
 		fh = file
 	end if
@@ -1151,7 +1164,7 @@ public function process_lines(object file, integer proc, object user_data = 0)
 		aLine = gets(fh)
 	end while
 
-	if sequence(file) then
+	if sequence(file) and length(file) != 0 then
 		close(fh)
 	end if
 
