@@ -120,27 +120,13 @@ typedef struct block_list * block_list_ptr;
 	
 */
 #ifdef HEAP_CHECK 
-#define FreeD(p) freeD(p)
-#define Trash(a,n) memset(a, (char)0x11, n)
-
+	#define FreeD(p) freeD(p)
+	#define Trash(a,n) memset(a, (char)0x11, n)
 #else
-	extern unsigned cache_size;
 	extern d_ptr d_list;
-	#ifdef ESIMPLE_MALLOC
-	#define FreeD(p){ if (cache_size > CACHE_LIMIT) { \
-						  EFree((char *)p); \
-					  } \
-					  else { \
-						  ((free_block_ptr)p)->next = (free_block_ptr)d_list; \
-						  d_list = (d_ptr)p; \
-						  cache_size++; } \
-					  }
-	
-	#else
 	#define FreeD(p){ ((free_block_ptr)p)->next = (free_block_ptr)d_list; \
 					  d_list = (d_ptr)p; \
 					}
-	#endif
 #endif
 
 // Size of the usable space in an allocated block
