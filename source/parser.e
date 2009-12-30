@@ -3124,7 +3124,7 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 		putback(ptok)
 	end if
 
-	
+	valsym = 0	
 	while TRUE do
 		tok = next_token()
 		if tok[T_ID] = DOLLAR then
@@ -3638,12 +3638,13 @@ procedure SubProg(integer prog_type, integer scope)
 	integer first_def_arg
 	integer again
 	integer type_enum
-
+	object seq_sym
+	object i1_sym
+	
 	LeaveTopLevel()
 	prog_name = next_token()
 	type_enum = prog_type = TYPE_DECL and equal(sym_name(prog_name[T_SYM]),"enum")
 	if type_enum then
-		sequence i1_sym
 		sequence symbols, seq_symbol
 		prog_name = next_token()
 		symbols = Global_declaration(-1, scope)
@@ -3656,14 +3657,7 @@ procedure SubProg(integer prog_type, integer scope)
 		-- range of the enum is accepted
 		-- as valid.
 		i1_sym = keyfind("i1",-1)
-		p = NewStringSym(seq_symbol)
-		putback(keyfind("end",-1))
-		putback({RIGHT_ROUND,0})
-		putback({VARIABLE,p})
-		putback({COMMA,0})
-		putback(i1_sym)
-		putback({LEFT_ROUND,0})
-		putback(keyfind("find",-1))
+		seq_sym = NewStringSym(seq_symbol)
 		putback(keyfind("return",-1))
 		putback({RIGHT_ROUND,0})
 		putback(i1_sym)
@@ -3885,12 +3879,36 @@ procedure SubProg(integer prog_type, integer scope)
 
 	-- parse body of routine.
 	FuncReturn = FALSE
-	Statement_list()
-	
-	-- parse routine end.
-	if not type_enum then
+	if type_enum then
+		-- Parse a list of statements
+		stmt_nest += 1
+		tok_match(RETURN)
+		putback({RIGHT_ROUND,0})
+		putback({VARIABLE,seq_sym})
+		putback({COMMA,0})
+		putback(i1_sym)
+		putback({LEFT_ROUND,0})
+		putback(keyfind("find",-1))
+		if not TRANSLATE then
+			if OpTrace then
+				emit_op(ERASE_PRIVATE_NAMES)
+				emit_addr(CurrentSub)
+			end if
+		end if
+		Expr()
+		FuncReturn = TRUE
+		emit_op(RETURNF)
+		flush_temps()
+		stmt_nest -= 1
+		InitDelete()
+		flush_temps()
+	else
+		Statement_list()
+		-- parse routine end.
 		tok_match(END)
 	end if
+	
+	-- parse routine end.
 	tok_match(prog_type)
 	
 	if prog_type != PROCEDURE then
