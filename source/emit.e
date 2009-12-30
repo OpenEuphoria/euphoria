@@ -176,6 +176,7 @@ export procedure TempFree(symtab_index x)
 	if x > 0 then
 		if SymTab[x][S_MODE] = M_TEMP then
 			SymTab[x][S_SCOPE] = FREE 
+			clear_temp( x )
 		end if
 	end if
 end procedure
@@ -350,6 +351,14 @@ export procedure flush_temps( sequence except_for = {} )
 	
 	emitted_temps = {}
 	emitted_temp_referenced = {}
+end procedure
+
+procedure flush_temp( symtab_index temp )
+	sequence except_for = emitted_temps
+	integer ix = find( temp, emitted_temps )
+	if ix and length(except_for) > 1 then
+		flush_temps( remove( except_for, ix ) )
+	end if
 end procedure
 
 procedure check_for_temps()
@@ -780,6 +789,7 @@ export procedure emit_op(integer op)
 		Push(target)
 		emit_addr(target)
 		current_sequence = append(current_sequence, target)
+		flush_temp( Code[$-2] )
 		
 	elsif op = PROC then  -- procedure, function and type calls
 	
@@ -1083,6 +1093,7 @@ export procedure emit_op(integer op)
 			lhs_subs1_copy_temp = NewTempSym() -- place to copy (may be ignored)
 			emit_addr(lhs_subs1_copy_temp)
 		end if
+		
 		current_sequence = append(current_sequence, lhs_target_temp)
 		assignable = FALSE  -- need to update current_sequence like in RHS_SUBS
 		

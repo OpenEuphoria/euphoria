@@ -5,6 +5,10 @@
 /*****************************************************************************/
 #ifndef _ALLOC_H_
 #define _ALLOC_H_ 1
+
+#include "execute.h"
+#include "symtab.h"
+
 #define RESOLUTION 8            /* minimum size & increment before mapping */
 #define LOG_RESOLUTION 3        /* log2 of RESOLUTION */
 #define CACHE_LIMIT 2000        /* maximum number of cached allocations allowed. */
