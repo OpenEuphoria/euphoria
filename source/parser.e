@@ -3117,9 +3117,13 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 	
 	sequence ptok = next_token()
 	if ptok[T_ID] = TYPE_DECL then
-		putback(keyfind("enum",-1))
-		SubProg(TYPE_DECL, scope)
-		return {}
+		if type_ptr = -1 then
+			putback(keyfind("enum",-1))
+			SubProg(TYPE_DECL, scope)
+			return {}
+		else
+			CompileErr( 330 )
+		end if
 	else
 		putback(ptok)
 	end if
