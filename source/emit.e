@@ -356,7 +356,7 @@ end procedure
 procedure flush_temp( symtab_index temp )
 	sequence except_for = emitted_temps
 	integer ix = find( temp, emitted_temps )
-	if ix and length(except_for) > 1 then
+	if ix then
 		flush_temps( remove( except_for, ix ) )
 	end if
 end procedure
@@ -694,6 +694,19 @@ export procedure emit_op(integer op)
 	last_pc = length(Code) + 1
 	-- 1 input, 0 outputs, can combine with previous op
 	if op = ASSIGN label "EMIT" then
+		symtab_index temp = 0
+		if previous_op = RHS_SUBS_CHECK 
+		or previous_op = RHS_SUBS then
+			if Code[$-1] = DEREF_TEMP then
+				/* the DEREF_TEMP op interferes with the ASSIGN op, so
+				 * we'll clean it up here and re-flush later */
+				temp = Code[$]
+				Code = Code[1..$-2]
+				emitted_temps &= temp
+				emitted_temp_referenced &= NEW_REFERENCE
+			end if
+		end if
+		
 		source = Pop()
 		target = Pop()
 		if assignable then
@@ -764,6 +777,11 @@ export procedure emit_op(integer op)
 		
 		assignable = FALSE
 		emit_addr(target)
+		
+		if temp then
+			-- need to re-flush, since it was wiped out above
+			flush_temp( temp )
+		end if
 
 	elsif op = RHS_SUBS then
 		b = Pop() -- subscript 

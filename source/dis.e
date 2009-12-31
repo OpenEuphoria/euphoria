@@ -1732,6 +1732,13 @@ function set_html( object o )
 	generate_html = 1
 	return 0
 end function
+
+integer generate_file_list = 0
+function enable_file_list( object o )
+	generate_file_list = 1
+	return 0
+end function
+
 include std/pretty.e
 
 sequence opts = {
@@ -1742,7 +1749,9 @@ sequence opts = {
 		{ "f", "file", "include this file", {HAS_PARAMETER}, routine_id("document_file") },
 		{ "g", "graphs", "suppress call graphs", {NO_PARAMETER}, routine_id("suppress_callgraphs") },
 		{ "t", 0, "translator mode", {NO_PARAMETER}, -1 },
-		{ "b", 0, "binder mode", {NO_PARAMETER}, -1 }
+		{ "b", 0, "binder mode", {NO_PARAMETER}, -1 },
+		{ 0, "file-list", "outputs the list of files in the disassembled code at the top of the .dis file", 
+			{NO_PARAMETER}, routine_id("enable_file_list") }
 		}
 
 add_options( opts )
@@ -1754,9 +1763,19 @@ export procedure BackEnd( object ignore )
 	save_il( file_name[1] & '.' )
 	out = open( file_name[1] & ".dis", "wb" )
 	printf(1,"saved to [%s.dis]\n", {file_name[1]})
+	
+	if generate_file_list then
+		puts( out, "File List:\n" )
+		for i = 1 to length( file_name ) do
+			printf( out, "%s\n", {file_name[i]})
+		end for
+		puts( out, "\n" )
+	end if
+	
 	if atom(slist[$]) then
 		slist = s_expand(slist)
 	end if
+	
 	for i = TopLevelSub to length(SymTab) do
 		if length(SymTab[i]) = SIZEOF_ROUTINE_ENTRY 
 		and sequence(SymTab[i][S_CODE]) 
@@ -1768,12 +1787,9 @@ export procedure BackEnd( object ignore )
 	end for
 	close( out )
 	
-	
 	if generate_html then
 		dox:generate()
 	end if
-	--write_call_info( file_name[1] & '.' )
 	
 end procedure
 mode:set_backend( routine_id("BackEnd") )
-
