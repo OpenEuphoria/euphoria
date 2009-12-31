@@ -415,10 +415,10 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/bin 
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/include/euphoria
-	install $(EECUA) $(DESTDIR)$(PREFIX)/lib
-	install $(EEXU) $(DESTDIR)$(PREFIX)/bin
-	install $(EECU) $(DESTDIR)$(PREFIX)/bin
-	install $(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EECUA) $(DESTDIR)$(PREFIX)/lib
+	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
 	install ../include/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
 	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
