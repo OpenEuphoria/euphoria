@@ -1,0 +1,17 @@
+t_c_integer_type.e:4
+<0330>:: Only enums may be declared as types
+integer type foo
+            ^
+
+
+--- Defined Words ---
+EU4
+EU400
+EU40000
+WINDOWS
+WIN32
+WIN32_CONSOLE
+UNITTEST
+CRASH
+EUI
+-------------------

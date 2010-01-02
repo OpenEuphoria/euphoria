@@ -1,5 +1,5 @@
 include std/unittest.e
-type enum weekdays
+type enum weekday
 	MONDAY = 2,
 	TUESDAY = 1,
 	WEDNESDAY = 3,
@@ -9,7 +9,7 @@ type enum weekdays
 end type
 test_equal("assigned values", {2,1,3,9,5}, {MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY})
 
-public enum type inner_planets
+enum type inner_planet
 	MERCURY,
 	VENUS,
 	EARTH,
@@ -17,7 +17,7 @@ public enum type inner_planets
 end type
 test_equal("derived values", {1,2,3,4}, {MERCURY, VENUS, EARTH, MARS})
 
-weekdays thisday
+weekday thisday
 thisday = MONDAY
 thisday = TUESDAY
 thisday = WEDNESDAY
@@ -25,9 +25,14 @@ thisday = THURSDAY
 thisday = FRIDAY
 
 test_pass("type enum")
-test_true("MONDAY is weekdays", weekdays(MONDAY))
-test_true("THURSDAY is a weekday", weekdays(THURSDAY))
-test_true("FRIDAY is a weekday", weekdays(FRIDAY))
-test_false("8 is not a weekday", weekdays(8))
+test_true("MONDAY is a weekday", weekday(MONDAY))
+test_true("THURSDAY is a weekday", weekday(THURSDAY))
+test_true("FRIDAY is a weekday", weekday(FRIDAY))
+test_true("MERCURY is an inner_planet", inner_planet(MERCURY))
+test_true("VENUS is an inner_planet", inner_planet(VENUS))
+test_true("EARTH is an inner_planet", inner_planet(EARTH))
+test_true("MARS is an inner_planet", inner_planet(MARS))
+
+test_false("8 is not a weekday", weekday(8))
 
 test_report()

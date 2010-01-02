@@ -365,7 +365,7 @@ translate : .SYMBOLIC
 testeu : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	$(EXE) ..\source\eutest.ex -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex"
+	$(EXE) ..\source\eutest.ex -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex" $(LIST)
 	cd ..\source
 
 !endif #EUPHORIA
@@ -373,7 +373,7 @@ testeu : .SYMBOLIC
 test : .SYMBOLIC
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EXE) -i $(%EUDIR)\include $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT)
+	$(EXE) -i $(%EUDIR)\include $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) $(LIST)
 	cd ..\source
 	
 report: .SYMBOLIC
@@ -382,7 +382,7 @@ report: .SYMBOLIC
 ..\reports\report.html: $(EU_ALL_FILES)
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	-$(EXE) $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log
+	-$(EXE) $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
 	$(EXE) $(%EUDIR)\source\eutest.ex -process-log -html > ..\reports\report.html
 	cd ..\source
 
@@ -493,7 +493,6 @@ be_rev.c : .recheck .always
 !ifdef EU_TARGET
 !ifdef OBJDIR
 $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
-	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	-$(RM) $(TRUNKDIR)\source\main-.h
 	-$(RM) $(TRUNKDIR)\source\init-.c
