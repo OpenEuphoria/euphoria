@@ -1229,7 +1229,7 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 		close(fn)
 	end if
 
-	ifdef DOSFAMILY then
+	ifdef DOSFAMILY or WINDOWS then
 		-- Remove any extra -1 (EOF) characters in case file
 		-- had been opened in Windows 'text mode'.
 		for i = len to 1 by -1 do

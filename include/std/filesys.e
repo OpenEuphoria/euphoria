@@ -1258,7 +1258,7 @@ public function absolute_path(sequence filename)
 		return 1
 	end if
 	
-	ifdef DOSFAMILY then
+	ifdef DOSFAMILY or WINDOWS then
 		if length(filename) = 1 then
 			return 0
 		end if
