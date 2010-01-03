@@ -79,7 +79,7 @@ procedure search_path()
 		    -- file or directory exists
 		    if length(dir_info) = 1 then
 				sequence new_name = canonical_path(dir_name & SLASH & dir_info[1][D_NAME])
-				ifdef DOSFAMILY then
+				ifdef WINDOWS then
 					new_name = lower(new_name)
 				end ifdef
 				if not map:has(found_files, new_name) then
