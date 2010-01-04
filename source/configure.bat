@@ -7,6 +7,11 @@ rem	============================================================
 SET BUILDDIR=build
 
 rem ============================================================
+rem Set a variable we will need to blank
+rem ============================================================
+SET DISABLED_MANAGED_MEM=
+
+rem ============================================================
 rem Be sure to start with a blank config.wat
 rem by simply writing in a comment
 rem ============================================================
@@ -177,6 +182,8 @@ echo Options:
 echo     --without-euphoria
 echo     --prefix value
 echo     --no-managed-mem    disable managed memory
+echo     --align4            malloc allocates addresses that are
+echo                         not always 8 byte aligned.
 echo     --eubin value
 echo     --build value       set the build directory
 echo     --full
@@ -193,3 +200,9 @@ rem Batch file is all done
 rem ============================================================
 
 :Completed
+
+rem ============================================================
+rem Set a variable we used to blank
+rem ============================================================
+SET DISABLED_MANAGED_MEM=
+
