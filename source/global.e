@@ -439,3 +439,8 @@ export boolean verbose = FALSE
 export sequence main_path         -- path of main file being executed
 export integer src_file           -- the source file
 export sequence new_include_name  -- name of file to be included at end of line
+
+-- an index for GetMsgText in msgtext.e and for various routines in error.e
+export constant ENUM_FWD_REFERENCES_NOT_SUPPORTED = 331 
+
+

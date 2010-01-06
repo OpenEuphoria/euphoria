@@ -35,7 +35,7 @@ constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
 						DIVIDE_EQUALS, CONCAT_EQUALS}
 constant SCOPE_TYPES = {SC_LOCAL, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_UNDEFINED}
 	
-without trace
+with trace
 
 --*****************
 -- Local variables
@@ -3219,7 +3219,6 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 				if tok[T_ID] = ATOM then
 					valsym = tok[T_SYM]
 				elsif tok[T_SYM] > 0 then
-					
 					tsym = SymTab[tok[T_SYM]]
 					if tsym[S_MODE] = M_CONSTANT then
 						if length(tsym) >= S_CODE and tsym[S_CODE] then
@@ -3234,18 +3233,18 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 						else
 							CompileErr(70)
 						end if
-					elsif valsym < 0 then
+					elsif tsym[S_OBJ] = NOVALUE then
 						-- forward reference
-						
+						CompileErr(ENUM_FWD_REFERENCES_NOT_SUPPORTED)
 					else
 						CompileErr(99)
 	
 					end if
-				else
+				else -- tok[T_ID] != ATOM and tok[T_SYM] !> 0 
 						CompileErr(99)					
 				end if
 				valsym = tok[T_SYM]
-				if not integer( SymTab[valsym][S_OBJ] ) then
+				if not integer( SymTab[valsym][S_OBJ] ) and tsym[S_SCOPE] != SC_UNDEFINED then
 					CompileErr(84)
 				end if
 				val = SymTab[valsym][S_OBJ] * negate

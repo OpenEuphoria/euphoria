@@ -11,6 +11,7 @@ include std/text.e
 
 include common.e
 
+-- don't change this please
 constant StdErrMsgs = {
 	{  0, "Unknown message code"},
 	{  1, "[1] is missing defined word before 'or'"},
@@ -343,6 +344,7 @@ constant StdErrMsgs = {
 	{328, "Overrides the value of EUDIR"},
 	{329, "Invalid character in HEX string"},
 	{330, "Only enums may be declared as types"},
+	{ENUM_FWD_REFERENCES_NOT_SUPPORTED, "Forward references are not supported for enums"},
 	$
 }
 
