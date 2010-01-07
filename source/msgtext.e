@@ -344,7 +344,7 @@ constant StdErrMsgs = {
 	{328, "Overrides the value of EUDIR"},
 	{329, "Invalid character in HEX string"},
 	{330, "Only enums may be declared as types"},
-	{ENUM_FWD_REFERENCES_NOT_SUPPORTED, "Forward references are not supported for enums"},
+	{331, "Forward references are not supported for enums"},
 	$
 }
 
