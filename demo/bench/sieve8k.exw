@@ -3,7 +3,7 @@
 		   -- "Shootout" Version    --
 		   ---------------------------
 -- usage:
---     exw sieve8k <iterations> <largest>
+--     eui sieve8k <iterations> <largest>
 -- default is 1 iteration with 8192 as largest allowable prime
 
 without type_check

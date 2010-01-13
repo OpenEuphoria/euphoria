@@ -1,12 +1,12 @@
 -- Play back a Language War game
 --
 -- usage 1:
---    ex playback  
+--    euid playback  
 --    (plays lastgame.vid by default) 
 --
 -- usage 2:
---    ex playback filename.vid
---    e.g. ex playback win1
+--    euid playback filename.vid
+--    e.g. euid playback win1
 --
 -- p           pauses or resumes
 -- right-arrow speeds up

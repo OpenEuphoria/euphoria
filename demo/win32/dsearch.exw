@@ -1,6 +1,6 @@
 -- search for a .DLL that contains a given routine
 -- usage:  
---      exw dsearch [routine] 
+--      eui dsearch [routine] 
 --
 -- If you don't supply a string on the command line you will be prompted 
 -- for it. 
@@ -109,7 +109,7 @@ end function
 
 CSetup()
 
-cmd = command_line()   -- exw dsearch [string]
+cmd = command_line()   -- eui dsearch [string]
 
 if length(cmd) >= 3 then
     orig_string = cmd[3]

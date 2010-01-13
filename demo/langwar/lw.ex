@@ -1,7 +1,7 @@
                ------------------
                -- Language War --
                ------------------
--- Run with:  ex lw
+-- Run with:  euid lw
 -- in pure DOS, or a full-screen DOS window. (press Alt+Enter)
 
 -- See lw.doc for a complete description of how to play.

@@ -6,7 +6,7 @@
 -- statistics to "hash.out".
 
 -- example: 
---          ex hash < \euphoria\doc\library.doc
+--          eui hash < \euphoria\doc\library.doc
 --
 -- You can direct standard output to a file with '>'
 -- hash.ex (hash table) is faster than tree.ex (binary tree),

@@ -17,7 +17,7 @@
 -- http://www.RapidEuphoria.com and click "The Archive". Most of the games 
 -- include complete source code.
 
--- Run with: exu lw.ex
+-- Run with: eui lw.ex
 
 type file_number(integer x)
     return x >= -1

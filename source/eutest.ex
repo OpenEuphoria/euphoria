@@ -325,7 +325,7 @@ function interpret_fail( sequence cmd, sequence filename, object control_error_f
 	
 	if sequence(control_error_file) then 
 		-- Now we will compare the control error file to the newly created 
-		-- ex.exe.  If ex.err doesn't exist or there is no match error()
+		-- eui.exe.  If ex.err doesn't exist or there is no match error()
 		-- is called and we add to the failed list.
 		comparison = length( fail_list )
 		fail_list = check_errors( filename, control_error_file, fail_list )
@@ -574,12 +574,12 @@ function platform_init( sequence cmds )
 		executable = "eui"
 		dexe = ".exe"		
 	end ifdef
-	integer ex
-	while ex and ex < length(cmds) with entry do
-		executable = cmds[ex+1]
-		cmds = cmds[1..ex-1] & cmds[ex+2..$]
+	integer eui
+	while eui and eui < length(cmds) with entry do
+		executable = cmds[eui+1]
+		cmds = cmds[1..ex-1] & cmds[eui+2..$]
 	entry
-		ex = find("-exe", cmds)
+		eui = find("-exe", cmds)
 	end while
 
 	integer ec

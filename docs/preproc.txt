@@ -98,7 +98,7 @@ that we just
 created and then see what happens.
 
 {{{
-C:\MyProjects\datesub> eui -p ex:datesub.ex thedate.ex
+C:\MyProjects\datesub> eui -p eui:datesub.ex thedate.ex
 The date this was run is 2009-08-05 19:36:22
 }}}
 

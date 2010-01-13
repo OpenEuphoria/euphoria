@@ -10,11 +10,11 @@
 	----------------------------------------------------------
 
 -- This program can be run with:
---     ex ed
+--     eui ed
 -- or
---     exu ed.ex
+--     eui ed.ex
 -- or
---     exwc ed.ex (quicker response but some control-key combinations aren't recognized)
+--     eui ed.ex (quicker response but some control-key combinations aren't recognized)
 --
 -- How it Works:
 -- * Using gets(), ed reads and appends each line of text into a 2-d "buffer",
@@ -1676,9 +1676,9 @@ procedure get_escape(boolean help)
 	first_bold("new ")
 	if dot_e then
 	    if platform() = LINUX then
-		first_bold("exu ")
+		first_bold("eui ")
 	    else
-		first_bold("ex ")
+		first_bold("eui ")
 	    end if
 	end if
 	first_bold("dos ")
@@ -1758,12 +1758,12 @@ procedure get_escape(boolean help)
 	    end if
 	end if
 	if platform() = LINUX then
-	    shell("exu " & "\"" & file_name & "\"")
+	    shell("eui " & "\"" & file_name & "\"")
 	elsif match(".exw", lower(file_name)) or 
 	      match(".ew",  lower(file_name)) then
-	    shell("exw " & file_name)
+	    shell("eui " & file_name)
 	else
-	    shell("ex " & file_name)
+	    shell("eui " & file_name)
 	end if
 	goto_line(0, b_col)
 	if equal(file_name, get_err_line()) then
@@ -2275,8 +2275,8 @@ procedure ed(sequence command)
 -- start editing a new file
 -- ed.ex is executed by ed.bat
 -- command line will be:
---    ex ed.ex              - get filename from ex.err, or user
---    ex ed.ex filename     - filename specified
+--    eui ed.ex              - get filename from ex.err, or user
+--    eui ed.ex filename     - filename specified
 
     file_number file_no
 
@@ -2396,7 +2396,7 @@ procedure ed_main()
 
     while length(window_list) > 0 do
 	ed(cl)
-	cl = {"ex", "ed.ex" , file_name}
+	cl = {"eui", "ed.ex" , file_name}
     end while
 
     -- exit editor

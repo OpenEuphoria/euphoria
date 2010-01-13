@@ -434,7 +434,7 @@ end ifdef
 
 clear_screen()
 
-cmd = command_line()   -- ex search.ex [string]
+cmd = command_line()   -- eui search.ex [string]
 
 if length(cmd) >= 3 then
     orig_string = cmd[3]

@@ -6,7 +6,7 @@ rem need syncolor.e and keywords.e - EUINC will be changed temporarily
 set TEMP_EUINC=%EUINC%
 SET EUINC=..\bin;..\include
 
-exwc doc.exw HTML ..
+eui doc.exw HTML ..
 
 rem these files are only needed to update RDS Web site
 

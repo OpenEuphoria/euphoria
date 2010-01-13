@@ -17,7 +17,7 @@ it contains a low-level intermediate language (IL) that is executed by the
 back-end of the interpreter. A shrouded file does not require any parsing. It
 starts running immediately, and with large programs you will see a quicker
 start-up time. Shrouded files must be run using the interpreter back-end:
-##backendw.exe## (//Windows//) or ##backendu##
+##eubw.exe## (//Windows//) or ##eub.exe##
 (//Linux/FreeBSD//).  This backend is freely available, and you can give it to
 any of your users who need it. It's stored in ##euphoria\bin## in the Euphoria
 interpreter package. You can run your .il file with:
@@ -31,7 +31,7 @@ backendw myprog.il
 On //Unix// use:
 
 {{{
-backendu myprog.il
+eub.exe myprog.il
 }}}
 
 Although it does not contain any source statements, a .il file will generate a useful
@@ -61,7 +61,7 @@ The Euphoria interpreter will not perform tracing on a shrouded file. You must
 trace your original source.
 
 On //Unix//, the shrouder will make your shrouded file executable,
-and will add a ###!## line at the top, that will run ##backendu.## You
+and will add a ###!## line at the top, that will run ##eub.exe.## You
 can override this ###!## line by specifying your own ###!##
 line at the top of your main Euphoria file.
 
@@ -80,7 +80,7 @@ bindw [-full_debug] [-list] [-quiet] [-out executable_file] [-con] [-icon filena
 
 ##bind## (##bindw## or ##bindu##) does the same thing as ##shroud##, and
 includes the same options. It then combines your shrouded .il file with the
-interpreter backend (##backend.exe##, ##backendw.exe## or ##backendu##) to make
+interpreter backend (##eubd.exe##, ##eubw.exe## or ##eub.exe##) to make
 a **single, stand-alone executable** file that you can conveniently use and
 distribute. Your users need not have Euphoria installed.  Each time your
 executable file is run, a quick integrity check is performed to detect any
@@ -116,8 +116,8 @@ source statements are not there.
 A one-line Euphoria program will result in an executable file as large as the
 back-end you are binding with, but the size increases very slowly as you add to
 your program. **When bound, the entire Euphoria editor,
-##ed.ex##, adds only 27K to the size of the back-end.** ##backendw.exe##
-and ##backendu## //Linux// are compressed using a
+##ed.ex##, adds only 27K to the size of the back-end.** ##eubw.exe##
+and ##eub.exe## //Linux// are compressed using a
 [[http://upx.sourceforge.net|UPX]]. Note: In some very rare cases, a compressed
 executable may trigger a warning message from a virus scanner. This is simply
 because the executable file looks abnormal to the virus scanner.
@@ -132,7 +132,7 @@ myprog.exe < file.in > file.out
 }}}
 
 If you were to write a small ##.bat## file, say ##myprog.bat##, that contained the line
-"##ex myprog.ex##" you would //not// be able to redirect input and output. The following
+"##eui myprog.ex##" you would //not// be able to redirect input and output. The following
 will not work:
 
 {{{

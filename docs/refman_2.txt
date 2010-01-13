@@ -424,7 +424,7 @@ Euphoria interpreter, and gives the full path to the interpreter.  If you make
 your file executable, you can run it, just by typing its name, and without the
 need to type "##exi##". On //Windows// this line is just
 treated as a comment (though Apache Web server on //Windows// does
-recognize it.). If your file is a shrouded ##.il## file, use backendu
+recognize it.). If your file is a shrouded ##.il## file, use eub.exe
 instead of ##eui##.
 
 Line comments are typically used to annotate a single (or small section) of
@@ -1392,7 +1392,7 @@ faster than calculations involving variables declared as atom. If your machine
 has floating-point hardware, Euphoria will use it to manipulate atoms that
 are not integers. If your machine doesn't have floating-point
 hardware (this may happen on old 386 or 486 PCs), Euphoria will call software floating-point
-arithmetic routines contained in **ex.exe** (or in Windows).  You can force ex.exe to
+arithmetic routines contained in **euid.exe** (or in Windows).  You can force eui.exe to
 bypass any floating-point hardware, by setting an environment variable:
 <eucode>
 SET NO87=1

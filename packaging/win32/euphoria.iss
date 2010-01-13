@@ -196,7 +196,7 @@ Root: HKCR; Subkey: "EUCodeFile\DefaultIcon"; ValueType: string; ValueName: ""; 
 Root: HKCR; Subkey: "EUCodeFile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\ed.bat"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 [Messages]
-FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex, .exw and .exd programs by double-clicking them, or (after reboot) by typing:%n     ex filename.exd%nor%n     exw/exwc filename.ex/exw%non a command-line.
+FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex, .exw and .exd programs by double-clicking them, or (after reboot) by typing:%n     euid filename.exd%nor%n     eui/exwc filename.ex/eui%non a command-line.
 
 [Run]
 ;Update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME

@@ -589,7 +589,7 @@ end ifdef
 clear_screen()
 
 sequence cmd
-cmd = command_line()  -- ex guru.ex words...
+cmd = command_line()  -- eui guru.ex words...
 
 euphoria = FALSE
 if length(cmd) < 3 then

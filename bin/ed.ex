@@ -7,11 +7,11 @@
 		----------------------------------------------------------
 
 -- This program can be run with:
---     ex ed (quick response on 95/98/ME)
+--     eui ed (quick response on 95/98/ME)
 -- or
---     exu ed.ex  (Linux / FreeBSD)
+--     eui ed.ex  (Linux / FreeBSD)
 -- or
---     exwc ed.ex (quicker response on XP 
+--     eui ed.ex (quicker response on XP 
 --                 but some control-key combinations aren't recognized)
 --
 -- How it Works:
@@ -59,7 +59,7 @@ constant CONTROL_B = 2,
 		 CONTROL_T = 20,
 		 CONTROL_U = 21   -- alternate key for PAGE-UP in Linux
 		 
-constant CAPS_LOCK = 314  -- exwc only
+constant CAPS_LOCK = 314  -- eui only
 
 integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
 		PAGE_UP, PAGE_DOWN, INSERT, NUM_PAD_SLASH,
@@ -1735,9 +1735,9 @@ procedure get_escape(boolean help)
 		first_bold("new ")
 		if dot_e then
 			ifdef UNIX then
-				first_bold("exu ")
+				first_bold("eui ")
 			elsedef
-				first_bold("ex ")
+				first_bold("eui ")
 			end ifdef
 		end if
 		first_bold("dos ")
@@ -2325,8 +2325,8 @@ procedure ed(sequence command)
 -- start editing a new file
 -- ed.ex is executed by ed.bat
 -- command line will be:
---    ex ed.ex              - get filename from ex.err, or user
---    ex ed.ex filename     - filename specified
+--    eui ed.ex              - get filename from ex.err, or user
+--    eui ed.ex filename     - filename specified
 
 	file_number file_no
 
@@ -2445,7 +2445,7 @@ procedure ed_main()
 
 	while length(window_list) > 0 do
 		ed(cl)
-		cl = {"ex", "ed.ex" , file_name}
+		cl = {"eui", "ed.ex" , file_name}
 	end while
 
 	-- exit editor

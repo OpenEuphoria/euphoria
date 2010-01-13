@@ -375,7 +375,7 @@ $(BUILDDIR)/$(EBACKENDU) : EU_TARGET = backend.ex
 $(BUILDDIR)/$(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 $(BUILDDIR)/$(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-	@$(ECHO) making BACKENDU $(OBJDIR)
+	@$(ECHO) making EUB.EXE $(OBJDIR)
 	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(DEBUG_FLAGS) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDU)
 ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EBACKENDC)
@@ -448,7 +448,7 @@ install :
 	           be_*.c \
 	           *.h
 
-# This doesn't seem right. What about eub or eushroud ?
+# This doesn't seem right. What about eub or shroud ?
 uninstall :
 	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EBACKENDU)
 	-rm -r $(PREFIX)/share/euphoria

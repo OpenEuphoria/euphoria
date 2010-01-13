@@ -504,7 +504,7 @@ end procedure
 -- cmd = command_line()
 --
 -- -- cmd will be:
---       {"C:\EUPHORIA\BIN\EX.EXE",
+--       {"C:\EUPHORIA\BIN\EUI.EXE",
 --        "myprog",
 --        "myfile.dat",
 --        "12345",

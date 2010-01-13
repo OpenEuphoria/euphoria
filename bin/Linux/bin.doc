@@ -1,10 +1,10 @@
    EUPHORIA\BIN
 
    Executable code:
-        exu          - the Euphoria interpreter 
-        ecu          - the Euphoria translator
-        ecu.a        - the Translator run-time library
-        backendu     - the interpreter backend
+        eui          - the Euphoria interpreter 
+        euc          - the Euphoria translator
+        eu.a         - the Translator run-time library
+        eub          - the interpreter backend
         
    Utility programs written in Euphoria:
 
@@ -26,14 +26,14 @@
 	where.ex     - search for a file on your PATH
 
    registered users only:
-	bindu        - bind a Linux Euphoria program with backendu to make
+	bind         - bind a Linux Euphoria program with eub.exe to make
 	               a stand-alone executable file
 	shroud       - source code shrouder, makes a .il file
 	bind.il	     - a shrouded Euphoria program used by 
 	               shroud.bat and bind.bat
 
    There are small shell scripts for most of the .ex utilities, so you
-   don't have to type "exu ...", e.g. just type "ascii" to turn run the
+   don't have to type "eui ...", e.g. just type "ascii" to turn run the
    ascii.ex program.
 
    Many of these programs expect to be run from a command line interface.

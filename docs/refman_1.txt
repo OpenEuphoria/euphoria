@@ -267,8 +267,8 @@ and ##EUINC##.
 
 The packaged version installs Euphoria in a more //Unix//-like way, putting the
 executables into ##/usr/bin##, ##/usr/share/euphoria## and
-##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eubackend##,
-##eushroud## and ##eubind## are also installed.  It will also create
+##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eub##,
+##shroud## and ##bind## are also installed.  It will also create
 ##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
 
@@ -336,7 +336,7 @@ statements like:
 eui myprog.ex %1 %2 %3 %4 %5 %6 %7 %8 %9
 </eucode>
 The first statement turns off echoing of commands to the screen. The second
-runs ##ex myprog.ex## with up to 9 command-line arguments. See
+runs ##eui myprog.ex## with up to 9 command-line arguments. See
 [[:command_line]]() for an example of how to read these arguments. Having
 a .bat file will save you the minor inconvenience of typing ##eui##
 all the time; i.e., you can just type:

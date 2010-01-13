@@ -4,11 +4,11 @@
 
  Open a full-screen DOS window (press Alt-Enter) and type:
       
-      ex lw
+      euid lw
 
  If you choose to record a movie of your game, it will be stored
  in lastgame.vid (if you lose) or win1.vid, win2.vid etc. (if you win).
- You can play it back with: ex playback.ex
+ You can play it back with: euid playback.ex
  
  More games, for DOS, Windows, Linux and FreeBSD await you on 
  the Euphoria Web site:

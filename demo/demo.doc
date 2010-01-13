@@ -93,11 +93,11 @@
 		     against other languages.
 
  langwar directory - contains a real-time star wars type game
-                   - runs with ex
+                   - runs with euid
                    
- win32 directory   - programs that require exw.exe (Windows version only)
+ win32 directory   - programs that require eui.exe (Windows version only)
  
- dos32 directory   - programs that require ex.exe (Windows/DOS version only)
+ dos32 directory   - programs that require euid.exe (Windows/DOS version only)
 
  linux directory   - programs that require Linux/Unix
  

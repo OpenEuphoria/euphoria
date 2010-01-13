@@ -65,12 +65,12 @@ constant translator_names =
 				putm( 
 					putm( 
 						putm( map:new(10), 
-							"DOS32", "ec " ), 
-						"WIN32", "ecw " ), 
-					"LINUX", "ecu" ), 
-				"FREEBSD", "ecu" ), 
-			"UNIX", "ecu" ), 
-		"OSX",  "ecu" ) 
+							"DOS32", "eucd " ), 
+						"WIN32", "euc " ), 
+					"LINUX", "euc" ), 
+				"FREEBSD", "euc" ), 
+			"UNIX", "euc" ), 
+		"OSX",  "euc" ) 
 
 test_true("Created the Hashes:", 1) 
 

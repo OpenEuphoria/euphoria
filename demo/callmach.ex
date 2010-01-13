@@ -32,7 +32,7 @@ string = {'E', BRIGHT_BLUE, 'u', BRIGHT_GREEN, 'p', BRIGHT_CYAN,
 -- Use define_c_func() to allow parameters to be passed to machine code. 
 -- This particular example demonstrates integer calculations only.
 
--- Note: ex.exe uses software-emulated floating-point. It keeps
+-- Note:euid.exe uses software-emulated floating-point. It keeps
 -- floating-point values in register pairs (eax, edx) and (ebx, ecx).
 -- Floating-point results should be returned in (eax, edx).
 
@@ -62,7 +62,7 @@ free(code_space)
 
 -- Example #3 - Windows/Linux 
 -- Use define_c_func() to allow parameters to be passed
--- to machine code. exw.exe uses hardware floating-point instructions. 
+-- to machine code. eui.exe uses hardware floating-point instructions. 
 -- Floating-point results should be returned in ST(0) - the top of the 
 -- floating-point register stack.
 

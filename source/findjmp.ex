@@ -85,7 +85,7 @@ export function write_jmp_file(sequence obj, sequence outfile, integer interacti
 end function
 
 -- Only run automatically if findjmp.ex was executed directly, i.e. not included
--- from another ex program
+-- from another eui program
 
 sequence cmds = command_line()
 if match("findjmp.ex", cmds[2]) then

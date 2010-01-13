@@ -10,7 +10,7 @@
 	bind.bat     - bind a Euphoria program with the backend making 
 	               it a stand-alone .exe file
 	shroud.bat   - source code shrouder, makes a .il file that can be
-	               run with backend.exe or backendw.exe
+	               run with eubd.exe, eubw.exe or eub.exe
    	euphoria.ico - default icon for binding .exe's
    
    Translator libraries:
@@ -30,14 +30,14 @@
 	lines.ex     - count lines and characters in a bunch of files
 	search.ex    - search files for a string-pattern
 	where.ex     - search for a file on your PATH
-	make31.exw   - build a version of exw.exe that uses version 3.1 of
+	make31.exw   - build a version of eui.exe that uses version 3.1 of
                        the Windows GUI (instead of 4.0)
-        makecon.exw  - makes exwc.exe from exw.exe 
+        makecon.exw  - makes eui.exe from euiw.exe 
         euinc.ico    - gray scale version of the Euphoria icon
         
    	
    There are small .bat files for most of the .ex utilities, so you
-   don't have to type "ex ...", e.g. just type "ascii" to turn run the
+   don't have to type "eui ...", e.g. just type "ascii" to turn run the
    ascii.ex program. 
 
    Many of these programs expect to be run from a command line interface.

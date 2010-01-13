@@ -69,7 +69,7 @@ and the C source files will have been removed to avoid clutter.
 
 When you run ##allsorts.exe##, it should run the same as if you had typed:
 
-##ex allsorts##
+##eui allsorts##
 
 to run it with the **Interpreter**, except that it should run faster, showing
 reduced times for the various sorting algorithms in ##euphoria\demo\allsorts.ex##.

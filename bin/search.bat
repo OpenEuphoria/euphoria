@@ -1,2 +1,2 @@
 @echo off
-ex.exe SEARCH.ex %1
+eui.exe SEARCH.ex %1

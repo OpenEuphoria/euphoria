@@ -7,7 +7,7 @@
  on the Archive page in the WIN32 section, and on the Recent User Contributions
  page. Most use the Win32Lib package, also on the Euphoria Web site.
  
- Run each program using exw.exe.
+ Run each program using eui.exe.
  
  window.exw  - A simple example of making a Window
 

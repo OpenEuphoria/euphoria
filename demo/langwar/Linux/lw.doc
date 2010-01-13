@@ -4,7 +4,7 @@
 
  This program can be run with:
       
-      exu lw.ex 
+      eui lw.ex 
  
  There's a *much* better version of this game in the WIN32 package. 
  This Linux version only uses character-based graphics.        

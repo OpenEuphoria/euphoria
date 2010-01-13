@@ -4,10 +4,10 @@
 -- Miscellaneous routines and constants
 
 -- platform() values:
-global constant DOS32 = 1,  -- ex.exe
-		WIN32 = 2,  -- exw.exe
-		LINUX = 3,  -- exu
-		FREEBSD = 8 -- exu
+global constant DOS32 = 1,  -- eui.exe
+		WIN32 = 2,  -- eui.exe
+		LINUX = 3,  -- eui
+		FREEBSD = 8 -- eui
 
 constant M_INSTANCE = 55, M_SLEEP = 64
 

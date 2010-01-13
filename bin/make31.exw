@@ -1,4 +1,4 @@
--- Produce exw31.exe, a version of exw.exe that uses 
+-- Produce exw31.exe, a version of eui.exe that uses 
 -- Windows GUI version 3.1 instead of 4.0
 
 include std/file.e
@@ -15,7 +15,7 @@ procedure quit()
 end procedure
 
 system("del exw31.exe > nul", 2)
-system("copy exw.exe exw31.exe > nul", 2)
+system("copy eui.exe exw31.exe > nul", 2)
 
 fn = open("exw31.exe", "ub")
 if fn = -1 then

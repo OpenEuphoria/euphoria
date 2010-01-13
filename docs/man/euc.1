@@ -16,9 +16,9 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-ecu \- Euphoria to C Translator \- Translates Euphoria programs to C.
+euc \- Euphoria to C Translator \- Translates Euphoria programs to C.
 .SH SYNOPSIS
-.B ecu
+.B euc
 .RB [\| \-i
 .IR path ]
 .RB [\| \-c 
@@ -31,7 +31,7 @@ ecu \- Euphoria to C Translator \- Translates Euphoria programs to C.
 .br
 .SH DESCRIPTION
 This manual page documents briefly the
-.B ecu
+.B euc
 command.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
@@ -39,7 +39,7 @@ command.
 .\" respectively.
 The euphoria to C translator converts euphoria source code into C source
 that can be compiled into native code.  The resulting executable doesn't
-need the euphoria interpreter (exu) to run.  After translation, an executable
+need the euphoria interpreter (eui) to run.  After translation, an executable
 script named emake will be created in the current directory.  It contains
 the commands required to compile and link the resulting C source files.  
 Either stand alone executables or shared libraries can be built.  The 
@@ -65,10 +65,10 @@ after it completes.
 .B \-stack n
 Change the amount of stack size reserved for your translated program.
 .SH SEE ALSO
-.BR exu (1),
-.BR eubackend (1),
-.BR eubind (1),
-.BR eushroud (1).
+.BR eui (1),
+.BR eub (1),
+.BR bind (1),
+.BR shroud (1).
 .br
 The programs are documented fully
 in /usr/share/euphoria/html

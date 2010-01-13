@@ -406,7 +406,7 @@ integer OUR_SIZE
 il_file = match(".il", cl[3])
 
 if not il_file then
-	-- roughly, but must be less or equal to size of backend[w].exe
+	-- roughly, but must be less or equal to size of eub[w].exe
 	OUR_SIZE = 61500 
 
 	if seek(f, OUR_SIZE) then

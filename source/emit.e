@@ -1670,7 +1670,7 @@ export procedure emit_op(integer op)
 	-- 0 inputs, 1 output 
 	elsif op = PLATFORM then
 		if BIND and shroud_only then
-			-- must check with backend/backendw/backendu for platform
+			-- must check with backend/backendw/eub.exe for platform
 			c = NewTempSym()
 			TempInteger(c)
 			Push(c)
@@ -1683,7 +1683,7 @@ export procedure emit_op(integer op)
 			n = host_platform()
 			if n <= WIN32 and BIND then
 				n = 1 + w32  -- set platform value based on bind option, so
-							 -- backendw.exe bind.il can serve DOS and Windows
+							 -- eubw.exe bind.il can serve DOS and Windows
 			end if
 		
 			Push(NewIntSym(n))

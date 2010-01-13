@@ -3,7 +3,7 @@
 -- an alphabetic listing to standard output.
 
 -- usage: 
---        ex tree < file1 
+--        eui tree < file1 
 --
 -- You can direct standard output to a file with '>'
 

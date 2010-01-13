@@ -167,23 +167,23 @@ General Notes:
 
 Specific Notes for each C compiler
 			
-			Euphoria for Windows, exw.exe
+			Euphoria for Windows, eui.exe
 
 
 WATCOM
 ======
-  build exw.exe with: imakew.bat
+  build eui.exe with: imakew.bat
   
   Ignore the warning about graph.lib.
   
   The interactive trace, trace(1) should fully work.
   
 
-			Euphoria for DOS, ex.exe
+			Euphoria for DOS, euid.exe
 
 WATCOM
 ======
-  build ex.exe with: imake.bat
+  build euid.exe with: imake.bat
   
   In OpenWatcom's Readme file, it is written that OpenWatcom doesn't need the 
   LIB environment variable, that's why it is not set. That's true when 
@@ -195,7 +195,7 @@ WATCOM
 
 DJGPP
 =====
-  build ex.exe with: djgex.bat
+  build euid.exe with: djgex.bat
   
   It will run at full speed. -DINT_CODES is not used.
   You'll need the Allegro graphics library liballeg.zip from 
@@ -206,7 +206,7 @@ DJGPP
   Some work will be required.
 
 			
-			Euphoria for Linux, exu
+			Euphoria for Linux, eui
 GNU C
 =====
   You'll have to convert the line terminators in the
@@ -214,22 +214,22 @@ GNU C
   the Windows/DOS form of \r\n, otherwise several files
   will give you errors. You can use: 
        
-       exu fixline.ex 
+       eui fixline.ex 
   
   for this. Also, when you save a file using ed.ex, it will let you
   convert to \n terminators. You should also ensure that all 
   source file names are lower case (unzip -L).
   
-  build exu with: imakeu
+  build eui with: imakeu
   Make sure it has \n line-terminators, and execute permission
   (chmod +x imakeu).
   
-  exu will run at full speed. -DINT_CODES is not used.
+  eui will run at full speed. -DINT_CODES is not used.
 
   The interactive trace, trace(1) should fully work.
 			
 			
-			Euphoria for FreeBSD, exu
+			Euphoria for FreeBSD, eui
 GNU C
 =====
   You'll have to convert the line terminators in the
@@ -237,7 +237,7 @@ GNU C
   the Windows/DOS form of \r\n, otherwise several files
   will give you errors. You can use: 
        
-       exu fixline.ex 
+       eui fixline.ex 
   
   for this. Also, when you save a file using ed.ex, it will let you
   convert to \n terminators. You should also ensure that all 
@@ -247,11 +247,11 @@ GNU C
 
   In backend.ex set EBSD = 1
   
-  build exu with: bsdimakeu
+  build eui with: bsdimakeu
   Make sure it has \n line-terminators, and execute permission
   (chmod +x bsdimakeu).
   
-  exu will run at full speed. -DINT_CODES is not used.
+  eui will run at full speed. -DINT_CODES is not used.
 
   The interactive trace, trace(1) should fully work.
 

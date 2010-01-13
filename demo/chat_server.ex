@@ -38,7 +38,7 @@ procedure main(sequence args)
 	if sock:bind(server, addr) != sock:OK then
 		printf(1, "Could not bind server to %s, error=%d\n", { addr, sock:error_code() })
 		puts(1, "You may try another IP and/or port:\n")
-		puts(1, "  Usage: exwc chat_sever.ex [IP:PORT]\n")
+		puts(1, "  Usage: eui chat_sever.ex [IP:PORT]\n")
 		abort(1)
 	end if
 

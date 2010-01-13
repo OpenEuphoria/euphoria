@@ -1,4 +1,4 @@
-#!/usr/bin/exu -i /usr/share/euphoria/source/
+#!/usr/bin/eui -i /usr/share/euphoria/source/
 -- (c) Copyright - See License.txt
 --
 -- The Binder

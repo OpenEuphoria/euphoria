@@ -446,9 +446,9 @@ procedure OutputIL()
 		end for
 				
 		be = -1
-		backend_name = "eub.exe"
+		backend_name = "eubd.exe"
 		if w32 then
-			backend_name = "eubw.exe"
+			backend_name = "eub.exe"
 		else
 			ifdef UNIX then
 				backend_name = "eub"

@@ -51,7 +51,7 @@ write_file("extra.txt", extra_data, DOS_TEXT)
 write_file("optional.txt", optional_data, DOS_TEXT)
 delete_file("nofile.txt") -- Ensure that this does not exist.
 map:map opts = cmd_parse(option_defs, routine_id("opt_help"), 
-				{"exu", 
+				{"eui", 
 				 "app.ex", 
 				 "-d", 
 				 "@@nofile.txt",

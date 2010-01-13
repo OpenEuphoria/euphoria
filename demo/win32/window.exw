@@ -208,7 +208,7 @@ procedure WinMain()
     poke4(wndclass + hInstance, 0) --hInstance
 
     -- set icon in top-left of window
-    icon_handle = c_func(LoadIcon, {instance(), allocate_string("exw")})
+    icon_handle = c_func(LoadIcon, {instance(), allocate_string("eui")})
     poke4(wndclass + hIcon, icon_handle)
     poke4(wndclass + hIconSm, icon_handle)
     

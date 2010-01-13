@@ -50,7 +50,7 @@
  
  The Results:
  
- Euphoria interpreter, exw.exe:
+ Euphoria interpreter, eui.exe:
  
      For N=90000 on 1.8GHz machine: 41.39 seconds
  
@@ -78,7 +78,7 @@
  (EtoC added for comparison)
  ---------------------------------------
  Euphoria  0.13  - EtoC Translator / Watcom
- Euphoria  0.47  - Interpreted with exw.exe
+ Euphoria  0.47  - Interpreted with eui.exe
  pliant    0.68
  gforth    0.75 
  parrot    2.98 

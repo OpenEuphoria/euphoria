@@ -961,7 +961,7 @@ global type sorted(sequence x)
 end type
 
 procedure win32_tests()
--- tests that require WIN32 platform (exw sanity.ex)
+-- tests that require WIN32 platform (eui sanity.ex)
     atom lib
     integer Sleep
     
@@ -1025,11 +1025,11 @@ procedure corrupt(sequence filename)
     else
 		printf(msg, "%s seems to be incorrect. \n", {full_name})
 		if    last_sum = SUM_EX then
-	    	puts(msg, "It's the Complete Edition ex.exe file. ")
+	    	puts(msg, "It's the Complete Edition eui.exe file. ")
 		elsif last_sum = SUM_EXW then
-		    puts(msg, "It's the Complete Edition exw.exe file. ")
+		    puts(msg, "It's the Complete Edition eui.exe file. ")
 		elsif last_sum = SUM_EXU then
-		    puts(msg, "It's the Complete Edition exu file. ")
+		    puts(msg, "It's the Complete Edition eui file. ")
 		else                
 		    printf(msg, "Its check-sum (%d) is wrong. \n", last_sum)
 	    	puts(msg, 
@@ -1106,18 +1106,18 @@ procedure check_install(integer doit)
 --          end if
 --      elsif ex_sum = SUM_PDEXU then
 --      else
---           corrupt("exu") -- could be FreeBSD
+--           corrupt("eui") -- could be FreeBSD
 --      end if
     elsedef
 	-- Windows
 		eudir &= "\\BIN\\"
-		ex_sum = checksum(eudir & "ex.exe")
+		ex_sum = checksum(eudir & "eui.exe")
 		if ex_sum = SUM_EX then
-		    if checksum(eudir & "exw.exe") != SUM_EXW then
-				corrupt("exw.exe")
+		    if checksum(eudir & "eui.exe") != SUM_EXW then
+				corrupt("eui.exe")
 		    end if
 		else
-		    corrupt("ex.exe")
+		    corrupt("eui.exe")
 		end if   
     end ifdef
 end procedure

@@ -382,7 +382,7 @@ end function
 --
 -- Example 2:
 -- <eucode>
---  system("ex \\test\\myprog.ex < indata > outdata", 2)
+--  system("eui \\test\\myprog.ex < indata > outdata", 2)
 -- -- executes myprog by redirecting standard input and
 -- -- standard output
 -- </eucode>
@@ -447,7 +447,7 @@ end function
 -- Example 2:
 -- <eucode>
 --  -- executes myprog with two file names as arguments
--- if system_exec("ex \\test\\myprog.ex indata outdata", 2) then
+-- if system_exec("eui \\test\\myprog.ex indata outdata", 2) then
 --     puts(2, "failure!\n")
 -- end if
 -- </eucode>
