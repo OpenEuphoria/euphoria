@@ -1,0 +1,63 @@
+== Euphoria Internals ==
+
+The interpreter has four binary components.  The translator, library, interpreter and the backend.  Euphoria's parser first converts the code into a set of instructions that the translator, interpreter backend can process.  Then the backend runs these instructions.  The translator takes these same instructions and converts them into C-code.  The library is called by the backend for
+the many builtins included in EUPHORIA.
+
+=== Euphoria's Data Structures ===
+
+Every EUPHORIA object is either stored as is or an encoded pointer.  A EUPHORIA integer is stored in a 32-bit signed integer.  If the number is too big for a EUPHORIA integer or not an integer, it is assigned to a 64-bit double float in a structure and an encoded pointer to that structure is stored in the said 32-bit memory space.  Sequences are stored in a similar way.
+
+==== The C Representation of a EUPHORIA Object =====
+
+EUPHORIA integers are stored in object variables as-is.  An object variable is a four byte signed integer.  Legal integer values for EUPHORIA integers are between -1,073,741,824 ( -power(2,30) ) and +1,073,741,823 ( power(2,30)+1 ).  Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other values are for encoded pointers.  Pointers are always 8 byte aligned.  So a pointer is stored in 29-bits instead of 32 and can fit in a hexadecimal range 0x2000_0000 long.     The other values are not stored in the same place but their encoded pointers are.  The pointers are encoded in such a way that their values will never be in the range of the integers.  Pointers to sequences are encoded into a range between 8000_0000 to 9FFF_FFFF.  Pointers to structures for doubles are encoded into a range between A000_0000 to BFFF_FFFF.  A special value NOVALUE is at the end of the range of encoded pointers is BFFF_FFFF and it signifies that there is no value yet assigned to a variable and it also signifies the end of a sequence.  These methods are how objects are stored.  Values of this type are stored in the 'object' type.
+
+The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns true and IS_ATOM_DBL() will return true for integer values as well as encoded double pointers.   There is an order that these tests are made so we test IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be true if we pass an encoded pointer to a double.  We must be sure that something is not NOVALUE before we use IS_SEQUENCE on it.
+
+A sequence is held in a 'struct s1' type and a double is contained in a 'struct d'.
+
+--**
+-- Returns an object with the same value as x.  x must be with in the integer range of a legal EUPHORIA integer type.
+object MAKE_INT( signed int x )
+
+--**
+-- Returns an object with an argument of a pointer to a 'struct s1'
+object MAKE_SEQ( struct s1 * sptr )
+
+--**
+-- Returns an object with an argument of a pointer to a 'struct d.'
+object MAKE_DBL( struct d * dptr )
+
+--**
+-- Returns true if object is a EUPHORIA integer and not an encoded pointer.
+int IS_ATOM_INT( object o )
+
+An encoded double struct 'struct d' could indeed contain a value that is legally in the range of a EUPHORIA integer.  The interpreter should and does recognize that as an 'integer' but in this internals document when we say EUPHORIA integer we mean it is not an encoded pointer.  IS_ATOM_INT() will return true even though the argument is out of the EUPHORIA integer range when the argument is positive.
+
+Use MAXINT and MININT to check for overflow and underflow.
+
+
+--**
+-- Returns true if the object is an encoded pointer to a double struct.
+-- Assumption: /o/ must not be a EUPHORIA integer.
+int IS_ATOM_DBL( object o )
+
+
+--**
+-- Returns true if the object is a EUPHORIA integer or an encoded pointer to a 'struct d'. 
+int IS_ATOM( object o )
+
+--**
+-- Returns true if the object is an encoded pointer to a 'struct s1'.
+-- Assumption: /o/ is not NOVALUE.
+int IS_SEQUENCE( object o )
+
+--**
+-- Returns true if the object is an encoded pointer of either kind of structure.
+int IS_DBL_OR_SEQUENCE( object o )
+
+
+object MAKE_DBL( struct d * dptr )
+struct d * DBL_PTR( object o )
+object MAKE_SEQ( struct s1 * sptr )
+struct s1 * MAKE_SEQ( object o )
+

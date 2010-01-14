@@ -2497,6 +2497,13 @@ but ##EU5## will be defined.
 * **EUB_CON** - Application is being converted to a bound //console// program by ##eub##.
 * **EUB_WIN32** - Application is being converted to a bound //MS-Windows// program by ##eub##.
 
+==== Library Definitions
+
+* **DATA_EXECUTE** - Application will always get executable memory from ##allocate()## even when the system has Data Execute Protection enabled for the Euphoria Interpreter.
+* **SAFE** - Enables safe runtime checks for operations for routines found in machine.e and dll.e
+* **UCSTYPE_DEBUG** - Found in include/std/ucstypes.e
+* **CRASH** - Found in include/std/unittest.e
+
 More examples
 <eucode>
 -- file: myproj.ex
