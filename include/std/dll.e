@@ -274,6 +274,9 @@ end function
 
 public function define_c_proc(object lib, object routine_name, 
 							  sequence arg_types)
+	if atom(routine_name) and not safe_address(routine_name, 1, A_EXECUTE) then
+        crash("A C function is being defined from Non-executable memory.")
+	end if			
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, 0})
 end function
 
@@ -368,7 +371,10 @@ end function
 
 public function define_c_func(object lib, object routine_name,
 							  sequence arg_types, atom return_type)
-	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
+	  if atom(routine_name) and not safe_address(routine_name, 1, A_EXECUTE) then
+	      crash("A C function is being defined from Non-executable memory.")
+	  end if			
+	  return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
 
 --****

@@ -132,6 +132,8 @@ export constant MEM_COMMIT = #1000,
 
 export integer FREE_RID		
 
+public enum A_READ = 1, A_WRITE = 2, A_EXECUTE = 3
+
 export constant
         M_ALLOC = 16,
         M_FREE = 17

@@ -1114,6 +1114,10 @@ end procedure
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
 
+public function safe_address(atom start, integer len, positive_int action)
+	return 1
+end function
+
 public procedure check_all_blocks()
 end procedure
 

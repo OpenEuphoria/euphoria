@@ -92,7 +92,7 @@ constant M_SOUND = 1
 -- Constants that tell us what we are about to try to do: read, write or execute memory.  
 -- They should be distinct from PERM_EXEC, etc...
 -- These are not permission constants.
-export enum A_READ = 1, A_WRITE = 2, A_EXECUTE = 3
+
 
 -- Include the starting address and length of any 
 -- acceptable areas of memory for peek/poke here. 
@@ -173,7 +173,7 @@ function permits(valid_memory_protection_constant protection, positive_int actio
 	return not does_not_permit(protection,action)
 end function
 
-export function safe_address(atom start, integer len, positive_int action )
+public function safe_address(atom start, integer len, positive_int action )
 -- is it ok to read/write all addresses from start to start+len-1?
 	atom block_start, block_upper, upper
 	sequence block
