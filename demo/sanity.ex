@@ -917,12 +917,9 @@ procedure machine_level()
     if compare(peek({addr, 4}), {77, 255, 5, 255}) then
 	crash(generic_msg)
     end if
-    poke(addr, #C3) -- RET instruction
-    if peek(addr) != #C3 then
-	crash(generic_msg)
-    end if
-    call(addr)
     free(addr)
+    addr = allocate_code({#C3}) -- RET instruction
+    call(addr)
     for x = 0 to +2000000 by 99999 do
 	if bytes_to_int(int_to_bytes(x)) != x then
 	    crash(generic_msg)
@@ -1007,17 +1004,25 @@ function checksum(sequence filename)
     return last_sum
 end function
 
-constant SUM_EX = 19552919,
-	 SUM_EXW = 8092818,
-	 SUM_EXU = 9917472
-
+-- use the checksum from the last beta release
+ifdef WINDOWS then
+	constant SUM_EX = 32204003, 
+		 SUM_EXW = 32200661
+elsedef
+	 -- we need seperate lines for each platform...
+	 puts(msg,"Dear Developer: "&
+	 	"Please add the checksum for the non Windows platforms\n"&
+	 	"constant SUM_EX = <some number>\nPress ENTER.")
+	 gets(0)
+	 constant SUM_EX = 0
+end ifdef
 object eudir
 
 procedure corrupt(sequence filename)
 -- say that a file is corrupt   
     sequence full_name
 
-    full_name = lower(eudir & filename)
+    full_name = lower(eudir & SLASH & "bin" & SLASH & filename)
     puts(msg, "\n\n")
     if last_sum = 0 then
 		puts(msg, full_name & " does not exist. \n")
@@ -1028,11 +1033,11 @@ procedure corrupt(sequence filename)
 	    	puts(msg, "It's the Complete Edition eui.exe file. ")
 		elsif last_sum = SUM_EXW then
 		    puts(msg, "It's the Complete Edition eui.exe file. ")
-		elsif last_sum = SUM_EXU then
+		elsif last_sum = SUM_EX then
 		    puts(msg, "It's the Complete Edition eui file. ")
 		else                
 		    printf(msg, "Its check-sum (%d) is wrong. \n", last_sum)
-	    	puts(msg, 
+		    puts(msg, 
 			    "Either it's an old version, or it has been corrupted. \n")
 		    puts(msg, 
 			    "You can download the latest version of Euphoria from: \n")
@@ -1090,36 +1095,22 @@ procedure check_install(integer doit)
 	temp_eudir = temp_eudir[slash+1..$]
     end if
     
-    if not match(temp_eudir & PATHSEP & "BIN", wild:upper(path)) then
-	puts(msg, "Note: " & eudir & PATHSEP & "BIN is not on your PATH.\n")
+    if not match(temp_eudir & SLASH & "BIN", wild:upper(path)) then
+	puts(msg, "Note: " & eudir & SLASH & "BIN is not on your PATH.\n")
 	reboot_msg()
     end if
 
     -- check for corrupted or incorrect files:
-    ifdef UNIX then
-    	return
---      eudir &= "/bin/"
---      ex_sum = checksum(eudir & "eui")
---      if ex_sum = SUM_EXU then
---          if checksum(eudir & "pdexu") != SUM_PDEXU then
---              corrupt("pdexu")
---          end if
---      elsif ex_sum = SUM_PDEXU then
---      else
---           corrupt("eui") -- could be FreeBSD
---      end if
-    elsedef
-	-- Windows
-		eudir &= "\\BIN\\"
-		ex_sum = checksum(eudir & "eui.exe")
-		if ex_sum = SUM_EX then
-		    if checksum(eudir & "eui.exe") != SUM_EXW then
-				corrupt("eui.exe")
-		    end if
-		else
-		    corrupt("eui.exe")
-		end if   
-    end ifdef
+    ex_sum = checksum(eudir & SLASH & "BIN" & SLASH & "eui.exe")
+    if ex_sum = SUM_EX then
+    	ifdef WINDOWS then
+	    if checksum(eudir & SLASH & "BIN" & SLASH & "euiw.exe") != SUM_EXW then
+			    corrupt("euiw.exe")
+	    end if
+	end ifdef
+    else
+	corrupt("eui.exe")
+    end if   
 end procedure
 
 without profile
@@ -1138,7 +1129,7 @@ global procedure sanity()
 		if ok = IDCANCEL then
 		    return
 		end if
-    elsedef
+	elsedef
 		-- some text mode tests
 		clear_screen()
 		position(1,1)
@@ -1213,11 +1204,7 @@ global procedure sanity()
 
     end for
     
-	ifdef UNIX then
-		system("rm sanityio.tst", 2)
-    elsedef
-		system("del sanityio.tst", 2)
-    end ifdef  
+	delete_file("sanityio.tst")
     save_colors = {}
     ifdef WIN32 then
 		ok = message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)

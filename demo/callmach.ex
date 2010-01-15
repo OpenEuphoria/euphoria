@@ -47,17 +47,15 @@ add_code = {
        #C2, #00, #08 * platform() = WIN32 -- ret 8  -- pop 8 bytes off the stack
 }
 
-code_space = allocate(length(add_code))
+code_space = allocate_code(add_code)
     
-poke(code_space, add_code)
-
 r = define_c_func("", code_space, {C_INT, C_INT}, C_INT)
 
 x = -17
 w = 80
 printf(1, "  the result of %d + %d is: %d\n", {x, w, c_func(r, {x, w})})
 
-free(code_space)
+free_code(code_space,length(add_code))
 
 
 -- Example #3 - Windows/Linux 
@@ -77,10 +75,8 @@ multiply_code = {
 
 if platform() = WIN32 or platform() = LINUX or platform() = OSX then
     
-    code_space = allocate(length(multiply_code))
+    code_space = allocate_code(multiply_code)
     
-    poke(code_space, multiply_code)
-
     r = define_c_func("", code_space, {C_INT, C_DOUBLE}, C_DOUBLE)
 
     x = 7
@@ -88,7 +84,7 @@ if platform() = WIN32 or platform() = LINUX or platform() = OSX then
     printf(1, "  the result of %d * %.2f is: %g\n",  
 	  {x, y, c_func(r, {x, y})})
 
-    free(code_space)
+    free_code(code_space,length(multiply_code))
     puts(1, "Finished.  Press any key to exit.\n" )
     if getc(0) then
     end if
