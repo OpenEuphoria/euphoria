@@ -97,6 +97,8 @@ rem Store our options to the config.wat file
 rem ============================================================
 
 :Continue
+echo ARCH=ix86 >> config.wat
+
 IF "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat
 )

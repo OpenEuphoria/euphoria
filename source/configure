@@ -1,11 +1,15 @@
 #!/bin/sh
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
-if echo "$UNAME_SYSTEM" | grep CYGWIN; then
+UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
+
+
+
+if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# for now, we build with -mno-cygwin under cygwin, so this is treated
 	# identically to MinGW
 	# A true exu.exe should probably set UNAME_SYSTEM="CYGWIN"
 	UNAME_SYSTEM=WINDOWS
-elif echo "$UNAME_SYSTEM" | grep MINGW; then
+elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
 fi
 
@@ -15,7 +19,15 @@ else
 	PREFIX=./
 fi
 
+
+
 echo "# File generated from configure" > Makefile.eu
+
+if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
+	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
+elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
+	echo ARCH=ARM >> "$PREFIX"Makefile.eu
+fi	
 
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
@@ -94,7 +106,7 @@ while [ "$1" != "" ]; do
         --without-euphoria )
 			export EUPHORIA=0
         ;;
-		--eubin )
+	--eubin )
 			export LEN=`echo $2/eucd.exe | wc -c`
 			if test $LEN -gt 85; then
 				if test $UNAME_SYSTEM = "MS-DOS"; then
