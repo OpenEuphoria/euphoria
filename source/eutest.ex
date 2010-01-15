@@ -577,7 +577,7 @@ function platform_init( sequence cmds )
 	integer eui
 	while eui and eui < length(cmds) with entry do
 		executable = cmds[eui+1]
-		cmds = cmds[1..ex-1] & cmds[eui+2..$]
+		cmds = cmds[1..eui-1] & cmds[eui+2..$]
 	entry
 		eui = find("-exe", cmds)
 	end while
