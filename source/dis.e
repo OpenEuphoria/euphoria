@@ -811,8 +811,14 @@ end procedure
 procedure opEQUALS_IFW()
     a = Code[pc+1]
     b = Code[pc+2]
-    il( sprintf( "IFW %s = %s goto %04d else goto %04d", 
-    	{name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
+	sequence i 
+	if Code[pc] = EQUALS_IFW then
+		i = ""
+	else
+		i = "_I"
+	end if
+    il( sprintf( "EQUALS_IFW%s %s = %s goto %04d else goto %04d", 
+    	{i, name_or_literal(a),name_or_literal(b), pc + 4, Code[pc+3]}), 3 )
     pc += 4
 end procedure
 	

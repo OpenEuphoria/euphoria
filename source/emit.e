@@ -1644,7 +1644,6 @@ export procedure emit_op(integer op)
 	-- 0 inputs, 1 output   
 	elsif op = TASK_SELF then
 		c = NewTempSym()
-		TempInteger(c)
 		Push(c)
 		emit_opcode(op)
 		emit_addr(c)

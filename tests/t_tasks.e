@@ -120,6 +120,12 @@ for i = 1 to length(dirlist) do
 	end if
 end for
 
+if task_self() = 0 then
+	test_pass( "task self evaluated as atom" )
+else
+	test_fail( "task self evaluated as integer" )
+end if
+
 test_equal("Tasks dir hash", xResults, vResults)
 test_report()
 
