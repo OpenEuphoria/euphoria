@@ -283,13 +283,13 @@ function check_errors( sequence filename, sequence control_error_file, sequence 
 		if atom(ex_err) then
 			error(filename, E_INTERPRET, "No ex.err has been generated.", {})
 		elsif length(ex_err) >=4  and length(control_err) >= 4 then
-			error(filename, E_INTERPRET, "Unexpected ex.err expected: " &
-				"\'%s\n%s\n%s\n%s\' but got \'%s\n%s\n%s\n%s\'\n",
+			error(filename, E_INTERPRET, "Unexpected ex.err.  Expected: " &
+				"\'%s\n%s\n%s\n%s\' \nbut got \'%s\n%s\n%s\n%s\'\n",
 				control_err & ex_err, "ex.err")
 		elsif length(ex_err) then
-			error(filename, E_INTERPRET, "Unexpected ex.err got: \'%s\'\n", ex_err)
+			error(filename, E_INTERPRET, "Unexpected ex.err.  Got: \'%s\'\n", ex_err)
 		else
-			error(filename, E_INTERPRET, "Unexpected empty ex.err", {})
+			error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
 		end if
 	end if
 	return fail_list
