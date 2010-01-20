@@ -1,6 +1,7 @@
 -- (c) Copyright - See License.txt
 --
 namespace safe
+include std/error.e
 
 -- Euphoria 4.0
 -- Machine Level Programming (386/486/Pentium)
@@ -9,6 +10,7 @@ public include std/memconst.e
 ifdef DATA_EXECUTE then
 	public include std/machine.e as machine
 end ifdef
+
 --****
 -- === safe.e
 --
@@ -26,10 +28,10 @@ end ifdef
 -- </eucode>
 -- in your main program, before the statement including machine.e.
 --
--- 3. If necessary, call register_block(address, length) to add additional
+-- 3. If necessary, call register_block(address, length, memory_protection) to add additional
 --    "external" blocks of memory to the safe_address_list. These are blocks 
---    of memory that are safe to read/write but which you did not acquire 
---    through Euphoria's allocate(). Call 
+--    of memory that are safe to use but which you did not acquire 
+--    through Euphoria's allocate(), allocate_data() or allocate_code(). Call 
 --    unregister_block(address) when you want to prevent further access to
 --    an external block.
 --
@@ -258,27 +260,7 @@ end function
 public procedure die(sequence msg)
 -- Terminate with a message.
 -- makes warning beeps first so you can see what's happening on the screen
-	atom t
-	
-	for i = 1 to 7 do
-		machine_proc(M_SOUND, 1000)
-		t = time()
-		while time() < t + .1 do
-		end while
-		machine_proc(M_SOUND, 0)
-		t = time()
-		while time() < t + .1 do
-		end while
-	end for
-	puts(1, "\n *** Press Enter *** ")
-	if getc(0) then
-	end if
-	if machine_func(5, -1) then -- graphics_mode
-	end if		
-	puts(1, "\n\n" & msg & "\n\n" )
-	if getc(0) then
-	end if
-	? 1/0 -- force traceback
+	crash(msg)
 end procedure
 
 function bad_address(atom a)
@@ -631,8 +613,13 @@ enum BLOCK_ADDRESS, BLOCK_LENGTH, ALLOC_NUMBER, BLOCK_PROT
 public procedure register_block(machine_addr block_addr, positive_int block_len, valid_memory_protection_constant memory_protection = PAGE_READ_WRITE )
 -- register an externally-acquired block of memory as being safe to use
 	allocation_num += 1
-	safe_address_list = prepend(safe_address_list, {block_addr, block_len,
-	   -allocation_num,memory_protection})
+    for i = 1 to length(safe_address_list) do
+	if safe_address_list[i][BLOCK_ADDRESS] = block_addr then
+	    die("ATTEMPT TO REGISTER A NON-EXTERNAL BLOCK.")
+	end if
+    end for
+    safe_address_list = prepend(safe_address_list, {block_addr, block_len,
+       -allocation_num,memory_protection})
 end procedure
 
 public procedure unregister_block(machine_addr block_addr)

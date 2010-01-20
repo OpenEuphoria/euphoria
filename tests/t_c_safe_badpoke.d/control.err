@@ -1,0 +1,248 @@
+E:\EUPHORIA\include\std\safe.e:262 in procedure die() 
+BAD POKE ADDRESS!!!! 3735928559 (#DEADBEEF) 
+    msg = {66'B',65'A',68'D',32' ',80'P',79'O',75'K',69'E',32' ',65'A',68'D',
+68'D',82'R',69'E',83'S',83'S',33'!',33'!',33'!',33'!',32' ',51'3',55'7',
+51'3',53'5',57'9',50'2',56'8',53'5',53'5',57'9',32' ',40'(',35'#',68'D',
+69'E',65'A',68'D',66'B',69'E',69'E',70'F',41')'}
+    crash_msg__inl = {66'B',65'A',68'D',32' ',80'P',79'O',75'K',69'E',32' ',
+65'A',68'D',68'D',82'R',69'E',83'S',83'S',33'!',33'!',33'!',33'!',32' ',
+51'3',55'7',51'3',53'5',57'9',50'2',56'8',53'5',53'5',57'9',32' ',40'(',
+35'#',68'D',69'E',65'A',68'D',66'B',69'E',69'E',70'F',41')'}
+
+... called from E:\EUPHORIA\include\std\safe.e:421 in procedure poke()  
+    a = 3735928559
+    v = {72'H',101'e',108'l',108'l',111'o'}
+    len = 5
+
+... called from t_c_safe_badpoke.e:10 
+
+
+Global & Local Variables
+
+ E:\EUPHORIA\include\std\convert.e:
+    mem = 16301672
+    decimal_mark = 46'.'
+
+ E:\EUPHORIA\include\std\safe.e:
+    t = 0.453
+    allocation_num = 6
+
+ E:\EUPHORIA\include\std\machine.e:
+    FREE_ARRAY_RID = 1
+    kernel_dll = 2088763392
+    memDLL_id = 2088763392
+    VirtualAlloc_rid = 19
+    VirtualProtect_rid = 20
+    GetLastError_rid = 22
+    GetSystemInfo_rid = 23
+    vaa = <no value>
+    page_size = 4096
+    system_info_ptr = <no value>
+    oldprotptr = 1492480
+
+ E:\EUPHORIA\include\std\types.e:
+    Defined_Sets = {
+                     {98'b',99'c',100'd',102'f',103'g',104'h',106'j',107'k',
+108'l',109'm',110'n',112'p',113'q',114'r',115's',116't',118'v',119'w',120'x',
+121'y',122'z',66'B',67'C',68'D',70'F',71'G',72'H',74'J',75'K',76'L',77'M',
+78'N',80'P',81'Q',82'R',83'S',84'T',86'V',87'W',88'X',89'Y',90'Z'},
+                     {97'a',101'e',105'i',111'o',117'u',65'A',69'E',73'I',
+79'O',85'U'},
+                     {
+                       {48'0',57'9'},
+                       {65'A',70'F'},
+                       {97'a',102'f'}
+                     },
+                     {32' ',9,10,13,11,160},
+                     {
+                       {32' ',47'/'},
+                       {58':',63'?'},
+                       {91'[',96'`'},
+                       {123'{',126'~'}
+                     },
+                     {
+                       {32' ',126'~'}
+                     },
+                     {
+                       {32' ',126'~'},
+                       {32' ',32' '},
+                       {9,9},
+                       {10,10},
+                       {13,13},
+                       {8,8},
+                       {7,7}
+                     },
+                     {
+                       {97'a',122'z'}
+                     },
+                     {
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'},
+                       {95'_',95'_'}
+                     },
+                     {
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {0,127''}
+                     },
+                     {
+                       {0,31},
+                       {127'',127''}
+                     },
+                     {
+                       {48'0',57'9'}
+                     },
+                     {
+                       {33'!',126'~'}
+                     },
+                     {
+                       {0,255}
+                     },
+                     {95'_'},
+                     {1,0}
+                   }
+
+ E:\EUPHORIA\include\std\dll.e:
+    page_addr = 0
+    page_offset = 0
+
+ E:\EUPHORIA\include\std\get.e:
+    input_file = <no value>
+    input_string = <no value>
+    string_next = <no value>
+    ch = <no value>
+    leading_whitespace = <no value>
+
+ E:\EUPHORIA\include\std\filesys.e:
+    InitCurDir = {69'E',58':',92'\',101'e',117'u',112'p',104'h',111'o',114'r',
+105'i',97'a',92'\',116't',101'e',115's',116't',115's',92'\'}
+    file_counters = {}
+
+ E:\EUPHORIA\include\std\serialize.e:
+    mem0 = 1469840
+    mem1 = 1469841
+    mem2 = 1469842
+    mem3 = 1469843
+
+ E:\EUPHORIA\include\std\pretty.e:
+    pretty_end_col = <no value>
+    pretty_chars = <no value>
+    pretty_start_col = <no value>
+    pretty_level = <no value>
+    pretty_file = <no value>
+    pretty_ascii = <no value>
+    pretty_indent = <no value>
+    pretty_ascii_min = <no value>
+    pretty_ascii_max = <no value>
+    pretty_line_count = <no value>
+    pretty_line_max = <no value>
+    pretty_dots = <no value>
+    pretty_line_breaks = <no value>
+    pretty_printing = <no value>
+    pretty_fp_format = <no value>
+    pretty_int_format = <no value>
+    pretty_line = <no value>
+
+ E:\EUPHORIA\include\std\eds.e:
+    current_db = -1
+    current_table_pos = -1
+    current_table_name = {}
+    db_names = {}
+    db_file_nums = {}
+    db_lock_methods = {}
+    current_lock = 0
+    key_pointers = {}
+    key_cache = {}
+    cache_index = {}
+    caching_option = 1
+    void = <no value>
+    vLastErrors = {}
+    mem0 = 1468416
+    mem1 = 1468417
+    mem2 = 1468418
+    mem3 = 1468419
+    memseq = {1468416,4}
+
+ E:\EUPHORIA\include\std\text.e:
+    lower_case_SET = {}
+    upper_case_SET = {}
+    encoding_NAME = {65'A',83'S',67'C',73'I',73'I'}
+    user32 = 2117664768
+    api_CharLowerBuff = 33'!'
+    api_CharUpperBuff = 34'"'
+    tm_size = 1024
+    temp_mem = 16550736
+
+ E:\EUPHORIA\include\std\io.e:
+    mem0 = 1415008
+    mem1 = 1415009
+    mem2 = 1415010
+    mem3 = 1415011
+
+ E:\EUPHORIA\include\std\unittest.e:
+    time_start = 3.453
+    time_test = 3.453
+    test_count = 0
+    tests_passed = 0
+    tests_failed = 0
+    filename = {116't',95'_',99'c',95'_',115's',97'a',102'f',101'e',95'_',
+98'b',97'a',100'd',112'p',111'o',107'k',101'e',46'.',101'e'}
+    verbose = 1
+    abort_on_fail = 0
+    wait_on_summary = 0
+    accumulate_on_summary = 0
+    logging = 0
+    log_fh = 0
+    cmd = {
+            {69'E',58':',92'\',69'E',85'U',80'P',72'H',79'O',82'R',73'I',
+65'A',92'\',66'B',73'I',78'N',92'\',101'e',117'u',105'i',46'.',101'e',120'x',
+101'e'},
+            {116't',95'_',99'c',95'_',115's',97'a',102'f',101'e',95'_',98'b',
+97'a',100'd',112'p',111'o',107'k',101'e',46'.',101'e'}
+          }
+    i = 3
+
+ t_c_safe_badpoke.e:
+    addr = 3735928559
+
+
+Traced lines leading up to the failure:
+
+E:\EUPHORIA\include\std\safe.e:190			block_start = block[BLOCK_ADDRESS]
+E:\EUPHORIA\include\std\safe.e:191			if edges_only then
+E:\EUPHORIA\include\std\safe.e:230				if start >= block_start then 
+E:\EUPHORIA\include\std\safe.e:231					block_upper = block_start + block[BLOCK_LENGTH]
+E:\EUPHORIA\include\std\safe.e:232					if upper <= block_upper then
+E:\EUPHORIA\include\std\safe.e:251		end for
+E:\EUPHORIA\include\std\safe.e:189			block = safe_address_list[i]
+E:\EUPHORIA\include\std\safe.e:190			block_start = block[BLOCK_ADDRESS]
+E:\EUPHORIA\include\std\safe.e:191			if edges_only then
+E:\EUPHORIA\include\std\safe.e:230				if start >= block_start then 
+E:\EUPHORIA\include\std\safe.e:231					block_upper = block_start + block[BLOCK_LENGTH]
+E:\EUPHORIA\include\std\safe.e:232					if upper <= block_upper then
+E:\EUPHORIA\include\std\safe.e:251		end for
+E:\EUPHORIA\include\std\safe.e:189			block = safe_address_list[i]
+E:\EUPHORIA\include\std\safe.e:190			block_start = block[BLOCK_ADDRESS]
+E:\EUPHORIA\include\std\safe.e:191			if edges_only then
+E:\EUPHORIA\include\std\safe.e:230				if start >= block_start then 
+E:\EUPHORIA\include\std\safe.e:231					block_upper = block_start + block[BLOCK_LENGTH]
+E:\EUPHORIA\include\std\safe.e:232					if upper <= block_upper then
+E:\EUPHORIA\include\std\safe.e:251		end for
+E:\EUPHORIA\include\std\safe.e:252		if edges_only then
+E:\EUPHORIA\include\std\safe.e:255			return BAD -- not found in any safe block
+E:\EUPHORIA\include\std\safe.e:421			die("BAD POKE" & bad_address(a))
+E:\EUPHORIA\include\std\safe.e:267		return sprintf(" ADDRESS!!!! %d (#%08x)", {a, a})
+E:\EUPHORIA\include\std\safe.e:262		crash(msg)
+
+

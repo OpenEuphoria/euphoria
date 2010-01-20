@@ -64,6 +64,12 @@ else
 	test_fail("PAGE_READ_EXECUTE memory could not be allocated by allocate_protect")
 end if
 
+-- The address #DEADBEEF could never be returned from allocation routines
+-- for this address is not aligned by 4 and all implementations align addresses
+-- that way.
+test_false("PAGE_READ_EXECUTE memory readable", safe_address(#DEADBEEF, 4, A_READ))
+test_false("PAGE_READ_EXECUTE memory writable", safe_address(#DEADBEEF, 4, A_WRITE))
+test_false("PAGE_READ_EXECUTE memory executable", safe_address(#DEADBEEF, 4, A_EXECUTE ))
 
 
 test_report()
