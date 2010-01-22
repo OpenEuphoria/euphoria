@@ -4546,11 +4546,10 @@ procedure exit_block( symtab_index block, integer no_value = 1, integer except_s
 	ifdef DEBUG then
 		c_puts(sprintf("\n// Exiting block %s\n", {SymTab[block][S_NAME]}))
 	end ifdef
+	
 	sym = block
 	integer deref = 1
--- 	if match( "BLOCK: EXIT_BLOCK-Inline-", sym_name( block ) ) = 1 then
--- 		deref = 0
--- 	end if
+	
 	while sym != 0 with entry do
 		if sym != except_sym 
 		and not find( sym_usage( sym ), {U_UNUSED, U_DELETED}) then
@@ -7209,7 +7208,6 @@ procedure BackEnd(atom ignore)
 	if dll_option then
 		c_stmt0(";\n")
 	else
-		exit_block( SymTab[TopLevelSub][S_BLOCK], 0, , 0 )
 		c_stmt0("Cleanup(0);\n")
 	end if
 
