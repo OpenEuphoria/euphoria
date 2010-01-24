@@ -1,7 +1,6 @@
-/*
- * Copyright 2009 by OpenEuphoria Group. All Rights Reserved.
- * See License.txt
- */
+/*****************************************************************************/
+/*      (c) Copyright - See License.txt       */
+/*****************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
