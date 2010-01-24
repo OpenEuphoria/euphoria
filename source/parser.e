@@ -478,6 +478,9 @@ function restore_parser()
 	clear_last()
 	if n=PAM_PLAYBACK then
 		return {}
+		
+	elsif n = PAM_NORMAL then
+		use_private_list = 0
 	end if
 	if length(backed_up_tok) > 0 then
 		return x[1..$-1]
@@ -527,7 +530,6 @@ end procedure
 function read_recorded_token(integer n)
 	token t
 	integer p, prev_Nne
-
 	if atom(Ns_recorded[n]) then
 		if use_private_list then
 			p=find(Recorded[n],private_list)
@@ -831,8 +833,8 @@ procedure ParseArgs(symtab_index subsym)
 				s = SymTab[s][S_NEXT]
 				name = SymTab[s][S_NAME]
 			end if
-			
-			use_private_list = 0
+			-- If we're reading default, we don't want to drop out before we're actually done
+			use_private_list = Parser_mode != PAM_NORMAL
 			putback(tok)
 			Expr()
 			on_arg += 1
