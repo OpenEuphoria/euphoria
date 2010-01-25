@@ -619,7 +619,7 @@ void screen_output(IFILE f, char *out_string)
 			collect_free = 80;
 			collect_len = len + collect_free;
             collect = EMalloc(collect_len + 1);
-			strlcpy(collect, out_string, collect_len);
+			copy_string(collect, out_string, collect_len);
             collect_next = len;
         }
         else {

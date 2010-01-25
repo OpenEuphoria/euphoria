@@ -127,7 +127,7 @@ static int e_path_open(char *name, int mode)
 			/* end of a directory */
 			if (fn > 0) {
 				full_name[fn++] = SLASH;
-				strlcpy(full_name + fn, name, PATH_MAX);
+				copy_string(full_name + fn, name, PATH_MAX);
 				src_file = long_open(full_name, mode);
 				if (src_file > -1) {
 					file_name[1] = full_name;           
@@ -181,7 +181,7 @@ void be_init()
 
 #define TempErrName_len (30)
 	TempErrName = (char *)EMalloc(TempErrName_len);
-	strlcpy(TempErrName, "ex.err", TempErrName_len); // can change
+	copy_string(TempErrName, "ex.err", TempErrName_len); // can change
 	
 	eudir = getenv("EUDIR");
 	if (eudir == NULL) {
@@ -204,7 +204,7 @@ void be_init()
 	}
 	
 #if defined(EUNIX) || defined(EMINGW)
-	strlcpy(main_path, file_name[1], PATH_MAX); // FOR NOW!
+	copy_string(main_path, file_name[1], PATH_MAX); // FOR NOW!
 #else
 	(void)_fullpath(main_path, file_name[1], PATH_MAX+1); 
 #endif

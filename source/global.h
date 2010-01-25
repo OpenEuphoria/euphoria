@@ -227,5 +227,6 @@ struct EuViewPort
 };
 
 int memcopy( void *dest, size_t avail, void *src, size_t len);
-
+long copy_string(char *dest, char *src, size_t bufflen);
+long append_string(char *dest, char *src, size_t bufflen);
 #endif // H_GLOBAL

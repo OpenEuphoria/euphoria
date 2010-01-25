@@ -322,15 +322,25 @@ static void DisplayLine(long n, int highlight)
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
 #ifdef EUNIX
-		strlcat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
+		append_string(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #else
-		strlcat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
+		append_string(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #endif
 		screen_output(NULL, TempBuff);
 	}
 	else {
-		strlcat(TempBuff, line, TEMP_SIZE - strlen(TempBuff) - 1); // must be <=200 chars
-		strlcat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff) - 1); // will end in \0
+		size_t bufsize;
+		long cb;
+		
+		bufsize = TEMP_SIZE - strlen(TempBuff) - 1;
+		cb = append_string(TempBuff, line, bufsize); // must be <=200 chars
+		if (cb > 0) {
+			copy_string(TempBuff + cb, "\n", bufsize - cb); // will end in \0
+		}
+		else {
+			// data was truncated
+			copy_string(TempBuff + TEMP_SIZE - 2, "\n", 2); // will end in \0
+		}
 		
 		if (color_trace && COLOR_DISPLAY) 
 			DisplayColorLine(TempBuff, string_color);
@@ -578,7 +588,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	}
 	else {
 		if (val == NOVALUE) 
-			strlcpy( val_string, "<no value>", DV_len);
+			copy_string( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
 			snprintf(val_string,  DV_len, "%ld", iv);
@@ -1233,13 +1243,13 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
-					strlcpy(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
+					copy_string(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
 				}
 				else {
 #ifdef EWINDOWS         
-					strlcpy(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
+					copy_string(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
 #else           
-					strlcpy(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
+					copy_string(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
 #endif          
 				}
 				sf_output(TempBuff);

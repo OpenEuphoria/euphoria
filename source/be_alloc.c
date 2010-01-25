@@ -897,22 +897,61 @@ char *TransAlloc(unsigned long size){
 	return EMalloc( size );
 }
 
-#if defined(ELINUX) || defined(EMINGW)
-size_t strlcpy(char *dest, char *src, size_t maxlen)
+/* ----------------------------------------------------------------------
+  :: copy_string ::
+ Returns 0 if destination cannot fit any source characters otherwise
+ the absolute return value is the number of characters from source that
+ have been copied. If the return value is negative, it means that not
+ all of the source has been copied.
+
+ To test if truncation occurred, the return value will be <= 0.
+*/
+long copy_string(char *dest, char *src, size_t bufflen)
 {
-	strncpy(dest, src, maxlen);
-	dest[maxlen-1] = 0;
-	return strlen(src);
+	long n;
+	n = 0;
+	while (bufflen > 1 && *src != '\0') {
+		*dest++ = *src++;
+		n++;
+		bufflen--;
+	}
+	if (n > 0) {	// At least one char was copied.
+		*dest = '\0';
+	 	if (*src != '\0')
+	 		n = -n; // Only some of source was copied to the destination
+ 	}
+	else {
+		// Destination too small
+		if (bufflen > 0)
+			*dest = '\0';
+	}
+	return n;
 }
 
-size_t strlcat(char *dest, char *src, size_t maxlen)
+/* ----------------------------------------------------------------------
+  :: append_string ::
+ Returns 0 if destination cannot fit any source characters otherwise
+ the absolute return value is the number of characters from source that
+ have been copied. If the return value is negative, it means that not
+ all of the source has been copied.
+
+ To test if truncation occurred, the return value will be <= 0.
+*/
+long append_string(char *dest, char *src, size_t bufflen)
 {
-	int orig_dest_len = strlen(dest);
-	strncat(dest, src, maxlen-1);
-	dest[maxlen-1] = 0;
-	return orig_dest_len + strlen(src);
+	long res;
+	int dest_len;
+	
+	dest_len = strlen(dest);
+	if (dest_len + 1 < bufflen) {
+		return copy_string(dest + dest_len, src, bufflen - dest_len);
+	}
+	
+	if (dest_len + 1 == bufflen)
+		*(dest + dest_len) = '\0';
+		
+	return 0;
 }
-#endif
 
 static void new_dbl_block(unsigned int cnt)
 {

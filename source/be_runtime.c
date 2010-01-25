@@ -568,7 +568,7 @@ void call_crash_routines()
 	if (TempErrName) EFree(TempErrName);
 #define CCR_len (16)
 	TempErrName = (char *)EMalloc(CCR_len);
-	strlcpy(TempErrName, "ex_crash.err", CCR_len);
+	copy_string(TempErrName, "ex_crash.err", CCR_len);
 
 #ifndef ERUNTIME
 	// clear the interpreter call stack
@@ -3748,12 +3748,12 @@ object cleanup;
 	else if (strcmp(cmode, "ub") == 0) {
 		mode = EF_READ | EF_WRITE;
 		text_mode = 0;
-		strlcpy(cmode, "r+b", EOpen_cmode_len);
+		copy_string(cmode, "r+b", EOpen_cmode_len);
 	}
 
 	else if (strcmp(cmode, "u") == 0) {
 		mode = EF_READ | EF_WRITE;
-		strlcpy(cmode, "r+", EOpen_cmode_len);
+		copy_string(cmode, "r+", EOpen_cmode_len);
 	}
 
 	else
@@ -4861,7 +4861,7 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	InitFiles();
 #define TempErrName_len (16)
 	TempErrName = (char *)EMalloc(TempErrName_len);
-	strlcpy(TempErrName, "ex.err", TempErrName_len);
+	copy_string(TempErrName, "ex.err", TempErrName_len);
 	TempWarningName = NULL;
 	display_warnings = 1;
 
