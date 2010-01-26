@@ -44,7 +44,7 @@ add_code = {
        -- first int argument is at stack offset +4, 2nd int is at +8 
        #8B, #44, #24, #04,        -- mov   eax, +4[esp]
        #03, #44, #24, #08,        -- add   eax, +8[esp]
-       #C2, #00, #08 * platform() = WIN32 -- ret 8  -- pop 8 bytes off the stack
+       #C2, #00, #08 * (platform() = WIN32) -- ret 8  -- pop 8 bytes off the stack
 }
 
 code_space = allocate_code(add_code)
