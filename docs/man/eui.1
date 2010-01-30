@@ -22,7 +22,7 @@ eui \- Interpreter for the Euphoria programming language
 .RB [\| \-batch ]
 .RB [\| \-c
 .IR file ]
-.RB [\| \-copyright]
+.RB [\| \-copyright ]
 .RB [\| \-d
 .IR word ]
 .RB [\| \-i
@@ -66,7 +66,7 @@ not presented. The exit code will be set to 1 on error, 0 on success.
 Specifies a configuration file to be read in to specify additional
 include paths for the interpreter.
 .TP
-/B \-copyright
+.B \-copyright
 Display all copyright notices.
 .TP
 .B -d word
@@ -88,6 +88,7 @@ Setup a pre-processor
 .TP
 .B \-pf
 Force pre-processing regardless of cache state.
+.TP
 .B \-strict
 This turns on all warnings, overriding any with/without warning statement
 found in the source.
@@ -105,6 +106,7 @@ Display the version number.
 .B \-w warning_name
 Resets, or adds to, the current list of wrnings that may be emitted. The list of known 
 names is to be found in the detailed documentation subsection describing 
+.TP
 .B with\ warning. 
 A name should appear without quotes. The first 
 .B -w
