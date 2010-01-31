@@ -523,15 +523,15 @@ test_equal("remove_subseq #1", {4, 6, 0.1, 4}, remove_subseq({4,6,"Apple",0.1, {
 test_equal("remove_subseq #2", {4, 6, -1, 0.1, -1, 4}, remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, -1))
 test_equal("remove_subseq #3", {14, 16, 9, 0.1, 1, 2, 3, 4}, remove_subseq({14,16,9,0.1,1,2,3,4}, SEQ_NOALT))
 
-include std/sort.e
+include std/sort.e as sort
 sequence rds = { 4,7,9,7,2,5,5,9,0,4,4,5,6,5}
 test_equal("remove_dups inplace", {4,7,9,2,5,0,6}, remove_dups(rds, RD_INPLACE))
 test_equal("remove_dups sort",    {0,2,4,5,6,7,9}, remove_dups(rds, RD_SORT))
 test_equal("remove_dups presorted #1", {4,7,9,7,2,5,9,0,4,5,6,5}, remove_dups(rds, RD_PRESORTED))
 test_equal("remove_dups presorted #2", {0,2,4,5,6,7,9}, remove_dups(sort(rds), RD_PRESORTED))
 
-test_equal("merge #1", {"cat","dog","fish","snail","whale","wolf","worm"}, merge({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}))
-test_equal("merge #2", {0,2,4,4,5,5,5,6,7,7,9,9}, merge({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}))
+test_equal("merge #1", {"cat","dog","fish","snail","whale","wolf","worm"}, seq:merge({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}))
+test_equal("merge #2", {0,2,4,4,5,5,5,6,7,7,9,9}, seq:merge({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}))
 
 -- transforming
 test_equal("transform", "HELLA", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper"), {routine_id("replace_all"), "O", "A"}}))
