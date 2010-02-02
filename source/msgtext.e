@@ -214,8 +214,7 @@ constant StdErrMsgs = {
 	{198, "Set the output filename"},
 	{199, "euc.exe [options] file.ex...\n common options:"},
 	{200, "\n translator options:"},
-	{201, "Unknown platform: [1].  Supported platforms are:\n"&
-	"WIN, LINUX, FREEBSD, OSX, SUNOS, OPENBSD and NETBSD."},
+	{201, "Unknown platform: [1].  Supported platforms are: [2]"},
 	{202, "Invalid maximum file size"},
 	{203, "\nERROR: Must specify the file to be translated on the command line\n"},
 	{204, "Warning [1]:\n\t[2]\n"},

@@ -2021,7 +2021,7 @@ public function disk_metrics(object disk_path)
 			stat_t_offset = 48
 			stat_buf_size = 88
 			dev_t_size = 4
-		elsifdef FREEBSD or SUNON then
+		elsifdef FREEBSD or SUNOS then
 			--TODO
 			stat_t_offset = 48
 			stat_buf_size = 88
