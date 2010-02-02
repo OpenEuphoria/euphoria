@@ -27,6 +27,9 @@
 #
 #     --noassert  Use this to remove 'assert()' processing in the C code.
 #
+#     --plat value   set the OS that the translator will translate the code to.
+#            values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD.
+#
 # Syntax:
 #   Interpreter (euiw.exe, eui.exe):  wmake interpreter
 #   Translator  		  (euc.exe):  wmake translator
@@ -290,10 +293,14 @@ $(BUILD_DIRS) : .existsonly
 	mkdir $@
 	mkdir $@\back
 
+	
+!ifdef PLAT
+OS=$(PLAT)
+!else
 OS=WIN
+!endif
 OSFLAG=EWINDOWS
 LIBTARGET=$(BUILDDIR)\eu.lib
-
 CC = wcc386
 .ERASE
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\
@@ -355,10 +362,10 @@ exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
 !endif
 # OBJDIR
 
-!ifdef EUPHORIA
-translate : .SYMBOLIC  
+!ifeq EUPHORIA 1
+translate source : .SYMBOLIC  
     @echo ------- TRANSLATE WIN -----------
-	$wmake -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
+	wmake -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h backendsource EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
@@ -484,7 +491,7 @@ $(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERP
 $(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES) $(CONFIG)
 $(BUILDDIR)\backobj\main-.c: $(BUILDDIR)\backobj\back $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_INCLUDES) $(CONFIG)
 
-!ifdef EUPHORIA
+!ifeq EUPHORIA 1
 # We should have ifdef EUPHORIA so that make doesn't decide
 # to update rev.e when there is no $(EX)
 be_rev.c : .recheck .always
@@ -507,10 +514,16 @@ $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back
 	cd $(BUILDDIR)\$(OBJDIR)
 	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
+!else
+$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
+	@echo Error: attempt to create main-.c without OBJDIR defined.
 !endif
+!else	
+$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
+	@echo Error: attempt to create main-.c without OBJDIR defined.
 !endif
 !else
-$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back
+$(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 	@echo *****************************************************************
 	@echo If you have EUPHORIA installed you'll need to run configure again.
 	@echo Make is configured to not try to use the interpreter.

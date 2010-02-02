@@ -31,8 +31,8 @@
 		<modify-target target="install">
 			<is-phony />
 			<set var="__makefile">
-				<if cond="FORMAT=='watcom'">makefile.wat</if>
-				<if cond="FORMAT=='mingw'">makefile.gcc</if>
+				<if cond="FORMAT=='watcom'">WCmakefile</if>
+				<if cond="FORMAT=='mingw'">GNUmakefile</if>
 			</set>
 			<set var="__make">
 				<if cond="FORMAT=='watcom'">wmake /f</if>

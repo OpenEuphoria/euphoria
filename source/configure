@@ -27,7 +27,18 @@ if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
 elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"Makefile.eu
-fi	
+fi
+
+touch nothing.ex
+# if eui doesn't exist the error message goes into
+# the device file /dev/null. [works on Mingw too.]
+if eui nothing.ex 2> /dev/null; then
+    export EUPHORIA=1
+else
+    export EUPHORIA=0
+fi
+rm nothing.ex
+
 
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EBSD= >> "$PREFIX"Makefile.eu
@@ -103,6 +114,10 @@ export BUILDDIR=build
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
+    	--plat )
+		echo "PLAT=$2" >> "$PREFIX"Makefile.eu
+		shift
+	;;
         --without-euphoria )
 			export EUPHORIA=0
         ;;
@@ -146,14 +161,18 @@ while [ "$1" != "" ]; do
 			echo "    --full"
 			echo "    --debug             turn debugging on"
 			echo "    --prefix value      set the install directory (default /usr/local)"
+			echo "    --plat value        set the OS that we will translate to."
+			echo "           values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD."
 			echo
 			exit
 			;;
     esac
     shift
 done
-if [ "x$EUPHORIA" = "x" ]; then
+if [ "x$EUPHORIA" = "x1" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
+else
+	echo EUPHORIA=0 >> "$PREFIX"Makefile.eu
 fi
 if [ "x$MANAGED_MEM" = "x" ]; then
         if test $UNAME_SYSTEM = "MS-DOS"; then

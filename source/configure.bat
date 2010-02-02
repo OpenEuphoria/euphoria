@@ -19,6 +19,19 @@ rem ============================================================
 echo # Configuration for Watcom > config.wat
 
 rem ============================================================
+rem Detect some parameters
+rem ============================================================
+
+wtouch nothing.ex
+eui nothing.ex 2> NUL
+if "%ERRORLEVEL%" == "9009" (
+    set NOEU=1
+) else (
+    set NOEU=
+)
+
+
+rem ============================================================
 rem Read command line parameters
 rem ============================================================
 
@@ -46,6 +59,11 @@ IF "%1" =="--eubin" (
 )
 IF "%1" =="--build" (
 	set BUILDDIR=%2
+	SHIFT
+	GOTO EndLoop
+)
+IF "%1" =="--plat" (
+    	echo PLAT=%2  >> config.wat
 	SHIFT
 	GOTO EndLoop
 )
@@ -101,6 +119,8 @@ echo ARCH=ix86 >> config.wat
 
 IF "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat
+) else (
+	echo EUPHORIA=0 >> config.wat
 )
 IF "%DISABLED_MANAGED_MEM%" == "" (
 	echo MANAGED_MEM=1 >> config.wat
@@ -189,6 +209,8 @@ echo                         not always 8 byte aligned.
 echo     --eubin value
 echo     --build value       set the build directory
 echo     --full
+echo     --plat value        set the OS that we will translate to.
+echo            values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD.
 echo.
 echo Developer Options:
 echo     --debug             turn debugging on

@@ -136,7 +136,10 @@ export procedure transoptions()
 				OpDefines &= { "EUC_DLL" }
 
 			case "plat" then
-				switch upper(val) do
+				switch upper(val) do				
+					-- please update comments in Makefile.gnu, Makefile.wat, configure and 
+					-- configure.bat; and the help section in configure and configure.bat; and
+					-- the message 201 in msgtext.e if you add another platform.
 					case "WIN" then
 						set_host_platform( WIN32 )
 

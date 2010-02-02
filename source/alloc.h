@@ -6,6 +6,7 @@
 #ifndef _ALLOC_H_
 #define _ALLOC_H_ 1
 
+#include <limits.h>
 #include "execute.h"
 #include "symtab.h"
 
@@ -155,7 +156,8 @@ typedef struct block_list * block_list_ptr;
 	char *ERealloc(char *orig, unsigned long newsize);
 #endif
 
-#if defined(ELINUX) || defined(EMINGW) || (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)
+#if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \
+	|| (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)    
 extern size_t strlcpy(char *dest, char *src, size_t maxlen);
 extern size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif

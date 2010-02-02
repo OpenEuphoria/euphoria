@@ -61,3 +61,4 @@ struct d * DBL_PTR( object o )
 object MAKE_SEQ( struct s1 * sptr )
 struct s1 * MAKE_SEQ( object o )
 
+The macro: __UCLIBC__ identifies UCLIBC.

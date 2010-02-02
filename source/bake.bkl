@@ -74,17 +74,21 @@
 		$(BE_MAGIC)
 	</set>
 	
-	<action id=".$(DIRSEP)be_rev.c">
-		<is-phony />
-		<command>eui revget.ex -output be_rev.c -root ../</command>
-	</action>
+	<if cond="EUPHORIA==1">
+	    <action id=".$(DIRSEP)be_rev.c">
+		    <is-phony />
+		    <command>eui revget.ex -output be_rev.c -root ../</command>
+	    </action>
+	</if>
 
-	<if cond="FORMAT=='watcom'">
-		<action id=".$(DIRSEP)be_magic.c">
-			<set var="__obj">$(BUILDDIR)$(DIRSEP)ebackend_be_execute$(OBJEXT)</set>
-			<depends-on-file>$(__obj)</depends-on-file>
-			<command>eui findjmp.ex be_magic.c $(__obj)</command>
-		</action>
+	<if cond="EUPHORIA==1">
+	    <if cond="FORMAT=='watcom'">
+		    <action id=".$(DIRSEP)be_magic.c">
+			    <set var="__obj">$(BUILDDIR)$(DIRSEP)ebackend_be_execute$(OBJEXT)</set>
+			    <depends-on-file>$(__obj)</depends-on-file>
+			    <command>eui findjmp.ex be_magic.c $(__obj)</command>
+		    </action>
+	    </if>
 	</if>
 
 	<lib id="ebackend">
