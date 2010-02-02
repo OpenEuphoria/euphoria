@@ -530,8 +530,12 @@ test_equal("remove_dups sort",    {0,2,4,5,6,7,9}, remove_dups(rds, RD_SORT))
 test_equal("remove_dups presorted #1", {4,7,9,7,2,5,9,0,4,5,6,5}, remove_dups(rds, RD_PRESORTED))
 test_equal("remove_dups presorted #2", {0,2,4,5,6,7,9}, remove_dups(sort(rds), RD_PRESORTED))
 
-test_equal("merge #1", {"cat","dog","fish","snail","whale","wolf","worm"}, seq:merge({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}))
-test_equal("merge #2", {0,2,4,4,5,5,5,6,7,7,9,9}, seq:merge({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}))
+test_equal("combine #1s", {"cat","dog","fish","snail","whale","wolf","worm"}, combine({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}))
+test_equal("combine #1u", {"cat", "dog", "fish", "whale", "wolf", "snail", "worm"}, combine({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}, COMBINE_UNSORTED))
+test_equal("combine #2s", {0,2,4,4,5,5,5,6,7,7,9,9}, combine({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}))
+test_equal("combine #2u", {4,7,9,7,2,5,9,0,4,5,6,5}, combine({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}, COMBINE_UNSORTED))
+test_equal("combine #3s", "aaacdeffghhiilllmnooorsstwww", combine({"cat", "dog","fish", "whale", "wolf", "snail", "worm"}))
+test_equal("combine #3u", "catdogfishwhalewolfsnailworm", combine({"cat", "dog","fish", "whale", "wolf", "snail", "worm"}, COMBINE_UNSORTED))
 
 -- transforming
 test_equal("transform", "HELLA", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper"), {routine_id("replace_all"), "O", "A"}}))

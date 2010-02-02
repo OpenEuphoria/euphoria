@@ -498,7 +498,7 @@ end function
 --
 -- Comments:
 -- The length of each sequence is stored internally by the
--- interpreter for quick access. In other languages this
+-- interpreter for fast access. In some other languages this
 -- operation requires a search through memory for an end marker.
 --
 -- Example 1:
@@ -2989,11 +2989,18 @@ public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
 
 end function
 
+public enum 
+	COMBINE_UNSORTED = 0,
+	COMBINE_SORTED,
+	$
+	
 --**
--- Combines all the sub-sequences into a single sorted list
+-- Combines all the sub-sequences into a single, optionally sorted, list
 --
 -- Parameters:
--- # ##pSource## : A sequence that contains sub-sequences to be merged.
+-- # ##pSource## : A sequence that contains sub-sequences to be combined.
+-- # ##pSorted## : An integer; COMBINE_UNSORTED to return a non-sorted list and 
+--                 COMBINE_SORTED (the default) to return a sorted list.
 --
 -- Returns:
 -- A **sequence**, that contains all the elements from all the first-level of
@@ -3002,27 +3009,30 @@ end function
 -- Comments:
 -- The elements in the sub-sequences do not have to be pre-sorted.
 --
--- Only one level of sub-sequence is merged.
+-- Only one level of sub-sequence is combined.
 --
 -- Example 1:
 -- <eucode>
 -- sequence s = { {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}
--- ? merge(s) --> {0,2,4,4,5,5,5,6,7,7,9,9}
+-- ? combine(s, COMBINE_SORTED)   --> {0,2,4,4,5,5,5,6,7,7,9,9}
+-- ? combine(s, COMBINE_UNSORTED) --> {4,7,9,7,2,5,9,0,4,5,6,5}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- sequence s = { {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}
--- ? merge(s) --> {"cat","dog","fish","snail","whale","wolf","worm"}
+-- ? combine(s)                   --> {"cat","dog","fish","snail","whale","wolf","worm"}
+-- ? combine(s, COMBINE_UNSORTED) --> {"cat","dog","fish","whale","wolf","snail","worm"}
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
 -- sequence s = { "cat", "dog","fish", "whale", "wolf", "snail", "worm"}
--- ? merge(s) --> "aaacdeffghhiilllmnooorsstwww"
+-- ? combine(s)                   --> "aaacdeffghhiilllmnooorsstwww"
+-- ? combine(s, COMBINE_UNSORTED) --> "catdogfishwhalewolfsnailworm"
 -- </eucode>
 --
-public function merge(sequence pSource)
+public function combine(sequence pSource, integer pSorted = COMBINE_SORTED)
 	sequence lResult
 	integer lTotalSize = 0
 	integer lPos
@@ -3045,7 +3055,12 @@ public function merge(sequence pSource)
 		lResult[lPos .. length(pSource[i]) + lPos - 1] = pSource[i]
 		lPos += length(pSource[i])
 	end for
-	return sort(lResult)
+	
+	if pSorted = COMBINE_SORTED then
+		return sort(lResult)
+	else
+		return lResult
+	end if
 end function
 
 --/desc Pads /i pList to the right until its length reaches /i pMinSize using /i pNewData as filler.
