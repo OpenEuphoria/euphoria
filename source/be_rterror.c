@@ -333,12 +333,13 @@ static void DisplayLine(long n, int highlight)
 		long cb;
 		
 		bufsize = TEMP_SIZE - strlen(TempBuff) - 1;
-		cb = append_string(TempBuff, line, bufsize); // must be <=200 chars
-		if (cb > 0) {
-			copy_string(TempBuff + cb, "\n", bufsize - cb); // will end in \0
+		cb = append_string(TempBuff, line, bufsize);
+		if (cb >= 0) {
+			// Add EOL to line data
+			copy_string(TempBuff + strlen(TempBuff), "\n", bufsize - cb);
 		}
 		else {
-			// data was truncated
+			// data was truncated, so force EOL at end of buffer.
 			copy_string(TempBuff + TEMP_SIZE - 2, "\n", 2); // will end in \0
 		}
 		
