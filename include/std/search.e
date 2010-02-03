@@ -749,11 +749,11 @@ end function
 -- Test whether a sequence is the head of another one.
 -- 
 -- Parameters:
---	# ##pSubText## : an object to be looked for
---  # ##pFullText## : a sequence, the head of which is being inspected.
+--	# ##sub_text## : an object to be looked for
+--  # ##full_text## : a sequence, the head of which is being inspected.
 --
 -- Returns:
---		An **integer**, 1 if ##pSubText## begins ##pFullText##, else 0.
+--		An **integer**, 1 if ##sub_text## begins ##full_text##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -766,24 +766,24 @@ end function
 -- See Also:
 --     [[:ends]], [[:head]]
 
-public function begins(object pSubText, sequence pFullText)
-	if length(pFullText) = 0 then
+public function begins(object sub_text, sequence full_text)
+	if length(full_text) = 0 then
 		return 0
 	end if
 	
-	if atom(pSubText) then
-		if equal(pSubText, pFullText[1]) then
+	if atom(sub_text) then
+		if equal(sub_text, full_text[1]) then
 			return 1
 		else
 			return 0
 		end if
 	end if
 	
-	if length(pSubText) > length(pFullText) then
+	if length(sub_text) > length(full_text) then
 		return 0
 	end if
 	
-	if equal(pSubText, pFullText[1.. length(pSubText)]) then
+	if equal(sub_text, full_text[1.. length(sub_text)]) then
 		return 1
 	else
 		return 0
@@ -794,11 +794,11 @@ end function
 -- Test whether a sequence ends another one.
 --
 -- Parameters:
---	# ##pSubText## : an object to be looked for
---  # ##pFullText## : a sequence, the tail of which is being inspected.
+--	# ##sub_text## : an object to be looked for
+--  # ##full_text## : a sequence, the tail of which is being inspected.
 --
 -- Returns:
---		An **integer**, 1 if ##pSubText## ends ##pFullText##, else 0.
+--		An **integer**, 1 if ##sub_text## ends ##full_text##, else 0.
 --
 -- Example 1:
 -- <eucode>
@@ -811,24 +811,24 @@ end function
 -- See Also:
 --     [[:begins]], [[:tail]]
 
-public function ends(object pSubText, sequence pFullText)
-	if length(pFullText) = 0 then
+public function ends(object sub_text, sequence full_text)
+	if length(full_text) = 0 then
 		return 0
 	end if
 	
-	if atom(pSubText) then
-		if equal(pSubText, pFullText[$]) then
+	if atom(sub_text) then
+		if equal(sub_text, full_text[$]) then
 			return 1
 		else
 			return 0
 		end if
 	end if
 	
-	if length(pSubText) > length(pFullText) then
+	if length(sub_text) > length(full_text) then
 		return 0
 	end if
 	
-	if equal(pSubText, pFullText[$ - length(pSubText) + 1 .. $]) then
+	if equal(sub_text, full_text[$ - length(sub_text) + 1 .. $]) then
 		return 1
 	else
 		return 0
@@ -933,18 +933,18 @@ end function
 -- If the supplied item is in the source list, this returns the corresponding
 -- element from the target list.
 -- Parameters:
--- # ##pItem##: an object that might exist in ##pSource##.
--- # ##pSource##: a sequence that might contain ##pITem##.
--- # ##pTarget##: a sequence from which the corresponding item will be returned.
--- # ##pDefault##: an object (defaults to zero). This is returned when ##pItem## 
--- is not in ##pSource## **and** ##pTarget## is not longer than ##pSource##.
+-- # ##find_item##: an object that might exist in ##source_list##.
+-- # ##source_list##: a sequence that might contain ##pITem##.
+-- # ##target_list##: a sequence from which the corresponding item will be returned.
+-- # ##def_value##: an object (defaults to zero). This is returned when ##find_item## 
+-- is not in ##source_list## **and** ##target_list## is not longer than ##source_list##.
 --
 -- Returns:
 -- an object
--- * If ##pItem## is found in ##pSource## then this is the corresponding element
--- from ##pTarget##
--- * If ##pItem## is not in ##pSource## then if ##pTarget## is longer than ##pSource##
--- then the last item in ##pTarget## is returned otherwise ##pDefault## is returned.
+-- * If ##find_item## is found in ##source_list## then this is the corresponding element
+-- from ##target_list##
+-- * If ##find_item## is not in ##source_list## then if ##target_list## is longer than ##source_list##
+-- then the last item in ##target_list## is returned otherwise ##def_value## is returned.
 --
 --Examples:
 --<eucode>
@@ -955,24 +955,24 @@ end function
 -- lookup("ant", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "spider"
 -- lookup("dog", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "unknown"
 --</eucode>
-public function lookup(object pItem, sequence pSource, sequence pTarget, object pDefault = 0)
+public function lookup(object find_item, sequence source_list, sequence target_list, object def_value = 0)
     integer lPosn
 
-    lPosn = find(pItem, pSource)
+    lPosn = find(find_item, source_list)
     if lPosn then
-        if lPosn <= length(pTarget) then
-            return pTarget[lPosn]
+        if lPosn <= length(target_list) then
+            return target_list[lPosn]
         else
-        	return pDefault
+        	return def_value
         end if
         
-    elsif length(pTarget) > length(pSource) then
+    elsif length(target_list) > length(source_list) then
     	-- Return the default built into the target list
-        return pTarget[$]
+        return target_list[$]
         
     else
     	-- Return the supplied default
-    	return pDefault
+    	return def_value
     end if
 
 end function
@@ -981,18 +981,23 @@ end function
 -- If the supplied item is in a source grid column, this returns the corresponding
 -- element from the target column.
 -- Parameters:
--- # ##pItem##: an object that might exist in ##pSource##.
--- # ##pGrid##: a 2D grid sequence that might contain ##pITem##.
--- # ##pSource##: an integer. The column number to look for ##pItem##.
--- # ##pTarget##: an integer. The column number from which the corresponding
+-- # ##find_item##: an object that might exist in ##source_col##.
+-- # ##grid_data##: a 2D grid sequence that might contain ##pITem##.
+-- # ##source_col##: an integer. The column number to look for ##find_item##.
+-- # ##target_col##: an integer. The column number from which the corresponding
 -- item will be returned.
--- # ##pDefault##: an object (defaults to zero). This is returned when ##pItem## 
--- is not in ##pSource## column, or ##pSource## or ##pTarget## are invalid columns.
+-- # ##def_value##: an object (defaults to zero). This is returned when ##find_item## 
+-- is not found in the ##source_col## column, or if found but the target column
+-- does not exist.
+--
+-- Comments:
+-- * If a row in the grid is actually a single atom, the row is ignored.
+-- * If a row's length is less than the ##source_col##, the row is ignored.
 --
 -- Returns:
 -- an object
--- * If ##pItem## is found in the ##pSource## column then this is the corresponding element
--- from the ##pTarget## column.
+-- * If ##find_item## is found in the ##source_col## column then this is the corresponding element
+-- from the ##target_col## column.
 --
 --Examples:
 --<eucode>
@@ -1006,25 +1011,29 @@ end function
 -- vlookup("ant", grid, 1, 2, "?") --> "spider"
 -- vlookup("ant", grid, 1, 3, "?") --> "mortein"
 -- vlookup("seal", grid, 2, 3, "?") --> "gun"
+-- vlookup("seal", grid, 2, 1, "?") --> "bear"
 -- vlookup("mouse", grid, 2, 3, "?") --> "?"
 --</eucode>
-public function vlookup(object pItem, sequence pGrid, integer pSource, integer pTarget, object pDefault = 0)
+public function vlookup(object find_item, sequence grid_data, integer source_col, integer target_col, object def_value = 0)
     integer lPosn
 
-    for i = 1 to length(pGrid) do
-    	if length(pGrid[i]) < pSource then
-    		return pDefault
+    for i = 1 to length(grid_data) do
+    	if atom(grid_data[i]) then
+    		continue
+    	end if
+    	if length(grid_data[i]) < source_col then
+    		continue
     	end if
     	
-    	if equal(pItem, pGrid[i][pSource]) then
-	    	if length(pGrid[i]) < pTarget then
-    			return pDefault
+    	if equal(find_item, grid_data[i][source_col]) then
+	    	if length(grid_data[i]) < target_col then
+    			return def_value
     		end if
-    		return pGrid[i][pTarget]
+    		return grid_data[i][target_col]
     	end if
     end for
     
-    return pDefault
+    return def_value
 
 end function
 

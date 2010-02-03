@@ -1267,15 +1267,15 @@ end function
 -- Formats a set of arguments in to a string based on a supplied pattern.
 --
 -- Parameters:
---   # ##pFormat## : A sequence: the pattern string that contains zero or more tokens.
---   # ##pArgs## : An object: Zero or more arguments used in token replacement.
+--   # ##format_pattern## : A sequence: the pattern string that contains zero or more tokens.
+--   # ##arg_list## : An object: Zero or more arguments used in token replacement.
 --
 -- Returns:
--- A string **sequence**, the original ##pFormat## but with tokens replaced by
+-- A string **sequence**, the original ##format_pattern## but with tokens replaced by
 -- corresponding arguments.
 --
 -- Comments:
--- The ##pFormat## string contains text and argument tokens. The resulting string
+-- The ##format_pattern## string contains text and argument tokens. The resulting string
 -- is the same as the format string except that each token is replaced by an
 -- item from the argument list.
 --
@@ -1391,7 +1391,7 @@ end function
 --   [[:sprintf]]
 --
 
-public function format(sequence pFormat, object pArgs = {})
+public function format(sequence format_pattern, object arg_list = {})
 	sequence result
 	integer in_token
 	integer tch
@@ -1421,8 +1421,8 @@ public function format(sequence pFormat, object pArgs = {})
 	object envsym
 	object envvar
 
-	if atom(pArgs) then
-		pArgs = {pArgs}
+	if atom(arg_list) then
+		arg_list = {arg_list}
 	end if
 
 	result = ""
@@ -1435,9 +1435,9 @@ public function format(sequence pFormat, object pArgs = {})
 	argl = 0
 	spacer = 0
 	prevargv = 0
-    while i < length(pFormat) do
+    while i < length(format_pattern) do
     	i += 1
-    	tch = pFormat[i]
+    	tch = format_pattern[i]
     	if not in_token then
     		if tch = '[' then
     			in_token = 1
@@ -1472,9 +1472,9 @@ public function format(sequence pFormat, object pArgs = {})
 
     			case '[' then
 	    			result &= tch
-	    			while i < length(pFormat) do
+	    			while i < length(format_pattern) do
 	    				i += 1
-	    				if pFormat[i] = ']' then
+	    				if format_pattern[i] = ']' then
 	    					in_token = 0
 	    					tstart = 0
 	    					tend = 0
@@ -1516,9 +1516,9 @@ public function format(sequence pFormat, object pArgs = {})
 	    			alt = 1
 
 	    		case ':' then
-	    			while i < length(pFormat) do
+	    			while i < length(format_pattern) do
 	    				i += 1
-	    				tch = pFormat[i]
+	    				tch = format_pattern[i]
 	    				pos = find(tch, "0123456789")
 	    				if pos = 0 then
 	    					i -= 1
@@ -1532,9 +1532,9 @@ public function format(sequence pFormat, object pArgs = {})
 
 	    		case '.' then
 	    			decs = 0
-	    			while i < length(pFormat) do
+	    			while i < length(format_pattern) do
 	    				i += 1
-	    				tch = pFormat[i]
+	    				tch = format_pattern[i]
 	    				pos = find(tch, "0123456789")
 	    				if pos = 0 then
 	    					i -= 1
@@ -1549,28 +1549,28 @@ public function format(sequence pFormat, object pArgs = {})
 
 	    			sp = i + 1
 	    			i = sp
-	    			while i < length(pFormat) do
-	    				if pFormat[i] = '}' then
+	    			while i < length(format_pattern) do
+	    				if format_pattern[i] = '}' then
 	    					exit
 	    				end if
-	    				if pFormat[i] = ']' then
+	    				if format_pattern[i] = ']' then
 	    					exit
 	    				end if
 	    				i += 1
 	    			end while
-	    			idname = trim(pFormat[sp .. i-1]) & '='
-    				if pFormat[i] = ']' then
+	    			idname = trim(format_pattern[sp .. i-1]) & '='
+    				if format_pattern[i] = ']' then
     					i -= 1
     				end if
 
-    				for j = 1 to length(pArgs) do
-    					if begins(idname, pArgs[j]) then
+    				for j = 1 to length(arg_list) do
+    					if begins(idname, arg_list[j]) then
     						if argn = 0 then
     							argn = j
     							exit
     						end if
     					end if
-    					if j = length(pArgs) then
+    					if j = length(arg_list) then
     						idname = ""
     						argn = -1
     					end if
@@ -1581,17 +1581,17 @@ public function format(sequence pFormat, object pArgs = {})
 
 	    			sp = i + 1
 	    			i = sp
-	    			while i < length(pFormat) do
-	    				if pFormat[i] = '%' then
+	    			while i < length(format_pattern) do
+	    				if format_pattern[i] = '%' then
 	    					exit
 	    				end if
-	    				if pFormat[i] = ']' then
+	    				if format_pattern[i] = ']' then
 	    					exit
 	    				end if
 	    				i += 1
 	    			end while
-	    			envsym = trim(pFormat[sp .. i-1])
-    				if pFormat[i] = ']' then
+	    			envsym = trim(format_pattern[sp .. i-1])
+    				if format_pattern[i] = ']' then
     					i -= 1
     				end if
 
@@ -1606,9 +1606,9 @@ public function format(sequence pFormat, object pArgs = {})
 	    		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' then
 	    			if argn = 0 then
 		    			i -= 1
-		    			while i < length(pFormat) do
+		    			while i < length(format_pattern) do
 		    				i += 1
-		    				tch = pFormat[i]
+		    				tch = format_pattern[i]
 		    				pos = find(tch, "0123456789")
 		    				if pos = 0 then
 		    					i -= 1
@@ -1619,9 +1619,9 @@ public function format(sequence pFormat, object pArgs = {})
 		    		end if
 
 	    		case ',' then
-	    			if i < length(pFormat) then
+	    			if i < length(format_pattern) then
 	    				i +=1
-	    				tsep = pFormat[i]
+	    				tsep = format_pattern[i]
 	    			end if
 
 	    		case else
@@ -1637,7 +1637,7 @@ public function format(sequence pFormat, object pArgs = {})
     			end if
     			argl = argn
 
-    			if argn < 1 or argn > length(pArgs) then
+    			if argn < 1 or argn > length(arg_list) then
     				if length(envvar) > 0 then
     					argtext = envvar
 	    				currargv = envvar
@@ -1646,18 +1646,18 @@ public function format(sequence pFormat, object pArgs = {})
 	    				currargv =""
 	    			end if
 				else
-					if string(pArgs[argn]) then
+					if string(arg_list[argn]) then
 						if length(idname) > 0 then
-							argtext = pArgs[argn][length(idname) + 1 .. $]
+							argtext = arg_list[argn][length(idname) + 1 .. $]
 						else
-							argtext = pArgs[argn]
+							argtext = arg_list[argn]
 						end if
 						
-					elsif integer(pArgs[argn]) then
-						if bwz != 0 and pArgs[argn] = 0 then
+					elsif integer(arg_list[argn]) then
+						if bwz != 0 and arg_list[argn] = 0 then
 							argtext = ""
 						elsif binout = 1 then
-							argtext = reverse(int_to_bits(pArgs[argn], 32)) + '0'
+							argtext = reverse(int_to_bits(arg_list[argn], 32)) + '0'
 							for ib = 1 to length(argtext) do
 								if argtext[ib] = '1' then
 									argtext = argtext[ib .. $]
@@ -1666,7 +1666,7 @@ public function format(sequence pFormat, object pArgs = {})
 							end for
 
 						elsif hexout = 0 then
-							argtext = sprintf("%d", pArgs[argn])
+							argtext = sprintf("%d", arg_list[argn])
 							if zfill != 0 and width > 0 then
 								if length(argtext) > 0 then
 									if argtext[1] = '-' then
@@ -1683,7 +1683,7 @@ public function format(sequence pFormat, object pArgs = {})
 								end if
 							end if
 							
-							if pArgs[argn] > 0 then
+							if arg_list[argn] > 0 then
 								if psign then
 									if zfill = 0 then
 										argtext = '+' & argtext
@@ -1691,7 +1691,7 @@ public function format(sequence pFormat, object pArgs = {})
 										argtext[1] = '+'
 									end if
 								end if
-							elsif pArgs[argn] < 0 then
+							elsif arg_list[argn] < 0 then
 								if msign then
 									if zfill = 0 then
 										argtext = '(' & argtext[2..$] & ')'
@@ -1705,7 +1705,7 @@ public function format(sequence pFormat, object pArgs = {})
 								end if
 							end if
 						else
-							argtext = sprintf("%x", pArgs[argn])
+							argtext = sprintf("%x", arg_list[argn])
 							if zfill != 0 and width > 0 then
 								if width > length(argtext) then
 									argtext = repeat('0', width - length(argtext)) & argtext
@@ -1713,19 +1713,19 @@ public function format(sequence pFormat, object pArgs = {})
 							end if
 						end if
 
-					elsif atom(pArgs[argn]) then
-						if bwz != 0 and pArgs[argn] = 0 then
+					elsif atom(arg_list[argn]) then
+						if bwz != 0 and arg_list[argn] = 0 then
 							argtext = ""
 						else
 							if hexout then
-								argtext = sprintf("%x", pArgs[argn])
+								argtext = sprintf("%x", arg_list[argn])
 								if zfill != 0 and width > 0 then
 									if width > length(argtext) then
 										argtext = repeat('0', width - length(argtext)) & argtext
 									end if
 								end if
 							else
-								argtext = trim(sprintf("%15.15g", pArgs[argn]))
+								argtext = trim(sprintf("%15.15g", arg_list[argn]))
 								if zfill != 0 and width > 0 then
 									if length(argtext) > 0 then
 										if width > length(argtext) then
@@ -1739,7 +1739,7 @@ public function format(sequence pFormat, object pArgs = {})
 										argtext = repeat('0', width - length(argtext)) & argtext
 									end if
 								end if
-								if pArgs[argn] > 0 then
+								if arg_list[argn] > 0 then
 									if psign  then
 										if zfill = 0 then
 											argtext = '+' & argtext
@@ -1747,7 +1747,7 @@ public function format(sequence pFormat, object pArgs = {})
 											argtext[1] = '+'
 										end if
 									end if
-								elsif pArgs[argn] < 0 then
+								elsif arg_list[argn] < 0 then
 									if msign then
 										if zfill = 0 then
 											argtext = '(' & argtext[2..$] & ')'
@@ -1764,19 +1764,19 @@ public function format(sequence pFormat, object pArgs = {})
 						end if
 
 					else
-						if alt != 0 and length(pArgs[argn]) = 2 then
+						if alt != 0 and length(arg_list[argn]) = 2 then
 							object tempv
 							if atom(prevargv) then
 								if prevargv != 1 then
-									tempv = pArgs[argn][1]
+									tempv = arg_list[argn][1]
 								else
-									tempv = pArgs[argn][2]
+									tempv = arg_list[argn][2]
 								end if
 							else
 								if length(prevargv) = 0 then
-									tempv = pArgs[argn][1]
+									tempv = arg_list[argn][1]
 								else
-									tempv = pArgs[argn][2]
+									tempv = arg_list[argn][2]
 								end if
 							end if
 
@@ -1801,12 +1801,12 @@ public function format(sequence pFormat, object pArgs = {})
 											)
 							end if
 						else
-							argtext = pretty_sprint( pArgs[argn],
+							argtext = pretty_sprint( arg_list[argn],
 										{2,0,1,1000,"%d","%.15g",32,127,1,0}
 										)
 						end if
 					end if
-	    			currargv = pArgs[argn]
+	    			currargv = arg_list[argn]
     			end if
 
 

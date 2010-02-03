@@ -2246,22 +2246,22 @@ end function
 -- Returns a file name that can be used as a temporary file.
 --
 -- Parameters:
---	# ##pDir## : A sequence. A directory where the temporary file is expected
+--	# ##temp_location## : A sequence. A directory where the temporary file is expected
 --               to be created. 
 --            ** If omitted (the default) the 'temporary' directory
 --               will be used. The temporary directory is defined in the "TEMP" 
 --               environment symbol, or failing that the "TMP" symbol and failing
 --               that "C:\TEMP\" is used in non-Unix systems and "/tmp/" is used
 --               in Unix systems. 
---            ** If ##pDir## was supplied, 
+--            ** If ##temp_location## was supplied, 
 --               *** If it is an existing file, that file's directory is used.
 --               *** If it is an existing directory, it is used.
 --               *** If it doesn't exist, the directory name portion is used.
---  # ##pPrefix## : A sequence: The is prepended to the start of the generated file name.
+--  # ##temp_prefix## : A sequence: The is prepended to the start of the generated file name.
 --               The default is "".
---  # ##pExt## : A sequence: The is a file extention used in the generated file. 
+--  # ##temp_extn## : A sequence: The is a file extention used in the generated file. 
 --               The default is "_T_".
---  # ##pReserve## : An integer: If not zero an empty file is created using the 
+--  # ##reserve_temp## : An integer: If not zero an empty file is created using the 
 --               generated name. The default is not to reserve (create) the file.
 --
 -- Returns:
@@ -2276,10 +2276,10 @@ end function
 --  ? temp_file("/users/me/abc.exw") --> /users/me/992831._T_
 -- </eucode>
 
-public function temp_file(sequence pDir = "", sequence pPrefix = "", sequence pExt = "_T_", integer pReserve = 0)
+public function temp_file(sequence temp_location = "", sequence temp_prefix = "", sequence temp_extn = "_T_", integer reserve_temp = 0)
 	sequence  randname
 	
-	if length(pDir) = 0 then
+	if length(temp_location) = 0 then
 		object envtmp
 		envtmp = getenv("TEMP")
 		if atom(envtmp) then
@@ -2294,47 +2294,47 @@ public function temp_file(sequence pDir = "", sequence pPrefix = "", sequence pE
 				envtmp = "/tmp/"
 			end if
 		end ifdef
-		pDir = envtmp
+		temp_location = envtmp
 	else
-		switch file_type(pDir) do
+		switch file_type(temp_location) do
 			case FILETYPE_FILE then
-				pDir = dirname(pDir, 1)
+				temp_location = dirname(temp_location, 1)
 				
 			case FILETYPE_DIRECTORY then
-				-- use pDir
-				pDir = pDir
+				-- use temp_location
+				temp_location = temp_location
 								
 			case FILETYPE_NOT_FOUND then
-				object tdir = dirname(pDir, 1)
+				object tdir = dirname(temp_location, 1)
 				if file_exists(tdir) then
-					pDir = tdir
+					temp_location = tdir
 				else
-					pDir = "."
+					temp_location = "."
 				end if
 				
 			case else
-				pDir = "."
+				temp_location = "."
 				
 		end switch
 	end if
 	
-	if pDir[$] != SLASH then
-		pDir &= SLASH
+	if temp_location[$] != SLASH then
+		temp_location &= SLASH
 	end if
 	
 	
 	while 1 do
-		randname = sprintf("%s%s%06d.%s", {pDir, pPrefix, rand(1_000_000) - 1, pExt})
+		randname = sprintf("%s%s%06d.%s", {temp_location, temp_prefix, rand(1_000_000) - 1, temp_extn})
 		if not file_exists( randname ) then
 			exit
 		end if
 	end while
 	
-	if pReserve then
+	if reserve_temp then
 		integer ret
 		-- Reserve the name by creating an empty file.
-		if not file_exists(pDir) then
-			if create_directory(pDir) = 0 then
+		if not file_exists(temp_location) then
+			if create_directory(temp_location) = 0 then
 				return ""
 			end if
 		end if

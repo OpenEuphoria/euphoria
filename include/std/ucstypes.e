@@ -913,12 +913,12 @@ function getPackedData(atom c)
 end function
 
 
-function getType(atom pUCSChar)
-	if pUCSChar >= 0x10FFFF then
+function getType(atom ucs_char)
+	if ucs_char >= 0x10FFFF then
 		return UNASSIGNED
 	end if
 	
-	return and_bits(shift_bits(getPackedData(pUCSChar), TYPE_SHIFT), TYPE_MASK)
+	return and_bits(shift_bits(getPackedData(ucs_char), TYPE_SHIFT), TYPE_MASK)
 end function
 
 function getDirectionality(atom c)
@@ -937,19 +937,19 @@ end function
 -- The code point is a 'letter'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isAlpha(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_alpha(pUCSChar)
+public function isAlpha(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_alpha(ucs_char)
 	end if
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case UPPERCASE_LETTER,
 		     LOWERCASE_LETTER,
 		     TITLECASE_LETTER,
@@ -966,18 +966,18 @@ end function
 -- The code point is an uppercase 'letter'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isUpper(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_upper(pUCSChar)
+public function isUpper(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_upper(ucs_char)
 	end if
 	
-	return (getType(pUCSChar) = UPPERCASE_LETTER)
+	return (getType(ucs_char) = UPPERCASE_LETTER)
 end function
 
 
@@ -985,55 +985,55 @@ end function
 -- The code point is a lowercase 'letter'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isLower(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_lower(pUCSChar)
+public function isLower(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_lower(ucs_char)
 	end if
 	
-	return (getType(pUCSChar) = LOWERCASE_LETTER)
+	return (getType(ucs_char) = LOWERCASE_LETTER)
 end function
 
 --**
 -- The code point is a Title case 'letter'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isTitle(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_upper(pUCSChar)
+public function isTitle(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_upper(ucs_char)
 	end if
 	
-	return (getType(pUCSChar) = TITLECASE_LETTER)
+	return (getType(ucs_char) = TITLECASE_LETTER)
 end function
 
 --**
 -- The code point is either a 'letter' or a 'digit'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isAlphaNum(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_alnum(pUCSChar)
+public function isAlphaNum(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_alnum(ucs_char)
 	end if
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case UPPERCASE_LETTER,
 		     LOWERCASE_LETTER,
 		     TITLECASE_LETTER,
@@ -1052,19 +1052,19 @@ end function
 -- The code point is a 'digit'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDigit(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_digit(pUCSChar)
+public function isDigit(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_digit(ucs_char)
 	end if
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case DECIMAL_DIGIT_NUMBER then
 			return TRUE
 	
@@ -1077,19 +1077,19 @@ end function
 -- The code point is a 'number'. Some code points represent fractional numbers.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isNumber(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_digit(pUCSChar)
+public function isNumber(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_digit(ucs_char)
 	end if
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case DECIMAL_DIGIT_NUMBER,
 			LETTER_NUMBER,
 			OTHER_NUMBER
@@ -1106,19 +1106,19 @@ end function
 -- The code point is a word separator.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSeparator(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_space(pUCSChar)
+public function isSeparator(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_space(ucs_char)
 	end if
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case SPACE_SEPARATOR,
 		     LINE_SEPARATOR,
 		     PARAGRAPH_SEPARATOR
@@ -1134,19 +1134,19 @@ end function
 -- The code point is a 'space' character.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSpace(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_space(pUCSChar)
+public function isSpace(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_space(ucs_char)
 	end if
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case SPACE_SEPARATOR
 		      then
 			return TRUE
@@ -1160,16 +1160,16 @@ end function
 -- The code point is a line separator.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isLine(atom pUCSChar)
+public function isLine(atom ucs_char)
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case LINE_SEPARATOR
 		      then
 			return TRUE
@@ -1183,16 +1183,16 @@ end function
 -- The code point is a paragraph separator
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isParagraph(atom pUCSChar)
+public function isParagraph(atom ucs_char)
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case PARAGRAPH_SEPARATOR
 		      then
 			return TRUE
@@ -1206,16 +1206,16 @@ end function
 -- The code point is a textual 'marker'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isMark(atom pUCSChar)
+public function isMark(atom ucs_char)
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case NONSPACING_MARK,
 			COMBINING_SPACING_MARK,
 			ENCLOSING_MARK
@@ -1231,16 +1231,16 @@ end function
 -- The code point is a non-spacing letter.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isNonSpacing(atom pUCSChar)
+public function isNonSpacing(atom ucs_char)
 
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case NONSPACING_MARK
 		      then
 			return TRUE
@@ -1255,20 +1255,20 @@ end function
 -- The code point is a punctuation mark.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isPunctuation(atom pUCSChar)
+public function isPunctuation(atom ucs_char)
 
-	if pUCSChar <= 0x7F then
-		return t_punct(pUCSChar)
+	if ucs_char <= 0x7F then
+		return t_punct(ucs_char)
 	end if
 	
 	
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case
 			CONNECTOR_PUNCTUATION,
 			DASH_PUNCTUATION,
@@ -1289,14 +1289,14 @@ end function
 -- The code point is a 'symbol'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSymbol(atom pUCSChar)
-	switch getType(pUCSChar) do
+public function isSymbol(atom ucs_char)
+	switch getType(ucs_char) do
 		case
 			MATH_SYMBOL,
 			CURRENCY_SYMBOL,
@@ -1314,14 +1314,14 @@ end function
 -- The code point is a 'symbol'.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isCurrency(atom pUCSChar)
-	return getType(pUCSChar) = CURRENCY_SYMBOL
+public function isCurrency(atom ucs_char)
+	return getType(ucs_char) = CURRENCY_SYMBOL
 end function
 
 
@@ -1329,14 +1329,14 @@ end function
 -- The code point is a functional item, such as a control character, or private-use.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isOther(atom pUCSChar)
-	switch getType(pUCSChar) do
+public function isOther(atom ucs_char)
+	switch getType(ucs_char) do
 		case
 			CONTROL,
 			FORMAT,
@@ -1355,76 +1355,76 @@ end function
 -- The code point is a control item.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isControl(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_cntrl(pUCSChar)
+public function isControl(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_cntrl(ucs_char)
 	end if
-	return getType(pUCSChar) = CONTROL
+	return getType(ucs_char) = CONTROL
 end function
 
 --**
 -- The code point is a formatting item.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isFormat(atom pUCSChar)
-	return getType(pUCSChar) = FORMAT
+public function isFormat(atom ucs_char)
+	return getType(ucs_char) = FORMAT
 end function
 
 --**
 -- The code point is a surrogate code.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSurrogate(atom pUCSChar)
-	return getType(pUCSChar) = SURROGATE
+public function isSurrogate(atom ucs_char)
+	return getType(ucs_char) = SURROGATE
 end function
 
 --**
 -- The code point is a private-use item.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isPrivate(atom pUCSChar)
-	return getType(pUCSChar) = PRIVATE_USE
+public function isPrivate(atom ucs_char)
+	return getType(ucs_char) = PRIVATE_USE
 end function
 
 --**
 -- The code point is a character with a glyph.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isGraph(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_graph(pUCSChar)
+public function isGraph(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_graph(ucs_char)
 	end if
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case
 			UPPERCASE_LETTER,
 			LOWERCASE_LETTER,
@@ -1460,17 +1460,17 @@ end function
 -- The code point is a character that is printable.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isPrint(atom pUCSChar)
-	if pUCSChar <= 0x7F then
-		return t_print(pUCSChar)
+public function isPrint(atom ucs_char)
+	if ucs_char <= 0x7F then
+		return t_print(ucs_char)
 	end if
-	switch getType(pUCSChar) do
+	switch getType(ucs_char) do
 		case
 			UPPERCASE_LETTER,
 			LOWERCASE_LETTER,
@@ -1508,56 +1508,56 @@ end function
 -- The code point is a directional white space character.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirWhiteSpace(atom pUCSChar)
-	return getDirectionality(pUCSChar) = WHITESPACE
+public function isDirWhiteSpace(atom ucs_char)
+	return getDirectionality(ucs_char) = WHITESPACE
 end function
 
 --**
 -- The code point is a left-to-right character.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirLTR(atom pUCSChar)
-	return getDirectionality(pUCSChar) = LEFT_TO_RIGHT
+public function isDirLTR(atom ucs_char)
+	return getDirectionality(ucs_char) = LEFT_TO_RIGHT
 end function
 
 --**
 -- The code point is a right-to-left character.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirRTL(atom pUCSChar)
-	return getDirectionality(pUCSChar) = RIGHT_TO_LEFT
+public function isDirRTL(atom ucs_char)
+	return getDirectionality(ucs_char) = RIGHT_TO_LEFT
 end function
 
 --**
 -- The code point has an exact directional aspect. It must be always be LtR or RtL.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirStrong(atom pUCSChar)
-	switch getDirectionality(pUCSChar) do
+public function isDirStrong(atom ucs_char)
+	switch getDirectionality(ucs_char) do
 		case 
 			RIGHT_TO_LEFT,
 			LEFT_TO_RIGHT
@@ -1573,14 +1573,14 @@ end function
 -- The code point has an implied directional aspect, that depends on context.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirWeak(atom pUCSChar)
-	switch getDirectionality(pUCSChar) do
+public function isDirWeak(atom ucs_char)
+	switch getDirectionality(ucs_char) do
 		case 
 			EUROPEAN_NUMBER,
 			EUROPEAN_NUMBER_SEPARATOR,
@@ -1599,14 +1599,14 @@ end function
 -- The code point has no directional aspect.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirNeutral(atom pUCSChar)
-	switch getDirectionality(pUCSChar) do
+public function isDirNeutral(atom ucs_char)
+	switch getDirectionality(ucs_char) do
 		case 
 			BLOCK_SEPARATOR,
 			SEGMENT_SEPARATOR,
@@ -1624,14 +1624,14 @@ end function
 -- The code point is a directional separator.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isDirSeparator(atom pUCSChar)
-	switch getDirectionality(pUCSChar) do
+public function isDirSeparator(atom ucs_char)
+	switch getDirectionality(ucs_char) do
 		case 
 			BLOCK_SEPARATOR,
 			SEGMENT_SEPARATOR
@@ -1648,14 +1648,14 @@ end function
 -- The code point is a block separator.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isBlock(atom pUCSChar)
-	return getDirectionality(pUCSChar) = BLOCK_SEPARATOR
+public function isBlock(atom ucs_char)
+	return getDirectionality(ucs_char) = BLOCK_SEPARATOR
 end function
 
 
@@ -1663,14 +1663,14 @@ end function
 -- The code point is a segment separator.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
 
-public function isSegment(atom pUCSChar)
-	return getDirectionality(pUCSChar) = SEGMENT_SEPARATOR
+public function isSegment(atom ucs_char)
+	return getDirectionality(ucs_char) = SEGMENT_SEPARATOR
 end function
 
 
@@ -1678,14 +1678,14 @@ end function
 -- The code point is a non-breaking character.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
-public function isNonBreaking(atom pUCSChar)
+public function isNonBreaking(atom ucs_char)
 	return NOBREAK = and_bits(
-				shift_bits(findCharacterValue(pUCSChar), DECOMPOSITION_SHIFT),
+				shift_bits(findCharacterValue(ucs_char), DECOMPOSITION_SHIFT),
 				DECOMPOSITION_MASK)
 end function
 
@@ -1693,106 +1693,106 @@ end function
 -- The code point has a mirror (matching) character, such as parenthesis.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to test.
+-- # ##ucs_char##: An atom. The code point to test.
 -- 
 -- Returns:
--- TRUE when ##pUCSChar## is in the set, FALSE otherwise.
+-- TRUE when ##ucs_char## is in the set, FALSE otherwise.
 --
-public function isMirroring(atom pUCSChar)
-	return and_bits(shift_bits(getPackedData(pUCSChar), MIRRORED_SHIFT), MIRRORED_MASK) != 0
+public function isMirroring(atom ucs_char)
+	return and_bits(shift_bits(getPackedData(ucs_char), MIRRORED_SHIFT), MIRRORED_MASK) != 0
 end function
 
 --**
 -- Converts the input to lower case.
 --
 -- Parameters:
--- # ##pUCSChar##: An object. Either a single code point to convert or a text string.
+-- # ##ucs_char##: An object. Either a single code point to convert or a text string.
 -- 
 -- Returns:
 -- The converted input.
 --
-public function toLower(object pUCSChar)
-	if atom(pUCSChar) then
-		return pUCSChar + LCDIFF[1 + and_bits(shift_bits(getPackedData(pUCSChar), TOLOWER_SHIFT), TOLOWER_MASK)]
+public function toLower(object ucs_char)
+	if atom(ucs_char) then
+		return ucs_char + LCDIFF[1 + and_bits(shift_bits(getPackedData(ucs_char), TOLOWER_SHIFT), TOLOWER_MASK)]
 	end if
 	
-	for i = 1 to length(pUCSChar) do
-		pUCSChar[i] = toLower(pUCSChar[i])
+	for i = 1 to length(ucs_char) do
+		ucs_char[i] = toLower(ucs_char[i])
 	end for
 	
-	return pUCSChar
+	return ucs_char
 end function
 
 --**
 -- Converts the input to upperer case.
 --
 -- Parameters:
--- # ##pUCSChar##: An object. Either a single code point to convert or a text string.
+-- # ##ucs_char##: An object. Either a single code point to convert or a text string.
 -- 
 -- Returns:
 -- The converted input.
 --
-public function toUpper(object pUCSChar)
-	if atom(pUCSChar) then
-		return pUCSChar + UCDIFF[1 + and_bits(shift_bits(getPackedData(pUCSChar), TOUPPER_SHIFT), TOUPPER_MASK)]
+public function toUpper(object ucs_char)
+	if atom(ucs_char) then
+		return ucs_char + UCDIFF[1 + and_bits(shift_bits(getPackedData(ucs_char), TOUPPER_SHIFT), TOUPPER_MASK)]
 	end if
 	
-	for i = 1 to length(pUCSChar) do
-		pUCSChar[i] = toUpper(pUCSChar[i])
+	for i = 1 to length(ucs_char) do
+		ucs_char[i] = toUpper(ucs_char[i])
 	end for
 	
-	return pUCSChar
+	return ucs_char
 end function
 
 --**
 -- Converts the input to lower case.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to convert.
+-- # ##ucs_char##: An atom. The code point to convert.
 -- 
 -- Returns:
 -- The converted input.
 --
-public function toTitle(atom pUCSChar)
-	integer diff = TCDIFF[1 + and_bits(shift_bits(getPackedData(pUCSChar), TOTITLE_SHIFT), TOTITLE_MASK)]
-	return iff( diff != TOTITLE_MASK, pUCSChar + diff , toUpper(pUCSChar))
+public function toTitle(atom ucs_char)
+	integer diff = TCDIFF[1 + and_bits(shift_bits(getPackedData(ucs_char), TOTITLE_SHIFT), TOTITLE_MASK)]
+	return iff( diff != TOTITLE_MASK, ucs_char + diff , toUpper(ucs_char))
 end function
 
 --**
 -- Gets the matching charater for the supplied code point.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to match.
+-- # ##ucs_char##: An atom. The code point to match.
 -- 
 -- Returns:
 -- If the code point has no matching value, the code point is returned, otherwise
 -- the matching (mirror) code point is returned.
 --
-public function toMirror(atom pUCSChar)
-	if not isMirroring(pUCSChar) then
-		return pUCSChar
+public function toMirror(atom ucs_char)
+	if not isMirroring(ucs_char) then
+		return ucs_char
 	end if
 
-	return pUCSChar + MIRROR_DIFF[1 + and_bits(shift_bits(getPackedData(pUCSChar), MIRROR_SHIFT), MIRROR_MASK)]
+	return ucs_char + MIRROR_DIFF[1 + and_bits(shift_bits(getPackedData(ucs_char), MIRROR_SHIFT), MIRROR_MASK)]
 end function
 
 --**
 -- Gets the numerical value of the character.
 --
 -- Parameters:
--- # ##pUCSChar##: An atom. The code point to convert.
+-- # ##ucs_char##: An atom. The code point to convert.
 -- 
 -- Returns:
 -- An atom: -1 if the code point has no numerical value,
 -- -2 if the value is not known, otherwise the numerical value of it.
 --
-public function getNumericValue(atom pUCSChar)
-	if isMirroring(pUCSChar) then
+public function getNumericValue(atom ucs_char)
+	if isMirroring(ucs_char) then
 		return -1
 	end if
-	atom val = NUMERICS[1 + and_bits(shift_bits(getPackedData(pUCSChar), NUMERIC_SHIFT), NUMERIC_MASK)]
+	atom val = NUMERICS[1 + and_bits(shift_bits(getPackedData(ucs_char), NUMERIC_SHIFT), NUMERIC_MASK)]
 	if val = -2 then
-		val = find(pUCSChar, NON_INTEGERS)
+		val = find(ucs_char, NON_INTEGERS)
 		if val != 0 then
 			val = NON_INTEGER_VALS[val]
 		else

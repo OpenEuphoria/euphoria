@@ -297,19 +297,19 @@ end function
 -- Selects a random sample sub-set of items from a population set.
 --
 -- Parameters:
--- # ##pPopulation## : a sequence. The set of items from which to take a sample.
--- # ##pSampleSize##: an integer. The number of samples to take.
--- # ##pRemainder##: an integer. If non-zero, the sub-set not selected is also returned.
+-- # ##full_set## : a sequence. The set of items from which to take a sample.
+-- # ##sample_size##: an integer. The number of samples to take.
+-- # ##return_remaining##: an integer. If non-zero, the sub-set not selected is also returned.
 -- If zero, the default, only the sampled set is returned.
 --
 -- Returns:
---    a sequence. When ##pRemainder## = 0 then this is the set of samples, otherwise
+--    a sequence. When ##return_remaining## = 0 then this is the set of samples, otherwise
 --   it returns a two-element sequence; the first is the samples, and the second
 --   is the remainder of the population (in the original order).
 --
 -- Comments:
--- * If ##pSampleSize## is less than 1, an empty set is returned.
--- * If ##pSampleSize## is greater than or equal to the population count, 
+-- * If ##sample_size## is less than 1, an empty set is returned.
+-- * If ##sample_size## is greater than or equal to the population count, 
 --   the entire population set is returned, but in a random order.
 --
 -- Example 1:
@@ -345,37 +345,37 @@ end function
 -- end for
 --
 -- </eucode>
-public function sample(sequence pPopulation, integer pSampleSize, integer pRemainder = 0)
+public function sample(sequence full_set, integer sample_size, integer return_remaining = 0)
 	sequence lResult
 	integer lIdx
 	integer lChoice
 	integer lLen
 	
-	if pSampleSize < 1 then
-		if pRemainder then
-			return {{}, pPopulation}	
+	if sample_size < 1 then
+		if return_remaining then
+			return {{}, full_set}	
 		else
 			return {}
 		end if
 	end if
 	
-	if pSampleSize >= length(pPopulation) then
-		pSampleSize = length(pPopulation)
+	if sample_size >= length(full_set) then
+		sample_size = length(full_set)
 	end if
 	
-	lResult = repeat(0, pSampleSize)
+	lResult = repeat(0, sample_size)
 	lIdx = 0
-	lLen = length(pPopulation)
-	while lIdx < pSampleSize do
+	lLen = length(full_set)
+	while lIdx < sample_size do
 		lChoice = rand(lLen)
 		lIdx += 1
-		lResult[lIdx] = pPopulation[lChoice]
+		lResult[lIdx] = full_set[lChoice]
 		lLen -= 1
-		pPopulation[lChoice .. $-1] = pPopulation[lChoice+1 .. $]
+		full_set[lChoice .. $-1] = full_set[lChoice+1 .. $]
 	end while
 
-	if pRemainder then
-		return {lResult, pPopulation[1 .. $ - pSampleSize]}	
+	if return_remaining then
+		return {lResult, full_set[1 .. $ - sample_size]}	
 	else
 		return lResult
 	end if

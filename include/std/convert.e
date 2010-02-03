@@ -488,27 +488,27 @@ end function
 -- Converts the text into a number.
 --
 -- Parameters:
--- # ##pText## : A string containing the text representation of a number.
--- # ##pReturnBadPos## : An integer. 
+-- # ##text_in## : A string containing the text representation of a number.
+-- # ##return_bad_pos## : An integer. 
 --     ** If 0 (the default) then this will return
 --     a number based on the supplied text and it will **not** return
---     any position in ##pText## that caused an incomplete conversion. 
---     ** If ##pReturnBadPos## is -1 then if the conversion of ##pText## was
+--     any position in ##text_in## that caused an incomplete conversion. 
+--     ** If ##return_bad_pos## is -1 then if the conversion of ##text_in## was
 --        complete the resulting number is returned otherwise a single-element
---        sequence containing the position within ##pText## where the conversion
+--        sequence containing the position within ##text_in## where the conversion
 --        stopped. 
 --     ** If not 0 then this returns both the converted value up to the point of failure (if any) and the
---     position in ##pText## that caused the failure. If that position is 0 then
+--     position in ##text_in## that caused the failure. If that position is 0 then
 --     there was no failure. 
 --
 -- Returns:
--- * an **atom**, If ##pReturnBadPos## is zero, the number represented by ##pText##.
---  If ##pText## contains invalid characters, zero is returned.\\
--- * a **sequence**, If ##pReturnBadPos## is non-zero. If ##pReturnBadPos## is -1
--- it returns a 1-element sequence containing the spot inside ##pText## where
+-- * an **atom**, If ##return_bad_pos## is zero, the number represented by ##text_in##.
+--  If ##text_in## contains invalid characters, zero is returned.\\
+-- * a **sequence**, If ##return_bad_pos## is non-zero. If ##return_bad_pos## is -1
+-- it returns a 1-element sequence containing the spot inside ##text_in## where
 -- conversion stopped. Otherwise it returns a 2-element sequence
--- containing the number represented by ##pText## and either 0 or the position in
--- ##pText## where conversion stopped.
+-- containing the number represented by ##text_in## and either 0 or the position in
+-- ##text_in## where conversion stopped.
 --
 -- Comments:
 -- # You can supply **Hexadecimal** values if the value is preceded by
@@ -531,7 +531,7 @@ end function
 -- after the last digit.
 -- # The currency, sign and base symbols can appear in any order. Thus "$ -21.10" is
 -- the same as " -$21.10 ", which is also the same as "21.10$-", etc.
--- # This function can optionally return information about invalid numbers. If ##pReturnBadPos##
+-- # This function can optionally return information about invalid numbers. If ##return_bad_pos##
 -- is not zero, a two-element sequence is returned. The first element is the converted
 -- number value , and the second is the position in the text where conversion stopped.
 -- If no errors were found then the second element is zero.
@@ -557,8 +557,8 @@ end function
 -- </eucode>
 
 
-public function to_number( sequence pText, integer pReturnBadPos = 0)
-	-- get the numeric result of pText
+public function to_number( sequence text_in, integer return_bad_pos = 0)
+	-- get the numeric result of text_in
 	integer lDotFound = 0
 	integer lSignFound = 2
 	integer lCharValue
@@ -575,12 +575,12 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 	integer lLastDigit = 0
 	integer lChar
 
-	for i = 1 to length(pText) do
-		if not integer(pText[i]) then
+	for i = 1 to length(text_in) do
+		if not integer(text_in[i]) then
 			exit
 		end if
 
-		lChar = pText[i]
+		lChar = text_in[i]
 		switch lChar do
 			case '-' then
 				if lSignFound = 2 then
@@ -653,7 +653,7 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 					if lPercent = 1 then
 						lPercent = 100
 					else
-						if pText[i-1] = '%' then
+						if text_in[i-1] = '%' then
 							lPercent *= 10 -- Yes ten not one hundred.
 						else
 							lBadPos = i
@@ -710,7 +710,7 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 		lBadPos = 1
 	end if
 
-	if pReturnBadPos = 0 and lBadPos != 0 then
+	if return_bad_pos = 0 and lBadPos != 0 then
 		return 0
 	end if
 
@@ -733,11 +733,11 @@ public function to_number( sequence pText, integer pReturnBadPos = 0)
 		lResult = -lResult
 	end if
 
-	if pReturnBadPos = 0 then
+	if return_bad_pos = 0 then
 		return lResult
 	end if
 
-	if pReturnBadPos = -1 then
+	if return_bad_pos = -1 then
 		if lBadPos = 0 then
 			return lResult
 		else
@@ -753,12 +753,12 @@ end function
 -- Converts an object into a integer.
 --
 -- Parameters:
--- # ##pData## : Any Euphoria object.
--- # ##pError## : An integer. This is returned if ##pData## cannot be converted
+-- # ##data_in## : Any Euphoria object.
+-- # ##def_value## : An integer. This is returned if ##data_in## cannot be converted
 --                into an integer. If omitted, zero is returned.
 --
 -- Returns:
--- An **integer**, either the integer rendition of ##pData## or ##pError## if it has
+-- An **integer**, either the integer rendition of ##data_in## or ##def_value## if it has
 -- no integer value.
 --
 -- Comments:
@@ -777,22 +777,22 @@ end function
 -- ? to_integer(#3FFFFFFF + 1)   --> 0 (too big for a Euphoria integer)
 -- </eucode>
 
-public function to_integer(object pData, integer pError = 0)
-	if integer(pData) then
-		return pData
+public function to_integer(object data_in, integer def_value = 0)
+	if integer(data_in) then
+		return data_in
 	end if
 
-	if atom(pData) then
-		pData = floor(pData)
-		if not integer(pData) then
-			return pError
+	if atom(data_in) then
+		data_in = floor(data_in)
+		if not integer(data_in) then
+			return def_value
 		end if
-		return pData
+		return data_in
 	end if
 
-	sequence lResult = to_number(pData, 1)
+	sequence lResult = to_number(data_in, 1)
 	if lResult[2] != 0 then
-		return pError
+		return def_value
 	else
 		return floor(lResult[1])
 	end if

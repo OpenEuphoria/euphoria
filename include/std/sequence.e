@@ -2713,8 +2713,8 @@ end function
 -- Transforms the input sequence by using one or more user-supplied transformers.
 --
 -- Parameters:
--- # ##pSource## : A sequence to be transformed.
--- # ##pTransformer## : An object. One or more routine_ids used to transform the input.
+-- # ##source_data## : A sequence to be transformed.
+-- # ##transformer_rids## : An object. One or more routine_ids used to transform the input.
 --
 -- Returns:
 -- The source **sequence**, that has been transformed.
@@ -2727,7 +2727,7 @@ end function
 -- to be transformed and others are any user data that may have been supplied
 -- to the ##transform## routine.
 -- * Each transformer routine returns a transformed sequence.
--- * The ##pTransformer## parameters is either a single routine_id or a sequence
+-- * The ##transformer_rids## parameters is either a single routine_id or a sequence
 -- of routine_ids. In this second case, the routine_id may actually be a
 -- multi-element sequence containing the real routine_id and some user data to
 -- pass to the transformer routine. If there is no user data then the transformer
@@ -2743,19 +2743,19 @@ end function
 -- --> "HELLA"
 -- </eucode>
 
-public function transform( sequence pSource, object pTransformer)
+public function transform( sequence source_data, object transformer_rids)
 	sequence lResult
 
-	lResult = pSource
-	if atom(pTransformer) then
-		pTransformer = {pTransformer}
+	lResult = source_data
+	if atom(transformer_rids) then
+		transformer_rids = {transformer_rids}
 	end if
 
-	for i = 1 to length(pTransformer) do
-		if atom(pTransformer[i]) then
-			lResult = call_func(pTransformer[i], {lResult})
+	for i = 1 to length(transformer_rids) do
+		if atom(transformer_rids[i]) then
+			lResult = call_func(transformer_rids[i], {lResult})
 		else
-			lResult = call_func(pTransformer[i][1], {lResult} & pTransformer[i][2..$])
+			lResult = call_func(transformer_rids[i][1], {lResult} & transformer_rids[i][2..$])
 		end if
 	end for
 	return lResult
@@ -2865,14 +2865,14 @@ public constant SEQ_NOALT = {{1.23456}}
 -- replacing them with a supplied alternative value.
 --
 -- Parameters:
--- # ##pSource## : A sequence from which sub-sequences are removed.
--- # ##pAltValue## : An object. Use SEQ_NOALT to indicate that sub-sequences
+-- # ##source_list## : A sequence from which sub-sequences are removed.
+-- # ##alt_value## : An object. Use SEQ_NOALT to indicate that sub-sequences
 --                  are to be physically removed, any other value will be
 --                  used to replace the sub-sequence.
 --
 -- Returns:
--- A **sequence**, which contains only the atoms from ##pSource## and optionally
--- the ##pAltValue## where sub-sequences used to be.
+-- A **sequence**, which contains only the atoms from ##source_list## and optionally
+-- the ##alt_value## where sub-sequences used to be.
 --
 -- Example:
 -- <eucode>
@@ -2883,15 +2883,15 @@ public constant SEQ_NOALT = {{1.23456}}
 -- </eucode>
 --
 
-public function remove_subseq( sequence pSource, object pAltValue)
+public function remove_subseq( sequence source_list, object alt_value)
 	sequence lResult
 	integer lCOW = 0
 
-	for i = 1 to length(pSource) do
-		if atom(pSource[i]) then
+	for i = 1 to length(source_list) do
+		if atom(source_list[i]) then
 			if lCOW != 0 then
 				if lCOW != i then
-					lResult[lCOW] = pSource[i]
+					lResult[lCOW] = source_list[i]
 				end if
 				lCOW += 1
 			end if
@@ -2899,18 +2899,18 @@ public function remove_subseq( sequence pSource, object pAltValue)
 		end if
 
 		if lCOW = 0 then
-			lResult = pSource
+			lResult = source_list
 			lCOW = i
 		end if
-		if not equal(pAltValue, SEQ_NOALT) then
-			lResult[lCOW] = pAltValue
+		if not equal(alt_value, SEQ_NOALT) then
+			lResult[lCOW] = alt_value
 			lCOW += 1
 		end if
 
 	end for
 
 	if lCOW = 0 then
-		return pSource
+		return source_list
 	end if
 	return lResult[1.. lCOW - 1]
 end function
@@ -2918,7 +2918,7 @@ end function
 --**
 -- These are used with the [[:remove_dups]]() function.
 -- ** RD_INPLACE removes items while preserving the original order of the unique items.
--- ** RD_PRESORTED assumes that the elements in ##pSource## are already sorted. If they
+-- ** RD_PRESORTED assumes that the elements in ##source_data## are already sorted. If they
 -- are not already sorted, this option merely removed adjacent duplicate elements.
 -- ** RD_SORT will return the unique elements in ascending sorted order.
 
@@ -2931,15 +2931,15 @@ public enum
 -- Removes duplicate elements
 --
 -- Parameters:
--- # ##pSource## : A sequence that may contain duplicated elements
--- # ##pInPlace## : One of RD_INPLACE, RD_PRESORTED, or RD_SORT.
+-- # ##source_data## : A sequence that may contain duplicated elements
+-- # ##proc_option## : One of RD_INPLACE, RD_PRESORTED, or RD_SORT.
 -- ** RD_INPLACE removes items while preserving the original order of the unique items.
--- ** RD_PRESORTED assumes that the elements in ##pSource## are already sorted. If they
+-- ** RD_PRESORTED assumes that the elements in ##source_data## are already sorted. If they
 -- are not already sorted, this option merely removed adjacent duplicate elements.
 -- ** RD_SORT will return the unique elements in ascending sorted order.
 --
 -- Returns:
--- A **sequence**, that contains only the unique elements from ##pSource##.
+-- A **sequence**, that contains only the unique elements from ##source_data##.
 --
 -- Example 1:
 -- <eucode>
@@ -2950,39 +2950,39 @@ public enum
 -- ? remove_dups(sort(s), RD_PRESORTED) --> {0,2,4,5,6,7,9}
 -- </eucode>
 --
-public function remove_dups(sequence pSource, integer pInPlace = RD_PRESORTED)
+public function remove_dups(sequence source_data, integer proc_option = RD_PRESORTED)
 	integer lTo
 	integer lFrom
 
-	if length(pSource) < 2 then
-		return pSource
+	if length(source_data) < 2 then
+		return source_data
 	end if
 
-	if pInPlace = RD_SORT then
-		pSource = sort(pSource)
-		pInPlace = RD_PRESORTED
+	if proc_option = RD_SORT then
+		source_data = sort(source_data)
+		proc_option = RD_PRESORTED
 	end if
-	if pInPlace = RD_PRESORTED then
+	if proc_option = RD_PRESORTED then
 		lTo = 1
 		lFrom = 2
 
-		while lFrom <= length(pSource) do
-			if not equal(pSource[lFrom], pSource[lTo]) then
+		while lFrom <= length(source_data) do
+			if not equal(source_data[lFrom], source_data[lTo]) then
 				lTo += 1
 				if lTo != lFrom then
-					pSource[lTo] = pSource[lFrom]
+					source_data[lTo] = source_data[lFrom]
 				end if
 			end if
 			lFrom += 1
 		end while
-		return pSource[1 .. lTo]
+		return source_data[1 .. lTo]
 	end if
 
 	sequence lResult
 	lResult = {}
-	for i = 1 to length(pSource) do
-		if not find(pSource[i], lResult) then
-			lResult = append(lResult, pSource[i])
+	for i = 1 to length(source_data) do
+		if not find(source_data[i], lResult) then
+			lResult = append(lResult, source_data[i])
 		end if
 	end for
 	return lResult
@@ -2998,13 +2998,13 @@ public enum
 -- Combines all the sub-sequences into a single, optionally sorted, list
 --
 -- Parameters:
--- # ##pSource## : A sequence that contains sub-sequences to be combined.
--- # ##pSorted## : An integer; COMBINE_UNSORTED to return a non-sorted list and 
+-- # ##source_data## : A sequence that contains sub-sequences to be combined.
+-- # ##proc_option## : An integer; COMBINE_UNSORTED to return a non-sorted list and 
 --                 COMBINE_SORTED (the default) to return a sorted list.
 --
 -- Returns:
 -- A **sequence**, that contains all the elements from all the first-level of
--- sub-sequences from ##pSource##.
+-- sub-sequences from ##source_data##.
 --
 -- Comments:
 -- The elements in the sub-sequences do not have to be pre-sorted.
@@ -3032,48 +3032,48 @@ public enum
 -- ? combine(s, COMBINE_UNSORTED) --> "catdogfishwhalewolfsnailworm"
 -- </eucode>
 --
-public function combine(sequence pSource, integer pSorted = COMBINE_SORTED)
+public function combine(sequence source_data, integer proc_option = COMBINE_SORTED)
 	sequence lResult
 	integer lTotalSize = 0
 	integer lPos
 
-	if length(pSource) = 0 then
+	if length(source_data) = 0 then
 		return {}
 	end if
 
-	if length(pSource) = 1 then
-		return pSource[1]
+	if length(source_data) = 1 then
+		return source_data[1]
 	end if
 
-	for i = 1 to length(pSource) do
-		lTotalSize += length(pSource[i])
+	for i = 1 to length(source_data) do
+		lTotalSize += length(source_data[i])
 	end for
 
 	lResult = repeat(0, lTotalSize)
 	lPos = 1
-	for i = 1 to length(pSource) do
-		lResult[lPos .. length(pSource[i]) + lPos - 1] = pSource[i]
-		lPos += length(pSource[i])
+	for i = 1 to length(source_data) do
+		lResult[lPos .. length(source_data[i]) + lPos - 1] = source_data[i]
+		lPos += length(source_data[i])
 	end for
 	
-	if pSorted = COMBINE_SORTED then
+	if proc_option = COMBINE_SORTED then
 		return sort(lResult)
 	else
 		return lResult
 	end if
 end function
 
---/desc Pads /i pList to the right until its length reaches /i pMinSize using /i pNewData as filler.
---/ret The padded sequence, unchanged if its size was not less than /i pMinSize on input.
+--/desc Pads /i source_data to the right until its length reaches /i min_size using /i new_data as filler.
+--/ret The padded sequence, unchanged if its size was not less than /i min_size on input.
 --**
 -- Ensures that the supplied sequence is at least the supplied minimum length.
 --
 -- Parameters:
--- # ##pList## : A sequence that might need extending.
--- # ##pMinSize##: An integer. The minimum length that ##pList## must be.
--- # ##pNewData##: An object. This used to when ##pList## needs to be extended,
+-- # ##source_data## : A sequence that might need extending.
+-- # ##min_size##: An integer. The minimum length that ##source_data## must be.
+-- # ##new_data##: An object. This used to when ##source_data## needs to be extended,
 -- in which case it is appended as many times as required to make the length
--- equal to ##pMinSize##.
+-- equal to ##min_size##.
 --
 -- Returns:
 -- A **sequence**. 
@@ -3085,12 +3085,12 @@ end function
 -- s = minsize({4,3,6,2,7,1,2},  5, -1) --> {4,3,6,2,7,1,2}
 -- </eucode>
 --
-public function minsize(sequence pList, integer pMinSize, object pNewData)
+public function minsize(sequence source_data, integer min_size, object new_data)
 
-    if length(pList) < pMinSize then
-        pList &= repeat(pNewData, pMinSize - length(pList))
+    if length(source_data) < min_size then
+        source_data &= repeat(new_data, min_size - length(source_data))
     end if
     
-    return pList
+    return source_data
 end function
 

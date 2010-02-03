@@ -19,17 +19,17 @@ include std/sequence.e
 -- Determines the k-th smallest value from the supplied set of numbers. 
 --
 -- Parameters:
--- # ##pData## : The list of values from which the smallest value is chosen.
--- # ##pIndex## : The relative index of the desired smallest value.
+-- # ##data_set## : The list of values from which the smallest value is chosen.
+-- # ##ordinal_idx## : The relative index of the desired smallest value.
 --
 -- Returns:
 -- A **sequence**, {The k-th smallest value, its index in the set}
 --
 -- Comments: 
 -- ##small##() is used to return a value based on its size relative to
--- all the other elements in the sequence. When ##index## is 1, the smallest index is returned. Use ##index = length(pData)## to return the highest. 
+-- all the other elements in the sequence. When ##index## is 1, the smallest index is returned. Use ##index = length(data_set)## to return the highest. 
 --
--- If ##pIndex## is less than one, or greater then length of ##pData##,
+-- If ##ordinal_idx## is less than one, or greater then length of ##data_set##,
 --     an empty sequence is returned.
 --
 -- The set of values does not have to be in any particular order. The values may be any Euphoria object.
@@ -45,23 +45,23 @@ include std/sequence.e
 --   </eucode>
 --
 
-public function small(sequence pData, integer pIndex)
+public function small(sequence data_set, integer ordinal_idx)
 	sequence lSortedData
 
-	if pIndex < 1 or pIndex > length(pData) then
+	if ordinal_idx < 1 or ordinal_idx > length(data_set) then
 		return {}
 	end if
 	
-	lSortedData = sort(pData)
+	lSortedData = sort(data_set)
 	
-	return {lSortedData[pIndex], find(lSortedData[pIndex], pData)}
+	return {lSortedData[ordinal_idx], find(lSortedData[ordinal_idx], data_set)}
 end function
 
 --**
 -- Returns the largest of the data points that are atoms.
 --
 -- Parameters:
---   # ##pData## : a list of 1 or more numbers among which you want the largest.
+--   # ##data_set## : a list of 1 or more numbers among which you want the largest.
 --
 -- Returns:
 --   An **object**, either of:
@@ -69,7 +69,7 @@ end function
 -- * ##{} ##if there //is// no largest value.
 --
 -- Comments:
--- Any ##pData## element which is not an atom is ignored.
+-- Any ##data_set## element which is not an atom is ignored.
 --
 -- Example 1:
 --   <eucode>
@@ -80,16 +80,16 @@ end function
 -- See also:
 --   [[:range]]
 --
-public function largest(object pData)
+public function largest(object data_set)
 	atom result_, temp_
 	integer lFoundAny
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
 	lFoundAny = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			temp_ = pData[i]
+	for i = 1 to length(data_set) do
+		if atom(data_set[i]) then
+			temp_ = data_set[i]
 			if lFoundAny then
 				if temp_ > result_ then
 					result_ = temp_
@@ -110,7 +110,7 @@ end function
 -- Returns the smallest of the data points. 
 --
 -- Parameters:
---   # ##pData## : A list of 1 or more numbers for which you want the smallest.
+--   # ##data_set## : A list of 1 or more numbers for which you want the smallest.
 --             **Note:** only atom elements are included and any sub-sequences
 --             elements are ignored.
 --
@@ -120,7 +120,7 @@ end function
 -- * ##{} ##if there //is// no largest value.
 --
 -- Comments:
--- Any ##pData## element which is not an atom is ignored.
+-- Any ##data_set## element which is not an atom is ignored.
 --
 -- Example 1:
 --   <eucode>
@@ -130,16 +130,16 @@ end function
 --
 -- See also:
 --   [[:range]]
-public function smallest(object pData)
+public function smallest(object data_set)
 	atom result_, temp_
 	integer lFoundAny
-	if atom(pData) then
-			return pData
+	if atom(data_set) then
+			return data_set
 	end if
 	lFoundAny = 0
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			temp_ = pData[i]
+	for i = 1 to length(data_set) do
+		if atom(data_set[i]) then
+			temp_ = data_set[i]
 			if lFoundAny then
 				if temp_ < result_ then
 					result_ = temp_
@@ -160,13 +160,13 @@ end function
 -- Determines a number of //range// statistics for the data set. 
 --
 -- Parameters:
---   # ##pData## : a list of 1 or more numbers for which you want the range data.
+--   # ##data_set## : a list of 1 or more numbers for which you want the range data.
 --
 -- Returns:
 --  A **sequence**, empty if no atoms were found, else like {Lowest, Highest, Range, Mid-range}
 --
 -- Comments:
--- Any sequence element in ##pData## is ignored.
+-- Any sequence element in ##data_set## is ignored.
 --
 -- Example 1:
 --   <eucode>
@@ -176,18 +176,18 @@ end function
 -- See also:
 --   [[:smallest]] [[:largest]]
 --
-public function range(object pData)
+public function range(object data_set)
 	sequence result_
 	atom temp_
 	integer lFoundAny = 0
 	
-	if atom(pData) then
-		pData = {pData}
+	if atom(data_set) then
+		data_set = {data_set}
 	end if
 	
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			temp_ = pData[i]
+	for i = 1 to length(data_set) do
+		if atom(data_set[i]) then
+			temp_ = data_set[i]
 			if lFoundAny then
 				if temp_ < result_[1] then
 					result_[1] = temp_
@@ -222,28 +222,28 @@ public enum
 
 public constant ST_NOALT = SEQ_NOALT
    
-function massage(sequence pData, object pMassage)
-   	if atom(pMassage) or equal(pMassage, ST_NOALT) then
-		return remove_subseq(pData, pMassage)
+function massage(sequence data_set, object subseq_opt)
+   	if atom(subseq_opt) or equal(subseq_opt, ST_NOALT) then
+		return remove_subseq(data_set, subseq_opt)
 	end if
 	
-	if length(pMassage) > 0 then
-		return remove_subseq(pData, 0)
+	if length(subseq_opt) > 0 then
+		return remove_subseq(data_set, 0)
 	end if
 	
-	return pData
+	return data_set
 end function
 
 --**
 -- Returns the standard deviation based of the population. 
 --
 -- Parameters:
--- # ##pData## : a list of 1 or more numbers for which you want the estimated standard deviation.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+-- # ##data_set## : a list of 1 or more numbers for which you want the estimated standard deviation.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
--- # ##pPop## : an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
--- sample of the total population. ST_FULLPOP means that ##pData## is the
+-- # ##population_type## : an integer. ST_SAMPLE (the default) assumes that ##data_set## is a random
+-- sample of the total population. ST_FULLPOP means that ##data_set## is the
 -- entire population.
 --
 -- Returns:
@@ -253,19 +253,19 @@ end function
 -- Comments:
 -- ##stdev##() is a measure of how values are different from the average. 
 --
--- The numbers in ##pData## can either be the entire population of values or
--- just a random subset. You indicate which in the ##pPop## parameter. By default
--- ##pData## represents a sample and not the entire population. When using this
+-- The numbers in ##data_set## can either be the entire population of values or
+-- just a random subset. You indicate which in the ##population_type## parameter. By default
+-- ##data_set## represents a sample and not the entire population. When using this
 -- function with sample data, the result is an //estimated// standard deviation.
 --
 -- If the data can contain sub-sequences, such as strings, you need to let the
--- the function know about this otherwise it assumes every value in ##pData## is
+-- the function know about this otherwise it assumes every value in ##data_set## is
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
--- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
--- value otherwise use the replacement value in ##pMassage##. However, if you
--- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- with some number. To ignore them, use ST_NOALT as the ##subseq_opt## parameter
+-- value otherwise use the replacement value in ##subseq_opt##. However, if you
+-- know that ##data_set## only contains numbers use the default ##subseq_opt## value,
 -- which is an empty sequence. **Note** It is faster if the data only contains
 -- numbers.
 --
@@ -288,14 +288,14 @@ end function
 --   [[:average]], [[:avedev]]
 --
 
-public function stdev(sequence pData, object pMassage = "", integer pPop = ST_SAMPLE)
+public function stdev(sequence data_set, object subseq_opt = "", integer population_type = ST_SAMPLE)
 	atom lSum
 	atom lMean
 	integer lCnt
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	lCnt = length(pData)
+	lCnt = length(data_set)
 	
 	if lCnt = 0 then
 		return {}
@@ -305,17 +305,17 @@ public function stdev(sequence pData, object pMassage = "", integer pPop = ST_SA
 	end if
 	
 	lSum = 0
-	for i = 1 to length(pData) do
-		lSum += pData[i]
+	for i = 1 to length(data_set) do
+		lSum += data_set[i]
 	end for
 	
 	lMean = lSum / lCnt
 	lSum = 0
-	for i = 1 to length(pData) do
-		lSum += power(pData[i] - lMean, 2)
+	for i = 1 to length(data_set) do
+		lSum += power(data_set[i] - lMean, 2)
 	end for
 	
-	if pPop = ST_SAMPLE then
+	if population_type = ST_SAMPLE then
 		lCnt -= 1
 	end if
 	
@@ -326,12 +326,12 @@ end function
 -- Returns the average of the absolute deviations of data points from their mean.
 --
 -- Parameters:
--- # ##pData## : a list of 1 or more numbers for which you want the mean of the absolute deviations.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+-- # ##data_set## : a list of 1 or more numbers for which you want the mean of the absolute deviations.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
--- # ##pPop## : an integer. ST_SAMPLE (the default) assumes that ##pData## is a random
--- sample of the total population. ST_FULLPOP means that ##pData## is the
+-- # ##population_type## : an integer. ST_SAMPLE (the default) assumes that ##data_set## is a random
+-- sample of the total population. ST_FULLPOP means that ##data_set## is the
 -- entire population.
 --
 -- Returns:
@@ -343,19 +343,19 @@ end function
 -- properties are less well behaved than those of the standard deviation, which is
 -- why it is used less. 
 --
--- The numbers in ##pData## can either be the entire population of values or
--- just a random subset. You indicate which in the ##pPop## parameter. By default
--- ##pData## represents a sample and not the entire population. When using this
+-- The numbers in ##data_set## can either be the entire population of values or
+-- just a random subset. You indicate which in the ##population_type## parameter. By default
+-- ##data_set## represents a sample and not the entire population. When using this
 -- function with sample data, the result is an //estimated// deviation.
 --
 -- If the data can contain sub-sequences, such as strings, you need to let the
--- the function know about this otherwise it assumes every value in ##pData## is
+-- the function know about this otherwise it assumes every value in ##data_set## is
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
--- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
--- value otherwise use the replacement value in ##pMassage##. However, if you
--- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- with some number. To ignore them, use ST_NOALT as the ##subseq_opt## parameter
+-- value otherwise use the replacement value in ##subseq_opt##. However, if you
+-- know that ##data_set## only contains numbers use the default ##subseq_opt## value,
 -- which is an empty sequence. **Note** It is faster if the data only contains
 -- numbers.
 --
@@ -378,14 +378,14 @@ end function
 --   [[:average]], [[:stdev]]
 --
 
-public function avedev(sequence pData, object pMassage = "", integer pPop = ST_SAMPLE)
+public function avedev(sequence data_set, object subseq_opt = "", integer population_type = ST_SAMPLE)
 	atom lSum
 	atom lMean
 	integer lCnt
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	lCnt = length(pData)
+	lCnt = length(data_set)
 	
 	if lCnt = 0 then
 		return {}
@@ -395,21 +395,21 @@ public function avedev(sequence pData, object pMassage = "", integer pPop = ST_S
 	end if
 	lSum = 0
 
-	for i = 1 to length(pData) do
-		lSum += pData[i]
+	for i = 1 to length(data_set) do
+		lSum += data_set[i]
 	end for
 	
 	lMean = lSum / lCnt
 	lSum = 0
-	for i = 1 to length(pData) do
-		if pData[i] > lMean then
-			lSum += pData[i] - lMean
+	for i = 1 to length(data_set) do
+		if data_set[i] > lMean then
+			lSum += data_set[i] - lMean
 		else
-			lSum += lMean - pData[i]
+			lSum += lMean - data_set[i]
 		end if
 	end for
 	
-	if pPop = ST_SAMPLE then
+	if population_type = ST_SAMPLE then
 		lCnt -= 1
 	end if
 	return lSum / lCnt
@@ -419,9 +419,9 @@ end function
 -- Returns the sum of all the atoms in an object.
 --
 -- Parameters:
--- # ##pData## : Either an atom or a list of numbers to sum.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+-- # ##data_set## : Either an atom or a list of numbers to sum.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
@@ -431,13 +431,13 @@ end function
 --   ##sum##() is used as a measure of the magnitude of a sequence of positive values.
 --
 -- If the data can contain sub-sequences, such as strings, you need to let the
--- the function know about this otherwise it assumes every value in ##pData## is
+-- the function know about this otherwise it assumes every value in ##data_set## is
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
--- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
--- value otherwise use the replacement value in ##pMassage##. However, if you
--- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- with some number. To ignore them, use ST_NOALT as the ##subseq_opt## parameter
+-- value otherwise use the replacement value in ##subseq_opt##. However, if you
+-- know that ##data_set## only contains numbers use the default ##subseq_opt## value,
 -- which is an empty sequence. **Note** It is faster if the data only contains
 -- numbers.
 --
@@ -455,16 +455,16 @@ end function
 -- See also:
 --   [[:average]]
 
-public function sum(object pData, object pMassage = "")
+public function sum(object data_set, object subseq_opt = "")
 	atom result_
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	result_ = 0
-	for i = 1 to length(pData) do
-		result_ += pData[i]
+	for i = 1 to length(data_set) do
+		result_ += data_set[i]
 	end for
 
 	return result_
@@ -474,28 +474,28 @@ end function
 -- Returns the count of all the atoms in an object.
 --
 -- Parameters:
---   # ##pData## : either an atom or a list.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--   # ##data_set## : either an atom or a list.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 -- Comments: 
--- This returns the number of numbers in ##pData##
+-- This returns the number of numbers in ##data_set##
 --
 -- If the data can contain sub-sequences, such as strings, you need to let the
--- the function know about this otherwise it assumes every value in ##pData## is
+-- the function know about this otherwise it assumes every value in ##data_set## is
 -- an number. If that is not the case then the function will crash. So it is
 -- important that if it can possibly contain sub-sequences that you tell this
 -- function what to do with them. Your choices are to ignore them or replace them
--- with some number. To ignore them, use ST_NOALT as the ##pMassage## parameter
--- value otherwise use the replacement value in ##pMassage##. However, if you
--- know that ##pData## only contains numbers use the default ##pMassage## value,
+-- with some number. To ignore them, use ST_NOALT as the ##subseq_opt## parameter
+-- value otherwise use the replacement value in ##subseq_opt##. However, if you
+-- know that ##data_set## only contains numbers use the default ##subseq_opt## value,
 -- which is an empty sequence. **Note** It is faster if the data only contains
 -- numbers.
 --
 -- Returns:
 --
---  An **integer**, the number of atoms in the set. When ##pData## is an atom, 1 is returned.
+--  An **integer**, the number of atoms in the set. When ##data_set## is an atom, 1 is returned.
 --
 -- Example 1:
 --   <eucode>
@@ -507,12 +507,12 @@ end function
 -- See also:
 --   [[:average]], [[:sum]]
 
-public function count(object pData, object pMassage = "")
-	if atom(pData) then
+public function count(object data_set, object subseq_opt = "")
+	if atom(data_set) then
 		return 1
 	end if
 	
-	return length(massage(pData, pMassage))
+	return length(massage(data_set, subseq_opt))
 
 end function
 
@@ -521,9 +521,9 @@ end function
 -- Returns the average (mean) of the data points.
 --
 -- Parameters:
---   # ##pData## : A list of 1 or more numbers for which you want the mean.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+--   # ##data_set## : A list of 1 or more numbers for which you want the mean.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 --
@@ -550,32 +550,32 @@ end function
 -- See also:
 --   [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
-public function average(object pData, object pMassage = "")
+public function average(object data_set, object subseq_opt = "")
 	
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	if length(pData) = 0 then
+	if length(data_set) = 0 then
 		return {}
 	end if
-	return sum(pData) / length(pData)
+	return sum(data_set) / length(data_set)
 end function
 
 --**
 -- Returns the geometric mean of the atoms in a sequence.
 --
 -- Parameters:
--- # ##pData## : the values to take the geometric mean of.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+-- # ##data_set## : the values to take the geometric mean of.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --
--- An **atom**, the geometric mean of the atoms in ##pData##.
+-- An **atom**, the geometric mean of the atoms in ##data_set##.
 -- If there is no atom to take the mean of, 1 is returned.
 --
 -- Comments:
@@ -593,26 +593,26 @@ end function
 -- See Also:
 -- [[:average]]
 
-public function geomean(object pData, object pMassage = "")
+public function geomean(object data_set, object subseq_opt = "")
 	atom prod_ = 1.0
 	integer count_
 
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	count_ = length(pData)
+	count_ = length(data_set)
 	if count_ = 0 then
 		return 1
 	end if
 	if count_ = 1 then
-		return pData[1]
+		return data_set[1]
 	end if
 	
-	for i = 1 to length(pData) do
-		atom x = pData[i]
+	for i = 1 to length(data_set) do
+		atom x = data_set[i]
 		
 	    if x = 0 then
 	        return 0
@@ -634,14 +634,14 @@ end function
 -- Returns the harmonic mean of the atoms in a sequence.
 --
 -- Parameters:
--- # ##pData## : the values to take the harmonic mean of.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+-- # ##data_set## : the values to take the harmonic mean of.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
 --
--- An **atom**, the harmonic mean of the atoms in ##pData##.
+-- An **atom**, the harmonic mean of the atoms in ##data_set##.
 --
 -- Comments:
 -- The harmonic mean is the inverse of the average of their inverses.
@@ -657,28 +657,28 @@ end function
 -- See Also:
 -- [[:average]]
 
-public function harmean(sequence pData, object pMassage = "")
+public function harmean(sequence data_set, object subseq_opt = "")
 	integer count_
 
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	count_ = length(pData)
+	count_ = length(data_set)
 	if count_ = 1 then
-		return pData[1]
+		return data_set[1]
 	end if
 
 	atom y = 0
 	atom z = 1
 	for i = 1 to count_ do
 		atom x = 1
-		z *= pData[i]
+		z *= data_set[i]
 		for j = 1 to count_ do
 			if j != i then
-				x *= pData[j]
+				x *= data_set[j]
 			end if
 		end for
 		y += x
@@ -696,8 +696,8 @@ end function
 -- can be either a simple or weighted moving average.
 --
 -- Parameters:
---   # ##pData## : a list of 1 or more numbers for which you want a moving average.
---   # ##pPeriod## : an object, either 
+--   # ##data_set## : a list of 1 or more numbers for which you want a moving average.
+--   # ##period_delta## : an object, either 
 -- * an integer representing the size of the period, or
 -- * a list of weightings to apply to the respective period positions.
 --
@@ -718,7 +718,7 @@ end function
 --   the last returned value is the average of the last 5 data points
 --   [$-4 .. $].
 --
--- When ##pPeriod## is an atom, it is rounded down to the width of the average. When it is a 
+-- When ##period_delta## is an atom, it is rounded down to the width of the average. When it is a 
 -- sequence, the width is its length. If there are not enough data points, zeroes are inserted.
 --
 --  Note that only atom elements are included and any sub-sequence elements are ignored.
@@ -736,39 +736,39 @@ end function
 -- See also:
 --   [[:average]]
 --
-public function movavg(object pData, object pPeriod)
+public function movavg(object data_set, object period_delta)
 	sequence result_ 
 	integer lLow
 	integer lHigh
 	integer j
 	integer n
 
-	if atom(pData) then
-		pData = {pData}
+	if atom(data_set) then
+		data_set = {data_set}
 		
-	elsif count(pData) = 0 then
-		return pData
+	elsif count(data_set) = 0 then
+		return data_set
 	end if
 	
-	if atom(pPeriod) then
-		if floor(pPeriod) < 1 then
+	if atom(period_delta) then
+		if floor(period_delta) < 1 then
 			return {}
 		end if
-		pPeriod = repeat(1, floor(pPeriod))
+		period_delta = repeat(1, floor(period_delta))
 	end if
 	
-	if length(pData) < length(pPeriod) then
-		pData = repeat(0, length(pPeriod) - length(pData)) & pData
+	if length(data_set) < length(period_delta) then
+		data_set = repeat(0, length(period_delta) - length(data_set)) & data_set
 	end if
 	lLow = 1
-	lHigh = length(pPeriod)
-	result_ = repeat(0, length(pData) - length(pPeriod) + 1)
-	while lHigh <= length(pData) do
+	lHigh = length(period_delta)
+	result_ = repeat(0, length(data_set) - length(period_delta) + 1)
+	while lHigh <= length(data_set) do
 		j = 1
 		n = 0
 		for i = lLow to lHigh do
-			if atom(pData[i]) then
-				result_[lLow] += pData[i] * pPeriod[j]
+			if atom(data_set[i]) then
+				result_[lLow] += data_set[i] * period_delta[j]
 				n += 1
 			end if
 			j += 1
@@ -790,11 +790,11 @@ end function
 -- Returns the exponential moving average of a set of data points.
 --
 -- Parameters:
---   # ##pData## : a list of 1 or more numbers for which you want a moving average.
---   # ##pFactor## : an atom, the smoothing factor, typically between 0 and 1.
+--   # ##data_set## : a list of 1 or more numbers for which you want a moving average.
+--   # ##smoothing_factor## : an atom, the smoothing factor, typically between 0 and 1.
 --
 -- Returns:
---   A **sequence**, made of the requested averages, or ##{}## if ##pData## is empty or
+--   A **sequence**, made of the requested averages, or ##{}## if ##data_set## is empty or
 -- the supplied period is less than one.
 --
 -- Comments: 
@@ -808,7 +808,7 @@ end function
 --
 -- The smoothing factor controls how data is smoothed. 0 smooths everything to 0, and 1 means no smoothing at all.
 --
--- Any value for ##pFactor## outside the 0.0..1.0 range causes ##pFactor## 
+-- Any value for ##smoothing_factor## outside the 0.0..1.0 range causes ##smoothing_factor## 
 -- to be set to the periodic factor ##(2/(N+1))##.
 --
 -- Example 1:
@@ -824,28 +824,28 @@ end function
 -- See also:
 --   [[:average]]
 
-public function emovavg(object pData, atom pFactor)
+public function emovavg(object data_set, atom smoothing_factor)
 	atom lPrev
 	
-	if atom(pData) then
-		pData = {pData}
+	if atom(data_set) then
+		data_set = {data_set}
 		
-	elsif count(pData) = 0 then
-		return pData
+	elsif count(data_set) = 0 then
+		return data_set
 	end if
 	
-	if pFactor < 0 or pFactor > 1 then
-		pFactor = (2 / (count(pData) + 1))
+	if smoothing_factor < 0 or smoothing_factor > 1 then
+		smoothing_factor = (2 / (count(data_set) + 1))
 	end if
 	
-	lPrev = average(pData)
-	for i = 1 to length(pData) do
-		if atom(pData[i]) then
-			pData[i] = (pData[i] - lPrev) * pFactor + lPrev
-			lPrev = pData[i]
+	lPrev = average(data_set)
+	for i = 1 to length(data_set) do
+		if atom(data_set[i]) then
+			data_set[i] = (data_set[i] - lPrev) * smoothing_factor + lPrev
+			lPrev = data_set[i]
 		end if
 	end for
-	return pData
+	return data_set
 end function
 
 
@@ -853,9 +853,9 @@ end function
 -- Returns the mid point of the data points.
 --
 -- Parameters:
--- # ##pData## : a list of 1 or more numbers for which you want the mean.
--- # ##pMassage## : an object. When this is an empty sequence (the default) it 
---  means that ##pData## is assumed to contain no sub-sequences otherwise this
+-- # ##data_set## : a list of 1 or more numbers for which you want the mean.
+-- # ##subseq_opt## : an object. When this is an empty sequence (the default) it 
+--  means that ##data_set## is assumed to contain no sub-sequences otherwise this
 --  gives instructions about how to treat sub-sequences.
 --
 -- Returns:
@@ -883,28 +883,28 @@ end function
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 
-public function median(object pData, object pMassage = "")
+public function median(object data_set, object subseq_opt = "")
 
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	if length(pData) = 0 then
-		return pData[1]
+	if length(data_set) = 0 then
+		return data_set[1]
 	end if
 	
-	if length(pData) < 3 then
-		return pData[1]
+	if length(data_set) < 3 then
+		return data_set[1]
 	end if
-	pData = sort(pData)
-	return pData[ floor((length(pData) + 1) / 2) ]
+	data_set = sort(data_set)
+	return data_set[ floor((length(data_set) + 1) / 2) ]
 	
 end function
 
 
-public function raw_frequency(object pData, object pMassage = "")
+public function raw_frequency(object data_set, object subseq_opt = "")
 	
 	sequence lCounts
 	sequence lKeys
@@ -912,24 +912,24 @@ public function raw_frequency(object pData, object pMassage = "")
 	integer lPos
 	integer lMax = -1
 	
-	if atom(pData) then
-		return {{1,pData}}
+	if atom(data_set) then
+		return {{1,data_set}}
 	end if
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	if length(pData) = 0 then
-		return {{1,pData}}
+	if length(data_set) = 0 then
+		return {{1,data_set}}
 	end if
-	lCounts = repeat({0,0}, length(pData))
-	lKeys   = repeat(0, length(pData))
-	for i = 1 to length(pData) do
-		lPos = find(pData[i], lKeys)
+	lCounts = repeat({0,0}, length(data_set))
+	lKeys   = repeat(0, length(data_set))
+	for i = 1 to length(data_set) do
+		lPos = find(data_set[i], lKeys)
 		if lPos = 0 then
 			lNew += 1
 			lPos = lNew
-			lCounts[lPos][2] = pData[i]
-			lKeys[lPos] = pData[i]
+			lCounts[lPos][2] = data_set[i]
+			lKeys[lPos] = data_set[i]
 			if lPos > lMax then
 				lMax = lPos
 			end if
@@ -940,15 +940,15 @@ public function raw_frequency(object pData, object pMassage = "")
 	
 end function
 
-public function mode(object pData, object pMassage = "")
+public function mode(object data_set, object subseq_opt = "")
 	
 	sequence lCounts
 	integer lTop
 	integer lTopFreq
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 
-	lCounts = sort(raw_frequency(pData))
+	lCounts = sort(raw_frequency(data_set))
 	lTop = length(lCounts)-1
 	lTopFreq = lCounts[$][1]
 	while lTop > 0 do
@@ -977,65 +977,65 @@ public function mode(object pData, object pMassage = "")
 	end if
 end function
 
-public function central_moment(object pData, atom datum, integer which = 1)
+public function central_moment(object data_set, atom datum, integer which = 1)
 
 	atom lMean
 	
-	if atom(pData) or length(pData) = 0 then
+	if atom(data_set) or length(data_set) = 0 then
 		return 0
 	end if
 	
-	lMean = average(pData)
+	lMean = average(data_set)
 	
 	return power( datum - lMean, which)
 
 end function
  
-public function sum_central_moments(object pData, integer which = 1)
+public function sum_central_moments(object data_set, integer which = 1)
 
 	atom lMean
 	atom lTop
 	
-	if atom(pData) or length(pData) = 0 then
+	if atom(data_set) or length(data_set) = 0 then
 		return 0
 	end if
 	
-	lMean = average(pData)
+	lMean = average(data_set)
 	
 	lTop = 0
-	for i = 1 to length(pData) do
-		lTop += power( pData[i] - lMean, which)
+	for i = 1 to length(data_set) do
+		lTop += power( data_set[i] - lMean, which)
 	end for
 	
 	return lTop
 end function
  
-public function kurtosis(object pData, integer norm = 3, object pMassage = "")
+public function kurtosis(object data_set, integer norm = 3, object subseq_opt = "")
 
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
-	pData = massage(pData, pMassage)
-	if length(pData) = 0 then
-		return pData
+	data_set = massage(data_set, subseq_opt)
+	if length(data_set) = 0 then
+		return data_set
 	end if
 	
-	return (sum_central_moments(pData, 4) / ((length(pData) - 1) * power(stdev(pData), 4))) - norm
+	return (sum_central_moments(data_set, 4) / ((length(data_set) - 1) * power(stdev(data_set), 4))) - norm
 
 end function
  
-public function skewness(object pData, object pMassage = "")
+public function skewness(object data_set, object subseq_opt = "")
 
-	if atom(pData) then
-		return pData
+	if atom(data_set) then
+		return data_set
 	end if
 	
-	pData = massage(pData, pMassage)
+	data_set = massage(data_set, subseq_opt)
 	
-	if length(pData) = 0 then
-		return pData
+	if length(data_set) = 0 then
+		return data_set
 	end if
-	return sum_central_moments(pData, 3) / ((length(pData) - 1) * power(stdev(pData), 3))
+	return sum_central_moments(data_set, 3) / ((length(data_set) - 1) * power(stdev(data_set), 3))
 	
 end function
  

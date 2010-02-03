@@ -1555,20 +1555,20 @@ end function
 -- Moves the bits in the input value by the specified distance.
 --
 -- Parameters:
---   # ##pNumber## : object: The value(s) whose bits will be be moved.
---   # ##pDistance## : integer: number of bits to be moved by. 
+--   # ##source_number## : object: The value(s) whose bits will be be moved.
+--   # ##shift_distance## : integer: number of bits to be moved by. 
 -- Comments:
--- * If ##pNumber## is a sequence, each element is shifted.
--- * The value(s) in ##pNumber## are first truncated to a 32-bit integer.
+-- * If ##source_number## is a sequence, each element is shifted.
+-- * The value(s) in ##source_number## are first truncated to a 32-bit integer.
 -- * The output is truncated to a 32-bit integer.
 -- * Vacated bits are replaced with zero.
--- * If ##pDistance## is negative, the bits in ##pNumber## are moved left.
--- * If ##pDistance## is positive, the bits in ##pNumber## are moved right.
--- * If ##pDistance## is zero, the bits in ##pNumber## are not moved.
+-- * If ##shift_distance## is negative, the bits in ##source_number## are moved left.
+-- * If ##shift_distance## is positive, the bits in ##source_number## are moved right.
+-- * If ##shift_distance## is zero, the bits in ##source_number## are not moved.
 --
 -- Returns:
--- Atom(s) containing a 32-bit integer. A single atom in ##pNumber## is an atom, or
--- a sequence in the same form as ##pNumber## containing 32-bit integers.
+-- Atom(s) containing a 32-bit integer. A single atom in ##source_number## is an atom, or
+-- a sequence in the same form as ##source_number## containing 32-bit integers.
 --
 -- Example 1:
 -- <eucode>
@@ -1592,55 +1592,55 @@ end function
 -- See Also:
 --   [[:rotate_bits]]
 
-public function shift_bits(object pNumber, integer pDistance)
+public function shift_bits(object source_number, integer shift_distance)
 
-	if sequence(pNumber) then
-		for i = 1 to length(pNumber) do
-			pNumber[i] = shift_bits(pNumber[i], pDistance)
+	if sequence(source_number) then
+		for i = 1 to length(source_number) do
+			source_number[i] = shift_bits(source_number[i], shift_distance)
 		end for
-		return pNumber
+		return source_number
 	end if
-	pNumber = and_bits(pNumber, 0xFFFFFFFF)
-	if pDistance = 0 then
-		return pNumber
+	source_number = and_bits(source_number, 0xFFFFFFFF)
+	if shift_distance = 0 then
+		return source_number
 	end if
 	
-	if pDistance < 0 then
-		pNumber *= power(2, -pDistance)
+	if shift_distance < 0 then
+		source_number *= power(2, -shift_distance)
 	else
 		integer lSigned = 0
 		-- Check for the sign bit so we don't propagate it.
-		if and_bits(pNumber, 0x80000000) then
+		if and_bits(source_number, 0x80000000) then
 			lSigned = 1
-			pNumber = and_bits(pNumber, 0x7FFFFFFF)
+			source_number = and_bits(source_number, 0x7FFFFFFF)
 		end if
-		pNumber /= power(2, pDistance)
-		if lSigned and pDistance < 32 then
+		source_number /= power(2, shift_distance)
+		if lSigned and shift_distance < 32 then
 			-- Put back the sign bit now shifted
-			pNumber = or_bits(pNumber, power(2, 31-pDistance))
+			source_number = or_bits(source_number, power(2, 31-shift_distance))
 		end if
 	end if
 	
-	return and_bits(pNumber, 0xFFFFFFFF)
+	return and_bits(source_number, 0xFFFFFFFF)
 end function
 
 --**
 -- Rotates the bits in the input value by the specified distance.
 --
 -- Parameters:
---   # ##pNumber## : object: value(s) whose bits will be be rotated.
---   # ##pDistance## : integer: number of bits to be moved by. 
+--   # ##source_number## : object: value(s) whose bits will be be rotated.
+--   # ##shift_distance## : integer: number of bits to be moved by. 
 -- Comments:
--- * If ##pNumber## is a sequence, each element is rotated.
--- * The value(s) in ##pNumber## are first truncated to a 32-bit integer.
+-- * If ##source_number## is a sequence, each element is rotated.
+-- * The value(s) in ##source_number## are first truncated to a 32-bit integer.
 -- * The output is truncated to a 32-bit integer.
--- * If ##pDistance## is negative, the bits in ##pNumber## are rotated left.
--- * If ##pDistance## is positive, the bits in ##pNumber## are rotated right.
--- * If ##pDistance## is zero, the bits in ##pNumber## are not rotated.
+-- * If ##shift_distance## is negative, the bits in ##source_number## are rotated left.
+-- * If ##shift_distance## is positive, the bits in ##source_number## are rotated right.
+-- * If ##shift_distance## is zero, the bits in ##source_number## are not rotated.
 --
 -- Returns:
--- Atom(s) containing a 32-bit integer. A single atom in ##pNumber## is an atom, or
--- a sequence in the same form as ##pNumber## containing 32-bit integers.
+-- Atom(s) containing a 32-bit integer. A single atom in ##source_number## is an atom, or
+-- a sequence in the same form as ##source_number## containing 32-bit integers.
 --
 -- Example 1:
 -- <eucode>
@@ -1664,34 +1664,34 @@ end function
 -- See Also:
 --   [[:shift_bits]]
 
-public function rotate_bits(object pNumber, integer pDistance)
+public function rotate_bits(object source_number, integer shift_distance)
 	atom lTemp
 	atom lSave
 	integer lRest
 	
-	if sequence(pNumber) then
-		for i = 1 to length(pNumber) do
-			pNumber[i] = rotate_bits(pNumber[i], pDistance)
+	if sequence(source_number) then
+		for i = 1 to length(source_number) do
+			source_number[i] = rotate_bits(source_number[i], shift_distance)
 		end for
-		return pNumber
+		return source_number
 	end if
 	
-	pNumber = and_bits(pNumber, 0xFFFFFFFF)
-	if pDistance = 0 then
-		return pNumber
+	source_number = and_bits(source_number, 0xFFFFFFFF)
+	if shift_distance = 0 then
+		return source_number
 	end if
 
-	if pDistance < 0 then
-		lSave = not_bits(power(2, 32 + pDistance) - 1) 	
-		lRest = 32 + pDistance
+	if shift_distance < 0 then
+		lSave = not_bits(power(2, 32 + shift_distance) - 1) 	
+		lRest = 32 + shift_distance
 	else
-		lSave = power(2, pDistance) - 1
-		lRest = pDistance - 32
+		lSave = power(2, shift_distance) - 1
+		lRest = shift_distance - 32
 	end if
 	
-	lTemp = shift_bits(and_bits(pNumber, lSave), lRest)
-	pNumber = shift_bits(pNumber, pDistance)
-	return or_bits(pNumber, lTemp)
+	lTemp = shift_bits(and_bits(source_number, lSave), lRest)
+	source_number = shift_bits(source_number, shift_distance)
+	return or_bits(source_number, lTemp)
 end function
 
 --****
@@ -1875,7 +1875,7 @@ end function
 -- Test if the supplied integer is a even or odd number.
 --
 -- Parameters:
---		# ##pData## : an integer. The item to test.
+--		# ##test_integer## : an integer. The item to test.
 --
 -- Returns:
 -- An **integer**,
@@ -1900,23 +1900,23 @@ end function
 -- -- {10,1}
 -- </eucode>
 --
-public function is_even(integer pData)
-	return (and_bits(pData, 1) = 0)
+public function is_even(integer test_integer)
+	return (and_bits(test_integer, 1) = 0)
 end function
 
 --**
 -- Test if the supplied Euphoria object is even or odd.
 --
 -- Parameters:
---		# ##pData## : any Euphoria object. The item to test.
+--		# ##test_object## : any Euphoria object. The item to test.
 --
 -- Returns:
 -- An **object**,
--- * If ##pData## is an integer...
+-- * If ##test_object## is an integer...
 -- ** 1 if its even.
 -- ** 0 if its odd.
--- * If ##pData## is an atom this always returns 0
--- * If ##pData## is an sequence it tests each element recursively, returning a
+-- * Otherwise if ##test_object## is an atom this always returns 0
+-- * otherwise if ##test_object## is an sequence it tests each element recursively, returning a
 -- sequence of the same structure containing ones and zeros for each element. A
 -- 1 means that the element at this position was even otherwise it was odd.
 --
@@ -1943,17 +1943,17 @@ end function
 -- ? is_even_obj({{1,2,3}, {{4,5},6,{7,8}},9}) --> {{0,1,0},{{1,0},1,{0,1}},0}
 -- </eucode>
 --
-public function is_even_obj(object pData)
-	if atom(pData) then
-		if integer(pData) then
-			return (and_bits(pData, 1) = 0)
+public function is_even_obj(object test_object)
+	if atom(test_object) then
+		if integer(test_object) then
+			return (and_bits(test_object, 1) = 0)
 		end if
 		return 0
 	end if
-	for i = 1 to length(pData) do
-		pData[i] = is_even_obj(pData[i])
+	for i = 1 to length(test_object) do
+		test_object[i] = is_even_obj(test_object[i])
 	end for
 	
-	return pData
+	return test_object
 end function
 

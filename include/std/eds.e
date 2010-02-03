@@ -2610,6 +2610,27 @@ public function db_current ()
 end function
 
 --**
+-- Forces the database index cache to be cleared.
+--
+-- Parameters:
+--  None
+--
+-- Comments:
+-- * This is not normally required to the run. You might run it to set up a
+-- predetermined state for performance timing, or to release some memory back to the
+-- application.
+--
+-- Example 1:
+-- <eucode>
+-- db_cache_clear() -- Clear the cache.
+-- </eucode>
+
+public procedure db_cache_clear()
+	cache_index = {}
+	key_cache = {}
+end procedure
+
+--**
 -- Sets the key cache behavior.\\
 -- Initially, the cache option is turned on. This means that when possible, the
 -- keys of a table are kept in RAM rather than read from disk each time
@@ -2630,16 +2651,11 @@ end function
 -- x = db_set_caching(0) -- Turn off key caching.
 -- </eucode>
 
-public procedure db_cache_clear()
-	cache_index = {}
-	key_cache = {}
-end procedure
-
-public function db_set_caching(atom pVal)
+public function db_set_caching(atom new_setting)
 	integer lOldVal
 
 	lOldVal = caching_option
-	caching_option = (pVal != 0)
+	caching_option = (new_setting != 0)
 
 	if caching_option = 0 then
 		-- Wipe existing cache data.
