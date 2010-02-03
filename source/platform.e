@@ -14,8 +14,8 @@ include std/text.e
 include std/io.e
 
 public constant
-	ULINUX = LINUX + 0.3,
-	UFREEBSD = FREEBSD + 0.4,
+	ULINUX = LINUX,
+	UFREEBSD = FREEBSD,
 	UOSX = OSX,
 	USUNOS = SUNOS,
 	UOPENBSD = OPENBSD,
