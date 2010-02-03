@@ -32,6 +32,8 @@
 #     --plat value   set the OS that the translator will translate the code to.
 #            values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD.
 #
+#     --watcom   Use this so the translator will create C code for Watcom C.
+#
 #   Clean up binary files     :  make clean
 #   Clean up binary and       :  make distclean
 #        translated files
@@ -496,7 +498,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	cp Makefile Makefile.gnu $(CONFIG) revget.ex $(BUILDDIR)/$(OBJDIR)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
-	(cd $(BUILDDIR)/$(OBJDIR);$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex -nobuild $(INCDIR) -gcc $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) )
+	(cd $(BUILDDIR)/$(OBJDIR);$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex -nobuild $(INCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) )
 	
 endif
 

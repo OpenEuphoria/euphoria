@@ -303,7 +303,9 @@ procedure InitBackEnd(integer c)
 				wat_path = getenv("WATCOM")
 			end if
 
-			if atom(wat_path) then
+			if atom(wat_path) and build_system_type != BUILD_NONE then
+			 	-- the emake build and I am assuming the other systems use the WATCOM variable to 
+				-- in the files they create.  That is why these conditions produce this error.
 				CompileErr(159)
 			elsif find(' ', wat_path) then
 				Warning( 214, translator_warning_flag)

@@ -99,7 +99,7 @@ elif test $UNAME_SYSTEM = "NetBSD"; then
 else
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	if test $UNAME_SYSTEM = "Darwin"; then
-		echo EOSX=1 >> "$PREFIX"Makefile.eu
+		echo EOSX=1 >> "$PREFIX"Makefile.eu                                   
 	else
 		echo EOSX= >> "$PREFIX"Makefile.eu
 	fi
@@ -111,12 +111,16 @@ else
 fi
 
 export BUILDDIR=build
+export XLTTARGETCC=gcc
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
     	--plat )
 		echo "PLAT=$2" >> "$PREFIX"Makefile.eu
 		shift
+	;;
+	--watcom )
+		export XLTTARGETCC=wat
 	;;
         --without-euphoria )
 			export EUPHORIA=0
@@ -163,6 +167,8 @@ while [ "$1" != "" ]; do
 			echo "    --prefix value      set the install directory (default /usr/local)"
 			echo "    --plat value        set the OS that we will translate to."
 			echo "           values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD."
+			echo "    --watcom            set this so the translator will create C code for "
+			echo "                        Watcom C."
 			echo
 			exit
 			;;
@@ -196,6 +202,6 @@ mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
-
+echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"Makefile.eu
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
