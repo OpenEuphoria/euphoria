@@ -17,6 +17,7 @@ rem by simply writing in a comment
 rem ============================================================
 
 echo # Configuration for Watcom > config.wat
+echo ASSERT=1 >> config.wat
 
 rem ============================================================
 rem Detect some parameters
@@ -96,7 +97,6 @@ IF "%1" == "--align4" (
 	GOTO EndLoop
 )
 
-echo ASSERT=1 >> config.wat
 IF "%1" == "--noassert" (
 	echo ASSERT=0 >> config.wat
 	GOTO EndLoop
