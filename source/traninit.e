@@ -303,10 +303,17 @@ procedure InitBackEnd(integer c)
 				wat_path = getenv("WATCOM")
 			end if
 
-			if atom(wat_path) and build_system_type != BUILD_NONE then
-			 	-- the emake build and I am assuming the other systems use the WATCOM variable to 
-				-- in the files they create.  That is why these conditions produce this error.
-				CompileErr(159)
+			if atom(wat_path) then
+				if build_system_type = BUILD_DIRECT then
+					-- We know the building process will fail when the translator starts 
+					-- calling the compiler.  So, the process fails here.
+					CompileErr(159)
+				else
+					-- In this case, the user has to call something to compile after the
+					-- translation.  The user may set up the environment after the translation or 
+					-- the environment may be on another machine on the network.
+					Warning(159, translator_warning_flag)
+				end if
 			elsif find(' ', wat_path) then
 				Warning( 214, translator_warning_flag)
 			elsif atom(getenv("INCLUDE")) then
