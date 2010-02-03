@@ -502,7 +502,7 @@ These operators can also be applied to sequences. See below.
 
 In some cases [[:short-circuit]] evaluation will be used for expressions containing ##and##
 or ##or##. Specifically, short circuiting applies inside decision taking statements, like the
-[[:if statement]], [[:while statement]] or [[:loop until statement]]. More on this later.
+[[:if statement]], [[:while statement]] or [[:loop statement]]. More on this later.
 
 ==== Arithmetic Operators
 
@@ -2735,19 +2735,21 @@ end while
 
 === loop until statement
 
-A **loop until** statement tests a condition to see if it is
+A **loop** statement tests a condition to see if it is
 non-zero (true), and until it is true a loop is executed.
 
 Syntax Format:
 >##**loop** //[//**with entry**//]// //[//**label** //"name"// //]// **do**##
 >>##//statements//##
->##**until** //expr//##
+>>##**until** //expr//##
+>##end loop##
 
 <eucode>
 loop do
     a = a * 2
     x = x - 1
-until x<=0
+    until x<=0
+end loop
 </eucode>
 
 <eucode>
@@ -2755,7 +2757,8 @@ loop with entry do
     a = a * 2
   entry
     x = x - 1
-until x<=0
+    until x<=0
+end loop
 </eucode>
 
 <eucode>
@@ -2764,7 +2767,8 @@ loop label "GONEXT" do
     y += 1
     if y = 7 then continue "GONEXT" end if
     x = x - 1
-until x<=0
+    until x<=0
+end loop
 </eucode>
 
 This differs from a **while** loop in more than one way:
@@ -2772,8 +2776,6 @@ This differs from a **while** loop in more than one way:
 # The body of the loop is executed at least once, since testing takes place AFTER
   it completes.  In a **while**, the test is taken BEFORE execution.
 # The header contains only optional **label** and **entry** tags.
-# The footer of the block, instead of being "end loop", has a distinctive form and holds the
-  termination test.
 
 === for statement
 
@@ -3039,8 +3041,8 @@ Likewise, skipping the rest of an iteration in a single
 code block is done using a single keyword, **continue**.
 The **continue statement** continues execution of the loop it
 applies to by going to the next iteration now. Going to the next iteration
-means testing a condition (for **while** and **loop until** loops, or changing
-the **for** loop variable index and checking
+means testing a condition (for **while** and **loop** constructs, or changing
+the **for** construct variable index and checking
 whether it is still within bounds.
 
 <eucode>

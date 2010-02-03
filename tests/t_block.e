@@ -21,7 +21,9 @@ loop label "loop label" do
 		continue "loop label"
 	end if
 	lly += 1
-until llv > 10
+	until llv > 10
+end loop
+
 test_pass( "don't crash on label for loop" )
 
 test_equal("loop worked", {7, 11}, {lly, llv})

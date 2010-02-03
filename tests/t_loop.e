@@ -82,7 +82,8 @@ loop do
 		continue
 	end if
 	idx2 += 1
-until idx = 3
+	until idx = 3
+end loop
 test_equal( "loop..until with continue", 1, idx2 )
 
 
@@ -112,7 +113,7 @@ idx = 0
 loop do
 	loop do
 		idx += 1
-until idx >= 25	until idx = 30
+		until idx >= 25	end loop until idx = 30 end loop
 test_equal( "loop-until with two 'until's on one line", 30, idx )
 
 

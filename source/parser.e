@@ -2608,6 +2608,7 @@ procedure Loop_statement()
 -- Parse a loop-until loop
 	integer bp1
 	integer exit_base,next_base
+	token t
 
 	Start_block( LOOP )
 
@@ -2660,6 +2661,10 @@ procedure Loop_statement()
 		emit_op(NOP1)
 	end if
 	exit_loop(exit_base)
+
+	tok_match(END)
+	tok_match(LOOP, END)
+
 end procedure
 
 integer top_level_parser
@@ -3914,7 +3919,7 @@ procedure SubProg(integer prog_type, integer scope)
 	end if
 	
 	-- parse routine end.
-	tok_match(prog_type)
+	tok_match(prog_type, END)
 	
 	if prog_type != PROCEDURE then
 		if not FuncReturn then

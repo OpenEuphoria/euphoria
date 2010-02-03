@@ -126,7 +126,7 @@ SLICEEND   ==: ']'
  
 == loop == @[LOOPSTMT]
 <eucode>
- LOOPSTMT ==: 'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR
+ LOOPSTMT ==: 'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
 </eucode>
  
 == goto == @[GOTOSTMT]
