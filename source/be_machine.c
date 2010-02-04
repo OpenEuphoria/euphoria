@@ -166,8 +166,8 @@ extern int Argc;
 /**********************/
 /* Imported variables */
 /**********************/
-#ifdef EUNIX
 extern int pagesize;
+#ifdef EUNIX
 extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
 #endif
 extern double clock_period;
@@ -2278,11 +2278,26 @@ object DefineC(object x)
 #else
 #define CALLBACK_SIZE 80
 #endif
+
+#define EXECUTABLE_ALIGNMENT 4
+
 extern struct routine_list *rt00;
 
 #ifdef EWINDOWS
 typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection);
 #endif
+
+/* Return the smallest multiple of p_radix that is at least as big as p_v.
+
+	Assumptions: p_radix must be a power of two.
+				p_v and p_radix must be < power(2,31) 
+*/
+inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
+	signed int radix = (signed int)p_radix;
+	signed int v = (signed int)p_v;
+	
+	return - (-radix & -v);
+}
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl 
@@ -2299,25 +2314,19 @@ object CallBack(object x)
 	unsigned addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
+	static unsigned char *page_addr = NULL;
+	static unsigned int page_offset = 0;
 	symtab_ptr routine;
-	int bare_flag = 0;
 	object_ptr obj_ptr;
 	void * replace_value;
     s1_ptr result;
 	s1_ptr x_ptr;
 	int convention;
 	int res;
+	unsigned int oldprot;
+	unsigned int * oldprotptr;
 	convention = C_CDECL;
-	
-	/* Handle {{'+', routine_id} and {routine_id} case:
-	 *    Set a flag and take the first element of the argument
-	 * to the new value of the argument. */
-	if (IS_SEQUENCE(x) && (x_ptr = SEQ_PTR(x))->length == 1) {
-			bare_flag = 1;
-			obj_ptr = x_ptr->base + 1;
-			x = *obj_ptr;
-	}
-	
+	oldprotptr = &oldprot;
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
@@ -2327,12 +2336,10 @@ object CallBack(object x)
 		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
 		fflush(stdout);*/
 		if (x_ptr->length != 2){
-			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}, {routine_id},"
-				"or {{'+', routine_id}}");
+			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}");
 		}
 		if (get_int( x_ptr->base[1] ) != '+')
-			RTFatal("for cdecl, use call_back({'+', routine_id}) or "
-				    "call_back({{'+', routine_id}})");
+			RTFatal("for cdecl, use call_back({'+', routine_id})");
 		routine_id = get_int( x_ptr->base[2] );
 	}
 	else {
@@ -2387,32 +2394,36 @@ object CallBack(object x)
 		}
 	}
 	
-	/* Now if the arguments were originally {{'+', routine_id}} or {routine_id} we return the 
-	 * address of the template; a handle for the routine routine_id, which may be the same as 
-	 * the routine id passed in; and the call back size. */
-	if (bare_flag) {
-#ifdef ERUNTIME
-		replace_value = routine_id;
-#else
-		replace_value = e_routine[routine_id];
-#endif
-		result = NewS1(3);
-		obj_ptr = result->base+1;
-		obj_ptr[0] = NewDouble((double)(unsigned long)addr);
-		obj_ptr[1] = NewDouble((double)(unsigned long)replace_value);
-		obj_ptr[2] = NewDouble((double)(unsigned long)CALLBACK_SIZE);
-		return MAKE_SEQ(result);
-	}
-	
 	/* Now allocate memory that is executable or at least can be made to be ... */
-#ifdef EWINDOWS
-	copy_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT,
-		PAGE_EXECUTE_READWRITE );
-	if (copy_addr == NULL)
+#	ifdef EWINDOWS
+		/* Here allocate and manage memory for 4kB is a lot to use when you
+			only use 92B.  Memory is allocated by VirtualAlloc() /pagesize/ bytes at a time.
+			So, we give peices of this page on each call until there is not enough to complete
+			up to /CALLBACK_SIZE/ bytes.  When this happens we make the page unwritable and
+			allocate a new page.
+			*/
+		if (
+			page_addr == NULL || 
+			(
+				(page_addr + page_offset + roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT) >= pagesize) &&
+				(VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr ),1)
+			)
+			)
+			
+		 {
+			page_addr = copy_addr = VirtualAlloc( NULL, CALLBACK_SIZE, 
+				MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+			page_offset = 0;
+		} else {
+			copy_addr = page_addr + (page_offset += roundup(CALLBACK_SIZE,EXECUTABLE_ALIGNMENT));
+		}
+		/* Assume we are running under some Windows that
+		   supports VirtualAlloc() always returning 0. */
+		if (copy_addr == NULL)
+			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
+#	else /* ndef EWNIDOWS */
 		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
-#else /* ndef EWNIDOWS */
-	copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
-#endif /* ndef EWINDOWS */
+#	endif /* ndef EWINDOWS */
 
 
 	/* Check if the memory allocation worked. */
@@ -2453,7 +2464,7 @@ object CallBack(object x)
 
 	/* Return new address. */
 	if (addr <= (unsigned)MAXINT_VAL)
-		return addr;
+		return MAKE_INT(addr);
 	else
 		return NewDouble((double)addr);
 }

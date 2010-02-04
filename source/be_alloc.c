@@ -61,9 +61,7 @@ extern int Argc;
 char *malloc_options="A"; // abort
 #endif
 
-#ifdef EUNIX
-int pagesize;  // needed for Linux only, not FreeBSD
-#endif
+int pagesize;  // needed for Linux or Windows only, not FreeBSD
 
 int eu_dll_exists = FALSE; // a Euphoria .dll is being used
 #if defined(EALIGN4)
@@ -159,6 +157,18 @@ symtab_ptr tmp_alloc()
 	return (symtab_ptr)EMalloc(sizeof(struct temp_entry));
 }
 
+#ifdef EWINDOWS
+long getpagesize (void) {
+    static long g_pagesize = 0;
+    if (! g_pagesize) {
+        SYSTEM_INFO system_info;
+        GetSystemInfo (&system_info);
+        g_pagesize = system_info.dwPageSize;
+    }
+    return g_pagesize;
+}
+#endif
+
 void InitEMalloc()
 /* initialize storage allocator */
 {
@@ -167,9 +177,8 @@ void InitEMalloc()
 	
 	if (done) return;
 	done = 1;
-#ifdef EUNIX
 	pagesize = getpagesize();
-#else
+#ifndef UNIX
 	// DJP // eu_dll_exists = (Argc == 0);  // Argc is 0 only in Euphoria .dll
 	freeblk_list[0].size = 8;
 	freeblk_list[0].first = NULL;

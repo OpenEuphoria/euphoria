@@ -477,12 +477,6 @@ end function
 -- 
 
 constant M_CALL_BACK = 52
-constant EXECUTABLE_ALIGNMENT = 4 -- can we execute on 2 mod 4 or even odd 
-                                -- addresses?
-constant call_back_size = 92 -- maximum value of C based Euphoria and the 
-                             -- Euphoria based Euphoria.
-atom page_addr = 0
-atom page_offset = 0
 
 --**
 -- Get a machine address for an Euphoria procedure.
@@ -531,37 +525,5 @@ atom page_offset = 0
 --     [[:routine_id]]
 
 public function call_back(object id)
-	ifdef not WIN32 then
-		-- save speed for OSes that do not have DEP.
 		return machine_func(M_CALL_BACK, id)
-	elsedef
-		object s
-		sequence code, rep
-		atom addr, size, repi
-
-		s = machine_func(M_CALL_BACK, {id})
-		if not sequence(s) then
-			-- running under eu.ex or DEP-style callbacks disabled
-			-- for some other reason. Just return the machine_func()
-			-- in this case.
-			return s
-		end if
-		addr = s[1]
-		rep =  int_to_bytes( s[2] )
-		size = s[3]
-		code = peek( {addr, size} )
-		repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
-		if repi = 4 then
-			crash("Cannot generate call_back address.")
-		end if
-		if page_addr = 0 or page_addr + page_offset + call_back_size >= PAGE_SIZE then
-			page_addr = allocate_protect( code[1..repi-1] & rep & code[repi+4..$], 1, PAGE_EXECUTE_READWRITE )
-			page_offset = 0
-		else
-			-- align for execution (need 8-byte?) and put after the previous call back
-			page_offset += EXECUTABLE_ALIGNMENT* ceil( size / EXECUTABLE_ALIGNMENT )
-			poke( page_addr + page_offset, code[1..repi-1] & rep & code[repi+4..$] )
-		end if
-		return page_offset + page_addr
-	end ifdef
 end function
