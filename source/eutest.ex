@@ -220,6 +220,9 @@ function check_errors( sequence filename, sequence control_error_file, sequence 
 			ex_err = ex_err[1..4]
 		end if
 		for i = 1 to length(ex_err) do
+			if find('=',ex_err[i]) then
+				ex_err[i] = ex_err[i][1..find('=',ex_err[i])] & " ..."
+			end if
 			if equal(ex_err[i], "--- Defined Words ---") then
 				ex_err = ex_err[1 .. i-1]
 				exit
@@ -230,6 +233,9 @@ function check_errors( sequence filename, sequence control_error_file, sequence 
 			control_err = control_err[1..4]
 		end if
 		for i = 1 to length(control_err) do
+			if find('=',control_err[i]) then
+				control_err[i] = control_err[i][1..find('=',control_err[i])] & " ..."
+			end if
 			if equal(control_err[i], "--- Defined Words ---") then
 				control_err = control_err[1 .. i-1]
 				exit
@@ -325,7 +331,7 @@ function interpret_fail( sequence cmd, sequence filename, object control_error_f
 	
 	if sequence(control_error_file) then 
 		-- Now we will compare the control error file to the newly created 
-		-- eui.exe.  If ex.err doesn't exist or there is no match error()
+		-- ex.err.  If ex.err doesn't exist or there is no match error()
 		-- is called and we add to the failed list.
 		comparison = length( fail_list )
 		fail_list = check_errors( filename, control_error_file, fail_list )
