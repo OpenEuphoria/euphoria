@@ -202,102 +202,93 @@ procedure report_last_error(sequence filename)
 	end if
 end procedure
 
-function strip_path_junk(sequence path)
-	for i = 1 to length(path) do
-		if not find(path[i], "./\\") then
-			return path[i..$]
+function strip_path_junk(sequence err_data)
+	sequence path
+
+	path = err_data[1]
+	if find('/', path) or find('\\', path) then
+		for i = length(path) to 1 by -1 do	
+			if find(path[i], `\/`) then
+				err_data =  {path[1 .. i], path[i+1 .. $]} & err_data[2 .. $]
+				exit
+			end if
+		end for
+	else
+		err_data = prepend("", err_data)
+	end if
+
+	return err_data
+end function
+
+function prepare_error_file(sequence file_name)
+	integer pos
+	object file_data
+	
+	file_data = read_lines(file_name)
+	
+	if atom(file_data) then
+		return file_data
+	end if
+	
+	if length(file_data) > 4 then
+		file_data = file_data[1..4]
+	end if
+	for i = 1 to length(file_data) do
+		pos = find('=', file_data[i])
+		if pos then
+			if length(file_data[i]) >= 6 then
+				if equal(file_data[i][1..4], "    ") then
+					file_data = file_data[1 .. i-1]
+					exit
+				end if
+			end if
+		end if
+		if equal(file_data[i], "Global & Local Variables") then
+			file_data = file_data[1 .. i-1]
+			exit
+		end if
+		if equal(file_data[i], "--- Defined Words ---") then
+			file_data = file_data[1 .. i-1]
+			exit
 		end if
 	end for
-
-	return ""
+	
+	if length(file_data) > 0 then
+		file_data = strip_path_junk(file_data)
+	end if
+	return file_data
 end function
 
 function check_errors( sequence filename, sequence control_error_file, sequence fail_list )
-	object control_err = read_lines(control_error_file)
-	object ex_err = read_lines("ex.err")
-	if sequence(ex_err) then
-		if length(ex_err) > 4 then
-			ex_err = ex_err[1..4]
+	object expected_err
+	object actual_err
+	integer comparison
+	
+	expected_err = prepare_error_file(control_error_file)
+	actual_err = prepare_error_file("ex.err")
+	if sequence(actual_err) and sequence(expected_err) then
+		-- N.B. Do not compare the first line as it contains PATH 
+		-- information which can vary from system to system.			
+		if not equal(actual_err[2..$], expected_err[2..$]) then
+			failed += 1
+			fail_list = append(fail_list, filename)
+	
+			if length(actual_err) and length(expected_err) then
+				error(filename, E_INTERPRET, "Unexpected ex.err.  Expected:\n----\n" &
+					"%s\n----\nbut got\n----\n%s\n----\n",
+					{join(expected_err,"\n"), join(actual_err, "\n")}, "ex.err")
+			elsif length(actual_err) then
+				error(filename, E_INTERPRET, "Unexpected empty control file.", {})
+			else
+				error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
+			end if
 		end if
-		for i = 1 to length(ex_err) do
-			if find('=',ex_err[i]) then
-				ex_err[i] = ex_err[i][1..find('=',ex_err[i])] & " ..."
-			end if
-			if equal(ex_err[i], "--- Defined Words ---") then
-				ex_err = ex_err[1 .. i-1]
-				exit
-			end if
-		end for
-
-		if length(control_err) > 4 then
-			control_err = control_err[1..4]
-		end if
-		for i = 1 to length(control_err) do
-			if find('=',control_err[i]) then
-				control_err[i] = control_err[i][1..find('=',control_err[i])] & " ..."
-			end if
-			if equal(control_err[i], "--- Defined Words ---") then
-				control_err = control_err[1 .. i-1]
-				exit
-			end if
-		end for
-
-		ex_err[1] = strip_path_junk(ex_err[1])
-		control_err[1] = strip_path_junk(control_err[1])
-
-		for j = 1 to length(ex_err) do
-			integer mde = match(".e:", ex_err[j]) 
-
-			if mde then
-				integer sl = mde
-				while sl > 1 and ex_err[j][sl] != SLASH do
-					sl -= 1
-				end while
-
-				ex_err[j] = ex_err[j][sl..$]
-
-				if sl > 1 then
-					ex_err[j] = "..." & ex_err[j]
-				end if
-			end if
-
-		end for
-
-		for j = 1 to length(control_err) do
-			integer mde = match(".e:", control_err[j])
-
-			if mde then
-				integer sl = mde
-				while sl > 1 and control_err[j][sl] != SLASH do
-					sl -= 1
-				end while
-
-				control_err[j] = control_err[j][sl..$]
-				if sl > 1 then
-					control_err[j] = "..." & control_err[j]
-				end if
-			end if
-
-		end for
-	end if -- sequence(ex_err)
-			
-	integer comparison = compare(ex_err, control_err)
-	if comparison then
-		failed += 1
-		fail_list = append(fail_list, filename)
-
-		if atom(ex_err) then
-			error(filename, E_INTERPRET, "No ex.err has been generated.", {})
-		elsif length(ex_err) >=4  and length(control_err) >= 4 then
-			error(filename, E_INTERPRET, "Unexpected ex.err.  Expected: " &
-				"\'%s\n%s\n%s\n%s\' \nbut got \'%s\n%s\n%s\n%s\'\n",
-				control_err & ex_err, "ex.err")
-		elsif length(ex_err) then
-			error(filename, E_INTERPRET, "Unexpected ex.err.  Got: \'%s\'\n", ex_err)
-		else
-			error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
-		end if
+	elsif atom(actual_err) then
+		error(filename, E_INTERPRET, "No ex.err has been generated.", {})
+	else
+		error(filename, E_INTERPRET, "No control file was supplied.", {})
 	end if
+	
 	return fail_list
 end function
 
