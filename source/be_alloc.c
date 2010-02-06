@@ -520,8 +520,8 @@ char *EMalloc(unsigned long nbytes)
 	do {
 		p = malloc(nbytes+8);
 		assert(p);
-		assert(((unsigned int)p & 7) == 0);
 		if (p == NULL) {
+			// Only triggered if asserts are turned off.
 			p = Out_Of_Space(nbytes + 8);
 		}
 
@@ -547,6 +547,7 @@ char *EMalloc(unsigned long nbytes)
 
 		if (align4) {
 			*(int *)p = MAGIC_FILLER;
+			assert((((unsigned int)p + 4) & 7) == 0);
 			return p+4;
 		}
 
@@ -555,6 +556,7 @@ char *EMalloc(unsigned long nbytes)
 		align4 = 4;  // start handling 4-aligned blocks
 		nbytes += align4;
 #else
+		assert(((unsigned int)p & 7) == 0);
 		return p;
 #endif
 	} while (TRUE);
@@ -977,8 +979,9 @@ static void new_dbl_block(unsigned int cnt)
 	dsize = (D_SIZE + 7) & (~7);
 	
 	blksize = cnt * dsize;
-	dbl_block = (free_block_ptr)malloc( blksize );
-	
+	dbl_block = (free_block_ptr)EMalloc( blksize );
+	assert(((unsigned int)dbl_block & 7) == 0);
+
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
 	q = (char *)dbl_block;
