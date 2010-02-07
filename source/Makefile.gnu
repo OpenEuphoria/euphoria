@@ -34,6 +34,9 @@
 #
 #     --watcom   Use this so the translator will create C code for Watcom C.
 #
+#     --cc  value         set this to the name of your GNU C compiler file name if its 
+#                        name is not 'gcc'
+#
 #   Clean up binary files     :  make clean
 #   Clean up binary and       :  make distclean
 #        translated files
@@ -170,7 +173,6 @@ ifndef ECHO
 ECHO=/bin/echo
 endif
 
-CC = gcc
 FE_FLAGS =  $(MSIZE) -pthread -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
 BE_FLAGS =  $(MSIZE) -pthread  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
 

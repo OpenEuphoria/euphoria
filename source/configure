@@ -112,6 +112,7 @@ fi
 
 export BUILDDIR=build
 export XLTTARGETCC=gcc
+export CC=gcc
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
@@ -121,6 +122,9 @@ while [ "$1" != "" ]; do
 	;;
 	--watcom )
 		export XLTTARGETCC=wat
+	;;
+	--cc )
+		export CC=$2
 	;;
         --without-euphoria )
 			export EUPHORIA=0
@@ -169,6 +173,8 @@ while [ "$1" != "" ]; do
 			echo "           values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD."
 			echo "    --watcom            set this so the translator will create C code for "
 			echo "                        Watcom C."
+			echo "    --cc  value         set this to the name of your GNU C compiler file name if its "
+			echo "                        name is not 'gcc'"
 			echo
 			exit
 			;;
@@ -186,6 +192,7 @@ if [ "x$MANAGED_MEM" = "x" ]; then
 		echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu 
 	fi	
 fi
+echo "CC=$CC" >> "$PREFIX"Makefile.eu
 
 export PWD=`pwd`
 export PPWD=`cd .. && pwd`
