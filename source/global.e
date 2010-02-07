@@ -55,7 +55,7 @@ export enum
 	         -- run time object (vars)
 	         -- must be first field in C
 	S_NEXT,  -- index of next temp, or next var, or 0
-	S_MODE,  -- M_NORMAL, M_TEMP or M_CONSTANT
+	S_MODE,  -- M_NORMAL, M_TEMP M_CONSTANT or M_BLOCK
 	S_SCOPE, -- for temps at compile time: FREE or IN_USE,
 	         -- or DELETED (Translator-only)
 	S_USAGE  -- for temps: type T_UNKNOWN or T_INTEGER

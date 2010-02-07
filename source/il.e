@@ -557,6 +557,7 @@ procedure OutputIL()
 	OutputSlist(out) 
 	fcompress( out, file_include )
 	fcompress( out, get_switches() )
+	fcompress( out, include_matrix )
 	close(out)
 	
 	store_checksum(out_name)

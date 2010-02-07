@@ -140,6 +140,7 @@ procedure InputIL()
 	slist = fdecompress(0)
 	file_include = fdecompress(0)
 	switches = fdecompress(0)
+	include_matrix = fdecompress(0)
 end procedure
 
 sequence cl
