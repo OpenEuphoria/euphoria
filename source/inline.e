@@ -646,6 +646,9 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 		
 	end if
 	Block_var( var )
+	if BIND then
+		add_ref( {VARIABLE, var} )
+	end if
 	return var
 end function
 

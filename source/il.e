@@ -132,9 +132,9 @@ procedure OutputSymTab(file f)
 					if i > TopLevelSub then
 						-- only report user-defined
 						if list then
-							printf(fd, "%s: %s%s\n", 
+							printf(fd, "%s: %s%s [%d]\n", 
 								  {file_name[SymTab[i][S_FILE_NO]], 
-								   SymTab[i][S_NAME], decorate})
+								   SymTab[i][S_NAME], decorate, i})
 						end if
 
 						if length(decorate) then
