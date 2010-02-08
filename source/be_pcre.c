@@ -244,7 +244,7 @@ static int add(int *len, char **s, const char *a, int alen, int *flag) {
         return 0;
 
     if (*s) {
-        *s = (char *) realloc(*s, NewLen);
+        *s = (char *) ERealloc(*s, NewLen);
         res = memcopy(*s + *len, NewLen, a, alen);
                 if (res != 0) {
                         RTFatal("Internal error: be_pcre:add#1 memcopy failed (%d).", res);

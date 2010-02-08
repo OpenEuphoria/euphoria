@@ -377,7 +377,7 @@ static void MyWriteConsole(char *string, int nchars)
 	
 		if (nchars > oldstr_len) {
 			oldstr_len = nchars + 3;
-			old_string = (char *)realloc(old_string, oldstr_len);
+			old_string = (char *)ERealloc(old_string, oldstr_len);
 			if (old_string == 0) return;
 		}
 	
@@ -540,7 +540,7 @@ static void expand_tabs(char *raw_string)
 	            if (expanded_ptr >= expanded_end) {
 		            colpos = expanded_ptr - expanded_string;
 		            screen_width += 100;
-		            expanded_string = (char *)realloc(expanded_string, screen_width + 3);
+		            expanded_string = (char *)ERealloc(expanded_string, screen_width + 3);
 		            expanded_ptr = expanded_string + colpos;
 		            expanded_end = expanded_string + screen_width;
 	            }
@@ -575,7 +575,7 @@ static void expand_tabs(char *raw_string)
 //             if (expanded_ptr >= expanded_end) {
 // 	            colpos = expanded_ptr - expanded_string;
 // 	            screen_width += 100;
-// 	            expanded_string = (char *)realloc(expanded_string, screen_width + 3);
+// 	            expanded_string = (char *)ERealloc(expanded_string, screen_width + 3);
 // 	            expanded_ptr = expanded_string + colpos;
 // 	            expanded_end = expanded_string + screen_width;
 //             }

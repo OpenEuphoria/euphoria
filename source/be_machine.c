@@ -2048,13 +2048,13 @@ object OpenDll(object x)
 		if (open_dll_count >= open_dll_size) {
 			size_t newsize;
 			
-			open_dll_size += 20;
+			open_dll_size += 100;
 			newsize = open_dll_size * sizeof(HINSTANCE);
 			if (open_dll_list == NULL) {
 				open_dll_list = (HINSTANCE *)EMalloc(newsize);
 			}
 			else {
-				open_dll_list = (HINSTANCE *)realloc(open_dll_list, newsize);
+				open_dll_list = (HINSTANCE *)ERealloc((char *)open_dll_list, newsize);
 			}
 			if (open_dll_list == NULL) {
 				RTFatal("Cannot allocate RAM (%d bytes) for dll list to add %s", newsize, dll_string);

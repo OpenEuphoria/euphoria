@@ -182,6 +182,11 @@ EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
 		 int.ex ec.ex backend.ex
 
+!ifeq ALIGN4 1
+SETALIGN4 = /dEALIGN4
+MANAGED_MEM=1
+!endif
+
 !ifneq MANAGED_MEM 1
 MEMFLAG = /dESIMPLE_MALLOC
 !else
@@ -200,10 +205,6 @@ NOASSERT = /dNDEBUG
 
 !ifneq ASSERT 1
 NOASSERT = /dNDEBUG
-!endif
-
-!ifeq ALIGN4 1
-SETALIGN4 = /dEALIGN4
 !endif
 
 !ifndef EUBIN

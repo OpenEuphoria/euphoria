@@ -21,6 +21,8 @@
 									Note: other vars must change if this does */
 #endif
 #if defined(EALIGN4)
+#undef ESIMPLE_MALLOC
+
 #define MAGIC_FILLER ((int)0xFFFFFFF3) 
 								/* magic 4-byte value that should never appear
 								   prior to a block pointer, unless we put it 
@@ -146,7 +148,7 @@ typedef struct block_list * block_list_ptr;
 	#endif
 #endif
 
-#if defined( ESIMPLE_MALLOC ) && (defined( EWINDOWS) || defined (EUNIX) )
+#if defined( ESIMPLE_MALLOC )
 	#define EMalloc(size) malloc(size)
 	#define EFree(ptr) free(ptr)
 	#define ERealloc(orig, newsize) realloc(orig, newsize)
