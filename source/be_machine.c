@@ -842,14 +842,14 @@ object SetTColor(object x)
 #ifdef EUNIX
 	current_fg_color = c & 15;
 	if (current_fg_color > 7) {
-//		bold = 22; // BOLD ON (BRIGHT)
-		c = 90 + (current_fg_color & 7);
+		bold = 1; // BOLD ON (BRIGHT)
+		c = 30 + (current_fg_color & 7);
 	}
 	else {
-//		bold = 22; // BOLD OFF
+		bold = 22; // BOLD OFF
 		c = 30 + current_fg_color;
 	}
-	snprintf(buff, STC_buflen, "\E[%dm", c);
+	snprintf(buff, STC_buflen, "\E[%d;%dm", bold, c);
 	iputs(buff, stdout);
 	iflush(stdout);
 #endif
@@ -897,11 +897,9 @@ object SetBColor(object x)
 #ifdef EUNIX
 	current_bg_color = c & 15;
 	if (current_bg_color > 7) {
-//		bold = 22; // BOLD ON (BRIGHT)
 		c = 100 + (current_bg_color & 7);
 	}
 	else {
-//		bold = 22; // BOLD OFF
 		c = 40 + current_bg_color;
 	}
 	snprintf(buff, SBC_buflen, "\E[%dm", c);
