@@ -1039,6 +1039,8 @@ function EscapeChar()
 			c = 13 -- Carriage Return
 		case '0' then
 			c = 0 -- Null
+		case 'e', 'E' then
+			c = 27 -- escape char.
 		case 'x' then
 			-- Two Hex digits follow
 			c = GetHexChar(2, 155)

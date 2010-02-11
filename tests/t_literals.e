@@ -113,6 +113,8 @@ test_equal("Escaped characters - back slash",      92, '\\')
 test_equal("Escaped characters - dbl quote",       34, '\"')
 test_equal("Escaped characters - sgl quote",       39, '\'')
 test_equal("Escaped characters - null",            00, '\0')
+test_equal("Escaped characters - escape #1",       27, '\e')
+test_equal("Escaped characters - escape #2",       27, '\E')
 
 test_equal("Escaped characters - hex", {0xAB, 0xDF, 0x01, 0x2E}, {'\xab','\xDF','\x01','\x2E'})
 test_equal("Escaped characters - u16", {0xABDF, 0x012E}, {'\uabDF','\u012E'})

@@ -172,8 +172,8 @@ x"65 66 67 AE"
 * using unicode strings e.g.
 
 <eucode>
-u"65 66 67 AE"  -- utf-16
-U"65 66 67 AE"  -- utf-32
+u"65 66 67 AE"  -- utf-16 ==> {25958, 26542}
+U"65 66 67 AE"  -- utf-32 ==> {1701210030}
 </eucode>
 
 
@@ -182,15 +182,11 @@ U"65 66 67 AE"  -- utf-32
 # they cannot contain a double-quote
 # they must be only on a single line
 # they cannot contain the TAB character
-# they cannot contain the back-slash '\' character
-
-If you need to include double-quote, end-of-line, back-slash, or TAB characters
-inside a double-quoted string, you need to enter them in a special manner.
-
-* Use \" for a double-quote character
-* Use \n for a new-line character
-* Use {{{\\}}} for a back-slash character
-* Use \t for a TAB character
+# if they contain the back-slash '\' character, that character must immediately
+  be followed by one of the special //escape// codes. The back-slash and escape code
+  will be replaced by the approriate single character equivalent.
+  If you need to include double-quote, end-of-line, back-slash, or TAB characters
+  inside a double-quoted string, you need to enter them in a special manner.
 
 e.g.
 
@@ -353,6 +349,12 @@ Special characters may be entered using a back-slash:
 | {{{\\}}} | backslash |
 | \"       | double quote |
 | \'       | single quote |
+| \0       | null |
+| \e       | escape |
+| \E       | escape |
+| \x/hh/   | A 2-hex-digit value, e.g. "\x5F" ==> {95} |
+| \u/hhhh/ | A 4-hex-digit value, e.g. "\u2A7C" ==> {10876} |
+| \U/hhhhhhhh/ | An 8-hex-digit value, e.g. "\U8123FEDC" ==> {2166619868} |
 
 For example, ##"Hello, World!\n"##, or ##'~\~\'##. The Euphoria editor displays character
 strings in green.
