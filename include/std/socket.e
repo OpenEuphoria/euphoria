@@ -406,7 +406,7 @@ ifdef WINDOWS then
 		SO_MAXPATHDG   = #700A,
 		SO_SYNCHRONOUS_ALTERT   = #10,
 		SO_SYNCHRONOUS_NONALERT = #20
-elseifdef LINUX then
+elsifdef LINUX then
 	public constant SOL_SOCKET = 1,
 		SO_REUSEADDR = 2
 		SO_TYPE = 3
