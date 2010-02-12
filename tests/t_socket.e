@@ -22,20 +22,16 @@ ifdef WINDOWS then
 	test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_DEBUG, 1))
 	test_equal("get_option #2", 1, get_option(socket, SOL_SOCKET, SO_DEBUG))
 end ifdef
-ifdef LINUX then
+ifdef LINUX or WINDOWS then
 	-- these constants may be specific to Linux
 	-- if not, change the ifdef from LINUX to UNIX
-	constant USOL_SOCKET = 1
-	constant USO_REUSEADDR = 2
-	constant USO_TYPE = 3
-	constant USO_KEEPALIVE = 9
-	test_equal("get_option #1", SOCK_STREAM, get_option(socket, USOL_SOCKET, USO_TYPE))
-	test_equal("get_option #2", 0, get_option(socket, USOL_SOCKET, USO_REUSEADDR))
-	test_equal("set_option #1", 1, set_option(socket, USOL_SOCKET, USO_REUSEADDR, 1))
-	test_equal("get_option #3", 1, get_option(socket, USOL_SOCKET, USO_REUSEADDR))
-	test_equal("get_option #4", 0, get_option(socket, USOL_SOCKET, USO_KEEPALIVE))
-	test_equal("set_option #2", 1, set_option(socket, USOL_SOCKET, USO_KEEPALIVE, 1))
-	test_equal("get_option #5", 1, get_option(socket, USOL_SOCKET, USO_KEEPALIVE))
+	test_equal("get_option #1", SOCK_STREAM, get_option(socket, SOL_SOCKET, SO_TYPE))
+	test_equal("get_option #2", 0, get_option(socket, SOL_SOCKET, SO_REUSEADDR))
+	test_equal("set_option #1", 1, set_option(socket, SOL_SOCKET, SO_REUSEADDR, 1))
+	test_equal("get_option #3", 1, get_option(socket, SOL_SOCKET, SO_REUSEADDR))
+	test_equal("get_option #4", 0, get_option(socket, SOL_SOCKET, SO_KEEPALIVE))
+	test_equal("set_option #2", 1, set_option(socket, SOL_SOCKET, SO_KEEPALIVE, 1))
+	test_equal("get_option #5", 1, get_option(socket, SOL_SOCKET, SO_KEEPALIVE))
 end ifdef
 
 --

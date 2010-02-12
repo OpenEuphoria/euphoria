@@ -371,41 +371,47 @@ public constant
 -- There may be other values that your OS defines and some defined here are not
 -- supported on all operating systems.
 
-public constant
-	SOL_SOCKET     = #FFFF,
-	SO_DEBUG       = #0001,
-	SO_ACCEPTCONN  = #0002,
-	SO_REUSEADDR   = #0004,
-	SO_KEEPALIVE   = #0008,
-	SO_DONTROUTE   = #0010,
-	SO_BROADCAST   = #0020,
-	SO_USELOOPBACK = #0040,
-	SO_LINGER      = #0080,
-	SO_DONTLINGER  = not_bits(SO_LINGER),
-	SO_OOBINLINE   = #0100,
-	SO_REUSEPORT   = #9999,
-	SO_SNDBUF      = #1001,
-	SO_RCVBUF      = #1002,
-	SO_SNDLOWAT    = #1003,
-	SO_RCVLOWAT    = #1004,
-	SO_SNDTIMEO    = #1005,
-	SO_RCVTIMEO    = #1006,
-	SO_ERROR       = #1007,
-	SO_TYPE        = #1008,
-	SO_CONNDATA    = #7000,
-	SO_CONNOPT     = #7001,
-	SO_DISCDATA    = #7002,
-	SO_DISCOPT     = #7003,
-	SO_CONNDATALEN = #7004,
-	SO_CONNOPTLEN  = #7005,
-	SO_DISCDATALEN = #7006,
-	SO_DISCOPTLEN  = #7007,
-	SO_OPENTYPE    = #7008,
-	SO_MAXDG       = #7009,
-	SO_MAXPATHDG   = #700A,
-	SO_SYNCHRONOUS_ALTERT   = #10,
-	SO_SYNCHRONOUS_NONALERT = #20
-
+ifdef WINDOWS then
+	public constant
+		SOL_SOCKET     = #FFFF,
+		SO_DEBUG       = #0001,
+		SO_ACCEPTCONN  = #0002,
+		SO_REUSEADDR   = #0004,
+		SO_KEEPALIVE   = #0008,
+		SO_DONTROUTE   = #0010,
+		SO_BROADCAST   = #0020,
+		SO_USELOOPBACK = #0040,
+		SO_LINGER      = #0080,
+		SO_DONTLINGER  = not_bits(SO_LINGER),
+		SO_OOBINLINE   = #0100,
+		SO_REUSEPORT   = #9999,
+		SO_SNDBUF      = #1001,
+		SO_RCVBUF      = #1002,
+		SO_SNDLOWAT    = #1003,
+		SO_RCVLOWAT    = #1004,
+		SO_SNDTIMEO    = #1005,
+		SO_RCVTIMEO    = #1006,
+		SO_ERROR       = #1007,
+		SO_TYPE        = #1008,
+		SO_CONNDATA    = #7000,
+		SO_CONNOPT     = #7001,
+		SO_DISCDATA    = #7002,
+		SO_DISCOPT     = #7003,
+		SO_CONNDATALEN = #7004,
+		SO_CONNOPTLEN  = #7005,
+		SO_DISCDATALEN = #7006,
+		SO_DISCOPTLEN  = #7007,
+		SO_OPENTYPE    = #7008,
+		SO_MAXDG       = #7009,
+		SO_MAXPATHDG   = #700A,
+		SO_SYNCHRONOUS_ALTERT   = #10,
+		SO_SYNCHRONOUS_NONALERT = #20
+elseifdef LINUX then
+	public constant SOL_SOCKET = 1,
+		SO_REUSEADDR = 2
+		SO_TYPE = 3
+	 	SO_KEEPALIVE = 9
+end ifdef
 --****
 -- === Send Flags
 --
