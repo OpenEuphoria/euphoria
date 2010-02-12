@@ -54,7 +54,11 @@ integer list, quiet, full_debug, con
 integer del_routines, del_vars
 sequence user_out, icon
 
-w32 = FALSE
+ifdef WINDOWS then 
+	w32 = TRUE
+elsedef
+	w32 = FALSE
+end ifdef
 list = FALSE
 quiet = FALSE
 full_debug = FALSE
