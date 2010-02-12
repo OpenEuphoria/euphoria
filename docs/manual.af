@@ -34,6 +34,7 @@
 ../docs/refman_1.txt
 ../docs/refman_2.txt
 ../docs/syntax.txt
+../docs/internals.txt
 
 ########
 := Mini-Guides
