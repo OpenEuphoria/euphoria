@@ -408,8 +408,8 @@ ifdef WINDOWS then
 		SO_SYNCHRONOUS_NONALERT = #20
 elsifdef LINUX then
 	public constant SOL_SOCKET = 1,
-		SO_REUSEADDR = 2
-		SO_TYPE = 3
+		SO_REUSEADDR = 2,
+		SO_TYPE = 3,
 	 	SO_KEEPALIVE = 9
 end ifdef
 --****
