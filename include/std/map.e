@@ -1849,6 +1849,7 @@ end function
 -- ##for_each()##.
 --
 -- Example 1:
+-- <eucode>
 -- include std/map.e
 -- include std/math.e
 -- include std/io.e
