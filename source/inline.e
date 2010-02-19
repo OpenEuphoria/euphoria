@@ -38,6 +38,7 @@ sequence
 	proc_vars,
 	inline_temps,
 	passed_params,
+	original_params,
 	inline_params,
 	assigned_params
 
@@ -560,6 +561,20 @@ function get_param_sym( integer pc )
 	return passed_params[px]
 end function
 
+function get_original_sym( integer pc )
+	object il = inline_code[pc]
+	if integer( il ) then
+		return inline_code[pc]
+	
+	elsif length( il ) = 1 then
+		return inline_target
+	
+	end if
+	
+	integer px = il[2]
+	return original_params[px]
+end function
+
 procedure replace_param( integer pc )
 	inline_code[pc] = get_param_sym( pc )
 end procedure
@@ -602,12 +617,23 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 	
 	if not var then
 		if s > 0 then
-			name = sprintf( "%s_%s", {SymTab[inline_sub][S_NAME], SymTab[s][S_NAME]})
-			hashval = hashfn(name)
-			if reuse then
-				name &= "__inl"
+			if TRANSLATE then
+				name = sprintf( "%s_inlined_%s", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME] })
 			else
-				name &= sprintf( "__inl_at%d", inline_start)
+				name = sprintf( "%s (from inlined routine '%s'", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME] })
+			end if
+			hashval = hashfn(name)
+			
+			if reuse then
+				if not TRANSLATE then
+					name &= ")"
+				end if
+			else
+				if TRANSLATE then
+					name &= sprintf( "_at_%d", inline_start)
+				else
+					name &= sprintf( " at %d)", inline_start)
+				end if
 			end if
 			
 			vtype = SymTab[s][S_VTYPE]
@@ -663,6 +689,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	sequence backpatches = SymTab[sub][S_INLINE][3]
 	
 	passed_params = {}
+	original_params = {}
 	proc_vars = {}
 	sequence prolog = {}
 	sequence epilog = {}
@@ -690,6 +717,8 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	for p = SymTab[sub][S_NUM_ARGS] to 1 by -1 do
 		passed_params = prepend( passed_params, Pop() )
 	end for
+	
+	original_params = passed_params
 	
 	symtab_index int_sym = 0
 	for p = 1 to SymTab[sub][S_NUM_ARGS] do
@@ -765,8 +794,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			case ATOM_CHECK then
 			case SEQUENCE_CHECK then
 			case INTEGER_CHECK then
-				symtab_index sym = get_param_sym( check_pc + 1 )
-				
+				symtab_index sym = get_original_sym( check_pc + 1 )
 				if is_literal( sym ) then
 					integer check_result
 						
@@ -787,6 +815,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					end if
 					
 				elsif not is_temp( sym ) then
+				
 					if (op = INTEGER_CHECK and SymTab[sym][S_VTYPE] = integer_type )
 					or (op = SEQUENCE_CHECK and SymTab[sym][S_VTYPE] = sequence_type )
 					or (op = ATOM_CHECK and find( SymTab[sym][S_VTYPE], {integer_type, atom_type} ) ) then
