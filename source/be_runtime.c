@@ -1405,14 +1405,14 @@ void udt_clean_rt( object o, long rid ){
 void udt_clean( object o, long rid ){
 
 	int *code;
-	int seq[9]; // seq struct on the stack
+	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
 	s1_ptr s;
 	object args;
 	int pre_ref;
 	int *save_tpc;
 
 	// Need to make sure that s is 8-byte aligned
-	s = (s1_ptr)( (int)&seq + ( 8 - ( ((int)&seq) & 7 ) ));
+	s = (s1_ptr)( ((object)&seq[7])  & ~7 );
 	s->base = (((object_ptr)(s+1))-1);
 	s->ref = 2;
 	s->length = 1;
