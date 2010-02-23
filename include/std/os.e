@@ -44,8 +44,8 @@ public enum
 -- These constants are returned by the [[:platform]] function.
 --
 -- * ##WIN32##   ~-- Host operating system is Windows
--- * ##LINUX##   ~-- Host operating system is Linux **or** FreeBSD
--- * ##FREEBSD## ~-- Host operating system is Linux **or** FreeBSD
+-- * ##LINUX##   ~-- Host operating system is Linux
+-- * ##FREEBSD## ~-- Host operating system is FreeBSD
 -- * ##OSX##     ~-- Host operating system is Mac OS X
 -- * ##SUNOS##   ~-- Host operating system is Sun's OpenSolaris
 -- * ##OPENBSD## ~-- Host operating system is OpenBSD

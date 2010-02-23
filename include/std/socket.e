@@ -8,7 +8,7 @@ namespace sockets
  
 include std/get.e
 include std/regex.e as re
-include std/memory.e as mem
+include std/machine.e as mem
 include std/sequence.e as seq
 include std/net/common.e
 

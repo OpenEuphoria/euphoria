@@ -19,6 +19,7 @@ include std/text.e
 include std/math.e
 include std/search.e  as search
 include std/error.e as e
+include std/types.e as types
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
@@ -40,11 +41,23 @@ end type
 
 procedure error(sequence file, error_class e, sequence message, sequence vals, object error_file = 0)
 	object lines
-
+	integer bad_string_flag = 0
 	if sequence(error_file) then
 		lines = read_lines(error_file)
 	else
 		lines = 0
+	end if
+
+	for i = 1 to length(vals) do
+		-- assume only nested sequences of vals[i] to be bad.
+		if not atom(vals[i]) and not ascii_string(vals[i]) then
+			bad_string_flag = 1
+		end if
+	end for
+	if bad_string_flag then
+	    for i = 1 to length(vals) do
+	    	vals[i] = pretty_sprint(vals[i], {2} )
+	    end for
 	end if
 	
 	error_list = {

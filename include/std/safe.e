@@ -1,10 +1,10 @@
 -- (c) Copyright - See License.txt
 --
-namespace safe
-include std/error.e
-
 -- Euphoria 4.0
 -- Machine Level Programming (386/486/Pentium)
+
+namespace safe
+include std/error.e
 
 public include std/memconst.e
 ifdef DATA_EXECUTE then
@@ -87,10 +87,6 @@ public integer check_calls = 1
 -- On //WIN32// people often use unregistered blocks.
 public integer edges_only = (platform()=2) 
 				  
-
--- from misc.e and graphics.e:
-constant M_SOUND = 1
-
 -- Constants that tell us what we are about to try to do: read, write or execute memory.  
 -- They should be distinct from PERM_EXEC, etc...
 -- These are not permission constants.
@@ -101,17 +97,21 @@ constant M_SOUND = 1
 -- Set allocation number to 0.
 public sequence safe_address_list = {}
 
-with type_check
+enum BLOCK_ADDRESS, BLOCK_LENGTH, ALLOC_NUMBER, BLOCK_PROT
 
-puts(1, "\n\t\tUsing Debug Version of machine.e\n")
-atom t
-t = time()
-while time() < t + 3 do
-end while
+with type_check
 
 constant OK = 1, BAD = 0
 constant M_ALLOC = 16,
-		 M_FREE = 17
+		 M_FREE = 17,
+		 M_SLEEP = 64
+
+puts(1, "\n\t\tUsing Debug Version of machine.e\n")
+machine_proc(M_SLEEP, 3)
+
+
+
+
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -119,7 +119,7 @@ constant MAX_ADDR = power(2, 32)-1
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
 
-public type positive_int(integer x)
+type positive_int(integer x)
 	return x >= 1
 end type
 
@@ -257,7 +257,7 @@ public function safe_address(atom start, integer len, positive_int action )
 	end if
 end function
 
-public procedure die(sequence msg)
+procedure die(sequence msg)
 -- Terminate with a message.
 -- makes warning beeps first so you can see what's happening on the screen
 	crash(msg)
@@ -607,7 +607,7 @@ override function c_func(integer i, sequence s)
 	return r
 end function
 
-enum BLOCK_ADDRESS, BLOCK_LENGTH, ALLOC_NUMBER, BLOCK_PROT
+
 
 
 public procedure register_block(machine_addr block_addr, positive_int block_len, valid_memory_protection_constant memory_protection = PAGE_READ_WRITE )
@@ -668,34 +668,21 @@ end function
 
 public function allocate(positive_int n, integer cleanup = 0)
 -- allocate memory block and add it to safe list
+	atom a	
 	ifdef DATA_EXECUTE then                                   
-		return allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
+		a = allocate_protect( n+BORDER_SPACE*2, 1, PAGE_READ_WRITE_EXECUTE )
 	elsedef	
-		atom a	
-		a = machine_func(M_ALLOC, n+BORDER_SPACE*2)
-		return prepare_block(a, n, PAGE_READ_WRITE )
+		a = machine_func(M_ALLOC, n+BORDER_SPACE*2)		
+		a = prepare_block(a, n, PAGE_READ_WRITE )
 	end ifdef	
-end function
-
-public function allocate_string(sequence s, integer cleanup = 0 )
-	atom mem
-	
-	mem = allocate( length(s) + 1) -- Thanks to Igor
-	
-	if mem then
-		poke(mem, s)
-		poke(mem+length(s), 0)  -- Thanks to Aku
-		if cleanup then
-			mem = delete_routine( mem, FREE_RID )
-		end if
+	if cleanup then
+		a = delete_routine( a, FREE_RID )
 	end if
-
-	return mem
+	return a
 end function
 
-
-public procedure free(bordered_address a)
--- free address a - make sure it was allocated
+export procedure deallocate(atom a)
+	-- free address a - make sure it was allocated
 	for i = 1 to length(safe_address_list) do
 		if safe_address_list[i][BLOCK_ADDRESS] = a then
 			-- check pre and post block areas
@@ -725,11 +712,11 @@ public procedure free(bordered_address a)
 	end for
 	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 end procedure
-FREE_RID = routine_id("free")
+FREE_RID = routine_id("deallocate")
 
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return DEP_really_works		
 	end ifdef
 
@@ -738,7 +725,7 @@ end function
 
 export atom VirtualFree_rid
 
-public procedure free_code( bordered_address addr, integer size, valid_wordsize wordsize = 1 )
+public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
 	integer free_succeeded
 	sequence block
 
@@ -756,17 +743,15 @@ public procedure free_code( bordered_address addr, integer size, valid_wordsize 
 			end if
 			safe_address_list = remove( safe_address_list, i )
 			exit
-		end if		
+		end if
 	end for
 
-	ifdef WIN32 then
-		if not dep_works() then
-			machine_proc(M_FREE, addr-BORDER_SPACE)
-		else
+	ifdef WINDOWS then
+		if dep_works() then
 			free_succeeded = c_func( VirtualFree_rid, 
 				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
+			return
 		end if
-	elsedef
-		machine_proc(M_FREE, addr-BORDER_SPACE)	
 	end ifdef
+	machine_proc(M_FREE, addr-BORDER_SPACE)
 end procedure

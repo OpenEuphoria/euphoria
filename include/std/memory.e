@@ -38,13 +38,15 @@ namespace memory
 --
 
 public include std/memconst.e
-include std/types.e
 include std/error.e
-include std/unicode.e
 
 ifdef DATA_EXECUTE then
 	include std/machine.e
 end ifdef
+
+without warning &= (not_used)
+
+public integer edges_only 
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -52,7 +54,7 @@ constant MAX_ADDR = power(2, 32)-1
 --**
 -- Positive integer type
 
-export type positive_int(integer x)
+type positive_int(integer x)
         return x >= 1
 end type
 
@@ -136,271 +138,16 @@ public function allocate_data(positive_int n, integer cleanup = 0)
 	end if
 end function
 
---**
--- Stores a C-style null-terminated ANSI string in memory
---
--- Parameters:
--- # ##buffaddr##: an atom, the RAM address to to the string at.
--- # ##buffsize##: an integer, the number of bytes available, starting from ##buffaddr##.
--- # ##s## : a sequence, the string to store at address ##buffaddr##.
---
--- Comments:
--- * This does not allocate an RAM. You must supply the preallocated area.
--- * This can only be used on ANSI strings. It cannot be used for double-byte strings.
--- * If ##s## is not a string, nothing is stored and a zero is returned.
---
--- Returns:
--- An atom. If this is zero, then nothing was stored, otherwise it is the
--- address of the first byte after the stored string.
---
--- Example 1:
--- <eucode>
---  atom title
---
--- title = allocate(1000)
--- if poke_string(title, 1000, "The Wizard of Oz") then
---     -- successful
--- else
---     -- failed
--- end if
--- </eucode>
--- 
--- See Also:
--- [[:allocate]], [[:allocate_string]]
-
-public function poke_string(atom buffaddr, integer buffsize, sequence s)
-	
-	if buffaddr <= 0 then
-		return 0
-	end if
-	
-	if not string(s) then
-		return 0
-	end if
-	
-	if buffsize <= length(s) then
-		return 0
-	end if
-
-	poke(buffaddr, s)
-	buffaddr += length(s)
-	poke(buffaddr, 0)
-
-	return buffaddr
-end function
-
---**
--- Stores a C-style null-terminated Double-Byte string in memory
---
--- Parameters:
--- # ##buffaddr##: an atom, the RAM address to to the string at.
--- # ##buffsize##: an integer, the number of bytes available, starting from ##buffaddr##.
--- # ##s## : a sequence, the string to store at address ##buffaddr##.
---
--- Comments:
--- * This does not allocate an RAM. You must supply the preallocated area.
--- * This uses two bytes per string character. **Note** that ##buffsize## 
--- is the number of //bytes// available in the buffer and not the number
--- of //characters// available.
--- * If ##s## is not a double-byte string, nothing is stored and a zero is returned.
---
--- Returns:
--- An atom. If this is zero, then nothing was stored, otherwise it is the
--- address of the first byte after the stored string.
---
--- Example 1:
--- <eucode>
---  atom title
---
--- title = allocate(1000)
--- if poke_wstring(title, 1000, "The Wizard of Oz") then
---     -- successful
--- else
---     -- failed
--- end if
--- </eucode>
--- 
--- See Also:
--- [[:allocate]], [[:allocate_wstring]]
-
-public function poke_wstring(atom buffaddr, integer buffsize, sequence s)
-	
-	if buffaddr <= 0 then
-		return 0
-	end if
-	
-	if buffsize <= 2 * length(s) then
-		return 0
-	end if
-
-	poke2(buffaddr, s)
-	buffaddr += 2 * length(s)
-	poke2(buffaddr, 0)
-
-	return buffaddr
-end function
-
---**
--- Allocate a C-style null-terminated string in memory
---
--- Parameters:
---              # ##s## : a sequence, the string to store in RAM.
---              # ##cleanup## : an integer, if non-zero, then the returned pointer will be
---                automatically freed when its reference count drops to zero, or
---                when passed as a parameter to [[:delete]].  
---
--- Returns:
---              An **atom**, the address of the memory block where the string was
--- stored, or 0 on failure.
---
--- Comments:
--- Only the 8 lowest bits of each atom in ##s## is stored. Use
--- ##allocate_wstring##()  for storing double byte encoded strings.
---
--- There is no allocate_string_low() function. However, you could easily
--- craft one by adapting the code for ##allocate_string##.
---
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
--- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the pointer's reference count drops to zero.
---
--- Example 1:
--- <eucode>
---  atom title
---
--- title = allocate_string("The Wizard of Oz")
--- </eucode>
--- 
--- See Also:
---              [[:allocate]], [[:allocate_wstring]]
-
-public function allocate_string(sequence s, integer cleanup = 0 )
-	atom mem
-	
-	mem = allocate( length(s) + 1) -- Thanks to Igor
-	
-	if mem then
-		poke(mem, s)
-		poke(mem+length(s), 0)  -- Thanks to Aku
-		if cleanup then
-			mem = delete_routine( mem, FREE_RID )
-		end if
-	end if
-
-	return mem
-end function
-
---**
--- Create a C-style null-terminated wchar_t string in memory
---
--- Parameters:
---   # ##s## : a unicode (utf16) string
---
--- Returns:
---   An **atom**, the address of the allocated string, or 0 on failure.
---
--- See Also:
--- [[:allocate_string]]
---
-public function allocate_wstring(sequence s, integer cleanup = 0 )
-	atom mem
-	
-	mem = allocate( 2 * (length(s) + 1) )
-	if mem then
-		poke2(mem, s)
-		poke2(mem + length(s)*2, 0)
-		if cleanup then
-			mem = delete_routine( mem, FREE_RID )
-		end if
-	end if
-	
-	return mem
-end function
-
---**
--- Return a unicode (utf16) string that are stored at machine address a.
---
--- Parameters:
---   # ##addr## : an atom, the address of the string in memory
---
--- Returns:
---   The **string**, at the memory position.  The terminator is the null word (two bytes equal to 0).
---
--- See Also:
--- [[:peek_string]]
-
-public function peek_wstring(atom addr)
-	atom ptr = addr
-	
-	while peek2u(ptr) do
-		ptr += 2
-	end while
-	
-	return peek2u({addr, (ptr - addr) / 2})
-end function
-
-
---**
--- Free up a previously allocated block of memory.
--- @[machine:free]
---
--- Parameters:
---  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
---
--- Comments:
---  * Use ##free##() to return blocks of memory the during execution. This will reduce the chance of 
---   running out of memory or getting into excessive virtual memory swapping to disk. 
--- * Do not reference a block of memory that has been freed. 
--- * When your program terminates, all allocated memory will be returned to the system.
--- * ##addr## must have been allocated previously using [[:allocate]](). You
---   cannot use it to relinquish part of a block. Instead, you have to allocate
---   a block of the new size, copy useful contents from old block there and
---   then ##free##() the old block.  
--- * If the memory was allocated and automatic cleanup
---   was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
--- * An ##addr## of zero is simply ignored.
---
--- Example 1:
---   ##demo/callmach.ex##
---
--- See Also:
---     [[:allocate]], [[:free_code]]
-
-public procedure free(object addr)
-	if number_array (addr) then
-		if ascii_string(addr) then
-			crash("free(\"%s\") is not a valid address", {addr})
-		end if
-		
-		for i = 1 to length(addr) do
-			free(addr[i])
-		end for
-		return
-	elsif sequence(addr) then
-		crash("free() called with nested sequence")
-	end if
-	
-	if addr = 0 then
-		-- Special case, a zero address is assumed to be an uninitialized pointer,
-		-- so it is ignored.
-		return
-	end if
-	
-	ifdef not DATA_EXECUTE then
-        	machine_proc(M_FREE, addr)
-	elsedef	
-		if not dep_works() then
-        	machine_proc(M_FREE, addr)
+export procedure deallocate(atom addr)
+	ifdef DATA_EXECUTE and WINDOWS then
+		if dep_works() then
+			c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
 			return
 		end if
-	
-		ifdef WIN32 then
-			c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
-		end ifdef
 	end ifdef
+   	machine_proc(M_FREE, addr)
 end procedure
-FREE_RID = routine_id("free")
+FREE_RID = routine_id("deallocate")
 
 
 --****
@@ -426,7 +173,7 @@ FREE_RID = routine_id("free")
 -- Errors:
 --
 -- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -479,7 +226,7 @@ FREE_RID = routine_id("free")
 -- Errors:
 --
 -- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -533,7 +280,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -590,7 +337,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -648,7 +395,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 -- Peeking in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -704,7 +451,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Peek() in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -779,7 +526,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. The -D SAFE option will make ##poke()## catch this sort of issues.
 --
 -- Comments:
 --
@@ -828,7 +575,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- Comments: 
 --
@@ -879,7 +626,7 @@ FREE_RID = routine_id("free")
 --
 -- Errors:
 --      Poke() in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- Comments: 
 --
@@ -1017,7 +764,7 @@ public integer check_calls = 1
 
 --**
 -- Description: Add a block of memory to the list of safe blocks maintained
--- by safe.e (the debug version of machine.e). The block starts at address a.
+-- by safe.e (the debug version of memory.e). The block starts at address a.
 -- The length of the block is i bytes.
 --
 -- Parameters:
@@ -1068,7 +815,7 @@ end procedure
 
 --**
 -- Remove a block of memory from the list of safe blocks maintained by safe.e
--- (the debug version of machine.e).
+-- (the debug version of memory.e).
 --
 -- Parameters:
 --              # ##block_addr## : an atom, the start address of the block
