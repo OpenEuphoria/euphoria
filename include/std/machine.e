@@ -431,7 +431,7 @@ end type
 
 --**
 -- page aligned address type
-export type page_aligned_address( atom a )
+public type page_aligned_address( atom a )
 	return remainder( a, 4096 ) = 0
 end type
 

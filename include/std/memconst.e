@@ -1,14 +1,10 @@
-
 namespace memconst
 
-ifdef WIN32 then
-	--****
-	-- === Microsoft's Memory Protection Constants === @[microsoftsmemoryprotectionconstants]
-	--
-	-- Memory Protection Constants are the same constants
-	-- across all platforms.  The API converts them as
-	-- necessary.  They are only necessary for [[:allocate_protect]]
+--****
+-- === Microsoft Windows Memory Protection Constants === @[microsoftsmemoryprotectionconstants]
+-- These constant names are taken right from Microsoft's Memory Protection constants.
 
+ifdef WIN32 then
 	--**
 	-- You may run the data in this page
 	public constant PAGE_EXECUTE = #10
@@ -60,6 +56,62 @@ elsedef
 		PAGE_NOACCESS = PROT_NONE
 
 end ifdef
+
+--****
+-- === Standard Library Memory Protection Constants === @[stardardlibrarymemoryprotectionconstants]
+--
+-- 
+-- Memory Protection Constants are the same constants names and meaning
+-- across all platforms yet possibly of different numeric value.
+-- They are only necessary for [[:allocate_protect]]
+--
+-- The constant names are created like this:  You have four aspects of protection 
+-- READ, WRITE, EXECUTE and COPY.
+-- You take the word PAGE and you concatonate an underscore and the aspect
+-- in the order above.  For example: PAGE_WRITE_EXECUTE
+-- The sole exception to this nomenclature is when you will have no acesss to the page the 
+-- constant is called PAGE_NOACCESS.
+
+--** 
+-- You have no access to this page
+-- An alias to PAGE_NOACCESS
+public constant PAGE_NONE = PAGE_NOACCESS
+
+--**
+-- You may read or run the data
+-- An alias to PAGE_EXECUTE_READ
+public constant PAGE_READ_EXECUTE = PAGE_EXECUTE_READ
+
+--**
+-- You may read or write to this page
+-- An alias to PAGE_READWRITE
+public constant PAGE_READ_WRITE = PAGE_READWRITE
+
+--**
+-- You may only read to this page
+-- An alias to PAGE_READONLY
+public constant PAGE_READ = PAGE_READONLY
+
+--**
+-- You may run, read or write in this page
+-- An alias to PAGE_EXECUTE_READWRITE
+public constant PAGE_READ_WRITE_EXECUTE = PAGE_EXECUTE_READWRITE
+
+--**
+-- You may run or write to this page.  Data
+-- will copied for use with other processes when
+-- you first write to it.
+public constant PAGE_WRITE_EXECUTE_COPY = PAGE_EXECUTE_WRITECOPY 
+
+--**
+-- You may write to this page.  Data
+-- will copied for use with other processes when
+-- you first write to it.
+public constant PAGE_WRITE_COPY = PAGE_WRITECOPY
+
+
+
+
 export constant MEMORY_PROTECTION = {
 	PAGE_EXECUTE,
 	PAGE_EXECUTE_READ,
@@ -76,33 +128,24 @@ export type valid_memory_protection_constant( integer x )
 end type
 
 
---** 
--- An alias to PAGE_NOACCESS
-public constant PAGE_NONE = PAGE_NOACCESS
-
---**
--- An alias to PAGE_EXECUTE_READ
-public constant PAGE_READ_EXECUTE = PAGE_EXECUTE_READ
-
---**
--- An alias to PAGE_READWRITE
-public constant PAGE_READ_WRITE = PAGE_READWRITE
-
---**
--- An alias to PAGE_READONLY
-public constant PAGE_READ = PAGE_READONLY
-
---**
--- An alias to PAGE_EXECUTE_READWRITE
-public constant PAGE_READ_WRITE_EXECUTE = PAGE_EXECUTE_READWRITE
-
 export function test_read( valid_memory_protection_constant protection )
-	return find( protection, { PAGE_EXECUTE_READ, PAGE_EXECUTE_READWRITE,  
-			PAGE_READWRITE,	PAGE_READONLY } )
+	-- does this protection allow for reading?
+	ifdef UNIX then
+		-- take advantage of the use of bit fields in UNIX for protections
+		return or_bits(PROT_READ,protection) != 0
+	elsedef
+		return find( protection, { PAGE_EXECUTE_READ, PAGE_EXECUTE_READWRITE,  
+				PAGE_READWRITE,	PAGE_READONLY } )
+	end ifdef			
 end function
 
 
 export function test_write( valid_memory_protection_constant protection )
+	-- does this protection allow for writing?
+	ifdef UNIX then
+		-- take advantage of the use of bit fields in UNIX for protections
+		return or_bits(PROT_WRITE,protection) != 0
+	end ifdef
 	return find( protection, { PAGE_EXECUTE_READWRITE,
 		 	PAGE_EXECUTE_WRITECOPY,
 		 PAGE_WRITECOPY,
@@ -110,6 +153,11 @@ export function test_write( valid_memory_protection_constant protection )
 end function
 
 export function test_exec( valid_memory_protection_constant protection )
+	-- does this protection allow for executing?
+	ifdef UNIX then
+		-- take advantage of the use of bit fields in UNIX for protections
+		return or_bits(PROT_EXEC,protection) != 0
+	end ifdef
 	return find(protection,{PAGE_EXECUTE,
 		PAGE_EXECUTE_READ,
 		PAGE_EXECUTE_READWRITE,

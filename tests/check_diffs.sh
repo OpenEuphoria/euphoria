@@ -1,3 +1,11 @@
+# This script determines if the following are true:
+#       All routines or variables found in std/memory.e are also be complimented with a  version for std/safe.e with the same name. 
+#	The sets of symbols exported by std/safe.e and std/memory.e are the same. 
+#
+# The user should use std/machine.e for his/her programs.  If SAFE is defined std/safe.e   
+# will implement SAFE behavior for std/machine.e if not memory.e will implement faster behavior
+# for std/machine.e.
+#
 egrep 'export ' ../include/std/safe.e | sort | awk -F '(' '{ print $1; }' | awk -F '=' '{ print $1;
 }' > exported_from_safe.txt 
 egrep 'export ' ../include/std/memory.e | sort | awk -F '(' '{ print $1; }' | awk -F '=' '{ print $1;

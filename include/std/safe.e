@@ -5,7 +5,9 @@
 
 namespace safe
 include std/error.e
-
+ifdef WINDOWS then
+	include std/win32/sounds.e
+end ifdef
 public include std/memconst.e
 ifdef DATA_EXECUTE then
 	public include std/machine.e as machine
@@ -31,8 +33,8 @@ end ifdef
 -- 3. If necessary, call register_block(address, length, memory_protection) to add additional
 --    "external" blocks of memory to the safe_address_list. These are blocks 
 --    of memory that are safe to use but which you did not acquire 
---    through Euphoria's allocate(), allocate_data() or allocate_code(). Call 
---    unregister_block(address) when you want to prevent further access to
+--    through Euphoria's allocate(), allocate_data(), allocate_code() or memory_protect(). Call 
+--    unregister_block(address) when you want to prevent further access to 
 --    an external block.
 --
 -- 4. Run your program. It might be 10x slower than normal but it's
@@ -95,6 +97,7 @@ public integer edges_only = (platform()=2)
 -- Include the starting address and length of any 
 -- acceptable areas of memory for peek/poke here. 
 -- Set allocation number to 0.
+-- This symbol is *only* available from std/machine.e when SAFE is defined.
 public sequence safe_address_list = {}
 
 enum BLOCK_ADDRESS, BLOCK_LENGTH, ALLOC_NUMBER, BLOCK_PROT
@@ -177,6 +180,8 @@ end function
 
 public function safe_address(atom start, integer len, positive_int action )
 -- is it ok to read/write all addresses from start to start+len-1?
+-- Note:  This routine is available from std/machine.e *only* when SAFE
+-- is defined.
 	atom block_start, block_upper, upper
 	sequence block
 	
@@ -260,6 +265,16 @@ end function
 procedure die(sequence msg)
 -- Terminate with a message.
 -- makes warning beeps first so you can see what's happening on the screen
+	for i = 1 to 3 do
+		ifdef WINDOWS then
+			sound()
+		end ifdef
+		machine_func(M_SLEEP,0.1)
+		ifdef WINDOWS then
+			sound(0)
+		end ifdef
+		machine_func(M_SLEEP,0.1)
+	end for
 	crash(msg)
 end procedure
 
