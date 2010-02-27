@@ -407,9 +407,9 @@ ifdef WIN32 then
 		end if
 	end if
 	public constant PAGE_SIZE = page_size
-elsedef
-	public constant PAGE_SIZE = -1
-
+elsifdef UNIX then
+	constant getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )	 
+	public constant PAGE_SIZE = c_func( getpagesize_rid, {} )
 end ifdef
 
 ifdef WIN32 then
@@ -432,7 +432,7 @@ end type
 --**
 -- page aligned address type
 public type page_aligned_address( atom a )
-	return remainder( a, 4096 ) = 0
+	return remainder( a, PAGE_SIZE ) = 0
 end type
 
 public function is_DEP_supported()
