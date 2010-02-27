@@ -802,7 +802,7 @@ char *ERealloc(char *orig, unsigned long newsize)
 	q = EMalloc(newsize);
 	/* copy the data to it's new location */
 	/* OPTIMIZE? we may be copying more than the actual live data */
-    res = memcopy(q, newsize, orig, oldsize - (orig - (unsigned char *)p));
+    res = memcopy(q, newsize, orig, oldsize - (orig - p));
 	if (res != 0) {
 		RTFatal("Internal error: ERealloc memcopy failed (%d).", res);
 	}
