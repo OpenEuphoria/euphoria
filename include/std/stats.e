@@ -209,7 +209,7 @@ public function range(object data_set)
 end function
 
 --****
--- Enums used for to influence the results of some of these functions.
+-- Enums used to influence the results of some of these functions.
 
 public enum
    --** 

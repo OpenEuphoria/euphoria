@@ -138,10 +138,12 @@ public function allocate_data(positive_int n, integer cleanup = 0)
 	end if
 end function
 
+-- Internal use of the library only.  free() calls this.  It works with
+-- only atoms and in the SAFE implementation is different.
 export procedure deallocate(atom addr)
 	ifdef DATA_EXECUTE and WINDOWS then
 		if dep_works() then
-			c_func( VirtualFree_rid, { addr-BORDER_SPACE, 1, MEM_RELEASE } )
+			c_func( VirtualFree_rid, { addr, 1, MEM_RELEASE } )
 			return
 		end if
 	end ifdef

@@ -1471,7 +1471,7 @@ end function
 -- <eucode>
 -- sequence source = "abc", target = "John Doe"
 -- sequence s = patch(target, source, 6)
--- -- s is now "abcohn Dabc"
+-- -- s is now "John Dabc"
 -- </eucode>
 --
 -- See Also:
@@ -1906,7 +1906,7 @@ end function
 -- Predefined routine_id for use with [[:filter]]().
 --
 -- Comments:
--- Used to filter out non-alohabetic characters from a string.
+-- Used to filter out non-alphabetic characters from a string.
 --
 -- Example:
 -- <eucode>
@@ -2097,7 +2097,7 @@ end function
 --   # ##limit## : an integer (default is 0). The maximum number of sub-sequences
 --                to create. If zero, there is no limit.
 --   # ##no_empty## : an integer (default is 0). If not zero then all zero-length sub-sequences
---                   removed from the returned sequence. Use this when leading,
+--                   are removed from the returned sequence. Use this when leading,
 --                   trailing and duplicated delimiters are not significant.
 --
 -- Returns:

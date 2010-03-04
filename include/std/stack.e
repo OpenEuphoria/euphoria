@@ -41,7 +41,7 @@ public type stack(object obj_p)
 
 	object o = ram_space[obj_p]
 	if not sequence(o) then return 0 end if
-	if not length(o) = data then return 0 end if
+	if length(o) != data then return 0 end if
 	if not equal(o[type_tag], type_is_stack) then return 0 end if
 	if not find(o[stack_type], { FIFO, FILO }) then return 0 end if
 	if not sequence(o[data]) then return 0 end if

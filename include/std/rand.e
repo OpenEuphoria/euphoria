@@ -269,9 +269,9 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- res = roll(1,2) -- Simulate a coin toss.
--- res = roll( {1,6} ) -- Try for a 1 or a 6 from a standard die toss.
--- res = roll( {1,2,3,4}, 20) -- Looking for any number under 5 from a 20-sided die.
+-- res = roll(1, 2) -- Simulate a coin toss.
+-- res = roll({1,6}) -- Try for a 1 or a 6 from a standard die toss.
+-- res = roll({1,2,3,4}, 20) -- Looking for any number under 5 from a 20-sided die.
 -- </eucode>
 -- 
 -- See Also:

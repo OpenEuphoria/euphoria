@@ -712,7 +712,7 @@ export procedure deallocate(atom a)
 				show_block(safe_address_list[i])
 			end if
 			ifdef DATA_EXECUTE then
-				free_code(a, safe_address_list[i][BLOCK_LENGTH])
+				free_code(a, n)
 			elsedef
 				if safe_address_list[i][BLOCK_PROT] != PAGE_READ_WRITE then
 					die("ATTEMPT TO FREE WITH free() A BLOCK " &

@@ -29,7 +29,7 @@ sequence list_of_primes  = {2,3} -- Initial seedings.
 --      the next prime number that falls on or after the value of ##max_p##.
 --
 -- Comments:
--- * The returned sequence contains all the prime number less than its last element.
+-- * The returned sequence contains all the prime numbers less than its last element.
 --
 -- * If the function times out, it may not hold all primes below ##max_p##,
 -- but only the largest ones will be absent. If the last element returned is 
