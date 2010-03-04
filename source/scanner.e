@@ -1994,7 +1994,7 @@ export procedure IncludeScan( integer is_public )
 
 	-- record the new filename
 	ifdef WINDOWS then
-		new_include_name = find_replace(`/`, gtext, `\`)
+		new_include_name = match_replace(`/`, gtext, `\`)
 	elsedef
 		new_include_name = gtext
 	end ifdef

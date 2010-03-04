@@ -475,20 +475,20 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = find_replace("the", "the cat ate the food under the table", "THE", 0)
+-- s = match_replace("the", "the cat ate the food under the table", "THE", 0)
 -- -- s is "THE cat ate THE food under THE table"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- s = find_replace("the", "the cat ate the food under the table", "THE", 2)
+-- s = match_replace("the", "the cat ate the food under the table", "THE", 2)
 -- -- s is "THE cat ate THE food under the table"
 -- </eucode>
 --
 -- See Also:
 --		[[:find]], [[:replace]]
 
-public function find_replace(object needle, sequence haystack, object replacement, 
+public function match_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
 	integer posn, needle_len, replacement_len
 	

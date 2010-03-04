@@ -1319,7 +1319,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 	elsedef
 	    sequence lDrive = ""
 	    -- Replace unix style separators with Windows style
-	    lPath = find_replace("/", path_in, SLASH)
+	    lPath = match_replace("/", path_in, SLASH)
 	end ifdef
 
     -- Strip off any enclosing quotes.

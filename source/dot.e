@@ -182,7 +182,7 @@ export procedure short_files()
 	for f = 1 to length( short_names ) do
 		-- just the short name
 		sequence name = short_names[f]
-		name = find_replace( '\\', name, '/' )
+		name = match_replace( '\\', name, '/' )
 		file_name[f] = name
 		for r = length( name ) to 1 by -1 do
 			if name[r] = '/' then

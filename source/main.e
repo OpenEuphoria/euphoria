@@ -51,7 +51,7 @@ function GetSourceName()
 	end if
 
 	ifdef WINDOWS then
-		src_name = find_replace("/", src_name, "\\")
+		src_name = match_replace("/", src_name, "\\")
 	end ifdef
 	-- check src_name for last '.'
 	for p = length(src_name) to 1 by -1 do

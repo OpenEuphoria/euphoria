@@ -1481,7 +1481,7 @@ public function load_map(object file_name_p)
 			if delim_ > 0 then
 				key_ = trim(line_[1..delim_-1])
 				if length(key_) > 0 then
-					key_ = find_replace("\\-", key_, "-")
+					key_ = match_replace("\\-", key_, "-")
 					if not t_alpha(key_[1]) then
 						conv_res_ = value(key_,,GET_LONG_ANSWER)
 						if conv_res_[1] = GET_SUCCESS then
@@ -1492,7 +1492,7 @@ public function load_map(object file_name_p)
 					end if
 									
 					value_ = trim(line_[delim_+1..$])
-					value_ = find_replace("\\-", value_, "-")
+					value_ = match_replace("\\-", value_, "-")
 					conv_res_ = value(value_,,GET_LONG_ANSWER)
 					if conv_res_[1] = GET_SUCCESS then
 						if conv_res_[3] = length(value_) then
@@ -1622,9 +1622,9 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 	else
 		for i = 1 to length(keys_) do
 			keys_[i] = pretty_sprint(keys_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
-			keys_[i] = find_replace("-", keys_[i], "\\-")
+			keys_[i] = match_replace("-", keys_[i], "\\-")
 			values_[i] = pretty_sprint(values_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
-			values_[i] = find_replace("-", values_[i], "\\-")
+			values_[i] = match_replace("-", values_[i], "\\-")
 				
 			printf(file_handle_, "%s = %s\n", {keys_[i], values_[i]})
 			

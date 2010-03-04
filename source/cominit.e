@@ -88,7 +88,7 @@ end function
 procedure show_copyrights()
 	sequence notices = all_copyrights()
 	for i = 1 to length(notices) do
-		printf(2, "%s\n  %s\n\n", { notices[i][1], find_replace("\n", notices[i][2], "\n  ") })
+		printf(2, "%s\n  %s\n\n", { notices[i][1], match_replace("\n", notices[i][2], "\n  ") })
 	end for
 end procedure
 

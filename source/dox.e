@@ -89,8 +89,8 @@ end procedure
 
 
 function underscore_name( sequence name )
-	name = find_replace( '\\', name, '_' )
-	name = find_replace( '/', name,  '_' )
+	name = match_replace( '\\', name, '_' )
+	name = match_replace( '/', name,  '_' )
 	return name
 end function
 
