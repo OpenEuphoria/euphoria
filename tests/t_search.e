@@ -1,6 +1,8 @@
 include std/search.e
 include std/unittest.e
 
+	
+
 test_equal("find_all() empty", {}, find_all('Z', "ABACDE", 1))
 test_equal("find_all() atom", {1,3}, find_all('A', "ABACDE", 1))
 test_equal("find_all() atom from", {3}, find_all('A', "ABACDE", 2))
@@ -41,6 +43,13 @@ test_equal("rmatch() #9",13, rmatch("the", "the dog ate the steak from the table
 test_equal("match_replace() string", "John Smith", match_replace("Doe", "John Doe","Smith",  0))
 test_equal("match_replace() sequence", {1,1,1,1,1}, match_replace({5,2},{1,5,2,5,2},  {1,1}, 0))
 test_equal("match_replace() max set", "BBBAAA", match_replace("A", "AAAAAA","B",  3))
+
+test_equal("find_replace() letter", "John Dot", find_replace('e', "John Doe",'t',  0))
+test_equal("find_replace() number", {1,1,2,1,2}, find_replace(5,{1,5,2,5,2}, 1, 0))
+test_equal("find_replace() max set", "BBBAAA", find_replace('A',"AAAAAA",'B',  3))
+test_equal("find_replace() 'b' to 'c'", "The catty cook was all cut in Canada",
+	find_replace('b', "The batty book was all but in Canada", 'c'))
+
 
 constant haystack = "012345678ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 test_equal("binary_search missing #1", -10, binary_search('9',haystack))

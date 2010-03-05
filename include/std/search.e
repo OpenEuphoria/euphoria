@@ -460,6 +460,56 @@ end function
 --
 -- Parameters:
 --
+--		# ##needle## : an atom to search and perhaps replace
+--		# ##haystack## : a sequence to be inspected
+--		# ##replacement## : an atom to substitute for any (first) instance of ##needle##
+--		# ##max## : an integer, 0 to replace all occurrences
+--
+-- Returns:
+--		A **sequence**, the modified ##haystack##.
+--
+-- Comments:
+-- Replacements will not be made recursively on the part of ##haystack## that was already changed.
+--
+-- If ##max## is 0 or less, any occurrence of ##needle## in ##haystack## will be replaced by ##replacement##. Otherwise, only the first ##max## occurrences are.
+--
+-- Example 1:
+-- <eucode>
+-- s = find_replace('b', "The batty book was all but in Canada.", 'c', 0)
+-- -- s is "The catty cook was all cut in Canada."
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- s = find_replace('/', "/euphoria/demo/unix", '\\', 2)
+-- -- s is "\\euphoria\\demo/unix"
+-- </eucode>
+--
+-- See Also:
+--		[[:find]], [[:replace]], [[:match_replace]]
+
+public function find_replace(atom needle, sequence haystack, atom replacement, 
+			integer max=0)
+
+	integer posn = 0
+	while posn != 0 entry do 
+		haystack[posn] = replacement
+		max -= 1
+		if max = 0 then
+			exit
+		end if
+	entry
+		posn = find_from(needle, haystack, posn + 1)
+	end while
+
+	return haystack
+end function
+
+--**
+-- Finds a "needle" in a "haystack", and replace any, or only the first few, occurrences with a replacement.
+--
+-- Parameters:
+--
 --		# ##needle## : an object to search and perhaps replace
 --		# ##haystack## : a sequence to be inspected
 --		# ##replacement## : an object to substitute for any (first) instance of ##needle##
@@ -473,6 +523,9 @@ end function
 --
 -- If ##max## is 0 or less, any occurrence of ##needle## in ##haystack## will be replaced by ##replacement##. Otherwise, only the first ##max## occurrences are.
 --
+-- If either ##needle## or ##replacement## are atoms they will be treated as if you had passed in a 
+-- length-1 sequence containing the said atom. 
+--
 -- Example 1:
 -- <eucode>
 -- s = match_replace("the", "the cat ate the food under the table", "THE", 0)
@@ -485,8 +538,14 @@ end function
 -- -- s is "THE cat ate THE food under the table"
 -- </eucode>
 --
+-- Example 3:
+-- <eucode>
+-- s = match_replace('/', "/euphoria/demo/unix", '\\', 2)
+-- -- s is "\\euphoria\\demo/unix"
+-- </eucode>
+--
 -- See Also:
---		[[:find]], [[:replace]]
+--		[[:find]], [[:replace]], [[:find_replace]]
 
 public function match_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
@@ -519,7 +578,7 @@ public function match_replace(object needle, sequence haystack, object replaceme
 end function
 
 --**
--- Finds a "needle" in an ordered "haystack". Star and end point can be given for the search.
+-- Finds a "needle" in an ordered "haystack". Start and end point can be given for the search.
 --
 -- Parameters:
 --		# ##needle## : an object to look for
