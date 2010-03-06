@@ -460,9 +460,9 @@ end function
 --
 -- Parameters:
 --
---		# ##needle## : an atom to search and perhaps replace
+--		# ##needle## : an object to search and perhaps replace
 --		# ##haystack## : a sequence to be inspected
---		# ##replacement## : an atom to substitute for any (first) instance of ##needle##
+--		# ##replacement## : an object to substitute for any (first) instance of ##needle##
 --		# ##max## : an integer, 0 to replace all occurrences
 --
 -- Returns:
@@ -485,10 +485,15 @@ end function
 -- -- s is "\\euphoria\\demo/unix"
 -- </eucode>
 --
+-- Example 3:
+-- <eucode>
+-- s = find_replace("theater", { "the", "theater", "theif" }, "theatre")
+-- -- s is { "the", "theatre", "theif" }
+--
 -- See Also:
 --		[[:find]], [[:replace]], [[:match_replace]]
 
-public function find_replace(atom needle, sequence haystack, atom replacement, 
+public function find_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
 
 	integer posn = 0

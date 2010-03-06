@@ -422,6 +422,24 @@ constant lcid_string = {
 "zu_ZA",
 "C"}
 
+--**
+-- type for a locale context
+--
+-- Returns 1 if ##x## is a locale context identifier
+public type lcid( integer x ) 
+	return find(x,lcid_hex) != 0
+end type
+
+--**
+--
+-- Returns:
+--  the current locale context identifier.   
+--
+-- Returns:
+-- # The ##lcid## which is of type LCID in C/C++.
+--
+-- 
+-- 
 public function get_lcid(sequence name)
 	integer i
 	i = find(name, lcid_string)

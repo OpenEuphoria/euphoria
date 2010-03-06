@@ -49,7 +49,8 @@ test_equal("find_replace() number", {1,1,2,1,2}, find_replace(5,{1,5,2,5,2}, 1, 
 test_equal("find_replace() max set", "BBBAAA", find_replace('A',"AAAAAA",'B',  3))
 test_equal("find_replace() 'b' to 'c'", "The catty cook was all cut in Canada",
 	find_replace('b', "The batty book was all but in Canada", 'c'))
-
+test_equal("find_replace() string", { "tom", "dick", "harry" },
+	find_replace("richard", {"tom", "richard", "harry"}, "dick"))
 
 constant haystack = "012345678ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 test_equal("binary_search missing #1", -10, binary_search('9',haystack))
