@@ -2862,12 +2862,13 @@ public constant SEQ_NOALT = {{1.23456}}
 
 --**
 -- Removes all sub-sequences from the supplied sequence, optionally
--- replacing them with a supplied alternative value.
+-- replacing them with a supplied alternative value. One common use
+-- is to remove all strings from a mixed set of numbers and strings.
 --
 -- Parameters:
 -- # ##source_list## : A sequence from which sub-sequences are removed.
--- # ##alt_value## : An object. Use SEQ_NOALT to indicate that sub-sequences
---                  are to be physically removed, any other value will be
+-- # ##alt_value## : An object. The default is SEQ_NOALT, which causes sub-sequences
+--                  to be physically removed, otherwise any other value will be
 --                  used to replace the sub-sequence.
 --
 -- Returns:
@@ -2876,14 +2877,14 @@ public constant SEQ_NOALT = {{1.23456}}
 --
 -- Example:
 -- <eucode>
--- sequence s = remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, SEQ_NOALT)
+-- sequence s = remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4})
 -- -- 's' is now {4, 6, 0.1, 4} -- length now 4
 -- s = remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, -1)
 -- -- 's' is now {4, 6, -1, 0.1, -1, 4} -- length unchanged.
 -- </eucode>
 --
 
-public function remove_subseq( sequence source_list, object alt_value)
+public function remove_subseq( sequence source_list, object alt_value = SEQ_NOALT)
 	sequence lResult
 	integer lCOW = 0
 
