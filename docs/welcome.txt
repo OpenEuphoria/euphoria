@@ -1,6 +1,3 @@
-= Euphoria Programming Language v4.0
-<<LEVELTOC depth=2>>
-
 == Introduction
 
 Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical

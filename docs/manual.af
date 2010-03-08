@@ -16,13 +16,20 @@
 :<<TOC level=3>>
 
 ########
-# Front-Matter
+:= Euphoria Programming Language v4.0
+:<<LEVELTOC depth=2>>
+
 ../docs/welcome.txt
 ../docs/c.txt
 ../docs/install.txt
 ../docs/what2do.txt
 #TODO: other release notes
-:= Euphoria License =
+
+########
+:= Euphoria License
+:<<LEVELTOC depth=2>>
+
+:== Euphoria License 
 :----
 ../License.txt <nowiki
 :----
@@ -30,9 +37,21 @@
 ../docs/credits.txt
 
 ########
-# Language Reference
+:= Quick Start
+:<<LEVELTOC depth=2>>
+
 ../docs/refman_1.txt
+
+########
+:= Language Reference
+:<<LEVELTOC depth=3>>
+
 ../docs/refman_2.txt
+
+########
+:= Formal Syntax
+: <<LEVELTOC depth=3>>
+
 ../docs/syntax.txt
 ../docs/internals.txt
 
@@ -163,8 +182,13 @@
 ########
 := Release Notes
 : <<LEVELTOC depth=2>>
+
 :@@(color <<font color="$(1)" text=`$(+)`>>)@
 :@@(bugfix **$$(color #009999 bug fixed:)**)@
 :@@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
 
 ../docs/relnotes400.txt
+
+
+########
+:= Index

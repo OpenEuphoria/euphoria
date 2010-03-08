@@ -1,7 +1,3 @@
-= Language Reference
-
-<<LEVELTOC depth=3>>
-
 == Definition
 
 === Objects === @[predefined types]

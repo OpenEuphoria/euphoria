@@ -489,6 +489,7 @@ end function
 -- <eucode>
 -- s = find_replace("theater", { "the", "theater", "theif" }, "theatre")
 -- -- s is { "the", "theatre", "theif" }
+-- </eucode>
 --
 -- See Also:
 --		[[:find]], [[:replace]], [[:match_replace]]
@@ -1010,15 +1011,16 @@ end function
 -- * If ##find_item## is not in ##source_list## then if ##target_list## is longer than ##source_list##
 -- then the last item in ##target_list## is returned otherwise ##def_value## is returned.
 --
---Examples:
---<eucode>
+-- Examples:
+-- <eucode>
 -- lookup('a', "cat", "dog") --> 'o'
 -- lookup('d', "cat", "dogx") --> 'x'
 -- lookup('d', "cat", "dog") --> 0
 -- lookup('d', "cat", "dog", -1) --> -1
 -- lookup("ant", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "spider"
 -- lookup("dog", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "unknown"
---</eucode>
+-- </eucode>
+--
 public function lookup(object find_item, sequence source_list, sequence target_list, object def_value = 0)
     integer lPosn
 
@@ -1063,8 +1065,8 @@ end function
 -- * If ##find_item## is found in the ##source_col## column then this is the corresponding element
 -- from the ##target_col## column.
 --
---Examples:
---<eucode>
+-- Examples:
+-- <eucode>
 -- sequence grid
 -- grid = {
 --        {"ant", "spider", "mortein"},
@@ -1077,7 +1079,8 @@ end function
 -- vlookup("seal", grid, 2, 3, "?") --> "gun"
 -- vlookup("seal", grid, 2, 1, "?") --> "bear"
 -- vlookup("mouse", grid, 2, 3, "?") --> "?"
---</eucode>
+-- </eucode>
+--
 public function vlookup(object find_item, sequence grid_data, integer source_col, integer target_col, object def_value = 0)
     integer lPosn
 

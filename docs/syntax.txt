@@ -1,7 +1,3 @@
-= Syntax Reference
-
-<<LEVELTOC depth=3>>
-
 == basics ==
 <eucode>
 ALPHA ==: ('a' - 'z') | ('A' - 'Z')
