@@ -711,7 +711,7 @@ public procedure free_console()
 end procedure
 
 
---*
+--**
 -- Displays the supplied data on the console screen at the current cursor position.
 --
 -- Parameters:
