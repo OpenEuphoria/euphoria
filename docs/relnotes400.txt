@@ -56,7 +56,7 @@ $$(doneby C. Cuvier)
 * **Translator:** Added **-lccopt-off** option for translator to disable using the
   optimization flag when compiling with LCC, as it has problems sometimes.
   $$(doneby Jeremy Cowgar)
-* New **loop do** ... **until**//condition// end loop construct, which differs from a while loop
+* New **loop do** ... **until** //condition// end loop construct, which differs from a while loop
   in that it performs its test at the end of the block, rather than at the start.
   $$(doneby C. Cuvier.)
 * New keywords to give greater control over the instruction flow: $$(doneby C. Cuvier.)
