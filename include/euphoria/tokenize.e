@@ -487,7 +487,7 @@ function scan_number()
 	end if
 	return TRUE
 end function
-with trace
+
 ---------------------------------------------------------------------------------
 function hex_string(sequence textdata, integer string_type)
 	integer ch
@@ -564,7 +564,7 @@ function scan_identifier()
 	if find(Look, "xuU") then
 		nextch = lookahead()
 		if nextch = '"' then
-			trace(1)
+
 			-- A special string token
 			textdata = ""
 			scan_char()	-- Skip over starting quote
