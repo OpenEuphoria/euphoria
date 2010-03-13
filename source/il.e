@@ -37,7 +37,6 @@ constant OPTIONS = {
 { "shroud_only", 0, GetMsgText(303, 0), { NO_CASE, NO_PARAMETER }  },
 { "quiet",       0, GetMsgText(304, 0), { NO_CASE, NO_PARAMETER }  },
 { "list",        0, GetMsgText(305, 0), { NO_CASE, NO_PARAMETER }  },
-{ "w32",         0, GetMsgText(306, 0), { NO_CASE, NO_PARAMETER }  },
 { "icon",        0, GetMsgText(307, 0), { NO_CASE, HAS_PARAMETER, "file" }  },
 { "con",         0, GetMsgText(308, 0), { NO_CASE, NO_PARAMETER }  },
 { "full_debug",  0, GetMsgText(309, 0), { NO_CASE, NO_PARAMETER }  },
@@ -49,16 +48,11 @@ $
 }
 
 
--- options for BIND - see also w32 in emit.e
-integer list, quiet, full_debug, con
+-- options for BIND
+integer list, quiet, full_debug
 integer del_routines, del_vars
 sequence user_out, icon
 
-ifdef WINDOWS then 
-	w32 = TRUE
-elsedef
-	w32 = FALSE
-end ifdef
 list = FALSE
 quiet = FALSE
 full_debug = FALSE
@@ -297,16 +291,12 @@ export procedure handle_options_for_bind( m:map opts )
 			case "LIST" then
 				list = TRUE
 		
-			case "W32" then
-				w32 = TRUE
-				OpDefines &= { "EUB_WIN32" }
 		
 			case "ICON" then				
 				icon = val
 		
 			case "CON" then
 				con = TRUE
-				OpDefines &= { "EUB_CON" }
 			
 			case "FULL_DEBUG" then
 				full_debug = TRUE
@@ -337,6 +327,13 @@ export procedure handle_options_for_bind( m:map opts )
 	if file_supplied = 0 then	
 		fatal(GetMsgText(313))
 	end if
+	ifdef WINDOWS then
+		OpDefines &= { "EUB_WIN32" }
+		if con then
+			OpDefines &= { "EUB_CON" }
+		end if
+	end ifdef
+	
 	OpDefines &= { "EUB" }
 
 end procedure
@@ -450,11 +447,14 @@ procedure OutputIL()
 		end for
 				
 		be = -1
-		backend_name = "eubd.exe"
-		if w32 then
-			backend_name = "eub.exe"
-		else
-			ifdef UNIX then
+		ifdef WIN32 then
+			if con then
+				backend_name = "eub.exe"
+			else
+				backend_name = "eubw.exe"
+			end if
+		end ifdef
+		ifdef UNIX then
 				backend_name = "eub"
 				-- try to get the installed backend, if it exists:
 				be = open( "/usr/bin/eub", "r" )
@@ -462,8 +462,8 @@ procedure OutputIL()
 					-- try an obvious other path
 					be = open( "/usr/local/bin/eub", "r" )
 				end if
-			end ifdef
-		end if
+		end ifdef
+
 		sequence ondisk_name = locate_file( backend_name, 
 									{ eu_dir & SLASH & "bin", source_dir }
 									)
@@ -485,62 +485,68 @@ procedure OutputIL()
 			fatal(GetMsgText(317, , {backend_name}))
 		end if
 	
-		-- copy eub[w].exe to output .exe file
-		-- w32: replace the icon with user's icon file if any
-		--      con: replace 2 with 3 in header at #DC
-		last6 = repeat(' ', 6)
+		-- copy eub to output file
 		size = 0
-		while 1 do
-			c = getc(be)
-			if c = -1 then
-				exit
-			end if
-			
-			if w32 and con and size = #DC then
-				puts(out, 3)
-			else
-				puts(out, c)
-			end if
-			
-			size += 1
-			
-			if w32 and size > 55000 and length(icon) then
-				-- looking for icon to replace
-				last6[1..5] = last6[2..6]
-				last6[6] = c
-				if equal(last6, {'E', 0, 'X', 0, 'W', 0}) then
-					-- found icon marker
-
-					-- open icon file
-					if not find('.', icon) then
-						icon &= ".ico"
-					end if
-					ic = open(icon, "rb")
-					if ic = -1 then
-						fatal(GetMsgText(317,, {icon}))
-					end if
-					-- skip icon file header
-					for i = 1 to 22 do
-						c = getc(ic)
-					end for
-					-- insert the custom icon file
-					while TRUE do
-						c = getc(ic)
-						if c = -1 then
-							size = 0 -- don't bother looking anymore
-							exit
-						end if
-						puts(out, c)
-						
-						c = getc(be) -- skip over our icon
-						if c = -1 then
-							fatal(GetMsgText(318))
-						end if
-					end while
-					close(ic)
+		ifdef UNIX then
+			while 1 do
+				c = getc(be)
+				if c = -1 then
+					exit
 				end if
-			end if
-		end while
+				puts(out, c)
+			end while
+		end ifdef
+		
+		ifdef WIN32 then
+			last6 = repeat(' ', 6)
+			while 1 do
+				c = getc(be)
+				if c = -1 then
+					exit
+				end if
+				
+ 				puts(out, c)
+				
+				size += 1
+				
+				if size > 55000 and length(icon) then
+					-- looking for icon to replace
+					last6[1..5] = last6[2..6]
+					last6[6] = c
+					if equal(last6, {'E', 0, 'X', 0, 'W', 0}) then
+						-- found icon marker
+	
+						-- open icon file
+						if not find('.', icon) then
+							icon &= ".ico"
+						end if
+						ic = open(icon, "rb")
+						if ic = -1 then
+							fatal(GetMsgText(317,, {icon}))
+						end if
+						-- skip icon file header
+						for i = 1 to 22 do
+							c = getc(ic)
+						end for
+						-- insert the custom icon file
+						while TRUE do
+							c = getc(ic)
+							if c = -1 then
+								size = 0 -- don't bother looking anymore
+								exit
+							end if
+							puts(out, c)
+							
+							c = getc(be) -- skip over our icon
+							if c = -1 then
+								fatal(GetMsgText(318))
+							end if
+						end while
+						close(ic)
+					end if
+				end if
+			end while
+		end ifdef
 		close(be)
 		
 		-- add marker in .exe
@@ -575,10 +581,10 @@ procedure OutputIL()
 		if shroud_only then
 			sequence filename = "eub"
 			ifdef WIN32 then
-				if w32 then
-					filename &= "w.exe"
-				else
+				if con then
 					filename &= ".exe"
+				else
+					filename &= "w.exe"
 				end if
 			end ifdef
 			ShowMsg(1, 246, {filename, out_name})

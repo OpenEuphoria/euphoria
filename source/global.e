@@ -27,7 +27,7 @@ export constant
 
 export constant EGPM = 0     -- GPM mouse support on Linux
 
-export boolean w32 -- Windows option for BIND
+export integer con -- Windows console option for BIND
 
 export sequence version_name
 ifdef WIN32 then
