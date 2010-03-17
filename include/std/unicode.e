@@ -100,6 +100,12 @@ public enum
 	utf_8,
 	utf_16,
 	utf_32
+
+public constant BOM_8 = x"efbbbf",
+				BOM_16be = x"feff",
+				BOM_16le = x"fffe",
+				BOM_32be = x"0000feff",
+				BOM_32le = x"feff0000"
 	
 --**
 -- Returns the length of an encoded UTF sequence.

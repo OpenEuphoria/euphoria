@@ -83,6 +83,27 @@ object compile(object pattern, object eflags) {
         return ret;
 }
 
+
+/* Acceptable values for flags in compile_pcre() is a 
+   bitmask or of the following flags:
+		DEFAULT				,
+        AUTO_CALLOUT       ,
+        ANCHORED           ,
+		NEWLINE_CR         ,
+        NEWLINE_LF         ,
+        NEWLINE_CRLF       ,
+        NEWLINE_ANY        ,
+        NEWLINE_ANYCRLF    ,
+        BSR_ANYCRLF        ,
+        BSR_UNICODE		   ,
+        CASELESS           ,
+        MULTILINE          ,
+        DOTALL             ,
+        EXTENDED           ,
+        UNGREEDY           ,
+        EXTRA              ,
+		UTF8
+*/
 object compile_pcre(object x, object flags) {
         pcre *re;
         pcre_cleanup_ptr rcp, prev;

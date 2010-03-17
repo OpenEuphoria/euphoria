@@ -312,11 +312,14 @@ end function
 -- An **integer**,
 -- <eucode>
 -- public constant
---     WIN32   = 2,
---     LINUX   = 3,
---     FREEBSD = 3, -- NOTE: same as LINUX.
---     OSX     = 4,
---     SUNOS   = 5
+--     WIN32,
+--     LINUX,
+--     FREEBSD,
+--     OSX,
+--     SUNOS,
+--	   OPENBSD,
+--     NETBSD,
+--     FREEBSD
 -- </eucode>
 --
 -- Comments:

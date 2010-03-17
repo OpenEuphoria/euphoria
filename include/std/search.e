@@ -714,7 +714,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]]
+--     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]], [[:regex:find]]
 
 --**
 -- Match all items of haystack in needle.

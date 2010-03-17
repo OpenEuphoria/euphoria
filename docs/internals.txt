@@ -154,16 +154,18 @@ true if the object is an encoded pointer to a ##'struct s1'##.
 true if the object is an encoded pointer of either kind of structure.
 
 
-== The C Representation of a EUPHORIA Sequence =====
+== The C Representations of a EUPHORIA Sequence and a EUPHORIA Double =====
 
 struct s1
 {{{
+{
 	object_ptr base;   // base is such that base[1] is the first element
 	long length;       // this is the sequence length
 	long ref;          // ref is the number of as virtual copies of this sequence
 	long postfill;     // is how many extra objects could fit at the end of base
 	cleanup_ptr cleanup; // this is a pointer to a EUPHORIA routine that is run 
 		            // just before the sequence is freed.
+}
 }}}
 
 struct d
