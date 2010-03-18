@@ -111,9 +111,9 @@ public constant OBJ_SEQUENCE = 3
 --
 -- Example 1:
 -- <eucode>
--- ? integer(1) --> 0
--- ? integer(1.1) --> 0
--- ? integer("1") --> 1
+-- ? sequence(1) --> 0
+-- ? sequence({1}) --> 1
+-- ? sequence("1") --> 1
 -- </eucode>
 --
 -- See Also:

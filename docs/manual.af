@@ -127,6 +127,7 @@
 
 ../include/std/eds.e
 ../include/std/primes.e
+../include/std/flags.e
 ../include/std/map.e
 ../include/std/stack.e
 ../include/std/sets.e

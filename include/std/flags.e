@@ -1,3 +1,11 @@
+-- (c) Copyright - See License.txt
+
+namespace flags
+--****
+-- == flags
+
+
+
 include std/search.e
 include std/pretty.e
 include std/sequence.e
