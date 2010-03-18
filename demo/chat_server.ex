@@ -45,7 +45,7 @@ procedure main(sequence args)
 	printf(1, "Waiting for connections on %s\n", { addr })
 	while sock:listen(server, 0) = sock:OK label "MAIN" do
 		-- get socket states
-		object sock_data = sock:select({ server } & clients, 0)
+		object sock_data = sock:select({ server } & clients, {}, {})
 
 		-- check for new incoming connects on server socket
 		if sock_data[1][SELECT_IS_READABLE] = 1 then

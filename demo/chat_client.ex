@@ -59,7 +59,7 @@ procedure main(sequence args)
 				exit "top"
 		end switch
 
-		object sock_data = slib:select(sock, 0)
+		object sock_data = slib:select(sock, {}, {})
 		if sock_data[1][SELECT_IS_ERROR] then
 			lost_server()
 
