@@ -1816,7 +1816,7 @@ end function
 --   in which case it is opened accordingly, written to and then closed.
 -- * With the alternative arguments, the third argument can a file handle, 
 --   in which case it is written to only
--- * The format pattern uses the formatting codes defined in [[:text.e:format]].
+-- * The format pattern uses the formatting codes defined in [[:text:format]].
 -- * When the data to be formatted is a single text string, it does not have to
 --   be enclosed in braces, 
 --
@@ -1840,7 +1840,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---    [[:text.e:format]], [[:writefln]], [[:write_lines]]
+--    [[:text:format]], [[:writefln]], [[:write_lines]]
 
 public procedure writef(object fm, object data={}, object fn = 1, object data_not_string = 0)
 	integer real_fn = 0
@@ -1910,7 +1910,7 @@ end procedure
 --   an output type ("a" for append, "w" for write), it is opened accordingly, 
 --   written to and then closed.
 -- * When ##fn## is a file handle, it is written to only
--- * The ##fm## uses the formatting codes defined in [[:text.e:format]].
+-- * The ##fm## uses the formatting codes defined in [[:text:format]].
 --
 -- Example 1:
 -- <eucode>
@@ -1923,7 +1923,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
---    [[:text.e:format]], [[:writef]], [[:write_lines]]
+--    [[:text:format]], [[:writef]], [[:write_lines]]
 public procedure writefln(object fm, object data={}, object fn = 1, object data_not_string = 0)
 	if integer(fm) then
 		writef(data & '\n', fn, fm, data_not_string)

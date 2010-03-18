@@ -3,6 +3,10 @@ namespace regex
 
 include std/math.e
 include std/text.e
+include std/types.e
+include std/flags.e as flags
+include std/error.e
+include std/search.e
 
 --****
 -- == Regular Expressions
@@ -24,19 +28,291 @@ include std/text.e
 -- * [[Regular Expression Library -> http://regexlib.com/]] (user supplied regular
 --   expressions for just about any task).
 -- * [[WikiPedia Regular Expression Article -> http://en.wikipedia.org/wiki/Regular_expression]]
---
+-- * [[Man page of PCRE in HTML -> http://www.slabihoud.de/software/archives/pcrecompat.html]]
 -- === General Use
 --
 -- Many functions take an optional ##options## parameter. This parameter can be either
--- a single option constant (see [[:Option Constants]], multiple option constants or'ed
+-- a single option constant (see [[:Option Constants]]), multiple option constants or'ed
 -- together into a single atom or a sequence of options, in which the function will take
--- care of ensuring the are or'ed together correctly.
+-- care of ensuring the are or'ed together correctly.  Options are like their C equivalents
+-- with the 'PCRE_' prefix stripped off.  Name spaces disambiguate symbols so we don't
+-- need this prefix.
 --
+-- All strings passed into this library must be either 8-bit per character strings or
+-- UTF which uses multiple bytes to encode UNICODE characters. You can
+-- use UTF8 encoded UNICODE strings when you pass the UTF8 option.
 
 enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_MESSAGE=95, M_PCRE_GET_OVECTOR_SIZE=97
 
 --****
 -- === Option Constants
+
+--****
+-- Signature:
+-- public constant ANCHORED
+--
+-- Description:
+-- Froces matches to be only from the first place it is asked to
+-- try to make a search.  
+-- In C, this is called PCRE_ANCHORED.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant AUTO_CALLOUT
+--
+-- Description:
+-- In C, this is called PCRE_AUTO_CALLOUT.
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant BSR_ANYCRLF
+--
+-- Description:
+-- With this option only ASCII new line sequences are recognized as newlines.  Other UNICODE
+-- newline sequences (encoded as UTF8) are not recognized as an end of line marker.  
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant BSR_UNICODE
+--
+-- Description:
+-- With this option any UNICODE new line sequence is recognized as a newline.
+-- The UNICODE will have to be encoded as UTF8, however.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant CASELESS
+--
+-- Description:
+-- This will make your regular expression matches case insensitive.  With this 
+-- flag for example, [a-z] is the same as [A-Za-z].
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant DEFAULT
+--
+-- Description:
+-- This is a value used for not setting any flags at all.  This can be passed to
+-- all routines including [[:new]]
+
+--****
+-- Signature:
+-- public constant DFA_SHORTEST
+--
+-- Description:
+-- This is NOT used by any standard library routine.
+
+--****
+-- Signature:
+-- public constant DFA_RESTART
+--
+-- Description:
+-- This is NOT used by any standard library routine.
+
+--****
+-- Signature:
+-- public constant DOLLAR_ENDONLY
+--
+-- Description: 
+-- If this bit is set, a dollar metacharacter in the pattern matches only
+-- at the end of the subject string. Without this option,  a  dollar  also
+-- matches  immediately before a newline at the end of the string (but not
+-- before any other newlines). The DOLLAR_ENDONLY option  is  ignored
+-- if  MULTILINE  is  set.   There is no way to set this option within a pattern.
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant DOTALL
+--
+-- Description:
+-- With this option the '.' character also matches a newline sequence.  
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant DUPNAMES
+--
+-- Description:
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant EXTRA
+--
+-- Description:
+-- When an alphanumeric follows a backslash(\) has no special meaning an 
+-- error is generated.
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant EXTENDED
+--
+-- Description:
+-- Whitespace and characters beginning with a hash mark to the end of the line 
+-- in the pattern will be ignored when searching except when the whitespace or hash
+-- is escaped or in a character class.
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant FIRSTLINE
+--
+-- Description:
+-- If PCRE_FIRSTLINE is set, the match must happen before or at the first
+-- newline in the subject (though it may continue over the newline).
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant MULTILINE
+--
+-- Description:
+-- When  MULTILINE  it  is set, the "start of line" and "end of line"
+-- constructs match immediately following or immediately  before  internal
+-- newlines  in  the  subject string, respectively, as well as at the very
+-- start and end.  This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant NEWLINE_CR
+--
+-- Description:
+-- Sets CR as the NEWLINE sequence.
+-- The NEWLINE sequence will match $
+-- when MULTILINE is set.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant NEWLINE_LF
+--
+-- Description:
+-- Sets LF as the NEWLINE sequence.
+-- The NEWLINE sequence will match $
+-- when MULTILINE is set.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant NEWLINE_CRLF
+--
+-- Description:
+-- Sets CRLF as the NEWLINE sequence
+-- The NEWLINE sequence will match $
+-- when MULTILINE is set.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant NEWLINE_ANY
+--
+-- Description:
+-- Sets ANY newline sequence as the NEWLINE sequence including
+-- those from UNICODE when UTF8 is also set.  The string will have
+-- to be encoded as UTF8, however.
+-- The NEWLINE sequence will match $
+-- when MULTILINE is set.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant NEWLINE_ANYCRLF
+--
+-- Description:
+-- Sets ANY newline sequence from ASCII.
+-- The NEWLINE sequence will match $
+-- when MULTILINE is set.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant NOBOL
+--
+-- Description:
+-- This indicates that beginning of the passed string does **NO**t start
+-- at the **B**eginning **O**f a **L**ine (NOBOL), so a carrot symbol (^) in the 
+-- original pattern will not match the beginning of the string. 
+-- This is used by routines other than [[:new]].
+
+--****
+-- Signature:
+-- public constant NOEOL
+--
+-- Description:
+-- This indicates that beginning of the passed string does **NO**t end
+-- at the **E**nd **O**f a **L**ine (NOEOL), so a dollar sign ($) in the 
+-- original pattern will not match the end of the string. 
+-- This is used by routines other than [[:new]].
+
+--****
+-- Signature:
+-- public constant NO_AUTO_CAPTURE
+--
+-- Description:
+-- Disables capturing subpatterns except when the subpatterns are
+-- named.
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant NO_UTF8_CHECK
+--
+-- Description:
+-- Turn off checking for the validity of your UTF string.  Use this
+-- with caution.  An invalid utf8 string with this option could **crash**
+-- your program.
+-- This is passed to all routines including [[:new]].
+
+--****
+-- Signature:
+-- public constant NOTEMPTY
+--
+-- Description:
+-- Here matches of empty strings will not be allowed.  In C, this is PCRE_NOTEMPTY.
+-- The pattern: `A*a*` will match "AAAA", "aaaa", and "Aaaa" but not "".
+-- This is used by routines other than [[:new]].
+
+--****
+-- Signature:
+-- public constant PARTIAL
+--
+-- Description:
+-- With this in some routines [[:find]] a string that matches some truncated version of the regular 
+-- expression will return the integer constant ERROR_PARTIAL.  Others will fail by returning some
+-- error value like [[:find_replace]] and still others will crash the program: [[:split]].
+-- In C, this constant is called PCRE_PARTIAL.
+-- This is used by routines other than [[:new]].
+
+--****
+-- Signature:
+-- public constant STRING_OFFSETS
+--
+-- Description:
+-- This is used by [[:matches]] and [[:all_matches]].
+
+--****
+-- Signature:
+-- public constant UNGREEDY
+-- This modifier sets the pattern such that quantifiers are 
+-- not greedy by default, but become greedy if followed by a question mark.  
+-- 
+-- Description:
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant UTF8
+--
+-- Description:
+-- Makes strings passed in to be interpreted as a UTF8 encoded string.
+-- This is passed to [[:new]].
 
 public constant 
         DEFAULT            = #00000000,
@@ -69,6 +345,38 @@ public constant
         BSR_UNICODE        = #01000000,
         STRING_OFFSETS     = #0C000000
 
+constant option_names = {  
+        { DEFAULT, "DEFAULT" },
+        { CASELESS, "CASELESS" },
+        { MULTILINE, "MULTILINE" },
+        { DOTALL, "DOTALL" },
+        { EXTENDED, "EXTENDED" },
+        { ANCHORED, "ANCHORED" },
+        { DOLLAR_ENDONLY, "DOLLAR_ENDONLY" },
+        { EXTRA, "EXTRA" },
+        { NOTBOL, "NOTBOL" },
+        { NOTEOL, "NOTEOL" },
+        { UNGREEDY, "UNGREEDY" },
+        { NOTEMPTY, "NOTEMPTY" },
+        { UTF8, "UTF8" },
+        { NO_AUTO_CAPTURE, "NO_AUTO_CAPTURE" },
+        { NO_UTF8_CHECK, "NO_UTF8_CHECK" },
+        { AUTO_CALLOUT, "AUTO_CALLOUT" },
+        { PARTIAL, "PARTIAL" },
+        { DFA_SHORTEST, "DFA_SHORTEST" },
+        { DFA_RESTART, "DFA_RESTART" },
+        { FIRSTLINE, "FIRSTLINE" },
+        { DUPNAMES, "DUPNAMES" },
+        { NEWLINE_CR, "NEWLINE_CR" },
+        { NEWLINE_LF, "NEWLINE_LF" },
+        { NEWLINE_CRLF, "NEWLINE_CRLF" },
+        { NEWLINE_ANY, "NEWLINE_ANY" },
+        { NEWLINE_ANYCRLF, "NEWLINE_ANYCRLF" },
+        { BSR_ANYCRLF, "BSR_ANYCRLF" },
+        { BSR_UNICODE, "BSR_UNICODE" },
+        { STRING_OFFSETS, "STRING_OFFSETS" }
+	}		
+
 --****
 -- === Error Constants
 
@@ -98,6 +406,65 @@ public constant
         ERROR_NULLWSLIMIT    = (-22),
         ERROR_BADNEWLINE     = (-23)
 
+public constant error_names = {
+        {ERROR_NOMATCH        ,"ERROR_NOMATCH"},
+        {ERROR_NULL           ,"ERROR_NULL"},
+        {ERROR_BADOPTION      ,"ERROR_BADOPTION"},
+        {ERROR_BADMAGIC       ,"ERROR_BADMAGIC"},
+        {ERROR_UNKNOWN_OPCODE ,"ERROR_UNKNOWN_OPCODE"},
+        {ERROR_UNKNOWN_NODE   ,"ERROR_UNKNOWN_NODE"},
+        {ERROR_NOMEMORY       ,"ERROR_NOMEMORY"},
+        {ERROR_NOSUBSTRING    ,"ERROR_NOSUBSTRING"},
+        {ERROR_MATCHLIMIT     ,"ERROR_MATCHLIMIT"},
+        {ERROR_CALLOUT        ,"ERROR_CALLOUT"},
+        {ERROR_BADUTF8        ,"ERROR_BADUTF8"},
+        {ERROR_BADUTF8_OFFSET ,"ERROR_BADUTF8_OFFSET"},
+        {ERROR_PARTIAL        ,"ERROR_PARTIAL"},
+        {ERROR_BADPARTIAL     ,"ERROR_BADPARTIAL"},
+        {ERROR_INTERNAL       ,"ERROR_INTERNAL"},
+        {ERROR_BADCOUNT       ,"ERROR_BADCOUNT"},
+        {ERROR_DFA_UITEM      ,"ERROR_DFA_UITEM"},
+        {ERROR_DFA_UCOND      ,"ERROR_DFA_UCOND"},
+        {ERROR_DFA_UMLIMIT    ,"ERROR_DFA_UMLIMIT"},
+        {ERROR_DFA_WSSIZE     ,"ERROR_DFA_WSSIZE"},
+        {ERROR_DFA_RECURSE    ,"ERROR_DFA_RECURSE"},
+        {ERROR_RECURSIONLIMIT ,"ERROR_RECURSIONLIMIT"},
+        {ERROR_NULLWSLIMIT    ,"ERROR_NULLWSLIMIT"},
+        {ERROR_BADNEWLINE     ,"ERROR_BADNEWLINE"}
+}
+		
+constant all_options = or_all({
+	    DEFAULT            ,
+        CASELESS           ,
+        MULTILINE          ,
+        DOTALL             ,
+        EXTENDED           ,
+        ANCHORED           ,
+        DOLLAR_ENDONLY     ,
+        EXTRA              ,
+        NOTBOL             ,
+        NOTEOL             ,
+        UNGREEDY           ,
+        NOTEMPTY           ,
+        UTF8               ,
+        NO_AUTO_CAPTURE    ,
+        NO_UTF8_CHECK      ,
+        AUTO_CALLOUT       ,
+        PARTIAL            ,
+        DFA_SHORTEST       ,
+        DFA_RESTART        ,
+        FIRSTLINE          ,
+        DUPNAMES           ,
+        NEWLINE_CR         ,
+        NEWLINE_LF         ,
+        NEWLINE_CRLF       ,
+        NEWLINE_ANY        ,
+        NEWLINE_ANYCRLF    ,
+        BSR_ANYCRLF        ,
+        BSR_UNICODE        ,
+        STRING_OFFSETS})
+		
+
 --****
 -- === Create/Destroy
 
@@ -107,6 +474,53 @@ public constant
 public type regex(object o)
         return sequence(o)
 end type
+
+--**
+-- Regular expression option specification type
+--
+-- Although the functions do not use this type (they return an error instead),
+-- you can use this to check if your routine is receiving something sane.
+public type option_spec(object o)
+	if atom(o) then
+		if not integer(o) then
+			return 0
+		else
+			if (or_bits(o,all_options) != all_options) then
+				return 0
+			else
+				return 1
+			end if
+		end if
+	elsif integer_array(o) then
+		return option_spec(or_all(o))
+	else
+		return 0
+	end if
+end type
+
+--**
+-- Converts an option spec to a string.
+-- 
+-- This can be useful for debugging what options were passed in.
+-- Without it you have to convert a number to hex and lookup the
+-- constants in the source code.
+public function option_spec_to_string(option_spec o)
+	return flags:flags_to_string(o, option_names)
+end function
+
+--**
+-- Converts an regex error to a string. 
+-- 
+-- This can be useful for debugging and even something rough to give to
+-- the user incase of a regex failure.  It's preferable to 
+-- a numeric literal.
+public function error_to_string(integer i)
+	if i >= 0 or i < -23 then
+		return sprintf("%d",{i})
+	else
+		return vlookup(i, error_names, 1, 2, "Unknown Error")
+	end if
+end function
 
 --**
 -- Return an allocated regular expression
@@ -132,7 +546,7 @@ end type
 --  
 --   while sequence(line) do
 --       re:regex proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
---       if re:match(line) then
+--       if re:find(proper_name, line) then
 --           -- code
 --       end if
 --   end while
@@ -142,7 +556,7 @@ end type
 --   -- Good Example
 --   constant re_proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
 --   while sequence(line) do
---       if re:match(line) then
+--       if re:find(re_proper_name, line) then
 --           -- code
 --       end if
 --   end while
@@ -156,20 +570,19 @@ end type
 --
 -- Note:
 --   For simple finds, matches or even simple wildcard matches, the built-in Euphoria
---   routines [[:find]], [[:match]] and [[:wildcard_match]] are often times easier to use and
+--   routines find, [[:eu:match]] and [[:wildcard_match]] are often times easier to use and
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
 -- See Also:
 --   [[:error_message]], [[:find]], [[:find_all]]
 
-public function new(sequence pattern, object options=DEFAULT)
+public function new(integer_array pattern, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
-
         return machine_func(M_PCRE_COMPILE, { pattern, options })
 end function
 
 --**
--- If ##[[:new]]()## returns an atom, this function will return a text error message
+-- If ##[[:new]]## returns an atom, this function will return a text error message
 -- as to the reason.
 --
 -- Parameters:
@@ -218,7 +631,7 @@ end function
 -- </eucode>
 --
 
-public function escape(sequence s)
+public function escape(integer_array s)
         return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
 end function
 
@@ -274,7 +687,7 @@ end function
 --   </eucode>
 --
 
-public function find(regex re, sequence haystack, integer from=1, object options=DEFAULT, integer size = get_ovector_size(re, 30))
+public function find(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
         if sequence(options) then options = or_all(options) end if
         if size < 0 then
             size = 0
@@ -311,7 +724,7 @@ end function
 --   </eucode>
 --
 
-public function find_all(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+public function find_all(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
 
         object result
@@ -343,7 +756,7 @@ end function
 --   An **atom**, 1 if ##re## matches any portion of ##haystack## or 0 if not.
 --
 
-public function has_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+public function has_match(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
         return sequence(find(re, haystack, from, options))
 end function
 
@@ -360,7 +773,7 @@ end function
 --   An **atom**,  1 if ##re## matches the entire ##haystack## or 0 if not.
 --
 
-public function is_match(regex re, sequence haystack, integer from=1, object options=DEFAULT)
+public function is_match(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
         object m = find(re, haystack, from, options)
 
         if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
@@ -411,9 +824,10 @@ end function
 --
 -- See Also:
 --   [[:all_matches]]
-
-public function matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-        object str_offsets = and_bits(STRING_OFFSETS, options)
+--
+public function matches(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
+        if sequence(options) then options = or_all(options) end if
+        integer str_offsets = and_bits(STRING_OFFSETS, options)
         object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
         if atom(match_data) then return ERROR_NOMATCH end if
@@ -472,7 +886,7 @@ end function
 --   --   }
 --   -- }
 --
---   matches = re:match_all(re_name, "John Doe and Jane Doe")
+--   matches = re:match_all(re_name, "John Doe and Jane Doe", STRING_OFFSETS)
 --   -- matches is:
 --   -- {
 --   --   {                         -- first match
@@ -485,13 +899,15 @@ end function
 --   --     { "Jane",     14, 17 }, -- first group
 --   --     { "Doe",      19, 21 }  -- second group
 --   --   }
---   -- }--   </eucode>
+--   -- }
+--   </eucode>
 --
 -- See Also:
 --   [[:matches]]
 
-public function all_matches(regex re, sequence haystack, integer from=1, object options=DEFAULT)
-        object str_offsets = and_bits(STRING_OFFSETS, options)
+public function all_matches(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
+        if sequence(options) then options = or_all(options) end if
+        integer str_offsets = and_bits(STRING_OFFSETS, options)
         object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
 
         if length(match_data) = 0 then return ERROR_NOMATCH end if
@@ -527,7 +943,7 @@ end function
 --   
 -- Example 1:
 -- <eucode>
--- regex comma_space_re = re:new(`\s,`)
+-- regex comma_space_re = re:new(`,\s`)
 -- sequence data = re:split(comma_space_re, "euphoria programming, source code, reference data")
 -- -- data is
 -- -- {
@@ -538,11 +954,12 @@ end function
 -- </eucode>
 -- 
 
-public function split(regex re, sequence text, integer from=1, object options=DEFAULT)
+public function split(regex re, integer_array text, integer from=1, option_spec options=DEFAULT)
         return split_limit(re, text, 0, from, options)
 end function
 
-public function split_limit(regex re, sequence text, integer limit=0, integer from=1, object options=DEFAULT)
+public function split_limit(regex re, integer_array text, integer limit=0, integer from=1, option_spec options=DEFAULT)
+        if sequence(options) then options = or_all(options) end if
         sequence match_data = find_all(re, text, from, options), result
         integer last = 1
 
@@ -603,8 +1020,8 @@ end function
 -- </eucode>
 --
 
-public function find_replace(regex ex, sequence text, sequence replacement, integer from=1,
-                object options=DEFAULT)
+public function find_replace(regex ex, integer_array text, sequence replacement, integer from=1,
+                option_spec options=DEFAULT)
         return find_replace_limit(ex, text, replacement, -1, from, options)
 end function
 
@@ -630,8 +1047,8 @@ end function
 --   [[:find_replace]]
 --
 
-public function find_replace_limit(regex ex, sequence text, sequence replacement, 
-                        integer limit, integer from=1, object options=DEFAULT)
+public function find_replace_limit(regex ex, integer_array text, sequence replacement, 
+                        integer limit, integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
 
         return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from, limit })
@@ -640,7 +1057,7 @@ end function
 --**
 -- Replaces up to ##limit## matches of ##ex## in ##text## with the result of a user
 -- defined callback. The callback should take one sequence which will contain a string
--- representing the entire match and also a string for every group within the regular
+-- representing the entire match and also a integer_array for every group within the regular
 -- expression.
 --
 -- Parameters:
@@ -673,8 +1090,9 @@ end function
 -- </eucode>
 --
 
-public function find_replace_callback(regex ex, sequence text, integer rid, integer limit=0, 
-                integer from=1, object options=DEFAULT)
+public function find_replace_callback(regex ex, integer_array text, integer rid, integer limit=0, 
+                integer from=1, option_spec options=DEFAULT)
+        if sequence(options) then options = or_all(options) end if
         sequence match_data = find_all(ex, text, from, options), replace_data
 
         if limit = 0 then

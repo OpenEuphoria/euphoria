@@ -500,7 +500,7 @@ These operators can also be applied to sequences. See below.
 
 In some cases [[:short-circuit]] evaluation will be used for expressions containing ##and##
 or ##or##. Specifically, short circuiting applies inside decision taking statements, like the
-[[:if statement]], [[:while statement]] or [[:loop statement]]. More on this later.
+[[:if statement]], [[:while statement]] or [[:loop statements]]. More on this later.
 
 ==== Arithmetic Operators
 
@@ -3343,7 +3343,7 @@ tools all share the same front-end (written in Euphoria).
 If your program contains only routine and variable declarations, but no
 top-level executable statements, then nothing will happen when you run it
 (other than syntax checking). You need a top-level statement to call your main
-routine (see [[:Example Program]]).  It's quite
+routine (see [[:Example Programs]]).  It's quite
 possible to have a program with nothing but top-level executable statements and
 no routines. For example you might want to use Euphoria as a simple calculator,
 typing just a few [[:print]] or [[:? -> q_print]] statements into a file, and then executing it.
