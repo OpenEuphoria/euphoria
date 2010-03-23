@@ -7324,7 +7324,7 @@ procedure BackEnd(atom ignore)
 				escape_string( string )
 				
 				if decompress then
-					c_printf( "\"\n\t_%d", SymTab[csym][S_FILE_NO] )
+					c_printf( "\";\n\t_%d", SymTab[csym][S_FILE_NO] )
 					c_puts( SymTab[csym][S_NAME] )
 					c_printf(" = decompress( 0 );\n", SymTab[csym][S_TEMP_NAME])
 				else
