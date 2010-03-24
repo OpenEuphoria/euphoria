@@ -1,4 +1,5 @@
 include std/regex.e as regex
+include std/regex.e as re
 include std/text.e
 include std/sequence.e
 include std/unittest.e
@@ -6,6 +7,93 @@ include std/unittest.e
 object ignore = 0
 
 object re 
+	
+re = regex:new("Second|Third")
+test_equal("Matches normally can occur inside a string",{
+	{length("First, you break the eggs.  S"),length("First, you break the eggs.  Second")}
+	}, 
+	regex:find(re,"First, you break the eggs.  Second, you stir the egg.  "&
+	"Third, you turn on the frying pan",, regex:DEFAULT )
+	)
+test_equal("With regex:ANCHORED, it must match from the first place it tries", -1, 
+	regex:find(re,"First, you break the eggs.  Second, you stir the egg.  "&
+	"Third, you turn on the frying pan",, regex:ANCHORED )
+	)
+
+re = regex:new("[comunicate]+", regex:CASELESS)
+test_true("Caseless makes matches case insensitive", is_match(re,"Communicate"))
+
+re = regex:new("rain\\?\n$")
+test_equal("When regex:DOLLAR_ENDONLY is set, $ comes after the \\n character",
+	{
+   }
+, regex:find_all(re,"Have you ever seen the rain?\n",,regex:DOLLAR_ENDONLY) )
+
+re = regex:new("rain\\?$")
+test_equal("By default, the $ matches the place just before the newline character.",
+		{
+		 {24,28} -- five characters not including the \n
+		}
+, regex:find(re,"Have you ever seen the rain?\n") )
+re = regex:new("rain\\?.$", {regex:DOLLAR_ENDONLY,regex:DOTALL})
+test_equal("When regex:DOLLAR_ENDONLY is set, matches only occur at the end of the string",
+		{
+		 {24,29} -- six characters including the \n
+		}
+, regex:find(re,"Have you ever seen the rain?\n") )
+re = regex:new("rain\\?$", {regex:DOLLAR_ENDONLY})
+test_equal("When regex:DOLLAR_ENDONLY is set, matches only occur at the end of the string",
+-1, regex:find(re,"Have you ever seen the rain?\n") )
+
+re = regex:new("(?:where\\?|string)$", regex:MULTILINE)
+sequence s =  `Here is a multiline subject string
+We should get several matches can you guess where?`
+test_equal("Matches occur both at the regex:EOL and at the end of the string",
+	{
+			{
+			 {29,34}
+			},
+			{
+			 {80,85}
+			}
+	},
+	regex:find_all(re,s)
+)
+
+-- See www.regextester.com/pregsyntax.html
+-- and
+-- http://www.ambienteto.arti.beniculturali.it/cgi-bin/man2html?pcre+3
+test_equal("regex:DOLLAR_ENDONLY is ignored when regex:MULTILINE is set",
+regex:find_all(re,s), regex:find_all(re,s,,regex:DOLLAR_ENDONLY) )
+
+test_equal("When regex:NOTEOL is set, matches do not occur at end of the string.", 
+	{
+		{
+		 {29,34}
+		}
+   }
+, regex:find_all(re,s,,regex:NOTEOL) )
+
+re = regex:new("We should", regex:FIRSTLINE)
+test_equal("Matches will not occur after the first line when regex:FIRSTLINE is set", 
+	-1, regex:find(re,s) )
+
+test_equal("Normally, dot doesn\'t match a regex:NEWLINE", -1, regex:find(regex:new("g.We", regex:DEFAULT),s) )
+test_equal("regex:DOT does match a newline when regex:DOTALL is set", {{34,37}}, 
+	regex:find(regex:new("g.We", regex:DOTALL),s) )
+
+re = regex:new("((?regex:P<gender>Male|Female)|(?regex:P<gender>Boy|Girl))", regex:DUPNAMES)
+test_true("DUPNAMES subpatterns", regex:regex(re))
+	
+-- flags to test regex:EXTENDED to regex:NOTEMPTY	
+	
+re = regex:new("What in the world")
+test_false("find with regex:PARTIAL doesn\'t match regex:PARTIAL strings", 
+	sequence(regex:find(re, "What a ride!",,regex:PARTIAL)))
+test_equal("find with regex:PARTIAL matches strings", {{1, length("What in the world")}},
+	regex:find(re, "What in the world is going on?",,regex:PARTIAL))
+
+-- flags to test UNGREEDY to UTF8
 
 re = regex:new("[e][x]press.?*")
 test_equal("new() on bad expression", 0, re)
@@ -85,9 +173,12 @@ test_true("regex matched groups 1", regex(re))
 
 re = regex:new("^")
 test_equal("regex bol on empty string", {{1,0}}, regex:find(re, ""))
+test_equal("regex bol on empty string with NOTBOL flag", -1, regex:find(re, "", ,regex:NOTBOL))
 
 re = regex:new("$")
 test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
+test_equal("regex eol on empty string with NOTEOL flag", -1, regex:find(re, "", ,regex:NOTEOL))
+test_equal("regex eol on empty string with NOTEMPTY flag", -1, regex:find(re, "",, regex:NOTEMPTY))
 
 re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 test_equal("find_replace() #1", "hello Doe, John!", regex:find_replace(re, "hello John Doe!", `\2, \1`))

@@ -63,6 +63,8 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 --
 -- Description:
 -- In C, this is called PCRE_AUTO_CALLOUT.
+-- To get the functionality of this flag in EUPHORIA, you can use:
+-- [[:find_replace_callback]] without passing this option.
 -- This is passed to [[:new]].
 
 --****
@@ -119,11 +121,14 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant DOLLAR_ENDONLY
 --
 -- Description: 
--- If this bit is set, a dollar metacharacter in the pattern matches only
--- at the end of the subject string. Without this option,  a  dollar  also
+-- If this bit is set, a dollar sign metacharacter in the pattern matches only
+-- at the end of the subject string. Without this option,  a  dollar sign  also
 -- matches  immediately before a newline at the end of the string (but not
--- before any other newlines). The DOLLAR_ENDONLY option  is  ignored
--- if  MULTILINE  is  set.   There is no way to set this option within a pattern.
+-- before any other newlines). Thus you must include the newline character
+-- in the pattern before the dollar sign if you want to match a line that contanis
+-- a newline character.  
+-- The DOLLAR_ENDONLY option  is  ignored if  MULTILINE  is  set.     
+-- There is no way to set this option within a pattern.
 -- This is passed to [[:new]].
 
 --****
@@ -131,7 +136,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant DOTALL
 --
 -- Description:
--- With this option the '.' character also matches a newline sequence.  
+-- With this option the '.' character also matches a newline sequence.
 -- This is passed to [[:new]].
 
 --****
@@ -139,6 +144,8 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant DUPNAMES
 --
 -- Description:
+-- Allow duplicate names for named subpatterns.
+-- Since there is no way to access named subpatterns this flag has no effect.
 -- This is passed to [[:new]].
 
 --****
@@ -233,21 +240,21 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 
 --****
 -- Signature:
--- public constant NOBOL
+-- public constant NOTBOL
 --
 -- Description:
--- This indicates that beginning of the passed string does **NO**t start
--- at the **B**eginning **O**f a **L**ine (NOBOL), so a carrot symbol (^) in the 
+-- This indicates that beginning of the passed string does **NOT** start
+-- at the **B**eginning **O**f a **L**ine (NOTBOL), so a carrot symbol (^) in the 
 -- original pattern will not match the beginning of the string. 
 -- This is used by routines other than [[:new]].
 
 --****
 -- Signature:
--- public constant NOEOL
+-- public constant NOTEOL
 --
 -- Description:
--- This indicates that beginning of the passed string does **NO**t end
--- at the **E**nd **O**f a **L**ine (NOEOL), so a dollar sign ($) in the 
+-- This indicates that end of the passed string does **NOT** end
+-- at the **E**nd **O**f a **L**ine (NOTEOL), so a dollar sign ($) in the 
 -- original pattern will not match the end of the string. 
 -- This is used by routines other than [[:new]].
 
@@ -267,7 +274,8 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- Description:
 -- Turn off checking for the validity of your UTF string.  Use this
 -- with caution.  An invalid utf8 string with this option could **crash**
--- your program.
+-- your program.  Only use this if you know the string is a valid utf8 string.
+-- See [[:unicode:validate]].
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -284,9 +292,8 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant PARTIAL
 --
 -- Description:
--- With this in some routines [[:find]] a string that matches some truncated version of the regular 
--- expression will return the integer constant ERROR_PARTIAL.  Others will fail by returning some
--- error value like [[:find_replace]] and still others will crash the program: [[:split]].
+-- This option has no effect with these routines.  Refer to the C documentation
+-- for what it does in C.
 -- In C, this constant is called PCRE_PARTIAL.
 -- This is used by routines other than [[:new]].
 
