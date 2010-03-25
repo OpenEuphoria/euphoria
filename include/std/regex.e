@@ -585,7 +585,11 @@ end function
 
 public function new(integer_array pattern, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
-        return machine_func(M_PCRE_COMPILE, { pattern, options })
+        
+        -- concatenation ensures we really get a new sequence, and don't just use the
+        -- one passed in, which could be another regex previously created...this may
+        -- be a bug with the refcount/delete_instance/regex code
+        return machine_func(M_PCRE_COMPILE, { pattern & "", options })
 end function
 
 --**
@@ -673,7 +677,11 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]].  The only options that
+--     may be set when calling find are [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
+--     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]], 
+--     [[:NOTEMPTY]], [[:NOTEMPTY_ATSTART]], [[:NO_START_OPTIMIZE]], [[:NO_UTF8_CHECK]], [[:PARTIAL_SOFT]],
+--     and [[:PARTIAL_HARD]]
 --   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in rare cases this number may need to be increased in order to accomodate complex regex expressions.
 --
 -- Returns:

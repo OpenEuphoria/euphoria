@@ -25,29 +25,32 @@ test_true("Caseless makes matches case insensitive", is_match(re,"Communicate"))
 
 re = regex:new("rain\\?\n$")
 test_equal("When regex:DOLLAR_ENDONLY is set, $ comes after the \\n character",
-	{
-   }
-, regex:find_all(re,"Have you ever seen the rain?\n",,regex:DOLLAR_ENDONLY) )
+	{}, 
+	regex:find_all(re,"Have you ever seen the rain?\n",,regex:DOLLAR_ENDONLY) )
 
 re = regex:new("rain\\?$")
 test_equal("By default, the $ matches the place just before the newline character.",
 		{
 		 {24,28} -- five characters not including the \n
 		}
-, regex:find(re,"Have you ever seen the rain?\n") )
+	, regex:find(re,"Have you ever seen the rain?\n") )
+
 re = regex:new("rain\\?.$", {regex:DOLLAR_ENDONLY,regex:DOTALL})
 test_equal("When regex:DOLLAR_ENDONLY is set, matches only occur at the end of the string",
 		{
 		 {24,29} -- six characters including the \n
-		}
-, regex:find(re,"Have you ever seen the rain?\n") )
+		},
+		regex:find(re,"Have you ever seen the rain?\n") )
+
 re = regex:new("rain\\?$", {regex:DOLLAR_ENDONLY})
 test_equal("When regex:DOLLAR_ENDONLY is set, matches only occur at the end of the string",
--1, regex:find(re,"Have you ever seen the rain?\n") )
+	-1, regex:find(re,"Have you ever seen the rain?\n") )
 
-re = regex:new("(?:where\\?|string)$", regex:MULTILINE)
+re = regex:new(`(?:where\?|string)$`, regex:MULTILINE)
+
 sequence s =  `Here is a multiline subject string
 We should get several matches can you guess where?`
+
 test_equal("Matches occur both at the regex:EOL and at the end of the string",
 	{
 			{
@@ -63,8 +66,9 @@ test_equal("Matches occur both at the regex:EOL and at the end of the string",
 -- See www.regextester.com/pregsyntax.html
 -- and
 -- http://www.ambienteto.arti.beniculturali.it/cgi-bin/man2html?pcre+3
+regex deo = regex:new( `(?:where\?|string)$`, or_bits( regex:DOLLAR_ENDONLY, regex:MULTILINE ) )
 test_equal("regex:DOLLAR_ENDONLY is ignored when regex:MULTILINE is set",
-regex:find_all(re,s), regex:find_all(re,s,,regex:DOLLAR_ENDONLY) )
+	regex:find_all(re,s), regex:find_all(deo,s) )
 
 test_equal("When regex:NOTEOL is set, matches do not occur at end of the string.", 
 	{
@@ -72,7 +76,7 @@ test_equal("When regex:NOTEOL is set, matches do not occur at end of the string.
 		 {29,34}
 		}
    }
-, regex:find_all(re,s,,regex:NOTEOL) )
+	, regex:find_all(re,s,,regex:NOTEOL) )
 
 re = regex:new("We should", regex:FIRSTLINE)
 test_equal("Matches will not occur after the first line when regex:FIRSTLINE is set", 
@@ -82,7 +86,7 @@ test_equal("Normally, dot doesn\'t match a regex:NEWLINE", -1, regex:find(regex:
 test_equal("regex:DOT does match a newline when regex:DOTALL is set", {{34,37}}, 
 	regex:find(regex:new("g.We", regex:DOTALL),s) )
 
-re = regex:new("((?regex:P<gender>Male|Female)|(?regex:P<gender>Boy|Girl))", regex:DUPNAMES)
+re = regex:new("((?<gender>Male|Female)|(?<gender>Boy|Girl))", regex:DUPNAMES)
 test_true("DUPNAMES subpatterns", regex:regex(re))
 	
 -- flags to test regex:EXTENDED to regex:NOTEMPTY	
