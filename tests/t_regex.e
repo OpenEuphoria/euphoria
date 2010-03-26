@@ -7,7 +7,22 @@ include std/unittest.e
 object ignore = 0
 
 object re 
+
+-- how do we do named duplicated subpatterns?
+re = regex:new(`(?P<year>\d{2,4})\s*# This is the year of the extended pattern
+				(?P<month>Jan|Feb|Mar|Nov)\s*#This is the month
+			    \2\s*#This is the repeated month
+				(?P<day>\d{1,2})# This is the day`, {regex:EXTENDED,regex:EXTRA})
+test_true("Created EXTENDED EXTRA regex", regex:regex(re))
+if not regex:regex(re) then
+	printf(1,"%s\n", {regex:error_message(re)})
+end if
+				
+test_true("Test with duplicated subpatterns in extended expression", 
+	sequence(regex:find(re, "1955 Nov Nov 5")))
 	
+	
+
 re = regex:new("Second|Third")
 test_equal("Matches normally can occur inside a string",{
 	{length("First, you break the eggs.  S"),length("First, you break the eggs.  Second")}
@@ -51,7 +66,7 @@ re = regex:new(`(?:where\?|string)$`, regex:MULTILINE)
 sequence s =  `Here is a multiline subject string
 We should get several matches can you guess where?`
 
-test_equal("Matches occur both at the regex:EOL and at the end of the string",
+test_equal("Matches occur both at the EOL and at the end of the string",
 	{
 			{
 			 {29,34}
@@ -88,11 +103,22 @@ test_equal("regex:DOT does match a newline when regex:DOTALL is set", {{34,37}},
 
 re = regex:new("((?<gender>Male|Female)|(?<gender>Boy|Girl))", regex:DUPNAMES)
 test_true("DUPNAMES subpatterns", regex:regex(re))
+
+test_true("Test the use of backslashes infront of nonspecial letters",
+	regex:regex(regex:new(`\h\i`)) )
 	
--- flags to test regex:EXTENDED to regex:NOTEMPTY	
+test_false("Test the use of backslashes infront of nonspecial letters with regex:EXTRA",
+	regex:regex(regex:new(`\h\i`, regex:EXTRA) ) )
+	
+-- flags with newlines to be tested.
+
+re = regex:new("(white|red|blue) (?P<animal>fox|bear|tiger)", NO_AUTO_CAPTURE)
+
+test_equal("Automatic subpattern capture can be disabled.",
+    { {1,8}, {5,8} }, regex:find(re, "red bear") )
 	
 re = regex:new("What in the world")
-test_false("find with regex:PARTIAL doesn\'t match regex:PARTIAL strings", 
+test_false("find with regex:PARTIAL doesn\'t match PARTIAL strings", 
 	sequence(regex:find(re, "What a ride!",,regex:PARTIAL)))
 test_equal("find with regex:PARTIAL matches strings", {{1, length("What in the world")}},
 	regex:find(re, "What in the world is going on?",,regex:PARTIAL))

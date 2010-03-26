@@ -150,21 +150,21 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 
 --****
 -- Signature:
--- public constant EXTRA
---
--- Description:
--- When an alphanumeric follows a backslash(\) has no special meaning an 
--- error is generated.
--- This is passed to [[:new]].
-
---****
--- Signature:
 -- public constant EXTENDED
 --
 -- Description:
 -- Whitespace and characters beginning with a hash mark to the end of the line 
 -- in the pattern will be ignored when searching except when the whitespace or hash
 -- is escaped or in a character class.
+-- This is passed to [[:new]].
+
+--****
+-- Signature:
+-- public constant EXTRA
+--
+-- Description:
+-- When an alphanumeric follows a backslash(\) has no special meaning an 
+-- error is generated.
 -- This is passed to [[:new]].
 
 --****
