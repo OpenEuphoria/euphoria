@@ -121,4 +121,15 @@ vX = NOVALUE
 
 test_equal( "simulated ASSIGN_SUBS_I", 1, delete_count() )
 
+function simple_function( object x )
+  return 0
+end function
+
+function is_sequence( object x, integer y = simple_function(x) )
+  return sequence(x)
+end function
+
+test_equal( "temp with delete routine lost when used in default argument as an argument to another call", 
+  1, is_sequence( repeat( 0, 2 ) ) )
+
 test_report()
