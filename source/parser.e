@@ -2070,6 +2070,7 @@ procedure If_statement()
 	
 	sequence temps = pop_temps()
 	
+	push_temps( temps )
 	Statement_list()
 	tok = next_token()
 
@@ -2086,6 +2087,7 @@ procedure If_statement()
 		if prev_false2 != 0 then
 			backpatch(prev_false2, length(Code)+1)
 		end if
+		
 		StartSourceLine(TRUE)
 		short_circuit += 1
 		short_circuit_B = FALSE
@@ -2107,13 +2109,19 @@ procedure If_statement()
 		end if
 		short_circuit -= 1
 		tok_match(THEN)
+		
+		push_temps( temps )
 		Statement_list()
 		tok = next_token()
 	end while
 
-	if tok[T_ID] = ELSE then
+	if tok[T_ID] = ELSE or length(temps[1]) then
+		-- if there was no else, but temps were emitted during
+		-- the initial if condition check, then we need to
+		-- create a 'fake' else block to release those temps
+		
 		Sibling_block( IF )
-
+		
 		StartSourceLine(FALSE)
 		emit_op(ELSE)
 		AppendEList(length(Code)+1)
@@ -2127,8 +2135,12 @@ procedure If_statement()
 			backpatch(prev_false2, length(Code)+1)
 		end if
 		
-		Statement_list()
-
+		push_temps( temps )
+		if tok[T_ID] = ELSE then	
+			Statement_list()
+		else
+			putback(tok)
+		end if
 	else
 		putback(tok)
 		if TRANSLATE then
@@ -2139,7 +2151,7 @@ procedure If_statement()
 			backpatch(prev_false2, length(Code)+1)
 		end if
 	end if
-
+	
 	tok_match(END)
 	tok_match(IF, END)
 	
@@ -2155,7 +2167,6 @@ procedure If_statement()
 	block_index -= 1
 	if_stack = if_stack[1..$-1]
 	
-	push_temps( temps )
 end procedure
 
 procedure exit_loop(integer exit_base)
