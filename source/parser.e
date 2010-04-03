@@ -532,9 +532,22 @@ function read_recorded_token(integer n)
 	integer p, prev_Nne
 	if atom(Ns_recorded[n]) then
 		if use_private_list then
-			p=find(Recorded[n],private_list)
-			if p>0 then -- the value of this parameter is known, use it
-				return {VARIABLE,private_sym[p]}
+			p = find( Recorded[n], private_list)
+			if p > 0 then -- the value of this parameter is known, use it
+				
+				if TRANSLATE
+				and SymTab[private_sym[p]][S_MODE] = M_TEMP
+				then
+					-- we're reusing a temp in a default parameter
+					-- This will ensure we get an extra reference and that
+					-- the source temp isn't recycled by the translator
+					symtab_index ts = NewTempSym()
+					Code &= { ASSIGN, private_sym[p], ts }
+					return {VARIABLE, ts}
+				else
+					return {VARIABLE, private_sym[p]}
+				end if
+				
 			end if
 		end if
 		prev_Nne = No_new_entry

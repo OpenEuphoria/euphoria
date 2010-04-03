@@ -2916,9 +2916,13 @@ procedure opASSIGN()
 	symtab_index 
 		sourcesym = Code[pc+1],
 		targetsym = Code[pc+2]
-	integer source_is_temp = is_temp( sourcesym )
+	integer 
+		source_is_temp = is_temp( sourcesym ),
+		-- This will happen when we re-use a temp parameter that gets
+		-- used in a default parameter...we need the extra ref in this case
+		both_are_temps = source_is_temp and is_temp( targetsym )
 		
-	if not source_is_temp or map:get( dead_temp_walking, sourcesym, NO_REFERENCE ) = NO_REFERENCE then
+	if not source_is_temp or both_are_temps or map:get( dead_temp_walking, sourcesym, NO_REFERENCE ) = NO_REFERENCE then
 		CRef(sourcesym)
 		SymTab[Code[pc+1]][S_ONE_REF] = FALSE
 		SymTab[Code[pc+2]][S_ONE_REF] = FALSE
@@ -2939,7 +2943,10 @@ procedure opASSIGN()
 				  TYPE_OBJECT, HasDelete( sourcesym ) )
 	end if
 	
-	dispose_temp( sourcesym, SAVE_TEMP, REMOVE_FROM_MAP )
+	if not both_are_temps then
+		dispose_temp( sourcesym, SAVE_TEMP, REMOVE_FROM_MAP )
+	end if
+	
 	pc += 3
 end procedure
 
