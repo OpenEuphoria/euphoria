@@ -884,20 +884,18 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		
 		if final_target then
 			epilog &= { ASSIGN, inline_target, final_target }
+			emit_temp( final_target, NEW_REFERENCE )
 		else
 		
---		if int_sym 
---		and is_temp( inline_target )
---		and SymTab[sub][S_TOKEN] = TYPE then
 			-- This allows type checks to work properly, since they expect a 0/1 
 			-- object ptr immediately before.  The PRIVATE_INIT_CHECK is skipped, 
 			-- and is used since it takes a single symbol coming after it.
-		if not TRANSLATE then
-			epilog &= { ELSE, 0, PRIVATE_INIT_CHECK, inline_target }
-			epilog[$-2] = length(inline_code) + length(epilog) + inline_start + 1
-		end if
+			emit_temp( inline_target, NEW_REFERENCE )
+			if not TRANSLATE then
+				epilog &= { ELSE, 0, PRIVATE_INIT_CHECK, inline_target }
+				epilog[$-2] = length(inline_code) + length(epilog) + inline_start + 1
+			end if
 			
---		end if
 		end if
 	end if
 	
