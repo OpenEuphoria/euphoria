@@ -470,6 +470,9 @@ install :
 	           *.e \
 	           be_*.c \
 	           *.h
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eudis
+	echo eui $(PREFIX)/share/euphoria/source/dis.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eudis
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eudis
 
 # This doesn't seem right. What about eub or shroud ?
 uninstall :

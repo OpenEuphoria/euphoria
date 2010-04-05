@@ -26,4 +26,4 @@ all clean library interpreter translator backend source install uninstall distcl
 	cd source && $(MAKE) $@
 
 
-.PHONY : all clean library interpreter translator eub.exe source install distclean
+.PHONY : all clean library interpreter translator backend source install uninstall distclean

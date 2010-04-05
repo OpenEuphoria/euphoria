@@ -234,10 +234,11 @@ procedure OutputHeader(file f)
 		if sequence(shebang) then
 			puts(f, shebang)
 		else
-			puts(f, "#!" & get_eudir() & SLASH & "bin" & SLASH)
+			
 			ifdef UNIX then
-				puts(f, "eub\n")
+				puts(f, "#!/usr/bin/env eub\n")
 			elsedef
+				puts(f, "#!" & get_eudir() & SLASH & "bin" & SLASH)
 				puts(f, "eubw.exe\n") -- assume Apache CGI
 			end ifdef
 		end if

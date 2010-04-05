@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH EUI 1 "August 27, 2009"
+.TH DIS.IX 1 "April 4, 2010"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -16,9 +16,9 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-eui \- Interpreter for the Euphoria programming language
+dis.ex \- IL Code Disassembler for the Euphoria programming language
 .SH SYNOPSIS
-.B eui
+.B int
 .RB [\| \-batch ]
 .RB [\| \-c
 .IR file ]
@@ -34,6 +34,7 @@ eui \- Interpreter for the Euphoria programming language
 .RB [\| \-p
 .IR file_ext:command]
 .RB [\| \-strict ]
+.RB [\| \-t]
 .RB [\| \-test ]
 .RB [|\ \-version]
 .RB [\| \-w
@@ -47,10 +48,9 @@ eui \- Interpreter for the Euphoria programming language
 .br
 .SH DESCRIPTION
 This manual page documents briefly the
-.B eui
-command.  The euphoria-file is optional.  If omitted, the interpreter will prompt
-for the file to be executed.  If the file is passed to the command line, any 
-additional command line info is passed to the euphoria program to be run.
+.B int
+command.  Parses euphoria code and outputs the IL code in a human
+readable format.
 .PP
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
@@ -93,6 +93,10 @@ Force pre-processing regardless of cache state.
 This turns on all warnings, overriding any with/without warning statement
 found in the source.
 .TP
+.B \-t
+Parses and outputs IL code as though the euphoria translator (euc) were
+executing instead of the translator.
+.TP
 .B \-test
 Parses the code only and issues any warnings or errors to ##STDOUT##. On
 error the exit code will be 1, otherwise 0. If an error was found, the 
@@ -124,9 +128,9 @@ be issued. This is symetric of the
 .B \-w
 switch.
 .SH SEE ALSO
-.BR eudis (1),
 .BR euc (1),
-.BR eub (1)
+.BR eub (1),
+.BR eui (1)
 .br
 The programs are documented fully
 in /usr/share/euphoria/html

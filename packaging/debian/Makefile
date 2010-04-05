@@ -1,6 +1,6 @@
 
 EU_VERSION =4.0
-EU_BASE_DIR =..
+EU_BASE_DIR =../..
 DEBIAN_VERSION =1
 EU_ALL_FILES = \
 	source/be_alloc.c \
@@ -13,15 +13,22 @@ EU_ALL_FILES = \
 	source/be_pcre.c \
 	source/be_rterror.c \
 	source/be_runtime.c \
+	source/be_runtime.h \
+	source/be_socket.c \
 	source/be_symtab.c \
 	source/be_syncolor.c \
 	source/be_task.c \
+	source/task.h \
 	source/be_w.c \
+	source/version.h \
 	source/int.ex \
 	source/ec.ex \
+	source/eu.ex \
 	source/backend.ex \
 	source/bind.ex \
 	source/backend.e \
+	source/block.e \
+	source/buildsys.e \
 	source/c_decl.e \
 	source/cominit.e \
 	source/common.e \
@@ -31,20 +38,26 @@ EU_ALL_FILES = \
 	source/emit.e \
 	source/error.e \
 	source/execute.e \
+	source/fwdref.e \
 	source/global.e \
 	source/il.e \
+	source/inline.e \
 	source/intinit.e \
 	source/keylist.e \
 	source/main.e \
 	source/mode.e \
+	source/msgtext.e \
 	source/opnames.e \
 	source/parser.e \
 	source/pathopen.e \
+	source/platform.e \
+	source/preproc.e \
 	source/reswords.e \
 	source/rev.e \
 	source/revget.ex \
 	source/scanner.e \
-	source/scientific.e \
+	source/scinot.e \
+	source/shift.e \
 	source/symtab.e \
 	source/traninit.e \
 	source/tranplat.e \
@@ -57,23 +70,61 @@ EU_ALL_FILES = \
 	source/redef.h \
 	source/symtab.h \
 	source/Makefile \
-	source/eushroud \
-	source/eubind \
-	source/configure
+	source/Makefile.gnu \
+	source/configure \
+	source/dis.ex \
+	source/dis.e \
+	source/dot.e \
+	source/dox.e \
+	source/std.ex
 
-EU_DIRS = include html doc demo tutorial demo/bench demo/linux demo/langwar demo/langwar/Linux
-EU_BIN_FILES = ed.ex ascii.ex eprint.ex guru.ex key.ex keywords.e \
-	lines.ex search.ex syncolor.e where.ex
-BUILD_DIRS = intobj/ transobj/ libobj/ backobj/ backobj/back/ intobj/back/ transobj/back/ libobj/back/
+EU_DIRS = include \
+	include/std/ \
+	include/std/net \
+	include/std/unix \
+	include/std/win32 \
+	include/euphoria \
+	html \
+	doc \
+	demo \
+	tutorial \
+	demo/bench \
+	demo/linux \
+	demo/langwar \
+	demo/langwar/Linux
+
+EU_BIN_FILES = ed.ex \
+	ascii.ex \
+	buildcpdb.ex \
+	bugreport.ex \
+	ed.ex \
+	eutest \
+	eprint.ex \
+	guru.ex \
+	key.ex \
+	lines.ex \
+	search.ex \
+	where.ex
+
+BUILD_DIRS = intobj/ \
+	transobj/ \
+	libobj/ \
+	backobj/ \
+	backobj/back/ \
+	intobj/back/ \
+	transobj/back/ \
+	libobj/back/
+
 euphoria-$(EU_VERSION)-$(DEBIAN_VERSION)_i386 : update
-	cd $(DEB_SOURCE_DIR) && fakeroot debian/rules binary
+	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage
+# 	cd $(DEB_SOURCE_DIR) && fakeroot debian/rules binary
 
 binclean :
 	for d in $(BUILD_DIRS); \
 	do \
 	    -rm "$$d"/*o; \
 	done
-	-rm exu ecu ecu.a eubackend
+	-rm eui euc eu.a eub
 
 clean : 
 	-rm -rf $(DEB_SOURCE_DIR)
@@ -83,8 +134,8 @@ clean :
 DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
 
 update :
-	cd $(EU_BASE_DIR)/source && ./configure && make distclean && ./configure && make svn_rev
 	-mkdir -p $(DEB_SOURCE_DIR)/source/pcre
+	cd $(EU_BASE_DIR)/source && ./configure && make distclean && ./configure && make svn_rev
 	for file in $(EU_ALL_FILES); \
 	do \
 	    cp $(EU_BASE_DIR)/"$$file" $(DEB_SOURCE_DIR)/"$$file"; \
@@ -101,19 +152,21 @@ update :
 	    cp $(EU_BASE_DIR)/bin/"$$file" $(DEB_SOURCE_DIR)/bin; \
 	done
 	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
-	cd $(DEB_SOURCE_DIR)/source && ./configure
-	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  source
-	-rm *.gz
+# 	cd $(DEB_SOURCE_DIR)/source && ./configure
+# 	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  source
+# 	-rm *.gz
 	-rm -r $(DEB_SOURCE_DIR)/debian
-	tar -czf euphoria-$(EU_VERSION).tar.gz $(DEB_SOURCE_DIR)
+# 	tar -czf euphoria-$(EU_VERSION).tar.gz $(DEB_SOURCE_DIR)
 	-mkdir $(DEB_SOURCE_DIR)/debian
 	-cp rules $(DEB_SOURCE_DIR)/debian
 	-cp postinst $(DEB_SOURCE_DIR)/debian
-	-cp $(EU_BASE_DIR)/doc/*.1 $(DEB_SOURCE_DIR)/debian
+	-cp $(EU_BASE_DIR)/docs/man/*.1 $(DEB_SOURCE_DIR)/debian
 	-cp control $(DEB_SOURCE_DIR)/debian
 	-cp changelog $(DEB_SOURCE_DIR)/debian
 	-cp copyright $(DEB_SOURCE_DIR)/debian
 	-rm $(DEB_SOURCE_DIR)/*stamp
+	-echo 7 > $(DEB_SOURCE_DIR)/debian/compat
+	
 
 dh-make : update
 	@cd $(DEB_SOURCE_DIR) && dh_make -e matthewwalkerlewis@gmail.com --createorig

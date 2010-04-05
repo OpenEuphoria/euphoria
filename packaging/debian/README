@@ -1,0 +1,14 @@
+Making a Debian package
+
+Required:  debhelper
+This package is used to help build the package.
+
+From the packaging/debian directory, simply type:
+
+$ make
+
+The process should be automated.  It will build a source and a binary package.
+
+TODO:
+Automate the building and installation of the html documentation
+Bind, shroud, man pages

@@ -2,8 +2,8 @@ Source: euphoria
 Section: interpreters
 Priority: extra
 Maintainer: Matt Lewis <matthewwalkerlewis@gmail.com>
-Build-Depends: libc6-dev (>= 2.6.1-1ubuntu10 ), linux-libc-dev (>= 2.6.22-14.47 )
-Standards-Version: 3.7.2
+Build-Depends: libc6-dev (>= 2.6.1 ), linux-libc-dev (>= 2.6.22-14.47 )
+Standards-Version: 3.8.4
 
 Package: euphoria
 Architecture: i386
