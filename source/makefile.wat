@@ -35,6 +35,7 @@
 #   Translator  		  (euc.exe):  wmake translator
 #   Translator Library     (eu.lib):  wmake library
 #   Backend 	 eub.exe, eubw.exe):  wmake backend
+#   Code Page Database             : wmake code-page-db
 #	        	   Make all targets:  wmake
 #		             	    		  wmake all
 #
@@ -44,10 +45,10 @@
 #   			                   :  wmake translate
 #
 # Install binaries, source and 
-#		    		 include files : wmake install
+# include files                            : wmake install
 #
-#					 Run unit tests: wmake test
-#						Using eu.ex: wmake testeu
+# Run unit tests                           : wmake test
+# Using eu.ex                              : wmake testeu
 #
 # The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
 # The default for SVN_REV is 'xxx'.
@@ -261,6 +262,11 @@ all :  .SYMBOLIC
 	wmake -h winlibrary $(VARS)
 	wmake -h backend $(VARS)
 
+code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
+
+$(BUILDDIR)\ecp.dat : interpreter
+	$(BUILDDIR)\eui $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
+
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
@@ -370,7 +376,7 @@ translate source : .SYMBOLIC
 	wmake -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h backendsource EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
-testeu : .SYMBOLIC
+testeu : .SYMBOLIC code-page-db
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
 	$(EXE) ..\source\eutest.ex -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex" $(LIST)
@@ -378,7 +384,7 @@ testeu : .SYMBOLIC
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC
+test : .SYMBOLIC code-page-db
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
 	$(EXE) -i $(%EUDIR)\include $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) $(LIST)
@@ -438,12 +444,15 @@ install : .SYMBOLIC
 	copy ..\include\std\unix\* $(PREFIX)\include\std\unix
 	if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
 	copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	copy ..\bin\*.ex $(PREFIX)\bin
+	copy ..\bin\*.bat ${PREFIX)\bin
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\euiw.exe copy $(BUILDDIR)\euiw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eui.exe copy $(BUILDDIR)\eui.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eubw.exe copy $(BUILDDIR)\eubw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
+	@if exist $(BUILDDIR)\ecp.dat copy $(BUILDDIR)\ecp.dat $(PREFIX)\bin\	
 
 installbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\

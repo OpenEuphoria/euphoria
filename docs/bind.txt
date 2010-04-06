@@ -5,7 +5,7 @@
 ==== Synopsis
 
 {{{
-shroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]
+eushroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]
 }}}
 
 The ##shroud## command converts a Euphoria program, typically consisting of a main
@@ -25,13 +25,14 @@ interpreter package. You can run your .il file with:
 On //Windows// use:
 
 {{{
-backendw myprog.il
+eub myprog.il
+eubw myprog.il
 }}}
 
 On //Unix// use:
 
 {{{
-eub.exe myprog.il
+eub myprog.il
 }}}
 
 Although it does not contain any source statements, a .il file will generate a useful
@@ -72,15 +73,13 @@ Always keep a copy of your original source. There's no way to recover it from a 
 ==== Synopsis:
 
 {{{
-bind  [-full_debug] [-list] [-quiet] [-out executable_file] [filename.ex]
-bindu [-full_debug] [-list] [-quiet] [-out executable_file] [filename.ex]
-bindw [-full_debug] [-list] [-quiet] [-out executable_file] [-con] [-icon filename.ico] [filename.exw]
+eubind [-c config-file] [-con] [-copyright] [-full_debug] [-i dir] [-icon file] [-list] [-quiet] [-out executable_file] [-shroud_only [filename.ex]
 }}}
 
 
-##bind## (##bindw## or ##bindu##) does the same thing as ##shroud##, and
+##eubind## does the same thing as ##eushroud##, and
 includes the same options. It then combines your shrouded .il file with the
-interpreter backend (##eubd.exe##, ##eubw.exe## or ##eub.exe##) to make
+interpreter backend (##eub.exe##, ##eubw.exe## or ##eub##) to make
 a **single, stand-alone executable** file that you can conveniently use and
 distribute. Your users need not have Euphoria installed.  Each time your
 executable file is run, a quick integrity check is performed to detect any
@@ -92,17 +91,14 @@ source statements are not there.
 
 ==== Options:
 
-* **-full_debug**: Same as ##shroud## above. If Euphoria detects an error, your executable will
-  generate either a partial, or a full, ##ex.err## dump, according to this option.
-* **-list**: Same as ##shroud## above.
-* **-quiet**: Same as ##shroud## above.
-* **-out executable_file**: This option lets you choose the name of the executable file
-  created by the binder. Without this option, ##bind## will choose a name based on the name
-  of the main Euphoria source file.
-* **-con**: **(##bindw## only)**: This option will create a //Windows// console program instead
+* **-c config-file**: A euphoria config file to use when binding.
+* **-con**: **(Windows only)**: This option will create a //Windows// console program instead
   of a //Windows GUI// program. Console programs can access standard input and output, and
   they work within the current console window, rather than popping up a new one.
-* **-icon filename[.ico]**: **(##bindw## only)** When you bind a program, you can patch in
+* **-full_debug**: Same as ##shroud## above. If Euphoria detects an error, your executable will
+  generate either a partial, or a full, ##ex.err## dump, according to this option.
+* **-i dir**: A directory to add to the paths to use for searching for included files.
+* **-icon filename[.ico]**: **(Windows only)** When you bind a program, you can patch in
   your own customized icon, overwriting the one in ##euiw.exe##. ##eui.exe## contains a 32x32
   icon using 256 colors. It resembles an **E)** shape. //Windows// will display this shape
   beside ##euiw.exe##, and beside your bound program, in file listings. You can also load this
@@ -112,15 +108,16 @@ source statements are not there.
   or less. The file must contain a single icon image (//Windows// will create a smaller or
   larger image as necessary). The default **E)** icon file, ##euphoria.ico##, is included in
   the ##euphoria\bin## directory.
+* **-list**: Same as ##shroud## above.
+* **-quiet**: Same as ##shroud## above.
+* **-out executable_file**: This option lets you choose the name of the executable file
+  created by the binder. Without this option, ##bind## will choose a name based on the name
+  of the main Euphoria source file.
 
 A one-line Euphoria program will result in an executable file as large as the
 back-end you are binding with, but the size increases very slowly as you add to
 your program. **When bound, the entire Euphoria editor,
-##ed.ex##, adds only 27K to the size of the back-end.** ##eubw.exe##
-and ##eub.exe## //Linux// are compressed using a
-[[http://upx.sourceforge.net|UPX]]. Note: In some very rare cases, a compressed
-executable may trigger a warning message from a virus scanner. This is simply
-because the executable file looks abnormal to the virus scanner.
+##ed.ex##, adds only 27K to the size of the back-end.** 
 
 The first two items returned by [[:command_line]]() will be
 slightly different when your program is bound. See the procedure description for the details.

@@ -427,7 +427,7 @@ The Binder gives you two more methods of distribution. You can ##shroud## your
 program, or you can ##bind## your program. **Shrouding** combines all of the
 Euphoria source code that your program needs to create a single ##.il## file.
 **Binding** combines your shrouded program with the Euphoria backend
-(##eub## or ##eubw##) to create a single, stand-alone executable file.
+(##eub## or ##eubw## on Windows) to create a single, stand-alone executable file.
 For example, if your program is called "##myprog.ex##" you can create "##myprog.exe##"
 which will run identically. For more information about shrouding and binding,
 see [[:Binding and Shrouding]].

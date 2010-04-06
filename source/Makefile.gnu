@@ -47,6 +47,7 @@
 #   Backend              (eub):  make eub
 #   Run Unit Tests            :  make test
 #   Run Unit Tests with eu.ex :  make testeu
+#   Code Page Database        :  make code-page-db
 #
 # In order to achieve compatibility among 9 platforms
 # please follow these Code standards:
@@ -271,7 +272,7 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library backend
+all : interpreter translator library backend code-page-db
 
 BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
 
@@ -308,6 +309,11 @@ builddirs : svn_rev
 svn_rev : 
 	-$(EXE) -i ../include revget.ex -root ..
 
+code-page-db : $(BUILDDIR)/ecp.dat
+
+$(BUILDDIR)/ecp.dat : interpreter
+	$(BUILDDIR)/eui $(TRUNKDIR)/bin/buildcpdb.ex -p$(TRUNKDIR)/source/codepage -o$(BUILDDIR)
+
 interpreter : builddirs
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -325,6 +331,7 @@ endif
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
+.PHONY : code-page-db
 
 euisource : $(BUILDDIR)/intobj/main-.c
 euisource :  EU_TARGET = int.ex
@@ -408,12 +415,13 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
+test : code-page-db
 test :  
 	cd ../tests && sh check_diffs.sh
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA);
 	
 
-testeu :
+testeu : code-page-db
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
 
 ifeq "$(PREFIX)" ""
@@ -459,6 +467,9 @@ install :
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/bin \
 	           ../bin/ed.ex \
 	           ../bin/ascii.ex \
+	           ../bin/bugreport.ex \
+	           ../bin/buildcpdb.ex \
+	           $(BUILDDIR)/ecp.dat \
 	           ../bin/eprint.ex \
 	           ../bin/guru.ex \
 	           ../bin/key.ex \
@@ -470,9 +481,18 @@ install :
 	           *.e \
 	           be_*.c \
 	           *.h
+	# helper script for running dis.ex
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eudis
 	echo eui $(PREFIX)/share/euphoria/source/dis.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eudis
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eudis
+	# helper script for binding programs
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eubind
+	echo eui $(PREFIX)/share/euphoria/source/bind.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eubind
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eubind
+	# helper script for shrouding programs
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
+	echo eui $(PREFIX)/share/euphoria/source/bind.ex -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
 
 # This doesn't seem right. What about eub or shroud ?
 uninstall :
