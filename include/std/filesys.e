@@ -1891,9 +1891,10 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 		extra_paths = canonical_path(dirname(extra_paths[2]), 1)
 		search_list = append(search_list, extra_paths)
 
-		ifdef LINUX	then
+		ifdef UNIX then
 			extra_paths = getenv("HOME")
-		elsifdef WIN32 then
+			
+		elsedef
 			extra_paths = getenv("HOMEDRIVE") & getenv("HOMEPATH")
 		end ifdef		
 			
@@ -1902,6 +1903,12 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 		end if				
 				
 		search_list = append(search_list, ".." & SLASH)
+		
+		ifdef UNIX then
+			-- typical install directories:
+			search_list = append( search_list, "/usr/local/share/euphoria/bin/" )
+			search_list = append( search_list, "/usr/share/euphoria/bin/" )
+		end ifdef
 		
 		search_list &= include_paths(1)
 		
