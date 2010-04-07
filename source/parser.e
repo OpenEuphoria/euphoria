@@ -2105,7 +2105,12 @@ procedure If_statement()
 		short_circuit += 1
 		short_circuit_B = FALSE
 		SC1_type = 0
+		
+		push_temps( temps )
+		temps = pop_temps()
 		Expr()
+		
+		
 		emit_op(IF)
 		prev_false = length(Code)+1
 		prev_false2 = 0
@@ -2123,7 +2128,7 @@ procedure If_statement()
 		short_circuit -= 1
 		tok_match(THEN)
 		
-		push_temps( temps )
+		
 		Statement_list()
 		tok = next_token()
 	end while
