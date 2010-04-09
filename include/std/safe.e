@@ -3,16 +3,6 @@
 -- Euphoria 4.0
 -- Machine Level Programming (386/486/Pentium)
 
-namespace safe
-include std/error.e
-ifdef WINDOWS then
-	include std/win32/sounds.e
-end ifdef
-public include std/memconst.e
-ifdef DATA_EXECUTE then
-	public include std/machine.e as machine
-end ifdef
-
 --****
 -- === safe.e
 --
@@ -61,6 +51,18 @@ end ifdef
 -- that it allocated (and hasn't freed), as well as areas in low memory
 -- that you list below, or add dynamically via register_block().
 
+namespace safe
+include std/error.e
+ifdef WINDOWS then
+	include std/win32/sounds.e
+end ifdef
+public include std/memconst.e
+ifdef DATA_EXECUTE then
+	public include std/machine.e as machine
+end ifdef
+
+
+
 -- Some parameters you may wish to change:
 
 --**
@@ -93,6 +95,22 @@ public integer edges_only = (platform()=2)
 -- They should be distinct from PERM_EXEC, etc...
 -- These are not permission constants.
 
+-- Internal types for understanding more than type-checking:
+
+-- internal address
+-- addresses used for passing to and getting from low level machine_func calls and to a few
+-- local only routines.
+export type int_addr(machine_addr a)
+	return 1
+end type
+
+-- external address
+-- addresses used for passing to and getting from high level functions in machine.e and 
+-- public functions declared here.
+export type ext_addr(machine_addr a)
+	return 1
+end type
+
 
 -- Include the starting address and length of any 
 -- acceptable areas of memory for peek/poke here. 
@@ -112,17 +130,13 @@ constant M_ALLOC = 16,
 puts(1, "\n\t\tUsing Debug Version of machine.e\n")
 machine_proc(M_SLEEP, 3)
 
-
-
-
-
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
 
-type positive_int(integer x)
+export type positive_int(integer x)
 	return x >= 1
 end type
 
@@ -149,7 +163,7 @@ export constant BORDER_SPACE = 40
 export constant leader = repeat('@', BORDER_SPACE)
 export constant trailer = repeat('%', BORDER_SPACE)
 
-export type bordered_address( atom addr )
+export type bordered_address(ext_addr addr )
 	sequence l
 	for i = 1 to length(safe_address_list) do
 		if safe_address_list[i][BLOCK_ADDRESS] = addr then
@@ -178,7 +192,7 @@ function permits(valid_memory_protection_constant protection, positive_int actio
 	return not does_not_permit(protection,action)
 end function
 
-public function safe_address(atom start, integer len, positive_int action )
+public function safe_address(machine_addr start, natural len, positive_int action )
 -- is it ok to read/write all addresses from start to start+len-1?
 -- Note:  This routine is available from std/machine.e *only* when SAFE
 -- is defined.
@@ -573,7 +587,7 @@ end procedure
 public procedure check_all_blocks()
 -- Check all allocated blocks for corruption of the leader and trailer areas. 
 	integer n
-	atom a
+	ext_addr a
 	sequence block
 	
 	for i = 1 to length(safe_address_list) do
@@ -593,7 +607,7 @@ public procedure check_all_blocks()
 	end for
 end procedure
 
-override procedure call(bordered_address addr)
+override procedure call(machine_addr addr)
 -- safe call - machine code must start in block that we own
 	if safe_address(addr, 1, A_EXECUTE) then
 		eu:call(addr)
@@ -622,9 +636,6 @@ override function c_func(integer i, sequence s)
 	return r
 end function
 
-
-
-
 public procedure register_block(machine_addr block_addr, positive_int block_len, valid_memory_protection_constant memory_protection = PAGE_READ_WRITE )
 -- register an externally-acquired block of memory as being safe to use
 	allocation_num += 1
@@ -652,73 +663,58 @@ public procedure unregister_block(machine_addr block_addr)
 	die("ATTEMPT TO UNREGISTER A BLOCK THAT WAS NOT REGISTERED!")
 end procedure
 
-export function prepare_block(atom a, integer n, natural protection)
+export function prepare_block(int_addr iaddr, positive_int n, natural protection)
+	ext_addr eaddr
 -- set up an allocated block so we can check it for corruption
-	if a = 0 then
+	if iaddr = 0 then
 		die("OUT OF MEMORY!")
 	end if
-	eu:poke(a, leader)
-	a += BORDER_SPACE
-	eu:poke(a+n, trailer)
+	eu:poke(iaddr, leader)
+	eaddr = iaddr + BORDER_SPACE
+	eu:poke(eaddr+n, trailer)
 	allocation_num += 1
 --  if allocation_num = ??? then 
 --      trace(1) -- find out who allocated this block number
---  end if  
-	safe_address_list = prepend(safe_address_list, {a, n, allocation_num, protection})
-	return a
+--  end if
+	safe_address_list = prepend(safe_address_list, {eaddr, n, allocation_num, protection})
+	return eaddr
 end function
 
-public function allocate_data(positive_int n, integer cleanup = 0)
--- allocate memory block and add it to safe list
-	atom a
-	bordered_address sla
-	a = machine_func(M_ALLOC, n+BORDER_SPACE*2)
-	sla = prepare_block(a, n, PAGE_READ_WRITE )
-	if cleanup then
-		return delete_routine( sla, FREE_RID )
-	else
-		return sla
-	end if
-end function
-
-public function allocate(positive_int n, integer cleanup = 0)
--- allocate memory block and add it to safe list
-	atom a	
-	ifdef DATA_EXECUTE then                                   
-		a = allocate_protect( n+BORDER_SPACE*2, 1, PAGE_READ_WRITE_EXECUTE )
-	elsedef	
-		a = machine_func(M_ALLOC, n+BORDER_SPACE*2)		
-		a = prepare_block(a, n, PAGE_READ_WRITE )
-	end ifdef	
-	if cleanup then
-		a = delete_routine( a, FREE_RID )
-	end if
-	return a
-end function
-
-export procedure deallocate(atom a)
+-- Internal use of the library only.  free() calls this.  It works with
+-- only atoms and in the unSAFE implementation is different.
+export procedure deallocate(bordered_address a)
 	-- free address a - make sure it was allocated
+	int_addr ia
 	for i = 1 to length(safe_address_list) do
 		if safe_address_list[i][BLOCK_ADDRESS] = a then
 			-- check pre and post block areas
 			integer n
+			ia = a-BORDER_SPACE
 			if safe_address_list[i][ALLOC_NUMBER] <= 0 then
 				die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
 			end if
 			n = safe_address_list[i][BLOCK_LENGTH]
-			if not equal(leader, eu:peek({a-BORDER_SPACE, BORDER_SPACE})) then
+			if not equal(leader, eu:peek({ia, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
 			elsif not equal(trailer, eu:peek({a+n, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
 			end if
 			ifdef DATA_EXECUTE then
-				free_code(a, n)
+				ifdef WINDOWS then
+					if dep_works() then
+						eu:c_func( VirtualFree_rid, { ia, n, MEM_RELEASE } )
+					else
+						eu:machine_proc(M_FREE, ia)
+					end if
+				elsedef
+					eu:machine_proc(M_FREE, ia)			
+				end ifdef
 			elsedef
 				if safe_address_list[i][BLOCK_PROT] != PAGE_READ_WRITE then
 					die("ATTEMPT TO FREE WITH free() A BLOCK " &
 						"THAT WAS ALLOCATED BY allocate_protect()!") 
 				end if
-				machine_proc(M_FREE, a-BORDER_SPACE)
+				eu:machine_proc(M_FREE, ia)
 			end ifdef
 			-- remove it from list
 			safe_address_list = remove(safe_address_list, i)

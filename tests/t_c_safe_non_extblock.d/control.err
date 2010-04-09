@@ -1,4 +1,4 @@
-E:\EUPHORIA\include\std\safe.e:278 in procedure die() 
+E:\EUPHORIA\include\std\safe.e:292 in procedure die() 
 ATTEMPT TO REGISTER A NON-EXTERNAL BLOCK. 
     block_addr = 1325728
     block_len = 100'd'

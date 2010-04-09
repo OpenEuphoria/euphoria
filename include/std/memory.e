@@ -54,7 +54,7 @@ constant MAX_ADDR = power(2, 32)-1
 --**
 -- Positive integer type
 
-type positive_int(integer x)
+export type positive_int(integer x)
         return x >= 1
 end type
 
@@ -65,78 +65,6 @@ public type machine_addr(object a)
 -- a 32-bit non-null machine address 
 	return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
-
-
---****
--- === Memory allocation
---
-
---**
--- Allocate a contiguous block of data memory.
---
--- Parameters:
---   # ##n## : a positive integer, the size of the requested block.
---   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
---     automatically freed when its reference count drops to zero, or
---     when passed as a parameter to [[:delete]].
---
--- Return:
---   An **atom**, the address of the allocated memory or 0 if the memory
---   can't be allocated.
---
--- Comments:
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
--- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the pointer's reference count drops to zero.
--- When you are finished using the block, you should pass the address of the block to 
--- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
--- can be freed by calling [[:delete]], or when the pointer's reference count drops to zero.
--- This will free the block and make the memory available for other purposes. When 
--- your program terminates, the operating system will reclaim all memory for use with other 
--- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
--- For that purpose you may use ##[[:allocate_code]]()## instead. 
---
--- The address returned will be at least 4-byte aligned.
---
--- Example 1:
--- <eucode>
--- buffer = allocate(100)
--- for i = 0 to 99 do
---     poke(buffer+i, 0)
--- end for
--- </eucode>
---                  
--- See Also:
---     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
-
-public function allocate(positive_int n, integer cleanup = 0)
-	atom addr
-	-- Allocate n bytes of memory and return the address.
-	-- Free the memory using free() below.
-	ifdef not DATA_EXECUTE then
-		addr = machine_func(M_ALLOC, n )
-	elsedef
-		addr = allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
-	end ifdef
-	if cleanup then
-		return delete_routine( addr, FREE_RID )
-	else
-		return addr
-	end if
-end function
-
---**
--- Allocate n bytes of memory and return the address.
--- Free the memory using free() below.
-
-public function allocate_data(positive_int n, integer cleanup = 0)
-	if cleanup then
-		return delete_routine( machine_func(M_ALLOC, n ), FREE_RID )
-	else
-		return machine_func(M_ALLOC, n)
-	end if
-end function
 
 -- Internal use of the library only.  free() calls this.  It works with
 -- only atoms and in the SAFE implementation is different.

@@ -9,11 +9,11 @@ include std/types.e
 
 ifdef SAFE then
 
-	public include std/safe.e
+	public include std/safe.e as memory
 
 elsedef
 
-	public include std/memory.e
+	public include std/memory.e as memory
 
 end ifdef
 
@@ -23,6 +23,83 @@ type block_aligned( atom a )
 	return remainder(a,4096)=0
 end type
 
+
+--****
+-- === Memory allocation
+--
+
+--**
+-- Allocate a contiguous block of data memory.
+--
+-- Parameters:
+--   # ##n## : a positive integer, the size of the requested block.
+--   # ##cleanup## : an integer, if non-zero, then the returned pointer will be
+--     automatically freed when its reference count drops to zero, or
+--     when passed as a parameter to [[:delete]].
+--
+-- Return:
+--   An **atom**, the address of the allocated memory or 0 if the memory
+--   can't be allocated.
+--
+-- Comments:
+-- Since ##allocate_string##() allocates memory, you are responsible to
+-- [[:free]]() the block when done with it if ##cleanup## is zero.
+-- If ##cleanup## is non-zero, then the memory can be freed by calling
+-- [[:delete]], or when the pointer's reference count drops to zero.
+-- When you are finished using the block, you should pass the address of the block to 
+-- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
+-- can be freed by calling [[:delete]], or when the pointer's reference count drops to zero.
+-- This will free the block and make the memory available for other purposes. When 
+-- your program terminates, the operating system will reclaim all memory for use with other 
+-- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
+-- For that purpose you may use ##[[:allocate_code]]()## instead. 
+--
+-- The address returned will be at least 4-byte aligned.
+--
+-- Example 1:
+-- <eucode>
+-- buffer = allocate(100)
+-- for i = 0 to 99 do
+--     poke(buffer+i, 0)
+-- end for
+-- </eucode>
+--                  
+-- See Also:
+--     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
+
+public function allocate(positive_int n, boolean cleanup = 0)
+-- allocate memory block and add it to safe list
+	machine_addr iaddr
+	machine_addr eaddr	
+	ifdef DATA_EXECUTE then
+		-- high level call:  No need to add BORDER_SPACE*2 here.
+		eaddr = machine:allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
+	elsedef	
+		iaddr = eu:machine_func(M_ALLOC, n+BORDER_SPACE*2)
+		eaddr = prepare_block(iaddr, n, PAGE_READ_WRITE )
+	end ifdef
+	if cleanup then
+		eaddr = delete_routine( eaddr, FREE_RID )
+	end if
+	return eaddr
+end function
+
+--**
+-- Allocate n bytes of memory and return the address.
+-- Free the memory using free() below.
+
+public function allocate_data(positive_int n, boolean cleanup = 0)
+-- allocate memory block and add it to safe list
+	machine_addr a
+	bordered_address sla
+	a = eu:machine_func(M_ALLOC, n+BORDER_SPACE*2)
+	sla = prepare_block(a, n, PAGE_READ_WRITE )
+	if cleanup then
+		return delete_routine( sla, FREE_RID )
+	else
+		return sla
+	end if
+end function
 
 
 --**
@@ -519,7 +596,11 @@ std_library_address oldprotptr = allocate_data(4)
 end ifdef
 
 --**
--- Allocates and copies data into memory and gives it protection using [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  If you only want to read and write data into memory use ##allocate()##.
+-- Allocates and copies data into memory and gives it protection using
+-- [[:Standard Library Memory Protection Constants]] or
+-- [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these 
+-- constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  
+-- If you only want to read and write data into memory use ##allocate()##.
 --
 -- See [[http://msdn.microsoft.com/en-us/library/aa366786(VS.85).aspx "MSDN: Microsoft's Memory Protection Constants"]]
 --

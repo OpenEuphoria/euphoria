@@ -132,7 +132,7 @@ export function test_read( valid_memory_protection_constant protection )
 	-- does this protection allow for reading?
 	ifdef UNIX then
 		-- take advantage of the use of bit fields in UNIX for protections
-		return or_bits(PROT_READ,protection) != 0
+		return and_bits(PROT_READ,protection) != 0
 	elsedef
 		return find( protection, { PAGE_EXECUTE_READ, PAGE_EXECUTE_READWRITE,  
 				PAGE_READWRITE,	PAGE_READONLY } )
@@ -144,7 +144,7 @@ export function test_write( valid_memory_protection_constant protection )
 	-- does this protection allow for writing?
 	ifdef UNIX then
 		-- take advantage of the use of bit fields in UNIX for protections
-		return or_bits(PROT_WRITE,protection) != 0
+		return and_bits(PROT_WRITE,protection) != 0
 	end ifdef
 	return find( protection, { PAGE_EXECUTE_READWRITE,
 		 	PAGE_EXECUTE_WRITECOPY,
@@ -156,7 +156,7 @@ export function test_exec( valid_memory_protection_constant protection )
 	-- does this protection allow for executing?
 	ifdef UNIX then
 		-- take advantage of the use of bit fields in UNIX for protections
-		return or_bits(PROT_EXEC,protection) != 0
+		return and_bits(PROT_EXEC,protection) != 0
 	end ifdef
 	return find(protection,{PAGE_EXECUTE,
 		PAGE_EXECUTE_READ,
