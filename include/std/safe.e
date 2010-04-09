@@ -100,14 +100,14 @@ public integer edges_only = (platform()=2)
 -- internal address
 -- addresses used for passing to and getting from low level machine_func calls and to a few
 -- local only routines.
-export type int_addr(machine_addr a)
+type int_addr(machine_addr a)
 	return 1
 end type
 
 -- external address
 -- addresses used for passing to and getting from high level functions in machine.e and 
 -- public functions declared here.
-export type ext_addr(machine_addr a)
+type ext_addr(machine_addr a)
 	return 1
 end type
 

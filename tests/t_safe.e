@@ -1,7 +1,5 @@
 with define SAFE
 include std/machine.e
-include std/safe.e
-
 include std/unittest.e
 
 edges_only = 0
@@ -15,7 +13,7 @@ if addr != 0 then
 	test_false("PAGE_NONE memory readable", safe_address(addr, 4, A_READ))
 	test_false("PAGE_NONE memory writable", safe_address(addr, 4, A_WRITE))
 	test_false("PAGE_NONE memory executable", safe_address( addr, 4, A_EXECUTE ))
-	safe:free_code(addr, 4)
+	free_code(addr, 4)
 else
 	test_fail("PAGE_NONE memory could not be allocated by allocate_protect")
 end if
