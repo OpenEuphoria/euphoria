@@ -551,7 +551,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[:find]], [[:replace]], [[:find_replace]]
+--		[[:find]], [[:replace]], [[regex:find_replace]], [[:find_replace]]
 
 public function match_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
@@ -734,7 +734,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:match]], [[:find]], [[:find_all]]
+--     [[:match]], [[regex:find_all]] [[:find]], [[:find_all]]
 
 public function match_all(sequence needle, sequence haystack, integer start=1)
 	sequence ret = {}
