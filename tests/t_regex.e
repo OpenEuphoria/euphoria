@@ -30,7 +30,7 @@ test_equal("Matches normally can occur inside a string",{
 	regex:find(re,"First, you break the eggs.  Second, you stir the egg.  "&
 	"Third, you turn on the frying pan",, regex:DEFAULT )
 	)
-test_equal("With regex:ANCHORED, it must match from the first place it tries", -1, 
+test_equal("With regex:ANCHORED, it must match from the first place it tries", regex:ERROR_NOMATCH, 
 	regex:find(re,"First, you break the eggs.  Second, you stir the egg.  "&
 	"Third, you turn on the frying pan",, regex:ANCHORED )
 	)
@@ -59,7 +59,7 @@ test_equal("When regex:DOLLAR_ENDONLY is set, matches only occur at the end of t
 
 re = regex:new("rain\\?$", {regex:DOLLAR_ENDONLY})
 test_equal("When regex:DOLLAR_ENDONLY is set, matches only occur at the end of the string",
-	-1, regex:find(re,"Have you ever seen the rain?\n") )
+	regex:ERROR_NOMATCH, regex:find(re,"Have you ever seen the rain?\n") )
 
 re = regex:new(`(?:where\?|string)$`, regex:MULTILINE)
 
@@ -95,9 +95,9 @@ test_equal("When regex:NOTEOL is set, matches do not occur at end of the string.
 
 re = regex:new("We should", regex:FIRSTLINE)
 test_equal("Matches will not occur after the first line when regex:FIRSTLINE is set", 
-	-1, regex:find(re,s) )
+	regex:ERROR_NOMATCH, regex:find(re,s) )
 
-test_equal("Normally, dot doesn\'t match a regex:NEWLINE", -1, regex:find(regex:new("g.We", regex:DEFAULT),s) )
+test_equal("Normally, dot doesn\'t match a regex:NEWLINE", regex:ERROR_NOMATCH, regex:find(regex:new("g.We", regex:DEFAULT),s) )
 test_equal("regex:DOT does match a newline when regex:DOTALL is set", {{34,37}}, 
 	regex:find(regex:new("g.We", regex:DOTALL),s) )
 
@@ -144,11 +144,11 @@ test_equal("find() #5", {{9,10}}, regex:find(re, "the dog is happy", 8))
 
 re = regex:new(`[A-Z][a-z]+\s`, { regex:CASELESS })
 test_equal("find() #6", {{1,4}}, regex:find(re, "and John ran"))
-test_equal("find() #7", -1, regex:find(re, "15 dogs ran", regex:ANCHORED))
+test_equal("find() #7", regex:ERROR_NOMATCH, regex:find(re, "15 dogs ran", regex:ANCHORED))
 
 re = regex:new(`[A-Z][a-z]+\s`, { regex:CASELESS, regex:ANCHORED })
 test_equal("find() #8", {{1,4}}, regex:find(re, "and John ran"))
-test_equal("find() #9", -1, regex:find(re, "15 dogs ran"))
+test_equal("find() #9", regex:ERROR_NOMATCH, regex:find(re, "15 dogs ran"))
 
 re = regex:new("[A-Z]+")
 test_equal("find_all() #1", {{{5,7}}, {{13,14}}},
@@ -203,12 +203,12 @@ test_true("regex matched groups 1", regex(re))
 
 re = regex:new("^")
 test_equal("regex bol on empty string", {{1,0}}, regex:find(re, ""))
-test_equal("regex bol on empty string with NOTBOL flag", -1, regex:find(re, "", ,regex:NOTBOL))
+test_equal("regex bol on empty string with NOTBOL flag", regex:ERROR_NOMATCH, regex:find(re, "", ,regex:NOTBOL))
 
 re = regex:new("$")
 test_equal("regex eol on empty string", {{1,0}}, regex:find(re, ""))
-test_equal("regex eol on empty string with NOTEOL flag", -1, regex:find(re, "", ,regex:NOTEOL))
-test_equal("regex eol on empty string with NOTEMPTY flag", -1, regex:find(re, "",, regex:NOTEMPTY))
+test_equal("regex eol on empty string with NOTEOL flag", regex:ERROR_NOMATCH, regex:find(re, "", ,regex:NOTEOL))
+test_equal("regex eol on empty string with NOTEMPTY flag", regex:ERROR_NOMATCH, regex:find(re, "",, regex:NOTEMPTY))
 
 re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 test_equal("find_replace() #1", "hello Doe, John!", regex:find_replace(re, "hello John Doe!", `\2, \1`))

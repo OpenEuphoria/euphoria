@@ -498,7 +498,7 @@ public type option_spec(object o)
 				return 1
 			end if
 		end if
-	elsif integer_array(o) then
+	elsif string(o) then
 		return option_spec(or_all(o))
 	else
 		return 0
@@ -520,7 +520,10 @@ end function
 -- 
 -- This can be useful for debugging and even something rough to give to
 -- the user incase of a regex failure.  It's preferable to 
--- a numeric literal.
+-- a number.
+-- 
+-- See Also:
+-- [[:error_message]]
 public function error_to_string(integer i)
 	if i >= 0 or i < -23 then
 		return sprintf("%d",{i})
@@ -583,7 +586,7 @@ end function
 -- See Also:
 --   [[:error_message]], [[:find]], [[:find_all]]
 
-public function new(integer_array pattern, option_spec options=DEFAULT)
+public function new(string pattern, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
         
         -- concatenation ensures we really get a new sequence, and don't just use the
@@ -642,7 +645,7 @@ end function
 -- </eucode>
 --
 
-public function escape(integer_array s)
+public function escape(string s)
         return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
 end function
 
@@ -702,7 +705,7 @@ end function
 --   </eucode>
 --
 
-public function find(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
+public function find(regex re, string haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
         if sequence(options) then options = or_all(options) end if
         if size < 0 then
             size = 0
@@ -722,8 +725,10 @@ end function
 --   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   A **sequence**, of matches. Please see [[:find]] for a detailed description of the return
---   value.
+--   A **sequence** of **sequences** that were returned by [[re:find]] and in the case of 
+--   no matches this returns an empty **sequence**. 
+--   Please see [[:find]] for a detailed description of each member of the return
+--   sequence.
 --
 -- Example 1:
 --   <eucode>
@@ -732,14 +737,14 @@ end function
 --
 --   -- matches is:
 --   -- {
---   --     {1, 2},
---   --     {4, 5},
---   --     {7, 8}
+--   --     {{1, 2}},
+--   --     {{4, 5}},
+--   --     {{7, 8}}
 --   -- }
 --   </eucode>
 --
 
-public function find_all(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
+public function find_all(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
 
         object result
@@ -771,7 +776,7 @@ end function
 --   An **atom**, 1 if ##re## matches any portion of ##haystack## or 0 if not.
 --
 
-public function has_match(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
+public function has_match(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
         return sequence(find(re, haystack, from, options))
 end function
 
@@ -788,7 +793,7 @@ end function
 --   An **atom**,  1 if ##re## matches the entire ##haystack## or 0 if not.
 --
 
-public function is_match(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
+public function is_match(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
         object m = find(re, haystack, from, options)
 
         if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
@@ -808,8 +813,9 @@ end function
 --   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
 --
 -- Returns:
---   Returns a **sequence**, of strings, the first being the entire match and subsequent
---   items being each of the captured groups. The size of the sequence is the number
+--   Returns a **sequence** of strings, the first being the entire match and subsequent
+--   items being each of the captured groups or **ERROR_NOMATCH** of there is no match. 
+--   The size of the sequence is the number
 --   of groups in the expression plus one (for the entire match).
 --
 --   If ##options## contains the bit [[:STRING_OFFSETS]], then the result is different.
@@ -840,7 +846,7 @@ end function
 -- See Also:
 --   [[:all_matches]]
 --
-public function matches(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
+public function matches(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
         integer str_offsets = and_bits(STRING_OFFSETS, options)
         object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
@@ -874,13 +880,18 @@ end function
 --   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
 --
 -- Returns:
---   Returns a **sequence**, of a sequence of strings, the first being the entire match and
---   subsequent items being each of the captured groups. The size of the sequence is
---   the number of groups in the expression plus one (for the entire match).
+--   Returns **ERROR_NOMATCH** if no matches are found, or a **sequence** of **sequences** of 
+--   **strings** if there is at least one match. In each member sequence of the returned sequence, 
+--   the first string is the entire match and subsequent items being each of the 
+--   captured groups.  The size of the sequence is
+--   the number of groups in the expression plus one (for the entire match).  In other words,
+--   each member of the return value will be of the same structure of that is returned by
+--   [[:matches]].
 --
 --   If ##options## contains the bit [[:STRING_OFFSETS]], then the result is different.
---   For each item, a sequence is returned containing the matched text, the starting
---   index in ##haystack## and the ending index in ##haystack##.
+--   In each member sequence, instead of each member being a string each member is itself a sequence
+--   containing the matched text, the starting index in ##haystack## and the ending 
+--   index in ##haystack##.
 --
 -- Example 1:
 --   <eucode>
@@ -920,7 +931,7 @@ end function
 -- See Also:
 --   [[:matches]]
 
-public function all_matches(regex re, integer_array haystack, integer from=1, option_spec options=DEFAULT)
+public function all_matches(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
         integer str_offsets = and_bits(STRING_OFFSETS, options)
         object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
@@ -954,7 +965,8 @@ end function
 --   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
 --
 -- Returns:
---   A **sequence**, of string values split at the delimiter.
+--   A **sequence** of string values split at the delimiter and if no delimiters were found
+-- this **sequence** will be a one member sequence equal to ##{text}##.
 --   
 -- Example 1:
 -- <eucode>
@@ -969,16 +981,16 @@ end function
 -- </eucode>
 -- 
 
-public function split(regex re, integer_array text, integer from=1, option_spec options=DEFAULT)
+public function split(regex re, string text, integer from=1, option_spec options=DEFAULT)
         return split_limit(re, text, 0, from, options)
 end function
 
-public function split_limit(regex re, integer_array text, integer limit=0, integer from=1, option_spec options=DEFAULT)
+public function split_limit(regex re, string text, integer limit=0, integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
         sequence match_data = find_all(re, text, from, options), result
         integer last = 1
 
-        if limit = 0 then
+        if limit = 0 or limit > length(match_data) then
                 limit = length(match_data)
         end if
 
@@ -1011,7 +1023,8 @@ end function
 --   # ##options## : options, defaults to [[:DEFAULT]]
 --
 -- Returns:
---   A **sequence**, the modified ##text##.
+--   A **sequence**, the modified ##text##.  If there is no match with ##re## the
+--  return value will be the same as ##text## when it was passed in.
 --
 -- Special replacement operators:
 -- 
@@ -1035,13 +1048,14 @@ end function
 -- </eucode>
 --
 
-public function find_replace(regex ex, integer_array text, sequence replacement, integer from=1,
+public function find_replace(regex ex, string text, sequence replacement, integer from=1,
                 option_spec options=DEFAULT)
         return find_replace_limit(ex, text, replacement, -1, from, options)
 end function
 
 --**
--- Replaces up to ##limit## matches of ##ex## in ##text##.
+-- Replaces up to ##limit## matches of ##ex## in ##text## except when ##limit## is 0.  When  
+-- ##limit## is 0, this routine replaces all of the matches.
 --
 -- This function is identical to [[:find_replace]] except it allows you to limit the number of
 -- replacements to perform. Please see the documentation for [[:find_replace]] for all the
@@ -1062,7 +1076,7 @@ end function
 --   [[:find_replace]]
 --
 
-public function find_replace_limit(regex ex, integer_array text, sequence replacement, 
+public function find_replace_limit(regex ex, string text, sequence replacement, 
                         integer limit, integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
 
@@ -1070,10 +1084,17 @@ public function find_replace_limit(regex ex, integer_array text, sequence replac
 end function
 
 --**
--- Replaces up to ##limit## matches of ##ex## in ##text## with the result of a user
--- defined callback. The callback should take one sequence which will contain a string
--- representing the entire match and also a integer_array for every group within the regular
--- expression.
+-- When ##limit## is positive, 
+-- this routine replaces up to ##limit## matches of ##ex## in ##text## with the 
+-- result of the user
+-- defined callback, ##rid##, and when ##limit## is 0, replaces
+-- all matches of ##ex## in ##text## with the result of this user defined callback, ##rid##.  
+--
+-- The callback should take one sequence.  The first member of this sequence will be a
+-- a string 
+-- representing the entire match and the subsequent members, if they exist, 
+-- will be a strings 
+-- for the captured groups within the regular expression.
 --
 -- Parameters:
 --   # ##re## : a regex which will be used for matching
@@ -1105,12 +1126,12 @@ end function
 -- </eucode>
 --
 
-public function find_replace_callback(regex ex, integer_array text, integer rid, integer limit=0, 
+public function find_replace_callback(regex ex, string text, integer rid, integer limit=0, 
                 integer from=1, option_spec options=DEFAULT)
         if sequence(options) then options = or_all(options) end if
         sequence match_data = find_all(ex, text, from, options), replace_data
 
-        if limit = 0 then
+        if limit = 0 or limit > length(match_data) then
                 limit = length(match_data)
         end if
         replace_data = repeat(0, limit)
