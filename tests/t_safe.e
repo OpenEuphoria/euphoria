@@ -25,13 +25,8 @@ addr = allocate_protect( {1,2,3,4}, 1, PAGE_READ )
 if addr != 0 then
 	test_pass("PAGE_READ memory was allocated by allocate_protect")
 	test_true("PAGE_READ memory readable", safe_address(addr, 4, A_READ))
-	ifdef WINDOWS then
-		test_false("PAGE_READ memory writable", safe_address(addr, 4, A_WRITE))
-		test_false("PAGE_READ memory executable", safe_address( addr, 4, A_EXECUTE ))
-	elsedef
-		test_true("PAGE_READ memory writable", safe_address(addr, 4, A_WRITE))
-		test_true("PAGE_READ memory executable", safe_address( addr, 4, A_EXECUTE ))
-	end ifdef
+	test_false("PAGE_READ memory writable", safe_address(addr, 4, A_WRITE))
+	test_false("PAGE_READ memory executable", safe_address( addr, 4, A_EXECUTE ))
 else	
 	test_fail("PAGE_READ memory could not be allocated by allocate_protect")
 end if
@@ -42,11 +37,7 @@ if addr != 0 then
 	test_pass("PAGE_READ_WRITE memory was allocated by allocate_protect")
 	test_true("PAGE_READ_WRITE memory readable", safe_address(addr, 4, A_READ))
 	test_true("PAGE_READ_WRITE memory writable", safe_address(addr, 4, A_WRITE))
-	ifdef WINDOWS then
-		test_false("PAGE_READ_WRITE memory executable", safe_address( addr, 4, A_EXECUTE ))
-	elsedef
-		test_true("PAGE_READ_WRITE memory executable", safe_address( addr, 4, A_EXECUTE ))
-	end ifdef
+	test_false("PAGE_READ_WRITE memory executable", safe_address( addr, 4, A_EXECUTE ))
 else
 	test_fail("PAGE_READ_WRITE memory could not be allocated by allocate_protect")
 end if
@@ -67,11 +58,7 @@ addr = allocate_protect( {1,2,3,4}, 1, PAGE_READ_EXECUTE )
 if addr != 0 then
 	test_pass("PAGE_READ_EXECUTE memory was allocated by allocate_protect")
 	test_true("PAGE_READ_EXECUTE memory readable", safe_address(addr, 4, A_READ))
-	ifdef WINDOWS then
-		test_false("PAGE_READ_EXECUTE memory writable", safe_address(addr, 4, A_WRITE))
-	elsedef
-		test_true("PAGE_READ_EXECUTE memory writable", safe_address(addr, 4, A_WRITE))
-	end ifdef
+	test_false("PAGE_READ_EXECUTE memory writable", safe_address(addr, 4, A_WRITE))
 	test_true("PAGE_READ_EXECUTE memory executable", safe_address( addr, 4, A_EXECUTE ))
 else
 	test_fail("PAGE_READ_EXECUTE memory could not be allocated by allocate_protect")
