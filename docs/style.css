@@ -1,0 +1,77 @@
+/* Cascading Style Sheet for Euphoria Documentation */
+
+body             {/*background-color: #FFFFF5;*/}
+a                {color: #0000ff;}
+a:visited        {color: #0000ff; }
+a:active         {color: red; }
+a:hover          {color: red; }
+
+a.blue           {text-decoration: none;}
+a.blue:link      {color: "#5500FF"; text-decoration: underline;}
+a.blue:visited   {color: "#5500FF"; text-decoration: underline;}
+a.blue:active    {color: red; text-decoration: underline;}
+a.blue:hover     {color: red; text-decoration: underline;}
+a.brown          {text-decoration: none;}
+a.brown:link     {color: "#993333"; text-decoration: underline;}
+a.brown:visited  {color: "#993333"; text-decoration: underline;}
+a.brown:active   {color: red; text-decoration: underline;}
+a.brown:hover    {color: red; text-decoration: underline;}
+
+p {
+	padding-top: 0px;
+	margin-top: 0px;
+}
+
+pre {
+	padding-top: 0px;
+	margin-top: 0px;
+}
+
+h2 {
+	border-bottom: 2px solid black;
+	font-size: 1.3em;
+}
+
+h3 {
+	border-bottom: 1px solid black;
+	font-size: 1.2em;
+}
+
+h4 {
+	border-bottom: 1px dotted black;
+	font-size: 1.1em;
+	font-weight: bold;
+	font-style: italic;
+	font-family: courier;
+}
+
+h5 {
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+}
+
+div.TOC a { text-decoration: none; }
+
+div.TOC div.toc_1 { 
+	font-size: 1.5em; 
+	font-weight: bold; 
+	margin-top: 10px; 
+	margin-bottom: 10px; 
+	border-bottom: 1px solid black; 
+	background-color: #efefef;
+}
+div.TOC div.toc_2 { padding-left: 30px;  }
+div.TOC div.toc_3 { padding-left: 60px; font-style: italic; font-size: 0.95em; }
+div.TOC div.toc_4 { padding-left: 90px; font-size: 0.90em; }
+div.TOC div.toc_5 { padding-left: 120px; }
+div.TOC div.toc_6 { padding-left: 150px; }
+
+div.LEVELTOC { 
+	padding: 5px;
+	border: 1px solid #555;
+	background-color: #efefef;
+}
+
+div.LEVELTOC div.toc_3 { font-weight: bold; }
+div.LEVELTOC div.toc_4 { padding-left: 30px; }
+div.LEVELTOC div.toc_5 { padding-left: 60px; }
