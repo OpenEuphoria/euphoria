@@ -78,6 +78,9 @@ type int( object i )
 end type
 test_pass( "forward type with param name reused from routine name" )
 
+fwd_noassign()
+function fwd_noassign()
+	return 1
+end function
+
 test_report()
-
-
