@@ -121,11 +121,11 @@ export function get_eucompiledir()
 	
 	ifdef UNIX then
 		if equal(x, -1) then
-			x = "/usr/share/euphoria"
+			x = "/usr/local/share/euphoria"
 			if not file_exists( x ) then
 				-- somewhat hacky, but covers the default (and obvious)
 				-- other place to look
-				x = "/usr/local/share/euphoria"
+				x = "/usr/share/euphoria"
 				if not file_exists( x ) then
 					x = -1
 				end if

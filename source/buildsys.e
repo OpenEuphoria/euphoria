@@ -194,12 +194,12 @@ function setup_build()
 				sequence eudir = get_eucompiledir()
 				if match( "/share/euphoria", eudir ) then
 					-- EUDIR probably not set, look in /usr/local/lib or /usr/lib
-					if file_exists( "/usr/lib/eu.a" ) then
+					if file_exists( "/usr/local/lib/eu.a" ) then
+						user_library = "/usr/local/lib/eu.a"
+						
+					elsif file_exists( "/usr/lib/eu.a" ) then
 						user_library = "/usr/lib/eu.a"
 						
-					elsif file_exists( "/usr/local/lib/eu.a" ) then
-						user_library = "/usr/local/lib/eu.a"
-					
 					else
 						-- It's not in the 'standard' location, so try EUDIR
 						user_library = eudir & "/bin/eu.a"
@@ -479,7 +479,7 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s: $(%s_OBJECTS) $s" & HOSTNL, { exe_name, upper(file0), user_library })
+		printf(fh, "%s: $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
 		if TWINDOWS then
 			printf(fh, "\t$(LINKER) -o %s%s @%s.lnk" & HOSTNL, {
 				file0, settings[SETUP_EXE_EXT], file0 })
