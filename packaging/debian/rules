@@ -79,6 +79,7 @@ install-arch:
 	# debian/tmp.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/euphoria install
 	dh_install -s --sourcedir=debian/euphoria --autodest
+	dh_install -s debian/euphoria-manual debian/euphoria/usr/share/doc-base/
 
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep

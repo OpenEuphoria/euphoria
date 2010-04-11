@@ -1,0 +1,8 @@
+#!/bin/sh
+# prerm script for euphoria
+
+if [ "$1" = remove ] || [ "$1" = upgrade ]; then
+	if which install-docs >/dev/null 2>&1; then
+		install-docs -r /usr/share/doc-base/euphoria-manual
+	fi
+fi

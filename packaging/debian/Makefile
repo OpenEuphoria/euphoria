@@ -170,11 +170,13 @@ update :
 	-mkdir $(DEB_SOURCE_DIR)/debian
 	-cp rules $(DEB_SOURCE_DIR)/debian
 	-cp postinst $(DEB_SOURCE_DIR)/debian
+	-cp prerm $(DEB_SOURCE_DIR)/debian
 	-cp $(EU_BASE_DIR)/docs/man/*.1 $(DEB_SOURCE_DIR)/debian
 	-cp control $(DEB_SOURCE_DIR)/debian
 	-cp changelog $(DEB_SOURCE_DIR)/debian
 	-cp copyright $(DEB_SOURCE_DIR)/debian
 	-rm $(DEB_SOURCE_DIR)/*stamp
+	-cp euphoria-manual $(DEB_SOURCE_DIR)/debian
 	-echo 7 > $(DEB_SOURCE_DIR)/debian/compat
 	
 

@@ -28,6 +28,9 @@ case "$1" in
             echo '/usr/share/euphoria/include' > /etc/euphoria/eu.cfg
         fi
         exit 0
+		if which install-docs >dev/nul 2>&1; then
+			install-docs -i /usr/share/doc-base/euphoria-manual
+		fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

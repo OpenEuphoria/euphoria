@@ -466,7 +466,8 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/html 
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/js
+	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/images
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar/Linux
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
@@ -491,7 +492,9 @@ install :
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
-	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html ../html/*
+	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html $(BUILDDIR)/html/*
+	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images $(BUILDDIR)/html/images/*
+	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js $(BUILDDIR)/html/js/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo ../demo/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench ../demo/bench/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar ../demo/langwar/*
