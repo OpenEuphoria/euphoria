@@ -151,6 +151,16 @@ update :
 	do \
 	    cp $(EU_BASE_DIR)/bin/"$$file" $(DEB_SOURCE_DIR)/bin; \
 	done
+	-mkdir -p $(DEB_SOURCE_DIR)/source/codepage
+	cp $(EU_BASE_DIR)/source/codepage/*ecp $(DEB_SOURCE_DIR)/source/codepage
+	-mkdir -p $(DEB_SOURCE_DIR)/docs/html/images
+	cp $(EU_BASE_DIR)/docs/*.af $(DEB_SOURCE_DIR)/docs
+	cp $(EU_BASE_DIR)/docs/*.txt $(DEB_SOURCE_DIR)/docs
+	cp $(EU_BASE_DIR)/*.txt $(DEB_SOURCE_DIR)
+	cp $(EU_BASE_DIR)/docs/*.html $(DEB_SOURCE_DIR)/docs
+	cp $(EU_BASE_DIR)/docs/*.css $(DEB_SOURCE_DIR)/docs
+	cp $(EU_BASE_DIR)/docs/*.js $(DEB_SOURCE_DIR)/docs
+	cp $(EU_BASE_DIR)/docs/html/images/* $(DEB_SOURCE_DIR)/docs/html/images
 	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
 # 	cd $(DEB_SOURCE_DIR)/source && ./configure
 # 	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  source

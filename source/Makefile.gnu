@@ -174,6 +174,14 @@ ifndef ECHO
 ECHO=/bin/echo
 endif
 
+ifeq "$(EUDOC)" ""
+EUDOC=eudoc
+endif
+
+ifeq "$(CREOLEHTML)" ""
+CREOLEHTML=creolehtml
+endif
+
 FE_FLAGS =  $(MSIZE) -pthread -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
 BE_FLAGS =  $(MSIZE) -pthread  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
 
@@ -268,6 +276,20 @@ EU_LIB_OBJECTS = \
 	$(PREFIXED_PCRE_OBJECTS)
 	
 
+STDINCDIR = $(TRUNKDIR)/include/std
+
+EU_STD_INC = \
+	$(wildcard $(STDINCDIR)/*.e) \
+	$(wildcard $(STDINCDIR)/unix/*.e) \
+	$(wildcard $(STDINCDIR)/net/*.e) \
+	$(wildcard $(STDINCDIR)/win32/*.e)
+
+DOCDIR = $(TRUNKDIR)/docs
+EU_DOC_SOURCE = \
+	$(EU_STD_INC) \
+	$(DOCDIR)/manual.af \
+	$(wildcard $(DOCDIR)/*.txt)
+
 EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
@@ -295,7 +317,7 @@ endif
 clobber : distclean
 	-rm -fr $(BUILDDIR)
 
-.PHONY : clean distclean clobber all
+.PHONY : clean distclean clobber all htmldoc
 
 library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -408,6 +430,19 @@ $(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EBACKENDC)
 endif
+
+$(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
+	cd ../docs/ && $(EUDOC)  -v -a manual.af -o $(BUILDDIR)/euphoria.txt
+
+$(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
+	-mkdir -p $(BUILDDIR)/html/images
+	-mkdir -p $(BUILDDIR)/html/js
+	cd ../docs/ && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(BUILDDIR)/html $(BUILDDIR)/euphoria.txt
+	cp $(DOCDIR)/style.css $(BUILDDIR)/html
+	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
+	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
+
+htmldoc : $(BUILDDIR)/html/index.html
 
 
 test : EUDIR=$(TRUNKDIR)
