@@ -195,9 +195,25 @@ procedure patch_forward_call( token tok, integer ref )
 	integer next_pc = pc
 	integer supplied_args = code[pc+2]
 	sequence name = fr[FR_NAME]
+	
+	if is_func and fr[FR_OP] = PROC then
+		-- an unused forward function call!
+		-- need to convert from a PROC_FORWARD to a FUNC_FORWARD
+		symtab_index temp_target = NewTempSym()
+		sequence converted_code = 
+			FUNC_FORWARD 
+			& Code[pc+1..pc+2+supplied_args] 
+			& temp_target 
+			& { DEREF_TEMP, temp_target }
+		
+		replace_code( converted_code, pc, pc + 2 + supplied_args, code_sub )
+
+		code = Code
+	end if
+	
 	next_pc +=
 		  3                         -- op, sym, #args
-		+ code[next_pc + 2]         -- # args emitted
+		+ supplied_args             -- # args emitted
 		+ is_func                   -- target sym for func assignment
 	integer target
 	if is_func then
@@ -267,8 +283,8 @@ procedure patch_forward_call( token tok, integer ref )
 	end if
 	
 	replace_code( new_code, pc, next_pc - 1, code_sub )
-	
 	reset_code()
+	
 	-- mark this one as resolved already
 	resolved_reference( ref )
 end procedure
@@ -637,7 +653,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 					sym_tok = FUNC
 				end if
 				if sym_tok != fr_type then
-					forward_error( tok, ref )
+					if sym_tok != FUNC and fr_type != PROC then
+						forward_error( tok, ref )
+					end if
 				end if
 				switch sym_tok with fallthru do
 					case PROC then

@@ -189,6 +189,15 @@ procedure dispose_temp( symtab_index sym, integer keep, integer remove_from_map 
 end procedure
 
 --**
+-- Normally not used by the translator, but may be used in some cases
+-- where a forward procedure call was transformed into a forward function
+-- call.
+procedure opDEREF_TEMP()
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	pc += 2
+end procedure
+
+--**
 -- Disposes ##count## temps starting at ##start## in the Code using
 -- the specified value of ##keep##.
 procedure dispose_temps( integer start, integer count, integer keep, integer remove_from_map )
@@ -6803,7 +6812,6 @@ export procedure init_opcodes()
 			     "FUNC_FORWARD",
 			     "TYPE_CHECK_FORWARD",
 				 "REF_TEMP",
-				 "DEREF_TEMP",
 				 "NOVALUE_TEMP" then
 				-- never emitted
 				operation[i] = routine_id("opINTERNAL_ERROR")
@@ -6816,6 +6824,9 @@ export procedure init_opcodes()
 			
 			case "EXIT_BLOCK" then
 				operation[i] = routine_id("opEXIT_BLOCK" )			
+			
+			case "DEREF_TEMP" then
+				operation[i] = routine_id("opDEREF_TEMP")
 			
 			case else
 				operation[i] = -1
