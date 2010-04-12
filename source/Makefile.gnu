@@ -49,6 +49,12 @@
 #   Run Unit Tests with eu.ex :  make testeu
 #   Code Page Database        :  make code-page-db
 #
+#   Html Documentation        :  make htmldoc 
+#   PDF Documentation         :  make pdfdoc
+#
+#   Note that Html and PDF Documentation require eudoc and creolehtml
+#   PDF docs also require htmldoc
+#
 # In order to achieve compatibility among 9 platforms
 # please follow these Code standards:
 
@@ -437,13 +443,25 @@ $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
-	cd ../docs/ && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(BUILDDIR)/html $(BUILDDIR)/euphoria.txt
+	 $(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=offline-template.html -o$(BUILDDIR)/html $(BUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/style.css $(BUILDDIR)/html
 	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 
 htmldoc : $(BUILDDIR)/html/index.html
 
+$(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
+	sed -e "s/splitlevel = 2/splitlevel = 0/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
+
+$(BUILDDIR)/pdf/index.html : $(BUILDDIR)/euphoria-pdf.txt
+	-mkdir -p $(BUILDDIR)/pdf
+	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=offline-template.html -o$(BUILDDIR)/pdf $(BUILDDIR)/euphoria-pdf.txt
+# 	cd $(TRUNKDIR)/docs && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(BUILDDIR)/pdf $(BUILDDIR)/euphoria-pdf.txt
+
+$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/index.html
+	htmldoc -f $(BUILDDIR)/euphoria-4.0.pdf --book $(BUILDDIR)/pdf/eu400*.html $(BUILDDIR)/pdf/index.html
+
+pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 
 test : EUDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)
@@ -492,6 +510,7 @@ install :
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
+	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/pdf $(BUILDDIR)/*pdf
 	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html $(BUILDDIR)/html/*
 	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images $(BUILDDIR)/html/images/*
 	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js $(BUILDDIR)/html/js/*

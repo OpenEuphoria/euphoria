@@ -46,7 +46,7 @@ build-arch-stamp: configure-stamp
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp 
 	# Add here commands to compile the indep part of the package.
-	$(MAKE) -C source htmldoc
+	$(MAKE) -C source htmldoc pdfdoc
 	touch $@
 
 clean:
@@ -88,7 +88,7 @@ binary-common:
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
-	dh_installdocs -A source/build/html/*
+	dh_installdocs -A source/build/*pdf source/build/html/*
 	dh_installexamples
 #	dh_installmenu
 #	dh_installdebconf	
