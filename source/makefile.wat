@@ -378,16 +378,20 @@ translate source : .SYMBOLIC
 
 testeu : .SYMBOLIC code-page-db
 	cd ..\tests
+	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR)
 	$(EXE) ..\source\eutest.ex -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex" $(LIST)
+	-del ecp.dat
 	cd ..\source
 
 !endif #EUPHORIA
 
 test : .SYMBOLIC code-page-db
 	cd ..\tests
+	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR) 
 	$(EXE) -i $(%EUDIR)\include $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) $(LIST)
+	-del ecp.dat
 	cd ..\source
 	
 report: .SYMBOLIC
@@ -445,7 +449,7 @@ install : .SYMBOLIC
 	if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
 	copy ..\include\euphoria\* $(PREFIX)\include\euphoria
 	copy ..\bin\*.ex $(PREFIX)\bin
-	copy ..\bin\*.bat ${PREFIX)\bin
+	copy ..\bin\*.bat $(PREFIX)\bin
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\euiw.exe copy $(BUILDDIR)\euiw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eui.exe copy $(BUILDDIR)\eui.exe $(PREFIX)\bin\
