@@ -46,7 +46,33 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 
 --****
 -- === Option Constants
+--
+-- ==== Compile Time and Match Time
+--
+-- When a regular expression object is created via ##new## we call also say it get's "compiled."  
+-- The options you may use for this are called "compile time" option constants.  Once
+-- the regular expression is created you can use the other functions that take this regular
+-- expression and a string.  These routines' options are called "match time" option constants.
+-- To not set any options at all, do not supply the options argument or supply [[:DEFAULT]].
+-- 
+-- ==== Compile Time Option Constants
+--
+--     The only options that may set at "compile time"; that is, to pass to ##new##;
+--     are [[:ANCHORED]], [[:AUTO_CALLOUT]], [[:BSR_ANYCRLF]], [[:BSR_UNICODE]], [[:CASELESS]], 
+--     [[:DEFAULT]], [[:DOLLAR_ENDONLY]], [[:DOTALL]], [[:DUPNAMES]], [[:EXTENDED]], [[:EXTRA]], 
+--     [[:FIRSTLINE]], [[:MULTILINE]], [[:NEWLINE_CR]], [[:NEWLINE_LF]], [[:NEWLINE_CRLF]], 
+--     [[:NEWLINE_ANY]], [[:NEWLINE_ANYCRLF]],  [[:NO_AUTO_CAPTURE]], [[:NO_UTF8_CHECK]], 
+--     [[:UNGREEDY]], and [[:UTF8]].
+--
+--
+-- ==== Match Time Option Constants
+--
+--     Options that may be set at "match time" are [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
+--     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]], 
+--     [[:NOTEMPTY]], [[:NO_UTF8_CHECK]].  Routines that are match time take a regular expression
+--     and a string to search.
 
+-- ==== Alphabetical Constant list
 --****
 -- Signature:
 -- public constant ANCHORED
@@ -680,11 +706,14 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]].  The only options that
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].  
+--     The only options that
 --     may be set when calling find are [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
 --     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]], 
---     [[:NOTEMPTY]], [[:NOTEMPTY_ATSTART]], [[:NO_START_OPTIMIZE]], [[:NO_UTF8_CHECK]], [[:PARTIAL_SOFT]],
---     and [[:PARTIAL_HARD]]
+--     [[:NOTEMPTY]], and [[:NO_UTF8_CHECK]].
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in rare cases this number may need to be increased in order to accomodate complex regex expressions.
 --
 -- Returns:
@@ -722,7 +751,7 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
 --
 -- Returns:
 --   A **sequence** of **sequences** that were returned by [[re:find]] and in the case of 
@@ -770,7 +799,10 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]]. 
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   An **atom**, 1 if ##re## matches any portion of ##haystack## or 0 if not.
@@ -787,7 +819,10 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##options## : defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   An **atom**,  1 if ##re## matches the entire ##haystack## or 0 if not.
@@ -810,7 +845,10 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]]. 
+--     ##options## can be any match time option or STRING_OFFSETS or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   Returns a **sequence** of strings, the first being the entire match and subsequent
@@ -877,7 +915,10 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   Returns **ERROR_NOMATCH** if no matches are found, or a **sequence** of **sequences** of 
@@ -962,7 +1003,10 @@ end function
 --   # ##re## : a regex which will be used for matching
 --   # ##text## : a string on which search and replace will apply
 --   # ##from## : optional start position
---   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Option Constants]].
+--   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   A **sequence** of string values split at the delimiter and if no delimiters were found
@@ -1020,7 +1064,10 @@ end function
 --   # ##text## : a string on which search and replace will apply
 --   # ##replacement## : a string, used to replace each of the full matches found
 --   # ##from## : optional start position
---   # ##options## : options, defaults to [[:DEFAULT]]
+--   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.  If there is no match with ##re## the
@@ -1067,7 +1114,10 @@ end function
 --   # ##replacement## : a string, used to replace each of the full matches found
 --   # ##limit## : the number of matches to process
 --   # ##from## : optional start position
---   # ##options## : options, defaults to [[:DEFAULT]]
+--   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
@@ -1102,7 +1152,10 @@ end function
 --   # ##rid## : routine id to execute for each match
 --   # ##limit## : the number of matches to process
 --   # ##from## : optional start position
---   # ##options## : options, defaults to [[:DEFAULT]]
+--   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or a 
+--     sequence of valid options or it can be a value that comes from using or_bits on
+--     any two valid option values.
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.

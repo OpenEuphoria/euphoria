@@ -215,7 +215,7 @@ echo.
 echo Developer Options:
 echo     --debug             turn debugging on
 echo     --heapcheck         check memory management system
-echo     --extracheck        check for when data corruption
+echo     --extracheck        check for data corruption
 echo     --extrastats        generates statistics
 echo.
 
