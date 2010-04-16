@@ -55,7 +55,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- expression and a string.  These routines' options are called "match time" option constants.
 -- To not set any options at all, do not supply the options argument or supply [[:DEFAULT]].
 -- 
--- ==== Compile Time Option Constants
+-- ===== Compile Time Option Constants
 --
 --     The only options that may set at "compile time"; that is, to pass to ##new##;
 --     are [[:ANCHORED]], [[:AUTO_CALLOUT]], [[:BSR_ANYCRLF]], [[:BSR_UNICODE]], [[:CASELESS]], 
@@ -65,14 +65,15 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 --     [[:UNGREEDY]], and [[:UTF8]].
 --
 --
--- ==== Match Time Option Constants
+-- ===== Match Time Option Constants
 --
 --     Options that may be set at "match time" are [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
 --     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]], 
---     [[:NOTEMPTY]], [[:NO_UTF8_CHECK]].  Routines that are match time take a regular expression
---     and a string to search.
+--     [[:NOTEMPTY]], [[:NO_UTF8_CHECK]].  Routines that take match time option constants match,
+--     split or replace a regular expression against some string.
+--
+--
 
--- ==== Alphabetical Constant list
 --****
 -- Signature:
 -- public constant ANCHORED
@@ -563,7 +564,7 @@ end function
 --
 -- Parameters:
 --   # ##pattern## : a sequence representing a human readable regular expression
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Option Constants]]. 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Compile Time Option Constants]]. 
 --
 -- Returns:
 --   A **regex**, which other regular expression routines can work on or an atom to indicate an 
@@ -579,6 +580,7 @@ end function
 --
 --   <eucode>
 --   -- Bad Example
+--   include std/regex.e as re
 --  
 --   while sequence(line) do
 --       re:regex proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
@@ -590,6 +592,7 @@ end function
 --
 --   <eucode>
 --   -- Good Example
+--   include std/regex.e as re
 --   constant re_proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
 --   while sequence(line) do
 --       if re:find(re_proper_name, line) then
@@ -600,13 +603,14 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   include regex.e as re
+--   include std/regex.e as re
 --   re:regex number = re:new("[0-9]+")
 --   </eucode>
 --
 -- Note:
---   For simple finds, matches or even simple wildcard matches, the built-in Euphoria
---   routines find, [[:eu:match]] and [[:wildcard_match]] are often times easier to use and
+--   For simple matches, the built-in Euphoria 
+--   routine [[:eu:match]] and the library routine [[:wildcard:wildcard_match]] 
+--   are often times easier to use and
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
 -- See Also:
@@ -633,6 +637,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/regex.e
 -- object r = regex:new("[A-Z[a-z]*")
 -- if atom(r) then
 --   printf(1, "Regex failed to compile: %s\n", { regex:error_message(r) })
@@ -666,7 +671,8 @@ end function
 --       
 -- Example 1:
 -- <eucode>
--- sequence search_s = escape("Payroll is $***15.00")
+-- include std/regex.e as re
+-- sequence search_s = re:escape("Payroll is $***15.00")
 -- -- search_s = "Payroll is \\$\\*\\*\\*15\\.00"
 -- </eucode>
 --
@@ -696,10 +702,10 @@ public function get_ovector_size(regex ex, integer maxsize=0)
 end function
 
 --****
--- === Find/Match
+-- === Match
 
 --**
--- Find the first match of ##re## in ##haystack##. You can optionally start at the position
+-- Return the first match of ##re## in ##haystack##. You can optionally start at the position
 -- ##from##.
 --
 -- Parameters:
@@ -717,11 +723,12 @@ end function
 --   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in rare cases this number may need to be increased in order to accomodate complex regex expressions.
 --
 -- Returns:
---   An **object**, which is either an atom of 0, meaning nothing found or a sequence of matched pairs.
+--   An **object**, which is either an atom of 0, meaning nothing matched or a sequence of matched pairs.
 --   For the explanation of the returned sequence, please see the first example.
 --
 -- Example 1:
 --   <eucode>
+--   include std/regex.e as re
 --   r = re:new("([A-Za-z]+) ([0-9]+)") -- John 20 or Jane 45
 --   object result = re:find(r, "John 20")
 --
@@ -744,7 +751,7 @@ public function find(regex re, string haystack, integer from=1, option_spec opti
 end function
 
 --**
--- Find all occurrences of ##re## in ##haystack## optionally starting at the sequence position
+-- Return all matches of ##re## in ##haystack## optionally starting at the sequence position
 -- ##from##.
 --
 -- Parameters:
@@ -754,13 +761,14 @@ end function
 --   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
 --
 -- Returns:
---   A **sequence** of **sequences** that were returned by [[re:find]] and in the case of 
+--   A **sequence** of **sequences** that were returned by [[:find]] and in the case of 
 --   no matches this returns an empty **sequence**. 
 --   Please see [[:find]] for a detailed description of each member of the return
 --   sequence.
 --
 -- Example 1:
 --   <eucode>
+--   include std/regex.e as re
 --   constant re_number = re:new("[0-9]+")
 --   object matches = re:find_all(re_number, "10 20 30")
 --
@@ -862,6 +870,7 @@ end function
 --
 -- Example 1:
 --   <eucode>
+--   include std/regex.e as re
 --   constant re_name = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 --
 --   object matches = re:matches(re_name, "John Doe and Jane Doe")
@@ -872,7 +881,7 @@ end function
 --   --   "Doe"       -- second group
 --   -- }
 --
---   matches = re:matches(re_name, "John Doe and Jane Doe", STRING_OFFSETS)
+--   matches = re:matches(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
 --   -- matches is:
 --   -- {
 --   --   { "John Doe", 1, 8 }, -- full match data
@@ -921,7 +930,7 @@ end function
 --     any two valid option values.
 --
 -- Returns:
---   Returns **ERROR_NOMATCH** if no matches are found, or a **sequence** of **sequences** of 
+--   Returns **ERROR_NOMATCH** if there are no matches, or a **sequence** of **sequences** of 
 --   **strings** if there is at least one match. In each member sequence of the returned sequence, 
 --   the first string is the entire match and subsequent items being each of the 
 --   captured groups.  The size of the sequence is
@@ -936,6 +945,7 @@ end function
 --
 -- Example 1:
 --   <eucode>
+--   include std/regex.e as re
 --   constant re_name = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 --
 --   object matches = re:match_all(re_name, "John Doe and Jane Doe")
@@ -953,7 +963,7 @@ end function
 --   --   }
 --   -- }
 --
---   matches = re:match_all(re_name, "John Doe and Jane Doe", STRING_OFFSETS)
+--   matches = re:match_all(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
 --   -- matches is:
 --   -- {
 --   --   {                         -- first match
@@ -1009,11 +1019,12 @@ end function
 --     any two valid option values.
 --
 -- Returns:
---   A **sequence** of string values split at the delimiter and if no delimiters were found
+--   A **sequence** of string values split at the delimiter and if no delimiters were matched
 -- this **sequence** will be a one member sequence equal to ##{text}##.
 --   
 -- Example 1:
 -- <eucode>
+-- include std/regex.e as re
 -- regex comma_space_re = re:new(`,\s`)
 -- sequence data = re:split(comma_space_re, "euphoria programming, source code, reference data")
 -- -- data is
@@ -1062,7 +1073,7 @@ end function
 -- Parameters:
 --   # ##re## : a regex which will be used for matching
 --   # ##text## : a string on which search and replace will apply
---   # ##replacement## : a string, used to replace each of the full matches found
+--   # ##replacement## : a string, used to replace each of the full matches
 --   # ##from## : optional start position
 --   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
 --     ##options## can be any match time option or a 
@@ -1089,6 +1100,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/regex.e
 -- regex r = new(`([A-Za-z]+)\.([A-Za-z]+)`)
 -- sequence details = find_replace(r, "hello.txt", `Filename: \U\1\e Extension: \U\2\e`)
 -- -- details = "Filename: HELLO Extension: TXT"
@@ -1111,7 +1123,7 @@ end function
 -- Parameters:
 --   # ##re## : a regex which will be used for matching
 --   # ##text## : a string on which search and replace will apply
---   # ##replacement## : a string, used to replace each of the full matches found
+--   # ##replacement## : a string, used to replace each of the full matches
 --   # ##limit## : the number of matches to process
 --   # ##from## : optional start position
 --   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
@@ -1162,6 +1174,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
+-- include std/regex.e as re
 -- function my_convert(sequence params)
 --     switch params[1] do
 --         case "1" then 
