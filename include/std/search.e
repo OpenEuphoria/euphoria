@@ -659,7 +659,7 @@ end function
 --
 
 --****
--- Signature:
+-- Signature: 
 --     <built-in> function match(sequence needle, sequence haystack, integer start)
 --
 -- Description:

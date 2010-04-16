@@ -3,6 +3,8 @@
 --
 -- <<LEVELTOC depth=2>>
 
+namespace info
+
 constant M_EU_INFO=75
 
 enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION

@@ -78,7 +78,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant ANCHORED
 --
 -- Description:
--- Froces matches to be only from the first place it is asked to
+-- Forces matches to be only from the first place it is asked to
 -- try to make a search.  
 -- In C, this is called PCRE_ANCHORED.
 -- This is passed to all routines including [[:new]].

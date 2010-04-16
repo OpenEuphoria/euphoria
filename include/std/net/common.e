@@ -3,6 +3,8 @@
 
 -- Copyright (c) 2009 by OpenEuphoria Group.
 
+namespace common
+
 include std/regex.e as re
 include std/sequence.e as seq
 include std/get.e

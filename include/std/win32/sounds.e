@@ -5,8 +5,11 @@
 --
 -- <<LEVELTOC depth=2>>
 --
-include std/dll.e
+ 
 
+namespace sound
+
+include std/dll.e
 
 public constant   
 	SND_DEFAULT     = 0x00,

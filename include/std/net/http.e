@@ -3,6 +3,8 @@
 --
 -- <<LEVELTOC depth=2>>
 
+namespace http
+
 include std/socket.e as sock
 include std/net/url.e
 include std/net/dns.e

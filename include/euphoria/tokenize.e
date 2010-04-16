@@ -1,6 +1,8 @@
 --****
 -- == Source Tokenizer
 
+namespace tokenize
+
 include keywords.e
 include std/io.e
 

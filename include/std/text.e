@@ -510,7 +510,7 @@ end ifdef
 --   use the [[:set_encoding_properties]] first.
 -- * ##x## may be a sequence of any shape, all atoms of which will be acted upon.
 --
--- **WARNING**, When using ASCII encoding, this can also affects floating point
+-- **WARNING**, When using ASCII encoding, this can also affect floating point
 -- numbers in the range 65 to 90.
 --
 -- Example 1:

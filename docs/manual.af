@@ -97,6 +97,7 @@
 ../include/std/stats.e
 ../include/std/task.e
 ../include/std/types.e
+../include/std/utils.e
 
 ########
 := Sequence Centric Routines

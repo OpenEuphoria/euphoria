@@ -5,6 +5,8 @@
 --
 -- Keywords and routines built in to Euphoria.
 
+namespace keywords
+
 --**
 -- Sequence of Euphoria keywords
 

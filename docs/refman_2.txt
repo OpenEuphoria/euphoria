@@ -1,5 +1,6 @@
 == Definition
 
+
 === Objects === @[predefined types]
 
 ==== Atoms and Sequences
@@ -1447,9 +1448,9 @@ in an expression. The type just serves as an error check to prevent any
 logical errors in your program.  They are not designed to catch or correct user
 input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
 
-@[[:type_check]]
+@[:type_check]
 Type checking can be turned off or on between subroutines using the with
-##type_check## or ##without type_check## (see [ @[[:special statements]].
+##type_check## or ##without type_check## (see [[:special statements]]).
 It is initially on by default.
 
 ;**Note to Bench markers~:**
@@ -1696,7 +1697,8 @@ symbol table before using **global** scope{{{--}}}which is what a large part of 
 files do. Built-in identifiers act as if declared as **global**{{{--}}}but they are not declared in any
 Euphoria coded file.
 
-==== Using namespaces
+
+==== Using namespaces ==== @[namespace]
 
 Identifiers marked as ##global##, ##public## or ##export## are known as //exposed//
 variables because they can be used in files other than the one they were declared
@@ -3196,7 +3198,7 @@ may be defined only in that scope, and they may or may not have sensible values.
 the programmer to take appropriate action in this respect.
 
 
-=== Header Labels == @[Labelled headers]
+=== Header Labels === @[labelled headers]
 
 As shown in the above section on control flow statements, most can have their
 own label. To label a flow control statement, use a ##label## clause immediately
@@ -3232,6 +3234,7 @@ while 1 label "top" with entry do -- WRONG
 
 while 1 with entry label "top" do -- CORRECT
 </eucode>
+
 
 == Short-Circuit Evaluation == @[short-circuit]
 
@@ -3331,7 +3334,8 @@ at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used in
 if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
-== Special Top-Level Statements
+
+== Special Top-Level Statements == @[special statements]
 
 Before any of your statements are executed, the Euphoria front-end quickly
 reads your entire program. All statements are syntax checked and converted to a

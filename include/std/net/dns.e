@@ -6,6 +6,8 @@
 -- <<LEVELTOC depth=2>>
 --
 
+namespace dns
+
 include std/socket.e
 include std/get.e
 

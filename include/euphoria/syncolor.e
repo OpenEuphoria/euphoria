@@ -16,6 +16,8 @@
 --		 STRING_COLOR
 --		BRACKET_COLOR  (a sequence of colors)
 
+namespace syncolor
+
 include std/text.e
 include std/wildcard.e
 
