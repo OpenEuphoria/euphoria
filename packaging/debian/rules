@@ -77,9 +77,10 @@ install-arch:
 	dh_installdirs -s
 	# Add here commands to install the arch part of the package into 
 	# debian/tmp.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/euphoria install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/euphoria install install-docs
 	dh_install -s --sourcedir=debian/euphoria --autodest
-	dh_install -s debian/euphoria-manual debian/euphoria/usr/share/doc-base/
+	install -d $(CURDIR)/debian/euphoria/usr/share/doc-base
+	install debian/euphoria-manual $(CURDIR)/debian/euphoria/usr/share/doc-base/
 
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
@@ -88,7 +89,7 @@ binary-common:
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
-	dh_installdocs -A source/build/*pdf source/build/html/*
+	dh_installdocs -A source/build/euphoria-4.0.pdf source/build/html/*
 	dh_installexamples
 #	dh_installmenu
 #	dh_installdebconf	

@@ -7,7 +7,7 @@ Section : Programming
 
 Format : HTML
 Index : /usr/share/doc/euphoria/eu400_0001.html
-Files : /usr/share/doc/euphoria/*.html
+Files : /usr/share/doc/euphoria/html/*.html
 
 Format : PDF
-Files : /usr/share/doc/euphoria/*.pdf
+Files : /usr/share/doc/euphoria/euphoria-4.0.pdf.gz

@@ -487,14 +487,11 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/js
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/images
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar/Linux
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench
-	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/euphoria/doc
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/tutorial 
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/bin 
 	mkdir -p $(DESTDIR)/etc/euphoria 
@@ -513,10 +510,6 @@ install :
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
-	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/pdf $(BUILDDIR)/*pdf
-	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html $(BUILDDIR)/html/*
-	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images $(BUILDDIR)/html/images/*
-	-install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js $(BUILDDIR)/html/js/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo ../demo/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench ../demo/bench/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar ../demo/langwar/*
@@ -553,14 +546,29 @@ install :
 	echo eui $(PREFIX)/share/euphoria/source/bind.ex -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
 
+install-docs :
+	# create dirs
+	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
+	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images
+	install $(BUILDDIR)/euphoria-4.0.pdf $(DESTDIR)$(PREFIX)/share/doc/euphoria/
+	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html \
+		$(BUILDDIR)/html/*html \
+		$(BUILDDIR)/html/*css
+	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images \
+		$(BUILDDIR)/html/images/*
+	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js \
+		$(BUILDDIR)/html/js/*
+
 # This doesn't seem right. What about eub or shroud ?
 uninstall :
 	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EBACKENDU)
 	-rm -r $(PREFIX)/share/euphoria
-	-rm -r $(PREFIX)/share/doc/euphoria
 
-.PHONY : install
-.PHONY : uninstall
+uninstall-docs :
+	-rm -rf $(PREFIX)/share/doc/euphoria
+
+.PHONY : install install-docs
+.PHONY : uninstall uninstall-docs
 
 ifeq "$(EUPHORIA)" "1"
 $(BUILDDIR)/intobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
