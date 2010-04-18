@@ -1,11 +1,10 @@
 -- (c) Copyright - See License.txt
---
+
 --****
 -- ==  Locale Routines
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
--- 
+
 namespace locale
 
 include std/dll.e
@@ -742,4 +741,3 @@ public function datetime(sequence fmt, dt:datetime dtm)
 	
 	return res
 end function
-

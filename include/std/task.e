@@ -2,7 +2,6 @@ namespace task
 
 --****
 -- == Multi-tasking
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --

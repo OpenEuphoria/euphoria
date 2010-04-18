@@ -2,7 +2,6 @@ namespace pretty
 
 --****
 -- == Pretty Printing
--- **Page Contents**
 --
 -- <<LEVELTOC depth=2>>
 --

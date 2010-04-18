@@ -53,14 +53,17 @@ MARGINSTR  ==: '_' ...
 [[:LOOPSTMT]]\\
 [[:GOTOSTMT]]\\
 
+!!splice
 
-== slice == @[SLICE]
+
+== sequence slice == @[SLICING]
 <eucode>
 SLICE      ==: SLICESTART INTEXPRESSION SLICEDELIM INTEXPRESSION SLICEEND
 SLICESTART ==: '['
 SLICEDELIM ==: '..'
 SLICEEND   ==: ']'
 </eucode>
+    See Also: [[:Slicing of Sequences]]
 
 == if == @[IFSTMT]
 <eucode>
@@ -70,6 +73,7 @@ SLICEEND   ==: ']'
  ELSE    ==:  'else' [ STMTBLOCK ] 
  ENDIF   ==:  'end' 'if' 
 </eucode>
+    See Also: [[:if statement]]
 
 == switch == @[SWITCHSTMT]
 <eucode>
@@ -81,51 +85,61 @@ SLICEEND   ==: ']'
  CASEELSE    ==:  'case' 'else'
  ENDSWITCH   ==:  'end' 'switch'
 </eucode>
+    See Also: [[:switch statement]]
 
 == break == @[BREAKSTMT]
 <eucode>
  BREAKSTMT       ==:  'break' [ STRINGLIT ]
 </eucode>
+    See Also: [[:break statement]]
 
 == continue == @[CONTINUESTMT]
 <eucode>
  CONTINUESTMT       ==:  'continue' [ STRINGLIT ]
 </eucode>
+    See Also: [[:continue statement]]
 
 == retry == @[RETRYSTMT]
 <eucode>
  RETRYSTMT       ==:  'retry' [ STRINGLIT ]
 </eucode>
+    See Also: [[:retry statement]]
 
 == exit == @[EXITSTMT]
 <eucode>
  EXITSTMT       ==:  'exit' [ STRINGLIT ]
 </eucode>
+    See Also: [[:exit statement]]
 
 == fallthru == @[FALLTHRUSTMT]
 <eucode>
  FALLTHRUSTMT       ==:  'fallthru'
 </eucode>
+    See Also: [[:switch statement]]
 
 == for == @[FORSTMT]
 <eucode>
  FORSTMT ==: 'for' FORIDX [ LABEL ] 'do' [STMTBLK] 'end' 'for'
  FORIDX  ==: IDENTIFIER '=' NUMEXPR 'to' NUMEXPR ['by' NUMEXPR]
 </eucode>
- 
+    See Also: [[:for statement]]
+
 == while == @[WHILESTMT]
 <eucode>
  WHILESTMT ==: 'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
  WITHENTRY ==: 'with' 'entry'
  ENTRY ==: 'entry' [STMTBLK]
 </eucode>
- 
+   See Also: [[:while statement]]
+
 == loop == @[LOOPSTMT]
 <eucode>
  LOOPSTMT ==: 'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
 </eucode>
- 
+   See Also: [[:loop until statement]]
+
 == goto == @[GOTOSTMT]
 <eucode>
  GOTOSMT ==: 'goto' LABEL
 </eucode>
+  See Also: [[:goto statement]]

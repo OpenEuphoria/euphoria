@@ -249,7 +249,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- 	[[:crash_file]], [[:routine_id]], [[:Debugging and profiling]]
+-- 	[[:crash_file]], [[:routine_id]], [[:Debugging and Profiling]]
 
 public procedure crash_routine(integer func)
 	machine_proc(M_CRASH_ROUTINE, func)

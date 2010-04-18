@@ -813,8 +813,8 @@ end type
 
 with warning
 
--- ****
--- === Automatic Resource Management
+--****
+--=== Automatic Resource Management
 --
 -- Euphoria objects are automatically garbage collected when they are no
 -- longer referenced anywhere.  Euphoria also provides the ability to manage 
@@ -824,7 +824,7 @@ with warning
 
 --****
 -- Signature:
--- <built-in>function delete_routine( object x, integer rid )
+-- <built-in> function delete_routine( object x, integer rid )
 -- 
 -- Description:
 -- Associates a routine for cleaning up after a euphoria object.
@@ -843,7 +843,8 @@ with warning
 -- 
 -- The second way for the delete routine to be called is when its
 -- reference count is reduced to 0.  Before its memory is freed, the
--- delete routine is called.
+-- delete routine is called. A default delete will be used if the cleanup 
+-- parameter to one of the [[:allocate]] routines is true. 
 -- 
 -- delete_routine() may be called multiple times for the same object.
 -- In this case, the routines are called in reverse order compared to
@@ -851,7 +852,7 @@ with warning
 
 --****
 -- Signature:
--- <built-in>procedure delete( object x )
+-- <built-in> procedure delete( object x )
 -- 
 -- Description:
 -- Calls the cleanup routines associated with the object, and removes the
@@ -866,6 +867,7 @@ with warning
 -- unchanged, though the cleanup routine will no longer be associated
 -- with the object.
 
+--**
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()
 	ifdef WIN32 then

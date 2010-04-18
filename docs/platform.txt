@@ -216,7 +216,7 @@ See [[:c_func]], [[:c_proc]], [[:define_c_func]], [[:define_c_proc]], [[:open_dl
 See ##**demo\win32**## or ##**demo/linux**## for example programs.
 
 On Windows there is more than one C calling convention.
-The Windows API routines all use the **{{{__stdcall}}** convention.
+The Windows API routines all use the **{{{__stdcall}}}** convention.
 Most C compilers however have **{{{__cdecl}}}** as their default.
 {{{__cdecl}}} allows for variable numbers of arguments to be passed.
 Euphoria assumes {{{__stdcall}}}, but if you need to call a C routine
@@ -340,7 +340,7 @@ Euphoria procedure or function by returning an integer value. This
 value can be used later to call the routine. You can also use it as an
 argument to the [[:call_back]] function.
 
-In the example above, The 32-bit //call-back address//, ##~WndProcAddress##,
+In the example above, The 32-bit //call-back address//, ##WndProcAddress##,
 can be stored in a C structure and passed to Windows via the
 ~RegisterClass() C API function.\\
 **This gives Windows the ability to call the Euphoria routine, ~WndProc(),

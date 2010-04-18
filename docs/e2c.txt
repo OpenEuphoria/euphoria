@@ -19,6 +19,8 @@ front-end portion of the interpreter. The source code for the Translator is in
 === C Compilers Supported
 
 The **Translator** currently works with GNU C on //Linux// or //FreeBSD//,
+GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
+or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the -gcc option
 and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
 These are all **free** compilers.
 
@@ -28,8 +30,13 @@ downloaded from their respective Web sites.
 ==== Notes:
 
 * Warnings are turned off when compiling with ##emake.bat##. If you turn them on, you may see some
-harmless messages about variables declared but not used, labels defined but
-not used, function prototypes not declared etc.
+ harmless messages about variables declared but not used, labels defined but
+ not used, function prototypes not declared etc.
+* Options bor and lcc for previously supported compilers on //Windows// no longer work. 
+* For the -gcc option on //Windows// you will need a ##libeu.a## compiled with //minGW// or //Cygwin//.
+ the official distribution may only contain ##eu.lib## compiled with //Watcom//.
+ also, the -stack and -con options may not produce the expected result with //GCC C//.
+* currently only 32 bit compiles are supported on 64 bit platforms.
 
 === How to Run the Translator
 
@@ -90,14 +97,16 @@ select the one you want to use with a command-line option:
 
 {{{
 -wat
+-gcc
 }}}
 
 on the command line to **euc** or **euc**. e.g.
 
 {{{
-euc -bor pretend.exw
+euc -gcc pretend.exw
 }}}
 
+Note: //Watcom// is the default on //Windows// and -wat is assumed.
 Normally, after building your ##.exe## file, the **emake** batch file will delete
 all C files and object files produced by the Translator. If you want **emake**
 to keep these files, add the ##-keep## option to the Translator command-line.
@@ -111,14 +120,14 @@ To make a //Windows// ##.dll## file, or //Linux// or //FreeBSD// ##.so## file, j
 add ##-dll## to the command line. e.g.
 
 {{{
-euc -bor -dll mylib.ew
+euc -wat -dll mylib.ew
 }}}
 
 To make a //Windows// console program instead of a //Windows// GUI program,
 add ##-con## to the command line. e.g.
 
 {{{
-euc -bor -con myprog.exw
+euc -wat -con myprog.exw
 }}}
 
 To increase or decrease the total amount of stack space reserved for your

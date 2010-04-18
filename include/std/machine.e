@@ -598,7 +598,7 @@ end ifdef
 --**
 -- Allocates and copies data into memory and gives it protection using
 -- [[:Standard Library Memory Protection Constants]] or
--- [[:Microsoft's Memory Protection Constants]].  The user may only pass in one of these 
+-- [[:Microsoft Windows Memory Protection Constants]].  The user may only pass in one of these 
 -- constants.  If you only wish to execute a sequence as machine code use ##allocate_code()##.  
 -- If you only want to read and write data into memory use ##allocate()##.
 --

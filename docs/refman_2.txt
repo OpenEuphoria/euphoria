@@ -1,6 +1,6 @@
 == Definition
 
-
+@[predefined types|]
 === Objects === @[predefined types]
 
 ==== Atoms and Sequences
@@ -47,12 +47,12 @@ code that lets Euphoria know which base to use.
 
 For example:
 <eucode>
+ 
  0b101 --> decimal 5
  0t101 --> decimal 65
  0d101 --> decimal 101
  0x101 --> decimal 257
 </eucode>
-
 
 Additionally, hexadecimal integers can also be written
 by prefixing the number with the '#' character.
@@ -120,10 +120,10 @@ other directories, a sequence can contain both atoms and other sequences
 (and //those// sequences can contain atoms and sequences and so on).
 
 {{{
-    object
-     / \
-    /   \
-     atom   sequence
+.          object
+.           /  \
+.          /    \
+.        atom  sequence
 }}}
 
 As you will soon discover, sequences make Euphoria very simple //and// very
@@ -1062,58 +1062,57 @@ Identifiers must start with a letter or underscore and then be followed by
 any combination of letters, digits and underscores. The following 
 **reserved words** have special meaning in Euphoria and cannot be used
 as identifiers:
+@@(k <<font color="#0000FF" text=`$(0)`>>)@
+@@(b <<font color="#9900CC" text=`$(0)`>>)@
 
-<eucode>
- and            export          public
- as             fallthru        retry
- break          for             return
- by             function        routine
- case           global          switch
- constant       goto            then
- continue       if              to
- do             ifdef           type
- else           include         until
- elsedef        label           while
- elsif          loop            with
- elsifdef       namespace       without
- end            not             xor
- entry          or
- enum           override
- exit           procedure
-</eucode>
+ |$$(k and             )|$$(k export           )|$$(k public )|
+ |$$(k  as              )|$$(k fallthru         )|$$(k retry    )|
+ |$$(k  break           )|$$(k for              )|$$(k return  )|
+ |$$(k by              )|$$(k function         )|$$(k routine  )|
+ |$$(k case            )|$$(k global           )|$$(k switch  )|
+ |$$(k constant        )|$$(k goto             )|$$(k then  )|
+ |$$(k continue        )|$$(k if               )|$$(k to  )|
+ |$$(k do              )|$$(k ifdef            )|$$(k type  )|
+ |$$(k else            )|$$(k include          )|$$(k until  )|
+ |$$(k elsedef         )|$$(k label            )|$$(k while  )|
+ |$$(k elsif           )|$$(k loop             )|$$(k with  )|
+ |$$(k elsifdef        )|$$(k namespace        )|$$(k without  )|
+ |$$(k end             )|$$(k not              )|$$(k xor  )|
+ |$$(k entry           )|$$(k or  )||
+ |$$(k enum            )|$$(k override  )||
+ |$$(k exit            )|$$(k procedure   )||
+
 
 The Euphoria editor displays these words in blue
 
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
 
-<eucode>
- ?                peek                 peek2u             sprintf
- abort            peek2s               peek4s             sqrt
- and_bits         log                  peek4u             system
- append           machine_func         peek_string        system_exec
- arctan           machine_proc         peeks              tail
- atom             match                pixel              tan
- c_func           match_from           platform           task_clock_start
- c_proc           get_key              poke               task_clock_stop
- call             get_pixel            poke2              task_create
- call_func        getc                 poke4              task_list
- call_proc        getenv               position           task_schedule
- clear_screen     gets                 power              task_self
- close            hash                 prepend            task_status
- command_line     head                 print              task_suspend
- compare          include_paths        printf             task_yield
- cos              insert               profile            time
- date             mem_copy             profile_time       trace
- delete           mem_set              puts               warning
- delete_routine   not_bits             rand               xor_bits
- equal            object               remainder
- find             open                 remove
- find_from        option_switches      routine_id
- floor            or_bits              sequence
- integer          repeat               sin
- length           replace              splice
-</eucode>
+ |                        |$$(b  peek         )|$$(b     peek2u        )|$$(b     sprintf)|
+ |$$(b  abort )|$$(b  peek2s   )|$$(b       peek4s       )|$$(b       sqrt)|
+ |$$(b and_bits     )|$$(b  log          )|$$(b  peek4u           )|$$(b    system)|
+ |$$(b  append      )|$$(b   machine_func)|$$(b    peek_string)|$$(b   system_exec)|
+ |$$(b arctan         )|$$(b  machine_proc)|$$(b   peeks      )|$$(b    tail)|
+ |$$(b  atom          )|$$(b  match        )|$$(b   pixel           )|$$(b  tan)|
+ |$$(b  c_func        )|$$(b    match_from)|$$(b   platform  )|$$(b   task_clock_start)|
+ |$$(b  c_proc        )|$$(b   get_key        )|$$(b   poke        )|$$(b  task_clock_stop)|
+ |$$(b  call             )|$$(b  get_pixel       )|$$(b  poke2       )|$$(b  task_create)|
+ |$$(b  call_func     )|$$(b  getc              )|$$(b  poke4       )|$$(b   task_list)|
+ |$$(b call_proc     )|$$(b   getenv          )|$$(b  position    )|$$(b   task_schedule )|
+ |$$(b clear_screen)|$$(b   gets            )|$$(b   power       )|$$(b  task_self  )|
+ |$$(b close           )|$$(b  hash             )|$$(b  prepend    )|$$(b  task_status )|
+ |$$(b command_line)|$$(b   head        )|$$(b    print        )|$$(b  task_suspend  )|
+ |$$(b compare    )|$$(b   include_paths)|$$(b   printf       )|$$(b     task_yield  )|
+ |$$(b cos            )|$$(b   insert           )|$$(b      profile     )|$$(b   time)|
+ |$$(b date          )|$$(b   mem_copy   )|$$(b    profile_time)|$$(b    trace)|
+ |$$(b delete       )|$$(b   mem_set      )|$$(b  puts            )|$$(b  warning)|
+ |$$(b delete_routine)|$$(b  not_bits   )|$$(b     rand        )|$$(b   xor_bits  )|
+ |$$(b equal        )|$$(b    object          )|$$(b   remainder)|$$(b  ?) |
+ |$$(b find          )|$$(b   open              )|$$(b  remove      )|$$(b &)|
+ |$$(b find_from )|$$(b  option_switches)|$$(b  routine_id)|$$(b ~$)| 
+ |$$(b floor        )|$$(b   or_bits            )|$$(b  sequence )|  | 
+ |$$(b integer    )|$$(b    repeat           )|$$(b    sin          )|  | 
+ |$$(b  length    )|$$(b    replace         )|$$(b  splice       )|  | 
 
 
 Identifiers can be used in naming the following:
@@ -1400,7 +1399,7 @@ The slower software routines will be used, but this could be of some advantage
 if you are worried about the floating-point bug in some early Pentium
 chips.
 
-@[:udt]
+@[udt]
 To augment the [[:predefined types]], you can create **user-defined types**. All you have to
 do is define a single-parameter function, but declare it with **type ...
 end type** instead of **function ... end function**.  For
@@ -1448,7 +1447,7 @@ in an expression. The type just serves as an error check to prevent any
 logical errors in your program.  They are not designed to catch or correct user
 input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
 
-@[:type_check]
+@[type_check]
 Type checking can be turned off or on between subroutines using the with
 ##type_check## or ##without type_check## (see [[:special statements]]).
 It is initially on by default.
@@ -1697,8 +1696,8 @@ symbol table before using **global** scope{{{--}}}which is what a large part of 
 files do. Built-in identifiers act as if declared as **global**{{{--}}}but they are not declared in any
 Euphoria coded file.
 
-
-==== Using namespaces ==== @[namespace]
+@[namespace|]
+==== Using namespaces ==== @[namespace ignored]
 
 Identifiers marked as ##global##, ##public## or ##export## are known as //exposed//
 variables because they can be used in files other than the one they were declared
@@ -1885,7 +1884,7 @@ export function foobarr2()
     return 0
 end function
 </eucode>
-<
+< 
  and
 >
 <eucode>
@@ -1894,8 +1893,8 @@ end function
 -- the functions from LIBA.e.
 public include LIBA.e
 </eucode>
-<
-The export scope modifier is used to limit the extent that symbols can be accessed.
+< 
+ The export scope modifier is used to limit the extent that symbols can be accessed.
 It works just like ##public## except that ##export## symbols are only ever passed up
 one level only. In other words, if a file wants to use an ##export## symbol, that
 file must include it explicitly.
@@ -3197,7 +3196,7 @@ goto-ing into a scope (like an if block, a for loop,...) will just do that. Some
 may be defined only in that scope, and they may or may not have sensible values. It is up to
 the programmer to take appropriate action in this respect.
 
-
+@[labelled headers|]
 === Header Labels === @[labelled headers]
 
 As shown in the above section on control flow statements, most can have their
@@ -3235,7 +3234,7 @@ while 1 label "top" with entry do -- WRONG
 while 1 with entry label "top" do -- CORRECT
 </eucode>
 
-
+@[short-circuit|]
 == Short-Circuit Evaluation == @[short-circuit]
 
 When the condition tested by if, elsif, until, or while contains ##and## or ##or##
@@ -3334,7 +3333,7 @@ at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used in
 if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
-
+@[special statements|]
 == Special Top-Level Statements == @[special statements]
 
 Before any of your statements are executed, the Euphoria front-end quickly
@@ -3360,6 +3359,7 @@ following special statements may //only// appear at the top level:
 * ##include##
 * ##with## / ##without##
 
+@[as|]
 === include
 
 When you write a large program it is often helpful to break it up into
@@ -3593,7 +3593,7 @@ You can also set this option via a [[:batch_command_line "command line parameter
 Any warnings that are issued will appear on your screen after your program
 has finished execution. Warnings indicate minor problems.  A warning will
 never terminate the execution of your program. You will simply have to hit
-the Enter key to keep going{{{--}}}which may stop the program on an unattended
+the Enter key to keep going ~-- which may stop the program on an unattended
 computer.
 
 
