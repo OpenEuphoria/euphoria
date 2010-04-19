@@ -766,3 +766,27 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 	end ifdef
 	machine_proc(M_FREE, addr-BORDER_SPACE)
 end procedure
+
+-- Shawn's custom stuff:
+public function info() 
+	integer tm = 0 
+	for i = 1 to length( safe_address_list ) do 
+		tm += safe_address_list[i][BLOCK_LENGTH] 
+	end for 
+	return sprintf(""" 
+Total memory allocations %10d 
+Total memory allocated   %10dB""", 
+	{ length(safe_address_list), tm } ) 
+end function 
+ 
+public function memory_used() 
+	integer tm = 0 
+	for i = 1 to length( safe_address_list ) do 
+		tm += safe_address_list[i][BLOCK_LENGTH] 
+	end for 
+	return tm 
+end function 
+ 
+public function allocations() 
+	return length( safe_address_list ) 
+end function 

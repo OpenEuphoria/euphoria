@@ -183,6 +183,14 @@ EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
 		 int.ex ec.ex backend.ex
 
+STDINCDIR = $(TRUNKDIR)/include/std
+
+DOCDIR = $(TRUNKDIR)\docs
+EU_DOC_SOURCE = &
+	$(EU_INCLUDES) &
+	$(DOCDIR)\manual.af &
+	$(DOCDIR)\*.txt
+
 !ifeq ALIGN4 1
 SETALIGN4 = /dEALIGN4
 MANAGED_MEM=1
@@ -253,6 +261,14 @@ EXE=$(EX)
 INCDIR=-i $(TRUNKDIR)\include
 
 PWD=$(%cdrive):$(%cwd)
+
+ifeq "$(EUDOC)" ""
+EUDOC=eudoc.exe
+endif
+
+ifeq "$(CREOLEHTML)" ""
+CREOLEHTML=creolehtml.exe
+endif
 
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 all :  .SYMBOLIC
@@ -586,3 +602,31 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 	wmake -h -f makefile.wat CONFIG=..\$(CONFIG) EOSTYPE=-D$(OSFLAG)
 	cd ..
 !endif
+
+$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE)
+	$(EUDOC) -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
+
+$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+	-mkdir $(BUILDDIR)\html\images
+	-mkdir $(BUILDDIR)\html\js
+	 $(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	copy $(DOCDIR)\style.css $(BUILDDIR)\html
+	copy $(DOCDIR)\*js $(BUILDDIR)\html\js
+	copy $(DOCDIR)\html\images\* $(BUILDDIR)\html\images
+
+htmldoc : $(BUILDDIR)\html\index.html
+
+$(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
+	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "splitlevel = 2" "splitlevel = 0" &
+		-e "toclevel = 3" "toclevel = 0" -e "TOC level=3" "TOC level=0" &
+		-e "LEVELTOC depth=2" "LEVELTOC depth=0"  $(BUILDDIR)\euphoria.txt > $(BUILDDIR)\euphoria-pdf.txt
+	
+
+$(BUILDDIR)\pdf\index.html : $(BUILDDIR)\euphoria-pdf.txt
+	-mkdir $(BUILDDIR)\pdf
+	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=offline-template.html -o$(BUILDDIR)\pdf $(BUILDDIR)\euphoria-pdf.txt
+
+$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\index.html
+	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\eu400_0001.html $(BUILDDIR)\pdf\index.html
+
+pdfdoc : $(BUILDDIR)\euphoria-4.0.pdf
