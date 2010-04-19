@@ -130,8 +130,8 @@ As you will soon discover, sequences make Euphoria very simple //and// very
 powerful.  **Understanding atoms and sequences is the key to understanding
 Euphoria.**
 
-; **Performance Note~:**
-: Does this mean that all atoms are stored in memory as 8-byte floating-point
+;**Performance Note~:**
+:Does this mean that all atoms are stored in memory as 8-byte floating-point
 numbers? No. The Euphoria interpreter usually stores integer-valued atoms as
 machine integers (4 bytes) to save space and improve execution speed. When
 fractional results occur or integers get too big, conversion to IEEE 8-byte
@@ -315,7 +315,7 @@ immediately convert "ABCDEFG" to the above sequence of numbers.  In a sense,
 there are no "strings" in Euphoria, only sequences of numbers.  A quoted string
 is really just a convenient notation that saves you from having to type in all
 the ASCII codes.
-@[emptyseq]
+@[emptyseq|]
 It follows that "" is equivalent to {}. Both represent
 the sequence of length-0, also known as the **empty sequence**. As
 a matter of programming style, it is natural to use "" to suggest a length-0
@@ -1148,7 +1148,7 @@ A copy of the value of each argument is passed in. The formal parameter
 variables may be modified inside the procedure but this does not affect the
 value of the arguments. Pass by reference can be achieved using indexes into some fixed sequence.
 
-;**Performance Note:**
+;**Performance Note~:**
 :The interpreter does not actually copy sequences or floating-point numbers
 unless it becomes necessary. For example,
 <eucode>
@@ -1399,7 +1399,9 @@ The slower software routines will be used, but this could be of some advantage
 if you are worried about the floating-point bug in some early Pentium
 chips.
 
-@[udt]
+@[udt|]
+==== User-defined types
+
 To augment the [[:predefined types]], you can create **user-defined types**. All you have to
 do is define a single-parameter function, but declare it with **type ...
 end type** instead of **function ... end function**.  For
@@ -1447,7 +1449,7 @@ in an expression. The type just serves as an error check to prevent any
 logical errors in your program.  They are not designed to catch or correct user
 input errors. In particular, they cannot adjust a wrong value to some other, presumably legal, one.
 
-@[type_check]
+@[type_check|]
 Type checking can be turned off or on between subroutines using the with
 ##type_check## or ##without type_check## (see [[:special statements]]).
 It is initially on by default.
@@ -1516,7 +1518,7 @@ this bug goes away{{{--}}}but he presented this version as being correct.
 **//Even the experts need subscript checking!//**
 
 ;**Performance Note~:**
-: When typical user-defined types are used extensively, type checking adds only
+:When typical user-defined types are used extensively, type checking adds only
 20 to 40 percent to execution time. Leave it on unless you really need the
 extra speed. You might also consider turning it off for just a few
 heavily-executed routines.  [[:Profiling]] can help with this decision.
@@ -1692,8 +1694,8 @@ will increase the risks of name conflicts. This is why, for instance, all
 public identifiers from the standard library have **public** scope. **global** should be used
 rarely, if ever. Because earlier versions of Euphoria didn't have **public** or **export**, it has
 to remain there for a while. One should be very sure of not polluting any foreign file's
-symbol table before using **global** scope{{{--}}}which is what a large part of the Euphoria source
-files do. Built-in identifiers act as if declared as **global**{{{--}}}but they are not declared in any
+symbol table before using **global** scope.
+Built-in identifiers act as if declared as **global** ~-- but they are not declared in any
 Euphoria coded file.
 
 @[namespace|]
@@ -2995,8 +2997,8 @@ end while
 i.e. an "infinite" while-loop that actually terminates via an **exit
 statement** at some arbitrary point in the body of the loop.
 
-; **Performance Note~:**:
-: Euphoria optimizes this type of loop.  At run-time, no test is performed at the
+;**Performance Note~:**
+:Euphoria optimizes this type of loop.  At run-time, no test is performed at the
 top of the loop. There's just a simple unconditional jump from **end while**
 back to the first statement inside the loop.
 
@@ -3560,7 +3562,7 @@ included file.  For instance, an included file might turn off warnings for
 itself and (initially) for any files that it includes, but this will not turn
 off warnings for the main file.
 
-@[indirect_includes]
+@[indirect_includes|]
 This ##with/without## option changes the way in which global symbols are
 resolved.  Normally, the parser uses the way that files were included to
 resolve a usage of a global symbol.  If ##without indirect_includes## is
@@ -3578,7 +3580,7 @@ Note that this setting does not propagate down to included files, unlike
 most ##with/without options##.  Each file begins with ##indirect_includes##
 turned on.
 
-@[with_batch]
+@[with_batch| with batch]
 Causes the program to not present the "Press Enter" prompt if an error
 occurs. The exit code will still be set to 1 on error. This is helpful
 for programs that run in a mode where no human may be directly interacting
@@ -3697,7 +3699,7 @@ Initially, only the following warnings are enabled:
 
 This set can be changed using -W or -X command line switches.
 
-@[with_define]
+@[with_define|]
 ===== with / without define
 
 As mentioned about [[:ifdef statement]], this top level statement is used to
@@ -3721,7 +3723,7 @@ The name of a tag may contain any character that is a valid
 identifier character, that is ##A-Za-z0-9_##. It is not required, but
 by convention defined words are upper case.
 
-@[with_inline]
+@[with_inline|]
 ==== with / without inline
 
 This directive allows coders some flexibility with inlined routines.  The default is

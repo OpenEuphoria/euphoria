@@ -11,7 +11,7 @@ at the top, several test-routines for comparison between expected value
 and true value and at the end of the program a call to
 ##test_report()##.  There are error control files for when we expect
 the interpreter to fail but we want it to fail with a particular error
-message.
+message. You may use this section as an outline for testing your own code.
 
 === The eutest Program
 
@@ -47,8 +47,8 @@ some shells do not do this for programs.
 ==== Options detail
 
 * -D REC: Is for creating control files, use only when on tests that
-work already on an interpreter that correctly works or correctly
-*fails* with them.  This option must come before the eutest.ex program
+work already on an interpreter that correctly works or correctly *fails*
+ with them.  This option must come before the eutest.ex program
 itself in the command line and is the option with that requirement.
 * -log: Is for creating a log file for later processing
 * -verbose: Is for eutest.ex to give you detail of what it is doing
@@ -56,7 +56,7 @@ itself in the command line and is the option with that requirement.
   interpreter and the translator when interpreting and translating the
   test.
 * -cc: is for specifying the compiler.  This can be any one of -wat,
-  djg, or lcc.  Each of these represent the kind of compiler we will
+  djg, or gcc.  Each of these represent the kind of compiler we will
   request the translator to use.
 * -process-log: Is for processing a log created by a previous
 invocation of eutest.ex output is sent to standard output as a report
@@ -81,7 +81,7 @@ include std/unittest.e
 test_report()
 }}}
 
-Please see "Unit Test Framework", currently 13.5, for information on how to
+Please see the [[:Unit Testing Framework]], for information on how to
 construct these files.
 
 
