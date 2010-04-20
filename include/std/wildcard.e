@@ -13,6 +13,52 @@ namespace wildcard
 
 include std/text.e as txt -- upper/lower
 
+
+
+--**
+-- Return a text pattern
+--
+-- Parameters:
+--   # ##pattern## : a sequence representing a text string pattern
+--
+-- Returns:
+--   A the same ##pattern##.
+--
+-- Comments:
+--   You might wonder why this function even exists.  If you use it and ##is_match## you can easily
+--   change to the routines found in std/regex.e.  And if using std/regex.e and you restrict 
+--   yourself to only using
+--   [[:regex:new]] and [[:regex:is_match]], you can change to using 
+--   std/wildcards.e with very little modification to your source code.
+--
+--   <eucode>
+--   -- Users are having a hard time understanding this...
+--   include std/regex.e as uip -- user input patterns 'uip'
+--   puts(1,"Enter a person to find.  You may use regular expressions:")
+--
+--   sequence person_to_find
+--   object pattern
+--   person_to_find = gets(0)
+--   person_to_find_pattern = uip:new(person_to_find[1..$-1])
+--   while sequence(line) do
+--       line = line[1..$-1]
+--       if uip:is_match(person_to_find_pattern, line) then
+--           -- code for telling users the person is there.
+--       end if
+--       -- code loads next name into 'line'
+--   end while
+--   close(dbfd)
+--   </eucode>
+--
+-- Later you might decide you want to use the regular expressions' set of routines:
+-- you need only change the include line and the pattern construction.
+--   <eucode>
+--   -- This will make things simpler...
+--   include std/wildcard.e as uip -- user input patterns 'uip'.
+--   puts(1,"Enter a person to find.  You may use '*' and '?' wildcards:")
+--   </eucode>
+--
+-- See Also: [[:is_match]]
 public function new(sequence s)
 	return s
 end function

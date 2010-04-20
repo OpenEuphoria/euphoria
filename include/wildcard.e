@@ -45,10 +45,6 @@ end function
 constant END_MARKER = -1
 
 global function wildcard_match(sequence pattern, sequence string)
-	crash("wildcard_match has been renamed to wildcard:is_match")
-end function
-
-global function is_match(sequence pattern, sequence string)
 -- returns TRUE if string matches pattern
 -- pattern can include '*' and '?' "wildcard" characters
     integer p, f, t 
@@ -113,7 +109,7 @@ global function wildcard_file(sequence pattern, sequence filename)
     if not find('.', filename) then
 	filename = filename & '.'
     end if
-    return is_match(pattern, filename)
+    return wildcard_match(pattern, filename)
 end function
 
 
