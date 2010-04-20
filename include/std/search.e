@@ -684,7 +684,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard_match]]
+--     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard:is_match]]
 
 --****
 -- Signature:
@@ -714,7 +714,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]], [[:regex:find]]
+--     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:is_match]], [[:regex:find]]
 
 --**
 -- Match all items of haystack in needle.

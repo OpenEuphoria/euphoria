@@ -609,7 +609,7 @@ end function
 --
 -- Note:
 --   For simple matches, the built-in Euphoria 
---   routine [[:eu:match]] and the library routine [[:wildcard:wildcard_match]] 
+--   routine [[:eu:match]] and the library routine [[:wildcard:is_match]] 
 --   are often times easier to use and
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
@@ -622,7 +622,7 @@ public function new(string pattern, option_spec options=DEFAULT)
         -- concatenation ensures we really get a new sequence, and don't just use the
         -- one passed in, which could be another regex previously created...this may
         -- be a bug with the refcount/delete_instance/regex code
-        return machine_func(M_PCRE_COMPILE, { pattern & "", options })
+        return machine_func(M_PCRE_COMPILE, { pattern, options })
 end function
 
 --**

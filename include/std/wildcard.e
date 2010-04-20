@@ -13,6 +13,10 @@ namespace wildcard
 
 include std/text.e as txt -- upper/lower
 
+public function new(sequence s)
+	return s
+end function
+
 function qmatch(sequence p, sequence s)
 -- find pattern p in string s
 -- p may have '?' wild cards (but not '*')
@@ -53,30 +57,30 @@ constant END_MARKER = -1
 -- Comments:
 --
 -- Character comparisons are case sensitive.
--- If you want case insensitive comparisons, pass both ##pattern## and ##string## through [[:upper]](), or both through [[:lower]](), before calling ##wildcard_match##().
+-- If you want case insensitive comparisons, pass both ##pattern## and ##string## through [[:upper]](), or both through [[:lower]](), before calling ##is_match##().
 --
 -- If you want to detect a pattern anywhere within a string, add * to each end of the pattern: 
 --  {{{
---  i = wildcard_match('*' & pattern & '*', string)
+--  i = is_match('*' & pattern & '*', string)
 --  }}}
 --  
 --  There is currently no way to treat * or ? literally in a pattern.
 --
 -- Example 1: 
 -- <eucode> 
---  i = wildcard_match("A?B*", "AQBXXYY")
+--  i = is_match("A?B*", "AQBXXYY")
 -- -- i is 1 (TRUE)
 -- </eucode>
 --
 -- Example 2:  
 -- <eucode> 
---  i = wildcard_match("*xyz*", "AAAbbbxyz")
+--  i = is_match("*xyz*", "AAAbbbxyz")
 -- -- i is 1 (TRUE)
 -- </eucode>
 --
 -- Example 3:
 -- <eucode> 
---  i = wildcard_match("A*B*C", "a111b222c")
+--  i = is_match("A*B*C", "a111b222c")
 -- -- i is 0 (FALSE) because upper/lower case doesn't match
 -- </eucode>
 --
@@ -86,7 +90,7 @@ constant END_MARKER = -1
 -- See Also: 
 -- [[:wildcard_file]], [[:upper]], [[:lower]], [[:Regular Expressions]]
 
-public function wildcard_match(sequence pattern, sequence string)
+public function is_match(sequence pattern, sequence string)
 	integer p, f, t 
 	sequence match_string
 	
@@ -167,7 +171,7 @@ end function
 -- ##bin/search.ex##
 --
 -- See Also: 
--- [[:wildcard_match]], [[:dir]]
+-- [[:is_match]], [[:dir]]
 
 public function wildcard_file(sequence pattern, sequence filename)
 	ifdef not UNIX then
@@ -183,5 +187,5 @@ public function wildcard_file(sequence pattern, sequence filename)
 		filename = filename & '.'
 	end if
 	
-	return wildcard_match(pattern, filename)
+	return is_match(pattern, filename)
 end function
