@@ -11,11 +11,11 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Intrepreted and compiled programming language
  Euphoria is a simple, flexible, and easy-to-learn programming 
  language. It lets you quickly and easily develop programs for 
- Windows, DOS, Linux and FreeBSD. Euphoria was first released 
+ Windows, Linux, OSX and FreeBSD. Euphoria was first released 
  in 1993. Since then Rapid Deployment Software has been steadily 
  improving it with the help of a growing number of enthusiastic users. 
  Although Euphoria provides subscript checking, uninitialized variable 
  checking and numerous other run-time checks, it is extremely fast. 
- People use it to develop Windows GUI programs, high-speed DOS games, 
- and Linux/FreeBSD X Windows programs. It is also very useful for CGI 
+ People use it to develop Windows GUI programs and Linux/FreeBSD 
+ X Windows programs. It is also very useful for CGI 
  (Web-based) programming.
