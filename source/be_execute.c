@@ -1371,6 +1371,7 @@ void analyze_switch()
 			new_values->base[i] = top;
 		}
 		else{
+			
 			new_values->base[i] = fe.st[sym].obj;
 		}
 	}
@@ -1378,7 +1379,11 @@ void analyze_switch()
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){
 		*tpc = (int *)opcode( SWITCH_SPI );
-		a = Repeat( *(object_ptr)tpc[4], max - min + 1 );
+		
+		// calculate the 'else' jump as a relative jump:
+		offset = (tpc[4]-(int)tpc) / sizeof( int* );
+		
+		a = Repeat( offset, max - min + 1 );
 		lookup = SEQ_PTR( a );
 		offset = min - 1;
 		for( i = 1; i <= new_values->length; ++i ){
