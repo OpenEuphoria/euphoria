@@ -267,6 +267,7 @@ test_equal( "rt int switch #1", D, rt_int_switch( D ) )
 test_equal( "rt int switch #2", A, rt_int_switch( A ) )
 test_equal( "rt int switch #3", "else", rt_int_switch( 0 ) )
 test_equal( "rt int switch #4", "else", rt_int_switch( "" ) )
+test_equal( "rt int switch #5", "else", rt_int_switch( 2 ) )
 
 test_equal( "rt switch #1", D, rt_switch( D ) )
 test_equal( "rt switch #2", E, rt_switch( E ) )
