@@ -140,7 +140,8 @@ end function
 -- when ##order = REVERSE_ORDER##.
 -- The default is ##order = NORMAL_ORDER##, which sorts in order returned by the
 -- custom comparison routine.
--- <
+-- < 
+--
 -- * When no user data is provided, the user defined routine must accept two
 --  objects (A, B) and return just the //comparison result//.
 --

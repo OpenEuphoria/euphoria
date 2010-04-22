@@ -1,6 +1,5 @@
 == Definition
 
-@[predefined types|]
 === Objects === @[predefined types]
 
 ==== Atoms and Sequences
@@ -1699,7 +1698,7 @@ Built-in identifiers act as if declared as **global** ~-- but they are not decla
 Euphoria coded file.
 
 @[namespace|]
-==== Using namespaces ==== @[namespace ignored]
+==== Using namespaces
 
 Identifiers marked as ##global##, ##public## or ##export## are known as //exposed//
 variables because they can be used in files other than the one they were declared
@@ -3198,7 +3197,7 @@ goto-ing into a scope (like an if block, a for loop,...) will just do that. Some
 may be defined only in that scope, and they may or may not have sensible values. It is up to
 the programmer to take appropriate action in this respect.
 
-@[labelled headers|]
+
 === Header Labels === @[labelled headers]
 
 As shown in the above section on control flow statements, most can have their
@@ -3236,7 +3235,6 @@ while 1 label "top" with entry do -- WRONG
 while 1 with entry label "top" do -- CORRECT
 </eucode>
 
-@[short-circuit|]
 == Short-Circuit Evaluation == @[short-circuit]
 
 When the condition tested by if, elsif, until, or while contains ##and## or ##or##
@@ -3335,7 +3333,6 @@ at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used in
 if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
-@[special statements|]
 == Special Top-Level Statements == @[special statements]
 
 Before any of your statements are executed, the Euphoria front-end quickly
