@@ -53,7 +53,7 @@ public constant EOF = (-1)
 -- === Read/Write Routines
 
 --**
--- @[q_print]
+-- @[q_print|]
 -- Signature:
 -- <built-in> procedure ? (no parentheses around the unique parameter)
 --
@@ -104,7 +104,7 @@ public constant EOF = (-1)
 -- </eucode>
 --
 -- See Also:
--- 		[[:?]], [[:puts]]
+-- 		[[q_print|?]], [[:puts]]
 
 --**
 -- Signature:

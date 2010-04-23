@@ -1123,6 +1123,7 @@ Identifiers can be used in naming the following:
 * constants
 * enums
 
+@[end|] 
 ==== procedures
 
 These perform some computation and may have a list of parameters, e.g.
@@ -2040,6 +2041,7 @@ legal values of the loop variable.
 Variables declared inside other types of blocks, such as a **loop**, **while**,
 **if** or **switch** statement use the same scoping rules as a for-loop index.
 
+@[override|]
 ==== The override qualifier
 
 There are times when it is necessary to replace a global, public or export identifier. Typically, one
@@ -2174,7 +2176,9 @@ You cannot use assignment with operators while declaring a variable, because tha
 not initialised when you perform the assignment.
 
 == Branching Statements
+@[then|] @[else|]
 
+ @[elsif|]
 === if statement
 
 An **if statement** tests a condition to see whether it is true or false, and
@@ -2246,6 +2250,7 @@ The ##**if**## and ##**elsif**## expressions are tested using [[:short-circuit]]
 An //if statement// can have a //label clause// just before the first ##**then**## keyword.
 See the section on [[:labelled headers]]. Note that an //elsif clause// can not have a label.
 
+@[case|]   @[do|]
 === switch statement ===
 The switch statement is used to run a specific set of statements, depending on
 the value of an expression. It often replaces a set of if-elsif statements due to it's
@@ -2395,6 +2400,7 @@ FuncM()
 In other words, the ##break "LBLa"## skips to the end of the switch called "LBLa"
 rather than the switch called "LBLb".
 
+ @[elsedef|]  @[elsifdef|] 
 === ifdef statement
 
 The ##ifdef## statement has a similar syntax to the ##if## statement.
@@ -2777,6 +2783,7 @@ This differs from a **while** loop in more than one way:
   it completes.  In a **while**, the test is taken BEFORE execution.
 # The header contains only optional **label** and **entry** tags.
 
+@[to|] @[by|] 
 === for statement
 
 A **for** statement sets up a special loop that has its own **loop variable**.
@@ -3197,7 +3204,7 @@ goto-ing into a scope (like an if block, a for loop,...) will just do that. Some
 may be defined only in that scope, and they may or may not have sensible values. It is up to
 the programmer to take appropriate action in this respect.
 
-
+@[label|]
 === Header Labels === @[labelled headers]
 
 As shown in the above section on control flow statements, most can have their
@@ -3358,7 +3365,7 @@ following special statements may //only// appear at the top level:
 * ##include##
 * ##with## / ##without##
 
-@[as|]
+
 === include
 
 When you write a large program it is often helpful to break it up into
@@ -3506,6 +3513,7 @@ included.
 An include statement must be written on a line by itself.  Only a comment can
 appear after it on the same line.
 
+@[as|]
 The second form of the include statement is:
 
 ; ##include** **//filename// as //namespace_identifier//##:
@@ -3513,8 +3521,13 @@ The second form of the include statement is:
   that can be attached to global identifiers in the included file that
   you want to refer to in the main file. This might be necessary to disambiguate
   references to those identifiers, or you might feel that it makes your code more
-  readable. See [[:Using namespaces]] for more. This namespace overrides the
-  default namespace the file may define.
+  readable. This ##as identifier## namespace exists in the current file, along with
+  any ##namespace identifier## the included file may define.
+
+>
+  See Also:
+   [[:Using namespaces]].
+< 
 
 === with / without
 
@@ -3559,7 +3572,7 @@ included file.  For instance, an included file might turn off warnings for
 itself and (initially) for any files that it includes, but this will not turn
 off warnings for the main file.
 
-@[indirect_includes|]
+**@[indirect_includes]**, 
 This ##with/without## option changes the way in which global symbols are
 resolved.  Normally, the parser uses the way that files were included to
 resolve a usage of a global symbol.  If ##without indirect_includes## is
@@ -3577,7 +3590,7 @@ Note that this setting does not propagate down to included files, unlike
 most ##with/without options##.  Each file begins with ##indirect_includes##
 turned on.
 
-@[with_batch| with batch]
+**@[with_batch]**,
 Causes the program to not present the "Press Enter" prompt if an error
 occurs. The exit code will still be set to 1 on error. This is helpful
 for programs that run in a mode where no human may be directly interacting
@@ -3617,7 +3630,7 @@ The forms available are ...
 : enables listed warnings in addition to whichever are enabled already
 
 ; ##without warning &= (//warning name list//)\\
-; without warning += (//warning name list//)##
+  without warning += (//warning name list//)##
 : disables listed warnings and leaves any not listed in its current state.
 
 ; ##with warning save##
@@ -3628,7 +3641,7 @@ The forms available are ...
 : causes the previously saved state to be restored.
 
 ; ##without warning strict##
-: overrides the -strict command line option, but only until the end of the
+: overrides the -STRICT command line option, but only until the end of the
   next function or procedure.
 
 The **with/without warnings** directives will have no effect if the

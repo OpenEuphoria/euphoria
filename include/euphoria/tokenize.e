@@ -5,12 +5,12 @@ namespace tokenize
 
 include keywords.e
 include std/io.e
+include std/types.e
+include std/types.e
+include std/filesys.e
 
 ---------------------------------------------------------------------------------
 
-constant FALSE = 0, TRUE = 1
-constant EOF = -1
-object EOL					EOL = '\n'
 
 integer enum_val,enum_inc
 function Enum_Start(integer start, integer inc)
@@ -79,7 +79,9 @@ public constant
 -- this list of delimiters must match the order of the corresponding T_ codes above
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
+--****
 -- T_NUMBER formats
+
 public constant 
 		TF_HEX        = Enum(),
 		TF_INT        = Enum(),
@@ -110,7 +112,10 @@ integer ERR       = 0
 integer ERR_LNUM  = 0
 integer ERR_LPOS  = 0
 
-public enum -- et error codes
+--****
+-- et error codes
+
+public enum 
 		ERR_OPEN,
 		ERR_ESCAPE,
 		ERR_EOL_CHAR,
@@ -177,10 +182,11 @@ end procedure
 --**
 -- return TDATA for all T_NUMBER tokens in "string" format
 -- by default:
--- 		T_NUMBER tokens return atoms
--- 		T_CHAR tokens return single integer chars
---		T_EOF tokens return undefined data
---		all other tokens return strings
+-- 	*T_NUMBER tokens return atoms
+-- 	*T_CHAR tokens return single integer chars
+--	*T_EOF tokens return undefined data
+--	*all other tokens return strings
+--
 public procedure et_string_numbers(integer toggle)
 	STRING_NUMBERS = toggle
 end procedure
