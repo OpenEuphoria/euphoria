@@ -52,7 +52,7 @@ public constant EOF = (-1)
 --****
 -- === Read/Write Routines
 
---**
+--****
 -- @[q_print|]
 -- Signature:
 -- <built-in> procedure ? (no parentheses around the unique parameter)
@@ -69,7 +69,7 @@ public constant EOF = (-1)
 -- See Also:
 --   [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure print(integer fn, object x)
 --
@@ -104,9 +104,9 @@ public constant EOF = (-1)
 -- </eucode>
 --
 -- See Also:
--- 		[[q_print|?]], [[:puts]]
+-- 		[[:q_print|?]], [[:puts]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure printf(integer fn, sequence format, object values)
 --
@@ -214,7 +214,7 @@ public constant EOF = (-1)
 -- See Also:
 --     [[:sprintf]], [[:sprint]], [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> procedure puts(integer fn, object text)
 --
@@ -252,7 +252,7 @@ public constant EOF = (-1)
 -- See Also:
 --   [[:print]]
 
---**
+--****
 -- Signature:
 -- <built-in> function getc(integer fn)
 --
@@ -280,7 +280,7 @@ public constant EOF = (-1)
 -- See Also:
 -- 		[[:gets]], [[:get_key]]
 
---**
+--****
 -- Signature:
 -- <built-in> function gets(integer fn)
 --
@@ -344,7 +344,7 @@ public constant EOF = (-1)
 -- See Also:
 --		[[:getc]], [[:read_lines]]
 
---**
+--****
 -- Signature:
 -- <built-in> function get_key()
 --
