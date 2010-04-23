@@ -6,7 +6,6 @@ namespace tokenize
 include keywords.e
 include std/io.e
 include std/types.e
-include std/types.e
 include std/filesys.e
 
 ---------------------------------------------------------------------------------
