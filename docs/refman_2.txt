@@ -3117,6 +3117,7 @@ opening the same file, there has to be a way to break from the loop, which the
 The same optional parameters that can be used in an **exit** statement can apply to a
 **retry** statement.
 
+@[entry|]
 === with entry statement
 
 It is often the case that the first iteration of a loop is somehow special.
@@ -3590,7 +3591,7 @@ Note that this setting does not propagate down to included files, unlike
 most ##with/without options##.  Each file begins with ##indirect_includes##
 turned on.
 
-**@[with_batch]**,
+**@[with_batch|with batch]**,
 Causes the program to not present the "Press Enter" prompt if an error
 occurs. The exit code will still be set to 1 on error. This is helpful
 for programs that run in a mode where no human may be directly interacting
