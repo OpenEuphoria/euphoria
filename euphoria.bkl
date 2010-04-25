@@ -63,9 +63,7 @@
 			<set var="__cmd" eval="0">
 				eui ec.ex $(EU_MANAGED_MEMORY) $(__console) $(EUC_FLAGS) -builddir $(__build_dir) -keep -o $(__output) -lib $(__lib) $(__source)
 			</set>
-			<if cond="EUPHORIA==1">		    
-			    <command>$(__cmd)</command>
-			</if>
+			<command>$(__cmd)</command>
 			<dependency-of>all</dependency-of>
 			<modify-target target="clean">
 				<if cond="FORMAT in ['watcom','mingw']">
@@ -105,9 +103,7 @@
 			<depends>$(value)</depends>
 		</define-tag>
 	</define-rule>
-
 	
-	<if cond="EUPHORIA==1">
 	<define-rule name="eutest" extends="action">
 		<template>
 			<is-phony />
@@ -134,9 +130,7 @@
 			<set var="__tests">$(value)</set>
 		</define-tag>
 	</define-rule>
-	</if>
 	
-	<if cond="EUPHORIA==1">
 	<define-rule name="eudoc" extends="action">
 		<template>
 			<is-phony />
@@ -162,5 +156,4 @@
 			<set var="__template_file">-t=$(value)</set>
 		</define-tag>
 	</define-rule>
-	</if>
 </makefile>
