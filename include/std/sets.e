@@ -68,7 +68,7 @@ function bounded_integer(object x, integer lbound, integer ubound)
 -- Returns: 1 if x is an integer greater or equal to lbound and less than or
 -- equal to ubound, else 0.
 --
--- See also: map, is_left_unit, is_right_unit
+-- See Also: map, is_left_unit, is_right_unit
     if not integer(x) then
         return 0
     end if
@@ -104,8 +104,8 @@ end function
 -- ? map(s0)   -- prints out 1.
 -- </eucode>
 --
--- See also: 
---   [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_map]], [[:reverse_map],
+-- See Also: 
+--   [[:define_map]], [[:fiber_over]], [[:restrict]], [[:direct_map]], [[:reverse_map]],
 --   [[:is_injective]], [[:is_surjective]], [[:is_bijective]]
 
 public type map(object s)
@@ -251,11 +251,11 @@ include std/sequence.e
 --
 -- Example 1:
 -- <eucode>
---   sequence s0 s0={1,3,7,5,7,4,1}
---   set s1 s1=sequence_to_set(s0)   -- s1 is now {1,3,4,5,7}
+--   sequence s0 = {1,3,7,5,7,4,1}
+--   set s1 = sequence_to_set(s0)   -- s1 is now {1,3,4,5,7}
 -- </eucode>
 --
--- See also: 
+-- See Also: 
 -- [[:set]]
 
 public function sequence_to_set(sequence s)
@@ -292,7 +292,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0 s0={1,3,5,7}
+--   set s0 = {1,3,5,7}
 --   ?belongs_to(2,s)   -- prints out 0
 -- </eucode>
 --
@@ -334,7 +334,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0 s0={1,3,5,7}
+--   set s0 = {1,3,5,7}
 --   s0=add_to(2,s)   -- s0 is now {1,2,3,5,7}
 -- </eucode>
 --
@@ -373,7 +373,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0 s0={1,2,3,5,7}
+--   set s0 = {1,2,3,5,7}
 --   s0=remove_from(2,s0)   -- s0 is now {1,3,5,7}
 -- </eucode>
 --
@@ -473,7 +473,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0 s0={1,3,5,7}
+--   set s0 = {1,3,5,7}
 --   ? is_subset({3,5},s0)   -- prints out 1
 -- </eucode>
 --
@@ -498,8 +498,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0 s0={1,3,5,7}
---   set s s=embedding({3,5},s0)   -- s is now {2,3}
+--   set s0 = {1,3,5,7}
+--   set s = embedding({3,5},s0)   -- s is now {2,3}
 -- </eucode>
 --
 -- See Also: 
@@ -629,8 +629,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s0 s0={1,3,5,7}
---   s0=subsets(s0)   -- s0 is now:
+--   set s0 = {1,3,5,7}
+--   s0 = subsets(s0)   -- s0 is now:
 --   {{},{1},{3},{5},{7},{1,3},{1,5},{1,7},{3,5},{3,7},{5,7},{1,3,5},{1,3,7},{1,5,7},{3,5,7},{1,3,5,7}}
 -- </eucode>
 --
@@ -1084,7 +1084,7 @@ end function
 -- s0 = {2, 3, 4, 1, 4} 
 -- s1 = {"aba", "aac", 3, "def"}
 --
--- map f f=sequences_to_map(s0,s1)
+-- map f = sequences_to_map(s0,s1)
 -- --  As a sequence, f is {3,2,1,4,4,4}
 -- </eucode>
 --
@@ -1141,7 +1141,7 @@ end function
 -- map f={3,1,2,2,4,3}
 -- set s1,s2
 -- s1={"Albert","Beatrix","Conrad","Doris"} s2={13,17,19}
--- object x x=image(f,"Conrad",s1,s2}
+-- object x = image(f,"Conrad",s1,s2}
 -- -- x is now 17.
 -- </eucode>
 --
@@ -1219,11 +1219,11 @@ end function
 --
 -- Example:
 -- <eucode>
---   sequence s0 s0={2,3,4,1,4}
+--   sequence s0 = {2,3,4,1,4}
 --   set t1,t2
 --   t1={1,2,2.5,3,4} t2={11,13,17,19,23,29}
---   map f f={3,1,4,5,3,5,5}
---   sequence s2 s2=direct_map(f,t1,s0,t2)
+--   map f = {3,1,4,5,3,5,5}
+--   sequence s2 = direct_map(f,t1,s0,t2)
 --   -- s2 is now {11,29,17,17,17}.
 -- </eucode>
 --
@@ -1266,10 +1266,10 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s1 s1={1,3,5,7,9,11,13,17,19,23}}
---   map f f=[3,7,1,4,5,2,7,1,6,2,10,7}
---   set s0 s0={3,11,13,19,29}
---   map f0 f0=restrict(f,s1,s0)
+--   set s1 = {1,3,5,7,9,11,13,17,19,23}}
+--   map f = [3,7,1,4,5,2,7,1,6,2,10,7}
+--   set s0 = {3,11,13,19,29}
+--   map f0 = restrict(f,s1,s0)
 --   f0 is now: {7,2,7,6,4,7}
 -- </eucode>
 --
@@ -1336,8 +1336,8 @@ end function
 -- <eucode>
 --   set s1,s2
 --   s1={1,3,5,7,9,11} s2={1,3,7,11,17,19,23}
---   map f f={2,1,4,6,2,6,6,6}
---   map f0 f0=change_target(f,s1,s2)
+--   map f = {2,1,4,6,2,6,6,6}
+--   map f0 = change_target(f,s1,s2)
 --   f0 is now: {2,1,3,4,2,4,6,7}
 -- </eucode>
 --
@@ -1376,7 +1376,7 @@ end function
 --   s12={-1,0,1,4} s22={-2,0,1,2,6}
 --   map f1,f2
 --   f1={2,1,3,3,2,3,1,2,8,4} f2={3,3,2,4,5,5,5}
---   map f f=combine_maps(f1,s11,s12,f2,s21,s22)
+--   map f = combine_maps(f1,s11,s12,f2,s21,s22)
 --   -- f is now: {3,2,4,4,3,4,2,3,5,7,10,7}.
 -- </eucode>
 --
@@ -1506,7 +1506,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   map f f={2,3,1,1,2,5,3}
+--   map f = {2,3,1,1,2,5,3}
 --   ?is_injective(f)  -- prints out 0
 -- </eucode>
 --
@@ -1557,7 +1557,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   map f f={2,3,1,1,2,5,3}
+--   map f = {2,3,1,1,2,5,3}
 --   ?is_surjective(f)  -- prints out 1
 -- </eucode>
 --
@@ -1580,7 +1580,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   map f f={2,3,1,1,2,5,3}
+--   map f = {2,3,1,1,2,5,3}
 --   ? is_surjective(f)  -- prints out 0
 -- </eucode>
 --
@@ -1641,8 +1641,8 @@ end function
 -- <eucode>
 --   set s1,s2
 --   s1={5,7,9,11} s2={13,17,19,23,29}
---   map f f={2,1,4,1,4,5}
---   sequence s s=fiber_over(f,s1,s2)
+--   map f = {2,1,4,1,4,5}
+--   sequence s = fiber_over(f,s1,s2)
 --   -- s is now {{{7,11},{5},{9}},{13,17,23}}.
 -- </eucode>
 --
@@ -1673,9 +1673,9 @@ end function
 -- <eucode>
 --   set s1,s2
 --   s1={5,7,9,11} s2={13,17,19,23,29}
---   sequence s0 s0={23,13,17,23}
---   map f f={5,3,1,3,4,5}
---   set s s=reverse_map(f,s1,s0,s2)
+--   sequence s0 = {23,13,17,23}
+--   map f = {5,3,1,3,4,5}
+--   set s = reverse_map(f,s1,s0,s2)
 --   s is now {9}.
 -- </eucode>
 --
@@ -1765,9 +1765,9 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   set s s={1,3,5,7}
---   map f f={3,1,4,1,4,4}
---   map f1 f1=product(f,f)
+--   set s = {1,3,5,7}
+--   map f = {3,1,4,1,4,4}
+--   map f1 = product(f,f)
 --   -- f1 is {11,9,12,9,3,1,4,1,15,13,16,13,3,1,4,1,16,16}.
 -- </eucode>
 --
@@ -1808,13 +1808,13 @@ end function
 --   s0={1,2,3} s1={5,7,9,11} s2={13,17,19}
 --   map f01,f02
 --   f01={2,4,1,3,4} f02={2,2,1,3,3}
---   set s s=amalgamated_product(s1,s2,s0,f01,f02)
+--   set s = amalgamated_product(s1,s2,s0,f01,f02)
 --   -- s is now {{7,17},{11,17},{5,13}}.
 -- </eucode>
 --
 -- See Also:
---
 -- [[:product]], [[:product_map]], [[:fiber_product]]
+--
 
 public function amalgamated_sum(set first,set second,set base,map base_to_1,map base_to_2)
     sequence result
@@ -1847,12 +1847,12 @@ end function
 --   s0={1,2,3} s1={5,7,9,11} s2={13,17,19,23,29}
 --   map f10,f20
 --   f10={2,1,2,1,4,3} f20={1,3,3,2,3,5,3}
---   set s s=fiber_product(s1,s2,s0,f10,f20)
+--   set s = fiber_product(s1,s2,s0,f10,f20)
 --   -- s is now {{5,23},{7,13},{9,23},{11,13}}.
 -- </eucode>
 --
 -- See Also: 
--- [[:reverse_map]], {{:amalgamated_sum]], [[:fiber_over]]
+-- [[:reverse_map]], [[:amalgamated_sum]], [[:fiber_over]]
 --
 public function fiber_product(set first,set second,set base,map from_1_to_base,map from_2_to_base)
     sequence result,x1,x2,x0
@@ -1949,7 +1949,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- operation f f={{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
+-- operation f = {{{1,2,3},{2,3,4},{3,4,5}},{3,3,5}}
 -- -- f is the addition from {0,1,2}x{0,1,2} to {0,1,2,3,4}.
 -- ? is_symmetric(f)   -- prints out 1.
 -- </eucode>
@@ -1991,7 +1991,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- operation f f={{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
+-- operation f = {{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
 -- -- f is the addition modulo 3 from {0, 1, 2} x {0, 1, 2} to {0, 1, 2}.
 -- ? is_symmetric(f)   -- prints out 1.
 -- </eucode>
@@ -2057,8 +2057,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
---   sequence s s=all_left_units(f)
+--   operation f = {{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+--   sequence s = all_left_units(f)
 --   s is now {1,2}.
 -- </eucode>
 --
@@ -2110,8 +2110,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
---   sequence s s=all_right_units(f)
+--   operation f = {{{1,2,3},{1,2,3},{3,1,2}},{3,3,3}}
+--   sequence s = all_right_units(f)
 --   s is now empty.
 -- </eucode>
 --
@@ -2187,7 +2187,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation f f={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
+--   operation f = {{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}
 --   ? has_unit(f)  -- prints out 1.
 -- </eucode>
 --
@@ -2221,7 +2221,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- operation f f={{{1, 2, 3}, {1, 2, 3}, {3, 1, 2}}, {3, 3,3 }}
+-- operation f = {{{1, 2, 3}, {1, 2, 3}, {3, 1, 2}}, {3, 3,3 }}
 -- ? is_left_unit(3, f)   -- prints out 0.
 -- </eucode>
 --
@@ -2246,7 +2246,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- operation f f={{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
+--  operation f = {{{1, 2, 3}, {2, 3, 1}, {3, 1, 2}}, {3, 3, 3}}
 --  ? has_inverse(3, f)  -- prints out 2.
 -- </eucode>
 --
@@ -2356,9 +2356,9 @@ end function
 --
 -- Example 1:
 -- <eucode>
---   operation sum 	sum={{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}		
---   operation product product={{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
---   ?distributes_right(product,sum,0)  -- prints out 1.
+--   operation sum = {{{1,2,3},{2,3,1},{3,1,2}},{3,3,3}}		
+--  operation product = {{{1,1,1},{1,2,3},{1,3,2}},{3,3,3}}
+--  ?distributes_right(product,sum,0)  -- prints out 1.
 -- </eucode>
 --
 
