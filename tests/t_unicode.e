@@ -35,6 +35,19 @@ for i = 1 to length(a) do
 end for
 test_equal("validate utfs", {0,-1,1,0,0,28, 28}, a)
 
+test_equal("UTF8 literal #1",  {101,102,103,174}, x"656667AE")
+test_equal("UTF8 literal #2",  {101,102,103,174}, x"6566 67AE")
+test_equal("UTF8 literal #3",  {101,102,103,174}, x"65 66 67 AE")
+
+test_equal("UTF16 literal #1",  {25958, 26542}, u"656667AE")
+test_equal("UTF16 literal #2",  {25958, 26542}, u"6566 67AE")
+test_equal("UTF16 literal #3",  {101,102,103,174}, u"65 66 67 AE")
+
+test_equal("UTF32 literal #1",  {1701210030}, U"656667AE")
+test_equal("UTF32 literal #2",  {25958, 26542}, U"6566 67AE")
+test_equal("UTF32 literal #3",  {101,102,103,174}, U"65 66 67 AE")
+
+
 -- utf8 tests -- taken from rfc 2279
 
 sequence e1, e2, e3
