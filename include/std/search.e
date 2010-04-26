@@ -551,7 +551,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[:find]], [[:replace]], [[regex:find_replace]], [[:find_replace]]
+--		[[:find]], [[:replace]], [[:regex:find_replace]], [[:find_replace]]
 
 public function match_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
@@ -684,7 +684,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard:is_match]]
+--     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard_match]]
 
 --****
 -- Signature:
@@ -714,7 +714,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:is_match]], [[:regex:find]]
+--     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard_match]], [[:regex:find]]
 
 --**
 -- Match all items of haystack in needle.
@@ -734,7 +734,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:match]], [[regex:find_all]] [[:find]], [[:find_all]]
+--     [[:match]], [[:regex:find_all]] [[:find]], [[:find_all]]
 
 public function match_all(sequence needle, sequence haystack, integer start=1)
 	sequence ret = {}

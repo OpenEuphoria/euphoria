@@ -23,22 +23,40 @@ function Enum()
 	return enum_val
 end function
 
----------------------------------------------------------------------------------
+--****
+-- === tokenize return sequence key
+
+public constant
+		 ET_TOKENS		= Enum_Start(1,1)
+		,ET_ERROR		= Enum()
+		,ET_ERR_LINE		= Enum()
+		,ET_ERR_COLUMN	= Enum()
+
+--****
+-- === Tokens
+
 public constant
 		T_EOF        = Enum_Start(EOF,1),
-		T_NULL       = Enum(), -- 
+		--** 
+		T_NULL       = Enum(),
 		T_SHBANG     = Enum(),
 		T_BLANK      = Enum(),
 		T_COMMENT    = Enum(),
 		T_NUMBER     = Enum(),
-		T_CHAR       = Enum(), -- quoted character
-		T_STRING     = Enum(), -- string
+		--** 
+		-- quoted character
+		T_CHAR       = Enum(),
+		--** 
+		-- string
+		T_STRING     = Enum(),
 		T_IDENTIFIER = Enum(),
 		T_KEYWORD    = Enum(),
-		
-		-- must not alter the following list of token codes from T_DOUBLE_OPS
-		-- up to and including T_DOLLAR
-		T_DOUBLE_OPS  = Enum(), -- marks the start of the double-op delimiter codes
+		--** 
+		--!!
+		--!! must not alter the following list of token codes from T_DOUBLE_OPS
+		--!! up to and including T_DOLLAR
+		--!! marks the start of the double-op delimiter codes
+		T_DOUBLE_OPS  = Enum(),
 		T_PLUSEQ      = Enum_Start(Enum()-1,1),
 		T_MINUSEQ     = Enum(),
 		T_MULTIPLYEQ  = Enum(),
@@ -47,8 +65,9 @@ public constant
 		T_GTEQ        = Enum(),
 		T_NOTEQ       = Enum(),
 		T_CONCATEQ    = Enum(),
-
-		T_DELIMITER   = Enum(), -- marks the start of the delimiter codes
+		--** 
+		--!! marks the start of the delimiter codes
+		T_DELIMITER   = Enum(),
 		T_PLUS        = Enum_Start(Enum()-1,1),
 		T_MINUS       = Enum(),
 		T_MULTIPLY    = Enum(),
@@ -57,8 +76,9 @@ public constant
 		T_GT          = Enum(),
 		T_NOT         = Enum(),
 		T_CONCAT      = Enum(),
-		
-		T_SINGLE_OPS  = Enum(), -- marks the start of the single-op delimiter codes
+		--** 
+		--!! marks the start of the single-op delimiter codes
+		T_SINGLE_OPS  = Enum(),
 		T_EQ          = Enum_Start(Enum()-1,1),
 		T_LPAREN      = Enum(),
 		T_RPAREN      = Enum(),
@@ -66,12 +86,15 @@ public constant
 		T_RBRACE      = Enum(),
 		T_LBRACKET    = Enum(),
 		T_RBRACKET    = Enum(),
-		T_QPRINT      = Enum(), -- quick print ( ? x )
+		--** 
+		-- quick print ( ? x )
+		T_QPRINT      = Enum(),
 		T_COMMA       = Enum(),
 		T_PERIOD      = Enum(),
 		T_COLON       = Enum(),  
 		T_DOLLAR      = Enum(),
-		
+		--** 
+		--!!
 		T_SLICE       = Enum(),
 		$
 
@@ -79,7 +102,7 @@ public constant
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
 --****
--- T_NUMBER formats
+-- === T_NUMBER formats and T_types
 
 public constant 
 		TF_HEX        = Enum(),
@@ -97,6 +120,7 @@ public enum
 		TFORM,
 		$
 
+
 sequence Token = {T_EOF,"",0,0,0}
 
 sequence source_text = ""
@@ -112,7 +136,7 @@ integer ERR_LNUM  = 0
 integer ERR_LPOS  = 0
 
 --****
--- et error codes
+-- === ET error codes
 
 public enum 
 		ERR_OPEN,
@@ -150,6 +174,9 @@ procedure report_error(integer err)
 	ERR_LPOS = Token[TLPOS]
 end procedure
 
+--**
+-- return error string from error code
+
 public function et_error_string(integer err)
 	if err >= ERR_OPEN and err <= ERR_EOF then
 		return ERROR_STRING[err]
@@ -157,6 +184,9 @@ public function et_error_string(integer err)
 		return ""
 	end if
 end function
+
+--****
+-- === get/set options
 
 ---------------------------------------------------------------------------------
 
@@ -189,6 +219,7 @@ end procedure
 public procedure et_string_numbers(integer toggle)
 	STRING_NUMBERS = toggle
 end procedure
+
 
 ---------------------------------------------------------------------------------
 -- CHAR TYPE ROUTINES --
@@ -709,13 +740,9 @@ procedure next_token()
 	end if
 end procedure
 
----------------------------------------------------------------------------------
 
-public constant
-		 ET_TOKENS			= Enum_Start(1,1)
-		,ET_ERROR				= Enum()
-		,ET_ERR_LINE		= Enum()
-		,ET_ERR_COLUMN	= Enum()
+--****
+-- === Routines
 
 
 public function et_tokenize_string(sequence code)
