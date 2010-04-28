@@ -2409,11 +2409,11 @@ ifdef SOME_WORD then
  --... zero or more statements
 elsifdef SOME_OTHER_WORD then
  --... zero or more statments
-elsdef
+elsedef
  --... zero or more statments
 end ifdef
 </eucode>
-Of course, the ##elsifdef## and ##elsdef## clauses are optional, just like 
+Of course, the ##elsifdef## and ##elsedef## clauses are optional, just like 
 ##elsif## and ##else## are option in an ##if## statement.
 
 The major differences between and ##if## and ##ifdef## statement are that ##ifdef##
@@ -2628,7 +2628,7 @@ ifdef UNIX then
     include unix_ftp.e
 elsifdef WIN32 then
     include win32_ftp.e
-else
+elsedef
     crash("Operating system is not supported")
 end ifdef
 
