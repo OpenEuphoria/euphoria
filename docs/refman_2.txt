@@ -159,18 +159,39 @@ entered in a number of ways ...
 """ABCDEFG"""
 </eucode>
 
-* using hexadecimal strings e.g.
+* using hexadecimal byte strings e.g.
 
 <eucode>
-x"65 66 67 AE"
+x"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
 </eucode>
 
-* using unicode strings e.g.
+* using word strings hexadecimal (for utf-16) and double word hexadecimal (for utf-32)  e.g.
 
 <eucode>
-u"65 66 67 AE"  -- utf-16 ==> {25958, 26542}
-U"65 66 67 AE"  -- utf-32 ==> {1701210030}
+u"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
+U"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
 </eucode>
+
+The value of the three strings above are equivalent.  Spaces seperate values to other elements.  When you put too many hex characters together for the kind of string they are split up appropriately for you:
+
+<eucode>
+x"6566 67AE"  -- 8-bit  ==> {#65,#66,#67,#AE}
+u"6566 67AE"  -- 16-bit ==> {#6566,#67AE}
+U"6566 67AE"  -- 32-bit ==> {#6566,#67AE}
+U"656667AE"   -- 32-bit ==> {#656667AE}
+</eucode>
+
+String literals encoded as ASCII, UTF-8, UTF-16, UTF-32 or really any encoding that uses elements that are 32-bits long or shorter can be built with U"" syntax.  Literals of encodings that have 16-bit long or shorter or 8-bit long or shorter elements can be built using u"" syntax or x"" syntax  respectively.  Use delimiters, such as spaces, to break the ambiguity and improve readability. 
+
+The following is code with a vaild UTF8 encoded string:
+
+<eucode>
+sequence utf8_val = x"3e 65" -- This is ">e"
+</eucode>
+
+**However,** it is up to the coder to know the correct code-point values for these to make any sense in the encoding the coder is using. That is to say, it is possible for the coder to use the x"", u"", and U"" syntax to create literals that are **not valid** UTF strings.
+
+There are routines for working with Unicode strings and for validating, converting and working with Unicode strings.  See [[:Unicode]].
 
 
 **The rules for double-quote strings are...**
@@ -296,13 +317,13 @@ x"1 2 34 5678_AbC" == {0x01, 0x02, 0x34, 0x56, 0x78, 0xAB, 0x0C}
 
 <eucode>
 u"1 2 34 5678AbC" == {0x0001, 0x0002, 0x0034, 0x5678, 0x0ABC}
-u"1 2 34 5678AbC" == {0x0000_0001, 0x0000_0002, 0x0000_0034, 0x05678ABC}
+U"1 2 34 5678AbC" == {0x0000_0001, 0x0000_0002, 0x0000_0034, 0x05678ABC}
 </eucode>
 
 ----
 
 Character strings may be manipulated and operated upon just like any other
-sequences. For example the above string is entirely equivalent to the
+sequences. For example the string we first looked at "ABCDEFG" is entirely equivalent to the
 sequence:
 
 <eucode>
@@ -892,7 +913,7 @@ The sequence-formation operator is listed at the bottom of the a
 
 Some other important operations that you can perform on sequences have English
 names, rather than special characters. These operations are built-in to
-**eui.exe/euiw**, so they'll always be there, and so they'll be fast. They are
+**eui.exe/euiw.exe**, so they'll always be there, and so they'll be fast. They are
 described in detail in the [[:Language Reference]], but are
 important enough to Euphoria programming that we should mention them here before
 proceeding. You call these operations as if they were subroutines, although
@@ -1698,6 +1719,7 @@ symbol table before using **global** scope.
 Built-in identifiers act as if declared as **global** ~-- but they are not declared in any
 Euphoria coded file.
 
+
 @[namespace|]
 ==== Using namespaces
 
@@ -1806,7 +1828,22 @@ public procedure sub()
 include lib.e
 
 lib:main()
-lib:sub()
+lib:sub() 
+
+
+</eucode>
+
+Now, what happens if you do not use 'public include'?
+
+<eucode>
+-- lib2.e
+include sublib.e
+...
+
+-- app2.ex
+include lib.e
+lib:main()
+lib:sub() -- error.  sub() is visible in lib2.e but not in app2.ex  
 </eucode>
 
 ==== The visibility of public and export identifiers
