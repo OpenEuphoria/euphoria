@@ -405,6 +405,7 @@ Shell Sort -- Cannot have spaces in identifiers.
 quick-sort -- must only consist of letters, digits or underscore.
 </eucode>
 
+@[source_comments|]
 === Comments
 Comments are ignored by Euphoria and have no effect on execution speed.
 The editor displays comments in red.
@@ -862,7 +863,8 @@ s[$-5..$]
 s[$][1..floor($/2)] -- first half of the last element of s
 </eucode>
 
-==== Concatenation of Sequences and Atoms - The '&' Operator ==== [amp_concat]
+@[amp_concat|]
+==== Concatenation of Sequences and Atoms - The '&' Operator ==== @[amp concat]
 
 Any two objects may be concatenated using the **&** operator. The
 result is a sequence with a length equal to the sum of the lengths of the
