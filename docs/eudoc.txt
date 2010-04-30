@@ -70,7 +70,7 @@ write after this tag.
 --**
 -- this is my favorite routine
 
-procedure hello( sequence name )
+public procedure hello( sequence name )
    printf(1, "Hello %s!", {name} )
 end procedure
 	
@@ -87,7 +87,7 @@ end procedure
 ==== hello
 <eucode>
 include favorite.ex
-procedure hello(sequence name)
+public procedure hello(sequence name)
 </eucode>
 
   This is my favorite routine.
@@ -99,7 +99,7 @@ procedure hello(sequence name)
 \\  ** hello **
 <eucode>
 include favorite.ex
-procedure hello(sequence name)
+public procedure hello(sequence name)
 </eucode>
 
   This is my favorite routine.
