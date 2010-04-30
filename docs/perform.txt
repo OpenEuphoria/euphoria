@@ -180,11 +180,9 @@
    loop.
 
 === In-lining of Routine Calls
- If you have a routine that is rather small and fast, but is called a huge
- number of times, you will save time by doing the operation
- //in-line//, rather than calling the routine. Your code may
- become less readable, so it might be better to in-line only at places that
- generate a lot of calls to the routine.
+ If you have a routine that is rather small, the interpreter and translator
+ will //in-line// it for you.  Your code will remain
+ as readable as before.
 
 === Operations on Sequences
  Euphoria lets you operate on a large sequence of data using a single
@@ -366,9 +364,7 @@ For example:
  lower-level compiled languages, but they are measurable.
 
 === Using Machine Code and C
- Euphoria lets you call routines written in 32-bit Intel machine code. On
- **WIN32** and **Linux** and **FreeBSD** you can call C routines in
- ##dll## or ##so## files, and these C routines can call your Euphoria routines.
+ Euphoria lets you call routines written in machine code. You can call C routines in dynamically loaded library files, and these C routines can call your Euphoria routines.
  You might need to call C or machine code because of something that can't be
  done directly in Euphoria, or you might do it for improved speed.
 

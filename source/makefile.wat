@@ -31,27 +31,45 @@
 #            values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD.
 #
 # Syntax:
-#   Interpreter (euiw.exe, eui.exe):  wmake interpreter
-#   Translator  		  (euc.exe):  wmake translator
-#   Translator Library     (eu.lib):  wmake library
-#   Backend 	 eub.exe, eubw.exe):  wmake backend
-#   Code Page Database             : wmake code-page-db
-#	        	   Make all targets:  wmake
-#		             	    		  wmake all
-#
-#   Make C sources so this tree      
-#   can be built with just a	 
-#   compiler.
-#   			                   :  wmake translate
-#
-# Install binaries, source and 
-# include files                            : wmake install
-#
-# Run unit tests                           : wmake test
-# Using eu.ex                              : wmake testeu
-#
-# The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
-# The default for SVN_REV is 'xxx'.
+#   Interpreter (euiw.exe, eui.exe)  : wmake interpreter
+#   Translator            (euc.exe)  : wmake translator
+#   Translator Library     (eu.lib)  : wmake library
+#   Backend 	 eub.exe, eubw.exe)  : wmake backend
+#   Code Page Database               : wmake code-page-db
+#   Create Documentation in HTML     : wmake htmldoc
+#   Create Documentation in PDF      : wmake pdfdoc
+#                                    
+#   Clean binaries, object files,    
+#   C files and configuration        : wmake clobber
+#                                    
+#   Clean binaries, object files,    
+#   C files                          : wmake clean
+#                                    
+#   Clean binaries, object files,    
+#   C files and configuration and    
+#   build directory                  : wmake distclean
+#                                    
+#   Clean binaries and object files  
+#   but keep configuration and C     
+#   files                            : wmake nearlyclean
+#                                    
+#   Make all targets                 : wmake
+#                                      wmake all
+#                                    
+#   Make C sources so this tree        
+#   can be built without the         
+#   EUPHORIA binaries 	             : wmake translate
+#                                  
+#   Install binaries only            : wmake installbin
+#                                    
+#   Install binaries, source and     
+#   include files                    : wmake install
+#                                    
+#   Run unit tests using eui.exe     : wmake test
+#   Run unit tests using eu.ex       : wmake testeu
+#   
+#   The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
+#   The default for SVN_REV is 'xxx'.
 #
 #
 #   Options:
@@ -629,4 +647,4 @@ $(BUILDDIR)\pdf\index.html : $(BUILDDIR)\euphoria-pdf.txt
 $(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\index.html
 	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\eu400_0001.html $(BUILDDIR)\pdf\index.html
 
-pdfdoc : $(BUILDDIR)\euphoria-4.0.pdf
+

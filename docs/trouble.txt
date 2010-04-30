@@ -185,7 +185,7 @@ Remove that earlier declaration or change the name of your loop variable.
 //I get the message "unknown escape character" on a line where I am trying
 to specify a file name.//
 
-**Do not** say ##"C:\TMP\MYFILE"##. You need to say ##"C:~\~\TMP~\~\MYFILE"##.
+**Do not** say ##"C:\TMP\MYFILE"##. You need to say ##"C:~\~\TMP~\~\MYFILE"## or use back-quotes ##`C:~\TMP~\MYFILE`##.
 
 Backslash is used for
 escape characters such as ##\n## or ##\t##. To specify a single backslash in a string you need

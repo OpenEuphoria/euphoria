@@ -31,8 +31,11 @@ include std/text.e as txt -- upper/lower
 --   [[:regex:new]] and [[:regex:is_match]], you can change to using 
 --   std/wildcards.e with very little modification to your source code.
 --
+--   Suppose you work for a hotel and you set up a system for looking up
+--   guests.
+--   
 --   <eucode>
---   -- Users are having a hard time understanding this...
+--   -- The user can use regular expressions to find guests at a hotel...
 --   include std/regex.e as uip -- user input patterns 'uip'
 --   puts(1,"Enter a person to find.  You may use regular expressions:")
 --
@@ -50,8 +53,8 @@ include std/text.e as txt -- upper/lower
 --   close(dbfd)
 --   </eucode>
 --
--- Later you might decide you want to use the regular expressions' set of routines:
--- you need only change the include line and the pattern construction.
+-- Later the hotel manager tells you that the users would rather use wildcard
+-- matching you need only change the include line and the prompt for the pattern.
 --   <eucode>
 --   -- This will make things simpler...
 --   include std/wildcard.e as uip -- user input patterns 'uip'.
