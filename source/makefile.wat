@@ -624,13 +624,18 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE)
 	$(EUDOC) -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
 
-$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
-	-mkdir $(BUILDDIR)\html\images
-	-mkdir $(BUILDDIR)\html\js
-	 $(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
-	copy $(DOCDIR)\style.css $(BUILDDIR)\html
+$(BUILDDIR)\html\images $(BUILDDIR)\html\js : $(DOCDIR)\*.js $(DOCDIR)\html\images\*.png
+	mkdir $^@
 	copy $(DOCDIR)\*js $(BUILDDIR)\html\js
 	copy $(DOCDIR)\html\images\* $(BUILDDIR)\html\images
+
+$(BUILDDIR)\html\style.css : $(DOCDIR)\style.css
+	copy $(DOCDIR)\style.css $(BUILDDIR)\html
+
+$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html Makefile.wat $(BUILDDIR)\html\images $(BUILDDIR)\html\js $(BUILDDIR)\html\style.css
+	cd $(TRUNKDIR)\docs
+	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source	
 
 htmldoc : $(BUILDDIR)\html\index.html
 
