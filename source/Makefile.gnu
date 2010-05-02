@@ -151,6 +151,9 @@ endif
 
 ifdef EPROFILE
 PROFILE_FLAGS=-pg
+ifndef EDEBUG
+DEBUG_FLAGS=$(EOSMING)
+endif
 endif
 
 ifeq  "$(ELINUX)" "1"
@@ -451,15 +454,12 @@ $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-templat
 htmldoc : $(BUILDDIR)/html/index.html
 
 $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
-	sed -e "s/splitlevel = 2/splitlevel = 0/" $(BUILDDIR)/euphoria.txt | \
-		sed -e "s/toclevel = 3/toclevel = 0/" | \
-		sed -e "s/TOC level=3/TOC level=0/" | \
-		sed -e "s/LEVELTOC depth=2/LEVELTOC depth=0/"  > $(BUILDDIR)/euphoria-pdf.txt
-	
+	sed -e "s/splitlevel = 2/splitlevel = 0/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
 
 $(BUILDDIR)/pdf/index.html : $(BUILDDIR)/euphoria-pdf.txt
 	-mkdir -p $(BUILDDIR)/pdf
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=offline-template.html -o$(BUILDDIR)/pdf $(BUILDDIR)/euphoria-pdf.txt
+	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=offline-template.html -o$(BUILDDIR)/pdf -htmldoc $(BUILDDIR)/euphoria-pdf.txt
+# 	cd $(TRUNKDIR)/docs && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(BUILDDIR)/pdf $(BUILDDIR)/euphoria-pdf.txt
 
 $(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/index.html
 	htmldoc -f $(BUILDDIR)/euphoria-4.0.pdf --book $(BUILDDIR)/pdf/eu400*.html $(BUILDDIR)/pdf/index.html
