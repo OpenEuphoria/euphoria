@@ -471,8 +471,6 @@ op_temp_ref[ASSIGN_OP_SUBS]   = NEW_REFERENCE
 op_temp_ref[RHS_SLICE]        = NEW_REFERENCE
 op_temp_ref[RHS_SUBS]         = NEW_REFERENCE
 op_temp_ref[RHS_SUBS_CHECK]   = NEW_REFERENCE
-op_temp_ref[RIGHT_BRACE_N]    = NEW_REFERENCE
-op_temp_ref[RIGHT_BRACE_2]    = NEW_REFERENCE
 op_temp_ref[rw:APPEND]        = NEW_REFERENCE
 op_temp_ref[rw:PREPEND]       = NEW_REFERENCE
 op_temp_ref[rw:CONCAT]        = NEW_REFERENCE
@@ -1049,6 +1047,7 @@ export procedure emit_op(integer op)
 			end for
 			c = NewTempSym()
 			emit_addr(c)
+			emit_temp( c, NEW_REFERENCE )
 			assignable = TRUE
 		end if
 		Push(c)

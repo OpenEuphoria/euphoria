@@ -438,7 +438,7 @@ procedure opRIGHT_BRACE_N()  -- form a sequence of any length
     sequence x
     
     len = Code[pc+1]
-    x = sprintf("RIGHT_BRACE: len %d", len)
+    x = sprintf("RIGHT_BRACE_N: len %d", len)
     
     for i = pc+len+1 to pc+2 by -1 do
 		-- last one comes first
