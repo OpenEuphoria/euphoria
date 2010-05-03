@@ -280,13 +280,13 @@ INCDIR=-i $(TRUNKDIR)\include
 
 PWD=$(%cdrive):$(%cwd)
 
-ifeq "$(EUDOC)" ""
+!ifndef EUDOC
 EUDOC=eudoc.exe
-endif
+!endif
 
-ifeq "$(CREOLEHTML)" ""
+!ifndef CREOLEHTML
 CREOLEHTML=creolehtml.exe
-endif
+!endif
 
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 all :  .SYMBOLIC
