@@ -695,10 +695,10 @@ procedure patterns()
 			crash(generic_msg)
     	end if
     end ifdef
-    if wildcard_match("AAA", "AAa") then
+    if wildcard:is_match("AAA", "AAa") then
 		crash(generic_msg)
     end if
-    if not wildcard_match("??Z*Z*", "ABZ123Z123") then
+    if not wildcard:is_match("??Z*Z*", "ABZ123Z123") then
 		crash(generic_msg)
     end if
 end procedure

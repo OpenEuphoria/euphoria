@@ -320,7 +320,7 @@ function scan(sequence file_name, atom file_size, sequence string)
 		match_line = fast_lower(line)
 	    end if
 	    if wild_string then
-		found = wildcard_match(string, match_line) 
+		found = wildcard:is_match(string, match_line) 
 	    else        
 		found = match(string, match_line) 
 	    end if

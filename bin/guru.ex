@@ -448,7 +448,7 @@ procedure scan(sequence file_name)
 	    for i = 1 to length(word_list) do
 		if wild_word[i] then
 		    -- slow
-		    matched = wildcard_match(word_list[i], lword) 
+		    matched = wildcard:is_match(word_list[i], lword) 
 		else
 		    -- fast
 		    matched = equal(word_list[i], lword)
@@ -582,7 +582,7 @@ function blank_delim(sequence s)
     return list
 end function
 
-ifdef !UNIX then
+ifdef not UNIX then
     log_name = upper(log_name)
 end ifdef
 
