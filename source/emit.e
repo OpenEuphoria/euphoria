@@ -1555,12 +1555,6 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	elsif op = RETURNF then
-		
-		if not TRANSLATE and last_op_backup = PROC 
-		and sym_mode( Top() ) = M_TEMP then
-			emit_opcode( REF_TEMP )
-			emit_addr( Top() )
-		end if
 		clear_temp( Top() )
 		flush_temps()
 		emit_opcode(op)
