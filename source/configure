@@ -25,19 +25,13 @@ echo "# File generated from configure" > Makefile.eu
 
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
+elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
+	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
 elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"Makefile.eu
 fi
 
-touch nothing.ex
-# if eui doesn't exist the error message goes into
-# the device file /dev/null. [works on Mingw too.]
-if eui nothing.ex 2> /dev/null; then
-    export EUPHORIA=1
-else
-    export EUPHORIA=0
-fi
-rm nothing.ex
+
 
 
 if test $UNAME_SYSTEM = "Linux"; then
@@ -139,6 +133,7 @@ while [ "$1" != "" ]; do
 				fi
 			fi
 			echo "EUBIN=$2" >> "$PREFIX"Makefile.eu
+			EUBIN=$2
 			shift
 		;;
         --full )
@@ -181,6 +176,21 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+touch nothing.ex
+# if eui doesn't exist the error message goes into
+# the device file /dev/null. [works on Mingw too.]
+if [ "x$EUBIN" = "x" ]; then
+	if eui nothing.ex 2> /dev/null; then
+		export EUPHORIA=1
+	else
+		export EUPHORIA=0
+	fi
+else
+	export EUPHORIA=1
+fi
+rm nothing.ex
+
 if [ "x$EUPHORIA" = "x1" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
 else

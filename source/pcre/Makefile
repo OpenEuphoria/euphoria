@@ -2,7 +2,7 @@
 # Makefile for PCRE to be included into Euphoria
 #
 
-CFLAGS=-O2 $(EOSTYPE) -D NO_RECURSE
+CFLAGS=-O2 $(EOSTYPE) -D NO_RECURSE -m32
 
 include objects.mak
 include $(CONFIG)
