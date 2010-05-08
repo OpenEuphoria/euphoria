@@ -5,8 +5,8 @@
 The Euphoria to C Translator will translate any Euphoria program into
 equivalent C source code.
 
-There are versions of the translator for //Windows//, //Linux//,
-//FreeBSD// and //Mac OS X//. After translating a Euphoria program to C, you
+There are versions of the translator for //Windows// and //UNIX// like 
+Operating Systems. After translating a Euphoria program to C, you
 can compile and link using one of the supported C compilers. This will give
 you an executable file that will typically run much faster than if you used
 the Euphoria interpreter.
@@ -18,13 +18,13 @@ front-end portion of the interpreter. The source code for the Translator is in
 
 === C Compilers Supported
 
-The **Translator** currently works with GNU C on //Linux// or //FreeBSD//,
+The **Translator** currently works with GNU C on //UNIX// like OSes,
 GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
 or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the -gcc option
 and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
 These are all **free** compilers.
 
-GNU C will exist already on your Linux or FreeBSD system. The others can be
+GNU C will exist already on your UNIX system. The others can be
 downloaded from their respective Web sites.
 
 ==== Notes:
@@ -48,7 +48,7 @@ On Windows you would type:
 euc taskwire.exw
 }}}
 
-On Linux/FreeBSD you would type:
+On UNIX you would type:
 
 {{{
 euc qsort.ex
@@ -85,7 +85,7 @@ After creating your executable file, emake removes all the C files that were
 created. If you want to look at these files, run the translator again and look
 at the files before running emake.
 
-==== Note to Linux, FreeBSD and OSX users:
+==== Note to UNIX users:
 
 The files will be called ##emake## and ##shell##, and you type ##./emake## to
 perform the compiles and link, and **./shell** to run the shell sort program.
@@ -116,7 +116,7 @@ e.g.
 euc -wat -keep sanity.ex
 }}}
 
-To make a //Windows// ##.dll## file, or //Linux// or //FreeBSD// ##.so## file, just
+To make a shared dynamically loading library, just
 add ##-dll## to the command line. e.g.
 
 {{{
@@ -175,8 +175,7 @@ euc -lib decu.a myapp.ex
 -plat SUNOS
 }}}
 
-Use one of these options to translate code for the specified platform, even
-if running on a different platform.  The default will always be the native
+Use one of these options to translate code into C for the specified platform.  The default will always be the native
 platform of the translator that is executed, so ##euc.exe## will default
 to Windows, and ##euc## will default to the platform upon which it was built.
 
@@ -186,8 +185,7 @@ one configured.
 
 === Dynamic Link Libraries (Shared Libraries)
 
-Simply by adding ##-dll## to the command line, the **Translator** will build a
-//Windows// ##.dll## (//Linux/FreeBSD// ##.so##) file instead of an executable
+Simply by adding ##-dll## to the command line, the **Translator** will build a shared dynamically loading library instead of an executable
 program.
 
 You can translate and compile a set of useful Euphoria routines, and share
@@ -197,19 +195,18 @@ translated/compiled and interpreted programs will be able to use your library.
 
 Only the global Euphoria procedures and functions, i.e. those declared with
 the "##global##", "##public##" or "##export##" keyword, will be exported from
-the ##.dll## (##.so##).
+the shared dyanmically loaded library.
 
 Any Euphoria program, whether translated/compiled or interpreted, can link
-with a Euphoria ##.dll## (##.so##) using the same mechanism that lets you link with a
-##.dll## (##.so##) written in C. The program first calls [[:open_dll]]() to open the
-##.dll## or ##.so## file, then it calls [[:define_c_func]]() or [[:define_c_proc]]() for
+with a Euphoria shared dynamically loading library using the same mechanism that lets you link with a shared dynamically loading library written in C. The program first calls [[:open_dll]]() to open the
+file, then it calls [[:define_c_func]]() or [[:define_c_proc]]() for
 any routines that it wants to call. It calls these routines using [[:c_func]]()
 and [[:c_proc]]().
 
-The routine names exported from a Euphoria ##.dll## will vary depending on which C
+The routine names exported from a Euphoria shared dynamically loading library will vary depending on which C
 compiler you use.
 
-GNU C on //Linux// or //FreeBSD// exports the names exactly as they appear in the C
+GNU C on UNIX exports the names exactly as they appear in the C
 code produced by the **Translator**, e.g. a Euphoria routine
 
 {{{
@@ -230,15 +227,14 @@ rerun ##emake.bat##, to rename the exported identifiers, or remove ones that you
 don't want to export.
 
 Having nice exported names is not critical, since the name need only appear
-once in each Euphoria program that uses the .dll, i.e. in a single
-[[:define_c_func]]() or [[:define_c_proc]]() statement. The author of a .dll
+once in each Euphoria program that uses the shared dynamically loading library, i.e. in a single
+[[:define_c_func]]() or [[:define_c_proc]]() statement. The author of a shared dynamically loading library
 should probably provide his users with a Euphoria include file containing the
 necessary [[:define_c_func]]() and [[:define_c_proc]]() statements, and he might
 even provide a set of Euphoria "wrapper" routines to call the routines in the
-.dll.
+shared dynamically loading library.
 
-When you call [[:open_dll]](), any top-level Euphoria statements in the .dll or
-.so will be executed automatically, just like a normal program. This gives the
+When you call [[:open_dll]](), any top-level Euphoria statements in the shared dynamically loading library will be executed automatically, just like a normal program. This gives the
 library a chance to initialize its data structures prior to the first call to
 a library routine. For many libraries no initialization is required.
 
@@ -247,7 +243,7 @@ Euphoria object as a result, you will need to use the following constants in
 ##euphoria\include\dll.e##:
 
 <eucode>
--- Euphoria types for .dll (.so) arguments and return values:
+-- Euphoria types for shared dynamically loading library arguments and return values:
 global constant
     E_INTEGER = #06000004,
     E_ATOM    = #07000004,
@@ -256,19 +252,18 @@ global constant
 </eucode>
 
 Use these in **define_c_proc()** and **define_c_func()** just as you currently
-use ##C_INT##, ##C_UINT## etc. to call C .dll's and .so's.
+use ##C_INT##, ##C_UINT## etc. to call C shared dynamically loading libraries.
 
 Currently, file numbers returned by [[:open]](), and routine id's returned by
 [[:routine_id]](), can be passed and returned, but the library and the main
 program each have their own separate ideas of what these numbers mean. Instead
 of passing the file number of an open file, you could instead pass the file
-name and let the .dll (.so) open it. Unfortunately there is no simple solution
-for passing routine id's. This might be fixed in the future.
+name and let the shared dynamically loading library open it. Unfortunately there is no simple solution for passing routine id's. This might be fixed in the future.
 
-A Euphoria .dll or .so currently may not execute any multitasking operations.
+A Euphoria shared dynamically loading library currently may not execute any multitasking operations.
 The Translator will give you an error message about this.
 
-Euphoria .dlls (.so's) can also be used by C programs as long as only 31-bit
+Euphoria shared dynamically loading library can also be used by C programs as long as only 31-bit
 integer values are exchanged. If a 32-bit pointer or integer must be passed,
 and you have the source to the C program, you could pass the value in two
 separate 16-bit integer arguments (upper 16 bits and lower 16 bits), and then
@@ -339,7 +334,8 @@ extreme when ##trace(3)## is also in effect.
 
 === Legal Restrictions
 
-As far as RDS is concerned, any executable programs or .dll's that you create
+As far as RDS is concerned, any executable programs or shared dynamically 
+loading libraries that you create
 with this **Translator** without modifying an RDS translator library file, may
 be distributed royalty-free. You are free to incorporate any Euphoria files
 provided by RDS into your application.

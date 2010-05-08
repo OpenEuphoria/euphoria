@@ -59,10 +59,11 @@ different parts of a single file.
 
 === Special Keys
 
-Some PC keys do not work in a Linux or FreeBSD text console, or in Telnet, and
+Some PC keys do not work in a Linux or FreeBSD or Windows text console, or in Telnet, and
 some keys do not work in an xterm under X windows. Alternate keys have been
-provided. In some cases on Linux/FreeBSD you might have to edit ed.ex to map
-the desired key to the desired function.
+provided. In some cases you might have to edit ed.ex to map
+the desired key to the desired function.  e.g. you'll have to use
+//C-t// and //C-b// instead of //C-Home// and //C-End//.
 
 | Delete    | Delete the current character above the cursor |
 | Backspace | Move the cursor to the left and delete a character |
@@ -224,14 +225,4 @@ You are welcome to make improvements. There is a section at the top of ##ed.ex##
 containing "user-modifiable" configuration parameters that you can adjust. The
 colors and the cursor size may need adjusting for some operating environments.
 
-=== Platform Issues
-
-##euphoria\bin\ed.bat## can be set up to run ##ed.ex## using ##eui.exe## or
-##euid.exe##. You are better off running **ed** with ##euid.exe## on Windows 95/98/ME.
-You'll get much quicker screen updates than with ##eui.exe##. On Windows XP you'll
-be a bit better off using ##eui.exe##. You'll get slightly quicker screen updates,
-and you'll be able to create files with long names, not just open existing ones.
-However some special keys won't work with ##eui.exe##, e.g. you'll have to use
-//C-t// and //C-b// instead of //C-Home// and //C-End//. On other platforms there
-are no problems with long filenames, and the keyboard response is always fast.
 

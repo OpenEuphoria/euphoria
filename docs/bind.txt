@@ -18,7 +18,7 @@ back-end of the interpreter. A shrouded file does not require any parsing. It
 starts running immediately, and with large programs you will see a quicker
 start-up time. Shrouded files must be run using the interpreter back-end:
 ##eubw.exe## (//Windows//) or ##eub.exe##
-(//Linux/FreeBSD//).  This backend is freely available, and you can give it to
+(//UNIX//).  This backend is freely available, and you can give it to
 any of your users who need it. It's stored in ##euphoria\bin## in the Euphoria
 interpreter package. You can run your .il file with:
 
@@ -111,7 +111,7 @@ source statements are not there.
 * **-list**: Same as ##shroud## above.
 * **-quiet**: Same as ##shroud## above.
 * **-out executable_file**: This option lets you choose the name of the executable file
-  created by the binder. Without this option, ##bind## will choose a name based on the name
+  created by the binder. Without this option, ##eubind## will choose a name based on the name
   of the main Euphoria source file.
 
 A one-line Euphoria program will result in an executable file as large as the
