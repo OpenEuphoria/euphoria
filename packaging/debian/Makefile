@@ -1,4 +1,6 @@
 
+include Makefile.eu
+
 EU_VERSION =4.0
 EU_BASE_DIR =../..
 DEBIAN_VERSION =1
@@ -172,7 +174,7 @@ update :
 	-cp postinst $(DEB_SOURCE_DIR)/debian
 	-cp prerm $(DEB_SOURCE_DIR)/debian
 	-cp $(EU_BASE_DIR)/docs/man/*.1 $(DEB_SOURCE_DIR)/debian
-	-cp control $(DEB_SOURCE_DIR)/debian
+	-sed s/%arch%/$(ARCH)/ control > $(DEB_SOURCE_DIR)/debian/control
 	-cp changelog $(DEB_SOURCE_DIR)/debian
 	-cp copyright $(DEB_SOURCE_DIR)/debian
 	-rm $(DEB_SOURCE_DIR)/*stamp

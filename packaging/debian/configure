@@ -1,0 +1,10 @@
+#!/bin/sh
+
+UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
+UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
+
+if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
+	echo ARCH=i386 >> "$PREFIX"Makefile.eu
+elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
+	echo ARCH=amd64 >> "$PREFIX"Makefile.eu
+fi

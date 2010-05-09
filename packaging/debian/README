@@ -2,6 +2,7 @@ Making a Debian package
 
 Required:  
 
+euphoria:   Working euphoria installation.
 debhelper:  This package is used to help build the package.
 eudoc:      Generates the euphoria documentation
 creolehtml: Converts the eudoc output to html
@@ -11,9 +12,11 @@ source code repository.
 
 From the packaging/debian directory, simply type:
 
-$ make
+$ ./configure && make
 
 The process should be automated.  It will build a source and a binary package.
+It will build a package with either i386 or amd64, depending upon the 
+host machine.
 
 TODO:
 Bind, shroud, man pages

@@ -6,7 +6,7 @@ Build-Depends: libc6-dev (>= 2.6.1 ), linux-libc-dev (>= 2.6.22-14.47 )
 Standards-Version: 3.8.4
 
 Package: euphoria
-Architecture: i386
+Architecture: %arch%
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Intrepreted and compiled programming language
  Euphoria is a simple, flexible, and easy-to-learn programming 
