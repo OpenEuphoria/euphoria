@@ -2,33 +2,8 @@
 #
 # You must first run configure.bat, supplying any options you might need:
 #
-#     --without-euphoria      Use this option if you are building Euphoria 
-#		     with only a C compiler.
-# 
-#     --prefix <dir>  Use this option to specify the location for euphoria to
-#		     be installed.  The default is EUDIR, or c:\euphoria,
-#		     if EUDIR is not set.
+#     Run "configure.bat --help" for a list of options.
 #
-#     --eubin <dir>   Use this option to specify the location of the interpreter
-#		     binary to use to translate the front end.  The default
-#		     is ..\bin
-#
-#     --managed-mem   Use this option to turn EUPHORIA's memory cache on in
-#		     the targets
-#
-#     --debug	 Use this option to turn on debugging symbols
-#
-#
-#     --full	  Use this option to so EUPHORIA doesn't report itself
-#		     as a development version.
-#
-#     --align4    Use this on systems in which 'malloc' may return addresses
-#            that are 4-byte aligned. Win95 for example.
-#
-#     --noassert  Use this to remove 'assert()' processing in the C code.
-#
-#     --plat value   set the OS that the translator will translate the code to.
-#            values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD.
 #
 # Syntax:
 #   Interpreter (euiw.exe, eui.exe)  : wmake interpreter
@@ -276,6 +251,19 @@ EX=$(EUBIN)\eui.exe
 !endif
 
 EXE=$(EX)
+
+# The default is to use the interpreter for everything
+# That way one can build everything with only the
+# interpreter.
+# Change to using the EXEs to keep your CPU cool using
+# --use-binary-translator
+!ifndef EC
+EC=$(EXE) $(INCDIR) $(EUDEBUG)  $(TRUNKDIR)\source\ec.ex
+!endif
+
+EUTEST=$(EXE) $(%EUDIR)\source\eutest.ex
+#EUTEST=$(EUBIN)\eutest.exe
+
 INCDIR=-i $(TRUNKDIR)\include
 
 PWD=$(%cdrive):$(%cwd)
@@ -414,7 +402,7 @@ testeu : .SYMBOLIC code-page-db
 	cd ..\tests
 	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	$(EXE) ..\source\eutest.ex -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex" $(LIST)
+	$(EUTEST) -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex" $(LIST)
 	-del ecp.dat
 	cd ..\source
 
@@ -424,7 +412,7 @@ test : .SYMBOLIC code-page-db
 	cd ..\tests
 	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EXE) -i $(%EUDIR)\include $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) $(LIST)
+	$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) $(LIST)
 	-del ecp.dat
 	cd ..\source
 	
@@ -434,8 +422,8 @@ report: .SYMBOLIC
 ..\reports\report.html: $(EU_ALL_FILES)
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	-$(EXE) $(%EUDIR)\source\eutest.ex -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
-	$(EXE) $(%EUDIR)\source\eutest.ex -process-log -html > ..\reports\report.html
+	-$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
+	$(EUTEST) -process-log -html > ..\reports\report.html
 	cd ..\source
 
 tester: .SYMBOLIC 
@@ -553,14 +541,14 @@ $(BUILDDIR)\$(OBJDIR)\main-.c : $(EU_TARGET)ex $(BUILDDIR)\$(OBJDIR)\back $(EU_T
 	-$(RM) $(TRUNKDIR)\source\init-.c
 	-$(RM) $(TRUNKDIR)\source\main-.c
 	cd  $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC) $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : $(EU_TARGET)ex  $(BUILDDIR)\$(OBJDIR)\back $(EU_TRANSLATOR_FILES)
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\back\*.*
 	-$(RM) $(BUILDDIR)\$(OBJDIR)\*.*
 	cd $(BUILDDIR)\$(OBJDIR)
-	$(EXE) $(INCDIR) $(EUDEBUG) $(TRUNKDIR)\source\ec.ex  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
+	$(EC)  $(TRANSDEBUG) -nobuild -wat -plat $(OS) $(RELEASE_FLAG) $(MANAGED_FLAG) $(DOSEUBIN) $(INCDIR) $(TRUNKDIR)\source\$(EU_TARGET)ex
 	cd $(TRUNKDIR)\source
 !else
 $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
