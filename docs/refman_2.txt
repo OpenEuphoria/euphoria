@@ -3266,7 +3266,8 @@ end while
 
 loop label "a_loop_block" do
     ...
-until TRUE
+   until TRUE
+end loop
 
 switch x label "a_switch_block" do
    ...
