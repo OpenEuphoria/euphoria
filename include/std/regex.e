@@ -525,7 +525,7 @@ public type option_spec(object o)
 				return 1
 			end if
 		end if
-	elsif string(o) then
+	elsif integer_array(o) then
 		return option_spec(or_all(o))
 	else
 		return 0

@@ -234,5 +234,7 @@ test_equal("find_replace_callback() #3", "John Doe JANE DOE",
 test_equal("escape #1", "Payroll is \\$\\*\\*\\*15\\.00", regex:escape("Payroll is $***15.00"))
 
 test_equal("option names", {"STRING_OFFSETS"}, option_spec_to_string(regex:STRING_OFFSETS))
-
+test_equal("sequence option spec", re:regex(
+	re:new(`\<\?xml(.*)\?\>`, {re:MULTILINE, NEWLINE_ANY,DOTALL} ) 
+	), 1 ) -- ticket 161  
 test_report()
