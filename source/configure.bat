@@ -25,14 +25,6 @@ rem ============================================================
 rem Detect some parameters
 rem ============================================================
 
-wtouch nothing.ex
-eui nothing.ex 2> NUL
-if "%ERRORLEVEL%" == "9009" (
-    set NOEU=1
-) else (
-    set NOEU=
-)
-
 
 rem ============================================================
 rem Read command line parameters
@@ -57,6 +49,7 @@ IF "%1" =="--no-managed-mem" (
 )
 IF "%1" =="--eubin" (
 	echo EUBIN=%2 >> config.wat
+        SET HAS_EUBIN=1
 	SHIFT
 	GOTO EndLoop
 )
@@ -122,12 +115,24 @@ GOTO Help
 SHIFT
 GOTO Loop
 
-
 rem ============================================================
 rem Store our options to the config.wat file
 rem ============================================================
 
 :Continue
+
+if "%HAS_EUBIN%" == "1" (
+SET NOEU=
+) else (
+wtouch nothing.ex
+eui nothing.ex 2> NUL
+if "%ERRORLEVEL%" == "9009" (
+    set NOEU=1
+) else (
+    set NOEU=
+)
+)
+
 echo ARCH=ix86 >> config.wat
 
 IF "%NOEU%" == "" (

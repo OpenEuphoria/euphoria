@@ -209,16 +209,16 @@ NOASSERT = /dNDEBUG
 NOASSERT = /dNDEBUG
 !endif
 
-!ifndef EUBIN
-EUBIN=$(TRUNKDIR)\bin
-!endif
-
 !ifndef PREFIX
-!ifneq PREFIX ""
+!ifdef %EUDIR
 PREFIX=$(%EUDIR)
 !else
 PREFIX=C:\euphoria
 !endif
+!endif
+
+!ifndef EUBIN
+EUBIN=$(PREFIX)\bin
 !endif
 
 !ifndef BUILDDIR
@@ -261,7 +261,7 @@ EXE=$(EX)
 EC=$(EXE) $(INCDIR) $(EUDEBUG)  $(TRUNKDIR)\source\ec.ex
 !endif
 
-EUTEST=$(EXE) $(%EUDIR)\source\eutest.ex
+EUTEST=$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
 #EUTEST=$(EUBIN)\eutest.exe
 
 INCDIR=-i $(TRUNKDIR)\include
@@ -287,7 +287,7 @@ all :  .SYMBOLIC
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
 $(BUILDDIR)\ecp.dat : interpreter
-	$(BUILDDIR)\eui $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
+	$(BUILDDIR)\eui -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
 
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
@@ -457,6 +457,8 @@ interpreter : .SYMBOLIC
 install : .SYMBOLIC
 	@echo --------- install $(PREFIX) ------------
 	if /I $(PWD)==$(PREFIX)\source exit
+	if not exist $(PREFIX) mkdir $(PREFIX)
+	if not exist $(PREFIX)\source mkdir $(PREFIX)\source
 	for %i in (*.e) do @copy %i $(PREFIX)\source\
 	for %i in (*.ex) do @copy %i $(PREFIX)\source\
 	if not exist $(PREFIX)\include\std mkdir $(PREFIX)\include\std
@@ -470,6 +472,7 @@ install : .SYMBOLIC
 	copy ..\include\std\unix\* $(PREFIX)\include\std\unix
 	if not exist $(PREFIX)\include\euphoria mkdir $(PREFIX)\include\euphoria
 	copy ..\include\euphoria\* $(PREFIX)\include\euphoria
+	@if not exist $(PREFIX)\bin mkdir $(PREFIX)\bin
 	copy ..\bin\*.ex $(PREFIX)\bin
 	copy ..\bin\*.bat $(PREFIX)\bin
 	@if exist $(BUILDDIR)\euc.exe copy $(BUILDDIR)\euc.exe $(PREFIX)\bin\
