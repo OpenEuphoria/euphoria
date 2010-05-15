@@ -103,7 +103,8 @@ else
 	echo EMINGW= >> "$PREFIX"Makefile.eu
 	echo EDJGPP= >> "$PREFIX"Makefile.eu
 fi
-
+# default use source
+export EC="eui ec.ex"
 export BUILDDIR=build
 export XLTTARGETCC=gcc
 export CC=gcc
@@ -151,6 +152,12 @@ while [ "$1" != "" ]; do
 			echo "PREFIX=$2" >> Makefile.eu
 			shift
 		;;
+	--use-binary-translator )
+		export EC="euc"
+		;;
+	--use-source-translator )
+		export EC="eui ec.ex"
+		;;
 		* )
 			echo "Unknown option '$1'"
 			echo "Configures and prepares the euphoria source for building"
@@ -170,7 +177,16 @@ while [ "$1" != "" ]; do
 			echo "                        Watcom C."
 			echo "    --cc  value         set this to the name of your GNU C compiler file name if its "
 			echo "                        name is not 'gcc'"
-			echo
+			echo "Press ENTER to continue" 
+			read
+			echo "    --use-binary-translator"
+			echo "                        Use the already built translator rather"
+			echo "                        than interpreting its source           "
+			echo "                                                               "
+			echo "    --use-source-translator                                    "
+			echo "                        Interpret the translator's source rather"
+			echo "                        than using the already built translator"
+			echo "                        (default)"
 			exit
 			;;
     esac
@@ -203,7 +219,9 @@ if [ "x$MANAGED_MEM" = "x" ]; then
 	fi	
 fi
 echo "CC=$CC" >> "$PREFIX"Makefile.eu
-
+if [ "$EC" != "" ]; then
+	echo "TRANSLATE=$EC" >> "$PREFIX"Makefile.eu
+fi
 export PWD=`pwd`
 export PPWD=`cd .. && pwd`
 # The following works around a bug in djgpp's pwd
