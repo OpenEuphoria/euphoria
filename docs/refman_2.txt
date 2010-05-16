@@ -1004,7 +1004,7 @@ plugs the object what in the hole just created. The modified sequence is
 returned. For instance:
 
 <eucode>
-s = insert("Joe",'h',3) -    - s id "Johe", another string
+s = insert("Joe",'h',3)     -- s is "Johe", another string
 s = insert("Joe","h",3)     -- s is {'J','o',{'h'},'e'}, not a string
 s = insert({1,2,3},4,-0.5)  -- s is {4,1,2,3}, like prepend()
 s = insert({1,2,3},4,8.5)   -- s is {1,2,3,4}, like append()
