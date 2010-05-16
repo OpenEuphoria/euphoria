@@ -97,6 +97,7 @@ Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Componen
 Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\bin\euinc.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\bin\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main

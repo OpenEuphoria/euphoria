@@ -186,35 +186,46 @@ end procedure
 
 function setup_build()
 	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "",
-		exe_ext = "", l_flags_begin = ""
+		exe_ext = "", l_flags_begin = "", l_names, l_ext, t_slash
 
 	if length(user_library) = 0 then
-		if TUNIX or compiler_type = COMPILER_GCC then
-			ifdef UNIX then
-				sequence eudir = get_eucompiledir()
-				if match( "/share/euphoria", eudir ) then
-					-- EUDIR probably not set, look in /usr/local/lib or /usr/lib
-					if file_exists( "/usr/local/lib/eu.a" ) then
-						user_library = "/usr/local/lib/eu.a"
-						
-					elsif file_exists( "/usr/lib/eu.a" ) then
-						user_library = "/usr/lib/eu.a"
-						
-					else
-						-- It's not in the 'standard' location, so try EUDIR
-						user_library = eudir & "/bin/eu.a"
-					end if
-				else
-					user_library = eudir & "/bin/eu.a"
-				end if
-			elsedef
-				user_library = get_eucompiledir() & "/bin/eu.a"
-			end ifdef
+		if debug_option then
+			l_names = { "eudbg", "eu" }
 		else
-			user_library = get_eucompiledir() & "\\bin\\eu"
-			user_library &= ".lib"
+			l_names = { "eu", "eudbg" }
+		end if	
+		-- We assume the platform the compiler will **build on** is the same
+		-- as the platform the compiler will **build for*.
+		if TUNIX or compiler_type = COMPILER_GCC then
+			l_ext = "a"
+			t_slash = "/"
+		elsif TWINDOWS then
+			l_ext = "lib"
+			t_slash = "\\"
 		end if
-	end if
+		sequence eudir = get_eucompiledir()
+		for tk = 1 to length(l_names) do -- translation kind
+			user_library = eudir & sprintf("%sbin%s%s.%s",{t_slash, t_slash, l_names[tk],l_ext})
+			if TUNIX or compiler_type = COMPILER_GCC then
+				ifdef UNIX then
+					sequence locations = { "/usr/local/lib/%s.a", "/usr/lib/%s.a"}
+					if match( "/share/euphoria", eudir ) then
+						-- EUDIR probably not set, look in /usr/local/lib or /usr/lib
+						for i = 1 to length(locations) do
+							if file_exists( sprintf(locations[i],{l_names[tk]}) ) then
+								user_library = sprintf(locations[i],{l_names[tk]})
+								exit
+							end if
+						end for
+					end if
+				end ifdef -- The translation or interpretation of the translator
+				          -- is done on a UNIX computer
+			end if -- compiling for UNIX and/or with GCC
+			if file_exists(user_library) then			
+				exit
+			end if
+		end for -- tk
+	end if -- user_library = 0
 
 	if TWINDOWS then
 		if dll_option then

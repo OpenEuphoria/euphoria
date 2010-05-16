@@ -21,7 +21,7 @@ rm -rf Linux FreeBSD
 cd ../
 rm -rf docs packaging Setup
 
-cp ../../../bin/eui ../../../bin/euc ../../../bin/eu.a ../../../bin/eub.exe bin
+cp ../../../bin/eui ../../../bin/euc ../../../bin/eu.a ../../../bin/eudbg.a ../../../bin/eub.exe bin
 
 cd ..
 

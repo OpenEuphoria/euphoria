@@ -15,6 +15,27 @@
 -- variables and use the selected platform to determine which compiler must
 -- be used.
 
+-- If you are translating to another platform, we expect you to take the 
+-- C files and compile natively rather than using a cross compiler
+--
+-- From the GNU terminology there are three platforms ##target##, ##host##, and ##build##.
+-- For the translator that will be built using this file there are four:
+--
+-- |= GNU platform name |= Description |= Variable Names |
+-- |##target##   | The newly translated and compiled translator will translate to 
+--                 any target platform for this translator... | none|
+-- |##host##     | The platform of the host this translated compiled translator will run on.|
+--                 ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/## |
+-- |##build##    | The platform where the building utilities make, wmake, compiler 
+--                 and assembler are run.| ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/##|
+-- |##translate##| The platform where the current translator is run on|platform()|
+--
+-- ifdef OSNAME and platform() is for our translation platform,
+-- TOSNAME is for the target platform.
+-- We assume that the target platform is the same as our build platform.  
+-- Thus, no cross compilers.
+
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
