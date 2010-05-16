@@ -2,6 +2,14 @@ include std/machine.e
 include std/math.e
 include std/unittest.e
 
+test_equal("gcd", 17, gcd(3*17,17*7))
+  
+test_equal("is_even #1", 1, is_even(12) )
+test_equal("is_even #2", 0, is_even(7) )
+test_equal("is_even_obj", {1,0}, is_even_obj({2,3}) )
+
+test_equal("or_all", and_bits(#DEADBEE5,-1), or_all({#D000_0000,#0E00_0000,#00AD0000,#BEE5}))
+
 test_equal("ceil() integer", 5, ceil(5))
 test_equal("ceil() float #1", 4, ceil(4.0))
 test_equal("ceil() float #2", 5, ceil(4.1))
@@ -44,6 +52,7 @@ test_equal("sum() two sequences",
     {2,4,5,6,    2,2.2,{6.3},    1.1,0.4,{3.6},   {2},{2.2},{6.3},  {6},#C000001}, 
     {1,4,2,3,    1,2  ,3    ,    0.1,0.2, 0.3,    {1},{2},  {3},    {2},#C000000} 
   + {1,0,3,3,    1,0.2,{3.3},      1,0.2,{3.3},    1, 0.2,  {3.3},  {4},       1} ) 
+
 test_equal("min() integer", 5, min(5))
 test_equal("min() sequence", 3, min({5,8,3,100,32}))
 
@@ -67,10 +76,15 @@ test_equal("log10() #3", {1,1}, close_enough( {3.0, 1.91908}, log10({1000.0, 83}
 test_equal("deg2rad() #1", "0.0174532925", sprintf("%.10f", deg2rad(1)))
 test_equal("deg2rad() #2", "3.4906585040", sprintf("%.10f", deg2rad(200)))
 test_equal("deg2rad() #3", "0.0174532925,3.3859387489", sprintf("%.10f,%.10f", deg2rad({1,194})))
+test_equal("deg2rad() #4", 0.01745, deg2rad(0.9998113525))
+test_equal("deg2rad() #5", 0.5, deg2rad(28.6478897565))
+test_equal("deg2rad() #6", {HALFPI,{PI,-HALFPI}}, deg2rad({90,{180,-90}}))
+test_equal("deg2rad() #7", {}, deg2rad({}))
 
 test_equal("rad2deg() #1", "0.9998113525", sprintf("%.10f", rad2deg(0.01745)))
 test_equal("rad2deg() #2", "28.6478897565", sprintf("%.10f", rad2deg(0.5)))
 test_equal("rad2deg() #3", "0.9998113525,28.6478897565", sprintf("%.10f,%.10f", rad2deg({0.01745,0.5})))
+
 
 test_equal("exp() #1", 7.389056, round(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round(exp(2.3), 100000))
@@ -93,6 +107,11 @@ for i = 1 to 10 do
     test_true("rand_range(-100,-10)", n >= -100 and n <= -10)
 end for
 
+test_equal("remainder() #1", 1, remainder(9, 4) )
+test_equal("remainder() #2", 
+	{1, -0.1, -1, 1.5}, 
+	remainder({81, -3.5, -9, 5.5}, {8, -1.7, 2, -4}) )
+
 test_equal("mod() #1",  3573, mod(-27, 3600))
 test_equal("mod() #2",  3573, mod(-3627, 3600))
 test_equal("mod() #3",   -27, mod(-3627, -3600))
@@ -110,6 +129,10 @@ test_equal ("mod() #7",  33.218, mod( a, n))
 test_equal ("mod() #8",   1.743, mod(-a, n))
 test_equal ("mod() #9",   -1.743, mod( a,-n))
 test_equal ("mod() #10", -33.218, mod(-a,-n))
+
+test_equal("product:6!", 720, product({1,2,3,4,5,6}))
+test_equal("product(1)",   1, product({}))
+test_equal("product deep sequence", 100, product({{2,5},{2,5}}))
 
 
 test_equal("rem() #1", sign(a)  * 33.218, remainder( a, n))
@@ -155,12 +178,17 @@ test_equal("rotate bits #A", 0x7FFFFFF8,  rotate_bits(0x7FFFFFF8, 32))
 test_equal("rotate bits #B", {0x30000000, 0x50000000, 0x10000001, 0x30001E0F, -1879047985 /* 0x900000CF */ ,-1610614895 /* 0x9FFFF791 */}, 
 							 rotate_bits({3,5,17,123123,3321,-34535}, 4))
 
-test_equal("sh", 0.75, sinh(LN2))
-test_equal("ch", 1.25, cosh(LN2))
+test_equal("sinh", 0.75, sinh(LN2))
+test_equal("cosh", 1.25, cosh(LN2))
 test_equal("argsh", 1.146215834780588843900393655674, arcsinh(SQRT2))
 test_equal("argch", 1.7627471740390860504652186499596, arccosh(3))
-test_equal("th", 0.46211715726000975850231848364367, tanh(0.5))
-test_equal("argth", log(3)/2, arctanh(0.5))
+test_equal("tanh", 0.46211715726000975850231848364367, tanh(0.5))
+test_equal("arctanh", log(3)/2, arctanh(0.5))
+test_equal("arccos", 0, arccos(1.0) )
+test_equal("arcsin", HALFPI, arcsin(1.0) )
+
+
+
 
 test_true("Hex Literal #1", #abcdef = #ABCDEF)
 test_true("Hex Literal #2", #012345 = #012345)
@@ -212,7 +240,6 @@ test_equal("ensure_in_list #3", 100, ensure_in_list(1, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #4", 100, ensure_in_list(100, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #5", -6, ensure_in_list(-6, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #6", 9, ensure_in_list(9, {100, 2, 45, 9, 17, -6}))
-
 
 test_report()
 
