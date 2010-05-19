@@ -2,7 +2,7 @@ include std/machine.e
 include std/math.e
 include std/unittest.e
 
-test_equal("gcd", 17, gcd(3*17,17*7))
+test_equal("gcd", 17, gcd(1999*3*17,1993*17*7))
   
 test_equal("is_even #1", 1, is_even(12) )
 test_equal("is_even #2", 0, is_even(7) )
@@ -225,6 +225,8 @@ test_equal("intdiv #3", {1, -2, 13}, intdiv({1.1, -9.998, 88}, 7))
 test_equal("intdiv #4", {707, 78, 9}, intdiv(777, {1.1, -9.998, 88}))
 test_equal("intdiv #5", {91, 21, -4}, intdiv({100, 200, -300}, {1.1, -9.998, 88}))
 test_equal("intdiv #6", 20, intdiv(100, 5))
+test_equal("intdiv #7", {43,4,-11}, intdiv({300,28,-73},7))
+test_equal("intdiv #8", {{4,8,5},45}, intdiv({24,312},{{6,3,5},7}))
 
 test_equal("ensure_in_range #1", 1, ensure_in_range(1, {}))
 test_equal("ensure_in_range #2", 1, ensure_in_range(1, {1}))
@@ -242,4 +244,3 @@ test_equal("ensure_in_list #5", -6, ensure_in_list(-6, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #6", 9, ensure_in_list(9, {100, 2, 45, 9, 17, -6}))
 
 test_report()
-
