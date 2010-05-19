@@ -56,7 +56,25 @@ end type
 --		[[:sign]]
 
 public function abs(object a)
-	return sign(a) * a
+	object t
+	if atom(a) then
+		if a >= 0 then
+			return a
+		else
+			return - a
+		end if
+	end if
+	for i = 1 to length(a) do
+		t = a[i]
+		if atom(t) then
+			if t < 0 then
+				a[i] = - t
+			end if
+		else
+			a[i] = abs(t)
+		end if
+	end for
+	return a
 end function
 
 --**
@@ -156,7 +174,7 @@ public function min(object a)
 	b = PINF
 	for i = 1 to length(a) do
 		c = min(a[i])
-		if c < b then
+			if c < b then
 				b = c
 		end if
 	end for
@@ -456,7 +474,7 @@ end function
 -- </eucode>
 --
 
-public function intdiv(object a, object b)
+public function intdiv(object a, object b)	
 	return sign(a)*ceil(abs(a)/abs(b))
 end function
 
@@ -539,23 +557,58 @@ end function
 --	[[:floor]], [[:ceil]]
 
 public function round(object a, object precision=1)
-	object t
+	integer len
+	sequence s
+	object t, u
+
 	precision = abs(precision)
-	if atom(precision) or atom(a) then
-		return floor(0.5 + (a * precision )) / precision
+	if atom(a) then
+		if atom(precision) then
+			return floor(0.5 + (a * precision )) / precision
+		end if
+		len = length(precision)
+		s = repeat(0, len)
+		for i = 1 to len do
+			t = precision[i]
+			if atom (t) then
+				s[i] = floor( 0.5 + (a * t)) / t
+			else
+				s[i] = round(a, t)
+			end if
+		end for
+		return s
+	elsif atom(precision) then
+		len = length(a)
+		s = repeat(0, len)
+		for i = 1 to len do
+			t = a[i]
+			if atom(t) then
+				s[i] = floor(0.5 + (t * precision)) / precision
+			else
+				s[i] = round(t, precision)
+			end if
+		end for
+		return s
 	end if
-	if length(a) != length(precision) then
+	len = length(a)
+	if len != length(precision) then
 		crash("The lengths of the two supplied sequences do not match.")
 	end if
-	for i = 1 to length(precision) do
+	s = repeat(0, len)
+	for i = 1 to len do
 		t = precision[i]
-		if atom (t) then
-			a[i] = floor( 0.5 + (a[i] * t)) / t
+		if atom(t) then
+			u = a[i]
+			if atom(u) then
+				s[i] = floor(0.5 + (u * t)) / t
+			else
+				s[i] = round(u, t)
+			end if
 		else
-			a[i] = round(a[i], t)
+			s[i] = round(a[i], t)
 		end if
 	end for
-	return a
+	return s
 end function
 
 --****
