@@ -209,6 +209,7 @@ BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -w $(EOSTYPE) $(EBSDFLAG) $(RU
 EU_CORE_FILES = \
 	block.e \
 	common.e \
+	coverage.e \
 	emit.e \
 	error.e \
 	fwdref.e \
@@ -490,6 +491,15 @@ test :
 
 testeu : code-page-db
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
+
+coverage : 
+	-rm $(BUILDDIR)/unit-test.edb
+	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -verbose -i ../include \
+		-exe "$(BUILDDIR)/$(EEXU) -batch -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eu.ex -coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std" \
+		$(TRUNKDIR)/tests/t_text.e $(TRUNKDIR)/tests/t_sequence.e
+	$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex $(BUILDDIR)/unit-test.edb
+
+.PHONY : coverage
 
 ifeq "$(PREFIX)" ""
 PREFIX=/usr/local

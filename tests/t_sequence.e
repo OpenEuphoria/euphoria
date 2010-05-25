@@ -3,7 +3,8 @@ include std/sequence.e as seq
 include std/search.e as srch
 
 include std/unittest.e
-
+with trace
+trace(3)
 test_equal("reverse() integer sequence", {3,2,1}, reverse({1,2,3}))
 test_equal("reverse() string", "nhoJ", reverse("John"))
 test_equal("reverse() sub-string 1", "ayxwvutsrqponmlkjihgfedcbz", reverse("abcdefghijklmnopqrstuvwxyz", 2, -1))

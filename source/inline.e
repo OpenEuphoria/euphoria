@@ -217,7 +217,7 @@ function adjust_il( integer pc, integer op)
 		elsif sub then
 			inline_code[pc+i] = {INLINE_SUB}
 		else
-			if op != STARTLINE then
+			if op != STARTLINE and op != COVERAGE_LINE and op != COVERAGE_ROUTINE then
 				check_target( pc, op )
 				if not adjust_symbol( pc + i ) then
 					return 0

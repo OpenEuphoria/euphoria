@@ -76,6 +76,7 @@ FULLBUILDDIR=$(BUILDDIR)
 EU_CORE_FILES = &
 	block.e &
 	common.e &
+	coverage.e &
 	emit.e &
 	error.e &
 	fwdref.e &

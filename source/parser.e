@@ -28,14 +28,13 @@ include error.e
 include c_out.e
 include block.e
 include keylist.e
+include coverage.e
 
 constant UNDEFINED = -999
 constant DEFAULT_SAMPLE_SIZE = 25000  -- for time profile
 constant ASSIGN_OPS = {EQUALS, PLUS_EQUALS, MINUS_EQUALS, MULTIPLY_EQUALS,
 						DIVIDE_EQUALS, CONCAT_EQUALS}
 constant SCOPE_TYPES = {SC_LOCAL, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_UNDEFINED}
-	
-with trace
 
 --*****************
 -- Local variables
@@ -3879,6 +3878,8 @@ procedure SubProg(integer prog_type, integer scope)
 		CompileErr(148)
 	end if
 	
+	include_routine()
+	
 	-- code to perform type checks on all the parameters
 	sym = SymTab[p][S_NEXT]
 	for i = 1 to SymTab[p][S_NUM_ARGS] do
@@ -3915,7 +3916,7 @@ procedure SubProg(integer prog_type, integer scope)
 		end if
 	end if
 	putback(tok)
-
+	
 	-- parse body of routine.
 	FuncReturn = FALSE
 	if type_enum then

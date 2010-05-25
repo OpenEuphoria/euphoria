@@ -55,6 +55,8 @@ procedure init_op_info()
 	op_info[COMPARE             ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[CONCAT              ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[COS                 ] = { FIXED_SIZE, 3, {}, {2}, {} }
+	op_info[COVERAGE_LINE       ] = { FIXED_SIZE, 2, {}, {}, {} }
+	op_info[COVERAGE_ROUTINE    ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[C_FUNC              ] = { FIXED_SIZE, 5, {}, {4}, {3} }
 	op_info[C_PROC              ] = { FIXED_SIZE, 4, {}, {}, {3} }
 	op_info[DATE                ] = { FIXED_SIZE, 2, {}, {1}, {} }

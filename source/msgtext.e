@@ -345,6 +345,12 @@ constant StdErrMsgs = {
 	{329, "Invalid character in HEX string"},
 	{330, "Only enums may be declared as types"},
 	{331, "Forward references are not supported for enums"},
+	{332, "Indicate files or directories for which to gather coverage statistics"},
+	{333, "Specify the filename for the coverage database."},
+	{334, "Erase an existing coverage database and start a new coverage analysis."},
+	{335, "Could not erase coverage database: [1]"},
+	{336, "Could not create coverage table: [1]"},
+	{337, "Could not create coverage database: [1]"},
 	$
 }
 

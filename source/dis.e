@@ -187,6 +187,45 @@ procedure pnonary()
 	pc += 1
 end procedure
 
+procedure opCOVERAGE_LINE()
+	
+	object line
+	sequence entry_
+	integer lx
+	
+	
+	lx = Code[pc+1]
+	symtab_index sub = Code[pc+2]
+	if atom(slist[$]) then
+		slist = s_expand( slist )
+	end if
+	
+	if atom(slist[lx][SRC]) then
+		slist[lx][SRC] = fetch_line(slist[lx][SRC])
+	end if
+
+	entry_ = slist[Code[pc+1]]
+	line = entry_[SRC]
+	if atom(line) then
+		line = ""
+	else
+		while length(line) and find( line[1], "\t " ) do
+			line = line[2..$]
+		end while
+	end if
+	
+	il( sprintf( "%s: %s:(%d)<<%s>>", {opnames[Code[pc]],  file_name[entry_[LOCAL_FILE_NO]], entry_[LINE] ,line}), 1)
+	pc += 2
+end procedure
+
+include std/filesys.e
+procedure opCOVERAGE_ROUTINE()
+	il( sprintf( "%s: %s:%s\n", 
+		{ opnames[Code[pc]], canonical_path( file_name[ SymTab[Code[pc+1]][S_FILE_NO] ] ), 
+			sym_name( Code[pc+1] ) }  ), 1 )
+	pc += 2
+end procedure
+
 procedure opSTARTLINE()
 -- Start of a line. Use for diagnostics.
 	object line

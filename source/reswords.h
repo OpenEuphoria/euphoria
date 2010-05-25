@@ -222,7 +222,8 @@
 #define REF_TEMP            209
 #define DEREF_TEMP          210
 #define NOVALUE_TEMP        211
-#define MAX_OPCODE          211
+#define COVERAGE            212
+#define MAX_OPCODE          212
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

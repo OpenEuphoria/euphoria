@@ -22,6 +22,7 @@ include error.e
 include c_out.e
 include block.e
 include shift.e
+include coverage.e
 
 export integer op_info1, op_info2
 export integer optimized_while
@@ -669,6 +670,7 @@ constant opZeroZero = {
 	ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS,
 	DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
 	TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP, NOPSWITCH,
+	COVERAGE_LINE, COVERAGE_ROUTINE,
 	$
 	}
 export procedure emit_op(integer op)
@@ -1761,6 +1763,10 @@ export procedure StartSourceLine(integer sl, integer dup_ok = 0)
 		emit_op(STARTLINE)
 		emit_addr(gline_number)
 	end if
+	
+	-- emit opcode for coverage gathering
+	include_line( gline_number )
+	
 end procedure
 
 export function has_forward_params(integer sym)

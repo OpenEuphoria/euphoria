@@ -220,7 +220,9 @@ export constant
 	REF_TEMP            = 209,  -- Interpreter only?
 	DEREF_TEMP          = 210,  -- Interpreter only?
 	NOVALUE_TEMP        = 211,  -- Interpreter only?
-	MAX_OPCODE          = 211
+	COVERAGE_LINE       = 212,
+	COVERAGE_ROUTINE    = 213,
+	MAX_OPCODE          = 213
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

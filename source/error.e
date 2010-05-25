@@ -15,6 +15,7 @@ include std/text.e
 include global.e
 include reswords.e
 include msgtext.e
+include coverage.e
 
 integer Errors = 0 -- number of errors detected during compile
 
@@ -167,7 +168,8 @@ end procedure
 -- clean things up before quitting
 export procedure Cleanup(integer status)
 	integer w, show_error = 0
-
+	
+	write_coverage_db()
 	ifdef WIN32 or UNIX then
 		show_error = 1
 	end ifdef
@@ -183,7 +185,7 @@ export procedure Cleanup(integer status)
 			getc(0) -- wait
 		end if
 	end if
-
+	
 	abort(status)
 end procedure
 
