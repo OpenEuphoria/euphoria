@@ -2575,7 +2575,7 @@ extern struct IL fe;
 object start_backend(object x)
 /* called by Euphoria-written front-end to run the back-end
  *
- * x is {symtab, topcode, subcode, names, line_table, miscellaneous}
+ * x is {symtab, topcode, subcode, names, line_table, miscellaneous }
  */
 {
 	long switch_len, i;

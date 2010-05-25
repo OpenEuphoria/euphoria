@@ -56,6 +56,7 @@
 #include "alldefs.h"
 #include "be_runtime.h"
 #include "task.h"
+#include "coverage.h"
 
 /******************/
 /* Local defines  */
@@ -273,6 +274,7 @@ extern void cleanup_double(d_ptr);
 /**********************/
 /* Declared functions */
 /**********************/
+
 object decompress(unsigned int c);
 void INT_Handler(int);
 unsigned long good_rand();
@@ -930,6 +932,8 @@ void code_set_pointers(int **code)
 
 			case NOP2: 
 			case STARTLINE: 
+			case COVERAGE_LINE:
+			case COVERAGE_ROUTINE:
 				i += 2;
 				break;
 
@@ -1703,8 +1707,10 @@ void do_exec(int *start_pc)
 /* 204 (previous) */
   &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT, &&L_EXIT_BLOCK,
 /* 208 (previous) */
-  &&L_REF_TEMP, &&L_DEREF_TEMP, &&L_NOVALUE_TEMP
+  &&L_REF_TEMP, &&L_DEREF_TEMP, &&L_NOVALUE_TEMP,
 /* 211 (previous) */
+  &&L_COVERAGE_LINE, &&L_COVERAGE_ROUTINE
+/* 213 (previous) */
   };
 #endif
 #endif
@@ -5112,7 +5118,19 @@ void do_exec(int *start_pc)
 						
 					thread5();
 					BREAK;
-
+					
+			case L_COVERAGE_LINE:
+			deprintf("case L_COVERAGE_LINE");
+				COVER_LINE( *(pc+1) );
+				thread2();
+				BREAK;
+				
+			case L_COVERAGE_ROUTINE:
+			deprintf("case L_COVERAGE_ROUTINE");
+				COVER_ROUTINE( *(pc+1) );
+				thread2();
+				BREAK;
+			
 			default:
 				RTFatal("Unsupported Op Code ");
 		

@@ -264,15 +264,19 @@ procedure write_file_html( sequence output_dir, integer fx )
 					in_routine = 0
 					map:put( routine_lines, routine_name, { routine_executed_count, routine_line_count } )
 					routine_executed_count = 0
-				routine_line_count = 0
+					routine_line_count = 0
+				else
+					
 				end if
 			elsif regex:has_match( match_routine, line ) then
 				sequence routine_matches = all_matches( match_routine, line )
 				routine_name = routine_matches[1][2]
-				executed = map:get( routines, routine_name)
+				integer r_executed = map:get( routines, routine_name)
+				if r_executed and not executed then
+					total_executed += 1
+				end if
+				executed = r_executed
 				
-				total_lines += 1
-				total_executed += 0 != executed
 				routines_executed += 0 != executed
 				total_routines += 1
 				out_line = sprintf( ROUTINE_LINE, { line_number, executed, get_style( executed ), routine_name, line })
@@ -299,7 +303,7 @@ procedure write_file_html( sequence output_dir, integer fx )
 	end while
 	
 	file_coverage[fx][COV_FUNCS] = total_routines
-	
+	file_coverage[fx][COV_LINES_TESTED] = total_executed
 	puts( out, HEADER )
 	
 	

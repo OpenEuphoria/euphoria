@@ -6,6 +6,7 @@ include std/filesys.e
 include std/regex.e
 include std/map.e
 include std/eds.e
+include std/dll.e
 
 include global.e
 include error.e
@@ -49,6 +50,11 @@ export procedure init_coverage()
 		puts(1, "Deleting coverage DB!\n")
 		if not delete_file( coverage_db_name ) then
 			CompileErr( 335, { coverage_db_name } )
+			
+			-- prevent the translator from eliminating:
+			write_coverage_db()
+			cover_line( length( command_line() ) )
+			cover_routine( length( command_line() ) )
 		end if
 	end if
 	
@@ -77,14 +83,14 @@ procedure write_map( map coverage, sequence table_name )
 	end for
 end procedure
 
-export procedure write_coverage_db()
+export function write_coverage_db()
 	if not length( covered_files ) then
-		return
+		return 1
 	end if
 	
 	if DB_OK != db_open( coverage_db_name ) then
 		if DB_OK != db_create( coverage_db_name ) then
-			CompileErr( 337, { coverage_db_name } )
+			return 0
 		end if
 	end if
 	
@@ -98,7 +104,8 @@ export procedure write_coverage_db()
 	
 	routine_map = {}
 	line_map    = {}
-end procedure
+	return 1
+end function
 
 procedure read_coverage_db()
 	sequence tables = db_table_list()
@@ -210,7 +217,7 @@ procedure process_lines()
 	end for
 end procedure
 
-export function cover_line( integer gline_number )
+export procedure cover_line( integer gline_number )
 	if atom(slist[$]) then
 		slist = s_expand(slist)
 	end if
@@ -220,11 +227,13 @@ export function cover_line( integer gline_number )
 		integer line = sline[LINE]
 		map:put( line_map[file], line, 1, map:ADD )
 	end if
-	return 0
-end function
+end procedure
 
-export function cover_routine( symtab_index sub )
+export procedure cover_routine( symtab_index sub )
 	integer file_no = SymTab[sub][S_FILE_NO]
 	map:put( routine_map[file_coverage[file_no]], sym_name( sub ), 1, map:ADD )
-	return 0
+end procedure
+
+export function has_coverage()
+	return length( covered_files )
 end function

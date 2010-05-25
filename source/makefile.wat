@@ -392,6 +392,7 @@ exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
 !endif
 # OBJDIR
 
+
 !ifeq EUPHORIA 1
 translate source : .SYMBOLIC  
     @echo ------- TRANSLATE WIN -----------
@@ -416,7 +417,15 @@ test : .SYMBOLIC code-page-db
 	$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) $(LIST)
 	-del ecp.dat
 	cd ..\source
-	
+
+coverage : .SYMBOLIC code-page-db
+	cd ..\tests
+	-copy $(BUILDDIR)\ecp.dat .
+	$(EUTEST) -verbose -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include\std " $(LIST)
+	$(FULLBUILDDIR)\eui.exe -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex $(FULLBUILDDIR)\unit-test.edb
+	-del ecp.dat
+	cd ..\source
+
 report: .SYMBOLIC
 	$(MAKE) ..\reports\report.html
 	
@@ -437,6 +446,12 @@ $(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 	$(EUBIN)\euc -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
 
 !endif #BUILD_TOOLS
+
+coverage.h : $(BUILDDIR)\intobj\main-.c
+	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\intobj
+
+$(BUILDDIR)\intobj\back\be_execute.o : coverage.h
+$(BUILDDIR)\intobj\back\be_runtime.o : coverage.h
 
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG)
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc

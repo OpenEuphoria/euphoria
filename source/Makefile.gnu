@@ -414,6 +414,13 @@ source-tarball : source
 .PHONY : backendsource
 .PHONY : source
 
+
+coverage.h : $(BUILDDIR)/intobj/main-.c
+	$(EXE) -i $(TRUNKDIR)/include coverage.ex $(BUILDDIR)/intobj
+
+$(BUILDDIR)/intobj/back/be_execute.o : coverage.h
+$(BUILDDIR)/intobj/back/be_runtime.o : coverage.h
+
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
@@ -494,9 +501,8 @@ testeu : code-page-db
 
 coverage : 
 	-rm $(BUILDDIR)/unit-test.edb
-	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -verbose -i ../include \
-		-exe "$(BUILDDIR)/$(EEXU) -batch -i $(TRUNKDIR)/include $(TRUNKDIR)/source/eu.ex -coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std" \
-		$(TRUNKDIR)/tests/t_text.e $(TRUNKDIR)/tests/t_sequence.e
+	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc \
+		-exe "$(BUILDDIR)/$(EEXU) -coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std " 
 	$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex $(BUILDDIR)/unit-test.edb
 
 .PHONY : coverage
