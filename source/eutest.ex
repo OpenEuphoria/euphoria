@@ -43,6 +43,7 @@ constant cmdopts = {
 	{ "coverage-erase",  0, "Erase an existing coverage database and start a new coverage analysis.", 
 		{ NO_CASE } },
 	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", {NO_CASE, HAS_PARAMETER, "path-to-eucoverage.ex"} },
+	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
 	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
@@ -1162,6 +1163,11 @@ procedure main()
 			case "coverage-pp" then
 				coverage_pp = val
 			
+			case "coverage-exclude" then
+				for j = 1 to length( val ) do
+					interpreter_options &= sprintf(` -coverage-exclude "%s"`, {val[j]} )
+				end for
+				
 			case "extras" then
 				if length( val ) then
 					files = build_file_list( val )

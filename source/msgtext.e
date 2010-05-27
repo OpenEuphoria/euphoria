@@ -351,6 +351,8 @@ constant StdErrMsgs = {
 	{335, "Could not erase coverage database: [1]"},
 	{336, "Could not create coverage table: [1]"},
 	{337, "Could not create coverage database: [1]"},
+	{338, "Exclude from coverage"},
+	{339, "Error creating regex for coverage exclusion pattern '[1]'"},
 	$
 }
 

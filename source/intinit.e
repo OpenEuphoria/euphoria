@@ -25,6 +25,7 @@ sequence interpreter_opt_def = {
 	{ "coverage",  0, GetMsgText(332,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
 	{ "coverage-db",  0, GetMsgText(333,0), { NO_CASE, HAS_PARAMETER, "file" } },
 	{ "coverage-erase",  0, GetMsgText(334,0), { NO_CASE } },
+	{ "coverage-exclude", 0, GetMsgText(338,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
 	$}
 
 add_options( interpreter_opt_def )
@@ -85,6 +86,9 @@ export procedure intoptions()
 			
 			case "coverage-erase" then
 				new_coverage_db()
+			
+			case "coverage-exclude" then
+				coverage_exclude( val )
 		end switch
 	end for
 	

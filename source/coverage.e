@@ -14,11 +14,13 @@ include emit.e
 include symtab.e
 include reswords.e
 include scanner.e
+include msgtext.e
 
 sequence covered_files = {}
 sequence file_coverage = {}
 sequence coverage_db_name = ""
 integer  coverage_erase = 0
+sequence exclusion_patterns = {}
 
 sequence line_map    = {}
 sequence routine_map = {}
@@ -90,7 +92,7 @@ export function write_coverage_db()
 	
 	process_lines()
 	
-	for tx = 1 to length( covered_files ) do
+	for tx = 1 to length( routine_map ) do
 		write_map( routine_map[tx], 'r' & covered_files[tx] )
 		write_map( line_map[tx],    'l' & covered_files[tx] )
 	end for
@@ -158,7 +160,7 @@ export procedure add_coverage( sequence cover_this )
 			
 			elsif regex:has_match( eu_file, files[i][D_NAME] ) then
 				sequence canonical = canonical_path( cover_this & '/' & files[i][D_NAME] )
-				if not find( canonical, covered_files ) then
+				if not find( canonical, covered_files ) and not excluded( canonical ) then
 					covered_files = append( covered_files, canonical )
 					routine_map &= map:new()
 					line_map    &= map:new()
@@ -166,11 +168,43 @@ export procedure add_coverage( sequence cover_this )
 			end if
 		end for
 	elsif regex:has_match( eu_file, path ) 
-	and not find( path, covered_files ) then
+	and not find( path, covered_files ) 
+	and not excluded( path ) then
 		covered_files = append( covered_files, path )
 		routine_map &= map:new()
 		line_map    &= map:new()
 	end if
+end procedure
+
+function excluded( sequence file )
+	for i = 1 to length( exclusion_patterns ) do
+		if regex:has_match( exclusion_patterns[i], file ) then
+			return 1
+		end if
+	end for
+	return 0
+end function
+
+export procedure coverage_exclude( sequence patterns )
+	for i = 1 to length( patterns ) do
+		regex ex = regex:new( patterns[i] )
+		if regex( ex ) then
+			exclusion_patterns = append( exclusion_patterns, ex )
+			integer fx = 1
+			while fx <= length( covered_files ) do
+				if regex:has_match( ex, covered_files[fx] ) then
+					covered_files = remove( covered_files, fx )
+					routine_map   = remove( routine_map, fx )
+					line_map      = remove( line_map, fx )
+				else
+					fx += 1
+				end if
+			end while
+		else
+			printf( 2,"%s\n", { GetMsgText( 339, 1, {patterns[i]}) } )
+		end if
+	end for
+	
 end procedure
 
 export procedure new_coverage_db()
@@ -204,7 +238,7 @@ procedure process_lines()
 	for i = 1 to length( included_lines ) do
 		sequence sline = slist[included_lines[i]]
 		integer file = file_coverage[sline[LOCAL_FILE_NO]]
-		if file then
+		if file and file <= length( line_map ) and line_map[file] then
 			integer line = sline[LINE]
 			map:put( line_map[file], line, 0, map:ADD )
 		end if
@@ -232,6 +266,9 @@ export function has_coverage()
 	return length( covered_files )
 end function
 
+-- just to ensure that the translator doesn't get rid of 
+-- these routines...they're only called from the back end,
+-- so they look unused...
 if routine_id("cover_line") = -1 
 or routine_id("cover_routine") = -1
 or routine_id("write_coverage_db") = -1 then
