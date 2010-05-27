@@ -130,8 +130,13 @@ map:put(m4, 1, 11)
 test_equal("map m4 has -- yes", 1, map:has(m4, 1))
 test_equal("map m4 has -- no", 0, map:has(m4, 2))
 
-m1 = load_map("test_map.txt")
+test_equal("map load, bad file #1", -1, map:load_map("badfile.name"))
+test_equal("map load, bad file #2", -2, map:load_map("test_bad_map.dat"))
 
+m1 = load_map("test_map_small.txt")
+test_equal("map load, small", "bcd", map:get(m1, "a",-1))
+
+m1 = load_map("test_map.txt")
 test_equal("map load #1", "bar", map:get(m1, "foo",-1))
 test_equal("map load #2", "foo", map:get(m1, "bar",-1))
 test_equal("map load #3", "comment", map:get(m1, "trail",-1))
@@ -146,6 +151,8 @@ test_equal("map load embed", "--", map:get(m1, "embed",-1))
 map:put(m1, 12.34, "Non alpha key - float")
 map:put(m1, {{"text"}}, "Non alpha key - sequence")
 map:put(m1, "This has a \\backslash", "Test back\\- slash handling")
+
+test_equal("map save fail", -1, save_map(m1, "1:\\badname.txt"))
 
 test_equal("map save #1", 12, save_map(m1, "save_map.txt", SM_TEXT))
 m2 = load_map("save_map.txt")

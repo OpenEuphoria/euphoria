@@ -50,7 +50,7 @@ function deserialize_file(integer fh, integer c)
 -- read a serialized Euphoria object from disk
 
 	sequence s
-	integer len
+	atom len
 
 	if c = 0 then
 		c = getc(fh)
@@ -90,6 +90,9 @@ function deserialize_file(integer fh, integer c)
 				len = getc(fh)
 			else
 				len = get4(fh)
+			end if
+			if len < 0  or not integer(len) then
+				return 0
 			end if
 			s = repeat(0, len)
 			for i = 1 to len do

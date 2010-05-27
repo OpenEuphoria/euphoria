@@ -1401,7 +1401,7 @@ end procedure
 --
 -- Returns:
 --		Either a **map**, with all the entries found in ##file_name_p##, or **-1**
---      if the file failed to open.
+--      if the file failed to open, or **-2** if the file is incorrectly formatted.
 --
 -- Comments:
 -- If ##file_name_p## is an already opened file handle, this routine will write
@@ -1449,7 +1449,7 @@ public function load_map(object file_name_p)
 		file_handle_ = file_name_p
 	end if
 	if file_handle_ = -1 then
-		return 0
+		return -1
 	end if
 	
 	new_map_ = new(threshold_size) -- Assume a small map initially.
@@ -1463,7 +1463,9 @@ public function load_map(object file_name_p)
 			exit
 		end if
 	    if not t_print(delim_) then 
-	    	exit
+	    	if not t_space(delim_) then
+	    		exit
+	    	end if
 	    end if
 	    delim_ = -1
 	end for
@@ -1508,6 +1510,10 @@ public function load_map(object file_name_p)
 	else
 		object _ = seek(file_handle_, 0)
 		line_  = deserialize(file_handle_)
+		if atom(line_) then
+			-- failed to decode the file.
+			return -2
+		end if
 		if line_[1] = 1 then
 			-- Saved Map Format version 1
 			key_   = deserialize(file_handle_)
@@ -1516,6 +1522,9 @@ public function load_map(object file_name_p)
 			for i = 1 to length(key_) do
 				put(new_map_, key_[i], value_[i])
 			end for
+		else
+			-- Bad file format
+			return -2
 		end if
 	end if
 	if sequence(file_name_p) then

@@ -17,7 +17,7 @@ OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-RDS requests, but does not require, that you:
+The copyright holders request, but do not require, that you:
 
-1. Acknowledge RDS and others who contribute to this software,
+1. Acknowledge RDS and others who contributed to this software.
 2. Provide a link to www.RapidEuphoria.com, if possible, from your Web site.
