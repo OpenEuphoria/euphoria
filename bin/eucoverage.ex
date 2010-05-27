@@ -217,7 +217,7 @@ function calc_percent( atom numerator, atom denominator )
 	if denominator then
 		return 100 * numerator / denominator
 	else
-		return 0
+		return 100
 	end if
 end function
 

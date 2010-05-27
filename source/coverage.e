@@ -47,14 +47,8 @@ export procedure init_coverage()
 	end if
 	
 	if coverage_erase and file_exists( coverage_db_name ) then
-		puts(1, "Deleting coverage DB!\n")
 		if not delete_file( coverage_db_name ) then
 			CompileErr( 335, { coverage_db_name } )
-			
-			-- prevent the translator from eliminating:
-			write_coverage_db()
-			cover_line( length( command_line() ) )
-			cover_routine( length( command_line() ) )
 		end if
 	end if
 	
@@ -237,3 +231,9 @@ end procedure
 export function has_coverage()
 	return length( covered_files )
 end function
+
+if routine_id("cover_line") = -1 
+or routine_id("cover_routine") = -1
+or routine_id("write_coverage_db") = -1 then
+	puts(2, "error: missing coverage routines\n")
+end if

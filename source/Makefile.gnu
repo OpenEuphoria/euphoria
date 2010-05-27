@@ -415,11 +415,16 @@ source-tarball : source
 .PHONY : source
 
 
-coverage.h : $(BUILDDIR)/intobj/main-.c
-	$(EXE) -i $(TRUNKDIR)/include coverage.ex $(BUILDDIR)/intobj
+$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
+	$(EXE) -i $(TRUNKDIR)/include coverage.ex $(BUILDDIR)/$(OBJDIR)
 
-$(BUILDDIR)/intobj/back/be_execute.o : coverage.h
-$(BUILDDIR)/intobj/back/be_runtime.o : coverage.h
+$(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
+$(BUILDDIR)/transobj/back/be_execute.o : $(BUILDDIR)/transobj/back/coverage.h
+$(BUILDDIR)/backobj/back/be_execute.o : $(BUILDDIR)/backobj/back/coverage.h
+
+$(BUILDDIR)/intobj/back/be_runtime.o : $(BUILDDIR)/intobj/back/coverage.h
+$(BUILDDIR)/transobj/back/be_runtime.o : $(BUILDDIR)/transobj/back/coverage.h
+$(BUILDDIR)/backobj/back/be_runtime.o : $(BUILDDIR)/backobj/back/coverage.h
 
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
@@ -493,7 +498,11 @@ test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test : code-page-db
 test :  
-	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib "$(BUILDDIR)/$(EECUA)\ $(COVERAGELIB)"
+	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+		$(EXE) ../source/eutest.ex -i ../include -cc gcc \
+		-exe $(BUILDDIR)/$(EEXU) \
+		-ec $(BUILDDIR)/$(EECU) \
+		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)"
 	cd ../tests && sh check_diffs.sh
 
 testeu : code-page-db
@@ -501,9 +510,11 @@ testeu : code-page-db
 
 coverage : 
 	-rm $(BUILDDIR)/unit-test.edb
-	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc \
-		-exe "$(BUILDDIR)/$(EEXU) -coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std " 
-	$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex $(BUILDDIR)/unit-test.edb
+	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+		$(EXE) ../source/eutest.ex -i ../include \
+		-exe "$(BUILDDIR)/$(EEXU)" \
+		-coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std \
+		-coverage-erase -coverage-pp $(TRUNKDIR)/bin/eucoverage.ex
 
 .PHONY : coverage
 
@@ -625,7 +636,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 endif
 
 $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c execute.h alloc.h global.h alldefs.h opnames.h reswords.h symtab.h Makefile.eu
-	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
+	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c Makefile.eu
 	$(CC) -c -w $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o

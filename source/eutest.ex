@@ -20,6 +20,30 @@ include std/math.e
 include std/search.e  as search
 include std/error.e as e
 include std/types.e as types
+include std/map.e
+include std/cmdline.e
+include std/eds.e
+
+constant cmdopts = {
+	{"exe", 0, "interpreter path", { NO_CASE, HAS_PARAMETER, "path-to-interpreter"} },
+	{"ec",  0, "translator path",  { NO_CASE, HAS_PARAMETER, "path-to-translator"} },
+	{"trans", 0, "translate using default translator", { NO_CASE } },
+	{"lib", 0, "runtime library path", {NO_CASE, HAS_PARAMETER, "path-to-runtime-library"} },
+	{"cc",  0, "C compiler", { NO_CASE, HAS_PARAMETER, "-wat|wat|gcc|compiler-name"} },
+	{"log", 0, "output a log", { NO_CASE } },
+	{"verbose", 0, "verbose output", {NO_CASE} },
+	{"process-log", 0, "", {NO_CASE} },
+	{"html", 0, "", {NO_CASE} },
+	{"i", 0, "include directory", {NO_CASE, MULTIPLE, HAS_PARAMETER, "directory"}},
+	{"d", 0, "define a preprocessor word", {NO_CASE, MULTIPLE, HAS_PARAMETER, "word"}},
+	{ "coverage",  0, "Indicate files or directories for which to gather coverage statistics", 
+		{ NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
+	{ "coverage-db",  0, "Specify the filename for the coverage database.", 
+		{ NO_CASE, HAS_PARAMETER, "file" } },
+	{ "coverage-erase",  0, "Erase an existing coverage database and start a new coverage analysis.", 
+		{ NO_CASE } },
+	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", {NO_CASE, HAS_PARAMETER, "path-to-eucoverage.ex"} },
+	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
@@ -31,7 +55,9 @@ sequence error_list = repeat({},4)
 integer log = 0
 integer failed = 0
 integer total
-sequence dexe, executable
+sequence 
+	dexe = "", 
+	executable = ""
 
 enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_EUTEST
 
@@ -443,8 +469,8 @@ function test_file( sequence filename, sequence fail_list )
 	end if
 	
 	printf(1, "interpreting %s:\n", {filename})
-	sequence cmd = sprintf("%s %s -D UNITTEST -batch %s%s %s",
-		{ executable, interpreter_options, crash_option, filename, test_options })
+	sequence cmd = sprintf("%s %s %s -D UNITTEST -batch %s%s %s",
+		{ executable, interpreter_options, coverage_erase, crash_option, filename, test_options })
 
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	
@@ -513,144 +539,53 @@ sequence translator_options = "-emake "
 sequence test_options = ""
 sequence translator = "", library = "", compiler = ""
 sequence interpreter_os_name
-function parse_options( sequence cmds  )
-	-- pass options with arguments passed to eutest to the 
-	-- interpreter or translator...
-	integer outstanding_argument_count = 0
-	integer cci
-	compiler = ""
-	while cci and cci < length(cmds) with entry do
-		if cmds[cci+1][1] != '-' then
-			compiler = "-" & cmds[cci+1]
-		else
-			compiler = cmds[cci+1]
-		end if
 
-		cmds = cmds[1..cci-1] & cmds[cci+2..$]
-	entry
-		cci = find("-cc", cmds)               
-	end while
-	
-	sequence files = {}
-	for i = 3 to length(cmds) do
-		if outstanding_argument_count > 0 then
-			outstanding_argument_count -= 1
-			continue
+sequence coverage_db    = ""
+sequence coverage_pp    = ""
+sequence coverage_erase = ""
 
-		elsif cmds[i][1] != '-' then			
-			files = append(files,repeat(0,8))
-			files[$][D_NAME] = cmds[i]
-
-		-- put the options that take arguments in the sequence argument
-		-- to find below.
-		elsif find(cmds[i],{"-i","-D"}) and i < length(cmds) then
-			-- for both interpreter and translator but not test
-			outstanding_argument_count = 1 -- an argument to skip
-			interpreter_options &= " " & cmds[i] & " " & cmds[i+1]
-			translator_options &= " " & cmds[i] & " " & cmds[i+1]
-
-		elsif find(cmds[i],{"-lib"}) and i < length(cmds) then
-			-- for translator only
-			outstanding_argument_count = 1
-			translator_options &= " " & cmds[i] & " " & cmds[i+1]
-
-		else
-			-- for test 
-			test_options &= " " & cmds[i] & " "
-		end if
-	end for
-	
-	
-	
-	if length(files) = 0 then
-		files = dir("t_*.e")
-		if atom(files) then
-			puts(2,"No unit tests supplied or found.\n")
-			abort(1)
-		end if
-
-		files = sort(files)
+procedure ensure_coverage()
+	-- ensure that everything was at least included
+	if DB_OK != db_open( coverage_db ) then
+		printf( 2, "Error reading coverage database: %s\n", {coverage_db} )
+		return
 	end if
 	
-	return files
-end function
-
-function platform_init( sequence cmds )
-	ifdef UNIX then
-		executable = "eui"
-		dexe = ""
-		
-	elsifdef WIN32 then
-		executable = "eui"
-		dexe = ".exe"		
-	end ifdef
-	integer eui
-	while eui and eui < length(cmds) with entry do
-		executable = cmds[eui+1]
-		cmds = cmds[1..eui-1] & cmds[eui+2..$]
-	entry
-		eui = find("-exe", cmds)
-	end while
-
-	integer ec
-	while ec and ec <= length(cmds) with entry do
-		if ec < length(cmds) then
-			if cmds[ec+1][1] != '-' then
-				translator = cmds[ec+1]
-				cmds = cmds[1..ec-1] & cmds[ec+2..$]
-			else
-				translator = "-"
-				cmds = cmds[1..ec-1] & cmds[ec+1..$]
-			end if
-		else
-			translator = "-"
-			cmds = cmds[1..ec-1] & cmds[ec+1..$]
+	sequence tables = db_table_list()
+	interpreter_options &= " -test"
+	for tx = 1 to length( tables ) do
+		sequence table_name = tables[tx]
+		if table_name[1] = 'l' 
+		and db_table_size( table_name ) = 0 then
+			
+			test_file( table_name[2..$], {} )
+			
 		end if
-	entry
-		ec = find("-ec", cmds)
-	end while
+	end for
+end procedure
+
+procedure process_coverage()
+	if not length( coverage_db ) then
+		return
+	end if
 	
-	if equal(translator, "-") then
-		ifdef UNIX then
-			translator = "euc"
-		
-		elsifdef WIN32 then
-			translator = "euc.exe"
-		end ifdef
-	end if	
-
-	-- Check for various executable names to see if we need -CON or not
+	ensure_coverage()
 	
-	-- lower for Windows or DOS, lower for all.  K.I.S.S.
+	if not length( coverage_pp ) then
+		return
+	end if
+	
+	-- post process the database
+	if system_exec( sprintf(`"%s" "%s" "%s"`, { executable, coverage_pp, coverage_db }), 2 ) then
+		puts( 2, "Error running coverage postprocessor\n" )
+	end if
+end procedure
 
-	ifdef UNIX then
-		interpreter_os_name = "UNIX"
-
-	elsifdef WIN32 then
-		if length(translator) > 0 then
-			translator_options &= " -CON"
-		end if
-		
-		interpreter_os_name = "WIN32"
-
-	elsedef
-		puts(2, "eutest is only supported on Unix and Windows.\n")
-		abort(1)
-	end ifdef
-	return cmds
-end function
-
-procedure do_test( sequence cmds )
+procedure do_test( sequence files )
 	atom score
-	object files = {}
 	
 	integer log_fd = 0
 	sequence silent = ""
-	
-	log    = find("-log", cmds)
-	verbose_switch = find("-verbose", cmds)
-	
-	files = parse_options( cmds )
 	
 	total = length(files)
 
@@ -667,7 +602,8 @@ procedure do_test( sequence cmds )
 	end if
 
 	for i = 1 to length(files) do
-		fail_list = test_file( files[i][D_NAME], fail_list )		
+		fail_list = test_file( files[i], fail_list )
+		coverage_erase = ""
 	end for
 	
 	if log and ctcfh != -1 then
@@ -720,7 +656,9 @@ procedure do_test( sequence cmds )
 
 		printf(1, "Tests (run: %d) (failed: %d) (%.1f%% success)\n", {total, failed, score})
 	end if
-
+	
+	process_coverage()
+	
 	abort(failed > 0)
 end procedure
 
@@ -970,12 +908,11 @@ procedure summarize_error(sequence message, error_class e, integer html)
 	end if
 end procedure
 
-procedure do_process_log(sequence cmds)
+procedure do_process_log( sequence cmds, integer html)
 	sequence summary = {}
 	object other_files = {}
 	integer total_failed=0, total_passed=0
 	integer test_files=0
-	integer html = find("-html", cmds)
 	integer out_r
 	atom total_time = 0
 	object ctc
@@ -989,13 +926,13 @@ procedure do_process_log(sequence cmds)
 
 	ctcfh = open("ctc.log","r")
 	if ctcfh != -1 then
-		ctc = get(ctcfh)
+		ctc = stdget:get(ctcfh)
 
 		if ctc[1] = GET_SUCCESS then
 			ctc = ctc[2]
 			error_list = ctc
 
-			ctc = get(ctcfh)
+			ctc = stdget:get(ctcfh)
 			if ctc[1] = GET_SUCCESS then
 				test_files = ctc[2]
 			else
@@ -1097,59 +1034,159 @@ procedure do_process_log(sequence cmds)
 	end if
 end procedure
 
-procedure main(sequence cmds = command_line())
-	integer i = 3, sl
-	object buf
-
-	while i <= length(cmds) do
-		if find('-',cmds[i]) = 1 then
-			if not find(upper(cmds[i]), {"-LOG","-VERBOSE"}) then
-				i += 2
-				continue
-			end if
+procedure platform_init()
+	ifdef UNIX then
+		if equal( executable, "" ) then
+			executable = "eui"
 		end if
+		dexe = ""
+		
+	elsifdef WIN32 then
+		if equal( executable, "" ) then
+			executable = "eui"
+		end if
+		dexe = ".exe"		
+	end ifdef
+	
+	if equal(translator, "-") then
+		ifdef UNIX then
+			translator = "euc"
+		
+		elsifdef WIN32 then
+			translator = "euc.exe"
+		end ifdef
+	end if	
 
-		buf = dir(cmds[i])
+	-- Check for various executable names to see if we need -CON or not
+	
+	-- lower for Windows or DOS, lower for all.  K.I.S.S.
 
-		if sequence(buf) and length(buf) > 1 then
-			sl = length(cmds[i])
-			while sl >= 1 and cmds[i][sl] != SLASH do
-				sl -= 1
-			end while
+	ifdef UNIX then
+		interpreter_os_name = "UNIX"
 
-			for j = 1 to length(buf) do
-				if sl then
-					buf[j] = cmds[i][1..sl] & buf[j][D_NAME]
-				else
-					buf[j] = buf[j][D_NAME]
+	elsifdef WIN32 then
+		if length(translator) > 0 then
+			translator_options &= " -CON"
+		end if
+		
+		interpreter_os_name = "WIN32"
+
+	elsedef
+		puts(2, "eutest is only supported on Unix and Windows.\n")
+		abort(1)
+	end ifdef
+	
+end procedure
+
+function build_file_list( sequence list )
+	sequence files = {}
+	for j = 1 to length( list ) do
+		
+		if file_type( list[j] ) = FILETYPE_DIRECTORY then
+			object dirlist = dir( list[j] )
+		
+			if sequence( dirlist ) then
+				sequence basedir = canonical_path( list[j] )
+				if basedir[$] != SLASH then
+					basedir &= SLASH
 				end if
-			end for
-
-			cmds = cmds[1..i-1] & buf & cmds[i+1..$]
-			i += length(buf)
-		else	
-			i = i + 1
+					
+				for k = 1 to length( dirlist ) do
+					files = append( files, basedir & dirlist[k][D_NAME] )
+					printf( 1, "adding test file: %s\n", { files[$] })
+				end for
+			end if
+		else
+			files = append( files, list[j] )
 		end if
-	end while
+	end for
+	return files
+end function
 
-	if find("-help", cmds) or find("--help",cmds) or find("/?", cmds) then
-		puts(2, "Usage:\n" & cmds[1] & " eutest.ex [[-process-log] [-html]]\n" &
-			"  [-exe interpreter-path-and-filename]\n" &
-			"  [-ec translator-path-and-filename] [-i include directory]\n" &
-			"  [-lib library-path-and-filename-relative-to-%EUDIR%\\bin]\n" &
-			"  [-cc [-wat|wat|some-other-compiler-name-to-pass-to-translator]]\n" &
-			"  [-log]\n" &
-			"  [-verbose]\n" &
-			"  [unit test files]\n")
-		abort(0)
+procedure main()
+
+	sequence files = {}
+	
+	map opts = cmd_parse( cmdopts )
+	sequence keys = map:keys( opts )
+	for i = 1 to length( keys ) do
+		sequence param = keys[i]
+		object val = map:get(opts, param)
+		
+		switch param do
+			case "log" then
+				log = 1
+				
+			case "verbose" then
+				verbose_switch = 1
+				
+			case "exe" then
+				executable = val
+				
+			case "ec" then
+				translator = val
+				
+			case "trans" then
+				if not length( translator ) then
+					translator = "-"
+				end if
+				
+			case "cc" then
+				compiler = "-" & val
+				
+			case "lib" then
+				library = "-lib " & val
+				
+			case "i", "d" then
+				for j = 1 to length( val ) do
+					sequence option = sprintf( " -%s %s", {param, val[j] })
+					interpreter_options &= option
+					translator_options &= option
+				end for
+			
+			case "coverage" then
+				for j = 1 to length( val ) do
+					interpreter_options &= sprintf( " -coverage %s", {val[j]} )
+				end for
+				if not length( coverage_db ) then
+					coverage_db = "-"
+				end if
+			
+			case "coverage-db" then
+				coverage_db = val
+				interpreter_options &= " -coverage-db " & val
+			
+			case "coverage-erase" then
+				coverage_erase = "-coverage-erase"
+			
+			case "coverage-pp" then
+				coverage_pp = val
+			
+			case "extras" then
+				if length( val ) then
+					files = build_file_list( val )
+				else
+					files = dir("t_*.e" )
+					for f = 1 to length( files ) do
+						files[f] = files[f][D_NAME]
+					end for
+					files = sort( files )
+				end if
+				
+		end switch
+	end for
+	
+	if equal( coverage_db, "-" ) then
+		coverage_db = "eutest-cvg.edb"
 	end if
-
-	if find("-process-log", cmds) then
-		do_process_log(cmds)
+	
+	if map:has( opts, "process-log") then
+		do_process_log( files, map:has( opts, "html" ) )
 	else
-		cmds = platform_init( cmds )
-		do_test(cmds)
+		platform_init()
+		do_test( files )
 	end if
 end procedure
 
 main()
+
