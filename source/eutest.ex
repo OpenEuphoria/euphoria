@@ -577,7 +577,7 @@ procedure process_coverage()
 	end if
 	
 	-- post process the database
-	if system_exec( sprintf(`"%s" "%s" "%s"`, { executable, coverage_pp, coverage_db }), 2 ) then
+	if system_exec( sprintf(`"%s" "%s"`, { coverage_pp, coverage_db }), 2 ) then
 		puts( 2, "Error running coverage postprocessor\n" )
 	end if
 end procedure

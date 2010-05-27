@@ -43,7 +43,7 @@ procedure process_cmd_line()
 	
 	sequence extras = map:get( cmd, "extras" )
 	if length( extras ) != 1 then
-		puts( 2, "Expected a single input coverage database" )
+		puts( 2, "Expected a single input coverage database\n" )
 		abort( 1 )
 	end if
 	

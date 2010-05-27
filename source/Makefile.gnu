@@ -512,9 +512,9 @@ coverage :
 	-rm $(BUILDDIR)/unit-test.edb
 	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
 		$(EXE) ../source/eutest.ex -i ../include \
-		-exe "$(BUILDDIR)/$(EEXU)" \
+		-exe "$(BUILDDIR)/$(EEXU)" -coverage-erase \
 		-coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std \
-		-coverage-erase -coverage-pp $(TRUNKDIR)/bin/eucoverage.ex
+		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex"
 
 .PHONY : coverage
 
@@ -562,6 +562,7 @@ install :
 	           ../bin/buildcpdb.ex \
 	           $(BUILDDIR)/ecp.dat \
 	           ../bin/eprint.ex \
+	           ../bin/eucoverage.ex \
 	           ../bin/guru.ex \
 	           ../bin/key.ex \
 	           ../bin/lines.ex \
@@ -584,6 +585,15 @@ install :
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
 	echo eui $(PREFIX)/share/euphoria/source/bind.ex -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
+	# helper script for eutest
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eutest
+	echo eui $(PREFIX)/share/euphoria/source/eutest.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eutest
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eutest
+	# helper script for eucoverage
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eucoverage
+	echo eui $(PREFIX)/share/euphoria/bin/eucoverage.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eucoverage
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eucoverage
+	
 
 install-docs :
 	# create dirs
