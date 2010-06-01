@@ -381,7 +381,7 @@ procedure write_summary( sequence output_directory )
 		total_routines_executed += coverage[COV_FUNCS_TESTED]
 		
 		total_files_executed    += 0 != coverage[COV_LINES_TESTED]
-		sequence html_name = encode( "files/" & encode( files[i] ) & ".html" )
+		sequence html_name = "files/" & encode( encode( files[i] ) ) & ".html"
 		file_data[i] = { line_percent, files[i], html_name,
 			files[i], 
 			coverage[COV_FUNCS_TESTED], coverage[COV_FUNCS], routine_percent,
