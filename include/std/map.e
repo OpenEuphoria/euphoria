@@ -171,21 +171,23 @@ public type map(object obj_p)
 -- Must be a valid EuMem pointer.
 	if not valid(obj_p, "") then return 0 end if
 	
--- Large maps have five data elements:
---   (1) Count of elements 
---   (2) Number of slots being used
---   (3) The map type
---   (4) Key Buckets 
---   (5) Value Buckets
+-- Large maps have six data elements:
+--   (1) Data type magic value
+--   (2) Count of elements 
+--   (3) Number of slots being used
+--   (4) The map type
+--   (5) Key Buckets 
+--   (6) Value Buckets
 -- A bucket contains one or more lists of items.
 
--- Small maps have six data elements:
---   (1) Count of elements 
---   (2) Number of slots being used
---   (3) The map type
---   (4) Sequence of keys
---   (5) Sequence of values, in the same order as the keys.
---   (6) Sequence. A Free space map.
+-- Small maps have seven data elements:
+--   (1) Data type magic value
+--   (2) Count of elements 
+--   (3) Number of slots being used
+--   (4) The map type
+--   (5) Sequence of keys
+--   (6) Sequence of values, in the same order as the keys.
+--   (7) Sequence. A Free space map.
 	object m_
 	
 	m_ = ram_space[obj_p]
@@ -337,9 +339,9 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 		size_ = requested_bucket_size_p
 	end if
 	
-	size_ = next_prime(size_, 2)	-- Allow up to 2 seconds to calc next prime.
+	size_ = next_prime(size_, -size_, 2)	-- Allow up to 2 seconds to calc next prime.
 	if size_ < 0 then
-		size_ = -size_	-- Failed to just use given size_.
+		return  -- don't do anything. New size would take too long.
 	end if
 	old_key_buckets_ = ram_space[the_map_p][KEY_BUCKETS]
 	old_val_buckets_ = ram_space[the_map_p][VALUE_BUCKETS]

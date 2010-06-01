@@ -8,6 +8,13 @@ include std/io.e
 include std/math.e
 
 object o1, o2, o3
+
+o1 = map:new()
+test_true("map new #1", map(o1) )
+ram_space[o1][4] = '?' -- MAP_TYPE corruption
+test_false("map new #1", map(o1) )
+
+
 o1 = map:threshold()
 o2 = map:threshold(60)
 o3 = map:threshold()
@@ -16,6 +23,7 @@ test_equal("map get threshold #2", 60, o3 )
 
 
 map:map m1
+
 m1 = map:new(11)
 
 -- add integers from -5 to 5 with keys -50 to 50
@@ -60,7 +68,14 @@ for i = 1 to 1000 do
 end for
 test_equal("map m1 get#1 -133.3333",           100, map:get(m1, -1.333333*100, 999) )
 
+o1 = statistics(m1)
 rehash(m1, 100)
+o2 = statistics(m1)
+test_not_equal("Rehash works for large maps", o1, o2)
+
+rehash(m1, 50_000_000) -- Force timeout for prime number determination
+
+
 test_equal("map m1 get#2 -133.3333",           100, map:get(m1, -1.333333*100, 999) )
 rehash(m1, 10000)
 test_equal("map m1 get#3 -133.3333",           100, map:get(m1, -1.333333*100, 999) )
@@ -91,6 +106,10 @@ m2 = map:new(map:threshold())	-- Create a small map
 for i = 1 to 33 do
 	map:put(m2, repeat('a', i), i)
 end for
+o1 = statistics(m2)
+rehash(m2)
+o2 = statistics(m2)
+test_equal( "No rehash for small maps", o1, o2)
 
 test_equal("map m2 size#1", 33, map:size(m2))
 test_equal("map m2 get a", 1, map:get(m2, "a", 999))
@@ -152,7 +171,7 @@ map:put(m1, 12.34, "Non alpha key - float")
 map:put(m1, {{"text"}}, "Non alpha key - sequence")
 map:put(m1, "This has a \\backslash", "Test back\\- slash handling")
 
-test_equal("map save fail", -1, save_map(m1, "1:\\badname.txt"))
+test_equal("map save fail", -1, save_map(m1, "<//badname.txt"))
 
 test_equal("map save #1", 12, save_map(m1, "save_map.txt", SM_TEXT))
 m2 = load_map("save_map.txt")
@@ -389,6 +408,18 @@ sequence efer = {
 }
 
 test_equal("for_each", efer, fer)
+
+
+-- Testing the removal of items from a multi-item bucket
+map:threshold(50)
+m1 = map:new( map:threshold() + 1 )
+for i = 1 to map:threshold() * 5 do
+	put(m1, sprintf("%d", i), i,, 0)
+end for
+
+test_true("Gone #1", map:has(m1, "5"))
+map:remove(m1, "5")
+test_false("Gone #2", map:has(m1, "5"))
 
 --
 -- Done with testing
