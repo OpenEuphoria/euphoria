@@ -6,6 +6,7 @@ include std/pretty.e
 include std/filesys.e
 include std/io.e
 include std/math.e
+include std/eumem.e
 
 object o1, o2, o3
 
