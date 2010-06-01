@@ -1,7 +1,6 @@
 #!/usr/bin/env eui
 -- (c) Copyright - See License.txt
 
--- TODO: Replace all command line handling with cmd_parse
 -- TODO: Extract log parsing code into it's own file
 -- TODO: Use templates (with defaults supplied) for HTML reports, thus
 --       users will be able to theme the unit test reports to fit into

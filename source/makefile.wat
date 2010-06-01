@@ -446,7 +446,7 @@ $(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 
 !endif #BUILD_TOOLS
 
-$(BUILDDIR)\$(OBJDIR)\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
+$(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
 	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
 
 $(BUILDDIR)\intobj\back\be_execute.o : $(BUILDDIR)\intobj\back\coverage.h
