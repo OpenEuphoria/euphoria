@@ -169,7 +169,6 @@ end procedure
 export procedure Cleanup(integer status)
 	integer w, show_error = 0
 	
-	write_coverage_db()
 	ifdef WIN32 or UNIX then
 		show_error = 1
 	end ifdef

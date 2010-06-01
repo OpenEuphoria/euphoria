@@ -200,7 +200,7 @@ procedure main()
 			BackEnd(0) -- execute IL using Euphoria-coded back-end
 		end ifdef
 	end if
-	write_coverage_db()
+	
 	Cleanup(0) -- does warnings
 end procedure
 

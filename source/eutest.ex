@@ -552,15 +552,21 @@ procedure ensure_coverage()
 	end if
 	
 	sequence tables = db_table_list()
+	integer ix = 1
+	while ix <= length(tables) do
+		sequence table_name = tables[ix]
+		if table_name[1] = 'l' 
+		and db_table_size( table_name ) = 0 then
+			ix += 1
+		else
+			tables = remove( tables, ix )
+		end if
+	end while
+	db_close()
 	interpreter_options &= " -test"
 	for tx = 1 to length( tables ) do
 		sequence table_name = tables[tx]
-		if table_name[1] = 'l' 
-		and db_table_size( table_name ) = 0 then
-			
-			test_file( table_name[2..$], {} )
-			
-		end if
+		test_file( table_name[2..$], {} )
 	end for
 end procedure
 
@@ -576,8 +582,9 @@ procedure process_coverage()
 	end if
 	
 	-- post process the database
-	if system_exec( sprintf(`"%s" "%s"`, { coverage_pp, coverage_db }), 2 ) then
+	if system_exec( sprintf(`%s "%s"`, { coverage_pp, coverage_db }), 2 ) then
 		puts( 2, "Error running coverage postprocessor\n" )
+		printf(2,`CMD: %s "%s"`, { coverage_pp, coverage_db })
 	end if
 end procedure
 

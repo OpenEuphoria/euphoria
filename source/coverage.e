@@ -80,12 +80,14 @@ procedure write_map( map coverage, sequence table_name )
 end procedure
 
 export function write_coverage_db()
+	
 	if not length( covered_files ) then
 		return 1
 	end if
 	
 	if DB_OK != db_open( coverage_db_name ) then
 		if DB_OK != db_create( coverage_db_name ) then
+			printf(2, "error opening %s\n", {coverage_db_name})
 			return 0
 		end if
 	end if
@@ -96,6 +98,7 @@ export function write_coverage_db()
 		write_map( routine_map[tx], 'r' & covered_files[tx] )
 		write_map( line_map[tx],    'l' & covered_files[tx] )
 	end for
+	
 	db_close()
 	
 	routine_map = {}

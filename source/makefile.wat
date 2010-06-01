@@ -449,14 +449,14 @@ $(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 $(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
 	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
 
-$(BUILDDIR)\intobj\back\be_execute.o : $(BUILDDIR)\intobj\back\coverage.h
-$(BUILDDIR)\intobj\back\be_runtime.o : $(BUILDDIR)\intobj\back\coverage.h
+$(BUILDDIR)\intobj\back\be_execute.obj : $(BUILDDIR)\intobj\back\coverage.h
+$(BUILDDIR)\intobj\back\be_runtime.obj : $(BUILDDIR)\intobj\back\coverage.h
 
-$(BUILDDIR)\transobj\back\be_execute.o : $(BUILDDIR)\transobj\back\coverage.h
-$(BUILDDIR)\transobj\back\be_runtime.o : $(BUILDDIR)\transobj\back\coverage.h
+$(BUILDDIR)\transobj\back\be_execute.obj : $(BUILDDIR)\transobj\back\coverage.h
+$(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
 
-$(BUILDDIR)\backobj\back\be_execute.o : $(BUILDDIR)\backobj\back\coverage.h
-$(BUILDDIR)\backobj\back\be_runtime.o : $(BUILDDIR)\backobj\back\coverage.h
+$(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
+$(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG)
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
