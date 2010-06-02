@@ -442,7 +442,7 @@ e.g.
 This informs the Linux shell that your file should be executed by the
 Euphoria interpreter, and gives the full path to the interpreter.  If you make
 your file executable, you can run it, just by typing its name, and without the
-need to type "##exi##". On //Windows// this line is just
+need to type "##eui##". On //Windows// this line is just
 treated as a comment (though Apache Web server on //Windows// does
 recognize it.). If your file is a shrouded ##.il## file, use eub.exe
 instead of ##eui##.
