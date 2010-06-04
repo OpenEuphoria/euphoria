@@ -215,27 +215,34 @@ procedure report_last_error(sequence filename)
 	end if
 end procedure
 
-function strip_path_junk(sequence err_data)
-	sequence path
-
-	path = err_data[1]
-	if find('/', path) or find('\\', path) then
-		for i = length(path) to 1 by -1 do	
-			if find(path[i], `\/`) then
-				err_data =  {path[1 .. i], path[i+1 .. $]} & err_data[2 .. $]
-				exit
+type sequence_of_strings_or_integer(object x)
+	if atom(x) then
+		return 1
+	end if
+	for i = 1 to length(x) do
+		if atom(x[i]) then
+			return 0
+		end if
+		for j = 1 to length(x[i]) do
+			if sequence(x[i][j]) then
+				return 0
 			end if
 		end for
-	else
-		err_data = prepend("", err_data)
-	end if
+	end for
+	return 1
+end type
 
-	return err_data
+function strip_path_junk(sequence_of_strings_or_integer err_data)
+    sequence path
+    path = "\\/" & err_data[1]
+    path = path[max(rfind('/', path)&rfind('\\', path))+1..$]
+    err_data[1] = path
+    return err_data
 end function
 
 function prepare_error_file(sequence file_name)
 	integer pos
-	object file_data
+	sequence_of_strings_or_integer file_data
 	
 	file_data = read_lines(file_name)
 	
@@ -273,8 +280,8 @@ function prepare_error_file(sequence file_name)
 end function
 
 function check_errors( sequence filename, sequence control_error_file, sequence fail_list )
-	object expected_err
-	object actual_err
+	sequence_of_strings_or_integer expected_err
+	sequence_of_strings_or_integer actual_err
 	integer comparison
 	
 	expected_err = prepare_error_file(control_error_file)
