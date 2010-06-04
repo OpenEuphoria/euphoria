@@ -1,0 +1,20 @@
+t_c_slice_past_end_double.e:4
+slice ends past end of sequence (4294967296 > 3) 
+
+
+Global & Local Variables
+
+ t_c_slice_past_end_double.e:
+    s = {12,23,34'"'}
+
+
+t_c_slice_past_end_double.e:4
+slice ends past end of sequence (4294967296 > 3) 
+
+
+Global & Local Variables
+
+ t_c_slice_past_end_double.e:
+    s = {12,23,34'"'}
+
+
