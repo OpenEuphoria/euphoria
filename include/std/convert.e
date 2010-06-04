@@ -5,6 +5,7 @@
 -- <<LEVELTOC depth=2>>
 --
 namespace convert
+with define LITTLE_ENDIAN
 
 constant
 	M_A_TO_F64 = 46,
@@ -65,7 +66,9 @@ public function int_to_bytes(atom x)
 	c = remainder(x, #100)
 	x = floor(x / #100)
 	d = remainder(x, #100)
-	return {a,b,c,d}
+	ifdef LITTLE_ENDIAN then
+		return {a,b,c,d}
+	end ifdef
 end function
 
 type sequence_8(sequence s)
@@ -106,6 +109,7 @@ end type
 --   [[:peek4s]], [[:peek4u]], [[:poke4]]
 
 public function bytes_to_int(sequence s)
+	-- this, unlike its opposite, is endian-independent.
 	if length(s) = 4 then
 		poke(mem, s)
 	elsif length(s) < 4 then

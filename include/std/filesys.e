@@ -32,16 +32,6 @@ constant
 
 ifdef WIN32 then
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
-		C_BOOL)
-	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
-	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
-	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
-		{C_POINTER, C_POINTER}, C_BOOL)
-	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
-	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
-	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
-		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
 
 elsifdef LINUX then
 	constant lib = open_dll("")
@@ -52,6 +42,26 @@ elsifdef FREEBSD or SUNOS or OPENBSD then
 elsifdef OSX then
 	constant lib = open_dll("libc.dylib")
 
+end ifdef
+
+ifdef WIN32 then
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
+		C_BOOL)
+	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
+	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
+	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
+		{C_POINTER, C_POINTER}, C_BOOL)
+	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
+	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
+	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
+		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
+elsifdef UNIX then
+	constant xMoveFile        = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_INT)
+	--constant xDeleteFile      = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
+	constant xDeleteFile      = define_c_func(lib, "unlink", {C_POINTER}, C_INT)
+	constant xCreateDirectory = define_c_func(lib, "mkdir", {C_POINTER, C_INT}, C_INT)
+	constant xRemoveDirectory = define_c_func(lib, "rmdir", {C_POINTER}, C_INT)
+	constant xGetFileAttributes = define_c_func(lib, "access", {C_POINTER, C_INT}, C_INT)
 elsedef
 	constant xCopyFile          = -1
 	constant xMoveFile          = -1
@@ -59,22 +69,12 @@ elsedef
 	constant xCreateDirectory   = -1
 	constant xRemoveDirectory   = -1
 	constant xGetFileAttributes = -1
-
 end ifdef
 
 ifdef LINUX then
 	constant xStatFile = define_c_func(lib, "__xstat", {C_INT, C_POINTER, C_POINTER}, C_INT)
 elsifdef UNIX then
 	constant xStatFile = define_c_func(lib, "stat", {C_POINTER, C_POINTER}, C_INT)
-end ifdef
-
-ifdef UNIX then
-	constant xMoveFile        = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_INT)
-	--constant xDeleteFile      = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
-	constant xDeleteFile      = define_c_func(lib, "unlink", {C_POINTER}, C_INT)
-	constant xCreateDirectory = define_c_func(lib, "mkdir", {C_POINTER, C_INT}, C_INT)
-	constant xRemoveDirectory = define_c_func(lib, "rmdir", {C_POINTER}, C_INT)
-	constant xGetFileAttributes = define_c_func(lib, "access", {C_POINTER, C_INT}, C_INT)
 end ifdef
 
 

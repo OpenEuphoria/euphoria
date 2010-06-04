@@ -14,6 +14,7 @@ include std/text.e
 include std/sequence.e
 include std/error.e
 public include std/unicode.e
+with define LITTLE_ENDIAN
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -1269,7 +1270,7 @@ public enum
 	UNIX_TEXT,
 	DOS_TEXT
 
-public enum
+public type enum encoding_type
 	ANSI,
 	UTF,
 	UTF_8,
@@ -1280,7 +1281,43 @@ public enum
 	UTF_32BE,
 	UTF_32LE,
 	$
+end type
+
+-- host endian constants meaning
+-- you don't need to change
+-- the byte/sex.
+ifdef LITTLE_ENDIAN then
+	constant UTF_16HE = UTF_16LE,
+		UTF_32HE = UTF_32LE
+elsifdef BIG_ENDIAN then
+	constant UTF_16HE = UTF_16BE,
+		UTF_32HE = UTF_32BE
+end ifdef
 	
+function change_bytesex_4(sequence ret)
+	atom temp
+	for i = 1 to length(ret) - 3 by 4 do
+		temp = ret[i]
+		ret[i] = ret[i+3]
+		ret[i+3] = temp
+		temp = ret[i+1]
+		ret[i+1] = ret[i+2]
+		ret[i+2] = temp
+	end for
+	return ret
+end function
+
+function change_bytesex_2(sequence ret)
+	integer temp
+	for i = 1 to length(ret) - 1 by 2 do
+		temp = ret[i]
+		ret[i] = ret[i+1]
+		ret[i+1] = temp
+	end for
+	return ret
+end function
+
+
 --**
 -- Read the contents of a file as a single sequence of bytes.
 --
@@ -1358,7 +1395,7 @@ public enum
 -- See Also:
 --     [[:write_file]], [[:read_lines]]
 
-public function read_file(object file, integer as_text = BINARY_MODE, integer encoding = ANSI)
+public function read_file(object file, integer as_text = BINARY_MODE, encoding_type encoding = ANSI)
 	integer fn
 	integer len
 	sequence ret
@@ -1385,23 +1422,6 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 		close(fn)
 	end if
 
-	ifdef WINDOWS then
-		-- Remove any extra -1 (EOF) characters in case file
-		-- had been opened in Windows 'text mode'.
-		for i = len to 1 by -1 do
-			if ret[i] != -1 then
-				if i != len then
-					ret = ret[1 .. i]
-				end if
-				exit
-			end if
-		end for
-	end ifdef
-
-	if as_text = BINARY_MODE then
-		return ret
-	end if
-	
 	-- Treat as a text file.
 	while 1 label "ChkEnc" do
 		switch encoding do
@@ -1443,11 +1463,9 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 						ret = ret[3..$]
 					end if
 				end if
-				for i = 1 to length(ret) - 1 by 2 do
-					temp = ret[i]
-					ret[i] = ret[i+1]
-					ret[i+1] = temp
-				end for
+				ifdef LITTLE_ENDIAN then
+					ret = change_bytesex_2(ret)
+				end ifdef
 				
 				fallthru
 				
@@ -1457,6 +1475,9 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 						ret = ret[3..$]
 					end if
 				end if
+				ifdef BIG_ENDIAN then
+					ret = change_bytesex_2(ret)
+				end ifdef
 				
 				adr = allocate(length(ret),1)
 				poke(adr, ret)
@@ -1490,15 +1511,9 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 						ret = ret[5..$]
 					end if
 				end if
-				for i = 1 to length(ret) - 3 by 4 do
-					temp = ret[i]
-					ret[i] = ret[i+3]
-					ret[i+3] = temp
-					temp = ret[i+1]
-					ret[i+1] = ret[i+2]
-					ret[i+2] = temp
-				end for
-				
+				ifdef LITTLE_ENDIAN then
+					ret = change_bytesex_4(ret)
+				end ifdef
 				fallthru
 				
 			case UTF_32LE then
@@ -1507,6 +1522,9 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 						ret = ret[5..$]
 					end if
 				end if
+				ifdef BIG_ENDIAN then
+					ret = change_bytesex_4(ret)
+				end ifdef
 				
 				adr = allocate(length(ret),1)
 				poke(adr, ret)
@@ -1555,12 +1573,12 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 				
 				temp = peek2u({adr, length(ret) / 2})
 				if validate(temp, utf_16) = 0 then
-					encoding = UTF_16LE
+					encoding = UTF_16HE
 					retry "ChkEnc"
 				end if
 				temp = peek4u({adr, length(ret) / 4})
 				if validate(temp, utf_32) = 0 then
-					encoding = UTF_32LE
+					encoding = UTF_32HE
 					retry "ChkEnc"
 				end if
 				
@@ -1573,7 +1591,7 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 				poke(adr, temp)
 				temp = peek2u({adr, length(ret) / 2})
 				if validate(temp, utf_16) = 0 then
-					encoding = UTF_16LE
+					encoding = UTF_16HE
 					retry "ChkEnc"
 				end if
 				
@@ -1589,7 +1607,7 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 				poke(adr, temp)
 				temp = peek4u({adr, length(ret) / 4})
 				if validate(temp, utf_32) = 0 then
-					encoding = UTF_32LE
+					encoding = UTF_32HE
 					retry "ChkEnc"
 				end if
 				
@@ -1598,7 +1616,24 @@ public function read_file(object file, integer as_text = BINARY_MODE, integer en
 		
 		exit
 	end while
-		
+
+	ifdef WINDOWS then
+		-- Remove any extra -1 (EOF) characters in case file
+		-- had been opened in Windows 'text mode'.
+		for i = len to 1 by -1 do
+			if ret[i] != -1 then
+				if i != len then
+					ret = ret[1 .. i]
+				end if
+				exit
+			end if
+		end for
+	end ifdef
+
+	if as_text = BINARY_MODE then
+		return ret
+	end if
+	
 	fn = find(26, ret) -- Any Ctrl-Z found?
 	if fn then
 		-- Ok, so truncate the file data

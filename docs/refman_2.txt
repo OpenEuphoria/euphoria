@@ -2530,6 +2530,8 @@ but ##EU5## will be defined.
 * **OPENBSD** - Platform is OpenBSD
 * **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, SunOS and OS X)
 * **UNIX** - Platform is any Unix
+* **INTEL32** - The computer is an Intel compatible 32-bit processor or running in 32-bit mode.
+* **LITTLE_ENDIAN** - The computer stores integers in little endian format
 
 ==== Application Definitions
 

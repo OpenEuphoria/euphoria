@@ -2627,6 +2627,19 @@ object start_backend(object x)
 }
 #endif
 
+object get_machine_architecture_defines() {
+	struct s1 * arch_defines;
+#if ARCH==ix86
+	arch_defines = NewS1(2);
+	arch_defines->base[1] = NewString("INTEL32");
+	arch_defines->base[2] = NewString("LITTLE_ENDIAN");
+#else
+	arch_defines = NewS1(0);
+#endif
+	return MAKE_SEQ(arch_defines);
+}
+
+
 object machine(object opcode, object x)
 /* Machine-specific function "machine". It is passed an opcode and
    a general Euphoria object as its parameters and it returns a
@@ -3050,7 +3063,10 @@ object machine(object opcode, object x)
             
             case M_SOCK_RECVFROM:
                 return eusock_recvfrom(x);
-
+				
+			case M_DEFINES:
+				return get_machine_architecture_defines();
+				
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
 				/* could be out-of-range int, or double, or sequence */
@@ -3070,3 +3086,5 @@ object machine(object opcode, object x)
 		}
 	}
 }
+
+

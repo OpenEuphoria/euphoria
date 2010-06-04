@@ -21,6 +21,8 @@ include std/math.e
 --****
 -- === Database File Format
 --
+-- Note that this module uses host endian and little endian interchangably. 
+--
 -- ==== Header
 -- * byte 0: magic number for this file-type: 77
 -- * byte 1: version number (major)

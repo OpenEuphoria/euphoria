@@ -14,12 +14,6 @@ include std/text.e
 include std/io.e
 
 public constant
-	ULINUX = LINUX,
-	UFREEBSD = FREEBSD,
-	UOSX = OSX,
-	USUNOS = SUNOS,
-	UOPENBSD = OPENBSD,
-	UNETBSD = NETBSD,
 	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
 
 -- For cross-translation:
@@ -90,18 +84,18 @@ public function host_platform()
 	return ihost_platform
 end function
 
-sequence unices = {ULINUX, UFREEBSD, UOSX, USUNOS, UOPENBSD, UNETBSD}
+sequence unices = {LINUX, FREEBSD, OSX, SUNOS, OPENBSD, NETBSD}
 public procedure set_host_platform( atom plat )
 	ihost_platform = floor(plat)
 
 	TUNIX    = (find(ihost_platform, unices) != 0) 
 	TWINDOWS = (ihost_platform = WIN32)
-	TBSD     = (ihost_platform = UFREEBSD)
-	TOSX     = (ihost_platform = UOSX)
-	TLINUX   = (ihost_platform = ULINUX)
-	TSUNOS   = (ihost_platform = USUNOS)
-	TOPENBSD = (ihost_platform = UOPENBSD)
-	TNETBSD  = (ihost_platform = UNETBSD)
+	TBSD     = (ihost_platform = FREEBSD)
+	TOSX     = (ihost_platform = OSX)
+	TLINUX   = (ihost_platform = LINUX)
+	TSUNOS   = (ihost_platform = SUNOS)
+	TOPENBSD = (ihost_platform = OPENBSD)
+	TNETBSD  = (ihost_platform = NETBSD)
 	IUNIX    = TUNIX
 	IWINDOWS = TWINDOWS
 	IBSD     = TBSD

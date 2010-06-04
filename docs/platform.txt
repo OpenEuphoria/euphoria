@@ -2,8 +2,56 @@
 
 === Introduction
 
+=== CPU Specific Issues
+
+==== Architecture
+
+Currently all EUPHORIA implementations all run on the same architecture: INTEL32.  For this reason, there is always a symbol defined 'INTEL32.'  Machine code that will be executed in memory is INTEL32 specific and you should mark it with "ifdef INTEL32."
+
+<eucode>
+atom f1 = allocate(24)
+ifdef INTEL32 then
+    --warning machine code ahead!
+    global constant sin_cos_asm = allocate_code(
+    {
+	#60,                            --    0: pusha        
+	#DD,#05} & int_to_bytes(f1)     --    1: fld qword ptr [f1] (3)
+     & {#D9,#FB,                        --    7: fsincos    
+	#DD,#1D} & int_to_bytes(f1+8)   --    9: fstp qword ptr [f2] (11)
+     & {#DD,#1D} & int_to_bytes(f1+16)  --    F: fstp qword ptr [f3] (17)
+     & {#61,                            --   15: popa
+	#C3}                            --   16: ret
+    )
+end ifdef
+</eucode>
+
+The code will only run on a 386 compatible processor (INTEL32).  It was found in testing it was faster to use the support routines ##sin## and ##cos##.
+
+==== Endianness
+
+Every computer has Endianness.  When converting from one endian to another you should use
+"ifdef LITTLE_ENDIAN".
+<eucode>
+    -- big endian 16-bit values have been put into
+    -- the sequence ret as a string of 8-bit values
+    -- if we are on a LITTLE_ENDIAN machine they need to be
+    -- converted.
+    ifdef LITTLE_ENDIAN then
+	for i = 1 to length(ret) - 1 by 2 do
+		temp = ret[i]
+		ret[i] = ret[i+1]
+		ret[i+1] = temp
+	end for
+    end ifdef
+    -- now ret has the endianess of the host.    
+</eucode>				
+
+
+=== Platforms
+
 OpenEuphoria currently supports Euphoria on many different
 //platforms//. More platforms will be added in the future.
+=== Platforms
 
 **Windows ,,(tm),,** in particular, the 32-bit version of
 Windows that is used on Windows 95/98/ME, as well as NT/2000/XP and

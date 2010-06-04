@@ -23,6 +23,9 @@ fi
 
 echo "# File generated from configure" > Makefile.eu
 
+# If you want to add a new architecture, please also modify traninit.e (transoptions()), 
+# ../tests/t_arch.e, be_machine.c (get_machine_architecture_defines()) and the other
+# configure.
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then

@@ -14,6 +14,8 @@ include std/text.e
 include std/map.e as m
 include std/console.e
 
+constant M_DEFINES = 98
+
 include global.e
 include cominit.e
 include error.e
@@ -74,6 +76,7 @@ export procedure intoptions()
 	end if
 
 	OpDefines &= { "EUI" }
-
+	OpDefines &= machine_func(M_DEFINES,{})
+	
 	finalize_command_line(opts)
 end procedure

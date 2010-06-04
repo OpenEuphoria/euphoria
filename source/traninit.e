@@ -35,12 +35,13 @@
 -- We assume that the target platform is the same as our build platform.  
 -- Thus, no cross compilers.
 
-
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
 	without type_check
 end ifdef
+
+constant M_DEFINES      = 98
 
 include std/cmdline.e
 include std/error.e
@@ -71,6 +72,7 @@ end function
 set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
+	{ "arch",          0, GetMsgText(332,0), { NO_CASE, HAS_PARAMETER, "architecture" } },
 	{ "silent",        0, GetMsgText(177,0), { NO_CASE } },
 	{ "verbose",	   0, GetMsgText(319,0), { NO_CASE } },
 	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
@@ -109,7 +111,8 @@ end procedure
 
 --**
 -- Process the translator command-line options
-
+boolean arch_option = FALSE
+	
 export procedure transoptions()
 	Argv &= GetDefaultArgs()
 
@@ -156,6 +159,17 @@ export procedure transoptions()
 				dll_option = TRUE
 				OpDefines &= { "EUC_DLL" }
 
+			case "arch" then
+				arch_option = TRUE
+				switch upper(val) do
+					case "PORTABLE" then
+					case "INTEL32" then
+						OpDefines &= { "INTEL32" }
+					case else
+						ShowMsg(2, 333, { val, "INTEL32 or portable." }) 
+						abort(1)
+				end switch
+				
 			case "plat" then
 				switch upper(val) do				
 					-- please update comments in Makefile.gnu, Makefile.wat, configure and 
@@ -165,22 +179,22 @@ export procedure transoptions()
 						set_host_platform( WIN32 )
 
 					case "LINUX" then
-						set_host_platform( ULINUX )
+						set_host_platform( LINUX )
 
 					case "FREEBSD" then
-						set_host_platform( UFREEBSD )
+						set_host_platform( FREEBSD )
 
 					case "OSX" then
-						set_host_platform( UOSX )
+						set_host_platform( OSX )
 
 					case "SUNOS" then
-						set_host_platform( USUNOS )
+						set_host_platform( SUNOS )
 
 					case "OPENBSD" then
-						set_host_platform( UOPENBSD )
+						set_host_platform( OPENBSD )
 
 					case "NETBSD" then
-						set_host_platform( UNETBSD )
+						set_host_platform( NETBSD )
 
 					case else
 						ShowMsg(2, 201, { val, "WIN, LINUX, FREEBSD, OSX, SUNOS, OPENBSD, NETBSD" })
@@ -261,6 +275,10 @@ export procedure transoptions()
 		OpDefines = append( OpDefines, "WIN32_GUI" )
 	end if
 
+	if not arch_option then
+		OpDefines &= machine_func(M_DEFINES,{})
+	end if
+	
 	finalize_command_line(opts)
 end procedure
 
@@ -296,13 +314,14 @@ end procedure
 -- Initialize special stuff for the translator
 procedure InitBackEnd(integer c)
 	init_opcodes()
-	transoptions()
 
 	if c = 1 then
 		OpenCFiles()
 
 		return
 	end if
+
+	transoptions()
 
 	if compiler_type = COMPILER_UNKNOWN then
 		if TWINDOWS then
