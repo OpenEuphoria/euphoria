@@ -22,6 +22,8 @@ export enum
 
 export sequence op_info = {}
 
+-- op_info is an array of structures with
+-- the following members
 export enum
 	OP_SIZE_TYPE,
 	OP_SIZE,

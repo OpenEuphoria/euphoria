@@ -775,7 +775,8 @@ static void wrong_arg_count(symtab_ptr sub, object a)
 }
 
 static int recover_lhs_subscript(object subscript, s1_ptr s)
-/* lhs subscript failed initial check, but might be ok */
+/* lhs subscript failed initial check but the value may be an
+ * encoded pointer to a number. */
 {
 	int subscripti;
 	
@@ -2274,8 +2275,11 @@ void do_exec(int *start_pc)
 					*obj_ptr = MAKE_SEQ(top);
 				}
 				obj_ptr = (object_ptr)top;
+				// The variable, a, seems to index past the end of the sequence.
 				if ((unsigned long)(a-1) >= ((s1_ptr)obj_ptr)->length) {
 					tpc = pc;
+					// It may be an encoded pointer to d struct.
+					// Do a check in the routine below.
 					a = recover_lhs_subscript(a, (s1_ptr)obj_ptr);
 				}
 				obj_ptr = a + ((s1_ptr)obj_ptr)->base;
@@ -3591,7 +3595,7 @@ void do_exec(int *start_pc)
 					/* don't push */
 					/* save & copy the args */
 					while (TRUE) {
-						obj_ptr++;                      
+						obj_ptr++;
 						a = *(object_ptr)obj_ptr;
 						if (!IS_ATOM_INT(a)) {
 							if (a == NOVALUE) { // sentinel
