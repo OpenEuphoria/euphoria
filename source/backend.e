@@ -21,6 +21,7 @@ include error.e
 include cominit.e
 include compress.e
 include symtab.e
+include coverage.e
 
 procedure InitBackEnd(integer x)
 	if not BIND then
@@ -214,7 +215,9 @@ procedure BackEnd(integer il_file)
 		end if
 	end for
 	
-	SymTab = {}  -- free up some space
+	if not has_coverage() then
+		SymTab = {}  -- free up some space
+	end if
 	
 	-- slist is in run-length compressed form
 	-- elements might be atoms (rep count), or 2 or 4 wide sequences
@@ -266,8 +269,10 @@ procedure BackEnd(integer il_file)
 			eentry[LINE-short] += 1
 		end for
 	end for
-
-	slist = {}  -- free up some space
+	
+	if not has_coverage() then
+		slist = {}  -- free up some space
+	end if
 	
 	-- store file names and other variables
 	other_strings = append(file_name, file_name_entered) & warning_list
@@ -315,6 +320,6 @@ procedure BackEnd(integer il_file)
 		Argv = {Argv[1]} & Argv[3 .. Argc]
 	end if
 	
-	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv})
+	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv })
 end procedure
 mode:set_backend( routine_id("BackEnd") )

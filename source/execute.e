@@ -34,6 +34,7 @@ include symtab.e
 include scanner.e
 include mode.e as mode
 include intinit.e
+include coverage.e
 
 ifdef WIN32 then
 	include std/machine.e as dep
@@ -577,6 +578,7 @@ end procedure
 
 procedure quit_after_error()
 -- final termination
+	write_coverage_db()
 	ifdef WIN32 then
 		if not batch_job then
 			puts(2, "\nPress Enter...\n")
@@ -1102,6 +1104,16 @@ procedure one_trace_line(sequence line)
 	elsedef
 		printf(trace_file, "%-77.77s\r\n", {line})
 	end ifdef
+end procedure
+
+procedure opCOVERAGE_LINE()
+	cover_line( Code[pc+1] )
+	pc += 2
+end procedure
+
+procedure opCOVERAGE_ROUTINE()
+	cover_routine( Code[pc+1] )
+	pc += 2
 end procedure
 
 procedure opSTARTLINE()
@@ -4278,6 +4290,12 @@ procedure do_exec()
 			case DEREF_TEMP, NOVALUE_TEMP then
 				opDEREF_TEMP()
 			
+			case COVERAGE_LINE then
+				opCOVERAGE_LINE()
+			
+			case COVERAGE_ROUTINE then
+				opCOVERAGE_ROUTINE()
+				
 			case else
 				RTFatal( sprintf("Unknown opcode: %d", op ) )
 		end switch

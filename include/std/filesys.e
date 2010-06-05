@@ -1453,7 +1453,7 @@ object dirfil
 	
 	dirfil = dir(filename)
 	if sequence(dirfil) then
-		if eu:find('d', dirfil[1][2]) or (length(filename)=3 and filename[2]=':') then
+		if length( dirfil ) > 1 or eu:find('d', dirfil[1][2]) or (length(filename)=3 and filename[2]=':') then
 			return FILETYPE_DIRECTORY
 		else
 			return FILETYPE_FILE

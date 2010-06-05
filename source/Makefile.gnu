@@ -156,6 +156,12 @@ DEBUG_FLAGS=$(EOSMING)
 endif
 endif
 
+ifdef COVERAGE
+COVERAGEFLAG=-fprofile-arcs -ftest-coverage
+DEBUG_FLAGS=-g3 -O0 -Wall
+COVERAGELIB=-lgcov
+endif
+
 ifeq  "$(ELINUX)" "1"
 EBSDFLAG=-DELINUX
 endif
@@ -197,12 +203,13 @@ else
 	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex
 endif
 
-FE_FLAGS =  $(MSIZE) -pthread -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
-BE_FLAGS =  $(MSIZE) -pthread  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
 
 EU_CORE_FILES = \
 	block.e \
 	common.e \
+	coverage.e \
 	emit.e \
 	error.e \
 	fwdref.e \
@@ -407,18 +414,30 @@ source-tarball : source
 .PHONY : backendsource
 .PHONY : source
 
+
+$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
+	$(EXE) -i $(TRUNKDIR)/include coverage.ex $(BUILDDIR)/$(OBJDIR)
+
+$(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
+$(BUILDDIR)/transobj/back/be_execute.o : $(BUILDDIR)/transobj/back/coverage.h
+$(BUILDDIR)/backobj/back/be_execute.o : $(BUILDDIR)/backobj/back/coverage.h
+
+$(BUILDDIR)/intobj/back/be_runtime.o : $(BUILDDIR)/intobj/back/coverage.h
+$(BUILDDIR)/transobj/back/be_runtime.o : $(BUILDDIR)/transobj/back/coverage.h
+$(BUILDDIR)/backobj/back/be_runtime.o : $(BUILDDIR)/backobj/back/coverage.h
+
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EEXU)
 	@echo $(OS)
-	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
+	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EEXU)
-	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EEXUW)
+	$(CC) $(EOSFLAGSCONSOLE) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXU)
+	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXUW)
 else
-	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
+	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
 endif
 	
 $(BUILDDIR)/$(EECU) :  OBJDIR = transobj
@@ -427,7 +446,7 @@ $(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
 $(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EECU)
+	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
 
 backend : builddirs
 ifeq "$(EUPHORIA)" "1"
@@ -441,9 +460,9 @@ $(BUILDDIR)/$(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 $(BUILDDIR)/$(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EBACKENDU) $(OBJDIR)
-	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDU)
+	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDU)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) -o $(BUILDDIR)/$(EBACKENDC)
+	$(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
 endif
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
@@ -479,11 +498,25 @@ test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test : code-page-db
 test :  
-	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe $(BUILDDIR)/$(EEXU) -ec $(BUILDDIR)/$(EECU) -lib $(BUILDDIR)/$(EECUA)
+	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+		$(EXE) ../source/eutest.ex -i ../include -cc gcc \
+		-exe $(BUILDDIR)/$(EEXU) \
+		-ec $(BUILDDIR)/$(EECU) \
+		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)"
 	cd ../tests && sh check_diffs.sh
 
 testeu : code-page-db
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
+
+coverage : 
+	-rm $(BUILDDIR)/unit-test.edb
+	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+		$(EXE) ../source/eutest.ex -i ../include \
+		-exe "$(BUILDDIR)/$(EEXU)" -coverage-erase \
+		-coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std \
+		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex"
+
+.PHONY : coverage
 
 ifeq "$(PREFIX)" ""
 PREFIX=/usr/local
@@ -529,6 +562,7 @@ install :
 	           ../bin/buildcpdb.ex \
 	           $(BUILDDIR)/ecp.dat \
 	           ../bin/eprint.ex \
+	           ../bin/eucoverage.ex \
 	           ../bin/guru.ex \
 	           ../bin/key.ex \
 	           ../bin/lines.ex \
@@ -551,6 +585,15 @@ install :
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
 	echo eui $(PREFIX)/share/euphoria/source/bind.ex -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
+	# helper script for eutest
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eutest
+	echo eui $(PREFIX)/share/euphoria/source/eutest.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eutest
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eutest
+	# helper script for eucoverage
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eucoverage
+	echo eui $(PREFIX)/share/euphoria/bin/eucoverage.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eucoverage
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eucoverage
+	
 
 install-docs :
 	# create dirs
@@ -603,7 +646,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 endif
 
 $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c execute.h alloc.h global.h alldefs.h opnames.h reswords.h symtab.h Makefile.eu
-	$(CC) $(BE_FLAGS) $(EBSDFLAG) $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
+	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c Makefile.eu
 	$(CC) -c -w $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o

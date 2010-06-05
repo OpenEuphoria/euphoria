@@ -6812,7 +6812,9 @@ export procedure init_opcodes()
 			     "FUNC_FORWARD",
 			     "TYPE_CHECK_FORWARD",
 				 "REF_TEMP",
-				 "NOVALUE_TEMP" then
+				 "NOVALUE_TEMP",
+				 "COVERAGE_LINE",
+				 "COVERAGE_ROUTINE" then
 				-- never emitted
 				operation[i] = routine_id("opINTERNAL_ERROR")
 			

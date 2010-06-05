@@ -42,6 +42,10 @@
 #include "alldefs.h"
 #include "be_runtime.h"
 
+#ifndef ERUNTIME
+#include "coverage.h"
+#endif
+
 /******************/
 /* Local defines  */
 /******************/
@@ -5682,7 +5686,9 @@ void Cleanup(int status)
 	EndGraphics();
 
 #ifndef ERUNTIME
-
+	if( !WRITE_COVERAGE_DB() ){
+		screen_output(stderr, "\nUnable to open coverage database!\n");
+	}
 #ifdef EXTRA_STATS
 	Stats();
 #endif

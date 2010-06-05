@@ -31,6 +31,7 @@ include scanner.e
 include error.e
 include preproc.e
 include msgtext.e
+include coverage.e
 
 ifdef TRANSLATOR then
 	include buildsys.e
@@ -180,9 +181,12 @@ procedure main()
 
 	-- starts reading and checks for a default namespace
 	main_file()
-
+	
+	check_coverage()
+	
 	parser()
-
+	
+	init_coverage()
 	-- we've parsed successfully
 	-- now run the appropriate back-end
 	if TRANSLATE then
@@ -196,7 +200,7 @@ procedure main()
 			BackEnd(0) -- execute IL using Euphoria-coded back-end
 		end ifdef
 	end if
-
+	
 	Cleanup(0) -- does warnings
 end procedure
 

@@ -25,6 +25,7 @@ include fwdref.e
 include error.e
 include keylist.e
 include preproc.e
+include coverage.e
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
 constant MAX_FILE = 256       -- maximum number of source files
@@ -892,6 +893,7 @@ end ifdef
 		CompileErr(126)
 	end if
 	file_name = append(file_name, new_include_name)
+	check_coverage()
 	default_namespaces &= 0
 	update_include_matrix( length( file_include ), current_file_no )
 	old_file_no = current_file_no

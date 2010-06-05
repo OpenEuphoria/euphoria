@@ -19,8 +19,16 @@ include cominit.e
 include error.e
 include pathopen.e
 include msgtext.e
+include coverage.e
 
-sequence interpreter_opt_def = {}
+sequence interpreter_opt_def = {
+	{ "coverage",  0, GetMsgText(332,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
+	{ "coverage-db",  0, GetMsgText(333,0), { NO_CASE, HAS_PARAMETER, "file" } },
+	{ "coverage-erase",  0, GetMsgText(334,0), { NO_CASE } },
+	{ "coverage-exclude", 0, GetMsgText(338,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
+	$}
+
+add_options( interpreter_opt_def )
 
 --**
 -- Merges values from map b into map a, using operation CONCAT
@@ -60,6 +68,30 @@ export procedure intoptions()
 
 	handle_common_options(opts)
 
+	sequence opt_keys = map:keys(opts)
+	integer option_w = 0
+
+	for idx = 1 to length(opt_keys) do
+		sequence key = opt_keys[idx]
+		object val = map:get(opts, key)
+		
+		switch key do
+			case "coverage" then
+				for i = 1 to length( val ) do
+					add_coverage( val[i] )
+				end for
+				
+			case "coverage-db" then
+				coverage_db( val )
+			
+			case "coverage-erase" then
+				new_coverage_db()
+			
+			case "coverage-exclude" then
+				coverage_exclude( val )
+		end switch
+	end for
+	
 	if length(m:get(opts, "extras")) = 0 then
 		show_banner()
 		ShowMsg(2, 249)

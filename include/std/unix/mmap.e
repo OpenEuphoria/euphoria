@@ -4,6 +4,7 @@
 namespace mmap
 
 ifdef not UNIX then
+	include std/error.e
 	crash("Only supported on Unix systems!")
 end ifdef
 

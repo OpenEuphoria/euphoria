@@ -219,5 +219,7 @@ export constant opnames = {
 	"EXIT_BLOCK",
 	"REF_TEMP",
 	"DEREF_TEMP",
-	"NOVALUE_TEMP"
+	"NOVALUE_TEMP",
+	"COVERAGE_LINE",
+	"COVERAGE_ROUTINE"
 }

@@ -76,6 +76,7 @@ FULLBUILDDIR=$(BUILDDIR)
 EU_CORE_FILES = &
 	block.e &
 	common.e &
+	coverage.e &
 	emit.e &
 	error.e &
 	fwdref.e &
@@ -391,6 +392,7 @@ exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
 !endif
 # OBJDIR
 
+
 !ifeq EUPHORIA 1
 translate source : .SYMBOLIC  
     @echo ------- TRANSLATE WIN -----------
@@ -415,7 +417,14 @@ test : .SYMBOLIC code-page-db
 	$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) $(LIST)
 	-del ecp.dat
 	cd ..\source
-	
+
+coverage : .SYMBOLIC code-page-db
+	cd ..\tests
+	-copy $(BUILDDIR)\ecp.dat .
+	$(EUTEST) -verbose -i ..\include -exe "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include\std -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(LIST)
+	-del ecp.dat
+	cd ..\source
+
 report: .SYMBOLIC
 	$(MAKE) ..\reports\report.html
 	
@@ -436,6 +445,18 @@ $(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 	$(EUBIN)\euc -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
 
 !endif #BUILD_TOOLS
+
+$(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
+	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
+
+$(BUILDDIR)\intobj\back\be_execute.obj : $(BUILDDIR)\intobj\back\coverage.h
+$(BUILDDIR)\intobj\back\be_runtime.obj : $(BUILDDIR)\intobj\back\coverage.h
+
+$(BUILDDIR)\transobj\back\be_execute.obj : $(BUILDDIR)\transobj\back\coverage.h
+$(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
+
+$(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
+$(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG)
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
@@ -572,7 +593,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) /I$(BUILDDIR)\$(OBJDIR)\back $[@ -fo=$^@
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@
