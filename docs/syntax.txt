@@ -40,6 +40,9 @@ MARGINSTR  ==: '_' ...
 </eucode>
 
 == statements ==
+=== directives ===
+[[:INCLUDESTMT]]\\
+
 === flow control ===
 [[:IFSTMT]]\\
 [[:SWITCHSTMT]]\\
@@ -55,6 +58,14 @@ MARGINSTR  ==: '_' ...
 
 !!splice
 
+== include == @[INCLUDESTMT]
+<eucode>
+ INCLUDESTMT  ==:  'include' FILEREF [ 'as' NAMESPACE ] EOL
+ FILEREF  ==:  A file path that may be enclosed in double-quotes. 
+ NAMESPACE ==: IDENTIFIER  
+</eucode>
+**NOTE** that after the file reference, the only text allowed is the keyword 'as'
+or the start of a comment. Nothing else is permitted on the same text line.
 
 == sequence slice == @[SLICING]
 <eucode>

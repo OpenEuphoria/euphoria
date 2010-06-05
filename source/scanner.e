@@ -2044,8 +2044,28 @@ export procedure IncludeScan( integer is_public )
 		else
 			CompileErr(100)
 		end if
-	else
+		
+	elsif find(ch, {'\n', '\r', END_OF_FILE_CHAR}) then
 		ungetch()
+		
+	elsif ch = '-' then
+		ch = getch()
+		if ch != '-' then
+			CompileErr(100)
+		end if
+		ungetch()
+		ungetch()
+		
+	elsif ch = '/' then
+		ch = getch()
+		if ch != '*' then
+			CompileErr(100)
+		end if
+		ungetch()
+		ungetch()
+		
+	else
+		CompileErr(100)
 	end if
 
 	start_include = TRUE -- let scanner know

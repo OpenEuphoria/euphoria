@@ -113,7 +113,7 @@ constant StdErrMsgs = {
 	{ 97, "hex number not formed correctly"},
 	{ 98, "internal nested call parsing error"},
 	{ 99, "integer or constant expected"},
-	{100, "improper syntax for include-as"},
+	{100, "expecting 'as' or end-of line. Unexpected text on 'include' directive"},
 	{101, "illegal character in source"},
 	{102, "illegal character"},
 	{103, "illegal character (ASCII 0) at line:col [1]:[2]"},

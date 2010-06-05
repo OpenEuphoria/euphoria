@@ -101,7 +101,7 @@ table 1
 { 97, "hex number not formed correctly"}
 { 98, "internal nested call parsing error"}
 { 99, "integer or constant expected"}
-{100, "improper syntax for include-as"}
+{100, "expecting 'as' or end-of line. Unexpected text on 'include' directive"}
 {101, "illegal character in source"}
 {102, "illegal character"}
 {103, "illegal character (ASCII 0) at line:col [1]:[2]"}
@@ -320,6 +320,19 @@ table 1
 {316, "Internal error; Binding seek to checksum area failed!"}
 {317, "couldn't open [1]!"}
 {318, "Your custom icon file is too large."}
+{319, "Verbose output"}
+{320, "[1] - module variable '[2]' is assigned but never used"}
+{321, "[1] - parameter '[2]' of [3]() is assigned but never used"}
+{322, "[1] - private variable '[2]' of [3]() is assigned but never used"}
+{323, "Flags to pass to compiler (overrides internal compiler flags)"}
+{324, "Flags to pass to linker (overrides internal linker flags)"}
+{325, "Skipping  [1:3.0]% [2] (up-to-date)"}
+{326, "Force building, even if file is up-to-date"}
+{327, "[1] is deprecated ([2]:[3])"}
+{328, "Overrides the value of EUDIR"}
+{329, "Invalid character in HEX string"}
+{330, "Only enums may be declared as types"}
+{331, "Forward references are not supported for enums"}
 
 
 --dump dump.txt
