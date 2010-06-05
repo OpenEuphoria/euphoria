@@ -843,7 +843,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	if (seq->ref == 1 ){
 		if( len >= seq->postfill ){
 			new_len = EXTRA_EXPAND(nseq + len);
-			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 3)*4);
+			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len)*sizeof(s1_ptr) + sizeof( struct s1 ));
 			new_seq->base = ((object_ptr)(new_seq+1)) - 1;
 			seq = new_seq;
 			seq->postfill = new_len - (len + nseq) - 1;

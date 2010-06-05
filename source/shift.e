@@ -389,7 +389,8 @@ export procedure insert_code( sequence code, integer index )
 end procedure
 
 export procedure replace_code( sequence code, integer start, integer finish )
-	Code = replace( Code, code, start, finish )
+	--Code = replace( Code, code, start, finish )
+	Code = Code[1..start-1] & code & Code[finish+1..$]
 	shift( start , length( code ) - (finish - start + 1), finish )
 end procedure
 
