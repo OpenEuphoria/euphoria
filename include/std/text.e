@@ -1076,7 +1076,7 @@ end function
 -- Example 3:
 -- <eucode>
 -- s = quote("The (small) man", {"(", ")"}, '~' )
--- -- 's' now contains '(the ~(small~) man)'
+-- -- 's' now contains '(The ~(small~) man)'
 -- </eucode>
 --
 -- Example 4:
@@ -1186,7 +1186,9 @@ end function
 --
 -- Parameters:
 --   # ##text_in## : The string or set of strings to de-quote.
---   # ##quote_pairs## : A set of one or more sub-sequences of two strings.
+--   # ##quote_pairs## : A set of one or more sub-sequences of two strings,
+--              or an atom representing a single character to be used as 
+--              both the open and close quotes.
 --              The first string in each sub-sequence is the opening
 --              quote to look for, and the second string is the closing quote.
 --              The default is {{{"\"", "\""}}} which means that the output is
@@ -1202,29 +1204,29 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- Using the defaults.
--- s = quote("\"The small man\"")
+-- s = dequote("\"The small man\"")
 -- -- 's' now contains "The small man"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- -- Using the defaults.
--- s = quote("(The small ?(?) man)", {{"[","]"}}, '?')
+-- s = dequote("(The small ?(?) man)", {{"(",")"}}, '?')
 -- -- 's' now contains "The small () man"
 -- </eucode>
 --
-public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, integer esc = -1)
+public function dequote(sequence text_in, object quote_pairs = {{"\"", "\""}}, integer esc = -1)
 
 	if length(text_in) = 0 then
 		return text_in
 	end if
 
 	if atom(quote_pairs) then
-		quote_pairs = {{quote_pairs}, {quote_pairs}}
+		quote_pairs = {{{quote_pairs}, {quote_pairs}}}
 	elsif length(quote_pairs) = 1 then
 		quote_pairs = {quote_pairs[1], quote_pairs[1]}
 	elsif length(quote_pairs) = 0 then
-		quote_pairs = {"\"", "\""}
+		quote_pairs = {{"\"", "\""}}
 	end if
 
 	if sequence(text_in[1]) then

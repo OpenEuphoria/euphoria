@@ -132,6 +132,16 @@ test_equal("quote #2", "(The small man)", quote("The small man", {"(", ")"} ))
 test_equal("quote #3", "(The ~(small~) man)", quote("The (small) man", {"(", ")"}, '~' ))
 test_equal("quote #4", "The (small) man", quote("The (small) man", {"(", ")"}, '~', "#" ))
 test_equal("quote #5", "(The #1 ~(small~) man)", quote("The #1 (small) man", {"(", ")"}, '~', "#" ))
+test_equal("quote #6", "", quote( "" ) )
+test_equal("quote #7", `"foo"`, quote( "foo", '\"' ) )
+test_equal("quote #8", `"foo"`, quote( "foo", "" ) )
+test_equal("quote #9", `"foo"`, quote( "foo", {`"`} ) )
+test_equal("quote #10", `"foo"`, quote( "foo", {'\"'}, '?' ) )
+test_equal("quote #11", "(The ~(small~) man)" , quote("The (small) man", {"(", ")"}, '~' ) )
+test_equal("quote #12", "(The ~~~(small~~~) man)" , quote("The ~(small~) man", {"(", ")"}, '~' ) )
+test_equal("quote #13", "$The ~$small~$ man$" , quote("The $small$ man", {"$"}, '~' ) )
+test_equal("quote #14", "$The ~~~$small~~~$ man$" , quote("The ~$small~$ man", {"$"}, '~' ) )
+test_equal("quote #15", repeat("\"The small man\"",2), quote( repeat("The small man", 2)))
 
 
 -- format()
@@ -362,6 +372,18 @@ test_equal("env", "AbCdEf", "AbCdEf")
 res = format("([lc%testenv%:20])")
 exp = "(       abcdef       )"
 test_equal("format 'BC'", exp, res)
+
+-- dequote()
+test_equal( "dequote empty", "", dequote( "" ) )
+test_equal( "dequote no pairs", `foo`, dequote( `"foo"`, "" ) )
+test_equal( "dequote atom pair", `foo`, dequote( `"foo"`, '\"' ) )
+test_equal( "dequote defaults 1", "The small man", dequote("\"The small man\"") )
+test_equal( "dequote defaults 2", "The small () man", dequote("(The small ?(?) man)", {{"(",")"}}, '?') )
+
+test_equal( "dequote multiple strings", {"The small man","The small () man"}, 
+	dequote({"\"The small man\"", "(The small ?(?) man)"}, {{"(",")"},{"\"","\""}}, '?'))
+
+
 
 test_report()
 

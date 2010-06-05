@@ -162,6 +162,10 @@ DEBUG_FLAGS=-g3 -O0 -Wall
 COVERAGELIB=-lgcov
 endif
 
+ifndef TESTFILE
+COVERAGE_ERASE=-coverage-erase
+endif
+
 ifeq  "$(ELINUX)" "1"
 EBSDFLAG=-DELINUX
 endif
@@ -509,12 +513,11 @@ testeu : code-page-db
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
 
 coverage : 
-	-rm $(BUILDDIR)/unit-test.edb
-	-cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
 		$(EXE) ../source/eutest.ex -i ../include \
-		-exe "$(BUILDDIR)/$(EEXU)" -coverage-erase \
+		-exe "$(BUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
 		-coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std \
-		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex"
+		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
 .PHONY : coverage
 
