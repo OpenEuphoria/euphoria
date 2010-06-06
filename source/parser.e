@@ -3572,7 +3572,7 @@ procedure Statement_list()
 			Return_statement()
 
 		elsif id = LABEL then
-			StartSourceLine(TRUE)
+			StartSourceLine(TRUE, , COVERAGE_SUPPRESS )
 			GLabel_statement()
 
 		elsif id = GOTO then
@@ -3596,7 +3596,7 @@ procedure Statement_list()
 	        Loop_statement()
 
 		elsif id = ENTRY then
-		    StartSourceLine(TRUE)
+		    StartSourceLine(TRUE, , COVERAGE_SUPPRESS )
 		    Entry_statement()
 
 		elsif id = QUESTION_MARK then
@@ -4401,7 +4401,7 @@ export procedure real_parser(integer nested)
 			ExecCommand()
 
 		elsif id = LABEL then
-			StartSourceLine(TRUE)
+			StartSourceLine(TRUE, , COVERAGE_SUPPRESS)
 			GLabel_statement()
 
 		elsif id = GOTO then
@@ -4434,7 +4434,7 @@ export procedure real_parser(integer nested)
 
 		elsif id = ENTRY then
 			if nested then
-			    StartSourceLine(TRUE)
+			    StartSourceLine(TRUE, , COVERAGE_SUPPRESS)
 			    Entry_statement()
 			else
 				CompileErr(72)

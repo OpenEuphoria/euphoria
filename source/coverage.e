@@ -31,6 +31,8 @@ sequence routine_map = {}
 
 sequence included_lines = {}
 
+integer initialized_coverage = 0
+
 export procedure check_coverage()
 
 	for i = length( file_coverage ) + 1 to length( file_name ) do
@@ -42,7 +44,10 @@ end procedure
 -- Processes the files in the application vs the files requested for coverage.
 -- Creates the coverage db.
 export procedure init_coverage()
-	
+	if initialized_coverage then
+		return
+	end if
+	initialized_coverage = 1
 	for i = 1 to length( file_coverage ) do
 		file_coverage[i] = find( canonical_path( file_name[i] ), covered_files )
 	end for
@@ -81,10 +86,16 @@ procedure write_map( map coverage, sequence table_name )
 			db_insert( keys[i], val )
 		end if
 	end for
+	
 end procedure
 
+integer wrote_coverage = 0
 export function write_coverage_db()
-	
+	if wrote_coverage then
+		return 0
+	end if
+	wrote_coverage = 1
+	init_coverage()
 	if not length( covered_files ) then
 		return 1
 	end if
@@ -135,6 +146,7 @@ procedure read_coverage_db()
 		for j = 1 to db_table_size() do
 			map:put( the_map, db_record_key( j ), db_record_data( j ), map:ADD )
 		end for
+		
 	end for
 end procedure
 
