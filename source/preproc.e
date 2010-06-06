@@ -42,7 +42,7 @@ end function
 
 public procedure add_preprocessor(sequence file_ext, object command=0, object params=0)
 	if atom(command) then
-		sequence tmp = split(file_ext, ":")
+		sequence tmp = split(":", file_ext)
 		file_ext = tmp[1]
 		command = tmp[2]
 		if length(tmp) >= 3 then
@@ -50,13 +50,13 @@ public procedure add_preprocessor(sequence file_ext, object command=0, object pa
 		end if
 	end if
 
-	sequence file_exts = split(file_ext, ",")
+	sequence file_exts = split(",", file_ext)
 	
 	if atom(params) then
 		params = ""
 	end if
 	
-	sequence exts = split(file_ext, ",")
+	sequence exts = split(",", file_ext)
 	for i = 1 to length(exts) do
 		preprocessors &= { { exts[i], command, params, -1 } }
 	end for

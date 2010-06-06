@@ -2091,9 +2091,9 @@ end function
 -- Split a sequence on separator delimiters into a number of sub-sequences.
 --
 -- Parameters:
---   # ##source## : the sequence to split.
 --   # ##delim## : an object (default is ' '). The delimiter that separates items
 --                in ##source##.
+--   # ##source## : the sequence to split.
 --   # ##limit## : an integer (default is 0). The maximum number of sub-sequences
 --                to create. If zero, there is no limit.
 --   # ##no_empty## : an integer (default is 0). If not zero then all zero-length sub-sequences
@@ -2111,20 +2111,20 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- result = split("John Middle Doe")
+-- result = split(,"John Middle Doe")
 -- -- result is {"John", "Middle", "Doe"}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- result = split("John,Middle,Doe", ",", 2)
+-- result = split(",", "John,Middle,Doe", 2)
 -- -- result is {"John", "Middle,Doe"}
 -- </eucode>
 --
 -- See Also:
 --     [[:split_any]], [[:breakup]], [[:join]]
 
-public function split(sequence st, object delim=' ', integer limit=0, integer no_empty = 0)
+public function split(object delim=' ', sequence st, integer limit=0, integer no_empty = 0)
 	sequence ret = {}
 	integer start
 	integer pos
@@ -2135,7 +2135,7 @@ public function split(sequence st, object delim=' ', integer limit=0, integer no
 
 
 	if sequence(delim) then
-		-- Handle the simple case of split("123", ""), opposite is join({"1","2","3"}, "") -- "123"
+		-- Handle the simple case of split("", "123"), opposite is join({"1","2","3"}, "") -- "123"
 		if equal(delim, "") then
 			for i = 1 to length(st) do
 				st[i] = {st[i]}

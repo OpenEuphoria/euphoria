@@ -131,7 +131,7 @@ function run_emake()
 		
 		elsif match("set ", line) = 1 then 
 			sequence pair
-			pair = split(line[5..$], "=")
+			pair = split("=", line[5..$])
 			pair = {setenv(pair[1], pair[2])}
 
 		elsif match("move ", line) = 1 or
@@ -972,7 +972,7 @@ procedure do_process_log( sequence cmds, integer html)
 	if atom(content) then
 		puts(1, "unittest.log could not be read\n")
 	else    
-		messages = split(content, "entry = ")
+		messages = split("entry = ", content)
 		for a = 1 to length(messages) do
 			if sequence(messages[a]) and equal(messages[a], "") then
 				continue

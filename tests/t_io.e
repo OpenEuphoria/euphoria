@@ -182,7 +182,7 @@ end function
 
 test_equal( "process lines #1", 0, process_lines("file.txt", routine_id("test_proc"), {"[1z:4] : [2]", 0}))
 test_equal( "process lines #2", test_file_data, tmp)
-tmp = split(test_file_data, '\n')
+tmp = split('\n', test_file_data)
 tmp = tmp[1..$-1] -- Strip off final empty sequence.
 for i = 1 to length(tmp) do
 	tmp[i] = sprintf("%04d : %s", {i, tmp[i]})
