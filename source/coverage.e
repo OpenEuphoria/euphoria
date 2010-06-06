@@ -2,6 +2,10 @@
 --
 -- Instruments euphoria source code for code coverage analysis
 
+export enum 
+	COVERAGE_SUPPRESS,
+	COVERAGE_INCLUDE
+
 include std/filesys.e
 include std/regex.e
 include std/map.e
@@ -16,9 +20,6 @@ include reswords.e
 include scanner.e
 include msgtext.e
 
-export enum 
-	COVERAGE_SUPPRESS,
-	COVERAGE_INCLUDE
 
 sequence covered_files = {}
 sequence file_coverage = {}
