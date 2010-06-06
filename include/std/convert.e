@@ -360,6 +360,7 @@ end function
 -- * The text can have any number of underscores, all of which are ignored.
 -- * The text can have one leading '-', indicating a negative number.
 -- * The text can have any number of underscores, all of which are ignored.
+-- * Any other characters in the text stops the parsing and returns the value thus far.
 --
 -- Example 1:
 -- <eucode>
@@ -634,11 +635,11 @@ public function to_number( sequence text_in, integer return_bad_pos = 0)
 
 			case '.', ',' then
 				if lLastDigit = 0 then
-	            	if decimal_mark = lChar then
-		                if lDotFound = 0 then
-			                lDotFound = 1
-				        else
-					        lBadPos = i
+					if decimal_mark = lChar then
+						if lDotFound = 0 then
+							lDotFound = 1
+						else
+							lBadPos = i
 						end if
 					else
 						-- Ignore it
@@ -648,21 +649,17 @@ public function to_number( sequence text_in, integer return_bad_pos = 0)
 				end if
 
 			case '%' then
-				if lDigitCount >= 0 then
-					lLastDigit = lDigitCount
-					if lPercent = 1 then
-						lPercent = 100
-					else
-						if text_in[i-1] = '%' then
-							lPercent *= 10 -- Yes ten not one hundred.
-						else
-							lBadPos = i
-						end if
-					end if
+				lLastDigit = lDigitCount
+				if lPercent = 1 then
+					lPercent = 100
 				else
-					lBadPos = i
+					if text_in[i-1] = '%' then
+						lPercent *= 10 -- Yes ten not one hundred.
+					else
+						lBadPos = i
+					end if
 				end if
-
+				
 			case '\t', ' ', #A0 then
 				if lDigitCount = 0 then
 					-- skip it

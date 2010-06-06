@@ -145,11 +145,12 @@ export function test_write( valid_memory_protection_constant protection )
 	ifdef UNIX then
 		-- take advantage of the use of bit fields in UNIX for protections
 		return and_bits(PROT_WRITE,protection) != 0
+	elsedef
+		return find( protection, { PAGE_EXECUTE_READWRITE,
+				PAGE_EXECUTE_WRITECOPY,
+			PAGE_WRITECOPY,
+		PAGE_READWRITE})
 	end ifdef
-	return find( protection, { PAGE_EXECUTE_READWRITE,
-		 	PAGE_EXECUTE_WRITECOPY,
-		 PAGE_WRITECOPY,
-	PAGE_READWRITE})
 end function
 
 export function test_exec( valid_memory_protection_constant protection )
@@ -157,11 +158,12 @@ export function test_exec( valid_memory_protection_constant protection )
 	ifdef UNIX then
 		-- take advantage of the use of bit fields in UNIX for protections
 		return and_bits(PROT_EXEC,protection) != 0
+	elsedef
+		return find(protection,{PAGE_EXECUTE,
+			PAGE_EXECUTE_READ,
+			PAGE_EXECUTE_READWRITE,
+			PAGE_EXECUTE_WRITECOPY})
 	end ifdef
-	return find(protection,{PAGE_EXECUTE,
-		PAGE_EXECUTE_READ,
-		PAGE_EXECUTE_READWRITE,
-		PAGE_EXECUTE_WRITECOPY})
 end function
 
 
