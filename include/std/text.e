@@ -1163,14 +1163,14 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 			if match(quote_pair[1], text_in) or
 			   match(quote_pair[2], text_in) then
 				if match(esc & quote_pair[1], text_in) then
-					text_in = replace_all(text_in, esc & quote_pair[1], esc & esc & esc & quote_pair[1])
+					text_in = replace_all(text_in, esc & quote_pair[1], esc & esc & quote_pair[1])
 				end if
 				text_in = replace_all(text_in, quote_pair[1], esc & quote_pair[1])
 			end if
 
 			if match(quote_pair[2], text_in) then
 				if match(esc & quote_pair[2], text_in) then
-					text_in = replace_all(text_in, esc & quote_pair[2], esc & esc & esc & quote_pair[2])
+					text_in = replace_all(text_in, esc & quote_pair[2], esc & esc & quote_pair[2])
 				end if
 				text_in = replace_all(text_in, quote_pair[2], esc & quote_pair[2])
 			end if

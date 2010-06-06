@@ -1731,7 +1731,7 @@ export procedure emit_assign_op(integer op)
 	end if
 end procedure
 
-export procedure StartSourceLine(integer sl, integer dup_ok = 0)
+export procedure StartSourceLine(integer sl, integer dup_ok = 0, integer emit_coverage = COVERAGE_INCLUDE )
 -- record code offset at start of new source statement, 
 -- optionally emit start of line op
 -- sl is true if we want a STARTLINE emitted as well
@@ -1765,7 +1765,9 @@ export procedure StartSourceLine(integer sl, integer dup_ok = 0)
 	end if
 	
 	-- emit opcode for coverage gathering
-	include_line( gline_number )
+	if emit_coverage = COVERAGE_INCLUDE then
+		include_line( gline_number )
+	end if
 	
 end procedure
 

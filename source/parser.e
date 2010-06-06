@@ -2139,7 +2139,7 @@ procedure If_statement()
 		
 		Sibling_block( IF )
 		
-		StartSourceLine(FALSE)
+		StartSourceLine(FALSE, , COVERAGE_SUPPRESS )
 		emit_op(ELSE)
 		AppendEList(length(Code)+1)
 		break_delay &= 1
@@ -2271,7 +2271,7 @@ procedure Case_statement()
 		Start_block( CASE )
 	end if
 	
-	StartSourceLine(TRUE)
+	StartSourceLine(TRUE, , COVERAGE_SUPPRESS)
 			
 	fallthru_case = 0
 	integer start_line = line_number

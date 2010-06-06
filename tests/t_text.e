@@ -138,11 +138,11 @@ test_equal("quote #8", `"foo"`, quote( "foo", "" ) )
 test_equal("quote #9", `"foo"`, quote( "foo", {`"`} ) )
 test_equal("quote #10", `"foo"`, quote( "foo", {'\"'}, '?' ) )
 test_equal("quote #11", "(The ~(small~) man)" , quote("The (small) man", {"(", ")"}, '~' ) )
-test_equal("quote #12", "(The ~~~~(small~~~~) man)" , quote("The ~(small~) man", {"(", ")"}, '~' ) )
+test_equal("quote #12", "(The ~~~(small~~~) man)" , quote("The ~(small~) man", {"(", ")"}, '~' ) )
 test_equal("quote #13", "$The ~$small~$ man$" , quote("The $small$ man", {"$"}, '~' ) )
 test_equal("quote #14", "$The ~~~$small~~~$ man$" , quote("The ~$small~$ man", {"$"}, '~' ) )
 test_equal("quote #15", repeat("\"The small man\"",2), quote( repeat("The small man", 2)))
-
+test_equal("quote #16", `(The ~(small~)! man)`, quote("The (small)! man", {"(", ")"}, '~', "#!" ))
 
 -- format()
 sequence res

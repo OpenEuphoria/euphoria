@@ -16,6 +16,10 @@ include reswords.e
 include scanner.e
 include msgtext.e
 
+export enum 
+	COVERAGE_SUPPRESS,
+	COVERAGE_INCLUDE
+
 sequence covered_files = {}
 sequence file_coverage = {}
 sequence coverage_db_name = ""
