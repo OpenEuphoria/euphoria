@@ -38,9 +38,11 @@ n0 = foo4( 6 )
 test_equal("with pseudo namespace #1", {1,2,3,4}, result4)
 test_equal("with pseudo namespace #2", 10 , n0)
 
+
 function forward_constant_default_param( atom val = EXPORT_CONSTANT )
 	return val
 end function
+test_equal( "forward constant default param", EXPORT_CONSTANT, forward_constant_default_param() )
 
 include fwd.e
 object a, b, c, d, e, f, g, h

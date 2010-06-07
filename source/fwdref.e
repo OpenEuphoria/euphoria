@@ -611,9 +611,17 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	if op = GOTO then
 		forward_references[ref][FR_DATA] = { sym }
 	end if
-	active_references &= ref
-	active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
-	fwdref_count += 1
+	
+	-- If we're recording tokens (for a default parameter), this ref will never 
+	-- get resolved.  So ignore it for now, and when someone actually calls
+	-- the routine, it will be resolved normally then.
+	if  Parser_mode != PAM_RECORD then
+		
+		active_references &= ref
+		active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
+		fwdref_count += 1
+	end if
+	
 	return ref
 end function
 

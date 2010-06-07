@@ -555,9 +555,16 @@ function read_recorded_token(integer n)
 		if t[T_ID] = IGNORED then
 	        p = Recorded_sym[n]
 	        if p = 0 then
-	        	CompileErr(157,{Recorded[n]})
-	        end if
-		    t = {SymTab[p][S_TOKEN], p}
+				-- a forward reference
+				No_new_entry = 0
+				t = keyfind( Recorded[n], -1 )
+				No_new_entry = 1
+				if t[T_ID] = IGNORED then
+					CompileErr(157,{Recorded[n]})
+				end if
+			else
+				t = {SymTab[p][S_TOKEN], p}
+			end if
 		end if
 	else
 		prev_Nne = No_new_entry
