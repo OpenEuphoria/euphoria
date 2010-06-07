@@ -1669,7 +1669,9 @@ procedure Assignment(token left_var)
 				-- copy temp back into lhs var
 				emit_opnd(left_sym)
 				emit_opnd(lhs_subs1_copy_temp) -- will be freed
+				emit_temp( lhs_subs1_copy_temp, NEW_REFERENCE )
 				emit_op(ASSIGN)
+				
 			else
 				TempFree(lhs_subs1_copy_temp)
 			end if

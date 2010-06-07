@@ -955,6 +955,7 @@ export procedure inline_deferred_calls()
 				CurrentSub = calling_sub
 				Code = SymTab[calling_sub][S_CODE]
 				LineTable = SymTab[calling_sub][S_LINETAB]
+				sequence code = {}
 				while ix and ix < length( Code ) with entry do
 					
 					if SymTab[sub][S_TOKEN] != PROC then
@@ -965,11 +966,11 @@ export procedure inline_deferred_calls()
 						Push( Code[ix + p] )
 					end for
 					
-					sequence code = get_inlined_code( sub, ix - 1, 1 )
+					code = get_inlined_code( sub, ix - 1, 1 )
 					
 					shift:replace_code( code, ix, ix + 1 + SymTab[sub][S_NUM_ARGS] + (SymTab[sub][S_TOKEN] != PROC) )
 				entry
-					ix = match_from( PROC & sub, Code, ix + 1 )
+					ix = match_from( PROC & sub, Code, ix + length(code) )
 				end while
 				SymTab[calling_sub][S_CODE] = Code
 				SymTab[calling_sub][S_LINETAB] = LineTable

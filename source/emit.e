@@ -819,15 +819,18 @@ export procedure emit_op(integer op)
 			-- calling ourself - parameter values may 
 			-- get overwritten before we can use them 
 			for i = cgi-n+1 to cgi do
-				if cg_stack[i] > 0 and -- if it's a forward reference, it's not a private
-				   SymTab[cg_stack[i]][S_SCOPE] = SC_PRIVATE and 
-				   SymTab[cg_stack[i]][S_VARNUM] < i then
-					-- copy parameter to a temp 
-					emit_opcode(ASSIGN)
-					emit_addr(cg_stack[i])
-					cg_stack[i] = NewTempSym()
-					emit_addr(cg_stack[i])
-					check_for_temps()
+				if cg_stack[i] > 0 then -- if it's a forward reference, it's not a private
+					if SymTab[cg_stack[i]][S_SCOPE] = SC_PRIVATE and 
+					   SymTab[cg_stack[i]][S_VARNUM] < i then
+						-- copy parameter to a temp 
+						emit_opcode(ASSIGN)
+						emit_addr(cg_stack[i])
+						cg_stack[i] = NewTempSym()
+						emit_addr(cg_stack[i])
+						check_for_temps()
+					elsif sym_mode( cg_stack[i] ) = M_TEMP then
+						emit_temp( cg_stack[i], NEW_REFERENCE )
+					end if
 				end if
 			end for
 		end if
@@ -835,7 +838,7 @@ export procedure emit_op(integer op)
 		emit_addr(subsym)
 		for i = cgi-n+1 to cgi do 
 			emit_addr(cg_stack[i])
-			TempFree(cg_stack[i])
+			emit_temp( cg_stack[i], NEW_REFERENCE )
 		end for
 		
 		cgi -= n
@@ -843,9 +846,11 @@ export procedure emit_op(integer op)
 		if SymTab[subsym][S_TOKEN] != PROC then
 			assignable = TRUE
 			c = NewTempSym() -- put final result in temp 
+			emit_temp( c, NEW_REFERENCE )
 			Push(c)
 			-- emit location to assign result to
 			emit_addr(c)
+			
 		end if
 		
 	elsif op = PROC_FORWARD or op = FUNC_FORWARD then
@@ -865,7 +870,7 @@ export procedure emit_op(integer op)
 		emit_addr( n ) -- this changes to be the "next" instruction
 		for i = cgi-n+1 to cgi do 
 			emit_addr(cg_stack[i])
-			TempFree(cg_stack[i])
+			emit_temp( cg_stack[i], NEW_REFERENCE )
 		end for
 		cgi -= n
 		
@@ -875,6 +880,7 @@ export procedure emit_op(integer op)
 			Push(c)
 			-- emit location to assign result to
 			emit_addr(c)
+			emit_temp( c, NEW_REFERENCE )
 		end if
 		
 	elsif op = WARNING then

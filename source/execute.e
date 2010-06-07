@@ -1835,9 +1835,6 @@ procedure opASSIGN_SUBS() -- also ASSIGN_SUBS_CHECK, ASSIGN_SUBS_I
 	x = val[c]
 	subs = val[b]
 	val[a][subs] = x  -- single LHS subscript
-	if sym_mode( c ) = M_TEMP then
-		val[c] = NOVALUE
-	end if
 	pc += 4
 end procedure
 
@@ -1853,12 +1850,10 @@ procedure opPASSIGN_SUBS()
 	-- multiple LHS subscript case
 	lhs_seq_index = val[a][1]
 	lhs_subs = val[a][2..$]    
+
 	val[lhs_seq_index] = assign_subs(val[lhs_seq_index], 
 										 lhs_subs & val[b], 
 										 val[c])
-	if sym_mode( c ) = M_TEMP then
-		val[c] = NOVALUE
-	end if
 	pc += 4
 end procedure
 
