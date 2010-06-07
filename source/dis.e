@@ -346,7 +346,7 @@ function find_line(symtab_index sub, integer pc, integer file_only = 1)
 	if file_only then
 		return slist[gline][LOCAL_FILE_NO]
 	else
-		return {file_name[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC]}
+		return {file_name[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC], gline}
 	end if
 	
 end function
@@ -1753,7 +1753,7 @@ procedure dis( integer sub )
 	while pc <= length(Code) do
 		integer ln = find( pc-1, line_table )
 		if ln > 0 and ln <= length(line_table) then
-			printf(out, "\n        [%s:%d] %s\n", find_line( sub, pc, 0 ) )
+			printf(out, "\n        [%s:%d] %s (%d)\n", find_line( sub, pc, 0 ) )
 		end if
 		
 		op = Code[pc]

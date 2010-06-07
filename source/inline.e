@@ -938,7 +938,7 @@ end procedure
 -- inline what we can.
 export procedure inline_deferred_calls()
 	deferred_inlining = 1
-
+	/*
 	for i = 1 to length( deferred_inline_decisions ) do
 		
 		if length( deferred_inline_calls[i] ) then
@@ -954,6 +954,7 @@ export procedure inline_deferred_calls()
 				symtab_index calling_sub = deferred_inline_calls[i][cx]
 				CurrentSub = calling_sub
 				Code = SymTab[calling_sub][S_CODE]
+				LineTable = SymTab[calling_sub][S_LINETAB]
 				while ix and ix < length( Code ) with entry do
 					
 					if SymTab[sub][S_TOKEN] != PROC then
@@ -965,16 +966,16 @@ export procedure inline_deferred_calls()
 					end for
 					
 					sequence code = get_inlined_code( sub, ix - 1, 1 )
-					shift:replace_code( 
-						repeat( NOP1, length( code )), ix, ix + 1 + SymTab[sub][S_NUM_ARGS] + (SymTab[sub][S_TOKEN] != PROC) )
-					Code = replace( Code, code, ix, ix + length(code) - 1 )
+					
+					shift:replace_code( code, ix, ix + 1 + SymTab[sub][S_NUM_ARGS] + (SymTab[sub][S_TOKEN] != PROC) )
 				entry
 					ix = match_from( PROC & sub, Code, ix + 1 )
 				end while
 				SymTab[calling_sub][S_CODE] = Code
+				SymTab[calling_sub][S_LINETAB] = LineTable
 			end for
 		end if
 	end for
---	delete( inline_var_map )
+	*/
 end procedure
 

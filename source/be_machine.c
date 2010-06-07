@@ -2272,7 +2272,7 @@ object DefineC(object x)
 }
 
 #if __GNUC__ == 4
-#define CALLBACK_SIZE 92
+#define CALLBACK_SIZE 96
 #else
 #define CALLBACK_SIZE 80
 #endif

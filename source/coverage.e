@@ -252,6 +252,9 @@ export procedure include_routine()
 end procedure
 
 procedure process_lines()
+	if not length( included_lines ) then
+		return
+	end if
 	if atom(slist[$]) then
 		slist = s_expand( slist )
 	end if
