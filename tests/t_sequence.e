@@ -60,7 +60,7 @@ test_equal("tail() nested sequence", {{3,4},{5,6}}, tail({{1,2},{3,4},{5,6}}, 2)
 test_equal("tail() bounds", {1,2,3,4}, tail({1,2,3,4}, 50))
 
 test_equal("split() simple string no empty", {"John","Middle","Doe"}, split(," John  Middle  Doe  ",,1))
-test_equal("split() simple string", {"a","b","c"}, split(,"a,b,c", ","))
+test_equal("split() simple string", {"a","b","c"}, split(",","a,b,c"))
 test_equal("split() sequence", {{1},{2},{3},{4}}, split(0, {1,0,2,0,3,0,4}))
 test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split(0, {"John", 0, "Doe"}))
 test_equal("split() limit set", {"a", "b,c"}, split(',', "a,b,c", 1))
