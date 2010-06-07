@@ -305,6 +305,7 @@ function load_private_block(symtab_index rtn_idx, integer task)
 			-- won't be for old dead task, must be current
 			block = saved_list[p][SP_BLOCK]
 			saved_list[p][SP_TASK_NUMBER] = -1 -- mark it as deleted
+			saved_list[p][SP_BLOCK] = {}
 			if prev_p = -1 then
 				first = saved_list[p][SP_NEXT]
 			else    
@@ -1256,21 +1257,21 @@ integer result
 result = 0
 object result_val
 
-procedure exit_block( symtab_index block, integer except = 0 )
+procedure exit_block( symtab_index block )
 	integer a = SymTab[block][S_NEXT_IN_BLOCK]
 	while a do
-		if a != except then
-			ifdef DEBUG then
-				sequence name
-				if length( SymTab[a] ) >= S_NAME then
-					name = sym_name( a )
-				else
-					name = "temp"
-				end if
-				printf(2, "\tEXIT_BLOCK[%s] resetting [%d][%s][%s]\n", {sym_name( block ), a, name, pretty_sprint( val[a] )})
-			end ifdef
-			val[a] = NOVALUE
-		end if
+		
+		ifdef DEBUG then
+			sequence name
+			if length( SymTab[a] ) >= S_NAME then
+				name = sym_name( a )
+			else
+				name = "temp"
+			end if
+			printf(2, "\tEXIT_BLOCK[%s] resetting [%d][%s][%s]\n", {sym_name( block ), a, name, pretty_sprint( val[a] )})
+		end ifdef
+		val[a] = NOVALUE
+		
 		a = SymTab[a][S_NEXT_IN_BLOCK]
 	end while
 end procedure
@@ -1291,26 +1292,21 @@ procedure opRETURNP()
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	
 	integer local_result = result
-	integer except
 	object local_result_val
 	if local_result then
-		except = Code[pc+3]
 		result = 0
 		local_result_val = result_val
+		result_val = NOVALUE
 	end if
 	
 	while block != sub_block do
 		if local_result then
-			exit_block( block, except )
-		else
 			exit_block( block )
 		end if
 		block = SymTab[block][S_BLOCK]
 	end while
 	
 	if local_result then
-		exit_block( block, except )
-	else
 		exit_block( block )
 	end if
 	
