@@ -118,8 +118,8 @@
 ../include/std/localeconv.e
 ../include/std/regex.e
 ../include/std/text.e
-../include/std/unicode.e
-../include/std/ucstypes.e
+#../include/std/unicode.e
+#../include/std/ucstypes.e
 ../include/std/wildcard.e
 
 ########
