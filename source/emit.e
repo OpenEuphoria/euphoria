@@ -982,6 +982,7 @@ export procedure emit_op(integer op)
 			last_op = last_op_backup
 			last_pc = last_pc_backup
 		end if  
+		clear_temp( Code[$-1] )
 
 	elsif op = SEQUENCE_CHECK then
 		assignable = FALSE
@@ -1004,6 +1005,7 @@ export procedure emit_op(integer op)
 			last_op = last_op_backup
 			last_pc = last_pc_backup
 		end if
+		clear_temp( Code[$-1] )
 
 	elsif op = ATOM_CHECK then
 		assignable = FALSE
@@ -1026,6 +1028,7 @@ export procedure emit_op(integer op)
 			last_op = last_op_backup
 			last_pc = last_pc_backup
 		end if
+		clear_temp( Code[$-1] )
 
 	elsif op = RIGHT_BRACE_N then -- form a sequence of n items
 		n = op_info1
@@ -1170,10 +1173,13 @@ export procedure emit_op(integer op)
 			cont11ii(op, FALSE)   
 		end if
 	
-	elsif find(op, {IS_AN_INTEGER, IS_AN_ATOM, IS_A_SEQUENCE, IS_AN_OBJECT,
-					LENGTH, GETC, SQRT, SIN, COS, TAN, ARCTAN, LOG, GETS, 
+	elsif find(op, {LENGTH, GETC, SQRT, SIN, COS, TAN, ARCTAN, LOG, GETS, 
 					GET_PIXEL, GETENV}) then
 		cont11ii(op, FALSE)
+		
+	elsif find(op, {IS_AN_INTEGER, IS_AN_ATOM, IS_A_SEQUENCE, IS_AN_OBJECT}) then
+		cont11ii(op, FALSE)
+		clear_temp( Code[$-1] )
 
 	-- special 1 input, 1 output - also emits CurrentSub 
 	elsif op = ROUTINE_ID then

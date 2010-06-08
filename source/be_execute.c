@@ -1891,6 +1891,7 @@ void do_exec(int *start_pc)
 			
 			case L_ASSIGN_SUBS:  /* final subscript and assignment */
 			deprintf("case L_ASSIGN_SUBS:");
+			
 				/* the var sequence */
 				top = *(object_ptr)pc[3];  /* the rhs value */ 
 				Ref(top); /* do before UNIQUE check - avoids circularity */
@@ -1909,10 +1910,10 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					a = recover_lhs_subscript(a, (s1_ptr)obj_ptr);
 				}   
+				
 				obj_ptr = a + ((s1_ptr)obj_ptr)->base;
 				a = *obj_ptr;
 				*obj_ptr = top;
-				
 				pc += 4;
 				if (IS_ATOM_INT_NV(a)) {
 					thread();
@@ -2246,8 +2247,7 @@ void do_exec(int *start_pc)
 			case L_LHS_SUBS:
 			deprintf("case L_LHS_SUBS:");
 				// temp contains a pointer to the sequence
-				obj_ptr = (object_ptr)*(object_ptr)pc[1]; 
-				b = 0;
+				obj_ptr = (object_ptr)*(object_ptr)pc[1];
 				goto ls;
 
 			case L_LHS_SUBS1_COPY:
@@ -2256,9 +2256,7 @@ void do_exec(int *start_pc)
 				obj_ptr = (object_ptr)pc[4]; 
 				a = *(object_ptr)pc[1];
 				Ref(a);
-				DeRef(*obj_ptr);
 				*obj_ptr = a;
-				b = 1;
 				goto ls;
 				
 			case L_LHS_SUBS1:  
@@ -2266,7 +2264,6 @@ void do_exec(int *start_pc)
 				/* left hand side, first subscript of multiple lhs subscripts */
 				// sequence var: 
 				obj_ptr = (object_ptr)pc[1]; 
-				b = 1;
 			  ls:   
 				// subscript:
 				a = *(object_ptr)pc[2];
@@ -2293,9 +2290,6 @@ void do_exec(int *start_pc)
 				// error-check for sequence
 				if (IS_SEQUENCE(*obj_ptr)) {
 					top = pc[3]; // target temp
-					if (b) {
-						DeRef(*(object_ptr)top); // only SUBS1
-					}
 					*((object_ptr)top) = (object)obj_ptr; // storing a C pointer
 					thread5();
 				}
@@ -3769,7 +3763,6 @@ void do_exec(int *start_pc)
 				sub = ((symtab_ptr)pc[1]);
 				/* release the privates and set to NOVALUE */
 				sym = (symtab_ptr)pc[2];
-				
 				while(1){
 					obj_ptr = (object_ptr)sym;
 					while( obj_ptr = (object_ptr)((symtab_ptr)obj_ptr)->next_in_block ){
@@ -4027,6 +4020,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_REPLACE:");
 				// type check arguments
 				tpc = pc;
+				
 				if (!IS_SEQUENCE(*(object_ptr)pc[1])) // source
 					RTFatal("First argument to replace() must be a sequence");
 				

@@ -1141,7 +1141,7 @@ procedure opSTARTLINE()
 						slist[a][LINE],
 						line})
 		trace_line += 1
-		if trace_line >= 500 then
+		if trace_line >= 5000 then
 			-- wrap around to start of file
 			trace_line = 0
 			one_trace_line("")
@@ -1164,7 +1164,7 @@ procedure opSTARTLINE()
 	end if
 	pc += 2
 end procedure
-		
+
 procedure opPROC_TAIL()
 	integer arg, sub
 	
@@ -1647,13 +1647,13 @@ procedure opPLENGTH()
 	lhs_seq_index = val[a][1]
 	lhs_subs = val[a][2..$]
 	val[target] = length(var_subs(val[lhs_seq_index], lhs_subs))
+	lhs_subs = {}
 	pc += 3
 end procedure
 
 procedure opLHS_SUBS() 
 -- LHS = "Left Hand Side" of assignment
 -- Handle one LHS subscript, when there are multiple LHS subscripts.
-	
 	a = Code[pc+1] -- base var sequence, or a temp that contains
 				   -- {base index, subs1, subs2... so far}
 	b = Code[pc+2] -- subscript
@@ -1836,6 +1836,7 @@ end procedure
 
 procedure opPASSIGN_SUBS()
 -- final LHS subscript and assignment after a series of subscripts
+
 	a = Code[pc+1]
 	b = Code[pc+2]  -- subscript
 	if sequence(val[b]) then
@@ -1846,10 +1847,10 @@ procedure opPASSIGN_SUBS()
 	-- multiple LHS subscript case
 	lhs_seq_index = val[a][1]
 	lhs_subs = val[a][2..$]    
-
 	val[lhs_seq_index] = assign_subs(val[lhs_seq_index], 
 										 lhs_subs & val[b], 
 										 val[c])
+	lhs_subs = {}
 	pc += 4
 end procedure
 
@@ -1877,6 +1878,7 @@ procedure opPASSIGN_OP_SUBS()
 	lhs_subs = val[a][2..$]
 	Code[pc+9] = Code[pc+1] -- patch upcoming op
 	val[target] = var_subs(val[lhs_seq_index], lhs_subs & val[b])
+	lhs_subs = {}
 	pc += 4
 end procedure
 
@@ -1911,6 +1913,7 @@ procedure opPASSIGN_OP_SLICE()
 	lhs_subs = x[2..$]
 	Code[pc+10] = Code[pc+1]
 	val[target] = var_slice(val[lhs_seq_index], lhs_subs, val[b], val[c])
+	lhs_subs = {}
 	pc += 5
 end procedure
 			
@@ -1942,6 +1945,7 @@ procedure opPASSIGN_SLICE()
 	val[lhs_seq_index] = assign_slice(val[lhs_seq_index],
 									  lhs_subs,
 									  val[b], val[c], val[d])
+	lhs_subs = {}
 	pc += 5
 end procedure
 
@@ -2001,7 +2005,12 @@ end procedure
 procedure opIS_AN_OBJECT()
 	a = Code[pc+1]
 	target = Code[pc+2]
-	val[target] = not equal(val[a], NOVALUE)
+	if equal( val[a], NOVALUE ) then
+		val[target] = 0
+	else
+		val[target] = object( val[a] )
+	end if
+	
 	kill_temp( a )
 	pc += 3
 end procedure
@@ -2982,7 +2991,7 @@ procedure opMATCH_FROM()
 				pc += 5
 				return
 		end if
-		val[target] = match( val[Code[pc+1]], s, c )
+		val[target] = match( val[a], s, c )
 		pc += 5
 end procedure
 
@@ -3491,10 +3500,6 @@ procedure opREPLACE()
  	d = Code[pc+4]
  	target = Code[pc+5]
  	val[target] = replace(val[a],val[b],val[c],val[d])
-	kill_temp( a )
-	kill_temp( b )
-	kill_temp( c )
-	kill_temp( d )
  	pc += 6
 end procedure
 

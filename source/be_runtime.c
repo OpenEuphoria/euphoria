@@ -780,7 +780,7 @@ void Append(object_ptr target, object s1, object a)
 	len = s1p->length;
 
 	if ((s1_ptr)s1 == t && s1p->ref == 1) {
-		/* we can to append in-place */
+		/* we can append in-place */
 		if (s1p->postfill == 0) {
 			/* make some more postfill space */
 			new_len = EXTRA_EXPAND(len);
@@ -847,7 +847,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 	if (seq->ref == 1 ){
 		if( len >= seq->postfill ){
 			new_len = EXTRA_EXPAND(nseq + len);
-			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len)*sizeof(s1_ptr) + sizeof( struct s1 ));
+			new_seq = (s1_ptr)ERealloc((char *)seq, (new_len + 1)*sizeof(s1_ptr) + sizeof( struct s1 ));
 			new_seq->base = ((object_ptr)(new_seq+1)) - 1;
 			seq = new_seq;
 			seq->postfill = new_len - (len + nseq) - 1;
@@ -885,8 +885,9 @@ s1_ptr Add_internal_space(object a,int at,int len)
 		temp = *(++q);
 		*(++p) = temp;
 		if (!IS_ATOM_INT(temp)) {
-			if (temp == NOVALUE)
+			if (temp == NOVALUE){
 				break;
+			}
 			RefDS(temp);
 		}
 		i++;
@@ -6172,11 +6173,11 @@ void Replace( replace_ptr rb ){
 	}
 	// actual inner replacing
 	if (IS_SEQUENCE( copy_from )) {
+		
 		s2 = SEQ_PTR( copy_from );
 		replace_len = s2->length;
 		assign_slice_seq = &s1;
 		if (replace_len > end_pos - start_pos+1) { //replacement longer than replaced
-
 		/**												a->ref != 1		a->ref==1
 			Assigning to something else	*obj_ptr != a	D(o)			D(o) R(a)
 			Assigning to same var		*obj_ptr == a	R(a)			N/A
@@ -6185,9 +6186,7 @@ void Replace( replace_ptr rb ){
 				if( target != NOVALUE ){
 					DeRef(target);
 				}
-				if( ( SEQ_PTR( copy_to )->ref == 1 ) ){
-					RefDS( copy_to );
-				}
+				RefDS( copy_to );
 			}
 			else if( SEQ_PTR( copy_to )->ref != 1 ){
 				RefDS( copy_to );
@@ -6195,10 +6194,10 @@ void Replace( replace_ptr rb ){
 			s1 = Add_internal_space( copy_to, end_pos + 1, replace_len + start_pos - end_pos - 1);
 			assign_slice_seq = &s1;
 			s1 = Copy_elements( start_pos, s2, 1);
-
 			*rb->target = MAKE_SEQ(s1);
 		}
 		else { // remove any extra elements, and then assign a regular slice
+			
 			long c;
 			if( target != copy_to ){
 				// ensures that Add_internal_space will make a copy
