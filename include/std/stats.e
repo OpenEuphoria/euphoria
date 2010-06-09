@@ -700,10 +700,6 @@ end function
 
 public function harmean(sequence data_set, object subseq_opt = ST_ALLNUM)
 	integer count_
-
-	if atom(data_set) then
-		return data_set
-	end if
 	
 	data_set = massage(data_set, subseq_opt)
 	
@@ -942,7 +938,7 @@ public function median(object data_set, object subseq_opt = ST_ALLNUM)
 	data_set = massage(data_set, subseq_opt)
 	
 	if length(data_set) = 0 then
-		return data_set[1]
+		return data_set
 	end if
 	
 	if length(data_set) < 3 then
@@ -1072,17 +1068,18 @@ end function
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 
-public function mode(object data_set, object subseq_opt = ST_ALLNUM)
+public function mode(sequence data_set, object subseq_opt = ST_ALLNUM)
 	
 	sequence lCounts
 	sequence lRes
 	
 	data_set = massage(data_set, subseq_opt)
-
-	lCounts = raw_frequency(data_set, subseq_opt)
-	if length(lCounts) = 0 then
+	
+	if not length( data_set ) then
 		return {}
 	end if
+
+	lCounts = raw_frequency(data_set, subseq_opt)
 	
 	lRes = {lCounts[1][2]}
 	for i = 2 to length(lCounts) do
@@ -1142,13 +1139,13 @@ end function
 -- See also:
 --   [[:average]]
 --
-public function central_moment(object data_set, object datum, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
+public function central_moment(sequence data_set, object datum, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
 
 	atom lMean
 	
 	data_set = massage(data_set, subseq_opt)
 
-	if atom(data_set) or length(data_set) = 0 then
+	if length(data_set) = 0 then
 		return 0
 	end if
 	
