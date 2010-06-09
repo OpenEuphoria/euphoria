@@ -3211,7 +3211,7 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 			-- temporarily hide sym so it can't be used in defining itself
 			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH]
 			tok_match(EQUALS)
-			StartSourceLine(FALSE)
+			StartSourceLine(FALSE, , COVERAGE_OVERRIDE)
 			emit_opnd(sym)
 			Expr()  -- no new symbols can be defined in here
 			buckets[SymTab[sym][S_HASHVAL]] = sym
@@ -3244,12 +3244,13 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 			end if
 		elsif type_ptr = -1 and not is_fwd_ref then
 			-- ENUM
+			StartSourceLine(FALSE, , COVERAGE_OVERRIDE )
 			SymTab[sym][S_MODE] = M_CONSTANT
 			-- temporarily hide sym so it can't be used in defining itself
 			buckets[SymTab[sym][S_HASHVAL]] = SymTab[sym][S_SAMEHASH]
 			tok = next_token()
 
-			StartSourceLine(FALSE)
+			
 			emit_opnd(sym)
 
 			if tok[T_ID] = EQUALS then
@@ -3358,7 +3359,7 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 	   		tok = next_token()
    			putback(tok)
 	   		if tok[T_ID] = EQUALS then -- assign on declare
---	   			StartSourceLine( TRUE )
+	   			StartSourceLine( FALSE, , COVERAGE_OVERRIDE )
 	   			Assignment({VARIABLE,sym})
 			end if
 		end if
@@ -3774,7 +3775,7 @@ procedure SubProg(integer prog_type, integer scope)
 		SymTab[p][S_USAGE] = or_bits( SymTab[p][S_USAGE], U_FORWARD )
 	end if
 
-	StartSourceLine(FALSE)
+	StartSourceLine(FALSE, , COVERAGE_OVERRIDE)
 	tok_match(LEFT_ROUND)
 	tok = next_token()
 	param_num = 0

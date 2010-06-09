@@ -4,7 +4,8 @@
 
 export enum 
 	COVERAGE_SUPPRESS,
-	COVERAGE_INCLUDE
+	COVERAGE_INCLUDE,
+	COVERAGE_OVERRIDE
 
 include std/filesys.e
 include std/regex.e

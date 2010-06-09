@@ -1777,7 +1777,7 @@ export procedure StartSourceLine(integer sl, integer dup_ok = 0, integer emit_co
 	end if
 	
 	-- emit opcode for coverage gathering
-	if emit_coverage = COVERAGE_INCLUDE then
+	if (sl and emit_coverage = COVERAGE_INCLUDE) or emit_coverage = COVERAGE_OVERRIDE then
 		include_line( gline_number )
 	end if
 	

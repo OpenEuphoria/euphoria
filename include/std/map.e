@@ -953,7 +953,6 @@ public procedure remove(map the_map_p, object the_key_p)
 		end while
 	end if
 	ram_space[the_map_p] = temp_map_
-	return
 end procedure
 
 --**
@@ -998,7 +997,6 @@ public procedure clear(map the_map_p)
 		temp_map_[FREE_LIST] = repeat(0, length(temp_map_[FREE_LIST]))
 	end if
 	ram_space[the_map_p] = temp_map_
-	return
 end procedure
 
 --**
@@ -1393,7 +1391,6 @@ public procedure optimize(map the_map_p, integer max_p = 25, atom grow_p = 1.333
 			stats_ = statistics(the_map_p)
 		end while
 	end if
-	return
 end procedure
 
 --**
@@ -1959,7 +1956,6 @@ procedure convert_to_large_map(map the_map_)
 	end for
 
 	ram_space[the_map_] = ram_space[map_handle_]
-	return
 end procedure
 
 procedure convert_to_small_map(map the_map_)
@@ -1978,6 +1974,5 @@ procedure convert_to_small_map(map the_map_)
 		put(the_map_, keys_[i], values_[i])
 	end for
 
-	return
 end procedure
 
