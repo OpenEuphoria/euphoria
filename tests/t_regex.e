@@ -237,4 +237,13 @@ test_equal("option names", {"STRING_OFFSETS"}, option_spec_to_string(regex:STRIN
 test_equal("sequence option spec", re:regex(
 	re:new(`\<\?xml(.*)\?\>`, {re:MULTILINE, NEWLINE_ANY,DOTALL} ) 
 	), 1 ) -- ticket 161  
+
+-- error reports
+for i = 1 to length(error_names) do
+	test_equal( sprintf("error name %d", i), error_names[i][2], error_to_string( error_names[i][1] ) )
+end for
+
+test_equal( sprintf("error name %d", 0),"0", error_to_string( 0 ) )
+test_equal( sprintf("error name %d", 21),"21", error_to_string( 21 ) )
+
 test_report()

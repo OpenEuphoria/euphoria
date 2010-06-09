@@ -112,6 +112,12 @@ test_equal("FILO set #1", 90, s:peek_top(sk, 1))
 s:set(sk, "", 2)
 test_equal("FILO set #2", "", s:peek_top(sk, 2))
 
+s:set( sk, "from the end", -1 )
+test_equal("FILO set #3 -1 from the end", "from the end", s:peek_end(sk, 2 ) )
+
+s:set( sk, "last", 0 )
+test_equal("FILE set #4 0 frmo the end", "last", s:last(sk) )
+
 delete(sk)
 test_pass("FILO delete")
 

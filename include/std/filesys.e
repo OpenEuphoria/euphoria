@@ -1447,9 +1447,11 @@ public function file_type(sequence filename)
 object dirfil
 	if eu:find('*', filename) or eu:find('?', filename) then return FILETYPE_UNDEFINED end if
 	
-	if length(filename) = 2 and filename[2] = ':' then
-		filename &= "\\"
-	end if
+	ifdef WINDOWS then
+		if length(filename) = 2 and filename[2] = ':' then
+			filename &= "\\"
+		end if
+	end ifdef
 	
 	dirfil = dir(filename)
 	if sequence(dirfil) then

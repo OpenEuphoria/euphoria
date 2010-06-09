@@ -52,6 +52,7 @@ test_equal("EOLSEP", eolsep, EOLSEP)
 
 test_equal("file_exists #1", 1, file_exists("t_filesys.e"))
 test_equal("file_exists #2", 0, file_exists("nononononono.txt"))
+test_equal("file_exists #3", 0, file_exists( 1 ))
 
 test_false("absolute_path('')", absolute_path(""))
 test_true("absolute_path('/usr/bin/abc')", absolute_path("/usr/bin/abc"))
@@ -108,6 +109,23 @@ test_false("copy_file #4", copy_file("fstesta.txt", "fstestb.txt")) -- should no
 test_false("copy_file #5", copy_file("fstesta.txt", "fstestb.txt", 0)) -- should not overwrite existing file
 delete_file("fstesta.txt")
 delete_file("fstestb.txt")
+
+-- filebase()
+test_equal( "file base", "readme", filebase("/opt/euphoria/readme.txt") )
+
+-- file_type()
+test_equal( "file_type() directory", FILETYPE_DIRECTORY, file_type( current_dir() ))
+
+-- canonical_path()
+test_equal( "canonical_path() #1", current_dir() & SLASH & "t_filesys.e", canonical_path( "t_filesys.e" ) )
+test_equal( "canonical_path() #2", current_dir() & SLASH & "t_filesys.e", canonical_path( `"t_filesys.e"` ) )
+test_equal( "canonical_path() #3", current_dir() & SLASH, canonical_path( current_dir() & SLASH & '.' & SLASH ) )
+sequence home = getenv("HOME")
+if home[$] != SLASH then
+	home &= SLASH
+end if
+test_equal( "canonical_path() #4", home, canonical_path("~"))
+test_equal( "canonical_path() #3", current_dir() & SLASH, canonical_path( current_dir() & SLASH & "foo" & SLASH & ".." & SLASH ) )
 
 test_report()
 
