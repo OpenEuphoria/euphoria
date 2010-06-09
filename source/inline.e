@@ -938,7 +938,6 @@ end procedure
 -- inline what we can.
 export procedure inline_deferred_calls()
 	deferred_inlining = 1
-	/*
 	for i = 1 to length( deferred_inline_decisions ) do
 		
 		if length( deferred_inline_calls[i] ) then
@@ -948,7 +947,6 @@ export procedure inline_deferred_calls()
 			if atom( SymTab[sub][S_INLINE] ) then
 				continue
 			end if
-			
 			for cx = 1 to length( deferred_inline_calls[i] ) do
 				integer ix = 1
 				symtab_index calling_sub = deferred_inline_calls[i][cx]
@@ -956,27 +954,38 @@ export procedure inline_deferred_calls()
 				Code = SymTab[calling_sub][S_CODE]
 				LineTable = SymTab[calling_sub][S_LINETAB]
 				sequence code = {}
-				while ix and ix < length( Code ) with entry do
-					
-					if SymTab[sub][S_TOKEN] != PROC then
-						Push( Code[ix + SymTab[sub][S_NUM_ARGS] + 2] )
+				
+				sequence calls = find_ops( 1, PROC )
+				integer is_func = SymTab[sub][S_TOKEN] != PROC 
+				integer offset = 0
+				for o = 1 to length( calls ) do
+					if calls[o][2][2] = sub then
+						ix = calls[o][1]
+						sequence op = calls[o][2]
+						integer size = length( op ) - 1
+						if is_func then
+							-- push the return target
+							Push( op[$] )
+							op = remove( op, length(op) )
+						end if
+						
+						-- push the parameters
+						for p = 3 to length( op ) do
+							Push( op[p] )
+						end for
+						code = get_inlined_code( sub, ix + offset - 1, 1 )
+						shift:replace_code( repeat( NOP1, length(code) ), ix + offset, ix + offset + size )
+						
+						-- prevent unwanted code shifting...the inlining process does this for us
+						Code = eu:replace( Code, code, ix + offset, ix + offset + length( code ) -1 )
+						offset += length(code) - size - 1
+						
 					end if
-					
-					for p = 2 to SymTab[sub][S_NUM_ARGS] + 1 do
-						Push( Code[ix + p] )
-					end for
-					
-					code = get_inlined_code( sub, ix - 1, 1 )
-					
-					shift:replace_code( code, ix, ix + 1 + SymTab[sub][S_NUM_ARGS] + (SymTab[sub][S_TOKEN] != PROC) )
-				entry
-					ix = match_from( PROC & sub, Code, ix + length(code) )
-				end while
+				end for
 				SymTab[calling_sub][S_CODE] = Code
 				SymTab[calling_sub][S_LINETAB] = LineTable
 			end for
 		end if
 	end for
-	*/
 end procedure
 

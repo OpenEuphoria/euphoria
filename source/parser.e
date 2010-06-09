@@ -4213,7 +4213,7 @@ procedure SetWith(integer on_off)
 				OpInline = floor( SymTab[tok[T_SYM]][S_OBJ] )
 			else
 				putback(tok)
-				OpInline = DEFAULT_SAMPLE_SIZE
+				OpInline = DEFAULT_INLINE
 			end if
 		else
 			OpInline = 0
@@ -4250,6 +4250,9 @@ export procedure real_parser(integer nested)
 	integer scope
 
 	while TRUE do  -- infinite loop until scanner aborts
+		if OpInline = 25000 then
+			CompileErr("OpInline went nuts: [1]", OpInline )
+		end if
 		start_index = length(Code)+1
 		tok = next_token()
 		id = tok[T_ID]

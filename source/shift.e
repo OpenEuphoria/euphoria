@@ -434,6 +434,18 @@ export function get_ops( integer pc, integer offset, integer num_ops = 1, sequen
 	return ops
 end function
 
+export function find_ops( integer pc, integer op, sequence code=Code )
+	sequence ops = {}
+	while pc <= length(code) do
+		sequence found_op = current_op( pc )
+		if found_op[1] = op then
+			ops = append( ops, { pc, found_op } )
+		end if
+		pc += length( found_op )
+	end while
+	return ops
+end function
+
 --**
 -- Pass in the result of [:current_op].  The return value will be
 -- zero if there is no target, or the sym of the target for the op,
