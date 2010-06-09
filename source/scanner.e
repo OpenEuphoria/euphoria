@@ -1801,6 +1801,8 @@ export function Scanner()
 				CompileErr(145)
 			elsif ach = '\'' then
 				CompileErr(137)
+			elsif ach = '\n' then
+				CompileErr(68, {"character", "end of line"})
 			end if
 			if getch() != '\'' then
 				CompileErr(56)
