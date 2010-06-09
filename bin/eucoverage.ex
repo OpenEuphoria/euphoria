@@ -197,12 +197,12 @@ constant ROUTINE_LINE = `
 -- routines executed, routines total, percent routines executed, 
 -- lines executed, lines total, percent line executed
 constant FILE_SUMMARY_ROW = `
-	<tr class="%s"><td><a href="%s">%s</a></td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td></tr>
+	<tr class="%s"><td><a href="%s">%s</a></td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td></tr>
 `
 
 -- row class, name, name, executed, total, percent executed
 constant ROUTINE_SUMMARY_ROW = `
-	<tr class="%s"><td><a href="#%s">%s()</a></td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td></tr>
+	<tr class="%s"><td><a href="#%s">%s()</a></td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td></tr>
 `
 
 function get_style( integer executed )
@@ -312,11 +312,12 @@ procedure write_file_html( sequence output_dir, integer fx )
 	-- file summary
 	puts( out, "<div class='summary_header'>FILE SUMMARY</div>\n" )
 	puts( out, "<table><tr><td>Name</td><td>Executed</td><td>Routines</td><td><span style='margin-left:3em;'>%</span>" &
-				"</td><td>Executed</td><td>Lines</td><td><span style='margin-left:3em;'>%</span></td></tr>\n" )
+				"</td><td>Executed</td><td>Lines</td><td><span style='margin-left:3em;'>%</span></td><td>Unexecuted</td></tr>\n" )
 	
 	printf( out, FILE_SUMMARY_ROW, { "", html_name, files[fx], 
 		routines_executed, map:size( routine_lines ), calc_percent( routines_executed, total_routines ),
-		total_executed, total_lines, calc_percent( total_executed, total_lines ) })
+		total_executed, total_lines, calc_percent( total_executed, total_lines ),
+		total_lines - total_executed})
 	
 	puts( out, "</table>\n" )
 	
@@ -331,13 +332,13 @@ procedure write_file_html( sequence output_dir, integer fx )
 		total_executed = coverage[1]
 		total_lines    = coverage[2]
 		percent = calc_percent( total_executed, total_lines )
-		routine_coverage[i] = { percent, keys[i], keys[i], 
-			total_executed, total_lines, percent }
+		routine_coverage[i] = { total_executed - total_lines, keys[i], keys[i], 
+			total_executed, total_lines, percent,total_lines -  total_executed }
 	end for
 	routine_coverage = sort( routine_coverage )
 	
 	puts( out, "<div class='summary_header'>ROUTINE SUMMARY</div>\n" )
-	puts( out, "<table><tr><td>Routine</td><td>Executed</td><td>Lines</td><td></td></tr>\n" )
+	puts( out, "<table><tr><td>Routine</td><td>Executed</td><td>Lines</td><td></td><td>Unexecuted</td></tr>\n" )
 	for i = 1 to length( routine_coverage ) do
 		sequence row_class = ""
 		if and_bits( i, 1 ) then
@@ -382,10 +383,11 @@ procedure write_summary( sequence output_directory )
 		
 		total_files_executed    += 0 != coverage[COV_LINES_TESTED]
 		sequence html_name = "files/" & encode( encode( files[i] ) ) & ".html"
-		file_data[i] = { line_percent, files[i], html_name,
+		file_data[i] = { coverage[COV_LINES_TESTED] - coverage[COV_LINES], files[i], html_name,
 			files[i], 
 			coverage[COV_FUNCS_TESTED], coverage[COV_FUNCS], routine_percent,
-			coverage[COV_LINES_TESTED], coverage[COV_LINES], line_percent }
+			coverage[COV_LINES_TESTED], coverage[COV_LINES], line_percent,
+			coverage[COV_LINES] - coverage[COV_LINES_TESTED]}
 		
 		
 			
@@ -396,23 +398,25 @@ procedure write_summary( sequence output_directory )
 	puts( out, HEADER )
 	
 	puts( out, "<div class='summary_header'>COVERAGE SUMMARY</div>\n" )
-	puts( out, "<table style='border-spacing: 4px;'><tr><td>Files</td><td>Routines</td><td>Lines</td></tr>\n" )
+	puts( out, "<table style='border-spacing: 4px;'><tr><td>Files</td><td>Routines</td><td>Lines</td><td>Unexecuted</td></tr>\n" )
 	printf( out, 
 		"<tr class='shade-row'>" &
 		"<td>%d / %d [%0.2f%%]</td>" &
 		"<td>%d / %d [%0.2f%%]</td>" &
 		"<td>%d / %d [%0.2f%%]</td>" &
+		"<td>%d</td>" &
 		"</tr>\n", 
 		{ 
 			total_files_executed,    length( files ), calc_percent( total_files_executed,    length( files ) ),
 			total_routines_executed, total_routines,  calc_percent( total_routines_executed, total_routines ),
-			total_lines_executed,    total_lines,     calc_percent( total_lines_executed,    total_lines ) } )
+			total_lines_executed,    total_lines,     calc_percent( total_lines_executed,    total_lines ),
+			total_lines - total_lines_executed } )
 			
 	puts( out, "</table>\n" )
 	
 	puts( out, "<div class='summary_header'>FILES COVERAGE SUMMARY</div>\n" )
 	puts( out, "<table><tr><td>Name</td><td>Executed</td><td>Routines</td><td><span style='margin-left:3em;'>%</span></td>" &
-				"<td>Executed</td><td>Lines</td><td><span style='margin-left:3em;'>%</span></td></tr>\n" )
+				"<td>Executed</td><td>Lines</td><td><span style='margin-left:3em;'>%</span></td><td>Unexecuted</td></tr>\n" )
 	for i = 1 to length( file_data ) do
 		sequence row_class = ""
 		if and_bits( i, 1 ) then
