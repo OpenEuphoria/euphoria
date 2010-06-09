@@ -750,10 +750,13 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		
 		return
 	else -- Small Map
+		-- First, check to see if the key is already in the map.
 		if equal(the_key_p, init_small_map_key) then
+			-- Special case when the key happens to be the magic init value.
+			-- We have to double check the free list whenever we have a hit on the key.
 			from_ = 1
 			while index_ > 0 with entry do
-				if ram_space[the_map_p][FREE_LIST][index_] = 0 then
+				if ram_space[the_map_p][FREE_LIST][index_] = 1 then
 					exit
 				end if
 				from_ = index_ + 1
@@ -764,7 +767,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			index_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
 		end if
 		
-		-- Did we find it?
+		-- Did we find the key?
 		if index_ = 0 then
 			-- No, so add it.
 			index_ = find(0, ram_space[the_map_p][FREE_LIST])

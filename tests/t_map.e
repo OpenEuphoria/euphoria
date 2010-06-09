@@ -8,7 +8,9 @@ include std/io.e
 include std/math.e
 include std/eumem.e
 
+
 object o1, o2, o3
+constant init_small_map_key = -75960.358941
 
 o1 = map:new()
 test_true("map new #1", map(o1) )
@@ -194,30 +196,58 @@ close(fhs)
 test_equal("map save #6", 1, map:compare(m1,m2))
 	
 map:map m5
+
+-- Test put operations with small maps.
 m5 = map:new(10)
 map:put( m5, ADD, 1 )
 map:put( m5, ADD, 1, ADD ) -- 2
-test_equal( "put ADD", 2, map:get( m5, ADD, "" ) )
+test_equal( "small putADD", 2, map:get( m5, ADD, "" ) )
 
 map:put( m5, MULTIPLY, 2 )
 map:put( m5, MULTIPLY, 3, MULTIPLY ) -- 6
-test_equal( "put MULTIPLY", 6, map:get( m5, MULTIPLY, "" ) )
+test_equal( "small put MULTIPLY", 6, map:get( m5, MULTIPLY, "" ) )
 
 map:put( m5, DIVIDE, 6 )
 map:put( m5, DIVIDE, 2, DIVIDE ) -- 3
-test_equal( "put DIVIDE", 3, map:get( m5, DIVIDE, "" ) )
+test_equal( "small put DIVIDE", 3, map:get( m5, DIVIDE, "" ) )
 
 map:put( m5, SUBTRACT, 3 )
 map:put( m5, 3, 3, SUBTRACT )
-test_equal( "put SUBTRACT", 0, map:get( m5, SUBTRACT, "" ) )
+test_equal( "small put SUBTRACT", 0, map:get( m5, SUBTRACT, "" ) )
 
 map:put( m5, CONCAT, "foo" )
 map:put( m5, CONCAT, "bar", CONCAT )
-test_equal( "put CONCAT", "foobar", map:get( m5, CONCAT, "" ) )
+test_equal( "small put CONCAT", "foobar", map:get( m5, CONCAT, "" ) )
 
 map:put( m5, APPEND, {"foo"} )
 map:put( m5, APPEND, "bar", APPEND )
-test_equal( "put APPEND", {"foo","bar"}, map:get( m5, APPEND, "" ) )
+test_equal( "small put APPEND", {"foo","bar"}, map:get( m5, APPEND, "" ) )
+
+-- Now repeat for Large maps
+m5 = map:new(threshold() * 2) -- Force a large map type and make sure puts don't rehash it.
+map:put( m5, ADD, 1, PUT, 0 )
+map:put( m5, ADD, 1, ADD, 0 ) -- 2
+test_equal( "large put ADD", 2, map:get( m5, ADD, "" ) )
+
+map:put( m5, MULTIPLY, 2, PUT, 0 )
+map:put( m5, MULTIPLY, 3, MULTIPLY, 0 ) -- 6
+test_equal( "large put MULTIPLY", 6, map:get( m5, MULTIPLY, "" ) )
+
+map:put( m5, DIVIDE, 6, PUT, 0 )
+map:put( m5, DIVIDE, 2, DIVIDE, 0 ) -- 3
+test_equal( "large put DIVIDE", 3, map:get( m5, DIVIDE, "" ) )
+
+map:put( m5, SUBTRACT, 3, PUT, 0 )
+map:put( m5, 3, 3, SUBTRACT, 0 )
+test_equal( "large put SUBTRACT", 0, map:get( m5, SUBTRACT, "" ) )
+
+map:put( m5, CONCAT, "foo", PUT, 0 )
+map:put( m5, CONCAT, "bar", CONCAT, 0 )
+test_equal( "large put CONCAT", "foobar", map:get( m5, CONCAT, "" ) )
+
+map:put( m5, APPEND, {"foo"}, PUT, 0 )
+map:put( m5, APPEND, "bar", APPEND, 0 )
+test_equal( "large put APPEND", {"foo","bar"}, map:get( m5, APPEND, "" ) )
 
 
 map:map city_population
@@ -422,6 +452,13 @@ test_true("Gone #1", map:has(m1, "5"))
 map:remove(m1, "5")
 test_false("Gone #2", map:has(m1, "5"))
 
+
+-- Test small maps using the special maginc number used to initialize its buckets.
+m2 = map:new(map:threshold())	-- Create a small map
+map:put(m2, init_small_map_key, "Special Key")
+map:put(m2, "Special Key", init_small_map_key)
+test_equal("small map magic number #1", "Special Key", map:get(m2, init_small_map_key))
+test_equal("small map magic number #2", init_small_map_key, map:get(m2, "Special Key"))
 --
 -- Done with testing
 --
