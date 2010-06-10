@@ -808,6 +808,8 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			case CONCAT then
 				ram_space[the_map_p][VALUE_LIST][index_] &= the_value_p
 				
+			case LEAVE then
+				-- do nothing
 			case else
 				crash("Unknown operation given to map.e:put()")
 				

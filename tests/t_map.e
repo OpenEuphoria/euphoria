@@ -179,7 +179,9 @@ test_equal("map save fail", -1, save_map(m1, "<//badname.txt"))
 test_equal("map save #1", 12, save_map(m1, "save_map.txt", SM_TEXT))
 m2 = load_map("save_map.txt")
 test_equal("map save #2", 1, map:compare(m1,m2))
-	
+test_equal("map save #2 compare keys", 1, map:compare( m1, m2, 'k' ) )
+test_equal("map save #2 compare values", 1, map:compare( m1, m2, 'v' ) )
+
 test_equal("map save #3", 12, save_map(m1, "save_map.raw", SM_RAW))
 m2 = load_map("save_map.raw")
 test_equal("map save #4", 1, map:compare(m1,m2))
@@ -468,5 +470,16 @@ delete_file("save_map.raw")
 delete_file("save_map.raw2")
 delete_file("xyz.cfg")
 
+m3 = map:new()
+map:put( m3, 1, 1, map:LEAVE )
+test_true( "LEAVE add when doesn't exist", map:has( m3, 1 ) )
+
+map:put( m3, 1, 2, map:LEAVE )
+test_equal( "LEAVE doesn't change existing value", 1, map:get( m3, 1 ) )
+
+map:put( m3, 2, 1, map:APPEND )
+test_equal( "APPEND new entry", {1}, map:get( m3, 2 ) )
+
+map:optimize( m3, 1, 0.5 )
 
 test_report()
