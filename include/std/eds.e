@@ -130,7 +130,9 @@ public enum
 	--** couldn't insert a new record.
 	INSERT_FAILED,
 	--** last error code
-	LAST_ERROR_CODE
+	LAST_ERROR_CODE,
+	--** bad file
+	BAD_FILE
 	
 constant DB_MAGIC = 77
 constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0
@@ -184,7 +186,7 @@ sequence vLastErrors = {}
 procedure fatal(integer errcode, sequence msg, sequence routine_name, sequence parms)
 	vLastErrors = append(vLastErrors, {errcode, msg, routine_name, parms})
 	if db_fatal_id >= 0 then
-		call_proc(db_fatal_id, sprintf("Error Code %d: %s, from %s", {errcode, msg, routine_name}))
+		call_proc(db_fatal_id, {sprintf("Error Code %d: %s, from %s", {errcode, msg, routine_name})})
 	end if
 end procedure
 
@@ -508,11 +510,14 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 
 	if sequence(file_id) then
 		fn = open(file_id, "w")
-	else
+	elsif file_id > 0 then
 		fn = file_id
 		puts(fn, '\n')
+	else
+		fn = file_id
 	end if
-	if fn < 0 then
+	if fn <= 0 then
+		fatal( BAD_FILE, "bad file", "db_dump", {file_id, low_level_too})
 		return
 	end if
 
@@ -2496,51 +2501,29 @@ public function db_compress()
 	db_close()
 
 	fn = -1
-	for i = 0 to 99 do
-		-- try to find a temp name that isn't in use
-		old_path = new_path[1..$-3] & sprintf("t%d", i)
-		fn = open(old_path, "r")
-		if fn = -1 then
-			exit
-		else
-			-- file exists, can't use it
-			close(fn)
-		end if
-	end for
+	sequence temp_path = temp_file()
+	fn = open( temp_path, "r" )
 	if fn != -1 then
 		return DB_EXISTS_ALREADY -- you better delete some temp files
 	end if
 
-	-- TODO: replace with shell commands from shell.e
-	--       move_file, copy_file, etc...
-	-- rename database as .tmp
-	ifdef UNIX then
-		system( "mv \"" & new_path & "\" \"" & old_path & '"', 2)
-	elsifdef WIN32 then
-		system("ren \"" & new_path & "\" \"" & filename(old_path) & '"', 2)
-	end ifdef
-
+	move_file( new_path, temp_path )
+	
 	-- create a new database
 	index = db_create(new_path, DB_LOCK_NO)
 	if index != DB_OK then
-		-- failed, move it back to .edb
-		ifdef UNIX then
-			system( "mv \"" & old_path & "\" \"" & new_path & '"', 2)
-		elsifdef WIN32 then
-			system("ren \"" & old_path & "\" \"" & filename(new_path) & '"', 2)
-		end ifdef
-
+		move_file( temp_path, new_path )
 		return index
 	end if
 
-	index = db_open(old_path, DB_LOCK_NO)
+	index = db_open(temp_path, DB_LOCK_NO)
 	table_list = db_table_list()
 
 	for i = 1 to length(table_list) do
 		index = db_select(new_path)
 		index = db_create_table(table_list[i])
 
-		index = db_select(old_path)
+		index = db_select(temp_path)
 		index = db_select_table(table_list[i])
 
 		nrecs = db_table_size()
@@ -2568,7 +2551,7 @@ public function db_compress()
 				end if
 			end for
 			-- switch back to old table
-			index = db_select(old_path)
+			index = db_select(temp_path)
 			index = db_select_table(table_list[i])
 		end while
 	end for

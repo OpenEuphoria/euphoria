@@ -127,5 +127,55 @@ end if
 test_equal( "canonical_path() #4", home, canonical_path("~"))
 test_equal( "canonical_path() #3", current_dir() & SLASH, canonical_path( current_dir() & SLASH & "foo" & SLASH & ".." & SLASH ) )
 
+test_true( "simple disk_size test", sequence( disk_size( "." ) ) )
+
+sequence walk_data = {}
+function test_walk( sequence path_name, sequence item )
+	walk_data = append( walk_data, { path_name, item[D_NAME] } )
+	return 0
+end function
+
+procedure dir_tests()
+	if file_exists( "filesyse_dir" ) then
+		test_true( "remove existing testing directory", remove_directory( "filesyse_dir", 1))
+		
+	end if
+	
+	test_false( "testing directory is gone", file_exists( "filesyse_dir" ) )
+	test_true( "create filesyse_dir", create_directory( canonical_path( "filesyse_dir" ) ) )
+	
+	test_true( "chdir filesyse_dir", chdir( "filesyse_dir" ) )
+	sequence expected_walk_data = {}
+	
+	for d = 1 to 2 do
+		sequence dirname = sprintf("directory%d", d )
+		test_true( "create dir " & dirname, create_directory( dirname ) )
+		test_true( "chdir " & dirname, chdir( dirname ))
+		expected_walk_data = append( expected_walk_data, { "filesyse_dir", dirname } )
+		for f = 1 to 2 do
+			sequence filename = sprintf("file%d",f)
+			open( filename, "w", 1 )
+			expected_walk_data = append( expected_walk_data, { "filesyse_dir" & SLASH & dirname, filename } )
+		end for
+		test_true( "back to filesyse_dir", chdir( ".." ))
+	end for
+	open( "test-file", "w", 1 )
+	expected_walk_data = append( expected_walk_data, {"filesyse_dir", "test-file"})
+	
+	test_true("back to tests", chdir("..") )
+	
+	test_equal( "walk dir", 0, walk_dir( "filesyse_dir", routine_id("test_walk"), 1 ) )
+	
+	test_equal( "test walk_dir results", expected_walk_data, walk_data )
+	
+	sequence test_dir_size = dir_size( "filesyse_dir" )
+	test_equal( "dir size dir count", 2, test_dir_size[COUNT_DIRS] )
+	test_equal( "dir size file count", 1, test_dir_size[COUNT_FILES] )
+	
+	test_not_equal( "clear directory", 0, clear_directory( "filesyse_dir", 0 ) )
+	test_true( "remove testing directory", remove_directory( "filesyse_dir", 1 ) )
+end procedure
+dir_tests()
+
 test_report()
 

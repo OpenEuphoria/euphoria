@@ -799,7 +799,7 @@ public function clear_directory(sequence path, integer recurse = 1)
 	if atom(files) then
 		return 0
 	end if
-	if not equal(files[1][D_NAME], ".") then
+	if length( files ) = 1 then
 		return 0 -- Supplied name was not a directory
 	end if
 	
@@ -881,13 +881,12 @@ public function remove_directory(sequence dir_name, integer force=0)
 	if atom(files) then
 		return 0
 	end if
-	if not equal(files[1][D_NAME], ".") then
+	if length( files ) = 1 then
 		return 0	-- Supplied dir_name was not a directory
 	end if
 	
 	
 	dir_name &= SLASH
-	
 	for i = 1 to length(files) do
 		if eu:find(files[i][D_NAME], {".", ".."}) then
 			continue

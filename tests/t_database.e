@@ -18,7 +18,7 @@ db_close()
 test_equal("current db #4", "", db_current())
 
 
-test_equal("open db", DB_OK, db_open("testunit.edb", DB_LOCK_EXCLUSIVE))
+test_equal("open db", DB_OK, db_open("testunit", DB_LOCK_EXCLUSIVE))
 test_equal("current db #4", "testunit.edb", db_current())
 
 test_equal("create table #1", DB_OK, db_create_table("first"))
@@ -167,6 +167,10 @@ rec[2] = "Updated 99"
 db_replace_recid(rid2, rec[2]) 
 test_equal("fetch with recid #3", {99, "Updated 99"}, db_record_recid(rid2)) 
 
+-- create lots of tables
+for i = 1 to 10 do
+	test_equal( sprintf("create lots of tables #%d", i ), DB_OK, db_create_table( sprintf("lots of tables #%d", i) ) )
+end for
 
 db_close()
 test_equal("current db #5", "", db_current())
@@ -175,6 +179,7 @@ test_equal("current db #5", "", db_current())
 rec = db_record_data(rid2)
 test_true( "Error recorded", length(db_get_errors()) > 0)
 test_true( "Errors cleared", length(db_get_errors()) = 0)
+
 
 
 void = delete_file("testunit.edb")
@@ -243,5 +248,103 @@ procedure test_db_select()
 	
 end procedure
 test_db_select()
+
+
+sequence error_msg = ""
+procedure db_fatal_error( sequence msg )
+	error_msg = msg
+end procedure
+
+function get_db_error()
+	sequence msg = error_msg
+	error_msg = ""
+	db_get_errors( 1 )
+	return msg
+end function
+
+procedure test_dump()
+	db_fatal_id = routine_id("db_fatal_error")
+	db_close()
+	if file_exists( "dump.edb" ) then
+		delete_file( "dump.edb" )
+	end if
+	test_equal( "create dump.edb", DB_OK, db_create( "dump.edb" ) )
+	
+	db_delete_record( 1 )
+	test_not_equal( "delete record with no table", "", get_db_error() )
+	
+	test_equal( "creeate dump.edb table 1", DB_OK, db_create_table( "table 1" ) )
+	test_equal( "check for dump.edb #1", {"table 1"}, db_table_list() )
+	
+	test_equal( "creeate dump.edb table 2", DB_OK, db_create_table( "table-2" ) )
+	test_equal( "check for dump.edb #2", {"table 1", "table-2"}, db_table_list() )
+	
+	db_rename_table( "Table 1", "table-1")
+	test_not_equal( "rename table fail #1 check error msg", "", get_db_error() )
+	test_equal( "rename table fail #1 check table list", {"table 1", "table-2"}, db_table_list() )
+	
+	db_rename_table( "table 1", "table-2")
+	test_not_equal( "rename table fail #2 check error msg", "", get_db_error() )
+	test_equal( "rename table fail #2", {"table 1", "table-2"}, db_table_list() )
+	
+	db_rename_table( "table 1", "table-1")
+	test_equal( "renamed table", {"table-1", "table-2"}, db_table_list() )
+	
+	db_select_table( "table-1" )
+	db_insert( 1, 1 )
+	db_insert( 2, 1 )
+	db_insert( 3, 1 )
+	db_delete_record( 2 )
+	
+	db_delete_record( 1, "what table?")
+	test_not_equal( "delete record with a bad table name", "", get_db_error() )
+	
+	if file_exists( "eds-dump.txt" ) then
+		delete_file( "eds-dump.txt" )
+	end if
+	
+	db_dump( -1 ) -- this should simply return
+	test_not_equal( "passing invalid file handle to db_dump", "", get_db_error() )
+	
+	db_dump( "eds-dump.txt", 1 )
+	
+	atom fn = open( "eds-dump.txt", "r", 1 )
+	test_not_equal( "opened dump file", -1, fn )
+	
+	sequence look_for = {
+			"Database dump as at",
+			"Euphoria Database System",
+			`The "dump.edb" database`,
+			"Disk Dump",
+			"DiskAddr",
+			"[tables:",
+			`table "table-1"`,
+			"key: 1",
+			"data: 1",
+			"key: 3",
+			"data: 1",
+			`table "table-2"`,
+			"[free blocks",
+			{0}
+			}
+	
+	object in
+	integer lf = 1
+	while sequence(in) with entry do
+		if match( look_for[lf], in ) then
+			lf += 1
+		end if
+	entry
+		in = gets( fn )
+	end while
+	
+	test_equal( "examine dump file", {0}, look_for[lf] )
+	
+	delete_file( "eds-dump.txt" )
+	delete_file( "dump.edb" )
+end procedure
+test_dump()
+
+
 
 test_report()
