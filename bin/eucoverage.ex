@@ -27,15 +27,15 @@ map dir_coverage
 map dir_map
 
 procedure process_cmd_line()
+
 	map cmd = cmd_parse( opts )
-	
 	sequence keys = map:keys( cmd )
 	
 	for i = 1 to length( keys ) do
 		object val = map:get( cmd, keys[i] )
 		switch keys[i] do
 			case "o" then
-				output_directory = val[1]
+				output_directory = val
 			case "v" then
 				verbose = 1
 		end switch
@@ -225,10 +225,13 @@ regex match_routine = regex:new( `^\s*(?:global\s+|public\s+|export\s+|\s*)(?:fu
 regex match_end_routine = regex:new( `^\s*end\s+(?:function|procedure|type)` )
 
 procedure write_file_html( sequence output_dir, integer fx )
+	atom in  = open( files[fx], "r", 1 )
+	if in = -1 then
+		return
+	end if
+		
 	sequence html_name = output_dir & encode( files[fx] ) & ".html"
 	atom out = open( html_name, "w", 1 )
-	atom in  = open( files[fx], "r", 1 )
-	
 	
 	sequence source_lines = {}
 	integer line_number = 0

@@ -216,7 +216,8 @@ public type map(object obj_p)
 	return 1
 end type
 
-constant maxInt = #3FFFFFFF
+constant maxInt = #3FFFFFFF,
+         maxAutoSize = floor( (maxInt - 1 )  / 3.5 )
 
 --****
 -- === Routines
@@ -227,8 +228,7 @@ constant maxInt = #3FFFFFFF
 --
 -- Parameters:
 --   # ##pData## : The data for which you want a hash value calculated.
---   # ##max_hash_p## :  (default = 0) The returned value will be no larger than this value.
---     However, a value of 0 or lower means that it can grow as large as the maximum integer value.
+--   # ##max_hash_p## :  The returned value will be no larger than this value.
 --
 -- Returns:
 --		An **integer**, the value of which depends only on the supplied data.
@@ -241,17 +241,14 @@ constant maxInt = #3FFFFFFF
 -- Example 1:
 --   <eucode>
 --   integer h1
---   h1 = calc_hash( symbol_name )
+--   -- calculate a hash value and ensure it will be a value from 1 to 4097.
+--   h1 = calc_hash( symbol_name, 4097 )
 --   </eucode>
 
-public function calc_hash(object key_p, integer max_hash_p = 0)
+public function calc_hash(object key_p, integer max_hash_p)
 	atom ret_
 
     ret_ = hash(key_p, -4) --HSIEH32)
-	if max_hash_p <= 0 then
-		return ret_
-	end if
-
 	return remainder(ret_, max_hash_p) + 1 -- 1-based
 
 end function
@@ -321,7 +318,7 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	sequence new_val_buckets_
 	object key_
 	object value_
-	atom new_size_
+	integer new_size_
 	sequence temp_map_
 
 	if ram_space[the_map_p][MAP_TYPE] = SMALLMAP then
@@ -330,10 +327,11 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	
 	if requested_bucket_size_p <= 0 then
 		-- grow bucket size_
-		new_size_ = floor(length(ram_space[the_map_p][KEY_BUCKETS]) * 3.5) + 1
-		if new_size_ > maxInt then
+		new_size_ = length(ram_space[the_map_p][KEY_BUCKETS])
+		if new_size_ > maxAutoSize then
 				return  -- don't do anything. already too large
 		end if
+		new_size_ = floor(new_size_ * 3.5) + 1
 		size_ = new_size_
 	else
 		size_ = requested_bucket_size_p
@@ -872,12 +870,10 @@ public procedure nested_put( map the_map_p, sequence the_keys_p, object the_valu
 
 	if length( the_keys_p ) = 1 then
 		put( the_map_p, the_keys_p[1], the_value_p, operation_p, trigger_p )
-		return
 	else
 		temp_map_ = new_extra( get( the_map_p, the_keys_p[1] ) )
 		nested_put( temp_map_, the_keys_p[2..$], the_value_p, operation_p, trigger_p )
 		put( the_map_p, the_keys_p[1], temp_map_, PUT, trigger_p )
-		return
 	end if
 end procedure
 
@@ -1940,16 +1936,13 @@ public function for_each(map source_map, integer user_rid, object user_data = 0,
 	return 0
 end function
 
----- Local Functions ------------
+-- LOCAL FUNCTIONS --
 procedure convert_to_large_map(map the_map_)
 	sequence temp_map_
 	atom map_handle_
 
 	temp_map_ = ram_space[the_map_]
-	if temp_map_[MAP_TYPE] = LARGEMAP then
-		return 
-	end if
-	
+
 	map_handle_ = new()
 	for index = 1 to length(temp_map_[FREE_LIST]) do
 		if temp_map_[FREE_LIST][index] !=  0 then
@@ -1964,16 +1957,13 @@ procedure convert_to_small_map(map the_map_)
 	sequence keys_
 	sequence values_
 
-	if ram_space[the_map_][MAP_TYPE] = SMALLMAP then
-		return
-	end if
 	keys_ = keys(the_map_)
 	values_ = values(the_map_)
 	
 	ram_space[the_map_] = {type_is_map, 0,0, SMALLMAP, repeat(init_small_map_key, threshold_size), repeat(0, threshold_size), repeat(0, threshold_size)}
 	
 	for i = 1 to length(keys_) do
-		put(the_map_, keys_[i], values_[i])
+		put(the_map_, keys_[i], values_[i], PUT, 0)
 	end for
 
 end procedure

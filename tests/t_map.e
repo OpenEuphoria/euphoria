@@ -12,7 +12,7 @@ include std/eumem.e
 object o1, o2, o3
 constant init_small_map_key = -75960.358941
 
-o1 = map:new()
+o1 = map:new(1)
 test_true("map new #1", map(o1) )
 ram_space[o1][4] = '?' -- MAP_TYPE corruption
 test_false("map new #1", map(o1) )
@@ -96,6 +96,11 @@ m1s = statistics(m1)
 opms = statistics(opm)
 
 test_true("map optimize #1", m1s[NUM_ENTRIES] = opms[NUM_ENTRIES]) -- total element unchanged
+
+optimize(m1, 0, 0)
+m1s = statistics(m1)
+test_true("map optimize #2", m1s[NUM_ENTRIES] = opms[NUM_ENTRIES]) -- total element unchanged
+
 
 clear(m1)
 test_equal( "map clear #1", 0, map:size(m1))
@@ -322,6 +327,26 @@ test_equal("values w/key sequence #2",	{ 0, 0 }, map:values(m1, { 2, 1 }))
 test_equal("values w/key sequence and default value sequence #1",
 	{ "ten", "one", "thirty" }, map:values(m1, { 10, 1, 30 }, { "abc", "one", "def" }))
 
+clear(m2)
+
+map:put(m2, 10, "TEN")
+map:put(m2, 20, "TWENTY")
+map:put(m2, 30, "THIRTY")
+map:put(m2, 40, "FORTY")
+	
+-- Ensure they have the same keys.
+test_equal("compare equality #5", 1, map:compare(m2, m1, 'k'))
+test_equal("compare inequality #5", -1, map:compare(m2, m1, 'v'))
+
+map:put(m2, 10, "ten")
+map:put(m2, 20, "twenty")
+map:put(m2, 30, "thirty")
+map:remove(m2, 40)
+map:put(m2, 50, "forty")
+-- Ensure they have the same values.
+test_equal("compare equality #6", 1, map:compare(m2, m1, 'v'))
+test_equal("compare inequality #6", -1, map:compare(m2, m1, 'k'))
+
 --
 -- Copy w/destination tests
 --
@@ -459,8 +484,15 @@ test_false("Gone #2", map:has(m1, "5"))
 m2 = map:new(map:threshold())	-- Create a small map
 map:put(m2, init_small_map_key, "Special Key")
 map:put(m2, "Special Key", init_small_map_key)
+test_equal("Ensure small map", SMALLMAP, type_of(m2))
 test_equal("small map magic number #1", "Special Key", map:get(m2, init_small_map_key))
 test_equal("small map magic number #2", init_small_map_key, map:get(m2, "Special Key"))
+
+-- Copy a small map.
+map:clear(m1)
+map:copy(m2, m1)
+test_equal("compare equality #5", 1, map:compare(m1, m2))
+
 --
 -- Done with testing
 --
