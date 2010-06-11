@@ -127,5 +127,53 @@ test_equal("is_in_list #5", 1, is_in_list(-6, {100, 2, 45, 9, 17, -6}))
 test_equal("is_in_list #6", 1, is_in_list(9, {100, 2, 45, 9, 17, -6}))
 
 
+  test_equal("begins1c", 0, begins("abc", ""))
+  test_equal("begins2c", 1, begins("", "abc"))  --?
+  test_equal("begins3c", 1, begins('a', "abc"))
+  test_equal("begins4c", 0, begins('b', "abc"))
+  test_equal("begins5c", 0, begins("abcb", "abc"))
+  test_equal("begins5cc", 0, begins("babc", "abc"))
+  test_equal("begins6c", 0, begins("abcabc", "abc"))
+
+  test_equal("ends1c", 0, ends("abc", ""))
+  test_equal("ends2c", 1, ends("", "abc"))  --?
+  test_equal("ends3c", 1, ends('c', "abc"))
+  test_equal("ends4c", 0, ends('b', "abc"))
+  test_equal("ends5c", 0, ends("babc", "abc"))
+  test_equal("ends5cc", 0, ends("abcb", "abc"))
+  test_equal("ends6c", 0, ends("abcabc", "abc"))
+  test_equal("match_replace1c", "The caT aTe The food", match_replace('t', "the cat ate the food", "T", 0) )
+  test_equal("rmatch1c", 0, rmatch("", "the dog ate the steak")  )
+  test_equal("rmatch2c", 0, rmatch("og", "the dog",  8) )
+  test_equal("rmatch3c", 0, rmatch("og", "the dog",  -8) )
+  test_equal("lookup1c", 11, lookup('d', "cat", "dog", 11)  )
+  test_equal("lookup2c", 11, lookup('s', "cats", "dog", 11)  )
+  test_equal("lookup3c", 'x', lookup('d', "cat", "dogx", 11)  )
+
+
+
+function fnequal(object needle, object haystack)
+	return equal(needle, haystack)
+end function
+
+function fnfind(object needle, object haystack)
+	return find(needle, haystack)
+end function
+
+test_equal("lookup1c", {{3,2}, {3,1}, {2}} ,
+	find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_BACKWARD + NESTED_ALL)
+  )
+test_equal("lookup2c", {{2 ,2 ,1}}  ,  --example wrong?
+	find_nested(3, {5, {4, {3, {2}}}}, NESTED_BACKWARD + NESTED_ALL, routine_id("fnequal"))
+  )
+test_equal("lookup3c", {{3,2}, {3,1}, {2}} ,
+	find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_BACKWARD + NESTED_ALL, routine_id("fnfind"))
+  )
+	-- -1 bad choice for default no routine_id, could mask typo
+test_equal("lookup4c-1", {{3,2}, {3,1}, {2}}  ,
+	find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_BACKWARD + NESTED_ALL, routine_id("ffind"))
+  )
+
+
 test_report()
 
