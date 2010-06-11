@@ -367,6 +367,21 @@ test_equal("filter out [] range", {20,19,2,10}, filter(data, "out", {3,8}, "[]")
 test_equal("filter out [) range", {8,20,19,2,10}, filter(data, "out", {3,8}, "[)")) 
 test_equal("filter out (] range", {20,19,3,2,10}, filter(data, "out", {3,8}, "(]")) 
 test_equal("filter out () range", {8,20,19,3,2,10}, filter(data, "out", {3,8}, "()")) 
+test_equal("filter STDFLTR_ALPHA", "abc",
+		filter("123abc123", STDFLTR_ALPHA, {})
+	)
+
+constant data1 = {5,8,20,19,3,2,10}
+	test_equal("filter1", {5,8,3}, filter(data1, "in", {3,4,5,6,7,8}))
+	test_equal("filter2", {20,19,2,10}, filter(data1, "out", {3,4,5,6,7,8}))
+
+	test_equal("sim_index0", 0.08784, round(sim_index("sit", "sin"), 1e5))
+	test_equal("sim_index", 0.32394, round(sim_index("sit", "sat"), 1e5))
+	test_equal("sim_index2", 0.34324, round(sim_index("sit", "skit"), 1e5))
+	test_equal("sim_index3", 0.68293, round(sim_index("sit", "its"), 1e5))
+
+	test_equal("minsize1", {4,3,6,2,7,1,2,-1,-1,-1}, minsize({4,3,6,2,7,1,2}, 10, -1))
+	test_equal("minsize2", {4,3,6,2,7,1,2}, minsize({4,3,6,2,7,1,2}, 5, -1))
 
 function quiksort(sequence s)
 	if length(s) < 2 then
