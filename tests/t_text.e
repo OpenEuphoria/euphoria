@@ -383,6 +383,42 @@ test_equal( "dequote defaults 2", "The small () man", dequote("(The small ?(?) m
 test_equal( "dequote multiple strings", {"The small man","The small () man"}, 
 	dequote({"\"The small man\"", "(The small ?(?) man)"}, {{"(",")"},{"\"","\""}}, '?'))
 
+test_equal("trim 1c ", {4,4},  trim(" \t .\t", " \t\r\n", 1)  )
+test_equal("trim_head 1c ", 4,  trim_head(" \t .\t", " \t\r\n", 1)  )
+test_equal("trim_tail 1c ", 4,  trim_tail(" \t .\t", " \t\r\n", 1)  )
+
+test_equal("keyvalues 1c", { {"foo", "bar"}, {"qwe", "1234"}, {"asdf", "contains space, comma, and equal(=)"}},
+	keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
+ )
+
+test_equal("keyvalues 2c", { {"p[1]", "abc"}, {"fgh", "ijk"}, {"p[3]", "def"} },
+	keyvalues("abc fgh=ijk def")
+ )
+test_equal("keyvalues 3c", { {"abc", "'quoted'"} },
+	keyvalues("abc=`'quoted'`")
+ )
+test_equal("keyvalues 4c", {{"c", ""}}, keyvalues("c=`\t`"))
+test_equal("keyvalues 5c", {{"c", ""}}, keyvalues("c='\t'"))
+test_equal("keyvalues 6c", {}, keyvalues(""))
+test_equal("keyvalues 7c", {{"c", "=t"}},
+	keyvalues("c:=t", 0x3B)  --;
+ )
+test_equal("keyvalues 8c", {{"c", "t"}},
+	keyvalues("c=t",, 0x3D)  --=
+ )
+test_equal("keyvalues 9c", {{"c", "t"}},
+	keyvalues("c=t",,, 0x60)  --`
+ )
+test_equal("keyvalues ac",{{"c", "t"}},
+	keyvalues("c=\tt",,,, 0x09)  --\t
+ )
+ --need more keyvalues testing
+
+ --need to also check is covered on more than one system
+test_equal("change case 1uc","", upper("") )
+test_equal("change case 1lc","", lower("") )
+-- curent default initial max on len of case change string
+test_equal("change case 2c",repeat('a',1024), lower(repeat('A',1024)) )
 
 
 test_report()
