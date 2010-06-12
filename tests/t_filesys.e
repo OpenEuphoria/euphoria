@@ -1,6 +1,7 @@
 include std/filesys.e
 include std/io.e
 include std/unittest.e
+include std/text.e
 
 sequence fullname, pname, fname, fext, eolsep, driveid
 integer sep
@@ -60,6 +61,10 @@ test_false("absolute_path('../abc')", absolute_path("../abc"))
 test_false("absolute_path('local/abc.txt')", absolute_path("local/abc.txt"))
 test_false("absolute_path('abc.txt')", absolute_path("abc.txt"))
 test_false("absolute_path('c:..\\abc')", absolute_path("c:..\\abc"))
+test_false("absolute_path('a')", absolute_path("a"))
+test_false("absolute_path('ab')", absolute_path("ab"))
+test_false("absolute_path('a:')", absolute_path("a:"))
+test_false("absolute_path('a:b')", absolute_path("a:b"))
 
 ifdef WINDOWS then
 	test_true("absolute_path('\\temp\\somefile.doc')", absolute_path("\\temp\\somefile.doc"))
@@ -120,12 +125,23 @@ test_equal( "file_type() directory", FILETYPE_DIRECTORY, file_type( current_dir(
 test_equal( "canonical_path() #1", current_dir() & SLASH & "t_filesys.e", canonical_path( "t_filesys.e" ) )
 test_equal( "canonical_path() #2", current_dir() & SLASH & "t_filesys.e", canonical_path( `"t_filesys.e"` ) )
 test_equal( "canonical_path() #3", current_dir() & SLASH, canonical_path( current_dir() & SLASH & '.' & SLASH ) )
+
 sequence home = getenv("HOME")
 if home[$] != SLASH then
 	home &= SLASH
 end if
 test_equal( "canonical_path() #4", home, canonical_path("~"))
-test_equal( "canonical_path() #3", current_dir() & SLASH, canonical_path( current_dir() & SLASH & "foo" & SLASH & ".." & SLASH ) )
+test_equal( "canonical_path() #5", current_dir() & SLASH, canonical_path( current_dir() & SLASH & "foo" & SLASH & ".." & SLASH ) )
+
+ifdef UNIX then
+	test_equal( "canonical_path() #6", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,1 ))
+	test_equal( "canonical_path() #7", current_dir() & SLASH & "UPPERNAME", canonical_path( "UPPERNAME",,0 ))
+end ifdef
+
+ifdef WINDOWS then
+	test_equal( "canonical_path() #6", lower(current_dir() & SLASH & "UPPERNAME"), canonical_path( "UPPERNAME",,1 ))
+	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME",,0 ))
+end ifdef
 
 test_true( "simple disk_size test", sequence( disk_size( "." ) ) )
 
@@ -141,12 +157,15 @@ procedure dir_tests()
 		
 	end if
 	
+	test_false( "Bad name #1", create_directory( ".." ) )
+	test_false( "Bad name #2", create_directory( "" ) )
+	
 	test_false( "testing directory is gone", file_exists( "filesyse_dir" ) )
-	test_true( "create filesyse_dir", create_directory( canonical_path( "filesyse_dir" ) ) )
+	test_true( "create filesyse_dir", create_directory( canonical_path( "filesyse_dir" ) & SLASH ) )
 	
 	test_true( "chdir filesyse_dir", chdir( "filesyse_dir" ) )
 	sequence expected_walk_data = {}
-	
+
 	for d = 1 to 2 do
 		sequence dirname = sprintf("directory%d", d )
 		test_true( "create dir " & dirname, create_directory( dirname ) )
@@ -154,12 +173,15 @@ procedure dir_tests()
 		expected_walk_data = append( expected_walk_data, { "filesyse_dir", dirname } )
 		for f = 1 to 2 do
 			sequence filename = sprintf("file%d",f)
-			open( filename, "w", 1 )
+			create_file( filename)
+			test_true( "File exists " & filename, file_exists(filename))
 			expected_walk_data = append( expected_walk_data, { "filesyse_dir" & SLASH & dirname, filename } )
 		end for
 		test_true( "back to filesyse_dir", chdir( ".." ))
 	end for
-	open( "test-file", "w", 1 )
+	create_file( "test-file")
+	test_true( "test-file exists", file_exists("test-file"))
+	
 	expected_walk_data = append( expected_walk_data, {"filesyse_dir", "test-file"})
 	
 	test_true("back to tests", chdir("..") )

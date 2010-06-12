@@ -599,7 +599,7 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 	integer pos
 
 	if length(name) = 0 then
-		return 1
+		return 0 -- failed
 	end if
 	
 	-- Remove any trailing slash.
@@ -627,6 +627,35 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 end function
 
 --**
+-- Create a new file.
+--
+-- Parameters:
+-- 		# ##name## : a sequence, the name of the new file to create
+--
+-- Returns:
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Comments:
+-- * The created file will be empty, that is it has a length of zero.
+-- * The created file will not be open when this returns.
+--
+-- Example 1:
+-- <eucode>
+-- if not create_file("the_new_file") then
+--		crash("Filesystem problem - could not create the new file")
+-- end if
+-- </eucode>
+--
+-- See Also:
+-- 	[[:create_directory]]
+
+public function create_file(sequence name)
+	integer fh = open(name, "wb")
+	close(fh)
+	return (fh != -1)
+end function
+
+--**
 -- Delete a file.
 --
 -- Parameters:
@@ -636,6 +665,7 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 
 public function delete_file(sequence name)
+
 	atom pfilename = allocate_string(name)
 	integer success = c_func(xDeleteFile, {pfilename})
 		
@@ -776,6 +806,7 @@ end function
 public function clear_directory(sequence path, integer recurse = 1)
 	object files
 	integer ret
+
 	if length(path) > 0 then
 		if path[$] = SLASH then
 			path = path[1 .. $-1]
@@ -799,17 +830,21 @@ public function clear_directory(sequence path, integer recurse = 1)
 	if atom(files) then
 		return 0
 	end if
-	if length( files ) = 1 then
+	if length( files ) < 3 then
 		return 0 -- Supplied name was not a directory
 	end if
-	
+	if not equal(files[1][D_NAME], ".") then
+		return 0 -- Supplied name was not a directory
+	end if
+	if not eu:find('d', files[1][D_ATTRIBUTES]) then
+		return 0 -- Supplied name was not a directory
+	end if
+		
 	ret = 1
 	path &= SLASH
 	
-	for i = 1 to length(files) do
-		if eu:find(files[i][D_NAME], {".", ".."}) then
-			continue
-		elsif eu:find('d', files[i][D_ATTRIBUTES]) then
+	for i = 3 to length(files) do
+		if eu:find('d', files[i][D_ATTRIBUTES]) then
 			if recurse then
 				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
 				if cnt = 0 then
@@ -881,28 +916,34 @@ public function remove_directory(sequence dir_name, integer force=0)
 	if atom(files) then
 		return 0
 	end if
-	if length( files ) = 1 then
+	if length( files ) <= 2 then
 		return 0	-- Supplied dir_name was not a directory
 	end if
+	if not equal(files[1][D_NAME], ".") then
+		return 0 -- Supplied name was not a directory
+	end if
+	if not eu:find('d', files[1][D_ATTRIBUTES]) then
+		return 0 -- Supplied name was not a directory
+	end if
 	
-	
-	dir_name &= SLASH
-	for i = 1 to length(files) do
-		if eu:find(files[i][D_NAME], {".", ".."}) then
-			continue
-			
-		elsif not force then
-			return 0
-		else
-			if eu:find('d', files[i][D_ATTRIBUTES]) then
-				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
-			else
-				ret = delete_file(dir_name & files[i][D_NAME])
-			end if
-			if not ret then
-				return 0
-			end if
+	if length(files) > 2 then
+		if not force then
+			return 0 -- Directory is not already emptied.
 		end if
+	end if
+		
+	dir_name &= SLASH
+	
+	for i = 3 to length(files) do
+		if eu:find('d', files[i][D_ATTRIBUTES]) then
+			ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
+		else
+			ret = delete_file(dir_name & files[i][D_NAME])
+		end if
+		if not ret then
+			return 0
+		end if
+
 	end for
 	
 	pname = allocate_string(dir_name)
@@ -1288,6 +1329,9 @@ end function
 --  # ##directory_given## : An integer. This is zero if ##path_in## is 
 --  to be interpreted as a file specification otherwise it is assumed to be a
 --  directory specification. The default is zero.
+--  # ##no_case## : An integer. Only applies to the Windows platform. If zero (the default) 
+--  the path name is returned exactly as stored in the file system, otherwise the
+--  returned value is all in lowercase.
 --
 -- Returns:
 --     A **sequence**, the full path and file name.
@@ -1305,7 +1349,7 @@ end function
 -- -- res is now "/usr/foo/abc.def"
 -- </eucode>
 
-public function canonical_path(sequence path_in, integer directory_given = 0)
+public function canonical_path(sequence path_in, integer directory_given = 0, integer no_case = 0)
     sequence lPath = ""
     integer lPosA = -1
     integer lPosB = -1
@@ -1408,8 +1452,11 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 		lPosA = match(lLevel, lPath)
 	end while
 	
-	ifdef not UNIX then
-		lPath = lower(lDrive & lPath)
+	ifdef WINDOWS then
+		lPath = lDrive & lPath
+		if no_case then
+			lPath = lower(lPath)
+		end if
 	end ifdef
 	
 	return lPath

@@ -38,7 +38,7 @@ integer initialized_coverage = 0
 export procedure check_coverage()
 
 	for i = length( file_coverage ) + 1 to length( file_name ) do
-		file_coverage &= find( canonical_path( file_name[i] ), covered_files )
+		file_coverage &= find( canonical_path( file_name[i],,1 ), covered_files )
 	end for
 end procedure
 
@@ -51,12 +51,12 @@ export procedure init_coverage()
 	end if
 	initialized_coverage = 1
 	for i = 1 to length( file_coverage ) do
-		file_coverage[i] = find( canonical_path( file_name[i] ), covered_files )
+		file_coverage[i] = find( canonical_path( file_name[i],,1 ), covered_files )
 	end for
 	
 	if equal( coverage_db_name, "" ) then
 		sequence cmd = command_line()
-		coverage_db_name = canonical_path( filebase( cmd[2] ) & "-cvg.edb" )
+		coverage_db_name = canonical_path( filebase( cmd[2] ) & "-cvg.edb",, 1 )
 	end if
 	
 	if coverage_erase and file_exists( coverage_db_name ) then
@@ -164,36 +164,38 @@ end function
 
 regex eu_file = regex:new( `(?:\.e|\.eu|\.ew|\.exu|\.ex|\.exw)\s*$`, CASELESS )
 
+procedure new_covered_path(sequence name)
+	covered_files = append( covered_files, name )
+	routine_map &= map:new()
+	line_map    &= map:new()
+end procedure
+
 --**
 -- Add the specified file or directory to the coverage analysis.
 export procedure add_coverage( sequence cover_this )
 	
-	sequence path = canonical_path( cover_this )
+	sequence path = canonical_path( cover_this,,1 )
 	
 	if file_type( path ) = FILETYPE_DIRECTORY then
 		sequence files = dir( path  )
 		
 		for i = 1 to length( files ) do
 			if find( 'd', files[i][D_ATTRIBUTES] ) then
-				if '.' != files[i][D_NAME][1] then
-					add_coverage( cover_this & '/' & files[i][D_NAME] )
+				if not eu:find(files[i][D_NAME], {".", ".."}) then
+					add_coverage( cover_this & SLASH & files[i][D_NAME] )
 				end if
 			
 			elsif regex:has_match( eu_file, files[i][D_NAME] ) then
-				sequence canonical = canonical_path( cover_this & '/' & files[i][D_NAME] )
-				if not find( canonical, covered_files ) and not excluded( canonical ) then
-					covered_files = append( covered_files, canonical )
-					routine_map &= map:new()
-					line_map    &= map:new()
+				path = canonical_path( cover_this & SLASH & files[i][D_NAME],,1 )
+				if not find( path, covered_files ) and not excluded( path ) then
+					new_covered_path( path )
 				end if
 			end if
 		end for
-	elsif regex:has_match( eu_file, path ) 
-	and not find( path, covered_files ) 
-	and not excluded( path ) then
-		covered_files = append( covered_files, path )
-		routine_map &= map:new()
-		line_map    &= map:new()
+	elsif regex:has_match( eu_file, path ) and
+			not find( path, covered_files ) and
+			not excluded( path ) then
+		new_covered_path( path )
 	end if
 end procedure
 
