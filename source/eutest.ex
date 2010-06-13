@@ -241,34 +241,9 @@ procedure report_last_error(sequence filename)
 	end if
 end procedure
 
-type sequence_of_strings_or_integer(object x)
-	if atom(x) then
-		return 1
-	end if
-	for i = 1 to length(x) do
-		if atom(x[i]) then
-			return 0
-		end if
-		for j = 1 to length(x[i]) do
-			if sequence(x[i][j]) then
-				return 0
-			end if
-		end for
-	end for
-	return 1
-end type
-
-function strip_path_junk(sequence_of_strings_or_integer err_data)
-    sequence path
-    path = "\\/" & err_data[1]
-    path = path[max(rfind('/', path)&rfind('\\', path))+1..$]
-    err_data[1] = path
-    return err_data
-end function
-
-function prepare_error_file(sequence file_name)
+function prepare_error_file(object file_name)
 	integer pos
-	sequence_of_strings_or_integer file_data
+	object file_data
 	
 	file_data = read_lines(file_name)
 	
@@ -299,101 +274,112 @@ function prepare_error_file(sequence file_name)
 		end if
 	end for
 	
-	if length(file_data) > 0 then
-		file_data = strip_path_junk(file_data)
-	end if
-	return file_data
+    sequence path
+    if length(file_data) >= 2 then
+    	path = "\\/" & file_data[1]
+    	path = path[max(rfind('/', path) & rfind('\\', path))+1..$]
+    	file_data[1] = path
+    else
+    	-- Malformed error file
+    	file_data = 0
+    end if
+    
+    return file_data
 end function
 
-function check_errors( sequence filename, sequence control_error_file, sequence fail_list )
-	sequence_of_strings_or_integer expected_err
-	sequence_of_strings_or_integer actual_err
-	integer comparison
+function check_errors( sequence filename, sequence fail_list )
+	object expected_err
+	object actual_err
+	integer some_error = 0
 	
-	expected_err = prepare_error_file(control_error_file)
-	actual_err = prepare_error_file("ex.err")
-	if sequence(actual_err) and sequence(expected_err) then
-		-- N.B. Do not compare the first line as it contains PATH 
-		-- information which can vary from system to system.			
-		if not equal(actual_err[2..$], expected_err[2..$]) then
-			failed += 1
-			fail_list = append(fail_list, filename)
-	
-			if length(actual_err) and length(expected_err) then
-				error(filename, E_INTERPRET, "Unexpected ex.err.  Expected:\n----\n" &
-					"%s\n----\nbut got\n----\n%s\n----\n",
-					{join(expected_err,"\n"), join(actual_err, "\n")}, "ex.err")
-			elsif length(actual_err) then
-				error(filename, E_INTERPRET, "Unexpected empty control file.", {})
-			else
-				error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
-			end if
-		end if
-	elsif atom(actual_err) then
-		error(filename, E_INTERPRET, "No ex.err has been generated.", {})
-	else
-		error(filename, E_INTERPRET, "No control file was supplied.", {})
+	expected_err = prepare_error_file( find_error_file( filename ) )
+	if atom(expected_err) then
+		error(filename, E_INTERPRET, "No valid control file was supplied.", {})
+		some_error = 1
+	elsif length(expected_err) = 0 then
+		error(filename, E_INTERPRET, "Unexpected empty control file.", {})
+		some_error = 1
 	end if
 	
+	if not some_error then
+		actual_err = prepare_error_file("ex.err")
+		if atom(actual_err) then
+			error(filename, E_INTERPRET, "No valid ex.err has been generated.", {})
+			some_error = 1
+		elsif length(actual_err) = 0 then
+			error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
+			some_error = 1
+		end if
+	
+		if not some_error then
+			-- N.B. Do not compare the first line as it contains PATH 
+			-- information which can vary from system to system.			
+			if not equal(actual_err[2..$], expected_err[2..$]) then
+		
+				error(filename, E_INTERPRET, "Unexpected ex.err.  Expected:\n----\n" &
+						"%s\n----\nbut got\n----\n%s\n----\n",
+						{join(expected_err,"\n"), join(actual_err, "\n")}, "ex.err")
+				some_error = 1
+			end if
+		end if
+	end if
+	
+	if some_error then	
+		failed += 1
+		fail_list = append(fail_list, filename)
+	end if
 	return fail_list
 end function
 
-function open_error_file( sequence filename )
-	object control_error_file
+function find_error_file( sequence filename )
+	sequence control_error_file
+	sequence base_filename
+	
+	base_filename = filename[1 .. find('.', filename & '.') - 1] & ".d" & SLASH
+	
 	-- try tests/t_test.d/interpreter/UNIX/control.err
-	control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "interpreter" &
-		SLASH & interpreter_os_name & SLASH & "control.err"
-
-	if not file_exists(control_error_file) then
-		-- try tests/t_test/UNIX/control.err
-		control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH &
-			interpreter_os_name & SLASH & "control.err"
+	control_error_file =  base_filename & "interpreter" & SLASH & interpreter_os_name & SLASH & "control.err"
+	if file_exists(control_error_file) then
+		return control_error_file
+	end if
+	
+	-- try tests/t_test/UNIX/control.err
+	control_error_file =  base_filename & interpreter_os_name & SLASH & "control.err"
+	if file_exists(control_error_file) then
+		return control_error_file
 	end if
 
-	if not file_exists(control_error_file) then
-		-- try tests/t_test/control.err
-		control_error_file = filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "control.err"
+	-- try tests/t_test/control.err
+	control_error_file = base_filename & "control.err"
+	if file_exists(control_error_file) then
+		return control_error_file
 	end if
 
-	if not file_exists(control_error_file) then
-		-- don't try anything
-		control_error_file = 0
-	end if
-	return control_error_file
+	return -1
 end function
 
-function interpret_fail( sequence cmd, sequence filename, object control_error_file, sequence fail_list )
+function interpret_fail( sequence cmd, sequence filename,  sequence fail_list )
 	integer status = system_exec(cmd, 2)
-	integer comparison
+	integer old_length
 	
-	if sequence(control_error_file) then 
-		-- Now we will compare the control error file to the newly created 
-		-- ex.err.  If ex.err doesn't exist or there is no match error()
-		-- is called and we add to the failed list.
-		comparison = length( fail_list )
-		fail_list = check_errors( filename, control_error_file, fail_list )
-		comparison = comparison != length( fail_list )
-	else	
-		-- no control_error_file. thus, there is nothing to compare to we go on as
-		-- if the files matched.
-		comparison = 0
-	end if  -- sequence(control_error_file)
+	-- Now we will compare the control error file to the newly created 
+	-- ex.err.  If ex.err doesn't exist or there is no match error()
+	-- is called and we add to the failed list.
+	old_length = length( fail_list )
+	fail_list = check_errors( filename, fail_list )
 
-	if comparison = 0 then
+	if old_length = length( fail_list ) then
+		-- No new errors found.
 		if status = 0 then
-			-- Here, we were expecting the test to fail.  Yet, we recieved a 0
-			-- error status. This is a failure for we should get some other number
-			-- for errors.
+			-- We were expecting the test program to crash, but it didn't.
 			failed += 1
 			fail_list = append(fail_list, filename)
 			error(filename, E_INTERPRET,
-				"The unit test exited with 0 while we expected a failure.", {})
+				"The unit test did not crash, which was unexpected.", {})
 		else						
-			error(filename, E_NOERROR, "The unit test failed in the expected manner. " &
+			error(filename, E_NOERROR, "The unit test crashed in the expected manner. " &
 				"Error status %d.", {status})
 		end if
-	else
-		-- error() has been called in the previous block if comparsion != 0
 	end if
 	return fail_list
 end function
@@ -469,9 +455,8 @@ function test_file( sequence filename, sequence fail_list )
 	void = delete_file("ex.err")
 	void = delete_file("cw.err")
 	
-	object control_error_file = open_error_file( filename )
 	sequence crash_option = ""
-	if match("t_c_", filename) = 1 or sequence(control_error_file) then
+	if match("t_c_", filename) = 1 then
 		crash_option = " -D CRASH "
 	end if
 	
@@ -481,16 +466,16 @@ function test_file( sequence filename, sequence fail_list )
 
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	
-	integer expected_status = 0
-	if match("t_c_", filename) = 1 or sequence(control_error_file) then
+	integer expected_status
+	if match("t_c_", filename) = 1 then
 		-- We expect this test to fail
 		expected_status = 1
-		fail_list = interpret_fail( cmd, filename, control_error_file, fail_list )
+		fail_list = interpret_fail( cmd, filename, fail_list )
 		
 	else -- not match(t_c_*.e)
 		-- in this branch error() is called once and only once in all sub-branches
-		status = invoke(cmd, filename, E_INTERPRET) -- error() called if status != 0
 		expected_status = 0
+		status = invoke(cmd, filename, E_INTERPRET) -- error() called if status != 0
 
 		if status then
 			failed += 1
