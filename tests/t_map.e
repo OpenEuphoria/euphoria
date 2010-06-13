@@ -7,7 +7,8 @@ include std/filesys.e
 include std/io.e
 include std/math.e
 include std/eumem.e
-
+include std/serialize.e
+include std/datetime.e
 
 object o1, o2, o3
 constant init_small_map_key = -75960.358941
@@ -201,7 +202,19 @@ fhs = open("save_map.raw2", "rb")
 m2 = load_map(fhs)
 close(fhs)
 test_equal("map save #6", 1, map:compare(m1,m2))
-	
+
+-- Tests for invalid saved map format.
+fhs = open("save_map.raw3", "wb")
+puts(fhs, serialize(
+		{0, -- illegal saved map version
+		datetime:format(now_gmt(), "%Y%m%d%H%M%S" ), -- date of this saved map
+		{4,0,0,0}} -- Euphoria version
+	 	))	
+puts(fhs, serialize({}))
+puts(fhs, serialize({}))
+close(fhs)
+test_equal("Bad saved map version", -2, load_map("save_map.raw3"))
+
 map:map m5
 
 -- Test put operations with small maps.
@@ -258,7 +271,7 @@ test_equal( "large put APPEND", {"foo","bar"}, map:get( m5, APPEND, "" ) )
 
 
 map:map city_population
-city_population = new()
+city_population = map:new()
 nested_put(city_population, {"Canada",        "Quebec",    "SmallTown"},        100 )
 nested_put(city_population, {"United States", "California", "Los Angeles"}, 3819951 )
 nested_put(city_population, {"Canada",        "Ontario",    "Toronto"},     2503281 )
@@ -288,8 +301,8 @@ delete(city_population)
 test_false( "delete #2", map:map(city_population))
 
 o2 = map:threshold(20)
-m1 = new(30)
-m2 = new(400)
+m1 = map:new(30)
+m2 = map:new(400)
 for i = 1 to 500 do
 	map:put(m1, i, i)
 	map:put(m2, i, i)
@@ -368,17 +381,17 @@ test_equal("copy w/destination #2", "twenty", map:get(m2, 20))
 test_equal("copy w/destination #3", "thirty", map:get(m2, 30))
 test_equal("copy w/destination #4", "forty", map:get(m2, 40))
 
-map cm1 = new()
-map cm2 = new()
+map cm1 = map:new()
+map cm2 = map:new()
 
 put(cm1, "XY", 1)
 put(cm1, "AB", 2)
 put(cm2, "XY", 3)
 
 -- Add same keys' values.
-copy(cm1, cm2, ADD)
+copy(cm2, cm1, ADD)
 
-test_equal("copy w/destinaion ADD", { {"AB", 2}, {"XY", 4} }, pairs(cm2, 1))
+test_equal("copy w/destination ADD", { {"AB", 2}, {"XY", 4} }, pairs(cm1, 1))
 
 
 write_file("xyz.cfg", `
@@ -436,10 +449,19 @@ function Process_B(object k, object v, object d, integer pc)
 	return 0
 end function
 
+function Process_C(object k, object v, object d, integer pc)
+	if pc > 0 then
+		fer = append(fer, {k,v,d,pc})
+		if pc = 2 then
+			return 1
+		end if
+	end if
+	return 0
+end function
+
 clear(m1)
 -- Empty
 map:for_each(m1, routine_id("Process_B"))
-
 map:put(m1, "application", "Euphoria")
 map:put(m1, "version", "4.0")
 map:put(m1, "genre", "programming language")
@@ -467,6 +489,15 @@ sequence efer = {
 
 test_equal("for_each", efer, fer)
 
+fer = {}
+efer = {
+	{"application", "Euphoria", 0, 1},
+	{"crc", "4F71AE10", 0, 2},
+	$
+}
+-- Sorted
+map:for_each(m1, routine_id("Process_C"), , 1)
+test_equal("for_each", efer, fer)
 
 -- Testing the removal of items from a multi-item bucket
 map:threshold(50)
@@ -487,20 +518,21 @@ map:put(m2, "Special Key", init_small_map_key)
 test_equal("Ensure small map", SMALLMAP, type_of(m2))
 test_equal("small map magic number #1", "Special Key", map:get(m2, init_small_map_key))
 test_equal("small map magic number #2", init_small_map_key, map:get(m2, "Special Key"))
+map:put(m2, init_small_map_key, "Another Special Key")
+test_equal("small map magic number #3", "Another Special Key", map:get(m2, init_small_map_key))
+
+map:clear(m2)
+test_equal("no small map magic number #1", "No Key", map:get(m2, init_small_map_key, "No Key"))
+map:put(m2, "Key1", "1")
+map:put(m2, "Key2", "too")
+test_equal("Ensure small map", SMALLMAP, type_of(m2))
+test_equal("no small map magic number #2", "No Key", map:get(m2, init_small_map_key, "No Key"))
+
 
 -- Copy a small map.
 map:clear(m1)
 map:copy(m2, m1)
 test_equal("compare equality #5", 1, map:compare(m1, m2))
-
---
--- Done with testing
---
-
-delete_file("save_map.txt")
-delete_file("save_map.raw")
-delete_file("save_map.raw2")
-delete_file("xyz.cfg")
 
 m3 = map:new()
 map:put( m3, 1, 1, map:LEAVE )
@@ -513,5 +545,26 @@ map:put( m3, 2, 1, map:APPEND )
 test_equal( "APPEND new entry", {1}, map:get( m3, 2 ) )
 
 map:optimize( m3, 1, 0.5 )
+
+m2 = map:new(map:threshold())	-- Create a small map
+map:put( m2, 1, "ONE", map:APPEND )
+map:put( m2, 2, "TWO", map:CONCAT )
+test_equal("Initial append/concat small", {{1, {"ONE"}}, {2, "TWO"}}, pairs(m2, 1))
+
+m2 = map:new(map:threshold() + 1)	-- Create a large map
+map:put( m2, 1, "ONE", map:APPEND )
+map:put( m2, 2, "TWO", map:CONCAT )
+test_equal("Initial append/concat large", {{1, {"ONE"}}, {2, "TWO"}}, pairs(m2, 1))
+
+
+--
+-- Done with testing
+--
+
+delete_file("save_map.txt")
+delete_file("save_map.raw")
+delete_file("save_map.raw2")
+delete_file("save_map.raw3")
+delete_file("xyz.cfg")
 
 test_report()

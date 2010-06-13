@@ -120,6 +120,7 @@ procedure analyze_coverage()
 		sequence path = dirname( file_name )
 		
 		sequence coverage = repeat( 0, COV_SIZE )
+		integer op
 		
 		coverage[COV_FUNCS] = map:size( routine_map[i] )
 		coverage[COV_FUNCS_TESTED] = sum_coverage( routine_map[i] )
@@ -135,7 +136,12 @@ procedure analyze_coverage()
 		end if
 		
 		map:put( dir_map, path, i, map:APPEND )
-		map:put( dir_coverage, path, coverage, map:ADD )
+		if map:has(dir_coverage, path) then
+			op = map:ADD
+		else
+			op = map:PUT
+		end if
+		map:put( dir_coverage, path, coverage, op )
 		
 	end for
 	

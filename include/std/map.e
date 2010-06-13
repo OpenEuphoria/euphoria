@@ -140,7 +140,7 @@ public enum
 	CONCAT,
 	LEAVE
 
-
+constant INIT_OPERATIONS = {PUT, APPEND, CONCAT, LEAVE}
 --****
 -- === Types of Maps
 
@@ -318,7 +318,6 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	sequence new_val_buckets_
 	object key_
 	object value_
-	integer new_size_
 	sequence temp_map_
 
 	if ram_space[the_map_p][MAP_TYPE] = SMALLMAP then
@@ -327,12 +326,7 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	
 	if requested_bucket_size_p <= 0 then
 		-- grow bucket size_
-		new_size_ = length(ram_space[the_map_p][KEY_BUCKETS])
-		if new_size_ > maxAutoSize then
-				return  -- don't do anything. already too large
-		end if
-		new_size_ = floor(new_size_ * 3.5) + 1
-		size_ = new_size_
+		size_ = floor(length(ram_space[the_map_p][KEY_BUCKETS]) * 3.5) + 1
 	else
 		size_ = requested_bucket_size_p
 	end if
@@ -685,7 +679,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 	integer bucket_
 	atom average_length_
 	integer from_
-	
+
 	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
 		bucket_ = calc_hash(the_key_p,  length(ram_space[the_map_p][KEY_BUCKETS]))
 		index_ = find(the_key_p, ram_space[the_map_p][KEY_BUCKETS][bucket_])
@@ -724,6 +718,9 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			return
 		end if
 
+		if not eu:find(operation_p, INIT_OPERATIONS) then
+				crash("Inappropriate initial operation given to map.e:put()")
+		end if
 		
 		ram_space[the_map_p][IN_USE] += (length(ram_space[the_map_p][KEY_BUCKETS][bucket_]) = 0)
 		ram_space[the_map_p][ELEMENT_COUNT] += 1 -- elementCount
@@ -767,6 +764,10 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		
 		-- Did we find the key?
 		if index_ = 0 then
+			
+			if not eu:find(operation_p, INIT_OPERATIONS) then
+					crash("Inappropriate initial operation given to map.e:put()")
+			end if
 			-- No, so add it.
 			index_ = find(0, ram_space[the_map_p][FREE_LIST])
 			if index_ = 0 then
@@ -774,13 +775,19 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				convert_to_large_map(the_map_p)
 				put(the_map_p, the_key_p, the_value_p, operation_p, trigger_p)
 				return
-			else
-				ram_space[the_map_p][KEY_LIST][index_] = the_key_p
-				ram_space[the_map_p][VALUE_LIST][index_] = the_value_p
-				ram_space[the_map_p][FREE_LIST][index_] = 1
-				ram_space[the_map_p][IN_USE] += 1
-				ram_space[the_map_p][ELEMENT_COUNT] += 1
-				return
+			end if
+			ram_space[the_map_p][KEY_LIST][index_] = the_key_p
+			ram_space[the_map_p][FREE_LIST][index_] = 1
+			ram_space[the_map_p][IN_USE] += 1
+			ram_space[the_map_p][ELEMENT_COUNT] += 1
+			
+			if operation_p = APPEND then
+				operation_p = PUT
+				the_value_p = { the_value_p }
+				
+			elsif operation_p = CONCAT then
+				operation_p = PUT
+				
 			end if
 		end if
 		
@@ -990,7 +997,7 @@ public procedure clear(map the_map_p)
 	else
 		temp_map_[ELEMENT_COUNT] = 0
 		temp_map_[IN_USE] = 0
-		temp_map_[KEY_LIST] = repeat(0, length(temp_map_[KEY_LIST]))
+		temp_map_[KEY_LIST] = repeat(init_small_map_key, length(temp_map_[KEY_LIST]))
 		temp_map_[VALUE_LIST] = repeat(0, length(temp_map_[VALUE_LIST]))
 		temp_map_[FREE_LIST] = repeat(0, length(temp_map_[FREE_LIST]))
 	end if
