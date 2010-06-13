@@ -3,6 +3,8 @@
 include std/unittest.e
 include std/filesys.e
 
+-- doesn't make any sense to bother translating this...
+ifdef not EC then
 sequence eutest = ".." & SLASH &".." & SLASH & "source" & SLASH & "eutest.ex"
 sequence incdir = ".." & SLASH & "include"
 sequence exe    = command_line()
@@ -24,4 +26,6 @@ end for
 
 puts(1, "t_eutest summary:\n")
 set_test_verbosity( TEST_SHOW_ALL )
+end ifdef
+
 test_report()

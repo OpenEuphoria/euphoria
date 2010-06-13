@@ -537,7 +537,7 @@ procedure replace_temp( integer pc )
 	
 	if not inline_temps[temp_num] then
 		if TRANSLATE then
-			inline_temps[temp_num] = new_inline_var( -temp_num )
+			inline_temps[temp_num] = new_inline_var( -temp_num, 0 )
 		else
 			inline_temps[temp_num] = NewTempSym( TRUE )
 -- 			Block_var( inline_temps[temp_num] )
@@ -729,7 +729,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			-- This param is left alone in the routine, but we don't
 			-- want the parser to re-use it as another temp
 			varnum += 1
-			symtab_index var = new_inline_var( s )
+			symtab_index var = new_inline_var( s, 0 )
 			prolog &= {ASSIGN, param, var}
 			if not int_sym then
 				int_sym = NewIntSym( 0 )
@@ -749,7 +749,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			
 			-- make new vars for the privates of the routine
 			varnum += 1
-			symtab_index var = new_inline_var( s )
+			symtab_index var = new_inline_var( s, 0 )
 			proc_vars &= var
 			if int_sym = 0 then
 				int_sym = NewIntSym( 0 )

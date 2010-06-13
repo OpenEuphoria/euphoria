@@ -3164,10 +3164,22 @@ procedure opPLUS1()
 	end if
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
+		integer target_is_int = (not is_temp( Code[pc+3] )) and GType( Code[pc+3] ) = TYPE_INTEGER
+		if target_is_int then
+			c_stmt(sprintf("{ // coercing @ to an integer %d\n", GType(Code[pc+3])), Code[pc+3])
+			target_type = TYPE_INTEGER
+		end if
 		if Code[pc] = PLUS1 then
 			c_stmt("@ = binary_op(PLUS, 1, @);\n", {Code[pc+3], Code[pc+1]})
 		else
 			c_stmt("@ = 1+(long)(DBL_PTR(@)->dbl);\n", {Code[pc+3], Code[pc+1]})
+		end if
+		if target_is_int then
+			-- this could lead to overflow, but you should have found that while interpreting
+			c_stmt("if( !IS_ATOM_INT(@) ){\n", Code[pc+3] )
+			c_stmt("@ = (object)DBL_PTR(@)->dbl;\n", { Code[pc+3], Code[pc+3] })
+			c_stmt0("}\n")
+			c_stmt0("}\n")
 		end if
 	end if
 

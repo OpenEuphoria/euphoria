@@ -1792,7 +1792,6 @@ export function Scanner()
 				ungetch()
 				return {DIVIDE, 0}
 			end if
-
 		elsif class = SINGLE_QUOTE then
 			atom ach = getch()
 			if ach = '\\' then
