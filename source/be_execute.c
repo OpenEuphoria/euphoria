@@ -448,7 +448,7 @@ static object do_peek2(object a, int b, int *pc)
 		else {
 			// signed
 			while (--i >= 0) {
-				top = peek4(peek2_addr);
+				top = (object)(signed short)peek4(peek2_addr);
 				++peek2_addr;
 				if (top < MININT || top > MAXINT)
 					top = NewDouble((double)(long)top);

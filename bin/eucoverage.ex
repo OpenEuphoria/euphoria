@@ -227,7 +227,7 @@ function calc_percent( atom numerator, atom denominator )
 	end if
 end function
 
-regex match_routine = regex:new( `^\s*(?:global\s+|public\s+|export\s+|\s*)(?:function|procedure|type)\s+([a-zA-Z_0-9]+)\s*\(` )
+regex match_routine = regex:new( `^\s*(?:global\s+|public\s+|export\s+|override\s+|\s*)(?:function|procedure|type)\s+([a-zA-Z_0-9]+)\s*\(` )
 regex match_end_routine = regex:new( `^\s*end\s+(?:function|procedure|type)` )
 
 procedure write_file_html( sequence output_dir, integer fx )
@@ -285,6 +285,7 @@ procedure write_file_html( sequence output_dir, integer fx )
 					total_executed += 1
 				end if
 				executed = r_executed
+				
 				
 				routines_executed += 0 != executed
 				total_routines += 1

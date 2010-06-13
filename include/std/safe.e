@@ -128,7 +128,7 @@ constant M_ALLOC = 16,
 		 M_SLEEP = 64
 
 puts(1, "\n\t\tUsing Debug Version of machine.e\n")
-machine_proc(M_SLEEP, 3)
+-- machine_proc(M_SLEEP, 3)
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
@@ -581,7 +581,7 @@ public procedure show_block(sequence block_info)
 			show_byte(i)
 		end if
 	end for 
-	die("")
+	die("safe.e: show_block()")
 end procedure
 
 public procedure check_all_blocks()
@@ -673,18 +673,16 @@ export function prepare_block(int_addr iaddr, positive_int n, natural protection
 	eaddr = iaddr + BORDER_SPACE
 	eu:poke(eaddr+n, trailer)
 	allocation_num += 1
---  if allocation_num = ??? then 
---      trace(1) -- find out who allocated this block number
---  end if
 	safe_address_list = prepend(safe_address_list, {eaddr, n, allocation_num, protection})
 	return eaddr
 end function
 
 -- Internal use of the library only.  free() calls this.  It works with
 -- only atoms and in the unSAFE implementation is different.
-export procedure deallocate(bordered_address a)
+export procedure deallocate(atom a)
 	-- free address a - make sure it was allocated
 	int_addr ia
+	
 	for i = 1 to length(safe_address_list) do
 		if safe_address_list[i][BLOCK_ADDRESS] = a then
 			-- check pre and post block areas
@@ -721,7 +719,9 @@ export procedure deallocate(bordered_address a)
 			return
 		end if
 	end for
-	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
+	if bordered_address( a ) then
+		die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
+	end if
 end procedure
 FREE_RID = routine_id("deallocate")
 
@@ -729,9 +729,9 @@ FREE_RID = routine_id("deallocate")
 export function dep_works()
 	ifdef WINDOWS then
 		return DEP_really_works		
+	elsedef
+		return 0
 	end ifdef
-
-	return 0
 end function
 
 export atom VirtualFree_rid
