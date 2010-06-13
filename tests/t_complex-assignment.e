@@ -7,8 +7,8 @@ include std/unittest.e
 include std/map.e
 include std/os.e as os
 
-function putm(map:map m, object k, object v, integer trigger = 100, object act = map:PUT)
-	map:put(m, k, v, trigger, act)
+function putm(map:map m, object k, object v, object act = map:PUT, integer trigger = 100)
+	map:put(m, k, v, act, trigger)
 	return m
 end function
 

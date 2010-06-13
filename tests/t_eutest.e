@@ -16,8 +16,9 @@ for i = 1 to length( files ) do
 	
 	integer result = system_exec( sprintf("%s -i %s %s %s", 
 		{exe, incdir, eutest, files[i][D_NAME]}), 2 )
-	
-	test_equal( sprintf("eutest %s", {files[i][D_NAME]}), 0, result )
+
+	integer expected = file_exists(	files[i][D_NAME] & ".fail")
+	test_equal( sprintf("eutest %s", {files[i][D_NAME]}), expected, result )
 	
 end for
 
