@@ -43,6 +43,7 @@ test_equal("mid() nested sequence", {{3,4},{5,6}}, mid({{1,2},{3,4},{5,6},{7,8}}
 test_equal("mid() bounds #1", {2,3}, mid({1,2,3}, 2, 50))
 test_equal("mid() bounds #2",{1,2},mid({1,2,3},0,2))
 test_equal("mid() bounds #3",{1,2},mid({1,2,3},1,-1))
+test_equal("mid 1c", "", mid("John", 5, 4)  )
 
 test_equal("slice() string", "Middle", slice("John Middle Doe", 6, 11))
 test_equal("slice() string, zero end", "Middle Doe", slice("John Middle Doe", 6, 0))
@@ -52,6 +53,8 @@ test_equal("slice() nested sequence", {{3,4},{5,6}}, slice({{1,2},{3,4},{5,6},{7
 test_equal("slice() bounds", "Middle Doe", slice("John Middle Doe", 6, 50))
 test_equal("slice() def start", "John ", slice("John Middle Doe", , 5))
 test_equal("slice() def end", "Middle Doe", slice("John Middle Doe", 6))
+test_equal("slice 1c", "it", slice("it", 0, 0))
+test_equal("slice 2c", "", slice("it", 2, 1))
 
 test_equal("tail() string default", "ohn Middle Doe", tail("John Middle Doe"))
 test_equal("tail() string", "Doe", tail("John Middle Doe", 3))
@@ -73,6 +76,7 @@ test_equal("split() using an empty delimiter and limit", {"1","23"}, split("", "
 test_equal("split_any()", {"a", "b", "c"}, split_any("a,b.c", ",."))
 test_equal("split_any() limit", {"a", "b", "c|d"}, split_any("a,b.c|d", ",.|", 2))
 test_equal("split_any() no empty", {"a", "b", "c"}, split_any(",a,,b...c.", ",.",,1))
+test_equal("split_any 1c", {"a","c"}, split_any("abc", 0x62))
 
 test_equal("join() simple string default", "a b c", join({"a", "b", "c"}))
 test_equal("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
@@ -100,11 +104,16 @@ test_equal("remove_all() 1", {2,3,4,3,2}, remove_all(1,{1,2,3,1,4,3,1,2,1}))
 test_equal("remove_all() 2", "Ask what you can do for your country.", 
            remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
 
+test_equal("remove_all 1c", "it", remove_all("s", "it"))
+test_equal("remove_all 2c", "itit", remove_all('s', "sitsit"))
+test_equal("remove_all 3c", "sitsit", remove_all("si", "sitsit"))
+
 test_equal("retain_all", {1,1,3,1,3}, retain_all( {1,3,5}, {1,2,4,1,3,2,4,1,2,3} ))
 test_equal("retain_all no match", {}, retain_all( 7, {1,2,4,1,3,2,4,1,2,3} ))
 test_equal("retain_all all match",{1,2,4,1,3,2,4,1,2,3} , retain_all( {1,2,3,4}, {1,2,4,1,3,2,4,1,2,3} ))
 test_equal("retain_all no objects",{} , retain_all( {}, {1,2,4,1,3,2,4,1,2,3} ))
-           
+test_equal("retain_all 1c", {}, retain_all( {1,3,5}, {} ))
+
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
@@ -243,11 +252,15 @@ test_equal("flatten() nested char delim", "abc,def,g h i", flatten({"abc", "def"
 
 test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
+test_equal("vslice 1c", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
+test_equal("vslice 2c", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1, {}))
+test_equal("vslice 3c", {6}, vslice({{5,1}, {5,2}, {5,3}}, 3, {6}))
 
 test_equal("can_add #1",0,can_add({{1,2},{3,4}},{5,6,7}))
 test_equal("can_add #2",1,can_add({{1,2},{3,4}},{{5,6},7}))
 
 test_equal("linear",{{1,5},{4,8},{7,11},{10,14}},linear({1,5},3,4))
+test_equal("linear 1c", 0, linear({1,2,3},1, -1 ) )
 
 sequence s
 s={0,1,2,3,{"aaa",{{3},{1},{2}},"ccc"},4}
@@ -255,6 +268,9 @@ test_equal("fetch",{2},fetch(s,{5,2,3}))
 test_equal("store",{0,1,2,3,{"aaa",{{3},{1},{98,98,98}},"ccc"},4},store(s,{5,2,3},"bbb"))
 
 test_equal("repeat_pattern",{1,2,1,2,1,2,1,2},repeat_pattern({1,2},4))
+test_equal("repeat_pattern 1c", {}, repeat_pattern("it", 0))
+
+
 sequence vect,coords
 vect={{21,22,23},{4,5,6,7},{8,9,0},{10,-1,-2,-3}}
 coords={{2,1},{1,3},{2}}
@@ -315,6 +331,12 @@ test_not_equal("replace() 2,5 #3a", "/--omeething         ", replace("//somethin
 test_not_equal("replace() 2,5 #3b", "/--eething         ", replace("//something                                            ", "--", 2, 5))
 test_not_equal("replace() 2,5 #3c", " --someething         ", replace(" //something                                           ", "--", 2, 3))
 
+test_equal("reverse 1c", "tegrat", reverse("target", -1))
+test_equal("reverse 2c", "target", reverse("target", 2, 1))
+test_equal("reverse 3c", "tategr", reverse("target", 3, 0))
+test_equal("reverse 4c", "tategr", reverse("target", 3, 7))
+test_equal("reverse 5c", "target", reverse("target", 7))
+
 test_equal("pivot #1", {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}, pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 ))
 test_equal("pivot #2", {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}, pivot( {4, 1, -4, 6, -1, -7, 9, 10} ) )
 test_equal("pivot #3", {{}, {}, {5}}, pivot( 5 ) )
@@ -372,16 +394,18 @@ test_equal("filter STDFLTR_ALPHA", "abc",
 	)
 
 constant data1 = {5,8,20,19,3,2,10}
-	test_equal("filter1", {5,8,3}, filter(data1, "in", {3,4,5,6,7,8}))
-	test_equal("filter2", {20,19,2,10}, filter(data1, "out", {3,4,5,6,7,8}))
+test_equal("filter 1c", {5,8,3}, filter(data1, "in", {3,4,5,6,7,8}))
+test_equal("filter 2c", {20,19,2,10}, filter(data1, "out", {3,4,5,6,7,8}))
+test_equal("filter3c", {}, filter({}, "in"))
 
-	test_equal("sim_index0", 0.08784, round(sim_index("sit", "sin"), 1e5))
-	test_equal("sim_index", 0.32394, round(sim_index("sit", "sat"), 1e5))
-	test_equal("sim_index2", 0.34324, round(sim_index("sit", "skit"), 1e5))
-	test_equal("sim_index3", 0.68293, round(sim_index("sit", "its"), 1e5))
+test_equal("sim_index 0c", 0.08784, round(sim_index("sit", "sin"), 1e5))
+test_equal("sim_index 1c", 0.32394, round(sim_index("sit", "sat"), 1e5))
+test_equal("sim_index 2c", 0.34324, round(sim_index("sit", "skit"), 1e5))
+test_equal("sim_index 3c", 0.68293, round(sim_index("sit", "its"), 1e5))
 
-	test_equal("minsize1", {4,3,6,2,7,1,2,-1,-1,-1}, minsize({4,3,6,2,7,1,2}, 10, -1))
-	test_equal("minsize2", {4,3,6,2,7,1,2}, minsize({4,3,6,2,7,1,2}, 5, -1))
+test_equal("minsize 1c", {4,3,6,2,7,1,2,-1,-1,-1}, minsize({4,3,6,2,7,1,2}, 10, -1))
+test_equal("minsize 2c", {4,3,6,2,7,1,2}, minsize({4,3,6,2,7,1,2}, 5, -1))
+
 
 function quiksort(sequence s)
 	if length(s) < 2 then
@@ -532,6 +556,8 @@ test_equal("columnize #3", {{1,3,5}, {2,4,6}, {-999,-999,7}}, columnize({{1, 2},
 test_equal("columnize #4", {{2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, 2))
 test_equal("columnize #5", {{2,4,6},{1,3,5}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, {2,1}))
 test_equal("columnize #6", {"adg", "beh", "cfi"}, columnize({"abc", "def", "ghi"}))
+test_equal("columnize 1c", {"adg", "beh", "cfi" }, columnize({"abc", "def", "ghi"}) )
+test_equal("columnize 2c", {"ac", {'d',0}}, columnize({"ad", "c"}) )
 
 
 
@@ -552,9 +578,12 @@ test_equal("combine #2s", {0,2,4,4,5,5,5,6,7,7,9,9}, combine({ {4,7,9}, {7,2,5,9
 test_equal("combine #2u", {4,7,9,7,2,5,9,0,4,5,6,5}, combine({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}, COMBINE_UNSORTED))
 test_equal("combine #3s", "aaacdeffghhiilllmnooorsstwww", combine({"cat", "dog","fish", "whale", "wolf", "snail", "worm"}))
 test_equal("combine #3u", "catdogfishwhalewolfsnailworm", combine({"cat", "dog","fish", "whale", "wolf", "snail", "worm"}, COMBINE_UNSORTED))
+test_equal("combine 1c", {}, combine(""))
+test_equal("combine 2c", '1', combine("1"))
 
 -- transforming
 test_equal("transform", "HELLA", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper"), {routine_id("replace_all"), "O", "A"}}))
+test_equal("transform 1c", "HELLO", transform("hello",routine_id("upper")))
 
 -- mapping
 test_equal("mapping A", "ThE CAt In thE HAt", mapping("The Cat in the Hat", "aeiou", "AEIOU"))
@@ -566,6 +595,9 @@ test_equal("mapping E", "312", mapping({"one", "two", "three"}, {"two", "three",
 -- remove_item
 test_equal("remove_item #1", {3,4,2}, remove_item( 1, {3,4,2,1} ))
 test_equal("remove_item #2", {3,4,2,1}, remove_item( 5, {3,4,2,1} ))
+test_equal("remove_item 1c", "itsit", remove_item('s', "sitsit"))
+test_equal("remove_item 2c", "itit", remove_item('s', "itsit"))
+
 
 test_report()
 
