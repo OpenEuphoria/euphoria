@@ -830,37 +830,68 @@ public function clear_directory(sequence path, integer recurse = 1)
 	if atom(files) then
 		return 0
 	end if
-	if length( files ) < 3 then
-		return 0 -- Supplied name was not a directory
-	end if
-	if not equal(files[1][D_NAME], ".") then
-		return 0 -- Supplied name was not a directory
-	end if
-	if not eu:find('d', files[1][D_ATTRIBUTES]) then
-		return 0 -- Supplied name was not a directory
-	end if
-		
+	
+	ifdef WINDOWS then
+		if length( files ) < 3 then
+			return 0 -- Supplied name was not a directory
+		end if
+		if not equal(files[1][D_NAME], ".") then
+			return 0 -- Supplied name was not a directory
+		end if
+		if not eu:find('d', files[1][D_ATTRIBUTES]) then
+			return 0 -- Supplied name was not a directory
+		end if
+	elsedef
+		if length( files ) < 2 then
+			return 0 -- not a directory
+		end if
+	end ifdef
+	
 	ret = 1
 	path &= SLASH
 	
-	for i = 3 to length(files) do
-		if eu:find('d', files[i][D_ATTRIBUTES]) then
-			if recurse then
-				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
-				if cnt = 0 then
+	ifdef WINDOWS then
+		for i = 3 to length(files) do
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+				if recurse then
+					integer cnt = clear_directory(path & files[i][D_NAME], recurse)
+					if cnt = 0 then
+						return 0
+					end if
+					ret += cnt
+				else
+					continue
+				end if
+			else
+				if delete_file(path & files[i][D_NAME]) = 0 then
 					return 0
 				end if
-				ret += cnt
-			else
+				ret += 1
+			end if
+		end for
+	elsedef
+		for i = 1 to length(files) do
+			if files[i][D_NAME][1] = '.' then
 				continue
 			end if
-		else
-			if delete_file(path & files[i][D_NAME]) = 0 then
-				return 0
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+				if recurse then
+					integer cnt = clear_directory(path & files[i][D_NAME], recurse)
+					if cnt = 0 then
+						return 0
+					end if
+					ret += cnt
+				else
+					continue
+				end if
+			else
+				if delete_file(path & files[i][D_NAME]) = 0 then
+					return 0
+				end if
+				ret += 1
 			end if
-			ret += 1
-		end if
-	end for
+		end for
+	end ifdef
 	return ret
 end function
 
@@ -916,36 +947,59 @@ public function remove_directory(sequence dir_name, integer force=0)
 	if atom(files) then
 		return 0
 	end if
-	if length( files ) <= 2 then
-		return 0	-- Supplied dir_name was not a directory
-	end if
-	if not equal(files[1][D_NAME], ".") then
-		return 0 -- Supplied name was not a directory
-	end if
-	if not eu:find('d', files[1][D_ATTRIBUTES]) then
-		return 0 -- Supplied name was not a directory
-	end if
-	
-	if length(files) > 2 then
-		if not force then
-			return 0 -- Directory is not already emptied.
+	ifdef WINDOWS then
+		if length( files ) <= 2 then
+			return 0	-- Supplied dir_name was not a directory
 		end if
-	end if
-		
-	dir_name &= SLASH
 	
-	for i = 3 to length(files) do
-		if eu:find('d', files[i][D_ATTRIBUTES]) then
-			ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
-		else
-			ret = delete_file(dir_name & files[i][D_NAME])
+		if not equal(files[1][D_NAME], ".") then
+			return 0 -- Supplied name was not a directory
 		end if
-		if not ret then
+		if not eu:find('d', files[1][D_ATTRIBUTES]) then
+			return 0 -- Supplied name was not a directory
+		end if
+		for i = 1 to length( files ) do
+			printf(1, "file[%d] %s\n", {i,files[i][D_NAME]})
+		end for
+		if length(files) > 2 then
+			if not force then
+				return 0 -- Directory is not already emptied.
+			end if
+		end if
+	elsedef
+		if length( files ) < 2 then
 			return 0
 		end if
-
-	end for
+	end ifdef
 	
+	dir_name &= SLASH
+	ifdef WINDOWS then
+		for i = 3 to length(files) do
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
+			else
+				ret = delete_file(dir_name & files[i][D_NAME])
+			end if
+			if not ret then
+				return 0
+			end if
+
+		end for
+		elsedef
+		for i = 1 to length(files) do
+			if files[i][D_NAME][1] = '.' then
+				continue
+			end if
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+					ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
+			else
+				ret = delete_file(dir_name & files[i][D_NAME])
+			end if
+			if not ret then
+				return 0
+			end if
+		end for
+	end ifdef
 	pname = allocate_string(dir_name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
