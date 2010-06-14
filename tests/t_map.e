@@ -536,10 +536,11 @@ test_equal("compare equality #5", 1, map:compare(m1, m2))
 
 m3 = map:new()
 map:put( m3, 1, 1, map:LEAVE )
-test_true( "LEAVE add when doesn't exist", map:has( m3, 1 ) )
+test_false( "LEAVE doesn't affect the map #1", map:has( m3, 1 ) )
 
+map:put( m3, 1, 1, map:ADD )
 map:put( m3, 1, 2, map:LEAVE )
-test_equal( "LEAVE doesn't change existing value", 1, map:get( m3, 1 ) )
+test_equal( "LEAVE doesn't affect map #2", 1, map:get( m3, 1 ) )
 
 map:put( m3, 2, 1, map:APPEND )
 test_equal( "APPEND new entry", {1}, map:get( m3, 2 ) )

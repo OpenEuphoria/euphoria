@@ -136,12 +136,7 @@ procedure analyze_coverage()
 		end if
 		
 		map:put( dir_map, path, i, map:APPEND )
-		if map:has(dir_coverage, path) then
-			op = map:ADD
-		else
-			op = map:PUT
-		end if
-		map:put( dir_coverage, path, coverage, op )
+		map:put( dir_coverage, path, coverage, map:ADD )
 		
 	end for
 	

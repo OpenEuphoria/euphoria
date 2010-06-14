@@ -140,7 +140,7 @@ public enum
 	CONCAT,
 	LEAVE
 
-constant INIT_OPERATIONS = {PUT, APPEND, CONCAT, LEAVE}
+constant INIT_OPERATIONS = {PUT, APPEND, CONCAT, ADD, SUBTRACT, LEAVE}
 --****
 -- === Types of Maps
 
@@ -721,9 +721,9 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		if not eu:find(operation_p, INIT_OPERATIONS) then
 				crash("Inappropriate initial operation given to map.e:put()")
 		end if
-		
-		ram_space[the_map_p][IN_USE] += (length(ram_space[the_map_p][KEY_BUCKETS][bucket_]) = 0)
-		ram_space[the_map_p][ELEMENT_COUNT] += 1 -- elementCount
+		if operation_p = LEAVE then
+			return
+		end if
 		
 		
 		-- write new entry
@@ -732,7 +732,8 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			the_value_p = { the_value_p }
 		end if
 
-
+		ram_space[the_map_p][IN_USE] += (length(ram_space[the_map_p][KEY_BUCKETS][bucket_]) = 0)
+		ram_space[the_map_p][ELEMENT_COUNT] += 1 -- elementCount		
 		ram_space[the_map_p][KEY_BUCKETS][bucket_] = append(ram_space[the_map_p][KEY_BUCKETS][bucket_], the_key_p)
 		ram_space[the_map_p][VALUE_BUCKETS][bucket_] = append(ram_space[the_map_p][VALUE_BUCKETS][bucket_], the_value_p)
 				
@@ -776,18 +777,17 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				put(the_map_p, the_key_p, the_value_p, operation_p, trigger_p)
 				return
 			end if
+			
 			ram_space[the_map_p][KEY_LIST][index_] = the_key_p
 			ram_space[the_map_p][FREE_LIST][index_] = 1
 			ram_space[the_map_p][IN_USE] += 1
 			ram_space[the_map_p][ELEMENT_COUNT] += 1
 			
 			if operation_p = APPEND then
-				operation_p = PUT
 				the_value_p = { the_value_p }
-				
-			elsif operation_p = CONCAT then
-				operation_p = PUT
-				
+			end if
+			if operation_p != LEAVE then
+				operation_p = PUT	-- Initially, nearly everything is a PUT.
 			end if
 		end if
 		
