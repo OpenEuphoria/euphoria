@@ -169,10 +169,6 @@ test_equal("lookup2c", {{2 ,2 ,1}}  ,  --example wrong?
 test_equal("lookup3c", {{3,2}, {3,1}, {2}} ,
 	find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_BACKWARD + NESTED_ALL, routine_id("fnfind"))
   )
-	-- -1 bad choice for default no routine_id, could mask typo
-test_equal("lookup4c-1", {{3,2}, {3,1}, {2}}  ,
-	find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_BACKWARD + NESTED_ALL, routine_id("ffind"))
-  )
 
 
 test_report()

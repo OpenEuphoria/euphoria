@@ -1517,7 +1517,7 @@ end function
 --
 -- Example 2:
 -- <eucode>
--- s = remove_all("x", "I'm toox secxksy for my shixrt.")
+-- s = remove_all('x', "I'm toox secxksy for my shixrt.")
 -- -- s is "I'm too secksy for my shirt."
 -- </eucode>
 --

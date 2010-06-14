@@ -486,7 +486,7 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- See Also:
 --   [[:dir]], [[:sort]], [[:sort_columns]]
 
-public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = -1)
+public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = NO_ROUTINE_ID)
 	object d, abort_now
 	object orig_func
 	sequence user_data = {path_name, 0}
@@ -506,7 +506,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	end if
 
 	-- get the full directory information
-	if not equal(dir_source, -1) then
+	if not equal(dir_source, NO_ROUTINE_ID) then
 		if atom(source_orig_func) then
 			d = call_func(dir_source, {path_name})
 		else

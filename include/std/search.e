@@ -9,6 +9,7 @@ namespace search
 -- <<LEVELTOC depth=2>>
 
 include std/error.e
+include std/types.e
 
 --****
 -- === Equality
@@ -251,6 +252,7 @@ public constant
     NESTED_INDEX=4,
     NESTED_BACKWARD=8
 
+
 --**
 -- Find any object (among a list) in a sequence of arbitrary shape at arbitrary nesting.
 --
@@ -303,7 +305,7 @@ public constant
 -- See Also:
 -- [[:find]], [[:rfind]], [[:find_any]], [[:fetch]]
 
-public function find_nested(object needle, sequence haystack, integer flags=0, integer rtn_id=-1)
+public function find_nested(object needle, sequence haystack, integer flags=0, integer rtn_id=NO_ROUTINE_ID)
 	sequence occurrences = {} -- accumulated results
 	integer depth = 0
 	sequence branches = {}, indexes = {}, last_indexes = {} -- saved states
@@ -323,7 +325,7 @@ public function find_nested(object needle, sequence haystack, integer flags=0, i
 	        x = haystack[current_idx]
 	        
 	        -- is x what we want?
-			if rtn_id <= -1 then
+			if rtn_id = NO_ROUTINE_ID then
 	         	if any then
 	         		rc = find(x, needle)
 	         	else

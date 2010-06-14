@@ -1101,3 +1101,14 @@ public type string( object x )
 	end for
 	return 1
 end type
+
+--**
+-- value returned from [[:routine_id]]()
+-- when the routine doesm't exist or is out of scope.
+-- this is typically seen as -1 in legacy code.
+public constant INVALID_ROUTINE_ID = routine_id("INVALID_ROUTINE_ID")
+
+--**
+-- to be used as a flag for no [[:routine_id]]() supplied.
+public constant NO_ROUTINE_ID = -99999
+
