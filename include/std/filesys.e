@@ -958,9 +958,6 @@ public function remove_directory(sequence dir_name, integer force=0)
 		if not eu:find('d', files[1][D_ATTRIBUTES]) then
 			return 0 -- Supplied name was not a directory
 		end if
-		for i = 1 to length( files ) do
-			printf(1, "file[%d] %s\n", {i,files[i][D_NAME]})
-		end for
 		if length(files) > 2 then
 			if not force then
 				return 0 -- Directory is not already emptied.
