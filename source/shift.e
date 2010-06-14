@@ -307,11 +307,6 @@ procedure shift_switch( integer pc, integer start, integer amount )
 		end if
 	end if
 	
-	if start < pc or start > addr then
-		-- doesn't affect the switch jumps
-		return
-	end if
-	
 	sequence jump = SymTab[Code[pc+3]][S_OBJ]
 	for i = 1 to length(jump) do
 		if start > pc and start < pc + jump[i] then

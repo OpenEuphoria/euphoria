@@ -864,6 +864,7 @@ struct IL fe;
 #define SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
 
 #define SET_JUMP(word) ((int *)(&code[(int)(word)]))
+#define JUMP_INDEX(word) (((int*)word) - ((symtab_ptr)expr_top[-1])->u.subp.code)
 
 void code_set_pointers(int **code)
 /* adjust code pointers, changing some indexes into pointers */
