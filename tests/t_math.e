@@ -3,12 +3,17 @@ include std/math.e
 include std/unittest.e
 
 test_equal("gcd", 17, gcd(1999*3*17,1993*17*7))
-  
+test_equal("gcd 1c ", 1,  gcd(-4, -1)  )
+
 test_equal("is_even #1", 1, is_even(12) )
 test_equal("is_even #2", 0, is_even(7) )
 test_equal("is_even_obj", {1,0}, is_even_obj({2,3}) )
+test_not_equal("is_even_obj 1c ", 0,  is_even_obj(4.0)  )
+test_equal("is_even_obj 2c ", 0,  is_even_obj(4.1)  )
 
 test_equal("or_all", and_bits(#DEADBEE5,-1), or_all({#D000_0000,#0E00_0000,#00AD0000,#BEE5}))
+test_equal("or_all 1c ", 1,  or_all(1) )
+test_equal("or_all 2c ", 7,  or_all({1, {2,4}}) )
 
 test_equal("ceil() integer", 5, ceil(5))
 test_equal("ceil() float #1", 4, ceil(4.0))
@@ -29,6 +34,7 @@ test_equal("round() (default) float #1", 5, round(4.6))
 test_equal("round() (default) float #2", 5, round(4.5))
 test_equal("round() (default) float #3", 4, round(4.4))
 test_equal("round() (default) sequence", {1,2,3,4}, round({0.5, 2.1, 2.9, 3.6}))
+test_equal("round 1c ", "1234",  round("1234", "xxxx" ) )
 
 test_equal("sign() integer #1", 1, sign(10))
 test_equal("sign() integer #2", -1, sign(-10))
@@ -52,6 +58,7 @@ test_equal("sum() two sequences",
     {2,4,5,6,    2,2.2,{6.3},    1.1,0.4,{3.6},   {2},{2.2},{6.3},  {6},#C000001}, 
     {1,4,2,3,    1,2  ,3    ,    0.1,0.2, 0.3,    {1},{2},  {3},    {2},#C000000} 
   + {1,0,3,3,    1,0.2,{3.3},      1,0.2,{3.3},    1, 0.2,  {3.3},  {4},       1} ) 
+test_equal("sum 1c ", 7,   sum({1, {2,4}}) )
 
 test_equal("min() integer", 5, min(5))
 test_equal("min() sequence", 3, min({5,8,3,100,32}))
@@ -133,6 +140,7 @@ test_equal ("mod() #10", -33.218, mod(-a,-n))
 test_equal("product:6!", 720, product({1,2,3,4,5,6}))
 test_equal("product(1)",   1, product({}))
 test_equal("product deep sequence", 100, product({{2,5},{2,5}}))
+test_equal("product 1c ", 4,  product(4.0)  )
 
 
 test_equal("rem() #1", sign(a)  * 33.218, remainder( a, n))
@@ -186,6 +194,9 @@ test_equal("tanh", 0.46211715726000975850231848364367, tanh(0.5))
 test_equal("arctanh", log(3)/2, arctanh(0.5))
 test_equal("arccos", 0, arccos(1.0) )
 test_equal("arcsin", HALFPI, arcsin(1.0) )
+test_equal("trig_range 1c ", {1.104, {1.104}}, round(arccos({.45, {.45}}), 1e4)  )
+test_equal("abs_below_1 1c ", {.4847, {.4847}}, round(arctanh({.45, {.45}}), 1e4)  )
+test_equal("not_below_1 1c ", {0.9163, {.9163}}, round(arccosh({1.45, {1.45}}), 1e4)  )
 
 
 
