@@ -195,24 +195,36 @@ public function char_test(object test_data, sequence char_set)
 	if integer(test_data) then
 		if sequence(char_set[1]) then
 			for j = 1 to length(char_set) do
-				if test_data >= char_set[j][1] and test_data <= char_set[j][2] then return TRUE end if
+				if test_data >= char_set[j][1] and test_data <= char_set[j][2] then 
+					return TRUE 
+				end if
 			end for
 			return FALSE
 		else
 			return find(test_data, char_set) > 0
 		end if
 	elsif sequence(test_data) then
-		if length(test_data) = 0 then return FALSE end if
+		if length(test_data) = 0 then 
+			return FALSE 
+		end if
 		for i = 1 to length(test_data) label "NXTCHR" do
-			if sequence(test_data[i]) then return FALSE end if
-			if not integer(test_data[i]) then return FALSE end if
+			if sequence(test_data[i]) then 
+				return FALSE
+			end if
+			if not integer(test_data[i]) then 
+				return FALSE
+			end if
 			lChr = test_data[i]
 			if sequence(char_set[1]) then
 				for j = 1 to length(char_set) do
-					if lChr >= char_set[j][1] and lChr <= char_set[j][2] then continue "NXTCHR" end if
+					if lChr >= char_set[j][1] and lChr <= char_set[j][2] then
+						continue "NXTCHR" 
+					end if
 				end for
 			else
-				if find(lChr, char_set) > 0 then continue "NXTCHR" end if
+				if find(lChr, char_set) > 0 then
+					continue "NXTCHR"
+				end if
 			end if
 			return FALSE
 		end for
