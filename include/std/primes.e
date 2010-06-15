@@ -47,6 +47,7 @@ sequence list_of_primes  = {2,3} -- Initial seedings.
 --
 -- See Also:
 --		[[:next_prime]] [[:prime_list]]
+
 public function calc_primes(integer max_p, atom time_limit_p = 10)
 	sequence result_
 	integer candidate_
@@ -56,12 +57,13 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 	integer maxf_
 	integer maxf_idx
 	integer next_trigger
+	integer growth
 
 	-- First we check to see if we have already got the requested value.	
 	if max_p <= list_of_primes[$] then
 		pos_ = binary_search(max_p, list_of_primes)
 		if pos_ < 0 then
-			pos_ = (-pos_) + 1
+			pos_ = (-pos_)
 		end if
 		-- Already got it.
 		return list_of_primes[1..pos_]
@@ -84,7 +86,11 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 	
 	-- Pre-allocate space for the new values. This allocates more than we will
 	-- need so the return value takes a slice up to the last stored prime.
-	result_ = list_of_primes & repeat(0, floor(max_p  / 3.5) - length(list_of_primes))
+	growth = floor(max_p  / 3.5) - length(list_of_primes)
+	if growth <= 0 then
+		growth = length(list_of_primes)
+	end if
+	result_ = list_of_primes & repeat(0, growth)
 
 	-- Calculate when we must stop running. A negative value is really equivalent
 	-- to a little over three years from now.
