@@ -62,8 +62,8 @@ test_equal("smallest integers and text", 1,  smallest( {7,2,8,5,6,6,4,8,6,6,3,3,
 test_equal("smallest text", {}, smallest( {"just", "text"} ) )
 test_equal("smallest atom", 6.2, smallest( 6.2 ) )
 
-test_equal("skewness #1", -1.296820819, skewness("the cat is the hatter")) --> -1.296820819 
-test_equal("skewness #2", 0.1029393238, skewness("thecatisthehatter") )    --> 0.1029393238 
+test_equal("skewness #1", -1.36166186, skewness("the cat is the hatter"))
+test_equal("skewness #2", 0.1093730315, skewness("thecatisthehatter") ) 
 test_equal("skewness atom", 5.9, skewness( 5.9 ) )
 test_equal("skewness no data", {}, skewness( {} ) )
 
@@ -117,9 +117,9 @@ test_equal( "kurtosis atom", 5, kurtosis( 5 ) )
 test_equal( "kurtosis empty", {0}, kurtosis( {} ) )
 test_equal( "kurtosis sd = 0", {1}, kurtosis( {1, 1} ) )
 
-test_equal( "exp moving average #1",  {5.25,2.8125,6.703125,5.42578125,5.856445313}, movavg( {7,2,8,5,6}, 0.75 )  )
-test_equal( "exp moving average #2",  {1.75,1.8125,3.359375,3.76953125,4.327148438} , emovavg( {7,2,8,5,6}, 0.25 )  )
-test_equal( "exp moving average #3",  {2.333333333,2.222222222,4.148148148,4.432098765,4.95473251} , emovavg( {7,2,8,5,6}, -1 )   )
+test_equal( "exp moving average #1",  {6.65,3.1625,6.790625,5.44765625,5.861914063}, emovavg( {7,2,8,5,6}, 0.75 )  )
+test_equal( "exp moving average #2",  {5.95,4.9625,5.721875,5.54140625,5.656054687} , emovavg( {7,2,8,5,6}, 0.25 )  )
+test_equal( "exp moving average #3",  {6.066666667,4.711111111,5.807407407,5.538271605,5.69218107} , emovavg( {7,2,8,5,6}, -1 )   )
 test_equal( "exp moving average atom", {3}, emovavg( 3, 0.5 ) )
 test_equal( "exp moving average no data", {}, emovavg( {}, 0.5 ) )
 

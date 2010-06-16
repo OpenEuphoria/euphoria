@@ -851,11 +851,11 @@ end function
 -- Example 1:
 --   <eucode>
 --   ? emovavg( {7,2,8,5,6}, 0.75 ) 
---    -- Ans: {5.25,2.8125,6.703125,5.42578125,5.856445313}
+--    -- Ans: {6.65,3.1625,6.790625,5.44765625,5.861914063}
 --   ? emovavg( {7,2,8,5,6}, 0.25 ) 
---    -- Ans: {1.75,1.8125,3.359375,3.76953125,4.327148438}
+--    -- Ans: {5.95,4.9625,5.721875,5.54140625,5.656054687}
 --   ? emovavg( {7,2,8,5,6}, -1 ) 
---    -- Ans: {2.333333333,2.222222222,4.148148148,4.432098765,4.95473251}
+--    -- Ans: {6.066666667,4.711111111,5.807407407,5.538271605,5.69218107}
 --   </eucode>
 --
 -- See also:
@@ -863,7 +863,6 @@ end function
 
 public function emovavg(object data_set, atom smoothing_factor)
 	atom lPrev
-	
 	if atom(data_set) then
 		data_set = {data_set}
 		
@@ -1236,8 +1235,8 @@ end function
 --
 -- Example 1:
 --   <eucode>
--- ? skewness("the cat is the hatter") --> -1.296820819
--- ? skewness("thecatisthehatter")     --> 0.1029393238
+-- ? skewness("the cat is the hatter") --> -1.36166186
+-- ? skewness("thecatisthehatter")     --> 0.1093730315
 --   </eucode>
 --
 -- See also:
@@ -1257,7 +1256,7 @@ public function skewness(object data_set, object subseq_opt = ST_ALLNUM)
 	return sum_central_moments(data_set, 3) / ((length(data_set) - 1) * power(stdev(data_set), 3))
 	
 end function
- 
+
 --**
 -- Returns a measure of the spread of values in a dataset when compared to a 
 -- //normal// probability curve. 
