@@ -22,6 +22,7 @@ sequence line_map      = {}
 sequence routine_map   = {}
 sequence files         = {}
 sequence file_coverage = {}
+sequence short_names   = {}
 
 map dir_coverage
 map dir_map
@@ -160,7 +161,7 @@ procedure output_dir( sequence name )
 		end if
 	end if
 	
-	atom css = open( name & "/coverage.css", "w", 1 )
+	atom css = open( name & SLASH & "coverage.css", "w", 1 )
 	puts( css, CSS )
 end procedure
 	
@@ -169,6 +170,7 @@ constant HEADER =`
    "http://www.w3.org/TR/html4/strict.dtd">
 <HTML>
   <HEAD>
+    <TITLE>%s</TITLE>
     <LINK href="coverage.css" rel="stylesheet" type="text/css">
   </HEAD>
   <BODY>
@@ -201,6 +203,9 @@ constant FILE_SUMMARY_ROW = `
 	<tr class="%s"><td><a href="%s">%s</a></td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td></tr>
 `
 
+constant FILE_SUMMARY_ROW_NO_LINK = `
+	<tr class="%s"><td>%s</td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td></tr>
+`
 -- row class, name, name, executed, total, percent executed
 constant ROUTINE_SUMMARY_ROW = `
 	<tr class="%s"><td><a href="#%s">%s()</a></td><td class="num">%d</td><td class="num">%d</td><td class="num">%0.2f%%</td><td class="num">%d</td></tr>
@@ -231,7 +236,7 @@ procedure write_file_html( sequence output_dir, integer fx )
 		return
 	end if
 		
-	sequence html_name = output_dir & encode( files[fx] ) & ".html"
+	sequence html_name = output_dir & encode( short_names[fx] ) & ".html"
 	atom out = open( html_name, "w", 1 )
 	
 	sequence source_lines = {}
@@ -309,7 +314,7 @@ procedure write_file_html( sequence output_dir, integer fx )
 	
 	file_coverage[fx][COV_FUNCS] = total_routines
 	file_coverage[fx][COV_LINES_TESTED] = total_executed
-	puts( out, HEADER )
+	printf( out, HEADER, { short_names[fx] } )
 	
 	
 	atom percent
@@ -319,7 +324,7 @@ procedure write_file_html( sequence output_dir, integer fx )
 	puts( out, "<table><tr><td>Name</td><td>Executed</td><td>Routines</td><td><span style='margin-left:3em;'>%</span>" &
 				"</td><td>Executed</td><td>Lines</td><td><span style='margin-left:3em;'>%</span></td><td>Unexecuted</td></tr>\n" )
 	
-	printf( out, FILE_SUMMARY_ROW, { "", html_name, files[fx], 
+	printf( out, FILE_SUMMARY_ROW_NO_LINK, { "", short_names[fx], 
 		routines_executed, map:size( routine_lines ), calc_percent( routines_executed, total_routines ),
 		total_executed, total_lines, calc_percent( total_executed, total_lines ),
 		total_lines - total_executed})
@@ -365,7 +370,7 @@ procedure write_file_html( sequence output_dir, integer fx )
 end procedure
 
 procedure write_summary( sequence output_directory )
-	atom out = open( output_directory & "/index.html", "w", 1 )
+	atom out = open( output_directory & SLASH & "index.html", "w", 1 )
 	
 	integer total_lines             = 0
 	integer total_lines_executed    = 0
@@ -387,9 +392,9 @@ procedure write_summary( sequence output_directory )
 		total_routines_executed += coverage[COV_FUNCS_TESTED]
 		
 		total_files_executed    += 0 != coverage[COV_LINES_TESTED]
-		sequence html_name = "files/" & encode( encode( files[i] ) ) & ".html"
-		file_data[i] = { coverage[COV_LINES_TESTED] - coverage[COV_LINES], files[i], html_name,
-			files[i], 
+		sequence html_name = "files/" & encode( encode( short_names[i] ) ) & ".html"
+		file_data[i] = { coverage[COV_LINES_TESTED] - coverage[COV_LINES], short_names[i], html_name,
+			short_names[i], 
 			coverage[COV_FUNCS_TESTED], coverage[COV_FUNCS], routine_percent,
 			coverage[COV_LINES_TESTED], coverage[COV_LINES], line_percent,
 			coverage[COV_LINES] - coverage[COV_LINES_TESTED]}
@@ -400,7 +405,7 @@ procedure write_summary( sequence output_directory )
 	
 	file_data = sort( file_data )
 	
-	puts( out, HEADER )
+	printf( out, HEADER, { "Coverage Summary" } )
 	
 	puts( out, "<div class='summary_header'>COVERAGE SUMMARY</div>\n" )
 	puts( out, "<table style='border-spacing: 4px;'><tr><td>Files</td><td>Routines</td><td>Lines</td><td>Unexecuted</td></tr>\n" )
@@ -433,18 +438,54 @@ procedure write_summary( sequence output_directory )
 	puts( out, FOOTER )
 end procedure
 
+function get_common( sequence a, sequence b )
+	integer len = 1
+	while len <= length(a) and len <= length(b) do
+		if a[len] != b[len] then
+			exit
+		end if
+		len += 1
+	end while
+	return a[1..len-1]
+end function
+
+procedure shorten_names()
+	
+	if not length(files) then
+		return
+	end if
+	sequence common = files[1]
+	for i = 2 to length(files) do
+		common = get_common( common, files[i] )
+	end for
+	
+	integer size = length( common )
+	if length(common) and common[$] != SLASH then
+		while size and common[size] != SLASH do
+			size -= 1
+		end while
+	end if
+	
+	for i = 1 to length( files ) do
+		short_names = append( short_names, remove( files[i], 1, size ) )
+	end for
+end procedure
+
 procedure write_html()
+	shorten_names()
 	if equal( output_directory, "" ) then
-		output_directory = dirname( coverage_db_name ) & '/' & filebase( coverage_db_name )
+		output_directory = dirname( coverage_db_name ) & SLASH & filebase( coverage_db_name )
 	end if
 	
 	output_dir( output_directory )
 	
-	sequence files_dir = output_directory & "/files"
+	sequence files_dir = output_directory & SLASH & "files"
 	output_dir( files_dir )
 	
-	output_directory &= '/'
-	files_dir &= '/'
+	output_directory &= SLASH
+	files_dir &= SLASH
+	
+	
 	
 	for i = 1 to length( files ) do
 		write_file_html( files_dir, i )
