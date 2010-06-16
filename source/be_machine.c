@@ -17,7 +17,7 @@
 #include <stdlib.h>
 
 #ifdef EUNIX
-
+#define __USE_LARGEFILE64
 #include <strings.h>
 #define stricmp strcasecmp
 
@@ -26,9 +26,11 @@
 #else
 #include <sys/mman.h>
 #endif
+
 #ifdef EGPM
 #include <gpm.h>
 #endif
+
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -1345,7 +1347,7 @@ static object Dir(object x)
 
 	DIR *dirp;
 	int r;
-	struct stat stbuf;
+	struct stat64 stbuf;
 	struct tm *date_time;
 #if defined(EMINGW)
 #define full_name_size (MAX_FILE_NAME + 257)
@@ -1393,7 +1395,7 @@ static object Dir(object x)
 		if (dirp != NULL) {
 			snprintf(full_name, full_name_size, "%s/%s", path, direntp->d_name);
 			full_name[full_name_size] = 0; // ensure NULL
-			r = stat(full_name, &stbuf);
+			r = stat64(full_name, &stbuf);
 		}
 		if (r == -1) {
 			obj_ptr[3] = 0;
@@ -1408,10 +1410,11 @@ static object Dir(object x)
 			if ((stbuf.st_mode & S_IFMT) == S_IFDIR)
 				Append(temp, *temp, MAKE_INT('d'));
 
-			obj_ptr[3] = stbuf.st_size;
-			if ((unsigned)obj_ptr[3] > (unsigned)MAXINT) {
-				// file size over 1Gb
-				obj_ptr[3] = NewDouble((double)(unsigned)obj_ptr[3]);
+			if( stbuf.st_size > MAXINT ){
+				obj_ptr[3] = NewDouble( (double) stbuf.st_size );
+			}
+			else{
+				obj_ptr[3] = (object) stbuf.st_size;
 			}
 
 			date_time = localtime(&stbuf.st_mtime);
