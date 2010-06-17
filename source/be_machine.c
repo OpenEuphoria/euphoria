@@ -2721,8 +2721,10 @@ object machine(object opcode, object x)
 				return user_allocate(x);
 				break;
 			case M_FREE:
-				addr = get_pos_int("free", x);
-				if (addr != NULL) {
+				addr = (unsigned)get_pos_int("free", x);
+//				addr = get_pos_int("free", x);
+				if (((char *)addr) != NULL) {
+//				if (addr != NULL) {
 					EFree((char *)addr);
 				}
 				return ATOM_0;
