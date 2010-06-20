@@ -50,7 +50,7 @@ end function
 sequence cl = command_line()
 htmlfd = open_or_die(cl[$-1],"r")
 jsfd   = open_or_die(cl[$],"w")
-templfd = open_or_die(`..\docs\search-template.js`,"r")
+templfd = open_or_die(`../docs/search-template.js`,"r")
 line = gets(htmlfd)
 count = 0
 dictionary = map:new(3000)

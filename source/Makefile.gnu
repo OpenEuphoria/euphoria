@@ -206,8 +206,8 @@ else
 	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex
 endif
 
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -w -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
-BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -w $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
 
 EU_CORE_FILES = \
 	block.e \
@@ -478,12 +478,21 @@ $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-templat
 	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 
+$(BUILDDIR)/html/js/scriptaculous.js: $(DOCDIR)/scriptaculous.js  $(BUILDDIR)/html/js
+	copy $(DOCDIR)/scriptaculous.js $^@
+
+$(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
+	copy $(DOCDIR)/prototype.js $^@
+
+$(BUILDDIR)/html/js/search.js : $(DOCDIR)/search-template.js $(TRUNKDIR)/source/getindices.ex $(BUILDDIR)/html/index.html $(BUILDDIR)/html/js
+	$(EXE) $(TRUNKDIR)/source/getindices.ex $(BUILDDIR)/html/index.html $(BUILDDIR)/html/js/search.js 
+
 htmldoc : $(BUILDDIR)/html/index.html
 
 $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
 	sed -e "s/splitlevel = 2/splitlevel = 0/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
 
-$(BUILDDIR)/pdf/index.html : $(BUILDDIR)/euphoria-pdf.txt
+$(BUILDDIR)/pdf/index.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/pdf
 	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=offline-template.html -o$(BUILDDIR)/pdf -htmldoc $(BUILDDIR)/euphoria-pdf.txt
 # 	cd $(TRUNKDIR)/docs && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(BUILDDIR)/pdf $(BUILDDIR)/euphoria-pdf.txt
@@ -650,8 +659,8 @@ $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c execute.h alloc.h global.h alldefs.h opname
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c Makefile.eu
-	$(CC) -c -w $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
-	$(CC) -S -w $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
+	$(CC) -c -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
+	$(CC) -S -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
