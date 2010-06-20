@@ -10,6 +10,10 @@ typedef unsigned char   uchar;
 typedef signed   char   schar;
 
 #include <stdarg.h>
+#include <stdio.h>
+
+#include "object.h"
+#include "symtab.h"
 
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
 #if defined(ELINUX)
@@ -107,17 +111,6 @@ typedef signed   char   schar;
 #undef FALSE
 #define TRUE  1
 #define FALSE 0
-
-typedef long object;
-typedef object *object_ptr;
-
-struct d;
-struct s1;
-typedef struct d  *d_ptr;
-typedef struct s1 *s1_ptr;
-
-struct symtab_entry; 
-typedef struct symtab_entry *symtab_ptr; 
 
 struct replace_block;
 typedef struct replace_block *replace_ptr;
@@ -379,6 +372,8 @@ void DebugScreen();
 void DisplayVar(symtab_ptr s_ptr, int user_requested);
 void ErasePrivates(symtab_ptr proc_ptr);
 void EraseSymbol(symtab_ptr sym);
+
+void echo_wait();
 
 #ifdef EWINDOWS
 	int wingetch();

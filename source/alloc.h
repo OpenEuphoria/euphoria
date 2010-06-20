@@ -149,6 +149,9 @@ typedef struct block_list * block_list_ptr;
 #endif
 
 #if defined( ESIMPLE_MALLOC )
+	#ifdef EUNIX
+	#include <stdlib.h>
+	#endif
 	#define EMalloc(size) malloc(size)
 	#define EFree(ptr) free(ptr)
 	#define ERealloc(orig, newsize) realloc(orig, newsize)

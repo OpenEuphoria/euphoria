@@ -15,9 +15,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <io.h>
+
 
 #ifdef EUNIX
+
 #define __USE_LARGEFILE64
 #include <strings.h>
 #define stricmp strcasecmp
@@ -77,6 +78,7 @@ int emul_flock(fd, cmd)
 
 #else // EUNIX
 
+#include <io.h>
 #include <direct.h>
 
 #ifdef EWATCOM
@@ -346,15 +348,18 @@ char *name_ext(char *s)
 extern long get_int(object x)
 /* return an integer value if possible, truncated to 32 bits. */
 {
-	if (IS_ATOM_INT(x))
+	if (IS_ATOM_INT(x)){
 		return x;
+	}
 
-	if (IS_ATOM(x))
-		if (DBL_PTR(x)->dbl <= 0.0)
+	if (IS_ATOM(x)){
+		if (DBL_PTR(x)->dbl <= 0.0){
 			return (long)(DBL_PTR(x)->dbl);
-		else
+		}
+		else{
 			return (unsigned long)(DBL_PTR(x)->dbl);
-
+		}
+	}
 	RTFatal("an integer was expected, not a sequence");
 
 }
@@ -652,22 +657,6 @@ void do_scroll(int top, int bottom, int amount)
 // scroll the screen from top line to bottom line by amount
 // amount is positive => text moves up
 {
-#ifdef EUINX
-	short c1;
-	short r1;
-	int t;
-	int i;
-	int j;
-	int b;
-	int prev_t;
-	int prev_b;
-	int fg;
-	int newl;
-	int bg;
-	char c;
-	char linebuff[200 + 1];
-	int lbi;
-#endif
 
 #ifdef EWINDOWS
 	SMALL_RECT src, clip;
@@ -702,6 +691,20 @@ void do_scroll(int top, int bottom, int amount)
 #endif
 
 #ifdef EUNIX
+	short c1;
+	short r1;
+	int t;
+	int i;
+	int j;
+	int b;
+	int prev_t;
+	int prev_b;
+	int fg;
+	int newl;
+	int bg;
+	char c;
+	char linebuff[200 + 1];
+	int lbi;
 	// save the current position
 	r1 = screen_line;
 	c1 = screen_col;

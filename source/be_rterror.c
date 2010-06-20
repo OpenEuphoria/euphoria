@@ -847,21 +847,21 @@ static void DebugCommand()
 #ifdef EUNIX
 		// must handle ANSI codes
 		if (c == 27) {
-			c = get_key();
+			c = get_key(TRUE);
 			if (c == 91) {
-				c = get_key();
+				c = get_key(TRUE);
 				if (c == 66) {
 					c = DOWN_ARROW;
 				}
 				else if (c == 49) {
-					c = get_key();
+					c = get_key(TRUE);
 					if (c == 49) {
 						c = FLIP_TO_MAIN;
-						get_key();  // 126
+						get_key(TRUE);  // 126
 					}
 					else if (c == 50) {
 						c = FLIP_TO_DEBUG;
-						get_key(); // 126
+						get_key(TRUE); // 126
 					}
 				}
 			}

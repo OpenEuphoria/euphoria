@@ -41,6 +41,7 @@
 #include <time.h>
 #ifdef EUNIX
 #	include <sys/times.h>
+#	include <string.h>
 #else
 #	ifdef EWATCOM
 #		include <graph.h>
@@ -405,7 +406,7 @@ static void profile_command(object x)
 		RTFatal("argument to profile() must be 0 or 1");
 }
 
-static object do_peek2(object a, int b, int *pc)
+static object do_peek2(object a, int b )
 // peek2u, peek2s
 // moved it here because it was causing bad code generation for WIN32
 {
@@ -474,7 +475,7 @@ static object do_peek2(object a, int b, int *pc)
 }
 
 
-static object do_peek4(object a, int b, int *pc)
+static object do_peek4(object a, int b )
 // peek4u, peek4s
 // moved it here because it was causing bad code generation for WIN32
 {
@@ -732,10 +733,10 @@ void threadpc3(void);
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
-#define thread2() {(long)pc += 2; goto *((void *)*pc);}
-#define thread4() {(long)pc += 4; goto *((void *)*pc);}
-#define thread5() {(long)pc += 5; goto *((void *)*pc);}
-#define inc3pc() (long)pc += 3
+#define thread2() {pc += 2; goto *((void *)*pc);}
+#define thread4() {pc += 4; goto *((void *)*pc);}
+#define thread5() {pc += 5; goto *((void *)*pc);}
+#define inc3pc() pc += 3
 #define BREAK goto *((void *)*pc)
 #endif
 
@@ -755,7 +756,7 @@ static int recover_rhs_subscript(object subscript, s1_ptr s)
 	}
 	else if (IS_ATOM_DBL(subscript)) {
 		subscripti = (long)(DBL_PTR(subscript)->dbl); 
-		if ((unsigned long)(subscripti - 1) < s->length) 
+		if ((unsigned long)(subscripti - 1) < (unsigned long)s->length) 
 			return subscripti;
 		else
 			RangeReading(subscript, s->length);
@@ -787,7 +788,7 @@ static int recover_lhs_subscript(object subscript, s1_ptr s)
 	}
 	else if (IS_ATOM_DBL(subscript))  {
 		subscripti = (long)(DBL_PTR(subscript)->dbl);
-		if ((unsigned long)(subscripti - 1) < s->length)
+		if ((unsigned long)(subscripti - 1) < (unsigned long)s->length)
 			return subscripti;
 		else
 			BadSubscript(subscript, s->length);
@@ -1765,7 +1766,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_RHS_SUBS:");
 				top = *(object_ptr)pc[2];  /* the subscript */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr)pc[1]);/* the sequence */
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) {
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
 				}
@@ -1786,7 +1787,7 @@ void do_exec(int *start_pc)
 				   TypeCheck failure if assigned non-integer */
 				top = *(object_ptr)pc[2];  /* the subscript */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr)pc[1]);/* the sequence */
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) {
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					/* possibly bad subscript */
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
@@ -1839,7 +1840,7 @@ void do_exec(int *start_pc)
 				obj_ptr = (object_ptr)SEQ_PTR(top);/* the sequence */
 				top = *(object_ptr)pc[2];  /* the subscript */
 				pc[9] = pc[1]; // store in ASSIGN_SUBS op after length-4 binop
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) {
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					/* possibly bad subscript */
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
@@ -1906,7 +1907,7 @@ void do_exec(int *start_pc)
 				
 			  as:   
 				a = *(object_ptr)pc[2]; /* the subscript */
-				if ((unsigned long)(a-1) >= ((s1_ptr)obj_ptr)->length) { 
+				if ((unsigned long)(a-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) { 
 					/* subscript out of bounds (or it's a double) */
 					tpc = pc;
 					a = recover_lhs_subscript(a, (s1_ptr)obj_ptr);
@@ -1937,7 +1938,7 @@ void do_exec(int *start_pc)
 					*(object_ptr)pc[1] = MAKE_SEQ(obj_ptr);
 				}
 				top = *(object_ptr)pc[2]; /* the subscript */
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) { 
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) { 
 					/* subscript out of bounds (or it's a double) */
 					tpc = pc;
 					top = recover_lhs_subscript(top, (s1_ptr)obj_ptr);
@@ -2280,7 +2281,7 @@ void do_exec(int *start_pc)
 				}
 				obj_ptr = (object_ptr)top;
 				// The variable, a, seems to index past the end of the sequence.
-				if ((unsigned long)(a-1) >= ((s1_ptr)obj_ptr)->length) {
+				if ((unsigned long)(a-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					tpc = pc;
 					// It may be an encoded pointer to d struct.
 					// Do a check in the routine below.
@@ -3519,7 +3520,7 @@ void do_exec(int *start_pc)
 				
 				// get the routine symtab_ptr:
 				a = get_pos_int("call_proc/call_func", *(object_ptr)pc[1]); 
-				if ((unsigned)a >= e_routine_next) {
+				if (a >= e_routine_next) {
 					RTFatal("invalid routine id");
 				}
 				sub = e_routine[a];
@@ -3549,7 +3550,7 @@ void do_exec(int *start_pc)
 				
 				// if length is huge it will be rejected here,
 				// so max_stack_per_call will protect against stack overflow
-				if (sub->u.subp.num_args != ((s1_ptr)a)->length) {
+				if (sub->u.subp.num_args != (unsigned long)((s1_ptr)a)->length) {
 					// must avoid > 3 arg calls to get better WATCOM code gen
 					wrong_arg_count(sub, a);
 				}
@@ -3766,7 +3767,7 @@ void do_exec(int *start_pc)
 				sym = (symtab_ptr)pc[2];
 				while(1){
 					obj_ptr = (object_ptr)sym;
-					while( obj_ptr = (object_ptr)((symtab_ptr)obj_ptr)->next_in_block ){
+					while( (obj_ptr = (object_ptr)((symtab_ptr)obj_ptr)->next_in_block) ){
 						DeRef( *obj_ptr);
 						*obj_ptr = NOVALUE;
 					}
@@ -3816,7 +3817,7 @@ void do_exec(int *start_pc)
 				sym = ((symtab_ptr)pc[1]);
 				result_ptr = 0;
 				pc += 2;
-				while( sym = sym->next_in_block ){
+				while( (sym = sym->next_in_block) ){
 					DeRef(sym->obj);
 					sym->obj = NOVALUE;
 					
@@ -3841,7 +3842,7 @@ void do_exec(int *start_pc)
 				
 				// get the routine symtab_ptr:
 				b = get_pos_int("call_proc/call_func", *(object_ptr)pc[2]); 
-				if ((unsigned)b >= e_routine_next) {
+				if (b >= e_routine_next) {
 					RTFatal("invalid routine id");
 				}
 				obj_ptr = (object_ptr) DeleteRoutine( b );
@@ -3856,7 +3857,7 @@ void do_exec(int *start_pc)
 				}
 				else if( IS_ATOM_DBL(a) ){
 					if( (!UNIQUE(DBL_PTR(a)) && !DBL_PTR(a)->cleanup) || 
-					((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+					(((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0) ){
 						a = NewDouble( DBL_PTR(a)->dbl );
 						b = 0;
 					}
@@ -3870,7 +3871,7 @@ void do_exec(int *start_pc)
 				}
 				else{ // sequence
 					if( (!UNIQUE(SEQ_PTR(a)) && !DBL_PTR(a)->cleanup) || 
-					((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+					(((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0) ){
 						a = MAKE_SEQ( SequenceCopy( SEQ_PTR(a) ) );
 						b = 0;
 					}
@@ -4332,7 +4333,7 @@ void do_exec(int *start_pc)
 			 peek4s1:
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
-				top = do_peek4(a, b, pc);
+				top = do_peek4(a, b);
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -4350,7 +4351,7 @@ void do_exec(int *start_pc)
 			 peek2s1:
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
-				top = do_peek2(a, b, pc);
+				top = do_peek2(a, b);
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -4976,7 +4977,7 @@ void do_exec(int *start_pc)
 					else {
 						/* stop after down-arrow pressed */
 						i = expr_top - expr_stack;
-						b = top > TraceBeyond && i == TraceStack ||
+						b = (top > TraceBeyond && i == TraceStack) ||
 							i < TraceStack;
 					}
 					if (TraceOn || b) {

@@ -71,36 +71,8 @@
 #define ATOM_2     2
 
 
-struct cleanup;
-typedef struct cleanup *cleanup_ptr;
-typedef void(*cleanup_func)(object);
+#include "object.h"
 
-struct cleanup {
-	long type;
-	union func_union{
-		long rid;
-		cleanup_func builtin;
-	} func;
-	cleanup_ptr next;
-};
-
-
-
-struct s1 {                        /* a sequence header block */
-	object_ptr base;               /* pointer to (non-existent) 0th element */
-	long length;                   /* number of elements */
-	long ref;                      /* reference count */
-	long postfill;                 /* number of post-fill objects */
-	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
-}; /* total 20 bytes */
-
-struct d {                         /* a double precision number */
-	double dbl;                    /* double precision value */
-	long ref;                      /* reference count */
-	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
-}; /* total 16 bytes */
-
-#define D_SIZE (sizeof(struct d))  
 
 /* **** Important Note ****
   The offset of the 'ref' field in the 'struct d' and the 'struct s1' must

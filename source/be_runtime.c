@@ -10,7 +10,7 @@
 /* Included files */
 /******************/
 #include <stdio.h>
-#include <io.h>
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,6 +25,7 @@
 #    include <gpm.h>
 #  endif
 #else
+#  include <io.h>
 #  if !defined(EMINGW)
 #    include <bios.h>
 #  endif
