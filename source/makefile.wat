@@ -593,7 +593,7 @@ $(BUILDDIR)\$(OBJDIR)\main-.c $(BUILDDIR)\$(OBJDIR)\$(EU_TARGET)c : .EXISTSONLY
 
 .c: $(BUILDDIR)\$(OBJDIR);$(BUILDDIR)\$(OBJDIR)\back
 .c.obj: 
-	$(CC) $(FE_FLAGS) $(BE_FLAGS) /I$(BUILDDIR)\$(OBJDIR)\back $[@ -fo=$^@
+	$(CC) $(FE_FLAGS) $(BE_FLAGS) -fr=$^@.err /I$(BUILDDIR)\$(OBJDIR)\back $[@ -fo=$^@
 	
 $(BUILDDIR)\$(OBJDIR)\back\be_inline.obj : ./be_inline.c $(BUILDDIR)\$(OBJDIR)\back
 	$(CC) /oe=40 $(BE_FLAGS) $(FE_FLAGS) $^&.c -fo=$^@

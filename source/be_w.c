@@ -174,7 +174,6 @@ void InitInOut()
    use of the console - see show_console() below. */
 {
     struct rccoord position;
-    int i, j;
 #ifdef EWINDOWS
     position.col = 1;   // should do these 2 properly
     position.row = 1;
@@ -194,13 +193,6 @@ void InitInOut()
     screen_line = position.row;
     screen_col = position.col;
 
-//    for (i = 0; i < line_max; i++) {
-//        for (j = 0; j < col_max; j++) {
-//            screen_image[i][j].ascii = ' ';
-//            screen_image[i][j].fg_color = 15;
-//            screen_image[i][j].bg_color = 0;
-//        }
-//    }
 	Set_Image(screen_image, ' ', 15, 0);
 #endif
 }
@@ -339,7 +331,7 @@ static void MyWriteConsole(char *string, int nchars)
 // write a string of plain characters to the console and
 // update the cursor position
 {
-    int i;
+    unsigned long i;
     static int first = 0;
     CONSOLE_SCREEN_BUFFER_INFO console_info;
 
@@ -769,7 +761,7 @@ void SetPosition(int line, int col)
 
 #ifdef EWINDOWS
 
-void ReadInto(WORD * buf, LPTSTR * str, int size, int * n, int * m, WORD * saved, struct rccoord * pos)
+void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, WORD * saved, struct rccoord * pos)
 {
     COORD ch;
 
@@ -785,9 +777,9 @@ void ReadInto(WORD * buf, LPTSTR * str, int size, int * n, int * m, WORD * saved
     ReadConsoleOutputAttribute(console_output, buf, size, ch, m);
 }
 
-void WriteOutFrom(WORD * buf, LPTSTR * str, int n, int m, WORD * saved, struct rccoord * pos)
+void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, WORD * saved, struct rccoord * pos)
 {
-    int size1, size2;
+    unsigned long size1, size2;
     COORD ch;
     ch.X = 0;
     ch.Y = 0;
@@ -803,22 +795,22 @@ void WriteOutFrom(WORD * buf, LPTSTR * str, int n, int m, WORD * saved, struct r
 }
 
 TCHAR console_save_str[65536];
-int console_save_str_n = 0;
+unsigned long console_save_str_n = 0;
 WORD console_save_buf[65536];
-int console_save_buf_n = 0;
+unsigned long console_save_buf_n = 0;
 WORD console_save_saved = (WORD)-1;
 struct rccoord console_save_pos;
 
 TCHAR console_trace_str[65536];
-int console_trace_str_n = 0;
+unsigned long console_trace_str_n = 0;
 WORD console_trace_buf[65536];
-int console_trace_buf_n = 0;
+unsigned long console_trace_buf_n = 0;
 WORD console_trace_saved = (WORD)-1;
 struct rccoord console_trace_pos;
 
 void SaveNormal()
 {
-    int size = 65536;
+    unsigned long size = 65536;
     if (EuConsole){
         ReadInto(console_save_buf, console_save_str, size, &console_save_buf_n, &console_save_str_n, &console_save_saved, &console_save_pos);
     } else {

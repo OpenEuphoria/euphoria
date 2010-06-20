@@ -61,7 +61,7 @@ extern int Argc;
 char *malloc_options="A"; // abort
 #endif
 
-int pagesize;  // needed for Linux or Windows only, not FreeBSD
+long pagesize;  // needed for Linux or Windows only, not FreeBSD
 
 int eu_dll_exists = FALSE; // a Euphoria .dll is being used
 #if defined(EALIGN4)
@@ -100,22 +100,13 @@ static struct block_list *pool_map[MAX_CACHED_SIZE/RESOLUTION+1]; /* maps size d
 static struct block_list freeblk_list[NUMBER_OF_FBL]; /* set of free block lists */
 						 /* elements not power of 2 - but not used much */
 
-static char *str_free_ptr;
-static unsigned int chars_remaining = 0;
-
-static symtab_ptr sym_free_ptr;
-static unsigned int syms_remaining = 0;
-
-static temp_ptr tmp_free_ptr;
-static unsigned int tmps_remaining = 0;
-
 /**********************/
 /* Declared functions */
 /**********************/
 #ifndef EWINDOWS
 void free();
 #endif
-object NewString();
+
 static void AlreadyFree();
 size_t _msize();
 
@@ -323,7 +314,7 @@ static void DeAllocated(long n)
 static void Free_All()
 /* release the entire storage cache back to the heap */
 {
-	int i, alignment;
+	int i;
 	struct block_list *list;
 	s1_ptr s;
 	unsigned char *p;
@@ -357,48 +348,48 @@ static void Free_All()
 	cache_size = 0;
 }
 
-#ifndef ESIMPLE_MALLOC
-static void Recycle()
-/* Try to recycle some cached blocks back to heap.
-   With write-back CPU cache, it might be better
-   to free an older block on the list, not the most-recently freed,
-   but we only have a singly-linked list */
-{
-	register struct block_list *list;
-	unsigned char *p;
-	int i;
-
-#ifdef EXTRA_STATS
-	recycles++;
-#endif
-	/* try to take one from D list */
-	if (d_list != NULL) {
-		p = (unsigned char *)d_list;
-		d_list = (d_ptr)((free_block_ptr)d_list)->next;
-		#if defined(EALIGN4)
-		if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-			p = p - 4;
-		#endif
-		free(p); /* give it back to heap */
-		cache_size--;
-	}
-
-	/* try to take one from each other list */
-	for (i = 0; i < NUMBER_OF_FBL; i++) {
-		list = &freeblk_list[i];
-		if (list->first != NULL) {
-			p = (char *)list->first;
-			list->first = ((free_block_ptr)p)->next;
-			#if defined(EALIGN4)
-			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
-				p = p - 4;
-			#endif
-			free(p); /* give it back to heap */
-			cache_size--;
-		}
-	}
-}
-#endif
+// #ifndef ESIMPLE_MALLOC
+// static void Recycle()
+// /* Try to recycle some cached blocks back to heap.
+//    With write-back CPU cache, it might be better
+//    to free an older block on the list, not the most-recently freed,
+//    but we only have a singly-linked list */
+// {
+// 	register struct block_list *list;
+// 	char *p;
+// 	int i;
+// 
+// #ifdef EXTRA_STATS
+// 	recycles++;
+// #endif
+// 	/* try to take one from D list */
+// 	if (d_list != NULL) {
+// 		p = (char *)d_list;
+// 		d_list = (d_ptr)((free_block_ptr)d_list)->next;
+// 		#if defined(EALIGN4)
+// 		if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+// 			p = p - 4;
+// 		#endif
+// 		free(p); /* give it back to heap */
+// 		cache_size--;
+// 	}
+// 
+// 	/* try to take one from each other list */
+// 	for (i = 0; i < NUMBER_OF_FBL; i++) {
+// 		list = &freeblk_list[i];
+// 		if (list->first != NULL) {
+// 			p = (char *)list->first;
+// 			list->first = ((free_block_ptr)p)->next;
+// 			#if defined(EALIGN4)
+// 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
+// 				p = p - 4;
+// 			#endif
+// 			free(p); /* give it back to heap */
+// 			cache_size--;
+// 		}
+// 	}
+// }
+// #endif
 
 static void SpaceMessage()
 {
@@ -431,10 +422,11 @@ char *EMalloc(unsigned long nbytes)
    internal representation of an object). */
 {
 	char *p;
-	unsigned char *temp;
+	free_block_ptr temp;
 	register struct block_list *list;
+#if defined(EALIGN4)
 	int alignment;
-	int min_align;
+#endif
 	struct block_list * last_FBL;
 	
 #ifdef HEAP_CHECK
@@ -443,7 +435,7 @@ char *EMalloc(unsigned long nbytes)
 	
 #if defined(EUNIX)
 
-		p = (char *)malloc(nbytes);
+		p = malloc(nbytes);
 		assert(p);
 		assert(((unsigned int)p & 7) == 0);
 		return p;
@@ -465,13 +457,13 @@ char *EMalloc(unsigned long nbytes)
 			RTInternal("Alloc - size is %d, nbytes is %d", list->size, nbytes);
 		}
 #endif
-		temp = (char *)list->first;
+		temp = list->first;
 
 		if (temp == NULL) {
 			last_FBL = &freeblk_list[NUMBER_OF_FBL-1];
 			if (list < last_FBL) {
 				list++;
-				temp = (char *)list->first;
+				temp = list->first;
 			}
 		}
 
@@ -481,13 +473,13 @@ char *EMalloc(unsigned long nbytes)
 #ifdef EXTRA_STATS
 			a_hit++;
 #endif
-			list->first = ((free_block_ptr)temp)->next;
+			list->first = temp->next;
 			cache_size--;
 
 #ifdef HEAP_CHECK
 			if (cache_size > 100000000)
 				RTInternal("cache size is bad");
-			p = temp;
+			p = (char *)temp;
 			#if defined(EALIGN4)
 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 				p = p - 4;
@@ -496,7 +488,7 @@ char *EMalloc(unsigned long nbytes)
 			#endif
 			Allocated(block_size(p));
 #endif
-			return temp; /* will be 8-aligned */
+			return (char *)temp; /* will be 8-aligned */
 		}
 		else {
 			nbytes = list->size; /* better to grab bigger size
@@ -569,7 +561,7 @@ void EFree(char *p)
 	char *q;
 	register long nbytes;
 	register struct block_list *list;
-	int align;
+	
 
 #if defined(EUNIX)
 		free(p);
@@ -859,7 +851,7 @@ s1_ptr NewS1(long size)
 	return(s1);
 }
 
-object NewString(unsigned char *s)
+object NewString(char *s)
 /* create a new string sequence */
 {
 	int len;
@@ -950,7 +942,7 @@ long copy_string(char *dest, char *src, size_t bufflen)
 */
 long append_string(char *dest, char *src, size_t bufflen)
 {
-	long res;
+
 	int dest_len;
 	
 	dest_len = strlen(dest);

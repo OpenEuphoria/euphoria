@@ -30,7 +30,6 @@ object decompress(unsigned int c)
 	s1_ptr s;
 	object_ptr obj_ptr;
 	unsigned int len, i;
-	int x;
 	double d;
 	
 	if (c == 0) {

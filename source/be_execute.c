@@ -299,9 +299,9 @@ object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide()
 object x(); /* error */
 symtab_ptr PrivateVar();
 long find(), e_match();
-object calc_hash();
+
 IFILE which_file();
-object_ptr BiggerStack();
+
 void do_exec();
 s1_ptr NewS1();
 double current_time();
@@ -656,11 +656,11 @@ static void do_poke4(object a, object top)
 
 #ifdef INT_CODES
 #define thread() goto loop_top
-#define thread2() {pc += 2; goto loop_top;}
-#define thread4() {pc += 4; goto loop_top;}
-#define thread5() {pc += 5; goto loop_top;}
+#define thread2() {(long)pc += 2; goto loop_top;}
+#define thread4() {(long)pc += 4; goto loop_top;}
+#define thread5() {(long)pc += 5; goto loop_top;}
 #define threadpc3() {pc = (int *)pc[3]; goto loop_top;}
-#define inc3pc() pc += 3
+#define inc3pc() (long)pc += 3
 #include "redef.h"
 #include "opnames.h"
 #define BREAK break
@@ -674,7 +674,7 @@ static void do_poke4(object a, object top)
 #if defined(EWINDOWS) || (defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
 // #pragma aux thread aborts; does nothing
 
-#define thread() do { wcthread(pc); } while (0)
+#define thread() do { wcthread((long)pc); } while (0)
 void wcthread(long x);
 #pragma aux wcthread = \
 		"jmp [ECX]" \
@@ -702,19 +702,19 @@ long wcinc5pc(long x);
 		value [ECX] \
 		parm [ECX];
 
-#define thread2() do { pc = wcinc2pc(pc); wcthread(pc); } while (0)
-#define thread4() do { pc = wcinc4pc(pc); wcthread(pc); } while (0)
-#define thread5() do { pc = wcinc5pc(pc); wcthread(pc); } while (0)
+#define thread2() do { pc = (int *)wcinc2pc((long)pc); wcthread((long)pc); } while (0)
+#define thread4() do { pc = (int *)wcinc4pc((long)pc); wcthread((long)pc); } while (0)
+#define thread5() do { pc = (int *)wcinc5pc((long)pc); wcthread((long)pc); } while (0)
 
 /* have to hide this from WATCOM or it will generate stupid code
    at the top of the switch */
-#define inc3pc() do { pc = wcinc3pc(pc); } while (0)
-long wcin3pc(long x);
+long wcinc3pc(long x);
 #pragma aux wcinc3pc = \
 		"ADD ECX, 12" \
 		modify [] \
 		value [ECX] \
 		parm [ECX];
+#define inc3pc() do { pc = (int *)wcinc3pc((long)pc); } while (0)
 
 // not converted because it is not used
 void threadpc3(void);
@@ -732,10 +732,10 @@ void threadpc3(void);
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
-#define thread2() {pc += 2; goto *((void *)*pc);}
-#define thread4() {pc += 4; goto *((void *)*pc);}
-#define thread5() {pc += 5; goto *((void *)*pc);}
-#define inc3pc() pc += 3
+#define thread2() {(long)pc += 2; goto *((void *)*pc);}
+#define thread4() {(long)pc += 4; goto *((void *)*pc);}
+#define thread5() {(long)pc += 5; goto *((void *)*pc);}
+#define inc3pc() (long)pc += 3
 #define BREAK goto *((void *)*pc)
 #endif
 
@@ -805,7 +805,7 @@ void InitStack(int size, int toplevel)
 {
 	stack_size = size;
 	expr_stack = (object_ptr) EMalloc(stack_size * sizeof(object));
-	expr_stack[toplevel] = TopLevelSub;  
+	expr_stack[toplevel] = (object)TopLevelSub;  
 	expr_top = &expr_stack[toplevel+1];  /* next available place on expr stack */
  
 	/* must allow for a few extra words */
@@ -841,8 +841,6 @@ void InitExecute()
 	InitTask();
 	TopLevelSub->u.subp.resident_task = current_task;
 }
-
-void Execute(int *);
 
 #ifndef INT_CODES
 #if defined(EUNIX) || defined(EMINGW)
@@ -1384,10 +1382,10 @@ void analyze_switch()
 	
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){
-		*tpc = (int *)opcode( SWITCH_SPI );
+		*tpc = (int)opcode( SWITCH_SPI );
 		
 		// calculate the 'else' jump as a relative jump:
-		offset = (tpc[4]-(int)tpc) / sizeof( int* );
+		offset = (tpc[4]-(int)tpc) / sizeof( int );
 		
 		a = Repeat( offset, max - min + 1 );
 		lookup = SEQ_PTR( a );
@@ -1395,17 +1393,17 @@ void analyze_switch()
 		for( i = 1; i <= new_values->length; ++i ){
 			lookup->base[new_values->base[i] - offset] = jump->base[i];
 		}
-		tpc[2] = (int *)offset;
+		tpc[2] = (int)offset;
 		DeRefDS( *(object_ptr)tpc[3] );
-		*(object_ptr)tpc[3] = (int *)MAKE_SEQ( lookup );
+		*(object_ptr)tpc[3] = (object)MAKE_SEQ( lookup );
 	}
 	else{
-		*(object_ptr)tpc[2] = (int *)MAKE_SEQ( new_values );
+		*(object_ptr)tpc[2] = (object)MAKE_SEQ( new_values );
 		if( all_ints ){
-			*tpc = (int *)opcode( SWITCH_I );
+			*tpc = (int)opcode( SWITCH_I );
 		}
 		else{
-			*tpc = (int *)opcode( SWITCH );
+			*tpc = (int)opcode( SWITCH );
 		}
 	}
 }
@@ -1480,13 +1478,13 @@ static object *save_private_block(symtab_ptr routine)
 }
 
 
-static load_private_block(symtab_ptr routine, int task)
+static void load_private_block(symtab_ptr routine, int task)
 // Retrieve a private block and remove it from the list for this routine.
 // We know that the block will be there, often near the start of the list.
 {   
 	struct private_block *p;
 	struct private_block *prev_p;
-	struct private_block *defunct;
+	
 	object *block;
 	symtab_ptr sym;
 	 
@@ -1604,12 +1602,14 @@ void do_exec(int *start_pc)
 	
 	double temp_dbl;
 	struct d temp_d;
-	unsigned char *poke_addr;
+	char *poke_addr;
 	void (*sub_addr)();
 	int nvars;   
+#ifndef BACKEND             
 	int *iptr;
+#endif
 	int file_no;
-	int start_pos;
+	
 	int end_pos;
 	int going_up; 
 	object_ptr result_ptr;
@@ -1618,7 +1618,7 @@ void do_exec(int *start_pc)
 	int seqlen;
 	opcode_type *patch;
 	object b, c;
-	symtab_ptr sym, sub, caller;
+	symtab_ptr sym, sub;
 	int c0,splins;
 	s1_ptr s1,s2;
 	object *block;
@@ -3615,7 +3615,7 @@ void do_exec(int *start_pc)
 				sub->u.subp.resident_task = current_task;
 				
 				*expr_top++ = (object)obj_ptr; // push return address
-				*expr_top++ = sub;             // push sub symtab pointer
+				*expr_top++ = (object)sub;             // push sub symtab pointer
 				pc = sub->u.subp.code;         // start executing the sub 
 				thread();
 				BREAK;
@@ -3688,7 +3688,7 @@ void do_exec(int *start_pc)
 					obj_ptr++; /* skip address for fn/type result */
 				
 				*expr_top++ = (object)obj_ptr; // push return address
-				*expr_top++ = sub;             // push sub symtab pointer 
+				*expr_top++ = (object)sub;             // push sub symtab pointer 
 				pc = sub->u.subp.code;         // start executing the sub
 				thread();
 				BREAK;
@@ -3795,7 +3795,7 @@ void do_exec(int *start_pc)
 							DeRef( result_val );
 							
 							// Watch for recursion:
-							if( tpc[3] != result_ptr )
+							if( tpc[3] != (int)result_ptr )
 								((symtab_ptr)tpc[3])->obj = NOVALUE;
 						}
 						result_ptr = NULL;
@@ -3816,14 +3816,11 @@ void do_exec(int *start_pc)
 				sym = ((symtab_ptr)pc[1]);
 				result_ptr = 0;
 				pc += 2;
-				
-				exit_block:
-					// other places may jump here (RETURNP, END_FOR, etc)
-					while( sym = sym->next_in_block ){
-						DeRef(sym->obj);
-						sym->obj = NOVALUE;
-						
-					}
+				while( sym = sym->next_in_block ){
+					DeRef(sym->obj);
+					sym->obj = NOVALUE;
+					
+				}
 				thread();
 
 			case L_ROUTINE_ID:
@@ -3885,7 +3882,7 @@ void do_exec(int *start_pc)
 					}
 					SEQ_PTR(a)->cleanup = (cleanup_ptr)obj_ptr;
 				}
-				obj_ptr = pc[3];
+				obj_ptr = (object_ptr)pc[3];
 				if( a != *obj_ptr ){
 					DeRef( *obj_ptr );
 					*obj_ptr = a;
@@ -3907,7 +3904,7 @@ void do_exec(int *start_pc)
 						cleanup_double( DBL_PTR(a) );
 					}
 					else if( IS_SEQUENCE(a) ){
-						cleanup_sequence( DBL_PTR(a) );
+						cleanup_sequence( (s1_ptr)DBL_PTR(a) );
 					}
 				}
 				pc += 2;
@@ -4166,7 +4163,7 @@ void do_exec(int *start_pc)
 						// ensures that Add_internal_space will make a copy
 						RefDS( a );
 					}
-					s1 = Add_internal_space( a, nvars, s2->length );
+					s1 = (s1_ptr)Add_internal_space( a, nvars, s2->length );
 					assign_slice_seq = &s1;
 					
 					s1 = Copy_elements( nvars, s2, (*obj_ptr == a) );
@@ -4365,15 +4362,10 @@ void do_exec(int *start_pc)
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (unsigned char *)INT_VAL(a);
+					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					if( b )
-						poke_addr = (signed char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
-					else
-						poke_addr = (unsigned char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
 				}
 				else { /* sequence */
 						RTFatal(
@@ -4401,15 +4393,10 @@ void do_exec(int *start_pc)
 				
 				/* check address */
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (unsigned char *)INT_VAL(a);
+					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					if( b )
-						poke_addr = (signed char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
-					else
-						poke_addr = (unsigned char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
 				}
 				else {
 					/* a sequence: {addr, nbytes} */
@@ -4419,7 +4406,7 @@ void do_exec(int *start_pc)
 						RTFatal(
 				  "argument to peek() must be an atom or a 2-element sequence");
 					}
-					poke_addr = (unsigned char *)get_pos_int("peek", *(s1->base+1));
+					poke_addr = (char *)get_pos_int("peek", *(s1->base+1));
 					i = get_pos_int("peek", *((s1->base)+2)); /* length */
 					if (i < 0)
 						RTFatal("number of bytes to peek is less than 0");
@@ -4430,7 +4417,7 @@ void do_exec(int *start_pc)
 						if(b)
 							*obj_ptr = (signed char)*poke_addr; 
 						else
-							*obj_ptr = *poke_addr; 
+							*obj_ptr = (unsigned char)*poke_addr; 
 						poke_addr++;
 					}
 					DeRef(*(object_ptr)pc[2]);
@@ -4438,13 +4425,14 @@ void do_exec(int *start_pc)
 					inc3pc();
 					thread();
 				}
+				
 				DeRefx(*(object_ptr)pc[2]);
-				{
-					if(b)        
-						*(object_ptr)pc[2] = (signed char)*poke_addr;               
-					else
-						*(object_ptr)pc[2] = *poke_addr; 
-				}             
+				
+				if (b)        
+					*(object_ptr)pc[2] = (signed char)*poke_addr;               
+				else
+					*(object_ptr)pc[2] = (unsigned char)*poke_addr; 
+					
 				inc3pc();
 				thread();
 				BREAK;
@@ -4477,11 +4465,10 @@ void do_exec(int *start_pc)
 
 				/* check address */
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (unsigned char *)a;
+					poke_addr = (char *)a;
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (unsigned char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
 				}
 				else {
 					tpc = pc;
@@ -4769,9 +4756,7 @@ void do_exec(int *start_pc)
 				/* file number, format string, value */
 				tpc = pc;
 				file_no = *(object_ptr)pc[1];
-				EPrintf(file_no, 
-						(s1_ptr)*(object_ptr)pc[2], 
-						(s1_ptr)*(object_ptr)pc[3]);
+				EPrintf(file_no,*(object_ptr)pc[2], *(object_ptr)pc[3]);
 				pc += 4;
 				BREAK;
 
@@ -4779,9 +4764,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_SPRINTF:");
 				/* format string, value */
 				tpc = pc;
-				top = EPrintf(DOING_SPRINTF, 
-						(s1_ptr)*(object_ptr)pc[1], 
-						(s1_ptr)*(object_ptr)pc[2]);
+				top = EPrintf(DOING_SPRINTF, *(object_ptr)pc[1], *(object_ptr)pc[2]);
 				DeRef(*(object_ptr)pc[3]);
 				*(object_ptr)pc[3] = top;
 				pc += 4;

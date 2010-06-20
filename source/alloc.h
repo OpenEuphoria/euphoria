@@ -169,7 +169,7 @@ extern char *malloc_options;
 #endif
 
 #ifdef EUNIX
-extern int pagesize;  // needed for Linux only, not FreeBSD
+extern long pagesize;  // needed for Linux only, not FreeBSD
 #endif
 
 extern int eu_dll_exists; // a Euphoria .dll is being used

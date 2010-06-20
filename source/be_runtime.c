@@ -10,6 +10,7 @@
 /* Included files */
 /******************/
 #include <stdio.h>
+#include <io.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
@@ -32,6 +33,7 @@
 #  endif
 #  include <dos.h>
 #  include <process.h>
+#  include <conio.h>
 #endif
 
 #include <string.h>
@@ -104,7 +106,7 @@ extern int Argc;
 extern char **Argv;
 extern struct sline *slist;
 extern long gline_number;
-extern unsigned char TempBuff[];
+extern char TempBuff[];
 extern struct videoconfig config;
 extern int il_file;
 extern struct IL fe;
@@ -403,16 +405,14 @@ int Mouse_Handler(Gpm_Event *, void *);
 #endif
 struct rccoord GetTextPositionP();
 symtab_ptr Locate();
-void de_reference();
 s1_ptr NewS1();
 object NewString();
 object machine();
 s1_ptr SequenceCopy();
 char *getenv();
 IFILE long_iopen();
-void Cleanup();
-void UserCleanup();
-void MainScreen();
+
+
 int wingetch();
 
 /*********************/
@@ -526,7 +526,7 @@ int matherr(struct _exception *err)  // OW wants this
 #endif
 {
 	char *msg;
-	char sbuff[80];
+	
 
 	switch(err->type) {
 		case DOMAIN:
@@ -836,7 +836,7 @@ void Append(object_ptr target, object s1, object a)
  */
 s1_ptr Add_internal_space(object a,int at,int len)
 {
-	char *obj_ptr;
+	
 	s1_ptr new_seq;
 	object temp;
 	int i;
@@ -961,7 +961,7 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 	int i;
 	object_ptr op, se;
 
-	if (s1->ref == 1 && *target == s1) {
+	if (s1->ref == 1 && *target == (object)s1) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
 
@@ -996,12 +996,12 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 
 void Tail(s1_ptr s1, int start, object_ptr target)
 {
-	int i;
+	
 	int newlen;
 	object_ptr ss, op, se;
 
 	newlen = s1->length - start + 1;
-	if (s1->ref == 1 && s1 == *target) {
+	if (s1->ref == 1 && (object)s1 == *target) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
 
@@ -1089,7 +1089,7 @@ object Remove_elements(int start, int stop, int in_place )
 void AssignElement(object what, int place, object_ptr target)
 {
 	s1_ptr s1 = *assign_slice_seq;
-	if (UNIQUE(s1) && *target == *assign_slice_seq)
+	if (UNIQUE(s1) && *target == (object)(*assign_slice_seq))
 		{DeRef(*(s1->base+place));}
 	else {
 		s1_ptr s2 = NewS1(s1->length);
@@ -1323,7 +1323,7 @@ object Repeat(object item, object repcount)
 /* generate a sequence of <item> repeated <count> times */
 {
 	object_ptr obj_ptr;
-	double d;
+	
 	long count;
 	s1_ptr s1;
 
@@ -1437,10 +1437,10 @@ void udt_clean( object o, long rid ){
 	
 	args = MAKE_SEQ( s );
 	code = (int *)EMalloc( 4*sizeof(int*) );
-	code[0] = (int **)opcode(CALL_PROC);
-	code[1] = (int **)&rid;
-	code[2] = (int **)&args;
-	code[3] = (int *)opcode(CALL_BACK_RETURN);
+	code[0] = (int)opcode(CALL_PROC);
+	code[1] = (int)&rid;
+	code[2] = (int)&args;
+	code[3] = (int)opcode(CALL_BACK_RETURN);
 	if (expr_top >= expr_limit) {
 		expr_max = BiggerStack();
 		expr_limit = expr_max - 3;
@@ -1646,8 +1646,8 @@ void de_reference_i(s1_ptr a)
    they will all be integers */
 /* a must not be an ATOM_INT */
 {
-	object_ptr p;
-	object t;
+	
+	
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
@@ -2267,7 +2267,7 @@ void setran()
 #if !defined( EWINDOWS )
 	long garbage;
 #endif
-	static src = prim1 ^ prim2;
+	static long src = prim1 ^ prim2;
 
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
@@ -2635,7 +2635,7 @@ object calc_SHA256(object a)
 
 unsigned int calc_adler32(object a)
 {
-	object lTempResult;
+	
 	long lSLen;
 	int tfi;
 	union TF
@@ -2762,8 +2762,8 @@ static unsigned int hsieh32(char *data, int len, unsigned int starthash)
 
 static unsigned int calc_hsieh32(object a)
 {
-	long lSLen;
-	int tfi;
+	
+	
 	union TF
 	{
 		double ieee_double;
@@ -2777,8 +2777,8 @@ static unsigned int calc_hsieh32(object a)
 	char *sp;
 	int slen;
  	unsigned int lHashVal;
- 	int len;
- 	char *data;
+ 	
+ 	
 
  	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
@@ -2866,7 +2866,7 @@ static unsigned int calc_hsieh32(object a)
 
 unsigned int calc_fletcher32(object a)
 {
-	object lTempResult;
+	
 	long lSLen;
 	int tfi;
 	union TF
@@ -2968,11 +2968,11 @@ object calc_hash(object a, object b)
 {
 	unsigned long lHashValue;
 	long lSLen;
-	long f = 0;
-	double ff = 0.0L;
+	
+	
 	int tfi;
 	object lTemp;
-	object lTemp2;
+	
 	union TF
 	{
 		double ieee_double;
@@ -3020,9 +3020,9 @@ object calc_hash(object a, object b)
 			if (tf.ieee_uint.a == 0) {
 				tf.ieee_uint.a = MAXINT;
 			}
-			//lTemp2 = make_atom32(tf.ieee_uint.a);
+			
 			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
-			//DeRef(lTemp2)
+			
 			if (IS_ATOM_INT(lTemp)) {
 				seeder.ieee_uint.a = lTemp;
 				seeder.ieee_uint.b = rol(lTemp, 15);
@@ -3428,7 +3428,7 @@ void RHS_Slice( object a, object start, object end)
 	length = endval - startval + 1;
 
 #ifndef ERUNTIME
-	CheckSlice(a, startval, endval, length);
+	CheckSlice((s1_ptr)a, startval, endval, length);
 #endif
 
 
@@ -3592,7 +3592,7 @@ void MakeCString(char *s, object pobj, int slen)
 			slen = 1;
 		}
 		else {
-			obj = (object)SEQ_PTR(pobj);
+			obj = SEQ_PTR(pobj);
 			elem = obj->base;
 			seqlen = obj->length;
 			while (seqlen && (slen > 1)) {
@@ -4084,8 +4084,8 @@ static void indent()
 static void rPrint(object a)
 /* print any object in default numeric format */
 {
-	long length, printed;
-	int iv, multi_line;
+	long length;
+	int multi_line;
 	object_ptr elem;
 	char sbuff[NUM_SIZE];
 
@@ -4590,7 +4590,7 @@ int get_key(int wait)
 /* Get one key from keyboard, without echo. If wait is TRUE then wait until
    a key is typed, otherwise return -1 if no key is available. */
 {
-	unsigned a, ascii;
+	unsigned a;
 
 #ifdef EWINDOWS
 #if defined(EMINGW)
@@ -4930,8 +4930,10 @@ char **make_arg_cv(char *cmdline, int *argc)
 			argv[0] = (char *)EMalloc(bs + 2);
 			ns = GetModuleFileName(NULL, (LPTSTR)argv[0], bs);
 		}
-		if (ns == 0)
-			argv[0] = "eui.exe";
+		if (ns == 0) {
+			argv[0] = (char *)EMalloc(8); // strlen("eui.exe") + 1
+			strcpy(argv[0], "eui.exe");
+		}
 		w = 1;
 	}
 	else
@@ -4998,7 +5000,7 @@ void system_call(object command, object wait)
 	char *string_ptr;
 	int len, w;
 	int len_used;
-	long c;
+	
 
 	if (!IS_SEQUENCE(command))
 		RTFatal("first argument of system() must be a sequence");
@@ -5042,7 +5044,7 @@ object system_exec_call(object command, object wait)
 	char **argv;
 	int len, w, exit_code;
 	int len_used;
-	long c;
+	
 
 	if (!IS_SEQUENCE(command))
 		RTFatal("first argument of system_exec() must be a sequence");
@@ -5073,8 +5075,11 @@ object system_exec_call(object command, object wait)
 	exit_code = system(string_ptr);
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
-	exit_code = spawnvp(P_WAIT, argv[0], argv);
-	EFree(argv);
+	exit_code = spawnvp(P_WAIT, argv[0], (char const * const *)argv);
+	
+	EFree(argv[0]);		// free the 'process' name
+	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
+	
 #endif
 	if (len > TEMP_SIZE)
 		EFree(string_ptr);
@@ -5247,10 +5252,13 @@ unsigned general_call_back(
 						   unsigned arg7, unsigned arg8, unsigned arg9)
 /* general call-back routine: 0 to 9 args */
 {
+	int num_args;
+#ifdef ERUNTIME
+	int (*addr)();
+#else
 	int *code[4+9]; // place to put IL: max 9 args
 	int *save_tpc;
-	int num_args;
-	int (*addr)();
+#endif
 
 	if (gameover)
 		return (unsigned)0; // ignore messages after we decide to shutdown
@@ -5599,10 +5607,14 @@ object Command_Line()
 void Cleanup(int status)
 /* clean things up before leaving 0 - ok, non 0 - error */
 {
+#ifdef EUNIX
 	char *xterm;
+#endif
 	int i;
+#ifndef ERUNTIME
 	long c;
 	FILE *wrnf = NULL;
+#endif
 
 	gameover = TRUE;
 
@@ -5627,9 +5639,9 @@ void Cleanup(int status)
 	if (warning_count && display_warnings) {
 		if (TempWarningName) {
 			wrnf = iopen(TempWarningName,"w");
-			if (wrnf > 0) {
+			if (wrnf != NULL) {
 				for (i = 0; i < warning_count; i++) iprintf(wrnf,"%s",warning_list[i]);
-				close(wrnf);
+				iclose(wrnf);
 			}
 			else
 				screen_output(stderr, "\nUnable to open warning file!\n");
@@ -5731,8 +5743,8 @@ void UserCleanup(int status)
 }
 
 #ifdef EWINDOWS
-static unsigned char one_line[84];
-static unsigned char *next_char_ptr = NULL;
+static char one_line[84];
+static char *next_char_ptr = NULL;
 
 #if defined(EMINGW)
 int winkbhit()
@@ -5787,7 +5799,7 @@ int wingetch()
 }
 #endif
 
-void key_gets(unsigned char *input_string)
+void key_gets(char *input_string)
 /* return input string from keyboard */
 /* lets us use any color to echo user input in graphics modes */
 {
@@ -6002,7 +6014,7 @@ long find_from(object a, s1_ptr b, object c)
 	return 0;
 }
 
-e_match_from(s1_ptr a, s1_ptr b, object c)
+long e_match_from(s1_ptr a, s1_ptr b, object c)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
@@ -6074,7 +6086,8 @@ e_match_from(s1_ptr a, s1_ptr b, object c)
 	return 0; /* couldn't match */
 }
 
-void Replace( replace_ptr rb ){
+void Replace( replace_ptr rb )
+{
 //  normalise arguments, dispatch special cases
 	long start_pos, end_pos, seqlen, replace_len;
 	object copy_from, copy_to, target;

@@ -29,7 +29,7 @@ void pcre_deref(object re) {
         pcre_cleanup_ptr rcp;
         object errmsg;
         if (IS_ATOM_DBL(re)) {
-                rcp = DBL_PTR(re)->cleanup;
+                rcp = (pcre_cleanup_ptr)(DBL_PTR(re)->cleanup);
                 if (rcp != 0) {
                         if (errmsg = rcp->errmsg) {
                                 DeRefDS(errmsg);
@@ -37,7 +37,7 @@ void pcre_deref(object re) {
                         }
                 }
         } else if (IS_SEQUENCE(re)) { 
-                rcp = SEQ_PTR(re)->cleanup;
+                rcp = (pcre_cleanup_ptr)(SEQ_PTR(re)->cleanup);
                 if (rcp->re) {
                         (*pcre_free)(rcp->re);
                         rcp->re = 0;
@@ -71,7 +71,7 @@ object compile(object pattern, object eflags) {
         EFree( str );
         if( re == NULL ){
                 // error, so pass the error string to caller
-                return NewString( error );
+                return NewString( (char *)error );
         }
         
 
@@ -105,7 +105,7 @@ object compile(object pattern, object eflags) {
 		UTF8
 */
 object compile_pcre(object x, object flags) {
-        pcre *re;
+
         pcre_cleanup_ptr rcp, prev;
         object compiled_regex;
 
@@ -124,12 +124,12 @@ object compile_pcre(object x, object flags) {
                 DBL_PTR(x)->cleanup = (cleanup_ptr) rcp;
         } else {
                 // There could be some other cleanup attached
-                prev = SEQ_PTR(x)->cleanup;
+                prev = (pcre_cleanup_ptr)(SEQ_PTR(x)->cleanup);
                 
                 if( prev == 0 || prev->cleanup.type != CLEAN_PCRE ){
                         rcp = (pcre_cleanup_ptr)EMalloc(sizeof(struct pcre_cleanup));
                         if( prev ){
-                                rcp->cleanup.next = prev;
+                                rcp->cleanup.next = (cleanup_ptr)prev;
                         }
                         else{
                                 rcp->cleanup.next = 0;
@@ -145,14 +145,15 @@ object compile_pcre(object x, object flags) {
                 }
                 
                 SEQ_PTR(x)->cleanup = (cleanup_ptr) rcp;
-                rcp->re = compiled_regex;
+                rcp->re = (struct real_pcre *)compiled_regex;
                 RefDS(x);
         }
         
         return x;
 }
 
-object pcre_error_message(object x) {
+object pcre_error_message(object x)
+{
         pcre_cleanup_ptr rcp;
         object x1 = SEQ_PTR(x)->base[1];
 
@@ -160,7 +161,7 @@ object pcre_error_message(object x) {
                 return 0;
         }
 
-        rcp = DBL_PTR(x1)->cleanup;
+        rcp = (pcre_cleanup_ptr)(DBL_PTR(x1)->cleanup);
         if (rcp->errmsg == 0) {
                 return 0;
         }
@@ -173,7 +174,7 @@ object pcre_error_message(object x) {
 pcre *get_re(object x) {
         // Makes sure that the regex has been compiled, and then returns
         // the compiled regex
-        pcre_cleanup_ptr rcp = SEQ_PTR(x)->cleanup;
+        pcre_cleanup_ptr rcp = (pcre_cleanup_ptr)(SEQ_PTR(x)->cleanup);
         if (rcp == 0) {
                 return 0;
         }
@@ -266,13 +267,13 @@ static int add(int *len, char **s, const char *a, int alen, int *flag) {
 
     if (*s) {
         *s = (char *) ERealloc(*s, NewLen);
-        res = memcopy(*s + *len, NewLen, a, alen);
+        res = memcopy(*s + *len, NewLen, (void *)a, alen);
                 if (res != 0) {
                         RTFatal("Internal error: be_pcre:add#1 memcopy failed (%d).", res);
                 }
     } else {
         *s = (char *) EMalloc(NewLen);
-        res = memcopy(*s, NewLen, a, alen);
+        res = memcopy(*s, NewLen, (void *)a, alen);
                 if (res != 0) {
                         RTFatal("Internal error: be_pcre:add#2 memcopy failed (%d).", res);
                 }
@@ -323,7 +324,7 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
     int dlen = 0;
     char *dest = 0;
     char Ch;
-    int n, st, en;
+    int n, st;
     int flag = 0;
 
     *Dest = 0;
@@ -522,15 +523,16 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
     return 0;
 }
 
-object find_replace_pcre(object x ) {
+object find_replace_pcre(object x )
+{
         int rc;
         int ovector[30], out_len = 0;
         pcre *re;
         char *str, *rep, *out = 0;
-        s1_ptr s;
+        
         s1_ptr sub;
         s1_ptr rep_s;
-        int i, j;
+        
         object pcre_ptr;
         int options;
         int start_from;

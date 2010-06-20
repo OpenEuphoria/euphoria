@@ -79,97 +79,28 @@ char main_path[PATH_MAX+1]; /* path of main file being executed */
 /*******************/
 /* Local variables */
 /*******************/
-static int src_file;
+
 
 /**********************/
 /* Declared functions */
 /**********************/
 extern char *getenv();
+void InitExecute();
+void InitDebug();
+void InitTraceWindow();
 #include "alloc.h"
 
 /*********************/
 /* Defined functions */
 /*********************/
 
-static int e_path_open(char *name, int mode)
-/* follow the search path, if necessary to open the main file */
-{
-	int src_file, fn;
-#ifdef EWINDOWS
-	int accents;
-#endif
-	char *path;
-	char *full_name;
-	char *p;
-	   
-	file_name[1] = name;
-	src_file = long_open(name, mode);        
-	if (src_file > -1) {
-		return src_file;        
-	}
-	/* first make sure that name is a simple name without '\' in it */
-	for (p = name; *p != 0; p++) {
-		if (*p == '\\' || *p == '/')   // should add ':' too - but doesn't matter
-			return -1;
-	}     
-	path = getenv("PATH");
-	if (path == NULL)
-		return -1;
-	full_name = EMalloc(PATH_MAX+1);
-	fn = 0;
-#ifdef EWINDOWS
-	accents = 0;
-#endif
-	for (p = path; ; p++) {
-		if (*p == ' ' || *p == '\t')
-			continue;
-		else if (*p == PATH_SEPARATOR || *p == '\0') {
-			/* end of a directory */
-			if (fn > 0) {
-				full_name[fn++] = SLASH;
-				copy_string(full_name + fn, name, PATH_MAX);
-				src_file = long_open(full_name, mode);
-				if (src_file > -1) {
-					file_name[1] = full_name;           
-					return src_file;
-				}
-				else {
-#ifdef EWINDOWS                         
-					if (accents) {
-						accents = OemToCharBuffA(full_name,full_name,fn);
-				src_file = long_open(full_name, mode);
-				if (src_file > -1) {
-					file_name[1] = full_name;           
-					return src_file;
-				}
-					}
-#endif
-					fn = 0;
-				}
-			}
-			if (*p == '\0')
-				break;
-#ifdef EWINDOWS
-			accents = 0;
-#endif
-		}
-		else {
-			full_name[fn++] = *p;
-#ifdef EWINDOWS
-			if (*p >= 128) accents = 1;
-#endif
-		}
-	}
-	return -1;
-}
-
 void be_init()
 /* Main routine for Interpreter back end */
 {
 	char *p;
-	int i;
-	long c;
-	char *temp;
+	
+	
+
 
 	EuConsole = (getenv("EUCONS") != NULL && atoi(getenv("EUCONS")) == 1);
 	clocks_per_sec = CLOCKS_PER_SEC;

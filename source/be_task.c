@@ -47,8 +47,6 @@ double clock_period = 0.01;  // should check this at run-time
 /**********************/
 /* Imported variables */
 /**********************/
-extern unsigned char TempBuff[];
-
 extern struct routine_list *rt00;
 
 #ifndef ERUNTIME
@@ -80,10 +78,11 @@ extern int total_stack_size; // total amount of stack available
 /* Declared functions */
 /*********************/
 extern double current_time();
+void restore_privates(symtab_ptr this_routine);
 #include "alldefs.h"
 
 extern void debug_dbl(double);
-void scheduler(double);
+
 extern struct routine_list _00[]; 
 void run_current_task( int );
 void init_task( int );
@@ -96,7 +95,7 @@ void init_task( int );
 void InitTask()
 // initialize the first (top-level) task - task id 0
 {   
-	object_ptr word;
+	
 	
 	tcb = (struct tcb *)EMalloc(sizeof(struct tcb)); // allocate one entry
 	tcb[0].rid = -1;
@@ -473,7 +472,7 @@ static int which_task(double tid)
 // find internal task number, given external task id
 {   
 	int i;
-	char buff[40];
+
 	
 	for (i = 0; i < tcb_size; i++) {
 		if (tcb[i].tid == tid) {
@@ -709,8 +708,8 @@ object task_create(object r_id, object args)
 	struct tcb *new_entry;
 	int recycle, recycle_size, i, j, proc_args;
 	double id, t;
-	int size;
-	object_ptr word;
+	
+	
 	
 	r_id = (object)get_pos_int("task_create", r_id);
 
@@ -844,11 +843,11 @@ object ctask_create(object r_id, object args)
 // Create a new task for translated code - return a double task id - assumed by Translator
 {
 	
-	symtab_ptr sub;
+	
 	struct tcb *new_entry;
 	int recycle, i, j, proc_args;
 	double id, t;
-	object_ptr word;
+	
 	
 	r_id = (object)get_pos_int("task_create", r_id);
 
@@ -1032,7 +1031,7 @@ void WINAPI exec_task( void *task ){
 
 void init_task( int tx ){
 	// fibers...
-	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, tx );
+	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, (void *)tx );
 }
 
 #else
@@ -1090,6 +1089,7 @@ void scheduler(double now)
 	int p;
 
 	// first check the real-time tasks
+	stack_top = 0; // so the compiler thinks it's used.
 	
 	// find the task with the earliest MAX_TIME
 	earliest_task = rt_first;

@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <io.h>
 
 #ifdef EUNIX
 #define __USE_LARGEFILE64
@@ -108,6 +109,7 @@ int emul_flock(fd, cmd)
 
 extern char* get_svn_revision(); /* from rev.c */
 
+
 /*****************/
 /* Local defines */
 /*****************/
@@ -127,7 +129,7 @@ HINSTANCE winInstance;
 #endif
 
 int is_batch = 0; /* batch mode? Should press enter be displayed? 1=no, 0=yes */
-unsigned char TempBuff[TEMP_SIZE]; /* buffer for error messages */
+char TempBuff[TEMP_SIZE]; /* buffer for error messages */
 
 int c_routine_next = 0;       /* index of next available element */
 int c_routine_size = 0;       /* number of c_routine structs allocated */
@@ -168,7 +170,7 @@ extern int Argc;
 /**********************/
 /* Imported variables */
 /**********************/
-extern int pagesize;
+extern long pagesize;
 #ifdef EUNIX
 extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
 #endif
@@ -236,11 +238,10 @@ char *version_name =
 /* Declared Functions */
 /**********************/
 IFILE which_file();
-void NewConfig();
 s1_ptr NewS1();
 char *getcwd();
 struct rccoord GetTextPositionP();
-void do_exec(int *);
+
 void AfterExecute(void);
 void Machine_Handler();
 object SetTColor();
@@ -590,7 +591,7 @@ static object Cursor(object x)
 static object TextRows(object x)
 /* text_rows built-in */
 {
-	int rows, new_rows;
+	int new_rows;
 
 #ifdef EWINDOWS
 	COORD newsize;
@@ -651,11 +652,18 @@ void do_scroll(int top, int bottom, int amount)
 // scroll the screen from top line to bottom line by amount
 // amount is positive => text moves up
 {
-	short r1, c1, r2, c2;
-	int i, j;
+#ifdef EUINX
+	short c1;
+	short r1;
+	int t;
+	int i;
+	int j;
+	int b;
+	int prev_t;
+	int prev_b;
+	int fg;
 	int newl;
-	int fg, bg, b, t, prev_t, prev_b;
-#if defined(EUNIX)
+	int bg;
 	char c;
 	char linebuff[200 + 1];
 	int lbi;
@@ -807,7 +815,7 @@ void do_scroll(int top, int bottom, int amount)
 static object Scroll(object x)
 {
 	int amount, top, bottom;
-	int i;
+	
 
 	x = (object)SEQ_PTR(x);
 	amount = get_int(*(((s1_ptr)x)->base+1));
@@ -858,20 +866,6 @@ object SetTColor(object x)
 
 	return ATOM_1;
 }
-
-#if defined(EMINGW)
-// temporary
-static long colors[16];
-#endif
-
-#if !defined(EUNIX) && !defined(EMINGW)
-static long colors[16] = {
-	_BLACK, _BLUE, _GREEN, _CYAN,
-	_RED, _MAGENTA, _BROWN, _WHITE,
-	_GRAY, _LIGHTBLUE, _LIGHTGREEN, _LIGHTCYAN,
-	_LIGHTRED, _LIGHTMAGENTA, _YELLOW, _BRIGHTWHITE
-};
-#endif
 
 object SetBColor(object x)
 /* SET BACKGROUND COLOR */
@@ -1458,11 +1452,12 @@ static object CurrentDir()
 static object PutScreenChar(object x)
 /* x is {line, col, {c1, a1, c2, a2, ...}} */
 {
-	unsigned c, attr, len;
-	unsigned cur_line, cur_column, line, column;
+	unsigned attr, len;
+	unsigned line, column;
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
+	unsigned c;
 	char s1[2];
 	int save_line, save_col;
 #endif
@@ -1525,13 +1520,13 @@ static object PutScreenChar(object x)
 static object GetScreenChar(object x)
 /* return {character, attributes} at given (line, col) location */
 {
-	struct rccoord pos;
+
 	object_ptr obj_ptr;
 	s1_ptr result, x1;
-	unsigned c, cur_line, cur_column, line, column;
-	struct rccoord p;
+	unsigned line, column;
+	
 #ifdef EWINDOWS
-	CONSOLE_SCREEN_BUFFER_INFO console_info;
+
 	int temp, att;
 	char ch[4];
 	COORD coords;
@@ -1579,7 +1574,9 @@ static object GetScreenChar(object x)
 static object GetPosition()
 /* return {line, column} for cursor */
 {
+#ifdef EUNIX
 	struct rccoord pos;
+#endif
 	object_ptr obj_ptr;
 	s1_ptr result;
 #ifdef EWINDOWS
@@ -1620,7 +1617,10 @@ static object lock_file(object x)
 {
 	IFILE f;
 	int fd;
-	int r, t;
+	int r;
+#ifdef EUNIX
+	int t;
+#endif
 	unsigned long first, last;
 	object fn, s;
 
@@ -1801,17 +1801,13 @@ static object warning_file(object x)
 	return ATOM_1;
 }
 
-static object do_crash(object x)
+static void do_crash(object x)
 {
 	char *message;
 
 	message = EMalloc(SEQ_PTR(x)->length + 1);
 	MakeCString(message, x, SEQ_PTR(x)->length + 1);
 	RTFatal(message);
-
-	EFree(message);
-
-	return ATOM_1;
 }
 
 static object change_dir(object x)
@@ -1962,7 +1958,7 @@ static object atom_to_float64(object x)
 	}
 	else
 		len = 0;
-	return fpsequence((char *)&d, len);
+	return fpsequence((uchar *)&d, len);
 }
 
 static object atom_to_float32(object x)
@@ -1980,7 +1976,7 @@ static object atom_to_float32(object x)
 	}
 	else
 		len = 0;
-	return fpsequence((char *)&f, len);
+	return fpsequence((uchar *)&f, len);
 }
 
 object memory_copy(object d, object s, object n)
@@ -2020,10 +2016,10 @@ int open_dll_count = 0;
 
 object OpenDll(object x)
 {
-	void (FAR WINAPI *proc_address)();
+	
 	s1_ptr dll_ptr;
-	static unsigned char message[81];
-	unsigned char *dll_string;
+	static char message[81];
+	char *dll_string;
 	HINSTANCE lib;
 	int message_len;
 
@@ -2039,8 +2035,6 @@ object OpenDll(object x)
 		snprintf(message,80,"name for open_dll() is too long."
 			"  The name started with \"%s\".", dll_string);
 		RTFatal(message);
-		/*RTFatal("name for open_dll() is too long."
-			"  The name started with \"%s\".", dll_string);*/
 	}
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
@@ -2083,9 +2077,9 @@ object DefineCVar(object x)
 	HINSTANCE lib;
 	object variable_name;
 	s1_ptr variable_ptr;
-	unsigned char *variable_string;
+	char *variable_string;
 	char *variable_address;
-	object arg_size, return_size;
+	
 	unsigned addr;
 
 	// x will be a sequence if called from define_c_func/define_c_proc
@@ -2130,7 +2124,7 @@ object DefineC(object x)
 	HINSTANCE lib;
 	object routine_name;
 	s1_ptr routine_ptr;
-	unsigned char *routine_string;
+	char *routine_string;
 	int (*proc_address)();
 	object arg_size, return_size;
 	object_ptr arg;
@@ -2275,12 +2269,12 @@ object DefineC(object x)
 }
 
 #if __GNUC__ == 4
-#define CALLBACK_SIZE 96
+#define CALLBACK_SIZE (96)
 #else
-#define CALLBACK_SIZE 80
+#define CALLBACK_SIZE (80)
 #endif
 
-#define EXECUTABLE_ALIGNMENT 4
+#define EXECUTABLE_ALIGNMENT (4)
 
 extern struct routine_list *rt00;
 
@@ -2299,6 +2293,7 @@ inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	
 	return - (-radix & -v);
 }
+
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl 
@@ -2312,30 +2307,28 @@ object CallBack(object x)
    the replace value in the allocated memory. 
    */
 {
+	static unsigned char *page_addr = NULL;
+	static unsigned int page_offset = 0;
+	static long call_increment = 0;
+	static long last_block_offset = 0;
+	
 	unsigned addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
-	static unsigned char *page_addr = NULL;
-	static unsigned int page_offset = 0;
+#ifndef ERUNTIME
 	symtab_ptr routine;
-	object_ptr obj_ptr;
-	void * replace_value;
-    s1_ptr result;
+#endif
 	s1_ptr x_ptr;
 	int convention;
 	int res;
-	unsigned int oldprot;
-	unsigned int * oldprotptr;
+	unsigned long oldprot;
+	unsigned long * oldprotptr;
 	convention = C_CDECL;
 	oldprotptr = &oldprot;
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
 		x_ptr = SEQ_PTR(x);
-		/*printf( "x_ptr->length=%d, IS_SEQUENCE(*(obj_ptr=x_ptr->base+1))=%d, "
-			"SEQ_PTR(*obj_ptr)->length=%d\n",
-		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
-		fflush(stdout);*/
 		if (x_ptr->length != 2){
 			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}");
 		}
@@ -2399,25 +2392,32 @@ object CallBack(object x)
 #	ifdef EWINDOWS
 		/* Here allocate and manage memory for 4kB is a lot to use when you
 			only use 92B.  Memory is allocated by VirtualAlloc() /pagesize/ bytes at a time.
-			So, we give peices of this page on each call until there is not enough to complete
+			So, we give pieces of this page on each call until there is not enough to complete
 			up to /CALLBACK_SIZE/ bytes.  When this happens we make the page unwritable and
 			allocate a new page.
 			*/
-		if (
-			page_addr == NULL || 
-			(
-				(page_addr + page_offset + roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT) >= pagesize) &&
-				(VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr ),1)
-			)
-			)
-			
-		 {
-			page_addr = copy_addr = VirtualAlloc( NULL, CALLBACK_SIZE, 
-				MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
-			page_offset = 0;
+		if (page_addr != NULL) {
+			if (page_offset < last_block_offset) {
+				// Grab next sub-block from the current block.
+				page_offset += call_increment;
+			} else {
+				// Change previously allocated block to read-only
+				VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
+				
+				// Allocate a new block
+				page_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+				page_offset = 0;
+			}
 		} else {
-			copy_addr = page_addr + (page_offset += roundup(CALLBACK_SIZE,EXECUTABLE_ALIGNMENT));
+			// Set up 'constants' and initial block allocation
+			call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
+			last_block_offset = (pagesize - 2 * call_increment);
+			
+			page_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+			page_offset = 0;
 		}
+		
+		copy_addr = page_addr + page_offset;
 		/* Assume we are running under some Windows that
 		   supports VirtualAlloc() always returning 0. */
 		if (copy_addr == NULL)
@@ -2584,7 +2584,7 @@ object start_backend(object x)
 	long switch_len, i;
 	s1_ptr x_ptr;
 	char *w;
-	char **argv;
+	
 
 
 	w = "backend";
@@ -2612,7 +2612,7 @@ object start_backend(object x)
 	switch_len = SEQ_PTR(fe.switches)->length;
 
 	for (i=1; i <= switch_len; i++) {
-		x_ptr = SEQ_PTR(fe.switches)->base[i];
+		x_ptr = (s1_ptr)(SEQ_PTR(fe.switches)->base[i]);
 		w = (char *)EMalloc(SEQ_PTR(x_ptr)->length + 1);
 		MakeCString(w, (object) x_ptr, SEQ_PTR(x_ptr)->length + 1);
 
@@ -2635,12 +2635,12 @@ object machine(object opcode, object x)
    a general Euphoria object as its parameters and it returns a
    Euphoria object as a result. */
 {
-	unsigned addr;
+	char *addr;
 	int temp;
 	char *dest;
 	char *src;
-	unsigned long nbytes;
-	int bval;
+	
+	
 	double d;
 
 	while (TRUE) {
@@ -2721,11 +2721,9 @@ object machine(object opcode, object x)
 				return user_allocate(x);
 				break;
 			case M_FREE:
-				addr = (unsigned)get_pos_int("free", x);
-//				addr = get_pos_int("free", x);
-				if (((char *)addr) != NULL) {
-//				if (addr != NULL) {
-					EFree((char *)addr);
+				addr = (char *)get_pos_int("free", x);
+				if (addr != NULL) {
+					EFree(addr);
 				}
 				return ATOM_0;
 				break;
@@ -2905,7 +2903,8 @@ object machine(object opcode, object x)
 				break;
 
 			case M_CRASH:
-				return do_crash(x);
+				do_crash(x);
+				return ATOM_M1;
 				break;
 
 			case M_CHDIR:

@@ -455,7 +455,7 @@ object eusock_build_hostent(struct hostent *ent)
 object eusock_gethostbyname(object x)
 {
 	char *name;
-	int count;
+
 	s1_ptr name_s;
 
 	struct hostent *ent;
@@ -572,7 +572,7 @@ object eusock_socket(object x)
 	if ((unsigned) addr > (unsigned)MAXINT)
 		result_p->base[2] = NewDouble((double)(unsigned long) addr);
 	else
-		result_p->base[2] = addr;
+		result_p->base[2] = (object)addr;
 
 	return MAKE_SEQ(result_p);
 }
@@ -644,7 +644,7 @@ object eusock_connect(object x)
 		RTFatal("third argument to connect must be an integer");
 
 	s    = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	addr = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
+	addr = (struct sockaddr_in *)SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
 
 	addr->sin_port = htons(SEQ_PTR(x)->base[3]);
 
@@ -658,7 +658,7 @@ object eusock_connect(object x)
 		return ERR_FAULT;
 	}
 
-	result = connect(s, addr, sizeof(SOCKADDR));
+	result = connect(s, (struct sockaddr const *)addr, sizeof(SOCKADDR));
 
 	EFree(address);
 
@@ -912,7 +912,6 @@ object eusock_recvfrom(object x)
 
 	if (result > 0) {
         s1_ptr r;
-        object o;
 		buf[result] = 0;
 
         r = NewS1(3);
@@ -958,7 +957,7 @@ object eusock_bind(object x)
 		RTFatal("third argument to bind must be an integer");
 
 	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	service = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
+	service = (struct sockaddr_in *)SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
 	port    = SEQ_PTR(x)->base[3];
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
@@ -968,7 +967,7 @@ object eusock_bind(object x)
 	service->sin_addr.s_addr = inet_addr(address);
 	service->sin_port        = htons(port);
 
-	result = bind(s, service, sizeof(SOCKADDR));
+	result = bind(s, (struct sockaddr const *)service, sizeof(SOCKADDR));
 
 	EFree(address);
 
@@ -1023,7 +1022,7 @@ object eusock_accept(object x)
 	server = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
 
 	addr_len = sizeof(addr);
-	client   = accept(server, &addr, &addr_len);
+	client   = accept(server, (struct sockaddr *)&addr, &addr_len);
 
 	if (client == INVALID_SOCKET)
 	{

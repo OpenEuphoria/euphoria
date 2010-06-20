@@ -100,7 +100,7 @@ extern int screen_lin_addr;
 extern int max_stack_per_call;
 extern object_ptr expr_stack; 
 extern object_ptr expr_top;
-extern unsigned char TempBuff[];
+extern char TempBuff[];
 extern object_ptr frame_base;
 extern int *tpc;
 extern object_ptr *frame_base_ptr;
@@ -150,30 +150,38 @@ char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
 /*******************/
 /* Local variables */
 /*******************/
-static char FErrBuff[300];
+
+#ifdef EUNIX
 static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
-//#ifdef EUNIX
-//static WINDOW *var_scr = NULL;      // variable display screen
-//static WINDOW *debug_scr = NULL;    // debug screen
-//static WINDOW *main_scr  = NULL;    // main screen
-//#endif
-static char *DebugScreenSave = NULL;   /* place to save debug screen */
+#endif
+
+
+
+
+
+#ifndef BACKEND
 static struct rccoord MainPos; /* text position save area */
 static int MainWrap;  /* Main wrap mode */
-static int main_screen_col = 1;
-static int debug_screen_col = 1;
+static char *DebugScreenSave = NULL;   /* place to save debug screen */
 static int main_screen_line = 1;
 static int debug_screen_line = 1;
+static int main_screen_col = 1;
+static int debug_screen_col = 1;
+#endif
+
 static int first_debug;           /* first time into debug screen */
 static long trace_line;      /* current traced line */
 
-static long highlight_line;     /* current line on debug screen */
 
-static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
 								/* list of display slots */
+#ifndef BACKEND
+static long highlight_line;     /* current line on debug screen */
+static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
 static long tstamp = 1; /* time stamp for deleting vars on display */
 static IFILE conin; 
+#endif
+
 
 /**********************/
 /* Declared functions */
@@ -232,6 +240,7 @@ void InitDebug()
 	trace_line = 0;
 }
 
+#ifndef BACKEND
 static void set_bk_color(int c)
 /* set the background color for color displays 
    otherwise just leave the background as black */
@@ -279,7 +288,6 @@ static void set_bk_color(int c)
 	SetBColor(MAKE_INT(col));
 }
 
-#ifndef BACKEND
 static int OffScreen(long line_num)
 /* return TRUE if line_num is off (or almost off) the TRACE window */
 {
@@ -765,7 +773,7 @@ void ShowDebug()
 /* switch to debug screen from main screen */
 {
 	int i;
-	long size;
+	
 	struct EuViewPort vp;
 
 	if (current_screen == DEBUG_SCREEN)
@@ -1098,7 +1106,7 @@ static int screen_err_out;
 #define TPTEMP_BUFF_SIZE (800)
 static char TPTempBuff[TPTEMP_BUFF_SIZE]; // TempBuff might contain the error message
 
-static sf_output(char *string)
+static void sf_output(char *string)
 // output error info to ex.err and optionally to the screen
 {
 	iprintf(TempErrFile, "%s", string);
@@ -1148,8 +1156,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 // s_ptr is symbol involved in error
 {
 	int *new_pc;
-	symtab_ptr current_proc, prev_proc, sym;
-	object_ptr obj_ptr;
+	symtab_ptr current_proc;
+	
 	int levels, skipping, dash_count, i, task, show_message;
 	char *routine_name;
 	

@@ -70,8 +70,6 @@
 #define ATOM_1     1
 #define ATOM_2     2
 
-typedef long object;
-typedef object *object_ptr;
 
 struct cleanup;
 typedef struct cleanup *cleanup_ptr;
@@ -132,9 +130,6 @@ struct ns_list {
 	int file_num;
 };
 
-typedef struct d  *d_ptr;
-typedef struct s1 *s1_ptr;
-
 struct sline {      /* source line table entry */
 	char *src;               /* text of line, 
 								first 4 bytes used for count when profiling */
@@ -158,15 +153,7 @@ struct replace_block {
 	object_ptr stop;
 	object_ptr target;
 };
-typedef struct replace_block *replace_ptr;
 
-#ifdef INT_CODES
-typedef int opcode_type;
-#define opcode(x) (x)
-#else
-typedef int *opcode_type;
-#define opcode(x) jumptab[x-1]
-#endif
 
 #define UNKNOWN -1
 

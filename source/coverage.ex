@@ -6,9 +6,9 @@ constant H_FILE = `
 #ifndef COVERAGE_H_
 #define COVERAGE_H_
 
-#define COVER_LINE %scover_line
-#define COVER_ROUTINE %scover_routine
-#define WRITE_COVERAGE_DB %swrite_coverage_db
+#define COVER_LINE [1]cover_line
+#define COVER_ROUTINE [1]cover_routine
+#define WRITE_COVERAGE_DB [1]write_coverage_db
 
 void COVER_LINE( int );
 void COVER_ROUTINE( int );
@@ -37,7 +37,7 @@ procedure create_header( sequence builddir )
 				if regex:has_match( filenum, lines[j] ) then
 					sequence m = regex:all_matches( filenum, lines[j] )
 					atom out = open( builddir & "/back/coverage.h", "w", 1 )
-					printf( out, H_FILE, repeat( m[1][2], 3 ) )
+					writefln( out, H_FILE, m[1][2] )
 					exit "i_loop"
 				end if
 			end for

@@ -43,7 +43,7 @@
 /**********************/
 /* Imported variables */
 /**********************/
-extern unsigned char TempBuff[];
+extern char TempBuff[];
 extern int c_routine_next;         /* index of next available element */
 extern struct arg_info *c_routine; /* array of c_routine structs */
 
@@ -90,11 +90,13 @@ object call_c(int func, object proc_ad, object arg_list)
 	float flt_arg, fresult;
 	unsigned long size;
 	int proc_index;
-	int cdecl_call;
 	int (*int_proc_address)();
 	unsigned return_type;
 	unsigned long as_offset;
 	unsigned long last_offset;
+#if defined(EWINDOWS) && !defined(EWATCOM)
+	int cdecl_call;
+#endif
 
 	// this code relies on arg always being the first variable and last_offset 
 	// always being the last variable
