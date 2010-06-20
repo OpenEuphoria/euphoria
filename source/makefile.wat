@@ -633,23 +633,42 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 	cd ..
 !endif
 
-$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE)
+$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
 	$(EUDOC) -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
 
-$(BUILDDIR)\html\images $(BUILDDIR)\html\js : $(DOCDIR)\*.js $(DOCDIR)\html\images\*.png
+$(BUILDDIR)\html\js : .EXISTSONLY $(BUILDDIR)\html  
 	mkdir $^@
-	copy $(DOCDIR)\*js $(BUILDDIR)\html\js
-	copy $(DOCDIR)\html\images\* $(BUILDDIR)\html\images
 
+$(BUILDDIR)\html\images : .EXISTSONLY $(BUILDDIR)\html 
+	mkdir $^@
+
+$(BUILDDIR)\html: .EXISTSONLY
+	mkdir $^@
+	
 $(BUILDDIR)\html\style.css : $(DOCDIR)\style.css
 	copy $(DOCDIR)\style.css $(BUILDDIR)\html
 
-$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html Makefile.wat $(BUILDDIR)\html\images $(BUILDDIR)\html\js $(BUILDDIR)\html\style.css
+$(BUILDDIR)\html\js\scriptaculous.js: $(DOCDIR)\scriptaculous.js  $(BUILDDIR)\html\js
+	copy $(DOCDIR)\scriptaculous.js $^@
+
+$(BUILDDIR)\html\js\prototype.js: $(DOCDIR)\prototype.js  $(BUILDDIR)\html\js
+	copy $(DOCDIR)\prototype.js $^@
+
+$(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\html\images
+	copy $(DOCDIR)\html\images\prev.png $^@
+	
+$(BUILDDIR)\html\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\html\images
+	copy $(DOCDIR)\html\images\next.png $^@
+
+$(BUILDDIR)\html\js\search.js : $(DOCDIR)\search-template.js $(TRUNKDIR)\source\getindecies.ex $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js
+	$(EX) $(TRUNKDIR)\source\getindecies.ex $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js 
+	
+$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
-	cd $(TRUNKDIR)\source	
+	cd $(TRUNKDIR)\source
 
-htmldoc : $(BUILDDIR)\html\index.html
+htmldoc : $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png $(BUILDDIR)\html\js\scriptaculous.js $(BUILDDIR)\html\js\prototype.js
 
 $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
 	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "splitlevel = 2" "splitlevel = 0" &
