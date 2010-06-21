@@ -5420,7 +5420,7 @@ unsigned general_call_back(
 	code[num_args+3] = (int *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
-	*expr_top++ = NULL;           // prevents restore_privates()
+	*expr_top++ = (object)NULL;   // prevents restore_privates()
 
 	// Save the tpc value across do_exec. Sometimes Windows
 	// makes two or more call-backs in a row without returning
