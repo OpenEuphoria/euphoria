@@ -13,10 +13,10 @@
    check conversion. We must allow the user to call machine_func/
    machine_proc directly, even if he passes integers in f.p. format */
 
-#include "global.h"
+
 #include <stdlib.h>
 
-
+#include "global.h"
 #ifdef EUNIX
 
 #include <strings.h>
