@@ -742,9 +742,11 @@ void threadpc3(void);
 
 #endif  // threaded code
 
+#ifdef EWATCOM
 #pragma aux nop = \
 		"nop" \
 		modify[];
+#endif
 
 static int recover_rhs_subscript(object subscript, s1_ptr s)
 /* rhs subscript failed initial check, but might be ok */
@@ -5075,7 +5077,7 @@ void do_exec(int *start_pc)
 					RTFatal("argument to abort() must be an atom");
 				UserCleanup(i);  
 				sym = TopLevelSub->u.subp.block;
-				while( sym = sym->next_in_block ){
+				while( (sym = sym->next_in_block) ){
 						DeRef(sym->obj);
 				}
 				BREAK;

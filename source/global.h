@@ -6,10 +6,16 @@
 
 #ifndef H_GLOBAL
 #define H_GLOBAL
+
+#define UNUSED(expr) do { (void)(expr); } while (0)
+
 typedef unsigned char   uchar;
 typedef signed   char   schar;
 
 #include <stdarg.h>
+
+#define _LARGEFILE64_SOURCE
+
 #include <stdio.h>
 
 #include "object.h"
@@ -259,7 +265,16 @@ unsigned long get_pos_int(char *where, object x);
 void Append(object_ptr target, object s1, object a);
 void de_reference();
 void InitStack(int size, int toplevel);
-void Cleanup();
+void Cleanup()
+#ifdef EUNIX
+__attribute__ ((noreturn))
+#endif
+;
+void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
+#ifdef EUNIX
+__attribute__ ((noreturn))
+#endif
+;
 object NewString(char *s);
 void NewConfig(int raise_console);
 int charcopy(char *target, int target_len, char *source, int source_len);
@@ -337,7 +352,11 @@ void BadSubscript(object subs, long length);
 void SubsNotAtom();
 void NoValue(symtab_ptr s);
 object DoubleToInt(object d);
-void RTFatalType(int *pc);
+void RTFatalType(int *pc)
+#ifdef EUNIX
+__attribute__ ((noreturn))
+#endif
+;
 s1_ptr SequenceCopy(register s1_ptr a);
 void atom_condition();
 void terminate_task(int task);
@@ -374,6 +393,10 @@ void ErasePrivates(symtab_ptr proc_ptr);
 void EraseSymbol(symtab_ptr sym);
 
 void echo_wait();
+object SetTColor(object x);
+object SetBColor(object x);
+void debug_msg(char *msg);
+void update_screen_string(char *s);
 
 #ifdef EWINDOWS
 	int wingetch();

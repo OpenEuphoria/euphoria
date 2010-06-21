@@ -13,13 +13,12 @@
    check conversion. We must allow the user to call machine_func/
    machine_proc directly, even if he passes integers in f.p. format */
 
-#include <stdio.h>
+#include "global.h"
 #include <stdlib.h>
 
 
 #ifdef EUNIX
 
-#define __USE_LARGEFILE64
 #include <strings.h>
 #define stricmp strcasecmp
 
@@ -43,7 +42,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
-#include "global.h"
+
 #include "alloc.h"
 
 #ifndef LOCK_SH
@@ -214,18 +213,15 @@ extern IFILE last_w_file_ptr;
 /********************/
 /* Local variables */
 /*******************/
-#ifndef EWINDOWS
-static unsigned int long_buff = 0;
-static unsigned int short_buff = 0;
-#endif
-
 /* In DOS, this mouse data is locked in memory */
+#if defined(EGPM) || defined(EWINDOWS)
 static struct locked_data {
 	int lock;  /* = 0  semaphore */
 	int code;
 	int x;
 	int y;
 } mouse = {0,0,0,0};
+#endif
 
 char *version_name =
 #ifdef EWINDOWS
@@ -475,7 +471,8 @@ void NewConfig(int raise_console)
 	char *env_cols;
 	int x;
 	struct winsize ws;
-
+	UNUSED(raise_console);
+	
 	config.mode = 3;
 	config.numxpixels = 0;
 	config.numypixels = 0;
@@ -540,6 +537,7 @@ void NewConfig(int raise_console)
 static object Graphics_Mode(object x)
 /* x is the graphics mode */
 {
+	UNUSED(x);
 #if defined(EWINDOWS)
 	NewConfig(TRUE);
 #endif
@@ -596,10 +594,10 @@ static object Cursor(object x)
 static object TextRows(object x)
 /* text_rows built-in */
 {
-	int new_rows;
-
+	
 #ifdef EWINDOWS
 	COORD newsize;
+	int new_rows;
 
 	new_rows = get_int(x);
 	NewConfig(TRUE);
@@ -607,6 +605,8 @@ static object TextRows(object x)
 	newsize.Y = new_rows;
 	SetConsoleScreenBufferSize(console_output, newsize);
 	NewConfig(TRUE);
+#else
+	UNUSED(x);
 #endif
 	NewConfig(TRUE);
 	return MAKE_INT(line_max);
@@ -877,7 +877,6 @@ object SetBColor(object x)
 #if defined(EUNIX)
 #define SBC_buflen (20)
 	char buff[SBC_buflen];
-	int bold;
 #endif
 
 #ifdef EWINDOWS
@@ -912,22 +911,27 @@ object SetBColor(object x)
 
 static object MousePointer(object x)
 {
+	UNUSED(x);
 	return ATOM_1;
 }
 static object MouseEvents(int interrupts)
 {
+	UNUSED(interrupts);
 	return ATOM_1;
 }
 int mouse_installed()
 {
 	return 0;
 }
+#ifndef EUNIX
 static void show_mouse_cursor(int x)
 {
+	UNUSED(x);
 }
 static void lock_mouse_pages()
 {
 }
+#endif
 
 #ifdef EUNIX
 #ifdef EGPM  // if GPM package is desired, - not available on FreeBSD
@@ -1363,7 +1367,7 @@ static object Dir(object x)
 	dirp = opendir(path); // on Linux, path *must* be a directory
 
 	if (dirp == NULL) {
-		r = stat(path, &stbuf);  // should be a file
+		r = stat64(path, &stbuf);  // should be a file
 		if (r == -1)
 			return ATOM_M1;
 	}
@@ -1560,8 +1564,8 @@ static object GetScreenChar(object x)
 #endif
 
 #ifdef EUNIX
-	if (line >= 1 && line <= line_max &&
-		column >= 1 && column <= col_max) {
+	if (line >= 1 && line <= (unsigned)line_max &&
+		column >= 1 && column <= (unsigned)col_max) {
 		obj_ptr[1] = screen_image[line-1][column-1].ascii;
 		obj_ptr[2] = (screen_image[line-1][column-1].fg_color & 15) |
 					 (screen_image[line-1][column-1].bg_color << 4);
@@ -1623,9 +1627,11 @@ static object lock_file(object x)
 	int r;
 #ifdef EUNIX
 	int t;
-#endif
+#else
 	unsigned long first, last;
-	object fn, s;
+	object s;
+#endif
+	object fn;
 
 	// get 1st element of x - file number - assume x is a sequence of length 3
 	x = (object)SEQ_PTR(x);
@@ -1674,8 +1680,11 @@ static object unlock_file(object x)
 {
 	IFILE f;
 	int fd;
+#ifdef EWINDOWS
 	unsigned long first, last;
-	object fn, s;
+	object s;
+#endif
+	object fn;
 
 	// get 1st element of x - can assume x is a sequence of length 2
 	x = (object)SEQ_PTR(x);
@@ -1753,6 +1762,7 @@ static object set_rand(object x)
 static object use_vesa(object x)
 /* turn on/off vesa flag */
 {
+	UNUSED(x);
 	not_supported("use_vesa()");
 	return ATOM_1;
 }
@@ -1902,6 +1912,7 @@ object tick_rate(object x)
 /* Set new system clock tick (interrupt) rate.
    x may be int or double, >= 0. 0 means restore 18.2 rate. */
 {
+	UNUSED(x);
 	return ATOM_1;
 }
 
@@ -1912,12 +1923,13 @@ static object float_to_atom(object x, int flen)
 	object_ptr obj_ptr;
 	char fbuff[8];
 	double d;
+	s1_ptr s;
 
-	x = (object)SEQ_PTR(x);
-	len = ((s1_ptr)x)->length;
+	s = SEQ_PTR(x);
+	len = s->length;
 	if (len != flen)
 		RTFatal("sequence has wrong length");
-	obj_ptr = ((s1_ptr)x)->base+1;
+	obj_ptr = s->base+1;
 	for (i = 0; i < len; i++) {
 		fbuff[i] = (char)obj_ptr[i];
 	}
@@ -2177,7 +2189,7 @@ object DefineC(object x)
 #endif
 		}
 		/* assign a sequence value to routine_ptr */
-		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %x", proc_address);
+		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %p", proc_address);
 		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		routine_name = NewString(TempBuff);
 		routine_ptr = SEQ_PTR(routine_name);
@@ -2310,11 +2322,12 @@ object CallBack(object x)
    the replace value in the allocated memory. 
    */
 {
+#ifdef EWINDOWS
 	static unsigned char *page_addr = NULL;
 	static unsigned int page_offset = 0;
 	static long call_increment = 0;
 	static long last_block_offset = 0;
-	
+#endif
 	unsigned addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
@@ -2350,7 +2363,7 @@ object CallBack(object x)
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
 #else
-	if ((unsigned)routine_id >= e_routine_next)
+	if (routine_id >= e_routine_next)
 		RTFatal("call_back: bad routine id\n");
 	routine = e_routine[routine_id];
 
@@ -2459,7 +2472,7 @@ object CallBack(object x)
 	/* Make memory executable. */
 #ifdef EUNIX
 #ifndef EBSD
-	mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page
+	mprotect((void*)((unsigned)copy_addr & ~(pagesize-1)),  // start of page
 			 pagesize,  // one page
 			 PROT_READ+PROT_WRITE+PROT_EXEC);
 #endif
@@ -2565,12 +2578,14 @@ object eu_uname()
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */
 {
+	UNUSED( sig_no );
 	RTFatal("A machine-level exception occurred during execution of your program");
 }
 #else
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */
 {
+	UNUSED( sig_no );
 	RTFatal("A machine-level exception occurred during execution of this statement");
 }
 #endif

@@ -74,6 +74,15 @@ void wcpush(long X);
                 parm [EAX];
 #endif // EWATCOM
 
+typedef union {
+	double dbl;
+	int ints[2];
+} double_arg;
+
+typedef union {
+	float flt;
+	int intval;
+} float_arg;
 
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
@@ -86,8 +95,10 @@ object call_c(int func, object proc_ad, object arg_list)
 	object_ptr next_arg_ptr, next_size_ptr;
 	object next_arg, next_size;
 	int iresult, i;
-	double dbl_arg, dresult;
-	float flt_arg, fresult;
+	double dresult;
+	double_arg dbl_arg;
+	float_arg flt_arg;
+	float fresult;
 	unsigned long size;
 	int proc_index;
 	int (*int_proc_address)();
@@ -107,7 +118,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	// Setup and Check for Errors
 	
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
-	if ((unsigned)proc_index >= c_routine_next) {
+	if (proc_index >= c_routine_next) {
 		RTFatal("c_proc/c_func: bad routine number (%d)", proc_index);
 	}
 	
@@ -128,7 +139,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	return_type = c_routine[proc_index].return_size; // will be INT
 	
-	if (func && return_type == 0 || !func && return_type != 0) {
+	if ((func && return_type == 0) || (!func && return_type != 0) ) {
 		if (c_routine[proc_index].name->length < TEMP_SIZE)
 			MakeCString(TempBuff, MAKE_SEQ(c_routine[proc_index].name), TEMP_SIZE);
 		else
@@ -170,26 +181,26 @@ object call_c(int func, object proc_ad, object arg_list)
 		if (size == C_DOUBLE || size == C_FLOAT) {
 			/* push 8-byte double or 4-byte float */
 			if (IS_ATOM_INT(next_arg))
-				dbl_arg = (double)next_arg;
+				dbl_arg.dbl = (double)next_arg;
 			else if (IS_ATOM(next_arg))
-				dbl_arg = DBL_PTR(next_arg)->dbl;
+				dbl_arg.dbl = DBL_PTR(next_arg)->dbl;
 			else { 
 				arg = arg+argsize+9999; // 9999 = 270f hex - just a marker for asm code
 				RTFatal("arguments to C routines must be atoms");
 			}
 
 			if (size == C_DOUBLE) {
-				arg = *(1+(unsigned long *)&dbl_arg);
+				arg = dbl_arg.ints[1];
 
 				push();  // push high-order half first
 				argsize += 4;
-				arg = *(unsigned long *)&dbl_arg;
+				arg = dbl_arg.ints[0];
 				push(); // don't combine this with the push() below - Lcc bug
 			}
 			else {
 				/* C_FLOAT */
-				flt_arg = (float)dbl_arg;
-				arg = *(unsigned long *)&flt_arg;
+				flt_arg.flt = (float)dbl_arg.dbl;
+				arg = (unsigned long)flt_arg.intval;
 				push();
 			}
 		}

@@ -11,6 +11,7 @@
         #include "pcre/config.h" /* cannot make it link w/o it */
 #endif
 
+#include <ctype.h>
 #include <string.h>
 #include "alldefs.h"
 #include "alloc.h"
@@ -31,7 +32,7 @@ void pcre_deref(object re) {
         if (IS_ATOM_DBL(re)) {
                 rcp = (pcre_cleanup_ptr)(DBL_PTR(re)->cleanup);
                 if (rcp != 0) {
-                        if (errmsg = rcp->errmsg) {
+                        if ( (errmsg = rcp->errmsg) ) {
                                 DeRefDS(errmsg);
                                 rcp->errmsg = 0;
                         }

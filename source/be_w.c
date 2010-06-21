@@ -32,6 +32,8 @@
 #  include <windows.h>
 #endif
 #include "alldefs.h"
+#include "global.h"
+#include "be_w.h"
 
 /******************/
 /* Local defines  */
@@ -116,11 +118,7 @@ struct rccoord GetTextPositionP()
         p.col = screen_col;
         return p;
 }
-void OutTextP(const char * c)
-{
-    printf(c);
-    fflush(stdout);
-}
+
 
 #ifdef EUNIX
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],

@@ -107,9 +107,6 @@ static struct block_list freeblk_list[NUMBER_OF_FBL]; /* set of free block lists
 void free();
 #endif
 
-static void AlreadyFree();
-size_t _msize();
-
 /*********************/
 /* Defined functions */
 /*********************/
@@ -311,6 +308,7 @@ static void DeAllocated(long n)
 /* write garbage into freed storage block to prevent accidental reuse */
 #endif // HEAP_CHECK
 
+#ifndef ESIMPLE_MALLOC
 static void Free_All()
 /* release the entire storage cache back to the heap */
 {
@@ -347,6 +345,7 @@ static void Free_All()
 	d_list = NULL;
 	cache_size = 0;
 }
+#endif
 
 // #ifndef ESIMPLE_MALLOC
 // static void Recycle()
@@ -835,7 +834,7 @@ s1_ptr NewS1(long size)
 	register s1_ptr s1;
 
 	assert(size >= 0);
-	if (size > (((unsigned long)0xFFFFFFFF - sizeof(struct s1)) / sizeof(object)) - 1) {
+	if ((unsigned long)size > (((unsigned long)0xFFFFFFFF - sizeof(struct s1)) / sizeof(object)) - 1) {
 		// Ensure it doesn't overflow
 		SpaceMessage();
 	}
@@ -946,11 +945,11 @@ long append_string(char *dest, char *src, size_t bufflen)
 	int dest_len;
 	
 	dest_len = strlen(dest);
-	if (dest_len + 1 < bufflen) {
+	if ((size_t)dest_len + 1 < bufflen) {
 		return copy_string(dest + dest_len, src, bufflen - dest_len);
 	}
 	
-	if (dest_len + 1 == bufflen)
+	if ((size_t)dest_len + 1 == bufflen)
 		*(dest + dest_len) = '\0';
 		
 	return 0;

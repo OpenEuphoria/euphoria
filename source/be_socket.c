@@ -18,6 +18,8 @@
     #include <sys/types.h>
     #include <sys/socket.h>
     #include <netdb.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
 
 	#ifdef EUNIX
         #include <unistd.h>
@@ -879,7 +881,7 @@ object eusock_sendto(object x)
 	addr.sin_port   = htons(port);
     addr.sin_addr.s_addr = inet_addr(ip);
 
-	result = sendto(s, buf, buf_s->length, flags, (SOCKADDR *) &addr, sizeof(addr));
+	result = sendto(s, buf, buf_s->length, flags, (struct sockaddr*) &addr, sizeof(addr));
 
 	EFree(buf);
     EFree(ip);
@@ -896,7 +898,8 @@ object eusock_recvfrom(object x)
 {
 	SOCKET s;
 	struct sockaddr_in addr;
-	int flags, addr_size, result;
+	int flags, result;
+	unsigned int addr_size;
 	char buf[BUFF_SIZE];
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
@@ -908,7 +911,7 @@ object eusock_recvfrom(object x)
 	flags = SEQ_PTR(x)->base[2];
     addr_size = sizeof(addr);
 
-	result = recvfrom(s, buf, BUFF_SIZE, flags, (SOCKADDR *) &addr, &addr_size);
+	result = recvfrom(s, buf, BUFF_SIZE, flags, (struct sockaddr *) &addr, &addr_size);
 
 	if (result > 0) {
         s1_ptr r;
@@ -1012,7 +1015,7 @@ object eusock_accept(object x)
 {
 	SOCKET server, client;
 	struct sockaddr_in addr;
-	int addr_len;
+	unsigned int addr_len;
 
 	s1_ptr client_seq, client_sock_p;
 
@@ -1035,7 +1038,7 @@ object eusock_accept(object x)
 
 	client_seq = NewS1(2);
 	client_seq->base[1] = MAKE_SEQ(client_sock_p);
-	client_seq->base[2] = NewString(inet_ntoa(addr.sin_addr));
+	client_seq->base[2] = NewString( inet_ntoa( addr.sin_addr ) );
 
 	return MAKE_SEQ(client_seq);
 }
@@ -1047,7 +1050,8 @@ object eusock_accept(object x)
 object eusock_getsockopt(object x)
 {
 	SOCKET s;
-	int level, optname, optlen, optval;
+	int level, optname, optval;
+	unsigned int optlen;
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to get_option must be a socket");

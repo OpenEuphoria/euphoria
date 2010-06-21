@@ -714,7 +714,7 @@ object task_create(object r_id, object args)
 	r_id = (object)get_pos_int("task_create", r_id);
 
   
-	if ((unsigned)(r_id) >= e_routine_next)
+	if ( r_id >= e_routine_next)
 		RTFatal("invalid routine id");
 	sub = e_routine[r_id];
 	
@@ -1004,7 +1004,7 @@ void run_task( int tx ){
 #endif // !ERUNTIME 
 	{ // TRANSLATED_TASK
 		
-		if (tcb[earliest_task].impl.translated.task == NULL) {
+		if ( (tcb[earliest_task].impl.translated.task == (TASK_HANDLE)NULL) ){
 			// first time we are running this task
 			init_task( earliest_task );
 			
@@ -1050,9 +1050,10 @@ void wait_for_task( int task ){
  * This is where a new thread/task starts.  It waits for its turn before
  * calling the task's procedure.
  */
-void start_task( void *task ){
+void *start_task( void *task ){
 	wait_for_task( (int) task );
 	call_task( tcb[(int)task].rid, tcb[(int)task].args );
+	return task;
 }
 
 /**
@@ -1061,7 +1062,7 @@ void start_task( void *task ){
 
 void init_task( int tx ){
 	int ret;
-	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, tx );
+	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
 	// TODO error handling
 }
 

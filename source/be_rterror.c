@@ -9,6 +9,8 @@
 /******************/
 /* Included files */
 /******************/
+#define _LARGE_FILE_API
+#define _LARGEFILE64_SOURCE
 #include <stdio.h>
 #include <stdarg.h>
 #include <setjmp.h>
@@ -39,6 +41,8 @@ extern HANDLE console_output;
 #include "be_runtime.h"
 #include "global.h"
 #include "task.h"
+#include "be_w.h"
+#include "be_machine.h"
 
 void GetViewPort(struct EuViewPort *vp);
 
@@ -600,7 +604,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			copy_string( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			snprintf(val_string,  DV_len, "%ld", iv);
+			snprintf(val_string,  DV_len, "%ld", (long)iv);
 			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
@@ -754,7 +758,7 @@ void UpdateGlobals()
 				sym = sym->next;
 			}       
 		}
-		else if (dsym->scope > S_PRIVATE && !PrivateName(dsym->name, proc)
+		else if ((dsym->scope > S_PRIVATE && !PrivateName(dsym->name, proc))
 				 || ValidPrivate(dsym, proc)) {
 			/* skip redundant slots */
 			do {
@@ -1188,7 +1192,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 					 tcb[current_task].tid, routine_name);
 			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
-			if (strlen(TPTempBuff) < dash_count) {
+			if ((int)strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
 			}
 			if (dash_count < 1) {
@@ -1418,6 +1422,10 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	Cleanup(1);
 }
 
+#ifdef EUNIX
+void CleanUpError(char *msg, symtab_ptr s_ptr, ...) __attribute__ ((noreturn));
+#endif
+
 void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 {
 	va_list ap;
@@ -1425,6 +1433,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 	CleanUpError_va(msg, s_ptr, ap);
 	va_end(ap);
 }
+
 
 void RTFatalType(int *pc)
 /* handle type-check failures */
@@ -1456,7 +1465,7 @@ void BadSubscript(object subs, long length)
 	char subs_buff[BadSubscript_bufflen];
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, BadSubscript_bufflen, "%d", subs);
+		snprintf(subs_buff, BadSubscript_bufflen, "%d", (int)subs);
 	else
 		snprintf(subs_buff, BadSubscript_bufflen, "%.10g", DBL_PTR(subs)->dbl);
 	subs_buff[BadSubscript_bufflen - 1] = 0; // ensure NULL
@@ -1481,7 +1490,7 @@ void RangeReading(object subs, int len)
 	char subs_buff[RangeReading_buflen];
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, RangeReading_buflen, "%d", subs);
+		snprintf(subs_buff, RangeReading_buflen, "%d", (int)subs);
 	else
 		snprintf(subs_buff, RangeReading_buflen, "%.10g", DBL_PTR(subs)->dbl);
 	subs_buff[RangeReading_buflen - 1] = 0; // ensure NULL
@@ -1509,6 +1518,7 @@ extern void DisableControlCHandling(); // be_w.c
 void INT_Handler(int sig_no)
 /* control-c, control-break */
 {
+	UNUSED(sig_no);
 	if (!allow_break) {
 		signal(SIGINT, INT_Handler);
 		control_c_count++;

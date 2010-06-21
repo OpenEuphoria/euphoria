@@ -9,12 +9,16 @@
 /******************/
 /* Included files */
 /******************/
+#define _LARGE_FILE_API
+#define _LARGEFILE64_SOURCE
 #include <stdio.h>
 
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <ctype.h>
+
 #ifdef EUNIX
 #  include <unistd.h>
 #  include <termios.h>
@@ -43,6 +47,8 @@
 #endif
 
 #include "alldefs.h"
+#include "be_runtime.h"
+#include "be_machine.h"
 #include "be_runtime.h"
 
 #ifndef ERUNTIME
@@ -612,8 +618,12 @@ void call_crash_routines()
 	}
 }
 
+#ifdef EUNIX
+static void SimpleRTFatal(char *msg, va_list ap) __attribute__ ((noreturn));
+#endif
 
 static void SimpleRTFatal(char *msg, va_list ap)
+
 /* Fatal errors for translated code */
 {
 	va_list aq;
@@ -1447,8 +1457,9 @@ void udt_clean( object o, long rid ){
 		expr_limit = expr_max - 3;
 	}
 	*expr_top++ = (object)tpc;    // needed for traceback
-	*expr_top++ = *(expr_top-2);  // prevents restore_privates()
-
+	*expr_top = *(expr_top-2);  // prevents restore_privates()
+	++expr_top;
+	
 	save_tpc = tpc;
 	do_exec(code);  // execute routine without setting up new stack
 	EFree((char *)code);
@@ -1896,7 +1907,7 @@ object Dnot_bits(d_ptr a)
 // 		 check32(a, a);  // error msg
 	c = ~((unsigned long)(a->dbl));
 
-	if (c > NOVALUE && c < TOO_BIG_INT)
+	if (c > (unsigned long)NOVALUE && c < (unsigned long)TOO_BIG_INT)
 		return c; // an integer
 	else
 		return (object)NewDouble((double)c);
@@ -2916,7 +2927,7 @@ unsigned int calc_fletcher32(object a)
 					if (lChar == -1) {
 						lChar = av;
 					} else {
-						lA += av + lChar << 8;
+						lA += (av + lChar) << 8;
 						lChar = -1;
 						lB += lA;
 					}
@@ -3070,7 +3081,7 @@ object calc_hash(object a, object b)
 		{
 			if (tf.ieee_char[tfi] == 0)
 				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
-			lHashValue = rol(lHashValue, 3) ^ (tf.ieee_char[tfi] + (tfi + 1) << 8);
+			lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 		}
 	}
 	else if (IS_ATOM_DBL(a)) {
@@ -3079,7 +3090,7 @@ object calc_hash(object a, object b)
 		{
 			if (tf.ieee_char[tfi] == 0)
 				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
-			lHashValue = rol(lHashValue, 3) ^ (tf.ieee_char[tfi] + (tfi + 1) << 8);
+			lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 		}
 	}
 	else { /* input is a sequence */
@@ -3140,7 +3151,7 @@ object calc_hash(object a, object b)
 			{
 				if (tf.ieee_char[tfi] == 0)
 					tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
-				lHashValue = rol(lHashValue, 3) ^ (tf.ieee_char[tfi] + (tfi + 1) << 8);
+				lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 			}
 			lHashValue = rol(lHashValue,1);
 			lSLen--;
@@ -3360,11 +3371,12 @@ long e_match(s1_ptr a, s1_ptr b)
 }
 
 #ifndef ERUNTIME
-static void CheckSlice(s1_ptr a, long startval, long endval, long length)
+static void CheckSlice(object a, long startval, long endval, long length)
 /* check legality of a slice, return integer values of start, length */
 /* startval and endval are deref'd */
 {
 	long n;
+	s1_ptr s;
 
 	if (IS_ATOM(a))
 		RTFatal("attempt to slice an atom");
@@ -3380,9 +3392,9 @@ static void CheckSlice(s1_ptr a, long startval, long endval, long length)
 		RTFatal("slice length is less than 0 (%ld)", length);
 	}
 
-	a = SEQ_PTR(a);
-	n = a->length;
-	if (startval > n + 1 || length > 0 && startval > n) {
+	s = SEQ_PTR(a);
+	n = s->length;
+	if ((startval > n + 1 || length > 0) && startval > n) {
 		RTFatal("slice starts past end of sequence (%ld > %ld)",
 				startval, n);
 	}
@@ -3429,7 +3441,7 @@ void RHS_Slice( object a, object start, object end)
 	length = endval - startval + 1;
 
 #ifndef ERUNTIME
-	CheckSlice((s1_ptr)a, startval, endval, length);
+	CheckSlice( a, startval, endval, length);
 #endif
 
 
@@ -3515,7 +3527,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	length = endval - startval + 1;
 
 #ifndef ERUNTIME
-	CheckSlice(*seq_ptr, startval, endval, length);
+	CheckSlice((object)*seq_ptr, startval, endval, length);
 #endif
 
 	sp = SEQ_PTR(*seq_ptr);
@@ -4850,7 +4862,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	}
 }
 
-void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip, int code,
+void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {
@@ -4911,9 +4923,10 @@ char **make_arg_cv(char *cmdline, int *argc)
 {
 	int i, w, j;
 	char **argv;
+#ifdef EWINDOWS
 	int ns;
 	int bs;
-	
+#endif
 	InitEMalloc();
 	argv = (char **)EMalloc((strlen(cmdline)/2+3) * sizeof(char *));
 #ifdef EWINDOWS
@@ -4963,7 +4976,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 				   then we copy over the backslash */
 				if (cmdline[i] == '\\' && cmdline[i+1] == '\"') {
 					/* copy the rest of the string over the backslash */
-					for (j = ++i;cmdline[j-1] = cmdline[j]; ++j) /* do nothing */;
+					for (j = ++i;(cmdline[j-1] = cmdline[j]); ++j) /* do nothing */;
 				}
 
 				i++;
@@ -5040,9 +5053,10 @@ object system_exec_call(object command, object wait)
 /* Run a .exe or .com file, then restore the graphics mode.
    Will wait for user to hit key if desired. */
 {
-
-	char *string_ptr;
+#ifndef EUNIX
 	char **argv;
+#endif
+	char *string_ptr;
 	int len, w, exit_code;
 	int len_used;
 	
@@ -5183,7 +5197,7 @@ static void show_prof_line(IFILE f, long i)
 			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		else {
-			snprintf(buff, SPL_len, "%6ld |", *(int *)slist[i].src);
+			snprintf(buff, SPL_len, "%6ld |", (long int)*(int *)slist[i].src);
 			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		screen_output(f, buff);
@@ -5444,8 +5458,9 @@ unsigned general_call_back(
 
 unsigned (*general_ptr)() = (void *)&general_call_back;
 
+#ifdef EWATCOM
 #pragma off (check_stack);
-
+#endif
 
 /* Windows cdecl - Need only one template.
    It can handle a variable number of args.
@@ -5866,9 +5881,10 @@ void key_gets(char *input_string)
 // It's empty when key_write equals key_read.
 char key_buff[KEYBUFF_SIZE];
 int key_write = 0;       // place where next key will be stored
-static int key_read = 0; // place to read next key from
+
 
 #ifdef EGPM
+static int key_read = 0; // place to read next key from
 static Gpm_Event event;  // mouse event
 
 int mgetch(int wait)
@@ -6110,11 +6126,14 @@ void Replace( replace_ptr rb )
 	if (end_pos > seqlen)
 		end_pos = seqlen;   // Can't be after last position.
 
-	if (start_pos < 1)
-		if (seqlen > 0)
+	if (start_pos < 1){
+		if (seqlen > 0){
 			start_pos = 1;
-		else
+		}
+		else{
 			start_pos = 0;
+		}
+	}
 
 	if (start_pos > seqlen) {  // return (target & replacement)
 		Concat( rb->target, copy_to, copy_from );
