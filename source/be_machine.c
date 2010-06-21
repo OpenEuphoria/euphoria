@@ -13,7 +13,7 @@
    check conversion. We must allow the user to call machine_func/
    machine_proc directly, even if he passes integers in f.p. format */
 
-
+#define _LARGEFILE64_SOURCE
 #include <stdlib.h>
 
 #include "global.h"
