@@ -1,0 +1,14 @@
+t_c_atom_type.e:4
+<0330>:: Only enums may be declared as types
+atom type foo
+         ^
+
+
+--- Defined Words ---
+EU4
+EU400
+EU40000
+UNIX
+LINUX
+EUI
+-------------------
