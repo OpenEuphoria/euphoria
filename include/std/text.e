@@ -1566,10 +1566,12 @@ public function format(sequence format_pattern, object arg_list = {})
     				end if
 
     				for j = 1 to length(arg_list) do
-    					if begins(idname, arg_list[j]) then
-    						if argn = 0 then
-    							argn = j
-    							exit
+    					if sequence(arg_list[j]) then
+    						if begins(idname, arg_list[j]) then
+    							if argn = 0 then
+    								argn = j
+    								exit
+    							end if
     						end if
     					end if
     					if j = length(arg_list) then

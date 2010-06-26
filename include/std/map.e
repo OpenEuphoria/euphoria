@@ -122,8 +122,8 @@ constant type_is_map   = "Eu:StdMap"
 
 public enum
 	HSIEH32 = -5,
-	FLETCHER32,
 	ADLER32,
+	FLETCHER32,
 	MD5,
 	SHA256
 
