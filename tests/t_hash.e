@@ -2,7 +2,7 @@
 include std/unittest.e
 include std/map.e
 constant s = "Euphoria Programming Language brought to you by Rapid Deployment Software"
-constant hashalgo = {-9.123, HSIEH32, FLETCHER32, ADLER32, MD5, SHA256, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
+constant hashalgo = {-9.123, HSIEH32, ADLER32, FLETCHER32, MD5, SHA256, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
 
 constant expected = {
 {#B7F48C20,#F8C6DB45,#32EE1F21,#E99E6554,#70CA9A7C,#F0CA6A78,#D0FC1278,#A5472C74,#E9FC1361,#BF6F937D,#7C6C3F8F,#339E9365,#A547AC74,#EEE47627,#31046996}, -- (-9.123)
