@@ -1249,22 +1249,42 @@ static object Seek(object x)
 
 #ifdef EWATCOM
 	// 2 of 3: WATCOM method
-
+typedef struct {
+	unsigned short twosecs : 5; /* seconds / 2 */
+	unsigned short minutes : 6;
+	unsigned short hours : 5;
+} ftime_t;
+typedef struct {
+	unsigned short day : 5;
+	unsigned short month : 4;
+	unsigned short year : 7;
+} fdate_t;
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
 	char path[MAX_FILE_NAME+1];
 	s1_ptr result, row;
 	struct dirent *direntp;
-	object_ptr obj_ptr, temp;
+	object_ptr obj_ptr;
 	int last;
 	DIR *dirp;
-
+	struct _stati64 stat64_buf;
+	int stat_result;
+	char attrs[8];
+	char *next_attr;
+	char *fp_buf;
+	long fp_buf_len;
+	char *fn_buf;
+	long fn_buf_len;
+	long cpy_len;
+	ftime_t *f_time;
+	fdate_t *f_date;
+	
 	/* x will be sequence if called via dir() */
 
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
-
+		
 	MakeCString(path, x, MAX_FILE_NAME+1);
 
 	last = strlen(path)-1;
@@ -1280,11 +1300,12 @@ static object Dir(object x)
 		path[last+1] = 0; // delete any trailing backslash - Watcom has problems
 						  // with wildcards and trailing backslashes together
 
+	fp_buf = NULL;
 	dirp = opendir(path);
 	if (dirp == NULL) {
 		return ATOM_M1; /* couldn't open directory (or file) */
 	}
-
+	
 	/* start with empty sequence as result */
 	result = (s1_ptr)NewString("");
 
@@ -1292,46 +1313,84 @@ static object Dir(object x)
 		direntp = readdir(dirp);
 		if (direntp == NULL)
 			break; /* end of list */
-
+ 		
+		if (direntp->d_first != 0) {
+			// Initialize the path name for the 'stat' call.
+			fp_buf_len = strlen(direntp->d_openpath) + 1 + NAME_MAX + 1 + 10;
+			fp_buf = EMalloc(fp_buf_len);
+			cpy_len = copy_string(fp_buf, direntp->d_openpath, fp_buf_len);
+			
+			// Is the open path a directory or file? If a directory, we need to
+			// prepare the multiple stat calls with file names.
+			stat_result = _stati64(fp_buf, &stat64_buf);			
+			if (S_ISDIR( stat64_buf.st_mode )) {
+				fp_buf[cpy_len] = '\\';	// open path is a directory.
+			}
+			fn_buf = fp_buf + cpy_len + 1;
+			fn_buf_len = fp_buf_len - cpy_len - 1;
+			fn_buf[0] = '\0';
+		}
+		
 		/* create a length-9 sequence */
 		row = NewS1((long)9);
 		obj_ptr = row->base;
 		obj_ptr[1] = NewString(direntp->d_name);
-		obj_ptr[2] = NewString("");
-		temp = &obj_ptr[2];
+		
+		next_attr = &attrs[0];
 
 		if (direntp->d_attr & _A_RDONLY)
-			Append(temp, *temp, MAKE_INT('r'));
+			*next_attr++ = 'r';
 		if (direntp->d_attr & _A_HIDDEN)
-			Append(temp, *temp, MAKE_INT('h'));
+			*next_attr++ = 'h';
 		if (direntp->d_attr & _A_SYSTEM)
-			Append(temp, *temp, MAKE_INT('s'));
+			*next_attr++ = 's';
 		if (direntp->d_attr & _A_VOLID)
-			Append(temp, *temp, MAKE_INT('v'));
+			*next_attr++ = 'v';
 		if (direntp->d_attr & _A_SUBDIR)
-			Append(temp, *temp, MAKE_INT('d'));
+			*next_attr++ = 'd';
 		if (direntp->d_attr & _A_ARCH)
-			Append(temp, *temp, MAKE_INT('a'));
+			*next_attr++ = 'a';
 
-		obj_ptr[3] = MAKE_INT(direntp->d_size);
-		if ((unsigned)obj_ptr[3] > (unsigned)MAXINT) {
-			// file size over 1Gb
-			obj_ptr[3] = NewDouble((double)(unsigned)obj_ptr[3]);
-		}
+		*next_attr = '\0';
+		obj_ptr[2] = NewString(attrs);
+		
+		if (fn_buf[-1] == '\\') {
+			// complete the path name for the 'stat' call.
+			cpy_len = copy_string(fn_buf, direntp->d_name, fn_buf_len);
+			// Get the true file length. (Handles >4GB)
+			stat_result = _stati64(fp_buf, &stat64_buf);
+		} // else use previous stat call for the 'open path' name.
 
-		obj_ptr[4] = 1980 + direntp->d_date/512;
-		obj_ptr[5] = (direntp->d_date/32) & 0x0F;
-		obj_ptr[6] = direntp->d_date & 0x01F;
+ 		if (stat_result == 0) {
+			if (stat64_buf.st_size > (__int64)MAXINT) {
+				obj_ptr[3] = NewDouble((double)stat64_buf.st_size);
+			} else {
+				obj_ptr[3] = MAKE_INT((int)stat64_buf.st_size);
+			}
+		} else {
+			obj_ptr[3] = MAKE_INT( -errno ); // Negative of the error code.
+ 		}
 
-		obj_ptr[7] = direntp->d_time/2048;
-		obj_ptr[8] = (direntp->d_time/32) & 0x03F;
-		obj_ptr[9] = (direntp->d_time & 0x01F) << 1;
+ 		f_time = (ftime_t *)&direntp->d_time;
+		f_date = (fdate_t *)&direntp->d_date;
+
+		obj_ptr[4] = 1980 + f_date->year;
+		obj_ptr[5] = f_date->month;
+		obj_ptr[6] = f_date->day;
+
+		obj_ptr[7] = f_time->hours;
+		obj_ptr[8] = f_time->minutes;
+		obj_ptr[9] = f_time->twosecs << 1;
 
 		/* append row to overall result (ref count 1)*/
 		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
 	}
 	closedir(dirp);
-
+	
+	if (fp_buf != NULL) {
+		EFree(fp_buf);
+	}
+	
 	return (object)result;
 }
 #endif

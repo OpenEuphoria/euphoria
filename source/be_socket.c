@@ -899,7 +899,7 @@ object eusock_recvfrom(object x)
 	SOCKET s;
 	struct sockaddr_in addr;
 	int flags, result;
-	unsigned int addr_size;
+	int addr_size;
 	char buf[BUFF_SIZE];
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
@@ -1015,7 +1015,7 @@ object eusock_accept(object x)
 {
 	SOCKET server, client;
 	struct sockaddr_in addr;
-	unsigned int addr_len;
+	int addr_len;
 
 	s1_ptr client_seq, client_sock_p;
 
@@ -1051,7 +1051,7 @@ object eusock_getsockopt(object x)
 {
 	SOCKET s;
 	int level, optname, optval;
-	unsigned int optlen;
+	int optlen;
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to get_option must be a socket");
