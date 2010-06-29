@@ -1008,21 +1008,55 @@ function GetHexChar( integer cnt, integer errno)
 	atom val
 	integer d
 	val = 0
-	for i = 1 to cnt do
-		d = find(getch(), "0123456789ABCDEFabcdef")
+	
+	while cnt > 0 do
+		d = find(getch(), "0123456789ABCDEFabcdef_")
 		if d = 0 then
 			CompileErr( errno )
 		end if
-		val = val * 16 + d - 1
-		if d > 16 then
-			val -= 6
+		if d != 23 then
+			val = val * 16 + d - 1
+			if d > 16 then
+				val -= 6
+			end if
+			cnt -= 1
 		end if
-	end for
+	end while
 	
 	return val
 end function
 
-function EscapeChar()
+function GetBinaryChar( integer delim )
+	atom val
+	integer d
+	sequence vchars = "01_ " & delim
+	integer cnt = 0
+	val = 0
+	while 1 do
+		d = find(getch(), vchars)
+		if d = 0 then
+			CompileErr( 343 )
+		end if
+		if d = 5 then
+			ungetch()
+			exit
+		end if
+		if d = 4 then
+			exit
+		end if
+		if d != 3 then
+			val = val * 2 + d - 1
+			cnt += 1
+		end if
+	end while
+	
+	if cnt = 0 then
+		CompileErr(343)
+	end if
+	return val
+end function
+
+function EscapeChar(integer delim)
 	atom c
 	
 	-- The cursor is currently at the next byte after the back-slash.
@@ -1031,29 +1065,39 @@ function EscapeChar()
 	switch c do
 		case 'n' then
 			c = 10 -- Newline
+			
 		case 't' then
 			c = 9 -- Tabulator
+			
 		case '"', '\\', '\'' then
 			-- Double Quote
 			-- Back slash
 			-- Single Quote
+			
 		case 'r' then
 			c = 13 -- Carriage Return
+			
 		case '0' then
 			c = 0 -- Null
+			
 		case 'e', 'E' then
 			c = 27 -- escape char.
+			
 		case 'x' then
 			-- Two Hex digits follow
-			c = GetHexChar(2, 155)
+			c = GetHexChar(2, 340)
 			
 		case 'u' then
 			-- Four Hex digits follow
-			c = GetHexChar(4, 155)
+			c = GetHexChar(4, 341)
 			
 		case 'U' then
 			-- Eight Hex digits follow
-			c = GetHexChar(8, 155)
+			c = GetHexChar(8, 342)
+			
+		case 'b' then
+			-- Any number of binary digits follow
+			c = GetBinaryChar(delim)
 			
 		case else
 			CompileErr(155)
@@ -1260,26 +1304,27 @@ function GetHexString(integer maxnibbles = 2)
 			exit
 		end if
 
-		digit = find(ch, "0123456789ABCDEFabcdef _\t\n\r")
+		digit = find(ch, "0123456789ABCDEFabcdef_ \t\n\r")
 		if digit = 0 then
 			CompileErr(329)
 		end if
-		if digit < 23 then
-			if digit > 16 then
-				digit -= 6
-			end if
-			if nibble = 1 then
-				val = digit - 1
-			else
-				val = val * 16 + digit - 1
-				if nibble = maxnibbles then
-					string_text &= val
-					val = -1
-					nibble = 0
+		if digit <= 23 then
+			if digit != 23 then
+				if digit > 16 then
+					digit -= 6
 				end if
+				if nibble = 1 then
+					val = digit - 1
+				else
+					val = val * 16 + digit - 1
+					if nibble = maxnibbles then
+						string_text &= val
+						val = -1
+						nibble = 0
+					end if
+				end if
+				nibble += 1
 			end if
-			nibble += 1
-
 		else
 			if val >= 0 then
 				-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
@@ -1296,6 +1341,63 @@ function GetHexString(integer maxnibbles = 2)
 	
 	if val >= 0 then	
 		-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
+		string_text &= val
+	end if
+	
+	return string_text
+end function
+
+function GetBitString()
+	integer ch
+	integer digit
+	atom val
+	integer cline
+	integer bitcnt
+	sequence string_text
+
+	cline = line_number
+	string_text = ""
+	bitcnt = 1
+	val = -1
+	ch = getch()
+	while 1 do
+		if ch = END_OF_FILE_CHAR then
+			CompileErr(129, cline)
+		end if
+				
+		if ch = '"' then
+			exit
+		end if
+
+		digit = find(ch, "01_ \t\n\r")
+		if digit = 0 then
+			CompileErr(329)
+		end if
+		if digit <= 3 then
+			if digit != 3 then
+				if bitcnt = 1 then
+					val = digit - 1
+				else
+					val = val * 2 + digit - 1
+				end if
+				bitcnt += 1
+			end if
+		else
+			if val >= 0 then
+				-- Expecting more digits but didn't get any, so assume we got everything.
+				string_text &= val
+				val = -1
+			end if
+			bitcnt = 1
+			if ch = '\n' then
+				read_line()
+			end if
+		end if
+		ch = getch()
+	end while
+	
+	if val >= 0 then	
+		-- Expecting more digits but didn't get any, so assume we got everything.
 		string_text &= val
 	end if
 	
@@ -1327,15 +1429,20 @@ export function Scanner()
 			pch = ch
 			ch = getch()
 			if ch = '"' then
-				if pch = 'x' then
-					return {STRING, NewStringSym(GetHexString(2))}
-				end if
-				if pch = 'u' then
-					return {STRING, NewStringSym(GetHexString(4))}
-				end if
-				if pch = 'U' then
-					return {STRING, NewStringSym(GetHexString(8))}
-				end if
+				switch pch do
+					case 'x' then
+						return {STRING, NewStringSym(GetHexString(2))}
+				
+					case 'u' then
+						return {STRING, NewStringSym(GetHexString(4))}
+				
+					case 'U' then
+						return {STRING, NewStringSym(GetHexString(8))}
+						
+					case 'b' then
+						return {STRING, NewStringSym(GetBitString())}
+					
+				end switch
 			end if
 			
 			while id_char[ch] do
@@ -1640,7 +1747,7 @@ export function Scanner()
 				if ch = '"' then
 					exit
 				elsif ch = '\\' then
-					yytext &= EscapeChar()
+					yytext &= EscapeChar('"')
 				elsif ch = '\t' then
 					CompileErr(145)
 				else
@@ -1795,7 +1902,7 @@ export function Scanner()
 		elsif class = SINGLE_QUOTE then
 			atom ach = getch()
 			if ach = '\\' then
-				ach = EscapeChar()
+				ach = EscapeChar('\'')
 			elsif ach = '\t' then
 				CompileErr(145)
 			elsif ach = '\'' then
@@ -1973,7 +2080,7 @@ export procedure IncludeScan( integer is_public )
 		ch = getch()
 		while not find(ch, {'\n', '\r', '"', END_OF_FILE_CHAR}) do
 			if ch = '\\' then
-				gtext &= EscapeChar()
+				gtext &= EscapeChar('"')
 			else
 				gtext &= ch
 			end if

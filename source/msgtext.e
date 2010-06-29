@@ -353,6 +353,10 @@ constant StdErrMsgs = {
 	{337, "Could not create coverage database: [1]"},
 	{338, "Exclude from coverage"},
 	{339, "Error creating regex for coverage exclusion pattern '[1]'"},
+	{340, "Expecting exactly two hexadecimal digits to follow the '\\x'"},
+	{341, "Expecting exactly four hexadecimal digits to follow the '\\u'"},
+	{342, "Expecting exactly eight hexadecimal digits to follow the '\\U'"},
+	{343, "Expecting only '0', '1' or space to follow the '\\b'"},
 	$
 }
 

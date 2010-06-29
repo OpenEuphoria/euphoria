@@ -116,9 +116,17 @@ test_equal("Escaped characters - null",            00, '\0')
 test_equal("Escaped characters - escape #1",       27, '\e')
 test_equal("Escaped characters - escape #2",       27, '\E')
 
+test_equal("Escaped characters - binary", {0xA, 0xDF, 0x01, 0x12E}, {'\b1010','\b11011111','\b0000_0001','\b1_0010_1110'})
+
 test_equal("Escaped characters - hex", {0xAB, 0xDF, 0x01, 0x2E}, {'\xab','\xDF','\x01','\x2E'})
 test_equal("Escaped characters - u16", {0xABDF, 0x012E}, {'\uabDF','\u012E'})
 test_equal("Escaped characters - U32", {0xABDF012E}, {'\UabDF012E'})
+
+test_equal("Binary strings - no punc", {0x1,0xDF,0x012E}, b"1 11011111 100101110")
+test_equal("Binary strings - with punc", {0x1,0xDF,0x012E}, b"1 11_01_11_11 1_0010_1110")
+test_equal("Binary strings - multiline", {0x1,0xDF,0x012E}, b"1 
+                                                              11_01_11_11 
+                                                              1_0010_1110")
 
 test_equal("Hex strings - no punc", {0xAB,0xDF,0x01,0x2E}, x"abDF012E")
 test_equal("Hex strings - with punc", {0xAB,0x0D,0xF0,0x12,0xEF,0x03}, x"ab D F0__12Ef3")
@@ -128,7 +136,7 @@ test_equal("Hex strings - multiline", {0xAB,0x0D,0xF0,0x12,0xEF,0x03}, x"ab
                                                                          ")
 
 test_equal("utf16 strings - no punc", {0xABDF,0x012E}, u"abDF012E")
-test_equal("utf16 strings - with punc", {0xAB,0x0D,0xF0,0x12EF,0x03}, u"ab D F0__12Ef3")
+test_equal("utf16 strings - with punc", {0xAB,0x0D,0xF012, 0x0EF3}, u"ab D F0__12Ef3")
 test_equal("utf16 strings - no punc 2", {0xABDF, 0x012E, 0x1234, 0x5678, 0xFEDC, 0xBA98}, u"abDF012E12345678FEDCBA98")
 test_equal("utf16 strings - multiline", {0xABDF, 0x012E, 0x1234, 0x5678, 0xFEDC, 0xBA98}, 
 														u"abDF
@@ -140,8 +148,8 @@ test_equal("utf16 strings - multiline", {0xABDF, 0x012E, 0x1234, 0x5678, 0xFEDC,
 														  BA98")
  
 test_equal("utf32 strings - no punc", {0xABDF012E, 0x12345678, 0xFEDCBA98}, U"abDF012E 12345678 FEDCBA98 ")
-test_equal("utf32 strings - with punc", {0xAB,0x0D,0xF0,0x12EF3}, U"  ab D F0__12Ef3  ")
-test_equal("utf32 strings - multiline", {0xAB,0x0D,0xF0,0x12EF3}, U"  
+test_equal("utf32 strings - with punc", {0xAB,0x0D,0x0F012EF3}, U"  ab D F0__12Ef3  ")
+test_equal("utf32 strings - multiline", {0xAB,0x0D,0x0F012EF3}, U"  
                                                                    ab 
                                                                    D 
                                                                    F0__12Ef3

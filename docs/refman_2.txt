@@ -159,6 +159,12 @@ entered in a number of ways ...
 """ABCDEFG"""
 </eucode>
 
+* using binary strings e.g.
+
+<eucode>
+b"1001 00110110 0110_0111 1_0101_1010" -- ==> {#9,#36,#67,#15A}
+</eucode>
+
 * using hexadecimal byte strings e.g.
 
 <eucode>
@@ -172,16 +178,25 @@ u"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
 U"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
 </eucode>
 
-The value of the three strings above are equivalent.  Spaces seperate values to other elements.  When you put too many hex characters together for the kind of string they are split up appropriately for you:
+The value of the three strings above are equivalent.  
+Spaces seperate values to other elements.  
+When you put too many hex characters together for the kind of string they are
+split up appropriately for you:
 
 <eucode>
 x"6566 67AE"  -- 8-bit  ==> {#65,#66,#67,#AE}
 u"6566 67AE"  -- 16-bit ==> {#6566,#67AE}
 U"6566 67AE"  -- 32-bit ==> {#6566,#67AE}
+U"6566_67AE"  -- 32-bit ==> {#656667AE} Uses '_' to aid readability for long values.
 U"656667AE"   -- 32-bit ==> {#656667AE}
 </eucode>
 
-String literals encoded as ASCII, UTF-8, UTF-16, UTF-32 or really any encoding that uses elements that are 32-bits long or shorter can be built with U"" syntax.  Literals of encodings that have 16-bit long or shorter or 8-bit long or shorter elements can be built using u"" syntax or x"" syntax  respectively.  Use delimiters, such as spaces, to break the ambiguity and improve readability. 
+String literals encoded as ASCII, UTF-8, UTF-16, UTF-32 or really any encoding
+that uses elements that are 32-bits long or shorter can be built with U"" syntax.
+Literals of encodings that have 16-bit long or shorter or 8-bit long or shorter
+elements can be built using u"" syntax or x"" syntax  respectively.  
+Use delimiters, such as spaces and underscores, to break the ambiguity and
+improve readability. 
 
 The following is code with a vaild UTF8 encoded string:
 
@@ -189,9 +204,13 @@ The following is code with a vaild UTF8 encoded string:
 sequence utf8_val = x"3e 65" -- This is ">e"
 </eucode>
 
-**However,** it is up to the coder to know the correct code-point values for these to make any sense in the encoding the coder is using. That is to say, it is possible for the coder to use the x"", u"", and U"" syntax to create literals that are **not valid** UTF strings.
+**However,** it is up to the coder to know the correct code-point values for
+these to make any sense in the encoding the coder is using. That is to say,
+it is possible for the coder to use the x"", u"", and U"" syntax to create
+literals that are **not valid** UTF strings.
 
-There are routines for working with Unicode strings and for validating, converting and working with Unicode strings.  See [[:Unicode]].
+There are routines for working with Unicode strings and for validating,
+converting and working with Unicode strings.  See [[:Unicode]].
 
 
 **The rules for double-quote strings are...**
@@ -285,14 +304,31 @@ constant BQ = """This text contains a back quote ` for some reason."""
 constant QQ = """This text contains a back quote ` """ & `and """ for some reason.`
 </eucode>
 
+**The rules for binary strings are...**
+# they begin with the pair ##b"## and end with a double-quote (##"##) character
+# they can only contain binary digits (0-1), and space, underscore,
+ tab, newline, carriage-return. Anything else is invalid.
+# an underscore is simply ignored, as if it was never there. It is used to aid
+ readability.
+# each set of contiguous binary digits represent a single sequence element
+# they can span multiple lines
+# The non-digits  are treated as punctuation and used to delimit individual 
+  values.
+ 
+<eucode>
+b"1 10 11_0100 01010110_01111000" == {0x01, 0x02, 0x34, 0x5678}
+</eucode>
+
 **The rules for hexadecimal strings are...**
 # they begin with the pair ##x"## and end with a double-quote (##"##) character
 # they can only contain hexadecimal digits (0-9 A-F a-f), and space, underscore,
  tab, newline, carriage-return. Anything else is invalid.
+# an underscore is simply ignored, as if it was never there. It is used to aid
+ readability.
 # each pair of contiguous hex digits represent a single sequence element with a
  value from 0 to 255
 # they can span multiple lines
-# The non-hex digits are treated as punctuation and used to delimit individual 
+# The non-digits are treated as punctuation and used to delimit individual 
   values.
 # Hexadecimal strings can be used to encode UTF-8 strings, even though the resulting
  string does not have to be a valid UTF-8 string.
@@ -306,6 +342,8 @@ x"1 2 34 5678_AbC" == {0x01, 0x02, 0x34, 0x56, 0x78, 0xAB, 0x0C}
  end with a double-quote (##"##) character
 # they can only contain hexadecimal digits (0-9 A-F a-f), and space, underscore,
  tab, newline, carriage-return. Anything else is invalid.
+# an underscore is simply ignored, as if it was never there. It is used to aid
+ readability.
 # For UTF-16 strings, each set of four contiguous hex digits represent a single sequence element with a
  value from 0x0000 to 0xFFFF
 # For UTF-32 strings, each set of eight contiguous hex digits represent a single sequence element with a
@@ -318,6 +356,7 @@ x"1 2 34 5678_AbC" == {0x01, 0x02, 0x34, 0x56, 0x78, 0xAB, 0x0C}
 <eucode>
 u"1 2 34 5678AbC" == {0x0001, 0x0002, 0x0034, 0x5678, 0x0ABC}
 U"1 2 34 5678AbC" == {0x0000_0001, 0x0000_0002, 0x0000_0034, 0x05678ABC}
+U"1 2 34 5_678_AbC" == {0x0000_0001, 0x0000_0002, 0x0000_0034, 0x0567_8ABC}
 </eucode>
 
 ----
@@ -369,12 +408,17 @@ Special characters may be entered using a back-slash:
 | \0       | null |
 | \e       | escape |
 | \E       | escape |
+| \b/d..d/ | A binary coded value, The 'b is followed by 1 or more binary digits. \\
+             Inside strings, use the space character to delimit end a binary value.
 | \x/hh/   | A 2-hex-digit value, e.g. "\x5F" ==> {95} |
 | \u/hhhh/ | A 4-hex-digit value, e.g. "\u2A7C" ==> {10876} |
 | \U/hhhhhhhh/ | An 8-hex-digit value, e.g. "\U8123FEDC" ==> {2166619868} |
 
 For example, ##"Hello, World!\n"##, or ##'~\~\'##. The Euphoria editor displays character
 strings in green.
+
+Note that you can use the underscore character '_' inside the \b, \x, \u, and \U
+values to aid readability, e.g. "\U8123_FEDC" ==> {2166619868}
 
 === Identifiers
 An identifier is just the name you give something in your program. This can be
@@ -3537,8 +3581,12 @@ Include file names typically end in ##.e##, or sometimes ##.ew## or ##.eu## (whe
 intended for use with //Windows// or //Unix//).  This is just a convention. It is not
 required.
 
-If your filename (or path) contains blanks, you must enclose it in double-quotes, otherwise
-quotes are optional.  Note that under Windows, you can also use the forward slash '/' instead
+If your filename (or path) contains blanks or escape-able characters , you must
+enclose it in double-quotes, otherwise quotes are optional. When a filename is
+enclosed in double-quotes, you can also use the standard escape character notation
+to specify filenames that have non-ASCII characters in them. 
+
+Note that under Windows, you can also use the forward slash '/' instead
 of the usually back-slash '\'. By doing this, the file paths are compatible with Unix
 systems and it means you don't have to 'escape' the back-slashes. \\
 For example:
