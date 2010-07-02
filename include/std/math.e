@@ -1077,6 +1077,10 @@ end function
 -- An **atom**,
 -- * The Fibonacci Number specified by value.
 --
+-- Comments:
+-- * Note that due to the limitations of the floating point implementation,
+-- only 'i' values less than 76 are accurate.
+--
 -- Example 1:
 -- <eucode>
 --   ? fib(6)
@@ -1085,7 +1089,9 @@ end function
 -- </eucode>
 --
 public function fib(integer i)
-	return (1/sqrt(5)) * (power(((1+sqrt(5))/2), i) - power((1-sqrt(5))/2, i))
+	atom t
+	t = sqrt(5)
+	return floor((power((1 + t) / 2, i) / t) + 0.5)
 end function
 
 --****
