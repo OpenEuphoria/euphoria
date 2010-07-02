@@ -1067,6 +1067,27 @@ end function
 --		[[:power]], [[:Operations on sequences]]
 --
 
+--**
+-- Computes the Nth Fibonacci Number
+--
+-- Parameters:
+--		# ##value## : an integer. The starting value to compute a Fibonacci Number from.
+--
+-- Returns:
+-- An **atom**,
+-- * The Fibonacci Number specified by value.
+--
+-- Example 1:
+-- <eucode>
+--   ? fib(6)
+-- -- output ... 
+-- -- 8
+-- </eucode>
+--
+public function fib(integer i)
+	return (1/sqrt(5)) * (power(((1+sqrt(5))/2), i) - power((1-sqrt(5))/2, i))
+end function
+
 --****
 -- === Hyperbolic trigonometry
 --
