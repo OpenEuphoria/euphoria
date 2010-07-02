@@ -1282,6 +1282,8 @@ function max(atom a, atom b)
 end function
 </eucode>
 
+==== return statement
+
 Any Euphoria object can be returned.  You can, in effect, have multiple return
 values, by returning a sequence of objects. e.g.
 
@@ -3443,7 +3445,7 @@ no routines. For example you might want to use Euphoria as a simple calculator,
 typing just a few [[:print]] or [[:? -> q_print]] statements into a file, and then executing it.
 
 As we have seen, you can use any Euphoria statement, including
-[[:for statement]], [[:while statement]], [[:if statement]], etc... (but not [[:return]]),
+[[:for statement]], [[:while statement]], [[:if statement]], etc... (but not [[:return statement|return]]),
 at the top level i.e. //outside// of any [[:function ->functions]] or [[:procedure ->procedures]]. In addition, the
 following special statements may //only// appear at the top level:
 
@@ -3451,7 +3453,7 @@ following special statements may //only// appear at the top level:
 * ##with## / ##without##
 
 
-=== include
+=== include statement
 
 When you write a large program it is often helpful to break it up into
 logically separate files, by using **include statements**.

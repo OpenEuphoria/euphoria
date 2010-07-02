@@ -201,7 +201,7 @@ something like this into it.
 Then you can execute any of those files directly without the ##-p##
 parameters on the command line. This ##eu.cfg## file can be local to a
 project, local to a user or global on a system. Please read about the
-[[:eu.cfg] file for more information.
+[[:eu.cfg]] file for more information.
 
 === DLL/Shared Library Interface
 

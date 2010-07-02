@@ -862,7 +862,7 @@ end function
 -- integer gVerbose = 0
 -- sequence gOutFile = {}
 -- sequence gInFile = {}
--- procedure opt_verbose( sequence value)
+-- function opt_verbose( sequence value)
 --    if value[OPT_VAL] = -1 then -- (-!v used on command line)
 --    	gVerbose = 0
 --    else
@@ -872,19 +872,22 @@ end function
 --         gVerbose += 1
 --      end if
 --    end if
--- end procedure
+-- 	return 1
+-- end function
 --
--- procedure opt_output_filename( sequence value)
+-- function opt_output_filename( sequence value)
 --    gOutFile = value[OPT_VAL]
--- end procedure
+-- 	return 1
+-- end function
 --
--- procedure opt_extras( sequence value)
+-- function opt_extras( sequence value)
 --    if not file_exists(value[OPT_VAL]) then
---        show_help(option_definitions, sprintf("Cannot find '%s'", value[OPT_VAL]))
+--        show_help(option_definition, sprintf("Cannot find '%s'", {value[OPT_VAL]}) )
 --        abort(1)
 --    end if
 --    gInFile = append(gInFile, value[OPT_VAL])
--- end procedure
+-- 	return 1
+-- end function
 --
 -- option_definition = {
 --     { "v", "verbose", "Verbose output",{NO_PARAMETER}, routine_id("opt_verbose")},

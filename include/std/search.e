@@ -260,7 +260,7 @@ public constant
 --		# ##needle## : an object, either what to look up, or a list of items to look up
 --		# ##haystack## : a sequence, where to look up
 --		# ##flags## : options to the function, see Comments section.  Defaults to 0.
---		# ##routine## : an integer, the routine_id of an user supplied equal function. Defaults to -1.
+--		# ##routine## : an integer, the routine_id of an user supplied equal/find function. Defaults to  [[:types:NO_ROUTINE_ID]].
 --
 -- Returns:
 -- A possibly empty **sequence**, of results, one for each hit.

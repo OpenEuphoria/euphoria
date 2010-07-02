@@ -723,12 +723,12 @@ end procedure
 -- Comments:
 -- * If ##data_in## is an atom or integer, it is simply displayed.
 -- * If ##data_in## is a simple text string, then ##args## can be used to
---   produce a formatted output with ##data_in## providing the [[:format]] string and
+--   produce a formatted output with ##data_in## providing the [[:text:format]] string and
 --   ##args## being a sequence containing the data to be formatted.
 -- ** If the last character of ##data_in## is an underscore character then it
 -- is stripped off and ##finalnl## is set to zero. Thus ensuring that a new line
 -- is **not** output.
--- ** The formatting codes expected in ##data_in## are the ones used by [[:format]].
+-- ** The formatting codes expected in ##data_in## are the ones used by [[:text:format]].
 -- It is not mandatory to use formatting codes, and if ##data_in## does not contain
 -- any then it is simply displayed and anything in ##args## is ignored.
 -- * If ##data_in## is a sequence containing floating-point numbers, sub-sequences 

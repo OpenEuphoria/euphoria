@@ -462,7 +462,7 @@ Command line switches may be changed or added, one at a time.
 ; ##-C config_file## (all)
 : Specifies either a file name or the path for where the default file called
   eu.cfg exists. The configuration file which holds a set of additional
-  command line switches.
+  command line switches. See Also [[:Configuration file format]]
 
 ; ##-CON## (translator)
 : Windows only.  Specifies that the translated program should be a console

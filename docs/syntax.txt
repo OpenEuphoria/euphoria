@@ -67,6 +67,8 @@ MARGINSTR  ==: '_' ...
 **NOTE** that after the file reference, the only text allowed is the keyword 'as'
 or the start of a comment. Nothing else is permitted on the same text line.
 
+    See Also: [[:include statement]]
+
 == sequence slice == @[SLICING]
 <eucode>
 SLICE      ==: SLICESTART INTEXPRESSION SLICEDELIM INTEXPRESSION SLICEEND
