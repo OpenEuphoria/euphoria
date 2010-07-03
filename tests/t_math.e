@@ -96,6 +96,11 @@ test_equal("rad2deg() #3", "0.9998113525,28.6478897565", sprintf("%.10f,%.10f", 
 test_equal("exp() #1", 7.389056, round(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round(exp(2.3), 100000))
 
+test_equal("fib1 ", 1, fib(1) )
+test_equal("fib2 ", 1, fib(2) )
+test_equal("fib6 ", 8, fib(6) )
+
+
 test_equal("atan2() #1", "1.2837139576", sprintf("%.10f", atan2(10.5, 3.1)))
 test_equal("atan2() #2", "-0.0927563202", sprintf("%.10f", atan2(-0.4, 4.3)))
 test_equal("atan2() #3", "2.0672190802", sprintf("%.10f", atan2(1.2, -0.65)))
