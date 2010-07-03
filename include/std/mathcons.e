@@ -77,5 +77,8 @@ public constant
 	PINF     = 1E308 * 1000,
 	--**
 	-- Negative Infinity
-	MINF     = - PINF
+	MINF     = - PINF,
+	--**
+	-- sqrt(5)
+	SQRT5 = 2.23606_79774_99789_69641
 

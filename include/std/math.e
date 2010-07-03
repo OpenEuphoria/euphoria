@@ -1089,9 +1089,7 @@ end function
 -- </eucode>
 --
 public function fib(integer i)
-	atom t
-	t = sqrt(5)
-	return floor((power((1 + t) / 2, i) / t) + 0.5)
+	return floor((power(PHI, i) / SQRT5) + 0.5)
 end function
 
 --****
