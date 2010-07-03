@@ -1,7 +1,7 @@
 include std/machine.e
 include std/math.e
 include std/unittest.e
-
+include std/convert.e
 test_equal("gcd", 17, gcd(1999*3*17,1993*17*7))
 test_equal("gcd 1c ", 1,  gcd(-4, -1)  )
 
@@ -96,10 +96,10 @@ test_equal("rad2deg() #3", "0.9998113525,28.6478897565", sprintf("%.10f,%.10f", 
 test_equal("exp() #1", 7.389056, round(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round(exp(2.3), 100000))
 
-test_equal("fib1 ", 1, fib(1) )
-test_equal("fib2 ", 1, fib(2) )
-test_equal("fib6 ", 8, fib(6) )
-
+-- Because it doesn't take long to calculate, let's test all valid input args.
+for i = 1 to 74 do
+	test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
+end for
 
 test_equal("atan2() #1", "1.2837139576", sprintf("%.10f", atan2(10.5, 3.1)))
 test_equal("atan2() #2", "-0.0927563202", sprintf("%.10f", atan2(-0.4, 4.3)))
@@ -258,5 +258,9 @@ test_equal("ensure_in_list #3", 100, ensure_in_list(1, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #4", 100, ensure_in_list(100, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #5", -6, ensure_in_list(-6, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #6", 9, ensure_in_list(9, {100, 2, 45, 9, 17, -6}))
+
+test_equal("not_bits int #1", repeat(1,32), int_to_bits(not_bits(0),32))
+
+test_equal("not_bits dbl #1", repeat(1,32), int_to_bits(not_bits(0.1),32))
 
 test_report()
