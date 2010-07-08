@@ -55,9 +55,18 @@
 #include <signal.h>
 
 #include "alldefs.h"
+#include "be_alloc.h"
 #include "be_runtime.h"
-#include "task.h"
+#include "be_decompress.h"
+#include "be_inline.h"
+#include "be_machine.h"
+#include "be_task.h"
+#include "be_rterror.h"
+#include "be_symtab.h"
+#include "be_w.h"
+#include "be_callc.h"
 #include "coverage.h"
+#include "be_execute.h"
 
 /******************/
 /* Local defines  */
@@ -223,92 +232,41 @@ union pc_t {
 #define	poke4(peek4_addr,long_value)	*peek4_addr = ((unsigned long)long_value)
 #define poke1(addr,char_value)  *addr = char_value
 
-
-
-/**********************/
-/* Imported variables */
-/**********************/
-
-extern unsigned char *string_ptr;
-extern int clk_tck;
-extern int current_task;
-extern struct tcb *tcb;
-extern char *file_name_entered;
-extern int traced_lines;
-extern struct op_info optable[];
-extern int clocks_per_sec;
-extern unsigned char TempBuff[];
-extern int TraceOn;
-extern int in_from_keyb;
-extern int trace_enabled;
-extern int *TraceLineBuff;
-extern int TraceLineSize;
-extern int TraceLineNext;
-extern symtab_ptr TopLevelSub;
-extern object last_w_file_no;
-extern IFILE last_w_file_ptr;
-extern object last_r_file_no;
-extern IFILE last_r_file_ptr;
-extern int current_screen;
-extern int color_trace;
-extern int file_trace;
-extern symtab_ptr *e_routine;
-extern int e_routine_next;
-extern char *type_error_msg;
-extern object_ptr rhs_slice_target;  /* avoids 4th arg for RHS_Slice() */
-extern s1_ptr *assign_slice_seq;
-extern int *profile_sample;
-
-/**********************/
-/* Imported functions */
-/**********************/
-extern s1_ptr Copy_elements();
-extern void Head();
-extern void Tail();
-extern object Remove_elements(int,int,int);
-extern void AssignSlice();
-extern void AssignElement();
-extern cleanup_ptr DeleteRoutine( int);
-extern cleanup_ptr ChainDeleteRoutine( cleanup_ptr, cleanup_ptr);
-extern void cleanup_sequence(s1_ptr);
-extern void cleanup_double(d_ptr);
 /**********************/
 /* Declared functions */
 /**********************/
 
-object decompress(unsigned int c);
+
 void INT_Handler(int);
 unsigned long good_rand();
-void RHS_Slice();
-object user(), Command_Line(), EOpen(), Repeat(); 
-object machine();
-object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
-	   NewDouble();
+// object user(), Command_Line(), EOpen(), Repeat(); 
+// object machine();
+// object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
+// 	   NewDouble();
 
-object add(), minus(), uminus(), e_sqrt(), Random(), multiply(), divide(),
-	 equals(), less(), greater(), noteq(), greatereq(), lesseq(),
-	 and(), or(), xor(), not(), e_sin(), e_cos(), e_tan(), e_arctan(),
-	 e_log(), e_floor(), eremainder(), and_bits(), or_bits(),
-	 xor_bits(), not_bits(), power();
+// object add(), minus(), uminus(), e_sqrt(), Random(), multiply(), divide(),
+// 	 equals(), less(), greater(), noteq(), greatereq(), lesseq(),
+// 	 and(), or(), xor(), not(), e_sin(), e_cos(), e_tan(), e_arctan(),
+// 	 e_log(), e_floor(), eremainder(), and_bits(), or_bits(),
+// 	 xor_bits(), not_bits(), power();
 
-object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide(),
-	 Dequals(), Dless(), Dgreater(), Dnoteq(), Dgreatereq(), Dlesseq(),
-	 Dand(), Dor(), Dxor(), Dnot(), De_sin(), De_cos(), De_tan(), De_arctan(),
-	 De_log(), De_floor(), Dremainder(), Dand_bits(), Dor_bits(),
-	 Dxor_bits(), Dnot_bits(), Dpower(), Insert();
+// object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide(),
+// 	 Dequals(), Dless(), Dgreater(), Dnoteq(), Dgreatereq(), Dlesseq(),
+// 	 Dand(), Dor(), Dxor(), Dnot(), De_sin(), De_cos(), De_tan(), De_arctan(),
+// 	 De_log(), De_floor(), Dremainder(), Dand_bits(), Dor_bits(),
+// 	 Dxor_bits(), Dnot_bits(), Dpower(), Insert();
 
-object x(); /* error */
-symtab_ptr PrivateVar();
-long find(), e_match();
+// object x(); /* error */
+// symtab_ptr PrivateVar();
+// long find(), e_match();
+// 
+// IFILE which_file();
+// 
+// void do_exec();
+// s1_ptr NewS1();
+// double current_time();
+// void Machine_Handler();
 
-IFILE which_file();
-
-void do_exec();
-s1_ptr NewS1();
-double current_time();
-void Machine_Handler();
-long find_from();
-long e_match_from();
 /**********************/
 /* Exported variables */
 /**********************/
@@ -1415,8 +1373,6 @@ struct sline *slist;
 
 /* Front-end variables passed via miscellaneous fe.misc */
 char **file_name;
-extern int warning_count;
-extern char **warning_list;
 #ifdef EWINDOWS
 extern DWORD WINAPI WinTimer(LPVOID lpParameter);
 #endif
@@ -4798,7 +4754,7 @@ void do_exec(int *start_pc)
 			case L_GETENV:
 			deprintf("case L_GETENV:");
 				tpc = pc;
-				top = EGetEnv((s1_ptr)*(object_ptr)pc[1]);
+				top = EGetEnv( *(object_ptr)pc[1] );
 				DeRef(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -5085,7 +5041,7 @@ void do_exec(int *start_pc)
 			case L_FIND_FROM:
 			deprintf("case L_FIND_FROM:");
 					tpc = pc;
-					a = find_from(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2], *(object_ptr)pc[3]);
+					a = find_from(*(object_ptr)pc[1], *(object_ptr)pc[2], *(object_ptr)pc[3]);
 					top = MAKE_INT(a);
 					DeRef(*(object_ptr)pc[4]);
 					*(object_ptr)pc[4] = top;               
@@ -5095,7 +5051,7 @@ void do_exec(int *start_pc)
 			case L_MATCH_FROM:
 			deprintf("case L_MATCH_FROM:");
 					tpc = pc;
-					a = e_match_from((s1_ptr)*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2],
+					a = e_match_from( *(object_ptr)pc[1], *(object_ptr)pc[2],
 							*(object_ptr) pc[3]);
 					top = MAKE_INT(a);
 					DeRef(*(object_ptr)pc[4]);

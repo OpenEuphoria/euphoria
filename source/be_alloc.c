@@ -33,6 +33,7 @@
 #endif
 #include "alldefs.h"
 #include "be_runtime.h"
+#include "be_alloc.h"
 
 /******************/
 /* Local defines  */
@@ -46,11 +47,6 @@
 /**********************/
 /* Imported variables */
 /**********************/
-extern int Executing;
-extern symtab_ptr CurrentSub;
-extern int temps_allocated;
-extern IFILE obj_file;
-extern unsigned char *src_buf;
 extern int Argc;
 
 /**********************/
@@ -510,8 +506,9 @@ char *EMalloc(unsigned long nbytes)
 
 	do {
 		p = malloc(nbytes+8);
-		assert(p);
+// 		assert(p);
 		if (p == NULL) {
+			printf("couldn't alloc %d bytes\n", nbytes );
 			// Only triggered if asserts are turned off.
 			p = Out_Of_Space(nbytes + 8);
 		}

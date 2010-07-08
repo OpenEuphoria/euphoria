@@ -17,20 +17,11 @@
 #include <windows.h>
 #endif
 #include "alldefs.h"
+#include "be_execute.h"
+#include "be_alloc.h"
+#include "be_machine.h"
+#include "be_runtime.h"
 
-/******************/
-/* Local defines  */
-/******************/
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern struct sline *slist;
-extern unsigned char TempBuff[];
-extern int gline_number;
-extern struct IL fe;
-extern int SymTabLen; // avoid > 3 args
-extern char **file_name;
 /**********************/
 /* Exported variables */
 /**********************/
@@ -49,7 +40,7 @@ static int e_routine_size = 0;   /* number of symbol table pointers allocated */
 /**********************/
 /* Declared functions */
 /**********************/
-#include "alloc.h"
+#include "be_alloc.h"
 /*********************/
 /* Defined functions */
 /*********************/

@@ -482,17 +482,54 @@ function forward_branch_into(integer addr1, integer addr2)
 	return FALSE
 end function
 
+map:map label_usage = map:new()
+enum
+	LABEL_UNKNOWN = 0,
+	LABEL_EMITTED,
+	LABEL_UNUSED,
+	LABEL_USED
+
+function can_emit_label( integer addr, integer r_label = 0 )
+	sequence label_key = { CurrentSub, addr, r_label }
+	integer usage = map:get( label_usage, label_key, LABEL_UNKNOWN )
+	
+	switch usage do
+		case LABEL_UNKNOWN then
+			map:put( label_usage, label_key, LABEL_EMITTED )
+			return 1
+		case LABEL_EMITTED, LABEL_USED then
+			return 1
+		case else
+	end switch
+	return 0
+end function
+
+function prune_labels()
+	sequence labels = map:pairs( label_usage )
+	label_usage = map:new()
+	for i = 1 to length( labels ) do
+		if labels[i][2] = LABEL_UNUSED
+		or labels[i][2] = LABEL_EMITTED then
+			map:put( label_usage, labels[i][1], LABEL_UNUSED )
+		end if
+	end for
+	return map:size( label_usage )
+end function
+
 procedure Label(integer addr)
 -- emit a label, and start a new basic block
 	integer label_index
 
 	NewBB(0, E_ALL_EFFECT, 0)
-	label_index = find_label(addr)
-	ifdef DEBUG then
-		c_printf("L%x: // addr: %d pc: %d sub: %d op: %d\n", {label_index, addr, pc, CurrentSub, Code[pc]})
-	elsedef
-		c_printf("L%x: \n", label_index)
-	end ifdef
+	
+	if can_emit_label( addr ) then
+		label_index = find_label(addr)
+		ifdef DEBUG then
+			c_printf("L%x: // addr: %d pc: %d sub: %d op: %d\n", {label_index, addr, pc, CurrentSub, Code[pc]})
+		elsedef
+			c_printf("L%x: \n", label_index)
+		end ifdef
+	end if
 end procedure
 
 procedure RLabel(integer addr)
@@ -500,8 +537,14 @@ procedure RLabel(integer addr)
 	integer label_index
 
 	NewBB(0, E_ALL_EFFECT, 0)
-	label_index = find_label(addr)
-	c_printf("R%x:\n", label_index)
+	if can_emit_label( addr, 1 ) then
+		label_index = find_label(addr)
+		ifdef DEBUG then
+			c_printf("R%x: // addr: %d pc: %d sub: %d op: %d\n", {label_index, addr, pc, CurrentSub, Code[pc]})
+		elsedef
+			c_printf("R%x:\n", label_index)
+		end ifdef
+	end if
 end procedure
 
 procedure Goto(integer addr)
@@ -542,6 +585,7 @@ procedure Goto(integer addr)
 	label_index = find_label(addr)
 	c_stmt0("goto ")
 	c_printf("L%x; // [%d] %d\n", {label_index, pc, addr})
+	map:put( label_usage, { CurrentSub, addr, 0 }, LABEL_USED )
 end procedure
 
 procedure RGoto(integer addr)
@@ -549,6 +593,7 @@ procedure RGoto(integer addr)
 -- does not do branch straightening
 	c_stmt0("goto ")
 	c_printf("R%x;\n", find_label(addr))
+	map:put( label_usage, { CurrentSub, addr, 1 }, LABEL_USED )
 end procedure
 
 function BB_exist(integer var)
@@ -3602,7 +3647,7 @@ end procedure
 procedure opUMINUS()
 	gencode = "@ = unary_op(UMINUS, @);\n"
 	intcode2= "@1 = - @2;\n"    -- careful about -- occurring
-	intcode = "if (@2 == 0xC0000000)\n" &
+	intcode = "if ((unsigned long)@2 == 0xC0000000)\n" &
 			  "@1 = (int)NewDouble((double)-0xC0000000);\n" &
 			  "else\n" &
 			  "@1 = - @2;\n"    -- careful about -- occurring
@@ -4258,6 +4303,8 @@ procedure opFOR()
 	end if
 
 	pc += 7
+	
+	-- Retry label
 	RLabel(pc)
 
 end procedure
@@ -4879,9 +4926,9 @@ procedure opSPLICE()
 	c_stmt0( "}\n")
 	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
 		--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
-		c_stmt("assign_space = Add_internal_space(@,insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
+		c_stmt("assign_space = Add_internal_space( @, insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
 		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt("assign_space = Copy_elements(insert_pos,SEQ_PTR(@), &@ );\n",{Code[pc+2], Code[pc+4]})
+		c_stmt("assign_space = Copy_elements( insert_pos, SEQ_PTR(@), @ == @ );\n",{Code[pc+2], Code[pc+1], Code[pc+4]})
 		c_stmt("@ = MAKE_SEQ( assign_space );\n",{Code[pc+4]})
 	c_stmt0("}\n")
 	c_stmt0( "else {\n" )
@@ -5045,14 +5092,15 @@ procedure opREPLACE()
 	
 	c_stmt0("{\n")
 		for i = 1 to 4 do
-			c_stmt(sprintf("int p%d = @;\n", i-1 ), Code[pc+i])
+			c_stmt(sprintf("int p%d = @;\n", i ), Code[pc+i])
 		end for
-		c_stmt0("int replace_params[5];\n")
-		for i = 0 to 3 do
-			c_stmt0(sprintf("replace_params[%d] = &p%d;\n", {i,i}))
-		end for
-		c_stmt("replace_params[4] = &@;\n", Code[pc+5] )
-		c_stmt0("Replace( &replace_params );\n")
+		c_stmt0("struct replace_block replace_params;\n")
+		c_stmt0( "replace_params.copy_to   = &p1;\n" )
+		c_stmt0( "replace_params.copy_from = &p2;\n" )
+		c_stmt0( "replace_params.start     = &p3;\n" )
+		c_stmt0( "replace_params.stop      = &p4;\n" )
+		c_stmt(  "replace_params.target    = &@;\n", Code[pc+5] )
+		c_stmt0( "Replace( &replace_params );\n")
 		
 		target[MIN] = SeqLen(Code[pc+1])
 		SetBBType(Code[pc+5], TYPE_SEQUENCE, {-1,-1}, or_type( SeqElem(Code[pc+1]), SeqElem(Code[pc+2])),
@@ -7011,6 +7059,8 @@ procedure BackEnd(atom ignore)
 	LAST_PASS = FALSE
 	integer prev_updsym
 	integer updsym = 0
+	integer prev_unused_labels
+	integer unused_labels = 0
 	while not LAST_PASS do
 		
 		Pass += 1
@@ -7031,7 +7081,10 @@ procedure BackEnd(atom ignore)
 							-- promotes seq_elem_new, arg_type_new
 							-- for all symbols
 							-- sets U_DELETED, resets nrefs
-		if updsym = prev_updsym then
+		
+		prev_unused_labels = unused_labels
+		unused_labels = prune_labels() -- eliminate unused goto labels
+		if updsym = prev_updsym and unused_labels = prev_unused_labels then
 			LAST_PASS = TRUE
 		end if
 	end while
@@ -7375,17 +7428,7 @@ procedure BackEnd(atom ignore)
 	end for
 	c_stmt0("}\n")
 
-	c_hputs("extern int TraceOn;\n")
-	c_hputs("extern object_ptr rhs_slice_target;\n")
-	c_hputs("extern s1_ptr *assign_slice_seq;\n")
-	c_hputs("extern object last_r_file_no;\n")
-	c_hputs("extern void *last_r_file_ptr;\n")
-	c_hputs("extern int in_from_keyb;\n")
-	c_hputs("extern void *xstdin;\n")
-	c_hputs("extern struct tcb *tcb;\n")
-	c_hputs("extern int current_task;\n")
-	c_hputs("extern int insert_pos;\n")
-	c_hputs("extern unsigned char *string_ptr;\n")
+
 	if TWINDOWS then
 		c_hputs("extern void *winInstance;\n\n")
 	end if

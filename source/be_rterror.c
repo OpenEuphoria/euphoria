@@ -34,18 +34,20 @@
 #include <string.h>
 #ifdef EWINDOWS
 #include <windows.h>
-extern HANDLE console_output;
 #endif
 
 #include "alldefs.h"
+#include "be_rterror.h"
 #include "be_runtime.h"
 #include "global.h"
-#include "task.h"
+#include "be_task.h"
 #include "be_w.h"
 #include "be_machine.h"
-
-void GetViewPort(struct EuViewPort *vp);
-
+#include "be_execute.h"
+#include "be_symtab.h"
+#include "be_alloc.h"
+#include "be_syncolor.h"
+#include "be_task.h"
 
 /******************/
 /* Local defines  */
@@ -76,69 +78,6 @@ struct display_slot {
 };
 
 /**********************/
-/* Imported variables */
-/**********************/
-extern int tcb_size;
-extern struct tcb *tcb;
-extern int current_task;
-extern int warning_count;
-extern char **warning_list;
-extern int crash_count;
-extern symtab_ptr *e_routine;
-extern int **jumptab;
-extern char *last_traced_line;
-extern int Executing;
-extern int gameover;
-extern int current_screen;
-extern int allow_break;
-extern int control_c_count; 
-#ifdef EUNIX
-extern unsigned current_fg_color, current_bg_color;
-extern int consize_ioctl;
-#endif
-extern int bound;
-extern int print_chars;
-extern int stack_size;
-extern int screen_line, screen_col;
-extern int screen_lin_addr;
-extern int max_stack_per_call;
-extern object_ptr expr_stack; 
-extern object_ptr expr_top;
-extern char TempBuff[];
-extern object_ptr frame_base;
-extern int *tpc;
-extern object_ptr *frame_base_ptr;
-extern jmp_buf env;
-extern struct sline *slist;
-extern char **file_name;
-extern unsigned line_number;
-extern long gline_number;
-extern int start_line;
-extern int TraceBeyond;
-extern int TraceStack;
-extern symtab_ptr TopLevelSub;
-extern int TraceOn;
-extern IFILE TempErrFile;
-extern char *TempErrName;
-extern struct videoconfig config;
-extern int wrap_around;
-extern int in_from_keyb;
-extern char *crash_msg;
-
-#ifdef EWINDOWS
-extern void SaveNormal();
-extern void SaveTrace();
-extern void RestoreNormal();
-extern void RestoreTrace();
-#endif
-
-#ifdef EUNIX
-extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
-extern struct char_cell alt_image_main[MAX_LINES][MAX_COLS];
-extern struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
-#endif
-
-/**********************/
 /* Exported variables */
 /**********************/
 //int caught_interrupt = FALSE;   /* did we receive an interrupt? */
@@ -155,16 +94,12 @@ char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
 /* Local variables */
 /*******************/
 
+#ifndef BACKEND
 #ifdef EUNIX
 static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
 #endif
 
-
-
-
-
-#ifndef BACKEND
 static struct rccoord MainPos; /* text position save area */
 static int MainWrap;  /* Main wrap mode */
 static char *DebugScreenSave = NULL;   /* place to save debug screen */
@@ -172,34 +107,30 @@ static int main_screen_line = 1;
 static int debug_screen_line = 1;
 static int main_screen_col = 1;
 static int debug_screen_col = 1;
+
+								/* list of display slots */
+static long highlight_line;     /* current line on debug screen */
+static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
+static long tstamp = 1; /* time stamp for deleting vars on display */
+static IFILE conin; 
+
 #endif
 
 static int first_debug;           /* first time into debug screen */
 static long trace_line;      /* current traced line */
 
 
-								/* list of display slots */
-#ifndef BACKEND
-static long highlight_line;     /* current line on debug screen */
-static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
-static long tstamp = 1; /* time stamp for deleting vars on display */
-static IFILE conin; 
-#endif
-
 
 /**********************/
 /* Declared functions */
 /**********************/
-symtab_ptr Locate();
-#include "alloc.h"
+#ifndef BACKEND
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();
 struct rccoord GetTextPositionP();
 static void ShowName();
-void UpdateGlobals();
-void EraseSymbol();
-symtab_ptr RTLookup();
+#endif
 
 /*********************/
 /* Defined functions */
@@ -1511,10 +1442,6 @@ void atom_condition()
 
 /* signal handlers */
 
-#ifdef EWINDOWS
-extern void DisableControlCHandling(); // be_w.c
-#endif
-
 void INT_Handler(int sig_no)
 /* control-c, control-break */
 {
@@ -1548,9 +1475,6 @@ signed int vsnprintf(char * buf, size_t size, char * fmt, va_list list ) {
 	return vsprintf(buf,fmt,list);	
 }
 #endif
-
-extern int line_max;
-extern int col_max;
 
 void GetViewPort(struct EuViewPort *vp)
 {

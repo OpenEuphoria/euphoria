@@ -3,8 +3,8 @@
 /*                        STORAGE ALLOCATION MACROS                          */
 /*                                                                           */
 /*****************************************************************************/
-#ifndef _ALLOC_H_
-#define _ALLOC_H_ 1
+#ifndef BE_ALLOC_H_
+#define BE_ALLOC_H_ 1
 
 #include <limits.h>
 #include "execute.h"
@@ -156,24 +156,22 @@ typedef struct block_list * block_list_ptr;
 	#define EFree(ptr) free(ptr)
 	#define ERealloc(orig, newsize) realloc(orig, newsize)
 #else
-	char *EMalloc(unsigned long size);
-	void EFree(char *ptr);
-	char *ERealloc(char *orig, unsigned long newsize);
+	extern char *EMalloc(unsigned long size);
+	extern void EFree(char *ptr);
+	extern char *ERealloc(char *orig, unsigned long newsize);
 #endif
 
 #if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \
 	|| (defined(__DJGPP__) && __DJGPP__ <= 2 && __DJGPP_MINOR__ < 4)    
-extern size_t strlcpy(char *dest, char *src, size_t maxlen);
-extern size_t strlcat(char *dest, char *src, size_t maxlen);
+size_t strlcpy(char *dest, char *src, size_t maxlen);
+size_t strlcat(char *dest, char *src, size_t maxlen);
 #endif
 
 #ifdef EBSD
-extern char *malloc_options;
+char *malloc_options;
 #endif
 
-#ifdef EUNIX
 extern long pagesize;  // needed for Linux only, not FreeBSD
-#endif
 
 extern int eu_dll_exists; // a Euphoria .dll is being used
 extern int low_on_space;  // are we almost out of memory?
@@ -194,5 +192,14 @@ extern long funny_align;           /* number mallocs not 8-aligned */
 extern unsigned long bytes_allocated;       /* current number of object blocks alloc'd */
 extern unsigned long max_bytes_allocated;   /* high water mark */
 #endif
+
+extern void InitEMalloc();
+extern object NewString(char *s);
+extern s1_ptr NewS1(long size);
+extern s1_ptr SequenceCopy(register s1_ptr a);
+
+extern object NewDouble(double d);
+extern long copy_string(char *dest, char *src, size_t bufflen);
+extern long append_string(char *dest, char *src, size_t bufflen);
 
 #endif

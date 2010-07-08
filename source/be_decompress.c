@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "alldefs.h"
+#include "be_alloc.h"
 
 unsigned char *string_ptr;
 

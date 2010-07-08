@@ -39,13 +39,9 @@
 #endif
 #include "alldefs.h"
 #include "be_runtime.h"
+#include "be_machine.h"
+#include "be_alloc.h"
 
-/**********************/
-/* Imported variables */
-/**********************/
-extern char TempBuff[];
-extern int c_routine_next;         /* index of next available element */
-extern struct arg_info *c_routine; /* array of c_routine structs */
 
 /*******************/
 /* Local variables */

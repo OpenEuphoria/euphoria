@@ -47,13 +47,22 @@
 #endif
 
 #include "alldefs.h"
+#include "be_alloc.h"
 #include "be_runtime.h"
 #include "be_machine.h"
-#include "be_runtime.h"
+#include "be_inline.h"
+#include "be_w.h"
+#include "be_callc.h"
+#include "be_task.h"
 
 #ifndef ERUNTIME
+#include "be_rterror.h"
 #include "coverage.h"
+#include "be_execute.h"
+#include "be_symtab.h"
 #endif
+
+
 
 /******************/
 /* Local defines  */
@@ -66,8 +75,7 @@
 /* convert atom to char. *must avoid side effects in elem* */
 #define Char(elem) ((IS_ATOM_INT(elem)) ? ((char)INT_VAL(elem)) : doChar(elem))
 
-#define FIRST_USER_FILE 3
-#define MAX_USER_FILE 40
+
 
 #define CONTROL_Z 26
 
@@ -84,60 +92,8 @@
 /**********************/
 /* Imported variables */
 /**********************/
-extern int **jumptab;
-extern char *last_traced_line;
-extern int AnyStatementProfile;
-extern int first_mouse;
-extern int in_from_keyb;
-extern char *collect;
-extern int have_console;
-extern int in_from_keyb;
-extern int screen_col;
-extern symtab_ptr *e_routine;
-extern cleanup_ptr *e_cleanup;
-extern struct routine_list *rt00;
-extern symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3,
-				  call_back_arg4, call_back_arg5, call_back_arg6,
-				  call_back_arg7, call_back_arg8, call_back_arg9,
-				  call_back_result;
-
-extern char *crash_msg;
-extern object_ptr expr_stack;
-extern volatile int sample_next;
-extern int *profile_sample;
-extern int sample_size;
-extern int AnyTimeProfile;
-extern int line_max;
-extern int col_max;
 extern int Argc;
 extern char **Argv;
-extern struct sline *slist;
-extern long gline_number;
-extern char TempBuff[];
-extern struct videoconfig config;
-extern int il_file;
-extern struct IL fe;
-IFILE TempErrFile = 0;
-char *TempErrName; // "ex.err" - but must be on the heap
-char *TempWarningName;
-int display_warnings;
-extern int Executing;
-
-#ifdef EWINDOWS
-extern HINSTANCE *open_dll_list;
-extern int open_dll_count;
-extern HANDLE console_input;
-extern HANDLE console_output;
-#endif
-
-extern object_ptr expr_top;
-extern object_ptr expr_max;    // top limit of call stack
-extern object_ptr expr_limit;  // don't start a new routine above this
-extern int *tpc;
-
-#ifndef ERUNTIME
-extern symtab_ptr TopLevelSub;
-#endif
 
 /**********************/
 /* Exported variables */
@@ -150,27 +106,26 @@ int clocks_per_sec;
 int clk_tck;
 int gameover = FALSE;           /* Are we shutting down? */
 int insert_pos;
+IFILE TempErrFile;
+char *TempErrName; // "ex.err" - but must be on the heap
+char *TempWarningName;
+int display_warnings;
+
 /**********************/
 /* Declared Functions */
 /**********************/
-unsigned long good_rand();
-void RHS_Slice();
-object user(), Command_Line(), EOpen(), Repeat();
-object machine(), make_atom32();
-object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
-	   NewDouble();
-object add(), minus(), uminus(), e_sqrt(), Random(), multiply(), divide(),
-	 equals(), less(), greater(), noteq(), greatereq(), lesseq(),
-	 and(), or(), xor(), not(), e_sin(), e_cos(), e_tan(), e_arctan(),
-	 e_log(), e_floor(), eremainder(), and_bits(), or_bits(),
-	 xor_bits(), not_bits(), power();
-object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide(),
-	 Dequals(), Dless(), Dgreater(), Dnoteq(), Dgreatereq(), Dlesseq(),
-	 Dand(), Dor(), Dxor(), Dnot(), De_sin(), De_cos(), De_tan(), De_arctan(),
-	 De_log(), De_floor(), Dremainder(), Dand_bits(), Dor_bits(),
-	 Dxor_bits(), Dnot_bits(), Dpower();
-object x(); /* error */
-unsigned general_call_back();
+
+object add(long a, long b);
+
+unsigned general_call_back(
+#ifdef ERUNTIME
+		  int cb_routine,
+#else
+		  symtab_ptr cb_routine,
+#endif
+						   unsigned arg1, unsigned arg2, unsigned arg3,
+						   unsigned arg4, unsigned arg5, unsigned arg6,
+						   unsigned arg7, unsigned arg8, unsigned arg9);
 
 struct op_info optable[MAX_OPCODE+1] = {
 {x, x}, /* no 0th element */
@@ -373,7 +328,17 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
+{x, x},/*200*/
 {x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},
+{x, x},/*210*/
 {x, x},
 {x, x},
 {x, x}
@@ -396,6 +361,10 @@ int EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console s
                       for euid running on Windows systems that do not support
                       'full screen DOS' mode; eg. Vista.
                    */
+char *last_traced_line = NULL;
+struct routine_list *rt00;
+struct ns_list *rt01;
+unsigned char ** rt02;
 
 /*******************/
 /* Local variables */
@@ -410,17 +379,7 @@ static int user_abort = FALSE; /* TRUE if abort() was called by user program */
 int Mouse_Handler(Gpm_Event *, void *);
 #endif
 #endif
-struct rccoord GetTextPositionP();
-symtab_ptr Locate();
-s1_ptr NewS1();
-object NewString();
-object machine();
-s1_ptr SequenceCopy();
-char *getenv();
-IFILE long_iopen();
 
-
-int wingetch();
 
 /*********************/
 /* Defined functions */
@@ -520,8 +479,7 @@ int color_trace = 1;
 void MainScreen()
 {
 }
-#else
-extern int color_trace;
+
 #endif
 
 #if !defined(EBSD62)
@@ -560,10 +518,6 @@ int matherr(struct _exception *err)  // OW wants this
 	return 0;
 }
 #endif
-
-/* error trace back routines */
-extern int *crash_list;
-extern int crash_routines;
 
 int crash_call_back = FALSE;
 
@@ -2412,8 +2366,9 @@ object binary_op_a(int fn, object a, object b)
 	struct d temp_d;
 
 	if (IS_ATOM_INT(a)) {
-		if (IS_ATOM_INT(b))
+		if (IS_ATOM_INT(b)){
 			return (*optable[fn].intfn)(INT_VAL(a), INT_VAL(b));
+		}
 		else {
 			temp_d.dbl = (double)INT_VAL(a);
 			return (*optable[fn].dblfn)(&temp_d, DBL_PTR(b));
@@ -3704,11 +3659,8 @@ void EClose(object a)
 	}
 }
 
-object EOpen(filename, mode_obj, cleanup)
+object EOpen(object filename, object mode_obj, object cleanup)
 /* open a file */
-object filename;
-object mode_obj;
-object cleanup;
 {
 	char cname[MAX_FILE_NAME+1];
 #define EOpen_cmode_len (8)
@@ -4647,7 +4599,7 @@ int get_key(int wait)
 #endif // EUNIX
 }
 
-char *last_traced_line = NULL;
+
 static int trace_line = 0;
 static IFILE trace_file;
 
@@ -4705,9 +4657,7 @@ static void RTInternal(char *msg, ...)
 }
 #endif
 
-struct routine_list *rt00;
-struct ns_list *rt01;
-unsigned char ** rt02;
+
 void *xstdin;
 
 int CRoutineId(int seq_num, int current_file_no, object name)
@@ -5110,7 +5060,7 @@ object system_exec_call(object command, object wait)
 		return NewDouble((double)exit_code);
 }
 
-object EGetEnv(s1_ptr name)
+object EGetEnv(object name)
 /* map an environment var to its value */
 {
 	char *string;
@@ -5626,7 +5576,11 @@ void Cleanup(int status)
 #ifdef EUNIX
 	char *xterm;
 #endif
+
+#if defined(EWINDOWS) || !defined(ERUNTIME)
 	int i;
+#endif
+	
 #ifndef ERUNTIME
 	long c;
 	FILE *wrnf = NULL;
@@ -5929,17 +5883,18 @@ int mgetch(int wait)
 #endif
 #endif
 
-long find_from(object a, s1_ptr b, object c)
+long find_from(object a, object bobj, object c)
 /* find object a as an element of sequence b starting from c*/
 {
 	long length;
 	object_ptr bp;
 	object bv;
+	s1_ptr b;
 
-	if (!IS_SEQUENCE(b))
+	if (!IS_SEQUENCE(bobj))
 		RTFatal("second argument of find_from() must be a sequence");
 
-	b = SEQ_PTR(b);
+	b = SEQ_PTR(bobj);
 	length = b->length;
 
 	// same rules as the lower limit on a slice
@@ -6031,7 +5986,7 @@ long find_from(object a, s1_ptr b, object c)
 	return 0;
 }
 
-long e_match_from(s1_ptr a, s1_ptr b, object c)
+long e_match_from(object aobj, object bobj, object c)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
@@ -6040,15 +5995,16 @@ long e_match_from(s1_ptr a, s1_ptr b, object c)
 	object_ptr ai, bi;
 	object av, bv;
 	long lengtha, lengthb;
+	s1_ptr a, b;
 
-	if (!IS_SEQUENCE(a))
+	if (!IS_SEQUENCE(aobj))
 		RTFatal("first argument of match_from() must be a sequence");
 
-	if (!IS_SEQUENCE(b))
+	if (!IS_SEQUENCE(bobj))
 		RTFatal("second argument of match_from() must be a sequence");
 
-	a = SEQ_PTR(a);
-	b = SEQ_PTR(b);
+	a = SEQ_PTR(aobj);
+	b = SEQ_PTR(bobj);
 
 	lengtha = a->length;
 	if (lengtha == 0)

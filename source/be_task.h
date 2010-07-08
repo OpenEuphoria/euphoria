@@ -3,6 +3,10 @@
 
 #include "execute.h"
 
+extern int tcb_size;
+extern int current_task;
+extern double clock_period;
+
 enum task_mode {
 	INTERPRETED_TASK,
 	TRANSLATED_TASK
@@ -67,6 +71,8 @@ struct tcb {
 	
 };
 
+extern struct tcb *tcb;
+
 // TASK API:
 void task_yield();
 void task_schedule(object task, object sparams);
@@ -76,6 +82,9 @@ object task_status(object a);
 void task_clock_stop();
 void task_clock_start();
 object task_create(object r_id, object args);
-
-
+void InitTask();
+void terminate_task(int task);
+void scheduler(double now);
+void restore_privates(symtab_ptr this_routine);
+double Wait(double t);
 #endif

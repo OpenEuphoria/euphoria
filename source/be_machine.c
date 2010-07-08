@@ -17,6 +17,22 @@
 #include <stdlib.h>
 
 #include "global.h"
+#include "alldefs.h"
+#include "execute.h"
+#include "version.h"
+#include "be_runtime.h"
+#include "be_rterror.h"
+#include "be_main.h"
+#include "be_w.h"
+#include "be_runtime.h"
+#include "be_symtab.h"
+#include "be_machine.h"
+#include "be_pcre.h"
+#include "be_task.h"
+#include "be_alloc.h"
+#include "be_execute.h"
+#include "be_socket.h"
+
 #ifdef EUNIX
 
 #include <strings.h>
@@ -43,7 +59,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-#include "alloc.h"
+
 
 #ifndef LOCK_SH
 #define LOCK_SH  1 /* shared lock */
@@ -102,11 +118,6 @@ int emul_flock(fd, cmd)
 
 #include <signal.h>
 
-#include "alldefs.h"
-#include "alloc.h"
-#include "execute.h"
-#include "version.h"
-#include "be_runtime.h"
 
 extern char* get_svn_revision(); /* from rev.c */
 
@@ -168,47 +179,7 @@ unsigned current_bg_color = 0;
 extern char **Argv;
 extern int Argc;
 
-/**********************/
-/* Imported variables */
-/**********************/
-extern long pagesize;
-#ifdef EUNIX
-extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
-#endif
-extern double clock_period;
-extern symtab_ptr TopLevelSub;
-extern int eu_dll_exists;
-extern struct exe_routines backpointers;
-extern int clocks_per_sec;
-extern int clk_tck;
-extern char *TempErrName;
-extern char *TempWarningName;
-extern int display_warnings;
-extern int allow_break;
-extern int control_c_count;
-#ifndef ERUNTIME
-extern int sample_size;
-extern int Executing;
-extern int ProfileOn;
-extern int *tpc;
-#endif
-extern int current_screen;
-extern int screen_line, screen_col;
-extern int wrap_around;
-extern struct file_info user_file[];
-extern long seed1, seed2;
-extern int rand_was_set;
-extern int e_routine_next;
-extern symtab_ptr *e_routine;
 
-#ifdef EWINDOWS
-extern HANDLE console_output;
-#endif
-
-extern int have_console;
-extern symtab_ptr cb_routine[];
-extern object last_w_file_no;
-extern IFILE last_w_file_ptr;
 
 /********************/
 /* Local variables */
@@ -232,22 +203,6 @@ char *version_name =
 "Linux";
 #endif
 
-/**********************/
-/* Declared Functions */
-/**********************/
-IFILE which_file();
-s1_ptr NewS1();
-char *getcwd();
-struct rccoord GetTextPositionP();
-
-void AfterExecute(void);
-void Machine_Handler();
-object SetTColor();
-object SetBColor();
-
-object compile_pcre();
-object exec_pcre();
-int get_ovector_size(object);
 
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
@@ -341,7 +296,7 @@ char *name_ext(char *s)
 		return s;
 }
 
-extern long get_int(object x)
+long get_int(object x)
 /* return an integer value if possible, truncated to 32 bits. */
 {
 	if (IS_ATOM_INT(x)){
@@ -983,8 +938,6 @@ int Mouse_Handler(Gpm_Event *event, void *clientdata) {
 }
 
 static Gpm_Connect conn;
-extern char key_buff[];
-extern int key_write;
 
 void save_key(int key)
 // store a key in the buffer
@@ -1899,7 +1852,6 @@ static object change_dir(object x)
 		return ATOM_0;
 }
 
-extern double Wait(double);
 static object e_sleep(object x)
 /* sleep for x seconds */
 {
@@ -2350,8 +2302,6 @@ object DefineC(object x)
 
 #define EXECUTABLE_ALIGNMENT (4)
 
-extern struct routine_list *rt00;
-
 #ifdef EWINDOWS
 typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection);
 #endif
@@ -2633,21 +2583,17 @@ object eu_uname()
 #endif
 }
 
+
+void Machine_Handler(int sig_no)
+/* illegal instruction, segmentation violation */
+{
+	UNUSED( sig_no );
 #ifdef ERUNTIME
-void Machine_Handler(int sig_no)
-/* illegal instruction, segmentation violation */
-{
-	UNUSED( sig_no );
 	RTFatal("A machine-level exception occurred during execution of your program");
-}
 #else
-void Machine_Handler(int sig_no)
-/* illegal instruction, segmentation violation */
-{
-	UNUSED( sig_no );
 	RTFatal("A machine-level exception occurred during execution of this statement");
-}
 #endif
+}
 
 #ifndef ERUNTIME
 extern struct IL fe;

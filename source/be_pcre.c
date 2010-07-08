@@ -14,17 +14,11 @@
 #include <ctype.h>
 #include <string.h>
 #include "alldefs.h"
-#include "alloc.h"
+#include "be_alloc.h"
 #include "be_runtime.h"
-#include "pcre/pcre.h"
 #include "global.h"
+#include "be_pcre.h"
 
-struct pcre_cleanup {
-        struct cleanup cleanup;
-        pcre *re;
-        object errmsg;
-};
-typedef struct pcre_cleanup *pcre_cleanup_ptr;
 
 void pcre_deref(object re) {
         pcre_cleanup_ptr rcp;

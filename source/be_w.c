@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+
 #ifdef EUNIX
 #  include <sys/stat.h>
 #  include <unistd.h>
@@ -27,30 +28,24 @@
 #      include <graph.h>
 #  endif
 #endif
+
 #include <string.h>
+
 #ifdef EWINDOWS
 #  include <windows.h>
 #endif
+
 #include "alldefs.h"
 #include "global.h"
 #include "be_w.h"
+#include "be_machine.h"
+#include "be_runtime.h"
+#include "be_rterror.h"
 
 /******************/
 /* Local defines  */
 /******************/
 #define TAB_WIDTH 4    /* power of 2 assumed */
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern int EuConsole;
-extern int current_screen;
-extern int line_max, col_max;
-extern int con_was_opened;
-extern struct videoconfig config;
-extern int low_on_space;
-extern unsigned current_bg_color;
-extern unsigned current_fg_color;
 
 /**********************/
 /* Exported variables */
@@ -102,10 +97,10 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 /**********************/
 /* Declared functions */
 /**********************/
-#include "alloc.h"
+#include "be_alloc.h"
 static void expand_tabs();
 void SetPosition();
-void RTInternal();
+
 
 /*********************/
 /* Defined functions */
@@ -847,7 +842,6 @@ void RestoreNormal()
     }
 }
 
-extern void DisableControlCHandling();
 void DisableControlCHandling()
 {
 	// SetConsoleMode(console_input, ENABLE_MOUSE_INPUT);

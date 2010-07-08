@@ -41,32 +41,11 @@
 #include <fcntl.h>
 #include <string.h>
 #include "alldefs.h"
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern int EuConsole;
-extern int clocks_per_sec;
-extern int clk_tck;
-extern int have_console;
-
-extern int gameover;
-#ifdef EXTRA_STATS
-extern int mouse_ints;
-extern unsigned recycles;
-extern long a_miss;
-extern long a_hit; 
-extern long a_too_big;
-extern long funny_expand;
-extern long funny_align;
-extern int bad_samples;
-#endif
-extern char show_cursor[];
-extern char hide_cursor[];
-extern char wrap[];
-extern char **file_name;
-extern unsigned char TempBuff[];
-extern char *TempErrName;
+#include "be_runtime.h"
+#include "be_execute.h"
+#include "be_alloc.h"
+#include "be_rterror.h"
+#include "be_execute.h"
 
 /**********************/
 /* Exported variables */
@@ -81,14 +60,6 @@ char main_path[PATH_MAX+1]; /* path of main file being executed */
 /*******************/
 
 
-/**********************/
-/* Declared functions */
-/**********************/
-extern char *getenv();
-void InitExecute();
-void InitDebug();
-void InitTraceWindow();
-#include "alloc.h"
 
 /*********************/
 /* Defined functions */

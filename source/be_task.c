@@ -23,8 +23,14 @@
 #include "symtab.h"
 #include "reswords.h"
 #include "be_runtime.h"
-#include "task.h"
+#include "be_task.h"
+#include "be_alloc.h"
+#include "be_machine.h"
 
+#ifndef ERUNTIME
+#include "be_execute.h"
+#include "be_symtab.h"
+#endif
 /*********************/
 /* Local definitions */
 /*********************/
@@ -44,24 +50,6 @@ int current_task;
 // Windows/Linux/FreeBSD
 double clock_period = 0.01;  // should check this at run-time
 
-/**********************/
-/* Imported variables */
-/**********************/
-extern struct routine_list *rt00;
-
-#ifndef ERUNTIME
-extern object_ptr expr_stack;
-extern object_ptr expr_max;  
-extern object_ptr expr_limit;
-extern int stack_size;
-extern object_ptr expr_top;
-extern int *tpc;
-extern symtab_ptr TopLevelSub;
-extern int **jumptab;
-extern int e_routine_next;
-extern symtab_ptr *e_routine;
-#endif
-
 /*******************/
 /* Local variables */
 /*******************/
@@ -70,23 +58,14 @@ static int clock_stopped = FALSE;
 static int id_wrap = FALSE; // have task id's wrapped around? (very rare)
 static double next_task_id = 1.0;
 
-extern int total_stack_size; // total amount of stack available 
-							 // OPTION STACK will be 8k higher than this)
-
 
 /*********************/
 /* Declared functions */
 /*********************/
-extern double current_time();
-void restore_privates(symtab_ptr this_routine);
+
 #include "alldefs.h"
-
-extern void debug_dbl(double);
-
-extern struct routine_list _00[]; 
-void run_current_task( int );
-void init_task( int );
-
+static void init_task( int tx );
+static void run_current_task( int task );
 
 /*********************/
 /* Defined functions */
@@ -191,7 +170,6 @@ void terminate_task(int task)
 	}
 }
 
-extern double Wait(double t);
 double Wait(double t)
 // Wait for a while 
 {   
@@ -242,7 +220,8 @@ double Wait(double t)
 	return now;
 }
 
-
+// Created by the translator:
+extern struct routine_list _00[];
 static void call_task(int rid, object args) 
 /* translated code: call a task for the first time, passing its arguments */
 {
@@ -1018,7 +997,7 @@ void run_task( int tx ){
 
 #ifdef EWINDOWS
 
-void run_current_task( int task ){
+static void run_current_task( int task ){
 	current_task = task;
 	SwitchToFiber( tcb[current_task].impl.translated.task );
 }
@@ -1029,7 +1008,7 @@ void WINAPI exec_task( void *task ){
 	call_task( t->rid, t->args );
 }
 
-void init_task( int tx ){
+static void init_task( int tx ){
 	// fibers...
 	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, (void *)tx );
 }
@@ -1060,7 +1039,7 @@ void *start_task( void *task ){
  * Creates the thread where the new task will run.
  */
 
-void init_task( int tx ){
+static void init_task( int tx ){
 	int ret;
 	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
 	// TODO error handling
@@ -1070,7 +1049,7 @@ void init_task( int tx ){
  * Changes the value of the current_task to @task, then signals the waiting 
  * threads to see if they should be running, after which it calls wait_for_task().
  */
-void run_current_task( int task ){
+static void run_current_task( int task ){
 	int this_task = current_task;
 	current_task = task;
 	pthread_cond_broadcast( &task_condition );

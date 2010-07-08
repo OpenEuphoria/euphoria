@@ -5,40 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef EWINDOWS
-    #include <windows.h>
 
-    #ifndef AF_INET
-        // Support older version of Watcom < 1.8
-    	#include <winsock2.h>
-        #include <ws2tcpip.h>
-    #endif // AF_INET
-
-#else // ifdef EWINDOWS
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netdb.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-
-	#ifdef EUNIX
-        #include <unistd.h>
-
-		#ifdef EBSD
-    		#include <netinet/in.h>
-		#endif // EFREEBSD
-
-		#define SOCKET int
-		#define SOCKET_ERROR -1
-		#define INVALID_SOCKET -1
-		#define SOCKADDR struct sockaddr_in
-		#define closesocket close
-	#endif // UNIX
-#endif // ifdef EWINDOWS else
 
 #include "alldefs.h"
-#include "alloc.h"
+#include "be_alloc.h"
 #include "be_runtime.h"
+#include "be_socket.h"
 
 // Accessors for the socket sequence given to many functions
 #define SOCK_SOCKET   1
@@ -899,7 +871,7 @@ object eusock_recvfrom(object x)
 	SOCKET s;
 	struct sockaddr_in addr;
 	int flags, result;
-	int addr_size;
+	socklen_t addr_size;
 	char buf[BUFF_SIZE];
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
@@ -1015,7 +987,7 @@ object eusock_accept(object x)
 {
 	SOCKET server, client;
 	struct sockaddr_in addr;
-	int addr_len;
+	socklen_t addr_len;
 
 	s1_ptr client_seq, client_sock_p;
 
@@ -1051,7 +1023,7 @@ object eusock_getsockopt(object x)
 {
 	SOCKET s;
 	int level, optname, optval;
-	int optlen;
+	socklen_t optlen;
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to get_option must be a socket");

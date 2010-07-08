@@ -7,6 +7,11 @@
 #ifndef H_GLOBAL
 #define H_GLOBAL
 
+#ifdef EWATCOM
+#include <windows.h>
+#include <graph.h>
+#endif
+
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
 typedef unsigned char   uchar;
@@ -252,151 +257,6 @@ struct EuViewPort
 	int vars_per_line;  	/* number of variables slots per line */
 	int display_size;   	/* number of slots for variables */
 };
-
-int memcopy( void *dest, size_t avail, void *src, size_t len);
-long copy_string(char *dest, char *src, size_t bufflen);
-long append_string(char *dest, char *src, size_t bufflen);
-void MakeCString(char *s, object pobj, int slen);
-void set_text_color(int c);
-void screen_output(IFILE f, char *out_string);
-object NewDouble(double d);
-s1_ptr NewS1(long size);
-unsigned long get_pos_int(char *where, object x);
-void Append(object_ptr target, object s1, object a);
-void de_reference();
-void InitStack(int size, int toplevel);
-void Cleanup()
-#ifdef EUNIX
-__attribute__ ((noreturn))
-#endif
-;
-void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
-#ifdef EUNIX
-__attribute__ ((noreturn))
-#endif
-;
-object NewString(char *s);
-void NewConfig(int raise_console);
-int charcopy(char *target, int target_len, char *source, int source_len);
-void MainScreen();
-void show_console();
-int CheckFileNumber(object a);
-void setran();
-object calc_hash(object a, object b);
-object make_atom32(unsigned c32);
-void fe_set_pointers();
-void be_init();
-void Execute(int *start_index);
-int get_key(int wait);
-object find_replace_pcre(object x );
-object pcre_error_message(object x);
-
-object eusock_getservbyname(object x);
-object eusock_getservbyport(object x);
-object eusock_gethostbyname(object x);
-object eusock_gethostbyaddr(object x);
-object eusock_error_code();
-object eusock_socket(object x);
-object eusock_close(object x);
-object eusock_shutdown(object x);
-object eusock_connect(object x);
-object eusock_send(object x);
-object eusock_recv(object x);
-object eusock_bind(object x);
-object eusock_listen(object x);
-object eusock_accept(object x);
-object eusock_getsockopt(object x);
-object eusock_setsockopt(object x);
-object eusock_select(object x);
-object eusock_sendto(object x);
-object eusock_recvfrom(object x);
-
-int long_open(char *name, int mode);
-object_ptr BiggerStack();
-
-void screen_output_va(IFILE f, char *out_string, va_list ap);
-void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap);
-
-void do_exec(int *start_pc);
-object SetTColor(object x);
-void flush_screen();
-void buffer_screen();
-void ClearScreen();
-void InitInOut();
-void InitGraphics();
-void InitEMalloc();
-void InitTask();
-void SetPosition(int line, int col);
-void RestoreConfig();
-int FindLine(int *pc, symtab_ptr proc);
-int mouse_installed();
-void DisableControlCHandling();
-void EndGraphics();
-void key_gets(char *input_string);
-
-int NumberOpen();
-object SetBColor(object x);
-void DisplayColorLine(char *pline, int string_color);
-char *name_ext(char *s);
-object Wrap(object x);
-void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty);
-int show_ascii_char(IFILE print_file, int iv);
-int PrivateName(char *name, symtab_ptr proc);
-int ValidPrivate(symtab_ptr sym, symtab_ptr proc);
-void init_class();
-void restore_privates(symtab_ptr this_routine);
-void call_crash_routines();
-
-void RangeReading(object subs, int len);
-void BadSubscript(object subs, long length);
-void SubsNotAtom();
-void NoValue(symtab_ptr s);
-object DoubleToInt(object d);
-void RTFatalType(int *pc)
-#ifdef EUNIX
-__attribute__ ((noreturn))
-#endif
-;
-s1_ptr SequenceCopy(register s1_ptr a);
-void atom_condition();
-void terminate_task(int task);
-void scheduler(double now);
-int RoutineId(symtab_ptr current_sub, object name, int file_no);
-void Prepend(object_ptr target, object s1, object a);
-void Replace( replace_ptr rb );
-void Concat(object_ptr target, object a_obj, object b_obj);
-s1_ptr Add_internal_space(object a,int at,int len);
-void Concat_Ni(object_ptr target, object_ptr *source, int n);
-void Position(object line, object col);
-int compare(object a, object b);
-object memory_copy(object d, object s, object n);
-object memory_set(object d, object v, object n);
-void system_call(object command, object wait);
-object system_exec_call(object command, object wait);
-void EClose(object a);
-int might_go_screen(object file_no);
-object EGets(object file_no);
-void EPuts(object file_no, object obj);
-void StdPrint(int fn, object a, int new_lines);
-object EPrintf(int file_no, object format_obj, object values);
-object EGetEnv(s1_ptr name);
-object call_c(int func, object proc_ad, object arg_list);
-void UserCleanup(int status);
-void SubsAtomAss();
-
-void ctrace(char *line);
-void ShowDebug();
-void UpdateGlobals();
-void DebugScreen();
-void DisplayVar(symtab_ptr s_ptr, int user_requested);
-void ErasePrivates(symtab_ptr proc_ptr);
-void EraseSymbol(symtab_ptr sym);
-
-void echo_wait();
-object SetTColor(object x);
-object SetBColor(object x);
-void debug_msg(char *msg);
-void update_screen_string(char *s);
 
 #ifdef EWINDOWS
 	int wingetch();

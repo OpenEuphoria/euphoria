@@ -658,7 +658,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	
 endif
 
-$(BUILDDIR)/$(OBJDIR)/back/%.o : %.c execute.h alloc.h global.h alldefs.h opnames.h reswords.h symtab.h Makefile.eu
+$(BUILDDIR)/$(OBJDIR)/back/%.o : %.c Makefile.eu
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c Makefile.eu
@@ -683,181 +683,235 @@ depend :
 # DO NOT DELETE
 
 $(BUILDDIR)/intobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_alloc.o: execute.h reswords.h alloc.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/intobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_callc.o: execute.h reswords.h alloc.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_callc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/intobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/intobj/back/be_callc_conly.o: alloc.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/intobj/back/be_decompress.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_decompress.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/intobj/back/be_decompress.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_execute.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/intobj/back/be_execute.o: be_runtime.h task.h
+$(BUILDDIR)/intobj/back/be_execute.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/intobj/back/be_execute.o: be_runtime.h be_decompress.h
+$(BUILDDIR)/intobj/back/be_execute.o: be_inline.h be_machine.h be_task.h
+$(BUILDDIR)/intobj/back/be_execute.o: be_rterror.h be_symtab.h be_w.h
+$(BUILDDIR)/intobj/back/be_execute.o: be_callc.h be_execute.h
 $(BUILDDIR)/intobj/back/be_inline.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_inline.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/intobj/back/be_inline.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_machine.o: global.h object.h symtab.h alldefs.h
-$(BUILDDIR)/intobj/back/be_machine.o: execute.h reswords.h alloc.h version.h
-$(BUILDDIR)/intobj/back/be_machine.o: be_runtime.h
+$(BUILDDIR)/intobj/back/be_machine.o: execute.h reswords.h version.h
+$(BUILDDIR)/intobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
+$(BUILDDIR)/intobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
+$(BUILDDIR)/intobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
 $(BUILDDIR)/intobj/back/be_main.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_main.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/intobj/back/be_main.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/intobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_pcre.o: execute.h reswords.h alloc.h be_runtime.h
-$(BUILDDIR)/intobj/back/be_pcre.o: pcre/pcre.h
+$(BUILDDIR)/intobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/intobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/intobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_rterror.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/intobj/back/be_rterror.o: be_runtime.h task.h be_w.h be_machine.h
+$(BUILDDIR)/intobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
+$(BUILDDIR)/intobj/back/be_rterror.o: be_runtime.h be_task.h be_w.h
+$(BUILDDIR)/intobj/back/be_rterror.o: be_machine.h be_execute.h be_symtab.h
+$(BUILDDIR)/intobj/back/be_rterror.o: be_alloc.h be_syncolor.h
 $(BUILDDIR)/intobj/back/be_runtime.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_runtime.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/intobj/back/be_runtime.o: be_runtime.h be_machine.h
+$(BUILDDIR)/intobj/back/be_runtime.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/intobj/back/be_runtime.o: be_runtime.h be_machine.h be_inline.h
+$(BUILDDIR)/intobj/back/be_runtime.o: be_w.h be_callc.h be_task.h
+$(BUILDDIR)/intobj/back/be_runtime.o: be_rterror.h be_execute.h be_symtab.h
 $(BUILDDIR)/intobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_socket.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/intobj/back/be_socket.o: be_runtime.h
+$(BUILDDIR)/intobj/back/be_socket.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/intobj/back/be_socket.o: be_runtime.h be_socket.h
 $(BUILDDIR)/intobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_symtab.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/intobj/back/be_symtab.o: execute.h reswords.h be_execute.h
+$(BUILDDIR)/intobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_syncolor.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_syncolor.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/intobj/back/be_syncolor.o: be_runtime.h
+$(BUILDDIR)/intobj/back/be_syncolor.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_syncolor.o: be_w.h
 $(BUILDDIR)/intobj/back/be_task.o: global.h object.h symtab.h execute.h
-$(BUILDDIR)/intobj/back/be_task.o: reswords.h be_runtime.h task.h alldefs.h
-$(BUILDDIR)/intobj/back/be_task.o: alloc.h
+$(BUILDDIR)/intobj/back/be_task.o: reswords.h be_runtime.h be_task.h
+$(BUILDDIR)/intobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
+$(BUILDDIR)/intobj/back/be_task.o: be_symtab.h alldefs.h
 $(BUILDDIR)/intobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/intobj/back/be_w.o: execute.h reswords.h alloc.h be_w.h
+$(BUILDDIR)/intobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/intobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/intobj/back/rbt.o: rbt.h
 
 $(BUILDDIR)/transobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_alloc.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_alloc.o: be_runtime.h
+$(BUILDDIR)/transobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/transobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_callc.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_callc.o: be_runtime.h
+$(BUILDDIR)/transobj/back/be_callc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/transobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/transobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/transobj/back/be_callc_conly.o: alloc.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/transobj/back/be_decompress.o: alldefs.h global.h object.h
 $(BUILDDIR)/transobj/back/be_decompress.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/transobj/back/be_decompress.o: alloc.h
+$(BUILDDIR)/transobj/back/be_decompress.o: be_alloc.h
 $(BUILDDIR)/transobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_execute.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_execute.o: be_runtime.h task.h
+$(BUILDDIR)/transobj/back/be_execute.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/transobj/back/be_execute.o: be_runtime.h be_decompress.h
+$(BUILDDIR)/transobj/back/be_execute.o: be_inline.h be_machine.h be_task.h
+$(BUILDDIR)/transobj/back/be_execute.o: be_rterror.h be_symtab.h be_w.h
+$(BUILDDIR)/transobj/back/be_execute.o: be_callc.h be_execute.h
 $(BUILDDIR)/transobj/back/be_inline.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_inline.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/transobj/back/be_inline.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/transobj/back/be_machine.o: global.h object.h symtab.h alldefs.h
-$(BUILDDIR)/transobj/back/be_machine.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_machine.o: version.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_machine.o: execute.h reswords.h version.h
+$(BUILDDIR)/transobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
+$(BUILDDIR)/transobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
+$(BUILDDIR)/transobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
 $(BUILDDIR)/transobj/back/be_main.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_main.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/transobj/back/be_main.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/transobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_pcre.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_pcre.o: be_runtime.h pcre/pcre.h
+$(BUILDDIR)/transobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/transobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/transobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_rterror.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_rterror.o: be_runtime.h task.h be_w.h
-$(BUILDDIR)/transobj/back/be_rterror.o: be_machine.h
+$(BUILDDIR)/transobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
+$(BUILDDIR)/transobj/back/be_rterror.o: be_runtime.h be_task.h be_w.h
+$(BUILDDIR)/transobj/back/be_rterror.o: be_machine.h be_execute.h be_symtab.h
+$(BUILDDIR)/transobj/back/be_rterror.o: be_alloc.h be_syncolor.h
 $(BUILDDIR)/transobj/back/be_runtime.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_runtime.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_runtime.o: be_runtime.h be_machine.h
+$(BUILDDIR)/transobj/back/be_runtime.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/transobj/back/be_runtime.o: be_runtime.h be_machine.h be_inline.h
+$(BUILDDIR)/transobj/back/be_runtime.o: be_w.h be_callc.h be_task.h
+$(BUILDDIR)/transobj/back/be_runtime.o: be_rterror.h be_execute.h be_symtab.h
 $(BUILDDIR)/transobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_socket.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_socket.o: be_runtime.h
+$(BUILDDIR)/transobj/back/be_socket.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/transobj/back/be_socket.o: be_runtime.h be_socket.h
 $(BUILDDIR)/transobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_symtab.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/transobj/back/be_symtab.o: execute.h reswords.h be_execute.h
+$(BUILDDIR)/transobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_syncolor.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_syncolor.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/transobj/back/be_syncolor.o: be_runtime.h
+$(BUILDDIR)/transobj/back/be_syncolor.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_syncolor.o: be_w.h
 $(BUILDDIR)/transobj/back/be_task.o: global.h object.h symtab.h execute.h
-$(BUILDDIR)/transobj/back/be_task.o: reswords.h be_runtime.h task.h alldefs.h
-$(BUILDDIR)/transobj/back/be_task.o: alloc.h
+$(BUILDDIR)/transobj/back/be_task.o: reswords.h be_runtime.h be_task.h
+$(BUILDDIR)/transobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
+$(BUILDDIR)/transobj/back/be_task.o: be_symtab.h alldefs.h
 $(BUILDDIR)/transobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/transobj/back/be_w.o: execute.h reswords.h alloc.h be_w.h
+$(BUILDDIR)/transobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/transobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/transobj/back/rbt.o: rbt.h
 
 $(BUILDDIR)/backobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_alloc.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/backobj/back/be_alloc.o: be_runtime.h
+$(BUILDDIR)/backobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/backobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/backobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_callc.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/backobj/back/be_callc.o: be_runtime.h
+$(BUILDDIR)/backobj/back/be_callc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/backobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/backobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/backobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/backobj/back/be_callc_conly.o: alloc.h be_runtime.h
+$(BUILDDIR)/backobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/backobj/back/be_decompress.o: alldefs.h global.h object.h
 $(BUILDDIR)/backobj/back/be_decompress.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/backobj/back/be_decompress.o: alloc.h
+$(BUILDDIR)/backobj/back/be_decompress.o: be_alloc.h
 $(BUILDDIR)/backobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_execute.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/backobj/back/be_execute.o: be_runtime.h task.h
+$(BUILDDIR)/backobj/back/be_execute.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/backobj/back/be_execute.o: be_runtime.h be_decompress.h
+$(BUILDDIR)/backobj/back/be_execute.o: be_inline.h be_machine.h be_task.h
+$(BUILDDIR)/backobj/back/be_execute.o: be_rterror.h be_symtab.h be_w.h
+$(BUILDDIR)/backobj/back/be_execute.o: be_callc.h be_execute.h
 $(BUILDDIR)/backobj/back/be_inline.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_inline.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/backobj/back/be_inline.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/backobj/back/be_machine.o: global.h object.h symtab.h alldefs.h
-$(BUILDDIR)/backobj/back/be_machine.o: execute.h reswords.h alloc.h version.h
-$(BUILDDIR)/backobj/back/be_machine.o: be_runtime.h
+$(BUILDDIR)/backobj/back/be_machine.o: execute.h reswords.h version.h
+$(BUILDDIR)/backobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
+$(BUILDDIR)/backobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
+$(BUILDDIR)/backobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
 $(BUILDDIR)/backobj/back/be_main.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_main.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/backobj/back/be_main.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/backobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/backobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_pcre.o: execute.h reswords.h alloc.h be_runtime.h
-$(BUILDDIR)/backobj/back/be_pcre.o: pcre/pcre.h
+$(BUILDDIR)/backobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/backobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/backobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_rterror.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/backobj/back/be_rterror.o: be_runtime.h task.h be_w.h
-$(BUILDDIR)/backobj/back/be_rterror.o: be_machine.h
+$(BUILDDIR)/backobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
+$(BUILDDIR)/backobj/back/be_rterror.o: be_runtime.h be_task.h be_w.h
+$(BUILDDIR)/backobj/back/be_rterror.o: be_machine.h be_execute.h be_symtab.h
+$(BUILDDIR)/backobj/back/be_rterror.o: be_alloc.h be_syncolor.h
 $(BUILDDIR)/backobj/back/be_runtime.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_runtime.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/backobj/back/be_runtime.o: be_runtime.h be_machine.h
+$(BUILDDIR)/backobj/back/be_runtime.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/backobj/back/be_runtime.o: be_runtime.h be_machine.h be_inline.h
+$(BUILDDIR)/backobj/back/be_runtime.o: be_w.h be_callc.h be_task.h
+$(BUILDDIR)/backobj/back/be_runtime.o: be_rterror.h be_execute.h be_symtab.h
 $(BUILDDIR)/backobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_socket.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/backobj/back/be_socket.o: be_runtime.h
+$(BUILDDIR)/backobj/back/be_socket.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/backobj/back/be_socket.o: be_runtime.h be_socket.h
 $(BUILDDIR)/backobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_symtab.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/backobj/back/be_symtab.o: execute.h reswords.h be_execute.h
+$(BUILDDIR)/backobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_syncolor.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_syncolor.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/backobj/back/be_syncolor.o: be_runtime.h
+$(BUILDDIR)/backobj/back/be_syncolor.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/backobj/back/be_syncolor.o: be_w.h
 $(BUILDDIR)/backobj/back/be_task.o: global.h object.h symtab.h execute.h
-$(BUILDDIR)/backobj/back/be_task.o: reswords.h be_runtime.h task.h alldefs.h
-$(BUILDDIR)/backobj/back/be_task.o: alloc.h
+$(BUILDDIR)/backobj/back/be_task.o: reswords.h be_runtime.h be_task.h
+$(BUILDDIR)/backobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
+$(BUILDDIR)/backobj/back/be_task.o: be_symtab.h alldefs.h
 $(BUILDDIR)/backobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/backobj/back/be_w.o: execute.h reswords.h alloc.h be_w.h
+$(BUILDDIR)/backobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/backobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/backobj/back/rbt.o: rbt.h
 
 $(BUILDDIR)/libobj/back/be_alloc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_alloc.o: execute.h reswords.h alloc.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_alloc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/libobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_callc.o: execute.h reswords.h alloc.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_callc.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/libobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/libobj/back/be_callc_conly.o: alloc.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/libobj/back/be_decompress.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_decompress.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/libobj/back/be_decompress.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_execute.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/libobj/back/be_execute.o: be_runtime.h task.h
+$(BUILDDIR)/libobj/back/be_execute.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/libobj/back/be_execute.o: be_runtime.h be_decompress.h
+$(BUILDDIR)/libobj/back/be_execute.o: be_inline.h be_machine.h be_task.h
+$(BUILDDIR)/libobj/back/be_execute.o: be_rterror.h be_symtab.h be_w.h
+$(BUILDDIR)/libobj/back/be_execute.o: be_callc.h be_execute.h
 $(BUILDDIR)/libobj/back/be_inline.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_inline.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/libobj/back/be_inline.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_machine.o: global.h object.h symtab.h alldefs.h
-$(BUILDDIR)/libobj/back/be_machine.o: execute.h reswords.h alloc.h version.h
-$(BUILDDIR)/libobj/back/be_machine.o: be_runtime.h
+$(BUILDDIR)/libobj/back/be_machine.o: execute.h reswords.h version.h
+$(BUILDDIR)/libobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
+$(BUILDDIR)/libobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
+$(BUILDDIR)/libobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
 $(BUILDDIR)/libobj/back/be_main.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_main.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/libobj/back/be_main.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
 $(BUILDDIR)/libobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_pcre.o: execute.h reswords.h alloc.h be_runtime.h
-$(BUILDDIR)/libobj/back/be_pcre.o: pcre/pcre.h
+$(BUILDDIR)/libobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/libobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
 $(BUILDDIR)/libobj/back/be_rterror.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_rterror.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/libobj/back/be_rterror.o: be_runtime.h task.h be_w.h be_machine.h
+$(BUILDDIR)/libobj/back/be_rterror.o: execute.h reswords.h be_rterror.h
+$(BUILDDIR)/libobj/back/be_rterror.o: be_runtime.h be_task.h be_w.h
+$(BUILDDIR)/libobj/back/be_rterror.o: be_machine.h be_execute.h be_symtab.h
+$(BUILDDIR)/libobj/back/be_rterror.o: be_alloc.h be_syncolor.h
 $(BUILDDIR)/libobj/back/be_runtime.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_runtime.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/libobj/back/be_runtime.o: be_runtime.h be_machine.h
+$(BUILDDIR)/libobj/back/be_runtime.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/libobj/back/be_runtime.o: be_runtime.h be_machine.h be_inline.h
+$(BUILDDIR)/libobj/back/be_runtime.o: be_w.h be_callc.h be_task.h
+$(BUILDDIR)/libobj/back/be_runtime.o: be_rterror.h be_execute.h be_symtab.h
 $(BUILDDIR)/libobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_socket.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/libobj/back/be_socket.o: be_runtime.h
+$(BUILDDIR)/libobj/back/be_socket.o: execute.h reswords.h be_alloc.h
+$(BUILDDIR)/libobj/back/be_socket.o: be_runtime.h be_socket.h
 $(BUILDDIR)/libobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_symtab.o: execute.h reswords.h alloc.h
+$(BUILDDIR)/libobj/back/be_symtab.o: execute.h reswords.h be_execute.h
+$(BUILDDIR)/libobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_syncolor.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_syncolor.o: execute.h reswords.h alloc.h
-$(BUILDDIR)/libobj/back/be_syncolor.o: be_runtime.h
+$(BUILDDIR)/libobj/back/be_syncolor.o: execute.h reswords.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_syncolor.o: be_w.h
 $(BUILDDIR)/libobj/back/be_task.o: global.h object.h symtab.h execute.h
-$(BUILDDIR)/libobj/back/be_task.o: reswords.h be_runtime.h task.h alldefs.h
-$(BUILDDIR)/libobj/back/be_task.o: alloc.h
+$(BUILDDIR)/libobj/back/be_task.o: reswords.h be_runtime.h be_task.h
+$(BUILDDIR)/libobj/back/be_task.o: be_alloc.h be_machine.h be_execute.h
+$(BUILDDIR)/libobj/back/be_task.o: be_symtab.h alldefs.h
 $(BUILDDIR)/libobj/back/be_w.o: alldefs.h global.h object.h symtab.h
-$(BUILDDIR)/libobj/back/be_w.o: execute.h reswords.h alloc.h be_w.h
+$(BUILDDIR)/libobj/back/be_w.o: execute.h reswords.h be_w.h be_machine.h
+$(BUILDDIR)/libobj/back/be_w.o: be_runtime.h be_rterror.h be_alloc.h
 $(BUILDDIR)/libobj/back/rbt.o: rbt.h
