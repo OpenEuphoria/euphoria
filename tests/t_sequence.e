@@ -61,16 +61,16 @@ test_equal("tail() sequence", {3,4}, tail({1,2,3,4}, 2))
 test_equal("tail() nested sequence", {{3,4},{5,6}}, tail({{1,2},{3,4},{5,6}}, 2))
 test_equal("tail() bounds", {1,2,3,4}, tail({1,2,3,4}, 50))
 
-test_equal("split() simple string no empty", {"John","Middle","Doe"}, split(," John  Middle  Doe  ",,1))
-test_equal("split() simple string", {"a","b","c"}, split(",","a,b,c"))
-test_equal("split() sequence", {{1},{2},{3},{4}}, split(0, {1,0,2,0,3,0,4}))
-test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split(0, {"John", 0, "Doe"}))
-test_equal("split() limit set", {"a", "b,c"}, split(',', "a,b,c", 1))
+test_equal("split() simple string no empty", {"John","Middle","Doe"}, split(" John  Middle  Doe  ",,1))
+test_equal("split() simple string", {"a","b","c"}, split("a,b,c", ","))
+test_equal("split() sequence", {{1},{2},{3},{4}}, split({1,0,2,0,3,0,4}, 0))
+test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"},0))
+test_equal("split() limit set", {"a", "b,c"}, split("a,b,c",',',, 1))
 test_equal("split() single sequence delimiter",{"while 1 "," end while ",""},
-	split("do","while 1 do end while do"))
-test_equal("split() an empty string", {}, split(",", ""))
-test_equal("split() using an empty delimiter", {"1","2","3"}, split("", "123"))
-test_equal("split() using an empty delimiter and limit", {"1","23"}, split("", "123", 1))
+	split("while 1 do end while do", "do"))
+test_equal("split() an empty string", {}, split("", ","))
+test_equal("split() using an empty delimiter", {"1","2","3"}, split("123", ""))
+test_equal("split() using an empty delimiter and limit", {"1","23"}, split("123","",, 1))
 
 test_equal("split_any()", {"a", "b", "c"}, split_any("a,b.c", ",."))
 test_equal("split_any() limit", {"a", "b", "c|d"}, split_any("a,b.c|d", ",.|", 2))
@@ -320,7 +320,7 @@ test_equal("rotate: right 2/0",{1,2,3,4,5,6,7},rotate({1,2,3,4,5,6,7}, 2*ROTATE_
 
 
 sequence a, b, c
-a = split(,"John Doe")
+a = split("John Doe")
 b = a[1]
 c = a[2]
 test_equal("More defaulted params and tokens",{"John","Doe"},{b,c})

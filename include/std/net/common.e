@@ -63,7 +63,7 @@ end function
 -- </eucode>
 
 public function parse_ip_address(sequence address, integer port = -1)
-	address = seq:split(':', address)
+	address = seq:split(address, ':')
 	
 	if length(address) = 1 then
 		if port < 0 or port > 65_535 then

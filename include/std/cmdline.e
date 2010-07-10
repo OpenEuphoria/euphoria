@@ -1053,7 +1053,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					at_cmds[j] = at_cmds[j][2 .. $-1]
 
 				elsif at_cmds[j][1] = '\'' and at_cmds[j][$] = '\'' and length(at_cmds[j]) >= 2 then
-					sequence cmdex = split(' ', at_cmds[j][2 .. $-1], 0, 1) -- Empty words removed.
+					sequence cmdex = split(at_cmds[j][2 .. $-1],' ', 1) -- Empty words removed.
 
 					at_cmds = at_cmds[1..j-1] & cmdex & at_cmds[j+1 .. $]
 					j = j + length(cmdex) - 1

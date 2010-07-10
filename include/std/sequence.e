@@ -2091,14 +2091,14 @@ end function
 -- Split a sequence on separator delimiters into a number of sub-sequences.
 --
 -- Parameters:
+--   # ##source## : the sequence to split.
 --   # ##delim## : an object (default is ' '). The delimiter that separates items
 --                in ##source##.
---   # ##source## : the sequence to split.
---   # ##limit## : an integer (default is 0). The maximum number of sub-sequences
---                to create. If zero, there is no limit.
 --   # ##no_empty## : an integer (default is 0). If not zero then all zero-length sub-sequences
 --                   are removed from the returned sequence. Use this when leading,
 --                   trailing and duplicated delimiters are not significant.
+--   # ##limit## : an integer (default is 0). The maximum number of sub-sequences
+--                to create. If zero, there is no limit.
 --
 -- Returns:
 --		A **sequence**, of sub-sequences of ##source##. Delimiters are removed.
@@ -2111,20 +2111,29 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- result = split(,"John Middle Doe")
+-- result = split("John Middle Doe")
 -- -- result is {"John", "Middle", "Doe"}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- result = split(",", "John,Middle,Doe", 2)
+-- result = split("John,Middle,Doe", ",",, 2) -- Only want 2 sub-sequences.
 -- -- result is {"John", "Middle,Doe"}
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- result = split("John||Middle||Doe|", '|') -- Each '|' is significant by default
+-- -- result is {"John","","Middle","","Doe",""}
+-- result = split("John||Middle||Doe|", '|', 1) -- Adjacent '|' are just a single delim,
+--                                              -- and leading/trailing '|' ignored.
+-- -- result is {"John","Middle","Doe"}
 -- </eucode>
 --
 -- See Also:
 --     [[:split_any]], [[:breakup]], [[:join]]
 
-public function split(object delim=' ', sequence st, integer limit=0, integer no_empty = 0)
+public function split( sequence st, object delim=' ', integer no_empty = 0, integer limit=0)
 	sequence ret = {}
 	integer start
 	integer pos

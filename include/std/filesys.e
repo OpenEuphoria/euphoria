@@ -2026,18 +2026,18 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 		
 		extra_paths = getenv("USERPATH")
 		if sequence(extra_paths) then
-			extra_paths = split(PATHSEP, extra_paths)
+			extra_paths = split(extra_paths, PATHSEP)
 			search_list &= extra_paths
 		end if
 		
 		extra_paths = getenv("PATH")
 		if sequence(extra_paths) then
-			extra_paths = split(PATHSEP, extra_paths)
+			extra_paths = split(extra_paths, PATHSEP)
 			search_list &= extra_paths
 		end if
 	else
 		if integer(search_list[1]) then
-			search_list = split(PATHSEP, search_list)
+			search_list = split(search_list, PATHSEP)
 		end if
 	end if
 

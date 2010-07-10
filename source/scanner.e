@@ -472,7 +472,7 @@ function find_file(sequence fname)
 
 	conf_path = get_conf_dirs()
 	if length(conf_path) > 0 then
-		conf_path = split(PATHSEP, conf_path)
+		conf_path = split(conf_path, PATHSEP)
 		for i = 1 to length(conf_path) do
 			if find(conf_path[i][$], SLASH_CHARS) then
 				errbuff = conf_path[i][1..$-1]  -- looks better
@@ -488,7 +488,7 @@ function find_file(sequence fname)
 	inc_path = getenv("EUINC")
 	if sequence(inc_path) then
 		if length(inc_path) > 0 then
-			inc_path = split(PATHSEP, inc_path)
+			inc_path = split(inc_path, PATHSEP)
 			for i = 1 to length(inc_path) do
 				if find(inc_path[i][$], SLASH_CHARS) then
 					errbuff = inc_path[i][1..$-1]  -- looks better

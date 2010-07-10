@@ -43,6 +43,7 @@ constant cmdopts = {
 		{ NO_CASE } },
 	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", {NO_CASE, HAS_PARAMETER, "path-to-eucoverage.ex"} },
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
+	{"testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
 	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
@@ -52,7 +53,7 @@ integer ctcfh = 0
 sequence error_list = repeat({},4)
 
 -- moved from do_test:
-integer log = 0
+integer logging_activated = 0
 integer failed = 0
 integer total
 sequence 
@@ -131,7 +132,7 @@ function run_emake()
 		
 		elsif match("set ", line) = 1 then 
 			sequence pair
-			pair = split("=", line[5..$])
+			pair = split(line[5..$], "=")
 			pair = {setenv(pair[1], pair[2])}
 
 		elsif match("move ", line) = 1 or
@@ -216,14 +217,19 @@ end function
 -- returns the location in the log file if there has been
 -- writing to the log or or a string indicating which error 
 function check_log(integer log_where)
+
 	integer log_fd = open("unittest.log", "a")
+	atom pos
 					
 	if log_fd = -1  then
 		return "couldn't generate unittest.log"
-	elsif log_where = where(log_fd) then
-		close(log_fd)
-		return  "couldn't add to unittest.log"
-	end if
+	else
+		pos = where(log_fd)
+		if log_where = pos then
+			close(log_fd)
+			return  "couldn't add to unittest.log"
+		end if
+	end if	
 
 	log_where = where(log_fd)
 	close(log_fd)
@@ -411,7 +417,7 @@ function translate( sequence filename, sequence fail_list )
 				fail_list = append(fail_list, "translated" & " " & exename)
 			else
 				object token
-				if log then
+				if logging_activated then
 					token = check_log(log_where)
 				else
 					token = 0
@@ -483,7 +489,7 @@ function test_file( sequence filename, sequence fail_list )
 			-- error() called in invoke()
 		else
 			object token
-			if log then
+			if logging_activated then
 				token = check_log(log_where)
 			else
 				token = 0
@@ -593,7 +599,7 @@ procedure do_test( sequence files )
 	end if
 
 	sequence fail_list = {}
-	if log then
+	if logging_activated then
 		void = delete_file("unittest.dat")
 		void = delete_file("unittest.log")
 		void = delete_file("ctc.log")
@@ -605,7 +611,7 @@ procedure do_test( sequence files )
 		coverage_erase = ""
 	end for
 	
-	if log and ctcfh != -1 then
+	if logging_activated and ctcfh != -1 then
 		print(ctcfh, error_list)
 		puts(ctcfh, 10)
 
@@ -956,8 +962,9 @@ procedure do_process_log( sequence cmds, integer html)
 	object content = read_file("unittest.log")
 	if atom(content) then
 		puts(1, "unittest.log could not be read\n")
-	else    
-		messages = split("entry = ", content)
+	else 
+   
+		messages = split( content,"entry = ")
 		for a = 1 to length(messages) do
 			if sequence(messages[a]) and equal(messages[a], "") then
 				continue
@@ -1114,7 +1121,8 @@ procedure main()
 		
 		switch param do
 			case "log" then
-				log = 1
+				logging_activated = 1
+				test_options &= " -log "
 				
 			case "verbose" then
 				verbose_switch = 1
@@ -1165,7 +1173,10 @@ procedure main()
 				for j = 1 to length( val ) do
 					interpreter_options &= sprintf(` -coverage-exclude "%s"`, {val[j]} )
 				end for
-				
+
+			case "testopt" then
+				test_options &= " -" & val & " "
+
 			case "extras" then
 				if length( val ) then
 					files = build_file_list( val )

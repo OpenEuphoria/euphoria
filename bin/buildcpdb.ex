@@ -296,7 +296,7 @@ procedure load_file(sequence file_path)
 				exit
 			end if
 		end if
-		kv = split("=", line, 1)
+		kv = split(line, "=",, 1)
 		if length(kv) != 2 then
 		    continue
 		end if
@@ -323,7 +323,7 @@ procedure load_file(sequence file_path)
 			end if
 		end if
 		
-		kv = split("=", line, 1)
+		kv = split( line, "=",, 1)
 		if length(kv) != 2 then
 		    continue
 		end if
@@ -333,7 +333,7 @@ procedure load_file(sequence file_path)
 			continue
 		end if
 		key_num = hex_text(trim(kv[1]))
-		kv = split(":", value[3..$], 1)
+		kv = split( value[3..$],":",, 1)
 		if length(kv) != 2 then
 		    continue
 		end if
@@ -359,7 +359,7 @@ procedure load_file(sequence file_path)
 			end if
 		end if
 		
-		kv = split("=", line, 1)
+		kv = split( line,"=",, 1)
 		if length(kv) != 2 then
 		    continue
 		end if

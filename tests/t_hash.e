@@ -1,6 +1,7 @@
 -- t_hash.e
 include std/unittest.e
 include std/map.e
+include std/io.e
 constant s = "Euphoria Programming Language brought to you by Rapid Deployment Software"
 constant hashalgo = {-9.123, HSIEH32, ADLER32, FLETCHER32, MD5, SHA256, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
 
@@ -20,31 +21,34 @@ constant expected = {
 {#3EFDAC4F,#13FFE5B9,#5C31CCF6,#F956C5B9,#E7C9069E,#67C9F69A,#47FF8E9A,#3244B096,#7EFF8F83,#286C0F9F,#F5651FE0,#A49D0F87,#32443096,#ED7894B6,#E5B38385}, -- (3FFFFFFF)
 {#D293F868,#02D998E3,#FE45AD31,#0046E6F2,#62D72613,#E2D7D617,#C2E1AE17,#B75A901B,#FBE1AF0E,#AD722F12,#190B4BC7,#21832F0A,#B75A101B,#F3581939,#3EAE0B9C}, -- "abc"
 {#1AB62664,#1C3EBB39,#A45D1782,#74F86130,#11D7B76F,#91D7476B,#B1E13F6B,#C45A0167,#88E13E72,#DE72BE6E,#D12E95CB,#5283BE76,#C45A8167,#F3C96548,#3FF8236D}, -- "abb"
-{#CA3E47E3,#DE9EF010,#C752FDF0,#5D469E01,#41D792DE,#C1D762DA,#E1E11ADA,#945A24D6,#D8E11BC3,#8E729BDF,#01A6F44C,#02839BC7,#945AA4D6,#F3ECD418,#142557A4}  -- ""
+{#CA3E47E3,#DE9EF010,#C752FDF0,#5D469E01,#41D792DE,#C1D762DA,#E1E11ADA,#945A24D6,#D8E11BC3,#8E729BDF,#01A6F44C,#02839BC7,#945AA4D6,#F3ECD418,#142557A4}, -- ""
+$
              }
 
-sequence test_data = {}
-test_data = append(test_data, s									)
-test_data = append(test_data, s[1..1]							)
-test_data = append(test_data, s & 1.2345						)
-test_data = append(test_data, {s}								)
-test_data = append(test_data, s[1]								)
-test_data = append(test_data, 'a' 								)
-test_data = append(test_data, 'b' 								)
-test_data = append(test_data, s[1] + 0.123						)
-test_data = append(test_data, 0.123		        				)
-test_data = append(test_data, 0.124     						)
-test_data = append(test_data, -s								)
-test_data = append(test_data, -s[1]								)
-test_data = append(test_data, -s[1] - 0.123						)
-test_data = append(test_data, ""								)
-test_data = append(test_data, s[1..5] & {{1,1.1,{2.23,9}}}		)
+constant test_data = {
+	s,
+	s[1..1],
+	s & 1.2345,
+	{s},
+	s[1],
+	'a',
+	'b',
+	s[1] + 0.123,
+	0.123,
+	0.124,
+	-s,
+	-s[1],
+	-s[1] - 0.123,
+	"",
+	s[1..5] & {{1,1.1,{2.23,9}}},
+	$
+}
 
 
 for i = 1 to length(hashalgo) do
 	for x = 1 to length(test_data) do
 		ifdef SHOWHASH then
-    		printf(1, "#%08x,", hash(test_data[x], hashalgo[i]))
+    		writef(1, "#[Xz:8],", hash(test_data[x], hashalgo[i]))
     	elsedef
     		test_equal(sprintf("hash test# %d hashalgo=%d",{x,i}), expected[i][x], hash(test_data[x], hashalgo[i]) )
     	end ifdef
