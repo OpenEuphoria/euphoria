@@ -315,5 +315,5 @@ extern struct tcb *tcb;
 
 // be_w:
 extern int in_from_keyb;
-
+extern int TraceOn;
 #endif

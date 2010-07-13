@@ -2144,7 +2144,7 @@ public function split( sequence st, object delim=' ', integer no_empty = 0, inte
 
 
 	if sequence(delim) then
-		-- Handle the simple case of split("", "123"), opposite is join({"1","2","3"}, "") -- "123"
+		-- Handle the simple case of split(""123, ""), opposite is join({"1","2","3"}, "") -- "123"
 		if equal(delim, "") then
 			for i = 1 to length(st) do
 				st[i] = {st[i]}
