@@ -214,6 +214,51 @@ public function find_any(sequence needles, sequence haystack, integer start=1)
 end function
 
 --**
+-- Find all instances of any element from the needle sequence that occur in the
+-- haystack sequence. Returns a list of indexes.
+--
+-- Parameters:
+--		# ##needles## : a sequence, the list of items to look for
+--		# ##haystack## : a sequence, in which "needles" are looked for
+--		# ##start## : an integer, the starting point of the search. Defaults to 1.
+--
+-- Returns:
+--		A **sequence**, the list of indexes into ##haystack## that point to an
+-- element that is also in ##needles##.
+--
+-- Comments:
+--   This function may be applied to a string sequence or a complex
+--   sequence.
+--
+-- Example 1:
+--   <eucode>
+--   location = find_each("aeiou", "John Smith", 3)
+--   -- location is {8}
+--   </eucode>
+--
+-- Example 2:
+--   <eucode>
+--   location = find_each("aeiou", "John Doe")
+--   -- location is {2,7,8}
+--   </eucode>
+--
+-- See Also:
+--		[[:find]], [[:find_from]], [[:find_any]]
+
+public function find_each(sequence needles, sequence haystack, integer start=1)
+	sequence result
+	
+	result = {}
+	for i = start to length(haystack) do
+		if find(haystack[i],needles) then
+			result &= i
+		end if
+	end for
+
+	return result
+end function
+
+--**
 -- Find all occurrences of an object inside a sequence, starting at some specified point.
 --
 -- Parameters:

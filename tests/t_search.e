@@ -18,6 +18,11 @@ test_equal("find_any() from integers", 6, find_any({1,3,5,8}, {2,4,5,6,7,8,9}, 4
 test_equal("find_any() from floats", 6,
         find_any({1.3,3.5,5.6,8.3}, {2.1,4.2,5.3,6.4,7.5,8.3,9.1}, 4))
 
+test_equal("find_each #1", {8}, find_each("aeiou", "John Smith", 3))
+test_equal("find_each #2", {2,7,8}, find_each("aeiou", "John Doe"))
+test_equal("find_each #3", {}, find_each("xyz", "John Smith"))
+
+        
 test_equal("find_any() empty", 0, find_any("xyz", "John Doe"))
 test_equal("find_any() string #1", 2, find_any("aeiou", "John Doe"))
 test_equal("find_any() string #2", 3, find_any("Dh", "John Doe"))
