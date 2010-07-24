@@ -15,12 +15,10 @@ EU_ALL_FILES = \
 	source/be_pcre.c \
 	source/be_rterror.c \
 	source/be_runtime.c \
-	source/be_runtime.h \
 	source/be_socket.c \
 	source/be_symtab.c \
 	source/be_syncolor.c \
 	source/be_task.c \
-	source/task.h \
 	source/be_w.c \
 	source/version.h \
 	source/int.ex \
@@ -67,7 +65,6 @@ EU_ALL_FILES = \
 	source/execute.h  \
 	source/opnames.h  \
 	source/reswords.h \
-	source/alloc.h \
 	source/global.h \
 	source/redef.h \
 	source/symtab.h \
@@ -78,7 +75,25 @@ EU_ALL_FILES = \
 	source/dis.e \
 	source/dot.e \
 	source/dox.e \
-	source/std.ex
+	source/std.ex \
+	source/coverage.e \
+	source/coverage.ex \
+	source/be_alloc.h \
+	source/be_callc.h \
+	source/be_decompress.h \
+	source/be_execute.h \
+	source/be_inline.h \
+	source/be_machine.h \
+	source/be_main.h \
+	source/be_pcre.h \
+	source/be_rterror.h \
+	source/be_runtime.h \
+	source/be_socket.h \
+	source/be_symtab.h \
+	source/be_syncolor.h \
+	source/be_task.h \
+	source/be_w.h \
+	source/object.h
 
 EU_DIRS = include \
 	include/std/ \
