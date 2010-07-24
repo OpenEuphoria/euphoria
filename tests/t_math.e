@@ -97,7 +97,12 @@ test_equal("exp() #1", 7.389056, round(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round(exp(2.3), 100000))
 
 -- Because it doesn't take long to calculate, let's test all valid input args.
-for i = 1 to 74 do
+ifdef WINDOWS then
+	constant MAX_FIB = 74
+elsedef
+	constant MAX_FIB = 69
+end ifdef
+for i = 1 to MAX_FIB do
 	test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
 end for
 

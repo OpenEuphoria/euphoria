@@ -1079,7 +1079,9 @@ end function
 --
 -- Comments:
 -- * Note that due to the limitations of the floating point implementation,
--- only 'i' values less than 76 are accurate.
+-- only 'i' values less than 76 are accurate on Windows platforms, and 
+-- 69 on other platforms (due to rounding differences in the native C
+-- runtime libraries).
 --
 -- Example 1:
 -- <eucode>
