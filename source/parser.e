@@ -3186,7 +3186,7 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 		end if
 		
 		if not find(tok[T_ID], ADDR_TOKS) then
-			CompileErr(25)
+			CompileErr(25, {LexName(tok[T_ID])} )
 		end if
 		sym = tok[T_SYM]
 		new_symbols = append(new_symbols, sym)
@@ -3713,7 +3713,7 @@ procedure SubProg(integer prog_type, integer scope)
 		putback({LEFT_ROUND,0})
 	end if
 	if not find(prog_name[T_ID], ADDR_TOKS) then
-		CompileErr(25)
+		CompileErr(25, {LexName(prog_name[T_ID])} )
 	end if
 	p = prog_name[T_SYM]
 	DefinedYet(p)
