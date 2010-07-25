@@ -597,6 +597,15 @@ test_equal("remove_item #2", {3,4,2,1}, remove_item( 5, {3,4,2,1} ))
 test_equal("remove_item 1c", "itsit", remove_item('s', "sitsit"))
 test_equal("remove_item 2c", "itit", remove_item('s', "itsit"))
 
+-- transmute()
+test_equal("transmute Comp:sub Repl:item", "2e 3ool 1oes", transmute("the school shoes", {{}, "sh", "th", "sch"}, "123"))
+test_equal("transmute Comp:sub Repl:seq", "THe SCHool SHoes", transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, "SH", "TH", "SCH"}))
+test_equal("transmute Comp:sub Remove", "e ool oes", transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, "", "", ""}))
+test_equal("transmute Comp:sub Repl:mixed", "THe SCHool xoes", transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, 'x', "TH", "SCH"}))
+test_equal("transmute Comp:item Repl:item", "JIhn SmOth UnjIAs EncIIkUd YpplUs.", transmute("John Smith enjoys uncooked apples.", "aeiouy", "YUOIEA"))
+test_equal("transmute Comp:item Repl:seq", "J'O'hn Sm'I'th 'E'nj'O''Y's 'U'nc'O''O'k'E'd 'A'ppl'E's.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "'A'", "'E'", "'I'", "'O'", "'U'", "'Y'"}))
+test_equal("transmute Comp:item Remove", "Jhn Smth njs nckd ppls.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "", "", "", "", "", ""}))
+test_equal("transmute Comp:item Repl:mixed", "JOWhn Smth 1njOW{}s 2ncOWOWk1d AAppl1s.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "AA", '1', "", "OW", '2', "{}"}))
 
 test_report()
 

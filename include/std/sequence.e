@@ -2772,6 +2772,160 @@ public function transform( sequence source_data, object transformer_rids)
 end function
 
 --**
+-- Replaces all instances of any element from the current_items sequence that occur in the
+-- source_data sequence with the corresponding item from the new_items sequence.
+--
+-- Parameters:
+--		# ##source_data## : a sequence, the data that might contain elements from ##current_items##
+--		# ##current_items## : a sequence, the set of items to look for in ##source_data##. Matching
+--                            data is replaced with the correspoding data from ##new_items##.
+--		# ##new_items## : a sequence, the set of replacement data for any matches found.
+--		# ##start## : an integer, the starting point of the search. Defaults to 1.
+--		# ##limit## : an integer, the maximum number of replacements to be made. 
+--                    Defaults to length(source_data).
+--
+-- Returns:
+--		A **sequence**, an updated version of ##source_data##.
+--
+-- Comments:
+--   By default, this routine operates on single elements from each of the arguments.
+-- That is to say, it scans ##source_data## for elements that match any single element
+-- in ##current_items## and when matched, replaces that with a single element from ##new_items##.
+--
+-- For example, you can find all occurrances of 'h', 's', and 't' in a string and replace
+-- them with '1', '2', and '3' respectively. \\
+--   ##transmute(SomeString, "hts", "123")## \\
+-- However, the routine can also be used to scan for sub-sequences and/or replace
+-- matches with sequences rather than single elements. This is done by making the first
+-- element in ##current_items## and/or ##new_items## an empty sequence. 
+--
+-- For example, to find all occurrances of "sh","th", and "sch" you have the
+-- ##current_items## as ##{{}, "sh", "th", "sch"}##. Note that for the purposes
+-- of determine the corresponding replacement data, the leading empty sequence
+-- is not counted, so in this example "th" is the second item. 
+--
+-- <eucode>
+--   res = transmute("the school shoes", {{}, "sh", "th", "sch"}, "123")
+--   -- res becomes "2e 3ool 1oes"
+-- </eucode>
+-- The similar syntax is used to indicates that replacements are sequences and
+-- not single elements.
+--
+-- <eucode>
+--   res = transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, "SH", "TH", "SCH"})
+--   -- res becomes "THe SCHool SHoes"
+-- </eucode>
+--
+-- Using this option also allows you to remove matching data.
+-- <eucode>
+--   res = transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, "", "", ""})
+--   -- res becomes "e ool oes"
+-- </eucode>
+--
+-- Another thing to note is that when using this syntax, you can still mix together
+-- atoms and seqeuences.
+--
+-- <eucode>
+--   res = transmute("the school shoes", {{}, "sh", 't', "sch"}, {{}, 'x', "TH", "SCH"})
+--   -- res becomes "THhe SCHool xoes"
+-- </eucode>
+--
+-- Example 1:
+--   <eucode>
+--   res = transmute("John Smith enjoys uncooked apples.", "aeiouy", "YUOIEA")
+--   -- res is "JIhn SmOth UnjIAs EncIIkUd YpplUs."
+--   </eucode>
+-- See Also:
+--		[[:find]], [[:match]], [[:replace]]
+
+public function transmute(sequence source_data, sequence current_items, sequence new_items, integer start=1, integer limit = length(source_data))
+	sequence result
+	integer pos
+	integer cs
+	integer ns
+	integer i
+
+	-- Check 'current' for single or sub-sequence matching
+	if equal(current_items[1], {}) then
+		cs = 1
+		current_items = current_items[2 .. $]
+	else
+		cs = 0
+	end if
+	
+	-- Check 'new' for element or sequence replacements
+	if equal(new_items[1], {}) then
+		ns = 1
+		new_items = new_items[2 .. $]
+	else
+		ns = 0
+	end if
+	
+	-- Begin scanning
+	i = start - 1
+	while i < length(source_data) do
+		if limit <= 0 then
+			exit
+		end if
+		
+		i += 1
+		if cs = 0 then
+			-- Compare and replace single item in source.
+			pos = find(source_data[i], current_items) 
+			if pos then
+				if ns = 0 then
+					-- Treat 'new' as a single item to replace the match.
+					source_data[i] = new_items[pos]
+				else
+					-- Treat 'new' as a set of items to replace the match.
+					if sequence(new_items[pos]) then
+						source_data = source_data[1 .. i - 1] & new_items[pos] & source_data[i + 1 .. $]
+						i += length(new_items[pos]) - 1
+					else
+						source_data[i] = new_items[pos]
+					end if
+				end if
+				limit -= 1
+			end if
+		else
+			-- Compare and replace sub-sequences in source.
+			pos = 0
+			for j = 1 to length(current_items) do
+				if begins(current_items[j], source_data[i .. $]) then
+					pos = j
+					exit
+				end if
+			end for
+			if pos then
+			    integer elen
+			    if atom(current_items[pos]) then
+			    	elen = 1
+			    else
+			    	elen = length(current_items[pos])
+			    end if
+			    
+				if ns = 0 then
+					-- Treat 'new' as a single item to replace the match.
+					source_data = source_data[1 .. i-1] & {new_items[pos]} & 
+					               source_data[i + elen .. $]
+				else
+					-- Treat 'new' as a set of items to replace the match.
+					source_data = source_data[1 .. i-1] & new_items[pos] & 
+				               source_data[i + elen .. $]
+					if sequence(new_items[pos]) then
+						i += length(new_items[pos]) - 1
+					end if
+				end if
+				limit -= 1
+			end if
+		end if
+	end while
+
+	return source_data
+
+end function
+
+--**
 -- Calculates the similarity between two sequences.
 --
 -- Parameters:

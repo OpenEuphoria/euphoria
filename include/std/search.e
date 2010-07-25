@@ -214,6 +214,42 @@ public function find_any(sequence needles, sequence haystack, integer start=1)
 end function
 
 --**
+-- Determines if any element from ##needles## is in ##haystack##.
+--
+-- Parameters:
+--		# ##needles## : a sequence, the list of items to look for
+--		# ##haystack## : a sequence, in which "needles" are looked for
+--		# ##start## : an integer, the starting point of the search. Defaults to 1.
+--
+-- Returns:
+--		An **integer**, 0 if no matches, 1 if any matches.
+--
+-- Comments:
+--   This function may be applied to a string sequence or a complex
+--   sequence.
+--
+-- Example 1:
+--   <eucode>
+--   ok = match_any("aeiou", "John Smith")
+--   -- okay is 1
+--   ok = match_any("xyz", "John Smith" )
+--   -- okay is 0
+--   </eucode>
+--
+-- See Also:
+--		[[:find_any]]
+
+public function match_any(sequence needles, sequence haystack, integer start=1)
+	for i = start to length(haystack) do
+		if find(haystack[i],needles) then
+			return 1
+		end if
+	end for
+
+	return 0
+end function
+
+--**
 -- Find all instances of any element from the needle sequence that occur in the
 -- haystack sequence. Returns a list of indexes.
 --

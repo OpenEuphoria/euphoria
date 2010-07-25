@@ -29,6 +29,12 @@ test_equal("find_any() string #2", 3, find_any("Dh", "John Doe"))
 test_equal("find_any() integers", 3, find_any({1,3,5,7,9}, {2,4,5,6,7,8,9}))
 test_equal("find_any() floats", 3, find_any({1.1,3.2,5.3,7.4,9.5}, {2.1,4.2,5.3,6.4,7.5,8.6,9.7}))
 
+test_equal("match_any() empty", 0, match_any("xyz", "John Doe"))
+test_equal("match_any() string #1", 1, match_any("aeiou", "John Doe"))
+test_equal("match_any() string #2", 1, match_any("Dh", "John Doe"))
+test_equal("match_any() integers", 1, match_any({1,3,5,7,9}, {2,4,5,6,7,8,9}))
+test_equal("match_any() floats", 1, match_any({1.1,3.2,5.3,7.4,9.5}, {2.1,4.2,5.3,6.4,7.5,8.6,9.7}))
+
 test_equal("rfind() #1", 5, rfind('E', "EEEDEFG"))
 test_equal("rfind() #2", 0, rfind('E', "ABC"))
 test_equal("rfind() #3", 3, rfind('E', "EEEDEFG", 4))
