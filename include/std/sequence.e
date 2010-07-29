@@ -485,19 +485,21 @@ end function
 
 --****
 -- Signature:
--- <built-in> function length(sequence target)
+-- <built-in> function length(object target)
 --
 -- Description:
--- Return the length of a sequence.
+-- Return the length of an object.
 --
 -- Parameters:
---		# ##target## : the sequence being queried
+--		# ##target## : the object being queried
 --
 -- Returns:
---		An **integer**, the number of elements ##target## has.
+--		An **integer**, the number of elements involved with ##target##.
 --
 -- Comments:
--- The length of each sequence is stored internally by the
+-- * An atom only ever has a length of 1.
+-- * The length of a sequence is the number of elements in the sequence.
+-- * The length of each sequence is stored internally by the
 -- interpreter for fast access. In some other languages this
 -- operation requires a search through memory for an end marker.
 --
@@ -506,6 +508,8 @@ end function
 -- length({{1,2}, {3,4}, {5,6}})   -- 3
 -- length("")	 -- 0
 -- length({})	 -- 0
+-- length( 7 )   -- 1
+-- length( 3.14 ) -- 1
 -- </eucode>
 --
 -- See Also:
@@ -853,7 +857,7 @@ end function
 -- Comments:
 -- ##target## can be a sequence of any shape, and ##what## any kind of object.
 --
--- The length of the returned sequence is ##length(target)+1## always.
+-- The length of the returned sequence is always ##length(target) + 1##.
 --
 -- insert()ing a sequence into a string returns a sequence which is no longer a string.
 --
@@ -891,8 +895,8 @@ end function
 -- Comments:
 -- ##target## can be a sequence of any shape, and ##what## any kind of object.
 --
--- The length of this new sequence is the sum of the lengths of ##target## and ##what##
--- (atoms are of length 1 for this purpose). ##splice##() is equivalent to
+-- The length of this new sequence is the sum of the lengths of ##target## and ##what##.
+-- ##splice##() is equivalent to
 -- [[:insert]]() when ##what## is an atom, but not when it is a sequence.
 --
 -- Splicing a string into a string results into a new string.
@@ -1119,11 +1123,11 @@ end function
 -- <built-in> function head(sequence source, atom size=1)
 --
 -- Description:
--- Return the first item(s) of a sequence.
+-- Return the first ##size## item(s) of a sequence.
 --
 -- Parameters:
 --		# ##source## : the sequence from which elements will be returned
---		# ##size## : an integer, how many head elements at most will be returned.
+--		# ##size## : an integer; how many elements, at most, will be returned.
 --                              Defaults to 1.
 --
 -- Returns:
@@ -1153,10 +1157,10 @@ end function
 
 --****
 -- Signature:
--- <built-in> function tail(sequence source, atom n=length(source) - 1)
+-- <built-in> function tail(sequence source, atom size=length(source) - 1)
 --
 -- Description:
--- Return the last items of a sequence.
+-- Return the last ##size## item(s) of a sequence.
 --
 -- Parameters:
 --   # ##source## : the sequence to get the tail of.
@@ -1226,6 +1230,12 @@ end function
 -- <eucode>
 -- s2 = mid({1, 5.4, "John", 30}, 2, 2)
 -- -- s2 is {5.4, "John"}
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- s2 = mid({1, 5.4, "John", 30}, 2, -1)
+-- -- s2 is {5.4, "John", 30}
 -- </eucode>
 --
 -- See Also:
@@ -2014,14 +2024,14 @@ public function replace_all(sequence source, object olddata, object newdata)
 end function
 
 --**
--- Turns a sequences of indexes into the sequence of elements in a source that have such indexes.
+-- Picks out from a sequence a set of elements according to the supplied set of indexes.
 --
 -- Parameters:
 --		# ##source## : the sequence from which to extract elements
 --		# ##indexes## : a sequence of atoms, the indexes of the elements to be fetched in ##source##.
 --
 -- Returns:
---		A **sequence**, of length at most ##length(indexes)##. If ##p## is the r-th element of ##indexes## which is valid on ##source##, then ##result[r]## is ##source[p]##.
+--		A **sequence**, of the same length as ##indexes##. 
 --
 -- Example 1:
 -- <eucode>
@@ -2038,7 +2048,7 @@ public function extract(sequence source, sequence indexes)
 	for i = 1 to length(indexes) do
 		p = indexes[i]
 		if not valid_index(source,p) then
-			crash("%d is not a valid index on the input sequence",p)
+			crash("%d is not a valid index for the input sequence",p)
 		end if
 		indexes[i] = source[p]
 	end for
@@ -2836,7 +2846,7 @@ end function
 --   -- res is "JIhn SmOth UnjIAs EncIIkUd YpplUs."
 --   </eucode>
 -- See Also:
---		[[:find]], [[:match]], [[:replace]]
+--		[[:find]], [[:match]], [[:replace]], [[:mapping]]
 
 public function transmute(sequence source_data, sequence current_items, sequence new_items, integer start=1, integer limit = length(source_data))
 	sequence result

@@ -376,8 +376,8 @@ is really just a convenient notation that saves you from having to type in all
 the ASCII codes.
 @[emptyseq|]
 It follows that "" is equivalent to {}. Both represent
-the sequence of length-0, also known as the **empty sequence**. As
-a matter of programming style, it is natural to use "" to suggest a length-0
+the sequence of zero length, also known as the **empty sequence**. As
+a matter of programming style, it is natural to use "" to suggest a zero length
 sequence of characters, and {} to suggest some other kind of sequence.
 
 An **individual character** is an **atom**. It must be entered using single
@@ -778,8 +778,8 @@ employees = {
 -- employees[2][SALARY] would be 57000.
 </eucode>
 
-The ##length()## built-in function will tell you the length of a sequence.  So
-the last element of a sequence ##s##, is:
+The ##length()## built-in function will tell you how many elements are in a
+sequence.  So the last element of a sequence ##s##, is:
 
 <eucode>
 s[length(s)]
@@ -803,8 +803,8 @@ can be simplified to:
 s[$-1]
 </eucode>
 
-The ##$## symbol equals the length of the sequence. ##$## may only appear between
-square braces. Where there's nesting, e.g.:
+The ##$## may only appear between square braces and it equals the length of the
+sequence that is being subscripted. Where there's nesting, e.g.:
 
 <eucode>
 s[$ - t[$-1] + 1]
@@ -876,7 +876,7 @@ variable, then subscript the variable to get the month.
 A sequence of consecutive elements may be selected by giving the starting and
 ending element numbers. For example if ##x## is ##{1, 1, 2, 2, 2, 1, 1, 1}## then
 ##x[3..5]## is the sequence ##{2, 2, 2}##. ##x[3..3]## is the sequence
-##{2}##. ##x[3..2]## is also allowed. It evaluates to the length-0 sequence
+##{2}##. ##x[3..2]## is also allowed. It evaluates to the zero length sequence
 ##{}##.  If ##y## has the value: ##{"fred", "george", "mary"}## then
 ##y[1..2]## is ##{"fred", "george"}##.
 
@@ -912,7 +912,7 @@ s[$][1..floor($/2)] -- first half of the last element of s
 
 Any two objects may be concatenated using the **&** operator. The
 result is a sequence with a length equal to the sum of the lengths of the
-concatenated objects (where atoms are considered here to have length 1).
+concatenated objects.
 e.g.
 
 <eucode>
@@ -971,14 +971,14 @@ Returns the length of a sequence s1.
 
 This is the number of elements in s1. Some of these elements may be
 sequences that contain elements of their own, but ##length## just gives you the
-"top-level" count. You'll get an error if you ask for the length of an atom.
+"top-level" count. Note however that the length of an atom is always 1.
 e.g.
 
 <eucode>
 length({5,6,7})             -- 3
 length({1, {5,5,5}, 2, 3})  -- 4 (not 6!)
 length({})                  -- 0
-length(5)                   -- error!
+length(5)                   -- 1
 </eucode>
 
 ===== repeat(object o1, integer times)
@@ -1072,7 +1072,7 @@ s = splice({1,2,3},4,-2) -- s is {4,1,2,3}, like with the & operator in reversed
 </eucode>
 
 The length of ##splice(in_what, what, position)## always is ##length(in_what) + length(what)##, like for
-concatenation using ##&##. For this purpose, atoms behave as if they were of length 1.
+concatenation using ##&##.
 
 === Precedence Chart
 
@@ -3392,12 +3392,12 @@ This may look like sloppy coding, but in fact it often allows you to write
 something in a simpler and more readable way. For instance:
 
 <eucode>
-if atom(x) or length(x)=1 then
+if length(x) > 1 and x[2] = y then
 </eucode>
 
-Without short-circuiting, you would have a problem when x was an atom, since
-length is not defined for atoms. With short-circuiting, length(x) will only be
-checked when x is a sequence. Similarly:
+Without short-circuiting, you would have a problem when x contains less than 2 items.
+With short-circuiting, the assignment to x[2] will only be done when x has at least
+2 items. Similarly:
 
 <eucode>
 -- find 'a' or 'A' in s

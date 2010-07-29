@@ -2905,22 +2905,28 @@ end procedure
 procedure opLENGTH()
 -- LENGTH / PLENGTH
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	if opcode = LENGTH and
-	   TypeIsIn(Code[pc+1], TYPES_SO) then
-		if SeqLen(Code[pc+1]) != NOVALUE then
-			-- we know the length
-			c_stmt("@ = ", Code[pc+2])
-			c_printf("%d;\n", SeqLen(Code[pc+1]))
-			target = repeat(SeqLen(Code[pc+1]), 2)
+	if opcode = LENGTH then
+		if TypeIsIn(Code[pc+1], TYPES_SO) then
+			-- For sequences and object we need to check the length.
+			if SeqLen(Code[pc+1]) != NOVALUE then
+				-- we know the length already, so no need for a runtime check.
+				c_stmt("@ = ", Code[pc+2])
+				c_printf("%d;\n", SeqLen(Code[pc+1]))
+				target = repeat(SeqLen(Code[pc+1]), 2)
+			else
+				-- Fetch the current length from the struct
+				c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
+				target = {0, MAXLEN}
+			end if
 		else
-			c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
-			target = {0, MAXLEN}
+			c_stmt("@ = 1;\n", Code[pc+2])
+			target = {1,1}
 		end if
 		CDeRefStr("_0")
 		SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
 	else
 		if opcode = PLENGTH then
-			-- we have a pointer to a sequence
+			-- we have a pointer to an argument
 			c_stmt("@ = SEQ_PTR(*(object_ptr)_3)->length;\n", Code[pc+2])
 		else
 			c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})

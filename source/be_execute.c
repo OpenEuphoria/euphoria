@@ -2517,7 +2517,7 @@ void do_exec(int *start_pc)
 
 			case L_PLENGTH:
 			deprintf("case L_PLENGTH:");
-				/* *pc[1] contains a pointer to the sequence */
+				/* *pc[1] contains a pointer to the argument */
 				top = (object)**(object_ptr **)pc[1]; 
 				goto len;
 
@@ -2528,16 +2528,19 @@ void do_exec(int *start_pc)
 			  len:  
 				if (IS_SEQUENCE(top)) { 
 					top = SEQ_PTR(top)->length;
-					obj_ptr = (object_ptr)pc[2];
-					DeRefx(*obj_ptr);
-					*obj_ptr = top;
-					inc3pc();
-					thread();
 				}
 				else {
-					tpc = pc;
-					RTFatal("length of an atom is not defined");
+					if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+						DeRef( ((symtab_ptr)pc[1])->obj );
+						((symtab_ptr)pc[1])->obj = NOVALUE;
+					}
+					top = ATOM_1;
 				}
+				obj_ptr = (object_ptr)pc[2];
+				DeRefx(*obj_ptr);
+				*obj_ptr = top;
+				inc3pc();
+				thread();
 				BREAK;
 
 				/* ---------- start of unary ops ----------------- */
