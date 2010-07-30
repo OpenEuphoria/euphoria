@@ -2764,6 +2764,7 @@ void do_exec(long *start_pc)
 			case L_MINUS_I:
 			deprintf("case L_MINUS_I:");
 				START_BIN_OP_I
+				
 				top = a - top;
 				if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
 					tpc = pc;

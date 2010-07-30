@@ -1054,7 +1054,7 @@ static void TracePrint(symtab_ptr proc, long *pc)
 // print a line of traceback
 {
 	long gline;
-	unsigned int line, file;
+	unsigned long line, file;
 	char *subtype;
 
 	gline = FindLine(pc, proc);

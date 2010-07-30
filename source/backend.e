@@ -76,7 +76,8 @@ ifdef UNIX then
 	-- hack until we have a defined word for the architecture
 	if find( "x86_64", uname() ) then
 		SIZEOF_POINTER = 8
-		SIZEOF_SLINE  = 12
+		
+		SIZEOF_SLINE  = 16
 		SLINE_LINE    = 8
 		SLINE_FILE_NO = 10
 		SLINE_OPTIONS = 11
@@ -382,8 +383,10 @@ procedure BackEnd(integer il_file)
 			poke(addr + SLINE_FILE_NO, eentry[LOCAL_FILE_NO-short])
 			if not short then
 				if eentry[SRC] then
-					poke_pointer(addr, all_source[1+floor(eentry[SRC]/SOURCE_CHUNK)]
-					+remainder(eentry[SRC], SOURCE_CHUNK)) -- store actual address
+					poke_pointer(addr, 
+						all_source[1 + floor( eentry[SRC] / SOURCE_CHUNK)]
+						+ remainder( eentry[SRC], SOURCE_CHUNK) ) -- store actual address
+					
 				end if
 				poke(addr + SLINE_OPTIONS, eentry[OPTIONS]) -- else leave it 0
 			end if
@@ -416,7 +419,7 @@ procedure BackEnd(integer il_file)
 	fn = allocate(string_size)
 	
 	for i = 1 to length(other_strings) do
-		poke_pointer(ms + SIZEOF_POINTER * 8 + ( i - 1) * SIZEOF_POINTER, fn)
+		poke_pointer(ms + (i + 7) * SIZEOF_POINTER, fn)
 			
 		poke(fn, other_strings[i])
 		fn += length(other_strings[i])

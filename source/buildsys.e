@@ -259,7 +259,7 @@ function setup_build()
 				c_flags &= " -fPIC "
 		   	end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math", 
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -I%s -ffast-math", 
 				{ get_eucompiledir()  })
 
 			if TWINDOWS then
@@ -269,7 +269,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = user_library & " -m32 "
+			l_flags = user_library
 
 			if dll_option then
 				l_flags &= " -shared "
