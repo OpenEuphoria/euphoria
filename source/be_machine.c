@@ -1200,156 +1200,243 @@ static object Seek(object x)
 
 // 2 implementations of dir()
 
-#ifdef EWATCOM
-	// 2 of 3: WATCOM method
-typedef struct {
-	unsigned short twosecs : 5; /* seconds / 2 */
-	unsigned short minutes : 6;
-	unsigned short hours : 5;
-} ftime_t;
-typedef struct {
-	unsigned short day : 5;
-	unsigned short month : 4;
-	unsigned short year : 7;
-} fdate_t;
+
+#ifdef EWINDOWS
+	// 1 of 2: Windows
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
 	char path[MAX_FILE_NAME+1];
 	s1_ptr result, row;
-	struct dirent *direntp;
 	object_ptr obj_ptr;
-	int last;
-	DIR *dirp;
-	struct _stati64 stat64_buf;
-	int stat_result;
-	char attrs[8];
+	char attrs[16];
 	char *next_attr;
 	char *fp_buf;
-	long fp_buf_len;
-	char *fn_buf;
-	long fn_buf_len;
-	long cpy_len;
-	ftime_t *f_time;
-	fdate_t *f_date;
-	
+	WIN32_FIND_DATA file_info;
+	HANDLE next_file;
+	SYSTEMTIME file_time;
+	SYSTEMTIME local_time;
+	int findres;
+	int has_wildcards;
+/*
+typedef struct _WIN32_FIND_DATA {
+  DWORD    dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD    nFileSizeHigh;
+  DWORD    nFileSizeLow;
+  DWORD    dwReserved0;
+  DWORD    dwReserved1;
+  TCHAR    cFileName[MAX_PATH];
+  TCHAR    cAlternateFileName[14];
+} WIN32_FIND_DATA, *PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;
+
+typedef struct _BY_HANDLE_FILE_INFORMATION {
+  DWORD    dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD    dwVolumeSerialNumber;
+  DWORD    nFileSizeHigh;
+  DWORD    nFileSizeLow;
+  DWORD    nNumberOfLinks;
+  DWORD    nFileIndexHigh;
+  DWORD    nFileIndexLow;
+} BY_HANDLE_FILE_INFORMATION, *PBY_HANDLE_FILE_INFORMATION;
+
+typedef struct _SYSTEMTIME {
+  WORD wYear;
+  WORD wMonth;
+  WORD wDayOfWeek;
+  WORD wDay;
+  WORD wHour;
+  WORD wMinute;
+  WORD wSecond;
+  WORD wMilliseconds;
+} SYSTEMTIME, *PSYSTEMTIME;
+
+*/	
 	/* x will be sequence if called via dir() */
 
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 		
-	MakeCString(path, x, MAX_FILE_NAME+1);
+	MakeCString(path, x, MAX_FILE_NAME + 8); // Add a little extra space too.
 
-	last = strlen(path)-1;
-	while (last > 0 &&
-		   (path[last] == '\\' || path[last] == ' ' || path[last] == '\t')) {
-		last--;
+	// Convert any unix delims to Windows delim
+	has_wildcards = 0;
+	fp_buf = path;
+	while (*fp_buf)
+	{
+		if (*fp_buf == '/')
+		{
+			*fp_buf = '\\';
+		}
+		else
+		{
+			if (*fp_buf == '*' || *fp_buf == '?')
+			{
+				has_wildcards = 1;
+			}
+		}	
+		fp_buf++;
 	}
-
-	if (last >= 1 && path[last-1] == '*' && path[last] == '.')
-		last--; // work around WATCOM bug when we have "*." at end
-
-	if (path[last] != ':')
-		path[last+1] = 0; // delete any trailing backslash - Watcom has problems
-						  // with wildcards and trailing backslashes together
-
+	
+	// Trim off trailing whitespace
+	// N.B. 'fp_buf' should now be pointing to the null terminator at this point.
+	fp_buf--;
+	while (fp_buf != path) 
+	{
+		if (*fp_buf == ' ' || *fp_buf == '\t')
+		{
+			fp_buf--;
+		}
+		else
+		{
+			break;
+		}
+	}
+	fp_buf++;
+	*fp_buf = '\0'; // Mark end of C string
+	
+	if (fp_buf == path)
+	{
+		// Empty path so assume current directory
+		strcpy(path, ".\\*");
+		has_wildcards = 1;
+	}
+	else
+	{
+		if (*(fp_buf-1) == '\\')
+		{
+			// Special case. If path has trailing slash, append an asterisk.
+			*fp_buf = '*';
+			has_wildcards = 1;
+			fp_buf++;
+			*fp_buf = '\0';
+		}	
+	}
+	
 	fp_buf = NULL;
-	dirp = opendir(path);
-	if (dirp == NULL) {
+	next_file = FindFirstFile( path, &file_info);
+	if (next_file == INVALID_HANDLE_VALUE)
+	{
 		return ATOM_M1; /* couldn't open directory (or file) */
+	}
+	
+	if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	{
+		if (has_wildcards == 0)
+		{
+			// Initial path is a directory and no wildcards were used,
+			// so assume the caller wants to see inside the directory.
+			FindClose(next_file);
+			strcat(path, "\\*");
+			has_wildcards = 1;
+			next_file = FindFirstFile( path, &file_info);
+			if (next_file == INVALID_HANDLE_VALUE)
+			{
+				return ATOM_M1; /* couldn't open directory (or file) */
+			}
+		}
 	}
 	
 	/* start with empty sequence as result */
 	result = (s1_ptr)NewString("");
 
-	for (;;) {
-		direntp = readdir(dirp);
-		if (direntp == NULL)
-			break; /* end of list */
- 		
-		if (direntp->d_first != 0) {
-			// Initialize the path name for the 'stat' call.
-			fp_buf_len = strlen(direntp->d_openpath) + 1 + NAME_MAX + 1 + 10;
-			fp_buf = EMalloc(fp_buf_len);
-			cpy_len = copy_string(fp_buf, direntp->d_openpath, fp_buf_len);
-			
-			// Is the open path a directory or file? If a directory, we need to
-			// prepare the multiple stat calls with file names.
-			stat_result = _stati64(fp_buf, &stat64_buf);			
-			if (S_ISDIR( stat64_buf.st_mode )) {
-				fp_buf[cpy_len] = '\\';	// open path is a directory.
-			}
-			fn_buf = fp_buf + cpy_len + 1;
-			fn_buf_len = fp_buf_len - cpy_len - 1;
-			fn_buf[0] = '\0';
-		}
-		
-		/* create a length-9 sequence */
-		row = NewS1((long)9);
+	findres = ~0;
+	while (findres != 0) {
+ 			
+		/* create a length-11 sequence */
+		row = NewS1((long)11);
 		obj_ptr = row->base;
-		obj_ptr[1] = NewString(direntp->d_name);
+		obj_ptr[1] = NewString(file_info.cFileName);
 		
 		next_attr = &attrs[0];
 
-		if (direntp->d_attr & _A_RDONLY)
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
 			*next_attr++ = 'r';
-		if (direntp->d_attr & _A_HIDDEN)
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
 			*next_attr++ = 'h';
-		if (direntp->d_attr & _A_SYSTEM)
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
 			*next_attr++ = 's';
-		if (direntp->d_attr & _A_VOLID)
-			*next_attr++ = 'v';
-		if (direntp->d_attr & _A_SUBDIR)
+// 		if (direntp->d_attr & _A_VOLID)
+// 			*next_attr++ = 'v';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			*next_attr++ = 'd';
-		if (direntp->d_attr & _A_ARCH)
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
 			*next_attr++ = 'a';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED)
+			*next_attr++ = 'c';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_ENCRYPTED)
+			*next_attr++ = 'e';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_NOT_CONTENT_INDEXED)
+			*next_attr++ = 'N';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DEVICE)
+			*next_attr++ = 'D';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_OFFLINE)
+			*next_attr++ = 'O';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+			*next_attr++ = 'R';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_SPARSE_FILE)
+			*next_attr++ = 'S';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_TEMPORARY)
+			*next_attr++ = 'T';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_VIRTUAL)
+			*next_attr++ = 'V';
 
 		*next_attr = '\0';
 		obj_ptr[2] = NewString(attrs);
 		
-		if (fn_buf[-1] == '\\') {
-			// complete the path name for the 'stat' call.
-			cpy_len = copy_string(fn_buf, direntp->d_name, fn_buf_len);
-			// Get the true file length. (Handles >4GB)
-			stat_result = _stati64(fp_buf, &stat64_buf);
-		} // else use previous stat call for the 'open path' name.
-
- 		if (stat_result == 0) {
-			if (stat64_buf.st_size > (__int64)MAXINT) {
-				obj_ptr[3] = NewDouble((double)stat64_buf.st_size);
+		if (file_info.nFileSizeHigh == 0)
+		{
+			if (file_info.nFileSizeLow > MAXINT) {
+				obj_ptr[3] = NewDouble((double)file_info.nFileSizeLow);
 			} else {
-				obj_ptr[3] = MAKE_INT((int)stat64_buf.st_size);
+				obj_ptr[3] = MAKE_INT((int)file_info.nFileSizeLow);
 			}
-		} else {
-			obj_ptr[3] = MAKE_INT( -errno ); // Negative of the error code.
+		}
+		else
+		{
+			obj_ptr[3] = NewDouble((double)file_info.nFileSizeHigh * ((double)(MAXDWORD) + 1.0) +
+			                       (double)file_info.nFileSizeLow);
+		}
+
+		FileTimeToSystemTime( &file_info.ftLastWriteTime, &file_time);
+		SystemTimeToTzSpecificLocalTime(NULL, &file_time, &local_time);
+
+		obj_ptr[4] = local_time.wYear;
+		obj_ptr[5] = local_time.wMonth;
+		obj_ptr[6] = local_time.wDay;
+
+		obj_ptr[7] = local_time.wHour;
+		obj_ptr[8] = local_time.wMinute;
+		obj_ptr[9] = local_time.wSecond;
+		obj_ptr[10]= local_time.wMilliseconds;
+
+ 		if (file_info.cAlternateFileName[0] != '\0')
+ 		{
+			obj_ptr[11]= NewString(file_info.cAlternateFileName);
  		}
-
- 		f_time = (ftime_t *)&direntp->d_time;
-		f_date = (fdate_t *)&direntp->d_date;
-
-		obj_ptr[4] = 1980 + f_date->year;
-		obj_ptr[5] = f_date->month;
-		obj_ptr[6] = f_date->day;
-
-		obj_ptr[7] = f_time->hours;
-		obj_ptr[8] = f_time->minutes;
-		obj_ptr[9] = f_time->twosecs << 1;
-
+ 		else
+ 		{
+			obj_ptr[11]= 0;
+		}
+		
 		/* append row to overall result (ref count 1)*/
 		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
+		
+		findres = FindNextFile( next_file, &file_info);
 	}
-	closedir(dirp);
-	
-	if (fp_buf != NULL) {
-		EFree(fp_buf);
-	}
-	
+	FindClose(next_file);
+		
 	return (object)result;
 }
 #endif
 
 #if defined(EUNIX) || defined(EMINGW)
-	// 3 of 3: Unix style with stat()
+	// 2 of 2: Unix style with stat()
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
@@ -1394,8 +1481,8 @@ static object Dir(object x)
 				break; /* end of list */
 		}
 
-		/* create a length-9 sequence */
-		row = NewS1((long)9);
+		/* create a length-11 sequence */
+		row = NewS1((long)11);
 		obj_ptr = row->base;
 		if (dirp == NULL)
 			obj_ptr[1] = NewString(name_ext(path)); // just the name
@@ -1437,6 +1524,9 @@ static object Dir(object x)
 			obj_ptr[7] = date_time->tm_hour;
 			obj_ptr[8] = date_time->tm_min;
 			obj_ptr[9] = date_time->tm_sec;
+			
+			obj_ptr[10]= 0; // Millisecs not implemented
+			obj_ptr[11]= 0; // Alternate name not used.
 		}
 
 		/* append row to overall result (ref count 1)*/
