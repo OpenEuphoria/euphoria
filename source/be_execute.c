@@ -438,17 +438,17 @@ static object do_peek4(object a, int b )
 // moved it here because it was causing bad code generation for WIN32
 {
 	int i;              
-	unsigned long *peek4_addr;
+	unsigned int *peek4_addr;
 	object top;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
 	/* check address */
 	if (IS_ATOM_INT(a)) {
-		peek4_addr = (unsigned long *)a;
+		peek4_addr = (unsigned int *)a;
 	}
 	else if (IS_ATOM(a)) {
-		peek4_addr = (unsigned long *)(unsigned long)(DBL_PTR(a)->dbl);
+		peek4_addr = (unsigned int *)(unsigned long)(DBL_PTR(a)->dbl);
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -457,7 +457,7 @@ static object do_peek4(object a, int b )
 		if (i != 2) {
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
-		peek4_addr = (unsigned long *)get_pos_int("peek4s/peek4u", *(s1->base+1));
+		peek4_addr = (unsigned int *)get_pos_int("peek4s/peek4u", *(s1->base+1));
 		i = get_pos_int("peek4s/peek4u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");

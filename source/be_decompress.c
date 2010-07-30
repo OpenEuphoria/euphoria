@@ -87,7 +87,7 @@ object decompress(unsigned int c)
 			// inline small integer for greater speed on strings
 			c = *string_ptr++;
 			if (c < I2B) {
-				*obj_ptr = c + MIN1B;
+				*obj_ptr = (object)((int)c + (int)MIN1B);
 			}
 			else {
 				*obj_ptr = decompress(c);
