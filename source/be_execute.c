@@ -1227,7 +1227,6 @@ void symtab_set_pointers()
 					code_set_pointers(code);
 				}
 				s->u.subp.code = (long *)code+1; // skip length
-				
 				s->u.subp.temps = (symtab_ptr)SET_OPERAND(s->u.subp.temps);
 				
 				s->u.subp.resident_task = -1;
@@ -1569,14 +1568,14 @@ void do_exec(long *start_pc)
 #ifndef BACKEND             
 	long *iptr;
 #endif
-	int file_no;
+	long file_no;
 	
-	int end_pos;
-	int going_up; 
+	long end_pos;
+	long going_up; 
 	object_ptr result_ptr;
 	object result_val;
-	int cf;
-	int seqlen;
+	long cf;
+	long seqlen;
 	opcode_type *patch;
 	object b, c;
 	symtab_ptr sym, sub;

@@ -236,7 +236,7 @@ procedure BackEnd(integer il_file)
 			if length(eentry) >= S_NAME and sequence(eentry[S_NAME]) then
 				-- temps and literals have no NAME field
 				poke(addr + ST_FILE_NO, eentry[S_FILE_NO])
-				poke(addr + ST_TOKEN, eentry[S_TOKEN])
+				poke4(addr + ST_TOKEN, eentry[S_TOKEN]) -- C int
 				string_size += length(eentry[S_NAME])+1
 			end if
 		
