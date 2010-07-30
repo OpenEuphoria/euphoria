@@ -2047,7 +2047,7 @@ object OpenDll(object x)
 	static char message[81];
 	char *dll_string;
 	HINSTANCE lib;
-	int message_len;
+	long message_len;
 
 	/* x will be a sequence if called via open_dll() */
 
@@ -2089,6 +2089,7 @@ object OpenDll(object x)
 	lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
 
 #endif
+
 	if ((unsigned long)lib <= (unsigned long)MAXINT_VAL){
 			return MAKE_INT((unsigned long)lib);
 	}
@@ -2125,7 +2126,7 @@ object DefineCVar(object x)
 	MakeCString(variable_string, variable_name, TEMP_SIZE);
 #ifdef EWINDOWS
 	//Ray Smith says this works.
-	variable_address = (char *)(int (*)())GetProcAddress((void *)lib, variable_string);
+	variable_address = (char *)(long (*)())GetProcAddress((void *)lib, variable_string);
 	if (variable_address == NULL)
 		return ATOM_M1;
 #else
@@ -2154,7 +2155,7 @@ object DefineC(object xo)
 	long (*proc_address)();
 	object arg_size, return_size;
 	object_ptr arg;
-	int convention, t, raw_addr;
+	long convention, t, raw_addr;
 	s1_ptr xs1;
 
 	// x will be a sequence if called from define_c_func/define_c_proc

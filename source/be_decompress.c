@@ -36,14 +36,14 @@ object decompress(unsigned int c)
 	if (c == 0) {
 		c = *string_ptr++;
 		if (c < I2B) {
-			return c + MIN1B;
+			return (object)((int)c + (int)MIN1B);
 		}
 	}
 	
 	if (c == I2B) {
 		i = (*string_ptr++);
 		i = i + 256 * (*string_ptr++);
-		return i + MIN2B;
+		return (object)((int)i + (int)MIN2B);
 	}
 	
 	else if (c == I3B) {
@@ -56,7 +56,7 @@ object decompress(unsigned int c)
 	else if (c == I4B) {
 		i = *(unsigned int *)string_ptr;
 		string_ptr += 4;
-		return i + MIN4B;
+		return (object)((int)i + (int)MIN4B);
 	}
 	
 	else if (c == F4B) {
