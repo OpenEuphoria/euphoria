@@ -70,17 +70,7 @@ void wcpush(long X);
                 parm [EAX];
 #endif // EWATCOM
 
-typedef union {
-	double dbl;
-	int ints[2];
-} double_arg;
-
-typedef union {
-	float flt;
-	int intval;
-} float_arg;
-
-object call_c(int func, object proc_ad, object arg_list)
+object call_c(long func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
 {
@@ -186,6 +176,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 
 			if (size == C_DOUBLE) {
+				
 				arg = dbl_arg.ints[1];
 
 				push();  // push high-order half first

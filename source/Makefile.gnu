@@ -185,10 +185,13 @@ endif
 
 ifeq "$(ARCH)" "ix86"
 BE_CALLC = be_callc
+DARCH=-DARCH=ix86
 MSIZE=-m32
-else
+BITS=-DEBITS=32
+else ifeq "$(ARCH)" "x86_64"
 BE_CALLC = be_callc_conly
 MSIZE=
+BITS=-DEBITS=64
 endif
 
 ifndef ECHO
@@ -209,8 +212,8 @@ else
 	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex
 endif
 
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
-BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) $(DARCH) $(BITS)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) $(DARCH) $(BITS)
 
 EU_CORE_FILES = \
 	block.e \
@@ -662,11 +665,11 @@ $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c Makefile.eu
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c Makefile.eu
-	$(CC) -c -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
-	$(CC) -S -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
+	$(CC) -c -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -ffast-math -fno-defer-pop $(DARCH) $(BITS) $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
+	$(CC) -S -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(DARCH) $(BITS) $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
-	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
+	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(DARCH) $(BITS) $(RUNTIME_FLAGS) be_inline.c -o$*.o
 	
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
@@ -690,7 +693,8 @@ $(BUILDDIR)/intobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/intobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/intobj/back/be_callc_conly.o: be_runtime.h be_machine.h
+$(BUILDDIR)/intobj/back/be_callc_conly.o: be_alloc.h be_runtime.h
+$(BUILDDIR)/intobj/back/be_callc_conly.o: be_machine.h be_callc.h
 $(BUILDDIR)/intobj/back/be_decompress.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_decompress.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
@@ -706,6 +710,7 @@ $(BUILDDIR)/intobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/intobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/intobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/intobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/intobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/intobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
@@ -748,7 +753,8 @@ $(BUILDDIR)/transobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/transobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/transobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/transobj/back/be_callc_conly.o: be_runtime.h be_machine.h
+$(BUILDDIR)/transobj/back/be_callc_conly.o: be_alloc.h be_runtime.h
+$(BUILDDIR)/transobj/back/be_callc_conly.o: be_machine.h be_callc.h
 $(BUILDDIR)/transobj/back/be_decompress.o: alldefs.h global.h object.h
 $(BUILDDIR)/transobj/back/be_decompress.o: symtab.h execute.h reswords.h
 $(BUILDDIR)/transobj/back/be_decompress.o: be_alloc.h
@@ -765,6 +771,7 @@ $(BUILDDIR)/transobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/transobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/transobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/transobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/transobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/transobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
@@ -807,7 +814,8 @@ $(BUILDDIR)/backobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/backobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/backobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/backobj/back/be_callc_conly.o: be_runtime.h be_machine.h
+$(BUILDDIR)/backobj/back/be_callc_conly.o: be_alloc.h be_runtime.h
+$(BUILDDIR)/backobj/back/be_callc_conly.o: be_machine.h be_callc.h
 $(BUILDDIR)/backobj/back/be_decompress.o: alldefs.h global.h object.h
 $(BUILDDIR)/backobj/back/be_decompress.o: symtab.h execute.h reswords.h
 $(BUILDDIR)/backobj/back/be_decompress.o: be_alloc.h
@@ -824,6 +832,7 @@ $(BUILDDIR)/backobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/backobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/backobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/backobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/backobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/backobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
@@ -866,7 +875,8 @@ $(BUILDDIR)/libobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_callc.o: be_machine.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_callc_conly.o: alldefs.h global.h object.h
 $(BUILDDIR)/libobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/libobj/back/be_callc_conly.o: be_runtime.h be_machine.h
+$(BUILDDIR)/libobj/back/be_callc_conly.o: be_alloc.h be_runtime.h
+$(BUILDDIR)/libobj/back/be_callc_conly.o: be_machine.h be_callc.h
 $(BUILDDIR)/libobj/back/be_decompress.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_decompress.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
@@ -882,6 +892,7 @@ $(BUILDDIR)/libobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/libobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/libobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/libobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/libobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/libobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h

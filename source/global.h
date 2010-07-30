@@ -27,7 +27,7 @@ typedef signed   char   schar;
 #include "symtab.h"
 
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
-#if defined(ELINUX)
+#if defined(ELINUX) && EBITS == 32
 	/* use glibc 64bit variants */
 #	define _LARGEFILE_SOURCE
 #	define _LARGEFILE64_SOURCE
@@ -81,8 +81,12 @@ typedef signed   char   schar;
 #	define ifileno fileno
 #	define iprintf fprintf
 #   include <windef.h>
-#elif defined(EBSD) || defined(EOSX)
+#elif defined(EBSD) || defined(EOSX) || (defined(ELINUX) && EBITS == 64 )
 	/* 64bit support is automatic */
+#	include <sys/types.h>
+#	include <unistd.h>
+#	include <errno.h>
+
 #	define IFILE FILE*
 #	define IOFF long long
 #	define iopen fopen
@@ -127,10 +131,10 @@ struct replace_block;
 typedef struct replace_block *replace_ptr;
 
 #ifdef INT_CODES
-	typedef int opcode_type;
+	typedef long opcode_type;
 	#define opcode(x) (x)
 #else
-	typedef int *opcode_type;
+	typedef long *opcode_type;
 	#define opcode(x) jumptab[x-1]
 #endif
 
@@ -160,7 +164,7 @@ typedef int (*FARPROC)();
 #  define LRESULT long
 #  if !defined(EMINGW)
 #    define O_TEXT 0
-#    define HINSTANCE int
+#    define HINSTANCE long
 #  endif
 struct videoconfig {
 	int monitor;

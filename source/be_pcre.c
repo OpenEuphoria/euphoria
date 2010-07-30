@@ -70,7 +70,7 @@ object compile(object pattern, object eflags) {
         }
         
 
-        if ((unsigned) re > (unsigned)MAXINT)
+        if ((unsigned long) re > (unsigned long)MAXINT)
                 ret = NewDouble((double)(unsigned long)re);
         else
                 ret = (unsigned long)re;

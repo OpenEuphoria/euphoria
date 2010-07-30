@@ -26,7 +26,7 @@ echo "# File generated from configure" > Makefile.eu
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
+	echo ARCH=x86_64 >> "$PREFIX"Makefile.eu
 elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"Makefile.eu
 fi

@@ -99,17 +99,17 @@ extern char **Argv;
 /* Exported variables */
 /**********************/
 char *file_name_entered = "";
-int warning_count = 0;
+long warning_count = 0;
 char **warning_list;
-int crash_count = 0; /* number of crashes so far */
-int clocks_per_sec;
-int clk_tck;
-int gameover = FALSE;           /* Are we shutting down? */
-int insert_pos;
+long crash_count = 0; /* number of crashes so far */
+long clocks_per_sec;
+long clk_tck;
+long gameover = FALSE;           /* Are we shutting down? */
+long insert_pos;
 IFILE TempErrFile;
 char *TempErrName; // "ex.err" - but must be on the heap
 char *TempWarningName;
-int display_warnings;
+long display_warnings;
 
 /**********************/
 /* Declared Functions */
@@ -117,15 +117,15 @@ int display_warnings;
 
 object add(long a, long b);
 
-unsigned general_call_back(
+unsigned long general_call_back(
 #ifdef ERUNTIME
-		  int cb_routine,
+		  long cb_routine,
 #else
 		  symtab_ptr cb_routine,
 #endif
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9);
+						   unsigned long  arg1, unsigned long arg2, unsigned long arg3,
+						   unsigned long arg4, unsigned long arg5, unsigned long arg6,
+						   unsigned long arg7, unsigned long arg8, unsigned long arg9);
 
 struct op_info optable[MAX_OPCODE+1] = {
 {x, x}, /* no 0th element */
@@ -344,7 +344,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x}
 };
 
-int TraceOn = FALSE;
+long TraceOn = FALSE;
 object *rhs_slice_target;
 s1_ptr *assign_slice_seq;
 object last_w_file_no = NOVALUE;
@@ -353,11 +353,11 @@ object last_r_file_no = NOVALUE;
 IFILE last_r_file_ptr;
 struct file_info user_file[MAX_USER_FILE];
 long seed1, seed2;  /* current value of first and second random generators */
-int rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
-int con_was_opened = FALSE; /* TRUE if CON device was ever opened */
-int current_screen = MAIN_SCREEN;
+long rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
+long con_was_opened = FALSE; /* TRUE if CON device was ever opened */
+long current_screen = MAIN_SCREEN;
 
-int EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console support
+long EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console support
                       for euid running on Windows systems that do not support
                       'full screen DOS' mode; eg. Vista.
                    */
@@ -393,10 +393,10 @@ int Mouse_Handler(Gpm_Event *, void *);
    less than 1 then the target buffer was not big enough to hold the source and
    the target buffer is not terminated with a null character.
 */
-int charcopy(char *target, int target_len, char *source, int source_len)
+long charcopy(char *target, long target_len, char *source, long source_len)
 {
-	int source_remaining = source_len;
-	int target_remaining = target_len;
+	long source_remaining = source_len;
+	long target_remaining = target_len;
 
 	while ((source_remaining > 0) && (target_remaining > 0) && (*source != '\0'))
 	{
@@ -414,12 +414,17 @@ int charcopy(char *target, int target_len, char *source, int source_len)
 }
 
 
-#ifdef ELINUX
+#if defined( ELINUX ) && EBITS == 32
 // for largefile support on 32bit
 // int _llseek(unsigned int,unsigned long, unsigned long,long long *, unsigned int);
 // used instead of llseek() to avoid the warning
-#include <sys/types.h>
+
 #include <sys/syscall.h>
+#ifndef SYS__llseek 
+// use SYS_lseek on 64-bit system
+#define SYS__llseek SYS_lseek
+#endif
+
 #define _llseek(fd, offset_high, offset_low, result, origin) \
 	syscall(SYS__llseek, fd, offset_high, offset_low, result, origin)
 
@@ -549,7 +554,7 @@ void call_crash_routines()
 		crash_call_back = TRUE;
 		quit = (object)general_call_back(
 #ifdef ERUNTIME
-		   (int)r,
+		   (long)r,
 #else
 		   (symtab_ptr)e_routine[r],
 #endif
@@ -753,7 +758,7 @@ void Append(object_ptr target, object s1, object a)
 			/* allow 1*4 for end marker */
 			/* base + new_len + 2 could overflow 32-bits??? */
 			new_s1p = (s1_ptr)ERealloc((char *)s1p,
-							   (char *)(base + new_len + 2) - (char *)s1p);
+							   ((char *)(base + new_len + 2) - (char *)s1p));
 			new_s1p->base = (object_ptr)new_s1p +
 							 ((object_ptr)base - (object_ptr)s1p);
 
@@ -862,7 +867,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 }
 
 
-s1_ptr Copy_elements(int start,s1_ptr source, int replace )
+s1_ptr Copy_elements(long start, s1_ptr source, long replace )
 {
 	object_ptr t_elem, s_elem;
 	s1_ptr s1 = *assign_slice_seq;
@@ -921,7 +926,7 @@ object Insert(object a,object b,int pos)
 }
 
 
-void Head(s1_ptr s1, int reqlen, object_ptr target)
+void Head(s1_ptr s1, long reqlen, object_ptr target)
 {
 	int i;
 	object_ptr op, se;
@@ -959,7 +964,7 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 	}
 }
 
-void Tail(s1_ptr s1, int start, object_ptr target)
+void Tail(s1_ptr s1, long start, object_ptr target)
 {
 	
 	int newlen;
@@ -1006,9 +1011,9 @@ void Tail(s1_ptr s1, int start, object_ptr target)
  *
  * Returns the resulting object (no change if in_place == 1).
  */
-object Remove_elements(int start, int stop, int in_place )
+object Remove_elements(long start, long stop, long in_place )
 {
-	int n = stop-start+1;
+	long n = stop-start+1;
 	s1_ptr s1 = *assign_slice_seq;
 
 	if (in_place) {
@@ -1029,7 +1034,7 @@ object Remove_elements(int start, int stop, int in_place )
 	}
 	else {
 		s1_ptr s2 = NewS1(s1->length-n);
-		int i;
+		long i;
 		object temp, *src = s1->base, *trg = s2->base;
 		for ( i = 1; i < start; i++) {
 			temp = *(++src);
@@ -1217,7 +1222,7 @@ void Concat_N(object_ptr target, object_ptr  source, int n)
 	ASSIGN_SEQ(target, result);
 }
 
-void Concat_Ni(object_ptr target, object_ptr *source, int n)
+void Concat_Ni(object_ptr target, object_ptr *source, long n)
 /* version used by interpreter
  * Concatenate n objects (n > 2). This is more efficient
  * than doing multiple calls to Concat() above, since we
@@ -1227,7 +1232,7 @@ void Concat_Ni(object_ptr target, object_ptr *source, int n)
 {
 	s1_ptr result;
 	object s_obj, temp;
-	int i, size;
+	long i, size;
 	object_ptr p, q;
 
 	/* Compute the total size of all the operands */
@@ -1374,12 +1379,12 @@ void udt_clean_rt( object o, long rid ){
  */
 void udt_clean( object o, long rid ){
 
-	int *code;
+	long *code;
 	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
 	s1_ptr s;
 	object args;
 	int pre_ref;
-	int *save_tpc;
+	long *save_tpc;
 
 	// Need to make sure that s is 8-byte aligned
 	s = (s1_ptr)( ((object)&seq[7])  & ~7 );
@@ -1401,11 +1406,11 @@ void udt_clean( object o, long rid ){
 	}
 	
 	args = MAKE_SEQ( s );
-	code = (int *)EMalloc( 4*sizeof(int*) );
-	code[0] = (int)opcode(CALL_PROC);
-	code[1] = (int)&rid;
-	code[2] = (int)&args;
-	code[3] = (int)opcode(CALL_BACK_RETURN);
+	code = (long *)EMalloc( 4*sizeof(int*) );
+	code[0] = (long)opcode(CALL_PROC);
+	code[1] = (long)&rid;
+	code[2] = (long)&args;
+	code[3] = (long)opcode(CALL_BACK_RETURN);
 	if (expr_top >= expr_limit) {
 		expr_max = BiggerStack();
 		expr_limit = expr_max - 3;
@@ -1589,13 +1594,13 @@ void de_reference(s1_ptr a)
 	}
 }
 
-void DeRef1(int a)
+void DeRef1(long a)
 /* Saves space. Use in top-level code (outside of loops) */
 {
 	DeRef(a);
 }
 
-void DeRef5(int a, int b, int c, int d, int e)
+void DeRef5(long a, long b, long c, long d, long e)
 /* Saves space. Use instead of 5 in-line DeRef's */
 {
 	DeRef(a);
@@ -2323,7 +2328,7 @@ object DRandom(d_ptr a)
 }
 
 
-object unary_op(int fn, object a)
+object unary_op(long fn, object a)
 /* recursive evaluation of a unary op
    c may be the same as a. ATOM_INT case handled in-line by caller */
 {
@@ -2360,7 +2365,7 @@ object unary_op(int fn, object a)
 }
 
 
-object binary_op_a(int fn, object a, object b)
+object binary_op_a(long fn, object a, object b)
 /* perform binary op on two atoms */
 {
 	struct d temp_d;
@@ -2385,7 +2390,7 @@ object binary_op_a(int fn, object a, object b)
 }
 
 
-object binary_op(int fn, object a, object b)
+object binary_op(long fn, object a, object b)
 /* Recursively calculates fn of a and b. */
 /* Caller must handle INT:INT case */
 {
@@ -2398,7 +2403,7 @@ object binary_op(int fn, object a, object b)
 
 	/* handle all ATOM:ATOM cases except INT:INT - not allowed
 	   n.b. IS_ATOM_DBL actually only distinguishes ATOMS from SEQUENCES */
-	if (IS_ATOM_INT(a) && IS_ATOM_DBL(b)) {
+	if (IS_ATOM_INT(a) && (!IS_ATOM_INT(b) && IS_ATOM_DBL(b))) {
 		/* in test above b can't be an int if a is */
 		temp_d.dbl = (double)INT_VAL(a);
 		return (*optable[fn].dblfn)(&temp_d, DBL_PTR(b));
@@ -2983,9 +2988,9 @@ object calc_hash(object a, object b)
 			else {
 				tf.ieee_double = 196069.10 + (double)(SEQ_PTR(a)->length);
 			}
-			tf.ieee_uint.a &= MAXINT;
+			tf.ieee_uint.a &= MAXINT32;
 			if (tf.ieee_uint.a == 0) {
-				tf.ieee_uint.a = MAXINT;
+				tf.ieee_uint.a = MAXINT32;
 			}
 			
 			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
@@ -3122,7 +3127,7 @@ object calc_hash(object a, object b)
 
 }
 
-int compare(object a, object b)
+long compare(object a, object b)
 /* Compare general objects a and b. Return 0 if they are identical,
    1 if a > b, -1 if a < b. All atoms are less than all sequences.
    The INT-INT case *must* be taken care of by the caller */
@@ -3542,13 +3547,13 @@ object Date()
 	return MAKE_SEQ(result);
 }
 
-void MakeCString(char *s, object pobj, int slen)
+void MakeCString(char *s, object pobj, long slen)
 /* make an atom or sequence into a C string */
 /* N.B. caller must allow one extra for the null terminator */
 {
 	object_ptr elem;
 	object x;
-	int seqlen;
+	long seqlen;
 	s1_ptr obj;
 
 #ifdef EXTRA_CHECK
@@ -3585,7 +3590,7 @@ void MakeCString(char *s, object pobj, int slen)
 	*s = '\0';
 }
 
-int might_go_screen(object file_no)
+long might_go_screen(object file_no)
 // return TRUE if object file_no might be directed to the screen or keyboard
 // N.B. file_no is an object (maybe atom or sequence)
 {
@@ -3610,7 +3615,7 @@ int CheckFileNumber(object a)
 }
 
 
-IFILE which_file(object a, int mode)
+IFILE which_file(object a, long mode)
 /* return FILE pointer, given the file number */
 {
 	int file_no;
@@ -3670,7 +3675,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	int i;
 	long mode, text_mode;
 	cleanup_ptr cup;
-
+	
 	if (IS_ATOM(mode_obj))
 		RTFatal("open mode must be a sequence");
 
@@ -3678,10 +3683,10 @@ object EOpen(object filename, object mode_obj, object cleanup)
 		RTFatal("device or file name must be a sequence");
 
 	length = SEQ_PTR(filename)->length + 1;
-	if (length > MAX_FILE_NAME)
+	if (length > MAX_FILE_NAME){
 		return ATOM_M1;
+	}
 	MakeCString(cname, filename, MAX_FILE_NAME+1);
-
 	if (SEQ_PTR(mode_obj)->length > 3)
 		RTFatal("invalid open mode");
 	MakeCString(cmode, mode_obj, EOpen_cmode_len );
@@ -3742,8 +3747,9 @@ object EOpen(object filename, object mode_obj, object cleanup)
 			con_was_opened = TRUE;
 		}
 		fp = long_iopen(cname, cmode);
-		if (fp == NULL)
+		if (fp == NULL){
 			return ATOM_M1;
+		}
 		else {
 			user_file[i].fptr = fp;
 			user_file[i].mode = mode;
@@ -3922,7 +3928,7 @@ object EGets(object file_no)
 	return result_line;
 }
 
-void set_text_color(int c)
+void set_text_color(long c)
 /* set the foreground color for color displays
    or just set to white for mono displays */
 {
@@ -3937,7 +3943,7 @@ void set_text_color(int c)
 }
 
 /* print variables */
-int print_chars;  // value can be checked by caller
+long print_chars;  // value can be checked by caller
 static int print_lines;
 static int print_width;
 static int print_start;
@@ -3946,7 +3952,7 @@ static int print_level;
 static IFILE print_file;
 static int show_ascii;
 
-int show_ascii_char(IFILE print_file, int iv)
+int show_ascii_char(IFILE print_file, long iv)
 /* display corresponding ascii char */
 {
 	char sbuff[4];
@@ -4084,7 +4090,8 @@ static void rPrint(object a)
 	}
 	else {
 		/* a is a SEQUENCE */
-		a = (object)SEQ_PTR(a);
+		s1_ptr as1;
+		as1 = SEQ_PTR(a);
 		cut_line(1);
 		if (print_chars == -1)
 			return;
@@ -4092,8 +4099,8 @@ static void rPrint(object a)
 		multi_line = FALSE;
 		if (print_pretty) {
 			/* check if all elements are either atoms or null-sequences */
-			elem = ((s1_ptr)a)->base;
-			length = ((s1_ptr)a)->length;
+			elem = as1->base;
+			length = as1->length;
 			while (length > 0) {
 				elem++;
 				if (IS_SEQUENCE(*elem) && SEQ_PTR(*elem)->length > 0) {
@@ -4107,8 +4114,8 @@ static void rPrint(object a)
 		screen_output(print_file, "{");
 		print_chars++;
 
-		elem = ((s1_ptr)a)->base+1;
-		length = ((s1_ptr)a)->length;
+		elem = as1->base+1;
+		length = as1->length;
 		if (length > 0) {
 			print_level++;
 			while (--length > 0) {
@@ -4139,7 +4146,7 @@ static void rPrint(object a)
 	}
 }
 
-void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
+void Print(IFILE f, object a, long lines, long width, long init_chars, long pretty)
 /* print an object */
 {
 	print_lines = lines;
@@ -4158,7 +4165,7 @@ void Print(IFILE f, object a, int lines, int width, int init_chars, int pretty)
 	flush_screen();
 }
 
-void StdPrint(int fn, object a, int new_lines)
+void StdPrint(long fn, object a, long new_lines)
 /* standard Print - lets us have <= 3 args in do_exec() */
 {
 	if (new_lines) {
@@ -4408,7 +4415,7 @@ object_ptr v_elem;
 }
 
 
-object EPrintf(int file_no, object format_obj, object values)
+object EPrintf(long file_no, object format_obj, object values)
 /* formatted print */
 /* file_no could be DOING_SPRINTF (for sprintf) */
 {
@@ -4551,7 +4558,7 @@ int nodelaych(int wait)
 }
 #endif
 
-int get_key(int wait)
+int get_key(long wait)
 /* Get one key from keyboard, without echo. If wait is TRUE then wait until
    a key is typed, otherwise return -1 if no key is available. */
 {
@@ -4660,14 +4667,14 @@ static void RTInternal(char *msg, ...)
 
 void *xstdin;
 
-int CRoutineId(int seq_num, int current_file_no, object name)
+long CRoutineId(long seq_num, long current_file_no, object name)
 /* Routine_id for compiled code.
    (Similar to RTLookup() for interpreter, but here we only find routines,
 	not vars, and we don't have the normal symbol table available). */
 {
 	char *routine_string;
 	s1_ptr routine_ptr;
-	int i, f, ns_file, found;
+	long i, f, ns_file, found;
 	char *colon;
 	char *simple_name;
 	char *p;
@@ -4778,7 +4785,6 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 		out_of_path_found = 0;
 		in_path_found = 0;
 		while (rt00[i].seq_num <= seq_num) {
-
 			if (rt00[i].scope != S_LOCAL &&
 				strcmp(routine_string, rt00[i].name) == 0) {
 
@@ -5007,7 +5013,7 @@ object system_exec_call(object command, object wait)
 	char **argv;
 #endif
 	char *string_ptr;
-	int len, w, exit_code;
+	long len, w, exit_code;
 	int len_used;
 	
 
@@ -5101,25 +5107,25 @@ void match_samples()
 {
 	int i, gline;
 	symtab_ptr proc;
-	int *iptr;
+	long *iptr;
 
 	bad_samples = 0;
 	if (sample_next >= sample_size)
 		sample_overflow = TRUE;
 	total_samples += sample_next;  // volatile
 	for (i = 0; i < sample_next; i++) {
-		proc = Locate((int *)profile_sample[i]);
+		proc = Locate((long *)profile_sample[i]);
 		if (proc == NULL) {
 			bad_samples++;
 		}
 		else {
-			gline = FindLine((int *)profile_sample[i], proc);
+			gline = FindLine((long *)profile_sample[i], proc);
 
 			if (gline == 0) {
 				bad_samples++;
 			}
 			else if (slist[gline].options & OP_PROFILE_TIME) {
-				iptr = (int *)slist[gline].src;
+				iptr = (long *)slist[gline].src;
 				(*iptr)++;
 			}
 		}
@@ -5135,7 +5141,7 @@ static void show_prof_line(IFILE f, long i)
 		screen_output(f, "       |\021\n");
 		return;
 	}
-	else if (*(int *)slist[i].src == 0) {
+	else if (*(long *)slist[i].src == 0) {
 		screen_output(f, "       |");
 	}
 	else {
@@ -5143,11 +5149,11 @@ static void show_prof_line(IFILE f, long i)
 		char buff[SPL_len];
 		if (slist[i].options & OP_PROFILE_TIME) {
 			snprintf(buff, SPL_len, "%6.2f |",
-					 (double)(*(int *)slist[i].src)*100.0 / (double)total_samples);
+					 (double)(*(long *)slist[i].src)*100.0 / (double)total_samples);
 			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		else {
-			snprintf(buff, SPL_len, "%6ld |", (long int)*(int *)slist[i].src);
+			snprintf(buff, SPL_len, "%6ld |", (long int)*(long *)slist[i].src);
 			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		screen_output(f, buff);
@@ -5197,7 +5203,7 @@ void ProfileCommand()
 
 #endif // ERUNTIME
 
-object make_atom32(unsigned c32)
+object make_atom32(unsigned long c32)
 /* make a Euphoria atom from an unsigned C value */
 {
 	if (c32 <= (unsigned)MAXINT)
@@ -5206,27 +5212,27 @@ object make_atom32(unsigned c32)
 		return NewDouble((double)c32);
 }
 
-unsigned general_call_back(
+unsigned long general_call_back(
 #ifdef ERUNTIME
-		  int cb_routine,
+		  long cb_routine,
 #else
 		  symtab_ptr cb_routine,
 #endif
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9)
+						   unsigned long arg1, unsigned long arg2, unsigned long arg3,
+						   unsigned long arg4, unsigned long arg5, unsigned long arg6,
+						   unsigned long arg7, unsigned long arg8, unsigned long arg9)
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
 #ifdef ERUNTIME
-	int (*addr)();
+	long (*addr)();
 #else
-	int *code[4+9]; // place to put IL: max 9 args
-	int *save_tpc;
+	long *code[4+9]; // place to put IL: max 9 args
+	long *save_tpc;
 #endif
 
 	if (gameover)
-		return (unsigned)0; // ignore messages after we decide to shutdown
+		return (unsigned long)0; // ignore messages after we decide to shutdown
 
 #ifdef ERUNTIME
 // translator call-back
@@ -5330,46 +5336,46 @@ unsigned general_call_back(
 
 #else
 	/* Interpreter: set up a PROC opcode call */
-	code[0] = (int *)opcode(PROC);
-	code[1] = (int *)cb_routine;  // symtab_ptr of Euphoria routine
+	code[0] = (long *)opcode(PROC);
+	code[1] = (long *)cb_routine;  // symtab_ptr of Euphoria routine
 
 	num_args = cb_routine->u.subp.num_args;
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
 	  call_back_arg1->obj = make_atom32((unsigned)arg1);
-	  code[2] = (int *)call_back_arg1;
+	  code[2] = (long *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
 		call_back_arg2->obj = make_atom32((unsigned)arg2);
-		code[3] = (int *)call_back_arg2;
+		code[3] = (long *)call_back_arg2;
 		if (num_args >= 3) {
 		  DeRef(call_back_arg3->obj);
 		  call_back_arg3->obj = make_atom32((unsigned)arg3);
-		  code[4] = (int *)call_back_arg3;
+		  code[4] = (long *)call_back_arg3;
 		  if (num_args >= 4) {
 			DeRef(call_back_arg4->obj);
 			call_back_arg4->obj = make_atom32((unsigned)arg4);
-			code[5] = (int *)call_back_arg4;
+			code[5] = (long *)call_back_arg4;
 			if (num_args >= 5) {
 			  DeRef(call_back_arg5->obj);
 			  call_back_arg5->obj = make_atom32((unsigned)arg5);
-			  code[6] = (int *)call_back_arg5;
+			  code[6] = (long *)call_back_arg5;
 			  if (num_args >= 6) {
 				DeRef(call_back_arg6->obj);
 				call_back_arg6->obj = make_atom32((unsigned)arg6);
-				code[7] = (int *)call_back_arg6;
+				code[7] = (long *)call_back_arg6;
 				if (num_args >= 7) {
 				  DeRef(call_back_arg7->obj);
 				  call_back_arg7->obj = make_atom32((unsigned)arg7);
-				  code[8] = (int *)call_back_arg7;
+				  code[8] = (long *)call_back_arg7;
 				  if (num_args >= 8) {
 					DeRef(call_back_arg8->obj);
 					call_back_arg8->obj = make_atom32((unsigned)arg8);
-					code[9] = (int *)call_back_arg8;
+					code[9] = (long *)call_back_arg8;
 					if (num_args >= 9) {
 					  DeRef(call_back_arg9->obj);
 					  call_back_arg9->obj = make_atom32((unsigned)arg9);
-					  code[10] = (int *)call_back_arg9;
+					  code[10] = (long *)call_back_arg9;
 					}
 				  }
 				}
@@ -5380,8 +5386,8 @@ unsigned general_call_back(
 	  }
 	}
 
-	code[num_args+2] = (int *)call_back_result;
-	code[num_args+3] = (int *)opcode(CALL_BACK_RETURN);
+	code[num_args+2] = (long *)call_back_result;
+	code[num_args+3] = (long *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
 	*expr_top++ = (object)NULL;   // prevents restore_privates()
@@ -5391,7 +5397,7 @@ unsigned general_call_back(
 	// at all to the main Euphoria code.
 	save_tpc = tpc;
 
-	do_exec((int *)code);  // execute routine without setting up new stack
+	do_exec((long *)code);  // execute routine without setting up new stack
 
 	tpc = save_tpc;
 	expr_top -= 2;
@@ -5692,7 +5698,7 @@ void Cleanup(int status)
 	}
 	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	EFree( fe.misc ); // = (long *)        get_pos_int(w, *(x_ptr->base+3));
 #endif
 #endif
 
@@ -5705,7 +5711,7 @@ void Cleanup(int status)
 	exit(status);
 }
 
-void UserCleanup(int status)
+void UserCleanup(long status)
 /* Euphoria abort() */
 {
 	user_abort = TRUE;
@@ -6246,7 +6252,7 @@ void Replace( replace_ptr rb )
 	}
 }
 
-cleanup_ptr DeleteRoutine( int e_index ){
+cleanup_ptr DeleteRoutine( long e_index ){
 	cleanup_ptr cup;
 	
 #ifdef ERUNTIME

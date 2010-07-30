@@ -88,11 +88,11 @@ int ValidPrivate(symtab_ptr sym, symtab_ptr proc)
 	return sym->obj != NOVALUE; 
 }
 
-int FindLine(int *pc, symtab_ptr proc)
+int FindLine(long *pc, symtab_ptr proc)
 /* determine the global source line number for pc within proc */
 {
-	int pc_offset, code_offset;
-	int lt, code_line;
+	long pc_offset, code_offset;
+	long lt, code_line;
 	
 	code_line = 0;
 	if (proc->u.subp.linetab != NULL) {
@@ -112,10 +112,10 @@ int FindLine(int *pc, symtab_ptr proc)
 }
 
 symtab_ptr last_s = NULL;
-int *last_start;
-int *last_end;
+long *last_start;
+long *last_end;
 
-symtab_ptr Locate(int *pc)
+symtab_ptr Locate(long *pc)
 /* find out which routine pc is in */
 {
 	symtab_ptr s;
@@ -140,7 +140,7 @@ symtab_ptr Locate(int *pc)
 	return NULL; 
 }
 
-symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen)
+symtab_ptr RTLookup(char *name, int file, long *pc, symtab_ptr routine, int stlen)
 /* Look up a name (routine or var) in the symbol table at runtime.
    The name must have been defined earlier in the source than
    where we are currently executing. The name may be a simple "name"

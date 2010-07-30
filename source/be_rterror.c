@@ -1050,7 +1050,7 @@ static void sf_output(char *string)
 	}
 }
 
-static void TracePrint(symtab_ptr proc, int *pc)
+static void TracePrint(symtab_ptr proc, long *pc)
 // print a line of traceback
 {
 	long gline;
@@ -1090,7 +1090,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 // msg is error message or NULL
 // s_ptr is symbol involved in error
 {
-	int *new_pc;
+	long *new_pc;
 	symtab_ptr current_proc;
 	
 	int levels, skipping, dash_count, i, task, show_message;
@@ -1123,7 +1123,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 					 tcb[current_task].tid, routine_name);
 			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
-			if ((int)strlen(TPTempBuff) < dash_count) {
+			if ((long)strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
 			}
 			if (dash_count < 1) {
@@ -1176,7 +1176,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// unwind the stack for this task
 			
 			expr_top -= 2;
-			new_pc = (int *)*expr_top;
+			new_pc = (long *)*expr_top;
 			
 			if (current_proc->u.subp.saved_privates != NULL) {
 				// called recursively or multiple tasks - restore privates
@@ -1184,7 +1184,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				restore_privates(current_proc);
 			}
 			
-			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
+			if (*new_pc == (long)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
 					copy_string(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
@@ -1200,7 +1200,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				if (expr_top <= expr_stack+3)
 					break;
 				expr_top -= 2;
-				new_pc = (int *)*expr_top;
+				new_pc = (long *)*expr_top;
 			}
 
 			current_proc = Locate(new_pc - 1);
@@ -1366,7 +1366,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 }
 
 
-void RTFatalType(int *pc)
+void RTFatalType(long *pc)
 /* handle type-check failures */
 /* pc points to variable in instruction stream */ 
 {

@@ -29,7 +29,8 @@ constant MIN1B = -9,
 		 MAX2B =  power(2, 15)-1,
 		 MIN3B = -power(2, 23),
 		 MAX3B =  power(2, 23)-1,
-		 MIN4B = -power(2, 31)
+		 MIN4B = -power(2, 31),
+		 MAX4B =  power(2, 31)
 
 atom mem0, mem1, mem2, mem3
 mem0 = allocate(4)
@@ -91,7 +92,7 @@ function deserialize_file(integer fh, integer c)
 			else
 				len = get4(fh)
 			end if
-			if len < 0  or not integer(len) then
+			if len < 0  or len > MAX4B then
 				return 0
 			end if
 			s = repeat(0, len)

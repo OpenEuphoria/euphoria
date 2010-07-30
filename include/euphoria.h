@@ -25,27 +25,47 @@
 -->|                 o<--- IS_DBL_OR_SEQUENCE [-4*2^29..-2*2^29-1)
 *
 ****************************************************************************/
+#if EBITS == 32
 
 #define NOVALUE      ((long)0xbfffffffL)
-#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
-#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (long)0xA0000000)
-#define IS_ATOM(ob)             (((long)(ob)) >= (long)0xA0000000)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < (long)0xA0000000)
-#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
+#define DBL_MASK ((long)0xA0000000)
+#define SEQ_MASK ((long)0x80000000)
 #define HIGH_BITS    ((long)0xC0000000L)
 
 #undef MININT
 #undef MAXINT
 #define MININT     (long)0xC0000000
 #define MAXINT     (long)0x3FFFFFFF
+
+#elif EBITS == 64
+
+#define NOVALUE      ((long)0xbfffffffffffffffL)
+#define DBL_MASK ((long)0xA000000000000000)
+#define SEQ_MASK ((long)0x8000000000000000)
+#define HIGH_BITS    ((long)0xC000000000000000L)
+
+#undef MININT
+#undef MAXINT
+#define MININT     (long)0xC000000000000000
+#define MAXINT     (long)0x3FFFFFFFFFFFFFFF
+
+#endif
+
 #define MAXINT_VAL MAXINT
 #define MAXINT_DBL ((double)MAXINT_VAL)
 #define INT15      (long)0x00003FFFL
 
+#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
+#define IS_ATOM_DBL(ob)         (((object)(ob)) >= DBL_MASK)
+#define IS_ATOM(ob)             (((long)(ob)) >= DBL_MASK)
+#define IS_SEQUENCE(ob)         (((long)(ob))  < DBL_MASK)
+#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
+
+
 #define LOW_MEMORY_MAX ((unsigned)0x0010FFEF)
 
-typedef int object;
-typedef int *object_ptr;
+typedef long object;
+typedef long *object_ptr;
 
 struct cleanup;
 typedef struct cleanup *cleanup_ptr;
@@ -67,13 +87,18 @@ enum CLEANUP_TYPES {
 	CLEAN_FILE
 };
 
-struct s1 {
-	object_ptr base;
-	long length;
-	long ref;
-	long postfill;
-	cleanup_ptr cleanup;
-};
+struct s1 {                        /* a sequence header block */
+	object_ptr base;               /* pointer to (non-existent) 0th element */
+	#if EBITS == 32
+		long length;                   /* number of elements */
+		long ref;                      /* reference count */
+	#elif EBITS == 64
+		long ref;                      /* reference count */
+		long length;                   /* number of elements */
+	#endif
+	long postfill;                 /* number of post-fill objects */
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+}; /* total 20 bytes */
 
 struct d {
 	double dbl;
@@ -83,9 +108,9 @@ struct d {
 
 struct routine_list {
 	char *name;
-	int (*addr)();
-	int seq_num;
-	int file_num;
+	long (*addr)();
+	long seq_num;
+	long file_num;
 	short int num_args;
 	short int convention;
 	char scope;
@@ -94,18 +119,18 @@ struct routine_list {
 
 struct ns_list {
 	char *name;
-	int ns_num;
-	int seq_num;
-	int file_num;
+	long ns_num;
+	long seq_num;
+	long file_num;
 };
 
 typedef struct d  *d_ptr;
 typedef struct s1 *s1_ptr;
 
-#define MAKE_DBL(x) ( (int) (((unsigned)(x) >> 3) + (long)0xA0000000) )
-#define DBL_PTR(ob) ( (d_ptr)  (((unsigned)(ob)) << 3) )
-#define MAKE_SEQ(x) ( (int) (((unsigned)(x) >> 3) + (long)0x80000000) )
-#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned)(ob)) << 3) ) 
+#define MAKE_DBL(x) ( (long) (((unsigned long)(x) >> 3) + DBL_MASK) )
+#define DBL_PTR(ob) ( (d_ptr)  (((unsigned long)(ob)) << 3) )
+#define MAKE_SEQ(x) ( (long) (((unsigned long)(x) >> 3) + SEQ_MASK) )
+#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) ) 
 
 #define RefDS(a) ++(DBL_PTR(a)->ref)    
 #define RefDSn(a,n) (DBL_PTR(a)->ref += n)    
@@ -163,77 +188,77 @@ struct replace_block {
 
 typedef struct replace_block *replace_ptr;
 
-int wingetch();
-int call_c();
-int Command_Line();
+long wingetch();
+long call_c();
+long Command_Line();
 void show_console();
-int Dpower();
-int Dand_bits();
-int Dand();
-int Dremainder();
+long Dpower();
+long Dand_bits();
+long Dand();
+long Dremainder();
 void Cleanup();
 void init_literal();
 char **make_arg_cv();
-int NewDouble(double);
-void DeRef5(int, int, int, int, int);
+long NewDouble(double);
+void DeRef5(long, long, long, long, long);
 void de_reference(s1_ptr);
 void de_reference_i(s1_ptr);
 double current_time(void);
 double floor(double);
 double fabs(double);
-int binary_op_a(int, int, int);
-int binary_op(int, int, int);
-void *which_file(int, int);
-int unary_op(int, int);
-int NewS1(int);
-int compare(int, int);
-unsigned long get_pos_int(char *, int);
-int memory_set(int, int, int);
-int memory_copy(int, int, int);
-int EOpen(int, int,int);
-void EClose(int);
-int EPrintf(int, int, int);
-void EPuts(int, int);
-void Concat(int *, int, int);
-void Concat_N(int *, int *, int);
-void Append(int *, int, int);
-void Prepend(int *, int, int);
+long binary_op_a(long, long, long);
+long binary_op(long, long, long);
+void *which_file(long, long);
+long unary_op(long, long);
+long NewS1(long);
+long compare(long, long);
+unsigned long get_pos_int(char *, long);
+long memory_set(long, long, long);
+long memory_copy(long, long, long);
+long EOpen(long, long,int);
+void EClose(long);
+long EPrintf(long, long, long);
+void EPuts(long, long);
+void Concat(long *, long, long);
+void Concat_N(long *, long *, long);
+void Append(long *, long, long);
+void Prepend(long *, long, long);
 object EGetEnv(object name);
-void RHS_Slice(int, int, int);
-int find(int, int);
-int e_match(int, int);
+void RHS_Slice(long, long, long);
+long find(long, long);
+long e_match(long, long);
 void ctrace(char *);
-int e_floor(int);
-int DoubleToInt(int);
-int machine(int, int);
-int Repeat(int, int);
-void RepeatElem(int, int, int);
-int SequenceCopy(s1_ptr);
-int power(int, int);
-int EGets(int);
-int Pixel(int, int);
-int Get_Pixel(int);
-void shift_args(int, char**);
-int NewString(char *);
-char *malloc(int);
+long e_floor(long);
+long DoubleToInt(long);
+long machine(long, long);
+long Repeat(long, long);
+void RepeatElem(long, long, long);
+long SequenceCopy(s1_ptr);
+long power(long, long);
+long EGets(long);
+long Pixel(long, long);
+long Get_Pixel(long);
+void shift_args(long, char**);
+long NewString(char *);
+char *malloc(long);
 void eu_startup();
-void exit(int);
-int CRoutineId(int, int, int);
-int e_sqrt(int);
-int e_arctan(int);
-void AssignSlice(int, int, int);
-void StdPrint(int, int, int);
+// void exit(long);
+long CRoutineId(long, long, long);
+long e_sqrt(long);
+long e_arctan(long);
+void AssignSlice(long, long, long);
+void StdPrint(long, long, long);
 void ClearScreen();
-void Position(int, int);
-int CommandLine(void);
-void system_call(int, int);
+void Position(long, long);
+long CommandLine(void);
+void system_call(long, long);
 void RTFatal(char *);
 
 // be_alloc:
 char *TransAlloc(unsigned long);
 
 // be_decompress:
-object decompress(unsigned int c);
+object decompress(unsigned long c);
 
 // be_runtime:
 extern void *xstdin;
@@ -244,37 +269,37 @@ extern object last_w_file_no;
 extern IFILE last_w_file_ptr;
 extern object last_r_file_no;
 extern IFILE last_r_file_ptr;
-extern int insert_pos;;
+extern long insert_pos;;
 
-int find_from(int,int,int);
+long find_from(long,long,int);
 long e_match_from(object aobj, object bobj, object c);
-void Tail(s1_ptr , int , object_ptr );
-void Head(s1_ptr , int , object_ptr );
-object Remove_elements(int start, int stop, int in_place );
-s1_ptr Add_internal_space(object a,int at,int len);
+void Tail(s1_ptr , long , object_ptr );
+void Head(s1_ptr , long , object_ptr );
+object Remove_elements(long start, long stop, long in_place );
+s1_ptr Add_internal_space(object a,long at,long len);
 object system_exec_call(object command, object wait);
-s1_ptr Copy_elements(int start,s1_ptr source, int replace );
-object Insert(object a,object b,int pos);
+s1_ptr Copy_elements(long start,s1_ptr source, long replace );
+object Insert(object a,object b,long pos);
 object calc_hash(object a, object b);
 object Dxor_bits(d_ptr a, d_ptr b);
 object not_bits(long a);
 object Date();
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
-cleanup_ptr DeleteRoutine( int e_index );
-void DeRef1(int a);
+cleanup_ptr DeleteRoutine( long e_index );
+void DeRef1(long a);
 void Replace(replace_ptr rb);
-void UserCleanup(int);
+void UserCleanup(long);
 
 #define TASK_HANDLE int
 
 // be_task:
 struct interpreted_task{
-	int *pc;         // program counter for this task
+	long *pc;         // program counter for this task
 	object_ptr expr_stack; // call stack for this task
 	object_ptr expr_max;   // current top limit of stack
 	object_ptr expr_limit; // don't start a new routine above this
 	object_ptr expr_top;   // stack pointer
-	int stack_size;        // current size of stack
+	long stack_size;        // current size of stack
 };
 
 struct translated_task{
@@ -284,22 +309,22 @@ struct translated_task{
 
 // Task Control Block - sync with euphoria\include\euphoria.h
 struct tcb {
-	int rid;         // routine id
+	long rid;         // routine id
 	double tid;      // external task id
-	int type;        // type of task: T_REAL_TIME or T_TIME_SHARED
-	int status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
+	long type;        // type of task: T_REAL_TIME or T_TIME_SHARED
+	long status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
 	double start;    // start time of current run
 	double min_inc;  // time increment for min
 	double max_inc;  // time increment for max 
 	double min_time; // minimum activation time
 					 // or number of executions remaining before sharing
 	double max_time; // maximum activation time (determines task order)
-	int runs_left;   // number of executions left in this burst
-	int runs_max;    // maximum number of executions in one burst
-	int next;        // index of next task of the same kind
+	long runs_left;   // number of executions left in this burst
+	long runs_max;    // maximum number of executions in one burst
+	long next;        // index of next task of the same kind
 	object args;     // args to call task procedure with at startup
 	
-	int mode;  // TRANSLATED_TASK or INTERPRETED_TASK
+	long mode;  // TRANSLATED_TASK or INTERPRETED_TASK
 	union task_impl {
 		struct interpreted_task interpreted;
 		struct translated_task translated;
@@ -307,13 +332,13 @@ struct tcb {
 	
 };
 
-extern int tcb_size;
-extern int current_task;
+extern long tcb_size;
+extern long current_task;
 extern double clock_period;
 void task_yield();
 extern struct tcb *tcb;
 
 // be_w:
-extern int in_from_keyb;
-extern int TraceOn;
+extern long in_from_keyb;
+extern long TraceOn;
 #endif

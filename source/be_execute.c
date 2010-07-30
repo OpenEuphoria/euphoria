@@ -177,7 +177,7 @@ union pc_t {
 								;                     \
 						   }                          \
 						   else {                     \
-							   pc = (int *)pc[3];     \
+							   pc = (long *)pc[3];     \
 							   BREAK;                 \
 						   }                          \
 						   thread4();             \
@@ -194,7 +194,7 @@ union pc_t {
 								;                     \
 						   }                          \
 						   else {                     \
-							   pc = (int *)pc[3];     \
+							   pc = (long *)pc[3];     \
 							   BREAK;                 \
 						   }                          \
 						   thread4();             \
@@ -237,7 +237,7 @@ union pc_t {
 /**********************/
 
 
-void INT_Handler(int);
+void INT_Handler(long);
 unsigned long good_rand();
 // object user(), Command_Line(), EOpen(), Repeat(); 
 // object machine();
@@ -273,23 +273,23 @@ unsigned long good_rand();
 object_ptr expr_stack;  // runtime call stack
 object_ptr expr_max;    // top limit of call stack
 object_ptr expr_limit;  // don't start a new routine above this
-int stack_size;         // current size of call stack
+long stack_size;         // current size of call stack
 object_ptr expr_top;    // expression stack pointer
-int SymTabLen;          // avoid > 3 args
-int start_line;         // line number set by STARTLINE
-int TraceBeyond;        // continue tracing after this line
-int TraceStack;         // stack level when down-arrow was pressed
-int Executing = FALSE;  // TRUE if user program is executing
-int ProfileOn;          // TRUE if profile/profile_time is turned on
+long SymTabLen;          // avoid > 3 args
+long start_line;         // line number set by STARTLINE
+long TraceBeyond;        // continue tracing after this line
+long TraceStack;         // stack level when down-arrow was pressed
+long Executing = FALSE;  // TRUE if user program is executing
+long ProfileOn;          // TRUE if profile/profile_time is turned on
 
 /* Euphoria program counter needed for traceback */
-int *tpc;
+long *tpc;
 
 /*******************/
 /* Local variables */
 /*******************/
 #ifdef EXTRA_CHECK
-static int *watch_point = (int *)0x3aa41c;
+static int *watch_point = (long *)0x3aa41c;
 static int watch_value = 1948266795;
 static int watch_count = 1;
 #endif
@@ -307,7 +307,7 @@ static void trace_command(object x)
 		i = x;
 	}
 	else if (IS_ATOM(x)) {
-		i = (int)DBL_PTR(x)->dbl;
+		i = (long)DBL_PTR(x)->dbl;
 	}
 	else 
 		RTFatal("argument to trace() must be an atom");
@@ -350,7 +350,7 @@ static void profile_command(object x)
 		i = x;
 	}
 	else if (IS_ATOM(x)) {
-		i = (int)DBL_PTR(x)->dbl;
+		i = (long)DBL_PTR(x)->dbl;
 	}
 	else 
 		RTFatal("argument to profile() must be an atom");
@@ -557,17 +557,17 @@ static void do_poke2(object a, object top)
 static void do_poke4(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
-	unsigned long *poke4_addr;
+	unsigned int *poke4_addr;
 	double temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 		
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
-		poke4_addr = (unsigned long *)INT_VAL(a);
+		poke4_addr = (unsigned int *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
-		poke4_addr = (unsigned long *)(unsigned long)(DBL_PTR(a)->dbl);
+		poke4_addr = (unsigned int *)(unsigned long)(DBL_PTR(a)->dbl);
 	}
 	else {
 		RTFatal("first argument to poke4 must be an atom");
@@ -618,7 +618,7 @@ static void do_poke4(object a, object top)
 #define thread2() {(long)pc += 2; goto loop_top;}
 #define thread4() {(long)pc += 4; goto loop_top;}
 #define thread5() {(long)pc += 5; goto loop_top;}
-#define threadpc3() {pc = (int *)pc[3]; goto loop_top;}
+#define threadpc3() {pc = (long *)pc[3]; goto loop_top;}
 #define inc3pc() (long)pc += 3
 #include "redef.h"
 #include "opnames.h"
@@ -661,9 +661,9 @@ long wcinc5pc(long x);
 		value [ECX] \
 		parm [ECX];
 
-#define thread2() do { pc = (int *)wcinc2pc((long)pc); wcthread((long)pc); } while (0)
-#define thread4() do { pc = (int *)wcinc4pc((long)pc); wcthread((long)pc); } while (0)
-#define thread5() do { pc = (int *)wcinc5pc((long)pc); wcthread((long)pc); } while (0)
+#define thread2() do { pc = (long *)wcinc2pc((long)pc); wcthread((long)pc); } while (0)
+#define thread4() do { pc = (long *)wcinc4pc((long)pc); wcthread((long)pc); } while (0)
+#define thread5() do { pc = (long *)wcinc5pc((long)pc); wcthread((long)pc); } while (0)
 
 /* have to hide this from WATCOM or it will generate stupid code
    at the top of the switch */
@@ -673,7 +673,7 @@ long wcinc3pc(long x);
 		modify [] \
 		value [ECX] \
 		parm [ECX];
-#define inc3pc() do { pc = (int *)wcinc3pc((long)pc); } while (0)
+#define inc3pc() do { pc = (long *)wcinc3pc((long)pc); } while (0)
 
 // not converted because it is not used
 void threadpc3(void);
@@ -761,7 +761,7 @@ static int recover_lhs_subscript(object subscript, s1_ptr s)
 }
 
 
-void InitStack(int size, int toplevel)
+void InitStack(long size, long toplevel)
 // called to create the initial call stack for a task
 {
 	stack_size = size;
@@ -778,7 +778,7 @@ void InitExecute()
 {
 #ifndef EDEBUG
 	// signal(SIGFPE, FPE_Handler)  // generate inf and nan instead
-	signal(SIGINT, INT_Handler); 
+	signal(SIGINT, (__sighandler_t)INT_Handler); 
 	// SIG_IGN=> still see ^C echoed, but it has no effect other
 	// than messing up the screen. INT_Handler lets us do
 	// a bit of cleanup - tick rate, profile, active page etc.
@@ -805,11 +805,11 @@ void InitExecute()
 
 #ifndef INT_CODES
 #if defined(EUNIX) || defined(EMINGW)
-int **jumptab; // initialized in do_exec() 
+long **jumptab; // initialized in do_exec() 
 #else
 #ifdef EWATCOM
 /* Jump table location is determined by another program. */
-extern int ** jumptab;
+extern long ** jumptab;
 #else
 #error Not supported use INT_CODES?
 #endif
@@ -820,27 +820,27 @@ extern int ** jumptab;
 /* IL data passed from the front end */
 struct IL fe;
 
-#define SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
+#define SET_OPERAND(word) ((long *)(((word) == 0) ? 0 : (&fe.st[(long)(word)])))
 
-#define SET_JUMP(word) ((int *)(&code[(int)(word)]))
-#define JUMP_INDEX(word) (((int*)word) - ((symtab_ptr)expr_top[-1])->u.subp.code)
+#define SET_JUMP(word) ((long *)(&code[(long)(word)]))
+#define JUMP_INDEX(word) (((long*)word) - ((symtab_ptr)expr_top[-1])->u.subp.code)
 
-void code_set_pointers(int **code)
+void code_set_pointers(long **code)
 /* adjust code pointers, changing some indexes into pointers */
 {
-	int len, i, j, n, sub, word;
+	long len, i, j, n, sub, word;
 	
-	len = (int)code[0];
+	len = (long)code[0];
 	i = 1;
 	while (i <= len) {
-		word = (int)code[i];
+		word = (long)code[i];
 		
 		if (word > MAX_OPCODE || word < 1) {
-			RTFatal("BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d",
-					i, word, len);
+			RTFatal("BAD IL OPCODE: i is %ld, word is %ld (max=%ld), len is %ld",
+					i, word, MAX_OPCODE, len);
 		}
 		
-		code[i] = (int *)opcode(word);
+		code[i] = (long *)opcode(word);
 
 		switch (word) {
 			case TYPE_CHECK:
@@ -1151,7 +1151,7 @@ void code_set_pointers(int **code)
 		
 			case PROC:
 			case PROC_TAIL:
-				sub = (int)code[i+1];
+				sub = (long)code[i+1];
 				code[i+1] = SET_OPERAND(sub);
 				
 				// we must look at the symbol table to know
@@ -1172,9 +1172,9 @@ void code_set_pointers(int **code)
 				break;
 				
 			case RIGHT_BRACE_N:
-				n = (int)code[i+1];
+				n = (long)code[i+1];
 				for (j = 1; j <= n+1; j++) {
-					word = (int)code[i+1+j];
+					word = (long)code[i+1+j];
 					code[i+1+j] = SET_OPERAND(word);
 				}
 				
@@ -1183,12 +1183,12 @@ void code_set_pointers(int **code)
 				break;
 				
 			case CONCAT_N:
-				n = (int)code[i+1];
+				n = (long)code[i+1];
 				for (j = 1; j <= n; j++) {
-					word = (int)code[i+1+j];
+					word = (long)code[i+1+j];
 					code[i+1+j] = SET_OPERAND(word);
 				}
-				word = (int)code[i+n+2];
+				word = (long)code[i+n+2];
 				code[i+n+2] = SET_OPERAND(word);
 				
 				i += n + 3;
@@ -1206,10 +1206,10 @@ void symtab_set_pointers()
 {
 	int i, len;
 	struct symtab_entry *s;
-	int **code;
+	long **code;
 	
 	s = fe.st;
-	len = *(int *)s;  // number of entries
+	len = *(long *)s;  // number of entries
 	
 	s++;  // point to first real entry
 	for (i = 1; i <= len; i++) {
@@ -1219,15 +1219,14 @@ void symtab_set_pointers()
 		if (s->mode == M_NORMAL) {
 			// normal variables, routines
 			s->obj = NOVALUE;
-			
 			if (s->token == PROC ||
 				s->token == FUNC || 
 				s->token == TYPE) {
-				code = (int **)s->u.subp.code;
+				code = (long **)s->u.subp.code;
 				if (code != NULL) {
 					code_set_pointers(code);
 				}
-				s->u.subp.code = (int *)code+1; // skip length
+				s->u.subp.code = (long *)code+1; // skip length
 				
 				s->u.subp.temps = (symtab_ptr)SET_OPERAND(s->u.subp.temps);
 				
@@ -1262,6 +1261,9 @@ void symtab_set_pointers()
 		}
 		s++;
 	}
+	if( TopLevelSub == 0 ){
+		RTFatal("failed to find the Top Level subroutine");
+	}
 }
 
 void analyze_switch()
@@ -1273,13 +1275,13 @@ void analyze_switch()
  pc+3: jump_table
  pc+4: else jump
  
- SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
- SET_JUMP(word) ((int *)(&code[(int)(word)]))
+ SET_OPERAND(word) ((long *)(((word) == 0) ? 0 : (&fe.st[(long)(word)])))
+ SET_JUMP(word) ((long *)(&code[(long)(word)]))
 */
 
 	object a;
-	int min = MAXINT;
-	int max = MININT;
+	long min = MAXINT;
+	long max = MININT;
 	int all_ints = 1;
 	int negative;
 	int offset;
@@ -1343,10 +1345,10 @@ void analyze_switch()
 	
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){
-		*tpc = (int)opcode( SWITCH_SPI );
+		*tpc = (long)opcode( SWITCH_SPI );
 		
 		// calculate the 'else' jump as a relative jump:
-		offset = (tpc[4]-(int)tpc) / sizeof( int );
+		offset = (tpc[4]-(long)tpc) / sizeof( int );
 		
 		a = Repeat( offset, max - min + 1 );
 		lookup = SEQ_PTR( a );
@@ -1354,17 +1356,17 @@ void analyze_switch()
 		for( i = 1; i <= new_values->length; ++i ){
 			lookup->base[new_values->base[i] - offset] = jump->base[i];
 		}
-		tpc[2] = (int)offset;
+		tpc[2] = (long)offset;
 		DeRefDS( *(object_ptr)tpc[3] );
 		*(object_ptr)tpc[3] = (object)MAKE_SEQ( lookup );
 	}
 	else{
 		*(object_ptr)tpc[2] = (object)MAKE_SEQ( new_values );
 		if( all_ints ){
-			*tpc = (int)opcode( SWITCH_I );
+			*tpc = (long)opcode( SWITCH_I );
 		}
 		else{
-			*tpc = (int)opcode( SWITCH );
+			*tpc = (long)opcode( SWITCH );
 		}
 	}
 }
@@ -1376,12 +1378,12 @@ char **file_name;
 #ifdef EWINDOWS
 extern DWORD WINAPI WinTimer(LPVOID lpParameter);
 #endif
-int max_stack_per_call;
-int AnyTimeProfile;
-int AnyStatementProfile;
-int sample_size;
-int gline_number;  /* last global line number in program */
-int il_file;       /* we are processing a separate .il file */
+long max_stack_per_call;
+long AnyTimeProfile;
+long AnyStatementProfile;
+long sample_size;
+long gline_number;  /* last global line number in program */
+long il_file;       /* we are processing a separate .il file */
 
 void fe_set_pointers()
 {
@@ -1396,8 +1398,8 @@ void fe_set_pointers()
 	
 #if defined(EWINDOWS)
 	if (sample_size > 0) {
-		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
-		//lock_region(profile_sample, sample_size * sizeof(int));
+		profile_sample = (long *)EMalloc(sample_size * sizeof(long));
+		//lock_region(profile_sample, sample_size * sizeof(long));
 		//tick_rate(100);
 		SetThreadPriority(CreateThread(0,0,WinTimer,0,0,0),THREAD_PRIORITY_TIME_CRITICAL);
 	}
@@ -1526,7 +1528,7 @@ void restore_privates(symtab_ptr this_routine)
 	}
 }
 
-void Execute(int *start_index)
+void Execute(long *start_index)
 /* top level executor */
 /* CAREFUL: any change to this routine might affect the offset to
    the big opccode switch table - see jumptab */
@@ -1544,20 +1546,20 @@ void Execute(int *start_index)
 #endif //not INT_CODES
 
 
-void do_exec(int *start_pc)
+void do_exec(long *start_pc)
 /* execute code, starting at start_pc */
 {
 	/* WATCOM keeps pc in a register, and usually top, a, obj_ptr */
 
 	/* address registers: (3 max) */
-	register int *pc;               /* program counter, kept in a register */
+	register long *pc;               /* program counter, kept in a register */
 	register object_ptr obj_ptr;    /* general pointer to an object */
 
 	/* data registers: (5 max) */
 	register object a;            /* another object */
 	volatile object v;            /* get compiler to do the right thing! */
 	register object top;          /* an object - hopefully kept in a register */
-	/*register*/ int i;           /* loop counter */
+	/*register*/ long i;           /* loop counter */
 	
 	double temp_dbl;
 	struct d temp_d;
@@ -1565,7 +1567,7 @@ void do_exec(int *start_pc)
 	void (*sub_addr)();
 	int nvars;   
 #ifndef BACKEND             
-	int *iptr;
+	long *iptr;
 #endif
 	int file_no;
 	
@@ -1578,7 +1580,7 @@ void do_exec(int *start_pc)
 	opcode_type *patch;
 	object b, c;
 	symtab_ptr sym, sub;
-	int c0,splins;
+	long c0,splins;
 	s1_ptr s1,s2;
 	object *block;
 	
@@ -1678,7 +1680,7 @@ void do_exec(int *start_pc)
 	if (start_pc == NULL) {
 #if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
-		jumptab = (int **)localjumptab;
+		jumptab = (long **)localjumptab;
 #endif
 #endif
 		return;
@@ -1711,7 +1713,7 @@ void do_exec(int *start_pc)
 			return;
 		}
 		thread();
-		switch((int)pc) {                                       
+		switch((long)pc) {                                       
 
 #endif
 			case L_RHS_SUBS_CHECK:
@@ -1921,7 +1923,7 @@ void do_exec(int *start_pc)
 				top = *obj_ptr + 1;
 				if (top <= *(object_ptr)pc[2]) {  /* limit */
 					*obj_ptr = top;
-					pc = (int *)pc[1];   /* loop again */
+					pc = (long *)pc[1];   /* loop again */
 					thread();
 				}
 				else {
@@ -1935,7 +1937,7 @@ void do_exec(int *start_pc)
 				top = *obj_ptr + *(object_ptr)pc[4]; /* increment */
 				if (top <= *(object_ptr)pc[2]) { /* limit */
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (long *)pc[1]; /* loop again */
 					thread();
 				}
 				else {
@@ -1952,19 +1954,19 @@ void do_exec(int *start_pc)
 			deprintf("case L_ELSE:");
 			case L_RETRY:
 			deprintf("case L_RETRY:");
-				pc = (int *)pc[1];
+				pc = (long *)pc[1];
 				thread();
 				BREAK;
 
 			case L_GOTO:
 			deprintf("case L_GOTO:");
-				pc = (int *)pc[1];
+				pc = (long *)pc[1];
 				thread();
 				BREAK;
 
 			case L_GLABEL:
 			deprintf("case L_GLABEL:");
-				pc = (int *)pc[1];
+				pc = (long *)pc[1];
 				thread();
 				BREAK;
 
@@ -2050,18 +2052,18 @@ void do_exec(int *start_pc)
 				a = *(object_ptr)pc[1];
 				if( IS_SEQUENCE( a ) ){
 					// no match:  goto else or skip the switch
-					pc = (int *) pc[4];
+					pc = (long *) pc[4];
 					thread();
 					BREAK;
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (int) DBL_PTR( a )->dbl;
+					top = (long) DBL_PTR( a )->dbl;
 					if( (double)top == DBL_PTR( a )->dbl ){
-						a = (int) DBL_PTR( a )->dbl;
+						a = (long) DBL_PTR( a )->dbl;
 					}
 					else{
-						pc = (int *) pc[4];
+						pc = (long *) pc[4];
 						thread();
 						BREAK;
 					}
@@ -2075,7 +2077,7 @@ void do_exec(int *start_pc)
 					thread();
 					BREAK;
 				}
-				pc = (int *) pc[4];
+				pc = (long *) pc[4];
 				thread();
 				BREAK;
 				
@@ -2085,18 +2087,18 @@ void do_exec(int *start_pc)
 				a = *(object_ptr)pc[1];
 				if( IS_SEQUENCE( a ) ){
 					// no match:  goto else or skip the switch
-					pc = (int *) pc[4];
+					pc = (long *) pc[4];
 					thread();
 					BREAK;
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (int) DBL_PTR( a )->dbl;
+					top = (long) DBL_PTR( a )->dbl;
 					if( (double)top == DBL_PTR( a )->dbl ){
-						a = (int) DBL_PTR( a )->dbl;
+						a = (long) DBL_PTR( a )->dbl;
 					}
 					else{
-						pc = (int *) pc[4];
+						pc = (long *) pc[4];
 						thread();
 						BREAK;
 					}
@@ -2111,7 +2113,7 @@ void do_exec(int *start_pc)
 					}
 				}
 				// no match
-				pc = (int *) pc[4];
+				pc = (long *) pc[4];
 				thread();
 				BREAK;
 				
@@ -2129,7 +2131,7 @@ void do_exec(int *start_pc)
 		  		}
 		  		else{
 		  			// no match:  goto else or skip the switch
-					pc = (int *) pc[4];
+					pc = (long *) pc[4];
 		  		}
 		  		
 		  		thread();
@@ -2139,7 +2141,7 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];
 			if_check:
 				if (top == ATOM_0) {
-					pc = (int *)pc[2];
+					pc = (long *)pc[2];
 					thread();
 					pc++; /* DUMMY ! */
 				}
@@ -2154,7 +2156,7 @@ void do_exec(int *start_pc)
 						atom_condition();
 					}
 					if (DBL_PTR(top)->dbl == 0.0) {
-						pc = (int *)pc[2];
+						pc = (long *)pc[2];
 					}
 					else
 						inc3pc();
@@ -2169,7 +2171,7 @@ void do_exec(int *start_pc)
 				deprintf("(");
 				SHOW_PARAM(pc[2]);
 				deprintf(", ");
-				SHOW_PARAM((*(int*)pc[1]));
+				SHOW_PARAM((*(long*)pc[1]));
 				deprintf(")");
 #endif				
 				*(object_ptr)pc[2] = *(object_ptr)pc[1];
@@ -2184,7 +2186,7 @@ void do_exec(int *start_pc)
 				deprintf("(");
 				SHOW_PARAM(pc[2]);
 				deprintf(", ");
-				SHOW_PARAM((*(int*)pc[1]));
+				SHOW_PARAM((*(long*)pc[1]));
 				deprintf(")");
 #endif
 				top = *obj_ptr; 
@@ -2373,7 +2375,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_GLOBAL_INIT_CHECK:");
 				pc += 2;
 				if (*(object_ptr)pc[-1] != NOVALUE) {
-					*(pc - 2) = (int)opcode(NOP2);
+					*(pc - 2) = (long)opcode(NOP2);
 					thread();
 					BREAK;
 				}
@@ -2517,7 +2519,7 @@ void do_exec(int *start_pc)
 
 			case L_PLENGTH:
 			deprintf("case L_PLENGTH:");
-				/* *pc[1] contains a pointer to the argument */
+				/* *pc[1] contains a pointer to the sequence */
 				top = (object)**(object_ptr **)pc[1]; 
 				goto len;
 
@@ -2528,19 +2530,16 @@ void do_exec(int *start_pc)
 			  len:  
 				if (IS_SEQUENCE(top)) { 
 					top = SEQ_PTR(top)->length;
+					obj_ptr = (object_ptr)pc[2];
+					DeRefx(*obj_ptr);
+					*obj_ptr = top;
+					inc3pc();
+					thread();
 				}
 				else {
-					if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
-						DeRef( ((symtab_ptr)pc[1])->obj );
-						((symtab_ptr)pc[1])->obj = NOVALUE;
-					}
-					top = ATOM_1;
+					tpc = pc;
+					RTFatal("length of an atom is not defined");
 				}
-				obj_ptr = (object_ptr)pc[2];
-				DeRefx(*obj_ptr);
-				*obj_ptr = top;
-				inc3pc();
-				thread();
 				BREAK;
 
 				/* ---------- start of unary ops ----------------- */
@@ -2622,7 +2621,7 @@ void do_exec(int *start_pc)
 						BREAK;
 					}
 					else {
-						pc = (int *)pc[2]; 
+						pc = (long *)pc[2]; 
 						thread();
 						BREAK;
 					}
@@ -3130,7 +3129,7 @@ void do_exec(int *start_pc)
 					if (top == ATOM_0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_0;
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}   
@@ -3139,7 +3138,7 @@ void do_exec(int *start_pc)
 					if (DBL_PTR(top)->dbl == 0.0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_0;                
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3156,14 +3155,14 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}   
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl == 0.0) {
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3228,7 +3227,7 @@ void do_exec(int *start_pc)
 					if (top != ATOM_0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_1;
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}   
@@ -3237,7 +3236,7 @@ void do_exec(int *start_pc)
 					if (DBL_PTR(top)->dbl != 0.0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_1;                
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3254,14 +3253,14 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top != ATOM_0) {
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}   
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl != 0.0) {
-						pc = (int *)pc[3];
+						pc = (long *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3310,7 +3309,7 @@ void do_exec(int *start_pc)
 					if ((top >= 0)) {
 						/* going up */
 						if (c > a) {
-							pc = (int *)pc[6];
+							pc = (long *)pc[6];
 							thread();
 							BREAK;
 						} 
@@ -3324,7 +3323,7 @@ void do_exec(int *start_pc)
 					else {
 						/* going down */
 						if (c < a) {
-							pc = (int *)pc[6];
+							pc = (long *)pc[6];
 							thread();
 							BREAK;
 						} 
@@ -3355,7 +3354,7 @@ void do_exec(int *start_pc)
 					else 
 						b = binary_op_a(LESS, c, a);
 					if (b == ATOM_1) { 
-						pc = (int *)pc[6];  /* exit loop - 0 iterations */
+						pc = (long *)pc[6];  /* exit loop - 0 iterations */
 						BREAK;
 					}
 					else {
@@ -3365,8 +3364,8 @@ void do_exec(int *start_pc)
 					}
 				}
 				/* we're going in - patch the ENDFOR opcode */
-				patch = (opcode_type *) ((int *)pc[6] - 5);
-				i = (int)opcode(i);
+				patch = (opcode_type *) ((long *)pc[6] - 5);
+				i = (long)opcode(i);
 				pc += 7;   // so WATCOM will do it before thread()
 				if (patch[0] != (opcode_type)i) {
 					// changing the endfor op from what it was
@@ -3393,7 +3392,7 @@ void do_exec(int *start_pc)
 				}
 				else {
 					*obj_ptr = top;
-					pc = (int *)pc[1];  /* loop again */
+					pc = (long *)pc[1];  /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3407,7 +3406,7 @@ void do_exec(int *start_pc)
 				}
 				else {
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (long *)pc[1]; /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3442,7 +3441,7 @@ void do_exec(int *start_pc)
 				else {
 					DeRef(*obj_ptr);
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (long *)pc[1]; /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3461,7 +3460,7 @@ void do_exec(int *start_pc)
 				else {
 					DeRef(*obj_ptr);
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (long *)pc[1]; /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3714,7 +3713,7 @@ void do_exec(int *start_pc)
 				Ref(result_val);
 				
 				// record the place to put the return value 
-				result_ptr = (object_ptr)*((int *)expr_top[-2] - 1);
+				result_ptr = (object_ptr)*((long *)expr_top[-2] - 1);
 				goto return_p;
 				
 			case L_RETURNP: /* return from procedure */
@@ -3743,7 +3742,7 @@ void do_exec(int *start_pc)
 					
 				if (expr_top > expr_stack+3) {
 					// stack is not empty
-					pc = (int *)expr_top[-2]; 
+					pc = (long *)expr_top[-2]; 
 					expr_top -= 2;
 					top = expr_top[-1]; 
 					restore_privates((symtab_ptr)top);
@@ -3757,7 +3756,7 @@ void do_exec(int *start_pc)
 							DeRef( result_val );
 							
 							// Watch for recursion:
-							if( tpc[3] != (int)result_ptr )
+							if( tpc[3] != (long)result_ptr )
 								((symtab_ptr)tpc[3])->obj = NOVALUE;
 						}
 						result_ptr = NULL;
@@ -4900,7 +4899,7 @@ void do_exec(int *start_pc)
 #ifndef BACKEND             
 				if (a & OP_PROFILE_STATEMENT) {
 					if (ProfileOn) {
-						iptr = (int *)slist[top].src;
+						iptr = (long *)slist[top].src;
 						(*iptr)++;
 					}
 				}
@@ -5030,7 +5029,7 @@ void do_exec(int *start_pc)
 					i = top;
 				}
 				else if (IS_ATOM(top)) {
-					i = (int)DBL_PTR(top)->dbl;
+					i = (long)DBL_PTR(top)->dbl;
 				}
 				else 
 					RTFatal("argument to abort() must be an atom");

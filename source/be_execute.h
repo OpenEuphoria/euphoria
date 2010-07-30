@@ -9,46 +9,46 @@
 extern object_ptr expr_stack;  // runtime call stack
 extern object_ptr expr_max;    // top limit of call stack
 extern object_ptr expr_limit;  // don't start a new routine above this
-extern int stack_size;         // current size of call stack
+extern long stack_size;         // current size of call stack
 extern object_ptr expr_top;    // expression stack pointer
-extern int SymTabLen;          // avoid > 3 args
-extern int start_line;         // line number set by STARTLINE
-extern int TraceBeyond;        // continue tracing after this line
-extern int TraceStack;         // stack level when down-arrow was pressed
-extern int Executing;          // TRUE if user program is executing
-extern int ProfileOn;          // TRUE if profile/profile_time is turned on
+extern long SymTabLen;          // avoid > 3 args
+extern long start_line;         // line number set by STARTLINE
+extern long TraceBeyond;        // continue tracing after this line
+extern long TraceStack;         // stack level when down-arrow was pressed
+extern long Executing;          // TRUE if user program is executing
+extern long ProfileOn;          // TRUE if profile/profile_time is turned on
 extern char **file_name;
-extern int max_stack_per_call;
-extern int AnyTimeProfile;
-extern int AnyStatementProfile;
-extern int sample_size;
+extern long max_stack_per_call;
+extern long AnyTimeProfile;
+extern long AnyStatementProfile;
+extern long sample_size;
 
 extern struct sline *slist;
 extern struct IL fe;
 
-extern int gline_number;  /* last global line number in program */
-extern int il_file;       /* we are processing a separate .il file */
+extern long gline_number;  /* last global line number in program */
+extern long il_file;       /* we are processing a separate .il file */
 
 /* Euphoria program counter needed for traceback */
-extern int *tpc;
+extern long *tpc;
 
 #ifndef INT_CODES
 #if defined(EUNIX) || defined(EMINGW) || defined(EWATCOM)
-extern int **jumptab; // initialized in do_exec() 
+extern long **jumptab; // initialized in do_exec() 
 #else
 #ifdef EWATCOM
 /* Jump table location is determined by another program. */
-// extern int ** jumptab;
+// extern long ** jumptab;
 #else
 #error Not supported use INT_CODES?
 #endif
 #endif // not GNU-C
 #endif //not INT_CODES
 
-void do_exec(int *start_pc);
+void do_exec(long *start_pc);
 void fe_set_pointers();
-void Execute(int *start_index);
-void InitStack(int size, int toplevel);
+void Execute(long *start_index);
+void InitStack(long size, long toplevel);
 void InitExecute();
 
 #endif

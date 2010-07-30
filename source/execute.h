@@ -34,30 +34,55 @@
    so we can simplify some tests. For speed we first check for ATOM-INT
    since that's what most objects are. */ 
 
+#if EBITS == 32
+
 #define NOVALUE      ((long)0xbfffffffL)
-#define TOO_BIG_INT  ((long)0x40000000L)
+#define DBL_MASK ((long)0xA0000000)
+#define SEQ_MASK ((long)0x80000000)
 #define HIGH_BITS    ((long)0xC0000000L)
+#define ASEQ_MASK (unsigned long)0xE0000000)
+
+#define TOO_BIG_INT  ((long)0x40000000L)
+#undef MININT
+#undef MAXINT
+#define MININT     (long)0xC0000000
+#define MAXINT     (long)0x3FFFFFFF
+
+#elif EBITS == 64
+
+#define NOVALUE      ((long)0xbfffffffffffffffL)
+#define DBL_MASK ((long)0xA000000000000000)
+#define SEQ_MASK ((long)0x8000000000000000)
+#define HIGH_BITS    ((long)0xC000000000000000L)
+#define ASEQ_MASK ((unsigned long)0xE000000000000000)
+
+#define TOO_BIG_INT  ((long)0x4000000000000000L)
+#undef MININT
+#undef MAXINT
+#define MININT     (long)0xC000000000000000
+#define MAXINT     (long)0x3FFFFFFFFFFFFFFF
+
+#endif
+
+#define MAXINT32    (long)0x3FFFFFFF
+
 #define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
 #define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
 
 /* these are obsolete */
-#define INT_VAL(x)        ((int)(x))
+#define INT_VAL(x)        ((long)(x))
 #define MAKE_INT(x)       ((object)(x))
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */
-#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (long)0xA0000000)
-
-#define IS_ATOM(ob)             (((long)(ob)) >= (long)0xA0000000)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < (long)0xA0000000)
-
-#define ASEQ(s) (((unsigned long)s & (unsigned long)0xE0000000) == (unsigned long)0x80000000)
-
+#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
+#define IS_ATOM_DBL(ob)         (((object)(ob)) >= DBL_MASK)
+#define IS_ATOM(ob)             (((long)(ob)) >= DBL_MASK)
+#define IS_SEQUENCE(ob)         (((long)(ob))  < DBL_MASK)
 #define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
 
-#undef MININT
-#define MININT     (long)0xC0000000
-#define MAXINT     (long)0x3FFFFFFF
+#define ASEQ(s) ( ( (unsigned long)s & ASEQ_MASK) == ((unsigned long)SEQ_MASK) )
+
 #define MININT_VAL MININT
 #define MININT_DBL ((double)MININT_VAL)
 #define MAXINT_VAL MAXINT
@@ -86,9 +111,9 @@ struct symtab_entry;
 */
 struct routine_list {   
 	char *name;
-	int (*addr)();
-	int seq_num;
-	int file_num;
+	long (*addr)();
+	long seq_num;
+	long file_num;
 	short int num_args;
 	short int convention;
 	char scope;
@@ -133,9 +158,9 @@ struct replace_block {
 
 
 /* MACROS */
-#define MAKE_DBL(x) ( (object) (((unsigned long)(x) >> 3) + (long)0xA0000000) )
+#define MAKE_DBL(x) ( (object) (((unsigned long)(x) >> 3) + DBL_MASK) )
 #define DBL_PTR(ob) ( (d_ptr)  (((unsigned long)(ob)) << 3) )
-#define MAKE_SEQ(x) ( (object) (((unsigned long)(x) >> 3) + (long)0x80000000) )
+#define MAKE_SEQ(x) ( (object) (((unsigned long)(x) >> 3) + SEQ_MASK) )
 #define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) ) 
 
 /* ref a double or a sequence (both need same 3 bit shift) */
@@ -175,7 +200,7 @@ struct file_info {
 }; 
 
 struct arg_info {
-	int (*address)();     // pointer to C function
+	long (*address)();     // pointer to C function
 	s1_ptr name;          // name of routine (for diagnostics)
 	s1_ptr arg_size;      // s1_ptr of sequence of argument sizes
 	object return_size;   // atom or sequence for return value size
@@ -192,7 +217,7 @@ struct arg_info {
 struct IL {
 	struct symtab_entry *st;
 	struct sline *sl;
-	int *misc;
+	long *misc;
 	char *lit;
 	unsigned char **includes;
 	object switches;

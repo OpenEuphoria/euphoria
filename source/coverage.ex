@@ -10,8 +10,8 @@ constant H_FILE = `
 #define COVER_ROUTINE [1]cover_routine
 #define WRITE_COVERAGE_DB [1]write_coverage_db
 
-void COVER_LINE( int );
-void COVER_ROUTINE( int );
+void COVER_LINE( long );
+void COVER_ROUTINE( long );
 long WRITE_COVERAGE_DB();
 
 #endif

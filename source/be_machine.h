@@ -29,12 +29,12 @@ extern unsigned current_fg_color;
 extern unsigned current_bg_color;
 
 extern char *crash_msg;
-extern int *crash_list;       // list of routines to call when there's a crash
+extern long *crash_list;       // list of routines to call when there's a crash
 extern int crash_routines;    // number of routines
 extern int crash_size;        // space allocated for crash_list
 
-extern int *profile_sample;
-extern volatile int sample_next;
+extern long *profile_sample;
+extern volatile long sample_next;
 
 extern int first_mouse;
 

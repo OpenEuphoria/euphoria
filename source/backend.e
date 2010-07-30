@@ -11,6 +11,7 @@ elsedef
 end ifdef
 
 include std/machine.e
+include std/os.e
 
 include global.e
 include common.e
@@ -31,30 +32,146 @@ procedure InitBackEnd(integer x)
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
-constant ST_ENTRY_SIZE = 60  -- size (bytes) of back-end symbol table entry
-							 -- for interpreter. Fixed size for all entries.
+constant ST_ENTRY_SIZE_32 = 60 -- size (bytes) of back-end symbol table entry
+							   -- for interpreter. Fixed size for all entries.
+							   -- assumes 32-bit word size
+-- struct sline {      /* source line table entry */
+-- 	char *src;               /* text of line, 
+-- 								first 4 bytes used for count when profiling */
+-- 	unsigned short line;     /* line number within file */
+-- 	unsigned char file_no;   /* file number */
+-- 	unsigned char options;   /* options in effect: */
+integer 
+	SIZEOF_POINTER = 4,
+	SIZEOF_SLINE  = 8,
+	SLINE_SRC     = 0,
+	SLINE_LINE    = 4,
+	SLINE_FILE_NO = 6,
+	SLINE_OPTIONS = 7
+	
+
+ifdef UNIX then
+	integer ST_ENTRY_SIZE = ST_ENTRY_SIZE_32
+	
+	integer
+		ST_OBJ            = 0,
+		ST_NEXT           = 4,
+		ST_NEXT_IN_BLOCK  = 8,
+		ST_MODE           = 12,
+		ST_SCOPE          = 13,
+		ST_FILE_NO        = 14,
+		ST_DUMMY          = 15,
+		ST_NAME           = 16,
+		ST_TOKEN          = 20,
+		ST_CODE           = 24,
+		ST_LINETAB        = 28,
+		ST_FIRSTLINE      = 32,
+		ST_TEMPS          = 36,
+		ST_NUM_ARGS       = 40,
+		ST_RESIDENT_TASK  = 44,
+		ST_SAVED_PRIVATES = 48,
+		ST_STACK_SPACE    = 52,
+		ST_BLOCK          = 56
+	
+	-- hack until we have a defined word for the architecture
+	if find( "x86_64", uname() ) then
+		SIZEOF_POINTER = 8
+		SIZEOF_SLINE  = 12
+		SLINE_LINE    = 8
+		SLINE_FILE_NO = 10
+		SLINE_OPTIONS = 11
+		
+		ST_ENTRY_SIZE = 120
+		
+		ST_NEXT           = 8
+		ST_NEXT_IN_BLOCK  = 16
+		ST_MODE           = 24
+		ST_SCOPE          = 25
+		ST_FILE_NO        = 26
+		ST_DUMMY          = 27
+		ST_NAME           = 32
+		ST_TOKEN          = 40 -- int
+		ST_CODE           = 48
+		ST_LINETAB        = 56
+		ST_FIRSTLINE      = 64
+		ST_TEMPS          = 72
+		ST_NUM_ARGS       = 80
+		ST_RESIDENT_TASK  = 88
+		ST_SAVED_PRIVATES = 96
+		ST_STACK_SPACE    = 104
+		ST_BLOCK          = 112
+	end if
+	
+	-- this is a hack for 64-bit systems until the infrastructure catches up
+	-- to make this more elegant
+	procedure poke_pointer( atom addr, object val )
+		if ST_ENTRY_SIZE = ST_ENTRY_SIZE_32 then
+			poke4( addr, val )
+			return
+		end if
+		
+		if sequence(val) then
+			for i = 1 to length(val) do
+				poke_pointer( addr, val[i] )
+				addr += SIZEOF_POINTER
+			end for
+			return
+		end if
+		poke4( addr, val )
+		poke4( addr + 4, floor( val / 0x100000000 ) )
+	end procedure
+
+	function peek_pointer( object addr )
+		if ST_ENTRY_SIZE = ST_ENTRY_SIZE_32 then
+			return peek4u( addr )
+		end if
+		
+		if sequence(addr) then
+			sequence val = {}
+			
+			return val
+		end if
+		return peek4u( addr ) + peek4u( addr + 4 ) * power( 2, 32 )
+	end function
+	
+elsedef
+	constant ST_ENTRY_SIZE = ST_ENTRY_SIZE_32
+	constant
+		ST_OBJ            = 0,
+		ST_NEXT           = 4,
+		ST_NEXT_IN_BLOCK  = 8,
+		ST_MODE           = 12,
+		ST_SCOPE          = 13,
+		ST_FILE_NO        = 14,
+		ST_DUMMY          = 15,
+		ST_NAME           = 16,
+		ST_TOKEN          = 20,
+		ST_CODE           = 24,
+		ST_LINETAB        = 28,
+		ST_FIRSTLINE      = 32,
+		ST_TEMPS          = 36,
+		ST_NUM_ARGS       = 40,
+		ST_RESIDENT_TASK  = 44,
+		ST_SAVED_PRIVATES = 48,
+		ST_STACK_SPACE    = 52,
+		ST_BLOCK          = 56
+
+	procedure poke_pointer( atom addr, object val )
+		poke4( addr, val )
+	end procedure
+	
+	function peek_pointer( object addr )
+		return peek4u( addr )
+	end function
+	
+
+end ifdef
+
+
 
 constant SOURCE_CHUNK = 10000 -- copied from scanner.e !!
 
-constant
-	ST_OBJ            = 0,
-	ST_NEXT           = 4,
-	ST_NEXT_IN_BLOCK  = 8,
-	ST_MODE           = 12,
-	ST_SCOPE          = 13,
-	ST_FILE_NO        = 14,
-	ST_DUMMY          = 15,
-	ST_NAME           = 16,
-	ST_TOKEN          = 20,
-	ST_CODE           = 24,
-	ST_LINETAB        = 28,
-	ST_FIRSTLINE      = 32,
-	ST_TEMPS          = 36,
-	ST_NUM_ARGS       = 40,
-	ST_RESIDENT_TASK  = 44,
-	ST_SAVED_PRIVATES = 48,
-	ST_STACK_SPACE    = 52,
-	ST_BLOCK          = 56
+
 
 function get_next( symtab_index sym )
 	if get_backend() then
@@ -93,7 +210,7 @@ procedure BackEnd(integer il_file)
 	mem_set(st, 0, size) -- all fields are 0 (NULL) by default
 	
 	-- unused 0th entry contains the length:
-	poke4(st, length(SymTab))
+	poke_pointer(st, length(SymTab))
 		
 	lit_string = "" -- literal values are stored in a string like EDS
 	string_size = 0 -- precompute total space needed for symbol names
@@ -106,21 +223,20 @@ procedure BackEnd(integer il_file)
 		-- "constant" variables are initialized with executable code
 		if atom(eentry) then
 			-- deleted
-			poke4(addr + ST_NEXT, get_next( eentry) ) -- NEXT
+			poke_pointer(addr + ST_NEXT, get_next( eentry) ) -- NEXT
 			poke(addr + ST_MODE, M_TEMP) -- MODE
 			poke(addr + ST_SCOPE, SC_UNDEFINED)  -- SCOPE, must be > S_PRIVATE 
 			
 		
 		else
-			poke4(addr + ST_NEXT, get_next( eentry[S_NEXT]) )
-			poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK])
+			poke_pointer(addr + ST_NEXT, get_next( eentry[S_NEXT]) )
+			poke_pointer(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK])
 			poke(addr + ST_MODE, eentry[S_MODE])
 			poke(addr + ST_SCOPE, eentry[S_SCOPE])
-
 			if length(eentry) >= S_NAME and sequence(eentry[S_NAME]) then
 				-- temps and literals have no NAME field
 				poke(addr + ST_FILE_NO, eentry[S_FILE_NO])
-				poke4(addr + ST_TOKEN, eentry[S_TOKEN])
+				poke(addr + ST_TOKEN, eentry[S_TOKEN])
 				string_size += length(eentry[S_NAME])+1
 			end if
 		
@@ -131,38 +247,38 @@ procedure BackEnd(integer il_file)
 					-- routines only
 					if sequence(eentry[S_CODE]) and (get_backend() or eentry[S_OPCODE]=0) then  
 						-- routines with code
-						e_addr = allocate(4+4*length(eentry[S_CODE])) -- IL code
-						poke4(e_addr, length(eentry[S_CODE]))
-						poke4(e_addr+4, eentry[S_CODE])
-						poke4(addr + ST_CODE, e_addr)
+						e_addr = allocate( SIZEOF_POINTER + SIZEOF_POINTER * length(eentry[S_CODE])) -- IL code
+						poke_pointer(e_addr, length(eentry[S_CODE]))
+						poke_pointer(e_addr + SIZEOF_POINTER, eentry[S_CODE])
+						poke_pointer(addr + ST_CODE, e_addr)
 					
 						if sequence(eentry[S_LINETAB]) then
 							-- line table
-							l_addr = allocate(4*length(eentry[S_LINETAB])) 
-							poke4(l_addr, eentry[S_LINETAB])
-							poke4(addr + ST_LINETAB, l_addr)
+							l_addr = allocate( SIZEOF_POINTER * length(eentry[S_LINETAB])) 
+							poke_pointer(l_addr, eentry[S_LINETAB])
+							poke_pointer(addr + ST_LINETAB, l_addr)
 						else
 							-- pointer to linetable will be NULL
 						end if
 					end if
-					poke4(addr + ST_FIRSTLINE, eentry[S_FIRSTLINE])
-					poke4(addr + ST_TEMPS, eentry[S_TEMPS])
-					poke4(addr + ST_NUM_ARGS, eentry[S_NUM_ARGS])
+					poke_pointer(addr + ST_FIRSTLINE, eentry[S_FIRSTLINE])
+					poke_pointer(addr + ST_TEMPS, eentry[S_TEMPS])
+					poke_pointer(addr + ST_NUM_ARGS, eentry[S_NUM_ARGS])
 					--
 					--
-					poke4(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
-					poke4(addr + ST_BLOCK, eentry[S_BLOCK])
+					poke_pointer(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
+					poke_pointer(addr + ST_BLOCK, eentry[S_BLOCK])
 					
 				end if
 				
 			elsif eentry[S_MODE] = M_BLOCK then
-				poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK] )
-				poke4(addr + ST_BLOCK, eentry[S_BLOCK])
+				poke_pointer(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK] )
+				poke_pointer(addr + ST_BLOCK, eentry[S_BLOCK])
 				
 			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
 			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
 				-- compress constants and literal values in memory
-				poke4(addr, length(lit_string))  -- record the current offset
+				poke_pointer(addr, length(lit_string))  -- record the current offset
 				lit_string &= compress(eentry[S_OBJ])
 
 			end if
@@ -191,7 +307,7 @@ procedure BackEnd(integer il_file)
 			if length(eentry) >= S_NAME then
 				if sequence(eentry[S_NAME]) then
 					-- record the address of the name string
-					poke4(entry_addr + ST_NAME, addr) 
+					poke_pointer(entry_addr + ST_NAME, addr) 
 					-- store the name string
 					poke(addr, eentry[S_NAME])
 					addr += length(eentry[S_NAME])
@@ -200,16 +316,16 @@ procedure BackEnd(integer il_file)
 				
 				else
 					-- no name
-					poke4(entry_addr + ST_NAME, no_name)
+					poke_pointer(entry_addr + ST_NAME, no_name)
 				end if
 				
 				if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
 					-- convert offset to address
-					poke4(entry_addr, peek4u(entry_addr)+lit)
+					poke_pointer(entry_addr, peek_pointer(entry_addr) + lit)
 				end if
 			elsif eentry[S_MODE] = M_CONSTANT then
 				-- literals - convert offset of literal value to address
-				poke4(entry_addr, peek4u(entry_addr)+lit) 
+				poke_pointer(entry_addr, peek_pointer(entry_addr)+lit) 
 			
 			end if
 		end if
@@ -231,12 +347,18 @@ procedure BackEnd(integer il_file)
 			size += slist[i]
 		end if
 	end for
-		
-	sl = allocate((size+1)*8)
-	mem_set(sl, 0, (size+1)*8)
 	
-	poke4(sl, size)
-	addr = sl+8 -- 0th element is ignored - origin 1
+-- 	struct sline {      /* source line table entry */
+-- 	char *src;               /* text of line, 
+-- 								first 4 bytes used for count when profiling */
+-- 	unsigned short line;     /* line number within file */
+-- 	unsigned char file_no;   /* file number */
+-- 	unsigned char options; 
+	sl = allocate((size+1) * SIZEOF_SLINE)
+	mem_set(sl, 0, (size + 1 ) * SIZEOF_SLINE)
+	
+	poke_pointer(sl, size)
+	addr = sl + SIZEOF_SLINE -- 0th element is ignored - origin 1
 	string_size = 0
 	
 	for i = 1 to length(slist) do
@@ -255,17 +377,17 @@ procedure BackEnd(integer il_file)
 		
 		short = length(eentry) < 4
 		for j = 1 to repcount do
-			poke4(addr+4, eentry[LINE-short])  -- hits 4,5,6,7 
+			poke2(addr + SLINE_LINE, eentry[LINE-short])  -- hits 4,5,6,7 
 											  -- 7 should be 0 unless 16 million
-			poke(addr+6, eentry[LOCAL_FILE_NO-short])
+			poke(addr + SLINE_FILE_NO, eentry[LOCAL_FILE_NO-short])
 			if not short then
 				if eentry[SRC] then
-					poke4(addr, all_source[1+floor(eentry[SRC]/SOURCE_CHUNK)]
+					poke_pointer(addr, all_source[1+floor(eentry[SRC]/SOURCE_CHUNK)]
 					+remainder(eentry[SRC], SOURCE_CHUNK)) -- store actual address
 				end if
-				poke(addr+7, eentry[OPTIONS]) -- else leave it 0
+				poke(addr + SLINE_OPTIONS, eentry[OPTIONS]) -- else leave it 0
 			end if
-			addr += 8
+			addr += SIZEOF_SLINE
 			eentry[LINE-short] += 1
 		end for
 	end for
@@ -281,20 +403,20 @@ procedure BackEnd(integer il_file)
 		string_size += length(other_strings[i])+1
 	end for
 	
-	ms = allocate(4*(10+length(other_strings))) -- miscellaneous
-	poke4(ms, max_stack_per_call)
-	poke4(ms+4, AnyTimeProfile)
-	poke4(ms+8, AnyStatementProfile)
-	poke4(ms+12, sample_size)
-	poke4(ms+16, gline_number)
-	poke4(ms+20, il_file)
-	poke4(ms+24, length(warning_list))
-	poke4(ms+28, length(file_name)) -- stored in 0th position
+	ms = allocate( SIZEOF_POINTER * ( 10 + length(other_strings))) -- miscellaneous
+	poke_pointer(ms, max_stack_per_call)
+	poke_pointer(ms + SIZEOF_POINTER, AnyTimeProfile)
+	poke_pointer(ms + SIZEOF_POINTER * 2, AnyStatementProfile)
+	poke_pointer(ms + SIZEOF_POINTER * 3, sample_size)
+	poke_pointer(ms+ SIZEOF_POINTER * 4, gline_number)
+	poke_pointer(ms+ SIZEOF_POINTER * 5, il_file)
+	poke_pointer(ms + SIZEOF_POINTER * 6, length(warning_list))
+	poke_pointer(ms + SIZEOF_POINTER * 7, length(file_name)) -- stored in 0th position
 	
 	fn = allocate(string_size)
 	
 	for i = 1 to length(other_strings) do
-		poke4(ms+32+(i-1)*4, fn)
+		poke_pointer(ms + SIZEOF_POINTER * 8 + ( i - 1) * SIZEOF_POINTER, fn)
 			
 		poke(fn, other_strings[i])
 		fn += length(other_strings[i])
@@ -302,18 +424,18 @@ procedure BackEnd(integer il_file)
 		fn += 1
 	end for
 	
-	include_info = allocate( 4 * (1 + length( include_matrix )) ) 
+	include_info = allocate( SIZEOF_POINTER * (1 + length( include_matrix )) ) 
 	include_node = include_info
-	poke4( include_info, 0 )
-	include_node += 4
+	poke_pointer( include_info, 0 )
+	include_node += SIZEOF_POINTER
 	
 	for i = 1 to length( include_matrix ) do
 		
 		include_array = allocate( 1 + length( include_matrix ) )
 		poke( include_array, i & include_matrix[i] )
-		poke4( include_node, include_array )
+		poke_pointer( include_node, include_array )
 		
-		include_node += 4
+		include_node += SIZEOF_POINTER
 	end for
 
 	if Argc > 2 then

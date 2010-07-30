@@ -831,7 +831,7 @@ s1_ptr NewS1(long size)
 	register s1_ptr s1;
 
 	assert(size >= 0);
-	if ((unsigned long)size > (((unsigned long)0xFFFFFFFF - sizeof(struct s1)) / sizeof(object)) - 1) {
+	if ((unsigned long)size > (((unsigned long)(-1) - sizeof(struct s1)) / sizeof(object)) - 1) {
 		// Ensure it doesn't overflow
 		SpaceMessage();
 	}
@@ -856,12 +856,14 @@ object NewString(char *s)
 
 	len = strlen(s);
 	c1 = NewS1((long)len);
+// 	printf("NewString [%p] [size: %d] [length: %ld] [%s]\n", c1, len, c1->length, s);
 	obj_ptr = (object_ptr)c1->base;
 	if (len > 0) {
 		do {
 			*(++obj_ptr) = (unsigned char)*s++;
 		} while (--len > 0);
 	}
+	
 	return MAKE_SEQ(c1);
 }
 
@@ -968,13 +970,13 @@ static void new_dbl_block(unsigned int cnt)
 	
 	blksize = cnt * dsize;
 	dbl_block = (free_block_ptr)EMalloc( blksize );
-	assert(((unsigned int)dbl_block & 7) == 0);
+	assert(((unsigned long)dbl_block & 7) == 0);
 
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
 	q = (char *)dbl_block;
 	#if defined(EALIGN4)
-	if (align4 && *(int *)(q-4) == MAGIC_FILLER) 
+	if (align4 && *(long *)(q-4) == MAGIC_FILLER) 
 		q = q - 4;
 	#endif
 	Allocated(block_size(q));

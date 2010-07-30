@@ -150,8 +150,8 @@ struct arg_info *c_routine = NULL; /* array of c_routine structs */
 int allow_break = TRUE;       /* allow control-c/control-break to kill prog */
 int control_c_count = 0;      /* number of control-c/control-break since
 								 last call */
-int *profile_sample = NULL;
-volatile int sample_next = 0;
+long *profile_sample = NULL;
+volatile long sample_next = 0;
 
 int first_mouse = 1;  /* indicates if mouse function has been set up yet */
 int line_max; /* current number of text lines on screen */
@@ -209,7 +209,7 @@ LRESULT __cdecl cdecl_call_back();
 
 /* stdcall callbacks for each number of args */
 LRESULT CALLBACK call_back0();
-LRESULT CALLBACK call_back1(unsigned);
+LRESULT CALLBACK call_back1(unsigned long);
 LRESULT CALLBACK call_back2(unsigned, unsigned);
 LRESULT CALLBACK call_back3(unsigned, unsigned, unsigned);
 LRESULT CALLBACK call_back4(unsigned, unsigned, unsigned, unsigned);
@@ -376,7 +376,7 @@ void not_supported(char *feature)
 }
 
 
-#define MODE_19_BASE ((unsigned)0xA0000)
+#define MODE_19_BASE ((unsigned long)0xA0000)
 #define MODE_19_WIDTH 320
 #define MODE_19_HEIGHT 200
 
@@ -1107,10 +1107,10 @@ static object GetMouse()
 static object user_allocate(object x)
 /* x is number of bytes to allocate */
 {
-	int nbytes;
+	long nbytes;
 	char *addr;
 #ifdef EUNIX
-	unsigned first, last, gp1;
+	unsigned long first, last, gp1;
 #endif
 
 	nbytes = get_int(x);
@@ -1119,8 +1119,8 @@ static object user_allocate(object x)
 #ifndef EBSD
 	// make it executable
 	gp1 = pagesize-1;
-	first = (unsigned)addr & (~gp1); // start of page
-	last = (unsigned)addr+nbytes-1; // last address
+	first = (unsigned long)addr & (~gp1); // start of page
+	last = (unsigned long)addr+nbytes-1; // last address
 	last = last | gp1; // end of page
 	mprotect((void *)first, last - first + 1,
 			 PROT_READ+PROT_WRITE+PROT_EXEC);
@@ -1128,7 +1128,7 @@ static object user_allocate(object x)
 #endif
 
 	// we don't allow -ve addresses, so can't use -ve Euphoria ints
-	if ((unsigned long)addr <= (unsigned)MAXINT_VAL)
+	if ((unsigned long)addr <= (unsigned long)MAXINT_VAL)
 		return (unsigned long)addr;
 	else
 		return NewDouble((double)(unsigned long)addr);
@@ -1156,7 +1156,7 @@ static object Where(object x)
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
 		result = NewDouble((double)result);  // maximum 2 billion
-#if defined(ELINUX) || defined(EWATCOM)
+#if (defined(ELINUX) && EBITS == 32 ) || defined(EWATCOM)
 	else
 		result = iitell(f); // for better accuracy
 #endif
@@ -1318,7 +1318,7 @@ static object Dir(object x)
 			if (stat64_buf.st_size > (__int64)MAXINT) {
 				obj_ptr[3] = NewDouble((double)stat64_buf.st_size);
 			} else {
-				obj_ptr[3] = MAKE_INT((int)stat64_buf.st_size);
+				obj_ptr[3] = MAKE_INT((long)stat64_buf.st_size);
 			}
 		} else {
 			obj_ptr[3] = MAKE_INT( -errno ); // Negative of the error code.
@@ -1568,16 +1568,16 @@ static object GetScreenChar(object x)
 	ReadConsoleOutputAttribute(console_output, (LPWORD)&att, 1, coords, (LPDWORD)&temp);
 
 	obj_ptr[1] = ch[0];
-	if ((unsigned)att <= (unsigned)MAXINT)
+	if ((unsigned long)att <= (unsigned long)MAXINT)
 		obj_ptr[2] = att;
 	else
-		obj_ptr[2] = NewDouble((double)(unsigned)att);
+		obj_ptr[2] = NewDouble((double)(unsigned long)att);
 
 #endif
 
 #ifdef EUNIX
-	if (line >= 1 && line <= (unsigned)line_max &&
-		column >= 1 && column <= (unsigned)col_max) {
+	if (line >= 1 && line <= (unsigned long)line_max &&
+		column >= 1 && column <= (unsigned long)col_max) {
 		obj_ptr[1] = screen_image[line-1][column-1].ascii;
 		obj_ptr[2] = (screen_image[line-1][column-1].fg_color & 15) |
 					 (screen_image[line-1][column-1].bg_color << 4);
@@ -1754,7 +1754,7 @@ static object set_rand(object x)
 		} else {
 			obp = x_ptr->base;
 			// A sequence of two atoms explictly supplies seed1 and seed2 values.
-			if ((slen == 2) && !ASEQ(obp[1]) && !ASEQ(obp[2])) {
+			if ( (slen == 2) && !ASEQ(obp[1]) && !ASEQ(obp[2]) ) {
 				seed1 = get_int(obp[1]);
 				seed2 = get_int(obp[2]);
 			}
@@ -1905,7 +1905,7 @@ DWORD WINAPI WinTimer(LPVOID lpParameter)
 			Sleep((((double)(lcount.QuadPart-ncount.QuadPart))/((double)freq.QuadPart))*1000.0);
 		}
 		if (Executing && ProfileOn) {
-			profile_sample[sample_next++] = (int)tpc;
+			profile_sample[sample_next++] = (long)tpc;
 		}
 	}
 	return 0;
@@ -2028,7 +2028,7 @@ object memory_set(object d, object v, object n)
 	unsigned nbytes;
 
 	dest   = (char *)get_pos_int("mem_set", d);
-	value  = (int)get_pos_int("mem_set", v);
+	value  = (long)get_pos_int("mem_set", v);
 	nbytes = get_pos_int("mem_set", n);
 	memset(dest, value, nbytes);
 	return ATOM_1;
@@ -2089,7 +2089,7 @@ object OpenDll(object x)
 	lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
 
 #endif
-	if ((unsigned)lib <= (unsigned)MAXINT_VAL){
+	if ((unsigned long)lib <= (unsigned long)MAXINT_VAL){
 			return MAKE_INT((unsigned long)lib);
 	}
 	else{
@@ -2106,7 +2106,7 @@ object DefineCVar(object x)
 	char *variable_string;
 	char *variable_address;
 	
-	unsigned addr;
+	unsigned long addr;
 
 	// x will be a sequence if called from define_c_func/define_c_proc
 	x = (object)SEQ_PTR(x);
@@ -2134,15 +2134,15 @@ object DefineCVar(object x)
 	if (dlerror() != NULL)
 		return ATOM_M1;
 #endif
-	addr = (unsigned)variable_address;
-	if (addr <= (unsigned)MAXINT_VAL)
+	addr = (unsigned long)variable_address;
+	if (addr <= (unsigned long)MAXINT_VAL)
 		return MAKE_INT(addr);
 	else
 		return NewDouble((double)addr);
 }
 
 
-object DefineC(object x)
+object DefineC(object xo)
 /* define a C routine: x is {lib, name, arg_sizes, return_type or 0}
    alternatively, x is {"", address or {'+', address}, arg_sizes, return_type or 0}
    Return -1 on failure. */
@@ -2151,15 +2151,16 @@ object DefineC(object x)
 	object routine_name;
 	s1_ptr routine_ptr;
 	char *routine_string;
-	int (*proc_address)();
+	long (*proc_address)();
 	object arg_size, return_size;
 	object_ptr arg;
 	int convention, t, raw_addr;
+	s1_ptr xs1;
 
 	// x will be a sequence if called from define_c_func/define_c_proc
-	x = (object)SEQ_PTR(x);
+	xs1 = SEQ_PTR(xo);
 
-	lib = (HINSTANCE)*(((s1_ptr)x)->base+1);
+	lib = (HINSTANCE) xs1->base[1]; //*(((s1_ptr)x)->base+1);
 	raw_addr = FALSE;
 
 	if (IS_SEQUENCE(lib)) {
@@ -2174,24 +2175,24 @@ object DefineC(object x)
 		lib = (HINSTANCE)get_pos_int("define_c_proc/func", (object)lib);
 	}
 
-	routine_name = *(((s1_ptr)x)->base+2);
+	routine_name = xs1->base[2];
 	convention = C_STDCALL;
 
 	if (raw_addr) {
 		/* machine code routine */
 		if (IS_ATOM(routine_name)) {
 			/* addr */
-			proc_address = (int (*)())get_pos_int("define_c_proc/func",
+			proc_address = (long (*)())get_pos_int("define_c_proc/func",
 										(object)routine_name);
 		}
 		else {
 			/* {'+', addr} */
 			if (SEQ_PTR(routine_name)->length != 2)
 				RTFatal("expected {'+', address} as second argument of define_c_proc/func");
-			proc_address = (int (*)())*(SEQ_PTR(routine_name)->base+2);
-			proc_address = (int (*)())get_pos_int("define_c_proc/func", (object)proc_address);
+			proc_address = (long (*)())*(SEQ_PTR(routine_name)->base+2);
+			proc_address = (long (*)())get_pos_int("define_c_proc/func", (object)proc_address);
 #ifdef EWINDOWS
-			t = (int)*(SEQ_PTR(routine_name)->base+1);
+			t = (long)*(SEQ_PTR(routine_name)->base+1);
 			t = get_pos_int("define_c_proc/func", (object)t);
 			if (t == '+')
 				convention = C_CDECL;
@@ -2208,8 +2209,11 @@ object DefineC(object x)
 
 	else {
 		/* C .dll routine */
-		if (IS_ATOM(routine_name))
+		if (IS_ATOM(routine_name)){
+			printf("routine_name: %lx %lx\n", routine_name, DBL_MASK );
+			*((long*)routine_name) = 0;
 			RTFatal("routine name must be a sequence");
+		}
 		routine_ptr = SEQ_PTR(routine_name);
 		Ref(routine_name);
 		if (routine_ptr->length >= TEMP_SIZE)
@@ -2221,13 +2225,13 @@ object DefineC(object x)
 			routine_string++;
 			convention = C_CDECL;
 		}
-		proc_address = (int (*)())GetProcAddress((void *)lib, routine_string);
+		proc_address = (long (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
 		
 #else
 #ifdef EUNIX
-		proc_address = (int (*)())dlsym((void *)lib, routine_string);
+		proc_address = (long (*)())dlsym((void *)lib, routine_string);
 		if (dlerror() != NULL)
 			return ATOM_M1;
 #endif
@@ -2246,7 +2250,7 @@ object DefineC(object x)
 		}
 	}
 
-	arg_size = *(((s1_ptr)x)->base+3);
+	arg_size = xs1->base[3];
 	if (IS_ATOM(arg_size))
 		RTFatal("argument size list must be a sequence");
 	RefDS(arg_size);
@@ -2270,7 +2274,7 @@ object DefineC(object x)
 		arg++;
 	}
 
-	return_size = *(((s1_ptr)x)->base+4);
+	return_size = xs1->base[4];
 
 	if (IS_ATOM_INT(return_size)) {
 		t = return_size;
@@ -2337,7 +2341,7 @@ object CallBack(object x)
 	static long call_increment = 0;
 	static long last_block_offset = 0;
 #endif
-	unsigned addr;
+	unsigned long addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
 #ifndef ERUNTIME
@@ -2345,7 +2349,7 @@ object CallBack(object x)
 #endif
 	s1_ptr x_ptr;
 	int convention;
-	int res;
+	long res;
 	unsigned long oldprot;
 	unsigned long * oldprotptr;
 	convention = C_CDECL;
@@ -2384,29 +2388,29 @@ object CallBack(object x)
 	/* Get the address of the template to be modified. */
 	if (convention == C_CDECL) {
 		// cdecl allows var args - only one template needed
-		addr = (unsigned)&cdecl_call_back;
+		addr = (unsigned long)&cdecl_call_back;
 	}
 	else {
 		switch (num_args) {
-			case 0: addr = (unsigned)&call_back0;
+			case 0: addr = (unsigned long)&call_back0;
 					break;
-			case 1: addr = (unsigned)&call_back1;
+			case 1: addr = (unsigned long)&call_back1;
 					break;
-			case 2: addr = (unsigned)&call_back2;
+			case 2: addr = (unsigned long)&call_back2;
 					break;
-			case 3: addr = (unsigned)&call_back3;
+			case 3: addr = (unsigned long)&call_back3;
 					break;
-			case 4: addr = (unsigned)&call_back4;
+			case 4: addr = (unsigned long)&call_back4;
 					break;
-			case 5: addr = (unsigned)&call_back5;
+			case 5: addr = (unsigned long)&call_back5;
 					break;
-			case 6: addr = (unsigned)&call_back6;
+			case 6: addr = (unsigned long)&call_back6;
 					break;
-			case 7: addr = (unsigned)&call_back7;
+			case 7: addr = (unsigned long)&call_back7;
 					break;
-			case 8: addr = (unsigned)&call_back8;
+			case 8: addr = (unsigned long)&call_back8;
 					break;
-			case 9: addr = (unsigned)&call_back9;
+			case 9: addr = (unsigned long)&call_back9;
 					break;
 			default:
 					RTFatal("routine has too many parameters for call-back");
@@ -2470,7 +2474,7 @@ object CallBack(object x)
 		if (copy_addr[i]   == 0x078 &&
 			copy_addr[i+1] == 0x056) {
 #ifdef ERUNTIME
-			*(int *)(copy_addr+i) = routine_id;
+			*(long *)(copy_addr+i) = routine_id;
 #else
 			*(symtab_ptr *)(copy_addr+i) = e_routine[routine_id];
 #endif
@@ -2481,21 +2485,21 @@ object CallBack(object x)
 	/* Make memory executable. */
 #ifdef EUNIX
 #ifndef EBSD
-	mprotect((void*)((unsigned)copy_addr & ~(pagesize-1)),  // start of page
+	mprotect((void*)((unsigned long)copy_addr & ~(pagesize-1)),  // start of page
 			 pagesize,  // one page
 			 PROT_READ+PROT_WRITE+PROT_EXEC);
 #endif
 #endif
-	addr = (unsigned)copy_addr;
+	addr = (unsigned long)copy_addr;
 
 	/* Return new address. */
-	if (addr <= (unsigned)MAXINT_VAL)
+	if (addr <= (unsigned long)MAXINT_VAL)
 		return MAKE_INT(addr);
 	else
 		return NewDouble((double)addr);
 }
 
-int *crash_list = NULL;    // list of routines to call when there's a crash
+long *crash_list = NULL;    // list of routines to call when there's a crash
 int crash_routines = 0;    // number of routines
 int crash_size = 0;        // space allocated for crash_list
 
@@ -2530,11 +2534,11 @@ static object crash_routine(object x)
 #endif
 #endif
 		crash_size = 5;
-		crash_list = (int *)EMalloc(sizeof(int) * crash_size);
+		crash_list = (long *)EMalloc(sizeof(long) * crash_size);
 	}
 	else if (crash_routines >= crash_size) {
 		crash_size += 10;
-		crash_list = (int *)ERealloc((char *)crash_list, sizeof(int) * crash_size);
+		crash_list = (long *)ERealloc((char *)crash_list, sizeof(long) * crash_size);
 	}
 	crash_list[crash_routines++] = r;
 
@@ -2619,7 +2623,7 @@ object start_backend(object x)
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	fe.misc = (long *)        get_pos_int(w, *(x_ptr->base+3));
 	fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
 	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];
@@ -2873,15 +2877,15 @@ object machine(object opcode, object x)
 
 			case M_INSTANCE:
 			{
-				unsigned int inst = 0;
+				unsigned long inst = 0;
 #ifdef EUNIX
-				inst = (unsigned)getpid();
+				inst = (unsigned long)getpid();
 #endif
 #ifdef EWINDOWS
-				inst = (unsigned)winInstance;
+				inst = (unsigned long)winInstance;
 #endif
 
-				if (inst <= (unsigned)MAXINT)
+				if (inst <= (unsigned long)MAXINT)
 					return inst;
 				else
 					return NewDouble((double)inst);

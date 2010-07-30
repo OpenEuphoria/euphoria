@@ -95,6 +95,7 @@ procedure NewBlock( integer opcode, object block_label )
 -- creates a SymTab entry for the new block and returns the symtab_index
 
 	SymTab = append( SymTab, repeat( 0, SIZEOF_VAR_ENTRY ) )
+	SymTab[$][S_OBJ]  = NOVALUE
 	SymTab[$][S_MODE] = M_BLOCK
 	
 	sequence block = repeat( 0, BLOCK_SIZE-1 )

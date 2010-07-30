@@ -33,7 +33,7 @@ enum task_mode {
 #endif
 
 struct interpreted_task{
-	int *pc;         // program counter for this task
+	long *pc;         // program counter for this task
 	object_ptr expr_stack; // call stack for this task
 	object_ptr expr_max;   // current top limit of stack
 	object_ptr expr_limit; // don't start a new routine above this
@@ -83,7 +83,7 @@ void task_clock_stop();
 void task_clock_start();
 object task_create(object r_id, object args);
 void InitTask();
-void terminate_task(int task);
+void terminate_task(long task);
 void scheduler(double now);
 void restore_privates(symtab_ptr this_routine);
 double Wait(double t);

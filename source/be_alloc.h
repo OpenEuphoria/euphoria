@@ -23,7 +23,7 @@
 #if defined(EALIGN4)
 #undef ESIMPLE_MALLOC
 
-#define MAGIC_FILLER ((int)0xFFFFFFF3) 
+#define MAGIC_FILLER ((long)0xFFFFFFF3) 
 								/* magic 4-byte value that should never appear
 								   prior to a block pointer, unless we put it 
 								   there to align things on an 8-byte 
@@ -152,9 +152,9 @@ typedef struct block_list * block_list_ptr;
 	#ifdef EUNIX
 	#include <stdlib.h>
 	#endif
-	#define EMalloc(size) malloc(size)
+	#define EMalloc(size) malloc( (size_t) (size))
 	#define EFree(ptr) free(ptr)
-	#define ERealloc(orig, newsize) realloc(orig, newsize)
+	#define ERealloc(orig, newsize) realloc(orig, (size_t) (newsize))
 #else
 	extern char *EMalloc(unsigned long size);
 	extern void EFree(char *ptr);

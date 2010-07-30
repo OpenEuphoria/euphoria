@@ -20,8 +20,13 @@ struct cleanup {
 
 struct s1 {                        /* a sequence header block */
 	object_ptr base;               /* pointer to (non-existent) 0th element */
-	long length;                   /* number of elements */
-	long ref;                      /* reference count */
+	#if EBITS == 32
+		long length;                   /* number of elements */
+		long ref;                      /* reference count */
+	#elif EBITS == 64
+		long ref;                      /* reference count */
+		long length;                   /* number of elements */
+	#endif
 	long postfill;                 /* number of post-fill objects */
 	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 }; /* total 20 bytes */
