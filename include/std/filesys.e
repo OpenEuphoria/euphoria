@@ -185,7 +185,9 @@ public enum
 	D_DAY,
 	D_HOUR,
 	D_MINUTE,
-	D_SECOND
+	D_SECOND,
+	D_MILLISECOND,
+	D_ALTNAME
 
 --**
 -- Bad path error code. See [[:walk_dir]]
@@ -217,7 +219,8 @@ public constant W_BAD_PATH = -1 -- error code
 -- you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
--- the year, month, day, hour, minute and second of the last modification.
+-- the time of the last modification.
+--
 -- You can refer to the elements of an entry with the following constants:
 --  
 -- <eucode>
@@ -231,7 +234,9 @@ public constant W_BAD_PATH = -1 -- error code
 --     D_DAY        = 6,
 --     D_HOUR       = 7,
 --     D_MINUTE     = 8,
---     D_SECOND     = 9
+--     D_SECOND     = 9,
+--     D_MILLISECOND = 10,
+--     D_ALTNAME    = 11
 -- </eucode>
 --
 -- The attributes element is a string sequence containing characters chosen from:
@@ -241,8 +246,17 @@ public constant W_BAD_PATH = -1 -- error code
 -- | 'r'         | read only file
 -- | 'h'         | hidden file
 -- | 's'         | system file
--- | 'v'         | volume-id entry
+-- | 'v'         | volume-id entry 
 -- | 'a'         | archive file
+-- | 'c'         | compressed file
+-- | 'e'         | encrypted file
+-- | 'N'         | not indexed
+-- | 'D'         | a device name
+-- | 'O'         | offline
+-- | 'R'         | reparse point or symbolic link
+-- | 'S'         | sparse file
+-- | 'T'         | temporary file
+-- | 'V'         | virtual file
 --
 -- A normal file without special attributes would just have an empty string, "", in this field.
 --
@@ -250,12 +264,14 @@ public constant W_BAD_PATH = -1 -- error code
 -- 
 -- This function is often used just to test if a file or directory exists.
 -- 
--- Under //WIN32//, st can have a long file or directory name anywhere in 
+-- Under //WIN32//, the argument can have a long file or directory name anywhere in 
 -- the path.
 -- 
--- Under //Unix//, the only attribute currently available is 'd'.
+-- Under //Unix//, the only attribute currently available is 'd' and the milliseconds
+-- are always zero.
 -- 
--- //WIN32//: The file name returned in D_NAME will be a long file name.
+-- //WIN32//: The file name returned in [D_NAME] will be a long file name. If [D_ALTNAME]
+-- is not zero, it contains the 'short' name of the file.
 --
 -- Example 1:
 -- <eucode>

@@ -1320,27 +1320,23 @@ typedef struct _SYSTEMTIME {
 	
 	fp_buf = NULL;
 	next_file = FindFirstFile( path, &file_info);
-	if (next_file == INVALID_HANDLE_VALUE)
+	if ( (next_file == INVALID_HANDLE_VALUE) ||
+		((file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
+			(has_wildcards == 0)) )
 	{
-		return ATOM_M1; /* couldn't open directory (or file) */
-	}
-	
-	if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-	{
-		if (has_wildcards == 0)
+		// Inital path could be a 'share' folder or
+		// a directory when no wildcards were used,
+		// so assume the caller wants to see inside the directory.
+		FindClose(next_file);
+		strcat(path, "\\*");
+		has_wildcards = 1;
+		next_file = FindFirstFile( path, &file_info);
+		if (next_file == INVALID_HANDLE_VALUE)
 		{
-			// Initial path is a directory and no wildcards were used,
-			// so assume the caller wants to see inside the directory.
-			FindClose(next_file);
-			strcat(path, "\\*");
-			has_wildcards = 1;
-			next_file = FindFirstFile( path, &file_info);
-			if (next_file == INVALID_HANDLE_VALUE)
-			{
-				return ATOM_M1; /* couldn't open directory (or file) */
-			}
+			return ATOM_M1; /* couldn't open directory (or file) */
 		}
 	}
+
 	
 	/* start with empty sequence as result */
 	result = (s1_ptr)NewString("");
