@@ -2915,7 +2915,9 @@ procedure opLENGTH()
 				target = repeat(SeqLen(Code[pc+1]), 2)
 			else
 				-- Fetch the current length from the struct
-				c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
+				c_stmt ("if (IS_SEQUENCE(@))\n", Code[pc+1])
+				c_stmt ("    @ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
+				c_stmt ("else\n    @ = 1;\n", Code[pc+2])
 				target = {0, MAXLEN}
 			end if
 		else
@@ -2924,13 +2926,11 @@ procedure opLENGTH()
 		end if
 		CDeRefStr("_0")
 		SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
-	else
-		if opcode = PLENGTH then
-			-- we have a pointer to an argument
-			c_stmt("@ = SEQ_PTR(*(object_ptr)_3)->length;\n", Code[pc+2])
-		else
-			c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
-		end if
+	else -- opcode = PLENGTH
+		-- we have a pointer to an argument
+		c_stmt0("if (IS_SEQUENCE(*(object_ptr)_3))\n")
+		c_stmt ("    @ = SEQ_PTR(*(object_ptr)_3)->length;\n", Code[pc+2])
+		c_stmt ("else\n    @ = 1;\n", Code[pc+2])
 		CDeRefStr("_0")
 		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 	end if
