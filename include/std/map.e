@@ -299,9 +299,6 @@ end function
 --   # ##m## : the map to resize
 --   # ##requested_bucket_size_p## : a lower limit for the new size.
 --
--- Returns:
---		A **map**, with the same data in, but more evenly dispatched and hence faster to use.
---
 -- Comment:
 -- If ##requested_bucket_size_p## is not greater than zero, a new width is automatically derived from the current one.
 --
@@ -631,9 +628,6 @@ end function
 --		# ##operation## : an integer, indicating what is to be done with ##the_value_p##. Defaults to PUT.
 --		# ##trigger_p## : an integer. Default is 100. See Comments for details.
 --
--- Returns:
---		The updated **map**.
---
 -- Comments:
 -- * The operation parameter can be used to modify the existing value.  Valid operations are: 
 -- 
@@ -845,9 +839,6 @@ end procedure
 -- * ##APPEND## ~-- Appends the value to the existing data 
 -- * ##CONCAT## ~-- Equivalent to using the &= operator
 --
--- Returns:
---   The modified **map**.
---
 -- Comments:
 --   * If existing entry with the same key is already in the map, the value of the entry is updated.
 --   * The //trigger// parameter is used when you need to keep the average 
@@ -890,9 +881,6 @@ end procedure
 -- Parameters:
 --		# ##the_map_p## : the map to operate on
 --		# ##key## : an object, the key to remove.
---
--- Returns:
---		 The modified **map**.
 --
 -- Comments:
 --   * If ##key## is not on ##the_map_p##, the ##the_map_p## is returned unchanged.
@@ -1354,9 +1342,6 @@ end function
 --      # ##grow_p## : an atom, the factor to grow the number of buckets for each
 --                   iteration of rehashing. Default is 1.333. This must be 
 --                   greater than 1.
---
--- Returns:
---		The optimized **map**.
 --
 -- Comments:
 --      This rehashes the map until either the maximum bucket size is less than
@@ -1843,6 +1828,10 @@ end function
 --   # ##in_sorted_order##: An integer. Optional. If non-zero the items in the
 --                    map are processed in ascending key sequence otherwise
 --                    the order is undefined. By default they are not sorted.
+--   # ##signal_boundary##: A integer; 0 (the default) means that the user 
+--                    routine is not called if the map is empty and when the
+--                    last item is passed to the user routine, the Progress Code
+--                    is not negative.
 --
 -- Returns:
 -- An integer: 0 means that all the items were processed, and anything else is whatever
@@ -1860,9 +1849,15 @@ end function
 -- *** If the progress code is negative, it is also the last call to the routine.
 -- *** If the progress code is zero, it means that the map is empty and thus the
 -- item key and value cannot be used.
+-- *** **note** that if ##signal_boundary## is zero, the Progress Code is never
+--     less than 1.
 -- * The user routine must return 0 to get the next map item. Anything else will
 -- cause ##for_each()## to stop running, and is returned to whatever called 
 -- ##for_each()##.
+-- * Note that any changes that the user routine makes to the map do not affect the
+-- order or number of times the routine is called. ##for_each()## takes a copy of the
+-- map keys and data before the first call to the user routine and uses the copied
+-- data to call the user routine. 
 --
 -- Example 1:
 -- <eucode>
@@ -1921,21 +1916,23 @@ end function
 -- -------------------
 -- }}}
 --
-public function for_each(map source_map, integer user_rid, object user_data = 0, integer in_sorted_order = 0)
+public function for_each(map source_map, integer user_rid, object user_data = 0, integer in_sorted_order = 0, integer signal_boundary = 0)
 	sequence lKV
 	object lRes
+	integer progress_code
 	
 	lKV = pairs(source_map, in_sorted_order)	
-	if length(lKV) = 0 then
+	if length(lKV) = 0 and signal_boundary != 0 then
 		return call_func(user_rid, {0,0,user_data,0} )
 	end if
 	
 	for i = 1 to length(lKV) do
-		if i = length(lKV) then
-			lRes = call_func(user_rid, {lKV[i][1], lKV[i][2], user_data, -i})
+		if i = length(lKV) and signal_boundary then
+			progress_code = -i
 		else
-			lRes = call_func(user_rid, {lKV[i][1], lKV[i][2], user_data, i})
+			progress_code = i
 		end if
+		lRes = call_func(user_rid, {lKV[i][1], lKV[i][2], user_data, progress_code})
 		if not equal(lRes, 0) then
 			return lRes
 		end if

@@ -473,17 +473,17 @@ map:for_each(m1, routine_id("Process_A"))
 map:for_each(m1, routine_id("Process_B"), "List of Items", 1)
 
 sequence efer = {
-	{"The map is empty",0,0,0,0},
+--	{"The map is empty",0,0,0,0},
 	{"application", "Euphoria", 0, 1},
 	{"version", "4.0", 0, 2},
 	{"genre", "programming language", 0, 3},
-	{"crc", "4F71AE10", 0, -4},
+	{"crc", "4F71AE10", 0, 4},
 	{"START", "application", "Euphoria", "List of Items", 1},
 	{"application", "Euphoria", "List of Items", 1},
 	{"crc", "4F71AE10", "List of Items", 2},
 	{"genre", "programming language", "List of Items", 3},
-	{"version", "4.0", "List of Items", -4},
-	{"END", "version", "4.0", "List of Items", -4},
+	{"version", "4.0", "List of Items", 4},
+--	{"END", "version", "4.0", "List of Items", -4},
 	$
 }
 
@@ -498,6 +498,27 @@ efer = {
 -- Sorted
 map:for_each(m1, routine_id("Process_C"), , 1)
 test_equal("for_each", efer, fer)
+
+fer = {}
+efer = {
+	{0,0,0,0},
+	{"START", "application", "Euphoria", "List of Items", 1},
+	{"application", "Euphoria", "List of Items", 1},
+	{"crc", "4F71AE10", "List of Items", 2},
+	{"genre", "programming language", "List of Items", 3},
+	{"version", "4.0", "List of Items", -4},
+	{"END", "version", "4.0", "List of Items", -4},
+	$
+}
+clear(m1)
+-- Empty
+map:for_each(m1, routine_id("Process_A"),,,1)
+map:put(m1, "application", "Euphoria")
+map:put(m1, "version", "4.0")
+map:put(m1, "genre", "programming language")
+map:put(m1, "crc", "4F71AE10")
+map:for_each(m1, routine_id("Process_B"), "List of Items", 1, 1)
+test_equal("for_each with boundary", efer, fer)
 
 -- Testing the removal of items from a multi-item bucket
 map:threshold(50)
