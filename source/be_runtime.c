@@ -5206,7 +5206,7 @@ void ProfileCommand()
 object make_atom32(unsigned long c32)
 /* make a Euphoria atom from an unsigned C value */
 {
-	if (c32 <= (unsigned)MAXINT)
+	if (c32 <= (unsigned long)MAXINT)
 		return c32;
 	else
 		return NewDouble((double)c32);
@@ -5230,7 +5230,6 @@ unsigned long general_call_back(
 	long *code[4+9]; // place to put IL: max 9 args
 	long *save_tpc;
 #endif
-
 	if (gameover)
 		return (unsigned long)0; // ignore messages after we decide to shutdown
 
@@ -5239,23 +5238,23 @@ unsigned long general_call_back(
 	num_args = rt00[cb_routine].num_args;
 	addr = rt00[cb_routine].addr;
 	if (num_args >= 1) {
-	  call_back_arg1->obj = make_atom32((unsigned)arg1);
+	  call_back_arg1->obj = make_atom32((unsigned long)arg1);
 	  if (num_args >= 2) {
-		call_back_arg2->obj = make_atom32((unsigned)arg2);
+		call_back_arg2->obj = make_atom32((unsigned long)arg2);
 		if (num_args >= 3) {
-		  call_back_arg3->obj = make_atom32((unsigned)arg3);
+		  call_back_arg3->obj = make_atom32((unsigned long)arg3);
 		  if (num_args >= 4) {
-			call_back_arg4->obj = make_atom32((unsigned)arg4);
+			call_back_arg4->obj = make_atom32((unsigned long)arg4);
 			if (num_args >= 5) {
-			  call_back_arg5->obj = make_atom32((unsigned)arg5);
+			  call_back_arg5->obj = make_atom32((unsigned long)arg5);
 			  if (num_args >= 6) {
-				call_back_arg6->obj = make_atom32((unsigned)arg6);
+				call_back_arg6->obj = make_atom32((unsigned long)arg6);
 				if (num_args >= 7) {
-				  call_back_arg7->obj = make_atom32((unsigned)arg7);
+				  call_back_arg7->obj = make_atom32((unsigned long)arg7);
 				  if (num_args >= 8) {
-					call_back_arg8->obj = make_atom32((unsigned)arg8);
+					call_back_arg8->obj = make_atom32((unsigned long)arg8);
 					if (num_args >= 9) {
-					  call_back_arg9->obj = make_atom32((unsigned)arg9);
+					  call_back_arg9->obj = make_atom32((unsigned long)arg9);
 					}
 				  }
 				}
@@ -5342,39 +5341,39 @@ unsigned long general_call_back(
 	num_args = cb_routine->u.subp.num_args;
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
-	  call_back_arg1->obj = make_atom32((unsigned)arg1);
+	  call_back_arg1->obj = make_atom32((unsigned long)arg1);
 	  code[2] = (long *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
-		call_back_arg2->obj = make_atom32((unsigned)arg2);
+		call_back_arg2->obj = make_atom32((unsigned long)arg2);
 		code[3] = (long *)call_back_arg2;
 		if (num_args >= 3) {
 		  DeRef(call_back_arg3->obj);
-		  call_back_arg3->obj = make_atom32((unsigned)arg3);
+		  call_back_arg3->obj = make_atom32((unsigned long)arg3);
 		  code[4] = (long *)call_back_arg3;
 		  if (num_args >= 4) {
 			DeRef(call_back_arg4->obj);
-			call_back_arg4->obj = make_atom32((unsigned)arg4);
+			call_back_arg4->obj = make_atom32((unsigned long)arg4);
 			code[5] = (long *)call_back_arg4;
 			if (num_args >= 5) {
 			  DeRef(call_back_arg5->obj);
-			  call_back_arg5->obj = make_atom32((unsigned)arg5);
+			  call_back_arg5->obj = make_atom32((unsigned long)arg5);
 			  code[6] = (long *)call_back_arg5;
 			  if (num_args >= 6) {
 				DeRef(call_back_arg6->obj);
-				call_back_arg6->obj = make_atom32((unsigned)arg6);
+				call_back_arg6->obj = make_atom32((unsigned long)arg6);
 				code[7] = (long *)call_back_arg6;
 				if (num_args >= 7) {
 				  DeRef(call_back_arg7->obj);
-				  call_back_arg7->obj = make_atom32((unsigned)arg7);
+				  call_back_arg7->obj = make_atom32((unsigned long)arg7);
 				  code[8] = (long *)call_back_arg7;
 				  if (num_args >= 8) {
 					DeRef(call_back_arg8->obj);
-					call_back_arg8->obj = make_atom32((unsigned)arg8);
+					call_back_arg8->obj = make_atom32((unsigned long)arg8);
 					code[9] = (long *)call_back_arg8;
 					if (num_args >= 9) {
 					  DeRef(call_back_arg9->obj);
-					  call_back_arg9->obj = make_atom32((unsigned)arg9);
+					  call_back_arg9->obj = make_atom32((unsigned long)arg9);
 					  code[10] = (long *)call_back_arg9;
 					}
 				  }
@@ -5405,14 +5404,14 @@ unsigned long general_call_back(
 	// Don't do get_pos_int() for crash handler
 	if (crash_call_back) {
 		crash_call_back = FALSE;
-		return (unsigned)(call_back_result->obj);
+		return (unsigned long)(call_back_result->obj);
 	}
 	else {
-		return (unsigned)get_pos_int("call-back", call_back_result->obj);
+		return (unsigned long)get_pos_int("call-back", call_back_result->obj);
 	}
 }
 
-unsigned (*general_ptr)() = (void *)&general_call_back;
+unsigned long (*general_ptr)() = (void *)&general_call_back;
 
 #ifdef EWATCOM
 #pragma off (check_stack);
@@ -5421,12 +5420,18 @@ unsigned (*general_ptr)() = (void *)&general_call_back;
 /* Windows cdecl - Need only one template.
    It can handle a variable number of args.
    Not all args below will actually be provided on a given call. */
+#if EBITS == 32
+#define CALLBACK_POINTER 0x12345678
 
-LRESULT __cdecl cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
-						unsigned arg4, unsigned arg5, unsigned arg6,
-						unsigned arg7, unsigned arg8, unsigned arg9)
+#elif EBITS == 64
+#define CALLBACK_POINTER 0x1234567812345678
+#endif
+
+LRESULT __cdecl cdecl_call_back(unsigned long arg1, unsigned long arg2, unsigned long arg3,
+						unsigned long arg4, unsigned long arg5, unsigned long arg6,
+						unsigned long arg7, unsigned long arg8, unsigned long arg9)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
@@ -5438,79 +5443,79 @@ LRESULT __cdecl cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
 
 LRESULT CALLBACK call_back0()
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678, // will be replaced
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER, // will be replaced
 									 0, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back1(unsigned arg1)
+LRESULT CALLBACK call_back1(unsigned long arg1)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back2(unsigned arg1, unsigned arg2)
+LRESULT CALLBACK call_back2(unsigned long arg1, unsigned long arg2)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back3(unsigned arg1, unsigned arg2, unsigned arg3)
+LRESULT CALLBACK call_back3(unsigned long arg1, unsigned long arg2, unsigned long arg3)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back4(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4)
+LRESULT CALLBACK call_back4(unsigned long arg1, unsigned long arg2, unsigned long arg3,
+							unsigned long arg4)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back5(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5)
+LRESULT CALLBACK call_back5(unsigned long arg1, unsigned long arg2, unsigned long arg3,
+							unsigned long arg4, unsigned long arg5)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back6(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6)
+LRESULT CALLBACK call_back6(unsigned long arg1, unsigned long arg2, unsigned long arg3,
+							unsigned long arg4, unsigned long arg5, unsigned long arg6)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back7(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7)
+LRESULT CALLBACK call_back7(unsigned long arg1, unsigned long arg2, unsigned long arg3,
+							unsigned long arg4, unsigned long arg5, unsigned long arg6,
+							unsigned long arg7)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, 0, 0);
 }
 
-LRESULT CALLBACK call_back8(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7, unsigned arg8)
+LRESULT CALLBACK call_back8(unsigned long arg1, unsigned long arg2, unsigned long arg3,
+							unsigned long arg4, unsigned long arg5, unsigned long arg6,
+							unsigned long arg7, unsigned long arg8)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, 0);
 }
 
-LRESULT CALLBACK call_back9(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7, unsigned arg8, unsigned arg9)
+LRESULT CALLBACK call_back9(unsigned long arg1, unsigned long arg2, unsigned long arg3,
+							unsigned long arg4, unsigned long arg5, unsigned long arg6,
+							unsigned long arg7, unsigned long arg8, unsigned long arg9)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
+	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }

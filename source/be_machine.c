@@ -2300,12 +2300,16 @@ object DefineC(object xo)
 }
 
 #if __GNUC__ == 4
-#define CALLBACK_SIZE (96)
+	#if EBITS == 32
+		#define CALLBACK_SIZE 96
+	#elif EBITS == 64
+		#define CALLBACK_SIZE 129
+	#endif
 #else
-#define CALLBACK_SIZE (80)
+	#define CALLBACK_SIZE 40
 #endif
 
-#define EXECUTABLE_ALIGNMENT (4)
+#define EXECUTABLE_ALIGNMENT (EWORDSIZE)
 
 #ifdef EWINDOWS
 typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection);
@@ -2467,13 +2471,14 @@ object CallBack(object x)
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-
 	
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
-		if (copy_addr[i]   == 0x078 &&
-			copy_addr[i+1] == 0x056) {
+		if (copy_addr[i]   == 0x78 &&
+			copy_addr[i+1] == 0x56 &&
+			copy_addr[i+2] == 0x34 && 
+			copy_addr[i+3] == 0x12 ) {
 #ifdef ERUNTIME
 			*(long *)(copy_addr+i) = routine_id;
 #else
@@ -2481,6 +2486,17 @@ object CallBack(object x)
 #endif
 			break;
 		}
+		#if EBITS == 64
+		else if(
+			copy_addr[i]   == 0x4c &&
+			copy_addr[i+1] == 0x8b &&
+			copy_addr[i+2] == 0x15  ){
+			// Replacing the offset for loading general_ptr...objdump looks like this:
+			// 4c 8b 15 00 00 00 00 	mov    0x0(%rip),%r10        # acfe <cdecl_call_back+0x28>
+			*((int*)(copy_addr + i + 3)) = (int) ( (long)(&general_ptr)) - ( (long)(copy_addr + i + 7) );
+				   
+		}
+		#endif
 	}
 
 	/* Make memory executable. */
@@ -2492,7 +2508,6 @@ object CallBack(object x)
 #endif
 #endif
 	addr = (unsigned long)copy_addr;
-
 	/* Return new address. */
 	if (addr <= (unsigned long)MAXINT_VAL)
 		return MAKE_INT(addr);

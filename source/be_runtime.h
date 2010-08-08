@@ -4,7 +4,7 @@
 #include "global.h"
 #include "execute.h"
 #include "reswords.h"
-
+extern unsigned long (*general_ptr)();
 void de_reference(s1_ptr a);
 void UserCleanup(long status);
 
