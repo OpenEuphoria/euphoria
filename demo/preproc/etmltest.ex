@@ -3,7 +3,7 @@ include hello.etml as hello
 
 sequence cmds = command_line()
 if length(cmds) != 3 then
-	puts(1, "usage: test.ex <name>")
+	puts(1, "usage: test.ex <name>\n")
 	abort(0)
 end if
 
