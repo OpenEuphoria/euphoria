@@ -30,36 +30,18 @@ constant
 	M_CURRENT_DIR = 23,
 	M_CHDIR       = 63
 
-ifdef WIN32 then
+ifdef WIN32 then	
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
-		C_BOOL)
-	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
-	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
-	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
-		{C_POINTER, C_POINTER}, C_BOOL)
-	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
-	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
-	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
-		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
 
 elsifdef LINUX then
 	constant lib = open_dll("")
 
-elsifdef FREEBSD or SUNOS or OPENBSD then
-	constant lib = open_dll("libc.so")
-	
 elsifdef OSX then
 	constant lib = open_dll("libc.dylib")
 
-elsedef
-	constant xCopyFile          = -1
-	constant xMoveFile          = -1
-	constant xDeleteFile        = -1
-	constant xCreateDirectory   = -1
-	constant xRemoveDirectory   = -1
-	constant xGetFileAttributes = -1
-
+elsifdef UNIX then
+	constant lib = open_dll("libc.so")
+	
 end ifdef
 
 ifdef LINUX then
@@ -75,6 +57,24 @@ ifdef UNIX then
 	constant xCreateDirectory = define_c_func(lib, "mkdir", {C_POINTER, C_INT}, C_INT)
 	constant xRemoveDirectory = define_c_func(lib, "rmdir", {C_POINTER}, C_INT)
 	constant xGetFileAttributes = define_c_func(lib, "access", {C_POINTER, C_INT}, C_INT)
+elsifdef WIN32 then
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
+		C_BOOL)
+	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
+	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
+	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
+		{C_POINTER, C_POINTER}, C_BOOL)
+	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
+	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
+	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
+		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
+elsedef
+	constant xCopyFile          = -1
+	constant xMoveFile          = -1
+	constant xDeleteFile        = -1
+	constant xCreateDirectory   = -1
+	constant xRemoveDirectory   = -1
+	constant xGetFileAttributes = -1
 end ifdef
 
 

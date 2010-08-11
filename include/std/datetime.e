@@ -19,15 +19,15 @@ include std/types.e
 ifdef LINUX then
 	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_func(open_dll(""), "time", {C_POINTER}, C_INT)
-elsifdef FREEBSD or SUNOS or OPENBSD then
-	constant gmtime_ = define_c_func(open_dll("libc.so"), "gmtime", {C_POINTER}, C_POINTER)
-	constant time_ = define_c_func(open_dll("libc.so"), "time", {C_POINTER}, C_INT)
 elsifdef OSX then
 	constant gmtime_ = define_c_func(open_dll("libc.dylib"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_func(open_dll("libc.dylib"), "time", {C_POINTER}, C_INT)
 elsifdef WIN32 then
 	constant gmtime_ = define_c_func(open_dll("msvcrt.dll"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_proc(open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {C_POINTER})
+elsifdef UNIX then
+	constant gmtime_ = define_c_func(open_dll("libc.so"), "gmtime", {C_POINTER}, C_POINTER)
+	constant time_ = define_c_func(open_dll("libc.so"), "time", {C_POINTER}, C_INT)
 end ifdef
 
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
