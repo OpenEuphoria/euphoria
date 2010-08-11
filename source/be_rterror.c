@@ -939,7 +939,7 @@ static void ShowName()
 	}
 
 	name_len = strlen(name);
-	name_ptr = RTLookup(name+i, slist[trace_line].file_no, tpc, NULL, fe.st[0].obj); 
+	name_ptr = RTLookup(name+i, slist[trace_line].file_no, tpc, NULL, fe.st[0].obj, trace_line ); 
 	if (name_ptr == NULL || name_ptr->token != VARIABLE) {
 		SetPosition(prompt, 18 + name_len);
 		screen_output(NULL, "- not defined at this point");

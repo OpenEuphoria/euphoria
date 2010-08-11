@@ -46,6 +46,15 @@ constant
 	ST_DUMMY          = 15,
 	ST_NAME           = 16,
 	ST_TOKEN          = 20,
+	
+	-- var:
+	ST_DECLARED_IN    = 24,
+	
+	-- block:
+	ST_FIRST_LINE     = 24,
+	ST_LAST_LINE      = 28,
+	
+	-- routine:
 	ST_CODE           = 24,
 	ST_LINETAB        = 28,
 	ST_FIRSTLINE      = 32,
@@ -153,18 +162,22 @@ procedure BackEnd(integer il_file)
 					poke4(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
 					poke4(addr + ST_BLOCK, eentry[S_BLOCK])
 					
+				else
+					poke4(addr + ST_DECLARED_IN, eentry[S_BLOCK] )
 				end if
 				
 			elsif eentry[S_MODE] = M_BLOCK then
 				poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK] )
 				poke4(addr + ST_BLOCK, eentry[S_BLOCK])
+				poke4(addr + ST_FIRST_LINE, eentry[S_FIRST_LINE] )
+				poke4(addr + ST_LAST_LINE, eentry[S_LAST_LINE] )
 				
 			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
 			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
 				-- compress constants and literal values in memory
 				poke4(addr, length(lit_string))  -- record the current offset
 				lit_string &= compress(eentry[S_OBJ])
-
+				
 			end if
 
 		end if

@@ -82,7 +82,12 @@ export constant
 	S_VARNUM = 16,    -- local variable number
 	
 	S_BLOCK = 17 - get_backend() * 7 -- Either the containing scope for a var or the main scope for a routine
-	
+
+-- for blocks only:
+export constant
+	S_FIRST_LINE = 18 - get_backend() * 7,  -- first line of the block
+	S_LAST_LINE  = 19 - get_backend() * 7   -- last line of the block
+
 -- for routines only:
 export constant
 	S_LINETAB = 18 - get_backend()*7,      -- Line table for traceback
@@ -147,6 +152,7 @@ export constant
 export constant
 	SIZEOF_ROUTINE_ENTRY = 29 + 25 * TRANSLATE,
 	SIZEOF_VAR_ENTRY     = 17 + 37 * TRANSLATE,
+	SIZEOF_BLOCK_ENTRY   = 19 + 35 * TRANSLATE,
 	SIZEOF_TEMP_ENTRY    =  6 + 32 * TRANSLATE
 
 -- Permitted values for various symbol table fields

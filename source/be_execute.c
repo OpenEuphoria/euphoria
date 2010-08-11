@@ -1239,6 +1239,9 @@ void symtab_set_pointers()
 				}
 				s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );
 			}
+			else{
+				s->u.var.declared_in = (symtab_ptr)SET_OPERAND( s->u.var.declared_in );
+			}
 		}
 		else if (s->mode == M_CONSTANT ) {
 			if (s->obj) {
@@ -1251,6 +1254,7 @@ void symtab_set_pointers()
 				// forward references that require init checks
 				s->obj = NOVALUE;
 			}
+			
 		}
 		else if (s->mode == M_BLOCK ) {
 			s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );

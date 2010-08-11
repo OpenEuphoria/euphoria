@@ -163,8 +163,9 @@ procedure main()
 
 	InitSymTab()
 	InitEmit()
-	InitParser()
 	InitLex()
+	InitParser()
+	
 
 	-- sets up the internal namespace
 	eu_namespace()
