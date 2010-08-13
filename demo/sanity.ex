@@ -7,6 +7,20 @@
 --   eui sanity.ex
 
 with type_check
+constant version_string = "4.0.0 beta 2" -- the version of the distributed executable
+-- use the checksum from the last beta release
+ifdef WINDOWS then
+	constant SUM_EX  = 32204003, 
+		 SUM_EXW = 32200661
+elsedef
+	 -- we need seperate lines for each platform...
+	 puts(msg,"Dear Developer: "&
+	 	"Please add the checksum for the non Windows platforms\n"&
+	 	"constant SUM_EX = <some number>,SUM_EXW = 0\nPress ENTER.")
+	 gets(0)
+	 constant SUM_EX = 0, SUM_EXW = 0
+end ifdef
+
 include std/get.e
 include std/graphics.e  -- comment after include is ok
 include std/sort.e
@@ -1004,18 +1018,6 @@ function checksum(sequence filename)
     return last_sum
 end function
 
--- use the checksum from the last beta release
-ifdef WINDOWS then
-	constant SUM_EX = 32204003, 
-		 SUM_EXW = 32200661
-elsedef
-	 -- we need seperate lines for each platform...
-	 puts(msg,"Dear Developer: "&
-	 	"Please add the checksum for the non Windows platforms\n"&
-	 	"constant SUM_EX = <some number>\nPress ENTER.")
-	 gets(0)
-	 constant SUM_EX = 0
-end ifdef
 object eudir
 
 procedure corrupt(sequence filename)
@@ -1029,27 +1031,20 @@ procedure corrupt(sequence filename)
 		puts(msg, "The install is not correct. ")
     else
 		printf(msg, "%s seems to be incorrect. \n", {full_name})
-		if    last_sum = SUM_EX then
-	    	puts(msg, "It's the Complete Edition eui.exe file. ")
-		elsif last_sum = SUM_EXW then
-		    puts(msg, "It's the Complete Edition eui.exe file. ")
-		elsif last_sum = SUM_EX then
-		    puts(msg, "It's the Complete Edition eui file. ")
-		else                
-		    printf(msg, "Its check-sum (%d) is wrong. \n", last_sum)
-		    puts(msg, 
-			    "Either it's an old version, or it has been corrupted. \n")
-		    puts(msg, 
-			    "You can download the latest version of Euphoria from: \n")
-		    puts(msg, "    http://www.RapidEuphoria.com/ ")
-		end if
+		
+		printf(msg, "Its check-sum (%d) is wrong. \n", last_sum)
+		printf(msg, 
+			"Either it's not version %s, or it has been corrupted. \n", {version_string})
+		puts(msg, 
+			"You can download the latest version of Euphoria from: \n")
+		puts(msg, "    http://www.RapidEuphoria.com/ ")
     end if
     puts(msg, "\n\n\n")
     the_end()
 end procedure
 
 procedure reboot_msg()
-	ifdef UNIX then
+    ifdef UNIX then
 		puts(msg, "Did you forget to edit your profile and log in again?\n")
     elsedef
 		puts(msg, "Did you forget to reboot (restart) your machine?\n")
@@ -1063,12 +1058,12 @@ procedure check_install(integer doit)
 -- see if Euphoria was installed correctly
     object path
     sequence temp_eudir
-    integer ex_sum, slash
+    integer ex_sum, slash, key
     
     if not doit then
-	-- puts(1, "skipping checksum - press Enter\n")
-	-- if getc(0) then
-	-- end if
+	puts(1, "skipping checksum - press Enter\n")
+	if getc(0) then
+	end if
 	return
     end if
     
@@ -1083,7 +1078,7 @@ procedure check_install(integer doit)
 	puts(msg, "Note: Your EUDIR variable has not been set.\n")
 	reboot_msg()
     end if
-    
+        
     if length(eudir) and eudir[$] = '\\' then
 	eudir = eudir[1..$-1]
     end if
@@ -1105,10 +1100,25 @@ procedure check_install(integer doit)
     if ex_sum = SUM_EX then
     	ifdef WINDOWS then
 	    if checksum(eudir & SLASH & "BIN" & SLASH & "euiw.exe") != SUM_EXW then
-			    corrupt("euiw.exe")
+		corrupt("euiw.exe")
 	    end if
 	end ifdef
     else
+	if sequence(dir(eudir & SLASH & ".svn")) then
+	     ifdef WIN32_GUI then
+	     	if message_box("Checksum failed.", "Install Check", MB_OKCANCEL ) = IDOK then
+		    key = 'y'
+		else
+		    key = 0
+		end if
+	    elsedef
+    		puts(msg, "Checksum failed.  Do you wish to continue the test? [yn]")
+		key = wait_key()
+	    end ifdef
+	    if lower(key) = 'y' then
+		return
+	    end if
+	end if
 	corrupt("eui.exe")
     end if   
 end procedure
@@ -1120,9 +1130,9 @@ global procedure sanity()
     sequence cmd_line, save_colors, s1, s2
     integer vga, ok
 
-    check_install(FALSE) --TRUE)
+    check_install(TRUE)
 
-	ifdef WIN32 then
+	ifdef WIN32_GUI then
 		vga = FALSE
 		ok = message_box("Run the test?", "Euphoria WIN32 Sanity Test", 
 			{MB_OKCANCEL, MB_SYSTEMMODAL})
@@ -1141,7 +1151,7 @@ global procedure sanity()
 		display_text_image({10,20}, s1)
 		s2 = save_text_image({10, 20}, {11, 22})
 		if not equal(s1, s2) then
-	    	crash(generic_msg)
+	    	    crash(generic_msg)
 		end if
 
 		-- graphics mode and other tests
@@ -1206,7 +1216,7 @@ global procedure sanity()
     
 	delete_file("sanityio.tst")
     save_colors = {}
-    ifdef WIN32 then
+    ifdef WIN32_GUI then
 		ok = message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
     elsedef
 		puts(msg, "\nPASSED (100%)\n")
