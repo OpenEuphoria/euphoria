@@ -126,11 +126,28 @@ test_equal( "canonical_path() #1", current_dir() & SLASH & "t_filesys.e", canoni
 test_equal( "canonical_path() #2", current_dir() & SLASH & "t_filesys.e", canonical_path( `"t_filesys.e"` ) )
 test_equal( "canonical_path() #3", current_dir() & SLASH, canonical_path( current_dir() & SLASH & '.' & SLASH ) )
 
-sequence home = getenv("HOME")
-if home[$] != SLASH then
-	home &= SLASH
+
+object home
+
+home = getenv("HOME")	-- Usually defined in unix and might be defined in Windows.
+ifdef WINDOWS then
+if atom(home) then
+	-- Not defined so use alternative.
+	home = getenv("HOMEDRIVE")
+	if sequence(home) then
+		home &= getenv("HOMEPATH")
+	end if
 end if
-test_equal( "canonical_path() #4", home, canonical_path("~"))
+end ifdef
+if sequence(home) then
+	if home[$] != SLASH then
+		home &= SLASH
+	end if
+end if
+test_equal( "canonical_path() tilde = HOME #1", home, canonical_path("~"))
+test_equal( "canonical_path() tilde = HOME #2", home & 'a', canonical_path("~/a"))
+test_equal( "canonical_path() tilde = HOME #3", home & 'a', canonical_path("~a"))
+
 test_equal( "canonical_path() #5", current_dir() & SLASH, canonical_path( current_dir() & SLASH & "foo" & SLASH & ".." & SLASH ) )
 
 ifdef UNIX then
