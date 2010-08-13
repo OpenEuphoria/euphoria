@@ -10,6 +10,7 @@
 include std/io.e
 include std/regex.e as r
 include std/net/http.e
+include std/net/url.e as url
 
 sequence cmds = command_line()
 if not (length(cmds) = 5) then
@@ -25,9 +26,9 @@ if atom(data) then
 	abort(1)
 end if
 
-username = urlencode(username)
-title = urlencode(title)
-data = urlencode(data)
+username = url:encode(username)
+title = url:encode(title)
+data = url:encode(data)
 
 set_sendheader("POSTDATA", sprintf("language=euphoria&paste=Paste&author=%s&subject=%s&text=%s",
     { username, title, data }))
@@ -47,13 +48,13 @@ if r:has_match(reLink, data) then
 	puts(1, data[matchData[1][1]..matchData[1][2]] & "\n")
 else
     if match("Spam check", data) then
-	    puts(1, #~
+	    puts(1, `
 ____________Your paste triggered a spam check of pastey.net which is
 			normally triggered by including a URL in your paste. pastey.ex
 			does not currently support this handshake, thus you need to
 			try removing any URLs in your paste and try again, or submit
 			your paste manually to http://euphoria.pastey.net
-			~)
+			`)
     else
         puts(1, "Your paste was not accepted. The HTML result is:\n")
 	    puts(1, data & "\n")
