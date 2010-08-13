@@ -1379,10 +1379,12 @@ typedef struct _SYSTEMTIME {
 			*next_attr++ = 'S';
 		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_TEMPORARY)
 			*next_attr++ = 'T';
-		#ifdef FILE_ATTRIBUTE_VIRTUAL 
-			if (file_info.dwFileAttributes & FILE_ATTRIBUTE_VIRTUAL)
-				*next_attr++ = 'V';
+		#ifndef FILE_ATTRIBUTE_VIRTUAL 
+		    // This Windows constant is not defined in some older compilers.
+            #define FILE_ATTRIBUTE_VIRTUAL  (0x00010000L)
 		#endif
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_VIRTUAL)
+				*next_attr++ = 'V';
 
 		*next_attr = '\0';
 		obj_ptr[2] = NewString(attrs);
