@@ -1379,8 +1379,10 @@ typedef struct _SYSTEMTIME {
 			*next_attr++ = 'S';
 		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_TEMPORARY)
 			*next_attr++ = 'T';
-		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_VIRTUAL)
-			*next_attr++ = 'V';
+		#ifdef FILE_ATTRIBUTE_VIRTUAL 
+			if (file_info.dwFileAttributes & FILE_ATTRIBUTE_VIRTUAL)
+				*next_attr++ = 'V';
+		#endif
 
 		*next_attr = '\0';
 		obj_ptr[2] = NewString(attrs);
