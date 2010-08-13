@@ -477,11 +477,11 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 --     if find('d', item[D_ATTRIBUTES]) then
 --         return 0 -- Ignore directories
 --     end if
---     if not find(fileext(item[D_NAME]), {"c,h,cpp,hpp,cp"}) then
+--     if not find(fileext(item[D_NAME]), {"c","h","cpp","hpp","cp"}) then
 --         return 0 -- ignore non-C/C++ files
 --     end if
 --     printf(STDOUT, "%s%s%s: %d\n",
---            {path_name, SLASH, item[D_NAME], item[D_SIZE]})
+--            {path_name, {SLASH}, item[D_NAME], item[D_SIZE]})
 --     return 0 -- keep going
 -- end function
 --
@@ -1397,8 +1397,9 @@ end function
 --  to be interpreted as a file specification otherwise it is assumed to be a
 --  directory specification. The default is zero.
 --  # ##no_case## : An integer. Only applies to the Windows platform. If zero (the default) 
---  the path name is returned exactly as stored in the file system, otherwise the
+--  the path name is returned using the same case as supplied, otherwise the
 --  returned value is all in lowercase.
+--  
 --
 -- Returns:
 --     A **sequence**, the full path and file name.
@@ -1406,6 +1407,10 @@ end function
 -- Comment:
 -- * In non-Unix systems, the result is always in lowercase.
 -- * The supplied file/directory does not have to actually exist.
+-- * ##path_in## can be enclosed in quotes, which will be stripped off.
+-- * If ##path_in## begins with a tilde '~~' then that is replaced by the
+--   contents of $HOME in unix platforms and %HOMEDRIVE%%HOMEPATH% in Windows.
+-- * In Windows, all '/' characters are replaced by '\' characters.
 -- * Does not (yet) handle UNC paths or unix links.
 --
 --
