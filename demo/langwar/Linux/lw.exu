@@ -30,6 +30,9 @@ object line
 include vars.e
 include screen.e
 include std/graphics.e
+ifdef WINDOWS then
+    include std/win32/sounds.e
+end ifdef
 
 -- display summary file
 sum_no = open("lw.sum", "r")

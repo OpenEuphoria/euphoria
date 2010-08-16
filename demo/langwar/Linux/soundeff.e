@@ -1,6 +1,9 @@
 -- soundeff.e: Sound Effects
 include std/os.e
 include sched.e
+ifdef WINDOWS then
+    include std/win32/sounds.e
+end ifdef
 
 global procedure errbeep()
 -- error signal
