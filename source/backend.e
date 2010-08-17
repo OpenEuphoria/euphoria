@@ -169,8 +169,10 @@ procedure BackEnd(integer il_file)
 			elsif eentry[S_MODE] = M_BLOCK then
 				poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK] )
 				poke4(addr + ST_BLOCK, eentry[S_BLOCK])
-				poke4(addr + ST_FIRST_LINE, eentry[S_FIRST_LINE] )
-				poke4(addr + ST_LAST_LINE, eentry[S_LAST_LINE] )
+				if length(eentry) >= S_FIRST_LINE then
+					poke4(addr + ST_FIRST_LINE, eentry[S_FIRST_LINE] )
+					poke4(addr + ST_LAST_LINE, eentry[S_LAST_LINE] )
+				end if
 				
 			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
 			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
