@@ -32,6 +32,7 @@ include global.e
 include pathopen.e
 include error.e
 include msgtext.e
+include intinit.e
 
 constant OPTIONS = {
 { "shroud_only", 0, GetMsgText(303, 0), { NO_CASE, NO_PARAMETER }  },
@@ -44,6 +45,8 @@ constant OPTIONS = {
 { "i",           0, GetMsgText(311, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
 { "copyright",   0, GetMsgText(312, 0), { NO_CASE, NO_PARAMETER }  },
 { "c",           0, GetMsgText(280, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
+{ "d",           0, GetMsgText(282,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
+{ "batch",       0, GetMsgText(279,0), { NO_CASE } },
 $
 }
 
@@ -312,7 +315,13 @@ export procedure handle_options_for_bind( m:map opts )
 			
 			case "COPYRIGHT" then
 				copyrights()			
-						
+			
+			case "D" then
+				OpDefines &= val
+			
+			case "BATCH" then
+				batch_job = 1
+				
 			case "EXTRAS" then
 				if length(val) != 0 then
 					file_supplied = 1
@@ -596,8 +605,6 @@ procedure OutputIL()
 			
 			ShowMsg(1, 247, {out_name})
 		end if
-		ShowMsg(1, 242)
-		getc(0)
 	end if
 end procedure
 set_output_il( routine_id("OutputIL") )

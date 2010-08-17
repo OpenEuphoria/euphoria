@@ -4,7 +4,7 @@ include std/unittest.e
 include std/filesys.e
 
 -- doesn't make any sense to bother translating this...
-ifdef not EC then
+ifdef EUI then
 sequence eutest = ".." & SLASH &".." & SLASH & "source" & SLASH & "eutest.ex"
 sequence incdir = ".." & SLASH & "include"
 sequence exe    = command_line()

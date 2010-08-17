@@ -28,8 +28,8 @@ cmds = command_line()
 -- I have no logic for finding the interpreter here for the case
 -- of translated code and this method 
 -- below is a fork bomb when run as compiled translated C code. 
-ifdef not EC then
-
+ifdef not EUC then
+ifdef not EUB then
     integer xl = length(command_arrays)
 	interpreter = cmds[1]	
 	for i = 1 to xl do
@@ -52,6 +52,7 @@ ifdef not EC then
  		end if
  		if delete_file("command_line.txt") then end if
 	end for
+end ifdef
 end ifdef
 test_report()
 	 

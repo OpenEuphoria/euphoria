@@ -85,6 +85,16 @@ ifdef ABC then
 	end ifdef
 end ifdef
 
+ifdef XYZ then
+	test_fail( "XYZ not defined")
+	ifdef UVW then
+		test_fail( "nested UVW not defined" )
+	elsifdef ABC then
+		test_fail( "nested ifdef true elsifdef clause should never be evaluated" )
+	end ifdef
+end ifdef
+		
+
 -- ifdef then
 -- end ifdef
 -- 

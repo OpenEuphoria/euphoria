@@ -134,9 +134,11 @@ export function ShowWarnings()
 			if errfile = STDERR then
 				if remainder(i, 20) = 0 then
 					ShowMsg(errfile, 206)
-					c = getc(0)
-					if c = 'q' then
-						exit
+					if batch_job = 0 then
+						c = getc(0)
+						if c = 'q' then
+							exit
+						end if
 					end if
 				end if
 			end if

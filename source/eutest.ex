@@ -43,7 +43,8 @@ constant cmdopts = {
 		{ NO_CASE } },
 	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", {NO_CASE, HAS_PARAMETER, "path-to-eucoverage.ex"} },
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
-	{"testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
+	{ "testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
+	{ "bind", 0, "path to bind.ex", { NO_CASE, HAS_PARAMETER, "bind.ex"} },
 	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
@@ -60,7 +61,7 @@ sequence
 	dexe = "", 
 	executable = ""
 
-enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_EUTEST
+enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_BIND, E_BOUND, E_EUTEST
 
 type error_class(object i)
 	return integer(i) and i >= 1 and i <= E_EUTEST
@@ -454,6 +455,52 @@ function translate( sequence filename, sequence fail_list )
 	return fail_list
 end function
 
+function bind( sequence filename, sequence fail_list )
+	sequence cmd = sprintf("%s %s -batch \"%s\" %s -batch -D UNITTEST %s",
+		{ executable, interpreter_options, binder, interpreter_options, filename } )
+	
+	verbose_printf(1, "CMD '%s'\n", {cmd})
+	integer status = system_exec(cmd, 0)
+
+	filename = filebase(filename)
+	integer log_where = 0
+	if status = 0 then
+		sequence exename = filename & dexe
+		verbose_printf(1, "executing %s:\n", {exename})
+		cmd = sprintf("./%s %s", {exename, test_options})
+		status = invoke(cmd, exename,  E_EXECUTE) 
+		if status then
+			failed += 1
+			fail_list = append(fail_list, "bound" & " " & exename)
+		else
+			object token
+			if logging_activated then
+				token = check_log(log_where)
+			else
+				token = 0
+			end if
+
+			if sequence(token) then
+				failed += 1
+				fail_list = append(fail_list, "bound" & " " & exename)					
+				error(exename, E_BOUND, token, {}, "ex.err")
+			else
+				log_where = token
+				error(exename, E_NOERROR, "all tests successful", {})
+			end if -- sequence(token)
+		end if
+			
+		void = delete_file(exename)
+		
+	else
+		failed += 1
+		fail_list = append(fail_list, "binding " & filename)
+		error(filename, E_BIND, "program binding terminated with a bad status %d", {status})                               
+	end if
+	report_last_error(filename)
+	return fail_list
+end function
+
 function test_file( sequence filename, sequence fail_list )
 
 	integer log_where = 0 -- keep track of unittest.log
@@ -525,6 +572,10 @@ function test_file( sequence filename, sequence fail_list )
 	
 	report_last_error(filename)
 	
+	if length(binder) and expected_status = 0 then
+		fail_list = bind( filename, fail_list )
+	end if
+	
 	if length(translator) and expected_status = 0 then
 		fail_list = translate( filename, fail_list )
 	end if
@@ -538,6 +589,7 @@ sequence test_options = ""
 sequence translator = "", library = "", compiler = ""
 sequence interpreter_os_name
 
+sequence binder = ""
 sequence coverage_db    = ""
 sequence coverage_pp    = ""
 sequence coverage_erase = ""
@@ -1018,6 +1070,8 @@ procedure do_process_log( sequence cmds, integer html)
 	summarize_error("Test files could not be translated.........: %d", E_TRANSLATE, html)
 	summarize_error("Translated test files could not be compiled: %d", E_COMPILE, html)
 	summarize_error("Compiled test files failed unexpectedly....: %d", E_EXECUTE, html)
+	summarize_error("Test files could not be bound..............: %d", E_BIND, html )
+	summarize_error("Bound test files failed unexpectedly.......: %d", E_BOUND, html )
 	summarize_error("Test files run successfully................: %d", E_NOERROR, html)
 	
 	if html then
@@ -1176,6 +1230,9 @@ procedure main()
 
 			case "testopt" then
 				test_options &= " -" & val & " "
+				
+			case "bind" then
+				binder = val
 
 			case "extras" then
 				if length( val ) then

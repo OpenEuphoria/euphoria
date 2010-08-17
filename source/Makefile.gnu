@@ -513,10 +513,12 @@ test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test : code-page-db
 test :  
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
-		$(EXE) ../source/eutest.ex -i ../include -cc gcc \
-		-exe $(BUILDDIR)/$(EEXU) \
-		-ec $(BUILDDIR)/$(EECU) \
-		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)"
+		$(EXE) ../source/eutest.ex -i ../include -cc gcc -verbose \
+		-exe "$(BUILDDIR)/$(EEXU)" \
+		-ec "$(BUILDDIR)/$(EECU)" \
+		-bind ../source/bind.ex \
+		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)" \
+		$(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
 testeu : code-page-db

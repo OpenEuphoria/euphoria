@@ -1,8 +1,8 @@
 include std/filesys.e
 include std/unittest.e
 
-ifdef EC then
-	-- don't bother with translator for this test, because the warning file
+ifdef EUC or EUB then
+	-- don't bother with translator or binding for this test, because the warning file
 	-- is already gone
 elsedef
 	integer fn = open("warning.lst","r")

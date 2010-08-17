@@ -5,7 +5,7 @@ include std/text.e as text
 
 sequence list, interpreter
 list = command_line()
-ifdef EC then
+ifdef not EUI then
 	-- The tests test are here to test interpreters and libraries as we do not know where the
 	-- interpreter is we just quit.
 	test_report()
