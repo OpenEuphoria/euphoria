@@ -32,28 +32,27 @@ procedure InitBackEnd(integer x)
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
-constant ST_ENTRY_SIZE_32 = 60 -- size (bytes) of back-end symbol table entry
+ifdef X86 then
+	procedure poke_pointer( atom addr, object val )
+		poke4( addr, val )
+	end procedure
+	
+	function peek_pointer( object addr )
+		return peek4u( addr )
+	end function
+	
+	constant ST_ENTRY_SIZE = 60 -- size (bytes) of back-end symbol table entry
 							   -- for interpreter. Fixed size for all entries.
 							   -- assumes 32-bit word size
--- struct sline {      /* source line table entry */
--- 	char *src;               /* text of line, 
--- 								first 4 bytes used for count when profiling */
--- 	unsigned short line;     /* line number within file */
--- 	unsigned char file_no;   /* file number */
--- 	unsigned char options;   /* options in effect: */
-integer 
-	SIZEOF_POINTER = 4,
-	SIZEOF_SLINE  = 8,
-	SLINE_SRC     = 0,
-	SLINE_LINE    = 4,
-	SLINE_FILE_NO = 6,
-	SLINE_OPTIONS = 7
+							   
+	constant
+		SIZEOF_POINTER = 4,
+		SIZEOF_SLINE  = 8,
+		SLINE_SRC     = 0,
+		SLINE_LINE    = 4,
+		SLINE_FILE_NO = 6,
+		SLINE_OPTIONS = 7,
 	
-
-ifdef UNIX then
-	integer ST_ENTRY_SIZE = ST_ENTRY_SIZE_32
-	
-	integer
 		ST_OBJ            = 0,
 		ST_NEXT           = 4,
 		ST_NEXT_IN_BLOCK  = 8,
@@ -72,45 +71,10 @@ ifdef UNIX then
 		ST_SAVED_PRIVATES = 48,
 		ST_STACK_SPACE    = 52,
 		ST_BLOCK          = 56
-	
-	-- hack until we have a defined word for the architecture
-	if find( "x86_64", uname() ) then
-		SIZEOF_POINTER = 8
-		
-		SIZEOF_SLINE  = 16
-		SLINE_LINE    = 8
-		SLINE_FILE_NO = 10
-		SLINE_OPTIONS = 11
-		
-		ST_ENTRY_SIZE = 120
-		
-		ST_NEXT           = 8
-		ST_NEXT_IN_BLOCK  = 16
-		ST_MODE           = 24
-		ST_SCOPE          = 25
-		ST_FILE_NO        = 26
-		ST_DUMMY          = 27
-		ST_NAME           = 32
-		ST_TOKEN          = 40 -- int
-		ST_CODE           = 48
-		ST_LINETAB        = 56
-		ST_FIRSTLINE      = 64
-		ST_TEMPS          = 72
-		ST_NUM_ARGS       = 80
-		ST_RESIDENT_TASK  = 88
-		ST_SAVED_PRIVATES = 96
-		ST_STACK_SPACE    = 104
-		ST_BLOCK          = 112
-	end if
-	
-	-- this is a hack for 64-bit systems until the infrastructure catches up
-	-- to make this more elegant
+							   
+elsifdef X86_64 then
+
 	procedure poke_pointer( atom addr, object val )
-		if ST_ENTRY_SIZE = ST_ENTRY_SIZE_32 then
-			poke4( addr, val )
-			return
-		end if
-		
 		if sequence(val) then
 			for i = 1 to length(val) do
 				poke_pointer( addr, val[i] )
@@ -123,10 +87,6 @@ ifdef UNIX then
 	end procedure
 
 	function peek_pointer( object addr )
-		if ST_ENTRY_SIZE = ST_ENTRY_SIZE_32 then
-			return peek4u( addr )
-		end if
-		
 		if sequence(addr) then
 			sequence val = {}
 			
@@ -134,45 +94,37 @@ ifdef UNIX then
 		end if
 		return peek4u( addr ) + peek4u( addr + 4 ) * power( 2, 32 )
 	end function
-	
-elsedef
-	constant ST_ENTRY_SIZE = ST_ENTRY_SIZE_32
+
 	constant
-		ST_OBJ            = 0,
-		ST_NEXT           = 4,
-		ST_NEXT_IN_BLOCK  = 8,
-		ST_MODE           = 12,
-		ST_SCOPE          = 13,
-		ST_FILE_NO        = 14,
-		ST_DUMMY          = 15,
-		ST_NAME           = 16,
-		ST_TOKEN          = 20,
-		ST_CODE           = 24,
-		ST_LINETAB        = 28,
-		ST_FIRSTLINE      = 32,
-		ST_TEMPS          = 36,
-		ST_NUM_ARGS       = 40,
-		ST_RESIDENT_TASK  = 44,
-		ST_SAVED_PRIVATES = 48,
-		ST_STACK_SPACE    = 52,
-		ST_BLOCK          = 56
-
-	procedure poke_pointer( atom addr, object val )
-		poke4( addr, val )
-	end procedure
-	
-	function peek_pointer( object addr )
-		return peek4u( addr )
-	end function
-	
-
+		SIZEOF_POINTER = 8,
+		
+		SIZEOF_SLINE  = 16,
+		SLINE_LINE    = 8,
+		SLINE_FILE_NO = 10,
+		SLINE_OPTIONS = 11,
+		
+		ST_ENTRY_SIZE = 120,
+		
+		ST_NEXT           = 8,
+		ST_NEXT_IN_BLOCK  = 16,
+		ST_MODE           = 24,
+		ST_SCOPE          = 25,
+		ST_FILE_NO        = 26,
+		ST_DUMMY          = 27,
+		ST_NAME           = 32,
+		ST_TOKEN          = 40, -- int
+		ST_CODE           = 48,
+		ST_LINETAB        = 56,
+		ST_FIRSTLINE      = 64,
+		ST_TEMPS          = 72,
+		ST_NUM_ARGS       = 80,
+		ST_RESIDENT_TASK  = 88,
+		ST_SAVED_PRIVATES = 96,
+		ST_STACK_SPACE    = 104,
+		ST_BLOCK          = 112
 end ifdef
 
-
-
 constant SOURCE_CHUNK = 10000 -- copied from scanner.e !!
-
-
 
 function get_next( symtab_index sym )
 	if get_backend() then
@@ -227,7 +179,6 @@ procedure BackEnd(integer il_file)
 			poke_pointer(addr + ST_NEXT, get_next( eentry) ) -- NEXT
 			poke(addr + ST_MODE, M_TEMP) -- MODE
 			poke(addr + ST_SCOPE, SC_UNDEFINED)  -- SCOPE, must be > S_PRIVATE 
-			
 		
 		else
 			poke_pointer(addr + ST_NEXT, get_next( eentry[S_NEXT]) )

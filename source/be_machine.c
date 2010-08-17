@@ -2303,7 +2303,7 @@ object DefineC(object xo)
 	#if EBITS == 32
 		#define CALLBACK_SIZE 96
 	#elif EBITS == 64
-		#define CALLBACK_SIZE 129
+		#define CALLBACK_SIZE 143
 	#endif
 #else
 	#define CALLBACK_SIZE 40
@@ -2488,12 +2488,11 @@ object CallBack(object x)
 		}
 		#if EBITS == 64
 		else if(
-			copy_addr[i]   == 0x4c &&
-			copy_addr[i+1] == 0x8b &&
-			copy_addr[i+2] == 0x15  ){
+			*((int*) (copy_addr + i)) == (int)(((long)&general_ptr) - ((long)(addr + i + 4)) ) ) {
 			// Replacing the offset for loading general_ptr...objdump looks like this:
-			// 4c 8b 15 00 00 00 00 	mov    0x0(%rip),%r10        # acfe <cdecl_call_back+0x28>
-			*((int*)(copy_addr + i + 3)) = (int) ( (long)(&general_ptr)) - ( (long)(copy_addr + i + 7) );
+			// 4c 8b 15 00 00 00 00 	mov    0x0(%rip),%r10        # acfe <cdecl_call_back+0x28> DEBUG
+			// 48 8b 2d 00 00 00 00 	mov    0x0(%rip),%rbp        # b570 <cdecl_call_back+0x2b> REGULAR
+			*((int*)(copy_addr + i)) = (int) (((long)&general_ptr) - ( (long)(copy_addr + i + 4) ));
 				   
 		}
 		#endif

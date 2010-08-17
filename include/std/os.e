@@ -61,6 +61,24 @@ public enum
 --
 
 --****
+-- === Architecture Constants
+public enum
+	X86,
+	X86_64
+	
+public function architecture()
+	ifdef X86 then
+		return X86
+	elsifdef X86_64 then
+		return X86_64
+	elsedef
+		-- assume this...it must be an older binary that only worked on x86
+		return X86
+	end ifdef
+end function
+
+
+--****
 -- === Environment.
 
 constant M_INSTANCE = 55

@@ -33,6 +33,10 @@ public integer
 	IOPENBSD = 0, TOPENBSD = 0,
 	INETBSD  = 0, TNETBSD  = 0
 
+public integer
+	IX86    = 0, TX86    = 0,
+	IX86_64 = 0, TX86_64 = 0
+
 -- operating system:
 ifdef WIN32 then
 	IWINDOWS = 1
@@ -85,6 +89,16 @@ elsedef
 	public sequence HOSTNL = "\r\n" -- may change if cross-translating
 end ifdef
 
+-- architecture
+ifdef X86 then
+	IX86 = 1
+	TX86 = 1
+	
+elsifdef X86_64 then
+	IX86_64 = 1
+	TX86_64 = 1
+end ifdef
+
 integer ihost_platform = platform()
 public function host_platform()
 	return ihost_platform
@@ -118,8 +132,22 @@ public procedure set_host_platform( atom plat )
 	end if
 end procedure
 
+public procedure set_target_architecture( integer arch )
+	if arch = X86 then
+		IX86 = 1
+		TX86 = 1
+		IX86_64 = 0
+		TX86_64 = 0
+	elsif arch = X86_64 then
+		IX86 = 0
+		TX86 = 0
+		IX86_64 = 1
+		TX86_64 = 1
+	end if
+end procedure
+
 public function GetPlatformDefines(integer for_translator = 0)
-	sequence local_defines = {}
+	sequence local_defines = {"_PLAT_START"}
 
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
 		local_defines &= {"WINDOWS", "WIN32"}
@@ -186,8 +214,15 @@ public function GetPlatformDefines(integer for_translator = 0)
 	elsif (IBSD and not for_translator) or (TBSD and for_translator) then
 		local_defines &= {"UNIX", "BSD", "FREEBSD"}
 	end if
-
+	
+	if (IX86 and not for_translator) or (TX86 and for_translator) then
+		local_defines = append( local_defines, "X86" )
+	
+	elsif (IX86_64 and not for_translator) or (TX86_64 and for_translator) then 
+		local_defines = append( local_defines, "X86_64" )
+	end if
+	
 	-- So the translator knows what to strip from defines if translating
 	-- to a different platform
-	return { "_PLAT_START" } & local_defines & { "_PLAT_STOP" }
+	return local_defines & { "_PLAT_STOP" }
 end function

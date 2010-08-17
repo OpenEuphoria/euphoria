@@ -258,6 +258,15 @@ function setup_build()
 			if dll_option then
 				c_flags &= " -fPIC "
 		   	end if
+		   	
+		   	if TX86 then
+				c_flags &= " -m32 -DEBITS=32"
+				l_flags &= " -m32"
+				
+			elsif TX86_64 then
+				c_flags &= " -DEBITS=64"
+				
+			end if
 
 			c_flags &= sprintf(" -c -w -fsigned-char -O2 -I%s -ffast-math", 
 				{ get_eucompiledir()  })

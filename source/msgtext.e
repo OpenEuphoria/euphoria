@@ -357,6 +357,8 @@ constant StdErrMsgs = {
 	{341, "Expecting exactly four hexadecimal digits to follow the '\\u'"},
 	{342, "Expecting exactly eight hexadecimal digits to follow the '\\U'"},
 	{343, "Expecting only '0', '1' or space to follow the '\\b'"},
+	{344, "Set the target architecture"},
+	{345, "Unknown architecture: [1].  Supported architectures are: [2]"},
 	$
 }
 

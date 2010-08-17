@@ -188,10 +188,12 @@ BE_CALLC = be_callc
 DARCH=-DARCH=ix86
 MSIZE=-m32
 BITS=-DEBITS=32
+EUARCH=-D X86
 else ifeq "$(ARCH)" "x86_64"
 BE_CALLC = be_callc_conly
 MSIZE=
 BITS=-DEBITS=64
+EUARCH=-D X86_64
 endif
 
 ifndef ECHO
@@ -209,11 +211,11 @@ endif
 ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
-	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex
+	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex $(EUARCH)
 endif
 
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) $(DARCH) $(BITS)
-BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) $(DARCH) $(BITS)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -g -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) $(DARCH) $(BITS)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -g -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) $(DARCH) $(BITS)
 
 EU_CORE_FILES = \
 	block.e \
@@ -518,8 +520,8 @@ test :
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
 		$(EXE) ../source/eutest.ex -i ../include -cc gcc \
 		-exe $(BUILDDIR)/$(EEXU) \
-		-ec $(BUILDDIR)/$(EECU) \
-		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)"
+		-ec $(BUILDDIR)/$(EECU) -verbose \
+		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)" $(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
 testeu : code-page-db

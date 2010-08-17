@@ -95,7 +95,9 @@ sequence trans_opt_def = {
 	{ "nobuild",       0, GetMsgText(196,0), { NO_CASE } },
 	{ "force-build",   0, GetMsgText(326,0), { NO_CASE } },
 	{ "builddir",      0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "o",             0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
+	{ "o",             0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } },
+	{ "arch",          0, GetMsgText(344,0), { NO_CASE, HAS_PARAMETER, "architecture"} },
+	$
 }
 
 add_options( trans_opt_def )
@@ -185,6 +187,16 @@ export procedure transoptions()
 					case else
 						ShowMsg(2, 201, { val, "WIN, LINUX, FREEBSD, OSX, SUNOS, OPENBSD, NETBSD" })
 						abort(1)
+				end switch
+				
+			case "arch" then
+				switch upper(val) do
+					case "X86" then
+						set_target_architecture( X86 )
+					case "X86_64" then
+						set_target_architecture( X86_64 )
+					case else
+						ShowMsg( 2, 345, { val, "x86, x86_64"} )
 				end switch
 
 			case "lib" then
