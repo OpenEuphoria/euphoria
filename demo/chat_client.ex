@@ -3,6 +3,13 @@ object _ = 0
 include std/console.e
 include std/text.e
 include std/socket.e as slib
+without warning
+
+override procedure abort(integer x)
+	maybe_any_key()
+	eu:abort(x)
+end procedure
+
 
 procedure lost_server()
 	puts(1, "We have been disconnected from the server,\n")
@@ -77,4 +84,4 @@ procedure main(sequence args)
 end procedure
 
 main(command_line())
-
+maybe_any_key()

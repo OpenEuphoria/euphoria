@@ -9,6 +9,7 @@
 without type_check
 include std/get.e
 include std/search.e
+include std/console.e as con
 integer SIZE = 8192 
 integer iterations = 1
 integer count
@@ -63,5 +64,5 @@ main()
 
 t = time() - t -- end timer
 printf(1, "Count: %d, Largest: %d\ntime: %g\n", {count, rfind(ON, flags), t})  -- 1028
-
+con:maybe_any_key()
 

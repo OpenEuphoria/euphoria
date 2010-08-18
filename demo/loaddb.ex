@@ -7,6 +7,13 @@ include std/search.e
 include std/get.e
 include std/filesys.e
 
+include std/console.e
+
+without warning
+override procedure abort(integer x)
+	maybe_any_key()
+	eu:abort(x)
+end procedure
 
 procedure ProcessFile(sequence pFileName)
 
@@ -111,11 +118,14 @@ end procedure
 
 procedure main(sequence pArgs)
 
+	ifdef WIN32_GUI then
+	    puts(1, "This program must be run from the command-line:\n\n")
+	end ifdef
 	if length(pArgs) < 3 then
 		if equal(pArgs[1], pArgs[2]) then
-			printf(1, "Usage: %s SourceFile\n", {pArgs[1]})
+			printf(1, "Usage: eui SourceFile\n", {})
 		else
-			printf(1, "Usage: %s %s SourceFile\n", pArgs[1..2])
+			printf(1, "Usage: eui %s SourceFile\n", pArgs[2..2])
 		end if
 		abort(0)
 	end if

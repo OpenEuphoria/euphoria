@@ -2,6 +2,8 @@
 -- Place N Queens on an NxN chess board
 -- such that they don't threaten each other.
 
+include std/console.e
+
 constant N = 8 -- try some other sizes
 
 constant ROW = 1, COLUMN = 2
@@ -97,4 +99,5 @@ end procedure
 
 clear_screen()
 place_queen({})
+maybe_any_key()
 

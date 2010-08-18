@@ -2,6 +2,7 @@ object _ = 0
 
 include std/socket.e as sock
 include std/text.e
+include std/console.e
 
 ifdef OSX then
 	-- I couldn't bind to 127.0.0.1 under OS X for some reason
@@ -47,3 +48,4 @@ end while
 
 sock:shutdown(server)
 puts(1, "Server closed\n")
+maybe_any_key()

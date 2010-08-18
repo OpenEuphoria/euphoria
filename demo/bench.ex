@@ -1,8 +1,18 @@
 include std/sequence.e
+include std/console.e as con
+without warning
+
+override procedure abort(integer x)
+	maybe_any_key()
+	eu:abort(x)
+end procedure
 
 procedure main(sequence cmds=command_line())
 	if length(cmds) < 3 then
-		puts(1, "Usage: bench myprog [myprog options]\n")
+		ifdef WIN32_GUI then
+		    puts(1, "This program must be run from the command-line:\n\n")
+		end ifdef
+		puts(1, "Usage: eui bench.ex myprog [myprog options]\n")
 		abort(1)
 	end if
 
@@ -14,3 +24,4 @@ procedure main(sequence cmds=command_line())
 end procedure
 
 main()
+maybe_any_key()

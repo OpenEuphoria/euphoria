@@ -7,6 +7,7 @@
 include std/cmdline.e
 include std/io.e
 include std/map.e
+include std/console.e
 
 constant 
 	BEGIN_TAG = "<eucode>",
@@ -23,7 +24,11 @@ object input_filename=map:get(params, "i"),
 	output_filename=map:get(params, "o")
 
 if atom(input_filename) or atom(output_filename) then
-	puts(1, "Usage: literate.ex -i input_file -o output_file\n")
+	ifdef WIN32_GUI then
+	    puts(1, "This program must be run from the command-line:\n\n")
+	end ifdef
+	puts(1, "Usage: eui literate.ex -i input_file -o output_file\n")
+	maybe_any_key()
 	abort(1)
 end if
 

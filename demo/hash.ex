@@ -21,6 +21,7 @@
 --   integer. That integer is used as the index into a sequence of small 
 --   word-lists. We can quickly search the selected small list for the word.
 
+include std/console.e
 without type_check
 
 constant EOF = -1
@@ -189,4 +190,4 @@ end for
 
 printf(SCREEN, "\n%.2f seconds\n", t)
 
-
+maybe_any_key()

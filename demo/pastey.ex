@@ -11,10 +11,20 @@ include std/io.e
 include std/regex.e as r
 include std/net/http.e
 include std/net/url.e as url
+include std/console.e
+
+without warning
+override procedure abort(integer x)
+	maybe_any_key()
+	eu:abort(x)
+end procedure
 
 sequence cmds = command_line()
 if not (length(cmds) = 5) then
-    puts(1, "Usage: pastey.ex user title filename\n")
+    ifdef WIN32_GUI then
+	puts(1, "This program must be run from the command-line:\n\n")
+    end ifdef
+    puts(1, "Usage: eui pastey.ex user title filename\n")
 	abort(1)
 end if
 
