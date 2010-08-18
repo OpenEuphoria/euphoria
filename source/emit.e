@@ -1687,11 +1687,6 @@ export procedure emit_op(integer op)
 		else    
 			-- front end knows platform
 			n = host_platform()
-			if n <= WIN32 and BIND then
-				n = 1 + con  -- set platform value based on bind option, so
-							 -- eubw.exe bind.il can serve Console or Windowed
-			end if
-		
 			Push(NewIntSym(n))
 			assignable = FALSE
 		end if
