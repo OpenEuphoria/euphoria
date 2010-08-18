@@ -42,6 +42,9 @@
 #define MAXINT_DBL ((double)MAXINT_VAL)
 #define INT15      (long)0x00003FFFL
 
+#undef MAKE_UINT
+#define MAKE_UINT(x)	((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL  ? (unsigned int)x : NewDouble((double)(unsigned int)x)))
+
 #define LOW_MEMORY_MAX ((unsigned)0x0010FFEF)
 
 typedef int object;

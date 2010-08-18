@@ -1585,6 +1585,7 @@ void do_exec(int *start_pc)
 	int c0,splins;
 	s1_ptr s1,s2;
 	object *block;
+	unsigned long tuint;
 	
 #if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
@@ -2870,21 +2871,24 @@ void do_exec(int *start_pc)
 			case L_AND_BITS:
 			deprintf("case L_AND_BITS:");
 				START_BIN_OP
-				top = MAKE_INT(INT_VAL(a) & INT_VAL(top));
+				tuint = (unsigned long)a & (unsigned long)top;
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(AND_BITS)
 				BREAK;
 			
 			case L_OR_BITS:
 			deprintf("case L_OR_BITS:");
 				START_BIN_OP
-				top = MAKE_INT(INT_VAL(a) | INT_VAL(top));
+				tuint = (unsigned long)a | (unsigned long)top;
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(OR_BITS)
 				BREAK;
 			
 			case L_XOR_BITS:
 			deprintf("case L_XOR_BITS:");
 				START_BIN_OP
-				top = MAKE_INT(INT_VAL(a) ^ INT_VAL(top));
+				tuint = (unsigned long)a ^ (unsigned long)top;
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(XOR_BITS)
 				BREAK;
 				

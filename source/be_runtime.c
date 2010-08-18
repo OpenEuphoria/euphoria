@@ -1755,6 +1755,7 @@ object eremainder(long a, long b)  // avoid conflict with "remainder" math fn
 	return MAKE_INT(a % b);
 }
 
+
 object Dremainder(d_ptr a, d_ptr b)
 /* double remainder of a divided by b */
 {
@@ -1763,108 +1764,58 @@ object Dremainder(d_ptr a, d_ptr b)
 	return (object)NewDouble(fmod(a->dbl, b->dbl)); /* for now */
 }
 
-/* bitwise ops: as long as both are Euphoria integers then
-   the result will always be a Euphoria integer. True for
-   and/or/xor/not. This is because a Euphoria integer has the upper two
-   bits the same - both 0 or both 1, and this fact can't change
-   due to a bitwise op. */
 
-// static void check32(d_ptr a, d_ptr b)
-// /* check for doubles that are greater than 32-bits */
-// {
-// 	if (a->dbl < MIN_BITWISE_DBL ||
-// 		a->dbl > MAX_BITWISE_DBL ||
-// 		b->dbl < MIN_BITWISE_DBL ||
-// 		b->dbl > MAX_BITWISE_DBL)
-// 		RTFatal("bitwise operations are limited to 32-bit numbers");
-// }
-// 
-object and_bits(long a, long b)
+object and_bits(unsigned long a, unsigned long b)
 /* integer a AND b */
 {
-	return MAKE_INT(a & b);
+	a = a & b;
+	return MAKE_UINT(a);
 }
 
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-	unsigned long longa, longb;
-	long c;
-
-	//check32(a, b);
-	longa = (unsigned long)(a->dbl);
-	longb = (unsigned long)(b->dbl);
-	c = longa & longb;
-	if (c > NOVALUE && c < TOO_BIG_INT)
-		return c; // an integer
-	else
-		return (object)NewDouble((double)c);
+	return and_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
 }
 
-object or_bits(long a, long b)
+object or_bits(unsigned long a, unsigned long b)
 /* integer a OR b */
 {
-	return MAKE_INT(a | b);
+	a = a | b;
+	return MAKE_UINT(a);
 }
 
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-	unsigned long longa, longb;
-	long c;
-
-	// check32(a, b);
-	longa = (unsigned long)(a->dbl);
-	longb = (unsigned long)(b->dbl);
-	c = longa | longb;
-	if (c > NOVALUE && c < TOO_BIG_INT)
-		return c; // an integer
-	else
-		return (object)NewDouble((double)c);
+	return or_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
 }
 
-object xor_bits(long a, long b)
+object xor_bits(unsigned long a, unsigned long b)
 /* integer a XOR b */
 {
-	return MAKE_INT(a ^ b);
+	a = a ^ b;
+	return MAKE_UINT(a);
 }
 
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-	unsigned long longa, longb;
-	long c;
 
-	// check32(a, b);
-	longa = (unsigned long)(a->dbl);
-	longb = (unsigned long)(b->dbl);
-	c = longa ^ longb;
-	if (c > NOVALUE && c < TOO_BIG_INT)
-		return c; // an integer
-	else
-		return (object)NewDouble((double)c);
+	return xor_bits((unsigned long)(a->dbl), (unsigned long)(b->dbl));
 }
 
-object not_bits(long a)
+object not_bits(unsigned long a)
 /* integer bitwise NOT of a */
 {
-	return MAKE_INT(~a); // Euphoria integer will produce Euphoria integer
+	a = ~a;
+	return MAKE_UINT(a);
 }
 
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-	unsigned long c;
-
-// 	if (a->dbl < MIN_BITWISE_DBL ||
-// 		a->dbl > MAX_BITWISE_DBL)
-// 		 check32(a, a);  // error msg
-	c = ~((unsigned long)(a->dbl));
-
-	if (c > (unsigned long)NOVALUE && c < (unsigned long)TOO_BIG_INT)
-		return c; // an integer
-	else
-		return (object)NewDouble((double)c);
+	return not_bits((unsigned long)(a->dbl));
 }
 
 object power(long a, long b)

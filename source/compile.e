@@ -1853,7 +1853,7 @@ function ifw(integer pc, sequence op, sequence intop)
 	return pc + 4
 end function
 
-function binary_op(integer pc, integer iii, sequence target_val,
+function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 				   sequence intcode, sequence intcode2, sequence intcode_extra,
 				   sequence gencode, sequence dblfn, integer atom_type)
 -- handle the completion of many binary ops
@@ -1868,7 +1868,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 
 	if TypeIs(rhs1, TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
-		if iii and
+		if ResAlwaysInt and
 			SeqElem(rhs1) = TYPE_INTEGER and
 			(TypeIs(rhs2, TYPE_INTEGER) or
 			(TypeIs(rhs2, TYPE_SEQUENCE) and
@@ -1878,7 +1878,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 
 	elsif TypeIs(rhs2, TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
-		if iii and
+		if ResAlwaysInt and
 			  SeqElem(rhs2) = TYPE_INTEGER and
 			  TypeIs(rhs1, TYPE_INTEGER) then
 			target_elem = TYPE_INTEGER
@@ -1936,7 +1936,7 @@ function binary_op(integer pc, integer iii, sequence target_val,
 
 		c_stmt(intcode, {lhs, rhs1, rhs2})
 
-		if iii then
+		if ResAlwaysInt then
 			-- int operands => int result
 			SetBBType(lhs, TYPE_INTEGER, target_val, TYPE_OBJECT, 0)
 		else
@@ -2170,7 +2170,7 @@ procedure arg_list(integer i)
 end procedure
 
 -- common vars for do_exec ops
-integer iii, n, t, ov
+integer n, t, ov
 atom len
 integer const_subs
 symtab_index sub, sym
@@ -3786,9 +3786,8 @@ procedure opMULTIPLY()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="*"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3804,10 +3803,9 @@ procedure opPLUS()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="+"
 	
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3822,9 +3820,8 @@ procedure opMINUS()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="-"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3832,9 +3829,8 @@ procedure opOR()
 	gencode = "@ = binary_op(OR, @, @);\n"
 	intcode = "@ = (@ != 0 || @ != 0);\n"
 	atom_type = TYPE_INTEGER
-	iii = TRUE
 	dblfn="Dor"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3842,9 +3838,8 @@ procedure opXOR()
 	gencode = "@ = binary_op(XOR, @, @);\n"
 	intcode = "@ = ((@ != 0) != (@ != 0));\n"
 	atom_type = TYPE_INTEGER
-	iii = TRUE
 	dblfn="Dxor"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3852,9 +3847,8 @@ procedure opAND()
 	gencode = "@ = binary_op(AND, @, @);\n"
 	intcode = "@ = (@ != 0 && @ != 0);\n"
 	atom_type = TYPE_INTEGER
-	iii = TRUE
 	dblfn="Dand"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3871,9 +3865,8 @@ procedure opDIVIDE()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="/"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3895,13 +3888,13 @@ procedure opREMAINDER()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = TRUE
 	dblfn="Dremainder"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opFLOOR_DIV()
+	integer intresult
 	gencode = "_2 = binary_op(DIVIDE, @2, @3);\n" &
 			  "@1 = unary_op(FLOOR, _2);\n" &
 			  "DeRef(_2);\n"
@@ -3921,7 +3914,7 @@ procedure opFLOOR_DIV()
 	   NotInRange(Code[pc+1], MININT) and
 	   NotInRange(Code[pc+2], -1) then
 		intcode = intcode2
-		iii = TRUE
+		intresult = TRUE
 	else
 		intcode = "if (@3 > 0 && @2 >= 0) {\n" &
 				  "@1 = @2 / @3;\n" &
@@ -3933,36 +3926,33 @@ procedure opFLOOR_DIV()
 				  "else\n" &
 				  "@1 = NewDouble(temp_dbl);\n" &
 				  "}\n"
-		iii = FALSE
+		intresult = FALSE
 	end if
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, intresult, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opAND_BITS()
 	gencode = "@ = binary_op(AND_BITS, @, @);\n"
-	intcode = "@ = (@ & @);\n"
-	iii = TRUE
+	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 & (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dand_bits"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opOR_BITS()
 	gencode = "@ = binary_op(OR_BITS, @, @);\n"
-	intcode = "@ = (@ | @);\n"
-	iii = TRUE
+	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 | (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dor_bits"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opXOR_BITS()
 	gencode = "@ = binary_op(XOR_BITS, @, @);\n"
-	intcode = "@ = (@ ^ @);\n"
-	iii = TRUE
+	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 ^ (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dxor_bits"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3974,9 +3964,8 @@ procedure opPOWER()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="Dpower"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3988,9 +3977,8 @@ procedure opLESS()
 	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="<"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -4002,9 +3990,8 @@ procedure opGREATER()
 	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn=">"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -4016,9 +4003,8 @@ procedure opEQUALS()
 	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="=="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -4030,9 +4016,8 @@ procedure opNOTEQ()
 	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="!="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -4044,9 +4029,8 @@ procedure opLESSEQ()
 	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="<="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -4058,9 +4042,8 @@ procedure opGREATEREQ()
 	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn = ">="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 -- end of binary ops

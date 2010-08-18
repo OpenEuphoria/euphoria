@@ -169,10 +169,10 @@ test_equal("shift_bits left #2",   0, shift_bits(0, -9))
 test_equal("shift_bits left #3", 512, shift_bits(4, -7))
 test_equal("shift_bits left #4", 128, shift_bits(8, -4))
 test_equal("shift_bits left #5", 0x213D5600, shift_bits(0xFE427AAC, -7))
-test_equal("shift_bits left #6", -56 /* 0xFFFFFFC8*/, shift_bits(-7, -3))
+test_equal("shift_bits left #6", 0xFFFFFFC8, shift_bits(-7, -3))
 
 test_equal("shift_bits zero #1",  184, shift_bits(184.464, 0))
-test_equal("shift_bits zero #2",  -1530494977 /* 0xA4C67FFF*/ , shift_bits(999_999_999_999_999, 0))
+test_equal("shift_bits zero #2",  0xA4C67FFF , shift_bits(999_999_999_999_999, 0))
 
 test_equal("shift_bits right #1",  23, shift_bits(184, 3))
 test_equal("shift_bits right #2",  12, shift_bits(48, 2))
@@ -183,17 +183,17 @@ test_equal("shift_bits right #6", 0x1FFFFFFF, shift_bits(-7, 3))
 test_equal("shift_bits seq", {0x00000000, 0x00000000, 0x00000001, 0x00001E0F, 0x000000CF, 0x0FFFF791},  
 							shift_bits({3,5,17,123123,3321,-34535}, 4))
 
-test_equal("rotate bits #1", -16 /* 0xFFFFFFF0 */,  rotate_bits(0x7FFFFFF8, -1))
-test_equal("rotate bits #2", -121/* 0xFFFFFF87 */,  rotate_bits(0x7FFFFFF8, -4))
-test_equal("rotate bits #3", -1921/* 0xFFFFF87F */,  rotate_bits(0x7FFFFFF8, -8))
+test_equal("rotate bits #1", 0xFFFFFFF0,  rotate_bits(0x7FFFFFF8, -1))
+test_equal("rotate bits #2", 0xFFFFFF87,  rotate_bits(0x7FFFFFF8, -4))
+test_equal("rotate bits #3", 0xFFFFF87F,  rotate_bits(0x7FFFFFF8, -8))
 test_equal("rotate bits #4", 0x3FFFFFFC,  rotate_bits(0x7FFFFFF8, -31))
 test_equal("rotate bits #5", 0x7FFFFFF8,  rotate_bits(0x7FFFFFF8, -32))
 test_equal("rotate bits #6", 0x3FFFFFFC,  rotate_bits(0x7FFFFFF8, 1))
-test_equal("rotate bits #7", -2013265921/* 0x87FFFFFF */,  rotate_bits(0x7FFFFFF8, 4))
-test_equal("rotate bits #8", -125829121/* 0xF87FFFFF */,  rotate_bits(0x7FFFFFF8, 8))
-test_equal("rotate bits #9", -16 /* 0xFFFFFFF0 */,  rotate_bits(0x7FFFFFF8, 31))
+test_equal("rotate bits #7", 0x87FFFFFF,  rotate_bits(0x7FFFFFF8, 4))
+test_equal("rotate bits #8", 0xF87FFFFF,  rotate_bits(0x7FFFFFF8, 8))
+test_equal("rotate bits #9", 0xFFFFFFF0,  rotate_bits(0x7FFFFFF8, 31))
 test_equal("rotate bits #A", 0x7FFFFFF8,  rotate_bits(0x7FFFFFF8, 32))
-test_equal("rotate bits #B", {0x30000000, 0x50000000, 0x10000001, 0x30001E0F, -1879047985 /* 0x900000CF */ ,-1610614895 /* 0x9FFFF791 */}, 
+test_equal("rotate bits #B", {0x30000000, 0x50000000, 0x10000001, 0x30001E0F, 0x900000CF, 0x9FFFF791}, 
 							 rotate_bits({3,5,17,123123,3321,-34535}, 4))
 
 test_equal("sinh", 0.75, sinh(LN2))
