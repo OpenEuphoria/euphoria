@@ -2851,7 +2851,7 @@ procedure Ifdef_statement()
 						CompileErr(108, ifdef_lineno[$])
 					end if
 				end if
-			elsif tok[T_ID] = ELSIFDEF then
+			elsif tok[T_ID] = ELSIFDEF and not dead_ifdef then
 				if has_matched then
 					in_matched = 0
 					No_new_entry = 1

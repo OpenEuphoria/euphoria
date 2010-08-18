@@ -48,7 +48,7 @@ elsifdef DOS32 then
 	end ifdef
 	test_equal("DOS32=platform()", 1, platform() )
 	test_fail("Def-symbols set to an unsupported OS Defines: " & platform_defines)
-elseifdef UNIX then
+elsifdef UNIX then
 	ifdef DOS32 or WIN32 or WINDOWS then
 		test_fail("OS Name Conflict: Both UNIX and non-UNIX OS def-symbol defined. Defines: " & platform_defines)	
 	end ifdef
