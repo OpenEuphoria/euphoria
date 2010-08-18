@@ -7,9 +7,7 @@ include sched.e
 include std/os.e
 include std/graphics.e
 include std/math.e
-ifdef WINDOWS then
-    include std/win32/sounds.e
-end ifdef
+include sound.e
 
 global constant W_PHASOR = 1,
 		W_TORPEDO = 2,

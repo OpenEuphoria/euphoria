@@ -1,6 +1,7 @@
 -- Run this as with eui, or euiw, or translate with euc and it will inform you what platform
 -- you are using (as long as you are on Windows).  However, if you bind this program it
--- into an executable the executable will report DOS32!
+-- into an executable the executable it used to report DOS32!  Now, this has been fixed
+-- but please check from time to time.
 
 include std/win32/msgbox.e
 atom ok
