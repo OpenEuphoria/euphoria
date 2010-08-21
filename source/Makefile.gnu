@@ -541,7 +541,7 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
-	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar/Linux
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/win32
@@ -567,7 +567,6 @@ install :
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo ../demo/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench ../demo/bench/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar ../demo/langwar/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar/Linux ../demo/langwar/Linux/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix ../demo/unix/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/tutorial ../tutorial/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/bin \
