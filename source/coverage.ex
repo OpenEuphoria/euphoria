@@ -37,6 +37,10 @@ procedure create_header( sequence builddir )
 				if regex:has_match( filenum, lines[j] ) then
 					sequence m = regex:all_matches( filenum, lines[j] )
 					atom out = open( builddir & "/back/coverage.h", "w", 1 )
+					if out = -1 then
+						printf(2, "Error opening target file: %s/back/coverage.h\n", { builddir }) 
+						abort(1)
+					end if
 					writefln( out, H_FILE, m[1][2] )
 					exit "i_loop"
 				end if

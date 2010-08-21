@@ -328,15 +328,13 @@ BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/
 
 distclean : clean
 	-rm -f $(CONFIG)
-	-rm -fr $(BUILD_DIRS)
 	-rm -f Makefile
 
 clean : 	
-	-rm -fr $(BUILDDIR)/intobj
-	-rm -fr $(BUILDDIR)/transobj
-	-rm -fr $(BUILDDIR)/libobj
+	-rm -fr $(BUILDDIR)
 	-rm -fr $(BUILDDIR)/backobj
-	-rm -f $(BUILDDIR)/$(EEXU) $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA) $(BUILDDIR)/$(EBACKENDU) $(BUILDDIR)/$(DEB_SOURCE_DIR).tar.gz
+	-rm -f be_rev.c
+
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
 endif
@@ -358,6 +356,8 @@ builddirs : svn_rev
 
 svn_rev : 
 	-$(EXE) -i ../include revget.ex -root ..
+
+be_rev.c : svn_rev
 
 code-page-db : $(BUILDDIR)/ecp.dat
 
@@ -383,12 +383,15 @@ endif
 .PHONY : svn_rev
 .PHONY : code-page-db
 
-euisource : $(BUILDDIR)/intobj/main-.c
+euisource : $(BUILDDIR)/intobj/main-.c be_rev.c
 euisource :  EU_TARGET = int.ex
-eucsource : $(BUILDDIR)/transobj/main-.c
+euisource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
+eucsource : $(BUILDDIR)/transobj/main-.c  be_rev.c
 eucsource :  EU_TARGET = ec.ex
-backendsource : $(BUILDDIR)/backobj/main-.c
+eucsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h 
+backendsource : $(BUILDDIR)/backobj/main-.c  be_rev.c
 backendsource :  EU_TARGET = backend.ex
+backendsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 source : builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -421,7 +424,7 @@ source-tarball : source
 .PHONY : source
 
 
-$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
+$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c $(BUILDDIR)/$(OBJDIR)/back
 	$(EXE) -i $(TRUNKDIR)/include coverage.ex $(BUILDDIR)/$(OBJDIR)
 
 $(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h

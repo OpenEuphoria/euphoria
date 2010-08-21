@@ -152,7 +152,9 @@ DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
 
 update :
 	-mkdir -p $(DEB_SOURCE_DIR)/source/pcre
-	cd $(EU_BASE_DIR)/source && ./configure && make distclean && ./configure && make svn_rev
+	cd $(EU_BASE_DIR)/source && ./configure && make distclean 
+	cd $(EU_BASE_DIR)/source && ./configure && make source
+	cp -r $(EU_BASE_DIR)/source/build $(DEB_SOURCE_DIR)/source
 	for file in $(EU_ALL_FILES); \
 	do \
 	    cp $(EU_BASE_DIR)/"$$file" $(DEB_SOURCE_DIR)/"$$file"; \
