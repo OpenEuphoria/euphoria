@@ -20,7 +20,7 @@ include std/types.e
 include std/text.e
 include std/io.e
 include std/datetime.e as dt
-
+include std/map.e
 ifdef UNIX then
 	include std/get.e -- for disk_size()
 end ifdef
@@ -1173,6 +1173,41 @@ public function dirname(sequence path, integer pcd = 0)
 end function
 
 --**
+-- Return the directory name of a fully qualified filename
+--
+-- Parameters:
+-- 		# ##path## : the path from which to extract information
+--      # ##pcd## : If not zero and there is no directory name in ##path##
+--                 then "." is returned. The default (0) will just return
+--                 any directory name in ##path##.
+--
+-- Returns:
+-- 		A **sequence**, the full file name part of ##path##.
+--
+-- Comments:
+-- The host operating system path separator is used.
+--
+-- Example 1:
+-- <eucode>
+-- fname = dirname("/opt/euphoria/docs/readme.txt")
+-- -- fname is "/opt/euphoria/docs"
+-- </eucode>
+--
+-- See Also:
+--   [[:driveid]], [[:filename]], [[:pathinfo]]
+
+public function pathname(sequence path)
+	sequence data
+	integer stop
+	
+	data = canonical_path(path)
+	stop = rfind(SLASH, data)
+	
+	return data[1 .. stop - 1]
+
+end function
+
+--**
 -- Return the file name portion of a fully qualified filename
 --
 -- Parameters:
@@ -1739,8 +1774,8 @@ end function
 -- Rename a file.
 -- 
 -- Parameters:
--- 		# ##src## : a sequence, the name of the file or directory to rename.
--- 		# ##dest## : a sequence, the new name for the renamed file
+-- 		# ##old_name## : a sequence, the name of the file or directory to rename.
+-- 		# ##new_name## : a sequence, the new name for the renamed file
 --		# ##overwrite## : an integer, 0 (the default) to prevent renaming if destination file exists,
 --                                   1 to delete existing destination file first
 --
@@ -1748,7 +1783,7 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
--- 	*	If ##dest## contains a path specification, this is equivalent to moving the file, as 
+-- 	*	If ##new_name## contains a path specification, this is equivalent to moving the file, as 
 -- 		well as possibly changing its name. However, the path must be on the same drive for 
 -- 		this to work.
 -- * If ##overwrite## was requested but the rename fails, any existing destination
@@ -1757,24 +1792,24 @@ end function
 -- See Also:
 -- [[:move_file]], [[:copy_file]]
 
-public function rename_file(sequence src, sequence dest, integer overwrite=0)
+public function rename_file(sequence old_name, sequence new_name, integer overwrite=0)
 	atom psrc, pdest, ret
 	sequence tempfile = ""
-	
+
 	if not overwrite then
-		if file_exists(dest) then
+		if file_exists(new_name) then
 			return 0
 		end if
 	else
-		if file_exists(dest) then
-			tempfile = temp_file(dest)
-			ret = move_file(dest, tempfile)
+		if file_exists(new_name) then
+			tempfile = temp_file(new_name)
+			ret = move_file(new_name, tempfile)
 		end if
 	end if
 	
 	
-	psrc = allocate_string(src)
-	pdest = allocate_string(dest)
+	psrc = allocate_string(old_name)
+	pdest = allocate_string(new_name)
 	ret = c_func(xMoveFile, {psrc, pdest})
 		
 	ifdef UNIX then
@@ -1787,7 +1822,7 @@ public function rename_file(sequence src, sequence dest, integer overwrite=0)
 		if not ret then
 			if length(tempfile) > 0 then
 				-- rename was unsuccessful so restore from tempfile
-				ret = move_file(tempfile, dest)
+				ret = move_file(tempfile, new_name)
 			end if
 		end if
 		delete_file(tempfile)
@@ -2471,3 +2506,77 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 	return randname
 	
 end function
+
+
+--**
+-- Returns a checksum value for the specified file.
+--
+-- Parameters:
+--	# ##filename## : A sequence. The name of the file whose checksum you want.
+--  # ##size## : An integer. The number of atoms to return. Default is 4 
+--
+-- Returns:
+--     A **sequence** containing ##size## atoms.
+--                  
+-- Comments:
+--  * The larger the ##size## value, the more unique will the checksum be. For 
+-- most files and uses, a single atom will be sufficient as this gives a 32-bit
+-- file signature. However, if you require better proof that two files are different
+-- then use higher values for ##size##. For example, ##size = 8 gives you 256 bits
+-- of file signature.
+--
+-- Example 1:
+-- <eucode>
+--  ? checksum("myfile", 1) --> {92837498}
+--  ? checksum("myfile", 2) --> {1238176, 87192873}
+--  ? checksum("myfile", 4) --> {23448, 239807, 79283749, 427370}
+--  ? checksum("myfile")    --> {23448, 239807, 79283749, 427370} -- default
+-- </eucode>
+
+global function checksum(sequence filename, integer size = 4)
+	integer fn
+	integer setsize
+	sequence cs
+	atom cs1
+	integer ix	
+	atom jx
+	sequence data
+
+	-- Initialize the result array based on the file's length and size of the array.
+	jx = file_length(filename)
+	setsize = remainder( hash(jx, HSIEH32), 8) + 7
+	cs = repeat(jx, size)
+	for i = 1 to size do
+		cs[i] = hash(i + size, cs[i])
+	end for
+
+
+	-- Process the file, one byte at a time
+	fn = open(filename, "rb")
+
+	if fn != -1 then
+		while data[1] != -1 with entry do
+			-- Determine which array entry gets affected. 
+			-- Depends on the current byte value, array size and initial file length
+			jx = hash(jx, data)
+			ix = remainder(jx, size) + 1
+			-- Change the index offset determinant for the next byte.
+			
+			-- flip some bits in the array, based on the byte set and current hash.
+			cs[ix] = xor_bits(cs[ix], hash(data, HSIEH32))
+							
+		entry
+			-- get the next byte set
+			data = repeat(0, setsize)
+			for i = 1 to length(data) do
+				data[i] = getc(fn)
+			end for
+		end while
+
+		close(fn)
+	end if
+	
+	return cs
+
+end function
+

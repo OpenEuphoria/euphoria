@@ -93,7 +93,7 @@ public constant EOF = (-1)
 -- puts(STDOUT, "ABC")   -- output is:  "ABC"
 -- print(STDOUT, 65)     -- output is:  "65"
 -- puts(STDOUT, 65)      -- output is:  "A"  (ASCII-65 ==> 'A')
--- puts(STDOUT, 65.1234) -- output is:  "65.1234"
+-- print(STDOUT, 65.1234) -- output is:  "65.1234"
 -- puts(STDOUT, 65.1234) -- output is:  "A" (Converts to integer first)
 -- </eucode>
 --
@@ -205,7 +205,7 @@ public constant EOF = (-1)
 --
 -- Example 4:
 -- <eucode>
--- printf(STDOUT, "%d  %e  %f  %g", 7.75) -- same value in different formats
+-- printf(STDOUT, "%d  %e  %f  %g", repeat(7.75, 4)) -- same value in different formats
 --
 -- --      7  7.750000e+000  7.750000  7.75
 -- </eucode>
@@ -514,7 +514,7 @@ end function
 -- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
 public function get_integer16(integer fh)
--- read the 4 bytes as a single integer value at current position in file
+-- read the 2 bytes as a single integer value at current position in file
 	poke(mem0, getc(fh))
 	poke(mem1, getc(fh))
 	return peek2u(mem0)
@@ -542,7 +542,7 @@ end function
 -- See Also:
 -- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
-public procedure put_integer32(integer fh, integer val)
+public procedure put_integer32(integer fh, atom val)
 	poke4(mem0, val)
 	puts(fh, peek({mem0,4}))
 end procedure
@@ -569,7 +569,7 @@ end procedure
 -- See Also:
 -- 		[[:getc]], [[:gets]], [[:get_bytes]], [[:get_dstring]]
 
-public procedure put_integer16(integer fh, integer val)
+public procedure put_integer16(integer fh, atom val)
 	poke2(mem0, val)
 	puts(fh, peek({mem0,2}))
 end procedure
