@@ -493,7 +493,7 @@ $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 $(BUILDDIR)/html/js/search.js : $(DOCDIR)/search-template.js $(TRUNKDIR)/source/getindices.ex $(BUILDDIR)/html/index.html $(BUILDDIR)/html/js
 	$(EXE) $(TRUNKDIR)/source/getindices.ex $(BUILDDIR)/html/index.html $(BUILDDIR)/html/js/search.js 
 
-htmldoc : $(BUILDDIR)/html/index.html
+htmldoc : $(BUILDDIR)/html/index.html $(BUILDDIR)/html/js/search.js
 
 $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
 	sed -e "s/splitlevel = 2/splitlevel = 0/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt

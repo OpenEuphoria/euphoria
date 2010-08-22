@@ -16,15 +16,18 @@ function extract_slices( sequence s, sequence indicies )
 	return out
 end function
 
-sequence id_pattern = re:new( `^<a href="([a-z_0-9]+\.html)#(_\d+_[A-Za-z_0-9]+)">(\d+\.\d+)((\.\d+)*) ([^<]+)<`, EXTRA )
-constant CLEAN_ID = 7
-constant SUBSECTION = 6
-constant CHAPTER = 4
-constant BOOKMARK = 3
-constant FILE = 2
+-- Example:
+-- <a href="eu400_0102.html#_5747_map_type">MAP_TYPE (Memory Management - Low-Level)</a>
+sequence id_pattern = re:new( `<a href="([a-z_0-9]+\.html)#(_\d+_[A-Za-z_0-9]+)">([a-xA-Z0-9_]+) \(([a-z_0-9A-Z -]+)\)`, EXTRA )
 
+enum
+	ENTIRE_MATCH = 1,
+	FILE,
+	BOOKMARK,
+	CLEAN_ID,
+	CHAPTER
 
-sequence id, url, section, chapter
+sequence id, url, /*section,*/ chapter
 map:map dictionary
 object match_data
 object line
@@ -58,37 +61,35 @@ printf(jsfd,"index=new Array();\nchapter=new Array();",{})
 while sequence(line) do
     match_data = re:matches( id_pattern, line )
     if sequence(match_data) then
-	printf(jsfd,"// %s",{line})
-	id = match_data[CLEAN_ID]	
-	url = match_data[FILE] & '#' &
-		match_data[BOOKMARK]
-	section = match_data[SUBSECTION]
-	chapter = match_data[CHAPTER]
-	if equal(section,{}) then
-	     printf(jsfd,`chapter['%s']='%s';`,
-	     {chapter,id})
-	end if
-	if not eu:find(' ',id) then
-	    if not map:has(dictionary,id) then
-		printf(jsfd,`index['%s'] = new Array();%s`, {id,"\n"} )
-		map:put(dictionary,id,0)
-	    else
-		map:put(dictionary,id,1,ADD)
-	    end if
-	    printf(jsfd,
-	    `t = new Array();
-	     t.url = '%s';
-	     t.chapter = '%s';
-	     index['%s'][%d] = t;
-	     `, 
-		    {url, chapter, id, map:get(dictionary,id), url } 
-		)
-	    count += 1
-	end if
+		printf(jsfd,"// %s",{line})
+		id = match_data[CLEAN_ID]	
+		url = match_data[FILE] & '#' &
+			match_data[BOOKMARK]
+		chapter = match_data[CHAPTER]
+		printf(jsfd,`chapter['%s']='%s';`,
+		{chapter,id})
+		if not eu:find(' ',id) then
+			if not map:has(dictionary,id) then
+				printf(jsfd,`index['%s'] = new Array();%s`, {id,"\n"} )
+				map:put(dictionary,id,0)
+			else
+				map:put(dictionary,id,1,ADD)
+			end if
+			printf(jsfd,
+			`t = new Array();
+			t.url = '%s';
+			t.chapter = '%s';
+			index['%s'][%d] = t;
+			`, 
+				{url, chapter, id, map:get(dictionary,id), url } 
+			)
+			count += 1
+		end if
     end if
     line = gets(htmlfd)
 end while
 close(htmlfd)
+
 line = gets(templfd)
 while sequence(line) do
 	puts(jsfd,line)
