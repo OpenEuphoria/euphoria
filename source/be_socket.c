@@ -536,7 +536,7 @@ object eusock_socket(object x)
 		return eusock_geterror();
 	}
 
-	addr = (struct sockaddr_in *)EMalloc((unsigned long)sizeof(struct sockaddr_in));
+	addr = (struct sockaddr_in *)EMalloc((unsigned eulong)sizeof(struct sockaddr_in));
 	addr->sin_family = af;
 	addr->sin_port   = 0;
 
@@ -544,7 +544,7 @@ object eusock_socket(object x)
 	result_p->base[1] = sock;
 
 	if ((unsigned) addr > (unsigned)MAXINT)
-		result_p->base[2] = NewDouble((double)(unsigned long) addr);
+		result_p->base[2] = NewDouble((double)(unsigned eulong) addr);
 	else
 		result_p->base[2] = (object)addr;
 

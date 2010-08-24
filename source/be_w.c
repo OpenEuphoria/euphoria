@@ -324,7 +324,7 @@ static void MyWriteConsole(char *string, int nchars)
 // write a string of plain characters to the console and
 // update the cursor position
 {
-    unsigned long i;
+    unsigned eulong i;
     static int first = 0;
     CONSOLE_SCREEN_BUFFER_INFO console_info;
 
@@ -468,9 +468,9 @@ void update_screen_string(char *s)
 #endif
 
 static void expand_tabs(char *raw_string)
-/* Expand tabs and truncate long lines.
+/* Expand tabs and truncate eulong lines.
  * Still needed to avoid a WATCOM bug that misprints lines that
- * are too long for the screen width. Debug/Trace screen still uses
+ * are too eulong for the screen width. Debug/Trace screen still uses
  * tab expansion feature. Flush feature is used for better performance.
  * Note: screen_col is the column based on what we have actually written
  * to the screen so far, not what we have buffered.
@@ -597,7 +597,7 @@ void screen_output(IFILE f, char *out_string)
 {
     int len, collect_len;
 
-    if ((long)f == DOING_SPRINTF) {
+    if ((eulong)f == DOING_SPRINTF) {
         /* save characters as a C string in memory */
         len = strlen(out_string);
         if (collect == NULL) {
@@ -668,7 +668,7 @@ void screen_output_va(IFILE f, char *out_string, va_list ap)
 	int nsize;
 	char * buf;
 
-	// figure out how long the string will be
+	// figure out how eulong the string will be
 	nsize = vsnprintf(0, 0, out_string, ap);
 
 	buf = EMalloc(nsize+1); // add one for the trailing '\0'
@@ -754,7 +754,7 @@ void SetPosition(int line, int col)
 
 #ifdef EWINDOWS
 
-void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, WORD * saved, struct rccoord * pos)
+void ReadInto(WORD * buf, LPTSTR str, int size, unsigned eulong * n, unsigned long * m, WORD * saved, struct rccoord * pos)
 {
     COORD ch;
 
@@ -770,9 +770,9 @@ void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long
     ReadConsoleOutputAttribute(console_output, buf, size, ch, m);
 }
 
-void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, WORD * saved, struct rccoord * pos)
+void WriteOutFrom(WORD * buf, LPTSTR str, unsigned eulong n, unsigned long m, WORD * saved, struct rccoord * pos)
 {
-    unsigned long size1, size2;
+    unsigned eulong size1, size2;
     COORD ch;
     ch.X = 0;
     ch.Y = 0;
@@ -788,22 +788,22 @@ void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, WORD
 }
 
 TCHAR console_save_str[65536];
-unsigned long console_save_str_n = 0;
+unsigned eulong console_save_str_n = 0;
 WORD console_save_buf[65536];
-unsigned long console_save_buf_n = 0;
+unsigned eulong console_save_buf_n = 0;
 WORD console_save_saved = (WORD)-1;
 struct rccoord console_save_pos;
 
 TCHAR console_trace_str[65536];
-unsigned long console_trace_str_n = 0;
+unsigned eulong console_trace_str_n = 0;
 WORD console_trace_buf[65536];
-unsigned long console_trace_buf_n = 0;
+unsigned eulong console_trace_buf_n = 0;
 WORD console_trace_saved = (WORD)-1;
 struct rccoord console_trace_pos;
 
 void SaveNormal()
 {
-    unsigned long size = 65536;
+    unsigned eulong size = 65536;
     if (EuConsole){
         ReadInto(console_save_buf, console_save_str, size, &console_save_buf_n, &console_save_str_n, &console_save_saved, &console_save_pos);
     } else {

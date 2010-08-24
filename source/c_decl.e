@@ -706,7 +706,7 @@ export procedure DeclareFileVars()
 			if eentry[S_TOKEN] = PROC then
 				c_puts( "void ")
 			else
-				c_puts("long ")
+				c_puts("eulong ")
 			end if
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
@@ -716,7 +716,7 @@ export procedure DeclareFileVars()
 				c_puts(" = 0;\n")
 			end if
 			
-			c_hputs("extern long ")
+			c_hputs("extern eulong ")
 			c_hprintf("_%d", eentry[S_FILE_NO])
 			c_hputs(eentry[S_NAME])
 			
@@ -875,7 +875,7 @@ export procedure DeclareRoutineList()
 			if sym_token( s ) = PROC then
 				ret_type = "void "
 			else
-				ret_type ="long "
+				ret_type ="eulong "
 			end if
 			
 			c_hputs(ret_type)
@@ -892,9 +892,9 @@ export procedure DeclareRoutineList()
 			c_hputs("(")
 			for i = 1 to SymTab[s][S_NUM_ARGS] do
 				if i = 1 then
-					c_hputs("long")
+					c_hputs("eulong")
 				else
-					c_hputs(", long")
+					c_hputs(", eulong")
 				end if
 			end for
 			c_hputs("); // main-.h?\n")
@@ -923,7 +923,7 @@ export procedure DeclareRoutineList()
 				c_puts("\", ")
 				
 				if dll_option then
-					c_puts("(long (*)())")
+					c_puts("(eulong (*)())")
 				end if
 					
 				c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -1418,7 +1418,7 @@ export procedure GenerateUserRoutines()
 					if SymTab[s][S_TOKEN] = PROC then
 						ret_type = "void "
 					else
-						ret_type = "long "
+						ret_type = "eulong "
 					end if
 					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
 						-- mark it as a routine_id target, so it won't be deleted
@@ -1440,7 +1440,7 @@ export procedure GenerateUserRoutines()
 					-- declare the parameters 
 					sp = SymTab[s][S_NEXT]
 					for p = 1 to SymTab[s][S_NUM_ARGS] do
-						c_puts("long _")
+						c_puts("eulong _")
 						c_puts(SymTab[sp][S_NAME])
 						if p != SymTab[s][S_NUM_ARGS] then
 							c_puts(", ")
@@ -1464,7 +1464,7 @@ export procedure GenerateUserRoutines()
 								break
 						
 							case SC_PRIVATE then
-								c_stmt0("long ")
+								c_stmt0("eulong ")
 								c_puts("_")
 								c_puts(SymTab[sp][S_NAME])
 								if SymTab[sp][S_GTYPE] != TYPE_INTEGER then
@@ -1492,7 +1492,7 @@ export procedure GenerateUserRoutines()
 							if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE] 
 																!= TYPE_NULL 
 								and not find( name, names ) then
-								c_stmt0("long ")
+								c_stmt0("eulong ")
 								c_puts( name )
 								if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE]
 									!= TYPE_INTEGER
@@ -1522,9 +1522,9 @@ export procedure GenerateUserRoutines()
 					Initializing = FALSE
 				
 					if SymTab[s][S_LHS_SUBS2] then
-						c_stmt0("long _0, _1, _2, _3;\n\n")
+						c_stmt0("eulong _0, _1, _2, _3;\n\n")
 					else    
-						c_stmt0("long _0, _1, _2;\n\n")
+						c_stmt0("eulong _0, _1, _2;\n\n")
 					end if
 				
 					-- set the local parameter types in BB 

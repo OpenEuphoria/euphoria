@@ -53,149 +53,149 @@
 
 /* for c_proc */
 typedef void (__stdcall *proc0)();
-typedef void (__stdcall *proc1)(long);
-typedef void (__stdcall *proc2)(long,long);
-typedef void (__stdcall *proc3)(long,long,long);
-typedef void (__stdcall *proc4)(long,long,long,long);
-typedef void (__stdcall *proc5)(long,long,long,long,long);
-typedef void (__stdcall *proc6)(long,long,long,long,long,long);
-typedef void (__stdcall *proc7)(long,long,long,long,long,long,long);
-typedef void (__stdcall *proc8)(long,long,long,long,long,long,long,long);
-typedef void (__stdcall *proc9)(long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procA)(long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *proc1)(eulong);
+typedef void (__stdcall *proc2)(eulong,long);
+typedef void (__stdcall *proc3)(eulong,long,long);
+typedef void (__stdcall *proc4)(eulong,long,long,long);
+typedef void (__stdcall *proc5)(eulong,long,long,long,long);
+typedef void (__stdcall *proc6)(eulong,long,long,long,long,long);
+typedef void (__stdcall *proc7)(eulong,long,long,long,long,long,long);
+typedef void (__stdcall *proc8)(eulong,long,long,long,long,long,long,long);
+typedef void (__stdcall *proc9)(eulong,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *procA)(eulong,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *procB)(eulong,long,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *procC)(eulong,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *procD)(eulong,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *procE)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *procF)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
 /* for c_func */
-typedef long (__stdcall *func0)();
-typedef long (__stdcall *func1)(long);
-typedef long (__stdcall *func2)(long,long);
-typedef long (__stdcall *func3)(long,long,long);
-typedef long (__stdcall *func4)(long,long,long,long);
-typedef long (__stdcall *func5)(long,long,long,long,long);
-typedef long (__stdcall *func6)(long,long,long,long,long,long);
-typedef long (__stdcall *func7)(long,long,long,long,long,long,long);
-typedef long (__stdcall *func8)(long,long,long,long,long,long,long,long);
-typedef long (__stdcall *func9)(long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcA)(long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *func0)();
+typedef eulong (__stdcall *func1)(long);
+typedef eulong (__stdcall *func2)(long,long);
+typedef eulong (__stdcall *func3)(long,long,long);
+typedef eulong (__stdcall *func4)(long,long,long,long);
+typedef eulong (__stdcall *func5)(long,long,long,long,long);
+typedef eulong (__stdcall *func6)(long,long,long,long,long,long);
+typedef eulong (__stdcall *func7)(long,long,long,long,long,long,long);
+typedef eulong (__stdcall *func8)(long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *func9)(long,long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *funcA)(long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *funcB)(long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *funcC)(long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *funcD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *funcE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__stdcall *funcF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
 /* for c_proc */
 typedef void (__cdecl *cdproc0)();
-typedef void (__cdecl *cdproc1)(long);
-typedef void (__cdecl *cdproc2)(long,long);
-typedef void (__cdecl *cdproc3)(long,long,long);
-typedef void (__cdecl *cdproc4)(long,long,long,long);
-typedef void (__cdecl *cdproc5)(long,long,long,long,long);
-typedef void (__cdecl *cdproc6)(long,long,long,long,long,long);
-typedef void (__cdecl *cdproc7)(long,long,long,long,long,long,long);
-typedef void (__cdecl *cdproc8)(long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdproc9)(long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocA)(long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdproc1)(eulong);
+typedef void (__cdecl *cdproc2)(eulong,long);
+typedef void (__cdecl *cdproc3)(eulong,long,long);
+typedef void (__cdecl *cdproc4)(eulong,long,long,long);
+typedef void (__cdecl *cdproc5)(eulong,long,long,long,long);
+typedef void (__cdecl *cdproc6)(eulong,long,long,long,long,long);
+typedef void (__cdecl *cdproc7)(eulong,long,long,long,long,long,long);
+typedef void (__cdecl *cdproc8)(eulong,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdproc9)(eulong,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdprocA)(eulong,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdprocB)(eulong,long,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdprocC)(eulong,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdprocD)(eulong,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdprocE)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdprocF)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
 /* for c_func */
-typedef long (__cdecl *cdfunc0)();
-typedef long (__cdecl *cdfunc1)(long);
-typedef long (__cdecl *cdfunc2)(long,long);
-typedef long (__cdecl *cdfunc3)(long,long,long);
-typedef long (__cdecl *cdfunc4)(long,long,long,long);
-typedef long (__cdecl *cdfunc5)(long,long,long,long,long);
-typedef long (__cdecl *cdfunc6)(long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc7)(long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc8)(long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc9)(long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfunc0)();
+typedef eulong (__cdecl *cdfunc1)(long);
+typedef eulong (__cdecl *cdfunc2)(long,long);
+typedef eulong (__cdecl *cdfunc3)(long,long,long);
+typedef eulong (__cdecl *cdfunc4)(long,long,long,long);
+typedef eulong (__cdecl *cdfunc5)(long,long,long,long,long);
+typedef eulong (__cdecl *cdfunc6)(long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfunc7)(long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfunc8)(long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfunc9)(long,long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfuncA)(long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfuncB)(long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef eulong (__cdecl *cdfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
 /* for c_func */
 typedef float (__stdcall *ffunc0)();
-typedef float (__stdcall *ffunc1)(long);
-typedef float (__stdcall *ffunc2)(long,long);
-typedef float (__stdcall *ffunc3)(long,long,long);
-typedef float (__stdcall *ffunc4)(long,long,long,long);
-typedef float (__stdcall *ffunc5)(long,long,long,long,long);
-typedef float (__stdcall *ffunc6)(long,long,long,long,long,long);
-typedef float (__stdcall *ffunc7)(long,long,long,long,long,long,long);
-typedef float (__stdcall *ffunc8)(long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffunc9)(long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffunc1)(eulong);
+typedef float (__stdcall *ffunc2)(eulong,long);
+typedef float (__stdcall *ffunc3)(eulong,long,long);
+typedef float (__stdcall *ffunc4)(eulong,long,long,long);
+typedef float (__stdcall *ffunc5)(eulong,long,long,long,long);
+typedef float (__stdcall *ffunc6)(eulong,long,long,long,long,long);
+typedef float (__stdcall *ffunc7)(eulong,long,long,long,long,long,long);
+typedef float (__stdcall *ffunc8)(eulong,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffunc9)(eulong,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffuncA)(eulong,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffuncB)(eulong,long,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffuncC)(eulong,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffuncD)(eulong,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffuncE)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffuncF)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
 /* for c_func */
 typedef float (__cdecl *cdffunc0)();
-typedef float (__cdecl *cdffunc1)(long);
-typedef float (__cdecl *cdffunc2)(long,long);
-typedef float (__cdecl *cdffunc3)(long,long,long);
-typedef float (__cdecl *cdffunc4)(long,long,long,long);
-typedef float (__cdecl *cdffunc5)(long,long,long,long,long);
-typedef float (__cdecl *cdffunc6)(long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc7)(long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc8)(long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc9)(long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffunc1)(eulong);
+typedef float (__cdecl *cdffunc2)(eulong,long);
+typedef float (__cdecl *cdffunc3)(eulong,long,long);
+typedef float (__cdecl *cdffunc4)(eulong,long,long,long);
+typedef float (__cdecl *cdffunc5)(eulong,long,long,long,long);
+typedef float (__cdecl *cdffunc6)(eulong,long,long,long,long,long);
+typedef float (__cdecl *cdffunc7)(eulong,long,long,long,long,long,long);
+typedef float (__cdecl *cdffunc8)(eulong,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffunc9)(eulong,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffuncA)(eulong,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffuncB)(eulong,long,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffuncC)(eulong,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffuncD)(eulong,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffuncE)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffuncF)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
 /* for c_func */
 typedef double (__stdcall *dfunc0)();
-typedef double (__stdcall *dfunc1)(long);
-typedef double (__stdcall *dfunc2)(long,long);
-typedef double (__stdcall *dfunc3)(long,long,long);
-typedef double (__stdcall *dfunc4)(long,long,long,long);
-typedef double (__stdcall *dfunc5)(long,long,long,long,long);
-typedef double (__stdcall *dfunc6)(long,long,long,long,long,long);
-typedef double (__stdcall *dfunc7)(long,long,long,long,long,long,long);
-typedef double (__stdcall *dfunc8)(long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfunc9)(long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfunc1)(eulong);
+typedef double (__stdcall *dfunc2)(eulong,long);
+typedef double (__stdcall *dfunc3)(eulong,long,long);
+typedef double (__stdcall *dfunc4)(eulong,long,long,long);
+typedef double (__stdcall *dfunc5)(eulong,long,long,long,long);
+typedef double (__stdcall *dfunc6)(eulong,long,long,long,long,long);
+typedef double (__stdcall *dfunc7)(eulong,long,long,long,long,long,long);
+typedef double (__stdcall *dfunc8)(eulong,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfunc9)(eulong,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfuncA)(eulong,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfuncB)(eulong,long,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfuncC)(eulong,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfuncD)(eulong,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfuncE)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfuncF)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
 /* for c_func */
 typedef double (__cdecl *cddfunc0)();
-typedef double (__cdecl *cddfunc1)(long);
-typedef double (__cdecl *cddfunc2)(long,long);
-typedef double (__cdecl *cddfunc3)(long,long,long);
-typedef double (__cdecl *cddfunc4)(long,long,long,long);
-typedef double (__cdecl *cddfunc5)(long,long,long,long,long);
-typedef double (__cdecl *cddfunc6)(long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc7)(long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc8)(long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc9)(long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfunc1)(eulong);
+typedef double (__cdecl *cddfunc2)(eulong,long);
+typedef double (__cdecl *cddfunc3)(eulong,long,long);
+typedef double (__cdecl *cddfunc4)(eulong,long,long,long);
+typedef double (__cdecl *cddfunc5)(eulong,long,long,long,long);
+typedef double (__cdecl *cddfunc6)(eulong,long,long,long,long,long);
+typedef double (__cdecl *cddfunc7)(eulong,long,long,long,long,long,long);
+typedef double (__cdecl *cddfunc8)(eulong,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfunc9)(eulong,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfuncA)(eulong,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfuncB)(eulong,long,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfuncC)(eulong,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfuncD)(eulong,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfuncE)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfuncF)(eulong,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
 
-float float_std_func(long i, long * op, long len) {
+float float_std_func(eulong i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((ffunc0)i)();
@@ -218,7 +218,7 @@ float float_std_func(long i, long * op, long len) {
     return 0.0;
 }
 
-float float_cdecl_func(long i, long * op, long len) {
+float float_cdecl_func(eulong i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cdffunc0)i)();
@@ -241,7 +241,7 @@ float float_cdecl_func(long i, long * op, long len) {
     return 0.0;
 }
 
-double double_std_func(long i, long * op, long len) {
+double double_std_func(eulong i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((dfunc0)i)();
@@ -264,7 +264,7 @@ double double_std_func(long i, long * op, long len) {
     return 0.0;
 }
 
-double double_cdecl_func(long i, long * op, long len) {
+double double_cdecl_func(eulong i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cddfunc0)i)();
@@ -287,7 +287,7 @@ double double_cdecl_func(long i, long * op, long len) {
     return 0.0;
 }
 
-void call_std_proc(long i, long * op, long len) {
+void call_std_proc(eulong i, long * op, long len) {
     
 	switch(len) {
 	    case 0: ((proc0)i)(); return;
@@ -309,7 +309,7 @@ void call_std_proc(long i, long * op, long len) {
 	}
 }
 
-long call_std_func(long i, long * op, long len) {
+eulong call_std_func(long i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((func0)i)();
@@ -332,7 +332,7 @@ long call_std_func(long i, long * op, long len) {
     return 0;
 }
 
-void call_cdecl_proc(long i, long * op, long len) {
+void call_cdecl_proc(eulong i, long * op, long len) {
     
 	switch(len) {
 	    case 0: ((cdproc0)i)(); return;
@@ -354,7 +354,7 @@ void call_cdecl_proc(long i, long * op, long len) {
 	}
 }
 
-long call_cdecl_func(long i, long * op, long len) {
+eulong call_cdecl_func(long i, long * op, long len) {
 	switch(len) {
 	    case 0: return ((cdfunc0)i)();
 	    case 1: return ((cdfunc1)i)(op[0]);
@@ -376,30 +376,30 @@ long call_cdecl_func(long i, long * op, long len) {
     return 0;
 }
 
-object call_c(long func, object proc_ad, object arg_list)
+object call_c(eulong func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
 {
 	s1_ptr arg_list_ptr, arg_size_ptr;
 	object_ptr next_arg_ptr, next_size_ptr;
 	object next_arg, next_size;
-	long iresult, i;
+	eulong iresult, i;
 	double_arg dbl_arg;
 	double dresult;
 	float_arg flt_arg;
 	float fresult;
-	unsigned long size;
-	long proc_index;
-	long cdecl_call;
-	long long_proc_address;
+	unsigned eulong size;
+	eulong proc_index;
+	eulong cdecl_call;
+	eulong long_proc_address;
 	unsigned return_type;
 	char NameBuff[100];
-	unsigned long arg;
+	unsigned eulong arg;
 
-	long arg_op[16];
-	long arg_len;
-	long arg_i = 0;
-	long is_double, is_float;
+	eulong arg_op[16];
+	eulong arg_len;
+	eulong arg_i = 0;
+	eulong is_double, is_float;
 
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
@@ -408,7 +408,7 @@ object call_c(long func, object proc_ad, object arg_list)
 		RTFatal(TempBuff);
 	}
 	
-	long_proc_address = (long)(c_routine[proc_index].address);
+	long_proc_address = (eulong)(c_routine[proc_index].address);
 #if defined(EWINDOWS) && !defined(EWATCOM)
 	cdecl_call = c_routine[proc_index].convention;
 #else
@@ -463,7 +463,7 @@ object call_c(long func, object proc_ad, object arg_list)
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
 		else if (IS_ATOM(next_size))
-			size = (unsigned long)DBL_PTR(next_size)->dbl;
+			size = (unsigned eulong)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -489,7 +489,7 @@ object call_c(long func, object proc_ad, object arg_list)
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				arg_op[arg_i++] = (unsigned long)flt_arg.intval;
+				arg_op[arg_i++] = (unsigned eulong)flt_arg.intval;
 			}
 		}
 		else {
@@ -520,9 +520,9 @@ object call_c(long func, object proc_ad, object arg_list)
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to longegers
 				
-				arg = (unsigned long)DBL_PTR(next_arg)->dbl; //correct
-				// if it's a -ve f.p. number, Watcom converts it to long and
-				// then to unsigned long. This is exactly what we want.
+				arg = (unsigned eulong)DBL_PTR(next_arg)->dbl; //correct
+				// if it's a -ve f.p. number, Watcom converts it to eulong and
+				// then to unsigned eulong. This is exactly what we want.
 				// Works with the others too. 
 				arg_op[arg_i++] = arg;
 			}

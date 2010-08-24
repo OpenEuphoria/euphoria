@@ -48,14 +48,14 @@ typedef signed   char   schar;
 	//#define itell ftell64
 	// these seem to be only 32 bit???
 	//#define iseek(f,o,w) lseek64(fileno(f),(o),(w))
-	//#define itell(f) lseek64(fileno(f), (long long)0, SEEK_CUR)
+	//#define itell(f) lseek64(fileno(f), (eulong long)0, SEEK_CUR)
 	// this works, but has the undesirable side-effect of an unsuppressable warning from glibc 2.1.3 on
-	//long long llseek(int,long long,int);
+	//eulong long llseek(int,long long,int);
 	//#define iseek(f,o,w) llseek(fileno(f),(o),(w))
-	//#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
+	//#define itell(f) llseek(fileno(f), (eulong long)0, SEEK_CUR)
 	// define iseek() in be_runtime.c - uses the llseek() syscall directly
-	long long iseek(FILE *, long long, int);
-#	define itell(f) iseek(f, (long long)0, SEEK_CUR)
+	eulong long iseek(FILE *, long long, int);
+#	define itell(f) iseek(f, (eulong long)0, SEEK_CUR)
 #	define iiseek fseek
 #	define iitell ftell
 #	define iflush fflush
@@ -88,7 +88,7 @@ typedef signed   char   schar;
 #	include <errno.h>
 
 #	define IFILE FILE*
-#	define IOFF long long
+#	define IOFF eulong
 #	define iopen fopen
 #	define igets fgets
 #	define igetc fgetc
@@ -106,7 +106,7 @@ typedef signed   char   schar;
 #else
 /* no 64bit support */
 #	define IFILE FILE*
-#	define IOFF long
+#	define IOFF eulong
 #	define iopen fopen
 #	define igets fgets
 #	define igetc fgetc
@@ -131,10 +131,10 @@ struct replace_block;
 typedef struct replace_block *replace_ptr;
 
 #ifdef INT_CODES
-	typedef long opcode_type;
+	typedef eulong opcode_type;
 	#define opcode(x) (x)
 #else
-	typedef long *opcode_type;
+	typedef eulong *opcode_type;
 	#define opcode(x) jumptab[x-1]
 #endif
 
@@ -142,13 +142,13 @@ typedef struct replace_block *replace_ptr;
 #define MAIN_SCREEN 1
 #define DEBUG_SCREEN 2
 
-#define MAX_LONG 0x7fffffffL /* largest positive long integer */
+#define MAX_LONG 0x7fffffffL /* largest positive eulong integer */
 
 struct time_info {
 	char *name;
-	long start_ticks;
-	long num_events;
-	long tot_ticks;
+	eulong start_ticks;
+	eulong num_events;
+	eulong tot_ticks;
 };
 
 #if defined(EUNIX) || defined(EMINGW)
@@ -161,10 +161,10 @@ typedef int (*FARPROC)();
 #    define WINAPI
 #  endif // EMINGW
 #  define __interrupt
-#  define LRESULT long
+#  define LRESULT eulong
 #  if !defined(EMINGW)
 #    define O_TEXT 0
-#    define HINSTANCE long
+#    define HINSTANCE eulong
 #  endif
 struct videoconfig {
 	int monitor;
@@ -234,7 +234,7 @@ extern unsigned default_heap;
 extern int is_batch;
 
 #ifndef LRESULT
-#define LRESULT long
+#define LRESULT eulong
 #endif
 #ifndef CALLBACK
 #define CALLBACK

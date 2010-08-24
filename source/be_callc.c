@@ -61,7 +61,7 @@
 #endif  // EUNIX
 
 #ifdef EWATCOM
-void wcpush(long X);
+void wcpush(eulong X);
 #define push() wcpush(last_offset);
 #define pop()
 #pragma aux wcpush = \
@@ -70,11 +70,11 @@ void wcpush(long X);
                 parm [EAX];
 #endif // EWATCOM
 
-object call_c(long func, object proc_ad, object arg_list)
+object call_c(eulong func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
 {
-	volatile unsigned long arg;  // !!!! magic var to push values on the stack
+	volatile unsigned eulong arg;  // !!!! magic var to push values on the stack
 	volatile int argsize;        // !!!! number of bytes to pop 
 	
 	s1_ptr arg_list_ptr, arg_size_ptr;
@@ -85,20 +85,20 @@ object call_c(long func, object proc_ad, object arg_list)
 	double_arg dbl_arg;
 	float_arg flt_arg;
 	float fresult;
-	unsigned long size;
+	unsigned eulong size;
 	int proc_index;
 	int (*int_proc_address)();
 	unsigned return_type;
-	unsigned long as_offset;
-	unsigned long last_offset;
+	unsigned eulong as_offset;
+	unsigned eulong last_offset;
 #if defined(EWINDOWS) && !defined(EWATCOM)
 	int cdecl_call;
 #endif
 
 	// this code relies on arg always being the first variable and last_offset 
 	// always being the last variable
-	last_offset = (unsigned long)&arg;
-	as_offset = (unsigned long)&argsize;
+	last_offset = (unsigned eulong)&arg;
+	as_offset = (unsigned eulong)&argsize;
 	// as_offset = last_offset - 4;
 
 	// Setup and Check for Errors
@@ -160,7 +160,7 @@ object call_c(long func, object proc_ad, object arg_list)
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
 		else if (IS_ATOM(next_size))
-			size = (unsigned long)DBL_PTR(next_size)->dbl;
+			size = (unsigned eulong)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -187,7 +187,7 @@ object call_c(long func, object proc_ad, object arg_list)
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				arg = (unsigned long)flt_arg.intval;
+				arg = (unsigned eulong)flt_arg.intval;
 				push();
 			}
 		}
@@ -219,7 +219,7 @@ object call_c(long func, object proc_ad, object arg_list)
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				
-				arg = (unsigned long)DBL_PTR(next_arg)->dbl; //correct
+				arg = (unsigned eulong)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to int and
 				// then to unsigned int. This is exactly what we want.
 				// Works with the others too. 

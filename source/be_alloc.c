@@ -57,7 +57,7 @@ extern int Argc;
 char *malloc_options="A"; // abort
 #endif
 
-long pagesize;  // needed for Linux or Windows only, not FreeBSD
+eulong pagesize;  // needed for Linux or Windows only, not FreeBSD
 
 int eu_dll_exists = FALSE; // a Euphoria .dll is being used
 #if defined(EALIGN4)
@@ -72,16 +72,16 @@ symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3, call_back_arg4,
 
 #ifdef EXTRA_STATS
 unsigned recycles = 0;          /* calls to Recycle() */
-long a_miss = 0;                /* cache list was empty */
-long a_hit = 0;                 /* found in cache */
-long a_too_big = 0;             /* too big - no caching */
-long funny_expand = 0;          /* _expand returns new pointer */
-long funny_align = 0;           /* number mallocs not 8-aligned */
+eulong a_miss = 0;                /* cache list was empty */
+eulong a_hit = 0;                 /* found in cache */
+eulong a_too_big = 0;             /* too big - no caching */
+eulong funny_expand = 0;          /* _expand returns new pointer */
+eulong funny_align = 0;           /* number mallocs not 8-aligned */
 #endif
 
 #ifdef HEAP_CHECK
-unsigned long bytes_allocated = 0;       /* current number of object blocks alloc'd */
-unsigned long max_bytes_allocated = 0;   /* high water mark */
+unsigned eulong bytes_allocated = 0;       /* current number of object blocks alloc'd */
+unsigned eulong max_bytes_allocated = 0;   /* high water mark */
 #endif
 
 d_ptr d_list = NULL;
@@ -142,8 +142,8 @@ symtab_ptr tmp_alloc()
 }
 
 #ifdef EWINDOWS
-long getpagesize (void) {
-    static long g_pagesize = 0;
+eulong getpagesize (void) {
+    static eulong g_pagesize = 0;
     if (! g_pagesize) {
         SYSTEM_INFO system_info;
         GetSystemInfo (&system_info);
@@ -229,7 +229,7 @@ void InitEMalloc()
 void StorageStats()
 {
 	int i;
-	long n;
+	eulong n;
 	free_block_ptr p;
 	s1_ptr s;
 
@@ -238,7 +238,7 @@ void StorageStats()
 	while (s != NULL) {
 		n++;
 		s = (s1_ptr)((free_block_ptr)s)->next;
-		if ((long)s % 8 != 0)
+		if ((eulong)s % 8 != 0)
 			iprintf(stderr, "misaligned s1d pointer!\n");
 	}
 	printf("\nd_list: %ld   ", n);
@@ -258,11 +258,11 @@ void StorageStats()
 #endif
 
 #ifdef HEAP_CHECK
-void Allocated(long n)
+void Allocated(eulong n)
 /* record that n bytes were allocated */
 {
 #if !defined(NDEBUG)	
-	unsigned long prev_value;
+	unsigned eulong prev_value;
 #endif	
 	
 	if (n == 0) return;
@@ -282,11 +282,11 @@ void Allocated(long n)
 		
 }
 
-static void DeAllocated(long n)
+static void DeAllocated(eulong n)
 /* record that n bytes were freed */
 {
 #if !defined(NDEBUG)	
-	unsigned long prev_value;
+	unsigned eulong prev_value;
 #endif	
 	
 	if (n == 0) return;
@@ -393,13 +393,13 @@ static void SpaceMessage()
 }
 
 #ifndef ESIMPLE_MALLOC
-static char *Out_Of_Space(long nbytes)
+static char *Out_Of_Space(eulong nbytes)
 /* allocation failed - make one last attempt */
 {
-	long *p;
+	eulong *p;
 
 	Free_All();
-	p = (long *)malloc(nbytes);
+	p = (eulong *)malloc(nbytes);
 	if (p == NULL) {
 		low_on_space = TRUE;
 		SpaceMessage();
@@ -411,7 +411,7 @@ static char *Out_Of_Space(long nbytes)
 }
 #endif
 #ifndef ESIMPLE_MALLOC
-char *EMalloc(unsigned long nbytes)
+char *EMalloc(unsigned eulong nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
@@ -425,7 +425,7 @@ char *EMalloc(unsigned long nbytes)
 	struct block_list * last_FBL;
 	
 #ifdef HEAP_CHECK
-	long size;
+	eulong size;
 #endif	
 	
 #if defined(EUNIX)
@@ -478,7 +478,7 @@ char *EMalloc(unsigned long nbytes)
 			#if defined(EALIGN4)
 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
 				p = p - 4;
-			if (((unsigned long)temp) & 3)
+			if (((unsigned eulong)temp) & 3)
 				RTInternal("unaligned address in storage cache");
 			#endif
 			Allocated(block_size(p));
@@ -519,7 +519,7 @@ char *EMalloc(unsigned long nbytes)
 
 #if defined(EALIGN4)
 		/* get 8-byte alignment */
-		alignment = ((unsigned long)p) & 7;
+		alignment = ((unsigned eulong)p) & 7;
 
 		if (alignment == 0) {
 			if (align4 && *(int *)(p-4) == MAGIC_FILLER)
@@ -555,7 +555,7 @@ void EFree(char *p)
 /* free storage pointed to by p. p is an 8-byte aligned pointer */
 {
 	char *q;
-	register long nbytes;
+	register eulong nbytes;
 	register struct block_list *list;
 	
 
@@ -566,7 +566,7 @@ void EFree(char *p)
 #ifdef HEAP_CHECK
 	check_pool();
 
-	if (((long)p & 7) != 0)
+	if (((eulong)p & 7) != 0)
 		RTInternal("EFree: badly aligned pointer");
 #endif // HEAP_CHECK
 	q = p;
@@ -616,30 +616,30 @@ void EFree(char *p)
 #if !defined(EWINDOWS) && !defined(EUNIX) 
 // Version of allocation routines for systems that might not return allocations
 // that are 8-byte aligned.
-char *EMalloc(unsigned long nbytes)
+char *EMalloc(unsigned eulong nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
 {
 	char *p;
 	char *a;
-	unsigned long adj;
+	unsigned eulong adj;
 	
 	// Add max possible adjustment (7) plus 1 to store adjustment value,
 	// plus 4 to store the requested size.
 	a = (char *)malloc(nbytes + 1 + sizeof(nbytes) + 7);
 	assert(a);
 	a += 1 + sizeof(nbytes);	// Skip over the stored stuff.
-	adj = (unsigned long)a & 7;
+	adj = (unsigned eulong)a & 7;
 	if (adj) {
 		adj = 8 - adj;
 		p = a + adj;
 	}
 	else
 		p = a;
-	assert( ((unsigned long)p & 7) == 0);
+	assert( ((unsigned eulong)p & 7) == 0);
 	*(p-1) = (char)adj;
-	*((unsigned long*)(p-5)) = nbytes;
+	*((unsigned eulong*)(p-5)) = nbytes;
 	return p;
 }
 
@@ -650,18 +650,18 @@ void EFree(char *p)
 	
 	assert(p);
 	adj = *(p-1);
-	p = p - 1 - sizeof(unsigned long) - adj;
+	p = p - 1 - sizeof(unsigned eulong) - adj;
 	free(p);
 }
 
-char *ERealloc(char *orig, unsigned long newsize)
+char *ERealloc(char *orig, unsigned eulong newsize)
 {
 	char *newadr;
-	unsigned long oldsize;
+	unsigned eulong oldsize;
 	int res;
 	
 	newadr = EMalloc(newsize);
-	oldsize = *((unsigned long*)(orig - 1 - sizeof(oldsize)));
+	oldsize = *((unsigned eulong*)(orig - 1 - sizeof(oldsize)));
 	
     res = memcopy(newadr, newsize, orig, (oldsize > newsize ? newsize : oldsize));
 	if (res != 0) {
@@ -695,7 +695,7 @@ int heap_dump(char *ptr)
 		//printf("  %s block at %Fp of size %4.4X\n",
 		//       (h_info._useflag == _USEDENTRY ? "USED" : "FREE"),
 		//       h_info._pentry, h_info._size);
-		if ((long)h_info._pentry == (long)(ptr-4))
+		if ((eulong)h_info._pentry == (long)(ptr-4))
 			found = TRUE;
 	}
 	switch (heap_status) {
@@ -722,7 +722,7 @@ int heap_dump(char *ptr)
 #endif // EUNIX
 
 #ifndef ESIMPLE_MALLOC
-char *ERealloc(char *orig, unsigned long newsize)
+char *ERealloc(char *orig, unsigned eulong newsize)
 /* Enlarge or shrink a malloc'd block.
    orig must not be NULL - not supported.
    Return a pointer to a storage area of the desired size
@@ -732,7 +732,7 @@ char *ERealloc(char *orig, unsigned long newsize)
 {
 	char *p;
 	char *q;
-	unsigned long oldsize;
+	unsigned eulong oldsize;
 	int res;
 
 #if defined(EUNIX)
@@ -771,7 +771,7 @@ char *ERealloc(char *orig, unsigned long newsize)
 #endif
 		return orig;
 	}
-	else if (((long)q & 0x07) == ((long)p & 0x07)) {
+	else if (((eulong)q & 0x07) == ((long)p & 0x07)) {
 		/* q is aligned the same way as p modulo 8 (almost always I think) */
 		orig = orig + (q - p);
 		return orig;
@@ -824,14 +824,14 @@ void freeD(unsigned char *p)
 }
 #endif
 
-s1_ptr NewS1(long size)
+s1_ptr NewS1(eulong size)
 /* make a new s1 sequence block with a single reference count */
 /* size is number of elements, NOVALUE is added as an end marker */
 {
 	register s1_ptr s1;
 
 	assert(size >= 0);
-	if ((unsigned long)size > (((unsigned long)(-1) - sizeof(struct s1)) / sizeof(object)) - 1) {
+	if ((unsigned eulong)size > (((unsigned long)(-1) - sizeof(struct s1)) / sizeof(object)) - 1) {
 		// Ensure it doesn't overflow
 		SpaceMessage();
 	}
@@ -855,7 +855,7 @@ object NewString(char *s)
 	s1_ptr c1;
 
 	len = strlen(s);
-	c1 = NewS1((long)len);
+	c1 = NewS1((eulong)len);
 // 	printf("NewString [%p] [size: %d] [length: %ld] [%s]\n", c1, len, c1->length, s);
 	obj_ptr = (object_ptr)c1->base;
 	if (len > 0) {
@@ -872,7 +872,7 @@ s1_ptr SequenceCopy(register s1_ptr a)
 {
 	s1_ptr c;
 	register object_ptr cp, ap;
-	register long length;
+	register eulong length;
 	register object temp_ap;
 
 	/* a is a SEQ_PTR */
@@ -893,7 +893,7 @@ s1_ptr SequenceCopy(register s1_ptr a)
 	return c;
 }
 
-char *TransAlloc(unsigned long size){
+char *TransAlloc(unsigned eulong size){
 // Convenience function for translated code to use EMalloc
 	return EMalloc( size );
 }
@@ -907,9 +907,9 @@ char *TransAlloc(unsigned long size){
 
  To test if truncation occurred, the return value will be <= 0.
 */
-long copy_string(char *dest, char *src, size_t bufflen)
+eulong copy_string(char *dest, char *src, size_t bufflen)
 {
-	long n;
+	eulong n;
 	n = 0;
 	while (bufflen > 1 && *src != '\0') {
 		*dest++ = *src++;
@@ -938,7 +938,7 @@ long copy_string(char *dest, char *src, size_t bufflen)
 
  To test if truncation occurred, the return value will be <= 0.
 */
-long append_string(char *dest, char *src, size_t bufflen)
+eulong append_string(char *dest, char *src, size_t bufflen)
 {
 
 	int dest_len;
@@ -970,13 +970,13 @@ static void new_dbl_block(unsigned int cnt)
 	
 	blksize = cnt * dsize;
 	dbl_block = (free_block_ptr)EMalloc( blksize );
-	assert(((unsigned long)dbl_block & 7) == 0);
+	assert(((unsigned eulong)dbl_block & 7) == 0);
 
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
 	q = (char *)dbl_block;
 	#if defined(EALIGN4)
-	if (align4 && *(long *)(q-4) == MAGIC_FILLER) 
+	if (align4 && *(eulong *)(q-4) == MAGIC_FILLER) 
 		q = q - 4;
 	#endif
 	Allocated(block_size(q));
@@ -1005,7 +1005,7 @@ object NewDouble(double d)
 	}
 	
 	new_dbl = d_list;
-	assert(((unsigned long)new_dbl & 7) == 0);
+	assert(((unsigned eulong)new_dbl & 7) == 0);
 	d_list = (d_ptr)((free_block_ptr)new_dbl)->next;
 
 	new_dbl->ref = 1;

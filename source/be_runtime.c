@@ -99,33 +99,33 @@ extern char **Argv;
 /* Exported variables */
 /**********************/
 char *file_name_entered = "";
-long warning_count = 0;
+eulong warning_count = 0;
 char **warning_list;
-long crash_count = 0; /* number of crashes so far */
-long clocks_per_sec;
-long clk_tck;
-long gameover = FALSE;           /* Are we shutting down? */
-long insert_pos;
+eulong crash_count = 0; /* number of crashes so far */
+eulong clocks_per_sec;
+eulong clk_tck;
+eulong gameover = FALSE;           /* Are we shutting down? */
+eulong insert_pos;
 IFILE TempErrFile;
 char *TempErrName; // "ex.err" - but must be on the heap
 char *TempWarningName;
-long display_warnings;
+eulong display_warnings;
 
 /**********************/
 /* Declared Functions */
 /**********************/
 
-object add(long a, long b);
+object add(eulong a, long b);
 
-unsigned long general_call_back(
+unsigned eulong general_call_back(
 #ifdef ERUNTIME
-		  long cb_routine,
+		  eulong cb_routine,
 #else
 		  symtab_ptr cb_routine,
 #endif
-						   unsigned long  arg1, unsigned long arg2, unsigned long arg3,
-						   unsigned long arg4, unsigned long arg5, unsigned long arg6,
-						   unsigned long arg7, unsigned long arg8, unsigned long arg9);
+						   unsigned eulong  arg1, unsigned long arg2, unsigned long arg3,
+						   unsigned eulong arg4, unsigned long arg5, unsigned long arg6,
+						   unsigned eulong arg7, unsigned long arg8, unsigned long arg9);
 
 struct op_info optable[MAX_OPCODE+1] = {
 {x, x}, /* no 0th element */
@@ -344,7 +344,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x}
 };
 
-long TraceOn = FALSE;
+eulong TraceOn = FALSE;
 object *rhs_slice_target;
 s1_ptr *assign_slice_seq;
 object last_w_file_no = NOVALUE;
@@ -352,12 +352,12 @@ IFILE last_w_file_ptr;
 object last_r_file_no = NOVALUE;
 IFILE last_r_file_ptr;
 struct file_info user_file[MAX_USER_FILE];
-long seed1, seed2;  /* current value of first and second random generators */
-long rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
-long con_was_opened = FALSE; /* TRUE if CON device was ever opened */
-long current_screen = MAIN_SCREEN;
+eulong seed1, seed2;  /* current value of first and second random generators */
+eulong rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
+eulong con_was_opened = FALSE; /* TRUE if CON device was ever opened */
+eulong current_screen = MAIN_SCREEN;
 
-long EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console support
+eulong EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console support
                       for euid running on Windows systems that do not support
                       'full screen DOS' mode; eg. Vista.
                    */
@@ -393,10 +393,10 @@ int Mouse_Handler(Gpm_Event *, void *);
    less than 1 then the target buffer was not big enough to hold the source and
    the target buffer is not terminated with a null character.
 */
-long charcopy(char *target, long target_len, char *source, long source_len)
+eulong charcopy(char *target, long target_len, char *source, long source_len)
 {
-	long source_remaining = source_len;
-	long target_remaining = target_len;
+	eulong source_remaining = source_len;
+	eulong target_remaining = target_len;
 
 	while ((source_remaining > 0) && (target_remaining > 0) && (*source != '\0'))
 	{
@@ -416,7 +416,7 @@ long charcopy(char *target, long target_len, char *source, long source_len)
 
 #if defined( ELINUX ) && EBITS == 32
 // for largefile support on 32bit
-// int _llseek(unsigned int,unsigned long, unsigned long,long long *, unsigned int);
+// int _llseek(unsigned int,unsigned eulong, unsigned long,long long *, unsigned int);
 // used instead of llseek() to avoid the warning
 
 #include <sys/syscall.h>
@@ -428,13 +428,13 @@ long charcopy(char *target, long target_len, char *source, long source_len)
 #define _llseek(fd, offset_high, offset_low, result, origin) \
 	syscall(SYS__llseek, fd, offset_high, offset_low, result, origin)
 
-long long iseek(FILE *f, long long o, int w)
+eulong long iseek(FILE *f, long long o, int w)
 {
-	unsigned long ohi;
-	unsigned long olow;
-	long long res = 0;
-	ohi = (unsigned long)((o >> 32) & (long long)0xFFFFFFFF);
-	olow = (unsigned long)(o & (long long)0xFFFFFFFF);
+	unsigned eulong ohi;
+	unsigned eulong olow;
+	eulong long res = 0;
+	ohi = (unsigned eulong)((o >> 32) & (long long)0xFFFFFFFF);
+	olow = (unsigned eulong)(o & (long long)0xFFFFFFFF);
 	int ret = _llseek(fileno(f), ohi, olow, &res, w);
 	return ((!ret) ? res : -1);
 }
@@ -554,7 +554,7 @@ void call_crash_routines()
 		crash_call_back = TRUE;
 		quit = (object)general_call_back(
 #ifdef ERUNTIME
-		   (long)r,
+		   (eulong)r,
 #else
 		   (symtab_ptr)e_routine[r],
 #endif
@@ -695,7 +695,7 @@ void Prepend(object_ptr target, object s1, object a)
 	object_ptr p, q;
 	s1_ptr t;
 	s1_ptr s1p, new_seq;
-	long len, new_len;
+	eulong len, new_len;
 	object temp;
 
 	t = (s1_ptr)*target;
@@ -741,7 +741,7 @@ void Append(object_ptr target, object s1, object a)
 	object_ptr p, q;
 	s1_ptr t;
 	s1_ptr s1p, new_s1p, new_seq;
-	long len, new_len;
+	eulong len, new_len;
 	object_ptr base, last;
 	object temp;
 
@@ -867,7 +867,7 @@ s1_ptr Add_internal_space(object a,int at,int len)
 }
 
 
-s1_ptr Copy_elements(long start, s1_ptr source, long replace )
+s1_ptr Copy_elements(eulong start, s1_ptr source, long replace )
 {
 	object_ptr t_elem, s_elem;
 	s1_ptr s1 = *assign_slice_seq;
@@ -926,7 +926,7 @@ object Insert(object a,object b,int pos)
 }
 
 
-void Head(s1_ptr s1, long reqlen, object_ptr target)
+void Head(s1_ptr s1, eulong reqlen, object_ptr target)
 {
 	int i;
 	object_ptr op, se;
@@ -964,7 +964,7 @@ void Head(s1_ptr s1, long reqlen, object_ptr target)
 	}
 }
 
-void Tail(s1_ptr s1, long start, object_ptr target)
+void Tail(s1_ptr s1, eulong start, object_ptr target)
 {
 	
 	int newlen;
@@ -1011,9 +1011,9 @@ void Tail(s1_ptr s1, long start, object_ptr target)
  *
  * Returns the resulting object (no change if in_place == 1).
  */
-object Remove_elements(long start, long stop, long in_place )
+object Remove_elements(eulong start, long stop, long in_place )
 {
-	long n = stop-start+1;
+	eulong n = stop-start+1;
 	s1_ptr s1 = *assign_slice_seq;
 
 	if (in_place) {
@@ -1034,7 +1034,7 @@ object Remove_elements(long start, long stop, long in_place )
 	}
 	else {
 		s1_ptr s2 = NewS1(s1->length-n);
-		long i;
+		eulong i;
 		object temp, *src = s1->base, *trg = s2->base;
 		for ( i = 1; i < start; i++) {
 			temp = *(++src);
@@ -1094,7 +1094,7 @@ void Concat(object_ptr target, object a_obj, object b_obj)
 {
 	object_ptr p, q;
 	s1_ptr c, a, b;
-	long na, nb;
+	eulong na, nb;
 	object temp;
 
 	if (IS_ATOM(a_obj)) {
@@ -1222,7 +1222,7 @@ void Concat_N(object_ptr target, object_ptr  source, int n)
 	ASSIGN_SEQ(target, result);
 }
 
-void Concat_Ni(object_ptr target, object_ptr *source, long n)
+void Concat_Ni(object_ptr target, object_ptr *source, eulong n)
 /* version used by interpreter
  * Concatenate n objects (n > 2). This is more efficient
  * than doing multiple calls to Concat() above, since we
@@ -1232,7 +1232,7 @@ void Concat_Ni(object_ptr target, object_ptr *source, long n)
 {
 	s1_ptr result;
 	object s_obj, temp;
-	long i, size;
+	eulong i, size;
 	object_ptr p, q;
 
 	/* Compute the total size of all the operands */
@@ -1294,7 +1294,7 @@ object Repeat(object item, object repcount)
 {
 	object_ptr obj_ptr;
 	
-	long count;
+	eulong count;
 	s1_ptr s1;
 
 	if (IS_ATOM_INT(repcount)) {
@@ -1302,7 +1302,7 @@ object Repeat(object item, object repcount)
 	}
 
 	else if (IS_ATOM_DBL(repcount)) {
-		count = (long)(DBL_PTR(repcount)->dbl);
+		count = (eulong)(DBL_PTR(repcount)->dbl);
 	}
 
 	else
@@ -1347,7 +1347,7 @@ object Repeat(object item, object repcount)
  * Calls the specified translated routine id for cleaning up the
  * UDT object.
  */
-void udt_clean_rt( object o, long rid ){
+void udt_clean_rt( object o, eulong rid ){
 	int pre_ref;
 
 	pre_ref = SEQ_PTR( o )->ref;
@@ -1377,14 +1377,14 @@ void udt_clean_rt( object o, long rid ){
 /**
  * Calls the specified routine id for cleaning up the UDT object.
  */
-void udt_clean( object o, long rid ){
+void udt_clean( object o, eulong rid ){
 
-	long *code;
+	eulong *code;
 	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
 	s1_ptr s;
 	object args;
 	int pre_ref;
-	long *save_tpc;
+	eulong *save_tpc;
 
 	// Need to make sure that s is 8-byte aligned
 	s = (s1_ptr)( ((object)&seq[7])  & ~7 );
@@ -1406,11 +1406,11 @@ void udt_clean( object o, long rid ){
 	}
 	
 	args = MAKE_SEQ( s );
-	code = (long *)EMalloc( 4*sizeof(int*) );
-	code[0] = (long)opcode(CALL_PROC);
-	code[1] = (long)&rid;
-	code[2] = (long)&args;
-	code[3] = (long)opcode(CALL_BACK_RETURN);
+	code = (eulong *)EMalloc( 4*sizeof(int*) );
+	code[0] = (eulong)opcode(CALL_PROC);
+	code[1] = (eulong)&rid;
+	code[2] = (eulong)&args;
+	code[3] = (eulong)opcode(CALL_BACK_RETURN);
 	if (expr_top >= expr_limit) {
 		expr_max = BiggerStack();
 		expr_limit = expr_max - 3;
@@ -1505,7 +1505,7 @@ void de_reference(s1_ptr a)
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
-	if ((long)a == NOVALUE || IS_ATOM_INT(a))
+	if ((eulong)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
 		RTInternal("more than 1000 refs");
@@ -1583,8 +1583,8 @@ void de_reference(s1_ptr a)
 						if( ((s1_ptr)t)->cleanup != 0 ){
 							cleanup_sequence( (s1_ptr)t );
 						}
-						((s1_ptr)t)->ref = (long)a;
-						((s1_ptr)t)->length = (long)p;
+						((s1_ptr)t)->ref = (eulong)a;
+						((s1_ptr)t)->length = (eulong)p;
 						a = (s1_ptr)t;
 						p = a->base;
 					}
@@ -1594,13 +1594,13 @@ void de_reference(s1_ptr a)
 	}
 }
 
-void DeRef1(long a)
+void DeRef1(eulong a)
 /* Saves space. Use in top-level code (outside of loops) */
 {
 	DeRef(a);
 }
 
-void DeRef5(long a, long b, long c, long d, long e)
+void DeRef5(eulong a, long b, long c, long d, long e)
 /* Saves space. Use instead of 5 in-line DeRef's */
 {
 	DeRef(a);
@@ -1622,7 +1622,7 @@ void de_reference_i(s1_ptr a)
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
-	if ((long)a == NOVALUE || IS_ATOM_INT(a))
+	if ((eulong)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
 		RTInternal("more than 1000 refs");
@@ -1674,7 +1674,7 @@ object DoubleToInt(object d)
 		temp_dbl <= MAXINT_DBL &&
 		temp_dbl >= MININT_DBL) {
 			/* return it in integer repn */
-			return MAKE_INT((long)temp_dbl);
+			return MAKE_INT((eulong)temp_dbl);
 	}
 	else
 		return d; /* couldn't convert */
@@ -1693,10 +1693,10 @@ object x()
 }
 
 
-object add(long a, long b)
+object add(eulong a, long b)
 /* integer add */
 {
-	long c;
+	eulong c;
 
 	c = a + b;
 	if (c + HIGH_BITS < 0)
@@ -1705,10 +1705,10 @@ object add(long a, long b)
 		return (object)NewDouble((double)c);
 }
 
-object minus(long a, long b)
+object minus(eulong a, long b)
 /* integer subtract */
 {
-	long c;
+	eulong c;
 
 	c = a - b;
 	if (c + HIGH_BITS < 0)
@@ -1717,7 +1717,7 @@ object minus(long a, long b)
 		return (object)NewDouble((double)c);
 }
 
-object multiply(long a, long b)
+object multiply(eulong a, long b)
 /* integer multiply */
 /* n.b. char type is signed */
 {
@@ -1733,7 +1733,7 @@ object multiply(long a, long b)
 	return (object)NewDouble(a * (double)b);
 }
 
-object divide(long a, long b)
+object divide(eulong a, long b)
 /* compute a / b */
 {
 	if (b == 0)
@@ -1752,7 +1752,7 @@ object Ddivide(d_ptr a, d_ptr b)
 	return (object)NewDouble(a->dbl / b->dbl);
 }
 
-object eremainder(long a, long b)  // avoid conflict with "remainder" math fn
+object eremainder(eulong a, long b)  // avoid conflict with "remainder" math fn
 /* integer remainder of a divided by b */
 {
 	if (b == 0)
@@ -1768,7 +1768,7 @@ object Dremainder(d_ptr a, d_ptr b)
 	return (object)NewDouble(fmod(a->dbl, b->dbl)); /* for now */
 }
 
-/* bitwise ops: as long as both are Euphoria integers then
+/* bitwise ops: as eulong as both are Euphoria integers then
    the result will always be a Euphoria integer. True for
    and/or/xor/not. This is because a Euphoria integer has the upper two
    bits the same - both 0 or both 1, and this fact can't change
@@ -1784,7 +1784,7 @@ object Dremainder(d_ptr a, d_ptr b)
 // 		RTFatal("bitwise operations are limited to 32-bit numbers");
 // }
 // 
-object and_bits(long a, long b)
+object and_bits(eulong a, long b)
 /* integer a AND b */
 {
 	return MAKE_INT(a & b);
@@ -1793,12 +1793,12 @@ object and_bits(long a, long b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-	unsigned long longa, longb;
-	long c;
+	unsigned eulong longa, longb;
+	eulong c;
 
 	//check32(a, b);
-	longa = (unsigned long)(a->dbl);
-	longb = (unsigned long)(b->dbl);
+	longa = (unsigned eulong)(a->dbl);
+	longb = (unsigned eulong)(b->dbl);
 	c = longa & longb;
 	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
@@ -1806,7 +1806,7 @@ object Dand_bits(d_ptr a, d_ptr b)
 		return (object)NewDouble((double)c);
 }
 
-object or_bits(long a, long b)
+object or_bits(eulong a, long b)
 /* integer a OR b */
 {
 	return MAKE_INT(a | b);
@@ -1815,12 +1815,12 @@ object or_bits(long a, long b)
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-	unsigned long longa, longb;
-	long c;
+	unsigned eulong longa, longb;
+	eulong c;
 
 	// check32(a, b);
-	longa = (unsigned long)(a->dbl);
-	longb = (unsigned long)(b->dbl);
+	longa = (unsigned eulong)(a->dbl);
+	longb = (unsigned eulong)(b->dbl);
 	c = longa | longb;
 	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
@@ -1828,7 +1828,7 @@ object Dor_bits(d_ptr a, d_ptr b)
 		return (object)NewDouble((double)c);
 }
 
-object xor_bits(long a, long b)
+object xor_bits(eulong a, long b)
 /* integer a XOR b */
 {
 	return MAKE_INT(a ^ b);
@@ -1837,12 +1837,12 @@ object xor_bits(long a, long b)
 object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
-	unsigned long longa, longb;
-	long c;
+	unsigned eulong longa, longb;
+	eulong c;
 
 	// check32(a, b);
-	longa = (unsigned long)(a->dbl);
-	longb = (unsigned long)(b->dbl);
+	longa = (unsigned eulong)(a->dbl);
+	longb = (unsigned eulong)(b->dbl);
 	c = longa ^ longb;
 	if (c > NOVALUE && c < TOO_BIG_INT)
 		return c; // an integer
@@ -1850,7 +1850,7 @@ object Dxor_bits(d_ptr a, d_ptr b)
 		return (object)NewDouble((double)c);
 }
 
-object not_bits(long a)
+object not_bits(eulong a)
 /* integer bitwise NOT of a */
 {
 	return MAKE_INT(~a); // Euphoria integer will produce Euphoria integer
@@ -1859,23 +1859,23 @@ object not_bits(long a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-	unsigned long c;
+	unsigned eulong c;
 
 // 	if (a->dbl < MIN_BITWISE_DBL ||
 // 		a->dbl > MAX_BITWISE_DBL)
 // 		 check32(a, a);  // error msg
-	c = ~((unsigned long)(a->dbl));
+	c = ~((unsigned eulong)(a->dbl));
 
-	if (c > (unsigned long)NOVALUE && c < (unsigned long)TOO_BIG_INT)
+	if (c > (unsigned eulong)NOVALUE && c < (unsigned long)TOO_BIG_INT)
 		return c; // an integer
 	else
 		return (object)NewDouble((double)c);
 }
 
-object power(long a, long b)
+object power(eulong a, long b)
 /* integer a to the power b */
 {
-	long i, p;
+	eulong i, p;
 
 	if (a == 2 && b >= 0 && b <= 29) {
 		/* positive power of 2 */
@@ -1907,7 +1907,7 @@ object Dpower(d_ptr a, d_ptr b)
 	return (object)NewDouble(pow(a->dbl, b->dbl));
 }
 
-object equals(long a, long b)
+object equals(eulong a, long b)
 /* integer a = b */
 {
 	if (a == b)
@@ -1926,7 +1926,7 @@ object Dequals(d_ptr a, d_ptr b)
 }
 
 
-object less(long a, long b)
+object less(eulong a, long b)
 /* integer a < b */
 {
 	if (a < b)
@@ -1945,7 +1945,7 @@ object Dless(d_ptr a, d_ptr b)
 }
 
 
-object greater(long a, long b)
+object greater(eulong a, long b)
 /* integer a > b */
 {
 	if (a > b)
@@ -1966,7 +1966,7 @@ object Dgreater(d_ptr a, d_ptr b)
 }
 
 
-object noteq(long a, long b)
+object noteq(eulong a, long b)
 /* integer a != b */
 {
 	if (a != b)
@@ -1985,7 +1985,7 @@ object Dnoteq(d_ptr a, d_ptr b)
 }
 
 
-object lesseq(long a, long b)
+object lesseq(eulong a, long b)
 /* integer a <= b */
 {
 	if (a <= b)
@@ -2004,7 +2004,7 @@ object Dlesseq(d_ptr a, d_ptr b)
 }
 
 
-object greatereq(long a, long b)
+object greatereq(eulong a, long b)
 /* integer a >= b */
 {
 	if (a >= b)
@@ -2023,7 +2023,7 @@ object Dgreatereq(d_ptr a, d_ptr b)
 }
 
 
-object and(long a, long b)
+object and(eulong a, long b)
 /* integer a and b */
 {
 	if (a != 0 && b != 0)
@@ -2042,7 +2042,7 @@ object Dand(d_ptr a, d_ptr b)
 }
 
 
-object or(long a, long b)
+object or(eulong a, long b)
 /* integer a or b */
 {
 	if (a != 0 || b != 0)
@@ -2060,7 +2060,7 @@ object Dor(d_ptr a, d_ptr b)
 		 return ATOM_0;
 }
 
-object xor(long a, long b)
+object xor(eulong a, long b)
 /* integer a xor b */
 {
 	if ((a != 0) != (b != 0))
@@ -2080,7 +2080,7 @@ object Dxor(d_ptr a, d_ptr b)
 
 /* --- Unary Ops --- */
 
-object uminus(long a)
+object uminus(eulong a)
 /* integer -a */
 {
 	if (a == MININT_VAL)
@@ -2096,7 +2096,7 @@ object Duminus(d_ptr a)
 }
 
 
-object not(long a)
+object not(eulong a)
 /* compute c := not a */
 {
 	if (a == 0)
@@ -2115,7 +2115,7 @@ object Dnot(d_ptr a)
 }
 
 
-object e_sqrt(long a)
+object e_sqrt(eulong a)
 /* integer square_root(a) */
 {
 	if (a < 0)
@@ -2132,7 +2132,7 @@ object De_sqrt(d_ptr a)
 }
 
 
-object e_sin(long a)
+object e_sin(eulong a)
 /* sin of an angle a (radians) */
 {
 	return (object)NewDouble( sin((double)a) );
@@ -2144,7 +2144,7 @@ object De_sin(d_ptr a)
 	return (object)NewDouble( sin(a->dbl) );
 }
 
-object e_cos(long a)
+object e_cos(eulong a)
 /* cos of an angle a (radians) */
 {
 	return (object)NewDouble( cos((double)a) );
@@ -2156,7 +2156,7 @@ object De_cos(d_ptr a)
 	return (object)NewDouble( cos(a->dbl) );
 }
 
-object e_tan(long a)
+object e_tan(eulong a)
 /* tan of an angle a (radians) */
 {
 	return (object)NewDouble( tan((double)a) );
@@ -2168,7 +2168,7 @@ object De_tan(d_ptr a)
 	return (object)NewDouble( tan(a->dbl) );
 }
 
-object e_arctan(long a)
+object e_arctan(eulong a)
 /* arctan of an angle a (radians) */
 {
 	return (object)NewDouble( atan((double)a) );
@@ -2180,7 +2180,7 @@ object De_arctan(d_ptr a)
 	return (object)NewDouble( atan(a->dbl) );
 }
 
-object e_log(long a)
+object e_log(eulong a)
 /* natural log of a (integer) */
 {
 	if (a <= 0)
@@ -2196,7 +2196,7 @@ object De_log(d_ptr a)
 	return (object)NewDouble( log(a->dbl) );
 }
 
-object e_floor(long a)  // not used anymore
+object e_floor(eulong a)  // not used anymore
 /* floor of a number - no op since a is already known to be an int */
 {
 	return a;
@@ -2210,7 +2210,7 @@ object De_floor(d_ptr a)
 	temp = floor(a->dbl);
 #ifndef ERUNTIME
 	if (fabs(temp) < MAXINT_DBL)
-		return MAKE_INT((long)temp);
+		return MAKE_INT((eulong)temp);
 	else
 #endif
 		return (object)NewDouble(temp);
@@ -2218,17 +2218,17 @@ object De_floor(d_ptr a)
 
 #define V(a,b) ((((a) << 1) | (a & 0x1)) ^ ((((b) >> 14) & 0x0000FFFF) | ((b) << 18)))
 
-#define prim1 ((long)2147483563L)
-#define prim2 ((long)2147483399L)
+#define prim1 ((eulong)2147483563L)
+#define prim2 ((eulong)2147483399L)
 
-#define root1 ((long)40014L)
-#define root2 ((long)40692L)
+#define root1 ((eulong)40014L)
+#define root2 ((eulong)40692L)
 
-#define quo1 ((long)53668L)  /* prim1 / root1 */
-#define quo2 ((long)52774L)  /* prim2 / root2 */
+#define quo1 ((eulong)53668L)  /* prim1 / root1 */
+#define quo2 ((eulong)52774L)  /* prim2 / root2 */
 
-#define rem1 ((long)12211L)  /* prim1 % root1 */
-#define rem2 ((long)3791L)   /* prim2 % root2 */
+#define rem1 ((eulong)12211L)  /* prim1 % root1 */
+#define rem2 ((eulong)3791L)   /* prim2 % root2 */
 
 /* set random seed1 and seed2 - neither can be 0 */
 void setran()
@@ -2236,9 +2236,9 @@ void setran()
 	time_t time_of_day;
 	struct tm *local;
 #if !defined( EWINDOWS )
-	long garbage;
+	eulong garbage;
 #endif
-	static long src = prim1 ^ prim2;
+	static eulong src = prim1 ^ prim2;
 
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
@@ -2247,13 +2247,13 @@ void setran()
 #ifdef EWINDOWS
 	seed1 = GetTickCount() + src;  // milliseconds since Windows started
 #else
-	seed1 = (unsigned long)(&garbage) + garbage + src;
+	seed1 = (unsigned eulong)(&garbage) + garbage + src;
 #endif
 	src += 1;
 	good_rand();  // skip first one, second will be more random-looking
 }
 
-static ldiv_t my_ldiv (long int numer, long int denom)
+static ldiv_t my_ldiv (eulong int numer, long int denom)
 {
 	ldiv_t result;
 
@@ -2268,11 +2268,11 @@ static ldiv_t my_ldiv (long int numer, long int denom)
 	return result;
 }
 
-unsigned long good_rand()
+unsigned eulong good_rand()
 /* Public Domain random number generator from USENET posting */
 {
 	ldiv_t temp;
-	long remval, quotval;
+	eulong remval, quotval;
 
 	if (!rand_was_set && seed1 == 0 && seed2 == 0) {
 		// First time thru.
@@ -2306,7 +2306,7 @@ unsigned long good_rand()
 	return V(seed1, seed2);
 }
 
-object Random(long a)
+object Random(eulong a)
 /* random number from 1 to a */
 /* a is a legal integer value */
 {
@@ -2328,11 +2328,11 @@ object DRandom(d_ptr a)
 }
 
 
-object unary_op(long fn, object a)
+object unary_op(eulong fn, object a)
 /* recursive evaluation of a unary op
    c may be the same as a. ATOM_INT case handled in-line by caller */
 {
-	long length;
+	eulong length;
 	object_ptr ap, cp;
 	object x;
 	s1_ptr c;
@@ -2365,7 +2365,7 @@ object unary_op(long fn, object a)
 }
 
 
-object binary_op_a(long fn, object a, object b)
+object binary_op_a(eulong fn, object a, object b)
 /* perform binary op on two atoms */
 {
 	struct d temp_d;
@@ -2390,11 +2390,11 @@ object binary_op_a(long fn, object a, object b)
 }
 
 
-object binary_op(long fn, object a, object b)
+object binary_op(eulong fn, object a, object b)
 /* Recursively calculates fn of a and b. */
 /* Caller must handle INT:INT case */
 {
-	long length;
+	eulong length;
 	object_ptr ap, bp, cp;
 	struct d temp_d;
 	s1_ptr c;
@@ -2507,7 +2507,7 @@ object binary_op(long fn, object a, object b)
 object calc_MD5(object a)
 {
 	object lTempResult;
-	long lSLen;
+	eulong lSLen;
 	int tfi;
 	union TF
 	{
@@ -2557,7 +2557,7 @@ object calc_MD5(object a)
 object calc_SHA256(object a)
 {
 	object lTempResult;
-	long lSLen;
+	eulong lSLen;
 	int tfi;
 	union TF
 	{
@@ -2608,7 +2608,7 @@ object calc_SHA256(object a)
 unsigned int calc_adler32(object a)
 {
 	
-	long lSLen;
+	eulong lSLen;
 	int tfi;
 	union TF
 	{
@@ -2839,7 +2839,7 @@ static unsigned int calc_hsieh32(object a)
 unsigned int calc_fletcher32(object a)
 {
 	
-	long lSLen;
+	eulong lSLen;
 	int tfi;
 	union TF
 	{
@@ -2938,8 +2938,8 @@ object calc_hash(object a, object b)
 
 */
 {
-	unsigned long lHashValue;
-	long lSLen;
+	unsigned eulong lHashValue;
+	eulong lSLen;
 	
 	
 	int tfi;
@@ -3127,14 +3127,14 @@ object calc_hash(object a, object b)
 
 }
 
-long compare(object a, object b)
+eulong compare(object a, object b)
 /* Compare general objects a and b. Return 0 if they are identical,
    1 if a > b, -1 if a < b. All atoms are less than all sequences.
    The INT-INT case *must* be taken care of by the caller */
 {
 	object_ptr ap, bp;
 	object av, bv;
-	long length, lengtha, lengthb;
+	eulong length, lengtha, lengthb;
 	double da, db;
 	int c;
 
@@ -3194,10 +3194,10 @@ long compare(object a, object b)
 }
 
 
-long find(object a, s1_ptr b)
+eulong find(object a, s1_ptr b)
 /* find object a as an element of sequence b */
 {
-	long length;
+	eulong length;
 	object_ptr bp;
 	object bv;
 
@@ -3256,7 +3256,7 @@ long find(object a, s1_ptr b)
 	}
 	else { // IS_SEQUENCE(a)
 
-		long a_len;
+		eulong a_len;
 
 		length = b->length;
 		a_len = SEQ_PTR(a)->length;
@@ -3280,15 +3280,15 @@ long find(object a, s1_ptr b)
 }
 
 
-long e_match(s1_ptr a, s1_ptr b)
+eulong e_match(s1_ptr a, s1_ptr b)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
-	long ntries, len_remaining;
+	eulong ntries, len_remaining;
 	object_ptr a1, b1, bp;
 	object_ptr ai, bi;
 	object av, bv;
-	long lengtha, lengthb;
+	eulong lengtha, lengthb;
 
 	if (!IS_SEQUENCE(a))
 		RTFatal("first argument of match() must be a sequence");
@@ -3331,11 +3331,11 @@ long e_match(s1_ptr a, s1_ptr b)
 }
 
 #ifndef ERUNTIME
-static void CheckSlice(object a, long startval, long endval, long length)
+static void CheckSlice(object a, eulong startval, long endval, long length)
 /* check legality of a slice, return integer values of start, length */
 /* startval and endval are deref'd */
 {
-	long n;
+	eulong n;
 	s1_ptr s;
 
 	if (IS_ATOM(a))
@@ -3367,9 +3367,9 @@ static void CheckSlice(object a, long startval, long endval, long length)
 void RHS_Slice( object a, object start, object end)
 /* Construct slice a[start..end] */
 {
-	long startval;
-	long length;
-	long endval;
+	eulong startval;
+	eulong length;
+	eulong endval;
 	s1_ptr newa, olda;
 	object temp;
 	object_ptr p, q, sentinel;
@@ -3378,7 +3378,7 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
 	else if (IS_ATOM_DBL(start)) {
-		startval = (long)(DBL_PTR(start)->dbl);
+		startval = (eulong)(DBL_PTR(start)->dbl);
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3386,9 +3386,9 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
-		endval = (long)(DBL_PTR(end)->dbl);
+		endval = (eulong)(DBL_PTR(end)->dbl);
 		 /* f.p.: if the double is too big for
-			a long WATCOM produces the most negative number. This
+			a eulong WATCOM produces the most negative number. This
 			will be caught as a bad subscript, although the value in the
 			diagnostic will be wrong */
 	}
@@ -3462,7 +3462,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 /* assign to a sliced variable */
 {
 	s1_ptr *seq_ptr, sp;
-	long startval, endval, length;
+	eulong startval, endval, length;
 	object_ptr s_elem;
 	object_ptr v_elem;
 
@@ -3471,7 +3471,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
 	else if (IS_ATOM_DBL(start)) {
-		startval = (long)(DBL_PTR(start)->dbl);
+		startval = (eulong)(DBL_PTR(start)->dbl);
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3479,7 +3479,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
-		endval = (long)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
+		endval = (eulong)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
 	}
 	else
 		RTFatal("slice upper index is not an atom");
@@ -3547,13 +3547,13 @@ object Date()
 	return MAKE_SEQ(result);
 }
 
-void MakeCString(char *s, object pobj, long slen)
+void MakeCString(char *s, object pobj, eulong slen)
 /* make an atom or sequence into a C string */
 /* N.B. caller must allow one extra for the null terminator */
 {
 	object_ptr elem;
 	object x;
-	long seqlen;
+	eulong seqlen;
 	s1_ptr obj;
 
 #ifdef EXTRA_CHECK
@@ -3590,7 +3590,7 @@ void MakeCString(char *s, object pobj, long slen)
 	*s = '\0';
 }
 
-long might_go_screen(object file_no)
+eulong might_go_screen(object file_no)
 // return TRUE if object file_no might be directed to the screen or keyboard
 // N.B. file_no is an object (maybe atom or sequence)
 {
@@ -3600,12 +3600,12 @@ long might_go_screen(object file_no)
 int CheckFileNumber(object a)
 /* check for valid file number */
 {
-	long file_no;
+	eulong file_no;
 
 	if (IS_ATOM_INT(a))
 		file_no = a;
 	else if (IS_ATOM_DBL(a))
-		file_no = (long)DBL_PTR(a)->dbl;
+		file_no = (eulong)DBL_PTR(a)->dbl;
 	else
 		RTFatal("file number must be an atom");
 	if (file_no < 0 || file_no >= MAX_USER_FILE) {
@@ -3615,7 +3615,7 @@ int CheckFileNumber(object a)
 }
 
 
-IFILE which_file(object a, long mode)
+IFILE which_file(object a, eulong mode)
 /* return FILE pointer, given the file number */
 {
 	int file_no;
@@ -3671,9 +3671,9 @@ object EOpen(object filename, object mode_obj, object cleanup)
 #define EOpen_cmode_len (8)
 	char cmode[EOpen_cmode_len];
 	IFILE fp;
-	long length;
+	eulong length;
 	int i;
-	long mode, text_mode;
+	eulong mode, text_mode;
 	cleanup_ptr cup;
 	
 	if (IS_ATOM(mode_obj))
@@ -3884,7 +3884,7 @@ object EGets(object file_no)
 		}
 
 		/* create a sequence */
-		obj_ptr = (object_ptr)NewS1((long)i);
+		obj_ptr = (object_ptr)NewS1((eulong)i);
 		result_line = (object)MAKE_SEQ(obj_ptr);
 		obj_ptr = ((s1_ptr)obj_ptr)->base;
 		len = i;
@@ -3894,7 +3894,7 @@ object EGets(object file_no)
 		} while (--i > 0);
 
 		if (len == TEMP_SIZE && TempBuff[TEMP_SIZE-1] != '\n') {
-			/* long line -- more coming */
+			/* eulong line -- more coming */
 			while (TRUE) {
 				/* read next character */
 				if (f == stdin) {
@@ -3928,7 +3928,7 @@ object EGets(object file_no)
 	return result_line;
 }
 
-void set_text_color(long c)
+void set_text_color(eulong c)
 /* set the foreground color for color displays
    or just set to white for mono displays */
 {
@@ -3943,7 +3943,7 @@ void set_text_color(long c)
 }
 
 /* print variables */
-long print_chars;  // value can be checked by caller
+eulong print_chars;  // value can be checked by caller
 static int print_lines;
 static int print_width;
 static int print_start;
@@ -3952,7 +3952,7 @@ static int print_level;
 static IFILE print_file;
 static int show_ascii;
 
-int show_ascii_char(IFILE print_file, long iv)
+int show_ascii_char(IFILE print_file, eulong iv)
 /* display corresponding ascii char */
 {
 	char sbuff[4];
@@ -4055,7 +4055,7 @@ static void indent()
 static void rPrint(object a)
 /* print any object in default numeric format */
 {
-	long length;
+	eulong length;
 	int multi_line;
 	object_ptr elem;
 	char sbuff[NUM_SIZE];
@@ -4146,7 +4146,7 @@ static void rPrint(object a)
 	}
 }
 
-void Print(IFILE f, object a, long lines, long width, long init_chars, long pretty)
+void Print(IFILE f, object a, eulong lines, long width, long init_chars, long pretty)
 /* print an object */
 {
 	print_lines = lines;
@@ -4165,7 +4165,7 @@ void Print(IFILE f, object a, long lines, long width, long init_chars, long pret
 	flush_screen();
 }
 
-void StdPrint(long fn, object a, long new_lines)
+void StdPrint(eulong fn, object a, long new_lines)
 /* standard Print - lets us have <= 3 args in do_exec() */
 {
 	if (new_lines) {
@@ -4204,9 +4204,9 @@ void EPuts(object file_no, object obj)
 {
 	object_ptr elem;
 	char *out_ptr;
-	long n;
+	eulong n;
 	int c, size;
-	long len;
+	eulong len;
 	IFILE f;
 
 	if (file_no == last_w_file_no)
@@ -4273,12 +4273,12 @@ object_ptr v_elem;
 {
 	int flen, sbuff_len=0;
 	char c;
-	long dval;
-	unsigned long uval;
+	eulong dval;
+	unsigned eulong uval;
 	double gval;
 	char *sval;
 	char *sbuff;
-	long slength;
+	eulong slength;
 	char quick_alloc1[LOCAL_SPACE];
 	int free_sv;
 	int free_sb;
@@ -4342,8 +4342,8 @@ object_ptr v_elem;
 			dval = INT_VAL(*v_elem);
 		else {
 			gval = DBL_PTR(*v_elem)->dbl;
-			if (gval > (long)0x7FFFFFFF || gval < (long)0x80000000) {
-				/* can't convert to long integer */
+			if (gval > (eulong)0x7FFFFFFF || gval < (long)0x80000000) {
+				/* can't convert to eulong integer */
 				if (c == 'd') {
 					/* use .0f instead */
 					cstring[flen-1] = '.';
@@ -4351,21 +4351,21 @@ object_ptr v_elem;
 					c = 'f';
 				}
 				else if (gval >= 0.0 &&
-						 gval <= (unsigned long)0xFFFFFFFF) {
+						 gval <= (unsigned eulong)0xFFFFFFFF) {
 					/* need conversion to unsigned */
 					uval = gval;
-					dval = (long)uval;
+					dval = (eulong)uval;
 				}
 				else
 					RTFatal("number is too big for %%x or %%o format");
 			}
 			else {
-				/* convert to positive or negative long integer */
+				/* convert to positive or negative eulong integer */
 				dval = gval;
 			}
 		}
 		if (NUM_SIZE + flen > TEMP_SIZE) {
-			sbuff_len = NUM_SIZE + (long) flen;
+			sbuff_len = NUM_SIZE + (eulong) flen;
 			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
@@ -4391,7 +4391,7 @@ object_ptr v_elem;
 		else
 			gval = DBL_PTR(*v_elem)->dbl;
 		if (NUM_SIZE + flen > TEMP_SIZE) {
-			sbuff_len = NUM_SIZE + (long) flen;
+			sbuff_len = NUM_SIZE + (eulong) flen;
 			sbuff = EMalloc(sbuff_len);
 			free_sb = TRUE;
 		}
@@ -4415,7 +4415,7 @@ object_ptr v_elem;
 }
 
 
-object EPrintf(long file_no, object format_obj, object values)
+object EPrintf(eulong file_no, object format_obj, object values)
 /* formatted print */
 /* file_no could be DOING_SPRINTF (for sprintf) */
 {
@@ -4426,7 +4426,7 @@ object EPrintf(long file_no, object format_obj, object values)
 	char quick_alloc[LOCAL_SPACE]; // don't use TempBuff - FormatItem uses it
 	int free_cs;
 	char out_string[LOCAL_SPACE];
-	long flen;
+	eulong flen;
 	int s;
 	IFILE f;
 	object result;
@@ -4558,7 +4558,7 @@ int nodelaych(int wait)
 }
 #endif
 
-int get_key(long wait)
+int get_key(eulong wait)
 /* Get one key from keyboard, without echo. If wait is TRUE then wait until
    a key is typed, otherwise return -1 if no key is available. */
 {
@@ -4667,14 +4667,14 @@ static void RTInternal(char *msg, ...)
 
 void *xstdin;
 
-long CRoutineId(long seq_num, long current_file_no, object name)
+eulong CRoutineId(long seq_num, long current_file_no, object name)
 /* Routine_id for compiled code.
    (Similar to RTLookup() for interpreter, but here we only find routines,
 	not vars, and we don't have the normal symbol table available). */
 {
 	char *routine_string;
 	s1_ptr routine_ptr;
-	long i, f, ns_file, found;
+	eulong i, f, ns_file, found;
 	char *colon;
 	char *simple_name;
 	char *p;
@@ -4978,7 +4978,7 @@ void system_call(object command, object wait)
 	if (IS_ATOM_INT(wait))
 		w = INT_VAL(wait);
 	else if (IS_ATOM_DBL(wait))
-		w = (long)DBL_PTR(wait)->dbl;
+		w = (eulong)DBL_PTR(wait)->dbl;
 	else
 		RTFatal("second argument of system() must be an atom");
 
@@ -5013,7 +5013,7 @@ object system_exec_call(object command, object wait)
 	char **argv;
 #endif
 	char *string_ptr;
-	long len, w, exit_code;
+	eulong len, w, exit_code;
 	int len_used;
 	
 
@@ -5023,7 +5023,7 @@ object system_exec_call(object command, object wait)
 	if (IS_ATOM_INT(wait))
 		w = INT_VAL(wait);
 	else if (IS_ATOM_DBL(wait))
-		w = (long)DBL_PTR(wait)->dbl;
+		w = (eulong)DBL_PTR(wait)->dbl;
 	else
 		RTFatal("second argument of system_exec() must be an atom");
 
@@ -5107,25 +5107,25 @@ void match_samples()
 {
 	int i, gline;
 	symtab_ptr proc;
-	long *iptr;
+	eulong *iptr;
 
 	bad_samples = 0;
 	if (sample_next >= sample_size)
 		sample_overflow = TRUE;
 	total_samples += sample_next;  // volatile
 	for (i = 0; i < sample_next; i++) {
-		proc = Locate((long *)profile_sample[i]);
+		proc = Locate((eulong *)profile_sample[i]);
 		if (proc == NULL) {
 			bad_samples++;
 		}
 		else {
-			gline = FindLine((long *)profile_sample[i], proc);
+			gline = FindLine((eulong *)profile_sample[i], proc);
 
 			if (gline == 0) {
 				bad_samples++;
 			}
 			else if (slist[gline].options & OP_PROFILE_TIME) {
-				iptr = (long *)slist[gline].src;
+				iptr = (eulong *)slist[gline].src;
 				(*iptr)++;
 			}
 		}
@@ -5134,14 +5134,14 @@ void match_samples()
 	total_samples -= bad_samples;
 }
 
-static void show_prof_line(IFILE f, long i)
+static void show_prof_line(IFILE f, eulong i)
 /* display one line of profile output */
 {
 	if (*(slist[i].src+4) == END_OF_FILE_CHAR) {
 		screen_output(f, "       |\021\n");
 		return;
 	}
-	else if (*(long *)slist[i].src == 0) {
+	else if (*(eulong *)slist[i].src == 0) {
 		screen_output(f, "       |");
 	}
 	else {
@@ -5149,11 +5149,11 @@ static void show_prof_line(IFILE f, long i)
 		char buff[SPL_len];
 		if (slist[i].options & OP_PROFILE_TIME) {
 			snprintf(buff, SPL_len, "%6.2f |",
-					 (double)(*(long *)slist[i].src)*100.0 / (double)total_samples);
+					 (double)(*(eulong *)slist[i].src)*100.0 / (double)total_samples);
 			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		else {
-			snprintf(buff, SPL_len, "%6ld |", (long int)*(long *)slist[i].src);
+			snprintf(buff, SPL_len, "%6ld |", (eulong int)*(long *)slist[i].src);
 			buff[SPL_len - 1] = 0; // ensure NULL
 		}
 		screen_output(f, buff);
@@ -5166,7 +5166,7 @@ static void show_prof_line(IFILE f, long i)
 void ProfileCommand()
 /* display the execution profile */
 {
-	long i;
+	eulong i;
 	IFILE f;
 
 	f = iopen("ex.pro", "w");
@@ -5203,58 +5203,58 @@ void ProfileCommand()
 
 #endif // ERUNTIME
 
-object make_atom32(unsigned long c32)
+object make_atom32(unsigned eulong c32)
 /* make a Euphoria atom from an unsigned C value */
 {
-	if (c32 <= (unsigned long)MAXINT)
+	if (c32 <= (unsigned eulong)MAXINT)
 		return c32;
 	else
 		return NewDouble((double)c32);
 }
 
-unsigned long general_call_back(
+unsigned eulong general_call_back(
 #ifdef ERUNTIME
-		  long cb_routine,
+		  eulong cb_routine,
 #else
 		  symtab_ptr cb_routine,
 #endif
-						   unsigned long arg1, unsigned long arg2, unsigned long arg3,
-						   unsigned long arg4, unsigned long arg5, unsigned long arg6,
-						   unsigned long arg7, unsigned long arg8, unsigned long arg9)
+						   unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+						   unsigned eulong arg4, unsigned long arg5, unsigned long arg6,
+						   unsigned eulong arg7, unsigned long arg8, unsigned long arg9)
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
 #ifdef ERUNTIME
-	long (*addr)();
+	eulong (*addr)();
 #else
-	long *code[4+9]; // place to put IL: max 9 args
-	long *save_tpc;
+	eulong *code[4+9]; // place to put IL: max 9 args
+	eulong *save_tpc;
 #endif
 	if (gameover)
-		return (unsigned long)0; // ignore messages after we decide to shutdown
+		return (unsigned eulong)0; // ignore messages after we decide to shutdown
 
 #ifdef ERUNTIME
 // translator call-back
 	num_args = rt00[cb_routine].num_args;
 	addr = rt00[cb_routine].addr;
 	if (num_args >= 1) {
-	  call_back_arg1->obj = make_atom32((unsigned long)arg1);
+	  call_back_arg1->obj = make_atom32((unsigned eulong)arg1);
 	  if (num_args >= 2) {
-		call_back_arg2->obj = make_atom32((unsigned long)arg2);
+		call_back_arg2->obj = make_atom32((unsigned eulong)arg2);
 		if (num_args >= 3) {
-		  call_back_arg3->obj = make_atom32((unsigned long)arg3);
+		  call_back_arg3->obj = make_atom32((unsigned eulong)arg3);
 		  if (num_args >= 4) {
-			call_back_arg4->obj = make_atom32((unsigned long)arg4);
+			call_back_arg4->obj = make_atom32((unsigned eulong)arg4);
 			if (num_args >= 5) {
-			  call_back_arg5->obj = make_atom32((unsigned long)arg5);
+			  call_back_arg5->obj = make_atom32((unsigned eulong)arg5);
 			  if (num_args >= 6) {
-				call_back_arg6->obj = make_atom32((unsigned long)arg6);
+				call_back_arg6->obj = make_atom32((unsigned eulong)arg6);
 				if (num_args >= 7) {
-				  call_back_arg7->obj = make_atom32((unsigned long)arg7);
+				  call_back_arg7->obj = make_atom32((unsigned eulong)arg7);
 				  if (num_args >= 8) {
-					call_back_arg8->obj = make_atom32((unsigned long)arg8);
+					call_back_arg8->obj = make_atom32((unsigned eulong)arg8);
 					if (num_args >= 9) {
-					  call_back_arg9->obj = make_atom32((unsigned long)arg9);
+					  call_back_arg9->obj = make_atom32((unsigned eulong)arg9);
 					}
 				  }
 				}
@@ -5335,46 +5335,46 @@ unsigned long general_call_back(
 
 #else
 	/* Interpreter: set up a PROC opcode call */
-	code[0] = (long *)opcode(PROC);
-	code[1] = (long *)cb_routine;  // symtab_ptr of Euphoria routine
+	code[0] = (eulong *)opcode(PROC);
+	code[1] = (eulong *)cb_routine;  // symtab_ptr of Euphoria routine
 
 	num_args = cb_routine->u.subp.num_args;
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
-	  call_back_arg1->obj = make_atom32((unsigned long)arg1);
-	  code[2] = (long *)call_back_arg1;
+	  call_back_arg1->obj = make_atom32((unsigned eulong)arg1);
+	  code[2] = (eulong *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
-		call_back_arg2->obj = make_atom32((unsigned long)arg2);
-		code[3] = (long *)call_back_arg2;
+		call_back_arg2->obj = make_atom32((unsigned eulong)arg2);
+		code[3] = (eulong *)call_back_arg2;
 		if (num_args >= 3) {
 		  DeRef(call_back_arg3->obj);
-		  call_back_arg3->obj = make_atom32((unsigned long)arg3);
-		  code[4] = (long *)call_back_arg3;
+		  call_back_arg3->obj = make_atom32((unsigned eulong)arg3);
+		  code[4] = (eulong *)call_back_arg3;
 		  if (num_args >= 4) {
 			DeRef(call_back_arg4->obj);
-			call_back_arg4->obj = make_atom32((unsigned long)arg4);
-			code[5] = (long *)call_back_arg4;
+			call_back_arg4->obj = make_atom32((unsigned eulong)arg4);
+			code[5] = (eulong *)call_back_arg4;
 			if (num_args >= 5) {
 			  DeRef(call_back_arg5->obj);
-			  call_back_arg5->obj = make_atom32((unsigned long)arg5);
-			  code[6] = (long *)call_back_arg5;
+			  call_back_arg5->obj = make_atom32((unsigned eulong)arg5);
+			  code[6] = (eulong *)call_back_arg5;
 			  if (num_args >= 6) {
 				DeRef(call_back_arg6->obj);
-				call_back_arg6->obj = make_atom32((unsigned long)arg6);
-				code[7] = (long *)call_back_arg6;
+				call_back_arg6->obj = make_atom32((unsigned eulong)arg6);
+				code[7] = (eulong *)call_back_arg6;
 				if (num_args >= 7) {
 				  DeRef(call_back_arg7->obj);
-				  call_back_arg7->obj = make_atom32((unsigned long)arg7);
-				  code[8] = (long *)call_back_arg7;
+				  call_back_arg7->obj = make_atom32((unsigned eulong)arg7);
+				  code[8] = (eulong *)call_back_arg7;
 				  if (num_args >= 8) {
 					DeRef(call_back_arg8->obj);
-					call_back_arg8->obj = make_atom32((unsigned long)arg8);
-					code[9] = (long *)call_back_arg8;
+					call_back_arg8->obj = make_atom32((unsigned eulong)arg8);
+					code[9] = (eulong *)call_back_arg8;
 					if (num_args >= 9) {
 					  DeRef(call_back_arg9->obj);
-					  call_back_arg9->obj = make_atom32((unsigned long)arg9);
-					  code[10] = (long *)call_back_arg9;
+					  call_back_arg9->obj = make_atom32((unsigned eulong)arg9);
+					  code[10] = (eulong *)call_back_arg9;
 					}
 				  }
 				}
@@ -5385,8 +5385,8 @@ unsigned long general_call_back(
 	  }
 	}
 
-	code[num_args+2] = (long *)call_back_result;
-	code[num_args+3] = (long *)opcode(CALL_BACK_RETURN);
+	code[num_args+2] = (eulong *)call_back_result;
+	code[num_args+3] = (eulong *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
 	*expr_top++ = (object)NULL;   // prevents restore_privates()
@@ -5396,7 +5396,7 @@ unsigned long general_call_back(
 	// at all to the main Euphoria code.
 	save_tpc = tpc;
 
-	do_exec((long *)code);  // execute routine without setting up new stack
+	do_exec((eulong *)code);  // execute routine without setting up new stack
 
 	tpc = save_tpc;
 	expr_top -= 2;
@@ -5404,14 +5404,14 @@ unsigned long general_call_back(
 	// Don't do get_pos_int() for crash handler
 	if (crash_call_back) {
 		crash_call_back = FALSE;
-		return (unsigned long)(call_back_result->obj);
+		return (unsigned eulong)(call_back_result->obj);
 	}
 	else {
-		return (unsigned long)get_pos_int("call-back", call_back_result->obj);
+		return (unsigned eulong)get_pos_int("call-back", call_back_result->obj);
 	}
 }
 
-unsigned long (*general_ptr)() = (void *)&general_call_back;
+unsigned eulong (*general_ptr)() = (void *)&general_call_back;
 
 #ifdef EWATCOM
 #pragma off (check_stack);
@@ -5427,9 +5427,9 @@ unsigned long (*general_ptr)() = (void *)&general_call_back;
 #define CALLBACK_POINTER 0x1234567812345678
 #endif
 
-LRESULT __cdecl cdecl_call_back(unsigned long arg1, unsigned long arg2, unsigned long arg3,
-						unsigned long arg4, unsigned long arg5, unsigned long arg6,
-						unsigned long arg7, unsigned long arg8, unsigned long arg9)
+LRESULT __cdecl cdecl_call_back(unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+						unsigned eulong arg4, unsigned long arg5, unsigned long arg6,
+						unsigned eulong arg7, unsigned long arg8, unsigned long arg9)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
@@ -5448,72 +5448,72 @@ LRESULT CALLBACK call_back0()
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back1(unsigned long arg1)
+LRESULT CALLBACK call_back1(unsigned eulong arg1)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back2(unsigned long arg1, unsigned long arg2)
+LRESULT CALLBACK call_back2(unsigned eulong arg1, unsigned long arg2)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back3(unsigned long arg1, unsigned long arg2, unsigned long arg3)
+LRESULT CALLBACK call_back3(unsigned eulong arg1, unsigned long arg2, unsigned long arg3)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back4(unsigned long arg1, unsigned long arg2, unsigned long arg3,
-							unsigned long arg4)
+LRESULT CALLBACK call_back4(unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+							unsigned eulong arg4)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back5(unsigned long arg1, unsigned long arg2, unsigned long arg3,
-							unsigned long arg4, unsigned long arg5)
+LRESULT CALLBACK call_back5(unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+							unsigned eulong arg4, unsigned long arg5)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back6(unsigned long arg1, unsigned long arg2, unsigned long arg3,
-							unsigned long arg4, unsigned long arg5, unsigned long arg6)
+LRESULT CALLBACK call_back6(unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+							unsigned eulong arg4, unsigned long arg5, unsigned long arg6)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back7(unsigned long arg1, unsigned long arg2, unsigned long arg3,
-							unsigned long arg4, unsigned long arg5, unsigned long arg6,
-							unsigned long arg7)
+LRESULT CALLBACK call_back7(unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+							unsigned eulong arg4, unsigned long arg5, unsigned long arg6,
+							unsigned eulong arg7)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, 0, 0);
 }
 
-LRESULT CALLBACK call_back8(unsigned long arg1, unsigned long arg2, unsigned long arg3,
-							unsigned long arg4, unsigned long arg5, unsigned long arg6,
-							unsigned long arg7, unsigned long arg8)
+LRESULT CALLBACK call_back8(unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+							unsigned eulong arg4, unsigned long arg5, unsigned long arg6,
+							unsigned eulong arg7, unsigned long arg8)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, 0);
 }
 
-LRESULT CALLBACK call_back9(unsigned long arg1, unsigned long arg2, unsigned long arg3,
-							unsigned long arg4, unsigned long arg5, unsigned long arg6,
-							unsigned long arg7, unsigned long arg8, unsigned long arg9)
+LRESULT CALLBACK call_back9(unsigned eulong arg1, unsigned long arg2, unsigned long arg3,
+							unsigned eulong arg4, unsigned long arg5, unsigned long arg6,
+							unsigned eulong arg7, unsigned long arg8, unsigned long arg9)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
@@ -5555,7 +5555,7 @@ object Command_Line()
 	else {
 #endif
 		argv = Argv;
-		result = NewS1((long)Argc);
+		result = NewS1((eulong)Argc);
 		obj_ptr = result->base;
 		for (i = 0; i < Argc; i++) {
 			*(++obj_ptr) = NewString(*argv++);
@@ -5593,7 +5593,7 @@ void Cleanup(int status)
 #endif
 	
 #ifndef ERUNTIME
-	long c;
+	eulong c;
 	FILE *wrnf = NULL;
 #endif
 
@@ -5703,7 +5703,7 @@ void Cleanup(int status)
 	}
 	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	EFree( fe.misc ); // = (long *)        get_pos_int(w, *(x_ptr->base+3));
+	EFree( fe.misc ); // = (eulong *)        get_pos_int(w, *(x_ptr->base+3));
 #endif
 #endif
 
@@ -5716,7 +5716,7 @@ void Cleanup(int status)
 	exit(status);
 }
 
-void UserCleanup(long status)
+void UserCleanup(eulong status)
 /* Euphoria abort() */
 {
 	user_abort = TRUE;
@@ -5894,10 +5894,10 @@ int mgetch(int wait)
 #endif
 #endif
 
-long find_from(object a, object bobj, object c)
+eulong find_from(object a, object bobj, object c)
 /* find object a as an element of sequence b starting from c*/
 {
-	long length;
+	eulong length;
 	object_ptr bp;
 	object bv;
 	s1_ptr b;
@@ -5913,7 +5913,7 @@ long find_from(object a, object bobj, object c)
 		;
 	}
 	else if (IS_ATOM_DBL(c)) {
-		c = (long)(DBL_PTR(c)->dbl);
+		c = (eulong)(DBL_PTR(c)->dbl);
 	}
 	else
 		RTFatal("third argument of find_from() must be an atom");
@@ -5974,7 +5974,7 @@ long find_from(object a, object bobj, object c)
 		}
 	}
 	else { // IS_SEQUENCE(a)
-		long a_len;
+		eulong a_len;
 
 		length -= c - 1;
 		a_len = SEQ_PTR(a)->length;
@@ -5997,15 +5997,15 @@ long find_from(object a, object bobj, object c)
 	return 0;
 }
 
-long e_match_from(object aobj, object bobj, object c)
+eulong e_match_from(object aobj, object bobj, object c)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
-	long ntries, len_remaining;
+	eulong ntries, len_remaining;
 	object_ptr a1, b1, bp;
 	object_ptr ai, bi;
 	object av, bv;
-	long lengtha, lengthb;
+	eulong lengtha, lengthb;
 	s1_ptr a, b;
 
 	if (!IS_SEQUENCE(aobj))
@@ -6026,7 +6026,7 @@ long e_match_from(object aobj, object bobj, object c)
 		;
 	}
 	else if (IS_ATOM_DBL(c)) {
-		c = (long)(DBL_PTR(c)->dbl);
+		c = (eulong)(DBL_PTR(c)->dbl);
 	}
 	else
 		RTFatal("third argument of match_from() must be an atom");
@@ -6073,12 +6073,12 @@ long e_match_from(object aobj, object bobj, object c)
 void Replace( replace_ptr rb )
 {
 //  normalise arguments, dispatch special cases
-	long start_pos, end_pos, seqlen, replace_len;
+	eulong start_pos, end_pos, seqlen, replace_len;
 	object copy_from, copy_to, target;
 	s1_ptr s1, s2;
 
-	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (long)(DBL_PTR(*rb->start)->dbl);
-	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (long)(DBL_PTR(*rb->stop)->dbl);
+	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (eulong)(DBL_PTR(*rb->start)->dbl);
+	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (eulong)(DBL_PTR(*rb->stop)->dbl);
 
 	copy_to   = *rb->copy_to;
 	copy_from = *rb->copy_from;
@@ -6198,7 +6198,7 @@ void Replace( replace_ptr rb )
 		}
 		else { // remove any extra elements, and then assign a regular slice
 			
-			long c;
+			eulong c;
 			if( target != copy_to ){
 				// ensures that Add_internal_space will make a copy
 				RefDS( copy_to );
@@ -6257,7 +6257,7 @@ void Replace( replace_ptr rb )
 	}
 }
 
-cleanup_ptr DeleteRoutine( long e_index ){
+cleanup_ptr DeleteRoutine( eulong e_index ){
 	cleanup_ptr cup;
 	
 #ifdef ERUNTIME

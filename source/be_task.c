@@ -64,8 +64,8 @@ static double next_task_id = 1.0;
 /*********************/
 
 #include "alldefs.h"
-static void init_task( long tx );
-static void run_current_task( long task );
+static void init_task( eulong tx );
+static void run_current_task( eulong task );
 
 /*********************/
 /* Defined functions */
@@ -110,7 +110,7 @@ void InitTask()
 
 	tcb[0].mode = INTERPRETED_TASK;
 	// these things will be set when task 0 yields for the first time
-	tcb[0].impl.interpreted.pc = (long *)1; 
+	tcb[0].impl.interpreted.pc = (eulong *)1; 
 	tcb[0].impl.interpreted.expr_max = NULL;
 	tcb[0].impl.interpreted.expr_limit = NULL;
 	tcb[0].impl.interpreted.expr_top = NULL;
@@ -155,7 +155,7 @@ static int task_delete(int first, int task)
 	return first;
 }
 
-void terminate_task(long task)
+void terminate_task(eulong task)
 // mark a task for deletion (task is the internal task number)
 {
 	if (tcb[task].type == T_REAL_TIME) {
@@ -177,7 +177,7 @@ double Wait(double t)
 	int it;
 #ifdef EUNIX
 	double t3;
-	long itsme;
+	eulong itsme;
 	struct timespec req;
 #endif // EUNIX
 	
@@ -198,7 +198,7 @@ double Wait(double t)
 		t -= t2;
 #else // EWINDOWS
 #ifdef EUNIX
-		itsme = (long)t3;
+		itsme = (eulong)t3;
 		req.tv_sec = it;
 		req.tv_nsec = itsme;
 		nanosleep(&req, NULL);
@@ -932,9 +932,9 @@ object ctask_create(object r_id, object args)
 // and/or stack corruption complications
 static int earliest_task; 
 
-void run_task( long tx ){
+void run_task( eulong tx ){
 #ifndef ERUNTIME
-	static long **code[3];
+	static eulong **code[3];
 	if( tcb[tx].mode == INTERPRETED_TASK ){
 		struct tcb *tp;
 		
@@ -959,10 +959,10 @@ void run_task( long tx ){
 			
 			// re-entrant? - ok, we use code right away
 			// infinite calls to scheduler?
-			code[0] = (long **)opcode(CALL_PROC);
-			code[1] = (long **)&tcb[current_task].rid;
-			code[2] = (long **)&tcb[current_task].args;
-			tpc = (long *)&code;
+			code[0] = (eulong **)opcode(CALL_PROC);
+			code[1] = (eulong **)&tcb[current_task].rid;
+			code[2] = (eulong **)&tcb[current_task].args;
+			tpc = (eulong *)&code;
 		}
 		else {
 			// Resuming an already-started task after a task_yield().
@@ -997,7 +997,7 @@ void run_task( long tx ){
 
 #ifdef EWINDOWS
 
-static void run_current_task( long task ){
+static void run_current_task( eulong task ){
 	current_task = task;
 	SwitchToFiber( tcb[current_task].impl.translated.task );
 }
@@ -1030,8 +1030,8 @@ void wait_for_task( int task ){
  * calling the task's procedure.
  */
 void *start_task( void *task ){
-	wait_for_task( (long) task );
-	call_task( tcb[(long)task].rid, tcb[(long)task].args );
+	wait_for_task( (eulong) task );
+	call_task( tcb[(eulong)task].rid, tcb[(long)task].args );
 	return task;
 }
 
@@ -1039,8 +1039,8 @@ void *start_task( void *task ){
  * Creates the thread where the new task will run.
  */
 
-static void init_task( long tx ){
-	long ret;
+static void init_task( eulong tx ){
+	eulong ret;
 	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
 	// TODO error handling
 }
@@ -1049,7 +1049,7 @@ static void init_task( long tx ){
  * Changes the value of the current_task to @task, then signals the waiting 
  * threads to see if they should be running, after which it calls wait_for_task().
  */
-static void run_current_task( long task ){
+static void run_current_task( eulong task ){
 	int this_task = current_task;
 	current_task = task;
 	pthread_cond_broadcast( &task_condition );

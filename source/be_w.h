@@ -32,8 +32,8 @@ extern HANDLE console_trace;  // HANDLE for WIN32 output to trace-screen
 extern HANDLE console_var_display; // HANDLE for WIN32 output to large sequence display
 extern HANDLE console_save;   // place to save console_output while in trace screen
 void EClearLines(int first_line, int last_line, int len, WORD attributes);
-void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, WORD * saved, struct rccoord * pos);
-void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, WORD * saved, struct rccoord * pos);
+void ReadInto(WORD * buf, LPTSTR str, int size, unsigned eulong * n, unsigned long * m, WORD * saved, struct rccoord * pos);
+void WriteOutFrom(WORD * buf, LPTSTR str, unsigned eulong n, unsigned long m, WORD * saved, struct rccoord * pos);
 
 #endif
 

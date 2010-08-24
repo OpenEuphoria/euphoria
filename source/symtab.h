@@ -60,14 +60,14 @@ struct symtab_entry {
 		} var;
 		struct {
 			// for subprograms only: 
-			long *code;          // start of proc/func/type 
-			long *linetab;       // line table for traceback 
-			unsigned long firstline; // global line number of start of routine 
+			eulong *code;          // start of proc/func/type 
+			eulong *linetab;       // line table for traceback 
+			unsigned eulong firstline; // global line number of start of routine 
 			struct symtab_entry *temps;  // pointer to list of temps, or NULL 
-			unsigned long num_args; // number of arguments - could be just 1 byte 
-			long resident_task; // task that's currently executing in this routine or -1
+			unsigned eulong num_args; // number of arguments - could be just 1 byte 
+			eulong resident_task; // task that's currently executing in this routine or -1
 			struct private_block *saved_privates;  // pointer to list of private blocks 
-			unsigned long stack_space; // set by fe - stack required 
+			unsigned eulong stack_space; // set by fe - stack required 
 			struct symtab_entry *block; // the scope for the routine
 		} subp;
 		

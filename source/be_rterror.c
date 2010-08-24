@@ -73,7 +73,7 @@
 
 struct display_slot {
 	symtab_ptr sym;
-	long time_stamp;
+	eulong time_stamp;
 	object value_on_screen;
 };
 
@@ -109,15 +109,15 @@ static int main_screen_col = 1;
 static int debug_screen_col = 1;
 
 								/* list of display slots */
-static long highlight_line;     /* current line on debug screen */
+static eulong highlight_line;     /* current line on debug screen */
 static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
-static long tstamp = 1; /* time stamp for deleting vars on display */
+static eulong tstamp = 1; /* time stamp for deleting vars on display */
 static IFILE conin; 
 
 #endif
 
 static int first_debug;           /* first time into debug screen */
-static long trace_line;      /* current traced line */
+static eulong trace_line;      /* current traced line */
 
 
 
@@ -223,14 +223,14 @@ static void set_bk_color(int c)
 	SetBColor(MAKE_INT(col));
 }
 
-static int OffScreen(long line_num)
+static int OffScreen(eulong line_num)
 /* return TRUE if line_num is off (or almost off) the TRACE window */
 {
-	long new_highlight_line;
+	eulong new_highlight_line;
 	struct EuViewPort vp;
 
 	GetViewPort( &vp );
-	new_highlight_line = (long)highlight_line + line_num - trace_line;    
+	new_highlight_line = (eulong)highlight_line + line_num - trace_line;    
 	if (new_highlight_line >= vp.num_trace_lines + BASE_TRACE_LINE - 1 || 
 		new_highlight_line <= BASE_TRACE_LINE)
 		return TRUE;
@@ -238,7 +238,7 @@ static int OffScreen(long line_num)
 		return FALSE;
 }
 
-static void DisplayLine(long n, int highlight)
+static void DisplayLine(eulong n, int highlight)
 /* display line n, possibly with highlighting */
 {
 	char *line;
@@ -273,7 +273,7 @@ static void DisplayLine(long n, int highlight)
 	}
 	else {
 		size_t bufsize;
-		long cb;
+		eulong cb;
 		
 		bufsize = TEMP_SIZE - strlen(TempBuff) - 1;
 		cb = append_string(TempBuff, line, bufsize);
@@ -299,11 +299,11 @@ static char blanks[BLANK_SIZE+1]={' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
 								  '\0'};
 static int prev_file_no = -1;
 
-static void Refresh(long line_num, int vars_too)
+static void Refresh(eulong line_num, int vars_too)
 /* refresh trace lines centred at line_num */
 {
-	long first_line;
-	long i;
+	eulong first_line;
+	eulong i;
 	struct EuViewPort vp;
 	
 #ifdef EWINDOWS
@@ -390,7 +390,7 @@ static void Refresh(long line_num, int vars_too)
 }
 
 
-static void Move(long line_num)
+static void Move(eulong line_num)
 /* update the inverse video line */
 {
 	/* reprint old line in normal video */
@@ -404,7 +404,7 @@ static void Move(long line_num)
 	trace_line = line_num;
 }
 
-static void ShowTraceLine(long line_num)
+static void ShowTraceLine(eulong line_num)
 /* show the line of source to be executed next */
 {
 	if (trace_line == 0 || OffScreen(line_num)) { 
@@ -535,7 +535,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			copy_string( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			snprintf(val_string,  DV_len, "%ld", (long)iv);
+			snprintf(val_string,  DV_len, "%ld", (eulong)iv);
 			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
@@ -1050,11 +1050,11 @@ static void sf_output(char *string)
 	}
 }
 
-static void TracePrint(symtab_ptr proc, long *pc)
+static void TracePrint(symtab_ptr proc, eulong *pc)
 // print a line of traceback
 {
-	long gline;
-	unsigned long line, file;
+	eulong gline;
+	unsigned eulong line, file;
 	char *subtype;
 
 	gline = FindLine(pc, proc);
@@ -1090,7 +1090,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 // msg is error message or NULL
 // s_ptr is symbol involved in error
 {
-	long *new_pc;
+	eulong *new_pc;
 	symtab_ptr current_proc;
 	
 	int levels, skipping, dash_count, i, task, show_message;
@@ -1123,7 +1123,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 					 tcb[current_task].tid, routine_name);
 			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
-			if ((long)strlen(TPTempBuff) < dash_count) {
+			if ((eulong)strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
 			}
 			if (dash_count < 1) {
@@ -1176,7 +1176,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// unwind the stack for this task
 			
 			expr_top -= 2;
-			new_pc = (long *)*expr_top;
+			new_pc = (eulong *)*expr_top;
 			
 			if (current_proc->u.subp.saved_privates != NULL) {
 				// called recursively or multiple tasks - restore privates
@@ -1184,7 +1184,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				restore_privates(current_proc);
 			}
 			
-			if (*new_pc == (long)opcode(CALL_BACK_RETURN)) {
+			if (*new_pc == (eulong)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
 					copy_string(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
@@ -1200,7 +1200,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				if (expr_top <= expr_stack+3)
 					break;
 				expr_top -= 2;
-				new_pc = (long *)*expr_top;
+				new_pc = (eulong *)*expr_top;
 			}
 
 			current_proc = Locate(new_pc - 1);
@@ -1299,7 +1299,7 @@ void RTInternal_va(char *msg, va_list ap)
 #define CUE_bufflen (200)
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
-	long i;
+	eulong i;
 
 	char *msgtext;
 	char *buf;
@@ -1366,7 +1366,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 }
 
 
-void RTFatalType(long *pc)
+void RTFatalType(eulong *pc)
 /* handle type-check failures */
 /* pc points to variable in instruction stream */ 
 {
@@ -1389,7 +1389,7 @@ object_ptr BiggerStack()
 	return expr_stack + stack_size - 5; /* new expr_max */
 }
 
-void BadSubscript(object subs, long length)
+void BadSubscript(object subs, eulong length)
 /* report a subscript violation */
 {
 #define BadSubscript_bufflen (40)

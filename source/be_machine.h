@@ -29,12 +29,12 @@ extern unsigned current_fg_color;
 extern unsigned current_bg_color;
 
 extern char *crash_msg;
-extern long *crash_list;       // list of routines to call when there's a crash
+extern eulong *crash_list;       // list of routines to call when there's a crash
 extern int crash_routines;    // number of routines
 extern int crash_size;        // space allocated for crash_list
 
-extern long *profile_sample;
-extern volatile long sample_next;
+extern eulong *profile_sample;
+extern volatile eulong sample_next;
 
 extern int first_mouse;
 
@@ -58,7 +58,7 @@ char *name_ext(char *s);
 void echo_wait();
 object memory_copy(object d, object s, object n);
 object memory_set(object d, object v, object n);
-unsigned long get_pos_int(char *where, object x);
+unsigned eulong get_pos_int(char *where, object x);
 
 void NewConfig(int raise_console);
 double current_time();

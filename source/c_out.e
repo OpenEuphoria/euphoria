@@ -161,7 +161,7 @@ export procedure c_printf8(atom value)
 end procedure
 
 --**
--- long term indent with braces
+-- eulong term indent with braces
 export integer indent = 0
 
 --**

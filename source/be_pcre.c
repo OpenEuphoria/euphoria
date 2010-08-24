@@ -42,7 +42,7 @@ void pcre_deref(object re) {
         }
 }
 
-long get_int();
+eulong get_int();
 
 object compile(object pattern, object eflags) {
         pcre *re;
@@ -70,10 +70,10 @@ object compile(object pattern, object eflags) {
         }
         
 
-        if ((unsigned long) re > (unsigned long)MAXINT)
-                ret = NewDouble((double)(unsigned long)re);
+        if ((unsigned eulong) re > (unsigned long)MAXINT)
+                ret = NewDouble((double)(unsigned eulong)re);
         else
-                ret = (unsigned long)re;
+                ret = (unsigned eulong)re;
 
         return ret;
 }

@@ -36,60 +36,60 @@
 
 #if EBITS == 32
 
-#define NOVALUE      ((long)0xbfffffffL)
-#define DBL_MASK ((long)0xA0000000)
-#define SEQ_MASK ((long)0x80000000)
-#define HIGH_BITS    ((long)0xC0000000L)
-#define ASEQ_MASK (unsigned long)0xE0000000)
+#define NOVALUE      ((eulong)0xbfffffffL)
+#define DBL_MASK ((eulong)0xA0000000)
+#define SEQ_MASK ((eulong)0x80000000)
+#define HIGH_BITS    ((eulong)0xC0000000L)
+#define ASEQ_MASK (unsigned eulong)0xE0000000)
 
-#define TOO_BIG_INT  ((long)0x40000000L)
+#define TOO_BIG_INT  ((eulong)0x40000000L)
 #undef MININT
 #undef MAXINT
-#define MININT     (long)0xC0000000
-#define MAXINT     (long)0x3FFFFFFF
+#define MININT     (eulong)0xC0000000
+#define MAXINT     (eulong)0x3FFFFFFF
 
 #elif EBITS == 64
 
-#define NOVALUE      ((long)0xbfffffffffffffffL)
-#define DBL_MASK ((long)0xA000000000000000)
-#define SEQ_MASK ((long)0x8000000000000000)
-#define HIGH_BITS    ((long)0xC000000000000000L)
-#define ASEQ_MASK ((unsigned long)0xE000000000000000)
+#define NOVALUE      ((eulong)0xbfffffffffffffffL)
+#define DBL_MASK ((eulong)0xA000000000000000)
+#define SEQ_MASK ((eulong)0x8000000000000000)
+#define HIGH_BITS    ((eulong)0xC000000000000000L)
+#define ASEQ_MASK ((unsigned eulong)0xE000000000000000)
 
-#define TOO_BIG_INT  ((long)0x4000000000000000L)
+#define TOO_BIG_INT  ((eulong)0x4000000000000000L)
 #undef MININT
 #undef MAXINT
-#define MININT     (long)0xC000000000000000
-#define MAXINT     (long)0x3FFFFFFFFFFFFFFF
+#define MININT     (eulong)0xC000000000000000
+#define MAXINT     (eulong)0x3FFFFFFFFFFFFFFF
 
 #endif
 
-#define MAXINT32    (long)0x3FFFFFFF
+#define MAXINT32    (eulong)0x3FFFFFFF
 
-#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
-#define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
+#define IS_ATOM_INT(ob)       (((eulong)(ob)) > NOVALUE)
+#define IS_ATOM_INT_NV(ob)    ((eulong)(ob) >= NOVALUE)
 
 /* these are obsolete */
-#define INT_VAL(x)        ((long)(x))
+#define INT_VAL(x)        ((eulong)(x))
 #define MAKE_INT(x)       ((object)(x))
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */
-#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
+#define IS_ATOM_INT(ob)       (((eulong)(ob)) > NOVALUE)
 #define IS_ATOM_DBL(ob)         (((object)(ob)) >= DBL_MASK)
-#define IS_ATOM(ob)             (((long)(ob)) >= DBL_MASK)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < DBL_MASK)
-#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
+#define IS_ATOM(ob)             (((eulong)(ob)) >= DBL_MASK)
+#define IS_SEQUENCE(ob)         (((eulong)(ob))  < DBL_MASK)
+#define IS_DBL_OR_SEQUENCE(ob)  (((eulong)(ob)) < NOVALUE)
 
-#define ASEQ(s) ( ( (unsigned long)s & ASEQ_MASK) == ((unsigned long)SEQ_MASK) )
+#define ASEQ(s) ( ( (unsigned eulong)s & ASEQ_MASK) == ((unsigned eulong)SEQ_MASK) )
 
 #define MININT_VAL MININT
 #define MININT_DBL ((double)MININT_VAL)
 #define MAXINT_VAL MAXINT
 #define MAXINT_DBL ((double)MAXINT_VAL)
-#define INT23      (long)0x003FFFFFL
-#define INT16      (long)0x00007FFFL
-#define INT15      (long)0x00003FFFL
+#define INT23      (eulong)0x003FFFFFL
+#define INT16      (eulong)0x00007FFFL
+#define INT15      (eulong)0x00003FFFL
 #define ATOM_M1    -1
 #define ATOM_0     0
 #define ATOM_1     1
@@ -111,9 +111,9 @@ struct symtab_entry;
 */
 struct routine_list {   
 	char *name;
-	long (*addr)();
-	long seq_num;
-	long file_num;
+	eulong (*addr)();
+	eulong seq_num;
+	eulong file_num;
 	short int num_args;
 	short int convention;
 	char scope;
@@ -158,10 +158,10 @@ struct replace_block {
 
 
 /* MACROS */
-#define MAKE_DBL(x) ( (object) (((unsigned long)(x) >> 3) + DBL_MASK) )
-#define DBL_PTR(ob) ( (d_ptr)  (((unsigned long)(ob)) << 3) )
-#define MAKE_SEQ(x) ( (object) (((unsigned long)(x) >> 3) + SEQ_MASK) )
-#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) ) 
+#define MAKE_DBL(x) ( (object) (((unsigned eulong)(x) >> 3) + DBL_MASK) )
+#define DBL_PTR(ob) ( (d_ptr)  (((unsigned eulong)(ob)) << 3) )
+#define MAKE_SEQ(x) ( (object) (((unsigned eulong)(x) >> 3) + SEQ_MASK) )
+#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned eulong)(ob)) << 3) ) 
 
 /* ref a double or a sequence (both need same 3 bit shift) */
 #define RefDS(a) ++(DBL_PTR(a)->ref)    
@@ -200,7 +200,7 @@ struct file_info {
 }; 
 
 struct arg_info {
-	long (*address)();     // pointer to C function
+	eulong (*address)();     // pointer to C function
 	s1_ptr name;          // name of routine (for diagnostics)
 	s1_ptr arg_size;      // s1_ptr of sequence of argument sizes
 	object return_size;   // atom or sequence for return value size
@@ -217,7 +217,7 @@ struct arg_info {
 struct IL {
 	struct symtab_entry *st;
 	struct sline *sl;
-	long *misc;
+	eulong *misc;
 	char *lit;
 	unsigned char **includes;
 	object switches;
@@ -271,8 +271,8 @@ struct char_cell {
 
 #define DEFAULT_SAMPLE_SIZE 25000
 
-#define MAX_BITWISE_DBL ((double)(unsigned long)0xFFFFFFFF)
-#define MIN_BITWISE_DBL ((double)(signed long)  0x80000000)
+#define MAX_BITWISE_DBL ((double)(unsigned eulong)0xFFFFFFFF)
+#define MIN_BITWISE_DBL ((double)(signed eulong)  0x80000000)
 
 /* .dll argument & return value types */
 #define C_TYPE     0x0F000000

@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include "execute.h"
 
-object call_c(long func, object proc_ad, object arg_list);
+object call_c(eulong func, object proc_ad, object arg_list);
 
 
 typedef union {

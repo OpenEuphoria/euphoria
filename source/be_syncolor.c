@@ -296,7 +296,7 @@ void DisplayColorLine(char *pline, int string_color)
 	line = pline;
 	length = strlen(line); /* the place where the '\0' exists */
 	if (length >= LMAX) 
-		line[LMAX-1] = 0;    /* truncate long line */
+		line[LMAX-1] = 0;    /* truncate eulong line */
 	color = -1; /* initially undefined */
 	bracket_level = -1;
 	seg_start = 0;

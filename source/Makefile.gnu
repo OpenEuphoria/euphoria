@@ -214,7 +214,7 @@ else
 	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex $(EUARCH)
 endif
 
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -g -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) $(DARCH) $(BITS)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -g -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) $(DARCH) $(BITS)
 BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -g -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) $(DARCH) $(BITS)
 
 EU_CORE_FILES = \

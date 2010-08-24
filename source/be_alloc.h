@@ -23,7 +23,7 @@
 #if defined(EALIGN4)
 #undef ESIMPLE_MALLOC
 
-#define MAGIC_FILLER ((long)0xFFFFFFF3) 
+#define MAGIC_FILLER ((eulong)0xFFFFFFF3) 
 								/* magic 4-byte value that should never appear
 								   prior to a block pointer, unless we put it 
 								   there to align things on an 8-byte 
@@ -115,7 +115,7 @@ typedef struct block_list * block_list_ptr;
 	
 	The cache for doubles is simplier because all doubles have the same size.
 	
-	Note, all allocations are at least 8 bytes long and aligned on an 8-byte
+	Note, all allocations are at least 8 bytes eulong and aligned on an 8-byte
 	boundary.  We need this because the address of the block is stored in the
 	lower 29-bits of an 'object' and so when getting the real address from an
 	'object', we shift the object's value to the left by 3. This is the same as
@@ -156,9 +156,9 @@ typedef struct block_list * block_list_ptr;
 	#define EFree(ptr) free(ptr)
 	#define ERealloc(orig, newsize) realloc(orig, (size_t) (newsize))
 #else
-	extern char *EMalloc(unsigned long size);
+	extern char *EMalloc(unsigned eulong size);
 	extern void EFree(char *ptr);
-	extern char *ERealloc(char *orig, unsigned long newsize);
+	extern char *ERealloc(char *orig, unsigned eulong newsize);
 #endif
 
 #if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \
@@ -171,7 +171,7 @@ size_t strlcat(char *dest, char *src, size_t maxlen);
 char *malloc_options;
 #endif
 
-extern long pagesize;  // needed for Linux only, not FreeBSD
+extern eulong pagesize;  // needed for Linux only, not FreeBSD
 
 extern int eu_dll_exists; // a Euphoria .dll is being used
 extern int low_on_space;  // are we almost out of memory?
@@ -181,25 +181,25 @@ extern symtab_ptr call_back_arg1, call_back_arg2, call_back_arg3, call_back_arg4
 
 #ifdef EXTRA_STATS
 extern unsigned recycles;          /* calls to Recycle() */
-extern long a_miss;                /* cache list was empty */
-extern long a_hit;                 /* found in cache */
-extern long a_too_big;             /* too big - no caching */
-extern long funny_expand;          /* _expand returns new pointer */
-extern long funny_align;           /* number mallocs not 8-aligned */
+extern eulong a_miss;                /* cache list was empty */
+extern eulong a_hit;                 /* found in cache */
+extern eulong a_too_big;             /* too big - no caching */
+extern eulong funny_expand;          /* _expand returns new pointer */
+extern eulong funny_align;           /* number mallocs not 8-aligned */
 #endif
 
 #ifdef HEAP_CHECK
-extern unsigned long bytes_allocated;       /* current number of object blocks alloc'd */
-extern unsigned long max_bytes_allocated;   /* high water mark */
+extern unsigned eulong bytes_allocated;       /* current number of object blocks alloc'd */
+extern unsigned eulong max_bytes_allocated;   /* high water mark */
 #endif
 
 extern void InitEMalloc();
 extern object NewString(char *s);
-extern s1_ptr NewS1(long size);
+extern s1_ptr NewS1(eulong size);
 extern s1_ptr SequenceCopy(register s1_ptr a);
 
 extern object NewDouble(double d);
-extern long copy_string(char *dest, char *src, size_t bufflen);
-extern long append_string(char *dest, char *src, size_t bufflen);
+extern eulong copy_string(char *dest, char *src, size_t bufflen);
+extern eulong append_string(char *dest, char *src, size_t bufflen);
 
 #endif
