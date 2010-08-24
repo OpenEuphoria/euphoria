@@ -27,7 +27,7 @@
 ****************************************************************************/
 #if EBITS == 32
 
-#define eulong ing
+#define eulong int
 
 #define NOVALUE      ((eulong)0xbfffffffL)
 #define DBL_MASK ((eulong)0xA0000000)
