@@ -93,7 +93,8 @@ EU_ALL_FILES = \
 	source/be_syncolor.h \
 	source/be_task.h \
 	source/be_w.h \
-	source/object.h
+	source/object.h \
+	source/getindices.ex
 
 EU_DIRS = include \
 	include/std/ \
@@ -132,7 +133,7 @@ BUILD_DIRS = intobj/ \
 	transobj/back/ \
 	libobj/back/
 
-euphoria-$(EU_VERSION)-$(DEBIAN_VERSION)_i386 : update
+euphoria-$(EU_VERSION)-$(DEBIAN_VERSION) : update
 	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage
 # 	cd $(DEB_SOURCE_DIR) && fakeroot debian/rules binary
 
@@ -150,10 +151,14 @@ clean :
 
 DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
 
+copy-files :
+
+source :
+
 update :
 	-mkdir -p $(DEB_SOURCE_DIR)/source/pcre
-	cd $(EU_BASE_DIR)/source && ./configure && make distclean 
-	cd $(EU_BASE_DIR)/source && ./configure && make source
+	cd $(EU_BASE_DIR)/source && ./configure $(CONFIG) && make distclean 
+	cd $(EU_BASE_DIR)/source && ./configure $(CONFIG) && make source
 	cp -r $(EU_BASE_DIR)/source/build $(DEB_SOURCE_DIR)/source
 	for file in $(EU_ALL_FILES); \
 	do \
@@ -181,11 +186,7 @@ update :
 	cp $(EU_BASE_DIR)/docs/*.js $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/html/images/* $(DEB_SOURCE_DIR)/docs/html/images
 	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
-# 	cd $(DEB_SOURCE_DIR)/source && ./configure
-# 	cd $(DEB_SOURCE_DIR)/source && $(MAKE)  source
-# 	-rm *.gz
 	-rm -r $(DEB_SOURCE_DIR)/debian
-# 	tar -czf euphoria-$(EU_VERSION).tar.gz $(DEB_SOURCE_DIR)
 	-mkdir $(DEB_SOURCE_DIR)/debian
 	-cp rules $(DEB_SOURCE_DIR)/debian
 	-cp postinst $(DEB_SOURCE_DIR)/debian
@@ -202,7 +203,7 @@ update :
 dh-make : update
 	@cd $(DEB_SOURCE_DIR) && dh_make -e matthewwalkerlewis@gmail.com --createorig
 	@-rm $(DEB_SOURCE_DIR)/debian/emacsen*
-	@cp rules $(DEB_SOURCE_DIR)/debian
+	@cp rules $(DEB_SOURCE_DIR)/debian CONFIG="$(CONFIG)"
 	@cp postinst $(DEB_SOURCE_DIR)/debian;
 	@cp ../doc/*.1 $(DEB_SOURCE_DIR)/debian;
 	@cp control $(DEB_SOURCE_DIR)/debian;

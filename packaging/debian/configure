@@ -1,5 +1,9 @@
 #!/bin/sh
 
+echo "# Configuration for building debian packages" > Makefile.eu
+
+ROOTDIR=`cd ../..; pwd` >> Makefile.eu
+
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
@@ -7,4 +11,30 @@ if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=i386 >> "$PREFIX"Makefile.eu
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	echo ARCH=amd64 >> "$PREFIX"Makefile.eu
+fi
+
+HAS_CONFIG=""
+
+while [ "$1" != "" ]; do
+    case $1 in
+    	--config )
+		echo "CONFIG=$2 --rootdir \"$ROOTDIR\"" >> "$PREFIX"Makefile.eu
+		HAS_CONFIG="YES"
+		shift
+	;;
+		* )
+			echo "Unknown option '$1'"
+			echo "Configures and prepares the euphoria source for building a Debian package"
+			echo
+ 			echo "configure [options]"
+			echo
+			echo "Options:"
+			echo "    --config options   supply options that will be passed to the"
+			echo "                       normal configure script when building euphoria"
+	esac
+	shift
+done
+
+if [ "x$HAS_CONFIG" = "x" ]; then
+	echo "CONFIG=--rootdir \"$ROOTDIR\"" >> "$PREFIX"Makefile.eu
 fi

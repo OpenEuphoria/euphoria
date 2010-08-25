@@ -209,8 +209,8 @@ else
 	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex
 endif
 
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH)
-BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 
 EU_CORE_FILES = \
 	block.e \
@@ -354,8 +354,12 @@ $(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS)
 builddirs : svn_rev
 	mkdir -p $(BUILD_DIRS) 
 
+ifeq "$(ROOTDIR)" ""
+ROOTDIR=$(TRUNKDIR)
+endif
+
 svn_rev : 
-	-$(EXE) -i ../include revget.ex -root ..
+	-$(EXE) -i ../include revget.ex -root $(ROOTDIR)
 
 be_rev.c : svn_rev
 

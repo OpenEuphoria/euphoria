@@ -108,6 +108,13 @@ IF "%1" == "--noassert" (
 IF "%1" == "--help" (
 	GOTO Help
 )
+
+IF "%1" == "--release" (
+	echo EREL_TYPE = /dEREL_TYPE=\"%2\"
+	SHIFT
+	GOTO EndLoop
+)
+
 echo Unknown option '%1'
 GOTO Help
 
@@ -243,6 +250,8 @@ pause
 echo.
 echo     --full              Use this option to so EUPHORIA doesn't report itself
 echo 		             as a development version.
+echo.
+echo     --release value     set the release type for the version string
 echo.
 echo     --noassert          Use this to remove 'assert()' processing in the C code.
 echo.
