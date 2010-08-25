@@ -2279,11 +2279,11 @@ public function disk_size(object disk_path)
 			
 		end while
 
-		data = get(temph)
+		data = stdget:get(temph)
 		disk_size[TOTAL_BYTES] = data[2] * 1024
-		data = get(temph)
+		data = stdget:get(temph)
 		disk_size[USED_BYTES] = data[2] * 1024
-		data = get(temph)
+		data = stdget:get(temph)
 		disk_size[FREE_BYTES] = data[2] * 1024
 		disk_size[4] = filesys
 
