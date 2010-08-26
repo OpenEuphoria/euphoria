@@ -457,7 +457,7 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 			
 			for i = 1 to length(add_help_rid) do
 				puts(1, add_help_rid[i])
-				if add_help_rid[i][$] != '\n' then
+				if length(add_help_rid[i]) = 0 or add_help_rid[i][$] != '\n' then
 					puts(1, '\n')
 				end if
 			end for
@@ -755,13 +755,14 @@ end function
 --   was encountered. This is helpful for programs such as the Interpreter itself:
 --   ##eui -D TEST greet.ex -name John##. -D TEST should be validated but anything after
 --   "greet.ex" should not as it is meant for greet.ex to handle, not eui.
--- # ##HELP_RID## ~-- Specify a routine id to call in the event of a parse error (invalid option
---   given, mandatory option not given, no parameter given for an option that requires a
---   parameter, etc...) or a set of text strings. This can be used to provide additional
+-- # ##HELP_RID## ~-- The next Parse Option must either a routine id or a set of
+--   text strings. The routine is called or the text is displayed when a parse error
+--  (invalid option given, mandatory option not given, no parameter given for an option that requires a
+--   parameter, etc...) occurs. This can be used to provide additional
 --   help text. By default, just the option switches and their descriptions will be
 --   displayed. However you can provide additional text by either supplying a
 --   routine_id of a procedure that accepts no parameters; this procedure is expected
---   to write text to the stdout device. Or you can supply one or more lines of text
+--   to write text to the stdout device, or you can supply one or more lines of text
 --   that will be displayed.
 -- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'
 -- # ##AT_EXPANSION## ~-- Expand arguments that begin with '@'.  The name that follows @ will be
@@ -923,7 +924,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	integer from_
 	sequence help_opts
 	sequence call_count
-	integer add_help_rid = -1
+	object add_help_rid = -1
 	integer validation = VALIDATE_ALL
 	integer has_extra = 0
 	integer use_at = 1
