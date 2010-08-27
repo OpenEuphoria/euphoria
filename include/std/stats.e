@@ -1113,7 +1113,7 @@ end function
 --
 -- Comments:
 --
--- For each of the items in #datum##, its central moment is calculated as ...
+-- For each of the items in ##datum##, its central moment is calculated as ...
 -- {{{
 --     CM = power( ITEM - AVG, MAGNITUDE)
 -- }}}
