@@ -1127,11 +1127,7 @@ static object user_allocate(object x)
 #endif
 #endif
 
-	// we don't allow -ve addresses, so can't use -ve Euphoria ints
-	if ((unsigned long)addr <= (unsigned)MAXINT_VAL)
-		return (unsigned long)addr;
-	else
-		return NewDouble((double)(unsigned long)addr);
+	return MAKE_UINT(addr);
 }
 
 static object Where(object x)
@@ -1820,6 +1816,18 @@ static object unlock_file(object x)
 	return ATOM_1; // ignored
 }
 
+static object get_rand()
+/* Return the random generator's current seed values */
+{
+	s1_ptr result;
+	
+	result = NewS1(2);
+	result->base[1] = seed1;
+	result->base[2] = seed2;
+
+	return MAKE_SEQ(result);
+}
+
 static object set_rand(object x)
 /* set random number generator */
 {
@@ -2179,12 +2187,7 @@ object OpenDll(object x)
 	lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
 
 #endif
-	if ((unsigned)lib <= (unsigned)MAXINT_VAL){
-			return MAKE_INT((unsigned long)lib);
-	}
-	else{
-		return NewDouble((double)(unsigned long)lib);
-	}
+	return MAKE_UINT(lib);
 }
 
 object DefineCVar(object x)
@@ -2225,10 +2228,7 @@ object DefineCVar(object x)
 		return ATOM_M1;
 #endif
 	addr = (unsigned)variable_address;
-	if (addr <= (unsigned)MAXINT_VAL)
-		return MAKE_INT(addr);
-	else
-		return NewDouble((double)addr);
+	return MAKE_UINT(addr);
 }
 
 
@@ -2579,10 +2579,7 @@ object CallBack(object x)
 	addr = (unsigned)copy_addr;
 
 	/* Return new address. */
-	if (addr <= (unsigned)MAXINT_VAL)
-		return MAKE_INT(addr);
-	else
-		return NewDouble((double)addr);
+	return MAKE_UINT(addr);
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
@@ -2869,6 +2866,9 @@ object machine(object opcode, object x)
 				break;
 			case M_SET_RAND:
 				return set_rand(x);
+				break;
+			case M_GET_RAND:
+				return get_rand();
 				break;
 			case M_USE_VESA:
 				return use_vesa(x);

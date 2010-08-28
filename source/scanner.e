@@ -1781,7 +1781,7 @@ export function Scanner()
 		elsif class = NUMBER_SIGN then
 			i = 0
 			is_int = -1
-			while i < MAXINT_VAL/32 do
+			while i < MAXINT/32 do
 				ch = getch()
 				if char_class[ch] = DIGIT then
 					if ch != '_' then
@@ -1814,7 +1814,7 @@ export function Scanner()
 					CompileErr(97)
 				end if
 			else
-				if i >= MAXINT_VAL/32 then
+				if i >= MAXINT/32 then
 					d = i
 					is_int = FALSE
 					while TRUE do

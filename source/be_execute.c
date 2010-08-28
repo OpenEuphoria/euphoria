@@ -801,6 +801,9 @@ void InitExecute()
 	// create first task (task 0)
 	InitTask();
 	TopLevelSub->u.subp.resident_task = current_task;
+	
+	// Initialize random generator seeds.
+	setran();
 }
 
 #ifndef INT_CODES
@@ -1328,7 +1331,7 @@ void analyze_switch()
 			
 			if( IS_ATOM_INT( top ) ){
 				if (top == MININT) {
-					top = (object)NewDouble((double)-MININT_VAL);
+					top = (object)NewDouble((double)-MININT);
 				}
 				else
 					top = -top;
@@ -2644,7 +2647,7 @@ void do_exec(int *start_pc)
 				START_UNARY_OP
 				if (top == MININT) {
 					tpc = pc; 
-					top = (object)NewDouble((double)-MININT_VAL);
+					top = (object)NewDouble((double)-MININT);
 				}
 				else
 					top = -top;

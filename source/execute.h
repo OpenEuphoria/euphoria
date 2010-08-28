@@ -40,7 +40,9 @@
 #define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
 #define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
 
-#define MAKE_UINT(x)	((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL  ? (unsigned int)x : NewDouble((double)(unsigned int)x)))
+#define MAKE_UINT(x) ((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL \
+                          ? (unsigned long)x : \
+                            NewDouble((double)(unsigned long)x)))
 
 /* these are obsolete */
 #define INT_VAL(x)        ((int)(x))
@@ -60,10 +62,8 @@
 #undef MININT
 #define MININT     (long)0xC0000000
 #define MAXINT     (long)0x3FFFFFFF
-#define MININT_VAL MININT
-#define MININT_DBL ((double)MININT_VAL)
-#define MAXINT_VAL MAXINT
-#define MAXINT_DBL ((double)MAXINT_VAL)
+#define MININT_DBL ((double)MININT)
+#define MAXINT_DBL ((double)MAXINT)
 #define INT23      (long)0x003FFFFFL
 #define INT16      (long)0x00007FFFL
 #define INT15      (long)0x00003FFFL
@@ -378,6 +378,7 @@ struct char_cell {
 #define M_PCRE_ERROR_MESSAGE 95
 #define M_SOCK_ERROR_CODE    96
 #define M_PCRE_GET_OVECTOR_SIZE 97
+#define M_GET_RAND           98
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

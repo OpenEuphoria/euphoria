@@ -2029,8 +2029,8 @@ object Dxor(d_ptr a, d_ptr b)
 object uminus(long a)
 /* integer -a */
 {
-	if (a == MININT_VAL)
-		return (object)NewDouble((double)-MININT_VAL);
+	if (a == MININT)
+		return (object)NewDouble((double)-MININT);
 	else
 		return MAKE_INT(-a);
 }
@@ -2265,12 +2265,12 @@ object Random(long a)
 object DRandom(d_ptr a)
 /* random number from 1 to a (a <= 1.07 billion) */
 {
+	unsigned long res;
+	
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
-	if (a->dbl > MAXINT_DBL)
-		RTFatal("argument to rand must be <= 1073741823");
-//  return (object)NewDouble( (double)(1 + good_rand() % (unsigned)(a->dbl)) );
-	return (object)(1 + good_rand() % (unsigned)(a->dbl));
+	res = (1 + good_rand() % (unsigned)(a->dbl));
+	return MAKE_UINT(res);
 }
 
 

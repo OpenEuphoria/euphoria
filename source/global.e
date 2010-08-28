@@ -224,10 +224,8 @@ export enum
 export constant
 	MAXINT = #3FFFFFFF,
 	MININT = -MAXINT-1,   -- should be -ve
-	MININT_VAL = MININT,  -- these are redundant ...
-	MAXINT_VAL = MAXINT,
-	MININT_DBL = MININT_VAL,
-	MAXINT_DBL = MAXINT_VAL
+	MININT_DBL = MININT,
+	MAXINT_DBL = MAXINT
 
 export constant NOVALUE = -1.295837195871e307
 -- An unlikely number. If it occurs naturally,  there will be a slight loss of optimization

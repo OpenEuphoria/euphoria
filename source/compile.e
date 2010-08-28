@@ -114,6 +114,7 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 		-- M_BACKEND      = 65,
 		M_CRASH        = 67
 		--, M_WARNING_FILE = 72
+		-- M_GET_RAND     = 98
 
 
 constant INIT_CHUNK = 2500 -- maximum number of literals to
@@ -3673,16 +3674,14 @@ end procedure
 procedure opRAND()
 	gencode = "@ = unary_op(RAND, @);\n"
 	intcode = "@ = good_rand() % ((unsigned)@) + 1;\n"
-	if TypeIsIn(Code[pc+1], TYPES_SO) then
-		target_type = GType(Code[pc+1])
+	if TypeIs(Code[pc+1], TYPE_INTEGER) then
+ 		target_type = TYPE_INTEGER
+		target = ObjMinMax(Code[pc+1])
+		target_val = {1, target[MAX]}
 	else
-		target_type = TYPE_INTEGER
-		if TypeIs(Code[pc+1], TYPE_INTEGER) then
-			target = ObjMinMax(Code[pc+1])
-			target_val = {1, target[MAX]}
-		end if
+		target_type = GType(Code[pc+1])
 	end if
-
+	
 	pc = unary_optimize(pc, target_type, target_val, intcode, intcode2,
 						gencode)
 end procedure
@@ -7323,9 +7322,11 @@ procedure BackEnd(atom ignore)
 	c_stmt0("void init_literal()\n{\n")
 	c_stmt0("extern unsigned char *string_ptr;\n")
 	c_stmt0("extern object decompress(unsigned int c);\n" )
+	c_stmt0("extern double sqrt();\n")
+	c_stmt0("setran(); /* initialize random generator seeds */\n")
+	
 	-- initialize the (non-integer) literals
 	tp = literal_init
-	c_stmt0("extern double sqrt();\n")
 	tp_count = 0
 
 	while tp != 0 do

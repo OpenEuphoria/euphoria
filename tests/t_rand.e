@@ -12,22 +12,33 @@ t = {rand(10), rand(100), rand(1000)}
 
 test_true( "set_rand", equal(s,t))
 
+set_rand({1001, -3456})
+test_equal("get_rand #1", {1001, -3456}, get_rand())
+
+set_rand("some text")
+test_equal("get_rand #2", {-913232434,701926632}, get_rand())
+
+set_rand(1001)
+test_equal("get_rand #3", {1002, -3}, get_rand())
 
 set_rand(1001)
 test_equal("rand_range A", 22, rand_range(18, 24))
 test_equal("rand_range B", -15, rand_range(-18, 24))
 test_equal("rand_range C", -20, rand_range(-24, -18))
 test_equal("rand_range D", -23, rand_range(-18, -24))
+test_equal("rand_range E", 2.18054905704903, rand_range(1.8, 2.4))
+test_equal("rand_range F", 1.27958396125514, rand_range(1, 2.4))
+test_equal("rand_range G", 1.89014651699885, rand_range(1.8, 2))
 
 set_rand(1001)
-test_equal("rnd() A", 0.391873680838033, rnd())
-test_equal("rnd() B", 0.257111201676016, rnd())
-test_equal("rnd() C", 0.527862612725599, rnd())
+test_equal("rnd() A", 0.627733820066871, rnd())
+test_equal("rnd() B", 0.782460699403474, rnd())
+test_equal("rnd() C", 0.63424842841505, rnd())
 
 set_rand(1001)
-test_equal("rnd_1() A", 0.391873680838033, rnd_1())
-test_equal("rnd_1() B", 0.257111201676016, rnd())
-test_equal("rnd_1() C", 0.527862612725599, rnd())
+test_equal("rnd_1() A", 0.627733820066871, rnd_1())
+test_equal("rnd_1() B", 0.782460699403474, rnd_1())
+test_equal("rnd_1() C", 0.63424842841505, rnd_1())
 
 set_rand(1001)
 atom A = rnd()
@@ -37,11 +48,11 @@ atom B = rnd()
 
 test_true( "rnd() #2", A != B)
 
-set_rand({34, 100919})
-test_equal("set_rand explicit ", 0.734853451398937, rnd())
+set_rand({134, -200919})
+test_equal("set_rand explicit ", 0.920170838582831, rnd())
 
 set_rand("some text string as a seed generator")
-test_equal("set_rand string", 0.46610033177015, rnd())
+test_equal("set_rand string", 0.163853923565223, rnd())
 
 set_rand("") -- Reset generator.
 integer y = 0

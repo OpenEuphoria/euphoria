@@ -7,8 +7,10 @@
 #ifndef H_GLOBAL
 #define H_GLOBAL
 
-#ifdef EWATCOM
+#ifdef EWINDOWS
 #include <windows.h>
+#endif
+#ifdef EWATCOM
 #include <graph.h>
 #endif
 
@@ -62,7 +64,7 @@ typedef signed   char   schar;
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
-#elif defined(EWATCOM)
+#elif defined(EWINDOWS)
 #	define IFILE FILE*
 #	define IOFF __int64
 #	define iopen fopen
@@ -226,6 +228,8 @@ extern unsigned default_heap;
 
 
 #endif
+
+void show_console();
 
 extern int is_batch;
 
