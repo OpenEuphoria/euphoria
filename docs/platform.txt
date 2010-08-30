@@ -107,7 +107,7 @@ ifdef UNIX then
 		public constant SHARED_LIB_EXT = "so"
 	end ifdef
         
-	public constant FOO =  SLASH == PATHSEP -- this has hidden syntax error
+	public constant FOO =  SLASH == PATHSEP -- this has a hidden syntax error
 	
 elsifdef WINDOWS then
 
@@ -118,7 +118,7 @@ elsifdef WINDOWS then
 	public constant NULLDEVICE = "NUL:"
 	public constant SHARED_LIB_EXT = "dll"
 	
-elsifdef TRASHOS then  -- this symbol is never defiend no error here either
+elsifdef TRASHOS then  -- this symbol is never defined -- no error here either
        
 end ifdef
 </eucode>
