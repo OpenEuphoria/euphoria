@@ -43,7 +43,7 @@ end ifdef
 --
 sequence list = command_line()
 sequence interpreter
-ifdef EC then
+ifdef EUC or EUB then
 	-- The tests test are here to test interpreters and libraries as we do not know where the
 	-- interpreter is we just quit.
 	test_report()
