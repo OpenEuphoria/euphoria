@@ -409,4 +409,11 @@ test_false("sequence_array(1, 2, 'a')", sequence_array({1, 2, 'a'}))
 test_true ("sequence_array({})", sequence_array({}))
 test_true ("sequence_array({})", sequence_array({"abc", {3.4, 5, 92837.12312, "abc"}}))
 
+-- test for ignored type calls:
+string()
+
+if 1 then
+	string()
+end if
+
 test_report()
