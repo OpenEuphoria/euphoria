@@ -23,7 +23,7 @@ include std/pretty.e
 include std/error.e
 include std/eds.e
 include std/convert.e
-
+include std/math.e
 --****
 -- Signature:
 -- <built-in> function sprintf(sequence format, object values)
@@ -1327,6 +1327,8 @@ end function
 --                N.B. if hex or binary output was specified, the \\
 --                separators are every 4 digits otherwise they are \\
 --                every three digits. |
+-- |  T         | If the argument is a number it is output as a text character, \\
+--                otherwise it is output as text string |
 --
 -- Clearly, certain combinations of these qualifier codes do not make sense and in
 -- those situations, the rightmost clashing code is used and the others are ignored.
@@ -1389,6 +1391,9 @@ end function
 -- -- "Today is Wednesday, the 10/Oct/2012"
 -- </eucode>
 --
+-- format("'A' is [T]", 65)
+-- -- `'A' is A`
+--
 -- See Also:
 --   [[:sprintf]]
 --
@@ -1417,6 +1422,7 @@ public function format(sequence format_pattern, object arg_list = {})
 	integer hexout
 	integer binout
 	integer tsep
+	integer istext
 	object prevargv
 	object currargv
 	sequence idname
@@ -1460,6 +1466,7 @@ public function format(sequence format_pattern, object arg_list = {})
     			binout = 0
     			trimming = 0
     			tsep = 0
+    			istext = 0
     			idname = ""
     			envvar = ""
     			envsym = ""
@@ -1516,6 +1523,9 @@ public function format(sequence format_pattern, object arg_list = {})
 
 	    		case '?' then
 	    			alt = 1
+
+	    		case 'T' then
+	    			istext = 1
 
 	    		case ':' then
 	    			while i < length(format_pattern) do
@@ -1658,8 +1668,12 @@ public function format(sequence format_pattern, object arg_list = {})
 						end if
 						
 					elsif integer(arg_list[argn]) then
-						if bwz != 0 and arg_list[argn] = 0 then
+						if istext then
+							argtext = {and_bits(0xFFFF_FFFF, abs(arg_list[argn]))}
+							
+						elsif bwz != 0 and arg_list[argn] = 0 then
 							argtext = ""
+							
 						elsif binout = 1 then
 							argtext = reverse(int_to_bits(arg_list[argn], 32)) + '0'
 							for ib = 1 to length(argtext) do
@@ -1718,7 +1732,10 @@ public function format(sequence format_pattern, object arg_list = {})
 						end if
 
 					elsif atom(arg_list[argn]) then
-						if bwz != 0 and arg_list[argn] = 0 then
+						if istext then
+							argtext = {and_bits(0xFFFF_FFFF, abs(floor(arg_list[argn])))}
+							
+						elsif bwz != 0 and arg_list[argn] = 0 then
 							argtext = ""
 						else
 							if hexout then
@@ -1787,14 +1804,19 @@ public function format(sequence format_pattern, object arg_list = {})
 							if string(tempv) then
 								argtext = tempv
 							elsif integer(tempv) then
-								if bwz != 0 and tempv = 0 then
+								if istext then
+									argtext = {and_bits(0xFFFF_FFFF, abs(tempv))}
+							
+								elsif bwz != 0 and tempv = 0 then
 									argtext = ""
 								else
 									argtext = sprintf("%d", tempv)
 								end if
 
 							elsif atom(tempv) then
-								if bwz != 0 and tempv = 0 then
+								if istext then
+									argtext = {and_bits(0xFFFF_FFFF, abs(floor(tempv)))}
+								elsif bwz != 0 and tempv = 0 then
 									argtext = ""
 								else
 									argtext = trim(sprintf("%15.15g", tempv))
