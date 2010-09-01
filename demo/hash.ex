@@ -127,7 +127,11 @@ procedure build_table()
     end while
 end procedure
 
-puts(SCREEN, "terminate typed input with: control-Z Enter\n")
+ifdef WINDOWS then
+	puts(SCREEN, "terminate typed input with: control-Z Enter\n")
+elsedef
+	puts(SCREEN, "terminate typed input with: Enter control-D\n")
+end ifdef
 
 atom t
 t = time()         -- Time the table-building process only
