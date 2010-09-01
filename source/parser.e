@@ -3637,13 +3637,26 @@ procedure Statement_list()
 
 		elsif id = TYPE or id = QUALIFIED_TYPE then
 			StartSourceLine(TRUE)
-			if param_num != -1 then
-				-- if we're in a routine, we need to know how much stack space will be required
-				param_num += 1
-				Private_declaration( tok[T_SYM] )
+			token test = next_token()
+			putback( test )
+			if test[T_ID] = LEFT_ROUND then
+				StartSourceLine( TRUE )
+				Procedure_call(tok)
+				clear_op()
+				if Pop() then end if
+				ExecCommand()
+				continue
 			else
-				Global_declaration( tok[T_SYM], SC_LOCAL )
+				
+				if param_num != -1 then
+					-- if we're in a routine, we need to know how much stack space will be required
+					param_num += 1
+					Private_declaration( tok[T_SYM] )
+				else
+					Global_declaration( tok[T_SYM], SC_LOCAL )
+				end if
 			end if
+			
 
 
 		else
@@ -4324,8 +4337,21 @@ export procedure real_parser(integer nested)
 				end if
 			end if
 
-		elsif id = TYPE or id = QUALIFIED_TYPE then		
-			Global_declaration(tok[T_SYM], SC_LOCAL)
+		elsif id = TYPE or id = QUALIFIED_TYPE then	
+			token test = next_token()
+			putback( test )
+			if test[T_ID] = LEFT_ROUND then
+					StartSourceLine( TRUE )
+					Procedure_call(tok)
+					clear_op()
+					if Pop() then end if
+					ExecCommand()
+					
+			else
+				Global_declaration( tok[T_SYM], SC_LOCAL )
+				
+			end if
+			continue
 
 		elsif id = CONSTANT then
 			Global_declaration(0, SC_LOCAL)

@@ -410,10 +410,21 @@ test_true ("sequence_array({})", sequence_array({}))
 test_true ("sequence_array({})", sequence_array({"abc", {3.4, 5, 92837.12312, "abc"}}))
 
 -- test for ignored type calls:
-string()
+object foo = 1
+atom( foo )
+test_pass( "ignored return for built-in type call at top level" )
+
+string( "" )
+test_pass( "ignored return for UDT type call at top level" )
+
+
 
 if 1 then
-	string()
+	string( "" )
+	test_pass( "ignored return for UDT type call in statement list" )
+	
+	atom( 3 )
+	test_pass( "ignored return for built-in type call in statement list" )
 end if
 
 test_report()
