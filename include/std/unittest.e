@@ -80,6 +80,7 @@ include std/filesys.e
 include std/math.e
 include std/types.e
 include std/error.e
+include std/console.e
 --
 -- Public Variables
 --
@@ -311,8 +312,14 @@ public procedure test_report()
 	
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
+		if wait_on_summary then
+			any_key("Press a key to exit")
+		end if
 		abort(0)
 	else
+		if wait_on_summary then
+			any_key("Press a key to exit")
+		end if
 		abort(tests_failed > 0)
 	end if
 end procedure

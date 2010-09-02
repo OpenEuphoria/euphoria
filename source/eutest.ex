@@ -45,6 +45,10 @@ constant cmdopts = {
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
 	{ "testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
 	{ "bind", 0, "path to bind.ex", { NO_CASE, HAS_PARAMETER, "bind.ex"} },
+	{ "all", 0, "show tests that pass and fail", {} },
+	{ "failed", 0, "show tests that fail only", {} },
+	{ "wait", 0, "Wait on summary", {} },	
+	{ "accumulate", 0, "Count the individual tests in each file", {} },
 	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
@@ -1174,6 +1178,9 @@ procedure main()
 		object val = map:get(opts, param)
 		
 		switch param do
+			case "all","failed","wait","accumulate" then
+				test_options &= " -" & param		
+		
 			case "log" then
 				logging_activated = 1
 				test_options &= " -log "
