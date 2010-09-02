@@ -26,7 +26,7 @@ public constant OBJ_SEQUENCE = 3
 
 --****
 -- Signature:
--- <built-in> function object(object x)
+-- <built-in> type object(object x)
 --
 -- Description:
 -- Returns information about the object type of the supplied argument ##x##.
@@ -53,7 +53,7 @@ public constant OBJ_SEQUENCE = 3
 
 --****
 -- Signature:
--- <built-in> function integer(object x)
+-- <built-in> type integer(object x)
 --
 -- Description:
 -- Tests the supplied argument ##x## to see if it is an integer or not.
@@ -76,7 +76,7 @@ public constant OBJ_SEQUENCE = 3
 
 --****
 -- Signature:
--- <built-in> function atom(object x)
+-- <built-in> type atom(object x)
 --
 -- Description:
 -- Tests the supplied argument ##x## to see if it is an atom or not.
@@ -99,7 +99,7 @@ public constant OBJ_SEQUENCE = 3
 
 --****
 -- Signature:
--- <built-in> function sequence( object x)
+-- <built-in> type sequence( object x)
 --
 -- Description:
 -- Tests the supplied argument ##x## to see if it is a sequence or not.

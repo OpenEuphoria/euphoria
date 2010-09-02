@@ -98,7 +98,7 @@ test_equal("Matches will not occur after the first line when regex:FIRSTLINE is 
 	regex:ERROR_NOMATCH, regex:find(re,s) )
 
 test_equal("Normally, dot doesn\'t match a regex:NEWLINE", regex:ERROR_NOMATCH, regex:find(regex:new("g.We", regex:DEFAULT),s) )
-test_equal("regex:DOT does match a newline when regex:DOTALL is set", {{34,37}}, 
+test_equal("regex:Dot does match a newline when regex:DOTALL is set", {{34,37}}, 
 	regex:find(regex:new("g.We", regex:DOTALL),s) )
 
 re = regex:new("((?<gender>Male|Female)|(?<gender>Boy|Girl))", regex:DUPNAMES)
@@ -118,9 +118,22 @@ test_equal("Automatic subpattern capture can be disabled.",
     { {1,8}, {5,8} }, regex:find(re, "red bear") )
 	
 re = regex:new("What in the world")
-test_false("find with regex:PARTIAL doesn\'t match PARTIAL strings", 
-	sequence(regex:find(re, "What a ride!",,regex:PARTIAL)))
-test_equal("find with regex:PARTIAL matches strings", {{1, length("What in the world")}},
+test_equal("find with regex:PARTIAL doesn\'t match unmatching strings", 
+	ERROR_NOMATCH, regex:find(re, "What a ride!",,regex:PARTIAL))
+test_equal(
+	"find with regex:PARTIAL returns ERROR_PARTIAL (only) when string matches " &
+	"the beginning of the pattern.",
+	ERROR_PARTIAL,
+	regex:find(re, "What i",,{regex:PARTIAL})
+	)
+test_equal("find with regex:PARTIAL returns ERROR_NOMATCH "&
+	"when the string matches the end of the patttern " &
+	"rather than the beginning.",
+	ERROR_NOMATCH,
+	regex:find(re, "the world",,regex:PARTIAL)
+	)
+test_equal("find with regex:PARTIAL matches strings that match the complete pattern.", 
+	{{1, length("What in the world")}},
 	regex:find(re, "What in the world is going on?",,regex:PARTIAL))
 
 -- flags to test UNGREEDY to UTF8
@@ -240,10 +253,10 @@ test_equal("sequence option spec", re:regex(
 
 -- error reports
 for i = 1 to length(error_names) do
-	test_equal( sprintf("error name %d", i), error_names[i][2], error_to_string( error_names[i][1] ) )
+	test_equal( sprintf("error name %d is %s.", {i, error_names[i][2]}), error_names[i][2], error_to_string( error_names[i][1] ) )
 end for
 
-test_equal( sprintf("error name %d", 0),"0", error_to_string( 0 ) )
-test_equal( sprintf("error name %d", 21),"21", error_to_string( 21 ) )
+test_equal( sprintf("error name %d gives the number.", 0),"0", error_to_string( 0 ) )
+test_equal( sprintf("error name %d gives the number.", 21),"21", error_to_string( 21 ) )
 
 test_report()

@@ -23,138 +23,8 @@ EUPHORIA integers are stored in object variables as-is.  An object variable is a
 
 A double structure 'struct d' could indeed contain a value that is legally in the range of a EUPHORIA integer.  So the encoded pointer to this structure is recognized by the interpreter as an 'integer' but in this internals document when we say EUPHORIA integer we mean it actually is a C integer in the legal EUPHORIA integer range.
 
-The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns TRUE and IS_ATOM_DBL() will return TRUE for integer values as well as encoded pointers to 'struct d's.   There is an order that these tests are made: We test IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be true if we pass an encoded pointer to a double.  We must be sure that something is not NOVALUE before we use IS_SEQUENCE on it.
 
-// Often we know foo is not NOVALUE before getting into this://
-
-{{{
-// object foo
-if (IS_ATOM_INT(foo)) {
- // some code for a EUPHORIA integer
-} else if (IS_ATOM_DBL(foo)) {
- // some code for a double
-} else {
- // code for a sequence foo
-}
-}}}
-
-A sequence is held in a 'struct s1' type and a double is contained in a 'struct d'.
-
-=== MAKE_INT
-
-===== Signature:
-{{{ <internal> object MAKE_INT( signed int x ) }}}
-
-===== Returns an object with the same value as x.  x must be with in the integer range of a legal EUPHORIA integer type.
-
-
-
-=== MAKE_SEQ
-
-===== Signature:
-{{{ <internal> object MAKE_SEQ( struct s1 * sptr ) }}}
-
-===== Returns:
-an object with an argument of a pointer to a ##'struct s1'##
-The pointer is encoded into a range that is not a valid EUPHORIA 
-31-bit integer and returned.
-
-
-=== IS_ATOM_INT
-
-===== Signature:
-{{{ <internal> int IS_ATOM_INT( object o ) }}}
-
-===== Returns:
-true if object is a EUPHORIA integer and not an encoded pointer.
-
-===== Note: 
-IS_ATOM_INT() will return true even though the argument is out of the 
-EUPHORIA integer range when the argument is positive.  These values 
-are not possible encoded pointers.
-
-
-
-
-=== DBL_PTR
-
-===== Signature:
-{{{ <internal> struct d * DBL_PTR( object o ) }}}
-
-===== Returns:
-the pointer to a 'struct d' from the object o.
-
-===== Assumption: 
-IS_ATOM_INT(o) is FALSE and IS_ATOM_DBL(o) is TRUE.
-
-
-
-=== MAKE_SEQ
-
-===== Signature:
-{{{ <internal> struct s1 * MAKE_SEQ( object o ) }}}
-
-===== Returns:
-the pointer to a ##'struct s1'## from the object o.
-
-===== Assumption: 
-IS_SEQUENCE(o) is TRUE and /o/ is not NOVALUE.
-
-Use MAXINT and MININT to check for overflow and underflow.
-
-
-
-=== IS_ATOM_DBL
-
-===== Signature:
-{{{ <internal> int IS_ATOM_DBL( object o ) }}}
-
-===== Returns:
-true if the object is an encoded pointer to a double struct.
-
-===== Assumption: 
-//o// must not be a EUPHORIA integer.
-
-
-
-
-
-=== IS_ATOM
-
-===== Signature:
-{{{ <internal> int IS_ATOM( object o ) }}}
-
-===== Returns:
-true if the object is a EUPHORIA integer or an encoded pointer to a 
-##'struct d'##. 
-
-
-
-=== IS_SEQUENCE
-
-===== Signature:
-{{{ <internal> int IS_SEQUENCE( object o ) }}}
-
-===== Returns:
-true if the object is an encoded pointer to a ##'struct s1'##.
-
-===== Assumption: 
-//o// is not NOVALUE.
-
-
-  
-  
-
-=== IS_DBL_OR_SEQUENCE
-
-===== Signature:
-{{{ <internal> int IS_DBL_OR_SEQUENCE( object o ) }}}
-
-===== Returns:
-true if the object is an encoded pointer of either kind of structure.
-
-
-== The C Representations of a EUPHORIA Sequence and a EUPHORIA Double =====
+=== The C Representations of a EUPHORIA Sequence and a EUPHORIA Double =====
 
 struct s1
 {{{
@@ -179,4 +49,174 @@ struct d
 }}}
 
 
-Now offset of the 'ref' in struct d must be the same as the offset of the 'ref' in struct s1.  A 64bit implementation would have to reorder these members.
+Now offset of the 'ref' in struct d must be the same as the offset of the 'ref' in struct s1.  A 64bit implementation would have to reorder these members.=== The Euphoria Object Macros and Functions ===
+
+==== Description
+
+The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns TRUE and IS_ATOM_DBL() will return TRUE for integer values as well as encoded pointers to 'struct d's.   There is an order that these tests are made: We test IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be true if we pass an encoded pointer to a double.  We must be sure that something is not NOVALUE before we use IS_SEQUENCE on it.
+
+// Often we know foo is not NOVALUE before getting into this://
+
+{{{
+// object foo
+if (IS_ATOM_INT(foo)) {
+ // some code for a EUPHORIA integer
+} else if (IS_ATOM_DBL(foo)) {
+ // some code for a double
+} else {
+ // code for a sequence foo
+}
+}}}
+
+A sequence is held in a 'struct s1' type and a double is contained in a 'struct d'.
+
+
+=== Type Value Functions and Macros
+
+==== IS_ATOM_INT
+
+===== Signature:
+{{{ <internal> int IS_ATOM_INT( object o ) }}}
+
+===== Returns:
+true if object is a EUPHORIA integer and not an encoded pointer.
+
+===== Note: 
+IS_ATOM_INT() will return true even though the argument is out of the 
+EUPHORIA integer range when the argument is positive.  These values 
+are not possible encoded pointers.
+
+
+==== IS_ATOM_DBL
+
+===== Signature:
+{{{ <internal> int IS_ATOM_DBL( object o ) }}}
+
+===== Returns:
+true if the object is an encoded pointer to a double struct.
+
+===== Assumption: 
+//o// must not be a EUPHORIA integer.
+
+
+
+
+==== IS_ATOM
+
+===== Signature:
+{{{ <internal> int IS_ATOM( object o ) }}}
+
+===== Returns:
+true if the object is a EUPHORIA integer or an encoded pointer to a 
+##'struct d'##. 
+
+
+==== IS_SEQUENCE
+
+===== Signature:
+{{{ <internal> int IS_SEQUENCE( object o ) }}}
+
+===== Returns:
+true if the object is an encoded pointer to a ##'struct s1'##.
+
+===== Assumption: 
+//o// is not NOVALUE.
+
+
+==== IS_DBL_OR_SEQUENCE
+
+===== Signature:
+{{{ <internal> int IS_DBL_OR_SEQUENCE( object o ) }}}
+
+===== Returns:
+true if the object is an encoded pointer of either kind of structure.
+
+
+=== Type Conversion Functions and Macros
+
+
+==== MAKE_INT
+
+===== Signature:
+{{{ <internal> object MAKE_INT( signed int x ) }}}
+
+===== Returns: 
+an object with the same value as x.  x must be with in the integer range of a legal EUPHORIA integer type.
+
+
+
+==== MAKE_SEQ
+
+===== Signature:
+{{{ <internal> object MAKE_SEQ( struct s1 * sptr ) }}}
+
+===== Returns:
+an object with an argument of a pointer to a ##'struct s1'##
+The pointer is encoded into a range for sequences and returned.
+
+
+===== Signature:
+{{{ <internal> object NewString(char *s) }}}
+
+===== Returns:
+an object representation of a EUPHORIA byte string s.  The returned encoded pointer
+is a sequence with all of the bytes from s copied over.
+
+==== MAKE_DBL
+
+===== Signature:
+{{{ <internal> object MAKE_DBL( struct d * dptr ) }}}
+
+===== Returns:
+an object with an argument of a pointer to a ##'struct d'##
+The pointer is encoded into a range for doubles and returned.
+
+==== NewDouble
+{{{ <internal> object NewDouble( double dbl ) }}}
+
+===== Returns:
+an object with an argument a double ##dbl##.  A ##struct d## is allocated and dbl is assigned
+to the value part of that structure.  The pointer is encoded into the 
+range for doubles and returned.
+
+
+==== DBL_PTR
+
+===== Signature:
+{{{ <internal> struct d * DBL_PTR( object o ) }}}
+
+===== Returns:
+The pointer to a 'struct d' from the object o.
+
+===== Assumption: 
+IS_ATOM_INT(o) is FALSE and IS_ATOM_DBL(o) is TRUE.
+
+
+==== SEQ_PTR
+
+===== Signature:
+{{{ <internal> struct s1 * SEQ_PTR( object o ) }}}
+
+===== Returns:
+The pointer to a ##'struct s1'## from the object o.
+
+===== Assumption: 
+IS_SEQUENCE(o) is TRUE and /o/ is not NOVALUE.
+
+=== Creating Objects
+
+===== Signature:
+{{{ <internal> object NewS1 ( long size ) }}}
+
+===== Returns:
+A sequence object with size members which are not yet set to a value.
+
+
+
+=== Object Constants
+
+Use MAXINT and MININT to check for overflow and underflow.
+
+
+
+

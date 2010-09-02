@@ -254,11 +254,11 @@ public function read(atom fd, integer bytes)
 	return data
 end function
 
---****
+--**
 -- Write ##bytes## to handle ##fd##
 --
 -- Returns:
---   A **integer**, number of bytes written, or -1 on error
+--   An **integer**, number of bytes written, or -1 on error
 --
 -- Example 1:
 -- <eucode>

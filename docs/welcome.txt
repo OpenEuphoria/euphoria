@@ -17,7 +17,7 @@ crowd of conventional languages.
 * open source
 * free for personal and commercial use
 * produces royalty-free, stand-alone, programs
-* multi-platform {{{--}}} Windows, Linux, FreeBSD, and OSX
+* multi-platform {{{--}}} Windows, UNIX
 * provides a choice of multi-platform gui toolkits: IUP, GTK, wxWindows
 * features a Windows IDE and gui library written in Euphoria
 * colored-syntax editors, profiling, and tracing of code
@@ -101,18 +101,14 @@ Euphoria programs that you write.
 
 === Requirements
 
-To run the //WIN32// version of Euphoria, you need Windows 95 or any later
-version of Windows.  It runs fine on XP and Vista.
+To run the //WIN32// version of Euphoria, you need any Windows 95 or any later
+32-bit version of Windows.  It runs fine on XP and Vista.
 
-To run the //Linux// version of Euphoria you need any reasonably up-to-date
+To run the //Linux// version of Euphoria you need a
 Linux distribution, that has libc6 or later. For example, Red Hat 5.2 or later
 will work fine.
 
-To run the //FreeBSD// version of Euphoria you need any reasonably up-to-date
-FreeBSD distribution.
-
-To run the //Mac OS X// version of Euphoria, you need any reasonably up-to-date
-Intel based Mac.
+To run the //Mac OS X// version of Euphoria, you need an Intel based Mac.
 
 === Disclaimer
 
@@ -147,7 +143,7 @@ includes WIN/95/ME/98/XP/NT/Vista/7/... You will see the constant ##WIN32## used
 for Windows specific code.
 
 * "Unix" will be a general reference to the family operating systems that
-includes Linux/FreeBSD,Mac OS X/... You will see the constant ##UNIX## used
+includes Linux, FreeBSD, Mac OS X,... You will see the constant ##UNIX## used
 for Unix specific code. You may also see "*nix" used to describe this group
 of operating systems.
 

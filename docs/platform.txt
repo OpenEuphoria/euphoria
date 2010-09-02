@@ -143,13 +143,13 @@ it will pop 0 bytes off of the stack.  This has to be done because of where the 
 
 === The Discontinued DOS32 Platform
 
-This platform is no longer supported the ##DOS32## platform are computers without Windows and though people could still use the EUPHORIA binaries built for this platform on Windows, it was slower than and lacked features available on binaries built for the ##WIN32## platform.
+This platform is no longer supported.  The ##DOS32## platform was for computers without Windows O/S and though people could still use the EUPHORIA binaries built for this platform on Windows, it was slower than and lacked features available on binaries built for the ##WIN32## platform.
 
-The binaries for this platform had support for low-level graphics and though DOS was 16-bit, the EUPHORIA binaries for ##DOS32## used techniques that allowed you to use 32-bit addresses transparently, hence the name of the platform: ##DOS32##.  However, in this platform you couldn't use dynamically loaded libraries and filenames had to be in a format of: eight letters, a dot, and three letters when creating a file.  You couldn't use the Windowing system even if your computer had Windows.  You were limited to full-sreen mode and the console.
+The binaries for this platform had support for low-level graphics and though DOS was 16-bit, the EUPHORIA binaries for ##DOS32## used techniques that allowed you to use 32-bit addresses transparently, hence the name of the platform: ##DOS32##.  However, in this platform you couldn't use dynamically loaded libraries and filenames had to be in a format of: eight letters, a dot, and three letters when creating a file.  You couldn't use the Windowing system even if your computer had Windows.  You were limited to full-sreen mode graphics and the text console.
 
 === The WIN32 Platform
 
-With the ##WIN32## platform, your programs can still use the ##//console//## but you are no longer limited to the console.  Because most library routines work the same way on each platform most text mode programs can be run using the console interpreter of any platform without any change.
+With the ##WIN32## platform, your programs can still use the ##//text console//##.  Because most library routines work the same way on each platform most text mode programs can be run using the console interpreter of any platform without any change.
 
 Since the EUPHORIA interpreter can work directly with your OS you can also create GUI programs.
 You can use a user submitted library from the archive or handle calls directly into the DLLs.  
@@ -157,11 +157,12 @@ There are high-level graphics libraries for Direct3D and OpenGL available from t
 
 A console window will be created automatically when a WIN32 Euphoria program
 first outputs something to the screen or reads from the keyboard.  If your program
-is displaying a screen.  You will also see a console window when you read standard input or write to
+is displaying a screen, you will also see a console window when you read standard input or write to
 standard output, even when these have been redirected to files. The console
 will disappear when your program finishes execution, or via a call to
 [[:free_console]].
-It might help to put the following statements at the top of
+
+If you don't want a console to appear, it might help to put the following statements at the top of
 your EUPHORIA program:
 
 <eucode>
@@ -171,18 +172,19 @@ close(STDOUT)
 close(STDIN)
 </eucode>
 
+Now with these lines the interpreter is forced to give you a runtime error, report where in the program the standard input or output is used.  It can be hard to find the offending I/O statement in programs that contain many commented out or debug mode only console I/O statements.
 
-If you actually use the console, and there is something on the console that you want your
+If you actually *want* to use the console, and there is something on the console that you want your
 user to read, you should prompt him and wait for his input before terminating.
 To prevent the console from quickly disappearing you might include a statement
 such as:
 
 <eucode>
-puts(1,"Press Enter to close this Window\n")
-if getc(0) then
-end if
+include std/console.e
+
+any_key("Press any key to close this Window")
 </eucode>
-which will wait for the user enter something.
+which will wait for the user enters something.
 
 If you want to run an interpreted Euphoria program to use the current console use eui.exe but if you want it to create a new console Window use euiw.exe.
 
@@ -190,6 +192,8 @@ Programs translated on by the translator for this platform, will also pop up a n
 ever input is asked for our output is sent to the screen unless you specify the ##-CON## option.
 
 When running an interpreter or translator for the WIN32 platform, ##platform## returns WIN32 and a parsetime branch (with ifdef/end ifdef) with ##WINDOWS## will be followed.
+
+
 
 ==== High-Level WIN32 Programming
 
