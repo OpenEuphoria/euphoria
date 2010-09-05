@@ -370,6 +370,10 @@ res = format("[(z:8]", -117)
 exp  = "(000117)"
 test_equal("format 'AY'", exp, res)
 
+res = format("[(z:3]", -117)
+exp  = "17)"
+test_equal("format 'AY#2'", exp, res)
+
 res = format("[(]", 117)
 exp  = "117"
 test_equal("format 'AZ'", exp, res)
@@ -378,13 +382,17 @@ res = format("[(]", 117.2)
 exp  = "117.2"
 test_equal("format 'BA'", exp, res)
 
-res = format("Today is [u{day}:9], the [{date}]", {"date=09/Oct/2012", "day=Tuesday"})
-exp = "Today is TUESDAY  , the 09/Oct/2012"
+res = format("Today is [u{day}:9], the [{date], [{badname}]?", {"date=09/Oct/2012", "day=Tuesday"})
+exp = "Today is TUESDAY  , the 09/Oct/2012, ?"
 test_equal("format 'BB'", exp, res)
 
 res = format("[T]", 117)
 exp  = "u"
 test_equal("format 'BC'", exp, res)
+
+res = format("[T]", 117.45)
+exp  = "u"
+test_equal("format 'BC#2'", exp, res)
 
 res = format("[T]", "U")
 exp  = "U"
@@ -398,7 +406,35 @@ test_equal("env", "AbCdEf", "AbCdEf")
 
 res = format("([lc%testenv%:20])")
 exp = "(       abcdef       )"
-test_equal("format 'BC'", exp, res)
+test_equal("format 'BE'", exp, res)
+
+res = format("[%testenv] symbol")
+exp = "AbCdEf symbol"
+test_equal("format 'BF'", exp, res)
+
+res = format("[%badname%] symbol")
+exp = " symbol"
+test_equal("format 'BG'", exp, res)
+
+res = format("[:08]", 0)
+exp = "00000000"
+test_equal("format 'BH'", exp, res)
+
+res = format("[b:3]", 0.0)
+exp  = "   "
+test_equal("format 'BI'", exp, res)
+
+res = format("hex is #[Xlz:8]", {1715.004})
+exp = "hex is #000006b3"
+test_equal("format 'BJ'", exp, res)
+
+res = format("hex is #[:04X]", {171.5004})
+exp = "hex is #00AB"
+test_equal("format 'BK'", exp, res)
+
+res = format("[(:07]", {-345.5004})
+exp = "5.5004)"
+test_equal("format 'BL'", exp, res)
 
 -- dequote()
 test_equal( "dequote empty", "", dequote( "" ) )

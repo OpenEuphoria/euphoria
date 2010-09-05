@@ -1671,7 +1671,7 @@ public function format(sequence format_pattern, object arg_list = {})
 							argtext = {and_bits(0xFFFF_FFFF, abs(arg_list[argn]))}
 							
 						elsif bwz != 0 and arg_list[argn] = 0 then
-							argtext = ""
+							argtext = repeat(' ', width)
 							
 						elsif binout = 1 then
 							argtext = reverse(int_to_bits(arg_list[argn], 32)) + '0'
@@ -1685,18 +1685,14 @@ public function format(sequence format_pattern, object arg_list = {})
 						elsif hexout = 0 then
 							argtext = sprintf("%d", arg_list[argn])
 							if zfill != 0 and width > 0 then
-								if length(argtext) > 0 then
-									if argtext[1] = '-' then
-										if width > length(argtext) then
-											argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
-										end if
-									else
-										if width > length(argtext) then
-											argtext = repeat('0', width - length(argtext)) & argtext
-										end if
+								if argtext[1] = '-' then
+									if width > length(argtext) then
+										argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
 									end if
 								else
-									argtext = repeat('0', width - length(argtext)) & argtext
+									if width > length(argtext) then
+										argtext = repeat('0', width - length(argtext)) & argtext
+									end if
 								end if
 							end if
 							
@@ -1716,6 +1712,8 @@ public function format(sequence format_pattern, object arg_list = {})
 										if argtext[2] = '0' then
 											argtext = '(' & argtext[3..$] & ')'
 										else
+											-- Don't need the '(' prefix as its just going to
+											-- be trunctated to fit the requested width.
 											argtext = argtext[2..$] & ')'
 										end if
 									end if
@@ -1734,8 +1732,6 @@ public function format(sequence format_pattern, object arg_list = {})
 						if istext then
 							argtext = {and_bits(0xFFFF_FFFF, abs(floor(arg_list[argn])))}
 							
-						elsif bwz != 0 and arg_list[argn] = 0 then
-							argtext = ""
 						else
 							if hexout then
 								argtext = sprintf("%x", arg_list[argn])
@@ -1747,16 +1743,12 @@ public function format(sequence format_pattern, object arg_list = {})
 							else
 								argtext = trim(sprintf("%15.15g", arg_list[argn]))
 								if zfill != 0 and width > 0 then
-									if length(argtext) > 0 then
-										if width > length(argtext) then
-											if argtext[1] = '-' then
-												argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
-											else
-												argtext = repeat('0', width - length(argtext)) & argtext
-											end if
+									if width > length(argtext) then
+										if argtext[1] = '-' then
+											argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+										else
+											argtext = repeat('0', width - length(argtext)) & argtext
 										end if
-									else
-										argtext = repeat('0', width - length(argtext)) & argtext
 									end if
 								end if
 								if arg_list[argn] > 0 then
@@ -1807,7 +1799,7 @@ public function format(sequence format_pattern, object arg_list = {})
 									argtext = {and_bits(0xFFFF_FFFF, abs(tempv))}
 							
 								elsif bwz != 0 and tempv = 0 then
-									argtext = ""
+									argtext = repeat(' ', width)
 								else
 									argtext = sprintf("%d", tempv)
 								end if
@@ -1816,7 +1808,7 @@ public function format(sequence format_pattern, object arg_list = {})
 								if istext then
 									argtext = {and_bits(0xFFFF_FFFF, abs(floor(tempv)))}
 								elsif bwz != 0 and tempv = 0 then
-									argtext = ""
+									argtext = repeat(' ', width)
 								else
 									argtext = trim(sprintf("%15.15g", tempv))
 								end if
