@@ -227,10 +227,10 @@ table 1
 {223, "[1]:[2] - built-in routine [3]() overridden again"}
 {224, "can't mix profile and profile_time"}
 {225, "[1]:[2] - Unknown warning name [3]"}
-{226, "[1] - local variable '[2]' is never assigned a value"}
+{226, "[1] - module variable '[2]' is never assigned a value"}
 {227, "[1] - private variable '[2]' of [3] is never assigned a value"}
-{228, "[1] - local constant '[2]' is not used"}
-{229, "[1] - local variable '[2]' is not used"}
+{228, "[1] - module constant '[2]' is not used"}
+{229, "[1] - module variable '[2]' is not used"}
 {230, "[1] - parameter '[2]' of [3] is not used"}
 {231, "[1] - private variable '[2]' of [3] is not used"}
 {232, "File '[1]' uses public symbols from '[2]', but does not include that file."}
@@ -333,6 +333,18 @@ table 1
 {329, "Invalid character in HEX string"}
 {330, "Only enums may be declared as types"}
 {331, "Forward references are not supported for enums"}
+{332, "Indicate files or directories for which to gather coverage statistics"}
+{333, "Specify the filename for the coverage database."}
+{334, "Erase an existing coverage database and start a new coverage analysis."}
+{335, "Could not erase coverage database: [1]"}
+{336, "Could not create coverage table: [1]"}
+{337, "Could not create coverage database: [1]"}
+{338, "Exclude from coverage"}
+{339, "Error creating regex for coverage exclusion pattern '[1]'"}
+{340, "Expecting exactly two hexadecimal digits to follow the '\\x'"}
+{341, "Expecting exactly four hexadecimal digits to follow the '\\u'"}
+{342, "Expecting exactly eight hexadecimal digits to follow the '\\U'"}
+{343, "Expecting only '0', '1' or space to follow the '\\b'"}
 
 
 --dump dump.txt

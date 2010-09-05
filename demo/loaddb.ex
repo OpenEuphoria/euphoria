@@ -119,13 +119,15 @@ end procedure
 procedure main(sequence pArgs)
 
 	ifdef WIN32_GUI then
-	    puts(1, "This program must be run from the command-line:\n\n")
+	    writefln("This program must be run from the command-line.")
+	    abort(0)
 	end ifdef
+	
 	if length(pArgs) < 3 then
 		if equal(pArgs[1], pArgs[2]) then
-			printf(1, "Usage: eui SourceFile\n", {})
+			writefln("Usage: [] SourceFile\n", {pArgs[2]})
 		else
-			printf(1, "Usage: eui %s SourceFile\n", pArgs[2..2])
+			writefln("Usage: eui [] SourceFile\n", {pArgs[2]})
 		end if
 		abort(0)
 	end if

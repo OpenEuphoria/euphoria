@@ -482,9 +482,6 @@ function change_case(object x, object api)
 	end if
 	poke(temp_mem, x)
 	len = c_func(api, {temp_mem, length(x)} )
-	if len < 1 then
-		len = length(x)
-	end if
 	changed_text = peek({temp_mem, len})
 	if single_char then
 		return changed_text[1]
@@ -904,6 +901,7 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 			lBracketed = {}
 			while pos_ <= length(source) do
 				lChar = source[pos_]
+				
 				if length(lBracketed) = 0 and find(lChar, quotes) != 0 then
 					if lChar = lQuote then
 						-- End of quoted span
@@ -914,11 +912,11 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 						lQuote = lChar
 						lChar = -1
 					end if
-				elsif find(lChar, lStartBracket) > 0 then
+				elsif length(value_) = 1 and value_[1] = '~' and find(lChar, lStartBracket) > 0 then
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
 
-				elsif length(value_) = 1 and value_[1] = '~' and find(lChar, lStartBracket) > 0 then
+				elsif find(lChar, lStartBracket) > 0 then
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
 
@@ -1989,7 +1987,7 @@ end function
 --
 -- Returns:
 -- A string **sequence**, the text associated with the message number and locale.\\
--- An **integer**, if not associated text can be found.
+-- The **integer** zero, if associated text can not be found for any reason.
 --
 -- Comments:
 -- * This first scans the database(s) linked to the locale codes supplied.
@@ -2004,16 +2002,22 @@ end function
 -- looks for keys in the format {"", msgnum}, and if that fails it looks for a
 -- key of just the msgnum.
 --
+
 public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
 	integer idx = 1
 	integer db_res
 	object lMsgText
+	sequence dbname
 
 	db_res = -1
 	lMsgText = 0
 	-- First, scan through the specialized local dbs
+	if string(LocalQuals) and length(LocalQuals) > 0 then
+		LocalQuals = {LocalQuals}
+	end if
 	for i = 1 to length(LocalQuals) do
-		db_res = db_select(	locate_file( DBBase & "_" & LocalQuals[i] & ".edb" ), DB_LOCK_NO)
+		dbname = DBBase & "_" & LocalQuals[i] & ".edb"
+		db_res = db_select(	locate_file( dbname ), DB_LOCK_READ_ONLY)
 		if db_res = DB_OK then
 			db_res = db_select_table("1")
 			if db_res = DB_OK then
@@ -2027,7 +2031,8 @@ public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBB
 
 	-- Next, scan through the generic db
 	if atom(lMsgText) then
-		db_res = db_select(	locate_file( DBBase & ".edb" ), DB_LOCK_NO)
+		dbname = locate_file( DBBase & ".edb" )
+		db_res = db_select(	dbname, DB_LOCK_READ_ONLY)
 		if db_res = DB_OK then
 			db_res = db_select_table("1")
 			if db_res = DB_OK then
@@ -2046,8 +2051,11 @@ public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBB
 			end if
 		end if
 	end if
-
-	return lMsgText
+	if atom(lMsgText) then
+		return 0
+	else
+		return lMsgText
+	end if
 
 end function
 

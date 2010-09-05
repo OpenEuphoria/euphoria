@@ -45,10 +45,6 @@ ifdef WIN32 then
 	test_equal("WIN32 test", 2, platform())
 end ifdef
 
-ifdef DOS32 then
-	test_equal("DOS32 test", 1, platform())
-end ifdef
-
 ifdef EU40000 then
     test_pass("EU40000")
 elsedef

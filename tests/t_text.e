@@ -22,10 +22,12 @@ test_equal("trim() to empty", "", trim("  ", 32))
 test_equal("trim() almost empty", "a", trim(" a ", 32))
 test_equal("trim() nothing", "abcdef", trim("abcdef", 32))
 
+test_equal("lower() zero", 0, lower(0))
 test_equal("lower() atom", 'a', lower('A'))
 test_equal("lower() letters only", "john", lower("JoHN"))
 test_equal("lower() mixed text", "john 55 &%.", lower("JoHN 55 &%."))
 test_equal("lower() with \\0", "abc\0def", lower("abc" & 0 & "DEF"))
+test_equal("lower() nested", {'a', "bcd", 'e', "fg"}, lower({'A', "BcD", 'e', "fG"}))
 
 test_equal("upper() atom", 'A', upper('a'))
 test_equal("upper() letters only", "JOHN", upper("joHn"))
@@ -59,22 +61,25 @@ test_equal("proper #7", {"Abc", 3.1472}, proper({"abc", 3.1472}))
 
 -- keyvalues()
 sequence s
-s = keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
+s = keyvalues("foo=bar, qwe=1234,, asdf='contains space, comma, and equal(=)'")
 test_equal("keyvalues #1", { {"foo", "bar"}, {"qwe", "1234"}, {"asdf", "contains space, comma, and equal(=)"}}, s)
 
-s = keyvalues("abc fgh=ijk def")
-test_equal("keyvalues #2", { {"p[1]", "abc"}, {"fgh", "ijk"}, {"p[3]", "def"} }, s)
+s = keyvalues("abc fgh=ijk def, =")
+test_equal("keyvalues #2", { {"p[1]", "abc"}, {"fgh", "ijk"}, {"p[3]", "def"},{} }, s)
 
 s = keyvalues("abc=`'quoted'`")
 test_equal("keyvalues #3", { {"abc", "'quoted'"} }, s)
 
+s = keyvalues("'a b c'=quoted")
+test_equal("keyvalues #3a", { {"a b c", "quoted"} }, s)
+
 s = keyvalues("colors=(a=black, b=blue, c=red)")
 test_equal("keyvalues #4", { {"colors", {{"a", "black"}, {"b", "blue"},{"c", "red"}}  } }, s)
 
-s = keyvalues("colors={a=black, b=blue, c=red}")
+s = keyvalues("colors={ a=black, b=blue, c=red}")
 test_equal("keyvalues #4a", { {"colors", {"a=black", "b=blue","c=red"}}  } , s)
 
-s = keyvalues("colors=[a=black, b=blue, c=red]")
+s = keyvalues("colors  =  [a=black, b=blue, c=red]")
 test_equal("keyvalues #4b", { {"colors", {"a=black", "b=blue","c=red"}}  } , s)
 
 s = keyvalues("colors=(black=[0,0,0], blue=[0,0,FF], red=[FF,0,0])")
@@ -99,9 +104,11 @@ test_equal("keyvalues #9", { {"colors", {"black", "blue", "red"}}  }, s)
 s = keyvalues("colors=black, blue, red", "",,,"")
 test_equal("keyvalues #10", { {"colors", "black, blue, red"}  }, s)
 
-s = keyvalues("colors=[black, blue, red]\nanimals=[cat,dog, rabbit]\n")
+s = keyvalues("colors=[black, blue, red]\n  animals=  [cat,dog, rabbit]\n")
 test_equal("keyvalues #11", { {"colors", { "black", "blue", "red"}}, {"animals", { "cat", "dog", "rabbit"}  } }, s)
 
+s = keyvalues("colors=[black, blue, red]\nanimals=~{cat,dog, rabbit}\n")
+test_equal("keyvalues #11a", { {"colors", { "black", "blue", "red"}}, {"animals", "{cat,dog, rabbit}"  } }, s)
 
 set_encoding_properties("Test Encoded", "aeiouy", "AEIOUY")
 test_equal("Encoding #1", {"Test Encoded", "aeiouy", "AEIOUY"}, get_encoding_properties())
@@ -363,6 +370,14 @@ res = format("Today is [u{day}:9], the [{date}]", {"date=09/Oct/2012", "day=Tues
 exp = "Today is TUESDAY  , the 09/Oct/2012"
 test_equal("format 'BB'", exp, res)
 
+res = format("[T]", 117)
+exp  = "u"
+test_equal("format 'BC'", exp, res)
+
+res = format("[T]", "U")
+exp  = "U"
+test_equal("format 'BD'", exp, res)
+
 include std/os.e
 setenv("testenv", "AbCdEf")
 object gv
@@ -378,7 +393,7 @@ test_equal( "dequote empty", "", dequote( "" ) )
 test_equal( "dequote no pairs", `foo`, dequote( `"foo"`, "" ) )
 test_equal( "dequote atom pair", `foo`, dequote( `"foo"`, '\"' ) )
 test_equal( "dequote defaults 1", "The small man", dequote("\"The small man\"") )
-test_equal( "dequote defaults 2", "The small () man", dequote("(The small ?(?) man)", {{"(",")"}}, '?') )
+test_equal( "dequote defaults 2", "The small (? ) man", dequote("(The small ?(? ?) man)", {{"(",")"}}, '?') )
 
 test_equal( "dequote multiple strings", {"The small man","The small () man"}, 
 	dequote({"\"The small man\"", "(The small ?(?) man)"}, {{"(",")"},{"\"","\""}}, '?'))
@@ -412,7 +427,6 @@ test_equal("keyvalues 9c", {{"c", "t"}},
 test_equal("keyvalues ac",{{"c", "t"}},
 	keyvalues("c=\tt",,,, 0x09)  --\t
  )
- --need more keyvalues testing
 
  --need to also check is covered on more than one system
 test_equal("change case 1uc","", upper("") )
@@ -420,6 +434,11 @@ test_equal("change case 1lc","", lower("") )
 -- curent default initial max on len of case change string
 test_equal("change case 2c",repeat('a',1024), lower(repeat('A',1024)) )
 
+test_equal("get_text unknown number", 0, get_text(-2))
+
+test_equal("get_text known number A", "Block comment from line [1] not terminated.", get_text(42,"two"))
+test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"}))
+test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"}))
 
 test_report()
 

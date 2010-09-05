@@ -106,10 +106,13 @@ public constant
 public enum
 	--** Do not lock the file.
 	DB_LOCK_NO = 0,
-	--** Open the database with read-only access.
+	--** Open the database with read-only access but allow others to update it.
 	DB_LOCK_SHARED,
 	--** Open the database with read and write access.
-	DB_LOCK_EXCLUSIVE
+	DB_LOCK_EXCLUSIVE,
+	--** Open the database with read-only acces and ignore others updating it
+	DB_LOCK_READ_ONLY,
+	$
 
 --****
 -- === Error Code Constants
@@ -132,7 +135,8 @@ public enum
 	--** last error code
 	LAST_ERROR_CODE,
 	--** bad file
-	BAD_FILE
+	BAD_FILE,
+	$
 	
 constant DB_MAGIC = 77
 constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0
@@ -938,6 +942,7 @@ public function db_create(sequence path, integer lock_method = DB_LOCK_NO, integ
 	if not eu:find('.', path) then
 		path &= ".edb"
 	end if
+	path = canonical_path(path)
 
 	-- see if it already exists
 	db = open(path, "rb")
@@ -1062,21 +1067,22 @@ public function db_open(sequence path, integer lock_method = DB_LOCK_NO)
 	if not eu:find('.', path) then
 		path &= ".edb"
 	end if
+	path = canonical_path(path)
 
-ifdef UNIX then
 	if lock_method = DB_LOCK_NO or
 	   lock_method = DB_LOCK_EXCLUSIVE then
 		-- get read and write access, "ub"
 		db = open(path, "ub")
 	else
-		-- DB_LOCK_SHARED
+		-- DB_LOCK_SHARED, DB_LOCK_READ_ONLY
 		db = open(path, "rb")
 	end if
-elsedef
+
+ifdef WINDOWS then
 	if lock_method = DB_LOCK_SHARED then
 		lock_method = DB_LOCK_EXCLUSIVE
 	end if
-	db = open(path, "ub")
+
 end ifdef
 
 	if db = -1 then
@@ -1099,7 +1105,7 @@ end ifdef
 		return DB_OPEN_FAIL
 	end if
 	save_keys()
-	current_db = db
+	current_db = db 
 	current_table_pos = -1
 	current_table_name = ""
 	current_lock = lock_method

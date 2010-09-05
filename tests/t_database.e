@@ -8,18 +8,18 @@ include std/pretty.e
 object void
 
 void = delete_file("testunit.edb")
-
+sequence dbname = canonical_path("testunit.edb")
 test_equal("current db #1", "", db_current())
 test_equal("create db #1", DB_OK, db_create("testunit.edb", DB_LOCK_EXCLUSIVE))
-test_equal("current db #2", "testunit.edb", db_current())
+test_equal("current db #2", dbname, db_current())
 test_equal("create db #2", DB_EXISTS_ALREADY, db_create("testunit.edb", DB_LOCK_SHARED))
-test_equal("current db #3", "testunit.edb", db_current())
+test_equal("current db #3", dbname, db_current())
 db_close()
 test_equal("current db #4", "", db_current())
 
 
 test_equal("open db", DB_OK, db_open("testunit", DB_LOCK_EXCLUSIVE))
-test_equal("current db #4", "testunit.edb", db_current())
+test_equal("current db #5", dbname, db_current())
 
 test_equal("create table #1", DB_OK, db_create_table("first"))
 test_equal("current table #1", "first", db_current_table())
@@ -273,10 +273,10 @@ procedure test_dump()
 	db_delete_record( 1 )
 	test_not_equal( "delete record with no table", "", get_db_error() )
 	
-	test_equal( "creeate dump.edb table 1", DB_OK, db_create_table( "table 1" ) )
+	test_equal( "create dump.edb table 1", DB_OK, db_create_table( "table 1" ) )
 	test_equal( "check for dump.edb #1", {"table 1"}, db_table_list() )
 	
-	test_equal( "creeate dump.edb table 2", DB_OK, db_create_table( "table-2" ) )
+	test_equal( "create dump.edb table 2", DB_OK, db_create_table( "table-2" ) )
 	test_equal( "check for dump.edb #2", {"table 1", "table-2"}, db_table_list() )
 	
 	db_rename_table( "Table 1", "table-1")
@@ -314,7 +314,7 @@ procedure test_dump()
 	sequence look_for = {
 			"Database dump as at",
 			"Euphoria Database System",
-			`The "dump.edb" database`,
+			`The "` & canonical_path("dump.edb") & `" database`,
 			"Disk Dump",
 			"DiskAddr",
 			"[tables:",
@@ -340,7 +340,7 @@ procedure test_dump()
 	
 	test_equal( "examine dump file", {0}, look_for[lf] )
 	
-	delete_file( "eds-dump.txt" )
+	--delete_file( "eds-dump.txt" )
 	delete_file( "dump.edb" )
 end procedure
 test_dump()
