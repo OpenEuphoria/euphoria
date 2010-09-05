@@ -23,7 +23,7 @@ elsedef
 		test_equal("with warning -=", -1, gets(fn))
 		
 		close(fn)
-		--fn=delete_file("warning.lst")
+		fn=delete_file("warning.lst")
 	
 	end if
 end ifdef

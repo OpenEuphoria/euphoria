@@ -279,8 +279,9 @@ public function trim(sequence source, object what=" \t\r\n", integer ret_index =
 	end if
 end function
 
-
+ifdef UNIX then
 constant TO_LOWER = 'a' - 'A'
+end ifdef
 
 sequence lower_case_SET = {}
 sequence upper_case_SET = {}

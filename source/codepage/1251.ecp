@@ -1,3 +1,4 @@
+; Based on data found at http://msdn.microsoft.com/en-us/goglobal/bb964654.aspx
 --HEAD--
 Title = Windows 1251 (Cyrillic)
 BPC = 1
@@ -285,6 +286,7 @@ FF = U+044F : CYRILLIC SMALL LETTER YA
 58 = 78
 59 = 79
 5A = 7A
+.
 80 = 90
 81 = 83
 8A = 9A
@@ -332,3 +334,4 @@ DC = FC
 DD = FD
 DE = FE
 DF = FF
+---

@@ -1347,7 +1347,7 @@ public function defaultext( sequence path, sequence defext)
 			-- There is a dot in the file name part
 			return path
 		end if
-		if path[i] = SLASH then
+		if find(path[i], SLASHES) then
 			if i = length(path) then
 				-- No file name in supplied path
 				return path

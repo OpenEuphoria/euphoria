@@ -122,7 +122,7 @@ test_equal("Encoding #2", {"ASCII", "", ""}, get_encoding_properties())
 test_equal("Encoding uppercase #2", "THE CAT IN THE HAT", upper("the cat in the hat"))
 test_equal("Encoding lowercase #3", "the cat in the hat", lower("THE CAT IN THE HAT"))
 
-set_encoding_properties("1251")
+set_encoding_properties("../source/codepage/1251")
 object ec
 ec = get_encoding_properties()
 test_equal("Encoding #3", "Windows 1251 (Cyrillic)", ec[1])
@@ -132,6 +132,18 @@ test_equal("Encoding uppercase #4", {#80,#81,#8A,#8C,#8D,#8E,#8F,#A1,#A3,#A5,#A8
 							  upper({#90,#83,#9A,#9C,#9D,#9E,#9F,#A2,#BC,#B4,#B8,#BA,#BF,#B3,#BE,#E0,#E1,#E2,#E3,#E4,#E5,#E6,#E7,#E8,#E9,#EA,#EB,#EC,#ED,#EE,#EF,#F0,#F1,#F2,#F3,#F4,#F5,#F6,#F7,#F8,#F9,#FA,#FB,#FC,#FD,#FE,#FF}))
 
 set_encoding_properties("", "", "")
+
+set_encoding_properties("0737")
+
+ec = get_encoding_properties()
+test_equal("Encoding #5", "OEM 737 (Greek)", ec[1])
+test_equal("Encoding uppercase #5", "THE CAT IN THE HAT", upper("the cat in the hat"))
+-- Test greek characters
+test_equal("Encoding uppercase #6", {#80,#81,#82,#83,#84,#85,#86,#87,#88,#89,#8A,#8B,#8C,#8D,#8E,#8F,#90,#91,#92,#93,#94,#95,#96,#97,#EA,#EB,#EC,#F4,#ED,#EE,#EF,#F5,#E9},
+                              upper({#98,#99,#9A,#9B,#9C,#9D,#9E,#9F,#A0,#A1,#A2,#A3,#A4,#A5,#A6,#A7,#A8,#A9,#AB,#AC,#AD,#AE,#AF,#E0,#E1,#E2,#E3,#E4,#E5,#E6,#E7,#E8,#F0}))
+                              
+set_encoding_properties("", "", "")
+
 
 -- quote()
 test_equal("quote #1", "\"The small man\"", quote("The small man"))
