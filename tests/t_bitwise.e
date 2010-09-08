@@ -13,4 +13,15 @@ end function
 
 test_equal( "and bits in func 1", 0x101, make_word( 1, 1 ) )
 
+i1 = and_bits( i1, 0xff )
+test_equal( "and bits assign operand", 1, i1 )
+
+i1 = 1
+i1 = or_bits( i1, 0xff )
+test_equal( "or bits assign operand", 0xff, i1 )
+
+i1 = 0xff
+i1 = xor_bits( i1, 0xff )
+test_equal( "xor bits assign operand", 0, i1 )
+
 test_report()
