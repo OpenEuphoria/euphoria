@@ -616,7 +616,7 @@ with warning
 
 --**
 -- output a C statement with replacements for @ or @1 @2 @3, ... @9
-export procedure c_stmt(sequence stmt, object arg)
+export procedure c_stmt(sequence stmt, object arg, symtab_index lhs_arg = 0)
 	integer argcount, i
 	
 	if LAST_PASS = TRUE and Initializing = FALSE then
@@ -644,11 +644,17 @@ export procedure c_stmt(sequence stmt, object arg)
 			
 			if i < length(stmt) and stmt[i+1] > '0' and stmt[i+1] <= '9' then
 				-- numbered argument
+				if arg[stmt[i+1]-'0'] = lhs_arg then
+					LeftSym = TRUE
+				end if
 				CName(arg[stmt[i+1]-'0'])
 				i += 1
 			
 			else
 				-- plain argument
+				if arg[argcount] = lhs_arg then
+					LeftSym = TRUE
+				end if
 				CName(arg[argcount])
 			
 			end if

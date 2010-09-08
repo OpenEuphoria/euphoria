@@ -24,4 +24,9 @@ i1 = 0xff
 i1 = xor_bits( i1, 0xff )
 test_equal( "xor bits assign operand", 0, i1 )
 
+function inline_binop( integer a, integer b )
+	return remainder( a, b ) + 1
+end function
+test_equal( "inlined return and_bits", 1, inline_binop( i1, i2 ) )
+
 test_report()

@@ -1866,7 +1866,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 
 	target_elem = TYPE_OBJECT
 	create_temp( lhs, NEW_REFERENCE )
-
+	
 	if TypeIs(rhs1, TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
 		if ResAlwaysInt and
@@ -1924,7 +1924,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 				  IntegerSize(np, lhs) or
 				  target[MIN] != NOVALUE then
 				-- result will be an integer
-				c_stmt(intcode2, {lhs, rhs1, rhs2})
+				c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 				CDeRefStr("_0")
 				if target[MIN] = NOVALUE then
 					target = novalue
@@ -1935,7 +1935,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 			end if
 		end if
 
-		c_stmt(intcode, {lhs, rhs1, rhs2})
+		c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 
 		if ResAlwaysInt then
 			-- int operands => int result
@@ -1946,7 +1946,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 
 		-- now that Code[pc+3]'s type and value have been updated:
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-			c_stmt(intcode_extra, {lhs, rhs1, rhs2})
+			c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 		end if
 
 		CDeRefStr("_0")
@@ -1964,14 +1964,14 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 						   rw:MULTIPLY, FLOOR_DIV}) and
 				(SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
 					IntegerSize(pc+4, lhs)) then
-			c_stmt(intcode2, {lhs, rhs1, rhs2})
+			c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 
 		else
-			c_stmt(intcode, {lhs, rhs1, rhs2})
+			c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
 				SetBBType(lhs, GType(lhs), target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {lhs, rhs1, rhs2})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 			end if
 
 		end if
@@ -1990,14 +1990,14 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 						   rw:MULTIPLY, FLOOR_DIV}) and
 						(SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
 						 IntegerSize(pc+4, Code[pc+3])) then
-			c_stmt(intcode2, {lhs, rhs1, rhs2})
+			c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 		else
-			c_stmt(intcode, {lhs, rhs1, rhs2})
+			c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
 				SetBBType(Code[pc+3], GType(lhs),
 									  target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {lhs, rhs1, rhs2})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 			end if
 		end if
 		c_stmt0("}\n")
@@ -2013,14 +2013,14 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 						   rw:MULTIPLY, FLOOR_DIV}) and
 						(SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
 						 IntegerSize(pc+4, lhs)) then
-			c_stmt(intcode2, {lhs, rhs1, rhs2})
+			c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 
 		else
-			c_stmt(intcode, {lhs, rhs1, rhs2})
+			c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
 				SetBBType(lhs, GType(lhs), target_val, target_elem,0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {lhs, rhs1, rhs2})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 			end if
 		end if
 		c_stmt0("}\n")
@@ -2045,12 +2045,12 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 			   TypeIsIn(rhs1, TYPES_IAO) then
 				if length(dblfn) > 2 then
 					c_stmt("temp_d.dbl = (double)@;\n", rhs1)
-					c_stmt("@ = ", lhs)
+					c_stmt("@ = ", lhs, lhs)
 					c_puts(dblfn)
 					temp_indent = -indent
 					c_stmt("(&temp_d, DBL_PTR(@));\n", rhs2)
 				else
-					c_stmt("@ = ", lhs)
+					c_stmt("@ = ", lhs, lhs)
 					temp_indent = -indent
 					if atom_type = TYPE_INTEGER then
 						c_stmt("((double)@ ", rhs1)
@@ -2079,12 +2079,12 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 				   TypeIsIn(rhs2, TYPES_IAO) then
 					if length(dblfn) > 2 then
 						c_stmt("temp_d.dbl = (double)@;\n", rhs2)
-						c_stmt("@ = ", lhs)
+						c_stmt("@ = ", lhs, lhs)
 						c_puts(dblfn)
 						temp_indent = -indent
 						c_stmt("(DBL_PTR(@), &temp_d);\n", rhs1)
 					else
-						c_stmt("@ = ", lhs)
+						c_stmt("@ = ", lhs, lhs)
 						temp_indent = -indent
 						if atom_type = TYPE_INTEGER then
 							c_stmt("(DBL_PTR(@)->dbl ", rhs1)
@@ -2105,13 +2105,13 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 
 				if TypeIsNot(rhs2, TYPE_INTEGER) then
 					if length(dblfn) > 2 then
-						c_stmt("@ = ", lhs)
+						c_stmt("@ = ", lhs, lhs)
 						c_puts(dblfn)
 						temp_indent = -indent
 						c_stmt("(DBL_PTR(@), DBL_PTR(@));\n",
 											{rhs1, rhs2})
 					else
-						c_stmt("@ = ", lhs)
+						c_stmt("@ = ", lhs, lhs)
 						temp_indent = -indent
 						if atom_type = TYPE_INTEGER then
 							c_stmt("(DBL_PTR(@)->dbl ", rhs1)
@@ -2132,7 +2132,7 @@ function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 
 		else
 			-- one might be a sequence - use general call
-			c_stmt(gencode, {lhs, rhs1, rhs2})
+			c_stmt(gencode, {lhs, rhs1, rhs2}, lhs)
 
 		end if
 	end if
