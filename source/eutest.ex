@@ -462,7 +462,7 @@ end function
 function bind( sequence filename, sequence fail_list )
 	sequence cmd = sprintf("%s %s -batch \"%s\" %s -batch -D UNITTEST %s",
 		{ executable, interpreter_options, binder, interpreter_options, filename } )
-	
+	total += 1
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	integer status = system_exec(cmd, 0)
 
