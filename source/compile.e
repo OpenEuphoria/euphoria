@@ -1677,7 +1677,7 @@ procedure unary_div(integer pc, integer target_type, sequence intcode,
 
 	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		-- handle integer
-		c_stmt(intcode, {Code[pc+3], Code[pc+1]})
+		c_stmt(intcode, {Code[pc+3], Code[pc+1]}, Code[pc+3])
 	end if
 
 	if TypeIsIn(Code[pc+1], TYPES_AO) then
@@ -1687,7 +1687,7 @@ procedure unary_div(integer pc, integer target_type, sequence intcode,
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
 		-- handle double or sequence
-		c_stmt(gencode, {Code[pc+3], Code[pc+1]})
+		c_stmt(gencode, {Code[pc+3], Code[pc+1]}, Code[pc+3])
 	end if
 
 	if TypeIsIn(Code[pc+1], TYPES_AO) then
