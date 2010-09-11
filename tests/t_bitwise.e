@@ -29,4 +29,11 @@ function inline_binop( integer a, integer b )
 end function
 test_equal( "inlined return and_bits", 1, inline_binop( i1, i2 ) )
 
+i1 = 0x00103070
+i1 = not_bits( i1 )
+test_equal( "not bits assign operand", 0xFFEFCF8F, i1 )
+
+i1 = not_bits( 0xFFEFCF8F )
+test_equal( "not bits assign operand", 0x00103070, i1 )
+
 test_report()
