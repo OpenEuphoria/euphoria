@@ -471,4 +471,5 @@ export sequence new_include_name  -- name of file to be included at end of line
 -- an index for GetMsgText in msgtext.e and for various routines in error.e
 export constant ENUM_FWD_REFERENCES_NOT_SUPPORTED = 331 
 
-
+export constant FIRST_USER_FILE = 3,
+                MAX_USER_FILE   = 40

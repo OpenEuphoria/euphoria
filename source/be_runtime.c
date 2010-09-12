@@ -5524,6 +5524,7 @@ object Command_Line()
 void Cleanup(int status)
 /* clean things up before leaving 0 - ok, non 0 - error */
 {
+	int fh;
 #ifdef EUNIX
 	char *xterm;
 #endif
@@ -5538,6 +5539,11 @@ void Cleanup(int status)
 #endif
 
 	gameover = TRUE;
+	
+	/* Close all user-opened files */
+	for (fh = FIRST_USER_FILE; fh < MAX_USER_FILE; fh++) {
+		EClose(fh);
+	}
 
 #ifndef ERUNTIME
 	Executing = FALSE;

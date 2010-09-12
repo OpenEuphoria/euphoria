@@ -180,6 +180,9 @@ export procedure Cleanup(integer status)
 	end if
 	
 	w = ShowWarnings()
+	for fh = FIRST_USER_FILE to MAX_USER_FILE - 1 do
+		close(fh)
+	end for
 	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
 		if not batch_job then
 			screen_output(STDERR, GetMsgText(208,0))
