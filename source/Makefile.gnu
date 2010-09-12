@@ -58,9 +58,6 @@
 #   Note that Html and PDF Documentation require eudoc and creolehtml
 #   PDF docs also require htmldoc
 #
-# In order to achieve compatibility among 9 platforms
-# please follow these Code standards:
-
 
 ifndef CONFIG
 CONFIG = Makefile.eu

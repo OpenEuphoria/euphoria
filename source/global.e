@@ -149,6 +149,30 @@ export constant
 	                         -- external call, e.g. call to a DLL
 	S_HAS_DELETE = 54
 
+export procedure print_sym(integer s)
+	printf(1,"[%d]:\n", {s} )
+	object s_obj = SymTab[s][S_OBJ]
+	if equal(s_obj,NOVALUE) then 
+		puts(1,"S_OBJ=>NOVALUE\n")
+	else
+		puts(1,"S_OBJ=>")
+		? s_obj		
+	end if
+	puts(1,"S_MODE=>")
+	switch SymTab[s][S_MODE] do
+		case M_NORMAL then
+			puts(1,"M_NORMAL")
+		case M_TEMP then
+			puts(1,"M_TEMP")
+		case M_CONSTANT then
+			puts(1,"M_CONSTANT")
+		case M_BLOCK then
+			puts(1,"M_BLOCK")
+	end switch
+	puts(1,{10,10})
+end procedure
+	
+		
 export constant
 	SIZEOF_ROUTINE_ENTRY = 29 + 25 * TRANSLATE,
 	SIZEOF_VAR_ENTRY     = 17 + 37 * TRANSLATE,

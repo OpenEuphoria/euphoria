@@ -2568,7 +2568,7 @@ but ##EU5## will be defined.
 * **WIN32_GUI** - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
 * **WIN32** - Platform is Windows (GUI or Console)
-* **WINDOWS** - Platform is any platform that was derived from Windows
+* **WINDOWS** - Platform is Windows (GUI or Console)
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
 * **SUNOS** - Platform is SunOS (Open Solaris)
