@@ -2627,14 +2627,35 @@ object start_backend(object x)
 }
 #endif
 
+static object get_byte_sex() {
+	unsigned int value;
+	unsigned char * vpc;
+	vpc = (char*)&value;
+	value = 0xDEADBEEF;
+	if (*vpc == 0xDE) {// big endian
+		return NewString("BIG_ENDIAN");
+	} else { 		
+		return NewString("LITTLE_ENDIAN");
+	}
+}
+
+
 object get_machine_architecture_defines() {
 	struct s1 * arch_defines;
-#if ARCH==ix86
-	arch_defines = NewS1(2);
-	arch_defines->base[1] = NewString("INTEL32");
+#if ARCH==x86
+	arch_defines = NewS1(3);	
+	arch_defines->base[1] = NewString("ARCH32");
 	arch_defines->base[2] = NewString("LITTLE_ENDIAN");
-#else
-	arch_defines = NewS1(0);
+	arch_defines->base[3] = NewString("X86");
+#elif ARCH==x86_64
+	arch_defines = NewS1(2);	
+	arch_defines->base[1] = NewString("ARCH32");
+	arch_defines->base[2] = NewString("X86_64");	
+#elif ARCH==ARM
+	arch_defines = NewS1(3);	
+	arch_defines->base[1] = NewString("ARCH32");
+	arch_defines->base[2] = NewString("LITTLE_ENDIAN");
+	arch_defines->base[2] = NewString("ARM");	
 #endif
 	return MAKE_SEQ(arch_defines);
 }

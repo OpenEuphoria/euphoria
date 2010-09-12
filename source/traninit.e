@@ -41,8 +41,6 @@ elsedef
 	without type_check
 end ifdef
 
-constant M_DEFINES      = 98
-
 include std/cmdline.e
 include std/error.e
 include std/filesys.e
@@ -73,6 +71,9 @@ set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
 	{ "arch",          0, GetMsgText(332,0), { NO_CASE, HAS_PARAMETER, "architecture" } },
+	{ "endian",        0, GetMsgText(334,0), { NO_CASE, HAS_PARAMETER, "byte sex" } },
+	{ "32",		   0, GetMsgText(335,0), { } },
+	{ "64",		   0, GetMsgText(335,0), { } },
 	{ "silent",        0, GetMsgText(177,0), { NO_CASE } },
 	{ "verbose",	   0, GetMsgText(319,0), { NO_CASE } },
 	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
@@ -109,10 +110,27 @@ procedure translator_help()
 	show_help(trans_opt_def, NO_HELP)
 end procedure
 
+
+
 --**
 -- Process the translator command-line options
-boolean arch_option = FALSE
+procedure process_arch_options(object arch_option)
+
+	iset = find( upper(arch_option), instruction_set_defines )
+
+	if not instruction_set(iset) then
+		ShowMsg(2, 333, { arch_option } )
+		abort(1)
+	end if
 	
+	if iset = Itanium or iset = x86_64 then
+		word_size = 64		
+	elsif iset = x86 or iset = ARM then
+		endian = LITTLE_ENDIAN
+		word_size = 32
+	end if	
+end procedure
+
 export procedure transoptions()
 	Argv &= GetDefaultArgs()
 
@@ -160,15 +178,20 @@ export procedure transoptions()
 				OpDefines &= { "EUC_DLL" }
 
 			case "arch" then
-				arch_option = TRUE
-				switch upper(val) do
-					case "PORTABLE" then
-					case "INTEL32" then
-						OpDefines &= { "INTEL32" }
-					case else
-						ShowMsg(2, 333, { val, "INTEL32 or portable." }) 
-						abort(1)
-				end switch
+				process_arch_options(val)
+				
+			case "endian" then
+				if find(upper(val),{"BIG","BIG_ENDIAN"}) then
+					endian = BIG_ENDIAN
+				elsif find(upper(val),{"LITTLE","LITTLE_ENDIAN"}) then				
+					endian = LITTLE_ENDIAN
+				end if
+				
+			case "32" then
+				word_size = 32
+			
+			case "64" then
+				word_size = 64
 				
 			case "plat" then
 				switch upper(val) do				
@@ -268,15 +291,11 @@ export procedure transoptions()
 
 		abort(1)
 	end if
-
+	
 	OpDefines &= { "EUC" }
 	
 	if host_platform() = WIN32 and not con_option then
 		OpDefines = append( OpDefines, "WIN32_GUI" )
-	end if
-
-	if not arch_option then
-		OpDefines &= machine_func(M_DEFINES,{})
 	end if
 	
 	finalize_command_line(opts)

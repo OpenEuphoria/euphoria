@@ -9,9 +9,17 @@ elsedef
 	without type_check
 end ifdef
 
+ifdef EU40000 then
+	with define X86
+	with define LITTLE_ENDIAN
+	with define ARCH32
+end ifdef
+
 include std/os.e
 include std/text.e
 include std/io.e
+
+constant M_DEFINES      = 98
 
 public constant
 	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
@@ -112,11 +120,89 @@ public procedure set_host_platform( atom plat )
 	end if
 end procedure
 
+export type enum instruction_set
+	x86, Itanium, x86_64, ARM
+end type
+export constant instruction_set_defines = upper({ "X86_32", "Itanium", "X86_64", "ARM" })                                   
+
+export type enum byte_sex
+	BIG_ENDIAN, LITTLE_ENDIAN
+end type
+export constant byte_sex_defines = { "BIG_ENDIAN", "LITTLE_ENDIAN" }
+
+export constant word_size_defines = repeat(0,31) & {"ARCH32"} & repeat(0,31) & {"ARCH64"}
+
+export integer iset   = 0
+export integer endian = 0
+export integer word_size = 0
+
 public function GetPlatformDefines(integer for_translator = 0)
 	sequence local_defines = {}
 
+	if for_translator and (iset or endian or word_size) then
+
+		if not instruction_set(iset) then
+			if word_size = 32 or word_size = 0 then
+				ifdef X86 then
+					iset = x86
+					endian = LITTLE_ENDIAN
+				elsifdef ARM then
+					iset = ARM
+					endian = LITTLE_ENDIAN
+				end ifdef
+			end if
+			if word_size = 64 or word_size = 0 then
+				ifdef X86_64 or X86 then
+					-- assume the extension to x86
+					iset = x86_64
+					-- biendian
+				elsifdef ITANIUM then
+					iset = Itanium
+					-- biendian
+				end ifdef
+			end if
+		end if
+		
+		if find(word_size,{32,64})=0 then
+			ifdef ARCH32 then
+				word_size = 32
+			elsifdef ARCH64 then
+				word_size = 64
+			end ifdef
+		end if
+	
+		if iset = 0 then
+			ifdef X86 then
+				iset = x86
+				endian = LITTLE_ENDIAN
+			elsifdef ARM then
+				iset = ARM
+				endian = LITTLE_ENDIAN
+			elsifdef X86_64 then
+				iset = x86_64
+			elsifdef ITANIUM then
+				iset = Itanium
+			end ifdef
+		end if
+		
+		local_defines &= { word_size_defines[word_size], 
+			instruction_set_defines[iset] }
+		
+		if endian then
+			local_defines &= { byte_sex_defines[endian] }
+		end if
+		
+	else
+	
+		local_defines &= machine_func(M_DEFINES,{})
+		
+	end if
+	
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
-		local_defines &= {"WINDOWS", "WIN32"}
+		local_defines &= {"WINDOWS" }
+		if find( "ARCH32", local_defines ) then
+			local_defines &= { "WIN32" }
+		end if
 		sequence lcmds = command_line()
 		
 		-- Examine the executable's image file to determine subsystem.
@@ -181,6 +267,8 @@ public function GetPlatformDefines(integer for_translator = 0)
 		local_defines &= {"UNIX", "BSD", "FREEBSD"}
 	end if
 
+
+		
 	-- So the translator knows what to strip from defines if translating
 	-- to a different platform
 	return { "_PLAT_START" } & local_defines & { "_PLAT_STOP" }

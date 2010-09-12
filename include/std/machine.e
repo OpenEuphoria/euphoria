@@ -1003,3 +1003,25 @@ FREE_RID = routine_id("free")
 -- Chances are you will not need to call this function because code allocations are typically public scope operations that you want to have available until your process exits.
 --
 -- See Also: [[:allocate_code]], [[:free]]
+
+--****
+-- === Byte Sex Constants
+--
+public type enum byte_sex
+	BIG_ENDIAN, LITTLE_ENDIAN
+end type
+
+--****
+-- 
+atom endian_mem = allocate(4)
+poke(endian_mem,"ABCD")
+public function get_bytesex()
+	atom x = peek4u(endian_mem)
+	if x = 'A' * #100_0000 + 'B' * #1_0000 + 'C' * #100 + 'D' then
+		return BIG_ENDIAN
+	else
+		return LITTLE_ENDIAN
+	end if
+end function
+
+

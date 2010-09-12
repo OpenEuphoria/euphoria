@@ -136,7 +136,7 @@ if "%ERRORLEVEL%" == "9009" (
 rem If you want to add a new architecture, please also modify traninit.e (transoptions()), 
 rem ../tests/t_arch.e, rem be_machine.c (get_machine_architecture_defines()) and the other 
 rem configure.
-echo ARCH=ix86 >> config.wat
+echo ARCH=x86 >> config.wat
 
 IF "%NOEU%" == "" (
 	echo EUPHORIA=1 >> config.wat

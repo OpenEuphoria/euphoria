@@ -14,8 +14,9 @@ include std/text.e
 include std/sequence.e
 include std/error.e
 public include std/unicode.e
-with define LITTLE_ENDIAN
-
+ifdef EU40000 then
+	with define LITTLE_ENDIAN
+end ifdef
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
 		 M_FLUSH = 60,
@@ -1286,15 +1287,32 @@ end type
 -- host endian constants meaning
 -- you don't need to change
 -- the byte/sex.
-ifdef LITTLE_ENDIAN then
+ifdef LITTLE_ENDIAN or EU40000 then
+	--** 16-bit host endian
 	constant UTF_16HE = UTF_16LE,
-		UTF_32HE = UTF_32LE
+	--** 32-bit host endian
+		UTF_32HE = UTF_32LE,
+	--** 16 bit reverse endian
+		UTF_16RE = UTF_16BE,
+	--** 32-bit reverse endian
+		UTF_32RE = UTF_32BE
+		
 elsifdef BIG_ENDIAN then
 	constant UTF_16HE = UTF_16BE,
-		UTF_32HE = UTF_32BE
+		UTF_32HE = UTF_32BE,
+		UTF_16RE = UTF_16LE,
+		UTF_32RE = UTF_32LE
 end ifdef
-	
-function change_bytesex_4(sequence ret)
+
+type byte_string(sequence s)
+	return find(0,s < 255)=0
+end type
+
+-- swaps the fourth member with the first,
+-- and the third with the second and does
+-- the same with each of ret[4*n+1..4+4*n]
+-- for all n.
+function change_bytesex_4(byte_string ret)
 	atom temp
 	for i = 1 to length(ret) - 3 by 4 do
 		temp = ret[i]
@@ -1307,6 +1325,14 @@ function change_bytesex_4(sequence ret)
 	return ret
 end function
 
+-- swaps each even member with the previous
+-- odd member in a sequence and returns the
+-- said sequence.
+--
+-- This is appropriate for changing byte-sex
+-- on 16-bit integers that have been
+-- loaded in as bytes.
+--
 function change_bytesex_2(sequence ret)
 	integer temp
 	for i = 1 to length(ret) - 1 by 2 do
@@ -1317,6 +1343,36 @@ function change_bytesex_2(sequence ret)
 	return ret
 end function
 
+constant EV_BE = { 256, 1 },
+		EV_LE = { 1, 256 },
+		EV4_BE = { #100_0000, #1_0000, #100, 1 },
+		EV4_LE = { 1, #100, #1_0000, #100_0000 }
+type shortEV(sequence s)
+	return length(s)=2 and find(s, {EV_BE, EV_LE} )
+end type
+
+type longEV(sequence s)
+	return length(s)=4 and find(s,{ EV4_BE, EV4_LE } )
+end type
+function bytes_to_shorts(sequence ret, shortEV ev)
+	integer k = 1
+	for i = 1 to length(ret) - 1 by 2 do
+		ret[k] = ret[i] * ev[1] + ret[i+1] * ev[2]
+		k += 1
+	end for
+	ret = ret[1..floor(length(ret)/2)]
+	return ret
+end function
+
+function bytes_to_longs(sequence ret, longEV ev)
+	integer k = 1
+	for i = 1 to length(ret) - 3 by 4 do
+		ret[$] = ret[i..i+3] * ev
+		ret[k] = ret[$][1] + ret[$][2] + ret[$][3] + ret[$][4]
+	end for
+	ret = ret[1..floor(length(ret)/4)]
+	return ret
+end function
 
 --**
 -- Read the contents of a file as a single sequence of bytes.
@@ -1398,9 +1454,10 @@ end function
 public function read_file(object file, integer as_text = BINARY_MODE, encoding_type encoding = ANSI)
 	integer fn
 	integer len
-	sequence ret
+	object ret
 	object temp
 	atom adr
+	integer data_location = 1
 
 	if sequence(file) then
 		fn = open(file, "rb")
@@ -1421,202 +1478,7 @@ public function read_file(object file, integer as_text = BINARY_MODE, encoding_t
 	if sequence(file) then
 		close(fn)
 	end if
-
-	-- Treat as a text file.
-	while 1 label "ChkEnc" do
-		switch encoding do
-			case ANSI then
-				break
-				
-			case UTF_8 then
-				if length(ret) >= 3 then
-					if equal(ret[1..3], x"ef bb bf") then
-						-- strip out any BOM that might be present.
-						ret = ret[4..$]
-					end if
-				end if
-				ret = toUTF(ret, utf_8, utf_32)
-				
-			case UTF_16 then
-				if length(ret) >= 2 then
-					if equal(ret[1 .. 2], x"fe ff") then
-						encoding = UTF_16BE
-						
-					elsif equal(ret[1 .. 2], x"ff fe") then
-						encoding = UTF_16LE
-						
-					else
-						if validate(ret, utf_16) = 0 then -- is valid
-							encoding = UTF_16BE
-						else
-							encoding = UTF_16LE -- assume little-endian and retest.
-						end if
-					end if
-				else
-					break
-				end if
-				retry "ChkEnc"
-			
-			case UTF_16BE then
-				if length(ret) >= 2 then
-					if equal(ret[1 .. 2], x"fe ff") then
-						ret = ret[3..$]
-					end if
-				end if
-				ifdef LITTLE_ENDIAN then
-					ret = change_bytesex_2(ret)
-				end ifdef
-				
-				fallthru
-				
-			case UTF_16LE then
-				if length(ret) >= 2 then
-					if equal(ret[1 .. 2], x"ff fe") then
-						ret = ret[3..$]
-					end if
-				end if
-				ifdef BIG_ENDIAN then
-					ret = change_bytesex_2(ret)
-				end ifdef
-				
-				adr = allocate(length(ret),1)
-				poke(adr, ret)
-				ret = peek2u({adr, length(ret) / 2})
-
-				ret = toUTF(ret, utf_16, utf_32)
-				
-			case UTF_32 then
-				if length(ret) >= 4 then
-					if equal(ret[1 .. 4], x"00 00 fe ff") then
-						encoding = UTF_32BE
-						
-					elsif equal(ret[1 .. 4], x"ff fe 00 00") then
-						encoding = UTF_32LE
-						
-					else
-						if validate(ret, utf_32) = 0 then -- is valid
-							encoding = UTF_32BE
-						else
-							encoding = UTF_32LE -- assume little-endian and retest.
-						end if
-					end if
-				else
-					break
-				end if
-				retry "ChkEnc"
-			
-			case UTF_32BE then
-				if length(ret) >= 4 then
-					if equal(ret[1 .. 4], x"00 00 fe ff") then
-						ret = ret[5..$]
-					end if
-				end if
-				ifdef LITTLE_ENDIAN then
-					ret = change_bytesex_4(ret)
-				end ifdef
-				fallthru
-				
-			case UTF_32LE then
-				if length(ret) >= 4 then
-					if equal(ret[1 .. 2], x"ff fe 00 00") then
-						ret = ret[5..$]
-					end if
-				end if
-				ifdef BIG_ENDIAN then
-					ret = change_bytesex_4(ret)
-				end ifdef
-				
-				adr = allocate(length(ret),1)
-				poke(adr, ret)
-				ret = peek4u({adr, length(ret) / 4})
-
-			case UTF then
-				if length(ret) >= 4 then
-					if equal(ret[1 .. 4], x"ff fe 00 00") then
-						encoding = UTF_32LE
-						retry "ChkEnc"
-					end if
-					if equal(ret[1 .. 4], x"00 00 fe ff") then
-						encoding = UTF_32BE
-						retry "ChkEnc"
-					end if
-				end if
-				if length(ret) >= 2 then
-					if equal(ret[1 .. 2], x"ff fe") then
-						encoding = UTF_16LE
-						retry "ChkEnc"
-					end if
-					if equal(ret[1 .. 2], x"fe ff") then
-						encoding = UTF_16BE
-						retry "ChkEnc"
-					end if
-				end if
-				if length(ret) >= 3 then
-					if equal(ret[1 .. 3], x"ef bb bf") then
-						encoding = UTF_8
-						retry "ChkEnc"
-					end if
-				end if
-				
-				if validate(ret, utf_8) = 0 then
-					encoding = UTF_8
-					retry "ChkEnc"
-				end if
-								
-				if find(0, ret) = 0 then
-					-- No nulls, so assume ANSI
-					exit "ChkEnc"
-				end if
-				
-				adr = allocate(length(ret), 1)
-				poke(adr, ret)
-				
-				temp = peek2u({adr, length(ret) / 2})
-				if validate(temp, utf_16) = 0 then
-					encoding = UTF_16HE
-					retry "ChkEnc"
-				end if
-				temp = peek4u({adr, length(ret) / 4})
-				if validate(temp, utf_32) = 0 then
-					encoding = UTF_32HE
-					retry "ChkEnc"
-				end if
-				
-				temp = ret
-				for i = 1 to length(temp) - 1 by 2 do
-					integer tmp = temp[i]
-					temp[i] = temp[i+1]
-					temp[i+1] = tmp
-				end for
-				poke(adr, temp)
-				temp = peek2u({adr, length(ret) / 2})
-				if validate(temp, utf_16) = 0 then
-					encoding = UTF_16HE
-					retry "ChkEnc"
-				end if
-				
-				temp = ret
-				for i = 1 to length(temp) - 3 by 4 do
-					integer tmp = temp[i]
-					temp[i] = temp[i+3]
-					temp[i+3] = tmp
-					tmp = temp[i+1]
-					temp[i+1] = temp[i+2]
-					temp[i+2] = tmp
-				end for
-				poke(adr, temp)
-				temp = peek4u({adr, length(ret) / 4})
-				if validate(temp, utf_32) = 0 then
-					encoding = UTF_32HE
-					retry "ChkEnc"
-				end if
-				
-				-- assume ANSI at this point.				
-		end switch	
-		
-		exit
-	end while
-
+	
 	ifdef WINDOWS then
 		-- Remove any extra -1 (EOF) characters in case file
 		-- had been opened in Windows 'text mode'.
@@ -1630,16 +1492,166 @@ public function read_file(object file, integer as_text = BINARY_MODE, encoding_t
 		end for
 	end ifdef
 
-	if as_text = BINARY_MODE then
+	if as_text = BINARY_MODE or encoding = ANSI then
 		return ret
 	end if
-	
-	fn = find(26, ret) -- Any Ctrl-Z found?
-	if fn then
-		-- Ok, so truncate the file data
-		ret = ret[1 .. fn - 1]
-	end if
 
+	-- make encoding more specific.	
+	-- encoding will specify word-size and byte order
+	switch encoding do
+		case ANSI then
+			break
+		
+		case UTF_8 then
+			if length(ret) >= 3 then
+				if equal(ret[1..3], x"ef bb bf") then
+					data_location = 4
+				end if
+			end if
+			
+		case UTF_16 then
+			if length(ret) >= 2 then
+			
+				if equal(ret[1 .. 2], x"fe ff") then
+					data_location = 3
+					encoding = UTF_16BE					
+				elsif equal(ret[1 .. 2], x"ff fe") then
+					data_location = 3
+					encoding = UTF_16LE					
+				else
+					ifdef LITTLE_ENDIAN or BIG_ENDIAN then
+						if validate(ret, utf_16) = 0 then -- is valid
+							encoding = UTF_16HE
+						else
+							encoding = UTF_16RE -- assume reverse-endian and retest.
+						end if
+					end ifdef					
+				end if
+				
+			end if
+		
+		case UTF_32 then
+			if length(ret) >= 4 then
+				if equal(ret[1 .. 4], x"00 00 fe ff") then
+					data_location = 5
+					encoding = UTF_32BE
+					
+				elsif equal(ret[1 .. 4], x"ff fe 00 00") then
+					data_location = 5
+					encoding = UTF_32LE
+				end if
+			end if
+			
+		case UTF then
+			if length(ret) >= 4 then
+				if equal(ret[1 .. 4], x"ff fe 00 00") then
+					encoding = UTF_32LE
+					data_location = 5
+					break
+				elsif equal(ret[1 .. 4], x"00 00 fe ff") then
+					data_location = 5
+					encoding = UTF_32BE
+					break
+				end if
+			end if
+			if length(ret) >= 2 then
+				if equal(ret[1 .. 2], x"ff fe") then
+					data_location = 3
+					encoding = UTF_16LE
+					break
+				elsif equal(ret[1 .. 2], x"fe ff") then
+					encoding = UTF_16BE
+					data_location = 3
+					break
+				end if
+			end if
+			if length(ret) >= 3 then
+				if equal(ret[1 .. 3], x"ef bb bf") then
+					data_location = 4
+					encoding = UTF_8
+					break
+				end if
+			end if	
+	end switch
+	
+	-- remove BOM
+	ret = ret[data_location..$]
+	
+	-- if valid input with encoding temp will contain the encoded data
+	-- if not, temp will be an atom.
+	switch encoding do
+		case UTF then
+			temp = validate(ret, utf_8)
+			if temp != 0 then					
+				temp = find(0, ret)
+				if temp = 0 then -- ANSI
+					encoding = ANSI
+					return ret
+				end if
+				temp = toUTF(bytes_to_shorts(ret,EV_BE), utf_16, utf_32)
+				if atom(temp) then
+					temp = toUTF(bytes_to_shorts(ret,EV_LE), utf_16, utf_32)
+				end if
+				if atom(temp) then
+					temp = bytes_to_longs(ret,EV4_LE)
+					if validate(temp, utf_32)!=0 then
+						temp = 0
+					end if
+				end if
+				if atom(temp) then
+					temp = bytes_to_longs(ret,EV4_BE)
+					if validate(temp, utf_32)!=0 then
+						temp = 0
+					end if
+				end if
+				if sequence(temp) then
+					break
+				end if
+			end if
+			fallthru
+			
+		case UTF_8 then
+			temp = toUTF(ret, utf_8, utf_32)
+			
+		ifdef LITTLE_ENDIAN or BIG_ENDIAN then
+			case UTF_16RE then
+				temp = change_bytesex_2(ret)
+				fallthru
+				
+			case UTF_16HE then
+				adr = allocate(length(ret),TRUE)
+				poke(adr, temp)
+				temp = toUTF(peek2u({adr, floor(length(ret) / 2)}), utf_16, utf_32)
+				
+		elsedef
+			case UTF_16BE then
+				temp = toUTF(bytes_to_shorts(ret,EV_BE), utf_16, utf_32)
+			
+			case UTF_16LE then
+				temp = toUTF(bytes_to_shorts(ret,EV_LE), utf_16, utf_32)
+		end ifdef
+								
+		case UTF_32BE then
+			temp = bytes_to_longs(ret,EV4_BE)
+			if validate(temp, utf_32)!=0 then
+				temp = 0
+			end if
+		
+		case UTF_32LE then
+			temp = bytes_to_longs(ret,EV4_LE)
+			if validate(temp, utf_32)!=0 then
+				temp = 0
+			end if
+
+	end switch	
+		
+	if atom(temp) then
+		-- failed validation!
+		return ret
+	else
+		ret = temp
+	end if
+		
 	-- Convert Windows endings
 	ret = replace_all(ret, {13,10}, {10})
 	if length(ret) > 0 then

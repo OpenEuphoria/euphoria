@@ -171,7 +171,7 @@ ifdef PLAT
 TARGETPLAT=-plat $(PLAT)
 endif
 
-ifeq "$(ARCH)" "ix86"
+ifeq "$(ARCH)" "x86"
 BE_CALLC = be_callc
 MSIZE=-m32
 else

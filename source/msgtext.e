@@ -345,8 +345,10 @@ constant StdErrMsgs = {
 	{329, "Invalid character in HEX string"},
 	{330, "Only enums may be declared as types"},
 	{331, "Forward references are not supported for enums"},
-	{332, "Set hardware architecture"},
-	{333, "Can not use [1].  Architecture must be one of [2]"},
+	{332, "Set instruction set for the translated code."},
+	{333, "Can not use '[1]' as an architecture."},
+	{334, "Set bytesex for the translated code."},
+	{335, "Set the word-length for the translated code."}, 
 	$
 }
 
