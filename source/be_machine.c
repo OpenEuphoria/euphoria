@@ -1431,7 +1431,7 @@ typedef struct _SYSTEMTIME {
 }
 #endif
 
-#if defined(EUNIX) || defined(EMINGW)
+#if defined(EUNIX)
 	// 2 of 2: Unix style with stat()
 static object Dir(object x)
 /* x is the name of a directory or file */
