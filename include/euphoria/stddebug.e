@@ -7,6 +7,7 @@ include std/eds.e
 include std/error.e
 include std/eumem.e
 include std/filesys.e
+include std/flags.e
 include std/get.e
 include std/graphcst.e
 include std/graphics.e
@@ -40,7 +41,7 @@ include std/stats.e
 include std/task.e
 include std/text.e
 include std/types.e
-include std/unicode.e
+--include std/unicode.e
 include std/unittest.e
 include std/wildcard.e
 include std/win32/msgbox.e
