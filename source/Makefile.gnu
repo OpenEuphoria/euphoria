@@ -206,8 +206,8 @@ else
 	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex
 endif
 
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -Wextra -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
-BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall -Wextra $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 
 EU_CORE_FILES = \
 	block.e \
@@ -363,7 +363,7 @@ be_rev.c : svn_rev
 code-page-db : $(BUILDDIR)/ecp.dat
 
 $(BUILDDIR)/ecp.dat : interpreter
-	$(BUILDDIR)/eui -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/buildcpdb.ex -p$(TRUNKDIR)/source/codepage -o$(BUILDDIR)
+	$(BUILDDIR)/$(EEXU) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/buildcpdb.ex -p$(TRUNKDIR)/source/codepage -o$(BUILDDIR)
 
 interpreter : builddirs
 ifeq "$(EUPHORIA)" "1"
@@ -667,8 +667,8 @@ $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c Makefile.eu
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
 $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c Makefile.eu
-	$(CC) -c -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
-	$(CC) -S -Wall -Wextra $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
+	$(CC) -c -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
+	$(CC) -S -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
