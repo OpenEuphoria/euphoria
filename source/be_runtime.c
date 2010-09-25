@@ -4639,7 +4639,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	MakeCString(routine_string, name, TEMP_SIZE);
 
 	colon = strchr(routine_string, ':');
-
+	seq_num = 999999998; // look through the whole list
 	if (colon != NULL) {
 		/* look up "ns : name" */
 

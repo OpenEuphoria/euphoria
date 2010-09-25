@@ -142,7 +142,7 @@ symtab_ptr Locate(int *pc)
 
 long block_contains_line( symtab_ptr block, unsigned long line){
 // Make sure the line is inside of the block
-	return (block == 0) || (block->u.block.first_line <= line) && (block->u.block.last_line >= line);
+	return (block == 0) || ((block->u.block.first_line <= line) && (block->u.block.last_line >= line));
 }
 
 symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen, unsigned long current_line )
@@ -346,7 +346,7 @@ int RoutineId(symtab_ptr current_sub, object name, int file_no)
 	routine_string = (char *)&TempBuff;
 	MakeCString(routine_string, name, TEMP_SIZE);
 
-	p = RTLookup(routine_string, file_no, NULL, current_sub, SymTabLen, 0); 
+	p = RTLookup(routine_string, file_no, NULL, current_sub, *(int*)fe.st, 0); 
 
 	if (p == NULL || (p->token != PROC && 
 					  p->token != FUNC &&
