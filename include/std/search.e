@@ -203,7 +203,10 @@ include std/types.e
 -- See Also:
 --		[[:find]], [[:find_from]]
 
-public function find_any(sequence needles, sequence haystack, integer start=1)
+public function find_any(object needles, sequence haystack, integer start=1)
+	if atom(needles) then
+		needles = {needles}
+	end if
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
 			return i

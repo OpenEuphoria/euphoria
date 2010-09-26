@@ -31,43 +31,45 @@ public constant
 --
 
 --**
--- Checks whether two objects can be legally added together.
+-- Checks whether two objects can perform a sequence operation together.
 --
 -- Parameters:
 --		# ##a## : one of the objects to test for compatible shape
 --		# ##b## : the other object
 --
 -- Returns:
---	An **integer**, 1 if an addition (or any of the [[:Relational operators]])
---  are possible between ##a## and ##b##, else 0.
+--	An **integer**, 1 if a sequence operation is valid between ##a## and ##b##, else 0.
 --
 -- Example 1:
 -- <eucode>
--- i = can_add({1,2,3},{4,5})
+-- i = binop_ok({1,2,3},{4,5})
 -- -- i is 0
 --
--- i = can_add({1,2,3},4)
+-- i = binop_ok({1,2,3},4)
 -- -- i is 1
 --
--- i = can_add({1,2,3},{4,{5,6},7})
+-- i = binop_ok({1,2,3},{4,{5,6},7})
 -- -- i is 1
 -- </eucode>
 --
 -- See Also:
---     [[:linear]]
+--     [[:series]]
 
-public function can_add(object a, object b)
+public function binop_ok(object a, object b)
 	if atom(a) or atom(b) then
 		return 1
 	end if
-	if length(a)!=length(b) then
+	
+	if length(a) != length(b) then
 		return 0
 	end if
-	for i=1 to length(a) do
-		if not can_add(a[i], b[i]) then
+	
+	for i = 1 to length(a) do
+		if not binop_ok(a[i], b[i]) then
 			return 0
 		end if
 	end for
+	
 	return 1
 end function
 
@@ -344,14 +346,8 @@ public function columnize(sequence source, object cols = {}, object defval = 0)
 	if length(collist) = 0 then
 		cols = 0
 		for i = 1 to length(source) do
-			if atom(source[i]) then
-				if cols = 0 then
-					cols = 1
-				end if
-			else
-				if cols < length(source[i]) then
-					cols = length(source[i])
-				end if
+			if cols < length(source[i]) then
+				cols = length(source[i])
 			end if
 		end for
 		for i = 1 to cols do
@@ -363,15 +359,11 @@ public function columnize(sequence source, object cols = {}, object defval = 0)
 	for i = 1 to length(collist) do
 		integer col = collist[i]
 		for j = 1 to length(source) do
-			if atom(source[j]) then
-				if 1 < col then
-					result[i] = append(result[i], defval)
-				else
-					result[i] = append(result[i], source[j][col])
-				end if
+			if length(source[j]) < col then
+				result[i] = append(result[i], defval)
 			else
-				if length(source[j]) < col then
-					result[i] = append(result[i], defval)
+				if atom(source[j]) then
+					result[i] = append(result[i], source[j])
 				else
 					result[i] = append(result[i], source[j][col])
 				end if
@@ -550,11 +542,10 @@ public function reverse(object target, integer pFrom = 1, integer pTo = 0)
 	integer uppr, n, lLimit
 	sequence t
 
-	if atom(target) or length(target) < 2 then
+	n = length(target)
+	if n < 2 then
 		return target
 	end if
-
-	n = length(target)
 	if pFrom < 1 then
 		pFrom = 1
 	end if
@@ -600,7 +591,7 @@ end function
 -- shuffle({1,2,3,3}) -- {1,2,3,3}
 -- </eucode>
 
-public function shuffle(sequence seq)
+public function shuffle(object seq)
 -- 1963 shuffle algorithm written by L.E. Moses and R.V. Oakford
 
 	for toIdx = length(seq) to 2 by -1 do
@@ -623,44 +614,73 @@ end function
 --
 
 --**
--- Returns a sequence in arithmetic progression.
+-- Returns a new sequence built as a series from a given object.
 --
 -- Parameters:
 --		# ##start## : the initial value from which to start
 --		# ##increment## : the value to recursively add to ##start## to get new elements
---		# ##count## :  an integer, the number of additions to perform.
+--		# ##count## :  an integer, the number of additions to perform. The default is 1.
+--		# ##operation## :  an integer, the type of operation used to build the series.
+--                         Can be either '+' for a linear series or '*' for a geometric series.
+--                         The default is '+'.
 --
 -- Returns:
---		An **object**, either 0 on failure or
--- ##{start, start+increment,...,start+count*increment}##
+--		An **object**, either 0 on failure or a sequence containing the series.
+-- 
 --
 -- Comments:
---
--- If ##count## is negative, or if adding ##start## to  ##increment## would
--- prove to be impossible, then 0 is returned. Otherwise, a sequence, of length
+-- * The first item in the returned series is always ##start##.
+-- * A //linear// series is formed by **adding** ##increment## to ##start##.
+-- * A //geometric// series is formed by **multiplying** ##increment## by ##start##.
+-- * If ##count## is negative, or if ##start## **##op##** ##increment## is invalid,
+-- then 0 is returned. Otherwise, a sequence, of length
 -- ##count+1##, staring with ##start## and whose adjacent elements differ
--- exactly by ##increment##, is returned.
+-- by ##increment##, is returned.
 --
 -- Example 1:
 -- <eucode>
--- s = linear({1,2,3},4,3)
--- -- s is {{1,2,3},{5,6,7},{9,10,11}}
+-- s = series( 1, 4, 5)
+-- -- s is {1, 5, 9, 13, 17, 21}
+-- s = series( 1, 2, 6, '*')
+-- -- s is {1, 2, 4, 8, 16, 32, 64}
+-- s = series({1,2,3}, 4, 2)
+-- -- s is {{1,2,3}, {5,6,7}, {9,10,11}}
+-- s = series({1,2,3}, {4,-1,10}, 2)
+-- -- s is {{1,2,3}, {5,1,13}, {9,0,23}}
 -- </eucode>
 --
 -- See Also:
 --     [[:repeat_pattern]]
 
-public function linear(object start, object increment, integer count)
+public function series(object start, object increment, integer count = 1, integer op = '+')
 	sequence result
 
-	if count<0 or not can_add(start,increment) then
+	if count < 0 then
 		return 0
 	end if
-	result=repeat(start,count)
-	for i=2 to count do
-		start += increment
-		result[i] = start
-	end for
+	
+	if not binop_ok(start, increment) then
+		return 0
+	end if
+	
+	result = repeat(0, count + 1)
+	result[1] = start
+	switch op do
+		case '+' then
+			for i = 1 to count do
+				start += increment
+				result[i+1] = start
+			end for
+			
+		case '*' then
+			for i = 1 to count do
+				start *= increment
+				result[i+1] = start
+			end for
+			
+		case else
+			return 0
+	end switch
 	return result
 end function
 
@@ -683,9 +703,9 @@ end function
 -- </eucode>
 --
 -- See Also:
---   [[:repeat]], [[:linear]]
+--   [[:repeat]], [[:series]]
 
-public function repeat_pattern(sequence pattern, integer count)
+public function repeat_pattern(object pattern, integer count)
 	integer ls
 	sequence result
 
@@ -735,7 +755,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:repeat_pattern]], [[:linear]]
+--     [[:repeat_pattern]], [[:series]]
 
 --****
 -- === Adding to sequences
@@ -947,7 +967,7 @@ end function
 -- See Also:
 --   [[:trim_head]], [[:pad_tail]], [[:head]]
 
-public function pad_head(sequence target, integer size, object ch=' ')
+public function pad_head(object target, integer size, object ch=' ')
 	if size <= length(target) then
 		return target
 	end if
@@ -990,7 +1010,7 @@ end function
 -- See Also:
 --   [[:trim_tail]], [[:pad_head]], [[:tail]]
 
-public function pad_tail(sequence target, integer size, object ch=' ')
+public function pad_tail(object target, integer size, object ch=' ')
 	if size <= length(target) then
 		return target
 	end if
@@ -1795,7 +1815,10 @@ public function filter(sequence source, object rid, object userdata = {}, object
 							end if
 						end if
 					end for
-					
+
+				case else
+					-- ignore type
+										
 			end switch
 		
 		case "out" then
@@ -1849,6 +1872,8 @@ public function filter(sequence source, object rid, object userdata = {}, object
 							dest[idx] = source[a]
 						end if
 					end for
+				case else
+					-- ignore type
 					
 			end switch
 		
@@ -1957,24 +1982,24 @@ public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 public function replace_all(sequence source, object olddata, object newdata)
 	integer startpos
 	integer endpos
-
-	if atom(olddata) then
-		olddata = {olddata}
-	end if
-
-	if atom(newdata) then
-		newdata = {newdata}
-	end if
+	integer adj_old
+	integer adj_new
 
 	if length(olddata) = 0 then
 		return source
 	end if
 
+	if atom(olddata) then
+		olddata = {olddata} -- match_from requires a sequence.
+	end if
+
+	adj_old = length(olddata) - 1
+	adj_new = length(newdata)
 	endpos = 1
 	while startpos != 0 with entry do
-		endpos = startpos + length(olddata) - 1
+		endpos = startpos + adj_old
 		source = replace(source, newdata, startpos, endpos)
-		endpos = startpos + length(newdata)
+		endpos = startpos + adj_new
 	entry
 		startpos = match_from(olddata, source, endpos)
 	end while
@@ -2113,7 +2138,7 @@ public function split( sequence st, object delim=' ', integer no_empty = 0, inte
 
 
 	if sequence(delim) then
-		-- Handle the simple case of split(""123, ""), opposite is join({"1","2","3"}, "") -- "123"
+		-- Handle the simple case of split("123", ""), opposite is join({"1","2","3"}, "") -- "123"
 		if equal(delim, "") then
 			for i = 1 to length(st) do
 				st[i] = {st[i]}
@@ -2189,7 +2214,7 @@ end function
 --
 -- Parameters:
 -- # ##source## : the sequence to split.
--- # ##delim## : a list of delimiters to split by.
+-- # ##delim## : a list of delimiters to split by. The default set is comma, space, tab and bar.
 -- # ##limit## : an integer (default is 0). The maximum number of sub-sequences
 --              to create. If zero, there is no limit.
 -- # ##no_empty## : an integer (default is 0). If not zero then all zero-length sub-sequences
@@ -2197,32 +2222,36 @@ end function
 --                   trailing and duplicated delimiters are not significant.
 --
 -- Comments:
--- This function may be applied to a string sequence or a complex sequence.
---
--- It works like ##split##(), but in this case ##delim## is a set of potential
+-- * This function may be applied to a string sequence or a complex sequence.
+-- * It works like ##split##(), but in this case ##delim## is a set of potential
 -- delimiters rather than a single delimiter.
+-- * If ##delim## is an empty set, the ##source## is returned in a sequence.
 --
 -- Example 1:
 -- <eucode>
--- result = split_any("One,Two|Three.Four", ".,|")
+-- result = split_any("One,Two|Three Four") -- Default delims
 -- -- result is {"One", "Two", "Three", "Four"}
--- result = split_any(",One,,Two|.Three||.Four,", ".,|",,1) -- No Empty option
+-- result = split_any("192.168.1.103:8080", ".:") -- Using dot and colon
+-- -- result is {"192","168","1","103","8080"}
+-- result = split_any("One,Two|Three Four",, 2) -- limited to two splits
+-- -- result is {"One", "Two", "Three Four"}
+-- result = split_any(",One,,Two| Three|| Four,"  ) -- Allow Empty option
+-- -- result is {"","One","","Two","","Three","","","Four",""}
+-- result = split_any(",One,,Two| Three|| Four,",,,1) -- No Empty option
 -- -- result is {"One", "Two", "Three", "Four"}
+-- result = split_any(",One,,Two| Three|| Four,", "") -- Empty delimiters
+-- -- result is {",One,,Two| Three|| Four,"}
 -- </eucode>
 --
 -- See Also:
 --   [[:split]], [[:breakup]], [[:join]]
 
-public function split_any(sequence source, object delim, integer limit=0, integer no_empty=0)
+public function split_any(sequence source, object delim=", \t|", integer limit=0, integer no_empty=0)
 	sequence ret = {}
 	integer start = 1, pos, next_pos
 
-	if atom(delim) then
-		delim = {delim}
-	end if
-
 	if length(delim) = 0 then
-		crash("sequence:split_any(): delimiter length must be greater than 0")
+		return {source}
 	end if
 
 	while 1 do
@@ -2502,9 +2531,6 @@ public function flatten(sequence s, object delim = "")
 	integer len
 	integer pos
 
-	if atom(delim) then
-		delim = {delim}
-	end if
 	ret = s
 	pos = 1
 	len = length(ret)
@@ -2529,7 +2555,6 @@ public function flatten(sequence s, object delim = "")
 
 	return ret
 end function
-
 
 --**
 -- Returns a sequence of three sub-sequences. The sub-sequences contain
@@ -2640,7 +2665,7 @@ public function build_list( sequence source, object transformer, integer singlet
 	object new_x
 
 	-- Special case where only one transformer is supplied.
-	if integer(transformer) then
+	if atom(transformer) then
 		transformer = {transformer}
 	end if
 
@@ -2813,6 +2838,7 @@ public function transmute(sequence source_data, sequence current_items, sequence
 	integer cs
 	integer ns
 	integer i
+    integer elen
 
 	-- Check 'current' for single or sub-sequence matching
 	if equal(current_items[1], {}) then
@@ -2832,64 +2858,87 @@ public function transmute(sequence source_data, sequence current_items, sequence
 	
 	-- Begin scanning
 	i = start - 1
-	while i < length(source_data) do
-		if limit <= 0 then
-			exit
-		end if
-		
-		i += 1
-		if cs = 0 then
-			-- Compare and replace single item in source.
-			pos = find(source_data[i], current_items) 
-			if pos then
-				if ns = 0 then
-					-- Treat 'new' as a single item to replace the match.
-					source_data[i] = new_items[pos]
-				else
-					-- Treat 'new' as a set of items to replace the match.
-					if sequence(new_items[pos]) then
-						source_data = source_data[1 .. i - 1] & new_items[pos] & source_data[i + 1 .. $]
-						i += length(new_items[pos]) - 1
-					else
-						source_data[i] = new_items[pos]
-					end if
-				end if
-				limit -= 1
-			end if
-		else
-			-- Compare and replace sub-sequences in source.
-			pos = 0
-			for j = 1 to length(current_items) do
-				if begins(current_items[j], source_data[i .. $]) then
-					pos = j
+	if cs = 0 then
+		-- Compare and replace single item in source.
+		if ns = 0 then
+			-- Treat 'new' as a single item to replace the match.
+			while i < length(source_data) do
+				if limit <= 0 then
 					exit
 				end if
-			end for
-			if pos then
-			    integer elen
-			    if atom(current_items[pos]) then
-			    	elen = 1
-			    else
-			    	elen = length(current_items[pos])
-			    end if
-			    
-				if ns = 0 then
-					-- Treat 'new' as a single item to replace the match.
-					source_data = source_data[1 .. i-1] & {new_items[pos]} & 
-					               source_data[i + elen .. $]
-				else
-					-- Treat 'new' as a set of items to replace the match.
-					source_data = source_data[1 .. i-1] & new_items[pos] & 
-				               source_data[i + elen .. $]
-					if sequence(new_items[pos]) then
-						i += length(new_items[pos]) - 1
-					end if
+				limit -= 1
+				
+				i += 1
+				pos = find(source_data[i], current_items) 
+				if pos then
+					source_data[i] = new_items[pos]
+				end if
+			end while
+		else
+			-- Treat 'new' as a set of items to replace the match.
+			while i < length(source_data) do
+				if limit <= 0 then
+					exit
 				end if
 				limit -= 1
-			end if
+				
+				i += 1
+				pos = find(source_data[i], current_items) 
+				if pos then
+					source_data = replace(source_data, new_items[pos], i, i)
+					-- Skip over the replacement data 
+					i += length(new_items[pos]) - 1
+				end if
+			end while
 		end if
-	end while
-
+	else
+		-- Compare and replace sub-sequences in source.
+		if ns = 0 then
+			-- Treat 'new' as a single item to replace the match.
+			while i < length(source_data) do
+				if limit <= 0 then
+					exit
+				end if
+				limit -= 1
+				
+				i += 1
+				pos = 0
+				for j = 1 to length(current_items) do
+					if begins(current_items[j], source_data[i .. $]) then
+						pos = j
+						exit
+					end if
+				end for
+				if pos then
+			    	elen = length(current_items[pos]) - 1
+					source_data = replace(source_data, {new_items[pos]}, i, i + elen)
+				end if
+			end while
+		else
+			-- Treat 'new' as a set of items to replace the match.
+			while i < length(source_data) do
+				if limit <= 0 then
+					exit
+				end if
+				limit -= 1
+				
+				i += 1
+				pos = 0
+				for j = 1 to length(current_items) do
+					if begins(current_items[j], source_data[i .. $]) then
+						pos = j
+						exit
+					end if
+				end for
+				if pos then
+			    	elen = length(current_items[pos]) - 1
+					source_data = replace(source_data, new_items[pos], i, i + elen)
+					-- Skip over the replacement data 
+					i += length(new_items[pos]) - 1
+				end if
+			end while
+		end if
+	end if
 	return source_data
 
 end function
@@ -3202,11 +3251,12 @@ end function
 -- Ensures that the supplied sequence is at least the supplied minimum length.
 --
 -- Parameters:
--- # ##source_data## : A sequence that might need extending.
+-- # ##source_data## : An object that might need extending.
 -- # ##min_size##: An integer. The minimum length that ##source_data## must be.
+-- The default is lengthen ##source_data# by 50%.
 -- # ##new_data##: An object. This used to when ##source_data## needs to be extended,
 -- in which case it is appended as many times as required to make the length
--- equal to ##min_size##.
+-- equal to ##min_size##. The default is 0.
 --
 -- Returns:
 -- A **sequence**. 
@@ -3218,7 +3268,7 @@ end function
 -- s = minsize({4,3,6,2,7,1,2},  5, -1) --> {4,3,6,2,7,1,2}
 -- </eucode>
 --
-public function minsize(sequence source_data, integer min_size, object new_data)
+public function minsize(object source_data, integer min_size = floor(length(source_data) * 1.5), object new_data = 0)
 
     if length(source_data) < min_size then
         source_data &= repeat(new_data, min_size - length(source_data))
@@ -3226,4 +3276,3 @@ public function minsize(sequence source_data, integer min_size, object new_data)
     
     return source_data
 end function
-

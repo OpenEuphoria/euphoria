@@ -1312,7 +1312,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:product]], [[:or_all]]
+--		[[:product]], [[:or_all]]
 
 public function sum(object a)
 	atom b
@@ -1352,7 +1352,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:sum]], [[:or_all]]
+--		[[:sum]], [[:or_all]]
 
 public function product(object a)
 	atom b
@@ -1391,7 +1391,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]]
+--		[[:sum]], [[:product]], [[:or_bits]]
 
 public function or_all	(object a)
 	atom b

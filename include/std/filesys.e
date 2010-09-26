@@ -21,6 +21,8 @@ include std/text.e
 include std/io.e
 include std/datetime.e as dt
 include std/map.e
+include std/math.e
+
 ifdef UNIX then
 	include std/get.e -- for disk_size()
 end ifdef
@@ -1569,6 +1571,110 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	return lPath
 end function
 
+
+--**
+-- Returns a path string to the supplied file which is shorter than the 
+-- given path string.
+--
+-- Parameters:
+--	# ##orig_path## : A sequence. This is the path to a file.
+--  # ##base_paths## : A sequence. This is an optional list of paths that may
+--  prefix the original path. The default is an empty list.
+--
+-- Returns:
+--     A **sequence**, an equivalent path to ##orig_path## which is shorter 
+--     than the supplied path. If a shorter one cannot be formed, then the
+--     original path is returned.
+--
+-- Comment:
+-- * This function is primarily used to get the shortest form of a file path
+--   for output to a file or screen.
+-- * It works by first trying to find if the ##orig_path## begins with any
+--   of the ##base_paths##. If so it returns the parameter minus the
+--   base path prefix.
+-- * Next it checks if the ##orig_path## begins with the current directory path.
+--   If so it returns the parameter minus the current directory path.
+-- * Next it checks if it can form a relative path from the current directory
+--   to the supplied file which is shorter than the parameter string.
+-- * Failing all of that, it returns the original parameter.
+-- * In Windows, the shorter result is always in lowercase and has all '/' 
+--   characters are replaced by '\' characters.
+-- * The supplied path does not have to actually exist.
+-- * ##orig_path## can be enclosed in quotes, which will be stripped off.
+-- * If ##orig_path## begins with a tilde '~~' then that is replaced by the
+--   contents of $HOME in unix platforms and %HOMEDRIVE%%HOMEPATH% in Windows.
+--
+--
+-- Example 1:
+-- <eucode>
+-- -- Assuming the current directory is "/usr/foo/bar" 
+-- res = abbreviate_path("/usr/foo/abc.def")
+-- -- res is now "../abc.def"
+-- res = abbreviate_path("/usr/foo/bar/inc/abc.def")
+-- -- res is now "inc/abc.def"
+-- res = abbreviate_path("abc.def", {"/usr/foo"})
+-- -- res is now "bar/abc.def"
+-- </eucode>
+
+public function abbreviate_path(sequence orig_path, sequence base_paths = {})
+	sequence expanded_path
+
+	-- Get full path of the parameter
+	expanded_path = canonical_path(orig_path,,1)
+	
+	-- Add the current directory onto the list of base search paths.
+	base_paths = append(base_paths, curdir())
+	
+	ifdef WINDOWS then
+		-- normalize for windows by setting all to lowercase and replacing any
+		-- unix style slashes with windows style ones.
+		base_paths = lower(base_paths)
+		for i = 1 to length(base_paths) do
+			base_paths[i] = replace_all(base_paths[i], `/`, `\`)
+		end for
+		expanded_path = replace_all(expanded_path, `/`, `\`)
+	end ifdef
+	
+	-- The first pass is to see if the parameter begins with any of the base paths.
+	for i = 1 to length(base_paths) do
+		if begins(base_paths[i], expanded_path) then
+			-- Found one, so strip it off and return the remainder.
+			return expanded_path[length(base_paths[i]) + 1 .. $]
+		end if
+	end for
+	
+	-- Second pass is to try and find the given path, relative to the current directory.
+	ifdef WINDOWS then
+		-- If not on same drive just return what was supplied.
+		if not equal(base_paths[$][1], expanded_path[1]) then
+			return orig_path
+		end if
+	end ifdef
+	
+	-- Separate the current dir into its component directories.
+	base_paths = split(base_paths[$], SLASH)
+	-- Separate full given path into its components.
+	expanded_path = split(expanded_path, SLASH)
+	
+	-- locate where the two paths begin to get different.
+	for i = 1 to min({length(expanded_path), length(base_paths) - 1}) do
+		if not equal(expanded_path[i], base_paths[i]) then
+			-- Create a new path by backing up from the current dir to
+			-- the point of difference and tacking on the remainder of the
+			-- parameter's path.
+			expanded_path = repeat("..", length(base_paths) - i) & expanded_path[i .. $]
+			expanded_path = join(expanded_path, SLASH)
+			if length(expanded_path) < length(orig_path) then
+				-- If the result is actually smaller then we abbreviated it.
+		  		return expanded_path
+			end if
+			exit
+		end if
+	end for
+	
+	-- If all else fails, just return the original data.
+	return orig_path
+end function
 
 --****
 -- === File Types

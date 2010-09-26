@@ -255,11 +255,32 @@ test_equal("vslice 1c", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
 test_equal("vslice 2c", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1, {}))
 test_equal("vslice 3c", {6}, vslice({{5,1}, {5,2}, {5,3}}, 3, {6}))
 
-test_equal("can_add #1",0,can_add({{1,2},{3,4}},{5,6,7}))
-test_equal("can_add #2",1,can_add({{1,2},{3,4}},{{5,6},7}))
+test_equal("binop_ok #1",  0, binop_ok({{1,2},{3,4}}, {5,6,7}))
+test_equal("binop_ok #2",  0, binop_ok({{1,2},{3,4}}, {5,{6,7,8}}))
+test_equal("binop_ok #3",  1, binop_ok({{1,2},{3,4}}, {{5,6},7}))
+test_equal("binop_ok #4",  1, binop_ok({{1,2},{3,4}}, 5))
+test_equal("binop_ok #5",  1, binop_ok(5, {{1,2},{3,4}}))
+test_equal("binop_ok #6",  1, binop_ok(1, 2))
 
-test_equal("linear",{{1,5},{4,8},{7,11},{10,14}},linear({1,5},3,4))
-test_equal("linear 1c", 0, linear({1,2,3},1, -1 ) )
+test_equal("series 1+", {{1,5},{4,8},{7,11},{10,14}},    series({1,5},  3, 3))
+test_equal("series 2+", 0,                               series({1,2,3},1, -1 ) )
+test_equal("series 3+", {{1,2,3}, {5,1,13}, {9,0,23}},   series({1,2,3}, {4,-1,10}, 2))
+test_equal("series 4+", {{1,2,3}},                       series({1,2,3}, 1, 0 ) )
+test_equal("series 5+", {1, {2,3,4}, {3,5,7}, {4,7,10}}, series(1, {1,2,3}, 3 ) )
+test_equal("series 6+", {1, 5, 9, 13, 17, 21},           series(1, 4, 5 ) )
+test_equal("series 7+", 0,                               series({1,2}, {1,2,3}, 3 ) )
+test_equal("series 8+", {12, 9, 6, 3},                   series( 12, -3, 3 ) )
+
+test_equal("series 1*", {{1,5},{3,15},{9,45},{27,135}},  series({1,5},  3, 3, '*'))
+test_equal("series 2*", 0,                               series({1,2,3},1, -1, '*' ) )
+test_equal("series 3*", {{1,2,3}, {4,-2,30}, {16,2,300}},series({1,2,3}, {4,-1,10}, 2, '*'))
+test_equal("series 4*", {{1,2,3}},                       series({1,2,3}, 1, 0, '*' ) )
+test_equal("series 5*", {1, {1,2,3}, {1,4,9}, {1,8,27}}, series(1, {1,2,3}, 3, '*' ) )
+test_equal("series 6*", {1, 4, 16, 64, 256, 1024},       series(1, 4, 5, '*' ) )
+test_equal("series 7*", 0,                               series({1,2}, {1,2,3}, 3, '*' ) )
+test_equal("series 8*", {12, 6, 3, 1.5},                 series( 12, 0.5, 3, '*' ) )
+
+test_equal("series 1?", 0,                               series({1,2}, {1,2,3}, 3, '?' ) )
 
 sequence s
 s={0,1,2,3,{"aaa",{{3},{1},{2}},"ccc"},4}
