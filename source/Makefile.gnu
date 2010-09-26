@@ -348,7 +348,9 @@ $(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(EECUA) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
 
-builddirs : svn_rev
+builddirs : $(BUILD_DIRS)
+
+$(BUILD_DIRS) :
 	mkdir -p $(BUILD_DIRS) 
 
 ifeq "$(ROOTDIR)" ""
@@ -425,7 +427,7 @@ source-tarball : source
 .PHONY : source
 
 
-$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c $(BUILDDIR)/$(OBJDIR)/back
+$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
 	$(EXE) -i $(TRUNKDIR)/include coverage.ex $(BUILDDIR)/$(OBJDIR)
 
 $(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
@@ -657,7 +659,6 @@ ifeq "$(EUPHORIA)" "1"
 
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
-	cp Makefile Makefile.gnu $(CONFIG) revget.ex $(BUILDDIR)/$(OBJDIR)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
 	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(INCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) )
 	

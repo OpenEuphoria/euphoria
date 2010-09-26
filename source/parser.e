@@ -231,7 +231,8 @@ enum
 	SWITCH_JUMP_TABLE,
 	SWITCH_ELSE,
 	SWITCH_PC,
-	SWITCH_FALLTHRU
+	SWITCH_FALLTHRU,
+	SWITCH_VALUE
 
 procedure NotReached(integer tok, sequence keyword)
 -- Issue warning about code that can't be executed
@@ -2208,7 +2209,7 @@ end procedure
 
 procedure push_switch()
 	if_stack &= SWITCH
-	switch_stack = append( switch_stack, { {}, {}, 0, 0, 0 })
+	switch_stack = append( switch_stack, { {}, {}, 0, 0, 0, 0 })
 end procedure
 
 procedure pop_switch( integer break_base )
@@ -2282,7 +2283,7 @@ procedure Case_statement()
 	end if
 	
 	StartSourceLine(TRUE, , COVERAGE_SUPPRESS)
-			
+	
 	fallthru_case = 0
 	integer start_line = line_number
 	while 1 do
@@ -2371,6 +2372,8 @@ procedure Case_statement()
 		end if
 	end while
 	StartSourceLine( TRUE )
+	emit_temp( switch_stack[$][SWITCH_VALUE], NEW_REFERENCE )
+	flush_temps()
 end procedure
 
 procedure Fallthru_statement()
@@ -2511,7 +2514,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 
 	-- convert to relative offsets
 	SymTab[jump_table][S_OBJ] = switch_stack[$][SWITCH_JUMP_TABLE] - switch_pc
-
+	
 end procedure
 
 procedure Switch_statement()
@@ -2524,6 +2527,8 @@ procedure Switch_statement()
 	break_base = length(break_list)
 
 	Expr()
+	switch_stack[$][SWITCH_VALUE] = Top()
+	clear_temp( switch_stack[$][SWITCH_VALUE] )
 
 	cases = NewStringSym( {-1, length(SymTab) } )
 
@@ -2544,9 +2549,9 @@ procedure Switch_statement()
 	token t
 	t = next_token()
 	if t[T_ID] = CASE then
-	
+		
 		Case_statement()
-	
+		
 		Statement_list()
 	
 	else
@@ -2561,10 +2566,15 @@ procedure Switch_statement()
 	end if
 
 	if not else_case() then
+		if not TRANSLATE then
+			StartSourceLine( TRUE, , COVERAGE_SUPPRESS )
+			emit_temp( switch_stack[$][SWITCH_VALUE], NEW_REFERENCE )
+			flush_temps()
+		end if
+		
 		Warning(221, no_case_else_warning_flag,
 				{known_files[current_file_no], line_number})
 	end if
-	
 	pop_switch( break_base )
 end procedure
 
@@ -3632,7 +3642,7 @@ procedure Statement_list()
 		elsif id = SWITCH then
 			StartSourceLine(TRUE)
 			Switch_statement()
-		
+			
 		elsif id = FALLTHRU then
 			Fallthru_statement()
 
@@ -3686,6 +3696,7 @@ procedure Statement_list()
 			return
 
 		end if
+		
 		flush_temps()
 	end while
 end procedure

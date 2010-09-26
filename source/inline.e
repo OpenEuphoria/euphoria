@@ -358,7 +358,14 @@ function inline_op( integer pc )
 		return ok
 		
 	elsif op_info[op][OP_SIZE_TYPE] = FIXED_SIZE then
-	
+		switch op do
+			case SWITCH, SWITCH_RT, SWITCH_I, SWITCH_SPI then
+				-- make a copy of the jump table
+				symtab_index original_table = inline_code[pc + 3]
+				symtab_index jump_table = NewStringSym( {-2, length(SymTab) } )
+				SymTab[jump_table][S_OBJ] = SymTab[original_table][S_OBJ]
+				inline_code[pc+3] = jump_table
+		end switch
 		return adjust_il( pc, op )
 		
 	else
