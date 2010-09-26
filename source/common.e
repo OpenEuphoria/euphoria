@@ -22,7 +22,8 @@ public constant
 
 public sequence SymTab = {}  -- the symbol table
 
-public sequence file_name = {}
+public sequence known_files = {}
+public sequence known_files_hash = {}
 public sequence file_include = {{}} -- remember which files were included where
 public sequence include_matrix = {{DIRECT_INCLUDE}} -- quicker access to include information
 public sequence indirect_include = {{1}}

@@ -14,11 +14,13 @@ include std/get.e
 include std/machine.e
 include std/search.e
 include std/sequence.e
+include std/text.e
+include std/map.e
 
 include global.e
 include common.e
 include platform.e
-include reswords.e
+include reswords.e as res
 include symtab.e
 include scinot.e
 include fwdref.e
@@ -107,8 +109,8 @@ export procedure InitLex()
 	char_class['\t'] = BLANK
 	char_class['+'] = PLUS
 	char_class['-'] = MINUS
-	char_class['*'] = MULTIPLY
-	char_class['/'] = DIVIDE
+	char_class['*'] = res:MULTIPLY
+	char_class['/'] = res:DIVIDE
 	char_class['='] = EQUALS
 	char_class['<'] = LESS
 	char_class['>'] = GREATER
@@ -128,7 +130,7 @@ export procedure InitLex()
 	char_class[']'] = RIGHT_SQUARE
 	char_class['$'] = DOLLAR
 	char_class[','] = COMMA
-	char_class['&'] = CONCAT
+	char_class['&'] = res:CONCAT
 	char_class['?'] = QUESTION_MARK
 	char_class['#'] = NUMBER_SIGN
 
@@ -411,7 +413,7 @@ function find_file(sequence fname)
 
 	-- We've got a relative path so we need to look into a few places. --
 	-- first try path from current file path
-	currdir = get_file_path( file_name[current_file_no] )
+	currdir = get_file_path( known_files[current_file_no] )
 	full_path = currdir & fname
 	if file_exists(full_path) then
 		return full_path
@@ -526,73 +528,16 @@ function path_open()
 	return fh
 end function
 
-function win_compare(sequence a,sequence b)
-	atom conv
-	integer rc
-
-	conv=allocate_string(a)
-	conv=c_func(char_upper,{conv}) -- conv is unchanged
-	a=peek({conv,length(a)})
-	poke(conv,b)
-	conv=c_func(char_upper,{conv}) -- conv is unchanged
-	rc = equal(a,peek({conv,length(a)}))
-	free(conv)
-	return rc
-end function
-
-function dos_compare(sequence a,sequence b)
-	integer ai,bi,c
-
-	for i=1 to length(a) do
-		ai=a[i]
-		bi=b[i]
-		if ai!=bi then -- do some work
-			c = xor_bits(ai,bi)
-			if c >= #40 then
-			-- either one of the chars is accented and not the other, or one is a letter and not the other
-				return FALSE
-			end if
-			-- both char are allowed in filenames and different
-			if ai<128 then  -- unaccented chars
-				if c != #20 or and_bits(ai,31)>26 then -- not case insensitive equal
-				-- if c=#20, then both chars ar in 'A'..#7F. Hence the need to filter out spurious positives from #7B..#7F.
-					return FALSE
-				end if
-			else  -- accented chars
-				if not fc_table then -- no capitalisation supported, chars differ
-					return FALSE
-				end if
-				-- speed things up by not always peeking twice
-				c = peek(fc_table+ai)
-				if c != ai then -- a[i] is lowercase
-					if c != bi then -- b[i] is neither of the allowed two
-						return FALSE
-					end if
-				else -- a[i] is uppercase, so check b[i] directly
-					if ai != peek(fc_table+bi) then -- different after uppercasing
-						return FALSE
-					end if
-				end if
-			end if
-		end if
-	end for
-	return TRUE
-end function
-
 function same_name(sequence a, sequence b)
 -- return TRUE if two file names (or paths) are equal
+	if length(a) != length(b) then
+		return FALSE
+	end if
+	
 	ifdef UNIX then
 		return equal(a, b) -- case sensitive
 	elsedef
-		if length(a) != length(b) then
-			return FALSE
-		else
-			ifdef WIN32 then
-				return win_compare(a,b)
-			elsedef
-				return dos_compare(a,b)
-			end ifdef
-		end if
+		return equal(upper(a), upper(b)) -- case insensitive
 	end ifdef
 end function
 
@@ -782,62 +727,55 @@ end procedure
 
 procedure IncludePush()
 -- start reading from new source file with given name
-	integer new_file, old_file_no
-	sequence new_name
+	integer new_file_handle, old_file_no
+	atom new_hash
+	integer idx
 
 	start_include = FALSE
 
-	new_file = path_open() -- sets new_include_name to full path
+	new_file_handle = path_open() -- sets new_include_name to full path
 
-	new_name = name_ext(new_include_name)
+	new_hash = hash(canonical_path(new_include_name,,1), HSIEH32)
 
-	for i = length(file_name) to 1 by -1 do
-		-- compare file names first to reduce calls to dir()
-		if same_name(new_name, name_ext(file_name[i])) and
-			equal(dir(new_include_name), dir(file_name[i]))
-		then
-			-- can assume we've included this file already
-			-- (Thanks to Vincent Howell.)
-			-- (currently, in a very rare case, it could be a
-			--  different file in another directory with the
-			--  same name, size and time-stamp down to the second)
-			if new_include_space != 0 then
-				SymTab[new_include_space][S_OBJ] = i -- but note any namespace
+	idx = find(new_hash, known_files_hash)
+	if idx then
+		-- can assume we've included this file already
+		if new_include_space != 0 then
+			SymTab[new_include_space][S_OBJ] = idx -- but note any namespace
 
-			end if
-			close(new_file)
-
-			if find( -i, file_include[current_file_no] ) then
-				-- it was included via export before, but we can now mark it as directly included
-				file_include[current_file_no][ find( -i, file_include[current_file_no] ) ] = i
-
-
-
-			elsif not find( i, file_include[current_file_no] ) then
-				-- don't reparse the file, but note that it was included here
-				file_include[current_file_no] &= i
-
-				-- also add anything that file exports
-				add_exports( i, current_file_no )
-
-				if public_include then
-
-					if not find( i, file_public[current_file_no] ) then
-						file_public[current_file_no] &= i
-						patch_exports( current_file_no )
-					end if
-
-				end if
-			end if
-			indirect_include[current_file_no][i] = OpIndirectInclude
-			add_include_by( current_file_no, i, public_include )
-			update_include_matrix( i, current_file_no )
-			public_include = FALSE
-			read_line() -- we can't return without reading a line first
-			return -- ignore it
 		end if
-	end for
+		close(new_file_handle)
 
+		if find( -idx, file_include[current_file_no] ) then
+			-- it was included via export before, but we can now mark it as directly included
+			file_include[current_file_no][ find( -idx, file_include[current_file_no] ) ] = idx
+
+
+
+		elsif not find( idx, file_include[current_file_no] ) then
+			-- don't reparse the file, but note that it was included here
+			file_include[current_file_no] &= idx
+
+			-- also add anything that file exports
+			add_exports( idx, current_file_no )
+
+			if public_include then
+
+				if not find( idx, file_public[current_file_no] ) then
+					file_public[current_file_no] &= idx
+					patch_exports( current_file_no )
+				end if
+
+			end if
+		end if
+		indirect_include[current_file_no][idx] = OpIndirectInclude
+		add_include_by( current_file_no, idx, public_include )
+		update_include_matrix( idx, current_file_no )
+		public_include = FALSE
+		read_line() -- we can't return without reading a line first
+		return -- ignore it
+	end if
+	
 	if length(IncludeStk) >= INCLUDE_LIMIT then
 		CompileErr(104)
 	end if
@@ -882,22 +820,24 @@ procedure IncludePush()
 	end if
 
 ifdef STDDEBUG then
-	if not match("std/", new_name ) then
+	if not match("std" & SLASH, new_include_name) then
 		file_include[$] &= 2 -- include the unexported std library
 	end if
 end ifdef
 
-	src_file = new_file
+	src_file = new_file_handle
 	file_start_sym = last_sym
 	if current_file_no >= MAX_FILE then
 		CompileErr(126)
 	end if
-	file_name = append(file_name, new_include_name)
+	known_files = append(known_files, new_include_name)
+	known_files_hash &= new_hash
 	check_coverage()
 	default_namespaces &= 0
+	
 	update_include_matrix( length( file_include ), current_file_no )
 	old_file_no = current_file_no
-	current_file_no = length(file_name)
+	current_file_no = length(known_files)
 	line_number = 0
 	read_line()
 
@@ -1769,13 +1709,13 @@ export function Scanner()
 				return {PLUS, 0}
 			end if
 
-		elsif class = CONCAT then
+		elsif class = res:CONCAT then
 			ch = getch()
 			if ch = '=' then
 				return {CONCAT_EQUALS, 0}
 			else
 				ungetch()
-				return {CONCAT, 0}
+				return {res:CONCAT, 0}
 			end if
 
 		elsif class = NUMBER_SIGN then
@@ -1847,16 +1787,16 @@ export function Scanner()
 				end if
 			end if
 
-		elsif class = MULTIPLY then
+		elsif class = res:MULTIPLY then
 			ch = getch()
 			if ch = '=' then
 				return {MULTIPLY_EQUALS, 0}
 			else
 				ungetch()
-				return {MULTIPLY, 0}
+				return {res:MULTIPLY, 0}
 			end if
 
-		elsif class = DIVIDE then
+		elsif class = res:DIVIDE then
 			ch = getch()
 			if ch = '=' then
 				return {DIVIDE_EQUALS, 0}
@@ -1897,7 +1837,7 @@ export function Scanner()
 				end if
 			else
 				ungetch()
-				return {DIVIDE, 0}
+				return {res:DIVIDE, 0}
 			end if
 		elsif class = SINGLE_QUOTE then
 			atom ach = getch()

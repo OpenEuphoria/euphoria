@@ -15,7 +15,7 @@ include std/get.e
 include std/error.e
 include std/console.e
 include std/search.e
-
+include std/map.e
 include euphoria/info.e
 
 include global.e
@@ -68,12 +68,12 @@ function GetSourceName()
 		-- no extension was found
 		-- N.B. The list of default extentions must always end with the first one again.
 		-- Add a placeholder in the file list.
-		file_name = append(file_name, "")
+		known_files = append(known_files, "")
 
 		-- test each ext until you find the file.
 		for i = 1 to length( DEFAULT_EXTS ) do
-			file_name[$] = src_name & DEFAULT_EXTS[i]
-			real_name = e_path_find(file_name[$])
+			known_files[$] = src_name & DEFAULT_EXTS[i]
+			real_name = e_path_find(known_files[$])
 			if sequence(real_name) then
 				exit
 			end if
@@ -83,9 +83,11 @@ function GetSourceName()
 			return -1
 		end if
 	else
-		file_name = append(file_name, src_name)
+		known_files = append(known_files, src_name)
 		real_name = e_path_find(src_name)
 	end if
+	known_files[$] = canonical_path(known_files[$],,1)
+	known_files_hash &= hash(known_files[$], HSIEH32)
 
 	if file_exists(real_name) then
 		real_name = maybe_preprocess(real_name)
@@ -140,14 +142,14 @@ procedure main()
 
 	if src_file = -1 then
 		-- too early for normal error processing
-		screen_output(STDERR, GetMsgText(276, 0, {file_name[$]}))
+		screen_output(STDERR, GetMsgText(276, 0, {known_files[$]}))
 		if not batch_job then
 			any_key(GetMsgText(277,0), STDERR)
 		end if
 		Cleanup(1)
 
 	elsif src_file >= 0 then
-		main_path = full_path(file_name[$])
+		main_path = known_files[$]
 		if length(main_path) = 0 then
 			main_path = '.' & SLASH
 		end if
@@ -172,8 +174,8 @@ procedure main()
 
 	ifdef TRANSLATOR then
 		if keep and build_system_type = BUILD_DIRECT then
-			if 0 and not quick_has_changed(file_name[$]) then
-				build_direct(1, file_name[$])
+			if 0 and not quick_has_changed(known_files[$]) then
+				build_direct(1, known_files[$])
 				Cleanup(0)
 				return
 			end if
@@ -201,7 +203,7 @@ procedure main()
 			BackEnd(0) -- execute IL using Euphoria-coded back-end
 		end ifdef
 	end if
-	
+
 	Cleanup(0) -- does warnings
 end procedure
 

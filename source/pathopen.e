@@ -435,7 +435,7 @@ export function ConfPath(sequence file_name)
 end function
 
 export function ScanPath(sequence file_name,sequence env,integer flag)
--- returns -1 if no path in geenv(env) leads to file_name, else {full_path,handle}
+-- returns -1 if no path in getenv(env) leads to file_name, else {full_path,handle}
 -- if flag is 1, the include_subfolder constant is prepended to filename
 	object inc_path
 	sequence full_path, file_path, strings

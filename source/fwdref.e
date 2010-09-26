@@ -9,6 +9,7 @@ ifdef ETYPE_CHECK then
 elsedef
 	without type_check
 end ifdef
+include std/filesys.e
 
 include global.e
 include parser.e
@@ -274,7 +275,7 @@ procedure patch_forward_call( token tok, integer ref )
 		current_file_no = from_file
 		line_number = line
 		CompileErr( 158,
-			{ file_name[from_file], line, routine_type, name, args, supplied_args + extra_default_args }  )
+			{ known_files[from_file], line, routine_type, name, args, supplied_args + extra_default_args }  )
 	end if
 	
 	new_code &= PROC & sub & params
@@ -644,17 +645,13 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			continue
 		end if
 		
-		sequence fname = file_name[fr[FR_FILE]]
-		sequence cname = file_name[current_file_no]
-		
 		-- found a match...
 		integer code_sub = fr[FR_SUBPROG]
 		integer fr_type  = fr[FR_TYPE]
 		integer sym_tok
 		
-		switch fr_type with fallthru label "fr_type" do
-			case PROC then
-			case FUNC then
+		switch fr_type label "fr_type" do
+			case PROC, FUNC then
 				
 				sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
 				if sym_tok = TYPE then
@@ -665,9 +662,8 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 						forward_error( tok, ref )
 					end if
 				end if
-				switch sym_tok with fallthru do
-					case PROC then
-					case FUNC then
+				switch sym_tok do
+					case PROC, FUNC then
 						patch_forward_call( tok, ref )
 						break "fr_type"
 												
@@ -682,10 +678,8 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 					errors &= ref
 					continue
 				end if
-				switch sym_tok with fallthru do
-					case CONSTANT then
-					case ENUM then
-					case VARIABLE then
+				switch sym_tok do
+					case CONSTANT, ENUM, VARIABLE then
 						patch_forward_variable( tok, ref )
 						break "fr_type"
 					case else
@@ -694,23 +688,19 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 
 			case TYPE_CHECK then
 				patch_forward_type_check( tok, ref )
-				break
 			
 			case GLOBAL_INIT_CHECK then
 				patch_forward_init_check( tok, ref )
-				break
 			
 			case CASE then
 				patch_forward_case( tok, ref )
-				break
 				
 			case TYPE then
 				patch_forward_type( tok, ref )
-				break
 			
 			case GOTO then
 				patch_forward_goto( tok, ref )
-				break
+				
 			case else
 				-- ?? what is it?
 				InternalErr( 263, {fr[FR_TYPE], fr[FR_NAME]})
@@ -732,7 +722,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				continue
 
 			else
-				errloc = sprintf("\t%s (%d): %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
+				errloc = sprintf("\t%s (%d): %s\n", {abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE], ref[FR_NAME]} )
 				if not match(errloc, msg) then
 					msg &= errloc
 				end if

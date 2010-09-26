@@ -251,7 +251,7 @@ function is_literal( symtab_index sym )
 end function
 
 function file_and_name( symtab_index sym )
-	return sprintf("%s:%s:%d", {file_name[SymTab[sym][S_FILE_NO]], SymTab[sym][S_NAME], sym})
+	return sprintf("%s:%s:%d", {known_files[SymTab[sym][S_FILE_NO]], SymTab[sym][S_NAME], sym})
 end function
 
 function returnf( integer pc )

@@ -37,8 +37,8 @@ integer initialized_coverage = 0
 
 export procedure check_coverage()
 
-	for i = length( file_coverage ) + 1 to length( file_name ) do
-		file_coverage &= find( canonical_path( file_name[i],,1 ), covered_files )
+	for i = length( file_coverage ) + 1 to length( known_files ) do
+		file_coverage &= find( canonical_path( known_files[i],,1 ), covered_files )
 	end for
 end procedure
 
@@ -51,7 +51,7 @@ export procedure init_coverage()
 	end if
 	initialized_coverage = 1
 	for i = 1 to length( file_coverage ) do
-		file_coverage[i] = find( canonical_path( file_name[i],,1 ), covered_files )
+		file_coverage[i] = find( canonical_path( known_files[i],,1 ), covered_files )
 	end for
 	
 	if equal( coverage_db_name, "" ) then

@@ -2194,7 +2194,7 @@ procedure opSTARTLINE()
 	if trace_called and
 	   and_bits(slist[Code[pc+1]][OPTIONS], SOP_TRACE) then
 		c_stmt0("ctrace(\"")
-		c_puts(name_ext(file_name[slist[Code[pc+1]][LOCAL_FILE_NO]]))
+		c_puts(name_ext(known_files[slist[Code[pc+1]][LOCAL_FILE_NO]]))
 		c_printf(":%d\t", slist[Code[pc+1]][LINE])
 		c_fixquote(line)
 		c_puts("\");\n")
@@ -5723,7 +5723,7 @@ end procedure
 function file_and_line()
 	integer ix = rfind( STARTLINE, Code, pc )
 	integer line = Code[ix+1]
-	return {file_name[slist[line][LOCAL_FILE_NO]], slist[line][LINE]}
+	return {known_files[slist[line][LOCAL_FILE_NO]], slist[line][LINE]}
 end function
 
 procedure opPIXEL()

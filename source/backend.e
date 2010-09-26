@@ -290,7 +290,7 @@ procedure BackEnd(integer il_file)
 	end if
 	
 	-- store file names and other variables
-	other_strings = append(file_name, file_name_entered) & warning_list
+	other_strings = append(known_files, file_name_entered) & warning_list
 	string_size = 0
 	for i = 1 to length(other_strings) do
 		string_size += length(other_strings[i])+1
@@ -304,7 +304,7 @@ procedure BackEnd(integer il_file)
 	poke4(ms+16, gline_number)
 	poke4(ms+20, il_file)
 	poke4(ms+24, length(warning_list))
-	poke4(ms+28, length(file_name)) -- stored in 0th position
+	poke4(ms+28, length(known_files)) -- stored in 0th position
 	
 	fn = allocate(string_size)
 	

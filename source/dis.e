@@ -214,14 +214,14 @@ procedure opCOVERAGE_LINE()
 		end while
 	end if
 	
-	il( sprintf( "%s: %s:(%d)<<%s>>", {opnames[Code[pc]],  file_name[entry_[LOCAL_FILE_NO]], entry_[LINE] ,line}), 1)
+	il( sprintf( "%s: %s:(%d)<<%s>>", {opnames[Code[pc]],  known_files[entry_[LOCAL_FILE_NO]], entry_[LINE] ,line}), 1)
 	pc += 2
 end procedure
 
 include std/filesys.e
 procedure opCOVERAGE_ROUTINE()
 	il( sprintf( "%s: %s:%s\n", 
-		{ opnames[Code[pc]], canonical_path( file_name[ SymTab[Code[pc+1]][S_FILE_NO] ] ), 
+		{ opnames[Code[pc]], canonical_path( known_files[ SymTab[Code[pc+1]][S_FILE_NO] ] ), 
 			sym_name( Code[pc+1] ) }  ), 1 )
 	pc += 2
 end procedure
@@ -250,7 +250,7 @@ procedure opSTARTLINE()
 			line = line[2..$]
 		end while
 	end if
-	il( sprintf( "%s: %s(%d)<<%s>>", {opnames[Code[pc]], file_name[entry_[LOCAL_FILE_NO]],entry_[LINE] ,line}), 1)
+	il( sprintf( "%s: %s(%d)<<%s>>", {opnames[Code[pc]], known_files[entry_[LOCAL_FILE_NO]],entry_[LINE] ,line}), 1)
 	
 	pc += 2
 end procedure
@@ -346,7 +346,7 @@ function find_line(symtab_index sub, integer pc, integer file_only = 1)
 	if file_only then
 		return slist[gline][LOCAL_FILE_NO]
 	else
-		return {file_name[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC], gline}
+		return {known_files[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC], gline}
 	end if
 	
 end function
@@ -1392,9 +1392,9 @@ procedure write_call_info( sequence name )
 	pretty_print( fn, called_from, pp )
 	puts( fn, "\n\n\"called_by\"\n" )
 	pretty_print( fn, called_by, pp )
-	puts( fn, "\n\n\"file_name\"\n") 
-	pretty_print( fn, file_name, pp )
-	puts( fn, "\n\n\"file_include\"\n" )
+	puts( fn, "\n\n\"known_files\"\n") 
+	pretty_print( fn, known_files, pp )
+	puts( fn, "\n\n\"file_include "\n" )
 	pretty_print( fn, file_include, pp )
 	puts( fn, "\n" )
 	close( fn )
@@ -1555,9 +1555,9 @@ procedure save_il( sequence name )
 	end if
 	
 	max_width = 0
-	for i = 1 to length(file_name) do
-		if length(file_name[i]) > max_width then
-			max_width = length(file_name[i])
+	for i = 1 to length(known_files) do
+		if length(known_files[i]) > max_width then
+			max_width = length(known_files[i])
 		end if
 	end for
 	
@@ -1569,7 +1569,7 @@ procedure save_il( sequence name )
 			slist[j][SRC] = fetch_line(slist[j][SRC])
 		end if
 		if length(slist[j][SRC]) then
-			printf( st, line_format, {file_name[slist[j][LOCAL_FILE_NO]], j, slist[j][SRC] })
+			printf( st, line_format, {known_files[slist[j][LOCAL_FILE_NO]], j, slist[j][SRC] })
 		end if
 		
 	end for
@@ -1744,7 +1744,7 @@ procedure dis( integer sub )
 	end for
 	
 	printf( out, "\nSubProgram [%s-%s:%05d] %s\n", 
-		{file_name[SymTab[sub][S_FILE_NO]], SymTab[sub][S_NAME], sub, params })
+		{known_files[SymTab[sub][S_FILE_NO]], SymTab[sub][S_NAME], sub, params })
 	
 	map:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
@@ -1805,14 +1805,14 @@ export procedure BackEnd( object ignore )
 	
 -- 	map:map result = cmd_parse( opts, -1, Argv )
 	
-	save_il( file_name[1] & '.' )
-	out = open( file_name[1] & ".dis", "wb" )
-	printf(1,"saved to [%s.dis]\n", {file_name[1]})
+	save_il( known_files[1] & '.' )
+	out = open( known_files[1] & ".dis", "wb" )
+	printf(1,"saved to [%s.dis]\n", {known_files[1]})
 	
 	if generate_file_list then
 		puts( out, "File List:\n" )
-		for i = 1 to length( file_name ) do
-			printf( out, "%s\n", {file_name[i]})
+		for i = 1 to length( known_files ) do
+			printf( out, "%s\n", {known_files[i]})
 		end for
 		puts( out, "\n" )
 	end if

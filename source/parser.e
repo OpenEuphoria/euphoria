@@ -14,6 +14,7 @@ include std/sequence.e
 include std/text.e
 include std/search.e
 include std/convert.e
+include std/filesys.e
 
 include global.e
 include platform.e
@@ -244,7 +245,7 @@ procedure NotReached(integer tok, sequence keyword)
 			return
 		end if
 		Warning(218, not_reached_warning_flag, 
-					{name_ext(file_name[current_file_no]), 
+					{name_ext(known_files[current_file_no]), 
 					 line_number,
 					 keyword})
 	end if
@@ -717,7 +718,7 @@ procedure UndefinedVar(symtab_index s)
 		-- extended error message
 		for i = 1 to length(dup_globals) do
 			dup = dup_globals[i]
-			fname = file_name[SymTab[dup][S_FILE_NO]]
+			fname = known_files[SymTab[dup][S_FILE_NO]]
 			errmsg &= "    " & fname & "\n"
 			
 		end for
@@ -1116,7 +1117,7 @@ procedure Function_call( token tok )
 		if short_circuit > 0 and short_circuit_B and
 				  find(id, FUNC_TOKS) then
 			Warning(219, short_circuit_warning_flag, 
-				{file_name[current_file_no], line_number,SymTab[tok[T_SYM]][S_NAME]})
+				{abbreviate_path(known_files[current_file_no]), line_number,SymTab[tok[T_SYM]][S_NAME]})
 		end if
 	end if
 	tok_match(LEFT_ROUND)
@@ -2356,7 +2357,7 @@ procedure Case_statement()
 				else
 					putback( tok )
 					Warning(220, empty_case_warning_flag,
-						{file_name[current_file_no], start_line} )
+						{known_files[current_file_no], start_line} )
 					exit
 				end if
 			else
@@ -2561,7 +2562,7 @@ procedure Switch_statement()
 
 	if not else_case() then
 		Warning(221, no_case_else_warning_flag,
-				{file_name[current_file_no], line_number})
+				{known_files[current_file_no], line_number})
 	end if
 	
 	pop_switch( break_base )
@@ -3749,7 +3750,7 @@ procedure SubProg(integer prog_type, integer scope)
 						again = 222
 					end if
 					Warning(again, override_warning_flag,
-								{file_name[current_file_no],line_number, SymTab[p][S_NAME]})
+								{known_files[current_file_no],line_number, SymTab[p][S_NAME]})
 			end if
 		end if
 
@@ -4177,7 +4178,7 @@ procedure SetWith(integer on_off)
  							CompileErr(147)
  						end if
 						Warning(225, 0,
-							{file_name[current_file_no], line_number, option})
+							{known_files[current_file_no], line_number, option})
 						tok = next_token()	
 						continue
 					end if

@@ -211,7 +211,7 @@ end procedure
 --**
 -- Show place where syntax error occurred
 procedure ShowErr(integer f)
-	if length(file_name) = 0 then
+	if length(known_files) = 0 then
 		return
 	end if
 
@@ -244,8 +244,8 @@ export procedure CompileErr(object msg, object args = {})
 	msg = format(msg, args)
 
 	Errors += 1
-	if length(file_name) then
-		errmsg = sprintf("%s:%d\n%s\n", {file_name[current_file_no],
+	if length(known_files) then
+		errmsg = sprintf("%s:%d\n%s\n", {known_files[current_file_no],
 					 line_number, msg})
 	else
 		errmsg = msg
@@ -292,7 +292,7 @@ export procedure InternalErr(integer  msgno, object args = {})
 	if TRANSLATE then
 		screen_output(STDERR, GetMsgText(211, 1, {msg}))
 	else
-		screen_output(STDERR, GetMsgText(212, 1, {file_name[current_file_no], line_number, msg}))
+		screen_output(STDERR, GetMsgText(212, 1, {known_files[current_file_no], line_number, msg}))
 	end if
 
 	if not batch_job then

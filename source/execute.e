@@ -220,7 +220,7 @@ function find_line(symtab_index sub, integer pc)
 		end if
 	end for
 	gline = SymTab[sub][S_FIRSTLINE] + line - 1
-	return {file_name[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE]}
+	return {known_files[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE]}
 end function
 
 procedure show_var(symtab_index x)
@@ -542,7 +542,7 @@ procedure trace_back(sequence msg)
 		   find(SymTab[v][S_SCOPE], {SC_LOCAL, SC_GLOBAL, SC_GLOOP_VAR}) then
 			if SymTab[v][S_FILE_NO] != prev_file_no then
 				prev_file_no = SymTab[v][S_FILE_NO]
-				puts(err_file, "\n " & file_name[prev_file_no] & ":\n")
+				puts(err_file, "\n " & known_files[prev_file_no] & ":\n")
 			end if
 			show_var(v)
 		end if
@@ -1137,7 +1137,7 @@ procedure opSTARTLINE()
 		end if
 		line = fetch_line(slist[a][SRC])
 		line = sprintf("%s:%d\t%s",
-					   {name_ext(file_name[slist[a][LOCAL_FILE_NO]]),
+					   {name_ext(known_files[slist[a][LOCAL_FILE_NO]]),
 						slist[a][LINE],
 						line})
 		trace_line += 1

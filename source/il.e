@@ -134,7 +134,7 @@ procedure OutputSymTab(file f)
 						-- only report user-defined
 						if list then
 							printf(fd, "%s: %s%s [%d]\n", 
-								  {file_name[SymTab[i][S_FILE_NO]], 
+								  {known_files[SymTab[i][S_FILE_NO]], 
 								   SymTab[i][S_NAME], decorate, i})
 						end if
 
@@ -253,7 +253,7 @@ end procedure
 procedure OutputMisc(file f)
 -- output miscellaneous variables of IL
 	fcompress(f, {max_stack_per_call, AnyTimeProfile, AnyStatementProfile,
-			   sample_size, gline_number, file_name})
+			   sample_size, gline_number, known_files})
 end procedure
 
 procedure copyrights()
@@ -413,7 +413,7 @@ procedure OutputIL()
 		out_name = user_out
 	else
 		-- we will create the name
-		out_name = file_name[1]
+		out_name = known_files[1]
 		m = length(out_name)
 		while m > 0 do
 			if out_name[m] = '.' then

@@ -9,6 +9,7 @@ elsedef
 end ifdef
 
 include std/search.e
+include std/filesys.e
 
 include global.e
 include c_out.e
@@ -706,8 +707,8 @@ ifdef STDDEBUG then
 								{ scanning_file, SymTab[tok[T_SYM]][S_FILE_NO] })
 							
 							symbol_resolution_warning = GetMsgText(232, 0, 
-										{name_ext(file_name[scanning_file]),
-										 name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])})
+										{name_ext(known_files[scanning_file]),
+										 name_ext(known_files[SymTab[tok[T_SYM]][S_FILE_NO]])})
 
 						end if
 						
@@ -817,11 +818,11 @@ end ifdef
 			end if
 			-- Get list of files...
 			for i = 1 to length(dup_globals) do
-				msg_file = file_name[SymTab[dup_globals[i]][S_FILE_NO]]
+				msg_file = known_files[SymTab[dup_globals[i]][S_FILE_NO]]
 				msg &= "    " & msg_file & "\n"
 			end for
 
-			Warning(234, builtin_chosen_warning_flag, {b_name, file_name[scanning_file], msg})
+			Warning(234, builtin_chosen_warning_flag, {b_name, known_files[scanning_file], msg})
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -893,10 +894,10 @@ ifdef STDDEBUG then
 				end if
 end ifdef
 				symbol_resolution_warning = GetMsgText(233,0,
-									{name_ext(file_name[scanning_file]), 
+									{name_ext(known_files[scanning_file]), 
 									 line_number,
 									 word,
-									 name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]])
+									 name_ext(known_files[SymTab[gtok[T_SYM]][S_FILE_NO]])
 									 })
 		end if
 		return gtok
@@ -1034,7 +1035,7 @@ export procedure LintCheck(symtab_index s)
 	end if
 	
 
-	file = file_name[current_file_no]
+	file = abbreviate_path(known_files[current_file_no])
 	if warn_level = 3 then
 		if vscope = SC_LOCAL then
 			if current_file_no = SymTab[s][S_FILE_NO] then

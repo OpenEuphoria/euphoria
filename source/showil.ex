@@ -361,7 +361,7 @@ procedure showMisc(integer flist, object misc)
 	printf(flist, "AnyStatementProfile: %d\n", misc[3])
 	printf(flist, "sample_size: %d\n", misc[4])
 	printf(flist, "gline_number: %d\n", misc[5])
-	puts(flist, "file_name:\n")
+	puts(flist, "known_files:\n")
 	for i = 1 to length(misc[6]) do
 		puts(flist, '\t' & misc[6][i] & '\n')
 	end for 

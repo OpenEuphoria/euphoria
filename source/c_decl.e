@@ -1331,12 +1331,12 @@ export procedure GenerateUserRoutines()
 	end if
 
 	c_puts("// GenerateUserRoutines\n")
-	for file_no = 1 to length(file_name) do
+	for file_no = 1 to length(known_files) do
 		if file_no = 1 or any_code(file_no) then 
 			-- generate a .c file for this Euphoria file
 			-- (we need to use the name of the first file - don't skip it)
 			next_c_char = 1
-			base_name = name_ext(file_name[file_no])
+			base_name = name_ext(known_files[file_no])
 			c_file = base_name
 
 			q = length(c_file)
@@ -1355,7 +1355,7 @@ export procedure GenerateUserRoutines()
 			long_c_file = c_file
 			if LAST_PASS = TRUE then
 				c_file = unique_c_name(c_file)
-				add_file(c_file, file_name[file_no])
+				add_file(c_file, known_files[file_no])
 			end if
 
 			if file_no = 1 then
