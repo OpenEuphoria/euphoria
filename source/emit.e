@@ -993,6 +993,7 @@ export procedure emit_op(integer op)
 			   not sequence(SymTab[c][S_OBJ]) then
 				emit_opcode(op)
 				emit_addr(op_info1)
+				clear_temp( Code[$-1] )
 			else
 				last_op = last_op_backup
 				last_pc = last_pc_backup
@@ -1001,11 +1002,12 @@ export procedure emit_op(integer op)
 			  op_result[previous_op] != T_SEQUENCE then
 			emit_opcode(op)
 			emit_addr(op_info1)
+			clear_temp( Code[$-1] )
 		else
 			last_op = last_op_backup
 			last_pc = last_pc_backup
 		end if
-		clear_temp( Code[$-1] )
+		
 
 	elsif op = ATOM_CHECK then
 		assignable = FALSE

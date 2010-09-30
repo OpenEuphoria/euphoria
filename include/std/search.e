@@ -293,8 +293,9 @@ public function find_each(sequence needles, sequence haystack, integer start=1)
 			haystack[kx] = i
 		end if
 	end for
-
-	return haystack[1 ..kx]
+	
+	haystack = remove( haystack, kx+1, length( haystack ) )
+	return haystack
 end function
 
 --**
@@ -327,7 +328,8 @@ public function find_all(object needle, sequence haystack, integer start=1)
 		start = find_from(needle, haystack, start)
 	end while
 
-	return haystack[1 .. kx]
+	haystack = remove( haystack, kx+1, length( haystack ) )
+	return haystack
 end function
 
 --**
@@ -377,7 +379,8 @@ public function find_all_but( object needle, sequence haystack, integer start = 
 	end for 
 	
 	-- send back what we collected.
-	return haystack[1 .. kx] 
+	haystack = remove( haystack, kx+1, length( haystack ) )
+	return haystack
 end function 
  
 
@@ -884,7 +887,8 @@ public function match_all(sequence needle, sequence haystack, integer start=1)
 		start = match_from(needle, haystack, start)
 	end while
 
-	return haystack[1 .. kx]
+	haystack = remove( haystack, kx+1, length( haystack ) )
+	return haystack
 end function
 
 --**
