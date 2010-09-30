@@ -5,8 +5,15 @@ include std/unittest.e
 
 test_equal("find_all() empty", {}, find_all('Z', "ABACDE", 1))
 test_equal("find_all() atom", {1,3}, find_all('A', "ABACDE", 1))
+test_equal("find_all() atom all", {1,2,3,4}, find_all('A', "AAAA"))
 test_equal("find_all() atom from", {3}, find_all('A', "ABACDE", 2))
 test_equal("find_all() sequence", {3,4}, find_all("Doe", {"John", "Middle", "Doe", "Doe"}, 1))
+
+test_equal("find_all_but() empty", {1,2,3,4,5,6}, find_all_but('Z', "ABACDE", 1))
+test_equal("find_all_but() atom", {2,4,5,6}, find_all_but('A', "ABACDE", 1))
+test_equal("find_all_but() atom all", {}, find_all_but('A', "AAAA"))
+test_equal("find_all_but() atom from", {4,5,6}, find_all_but('A', "ABACDE", 3))
+test_equal("find_all_but() sequence", {1,2}, find_all_but("Doe", {"John", "Middle", "Doe", "Doe"}, 1))
 
 test_equal("match_all() empty", {}, match_all("ZZ", "ABDCABDEF", 1))
 test_equal("match_all() string", {1,5}, match_all("AB", "ABDCABDEF", 1))

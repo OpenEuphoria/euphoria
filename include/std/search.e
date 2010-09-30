@@ -285,16 +285,16 @@ end function
 --		[[:find]], [[:find_from]], [[:find_any]]
 
 public function find_each(sequence needles, sequence haystack, integer start=1)
-	sequence result
-	
-	result = {}
+	integer kx = 0
+		
 	for i = start to length(haystack) do
 		if find(haystack[i],needles) then
-			result &= i
+			kx += 1
+			haystack[kx] = i
 		end if
 	end for
 
-	return result
+	return haystack[1 ..kx]
 end function
 
 --**
@@ -318,17 +318,68 @@ end function
 --     [[:find]], [[:match]], [[:match_all]]
 
 public function find_all(object needle, sequence haystack, integer start=1)
-	sequence ret = {}
-
-	while start > 0 with entry do
-		ret &= start
+	integer kx = 0
+	while start with entry do
+		kx += 1
+		haystack[kx] = start
 		start += 1
 	entry
 		start = find_from(needle, haystack, start)
 	end while
 
-	return ret
+	return haystack[1 .. kx]
 end function
+
+--**
+-- Find all non-occurrences of an object inside a sequence, starting at some specified point.
+--
+-- Parameters:
+--     # ##needle## : an object, what to look for
+--     # ##haystack## : a sequence to search in
+--     # ##start## : an integer, the starting index position (defaults to 1)
+--
+-- Returns:
+--	A **sequence**, the list of all indexes no less than ##start## of elements
+--  of ##haystack## that not equal to ##needle##. This sequence is empty if 
+--  ##haystack## only consists of ##needle##.
+--
+-- Example 1:
+-- <eucode>
+-- s = find_all_but('A', "ABCABAB")
+-- -- s is {2,3,5,7}
+-- </eucode>
+--
+-- See Also:
+--     [[:find_all]], [[:match]], [[:match_all]]
+
+public function find_all_but( object needle, sequence haystack, integer start = 1 ) 
+	integer ix = start 
+	integer jx 
+	integer kx = 0 
+	
+	while jx with entry do
+		-- Collect all the indexes up to the next needle
+		for i = ix to jx - 1 do 
+			kx += 1 
+			haystack[kx] = i 
+		end for 
+		-- Reset the next scan point.
+		ix = jx + 1 
+	entry 
+		-- Scan for a needle.
+		jx = find( needle, haystack, ix ) 
+	end while 
+	
+	-- Collect any trailing non-needles.
+	for i = ix to length(haystack) do 
+		kx += 1 
+		haystack[kx] = i 
+	end for 
+	
+	-- send back what we collected.
+	return haystack[1 .. kx] 
+end function 
+ 
 
 public constant
     NESTED_ANY=1,
@@ -823,16 +874,17 @@ end function
 --     [[:match]], [[:regex:find_all]] [[:find]], [[:find_all]]
 
 public function match_all(sequence needle, sequence haystack, integer start=1)
-	sequence ret = {}
+	integer kx = 0
 
 	while start > 0 with entry do
-		ret &= start
+		kx += 1
+		haystack[kx] = start
 		start += length(needle)
 	entry
 		start = match_from(needle, haystack, start)
 	end while
 
-	return ret
+	return haystack[1 .. kx]
 end function
 
 --**
