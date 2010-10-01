@@ -1023,7 +1023,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				if equal(at_cmds, -1) then
 					-- File didn't exist but this is not an error, so just
 					-- remove it from the commands.
-					cmds = cmds[1..arg_idx-1] & cmds[arg_idx+1..$]
+					cmds = remove(cmds, arg_idx)
 					arg_idx -= 1
 					continue
 				end if
@@ -1056,14 +1056,14 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				elsif at_cmds[j][1] = '\'' and at_cmds[j][$] = '\'' and length(at_cmds[j]) >= 2 then
 					sequence cmdex = split(at_cmds[j][2 .. $-1],' ', 1) -- Empty words removed.
 
-					at_cmds = at_cmds[1..j-1] & cmdex & at_cmds[j+1 .. $]
+					at_cmds = replace(at_cmds, cmdex, j)
 					j = j + length(cmdex) - 1
 
 				end if
 			end while
 
 			-- Replace the '@' argument with the contents of the file.
-			cmds = cmds[1..arg_idx-1] & at_cmds & cmds[arg_idx+1..$]
+			cmds = replace(cmds, at_cmds, arg_idx)
 			arg_idx -= 1
 			continue
 		end if

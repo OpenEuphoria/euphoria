@@ -674,7 +674,7 @@ public function number(object num)
 			if result[i] != '0' then
 				if not find(result[i], "1234567890") then
 					-- Step 3. Remove decimal point and all zeros, preserving any trailing symbols.
-					result = result[1..i-1] & result[is_int .. $]
+					result = remove(result, i, is_int - 1)
 				end if
 				exit
 			end if

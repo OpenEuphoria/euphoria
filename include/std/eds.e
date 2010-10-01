@@ -1203,9 +1203,9 @@ public procedure db_close()
 	close(current_db)
 	-- delete info for current_db
 	index = eu:find(current_db, db_file_nums)
-		   db_names = db_names[1..index-1] & db_names[index+1..$]
-	   db_file_nums = db_file_nums[1..index-1] & db_file_nums[index+1..$]
-	db_lock_methods = db_lock_methods[1..index-1] & db_lock_methods[index+1..$]
+	db_names = remove(db_names, index)
+	db_file_nums = remove(db_file_nums, index)
+	db_lock_methods = remove(db_lock_methods, index)
 	-- delete each cache entry for this database
 	for i = length(cache_index) to 1 by -1 do
 		if cache_index[i][1] = current_db then

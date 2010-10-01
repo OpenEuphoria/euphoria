@@ -1536,7 +1536,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	-- Replace all instances of "/./" with "/"
 	lLevel = SLASH & '.' & SLASH
 	while( lPosA != 0 ) with entry do
-		lPath = lPath[1..lPosA-1] & lPath[lPosA + 2 .. $]
+		lPath = remove(lPath, lPosA, lPosA + 1)
 		
 	  entry
 		lPosA = match(lLevel, lPath)
@@ -1554,8 +1554,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 		if (lPosB <= 0) then
 			lPosB = 1
 		end if
-		
-		lPath = lPath[1..lPosB-1] & lPath[lPosA + 3 .. $]
+		lPath = remove(lPath, lPosB, lPosA + 2)
 		
 	  entry
 		lPosA = match(lLevel, lPath)
