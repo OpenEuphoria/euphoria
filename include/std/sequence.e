@@ -884,7 +884,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- s = insert("John Doe", " Middle", 5)
--- -- s is {'J','o','h','n'," Middle ",'D','o','e'}
+-- -- s is {'J','o','h','n'," Middle",' ','D','o','e'}
 -- </eucode>
 --
 -- Example 2:
