@@ -19,7 +19,30 @@ Every EUPHORIA object is stored as-is.  A special unlikely floating point value 
 
 Every EUPHORIA object is either stored as is or an encoded pointer.  A EUPHORIA integer is stored in a 32-bit signed integer.  If the number is too big for a EUPHORIA integer or not an integer, it is assigned to a 64-bit double float in a structure and an encoded pointer to that structure is stored in the said 32-bit memory space.  Sequences are stored in a similar way.
 
-EUPHORIA integers are stored in object variables as-is.  An object variable is a four byte signed integer.  Legal integer values for EUPHORIA integers are between -1,073,741,824 ( -power(2,30) ) and +1,073,741,823 ( power(2,30)+1 ).  Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other values are for encoded pointers.  Pointers are always 8 byte aligned.  So a pointer is stored in 29-bits instead of 32 and can fit in a hexadecimal range 0x2000_0000 long.     The other values are not stored in the same place but their encoded pointers are.  The pointers are encoded in such a way that their values will never be in the range of the integers.  Pointers to sequence structures (struct s1) are encoded into a range between 8000_0000 to 9FFF_FFFF.  Pointers to structures for doubles (struct d) are encoded into a range between A000_0000 to BFFF_FFFF.  A special value NOVALUE is at the end of the range of encoded pointers is BFFF_FFFF and it signifies that there is no value yet assigned to a variable and it also signifies the end of a sequence.  These methods are how objects are stored.  Values of this type are stored in the 'object' type.
+
+
+{{{
+
+ 32 bit number range:
+  0X8      0XA      0XC      0XE      0X0      0X2      0X4      0X6      0X8
+-4*2^29  -3*2^29  -2*2^29-1  -2^29   0*2^29   1*2^29   2*2^29   3*2^29 4*2^29 
+   *--------*--------*--------*--------*--------*--------*--------*--------o
+                     o NOVALUE = -2*2^29-1
+		     o<-----------ATOM_INT---------[-2*2^29..4*2^29)------>o
+	    |<----------------ATOM_DBL-------[-3*2^29..4*2^29)------------>o
+-->|        |<-- IS_SEQUENCE [-4*2^29..-3*2^29)
+-->|                 o<--- IS_DBL_OR_SEQUENCE [-4*2^29..-2*2^29-1)
+-->|sequence|<-------
+            |<------------------  atom   --------------->|
+    ------->| double |<--------  
+                     |<--------     integer    --------->|
+   |<--------------------- object ---------------------->|		     
+
+
+}}}
+
+
+EUPHORIA integers are stored in object variables as-is.  An object variable is a four byte signed integer.  Legal integer values for EUPHORIA integers are between -1,073,741,824 ( -power(2,30) ) and +1,073,741,823 ( power(2,30)+1 ).  Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other values are for encoded pointers.  Pointers are always 8 byte aligned.  So a pointer is stored in 29-bits instead of 32 and can fit in a hexadecimal range 0x2000_0000 long.     The other values are not stored in the same place but their encoded pointers are.  The pointers are encoded in such a way that their values will never be in the range of the integers.  Pointers to sequence structures (struct s1) are encoded into a range between 8000_0000 to 9FFF_FFFF.  Pointers to structures for doubles (struct d) are encoded into a range between A000_0000 to BFFF_FFFF.  A special value NOVALUE is at the end of the range of encoded pointers is BFFF_FFFF and it signifies that there is no value yet assigned to a variable and it also signifies the end of a sequence.  In C, values of this type are stored in the 'object' type.  The range 4000_0000 to 7FFF_FFFF is unused.
 
 A double structure 'struct d' could indeed contain a value that is legally in the range of a EUPHORIA integer.  So the encoded pointer to this structure is recognized by the interpreter as an 'integer' but in this internals document when we say EUPHORIA integer we mean it actually is a C integer in the legal EUPHORIA integer range.
 
@@ -49,11 +72,13 @@ struct d
 }}}
 
 
-Now offset of the 'ref' in struct d must be the same as the offset of the 'ref' in struct s1.  A 64bit implementation would have to reorder these members.=== The Euphoria Object Macros and Functions ===
+Now offset of the 'ref' in struct d must be the same as the offset of the 'ref' in struct s1.  A 64bit implementation would have to reorder these members.
+
+=== The Euphoria Object Macros and Functions ===
 
 ==== Description
 
-The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns TRUE and IS_ATOM_DBL() will return TRUE for integer values as well as encoded pointers to 'struct d's.   There is an order that these tests are made: We test IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be true if we pass an encoded pointer to a double.  We must be sure that something is not NOVALUE before we use IS_SEQUENCE on it.
+The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns TRUE and IS_ATOM_DBL() will return TRUE for integer values as well as encoded pointers to 'struct d's.   This is why there is an order that these tests are made: We test IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be true if we pass an encoded pointer to a double.  We must be sure that something is not NOVALUE before we use IS_SEQUENCE on it.
 
 // Often we know foo is not NOVALUE before getting into this://
 
@@ -73,10 +98,11 @@ A sequence is held in a 'struct s1' type and a double is contained in a 'struct 
 
 === Type Value Functions and Macros
 
+@[:internals:IS_ATOM_INT|]
 ==== IS_ATOM_INT
-
-===== Signature:
-{{{ <internal> int IS_ATOM_INT( object o ) }}}
+<eucode>
+<internal> int IS_ATOM_INT( object o )
+</eucode>
 
 ===== Returns:
 true if object is a EUPHORIA integer and not an encoded pointer.
@@ -87,10 +113,11 @@ EUPHORIA integer range when the argument is positive.  These values
 are not possible encoded pointers.
 
 
+@[:internals:IS_ATOM_DBL|]
 ==== IS_ATOM_DBL
-
-===== Signature:
-{{{ <internal> int IS_ATOM_DBL( object o ) }}}
+<eucode>
+<internal> int IS_ATOM_DBL( object o )
+</eucode>
 
 ===== Returns:
 true if the object is an encoded pointer to a double struct.
@@ -101,20 +128,22 @@ true if the object is an encoded pointer to a double struct.
 
 
 
+@[:internals:IS_ATOM|]
 ==== IS_ATOM
-
-===== Signature:
-{{{ <internal> int IS_ATOM( object o ) }}}
+<eucode>
+<internal> int IS_ATOM( object o )
+</eucode>
 
 ===== Returns:
 true if the object is a EUPHORIA integer or an encoded pointer to a 
 ##'struct d'##. 
 
 
+@[:internals:IS_SEQUENCE|]
 ==== IS_SEQUENCE
-
-===== Signature:
-{{{ <internal> int IS_SEQUENCE( object o ) }}}
+<eucode>
+<internal> int IS_SEQUENCE( object o )
+</eucode>
 
 ===== Returns:
 true if the object is an encoded pointer to a ##'struct s1'##.
@@ -123,10 +152,11 @@ true if the object is an encoded pointer to a ##'struct s1'##.
 //o// is not NOVALUE.
 
 
+@[:internals:IS_DBL_OR_SEQUENCE|]
 ==== IS_DBL_OR_SEQUENCE
-
-===== Signature:
-{{{ <internal> int IS_DBL_OR_SEQUENCE( object o ) }}}
+<eucode>
+<internal> int IS_DBL_OR_SEQUENCE( object o )
+</eucode>
 
 ===== Returns:
 true if the object is an encoded pointer of either kind of structure.
@@ -135,44 +165,66 @@ true if the object is an encoded pointer of either kind of structure.
 === Type Conversion Functions and Macros
 
 
+@[:internals:MAKE_INT|]
 ==== MAKE_INT
-
-===== Signature:
-{{{ <internal> object MAKE_INT( signed int x ) }}}
+<eucode>
+<internal> object MAKE_INT( signed int x )
+</eucode>
 
 ===== Returns: 
 an object with the same value as x.  x must be with in the integer range of a legal EUPHORIA integer type.
 
+@[:internals:MAKE_UINT|]
+==== MAKE_UINT
+<eucode>
+<internal> object MAKE_UINT( unsigned int x )
+</eucode>
 
+===== Returns: 
+an object with the same value as x.  
 
+===== Assumption:
+x must be an **unsigned** integer with in the integer range of a C unsigned int type.
+
+===== Example:
+MAKE_UINT(4*1000*1000*1000) will make a EUPHORIA value of four billion by creating a double.
+
+@[:internals:MAKE_SEQ|]
 ==== MAKE_SEQ
-
-===== Signature:
-{{{ <internal> object MAKE_SEQ( struct s1 * sptr ) }}}
+<eucode>
+<internal> object MAKE_SEQ( struct s1 * sptr )
+</eucode>
 
 ===== Returns:
 an object with an argument of a pointer to a ##'struct s1'##
 The pointer is encoded into a range for sequences and returned.
 
-
-===== Signature:
-{{{ <internal> object NewString(char *s) }}}
+@[:internals:NewString|]
+==== NewString
+<eucode>
+<internal> object NewString(char *s)
+</eucode>
 
 ===== Returns:
 an object representation of a EUPHORIA byte string s.  The returned encoded pointer
 is a sequence with all of the bytes from s copied over.
 
+@[:internals:MAKE_DBL|]
 ==== MAKE_DBL
-
-===== Signature:
-{{{ <internal> object MAKE_DBL( struct d * dptr ) }}}
+<eucode>
+<internal> object MAKE_DBL( struct d * dptr )
+</eucode>
 
 ===== Returns:
 an object with an argument of a pointer to a ##'struct d'##
 The pointer is encoded into a range for doubles and returned.
 
+
+@[:internals:NewDouble|]
 ==== NewDouble
-{{{ <internal> object NewDouble( double dbl ) }}}
+<eucode>
+<internal> object NewDouble( double dbl )
+</eucode>
 
 ===== Returns:
 an object with an argument a double ##dbl##.  A ##struct d## is allocated and dbl is assigned
@@ -180,10 +232,11 @@ to the value part of that structure.  The pointer is encoded into the
 range for doubles and returned.
 
 
+@[:internals:DBL_PTR|]
 ==== DBL_PTR
-
-===== Signature:
-{{{ <internal> struct d * DBL_PTR( object o ) }}}
+<eucode>
+<internal> struct d * DBL_PTR( object o )
+</eucode>
 
 ===== Returns:
 The pointer to a 'struct d' from the object o.
@@ -192,21 +245,25 @@ The pointer to a 'struct d' from the object o.
 IS_ATOM_INT(o) is FALSE and IS_ATOM_DBL(o) is TRUE.
 
 
+@[:internals:SEQ_PTR|]
 ==== SEQ_PTR
-
-===== Signature:
-{{{ <internal> struct s1 * SEQ_PTR( object o ) }}}
+<eucode>
+<internal> struct s1 * SEQ_PTR( object o )
+</eucode>
 
 ===== Returns:
 The pointer to a ##'struct s1'## from the object o.
 
 ===== Assumption: 
-IS_SEQUENCE(o) is TRUE and /o/ is not NOVALUE.
+IS_SEQUENCE(o) is TRUE and //o// is not NOVALUE.
 
 === Creating Objects
 
-===== Signature:
-{{{ <internal> object NewS1 ( long size ) }}}
+@[:internals:NewS1|]
+==== NewS1
+<eucode>
+<internal> object NewS1 ( long size )
+</eucode>
 
 ===== Returns:
 A sequence object with size members which are not yet set to a value.
@@ -215,8 +272,33 @@ A sequence object with size members which are not yet set to a value.
 
 === Object Constants
 
-Use MAXINT and MININT to check for overflow and underflow.
+Use MAXINT and MININT to check for overflow and underflow, NOVALUE to check if a variable has not
+been assigned, and use NOVALUE to terminate a sequence.
 
+@[:internals:NOVALUE|]
+==== NOVALUE
+<eucode>
+<internal> object NOVALUE
+</eucode>
+
+Indicates that a variable has not been assigned and also terminates a sequence.
+
+@[:internals:MININT|]
+==== MININT
+<eucode>
+<internal> signed int MININT
+</eucode>
+
+The minimal EUPHORIA integer.
+
+
+@[:internals:MAXINT|]
+==== MAXINT
+<eucode>
+<internal> signed int MAXINT
+</eucode>
+
+The maximal EUPHORIA integer.
 
 
 
