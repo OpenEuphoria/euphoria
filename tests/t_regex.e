@@ -259,4 +259,22 @@ end for
 test_equal( sprintf("error name %d gives the number.", 0),"0", error_to_string( 0 ) )
 test_equal( sprintf("error name %d gives the number.", 21),"21", error_to_string( 21 ) )
 
+procedure test_references()
+	object x = re:find( `World`, "Hello World!" )  
+	test_equal( "try uncompiled regex literal", 1, atom( x ) )
+	
+	regex r=re:new( `World` )  
+	x = re:find( r, "Hello World!" )  
+	test_equal( "try compiled regex", 1, sequence(x) )
+	
+	----  
+	-- given a preceding re:new(`World`)  
+	-- this now works  
+	
+	x = re:find( `World`, "Hello World!" )  
+	test_equal( "retry literal used to compile a regex", 0, sequence( x ) )
+	
+end procedure
+test_references()
+
 test_report()
