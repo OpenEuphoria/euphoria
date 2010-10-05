@@ -1535,16 +1535,18 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	
 	-- Replace all instances of "/./" with "/"
 	lLevel = SLASH & '.' & SLASH
+	lPosA = 1
 	while( lPosA != 0 ) with entry do
 		lPath = remove(lPath, lPosA, lPosA + 1)
 		
 	  entry
-		lPosA = match(lLevel, lPath)
+		lPosA = match(lLevel, lPath, lPosA )
 	end while
 	
 	-- Replace all instances of "X/Y/../" with "X/"
 	lLevel = SLASH & ".." & SLASH
 	
+	lPosB = 1
 	while( lPosA != 0 ) with entry do
 		-- Locate preceding directory separator.
 		lPosB = lPosA-1
@@ -1557,7 +1559,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 		lPath = remove(lPath, lPosB, lPosA + 2)
 		
 	  entry
-		lPosA = match(lLevel, lPath)
+		lPosA = match(lLevel, lPath, lPosB )
 	end while
 	
 	ifdef WINDOWS then

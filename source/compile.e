@@ -5051,7 +5051,7 @@ procedure opREMOVE()
 	c_stmt0("else {\n")
 	c_stmt0("assign_slice_seq = &assign_space;\n")
 	if Code[pc+1] = Code[pc+4] then
-		c_stmt("Remove_elements(start, stop, (SEQ_PTR(@)->ref == 1));\n", Code[pc+4])
+		c_stmt("@ = Remove_elements(start, stop, (SEQ_PTR(@)->ref == 1));\n", repeat( Code[pc+4], 2 ))
 	else
 		c_stmt0("_1 = Remove_elements(start, stop, 0);\n")
 		c_stmt("DeRef(@);\n", Code[pc+4])

@@ -1167,9 +1167,9 @@ end function
 -- Add a file to the generated files list that will later be used for
 -- writing build files (emake, makefile, etc...)
 export procedure add_file(sequence filename, sequence eu_filename = "")
-	if match(".c", filename) then
+	if match(".c", filename) = (length( filename ) - 1) then
 		filename = filename[1..$-2]
-	elsif find('.', filename) then
+	elsif match( ".h", filename ) = (length( filename ) - 1) then
 		generated_files = append(generated_files, filename)
 		if build_system_type = BUILD_DIRECT then
 			outdated_files  = append(outdated_files, 0)
