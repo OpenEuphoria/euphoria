@@ -101,8 +101,9 @@ object compile(object pattern, object eflags) {
 */
 object compile_pcre(object x, object flags) {
 
-        pcre_cleanup_ptr rcp, prev;
+        pcre_cleanup_ptr rcp;
         object compiled_regex;
+		s1_ptr regex;
 
         compiled_regex = compile(x, flags);
 
@@ -118,30 +119,20 @@ object compile_pcre(object x, object flags) {
                 rcp->re = 0;
                 DBL_PTR(x)->cleanup = (cleanup_ptr) rcp;
         } else {
-                // There could be some other cleanup attached
-                prev = (pcre_cleanup_ptr)(SEQ_PTR(x)->cleanup);
+				RefDS( x );  // Sequence Copy will de-ref, which we don't want here
+				regex = SequenceCopy( SEQ_PTR( x ) );
+
+                rcp = (pcre_cleanup_ptr)EMalloc(sizeof(struct pcre_cleanup));
+				rcp->cleanup.next = 0;
+				
+				rcp->cleanup.func.builtin = &pcre_deref;
+				rcp->cleanup.type = CLEAN_PCRE;
+				rcp->errmsg = 0;
                 
-                if( prev == 0 || prev->cleanup.type != CLEAN_PCRE ){
-                        rcp = (pcre_cleanup_ptr)EMalloc(sizeof(struct pcre_cleanup));
-                        if( prev ){
-                                rcp->cleanup.next = (cleanup_ptr)prev;
-                        }
-                        else{
-                                rcp->cleanup.next = 0;
-                        }
-                        
-                        rcp->cleanup.func.builtin = &pcre_deref;
-                        rcp->cleanup.type = CLEAN_PCRE;
-                        rcp->errmsg = 0;
-                }
-                else {
-                        (*pcre_free)(prev->re);
-                        rcp = prev;
-                }
                 
-                SEQ_PTR(x)->cleanup = (cleanup_ptr) rcp;
+                regex->cleanup = (cleanup_ptr) rcp;
                 rcp->re = (struct real_pcre *)compiled_regex;
-                RefDS(x);
+                x = MAKE_SEQ( regex );
         }
         
         return x;
