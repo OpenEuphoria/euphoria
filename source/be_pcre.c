@@ -31,7 +31,7 @@ void pcre_deref(object re) {
                                 rcp->errmsg = 0;
                         }
                 }
-        } else if (IS_SEQUENCE(re)) { 
+        } else if (IS_SEQUENCE(re)) {
                 rcp = (pcre_cleanup_ptr)(SEQ_PTR(re)->cleanup);
                 if (rcp->re) {
                         (*pcre_free)(rcp->re);
@@ -68,7 +68,7 @@ object compile(object pattern, object eflags) {
                 // error, so pass the error string to caller
                 return NewString( (char *)error );
         }
-        
+
 
         if ((unsigned) re > (unsigned)MAXINT)
                 ret = NewDouble((double)(unsigned long)re);
@@ -79,7 +79,7 @@ object compile(object pattern, object eflags) {
 }
 
 
-/* Acceptable values for flags in compile_pcre() is a 
+/* Acceptable values for flags in compile_pcre() is a
    bitmask or of the following flags:
 		DEFAULT				,
         AUTO_CALLOUT       ,
@@ -124,17 +124,17 @@ object compile_pcre(object x, object flags) {
 
                 rcp = (pcre_cleanup_ptr)EMalloc(sizeof(struct pcre_cleanup));
 				rcp->cleanup.next = 0;
-				
+
 				rcp->cleanup.func.builtin = &pcre_deref;
 				rcp->cleanup.type = CLEAN_PCRE;
 				rcp->errmsg = 0;
-                
-                
+
+
                 regex->cleanup = (cleanup_ptr) rcp;
                 rcp->re = (struct real_pcre *)compiled_regex;
                 x = MAKE_SEQ( regex );
         }
-        
+
         return x;
 }
 
@@ -186,6 +186,7 @@ object exec_pcre(object x ){
         int ovector_size;
         pcre* re;
         char* str;
+        int strLen, freeStr;
         s1_ptr s;
         s1_ptr sub;
         int i, j;
@@ -196,27 +197,36 @@ object exec_pcre(object x ){
         int ovector_elements;
 
         // x[1] = pcre ptr
-        // x[2] = string to search
-        // x[3] = options
-        // x[4] = start_from
-        // x[5] = ovector size
+        // x[2] = string to search (sequence or atom - char*)
+        // x[3] = string to search length
+        // x[4] = options
+        // x[5] = start_from
+        // x[6] = ovector size
 
         pcre_ptr = SEQ_PTR(x)->base[1];
         re = get_re(pcre_ptr);
 
-        sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
-        str = EMalloc(sub->length+1);
-        MakeCString( str, SEQ_PTR(x)->base[2], sub->length+1 );
+        if (IS_SEQUENCE(SEQ_PTR(x)->base[2])) {
+          sub = SEQ_PTR(SEQ_PTR(x)->base[2]);
+          str = EMalloc(sub->length+1);
+          MakeCString( str, SEQ_PTR(x)->base[2], sub->length+1 );
+          strLen = get_int(SEQ_PTR(x)->base[3]);
+          freeStr = 1;
+        } else {
+          str = get_int(SEQ_PTR(x)->base[2]);
+          strLen = get_int(SEQ_PTR(x)->base[3]);
+          freeStr = 0;
+        }
 
-        options    = get_int( SEQ_PTR(x)->base[3] );
-        start_from = get_int( SEQ_PTR(x)->base[4] ) - 1;
-        ovector_elements = get_int( SEQ_PTR(x)->base[5] );
+        options    = get_int( SEQ_PTR(x)->base[4] );
+        start_from = get_int( SEQ_PTR(x)->base[5] ) - 1;
+        ovector_elements = get_int( SEQ_PTR(x)->base[6] );
         ovector_size = (ovector_elements+1) * 3;
         ovector = (int *)EMalloc(sizeof(int)*ovector_size);
 
-        rc = pcre_exec( re, NULL, str, ((s1_ptr)SEQ_PTR(SEQ_PTR(x)->base[2]))->length,
-                                   start_from, options, ovector, ovector_size );
-        EFree( str );
+        rc = pcre_exec( re, NULL, str, strLen, start_from, options, ovector, ovector_size );
+        if (freeStr == 1)
+          EFree( str );
 
         if( rc < 0 ) { EFree((char *)ovector); return rc; }
         if( rc == 0 ) { rc = ovector_elements+1; }
@@ -263,7 +273,7 @@ static int add(int *len, char **s, const char *a, int alen, int *flag) {
                 if (res != 0) {
                         RTFatal("Internal error: be_pcre:add#2 memcopy failed (%d).", res);
                 }
-        
+
         *len = 0;
     }
     if (*flag & FLAG_UP_CASE) {
@@ -515,10 +525,10 @@ object find_replace_pcre(object x )
         int ovector[30], out_len = 0;
         pcre *re;
         char *str, *rep, *out = 0;
-        
+
         s1_ptr sub;
         s1_ptr rep_s;
-        
+
         object pcre_ptr;
         int options;
         int start_from;
