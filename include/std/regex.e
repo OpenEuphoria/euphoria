@@ -789,7 +789,7 @@ end function
 --   </eucode>
 --
 
-public function find_all2(regex re, string haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
+public function find_all(regex re, string haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
         if sequence(options) then options = or_all(options) end if
         if size < 0 then
             size = 0
@@ -810,25 +810,6 @@ public function find_all2(regex re, string haystack, integer from=1, option_spec
         end while
 
         free(pHaystack)
-
-        return results
-end function
-
-public function find_all(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
-
-        object result
-        sequence results = {}
-        while sequence(result) with entry do
-                results = append(results, result)
-                from = max(result) + 1
-
-                if from > length(haystack) then
-                        exit
-                end if
-        entry
-                result = find(re, haystack, from, options)
-        end while
 
         return results
 end function
