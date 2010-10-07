@@ -3716,6 +3716,9 @@ procedure SubProg(integer prog_type, integer scope)
 	
 	LeaveTopLevel()
 	prog_name = next_token()
+	if prog_name[T_ID] = END_OF_FILE then
+		CompileErr( 32 )
+	end if
 	type_enum = prog_type = TYPE_DECL and equal(sym_name(prog_name[T_SYM]),"enum")
 	if type_enum then
 		sequence symbols, seq_symbol
