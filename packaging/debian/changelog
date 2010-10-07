@@ -1,6 +1,6 @@
-euphoria (4.0.beta.4-1ubuntu1) unstable; urgency=low
+euphoria (4.0.beta.4) unstable; urgency=low
 
   * Initial release
 
- -- Matt Lewis <matthewwalkerlewis@gmail.com>  Thu, 19 Jun 2008 21:28:05 -0500
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Thu, 19 Jun 2008 21:28:05 -0500
 

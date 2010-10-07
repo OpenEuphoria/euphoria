@@ -209,7 +209,9 @@ touch nothing.ex
 # the device file /dev/null. [works on Mingw too.]
 if [ "x$EUBIN" = "x" ]; then
 	if eui nothing.ex 2> /dev/null; then
-		export EUPHORIA=1
+		if [ "x$EUPHORIA" = "x" ]; then
+			export EUPHORIA=1
+		fi
 	else
 		export EUPHORIA=0
 	fi

@@ -1,7 +1,7 @@
 Source: euphoria
 Section: interpreters
 Priority: extra
-Maintainer: Matt Lewis <matthewwalkerlewis@gmail.com>
+Maintainer: Matt Lewis <mattlewis@openeuphoria.org>
 Build-Depends: libc6-dev (>= 2.6.1 ), linux-libc-dev (>= 2.6.22-14.47 )
 Standards-Version: 3.8.4
 
