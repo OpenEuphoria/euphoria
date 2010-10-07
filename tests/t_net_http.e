@@ -16,10 +16,9 @@ ifdef not NOINET_TESTS then
 	test_true("get_url 6", match("<TITLE>Example Web Page</TITLE>", "" & content[2]))
 
     sequence data = sprintf("%d", { rand_range(1000,10000) })
-
-    content = get_url("http://openeuphoria.org/tests/post_test.cgi", "data=" & data)
-	if length(content)>1 and sequence(content[2]) and
-		match("oe.cowgar.com", content[2]) then
+	data = "data=" & data
+    content = get_url("http://test.openeuphoria.org/post_test.ex", data)
+	if length(content)>1 and sequence(content[2]) then
 		-- main EUPHORIA site still down
 		-- let's not report misleading results.
 		test_report()
@@ -29,7 +28,7 @@ ifdef not NOINET_TESTS then
 	test_equal("get_url post 2", "success", content[2])
 	
 	set_sendheader("Cache-Control", "no-cache" )
-    content = get_url("http://openeuphoria.org/tests/post_test.txt")
+    content = get_url("http://test.openeuphoria.org/post_test.txt")
 	test_true("get_url post 3", length(content))
 	test_equal("get_url post 4", data, content[2])
 	
