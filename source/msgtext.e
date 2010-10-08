@@ -38,7 +38,7 @@ constant StdErrMsgs = {
 	{ 22, "a fallthru must be inside a switch"},
 	{ 23, "A namespace qualifier is needed to resolve '[1]'\nbecause '[2]' is declared as a global/public symbol in:\n[3]"},
 	{ 24, "a variable name is expected here"},
-	{ 25, "[1] is a reserved word and cannot be used as an identifier name"},
+	{ 25, "found ... [1] ... but was expecting an identifier name"},
 	{ 26, "Argument [1] of [2] ([3]) was omitted, but there is no default value defined"},
 	{ 27, "An unknown 'with/without' option has been specified"},
 	{ 28, "a loop variable name is expected here"},
@@ -357,6 +357,7 @@ constant StdErrMsgs = {
 	{341, "Expecting exactly four hexadecimal digits to follow the '\\u'"},
 	{342, "Expecting exactly eight hexadecimal digits to follow the '\\U'"},
 	{343, "Expecting only '0', '1' or space to follow the '\\b'"},
+	{344, "A numeric literal was expected"},
 	$
 }
 

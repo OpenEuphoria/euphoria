@@ -3159,8 +3159,10 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 	object tsym
 	object prevtok = 0
 	symtab_index sym, valsym
-	integer h, val, count = 0
-	val = 1
+	integer h, count = 0
+	atom val = 1, usedval
+	integer deltafunc = '+'
+	atom delta = 1
 	
 	new_symbols = {}
 	integer is_fwd_ref = 0
@@ -3170,19 +3172,70 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 		type_ptr = -new_forward_reference( TYPE, type_ptr )
 	end if
 	
-	sequence ptok = next_token()
-	if ptok[T_ID] = TYPE_DECL then
-		if type_ptr = -1 then
+	if type_ptr = -1 then
+		-- special enum processing
+		sequence ptok = next_token()
+		if ptok[T_ID] = TYPE_DECL then
+			-- Handle 'auto' type defn for this enum.
+			-- syntax form is "enum type TYPENAME ENUMID, ENUMID, ..., ENUMID end type"
 			putback(keyfind("enum",-1))
 			SubProg(TYPE_DECL, scope)
 			return {}
-		else
-			CompileErr( 330 )
-		end if
-	else
-		putback(ptok)
-	end if
+		elsif ptok[T_ID] = BY then
 
+			integer negate = 0
+			ptok = next_token()
+			switch ptok[T_ID] do
+				case MULTIPLY then
+					deltafunc = '*'
+					ptok = next_token()
+					
+				case DIVIDE then
+					deltafunc = '/'
+					ptok = next_token()
+					
+				case MINUS then
+					deltafunc = '-'
+					ptok = next_token()
+					
+				case PLUS then
+					deltafunc = '+'
+					ptok = next_token()
+					
+				case else
+					deltafunc = '+'
+					
+			end switch
+			
+			if ptok[T_ID] = MINUS then
+				negate = 1
+				ptok = next_token()
+			end if
+			if ptok[T_ID] != ATOM then
+				CompileErr( 344 )
+			end if
+			
+			delta = SymTab[ptok[T_SYM]][S_OBJ]
+			if negate then
+				delta = -delta
+			end if
+			
+			switch deltafunc do
+				case '/' then
+					delta = 1 / delta
+					deltafunc = '*'
+					
+				case '-' then
+					delta = -delta
+					deltafunc = '+'
+					
+			end switch
+			
+		else
+			putback(ptok)
+		end if
+	end if
+	
 	valsym = 0	
 	while TRUE do
 		tok = next_token()
@@ -3195,9 +3248,12 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 				end if
 			end if
 		end if
+		if tok[T_ID] = END_OF_FILE then
+			CompileErr( 32 )
+		end if
 		
 		if not find(tok[T_ID], ADDR_TOKS) then
-			CompileErr(25, {LexName(tok[T_ID])} )
+			CompileErr(25, {find_category(tok[T_ID])} )
 		end if
 		sym = tok[T_SYM]
 		new_symbols = append(new_symbols, sym)
@@ -3272,6 +3328,7 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 					negate = -1
 					tok = next_token()
 				end if
+
 				if tok[T_ID] = ATOM then
 					valsym = tok[T_SYM]
 				elsif tok[T_SYM] > 0 then
@@ -3300,16 +3357,34 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 						CompileErr(99)					
 				end if
 				valsym = tok[T_SYM]
-				if not integer( SymTab[valsym][S_OBJ] ) and tsym[S_SCOPE] != SC_UNDEFINED then
+				if not atom( SymTab[valsym][S_OBJ] ) and tsym[S_SCOPE] != SC_UNDEFINED then
 					CompileErr(84)
 				end if
 				val = SymTab[valsym][S_OBJ] * negate
-				Push(NewIntSym(val))
-				val += 1
+				if integer(val) then
+					Push(NewIntSym(val))
+				else
+					Push(NewDoubleSym(val))
+				end if
+				usedval = val
+				if deltafunc = '+' then
+					val += delta	
+				else
+					val *= delta
+				end if
 			else
 				putback(tok)
-				Push(NewIntSym(val))
-				val += 1
+				if integer(val) then
+					Push(NewIntSym(val))
+				else
+					Push(NewDoubleSym(val))
+				end if
+				usedval = val
+				if deltafunc = '+' then
+					val += delta	
+				else
+					val *= delta
+				end if
 				valsym = 0
 			end if
 			buckets[SymTab[sym][S_HASHVAL]] = sym
@@ -3328,24 +3403,24 @@ function Global_declaration(symtab_index type_ptr, integer scope)
 			if valsym and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				-- need to remember this for select/case statements
 				SymTab[sym][S_CODE] = valsym
-				SymTab[sym][S_OBJ]  = val - 1
+				SymTab[sym][S_OBJ]  = usedval
 				
 				if TRANSLATE then
 					-- Let the translator know about its value
 					SymTab[sym][S_GTYPE] = SymTab[valsym][S_GTYPE]
 					SymTab[sym][S_SEQ_ELEM] = SymTab[valsym][S_SEQ_ELEM]
-					SymTab[sym][S_OBJ_MIN] = val - 1
-					SymTab[sym][S_OBJ_MAX] = val - 1
+					SymTab[sym][S_OBJ_MIN] = usedval
+					SymTab[sym][S_OBJ_MAX] = usedval
 					SymTab[sym][S_SEQ_LEN] = SymTab[valsym][S_SEQ_LEN]
 				end if
 			else
-				SymTab[sym][S_OBJ] = val - 1
+				SymTab[sym][S_OBJ] = usedval
 				if TRANSLATE then
 					-- Let the translator know about its value
 					SymTab[sym][S_GTYPE] = TYPE_INTEGER
 					SymTab[sym][S_SEQ_ELEM] = 0
-					SymTab[sym][S_OBJ_MIN] = val - 1
-					SymTab[sym][S_OBJ_MAX] = val - 1
+					SymTab[sym][S_OBJ_MIN] = usedval
+					SymTab[sym][S_OBJ_MAX] = usedval
 					SymTab[sym][S_SEQ_LEN] = 0 --SymTab[valsym][S_SEQ_LEN]
 				end if
 			end if
@@ -3719,29 +3794,36 @@ procedure SubProg(integer prog_type, integer scope)
 	if prog_name[T_ID] = END_OF_FILE then
 		CompileErr( 32 )
 	end if
-	type_enum = prog_type = TYPE_DECL and equal(sym_name(prog_name[T_SYM]),"enum")
-	if type_enum then
-		sequence symbols, seq_symbol
-		prog_name = next_token()
-		symbols = Global_declaration(-1, scope)
-		seq_symbol = symbols
-		for i = 1 to length(symbols) do
-			seq_symbol[i] = sym_obj(symbols[i])
-		end for
-		-- boot strap in a type routine
-		-- so that anything falling in the
-		-- range of the enum is accepted
-		-- as valid.
-		i1_sym = keyfind("i1",-1)
-		seq_sym = NewStringSym(seq_symbol)
-		putback(keyfind("return",-1))
-		putback({RIGHT_ROUND,0})
-		putback(i1_sym)
-		putback(keyfind("object",-1))
-		putback({LEFT_ROUND,0})
+	type_enum =  0
+	if prog_type = TYPE_DECL then
+		object tsym = prog_name[T_SYM]
+		if equal(sym_name(prog_name[T_SYM]),"enum") then
+			type_enum = 1
+			sequence symbols, seq_symbol
+			prog_name = next_token()
+			if not find(prog_name[T_ID], ADDR_TOKS) then
+				CompileErr(25, {find_category(prog_name[T_ID])} )
+			end if
+			symbols = Global_declaration(-1, scope)
+			seq_symbol = symbols
+			for i = 1 to length(symbols) do
+				seq_symbol[i] = sym_obj(symbols[i])
+			end for
+			-- boot strap in a type routine
+			-- so that anything falling in the
+			-- range of the enum is accepted
+			-- as valid.
+			i1_sym = keyfind("i1",-1)
+			seq_sym = NewStringSym(seq_symbol)
+			putback(keyfind("return",-1))
+			putback({RIGHT_ROUND,0})
+			putback(i1_sym)
+			putback(keyfind("object",-1))
+			putback({LEFT_ROUND,0})
+		end if
 	end if
 	if not find(prog_name[T_ID], ADDR_TOKS) then
-		CompileErr(25, {LexName(prog_name[T_ID])} )
+		CompileErr(25, {find_category(prog_name[T_ID])} )
 	end if
 	p = prog_name[T_SYM]
 	DefinedYet(p)

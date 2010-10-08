@@ -154,4 +154,12 @@ test_equal("utf32 strings - multiline", {0xAB,0x0D,0x0F012EF3}, U"
                                                                    D 
                                                                    F0__12Ef3
                                                                      ")
+                                                                     
+
+enum type colors by * 2.3 BLUE, BLACK, WHITE=13, RED, GREEN, CYAN=94.3 end type
+constant colors_name = {"blue", "black", "white", "red", "green"}
+
+test_equal("enum values", {1, 2.3, 13, 29.9, 68.77, 94.3}, {BLUE, BLACK, WHITE, RED, GREEN, CYAN})
+test_equal("enum type func", "green", colors_name[colors(GREEN)])
+
 test_report()

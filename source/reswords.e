@@ -339,7 +339,10 @@ enum -- token category name id
 	TC_FUNC,
 	TC_TYPE,
 	TC_OPER,
-	TC_NAMESPACE
+	TC_NAMESPACE,
+	TC_LITERAL,
+	$
+	
 export constant token_catname = {
 	"illegal character",
 	"end of file",
@@ -350,7 +353,9 @@ export constant token_catname = {
 	"function",
 	"type",
 	"operation",
-	"namespace"
+	"namespace",
+	"literal",
+	$
 	}
 export constant token_category = {
 	{ILLEGAL_CHAR, TC_ILLCHAR},
@@ -423,7 +428,10 @@ export constant token_category = {
 	{PROC, TC_PROC},
 	{PROCEDURE, TC_PROC},
 	{TYPE, TC_TYPE},
-	{NAMESPACE, TC_NAMESPACE}
+	{NAMESPACE, TC_NAMESPACE},
+	{STRING, TC_LITERAL},
+	{ATOM, TC_LITERAL},
+	$
 
 }
 
