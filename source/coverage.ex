@@ -36,16 +36,21 @@ procedure create_header( sequence builddir )
 			sequence lines = read_lines( builddir & '/' & c_files[i][D_NAME] )
 			
 			for j = 1 to length( lines ) do
-				if regex:has_match( filenum, lines[j] ) then
+				--if regex:has_match( filenum, lines[j] ) then
+				if match( "cover_line", lines[j] ) and match( "void _", lines[j] ) = 1 then
 					found_line = 1
-					sequence m = regex:all_matches( filenum, lines[j] )
+					integer matched = match( "cover_line", lines[j] )
+
+					--sequence m = regex:all_matches( filenum, lines[j] )
+					sequence m = lines[j][length("void _")..matched-1]
 					atom out = open( builddir & "/back/coverage.h", "w", 1 )
 					if out = -1 then
 						printf(2, "Error opening target file: %s/back/coverage.h\n", { builddir }) 
 						abort(1)
 					end if
-					writefln( out, H_FILE, m[1][2] )
-					printf(1, "done\n", {})
+					--writefln( out, H_FILE, m[1][2] )
+					writefln( out, H_FILE, m )
+					printf(1, "done\n", {m})
 					exit "i_loop"
 				end if
 			end for
