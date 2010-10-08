@@ -134,8 +134,9 @@ BUILD_DIRS = intobj/ \
 	libobj/back/
 
 euphoria-$(EU_VERSION)-$(DEBIAN_VERSION) : update
-	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage
-# 	cd $(DEB_SOURCE_DIR) && fakeroot debian/rules binary
+	echo TARGET: $@
+	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage -nc -S
+	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage -nc -b
 
 binclean :
 	for d in $(BUILD_DIRS); \
@@ -198,10 +199,13 @@ update :
 	-rm $(DEB_SOURCE_DIR)/*stamp
 	-cp euphoria-manual $(DEB_SOURCE_DIR)/debian
 	-echo 7 > $(DEB_SOURCE_DIR)/debian/compat
+	cd $(DEB_SOURCE_DIR)/source && ./configure --prefix /usr $(CONFIG)
+	echo TARGET: UPDATE - MAKING SOURCE
+	$(MAKE) -C $(DEB_SOURCE_DIR)/source source
 	
 
 dh-make : update
-	@cd $(DEB_SOURCE_DIR) && dh_make -e matthewwalkerlewis@gmail.com --createorig
+	@cd $(DEB_SOURCE_DIR) && dh_make -e mattlewis@openeuphoria.org --createorig
 	@-rm $(DEB_SOURCE_DIR)/debian/emacsen*
 	@cp rules $(DEB_SOURCE_DIR)/debian CONFIG="$(CONFIG)"
 	@cp postinst $(DEB_SOURCE_DIR)/debian;
