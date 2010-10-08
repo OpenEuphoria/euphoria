@@ -420,8 +420,9 @@ function find_file(sequence fname)
 	end if
 
 	-- next try main_path
-	if not equal(main_path, currdir) then
-		full_path = main_path & new_include_name
+	sequence mainpath = main_path[1..rfind(SLASH, main_path)]
+	if not equal(mainpath, currdir) then
+		full_path = mainpath & new_include_name
 		if file_exists(full_path) then
 			return full_path
 		end if
