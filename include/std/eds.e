@@ -1163,6 +1163,7 @@ public function db_select(sequence path, integer lock_method = -1)
 		path &= ".edb"
 	end if
 
+	path = canonical_path(path)
 	index = eu:find(path, db_names)
 	if index = 0 then
 		if lock_method = -1 then
