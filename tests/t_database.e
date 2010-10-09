@@ -194,6 +194,7 @@ procedure test_db_select()
 	
 	ok = delete_file( the_db )
 	ok = db_create( the_db )
+	ok = db_select( the_db )
 	ok = db_create_table( "TABLEDEF" )
 	ok = db_insert( "MY_DATA", "original data" )
 	
@@ -222,6 +223,7 @@ procedure test_db_select()
 	
 	ok = delete_file( the_db )		
 	ok = db_create( the_db )
+	ok = db_select( the_db )
 	ok = db_create_table( "TABLEDEF" )
 	ok = db_insert( "MY_DATA", "original data" )
 	
@@ -245,7 +247,6 @@ procedure test_db_select()
 	-- Close the database before deleting it.
 	db_close()
 	ok = delete_file( the_db )
-	
 end procedure
 test_db_select()
 
