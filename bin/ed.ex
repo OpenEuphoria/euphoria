@@ -2374,6 +2374,13 @@ procedure ed(sequence command)
 	
 	if multi_color then
 		init_class()
+		set_colors({
+				{"NORMAL", NORMAL_COLOR},
+				{"COMMENT", COMMENT_COLOR},
+				{"KEYWORD", KEYWORD_COLOR},
+				{"BUILTIN", BUILTIN_COLOR},
+				{"STRING", STRING_COLOR},
+				{"BRACKET", BRACKET_COLOR}})	
 	end if
 
 	file_name = file_name[1..length(file_name)-1] -- remove ' '
