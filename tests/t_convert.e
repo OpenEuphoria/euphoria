@@ -98,6 +98,14 @@ test_equal( "to_integer #7", 0,  to_integer({"12"}))
 test_equal( "to_integer #8", 1073741823,  to_integer(#3FFFFFFF))
 test_equal( "to_integer #9", 0,  to_integer(#3FFFFFFF + 1))
 
+test_equal( "to_string #1", `12` , to_string(12))
+test_equal( "to_string #2", `abc` , to_string("abc"))
+test_equal( "to_string #3", `"abc"` , to_string("abc",'"'))
+test_equal( "to_string #4", `"abc\\\""` , to_string(`abc\"`,'"'))
+test_equal( "to_string #5", `{12, "abc", {4.5, -99}}` , to_string({12,"abc",{4.5, -99}}))
+test_equal( "to_string #6", `{12, abc, {4.5, -99}}` , to_string({12,"abc",{4.5, -99}},,0))
+test_equal( "to_string #7", `12.34567` , to_string(12.34567))
+test_equal( "to_string #8", `1234567891234` , to_string(1_234_567_891_234))
 
 test_report()
 

@@ -5,7 +5,9 @@
 -- <<LEVELTOC depth=2>>
 --
 namespace convert
-
+include std/types.e
+include std/sequence.e
+include std/text.e
 constant
 	M_A_TO_F64 = 46,
 	M_F64_TO_A = 47,
@@ -543,6 +545,7 @@ end function
 -- Examples:
 -- <eucode>
 --     object val
+--     val = to_number("12.34")  ---> 12.34 -- No errors and no error return needed.
 --     val = to_number("12.34", 1)  ---> {12.34, 0} -- No errors.
 --     val = to_number("12.34", -1)  ---> 12.34 -- No errors.
 --     val = to_number("12.34a", 1) ---> {12.34, 6} -- Error at position 6
@@ -794,5 +797,73 @@ public function to_integer(object data_in, integer def_value = 0)
 		return floor(lResult[1])
 	end if
 
+end function
+
+--**
+-- Converts an object into a text string.
+--
+-- Parameters:
+-- # ##data_in## : Any Euphoria object.
+-- # ##string_quote## : An integer. If not zero (the default) this will be used to
+--   enclose ##data_in##, if it is already a string. 
+-- # ##embed_string_quote## : An integer. This will be used to
+--   enclose any strings embedded inside ##data_in##. The default is '"'
+--
+-- Returns:
+-- A **sequence**. This is the string repesentation of data_in.
+--
+-- Comments:
+-- * The returned value is guaranteed to be a displayable text string.
+-- * ##string_quote## is only used if ##data_in## is already a string. In this case,
+--   all occurances of ##string_quote## already in ##data_in## are prefixed with
+--   the '\' escape character, as are any preexisting escape characters. Then 
+--   ##string_quote## is added to both ends of ##data_in##, resulting in a quoted
+--   string.
+-- * ##embed_string_quote## is only used if ##data_in## is a sequence that contains
+--   strings. In this case, it is used as the enclosing quote for embedded strings.
+--
+-- Examples:
+-- <eucode>
+-- ? to_string(12)       --> 12
+-- ? to_string("abc")       --> abc
+-- ? to_string("abc",'"')       --> "abc"
+-- ? to_string(`abc\"`,'"')       --> "abc\\\""
+-- ? to_string({12,"abc",{4.5, -99}})       --> {12, "abc", {4.5, -99}}
+-- ? to_string({12,"abc",{4.5, -99}},,0)       --> {12, abc, {4.5, -99}}
+-- </eucode>
+
+public function to_string(object data_in, integer string_quote = 0, integer embed_string_quote = '"')
+	sequence data_out
+	
+	if string(data_in) then
+		if string_quote = 0 then
+			return data_in
+		end if
+		data_in = replace_all(data_in, `\`, `\\`)
+		data_in = replace_all(data_in, string_quote, `\` & string_quote)
+		return string_quote & data_in & string_quote
+	end if
+	
+	if atom(data_in) then
+		if integer(data_in) then
+			return sprintf("%d", data_in)
+		end if
+		data_in = trim_tail(sprintf("%.15f", data_in), '0')
+		if data_in[$] = '.' then
+			data_in = remove(data_in, length(data_in))
+		end if
+		return data_in
+	end if
+	
+	data_out = "{"
+	for i = 1 to length(data_in) do
+		data_out &= to_string(data_in[i], embed_string_quote)
+		if i != length(data_in) then
+			data_out &= ", "
+		end if
+	end for
+	data_out &= '}'
+	
+	return data_out
 end function
 
