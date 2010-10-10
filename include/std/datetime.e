@@ -973,6 +973,9 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 					epos += 1
 				end while
 				
+				if spos > length(val) then
+					return -1
+				end if
 				got = value(val[spos .. epos-1], , GET_LONG_ANSWER)
 				if got[1] != GET_SUCCESS then
 					return -1
