@@ -258,7 +258,7 @@ test_equal("vslice 6", {1,6,3}, vslice({{5,1}, {5}, {5,3}}, 2, {6}))
 test_equal("vslice 7", {1,6,6}, vslice({{5,1}, {5}, {9}}, 2, {6}))
 test_equal("vslice 8", {1,6,4}, vslice({{5,1}, {5}, {9}}, 2, {6,4}))
 test_equal("vslice 9", {6},     vslice({0}, 2, {6,4}))
-test_equal("vslice 10",{6},     vslice(0, 2, {6,4}))
+
 
 test_equal("binop_ok #1",  0, binop_ok({{1,2},{3,4}}, {5,6,7}))
 test_equal("binop_ok #2",  0, binop_ok({{1,2},{3,4}}, {5,{6,7,8}}))
