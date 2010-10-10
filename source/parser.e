@@ -295,6 +295,9 @@ procedure InitCheck(symtab_index sym, integer ref)
 			-- else we know that it must be initialized at this point
 		end if
 		-- else ignore parameters, already initialized global/locals
+	elsif ref and sym > 0 and sym_mode( sym ) = M_CONSTANT and equal( NOVALUE, sym_obj( sym ) ) then
+		emit_op( GLOBAL_INIT_CHECK )
+		emit_addr(sym)
 	end if
 	-- else .. ignore loop vars, constants
 end procedure

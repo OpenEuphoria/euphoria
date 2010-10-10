@@ -344,7 +344,7 @@ endif
 clobber : distclean
 	-rm -fr $(BUILDDIR)
 
-.PHONY : clean distclean clobber all htmldoc
+.PHONY : clean distclean clobber all htmldoc manual
 
 library : builddirs
 	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -483,6 +483,13 @@ endif
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
 	cd ../docs/ && $(EUDOC)  -v -a manual.af -o $(BUILDDIR)/euphoria.txt
+
+$(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
+	-mkdir -p $(BUILDDIR)/docs/images
+	-mkdir -p $(BUILDDIR)/docs/js
+	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=template.html -o$(BUILDDIR)/docs $(BUILDDIR)/euphoria.txt
+
+manual : $(BUILDDIR)/docs/index.html
 
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images

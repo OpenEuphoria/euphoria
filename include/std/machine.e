@@ -2,20 +2,17 @@
 --
 namespace machine
 
-include std/dll.e
-include std/error.e
 public include std/memconst.e
-include std/types.e
 
 ifdef SAFE then
-
 	public include std/safe.e as memory
-
 elsedef
-
 	public include std/memory.e as memory
-
 end ifdef
+
+include std/dll.e
+include std/error.e
+include std/types.e
 
 integer FREE_ARRAY_RID
 
@@ -76,7 +73,7 @@ public function allocate(positive_int n, boolean cleanup = 0)
 		eaddr = machine:allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
 	elsedef	
 		iaddr = eu:machine_func(M_ALLOC, n+BORDER_SPACE*2)
-		eaddr = prepare_block(iaddr, n, PAGE_READ_WRITE )
+		eaddr = prepare_block( iaddr, n, PAGE_READ_WRITE )
 	end ifdef
 	if cleanup then
 		eaddr = delete_routine( eaddr, FREE_RID )

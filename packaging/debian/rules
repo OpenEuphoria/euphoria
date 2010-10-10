@@ -19,8 +19,6 @@ export DH_OPTIONS
 
 include ../Makefile.eu
 
-CFLAGS = -Wall -g
-
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
