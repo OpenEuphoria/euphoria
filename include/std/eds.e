@@ -17,6 +17,7 @@ include std/sequence.e
 include std/datetime.e
 include std/text.e
 include std/math.e
+include std/types.e
 
 --****
 -- === Database File Format
@@ -88,7 +89,7 @@ include std/math.e
 --****
 -- === Error Status Constants
 
-public constant
+public enum
 	--** Database is OK, not error has occurred.
 	DB_OK = 0,
 	--** The database could not be opened.
@@ -98,7 +99,8 @@ public constant
 	--** A lock could not be gained on the database.
 	DB_LOCK_FAIL = -3,
 	--** A fatal error has occurred.
-	DB_FATAL_FAIL = -404
+	DB_FATAL_FAIL = -404,
+	$
 
 --****
 -- === Lock Type Constants
@@ -106,12 +108,16 @@ public constant
 public enum
 	--** Do not lock the file.
 	DB_LOCK_NO = 0,
+	
 	--** Open the database with read-only access but allow others to update it.
 	DB_LOCK_SHARED,
+	
 	--** Open the database with read and write access.
 	DB_LOCK_EXCLUSIVE,
-	--** Open the database with read-only acces and ignore others updating it
+	
+	--** Open the database with read-only access and ignore others updating it
 	DB_LOCK_READ_ONLY,
+	
 	$
 
 --****
@@ -137,7 +143,7 @@ public enum
 	--** bad file
 	BAD_FILE,
 	$
-	
+
 constant DB_MAGIC = 77
 constant DB_MAJOR = 4, DB_MINOR = 0   -- database created with Euphoria v4.0
 constant SIZEOF_TABLE_HEADER = 16
@@ -145,11 +151,26 @@ constant TABLE_HEADERS = 3, FREE_COUNT = 7, FREE_LIST = 11 --, SIZEOF_DATABASE_H
 
 
 -- initial sizes for various things:
-constant INIT_FREE = 5,
-		 INIT_TABLES = 5,
-		 INIT_INDEX = 10,
-		 INIT_RECORDS = 50
+constant DEF_INIT_FREE = 5,
+		 DEF_INIT_TABLES = 5,
+		 MAX_INDEX = 10,
+		 DEF_INIT_RECORDS = 50
 
+-- 
+--****
+-- === Indexes for connection option structure.
+
+public enum 
+	--** Locking method
+	CONNECT_LOCK,
+	
+	--** Initial number of tables to create
+	CONNECT_TABLES,
+	
+	--** Initial number of free pointers to create
+	CONNECT_FREE,
+	$
+	
 constant TRUE = 1
 
 integer  current_db = -1
@@ -163,6 +184,30 @@ sequence key_pointers = {}
 sequence key_cache = {}
 sequence cache_index = {}
 integer  caching_option = 1
+
+--****
+-- === Database connection options
+
+public constant
+	--** Disconnect a connected database
+	DISCONNECT   = "!disconnect!",
+	
+	--** Locking method to use
+	LOCK_METHOD  = "lock_method",
+	
+	--** The initial number of tables to reserve space for when creating a database.
+	INIT_TABLES  = "init_tables",
+	
+	--** The initial number of free space pointers to reserve space for when creating a database.
+	INIT_FREE    = "init_free",
+	
+	--** Fetch the details about the alias
+	CONNECTION   = "?connection?",
+	
+	$
+	
+sequence Known_Aliases = {}
+sequence Alias_Details = {}
 
 atom void
 	
@@ -886,6 +931,145 @@ end procedure
 -- === Managing databases
 
 --**
+-- Define a symbolic name for a database, and its default attributes.
+--
+-- Parameters:
+--		# ##dbalias## : a sequence. This is the symbolic name that the database can
+--                      be referred to by.
+--		# ##path## : a sequence, the path to the file that will contain the database.
+--      # ##dboptions##: a sequence. Contains the set of attributes for the database.
+--                      The default is {} meaning it will use the various EDS default values.
+--
+-- Returns:
+--		An **integer**, status code, either DB_OK if creation successful or anything else on an error.
+--
+-- Comments:
+--
+-- * This does not create or open a database. It only associates a symbolic name with
+--   a database path. This name can then be used in the calls to db_create(), db_open(),
+--   and db_select() instead of the physical database name.
+-- * If the path does not end in ".edb", it will be added automatically.
+-- * The ##dboptions## can contain any of the options detailed below. These can be
+-- given as a single string of the form ##"option=value, option=value, ..."## or as
+-- as sequence containing option-value pairs, ##{ {option,value}, {option,value}, ... }##
+-- //Note:// The options can be in any order.
+-- * The options are...
+-- ** ##LOCK_METHOD## : an integer specifying which type of access can be granted to the database.
+--                      This must be one of ##DB_LOCK_NO##, ##DB_LOCK_EXCLUSIVE##,
+--                      ##DB_LOCK_SHARDED## or ##DB_LOCK_READ_ONLY##.
+-- ** ##INIT_TABLES## : an integer giving the initial number of tables to
+--                         reserve space for. The default is 5 and the minimum is 1.
+-- ** ##INIT_FREE## : an integer giving the initial amount of free space pointers to
+--                         reserve space for. The default is 5 and the minimum is 0.
+-- * If a symbolic name has already been defined for a database, you can get it's 
+--   full path and options by calling this function with ##dboptions## set to CONNECTION.
+--   The returned value is a sequence of two elements. The first is the full path name
+--   and the second is a list of the option values. These options are indexed by
+--   ##[CONNECT_LOCK]##, ##[CONNECT_TABLES]##, and ##[CONNECT_FREE]##.
+-- * If a symbolic name has already been defined for a database, you remove the
+--   symbolic name by calling this function with ##dboptions## set to DISCONNECT.
+--
+-- Example 1:
+-- <eucode>
+-- db_connect("myDB", "/usr/data/myapp/customer.edb", {{LOCK_METHOD,DB_LOCK_NO}, {INIT_TABLES,1}})
+-- db_open("myDB")
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- db_connect("myDB", "/usr/data/myapp/customer.edb", sprintf("init_tables=1,lock_method=%d",DB_LOCK_NO))
+-- db_open("myDB")
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- db_connect("myDB", "/usr/data/myapp/customer.edb", sprintf("init_tables=1,lock_method=%d",DB_LOCK_NO))
+-- db_connect("myDB",,CONNECTION) --> {"/usr/data/myapp/customer.edb", {0,1,1}}
+-- db_connect("myDB",,DISCONNECT) -- The name 'myDB' is removed from EDS.
+-- </eucode>
+--
+-- See Also:
+-- 		[[:db_create]], [[:db_open]], [[:db_select]]
+
+public function db_connect(sequence dbalias, sequence path="", sequence dboptions = {})
+	integer lPos
+	sequence lOptions
+
+	-- See if I know about this one already.	
+	lPos = find(dbalias, Known_Aliases)
+	if lPos then
+		-- I do, so only disconnect and connection options are allowed.
+		if equal(dboptions, DISCONNECT) or find(DISCONNECT, dboptions) then
+			Known_Aliases = remove(Known_Aliases, lPos)
+			Alias_Details = remove(Alias_Details, lPos)
+			return DB_OK
+		end if
+		if equal(dboptions, CONNECTION) or find(CONNECTION, dboptions) then
+			return Alias_Details[lPos]
+		end if
+		return DB_OPEN_FAIL
+	else
+		-- I don't so disallow disconnect and connection options.
+		if equal(dboptions, DISCONNECT) or find(DISCONNECT, dboptions) or
+		   equal(dboptions, CONNECTION) or find(CONNECTION, dboptions) then
+			return DB_OPEN_FAIL
+		end if
+	end if
+
+	-- A path is mandatory at this point.	
+	if length(path) = 0 then
+		return DB_OPEN_FAIL
+	end if
+	
+	-- If the options are in a single string, convert it to a list of key-value pairs.
+	if string(dboptions) then
+		dboptions = keyvalues(dboptions)
+		for i = 1 to length(dboptions) do
+			if string(dboptions[i][2]) then
+				dboptions[i][2] = to_number(dboptions[i][2])
+			end if
+		end for
+	end if
+	
+	-- Assume default options for now.
+	lOptions = {DB_LOCK_NO, DEF_INIT_TABLES, DEF_INIT_TABLES}
+	
+	-- Extract the supplied values.
+	for i = 1 to length(dboptions) do
+		switch dboptions[i][1] do
+			case LOCK_METHOD then
+				lOptions[CONNECT_LOCK] = dboptions[i][2]
+				
+			case INIT_TABLES then
+				lOptions[CONNECT_TABLES] = dboptions[i][2]
+				
+			case INIT_FREE then
+				lOptions[CONNECT_FREE] = dboptions[i][2]
+				
+		end switch
+	end for
+	
+	-- Do some validation on the supplied values.
+	if lOptions[CONNECT_TABLES] < 1 then
+		lOptions[CONNECT_TABLES] = DEF_INIT_TABLES
+	end if
+	
+	lOptions[CONNECT_FREE] = min({lOptions[CONNECT_TABLES], MAX_INDEX})
+	
+	if lOptions[CONNECT_FREE] < 1 then
+		lOptions[CONNECT_FREE] = min({DEF_INIT_TABLES, MAX_INDEX})
+	end if
+	
+	-- Save the alias.
+	Known_Aliases = append(Known_Aliases, dbalias)
+	Alias_Details = append(Alias_Details, { canonical_path( defaultext(path, "edb") ) , lOptions})
+	
+	return DB_OK
+	
+end function
+
+
+--**
 -- Create a new database, given a file path and a lock method.
 --
 -- Parameters:
@@ -928,21 +1112,28 @@ end procedure
 -- See Also:
 -- 		[[:db_open]], [[:db_select]]
 
-public function db_create(sequence path, integer lock_method = DB_LOCK_NO, integer init_tables = INIT_TABLES, integer init_free = INIT_FREE )
+public function db_create(sequence path, integer lock_method = DB_LOCK_NO, integer init_tables = DEF_INIT_TABLES, integer init_free = DEF_INIT_FREE )
 	integer db
 
-	if init_tables < 1 then
-		init_tables = 1
-	end if
+	db = find(path, Known_Aliases)
+	if db then
+		-- Fetch parameters from connection details.
+		path = Alias_Details[db][1]
+		lock_method = Alias_Details[db][2][CONNECT_LOCK]
+		init_tables = Alias_Details[db][2][CONNECT_TABLES]
+		init_free = Alias_Details[db][2][CONNECT_FREE]
+	else		
+		path = canonical_path( defaultext(path, "edb") )
 	
-	if init_free < 0 then
-		init_free = 0
+		if init_tables < 1 then
+			init_tables = 1
+		end if
+		
+		if init_free < 0 then
+			init_free = 0
+		end if
 	end if
-	
-	if not eu:find('.', path) then
-		path &= ".edb"
-	end if
-	path = canonical_path(path)
+
 
 	-- see if it already exists
 	db = open(path, "rb")
@@ -1064,10 +1255,14 @@ end function
 public function db_open(sequence path, integer lock_method = DB_LOCK_NO)
 	integer db, magic
 
-	if not eu:find('.', path) then
-		path &= ".edb"
+	db = find(path, Known_Aliases)
+	if db then
+		-- Fetch parameters from connection details.
+		path = Alias_Details[db][1]
+		lock_method = Alias_Details[db][2][CONNECT_LOCK]
+	else		
+		path = canonical_path( defaultext(path, "edb") )
 	end if
-	path = canonical_path(path)
 
 	if lock_method = DB_LOCK_NO or
 	   lock_method = DB_LOCK_EXCLUSIVE then
@@ -1159,11 +1354,15 @@ end function
 public function db_select(sequence path, integer lock_method = -1)
 	integer index
 
-	if not eu:find('.', path) then
-		path &= ".edb"
+	index = find(path, Known_Aliases)
+	if index then
+		-- Fetch parameters from connection details.
+		path = Alias_Details[index][1]
+		lock_method = Alias_Details[index][2][CONNECT_LOCK]
+	else		
+		path = canonical_path( defaultext(path, "edb") )
 	end if
 
-	path = canonical_path(path)
 	index = eu:find(path, db_names)
 	if index = 0 then
 		if lock_method = -1 then
@@ -1374,7 +1573,7 @@ end function
 -- See Also:
 --   [[:db_select_table]], [[:db_table_list]]
 
-public function db_create_table(sequence name, integer init_records = INIT_RECORDS)
+public function db_create_table(sequence name, integer init_records = DEF_INIT_RECORDS)
 	atom name_ptr, nt, tables, newtables, table, records_ptr
 	atom size, newsize, index_ptr
 	sequence remaining
@@ -1388,7 +1587,7 @@ public function db_create_table(sequence name, integer init_records = INIT_RECOR
 	if init_records < 1 then
 		init_records = 1
 	end if
-	init_index = min({init_records, INIT_INDEX})
+	init_index = min({init_records, MAX_INDEX})
 	
 	-- increment number of tables
 	void = seek(current_db, TABLE_HEADERS)
@@ -1554,7 +1753,7 @@ end procedure
 -- See Also:
 --		[[:db_table_list]], [[:db_select_table]], [[:db_delete_table]]
 
-public procedure db_clear_table(sequence name, integer init_records = INIT_RECORDS)
+public procedure db_clear_table(sequence name, integer init_records = DEF_INIT_RECORDS)
 -- delete all of records in the table
 	atom table, nrecs, records_ptr, blocks
 	atom p, data_ptr, index_ptr
@@ -1569,7 +1768,7 @@ public procedure db_clear_table(sequence name, integer init_records = INIT_RECOR
 	if init_records < 1 then
 		init_records = 1
 	end if
-	init_index = min({init_records, INIT_INDEX})
+	init_index = min({init_records, MAX_INDEX})
 
 	void = seek(current_db, table + 4)
 	nrecs = get4()

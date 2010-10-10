@@ -12,7 +12,7 @@ sequence dbname = canonical_path("testunit.edb")
 test_equal("current db #1", "", db_current())
 test_equal("create db #1", DB_OK, db_create("testunit.edb", DB_LOCK_EXCLUSIVE))
 test_equal("current db #2", dbname, db_current())
-test_equal("create db #2", DB_EXISTS_ALREADY, db_create("testunit.edb", DB_LOCK_SHARED))
+test_equal("create db #2", DB_EXISTS_ALREADY, db_create("testunit", DB_LOCK_SHARED))
 test_equal("current db #3", dbname, db_current())
 db_close()
 test_equal("current db #4", "", db_current())
@@ -188,57 +188,66 @@ void = delete_file("testunit.t0")
 procedure test_db_select()
 	-- create some fresh databases:
 	sequence the_db = "the_db.edb"
+	sequence the_db_full = canonical_path(the_db)
+	sequence the_alias = "myDB"
+	
+	test_equal("connect 0 - no path", DB_OPEN_FAIL, db_connect(the_alias))
+	test_equal("connect 1 - using connection string style", DB_OK, db_connect(the_alias, the_db, "init_tables=3, init_free=-1"))
+	test_equal("connect 2", {the_db_full,{DB_LOCK_NO,3,3}}, db_connect(the_alias, , CONNECTION))
+	
+	test_equal("disconnect 1", DB_OK, db_connect(the_alias, , DISCONNECT))
+	test_equal("disconnect 2 - already disconnected", DB_OPEN_FAIL, db_connect(the_alias, "", DISCONNECT))
+	test_equal("connect 3 - not connected", DB_OPEN_FAIL, db_connect(the_alias, , CONNECTION))
+	
+	test_equal("connect 4 - using kv style", DB_OK, db_connect(the_alias, the_db, {{INIT_TABLES,3}, {INIT_FREE,-1}}))
+	test_equal("connect 5", {the_db_full,{DB_LOCK_NO,3,3}}, db_connect(the_alias,"", CONNECTION))
+	test_equal("connect 6 - already connected", DB_OPEN_FAIL, db_connect(the_alias, the_db, {{INIT_TABLES,3}, {INIT_FREE,-1}}))
 	
 	-- WITHOUT CACHING
-	object ok = db_set_caching(0)
+	db_set_caching(0)
 	
-	ok = delete_file( the_db )
-	ok = db_create( the_db )
-	ok = db_select( the_db )
-	ok = db_create_table( "TABLEDEF" )
-	ok = db_insert( "MY_DATA", "original data" )
+	delete_file( the_db_full )
+	test_equal("w/o caching - create", DB_OK,  db_create( the_alias ) )
+	db_select( the_db_full )
+	db_create_table( "TABLEDEF" )
+	db_insert( "MY_DATA", "original data" )
 	
 	object temp_data = "replacement data"
 	
 	-- delete TABLEDEF entry in the_db
-	ok = db_select( the_db )
-	ok = db_select_table( "TABLEDEF" )
-	ok = db_find_key( "MY_DATA" )
-	db_delete_record(ok)
-	ok = db_find_key( "MY_DATA" )
-	test_equal( "Found MY_DATA #1 w/o caching", -1, ok)
+	db_select( the_db )
+	db_select_table( "TABLEDEF" )
+	db_delete_record( db_find_key( "MY_DATA" ) )
+	test_equal( "Found MY_DATA #1 w/o caching", -1, db_find_key( "MY_DATA" ))
 	
 	-- insert new TABLEDEF entry into the_db
-	ok = db_select( the_db )
-	ok = db_select_table( "TABLEDEF" )
-	ok = db_insert( "MY_DATA", temp_data )
-	test_equal( "Found MY_DATA #2 w/o caching", 0, ok)
+	db_select( the_alias )
+	db_select_table( "TABLEDEF" )
+	test_equal( "Found MY_DATA #2 w/o caching", 0, db_insert( "MY_DATA", temp_data ))
 	
 	object the_data = db_record_data( db_find_key( "MY_DATA" ) )
 	test_equal( "w/o caching -> insert, delete, select db/table, insert, get", temp_data, the_data )
-	ok = delete_file( the_db )
+	delete_file( the_db )
 
 	-- WITH CACHING
-	ok = db_set_caching(1)
+	db_set_caching(1)
 	
-	ok = delete_file( the_db )		
-	ok = db_create( the_db )
-	ok = db_select( the_db )
-	ok = db_create_table( "TABLEDEF" )
-	ok = db_insert( "MY_DATA", "original data" )
+	delete_file( the_db )		
+	db_create( the_db )
+	db_create_table( "TABLEDEF" )
+	db_insert( "MY_DATA", "original data" )
 	
 	temp_data = "replacement data"
 	
 	-- delete TABLEDEF entry in the_db
-	ok = db_select( the_db )
-	ok = db_select_table( "TABLEDEF" )
-	ok = db_find_key( "MY_DATA" )
-	db_delete_record(ok)
+	db_select( the_db )
+	db_select_table( "TABLEDEF" )
+	db_delete_record( db_find_key( "MY_DATA" ) )
 	test_equal( "db_find_key( \"MY_DATA\" ) w/caching", -1, db_find_key( "MY_DATA" ))
 	
 	-- insert new TABLEDEF entry into the_db
-	ok = db_select( the_db )
-	ok = db_select_table( "TABLEDEF" )
+	db_select( the_db )
+	db_select_table( "TABLEDEF" )
 	test_equal( "db_insert( \"MY_DATA\", \"" & temp_data & "\" ) w/caching", 0, db_insert( "MY_DATA", temp_data ))
 	
 	the_data = db_record_data( db_find_key( "MY_DATA" ) )
@@ -246,7 +255,7 @@ procedure test_db_select()
 	
 	-- Close the database before deleting it.
 	db_close()
-	ok = delete_file( the_db )
+	delete_file( the_db )
 end procedure
 test_db_select()
 
