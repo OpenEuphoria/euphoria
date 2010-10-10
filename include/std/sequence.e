@@ -1359,8 +1359,8 @@ end function
 -- * If 0 (the default), program is aborted.
 -- * If a nonzero atom, the short vertical slice is returned.
 -- * Otherwise, elements of ##error_control## will be taken to make for any
---   missing element. A short vertical slice is returned if ##error_control## is
---   exhausted.
+--   missing element. The elements are selected from the first to the last, 
+--   as needed and this cycles again from the first.
 --
 -- Example 1:
 -- <eucode>
@@ -1375,38 +1375,41 @@ end function
 --   [[:slice]], [[:project]]
 
 public function vslice(sequence source, atom colno, object error_control=0)
-	sequence ret
 	integer substitutes, current_sub
 
 	if colno < 1 then
 		crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
 	end if
 
-	ret = source
 	if atom(error_control) then
 		substitutes =-(not error_control)
 	else
 		substitutes = length(error_control)
-		current_sub = 1
+		current_sub = 0
 	end if
 
 	for i = 1 to length(source) do
-		if colno >= 1+length(source[i]) then
-			if substitutes=-1 then
-				crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d", {i,colno})
-			elsif substitutes=0 then
-				return ret[1..i-1]
+		if colno > length(source[i]) then
+			if substitutes = -1 then
+				crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d", {i, colno})
+			elsif substitutes = 0 then
+				return source[1..i-1]
 			else
-				substitutes -= 1
-				ret[i] = error_control[current_sub]
 				current_sub += 1
+				if current_sub > length(error_control) then
+					current_sub = 1
+				end if
+				source[i] = error_control[current_sub]
+				
 			end if
 		else
-			ret[i] = source[i][colno]
+			if sequence(source[i]) then
+				source[i] = source[i][colno]
+			end if
 		end if
 	end for
 
-	return ret
+	return source
 end function
 
 --****
