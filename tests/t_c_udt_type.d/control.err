@@ -1,5 +1,5 @@
 t_c_udt_type.e:8
-<0330>:: Only enums may be declared as types
+<0025>:: found ... reserved word ... but was expecting an identifier name
 blah type foo
          ^
 
