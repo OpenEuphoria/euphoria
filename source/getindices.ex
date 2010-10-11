@@ -6,7 +6,6 @@ include std/map.e  as map
 include std/sequence.e as seq
 include std/console.e as con
 include std/io.e as io
-include std/search.e as search
 
 function extract_slices( sequence s, sequence indicies )
 	sequence out
@@ -17,38 +16,16 @@ function extract_slices( sequence s, sequence indicies )
 	return out
 end function
 
-enum
-	ENTIRE_MATCH = 1,
-	FILE_NAME,
-	BOOK_MARK,
-	NUMERIC_ID,
-	NAMED_ID = 7
-
-constant pattern_fragments = {
-	0,
-	`([a-z_0-9]+\.html)`, -- FILE_NAME
-	`(_\d+_[A-Za-z_0-9]+)`, -- BOOK_MARK
-	`((\d+)(\.\d+)+)`, -- NUMERIC_ID
-	0,
-	0,
-	`([a-zA-Z][^<]+)`, -- NAMED_ID
-	$
-}
-
-
 -- Example:
 -- <a href="eu400_0102.html#_5747_map_type">MAP_TYPE (Memory Management - Low-Level)</a>
---sequence id_pattern = re:new( `<a href="([a-z_0-9]+\.html)#(_\d+_[A-Za-z_0-9]+)">([a-xA-Z0-9_]+) \(([a-z_0-9A-Z -]+)\)`, EXTRA )
+sequence id_pattern = re:new( `<a href="([a-z_0-9]+\.html)#(_\d+_[A-Za-z_0-9]+)">([a-xA-Z0-9_]+) \(([a-z_0-9A-Z -]+)\)`, EXTRA )
 
-constant id_pattern = re:new( 
-	sprintf(`<a href="%s#%s">%s %s</a><br />`, 
-		{ pattern_fragments[FILE_NAME], 
-		  pattern_fragments[BOOK_MARK],
-		  pattern_fragments[NUMERIC_ID],
-		  pattern_fragments[NAMED_ID] 
-		} 
-	)
-)
+enum
+	ENTIRE_MATCH = 1,
+	FILE,
+	BOOKMARK,
+	CLEAN_ID,
+	CHAPTER
 
 sequence id, url, /*section,*/ chapter
 map:map dictionary
@@ -82,19 +59,15 @@ count = 0
 dictionary = map:new(3000)
 printf(jsfd,"index=new Array();\nchapter=new Array();",{})
 while sequence(line) do
-    integer dloc
     match_data = re:matches( id_pattern, line )
     if sequence(match_data) then
 		printf(jsfd,"// %s",{line})
-		id = match_data[NAMED_ID]	
-		url = match_data[FILE_NAME] & '#' &
-			match_data[BOOK_MARK]
-		chapter = match_data[NUMERIC_ID]
-		printf(jsfd,"chapter[\'%s\']=\"%s\";\n",{text:escape(chapter),text:escape(id)})
-		dloc = search:rfind('.',chapter)
-		if dloc = 0 then
-			dloc = length(chapter) + 1
-		end if
+		id = match_data[CLEAN_ID]	
+		url = match_data[FILE] & '#' &
+			match_data[BOOKMARK]
+		chapter = match_data[CHAPTER]
+		printf(jsfd,`chapter['%s']='%s';`,
+		{chapter,id})
 		if not eu:find(' ',id) then
 			if not map:has(dictionary,id) then
 				printf(jsfd,`index['%s'] = new Array();%s`, {id,"\n"} )
@@ -102,15 +75,13 @@ while sequence(line) do
 			else
 				map:put(dictionary,id,1,ADD)
 			end if
-			printf(jsfd,`
-________________________t = new Array();
+			printf(jsfd,
+			`t = new Array();
 			t.url = '%s';
 			t.chapter = '%s';
-			index["%s"][%d] = t;
-			
+			index['%s'][%d] = t;
 			`, 
-				{url, remove(chapter,dloc,length(chapter)), 
-					text:escape(id), map:get(dictionary,id), url } 
+				{url, chapter, id, map:get(dictionary,id), url } 
 			)
 			count += 1
 		end if
@@ -128,10 +99,4 @@ close(templfd)
 close(jsfd)
 
 printf(1, "Matched %d lines\n", { count } )
-if count = 0 then
-	puts( 1, "Someone has broken the javascript search engine.\n" )
-	puts( 1, "Please thank him with a boot to the head.\n" )
-end if
-abort(not count)
-
 
