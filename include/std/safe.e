@@ -52,11 +52,12 @@
 -- that you list below, or add dynamically via register_block().
 
 namespace safe
+public include std/memconst.e
 include std/error.e
 ifdef WINDOWS then
 	include std/win32/sounds.e
 end ifdef
-public include std/memconst.e
+
 ifdef DATA_EXECUTE then
 	public include std/machine.e as machine
 end ifdef
