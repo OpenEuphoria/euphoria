@@ -30,17 +30,19 @@
 	<div id="main">
 		<div id="main_inner" class="fluid">
 			<div id="docs">
-	<table border=0 padding=0 cellpadding=0>
-		<tr align="right">
+	<form method=get action="javascript:void(0)" onsubmit="search(srchval); return false;">
+	<table width="100%" border=0 padding=0 cellpadding=0>
+		<tr align="left">
 			<td>
-			<form method=get action="javascript:void(0)" onsubmit="search(srchval); return false;">
-			<b>routine</b> or <b>constant</b> name search
-			<tr><td><input type=text name=srchval value=""><input type=submit></td></tr>
-			</form>
-			</td>
+			<b>routine</b> or <b>constant</b> name search</td>
 		</tr>
-		<tr><span id="searchresults" name="searchresults"></span>
+		<tr>	
+			<td><input type=text name=srchval value=""><input type=submit></td>
+		</tr>
+		<tr>
+		<td><span id="searchresults" name="searchresults"></td></span>
 	</table>
+	</form>
 				{$nav.html}
 				<div class="body">
 					{body}
