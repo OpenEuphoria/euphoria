@@ -260,7 +260,7 @@ function returnf( integer pc )
 	if equal( inline_code[$], BADRETURNF ) then
 		if TRANSLATE then
 			inline_code[$] = NOP1
-		else
+		elsif SymTab[inline_sub][S_TOKEN] = PROC then
 			replace_code( {}, length(inline_code), length(inline_code) )
 		end if
 		
