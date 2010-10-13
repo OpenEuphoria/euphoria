@@ -6,7 +6,7 @@ namespace search
 -- == Searching
 -- **Page Contents**
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 
 include std/error.e
 include std/types.e

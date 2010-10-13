@@ -3,7 +3,7 @@
 --****
 -- == Euphoria Database (EDS)
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 namespace eds
 
 include std/error.e

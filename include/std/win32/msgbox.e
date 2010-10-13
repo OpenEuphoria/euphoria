@@ -3,7 +3,7 @@
 --****
 -- == Windows Message Box
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 namespace msgbox
 

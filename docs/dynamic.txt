@@ -1,4 +1,5 @@
 == Indirect routine calling
+:<<LEVELTOC level=2 depth=4>>
 
 Euphoria does not have function pointers. However, it enables you to call
 any routine, including some internal to the interpreter, in an indirect way, 

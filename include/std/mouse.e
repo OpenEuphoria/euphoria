@@ -5,7 +5,7 @@ namespace mouse
 --****
 -- == Mouse
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Requirements
 --

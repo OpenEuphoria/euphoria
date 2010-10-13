@@ -1,6 +1,5 @@
 == Ed - Euphoria Editor
-
-<<LEVELTOC depth=3>>
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 

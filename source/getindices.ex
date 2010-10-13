@@ -6,6 +6,8 @@ include std/map.e  as map
 include std/sequence.e as seq
 include std/console.e as con
 include std/io.e as io
+include std/filesys.e
+include std/sort.e
 
 function extract_slices( sequence s, sequence indicies )
 	sequence out
@@ -50,8 +52,22 @@ function open_or_die(sequence name, sequence mode )
    return fd
 end function
 
+
+function find_index( sequence path )
+	sequence files = sort( dir( cl[$-1] ) )
+	integer fn
+	for i = 1 to length( files ) do
+		if match( "Subject and Routine Index", read_file( path & files[i][D_NAME] ) ) then
+			return open_or_die( path & files[i][D_NAME], "r" )
+		end if
+	end for
+	printf(STDERR, "Could not locate the index in %s\n", { path })
+	abort(1)
+end function
+
 sequence cl = command_line()
-htmlfd = open_or_die(cl[$-1],"r")
+
+htmlfd = find_index( cl[$-1] )
 jsfd   = open_or_die(cl[$],"w")
 templfd = open_or_die(`../docs/search-template.js`,"r")
 line = gets(htmlfd)

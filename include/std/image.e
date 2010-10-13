@@ -9,7 +9,7 @@ include std/machine.e
 --****
 -- == Graphics - Image Routines
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
 constant BMPFILEHDRSIZE = 14

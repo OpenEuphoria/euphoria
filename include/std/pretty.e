@@ -3,7 +3,7 @@ namespace pretty
 --****
 -- == Pretty Printing
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
 -- pretty print variables

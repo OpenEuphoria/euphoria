@@ -3,7 +3,7 @@ namespace task
 --****
 -- == Multi-tasking
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === General Notes
 --

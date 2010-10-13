@@ -6,7 +6,7 @@ namespace map
 --****
 -- == Map (hash table)
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- A map is a special array, often called an associative array or dictionary,
 -- in which the index to the data can be any Euphoria object and not just

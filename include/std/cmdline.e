@@ -1,7 +1,7 @@
 --****
 -- == Command Line Handling
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 namespace cmdline
 
 include std/text.e

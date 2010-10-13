@@ -3,7 +3,7 @@
 --****
 -- == Console
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 namespace console
 
 include std/types.e

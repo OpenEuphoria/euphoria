@@ -1,4 +1,5 @@
 == Euphoria Trouble-Shooting Guide
+:<<LEVELTOC level=2 depth=4>>
 
 If you get stuck, here are some things you can do:
 

@@ -202,7 +202,7 @@ end function
 --****
 -- == Indirect Routine Calling
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === SAFE mode
 --

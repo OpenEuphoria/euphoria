@@ -5,7 +5,7 @@ namespace serialize
 --****
 -- == Serialization of Euphoria Objects
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 
 include std/convert.e
 include std/machine.e

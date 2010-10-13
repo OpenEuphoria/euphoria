@@ -1,4 +1,5 @@
 == Euphoria Database System (EDS)
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction  
 

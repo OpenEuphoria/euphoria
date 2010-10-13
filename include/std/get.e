@@ -8,7 +8,7 @@ include std/error.e
 --****
 -- == Input Routines
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 --
 

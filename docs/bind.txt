@@ -1,4 +1,5 @@
 == Binding and Shrouding
+:<<LEVELTOC level=2 depth=4>>
 
 === The Shroud Command
 

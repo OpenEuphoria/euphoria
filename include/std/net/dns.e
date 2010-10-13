@@ -3,7 +3,7 @@
 --
 -- Based on EuNet project, version 1.3.2 at SourceForge.
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
 namespace dns

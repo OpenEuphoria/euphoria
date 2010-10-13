@@ -3,7 +3,7 @@ namespace os
 --****
 -- == Operating System Helpers
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
 include std/sequence.e

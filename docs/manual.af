@@ -17,7 +17,7 @@
 
 ########
 := Euphoria Programming Language v4.0
-:<<LEVELTOC depth=2>>
+:<<LEVELTOC level=1 depth=4>>
 
 ../docs/welcome.txt
 ../docs/c.txt
@@ -26,15 +26,15 @@
 #TODO: other release notes
 
 ########
-:= Euphoria License
-:<<LEVELTOC depth=2>>
-
-:== Euphoria License 
+:<<LEVELTOC level=1 depth=3>>
+:== License
 :----
 ../License.txt <nowiki
 :----
 
+:<<LEVELTOC level=2 depth=4>>
 ../docs/credits.txt
+
 
 ########
 := Quick Start
@@ -44,20 +44,20 @@
 
 ########
 := Language Reference
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC depth=2>>
 
 ../docs/refman_2.txt
 
 ########
 := Formal Syntax
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../docs/syntax.txt
 ../docs/internals.txt
 
 ########
 := Mini-Guides
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../docs/debug.txt
 ../docs/bind.txt
@@ -72,7 +72,7 @@
 
 ########
 := Included Tools
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../docs/eutest.txt
 ../docs/eudoc.txt
@@ -81,7 +81,7 @@
 
 ########
 := General Routine Reference
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/cmdline.e
 ../include/std/console.e
@@ -102,7 +102,7 @@
 
 ########
 := Sequence Centric Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/convert.e
 ../include/std/get.e
@@ -113,7 +113,7 @@
 
 ########
 := String Centric Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/locale.e
 ../include/std/localeconv.e
@@ -125,7 +125,7 @@
 
 ########
 := Data Structures
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/eds.e
 ../include/std/primes.e
@@ -136,7 +136,7 @@
 
 ########
 := Networking Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/socket.e
 ../include/std/net/common.e
@@ -146,7 +146,7 @@
 
 ########
 := Low Level Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/dll.e
 ../include/std/error.e
@@ -159,7 +159,7 @@
 
 ########
 := Graphics
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/graphcst.e
 ../include/std/graphics.e
@@ -167,7 +167,7 @@
 
 ########
 := Euphoria Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/euphoria/info.e
 ../include/euphoria/keywords.e
@@ -177,14 +177,14 @@
 
 ########
 := Windows Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/win32/msgbox.e
 ../include/std/win32/sounds.e
 
 ########
 := Release Notes
-: <<LEVELTOC depth=2>>
+:<<LEVELTOC level=1 depth=2>>
 
 :@@(color <<font color="$(1)" text=`$(+)`>>)@
 :@@(bugfix **$$(color #009999 bug fixed:)**)@
@@ -195,3 +195,4 @@
 
 ########
 := Index
+:<<INDEX>>

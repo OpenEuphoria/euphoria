@@ -5,7 +5,7 @@ namespace stdseq
 --****
 -- == Sequence Manipulation
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 include std/error.e
 include std/search.e
 

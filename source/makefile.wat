@@ -668,15 +668,15 @@ $(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\ht
 $(BUILDDIR)\html\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\html\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\html\js\search.js : $(DOCDIR)\search-template.js $(TRUNKDIR)\source\getindices.ex $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js
-	$(EX) $(TRUNKDIR)\source\getindices.ex $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js 
+$(BUILDDIR)\html\js\search.js : $(DOCDIR)\search-template.js $(TRUNKDIR)\source\getindices.ex $(BUILDDIR)\html\ $(BUILDDIR)\html\js
+	$(EX) $(TRUNKDIR)\source\getindices.ex $(BUILDDIR)\html\ $(BUILDDIR)\html\js\search.js 
 	
-$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+$(BUILDDIR)\html\eu400_0001.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
-htmldoc : $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png $(BUILDDIR)\html\js\scriptaculous.js $(BUILDDIR)\html\js\prototype.js
+htmldoc : $(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png $(BUILDDIR)\html\js\scriptaculous.js $(BUILDDIR)\html\js\prototype.js
 
 $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
 	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "splitlevel = 2" "splitlevel = 0" &
@@ -684,11 +684,11 @@ $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
 		-e "LEVELTOC depth=2" "LEVELTOC depth=0"  $(BUILDDIR)\euphoria.txt > $(BUILDDIR)\euphoria-pdf.txt
 	
 
-$(BUILDDIR)\pdf\index.html : $(BUILDDIR)\euphoria-pdf.txt
+$(BUILDDIR)\pdf\eu400_0001.html : $(BUILDDIR)\euphoria-pdf.txt
 	-mkdir $(BUILDDIR)\pdf
 	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=offline-template.html -o$(BUILDDIR)\pdf -htmldoc $(BUILDDIR)\euphoria-pdf.txt
 
-$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\index.html
-	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\eu400_0001.html $(BUILDDIR)\pdf\index.html
+$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\eu400_0001.html
+	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\eu400_0001.html
 
 

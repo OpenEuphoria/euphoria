@@ -11,6 +11,7 @@ end ifdef
 public include std/types.e 
 public include common.e
 include mode.e as mode
+include reswords.e
 
 export constant
 	INTERPRET = mode:get_interpret(),
@@ -296,7 +297,7 @@ export type token(object t)
 	if not integer(t[T_ID]) then
 		return FALSE
 	end if
-	if symtab_index(t[T_SYM]) = 0 then
+	if t[T_ID] != IGNORED and symtab_index(t[T_SYM]) = 0 then
 		return FALSE
 	end if
 	return TRUE

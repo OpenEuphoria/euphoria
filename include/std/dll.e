@@ -2,7 +2,7 @@
 --****
 -- == Dynamic Linking to external code
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 namespace dll
 

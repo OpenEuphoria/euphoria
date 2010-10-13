@@ -1,4 +1,5 @@
 == Performance Tips
+:<<LEVELTOC level=2 depth=4>>
 
 === General Tips
 

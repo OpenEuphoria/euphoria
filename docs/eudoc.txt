@@ -1,7 +1,6 @@
 
 == EuDOC - Source Documentation Tool
-
-<<LEVELTOC depth=3>>
+:<<LEVELTOC level=2 depth=4>>
 
 Write your documentation, in the form of comments, within the 
 source-code of your program. Euphoria comments do not slow down the 

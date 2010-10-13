@@ -5,7 +5,7 @@ namespace sets
 --****
 -- == Sets
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- The sets.e module defines a type for sets and provides basic tools for handling them.
 --

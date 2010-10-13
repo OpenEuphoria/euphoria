@@ -1,5 +1,5 @@
 == Definition
-
+:<<LEVELTOC level=2 depth=4>>
 === Objects === @[predefined types]
 
 ==== Atoms and Sequences
@@ -421,6 +421,7 @@ Note that you can use the underscore character '_' inside the \b, \x, \u, and \U
 values to aid readability, e.g. "\U8123_FEDC" ==> {2166619868}
 
 === Identifiers
+:<<LEVELTOC level=2 depth=4>>
 An identifier is just the name you give something in your program. This can be
 a variable, constant, function, procedure, parameter, or namespace. An identifier
 must begin with either a letter or an underscore, then followed by zero or more
@@ -1119,7 +1120,7 @@ The equals symbol ##'='## used in an [[:assignment statement]] is not an operato
 it's just part of the syntax of the language.
 
 == Declarations
-
+:<<LEVELTOC level=2 depth=4>>
 === Identifiers
 
 **Identifiers**, which encompass all explicitly declared variable, constant
@@ -2209,7 +2210,7 @@ same name, Euphoria will not assume an override, and will choose the built-in. A
 be generated whenever this happens.
 
 == Assignment statement
-
+:<<LEVELTOC level=2 depth=4>>
 An **assignment statement** assigns the value of an expression to
 a simple variable, or to a subscript or slice of a variable. e.g.
 
@@ -2320,6 +2321,7 @@ You cannot use assignment with operators while declaring a variable, because tha
 not initialised when you perform the assignment.
 
 == Branching Statements
+:<<LEVELTOC level=2 depth=4>>
 @[then|] @[else|]
 
  @[elsif|]
@@ -2826,6 +2828,7 @@ end ifdef
 
 
 == Loop statements
+:<<LEVELTOC level=2 depth=4>>
 
 An iterative code block repeats its own execution zero, one or more times.
 There are several ways to specify for how long the process should go on, and
@@ -2994,6 +2997,7 @@ established only on entering the loop, and are not affected by anything that
 happens during the execution of the loop.
 
 == Flow control statements
+:<<LEVELTOC level=2 depth=4>>
 
 Program execution flow refers to the order in which program statements are run in.
 By default, the next statement to run after the current one is the next statement
@@ -3389,6 +3393,7 @@ while 1 with entry label "top" do -- CORRECT
 </eucode>
 
 == Short-Circuit Evaluation == @[short-circuit]
+:<<LEVELTOC level=2 depth=4>>
 
 When the condition tested by if, elsif, until, or while contains ##and## or ##or##
 operators, [[:short-circuit]] evaluation will be used.  For example,
@@ -3487,6 +3492,7 @@ if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
 == Special Top-Level Statements == @[special statements]
+:<<LEVELTOC level=2 depth=4>>
 
 Before any of your statements are executed, the Euphoria front-end quickly
 reads your entire program. All statements are syntax checked and converted to a

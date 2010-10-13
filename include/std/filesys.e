@@ -5,7 +5,7 @@
 --
 -- Cross platform file operations for Euphoria
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 namespace filesys
 
 include std/dll.e

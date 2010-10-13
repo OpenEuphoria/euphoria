@@ -1,4 +1,5 @@
 == Euphoria To C Translator
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
