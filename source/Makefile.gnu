@@ -507,9 +507,6 @@ $(BUILDDIR)/html/js/scriptaculous.js: $(DOCDIR)/scriptaculous.js  $(BUILDDIR)/ht
 $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 	copy $(DOCDIR)/prototype.js $^@
 
-$(BUILDDIR)/html/js/search.js : $(DOCDIR)/search-template.js $(TRUNKDIR)/source/getindices.ex $(BUILDDIR)/html/ $(BUILDDIR)/html/js
-	$(EXE) $(TRUNKDIR)/source/getindices.ex $(BUILDDIR)/html/ $(BUILDDIR)/html/js/search.js 
-
 htmldoc : $(BUILDDIR)/html/eu400_0001.html $(BUILDDIR)/html/js/search.js
 
 $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt

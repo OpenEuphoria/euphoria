@@ -668,9 +668,6 @@ $(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\ht
 $(BUILDDIR)\html\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\html\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\html\js\search.js : $(DOCDIR)\search-template.js $(TRUNKDIR)\source\getindices.ex $(BUILDDIR)\html\ $(BUILDDIR)\html\js
-	$(EX) $(TRUNKDIR)\source\getindices.ex $(BUILDDIR)\html\ $(BUILDDIR)\html\js\search.js 
-	
 $(BUILDDIR)\html\eu400_0001.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
