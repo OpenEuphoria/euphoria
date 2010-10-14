@@ -488,6 +488,7 @@ $(BUILDDIR)/docs/eu400_0001.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TR
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
 	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=template.html -o$(BUILDDIR)/docs $(BUILDDIR)/euphoria.txt
+	cp $(DOCDIR)/html/images/* $(BUILDDIR)/docs/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
 manual : $(BUILDDIR)/docs/eu400_0001.html
