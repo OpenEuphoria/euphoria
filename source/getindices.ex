@@ -20,7 +20,7 @@ end function
 
 -- Example:
 -- <a href="eu400_0102.html#_5747_map_type">MAP_TYPE (Memory Management - Low-Level)</a>
-sequence id_pattern = re:new( `<a href="([a-z_0-9]+\.html)#(_\d+_[A-Za-z_0-9]+)">([a-xA-Z0-9_]+) \(([a-z_0-9A-Z -]+)\)`, EXTRA )
+sequence id_pattern = re:new( `<a href="(.+\.html)#(.+)">([A-Za-z0-9_]+) \(([^']+)\)</a>`, EXTRA )
 
 enum
 	ENTIRE_MATCH = 1,

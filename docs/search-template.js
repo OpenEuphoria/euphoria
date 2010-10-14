@@ -21,18 +21,7 @@ function search(frm) {
 	    instance = index[search_value][i];
 	    list += '<li>';
 	    list += "<a href=" + instance.url + ">";
-	    up = instance.chapter.split('.');
-	    locations = chapter[instance.chapter] + '(' + instance.chapter + ')';
-	    while (up.length > 1 || loop_limit > 0) {
-		up = instance.chapter.split('.');
-		up.length = up.length-1;
-		instance.chapter = up.join('.');
-		loop_limit -= 1;
-		if (chapter[instance.chapter] != undefined) {
-		    locations = chapter[instance.chapter] + '(' + instance.chapter + ')' + '/ ' + locations;
-		}
-	    }
-	    list += locations;
+	    list += instance.chapter;
 	    list += ' : ' + search_value + "</a>";
 	    list += '</li>';
 	}
