@@ -1,5 +1,5 @@
 t_c_integer_type.e:4
-<0025>:: found ... reserved word ... but was expecting an identifier name
+<0025>:: a name is expected here
 integer type foo
             ^
 
