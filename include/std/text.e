@@ -235,6 +235,8 @@ end function
 -- -- s is "Sentence read from a file"
 -- s = trim("\r\nSentence read from a file\r\n", "\r\n", TRUE)
 -- -- s is {3,27}
+-- s = trim(" This is a sentence.\n")  -- Default is to trim off all " \t\r\n"
+-- -- s is "This is a sentence."
 -- </eucode>
 --
 -- See Also:
