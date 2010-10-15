@@ -141,7 +141,9 @@ end procedure
 
 sequence fwd_private_sym  = {}
 sequence fwd_private_name = {}
-export procedure add_private_symbol( symtab_index sym, sequence name )
+-- add a private symbol which could be a forward reference or an already
+-- known symbol.
+export procedure add_private_symbol( symtab_pointer sym, sequence name )
 	
 	fwd_private_sym &= sym
 	fwd_private_name = append( fwd_private_name, name )

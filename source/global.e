@@ -274,7 +274,7 @@ export type symtab_index(integer x)
 		return FALSE
 	end if
 	return find(length(SymTab[x]), {SIZEOF_VAR_ENTRY, SIZEOF_ROUTINE_ENTRY,
-						  SIZEOF_TEMP_ENTRY})
+						  SIZEOF_TEMP_ENTRY, SIZEOF_BLOCK_ENTRY})
 end type
 
 export type temp_index(integer x)
