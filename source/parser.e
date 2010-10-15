@@ -2078,6 +2078,9 @@ procedure If_statement()
 	short_circuit_B = FALSE
 	SC1_type = 0
 	Expr()
+	
+	sequence temps = get_temps()
+	
 	emit_op(IF)
 	prev_false = length(Code)+1
 	emit_forward_addr() -- to be patched
@@ -2094,14 +2097,14 @@ procedure If_statement()
 	end if
 	short_circuit -= 1
 	
-	sequence temps = pop_temps()
 	
-	push_temps( temps )
 	Statement_list()
 	tok = next_token()
 
 	while tok[T_ID] = ELSIF do
 		Sibling_block( IF )
+		
+		
 		emit_op(ELSE)
 		AppendEList(length(Code)+1)
 		break_delay &= 1
@@ -2119,10 +2122,10 @@ procedure If_statement()
 		short_circuit_B = FALSE
 		SC1_type = 0
 		
-		temps = pop_temps()
-		push_temps(temps)
+		push_temps( temps )
 		Expr()
 		
+		temps = get_temps( temps )
 		
 		emit_op(IF)
 		prev_false = length(Code)+1
@@ -2166,7 +2169,8 @@ procedure If_statement()
 			backpatch(prev_false2, length(Code)+1)
 		end if
 		
-		push_temps({{},{}})
+		push_temps( temps )
+		
 		if tok[T_ID] = ELSE then	
 			Statement_list()
 		else

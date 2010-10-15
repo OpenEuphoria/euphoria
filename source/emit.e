@@ -394,6 +394,17 @@ export function pop_temps()
 end function
 
 --**
+-- Returns a sequence containing maps holding the current knowledge
+-- about temps.  The optional parameter add_to will concatenate the
+-- data to a result from a previous call to get_temps() or pop_temps()
+-- to accumulate a bigger list of temps.
+export function get_temps( sequence add_to = repeat( "", 2 ) )
+	add_to[1] &= emitted_temps
+	add_to[2] &= emitted_temp_referenced
+	return add_to
+end function
+
+--**
 -- temps is a sequence of two maps that was passed by pop_temps().
 -- Flushes any temps waiting to be flushed, then flushes all of the
 -- temps in the maps contained in the ##temps## sequence.
