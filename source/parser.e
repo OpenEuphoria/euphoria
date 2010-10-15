@@ -2119,8 +2119,8 @@ procedure If_statement()
 		short_circuit_B = FALSE
 		SC1_type = 0
 		
-		push_temps( temps )
 		temps = pop_temps()
+		push_temps(temps)
 		Expr()
 		
 		
@@ -2166,7 +2166,7 @@ procedure If_statement()
 			backpatch(prev_false2, length(Code)+1)
 		end if
 		
-		push_temps( temps )
+		push_temps({{},{}})
 		if tok[T_ID] = ELSE then	
 			Statement_list()
 		else
@@ -2652,6 +2652,7 @@ procedure While_statement()
 		backpatch(bp2, length(Code)+1)
 	end if
 	exit_loop(exit_base)
+	temps = pop_temps()
 	push_temps( temps )
 end procedure
 
