@@ -102,7 +102,7 @@ integer lhs_subs_level = -1   -- number of levels of subscripting of lhs var on 
 symtab_index left_sym = 0     -- var used on LHS of assignment
 
 integer subs_depth = 0       -- nesting level of slice expression.
-sequence canned_tokens = {}   -- recording stack when parser is in recording mode
+sequence_of_tokens canned_tokens = {}   -- recording stack when parser is in recording mode
 					          -- this sequence will be saved and the tape played back whenever needed
 
 integer canned_index = 0      -- previous playback position
@@ -3151,7 +3151,7 @@ procedure Assign_Constant( symtab_index sym )
 	end if
 end procedure
 
-function Global_declaration(symtab_index type_ptr, integer scope)
+function Global_declaration(integer type_ptr, integer scope)
 -- parse a command-level variable or constant declaration
 -- type_ptr is NULL if a list of constants (where each must be assigned to something)
 -- type_ptr is -1 if it is an enumerated list of constants (where the first is assigned one and

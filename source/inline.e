@@ -611,19 +611,26 @@ procedure fixup_special_op( integer pc )
 	end switch
 end procedure
 
-function new_inline_var( symtab_index s, integer reuse = 1 )
+function new_inline_var( integer ps, integer reuse = 1 )
+	-- create a new inline variable based on either a variable from the inlined routine
+	-- or a temporary (ps < 1).
+	-- if ps is positive use ps is taken to mean a symindex to a variable declared
+	-- in the inlined routine.  Otherwise it is taken to mean a temporary and the 
+	-- absolute value is used for naming the variable.
 	symtab_index 
 		var = 0, 
 		vtype
 	sequence name
 	integer hashval
+	symtab_index s
 	
 	if reuse then
-		var = map:nested_get( inline_var_map, { CurrentSub, s } )
+		var = map:nested_get( inline_var_map, { CurrentSub, ps } )
 	end if
 	
 	if not var then
-		if s > 0 then
+		if ps > 0 then
+			s = ps
 			if TRANSLATE then
 				name = sprintf( "%s_inlined_%s", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME] })
 			else
@@ -645,7 +652,7 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 			
 			vtype = SymTab[s][S_VTYPE]
 		else
-			name = sprintf( "%s_%d", {SymTab[inline_sub][S_NAME], -s})
+			name = sprintf( "%s_%d", {SymTab[inline_sub][S_NAME], -ps})
 			hashval = hashfn(name)
 			if reuse then
 				name &= "__tmp"
@@ -674,7 +681,7 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 		end if
 		SymTab[var][S_USAGE] = U_USED
 		if reuse then
-			map:nested_put( inline_var_map, {CurrentSub, s }, var )
+			map:nested_put( inline_var_map, {CurrentSub, ps }, var )
 		end if
 		
 	end if

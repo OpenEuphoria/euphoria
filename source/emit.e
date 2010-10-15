@@ -130,7 +130,7 @@ constant token_name =
 	{'?', "?"}
 } 
 
-export procedure Push(symtab_index x)
+export procedure Push(symtab_pointer x)
 -- Push element onto code gen stack 
 	cgi += 1
 	if cgi > length(cg_stack) then
@@ -147,11 +147,13 @@ end function
 
 export function Pop()
 -- Pop top element from code gen stack 
-	symtab_index t
+	symtab_pointer t
+	
 
 	t = cg_stack[cgi]
 	cgi -= 1
 	if t > 0 then
+		symtab_index s = t -- for type checking
 		if SymTab[t][S_MODE] = M_TEMP then 
 			if use_private_list = 0 then  -- no problem with reusing the temp
 				SymTab[t][S_SCOPE] = FREE -- mark it as being free
@@ -264,7 +266,7 @@ end procedure
 -- - BE CAREFUL! Often there must be some expression (opnd)
 -- prior to the current op.
 
-export procedure emit_opnd(symtab_index opnd)
+export procedure emit_opnd(symtab_pointer opnd)
 -- emit an operand into the IL  
 		Push(opnd)
 		previous_op = -1  -- N.B.
@@ -381,7 +383,7 @@ end procedure
 
 --**
 -- Returns a sequence containing maps holding the current knowledge
--- about temps.
+-- about temps and removes all of the temps from the stack.
 export function pop_temps()
 	sequence new_emitted  = emitted_temps
 	sequence new_referenced = emitted_temp_referenced
@@ -595,6 +597,7 @@ end procedure
 function good_string(sequence elements)
 -- are all elements suitable for a string?
 	object obj
+	symtab_pointer ep
 	symtab_index e
 	sequence element_vals
 	
@@ -603,11 +606,12 @@ function good_string(sequence elements)
 	end if
 	element_vals = {}
 	for i = 1 to length(elements) do
-		e = elements[i]
-		if e < 1 then
+		ep = elements[i]
+		if ep < 1 then
 			-- if there's a forward reference, assume false
 			return -1
 		end if
+		e = ep
 		obj = SymTab[e][S_OBJ]
 		if SymTab[e][S_MODE] = M_CONSTANT and
 		   integer(obj) and 

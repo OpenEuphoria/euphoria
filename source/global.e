@@ -283,7 +283,7 @@ end type
 
 -- token fields
 export enum
-	T_ID,
+	T_ID, -- SEE reswords.e from ILLEGAL_CHAR .. NAMESPACE
 	T_SYM
 
 export type token(object t)
@@ -297,9 +297,20 @@ export type token(object t)
 	if not integer(t[T_ID]) then
 		return FALSE
 	end if
-	if t[T_ID] != IGNORED and symtab_index(t[T_SYM]) = 0 then
+	if t[T_ID] != IGNORED and t[T_ID] < 500 and symtab_index(t[T_SYM]) = 0 then
 		return FALSE
 	end if
+	return TRUE
+end type
+
+export type sequence_of_tokens(object x)
+	token t
+	if atom(x) then
+		return FALSE
+	end if
+	for i = 1 to length(x) do
+		t = x[i]
+	end for
 	return TRUE
 end type
 
