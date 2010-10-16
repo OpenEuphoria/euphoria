@@ -210,7 +210,7 @@ ifeq "$(EUPHORIA)" "1"
 REVGET=svn_rev
 endif
 
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -Wall -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 
 EU_CORE_FILES = \

@@ -444,7 +444,7 @@ end function
 -- See Also:
 -- [[:machine_func]]
 
-
+integer page_size = 0
 ifdef WIN32 then
 
 	atom kernel_dll, memDLL_id, 
@@ -472,7 +472,7 @@ ifdef WIN32 then
 		end if
 	end if
 
-	integer page_size = 0
+	
 	if GetSystemInfo_rid != -1 then
 		bordered_address system_info_ptr = allocate( 9 * ADDRESS_LENGTH )
 		if system_info_ptr != 0 then
