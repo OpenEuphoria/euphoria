@@ -46,6 +46,8 @@ ps_options[LINE_BREAKS]   = 0
 function name_or_literal( integer sym )
 	if not sym then
 		return "[0: ???]"
+	elsif sym > length(SymTab) then
+		return sprintf("[_invalid_:%d]", sym )
 	elsif length(SymTab[sym]) = 1 then
 		return sprintf("[_deleted_:%d]", sym)
 	elsif length(SymTab[sym]) >= SIZEOF_VAR_ENTRY then

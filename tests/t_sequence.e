@@ -29,7 +29,6 @@ sequence dup = hs
 hs = head(hs, 2)
 test_equal("head() single ref a", "Jo", hs)
 test_equal("head() single ref b", "Joh", dup)
-test_equal("head() bad len", "Joh", head(hs, -3))
 test_equal("head() string default", "J", head("John Doe"))
 test_equal("head() string", "John", head("John Doe", 4))
 test_equal("head() sequence", {1,2,3}, head({1,2,3,4,5,6}, 3))

@@ -425,7 +425,7 @@ test : .SYMBOLIC code-page-db
 	cd ..\tests
 	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex $(LIST)
+	$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex $(LIST) $(TESTFILE)
 	-del ecp.dat
 	cd ..\source
 

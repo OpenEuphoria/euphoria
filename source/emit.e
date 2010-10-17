@@ -323,7 +323,9 @@ export procedure emit_temp( object tempsym, integer referenced )
 	end if
 end procedure
 
-	
+
+sequence derefs = {}
+
 --**
 -- Called by the parser after a complete statement.  Emits appropriate
 -- opcode + temp sym to clean up after a temp.
@@ -334,9 +336,9 @@ export procedure flush_temps( sequence except_for = {} )
 -- 	sequence syms = map:keys( emitted_temps )
 	sequence
 		refs = {},
-		derefs = {},
 		novalues = {}
-		
+	
+	derefs = {}
 	for i = 1 to length( emitted_temps ) do
 		symtab_index sym = emitted_temps[i]
 		
@@ -723,15 +725,15 @@ export procedure emit_op(integer op)
 	-- 1 input, 0 outputs, can combine with previous op
 	if op = ASSIGN label "EMIT" then
 		symtab_index temp = 0
-		if previous_op = RHS_SUBS_CHECK 
-		or previous_op = RHS_SUBS then
-			if Code[$-1] = DEREF_TEMP then
+		if not TRANSLATE and
+		(previous_op = RHS_SUBS_CHECK 
+		or previous_op = RHS_SUBS ) then
+			if Code[$-1] = DEREF_TEMP and find( Code[$], derefs ) then
 				/* the DEREF_TEMP op interferes with the ASSIGN op, so
 				 * we'll clean it up here and re-flush later */
 				temp = Code[$]
 				Code = Code[1..$-2]
-				emitted_temps &= temp
-				emitted_temp_referenced &= NEW_REFERENCE
+				emit_temp( temp, NEW_REFERENCE )
 			end if
 		end if
 		
@@ -754,13 +756,13 @@ export procedure emit_op(integer op)
 			end if
 			-- replace previous op (temp) target with ASSIGN target 
 			clear_temp( Code[$] )
-			Code = Code[1..$-1] -- drop previous target
+			Code = remove( Code, length( Code ) ) -- drop previous target
 			op = previous_op -- keep same previous op 
 			if IsInteger(target) then
 				if previous_op = RHS_SUBS then
 					op = RHS_SUBS_I
 					backpatch(length(Code) - 2, op)
-
+					
 				elsif previous_op = PLUS1 then
 					op = PLUS1_I
 					backpatch(length(Code) - 2, op)
