@@ -1996,13 +1996,17 @@ public function replace_all(sequence source, object olddata, object newdata)
 	integer endpos
 	integer adj_old
 	integer adj_new
+	
+	if atom(olddata) then
+		olddata = {olddata} -- match_from requires a sequence.
+	end if
 
 	if length(olddata) = 0 then
 		return source
 	end if
-
-	if atom(olddata) then
-		olddata = {olddata} -- match_from requires a sequence.
+	
+	if atom(newdata) then
+		newdata = {newdata}
 	end if
 
 	adj_old = length(olddata) - 1

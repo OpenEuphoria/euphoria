@@ -10,6 +10,9 @@
 #include "execute.h"
 #include "symtab.h"
 
+#ifndef MAX_SEQ_LEN
+#	define MAX_SEQ_LEN ((((unsigned long)0xFFFFFFFF - sizeof(struct s1)) / sizeof(object)) - 1) 
+#endif		                /* maximum sequence length set such that it doesn't overflow */
 #define RESOLUTION 8            /* minimum size & increment before mapping */
 #define LOG_RESOLUTION 3        /* log2 of RESOLUTION */
 #define CACHE_LIMIT 2000        /* maximum number of cached allocations allowed. */

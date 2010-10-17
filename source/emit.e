@@ -288,7 +288,20 @@ export constant
 	DISCARD_TEMP = 0,
 	SAVE_TEMP = 1
 
-sequence emitted_temps = {}
+type temporary_stack_entry( object s )
+	if atom(s) then
+		return FALSE
+	end if
+	if length(s)>100 then -- its too long
+		return FALSE
+	end if
+	if length(s)>1 and equal(s[$],s[$-1]) then
+		return FALSE
+	end if
+	return TRUE
+end type
+	
+temporary_stack_entry emitted_temps = {}
 sequence emitted_temp_referenced = {}
 export procedure emit_temp( object tempsym, integer referenced )
 	if not TRANSLATE  then -- translator has its own way of handling temps
@@ -373,7 +386,7 @@ procedure check_for_temps()
 	
 end procedure
 
-export procedure clear_temp( symtab_index tempsym )
+export procedure clear_temp( symtab_pointer tempsym )
 	integer ix = find( tempsym, emitted_temps )
 	if ix then
 		emitted_temps = remove( emitted_temps, ix )

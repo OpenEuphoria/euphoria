@@ -15,6 +15,7 @@ elsedef
 	without type_check
 end ifdef
 
+include std/types.e as t
 include std/filesys.e
 include std/io.e
 include std/sort.e
@@ -6956,7 +6957,7 @@ export function is_string( sequence s )
 	return 1
 end function
 
-export procedure escape_string( sequence string )
+export procedure escape_string( t:string string )
 	integer use_hex = FALSE
 	for elem = 1 to length(string) do
 		if (string[elem] < 32 or string[elem] > 127) and

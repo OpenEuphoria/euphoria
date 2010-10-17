@@ -1255,7 +1255,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 	RecentLines();
 }
 
-#ifdef EXTRA_CHECK
+#if defined(EXTRA_CHECK) || defined(HEAP_CHECK)
+#ifndef RUNTIME
 void RTInternal(char *msg, ...)
 {
 	va_list ap;
@@ -1294,6 +1295,7 @@ void RTInternal_va(char *msg, va_list ap)
 	if (buf) EFree(msgtext);
 	Cleanup(1);
 }
+#endif
 #endif
 
 #define CUE_bufflen (200)

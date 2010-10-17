@@ -776,6 +776,8 @@ void InitStack(int size, int toplevel)
 
 void InitExecute()
 {
+	// uncomment these lines to get rid of pop-ups when EUPHORIA dies...
+	//LPTOP_LEVEL_EXCEPTION_FILTER * old_filter;
 #ifndef EDEBUG
 	// signal(SIGFPE, FPE_Handler)  // generate inf and nan instead
 	signal(SIGINT, INT_Handler); 
@@ -790,7 +792,7 @@ void InitExecute()
 	signal(SIGSEGV, Machine_Handler);
 #endif
 #endif
-
+	//old_filter = SetUnhandledExceptionFilter( EXCEPTION_EXECUTE_HANDLER );
 	TraceOn = FALSE;
 	ProfileOn = TRUE;
 	TraceBeyond = HUGE_LINE;

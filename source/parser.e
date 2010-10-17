@@ -4145,9 +4145,9 @@ procedure SetWith(integer on_off)
 -- set a with/without option
 	sequence option
 	integer idx
-	token tok
 	integer reset_flags = 1
-
+	
+	
 	option = StringToken("&+=")
 	
 	if equal(option, "type_check") then
@@ -4179,7 +4179,7 @@ procedure SetWith(integer on_off)
 					Warning(224,mixed_profile_warning_flag)
 					OpProfileTime = FALSE
 				end if
-				tok = next_token()
+				token tok = next_token()
 				if tok[T_ID] = ATOM then
 					if integer(SymTab[tok[T_SYM]][S_OBJ]) then
 						sample_size = SymTab[tok[T_SYM]][S_OBJ]
@@ -4209,7 +4209,8 @@ procedure SetWith(integer on_off)
 	elsif equal(option, "warning") then
 		integer good_sofar = line_number
 		reset_flags = 1
-		tok = next_token()
+		token tok = next_token()
+		integer warning_extra = 1
 		if find(tok[T_ID], {CONCAT_EQUALS, PLUS_EQUALS}) != 0 then
 			tok = next_token()
 			if tok[T_ID] != LEFT_ROUND then
@@ -4226,11 +4227,11 @@ procedure SetWith(integer on_off)
 			option = SymTab[tok[T_SYM]][S_NAME]
 			if equal(option, "save") then
 				prev_OpWarning = OpWarning
-				tok = {}
+				warning_extra = FALSE
 				
 			elsif equal(option, "restore") then
 				OpWarning = prev_OpWarning
-				tok = {}
+				warning_extra = FALSE
 				
 			elsif equal(option, "strict") then
 				if on_off = 0 then
@@ -4238,11 +4239,11 @@ procedure SetWith(integer on_off)
 				elsif Strict_Override > 0 then
 					Strict_Override -= 1
 				end if
-				tok = {}
+				warning_extra = FALSE
 			end if
 		end if
 
-		if length(tok) > 0 then
+		if warning_extra = TRUE then
 			if reset_flags then
 				if on_off = 0 then
 					OpWarning = no_warning_flag
@@ -4327,7 +4328,7 @@ procedure SetWith(integer on_off)
 		
 	elsif equal(option, "inline") then
 		if on_off then
-			tok = next_token()
+			token tok = next_token()
 			if tok[T_ID] = ATOM then
 				OpInline = floor( SymTab[tok[T_SYM]][S_OBJ] )
 			else

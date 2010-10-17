@@ -29,6 +29,7 @@ export constant
 export constant EGPM = 0     -- GPM mouse support on Linux
 
 export integer con -- Windows console option for BIND
+export integer type_i -- for type checking where in the array a failure occured
 
 export sequence version_name
 ifdef WIN32 then
@@ -309,7 +310,25 @@ export type sequence_of_tokens(object x)
 		return FALSE
 	end if
 	for i = 1 to length(x) do
+		type_i = i
 		t = x[i]
+	end for
+	return TRUE
+end type
+
+export type sequence_of_opcodes(object s)
+	integer oc
+	if atom(s) then
+		return FALSE
+	end if
+	for i = 1 to length(s) do
+		-- if calling like a function change this 
+		oc = s[i]
+		-- to this:
+		--type_i = i
+		--if not integer(s[i]) then
+		--	return FALSE
+		--end if
 	end for
 	return TRUE
 end type

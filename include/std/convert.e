@@ -840,7 +840,7 @@ public function to_string(object data_in, integer string_quote = 0, integer embe
 			return data_in
 		end if
 		data_in = replace_all(data_in, `\`, `\\`)
-		data_in = replace_all(data_in, string_quote, `\` & string_quote)
+		data_in = replace_all(data_in, {string_quote}, `\` & string_quote)
 		return string_quote & data_in & string_quote
 	end if
 	

@@ -1169,7 +1169,7 @@ end function
 
 procedure main()
 
-	sequence files = {}
+	object files = {}
 	
 	map opts = cmd_parse( cmdopts )
 	sequence keys = map:keys( opts )
@@ -1246,10 +1246,23 @@ procedure main()
 					files = build_file_list( val )
 				else
 					files = dir("t_*.e" )
+					if atom(files) then
+						files = {}
+					end if
 					for f = 1 to length( files ) do
 						files[f] = files[f][D_NAME]
 					end for
 					files = sort( files )
+					-- put the counter tests last to do
+					for f = length( files ) to 1 by -1 do
+						if match( "t_c_", files[f] ) = 1 then
+							for g = f - 1 to 1 by -1 do
+								if match( "t_c_", files[g] ) != 1 then
+									files = remove(files, g+1, f) & files[g+1..f]
+								end if
+							end for
+						end if
+					end for						
 				end if
 				
 		end switch

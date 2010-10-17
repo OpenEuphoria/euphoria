@@ -23,7 +23,7 @@ end ifdef
 include std/os.e
 include std/pretty.e
 include std/io.e
-include std/io.e
+include std/types.e
 include std/text.e
 
 include global.e

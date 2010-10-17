@@ -107,17 +107,17 @@ void free();
 /* Defined functions */
 /*********************/
 
-#ifdef HEAP_CHECK
 
 void RTInternal(char *msg, ...)
 // Internal error
 {
 	va_list ap;
 	va_start(ap, msg);
-	RTFatal_va(msg);
+	RTFatal_va(msg, ap);
 	va_end(ap);
 }
 
+#if defined(HEAP_CHECK) || defined(EXTRA_CHECK)
 
 void check_pool()
 {
@@ -134,7 +134,6 @@ void check_pool()
 		}
 }
 #endif
-
 symtab_ptr tmp_alloc()
 /* return pointer to space for a temporary var/literal constant */
 {
@@ -399,7 +398,7 @@ static char *Out_Of_Space(long nbytes)
 	long *p;
 
 	Free_All();
-	p = (long *)malloc(nbytes);
+	p = NULL;/*(long *)malloc(nbytes);*/
 	if (p == NULL) {
 		low_on_space = TRUE;
 		SpaceMessage();
@@ -624,7 +623,7 @@ char *EMalloc(unsigned long nbytes)
 	char *p;
 	char *a;
 	unsigned long adj;
-	
+
 	// Add max possible adjustment (7) plus 1 to store adjustment value,
 	// plus 4 to store the requested size.
 	a = (char *)malloc(nbytes + 1 + sizeof(nbytes) + 7);
@@ -831,7 +830,7 @@ s1_ptr NewS1(long size)
 	register s1_ptr s1;
 
 	assert(size >= 0);
-	if ((unsigned long)size > (((unsigned long)0xFFFFFFFF - sizeof(struct s1)) / sizeof(object)) - 1) {
+	if ((unsigned long)size > MAX_SEQ_LEN) {
 		// Ensure it doesn't overflow
 		SpaceMessage();
 	}
