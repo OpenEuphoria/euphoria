@@ -287,7 +287,7 @@ all :  .SYMBOLIC
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
-$(BUILDDIR)\ecp.dat : interpreter
+$(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage 
 	$(BUILDDIR)\eui -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
 
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
@@ -408,11 +408,14 @@ translate source : .SYMBOLIC
 	wmake -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 	wmake -h backendsource EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
-testeu : .SYMBOLIC code-page-db
+
+$(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
+	-copy $(BUILDDIR)\ecp.dat $(TRUNKDIR)\tests
+
+testeu : .SYMBOLIC code-page-db $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
-	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	$(EUTEST) -i ..\include -exe "$(FULLBUILDDIR)\eui.exe -batch $(TRUNKDIR)\source\eu.ex" $(LIST)
+	-$(EUTEST) -i ..\include $(TEST_EXTRA) -exe "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -ec "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST)
 	-del ecp.dat
 	cd ..\source
 
@@ -656,9 +659,6 @@ $(BUILDDIR)\html: .EXISTSONLY
 $(BUILDDIR)\html\style.css : $(DOCDIR)\style.css
 	copy $(DOCDIR)\style.css $(BUILDDIR)\html
 
-$(BUILDDIR)\html\js\scriptaculous.js: $(DOCDIR)\scriptaculous.js  $(BUILDDIR)\html\js
-	copy $(DOCDIR)\scriptaculous.js $^@
-
 $(BUILDDIR)\html\js\prototype.js: $(DOCDIR)\prototype.js  $(BUILDDIR)\html\js
 	copy $(DOCDIR)\prototype.js $^@
 
@@ -673,7 +673,7 @@ $(BUILDDIR)\html\eu400_0001.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-te
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
-htmldoc : $(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png $(BUILDDIR)\html\js\scriptaculous.js $(BUILDDIR)\html\js\prototype.js
+htmldoc : $(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 
 $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
 	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "splitlevel = 2" "splitlevel = 0" &

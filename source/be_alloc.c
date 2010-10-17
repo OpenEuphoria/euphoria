@@ -107,7 +107,7 @@ void free();
 /* Defined functions */
 /*********************/
 
-
+#ifndef RUNTIME
 void RTInternal(char *msg, ...)
 // Internal error
 {
@@ -116,6 +116,7 @@ void RTInternal(char *msg, ...)
 	RTFatal_va(msg, ap);
 	va_end(ap);
 }
+#endif
 
 #if defined(HEAP_CHECK) || defined(EXTRA_CHECK)
 

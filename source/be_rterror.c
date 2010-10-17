@@ -1256,7 +1256,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 }
 
 #if defined(EXTRA_CHECK) || defined(HEAP_CHECK)
-#ifndef RUNTIME
+#ifdef RUNTIME
 void RTInternal(char *msg, ...)
 {
 	va_list ap;
