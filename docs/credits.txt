@@ -2,9 +2,9 @@
 
 This product is free and open source, and has benefited from the contributions
 of many people. You have complete royalty-free rights to distribute any
-Euphoria programs that you develop. You are also free to distribute the interpreter,
-backend and even translator. You can can ##shroud## or ##bind## your
-program and distribute the resulting files royalty-free.
+Euphoria programs that you develop. You are also free to distribute the 
+interpreter, backend and even translator. You can can ##shroud## or ##bind## 
+your program and distribute the resulting files royalty-free.
 
 You may incorporate any Euphoria source files from this package into your
 program, either "as is" or with your modifications. (You will probably need at

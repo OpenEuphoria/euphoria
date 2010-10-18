@@ -544,20 +544,21 @@ end function
 --
 -- Examples:
 -- <eucode>
---     object val
---     val = to_number("12.34")  ---> 12.34 -- No errors and no error return needed.
---     val = to_number("12.34", 1)  ---> {12.34, 0} -- No errors.
---     val = to_number("12.34", -1)  ---> 12.34 -- No errors.
---     val = to_number("12.34a", 1) ---> {12.34, 6} -- Error at position 6
---     val = to_number("12.34a", -1) ---> {6} -- Error at position 6
---     val = to_number("12.34a")  ---> 0 because its not a valid number
---     val = to_number("#f80c") --> 63500
---     val = to_number("#f80c.7aa") --> 63500.47900390625
---     val = to_number("@1703") --> 963
---     val = to_number("!101101") --> 45
---     val = to_number("12_583_891") --> 12583891
---     val = to_number("12_583_891%") --> 125838.91
---     val = to_number("12,583,891%%") --> 12583.891
+-- object val
+-- val = to_number("12.34")      ---> 12.34 -- No errors and no error return needed.
+-- val = to_number("12.34", 1)   ---> {12.34, 0} -- No errors.
+-- val = to_number("12.34", -1)  ---> 12.34 -- No errors.
+-- val = to_number("12.34a", 1)  ---> {12.34, 6} -- Error at position 6
+-- val = to_number("12.34a", -1) ---> {6} -- Error at position 6
+-- val = to_number("12.34a")     ---> 0 because its not a valid number
+--
+-- val = to_number("#f80c")        --> 63500
+-- val = to_number("#f80c.7aa")    --> 63500.47900390625
+-- val = to_number("@1703")        --> 963
+-- val = to_number("!101101")      --> 45
+-- val = to_number("12_583_891")   --> 12583891
+-- val = to_number("12_583_891%")  --> 125838.91
+-- val = to_number("12,583,891%%") --> 12583.891
 -- </eucode>
 
 
@@ -766,15 +767,16 @@ end function
 --
 -- Examples:
 -- <eucode>
--- ? to_integer(12)       --> 12
--- ? to_integer(12.4)     --> 12
--- ? to_integer("12")     --> 12
--- ? to_integer("12.9")   --> 12
--- ? to_integer("a12")    --> 0 (not a valid number)
--- ? to_integer("a12",-1) --> -1 (not a valid number)
--- ? to_integer({"12"})   --> 0 (sub-sequence found)
--- ? to_integer(#3FFFFFFF)   --> 1073741823
--- ? to_integer(#3FFFFFFF + 1)   --> 0 (too big for a Euphoria integer)
+-- ? to_integer(12)            --> 12
+-- ? to_integer(12.4)          --> 12
+-- ? to_integer("12")          --> 12
+-- ? to_integer("12.9")        --> 12
+--
+-- ? to_integer("a12")         --> 0 (not a valid number)
+-- ? to_integer("a12",-1)      --> -1 (not a valid number)
+-- ? to_integer({"12"})        --> 0 (sub-sequence found)
+-- ? to_integer(#3FFFFFFF)     --> 1073741823
+-- ? to_integer(#3FFFFFFF + 1) --> 0 (too big for a Euphoria integer)
 -- </eucode>
 
 public function to_integer(object data_in, integer def_value = 0)

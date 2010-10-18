@@ -746,8 +746,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
--- -- s is { {"foo", "bar"}, {"qwe", "1234"}, {"asdf", "contains space, comma, and equal(=)"}}
+-- s= keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
+-- -- s is 
+-- -- {
+-- --   {"foo", "bar"}, 
+-- --   {"qwe", "1234"}, 
+-- --   {"asdf", "contains space, comma, and equal(=)"}
+-- --  }
 -- </eucode>
 --
 -- Example 2:
@@ -767,7 +772,11 @@ end function
 -- s = keyvalues("colors=(a=black, b=blue, c=red)")
 -- -- s is { {"colors", {{"a", "black"}, {"b", "blue"},{"c", "red"}}  } }
 -- s = keyvalues("colors=(black=[0,0,0], blue=[0,0,FF], red=[FF,0,0])")
--- -- s is { {"colors", {{"black",{"0", "0", "0"}}, {"blue",{"0", "0", "FF"}},{"red", {"FF","0","0"}}}} }
+-- -- s is 
+-- -- { {"colors", 
+-- --   {{"black",{"0", "0", "0"}}, 
+-- --   {"blue",{"0", "0", "FF"}},
+-- --   {"red", {"FF","0","0"}}}} }
 -- </eucode>
 --
 -- Example 5:

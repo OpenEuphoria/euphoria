@@ -6,18 +6,27 @@ The interpreter has four binary components:
 * interpreter 
 * the backend.  
 
-Euphoria's parser first converts the code into a set of instructions that the translator, interpreter backend can process.  Then the backend runs these instructions.  The translator takes these same instructions and converts them into C-code.  The library is called by the backend for
+Euphoria's parser first converts the code into a set of instructions that the 
+translator, interpreter backend can process.  Then the backend runs these 
+instructions.  The translator takes these same instructions and converts them 
+into C-code.  The library is called by the backend for
 the many builtins included in EUPHORIA.
 
 === The Euphoria Data Structures ===
 
 ==== The EUPHORIA representation of a EUPHORIA Object =====
 
-Every EUPHORIA object is stored as-is.  A special unlikely floating point value is used for NOVALUE.  NOVALUE signifies that a variable has not been assigned a value or the end of a sequence.
+Every EUPHORIA object is stored as-is.  A special unlikely floating point value 
+is used for NOVALUE.  NOVALUE signifies that a variable has not been assigned a 
+value or the end of a sequence.
 
 ==== The C Representation of a EUPHORIA Object =====
 
-Every EUPHORIA object is either stored as is or an encoded pointer.  A EUPHORIA integer is stored in a 32-bit signed integer.  If the number is too big for a EUPHORIA integer or not an integer, it is assigned to a 64-bit double float in a structure and an encoded pointer to that structure is stored in the said 32-bit memory space.  Sequences are stored in a similar way.
+Every EUPHORIA object is either stored as is or an encoded pointer.  A EUPHORIA 
+integer is stored in a 32-bit signed integer.  If the number is too big for a 
+EUPHORIA integer or not an integer, it is assigned to a 64-bit double float in a 
+structure and an encoded pointer to that structure is stored in the said 32-bit 
+memory space.  Sequences are stored in a similar way.
 
 
 
@@ -38,13 +47,32 @@ Every EUPHORIA object is either stored as is or an encoded pointer.  A EUPHORIA 
                      |<--------     integer    --------->|
    |<--------------------- object ---------------------->|		     
 
-
 }}}
 
 
-EUPHORIA integers are stored in object variables as-is.  An object variable is a four byte signed integer.  Legal integer values for EUPHORIA integers are between -1,073,741,824 ( -power(2,30) ) and +1,073,741,823 ( power(2,30)+1 ).  Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other values are for encoded pointers.  Pointers are always 8 byte aligned.  So a pointer is stored in 29-bits instead of 32 and can fit in a hexadecimal range 0x2000_0000 long.     The other values are not stored in the same place but their encoded pointers are.  The pointers are encoded in such a way that their values will never be in the range of the integers.  Pointers to sequence structures (struct s1) are encoded into a range between 8000_0000 to 9FFF_FFFF.  Pointers to structures for doubles (struct d) are encoded into a range between A000_0000 to BFFF_FFFF.  A special value NOVALUE is at the end of the range of encoded pointers is BFFF_FFFF and it signifies that there is no value yet assigned to a variable and it also signifies the end of a sequence.  In C, values of this type are stored in the 'object' type.  The range 4000_0000 to 7FFF_FFFF is unused.
+EUPHORIA integers are stored in object variables as-is.  An object variable is a
+four byte signed integer.  Legal integer values for EUPHORIA integers are 
+between -1,073,741,824 ( -power(2,30) ) and +1,073,741,823 ( power(2,30)+1 ).  
+Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative 
+integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The
+hexadecimal values not used as integers are thus 4000_0000 to BFFF_FFFF.  Other 
+values are for encoded pointers.  Pointers are always 8 byte aligned.  So a 
+pointer is stored in 29-bits instead of 32 and can fit in a hexadecimal range 
+0x2000_0000 long. The other values are not stored in the same place but their 
+encoded pointers are. The pointers are encoded in such a way that their values 
+will never be in the range of the integers. Pointers to sequence structures 
+(struct s1) are encoded into a range between 8000_0000 to 9FFF_FFFF.  Pointers 
+to structures for doubles (struct d) are encoded into a range between A000_0000 
+to BFFF_FFFF. A special value NOVALUE is at the end of the range of encoded 
+pointers is BFFF_FFFF and it signifies that there is no value yet assigned to a 
+variable and it also signifies the end of a sequence.  In C, values of this type
+are stored in the 'object' type.  The range 4000_0000 to 7FFF_FFFF is unused.
 
-A double structure 'struct d' could indeed contain a value that is legally in the range of a EUPHORIA integer.  So the encoded pointer to this structure is recognized by the interpreter as an 'integer' but in this internals document when we say EUPHORIA integer we mean it actually is a C integer in the legal EUPHORIA integer range.
+A double structure 'struct d' could indeed contain a value that is legally in 
+the range of a EUPHORIA integer.  So the encoded pointer to this structure is 
+recognized by the interpreter as an 'integer' but in this internals document 
+when we say EUPHORIA integer we mean it actually is a C integer in the legal 
+EUPHORIA integer range.
 
 
 === The C Representations of a EUPHORIA Sequence and a EUPHORIA Double =====
@@ -52,33 +80,39 @@ A double structure 'struct d' could indeed contain a value that is legally in th
 struct s1
 {{{
 {
-	object_ptr base;   // base is such that base[1] is the first element
-	long length;       // this is the sequence length
-	long ref;          // ref is the number of as virtual copies of this sequence
-	long postfill;     // is how many extra objects could fit at the end of base
-	cleanup_ptr cleanup; // this is a pointer to a EUPHORIA routine that is run 
-		            // just before the sequence is freed.
+ object_ptr base;     // base is such that base[1] is the first element
+ long length;         // this is the sequence length
+ long ref;            // ref is the number of as virtual copies of this sequence
+ long postfill;       // is how many extra objects could fit at the end of base
+ cleanup_ptr cleanup; // this is a pointer to a EUPHORIA routine that is run 
+		              // just before the sequence is freed.
 }
 }}}
 
 struct d
 {{{
 {
-	double dbl;        // the actual value of a double number.
-	long ref;          // ref is the number of virtual copies of this double
-	cleanup_ptr cleanup; // this is a pointer to a EUPHORIA routine that is run 
-		            // just before the sequence is freed.
+ double dbl;          // the actual value of a double number.
+ long ref;            // ref is the number of virtual copies of this double
+ cleanup_ptr cleanup; // this is a pointer to a EUPHORIA routine that is run 
+		              // just before the sequence is freed.
 }
 }}}
 
 
-Now offset of the 'ref' in struct d must be the same as the offset of the 'ref' in struct s1.  A 64bit implementation would have to reorder these members.
+Now offset of the 'ref' in struct d must be the same as the offset of the 'ref' 
+in struct s1.  A 64bit implementation would have to reorder these members.
 
 === The Euphoria Object Macros and Functions ===
 
 ==== Description
 
-The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns TRUE and IS_ATOM_DBL() will return TRUE for integer values as well as encoded pointers to 'struct d's.   This is why there is an order that these tests are made: We test IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be true if we pass an encoded pointer to a double.  We must be sure that something is not NOVALUE before we use IS_SEQUENCE on it.
+The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns TRUE and 
+IS_ATOM_DBL() will return TRUE for integer values as well as encoded pointers to
+'struct d's.   This is why there is an order that these tests are made: We test 
+IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be 
+true if we pass an encoded pointer to a double.  We must be sure that something 
+is not NOVALUE before we use IS_SEQUENCE on it.
 
 // Often we know foo is not NOVALUE before getting into this://
 
@@ -93,7 +127,8 @@ if (IS_ATOM_INT(foo)) {
 }
 }}}
 
-A sequence is held in a 'struct s1' type and a double is contained in a 'struct d'.
+A sequence is held in a 'struct s1' type and a double is contained in a 
+'struct d'.
 
 
 === Type Value Functions and Macros
@@ -172,7 +207,8 @@ true if the object is an encoded pointer of either kind of structure.
 </eucode>
 
 ===== Returns: 
-an object with the same value as x.  x must be with in the integer range of a legal EUPHORIA integer type.
+an object with the same value as x.  x must be with in the integer range of a 
+legal EUPHORIA integer type.
 
 @[:internals:MAKE_UINT|]
 ==== MAKE_UINT
@@ -184,10 +220,12 @@ an object with the same value as x.  x must be with in the integer range of a le
 an object with the same value as x.  
 
 ===== Assumption:
-x must be an **unsigned** integer with in the integer range of a C unsigned int type.
+x must be an **unsigned** integer with in the integer range of a C unsigned 
+int type.
 
 ===== Example:
-MAKE_UINT(4*1000*1000*1000) will make a EUPHORIA value of four billion by creating a double.
+MAKE_UINT(4*1000*1000*1000) will make a EUPHORIA value of four billion by 
+creating a double.
 
 @[:internals:MAKE_SEQ|]
 ==== MAKE_SEQ
@@ -206,8 +244,8 @@ The pointer is encoded into a range for sequences and returned.
 </eucode>
 
 ===== Returns:
-an object representation of a EUPHORIA byte string s.  The returned encoded pointer
-is a sequence with all of the bytes from s copied over.
+an object representation of a EUPHORIA byte string s.  The returned encoded 
+pointer is a sequence with all of the bytes from s copied over.
 
 @[:internals:MAKE_DBL|]
 ==== MAKE_DBL
@@ -227,9 +265,9 @@ The pointer is encoded into a range for doubles and returned.
 </eucode>
 
 ===== Returns:
-an object with an argument a double ##dbl##.  A ##struct d## is allocated and dbl is assigned
-to the value part of that structure.  The pointer is encoded into the 
-range for doubles and returned.
+an object with an argument a double ##dbl##.  A ##struct d## is allocated and 
+dbl is assigned to the value part of that structure.  The pointer is encoded 
+into the  range for doubles and returned.
 
 
 @[:internals:DBL_PTR|]
@@ -272,7 +310,8 @@ A sequence object with size members which are not yet set to a value.
 
 === Object Constants
 
-Use MAXINT and MININT to check for overflow and underflow, NOVALUE to check if a variable has not
+Use MAXINT and MININT to check for overflow and underflow, NOVALUE to check if a 
+variable has not
 been assigned, and use NOVALUE to terminate a sequence.
 
 @[:internals:NOVALUE|]

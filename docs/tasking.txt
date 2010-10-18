@@ -15,23 +15,25 @@ given time.
 Most programs do not need to use multitasking and would not benefit from it.
 However it is very useful in some cases:
 
-* Action games where numerous characters, projectiles etc. need to be displayed in a
-  realistic way, as if they are all independent of one another. Language War is a good example.
-* Situations where your program must sometimes wait for input from a human or other computer.
-  While one task in your program is waiting, another separate task could be doing some
-  computation, disk search, etc.
-* Windows, Linux and FreeBSD all have special API routines that let you initiate some I/O,
-  and then proceed without waiting for it to finish. A task could check periodically to
-  see if the I/O is finished, while another task is performing some useful computation, or
-  is perhaps starting another I/O operation.
-* Situations where your program might be called upon to serve many users simultaneously.
-  With multiple tasks, it's easy to keep track of the state of your interaction with
-  all these separate users.
-* Perhaps you can divide your program into two logical processes, and have a task for each.
-  One produces data and stores it, while the other reads the data and processes it. Maybe
-  the first process is time-critical, since it interacts with the user, while the second
-  process can be executed during lulls in the action, where the user is thinking or doing
-  something that doesn't require quick response.
+* Action games where numerous characters, projectiles etc. need to be displayed 
+in a realistic way, as if they are all independent of one another. Language War 
+is a good example.
+* Situations where your program must sometimes wait for input from a human or 
+other computer. While one task in your program is waiting, another separate task
+could be doing some computation, disk search, etc.
+* //Windows//, //Linux// and //FreeBSD// all have special API routines that let 
+you initiate some I/O, and then proceed without waiting for it to finish. A task
+could check periodically to see if the I/O is finished, while another task is 
+performing some useful computation, or is perhaps starting another I/O operation.
+* Situations where your program might be called upon to serve many users 
+simultaneously. With multiple tasks, it's easy to keep track of the state of 
+your interaction with all these separate users.
+* Perhaps you can divide your program into two logical processes, and have a 
+task for each. One produces data and stores it, while the other reads the data 
+and processes it. Maybe the first process is time-critical, since it interacts 
+with the user, while the second process can be executed during lulls in the 
+action, where the user is thinking or doing something that doesn't require quick
+response.
 
 === Types of Tasks
 

@@ -319,7 +319,8 @@ end function
 -- <eucode>
 -- s = columnize({{1, 2}, {3, 4}, {5, 6, 7}})
 -- -- s is { {1,3,5}, {2,4,6}, {0,0,7} }
--- s = columnize({{1, 2}, {3, 4}, {5, 6, 7},,-999}) -- Change the not-available value.
+-- s = columnize({{1, 2}, {3, 4}, {5, 6, 7},,-999}) 
+--     --> Change the not-available value.
 -- -- s is { {1,3,5}, {2,4,6}, {-999,-999,7} }
 -- </eucode>
 --
@@ -409,7 +410,7 @@ end function
 --     return o[1] & ", " & o[2] & d
 -- end function
 --
--- s = apply({{"Hello", "John"}, {"Goodbye", "John"}}, routine_id("greeter"), "!")
+-- s = apply({{"Hello", "John"}, {"Goodbye", "John"}},routine_id("greeter"),"!")
 -- -- s is {"Hello, John!", "Goodbye, John!"}
 -- </eucode>
 --

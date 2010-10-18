@@ -12,7 +12,8 @@ STREXPR ==: (an expression that evaluates to a string sequence)
 
 SEQEXPR ==: (an expression that evaluates to an sequence)
 
-BOOLEXPR ==: (an expression that evaluates to an atom in which zero represents falsehood and non-zero represents truth)
+BOOLEXPR ==: (an expression that evaluates to an atom in which zero represents 
+              falsehood and non-zero represents truth)
 
 EXPR ==:
 
@@ -64,8 +65,8 @@ MARGINSTR  ==: '_' ...
  FILEREF  ==:  A file path that may be enclosed in double-quotes. 
  NAMESPACE ==: IDENTIFIER  
 </eucode>
-**NOTE** that after the file reference, the only text allowed is the keyword 'as'
-or the start of a comment. Nothing else is permitted on the same text line.
+**NOTE** that after the file reference, the only text allowed is the keyword 
+'as' or the start of a comment. Nothing else is permitted on the same text line.
 
     See Also: [[:include statement]]
 
@@ -139,15 +140,17 @@ SLICEEND   ==: ']'
 
 == while == @[WHILESTMT]
 <eucode>
- WHILESTMT ==: 'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
- WITHENTRY ==: 'with' 'entry'
- ENTRY ==: 'entry' [STMTBLK]
+WHILESTMT ==: 
+        'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
+WITHENTRY ==: 'with' 'entry'
+ENTRY ==: 'entry' [STMTBLK]
 </eucode>
    See Also: [[:while statement]]
 
 == loop == @[LOOPSTMT]
 <eucode>
- LOOPSTMT ==: 'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
+LOOPSTMT ==: 
+   'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
 </eucode>
    See Also: [[:loop until statement]]
 

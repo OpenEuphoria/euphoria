@@ -51,10 +51,12 @@ public constant
 -- 		<built-in> function get_key()
 --
 -- Description:
---     Return the key that was pressed by the user, without waiting. Special codes are returned for the function keys, arrow keys etc.
+--     Return the key that was pressed by the user, without waiting. Special 
+--  codes are returned for the function keys, arrow keys etc.
 --
 -- Returns:
---		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
+--		An **integer**, either -1 if no key waiting, or the code of the next key
+--  waiting in keyboard buffer.
 --
 -- Comments:
 --     The operating system can hold a small number of key-hits in its keyboard buffer.
@@ -744,15 +746,22 @@ end procedure
 --
 -- Examples:
 -- <eucode>
--- display("Some plain text") -- Displays this string on the console plus a new line.
--- display("Your answer:",0)  -- Displays this string on the console without a new line.
+-- display("Some plain text") 
+--         -- Displays this string on the console plus a new line.
+-- display("Your answer:",0)  
+--        -- Displays this string on the console without a new line.
 -- display("cat")
--- display("Your answer:",,0) -- Displays this string on the console without a new line.
+-- display("Your answer:",,0) 
+--         -- Displays this string on the console without a new line.
 -- display("")
--- display("Your answer:_")   -- Displays this string, except the '_', on the console without a new line.
+-- display("Your answer:_")   
+--        -- Displays this string, 
+--        -- except the '_', on the console without a new line.
 -- display("dog")
--- display({"abc", 3.44554}) -- Displays the contents of 'res' on the console.
--- display("The answer to [1] was [2]", {"'why'", 42}) -- formats these with a new line.
+-- display({"abc", 3.44554}) 
+--        -- Displays the contents of 'res' on the console.
+-- display("The answer to [1] was [2]", {"'why'", 42}) 
+--        -- formats these with a new line.
 -- display("",2)
 -- display({51,362,71}, {1})
 -- </eucode>

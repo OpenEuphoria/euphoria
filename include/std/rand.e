@@ -297,9 +297,12 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- res = roll(1, 2) -- Simulate a coin toss.
--- res = roll({1,6}) -- Try for a 1 or a 6 from a standard die toss.
--- res = roll({1,2,3,4}, 20) -- Looking for any number under 5 from a 20-sided die.
+-- res = roll(1, 2) 
+--       --> Simulate a coin toss.
+-- res = roll({1,6}) 
+--       --> Try for a 1 or a 6 from a standard die toss.
+-- res = roll({1,2,3,4}, 20) 
+--       --> Looking for any number under 5 from a 20-sided die.
 -- </eucode>
 -- 
 -- See Also:
@@ -344,11 +347,16 @@ end function
 -- Example 1:
 -- <eucode>
 -- set_rand("example")
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1)})  --> "t"
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 5)})  --> "flukq"
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", -1)}) --> ""
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 26)}) --> "kghrsxmjoeubaywlzftcpivqnd"
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 25)}) --> "omntrqsbjguaikzywvxflpedc"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1)})  
+--      --> "t"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 5)})  
+--      --> "flukq"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", -1)}) 
+--      --> ""
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 26)}) 
+--      --> "kghrsxmjoeubaywlzftcpivqnd"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 25)}) 
+--     --> "omntrqsbjguaikzywvxflpedc"
 -- </eucode>
 --
 -- Example 2:

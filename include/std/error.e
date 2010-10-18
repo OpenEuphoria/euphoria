@@ -31,14 +31,15 @@ constant
 -- Example 1:
 -- <eucode>
 -- if PI = 3 then
---     crash("The whole structure of universe just changed - please reload solar_system.ex")
+--     crash("The structure of universe just changed -- reload solar_system.ex")
 -- end if
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- if token = end_of_file then
---     crash("Test file #%d is bad, text read so far is %s\n", {file_number, read_so_far})
+--     crash("Test file #%d is bad, text read so far is %s\n", 
+--                                                   {file_number, read_so_far})
 -- end if
 -- </eucode>
 --
@@ -66,7 +67,8 @@ end procedure
 -- <eucode>
 -- crash_message("The password you entered must have at least 8 characters.")
 -- pwd_key = input_text[1..8]
--- -- if ##input_text## is too short, user will get a more meaningful message than 
+-- -- if ##input_text## is too short, 
+-- -- user will get a more meaningful message than 
 -- -- "index out of bounds".
 -- </eucode>
 --

@@ -64,8 +64,8 @@ The //mandatory// 'hello world' program is a one-liner in Euphoria.
 puts(1, "Hello, World\n")
 </eucode>
 This simply calls the built-in routine ##puts## ('put string'), passing it two
-parameters:- ##1##, which is the file number to output to (STDOUT - the console, in
-this case) and a string of text.
+parameters:- ##1##, which is the file number to output to (STDOUT - the console,
+in this case) and a string of text.
 
 === Sorting ===
 The following is an example of a more useful Euphoria program.
@@ -268,7 +268,8 @@ Depending on the platform you are using the interpreter could be called:
 | ##eui##     | General interpreter on Windows and *nix variants |
 | ##euiw##    | Console-less Windows interpreter                 |
 
-\\The command-line may contain extra information. Following your program filename
+\\The command-line may contain extra information. Following your program 
+filename
 you may add extra words (known as //arguments//) that can used in your
 program to customize its behavior. These arguments are read within your
 program by the built-in function [[:command_line]]().
@@ -433,7 +434,8 @@ program, or you can ##bind## your program. **Shrouding** combines all of the
 Euphoria source code that your program needs to create a single ##.il## file.
 **Binding** combines your shrouded program with the Euphoria backend
 (##eub## or ##eubw## on Windows) to create a single, stand-alone executable file.
-For example, if your program is called "##myprog.ex##" you can create "##myprog.exe##"
+For example, if your program is called "##myprog.ex##" you can create 
+"##myprog.exe##"
 which will run identically. For more information about shrouding and binding,
 see [[:Binding and Shrouding]].
 
@@ -450,8 +452,10 @@ executable program.
 You can launch Euphoria with some extra command line switches, in order to add
 or change configuration elements. When running a GUI, there is always some way
 to open a prompt and enter any text with options, arguments and whatever the
-program being launched may need for proper, expected operation. Under //Windows//,
-this is achieved by clicking the ##Run... start## menu entry, or hitting ##Windows-R##.
+program being launched may need for proper, expected operation. Under 
+//Windows//,
+this is achieved by clicking the ##Run... start## menu entry, or hitting 
+##Windows-R##.
 
 Command line switches may be changed or added, one at a time.
 
@@ -482,8 +486,8 @@ Command line switches may be changed or added, one at a time.
 : The translated euphoria code will include 
 
 ; ##-DLL, -SO## (translator)
-: Compiles and links the translated euphoria code into a DLL, SO or DYLIB (depending
-  on the platform).
+: Compiles and links the translated euphoria code into a DLL, SO or DYLIB 
+(depending on the platform).
 
 ; ##-EUDIR dir## (all)
 : This overrides the environment variable EUDIR.
@@ -518,21 +522,25 @@ Command line switches may be changed or added, one at a time.
 : Displays the version of euphoria that is running.
 
 ; ##-W warning_name## (all)
-: Resets, or adds to, the current list of warnings that may be emitted. The list of known names
-  is to be found in the subsection [[:with/without warning]]. A name should appear without quotes.
-  If the ##warning_name## begins with a plus symbol '##+##', this warning is added to the current
+: Resets, or adds to, the current list of warnings that may be emitted. The list
+of known names is to be found in the subsection [[:with/without warning]]. A 
+name should appear without quotes.
+  If the ##warning_name## begins with a plus symbol '##+##', this warning is 
+  added to the current
   set of warnings checked for, otherwise the first usage resets the list 
-  to the warning being introduced, and each subsequent ##-W## warning_name adds to the list.
+  to the warning being introduced, and each subsequent ##-W## warning_name adds 
+  to the list.
 
 ; ##-WF file_name## (all)
-: Sets the file where the warnings should go instead of the standard error. Warnings are written
- to that file regardless of whether or not there are errors in the source. If there are no
- warnings, the -wf file is not created. If the -wf file cannot be created, a suitable message
- is displayed on STDERR and written to ex.err.
+: Sets the file where the warnings should go instead of the standard error. 
+Warnings are written to that file regardless of whether or not there are errors 
+in the source. If there are no warnings, the ##-wf## file is not created. If the
+##-wf## file cannot be created, a suitable message
+ is displayed on STDERR and written to ##ex.err##.
  
 ; ##-X##;
-: Resets, or adds to, the list of warnings that will not be issued. This is opposite of
-  the ##-W## switch.
+: Resets, or adds to, the list of warnings that will not be issued. This is 
+opposite of the ##-W## switch.
 
 The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 
@@ -542,13 +550,16 @@ The case of the switches is ignored, so ##-I## and ##-i## are equivalent.
 ## The current path
 ## Paths specified in a ##-I## command line switch, which can also come from any
    configuration files found.
-## Paths listed in the ##EUINC## environment variable, in the order in which they appear
-## Paths listed in the ##EUDIR## environment variable, in the order in which they appear
+## Paths listed in the ##EUINC## environment variable, in the order in which 
+they appear
+## Paths listed in the ##EUDIR## environment variable, in the order in which 
+they appear
 ## The interpreter's path
 
 === eu.cfg
 
-Euphoria supports reading command line switches from configuration files. The default
+Euphoria supports reading command line switches from configuration files. The 
+default
 name for the configuration file is ##eu.cfg##. However you can specify different
 ones by using the ##-C## switch.
 
@@ -556,9 +567,10 @@ ones by using the ##-C## switch.
 
 The file is a text file. Each line in the file is either a command line switch,
 a section header, an include path or a comment.
-* Comments are lines that begin with a double dash {{{"--"}}}. Everything on the line
-is ignored.
-* A section header is a //name// enclosed in square brackets. eg. ##[interpret]##.
+* Comments are lines that begin with a double dash {{{"--"}}}. Everything on the
+line is ignored.
+* A section header is a //name// enclosed in square brackets. eg. 
+##[interpret]##.
 ** There are a number of predefined sections.
 ** The lines in a section are only added to the command line switches if they
  apply to the mode that Euphoria is running in.
@@ -567,24 +579,28 @@ is ignored.
 *** [interpret] Applies to the interpreter running in any platform.
 *** [translate] Applies to the translator running in any platform.
 *** [bind] Applies to the binder running in any platform.
-*** [interpret:win32] Applies to the interpreter when running under Windows only.
-*** [interpret:unix] Applies to the interpreter when running under Unix only.
-*** [translate:win32] Applies to the translator when running under Windows only.
-*** [translate:unix] Applies to the translator when running under Unix only.
-*** [bind:win32] Applies to the binder when running under Windows only.
-*** [bind:unix] Applies to the binder when running under Unix only.
+*** [interpret:win32] Applies to the interpreter when running under //Windows// 
+only.
+*** [interpret:unix] Applies to the interpreter when running under //Unix// 
+only.
+*** [translate:win32] Applies to the translator when running under //Windows// 
+only.
+*** [translate:unix] Applies to the translator when running under //Unix// only.
+*** [bind:win32] Applies to the binder when running under //Windows// only.
+*** [bind:unix] Applies to the binder when running under //Unix// only.
 *** [all] Applies to all running modes.
 ** All configuration lines before the first section header are assumed to be the
 ##[all]## section.
 ** You can have any number of section headers, but only the predefined ones are
 used. All lines in other sections are treated as comments.
-* A command line switch is a line that begins with a single dash. The entire line
- is added to the actual command line as if it was originally there.
-* An include path is any other line that is not one of the above. The string ##-I##
-is prepended to the line and then it is added to the command line.
+* A command line switch is a line that begins with a single dash. The entire 
+line is added to the actual command line as if it was originally there.
+* An include path is any other line that is not one of the above. The string 
+##-I## is prepended to the line and then it is added to the command line.
 
-When Euphoria starts up, it looks for configuration files in the following order ...
-* for UNIX systems
+When Euphoria starts up, it looks for configuration files in the following 
+order ...
+* for //UNIX// systems
 ## /etc/euphoria/eu.cfg
 ## ${EUDIR}/eu.cfg
 ## ${HOME}/.eu.cfg
@@ -600,11 +616,11 @@ When Euphoria starts up, it looks for configuration files in the following order
 ## Current working directory - "./eu.cfg"
 ## Command line -C switches
 
-* Euphoria processes every configuration file found, and in the order described above.
-This means that setting specified in earlier configuration files may be overridden by
-subsequent configuration files. For example, a configuration file in the current
-directory will override the same settings in a configuration file in the executable's
-directory.
+* Euphoria processes every configuration file found, and in the order described 
+above. This means that setting specified in earlier configuration files may be 
+overridden by subsequent configuration files. For example, a configuration file 
+in the current directory will override the same settings in a configuration file
+in the executable's directory.
 * If a configuration file contains a "-C" switch, the new configuration file
 specified on that switch is processed before subsequent lines in the old file.
 * A configuration file is only ever processed once. Additional references to the

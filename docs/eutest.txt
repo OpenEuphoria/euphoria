@@ -92,7 +92,8 @@ construct these files.
 There are times when we expect something to fail.  We want good
 EUPHORIA code to do the correct thing and there is a correct thing to
 do also for *bad* code.  The interpreter must return with an error message
-of why it failed and the error must be correct and it must get written to ex.err.
+of why it failed and the error must be correct and it must get written to 
+##ex.err##.
 We must thus check the ex.err file to see if it has
 the correct error message.
 
@@ -113,13 +114,16 @@ eutest runs it, watches it fail, then compares the ex.err file to
 ##t_foo.d/Win32/control.err##.  If they ex.err is different from
 control.err an error message is written to the log.  Now on, say NetBSD,
 t_file.e is tested with the expectation it will return 0 and the tests
-will all pass unless ##t_foo.d/UNIX/control.err## or ##t_foo.d/control.err## also exist.
+will all pass unless ##t_foo.d/UNIX/control.err## or ##t_foo.d/control.err## 
+also exist.
 Thus you can have different expectations for differing platforms.
-Some feature that is not possible to implement under WIN32 can be put into a unit test and the
+Some feature that is not possible to implement under WIN32 can be put into a 
+unit test and the
 resulting ex.err file can be put into a control file for WIN32.
 This means we do not need to have all of these errors that we expect to get
 drawing our attention away from errors that need our attention.
-On the other hand, if an unexpected error message not like ##t_foo.d/Win32/control.err##
+On the other hand, if an unexpected error message not like 
+##t_foo.d/Win32/control.err##
 gets generated in the Windows case then eutest will tell us that.
 
 How do we construct these control files?  You don't really need to, you
@@ -129,17 +133,19 @@ on a test and rename it and move it to the appropriate place.
 
 === Test Coverage
 
-When writing and evaluating the resuls of unit tests, it is important to understand which
-parts of your code are and are not being tested.  The euphoria interpreter has a built
-in capability to instrument your code to analyze how many times each line of your code
-is executed during your suite of tests.  The data is output into an EDS database.  Euphoria
-also comes with a coverage data post-processor that generates html reports to make 
+When writing and evaluating the resuls of unit tests, it is important to 
+understand which parts of your code are and are not being tested.  The Euphoria 
+interpreter has a  built in capability to instrument your code to analyze how 
+many times each line of your code is executed during your suite of tests.  The 
+data is output into an EDS database.  Euphoria also comes with a coverage data 
+post-processor that generates html reports to make 
 analysis of your coverage easy.
 
-The coverage capabilities can be used manually, with arguments supplied on the command line, 
-or passed to eutest.  Indeed, eutest simply passes these along to the intepreter.  The
-euphoria suite of unit tests can be run via the makefiles, and there is a special target
-to run a coverage analysis of the standard library:
+The coverage capabilities can be used manually, with arguments supplied on the 
+command line, or passed to eutest.  Indeed, eutest simply passes these along to 
+the intepreter.  The Euphoria suite of unit tests can be run via the makefiles, 
+and there is a special target to run a coverage analysis of the standard 
+library:
 
 {{{
 Windows:
@@ -149,52 +155,56 @@ Unix:
 > make coverage
 }}}
 
-Then, in your build directory, eutest will run the tests to create the coverage database
-unit-test.edb, and will post-process the results, placing the html reports into
-a unit-test subdirectory from your build directory.
+Then, in your build directory, eutest will run the tests to create the coverage 
+database unit-test.edb, and will post-process the results, placing the html 
+reports into a unit-test subdirectory from your build directory.
 
 ==== Coverage Command Line Switches
 
-* ##-coverage [file|dir]## This specifies what files to gather stats for.  If you supply a
-directory, it recurses on child directories.  Only files that are obviously euphoria are
-included (.e, .ew, .eu, .ex, .exw, .exu).
+* ##-coverage [file|dir]## This specifies what files to gather stats for.  If 
+you supply a directory, it recurses on child directories.  Only files that are 
+obviously euphoria are
+included ( ##.e, .ew, .eu, .ex, .exw, .exu##).
 
-* ##-coverage-db <file>## This one allows you to specify a specific location and name for the
-database where coverage information is stored.  It's an EDS database.
-By default, the DB is eui-cvg.edb.
+* ##-coverage-db <file>## This one allows you to specify a specific location and
+name for the database where coverage information is stored.  It's an EDS 
+database. By default, the DB is eui-cvg.edb.
 
-* ##-coverage-erase##  Tells the interpreter to start over.  By default, multiple runs
-accumulate coverage in the DB to allow coverage analysis based on a suite of unit test files.
+* ##-coverage-erase##  Tells the interpreter to start over.  By default, 
+multiple runs accumulate coverage in the DB to allow coverage analysis based on 
+a suite of unit test files.
 
-* ##-coverage-exclude <patern>##  Specifies a regular expression that is used to exclude
-files from coverage analysis.
+* ##-coverage-exclude <patern>##  Specifies a regular expression that is used to
+exclude files from coverage analysis.
 
-* ##-coverage-pp <post-processor>##  Supported by eutest only (i.e., not the interpreter 
-itself). Tells eutest how to post process the coverage data.  ##<post-processor>## must 
-be the path to a the post processing application.  After running the suite of tests, eutest 
-will execute this program with the path to the coverage db as an argument.
+* ##-coverage-pp <post-processor>##  Supported by eutest only (i.e., not the 
+interpreter itself). Tells eutest how to post process the coverage data.  
+##<post-processor>## must be the path to a the post processing application.  
+After running the suite of tests, eutest will execute this program with the path
+to the coverage db as an argument.
 
 
 ==== Coverage Post-Processing
 
-Once you have run tests to generate a coverage database, the data is not easily viewed.
-Euphoria comes with a post-processor called eucoverage.ex, which is installed in the
-bin directory.  On a Unix packaged install, you should be able to simply use
-eucoverage, which is configured to run eucoverage.ex.
+Once you have run tests to generate a coverage database, the data is not easily 
+viewed. Euphoria comes with a post-processor called ##eucoverage.ex##, which is 
+installed in the bin directory. On a //Unix// packaged install, you should be 
+able to simply use eucoverage, which is configured to run eucoverage.ex.
 
-The post-processor generates an index page, with coverage stats for each file, and
-individual html files, linked from the index page, for each file analyzed for
-test coverage.  At the file level, statistics are presented for total and executed
-routines and lines of code.  The files are sorted in descending order of lines
-that were never executed, in order to highlight the parts of your code that 
-are less tested.  The page for each file shows this information, as well as a
-similar breakdown by routine, displaying the number of lines in each routine
+The post-processor generates an index page, with coverage stats for each file, 
+and individual html files, linked from the index page, for each file analyzed 
+for test coverage.  At the file level, statistics are presented for total and 
+executed routines and lines of code.  The files are sorted in descending order 
+of lines that were never executed, in order to highlight the parts of your code 
+that are less tested.  The page for each file shows this information, as well as
+a similar breakdown by routine, displaying the number of lines in each routine
 that was executed.  The routines are also sorted in descending order by the
 most unexecuted lines.  
 
 Additionally, the source of the file is displayed below the statistics.  The 
-routines are linked to their place in the code. Each line is colored either green 
-red or white.  White lines are those that are not executed.  These are typically
+routines are linked to their place in the code. Each line is colored either 
+green red or white.  White lines are those that are not executed.  These are 
+typically
 blank, comments, declarations or "end" clauses of code blocks that do not 
 create any executable code.  Red lines are those that were never executed, and
 lines that were executed are colored green.  The line number is displayed in the
@@ -203,9 +213,9 @@ to the left of where the source code begins.
 
 ===== Command Line Switches
 
-* ##-o <dir>## Specify the output directory.  The default is to create a subdirectory,
-from the same directory as the coverage database, with the name of the base filename
-(without extension) of the coverage database.
+* ##-o <dir>## Specify the output directory.  The default is to create a 
+subdirectory, from the same directory as the coverage database, with the name of
+the base filename (without extension) of the coverage database.
 
 * ##-v## Verbose output
 

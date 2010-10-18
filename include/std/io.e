@@ -89,12 +89,11 @@ public constant EOF = (-1)
 --
 -- Example 1:
 -- <eucode>
--- print(STDOUT, "ABC")  -- output is:  "{65,66,67}"
--- puts(STDOUT, "ABC")   -- output is:  "ABC"
--- print(STDOUT, 65)     -- output is:  "65"
--- puts(STDOUT, 65)      -- output is:  "A"  (ASCII-65 ==> 'A')
+-- print(STDOUT, "ABC")   -- output is:  "{65,66,67}"
+-- puts(STDOUT, "ABC")    -- output is:  "65"
+-- puts(STDOUT, 65)       -- output is:  "A"  (ASCII-65 ==> 'A')
 -- print(STDOUT, 65.1234) -- output is:  "65.1234"
--- puts(STDOUT, 65.1234) -- output is:  "A" (Converts to integer first)
+-- puts(STDOUT, 65.1234)  -- output is:  "A" (Converts to integer first)
 -- </eucode>
 --
 -- Example 2:
@@ -205,7 +204,8 @@ public constant EOF = (-1)
 --
 -- Example 4:
 -- <eucode>
--- printf(STDOUT, "%d  %e  %f  %g", repeat(7.75, 4)) -- same value in different formats
+-- printf(STDOUT, "%d  %e  %f  %g", repeat(7.75, 4)) 
+--                   -- same value in different formats
 --
 -- --      7  7.750000e+000  7.750000  7.75
 -- </eucode>
@@ -946,7 +946,7 @@ end procedure
 -- On //Unix//, these locks are called advisory locks, which means they aren't enforced
 -- by the operating system. It is up to the processes that use a particular file to cooperate
 -- with each other. A process can access a file without first obtaining a lock on it. On
--- //WIN32// locks are enforced by the operating system.
+-- //Windows// locks are enforced by the operating system.
 --
 -- Example 1:
 -- <eucode>
@@ -986,7 +986,7 @@ end function
 --
 -- Comments:
 -- You must have previously locked the
--- file using ##lock_file##(). On //WIN32// you can unlock a range of bytes within a
+-- file using ##lock_file##(). On //Windows// you can unlock a range of bytes within a
 -- file by specifying the ##r## as {first_byte, last_byte}. The same range of bytes
 -- must have been locked by a previous call to [[:lock_file]](). On //Unix// you can
 -- currently only lock or unlock an entire file. ##r## should be {} when you
@@ -1501,20 +1501,25 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- To console
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName})
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName})
 -- -- To "sample.txt"
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, "sample.txt")
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName}, "sample.txt")
 -- -- To "sample.dat"
 -- integer dat = open("sample.dat", "w")
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, dat)
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName}, dat)
 -- -- Appended to "sample.log"
--- writef("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, {"sample.log", "a"})
+-- writef("Today is [4], [u2:3] [3:02], [1:4].", 
+--        {Year, MonthName, Day, DayName}, {"sample.log", "a"})
 -- -- Simple message to console
 -- writef("A message")
 -- -- Another console message
 -- writef(STDERR, "This is a []", "message")
 -- -- Outputs two numbers
--- writef(STDERR, "First [], second []", {65, 100},, 1) -- Note that {65, 100} is also "Ad"
+-- writef(STDERR, "First [], second []", {65, 100},, 1) 
+--      -- Note that {65, 100} is also "Ad"
 -- </eucode>
 --
 -- See Also:
@@ -1593,11 +1598,14 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- -- To console
--- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName})
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", 
+--          {Year, MonthName, Day, DayName})
 -- -- To "sample.txt"
--- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, "sample.txt")
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", 
+--          {Year, MonthName, Day, DayName}, "sample.txt")
 -- -- Appended to "sample.log"
--- writefln("Today is [4], [u2:3] [3:02], [1:4].", {Year, MonthName, Day, DayName}, {"sample.log", "a"})
+-- writefln("Today is [4], [u2:3] [3:02], [1:4].", 
+--          {Year, MonthName, Day, DayName}, {"sample.log", "a"})
 -- </eucode>
 --
 -- See Also:

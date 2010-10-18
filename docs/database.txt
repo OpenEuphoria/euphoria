@@ -22,17 +22,20 @@ the same table can have the same key part.
  
 The records of a table are stored in ascending order of key value.  An
 efficient binary search is used when you refer to a record by key. You can also
-access a record directly, with no search, if you know its current **record number** 
-within the table. Record numbers are integers from 1 to the length (current number of 
-records) of the table.  By incrementing the record number, you can efficiently step through 
-all the records, in order of key. Note however that a record's number can change
-whenever a new record is inserted, or an existing record is deleted.
+access a record directly, with no search, if you know its current 
+**record number** within the table. Record numbers are integers from 1 to the 
+length (current number of records) of the table. By incrementing the record 
+number, you can efficiently step through all the records, in order of key. 
+Note however that a record's number can change whenever a new record is 
+inserted, or an existing record is deleted.
 
-The keys and data parts are stored in a compact form, but **no** accuracy is lost when 
-saving or restoring floating-point numbers or **any** other Euphoria data.
+The keys and data parts are stored in a compact form, but **no** accuracy is 
+lost when saving or restoring floating-point numbers or **any** other Euphoria 
+data.
 
-##database.e## will work as is, on all platforms. EDS database files can be copied and 
-shared between programs running on all platforms as well. Be sure to make an exact byte for
+##database.e## will work as is, on all platforms. EDS database files can be 
+copied and shared between programs running on all platforms as well. Be sure to 
+make an exact byte for
 byte copy using "binary" mode copying, rather than "text" or "ASCII" mode which
 could change the line terminators.
  
@@ -52,8 +55,8 @@ database: "mydata.edb"
 
 It's up to you to interpret the meaning of the key and data. **In keeping with
 the spirit of Euphoria, you have total flexibility.** Unlike most other
-database systems, an EDS record is //not// required to have either a fixed number of 
-fields, or fields with a preset maximum length.
+database systems, an EDS record is //not// required to have either a fixed 
+number of fields, or fields with a preset maximum length.
  
 In many cases there will not be any natural key value for your records.  In
 those cases you should simply create a meaningless, but unique, integer to be
@@ -67,14 +70,15 @@ the **current database**, and **current table**.
 
 ==== The current database.
 
-Any data operation or table operation assumes there is a current database being defined.
-You set the current database by opening, creating or selecting a database. Deleting the current database leaves the current database undefined.
+Any data operation or table operation assumes there is a current database being 
+defined. You set the current database by opening, creating or selecting a 
+database. Deleting the current database leaves the current database undefined.
 
 ==== The current table.
 
-All data operations assume there is a current table being defined. You must create, select or
-rename a table in order to make it current. Deleting the current table leaves the current
-table undefined.
+All data operations assume there is a current table being defined. You must 
+create, select or rename a table in order to make it current. Deleting the 
+current table leaves the current table undefined.
 
 ==== Accessing data
 
@@ -127,7 +131,8 @@ any damage or data loss.
 
 === Warning: Use the right file mode
 
-.edb files are binary files, not text files.  You **must** use ##BINARY## mode when
+##.edb## files are binary files, not text files.  You **must** use ##BINARY## 
+mode when
 transferring a .edb file via FTP from one machine to another. You must also
 avoid loading a .edb file into an editor and saving it. If you open a .edb file
 directly using Euphoria's open(), which is not recommended, you must use binary

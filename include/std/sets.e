@@ -160,9 +160,12 @@ end type
 --
 -- Example 1:
 -- <eucode>
--- sequence s = {{{2, 3}, {3, 1}, {1, 2}, {2, 3}, {3, 1}}, {5,2,3}}
--- -- s represents the addition modulo 3 from {0, 1, 2, 3, 4} x {1, 2} to {0, 1, 2}
--- ? operation(s)   -- prints out 1.
+-- sequence s 
+-- s = {{{2, 3}, {3, 1}, {1, 2}, {2, 3}, {3, 1}}, {5,2,3}}
+-- --> s represents the addition modulo 3 
+-- --> from {0, 1, 2, 3, 4} x {1, 2} to {0, 1, 2}
+-- ? operation(s)   
+--  --> prints out 1.
 -- </eucode>
 
 public type operation(object s)
@@ -293,7 +296,7 @@ end function
 -- Example 1:
 -- <eucode>
 --   set s0 = {1,3,5,7}
---   ?belongs_to(2,s)   -- prints out 0
+--   ? belongs_to(2,s)   -- prints out 0
 -- </eucode>
 --
 -- See Also: 
@@ -631,7 +634,8 @@ end function
 -- <eucode>
 --   set s0 = {1,3,5,7}
 --   s0 = subsets(s0)   -- s0 is now:
---   {{},{1},{3},{5},{7},{1,3},{1,5},{1,7},{3,5},{3,7},{5,7},{1,3,5},{1,3,7},{1,5,7},{3,5,7},{1,3,5,7}}
+--   {{},{1},{3},{5},{7},{1,3},{1,5},{1,7},{3,5},{3,7},{5,7},{1,3,5},
+--                                            {1,3,7},{1,5,7},{3,5,7},{1,3,5,7}}
 -- </eucode>
 --
 -- See Also: 
@@ -1010,7 +1014,8 @@ end function
 -- <eucode>
 -- set s0,s1,s2
 -- s1 = {1, 3, 5, 7} s2 = {-1, 3}
--- s0 = product(s1, s2)   -- s0 is now {{1, -1}, {1, 3}, {3, -1}, {3, 3}, {5, -1}, {5, 3}, {7, -1}, {7, 3}}
+-- s0 = product(s1, s2)   
+-- --> now {{1, -1}, {1, 3}, {3, -1}, {3, 3}, {5, -1}, {5, 3}, {7, -1}, {7, 3}}
 -- </eucode>
 --
 -- See Also:
@@ -1907,7 +1912,8 @@ public enum SIDE_NONE = 0, SIDE_LEFT, SIDE_RIGHT, SIDE_BOTH
 --
 -- Example 1:
 -- <eucode>
--- sequence s = {{2, 3, 2, 3}, {3, 1, 2, 5}, {1, 2, 2, 2}, {2, 3, 2, 4}, {3, 1, 2, 3}}
+-- sequence s 
+-- s = {{2, 3, 2, 3}, {3, 1, 2, 5}, {1, 2, 2, 2}, {2, 3, 2, 4}, {3, 1, 2, 3}}
 -- operation F = define_operation(s)
 -- -- F is now {{{2,3},{3,1},{1,2},{2,3},{3,1}},{5,2,3}
 -- ? operation(s)   -- prints out 1.

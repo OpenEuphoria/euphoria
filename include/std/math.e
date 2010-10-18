@@ -1812,12 +1812,18 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? approx(10, 33.33 * 30.01 / 100) --> 0 because 10 and 10.002333 are within 0.005 of each other
--- ? approx(10, 10.001) -> 0 because 10 and 10.001 are within 0.005 of each other
--- ? approx(10, {10.001,9.999, 9.98, 10.04}) --> {0,0,1,-1}
--- ? approx({10.001,9.999, 9.98, 10.04}, 10) --> {0,0,-1,1}
--- ? approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}) --> {-1,{1,1},1,-1}
--- ? approx(23,32, 10) -> 0 because 23 and 32 are within 10 of each other.
+-- ? approx(10, 33.33 * 30.01 / 100) 
+--           --> 0 because 10 and 10.002333 are within 0.005 of each other
+-- ? approx(10, 10.001) 
+--           --> 0 because 10 and 10.001 are within 0.005 of each other
+-- ? approx(10, {10.001,9.999, 9.98, 10.04}) 
+--           --> {0,0,1,-1}
+-- ? approx({10.001,9.999, 9.98, 10.04}, 10) 
+--           --> {0,0,-1,1}
+-- ? approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}) 
+--           --> {-1,{1,1},1,-1}
+-- ? approx(23,32, 10) 
+--           --> 0 because 23 and 32 are within 10 of each other.
 -- </eucode>
 --
 public function approx(object p, object q, atom epsilon = 0.005)

@@ -115,7 +115,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- atom pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
+-- atom pa
+-- pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
 -- </eucode>
 --
 -- See Also:
@@ -624,7 +625,7 @@ end ifdef
 -- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
 -- [[:allocate_code()]] instead.  It is simpler.
 --
--- You mustn't use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
+-- You must not use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
 
 public function allocate_protect( object data, valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
 	-- set the actual protection for the OS to /true_protection/ in all cases

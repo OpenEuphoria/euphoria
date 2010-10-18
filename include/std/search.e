@@ -430,13 +430,15 @@ public constant
 --
 -- Example 2:
 -- <eucode>
--- sequence s = find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_BACKWARD + NESTED_ALL)
+-- sequence s = find_nested({3, 2}, {1, 3, {2,3}}, 
+--                                    NESTED_ANY + NESTED_BACKWARD + NESTED_ALL)
 -- -- s is {{3,2}, {3,1}, {2}}
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
--- sequence s = find_nested({3, 2}, {1, 3, {2,3}}, NESTED_ANY + NESTED_INDEXES + NESTED_ALL)
+-- sequence s = find_nested({3, 2}, {1, 3, {2,3}}, 
+--                                     NESTED_ANY + NESTED_INDEXES + NESTED_ALL)
 -- -- s is {{{2}, 1}, {{3, 1}, 2}, {{3, 2}, 1}}
 -- </eucode>
 --
@@ -1159,8 +1161,10 @@ end function
 -- lookup('d', "cat", "dogx") --> 'x'
 -- lookup('d', "cat", "dog") --> 0
 -- lookup('d', "cat", "dog", -1) --> -1
--- lookup("ant", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "spider"
--- lookup("dog", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) --> "unknown"
+-- lookup("ant", {"ant","bear","cat"}, {"spider","seal","dog","unknown"}) 
+--             --> "spider"
+-- lookup("dog", {"ant","bear","cat"}, {"spider","seal","dog","unknown"})     
+--             --> "unknown"
 -- </eucode>
 --
 public function lookup(object find_item, sequence source_list, sequence target_list, object def_value = 0)

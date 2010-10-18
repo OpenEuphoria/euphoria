@@ -183,7 +183,8 @@ public enum
 -- -- FALSE, not every char is in the range 'A' to 'C'
 --
 -- char_test("Harry", {{'a', 'z'}, {'D', 'J'}})
--- -- TRUE, every char is either in the range 'a' to 'z', or in the range 'D' to 'J'
+-- -- TRUE, every char is either in the range 'a' to 'z', 
+-- --       or in the range 'D' to 'J'
 --
 -- char_test("Potter", "novel")
 -- -- FALSE, not every character is in the set 'n', 'o', 'v', 'e', 'l'

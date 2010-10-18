@@ -589,8 +589,8 @@ end procedure
 --
 -- show_help({
 --     {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
---     {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},
---     description)
+--     {"r", 0, "Sets how many lines the console should display", 
+--     {HAS_PARAMETER,"lines"}, -1}}, description)
 -- </eucode>
 -- Outputs:
 -- {{{
@@ -619,8 +619,8 @@ end procedure
 --
 -- show_help({
 --     {"q", "silent", "Suppresses any output to console", NO_PARAMETER, -1},
---     {"r", 0, "Sets how many lines the console should display", {HAS_PARAMETER,"lines"}, -1}},
---     routine_id("sh"))
+--     {"r", 0, "Sets how many lines the console should display", 
+--      {HAS_PARAMETER,"lines"}, -1}}, routine_id("sh"))
 -- </eucode>
 -- Outputs:
 -- {{{
@@ -883,7 +883,8 @@ end function
 --
 -- function opt_extras( sequence value)
 --    if not file_exists(value[OPT_VAL]) then
---        show_help(option_definition, sprintf("Cannot find '%s'", {value[OPT_VAL]}) )
+--        show_help(option_definition, sprintf("Cannot find '%s'", 
+--                  {value[OPT_VAL]}) )
 --        abort(1)
 --    end if
 --    gInFile = append(gInFile, value[OPT_VAL])
@@ -891,16 +892,18 @@ end function
 -- end function
 --
 -- option_definition = {
---     { "v", "verbose", "Verbose output",{NO_PARAMETER}, routine_id("opt_verbose")},
---     { "h", "hash", "Calculate hash values",{NO_PARAMETER}, -1},
---     { "o", "output",  "Output filename",{MANDATORY, HAS_PARAMETER, ONCE} , routine_id("opt_output_filename") },
+-- { "v", "verbose", "Verbose output",{NO_PARAMETER},routine_id("opt_verbose")},
+-- { "h", "hash", "Calculate hash values",{NO_PARAMETER}, -1},
+-- { "o", "output",  "Output filename",{MANDATORY, HAS_PARAMETER, ONCE} , 
+--                                          routine_id("opt_output_filename") },
 --     { "i", "import",  "An import path", {HAS_PARAMETER, MULTIPLE}, -1 },
 --     {  0,  0, 0, 0, routine_id("opt_extras")}
 -- }
 --
 -- map:map opts = cmd_parse(option_definition)
 --
--- -- When run as: eui myprog.ex -v @output.txt -i /etc/app input1.txt input2.txt
+-- -- When run as: 
+-- --             eui myprog.ex -v @output.txt -i /etc/app input1.txt input2.txt
 -- -- and the file "output.txt" contains the two lines ...
 -- --   --output=john.txt
 -- --   '-i /usr/local'

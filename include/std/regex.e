@@ -1040,7 +1040,8 @@ end function
 -- <eucode>
 -- include std/regex.e as re
 -- regex comma_space_re = re:new(`,\s`)
--- sequence data = re:split(comma_space_re, "euphoria programming, source code, reference data")
+-- sequence data = re:split(comma_space_re, 
+--                          "euphoria programming, source code, reference data")
 -- -- data is
 -- -- {
 -- --   "euphoria programming",
@@ -1116,7 +1117,8 @@ end function
 -- <eucode>
 -- include std/regex.e
 -- regex r = new(`([A-Za-z]+)\.([A-Za-z]+)`)
--- sequence details = find_replace(r, "hello.txt", `Filename: \U\1\e Extension: \U\2\e`)
+-- sequence details = find_replace(r, "hello.txt", 
+--                                         `Filename: \U\1\e Extension: \U\2\e`)
 -- -- details = "Filename: HELLO Extension: TXT"
 -- </eucode>
 --
@@ -1201,7 +1203,7 @@ end function
 -- end function
 --
 -- regex r = re:new(`\d`)
--- sequence result = re:find_replace_callback(r, "125", routine_id("my_convert"))
+-- sequence result = re:find_replace_callback(r, "125",routine_id("my_convert"))
 -- -- result = "one two unknown "
 -- </eucode>
 --

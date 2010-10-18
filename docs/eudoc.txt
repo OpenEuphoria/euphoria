@@ -174,9 +174,11 @@ end for
 === Documentation software
 
 
-The programs eudoc ... https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk
+The programs eudoc ... 
+https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk
 
-and creolehtml ... https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
+and creolehtml ... 
+https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
 
 are hosted at Source-Forge ... http://sourceforge.net/projects/rapideuphoria/
 
@@ -186,4 +188,5 @@ More on using eudoc... http://openeuphoria.org/wiki/euwiki.cgi?Documenting40
 
 More on using Creole markup... http://openeuphoria.org/wiki/euwiki.cgi?CreoleHelp
 
-The program htmldoc is found at... http://www.htmldoc.org/ and http://htmldoc-binaries.org/
+The program htmldoc is found at... http://www.htmldoc.org/ and 
+http://htmldoc-binaries.org/

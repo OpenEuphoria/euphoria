@@ -36,12 +36,18 @@ include std/sequence.e
 --
 -- Example 1:
 --   <eucode>
---   ? small( {4,5,6,8,5,4,3,"text"}, 3 ) -- Ans: {4,1} (The 3rd smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 1 ) -- Ans: {3,7} (The 1st smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 7 ) -- Ans: {8,4} (The 7th smallest value)
---   ? small( {"def", "qwe", "abc", "try"}, 2 ) -- Ans: {"def", 1} (The 2nd smallest value)
---   ? small( {1,2,3,4}, -1) -- Ans: {} -- no-value
---   ? small( {1,2,3,4}, 10) -- Ans: {} -- no-value
+--   ? small( {4,5,6,8,5,4,3,"text"}, 3 ) 
+--     --> Ans: {4,1} (The 3rd smallest value)
+--   ? small( {4,5,6,8,5,4,3,"text"}, 1 ) 
+--     --> Ans: {3,7} (The 1st smallest value)
+--   ? small( {4,5,6,8,5,4,3,"text"}, 7 ) 
+--     --> Ans: {8,4} (The 7th smallest value)
+--   ? small( {"def", "qwe", "abc", "try"}, 2 ) 
+--     --> Ans: {"def", 1} (The 2nd smallest value)
+--   ? small( {1,2,3,4}, -1) 
+--     --> Ans: {} -- no-value
+--   ? small( {1,2,3,4}, 10) 
+--     --> Ans: {} -- no-value
 --   </eucode>
 --
 
@@ -289,14 +295,14 @@ end function
 -- }}}
 --
 -- Example 1:
---   <eucode>
---   ? stdev( {4,5,6,7,5,4,3,7} )                             -- Ans: 1.457737974
---   ? stdev( {4,5,6,7,5,4,3,7} ,, ST_FULLPOP)                -- Ans: 1.363589014
---   ? stdev( {4,5,6,7,5,4,3,"text"} , ST_IGNSTR)             -- Ans: 1.345185418
---   ? stdev( {4,5,6,7,5,4,3,"text"}, ST_IGNSTR, ST_FULLPOP ) -- Ans: 1.245399698
---   ? stdev( {4,5,6,7,5,4,3,"text"} , 0)                     -- Ans: 2.121320344
---   ? stdev( {4,5,6,7,5,4,3,"text"}, 0, ST_FULLPOP )         -- Ans: 1.984313483
---   </eucode>
+-- <eucode>
+-- ? stdev( {4,5,6,7,5,4,3,7} )                             -- Ans: 1.457737974
+-- ? stdev( {4,5,6,7,5,4,3,7} ,, ST_FULLPOP)                -- Ans: 1.363589014
+-- ? stdev( {4,5,6,7,5,4,3,"text"} , ST_IGNSTR)             -- Ans: 1.345185418
+-- ? stdev( {4,5,6,7,5,4,3,"text"}, ST_IGNSTR, ST_FULLPOP ) -- Ans: 1.245399698
+-- ? stdev( {4,5,6,7,5,4,3,"text"} , 0)                     -- Ans: 2.121320344
+-- ? stdev( {4,5,6,7,5,4,3,"text"}, 0, ST_FULLPOP )         -- Ans: 1.984313483
+-- </eucode>
 --
 -- See also:
 --   [[:average]], [[:avedev]]
@@ -379,12 +385,18 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7} ) -- Ans: 1.966666667
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7},, ST_FULLPOP ) -- Ans: 1.84375
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR  ) -- Ans: 1.99047619
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR,ST_FULLPOP ) -- Ans: 1.857777778
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0 ) -- Ans: 2.225
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0, ST_FULLPOP ) -- Ans: 2.0859375
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7} ) 
+--    --> Ans: 1.966666667
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7},, ST_FULLPOP ) 
+--    --> Ans: 1.84375
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR  ) 
+--    --> Ans: 1.99047619
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR,ST_FULLPOP ) 
+--    --> Ans: 1.857777778
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0 ) 
+--     --> Ans: 2.225
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0, ST_FULLPOP ) 
+--    --> Ans: 2.0859375
 -- </eucode>
 --
 -- See also:

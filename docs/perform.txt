@@ -10,7 +10,7 @@
 * The easiest way to gain a bit of speed is to turn off run-time
  type-checking. Insert the line:
 <eucode>
-           without type_check
+without type_check
 </eucode>
    at the top of your main **.ex** file, ahead of any include statements.
    You'll typically gain between 0 and 20 percent depending on the
@@ -21,9 +21,9 @@
 \\
    Also, be //sure// to remove, or comment-out, any
 <eucode>
-           with trace
-           with profile
-           with profile_time
+with trace
+with profile
+with profile_time
 </eucode>
    statements. **with trace** (even without  any calls to [[:trace]]), and
    **with profile** can easily slow you down
@@ -40,22 +40,22 @@
    floating-point value, say, x = 9.9\\\\
    change:
 <eucode>
-           x = x * 5
+x = x * 5
 </eucode>
    to:
 <eucode>
-           x = x * 5.0
+x = x * 5.0
 </eucode>
    This saves the interpreter from having to convert integer 5 to
    floating-point 5.0 each time.
 * Euphoria does //short-circuit// evaluation of ##if##, ##elsif##, and
-  ##while## conditions involving ##and## and ##or##. Euphoria will stop evaluating
-  any condition once it determines if the condition is true or not.
+  ##while## conditions involving ##and## and ##or##. Euphoria will stop 
+evaluating any condition once it determines if the condition is true or not.
   For instance in the //if-statement//:
 <eucode>
-        if x > 20 and y = 0 then
-            ...
-        end if
+if x > 20 and y = 0 then
+    ...
+end if
 </eucode>
    The "y = 0" test will only be made when "x > 20" is true.
 \\
@@ -71,26 +71,26 @@
    nested simple if's that compare integers are usually a bit faster
    than a single short-circuit if-statement e.g.:
 <eucode>
-       if x > 20 then
-           if y = 0 then
-               ...
-           end if
-       end if
+if x > 20 then
+    if y = 0 then
+       ...
+    end if
+end if
 </eucode>
 * The speed of access to private variables, local variables and global
    variables is the same.
 * There is no performance penalty for defining constants versus plugging
    in hard-coded literal numbers. The speed of:
 <eucode>
-           y = x * MAX
+y = x * MAX
 </eucode>
    is exactly the same as:
 <eucode>
-           y = x * 1000
+y = x * 1000
 </eucode>
    where you've previously defined:
 <eucode>
-           constant MAX = 1000
+constant MAX = 1000
 </eucode>
 * There is no performance penalty for having lots of comments in your
    program. Comments are completely ignored. They are not executed in any way.
@@ -117,12 +117,11 @@
 
  You can also measure the speed of code by using the [[:time]] function. e.g.
 <eucode>
-        atom t
-        t = time()
-        for i = 1 to 10000 do
-            -- small chunk of code here
-        end for
-        ? time() - t
+atom t = time()
+for i = 1 to 10000 do
+    -- small chunk of code here
+end for
+? time() - t
 </eucode>
  You might rewrite the small chunk of code in different ways to see which way
  is faster.
@@ -139,17 +138,17 @@
  Addition is faster than multiplication. Sometimes you can replace a
  multiplication by the loop variable, with an addition. Something like:
 <eucode>
-        for i = 0 to 199 do
-            poke(screen_memory+i*320, 0)
-        end for
+for i = 0 to 199 do
+    poke(screen_memory+i*320, 0)
+end for
 </eucode>
   becomes:
 <eucode>
-        x = screen_memory
-        for i = 0 to 199 do
-            poke(x, 0)
-            x = x + 320
-        end for
+x = screen_memory
+for i = 0 to 199 do
+    poke(x, 0)
+    x = x + 320
+end for
 </eucode>
 
 === Saving Results in Variables
@@ -160,17 +159,17 @@
 * When you have a sequence with multiple levels of subscripting,
    it is faster to change code like:
 <eucode>
-           for i = 1 to 1000 do
-               y[a][i] = y[a][i]+1
-           end for
+for i = 1 to 1000 do
+   y[a][i] = y[a][i]+1
+end for
 </eucode>
    to:
 <eucode>
-           ya = y[a]
-           for i = 1 to 1000 do
-               ya[i] = ya[i] + 1
-           end for
-           y[a] = ya
+ya = y[a]
+for i = 1 to 1000 do
+    ya[i] = ya[i] + 1
+end for
+y[a] = ya
 </eucode>
     So you are doing 2 subscript operations per iteration of the loop, rather
     than 4. The operations, ya = y[a] and y[a] = ya are very cheap.
@@ -190,16 +189,16 @@
  statement. This saves you from writing a loop where you process one element
  at-a-time. e.g.
 <eucode>
-        x = {1,3,5,7,9}
-        y = {2,4,6,8,10}
-        z = x + y
+x = {1,3,5,7,9}
+y = {2,4,6,8,10}
+z = x + y
 </eucode>
  versus:
 <eucode>
-        z = repeat(0, 5)  -- if necessary
-        for i = 1 to 5 do
-            z[i] = x[i] + y[i]
-        end for
+z = repeat(0, 5)  -- if necessary
+for i = 1 to 5 do
+    z[i] = x[i] + y[i]
+end for
 </eucode>
  In most interpreted languages, it is much faster to process a whole sequence
  (array) in one statement, than it is to perform scalar operations
@@ -216,22 +215,22 @@
  Euphoria automatically optimizes certain special cases. ##x## and ##y##
  below could  be variables or arbitrary expressions.
 <eucode>
-        x + 1      -- faster than general x + y
-        1 + x      -- faster than general y + x
-        x * 2      -- faster than general x * y
-        2 * x      -- faster than general y * x
-        x / 2      -- faster than general x / y
-        floor(x/y) -- where x and y are integers, is faster than x/y
-        floor(x/2) -- faster than floor(x/y)
+x + 1      -- faster than general x + y
+1 + x      -- faster than general y + x
+x * 2      -- faster than general x * y
+2 * x      -- faster than general y * x
+x / 2      -- faster than general x / y
+floor(x/y) -- where x and y are integers, is faster than x/y
+floor(x/2) -- faster than floor(x/y)
 </eucode>
 
  x below is a simple variable, y is any variable or expression:
 <eucode>
-        x = append(x, y)   -- faster than general z = append(x, y)
-        x = prepend(x, y)  -- faster than general z = prepend(x, y)
+x = append(x, y)   -- faster than general z = append(x, y)
+x = prepend(x, y)  -- faster than general z = prepend(x, y)
 
-        x = x & y          -- where x is much larger than y,
-                           -- is faster than general z = x & y
+x = x & y          -- where x is much larger than y,
+                   -- is faster than general z = x & y
 </eucode>
 
 When you write a loop that "grows" a sequence, by appending or
@@ -246,20 +245,21 @@ of the sequence, and then fill in the elements in a loop, as discussed
 below.)
 
 === Assignment with Operators
- For greater speed, convert:
+
+For greater speed, convert:
 {{{
-        **left-hand-side = left-hand-side op expression**
+**left-hand-side = left-hand-side op expression**
 }}}
  to:
 {{{
-        **left-hand-side op= expression**
+**left-hand-side op= expression**
 }}}
 For example:
 <eucode>
 -- Instead of ...
-  some_val = some_val * 3
+some_val = some_val * 3
 -- Use ...
-  some_val *= 3
+some_val *= 3
 </eucode>
 
  whenever left-hand-side contains at least 2 subscripts, or at least
@@ -267,6 +267,7 @@ For example:
  the same speed (or very close to the same).
 
 === Pixel-Graphics Tips
+
 * Mode 19 is the fastest mode for **animated graphics** and
  **games**.
 * The video memory (in mode 19) is not cached by the CPU. It usually takes longer
@@ -292,17 +293,17 @@ For example:
  Other routines are reasonably fast, but you might be able
  to do the job faster in some cases if speed was crucial.
 <eucode>
-        x = repeat(0,100) -- Pre-allocate all the elements first.
-        for i = 1 to 100 do
-            x[i] = i
-        end for
+x = repeat(0,100) -- Pre-allocate all the elements first.
+for i = 1 to 100 do
+    x[i] = i
+end for
 </eucode>
  is somewhat faster than:
 <eucode>
-        x = {}
-        for i = 1 to 100 do
-            x = append(x, i)
-        end for
+x = {}
+for i = 1 to 100 do
+    x = append(x, i)
+end for
 </eucode>
  because append() has to allocate and reallocate
  space as x grows in size. With repeat(), the
@@ -313,11 +314,11 @@ For example:
 
  You can replace:
 <eucode>
-        remainder(x, p)
+remainder(x, p)
 </eucode>
  with:
 <eucode>
-        and_bits(x, p-1)
+and_bits(x, p-1)
 </eucode>
  for greater speed when p is a positive power of 2. x must be a non-negative
  integer that fits in 32-bits.
@@ -327,7 +328,8 @@ For example:
 === Searching
 
  Euphoria's [[:find]] is the fastest way to search for a value in a
- sequence up to about 50 elements. Beyond that, you might consider a //hash table//
+ sequence up to about 50 elements. Beyond that, you might consider a 
+ //hash table//
  (**demo\hash.ex**) or a //binary tree// (**demo\tree.ex**).
 
 === Sorting
@@ -365,9 +367,12 @@ For example:
  lower-level compiled languages, but they are measurable.
 
 === Using Machine Code and C
- Euphoria lets you call routines written in machine code. You can call C routines in dynamically loaded library files, and these C routines can call your Euphoria routines.
- You might need to call C or machine code because of something that can't be
- done directly in Euphoria, or you might do it for improved speed.
+
+ Euphoria lets you call routines written in machine code. You can call C 
+ routines in dynamically loaded library files, and these C routines can call 
+your Euphoria routines.
+You might need to call C or machine code because of something that can not be
+done directly in Euphoria, or you might do it for improved speed.
 
  To boost speed, the machine code or C routine needs to do a significant
  amount of work on each call, otherwise the overhead of setting up the
@@ -380,7 +385,9 @@ For example:
  to C, without sacrificing Euphoria's safety and flexibility.
 
 === Using The Euphoria To C Translator
-From version 3.0, the full Euphoria To C Translator is included in the installation package.
+
+From version 3.0, the full Euphoria To C Translator is included in the 
+installation package.
 It will translate any Euphoria program into a set of C source files that you
 can compile using a C compiler.
 

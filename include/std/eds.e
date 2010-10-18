@@ -971,19 +971,22 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- db_connect("myDB", "/usr/data/myapp/customer.edb", {{LOCK_METHOD,DB_LOCK_NO}, {INIT_TABLES,1}})
+-- db_connect("myDB", "/usr/data/myapp/customer.edb", {{LOCK_METHOD,DB_LOCK_NO},
+--                                                             {INIT_TABLES,1}})
 -- db_open("myDB")
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
--- db_connect("myDB", "/usr/data/myapp/customer.edb", sprintf("init_tables=1,lock_method=%d",DB_LOCK_NO))
+-- db_connect("myDB", "/usr/data/myapp/customer.edb", 
+--                           sprintf("init_tables=1,lock_method=%d",DB_LOCK_NO))
 -- db_open("myDB")
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
--- db_connect("myDB", "/usr/data/myapp/customer.edb", sprintf("init_tables=1,lock_method=%d",DB_LOCK_NO))
+-- db_connect("myDB", "/usr/data/myapp/customer.edb", 
+--                           sprintf("init_tables=1,lock_method=%d",DB_LOCK_NO))
 -- db_connect("myDB",,CONNECTION) --> {"/usr/data/myapp/customer.edb", {0,1,1}}
 -- db_connect("myDB",,DISCONNECT) -- The name 'myDB' is removed from EDS.
 -- </eucode>

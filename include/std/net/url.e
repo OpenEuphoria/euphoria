@@ -99,7 +99,8 @@ public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWO
 --   
 -- Example 1:
 -- <eucode>
--- sequence parsed = parse("http://user:pass@www.debian.org:80/index.html?name=John&age=39")
+-- sequence parsed = 
+--       parse("http://user:pass@www.debian.org:80/index.html?name=John&age=39")
 -- -- parsed is
 -- -- { 
 -- --     "http",

@@ -855,11 +855,13 @@ end procedure
 --        bucket size to an optimal value. See [[:new]] on how to do this.
 --
 -- Example 1:
---   <eucode>
---   map city_population
---   city_population = new()
---   nested_put(city_population, {"United States", "California", "Los Angeles"}, 3819951 )
---   nested_put(city_population, {"Canada",        "Ontario",    "Toronto"},     2503281 )
+-- <eucode>
+-- map city_population
+-- city_population = new()
+-- nested_put(city_population, {"United States", "California", "Los Angeles"},
+--                                                                     3819951 )
+-- nested_put(city_population, {"Canada",        "Ontario",    "Toronto"},     
+--                                                                     2503281 )
 --   </eucode>
 --
 -- See also:  [[:put]]
@@ -1277,17 +1279,19 @@ end function
 --   If ##sorted_result## is not used, the order of the values returned is not predicable. 
 --
 -- Example 1:
---   <eucode>
---   map the_map_p
---   the_map_p = new()
---   put(the_map_p, 10, "ten")
---   put(the_map_p, 20, "twenty")
---   put(the_map_p, 30, "thirty")
---   put(the_map_p, 40, "forty")
+-- <eucode>
+-- map the_map_p
+-- the_map_p = new()
+-- put(the_map_p, 10, "ten")
+-- put(the_map_p, 20, "twenty")
+-- put(the_map_p, 30, "thirty")
+-- put(the_map_p, 40, "forty")
 --
---   sequence keyvals
---   keyvals = pairs(the_map_p) -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
---   keyvals = pairs(the_map_p, 1) -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
+-- sequence keyvals
+-- keyvals = pairs(the_map_p) 
+--           -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
+-- keyvals = pairs(the_map_p, 1) 
+--           -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
 --   </eucode>
 --
  -- See Also:

@@ -1,8 +1,8 @@
  
- How to Install Euphoria on Linux or FreeBSD
- -------------------------------------------
+== How to Install Euphoria on Linux or FreeBSD
+
  
- Now that you've run tar to create the euphoria directory,
+Now that you've run tar to create the euphoria directory,
  you need to: 
     
     1. add euphoria/bin to your PATH

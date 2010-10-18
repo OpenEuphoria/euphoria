@@ -4,16 +4,16 @@
 
 === Introduction
 
-In the euphoria source directory is a program named dis.ex, which can be
+In the euphoria source directory is a program named ##dis.ex##, which can be
 used for parsing euphoria code and outputting detailed disassembly
-of the intermediate language (i.e., byte code) used by euphoria, as well
+of the intermediate language (i.e., byte code) used by Euphoria, as well
 as the symbol table.  The purpose of this tool is for low level debugging,
-especially for developing euphoria itself, or for understanding why 
+especially for developing Euphoria itself, or for understanding why 
 certain code performs the way it does.
 
-It uses the actual euphoria front end to parse your code.  When euphoria
+It uses the actual Euphoria front end to parse your code.  When Euphoria
 is installed, there should be a shell script or batch file (depending on
-your operating system) called eudis or eudis.bat, respectively, that can
+your operating system) called ##eudis## or ##eudis.bat##, respectively, that can
 be used to analyze your code:
 
 {{{
@@ -21,44 +21,45 @@ $ eudis myapp.ex
 saved to [/path/to/myapp.ex.dis]
 }}}
 
-When run, eudis will say where its output was saved.  The file name, 
+When run, ##eudis## will say where its output was saved.  The file name, 
 including extension, is used as the base for its output.  By default,
 it outputs 4 files:
 
 * ##.dis## The main disassembly file.  This shows the IL code representation
 both raw and symbolically.
-
 * ##.sym## The symbol table.  This shows details for the entire symbol table
 for your code.
-
 * ##.hash## Details about symbol hashing.
-
 * ##.line## Line table information.  Unless tracing is enabled, this will be
 blank.
 
 === HTML Output
 
-eudis can output html documentation of your program somewhat similar to the
-output from Doxygen.  This documentation is different than eudoc.  It is meant 
-to document the structure of your program, and to help developers understand 
-code dependencies.  It can generate graphs showing how files include each other, 
-as well as which routines call which others.  Note that generating graphs 
-requires that you have [[http://www.graphviz.org|Graphviz]] installed.  Note 
-that generating call graphs can be quite time consuming for a large program.
+##eudis## can output html documentation of your program somewhat similar to the
+output from Doxygen.  This documentation is different than ##eudoc##.  It is 
+meant to document the structure of your program, and to help developers 
+understand code dependencies.  It can generate graphs showing how files include 
+each other, as well as which routines call which others.  Note that generating 
+graphs requires that you have [[http://www.graphviz.org|Graphviz]] installed.  
+Note that generating call graphs can be quite time consuming for a large 
+program.
 
 By default, eudis will create a subdirectory in the current directory called
 ##eudox##.  This may be changed using the ##--dir## option.
 
 ==== Command Line Switches
 
-You can use the standard -i and -c switches with eudis.  There are additional options:
+You can use the standard ##-i## and ##-c## switches with ##eudis##.  There are 
+additional options:
 
-* ##-b## Parse the code as though it were being bound.
+* ##-b## parse the code as though it were being bound
 * ##--dir <dir>## Specify the output directory for the html files
-* ##-f## Include a particular file in the html output.
-* ##--file-list## Output the list of files included in the .dis file at the top of the listing.
-* ##-g## Suppress call graphs in html output.
-* ##--html## Generate html documentation of your program.
-* ##--no-dep## Suppress dependencies.  Will not generate file and routine dependency graphs.
-* ##--std## Show standard library information.  By default this is not shown.
-* ##-t## Parse the code as though it were being translated.
+* ##-f## include a particular file in the html output
+* ##--file-list## output the list of files included in the ##.dis## file at the 
+top of the listing
+* ##-g## suppress call graphs in html output
+* ##--html## generate html documentation of your program
+* ##--no-dep## Suppress dependencies.  Will not generate file and routine 
+dependency graphs.
+* ##--std## show standard library information, by default this is not shown
+* ##-t## parse the code as though it were being translated

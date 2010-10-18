@@ -382,7 +382,7 @@ end function
 -- 
 -- The [[:current_dir]]() function will return the name of the current directory.
 -- 
--- On //WIN32// the current directory is a public property shared
+-- On //Windows// the current directory is a public property shared
 -- by all the processes running under one shell. On //Unix// a subprocess
 -- can change the current directory for itself, but this won't
 -- affect the current directory of its parent process.
@@ -498,7 +498,8 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 --  return sort_columns(d, {-D_SIZE})
 -- end function
 --
--- exit_code = walk_dir("C:\\MYFILES\\", routine_id("look_at"), TRUE, routine_id("mysort"))
+-- exit_code = walk_dir("C:\\MYFILES\\", routine_id("look_at"), TRUE, 
+--                                                         routine_id("mysort"))
 -- </eucode>
 --
 -- See Also:
@@ -598,12 +599,14 @@ end function
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
 -- 
--- -- This example will also create "myapp/" and "myapp/interface/" if they don't exist.
+-- -- This example will also create "myapp/" and "myapp/interface/" 
+-- -- if they don't exist.
 -- if not create_directory("myapp/interface/letters") then
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
 --
--- -- This example will NOT create "myapp/" and "myapp/interface/" if they don't exist.
+-- -- This example will NOT create "myapp/" and "myapp/interface/" 
+-- -- if they don't exist.
 -- if not create_directory("myapp/interface/letters",,0) then
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
@@ -1332,7 +1335,8 @@ end function
 --
 -- Example:
 -- <eucode>
---  -- ensure that the supplied path has an extension, but if it doesn't use "tmp".
+--  -- ensure that the supplied path has an extension, 
+--  -- but if it doesn't use "tmp".
 -- theFile = defaultext(UserFileName, "tmp")
 -- </eucode>
 --
@@ -1390,7 +1394,10 @@ end function
 -- ? absolute_path("local/abc.txt") -- returns 0
 -- ? absolute_path("abc.txt") -- returns 0
 -- ? absolute_path("c:..\\abc") -- returns 0
--- -- The next two examples return 0 on Unix platforms and 1 on Microsoft platforms
+--
+-- -- The next two examples return 
+-- -- 0 on Unix platforms and 
+-- -- 1 on Microsoft platforms
 -- ? absolute_path("c:\\windows\\system32\\abc")
 -- ? absolute_path("c:/windows/system32/abc")
 -- </eucode>
@@ -2134,8 +2141,10 @@ end function
 -- <eucode>
 --  res = locate_file("abc.def", {"/usr/bin", "/u2/someapp", "/etc"})
 --  res = locate_file("abc.def", "/usr/bin:/u2/someapp:/etc")
---  res = locate_file("abc.def") -- Scan default locations.
---  res = locate_file("abc.def", , "app") -- Scan the 'app' sub directory in the default locations.
+--  res = locate_file("abc.def") 
+--        -- Scan default locations.
+--  res = locate_file("abc.def", , "app") 
+--        -- Scan the 'app' sub directory in the default locations.
 -- </eucode>
 
 public function locate_file(sequence filename, sequence search_list = {}, sequence subdir = {})
@@ -2335,7 +2344,8 @@ end function
 -- Example 1:
 -- <eucode>
 -- res = disk_size("C:\\")
--- printf(1, "Drive %s has %3.2f%% free space\n", {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
+-- printf(1, "Drive %s has %3.2f%% free space\n", 
+--                                   {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
 -- </eucode>
 
 public function disk_size(object disk_path) 
@@ -2486,11 +2496,13 @@ end function
 -- Example 1:
 -- <eucode>
 -- res = dir_size("/usr/localbin")
--- printf(1, "Directory %s contains %d files\n", {"/usr/localbin", res[COUNT_FILES]})
+-- printf(1, "Directory %s contains %d files\n", 
+--                                          {"/usr/localbin", res[COUNT_FILES]})
 -- for i = 1 to length(res[COUNT_TYPES]) do
---   printf(1, "  Type: %s (%d files %d bytes)\n", {res[COUNT_TYPES][i][EXT_NAME],
---                                                  res[COUNT_TYPES][i][EXT_COUNT],
---                                                  res[COUNT_TYPES][i][EXT_SIZE]})
+--   printf(1, "  Type: %s (%d files %d bytes)\n", 
+--               {res[COUNT_TYPES][i][EXT_NAME],
+--               res[COUNT_TYPES][i][EXT_COUNT],
+--               res[COUNT_TYPES][i][EXT_SIZE]})
 -- end for
 -- </eucode>
 

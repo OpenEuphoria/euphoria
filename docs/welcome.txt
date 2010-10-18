@@ -28,8 +28,9 @@ crowd of conventional languages.
 
 === Euphoria is unique
 
-What makes Euphoria unique is a design that uses just two basic data-types {{{--}}}
- //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and //integer//.
+What makes Euphoria unique is a design that uses just two basic data-types~--
+ //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and
+ //integer//.
 
 * An **atom** is single numeric value (either an integer or floating point)
 * A **sequence** is a list of zero or more //objects//.
@@ -118,7 +119,8 @@ of, or inability to use, this product.
 
 === Discover Euphoria
 
-More information on Euphoria may be found at [[http://www.OpenEuphoria.org | OpenEuphoria.org]],
+More information on Euphoria may be found at 
+[[http://www.OpenEuphoria.org | OpenEuphoria.org]],
 along with an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]].
 
 Download Euphoria from the [[http://www.rapideuphoria.com|Euphoria Web site]].
@@ -135,14 +137,14 @@ it suitable for GUI applications.
 The manual will only reference ##eui## in examples and instructions; the
 reader is left to choose the correct interpreter.
 
-Euphoria runs on many platforms. When operating specific issues must be described
-you will see these descriptions:
+Euphoria runs on many platforms. When operating specific issues must be 
+described you will see these descriptions:
 
-* "Windows" will be a general reference to a family of operating systems that
+* //Windows//will be a general reference to a family of operating systems that
 includes WIN/95/ME/98/XP/NT/Vista/7/... You will see the constant ##WIN32## used
 for Windows specific code.
 
-* "Unix" will be a general reference to the family operating systems that
+* //Unix// will be a general reference to the family operating systems that
 includes Linux, FreeBSD, Mac OS X,... You will see the constant ##UNIX## used
 for Unix specific code. You may also see "*nix" used to describe this group
 of operating systems.
@@ -150,5 +152,5 @@ of operating systems.
 Directory names in Windows use ##\## separators, while Unix systems use ##/##.
 Unix users should substitute {{{ / }}} when they examine example code.
 
-Operating system names are often trademarks. There is no intent to infringe on their
-owner rights.
+Operating system names are often trademarks. There is no intent to infringe on 
+their owner rights.
