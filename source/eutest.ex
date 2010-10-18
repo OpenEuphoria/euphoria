@@ -33,6 +33,7 @@ constant cmdopts = {
 	{"verbose", 0, "verbose output", {NO_CASE} },
 	{"process-log", 0, "", {NO_CASE} },
 	{"html", 0, "", {NO_CASE} },
+	{"html-file", 0, "output file for html log output", {NO_CASE, HAS_PARAMETER, "html output file"}},
 	{"i", 0, "include directory", {NO_CASE, MULTIPLE, HAS_PARAMETER, "directory"}},
 	{"d", 0, "define a preprocessor word", {NO_CASE, MULTIPLE, HAS_PARAMETER, "word"}},
 	{ "coverage",  0, "Indicate files or directories for which to gather coverage statistics", 
@@ -64,6 +65,8 @@ integer total
 sequence 
 	dexe = "", 
 	executable = ""
+
+object html_fn = 1
 
 enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_BIND, E_BOUND, E_EUTEST
 
@@ -981,6 +984,9 @@ procedure do_process_log( sequence cmds, integer html)
 	
 	if html then
 		out_r = routine_id("html_out")
+		if sequence( html_fn ) then
+			html_fn = open( html_fn, "w" )
+		end if
 	else
 		out_r = routine_id("ascii_out")
 	end if
@@ -1012,7 +1018,7 @@ procedure do_process_log( sequence cmds, integer html)
 	other_files = error_list[1]
 
 	if html then
-		puts(1, "<html><body>\n")
+		puts(html_fn, "<html><body>\n")
 	end if
 
 	object content = read_file("unittest.log")
@@ -1084,12 +1090,15 @@ procedure do_process_log( sequence cmds, integer html)
 				{ error_list[1][find(E_EUTEST, error_list[3])] })
 		end if
 
-		printf(1, html_table_final_summary, {
+		printf(html_fn, html_table_final_summary, {
 			total_passed + total_failed,
 			total_failed,
 			total_passed,
 			total_time
 		})
+		if html_fn != 1 then
+			close( html_fn )
+		end if
 	else
 		puts(1, repeat('*', 76) & "\n\n")
 		printf(1, "Overall: Total Tests: %04d  Failed: %04d  Passed: %04d Time: %f\n\n", {
@@ -1240,6 +1249,9 @@ procedure main()
 				
 			case "bind" then
 				binder = val
+				
+			case "html-file" then
+				html_fn = val
 
 			case "extras" then
 				if length( val ) then

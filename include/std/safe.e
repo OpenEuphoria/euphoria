@@ -52,16 +52,22 @@
 -- that you list below, or add dynamically via register_block().
 
 namespace safe
+
+-- biggest address on a 32-bit machine
+constant MAX_ADDR = power(2, 32)-1
+
+export constant BORDER_SPACE = 40
+export constant leader = repeat('@', BORDER_SPACE)
+export constant trailer = repeat('%', BORDER_SPACE)
+
 public include std/memconst.e
+ifdef DATA_EXECUTE then
+	public include std/machine.e as machine
+end ifdef
 include std/error.e
 ifdef WINDOWS then
 	include std/win32/sounds.e
 end ifdef
-
-ifdef DATA_EXECUTE then
-	public include std/machine.e as machine
-end ifdef
-
 
 
 -- Some parameters you may wish to change:
@@ -131,9 +137,6 @@ constant M_ALLOC = 16,
 puts(1, "\n\t\tUsing Debug Version of machine.e\n")
 -- machine_proc(M_SLEEP, 3)
 
--- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
-
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
 
@@ -159,10 +162,6 @@ type low_machine_addr(atom a)
 -- a legal low machine address 
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
-
-export constant BORDER_SPACE = 40
-export constant leader = repeat('@', BORDER_SPACE)
-export constant trailer = repeat('%', BORDER_SPACE)
 
 export type bordered_address(ext_addr addr )
 	sequence l
