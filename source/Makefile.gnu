@@ -557,6 +557,7 @@ endif
 install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/unix
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix

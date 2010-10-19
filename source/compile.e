@@ -37,6 +37,7 @@ include reswords.e as rw
 include scanner.e
 include symtab.e
 include shift.e
+include fwdref.e
 
 integer np, pc
 
@@ -2409,6 +2410,8 @@ procedure opPROC()
 	pc += n
 end procedure
 
+constant ALL_RHS_SUBS = { RHS_SUBS, RHS_SUBS_I, RHS_SUBS_CHECK }
+symtab_pointer prev_rhs_subs_source = 0
 procedure opRHS_SUBS()
 -- RHS_SUBS / RHS_SUBS_CHECK / RHS_SUBS_I / ASSIGN_SUBS / PASSIGN_SUBS
 -- var[subs] op= expr
@@ -2417,86 +2420,99 @@ procedure opRHS_SUBS()
 -- pc+2 is the subscript
 -- pc+3 is the target
 	integer skip = 0
-	CSaveStr("_0", Code[pc+3], Code[pc+2], Code[pc+1], 0)
-	SymTab[Code[pc+3]][S_ONE_REF] = FALSE
-
-	if Code[pc] = ASSIGN_OP_SUBS or Code[pc] = PASSIGN_OP_SUBS then
-		if Code[pc] = PASSIGN_OP_SUBS then
+	integer op  = Code[pc]
+	symtab_index
+		source = Code[pc+1],
+		subs   = Code[pc+2],
+		target = Code[pc+3]
+	symtab_pointer prev_opnd = 0
+	
+	if find( previous_op, ALL_RHS_SUBS ) then
+		-- prevent early dereference if self assigning
+		prev_opnd = prev_rhs_subs_source
+		
+	else
+		prev_rhs_subs_source = source
+	end if
+	
+	CSaveStr("_0", target, subs, source, prev_opnd )
+	SymTab[target][S_ONE_REF] = FALSE
+	
+	switch op do
+		case PASSIGN_OP_SUBS then
 			c_stmt0("_2 = (int)SEQ_PTR(*(int *)_3);\n")
-		else
+		case ASSIGN_OP_SUBS then
 			c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
 			-- element type of pc[1] is changed
 			SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_OBJECT, 0 )
-		end if
-	else
-		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
-	end if
-
+		case else
+			c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
+	end switch
+	
 	-- _2 has the sequence
-
-	if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
-		c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+2])
+	if TypeIsNot( subs, TYPE_INTEGER) then
+		c_stmt("if (!IS_ATOM_INT(@))\n", subs )
 		c_stmt("@ = (int)*(((s1_ptr)_2)->base + (int)(DBL_PTR(@)->dbl));\n",
-				{Code[pc+3], Code[pc+2]})
+				{ target, subs })
 		c_stmt0("else\n")
 	end if
-	c_stmt("@ = (int)*(((s1_ptr)_2)->base + @);\n", {Code[pc+3], Code[pc+2]})
+	c_stmt("@ = (int)*(((s1_ptr)_2)->base + @);\n", {target, subs} )
 
-	if Code[pc] = PASSIGN_OP_SUBS then -- simplified
+	if op = PASSIGN_OP_SUBS then -- simplified
 		LeftSym = TRUE
-		if sym_mode( Code[pc+3] ) = M_NORMAL then
-			c_stmt("Ref(@);\n", Code[pc+3])
+		if sym_mode( target ) = M_NORMAL then
+			c_stmt("Ref(@);\n", target )
 		end if
 		CDeRefStr("_0")
-		SetBBType(Code[pc+3],
+		SetBBType( target,
 						 TYPE_OBJECT,    -- we don't know the element type
 						 novalue, TYPE_OBJECT, 0)
 	else
-		if Code[pc] = RHS_SUBS_I then
+		if op = RHS_SUBS_I then
 			-- target is integer var - convert doubles to ints
-			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
-				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
-				c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+3])
-				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", {Code[pc+3], Code[pc+3]})
+			if SeqElem( source ) != TYPE_INTEGER then
+				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
+				c_stmt("if (!IS_ATOM_INT(@))\n", target )
+				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", { target, target } )
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT,
-				HasDelete( Code[pc+3] ) )
+			SetBBType( target, TYPE_INTEGER, novalue, TYPE_OBJECT,
+				HasDelete( target ) )
 
 		elsif Code[pc+4] = INTEGER_CHECK and Code[pc+5] = Code[pc+3] then
 			-- INTEGER_CHECK coming next
-			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
-				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT,
-					HasDelete( Code[pc+3] ) )
-				c_stmt("if (!IS_ATOM_INT(@)){\n", Code[pc+3])
-					c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", {Code[pc+3], Code[pc+3]})
+			if SeqElem( source ) != TYPE_INTEGER then
+				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT,
+					HasDelete( target ) )
+				c_stmt("if (!IS_ATOM_INT(@)){\n", target )
+					c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", { target, target } )
 				c_stmt0("}\n")
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
+			SetBBType( target, TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 			skip = 2 -- skip INTEGER_CHECK
 
 		else
-			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
+			if SeqElem( source ) != TYPE_INTEGER then
 				LeftSym = TRUE
-				if sym_mode( Code[pc+3] ) = M_NORMAL then
-					if SeqElem(Code[pc+1]) = TYPE_OBJECT or
-					SeqElem(Code[pc+1]) = TYPE_ATOM then
-						c_stmt("Ref(@);\n", Code[pc+3])
+				if sym_mode( target ) = M_NORMAL then
+					if SeqElem( source ) = TYPE_OBJECT or
+					SeqElem( source ) = TYPE_ATOM then
+						c_stmt("Ref(@);\n", target )
 					else
-						c_stmt("RefDS(@);\n", Code[pc+3])
+						c_stmt("RefDS(@);\n", target )
 					end if
 				end if
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], SeqElem(Code[pc+1]), novalue, TYPE_OBJECT, 
-				HasDelete(Code[pc+1]) )
+			SetBBType( target, SeqElem( source ), novalue, TYPE_OBJECT, 
+				HasDelete( source ) )
 		end if
 	end if
 	
-	dispose_temp( Code[pc + 1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	dispose_temp( source, DISCARD_TEMP, REMOVE_FROM_MAP )
 -- 	dispose_all_temps( DISCARD_TEMP, KEEP_IN_MAP )  -- ?? Why was this here
-	create_temp( Code[pc+3], NO_REFERENCE )
+	create_temp( target, NO_REFERENCE )
 	pc += 4 + skip
 end procedure
 
