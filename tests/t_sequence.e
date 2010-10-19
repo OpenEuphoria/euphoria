@@ -632,5 +632,11 @@ test_equal("transmute Comp:item Repl:seq", "J'O'hn Sm'I'th 'E'nj'O''Y's 'U'nc'O'
 test_equal("transmute Comp:item Remove", "Jhn Smth njs nckd ppls.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "", "", "", "", "", ""}))
 test_equal("transmute Comp:item Repl:mixed", "JOWhn Smth 1njOW{}s 2ncOWOWk1d AAppl1s.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "AA", '1', "", "OW", '2', "{}"}))
 
+
+-- added at r3525, crashing the translator
+s = { {{1}}, {1} } + 1
+s = s[1][1]
+test_equal("RHS SUBS self assignment", 2,  s[1] )
+
 test_report()
 
