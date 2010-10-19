@@ -48,12 +48,47 @@
 #
 #
 #   Options:
-#		    MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
-#				  The default is to use straight HeapAlloc/HeapFree calls. ex:
-#				      wmake -h interpreter MANAGED_MEM=1
+#                   MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
+#                                 The default is to use straight HeapAlloc/HeapFree calls. 
+#                                 ex:
+#                                     wmake -h interpreter MANAGED_MEM=1
 #
-#			  DEBUG:  Set this to 1 to build debug versions of the targets.  ex:
-#				      wmake -h interpreter DEBUG=1
+#                         DEBUG:  Set this to 1 to build debug versions of the targets.
+#                                 ex:
+#                                     wmake -h interpreter DEBUG=1
+#
+#			C_EXTRA:  Set this to add C flags to the command line.
+#				  
+#                                 You can limit sequences to 100,000 members:
+#				  wmake clean C_EXTRA="/DMAX_SEQ_LEN=100000" all
+#
+#
+#                       I_EXTRA:  Set this to arguments you want to append to the interpreter.
+#                                 arguments when running the testeu or test target.  This is passed
+#                                 to the instances that compile and translate the code.
+#
+#                    TEST_EXTRA:  Set this to arguments you want to append to the eutest program's 
+#                                 arguments.
+#
+#              TESTFILE or LIST:  Set either of these to set narrow the list of unit test files for
+#                                 either the test target or the testeu target.
+#
+#
+# ex:
+# 	wmake testeu I_EXTRA="-D ETYPE_CHECK" TEST_EXTRA="-log"
+#
+#       This tests using the interpreter with type checking on and writes the results to a log
+#       file.
+#
+# ex:   wmake library DEBUG=1
+#
+#       Create a copy of eu.lib with debugging on.
+#
+#
+# ex:   wmake test LIST="t_switch.e t_math.e"
+#
+#       Run eutest on only two unit test files.
+#
 #
 !ifndef CONFIG
 CONFIG=config.wat
@@ -259,7 +294,7 @@ EXE=$(EX)
 # Change to using the EXEs to keep your CPU cool using
 # --use-binary-translator
 !ifndef EC
-EC=$(EXE) $(INCDIR) $(EUDEBUG)  $(TRUNKDIR)\source\ec.ex
+EC=$(EXE) $(INCDIR) $(EUDEBUG) $(I_FLAGS) $(TRUNKDIR)\source\ec.ex
 !endif
 
 EUTEST=$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
@@ -415,7 +450,7 @@ $(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
 testeu : .SYMBOLIC code-page-db $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
-	-$(EUTEST) -i ..\include $(TEST_EXTRA) -exe "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -ec "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST)
+	-$(EUTEST) -i ..\include $(TEST_EXTRA) -exe "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -ec "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
 	-del ecp.dat
 	cd ..\source
 
@@ -425,7 +460,7 @@ test : .SYMBOLIC code-page-db
 	cd ..\tests
 	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex $(LIST) $(TESTFILE)
+	$(EUTEST) $(TEST_EXTRA) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex $(LIST) $(TESTFILE)
 	-del ecp.dat
 	cd ..\source
 
