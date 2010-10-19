@@ -60,7 +60,6 @@ the benefits of these languages in a much simpler way.
 === Hello, World ===
 The //mandatory// 'hello world' program is a one-liner in Euphoria.
 <eucode>
-----------
 puts(1, "Hello, World\n")
 </eucode>
 This simply calls the built-in routine ##puts## ('put string'), passing it two
@@ -71,7 +70,6 @@ in this case) and a string of text.
 The following is an example of a more useful Euphoria program.
 
 <eucode>
-----------
 include std/console.e
 sequence original_list
 
