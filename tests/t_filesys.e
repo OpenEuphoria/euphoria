@@ -2,6 +2,7 @@ include std/filesys.e
 include std/io.e
 include std/unittest.e
 include std/text.e
+include std/sort.e
 
 sequence fullname, pname, fname, fext, eolsep, driveid
 integer sep
@@ -182,36 +183,38 @@ procedure dir_tests()
 	
 	test_true( "chdir filesyse_dir", chdir( "filesyse_dir" ) )
 	sequence expected_walk_data = {}
-
-	for d = 1 to 2 do
-		sequence dirname = sprintf("directory%d", d )
-		test_true( "create dir " & dirname, create_directory( dirname ) )
-		test_true( "chdir " & dirname, chdir( dirname ))
-		expected_walk_data = append( expected_walk_data, { "filesyse_dir", dirname } )
-		for f = 1 to 2 do
-			sequence filename = sprintf("file%d",f)
-			create_file( filename)
-			test_true( "File exists " & filename, file_exists(filename))
-			expected_walk_data = append( expected_walk_data, { "filesyse_dir" & SLASH & dirname, filename } )
+	
+	for h = 0 to 1 do
+		for d = 1 to 2 do
+			sequence dirname = sprintf("%sdirectory%d", { repeat('.', h), d } )
+			test_true( "create dir " & dirname, create_directory( dirname ) )
+			test_true( "chdir " & dirname, chdir( dirname ))
+			expected_walk_data = append( expected_walk_data, { "filesyse_dir", dirname } )
+			for f = 1 to 2 do
+				sequence filename = sprintf("file%d",f)
+				create_file( filename)
+				test_true( "File exists " & filename, file_exists(filename))
+				expected_walk_data = append( expected_walk_data, { "filesyse_dir" & SLASH & dirname, filename } )
+			end for
+			test_true( "back to filesyse_dir", chdir( ".." ))
 		end for
-		test_true( "back to filesyse_dir", chdir( ".." ))
 	end for
 	create_file( "test-file")
 	test_true( "test-file exists", file_exists("test-file"))
 	
-	expected_walk_data = append( expected_walk_data, {"filesyse_dir", "test-file"})
+	expected_walk_data = sort( append( expected_walk_data, {"filesyse_dir", "test-file"}) )
 	
 	test_true("back to tests", chdir("..") )
 	
 	test_equal( "walk dir", 0, walk_dir( "filesyse_dir", routine_id("test_walk"), 1 ) )
 	
-	test_equal( "test walk_dir results", expected_walk_data, walk_data )
+	test_equal( "test walk_dir results", expected_walk_data, sort( walk_data ) )
 	
 	sequence test_dir_size = dir_size( "filesyse_dir" )
-	test_equal( "dir size dir count", 2, test_dir_size[COUNT_DIRS] )
+	test_equal( "dir size dir count", 4, test_dir_size[COUNT_DIRS] )
 	test_equal( "dir size file count", 1, test_dir_size[COUNT_FILES] )
 	
-	test_not_equal( "clear directory", 0, clear_directory( "filesyse_dir", 0 ) )
+	test_not_equal( "clear directory", 0, clear_directory( "filesyse_dir/directory1", 0 ) )
 	test_true( "remove testing directory", remove_directory( "filesyse_dir", 1 ) )
 end procedure
 dir_tests()

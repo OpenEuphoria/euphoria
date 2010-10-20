@@ -369,7 +369,7 @@ be_rev.c : $(REVGET)
 
 code-page-db : $(BUILDDIR)/ecp.dat
 
-$(BUILDDIR)/ecp.dat : interpreter
+$(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp
 	$(BUILDDIR)/$(EEXU) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/buildcpdb.ex -p$(TRUNKDIR)/source/codepage -o$(BUILDDIR)
 
 interpreter : builddirs
@@ -527,7 +527,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : code-page-db
+test : $(BUILDDIR)/ecp.dat
 test :  
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
 		$(EXE) ../source/eutest.ex -i ../include -cc gcc -verbose \
@@ -538,7 +538,7 @@ test :
 		$(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
-testeu : code-page-db
+testeu : $(BUILDDIR)/ecp.dat
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
 
 coverage : 

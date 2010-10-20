@@ -996,6 +996,7 @@ public function remove_directory(sequence dir_name, integer force=0)
 			if eu:find('d', files[i][D_ATTRIBUTES]) then
 				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
 			else
+				
 				ret = delete_file(dir_name & files[i][D_NAME])
 			end if
 			if not ret then
@@ -1003,13 +1004,13 @@ public function remove_directory(sequence dir_name, integer force=0)
 			end if
 
 		end for
-		elsedef
+	elsedef
 		for i = 1 to length(files) do
-			if files[i][D_NAME][1] = '.' then
+			if find( files[i][D_NAME], {".",".."}) then
 				continue
 			end if
 			if eu:find('d', files[i][D_ATTRIBUTES]) then
-					ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
+				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
 			else
 				ret = delete_file(dir_name & files[i][D_NAME])
 			end if
