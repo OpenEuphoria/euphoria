@@ -889,7 +889,7 @@ procedure html_out(sequence data)
 	switch data[1] do
 		case "file" then
 			unsummarized_files = append(unsummarized_files, data[2])
-			printf(1, html_table_head, { data[2], data[2] })
+			printf(html_fn, html_table_head, { data[2], data[2] })
 
 			integer err = find(data[2], error_list[1])
 			if err then
@@ -900,21 +900,21 @@ procedure html_out(sequence data)
 					color = "#ffaaaa"
 				end if
 
-				printf(1, html_table_error_row, { color, data[2], error_list[2][err] })
+				printf(html_fn, html_table_error_row, { color, data[2], error_list[2][err] })
 				
 				if sequence(error_list[4][err]) then
-					puts(1, html_table_error_content_begin)
+					puts(html_fn, html_table_error_content_begin)
 
 					for i = 1 to length(error_list[4][err]) do
-						printf(1,"%s\n", { text2html(error_list[4][err][i]) })
+						printf(html_fn,"%s\n", { text2html(error_list[4][err][i]) })
 					end for
 
-					puts(1, html_table_error_content_end)
+					puts(html_fn, html_table_error_content_end)
 				end if
 			end if
 
 		case "failed" then
-			printf(1, html_table_failed_row, {
+			printf(html_fn, html_table_failed_row, {
 				data[2],
 				sprint(data[5]),
 				sprint(data[3]),
@@ -930,14 +930,14 @@ procedure html_out(sequence data)
 				anum = sprintf("%f", data[3])
 			end if
 
-			printf(1, html_table_passed_row, { data[2], anum })
+			printf(html_fn, html_table_passed_row, { data[2], anum })
 
 		case "summary" then
 			if length(unsummarized_files) then
 				unsummarized_files = unsummarized_files[1..$-1] 
 			end if
 
-			printf(1, html_table_summary, {
+			printf(html_fn, html_table_summary, {
 				data[2],
 				data[3],
 				data[4],
@@ -949,7 +949,7 @@ end procedure
 procedure summarize_error(sequence message, error_class e, integer html)
 	if find(e, error_list[3]) then
 		if html then
-			printf(1,message & "<br>\nThese were:\n", {sum(error_list[3] = e)})
+			printf(html_fn,message & "<br>\nThese were:\n", {sum(error_list[3] = e)})
 		else
 			printf(1,message & "\nThese were:\n", {sum(error_list[3] = e)})
 		end if
@@ -957,7 +957,7 @@ procedure summarize_error(sequence message, error_class e, integer html)
 		for i = 1 to length(error_list[1]) do
 			if error_list[3][i] = e then
 				if html then
-					printf(1, "<a href='#%s'>%s</a>, ", repeat(error_list[1][i],2))
+					printf(html_fn, "<a href='#%s'>%s</a>, ", repeat(error_list[1][i],2))
 				else
 					printf(1, "%s, ", repeat(error_list[1][i],1))
 				end if
@@ -965,7 +965,7 @@ procedure summarize_error(sequence message, error_class e, integer html)
 		end for
 
 		if html then
-			puts(1, "<p>")
+			puts(html_fn, "<p>")
 		end if
 
 		puts(1, "\n")
