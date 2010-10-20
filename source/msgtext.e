@@ -358,6 +358,7 @@ constant StdErrMsgs = {
 	{342, "Expecting exactly eight hexadecimal digits to follow the '\\U'"},
 	{343, "Expecting only '0', '1' or space to follow the '\\b'"},
 	{344, "A numeric literal was expected"},
+	{345, "Path to backend runner to use for binding" },
 	$
 }
 

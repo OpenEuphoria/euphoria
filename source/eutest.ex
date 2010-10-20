@@ -46,6 +46,7 @@ constant cmdopts = {
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
 	{ "testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
 	{ "bind", 0, "path to bind.ex", { NO_CASE, HAS_PARAMETER, "bind.ex"} },
+	{ "eub", 0, "path to backend runner", { NO_CASE, HAS_PARAMETER, "eub" } },
 	{ "all", 0, "show tests that pass and fail", {} },
 	{ "failed", 0, "show tests that fail only", {} },
 	{ "wait", 0, "Wait on summary", {} },	
@@ -57,6 +58,7 @@ integer verbose_switch = 0
 object void
 integer ctcfh = 0
 sequence error_list = repeat({},4)
+sequence eub_path = ""
 
 -- moved from do_test:
 integer logging_activated = 0
@@ -463,8 +465,9 @@ function translate( sequence filename, sequence fail_list )
 end function
 
 function bind( sequence filename, sequence fail_list )
-	sequence cmd = sprintf("%s %s -batch \"%s\" %s -batch -D UNITTEST %s",
-		{ executable, interpreter_options, binder, interpreter_options, filename } )
+	sequence cmd = sprintf("%s %s -batch \"%s\" %s %s -batch -D UNITTEST %s",
+		{ executable, interpreter_options, binder, eub_path, interpreter_options, filename } )
+	
 	total += 1
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	integer status = system_exec(cmd, 0)
@@ -1252,6 +1255,9 @@ procedure main()
 				
 			case "html-file" then
 				html_fn = val
+				
+			case "eub" then
+				eub_path = "-eub " & val
 
 			case "extras" then
 				if length( val ) then

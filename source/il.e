@@ -47,6 +47,7 @@ constant OPTIONS = {
 { "c",           0, GetMsgText(280, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
 { "d",           0, GetMsgText(282,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
 { "batch",       0, GetMsgText(279,0), { NO_CASE } },
+{ "eub",         0, GetMsgText(345,0), {NO_CASE, HAS_PARAMETER, "backend runner"} },
 $
 }
 
@@ -64,6 +65,8 @@ con = FALSE
 user_out = ""
 del_routines = 0
 del_vars = 0
+
+object eub_path = 0
 
 procedure fatal(sequence msg)
 -- fatal error during bind
@@ -201,8 +204,8 @@ procedure OutputSymTab(file f)
 					-- constant
 					SymTab[i] = SymTab[i][S_NEXT] -- "deleted"
 				else
-					-- regular variable
-					if not full_debug then
+					-- regular variable (can't delete the namespace name)
+					if not full_debug  and SymTab[i][S_TOKEN] != NAMESPACE then
 						SymTab[i][S_NAME] = 0
 					end if
 					
@@ -264,6 +267,8 @@ procedure copyrights()
 end procedure
 
 function extract_options( sequence cl )
+	Argv = cl
+	Argc = length(Argv)
 	m:map opts = cmd_parse(OPTIONS,,cl)
 	handle_options_for_bind( opts )
 	finalize_command_line( opts )
@@ -276,7 +281,6 @@ export procedure handle_options_for_bind( m:map opts )
 	integer op
 	integer file_supplied = 0
 	
-
 	opt_keys = m:keys(opts)
 	op = 1
 	while op <= length(opt_keys) do
@@ -326,6 +330,9 @@ export procedure handle_options_for_bind( m:map opts )
 				if length(val) != 0 then
 					file_supplied = 1
 				end if
+				
+			case "EUB" then
+				eub_path = val
 				
 			case else
 				fatal(GetMsgText(314, , {option}))
@@ -442,51 +449,55 @@ procedure OutputIL()
 	if not shroud_only then
 		-- binding:
 		-- first, copy eub[w].exe
-		
-		eu_dir = get_eudir()
+		if sequence( eub_path ) then
+			backend_name = eub_path
+			be = open( backend_name, "r" )
+		else
+			eu_dir = get_eudir()
 
-		source_dir = command_line()
-		source_dir = source_dir[2]
-		for j = length( source_dir ) to 1 by -1 do
-			if source_dir[j] = SLASH then
-				source_dir = source_dir[1..j]
-				exit
-			elsif j = 1 then
-				source_dir = current_dir() & SLASH
-			end if
-		end for
-				
-		be = -1
-		ifdef WIN32 then
-			if con then
-				backend_name = "eub.exe"
-			else
-				backend_name = "eubw.exe"
-			end if
-		end ifdef
-		ifdef UNIX then
-				backend_name = "eub"
-				-- try to get the installed backend, if it exists:
-				be = open( "/usr/bin/eub", "r" )
-				if be = -1 then
-					-- try an obvious other path
-					be = open( "/usr/local/bin/eub", "r" )
+			source_dir = command_line()
+			source_dir = source_dir[2]
+			for j = length( source_dir ) to 1 by -1 do
+				if source_dir[j] = SLASH then
+					source_dir = source_dir[1..j]
+					exit
+				elsif j = 1 then
+					source_dir = current_dir() & SLASH
 				end if
-		end ifdef
-
-		sequence ondisk_name = locate_file( backend_name, 
-									{ eu_dir & SLASH & "bin", source_dir }
-									)
-		ifdef UNIX then
-		if not equal( backend_name,  ondisk_name) then
-			backend_name = ondisk_name
+			end for
+					
+			be = -1
+			ifdef WIN32 then
+				if con then
+					backend_name = "eub.exe"
+				else
+					backend_name = "eubw.exe"
+				end if
+			end ifdef
+			ifdef UNIX then
+					backend_name = "eub"
+					-- try to get the installed backend, if it exists:
+					be = open( "/usr/bin/eub", "r" )
+					if be = -1 then
+						-- try an obvious other path
+						be = open( "/usr/local/bin/eub", "r" )
+					end if
+			end ifdef
+			
+			sequence ondisk_name = locate_file( backend_name, 
+										{ eu_dir & SLASH & "bin", source_dir }
+										)
+			ifdef UNIX then
+				if not equal( backend_name,  ondisk_name) then
+					backend_name = ondisk_name
+				end if
+			elsedef
+				-- do case-insensitive check on WIN
+				if not equal( lower(backend_name),  lower(ondisk_name)) then
+					backend_name = ondisk_name
+				end if
+			end ifdef
 		end if
-		elsedef
-		-- do case-insensitive check on WIN
-		if not equal( lower(backend_name),  lower(ondisk_name)) then
-			backend_name = ondisk_name
-		end if
-		end ifdef
 		
 		if be = -1 then
 			be = open(backend_name, "rb")

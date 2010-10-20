@@ -533,7 +533,7 @@ test :
 		$(EXE) ../source/eutest.ex -i ../include -cc gcc -verbose \
 		-exe "$(BUILDDIR)/$(EEXU)" \
 		-ec "$(BUILDDIR)/$(EECU)" \
-		-bind ../source/bind.ex \
+		-bind ../source/bind.ex -eub $(BUILDDIR)/$(EBACKENDC) \
 		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)" \
 		$(TESTFILE)
 	cd ../tests && sh check_diffs.sh

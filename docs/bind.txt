@@ -78,8 +78,9 @@ shrouded file.
 ==== Synopsis:
 
 {{{
-eubind [-c config-file] [-con] [-copyright] [-full_debug] [-i dir] [-icon file] 
-       [-list] [-quiet] [-out executable_file] [-shroud_only [filename.ex]
+eubind [-c config-file] [-con] [-copyright] [-eub path-to-backend] 
+       [-full_debug] [-i dir] [-icon file] [-list] [-quiet] 
+       [-out executable_file] [-shroud_only [filename.ex]
 }}}
 
 
@@ -102,6 +103,8 @@ source statements are not there.
 console program instead of a //Windows GUI// program. Console programs can 
 access standard input and output, and they work within the current console 
 window, rather than popping up a new one.
+* **-eub path-to-backend** Allows specification of the backend runner to use
+besides the default, installed version.
 * **-full_debug**: Same as ##shroud## above. If Euphoria detects an error, your 
 executable will generate either a partial, or a full, ##ex.err## dump, according
 to this option.

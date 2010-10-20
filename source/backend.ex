@@ -32,6 +32,7 @@ include cominit.e
 include pathopen.e
 include preproc.e
 include msgtext.e
+include intinit.e
 
 sequence misc
 integer il_file = 0
@@ -147,6 +148,8 @@ sequence cl
 object filename
 
 cl = command_line()
+Argv = cl
+Argc = length( Argv )
 
 -- open our own .exe file
 ifdef UNIX then
