@@ -449,7 +449,7 @@ procedure OutputIL()
 		-- first, copy eub[w].exe
 		if sequence( eub_path ) then
 			backend_name = eub_path
-			be = open( backend_name, "r" )
+			be = open( backend_name, "rb" )
 		else
 			eu_dir = get_eudir()
 
