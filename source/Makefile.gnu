@@ -408,22 +408,27 @@ source : builddirs
 SVN_REV=xxx
 SOURCEDIR=euphoria-$(PLAT)-r$(SVN_REV)
 source-tarball : source
-	rm -rf $(BUILDDIR)/$(SOURCEDIR)
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)
-	cp -r $(BUILDDIR)/intobj   $(BUILDDIR)/$(SOURCEDIR)
-	cp -r $(BUILDDIR)/transobj $(BUILDDIR)/$(SOURCEDIR)
-	cp -r $(BUILDDIR)/backobj  $(BUILDDIR)/$(SOURCEDIR)
-	cp -r $(BUILDDIR)/libobj   $(BUILDDIR)/$(SOURCEDIR)
-	cp be_*.c       $(BUILDDIR)/$(SOURCEDIR)
-	cp int.ex       $(BUILDDIR)/$(SOURCEDIR)
-	cp ec.ex        $(BUILDDIR)/$(SOURCEDIR)
-	cp backend.ex   $(BUILDDIR)/$(SOURCEDIR)
-	cp *.e          $(BUILDDIR)/$(SOURCEDIR)
-	cp Makefile.gnu    $(BUILDDIR)/$(SOURCEDIR)
-	cp makefile.wat    $(BUILDDIR)/$(SOURCEDIR)
-	cp configure    $(BUILDDIR)/$(SOURCEDIR)
-	cp ../include/euphoria.h $(BUILDDIR)/$(SOURCEDIR)
-	cp *.h          $(BUILDDIR)/$(SOURCEDIR)
+	rm -rf $(BUILDDIR)/$(SOURCEDIR)/source
+	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/include
+	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/intobj
+	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/transobj
+	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/backobj
+	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/libobj
+	cp -r $(BUILDDIR)/intobj   $(BUILDDIR)/$(SOURCEDIR)/source/build/
+	cp -r $(BUILDDIR)/transobj $(BUILDDIR)/$(SOURCEDIR)/source/build/
+	cp -r $(BUILDDIR)/backobj  $(BUILDDIR)/$(SOURCEDIR)/source/build/
+	cp -r $(BUILDDIR)/libobj   $(BUILDDIR)/$(SOURCEDIR)/source/build/
+	cp be_*.c       $(BUILDDIR)/$(SOURCEDIR)/source
+	cp int.ex       $(BUILDDIR)/$(SOURCEDIR)/source
+	cp ec.ex        $(BUILDDIR)/$(SOURCEDIR)/source
+	cp backend.ex   $(BUILDDIR)/$(SOURCEDIR)/source
+	cp *.e          $(BUILDDIR)/$(SOURCEDIR)/source
+	cp Makefile.gnu    $(BUILDDIR)/$(SOURCEDIR)/source
+	cp makefile.wat    $(BUILDDIR)/$(SOURCEDIR)/source
+	cp configure    $(BUILDDIR)/$(SOURCEDIR)/source
+	cp ../include/euphoria.h $(BUILDDIR)/$(SOURCEDIR)/include
+	cp *.h          $(BUILDDIR)/$(SOURCEDIR)/source
+	cp -r pcre $(BUILDDIR)/$(SOURCEDIR)/source
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
 	
 .PHONY : euisource
