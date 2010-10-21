@@ -222,7 +222,9 @@ int Pixel(int, int);
 int Get_Pixel(int);
 void shift_args(int, char**);
 int NewString(char *);
+#ifdef __GNUC__
 char *malloc(int);
+#endif
 void eu_startup();
 void exit(int);
 int CRoutineId(int, int, int);

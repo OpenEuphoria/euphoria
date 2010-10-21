@@ -62,6 +62,9 @@ unsigned long get_pos_int(char *where, object x);
 
 void NewConfig(int raise_console);
 double current_time();
+#ifdef EWINDOWS
+long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);
+#endif
 void Machine_Handler(int sig_no);
 
 object Wrap(object x);

@@ -774,10 +774,9 @@ void InitStack(int size, int toplevel)
 	expr_limit = expr_max - 3; // we only push two items per call
 }
 
+
 void InitExecute()
 {
-	// uncomment these lines to get rid of pop-ups when EUPHORIA dies...
-	//LPTOP_LEVEL_EXCEPTION_FILTER * old_filter;
 #ifndef EDEBUG
 	// signal(SIGFPE, FPE_Handler)  // generate inf and nan instead
 	signal(SIGINT, INT_Handler); 
@@ -786,13 +785,18 @@ void InitExecute()
 	// a bit of cleanup - tick rate, profile, active page etc.
 #endif
 
-#ifndef ERUNTIME  // dll shouldn't take handler away from main program
+#ifdef EWINDOWS
+		/* Prevent "Send Error Report to Microsoft dialog from coming up
+		   if this thing has an unhandled exception.  */
+		SetUnhandledExceptionFilter(Win_Machine_Handler);
+#endif
+
+#ifndef ERUNTIME  // dll shouldn't take handler away from main program	
 #ifndef EDEBUG
 	signal(SIGILL,  Machine_Handler);
 	signal(SIGSEGV, Machine_Handler);
 #endif
 #endif
-	//old_filter = SetUnhandledExceptionFilter( EXCEPTION_EXECUTE_HANDLER );
 	TraceOn = FALSE;
 	ProfileOn = TRUE;
 	TraceBeyond = HUGE_LINE;

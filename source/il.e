@@ -71,12 +71,10 @@ object eub_path = 0
 procedure fatal(sequence msg)
 -- fatal error during bind
 	puts(2, msg & '\n')
-	ifdef not UNIX then
-		-- TODO: Should we check for batch_job?
-		-- we run bind and bindw using eubw.exe, so this is needed
+	if not batch_job then
 		ShowMsg(2, 242)
 		getc(0)
-	end ifdef
+	end if
 
 	abort(1)
 end procedure

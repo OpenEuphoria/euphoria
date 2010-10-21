@@ -272,6 +272,9 @@ DEBUGFLAG = /d2 /dEDEBUG
 DEBUGLINK = debug all
 TRANSDEBUG= -debug
 EUDEBUG=-D DEBUG
+LIBRARY_NAME=eudbg
+!else
+LIBRARY_NAME=eu
 !endif
 
 !ifeq EXTRA_STATS 1
@@ -373,7 +376,7 @@ TRANS_CC_FLAG=-gcc
 !endif
 
 OSFLAG=EWINDOWS
-LIBTARGET=$(BUILDDIR)\eu.lib
+LIBTARGET=$(BUILDDIR)\$(LIBRARY_NAME).lib
 CC = wcc386
 .ERASE
 FE_FLAGS = /bt=nt /mf /w0 /zq /j /zp4 /fp5 /fpi87 /5r /otimra /s $(MEMFLAG) $(DEBUGFLAG) $(SETALIGN4) $(NOASSERT) $(HEAPCHECKFLAG) /I..\ $(EREL_TYPE)
@@ -394,8 +397,8 @@ runtime: .SYMBOLIC
 backendflag: .SYMBOLIC
 	set EBACKEND=/dBACKEND
 
-$(BUILDDIR)\eu.lib : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
-	wlib -q $(BUILDDIR)\eu.lib $(EU_LIB_OBJECTS)
+$(LIBTARGET) : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
+	wlib -q $(LIBTARGET) $(EU_LIB_OBJECTS)
 
 !ifdef OBJDIR
 
@@ -548,6 +551,7 @@ install : .SYMBOLIC
 	@if exist $(BUILDDIR)\eubw.exe copy $(BUILDDIR)\eubw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
+	@if exist $(BUILDDIR)\eudbg.lib copy $(BUILDDIR)\eudbg.lib $(PREFIX)\bin\	
 	@if exist $(BUILDDIR)\ecp.dat copy $(BUILDDIR)\ecp.dat $(PREFIX)\bin\	
 
 installbin : .SYMBOLIC
@@ -557,6 +561,7 @@ installbin : .SYMBOLIC
 	@if exist $(BUILDDIR)\eubw.exe copy $(BUILDDIR)\eubw.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eub.exe copy $(BUILDDIR)\eub.exe $(PREFIX)\bin\
 	@if exist $(BUILDDIR)\eu.lib copy $(BUILDDIR)\eu.lib $(PREFIX)\bin\	
+	@if exist $(BUILDDIR)\eudbg.lib copy $(BUILDDIR)\eudbg.lib $(PREFIX)\bin\	
 	
 $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	$(RM) $(BUILDDIR)\$(OBJDIR)\euc.lbc

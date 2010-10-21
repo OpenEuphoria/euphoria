@@ -7110,7 +7110,10 @@ procedure BackEnd(atom ignore)
 
 	if TUNIX then
 		c_puts("#include <unistd.h>\n")
+	elsif TWINDOWS then
+		c_puts("#include <Windows.h>\n")
 	end if
+	c_puts("\n\n")
 	c_puts("int Argc;\n")
 	c_hputs("extern int Argc;\n")
 
@@ -7120,10 +7123,11 @@ procedure BackEnd(atom ignore)
 	if TWINDOWS then
 		c_puts("unsigned default_heap;\n")
 		if sequence(wat_path) then
-			c_puts("__declspec(dllimport) unsigned __stdcall GetProcessHeap(void);\n")
+			c_puts("/* this is in the header */\n")
+			c_puts("/*__declspec(dllimport) unsigned __stdcall GetProcessHeap(void)*/;\n")
 		else
-		c_puts("unsigned __stdcall GetProcessHeap(void);\n")
-	end if
+			c_puts("//\'test me!\' is this in the header?: unsigned __stdcall GetProcessHeap(void);\n")		
+		end if
 	end if
 
 	c_puts("unsigned long *peek4_addr;\n")
@@ -7147,6 +7151,10 @@ procedure BackEnd(atom ignore)
 	c_puts("char *stack_base;\n")
 	c_hputs("extern char *stack_base;\n")
 
+	if TWINDOWS and not dll_option then
+			c_puts("extern long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);\n")
+	end if
+	
 	if total_stack_size = -1 then
 		-- user didn't set the option
 		if tasks_created then
@@ -7170,7 +7178,7 @@ procedure BackEnd(atom ignore)
 			end if
 			c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
 		else
-			c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
+			c_stmt0("\nint __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
 		end if
 
 	else -- TUNIX
@@ -7184,6 +7192,7 @@ procedure BackEnd(atom ignore)
 
 	c_stmt0("s1_ptr _0switch_ptr;\n")
 
+	
 	main_temps()
 
 	if TWINDOWS then
@@ -7194,6 +7203,7 @@ procedure BackEnd(atom ignore)
 		else
 			c_stmt0("int argc;\n")
 			c_stmt0("char **argv;\n\n")
+			c_stmt0("SetUnhandledExceptionFilter(Win_Machine_Handler);\n")
 			c_stmt0("default_heap = GetProcessHeap();\n")
 			c_stmt0("argc = 1;\n")
 			c_stmt0("Argc = 1;\n")

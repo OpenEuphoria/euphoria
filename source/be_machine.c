@@ -2670,6 +2670,17 @@ object eu_uname()
 #endif
 }
 
+#ifdef EWINDOWS
+long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p) {
+	is_batch = console_application();
+#ifdef ERUNTIME
+	RTFatal("A machine-level exception occurred during execution of your program");
+#else
+	RTFatal("A machine-level exception occurred during execution of this statement");
+#endif
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
 
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */

@@ -190,6 +190,18 @@ void InitInOut()
 #endif
 }
 
+int console_application() {
+#if defined(EWINDOWS)
+	if (!have_console)
+			show_console();
+		
+	return already_had_console;
+#else
+	return 1;
+#endif
+}
+
+
 #if defined(EWINDOWS)
 void show_console()
 /* set up a console window if not done yet */

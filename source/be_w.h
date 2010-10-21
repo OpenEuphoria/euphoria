@@ -19,6 +19,14 @@ struct char_cell screen_image[MAX_LINES][MAX_COLS];
 struct char_cell alt_image_main[MAX_LINES][MAX_COLS];
 struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 #endif
+/*
+  Description: opens a console Window if it doesn't exist and return true if the application started with one.
+  
+  Returns:
+  	1 - if the this is a console app.
+	0 - if this is a Windows Windowed application.
+*/
+extern int console_application();
 
 #ifdef EWINDOWS
 void SaveNormal();
