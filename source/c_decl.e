@@ -704,10 +704,11 @@ export procedure DeclareFileVars()
 	s = SymTab[TopLevelSub][S_NEXT]
 	while s do
 		eentry = SymTab[s]
-		if eentry[S_SCOPE] >= SC_LOCAL and (eentry[S_SCOPE] <= SC_GLOBAL 
-			or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC) and
-			eentry[S_USAGE] != U_UNUSED and eentry[S_USAGE] != U_DELETED and
-			not find(eentry[S_TOKEN], RTN_TOKS) then
+		if eentry[S_SCOPE] >= SC_LOCAL 
+		and (eentry[S_SCOPE] <= SC_GLOBAL or eentry[S_SCOPE] = SC_EXPORT or eentry[S_SCOPE] = SC_PUBLIC)
+		and eentry[S_USAGE] != U_UNUSED 
+		and eentry[S_USAGE] != U_DELETED 
+		and not find(eentry[S_TOKEN], RTN_TOKS) then
 			
 			if eentry[S_TOKEN] = PROC then
 				c_puts( "void ")

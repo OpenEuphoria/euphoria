@@ -25,6 +25,7 @@ include global.e
 include reswords.e
 include symtab.e
 include scanner.e
+include fwdref.e
 
 include dox.e as dox
 
@@ -1532,6 +1533,20 @@ function format_symbol( sequence symbol )
 	return symbol
 end function
 
+sequence in_chain = {}
+procedure write_next_links( symtab_pointer s, integer fn )
+	puts( fn, "\nSYMBOL CHAIN:\n")
+	while s do
+		if sym_mode( s ) = M_TEMP then
+			printf(fn, "\t%6d TEMP\n", { s })
+		else
+			printf(fn, "\t%6d %s\n", { s, SymTab[s][S_NAME] })
+		end if
+		in_chain[s] = 1
+		s = SymTab[s][S_NEXT]
+	end while
+end procedure
+
 procedure save_il( sequence name )
 	integer st, max_width
 	sequence line_format, pretty_options = PRETTY_DEFAULT
@@ -1548,6 +1563,15 @@ procedure save_il( sequence name )
 -- 		pretty_print( st, j & SymTab[j], pretty_options )
 		puts( st, "\n" )
 	end for
+	
+	-- now output the chains...
+	in_chain = repeat( 0, length( SymTab ) )
+	for j = 1 to length( SymTab ) do
+		if not in_chain[j] and sym_mode( j ) != M_TEMP then
+			write_next_links( j, st )
+		end if
+	end for
+	in_chain = {}
 	close( st )
 	
 	st = open( sprintf("%sline", {name}), "wb" )

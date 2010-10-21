@@ -3425,7 +3425,11 @@ function Global_declaration(integer type_ptr, integer scope)
 				SymTab[sym][S_OBJ] = usedval
 				if TRANSLATE then
 					-- Let the translator know about its value
-					SymTab[sym][S_GTYPE] = TYPE_INTEGER
+					if integer( usedval ) then
+						SymTab[sym][S_GTYPE] = TYPE_INTEGER
+					else
+						SymTab[sym][S_GTYPE] = TYPE_DOUBLE
+					end if
 					SymTab[sym][S_SEQ_ELEM] = 0
 					SymTab[sym][S_OBJ_MIN] = usedval
 					SymTab[sym][S_OBJ_MAX] = usedval
@@ -3796,6 +3800,7 @@ procedure SubProg(integer prog_type, integer scope)
 	integer type_enum
 	object seq_sym
 	object i1_sym
+	sequence enum_syms = {}
 	
 	LeaveTopLevel()
 	prog_name = next_token()
@@ -3807,15 +3812,15 @@ procedure SubProg(integer prog_type, integer scope)
 		object tsym = prog_name[T_SYM]
 		if equal(sym_name(prog_name[T_SYM]),"enum") then
 			type_enum = 1
-			sequence symbols, seq_symbol
+			sequence seq_symbol
 			prog_name = next_token()
 			if not find(prog_name[T_ID], ADDR_TOKS) then
 				CompileErr(25, {find_category(prog_name[T_ID])} )
 			end if
-			symbols = Global_declaration(-1, scope)
-			seq_symbol = symbols
-			for i = 1 to length(symbols) do
-				seq_symbol[i] = sym_obj(symbols[i])
+			enum_syms = Global_declaration(-1, scope)
+			seq_symbol = enum_syms
+			for i = 1 to length( enum_syms ) do
+				seq_symbol[i] = sym_obj(enum_syms[i])
 			end for
 			-- boot strap in a type routine
 			-- so that anything falling in the
@@ -3945,12 +3950,14 @@ procedure SubProg(integer prog_type, integer scope)
 		end if
 		sym = SetPrivateScope(tok[T_SYM], type_sym, param_num)
 		param_num += 1
-		if SymTab[last_link][S_NEXT] != sym then
+		
+		if SymTab[last_link][S_NEXT] != sym 
+		and SymTab[SymTab[last_link][S_NEXT]][S_SCOPE] = SC_UNDEFINED then
 			-- ignore SC_UNDEFINED symbols (should be forward declared types)
 			SymTab[SymTab[last_link][S_NEXT]][S_NEXT] = 0
 			SymTab[last_link][S_NEXT] = sym
-			
 		end if
+		
 		last_link = sym
 		
 		if TRANSLATE then
@@ -4117,6 +4124,14 @@ procedure SubProg(integer prog_type, integer scope)
 	check_inline( p )
 	param_num = -1
 	EnterTopLevel()
+	
+	-- need to patch up the SYM_NEXT chain in case of enum type
+	if length( enum_syms ) then
+		SymTab[p][S_NEXT] = SymTab[enum_syms[$]][S_NEXT]
+		SymTab[last_sym][S_NEXT] = enum_syms[1]
+		last_sym = enum_syms[$]
+		SymTab[last_sym][S_NEXT] = 0
+	end if
 end procedure
 
 export procedure InitGlobals()
