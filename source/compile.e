@@ -7178,7 +7178,7 @@ procedure BackEnd(atom ignore)
 			end if
 			c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
 		else
-			c_stmt0("\nint __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
+			c_stmt0("\nint __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)\n")
 		end if
 
 	else -- TUNIX
