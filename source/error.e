@@ -234,7 +234,7 @@ end procedure
 
 --**
 -- Handle fatal compilation errors
-export procedure CompileErr(object msg, object args = {})
+export procedure CompileErr(object msg, object args = {}, integer preproc = 0 )
 	sequence errmsg
 
 	if integer(msg) then
@@ -244,7 +244,7 @@ export procedure CompileErr(object msg, object args = {})
 	msg = format(msg, args)
 
 	Errors += 1
-	if length(known_files) then
+	if not preproc and length(known_files) then
 		errmsg = sprintf("%s:%d\n%s\n", {known_files[current_file_no],
 					 line_number, msg})
 	else
@@ -253,23 +253,29 @@ export procedure CompileErr(object msg, object args = {})
 			errmsg &= '\n'
 		end if
 	end if
-
-	-- try to open err file *before* displaying diagnostics on screen
-	OpenErrFile() -- exits if error filename is ""
+	
+	if not preproc then
+		-- try to open err file *before* displaying diagnostics on screen
+		OpenErrFile() -- exits if error filename is ""
+	end if
 	screen_output(STDERR, errmsg)
-	ShowErr(STDERR)
+	
+	if not preproc then
+		ShowErr(STDERR)
 
-	puts(TempErrFile, errmsg)
+		puts(TempErrFile, errmsg)
 
-	ShowErr(TempErrFile)
+		ShowErr(TempErrFile)
 
-	ShowWarnings()
+		ShowWarnings()
 
-	ShowDefines(TempErrFile)
+		ShowDefines(TempErrFile)
 
-	close(TempErrFile)
-	TempErrFile = -2
-	Cleanup(1)
+		close(TempErrFile)
+		TempErrFile = -2
+		Cleanup(1)
+	end if
+	
 end procedure
 
 --**

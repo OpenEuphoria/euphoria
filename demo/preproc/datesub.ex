@@ -26,7 +26,7 @@ public function preprocess(sequence inFileName, sequence outFileName,
 	map opts = cmd_parse(cmdopts, {}, {0,0} & parse_commandline(options))
     sequence content = read_file(inFileName)
 
-    content = find_replace("@DATE@", content, format(now(), map:get(opts, "f")))
+    content = match_replace("@DATE@", content, format(now(), map:get(opts, "f")))
 
     write_file(outFileName, content)
     
