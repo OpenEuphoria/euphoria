@@ -1272,15 +1272,27 @@ procedure main()
 					end for
 					files = sort( files )
 					-- put the counter tests last to do
-					for f = length( files ) to 1 by -1 do
-						if match( "t_c_", files[f] ) = 1 then
-							for g = f - 1 to 1 by -1 do
-								if match( "t_c_", files[g] ) != 1 then
-									files = remove(files, g+1, f) & files[g+1..f]
-								end if
-							end for
+					integer first_counter
+					integer last_counter
+					-- default values are chosen such that 
+					-- files are left alone if there are no 
+					-- counter tests.
+					first_counter = length(files)+1
+					last_counter = length(files)
+					for f = 1 to length(files) do
+						if match("t_c_", files[f])=1 then
+							first_counter = f
+							exit
 						end if
-					end for						
+					end for
+					for f = first_counter to length(files) do
+						if match("t_c_", files[f])!=1 then
+							last_counter = f-1
+							exit
+						end if
+					end for
+					files = remove(files,first_counter,last_counter) 
+						& files[first_counter..last_counter]
 				end if
 				
 		end switch
