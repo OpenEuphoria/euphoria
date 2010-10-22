@@ -277,7 +277,7 @@ function eunet_format_sendheader()
 						end while
 						-- append the http version
 						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
-							sendheader[idx][3] & " " & httpversion & "\r\n"
+							sendheader[idx][3] & httpversion & "\r\n"
 						break
 
 					case "POST" then
@@ -287,7 +287,7 @@ function eunet_format_sendheader()
 						end while
 						-- append the http version
 						tempheader &= sendheader[idx][1] & sendheader[idx][2] &
-							sendheader[idx][3] & " " & httpversion & "\r\n"
+							sendheader[idx][3] & httpversion & "\r\n"
 						break
 
 					case else
@@ -455,25 +455,24 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 	last_data_len = 0
 	sock = sock:create(AF_INET,SOCK_STREAM,0)
 	success = sock:connect(sock,inet_addr,port)
- 	
+
 	if success = sock:OK then
 		-- eunet_format_sendheader sets up the header to sent,
 		-- putting the POST data at the end,
 		-- filling in the CONTENT-LENGTH,
 		-- and avoiding sending empty fields for any field
 		success = sock:send(sock,eunet_format_sendheader(),0)
- 
+
 		-- } end version 1.3.0 mod
 		data = ""
 		header= {}
 		contentlen = 0
 		gotheader = 0
-				if success 
-					then		
+				if success then
 				   last = time()
 				   while sequence(junk) with entry do
 					data = data & junk
-					if gotheader and equal(contentlen,length(data)) then 
+					if gotheader and equal(contentlen,length(data)) then
 					   exit  -- we got all the server said it had
 					end if
 					if not gotheader and match({13,10,13,10},data) then -- we got the header in there
@@ -486,7 +485,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 								  contentlen = junk[2]
 								  if equal(contentlen,0) then exit end if -- there's no more
 								  if equal(contentlen,length(data)) then exit end if -- there's no more
-						   end if       
+						   end if
 							  gotheader = 1 -- we got what we came for here
 					end if
 				entry
@@ -505,7 +504,7 @@ public function get_http(sequence inet_addr, sequence hostname, sequence file, i
 				header = -1
 				data = "could not send or recieve using socket"
 		end if -- if success -- sock:send
-	else 
+	else
 		header = -1
 		data = "could not connect to socket"
 	end if -- if success = 1 then -- sock:connect
@@ -630,7 +629,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 					junk = sock:receive(sock, 0)
 			while sequence(junk) do
 				data = data & junk
-				if gotheader and equal(contentlen,length(data)) then 
+				if gotheader and equal(contentlen,length(data)) then
 				   exit  -- we got all the server said it had
 				end if
 				if not gotheader and match({13,10,13,10},data) then -- we got the header in there
@@ -643,7 +642,7 @@ public function get_http_use_cookie(sequence inet_addr, sequence hostname, seque
 							  contentlen = junk[2]
 							  if equal(contentlen,0) then exit end if -- there's no more
 							  if equal(contentlen,length(data)) then exit end if -- there's no more
-					   end if       
+					   end if
 						  gotheader = 1 -- we got what we came for here
 				end if
 				junk = sock:receive(sock, 0)
@@ -772,7 +771,7 @@ end function
 -- Comments:
 --   If ##post_data## is empty, then a normal GET request is done. If ##post_data## is non-empty
 --	 then ##get_url## will perform a POST request and supply ##post_data## during the request.
---	 
+--
 -- Example 1:
 -- <eucode>
 -- url = "http://banners.wunderground.com/weathersticker/mini" &

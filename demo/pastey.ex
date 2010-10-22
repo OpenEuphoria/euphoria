@@ -40,9 +40,9 @@ username = url:encode(username)
 title = url:encode(title)
 data = url:encode(data)
 
-set_sendheader("POSTDATA", sprintf("language=euphoria&paste=Paste&author=%s&subject=%s&text=%s",
-    { username, title, data }))
-data = get_url("http://euphoria.pastey.net/submit.php")
+data = get_url("http://euphoria.pastey.net/submit.php",
+	sprintf("language=euphoria&author=%s&subject=%s&secure=0&text=%s" &
+		"&submit=Paste&tabstop=2", { username, title, data }))
 
 if equal(data[1], "") or equal(data[2], "") then
     puts(1, "An error occurred while submitting your file.\n")
