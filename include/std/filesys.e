@@ -968,10 +968,10 @@ public function remove_directory(sequence dir_name, integer force=0)
 	if atom(files) then
 		return 0
 	end if
+	if length( files ) < 2 then
+		return 0	-- Supplied dir_name was not a directory
+	end if
 	ifdef WINDOWS then
-		if length( files ) <= 2 then
-			return 0	-- Supplied dir_name was not a directory
-		end if
 	
 		if not equal(files[1][D_NAME], ".") then
 			return 0 -- Supplied name was not a directory
@@ -983,10 +983,6 @@ public function remove_directory(sequence dir_name, integer force=0)
 			if not force then
 				return 0 -- Directory is not already emptied.
 			end if
-		end if
-	elsedef
-		if length( files ) < 2 then
-			return 0
 		end if
 	end ifdef
 	
