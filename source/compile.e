@@ -5858,7 +5858,7 @@ procedure opGETC()
 			c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
 		else
 			-- c_stmt("@ = getch(1);\n", Code[pc+2])   -- echo the character
-			c_stmt("@ = getc(xstdin);\n", Code[pc+2])   -- echo the character
+			c_stmt("@ = getc((FILE*)xstdin);\n", Code[pc+2])   -- echo the character
 		end if
 	else
 		c_stmt("@ = wingetch();\n", Code[pc+2])

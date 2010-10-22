@@ -25,8 +25,6 @@
 
 #ifdef EUNIX
 #include <sys/ioctl.h>
-#endif
-#ifdef EOSX
 #include <unistd.h>
 #endif
 
