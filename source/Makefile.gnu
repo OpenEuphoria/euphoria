@@ -512,7 +512,7 @@ $(BUILDDIR)/html/js/scriptaculous.js: $(DOCDIR)/scriptaculous.js  $(BUILDDIR)/ht
 $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 	copy $(DOCDIR)/prototype.js $^@
 
-htmldoc : $(BUILDDIR)/html/eu400_0001.html $(BUILDDIR)/html/js/search.js
+htmldoc : $(BUILDDIR)/html/eu400_0001.html
 
 $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
 	sed -e "s/splitlevel = 2/splitlevel = 0/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
