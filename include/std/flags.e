@@ -2,7 +2,7 @@
 
 namespace flags
 --****
--- == flags
+-- == Flags
 
 include std/map.e
 object one_bit_numbers = map:new()
