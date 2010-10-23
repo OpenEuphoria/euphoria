@@ -36,7 +36,7 @@ include mode.e as mode
 include intinit.e
 include coverage.e
 
-ifdef WIN32 then
+ifdef WINDOWS
 	include std/machine.e as dep
 end ifdef
 
@@ -1628,9 +1628,6 @@ procedure opLENGTH()
 -- operand should be a sequence 
 	a = Code[pc+1]
 	target = Code[pc+2]
-	if atom(val[a]) then
-		RTFatal("length of an atom is not defined")
-	end if
 	val[target] = length(val[a])
 	pc += 3
 end procedure
@@ -1733,8 +1730,11 @@ procedure check_slice(object seq, object lower, object upper)
 		RTFatal("slice upper index is not an atom")
 	end if
 	upper = floor(upper)
+	if upper > #FFFF_FFFF then
+		upper = -2147483645
+	end if
 	if upper < 0 then
-		RTFatal("slice upper index is less than 0")
+		RTFatal(sprintf("slice upper index is less than 0 (%d)", upper ) )
 	end if
 	
 	if atom(seq) then
@@ -2166,6 +2166,10 @@ end procedure
 procedure opEQUALS_IFW()
 	a = Code[pc+1]
 	b = Code[pc+2]
+	
+	if sequence( val[a] ) or sequence( val[b] ) then
+		RTFatal("true/false condition must be an ATOM")
+	end if
 	if val[a] = val[b] then
 		pc += 4
 	else
@@ -2519,7 +2523,7 @@ procedure opENDFOR_INT_UP1()
 	end if
 end procedure
 
-function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
+function RTLookup(sequence name, integer file, symtab_index proc, integer stlen )
 -- Look up a name (routine or var) in the symbol table at runtime.
 -- The name must have been defined earlier in the source than
 -- where we are currently executing. The name may be a simple "name"
@@ -2535,6 +2539,7 @@ function RTLookup(sequence name, integer file, symtab_index proc, integer stlen)
 	integer found_outside_path
 	integer s_in_include_path
 	
+	stlen = length( SymTab )
 	colon = find(':', name)
 	
 	if colon then
