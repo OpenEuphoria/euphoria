@@ -298,10 +298,28 @@ export type token(object t)
 	if not integer(t[T_ID]) then
 		return FALSE
 	end if
-	if t[T_ID] != IGNORED and t[T_ID] < 500 and symtab_index(t[T_SYM]) = 0 then
-		return FALSE
+	if t[T_ID] = VARIABLE and (t[T_SYM] < 0 or symtab_index(t[T_SYM])) then
+		return TRUE
 	end if
-	return TRUE
+	-- processed characters
+	if QUESTION_MARK <= t[T_ID] and t[T_ID] <= -1 then
+		return TRUE
+	end if
+	-- opcodes or EOF
+	if t[T_ID] >= 1 and t[T_ID] <= MAX_OPCODE then
+		return TRUE
+	end if
+	-- keywords that are not opcodes
+	if END <= t[T_ID] and t[T_ID] <=  ROUTINE then
+		if t[T_ID] != IGNORED and t[T_ID] < 500 and symtab_index(t[T_SYM]) = 0 then
+			return FALSE
+		end if
+		return TRUE
+	end if
+	if FUNC <= t[T_ID] and t[T_ID] <= NAMESPACE then
+		return TRUE
+	end if
+	return FALSE
 end type
 
 export type sequence_of_tokens(object x)
