@@ -4530,6 +4530,15 @@ int get_key(int wait)
 			a = getch();
 			if (a == 0) {
 				a = 256 + getch();
+				if ( 0x8000 & GetAsyncKeyState(VK_CONTROL)) {
+					a += 256;
+				}
+				if ( 0x8000 & GetAsyncKeyState(VK_SHIFT)) {
+					a += 512;
+				}
+				if ( 0x8000 & GetAsyncKeyState(VK_MENU)) {
+					a += 1024;
+				}
 			}
 			return a;
 		}

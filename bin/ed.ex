@@ -109,8 +109,8 @@ elsifdef WINDOWS then
 	BS = 8
 	HOME = 327
 	END = 335
-	CONTROL_HOME = 375
-	CONTROL_END = 373
+	CONTROL_HOME = 583
+	CONTROL_END = 591
 	PAGE_UP = 329
 	PAGE_DOWN = 337
 	INSERT = 338
@@ -118,8 +118,8 @@ elsifdef WINDOWS then
 	XDELETE = -999 -- never
 	ARROW_LEFT = 331
 	ARROW_RIGHT = 333
-	CONTROL_ARROW_LEFT = 371
-	CONTROL_ARROW_RIGHT = 372
+	CONTROL_ARROW_LEFT = 587
+	CONTROL_ARROW_RIGHT = 589
 	ARROW_UP = 328
 	ARROW_DOWN = 336
 	F1 = 315
@@ -128,7 +128,7 @@ elsifdef WINDOWS then
 	F12 = 344
 	NUM_PAD_ENTER = 284
 	NUM_PAD_SLASH = 309	
-	CONTROL_DELETE = 403 -- key for line-delete 
+	CONTROL_DELETE = 595 -- key for line-delete 
 end ifdef
 
 
@@ -1858,6 +1858,8 @@ procedure get_escape(boolean help)
 				else
 					answer = "yes"
 				end if
+			else
+				answer = "yes"
 			end if
 			if answer[1] = 'y' then
 				system(self_command & SLASH & "html" & SLASH & "index.html")
