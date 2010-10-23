@@ -36,7 +36,7 @@ include mode.e as mode
 include intinit.e
 include coverage.e
 
-ifdef WINDOWS
+ifdef WINDOWS then
 	include std/machine.e as dep
 end ifdef
 
