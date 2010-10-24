@@ -136,8 +136,9 @@ public function maybe_preprocess(sequence fname)
 
 		cmd &= sprintf(" -i %s -o %s %s", { fname, post_fname, pp[PP_PARAMS] })
 			
-		if system_exec(cmd, 2) then
-			CompileErr(sprintf("Preprocessor command failed: %s\n", { cmd } ),,1)
+		integer result = system_exec(cmd, 2)
+		if result != 0 then
+			CompileErr(sprintf("Preprocessor command failed (%d): %s\n", { result, cmd } ),,1)
 		end if
 	end if
 	
