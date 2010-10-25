@@ -185,6 +185,12 @@
 ../include/std/win32/sounds.e
 
 ########
+:= Unsuppored Features
+:<<LEVELTOC level=1 depth=2>>
+
+../docs/unsupported.txt
+
+########
 := Release Notes
 :<<LEVELTOC level=1 depth=2>>
 
