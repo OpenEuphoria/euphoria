@@ -3,7 +3,7 @@ include Makefile.eu
 
 EU_VERSION =4.0
 EU_BASE_DIR =../..
-DEBIAN_VERSION =1
+DEBIAN_VERSION =2
 EU_ALL_FILES = \
 	source/be_alloc.c \
 	source/be_callc.c \
@@ -53,14 +53,12 @@ EU_ALL_FILES = \
 	source/platform.e \
 	source/preproc.e \
 	source/reswords.e \
-	source/rev.e \
 	source/revget.ex \
 	source/scanner.e \
 	source/scinot.e \
 	source/shift.e \
 	source/symtab.e \
 	source/traninit.e \
-	source/tranplat.e \
 	source/alldefs.h \
 	source/execute.h  \
 	source/opnames.h  \
@@ -93,8 +91,7 @@ EU_ALL_FILES = \
 	source/be_syncolor.h \
 	source/be_task.h \
 	source/be_w.h \
-	source/object.h \
-	source/getindices.ex
+	source/object.h
 
 EU_DIRS = include \
 	include/std/ \
