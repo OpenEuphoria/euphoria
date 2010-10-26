@@ -1016,7 +1016,7 @@ end procedure
 --                 If this is an empty string, STDIN (the console) is used.
 --
 -- Returns:
---		A **sequence**, made of lines from the file, as [[:gets]] could read them.
+--		-1 on error or a **sequence**, made of lines from the file, as [[:gets]] could read them.
 --
 -- Comments:
 --	If ##file## was a sequence, the file will be closed on completion. Otherwise, it will remain open, but at end of file.
