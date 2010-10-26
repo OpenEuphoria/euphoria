@@ -1539,8 +1539,10 @@ procedure write_next_links( symtab_pointer s, integer fn )
 	while s do
 		if sym_mode( s ) = M_TEMP then
 			printf(fn, "\t%6d TEMP\n", { s })
-		else
+		elsif length( SymTab[s] ) >= S_NAME then
 			printf(fn, "\t%6d %s\n", { s, SymTab[s][S_NAME] })
+		else
+			printf(fn, "\t%6d ?\n", s )
 		end if
 		in_chain[s] = 1
 		s = SymTab[s][S_NEXT]
