@@ -45,16 +45,16 @@ ifdef WIN32 then
 	test_equal("WIN32 test", 2, platform())
 end ifdef
 
-ifdef EU40000 then
-    test_pass("EU40000")
+ifdef EU4_0_0 then
+    test_pass("EU4_0_0")
 elsedef
-    test_fail("EU40000")
+    test_fail("EU4_0_0")
 end ifdef
 
-ifdef EU400 then
-	test_pass("EU400")
+ifdef EU4_0 then
+	test_pass("EU4_0")
 elsedef
-	test_fail("EU400")
+	test_fail("EU4_0")
 end ifdef
 
 ifdef EU4 then
@@ -63,6 +63,4 @@ elsedef
 	test_fail("EU4")
 end ifdef
 
-
 test_report()
-
