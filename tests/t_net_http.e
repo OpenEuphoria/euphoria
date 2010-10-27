@@ -18,20 +18,14 @@ ifdef not NOINET_TESTS then
     sequence data = sprintf("%d", { rand_range(1000,10000) })
 	data = "data=" & data
     content = get_url("http://test.openeuphoria.org/post_test.ex", data)
-	if length(content)>1 and sequence(content[2]) then
-		-- main EUPHORIA site still down
-		-- let's not report misleading results.
-		test_report()
-		abort(0)
-	end if
 	test_true("get_url post 1", length(content))
 	test_equal("get_url post 2", "success", content[2])
-	
+
 	set_sendheader("Cache-Control", "no-cache" )
     content = get_url("http://test.openeuphoria.org/post_test.txt")
 	test_true("get_url post 3", length(content))
 	test_equal("get_url post 4", data, content[2])
-	
+
 elsedef
     puts(2, " WARNING: URL tests were not run\n")
 end ifdef
