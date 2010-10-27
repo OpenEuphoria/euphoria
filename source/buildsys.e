@@ -156,6 +156,11 @@ export sequence lflags = ""
 
 export integer force_build = 0
 
+--**
+-- Output directory was a system generated name, remove when done
+
+export integer remove_output_dir = 0
+
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
 	SETUP_LFLAGS_BEGIN
 
@@ -701,6 +706,15 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		for i = 1 to length(generated_files) do
 			delete_file(generated_files[i])
 		end for
+
+		if remove_output_dir then
+			chdir(cwd)
+
+			-- remove the trailing slash
+			if not remove_directory(output_dir) then
+				ShowMsg(2, 194, { output_dir })
+			end if
+		end if
 	end if
 
 	chdir(cwd)

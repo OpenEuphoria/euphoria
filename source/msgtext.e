@@ -207,7 +207,7 @@ constant StdErrMsgs = {
 	{191, "Keep the generated files"},
 	{192, "Generate a partial project Makefile"},
 	{193, "Generate a full Makefile"},
-	{194, "-deleted-"},
+	{194, "Could not remove directory [1]"},
 	{195, "Generate a emake/emake.bat file to build project"},
 	{196, "Do not build the project nor write a build file"},
 	{197, "Generate/compile all files in 'builddir'"},

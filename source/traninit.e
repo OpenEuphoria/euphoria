@@ -93,7 +93,7 @@ sequence trans_opt_def = {
 	{ "emake",            0, GetMsgText(195,0), { NO_CASE } },
 	{ "nobuild",          0, GetMsgText(196,0), { NO_CASE } },
 	{ "force-build",      0, GetMsgText(326,0), { NO_CASE } },
-	{ "builddir",         0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
+	{ "build-dir",        0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
 	{ "o",                0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
 }
 
@@ -228,7 +228,7 @@ export procedure transoptions()
 			case "nobuild" then
 				build_system_type = BUILD_NONE
 
-			case "builddir" then
+			case "build-dir" then
 				output_dir = val
 				if find(output_dir[$], "/\\") = 0 then
 					output_dir &= '/'
@@ -244,6 +244,16 @@ export procedure transoptions()
 
 	if length(exe_name) and not absolute_path(exe_name) then
 		exe_name = current_dir() & SLASH & exe_name
+	end if
+
+	if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
+		output_dir = temp_file("." & SLASH, "build-", "")
+		if find(output_dir[$], "/\\") = 0 then
+			output_dir &= '/'
+		end if
+
+		printf(1, "Build directory: %s\n", { output_dir })
+		remove_output_dir = 1
 	end if
 
 	if length(map:get(opts, "extras")) = 0 then
