@@ -106,7 +106,7 @@ end if
 val[X] = 0
 test_equal( "simulated eu.ex double deleted by derefs", 1, delete_count() )
 
-constant NOVALUE = -1.295837195871e307
+constant NOVALUE = -1.295837195872e307
 integer a, b, c, target, pc
 sequence Code
 val = repeat( NOVALUE, 10 )

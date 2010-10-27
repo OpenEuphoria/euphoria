@@ -1,7 +1,5 @@
 include std/unittest.e
 
-set_test_verbosity( TEST_SHOW_ALL )
-
 with define ABC
 with define DEF
 

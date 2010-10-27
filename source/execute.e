@@ -39,7 +39,7 @@ include coverage.e
 ifdef WINDOWS then
 	include std/machine.e as dep
 end ifdef
-
+without inline
 -- Note: In several places we omit checking for bad arguments to
 -- built-in routines. Those errors will be caught by the underlying 
 -- interpreter or Euphoria run-time system, and an error will be raised 
@@ -77,6 +77,12 @@ t_id = tmp_alloc()
 t_arglist = tmp_alloc()
 t_return_val = tmp_alloc()
 
+atom arg_assign = 0
+function new_arg_assign()
+	arg_assign += 1
+	return arg_assign
+end function
+
 -- dummy call-back routine
 call_back_routine = NewEntry("_call_back_", 0, 0, PROC, 0, 0, 0)
 SymTab[call_back_routine] = SymTab[call_back_routine] & 
@@ -105,6 +111,7 @@ SymTab[delete_code_routine][S_SAVED_PRIVATES] = {}
 delete_code = {CALL_PROC,
 				  t_id,
 				  t_arglist,
+				  
 				  CALL_BACK_RETURN
 				 }
 
@@ -365,7 +372,7 @@ procedure restore_privates(symtab_index this_routine)
 			base += 1
 			arg = SymTab[arg][S_NEXT]
 		end while
-			
+		
 		-- temps
 		arg = SymTab[this_routine][S_TEMPS]
 		while arg != 0 do
@@ -421,11 +428,10 @@ procedure trace_back(sequence msg)
 		
 		while length(call_stack) > 0 do
 			sub = call_stack[$]
-			
 			if levels = 1 then
 				puts(2, '\n')
 			
-			elsif sub != call_back_routine then
+			elsif sub != call_back_routine and sub != delete_code_routine then
 				both_puts("... called from ")
 				-- pc points to statement after the subroutine call
 			end if
@@ -436,13 +442,15 @@ procedure trace_back(sequence msg)
 					exit
 				else
 					both_puts("^^^ call-back from ")
-					ifdef WIN32 then
+					ifdef WINDOWS then
 						both_puts("Windows\n")
 					elsedef
 						both_puts("external program\n")
 					end ifdef
 				end if
-			
+			elsif sub = delete_code_routine then
+				both_puts("^^^ delete routine\n")
+				
 			else
 				both_printf("%s:%d", find_line(sub, pc)) 
 	
@@ -580,7 +588,7 @@ end procedure
 procedure quit_after_error()
 -- final termination
 	write_coverage_db()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if not batch_job then
 			puts(2, "\nPress Enter...\n")
 			getc(0)
@@ -768,6 +776,7 @@ procedure scheduler()
 			pc = 1
 			val[t_id] = tcb[current_task][TASK_RID]
 			val[t_arglist] = tcb[current_task][TASK_ARGS]
+			new_arg_assign()
 			Code = {CALL_PROC, t_id, t_arglist}
 		else
 			-- resuming after a task_yield()
@@ -1268,7 +1277,7 @@ procedure exit_block( symtab_index block )
 			else
 				name = "temp"
 			end if
-			printf(2, "\tEXIT_BLOCK[%s] resetting [%d][%s][%s]\n", {sym_name( block ), a, name, pretty_sprint( val[a] )})
+-- 			printf(2, "\tEXIT_BLOCK[%s] resetting [%d][%s][%s]\n", {sym_name( block ), a, name, pretty_sprint( val[a] )})
 		end ifdef
 		val[a] = NOVALUE
 		
@@ -1284,7 +1293,7 @@ end procedure
 procedure opRETURNP()   
 -- return from procedure (or function)
 	symtab_index arg, sub, caller
-	
+	integer op = Code[pc]
 	sub = Code[pc+1]
 	
 	-- set sub privates to NOVALUE -- necessary? - we do it at routine entry
@@ -1306,9 +1315,12 @@ procedure opRETURNP()
 		block = SymTab[block][S_BLOCK]
 	end while
 	
-	if local_result then
-		exit_block( block )
-	end if
+	exit_block( sub_block )
+-- 	if local_result or op = RETURNP then
+-- 		exit_block( block )
+-- 	elsif Code[pc] = RETURNP then
+-- 		printf( 1, "not exiting RETURNP block for %s\n", { sym_name(sub) })
+-- 	end if
 	
 	-- set up for caller
 	pc = call_stack[$-1]
@@ -1328,6 +1340,7 @@ procedure opRETURNP()
 		scheduler()
 	end if
 	
+
 end procedure
 
 procedure opRETURNF()  
@@ -2685,7 +2698,6 @@ procedure do_call_proc( symtab_index sub, sequence args, integer advance )
 	
 	n = SymTab[sub][S_NUM_ARGS]
 	arg = SymTab[sub][S_NEXT]
-	
 	if SymTab[sub][S_RESIDENT_TASK] != 0 then
 		-- save the parameters, privates and temps
 		
@@ -3341,6 +3353,7 @@ function general_callback(sequence rtn_def, sequence args)
 
 	val[t_id] = rtn_def[C_USER_ROUTINE]
 	val[t_arglist] = args
+	atom arglist_assign = new_arg_assign()
 	
 	SymTab[call_back_routine][S_RESIDENT_TASK] = current_task
 	
@@ -3357,6 +3370,9 @@ function general_callback(sequence rtn_def, sequence args)
 	pc = call_stack[$-1]
 	call_stack = call_stack[1..$-2]
 	
+	if arglist_assign = arg_assign then
+		val[t_arglist] = NOVALUE
+	end if
 	-- restore
 	Code = SymTab[call_stack[$]][S_CODE]
 	
@@ -3401,7 +3417,7 @@ constant
 	M_ALLOC = 16
 
 function alloc(integer size, integer depq)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if depq then
 			return dep:allocate_protect(size, 1, PAGE_EXECUTE_READWRITE)
 		end if
@@ -3409,7 +3425,7 @@ function alloc(integer size, integer depq)
 	return machine_func(M_ALLOC, size)
 end function
 function callback(object a, integer depq)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if depq then
 			-- this is necessary because machine_func() doesn't
 			-- handle the DEP support required to make call_back()
@@ -3616,6 +3632,8 @@ procedure do_delete_routine( integer dx, object o )
 	
 	val[t_id] = user_delete_rid[dx]
 	val[t_arglist] = {o}
+	atom arglist_assign = new_arg_assign()
+	
 	SymTab[delete_code_routine][S_RESIDENT_TASK] = current_task
 	
 	-- create a stack frame
@@ -3627,12 +3645,17 @@ procedure do_delete_routine( integer dx, object o )
 	
 	do_exec()
 	
-	-- free up the dangling reference
-	val[t_arglist] = NOVALUE
+	if arglist_assign = arg_assign then
+		-- free up the dangling reference if it's still there...
+		val[t_arglist] = NOVALUE
+	end if
+	o = 0
 	
 	-- remove the stack frame
 	pc = call_stack[$-1]
 	call_stack = call_stack[1..$-2]
+	
+	restore_privates( call_stack[$] )
 	
 	-- restore
 	Code = SymTab[call_stack[$]][S_CODE]

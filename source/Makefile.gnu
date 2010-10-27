@@ -155,6 +155,10 @@ DEBUG_FLAGS=$(EOSMING)
 endif
 endif
 
+ifdef ENO_DBL_CACHE
+MEM_FLAGS+=-DNO_DBL_CACHE
+endif
+
 ifdef COVERAGE
 COVERAGEFLAG=-fprofile-arcs -ftest-coverage
 DEBUG_FLAGS=-g3 -O0 -Wall
@@ -544,7 +548,7 @@ test :
 	cd ../tests && sh check_diffs.sh
 
 testeu : $(BUILDDIR)/ecp.dat
-	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex"
+	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex" $(TESTFILE)
 
 coverage : 
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
