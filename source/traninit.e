@@ -242,6 +242,10 @@ export procedure transoptions()
 		end switch
 	end for
 
+	if length(exe_name) and not absolute_path(exe_name) then
+		exe_name = current_dir() & SLASH & exe_name
+	end if
+
 	if length(map:get(opts, "extras")) = 0 then
 		-- No source supplied on command line
 		show_banner()

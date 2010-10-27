@@ -330,7 +330,7 @@ end function
 
 procedure ensure_exename(sequence ext)
 	if length(exe_name) = 0 then
-		exe_name = file0 & ext
+		exe_name = current_dir() & SLASH & file0 & ext
 	end if
 end procedure
 
@@ -455,11 +455,11 @@ procedure write_makefile_full()
 	else
 		printf(fh, "%s: $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
 		if TWINDOWS then
-			printf(fh, "\t$(LINKER) -o %s%s @%s.lnk" & HOSTNL, {
-				file0, settings[SETUP_EXE_EXT], file0 })
+			printf(fh, "\t$(LINKER) -o %s @%s.lnk" & HOSTNL, {
+				exe_name, file0 })
 		else
-			printf(fh, "\t$(LINKER) -o %s%s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
-				file0, settings[SETUP_EXE_EXT], upper(file0) })
+			printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
+				exe_name, upper(file0) })
 		end if
 		puts(fh, HOSTNL)
 		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
