@@ -53,21 +53,15 @@
 
 namespace safe
 
+atom allocation_num
+allocation_num = 0
+
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
 export constant BORDER_SPACE = 40
 export constant leader = repeat('@', BORDER_SPACE)
 export constant trailer = repeat('%', BORDER_SPACE)
-
-public include std/memconst.e
-ifdef DATA_EXECUTE then
-	public include std/machine.e as machine
-end ifdef
-include std/error.e
-ifdef WINDOWS then
-	include std/win32/sounds.e
-end ifdef
 
 
 -- Some parameters you may wish to change:
@@ -133,6 +127,15 @@ constant OK = 1, BAD = 0
 constant M_ALLOC = 16,
 		 M_FREE = 17,
 		 M_SLEEP = 64
+
+public include std/memconst.e
+ifdef DATA_EXECUTE then
+	public include std/machine.e as machine
+end ifdef
+include std/error.e
+ifdef WINDOWS then
+	include std/win32/sounds.e
+end ifdef
 
 puts(1, "\n\t\tUsing Debug Version of machine.e\n")
 -- machine_proc(M_SLEEP, 3)
@@ -503,8 +506,6 @@ override procedure mem_set(machine_addr target, atom value, natural len)
 	end if
 end procedure
 
-atom allocation_num
-allocation_num = 0
 
 procedure show_byte(atom m)
 -- display byte at memory location m

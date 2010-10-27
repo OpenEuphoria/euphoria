@@ -266,6 +266,7 @@ end procedure
 procedure InitCheck(symtab_index sym, integer ref)
 -- emit INIT_CHECK opcode if we aren't sure if a var has been
 -- initialized yet. ref is TRUE if this is a read of this var
+
 	if sym < 0 or (SymTab[sym][S_MODE] = M_NORMAL and
 	    SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
 	    SymTab[sym][S_SCOPE] != SC_GLOOP_VAR) then
@@ -286,10 +287,18 @@ procedure InitCheck(symtab_index sym, integer ref)
 					end if
 					emit_addr(sym)
 				end if
-				if sym > 0 and (short_circuit <= 0 or short_circuit_B = FALSE)
+				if sym > 0 
+				and (short_circuit <= 0 or short_circuit_B = FALSE)
 				and not (SymTab[sym][S_SCOPE] != SC_PRIVATE and and_bits(SymTab[CurrentSub][S_USAGE], U_FORWARD )) then
-					init_stack = append(init_stack, sym)
-					SymTab[sym][S_INITLEVEL] = stmt_nest
+					
+					if CurrentSub != TopLevelSub 
+					or current_file_no = length( known_files ) then
+						-- if we're in top level code, and we've already included other files,
+						-- we can't mark this as initialized, since one of those files could
+						-- use the symbol before we initialize
+						init_stack = append(init_stack, sym)
+						SymTab[sym][S_INITLEVEL] = stmt_nest
+					end if
 				end if
 			end if
 			-- else we know that it must be initialized at this point
@@ -298,6 +307,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 	elsif ref and sym > 0 and sym_mode( sym ) = M_CONSTANT and equal( NOVALUE, sym_obj( sym ) ) then
 		emit_op( GLOBAL_INIT_CHECK )
 		emit_addr(sym)
+	
 	end if
 	-- else .. ignore loop vars, constants
 end procedure
