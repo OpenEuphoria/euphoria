@@ -65,6 +65,64 @@
 #define ERR_TIMEDOUT              -39
 #define ERR_WOULDBLOCK            -40
 
+#define EAF_UNSPEC		0
+#define EAF_UNIX		1
+#define EAF_INET		2
+#define EAF_INET6		3
+#define EAF_APPLETALK		4
+#define EAF_BTH			5
+
+#define ESOCK_STREAM		1
+#define ESOCK_DGRAM		2
+#define ESOCK_RAW		3
+#define ESOCK_RDM		4
+#define ESOCK_SEQPACKET		5
+
+int eusock_getsock_type(int x)
+{
+    switch (x)
+    {
+	case ESOCK_STREAM:
+		return SOCK_STREAM;
+	case ESOCK_DGRAM:
+		return SOCK_DGRAM;
+	case ESOCK_RAW:
+		return SOCK_RAW;
+	case ESOCK_RDM:
+		return SOCK_RDM;
+	case ESOCK_SEQPACKET:
+		return SOCK_SEQPACKET;
+	default:
+		RTFatal("Unsupported SOCK type");
+    }
+}
+
+int eusock_getfamily(int x)
+{
+    switch (x)
+    {
+	case EAF_UNSPEC:
+		return AF_UNSPEC;
+	case EAF_UNIX:
+		return AF_UNIX;
+	case EAF_INET:
+		return AF_INET;
+	case EAF_INET6:
+		return AF_INET6;
+	case EAF_APPLETALK:
+		return AF_APPLETALK;
+	case EAF_BTH:
+#ifdef EWATCOM
+		return AF_BTH;
+#else
+	/* TODO - Is this supported under any Unix-like OS? Or under Mingw? */
+		/* fallthru */
+#endif
+	default:
+		RTFatal("Unsupported Protocol/AF type");
+    }
+}
+
 #ifdef EWINDOWS
     int eusock_wsastarted = 0;
 
@@ -529,6 +587,9 @@ object eusock_socket(object x)
 	af       = SEQ_PTR(x)->base[1];
 	type     = SEQ_PTR(x)->base[2];
 	protocol = SEQ_PTR(x)->base[3];
+
+	af = eusock_getfamily(af);
+	type = eusock_getsock_type(type);
 
 	sock = socket(af, type, protocol);
 	if (sock == INVALID_SOCKET)

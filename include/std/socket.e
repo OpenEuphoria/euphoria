@@ -257,26 +257,25 @@ public constant ERR_WOULDBLOCK          = -40
 -- the [[:create]] function.
 --
 
-ifdef WIN32 then
 	public constant
 		--**
 		-- Address family is unspecified
 		AF_UNSPEC=0,
 		--**
 		-- Local communications
-		AF_UNIX=-1,
+		AF_UNIX=1,
 		--**
 		-- IPv4 Internet protocols
 		AF_INET=2,
 		--**
 		-- IPv6 Internet protocols
-		AF_INET6=23,
+		AF_INET6=3,
 		--**
 		-- Appletalk
-		AF_APPLETALK=17,
+		AF_APPLETALK=4,
 		--**
-		-- Bluetooth
-		AF_BTH=32,
+		-- Bluetooth (currently Windows-only)
+		AF_BTH=5,
 		--**
 		-- Provides sequenced, reliable, two-way, connection-based byte streams.
 		-- An out-of-band data transmission mechanism may be supported.
@@ -294,27 +293,6 @@ ifdef WIN32 then
 		--**
 		-- Obsolete and should not be used in new programs
 		SOCK_SEQPACKET=5
-
-elsifdef LINUX then
-	public constant
-		AF_UNSPEC=0, AF_UNIX=1, AF_INET=2, AF_APPLETALK=5, AF_INET6=10,
-		SOCK_STREAM=1, SOCK_DGRAM=2, SOCK_RAW=3, SOCK_RDM=4, SOCK_SEQPACKET=5
-
-elsifdef SUNOS then
-	public constant
-		AF_UNSPEC=0, AF_UNIX=1, AF_INET=2, AF_APPLETALK=16, AF_INET6=26,
-		SOCK_STREAM=2, SOCK_DGRAM=1, SOCK_RAW=4, SOCK_RDM=5, SOCK_SEQPACKET=6
-
-elsifdef OSX then
-	public constant
-		AF_UNSPEC=0, AF_UNIX=1, AF_INET=2, AF_APPLETALK=16, AF_INET6=30,
-		SOCK_STREAM=1, SOCK_DGRAM=2, SOCK_RAW=3, SOCK_RDM=4, SOCK_SEQPACKET=5
-
-elsifdef FREEBSD then
-	public constant
-		AF_UNSPEC=0, AF_UNIX=1, AF_INET=2, AF_APPLETALK=16, AF_INET6=28,
-		SOCK_STREAM=1, SOCK_DGRAM=2, SOCK_RAW=3, SOCK_RDM=4, SOCK_SEQPACKET=5
-end ifdef
 
 --****
 -- === Select Accessor Constants
