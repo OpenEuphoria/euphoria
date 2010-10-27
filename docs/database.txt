@@ -3,15 +3,16 @@
 
 === Introduction  
 
-Many people have expressed an interest in accessing databases using Euphoria
-programs. Those people have either wanted to access a name-brand database
-management system from Euphoria, or they've wanted a simple, easy-to-use,
-Euphoria-oriented database for storing data.  EDS is the latter. **It provides
-a simple, extremely flexible, database system for use by Euphoria programs.**
+While you can connect Euphoria to most databases 
+(MySQL, SQLite, PostgreSQL, etc.), sometimes you don't need that kind
+of power. The Euphoria Database System is a simple, easy-to-use, flexible, 
+Euphoria-oriented database for storing data that works better for cases
+where you need more than a text file and don't quite need or want the
+power and complexity of larger database packages.
  
 === Structure of an EDS database
 
-In EDS, a **database** is a single file with ##.edb## file type.  An EDS
+In EDS, a **database** is a single file with a ##.edb## file extension.  An EDS
 database contains 0 or more **tables**. Each table has a **name**, and contains
 0 or more **records**.  Each record consists of a **key** part, and a **data**
 part. The key can be **any** Euphoria object - an atom, a sequence, a
@@ -34,10 +35,9 @@ lost when saving or restoring floating-point numbers or **any** other Euphoria
 data.
 
 ##database.e## will work as is, on all platforms. EDS database files can be 
-copied and shared between programs running on all platforms as well. Be sure to 
-make an exact byte for
-byte copy using "binary" mode copying, rather than "text" or "ASCII" mode which
-could change the line terminators.
+copied and shared between programs running on all platforms as well. When sharing
+EDS database files, be sure to make an exact byte-for-byte copy using "binary" mode
+copying, rather than "text" or "ASCII" mode, which could change the line terminators.
  
 Example:
 

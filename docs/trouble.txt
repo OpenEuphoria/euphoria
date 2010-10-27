@@ -13,10 +13,10 @@ example, ##guru declare global include##
 with trace
 trace(1)
 </eucode>
-# The [[http://www.rapideuphoria.com/listserv.htm|Euphoria Mailing List]] has a 
+# The [[http://openeuphoria.org/forum/index.wc|Euphoria Forum]] has a 
 search facility. You can search the archive of all previous messages. There is a
 good chance that your question has already been discussed.
-# Post a message on the mailing list.
+# Post a message on the forum.
 # Visit the Euphoria IRC channel, [[irc://irc.freenode.net/#euphoria]].
 
 === Common Problems and Solutions

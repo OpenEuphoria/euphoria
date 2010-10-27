@@ -6,7 +6,7 @@
 The Euphoria to C Translator will translate any Euphoria program into
 equivalent C source code.
 
-There are versions of the translator for //Windows// and //UNIX// like 
+There are versions of the translator for //Windows// and //UNIX//-like 
 Operating Systems. After translating a Euphoria program to C, you
 can compile and link using one of the supported C compilers. This will give
 you an executable file that will typically run much faster than if you used
@@ -15,11 +15,11 @@ the Euphoria interpreter.
 The translator can translate/compile **itself** into an executable file for
 each platform. The translator is also used in translating/compiling the
 front-end portion of the interpreter. The source code for the Translator is in
-##euphoria\source##. It's written 100% in Euphoria.
+##euphoria\source##. It is written 100% in Euphoria.
 
 === C Compilers Supported
 
-The **Translator** currently works with GNU C on //UNIX// like OSes,
+The **Translator** currently works with GNU C on //UNIX//-like OSes,
 GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
 or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the -gcc option
 and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
@@ -34,18 +34,17 @@ downloaded from their respective Web sites.
 on, you may see some
  harmless messages about variables declared but not used, labels defined but
  not used, function prototypes not declared etc.
-* Options bor and lcc for previously supported compilers on //Windows// no 
+* Options -bor and -lcc for previously supported compilers on //Windows// no 
 longer work. 
 * For the -gcc option on //Windows// you will need a ##libeu.a## compiled with 
 //minGW// or //Cygwin//. The official distribution may only contain ##eu.lib## 
 compiled with //Watcom//. Also, the -stack and -con options may not produce the 
 expected result with //GCC C//.
-* currently only 32 bit compiles are supported on 64 bit platforms.
+* currently, only 32-bit compilers are supported on 64-bit platforms.
 
 === How to Run the Translator
 
-Running the **Translator** is similar to running
-the **Interpreter**.
+Running the **Translator** is similar to running the **Interpreter**.
 
 On //Windows// you would type:
 
@@ -229,7 +228,7 @@ file where the identifier is defined. The main file is numbered as 0. The
 include files are numbered in the order they are encountered by the compiler. 
 You should check the C source to be sure.
 
-For Watcom the **Translator** also creates an EXPORT command, added to 
+For Watcom, the **Translator** also creates an EXPORT command, added to 
 ##objfiles.lnk## for each exported identifier, so ##foo()## would be exported as
 "##foo##".
 
@@ -279,8 +278,7 @@ is no simple solution for passing routine id's. This might be fixed in the
 future.
 
 A Euphoria shared dynamically loading library currently may not execute any 
-multitasking operations.
-The Translator will give you an error message about this.
+multitasking operations. The Translator will give you an error message about this.
 
 Euphoria shared dynamically loading library can also be used by C programs as 
 long as only 31-bit
@@ -360,9 +358,8 @@ with this **Translator** without modifying an RDS translator library file, may
 be distributed royalty-free. You are free to incorporate any Euphoria files
 provided by RDS into your application.
 
-In general, if you wish to use Euphoria code written by 3rd parties, you had
-better honor any restrictions that apply. If in doubt, you should ask for
-permission.
+In general, if you wish to use Euphoria code written by 3rd parties, please
+honor any restrictions that apply. If in doubt, you should ask for permission.
 
 On //Linux//, //FreeBSD//, the GNU Library licence
 will normally not affect programs created with this **Translator**. Simply
@@ -451,7 +448,7 @@ Euphoria file to avoid stressing the C compiler. It won't however, break a
 large routine into smaller routines.
 
 
-Post bug reports on EUforum.
+Post bug reports on [[http://www.openeuphoria.org/forum/index.wc|EUforum]].
 
 In particular, report any program that does not run the same when compiled as
 it does when interpreted.

@@ -7,28 +7,26 @@ The interpreter has four binary components:
 * the backend.  
 
 Euphoria's parser first converts the code into a set of instructions that the 
-translator, interpreter backend can process.  Then the backend runs these 
+translator, interpreter, and backend can process.  Then the backend runs these 
 instructions.  The translator takes these same instructions and converts them 
 into C-code.  The library is called by the backend for
-the many builtins included in EUPHORIA.
+the many builtins included in Euphoria.
 
 === The Euphoria Data Structures ===
 
-==== The EUPHORIA representation of a EUPHORIA Object =====
+==== The Euphoria representation of a Euphoria Object =====
 
-Every EUPHORIA object is stored as-is.  A special unlikely floating point value 
+Every Euphoria object is stored as-is.  A special unlikely floating point value 
 is used for NOVALUE.  NOVALUE signifies that a variable has not been assigned a 
 value or the end of a sequence.
 
-==== The C Representation of a EUPHORIA Object =====
+==== The C Representation of a Euphoria Object =====
 
-Every EUPHORIA object is either stored as is or an encoded pointer.  A EUPHORIA 
+Every Euphoria object is either stored as is, or as an encoded pointer.  A Euphoria 
 integer is stored in a 32-bit signed integer.  If the number is too big for a 
-EUPHORIA integer or not an integer, it is assigned to a 64-bit double float in a 
+Euphoria integer, it is assigned to a 64-bit double float in a 
 structure and an encoded pointer to that structure is stored in the said 32-bit 
 memory space.  Sequences are stored in a similar way.
-
-
 
 {{{
 
@@ -50,8 +48,8 @@ memory space.  Sequences are stored in a similar way.
 }}}
 
 
-EUPHORIA integers are stored in object variables as-is.  An object variable is a
-four byte signed integer.  Legal integer values for EUPHORIA integers are 
+Euphoria integers are stored in object variables as-is.  An object variable is a
+four byte signed integer.  Legal integer values for Euphoria integers are 
 between -1,073,741,824 ( -power(2,30) ) and +1,073,741,823 ( power(2,30)+1 ).  
 Unsigned hexadecimal numbers from C000_0000 to FFFF_FFFF are the negative 
 integers and numbers from 0000_0000 to 3FFF_FFFF are the positive integers.  The
@@ -69,13 +67,13 @@ variable and it also signifies the end of a sequence.  In C, values of this type
 are stored in the 'object' type.  The range 4000_0000 to 7FFF_FFFF is unused.
 
 A double structure 'struct d' could indeed contain a value that is legally in 
-the range of a EUPHORIA integer.  So the encoded pointer to this structure is 
+the range of a Euphoria integer.  So the encoded pointer to this structure is 
 recognized by the interpreter as an 'integer' but in this internals document 
-when we say EUPHORIA integer we mean it actually is a C integer in the legal 
-EUPHORIA integer range.
+when we say Euphoria integer we mean it actually is a C integer in the legal 
+Euphoria integer range.
 
 
-=== The C Representations of a EUPHORIA Sequence and a EUPHORIA Double =====
+=== The C Representations of a Euphoria Sequence and a Euphoria Double =====
 
 struct s1
 {{{
@@ -84,7 +82,7 @@ struct s1
  long length;         // this is the sequence length
  long ref;            // ref is the number of as virtual copies of this sequence
  long postfill;       // is how many extra objects could fit at the end of base
- cleanup_ptr cleanup; // this is a pointer to a EUPHORIA routine that is run 
+ cleanup_ptr cleanup; // this is a pointer to a Euphoria routine that is run 
 		              // just before the sequence is freed.
 }
 }}}
@@ -94,7 +92,7 @@ struct d
 {
  double dbl;          // the actual value of a double number.
  long ref;            // ref is the number of virtual copies of this double
- cleanup_ptr cleanup; // this is a pointer to a EUPHORIA routine that is run 
+ cleanup_ptr cleanup; // this is a pointer to a Euphoria routine that is run 
 		              // just before the sequence is freed.
 }
 }}}
@@ -119,7 +117,7 @@ is not NOVALUE before we use IS_SEQUENCE on it.
 {{{
 // object foo
 if (IS_ATOM_INT(foo)) {
- // some code for a EUPHORIA integer
+ // some code for a Euphoria integer
 } else if (IS_ATOM_DBL(foo)) {
  // some code for a double
 } else {
@@ -140,11 +138,11 @@ A sequence is held in a 'struct s1' type and a double is contained in a
 </eucode>
 
 ===== Returns:
-true if object is a EUPHORIA integer and not an encoded pointer.
+true if object is a Euphoria integer and not an encoded pointer.
 
 ===== Note: 
 IS_ATOM_INT() will return true even though the argument is out of the 
-EUPHORIA integer range when the argument is positive.  These values 
+Euphoria integer range when the argument is positive.  These values 
 are not possible encoded pointers.
 
 
@@ -158,7 +156,7 @@ are not possible encoded pointers.
 true if the object is an encoded pointer to a double struct.
 
 ===== Assumption: 
-//o// must not be a EUPHORIA integer.
+//o// must not be a Euphoria integer.
 
 
 
@@ -170,7 +168,7 @@ true if the object is an encoded pointer to a double struct.
 </eucode>
 
 ===== Returns:
-true if the object is a EUPHORIA integer or an encoded pointer to a 
+true if the object is a Euphoria integer or an encoded pointer to a 
 ##'struct d'##. 
 
 
@@ -208,7 +206,7 @@ true if the object is an encoded pointer of either kind of structure.
 
 ===== Returns: 
 an object with the same value as x.  x must be with in the integer range of a 
-legal EUPHORIA integer type.
+legal Euphoria integer type.
 
 @[:internals:MAKE_UINT|]
 ==== MAKE_UINT
@@ -224,7 +222,7 @@ x must be an **unsigned** integer with in the integer range of a C unsigned
 int type.
 
 ===== Example:
-MAKE_UINT(4*1000*1000*1000) will make a EUPHORIA value of four billion by 
+MAKE_UINT(4*1000*1000*1000) will make a Euphoria value of four billion by 
 creating a double.
 
 @[:internals:MAKE_SEQ|]
@@ -244,7 +242,7 @@ The pointer is encoded into a range for sequences and returned.
 </eucode>
 
 ===== Returns:
-an object representation of a EUPHORIA byte string s.  The returned encoded 
+an object representation of a Euphoria byte string s.  The returned encoded 
 pointer is a sequence with all of the bytes from s copied over.
 
 @[:internals:MAKE_DBL|]
@@ -328,7 +326,7 @@ Indicates that a variable has not been assigned and also terminates a sequence.
 <internal> signed int MININT
 </eucode>
 
-The minimal EUPHORIA integer.
+The minimal Euphoria integer.
 
 
 @[:internals:MAXINT|]
@@ -337,7 +335,4 @@ The minimal EUPHORIA integer.
 <internal> signed int MAXINT
 </eucode>
 
-The maximal EUPHORIA integer.
-
-
-
+The maximal Euphoria integer.

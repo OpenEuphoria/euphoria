@@ -29,7 +29,7 @@ You can then feed this integer to ##call_func##() or ##call_proc##() as
 appropriate. It does not matter whether the routine is still in scope at the 
 time you make that call. Once the id is gotten, it's valid.
 
-==== Calling Euphoria routines by id.
+==== Calling Euphoria routines by id
 
 This is very similar to using [[:c_func]]() or [[:c_proc]]() to interface with 
 external code.
@@ -87,11 +87,9 @@ cannot use ##call_proc##() to invoke a Euphoria function, only C functions.
 
 ==== Why call indirectly?
 
-The above examples do not look quite convincing, because it seems that calling 
-indirectly is a more complicated way to call routines. And slower.
-
-However, when the name of the routine you want to call might not be known until 
-run-time, the indirect method will solve the issue for you.
+Calling functions and procedures indirectly can seem more complicated and slower
+than just calling the routine directly, but indirect calls can be used when
+the name of the routine you want to call might not be known until run-time.
 
 
 <eucode>
@@ -136,11 +134,10 @@ may be overcome in future versions.
 
 A number of Euphoria routines are defined in different ways depending on the 
 platform they will run on. It would be cumbersome, and at times downright 
-impossible, to put such code in 
-include files, nor to make the routine fully builtin.
+impossible, to put such code in include files or to make the routine fully builtin.
 
-A response to this is provided by ##machine_func##() and ##machine_proc##(). 
-User code normally does not ever need to use these. Various examples are to be 
+A solution to this is provided by ##machine_func##() and ##machine_proc##(). 
+User code normally never needs to use these. Various examples are to be 
 found in the standard library.
 
 These primitives are called like this:
@@ -157,6 +154,3 @@ The complete list of known values for ##id## is to be found in the file
 
 Defining new identifiers and overriding machine_func/proc() to handle them is an
 easy way to extend the capabilities of the interpreter.
-
-
-

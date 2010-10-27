@@ -2,24 +2,26 @@
 == EuDOC - Source Documentation Tool
 :<<LEVELTOC level=2 depth=4>>
 
-Write your documentation, in the form of comments, within the 
-source-code of your program. Euphoria comments do not slow down the 
-execution of programs. Documentation written inside source-code 
-introduces no speed penalty, but is very convenient.
+Writing and managing documentation for your programs is made somewhat 
+easier with the **##eudoc##** tool. EuDOC, written entirely in Euphoria, 
+converts text comments embedded in your program, as well as information
+about routines and identifiers, into documentation
+that can be saved in a variety of formats, including plain text and HTML.
 
-The **##eudoc##** program extracts documentation written inside 
-source-code, and will extract information about routines and identifiers.  
+Since Euphoria comments do not slow down the 
+execution of programs, documentation written inside source-code 
+introduces no speed penalty but is very convenient.
+
 ##eudoc## can also incorporate documentation written externally from 
-your source-code. This automates the creation of documentation and makes
-it easy to maintain.
+your source-code.
 
-Write your material using //Creole// style markup to format documention.
+You write your material using //Creole// style markup to format documention.
 This gives you creative control using elements like headers, fonts, 
-cross-references, tables... The **##creolehtml##** program takes the output 
-of ##eudoc## and produces html formatted documentation.
+cross-references, tables, etc. The **##creolehtml##** program takes the output 
+of ##eudoc## and produces HTML-formatted documentation.
 
-A third party program like ##htmldoc## may then be used to convert html 
-to pdf.
+A third party program like ##htmldoc## may then be used to convert HTML 
+to PDF.
 
 === Documentation tags
 
@@ -60,7 +62,6 @@ Locate them before a routine or identifier that you wish to be described
 in your documentation. The ##eudoc## program will extract the 
 "signature" of a routine and combines it with the comments that you 
 write after this tag. 
-
 
 * Starting with the source-code file **favorite.ex** ... 
 
@@ -116,8 +117,9 @@ produce this documentation.
 
 === Creole markup
 
-Creole is a text markup language used in wikis, such as the Euphoria 
-Wiki, and for documenting source-code. 
+Creole is a text markup language used in wikis, such as the 
+[[http://openeuphoria.org/wiki/wiki.cgi|Euphoria Wiki]], 
+and for documenting source-code. 
 
 
 
@@ -169,10 +171,9 @@ for i=1 to 5 do
 end for
 </eucode>
 
-* More choices are described at the Euphoria Wiki.
+* More details can be found at the Euphoria Wiki under [[http://openeuphoria.org/wiki/wiki.cgi?CreoleHelp|CreoleHelp]].
 
 === Documentation software
-
 
 The programs eudoc ... 
 https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk

@@ -19,7 +19,7 @@ without type_check
    A program that is completely without user-defined type-checking
    might still be speeded up slightly.
 \\
-   Also, be //sure// to remove, or comment-out, any
+   Also, be sure to remove, or comment-out, any
 <eucode>
 with trace
 with profile
@@ -35,7 +35,7 @@ with profile_time
 * Declare variables as integer rather than atom where possible,
    and as sequence rather than object where possible. This usually gains
    you a few percent in speed.
-* In an expression involving floating-point calculations it's usually faster
+* In an expression involving floating-point calculations, it's usually faster
    to write constant numbers in floating point form, e.g. when x has a
    floating-point value, say, x = 9.9\\\\
    change:
@@ -348,50 +348,48 @@ and_bits(x, p-1)
  narrow range, try the //bucket sort// in **demo\allsorts.e**.
 
 === Taking Advantage of Cache Memory
- As CPU speeds increase, the gap between the speed of the on-chip cache
- memory and the speed of the main memory or DRAM (dynamic random access memory)
- becomes ever greater. You might have 256 Mb of DRAM on your computer, but the
- on-chip cache is likely to be only 8K (data) plus 8K (instructions) on a
- Pentium, or 16K (data) plus 16K (instructions) on a Pentium with MMX or a
- Pentium II/III. Most machines will also have a "level-2" cache of 256K or 512K.
+As CPU speeds increase, the gap between the speed of the on-chip cache
+memory and the speed of the main memory or DRAM (dynamic random access memory)
+becomes ever greater. You might have 256 Mb of DRAM on your computer, but the
+on-chip cache is likely to be only 8K (data) plus 8K (instructions) on a
+Pentium, or 16K (data) plus 16K (instructions) on a Pentium with MMX or a
+Pentium II/III. Most machines will also have a "level-2" cache of 256K or 512K.
 
- An algorithm that steps through a long sequence of a couple of thousand
- elements or more, many times, from beginning to end, performing one
- small operation on each element, will not make good use of the on-chip data
- cache. It might be better to go through once, applying several operations to
- each element, before moving on to the next element. The same argument holds
- when your program starts swapping, and the least-recently-used data is moved
- out to disk.
+An algorithm that steps through a long sequence of a couple of thousand
+elements or more, many times, from beginning to end, performing one
+small operation on each element, will not make good use of the on-chip data
+cache. It might be better to go through once, applying several operations to
+each element, before moving on to the next element. The same argument holds
+when your program starts swapping, and the least-recently-used data is moved
+out to disk.
 
- These cache effects aren't as noticeable in Euphoria as they are in
- lower-level compiled languages, but they are measurable.
+These cache effects aren't as noticeable in Euphoria as they are in
+lower-level compiled languages, but they are measurable.
 
 === Using Machine Code and C
 
- Euphoria lets you call routines written in machine code. You can call C 
- routines in dynamically loaded library files, and these C routines can call 
+Euphoria lets you call routines written in machine code. You can call C 
+routines in dynamically loaded library files, and these C routines can call 
 your Euphoria routines.
 You might need to call C or machine code because of something that can not be
 done directly in Euphoria, or you might do it for improved speed.
 
- To boost speed, the machine code or C routine needs to do a significant
- amount of work on each call, otherwise the overhead of setting up the
- arguments and making the call will dominate the time, and it might not
- gain you much.
+To boost speed, the machine code or C routine needs to do a significant
+amount of work on each call, otherwise the overhead of setting up the
+arguments and making the call will dominate the time, and it might not
+gain you much.
 
- Many programs have some inner core operation that consumes most of the
- CPU time. If you can code this in C or machine code, while leaving the
- bulk of the program in Euphoria, you might achieve a speed comparable
- to C, without sacrificing Euphoria's safety and flexibility.
+Many programs have some inner core operation that consumes most of the
+CPU time. If you can code this in C or machine code, while leaving the
+bulk of the program in Euphoria, you might achieve a speed comparable
+to C, without sacrificing Euphoria's safety and flexibility.
 
 === Using The Euphoria To C Translator
 
-From version 3.0, the full Euphoria To C Translator is included in the 
-installation package.
+The Euphoria To C Translator is included in the installation package.
 It will translate any Euphoria program into a set of C source files that you
 can compile using a C compiler.
 
 The executable file that you get using the Translator should run the same,
 but faster than when you use the interpreter. The speed-up can be anywhere
 from a few percent to a factor of 5 or more.
-

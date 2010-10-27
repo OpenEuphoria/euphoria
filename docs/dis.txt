@@ -4,8 +4,8 @@
 
 === Introduction
 
-In the euphoria source directory is a program named ##dis.ex##, which can be
-used for parsing euphoria code and outputting detailed disassembly
+In the Euphoria source directory is a program named ##dis.ex##, which can be
+used for parsing Euphoria code and outputting detailed disassembly
 of the intermediate language (i.e., byte code) used by Euphoria, as well
 as the symbol table.  The purpose of this tool is for low level debugging,
 especially for developing Euphoria itself, or for understanding why 

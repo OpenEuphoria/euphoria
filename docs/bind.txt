@@ -11,8 +11,8 @@ eushroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]
 
 The ##shroud## command converts a Euphoria program, typically consisting of a 
 main file plus many include files, into a single, compact file. A single file is
-not only convenient, it allows you to give people your program to use, without 
-giving them your source code.
+easier to distribute, and it allows you to distribute your program to others without 
+releasing your source code.
 
 A shrouded file does not contain any Euphoria source code statements. Rather,
 it contains a low-level intermediate language (IL) that is executed by the
@@ -42,8 +42,8 @@ useful ##ex.err## dump in case of a run-time error.
 
 The shrouder will remove any routines and variables that your program doesn't 
 use. This will give you a smaller .il file. There are often a great number of 
-unused routines and unused variables. For example your program might include 
-several 3rd party include files, plus some standard files from 
+unused routines and unused variables. For example, your program might include 
+several third party include files, plus some standard files from 
 ##euphoria\include##, but only use a few items from each file. The unused items 
 will be deleted.
 
@@ -98,13 +98,13 @@ source statements are not there.
 
 ==== Options:
 
-* **-c config-file**: A euphoria config file to use when binding.
+* **-c config-file**: A Euphoria config file to use when binding.
 * **-con**: **(//Windows// only)**: This option will create a //Windows// 
 console program instead of a //Windows GUI// program. Console programs can 
 access standard input and output, and they work within the current console 
 window, rather than popping up a new one.
 * **-eub path-to-backend** Allows specification of the backend runner to use
-besides the default, installed version.
+instead of the default, installed version.
 * **-full_debug**: Same as ##shroud## above. If Euphoria detects an error, your 
 executable will generate either a partial, or a full, ##ex.err## dump, according
 to this option.
@@ -120,8 +120,7 @@ When you bind your program, you can substitute your own 32x32 256-color icon
 file of size 2238 bytes or less. Other dimensions may also work as long as the 
 file is 2238 bytes or less. The file must contain a single icon image 
 (//Windows// will create a smaller or larger image as necessary). The default 
-**E)** icon file, ##euphoria.ico##, is included in
-the ##euphoria\bin## directory.
+**E)** icon file, ##euphoria.ico##, is included in the ##euphoria\bin## directory.
 * **-list**: Same as ##shroud## above.
 * **-quiet**: Same as ##shroud## above.
 * **-out executable_file**: This option lets you choose the name of the 

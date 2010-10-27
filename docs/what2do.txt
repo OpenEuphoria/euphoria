@@ -22,18 +22,19 @@ editing constant declarations in ##ed.ex##. Use //Esc q// to quit the editor or 
 help. There are several, even better, Euphoria-oriented editors in
 [[http://www.rapideuphoria.com/edi.htm|The Archive]]. If you use a more sophisticated text
 editor, many have a highlighter file for Euphoria. You will find it either on the Archive or
-on the community page for that editor.
+on the community page for that editor. Check 
+[[http://openeuphoria.org/wiki/wiki.cgi?Editors|the wiki for more information about Euphoria editors]].
 
 === Benchmark
 
 Create some new benchmark tests. See ##demo\bench##. Do you get the same speed ratios as we
-did in comparison with other popular languages?
+did in comparison with other popular languages? Report your findings on 
+[[http://openeuphoria.org/forum/index.wc|the forum]].
 
 === Read the Manual
 
-Read the manual in ##html\index.html## by double-clicking it. The simple expressive power of
-Euphoria makes this manual much shorter than manuals for other languages. If you have a
-specific question, type at the console:
+Read the manual in ##html\index.html## by double-clicking it. 
+If you have a specific question, type at the console:
 
 {{{
 guru word
@@ -42,6 +43,9 @@ guru word
 The ##guru## program will search all the ##.doc## files, example programs, and other files,
 and will present you with a //sorted// list of the most relevant chunks of text that might
 answer your enquiry.
+
+=== Visit the [[http://openeuphoria.org/forum/index.wc|Euphoria Discussion Forum]]
+
 
 === Trace a Demo
 

@@ -1,7 +1,6 @@
 == Introduction
 
-Welcome to Euphoria! //**E**nd **U**ser **P**rogramming with **H**ierarchical
-**O**bjects for **R**obust **I**nterpreted **A**pplications//.
+Welcome to the Euphoria programming language!
 
 Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
 **D**eployment **S**oftware (//RDS//).
@@ -123,7 +122,7 @@ More information on Euphoria may be found at
 [[http://www.OpenEuphoria.org | OpenEuphoria.org]],
 along with an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]].
 
-Download Euphoria from the [[http://www.rapideuphoria.com|Euphoria Web site]].
+Download Euphoria from the [[http://openeuphoria.org/downloads/index.wc|Euphoria Web site]].
 You will also find source-code for example programs and library files.
 
 === Conventions used in the manual

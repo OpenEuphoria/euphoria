@@ -6,7 +6,7 @@
 
 The testing system gives you the ability to check if the library,
 interpreter and translator works properly by use of //unit tests//.  The
-unit tests are **EUPHORIA** include files that ##include unittest.e##
+unit tests are **Euphoria** include files that ##include unittest.e##
 at the top, several test-routines for comparison between expected value
 and true value and at the end of the program a call to
 ##test_report()##.  There are error control files for when we expect
@@ -84,8 +84,6 @@ test_report()
 Please see the [[:Unit Testing Framework]], for information on how to
 construct these files.
 
-
-==== You can generate these files by
 
 === The Error Control Files
 

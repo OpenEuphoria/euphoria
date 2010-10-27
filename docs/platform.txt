@@ -7,7 +7,7 @@ OpenEuphoria currently supports Euphoria on many different
 //platforms//. More platforms will be added in the future.
 
 **Windows ,,(tm),,** in particular, the 32-bit version of
-Windows that is used on Windows 95/98/ME, as well as NT/2000/XP and
+Windows that is used on Windows 95/98/ME, as well as NT/2000/XP/Vista/7 and
 later systems.
 
 **Linux**. Linux is based on the UNIX operating
@@ -27,10 +27,10 @@ following due to it's ease of use and power.
 **Sun OS**.  Sun OS was developed by and is owned
 by SUN Microsystems Inc.  It is also based on UNIX.
 
-**Open BSD**. Open BSD is also a UNIX-like
+**OpenBSD**. Open BSD is also a UNIX-like
 Operating System and is developed by volunteers.
 
-**Net BSD**. Net BSD is also a UNIX-like
+**NetBSD**. Net BSD is also a UNIX-like
 Operating System  and is designed to be easily  portable to other
 hardware platforms.
 
@@ -54,11 +54,11 @@ that Operating System, then rebuilding the other binaries from the source.
 
 Sometimes you'll find that the majority of your code will be the
 same on all platforms, but some small parts will have to be
-written differently for each platform. Use the [[:platform]] built-in function 
-to tell you which platform you are currently running on.
+written differently for each platform. Use the [[:ifdef]] statement 
+to tell you 
+[[http://openEuphoria.org/docs/eu400_0021.html#_137_platformdefinitions|which platform you are currently running on]].
 
-If you want to decide which platform you are running on, [[:platform]] fits the 
-bill nicely:
+You can also use the [[:platform]] and [[:platform_name]] functions:
 
 <eucode>
 printf(1, "Our platform number is: %d", {platform()})
@@ -158,19 +158,19 @@ This is machine code to be put into memory as an example from
 will pop 8 bytes off of the stack, if not it will pop 0 bytes off of the stack.  
 This has to be done because of where the function call conventions are 
 implemented in the various compilers.  We use Watcom C for WIN32 and GCC for the 
-others.  Now if the programmer had put an unexistent symbol, such as ARCH64, the 
-parser would stop, point out the error, and I the programmer would then fix it.
+others.  Now if the programmer had put a non-existent symbol, such as ARCH64, the 
+parser would stop, point out the error, and the programmer would then fix it.
 
 
 === The Discontinued DOS32 Platform
 
 This platform is no longer supported.  The ##DOS32## platform was for computers 
-without //Windows// O/S and though people could still use the EUPHORIA binaries 
+without //Windows// O/S, and though people could still use the Euphoria binaries 
 built for this platform on //Windows//, it was slower than and lacked features 
 available on binaries built for the ##WIN32## platform.
 
 The binaries for this platform had support for low-level graphics and though 
-DOS was 16-bit, the EUPHORIA binaries for ##DOS32## used techniques that allowed 
+DOS was 16-bit, the Euphoria binaries for ##DOS32## used techniques that allowed 
 you to use 32-bit addresses transparently, hence the name of the platform: 
 ##DOS32##.  However, in this platform you could not use dynamically loaded 
 libraries and filenames had to be in a format of: eight letters, a dot, and 
@@ -185,7 +185,7 @@ With the ##WIN32## platform, your programs can still use the
 platform most text mode programs can be run using the console interpreter of any
 platform without any change.
 
-Since the EUPHORIA interpreter can work directly with your OS you can also 
+Since the Euphoria interpreter can work directly with your OS you can also 
 create GUI programs. You can use a user submitted library from the archive or 
 handle calls directly into the DLLs.  
 There are high-level graphics libraries for Direct3D and OpenGL available from 
@@ -200,7 +200,7 @@ will disappear when your program finishes execution, or via a call to
 [[:free_console]].
 
 If you don't want a console to appear, it might help to put the following 
-statements at the top of your EUPHORIA program:
+statements at the top of your Euphoria program:
 
 <eucode>
 -- Now, when there is input or output to the console we will get an error
@@ -231,10 +231,9 @@ If you want to run an interpreted Euphoria program to use the current console
 use ##eui.exe## but if you want it to create a new console window use 
 ##euiw.exe##.
 
-Programs translated on by the translator for this platform, will also pop up a 
-new console when
-ever input is asked for our output is sent to the screen unless you specify the 
-##-CON## option.
+Programs translated by the translator for this platform will also pop up a 
+new console whenever input is asked for our output is sent to the screen unless
+you specify the ##-CON## option.
 
 When running an interpreter or translator for the WIN32 platform, ##platform## 
 returns WIN32 and a parsetime branch (with ifdef/end ifdef) with ##WINDOWS## 
@@ -250,8 +249,8 @@ you can use to develop Windows GUI applications in Euphoria. It's
 remarkably easy to learn and use, and comes with good documentation and
 many small example programs.  
 
-If you have a SVN client, you can get a Euphoria version 4.0 compatible Win32lib
- via SVN at:
+If you have a SVN client, you can get a Euphoria version 4.0-compatible Win32lib
+ at:
 [[ https://win32libex.svn.sourceforge.net/svnroot/win32libex/trunk ]].  Get 
 version 68.
 
@@ -259,15 +258,13 @@ There is also an **IDE**, by Judith Evans for use with **Win32lib**.
 [[ https://euvide.svn.sourceforge.net/svnroot/euvide ]].
 
 **Andrea Cini** has also developed a similar, somewhat smaller package
-called **EuWinGUI**. It's also available from our site.
+called **EuWinGUI**. It's also available from the RapidEuphoria web site.
 
 **Matt Lewis** has developed a wrapper for the wxWidgets library for
-EUPHORIA: wxEuphoria.  It is cross-platform.
+Euphoria: wxEuphoria.  It is cross-platform.
 
-You can download WxEUPHORIA, EuWinGUI, Win32Lib and Judith's IDE
+You can download WxEuphoria, EuWinGUI, Win32Lib and Judith's IDE
 from the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
-
-There are also graphics routines available for 
 
 
 ==== Low-Level WIN32 Programming
@@ -301,15 +298,12 @@ in multiple colors and at any line or column position.
 Just as in WIN32, you can call C routines in shared libraries
 and C code can call back to your Euphoria routines.
 
-Pete Eberlein has created a EUPHORIA interface to the low level graphics library
-**svgalib**. 
-The **svgalib** has not had a stable release in more than 8 years.  This may not
-be supported on all //Unix// platforms.  Alternatively, you can get a EUPHORIA 
+You can get a Euphoria 
 interface to high level graphics library **OpenGL** from the 
 [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
 OpenGL also works with //Windows//.
 
-Easy X windows GUI programming is available using either Irv Mullin's
+Easy X-windows GUI programming is available using either Irv Mullin's
 EuGTK interface to the GTK GUI library, or wxEuphoria developed by
 Matt Lewis. wxEuphoria also runs on Windows.
 
@@ -407,7 +401,7 @@ You can examine a ##dll## file by right-clicking on it, and choosing
 routines that the ##dll## exports.
 
 To find out which **.**dll file contains a particular WIN32 C function,
-run **euphoria\demo\win32\dsearch.exw**
+run **Euphoria\demo\win32\dsearch.exw**
 
 ==== Accessing C Variables
 
