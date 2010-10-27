@@ -223,7 +223,9 @@ int Get_Pixel(int);
 void shift_args(int, char**);
 int NewString(char *);
 #ifdef __GNUC__
+#ifndef EMINGW
 char *malloc(int);
+#endif
 #endif
 void eu_startup();
 void exit(int);
