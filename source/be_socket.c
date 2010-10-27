@@ -107,17 +107,17 @@ int eusock_getfamily(int x)
 		return AF_UNIX;
 	case EAF_INET:
 		return AF_INET;
-	case EAF_INET6:
-		return AF_INET6;
 	case EAF_APPLETALK:
 		return AF_APPLETALK;
-	case EAF_BTH:
-#ifdef EWATCOM
-		return AF_BTH;
+	case EAF_INET6:
+#ifndef EWATCOM
+		return AF_INET6;
 #else
-	/* TODO - Is this supported under any Unix-like OS? Or under Mingw? */
 		/* fallthru */
 #endif
+	case EAF_BTH:
+	/* TODO - Is this supported under any Unix-like OS? Or under Mingw? */
+		/* fallthru */
 	default:
 		RTFatal("Unsupported Protocol/AF type");
     }
