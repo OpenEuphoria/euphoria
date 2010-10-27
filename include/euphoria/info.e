@@ -7,10 +7,9 @@ namespace info
 
 constant M_EU_INFO=75
 
-enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION
+enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION, START_TIME
 
 constant version_info = machine_func(M_EU_INFO, {})
-
 
 --****
 -- === Numeric Version Information
@@ -51,12 +50,12 @@ end function
 --
 -- Returns:
 --   An **integer**, representing Major, Minor and Patch versions. Version
---   4.0.0 will return 40000, 4.0.1 will return 40001, 
+--   4.0.0 will return 40000, 4.0.1 will return 40001,
 --   5.6.2 will return 50602, 5.12.24 will return 512624, etc...
 --
 
 public function version()
-  return (version_info[MAJ_VER] * 10000) + 
+  return (version_info[MAJ_VER] * 10000) +
 	(version_info[MIN_VER] * 100) +
 	version_info[PAT_VER]
 end function
@@ -249,4 +248,25 @@ public function all_copyrights()
 		euphoria_copyright(),
 		pcre_copyright()
 	}
+end function
+
+--****
+-- === Timing Information
+--
+
+--**
+-- Euphoria start time.
+--
+-- This time represents the time Euphoria itself started. This
+-- time is recorded before any of the users code is opened, parsed
+-- or executed. It can provide accurate timing information as to
+-- how long it takes for your application to go from start time
+-- to usable time.
+--
+-- Returns:
+--   An **atom** representing the start time of Euphoria itself
+--
+
+public function start_time()
+	return version_info[START_TIME]
 end function

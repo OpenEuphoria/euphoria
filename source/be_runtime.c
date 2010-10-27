@@ -110,6 +110,7 @@ IFILE TempErrFile;
 char *TempErrName; // "ex.err" - but must be on the heap
 char *TempWarningName;
 int display_warnings;
+double eustart_time;
 
 /**********************/
 /* Declared Functions */
@@ -491,7 +492,7 @@ int matherr(struct _exception *err)  // OW wants this
 #endif
 {
 	char *msg;
-	
+
 
 	switch(err->type) {
 		case DOMAIN:
@@ -801,7 +802,7 @@ void Append(object_ptr target, object s1, object a)
  */
 s1_ptr Add_internal_space(object a,int at,int len)
 {
-	
+
 	s1_ptr new_seq;
 	object temp;
 	int i;
@@ -961,7 +962,7 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 
 void Tail(s1_ptr s1, int start, object_ptr target)
 {
-	
+
 	int newlen;
 	object_ptr ss, op, se;
 
@@ -1288,7 +1289,7 @@ object Repeat(object item, object repcount)
 /* generate a sequence of <item> repeated <count> times */
 {
 	object_ptr obj_ptr;
-	
+
 	long count;
 	s1_ptr s1;
 
@@ -1315,7 +1316,7 @@ object Repeat(object item, object repcount)
 	if (! IS_ATOM_INT(item)) {
 		(DBL_PTR(item)->ref) += count;
 	}
-	
+
 	while (count >= 10) {
 		*obj_ptr++   = item; // 1
 		*obj_ptr++   = item; // 2
@@ -1329,12 +1330,12 @@ object Repeat(object item, object repcount)
 		*obj_ptr++   = item; // 10
 		count -= 10;
 	};
-	
+
 	while (count > 0) {
 		*obj_ptr++ = item;
 		count--;
 	};
-	
+
 	return MAKE_SEQ(s1);
 }
 
@@ -1399,7 +1400,7 @@ void udt_clean( object o, long rid ){
 	else{
 		RefDS( o );
 	}
-	
+
 	args = MAKE_SEQ( s );
 	code = (int *)EMalloc( 4*sizeof(int*) );
 	code[0] = (int)opcode(CALL_PROC);
@@ -1413,11 +1414,11 @@ void udt_clean( object o, long rid ){
 	*expr_top++ = (object)tpc;    // needed for traceback
 	*expr_top = *(expr_top-2);  // prevents restore_privates()
 	++expr_top;
-	
+
 	save_tpc = tpc;
 	do_exec(code);  // execute routine without setting up new stack
 	EFree((char *)code);
-	
+
 	tpc = save_tpc;
 	expr_top -= 2;
 	if( pre_ref == 0 ){
@@ -1612,8 +1613,8 @@ void de_reference_i(s1_ptr a)
    they will all be integers */
 /* a must not be an ATOM_INT */
 {
-	
-	
+
+
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
@@ -2224,7 +2225,7 @@ unsigned long good_rand()
 		// First time thru.
 		setran();
 	}
-	
+
 	/* seed = seed * ROOT % PRIME */
 	temp = my_ldiv(seed1, quo1);
 	remval = root1 * temp.rem;
@@ -2232,7 +2233,7 @@ unsigned long good_rand()
 
 	/* normalize */
 	seed1 = remval - quotval;
-	if (remval <= quotval) 
+	if (remval <= quotval)
 		seed1 += prim1;
 
 	temp = my_ldiv(seed2, quo2);
@@ -2240,7 +2241,7 @@ unsigned long good_rand()
 	quotval = rem2 * temp.quot;
 
 	seed2 = remval - quotval;
-	if (remval <= quotval) 
+	if (remval <= quotval)
 		seed2 += prim2;
 
 	if (seed1 == 0) {
@@ -2248,7 +2249,7 @@ unsigned long good_rand()
 	}
 	if (seed2 == 0)
 		seed2 = prim1;
-		
+
 	return V(seed1, seed2);
 }
 
@@ -2266,7 +2267,7 @@ object DRandom(d_ptr a)
 /* random number from 1 to a (a <= 1.07 billion) */
 {
 	unsigned long res;
-	
+
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
 	res = (1 + good_rand() % (unsigned)(a->dbl));
@@ -2553,7 +2554,7 @@ object calc_SHA256(object a)
 
 unsigned int calc_adler32(object a)
 {
-	
+
 	long lSLen;
 	int tfi;
 	union TF
@@ -2680,8 +2681,8 @@ static unsigned int hsieh32(char *data, int len, unsigned int starthash)
 
 static unsigned int calc_hsieh32(object a)
 {
-	
-	
+
+
 	union TF
 	{
 		double ieee_double;
@@ -2695,8 +2696,8 @@ static unsigned int calc_hsieh32(object a)
 	char *sp;
 	int slen;
  	unsigned int lHashVal;
- 	
- 	
+
+
 
  	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
@@ -2784,7 +2785,7 @@ static unsigned int calc_hsieh32(object a)
 
 unsigned int calc_fletcher32(object a)
 {
-	
+
 	long lSLen;
 	int tfi;
 	union TF
@@ -2886,11 +2887,11 @@ object calc_hash(object a, object b)
 {
 	unsigned long lHashValue;
 	long lSLen;
-	
-	
+
+
 	int tfi;
 	object lTemp;
-	
+
 	union TF
 	{
 		double ieee_double;
@@ -2938,9 +2939,9 @@ object calc_hash(object a, object b)
 			if (tf.ieee_uint.a == 0) {
 				tf.ieee_uint.a = MAXINT;
 			}
-			
+
 			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
-			
+
 			if (IS_ATOM_INT(lTemp)) {
 				seeder.ieee_uint.a = lTemp;
 				seeder.ieee_uint.b = rol(lTemp, 15);
@@ -4522,7 +4523,7 @@ int get_key(int wait)
 			SetConsoleMode(console_input, ENABLE_LINE_INPUT |
 									ENABLE_ECHO_INPUT |
 									ENABLE_PROCESSED_INPUT);
-									
+
 			return a;
 		}
 #else
@@ -4783,7 +4784,8 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
 	clocks_per_sec = cps;
 	clk_tck = clk;
 	xstdin = (void *)stdin;
-	InitInOut();
+        eustart_time = current_time();
+        InitInOut();
 	InitGraphics();
 	InitEMalloc();
 	InitFiles();
@@ -4844,13 +4846,13 @@ char **make_arg_cv(char *cmdline, int *argc)
 		argv[0] = 0;
 		bs = 32;
 		ns = bs;
-		/* If ns equals bs it means that we have not gotten 
+		/* If ns equals bs it means that we have not gotten
 		   the complete path string yet */
 		while (ns == bs) {
 			bs += 32;
 			if (argv[0] != 0)
 				EFree((void *)argv[0]);
-				
+
 			argv[0] = (char *)EMalloc(bs + 2);
 			ns = GetModuleFileName(NULL, (LPTSTR)argv[0], bs);
 		}
@@ -4924,7 +4926,7 @@ void system_call(object command, object wait)
 	char *string_ptr;
 	int len, w;
 	int len_used;
-	
+
 
 	if (!IS_SEQUENCE(command))
 		RTFatal("first argument of system() must be a sequence");
@@ -4969,7 +4971,7 @@ object system_exec_call(object command, object wait)
 	char *string_ptr;
 	int len, w, exit_code;
 	int len_used;
-	
+
 
 	if (!IS_SEQUENCE(command))
 		RTFatal("first argument of system_exec() must be a sequence");
@@ -5001,10 +5003,10 @@ object system_exec_call(object command, object wait)
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
 	exit_code = spawnvp(P_WAIT, argv[0], (char const * const *)argv);
-	
+
 	EFree(argv[0]);		// free the 'process' name
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
-	
+
 #endif
 	if (len > TEMP_SIZE)
 		EFree(string_ptr);
@@ -5491,7 +5493,7 @@ object Command_Line()
 	object_ptr obj_ptr;
 	char **argv;
 	s1_ptr result;
-	
+
 #ifndef ERUNTIME
 #ifdef BACKEND
 	if (Executing && il_file) {
@@ -5541,14 +5543,14 @@ void Cleanup(int status)
 #if defined(EWINDOWS) || !defined(ERUNTIME)
 	int i;
 #endif
-	
+
 #ifndef ERUNTIME
 	long c;
 	FILE *wrnf = NULL;
 #endif
 
 	gameover = TRUE;
-	
+
 	/* Close all user-opened files */
 	for (fh = FIRST_USER_FILE; fh < MAX_USER_FILE; fh++) {
 		EClose(fh);
@@ -5645,11 +5647,11 @@ void Cleanup(int status)
 	{
 		symtab_ptr sym = TopLevelSub;
 		while( sym ){
-			if( sym->mode = M_NORMAL && 
+			if( sym->mode = M_NORMAL &&
 				(sym->token == PROC ||
-				sym->token == FUNC || 
+				sym->token == FUNC ||
 				sym->token == TYPE)){
-					
+
 // 				EFree( sym->u.subp.code );
 				EFree( sym->u.subp.linetab );
 			}
@@ -6128,7 +6130,7 @@ void Replace( replace_ptr rb )
 	}
 	// actual inner replacing
 	if (IS_SEQUENCE( copy_from )) {
-		
+
 		s2 = SEQ_PTR( copy_from );
 		replace_len = s2->length;
 		assign_slice_seq = &s1;
@@ -6152,7 +6154,7 @@ void Replace( replace_ptr rb )
 			*rb->target = MAKE_SEQ(s1);
 		}
 		else { // remove any extra elements, and then assign a regular slice
-			
+
 			long c;
 			if( target != copy_to ){
 				// ensures that Add_internal_space will make a copy
@@ -6214,7 +6216,7 @@ void Replace( replace_ptr rb )
 
 cleanup_ptr DeleteRoutine( int e_index ){
 	cleanup_ptr cup;
-	
+
 #ifdef ERUNTIME
 	cup = rt00[e_index].cleanup;
 #else
@@ -6238,7 +6240,7 @@ int memcopy( void *dest, size_t avail, void *src, size_t len)
 {
 	// Only copies memory if both dest and source are valid addresses, and
 	// all of the source can be copied.
-	
+
 	if (dest == 0) return -1; // No destination supplied
 	if (src == 0) return -2; // No source supplied
 	if (len > avail) return -3; // Source is too large;
@@ -6251,14 +6253,14 @@ int memcopy( void *dest, size_t avail, void *src, size_t len)
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev ){
 	cleanup_ptr new_cup;
 	int res;
-	
+
 	new_cup = (cleanup_ptr)EMalloc( sizeof(struct cleanup) );
 	res = memcopy( new_cup, sizeof(struct cleanup), old, sizeof(struct cleanup) );
 	if (res != 0) {
 		RTFatal("Internal error: ChainDeleteRoutine memcopy failed (%d).", res);
 	}
-	
+
 	new_cup->next = prev;
-	
+
 	return new_cup;
 }

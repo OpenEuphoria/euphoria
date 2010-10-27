@@ -77,7 +77,7 @@ int emul_flock(fd, cmd)
 	struct flock f;
 
 	memset(&f, 0, sizeof(f));
-	
+
 	if (cmd & LOCK_UN)
 		f.l_type = F_UNLCK;
 	if (cmd & LOCK_SH)
@@ -120,7 +120,7 @@ int emul_flock(fd, cmd)
 
 
 extern char* get_svn_revision(); /* from rev.c */
-
+extern double eustart_time; /* from be_runtime.c */
 
 /*****************/
 /* Local defines */
@@ -229,10 +229,10 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len;
 	int real_len;
 	char *str;
-	
+
 	if (!overwrite && (getenv(name) != NULL))
 		return 0;
-		
+
 	len = strlen(name) + 1 + strlen(value);
 	str = EMalloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
 	if (! str)
@@ -427,7 +427,7 @@ void NewConfig(int raise_console)
 	int x;
 	struct winsize ws;
 	UNUSED(raise_console);
-	
+
 	config.mode = 3;
 	config.numxpixels = 0;
 	config.numypixels = 0;
@@ -549,7 +549,7 @@ static object Cursor(object x)
 static object TextRows(object x)
 /* text_rows built-in */
 {
-	
+
 #ifdef EWINDOWS
 	COORD newsize;
 	int new_rows;
@@ -687,7 +687,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetTColor(t);
 					prev_t = t;
 				}
@@ -697,7 +697,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetBColor(b);
 					prev_b = b;
 				}
@@ -732,7 +732,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetTColor(t);
 					prev_t = t;
 				}
@@ -742,7 +742,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetBColor(b);
 					prev_b = b;
 				}
@@ -773,7 +773,7 @@ void do_scroll(int top, int bottom, int amount)
 static object Scroll(object x)
 {
 	int amount, top, bottom;
-	
+
 
 	x = (object)SEQ_PTR(x);
 	amount = get_int(*(((s1_ptr)x)->base+1));
@@ -1252,12 +1252,12 @@ typedef struct _SYSTEMTIME {
   WORD wMilliseconds;
 } SYSTEMTIME, *PSYSTEMTIME;
 
-*/	
+*/
 	/* x will be sequence if called via dir() */
 
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
-		
+
 	MakeCString(path, x, MAX_FILE_NAME + 8); // Add a little extra space too.
 
 	// Convert any unix delims to Windows delim
@@ -1275,14 +1275,14 @@ typedef struct _SYSTEMTIME {
 			{
 				has_wildcards = 1;
 			}
-		}	
+		}
 		fp_buf++;
 	}
-	
+
 	// Trim off trailing whitespace
 	// N.B. 'fp_buf' should now be pointing to the null terminator at this point.
 	fp_buf--;
-	while (fp_buf != path) 
+	while (fp_buf != path)
 	{
 		if (*fp_buf == ' ' || *fp_buf == '\t')
 		{
@@ -1295,7 +1295,7 @@ typedef struct _SYSTEMTIME {
 	}
 	fp_buf++;
 	*fp_buf = '\0'; // Mark end of C string
-	
+
 	if (fp_buf == path)
 	{
 		// Empty path so assume current directory
@@ -1311,9 +1311,9 @@ typedef struct _SYSTEMTIME {
 			has_wildcards = 1;
 			fp_buf++;
 			*fp_buf = '\0';
-		}	
+		}
 	}
-	
+
 	fp_buf = NULL;
 	next_file = FindFirstFile( path, &file_info);
 	if ( (next_file == INVALID_HANDLE_VALUE) ||
@@ -1333,18 +1333,18 @@ typedef struct _SYSTEMTIME {
 		}
 	}
 
-	
+
 	/* start with empty sequence as result */
 	result = (s1_ptr)NewString("");
 
 	findres = ~0;
 	while (findres != 0) {
- 			
+
 		/* create a length-11 sequence */
 		row = NewS1((long)11);
 		obj_ptr = row->base;
 		obj_ptr[1] = NewString(file_info.cFileName);
-		
+
 		next_attr = &attrs[0];
 
 		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
@@ -1375,7 +1375,7 @@ typedef struct _SYSTEMTIME {
 			*next_attr++ = 'S';
 		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_TEMPORARY)
 			*next_attr++ = 'T';
-		#ifndef FILE_ATTRIBUTE_VIRTUAL 
+		#ifndef FILE_ATTRIBUTE_VIRTUAL
 		    // This Windows constant is not defined in some older compilers.
             #define FILE_ATTRIBUTE_VIRTUAL  (0x00010000L)
 		#endif
@@ -1384,7 +1384,7 @@ typedef struct _SYSTEMTIME {
 
 		*next_attr = '\0';
 		obj_ptr[2] = NewString(attrs);
-		
+
 		if (file_info.nFileSizeHigh == 0)
 		{
 			if (file_info.nFileSizeLow > MAXINT) {
@@ -1419,14 +1419,14 @@ typedef struct _SYSTEMTIME {
  		{
 			obj_ptr[11]= 0;
 		}
-		
+
 		/* append row to overall result (ref count 1)*/
 		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
-		
+
 		findres = FindNextFile( next_file, &file_info);
 	}
 	FindClose(next_file);
-		
+
 	return (object)result;
 }
 #endif
@@ -1520,7 +1520,7 @@ static object Dir(object x)
 			obj_ptr[7] = date_time->tm_hour;
 			obj_ptr[8] = date_time->tm_min;
 			obj_ptr[9] = date_time->tm_sec;
-			
+
 			obj_ptr[10]= 0; // Millisecs not implemented
 			obj_ptr[11]= 0; // Alternate name not used.
 		}
@@ -1629,7 +1629,7 @@ static object GetScreenChar(object x)
 	object_ptr obj_ptr;
 	s1_ptr result, x1;
 	unsigned line, column;
-	
+
 #ifdef EWINDOWS
 
 	int temp, att;
@@ -1820,7 +1820,7 @@ static object get_rand()
 /* Return the random generator's current seed values */
 {
 	s1_ptr result;
-	
+
 	result = NewS1(2);
 	result->base[1] = seed1;
 	result->base[2] = seed2;
@@ -2140,7 +2140,7 @@ int open_dll_count = 0;
 
 object OpenDll(object x)
 {
-	
+
 	s1_ptr dll_ptr;
 	static char message[81];
 	char *dll_string;
@@ -2166,7 +2166,7 @@ object OpenDll(object x)
 	if (lib != NULL) {
 		if (open_dll_count >= open_dll_size) {
 			size_t newsize;
-			
+
 			open_dll_size += 100;
 			newsize = open_dll_size * sizeof(HINSTANCE);
 			if (open_dll_list == NULL) {
@@ -2198,7 +2198,7 @@ object DefineCVar(object x)
 	s1_ptr variable_ptr;
 	char *variable_string;
 	char *variable_address;
-	
+
 	unsigned addr;
 
 	// x will be a sequence if called from define_c_func/define_c_proc
@@ -2314,7 +2314,7 @@ object DefineC(object x)
 		proc_address = (int (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
-		
+
 #else
 #ifdef EUNIX
 		proc_address = (int (*)())dlsym((void *)lib, routine_string);
@@ -2399,26 +2399,26 @@ typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned i
 /* Return the smallest multiple of p_radix that is at least as big as p_v.
 
 	Assumptions: p_radix must be a power of two.
-				p_v and p_radix must be < power(2,31) 
+				p_v and p_radix must be < power(2,31)
 */
 inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	signed int radix = (signed int)p_radix;
 	signed int v = (signed int)p_v;
-	
+
 	return - (-radix & -v);
 }
 
 object CallBack(object x)
 /* return either a call-back address for routine id x
-   x can be the routine id for stdcall, or {'+', routine_id} for cdecl 
-   
+   x can be the routine id for stdcall, or {'+', routine_id} for cdecl
+
    or return a three element sequence containing a Read-Only machine address, the replace value
    needed (sym tab pointer), and the call_back size respectively so the caller can make its *own*
-   call-back address.  In this case x must be a sequence containing only a routine_id:   
+   call-back address.  In this case x must be a sequence containing only a routine_id:
    {routine_id} or a sequence containing a two element sequence {{'+',routine_id}} for cdecl.   And
    the caller must search for the bytes {#78,#56,#34,#12}, allocate enough memory (call_back size)
    and to copy what is pointed to by the said address and then replace the searched for bytes with
-   the replace value in the allocated memory. 
+   the replace value in the allocated memory.
    */
 {
 #ifdef EWINDOWS
@@ -2457,7 +2457,7 @@ object CallBack(object x)
 		convention = C_STDCALL;
 #endif
 	}
-	
+
 	/* Check routine_id value and get the number of arguments */
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
@@ -2502,7 +2502,7 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-	
+
 	/* Now allocate memory that is executable or at least can be made to be ... */
 #	ifdef EWINDOWS
 		/* Here allocate and manage memory for 4kB is a lot to use when you
@@ -2518,7 +2518,7 @@ object CallBack(object x)
 			} else {
 				// Change previously allocated block to read-only
 				VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
-				
+
 				// Allocate a new block
 				page_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
 				page_offset = 0;
@@ -2527,11 +2527,11 @@ object CallBack(object x)
 			// Set up 'constants' and initial block allocation
 			call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
 			last_block_offset = (pagesize - 2 * call_increment);
-			
+
 			page_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
 			page_offset = 0;
 		}
-		
+
 		copy_addr = page_addr + page_offset;
 		/* Assume we are running under some Windows that
 		   supports VirtualAlloc() always returning 0. */
@@ -2553,7 +2553,7 @@ object CallBack(object x)
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
 
-	
+
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
@@ -2631,13 +2631,14 @@ static object crash_routine(object x)
 object eu_info()
 {
 	s1_ptr s1;
-	s1 = NewS1(5);
+	s1 = NewS1(6);
 	s1->base[1] = MAJ_VER;
 	s1->base[2] = MIN_VER;
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
 	s1->base[5] = NewString(get_svn_revision());
-	return MAKE_SEQ(s1);
+        s1->base[6] = NewDouble(eustart_time);
+        return MAKE_SEQ(s1);
 }
 
 object eu_uname()
@@ -2705,7 +2706,7 @@ object start_backend(object x)
 	long switch_len, i;
 	s1_ptr x_ptr;
 	char *w;
-	
+
 
 
 	w = "backend";
@@ -2760,8 +2761,8 @@ object machine(object opcode, object x)
 	int temp;
 	char *dest;
 	char *src;
-	
-	
+
+
 	double d;
 
 	while (TRUE) {
@@ -3052,9 +3053,9 @@ object machine(object opcode, object x)
 				x = (object)SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 				dest = EMalloc(SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
-				MakeCString(dest, (object) *(((s1_ptr)x)->base+2), 
+				MakeCString(dest, (object) *(((s1_ptr)x)->base+2),
 							SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
 				temp = setenv(src, dest, *(((s1_ptr)x)->base+3));
 				EFree(dest);
@@ -3065,7 +3066,7 @@ object machine(object opcode, object x)
 			case M_UNSET_ENV:
 				x = (object) SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
@@ -3133,7 +3134,7 @@ object machine(object opcode, object x)
 
 			case M_SOCK_GETHOSTBYADDR:
 				return eusock_gethostbyaddr(x);
-				
+
 			case M_SOCK_ERROR_CODE:
 				return eusock_error_code();
 
@@ -3163,7 +3164,7 @@ object machine(object opcode, object x)
 
 			case M_SOCK_ACCEPT:
 				return eusock_accept(x);
-			
+
 			case M_SOCK_GETSOCKOPT:
 				return eusock_getsockopt(x);
 
@@ -3172,10 +3173,10 @@ object machine(object opcode, object x)
 
 			case M_SOCK_SELECT:
 				return eusock_select(x);
-                
+
             case M_SOCK_SENDTO:
                 return eusock_sendto(x);
-            
+
             case M_SOCK_RECVFROM:
                 return eusock_recvfrom(x);
 
