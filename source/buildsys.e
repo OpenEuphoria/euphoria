@@ -97,7 +97,7 @@ export enum
 	--**
 	-- Makefile containing only ##PRGNAME_SOURCES## and ##PRGNAME_OBJECTS##
 	-- Makefile that is for inclusion into a parent Makefile.
-	BUILD_MAKEFILE,
+	BUILD_MAKEFILE_PARTIAL,
 
 	--**
 	-- A full Makefile project suitable for building the resulting project
@@ -481,7 +481,7 @@ end procedure
 --**
 -- Write a partial Makefile
 
-procedure write_makefile()
+procedure write_makefile_partial()
 	sequence settings = setup_build()
 	integer fh = open(output_dir & file0 & ".mak", "wb")
 
@@ -711,7 +711,7 @@ end procedure
 --
 -- See Also:
 --   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_MAKEFILE_FULL]],
---   [[:BUILD_MAKEFILE]], [[:BUILD_EMAKE]]
+--   [[:BUILD_MAKEFILE_PARTIAL]], [[:BUILD_EMAKE]]
 
 export procedure write_buildfile()
 	switch build_system_type do
@@ -730,8 +730,8 @@ export procedure write_buildfile()
 				ShowMsg(1, 172, { make_command, file0 })
 			end if
 
-		case BUILD_MAKEFILE then
-			write_makefile()
+		case BUILD_MAKEFILE_PARTIAL then
+			write_makefile_partial()
 
 			if not silent then
 				ShowMsg(1, 170, { cfile_count + 2 })
