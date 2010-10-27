@@ -45,10 +45,10 @@ For an up-to-date listing, see the [[http://www.openeuphoria.org/wiki/wiki.cgi?E
   * Jim Brown
   * Tom Ciplijauskas
   * Jeremy Cowgar
+  * C. K. Lester
   * Matthew Lewis
   * Derek Parnell
   * Shawn Pringle
-  * Christopher Lester
 
 === Past Authors
 
