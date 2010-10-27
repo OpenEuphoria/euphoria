@@ -1,6 +1,6 @@
 --
 -- (c) Copyright - See License.txt
--- 
+--
 --****
 -- == traninit.e: Initialize the translator
 --
@@ -15,24 +15,24 @@
 -- variables and use the selected platform to determine which compiler must
 -- be used.
 
--- If you are translating to another platform, we expect you to take the 
+-- If you are translating to another platform, we expect you to take the
 -- C files and compile natively rather than using a cross compiler
 --
 -- From the GNU terminology there are three platforms ##target##, ##host##, and ##build##.
 -- For the translator that will be built using this file there are four:
 --
 -- |= GNU platform name |= Description |= Variable Names |
--- |##target##   | The newly translated and compiled translator will translate to 
+-- |##target##   | The newly translated and compiled translator will translate to
 --                 any target platform for this translator... | none|
 -- |##host##     | The platform of the host this translated compiled translator will run on.|
 --                 ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/## |
--- |##build##    | The platform where the building utilities make, wmake, compiler 
+-- |##build##    | The platform where the building utilities make, wmake, compiler
 --                 and assembler are run.| ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/##|
 -- |##translate##| The platform where the current translator is run on|platform()|
 --
 -- ifdef OSNAME and platform() is for our translation platform,
 -- TOSNAME is for the target platform.
--- We assume that the target platform is the same as our build platform.  
+-- We assume that the target platform is the same as our build platform.
 -- Thus, no cross compilers.
 
 
@@ -90,7 +90,6 @@ sequence trans_opt_def = {
 	{ "keep",          0, GetMsgText(191,0), { NO_CASE } },
 	{ "makefile",      0, GetMsgText(192,0), { NO_CASE } },
 	{ "makefile-full", 0, GetMsgText(193,0), { NO_CASE } },
-	{ "cmakefile",     0, GetMsgText(194,0), { NO_CASE } },
 	{ "emake",         0, GetMsgText(195,0), { NO_CASE } },
 	{ "nobuild",       0, GetMsgText(196,0), { NO_CASE } },
 	{ "force-build",   0, GetMsgText(326,0), { NO_CASE } },
@@ -129,13 +128,13 @@ export procedure transoptions()
 		switch key do
 			case "silent" then
 				silent = TRUE
-			
+
 			case "verbose" then
 				verbose = TRUE
-			
+
 			case "cflags" then
 				cflags = val
-			
+
 			case "lflags" then
 				lflags = val
 
@@ -157,8 +156,8 @@ export procedure transoptions()
 				OpDefines &= { "EUC_DLL" }
 
 			case "plat" then
-				switch upper(val) do				
-					-- please update comments in Makefile.gnu, Makefile.wat, configure and 
+				switch upper(val) do
+					-- please update comments in Makefile.gnu, Makefile.wat, configure and
 					-- configure.bat; and the help section in configure and configure.bat; and
 					-- the message 201 in msgtext.e if you add another platform.
 					case "WIN" then
@@ -223,9 +222,6 @@ export procedure transoptions()
 			case "makefile-full" then
 				build_system_type = BUILD_MAKEFILE_FULL
 
-			case "cmakefile" then
-				build_system_type = BUILD_CMAKE
-
 			case "emake" then
 				build_system_type = BUILD_EMAKE
 
@@ -256,7 +252,7 @@ export procedure transoptions()
 	end if
 
 	OpDefines &= { "EUC" }
-	
+
 	if host_platform() = WIN32 and not con_option then
 		OpDefines = append( OpDefines, "WIN32_GUI" )
 	end if
@@ -326,12 +322,12 @@ procedure InitBackEnd(integer c)
 
 			if atom(wat_path) then
 				if build_system_type = BUILD_DIRECT then
-					-- We know the building process will fail when the translator starts 
+					-- We know the building process will fail when the translator starts
 					-- calling the compiler.  So, the process fails here.
 					CompileErr(159)
 				else
 					-- In this case, the user has to call something to compile after the
-					-- translation.  The user may set up the environment after the translation or 
+					-- translation.  The user may set up the environment after the translation or
 					-- the environment may be on another machine on the network.
 					Warning(159, translator_warning_flag)
 				end if

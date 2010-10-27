@@ -21,7 +21,7 @@ include platform.e
 include reswords.e
 include msgtext.e
 
-constant 
+constant
 	re_include = regex:new(`^[ ]*(public)*[ \t]*include[ \t]+([A-Za-z0-9_/.]+)`),
 	inc_dirs = { "." } & include_paths(0)
 
@@ -50,7 +50,7 @@ function find_all_includes(sequence fname, sequence includes = {})
 			end if
 		end if
 	end for
-	
+
 	return includes
 end function
 
@@ -82,14 +82,13 @@ end function
 --   * emake/emake.bat
 --   * Makefile - full
 --   * Makefile - partial (for inclusion into a parent Makefile)
---   * CMake
 --   * None
 --
 
 export enum
 	--**
 	-- No build system will be written (C/H files written only).
-	BUILD_NONE=0,
+	BUILD_NONE = 0,
 
 	--**
 	-- Standard emake/emake.bat file
@@ -104,10 +103,6 @@ export enum
 	-- A full Makefile project suitable for building the resulting project
 	-- entirely.
 	BUILD_MAKEFILE_FULL,
-
-	--**
-	-- prgname.cmake file for inclusion into a parent CMake project.
-	BUILD_CMAKE,
 
 	--**
 	-- build directly from the translator
@@ -167,9 +162,7 @@ enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EX
 --**
 -- Calculate a checksum to be used for detecting changes to generated c files.
 export procedure update_checksum( object raw_data )
-	
 	cfile_check = xor_bits(cfile_check, hash( raw_data, HSIEH32))
-
 end procedure
 
 --**
@@ -193,7 +186,8 @@ function setup_build()
 			l_names = { "eudbg", "eu" }
 		else
 			l_names = { "eu", "eudbg" }
-		end if	
+		end if
+
 		-- We assume the platform the compiler will **build on** is the same
 		-- as the platform the compiler will **build for*.
 		if TUNIX or compiler_type = COMPILER_GCC then
@@ -203,6 +197,7 @@ function setup_build()
 			l_ext = "lib"
 			t_slash = "\\"
 		end if
+
 		sequence eudir = get_eucompiledir()
 		for tk = 1 to length(l_names) do -- translation kind
 			user_library = eudir & sprintf("%sbin%s%s.%s",{t_slash, t_slash, l_names[tk],l_ext})
@@ -221,7 +216,7 @@ function setup_build()
 				end ifdef -- The translation or interpretation of the translator
 				          -- is done on a UNIX computer
 			end if -- compiling for UNIX and/or with GCC
-			if file_exists(user_library) then			
+			if file_exists(user_library) then
 				exit
 			end if
 		end for -- tk
@@ -259,7 +254,7 @@ function setup_build()
 				c_flags &= " -fPIC "
 		   	end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math", 
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
 				{ get_eucompiledir()  })
 
 			if TWINDOWS then
@@ -317,16 +312,16 @@ function setup_build()
 		case else
 			CompileErr(43)
 	end switch
-	
+
 	if length(cflags) then
 		c_flags = cflags
 	end if
-	
+
 	if length(lflags) then
 		l_flags = lflags
 		l_flags_begin = ""
 	end if
-	
+
 	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin }
 end function
 
@@ -376,7 +371,7 @@ procedure write_objlink_file()
 			if eu:find(SymTab[s][S_TOKEN], RTN_TOKS) then
 				if is_exported( s ) then
 					printf(fh, "EXPORT %s='__%d%s@%d'" & HOSTNL,
-						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO], 
+						   {SymTab[s][S_NAME], SymTab[s][S_FILE_NO],
 							SymTab[s][S_NAME], SymTab[s][S_NUM_ARGS] * 4})
 				end if
 			end if
@@ -387,38 +382,6 @@ procedure write_objlink_file()
 	close(fh)
 
 	generated_files = append(generated_files, file0 & ".lnk")
-end procedure
-
---**
--- Write a CMake build file
-
-procedure write_cmake()
-	sequence settings = setup_build()
-	integer fh = open(output_dir & file0 & ".cmake", "wb")
-
-	printf(fh, "SET( %s_SOURCES", { upper(file0) })
-	for i = 1 to length(generated_files) do
-		if generated_files[i][$] = 'c' then
-			puts(fh, " " & generated_files[i])
-		end if
-	end for
-	puts(fh, " )" & HOSTNL & HOSTNL)
-
-	printf(fh, "SET( %s_OBJECTS", { upper(file0) })
-	for i = 1 to length(generated_files) do
-		if match(".o", generated_files[i]) then
-			puts(fh, " " & generated_files[i])
-		end if
-	end for
-	puts(fh, " )" & HOSTNL & HOSTNL)
-
-	printf(fh, "SET( %s_GENERATED_FILES", { upper(file0) })
-	for i = 1 to length(generated_files) do
-		puts(fh, " " & generated_files[i])
-	end for
-	puts(fh, " )" & HOSTNL)
-
-	close(fh)
 end procedure
 
 procedure write_makefile_srcobj_list(integer fh)
@@ -680,7 +643,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 					else
 						ShowMsg(1, 163, { pdone, cmd })
 					end if
-						
+
 				end if
 
 				status = system_exec(cmd, 0)
@@ -747,19 +710,11 @@ end procedure
 -- Call's a write_BUILDSYS procedure based on the compiler setting enum
 --
 -- See Also:
---   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_CMAKE]],
---   [[:BUILD_MAKEFILE_FULL]], [[:BUILD_MAKEFILE]], [[:BUILD_EMAKE]]
+--   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_MAKEFILE_FULL]],
+--   [[:BUILD_MAKEFILE]], [[:BUILD_EMAKE]]
 
 export procedure write_buildfile()
 	switch build_system_type do
-		case BUILD_CMAKE then
-			write_cmake()
-
-			if not silent then
-				ShowMsg(1, 170, { cfile_count + 2 })
-				ShowMsg(1, 171,	{ file0 })
-			end if
-
 		case BUILD_MAKEFILE_FULL then
 			write_makefile_full()
 
