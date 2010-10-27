@@ -20,7 +20,6 @@
 :<<LEVELTOC level=1 depth=4>>
 
 ../docs/welcome.txt
-../docs/c.txt
 ../docs/install.txt
 ../docs/what2do.txt
 #TODO: other release notes
