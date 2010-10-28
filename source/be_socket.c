@@ -549,7 +549,7 @@ object eusock_gethostbyaddr(object x)
  * Error Information
  *
  * ========================================================================= */
- 
+
 object eusock_error_code()
 {
 	return eusock_geterror();
@@ -860,11 +860,24 @@ object eusock_recv(object x)
 	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
 	flags = SEQ_PTR(x)->base[2];
 
-	result = recv(s, buf, BUFF_SIZE, flags);
+	result = recv(s, buf, BUFF_SIZE - 1, flags);
 
 	if (result > 0) {
+		int len;
+		char *sBuf = buf;
+		object_ptr obj_ptr;
+		s1_ptr c1;
 		buf[result] = 0;
-		return NewString(buf);
+
+		len = result;
+		c1 = NewS1((long)len);
+		obj_ptr = (object_ptr)c1->base;
+		if (len > 0) {
+			do {
+				*(++obj_ptr) = (unsigned char)*sBuf++;
+			} while (--len > 0);
+		}
+		return MAKE_SEQ(c1);
 	} else if (result == 0) {
 		return ATOM_0;
 	} else {
@@ -944,7 +957,7 @@ object eusock_recvfrom(object x)
 	flags = SEQ_PTR(x)->base[2];
     addr_size = sizeof(addr);
 
-	result = recvfrom(s, buf, BUFF_SIZE, flags, (struct sockaddr *) &addr, &addr_size);
+	result = recvfrom(s, buf, BUFF_SIZE - 1, flags, (struct sockaddr *) &addr, &addr_size);
 
 	if (result > 0) {
         s1_ptr r;
@@ -954,7 +967,6 @@ object eusock_recvfrom(object x)
         r->base[1] = NewString(inet_ntoa(addr.sin_addr));
         r->base[2] = addr.sin_port;
         r->base[3] = NewString(buf);
-        
 
         return MAKE_SEQ(r);
 	} else if (result == 0) {
