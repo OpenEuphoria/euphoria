@@ -812,9 +812,9 @@ object eusock_send(object x)
 {
 	SOCKET s;
 	int flags, result;
+	char *buf;
 
 	s1_ptr buf_s;
-	char *buf;
 
 	if (!IS_SOCKET(SEQ_PTR(x)->base[1]))
 		RTFatal("first argument to send must be a socket");
@@ -824,11 +824,10 @@ object eusock_send(object x)
 		RTFatal("third argument to send must be an integer");
 
 	s     = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	flags = SEQ_PTR(x)->base[3];
-
 	buf_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
 	buf   = EMalloc(buf_s->length+1);
-	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length+1);
+	MakeCString(buf, SEQ_PTR(x)->base[2], buf_s->length + 1);
+	flags = SEQ_PTR(x)->base[3];
 
 	result = send(s, buf, buf_s->length, flags);
 
@@ -863,21 +862,7 @@ object eusock_recv(object x)
 	result = recv(s, buf, BUFF_SIZE - 1, flags);
 
 	if (result > 0) {
-		int len;
-		char *sBuf = buf;
-		object_ptr obj_ptr;
-		s1_ptr c1;
-		buf[result] = 0;
-
-		len = result;
-		c1 = NewS1((long)len);
-		obj_ptr = (object_ptr)c1->base;
-		if (len > 0) {
-			do {
-				*(++obj_ptr) = (unsigned char)*sBuf++;
-			} while (--len > 0);
-		}
-		return MAKE_SEQ(c1);
+		return NewSequence(buf, result);
 	} else if (result == 0) {
 		return ATOM_0;
 	} else {
@@ -966,7 +951,7 @@ object eusock_recvfrom(object x)
         r = NewS1(3);
         r->base[1] = NewString(inet_ntoa(addr.sin_addr));
         r->base[2] = addr.sin_port;
-        r->base[3] = NewString(buf);
+        r->base[3] = NewSequence(buf, result);
 
         return MAKE_SEQ(r);
 	} else if (result == 0) {
