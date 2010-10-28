@@ -158,7 +158,7 @@ void InitEMalloc()
 {
 	int i, j, p;
 	static int done = 0 ;
-	
+
 	if (done) return;
 	done = 1;
 	pagesize = getpagesize();
@@ -176,7 +176,7 @@ void InitEMalloc()
 			p = p * 2;
 		}
 	}
-	
+
 	j = 0;
 	for (i = 0; i <= MAX_CACHED_SIZE / RESOLUTION; i++) {
 		if (freeblk_list[j].size < i * RESOLUTION)
@@ -261,41 +261,41 @@ void StorageStats()
 void Allocated(long n)
 /* record that n bytes were allocated */
 {
-#if !defined(NDEBUG)	
+#if !defined(NDEBUG)
 	unsigned long prev_value;
-#endif	
-	
+#endif
+
 	if (n == 0) return;
-	
-#if !defined(NDEBUG)	
+
+#if !defined(NDEBUG)
 	assert(n > 0);
 	prev_value = bytes_allocated;
 #endif
 	bytes_allocated += n;
-#if !defined(NDEBUG)	
+#if !defined(NDEBUG)
 	// Check for overflow
 	assert(bytes_allocated > prev_value);
 #endif
-	
+
 	if (bytes_allocated > max_bytes_allocated)
 		max_bytes_allocated = bytes_allocated;
-		
+
 }
 
 static void DeAllocated(long n)
 /* record that n bytes were freed */
 {
-#if !defined(NDEBUG)	
+#if !defined(NDEBUG)
 	unsigned long prev_value;
-#endif	
-	
+#endif
+
 	if (n == 0) return;
-	
-#if !defined(NDEBUG)	
+
+#if !defined(NDEBUG)
 	prev_value = bytes_allocated;
 #endif
 	bytes_allocated -= n;
-#if !defined(NDEBUG)	
+#if !defined(NDEBUG)
 	// Check for underflow
 	assert(bytes_allocated < prev_value);
 #endif
@@ -353,7 +353,7 @@ static void Free_All()
 // 	register struct block_list *list;
 // 	char *p;
 // 	int i;
-// 
+//
 // #ifdef EXTRA_STATS
 // 	recycles++;
 // #endif
@@ -368,7 +368,7 @@ static void Free_All()
 // 		free(p); /* give it back to heap */
 // 		cache_size--;
 // 	}
-// 
+//
 // 	/* try to take one from each other list */
 // 	for (i = 0; i < NUMBER_OF_FBL; i++) {
 // 		list = &freeblk_list[i];
@@ -423,11 +423,11 @@ char *EMalloc(unsigned long nbytes)
 	int alignment;
 #endif
 	struct block_list * last_FBL;
-	
+
 #ifdef HEAP_CHECK
 	long size;
-#endif	
-	
+#endif
+
 #if defined(EUNIX)
 
 		p = malloc(nbytes);
@@ -528,7 +528,7 @@ char *EMalloc(unsigned long nbytes)
 						   // (this case is remotely possible on Win95 only)
 			return p;   // already 8-aligned, should happen most of the time
 		}
-		
+
 		if (alignment != 4) {
 			RTFatal("malloc block NOT 4-byte aligned!\n");
 		}
@@ -557,7 +557,7 @@ void EFree(char *p)
 	char *q;
 	register long nbytes;
 	register struct block_list *list;
-	
+
 
 #if defined(EUNIX)
 		free(p);
@@ -613,7 +613,7 @@ void EFree(char *p)
 
 }
 #else
-#if !defined(EWINDOWS) && !defined(EUNIX) 
+#if !defined(EWINDOWS) && !defined(EUNIX)
 // Version of allocation routines for systems that might not return allocations
 // that are 8-byte aligned.
 char *EMalloc(unsigned long nbytes)
@@ -647,7 +647,7 @@ void EFree(char *p)
 {
 	// 'p' must have been allocated by EMalloc.
 	unsigned char adj;
-	
+
 	assert(p);
 	adj = *(p-1);
 	p = p - 1 - sizeof(unsigned long) - adj;
@@ -659,17 +659,17 @@ char *ERealloc(char *orig, unsigned long newsize)
 	char *newadr;
 	unsigned long oldsize;
 	int res;
-	
+
 	newadr = EMalloc(newsize);
 	oldsize = *((unsigned long*)(orig - 1 - sizeof(oldsize)));
-	
+
     res = memcopy(newadr, newsize, orig, (oldsize > newsize ? newsize : oldsize));
 	if (res != 0) {
 		RTFatal("Internal error: ERealloc memcopy failed (%d).", res);
 	}
-	
+
 	EFree(orig);
-	
+
 	return newadr;
 }
 #endif // not windows and not unix
@@ -847,22 +847,24 @@ s1_ptr NewS1(long size)
 	return(s1);
 }
 
-object NewString(char *s)
-/* create a new string sequence */
+object NewSequence(char *data, int len)
+/* create a new sequence that may contain binary data */
 {
-	int len;
 	object_ptr obj_ptr;
 	s1_ptr c1;
 
-	len = strlen(s);
 	c1 = NewS1((long)len);
 	obj_ptr = (object_ptr)c1->base;
-	if (len > 0) {
-		do {
-			*(++obj_ptr) = (unsigned char)*s++;
-		} while (--len > 0);
+	for ( ; len > 0; --len) {
+		*(++obj_ptr) = (unsigned char)*data++;
 	}
 	return MAKE_SEQ(c1);
+}
+
+object NewString(char *s)
+/* create a new string sequence */
+{
+	return NewSequence(s, strlen(s));
 }
 
 s1_ptr SequenceCopy(register s1_ptr a)
@@ -940,15 +942,15 @@ long append_string(char *dest, char *src, size_t bufflen)
 {
 
 	int dest_len;
-	
+
 	dest_len = strlen(dest);
 	if ((size_t)dest_len + 1 < bufflen) {
 		return copy_string(dest + dest_len, src, bufflen - dest_len);
 	}
-	
+
 	if ((size_t)dest_len + 1 == bufflen)
 		*(dest + dest_len) = '\0';
-		
+
 	return 0;
 }
 
@@ -959,13 +961,13 @@ static void new_dbl_block(unsigned int cnt)
 	unsigned int dsize;
 	unsigned int blksize;
 	int chkcnt;
-#ifdef HEAP_CHECK  
+#ifdef HEAP_CHECK
 	char *q;
-#endif 
-	
+#endif
+
 	// Each element in the array must be on an 8-byte boundary.
 	dsize = (D_SIZE + 7) & (~7);
-	
+
 	blksize = cnt * dsize;
 	dbl_block = (free_block_ptr)EMalloc( blksize );
 	assert(((unsigned int)dbl_block & 7) == 0);
@@ -974,7 +976,7 @@ static void new_dbl_block(unsigned int cnt)
 	Trash((char *)dbl_block, blksize);
 	q = (char *)dbl_block;
 	#if defined(EALIGN4)
-	if (align4 && *(int *)(q-4) == MAGIC_FILLER) 
+	if (align4 && *(int *)(q-4) == MAGIC_FILLER)
 		q = q - 4;
 	#endif
 	Allocated(block_size(q));
@@ -1001,7 +1003,7 @@ object NewDouble(double d)
 	if (d_list == NULL) {
 		new_dbl_block(1024);
 	}
-	
+
 	new_dbl = d_list;
 	assert(((unsigned long)new_dbl & 7) == 0);
 	d_list = (d_ptr)((free_block_ptr)new_dbl)->next;
