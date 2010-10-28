@@ -37,21 +37,21 @@ public constant
 
 public constant
 		T_EOF        = Enum_Start(EOF,1),
-		--** 
+		--**
 		T_NULL       = Enum(),
 		T_SHBANG     = Enum(),
 		T_BLANK      = Enum(),
 		T_COMMENT    = Enum(),
 		T_NUMBER     = Enum(),
-		--** 
+		--**
 		-- quoted character
 		T_CHAR       = Enum(),
-		--** 
+		--**
 		-- string
 		T_STRING     = Enum(),
 		T_IDENTIFIER = Enum(),
 		T_KEYWORD    = Enum(),
-		--** 
+		--**
 		--!!
 		--!! must not alter the following list of token codes from T_DOUBLE_OPS
 		--!! up to and including T_DOLLAR
@@ -65,7 +65,7 @@ public constant
 		T_GTEQ        = Enum(),
 		T_NOTEQ       = Enum(),
 		T_CONCATEQ    = Enum(),
-		--** 
+		--**
 		--!! marks the start of the delimiter codes
 		T_DELIMITER   = Enum(),
 		T_PLUS        = Enum_Start(Enum()-1,1),
@@ -76,7 +76,7 @@ public constant
 		T_GT          = Enum(),
 		T_NOT         = Enum(),
 		T_CONCAT      = Enum(),
-		--** 
+		--**
 		--!! marks the start of the single-op delimiter codes
 		T_SINGLE_OPS  = Enum(),
 		T_EQ          = Enum_Start(Enum()-1,1),
@@ -86,14 +86,14 @@ public constant
 		T_RBRACE      = Enum(),
 		T_LBRACKET    = Enum(),
 		T_RBRACKET    = Enum(),
-		--** 
+		--**
 		-- quick print ( ? x )
 		T_QPRINT      = Enum(),
 		T_COMMA       = Enum(),
 		T_PERIOD      = Enum(),
-		T_COLON       = Enum(),  
+		T_COLON       = Enum(),
 		T_DOLLAR      = Enum(),
-		--** 
+		--**
 		--!!
 		T_SLICE       = Enum(),
 		$
@@ -104,7 +104,7 @@ constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 --****
 -- === T_NUMBER formats and T_types
 
-public constant 
+public constant
 		TF_HEX        = Enum(),
 		TF_INT        = Enum(),
 		TF_ATOM       = Enum(),
@@ -138,7 +138,7 @@ integer ERR_LPOS  = 0
 --****
 -- === ET error codes
 
-public enum 
+public enum
 		ERR_OPEN,
 		ERR_ESCAPE,
 		ERR_EOL_CHAR,
@@ -307,7 +307,6 @@ function scan_white() -- returns TRUE if a blank line was parsed
 end function
 
 function scan_multicomment()
-  	
 	Token[TTYPE] = T_COMMENT
 	Token[TDATA] = "/*"
 	while 1 do
@@ -356,30 +355,30 @@ function scan_string()
 	if (Look != '"') then return FALSE end if
 	if sti + 3 < length(source_text) then
 		if equal(source_text[sti .. sti + 2], "\"\"\"") then
-			-- Got a raw string 
+			-- Got a raw string
 			Token[TTYPE] = T_STRING
 			Token[TDATA] = ""
 			sti += 2
 			scan_char()
 			while (sti < length(source_text) - 2) and not equal(source_text[sti .. sti +2], "\"\"\"") do
-				if (Look = EOF) then 
-					report_error(ERR_EOF) 
-					return TRUE 
+				if (Look = EOF) then
+					report_error(ERR_EOF)
+					return TRUE
 				end if
-		
+
 				Token[TDATA] &= Look
 				scan_char()
 			end while
 			if sti > length(source_text) - 2 then
-				report_error(ERR_EOF) 
-				return TRUE 
+				report_error(ERR_EOF)
+				return TRUE
 			end if
 			sti += 2
 			scan_char()
 			return TRUE
 		end if
 	end if
-	
+
 	scan_char()
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
@@ -460,9 +459,9 @@ end function
 
 function scan_fraction(atom v)
  atom d
- 
+
 	if not Digit_Char(Look) then report_error(ERR_DECIMAL) return 0 end if
-	
+
 	d = 10
 	while Digit_Char(Look) do
 		if Look != '_' then
@@ -509,7 +508,7 @@ function scan_number()
 		v = Token[TDATA]
 		if Look = '.' then
 			scan_char()
-			
+
 			Token[TDATA] = scan_fraction(Token[TDATA])
 			if ERR then return TRUE end if
 		end if
@@ -543,18 +542,18 @@ function hex_string(sequence textdata, integer string_type)
 		case 'U' then
 			maxnibbles = 8
 	end switch
-	
+
 	string_text = ""
 	nibble = 1
 	val = -1
 	for cpos = 1 to length(textdata) do
 		ch = textdata[cpos]
-		
+
 		digit = find(ch, "0123456789ABCDEFabcdef _\t\n\r")
 		if digit = 0 then
 			return 0
 		end if
-		
+
 		if digit < 23 then
 			if digit > 16 then
 				digit -= 6
@@ -580,12 +579,12 @@ function hex_string(sequence textdata, integer string_type)
 			nibble = 1
 		end if
 	end for
-	
-	if val >= 0 then	
+
+	if val >= 0 then
 		-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
 		string_text &= val
 	end if
-	
+
 	return string_text
 end function
 
@@ -594,11 +593,11 @@ function scan_identifier()
 	integer nextch
 	integer startpos
 	object textdata
-	
+
 	if not Alpha_Char(Look) and Look != '_' then
 		return FALSE
 	end if
-	
+
 	if find(Look, "xuU") then
 		nextch = lookahead()
 		if nextch = '"' then
@@ -616,7 +615,7 @@ function scan_identifier()
 				report_error(ERR_EOF_STRING)
 				return TRUE
 			end if
-			
+
 			textdata = hex_string(source_text[startpos .. sti-1], source_text[startpos - 2])
 			if atom(textdata) then
 				-- Invalid hex string
@@ -629,7 +628,7 @@ function scan_identifier()
 			return TRUE
 		end if
 	end if
-	
+
 	Token[TTYPE] = T_IDENTIFIER
 	Token[TDATA] = ""
 	while Identifier_Char(Look) do
@@ -681,7 +680,7 @@ procedure next_token()
 		Token[TTYPE] += T_DELIMITER-1
 		Token[TDATA] = {Look}
 		scan_char()
-	
+
 		if (Token[TTYPE] = T_LBRACKET) then -- must check before T_PERIOD
 			SUBSCRIPT += 1 -- push subscript stack counter
 		elsif (Token[TTYPE] = T_RBRACKET) then -- must check before T_PERIOD
@@ -700,7 +699,7 @@ procedure next_token()
 				scan_char()
 			else -- .number
 				Token[TTYPE] = T_NUMBER
-				
+
 				Token[TDATA] = scan_fraction(0)
 				Token[TFORM] = TF_ATOM
 				if ERR then return end if
@@ -753,7 +752,7 @@ public function et_tokenize_string(sequence code)
 	ERR_LPOS = 0
 
 	tokens = {}
-		
+
 	source_text = code & EOL & EOF
 	LNum = 1
 	LPos = 1
@@ -786,7 +785,7 @@ public function et_tokenize_string(sequence code)
 		end while
 		tokens &={ Token }
 	end if
-	
+
 	return {tokens,ERR,ERR_LNUM, ERR_LPOS}
 end function
 
@@ -796,7 +795,7 @@ public function et_tokenize_file(sequence fname)
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
-	
+
 	return et_tokenize_string(txt)
 end function
 
