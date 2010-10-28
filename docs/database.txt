@@ -124,6 +124,11 @@ Inserts and deletes take slightly longer as a table gets larger.
 At the low end of the scale, it's possible to create extremely small databases
 without incurring much disk space overhead.
 
+=== EDS API
+
+More details on using EDS, including complete coverage of the EDS API, can be found at the 
+[[http://openeuphoria.org/docs/eu400_0088.html#_3690_euphoriadatabaseeds|Euphoria EDS page]].
+
 === Disclaimer
 
 Do not store valuable data without a backup.  RDS will not be responsible for
