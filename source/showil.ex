@@ -25,14 +25,14 @@ include global.e
 include compress.e
 
 -- fields for reduced symbol table stored in IL
-constant 
+constant
 	OBJ = 1,
 	NEXT = 2,
 	MODE = 3,
 	SCOPE = 4,
 	FILE_NO = 5,
-	NAME = 6, 
-	TOKEN = 7, 
+	NAME = 6,
+	TOKEN = 7,
 	CODE = 8,
 	LINETAB = 9,
 	TEMPS = 10,
@@ -43,7 +43,7 @@ constant
 integer il_file
 
 procedure show_operand(integer flist, atom word)
--- display one operand  
+-- display one operand
 	printf(flist, "%d ", word)
 end procedure
 
@@ -53,23 +53,23 @@ procedure error(sequence msg)
 end procedure
 
 procedure showCode(integer flist, sequence Code)
--- display the IL code. SymTab is needed.   
+-- display the IL code. SymTab is needed.
 	integer i, n, sub
 	atom word
-	
+
 	i = 1
 	puts(flist, "\n\n")
 	while i <= length(Code) do
-		printf(flist, "     %d: ", i) 
+		printf(flist, "     %d: ", i)
 		word = Code[i]
-		
+
 		if word > length(opnames) then
 			printf(flist, "* BAD OPCODE: %d\n", word)
 			error("BAD OPCODE!")
 		end if
-		
+
 		puts(flist, opnames[word] & " ")
-		
+
 		if find(word, {TYPE_CHECK, CALL_BACK_RETURN, BADRETURNF, RETURNT,
 					   CLEAR_SCREEN, UPDATE_GLOBALS, TASK_YIELD, TASK_CLOCK_STOP,
 					   TASK_CLOCK_START,
@@ -90,15 +90,15 @@ procedure showCode(integer flist, sequence Code)
 			word = Code[i+1]
 			show_operand(flist, word)
 			i += 2
-		
-		
+
+
 		elsif find(word, {NOT, IS_AN_ATOM, IS_A_SEQUENCE, UMINUS, GETS, GETC,
 						  SQRT, LENGTH, PLENGTH, ARCTAN, LOG, SIN, COS, TAN, RAND,
-						  PEEK, FLOOR, WHILE, ASSIGN_I, ASSIGN, 
+						  PEEK, FLOOR, WHILE, ASSIGN_I, ASSIGN,
 						  IS_AN_INTEGER, IS_AN_OBJECT, NOT_BITS,
 						  NOT_IFW, SC2_AND, SC2_OR, CALL_PROC,
 						  RETURNF, POSITION, PEEK4S, PEEK4U, TASK_SCHEDULE,
-						  PIXEL, GET_PIXEL, SYSTEM, PUTS, QPRINT, PRINT,
+						  SYSTEM, PUTS, QPRINT, PRINT,
 						  GETENV, MACHINE_PROC, IF, POKE4, POKE, TASK_STATUS
 						  }) then
 			-- 2 operands follow
@@ -108,15 +108,15 @@ procedure showCode(integer flist, sequence Code)
 			show_operand(flist, word)
 			i += 3
 
-		
+
 		elsif find(word, {LESS, GREATEREQ, EQUALS, NOTEQ, LESSEQ, GREATER,
-						  LESS_IFW_I, GREATEREQ_IFW_I, EQUALS_IFW_I, 
+						  LESS_IFW_I, GREATEREQ_IFW_I, EQUALS_IFW_I,
 						  NOTEQ_IFW_I, LESSEQ_IFW_I, GREATER_IFW_I,
 						  LESS_IFW, GREATEREQ_IFW, EQUALS_IFW, NOTEQ_IFW,
 						  LESSEQ_IFW, GREATER_IFW, AND, OR, MINUS, PLUS,
 						  MULTIPLY, DIVIDE, CONCAT, REMAINDER, POWER, OR_BITS,
 						  XOR_BITS, APPEND, REPEAT, OPEN, PREPEND, COMPARE,
-						  FIND, MATCH, XOR, AND_BITS, EQUAL, RHS_SUBS, 
+						  FIND, MATCH, XOR, AND_BITS, EQUAL, RHS_SUBS,
 						  RHS_SUBS_CHECK, RHS_SUBS_I, ASSIGN_OP_SUBS,
 						  ASSIGN_SUBS, ASSIGN_SUBS_CHECK, ASSIGN_SUBS_I,
 						  PASSIGN_SUBS, PASSIGN_OP_SUBS,
@@ -126,7 +126,7 @@ procedure showCode(integer flist, sequence Code)
 						  SYSTEM_EXEC, PRINTF, SPRINTF, MACHINE_FUNC,
 						  TASK_CREATE, C_PROC, CALL_FUNC, HEAD, TAIL
 						  }) then
-			
+
 			-- 3 operands follow
 			word = Code[i+1]
 			show_operand(flist, word)
@@ -135,11 +135,11 @@ procedure showCode(integer flist, sequence Code)
 			word = Code[i+3]
 			show_operand(flist, word)
 			i += 4
-		
+
 		elsif find(word, {ENDFOR_INT_UP1, ENDFOR_INT_DOWN1, ENDFOR_INT_UP,
 						  ENDFOR_INT_DOWN, ASSIGN_OP_SLICE, ASSIGN_SLICE,
-						  PASSIGN_SLICE, PASSIGN_OP_SLICE, LHS_SUBS, LHS_SUBS1, 
-						  LHS_SUBS1_COPY, RHS_SLICE, ENDFOR_UP, ENDFOR_DOWN, 
+						  PASSIGN_SLICE, PASSIGN_OP_SLICE, LHS_SUBS, LHS_SUBS1,
+						  LHS_SUBS1_COPY, RHS_SLICE, ENDFOR_UP, ENDFOR_DOWN,
 						  C_FUNC, ENDFOR_GENERAL, FIND_FROM, MATCH_FROM, REMOVE,
 						  INSERT, SPLICE
 						  }) then
@@ -153,7 +153,7 @@ procedure showCode(integer flist, sequence Code)
 			word = Code[i+4]
 			show_operand(flist, word)
 			i += 5
-		
+
 		elsif word = ROUTINE_ID or word = REPLACE then
 			-- 5 operands follow
 			word = Code[i+1]
@@ -167,7 +167,7 @@ procedure showCode(integer flist, sequence Code)
 			word = Code[i+5]
 			show_operand(flist, word)
 			i += 6
-		
+
 		elsif find(word, {FOR, FOR_I, ROUTINE_ID}) then
 			-- 6 operands follow
 			word = Code[i+1]
@@ -183,9 +183,9 @@ procedure showCode(integer flist, sequence Code)
 			word = Code[i+6]
 			show_operand(flist, word)
 			i += 7
-			
+
 		-- special cases: variable number of operands
-		
+
 		elsif word = PROC then
 			sub = Code[i+1]
 			show_operand(flist, sub)
@@ -206,7 +206,7 @@ procedure showCode(integer flist, sequence Code)
 			end if
 
 			i += 2 + n
-			
+
 		elsif word = RIGHT_BRACE_N then
 			n = Code[i+1]
 			show_operand(flist, n)
@@ -214,10 +214,10 @@ procedure showCode(integer flist, sequence Code)
 				word = Code[i+1+j]
 				show_operand(flist, word)
 			end for
-			
+
 			-- more
 			i += n + 3
-			
+
 		elsif word = CONCAT_N then
 			n = Code[i+1]
 			show_operand(flist, n)
@@ -225,10 +225,10 @@ procedure showCode(integer flist, sequence Code)
 				word = Code[i+1+j]
 				show_operand(flist, word)
 			end for
-			
+
 			-- more
 			i += n + 3
-		
+
 		else
 			puts(flist, " <-- BAD OPCODE!\n")
 			error("UNKNOWN OPCODE!")
@@ -236,7 +236,7 @@ procedure showCode(integer flist, sequence Code)
 
 		puts(flist, '\n')
 		flush(flist)
-		
+
 	end while
 end procedure
 
@@ -244,7 +244,7 @@ procedure showSymTab(integer f, integer flist)
 -- read the symbol table
 -- display it in flist and keep it in memory for use by showCode
 	object eentry
-	
+
 	current_db = f
 	SymTab = fdecompress(0)
 	for i = 1 to length(SymTab) do
@@ -252,7 +252,7 @@ procedure showSymTab(integer f, integer flist)
 		printf(flist, "%3d. ", i)
 		if atom(eentry) then
 			puts(flist, "*DELETED*     ")
-			
+
 		elsif length(eentry) >= NAME then
 			printf(flist, "%s", {eentry[NAME]})
 			if find(eentry[TOKEN], RTN_TOKS) then
@@ -271,47 +271,47 @@ procedure showSymTab(integer f, integer flist)
 
 				puts(flist, "\n LINETAB: ")
 				print(flist, eentry[LINETAB])
-				
+
 				puts(flist, "\n   TEMPS: ")
 				print(flist, eentry[TEMPS])
-				
+
 				puts(flist, "\nFIRSTLINE: ")
 				print(flist, eentry[FIRSTLINE])
-				
+
 				puts(flist, "\n   STACK_SPACE: ")
 				print(flist, eentry[STACK_SPACE])
-				
+
 			end if
-			
+
 		else
 			puts(flist, "<TEMP>     ")
 		end if
-		
+
 		if sequence(eentry) then
-			
+
 			puts(flist, "\n     OBJ: ")
 			print(flist, eentry[OBJ])
-			
+
 			puts(flist, "\n    NEXT: ")
 			print(flist, eentry[NEXT])
-			
+
 			puts(flist, "\n    MODE: ")
 			print(flist, eentry[MODE])
-			
+
 			puts(flist, "\n   SCOPE: ")
 			print(flist, eentry[SCOPE])
-		
+
 			if length(eentry) > 4 then
 				puts(flist, "\n FILE_NO: ")
 				print(flist, eentry[FILE_NO])
-				
+
 				puts(flist, "\n   TOKEN: ")
 				print(flist, eentry[TOKEN])
-				
+
 			end if
-		
+
 		end if
-		
+
 		puts(flist, "\n")
 		puts(flist, "\n")
 	end for
@@ -320,7 +320,7 @@ end procedure
 
 procedure showHeader(integer flist, integer c1, integer c2)
 	atom size, checksum
-	
+
 	if il_file then
 		if atom(gets(current_db)) then
 			-- ignore first (comment) line
@@ -328,12 +328,12 @@ procedure showHeader(integer flist, integer c1, integer c2)
 		c1 = getc(current_db)
 		c2 = getc(current_db)
 	end if
-	
+
 	if c1 != IL_MAGIC then
 		puts(2, "not an IL file!\n")
 		abort(1)
 	end if
-	
+
 	printf(flist, "IL version: %d\n", c2)
 
 	-- read size
@@ -341,13 +341,13 @@ procedure showHeader(integer flist, integer c1, integer c2)
 		   (getc(current_db) - 32) * 200 +
 		   (getc(current_db) - 32) * 40000 +
 		   (getc(current_db) - 32) * 8000000
-	
+
 	-- read checksum
 	checksum = (getc(current_db) - 32) +
 			   (getc(current_db) - 32) * 200 +
 			   (getc(current_db) - 32) * 40000 +
 			   (getc(current_db) - 32) * 8000000
-	
+
 	init_compress()
 end procedure
 
@@ -364,23 +364,23 @@ procedure showMisc(integer flist, object misc)
 	puts(flist, "known_files:\n")
 	for i = 1 to length(misc[6]) do
 		puts(flist, '\t' & misc[6][i] & '\n')
-	end for 
+	end for
 	puts(flist, '\n')
 end procedure
 
 function s_expand(sequence slist) -- copied/modified from scanner.e
 -- expand slist to full size if required. This version assumes 2-element slist.
 	sequence new_slist
-	
+
 	new_slist = {}
-	
+
 	for i = 1 to length(slist) do
 		if sequence(slist[i]) then
 			new_slist = append(new_slist, slist[i])
 		else
 			for j = 1 to slist[i] do
 				slist[i-1][1] += 1
-				new_slist = append(new_slist, slist[i-1]) 
+				new_slist = append(new_slist, slist[i-1])
 			end for
 		end if
 	end for
@@ -407,7 +407,7 @@ il_file = match(".il", cl[3])
 
 if not il_file then
 	-- roughly, but must be less or equal to size of eub[w].exe
-	OUR_SIZE = 61500 
+	OUR_SIZE = 61500
 
 	if seek(f, OUR_SIZE) then
 		error("initial seek failed")

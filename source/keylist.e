@@ -14,16 +14,16 @@ include emit.e
 
 export enum
 	K_NAME,      -- string
-	K_SCOPE,     -- keyword or predefined 
-	K_TOKEN,     -- token number returned to parser 
-	K_OPCODE,    -- opcode to emit (predefined subprograms) 
-	K_NUM_ARGS,  -- number of arguments (predefined subprograms) 
+	K_SCOPE,     -- keyword or predefined
+	K_TOKEN,     -- token number returned to parser
+	K_OPCODE,    -- opcode to emit (predefined subprograms)
+	K_NUM_ARGS,  -- number of arguments (predefined subprograms)
 	K_EFFECT,    -- side effects
 	-- optional fields
 	K_CODE,
 	K_DEF_ARGS
 
--- N.B. order and number of keywords and builtins 
+-- N.B. order and number of keywords and builtins
 -- is assumed by scanner.e, euphoria\bin\keywords.e, and others
 export sequence keylist = {
 	-- KEYWORDS
@@ -71,7 +71,7 @@ export sequence keylist = {
 	{"fallthru",  SC_KEYWORD, FALLTHRU,  0, 0, 0},
 	-- new ones must go at end to maintain compatibility with old shrouded code
 
-	-- PREDEFINED SUBPROGRAMS and TYPEs 
+	-- PREDEFINED SUBPROGRAMS and TYPEs
 	{"length",           SC_PREDEF, FUNC, LENGTH,           1, E_PURE},
 	{"puts",             SC_PREDEF, PROC, PUTS,             2, E_OTHER_EFFECT},
 	{"integer",          SC_PREDEF, TYPE, IS_AN_INTEGER,    1, E_PURE},
@@ -87,7 +87,7 @@ export sequence keylist = {
 	{"getc",             SC_PREDEF, FUNC, GETC,             1, E_OTHER_EFFECT},
 	{"gets",             SC_PREDEF, FUNC, GETS,             1, E_OTHER_EFFECT},
 	{"get_key",          SC_PREDEF, FUNC, GET_KEY,          0, E_PURE},
-	{"rand",             SC_PREDEF, FUNC, RAND,             1, E_PURE},         
+	{"rand",             SC_PREDEF, FUNC, RAND,             1, E_PURE},
 	{"repeat",           SC_PREDEF, FUNC, REPEAT,           2, E_PURE},
 	{"atom",             SC_PREDEF, TYPE, IS_AN_ATOM,       1, E_PURE},
 	{"compare",          SC_PREDEF, FUNC, COMPARE,          2, E_PURE},
@@ -120,8 +120,6 @@ export sequence keylist = {
 	{"or_bits",          SC_PREDEF, FUNC, OR_BITS,          2, E_PURE},
 	{"xor_bits",         SC_PREDEF, FUNC, XOR_BITS,         2, E_PURE},
 	{"not_bits",         SC_PREDEF, FUNC, NOT_BITS,         1, E_PURE},
-	{"pixel",            SC_PREDEF, PROC, PIXEL,            2, E_OTHER_EFFECT},
-	{"get_pixel",        SC_PREDEF, FUNC, GET_PIXEL,        1, E_PURE},
 	{"mem_copy",         SC_PREDEF, PROC, MEM_COPY,         3, E_OTHER_EFFECT},
 	{"mem_set",          SC_PREDEF, PROC, MEM_SET,          3, E_OTHER_EFFECT},
 	{"c_proc",           SC_PREDEF, PROC, C_PROC,           2, E_ALL_EFFECT, {0,{{STRING,{}}}}, {2,1,{2}}},
@@ -159,7 +157,7 @@ export sequence keylist = {
 	{"include_paths",	 SC_PREDEF,	FUNC, INCLUDE_PATHS,	1, E_OTHER_EFFECT},
 	{"hash",             SC_PREDEF, FUNC, HASH,             2, E_PURE},
 	{"head",             SC_PREDEF, FUNC, HEAD,             2, E_PURE, {0,{{ATOM,1}}},{2,1,{2}}},
-	{"tail",             SC_PREDEF, FUNC, TAIL,             2, E_PURE, 
+	{"tail",             SC_PREDEF, FUNC, TAIL,             2, E_PURE,
 									{0,{{BUILT_IN,"length"},{LEFT_ROUND,0},
 									 {DEF_PARAM,1},{RIGHT_ROUND,0},{MINUS,0},
 									 {ATOM,1}}},{2,1,{2}}},
@@ -168,17 +166,17 @@ export sequence keylist = {
 	{"delete_routine",   SC_PREDEF, FUNC, DELETE_ROUTINE,   2, E_PURE},
 	{"delete",           SC_PREDEF, PROC, DELETE_OBJECT,    1, E_OTHER_EFFECT},
 	{"routine",          SC_KEYWORD, ROUTINE,   0, 0, 0}
-	
+
 }
-	-- new words must go at end to maintain compatibility 
+	-- new words must go at end to maintain compatibility
 
 if EXTRA_CHECK then
 	-- for debugging storage leaks
-	keylist = append(keylist, {"space_used", SC_PREDEF, FUNC, SPACE_USED, 
+	keylist = append(keylist, {"space_used", SC_PREDEF, FUNC, SPACE_USED,
 							   0, E_PURE})
 end if
-	
--- top level pseudo-procedure (assumed to be last on the list) 
+
+-- top level pseudo-procedure (assumed to be last on the list)
 keylist = append(keylist, {"_toplevel_", SC_PREDEF, PROC, 0, 0, E_ALL_EFFECT})
 
 export function find_category(integer tokid)
@@ -209,7 +207,7 @@ end function
 -- Here, equal() gets its second parameter defaulted, not the first.
 -- This is why the K_CODE field starts with 0.
 --	{"equal",            SC_PREDEF, FUNC, EQUAL,            2, E_PURE,
--- The K_DEF_ARGS field reflects the lists of defaulted and non defaulted params, and 
+-- The K_DEF_ARGS field reflects the lists of defaulted and non defaulted params, and
 -- is just like it were built in a S_DEF_ARGS field of a regular SymTab entry, built in parser:SubProg().
 -- So here it reads {2,1,{2}}: param 2 is the first defaulted, param 1 is the last non defaulted
 -- and the complete list of defparm indexes is {2}.

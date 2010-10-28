@@ -94,7 +94,6 @@ procedure init_op_info()
 	op_info[GETENV              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[GETS                ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[GET_KEY             ] = { FIXED_SIZE, 2, {}, {1}, {} }
-	op_info[GET_PIXEL           ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[GLABEL              ] = { FIXED_SIZE, 2, {1}, {}, {} }
 	op_info[GLOBAL_INIT_CHECK   ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[PRIVATE_INIT_CHECK  ] = { FIXED_SIZE, 2, {}, {}, {} }
@@ -135,7 +134,7 @@ procedure init_op_info()
 	op_info[ASSIGN_SUBS2        ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[PLATFORM            ] = { FIXED_SIZE, 2, {}, {1}, {} }
 	op_info[END_PARAM_CHECK     ] = { FIXED_SIZE, 2, {}, {}, {} }
-	
+
 	op_info[NOPSWITCH           ] = { FIXED_SIZE, 1, {}, {}, {} }
 	op_info[NOT                 ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[NOTEQ               ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -158,7 +157,6 @@ procedure init_op_info()
 	op_info[PEEK4S              ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEKS               ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PEEK                ] = { FIXED_SIZE, 3, {}, {2}, {} }
-	op_info[PIXEL               ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[PLENGTH             ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[PLUS                ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[PLUS_I              ] = { FIXED_SIZE, 4, {}, {3}, {} }
@@ -191,7 +189,7 @@ procedure init_op_info()
 	op_info[RHS_SUBS_I          ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[RHS_SUBS_CHECK      ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[RIGHT_BRACE_2       ] = { FIXED_SIZE, 4, {}, {3}, {} }
-	
+
 	op_info[ROUTINE_ID          ] = { FIXED_SIZE, 6 - TRANSLATE, {}, { 4 + not TRANSLATE }, {} }
 	op_info[SC2_OR              ] = { FIXED_SIZE, 3, {}, {}, {} }
 	op_info[SC2_AND             ] = { FIXED_SIZE, 3, {}, {}, {} }
@@ -226,33 +224,33 @@ procedure init_op_info()
 	op_info[WHILE               ] = { FIXED_SIZE, 3, {2}, {}, {} }
 	op_info[XOR                 ] = { FIXED_SIZE, 4, {}, {3}, {} }
 	op_info[XOR_BITS            ] = { FIXED_SIZE, 4, {}, {3}, {} }
-	
+
 	op_info[TYPE_CHECK_FORWARD  ] = { FIXED_SIZE, 3, {}, {}, {} }
-	
+
 	sequence SHORT_CIRCUIT = { FIXED_SIZE, 4, {3}, {}, {} }
 	op_info[SC1_AND_IF          ] = SHORT_CIRCUIT
 	op_info[SC1_OR_IF           ] = SHORT_CIRCUIT
 	op_info[SC1_AND             ] = SHORT_CIRCUIT
 	op_info[SC1_OR              ] = SHORT_CIRCUIT
-	
+
 	op_info[ATOM_CHECK          ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[INTEGER_CHECK       ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[SEQUENCE_CHECK      ] = { FIXED_SIZE, 2, {}, {}, {} }
-	
+
 	op_info[IS_AN_INTEGER       ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[IS_AN_ATOM          ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[IS_A_SEQUENCE       ] = { FIXED_SIZE, 3, {}, {2}, {} }
 	op_info[IS_AN_OBJECT        ] = { FIXED_SIZE, 3, {}, {2}, {} }
-	
+
 	op_info[CALL_BACK_RETURN    ] = { FIXED_SIZE, 1, {}, {}, {} }
-	
+
 	op_info[REF_TEMP            ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[DEREF_TEMP          ] = { FIXED_SIZE, 2, {}, {}, {} }
 	op_info[NOVALUE_TEMP        ] = { FIXED_SIZE, 2, {}, {}, {} }
-	
+
 	op_info[PROC_FORWARD        ] = { VARIABLE_SIZE, 0, {}, {}, {} }
 	op_info[FUNC_FORWARD        ] = { VARIABLE_SIZE, 0, {}, {}, {} }
-	
+
 	op_info[RIGHT_BRACE_N       ] = { VARIABLE_SIZE, 3, {}, {}, {} } -- target: [pc+1] + 2
 	op_info[CONCAT_N            ] = { VARIABLE_SIZE, 0, {}, {}, {} } -- target: [pc+1] + 2
 	op_info[PROC                ] = { VARIABLE_SIZE, 0, {}, {}, {} }
@@ -264,7 +262,7 @@ init_op_info()
 function op_size( integer pc, sequence code = Code )
 	integer op = code[pc]
 	sequence info = op_info[op]
-	
+
 	if info[OP_SIZE_TYPE] = FIXED_SIZE then
 		return info[OP_SIZE]
 	else
@@ -297,7 +295,7 @@ procedure shift_switch( integer pc, integer start, integer amount )
 	else
 		addr = Code[pc+4]
 	end if
-	
+
 	-- the jump to end / else is still absolute, though:
 	if start < addr then
 		if sequence( Code[pc+4] ) then
@@ -306,7 +304,7 @@ procedure shift_switch( integer pc, integer start, integer amount )
 			Code[pc+4] += amount
 		end if
 	end if
-	
+
 	sequence jump = SymTab[Code[pc+3]][S_OBJ]
 	for i = 1 to length(jump) do
 		if start > pc and start < pc + jump[i] then
@@ -342,7 +340,7 @@ export procedure shift( integer start, integer amount, integer bound = start )
 	if amount = 0 then
 		return
 	end if
-	
+
 	for i = length( LineTable ) to 1 by -1 do
 		if LineTable[i] > 0 then
 			if LineTable[i] < start then
@@ -351,13 +349,13 @@ export procedure shift( integer start, integer amount, integer bound = start )
 			LineTable[i] += amount
 		end if
 	end for
-	
+
 	integer pc = 1
 	integer op
 	while pc <= length( Code ) do
 		op = Code[pc]
 		for i = 1 to length( op_info[op][OP_ADDR] ) do
-			
+
 			switch op with fallthru do
 				case SWITCH then
 				case SWITCH_I then
@@ -366,13 +364,13 @@ export procedure shift( integer start, integer amount, integer bound = start )
 					-- these have relative jumps, so we treat them specially
 					shift_switch( pc, start, amount )
 					break
-					
+
 				case else
 					shift_addr( pc + op_info[op][OP_ADDR][i], amount, start, bound )
-					
+
 			end switch
 			if find( op, {} ) then
-				
+
 			end if
 		end for
 		pc = advance( pc )
@@ -409,12 +407,12 @@ export function get_ops( integer pc, integer offset, integer num_ops = 1, sequen
 		offset = -offset
 		sign = -1
 	end if
-	
+
 	while offset do
 		pc = advance( pc )
 		offset -= sign
 	end while
-	
+
 	sequence ops = repeat( 0, num_ops )
 	integer opx = 1
 	while num_ops and pc <= length(code) do
@@ -444,7 +442,7 @@ end function
 --**
 -- Pass in the result of [:current_op].  The return value will be
 -- zero if there is no target, or the sym of the target for the op,
--- or a sequence of syms if the op has multiple targets 
+-- or a sequence of syms if the op has multiple targets
 -- (e.g., LHS_SUBS).
 export function get_target_sym( sequence opseq )
 	if not length( opseq ) then
@@ -452,40 +450,40 @@ export function get_target_sym( sequence opseq )
 	end if
 	integer op = opseq[1]
 	sequence info = op_info[op]
-	
+
 	if info[OP_SIZE_TYPE] = FIXED_SIZE then
 		switch length( info[OP_TARGET] ) do
 			case 0 then
 				break
-			
+
 			case 1 then
 				return opseq[info[OP_TARGET][1]+1]
-			
+
 			case else
 				sequence targets = info[OP_TARGET]
 				for i = 1 to length( targets ) do
 					targets[i] = opseq[targets[i] + 1]
 				end for
-				
+
 				return targets
-				
+
 		end switch
-		
+
 	else
-	
+
 		switch op do
 			case PROC, PROC_TAIL then
 				symtab_index sub = opseq[2]
 				if sym_token( sub ) = FUNC then
 					return opseq[$]
 				end if
-			
+
 			case FUNC_FORWARD then
 				return opseq[$]
-			
+
 			case RIGHT_BRACE_N, CONCAT_N then
 				return opseq[opseq[2]+2]
-			
+
 		end switch
 	end if
 	return 0
