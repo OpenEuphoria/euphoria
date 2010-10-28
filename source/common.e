@@ -90,7 +90,7 @@ public function get_eudir()
 		sequence possible_paths = {
 			"/usr/local/share/euphoria",
 			"/usr/share/euphoria",
-			"/opt/euphoria",
+			"/opt/euphoria"
 		}
 		object home = getenv("HOME")
 		if sequence(home) then
