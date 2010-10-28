@@ -36,13 +36,17 @@ if atom(data) then
 	abort(1)
 end if
 
-username = url:encode(username)
-title = url:encode(title)
-data = url:encode(data)
+sequence form_data = {
+	{ "language", "euphoria" },
+	{ "author",   username   },
+	{ "subject",  title      },
+	{ "secure",   "0"        },
+	{ "text",     data       },
+	{ "submit",   "Paste"    },
+	{ "tabstop",  "2"        }
+}
 
-data = get_url("http://euphoria.pastey.net/submit.php",
-	sprintf("language=euphoria&author=%s&subject=%s&secure=0&text=%s" &
-		"&submit=Paste&tabstop=2", { username, title, data }))
+data = http_post("http://euphoria.pastey.net/submit.php", form_data)
 
 if equal(data[1], "") or equal(data[2], "") then
     puts(1, "An error occurred while submitting your file.\n")
@@ -52,7 +56,7 @@ end if
 data = data[2] -- we are only interested in the web page data, not it's header data
 
 -- Test to see if the paste was a success
-regex reLink = r:new("http://euphoria.pastey.net/[0-9]+")
+regex reLink = r:new("http://euphoria.pastey.net:80/[0-9]+")
 if r:has_match(reLink, data) then
 	sequence matchData = r:find(reLink, data)
 	puts(1, data[matchData[1][1]..matchData[1][2]] & "\n")

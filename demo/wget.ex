@@ -7,7 +7,6 @@ override procedure abort(integer x)
 	eu:abort(x)
 end procedure
 
-
 procedure main(sequence args = command_line())
 	if length(args) = 2 then
 		ifdef WIN32_GUI then
@@ -18,14 +17,14 @@ procedure main(sequence args = command_line())
 	end if
 
 	sequence url = args[3]
-	object data = get_url(url)
+	object data = http_get(url)
 
 	if atom(data) or length(data) = 0 then
 		printf(1, "Could not download %s\n", { url })
 		abort(2)
 	end if
 
-	printf(1, "%s\n\n%s\n", data)
+	printf(1, "%s\n", { data[2] })
 
 	maybe_any_key()
 end procedure
