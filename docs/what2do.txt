@@ -44,7 +44,8 @@ The ##guru## program will search all the ##.doc## files, example programs, and o
 and will present you with a //sorted// list of the most relevant chunks of text that might
 answer your enquiry.
 
-=== Visit the [[http://openeuphoria.org/forum/index.wc|Euphoria Discussion Forum]]
+=== Visit the EuForum
+[[http://openeuphoria.org/forum/index.wc|Euphoria Discussion Forum]]
 
 
 === Trace a Demo
