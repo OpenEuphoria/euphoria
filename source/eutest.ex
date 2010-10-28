@@ -22,6 +22,7 @@ include std/types.e as types
 include std/map.e
 include std/cmdline.e
 include std/eds.e
+include std/regex.e
 
 constant cmdopts = {
 	{"exe", 0, "interpreter path", { NO_CASE, HAS_PARAMETER, "path-to-interpreter"} },
@@ -59,6 +60,7 @@ object void
 integer ctcfh = 0
 sequence error_list = repeat({},4)
 sequence eub_path = ""
+sequence exclude_patterns = {}
 
 -- moved from do_test:
 integer logging_activated = 0
@@ -142,7 +144,7 @@ function run_emake()
 		
 		elsif match("set ", line) = 1 then 
 			sequence pair
-			pair = split(line[5..$], "=")
+			pair = stdseq:split(line[5..$], "=")
 			pair = {setenv(pair[1], pair[2])}
 
 		elsif match("move ", line) = 1 or
@@ -625,10 +627,22 @@ procedure ensure_coverage()
 	db_close()
 	interpreter_options &= " -test"
 	for tx = 1 to length( tables ) do
+		
 		sequence table_name = tables[tx]
-		test_file( table_name[2..$], {} )
+		if not is_excluded( table_name[2..$] ) then
+			test_file( table_name[2..$], {} )
+		end if
 	end for
 end procedure
+
+function is_excluded( sequence file )
+	for i = 1 to length( exclude_patterns ) do
+		if regex:has_match( exclude_patterns[i], file ) then
+			return 1
+		end if
+	end for
+	return 0
+end function
 
 procedure process_coverage()
 	if not length( coverage_db ) then
@@ -1029,7 +1043,7 @@ procedure do_process_log( sequence cmds, integer html)
 		puts(1, "unittest.log could not be read\n")
 	else 
    
-		messages = split( content,"entry = ")
+		messages = stdseq:split( content,"entry = ")
 		for a = 1 to length(messages) do
 			if sequence(messages[a]) and equal(messages[a], "") then
 				continue
@@ -1245,6 +1259,12 @@ procedure main()
 			case "coverage-exclude" then
 				for j = 1 to length( val ) do
 					interpreter_options &= sprintf(` -coverage-exclude "%s"`, {val[j]} )
+					object pattern = regex:new( val[j] )
+					if regex( pattern ) then
+						exclude_patterns = append( exclude_patterns, regex:new( val[j] ) )
+					else
+						printf(2, "invalid exclude pattern: [%s]\n", { val[j] } )
+					end if
 				end for
 
 			case "testopt" then
