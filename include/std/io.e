@@ -639,36 +639,61 @@ public enum LOCK_SHARED, LOCK_EXCLUSIVE
 --**
 -- File number type
 
-public type file_number(integer f)
-	return f >= 0
+public type file_number(object f)
+	if integer(f) and f >= 0 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --**
 -- File position type
 
-public type file_position(atom p)
-	return p >= -1
+public type file_position(object p)
+	if atom(p) and p >= -1 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 
 --**
 -- Lock Type
 
-public type lock_type(integer t)
-	return t = LOCK_SHARED or t = LOCK_EXCLUSIVE
+public type lock_type(object t)
+	if integer(t) and (t = LOCK_SHARED or t = LOCK_EXCLUSIVE) then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --**
 -- Byte Range Type
 
-public type byte_range(sequence r)
-	if length(r) = 0 then
-		return 1
-	elsif length(r) = 2 and r[1] <= r[2] then
-		return 1
-	else
+public type byte_range(object r)
+	if atom(r) then
 		return 0
 	end if
+	if length(r) = 0 then
+		return 1
+	end if
+	if length(r) != 2 then
+		return 0
+	end if
+	
+	if not (atom(r[1]) and atom(r[2])) then
+		return 0
+	end if
+	
+	if r[1] < 0 or r[2] < 0 then
+		return 0
+	end if
+	
+	return r[1] <= r[2]
+
 end type
 
 --****

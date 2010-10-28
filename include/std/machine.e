@@ -504,13 +504,16 @@ end ifdef
 
 --**
 -- protection constants type
-public type valid_memory_protection_constant( integer x )
-	return 0 != find( x, MEMORY_PROTECTION )
+public type valid_memory_protection_constant( object x )
+	return find( x, MEMORY_PROTECTION )
 end type
 
 --**
 -- page aligned address type
-public type page_aligned_address( atom a )
+public type page_aligned_address( object a )
+	if not atom(a) then
+		return 0
+	end if
 	return remainder( a, PAGE_SIZE ) = 0
 end type
 
@@ -585,10 +588,13 @@ end function
 -- Only values that satisfy this type may be passed into
 -- free or free_code.
 --
-public type std_library_address( atom addr ) 
+public type std_library_address( object addr ) 
 	ifdef not SAFE then
 		return 1
 	elsedef
+		if not atom(addr) then
+			return 0
+		end if
 		return (addr = 0) or bordered_address(addr)
 	end ifdef
 end type

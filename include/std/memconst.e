@@ -123,8 +123,8 @@ export constant MEMORY_PROTECTION = {
 	PAGE_NOACCESS
 }
 
-export type valid_memory_protection_constant( integer x )
-	return 0 != find( x, MEMORY_PROTECTION )
+export type valid_memory_protection_constant( object x )
+	return find( x, MEMORY_PROTECTION )
 end type
 
 
@@ -167,8 +167,8 @@ export function test_exec( valid_memory_protection_constant protection )
 end function
 
 
-export type valid_wordsize( integer i )
-	return find(i, {1,2,4})!=0
+export type valid_wordsize( object i )
+	return find(i, {1,2,4})
 end type
 
 export integer DEP_really_works = 0

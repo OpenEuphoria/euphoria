@@ -56,8 +56,11 @@ public integer edges_only
 --**
 -- Positive integer type
 
-export type positive_int(integer x)
-        return x >= 1
+export type positive_int(object x)
+	if not integer(x) then
+		return 0
+	end if
+    return x >= 1
 end type
 
 --**
@@ -808,7 +811,10 @@ export constant BORDER_SPACE = 0
 export constant leader = repeat('@', BORDER_SPACE)
 export constant trailer = repeat('%', BORDER_SPACE)
 
-export type bordered_address( atom addr )
+export type bordered_address( object addr )
+	if not atom(addr) then
+		return 0
+	end if
 	return 1
 end type
 

@@ -18,8 +18,23 @@ constant EOF = -1
 
 integer fn, error_code
 
-public type graphics_point(sequence p)
-	return length(p) = 2 and p[1] >= 0 and p[2] >= 0
+public type graphics_point(object p)
+	if atom(p) then
+		return 0
+	end if
+	if length(p) != 2 then
+		return 0
+	end if
+	
+	if not integer(p[1]) or p[1] < 0 then
+		return 0
+	end if
+	
+	if not integer(p[2]) or p[2] < 0 then
+		return 0
+	end if
+	
+	return 1
 end type
 
 function get_word()

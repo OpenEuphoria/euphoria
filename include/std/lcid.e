@@ -426,8 +426,8 @@ constant lcid_string = {
 -- type for a locale context
 --
 -- Returns 1 if ##x## is a locale context identifier
-public type lcid( integer x ) 
-	return find(x,lcid_hex) != 0
+public type lcid( object x ) 
+	return find(x, lcid_hex) != 0
 end type
 
 --**

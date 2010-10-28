@@ -340,8 +340,12 @@ type text_point(sequence p)
 		   and p[1] <= 200 and p[2] <= 500 -- rough sanity check
 end type
 
-public type positive_int(integer x)
-	return x >= 1
+public type positive_int(object x)
+	if integer(x) and x >= 1 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --**
