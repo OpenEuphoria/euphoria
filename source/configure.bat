@@ -25,7 +25,6 @@ rem ============================================================
 rem Detect some parameters
 rem ============================================================
 
-
 rem ============================================================
 rem Read command line parameters
 rem ============================================================
@@ -151,7 +150,7 @@ IF "%DISABLED_MANAGED_MEM%" == "" (
 	echo MANAGED_MEM=1 >> config.wat
 )
 IF "%ECBIN%" == "1" (
-    	echo EC="$(EUBIN)\euc.exe" >> config.wat 
+    	echo EC="$(EUBIN)\euc.exe" >> config.wat
 )
 IF not exist %WINDIR%\command\deltree.exe (
 	echo DELTREE=del /Q /S >> config.wat
@@ -229,7 +228,7 @@ echo.
 echo CONFIGURE.BAT [options]
 echo.
 echo Options:
-echo     --without-euphoria  Use this option if you are building Euphoria 
+echo     --without-euphoria  Use this option if you are building Euphoria
 echo                         with only a C compiler.
 echo.
 echo     --prefix value      Use this option to specify the location for euphoria to
@@ -240,13 +239,11 @@ echo     --no-managed-mem    disable managed memory
 echo     --align4            malloc allocates addresses that are
 echo                         not always 8 byte aligned.
 echo.
-echo     --eubin value       Use this option to specify the location of the 
-echo                         interpreter binary to use to translate the front end.  
+echo     --eubin value       Use this option to specify the location of the
+echo                         interpreter binary to use to translate the front end.
 echo                         The default is ..\bin
 echo.
 echo     --build value       set the build directory
-echo.
-pause
 echo.
 echo     --full              Use this option to so EUPHORIA doesn't report itself
 echo 		             as a development version.
@@ -256,13 +253,13 @@ echo.
 echo     --noassert          Use this to remove 'assert()' processing in the C code.
 echo.
 echo     --plat value        set the OS that we will translate to.
-echo                         values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, 
+echo                         values can be: WIN, OSX, LINUX, FREEBSD, SUNOS,
 echo                         OPENBSD or NETBSD.
 echo.
 echo     --use-binary-translator
-echo                         Use the already built translator rather than 
+echo                         Use the already built translator rather than
 echo                         interpreting its source
-echo
+echo.
 echo     --use-source-translator
 echo                         Interpret the translator's source rather than
 echo                         using the already built translator (default)

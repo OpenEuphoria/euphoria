@@ -93,7 +93,7 @@ elif test $UNAME_SYSTEM = "NetBSD"; then
 else
 	echo EBSD=1 >> "$PREFIX"Makefile.eu
 	if test $UNAME_SYSTEM = "Darwin"; then
-		echo EOSX=1 >> "$PREFIX"Makefile.eu                                   
+		echo EOSX=1 >> "$PREFIX"Makefile.eu
 	else
 		echo EOSX= >> "$PREFIX"Makefile.eu
 	fi
@@ -140,7 +140,7 @@ while [ "$1" != "" ]; do
         --full )
 			echo RELEASE=1 >> "$PREFIX"Makefile.eu
         ;;
-	
+
         --build )
 			export BUILDDIR=$2
 			shift
@@ -182,14 +182,13 @@ while [ "$1" != "" ]; do
 			echo "    --prefix value      set the install directory (default /usr/local)"
 			echo "    --plat value        set the OS that we will translate to."
 			echo "           values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD."
+			echo "                                                               "
 			echo "    --watcom            set this so the translator will create C code for "
 			echo "                        Watcom C."
 			echo "    --cc  value         set this to the name of your GNU C compiler file name if its "
 			echo "                        name is not 'gcc'"
 			echo "    --roodir value      the root dir to use for checking the svn revision"
 			echo "                        default is the parent directory"
-			echo "Press ENTER to continue" 
-			read
 			echo "    --use-binary-translator"
 			echo "                        Use the already built translator rather"
 			echo "                        than interpreting its source           "
@@ -228,8 +227,8 @@ fi
 if [ "x$MANAGED_MEM" = "x" ]; then
         if test $UNAME_SYSTEM = "MS-DOS"; then
         	echo "Information: Managed memory always on for DJGPP."
-		echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu 
-	fi	
+		echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu
+	fi
 fi
 echo "CC=$CC" >> "$PREFIX"Makefile.eu
 if [ "$EC" != "" ]; then
