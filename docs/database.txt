@@ -126,8 +126,8 @@ without incurring much disk space overhead.
 
 === EDS API
 
-More details on using EDS, including complete coverage of the EDS API, can be found at the 
-[[http://openeuphoria.org/docs/eu400_0088.html#_3690_euphoriadatabaseeds|Euphoria EDS page]].
+More details on using EDS, including complete coverage of the EDS API, can be found at 
+[[:Euphoria Database (EDS)]].
 
 === Disclaimer
 
