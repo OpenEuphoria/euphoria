@@ -351,7 +351,7 @@ public constant
 
 ifdef WINDOWS then
 	--****
-	-- ===  Windows Socket Constants
+	-- ====  Windows Socket Options
 	public constant
 		SOL_SOCKET     = #FFFF,
 		SO_DEBUG       = #0001,
@@ -388,7 +388,7 @@ ifdef WINDOWS then
 		SO_SYNCHRONOUS_NONALERT = #20
 elsifdef LINUX then
 	--****
-	-- ===  LINUX Socket Constants
+	-- ====  LINUX Socket Options
 	public constant SOL_SOCKET = 1,
 		SO_DEBUG = 1,
 		SO_REUSEADDR = 2,
@@ -425,7 +425,7 @@ elsifdef LINUX then
 		SO_BINDTODEVICE = 25
 	 
 	--****
-	-- ====  Socket filtering 
+	-- =====  Socket filtering 
 	public constant	SO_ATTACH_FILTER = 26,
 		SO_DETACH_FILTER = 27,
 	 
