@@ -350,6 +350,8 @@ public constant
 -- supported on all operating systems.
 
 ifdef WINDOWS then
+	--****
+	-- ===  Windows Socket Constants
 	public constant
 		SOL_SOCKET     = #FFFF,
 		SO_DEBUG       = #0001,
@@ -385,6 +387,8 @@ ifdef WINDOWS then
 		SO_SYNCHRONOUS_ALTERT   = #10,
 		SO_SYNCHRONOUS_NONALERT = #20
 elsifdef LINUX then
+	--****
+	-- ===  LINUX Socket Constants
 	public constant SOL_SOCKET = 1,
 		SO_DEBUG = 1,
 		SO_REUSEADDR = 2,
@@ -418,10 +422,11 @@ elsifdef LINUX then
 		SO_SECURITY_ENCRYPTION_TRANSPORT = 23,
 		SO_SECURITY_ENCRYPTION_NETWORK = 24,
 	 
-		SO_BINDTODEVICE = 25,
+		SO_BINDTODEVICE = 25
 	 
-	 /* Socket filtering */
-		SO_ATTACH_FILTER = 26,
+	--****
+	-- ====  Socket filtering 
+	public constant	SO_ATTACH_FILTER = 26,
 		SO_DETACH_FILTER = 27,
 	 
 		SO_PEERNAME = 28,
@@ -445,6 +450,7 @@ elsifdef LINUX then
 	 
 		SO_RXQ_OVFL = 40
 end ifdef
+
 --****
 -- === Send Flags
 --
