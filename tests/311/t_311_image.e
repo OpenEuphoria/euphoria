@@ -1,8 +1,7 @@
 include std/unittest.e
 include std/filesys.e
 
-include std/image.e
-include std/console.e
+include image.e
 
 sequence palette = { {1,1,1} }
 sequence image = {
@@ -28,5 +27,10 @@ end for
 
 test_equal( "no bmp file", BMP_OPEN_FAILED, read_bitmap("not a real file" ) )
 
+
+-- doesn't truly test, but at least makes sure it's not completely broken:
+sequence img = save_text_image( {1,1}, {10,10})
+display_text_image( {1,1}, img )
+test_pass( "save / display text image" )
 
 test_report()

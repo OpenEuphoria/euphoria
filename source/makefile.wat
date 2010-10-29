@@ -470,7 +470,7 @@ test : .SYMBOLIC code-page-db
 coverage : .SYMBOLIC code-page-db
 	cd ..\tests
 	-copy $(BUILDDIR)\ecp.dat .
-	$(EUTEST) -verbose -i ..\include -exe "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include\std -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(LIST)
+	$(EUTEST) -verbose -i ..\include -exe "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(LIST)
 	-del ecp.dat
 	cd ..\source
 

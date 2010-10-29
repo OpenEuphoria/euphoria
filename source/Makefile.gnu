@@ -550,9 +550,26 @@ test :
 testeu : $(BUILDDIR)/ecp.dat
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex" $(TESTFILE)
 
+test-311 :
+	cd ../tests/311 && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+		$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc -verbose \
+		-exe "$(BUILDDIR)/$(EEXU)" \
+		-ec "$(BUILDDIR)/$(EECU)" \
+		-bind $(TRUNKDIR)/source/bind.ex -eub $(BUILDDIR)/$(EBACKENDC) \
+		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)" \
+		$(TESTFILE)
+		
+coverage-311 :
+	cd ../tests/311 && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+		$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include \
+		-exe "$(BUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
+		-coverage-db $(BUILDDIR)/unit-test-311.edb -coverage $(TRUNKDIR)/include \
+		-coverage-exclude std -coverage-exclude euphoria \
+		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
+
 coverage : 
 	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
-		$(EXE) ../source/eutest.ex -i ../include \
+		$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include \
 		-exe "$(BUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
 		-coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std \
 		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)

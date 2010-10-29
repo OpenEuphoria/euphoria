@@ -117,20 +117,13 @@ global function allocate_low(positive_int n)
 -- Allocate n bytes of low memory (address less than 1Mb) 
 -- and return the address. Free this memory using free_low() below.
 -- Addresses in this range can be passed to DOS during software interrupts.
-    return machine_func(M_ALLOC_LOW, n)
+    return allocate( n )
 end function
 
 global procedure free_low(low_machine_addr a)
 -- free the low memory at address a
-    machine_proc(M_FREE_LOW, a)
+    free( a )
 end procedure
-
-global function dos_interrupt(integer int_num, register_list input_regs)
--- call the DOS operating system via software interrupt int_num, using the
--- register values in input_regs. A similar register_list is returned.
--- It contains the register values after the interrupt.
-    return machine_func(M_INTERRUPT, {int_num, input_regs})
-end function
 
 global function int_to_bytes(atom x)
 -- returns value of x as a sequence of 4 bytes 
