@@ -8,130 +8,93 @@ include std/io.e
 include std/types.e
 include std/filesys.e
 
----------------------------------------------------------------------------------
-
-
-integer enum_val,enum_inc
-function Enum_Start(integer start, integer inc)
-	enum_val = start
-	enum_inc = inc
-	return enum_val
-end function
-
-function Enum()
-	enum_val += enum_inc
-	return enum_val
-end function
 
 --****
 -- === tokenize return sequence key
 
-public constant
-		 ET_TOKENS		= Enum_Start(1,1)
-		,ET_ERROR		= Enum()
-		,ET_ERR_LINE		= Enum()
-		,ET_ERR_COLUMN	= Enum()
+public enum
+	ET_TOKENS,
+	ET_ERROR,
+	ET_ERR_LINE,
+	ET_ERR_COLUMN
 
 --****
 -- === Tokens
 
-public constant
-		T_EOF        = Enum_Start(EOF,1),
-		--**
-		T_NULL       = Enum(),
-		T_SHBANG     = Enum(),
-		T_BLANK      = Enum(),
-		T_COMMENT    = Enum(),
-		T_NUMBER     = Enum(),
-		--**
-		-- quoted character
-		T_CHAR       = Enum(),
-		--**
-		-- string
-		T_STRING     = Enum(),
-		T_IDENTIFIER = Enum(),
-		T_KEYWORD    = Enum(),
-		--**
-		--!!
-		--!! must not alter the following list of token codes from T_DOUBLE_OPS
-		--!! up to and including T_DOLLAR
-		--!! marks the start of the double-op delimiter codes
-		T_DOUBLE_OPS  = Enum(),
-		T_PLUSEQ      = Enum_Start(Enum()-1,1),
-		T_MINUSEQ     = Enum(),
-		T_MULTIPLYEQ  = Enum(),
-		T_DIVIDEEQ    = Enum(),
-		T_LTEQ        = Enum(),
-		T_GTEQ        = Enum(),
-		T_NOTEQ       = Enum(),
-		T_CONCATEQ    = Enum(),
-		--**
-		--!! marks the start of the delimiter codes
-		T_DELIMITER   = Enum(),
-		T_PLUS        = Enum_Start(Enum()-1,1),
-		T_MINUS       = Enum(),
-		T_MULTIPLY    = Enum(),
-		T_DIVIDE      = Enum(),
-		T_LT          = Enum(),
-		T_GT          = Enum(),
-		T_NOT         = Enum(),
-		T_CONCAT      = Enum(),
-		--**
-		--!! marks the start of the single-op delimiter codes
-		T_SINGLE_OPS  = Enum(),
-		T_EQ          = Enum_Start(Enum()-1,1),
-		T_LPAREN      = Enum(),
-		T_RPAREN      = Enum(),
-		T_LBRACE      = Enum(),
-		T_RBRACE      = Enum(),
-		T_LBRACKET    = Enum(),
-		T_RBRACKET    = Enum(),
-		--**
-		-- quick print ( ? x )
-		T_QPRINT      = Enum(),
-		T_COMMA       = Enum(),
-		T_PERIOD      = Enum(),
-		T_COLON       = Enum(),
-		T_DOLLAR      = Enum(),
-		--**
-		--!!
-		T_SLICE       = Enum(),
-		$
+public enum
+	T_EOF,
+	T_NULL,
+	T_SHBANG,
+	T_BLANK,
+	T_COMMENT,
+	T_NUMBER,
+	--**
+	-- quoted character
+	T_CHAR,
+	--**
+	-- string
+	T_STRING,
+	T_IDENTIFIER,
+	T_KEYWORD,
+	T_DOUBLE_OPS,
+	T_PLUSEQ = T_DOUBLE_OPS,
+	T_MINUSEQ,
+	T_MULTIPLYEQ,
+	T_DIVIDEEQ,
+	T_LTEQ,
+	T_GTEQ,
+	T_NOTEQ,
+	T_CONCATEQ,
+	T_DELIMITER,
+	T_PLUS = T_DELIMITER,
+	T_MINUS,
+	T_MULTIPLY,
+	T_DIVIDE,
+	T_LT,
+	T_GT,
+	T_NOT,
+	T_CONCAT,
+	T_SINGLE_OPS,
+	T_EQ = T_SINGLE_OPS,
+	T_LPAREN,
+	T_RPAREN,
+	T_LBRACE,
+	T_RBRACE,
+	T_LBRACKET,
+	T_RBRACKET,
+	T_QPRINT,
+	T_COMMA,
+	T_PERIOD,
+	T_COLON,
+	T_DOLLAR,
+	T_SLICE,
+	--****
+	-- === T_NUMBER formats and T_types
+	TF_HEX,
+	TF_INT,
+	TF_ATOM,
+	$
 
 -- this list of delimiters must match the order of the corresponding T_ codes above
 constant Delimiters = "+-*/<>!&" & "=(){}[]?,.:$" -- double & single ops
 
---****
--- === T_NUMBER formats and T_types
-
-public constant
-		TF_HEX        = Enum(),
-		TF_INT        = Enum(),
-		TF_ATOM       = Enum(),
-		$
-
----------------------------------------------------------------------------------
-
 public enum
-		TTYPE,
-		TDATA,
-		TLNUM,
-		TLPOS,
-		TFORM,
-		$
-
+	TTYPE,
+	TDATA,
+	TLNUM,
+	TLPOS,
+	TFORM,
+	$
 
 sequence Token = {T_EOF,"",0,0,0}
 
 sequence source_text = ""
-integer  sti  = 0
-integer  LNum = 0
-integer  LPos = 0
-integer  Look = EOL
+integer	 sti  = 0
+integer	 LNum = 0
+integer	 LPos = 0
+integer	 Look = EOL
 
----------------------------------------------------------------------------------
-
-integer ERR       = 0
+integer ERR		  = 0
 integer ERR_LNUM  = 0
 integer ERR_LPOS  = 0
 
@@ -139,32 +102,32 @@ integer ERR_LPOS  = 0
 -- === ET error codes
 
 public enum
-		ERR_OPEN,
-		ERR_ESCAPE,
-		ERR_EOL_CHAR,
-		ERR_CLOSE_CHAR,
-		ERR_EOL_STRING,
-		ERR_HEX,
-		ERR_DECIMAL,
-		ERR_UNKNOWN,
-		ERR_EOF,
-		ERR_EOF_STRING,
-		ERR_HEX_STRING,
-		$
+	ERR_OPEN,
+	ERR_ESCAPE,
+	ERR_EOL_CHAR,
+	ERR_CLOSE_CHAR,
+	ERR_EOL_STRING,
+	ERR_HEX,
+	ERR_DECIMAL,
+	ERR_UNKNOWN,
+	ERR_EOF,
+	ERR_EOF_STRING,
+	ERR_HEX_STRING,
+	$
 
 constant ERROR_STRING = { -- use et_error_string(code) to retrieve these
-		"Failed to open file",
-		"Expected an escape character",
-		"End of line reached without closing \' char",
-		"Expected a closing \' char",
-		"End of line reached without closing \" char",
-		"Expected a hex value",
-		"Expected a decimal value",
-		"Unknown token type",
-		"Expected EOF",
-		"End of file reached without closing \" char",
-		"Invalid hexadecimal or unicode string",
-		$
+	"Failed to open file",
+	"Expected an escape character",
+	"End of line reached without closing \' char",
+	"Expected a closing \' char",
+	"End of line reached without closing \" char",
+	"Expected a hex value",
+	"Expected a decimal value",
+	"Unknown token type",
+	"Expected EOF",
+	"End of file reached without closing \" char",
+	"Invalid hexadecimal or unicode string",
+	$
 }
 
 procedure report_error(integer err)
@@ -188,11 +151,9 @@ end function
 --****
 -- === get/set options
 
----------------------------------------------------------------------------------
-
-integer IGNORE_BLANKS 	= TRUE
+integer IGNORE_BLANKS	= TRUE
 integer IGNORE_COMMENTS = TRUE
-integer STRING_NUMBERS 	= FALSE
+integer STRING_NUMBERS	= FALSE
 
 --**
 -- return blank lines as tokens
@@ -211,8 +172,8 @@ end procedure
 --**
 -- return TDATA for all T_NUMBER tokens in "string" format
 -- by default:
--- 	*T_NUMBER tokens return atoms
--- 	*T_CHAR tokens return single integer chars
+--	*T_NUMBER tokens return atoms
+--	*T_CHAR tokens return single integer chars
 --	*T_EOF tokens return undefined data
 --	*all other tokens return strings
 --
@@ -222,7 +183,10 @@ end procedure
 
 
 ---------------------------------------------------------------------------------
--- CHAR TYPE ROUTINES --
+--
+-- CHAR TYPE ROUTINES
+--
+---------------------------------------------------------------------------------
 
 type White_Char(object c)
 	return (Look >= 0) and (Look <= ' ')
@@ -264,8 +228,6 @@ type Identifier_Char(object c)
 	return Alphanum_Char(c)
 end type
 
----------------------------------------------------------------------------------
-
 procedure scan_char()
 	if Look = EOL then
 		LNum += 1
@@ -280,8 +242,6 @@ procedure scan_char()
 	Look = source_text[sti]
 end procedure
 
----------------------------------------------------------------------------------
-
 function lookahead(integer dist = 1)
 	if sti + dist <= length(source_text) then
 		return source_text[sti + dist]
@@ -289,8 +249,6 @@ function lookahead(integer dist = 1)
 		return EOF
 	end if
 end function
-
----------------------------------------------------------------------------------
 
 function scan_white() -- returns TRUE if a blank line was parsed
  integer lastLF
@@ -414,8 +372,6 @@ function scan_multistring()
 	return TRUE
 end function
 
----------------------------------------------------------------------------------
-
 function hex_val(integer h)
 	if h >= 'a' then
 		return h - 'a' + 10
@@ -444,10 +400,9 @@ function scan_hex()
 	return TRUE
 end function
 
-integer SUBSCRIPT   SUBSCRIPT = 0
+integer SUBSCRIPT	SUBSCRIPT = 0
 function scan_integer()
- atom i
-	i = 0
+	atom i = 0
 	while Digit_Char(Look) do
 		if (Look != '_') then
 			i = (i*10) + (Look-'0')
@@ -458,11 +413,9 @@ function scan_integer()
 end function
 
 function scan_fraction(atom v)
- atom d
-
 	if not Digit_Char(Look) then report_error(ERR_DECIMAL) return 0 end if
 
-	d = 10
+	atom d = 10
 	while Digit_Char(Look) do
 		if Look != '_' then
 			v += (Look-'0')/d
@@ -474,7 +427,8 @@ function scan_fraction(atom v)
 end function
 
 function scan_exponent(atom v)
- atom e
+	atom e
+
 	if ((Look != 'e') and (Look != 'E')) then return v end if
 	scan_char()
 
@@ -499,7 +453,8 @@ function scan_exponent(atom v)
 end function
 
 function scan_number()
- atom v
+	atom v
+
 	if not Digit_Char(Look) then return FALSE end if
 	Token[TTYPE] = T_NUMBER
 	Token[TDATA] = scan_integer()
@@ -525,7 +480,6 @@ function scan_number()
 	return TRUE
 end function
 
----------------------------------------------------------------------------------
 function hex_string(sequence textdata, integer string_type)
 	integer ch
 	integer digit
@@ -588,7 +542,8 @@ function hex_string(sequence textdata, integer string_type)
 	return string_text
 end function
 
-integer INCLUDE_NEXT	INCLUDE_NEXT = FALSE
+integer INCLUDE_NEXT = FALSE
+
 function scan_identifier()
 	integer nextch
 	integer startpos
@@ -659,8 +614,6 @@ function scan_include()
 	end if
 	return TRUE
 end function
-
----------------------------------------------------------------------------------
 
 procedure next_token()
 	Token[TLNUM] = LNum
@@ -743,9 +696,8 @@ end procedure
 --****
 -- === Routines
 
-
 public function et_tokenize_string(sequence code)
- sequence tokens
+	sequence tokens
 
 	ERR = FALSE
 	ERR_LNUM = 0
@@ -763,18 +715,18 @@ public function et_tokenize_string(sequence code)
 	Token[TLNUM] = 1
 	Token[TLPOS] = 1
 
-  if (Look = '#') and (source_text[sti+1] = '!') then
-    sti += 1
-    scan_char()
-    if scan_white() then end if
-    Token[TTYPE] = T_SHBANG
-    while Look != EOL do
-      Token[TDATA] &= Look
-      scan_char()
-    end while
-    scan_char()
-    tokens &= { Token }
-  end if
+	if (Look = '#') and (source_text[sti+1] = '!') then
+		sti += 1
+		scan_char()
+		if scan_white() then end if
+		Token[TTYPE] = T_SHBANG
+		while Look != EOL do
+			Token[TDATA] &= Look
+			scan_char()
+		end while
+		scan_char()
+		tokens &= { Token }
+	end if
 
 	next_token()
 	if not ERR then
@@ -790,8 +742,7 @@ public function et_tokenize_string(sequence code)
 end function
 
 public function et_tokenize_file(sequence fname)
-	object txt
-	txt = read_file(fname, TEXT_MODE)
+	object txt = read_file(fname, TEXT_MODE)
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
