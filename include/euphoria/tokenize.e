@@ -150,9 +150,10 @@ procedure report_error(integer err)
 end procedure
 
 --**
--- return error string from error code
+-- Get an error message string for a given error code.
+--
 
-public function et_error_string(integer err)
+public function error_string(integer err)
 	if err >= ERR_OPEN and err <= ERR_EOF then
 		return ERROR_STRING[err]
 	else
