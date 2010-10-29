@@ -351,7 +351,7 @@ public constant
 
 ifdef WINDOWS then
 	--****
-	-- ====  Windows Socket Options
+	-- ====  Socket Options In Common  
 	public constant
 		SOL_SOCKET     = #FFFF,
 		SO_DEBUG       = #0001,
@@ -360,11 +360,7 @@ ifdef WINDOWS then
 		SO_KEEPALIVE   = #0008,
 		SO_DONTROUTE   = #0010,
 		SO_BROADCAST   = #0020,
-		SO_USELOOPBACK = #0040,
 		SO_LINGER      = #0080,
-		SO_DONTLINGER  = not_bits(SO_LINGER),
-		SO_OOBINLINE   = #0100,
-		SO_REUSEPORT   = #9999,
 		SO_SNDBUF      = #1001,
 		SO_RCVBUF      = #1002,
 		SO_SNDLOWAT    = #1003,
@@ -373,6 +369,13 @@ ifdef WINDOWS then
 		SO_RCVTIMEO    = #1006,
 		SO_ERROR       = #1007,
 		SO_TYPE        = #1008,
+		SO_OOBINLINE   = #0100
+	--****
+	-- ====  Windows Socket Options
+	public constant
+		SO_USELOOPBACK = #0040,
+		SO_DONTLINGER  = not_bits(SO_LINGER),
+		SO_REUSEPORT   = #9999,
 		SO_CONNDATA    = #7000,
 		SO_CONNOPT     = #7001,
 		SO_DISCDATA    = #7002,
@@ -387,9 +390,8 @@ ifdef WINDOWS then
 		SO_SYNCHRONOUS_ALTERT   = #10,
 		SO_SYNCHRONOUS_NONALERT = #20
 elsifdef LINUX then
-	--****
-	-- ====  LINUX Socket Options
-	public constant SOL_SOCKET = 1,
+	public constant
+		SOL_SOCKET = 1,
 		SO_DEBUG = 1,
 		SO_REUSEADDR = 2,
 		SO_TYPE = 3,
@@ -398,18 +400,26 @@ elsifdef LINUX then
 		SO_BROADCAST = 6,
 		SO_SNDBUF = 7,
 		SO_RCVBUF = 8,
-		SO_SNDBUFFORCE = 32,
-		SO_RCVBUFFORCE = 33,
 		SO_KEEPALIVE = 9,
 		SO_OOBINLINE = 10,
+		SO_LINGER = 13,
+	 
+		SO_ACCEPTCONN = 30
+	--****
+	-- ====  LINUX Socket Options
+	public constant
+		SO_SNDBUFFORCE = 32,
+		SO_RCVBUFFORCE = 33,
 		SO_NO_CHECK = 11,
 		SO_PRIORITY = 12,
-		SO_LINGER = 13,
 		SO_BSDCOMPAT = 14
 	 /* To add :#define SO_REUSEPORT 15 */
 	 
-		ifdef not POWERPC then /* powerpc only differs in these */
-			public constant SO_PASSCRED = 16,
+		-- powerpc only differs in these
+		-- (last 4 common to windows)
+		ifdef not POWERPC then 
+			public constant
+				SO_PASSCRED = 16,
 				SO_PEERCRED = 17,
 				SO_RCVLOWAT = 18,
 				SO_SNDLOWAT = 19,
@@ -417,7 +427,7 @@ elsifdef LINUX then
 				SO_SNDTIMEO = 21
 		end ifdef
 	 
-	 /* Security levels - as per NRL IPv6 - don't actually do anything */
+	-- Security levels - as per NRL IPv6 - don't actually do anything
 	public constant	SO_SECURITY_AUTHENTICATION = 22,
 		SO_SECURITY_ENCRYPTION_TRANSPORT = 23,
 		SO_SECURITY_ENCRYPTION_NETWORK = 24,
@@ -425,15 +435,14 @@ elsifdef LINUX then
 		SO_BINDTODEVICE = 25
 	 
 	--****
-	-- =====  Socket filtering 
-	public constant	SO_ATTACH_FILTER = 26,
+	-- ====  LINUX Socket Filtering Options
+	public constant
+		SO_ATTACH_FILTER = 26,
 		SO_DETACH_FILTER = 27,
 	 
 		SO_PEERNAME = 28,
 		SO_TIMESTAMP = 29,
 		SCM_TIMESTAMP = SO_TIMESTAMP,
-	 
-		SO_ACCEPTCONN = 30,
 	 
 		SO_PEERSEC = 31,
 		SO_PASSSEC = 34,
