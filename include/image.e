@@ -269,26 +269,27 @@ global procedure display_text_image(text_point xy, sequence text)
     integer screen_width, extra_col2, extra_lines
     sequence vc, one_row
     
-    vc = video_config()
-    if xy[1] < 1 or xy[2] < 1 then
-	return -- bad starting point
-    end if
-    extra_lines = vc[VC_LINES] - xy[1] + 1 
-    if length(text) > extra_lines then
-	if extra_lines <= 0 then
-	    return -- nothing to display
+	vc = video_config()
+	if xy[1] < 1 or xy[2] < 1 then
+		return	-- bad starting point
 	end if
-	text = text[1..extra_lines] -- truncate
-    end if
-    extra_col2 = 2 * (vc[VC_COLUMNS] - xy[2] + 1)
-    for row = 1 to length(text) do
-	one_row = text[row]
-	if length(one_row) > extra_col2 then
-	    if extra_col2 <= 0 then
-		return -- nothing to display
-	    end if
-	    one_row = one_row[1..extra_col2] -- truncate
+	extra_lines = vc[VC_LINES] - xy[1] + 1 
+	if length(text) > extra_lines then
+		if extra_lines <= 0 then
+			return -- nothing to display
+		end if
+		text = text[1..extra_lines] -- truncate
 	end if
+	extra_col2 = 2 * (vc[VC_COLUMNS] - xy[2] + 1)
+	for row = 1 to length(text) do
+		one_row = text[row]
+		if length(one_row) > extra_col2 then
+			if extra_col2 <= 0 then
+				return -- nothing to display
+			end if
+			one_row = one_row[1..extra_col2] -- truncate
+		end if
+		machine_proc(M_PUT_SCREEN_CHAR, {xy[1]+row-1, xy[2], one_row})
 	end for
 end procedure
 

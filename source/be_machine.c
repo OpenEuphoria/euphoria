@@ -1559,6 +1559,7 @@ static object PutScreenChar(object x)
 {
 	unsigned attr, len;
 	unsigned line, column;
+	unsigned fg, bg;
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
@@ -1575,6 +1576,7 @@ static object PutScreenChar(object x)
 #if defined(EWINDOWS)
 	show_console();
 #endif
+
 	args = SEQ_PTR(x);
 	line =   get_int(*(args->base+1));
 	column = get_int(*(args->base+2));
@@ -1588,6 +1590,8 @@ static object PutScreenChar(object x)
 #ifdef EUNIX
 	save_line = screen_line;
 	save_col = screen_col;
+	fg = current_fg_color;
+	bg = current_bg_color;
 	SetPosition(line, column);
 	while (len > 0) {
 		c = get_pos_int("put_screen_char()", *p);
@@ -1603,6 +1607,14 @@ static object PutScreenChar(object x)
 		len -= 2;
 	}
 	SetPosition(save_line, save_col); // restore cursor location
+	
+	// reset colors to what they were before this call:
+	SetBColor( bg );
+	current_bg_color = bg;
+	
+	SetTColor( fg );
+	current_fg_color = fg;
+	
 	iflush(stdout);
 #endif
 
@@ -1619,6 +1631,7 @@ static object PutScreenChar(object x)
 		len -= 2;
 	}
 #endif
+	
 	return ATOM_1;
 }
 
