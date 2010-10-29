@@ -161,7 +161,7 @@ ifdef WINDOWS then
 	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME",,0 ))
 end ifdef
 
-test_true( "simple disk_size test", sequence( disk_size( "." ) ) )
+
 
 sequence walk_data = {}
 function test_walk( sequence path_name, sequence item )
@@ -218,6 +218,14 @@ procedure dir_tests()
 	test_true( "remove testing directory", remove_directory( "filesyse_dir", 1 ) )
 end procedure
 dir_tests()
+
+
+sequence metrics = disk_metrics( "." ) 
+test_not_equal( "current dir disk_metrics", repeat( 0, length( metrics) ), metrics )
+
+test_true( "simple disk_size test", sequence( disk_size( "." ) ) )
+metrics = disk_size( "." )
+test_not_equal( "disk size", repeat( 0, length( metrics ) - 1 ), metrics[1..$-1] )
 
 test_report()
 

@@ -1,0 +1,17 @@
+t_c_ifdef_scope.e:12
+<0132>:: Syntax error - expected to see possibly 'end', not '('
+		foo = foo()
+		         ^
+
+
+--- Defined Words ---
+EU4
+EU4_0
+EU4_0_0
+UNIX
+LINUX
+UNITTEST
+CRASH
+EUI
+FOO
+-------------------
