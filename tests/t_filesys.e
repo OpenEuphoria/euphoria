@@ -1,3 +1,5 @@
+sequence initial_directory = current_dir() & SLASH
+
 include std/filesys.e
 include std/io.e
 include std/unittest.e
@@ -6,6 +8,8 @@ include std/sort.e
 
 sequence fullname, pname, fname, fext, eolsep, driveid
 integer sep
+
+test_equal( "init_curdir", initial_directory, init_curdir() )
 
 ifdef UNIX then
     fullname = "/opt/euphoria/docs/readme.txt"
@@ -226,6 +230,28 @@ test_not_equal( "current dir disk_metrics", repeat( 0, length( metrics) ), metri
 test_true( "simple disk_size test", sequence( disk_size( "." ) ) )
 metrics = disk_size( "." )
 test_not_equal( "disk size", repeat( 0, length( metrics ) - 1 ), metrics[1..$-1] )
+
+
+copy_file( "t_filesys.e", "checksum-t_filesys.e", 1 )
+for i = 1 to 4 do
+	test_not_equal( sprintf("checksum diff %d", i), checksum( "t_filesys.e", i ), checksum( "t_ifdef.e", i ) )
+	test_equal(     sprintf("checksum same %d", i), checksum( "t_filesys.e", i ), checksum( "checksum-t_filesys.e", i ) )
+end for
+delete_file( "checksum-t_filesys.e" )
+
+-- TODO: these test miss a lot of abbreviate_path, but I can't figure out how to get there...
+test_equal( "abbreviate_path", 
+	"tests" & SLASH & "t_filesys.e",  
+	abbreviate_path( canonical_path( "t_filesys.e" ), { canonical_path( ".." & SLASH ) } ) ) 
+
+test_equal( "abbreviate_path with extra non matching paths 1", 
+	"tests" & SLASH & "t_filesys.e",  
+	abbreviate_path( canonical_path( "t_filesys.e" ), { "foo", canonical_path( ".." & SLASH ) } ) )
+
+
+test_equal( "pathname", current_dir(), pathname( current_dir() & SLASH & "t_filesys.e" ) )
+
+test_true( "driveid returns sequence", sequence( filesys:driveid( current_dir() ) ) )
 
 test_report()
 
