@@ -2261,7 +2261,7 @@ public function disk_metrics(object disk_path)
 	atom path_addr = 0
 	atom metric_addr = 0
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if sequence(disk_path) then 
 			path_addr = allocate_string(disk_path) 
 		else 
@@ -2281,7 +2281,8 @@ public function disk_metrics(object disk_path)
 	 
 		free({path_addr, metric_addr}) 
 	elsifdef UNIX then
-		sequence disk_size = {0,0,0}
+	
+		sequence size_of_disk = {0,0,0}
 
 		atom bytes_per_cluster
 		atom psrc, ret, psrcbuf
@@ -2313,16 +2314,16 @@ public function disk_metrics(object disk_path)
 			return result 
 		end if
 
-		disk_size = disk_size(disk_path)
-
+		size_of_disk = disk_size(disk_path)
+		
 		-- this is hardcoded for now, but may be x86 specific
 		-- on other Unix platforms that run on non x86 hardware, this
 		-- may need to be changed - there is no portable way to get this
 		result[BYTES_PER_SECTOR] = 512
 
 		result[SECTORS_PER_CLUSTER] = bytes_per_cluster / result[BYTES_PER_SECTOR]
-		result[TOTAL_NUMBER_OF_CLUSTERS] = disk_size[TOTAL_BYTES] / bytes_per_cluster
-		result[NUMBER_OF_FREE_CLUSTERS] = disk_size[FREE_BYTES] / bytes_per_cluster
+		result[TOTAL_NUMBER_OF_CLUSTERS] = size_of_disk[TOTAL_BYTES] / bytes_per_cluster
+		result[NUMBER_OF_FREE_CLUSTERS] = size_of_disk[FREE_BYTES] / bytes_per_cluster
 
 	end ifdef 
 	
