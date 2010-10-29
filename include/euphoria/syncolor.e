@@ -33,7 +33,8 @@ sequence BRACKET_COLOR
 enum
 	S_STRING_TRIPLE,
 	S_STRING_BACKTICK,
-	S_MULTILINE_COMMENT
+	S_MULTILINE_COMMENT,
+	S_BRACKET_LEVEL
 
 -- character classes
 enum
@@ -127,6 +128,18 @@ procedure seg_flush(integer new_color)
 	end if
 end procedure
 
+function default_state()
+	return {
+		0, -- S_MULTILINE_COMMENT
+		0, -- S_STRING_TRIPLE
+		0, -- S_STRING_BACKTICK
+		0  -- S_BRACKET_LEVEL
+	}
+end function
+
+atom g_state = eumem:malloc()
+ram_space[g_state] = default_state()
+
 --**
 -- Create a new colorizer state
 --
@@ -136,11 +149,9 @@ end procedure
 
 public function new()
 	atom state = mem:malloc()
-	ram_space[state] = { 0, 0, 0 }
+	reset(state)
 	return state
 end function
-
-atom g_state = new()
 
 --**
 -- Reset the state to begin parsing a new file
@@ -150,7 +161,7 @@ atom g_state = new()
 --
 
 public procedure reset(atom state = g_state)
-	ram_space[state] = { 0, 0, 0 }
+	ram_space[state] = default_state()
 end procedure
 
 --**
@@ -168,7 +179,7 @@ end procedure
 --
 
 public function SyntaxColor(sequence pline, atom state=g_state)
-	integer class, last, i, c, bracket_level
+	integer class, last, i, c
 	sequence word
 
 	-- Ensure we have a new-line to end this one.
@@ -183,7 +194,6 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 
 	line = pline
 	current_color = DONT_CARE
-	bracket_level = 0
 	seg_start = 1
 	seg_end = 0
 	color_segments = {}
@@ -235,18 +245,21 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 
 		elsif class = BRACKET then
 			if find(c, "([{") then
-				bracket_level += 1
+				ram_space[state][S_BRACKET_LEVEL] += 1
 			end if
-			if bracket_level >= 1 and
-			   bracket_level <= length(BRACKET_COLOR)
+
+			if ram_space[state][S_BRACKET_LEVEL] >= 1 and
+			   ram_space[state][S_BRACKET_LEVEL] <= length(BRACKET_COLOR)
 			then
-				seg_flush(BRACKET_COLOR[bracket_level])
+				seg_flush(BRACKET_COLOR[ram_space[state][S_BRACKET_LEVEL]])
 			else
 				seg_flush(NORMAL_COLOR)
 			end if
+
 			if find(c, ")]}") then
-				bracket_level -= 1
+				ram_space[state][S_BRACKET_LEVEL] -= 1
 			end if
+
 			seg_end += 1
 
 		elsif class = NEW_LINE then
