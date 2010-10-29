@@ -3785,12 +3785,20 @@ procedure Statement_list()
 					end if
 				end if
 			end if
-
-			putback(tok)
-			stmt_nest -= 1
-			InitDelete()
-			flush_temps()
-			return
+			
+			putback( tok )
+				
+			switch id do
+				case END, ELSEDEF, ELSIFDEF, ELSIF, ELSE, UNTIL then
+					-- something to mark the end of the block...
+					stmt_nest -= 1
+					InitDelete()
+					flush_temps()
+					return
+					
+				case else
+					tok_match( END )
+			end switch
 
 		end if
 
