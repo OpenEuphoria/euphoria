@@ -1,5 +1,6 @@
 include std/unittest.e
 include std/sets.e
+include std/sort.e
 
 set s,s1,s1a
 s={-1,3,5,17,"abc","abcd","acb"}
@@ -22,12 +23,30 @@ test_equal("remove_from(): absent element",s,remove_from(1,s))
 test_equal("is_subset(): not a subset",0,is_subset(s1,s))
 test_equal("is_subset(): subset",1,is_subset(s1a,s))    --???
 
+test_true("is_subset(): subset single", is_subset(s1a[1..1],s))    --???
+test_false("is_subset(): not a subset single", is_subset(s1[1..1],s))
+
 test_equal("embedding(): success",{2,4,6},embedding(s1a,s)) -- ???
 test_equal("embedding(): failure",0,embedding(s1,s))
 
 test_equal("embed_union()", {2,3,4},embed_union({2,5,7},{1,5,7,9}))
 
 test_equal("subsets()",{{},{-2},{17},{"abcd"},{-2,17},{-2,"abcd"},{17,"abcd"},s1},subsets(s1))
+
+test_equal("subsets() empty",{{}},subsets({}))
+test_equal("subsets() one element", { {}, {1} },subsets({ 1 }))
+test_equal("subsets() two elements",{ {}, {1}, {2}, {1,2} },subsets({ 1, 2 }))
+test_equal("subsets() four elements",
+	{ 
+		{}, 
+		{1}, 
+		{1,2}, {1,2,3}, {1,2,3,4}, {1,2,4}, {1,3}, {1,3,4}, {1,4},
+		{2}, {2,3}, {2,3,4}, {2,4},
+		{3}, {3, 4 },
+		{4}, 
+		$
+	},
+	sort( subsets({ 1, 2, 3, 4 }) ) )
 
 test_equal("intersection(): no inclusion",{17,"abcd"},intersection(s,s1))
 test_equal("intersection(): inclusion",s1a,intersection(s,s1a))
