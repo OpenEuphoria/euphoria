@@ -935,6 +935,7 @@ export procedure emit_op(integer op)
 	    Push(b)
 	    emit_addr(b)
 		last_op = RIGHT_BRACE_N
+		op = last_op
 
 	-- 0 inputs, 0 outputs - note: parser may emit an extra word
 	elsif find(op, opZeroZero) then
