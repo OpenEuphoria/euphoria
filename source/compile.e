@@ -572,7 +572,7 @@ procedure Goto(integer addr)
 		   not find(Code[addr-5], {ENDFOR_INT_UP1, ENDFOR_GENERAL})
 --         or
 --         SymTab[Code[addr-2]][S_GTYPE] = TYPE_INTEGER  -- could get subscript error
-			then
+		then
 			-- careful: general ENDFOR might emit a label followed by
 			-- code that shouldn't be skipped
 			if find(br, {ELSE, ENDWHILE, EXIT}) then
@@ -2194,7 +2194,8 @@ procedure opSTARTLINE()
 	offset = slist[Code[pc+1]][SRC]
 	line = fetch_line(offset)
 	if trace_called and
-	   and_bits(slist[Code[pc+1]][OPTIONS], SOP_TRACE) then
+		and_bits(slist[Code[pc+1]][OPTIONS], SOP_TRACE)
+	then
 		c_stmt0("ctrace(\"")
 		c_puts(name_ext(known_files[slist[Code[pc+1]][LOCAL_FILE_NO]]))
 		c_printf(":%d\t", slist[Code[pc+1]][LINE])

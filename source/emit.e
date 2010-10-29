@@ -726,8 +726,9 @@ export procedure emit_op(integer op)
 	if op = ASSIGN label "EMIT" then
 		symtab_index temp = 0
 		if not TRANSLATE and
-		(previous_op = RHS_SUBS_CHECK
-		or previous_op = RHS_SUBS ) then
+				(previous_op = RHS_SUBS_CHECK
+					or previous_op = RHS_SUBS )
+		then
 			if Code[$-1] = DEREF_TEMP and find( Code[$], derefs ) then
 				/* the DEREF_TEMP op interferes with the ASSIGN op, so
 				 * we'll clean it up here and re-flush later */
@@ -959,8 +960,7 @@ export procedure emit_op(integer op)
 				Code = Code[1..$-2]
 				Code &= if_code
 			else
-				if IsInteger(Code[$-1]) and
-				   IsInteger(Code[$]) then
+				if IsInteger(Code[$-1]) and IsInteger(Code[$]) then
 					op = previous_op + LESS_IFW_I - LESS
 				else
 					op = previous_op + LESS_IFW - LESS
@@ -1028,8 +1028,7 @@ export procedure emit_op(integer op)
 				last_op = last_op_backup
 				last_pc = last_pc_backup
 			end if
-		elsif previous_op = -1 or
-			  op_result[previous_op] != T_SEQUENCE then
+		elsif previous_op = -1 or op_result[previous_op] != T_SEQUENCE then
 			emit_opcode(op)
 			emit_addr(op_info1)
 			clear_temp( Code[$-1] )
