@@ -1,5 +1,11 @@
 --****
--- == Source Tokenizer
+-- == Euphoria Source Tokenizer
+--
+-- Todo:
+--
+-- * Consider distinguish between full line comments and end of line comments
+--   option to specify which end of line char/s are used to indicate new lines
+--
 
 namespace tokenize
 
@@ -73,6 +79,12 @@ public enum
 	TF_HEX,
 	TF_INT,
 	TF_ATOM,
+	TF_STRING_SINGLE,
+	TF_STRING_TRIPLE,
+	TF_STRING_BACKTICK,
+	TF_STRING_HEX,
+	TF_COMMENT_SINGLE,
+	TF_COMMENT_MULTIPLE,
 	$
 
 -- this list of delimiters must match the order of the corresponding T_ codes above
@@ -86,7 +98,7 @@ public enum
 	TFORM,
 	$
 
-sequence Token = {T_EOF,"",0,0,0}
+sequence Token = { T_EOF, "", 0, 0, 0 }
 
 sequence source_text = ""
 integer	 sti  = 0
@@ -156,31 +168,37 @@ integer IGNORE_COMMENTS = TRUE
 integer STRING_NUMBERS	= FALSE
 
 --**
--- return blank lines as tokens
--- default is FALSE
-public procedure et_keep_blanks(integer toggle)
-	IGNORE_BLANKS = not toggle
-end procedure
-
---**
--- return comments as tokens
--- default is FALSE
-public procedure et_keep_comments(integer toggle)
-	IGNORE_COMMENTS = not toggle
-end procedure
-
---**
--- return TDATA for all T_NUMBER tokens in "string" format
--- by default:
---	*T_NUMBER tokens return atoms
---	*T_CHAR tokens return single integer chars
---	*T_EOF tokens return undefined data
---	*all other tokens return strings
+-- Return blank lines as tokens.
 --
-public procedure et_string_numbers(integer toggle)
-	STRING_NUMBERS = toggle
+-- default is FALSE
+
+public procedure keep_blanks(integer val = 1)
+	IGNORE_BLANKS = not val
 end procedure
 
+--**
+-- Return comments as tokens
+--
+-- default is FALSE
+--
+
+public procedure keep_comments(integer val = 1)
+	IGNORE_COMMENTS = not val
+end procedure
+
+--**
+-- Return TDATA for all T_NUMBER tokens in "string" format.
+--
+-- Defaults:
+--	* T_NUMBER tokens return atoms
+--	* T_CHAR tokens return single integer chars
+--	* T_EOF tokens return undefined data
+--	* Other tokens return strings
+--
+
+public procedure string_numbers(integer val = 1)
+	STRING_NUMBERS = val
+end procedure
 
 ---------------------------------------------------------------------------------
 --
@@ -267,10 +285,11 @@ end function
 function scan_multicomment()
 	Token[TTYPE] = T_COMMENT
 	Token[TDATA] = "/*"
+	Token[TFORM] = TF_COMMENT_MULTIPLE
 	while 1 do
 		if (Look = EOF) then report_error(ERR_EOF) return TRUE end if
 		if (Look = '*') then
-			if (source_text[sti+1] = '/') then
+			if (source_text[sti + 1] = '/') then
 				exit
 			end if
 		end if
@@ -316,9 +335,12 @@ function scan_string()
 			-- Got a raw string
 			Token[TTYPE] = T_STRING
 			Token[TDATA] = ""
+			Token[TFORM] = TF_STRING_TRIPLE
 			sti += 2
 			scan_char()
-			while (sti < length(source_text) - 2) and not equal(source_text[sti .. sti +2], "\"\"\"") do
+			while (sti < length(source_text) - 2) and
+				not equal(source_text[sti .. sti +2], "\"\"\"")
+			do
 				if (Look = EOF) then
 					report_error(ERR_EOF)
 					return TRUE
@@ -340,6 +362,7 @@ function scan_string()
 	scan_char()
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
+	Token[TFORM] = TF_STRING_SINGLE
 	while (Look != '\"') do
 		if (Look = EOL) then report_error(ERR_EOL_STRING) return TRUE end if
 		scan_escaped_char()
@@ -359,6 +382,7 @@ function scan_multistring()
 	scan_char()
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
+	Token[TFORM] = TF_STRING_BACKTICK
 
 	while (Look != end_of_string) do
 		if (Look = EOF) then report_error(ERR_EOF) return TRUE end if
@@ -383,32 +407,49 @@ function hex_val(integer h)
 end function
 
 function scan_hex()
-	if (Look != '#') then return FALSE end if
+	if (Look != '#') then
+		return FALSE
+	end if
+
 	scan_char()
-	if not Hex_Char(Look) then report_error(ERR_HEX) return TRUE end if
+
+	if not Hex_Char(Look) then
+		report_error(ERR_HEX) return TRUE
+	end if
+
 	Token[TTYPE] = T_NUMBER
 	Token[TDATA] = hex_val(Look)
 	Token[TFORM] = TF_HEX
+
 	scan_char()
+
 	while Hex_Char(Look) do
 		if Look != '_' then
-			Token[TDATA] = Token[TDATA]*16 + hex_val(Look)
+			Token[TDATA] = Token[TDATA] * 16 + hex_val(Look)
 		end if
 		scan_char()
 	end while
-	if STRING_NUMBERS then Token[TDATA] = sprintf("#%x",{Token[TDATA]}) end if -- convert back to string format
+
+	if STRING_NUMBERS then
+		 -- convert back to string format
+		Token[TDATA] = sprintf("#%x",{Token[TDATA]})
+	end if
+
 	return TRUE
 end function
 
-integer SUBSCRIPT	SUBSCRIPT = 0
+integer SUBSCRIPT = 0
 function scan_integer()
 	atom i = 0
+
 	while Digit_Char(Look) do
 		if (Look != '_') then
-			i = (i*10) + (Look-'0')
+			i = (i * 10) + (Look - '0')
 		end if
+
 		scan_char()
 	end while
+
 	return i
 end function
 
@@ -418,7 +459,7 @@ function scan_fraction(atom v)
 	atom d = 10
 	while Digit_Char(Look) do
 		if Look != '_' then
-			v += (Look-'0')/d
+			v += (Look - '0') / d
 			d *= 10
 		end if
 		scan_char()
@@ -441,13 +482,13 @@ function scan_exponent(atom v)
 	end if
 
 	if e > 308 then
-		v *= power(10,308)
+		v *= power(10, 308)
 		if e > 1000 then e = 1000 end if
-		for i = 1 to e-308 do
-			v *=10
+		for i = 1 to e - 308 do
+			v *= 10
 		end for
 	else
-		v *= power(10,e)
+		v *= power(10, e)
 	end if
 	return v
 end function
@@ -455,10 +496,14 @@ end function
 function scan_number()
 	atom v
 
-	if not Digit_Char(Look) then return FALSE end if
+	if not Digit_Char(Look) then
+		return FALSE
+	end if
+
 	Token[TTYPE] = T_NUMBER
 	Token[TDATA] = scan_integer()
 	Token[TFORM] = TF_INT
+
 	if not SUBSCRIPT then
 		v = Token[TDATA]
 		if Look = '.' then
@@ -467,9 +512,14 @@ function scan_number()
 			Token[TDATA] = scan_fraction(Token[TDATA])
 			if ERR then return TRUE end if
 		end if
+
 		Token[TDATA] = scan_exponent(Token[TDATA])
-		if v != Token[TDATA] then	Token[TFORM] = TF_ATOM end if
+
+		if v != Token[TDATA] then
+			Token[TFORM] = TF_ATOM
+		end if
 	end if
+
 	if STRING_NUMBERS then
 		if Token[TFORM] = TF_INT then
 			Token[TDATA] = sprintf("%d",{Token[TDATA]})
@@ -477,6 +527,7 @@ function scan_number()
 			Token[TDATA] = sprintf("%g",{Token[TDATA]})
 		end if
 	end if
+
 	return TRUE
 end function
 
@@ -556,15 +607,16 @@ function scan_identifier()
 	if find(Look, "xuU") then
 		nextch = lookahead()
 		if nextch = '"' then
-
 			-- A special string token
 			textdata = ""
 			scan_char()	-- Skip over starting quote
 			scan_char() -- First char of string
 			startpos = sti
+
 			while not find(Look, {'"', EOF}) do
 				scan_char()
 			end while
+
 			if Look = EOF then
 				-- No matching end-quote
 				report_error(ERR_EOF_STRING)
@@ -577,86 +629,112 @@ function scan_identifier()
 				report_error(ERR_HEX_STRING)
 				return TRUE
 			end if
+
 			Token[TTYPE] = T_STRING
 			Token[TDATA] = textdata
+			Token[TFORM] = TF_STRING_HEX
+
 			scan_char()	-- go to next char after end of string
+
 			return TRUE
 		end if
 	end if
 
 	Token[TTYPE] = T_IDENTIFIER
 	Token[TDATA] = ""
+
 	while Identifier_Char(Look) do
 		Token[TDATA] &= Look
 		scan_char()
 	end while
+
 	if find(Token[TDATA],keywords) then
 		Token[TTYPE] = T_KEYWORD
 		if equal(Token[TDATA],"include") then
 			INCLUDE_NEXT = TRUE
 		end if
 	end if
+
 	return TRUE
 end function
 
 function scan_include()
-	if not INCLUDE_NEXT then return FALSE end if
+	if not INCLUDE_NEXT then
+		return FALSE
+	end if
+
 	INCLUDE_NEXT = FALSE
 
 	Token[TTYPE] = T_IDENTIFIER
 	Token[TDATA] = ""
-	if scan_string() then
-	else -- scan until whitespace
+
+	if not scan_string() then
+		-- scan until whitespace
 		while not White_Char(Look) do
 			Token[TDATA] &= Look
 			scan_char()
 		end while
 	end if
+
 	return TRUE
 end function
 
 procedure next_token()
 	Token[TLNUM] = LNum
 	Token[TLPOS] = LPos
+	Token[TFORM] = -1
 
 	if scan_white() then
 		if IGNORE_BLANKS then next_token() end if
 		return
 	end if
-	if scan_include() then return end if
+
+	if scan_include() then
+		return
+	end if
 
 	Token[TTYPE] = find(Look,Delimiters)
+
 	if Token[TTYPE] then
-
 		-- handle delimiters and special cases
-
 		Token[TTYPE] += T_DELIMITER-1
 		Token[TDATA] = {Look}
+
 		scan_char()
 
-		if (Token[TTYPE] = T_LBRACKET) then -- must check before T_PERIOD
+		if (Token[TTYPE] = T_LBRACKET) then
+			-- must check before T_PERIOD
 			SUBSCRIPT += 1 -- push subscript stack counter
-		elsif (Token[TTYPE] = T_RBRACKET) then -- must check before T_PERIOD
+		elsif (Token[TTYPE] = T_RBRACKET) then
+			-- must check before T_PERIOD
 			SUBSCRIPT -= 1 -- pop subscript stack counter
 
-		elsif (Look = '=') and (Token[TTYPE] <= T_SINGLE_OPS) then -- is a valid double op
+		elsif (Look = '=') and (Token[TTYPE] <= T_SINGLE_OPS) then
+			-- is a valid double op
 			-- double operators: += -= *= /= etc..
 			Token[TTYPE] -= T_DOUBLE_OPS
 			Token[TDATA] &= Look
 			scan_char()
 
-		elsif (Token[TTYPE] = T_PERIOD) then -- check for .. or .number
-			if (Look = '.') then -- scan for ..
+		elsif (Token[TTYPE] = T_PERIOD) then
+			-- check for .. or .number
+			if (Look = '.') then
+				-- scan for ..
 				Token[TTYPE] = T_SLICE
 				Token[TDATA] &= Look
-				scan_char()
-			else -- .number
-				Token[TTYPE] = T_NUMBER
 
+				scan_char()
+			else
+				-- .number
+				Token[TTYPE] = T_NUMBER
 				Token[TDATA] = scan_fraction(0)
 				Token[TFORM] = TF_ATOM
-				if ERR then return end if
+				if ERR then
+					return
+				end if
+
 				Token[TDATA] = scan_exponent(Token[TDATA])
+
 				if STRING_NUMBERS then
 					if integer(Token[TDATA]) then
 						Token[TDATA] = sprintf("%d",{Token[TDATA]})
@@ -666,29 +744,48 @@ procedure next_token()
 				end if
 			end if
 
-		elsif (Look = '-') and (Token[TTYPE] = T_MINUS) then -- check for comment
+		elsif (Look = '-') and (Token[TTYPE] = T_MINUS) then
+			-- check for comment
 			Token[TTYPE] = T_COMMENT
 			Token[TDATA] = "--"
+			Token[TFORM] = TF_COMMENT_SINGLE
+
 			scan_char()
+
 			while (Look != EOL) do
 				Token[TDATA] &= Look
 				scan_char()
 			end while
-			if IGNORE_COMMENTS then	next_token() end if
-		elsif (Look = '*') and (Token[TTYPE] = T_DIVIDE) then -- check for multi-line comment
+
+			if IGNORE_COMMENTS then
+				next_token()
+			end if
+
+		elsif (Look = '*') and (Token[TTYPE] = T_DIVIDE) then
+			-- check for multi-line comment
 			scan_multicomment()
 		end if
 
 	elsif scan_identifier() then
+
 	elsif scan_qchar() then
+
 	elsif scan_string() then
+
 	elsif scan_multistring() then
+
 	elsif scan_hex() then
+
 	elsif scan_number() then
-	else -- error or end of file
+
+	else
+		-- error or end of file
 		Token[TTYPE] = T_EOF
 		Token[TDATA] = Look
-		if (Look != EOF) then report_error(ERR_UNKNOWN) end if
+
+		if (Look != EOF) then
+			report_error(ERR_UNKNOWN)
+		end if
 	end if
 end procedure
 
@@ -696,7 +793,7 @@ end procedure
 --****
 -- === Routines
 
-public function et_tokenize_string(sequence code)
+public function tokenize_string(sequence code)
 	sequence tokens
 
 	ERR = FALSE
@@ -741,22 +838,11 @@ public function et_tokenize_string(sequence code)
 	return {tokens,ERR,ERR_LNUM, ERR_LPOS}
 end function
 
-public function et_tokenize_file(sequence fname)
+public function tokenize_file(sequence fname)
 	object txt = read_file(fname, TEXT_MODE)
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
 
-	return et_tokenize_string(txt)
+	return tokenize_string(txt)
 end function
-
----------------------------------------------------------------------------------
--- TODO --
-
----------------------------------------------------------------------------------
--- CONSIDER
-
--- distinguish between full line comments and end of line comments
--- option to specify which end of line char/s are used to indicate new lines
-
----------------------------------------------------------------------------------
