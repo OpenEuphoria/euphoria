@@ -2661,7 +2661,8 @@ public function checksum(sequence filename, integer size = 4)
 
 	-- Initialize the result array based on the file's length and size of the array.
 	jx = file_length(filename)
-	setsize = remainder( hash(jx, HSIEH32), 8) + 7
+	--setsize = remainder( hash(jx, HSIEH32), 8) + 7
+	setsize = remainder( jx, 8) + 7
 	cs = repeat(jx, size)
 	for i = 1 to size do
 		cs[i] = hash(i + size, cs[i])
@@ -2675,7 +2676,12 @@ public function checksum(sequence filename, integer size = 4)
 		while data[1] != -1 with entry do
 			-- Determine which array entry gets affected. 
 			-- Depends on the current byte value, array size and initial file length
-			jx = hash(jx, data)
+			--jx = hash(jx, data)
+			integer sum = 0
+			for i = 1 to length(data) do
+				sum = sum + data[i]
+			end for
+			jx = floor((sum + jx) / (length(data) + 1))
 			ix = remainder(jx, size) + 1
 			-- Change the index offset determinant for the next byte.
 			
