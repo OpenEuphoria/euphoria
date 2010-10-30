@@ -5,17 +5,32 @@ namespace sockets
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
- 
+
 include std/get.e
 include std/regex.e as re
 include std/machine.e as mem
 include std/sequence.e as seq
 include std/net/common.e
 
-enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLOSE, M_SOCK_SHUTDOWN,
-	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
-	M_SOCK_ACCEPT, M_SOCK_SETSOCKOPT, M_SOCK_GETSOCKOPT, M_SOCK_SELECT, M_SOCK_SENDTO, 
-    M_SOCK_RECVFROM, M_SOCK_ERROR_CODE=96
+enum
+	M_SOCK_GETSERVBYNAME = 77,
+	M_SOCK_GETSERVBYPORT,
+	M_SOCK_SOCKET = 81,
+	M_SOCK_CLOSE,
+	M_SOCK_SHUTDOWN,
+	M_SOCK_CONNECT,
+	M_SOCK_SEND,
+	M_SOCK_RECV,
+	M_SOCK_BIND,
+	M_SOCK_LISTEN,
+	M_SOCK_ACCEPT,
+	M_SOCK_SETSOCKOPT,
+	M_SOCK_GETSOCKOPT,
+	M_SOCK_SELECT,
+	M_SOCK_SENDTO,
+	M_SOCK_RECVFROM,
+	M_SOCK_ERROR_CODE = 96
+
 constant M_SOCK_INFO = 4
 
 --****
@@ -46,7 +61,7 @@ public constant OK                      = 0
 -- reason is you have tried to bind an address that is already exclusively bound by
 -- another application.
 --
--- May occur on a Unix Domain Socket when the socket directory or file could not be 
+-- May occur on a Unix Domain Socket when the socket directory or file could not be
 -- accessed due to security.
 
 public constant ERR_ACCESS              = -1
@@ -149,7 +164,7 @@ public constant ERR_LOOP = -19
 public constant ERR_MFILE               = -20
 
 --**
--- Message is too long for buffer size. This would indicate an internal error to 
+-- Message is too long for buffer size. This would indicate an internal error to
 -- Euphoria as Euphoria sets a dynamic buffer size.
 
 public constant ERR_MSGSIZE             = -21
@@ -200,7 +215,7 @@ public constant ERR_NOTCONN             = -29
 
 public constant ERR_NOTDIR  = -30
 
---** 
+--**
 -- Socket system is not initialized (Windows only)
 
 public constant ERR_NOTINITIALISED      = -31
@@ -231,7 +246,7 @@ public constant ERR_PROTOTYPE           = -35
 public constant ERR_ROFS = -36
 
 --**
--- The socket has been shutdown. Possibly a send/receive call after a shutdown took 
+-- The socket has been shutdown. Possibly a send/receive call after a shutdown took
 -- place.
 
 public constant ERR_SHUTDOWN            = -37
@@ -277,42 +292,42 @@ public constant
 -- to never change, and to be the same value across platforms.
 --
 
-	public constant
-		--**
-		-- Address family is unspecified
-		EAF_UNSPEC=6,
-		--**
-		-- Local communications
-		EAF_UNIX=1,
-		--**
-		-- IPv4 Internet protocols
-		EAF_INET=2,
-		--**
-		-- IPv6 Internet protocols
-		EAF_INET6=3,
-		--**
-		-- Appletalk
-		EAF_APPLETALK=4,
-		--**
-		-- Bluetooth (currently Windows-only)
-		EAF_BTH=5,
-		--**
-		-- Provides sequenced, reliable, two-way, connection-based byte streams.
-		-- An out-of-band data transmission mechanism may be supported.
-		ESOCK_STREAM=1,
-		--**
-		-- Supports datagrams (connectionless, unreliable messages of a
-		-- fixed maximum length).
-		ESOCK_DGRAM=2,
-		--**
-		-- Provides raw network protocol access.
-		ESOCK_RAW=3,
-		--**
-		-- Provides a reliable datagram layer that does not guarantee ordering.
-		ESOCK_RDM=4,
-		--**
-		-- Obsolete and should not be used in new programs
-		ESOCK_SEQPACKET=5
+public constant
+	--**
+	-- Address family is unspecified
+	EAF_UNSPEC=6,
+	--**
+	-- Local communications
+	EAF_UNIX=1,
+	--**
+	-- IPv4 Internet protocols
+	EAF_INET=2,
+	--**
+	-- IPv6 Internet protocols
+	EAF_INET6=3,
+	--**
+	-- Appletalk
+	EAF_APPLETALK=4,
+	--**
+	-- Bluetooth (currently Windows-only)
+	EAF_BTH=5,
+	--**
+	-- Provides sequenced, reliable, two-way, connection-based byte streams.
+	-- An out-of-band data transmission mechanism may be supported.
+	ESOCK_STREAM=1,
+	--**
+	-- Supports datagrams (connectionless, unreliable messages of a
+	-- fixed maximum length).
+	ESOCK_DGRAM=2,
+	--**
+	-- Provides raw network protocol access.
+	ESOCK_RAW=3,
+	--**
+	-- Provides a reliable datagram layer that does not guarantee ordering.
+	ESOCK_RDM=4,
+	--**
+	-- Obsolete and should not be used in new programs
+	ESOCK_SEQPACKET=5
 
 --****
 -- === Socket Type Constants
@@ -320,46 +335,46 @@ public constant
 -- These values are passed as the ##family## and ##sock_type## parameters of
 -- the [[:create]] function. They are OS-dependent.
 --
-	sequence sockinfo = info(ESOCK_TYPE_AF)
-	public constant
-		--**
-		-- Address family is unspecified
-		AF_UNSPEC=sockinfo[EAF_UNSPEC],
-		--**
-		-- Local communications
-		AF_UNIX=sockinfo[EAF_UNIX],
-		--**
-		-- IPv4 Internet protocols
-		AF_INET=sockinfo[EAF_INET],
-		--**
-		-- IPv6 Internet protocols
-		AF_INET6=sockinfo[EAF_INET6],
-		--**
-		-- Appletalk
-		AF_APPLETALK=sockinfo[EAF_APPLETALK],
-		--**
-		-- Bluetooth (currently Windows-only)
-		AF_BTH=sockinfo[EAF_BTH]
+sequence sockinfo = info(ESOCK_TYPE_AF)
+public constant
+	--**
+	-- Address family is unspecified
+	AF_UNSPEC = sockinfo[EAF_UNSPEC],
+	--**
+	-- Local communications
+	AF_UNIX = sockinfo[EAF_UNIX],
+	--**
+	-- IPv4 Internet protocols
+	AF_INET = sockinfo[EAF_INET],
+	--**
+	-- IPv6 Internet protocols
+	AF_INET6 = sockinfo[EAF_INET6],
+	--**
+	-- Appletalk
+	AF_APPLETALK = sockinfo[EAF_APPLETALK],
+	--**
+	-- Bluetooth (currently Windows-only)
+	AF_BTH = sockinfo[EAF_BTH]
 
-	sockinfo = info(ESOCK_TYPE_TYPE)
-	public constant
-		--**
-		-- Provides sequenced, reliable, two-way, connection-based byte streams.
-		-- An out-of-band data transmission mechanism may be supported.
-		SOCK_STREAM=sockinfo[ESOCK_STREAM],
-		--**
-		-- Supports datagrams (connectionless, unreliable messages of a
-		-- fixed maximum length).
-		SOCK_DGRAM=sockinfo[ESOCK_DGRAM],
-		--**
-		-- Provides raw network protocol access.
-		SOCK_RAW=sockinfo[ESOCK_RAW],
-		--**
-		-- Provides a reliable datagram layer that does not guarantee ordering.
-		SOCK_RDM=sockinfo[ESOCK_RDM],
-		--**
-		-- Obsolete and should not be used in new programs
-		SOCK_SEQPACKET=sockinfo[ESOCK_SEQPACKET]
+sockinfo = info(ESOCK_TYPE_TYPE)
+public constant
+	--**
+	-- Provides sequenced, reliable, two-way, connection-based byte streams.
+	-- An out-of-band data transmission mechanism may be supported.
+	SOCK_STREAM = sockinfo[ESOCK_STREAM],
+	--**
+	-- Supports datagrams (connectionless, unreliable messages of a
+	-- fixed maximum length).
+	SOCK_DGRAM = sockinfo[ESOCK_DGRAM],
+	--**
+	-- Provides raw network protocol access.
+	SOCK_RAW = sockinfo[ESOCK_RAW],
+	--**
+	-- Provides a reliable datagram layer that does not guarantee ordering.
+	SOCK_RDM = sockinfo[ESOCK_RDM],
+	--**
+	-- Obsolete and should not be used in new programs
+	SOCK_SEQPACKET = sockinfo[ESOCK_SEQPACKET]
 
 --****
 -- === Select Accessor Constants
@@ -416,85 +431,86 @@ public constant
 -- There may be other values that your OS defines and some defined here are not
 -- supported on all operating systems.
 
-	--****
-	-- ====  Socket Options In Common  
-	public enum
-		ESOL_SOCKET,
-		ESO_DEBUG,
-		ESO_ACCEPTCONN,
-		ESO_REUSEADDR,
-		ESO_KEEPALIVE,
-		ESO_DONTROUTE,
-		ESO_BROADCAST,
-		ESO_LINGER,
-		ESO_SNDBUF,
-		ESO_RCVBUF,
-		ESO_SNDLOWAT,
-		ESO_RCVLOWAT,
-		ESO_SNDTIMEO,
-		ESO_RCVTIMEO,
-		ESO_ERROR,
-		ESO_TYPE,
-		ESO_OOBINLINE,
+--****
+-- ====  Socket Options In Common
+
+public enum
+	ESOL_SOCKET,
+	ESO_DEBUG,
+	ESO_ACCEPTCONN,
+	ESO_REUSEADDR,
+	ESO_KEEPALIVE,
+	ESO_DONTROUTE,
+	ESO_BROADCAST,
+	ESO_LINGER,
+	ESO_SNDBUF,
+	ESO_RCVBUF,
+	ESO_SNDLOWAT,
+	ESO_RCVLOWAT,
+	ESO_SNDTIMEO,
+	ESO_RCVTIMEO,
+	ESO_ERROR,
+	ESO_TYPE,
+	ESO_OOBINLINE,
 	--****
 	-- ====  Windows Socket Options
-		ESO_USELOOPBACK,
-		ESO_DONTLINGER,
-		ESO_REUSEPORT,
-		ESO_CONNDATA,
-		ESO_CONNOPT,
-		ESO_DISCDATA,
-		ESO_DISCOPT,
-		ESO_CONNDATALEN,
-		ESO_CONNOPTLEN,
-		ESO_DISCDATALEN,
-		ESO_DISCOPTLEN,
-		ESO_OPENTYPE,
-		ESO_MAXDG,
-		ESO_MAXPATHDG,
-		ESO_SYNCHRONOUS_ALTERT,
-		ESO_SYNCHRONOUS_NONALERT,
+	ESO_USELOOPBACK,
+	ESO_DONTLINGER,
+	ESO_REUSEPORT,
+	ESO_CONNDATA,
+	ESO_CONNOPT,
+	ESO_DISCDATA,
+	ESO_DISCOPT,
+	ESO_CONNDATALEN,
+	ESO_CONNOPTLEN,
+	ESO_DISCDATALEN,
+	ESO_DISCOPTLEN,
+	ESO_OPENTYPE,
+	ESO_MAXDG,
+	ESO_MAXPATHDG,
+	ESO_SYNCHRONOUS_ALTERT,
+	ESO_SYNCHRONOUS_NONALERT,
 	--****
 	-- ====  LINUX Socket Options
-		ESO_SNDBUFFORCE,
-		ESO_RCVBUFFORCE,
-		ESO_NO_CHECK,
-		ESO_PRIORITY,
-		ESO_BSDCOMPAT,
+	ESO_SNDBUFFORCE,
+	ESO_RCVBUFFORCE,
+	ESO_NO_CHECK,
+	ESO_PRIORITY,
+	ESO_BSDCOMPAT,
 
-		ESO_PASSCRED,
-		ESO_PEERCRED,
-	 
-	 -- Security levels - as per NRL IPv6 - don't actually do anything
-		ESO_SECURITY_AUTHENTICATION,
-		ESO_SECURITY_ENCRYPTION_TRANSPORT,
-		ESO_SECURITY_ENCRYPTION_NETWORK,
-	 
-		ESO_BINDTODEVICE,
-	 
+	ESO_PASSCRED,
+	ESO_PEERCRED,
+
+	-- Security levels - as per NRL IPv6 - don't actually do anything
+	ESO_SECURITY_AUTHENTICATION,
+	ESO_SECURITY_ENCRYPTION_TRANSPORT,
+	ESO_SECURITY_ENCRYPTION_NETWORK,
+
+	ESO_BINDTODEVICE,
+
 	--****
 	-- ====  LINUX Socket Filtering Options
-		ESO_ATTACH_FILTER,
-		ESO_DETACH_FILTER,
-	 
-		ESO_PEERNAME,
-		ESO_TIMESTAMP,
-		ESCM_TIMESTAMP,
-	 
-		ESO_PEERSEC,
-		ESO_PASSSEC,
-		ESO_TIMESTAMPNS,
-		ESCM_TIMESTAMPNS,
-	 
-		ESO_MARK,
-	 
-		ESO_TIMESTAMPING,
-		ESCM_TIMESTAMPING,
-	 
-		ESO_PROTOCOL,
-		ESO_DOMAIN,
-	 
-		ESO_RXQ_OVFL
+	ESO_ATTACH_FILTER,
+	ESO_DETACH_FILTER,
+
+	ESO_PEERNAME,
+	ESO_TIMESTAMP,
+	ESCM_TIMESTAMP,
+
+	ESO_PEERSEC,
+	ESO_PASSSEC,
+	ESO_TIMESTAMPNS,
+	ESCM_TIMESTAMPNS,
+
+	ESO_MARK,
+
+	ESO_TIMESTAMPING,
+	ESCM_TIMESTAMPING,
+
+	ESO_PROTOCOL,
+	ESO_DOMAIN,
+
+	ESO_RXQ_OVFL
 
 --****
 -- === Socket Options
@@ -510,80 +526,84 @@ public constant
 -- supported on all operating systems.
 	sockinfo = info(ESOCK_TYPE_OPTION)
 
-	--****
-	-- ====  Socket Options In Common  
-	public constant
-		SOL_SOCKET = sockinfo[ESOL_SOCKET],
-		SO_DEBUG = sockinfo[ESO_DEBUG],
-		SO_ACCEPTCONN = sockinfo[ESO_ACCEPTCONN],
-		SO_REUSEADDR = sockinfo[ESO_REUSEADDR],
-		SO_KEEPALIVE = sockinfo[ESO_KEEPALIVE],
-		SO_DONTROUTE = sockinfo[ESO_DONTROUTE],
-		SO_BROADCAST = sockinfo[ESO_BROADCAST],
-		SO_LINGER = sockinfo[ESO_LINGER],
-		SO_SNDBUF = sockinfo[ESO_SNDBUF],
-		SO_RCVBUF = sockinfo[ESO_RCVBUF],
-		SO_SNDLOWAT = sockinfo[ESO_SNDLOWAT],
-		SO_RCVLOWAT = sockinfo[ESO_RCVLOWAT],
-		SO_SNDTIMEO = sockinfo[ESO_SNDTIMEO],
-		SO_RCVTIMEO = sockinfo[ESO_RCVTIMEO],
-		SO_ERROR = sockinfo[ESO_ERROR],
-		SO_TYPE = sockinfo[ESO_TYPE],
-		SO_OOBINLINE = sockinfo[ESO_OOBINLINE]
-	--****
-	-- ====  Windows Socket Options
-	public constant
-		SO_USELOOPBACK = sockinfo[ESO_USELOOPBACK],
-		SO_DONTLINGER = sockinfo[ESO_DONTLINGER],
-		SO_REUSEPORT = sockinfo[ESO_REUSEPORT],
-		SO_CONNDATA = sockinfo[ESO_CONNDATA],
-		SO_CONNOPT = sockinfo[ESO_CONNOPT],
-		SO_DISCDATA = sockinfo[ESO_DISCDATA],
-		SO_DISCOPT = sockinfo[ESO_DISCOPT],
-		SO_CONNDATALEN = sockinfo[ESO_CONNDATALEN],
-		SO_CONNOPTLEN = sockinfo[ESO_CONNOPTLEN],
-		SO_DISCDATALEN = sockinfo[ESO_DISCDATALEN],
-		SO_DISCOPTLEN = sockinfo[ESO_DISCOPTLEN],
-		SO_OPENTYPE = sockinfo[ESO_OPENTYPE],
-		SO_MAXDG = sockinfo[ESO_MAXDG],
-		SO_MAXPATHDG = sockinfo[ESO_MAXPATHDG],
-		SO_SYNCHRONOUS_ALTERT = sockinfo[ESO_SYNCHRONOUS_ALTERT],
-		SO_SYNCHRONOUS_NONALERT = sockinfo[ESO_SYNCHRONOUS_NONALERT]
-	--****
-	-- ====  LINUX Socket Options
-	public constant
-		SO_SNDBUFFORCE = sockinfo[ESO_SNDBUFFORCE],
-		SO_RCVBUFFORCE = sockinfo[ESO_RCVBUFFORCE],
-		SO_NO_CHECK = sockinfo[ESO_NO_CHECK],
-		SO_PRIORITY = sockinfo[ESO_PRIORITY],
-		SO_BSDCOMPAT = sockinfo[ESO_BSDCOMPAT],
-		SO_PASSCRED = sockinfo[ESO_PASSCRED],
-		SO_PEERCRED = sockinfo[ESO_PEERCRED]
-	--****
-	-- =====  - Security levels - as per NRL IPv6 - don't actually do anything
-	public constant
-		SO_SECURITY_AUTHENTICATION = sockinfo[ESO_SECURITY_AUTHENTICATION],
-		SO_SECURITY_ENCRYPTION_TRANSPORT = sockinfo[ESO_SECURITY_ENCRYPTION_TRANSPORT],
-		SO_SECURITY_ENCRYPTION_NETWORK = sockinfo[ESO_SECURITY_ENCRYPTION_NETWORK],
-		SO_BINDTODEVICE = sockinfo[ESO_BINDTODEVICE]
-	--****
-	-- ====  LINUX Socket Filtering Options
-	public constant
-		SO_ATTACH_FILTER = sockinfo[ESO_ATTACH_FILTER],
-		SO_DETACH_FILTER = sockinfo[ESO_DETACH_FILTER],
-		SO_PEERNAME = sockinfo[ESO_PEERNAME],
-		SO_TIMESTAMP = sockinfo[ESO_TIMESTAMP],
-		SCM_TIMESTAMP = sockinfo[ESCM_TIMESTAMP],
-		SO_PEERSEC = sockinfo[ESO_PEERSEC],
-		SO_PASSSEC = sockinfo[ESO_PASSSEC],
-		SO_TIMESTAMPNS = sockinfo[ESO_TIMESTAMPNS],
-		SCM_TIMESTAMPNS = sockinfo[ESCM_TIMESTAMPNS],
-		SO_MARK = sockinfo[ESO_MARK],
-		SO_TIMESTAMPING = sockinfo[ESO_TIMESTAMPING],
-		SCM_TIMESTAMPING = sockinfo[ESCM_TIMESTAMPING],
-		SO_PROTOCOL = sockinfo[ESO_PROTOCOL],
-		SO_DOMAIN = sockinfo[ESO_DOMAIN],
-		SO_RXQ_OVFL = sockinfo[ESO_RXQ_OVFL]
+--****
+-- ====  Socket Options In Common
+public constant
+	SOL_SOCKET = sockinfo[ESOL_SOCKET],
+	SO_DEBUG = sockinfo[ESO_DEBUG],
+	SO_ACCEPTCONN = sockinfo[ESO_ACCEPTCONN],
+	SO_REUSEADDR = sockinfo[ESO_REUSEADDR],
+	SO_KEEPALIVE = sockinfo[ESO_KEEPALIVE],
+	SO_DONTROUTE = sockinfo[ESO_DONTROUTE],
+	SO_BROADCAST = sockinfo[ESO_BROADCAST],
+	SO_LINGER = sockinfo[ESO_LINGER],
+	SO_SNDBUF = sockinfo[ESO_SNDBUF],
+	SO_RCVBUF = sockinfo[ESO_RCVBUF],
+	SO_SNDLOWAT = sockinfo[ESO_SNDLOWAT],
+	SO_RCVLOWAT = sockinfo[ESO_RCVLOWAT],
+	SO_SNDTIMEO = sockinfo[ESO_SNDTIMEO],
+	SO_RCVTIMEO = sockinfo[ESO_RCVTIMEO],
+	SO_ERROR = sockinfo[ESO_ERROR],
+	SO_TYPE = sockinfo[ESO_TYPE],
+	SO_OOBINLINE = sockinfo[ESO_OOBINLINE]
+
+--****
+-- ====  Windows Socket Options
+public constant
+	SO_USELOOPBACK = sockinfo[ESO_USELOOPBACK],
+	SO_DONTLINGER = sockinfo[ESO_DONTLINGER],
+	SO_REUSEPORT = sockinfo[ESO_REUSEPORT],
+	SO_CONNDATA = sockinfo[ESO_CONNDATA],
+	SO_CONNOPT = sockinfo[ESO_CONNOPT],
+	SO_DISCDATA = sockinfo[ESO_DISCDATA],
+	SO_DISCOPT = sockinfo[ESO_DISCOPT],
+	SO_CONNDATALEN = sockinfo[ESO_CONNDATALEN],
+	SO_CONNOPTLEN = sockinfo[ESO_CONNOPTLEN],
+	SO_DISCDATALEN = sockinfo[ESO_DISCDATALEN],
+	SO_DISCOPTLEN = sockinfo[ESO_DISCOPTLEN],
+	SO_OPENTYPE = sockinfo[ESO_OPENTYPE],
+	SO_MAXDG = sockinfo[ESO_MAXDG],
+	SO_MAXPATHDG = sockinfo[ESO_MAXPATHDG],
+	SO_SYNCHRONOUS_ALTERT = sockinfo[ESO_SYNCHRONOUS_ALTERT],
+	SO_SYNCHRONOUS_NONALERT = sockinfo[ESO_SYNCHRONOUS_NONALERT]
+
+--****
+-- ====  LINUX Socket Options
+public constant
+	SO_SNDBUFFORCE = sockinfo[ESO_SNDBUFFORCE],
+	SO_RCVBUFFORCE = sockinfo[ESO_RCVBUFFORCE],
+	SO_NO_CHECK = sockinfo[ESO_NO_CHECK],
+	SO_PRIORITY = sockinfo[ESO_PRIORITY],
+	SO_BSDCOMPAT = sockinfo[ESO_BSDCOMPAT],
+	SO_PASSCRED = sockinfo[ESO_PASSCRED],
+	SO_PEERCRED = sockinfo[ESO_PEERCRED]
+
+--****
+-- =====  - Security levels - as per NRL IPv6 - don't actually do anything
+public constant
+	SO_SECURITY_AUTHENTICATION = sockinfo[ESO_SECURITY_AUTHENTICATION],
+	SO_SECURITY_ENCRYPTION_TRANSPORT = sockinfo[ESO_SECURITY_ENCRYPTION_TRANSPORT],
+	SO_SECURITY_ENCRYPTION_NETWORK = sockinfo[ESO_SECURITY_ENCRYPTION_NETWORK],
+	SO_BINDTODEVICE = sockinfo[ESO_BINDTODEVICE]
+
+--****
+-- ====  LINUX Socket Filtering Options
+public constant
+	SO_ATTACH_FILTER = sockinfo[ESO_ATTACH_FILTER],
+	SO_DETACH_FILTER = sockinfo[ESO_DETACH_FILTER],
+	SO_PEERNAME = sockinfo[ESO_PEERNAME],
+	SO_TIMESTAMP = sockinfo[ESO_TIMESTAMP],
+	SCM_TIMESTAMP = sockinfo[ESCM_TIMESTAMP],
+	SO_PEERSEC = sockinfo[ESO_PEERSEC],
+	SO_PASSSEC = sockinfo[ESO_PASSSEC],
+	SO_TIMESTAMPNS = sockinfo[ESO_TIMESTAMPNS],
+	SCM_TIMESTAMPNS = sockinfo[ESCM_TIMESTAMPNS],
+	SO_MARK = sockinfo[ESO_MARK],
+	SO_TIMESTAMPING = sockinfo[ESO_TIMESTAMPING],
+	SCM_TIMESTAMPING = sockinfo[ESCM_TIMESTAMPING],
+	SO_PROTOCOL = sockinfo[ESO_PROTOCOL],
+	SO_DOMAIN = sockinfo[ESO_DOMAIN],
+	SO_RXQ_OVFL = sockinfo[ESO_RXQ_OVFL]
 
 --****
 -- === Send Flags
@@ -716,13 +736,13 @@ public type socket(object o)
 end type
 
 procedure delete_socket(object o)
-	if not socket(o) then 
-		return 
+	if not socket(o) then
+		return
 	end if
-	if o[SOCKET_SOCKADDR_IN] = 0 then 
-		return 
+	if o[SOCKET_SOCKADDR_IN] = 0 then
+		return
 	end if
-	
+
 	mem:free(o[SOCKET_SOCKADDR_IN])
 end procedure
 integer delete_socket_rid = routine_id("delete_socket")
@@ -770,18 +790,18 @@ end function
 --   # ##sock##: the socket to close
 --
 -- Returns:
---   An **integer**, 0 on success and -1 on error. 
+--   An **integer**, 0 on success and -1 on error.
 --
 -- Comments:
 --   It may take several minutes for the OS to declare the socket as closed.
--- 
+--
 
 public function close(socket sock)
 	return machine_func(M_SOCK_CLOSE, { sock })
 end function
 
 --**
--- Partially or fully close a socket. 
+-- Partially or fully close a socket.
 --
 -- Parameters:
 --   # ##sock## : the socket to shutdown
@@ -875,13 +895,13 @@ public function send(socket sock, sequence data, atom flags=0)
 end function
 
 --**
--- Receive data from a bound socket. 
+-- Receive data from a bound socket.
 --
 -- Parameters:
 --   # ##sock## : the socket to get data from
 --   # ##flags## : flags (see [[:Send Flags]])
 --
--- Returns:     
+-- Returns:
 --   A **sequence**, either a full string of data on success, or an atom indicating
 --   the error code.
 --
@@ -900,7 +920,7 @@ end function
 
 --**
 -- Get options for a socket.
--- 
+--
 -- Parameters:
 --   # ##sock## : the socket
 --   # ##level## : an integer, the option level
@@ -908,7 +928,7 @@ end function
 --
 -- Returns:
 --   An **object**, either:
--- * On error, {"ERROR",error_code}.  
+-- * On error, {"ERROR",error_code}.
 -- * On success, either an atom or a sequence containing the option value, depending on the option.
 --
 -- Comments:
@@ -932,7 +952,7 @@ end function
 
 --**
 -- Set options for a socket.
--- 
+--
 -- Parameters:
 --   # ##sock## : an atom, the socket id
 --   # ##level## : an integer, the option level
@@ -966,7 +986,7 @@ end function
 --   # ##address## : ip address to connect, optionally with :PORT at the end
 --   # ##port## : port number
 --
--- Returns: 
+-- Returns:
 --   An **integer**, 0 for success and -1 on failure.
 --
 -- Comments:
@@ -991,7 +1011,7 @@ end function
 
 --**
 -- Joins a socket to a specific local internet address and port so
--- later calls only need to provide the socket. 
+-- later calls only need to provide the socket.
 --
 -- Parameters:
 --   # ##sock## : the socket
@@ -999,7 +1019,7 @@ end function
 --   # ##port## : optional, if not specified you must include :PORT in
 --     the address parameter.
 --
--- Returns: 
+-- Returns:
 --   An **integer**, 0 on success and -1 on failure.
 --
 -- Example 1:
@@ -1070,27 +1090,27 @@ end function
 
 --****
 -- === UDP only
--- 
+--
 
 --**
 -- Send a UDP packet to a given socket
--- 
+--
 -- Parameters:
 --   # ##sock##: the server socket
 --   # ##data##: the data to be sent
---   # ##ip##: the ip where the data is to be sent to (ip:port) 
+--   # ##ip##: the ip where the data is to be sent to (ip:port)
 --     is acceptable
 --   # ##port##: the port where the data is to be sent on (if not supplied with the ip)
 --   # ##flags## : flags (see [[:Send Flags]])
 --
 -- Returns:
 --   An ##integer## status code.
---   
+--
 -- See Also:
 --   [[:receive_from]]
---   
+--
 
-public function send_to(socket sock, sequence data, sequence address, integer port=-1, 
+public function send_to(socket sock, sequence data, sequence address, integer port=-1,
     	atom flags=0)
 	object sock_data = parse_ip_address(address, port)
 
@@ -1106,10 +1126,10 @@ end function
 --
 -- Returns:
 --   A ##sequence## containing { client_ip, client_port, data } or an ##atom## error code.
---   
+--
 -- See Also:
 --   [[:send_to]]
---   
+--
 
 public function receive_from(socket sock, atom flags=0)
     return machine_func(M_SOCK_RECVFROM, { sock, flags })
