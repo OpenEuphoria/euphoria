@@ -443,14 +443,14 @@ public enum
 	ESO_SNDTIMEO,
 	ESO_RCVTIMEO,
 	ESO_ERROR,
-	ESO_TYPE,
-	ESO_OOBINLINE
-
 --****
+--!! = ESO_OOBINLINE+1
 -- ====  Windows Socket Option enums
+	ESO_TYPE,
 
-public enum
-	ESO_USELOOPBACK = ESO_OOBINLINE,
+	ESO_OOBINLINE,
+
+	ESO_USELOOPBACK,
 	ESO_DONTLINGER,
 	ESO_REUSEPORT,
 	ESO_CONNDATA,
@@ -465,32 +465,33 @@ public enum
 	ESO_MAXDG,
 	ESO_MAXPATHDG,
 	ESO_SYNCHRONOUS_ALTERT,
-	ESO_SYNCHRONOUS_NONALERT
 --****
+-- !! = ESO_SYNCHRONOUS_NONALERT+1
 -- ====  LINUX Socket Option enums
-public enum
-	ESO_SNDBUFFORCE = ESO_SYNCHRONOUS_NONALERT,
+	ESO_SYNCHRONOUS_NONALERT,
+
+	ESO_SNDBUFFORCE,
 	ESO_RCVBUFFORCE,
 	ESO_NO_CHECK,
 	ESO_PRIORITY,
 	ESO_BSDCOMPAT,
 
 	ESO_PASSCRED,
-	ESO_PEERCRED
-
 --****
+--  !!= ESO_PEERCRED+1
 -- Security levels - as per NRL IPv6 - don't actually do anything
-public enum
-	ESO_SECURITY_AUTHENTICATION = ESO_PEERCRED,
+	ESO_PEERCRED,
+
+	ESO_SECURITY_AUTHENTICATION,
 	ESO_SECURITY_ENCRYPTION_TRANSPORT,
 	ESO_SECURITY_ENCRYPTION_NETWORK,
 
-	ESO_BINDTODEVICE
-
 --****
+--  !!= ESO_BINDTODEVICE+1
 -- ====  LINUX Socket Filtering Option enums
-public enum
-	ESO_ATTACH_FILTER = ESO_BINDTODEVICE,
+	ESO_BINDTODEVICE,
+
+	ESO_ATTACH_FILTER,
 	ESO_DETACH_FILTER,
 
 	ESO_PEERNAME,
@@ -1204,7 +1205,8 @@ end function
 -- </eucode>
 --
 -- See Also:
-
+-- [[:Socket Options]] [[:Socket Backend Constants]
+-- [[:Socket Type Euphoria Constants]
 public function info(integer Type)
 	return machine_func(M_SOCK_INFO, Type)
 end function
