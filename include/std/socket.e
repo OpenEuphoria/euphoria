@@ -443,10 +443,10 @@ public enum
 	ESO_SNDTIMEO,
 	ESO_RCVTIMEO,
 	ESO_ERROR,
+	ESO_TYPE,
 --****
 --!! = ESO_OOBINLINE+1
 -- ====  Windows Socket Option enums
-	ESO_TYPE,
 
 	ESO_OOBINLINE,
 
@@ -1205,8 +1205,8 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:Socket Options]] [[:Socket Backend Constants]
--- [[:Socket Type Euphoria Constants]
+-- [[:Socket Options]] [[:Socket Backend Constants]]
+-- [[:Socket Type Euphoria Constants]]
 public function info(integer Type)
 	return machine_func(M_SOCK_INFO, Type)
 end function
