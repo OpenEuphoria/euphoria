@@ -15,7 +15,14 @@ test_equal("upper() mixed text", "JOHN 50 &%.", upper("joHn 50 &%."))
 test_equal("upper() with \\0", "ABC\0DEF", upper("abc" & 0 & "DEF"))
 
 test_equal("wildcard_file()", 1, wildcard_file("AB*CD.?", "AB123CD.e"))
+test_equal("wildcard_file()", 1, wildcard_file("foo", "foo"))
 test_equal("wildcard_file()", 0, wildcard_file("AB*CD.?", "abcd.ex"))
 
+test_true("wildcard match *", wildcard_match( "*", "foo" ) )
+test_true("wildcard match *o*", wildcard_match( "*o*", "foo" ) )
+test_true("wildcard match *o?", wildcard_match( "*o?", "foo" ) )
+test_false("wildcard match *ox", wildcard_match( "*ox", "foo" ) )
+test_false("wildcard match ??", wildcard_match( "??", "f" ) )
+test_false("wildcard match *?z", wildcard_match( "??", "foo" ) )
 
 test_report()

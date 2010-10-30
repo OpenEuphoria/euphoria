@@ -63,14 +63,9 @@ type machine_addr(atom a)
     return a > 0 and a <= MAX_ADDR and floor(a) = a
 end type
 
-type far_addr(sequence a)
--- protected mode far address {seg, offset}
-    return length(a) = 2 and integer(a[1]) and machine_addr(a[2])
-end type
-
 type low_machine_addr(integer a)
 -- a legal low machine address 
-    return a > 0 and a <= LOW_ADDR 
+    return a > 0
 end type
 
 type sequence_8(sequence s)
@@ -97,10 +92,6 @@ global constant REG_DI = 1,
 		REG_ES = 9,
 		REG_DS = 10
 
-type register_list(sequence r)
--- a list of register values
-    return length(r) = REG_LIST_SIZE
-end type
 
 global function allocate(positive_int n)
 -- Allocate n bytes of memory and return the address.
@@ -209,13 +200,6 @@ global procedure set_rand(integer seed)
     machine_proc(M_SET_RAND, seed)
 end procedure
 
-global procedure use_vesa(integer code)
--- If code is 1 then force Euphoria to use the VESA graphics standard.
--- This may let Euphoria work better in SVGA modes with certain graphics cards.
--- If code is 0 then Euphoria's normal use of the graphics card is restored.
--- Values of code other than 0 or 1 should not be used.
-    machine_proc(M_USE_VESA, code)
-end procedure
 
 -- Crash handling routines:
 
@@ -237,30 +221,6 @@ global procedure crash_routine(integer proc)
     machine_proc(M_CRASH_ROUTINE, proc)
 end procedure
 
-global procedure tick_rate(atom rate)
--- Specify the number of clock-tick interrupts per second.
--- This determines the precision of the time() library routine, 
--- and also the sampling rate for time profiling.
-    machine_proc(M_TICK_RATE, rate)
-end procedure
-
-global function get_vector(integer int_num)
--- returns the current (far) address of the interrupt handler
--- for interrupt vector number int_num as a 2-element sequence: 
--- {16-bit segment, 32-bit offset}
-    return machine_func(M_GET_VECTOR, int_num)
-end function
-
-global procedure set_vector(integer int_num, far_addr a)
--- sets a new interrupt handler address for vector int_num  
-    machine_proc(M_SET_VECTOR, {int_num, a})
-end procedure
-
-global procedure lock_memory(machine_addr a, positive_int n)
--- Prevent a chunk of code or data from ever being swapped out to disk.
--- You should lock any code or data used by an interrupt handler.
-    machine_proc(M_LOCK_MEMORY, {a, n})
-end procedure
 
 global function atom_to_float64(atom a)
 -- Convert an atom to a sequence of 8 bytes in IEEE 64-bit format

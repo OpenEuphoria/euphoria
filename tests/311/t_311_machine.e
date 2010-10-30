@@ -49,5 +49,23 @@ atom ptr = allocate_string( "hello" )
 test_equal( "allocate string", "hello", peek( ptr & 5 ) )
 free( ptr )
 
+ptr = allocate_low( 4 )
+test_not_equal( "allocate low", 0, ptr )
+free_low( ptr )
 
+crash_file( "machine.err" )
+crash_message( "machine.e crashed...use the new stdlib" )
+function my_crash( object o )
+	return 0
+end function
+crash_routine( routine_id("my_crash" ) )
+
+set_rand( 5 )
+integer first_rand = rand( 1000 )
+set_rand( 5 )
+test_equal( "set_rand", first_rand, rand ( 1000 ) )
+
+check_all_blocks()
+register_block(1,1)
+unregister_block(1)
 test_report()
