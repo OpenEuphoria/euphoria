@@ -419,20 +419,13 @@ public constant
 	SD_BOTH = 2
 
 --****
--- === Socket Options
---
--- Pass to the ##optname## parameter of the functions [[:get_option]]
--- and [[:set_option]].
---
--- These options are highly OS specific and are normally not needed for most
--- socket communication. They are provided here for your convenience. If you should
--- need to set socket options, please refer to your OS reference material.
---
--- There may be other values that your OS defines and some defined here are not
--- supported on all operating systems.
+-- === Socket Option enums
+-- these are the numeric indexes only.
+-- 
+-- See [[:Socket Options]] for details.
 
 --****
--- ====  Socket Options In Common
+-- ====  Socket Option enums In Common
 
 public enum
 	ESOL_SOCKET,
@@ -451,10 +444,13 @@ public enum
 	ESO_RCVTIMEO,
 	ESO_ERROR,
 	ESO_TYPE,
-	ESO_OOBINLINE,
-	--****
-	-- ====  Windows Socket Options
-	ESO_USELOOPBACK,
+	ESO_OOBINLINE
+
+--****
+-- ====  Windows Socket Option enums
+
+public enum
+	ESO_USELOOPBACK = ESO_OOBINLINE,
 	ESO_DONTLINGER,
 	ESO_REUSEPORT,
 	ESO_CONNDATA,
@@ -469,28 +465,32 @@ public enum
 	ESO_MAXDG,
 	ESO_MAXPATHDG,
 	ESO_SYNCHRONOUS_ALTERT,
-	ESO_SYNCHRONOUS_NONALERT,
-	--****
-	-- ====  LINUX Socket Options
-	ESO_SNDBUFFORCE,
+	ESO_SYNCHRONOUS_NONALERT
+--****
+-- ====  LINUX Socket Option enums
+public enum
+	ESO_SNDBUFFORCE = ESO_SYNCHRONOUS_NONALERT,
 	ESO_RCVBUFFORCE,
 	ESO_NO_CHECK,
 	ESO_PRIORITY,
 	ESO_BSDCOMPAT,
 
 	ESO_PASSCRED,
-	ESO_PEERCRED,
+	ESO_PEERCRED
 
-	-- Security levels - as per NRL IPv6 - don't actually do anything
-	ESO_SECURITY_AUTHENTICATION,
+--****
+-- Security levels - as per NRL IPv6 - don't actually do anything
+public enum
+	ESO_SECURITY_AUTHENTICATION = ESO_PEERCRED,
 	ESO_SECURITY_ENCRYPTION_TRANSPORT,
 	ESO_SECURITY_ENCRYPTION_NETWORK,
 
-	ESO_BINDTODEVICE,
+	ESO_BINDTODEVICE
 
-	--****
-	-- ====  LINUX Socket Filtering Options
-	ESO_ATTACH_FILTER,
+--****
+-- ====  LINUX Socket Filtering Option enums
+public enum
+	ESO_ATTACH_FILTER = ESO_BINDTODEVICE,
 	ESO_DETACH_FILTER,
 
 	ESO_PEERNAME,
@@ -524,7 +524,7 @@ public enum
 --
 -- There may be other values that your OS defines and some defined here are not
 -- supported on all operating systems.
-	sockinfo = info(ESOCK_TYPE_OPTION)
+sockinfo = info(ESOCK_TYPE_OPTION)
 
 --****
 -- ====  Socket Options In Common
