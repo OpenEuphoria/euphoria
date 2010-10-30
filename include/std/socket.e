@@ -529,9 +529,10 @@ public constant
 		SO_RCVTIMEO = sockinfo[ESO_RCVTIMEO],
 		SO_ERROR = sockinfo[ESO_ERROR],
 		SO_TYPE = sockinfo[ESO_TYPE],
-		SO_OOBINLINE = sockinfo[ESO_OOBINLINE],
+		SO_OOBINLINE = sockinfo[ESO_OOBINLINE]
 	--****
 	-- ====  Windows Socket Options
+	public constant
 		SO_USELOOPBACK = sockinfo[ESO_USELOOPBACK],
 		SO_DONTLINGER = sockinfo[ESO_DONTLINGER],
 		SO_REUSEPORT = sockinfo[ESO_REUSEPORT],
@@ -547,23 +548,27 @@ public constant
 		SO_MAXDG = sockinfo[ESO_MAXDG],
 		SO_MAXPATHDG = sockinfo[ESO_MAXPATHDG],
 		SO_SYNCHRONOUS_ALTERT = sockinfo[ESO_SYNCHRONOUS_ALTERT],
-		SO_SYNCHRONOUS_NONALERT = sockinfo[ESO_SYNCHRONOUS_NONALERT],
+		SO_SYNCHRONOUS_NONALERT = sockinfo[ESO_SYNCHRONOUS_NONALERT]
 	--****
 	-- ====  LINUX Socket Options
+	public constant
 		SO_SNDBUFFORCE = sockinfo[ESO_SNDBUFFORCE],
 		SO_RCVBUFFORCE = sockinfo[ESO_RCVBUFFORCE],
 		SO_NO_CHECK = sockinfo[ESO_NO_CHECK],
 		SO_PRIORITY = sockinfo[ESO_PRIORITY],
 		SO_BSDCOMPAT = sockinfo[ESO_BSDCOMPAT],
 		SO_PASSCRED = sockinfo[ESO_PASSCRED],
-		SO_PEERCRED = sockinfo[ESO_PEERCRED],
-	-- Security levels - as per NRL IPv6 - don't actually do anything
+		SO_PEERCRED = sockinfo[ESO_PEERCRED]
+	--****
+	-- =====  - Security levels - as per NRL IPv6 - don't actually do anything
+	public constant
 		SO_SECURITY_AUTHENTICATION = sockinfo[ESO_SECURITY_AUTHENTICATION],
 		SO_SECURITY_ENCRYPTION_TRANSPORT = sockinfo[ESO_SECURITY_ENCRYPTION_TRANSPORT],
 		SO_SECURITY_ENCRYPTION_NETWORK = sockinfo[ESO_SECURITY_ENCRYPTION_NETWORK],
-		SO_BINDTODEVICE = sockinfo[ESO_BINDTODEVICE],
+		SO_BINDTODEVICE = sockinfo[ESO_BINDTODEVICE]
 	--****
 	-- ====  LINUX Socket Filtering Options
+	public constant
 		SO_ATTACH_FILTER = sockinfo[ESO_ATTACH_FILTER],
 		SO_DETACH_FILTER = sockinfo[ESO_DETACH_FILTER],
 		SO_PEERNAME = sockinfo[ESO_PEERNAME],
