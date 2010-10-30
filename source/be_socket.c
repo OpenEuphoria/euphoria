@@ -65,7 +65,13 @@
 #define ERR_TIMEDOUT              -39
 #define ERR_WOULDBLOCK            -40
 
-#define EAF_UNSPEC		0
+#define ESOCK_UNDEFINED_VALUE	-9999
+#define ESOCK_UNKNOWN_FLAG	-9998
+#define ESOCK_TYPE_AF		1
+#define ESOCK_TYPE_TYPE		2
+#define ESOCK_TYPE_OPTION	3
+
+#define EAF_UNSPEC		6
 #define EAF_UNIX		1
 #define EAF_INET		2
 #define EAF_INET6		3
@@ -78,22 +84,102 @@
 #define ESOCK_RDM		4
 #define ESOCK_SEQPACKET		5
 
+#define ESOL_SOCKET		1
+#define ESO_DEBUG		2
+#define ESO_ACCEPTCONN		3
+#define ESO_REUSEADDR		4
+#define ESO_KEEPALIVE		5
+#define ESO_DONTROUTE		6
+#define ESO_BROADCAST		7
+#define ESO_LINGER		8
+#define ESO_SNDBUF		9
+#define ESO_RCVBUF		10
+#define ESO_SNDLOWAT		11
+#define ESO_RCVLOWAT		12
+#define ESO_SNDTIMEO		13
+#define ESO_RCVTIMEO		14
+#define ESO_ERROR		15
+#define ESO_TYPE		16
+#define ESO_OOBINLINE		17
+#define ESO_USELOOPBACK		18
+#define ESO_DONTLINGER		19
+#define ESO_REUSEPORT		20
+#define ESO_CONNDATA		21
+#define ESO_CONNOPT		22
+#define ESO_DISCDATA		23
+#define ESO_DISCOPT		24
+#define ESO_CONNDATALEN		25
+#define ESO_CONNOPTLEN		26
+#define ESO_DISCDATALEN		27
+#define ESO_DISCOPTLEN		28
+#define ESO_OPENTYPE		29
+#define ESO_MAXDG		30
+#define ESO_MAXPATHDG		31
+#define ESO_SYNCHRONOUS_ALTERT	32
+#define ESO_SYNCHRONOUS_NONALERT 33
+#define ESO_SNDBUFFORCE		34
+#define ESO_RCVBUFFORCE		35
+#define ESO_NO_CHECK		36
+#define ESO_PRIORITY		37
+#define ESO_BSDCOMPAT		38
+#define ESO_PASSCRED		39
+#define ESO_PEERCRED		40
+#define ESO_SECURITY_AUTHENTICATION 41
+#define ESO_SECURITY_ENCRYPTION_TRANSPORT 42
+#define ESO_SECURITY_ENCRYPTION_NETWORK 43
+#define ESO_BINDTODEVICE		44
+#define ESO_ATTACH_FILTER		45
+#define ESO_DETACH_FILTER		46
+#define ESO_PEERNAME		47
+#define ESO_TIMESTAMP		48
+#define ESCM_TIMESTAMP		49
+#define ESO_PEERSEC		50
+#define ESO_PASSSEC		51
+#define ESO_TIMESTAMPNS		52
+#define ESCM_TIMESTAMPNS	53
+#define ESO_MARK		54
+#define ESO_TIMESTAMPING	55
+#define ESCM_TIMESTAMPING	56
+#define ESO_PROTOCOL		57
+#define ESO_DOMAIN		58
+#define ESO_RXQ_OVFL		59
+
 int eusock_getsock_type(int x)
 {
     switch (x)
     {
 	case ESOCK_STREAM:
+#ifdef SOCK_STREAM
 		return SOCK_STREAM;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
 	case ESOCK_DGRAM:
+#ifdef SOCK_DGRAM
 		return SOCK_DGRAM;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
 	case ESOCK_RAW:
+#ifdef SOCK_RAW
 		return SOCK_RAW;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
 	case ESOCK_RDM:
+#ifdef SOCK_RDM
 		return SOCK_RDM;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
 	case ESOCK_SEQPACKET:
+#ifdef SOCK_SEQPACKET
 		return SOCK_SEQPACKET;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
 	default:
-		RTFatal("Unsupported SOCK type");
+		return ESOCK_UNKNOWN_FLAG;
     }
 }
 
@@ -102,24 +188,412 @@ int eusock_getfamily(int x)
     switch (x)
     {
 	case EAF_UNSPEC:
+#ifdef AF_UNSPEC
 		return AF_UNSPEC;
-	case EAF_UNIX:
-		return AF_UNIX;
-	case EAF_INET:
-		return AF_INET;
-	case EAF_APPLETALK:
-		return AF_APPLETALK;
-	case EAF_INET6:
-#ifndef EWATCOM
-		return AF_INET6;
 #else
-		/* fallthru */
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case EAF_UNIX:
+#ifdef AF_UNIX
+		return AF_UNIX;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case EAF_INET:
+#ifdef AF_INET
+		return AF_INET;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case EAF_APPLETALK:
+#ifdef AF_APPLETALK
+		return AF_APPLETALK;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case EAF_INET6:
+#ifdef AF_INET6
+		return AF_INET6;
+#elif defined(EWINDOWS)
+		// hack as Watcom doesn't have AF_INET6 defined
+		return 23;
+#else
+		return ESOCK_UNDEFINED_VALUE;
 #endif
 	case EAF_BTH:
-	/* TODO - Is this supported under any Unix-like OS? Or under Mingw? */
-		/* fallthru */
+#ifdef AF_BTH
+		return AF_BTH;
+#elif defined(EWINDOWS)
+		// hack as Watcom doesn't have AF_BTH defined
+		return 32;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
 	default:
-		RTFatal("Unsupported Protocol/AF type");
+		return ESOCK_UNKNOWN_FLAG;
+    }
+}
+
+int eusock_getsock_option(int x)
+{
+    switch (x)
+    {
+	case ESOL_SOCKET:
+#ifdef SOL_SOCKET
+		return SOL_SOCKET;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DEBUG:
+#ifdef SO_DEBUG
+		return SO_DEBUG;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_ACCEPTCONN:
+#ifdef SO_ACCEPTCONN
+		return SO_ACCEPTCONN;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_REUSEADDR:
+#ifdef SO_REUSEADDR
+		return SO_REUSEADDR;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_KEEPALIVE:
+#ifdef SO_KEEPALIVE
+		return SO_KEEPALIVE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DONTROUTE:
+#ifdef SO_DONTROUTE
+		return SO_DONTROUTE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_BROADCAST:
+#ifdef SO_BROADCAST
+		return SO_BROADCAST;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_LINGER:
+#ifdef SO_LINGER
+		return SO_LINGER;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SNDBUF:
+#ifdef SO_SNDBUF
+		return SO_SNDBUF;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_RCVBUF:
+#ifdef SO_RCVBUF
+		return SO_RCVBUF;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SNDLOWAT:
+#ifdef SO_SNDLOWAT
+		return SO_SNDLOWAT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_RCVLOWAT:
+#ifdef SO_RCVLOWAT
+		return SO_RCVLOWAT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SNDTIMEO:
+#ifdef SO_SNDTIMEO
+		return SO_SNDTIMEO;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_RCVTIMEO:
+#ifdef SO_RCVTIMEO
+		return SO_RCVTIMEO;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_ERROR:
+#ifdef SO_ERROR
+		return SO_ERROR;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_TYPE:
+#ifdef SO_TYPE
+		return SO_TYPE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_OOBINLINE:
+#ifdef SO_OOBINLINE
+		return SO_OOBINLINE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_USELOOPBACK:
+#ifdef SO_USELOOPBACK
+		return SO_USELOOPBACK;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DONTLINGER:
+#ifdef SO_DONTLINGER
+		return SO_DONTLINGER;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_REUSEPORT:
+#ifdef SO_REUSEPORT
+		return SO_REUSEPORT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_CONNDATA:
+#ifdef SO_CONNDATA
+		return SO_CONNDATA;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_CONNOPT:
+#ifdef SO_CONNOPT
+		return SO_CONNOPT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DISCDATA:
+#ifdef SO_DISCDATA
+		return SO_DISCDATA;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DISCOPT:
+#ifdef SO_DISCOPT
+		return SO_DISCOPT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_CONNDATALEN:
+#ifdef SO_CONNDATALEN
+		return SO_CONNDATALEN;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_CONNOPTLEN:
+#ifdef SO_CONNOPTLEN
+		return SO_CONNOPTLEN;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DISCDATALEN:
+#ifdef SO_DISCDATALEN
+		return SO_DISCDATALEN;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DISCOPTLEN:
+#ifdef SO_DISCOPTLEN
+		return SO_DISCOPTLEN;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_OPENTYPE:
+#ifdef SO_OPENTYPE
+		return SO_OPENTYPE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_MAXDG:
+#ifdef SO_MAXDG
+		return SO_MAXDG;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_MAXPATHDG:
+#ifdef SO_MAXPATHDG
+		return SO_MAXPATHDG;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SYNCHRONOUS_ALTERT:
+#ifdef SO_SYNCHRONOUS_ALTERT
+		return SO_SYNCHRONOUS_ALTERT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SYNCHRONOUS_NONALERT:
+#ifdef SO_SYNCHRONOUS_NONALERT
+		return SO_SYNCHRONOUS_NONALERT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SNDBUFFORCE:
+#ifdef SO_SNDBUFFORCE
+		return SO_SNDBUFFORCE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_RCVBUFFORCE:
+#ifdef SO_RCVBUFFORCE
+		return SO_RCVBUFFORCE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_NO_CHECK:
+#ifdef SO_NO_CHECK
+		return SO_NO_CHECK;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_PRIORITY:
+#ifdef SO_PRIORITY
+		return SO_PRIORITY;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_BSDCOMPAT:
+#ifdef SO_BSDCOMPAT
+		return SO_BSDCOMPAT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_PASSCRED:
+#ifdef SO_PASSCRED
+		return SO_PASSCRED;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_PEERCRED:
+#ifdef SO_PEERCRED
+		return SO_PEERCRED;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SECURITY_AUTHENTICATION:
+#ifdef SO_SECURITY_AUTHENTICATION
+		return SO_SECURITY_AUTHENTICATION;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SECURITY_ENCRYPTION_TRANSPORT:
+#ifdef SO_SECURITY_ENCRYPTION_TRANSPORT
+		return SO_SECURITY_ENCRYPTION_TRANSPORT;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_SECURITY_ENCRYPTION_NETWORK:
+#ifdef SO_SECURITY_ENCRYPTION_NETWORK
+		return SO_SECURITY_ENCRYPTION_NETWORK;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_BINDTODEVICE:
+#ifdef SO_BINDTODEVICE
+		return SO_BINDTODEVICE;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_ATTACH_FILTER:
+#ifdef SO_ATTACH_FILTER
+		return SO_ATTACH_FILTER;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DETACH_FILTER:
+#ifdef SO_DETACH_FILTER
+		return SO_DETACH_FILTER;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_PEERNAME:
+#ifdef SO_PEERNAME
+		return SO_PEERNAME;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_TIMESTAMP:
+#ifdef SO_TIMESTAMP
+		return SO_TIMESTAMP;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESCM_TIMESTAMP:
+#ifdef SCM_TIMESTAMP
+		return SCM_TIMESTAMP;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_PEERSEC:
+#ifdef SO_PEERSEC
+		return SO_PEERSEC;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_PASSSEC:
+#ifdef SO_PASSSEC
+		return SO_PASSSEC;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_TIMESTAMPNS:
+#ifdef SO_TIMESTAMPNS
+		return SO_TIMESTAMPNS;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESCM_TIMESTAMPNS:
+#ifdef SCM_TIMESTAMPNS
+		return SCM_TIMESTAMPNS;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_MARK:
+#ifdef SO_MARK
+		return SO_MARK;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_TIMESTAMPING:
+#ifdef SO_TIMESTAMPING
+		return SO_TIMESTAMPING;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESCM_TIMESTAMPING:
+#ifdef SCM_TIMESTAMPING
+		return SCM_TIMESTAMPING;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_PROTOCOL:
+#ifdef SO_PROTOCOL
+		return SO_PROTOCOL;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_DOMAIN:
+#ifdef SO_DOMAIN
+		return SO_DOMAIN;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	case ESO_RXQ_OVFL:
+#ifdef SO_RXQ_OVFL
+		return SO_RXQ_OVFL;
+#else
+		return ESOCK_UNDEFINED_VALUE;
+#endif
+	default:
+		return ESOCK_UNKNOWN_FLAG;
     }
 }
 
@@ -322,6 +796,99 @@ int eusock_getfamily(int x)
  * Information functions
  *
  * ========================================================================== */
+
+/*
+ * eusock_info(type)
+ */
+
+object eusock_info(object x)
+{
+	s1_ptr result_s;
+	if (IS_ATOM_INT(x)) {
+		if (x == ESOCK_TYPE_AF) {
+			result_s = NewS1(6);
+			result_s->base[EAF_UNSPEC] = eusock_getfamily(EAF_UNSPEC);
+			result_s->base[EAF_UNIX] = eusock_getfamily(EAF_UNIX);
+			result_s->base[EAF_INET] = eusock_getfamily(EAF_INET);
+			result_s->base[EAF_INET6] = eusock_getfamily(EAF_INET6);
+			result_s->base[EAF_APPLETALK] = eusock_getfamily(EAF_APPLETALK);
+			result_s->base[EAF_BTH] = eusock_getfamily(EAF_BTH);
+		} else if (x == ESOCK_TYPE_TYPE) {
+			result_s = NewS1(5);
+			result_s->base[ESOCK_STREAM] = eusock_getsock_type(ESOCK_STREAM);
+			result_s->base[ESOCK_DGRAM] = eusock_getsock_type(ESOCK_DGRAM);
+			result_s->base[ESOCK_RAW] = eusock_getsock_type(ESOCK_RAW);
+			result_s->base[ESOCK_RDM] = eusock_getsock_type(ESOCK_RDM);
+			result_s->base[ESOCK_SEQPACKET] = eusock_getsock_type(ESOCK_SEQPACKET);
+		} else if (x == ESOCK_TYPE_OPTION) {
+			result_s = NewS1(59);
+			result_s->base[ESOL_SOCKET] = eusock_getsock_option(ESOL_SOCKET);
+			result_s->base[ESO_DEBUG] = eusock_getsock_option(ESO_DEBUG);
+			result_s->base[ESO_ACCEPTCONN] = eusock_getsock_option(ESO_ACCEPTCONN);
+			result_s->base[ESO_REUSEADDR] = eusock_getsock_option(ESO_REUSEADDR);
+			result_s->base[ESO_KEEPALIVE] = eusock_getsock_option(ESO_KEEPALIVE);
+			result_s->base[ESO_DONTROUTE] = eusock_getsock_option(ESO_DONTROUTE);
+			result_s->base[ESO_BROADCAST] = eusock_getsock_option(ESO_BROADCAST);
+			result_s->base[ESO_LINGER] = eusock_getsock_option(ESO_LINGER);
+			result_s->base[ESO_SNDBUF] = eusock_getsock_option(ESO_SNDBUF);
+			result_s->base[ESO_RCVBUF] = eusock_getsock_option(ESO_RCVBUF);
+			result_s->base[ESO_SNDLOWAT] = eusock_getsock_option(ESO_SNDLOWAT);
+			result_s->base[ESO_RCVLOWAT] = eusock_getsock_option(ESO_RCVLOWAT);
+			result_s->base[ESO_SNDTIMEO] = eusock_getsock_option(ESO_SNDTIMEO);
+			result_s->base[ESO_RCVTIMEO] = eusock_getsock_option(ESO_RCVTIMEO);
+			result_s->base[ESO_ERROR] = eusock_getsock_option(ESO_ERROR);
+			result_s->base[ESO_TYPE] = eusock_getsock_option(ESO_TYPE);
+			result_s->base[ESO_OOBINLINE] = eusock_getsock_option(ESO_OOBINLINE);
+			result_s->base[ESO_USELOOPBACK] = eusock_getsock_option(ESO_USELOOPBACK);
+			result_s->base[ESO_DONTLINGER] = eusock_getsock_option(ESO_DONTLINGER);
+			result_s->base[ESO_REUSEPORT] = eusock_getsock_option(ESO_REUSEPORT);
+			result_s->base[ESO_CONNDATA] = eusock_getsock_option(ESO_CONNDATA);
+			result_s->base[ESO_CONNOPT] = eusock_getsock_option(ESO_CONNOPT);
+			result_s->base[ESO_DISCDATA] = eusock_getsock_option(ESO_DISCDATA);
+			result_s->base[ESO_DISCOPT] = eusock_getsock_option(ESO_DISCOPT);
+			result_s->base[ESO_CONNDATALEN] = eusock_getsock_option(ESO_CONNDATALEN);
+			result_s->base[ESO_CONNOPTLEN] = eusock_getsock_option(ESO_CONNOPTLEN);
+			result_s->base[ESO_DISCDATALEN] = eusock_getsock_option(ESO_DISCDATALEN);
+			result_s->base[ESO_DISCOPTLEN] = eusock_getsock_option(ESO_DISCOPTLEN);
+			result_s->base[ESO_OPENTYPE] = eusock_getsock_option(ESO_OPENTYPE);
+			result_s->base[ESO_MAXDG] = eusock_getsock_option(ESO_MAXDG);
+			result_s->base[ESO_MAXPATHDG] = eusock_getsock_option(ESO_MAXPATHDG);
+			result_s->base[ESO_SYNCHRONOUS_ALTERT] = eusock_getsock_option(ESO_SYNCHRONOUS_ALTERT);
+			result_s->base[ESO_SYNCHRONOUS_NONALERT] = eusock_getsock_option(ESO_SYNCHRONOUS_NONALERT);
+			result_s->base[ESO_SNDBUFFORCE] = eusock_getsock_option(ESO_SNDBUFFORCE);
+			result_s->base[ESO_RCVBUFFORCE] = eusock_getsock_option(ESO_RCVBUFFORCE);
+			result_s->base[ESO_NO_CHECK] = eusock_getsock_option(ESO_NO_CHECK);
+			result_s->base[ESO_PRIORITY] = eusock_getsock_option(ESO_PRIORITY);
+			result_s->base[ESO_BSDCOMPAT] = eusock_getsock_option(ESO_BSDCOMPAT);
+			result_s->base[ESO_PASSCRED] = eusock_getsock_option(ESO_PASSCRED);
+			result_s->base[ESO_PEERCRED] = eusock_getsock_option(ESO_PEERCRED);
+			result_s->base[ESO_SECURITY_AUTHENTICATION] = eusock_getsock_option(ESO_SECURITY_AUTHENTICATION);
+			result_s->base[ESO_SECURITY_ENCRYPTION_TRANSPORT] = eusock_getsock_option(ESO_SECURITY_ENCRYPTION_TRANSPORT);
+			result_s->base[ESO_SECURITY_ENCRYPTION_NETWORK] = eusock_getsock_option(ESO_SECURITY_ENCRYPTION_NETWORK);
+			result_s->base[ESO_BINDTODEVICE] = eusock_getsock_option(ESO_BINDTODEVICE);
+			result_s->base[ESO_ATTACH_FILTER] = eusock_getsock_option(ESO_ATTACH_FILTER);
+			result_s->base[ESO_DETACH_FILTER] = eusock_getsock_option(ESO_DETACH_FILTER);
+			result_s->base[ESO_PEERNAME] = eusock_getsock_option(ESO_PEERNAME);
+			result_s->base[ESO_TIMESTAMP] = eusock_getsock_option(ESO_TIMESTAMP);
+			result_s->base[ESCM_TIMESTAMP] = eusock_getsock_option(ESCM_TIMESTAMP);
+			result_s->base[ESO_PEERSEC] = eusock_getsock_option(ESO_PEERSEC);
+			result_s->base[ESO_PASSSEC] = eusock_getsock_option(ESO_PASSSEC);
+			result_s->base[ESO_TIMESTAMPNS] = eusock_getsock_option(ESO_TIMESTAMPNS);
+			result_s->base[ESCM_TIMESTAMPNS] = eusock_getsock_option(ESCM_TIMESTAMPNS);
+			result_s->base[ESO_MARK] = eusock_getsock_option(ESO_MARK);
+			result_s->base[ESO_TIMESTAMPING] = eusock_getsock_option(ESO_TIMESTAMPING);
+			result_s->base[ESCM_TIMESTAMPING] = eusock_getsock_option(ESCM_TIMESTAMPING);
+			result_s->base[ESO_PROTOCOL] = eusock_getsock_option(ESO_PROTOCOL);
+			result_s->base[ESO_DOMAIN] = eusock_getsock_option(ESO_DOMAIN);
+			result_s->base[ESO_RXQ_OVFL] = eusock_getsock_option(ESO_RXQ_OVFL);
+		} else {
+			return ATOM_M1;
+		}
+		return MAKE_SEQ(result_s);
+	} else {
+		return ATOM_M1;
+	}
+}
 
 /*
  * getservbyname(name, proto)

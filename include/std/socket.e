@@ -16,6 +16,7 @@ enum M_SOCK_GETSERVBYNAME=77, M_SOCK_GETSERVBYPORT, M_SOCK_SOCKET=81, M_SOCK_CLO
 	M_SOCK_CONNECT, M_SOCK_SEND, M_SOCK_RECV, M_SOCK_BIND, M_SOCK_LISTEN,
 	M_SOCK_ACCEPT, M_SOCK_SETSOCKOPT, M_SOCK_GETSOCKOPT, M_SOCK_SELECT, M_SOCK_SENDTO, 
     M_SOCK_RECVFROM, M_SOCK_ERROR_CODE=96
+constant M_SOCK_INFO = 4
 
 --****
 -- === Error Information
@@ -251,48 +252,114 @@ public constant ERR_TIMEDOUT            = -39
 public constant ERR_WOULDBLOCK          = -40
 
 --****
--- === Socket Type Constants
+-- === Socket Backend Constants
 --
--- These values are passed as the ##family## and ##sock_type## parameters of
--- the [[:create]] function.
+-- These values are used by the Euphoria backend to pass information to this
+-- library. The TYPE constants are used to identify to the [[:info]] function
+-- which family of constants are being retrieved (AF protocols, socket types,
+-- and socket options, respectively).
+--
+
+public constant
+	ESOCK_UNDEFINED_VALUE	= -9999, -- when a particular constant was not defined by C, the backend returns this value
+	ESOCK_UNKNOWN_FLAG	= -9998, -- if the backend doesn't recognize the flag in question
+	ESOCK_TYPE_AF		= 1,
+	ESOCK_TYPE_TYPE		= 2,
+	ESOCK_TYPE_OPTION	= 3
+
+--****
+-- === Socket Type Euphoria Constants
+--
+-- These values are used to retrieve the known values for ##family## and
+-- ##sock_type## parameters of the [[:create]] function from the Euphoria
+-- backend. (The reason for doing it this way is to retrieve the values defined
+-- in C, instead of duplicating them here.) These constants are guarranteed
+-- to never change, and to be the same value across platforms.
 --
 
 	public constant
 		--**
 		-- Address family is unspecified
-		AF_UNSPEC=0,
+		EAF_UNSPEC=6,
 		--**
 		-- Local communications
-		AF_UNIX=1,
+		EAF_UNIX=1,
 		--**
 		-- IPv4 Internet protocols
-		AF_INET=2,
+		EAF_INET=2,
 		--**
 		-- IPv6 Internet protocols
-		AF_INET6=3,
+		EAF_INET6=3,
 		--**
 		-- Appletalk
-		AF_APPLETALK=4,
+		EAF_APPLETALK=4,
 		--**
 		-- Bluetooth (currently Windows-only)
-		AF_BTH=5,
+		EAF_BTH=5,
 		--**
 		-- Provides sequenced, reliable, two-way, connection-based byte streams.
 		-- An out-of-band data transmission mechanism may be supported.
-		SOCK_STREAM=1,
+		ESOCK_STREAM=1,
 		--**
 		-- Supports datagrams (connectionless, unreliable messages of a
 		-- fixed maximum length).
-		SOCK_DGRAM=2,
+		ESOCK_DGRAM=2,
 		--**
 		-- Provides raw network protocol access.
-		SOCK_RAW=3,
+		ESOCK_RAW=3,
 		--**
 		-- Provides a reliable datagram layer that does not guarantee ordering.
-		SOCK_RDM=4,
+		ESOCK_RDM=4,
 		--**
 		-- Obsolete and should not be used in new programs
-		SOCK_SEQPACKET=5
+		ESOCK_SEQPACKET=5
+
+--****
+-- === Socket Type Constants
+--
+-- These values are passed as the ##family## and ##sock_type## parameters of
+-- the [[:create]] function. They are OS-dependent.
+--
+	sequence sockinfo = info(ESOCK_TYPE_AF)
+	public constant
+		--**
+		-- Address family is unspecified
+		AF_UNSPEC=sockinfo[EAF_UNSPEC],
+		--**
+		-- Local communications
+		AF_UNIX=sockinfo[EAF_UNIX],
+		--**
+		-- IPv4 Internet protocols
+		AF_INET=sockinfo[EAF_INET],
+		--**
+		-- IPv6 Internet protocols
+		AF_INET6=sockinfo[EAF_INET6],
+		--**
+		-- Appletalk
+		AF_APPLETALK=sockinfo[EAF_APPLETALK],
+		--**
+		-- Bluetooth (currently Windows-only)
+		AF_BTH=sockinfo[EAF_BTH]
+
+	sockinfo = info(ESOCK_TYPE_TYPE)
+	public constant
+		--**
+		-- Provides sequenced, reliable, two-way, connection-based byte streams.
+		-- An out-of-band data transmission mechanism may be supported.
+		SOCK_STREAM=sockinfo[ESOCK_STREAM],
+		--**
+		-- Supports datagrams (connectionless, unreliable messages of a
+		-- fixed maximum length).
+		SOCK_DGRAM=sockinfo[ESOCK_DGRAM],
+		--**
+		-- Provides raw network protocol access.
+		SOCK_RAW=sockinfo[ESOCK_RAW],
+		--**
+		-- Provides a reliable datagram layer that does not guarantee ordering.
+		SOCK_RDM=sockinfo[ESOCK_RDM],
+		--**
+		-- Obsolete and should not be used in new programs
+		SOCK_SEQPACKET=sockinfo[ESOCK_SEQPACKET]
 
 --****
 -- === Select Accessor Constants
@@ -349,116 +416,169 @@ public constant
 -- There may be other values that your OS defines and some defined here are not
 -- supported on all operating systems.
 
-ifdef WINDOWS then
 	--****
 	-- ====  Socket Options In Common  
-	public constant
-		SOL_SOCKET     = #FFFF,
-		SO_DEBUG       = #0001,
-		SO_ACCEPTCONN  = #0002,
-		SO_REUSEADDR   = #0004,
-		SO_KEEPALIVE   = #0008,
-		SO_DONTROUTE   = #0010,
-		SO_BROADCAST   = #0020,
-		SO_LINGER      = #0080,
-		SO_SNDBUF      = #1001,
-		SO_RCVBUF      = #1002,
-		SO_SNDLOWAT    = #1003,
-		SO_RCVLOWAT    = #1004,
-		SO_SNDTIMEO    = #1005,
-		SO_RCVTIMEO    = #1006,
-		SO_ERROR       = #1007,
-		SO_TYPE        = #1008,
-		SO_OOBINLINE   = #0100
+	public enum
+		ESOL_SOCKET,
+		ESO_DEBUG,
+		ESO_ACCEPTCONN,
+		ESO_REUSEADDR,
+		ESO_KEEPALIVE,
+		ESO_DONTROUTE,
+		ESO_BROADCAST,
+		ESO_LINGER,
+		ESO_SNDBUF,
+		ESO_RCVBUF,
+		ESO_SNDLOWAT,
+		ESO_RCVLOWAT,
+		ESO_SNDTIMEO,
+		ESO_RCVTIMEO,
+		ESO_ERROR,
+		ESO_TYPE,
+		ESO_OOBINLINE,
 	--****
 	-- ====  Windows Socket Options
-	public constant
-		SO_USELOOPBACK = #0040,
-		SO_DONTLINGER  = not_bits(SO_LINGER),
-		SO_REUSEPORT   = #9999,
-		SO_CONNDATA    = #7000,
-		SO_CONNOPT     = #7001,
-		SO_DISCDATA    = #7002,
-		SO_DISCOPT     = #7003,
-		SO_CONNDATALEN = #7004,
-		SO_CONNOPTLEN  = #7005,
-		SO_DISCDATALEN = #7006,
-		SO_DISCOPTLEN  = #7007,
-		SO_OPENTYPE    = #7008,
-		SO_MAXDG       = #7009,
-		SO_MAXPATHDG   = #700A,
-		SO_SYNCHRONOUS_ALTERT   = #10,
-		SO_SYNCHRONOUS_NONALERT = #20
-elsifdef LINUX then
-	public constant
-		SOL_SOCKET = 1,
-		SO_DEBUG = 1,
-		SO_REUSEADDR = 2,
-		SO_TYPE = 3,
-		SO_ERROR = 4,
-		SO_DONTROUTE = 5,
-		SO_BROADCAST = 6,
-		SO_SNDBUF = 7,
-		SO_RCVBUF = 8,
-		SO_KEEPALIVE = 9,
-		SO_OOBINLINE = 10,
-		SO_LINGER = 13,
-	 
-		SO_ACCEPTCONN = 30
+		ESO_USELOOPBACK,
+		ESO_DONTLINGER,
+		ESO_REUSEPORT,
+		ESO_CONNDATA,
+		ESO_CONNOPT,
+		ESO_DISCDATA,
+		ESO_DISCOPT,
+		ESO_CONNDATALEN,
+		ESO_CONNOPTLEN,
+		ESO_DISCDATALEN,
+		ESO_DISCOPTLEN,
+		ESO_OPENTYPE,
+		ESO_MAXDG,
+		ESO_MAXPATHDG,
+		ESO_SYNCHRONOUS_ALTERT,
+		ESO_SYNCHRONOUS_NONALERT,
 	--****
 	-- ====  LINUX Socket Options
-	public constant
-		SO_SNDBUFFORCE = 32,
-		SO_RCVBUFFORCE = 33,
-		SO_NO_CHECK = 11,
-		SO_PRIORITY = 12,
-		SO_BSDCOMPAT = 14
-	 /* To add :#define SO_REUSEPORT 15 */
+		ESO_SNDBUFFORCE,
+		ESO_RCVBUFFORCE,
+		ESO_NO_CHECK,
+		ESO_PRIORITY,
+		ESO_BSDCOMPAT,
+
+		ESO_PASSCRED,
+		ESO_PEERCRED,
 	 
-		-- powerpc only differs in these
-		-- (last 4 common to windows)
-		ifdef not POWERPC then 
-			public constant
-				SO_PASSCRED = 16,
-				SO_PEERCRED = 17,
-				SO_RCVLOWAT = 18,
-				SO_SNDLOWAT = 19,
-				SO_RCVTIMEO = 20,
-				SO_SNDTIMEO = 21
-		end ifdef
+	 -- Security levels - as per NRL IPv6 - don't actually do anything
+		ESO_SECURITY_AUTHENTICATION,
+		ESO_SECURITY_ENCRYPTION_TRANSPORT,
+		ESO_SECURITY_ENCRYPTION_NETWORK,
 	 
-	-- Security levels - as per NRL IPv6 - don't actually do anything
-	public constant	SO_SECURITY_AUTHENTICATION = 22,
-		SO_SECURITY_ENCRYPTION_TRANSPORT = 23,
-		SO_SECURITY_ENCRYPTION_NETWORK = 24,
-	 
-		SO_BINDTODEVICE = 25
+		ESO_BINDTODEVICE,
 	 
 	--****
 	-- ====  LINUX Socket Filtering Options
+		ESO_ATTACH_FILTER,
+		ESO_DETACH_FILTER,
+	 
+		ESO_PEERNAME,
+		ESO_TIMESTAMP,
+		ESCM_TIMESTAMP,
+	 
+		ESO_PEERSEC,
+		ESO_PASSSEC,
+		ESO_TIMESTAMPNS,
+		ESCM_TIMESTAMPNS,
+	 
+		ESO_MARK,
+	 
+		ESO_TIMESTAMPING,
+		ESCM_TIMESTAMPING,
+	 
+		ESO_PROTOCOL,
+		ESO_DOMAIN,
+	 
+		ESO_RXQ_OVFL
+
+--****
+-- === Socket Options
+--
+-- Pass to the ##optname## parameter of the functions [[:get_option]]
+-- and [[:set_option]].
+--
+-- These options are highly OS specific and are normally not needed for most
+-- socket communication. They are provided here for your convenience. If you should
+-- need to set socket options, please refer to your OS reference material.
+--
+-- There may be other values that your OS defines and some defined here are not
+-- supported on all operating systems.
+	sockinfo = info(ESOCK_TYPE_OPTION)
+
+	--****
+	-- ====  Socket Options In Common  
 	public constant
-		SO_ATTACH_FILTER = 26,
-		SO_DETACH_FILTER = 27,
-	 
-		SO_PEERNAME = 28,
-		SO_TIMESTAMP = 29,
-		SCM_TIMESTAMP = SO_TIMESTAMP,
-	 
-		SO_PEERSEC = 31,
-		SO_PASSSEC = 34,
-		SO_TIMESTAMPNS = 35,
-		SCM_TIMESTAMPNS = SO_TIMESTAMPNS,
-	 
-		SO_MARK = 36,
-	 
-		SO_TIMESTAMPING = 37,
-		SCM_TIMESTAMPING = SO_TIMESTAMPING,
-	 
-		SO_PROTOCOL = 38,
-		SO_DOMAIN = 39,
-	 
-		SO_RXQ_OVFL = 40
-end ifdef
+		SOL_SOCKET = sockinfo[ESOL_SOCKET],
+		SO_DEBUG = sockinfo[ESO_DEBUG],
+		SO_ACCEPTCONN = sockinfo[ESO_ACCEPTCONN],
+		SO_REUSEADDR = sockinfo[ESO_REUSEADDR],
+		SO_KEEPALIVE = sockinfo[ESO_KEEPALIVE],
+		SO_DONTROUTE = sockinfo[ESO_DONTROUTE],
+		SO_BROADCAST = sockinfo[ESO_BROADCAST],
+		SO_LINGER = sockinfo[ESO_LINGER],
+		SO_SNDBUF = sockinfo[ESO_SNDBUF],
+		SO_RCVBUF = sockinfo[ESO_RCVBUF],
+		SO_SNDLOWAT = sockinfo[ESO_SNDLOWAT],
+		SO_RCVLOWAT = sockinfo[ESO_RCVLOWAT],
+		SO_SNDTIMEO = sockinfo[ESO_SNDTIMEO],
+		SO_RCVTIMEO = sockinfo[ESO_RCVTIMEO],
+		SO_ERROR = sockinfo[ESO_ERROR],
+		SO_TYPE = sockinfo[ESO_TYPE],
+		SO_OOBINLINE = sockinfo[ESO_OOBINLINE],
+	--****
+	-- ====  Windows Socket Options
+		SO_USELOOPBACK = sockinfo[ESO_USELOOPBACK],
+		SO_DONTLINGER = sockinfo[ESO_DONTLINGER],
+		SO_REUSEPORT = sockinfo[ESO_REUSEPORT],
+		SO_CONNDATA = sockinfo[ESO_CONNDATA],
+		SO_CONNOPT = sockinfo[ESO_CONNOPT],
+		SO_DISCDATA = sockinfo[ESO_DISCDATA],
+		SO_DISCOPT = sockinfo[ESO_DISCOPT],
+		SO_CONNDATALEN = sockinfo[ESO_CONNDATALEN],
+		SO_CONNOPTLEN = sockinfo[ESO_CONNOPTLEN],
+		SO_DISCDATALEN = sockinfo[ESO_DISCDATALEN],
+		SO_DISCOPTLEN = sockinfo[ESO_DISCOPTLEN],
+		SO_OPENTYPE = sockinfo[ESO_OPENTYPE],
+		SO_MAXDG = sockinfo[ESO_MAXDG],
+		SO_MAXPATHDG = sockinfo[ESO_MAXPATHDG],
+		SO_SYNCHRONOUS_ALTERT = sockinfo[ESO_SYNCHRONOUS_ALTERT],
+		SO_SYNCHRONOUS_NONALERT = sockinfo[ESO_SYNCHRONOUS_NONALERT],
+	--****
+	-- ====  LINUX Socket Options
+		SO_SNDBUFFORCE = sockinfo[ESO_SNDBUFFORCE],
+		SO_RCVBUFFORCE = sockinfo[ESO_RCVBUFFORCE],
+		SO_NO_CHECK = sockinfo[ESO_NO_CHECK],
+		SO_PRIORITY = sockinfo[ESO_PRIORITY],
+		SO_BSDCOMPAT = sockinfo[ESO_BSDCOMPAT],
+		SO_PASSCRED = sockinfo[ESO_PASSCRED],
+		SO_PEERCRED = sockinfo[ESO_PEERCRED],
+	-- Security levels - as per NRL IPv6 - don't actually do anything
+		SO_SECURITY_AUTHENTICATION = sockinfo[ESO_SECURITY_AUTHENTICATION],
+		SO_SECURITY_ENCRYPTION_TRANSPORT = sockinfo[ESO_SECURITY_ENCRYPTION_TRANSPORT],
+		SO_SECURITY_ENCRYPTION_NETWORK = sockinfo[ESO_SECURITY_ENCRYPTION_NETWORK],
+		SO_BINDTODEVICE = sockinfo[ESO_BINDTODEVICE],
+	--****
+	-- ====  LINUX Socket Filtering Options
+		SO_ATTACH_FILTER = sockinfo[ESO_ATTACH_FILTER],
+		SO_DETACH_FILTER = sockinfo[ESO_DETACH_FILTER],
+		SO_PEERNAME = sockinfo[ESO_PEERNAME],
+		SO_TIMESTAMP = sockinfo[ESO_TIMESTAMP],
+		SCM_TIMESTAMP = sockinfo[ESCM_TIMESTAMP],
+		SO_PEERSEC = sockinfo[ESO_PEERSEC],
+		SO_PASSSEC = sockinfo[ESO_PASSSEC],
+		SO_TIMESTAMPNS = sockinfo[ESO_TIMESTAMPNS],
+		SCM_TIMESTAMPNS = sockinfo[ESCM_TIMESTAMPNS],
+		SO_MARK = sockinfo[ESO_MARK],
+		SO_TIMESTAMPING = sockinfo[ESO_TIMESTAMPING],
+		SCM_TIMESTAMPING = sockinfo[ESCM_TIMESTAMPING],
+		SO_PROTOCOL = sockinfo[ESO_PROTOCOL],
+		SO_DOMAIN = sockinfo[ESO_DOMAIN],
+		SO_RXQ_OVFL = sockinfo[ESO_RXQ_OVFL]
 
 --****
 -- === Send Flags
@@ -1039,4 +1159,27 @@ end function
 
 public function service_by_port(integer port, object protocol=0)
 	return machine_func(M_SOCK_GETSERVBYPORT, { port, protocol })
+end function
+
+--**
+-- Get constant definitions from the backend.
+--
+-- Parameters:
+--   # ##type## : The type of information requested.
+--
+-- Returns:
+--   A **sequence**, containing the list of definitions from the backend.
+--   The resulting list can be indexed into using the Euphoria constants.
+--   Or an atom indicating an error.
+--
+-- Example 1:
+-- <eucode>
+-- object result = info(ESOCK_TYPE_AF)
+-- -- result = { AF_UNIX, AF_INET, AF_INET6, AF_APPLETALK, AF_BTH, AF_UNSPEC }
+-- </eucode>
+--
+-- See Also:
+
+public function info(integer Type)
+	return machine_func(M_SOCK_INFO, Type)
 end function

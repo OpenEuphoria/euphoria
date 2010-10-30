@@ -32,6 +32,7 @@
 	#endif // UNIX
 #endif // ifdef EWINDOWS else
 
+object eusock_info(object x);
 object eusock_getservbyname(object x);
 object eusock_getservbyport(object x);
 object eusock_build_hostent(struct hostent *ent);

@@ -284,7 +284,7 @@ struct char_cell {
 #define M_SOUND               1
 #define M_LINE                2
 #define M_PALETTE             3
-#define M_REUSE_1             4 // REUSE
+#define M_SOCK_INFO           4
 #define M_GRAPHICS_MODE       5
 #define M_CURSOR              6
 #define M_WRAP                7

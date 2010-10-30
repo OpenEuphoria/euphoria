@@ -3136,6 +3136,9 @@ object machine(object opcode, object x)
 			case M_UNAME:
 				return eu_uname();
 
+			case M_SOCK_INFO:
+				return eusock_info(x);
+
 			case M_SOCK_GETSERVBYNAME:
 				return eusock_getservbyname(x);
 
