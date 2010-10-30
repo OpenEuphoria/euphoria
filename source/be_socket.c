@@ -1155,9 +1155,6 @@ object eusock_socket(object x)
 	type     = SEQ_PTR(x)->base[2];
 	protocol = SEQ_PTR(x)->base[3];
 
-	af = eusock_getfamily(af);
-	type = eusock_getsock_type(type);
-
 	sock = socket(af, type, protocol);
 	if (sock == INVALID_SOCKET)
 	{
