@@ -634,7 +634,7 @@ procedure run()
 		       
 end procedure
 
-ifdef not DLL then
+ifdef not EUC_DLL then
 run()
 end ifdef
 
