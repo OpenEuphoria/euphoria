@@ -86,7 +86,7 @@ function GetSourceName()
 		known_files = append(known_files, src_name)
 		real_name = e_path_find(src_name)
 	end if
-	known_files[$] = canonical_path(known_files[$],,1)
+	known_files[$] = canonical_path(real_name,,1)
 	known_files_hash &= hash(known_files[$], HSIEH32)
 
 	if file_exists(real_name) then
