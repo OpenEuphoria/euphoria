@@ -4269,8 +4269,9 @@ void do_exec(int *start_pc)
 			case L_HASH:
 			deprintf("case L_HASH:");
 				tpc = pc;
-				DeRef(*(object_ptr)pc[3]);
+				a = *(object_ptr)pc[3];
 				*(object_ptr)pc[3] = calc_hash(*(object_ptr)pc[1], *(object_ptr)pc[2]);
+				DeRef( a );
 				pc += 4;
 				thread();
 				BREAK;
