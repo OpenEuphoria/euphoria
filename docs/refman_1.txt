@@ -1,59 +1,136 @@
 
-== Introduction
+== Installation
 :<<LEVELTOC level=2 depth=4>>
 
-**Euphoria** is a programming language with the following advantages over
-conventional languages:
+To install Euphoria on your machine, first read the file ##install.txt##.
 
-* Euphoric
-** A remarkably simple, flexible, powerful language definition that is easy to
-   learn and use.
-* Dynamic
-** Variables grow or shrink without the programmer having to worry about
-   allocating and freeing chunks of memory.  Objects of any size can be assigned
-   to an element of a Euphoria sequence (array).
-* Fast
-** a high-performance, state-of-the-art interpreter that's significantly faster
-   than  conventional interpreters such as Perl and Python.
-* Compiles
-** an optimizing [[:Euphoria To C Translator]], that can boost your speed
-even further, often by a factor of 2x to 5x versus the already-fast
-interpreter.
-* Safe
-** extensive run-time checking for: out-of-bounds
-subscripts, uninitialized variables, bad parameter values for library
-routines, illegal value assigned to a variable and many more. There are
-no mysterious machine exceptions{{{--}}}you will always get a full English
-description of any problem that occurs with  your program at run-time,
-along with a call-stack trace-back and a dump of all of your variable
-values. Programs can be debugged quickly, easily and  more thoroughly.
-* High level
-** features of the underlying hardware are completely
-hidden. Programs are not aware of word-lengths, underlying bit-level
-representation of values, byte-order etc.
-* Debugger
-** a full-screen
-source debugger and an execution profiler are included, along with a
-full-screen, multi-file editor. On a color monitor, the editor displays
-Euphoria programs in multiple colors, to highlight comments, reserved
-words, built-in functions, strings, and level of nesting of brackets.
-It optionally performs auto-completion of statements, saving you typing
-effort and reducing syntax errors. This editor is written in Euphoria,
-and the source code is provided to you without restrictions. You are
-free to modify it, add features, and redistribute it as you wish.
-* Multi-platform
-** Euphoria programs run under Linux, FreeBSD, 32-bit //Windows//
-* Stand-alone
-** You can make a single, stand-alone executable
-file from your program.
-* Generic
-** Euphoria routines are naturally
-generic. The example program below shows a  single routine that will
-sort any type of data{{{--}}}integers, floating-point numbers, strings etc.
-Euphoria is not an "object-oriented" language, yet it achieves many of
-the benefits of these languages in a much simpler way.
-* Free
-** Euphoria is completely free and open source.
+Installation simply involves copying the //euphoria// files to your hard disk
+under a directory named ##euphoria##, and then appending the search path of your
+operating system to this directory.
+
+When installed, the ##euphoria## directory will look something like this:
+
+* ##\euphoria##
+** readme.doc
+** readme.htm
+** License.txt
+** ##\bin## - Interpreters ##eui.exe## and ##euiw.exe##. Translator
+    ##euc.exe##. Or on //Linux/FreeBSD//,
+    Interpreter ##eui## and Translator ##euc##. There are also utility
+    programs such as ##ed.bat##, ##guru.bat##, etc.
+** ##\include## - standard include files
+*** ##\include\std## - the standard Euphoria library include files, e.g.
+     ##file.e##, ##sequence.e##
+** ##\source## - the complete source code (interpreter, translator, binder)
+** ##\docs## - plain text, man pages, html documentation files
+** ##\tutorial## - small tutorial programs to help you learn Euphoria
+** ##\demo## - generic demo programs that run on all platforms
+*** ##\win32## - //WIN32//-specific demo programs (optional)
+*** ##\unix## - //Linux/FreeBSD/OS X//-specific demo programs (optional)
+*** ##\langwar## - language war game for //Linux/FreeBSD/OS X//
+*** ##\bench## - benchmark programs
+
+The //Linux// subdirectory is not included in the //Windows// distribution,
+and the ##win32## subdirectories are not included in the
+ //Linux/FreeBSD// distribution. In this manual, directory names are shown
+ using backslash (**\**). //Linux/FreeBSD// users should substitute forward
+ slash (**/**).
+
+=== Windows
+
+The installer copies the required files, and modifies the ##autoexec.bat## for
+ you. The ##euphoria\bin## is then on your search path, and the environment
+  variable **EUDIR** is set to the euphoria directory.
+
+=== Linux and FreeBSD
+
+Euphoria may be installed using either the gzipped tarball, or from a
+distribution specific package, if available.
+
+The gzipped tarball is laid out similarly to the windows directory structure.
+You'll need to manually edit ##/etc/profile## so the ##PATH## contains
+##euphoria\bin##, and either create a ##eu.cfg## file or set up ##EUDIR##
+and ##EUINC##.
+
+The packaged version installs Euphoria in a more //Unix//-like way, putting the
+executables into ##/usr/bin##, ##/usr/share/euphoria## and
+##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eub##,
+##shroud## and ##bind## are also installed.  It will also create
+##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
+directory in ##/usr/share/euphoria/include##.
+
+== Post Install
+:<<LEVELTOC level=2 depth=4>>
+
+=== Set Up the Euphoria Configuration File (eu.cfg)
+
+Euphoria supports reading command line switches from configuration files. The 
+default name for the configuration file is ##eu.cfg##. However you can specify
+different ones by using the ##-C## switch.
+
+==== Configuration file format
+
+The configuration file is a text file. Each line in the file is either a command line switch,
+a section header, an include path or a comment.
+* Comments are lines that begin with a double dash {{{"--"}}}. Everything on the
+line is ignored.
+* A section header is a //name// enclosed in square brackets. eg. 
+##[interpret]##.
+** There are a number of predefined sections.
+** The lines in a section are only added to the command line switches if they
+ apply to the mode that Euphoria is running in.
+*** [win32] Applies to Windows platform only.
+*** [unix] Applies to any Unix platform only.
+*** [interpret] Applies to the interpreter running in any platform.
+*** [translate] Applies to the translator running in any platform.
+*** [bind] Applies to the binder running in any platform.
+*** [interpret:win32] Applies to the interpreter when running under //Windows// 
+only.
+*** [interpret:unix] Applies to the interpreter when running under //Unix// 
+only.
+*** [translate:win32] Applies to the translator when running under //Windows// 
+only.
+*** [translate:unix] Applies to the translator when running under //Unix// only.
+*** [bind:win32] Applies to the binder when running under //Windows// only.
+*** [bind:unix] Applies to the binder when running under //Unix// only.
+*** [all] Applies to all running modes.
+** All configuration lines before the first section header are assumed to be the
+##[all]## section.
+** You can have any number of section headers, but only the predefined ones are
+used. All lines in other sections are treated as comments.
+* A command line switch is a line that begins with a single dash. The entire 
+line is added to the actual command line as if it was originally there.
+* An include path is any other line that is not one of the above. The string 
+##-I## is prepended to the line and then it is added to the command line.
+
+When Euphoria starts up, it looks for configuration files in the following 
+order ...
+* for //UNIX// systems
+## /etc/euphoria/eu.cfg
+## ${EUDIR}/eu.cfg
+## ${HOME}/.eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
+## Command line -C switches
+* for WINDOWS systems
+## ~%ALLUSERSPROFILE~%\euphoria\eu.cfg
+## ~%APPDATA~%\euphoria\eu.cfg
+## ~%EUDIR~%\eu.cfg
+## ~%HOMEDRIVE~%\~%HOMEPATH~%\eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
+## Command line -C switches
+
+* Euphoria processes every configuration file found, and in the order described 
+above. This means that setting specified in earlier configuration files may be 
+overridden by subsequent configuration files. For example, a configuration file 
+in the current directory will override the same settings in a configuration file
+in the executable's directory.
+* If a configuration file contains a "-C" switch, the new configuration file
+specified on that switch is processed before subsequent lines in the old file.
+* A configuration file is only ever processed once. Additional references to the
+same file are ignored.
+
 
 == Example Programs
 :<<LEVELTOC level=2 depth=4>>
@@ -180,74 +257,125 @@ numbers of objects.
 For a quick tutorial example of Euphoria programming, see
 ##euphoria\demo\bench\filesort.ex##.
 
-== Installation
-:<<LEVELTOC level=2 depth=4>>
 
-To install Euphoria on your machine, first read the file ##install.txt##.
+=== What to Do?
 
-Installation simply involves copying the //euphoria// files to your hard disk
-under a directory named ##euphoria##, and then appending the search path of your
-operating system to this directory.
+Now that you have installed Euphoria, here are some things you can try:
 
-When installed, the ##euphoria## directory will look something like this:
+==== Run the Demo Programs
 
-* ##\euphoria##
-** readme.doc
-** readme.htm
-** License.txt
-** ##\bin## - Interpreters ##eui.exe## and ##euiw.exe##. Translator
-    ##euc.exe##. Or on //Linux/FreeBSD//,
-    Interpreter ##eui## and Translator ##euc##. There are also utility
-    programs such as ##ed.bat##, ##guru.bat##, etc.
-** ##\include## - standard include files
-*** ##\include\std## - the standard Euphoria library include files, e.g.
-     ##file.e##, ##sequence.e##
-** ##\source## - the complete source code (interpreter, translator, binder)
-** ##\docs## - plain text, man pages, html documentation files
-** ##\tutorial## - small tutorial programs to help you learn Euphoria
-** ##\demo## - generic demo programs that run on all platforms
-*** ##\win32## - //WIN32//-specific demo programs (optional)
-*** ##\unix## - //Linux/FreeBSD/OS X//-specific demo programs (optional)
-*** ##\langwar## - language war game for //Linux/FreeBSD/OS X//
-*** ##\bench## - benchmark programs
+Run each of the demo programs in the ##demo## directory. You just type
+##eui <program name>##.
+An example of running the demos in a console
+{{{
+eui buzz
+}}}
 
-The //Linux// subdirectory is not included in the //Windows// distribution,
-and the ##win32## subdirectories are not included in the
- //Linux/FreeBSD// distribution. In this manual, directory names are shown
- using backslash (**\**). //Linux/FreeBSD// users should substitute forward
- slash (**/**).
+You can also double-click on a ##.ex## or ##.exw## file from //Windows// as file
+associations have been setup during the installation process.
 
-=== Windows
+==== Edit Sample Files
 
-The installer copies the required files, and modifies the ##autoexec.bat## for
- you. The ##euphoria\bin## is then on your search path, and the environment
-  variable **EUDIR** is set to the euphoria directory.
+Use the Euphoria editor, ##ed##, to edit a Euphoria file. Notice the use of colors. You can
+adjust these colors along with the cursor size and many other "user-modifiable" parameters by
+editing constant declarations in ##ed.ex##. Use //Esc q// to quit the editor or //Esc h// for
+help. There are several, even better, Euphoria-oriented editors in
+[[http://www.rapideuphoria.com/edi.htm|The Archive]]. If you use a more sophisticated text
+editor, many have a highlighter file for Euphoria. You will find it either on the Archive or
+on the community page for that editor. Check 
+[[http://openeuphoria.org/wiki/wiki.cgi?Editors|the wiki for more information about Euphoria editors]].
 
-=== Linux and FreeBSD
+==== Benchmark
 
-Euphoria may be installed using either the gzipped tarball, or from a
-distribution specific package, if available.
+Create some new benchmark tests. See ##demo\bench##. Do you get the same speed ratios as we
+did in comparison with other popular languages? Report your findings on 
+[[http://openeuphoria.org/forum/index.wc|the forum]].
 
-The gzipped tarball is laid out similarly to the windows directory structure.
-You'll need to manually edit ##/etc/profile## so the ##PATH## contains
-##euphoria\bin##, and either create a ##eu.cfg## file or set up ##EUDIR##
-and ##EUINC##.
+==== Read the Manual
 
-The packaged version installs Euphoria in a more //Unix//-like way, putting the
-executables into ##/usr/bin##, ##/usr/share/euphoria## and
-##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eub##,
-##shroud## and ##bind## are also installed.  It will also create
-##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
-directory in ##/usr/share/euphoria/include##.
+Read the manual in ##html\index.html## by double-clicking it. 
+If you have a specific question, type at the console:
 
-== Euphoria programs
+{{{
+guru word
+}}}
+
+The ##guru## program will search all the ##.doc## files, example programs, and other files,
+and will present you with a //sorted// list of the most relevant chunks of text that might
+answer your enquiry.
+
+==== Visit the EuForum
+[[http://openeuphoria.org/forum/index.wc|Euphoria Discussion Forum]]
+
+
+==== Trace a Demo
+
+Try running a Euphoria program with ##tracing## turned on. Add:
+
+<eucode>
+with trace
+trace(1)
+</eucode>
+
+at the beginning of any Euphoria source file.
+
+==== Run the Tutorial Programs
+
+Run some of the tutorial programs in ##euphoria\tutorial##.
+
+==== Modify the Tutorial Programs
+
+Try modifying some of the demo programs.
+
+First some //simple// modifications (takes less than a minute):
+
+===== Simple
+
+What if there were 100 C~+~+ ships in **Language Wars**? What if ##sb.ex## had to move 1000
+balls instead of 125? Change some parameters in ##polygon.ex##. Can you get prettier
+pictures to appear? Add some funny phrases to ##buzz.ex##.
+
+===== Harder
+
+Then, some slightly harder ones (takes a few minutes):
+
+Define a new function of x and y in ##plot3d.ex##.
+
+===== Challenging
+
+Then a challenging one (takes an hour or more):
+
+Set up your own customized database by defining the
+fields in ##mydata.ex##.
+
+===== Major
+
+Then a major project (several days or weeks):
+
+Write a //smarter// 3D TicTacToe algorithm.
+
+==== Write Your Own
+
+Try writing your own program in Euphoria. A program can be as simple as:
+
+<eucode>
+? 2+2
+</eucode>
+
+**Remember that after any error you can simply type:** ##ed## to jump into the editor at the
+offending file and line.
+
+Once you get used to it, you'll be developing programs //much// faster in Euphoria than you
+could in Perl, Java, C/C~+~+ or any other language that we are aware of.
+
+
+== Creating Euphoria programs
 :<<LEVELTOC level=2 depth=4>>
 
 Euphoria programs can be written with //any// plain text editor. As a
 convenience Euphoria comes with ##ed##, an editor written in Euphoria, that
 is handy for editing and executing Euphoria programs. Take a look at
 ##\euphoria\demo## and ##euphoria\tutorial## to see many example programs.
-
 
 === Running a Program
 
@@ -403,12 +531,11 @@ functionality implemented in a language like C, would take far more lines of
 code.
 
 ##ed## is a simple text-mode editor that runs on all platforms and is
-distributed with Euphoria. There are other editors in
-[[http://rapideuphoria.com/edi.htm "The Archive"]]. In addition to that many
-popular editors include syntax highlighting for Euphoria or can be made to.
+distributed with Euphoria. There is a list of other editors at the
+[[wiki:Editors|OpenEuphoria web site]], many of which include extra
+features such as syntax highlighting.
 
 == Distributing a Program
-:<<LEVELTOC level=2 depth=4>>
 
 Euphoria provides you with 4 distinct ways of distributing a program.
 
@@ -442,17 +569,15 @@ Euphoria program into C and then compile it with a C compiler to get an
 executable program.
 
 
-== Using Euphoria
+== Command line switches
 :<<LEVELTOC level=2 depth=4>>
-
-=== Command line switches
 
 You can launch Euphoria with some extra command line switches, in order to add
 or change configuration elements. When running a GUI, there is always some way
 to open a prompt and enter any text with options, arguments and whatever the
 program being launched may need for proper, expected operation. Under 
 //Windows//,
-this is achieved by clicking the ##Run... start## menu entry, or hitting 
+this is achieved by clicking the ##Start## button and selecting ##Run...##, or hitting 
 ##Windows-R##.
 
 Command line switches may be changed or added, one at a time.
@@ -553,73 +678,3 @@ they appear
 ## Paths listed in the ##EUDIR## environment variable, in the order in which 
 they appear
 ## The interpreter's path
-
-=== eu.cfg
-
-Euphoria supports reading command line switches from configuration files. The 
-default
-name for the configuration file is ##eu.cfg##. However you can specify different
-ones by using the ##-C## switch.
-
-===== Configuration file format
-
-The file is a text file. Each line in the file is either a command line switch,
-a section header, an include path or a comment.
-* Comments are lines that begin with a double dash {{{"--"}}}. Everything on the
-line is ignored.
-* A section header is a //name// enclosed in square brackets. eg. 
-##[interpret]##.
-** There are a number of predefined sections.
-** The lines in a section are only added to the command line switches if they
- apply to the mode that Euphoria is running in.
-*** [win32] Applies to Windows platform only.
-*** [unix] Applies to any Unix platform only.
-*** [interpret] Applies to the interpreter running in any platform.
-*** [translate] Applies to the translator running in any platform.
-*** [bind] Applies to the binder running in any platform.
-*** [interpret:win32] Applies to the interpreter when running under //Windows// 
-only.
-*** [interpret:unix] Applies to the interpreter when running under //Unix// 
-only.
-*** [translate:win32] Applies to the translator when running under //Windows// 
-only.
-*** [translate:unix] Applies to the translator when running under //Unix// only.
-*** [bind:win32] Applies to the binder when running under //Windows// only.
-*** [bind:unix] Applies to the binder when running under //Unix// only.
-*** [all] Applies to all running modes.
-** All configuration lines before the first section header are assumed to be the
-##[all]## section.
-** You can have any number of section headers, but only the predefined ones are
-used. All lines in other sections are treated as comments.
-* A command line switch is a line that begins with a single dash. The entire 
-line is added to the actual command line as if it was originally there.
-* An include path is any other line that is not one of the above. The string 
-##-I## is prepended to the line and then it is added to the command line.
-
-When Euphoria starts up, it looks for configuration files in the following 
-order ...
-* for //UNIX// systems
-## /etc/euphoria/eu.cfg
-## ${EUDIR}/eu.cfg
-## ${HOME}/.eu.cfg
-## From where ever the executable is run from "<exepath>/eu.cfg"
-## Current working directory - "./eu.cfg"
-## Command line -C switches
-* for WINDOWS systems
-## ~%ALLUSERSPROFILE~%\euphoria\eu.cfg
-## ~%APPDATA~%\euphoria\eu.cfg
-## ~%EUDIR~%\eu.cfg
-## ~%HOMEDRIVE~%\~%HOMEPATH~%\eu.cfg
-## From where ever the executable is run from "<exepath>/eu.cfg"
-## Current working directory - "./eu.cfg"
-## Command line -C switches
-
-* Euphoria processes every configuration file found, and in the order described 
-above. This means that setting specified in earlier configuration files may be 
-overridden by subsequent configuration files. For example, a configuration file 
-in the current directory will override the same settings in a configuration file
-in the executable's directory.
-* If a configuration file contains a "-C" switch, the new configuration file
-specified on that switch is processed before subsequent lines in the old file.
-* A configuration file is only ever processed once. Additional references to the
-same file are ignored.

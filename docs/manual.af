@@ -20,26 +20,13 @@
 :<<LEVELTOC level=1 depth=4>>
 
 ../docs/welcome.txt
-../docs/install.txt
-../docs/what2do.txt
+../License.txt <nowiki
+../docs/credits.txt
 #TODO: other release notes
 
 ########
-:<<LEVELTOC level=1 depth=3>>
-:== License
-:
-:----
-:
-../License.txt <nowiki
-:----
-
-:<<LEVELTOC level=2 depth=4>>
-../docs/credits.txt
-
-
-########
 := Quick Start
-:<<LEVELTOC depth=2>>
+:<<LEVELTOC level=1 depth=4>>
 
 ../docs/refman_1.txt
 
@@ -64,6 +51,7 @@
 ../docs/bind.txt
 ../docs/e2c.txt
 ../docs/dynamic.txt
+../docs/regex.txt
 ../docs/tasking.txt
 ../docs/database.txt
 ../docs/preproc.txt

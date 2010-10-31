@@ -1,10 +1,66 @@
-== Introduction
+== Quick Overview
 
 Welcome to the Euphoria programming language!
+
+Euphoria is a programming language with the following advantages over
+conventional languages:
+
+* Euphoric
+** A remarkably simple, flexible, powerful language definition that is easy to
+   learn and use.
+* Dynamic
+** Variables grow or shrink without the programmer having to worry about
+   allocating and freeing chunks of memory.  Objects of any size can be assigned
+   to an element of a Euphoria sequence (array).
+* Fast
+** a high-performance, state-of-the-art interpreter that's significantly faster
+   than  conventional interpreters such as Perl and Python.
+* Compiles
+** an optimizing [[:Euphoria To C Translator]], that can boost your speed
+even further, often by a factor of 2x to 5x versus the already-fast
+interpreter.
+* Safe
+** extensive run-time checking for: out-of-bounds
+subscripts, uninitialized variables, bad parameter values for library
+routines, illegal value assigned to a variable and many more. There are
+no mysterious machine exceptions{{{--}}}you will always get a full English
+description of any problem that occurs with  your program at run-time,
+along with a call-stack trace-back and a dump of all of your variable
+values. Programs can be debugged quickly, easily and  more thoroughly.
+* High level
+** features of the underlying hardware are completely
+hidden. Programs are not aware of word-lengths, underlying bit-level
+representation of values, byte-order etc.
+* Debugger
+** a full-screen
+source debugger and an execution profiler are included, along with a
+full-screen, multi-file editor. On a color monitor, the editor displays
+Euphoria programs in multiple colors, to highlight comments, reserved
+words, built-in functions, strings, and level of nesting of brackets.
+It optionally performs auto-completion of statements, saving you typing
+effort and reducing syntax errors. This editor is written in Euphoria,
+and the source code is provided to you without restrictions. You are
+free to modify it, add features, and redistribute it as you wish.
+* Multi-platform
+** Euphoria programs run under Linux, FreeBSD, 32-bit //Windows//
+* Stand-alone
+** You can make a single, stand-alone executable
+file from your program.
+* Generic
+** Euphoria routines are naturally
+generic. The example program below shows a  single routine that will
+sort any type of data{{{--}}}integers, floating-point numbers, strings etc.
+Euphoria is not an "object-oriented" language, yet it achieves many of
+the benefits of these languages in a much simpler way.
+* Free
+** Euphoria is completely free and open source.
 
 Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
 **D**eployment **S**oftware (//RDS//).
 There are now enthusiastic users around the world.
+
+== Introduction
+:<<LEVELTOC level=2 depth=4>>
 
 === Yet Another Programming Language?
 
@@ -88,7 +144,8 @@ Give Euphoria a try, and discover why it has enthusiastic supporters.
 This **Euphoria Interpreter, Binder, and Translator** package is free for anyone
 to use.
 
-Using the //Euphoria// **Binder** is used to create stand-alone programs.
+The //Euphoria// **Binder** is used to create stand-alone programs by "binding" the
+Euphoria interpreter onto your source code.
 
 The //Euphoria// **Translator** converts Euphoria-source into C-source. This
 allows Euphoria programs to be compiled by a standard C compiler to make even
@@ -110,27 +167,12 @@ will work fine.
 
 To run the //Mac OS X// version of Euphoria, you need an Intel based Mac.
 
-=== Disclaimer
-
-Euphoria is provided "as is" without warranty of any kind. In no event shall
-Rapid Deployment Software be held liable for any damages arising from the use
-of, or inability to use, this product.
-
-=== Discover Euphoria
-
-More information on Euphoria may be found at 
-[[http://www.OpenEuphoria.org | OpenEuphoria.org]],
-along with an active [[http://www.OpenEuphoria.org/EUforum|discussion forum]].
-
-Download Euphoria from the [[http://openeuphoria.org/downloads/index.wc|Euphoria Web site]].
-You will also find source-code for example programs and library files.
-
 === Conventions used in the manual
 
 Euphoria has multiple interpreters, the main one being **##eui##**.
 
 * On windows platforms you have two choices. If you run ##eui## then a console
-window is created. If you run ##euiw## then no console is created{{{--}}}making
+window is created. If you run ##euiw## then no console is created, making
 it suitable for GUI applications.
 
 The manual will only reference ##eui## in examples and instructions; the
@@ -139,9 +181,9 @@ reader is left to choose the correct interpreter.
 Euphoria runs on many platforms. When operating specific issues must be 
 described you will see these descriptions:
 
-* //Windows//will be a general reference to a family of operating systems that
-includes WIN/95/ME/98/XP/NT/Vista/7/... You will see the constant ##WIN32## used
-for Windows specific code.
+* //Windows//will be a general reference to a family of Microsoft Windows
+operating systems that includes 95/ME/98/XP/NT/Vista/7/. 
+You will see the constant ##WIN32## used for Windows specific code.
 
 * //Unix// will be a general reference to the family operating systems that
 includes Linux, FreeBSD, Mac OS X,... You will see the constant ##UNIX## used
@@ -153,3 +195,18 @@ Unix users should substitute {{{ / }}} when they examine example code.
 
 Operating system names are often trademarks. There is no intent to infringe on 
 their owner rights.
+
+=== Discover Euphoria
+
+Ready to get started? Click over to the [[:Quick Start]] guide, which has
+directions for installing Euphoria.
+
+Want more information? Find it at [[http://www.OpenEuphoria.org | OpenEuphoria.org]],
+and be sure to join the active [[http://openeuphoria.org/forum/index.wc|discussion forum]].
+
+=== Disclaimer
+
+Euphoria is provided "as is" without warranty of any kind. In no event shall
+Rapid Deployment Software be held liable for any damages arising from the use
+of, or inability to use, this product.
+

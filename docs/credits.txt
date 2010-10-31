@@ -28,6 +28,7 @@ Some additional 3rd-party legal restrictions might apply when you use the
 [[:Euphoria To C Translator]].
 
 == Euphoria Credits
+:<<LEVELTOC level=2 depth=4>>
 
 Euphoria has been continuously developed since it was started in 1993
 by Robert Craig. In 2006, version 3.0 was released as open source. Various
