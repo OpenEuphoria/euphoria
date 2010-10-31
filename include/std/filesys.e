@@ -2658,6 +2658,7 @@ public function checksum(sequence filename, integer size = 4)
 	integer ix	
 	atom jx
 	sequence data
+	atom yx
 
 	-- Initialize the result array based on the file's length and size of the array.
 	jx = file_length(filename)
@@ -2671,26 +2672,22 @@ public function checksum(sequence filename, integer size = 4)
 
 	-- Process the file, one byte at a time
 	fn = open(filename, "rb")
+	data = repeat(0, setsize)
 
 	if fn != -1 then
 		while data[1] != -1 with entry do
 			-- Determine which array entry gets affected. 
 			-- Depends on the current byte value, array size and initial file length
-			--jx = hash(jx, data)
-			integer sum = 0
-			for i = 1 to length(data) do
-				sum = sum + data[i]
-			end for
-			jx = floor((sum + jx) / (length(data) + 1))
-			ix = remainder(jx, size) + 1
+			yx = hash(jx, data)
+			ix = remainder(yx, size) + 1
 			-- Change the index offset determinant for the next byte.
 			
 			-- flip some bits in the array, based on the byte set and current hash.
 			cs[ix] = xor_bits(cs[ix], hash(data, HSIEH32))
 							
+			jx = yx
 		entry
 			-- get the next byte set
-			data = repeat(0, setsize)
 			for i = 1 to length(data) do
 				data[i] = getc(fn)
 			end for
