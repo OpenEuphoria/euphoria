@@ -233,12 +233,13 @@ void StorageStats()
 	free_block_ptr p;
 	s1_ptr s;
 
+	assert(((unsigned long)d_list & 7) == 0);	
 	s = (s1_ptr)d_list;
 	n = 0;
 	while (s != NULL) {
 		n++;
 		s = (s1_ptr)((free_block_ptr)s)->next;
-		if ((long)s % 8 != 0)
+		if ((unsigned long)s % 8 != 0)
 			iprintf(stderr, "misaligned s1d pointer!\n");
 	}
 	printf("\nd_list: %ld   ", n);
@@ -328,6 +329,7 @@ static void Free_All()
 		list->first = NULL;
 	}
 	/* now do the doubles list */
+	assert(((unsigned long)d_list & 7) == 0);		
 	s = (s1_ptr)d_list;
 	while (s != NULL) {
 		p = (unsigned char *)s;
@@ -816,6 +818,7 @@ static void AlreadyFree(free_block_ptr q, free_block_ptr p)
 /* free double storage block */
 void freeD(unsigned char *p)
 {
+	assert(((unsigned long)p & 7) == 0);		
 	Trash(p, D_SIZE);
 	AlreadyFree((free_block_ptr)d_list, (free_block_ptr)p);
 
@@ -970,7 +973,7 @@ static void new_dbl_block(unsigned int cnt)
 
 	blksize = cnt * dsize;
 	dbl_block = (free_block_ptr)EMalloc( blksize );
-	assert(((unsigned int)dbl_block & 7) == 0);
+	assert(((unsigned long)dbl_block & 7) == 0);
 
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
