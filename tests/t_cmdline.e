@@ -29,6 +29,8 @@ sequence option_defs = {
     
 }
 
+show_help( option_defs )
+
 -- Parse command line
 constant extra_data = `
 # Some 'extra' arguments
