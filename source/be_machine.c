@@ -1443,8 +1443,13 @@ static object Dir(object x)
 
 	DIR *dirp;
 	int r;
+#ifdef ELINUX
 	struct stat64 stbuf;
+#else
+	struct stat stbuf;
+#endif
 	struct tm *date_time;
+// TODO MinGW uses the Windows API version of Dir(), not the stat() version
 #if defined(EMINGW)
 #define full_name_size (MAX_FILE_NAME + 257)
 #else
@@ -1462,7 +1467,11 @@ static object Dir(object x)
 	dirp = opendir(path); // on Linux, path *must* be a directory
 
 	if (dirp == NULL) {
+#ifdef ELINUX
 		r = stat64(path, &stbuf);  // should be a file
+#else
+		r = stat(path, &stbuf);  // should be a file
+#endif
 		if (r == -1)
 			return ATOM_M1;
 	}
@@ -1491,7 +1500,11 @@ static object Dir(object x)
 		if (dirp != NULL) {
 			snprintf(full_name, full_name_size, "%s/%s", path, direntp->d_name);
 			full_name[full_name_size] = 0; // ensure NULL
+#ifdef ELINUX
 			r = stat64(full_name, &stbuf);
+#else
+			r = stat(full_name, &stbuf);
+#endif
 		}
 		if (r == -1) {
 			obj_ptr[3] = 0;
