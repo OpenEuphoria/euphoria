@@ -292,7 +292,7 @@ public sequence ampm = { "AM", "PM" }
 -- === Constants
 --
 
---**
+--****
 -- Accessors
 -- * ##YEAR##
 -- * ##MONTH##
@@ -301,9 +301,9 @@ public sequence ampm = { "AM", "PM" }
 -- * ##MINUTE##
 -- * ##SECOND##
 
-public enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
+public enum	YEAR, MONTH, DAY, HOUR,	MINUTE,	SECOND
 
---**
+--****
 -- Intervals
 -- * ##YEARS##
 -- * ##MONTHS##
@@ -314,7 +314,15 @@ public enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
 -- * ##SECONDS##
 -- * ##DATE##
 
-public enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
+public enum 
+	YEARS, 
+	MONTHS, 
+	WEEKS, 
+	DAYS,
+	HOURS,
+	MINUTES, 
+	SECONDS, 
+	DATE
 
 --****
 -- === Types
