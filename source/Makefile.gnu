@@ -111,17 +111,20 @@ ifeq "$(EMINGW)" "1"
 	SEDFLAG=-ri
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
+	EECUA=eu.A
+	EECUDGBA=eudbg.a
 	ifdef EDEBUG
 		EOSMING=
+		LIBRARY_NAME=eudbg.a
 	else
 		EOSMING=-ffast-math -O3 -Os
+		LIBRARY_NAME=eu.a
 	endif
 	EBACKENDU=eubw.exe
 	EBACKENDC=eub.exe
 	EECU=euc.exe
 	EEXU=eui.exe
 	EEXUW=euiw.exe
-	EECUA=eu.a
 	ifeq "$(MANAGED_MEM)" "1"
 		MEM_FLAGS=
 	else
@@ -137,6 +140,12 @@ else
 	EECU=euc
 	EEXU=eui
 	EECUA=eu.a
+	EECUDGBA=eudbg.a
+	ifdef EDEBUG
+		LIBRARY_NAME=eudbg.a
+	else
+		LIBRARY_NAME=eu.a
+	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
 
@@ -351,9 +360,9 @@ clobber : distclean
 .PHONY : clean distclean clobber all htmldoc manual
 
 library : builddirs
-	$(MAKE) $(BUILDDIR)/$(EECUA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
-$(BUILDDIR)/$(EECUA) : $(EU_LIB_OBJECTS)
-	ar -rc $(BUILDDIR)/$(EECUA) $(EU_LIB_OBJECTS)
+	$(MAKE) $(BUILDDIR)/$(LIBRARY_NAME) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+$(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
+	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
 
 builddirs : $(BUILD_DIRS)
@@ -543,7 +552,7 @@ test :
 		-exe "$(BUILDDIR)/$(EEXU)" \
 		-ec "$(BUILDDIR)/$(EECU)" \
 		-bind ../source/bind.ex -eub $(BUILDDIR)/$(EBACKENDC) \
-		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)" \
+		-lib "$(BUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
 		$(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
@@ -556,7 +565,7 @@ test-311 :
 		-exe "$(BUILDDIR)/$(EEXU)" \
 		-ec "$(BUILDDIR)/$(EECU)" \
 		-bind $(TRUNKDIR)/source/bind.ex -eub $(BUILDDIR)/$(EBACKENDC) \
-		-lib "$(BUILDDIR)/$(EECUA) $(COVERAGELIB)" \
+		-lib "$(BUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
 		$(TESTFILE)
 		
 coverage-311 :
@@ -598,9 +607,13 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/include/euphoria
 	install $(BUILDDIR)/$(EECUA) $(DESTDIR)$(PREFIX)/lib
+	install $(BUILDDIR)/$(EECUDBGA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
+	ifeq "$(EMINGW)" "1"
+		install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
+	endif
 	install ../include/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
 	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
@@ -666,9 +679,12 @@ install-docs :
 	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js \
 		$(BUILDDIR)/html/js/*
 
-# This doesn't seem right. What about eub or shroud ?
+# This doesn't seem right. What about eushroud ?
 uninstall :
-	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EBACKENDU)
+	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/lib/$(EBACKENDU)
+	ifeq "$(EMINGW)" "1"
+		-rm $(PREFIX)/lib/$(EBACKENDC)
+	endif
 	-rm -r $(PREFIX)/share/euphoria
 
 uninstall-docs :
