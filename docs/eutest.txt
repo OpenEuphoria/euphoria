@@ -18,7 +18,7 @@ message. You may use this section as an outline for testing your own code.
 ==== Synopsis for running the tests
 
 {{{
-stable-interpreter-path [-D REC] eutest.ex
+stable-interpreter-path [-D REC] eutest.ex [-D NO_INET ] [-D NO_INET_TESTS ]
     [-verbose] [-log] [-i include path] [-cc wat|gcc] [-exe interpreter]
     [-ec translator] [-lib binary library path]
     [optional list of unit test files]
@@ -63,6 +63,12 @@ invocation of eutest.ex output is sent to standard output as a report
 of how the tests went.  By default this is in ascii format.  Use -html
 to make it HTML format.
 * -html: Is for making the report creation to be in HTML format
+* -D NO_INET: This is for keeping tests from trying to use the Internet.  The
+tests have to be written to support them by using ifdef/end ifdef statements.
+Since in some Euphoria unit tests "-D NO_INET_TESTS" is used
+in its place, you must use both options to prevent them from trying to connect 
+through the Internet.
+* -D NO_INET_TESTS: See NO_INET
 
 === The Unit Test Files
 
@@ -70,7 +76,8 @@ Unit test files must match a pattern ##t_*.e##.  If the unit test file
 matches ##t_c_*.e## the test program will expect the program to fail,
 if there is an error control file in a directory with its same name and
 'd' extension it will also expect it to fail according to the control
-file's contents.  Found in the said directory.
+file's contents found in the said directory.  However, if there is no such
+directory or file the counter test will be marked as a failure.
 
 ==== A trivial example
 
