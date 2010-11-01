@@ -2631,6 +2631,12 @@ end function
 -- Parameters:
 --	# ##filename## : A sequence. The name of the file whose checksum you want.
 --  # ##size## : An integer. The number of atoms to return. Default is 4 
+--  # ##usename##: An integer. If not zero then the actual text of ##filename## will
+--  affect the resulting checksum. The default (0) will not use the name of
+--  the file.
+--  # ##return_text##: An integer. If not zero, the check sum is returned as a
+--  text string of hexadecimal digits otherwise (the default) the check sum
+--  is returned as a sequence of ##size## atoms.
 --
 -- Returns:
 --     A **sequence** containing ##size## atoms.
@@ -2638,65 +2644,152 @@ end function
 -- Comments:
 --  * The larger the ##size## value, the more unique will the checksum be. For 
 -- most files and uses, a single atom will be sufficient as this gives a 32-bit
--- file signature. However, if you require better proof that two files are different
--- then use higher values for ##size##. For example, ##size = 8 gives you 256 bits
--- of file signature.
+-- file signature. However, if you require better proof that the content of two
+-- files are different then use higher values for ##size##. For example, 
+-- ##size = 8 gives you 256 bits of file signature.
+-- * If ##size## is zero or negative, an empty sequence is returned.
+-- * All files of zero length will return the same checksum value when ##usename##
+--  is zero.
 --
 -- Example 1:
 -- <eucode>
+--  -- Example values. The exact values depend on the contents of the file.
 --  ? checksum("myfile", 1) --> {92837498}
 --  ? checksum("myfile", 2) --> {1238176, 87192873}
+--  ? checksum("myfile", 2,,1) --> "0012E480 05327529"
 --  ? checksum("myfile", 4) --> {23448, 239807, 79283749, 427370}
 --  ? checksum("myfile")    --> {23448, 239807, 79283749, 427370} -- default
 -- </eucode>
 
-public function checksum(sequence filename, integer size = 4)
+public function checksum(sequence filename, integer size = 4, integer usename = 0, integer return_text = 0)
 	integer fn
 	integer setsize
 	sequence cs
-	atom cs1
+	sequence hits
 	integer ix	
 	atom jx
+	atom fx
 	sequence data
-	atom yx
-
+	integer nhit
+	integer nmiss
+	
+	if size <= 0 then
+		-- No checksum can be done.
+		return {}
+	end if
+	fn = open(filename, "rb")
+	if fn = -1 then
+		-- No checksum can be done.
+		return {}
+	end if
+	
 	-- Initialize the result array based on the file's length and size of the array.
 	jx = file_length(filename)
-	--setsize = remainder( hash(jx, HSIEH32), 8) + 7
-	setsize = remainder( jx, 8) + 7
 	cs = repeat(jx, size)
 	for i = 1 to size do
 		cs[i] = hash(i + size, cs[i])
 	end for
 
-
-	-- Process the file, one byte at a time
-	fn = open(filename, "rb")
-	data = repeat(0, setsize)
-
-	if fn != -1 then
+	-- If filename is to be used, then seed each checksum bucket with a character
+	-- from the file name plus the hash of the entire name. All buckets and
+	-- every character is used to do this.	
+	if usename != 0 then
+		nhit = 0
+		nmiss = 0
+		hits = {0,0}
+		fx = hash(filename, HSIEH32) -- Get a hash value for the whole name.
+		while find(0, hits) do
+			-- find next character to use.
+			nhit += 1
+			if nhit > length(filename) then
+				nhit = 1
+				hits[1] = 1
+			end if
+			-- find next bucket to use.
+			nmiss += 1
+			if nmiss > length(cs) then
+				nmiss = 1
+				hits[2] = 1
+			end if
+			
+			-- adjust the bucket's seed value
+			cs[nmiss] = hash(filename[nhit], xor_bits(fx, cs[nmiss]))
+		end while -- repeat until every bucket and every character has been used.
+	end if
+	
+	hits = repeat(0, size)
+	if jx != 0 then
+		-- File is not empty file.
+	
+		-- Process the file, one set of bytes at a time
+		-- The size of the byte set is dependant on the file length and the check sum length requested,
+		-- and it is some value between 7 and 14 bytes long.
+		data = repeat(0, remainder( hash(jx * jx / size , HSIEH32), 8) + 7)
+		
+	
 		while data[1] != -1 with entry do
 			-- Determine which array entry gets affected. 
 			-- Depends on the current byte value, array size and initial file length
-			yx = hash(jx, data)
-			ix = remainder(yx, size) + 1
+			jx = hash(jx, data)
+			ix = remainder(jx, size) + 1
 			-- Change the index offset determinant for the next byte.
 			
 			-- flip some bits in the array, based on the byte set and current hash.
 			cs[ix] = xor_bits(cs[ix], hash(data, HSIEH32))
+			hits[ix] += 1
 							
-			jx = yx
 		entry
-			-- get the next byte set
+			-- get the next set of bytes.
+			-- Note that if a file ends before the 'set' is filled,
+			-- this algorithm still uses the -1 values as if it were
+			-- data from the file. This is by design to speed up the
+			-- calculations.
 			for i = 1 to length(data) do
 				data[i] = getc(fn)
 			end for
 		end while
-
-		close(fn)
-	end if
 	
-	return cs
+		-- Check for the situation where not all the check sum buckets have been
+		-- updated. In this situation, use the affected buckets to update the ones
+		-- not yet affected.
+		nhit = 0
+		while nmiss with entry do
+			-- Find next 'affected' bucket to use.
+			while 1 do
+				nhit += 1
+				if nhit > length(hits) then
+					nhit = 1
+				end if
+				if hits[nhit] != 0 then
+					exit
+				end if
+			end while
+			
+			-- Update the missed one.
+			cs[nmiss] = hash(cs[nmiss], cs[nhit])
+			hits[nmiss] += 1
+		entry
+			-- Find next missed bucket.
+			nmiss = find(0, hits)	
+		end while
+	
+	end if
+
+	close(fn)
+	if return_text then
+		-- Convert set of atoms to fixed length (8) hex strings.
+		sequence cs_text = ""
+		for i = 1 to length(cs) do
+			cs_text &= text:format("[:08X]", cs[i])
+			if i != length(cs) then
+				-- Add a space in between each 8-digit set
+				cs_text &= ' '
+			end if
+		end for
+		return cs_text
+	else
+		return cs
+	end if
 
 end function
 
