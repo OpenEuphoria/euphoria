@@ -120,7 +120,6 @@
 ../include/std/flags.e
 ../include/std/map.e
 ../include/std/stack.e
-../include/std/sets.e
 
 ########
 := Networking Routines
@@ -143,7 +142,6 @@
 ../include/std/memory.e
 ../include/std/safe.e
 ../include/std/memconst.e
-../include/std/unix/mmap.e
 
 ########
 := Graphics
