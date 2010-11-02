@@ -276,17 +276,25 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 
 		elsif class = FORWARD_SLASH then
 			if line[seg_end + 2] = '*' then
-	label "MULTILINE_COMMENT"
-				seg_end += 1
+label "MULTILINE_COMMENT"
+				if seg_end = 0 then
+					seg_end = 1
+				end if
 				seg_flush(COMMENT_COLOR)
 				i = match_from("*/", line, seg_end)
 				if i = 0 then
 					ram_space[state][S_MULTILINE_COMMENT] = 1
-					seg_end = length(line) -1
+					seg_end = length(line) - 1
 					exit
 				end if
-
+			
+				integer old_seg_end = seg_end + 2
 				seg_end = i + 1
+				
+				if old_seg_end < i and match("/*", line[old_seg_end..i]) then
+					goto "MULTILINE_COMMENT"
+				end if
+			
 				ram_space[state][S_MULTILINE_COMMENT] = 0
 			else
 				seg_flush(NORMAL_COLOR)
@@ -294,8 +302,11 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 			end if
 
 		elsif class = BACKTICK then
-	label "BACKTICK_STRING"
-			seg_end += 1
+label "BACKTICK_STRING"
+			if seg_end = 0 then
+				seg_end = 1
+			end if
+			
 			seg_flush(STRING_COLOR)
 			i = match_from("`", line, seg_end + 2)
 			if i = 0 then
@@ -309,7 +320,7 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 
 		else  -- QUOTE
 			if line[seg_end + 2] = '"' and line[seg_end + 3] = '"' then
-	label "MULTILINE_STRING"
+label "MULTILINE_STRING"
 				seg_end += 1
 				seg_flush(STRING_COLOR)
 				i = match_from(`"""`, line, seg_end + 3)
