@@ -126,9 +126,9 @@ ifeq "$(EMINGW)" "1"
 	EEXU=eui.exe
 	EEXUW=euiw.exe
 	ifeq "$(MANAGED_MEM)" "1"
-		MEM_FLAGS=
+		MEM_FLAGS=-DEALIGN4
 	else
-		MEM_FLAGS=-DESIMPLE_MALLOC -DEALIGN4
+		MEM_FLAGS=-DESIMPLE_MALLOC
 	endif
 	PCRE_CC=gcc
 else
