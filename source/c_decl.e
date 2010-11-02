@@ -929,9 +929,7 @@ export procedure DeclareRoutineList()
 				c_puts(SymTab[s][S_NAME])
 				c_puts("\", ")
 
-				if dll_option then
-					c_puts("(int (*)())")
-				end if
+				c_puts("(int (*)())")
 
 				c_printf("_%d", SymTab[s][S_FILE_NO])
 				c_puts(SymTab[s][S_NAME])

@@ -5984,7 +5984,7 @@ end procedure
 
 procedure delete_double( symtab_index obj )
 	c_stmt("if(DBL_PTR(@)->cleanup != 0 ){\n", obj )
-		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
+		c_stmt("_1 = (int) ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
 	c_stmt0("}\n")
 	c_stmt("else if( !UNIQUE(DBL_PTR(@)) ){\n", obj )
 		CDeRef( obj )
@@ -5995,7 +5995,7 @@ end procedure
 
 procedure delete_sequence( symtab_index obj )
 	c_stmt("if(SEQ_PTR(@)->cleanup != 0 ){\n", obj )
-		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
+		c_stmt("_1 = (int) ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
 	c_stmt0("}\n")
 	c_stmt("else if( !UNIQUE(SEQ_PTR(@)) ){\n", obj )
 		c_stmt("@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {obj, obj} )
@@ -6051,9 +6051,9 @@ end procedure
 
 
 procedure DeleteRoutine( symtab_index rid )
-	c_stmt("_1 = _00[@].cleanup;\n", rid )
+	c_stmt("_1 = (int) _00[@].cleanup;\n", rid )
 	c_stmt0("if( _1 == 0 ){\n")
-		c_stmt0("_1 = TransAlloc( sizeof(struct cleanup) );\n")
+		c_stmt0("_1 = (int) TransAlloc( sizeof(struct cleanup) );\n")
 		c_stmt( "_00[@].cleanup = (cleanup_ptr)_1;\n", rid)
 	c_stmt0("}\n")
 	c_stmt0("((cleanup_ptr)_1)->type = CLEAN_UDT_RT;\n")
@@ -7251,7 +7251,7 @@ procedure BackEnd(atom ignore)
 
 	-- options_switch initialization
 	switches = get_switches()
-	c_stmt0(sprintf("_0switch_ptr = NewS1( %d );\n", length(switches) ))
+	c_stmt0(sprintf("_0switch_ptr = (s1_ptr) NewS1( %d );\n", length(switches) ))
 	for i = 1 to length(switches) do
 		cmd_switch = switches[i]
 		slash_ix = 1
