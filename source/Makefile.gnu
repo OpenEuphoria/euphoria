@@ -111,7 +111,7 @@ ifeq "$(EMINGW)" "1"
 	SEDFLAG=-ri
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
-	EECUA=eu.A
+	EECUA=eu.a
 	EECUDGBA=eudbg.a
 	ifdef EDEBUG
 		EOSMING=
@@ -128,7 +128,7 @@ ifeq "$(EMINGW)" "1"
 	ifeq "$(MANAGED_MEM)" "1"
 		MEM_FLAGS=
 	else
-		MEM_FLAGS=-DESIMPLE_MALLOC
+		MEM_FLAGS=-DESIMPLE_MALLOC -DEALIGN4
 	endif
 	PCRE_CC=gcc
 else
