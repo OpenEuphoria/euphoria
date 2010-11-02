@@ -118,7 +118,7 @@ produce this documentation.
 === Creole markup
 
 Creole is a text markup language used in wikis, such as the 
-[[http://openeuphoria.org/wiki/wiki.cgi|Euphoria Wiki]], 
+[[http://openeuphoria.org/wiki/view/home.wc|Euphoria Wiki]], 
 and for documenting source-code. 
 
 
@@ -171,7 +171,7 @@ for i=1 to 5 do
 end for
 </eucode>
 
-* More details can be found at the Euphoria Wiki under [[http://openeuphoria.org/wiki/wiki.cgi?CreoleHelp|CreoleHelp]].
+* More details can be found at the Euphoria Wiki under [[OPENEU:CreoleHelp|CreoleHelp]].
 
 === Documentation software
 
@@ -182,8 +182,8 @@ eudoc: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eud
 
 creolehtml: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
 
-[[http://openeuphoria.org/wiki/euwiki.cgi?Documenting40|More on using eudoc]]
+[[OPENEU:Documenting40|More on using eudoc]]
 
-[[http://openeuphoria.org/wiki/euwiki.cgi?CreoleHelp|More on using Creole markup]]
+[[OPENEU:CreoleHelp|More on using Creole markup]]
 
 The program htmldoc is found at... http://www.htmldoc.org/ and http://htmldoc-binaries.org/.

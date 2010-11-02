@@ -283,7 +283,7 @@ help. There are several, even better, Euphoria-oriented editors in
 [[http://www.rapideuphoria.com/edi.htm|The Archive]]. If you use a more sophisticated text
 editor, many have a highlighter file for Euphoria. You will find it either on the Archive or
 on the community page for that editor. Check 
-[[http://openeuphoria.org/wiki/wiki.cgi?Editors|the wiki for more information about Euphoria editors]].
+[[OPENEU:Editors|the wiki for more information about Euphoria editors]].
 
 ==== Benchmark
 
@@ -532,7 +532,7 @@ code.
 
 ##ed## is a simple text-mode editor that runs on all platforms and is
 distributed with Euphoria. There is a list of other editors at the
-[[wiki:Editors|OpenEuphoria web site]], many of which include extra
+[[OPENEU:Editors|OpenEuphoria web site]], many of which include extra
 features such as syntax highlighting.
 
 == Distributing a Program
