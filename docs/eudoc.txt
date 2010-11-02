@@ -171,7 +171,7 @@ for i=1 to 5 do
 end for
 </eucode>
 
-* More details can be found at the Euphoria Wiki under [[OPENEU:CreoleHelp|CreoleHelp]].
+* More details can be found at the Euphoria Wiki under [[wiki:CreoleHelp|CreoleHelp]].
 
 === Documentation software
 
@@ -182,8 +182,8 @@ eudoc: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eud
 
 creolehtml: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
 
-[[OPENEU:Documenting40|More on using eudoc]]
+[[wiki:Documenting40|More on using eudoc]]
 
-[[OPENEU:CreoleHelp|More on using Creole markup]]
+[[wiki:CreoleHelp|More on using Creole markup]]
 
 The program htmldoc is found at... http://www.htmldoc.org/ and http://htmldoc-binaries.org/.

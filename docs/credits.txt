@@ -39,7 +39,7 @@ It has taken quite a few people to get this far and we would like to
 recognize them here. Authors/Contributors are listed in alphabetical 
 order by their last name.
 
-For an up-to-date listing, see the [[OPENEU:EuphoriaContributors|EuphoriaContributors]]
+For an up-to-date listing, see the [[wiki:EuphoriaContributors|EuphoriaContributors]]
  page at the [[http://openeuphoria.org/wiki/view/home.wc|OpenEuphoria Wiki]].
 
 === Current Authors
