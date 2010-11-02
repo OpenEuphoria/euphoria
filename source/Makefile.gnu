@@ -112,7 +112,7 @@ ifeq "$(EMINGW)" "1"
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
 	EECUA=eu.a
-	EECUDGBA=eudbg.a
+	EECUDBGA=eudbg.a
 	ifdef EDEBUG
 		EOSMING=
 		LIBRARY_NAME=eudbg.a
@@ -140,7 +140,7 @@ else
 	EECU=euc
 	EEXU=eui
 	EECUA=eu.a
-	EECUDGBA=eudbg.a
+	EECUDBGA=eudbg.a
 	ifdef EDEBUG
 		LIBRARY_NAME=eudbg.a
 	else
@@ -336,7 +336,7 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library backend code-page-db
+all : interpreter translator library debug-library backend code-page-db
 
 BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
 
@@ -359,8 +359,12 @@ clobber : distclean
 
 .PHONY : clean distclean clobber all htmldoc manual
 
+debug-library : builddirs
+	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
+
 library : builddirs
 	$(MAKE) $(BUILDDIR)/$(LIBRARY_NAME) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
+
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
@@ -397,7 +401,7 @@ ifeq "$(EUPHORIA)" "1"
 endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-.PHONY : library
+.PHONY : library debug-library
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator
@@ -611,9 +615,9 @@ install :
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
-	ifeq "$(EMINGW)" "1"
-		install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
-	endif
+ifeq "$(EMINGW)" "1"
+	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
+endif
 	install ../include/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include
 	install ../include/std/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std
 	install ../include/std/net/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/net
@@ -681,10 +685,10 @@ install-docs :
 
 # This doesn't seem right. What about eushroud ?
 uninstall :
-	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/lib/$(EBACKENDU)
-	ifeq "$(EMINGW)" "1"
-		-rm $(PREFIX)/lib/$(EBACKENDC)
-	endif
+	-rm $(PREFIX)/bin/$(EEXU) $(PREFIX)/bin/$(EECU) $(PREFIX)/lib/$(EECUA) $(PREFIX)/lib/$(EECUDBGA) $(PREFIX)/bin/$(EBACKENDU)
+ifeq "$(EMINGW)" "1"
+	-rm $(PREFIX)/lib/$(EBACKENDC)
+endif
 	-rm -r $(PREFIX)/share/euphoria
 
 uninstall-docs :
