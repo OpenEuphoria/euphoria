@@ -223,7 +223,11 @@ ifeq "$(EUPHORIA)" "1"
 REVGET=svn_rev
 endif
 
+ifeq "$(MANAGED_MEM)" "1"
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
+else
 FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+endif
 BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 
 EU_CORE_FILES = \
@@ -732,7 +736,7 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
-	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" CONFIG=../$(CONFIG)
+	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSFLAGSCONSOLE)" CONFIG=../$(CONFIG)
 endif
 
 depend :
