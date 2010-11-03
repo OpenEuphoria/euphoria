@@ -114,6 +114,7 @@ integer ERR_LPOS  = 0
 -- === ET error codes
 
 public enum
+	ERR_NONE = 0,
 	ERR_OPEN,
 	ERR_ESCAPE,
 	ERR_EOL_CHAR,
