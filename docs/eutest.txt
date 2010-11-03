@@ -18,7 +18,7 @@ message. You may use this section as an outline for testing your own code.
 ==== Synopsis for running the tests
 
 {{{
-stable-interpreter-path [-D REC] eutest.ex [-D NO_INET ] [-D NO_INET_TESTS ]
+stable-interpreter-path [-D REC] [-D SKIP_C_ONFAILURE] eutest.ex [-D NO_INET ] [-D NO_INET_TESTS ]
     [-verbose] [-log] [-i include path] [-cc wat|gcc] [-exe interpreter]
     [-ec translator] [-lib binary library path]
     [optional list of unit test files]
@@ -76,8 +76,10 @@ Unit test files must match a pattern ##t_*.e##.  If the unit test file
 matches ##t_c_*.e## the test program will expect the program to fail,
 if there is an error control file in a directory with its same name and
 'd' extension it will also expect it to fail according to the control
-file's contents found in the said directory.  However, if there is no such
-directory or file the counter test will be marked as a failure.
+file's contents found in the said directory.  Such a failure is marked as
+a successful test run.  However, if there is no such 
+directory or file the counter test will be marked as a failed test run.
+If any of the regular tests fail, the counter tests will be skipped.
 
 ==== A trivial example
 
