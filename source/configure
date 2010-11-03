@@ -2,13 +2,25 @@
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
+# If under Cygwin, we have 2 sets of paths: the normal TRUNKDIR/BUILDDIR/INCDIR
+# defined by the Cygwin path (/cygdrive/c/dir/file) as well as the CYP- versions
+# (c:/dir/file). The normal variables are used by make itself, which can't
+# handle the mixed-mode path and can only deal with pure Cygwin ones.
+# (These are also used by the various utilities ike cp, gcc, etc, even though
+# they can handle either format). The CYP- versions are used whenever we call
+# eui, euc, or an euphoria program, as these can only handle mixed-mode paths.
 
+USECYPPATH="false"
 
 if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# for now, we build with -mno-cygwin under cygwin, so this is treated
 	# identically to MinGW
 	# A true exu.exe should probably set UNAME_SYSTEM="CYGWIN"
 	UNAME_SYSTEM=WINDOWS
+	# However, since we use absolute paths and Cygwin's make can't deal with
+	# mixed-mode paths (C:/dir/file) the way MSYS's make can, we turn
+	# CYPPATH on
+	USECYPPATH="true"
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
 fi
@@ -249,6 +261,13 @@ mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
+if [ "$USECYPPATH" = "true" ]; then
+echo CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR` >> "$PREFIX"Makefile.eu
+echo CYPBUILDDIR=`cygpath -a -m $BUILDDIR` >> "$PREFIX"Makefile.eu
+else
+echo CYPTRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
+echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
+fi
 echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"Makefile.eu
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile

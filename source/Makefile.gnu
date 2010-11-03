@@ -111,6 +111,7 @@ ifeq "$(EMINGW)" "1"
 	SEDFLAG=-ri
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
+	EOSPCREFLAGS=-mno-cygwin -DPCRE_STATIC
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
 	ifdef EDEBUG
@@ -135,6 +136,7 @@ else
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
+	EOSPCREFLAGS=
 	EBACKENDU=eub
 	EBACKENDC=eub
 	EECU=euc
@@ -182,12 +184,22 @@ ifeq  "$(ELINUX)" "1"
 EBSDFLAG=-DELINUX
 endif
 
+# backwards compatibility
+# don't make Unix users reconfigure for a MinGW-only change
+ifndef CYPTRUNKDIR
+CYPTRUNKDIR=$(TRUNKDIR)
+endif
+ifndef CYPBUILDDIR
+CYPBUILDDIR=$(BUILDDIR)
+endif
+
 ifeq  "$(EUBIN)" ""
 EXE=$(EEXU)
 else
 EXE=$(EUBIN)/$(EEXU)
 endif
 INCDIR=-i $(TRUNKDIR)/include
+CYPINCDIR=-i $(CYPTRUNKDIR)/include
 
 ifdef PLAT
 TARGETPLAT=-plat $(PLAT)
@@ -216,7 +228,7 @@ endif
 ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
-	TRANSLATE=$(EXE) $(INCDIR) $(EC_DEBUG) $(TRUNKDIR)/source/ec.ex
+	TRANSLATE=$(EXE) $(CYPINCDIR) $(EC_DEBUG) $(CYPTRUNKDIR)/source/ec.ex
 endif
 
 ifeq "$(EUPHORIA)" "1"
@@ -391,7 +403,7 @@ be_rev.c : $(REVGET)
 code-page-db : $(BUILDDIR)/ecp.dat
 
 $(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp
-	$(BUILDDIR)/$(EEXU) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/buildcpdb.ex -p$(TRUNKDIR)/source/codepage -o$(BUILDDIR)
+	$(BUILDDIR)/$(EEXU) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/buildcpdb.ex -p$(CYPTRUNKDIR)/source/codepage -o$(CYPBUILDDIR)
 
 interpreter : builddirs
 ifeq "$(EUPHORIA)" "1"
@@ -459,7 +471,7 @@ source-tarball : source
 
 
 $(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
-	$(EXE) -i $(TRUNKDIR)/include coverage.ex $(BUILDDIR)/$(OBJDIR)
+	$(EXE) -i $(CYPTRUNKDIR)/include coverage.ex $(CYPBUILDDIR)/$(OBJDIR)
 
 $(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
 $(BUILDDIR)/transobj/back/be_execute.o : $(BUILDDIR)/transobj/back/coverage.h
@@ -508,12 +520,12 @@ ifeq "$(EMINGW)" "1"
 endif
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
-	cd ../docs/ && $(EUDOC)  -v -a manual.af -o $(BUILDDIR)/euphoria.txt
+	cd ../docs/ && $(EUDOC)  -v -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
 
 $(BUILDDIR)/docs/eu400_0001.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=template.html -o$(BUILDDIR)/docs $(BUILDDIR)/euphoria.txt
+	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/docs/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
@@ -522,7 +534,7 @@ manual : $(BUILDDIR)/docs/eu400_0001.html
 $(BUILDDIR)/html/eu400_0001.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
-	 $(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=offline-template.html -o$(BUILDDIR)/html $(BUILDDIR)/euphoria.txt
+	 $(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/html
@@ -540,8 +552,8 @@ $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
 
 $(BUILDDIR)/pdf/eu400_0001.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/pdf
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)/docs/ -t=offline-template.html -o$(BUILDDIR)/pdf -htmldoc $(BUILDDIR)/euphoria-pdf.txt
-# 	cd $(TRUNKDIR)/docs && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(BUILDDIR)/pdf $(BUILDDIR)/euphoria-pdf.txt
+	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
+# 	cd $(TRUNKDIR)/docs && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(CYPBUILDDIR)/pdf $(CYPBUILDDIR)/euphoria-pdf.txt
 
 $(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/eu400_0001.html
 	htmldoc -f $(BUILDDIR)/euphoria-4.0.pdf --book $(BUILDDIR)/pdf/eu400*.html
@@ -555,41 +567,41 @@ test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test : $(BUILDDIR)/ecp.dat
 test :  
-	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
+	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) ../source/eutest.ex -i ../include -cc gcc -verbose \
-		-exe "$(BUILDDIR)/$(EEXU)" \
-		-ec "$(BUILDDIR)/$(EECU)" \
-		-bind ../source/bind.ex -eub $(BUILDDIR)/$(EBACKENDC) \
-		-lib "$(BUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
+		-exe "$(CYPBUILDDIR)/$(EEXU)" \
+		-ec "$(CYPBUILDDIR)/$(EECU)" \
+		-bind ../source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
 		$(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
 testeu : $(BUILDDIR)/ecp.dat
-	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(BUILDDIR)/$(EEXU) -batch $(TRUNKDIR)/source/eu.ex" $(TESTFILE)
+	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(CYPBUILDDIR)/$(EEXU) -batch $(CYPTRUNKDIR)/source/eu.ex" $(TESTFILE)
 
 test-311 :
-	cd ../tests/311 && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
-		$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include -cc gcc -verbose \
-		-exe "$(BUILDDIR)/$(EEXU)" \
-		-ec "$(BUILDDIR)/$(EECU)" \
-		-bind $(TRUNKDIR)/source/bind.ex -eub $(BUILDDIR)/$(EBACKENDC) \
-		-lib "$(BUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
+	cd ../tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
+		$(EXE) $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc -verbose \
+		-exe "$(CYPBUILDDIR)/$(EEXU)" \
+		-ec "$(CYPBUILDDIR)/$(EECU)" \
+		-bind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
 		$(TESTFILE)
 		
 coverage-311 :
-	cd ../tests/311 && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
-		$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include \
-		-exe "$(BUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
-		-coverage-db $(BUILDDIR)/unit-test-311.edb -coverage $(TRUNKDIR)/include \
+	cd ../tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
+		$(EXE) $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
+		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
+		-coverage-db $(CYPBUILDDIR)/unit-test-311.edb -coverage $(CYPTRUNKDIR)/include \
 		-coverage-exclude std -coverage-exclude euphoria \
-		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
+		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
 coverage : 
-	cd ../tests && EUDIR=$(TRUNKDIR) EUCOMPILEDIR=$(TRUNKDIR) \
-		$(EXE) $(TRUNKDIR)/source/eutest.ex -i $(TRUNKDIR)/include \
-		-exe "$(BUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
-		-coverage-db $(BUILDDIR)/unit-test.edb -coverage $(TRUNKDIR)/include/std \
-		 -coverage-pp "$(EXE) -i $(TRUNKDIR)/include $(TRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
+	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
+		$(EXE) $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
+		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
+		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
+		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
 .PHONY : coverage
 
@@ -720,7 +732,7 @@ ifeq "$(EUPHORIA)" "1"
 $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	@$(ECHO) Translating $(EU_TARGET) to create $(EU_MAIN)
 	rm -f $(BUILDDIR)/$(OBJDIR)/{*.c,*.o}
-	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(INCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT)  $(TRUNKDIR)/source/$(EU_TARGET) )
+	(cd $(BUILDDIR)/$(OBJDIR);$(TRANSLATE) -nobuild $(CYPINCDIR) -$(XLTTARGETCC) $(RELEASE_FLAG) $(TARGETPLAT)  $(CYPTRUNKDIR)/source/$(EU_TARGET) )
 	
 endif
 
@@ -736,7 +748,7 @@ $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
 	
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
-	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSFLAGSCONSOLE)" CONFIG=../$(CONFIG)
+	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG)
 endif
 
 depend :

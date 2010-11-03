@@ -4,11 +4,11 @@
 #ifdef EWINDOWS
         #include <windows.h>
 #endif
-#ifdef EMINGW
-        #include "pcre/pcre_internal.h"
-#endif
 #if defined(EWINDOWS)
         #include "pcre/config.h" /* cannot make it link w/o it */
+#endif
+#ifdef EMINGW
+        #include "pcre/pcre_internal.h"
 #endif
 
 #include <ctype.h>
