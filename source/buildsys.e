@@ -256,14 +256,15 @@ function setup_build()
 			end if
 
 			if dll_option then
-				c_flags &= " -fPIC "
-		   	end if
+				c_flags &= " -fPIC"
+			end if
 
 			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
 				{ get_eucompiledir()  })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
+
 				if not con_option then
 					c_flags &= " -mwindows"
 				end if
@@ -282,7 +283,7 @@ function setup_build()
 			elsif TSUNOS then
 				l_flags &= " -lsocket -lresolv -lnsl"
 			elsif TWINDOWS then
-				l_flags &= " -lws2_32"
+				l_flags &= " -mno-cygwin -lws2_32"
 			end if
 
 		case COMPILER_WATCOM then
