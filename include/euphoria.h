@@ -223,7 +223,7 @@ int Get_Pixel(int);
 void shift_args(int, char**);
 int NewString(char *);
 #ifdef __GNUC__
-#ifndef EMINGW
+#if !defined(EMINGW) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
 char *malloc(int);
 #endif
 #endif
