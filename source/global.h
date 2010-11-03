@@ -64,7 +64,7 @@ typedef signed   char   schar;
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
-#elif defined(EWINDOWS)
+#elif defined(EWINDOWS) && !defined(EMINGW)
 #	define IFILE FILE*
 #	define IOFF __int64
 #	define iopen fopen
