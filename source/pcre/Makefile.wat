@@ -12,12 +12,12 @@ BASEPATH=$(BUILDDIR)\pcre
 PCREDEBUG=/d2
 !endif
 
-all: config.h pcre.h $(BASEPATH) $(PCRE_OBJECTS)
+all: $(BASEPATH) $(PCRE_OBJECTS) 
 
 # I wanted to put $(BASEPATH) here as a dependency for .c files but
 # watcom doesn't provide that functionality in inplicit rules... (sigh)
-.c.obj :
+.c.obj : .AUTODEPEND
 	wcc386 $(EOSTYPE) /zp4 /w0 /5r /ol $(PCREDEBUG) -zq -oaxt -DHAVE_CONFIG_H -DNO_RECURSE $< -fo=$@
 
-$(BASEPATH) : .EXISTSONLY
+$(BASEPATH) : .EXISTSONLY $(BUILDDIR)
 	mkdir $(BASEPATH)
