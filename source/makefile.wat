@@ -331,28 +331,21 @@ $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage
 BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
-!ifndef RM
-	@ECHO Please run configure
-	error
-!endif
 	-$(RM) $(CONFIG)
 	-$(RM) Makefile
 
-clean : .SYMBOLIC pcre
-!ifndef DELTREE
-	@ECHO Please run configure
-	error
-!endif
+clean : .SYMBOLIC mostlyclean
 	-@for %i in ($(BUILD_DIRS)) do -$(RMDIR) %i
-	-$(RM) $(BUILDDIR)\pcre\*.obj
-	-$(RM) $(BUILDDIR)\eu*.exe
-	-$(RM) $(BUILDDIR)\eu*.lib
-
+	
 nearlyclean mostlyclean : .SYMBOLIC	
 	-@for %i in ($(BUILD_DIRS)) do -$(RM) %i\*.obj
 	-$(RM) $(BUILDDIR)\pcre\*.obj
 	-$(RM) $(BUILDDIR)\eu*.exe
 	-$(RM) $(BUILDDIR)\eu*.lib
+	-$(RM) $(TRUNKDIR)\tests\ecp.dat
+	-$(RM) $(TRUNKDIR)\tests\*.c	
+	-$(RM) $(TRUNKDIR)\tests\*.obj
+	-$(RM) $(TRUNKDIR)\tests\*.h
 	
 clobber : .SYMBOLIC distclean
 	-$(RMDIR) $(BUILDDIR)
@@ -455,21 +448,18 @@ translate source : .SYMBOLIC
 $(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
 	-copy $(BUILDDIR)\ecp.dat $(TRUNKDIR)\tests
 
-testeu : .SYMBOLIC code-page-db $(TRUNKDIR)\tests\ecp.dat
+testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR)
 	-$(EUTEST) -i ..\include $(TEST_EXTRA) -exe "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\eu.ex" -ec "$(FULLBUILDDIR)\eui.exe $(I_EXTRA) -batch $(TRUNKDIR)\source\ec.ex" $(LIST) $(TESTFILE)
-	-del ecp.dat
 	cd ..\source
 
 !endif #EUPHORIA
 
-test : .SYMBOLIC code-page-db
+test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
-	-copy $(BUILDDIR)\ecp.dat .
 	set EUCOMPILEDIR=$(TRUNKDIR) 
 	$(EUTEST) $(TEST_EXTRA) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
-	-del ecp.dat
 	cd ..\source
 
 coverage : .SYMBOLIC code-page-db
