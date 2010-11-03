@@ -79,7 +79,6 @@ if there is an error control file in a directory with its same name and
 file's contents found in the said directory.  Such a failure is marked as
 a successful test run.  However, if there is no such 
 directory or file the counter test will be marked as a failed test run.
-If any of the regular tests fail, the counter tests will be skipped.
 
 ==== A trivial example
 

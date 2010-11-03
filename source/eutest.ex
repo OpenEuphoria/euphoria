@@ -683,21 +683,9 @@ procedure do_test( sequence files )
 	end if
 
 	for i = 1 to length(files) do
-		if match( "t_c_", files[i] ) = 1 then
-			first_counter = i
-			exit
-		end if
 		fail_list = test_file( files[i], fail_list )
 		coverage_erase = ""
 	end for
-	
-	-- if a failure occurs in a regular test, skip the counter tests.
-	if equal(fail_list,{}) then
-		for i = first_counter to length(files) do
-			fail_list = test_file( files[i], fail_list )
-			coverage_erase = ""
-		end for
-	end if
 	
 	if logging_activated and ctcfh != -1 then
 		print(ctcfh, error_list)
