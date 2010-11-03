@@ -111,7 +111,7 @@ ifeq "$(EMINGW)" "1"
 	SEDFLAG=-ri
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
-	EOSPCREFLAGS=-mno-cygwin -DPCRE_STATIC
+	EOSPCREFLAGS=-mno-cygwin
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
 	ifdef EDEBUG
