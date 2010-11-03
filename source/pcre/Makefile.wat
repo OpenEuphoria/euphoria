@@ -14,8 +14,6 @@ PCREDEBUG=/d2
 
 all: config.h pcre.h $(BASEPATH) $(PCRE_OBJECTS)
 
-distclean : .SYMBOLIC clean
-
 # I wanted to put $(BASEPATH) here as a dependency for .c files but
 # watcom doesn't provide that functionality in inplicit rules... (sigh)
 .c.obj :

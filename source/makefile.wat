@@ -361,15 +361,20 @@ $(BUILD_DIRS) : .existsonly
 	mkdir $@
 	mkdir $@\back
 
-	
+
 !ifdef PLAT
+!ifeq PLAT WIN
+OS=WIN
+!else
 OS=$(PLAT)
+!endif
 !else
 OS=WIN
 !endif
 
+
 # To tell the translator which compiler it should use.
-!ifeq $(OS) WIN
+!ifeq OS WIN
 TRANS_CC_FLAG=-wat
 !else
 TRANS_CC_FLAG=-gcc
