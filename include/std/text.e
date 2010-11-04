@@ -1438,7 +1438,8 @@ public function format(sequence format_pattern, object arg_list = {})
 	sequence idname
 	object envsym
 	object envvar
-
+	integer ep
+	
 	if atom(arg_list) then
 		arg_list = {arg_list}
 	end if
@@ -1753,6 +1754,12 @@ public function format(sequence format_pattern, object arg_list = {})
 								end if
 							else
 								argtext = trim(sprintf("%15.15g", arg_list[argn]))
+								-- Remove any leading 0 after e+
+								while ep != 0 with entry do
+									argtext = remove(argtext, ep+2)
+								entry
+									ep = match("e+0", argtext)
+								end while
 								if zfill != 0 and width > 0 then
 									if width > length(argtext) then
 										if argtext[1] = '-' then
@@ -1833,6 +1840,12 @@ public function format(sequence format_pattern, object arg_list = {})
 										{2,0,1,1000,"%d","%.15g",32,127,1,0}
 										)
 						end if
+						-- Remove any leading 0 after e+
+						while ep != 0 with entry do
+							argtext = remove(argtext, ep+2)
+						entry
+							ep = match("e+0", argtext)
+						end while
 					end if
 	    			currargv = arg_list[argn]
     			end if
