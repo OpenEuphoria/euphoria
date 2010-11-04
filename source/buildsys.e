@@ -1,5 +1,3 @@
--- (c) Copyright - See License.txt
-
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
@@ -12,6 +10,7 @@ include std/io.e
 include std/regex.e
 include std/text.e
 include std/map.e
+include std/search.e
 
 include c_decl.e
 include c_out.e
@@ -364,7 +363,7 @@ procedure write_objlink_file()
 	end for
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "NAME %s" & HOSTNL, { exe_name })
+		printf(fh, "NAME '%s'" & HOSTNL, { exe_name })
 	end if
 
 	puts(fh, trim(settings[SETUP_LFLAGS] & HOSTNL))
@@ -438,23 +437,23 @@ procedure write_makefile_full()
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "%s: $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
+		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
 		puts(fh, HOSTNL)
-		printf(fh, "%s-clean: .SYMBOLIC" & HOSTNL, { file0 })
+		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
 		for i = 1 to length(generated_files) do
 			if match(".o", generated_files[i]) then
-				printf(fh, "\tdel %s" & HOSTNL, { generated_files[i] })
+				printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
 			end if
 		end for
 		puts(fh, HOSTNL)
-		printf(fh, "%s-clean-all: .SYMBOLIC" & HOSTNL, { file0 })
-		printf(fh, "\tdel %s" & HOSTNL, { exe_name })
+		printf(fh, "%s-clean-all : .SYMBOLIC" & HOSTNL, { file0 })
+		printf(fh, "\tdel \"%s\"" & HOSTNL, { exe_name })
 		for i = 1 to length(generated_files) do
-			printf(fh, "\tdel %s" & HOSTNL, { generated_files[i] })
+			printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
 		end for
 		puts(fh, HOSTNL)
-		puts(fh, ".c.obj: .autodepend" & HOSTNL)
+		puts(fh, ".c.obj : .autodepend" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $<" & HOSTNL)
 		puts(fh, HOSTNL)
 
