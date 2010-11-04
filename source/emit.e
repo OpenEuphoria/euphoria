@@ -1043,13 +1043,29 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
-			if c < 1 or ((SymTab[c][S_MODE] != M_CONSTANT or not atom(SymTab[c][S_OBJ])))
-			   and not IsInteger(c) then
+			if c > 1
+			and SymTab[c][S_MODE] = M_CONSTANT then
+				-- we might know the constant's value at compile time
+				if sequence( SymTab[c][S_OBJ] ) then
+					-- type check error!
+					ThisLine = ForwardLine
+					bp = forward_bp
+					CompileErr( 346 )
+					
+				elsif SymTab[c][S_OBJ] = NOVALUE then
+					emit_opcode(op)
+					emit_addr(op_info1)
+				else
+					last_op = last_op_backup
+					last_pc = last_pc_backup
+				end if
+				
+			elsif c < 1 
+			or not IsInteger(c) then
+				-- fwd ref or non-integer
 				emit_opcode(op)
 				emit_addr(op_info1)
-			elsif SymTab[c][S_MODE] = M_CONSTANT then
-				emit_opcode(op)
-				emit_addr(op_info1)
+			
 			else
 				last_op = last_op_backup
 				last_pc = last_pc_backup
