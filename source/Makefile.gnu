@@ -354,7 +354,16 @@ EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
 all : interpreter translator library debug-library backend code-page-db
 
-BUILD_DIRS=$(BUILDDIR)/intobj/back $(BUILDDIR)/transobj/back $(BUILDDIR)/libobj/back $(BUILDDIR)/backobj/back $(BUILDDIR)/intobj/ $(BUILDDIR)/transobj/ $(BUILDDIR)/libobj/ $(BUILDDIR)/backobj/
+BUILD_DIRS=\
+	$(BUILDDIR)/intobj/back \
+	$(BUILDDIR)/transobj/back \
+	$(BUILDDIR)/libobj/back \
+	$(BUILDDIR)/libobjdbg/back \
+	$(BUILDDIR)/backobj/back \
+	$(BUILDDIR)/intobj/ \
+	$(BUILDDIR)/transobj/ \
+	$(BUILDDIR)/libobj/ \
+	$(BUILDDIR)/backobj/
 
 distclean : clean
 	-rm -f $(CONFIG)
@@ -376,7 +385,7 @@ clobber : distclean
 .PHONY : clean distclean clobber all htmldoc manual
 
 debug-library : builddirs
-	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
+	$(MAKE) $(BUILDDIR)/$(EECUDBGA) OBJDIR=libobjdbg ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=1 EPROFILE=$(EPROFILE)
 
 library : builddirs
 	$(MAKE) $(BUILDDIR)/$(LIBRARY_NAME) OBJDIR=libobj ERUNTIME=1 CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
