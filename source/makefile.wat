@@ -318,9 +318,10 @@ CREOLEHTML=creolehtml.exe
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 all :  .SYMBOLIC
     @echo ------- ALL -----------
+	wmake -h library $(VARS)
+	wmake -h library DEBUG=1 MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 	wmake -h interpreter $(VARS)
 	wmake -h translator $(VARS)
-	wmake -h winlibrary $(VARS)
 	wmake -h backend $(VARS)
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
@@ -328,7 +329,7 @@ code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 $(BUILDDIR)\ecp.dat : $(TRUNKDIR)\bin\buildcpdb.ex $(TRUNKDIR)\source\codepage 
 	$(BUILDDIR)\eui -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\buildcpdb.ex -p$(TRUNKDIR)\source\codepage -o$(BUILDDIR)
 
-BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
+BUILD_DIRS=$(BUILDDIR)\intobj $(BUILDDIR)\transobj $(BUILDDIR)\WINlibobj $(BUILDDIR)\WINlibobj1 $(BUILDDIR)\backobj $(BUILDDIR)\eutestdr
 
 distclean : .SYMBOLIC clean
 	-$(RM) $(CONFIG)
@@ -382,7 +383,7 @@ BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $
 	
 library : .SYMBOLIC runtime
     @echo ------- LIBRARY -----------
-	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj $(VARS) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj$(DEBUG) $(VARS) MANAGED_MEM=$(MANAGED_MEM)
 
 winlibrary : .SYMBOLIC
     @echo ------- WINDOWS LIBRARY -----------
