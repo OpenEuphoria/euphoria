@@ -25,7 +25,7 @@
 #TODO: other release notes
 
 ########
-:= Quick Start
+:= Installation & Setup
 :<<LEVELTOC level=1 depth=4>>
 
 ../docs/refman_1.txt
