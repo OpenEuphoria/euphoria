@@ -348,6 +348,10 @@ function find_line(symtab_index sub, integer pc, integer file_only = 1)
 	gline = SymTab[sub][S_FIRSTLINE] + line - 1
 	if file_only then
 		return slist[gline][LOCAL_FILE_NO]
+	
+	elsif gline > length( slist ) or not gline then
+		-- probably a bug with the line table code in the parser
+		return { "??", -1, "???", gline }
 	else
 		return {known_files[slist[gline][LOCAL_FILE_NO]], slist[gline][LINE], slist[gline][SRC], gline}
 	end if
@@ -1588,9 +1592,8 @@ procedure save_il( sequence name )
 		if atom(slist[j][SRC]) then
 			slist[j][SRC] = fetch_line(slist[j][SRC])
 		end if
-		if length(slist[j][SRC]) then
-			printf( st, line_format, {known_files[slist[j][LOCAL_FILE_NO]], j, slist[j][SRC] })
-		end if
+		
+		printf( st, line_format, {known_files[slist[j][LOCAL_FILE_NO]], j, slist[j][SRC] })
 
 	end for
 

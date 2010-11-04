@@ -162,12 +162,14 @@ procedure PopGoto()
 	goto_stack = goto_stack[1..$-1]
 end procedure
 
-procedure EnterTopLevel()
+procedure EnterTopLevel( integer end_line_table = 1 )
 -- prepare to put code into the top level procedure
 	if CurrentSub then
-		EndLineTable()
-		SymTab[CurrentSub][S_LINETAB] = LineTable
-		SymTab[CurrentSub][S_CODE] = Code
+		if end_line_table then
+			EndLineTable()
+			SymTab[CurrentSub][S_LINETAB] = LineTable
+			SymTab[CurrentSub][S_CODE] = Code
+		end if
 	end if
 	if length(goto_stack) then
 		PopGoto()
@@ -3274,16 +3276,15 @@ function Global_declaration(integer type_ptr, integer scope)
 			CompileErr(25, {find_category(tok[T_ID])} )
 		end if
 		sym = tok[T_SYM]
-		new_symbols = append(new_symbols, sym)
 		DefinedYet(sym)
 		if find(SymTab[sym][S_SCOPE], {SC_GLOBAL, SC_PREDEF, SC_PUBLIC, SC_EXPORT}) then
 			h = SymTab[sym][S_HASHVAL]
 			-- create a new entry at beginning of this hash chain
 			sym = NewEntry(SymTab[sym][S_NAME], 0, 0, VARIABLE, h, buckets[h], 0)
 			buckets[h] = sym
-
 			-- more fields set below:
 		end if
+		new_symbols = append(new_symbols, sym)
 		Block_var( sym )
 		if SymTab[sym][S_SCOPE] = SC_UNDEFINED and SymTab[sym][S_FILE_NO] != current_file_no then
 			SymTab[sym][S_FILE_NO] = current_file_no
@@ -3819,6 +3820,7 @@ procedure SubProg(integer prog_type, integer scope)
 	object seq_sym
 	object i1_sym
 	sequence enum_syms = {}
+	integer type_enum_gline, real_gline
 
 	LeaveTopLevel()
 	prog_name = next_token()
@@ -3829,6 +3831,11 @@ procedure SubProg(integer prog_type, integer scope)
 	if prog_type = TYPE_DECL then
 		object tsym = prog_name[T_SYM]
 		if equal(sym_name(prog_name[T_SYM]),"enum") then
+			-- because enum types are both top level declarations and type routines, we
+			-- have to Enter and Leave the top level, fixing up the LineTable, in order
+			-- to prevent corruption of the LineTables
+			EnterTopLevel( FALSE )
+			type_enum_gline = gline_number
 			type_enum = 1
 			sequence seq_symbol
 			prog_name = next_token()
@@ -3851,6 +3858,8 @@ procedure SubProg(integer prog_type, integer scope)
 			putback(i1_sym)
 			putback(keyfind("object",-1))
 			putback({LEFT_ROUND,0})
+			
+			LeaveTopLevel()
 		end if
 	end if
 	if not find(prog_name[T_ID], ADDR_TOKS) then
@@ -3916,7 +3925,17 @@ procedure SubProg(integer prog_type, integer scope)
 		SymTab[p][S_USAGE] = or_bits( SymTab[p][S_USAGE], U_FORWARD )
 	end if
 
-	StartSourceLine(FALSE, , COVERAGE_OVERRIDE)
+	
+	if type_enum then
+		SymTab[p][S_FIRSTLINE] = type_enum_gline
+		real_gline = gline_number
+		gline_number = type_enum_gline
+		StartSourceLine( FALSE, , COVERAGE_OVERRIDE )
+		gline_number = real_gline
+	else
+		StartSourceLine(FALSE, , COVERAGE_OVERRIDE)
+	end if
+	
 	tok_match(LEFT_ROUND)
 	tok = next_token()
 	param_num = 0
