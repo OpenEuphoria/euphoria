@@ -1043,8 +1043,11 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
-			if c < 1 or ((SymTab[c][S_MODE] != M_CONSTANT or not atom(SymTab[c][S_OBJ]))
-			   and not IsInteger(c)) then
+			if c < 1 or ((SymTab[c][S_MODE] != M_CONSTANT or not atom(SymTab[c][S_OBJ])))
+			   and not IsInteger(c) then
+				emit_opcode(op)
+				emit_addr(op_info1)
+			elsif SymTab[c][S_MODE] = M_CONSTANT then
 				emit_opcode(op)
 				emit_addr(op_info1)
 			else
