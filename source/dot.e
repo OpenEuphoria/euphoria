@@ -13,7 +13,6 @@ include std/get.e
 include std/map.e as map
 include std/sequence.e
 include std/search.e
-include std/sets.e as set
 include std/math.e
 
 -- called_from:  file -> proc -> called_proc file : called proc
@@ -217,14 +216,14 @@ export function diagram_includes( integer show_all = 0, integer stdlib = 0)
 	end for
 	lines &= "\t}\n"
 	
-	set:set included = {}
+	sequence included = {}
 	for fi = 1 to length( file_include ) do
 		for i = 1 to length( file_include[fi] ) do
 			integer file = abs( file_include[fi][i])
-			if show_all or not set:belongs_to( file, included ) then
+			if show_all or not find( file, included ) then
 				if stdlib or match( "std/", short_names[file] ) != 1 then
 					lines &= sprintf("\t\"%s\" -> \"%s\"\n", {short_names[fi], short_names[file]})
-					included = set:add_to( file, included )
+					included = append( included, file )
 				end if
 			end if
 		end for
