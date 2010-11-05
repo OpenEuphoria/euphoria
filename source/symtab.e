@@ -758,16 +758,24 @@ end ifdef
 					elsif file_no = tok_file then
 						good = 1
 					else
-						switch scope with fallthru do
-						case SC_GLOBAL then
-							good = and_bits( ANY_INCLUDE, include_matrix[file_no][tok_file] )
-							break
-						case SC_PUBLIC then
-							good = and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file_no][tok_file] )
-							break
-						case SC_EXPORT then
-							good = and_bits( DIRECT_INCLUDE, include_matrix[file_no][tok_file] )
+						integer include_type = 0
+						switch scope do
+							case SC_GLOBAL then
+								if Resolve_unincluded_globals then
+									include_type = ANY_INCLUDE
+								else
+									include_type = DIRECT_OR_PUBLIC_INCLUDE
+								end if
+								
+							case SC_PUBLIC then
+								include_type = DIRECT_OR_PUBLIC_INCLUDE
+								
+							case SC_EXPORT, SC_OVERRIDE then
+								include_type = DIRECT_INCLUDE
+							
 						end switch
+						
+						good = and_bits( include_type, include_matrix[file_no][tok_file] )
 					end if
 					
 					if good then
