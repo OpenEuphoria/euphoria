@@ -136,8 +136,8 @@ while [ "$1" != "" ]; do
         --no-managed-mem )
 		export MANAGED_MEM=0
 	;;
-        --no-align4 )
-		export ALIGN4=0
+        --align4 )
+		export ALIGN4=1
         ;;
         --without-euphoria )
 			export EUPHORIA=0
@@ -207,8 +207,8 @@ while [ "$1" != "" ]; do
 			echo "    --watcom            set this so the translator will create C code for "
 			echo "                        Watcom C."
 			echo "   --no-managed-mem    disable managed memory"
-			echo "   --no-align4         malloc allocates addresses that are"
-			echo "                       always 8 byte aligned."
+			echo "   --align4            malloc allocates addresses that are"
+			echo "                       always 4 byte aligned."
 			echo "   --eubin value       Use this option to specify the location of the"
 			echo "    --cc  value         set this to the name of your GNU C compiler file name if its "
 			echo "                        name is not 'gcc'"
@@ -265,9 +265,9 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 		echo MANAGED_MEM=0 >> "$PREFIX"Makefile.eu
 	fi
 	if [ "x$ALIGN4" = "x" ]; then
-		echo ALIGN4=1 >> "$PREFIX"Makefile.eu
-	else
 		echo ALIGN4=0 >> "$PREFIX"Makefile.eu
+	else
+		echo ALIGN4=1 >> "$PREFIX"Makefile.eu
 	fi
 fi
 echo "CC=$CC" >> "$PREFIX"Makefile.eu
