@@ -23,7 +23,7 @@
 #     --no-managed-mem   Use this option to turn EUPHORIA's memory cache off in
 #		     the targets for Windows
 #
-#     --no-align4   Use this option to disable support for non-8-byte-aligned
+#     --align4   Use this option to enable support for non-8-byte-aligned
 #		     malloc in the targets for Windows
 #
 #     --debug	 Use this option to turn on debugging symbols
