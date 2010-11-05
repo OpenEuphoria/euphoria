@@ -108,7 +108,7 @@ test_not_equal( "create forced cdecl callback", 0, five_cb_cdecl )
 atom five_cb = call_back( routine_id("five") )
 test_not_equal( "create regular callback", 0, five_cb )
 
-integer cb_cdecl = define_c_func("", {'+', five_cb}, {C_INT}, C_INT)
+integer cb_cdecl = define_c_func("", {'+', five_cb_cdecl}, {C_INT}, C_INT)
 integer cb = define_c_func("", five_cb, {C_INT}, C_INT)
 
 integer result
@@ -134,7 +134,7 @@ five_cb = call_back( routine_id("five") )
 void = call_back( routine_id("allocate_protect") )
 
 test_message = "call declared cdecl callback after many calls"
-cb_cdecl = define_c_func("", {'+', five_cb}, {C_INT}, C_INT)
+cb_cdecl = define_c_func("", {'+', five_cb_cdecl}, {C_INT}, C_INT)
 test_message = "call forced cdecl callback after many calls"
 result = c_func( cb_cdecl, {2})
 test_equal( "call forced cdecl callback", 10, c_func( cb_cdecl, {5}) )
