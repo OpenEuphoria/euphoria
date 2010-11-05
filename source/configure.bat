@@ -12,6 +12,7 @@ rem Set variables we will need to blank
 rem ============================================================
 SET ECBIN=
 SET DISABLED_MANAGED_MEM=
+SET DISABLED_ALIGN4=
 
 rem ============================================================
 rem Be sure to start with a blank config.wat
@@ -94,8 +95,9 @@ IF "%1" == "--extracheck" (
 	GOTO EndLoop
 )
 
-IF "%1" == "--align4" (
-	echo ALIGN4=1 >> config.wat
+IF "%1" == "--no-align4" (
+	echo ALIGN4=0 >> config.wat
+        SET DISABLED_ALIGN4=1
 	GOTO EndLoop
 )
 
@@ -148,6 +150,9 @@ IF "%NOEU%" == "" (
 )
 IF "%DISABLED_MANAGED_MEM%" == "" (
 	echo MANAGED_MEM=1 >> config.wat
+)
+IF "%DISABLED_ALIGN4%" == "" (
+	echo ALIGN4=1 >> config.wat
 )
 IF "%ECBIN%" == "1" (
     	echo EC="$(EUBIN)\euc.exe" >> config.wat
@@ -236,8 +241,8 @@ echo                         be installed.  The default is EUDIR, or c:\euphoria
 echo                         if EUDIR is not set.
 echo.
 echo     --no-managed-mem    disable managed memory
-echo     --align4            malloc allocates addresses that are
-echo                         not always 8 byte aligned.
+echo     --no-align4         malloc allocates addresses that are
+echo                         always 8 byte aligned.
 echo.
 echo     --eubin value       Use this option to specify the location of the
 echo                         interpreter binary to use to translate the front end.

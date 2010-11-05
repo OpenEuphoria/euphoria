@@ -20,8 +20,11 @@
 #		     binary to use to translate the front end.  The default
 #		     is ../bin
 #
-#     --managed-mem   Use this option to turn EUPHORIA's memory cache on in
-#		     the targets
+#     --no-managed-mem   Use this option to turn EUPHORIA's memory cache off in
+#		     the targets for Windows
+#
+#     --no-align4   Use this option to disable support for non-8-byte-aligned
+#		     malloc in the targets for Windows
 #
 #     --debug	 Use this option to turn on debugging symbols
 #
@@ -44,7 +47,7 @@
 #   Interpreter          (eui):  make interpreter
 #   Translator           (euc):  make translator
 #   Translator Library  (eu.a):  make library
-#   Backend              (eub):  make eub
+#   Backend              (eub):  make backend
 #   Run Unit Tests            :  make test
 #   Run Unit Tests with eu.ex :  make testeu
 #   Code Page Database        :  make code-page-db
@@ -127,9 +130,17 @@ ifeq "$(EMINGW)" "1"
 	EEXU=eui.exe
 	EEXUW=euiw.exe
 	ifeq "$(MANAGED_MEM)" "1"
-		MEM_FLAGS=-DEALIGN4
+		ifeq "$(ALIGN4)" "1"
+			MEM_FLAGS=-DEALIGN4
+		else
+			MEM_FLAGS=
+		endif
 	else
-		MEM_FLAGS=-DESIMPLE_MALLOC
+		ifeq "$(ALIGN4)" "1"
+			MEM_FLAGS=-DEALIGN4 -DESIMPLE_MALLOC
+		else
+			MEM_FLAGS=-DESIMPLE_MALLOC
+		endif
 	endif
 	PCRE_CC=gcc
 else
