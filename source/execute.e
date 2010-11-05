@@ -36,9 +36,7 @@ include mode.e as mode
 include intinit.e
 include coverage.e
 
-ifdef WINDOWS then
-	include std/machine.e as dep
-end ifdef
+include std/machine.e as dep
 without inline
 -- Note: In several places we omit checking for bad arguments to
 -- built-in routines. Those errors will be caught by the underlying
