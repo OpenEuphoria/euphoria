@@ -213,7 +213,7 @@ object exec_pcre(object x ){
           strLen = get_int(SEQ_PTR(x)->base[3]);
           freeStr = 1;
         } else {
-          str = get_int(SEQ_PTR(x)->base[2]);
+          str = (char *)get_int(SEQ_PTR(x)->base[2]);
           strLen = get_int(SEQ_PTR(x)->base[3]);
           freeStr = 0;
         }
@@ -575,8 +575,12 @@ object find_replace_pcre(object x )
 
                 str = EMalloc(out_len + 2);
                 copy_string(str, out, out_len + 1);
-
-                start_from = ovector[rc+1];
+            
+			//if (rep_s->length == 0)
+			//	start_from = ovector[rc];
+			//else
+			//	start_from = ovector[rc+1];
+			start_from = ovector[rc] + rep_s->length;
                 limit -= 1;
         }
 

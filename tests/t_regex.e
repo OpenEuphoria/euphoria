@@ -231,7 +231,10 @@ test_equal("find_replace() #4", "hello John\tDoe!", regex:find_replace(re, "hell
 test_equal("find_replace() #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", `Mr. \1 \2`))
 
 re = re:new(`<[^>]+>`)
-test_equal("find_replace() #6", "Howdy You", regex:find_replace(re, "<b>Howdy</b> <strong>You</strong>", ""))
+test_equal("find_replace() #6", "Howdy You", 
+	regex:find_replace(re, "<b>Howdy</b> <strong>You</strong>", ""))
+test_equal("find_replace() #7", "^Howdy^ ^You^", 
+	regex:find_replace(re, "<b>Howdy</b> <strong>You</strong>", "^"))
 
 re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 test_equal("find_replace_limit() #1", "JOHN DOE Jane Doe", 
