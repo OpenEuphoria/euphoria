@@ -13,7 +13,7 @@
 :%%splitname = eu400
 :%%splitlevel = 2
 :%%toclevel = 3
-:<<TOC level=3>>
+:<<TOC level=1>>
 
 ########
 := Euphoria Programming Language v4.0
