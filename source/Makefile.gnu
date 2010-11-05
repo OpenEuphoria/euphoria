@@ -237,9 +237,9 @@ CREOLEHTML=creolehtml
 endif
 
 ifdef WKHTMLTOPDF
-HTML2PDF=wkhtmltopdf $(BUILDDIR)/pdf/eu400*.html $(BUILDDIR)/euphoria-4.0.pdf
+HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/eu400*.html $(CYPBUILDDIR)/euphoria-4.0.pdf
 else
-HTML2PDF=htmldoc -f $(BUILDDIR)/euphoria-4.0.pdf --book $(BUILDDIR)/pdf/eu400*.html
+HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/eu400*.html
 endif
 
 ifeq "$(TRANSLATE)" "euc"
@@ -580,9 +580,9 @@ $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
 $(BUILDDIR)/pdf/eu400_0001.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
 	-mkdir -p $(BUILDDIR)/pdf
 	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
-# 	cd $(TRUNKDIR)/docs && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(CYPBUILDDIR)/pdf $(CYPBUILDDIR)/euphoria-pdf.txt
 
-$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/eu400_0001.html
+$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/eu400_0001.html  $(DOCDIR)/pdf.css
+	cp $(CYPTRUNKDIR)/docs/pdf.css $(CYPBUILDDIR)/pdf/
 	$(HTML2PDF)
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
