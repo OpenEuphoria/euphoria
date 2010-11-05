@@ -7,7 +7,6 @@
 namespace console
 
 include std/pretty.e
-include std/types.e
 include std/get.e
 include std/text.e
 include std/types.e
