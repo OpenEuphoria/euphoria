@@ -6,11 +6,11 @@
 -- <<LEVELTOC level=2 depth=4>>
 namespace console
 
+include std/pretty.e
 include std/types.e
 include std/get.e
 include std/text.e
 include std/types.e
-include std/pretty.e
 public include std/graphcst.e
 
 -- machine() commands
