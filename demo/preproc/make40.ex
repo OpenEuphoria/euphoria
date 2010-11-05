@@ -439,6 +439,9 @@ function getIncludeName( sequence data )
     if find( '\n', data ) then
 	data = data[1..length(data)-1]
     end if
+    if find( '\r', data ) then
+	data = data[1..length(data)-1]
+    end if
 
     -- not first statement?
     if not equal( data[1..8], "include " ) then
