@@ -4706,7 +4706,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 				||
 				( rt00[i].scope == S_GLOBAL
 					&& ( (rt00[i].file_num == ns_file  && rt02[current_file_no][ns_file] ) ||
-						(rt02[ns_file][rt01[i].file_num] && rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)) )
+						(rt02[ns_file][rt00[i].file_num] && rt02[current_file_no][ns_file] & DIRECT_OR_PUBLIC_INCLUDE)) )
 				||
 				( rt00[i].scope == S_LOCAL && ns_file == current_file_no && ns_file == rt00[i].file_num))
 				&& strcmp(simple_name, rt00[i].name) == 0) {
