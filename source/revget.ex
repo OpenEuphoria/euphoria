@@ -152,9 +152,9 @@ procedure rev_1_4()
 	sequence g
 	integer n
 
-	h = open(root_project_path & ".svn/entries", "r")
+	h = open(root_project_path & "/.svn/entries", "r")
 	if h = -1 then
-		h = open(root_project_path & "svn~1/entries", "r")
+		h = open(root_project_path & "/svn~1/entries", "r")
 	end if
 
 	if h = -1 then
@@ -217,9 +217,9 @@ procedure rev_1_3()
 	sequence f
 	object x
 
-	h = open(root_project_path & ".svn/entries", "r")
+	h = open(root_project_path & "/.svn/entries", "r")
 	if h = -1 then
-		h = open(root_project_path & "svn~1/entries", "r")
+		h = open(root_project_path & "/svn~1/entries", "r")
 	end if
 
 	if h = -1 then
