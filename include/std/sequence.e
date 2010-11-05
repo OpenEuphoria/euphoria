@@ -6,9 +6,9 @@ namespace stdseq
 -- == Sequence Manipulation
 --
 -- <<LEVELTOC level=2 depth=4>>
+
 include std/error.e
 include std/search.e
-
 include std/sort.e
 include std/math.e
 include std/types.e
@@ -341,7 +341,6 @@ end function
 -- s = columnize({"abc", "def", "ghi"})
 -- -- s is {"adg", "beh", "cfi" }
 -- </eucode>
-
 
 public function columnize(sequence source, object cols = {}, object defval = 0)
 	sequence result
