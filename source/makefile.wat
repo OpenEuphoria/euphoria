@@ -719,7 +719,7 @@ $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
 
 $(BUILDDIR)\pdf\eu400_0001.html : $(BUILDDIR)\euphoria-pdf.txt
 	-mkdir $(BUILDDIR)\pdf
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=offline-template.html -o$(BUILDDIR)\pdf -htmldoc $(BUILDDIR)\euphoria-pdf.txt
+	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=pdf-template.html -o$(BUILDDIR)\pdf -htmldoc $(BUILDDIR)\euphoria-pdf.txt
 
 $(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\eu400_0001.html
 	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\eu400_0001.html

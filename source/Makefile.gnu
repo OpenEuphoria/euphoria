@@ -225,6 +225,12 @@ ifeq "$(CREOLEHTML)" ""
 CREOLEHTML=creolehtml
 endif
 
+ifdef WKHTMLTOPDF
+HTML2PDF=wkhtmltopdf $(BUILDDIR)/pdf/eu400*.html $(BUILDDIR)/euphoria-4.0.pdf
+else
+HTML2PDF=htmldoc -f $(BUILDDIR)/euphoria-4.0.pdf --book $(BUILDDIR)/pdf/eu400*.html
+endif
+
 ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
@@ -557,15 +563,16 @@ $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 htmldoc : $(BUILDDIR)/html/eu400_0001.html
 
 $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
-	sed -e "s/splitlevel = 2/splitlevel = 0/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
+# 	cp  $(BUILDDIR)/euphoria.txt  $(BUILDDIR)/euphoria-pdf.txt
+	sed -e "s/splitlevel = 2/splitlevel = 1/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
 
-$(BUILDDIR)/pdf/eu400_0001.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/offline-template.html
+$(BUILDDIR)/pdf/eu400_0001.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
 	-mkdir -p $(BUILDDIR)/pdf
-	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
+	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
 # 	cd $(TRUNKDIR)/docs && $(CREOLEHTML) -A=ON -t=offline-template.html -o$(CYPBUILDDIR)/pdf $(CYPBUILDDIR)/euphoria-pdf.txt
 
 $(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/eu400_0001.html
-	htmldoc -f $(BUILDDIR)/euphoria-4.0.pdf --book $(BUILDDIR)/pdf/eu400*.html
+	$(HTML2PDF)
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 

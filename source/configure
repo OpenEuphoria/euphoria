@@ -178,6 +178,9 @@ while [ "$1" != "" ]; do
 		shift
 		echo ROOTDIR=$1 >> Makefile.eu
 		;;
+	--wkhtmltopdf )
+		echo WKHTMLTOPDF=1 >> Makefile.eu
+		;;
 		* )
 			echo "Unknown option '$1'"
 			echo "Configures and prepares the euphoria source for building"
@@ -209,6 +212,9 @@ while [ "$1" != "" ]; do
 			echo "                        Interpret the translator's source rather"
 			echo "                        than using the already built translator"
 			echo "                        (default)"
+			echo "    --wkhtmltopdf                                              "
+			echo "                        build pdf documentation with wkhtmltopdf"
+			echo "                        instead of the default htmldoc"
 			exit
 			;;
     esac
