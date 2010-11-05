@@ -3399,56 +3399,24 @@ cb_cdecl= {
 	#C3,#00,#00,            --   14: ret bytes
 		#00,#00,#00,#00}    --   17: function pointer (23)
 
-constant
-	M_ALLOC = 16
-
-function alloc(integer size, integer depq)
-	ifdef WINDOWS then
-		if depq then
-			return dep:allocate_protect(size, 1, PAGE_EXECUTE_READWRITE)
-		end if
-	end ifdef
-	return machine_func(M_ALLOC, size)
-end function
-function callback(object a, integer depq)
-	ifdef WINDOWS then
-		if depq then
-			-- this is necessary because machine_func() doesn't
-			-- handle the DEP support required to make call_back()
-			-- work when DEP is on, so we need to call the full
-			-- front end
-			return dep:call_back({a})
-		end if
-	end ifdef
+function callback(object a)
 	return machine_func(M_CALL_BACK, a)
 end function
 procedure do_callback(integer b)
 -- handle callback()
 	symtab_index r
 	atom asm
-	integer id, convention, depq
+	integer id, convention
 	object x
 
-	depq = 0
 	-- val[b] is:  routine id or {'+', routine_id}
 	x = val[b]
-	if sequence(x) and length(x) = 1 then
-		-- for now we do not handle DEP
-		-- therefore, just pass this up as a normal callback request
-		-- instead of a bare callback request
-		x = x[1]
-		depq = 1
-	end if
 	if atom(x) then
 		id = x
 		convention = 0
-	--elsif length(x) = 1 then
-		--RTFatal("DEP style callbacks not supported in eu.ex")
-
 	else
 		id = x[2]
 		convention = x[1]
-
 	end if
 
 	if id < 0 or id >= length(e_routine) then
@@ -3459,20 +3427,19 @@ procedure do_callback(integer b)
 
 	if platform() = WIN32 and convention = 0 then
 		-- stdcall
-		asm = alloc( length(cb_std), depq )
+		asm = dep:allocate_protect(length(cb_std), 1, PAGE_EXECUTE_READWRITE)
 		poke( asm, cb_std )
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 20 )
 		poke( asm + 18, SymTab[r][S_NUM_ARGS] * 4 )
-		poke4( asm + 20, callback( routine_id("machine_callback"), depq ) )
-
+		poke4( asm + 20, callback( routine_id("machine_callback") ) )
 	else
 		-- cdecl
-		asm = alloc( length(cb_cdecl), depq )
+		asm = dep:allocate_protect(length(cb_cdecl), 1, PAGE_EXECUTE_READWRITE)
 		poke( asm, cb_cdecl )
 		poke4( asm + 7, length(call_backs) + 1 )
 		poke4( asm + 13, asm + 23 )
-		poke4( asm + 23, callback( ( '+' & routine_id("machine_callback") ), depq))
+		poke4( asm + 23, callback( ( '+' & routine_id("machine_callback") ) ) )
 	end if
 
 	val[target] = asm

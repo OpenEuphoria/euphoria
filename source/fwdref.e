@@ -583,7 +583,7 @@ end procedure
 
 -- TRUE if ref is a forward reference encoded as a negative number.
 export type forward_reference( integer ref )
-	if 0 < -ref and -ref <= length( forward_references ) then
+	if 0 > ref and ref >= -length( forward_references ) then
 		ref = -ref
 		if integer(forward_references[ref][FR_FILE]) and
 			integer(forward_references[ref][FR_PC]) then
@@ -594,13 +594,6 @@ export type forward_reference( integer ref )
 	else
 		return 0
 	end if
-end type
-
-
--- More general than a symtab_index, it could also be a forward reference encoded as a
--- negative number.
-export type symtab_pointer(integer x)
-	return x = -1 or symtab_index(x) or forward_reference(x)
 end type
 
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )

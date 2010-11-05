@@ -709,8 +709,8 @@ export procedure emit_op(integer op)
 -- About 60% of the time it's one of the first 6 cases.
 -- You might get greater speed by converting the chain of elsif's
 -- to a single call_proc(), as in execute.e.
-	symtab_index a, b, c, d, source, target, subsym
-	symtab_index lhs_var
+	symtab_pointer a, b, c, d, source, target, subsym
+	symtab_pointer lhs_var
 	integer ib, ic, n
 	object obj
 	sequence elements

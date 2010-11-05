@@ -522,3 +522,13 @@ export constant ENUM_FWD_REFERENCES_NOT_SUPPORTED = 331
 
 export constant FIRST_USER_FILE = 3,
                 MAX_USER_FILE   = 40
+
+
+include fwdref.e
+				
+-- More general than a symtab_index, it could also be a forward reference encoded as a
+-- negative number.
+export type symtab_pointer(integer x)
+	return x = -1 or symtab_index(x) or forward_reference(x)
+end type
+				
