@@ -758,6 +758,7 @@ end ifdef
 					elsif file_no = tok_file then
 						good = 1
 					else
+						-- globals and publics can come from a file included by the namespace file
 						integer include_type = 0
 						switch scope do
 							case SC_GLOBAL then
@@ -766,15 +767,18 @@ end ifdef
 								else
 									include_type = DIRECT_OR_PUBLIC_INCLUDE
 								end if
+								good = and_bits( include_type, include_matrix[file_no][tok_file] )
 								
 							case SC_PUBLIC then
-								include_type = DIRECT_OR_PUBLIC_INCLUDE
 								
-							case SC_EXPORT, SC_OVERRIDE then
-								include_type = DIRECT_INCLUDE
+								if tok_file = current_file_no then
+									include_type = PUBLIC_INCLUDE
+								else
+									include_type = DIRECT_OR_PUBLIC_INCLUDE
+								end if
+								
 							
 						end switch
-						
 						good = and_bits( include_type, include_matrix[file_no][tok_file] )
 					end if
 					
