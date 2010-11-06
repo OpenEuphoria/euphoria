@@ -96,15 +96,25 @@ test_equal("rad2deg() #3", "0.9998113525,28.6478897565", sprintf("%.10f,%.10f", 
 test_equal("exp() #1", 7.389056, round(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round(exp(2.3), 100000))
 
+function using_gcc()
+	-- right now we don't have a good way to check the compiler used
+	-- from euphoria code
+	return equal(308061521170130,fib(71))
+end function
+
 -- Because it doesn't take long to calculate, let's test all valid input args.
-ifdef WINDOWS then
-	constant MAX_FIB = 74
-elsedef
-	constant MAX_FIB = 69
-end ifdef
-for i = 1 to MAX_FIB do
-	test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
-end for
+if using_gcc() then
+	for i = 1 to 69 do
+		test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
+	end for
+	for i = 71 to 74 do
+		test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
+	end for
+else
+	for i = 1 to 74 do
+		test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
+	end for
+end if
 
 test_equal("atan2() #1", "1.2837139576", sprintf("%.10f", atan2(10.5, 3.1)))
 test_equal("atan2() #2", "-0.0927563202", sprintf("%.10f", atan2(-0.4, 4.3)))
