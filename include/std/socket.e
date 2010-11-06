@@ -418,16 +418,7 @@ public constant
 	-- Shutdown both send and receive operations.
 	SD_BOTH = 2
 
---****
--- === Socket Option enums
--- these are the numeric indexes only.
--- 
--- See [[:Socket Options]] for details.
-
---****
--- ====  Socket Option enums In Common
-
-public constant
+constant
 	ESOL_SOCKET = 1,
 	ESO_DEBUG = 2,
 	ESO_ACCEPTCONN = 3,
@@ -444,9 +435,6 @@ public constant
 	ESO_RCVTIMEO = 14,
 	ESO_ERROR = 15,
 	ESO_TYPE = 16,
---****
---!! = ESO_OOBINLINE+1
--- ====  Windows Socket Option enums
 
 	ESO_OOBINLINE = 17,
 
@@ -465,9 +453,6 @@ public constant
 	ESO_MAXDG = 30,
 	ESO_MAXPATHDG = 31,
 	ESO_SYNCHRONOUS_ALTERT = 32,
---****
--- !! = ESO_SYNCHRONOUS_NONALERT+1
--- ====  LINUX Socket Option enums
 	ESO_SYNCHRONOUS_NONALERT = 33,
 
 	ESO_SNDBUFFORCE = 34,
@@ -477,18 +462,12 @@ public constant
 	ESO_BSDCOMPAT = 38,
 
 	ESO_PASSCRED = 39,
---****
---  !!= ESO_PEERCRED+1
--- Security levels - as per NRL IPv6 - don't actually do anything
 	ESO_PEERCRED = 40,
 
 	ESO_SECURITY_AUTHENTICATION = 41,
 	ESO_SECURITY_ENCRYPTION_TRANSPORT = 42,
 	ESO_SECURITY_ENCRYPTION_NETWORK = 43,
 
---****
---  !!= ESO_BINDTODEVICE+1
--- ====  LINUX Socket Filtering Option enums
 	ESO_BINDTODEVICE = 44,
 
 	ESO_ATTACH_FILTER = 45,
