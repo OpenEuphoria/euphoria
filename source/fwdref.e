@@ -743,6 +743,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				errloc = sprintf("\t%s (%d): %s\n", {abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE], ref[FR_NAME]} )
 				if not match(errloc, msg) then
 					msg &= errloc
+					prep_forward_error( errors[e] )
 				end if
 			end if
 			ThisLine    = ref[FR_THISLINE]
