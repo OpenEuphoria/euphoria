@@ -83,28 +83,29 @@ constant
 sequence Place = { current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH, "" },
 mainPath = ""
 -----------------------------------------------------------------------------
-function findFile( sequence fName )
+function findFile( sequence fName, integer showWarning = 1 )
 
     -- returns where a file is
     -- looks in the usual places
     
     -- look in the usual places
-    --trace(1)
     if find(fName[length(fName)], {10, 13}) then
 	fName = fName[1..length(fName)-1]
     end if
     for i = 1 to length( Place ) do
 	if sequence( dir( Place[i] & fName ) ) then
-	    if platform() = 3 then
-		return Place[i] & fName
-	    else
+	    ifdef WINDOWS then
 		return upper( Place[i] & fName )
-	    end if
+	    elsedef
+		return Place[i] & fName
+	    end ifdef
 	end if
     end for
     
-    printf( 1, "Unable to locate file %s.\n", {fName} )
-    --abort(0)
+    if showWarning then
+    printf( 1, "Warning: Unable to locate file %s.\n", {fName} )
+    end if
+    return fName
     
 end function
 
@@ -182,7 +183,7 @@ end function
 
 function includable(sequence name)
     --return not find(name, excludedIncludes)
-    name = findFile(name)
+    name = findFile(name,0)
     return not find(canonical_path(name), excludedIncludes)
 end function
 
@@ -202,11 +203,22 @@ function parseFile( sequence fName )
     inFile = open( fName, "r" )
     newfName = filename(fName)
 
+    if inFile = -1 then
+    	included = included[1..$-1]
+	return fName
+    end if
+
     if sequence(outputDir) then
    	 while file_exists( outputDir & SLASH & newfName ) do
 	 	newfName &= sprintf("%d", rand(10))
 	 end while
+	 puts(1, outputDir & SLASH & newfName & "\n")
    	 outFile = open( outputDir & SLASH & newfName, "w" )
+
+	 if outFile = -1 then
+	 	printf(1, "Warning: Unable to open %s for writing\n",
+			{outputDir & SLASH & newfName})
+	 end if
     else
 	 outFile = -1
     end if
@@ -286,6 +298,8 @@ constant cmd_params = {
 }
     
 procedure run()   
+    puts(1, "Euphoria distribution helper v1.0\n")
+
     -- read the command line
     map:map params = cmd_parse(cmd_params)
     object inFileName=map:get(params, "i"),
@@ -293,7 +307,7 @@ procedure run()
     excludeDirs=map:get(params, "ed"),
     excludeFiles=map:get(params, "e")
 
-    outputDir=map:get(params, "i")
+    outputDir=map:get(params, "d")
 
 	if sequence(excludeFiles) and length(excludeFiles) then
 		for i = 1 to length(excludeFiles) do
@@ -318,13 +332,17 @@ procedure run()
 	    abort(0)
 	end if
     end if
+
+    if sequence(outputDir) then
+	printf(1, "Outputting files to directory: %s\n", {outputDir})
+    end if
 		     
     mainPath = pathname(canonical_path(inFileName))
     Place &= {mainPath&SLASH}
     -- process the input file
     parseFile( inFileName )
 
-    printf(1, "%d files were found. These are:\n", {length(included)})
+    printf(1, "\n%d files were found. These are:\n", {length(included)})
     for i = 1 to length(included) do
     	printf(1, "%s\n", {included[i]})
     end for
