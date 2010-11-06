@@ -20,8 +20,10 @@
 --
 -- replacement for Euphoria's bind routine
 
+include std/cmdline.e
 include std/get.e
 include std/io.e
+include std/map.e
 include std/text.e
 include std/console.e
 include std/sequence.e
@@ -353,59 +355,39 @@ function getListOfFiles(sequence inDir, integer recursive = 0)
 end function
 
 -----------------------------------------------------------------------------
+constant cmd_params = {
+	{ "i", 0, "Input filename", { NO_CASE, HAS_PARAMETER, ONCE, "filename" } },
+	{ "e", 0, "Exclude file", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "filename" } },
+	{ "ed", 0, "Exclude directory", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
+	{ "edr", 0, "Exclude directory recursively", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
+	{ "d", 0, "Output dir", { NO_CASE, HAS_PARAMETER, OPTIONAL, ONCE, "dir" } }
+}
     
 procedure run()   
-    object cmd, inFileName
-    inFileName = -1
-
     -- read the command line
-    cmd = command_line()
+    map:map params = cmd_parse(cmd_params)
+    object inFileName=map:get(params, "i"),
+    excludeDirRec=map:get(params, "edr"),
+    excludeDirs=map:get(params, "ed"),
+    excludeFiles=map:get(params, "e")
 
-    for i = 3 to length(cmd) do
-    	if equal(cmd[i], "-i") then
-		if i = length(cmd) then
-			puts(1, "Expected filename to follow -i!\n")
-			abort(0)
-		else
-			inFileName = cmd[i+1]
-		end if
-    	elsif equal(cmd[i], "-d") then
-		if i = length(cmd) then
-			puts(1, "Expected output dir to follow -d!\n")
-			abort(0)
-		else
-			outputDir = cmd[i+1]
-		end if
-    	elsif equal(cmd[i], "-e") or
-    	      equal(cmd[i], "--exclude-file") then
-		if i = length(cmd) then
-			printf(1, "Expected excluded include file to follow %s!\n", {cmd[i]})
-			abort(0)
-		else
-			--excludedIncludes = append(excludedIncludes, cmd[i+1])
-			excludedIncludes = append(excludedIncludes, canonical_path(cmd[i+1]))
-		end if
-    	elsif equal(cmd[i], "-ed") or
-    	      equal(cmd[i], "--exclude-directory") then
-		if i = length(cmd) then
-			printf(1, "Expected excluded include dir to follow %s!\n", {cmd[i]})
-			abort(0)
-		else
-			excludedIncludes &= getListOfFiles(cmd[i+1])
-		end if
-    	elsif equal(cmd[i], "-edr") or
-    	      equal(cmd[i], "--exclude-directory-recursively") then
-		if i = length(cmd) then
-			printf(1, "Expected excluded include dir to follow %s!\n", {cmd[i]})
-			abort(0)
-		else
-			excludedIncludes &= getListOfFiles(cmd[i+1], 1)
-		end if
-    	elsif equal(cmd[i], "--no-copy") or
-    	      equal(cmd[i], "-nc") then
-	      	outputDir = -1
+    outputDir=map:get(params, "i")
+
+	if sequence(excludeFiles) and length(excludeFiles) then
+		for i = 1 to length(excludeFiles) do
+			excludedIncludes = append(excludedIncludes, canonical_path(excludeFiles[i+1]))
+		end for
 	end if
-    end for
+	if sequence(excludeDirs) and length(excludeDirs) then
+		for i = 1 to length(excludeDirs) do
+			excludedIncludes &= getListOfFiles(excludeDirs[i+1])
+		end for
+	end if
+	if sequence(excludeDirs) and length(excludeDirs) then
+		for i = 1 to length(excludeFiles) do
+			excludedIncludes &= getListOfFiles(excludeDirRec[i+1],1)
+		end for
+	end if
 
     -- get input file
     if atom(inFileName) then

@@ -20,8 +20,10 @@
 --
 -- replacement for Euphoria's bind routine
 
+include std/cmdline.e
 include std/get.e
 include std/io.e
+include std/map.e
 include std/text.e
 include std/console.e
 include std/sequence.e
@@ -584,35 +586,18 @@ end function
 
 
 -----------------------------------------------------------------------------
-		  
+constant cmd_params = {
+	{ "i", 0, "Input filename", { NO_CASE, HAS_PARAMETER, ONCE, "filename" } },
+	{ "o", 0, "Output filename", { NO_CASE, HAS_PARAMETER, ONCE, "filename" } }
+}
+    
 procedure run()   
-    object cmd, inFileName, outFileName, optParams
-    inFileName = -1
-    outFileName = -1
+    object optParams
     optParams = {}
-
     -- read the command line
-    cmd = command_line()
-
-    for i = 3 to length(cmd) do
-    	if equal(cmd[i], "-i") then
-		if i = length(cmd) then
-			puts(1, "Expected filename to follow -i!\n")
-			abort(0)
-		else
-			inFileName = cmd[i+1]
-		end if
-    	elsif equal(cmd[i], "-o") then
-		if i = length(cmd) then
-			puts(1, "Expected filename to follow -o!\n")
-			abort(0)
-		else
-			outFileName = cmd[i+1]
-		end if
-	else
-		--ignored
-	end if
-    end for
+    map:map params = cmd_parse(cmd_params)
+    object inFileName=map:get(params, "i"),
+    outFileName=map:get(params, "o")
 
     -- get input file
     if atom(inFileName) then
