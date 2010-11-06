@@ -140,7 +140,7 @@ while [ "$1" != "" ]; do
 		export ALIGN4=1
         ;;
         --without-euphoria )
-			export UPHORIA=1
+			export EUPHORIA=0
 	;;
 	--eubin )
 			export LEN=`echo $2/eucd.exe | wc -c`
@@ -240,7 +240,7 @@ if [ "x$EUBIN" = "x" ]; then
 			export EUPHORIA=1
 		fi
 	else
-		export EUPHORIA=1
+		export EUPHORIA=0
 	fi
 else
 	export EUPHORIA=1
@@ -250,7 +250,7 @@ rm nothing.ex
 if [ "x$EUPHORIA" = "x1" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
 else
-	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
+	echo EUPHORIA=0 >> "$PREFIX"Makefile.eu
 fi
 if test $UNAME_SYSTEM = "MS-DOS"; then
 	# "Information: Managed memory always on for DJGPP."
