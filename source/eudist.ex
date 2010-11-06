@@ -279,9 +279,9 @@ end function
 -----------------------------------------------------------------------------
 constant cmd_params = {
 	{ "i", 0, "Input filename", { NO_CASE, HAS_PARAMETER, ONCE, "filename" } },
-	{ "e", 0, "Exclude file", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "filename" } },
-	{ "ed", 0, "Exclude directory", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
-	{ "edr", 0, "Exclude directory recursively", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
+	{ "e", "exclude-file", "Exclude file", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "filename" } },
+	{ "ed", "exclude-directory", "Exclude directory", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
+	{ "edr", "exclude-directory-recursively", "Exclude directory recursively", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
 	{ "d", 0, "Output dir", { NO_CASE, HAS_PARAMETER, OPTIONAL, ONCE, "dir" } }
 }
     
