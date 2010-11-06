@@ -427,7 +427,7 @@ procedure write_makefile_full()
 	printf(fh, "CFLAGS = %s" & HOSTNL, { settings[SETUP_CFLAGS] })
 	printf(fh, "LINKER = %s" & HOSTNL, { settings[SETUP_LEXE] })
 
-	if compiler_type = COMPILER_GCC and not TWINDOWS then
+	if compiler_type = COMPILER_GCC then
 		printf(fh, "LFLAGS = %s" & HOSTNL, { settings[SETUP_LFLAGS] })
 	else
 		write_objlink_file()
@@ -459,13 +459,8 @@ procedure write_makefile_full()
 
 	else
 		printf(fh, "%s: $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
-		if TWINDOWS then
-			printf(fh, "\t$(LINKER) -o %s @%s.lnk" & HOSTNL, {
-				exe_name, file0 })
-		else
 			printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
 				exe_name, upper(file0) })
-		end if
 		puts(fh, HOSTNL)
 		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
 		puts(fh, HOSTNL)
