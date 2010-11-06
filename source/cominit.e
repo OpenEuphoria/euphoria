@@ -45,7 +45,8 @@ constant COMMON_OPTIONS = {
 	{ "pf",        0, GetMsgText(287,0), { NO_CASE } },
 	{ "strict",    0, GetMsgText(288,0), { NO_CASE } },
 	{ "test",      0, GetMsgText(289,0), { NO_CASE } },
-	{ "version",   0, GetMsgText(290,0), { NO_CASE } },
+	{ "version", "v", GetMsgText(290,0), { NO_CASE } },
+	{ "v", "version", GetMsgText(290,0), { NO_CASE } },
 	{ "w",         0, GetMsgText(291,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
 	{ "wf",        0, GetMsgText(292,0), { NO_CASE, HAS_PARAMETER, "filename" } },
 	{ "x",         0, GetMsgText(293,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
@@ -227,6 +228,8 @@ export procedure handle_common_options(m:map opts)
 				TempWarningName = val
 			  	error:warning_file(TempWarningName)
 
+			case "v" then
+				fallthru
 			case "version" then
 				show_banner()
 				if find("WIN32_GUI", OpDefines) then
