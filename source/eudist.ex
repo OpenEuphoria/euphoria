@@ -91,8 +91,9 @@ constant
     EuPlace = getenv( "EUDIR" )
     --Place = { "", EuPlace & "\\", EuPlace & "\\INCLUDE\\" }
 sequence Place = { current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH } &
-apply(split(stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier"))
-	& { "" },
+--apply(split(stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier"))
+	--& { "" },
+	{ "" },
 mainPath = ""
 -----------------------------------------------------------------------------
 function findFile( sequence fName, integer showWarning = 1 )
@@ -302,11 +303,12 @@ end function
 
 -----------------------------------------------------------------------------
 constant cmd_params = {
-	{ "i", 0, "Input filename", { NO_CASE, HAS_PARAMETER, ONCE, "filename" } },
+	{ "i", 0, "Input filename", { HAS_CASE, HAS_PARAMETER, ONCE, "filename" } },
+	{ "I", "include", "Input filename", { HAS_CASE, HAS_PARAMETER, MULTIPLE, "dir" } },
 	{ "e", "exclude-file", "Exclude file", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "filename" } },
 	{ "ed", "exclude-directory", "Exclude directory", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
 	{ "edr", "exclude-directory-recursively", "Exclude directory recursively", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
-	{ "d", 0, "Output dir", { NO_CASE, HAS_PARAMETER, OPTIONAL, ONCE, "dir" } }
+	{ "d", 0, "Output dir", { HAS_CASE, HAS_PARAMETER, OPTIONAL, ONCE, "dir" } }
 }
     
 procedure run()   
@@ -320,6 +322,7 @@ procedure run()
     excludeFiles=map:get(params, "e")
 
     outputDir=map:get(params, "d")
+    Place &= apply(stringifier(map:get(params, "include")), routine_id("slashifier"))
 
 	if sequence(excludeFiles) and length(excludeFiles) then
 		for i = 1 to length(excludeFiles) do
