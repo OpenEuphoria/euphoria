@@ -91,9 +91,8 @@ constant
     EuPlace = getenv( "EUDIR" )
     --Place = { "", EuPlace & "\\", EuPlace & "\\INCLUDE\\" }
 sequence Place = { current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH } &
---apply(split(stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier"))
-	--& { "" },
-	{ "" },
+apply(split(stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier"))
+	& { "" },
 mainPath = ""
 -----------------------------------------------------------------------------
 function findFile( sequence fName, integer showWarning = 1 )
