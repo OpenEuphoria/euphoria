@@ -77,10 +77,22 @@ sequence
 
 object outputDir=-1
 
+function stringifier(object s)
+	if atom(s) then
+		return ""
+	end if
+	return s
+end function
+function slashifier(sequence s, object null)
+	return s&SLASH
+end function
+
 constant
     EuPlace = getenv( "EUDIR" )
     --Place = { "", EuPlace & "\\", EuPlace & "\\INCLUDE\\" }
-sequence Place = { current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH, "" },
+sequence Place = { current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH } &
+apply(split(stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier"))
+	& { "" },
 mainPath = ""
 -----------------------------------------------------------------------------
 function findFile( sequence fName, integer showWarning = 1 )
