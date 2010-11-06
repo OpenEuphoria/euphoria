@@ -91,7 +91,8 @@ EU_ALL_FILES = \
 	source/be_syncolor.h \
 	source/be_task.h \
 	source/be_w.h \
-	source/object.h
+	source/object.h \
+	source/eudist.ex
 
 EU_DIRS = include \
 	include/std/ \
@@ -106,7 +107,9 @@ EU_DIRS = include \
 	demo/bench \
 	demo/linux \
 	demo/langwar \
-	demo/langwar/Linux
+	demo/langwar/Linux \
+	demo/preproc \
+	demo/unix
 
 EU_BIN_FILES = ed.ex \
 	ascii.ex \
@@ -155,8 +158,6 @@ source :
 
 update :
 	-mkdir -p $(DEB_SOURCE_DIR)/source/pcre
-	cd $(EU_BASE_DIR)/source && ./configure $(CONFIG) && make distclean 
-	cd $(EU_BASE_DIR)/source && ./configure $(CONFIG) && make source
 	cp -r $(EU_BASE_DIR)/source/build $(DEB_SOURCE_DIR)/source
 	for file in $(EU_ALL_FILES); \
 	do \
