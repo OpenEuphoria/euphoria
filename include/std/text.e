@@ -24,6 +24,7 @@ include std/error.e
 include std/eds.e
 include std/convert.e
 include std/math.e
+
 --****
 -- Signature:
 -- <built-in> function sprintf(sequence format, object values)
@@ -91,9 +92,6 @@ include std/math.e
 --    [[:sprintf]], [[:printf]]
 
 public function sprint(object x)
--- Return the string representation of any Euphoria data object.
--- This is the same as the output from print(1, x) or '?', but it's
--- returned as a string sequence rather than printed.
 	sequence s
 
 	if atom(x) then
@@ -282,7 +280,7 @@ public function trim(sequence source, object what=" \t\r\n", integer ret_index =
 end function
 
 ifdef UNIX then
-constant TO_LOWER = 'a' - 'A'
+	constant TO_LOWER = 'a' - 'A'
 end ifdef
 
 sequence lower_case_SET = {}
@@ -440,58 +438,58 @@ end procedure
 -- See Also:
 --   [[:lower]], [[:upper]], [[:set_encoding_properties]]
 --
+
 public function get_encoding_properties( )
 	return {encoding_NAME, lower_case_SET, upper_case_SET}
 end function
 
-
 ifdef WINDOWS then
-include std/dll.e
-include std/machine.e
-include std/types.e
-atom
-	user32 = open_dll( "user32.dll"),
-    api_CharLowerBuff = define_c_func(user32, "CharLowerBuffA", {C_POINTER, C_INT}, C_INT),
-    api_CharUpperBuff = define_c_func(user32, "CharUpperBuffA", {C_POINTER, C_INT}, C_INT),
-    tm_size = 1024,
-    temp_mem = allocate(1024)
+	include std/dll.e
+	include std/machine.e
+	include std/types.e
+	atom
+		user32 = open_dll( "user32.dll"),
+		api_CharLowerBuff = define_c_func(user32, "CharLowerBuffA", {C_POINTER, C_INT}, C_INT),
+		api_CharUpperBuff = define_c_func(user32, "CharUpperBuffA", {C_POINTER, C_INT}, C_INT),
+		tm_size = 1024,
+		temp_mem = allocate(1024)
 
-function change_case(object x, object api)
-	sequence changed_text
-	integer single_char = 0
-	integer len
-
-	if not string(x) then
-		if atom(x) then
-			if x = 0 then
-				return 0
+	function change_case(object x, object api)
+		sequence changed_text
+		integer single_char = 0
+		integer len
+	
+		if not string(x) then
+			if atom(x) then
+				if x = 0 then
+					return 0
+				end if
+				x = {x}
+				single_char = 1
+			else
+				for i = 1 to length(x) do
+					x[i] = change_case(x[i], api)
+				end for
+				return x
 			end if
-			x = {x}
-			single_char = 1
-		else
-			for i = 1 to length(x) do
-				x[i] = change_case(x[i], api)
-			end for
+		end if
+		if length(x) = 0 then
 			return x
 		end if
-	end if
-	if length(x) = 0 then
-		return x
-	end if
-	if length(x) >= tm_size then
-		tm_size = length(x) + 1
-		free(temp_mem)
-		temp_mem = allocate(tm_size)
-	end if
-	poke(temp_mem, x)
-	len = c_func(api, {temp_mem, length(x)} )
-	changed_text = peek({temp_mem, len})
-	if single_char then
-		return changed_text[1]
-	else
-		return changed_text
-	end if
-end function
+		if length(x) >= tm_size then
+			tm_size = length(x) + 1
+			free(temp_mem)
+			temp_mem = allocate(tm_size)
+		end if
+		poke(temp_mem, x)
+		len = c_func(api, {temp_mem, length(x)} )
+		changed_text = peek({temp_mem, len})
+		if single_char then
+			return changed_text[1]
+		else
+			return changed_text
+		end if
+	end function
 end ifdef
 
 --**
@@ -527,8 +525,8 @@ end ifdef
 --
 -- See Also:
 --   [[:upper]], [[:proper]], [[:set_encoding_properties]], [[:get_encoding_properties]]
+
 public function lower(object x)
--- convert atom or sequence to lower case
 	if length(lower_case_SET) != 0 then
 		return mapping(x, upper_case_SET, lower_case_SET)
 	end if
@@ -575,7 +573,6 @@ end function
 --     [[:lower]], [[:proper]], [[:set_encoding_properties]], [[:get_encoding_properties]]
 
 public function upper(object x)
--- convert atom or sequence to upper case
 	if length(upper_case_SET) != 0 then
 		return mapping(x, lower_case_SET, upper_case_SET)
 	end if
@@ -603,7 +600,6 @@ end function
 -- same level, meaning that sub-sequences could be converted if they are
 -- actually text sequences.
 --
---
 -- Example 1:
 -- <eucode>
 -- s = proper("euphoria programming language")
@@ -624,7 +620,6 @@ end function
 --     [[:lower]] [[:upper]]
 
 public function proper(sequence x)
--- Converts text to lowercase and makes each word start with an uppercase.
 	integer pos
 	integer inword
 	integer convert
@@ -795,9 +790,8 @@ end function
 -- </eucode>
 
 public function keyvalues(sequence source, object pair_delim = ";,",
-                          object kv_delim = ":=", object quotes =  "\"'`",
-                          object whitespace = " \t\n\r", integer haskeys = 1)
-
+			object kv_delim = ":=", object quotes =  "\"'`",
+			object whitespace = " \t\n\r", integer haskeys = 1)
 	sequence lKeyValues
 	sequence value_
 	sequence key_
@@ -1225,6 +1219,7 @@ end function
 -- -- 's' now contains "The small () man"
 -- </eucode>
 --
+
 public function dequote(sequence text_in, object quote_pairs = {{"\"", "\""}}, integer esc = -1)
 
 	if length(text_in) = 0 then
@@ -2020,7 +2015,7 @@ end function
 -- key of just the msgnum.
 --
 
-public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
+public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
 	integer idx = 1
 	integer db_res
 	object lMsgText
@@ -2073,6 +2068,102 @@ public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBB
 	else
 		return lMsgText
 	end if
-
 end function
 
+--**
+-- Wrap text
+--
+-- Parameters:
+--   * ##content##   - sequence content to wrap
+--   * ##width##     - width to wrap at, defaults to 78
+--   * ##wrap_with## - sequence to wrap with, defaults to "\n"
+--   * ##wrap_at##   - sequence of characters to wrap at, defaults to space and tab
+--
+-- Returns:
+--   Sequence containing wrapped text
+--
+-- Example 1:
+-- <eucode>
+-- sequence result = wrap("Hello, World")
+-- -- result = "Hello, World"
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- sequence msg = "Hello, World. Today we are going to learn about apples."
+-- sequence result = wrap(msg, 40)
+-- -- result =
+-- --   "Hello, World. today we are going to\n"
+-- --   "learn about apples."
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- sequence msg = "Hello, World. Today we are going to learn about apples."
+-- sequence result = wrap(msg, 40, "\n    ")
+-- -- result =
+-- --   "Hello, World. today we are going to\n"
+-- --   "    learn about apples."
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- sequence msg = "Hello, World. This, Is, A, Dummy, Sentence, Ok, World?"
+-- sequence result = wrap(msg, 30, "\n", ",")
+-- -- result = 
+-- --   "Hello, World. This, Is, A,"
+-- --   "Dummy, Sentence, Ok, World?"
+-- </eucode>
+
+public function wrap(sequence content, integer width = 78, sequence wrap_with = "\n",
+			sequence wrap_at = " \t")
+	if length(content) < width then
+		return content
+	end if
+
+	sequence result = ""
+	
+	while length(content) do
+		-- Find the first whitespace before width
+		integer split_at = 0
+		for i = width to 1 by -1 do
+			if find(content[i], wrap_at) then
+				split_at = i
+				exit
+			end if
+		end for
+	
+		if split_at = 0 then
+			-- Cannot split at width or less, try the closest thing to width
+			for i = width to length(content) do
+				if find(content[i], wrap_at) then
+					split_at = i
+					exit
+				end if
+			end for
+		
+			-- Didn't find any place to split, attache the entire string
+			if split_at = 0 then
+				if length(result) then
+					result &= wrap_with
+				end if
+				
+				result &= content
+				exit
+			end if
+		end if
+	
+		if length(result) then
+			result &= wrap_with
+		end if
+	
+		result &= trim(content[1..split_at])
+		content = trim(content[split_at + 1..$])
+		if length(content) < width then
+			result &= wrap_with & content
+			exit
+		end if
+	end while
+
+	return result
+end function

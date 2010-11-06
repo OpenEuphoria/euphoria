@@ -488,5 +488,11 @@ test_equal("get_text known number A", "Block comment from line [1] not terminate
 test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"}))
 test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"}))
 
+test_equal("wrap() #1", "Hello\nWorld", wrap("Hello World", 3))
+test_equal("wrap() #2", "Hello World, How\nare you doing?", 
+	wrap("Hello World, How are you doing?", 20))
+test_equal("wrap() #3", "Hello World,\nHow are you doing?",
+		wrap("Hello World, How are you doing?", 20, "\n", ","))
+
 test_report()
 
