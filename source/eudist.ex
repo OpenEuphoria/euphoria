@@ -276,7 +276,8 @@ function parseFile( sequence fName )
 			end if
 			
 			if eu:compare( includeName, newIncludeName ) then
-				data = sprintf( "include %s\n", { newIncludeName } )
+				integer ix = match( newIncludeName, data )
+				data = replace( data, "include ", 1, ix-1 )
 			end if
 		end if
 		if outFile != -1 then
