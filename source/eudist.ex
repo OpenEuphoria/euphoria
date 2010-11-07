@@ -28,6 +28,7 @@ include std/text.e
 include std/console.e
 include std/sequence.e
 include std/filesys.e
+include std/regex.e
 
 -----------------------------------------------------------------------------
 -- code from RDS's ED color coding routines
@@ -77,45 +78,52 @@ sequence
 
 object outputDir=-1
 
+integer verbose = 0
+
 function stringifier(object s)
 	if atom(s) then
 		return ""
 	end if
 	return s
 end function
-function slashifier(sequence s, object null)
-	return s&SLASH
+function slashifier(sequence s, object null = 0)
+	if length( s) and s[$] != SLASH then
+		s &= SLASH
+	end if
+	return s
 end function
 
 constant
     EuPlace = getenv( "EUDIR" )
     --Place = { "", EuPlace & "\\", EuPlace & "\\INCLUDE\\" }
-sequence Place = { current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH } &
-apply(split(stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier"))
+sequence Place = 
+	{ current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH } 
+	& apply( stdseq:split( stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier") )
 	& { "" },
+
 mainPath = ""
 -----------------------------------------------------------------------------
-function findFile( sequence fName, integer showWarning = 1 )
+function findFile( sequence fName, integer showWarning = verbose )
 
     -- returns where a file is
     -- looks in the usual places
     
     -- look in the usual places
     if find(fName[length(fName)], {10, 13}) then
-	fName = fName[1..length(fName)-1]
+		fName = fName[1..length(fName)-1]
     end if
     for i = 1 to length( Place ) do
-	if sequence( dir( Place[i] & fName ) ) then
-	    ifdef WINDOWS then
-		return upper( Place[i] & fName )
-	    elsedef
-		return Place[i] & fName
-	    end ifdef
-	end if
+		if sequence( dir( Place[i] & fName ) ) then
+			ifdef WINDOWS then
+				return upper( Place[i] & fName )
+			elsedef
+				return Place[i] & fName
+			end ifdef
+		end if
     end for
     
     if showWarning then
-    printf( 1, "Warning: Unable to locate file %s.\n", {fName} )
+		printf( 1, "Warning: Unable to locate file %s.\n", {fName} )
     end if
     return fName
     
@@ -220,20 +228,22 @@ function parseFile( sequence fName )
 	return fName
     end if
 
-    if sequence(outputDir) then
-   	 while file_exists( outputDir & SLASH & newfName ) do
-	 	newfName &= sprintf("%d", rand(10))
-	 end while
-	 puts(1, outputDir & SLASH & newfName & "\n")
-   	 outFile = open( outputDir & SLASH & newfName, "w" )
+	if sequence(outputDir) then
+		while file_exists( outputDir & SLASH & newfName ) do
+			newfName &= sprintf("%d", rand(10))
+		end while
+		if verbose then
+			puts(1, outputDir & SLASH & newfName & "\n")
+		end if
+		outFile = open( outputDir & SLASH & newfName, "w" )
 
-	 if outFile = -1 then
-	 	printf(1, "Warning: Unable to open %s for writing\n",
+		if outFile = -1 then
+		printf(1, "Warning: Unable to open %s for writing\n",
 			{outputDir & SLASH & newfName})
-	 end if
-    else
-	 outFile = -1
-    end if
+		end if
+	else
+		outFile = -1
+	end if
 
 	includedNewNames = append( includedNewNames, newfName )
     
@@ -302,26 +312,74 @@ end function
 
 -----------------------------------------------------------------------------
 constant cmd_params = {
-	{ "i", 0, "Input filename", { HAS_CASE, HAS_PARAMETER, ONCE, "filename" } },
-	{ "I", "include", "Input filename", { HAS_CASE, HAS_PARAMETER, MULTIPLE, "dir" } },
+	{ "c", "", "config file", { NO_CASE, HAS_PARAMETER, MULTIPLE, "eu.cfg" } },
+	{ "d", 0, "Output dir", { HAS_CASE, HAS_PARAMETER, OPTIONAL, ONCE, "dir" } },
 	{ "e", "exclude-file", "Exclude file", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "filename" } },
 	{ "ed", "exclude-directory", "Exclude directory", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
 	{ "edr", "exclude-directory-recursively", "Exclude directory recursively", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
-	{ "d", 0, "Output dir", { HAS_CASE, HAS_PARAMETER, OPTIONAL, ONCE, "dir" } }
+	{ "i", "include", "include dir", { NO_CASE, HAS_PARAMETER, MULTIPLE, "dir" } },
+	{ "v", "verbose", "verbose output", { NO_CASE } },
+	$
 }
-    
+
+regex inc_path = regex:new( `^\s*-i (.+)\s*$`, regex:CASELESS )
+procedure read_config( sequence eu_cfg )
+	sequence orig_dir = current_dir()
+	
+	sequence lines = read_lines( eu_cfg )
+	sequence cfg_path = pathname( canonical_path( eu_cfg ) )
+	chdir( cfg_path )
+	for lx = 1 to length( lines ) do
+		object m = regex:matches( inc_path, lines[lx] )
+		if sequence( m ) then
+			Place = append( Place, canonical_path( slashifier( m[2] ) ) )
+		end if
+	end for
+	
+	chdir( orig_dir )
+end procedure
+
 procedure run()   
     puts(1, "Euphoria distribution helper v1.0\n")
-
+	sequence default_dir = current_dir() & SLASH & "eudist"
     -- read the command line
     map:map params = cmd_parse(cmd_params)
-    object inFileName=map:get(params, "i"),
-    excludeDirRec=map:get(params, "edr"),
-    excludeDirs=map:get(params, "ed"),
-    excludeFiles=map:get(params, "e")
+    object 
+		inFileName    = map:get( params, "extras" ),
+		configFiles   = map:get( params, "c", {} ),
+		excludeDirRec = map:get( params, "edr"),
+		excludeDirs   = map:get( params, "ed"),
+		excludeFiles  = map:get( params, "e"),
+		verbose       = map:get( params, "verbose", 0 )
 
-    outputDir=map:get(params, "d")
+	outputDir = map:get(params, "d")
+	
+	    -- get input file
+    if atom(inFileName) then
+		inFileName = prompt_string( "File to parse? " )
+		if length( inFileName ) = 0 then
+			abort(0)
+		end if
+	elsif length( inFileName ) > 1 then
+		puts(2, "You must specify a single file\n" )
+		abort( 1 )
+	else
+		inFileName = inFileName[1]
+    end if
+    
     Place &= apply(stringifier(map:get(params, "include")), routine_id("slashifier"))
+    
+	sequence default_config_file = slashifier( pathname( inFileName ) ) & "eu.cfg"
+	if file_exists( default_config_file ) then
+		configFiles = prepend( configFiles, default_config_file )
+	end if
+	
+	
+	for i = 1 to length( configFiles ) do
+		read_config( configFiles[i] )
+	end for
+	
+	Place &= apply( include_paths( 1 ), routine_id("slashifier") )	
 
 	if sequence(excludeFiles) and length(excludeFiles) then
 		for i = 1 to length(excludeFiles) do
@@ -338,29 +396,29 @@ procedure run()
 			excludedIncludes &= getListOfFiles(excludeDirRec[i+1],1)
 		end for
 	end if
-
-    -- get input file
-    if atom(inFileName) then
-	inFileName = prompt_string( "File to parse? " )
-	if length( inFileName ) = 0 then
-	    abort(0)
+	
+	if atom( outputDir ) then
+		outputDir = default_dir
 	end if
-    end if
-
-    if sequence(outputDir) then
+	
+	if not file_exists( outputDir ) then
+		create_directory( outputDir )
+	end if
 	printf(1, "Outputting files to directory: %s\n", {outputDir})
-    end if
 		     
     mainPath = pathname(canonical_path(inFileName))
     Place &= {mainPath&SLASH}
     -- process the input file
     parseFile( inFileName )
-
-    printf(1, "\n%d files were found. These are:\n", {length(included)})
-    for i = 1 to length(included) do
-    	printf(1, "%s\n", {included[i]})
-    end for
-		       
+	
+	printf(1, "\n%d files were found.\n", {length(included)})
+	if verbose then
+		for i = 1 to length(included) do
+			printf(1, "%s\n", {included[i]})
+		end for
+	else
+		
+	end if
 end procedure
 
 run()
