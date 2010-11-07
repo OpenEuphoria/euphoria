@@ -3261,21 +3261,23 @@ public function combine(sequence source_data, integer proc_option = COMBINE_SORT
 	end if
 end function
 
---/desc Pads /i source_data to the right until its length reaches /i min_size using /i new_data as filler.
---/ret The padded sequence, unchanged if its size was not less than /i min_size on input.
 --**
 -- Ensures that the supplied sequence is at least the supplied minimum length.
+--
+-- Pads ##source_data## to the right until its length reaches ##min_size## 
+-- using ##new_data## as filler.
 --
 -- Parameters:
 -- # ##source_data## : An object that might need extending.
 -- # ##min_size##: An integer. The minimum length that ##source_data## must be.
--- The default is lengthen ##source_data# by 50%.
+-- The default is to increase the length of ##source_data# by 50%.
 -- # ##new_data##: An object. This used to when ##source_data## needs to be extended,
 -- in which case it is appended as many times as required to make the length
 -- equal to ##min_size##. The default is 0.
 --
 -- Returns:
--- A **sequence**. 
+-- A **sequence**. The padded sequence, unchanged if its size was not less
+-- than ##min_size## on input.
 --
 -- Example:
 -- <eucode>

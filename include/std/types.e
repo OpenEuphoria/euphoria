@@ -1093,6 +1093,7 @@ end type
 -- string({1, 2, "abc'6"}) -- FALSE (contains a sequence)
 -- string({1, 2, 9.7})    -- FALSE (contains a non-integer)
 -- string({1, 2, 'a'})    -- TRUE
+-- string({1, 2, 'a', 0}) -- TRUE (even though it contains a null byte)
 -- string({1, -2, 'a'})   -- FALSE (contains a negative integer)
 -- string({})            -- TRUE
 -- </eucode>
@@ -1106,6 +1107,43 @@ public type string( object x )
 			return 0
 		end if
 		if x[i] < 0 then
+			return 0
+		end if
+		if x[i] > 255 then
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+--**
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more non-null byte characters.
+--
+-- Comment:
+-- A non-null byte 'character' is defined as a integer in the range [1 to 255].
+--
+-- Example 1:
+-- <eucode>
+-- cstring(-1)            -- FALSE (not a sequence)
+-- cstring("abc'6")       -- TRUE (all single byte characters)
+-- cstring({1, 2, "abc'6"}) -- FALSE (contains a sequence)
+-- cstring({1, 2, 9.7})    -- FALSE (contains a non-integer)
+-- cstring({1, 2, 'a'})    -- TRUE
+-- cstring({1, 2, 'a', 0}) -- FALSE (contains a null byte)
+-- cstring({1, -2, 'a'})   -- FALSE (contains a negative integer)
+-- cstring({})            -- TRUE
+-- </eucode>
+public type cstring( object x )
+	if not sequence(x) then
+		return 0
+	end if
+
+	for i = 1 to length(x) do
+		if not integer(x[i]) then
+			return 0
+		end if
+		if x[i] <= 0 then
 			return 0
 		end if
 		if x[i] > 255 then

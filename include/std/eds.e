@@ -98,6 +98,8 @@ public enum
 	DB_EXISTS_ALREADY = -2,
 	--** A lock could not be gained on the database.
 	DB_LOCK_FAIL = -3,
+	--** An invalid name suppled when creating a table.
+	DB_BAD_NAME = -4,
 	--** A fatal error has occurred.
 	DB_FATAL_FAIL = -404,
 	$
@@ -1582,6 +1584,10 @@ public function db_create_table(sequence name, integer init_records = DEF_INIT_R
 	sequence remaining
 	integer init_index
 
+	if not cstring(name) then
+		return DB_BAD_NAME
+	end if
+	
 	table = table_find(name)
 	if table != -1 then
 		return DB_EXISTS_ALREADY
@@ -1984,6 +1990,7 @@ public function db_find_key(object key, object table_name=current_table_name)
 		fatal(NO_TABLE, "no table selected", "db_find_key", {key, table_name})
 		return 0
 	end if
+
 	lo = 1
 	hi = length(key_pointers)
 	mid = 1

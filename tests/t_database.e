@@ -21,6 +21,9 @@ test_equal("current db #4", "", db_current())
 test_equal("open db", DB_OK, db_open("testunit", DB_LOCK_EXCLUSIVE))
 test_equal("current db #5", dbname, db_current())
 
+test_equal("create table #0a", DB_BAD_NAME, db_create_table("zero" & 0))
+test_equal("create table #0b", DB_BAD_NAME, db_create_table({5,"bad"}))
+
 test_equal("create table #1", DB_OK, db_create_table("first"))
 test_equal("current table #1", "first", db_current_table())
 
