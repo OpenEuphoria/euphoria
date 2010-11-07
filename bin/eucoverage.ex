@@ -133,7 +133,7 @@ procedure process_cmd_line()
 		stylesheet = DEFAULT_CSS
 	end if
 
-	sequence extras = map:get( cmd, "extras" )
+	sequence extras = map:get( cmd, OPT_EXTRAS )
 	if length( extras ) != 1 then
 		puts( 2, "Expected a single input coverage database\n" )
 		abort( 1 )
