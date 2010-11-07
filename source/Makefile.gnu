@@ -709,6 +709,10 @@ endif
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eucoverage
 	echo eui $(PREFIX)/share/euphoria/bin/eucoverage.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eucoverage
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eucoverage
+	# helper script for running eudist.ex
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eudist
+	echo eui $(PREFIX)/share/euphoria/source/eudist.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eudist
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eudist
 	
 
 install-docs :

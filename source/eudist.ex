@@ -69,11 +69,9 @@ constant
 -----------------------------------------------------------------------------
 sequence
     included,
-    includedNewNames,
     excludedIncludes
 
     included = {}
-    includedNewNames = {}
     excludedIncludes = {}
 
 object outputDir=-1
@@ -96,12 +94,8 @@ end function
 constant
     EuPlace = getenv( "EUDIR" )
     --Place = { "", EuPlace & "\\", EuPlace & "\\INCLUDE\\" }
-sequence Place = 
-	{ current_dir()&SLASH, EuPlace & SLASH, EuPlace & SLASH&"include"&SLASH } 
-	& apply( stdseq:split( stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier") )
-	& { "" },
-
-mainPath = ""
+sequence 
+	Place = {}
 -----------------------------------------------------------------------------
 function findFile( sequence fName, integer showWarning = verbose )
 
@@ -132,51 +126,51 @@ end function
 -----------------------------------------------------------------------------
 function getIncludeName( sequence data )
 
-    -- if the statement is an include statement, return the file name
-    integer at
-    
-    -- include statement missing?
-    if not match( "include ", data ) then
-	return {"","",""}
-    end if
+	-- if the statement is an include statement, return the file name
+	integer at
 
-    -- trim white space
-    while charClass[ data[1] ] = WHITE_SPACE do
-	data = data[2..length( data ) ]
-    end while      
-    
-    -- line feed?
-    if find( '\n', data ) then
-	data = data[1..length(data)-1]
-    end if
-    if find( '\r', data ) then
-	data = data[1..length(data)-1]
-    end if
+	-- include statement missing?
+	if not match( "include ", data ) then
+		return {"","",""}
+	end if
 
-    sequence includeType
-    -- not first statement?
-    if equal( data[1..8], "include " ) then
-	-- remove statement
-	includeType = data[1..8]
-	data = data[9..length(data)]
-    elsif length(data) > 15 and equal( data[1..15], "public include " ) then
-	-- remove statement
-	includeType = data[1..15]
-	data = data[16..length(data)]
-    else
-	-- not an include statement
-	return {"","",""}
-    end if
+	-- trim white space
+	while charClass[ data[1] ] = WHITE_SPACE do
+		data = remove( data, 1 )
+	end while      
 
-    sequence nameSpace = ""
-    -- remove data after space
-    at = find( ' ', data )
-    if at then
-	nameSpace = data[at..$]
-	data = data[1..at-1]
-    end if
+	-- line feed?
+	if find( '\n', data ) then
+		data = remove( data, length( data ) )
+	end if
+	if find( '\r', data ) then
+		data = remove( data, length( data ) )
+	end if
 
-    return {data,nameSpace,includeType}
+	sequence includeType
+	-- not first statement?
+	if equal( data[1..8], "include " ) then
+		-- remove statement
+		includeType = data[1..8]
+		data = data[9..length(data)]
+	elsif length(data) > 15 and equal( data[1..15], "public include " ) then
+		-- remove statement
+		includeType = data[1..15]
+		data = data[16..length(data)]
+	else
+		-- not an include statement
+		return {"","",""}
+	end if
+
+	sequence nameSpace = ""
+	-- remove data after space
+	at = find( ' ', data )
+	if at then
+		nameSpace = data[at..$]
+		data = data[1..at-1]
+	end if
+
+	return {data,nameSpace,includeType}
 
 end function
 
@@ -185,19 +179,12 @@ end function
 function trimer(sequence s)
     sequence t
     integer u
-    if s[length(s)] = '\n' then
-	s = s[1..length(s)-1]
-    end if
-    if s[length(s)] = '\r' then
-	s = s[1..length(s)-1]
-    end if
-    --t = reverse(s)
-    --u = find(SLASH, t)
-    --if not u then
-	--return s
-    --end if
-    --t = t[1..u-1]
-    --s = reverse(t)
+	if s[$] = '\n' then
+		s = remove( s, length(s) )
+	end if
+	if s[$] = '\r' then
+		s = remove( s, length(s) )
+	end if
     return s
 end function
 
@@ -207,88 +194,102 @@ function includable(sequence name)
     return not find(canonical_path(name), excludedIncludes)
 end function
 
+-- strips out the leading slash / drive
+function convertAbsoluteToRelative( sequence name )
+	for i = 1 to length( name ) do
+		if find( name[i], `/\` ) then
+			return name[i+1..$]
+		end if
+	end for
+	return name
+end function
+
 -----------------------------------------------------------------------------
-without warning
 function parseFile( sequence fName )
 
-    integer inFile, outFile
-    sequence newIncludeName, includeName, newfName, nameSpace, includeType
-    object data
+	integer inFile, outFile
+	sequence newIncludeName, newfName, nameSpace, includeType, includeName
+	object data
 
 	included = append( included, fName )
 
-    -- find the file
-    fName = findFile( fName )
-    
-    inFile = open( fName, "r" )
-    newfName = filename(fName)
-
+	-- find the file
+	sequence includeFile = convertAbsoluteToRelative( fName )
+	sequence includePath = ""
+	for i = length( includeFile ) to 1 by -1 do
+		if find( includeFile[i], `\/` ) then
+			includePath = includeFile[1..i]
+			exit
+		end if
+	end for
+	
+	fName = findFile( fName )
+	
+	inFile = open( fName, "r" )
+	
     if inFile = -1 then
-    	included = included[1..$-1]
-	return fName
+		included = remove( included, length( included ) )
+		return includeFile
     end if
 
-	if sequence(outputDir) then
-		while file_exists( outputDir & SLASH & newfName ) do
-			newfName &= sprintf("%d", rand(10))
-		end while
-		if verbose then
-			puts(1, outputDir & SLASH & newfName & "\n")
-		end if
-		outFile = open( outputDir & SLASH & newfName, "w" )
-
-		if outFile = -1 then
-		printf(1, "Warning: Unable to open %s for writing\n",
-			{outputDir & SLASH & newfName})
-		end if
-	else
-		outFile = -1
-	end if
-
-	includedNewNames = append( includedNewNames, newfName )
-    
-    while 1 do        
-    
-	-- read a line
-	data = gets( inFile )
-    
-	-- end of file?
-	if integer( data ) then
-	    exit
-	end if
-
-	-- include file?
-	includeName = getIncludeName( data )
-	includeType = includeName[3]
-	nameSpace = includeName[2]
-	includeName = includeName[1]
-	if length( includeName ) and includable(trimer(includeName)) then
-	
-    -- already part of the file?
-    if find( includeName, included ) then
-	--return
-	    newIncludeName = includedNewNames[find(includeName, included)]
-    else
-	    -- include the file
-	    newIncludeName = parseFile( includeName )
-    end if  
-    if outFile != -1 then
-	    puts( outFile, includeType & newIncludeName & nameSpace & "\n")
-    end if
-	    
-	else
-    if outFile != -1 then
-	    puts( outFile, data )
-    end if
+	sequence newPath = slashifier( outputDir & includePath )
+	if not file_exists( newPath ) then
+		create_directory( newPath )
 	end if
 	
-    end while
+	if verbose then
+		puts(1, outputDir & SLASH & includeFile & "\n")
+	end if
+	outFile = open( outputDir & SLASH & includeFile, "w" )
+
+	if outFile = -1 then
+	printf(1, "Warning: Unable to open %s for writing\n",
+		{outputDir & SLASH & includeFile })
+	end if
+	
+	while 1 do        
     
-    close( inFile )
-    if outFile != -1 then
-    close( outFile )
-    end if
-    return newfName
+		-- read a line
+		data = gets( inFile )
+		
+		-- end of file?
+		if integer( data ) then
+			exit
+		end if
+
+		-- include file?
+		includeName = getIncludeName( data )
+		includeType = includeName[3]
+		nameSpace = includeName[2]
+		includeName = includeName[1]
+		if length( includeName ) and includable(trimer(includeName)) then
+
+			-- already part of the file?
+			newIncludeName = includeName
+			if not find( includeName, included ) then
+				-- include the file
+				newIncludeName = parseFile( includeName )
+				
+			elsif absolute_path( includeName ) then
+				newIncludeName = convertAbsoluteToRelative( includeName )
+				
+			end if
+			
+			if eu:compare( includeName, newIncludeName ) then
+				data = sprintf( "include %s\n", { newIncludeName } )
+			end if
+		end if
+		if outFile != -1 then
+			puts( outFile, data )
+		end if
+		
+	end while
+
+	close( inFile )
+	if outFile != -1 then
+		close( outFile )
+	end if
+	return includeFile
     
 end function
 with warning
@@ -313,6 +314,7 @@ end function
 -----------------------------------------------------------------------------
 constant cmd_params = {
 	{ "c", "", "config file", { NO_CASE, HAS_PARAMETER, MULTIPLE, "eu.cfg" } },
+	{ "", "clear", { NO_CASE } },
 	{ "d", 0, "Output dir", { HAS_CASE, HAS_PARAMETER, OPTIONAL, ONCE, "dir" } },
 	{ "e", "exclude-file", "Exclude file", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "filename" } },
 	{ "ed", "exclude-directory", "Exclude directory", { NO_CASE, HAS_PARAMETER, OPTIONAL, MULTIPLE, "dir" } },
@@ -339,13 +341,17 @@ procedure read_config( sequence eu_cfg )
 	chdir( orig_dir )
 end procedure
 
-procedure run()   
+procedure run()
+
+	
     puts(1, "Euphoria distribution helper v1.0\n")
 	sequence default_dir = current_dir() & SLASH & "eudist"
+	sequence start_dir   = current_dir() & SLASH
+	
     -- read the command line
     map:map params = cmd_parse(cmd_params)
     object 
-		inFileName    = map:get( params, OPT_EXTRAS ),
+		inFileName    = map:get( params, OPT_EXTRAS, {} ),
 		configFiles   = map:get( params, "c", {} ),
 		excludeDirRec = map:get( params, "edr"),
 		excludeDirs   = map:get( params, "ed"),
@@ -354,29 +360,52 @@ procedure run()
 
 	outputDir = map:get(params, "d")
 	
-	    -- get input file
-    if atom(inFileName) then
-		inFileName = prompt_string( "File to parse? " )
-		if length( inFileName ) = 0 then
-			abort(0)
+	if atom( outputDir ) then
+		outputDir = default_dir
+		
+	end if
+	
+	if not absolute_path( outputDir ) then
+		outputDir = start_dir & outputDir
+	end if
+	
+	outputDir = slashifier( outputDir )
+	
+	-- get input file
+	if length( inFileName ) != 1 then
+		puts(2, "You must specify a single file\n" )
+		abort( 1 )
+	else
+		inFileName = inFileName[1]
+		
+		if eu:compare( pathname( inFileName ), current_dir() ) then
+			chdir( pathname( inFileName ) )
+			inFileName = filename( inFileName )
 		end if
-    end if
-    
+		
+	end if
+
     Place &= apply(stringifier(map:get(params, "include")), routine_id("slashifier"))
     
-	for i = 1 to length(inFileName) do
-	sequence default_config_file = slashifier( pathname( inFileName[i] ) ) & "eu.cfg"
+	sequence default_config_file = slashifier( pathname( inFileName ) ) & "eu.cfg"
 	if file_exists( default_config_file ) then
 		configFiles = prepend( configFiles, default_config_file )
 	end if
-	end for
-	
 	
 	for i = 1 to length( configFiles ) do
 		read_config( configFiles[i] )
 	end for
 	
-	Place &= apply( include_paths( 1 ), routine_id("slashifier") )	
+	Place &= apply( include_paths( 1 ), routine_id("slashifier") )
+	
+	if sequence( EuPlace ) then
+		Place &= { EuPlace & SLASH, EuPlace & SLASH & "include" & SLASH }
+	end if
+	
+	if sequence( getenv( "EUINC" ) ) then
+		Place &= apply( stdseq:split( stringifier(getenv("EUINC")),PATHSEP), routine_id("slashifier") )
+	end if
+	Place &= { "" }
 
 	if sequence(excludeFiles) and length(excludeFiles) then
 		for i = 1 to length(excludeFiles) do
@@ -394,22 +423,21 @@ procedure run()
 		end for
 	end if
 	
-	if atom( outputDir ) then
-		outputDir = default_dir
-	end if
-	
 	if not file_exists( outputDir ) then
 		create_directory( outputDir )
+	
+	elsif map:get( params, "clear", 0 ) then
+		remove_directory( outputDir, 1 )
+		create_directory( outputDir )
+		if verbose then
+			puts(1, "clearing the output directory\n")
+		end if
+		
 	end if
+	
 	printf(1, "Outputting files to directory: %s\n", {outputDir})
 		     
-    Place &= { -1 }
-    for i = 1 to length(inFileName) do
-    mainPath = pathname(canonical_path(inFileName[i]))
-    Place[length(Place)] = {mainPath&SLASH}
-    -- process the input file
-    parseFile( inFileName[i] )
-    end for
+	parseFile( inFileName )
 	
 	printf(1, "\n%d files were found.\n", {length(included)})
 	if verbose then
