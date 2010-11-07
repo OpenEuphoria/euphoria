@@ -196,11 +196,13 @@ end function
 
 -- strips out the leading slash / drive
 function convertAbsoluteToRelative( sequence name )
-	for i = 1 to length( name ) do
-		if find( name[i], `/\` ) then
-			return name[i+1..$]
-		end if
-	end for
+	if absolute_path( name ) then
+		for i = 1 to length( name ) do
+			if find( name[i], `/\` ) then
+				return name[i+1..$]
+			end if
+		end for
+	end if
 	return name
 end function
 
