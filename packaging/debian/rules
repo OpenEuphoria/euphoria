@@ -106,7 +106,7 @@ binary-common:
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo
-	dh_installman debian/eui.1 debian/euc.1 debian/eub.1 debian/eudis.1
+	dh_installman debian/eui.1 debian/euc.1 debian/eub.1 debian/eudis.1 debian/eudist.1
 	dh_link
 	dh_strip
 	dh_compress 

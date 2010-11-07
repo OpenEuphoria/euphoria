@@ -1,0 +1,87 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH DIS.IX 1 "November 7, 2010"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+eudist.ex \- Gather all include files for distribution of a euphoria program
+.SH SYNOPSIS
+.B eudist
+.RB [\| \-c
+.IR file ]
+.RB [\| \--clear]
+.RB [\| \-d
+.IR dir ]
+.RB [\| \-e
+.IR dir ]
+.RB [\| \-ed
+.IR dir ]
+.RB [\| \-edr
+.IR dir ]
+.RB [\| \-i
+.IR dir ]
+.RB [\| \-v]
+[
+.IR euphoria-file\ args... ]
+.br
+.SH DESCRIPTION
+This manual page documents briefly the
+.B eudist
+command.  Gathers euphoria files for a program into a directory for
+easy distribution.
+.PP
+.\" TeX users may be more comfortable with the \fB<whatever>\fP and
+.\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
+.\" respectively.
+\fBeuphoria\fP is an interpreted or compiled programming language.
+.SH OPTIONS
+.TP
+.B \-c path-to-eu.cfg
+Specifies a configuration file to be read in to specify additional
+include paths for the interpreter.
+.TP
+.B \--clear
+Clear the output directory before writing the files.
+.TP
+.B -d dir
+Specify an output directory.  The default is eudist.
+.TP
+.B \-e file
+Excludes a file.
+.TP
+.B \-ed directory \--exclude-directory
+Exclude a directory.
+.TP
+.B \-edr dir \--exclude-directory-recursively
+Exclude a directory recursively.
+.TP
+.B \-i dir
+Specifies an additional include path to the interpreter.
+.TP
+.B \-v \--verbose
+Turn on verbose output
+.TP
+.SH SEE ALSO
+.BR euc (1),
+.BR eub (1),
+.BR eui (1),
+.BR eudis (1)
+.br
+The programs are documented fully
+in /usr/share/euphoria/html
+.SH AUTHOR
+euphoria was originally written by Robert Craig <rds@rapideuphoria.com>.
+.PP
+This manual page was written by Matt Lewis <matthewwalkerlewis@gmail.com>.
