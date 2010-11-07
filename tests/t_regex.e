@@ -6,7 +6,7 @@ include std/unittest.e
 
 object ignore = 0
 
-object re 
+object re
 
 -- how do we do named duplicated subpatterns?
 re = regex:new(`(?P<year>\d{2,4})\s*# This is the year of the extended pattern
@@ -17,20 +17,20 @@ test_true("Created EXTENDED EXTRA regex", regex:regex(re))
 if not regex:regex(re) then
 	printf(1,"%s\n", {regex:error_message(re)})
 end if
-				
-test_true("Test with duplicated subpatterns in extended expression", 
+
+test_true("Test with duplicated subpatterns in extended expression",
 	sequence(regex:find(re, "1955 Nov Nov 5")))
-	
-	
+
+
 
 re = regex:new("Second|Third")
 test_equal("Matches normally can occur inside a string",{
 	{length("First, you break the eggs.  S"),length("First, you break the eggs.  Second")}
-	}, 
+	},
 	regex:find(re,"First, you break the eggs.  Second, you stir the egg.  "&
 	"Third, you turn on the frying pan",, regex:DEFAULT )
 	)
-test_equal("With regex:ANCHORED, it must match from the first place it tries", regex:ERROR_NOMATCH, 
+test_equal("With regex:ANCHORED, it must match from the first place it tries", regex:ERROR_NOMATCH,
 	regex:find(re,"First, you break the eggs.  Second, you stir the egg.  "&
 	"Third, you turn on the frying pan",, regex:ANCHORED )
 	)
@@ -38,9 +38,12 @@ test_equal("With regex:ANCHORED, it must match from the first place it tries", r
 re = regex:new("[comunicate]+", regex:CASELESS)
 test_true("Caseless makes matches case insensitive", is_match(re,"Communicate"))
 
+re = regex:new("(?i)[communicate]+")
+test_true("Caseless via (?i) matches case insensitive", is_match(re, "Communicate"))
+
 re = regex:new("rain\\?\n$")
 test_equal("When regex:DOLLAR_ENDONLY is set, $ comes after the \\n character",
-	{}, 
+	{},
 	regex:find_all(re,"Have you ever seen the rain?\n",,regex:DOLLAR_ENDONLY) )
 
 re = regex:new("rain\\?$")
@@ -85,7 +88,7 @@ regex deo = regex:new( `(?:where\?|string)$`, or_bits( regex:DOLLAR_ENDONLY, reg
 test_equal("regex:DOLLAR_ENDONLY is ignored when regex:MULTILINE is set",
 	regex:find_all(re,s), regex:find_all(deo,s) )
 
-test_equal("When regex:NOTEOL is set, matches do not occur at end of the string.", 
+test_equal("When regex:NOTEOL is set, matches do not occur at end of the string.",
 	{
 		{
 		 {29,34}
@@ -94,11 +97,11 @@ test_equal("When regex:NOTEOL is set, matches do not occur at end of the string.
 	, regex:find_all(re,s,,regex:NOTEOL) )
 
 re = regex:new("We should", regex:FIRSTLINE)
-test_equal("Matches will not occur after the first line when regex:FIRSTLINE is set", 
+test_equal("Matches will not occur after the first line when regex:FIRSTLINE is set",
 	regex:ERROR_NOMATCH, regex:find(re,s) )
 
 test_equal("Normally, dot doesn\'t match a regex:NEWLINE", regex:ERROR_NOMATCH, regex:find(regex:new("g.We", regex:DEFAULT),s) )
-test_equal("regex:Dot does match a newline when regex:DOTALL is set", {{34,37}}, 
+test_equal("regex:Dot does match a newline when regex:DOTALL is set", {{34,37}},
 	regex:find(regex:new("g.We", regex:DOTALL),s) )
 
 re = regex:new("((?<gender>Male|Female)|(?<gender>Boy|Girl))", regex:DUPNAMES)
@@ -106,19 +109,19 @@ test_true("DUPNAMES subpatterns", regex:regex(re))
 
 test_true("Test the use of backslashes infront of nonspecial letters",
 	regex:regex(regex:new(`\h\i`)) )
-	
+
 test_false("Test the use of backslashes infront of nonspecial letters with regex:EXTRA",
 	regex:regex(regex:new(`\h\i`, regex:EXTRA) ) )
-	
+
 -- flags with newlines to be tested.
 
 re = regex:new("(white|red|blue) (?P<animal>fox|bear|tiger)", NO_AUTO_CAPTURE)
 
 test_equal("Automatic subpattern capture can be disabled.",
     { {1,8}, {5,8} }, regex:find(re, "red bear") )
-	
+
 re = regex:new("What in the world")
-test_equal("find with regex:PARTIAL doesn\'t match unmatching strings", 
+test_equal("find with regex:PARTIAL doesn\'t match unmatching strings",
 	ERROR_NOMATCH, regex:find(re, "What a ride!",,regex:PARTIAL))
 test_equal(
 	"find with regex:PARTIAL returns ERROR_PARTIAL (only) when string matches " &
@@ -132,7 +135,7 @@ test_equal("find with regex:PARTIAL returns ERROR_NOMATCH "&
 	ERROR_NOMATCH,
 	regex:find(re, "the world",,regex:PARTIAL)
 	)
-test_equal("find with regex:PARTIAL matches strings that match the complete pattern.", 
+test_equal("find with regex:PARTIAL matches strings that match the complete pattern.",
 	{{1, length("What in the world")}},
 	regex:find(re, "What in the world is going on?",,regex:PARTIAL))
 
@@ -231,13 +234,13 @@ test_equal("find_replace() #4", "hello John\tDoe!", regex:find_replace(re, "hell
 test_equal("find_replace() #5", "hello Mr. John Doe!", regex:find_replace(re, "hello John Doe!", `Mr. \1 \2`))
 
 re = re:new(`<[^>]+>`)
-test_equal("find_replace() #6", "Howdy You", 
+test_equal("find_replace() #6", "Howdy You",
 	regex:find_replace(re, "<b>Howdy</b> <strong>You</strong>", ""))
-test_equal("find_replace() #7", "^Howdy^ ^You^", 
+test_equal("find_replace() #7", "^Howdy^ ^You^",
 	regex:find_replace(re, "<b>Howdy</b> <strong>You</strong>", "^"))
 
 re = regex:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
-test_equal("find_replace_limit() #1", "JOHN DOE Jane Doe", 
+test_equal("find_replace_limit() #1", "JOHN DOE Jane Doe",
 	regex:find_replace_limit(re, "John Doe Jane Doe", `\U\1 \2\e`, 1))
 
 function myupper(sequence params)
@@ -255,8 +258,8 @@ test_equal("escape #1", "Payroll is \\$\\*\\*\\*15\\.00", regex:escape("Payroll 
 
 test_equal("option names", {"STRING_OFFSETS"}, option_spec_to_string(regex:STRING_OFFSETS))
 test_equal("sequence option spec", re:regex(
-	re:new(`\<\?xml(.*)\?\>`, {re:MULTILINE, NEWLINE_ANY,DOTALL} ) 
-	), 1 ) -- ticket 161  
+	re:new(`\<\?xml(.*)\?\>`, {re:MULTILINE, NEWLINE_ANY,DOTALL} )
+	), 1 ) -- ticket 161
 
 -- error reports
 for i = 1 to length(error_names) do
@@ -267,20 +270,20 @@ test_equal( sprintf("error name %d gives the number.", 0),"0", error_to_string( 
 test_equal( sprintf("error name %d gives the number.", 21),"21", error_to_string( 21 ) )
 
 procedure test_references()
-	object x = re:find( `World`, "Hello World!" )  
+	object x = re:find( `World`, "Hello World!" )
 	test_equal( "try uncompiled regex literal", 1, atom( x ) )
-	
-	regex r=re:new( `World` )  
-	x = re:find( r, "Hello World!" )  
+
+	regex r=re:new( `World` )
+	x = re:find( r, "Hello World!" )
 	test_equal( "try compiled regex", 1, sequence(x) )
-	
-	----  
-	-- given a preceding re:new(`World`)  
-	-- this now works  
-	
-	x = re:find( `World`, "Hello World!" )  
+
+	----
+	-- given a preceding re:new(`World`)
+	-- this now works
+
+	x = re:find( `World`, "Hello World!" )
 	test_equal( "retry literal used to compile a regex", 0, sequence( x ) )
-	
+
 end procedure
 test_references()
 
