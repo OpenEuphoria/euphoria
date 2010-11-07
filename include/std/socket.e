@@ -276,8 +276,11 @@ public constant ERR_WOULDBLOCK          = -40
 --
 
 public constant
-	ESOCK_UNDEFINED_VALUE	= -9999, -- when a particular constant was not defined by C, the backend returns this value
-	ESOCK_UNKNOWN_FLAG	= -9998, -- if the backend doesn't recognize the flag in question
+	--** when a particular constant was not defined by C,
+	-- the backend returns this value
+	ESOCK_UNDEFINED_VALUE	= -9999,
+	--** if the backend doesn't recognize the flag in question
+	ESOCK_UNKNOWN_FLAG	= -9998,
 	ESOCK_TYPE_AF		= 1,
 	ESOCK_TYPE_TYPE		= 2,
 	ESOCK_TYPE_OPTION	= 3
@@ -1184,8 +1187,9 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:Socket Options]] [[:Socket Backend Constants]]
+-- [[:Socket Options]], [[:Socket Backend Constants]], 
 -- [[:Socket Type Euphoria Constants]]
+
 public function info(integer Type)
 	return machine_func(M_SOCK_INFO, Type)
 end function
