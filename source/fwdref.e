@@ -733,7 +733,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		sequence msg = ""
 		sequence errloc
 		
-		for e = 1 to length( errors ) do
+		for e = length(errors) to 1 by -1 do
 			sequence ref = forward_references[errors[e]]
 			if (ref[FR_TYPE] = TYPE_CHECK and ref[FR_OP] = TYPE_CHECK) or ref[FR_TYPE] = GLOBAL_INIT_CHECK then
 				-- these checks end up looking like duplicate errors
