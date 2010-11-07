@@ -92,7 +92,7 @@ export procedure intoptions()
 		end switch
 	end for
 	
-	if length(m:get(opts, "extras")) = 0 then
+	if length(m:get(opts, OPT_EXTRAS)) = 0 then
 		show_banner()
 		ShowMsg(2, 249)
 		show_help( get_options() )

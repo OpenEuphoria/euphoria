@@ -273,13 +273,13 @@ export procedure finalize_command_line(m:map opts)
 
 	-- Initialize the option_switches and remove them
 	-- from the command line
-	sequence extras = m:get(opts, "extras")
+	sequence extras = m:get(opts, OPT_EXTRAS)
 	if length(extras) > 0 then
 		integer eufile_pos = find(extras[1], Argv)
 		sequence pairs = m:pairs( opts )
 		for i = 1 to length( pairs ) do
 			sequence pair = pairs[i]
-			if equal( pair[1], "extras" ) then
+			if equal( pair[1], OPT_EXTRAS ) then
 				continue
 			end if
 			pair[1] = prepend( pair[1], '-' )
