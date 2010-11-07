@@ -345,7 +345,7 @@ procedure run()
     -- read the command line
     map:map params = cmd_parse(cmd_params)
     object 
-		inFileName    = map:get( params, "extras" ),
+		inFileName    = map:get( params, OPT_EXTRAS ),
 		configFiles   = map:get( params, "c", {} ),
 		excludeDirRec = map:get( params, "edr"),
 		excludeDirs   = map:get( params, "ed"),
@@ -360,19 +360,16 @@ procedure run()
 		if length( inFileName ) = 0 then
 			abort(0)
 		end if
-	elsif length( inFileName ) > 1 then
-		puts(2, "You must specify a single file\n" )
-		abort( 1 )
-	else
-		inFileName = inFileName[1]
     end if
     
     Place &= apply(stringifier(map:get(params, "include")), routine_id("slashifier"))
     
-	sequence default_config_file = slashifier( pathname( inFileName ) ) & "eu.cfg"
+	for i = 1 to length(inFileName) do
+	sequence default_config_file = slashifier( pathname( inFileName[i] ) ) & "eu.cfg"
 	if file_exists( default_config_file ) then
 		configFiles = prepend( configFiles, default_config_file )
 	end if
+	end for
 	
 	
 	for i = 1 to length( configFiles ) do
@@ -406,10 +403,13 @@ procedure run()
 	end if
 	printf(1, "Outputting files to directory: %s\n", {outputDir})
 		     
-    mainPath = pathname(canonical_path(inFileName))
-    Place &= {mainPath&SLASH}
+    Place &= { -1 }
+    for i = 1 to length(inFileName) do
+    mainPath = pathname(canonical_path(inFileName[i]))
+    Place[length(Place)] = {mainPath&SLASH}
     -- process the input file
-    parseFile( inFileName )
+    parseFile( inFileName[i] )
+    end for
 	
 	printf(1, "\n%d files were found.\n", {length(included)})
 	if verbose then

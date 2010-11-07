@@ -256,7 +256,7 @@ export procedure transoptions()
 		remove_output_dir = 1
 	end if
 
-	if length(map:get(opts, "extras")) = 0 then
+	if length(map:get(opts, OPT_EXTRAS)) = 0 then
 		-- No source supplied on command line
 		show_banner()
 		ShowMsg(2, 203)

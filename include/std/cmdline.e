@@ -126,6 +126,12 @@ public enum
 	OPT_REV
 
 
+public constant
+	--**
+	--   The extra parameters on the cmd line, not associated with any
+	--   specific option. See [[:cmd_parse]]
+	OPT_EXTRAS = {-9,-8,-7,-6}
+
 -- Record fields in 'opts' argument.
 enum
 	SHORTNAME = 1,
@@ -174,7 +180,7 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 			else
 				lExtras = i
 				if atom(opt[MAPNAME]) then
-					opt[MAPNAME] = "extras"
+					opt[MAPNAME] = OPT_EXTRAS
 					updated = 1
 				end if
 			end if
@@ -248,7 +254,7 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 			elsif sequence(opt[SHORTNAME]) then
 				opt[MAPNAME] = opt[SHORTNAME]
 			else
-				opt[MAPNAME] = "extras"
+				opt[MAPNAME] = OPT_EXTRAS
 			end if
 			updated = 1
 		end if
@@ -740,7 +746,7 @@ end function
 --              ##command_line##() is used.
 --
 -- Returns:
--- A **map**, containing the options set. The returned map has one special key named "extras"
+-- A **map**, containing the options set. The returned map has one special key with a name represented by OPT_EXTRAS
 -- which are values passed on the command line that are not part of any option, for instance
 -- a list of files ##myprog -verbose file1.txt file2.txt##.  If any command element begins
 -- with an @ symbol then that file will be opened and its contents used to add to the command line.
@@ -912,7 +918,7 @@ end function
 -- -- map:get(opts, "hash") --> 0 (not supplied on command line)
 -- -- map:get(opts, "output") --> "john.txt"
 -- -- map:get(opts, "import") --> {"/usr/local", "/etc/app"}
--- -- map:get(opts, "extras") --> {"input1.txt", "input2.txt"}
+-- -- map:get(opts, OPT_EXTRAS) --> {"input1.txt", "input2.txt"}
 -- </eucode>
 --
 -- See Also:
@@ -982,7 +988,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 	map:map parsed_opts = map:new()
 
-	map:put(parsed_opts, "extras", {})
+	map:put(parsed_opts, OPT_EXTRAS, {})
 
 	arg_idx = 2
 	opts_done = 0
@@ -1073,7 +1079,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 		if (opts_done or find(cmd[1], CMD_SWITCHES) = 0 or length(cmd) = 1)
 		then
-			map:put(parsed_opts, "extras", cmd, map:APPEND)
+			map:put(parsed_opts, OPT_EXTRAS, cmd, map:APPEND)
 			has_extra = 1
 			if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
 				exit
