@@ -595,7 +595,7 @@ test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test : $(BUILDDIR)/ecp.dat
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) ../source/eutest.ex -i ../include -cc gcc -verbose \
+		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc -verbose \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind ../source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
@@ -608,7 +608,7 @@ testeu : $(BUILDDIR)/ecp.dat
 
 test-311 :
 	cd ../tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc -verbose \
+		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc -verbose \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
@@ -617,7 +617,7 @@ test-311 :
 		
 coverage-311 :
 	cd ../tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
+		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
 		-coverage-db $(CYPBUILDDIR)/unit-test-311.edb -coverage $(CYPTRUNKDIR)/include \
 		-coverage-exclude std -coverage-exclude euphoria \
@@ -625,7 +625,7 @@ coverage-311 :
 
 coverage : 
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
+		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" $(COVERAGE_ERASE) \
 		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)

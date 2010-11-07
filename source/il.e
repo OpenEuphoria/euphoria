@@ -324,7 +324,7 @@ export procedure handle_options_for_bind( m:map opts )
 			case "BATCH" then
 				batch_job = 1
 				
-			case "EXTRAS" then
+			case OPT_EXTRAS then
 				if length(val) != 0 then
 					file_supplied = 1
 				end if
