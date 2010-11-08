@@ -695,21 +695,18 @@ $(BUILDDIR)\html: .EXISTSONLY
 $(BUILDDIR)\html\style.css : $(DOCDIR)\style.css
 	copy $(DOCDIR)\style.css $(BUILDDIR)\html
 
-$(BUILDDIR)\html\js\prototype.js: $(DOCDIR)\prototype.js  $(BUILDDIR)\html\js
-	copy $(DOCDIR)\prototype.js $^@
-
 $(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\html\images
 	copy $(DOCDIR)\html\images\prev.png $^@
 	
 $(BUILDDIR)\html\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\html\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\html\eu400_0001.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+$(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
-htmldoc : $(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
+htmldoc : .SYMBOLIC $(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 
 $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
 	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "splitlevel = 2" "splitlevel = 0" &
