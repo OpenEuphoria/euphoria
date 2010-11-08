@@ -2,7 +2,7 @@ include std/unittest.e
 include std/primes.e
 
 sequence list_of_primes = prime_list( 10 )
-test_equal( "prime list (11)", 11, list_of_primes[$] )
+test_equal( "prime list (11)", 7, list_of_primes[$] )
 
 test_equal( "calc_primes up to 5 (already calc'd)", {2,3,5}, calc_primes(5) )
 

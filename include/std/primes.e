@@ -17,23 +17,27 @@ sequence list_of_primes  = {2,3} -- Initial seedings.
 --
 
 --**
--- Returns all the prime numbers below some threshold, with a cap on computation time.
+-- Returns all the prime numbers below a threshold, with a cap on computation time.
 --
 -- Parameters:
---		# ##max_p## : an integer, the last prime returned is the next prime after or on this value.
+--		# ##approx_limit## : an integer, This is not the upper limit but the last prime
+--        returned is the **next** prime after or on this value.
 --		# ##time_out_p## : an atom, the maximum number of seconds that this function can run for.
 --                        The default is 10 (ten) seconds.
 --
 -- Returns:
 --		A **sequence**, made of prime numbers in increasing order. The last value is 
---      the next prime number that falls on or after the value of ##max_p##.
+--      the next prime number that falls on or **after** the value of ##approx_limit##.
 --
 -- Comments:
+-- * The ##approx_limit## argument **does not** represent the largest value to return. 
+--   The largest value returned will be the next prime number on or after ##approx_limit#.
+--   The [[:prime_list]] function will allow to specify a upper limit.
 -- * The returned sequence contains all the prime numbers less than its last element.
 --
--- * If the function times out, it may not hold all primes below ##max_p##,
+-- * If the function times out, it may not hold all primes below ##approx_limit##,
 -- but only the largest ones will be absent. If the last element returned is 
--- less than ##max_p## then the function timed out.
+-- less than ##approx_limit## then the function timed out.
 --
 -- * To disable the timeout, simply give it a negative value.
 --
@@ -41,14 +45,14 @@ sequence list_of_primes  = {2,3} -- Initial seedings.
 -- <eucode>
 -- ? calc_primes(1000, 5)
 -- -- On a very slow computer, you may only get all primes up to say 719. 
--- -- On a faster computer, the last element printed out will be 997. 
+-- -- On a faster computer, the last element printed out will be 1009. 
 -- -- This call will never take longer than 5 seconds.
 -- </eucode>
 --
 -- See Also:
 --		[[:next_prime]] [[:prime_list]]
 
-public function calc_primes(integer max_p, atom time_limit_p = 10)
+public function calc_primes(integer approx_limit, atom time_limit_p = 10)
 	sequence result_
 	integer candidate_
 	integer pos_
@@ -60,8 +64,8 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 	integer growth
 
 	-- First we check to see if we have already got the requested value.	
-	if max_p <= list_of_primes[$] then
-		pos_ = binary_search(max_p, list_of_primes)
+	if approx_limit <= list_of_primes[$] then
+		pos_ = binary_search(approx_limit, list_of_primes)
 		if pos_ < 0 then
 			pos_ = (-pos_)
 		end if
@@ -86,7 +90,7 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 	
 	-- Pre-allocate space for the new values. This allocates more than we will
 	-- need so the return value takes a slice up to the last stored prime.
-	growth = floor(max_p  / 3.5) - length(list_of_primes)
+	growth = floor(approx_limit  / 3.5) - length(list_of_primes)
 	if growth <= 0 then
 		growth = length(list_of_primes)
 	end if
@@ -143,7 +147,7 @@ public function calc_primes(integer max_p, atom time_limit_p = 10)
 		
 		-- If the value just stored is larger or equal to the requested value
 		-- then we can stop running.
-		if candidate_ >= max_p then
+		if candidate_ >= approx_limit then
 			exit
 		end if
 	end while
@@ -171,7 +175,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- ? next_prime(997)
--- -- On a very slow computer, you might get -997, but 1003 is expected.
+-- -- On a very slow computer, you might get -997, but 1009 is expected.
 -- </eucode>
 --
 -- See Also:
@@ -207,17 +211,17 @@ end function
 --
 -- Parameters:
 -- 		# ##top_prime_p## : The list will end with the prime less than or equal
---        to this value. If this is zero, the current list calculated primes
+--        to this value. If ##top_prime_p## is zero, the current list of calculated primes
 --        is returned.
 --
 -- Returns:
---		An **sequence**, a list of prime numbers from 2 to ##top_prime_p##
+--		An **sequence**, a list of prime numbers from 2 to <= ##top_prime_p##
 --
 -- Example 1:
 -- <eucode>
 -- sequence pList = prime_list(1000)
 -- -- pList will now contain all the primes from 2 up to the largest less than or
--- --    equal to 1000.
+-- --    equal to 1000, which is 997.
 -- </eucode>
 --
 -- See Also:
@@ -237,6 +241,9 @@ public function prime_list(integer top_prime_p = 0)
 	index_ = binary_search(top_prime_p, list_of_primes)
 	if index_ < 0 then
 		index_ = - index_
+	end if
+	if list_of_primes[index_] > top_prime_p then
+		index_ -= 1
 	end if
 	
 	return list_of_primes[1 .. index_]
