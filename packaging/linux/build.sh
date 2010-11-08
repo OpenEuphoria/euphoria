@@ -1,26 +1,31 @@
-#!/bin/sh
+#!/bin/bash
 
 #
-# Ensure a tag name was given as a command line option
+# Ensure a directory name was given as a command line option
 #
 
 if [ "$1" = "" ]; then
-	echo Usage: build.sh TAG-NAME
+	echo Usage: build.sh DIR-NAME
         exit
 fi
 
-svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tags/$1 euphoria-$1
+svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/$1 euphoria-$1
 
 cd euphoria-$1/bin
 rm -f *.bat *.ico make31.exw *.exe
-chmod ug+rwx,o+rx Linux/*
-cp Linux/* .
-rm -rf Linux FreeBSD
-cd ../
-rm -rf docs packaging Setup
+cd ..
 
-cp ../../../bin/eui ../../../bin/euc ../../../bin/eu.a ../../../bin/eudbg.a ../../../bin/eub bin
+rm -rf docs
+rm -rf packaging
+
+cp ../../../bin/eu{i,b,c,doc,test,coverage,bind} ../../../bin/eu.a ../../../bin/eudbg.a bin
+cp ../../../bin/creolehtml ../../../bin/ecp.dat bin
+
+mkdir docs
+cp ../../../build/*.pdf docs
+cp -r ../../../build/html docs
 
 cd ..
 
 tar czf euphoria-$1.tar.gz euphoria-$1
+
