@@ -1,30 +1,48 @@
 == Euphoria Internals ==
 
 The interpreter has four binary components:
-* the translator
-* library
-* interpreter 
-* the backend.  
+* Interpreter
+* Translator
+* Backend  
+* Library
 
-Euphoria's parser first converts the code into a set of instructions that the 
-translator, interpreter, and backend can process.  Then the backend runs these 
-instructions.  The translator takes these same instructions and converts them 
-into C-code.  The library is called by the backend for
-the many builtins included in Euphoria.
+The Euphoria interpreter has two parts: the frontend and the backend. The
+**frontend** is a parser that converts source-code into a set of
+**Intermediate Language** (IL) instructions. The **backend** then takes the
+IL instructions and executes the program.
+
+When the //interpreter// executes source-code, the frontend and backend work 
+together in tandem. It appears as if the source-code executes immediately.
+
+When the //shrouder// executes source-code, only the frontend is run producing
+an ##.il## file. This ##.il## file may be run by the backend as an
+independent step to execute the program.
+
+When the //binder// executes source-code, the ##.il## instructions produced
+by the frontend are combined with the backend to produce a stand-alone
+executable program. The executable program may then be run independetly at any
+time.
+
+When the //translator// executes source-code, the ##.il## instructions are
+translated into C-code. This C-code is compiled with an installed C compiler
+producing an executable program.
+
+The //library// is called by the backend for the many builtins included in 
+Euphoria.
 
 === The Euphoria Data Structures ===
 
 ==== The Euphoria representation of a Euphoria Object =====
 
 Every Euphoria object is stored as-is.  A special unlikely floating point value 
-is used for NOVALUE.  NOVALUE signifies that a variable has not been assigned a 
-value or the end of a sequence.
+is used for ##NOVALUE##.  ##NOVALUE## signifies that a variable has not been 
+assigned a value or the end of a sequence.
 
 ==== The C Representation of a Euphoria Object =====
 
-Every Euphoria object is either stored as is, or as an encoded pointer.  A Euphoria 
-integer is stored in a 32-bit signed integer.  If the number is too big for a 
-Euphoria integer, it is assigned to a 64-bit double float in a 
+Every Euphoria object is either stored as is, or as an encoded pointer.  A 
+Euphoria ##integer## is stored in a 32-bit signed integer.  If the number is too
+big for a Euphoria ##integer##, it is assigned to a 64-bit double float in a 
 structure and an encoded pointer to that structure is stored in the said 32-bit 
 memory space.  Sequences are stored in a similar way.
 
@@ -105,12 +123,13 @@ in struct s1.  A 64bit implementation would have to reorder these members.
 
 ==== Description
 
-The macros are imperfect.  For example, IS_SEQUENCE(NOVALUE) returns TRUE and 
-IS_ATOM_DBL() will return TRUE for integer values as well as encoded pointers to
+The macros are imperfect.  For example, ##IS_SEQUENCE(NOVALUE)## returns 
+##TRUE## and ##IS_ATOM_DBL()## will return ##TRUE## for integer values as well 
+as encoded pointers to
 'struct d's.   This is why there is an order that these tests are made: We test 
-IS_ATOM_INT and if that fails we can use IS_ATOM_DBL and then that will only be 
-true if we pass an encoded pointer to a double.  We must be sure that something 
-is not NOVALUE before we use IS_SEQUENCE on it.
+##IS_ATOM_INT## and if that fails we can use ##IS_ATOM_DBL## and then that will 
+only be true if we pass an encoded pointer to a double.  We must be sure that 
+something is not ##NOVALUE## before we use ##IS_SEQUENCE## on it.
 
 // Often we know foo is not NOVALUE before getting into this://
 
@@ -141,7 +160,7 @@ A sequence is held in a 'struct s1' type and a double is contained in a
 true if object is a Euphoria integer and not an encoded pointer.
 
 ===== Note: 
-IS_ATOM_INT() will return true even though the argument is out of the 
+##IS_ATOM_INT##() will return true even though the argument is out of the 
 Euphoria integer range when the argument is positive.  These values 
 are not possible encoded pointers.
 

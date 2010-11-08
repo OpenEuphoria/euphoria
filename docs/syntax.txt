@@ -1,4 +1,8 @@
 == basics ==
+
+The syntax of Euphoria is described using BNF notation.
+
+
 <eucode>
 ALPHA ==: ('a' - 'z') | ('A' - 'Z')
 DIGIT ==: ('0' - '9')

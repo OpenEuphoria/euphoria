@@ -2,17 +2,18 @@
 == Installation
 :<<LEVELTOC level=2 depth=4>>
 
-To install Euphoria, consult the instructions below for your particular operating system.
+To install Euphoria, consult the instructions below for your particular 
+operating system.
 
 === Windows
 
-To install Euphoria on Windows, visit the following URL:
+To install Euphoria on //Windows//, visit the following URL:
 
 :http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
 
-Download the lastest Windows installer found under the Binary Releases heading
-of the Current version of Euphoria. Run the program and follow the prompts to
-get Euphoria installed.
+Download the lastest //Windows// installer found under the Binary Releases 
+heading of the Current version of Euphoria. Run the program and follow the 
+prompts to get Euphoria installed.
    
 The installer copies the required files and adds ##euphoria\bin## to your path.
 It also sets the environment variable **EUDIR** to the Euphoria directory.
@@ -22,7 +23,8 @@ It also sets the environment variable **EUDIR** to the Euphoria directory.
 Euphoria may be installed using either the gzipped tarball, or from a
 distribution specific package, if available.
 
-The gzipped tarball is laid out similarly to the Windows directory structure.
+The gzipped tarball is laid out similarly to the //Windows// directory 
+structure.
 You'll need to manually edit ##/etc/profile## so the ##PATH## contains
 ##euphoria\bin##, and either create a ##eu.cfg## file or set up ##EUDIR##
 and ##EUINC##.
@@ -73,8 +75,8 @@ different ones by using the ##-C## switch.
 
 ==== Configuration file format
 
-The configuration file is a text file. Each line in the file is either a command line switch,
-a section header, an include path or a comment.
+The configuration file is a text file. Each line in the file is either a command
+line switch, a section header, an include path or a comment.
 * Comments are lines that begin with a double dash {{{"--"}}}. Everything on the
 line is ignored.
 * A section header is a //name// enclosed in square brackets. eg. 
@@ -107,19 +109,19 @@ line is added to the actual command line as if it was originally there.
 ##-I## is prepended to the line and then it is added to the command line.
 
 When Euphoria starts up, it looks for configuration files in the following 
-order ...
-* for //UNIX// systems
-## /etc/euphoria/eu.cfg
-## ${EUDIR}/eu.cfg
-## ${HOME}/.eu.cfg
-## From where ever the executable is run from "<exepath>/eu.cfg"
-## Current working directory - "./eu.cfg"
-## Command line -C switches
-* for WINDOWS systems
+order:
+* For //Windows// systems
 ## ~%ALLUSERSPROFILE~%\euphoria\eu.cfg
 ## ~%APPDATA~%\euphoria\eu.cfg
 ## ~%EUDIR~%\eu.cfg
 ## ~%HOMEDRIVE~%\~%HOMEPATH~%\eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
+## Command line -C switches
+* For //Unix// systems
+## /etc/euphoria/eu.cfg
+## ${EUDIR}/eu.cfg
+## ${HOME}/.eu.cfg
 ## From where ever the executable is run from "<exepath>/eu.cfg"
 ## Current working directory - "./eu.cfg"
 ## Command line -C switches
@@ -129,7 +131,7 @@ above. This means that settings specified in earlier configuration files may be
 overridden by subsequent configuration files. For example, a configuration file 
 in the current directory will override the same settings in a configuration file
 in the executable's directory.
-* If a configuration file contains a "-C" switch, the new configuration file
+* If a configuration file contains a ##-C## switch, the new configuration file
 specified on that switch is processed before subsequent lines in the old file.
 * A configuration file is only ever processed once. Additional references to the
 same file are ignored.
@@ -137,16 +139,27 @@ same file are ignored.
 
 == Example Programs
 :<<LEVELTOC level=2 depth=4>>
+
 === Hello, World ===
-The //mandatory// 'hello world' program is a one-liner in Euphoria.
+
+The //mandatory// 'Hello World' program is a one-liner in Euphoria.
 <eucode>
 puts(1, "Hello, World\n")
 </eucode>
-This simply calls the built-in routine ##puts## ('put string'), passing it two
-parameters:- ##1##, which is the file number to output to (STDOUT - the console,
-in this case) and a string of text.
+
+The built-in routine ##puts()## does the job of displaying text on a screen. It
+requires two arguments. The first argument, ##1##,  directs the output to 
+STDOUT or the console. The second argument, is a string of text that will be 
+output.
+
+The result is:
+{{{
+Hello, World
+}}}
+
 
 === Sorting ===
+
 The following is an example of a more useful Euphoria program.
 
 <eucode>
@@ -279,9 +292,10 @@ associations have been setup during the installation process.
 
 ==== Edit Sample Files
 
-Use the Euphoria editor, ##ed##, to edit a Euphoria file. Notice the use of colors. You can
-adjust these colors along with the cursor size and many other "user-modifiable" parameters by
-editing constant declarations in ##ed.ex##. Use //Esc q// to quit the editor or //Esc h// for
+Use the Euphoria editor, ##ed##, to edit a Euphoria file. Notice the use of 
+colors. You can adjust these colors along with the cursor size and many other 
+"user-modifiable" parameters by editing constant declarations in ##ed.ex##. Use 
+//Esc q// to quit the editor or //Esc h// for
 help. There are several, even better, Euphoria-oriented editors in
 [[http://www.rapideuphoria.com/edi.htm|The Archive]]. If you use a more sophisticated text
 editor, many have a highlighter file for Euphoria. You will find it either on the Archive or
@@ -394,8 +408,8 @@ What you just typed is known as the //command-line//.
 Depending on the platform you are using the interpreter could be called:
 
 || Executable || Purpose                                        ||
-| ##eui##     | General interpreter on Windows and *nix variants |
-| ##euiw##    | Console-less Windows interpreter                 |
+| ##eui##     | General interpreter on //Windows// and //Unix// variants |
+| ##euiw##    | Console-less //Windows// interpreter                 |
 
 \\The command-line may contain extra information. Following your program 
 filename
@@ -416,7 +430,7 @@ Euphoria doesn't care about your choice of file extensions. By
 convention, however, console-based applications have an extension of ##.ex##,
 GUI-based applications have an extension of ##.exw## and include files have an
 extension of ##.e##. Note that a GUI application is not necessarily a
-Microsoft Windows (tm) program. A GUI application can exist on Linux,
+//Windows// program. A GUI application can exist on Linux,
 OS X, FreeBSD, etc...
 
 You can redirect standard input and standard output when you run a Euphoria

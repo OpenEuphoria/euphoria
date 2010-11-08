@@ -3,29 +3,29 @@
 
 === Introduction
 
-The Euphoria to C Translator will translate any Euphoria program into
-equivalent C source code.
+The **Euphoria to C Translator** (translator) will translate any Euphoria 
+program into equivalent C source code.
 
-There are versions of the translator for //Windows// and //UNIX//-like 
-Operating Systems. After translating a Euphoria program to C, you
+There are versions of the translator for //Windows// and //Unix// 
+operating Systems. After translating a Euphoria program to C, you
 can compile and link using one of the supported C compilers. This will give
 you an executable file that will typically run much faster than if you used
 the Euphoria interpreter.
 
-The translator can translate/compile **itself** into an executable file for
-each platform. The translator is also used in translating/compiling the
-front-end portion of the interpreter. The source code for the Translator is in
+The translator can translate and then compile //itself// into an executable file
+for each platform. The translator is also used in translating/compiling the
+front-end portion of the interpreter. The source code for the translator is in
 ##euphoria\source##. It is written 100% in Euphoria.
 
 === C Compilers Supported
 
-The **Translator** currently works with GNU C on //UNIX//-like OSes,
+The **Translator** currently works with GNU C on //Unix//-like OSes,
 GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
-or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the -gcc option
+or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the ##-gcc## option
 and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
 These are all **free** compilers.
 
-GNU C will exist already on your UNIX system. The others can be
+GNU C will exist already on your //Unix// system. The others can be
 downloaded from their respective Web sites.
 
 ==== Notes:
@@ -34,13 +34,13 @@ downloaded from their respective Web sites.
 on, you may see some
  harmless messages about variables declared but not used, labels defined but
  not used, function prototypes not declared etc.
-* Options -bor and -lcc for previously supported compilers on //Windows// no 
-longer work. 
-* For the -gcc option on //Windows// you will need a ##libeu.a## compiled with 
-//minGW// or //Cygwin//. The official distribution may only contain ##eu.lib## 
-compiled with //Watcom//. Also, the -stack and -con options may not produce the 
-expected result with //GCC C//.
-* currently, only 32-bit compilers are supported on 64-bit platforms.
+* Options ##-bor## and ##-lcc## for previously supported compilers on 
+//Windows// no longer work. 
+* For the ##-gcc## option on //Windows// you will need a ##libeu.a## compiled 
+with //minGW// or //Cygwin//. The official distribution may only contain 
+##eu.lib## compiled with //Watcom//. Also, the ##-stack## and ##-con## options 
+may not produce the expected result with //GCC C//.
+* Currently, only 32-bit compilers are supported on 64-bit platforms.
 
 === How to Run the Translator
 
@@ -52,7 +52,7 @@ On //Windows// you would type:
 euc taskwire.exw
 }}}
 
-On //UNIX// you would type:
+On //Unix// you would type:
 
 {{{
 euc qsort.ex
@@ -90,7 +90,7 @@ After creating your executable file, emake removes all the C files that were
 created. If you want to look at these files, run the translator again and look
 at the files before running emake.
 
-==== Note to UNIX users:
+==== Note to Unix users:
 
 The files will be called ##emake## and ##shell##, and you type ##./emake## to
 perform the compiles and link, and **./shell** to run the shell sort program.
@@ -184,7 +184,8 @@ euc -lib decu.a myapp.ex
 Use one of these options to translate code into C for the specified platform.  
 The default will always be the native
 platform of the translator that is executed, so ##euc.exe## will default
-to Windows, and ##euc## will default to the platform upon which it was built.
+to //Windows//, and ##euc## will default to the platform upon which it was 
+built.
 
 The resulting output can be compiled by the appropriate compiler on the
 specified platform, or, possibly a cross platform compiler, if you have
@@ -202,9 +203,9 @@ translated/compiled and interpreted programs will be able to use your library.
 
 Only the global Euphoria procedures and functions, i.e. those declared with
 the "##global##", "##public##" or "##export##" keyword, will be exported from
-the shared dyanmically loaded library.
+the shared dynamically loaded library.
 
-Any Euphoria program, whether translated/compiled or interpreted, can link
+Any Euphoria program, whether translated or compiled or interpreted, can link
 with a Euphoria shared dynamically loading library using the same mechanism that
 lets you link with a shared dynamically loading library written in C. The 
 program first calls [[:open_dll]]() to open the
@@ -215,7 +216,7 @@ and [[:c_proc]]().
 The routine names exported from a Euphoria shared dynamically loading library 
 will vary depending on which C compiler you use.
 
-GNU C on UNIX exports the names exactly as they appear in the C
+GNU C on Unix exports the names exactly as they appear in the C
 code produced by the **Translator**, e.g. a Euphoria routine
 
 {{{
@@ -266,7 +267,7 @@ global constant
     E_OBJECT  = #09000004
 </eucode>
 
-Use these in **define_c_proc()** and **define_c_func()** just as you currently
+Use these in ##define_c_proc##() and ##define_c_func##() just as you currently
 use ##C_INT##, ##C_UINT## etc. to call C shared dynamically loading libraries.
 
 Currently, file numbers returned by [[:open]](), and routine id's returned by
@@ -278,7 +279,8 @@ is no simple solution for passing routine id's. This might be fixed in the
 future.
 
 A Euphoria shared dynamically loading library currently may not execute any 
-multitasking operations. The Translator will give you an error message about this.
+multitasking operations. The Translator will give you an error message about 
+this.
 
 Euphoria shared dynamically loading library can also be used by C programs as 
 long as only 31-bit
@@ -378,7 +380,7 @@ program. They ask for, but do not require, some acknowledgement.
 
 This is what we believe to be the case. We are not lawyers. If it's important
 to you, you should read **all** licences and the legal comments in them,
-to form your own judgement. You may need to get professional legal opinion as 
+to form your own judgment. You may need to get professional legal opinion as 
 well.
 
 === Frequently Asked Questions
@@ -408,9 +410,9 @@ Typical user-defined types will not slow you down. Since your program is
 supposed to be free of type_check errors, types are ignored by the Translator,
 unless you call them directly with normal function calls. The one exception is
 when a user-defined type routine has side-effects (i.e. it sets a global
-variable, performs pokes into memory, I/O etc.). In that case, if **with
-type_check** is in effect, the Translator will issue code to call the type
-routine and report any type_check failure that results.
+variable, performs pokes into memory, I/O etc.). In that case, if 
+##with type_check## is in effect, the Translator will issue code to call the 
+type routine and report any type_check failure that results.
 
 On //Windows// we have left out the ##/ol## loop optimization for
 Watcom's ##wcc386##. We found in a couple of rare cases that this option led

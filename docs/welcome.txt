@@ -13,14 +13,14 @@ conventional languages:
    allocating and freeing chunks of memory.  Objects of any size can be assigned
    to an element of a Euphoria sequence (array).
 * Fast
-** a high-performance, state-of-the-art interpreter that's significantly faster
+** A high-performance, state-of-the-art interpreter that's significantly faster
    than  conventional interpreters such as Perl and Python.
 * Compiles
-** an optimizing [[:Euphoria To C Translator]], that can boost your speed
+** An optimizing [[:Euphoria To C Translator]], that can boost your speed
 even further, often by a factor of 2x to 5x versus the already-fast
 interpreter.
 * Safe
-** extensive run-time checking for: out-of-bounds
+** Extensive run-time checking for: out-of-bounds
 subscripts, uninitialized variables, bad parameter values for library
 routines, illegal value assigned to a variable and many more. There are
 no mysterious machine exceptions{{{--}}}you will always get a full English
@@ -28,11 +28,11 @@ description of any problem that occurs with  your program at run-time,
 along with a call-stack trace-back and a dump of all of your variable
 values. Programs can be debugged quickly, easily and  more thoroughly.
 * High level
-** features of the underlying hardware are completely
+** Features of the underlying hardware are completely
 hidden. Programs are not aware of word-lengths, underlying bit-level
 representation of values, byte-order etc.
 * Debugger
-** a full-screen
+** A full-screen
 source debugger and an execution profiler are included, along with a
 full-screen, multi-file editor. On a color monitor, the editor displays
 Euphoria programs in multiple colors, to highlight comments, reserved
@@ -67,19 +67,19 @@ There are now enthusiastic users around the world.
 Euphoria is a very high-level programming language. It is unique among a
 crowd of conventional languages.
 
-=== First, Euphoria delivers the "expected" features of a modern language:
+=== First, Euphoria delivers the expected features of a modern language:
 
-* open source
-* free for personal and commercial use
-* produces royalty-free, stand-alone, programs
-* multi-platform {{{--}}} Windows, UNIX
-* provides a choice of multi-platform gui toolkits: IUP, GTK, wxWindows
-* features a Windows IDE and gui library written in Euphoria
-* colored-syntax editors, profiling, and tracing of code
-* dynamic memory allocation and efficient garbage collection
-* interfacing to existing C libraries and databases
-* well-documented, lots of example source-code, and an enthusiastic forum
-* edit and run convenience
+* Open source
+* Free for personal and commercial use
+* Produces royalty-free, stand-alone, programs
+* Multi-platform {{{--}}} //Windows//, //Unix//
+* Provides a choice of multi-platform GUI toolkits: IUP, GTK, wxWindows
+* Features a //Windows// IDE and GUI library written in Euphoria
+* Colored-syntax editors, profiling, and tracing of code
+* Dynamic memory allocation and efficient garbage collection
+* Interfacing to existing C libraries and databases
+* Well-documented, lots of example source-code, and an enthusiastic forum
+* Edit and run convenience
 
 === Euphoria is unique
 
@@ -90,22 +90,22 @@ What makes Euphoria unique is a design that uses just two basic data-types~--
 * An **atom** is single numeric value (either an integer or floating point)
 * A **sequence** is a list of zero or more //objects//.
 * An **object** is a //variant// type in that it can hold an atom or a sequence.
-* An //integer// is just a special form of atom that can only hold integers. You
-can use the //integer// type for a performance advantage in situations where
+* An **integer** is just a special form of atom that can only hold integers. You
+can use the integer type for a performance advantage in situations where
 floating point values are not required.
 
 What follows from this design are some advantages over conventional languages:
 
-* the language syntax is smaller {{{--}}} and thus easier to learn
-* the language syntax is consistent {{{--}}} and thus easier to program
-* routines are more generic {{{--}}} a routine used for strings may also be
+* The language syntax is smaller {{{--}}} and thus easier to learn
+* The language syntax is consistent {{{--}}} and thus easier to program
+* Routines are more generic {{{--}}} a routine used for strings may also be
 applied to any data structure
-* a higher level view of programming {{{--}}} because sequences encompass
+* A higher level view of programming {{{--}}} because sequences encompass
 conventional lists, arrays, tables, tuples, ..., and all other
 data-structures.
-* sequences are dynamic {{{--}}} you may create and destroy at will {{{--}}} and
+* Sequences are dynamic {{{--}}} you may create and destroy at will {{{--}}} and
 modify them to any size and complexity
-* it supports both //static// data typing and //dynamic// data typing.
+* It supports both //static// data typing and //dynamic// data typing.
 
 === Euphoria has qualities that go beyond the elegance of sequences
 
@@ -156,14 +156,15 @@ contained in this package, in whole or in part, so anyone can run a Euphoria
 program that you have developed. You are completely free to distribute any
 Euphoria programs that you write.
 
+
 === Requirements
 
-To run the //WIN32// version of Euphoria, you need any Windows 95 or any later
+To run the //Windows// version of Euphoria, you need any Windows 95 or any later
 32-bit version of Windows.  It runs fine on XP and Vista.
 
-To run the //Linux// version of Euphoria you need a
+To run the //Unix// version of Euphoria you need a
 Linux distribution, that has libc6 or later. For example, Red Hat 5.2 or later
-will work fine.
+will work fine. 
 
 To run the //Mac OS X// version of Euphoria, you need an Intel based Mac.
 
@@ -171,7 +172,7 @@ To run the //Mac OS X// version of Euphoria, you need an Intel based Mac.
 
 Euphoria has multiple interpreters, the main one being **##eui##**.
 
-* On windows platforms you have two choices. If you run ##eui## then a console
+* On //Windows// platforms you have two choices. If you run ##eui## then a console
 window is created. If you run ##euiw## then no console is created, making
 it suitable for GUI applications.
 
@@ -181,20 +182,35 @@ reader is left to choose the correct interpreter.
 Euphoria runs on many platforms. When operating specific issues must be 
 described you will see these descriptions:
 
-* //Windows//will be a general reference to a family of Microsoft Windows
+* //Windows// will be a general reference to a family of Microsoft Windows
 operating systems that includes 95/ME/98/XP/NT/Vista/7/. 
-You will see the constant ##WIN32## used for Windows specific code.
+You will see the constant ##WIN32## used for //Windows// specific code.
 
 * //Unix// will be a general reference to the family operating systems that
 includes Linux, FreeBSD, Mac OS X,... You will see the constant ##UNIX## used
-for Unix specific code. You may also see "*nix" used to describe this group
-of operating systems.
+for Unix specific code. 
 
-Directory names in Windows use ##\## separators, while Unix systems use ##/##.
-Unix users should substitute {{{ / }}} when they examine example code.
+Directory names in //Windows// use ##\## separators, while //Unix// systems use ##/##.
+//Unix// users should substitute {{{ / }}} when they examine sample code.
+Hint: //Windows// users can now use {{ / }} in directory names.
 
 Operating system names are often trademarks. There is no intent to infringe on 
 their owner rights.
+
+Within a paragraph, Euphoria keywords (like ##atom## or ##while##) and program 
+excerpts are written in a ##fixed font##. 
+
+Samples of Euphoria programs will be syntax colored using a fixed font:
+<eucode>
+for i=1 to 10 do
+  ? i
+end for
+-- this is a comment line
+-- above is a 'for loop' example
+</eucode>
+
+
+
 
 === Discover Euphoria
 

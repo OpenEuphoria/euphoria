@@ -9,20 +9,20 @@
 eushroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]
 }}}
 
-The ##shroud## command converts a Euphoria program, typically consisting of a 
+The **##shroud##** command converts a Euphoria program, typically consisting of a 
 main file plus many include files, into a single, compact file. A single file is
 easier to distribute, and it allows you to distribute your program to others without 
 releasing your source code.
 
 A shrouded file does not contain any Euphoria source code statements. Rather,
-it contains a low-level intermediate language (IL) that is executed by the
+it contains a low-level **Intermediate Language** (IL) that is executed by the
 back-end of the interpreter. A shrouded file does not require any parsing. It
 starts running immediately, and with large programs you will see a quicker
 start-up time. Shrouded files must be run using the interpreter back-end:
 ##eubw.exe## (//Windows//) or ##eub.exe##
-(//UNIX//).  This backend is freely available, and you can give it to
+(//Unix//).  This backend is freely available, and you can give it to
 any of your users who need it. It's stored in ##euphoria\bin## in the Euphoria
-interpreter package. You can run your .il file with:
+interpreter package. You can run your ##.il## file with:
 
 On //Windows// use:
 
@@ -37,11 +37,11 @@ On //Unix// use:
 eub myprog.il
 }}}
 
-Although it does not contain any source statements, a .il file will generate a 
+Although it does not contain any source statements, a ##.il## file will generate a 
 useful ##ex.err## dump in case of a run-time error.
 
 The shrouder will remove any routines and variables that your program doesn't 
-use. This will give you a smaller .il file. There are often a great number of 
+use. This will give you a smaller ##.il## file. There are often a great number of 
 unused routines and unused variables. For example, your program might include 
 several third party include files, plus some standard files from 
 ##euphoria\include##, but only use a few items from each file. The unused items 

@@ -3,9 +3,10 @@
 
 === Introduction
 
-The Euphoria download package includes a handy, text-mode editor, ed, that's
-written completely in Euphoria. Many people find ed convenient for editing
-Euphoria programs and other files, but there is no requirement that you use it.
+The Euphoria download package includes a handy, text-mode editor, **##ed##**, 
+that's written completely in Euphoria. Many people find ##ed## convenient for 
+editing Euphoria programs and other files, but there is no requirement that you 
+use it.
 
 === Summary
 

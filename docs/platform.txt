@@ -4,11 +4,14 @@
 === Introduction
 
 OpenEuphoria currently supports Euphoria on many different
-//platforms//. More platforms will be added in the future.
+**platforms**. More platforms will be added in the future.
 
-**Windows ,,(tm),,** in particular, the 32-bit version of
+
+**Windows** in particular, the 32-bit version of
 Windows that is used on Windows 95/98/ME, as well as NT/2000/XP/Vista/7 and
 later systems.
+
+
 
 **Linux**. Linux is based on the UNIX operating
 system. It has recently become very popular  on PCs. There are many
@@ -34,18 +37,26 @@ Operating System and is developed by volunteers.
 Operating System  and is designed to be easily  portable to other
 hardware platforms.
 
+
+
 Euphoria source files use various file extensions. The common
 extensions are:
 
+|=extension |= application |
 | .e | Euphoria include file |
 | .ew | Euphoria include file for a Windowed (GUI) application only |
-| .ex | Console main program file |
-| .exw | Windowed (GUI) main program file |
+| .ex | Console main program file \\or any executable program |
+| .exw | Windowed (GUI) main program file\\or a //Windows// specific program |
+| .exu | Unix specific program |
 
-The Euphoria for Windows installation file contains **eui.exe**. It runs
-Euphoria programs on the Windows 32bit platform.
+It is convenient to use these file extensions, but they are not
+mandatory. 
 
-The Euphoria for Linux .tar file contains only **eui**. It runs
+
+The Euphoria for //Windows// installation file contains **eui.exe**. It runs
+Euphoria programs on the //Windows// 32bit platform.
+
+The Euphoria for //Linux// .tar file contains only **eui**. It runs
 Euphoria programs on the Linux platform.
 
 Other versions of Euphoria are installed by first installing the Linux
@@ -164,8 +175,14 @@ parser would stop, point out the error, and the programmer would then fix it.
 
 === The Discontinued DOS32 Platform
 
-This platform is no longer supported.  The ##DOS32## platform was for computers 
-without //Windows// O/S, and though people could still use the Euphoria binaries 
+This platform is no longer supported.  
+
+Those interested in writing DOS programs in Euphoria may use version 3.1
+downloadable from SourceForge. Interested DOS developers are welcome to use the 
+available open source code to produce an updated Euphoria version.
+
+The ##DOS32## platform was for computers 
+without //Windows// OS, and though people could still use the Euphoria binaries 
 built for this platform on //Windows//, it was slower than and lacked features 
 available on binaries built for the ##WIN32## platform.
 
@@ -175,7 +192,7 @@ you to use 32-bit addresses transparently, hence the name of the platform:
 ##DOS32##.  However, in this platform you could not use dynamically loaded 
 libraries and filenames had to be in a format of: eight letters, a dot, and 
 three letters when creating a file.  You could not use the Windowing system even
-if your computer had Windows.  You were limited to full-sreen mode graphics and 
+if your computer had //Windows//.  You were limited to full-sreen mode graphics and 
 the text console.
 
 === The WIN32 Platform
@@ -216,7 +233,7 @@ out or debug mode only console I/O statements.
 
 If you actually *want* to use the console, and there is something on the console
 that you want your
-user to read, you should prompt him and wait for his input before terminating.
+user to read, you should prompt them and wait for his input before terminating.
 To prevent the console from quickly disappearing you might include a statement
 such as:
 
@@ -245,7 +262,7 @@ will be followed.
 
 Thanks to **David Cuny**, **Derek Parnell**, **Judith Evans**
 and many others, there's a package called **Win32Lib** that
-you can use to develop Windows GUI applications in Euphoria. It's
+you can use to develop //Windows// GUI applications in Euphoria. It's
 remarkably easy to learn and use, and comes with good documentation and
 many small example programs.  
 
@@ -257,13 +274,14 @@ version 68.
 There is also an **IDE**, by Judith Evans for use with **Win32lib**. 
 [[ https://euvide.svn.sourceforge.net/svnroot/euvide ]].
 
-**Andrea Cini** has also developed a similar, somewhat smaller package
-called **EuWinGUI**. It's also available from the RapidEuphoria web site.
+!!**Andrea Cini** has also developed a similar, somewhat smaller package
+!!called **EuWinGUI**. It's also available from the RapidEuphoria web site.
 
 **Matt Lewis** has developed a wrapper for the wxWidgets library for
 Euphoria: wxEuphoria.  It is cross-platform.
 
-You can download WxEuphoria, EuWinGUI, Win32Lib and Judith's IDE
+You can download WxEuphoria, 
+Win32Lib and Judith's IDE
 from the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
 
 
@@ -493,8 +511,8 @@ which will give you a big advantage over those forced to code in C.
 
 ==== Call-backs to your Euphoria routines
 
-When you create a window, the Windows operating system will need to call your
-Euphoria routine.  
+When you create a window, the //Windows// operating system will need to call 
+your Euphoria routine.  
 To set this up, you must get a 32-bit "call-back"
 address for your routine and give it to Windows. For example (taken from
 **demo\win32\window.exw**):
@@ -515,7 +533,7 @@ argument to the [[:call_back]] function.
 In the example above, The 32-bit //call-back address//, ##WndProcAddress##,
 can be stored in a C structure and passed to Windows via the
 ~RegisterClass() C API function.\\
-**This gives Windows the ability to call the Euphoria routine, ~WndProc(),
+**This gives //Windows// the ability to call the Euphoria routine, ~WndProc(),
 whenever the user performs an action on a certain class of window.**
 Actions include clicking the mouse, typing a key, resizing the window etc.\\
 //See the **window.exw** demo program for the whole story.//
@@ -593,5 +611,5 @@ other place in your Euphoria program).
 
 A call-back address can be passed to the UNIX signal()
 function to specify a Euphoria routine to handle various signals (e.g. SIGTERM).
-It can also be passed to C routines such as qsort(), to specify a Euphoria
+It can also be passed to C routines such as ##qsort##(), to specify a Euphoria
 comparison function.

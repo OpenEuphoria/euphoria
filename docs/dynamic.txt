@@ -23,7 +23,7 @@ constant value_id = routine_id("value")
 
 Because ##value##() is defined as ##public##, that routine is in scope. This 
 ensures the call succeeds.
-A failed call returns -1, else a small nonnegative integer.
+A failed call returns ##-1##, else a small nonnegative integer.
 
 You can then feed this integer to ##call_func##() or ##call_proc##() as 
 appropriate. It does not matter whether the routine is still in scope at the 
@@ -134,7 +134,8 @@ may be overcome in future versions.
 
 A number of Euphoria routines are defined in different ways depending on the 
 platform they will run on. It would be cumbersome, and at times downright 
-impossible, to put such code in include files or to make the routine fully builtin.
+impossible, to put such code in include files or to make the routine fully 
+builtin.
 
 A solution to this is provided by ##machine_func##() and ##machine_proc##(). 
 User code normally never needs to use these. Various examples are to be 
@@ -152,5 +153,5 @@ use some sort of dynamic calling. The circumstances where it is useful are rare.
 The complete list of known values for ##id## is to be found in the file 
 ##source/execute.h##.
 
-Defining new identifiers and overriding machine_func/proc() to handle them is an
-easy way to extend the capabilities of the interpreter.
+Defining new identifiers and overriding ##machine_func##() or ##machine_proc##()
+to handle them is an easy way to extend the capabilities of the interpreter.

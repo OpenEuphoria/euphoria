@@ -2,43 +2,43 @@
 == How to Install Euphoria on Linux or FreeBSD
 
  
-Now that you've run tar to create the euphoria directory,
+Now that you've run tar to create the ##euphoria## directory,
  you need to: 
     
-    1. add euphoria/bin to your PATH
+    1. add ##euphoria/bin## to your ##PATH##
     
-    2. create an environment variable: EUDIR
+    2. create an environment variable: ##EUDIR##
     
  To view the hidden files in your home directory, type: 
        
-   ls -a
+   {{{ls -a}}}
  
  One or more of these files is executed when you log in.
  For instance, if you have a hidden profile file such as 
  ".bash_profile", you can edit the line: 
  
-   PATH=...  
+   {{{PATH=...}}}  
  
- and add euphoria/bin to it.
+ and add ##euphoria/bin## to it.
  
- For example, a user called rob might do the following:
+ For example, a user called ##rob## might do the following:
 
-   PATH=/home/rob/euphoria/bin:$PATH
+   {{{PATH=/home/rob/euphoria/bin:$PATH}}}
 
- You must also add a line for the variable EUDIR such as:
+ You must also add a line for the variable ##EUDIR## such as:
 
-   EUDIR=/home/rob/euphoria
+   {{{EUDIR=/home/rob/euphoria}}}
 
  And remember to export these variables, by adding this line:
  
-   export PATH EUDIR
+   {{{export PATH EUDIR}}}
 
- euphoria/bin doesn't have to be first on your PATH, but if it isn't 
- you'll have to rename the "ed" shell script in euphoria/bin, and perhaps a 
+ ##euphoria/bin## doesn't have to be first on your ##PATH##, but if it isn't 
+ you'll have to rename the "ed" shell script in ##euphoria/bin##, and perhaps a 
  few others.
 
- Alternatively, system administrators can put EUDIR and the PATH change 
- into a global file, such as /etc/profile, so many users will be able 
+ Alternatively, system administrators can put ##EUDIR## and the ##PATH## change 
+ into a global file, such as ##/etc/profile##, so many users will be able 
  to access the Euphoria interpreter.
 
  
