@@ -11,7 +11,7 @@ fi
 
 REL_NAME=euphoria-$1
 
-svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/$1 ${REL_NAME}
+svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tags/$1 ${REL_NAME}
 
 cd ${REL_NAME}/bin
 rm -f *.bat *.ico make31.exw *.exe
