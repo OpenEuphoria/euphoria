@@ -104,14 +104,14 @@ IF "%1" == "--noassert" (
 	GOTO EndLoop
 )
 
-IF "%1" == "--help" (
-	GOTO Help
-)
-
 IF "%1" == "--release" (
-	echo EREL_TYPE = /dEREL_TYPE=\"%2\"
+	echo EREL_TYPE = /dEREL_TYPE=\"%2\" >> config.wat
 	SHIFT
 	GOTO EndLoop
+)
+
+IF "%1" == "--help" (
+	GOTO Help
 )
 
 echo Unknown option '%1'
