@@ -9,9 +9,11 @@ if [ "$1" = "" ]; then
         exit
 fi
 
-svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/$1 euphoria-$1
+REL_NAME=euphoria-$1
 
-cd euphoria-$1/bin
+svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/$1 ${REL_NAME}
+
+cd ${REL_NAME}/bin
 rm -f *.bat *.ico make31.exw *.exe
 cd ..
 
@@ -27,5 +29,5 @@ cp -r ../../../build/html docs
 
 cd ..
 
-tar czf euphoria-$1.tar.gz euphoria-$1
+tar czf ${REL_NAME}.tar.gz ${REL_NAME}
 

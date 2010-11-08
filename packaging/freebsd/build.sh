@@ -9,7 +9,7 @@ if [ "$1" = "" ]; then
         exit
 fi
 
-REL_NAME=euphoria-$1-osx
+REL_NAME=euphoria-$1-freebsd
 
 svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/$1 ${REL_NAME}
 
