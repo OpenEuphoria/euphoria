@@ -306,7 +306,7 @@ label "BACKTICK_STRING"
 			if seg_end = 0 then
 				seg_end = 1
 			end if
-			
+
 			seg_flush(STRING_COLOR)
 			i = match_from("`", line, seg_end + 2)
 			if i = 0 then
@@ -323,10 +323,16 @@ label "BACKTICK_STRING"
 label "MULTILINE_STRING"
 				seg_end += 1
 				seg_flush(STRING_COLOR)
-				i = match_from(`"""`, line, seg_end + 3)
-				if i = 0 then
-					ram_space[state][S_STRING_TRIPLE] = 1
-					seg_end = length(line) - 1
+			
+				if seg_end + 3 < length(line) then
+					i = match_from(`"""`, line, seg_end + 3)
+					if i = 0 then
+						ram_space[state][S_STRING_TRIPLE] = 1
+						seg_end = length(line) - 1
+						exit
+					end if
+				else
+					i = length(line)
 					exit
 				end if
 
