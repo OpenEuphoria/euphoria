@@ -1,10 +1,10 @@
 -- (c) Copyright - See License.txt
 --
 -- Binder
--- save the Euphoria front-end data structures (IL) to disk 
+-- save the Euphoria front-end data structures (IL) to disk
 
--- Note: be careful not to make changes in the IL format 
--- that are not upwardly compatible. Otherwise, 
+-- Note: be careful not to make changes in the IL format
+-- that are not upwardly compatible. Otherwise,
 -- change the format number. (IL_VERSION)
 
 ifdef ETYPE_CHECK then
@@ -84,9 +84,9 @@ procedure OutputSymTab(file f)
 	boolean still_changing
 	integer fd, r
 	sequence reflist, decorate
-	
+
 	-- delete unused symbols (BIND only)
-	
+
 	if list then
 		fd = open("deleted.txt", "w")
 		if fd = -1 then
@@ -94,17 +94,17 @@ procedure OutputSymTab(file f)
 		end if
 		puts(fd, GetMsgText(244, 0))
 	end if
-	
+
 	still_changing = TRUE
 
 	while still_changing do
 		still_changing = FALSE
-		
+
 		for i = length(SymTab) to 1 by -1 do
 			if length(SymTab[i]) >= S_NREFS then
 				-- not temp or literal or constant, and not deleted yet
 				if SymTab[i][S_MODE] = M_NORMAL and
-				   SymTab[i][S_NREFS] = 0 and 
+				   SymTab[i][S_NREFS] = 0 and
 				   SymTab[i][S_SCOPE] > SC_PRIVATE then -- tricky to delete privates
 					-- delete this symbol
 					if find(SymTab[i][S_TOKEN], RTN_TOKS) then
@@ -115,7 +115,7 @@ procedure OutputSymTab(file f)
 							if SymTab[r][S_SCOPE] <= SC_PRIVATE then
 								-- let it be deleted only if its routine is deleted
 								-- otherwise we'll have execution-time problems
-								SymTab[r][S_SCOPE] = SC_UNDEFINED 
+								SymTab[r][S_SCOPE] = SC_UNDEFINED
 							end if
 							SymTab[r][S_NREFS] -= 1
 							ifdef DEBUG then
@@ -123,7 +123,7 @@ procedure OutputSymTab(file f)
 								InternalErr(264, { SymTab[r][S_NAME] })
 							end if
 							end ifdef
-							
+
 							still_changing = TRUE
 						end for
 						decorate = "()"
@@ -134,8 +134,8 @@ procedure OutputSymTab(file f)
 					if i > TopLevelSub then
 						-- only report user-defined
 						if list then
-							printf(fd, "%s: %s%s [%d]\n", 
-								  {known_files[SymTab[i][S_FILE_NO]], 
+							printf(fd, "%s: %s%s [%d]\n",
+								  {known_files[SymTab[i][S_FILE_NO]],
 								   SymTab[i][S_NAME], decorate, i})
 						end if
 
@@ -150,53 +150,53 @@ procedure OutputSymTab(file f)
 			end if
 		end for
 	end while
-	
+
 	if list then
 		close(fd)
 		if not quiet then
 			ShowMsg(1, 245)
 		end if
-		
+
 	end if
-	
+
 	-- strip down to the essential fields
 	for i = 1 to length(SymTab) do
 		if equal(SymTab[i][S_OBJ], NOVALUE) then
 			if SymTab[i][S_MODE] != M_CONSTANT or length(SymTab[i]) >= S_NAME then
 				-- only a literal NOVALUE will be retained
-				SymTab[i][S_OBJ] = 0 -- saves space, will be set to C "no value" 
+				SymTab[i][S_OBJ] = 0 -- saves space, will be set to C "no value"
 									 -- by back end
 			end if
 		end if
-		
-		if length(SymTab[i]) < SIZEOF_TEMP_ENTRY or 
+
+		if length(SymTab[i]) < SIZEOF_TEMP_ENTRY or
 		   (find(SymTab[i][S_SCOPE], {SC_KEYWORD, SC_PREDEF}) and
 		   not equal(SymTab[i][S_NAME], "_toplevel_")) then
 			-- an already deleted symbol, or a keyword or predefined symbol
-			SymTab[i] = SymTab[i][S_NEXT] -- store NEXT field as an atom, 
+			SymTab[i] = SymTab[i][S_NEXT] -- store NEXT field as an atom,
 										-- to save space
-		
+
 		elsif length(SymTab[i]) = SIZEOF_TEMP_ENTRY then
 			SymTab[i] = SymTab[i][1..4] & SymTab[i][S_NEXT_IN_BLOCK]
-		
+
 		else
 			if find(SymTab[i][S_TOKEN], RTN_TOKS) then
 				-- routine
 				if not full_debug then
 					SymTab[i][S_LINETAB] = 0
 				end if
-				SymTab[i] = SymTab[i][1..4] & {SymTab[i][S_NEXT_IN_BLOCK], 
-							SymTab[i][S_FILE_NO], 
-							SymTab[i][S_NAME], SymTab[i][S_TOKEN], 
+				SymTab[i] = SymTab[i][1..4] & {SymTab[i][S_NEXT_IN_BLOCK],
+							SymTab[i][S_FILE_NO],
+							SymTab[i][S_NAME], SymTab[i][S_TOKEN],
 							SymTab[i][S_CODE], SymTab[i][S_BLOCK],
-							SymTab[i][S_LINETAB], 
-							SymTab[i][S_TEMPS],  SymTab[i][S_NUM_ARGS], 
+							SymTab[i][S_LINETAB],
+							SymTab[i][S_TEMPS],  SymTab[i][S_NUM_ARGS],
 							SymTab[i][S_FIRSTLINE],
 							SymTab[i][S_STACK_SPACE]}
-			
-			else    
+
+			else
 				-- variable
-				-- constants are deleted (but there will be an OBJ field 
+				-- constants are deleted (but there will be an OBJ field
 				-- to hold their value at run-time)
 				if SymTab[i][S_MODE] = M_CONSTANT and equal( SymTab[i][S_OBJ], NOVALUE ) then
 					-- constant
@@ -206,19 +206,19 @@ procedure OutputSymTab(file f)
 					if not full_debug  and SymTab[i][S_TOKEN] != NAMESPACE then
 						SymTab[i][S_NAME] = 0
 					end if
-					
+
 					SymTab[i] = SymTab[i][1..4] & {SymTab[i][S_NEXT_IN_BLOCK],
-								SymTab[i][S_FILE_NO], 
-								SymTab[i][S_NAME], 
+								SymTab[i][S_FILE_NO],
+								SymTab[i][S_NAME],
 								SymTab[i][S_TOKEN],{},
-								SymTab[i][S_BLOCK]} 
+								SymTab[i][S_BLOCK]}
 				end if
 			end if
-							
+
 		end if
 	end for
 	fcompress(f, SymTab)
-	
+
 end procedure
 
 procedure OutputSlist(file f)
@@ -233,12 +233,12 @@ procedure OutputSlist(file f)
 end procedure
 
 procedure OutputHeader(file f)
--- output header of IL file 
+-- output header of IL file
 	if shroud_only then
 		if sequence(shebang) then
 			puts(f, shebang)
 		else
-			
+
 			ifdef UNIX then
 				puts(f, "#!/usr/bin/env eub\n")
 			elsedef
@@ -273,73 +273,73 @@ function extract_options( sequence cl )
 	return cl
 end function
 
+--**
+-- process the command line for any options
+
 export procedure handle_options_for_bind( m:map opts )
--- process the command line for any options 
 	sequence option, opt_keys
 	integer op
 	integer file_supplied = 0
-	
+
 	opt_keys = m:keys(opts)
 	op = 1
 	while op <= length(opt_keys) do
 		option = opt_keys[op]
 		object val = m:get(opts, option)
-		option = upper(option)
-		
+
 		switch option do
-			case "SHROUD_ONLY" then
+			case "shroud_only" then
 				shroud_only = TRUE
 				OpDefines &= { "EUB_SHROUD" }
-		
-			case "QUIET" then
+
+			case "quiet" then
 				quiet = TRUE
-		
-			case "LIST" then
+
+			case "list" then
 				list = TRUE
-		
-		
-			case "ICON" then				
+
+			case "icon" then
 				icon = val
-		
-			case "CON" then
+
+			case "con" then
 				con = TRUE
-			
-			case "FULL_DEBUG" then
+
+			case "full_debug" then
 				full_debug = TRUE
-		
-			case "OUT" then
+
+			case "out" then
 				user_out = val
-		
-			case "I"  then
+
+			case "i"  then
 				for j = 1 to length(val) do
 					add_include_directory( val[j] )
 				end for
-			
-			case "COPYRIGHT" then
-				copyrights()			
-			
-			case "D" then
+
+			case "copyright" then
+				copyrights()
+
+			case "d" then
 				OpDefines &= val
-			
-			case "BATCH" then
+
+			case "batch" then
 				batch_job = 1
-				
+
 			case OPT_EXTRAS then
 				if length(val) != 0 then
 					file_supplied = 1
 				end if
-				
-			case "EUB" then
+
+			case "eub" then
 				eub_path = val
-				
+
 			case else
 				fatal(GetMsgText(314, , {option}))
 		end switch
-		
+
 		op += 1
 	end while
 
-	if file_supplied = 0 then	
+	if file_supplied = 0 then
 		fatal(GetMsgText(313))
 	end if
 	ifdef WINDOWS then
@@ -348,7 +348,7 @@ export procedure handle_options_for_bind( m:map opts )
 			OpDefines &= { "EUB_CON" }
 		end if
 	end ifdef
-	
+
 	OpDefines &= { "EUB" }
 
 end procedure
@@ -358,7 +358,7 @@ integer check_place -- place where size and checksum are stored
 function base200(atom x)
 -- convert a number to 4 base-200 (+32) characters
 	sequence digits
-	
+
 	digits = {}
 	for i = 1 to 4 do
 		digits = append(digits, remainder(x, 200))
@@ -371,14 +371,14 @@ procedure store_checksum(sequence backend_name)
 -- write the size and checksum into the bound file
 	integer c, prev_c, bound_file
 	atom size
-	atom checksum 
-	
+	atom checksum
+
 	bound_file = open(backend_name, "ub") -- update mode
-	
+
 	if seek(bound_file, check_place+8) then
 		fatal(GetMsgText(315))
 	end if
-	
+
 	checksum = 11352 -- magic starting point
 	size = 0
 	prev_c = -1
@@ -397,13 +397,13 @@ procedure store_checksum(sequence backend_name)
 		size += 1
 		prev_c = c
 	end while
-	
+
 	if seek(bound_file, check_place) then
 		fatal(GetMsgText(316))
 	end if
-	
+
 	puts(bound_file, base200(size))
-	
+
 	checksum = remainder(checksum, 1000000000)
 	puts(bound_file, base200(checksum))
 end procedure
@@ -429,7 +429,7 @@ procedure OutputIL()
 		if m then
 			out_name= out_name[1..m-1]
 		end if
-	
+
 		if shroud_only then
 			out_name &= ".il"
 		else
@@ -438,7 +438,7 @@ procedure OutputIL()
 			end ifdef
 		end if
 	end if
-	
+
 	out = open(out_name, "wb")
 	if out = -1 then
 		fatal(GetMsgText(317, , {out_name}))
@@ -463,7 +463,7 @@ procedure OutputIL()
 					source_dir = current_dir() & SLASH
 				end if
 			end for
-					
+
 			be = -1
 			ifdef WIN32 then
 				if con then
@@ -481,8 +481,8 @@ procedure OutputIL()
 						be = open( "/usr/local/bin/eub", "r" )
 					end if
 			end ifdef
-			
-			sequence ondisk_name = locate_file( backend_name, 
+
+			sequence ondisk_name = locate_file( backend_name,
 										{ eu_dir & SLASH & "bin", source_dir }
 										)
 			ifdef UNIX then
@@ -496,14 +496,14 @@ procedure OutputIL()
 				end if
 			end ifdef
 		end if
-		
+
 		if be = -1 then
 			be = open(backend_name, "rb")
 		end if
 		if be = -1 then
 			fatal(GetMsgText(317, , {backend_name}))
 		end if
-	
+
 		-- copy eub to output file
 		size = 0
 		ifdef UNIX then
@@ -515,7 +515,7 @@ procedure OutputIL()
 				puts(out, c)
 			end while
 		end ifdef
-		
+
 		ifdef WIN32 then
 			last6 = repeat(' ', 6)
 			while 1 do
@@ -523,18 +523,18 @@ procedure OutputIL()
 				if c = -1 then
 					exit
 				end if
-				
+
  				puts(out, c)
-				
+
 				size += 1
-				
+
 				if size > 55000 and length(icon) then
 					-- looking for icon to replace
 					last6[1..5] = last6[2..6]
 					last6[6] = c
 					if equal(last6, {'E', 0, 'X', 0, 'W', 0}) then
 						-- found icon marker
-	
+
 						-- open icon file
 						if not find('.', icon) then
 							icon &= ".ico"
@@ -555,7 +555,7 @@ procedure OutputIL()
 								exit
 							end if
 							puts(out, c)
-							
+
 							c = getc(be) -- skip over our icon
 							if c = -1 then
 								fatal(GetMsgText(318))
@@ -567,36 +567,36 @@ procedure OutputIL()
 			end while
 		end ifdef
 		close(be)
-		
+
 		-- add marker in .exe
 		puts(out, '\n' & IL_START)
 	end if
-	
+
 	OutputHeader(out)
 
 	check_place = where(out)
-	-- reserve space for size 
+	-- reserve space for size
 	puts(out, {0,0,0,0})
 	-- reserve space for checksum
 	puts(out, {0,0,0,0})
-	
+
 	init_compress()
 	OutputMisc(out)
 	OutputSymTab(out)
-	OutputSlist(out) 
+	OutputSlist(out)
 	fcompress( out, file_include )
 	fcompress( out, get_switches() )
 	fcompress( out, include_matrix )
 	close(out)
-	
+
 	store_checksum(out_name)
-	
+
 	if not quiet then
 		ShowMsg(1, 248, {del_routines, del_vars})
 		ifdef UNIX then
 			system("chmod +x " & out_name, 2)
 		end ifdef
-		
+
 		if shroud_only then
 			sequence filename = "eub"
 			ifdef WIN32 then
@@ -611,7 +611,7 @@ procedure OutputIL()
 			ifdef UNIX then
 				out_name = "./" & out_name
 			end ifdef
-			
+
 			ShowMsg(1, 247, {out_name})
 		end if
 	end if
