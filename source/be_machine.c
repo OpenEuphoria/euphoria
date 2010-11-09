@@ -2459,6 +2459,7 @@ object CallBack(object x)
 #ifndef ERUNTIME
 	symtab_ptr routine;
 #endif
+	int not_patched;
 	s1_ptr x_ptr;
 	int convention;
 	int res;
@@ -2466,6 +2467,7 @@ object CallBack(object x)
 	unsigned long * oldprotptr;
 	convention = C_CDECL;
 	oldprotptr = &oldprot;
+	not_patched = 1;
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
@@ -2564,7 +2566,7 @@ object CallBack(object x)
 		if (copy_addr == NULL)
 			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
 #	else /* ndef EWNIDOWS */
-		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
+		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);		
 #	endif /* ndef EWINDOWS */
 
 
@@ -2590,19 +2592,26 @@ object CallBack(object x)
 #else
 			*(symtab_ptr *)(copy_addr+i) = e_routine[routine_id];
 #endif
+			not_patched = 0;
 			break;
 		}
 	}
-
+	
+	if (not_patched) {
+		RTFatal("Internal error: CallBack routine id patch failed: missing magic.");
+	}
+	
+	addr = (unsigned)copy_addr;
 	/* Make memory executable. */
 #ifdef EUNIX
 #ifndef EBSD
-	mprotect((void*)((unsigned)copy_addr & ~(pagesize-1)),  // start of page
+	int er;
+	if ((er = mprotect((void*)(addr & ~(pagesize-1)),  // start of page
 			 pagesize,  // one page
-			 PROT_READ+PROT_WRITE+PROT_EXEC);
+			 PROT_READ+PROT_WRITE+PROT_EXEC)) != 0)
+		RTFatal("Internal error: CallBack mprotect failed (%d).", er);
 #endif
-#endif
-	addr = (unsigned)copy_addr;
+#endif	
 
 	/* Return new address. */
 	return MAKE_UINT(addr);
