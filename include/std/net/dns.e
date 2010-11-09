@@ -11,7 +11,7 @@ namespace dns
 include std/socket.e
 include std/get.e
 
-constant BLOCK_SIZE = 4096
+--constant BLOCK_SIZE = 4096
 enum M_SOCK_GETHOSTBYNAME=79, M_SOCK_GETHOSTBYADDR
 
 --****
