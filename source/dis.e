@@ -1754,6 +1754,7 @@ function max( integer a, integer b )
 	return b
 end function
 
+
 procedure dis( integer sub )
 	integer op, ix
 	sequence sym
@@ -1768,7 +1769,16 @@ procedure dis( integer sub )
 
 	printf( out, "\nSubProgram [%s-%s:%05d] %s\n",
 		{known_files[SymTab[sub][S_FILE_NO]], SymTab[sub][S_NAME], sub, params })
-
+	
+	if sub != TopLevelSub then
+		integer stack_space_required = calc_stack_required( sub )
+		printf( out, "\tSTACK SPACE: %d\n\tRequired:    %d\n", { SymTab[sub][S_STACK_SPACE], stack_space_required } )
+		if stack_space_required > SymTab[sub][S_STACK_SPACE] then
+			printf(2, "Stack space mismatch! %s:%s Reserved[%d] Required[%d]\n", 
+				{ filename( known_files[SymTab[sub][S_FILE_NO]] ), sym_name( sub ), SymTab[sub][S_STACK_SPACE], stack_space_required } )
+		end if
+	end if
+	
 	map:put( proc_names, SymTab[sub][S_NAME], sub )
 	Code = SymTab[sub][S_CODE]
 	pc = 1

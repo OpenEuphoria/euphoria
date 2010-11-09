@@ -373,6 +373,10 @@ export function NewTempSym( integer inlining = 0)
 		SymTab[p][S_MODE] = M_TEMP
 		SymTab[p][S_NEXT] = SymTab[CurrentSub][S_TEMPS]
 		SymTab[CurrentSub][S_TEMPS] = p
+		
+		if inlining then
+			SymTab[CurrentSub][S_STACK_SPACE] += 1
+		end if
 
 	elsif TRANSLATE then
 		-- found a free temp - make another with same name,
@@ -387,7 +391,6 @@ export function NewTempSym( integer inlining = 0)
 		SymTab[q][S_NEXT] = SymTab[CurrentSub][S_TEMPS]
 		SymTab[CurrentSub][S_TEMPS] = q
 		p = q
-
 	end if
 
 	if TRANSLATE then
@@ -1147,4 +1150,29 @@ end function
 
 export function sym_usage( symtab_index sym )
 	return SymTab[sym][S_USAGE]
+end function
+
+
+export function calc_stack_required( symtab_index sub )
+	integer required = SymTab[sub][S_NUM_ARGS]
+	integer arg = SymTab[sub][S_NEXT]
+	
+	for i = 1 to required do
+		arg = SymTab[arg][S_NEXT]
+	end for
+	
+	-- count the privates
+	while arg != 0 and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
+		required += 1
+		arg = SymTab[arg][S_NEXT]
+	end while
+	
+	-- count the temps
+	arg = SymTab[sub][S_TEMPS]
+	while arg != 0 do
+		required += 1
+		arg = SymTab[arg][S_NEXT]
+	end while
+	
+	return required
 end function
