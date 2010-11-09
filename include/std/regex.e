@@ -43,7 +43,13 @@ include std/machine.e
 -- UTF which uses multiple bytes to encode UNICODE characters. You can
 -- use UTF8 encoded UNICODE strings when you pass the UTF8 option.
 
-enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_MESSAGE=95, M_PCRE_GET_OVECTOR_SIZE=97
+enum 
+	M_PCRE_COMPILE=68, 
+	M_PCRE_EXEC=70,
+	M_PCRE_REPLACE=71,
+	M_PCRE_ERROR_MESSAGE=95,
+	M_PCRE_GET_OVECTOR_SIZE=97,
+	$
 
 --****
 -- === Option Constants
