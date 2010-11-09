@@ -101,15 +101,15 @@ public integer edges_only = (platform()=2)
 -- internal address
 -- addresses used for passing to and getting from low level machine_func calls and to a few
 -- local only routines.
-type int_addr(machine_addr a)
-	return 1
+type int_addr(object a)
+	return machine_addr(a)
 end type
 
 -- external address
 -- addresses used for passing to and getting from high level functions in machine.e and 
 -- public functions declared here.
-type ext_addr(machine_addr a)
-	return 1
+type ext_addr(object a)
+	return machine_addr(a)
 end type
 
 
@@ -124,9 +124,9 @@ enum BLOCK_ADDRESS, BLOCK_LENGTH, ALLOC_NUMBER, BLOCK_PROT
 with type_check
 
 constant OK = 1, BAD = 0
-constant M_ALLOC = 16,
-		 M_FREE = 17,
-		 M_SLEEP = 64
+constant
+	M_FREE = 17,
+	M_SLEEP = 64
 
 public include std/memconst.e
 ifdef DATA_EXECUTE then
@@ -143,17 +143,33 @@ puts(1, "\n\t\tUsing Debug Version of machine.e\n")
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
 
-export type positive_int(integer x)
-	return x >= 1
+export type positive_int(object x)
+	if not integer(x) then
+		return 0
+	end if
+    return x >= 1
 end type
 
-type natural(integer x)
+type natural(object x)
+	if not integer(x) then
+		return 0
+	end if
 	return x >= 0
 end type
 
-public type machine_addr(atom a)
+public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-	return a > 0 and a <= MAX_ADDR and floor(a) = a
+	if not atom(a) then
+		return 0
+	end if
+	
+	if not integer(a)then
+		if floor(a) != a then
+			return 0
+		end if
+	end if
+	
+	return a > 0 and a <= MAX_ADDR
 end type
 
 type far_addr(sequence a)
@@ -738,7 +754,6 @@ end function
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	integer free_succeeded
 	sequence block
 
 	for i = 1 to length(safe_address_list) do
@@ -760,7 +775,7 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 
 	ifdef WINDOWS then
 		if dep_works() then
-			free_succeeded = c_func( VirtualFree_rid, 
+			c_func( VirtualFree_rid, 
 				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
 			return
 		end if
