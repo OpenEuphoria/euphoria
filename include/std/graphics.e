@@ -290,5 +290,5 @@ end procedure
 -- 		[[:video_config]]
 
 public function graphics_mode(object m = -1)
-   return machine_func(M_GRAPHICS_MODE, -1)
+   return machine_func(M_GRAPHICS_MODE, m)
 end function
