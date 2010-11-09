@@ -33,7 +33,7 @@ include std/safe.e
 include std/search.e
 include std/sequence.e
 include std/serialize.e
-include std/sets.e
+--include std/sets.e
 include std/socket.e
 include std/sort.e
 include std/stack.e
