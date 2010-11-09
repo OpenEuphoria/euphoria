@@ -292,7 +292,7 @@ function parseFile( sequence fName, sequence fromPath = "" )
 			if absolute_path( includeName ) and eu:compare( includeName, newIncludeName ) then
 				integer ix = match( newIncludeName, data )
 				if verbose then
-					printf(1, "rewriting include with absolute path: %s", { data } )'
+					printf(1, "rewriting include with absolute path: %s", { data } )
 				end if
 				data = replace( data, "include ", 1, ix-1 )
 			end if
