@@ -559,18 +559,17 @@ end function
 
 public function money(object amount)
 	sequence result
-	integer size
 	atom pResult, pTmp
 
 	if f_strfmon != -1 then
 		ifdef UNIX then
 			pResult = allocate(4 * 160)
 			pTmp = allocate_string("%n")
-			size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
+			c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
 		elsifdef WIN32 then
 			pResult = allocate(4 * 160)
 			pTmp = allocate_string(sprintf("%.8f", {amount}))
-			size = c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
+			c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
 		end ifdef
 	
 		result = peek_string(pResult)
@@ -603,7 +602,6 @@ end function
 
 public function number(object num)
 	sequence result
-	integer size
 	atom pResult, pTmp
 
 	ifdef UNIX then
@@ -614,7 +612,7 @@ public function number(object num)
 			else
 				pTmp = allocate_string("%!n")
 			end if
-			size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
+			c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
 		else
 			return text:format("[,,]", num)
 		end if
@@ -632,7 +630,7 @@ public function number(object num)
 				lpFormat = NULL
 				pTmp = allocate_string(sprintf("%.15f", {num}))
 			end if
-			size = c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
+			c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
 		else
 			return text:format("[,,]", num)
 		end if
@@ -674,7 +672,7 @@ public function number(object num)
 			if result[i] != '0' then
 				if not find(result[i], "1234567890") then
 					-- Step 3. Remove decimal point and all zeros, preserving any trailing symbols.
-					result = remove(result, i, is_int - 1)
+					result = eu:remove(result, i, is_int - 1)
 				end if
 				exit
 			end if
@@ -721,14 +719,13 @@ end function
 
 public function datetime(sequence fmt, dt:datetime dtm)
 	atom pFmt, pRes, pDtm
-	integer size
 	sequence res
 
 	if f_strftime != -1 then
 		pDtm = mk_tm_struct(dtm)
 		pFmt = allocate_string(fmt)
 		pRes = allocate(1024)
-		size = c_func(f_strftime, {pRes, 256, pFmt, pDtm})
+		c_func(f_strftime, {pRes, 256, pFmt, pDtm})
 		res = peek_string(pRes)
 		free(pRes)
 		free(pFmt)
