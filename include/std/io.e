@@ -1337,8 +1337,6 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	integer fn
 	integer len
 	sequence ret
-	object temp
-	atom adr
 
 	if sequence(file) then
 		fn = open(file, "rb")
@@ -1347,9 +1345,9 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	end if
 	if fn < 0 then return -1 end if
 
-	temp = seek(fn, -1)
+	seek(fn, -1)
 	len = where(fn)
-	temp = seek(fn, 0)
+	seek(fn, 0)
 
 	ret = repeat(0, len)
 	for i = 1 to len do
@@ -1438,7 +1436,6 @@ end function
 
 public function write_file(object file, sequence data, integer as_text = BINARY_MODE)
 	integer fn
-	atom adr
 
 	if as_text != BINARY_MODE then
 		-- Truncate at first Ctrl-Z
