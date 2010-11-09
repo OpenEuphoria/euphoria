@@ -5,8 +5,8 @@
 === Introduction
 
 EuDist is a tool that makes distributing your program easier.
-It's designed to gather all of the euphoria files that your program
-uses, and put them into a directory.  This can also be useful for
+It's designed to gather all of the Euphoria files that your program
+uses and put them into a directory.  This can also be useful for
 sending example code for bug reports.
 
 === Command Line Switches
