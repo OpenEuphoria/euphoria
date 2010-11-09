@@ -735,7 +735,6 @@ public function curdir(integer drive_id = 0)
 	ifdef not LINUX then
 	    sequence lOrigDir = ""
 	    sequence lDrive
-	    object void
 	
 	    if t_alpha(drive_id) then
 		    lOrigDir =  current_dir()
@@ -751,7 +750,7 @@ public function curdir(integer drive_id = 0)
     lCurDir = current_dir()
 	ifdef not LINUX then
 		if length(lOrigDir) > 0 then
-	    	void = chdir(lOrigDir[1..2])
+	    	chdir(lOrigDir[1..2])
 	    end if
 	end ifdef
 
@@ -1466,7 +1465,6 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
     sequence lPath = ""
     integer lPosA = -1
     integer lPosB = -1
-    integer lPosC = -1
     sequence lLevel = ""
     sequence lHome
 
@@ -1541,7 +1539,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	lLevel = SLASH & '.' & SLASH
 	lPosA = 1
 	while( lPosA != 0 ) with entry do
-		lPath = remove(lPath, lPosA, lPosA + 1)
+		lPath = eu:remove(lPath, lPosA, lPosA + 1)
 		
 	  entry
 		lPosA = match(lLevel, lPath, lPosA )
@@ -1560,7 +1558,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 		if (lPosB <= 0) then
 			lPosB = 1
 		end if
-		lPath = remove(lPath, lPosB, lPosA + 2)
+		lPath = eu:remove(lPath, lPosB, lPosA + 2)
 		
 	  entry
 		lPosA = match(lLevel, lPath, lPosB )
@@ -2505,14 +2503,13 @@ end function
 -- </eucode>
 
 public function dir_size(sequence dir_path, integer count_all = 0)
-	integer ok 
 	sequence fc
 
 	-- We create our own instance of the global 'file_counters' to use in case
 	-- the application is using threads.
 	
 	file_counters = append(file_counters, {0,0,0,{}})
-	ok = walk_dir(dir_path, {routine_id("count_files"), {count_all, length(file_counters)}}, 0)
+	walk_dir(dir_path, {routine_id("count_files"), {count_all, length(file_counters)}}, 0)
 	
 	fc = file_counters[$]
 	file_counters = file_counters[1 .. $-1]
@@ -2610,14 +2607,13 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 	end while
 	
 	if reserve_temp then
-		integer ret
 		-- Reserve the name by creating an empty file.
 		if not file_exists(temp_location) then
 			if create_directory(temp_location) = 0 then
 				return ""
 			end if
 		end if
-		ret = write_file(randname, "")
+		write_file(randname, "")
 	end if
 	
 	return randname
@@ -2663,7 +2659,6 @@ end function
 
 public function checksum(sequence filename, integer size = 4, integer usename = 0, integer return_text = 0)
 	integer fn
-	integer setsize
 	sequence cs
 	sequence hits
 	integer ix	
