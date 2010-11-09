@@ -1900,6 +1900,7 @@ public function filter(sequence source, object rid, object userdata = {}, object
 	return dest[1..idx]
 end function
 
+without warning strict
 function filter_alpha(object elem, object ud)
 	return t_alpha(elem)
 end function
@@ -2849,7 +2850,6 @@ end function
 --		[[:find]], [[:match]], [[:replace]], [[:mapping]]
 
 public function transmute(sequence source_data, sequence current_items, sequence new_items, integer start=1, integer limit = length(source_data))
-	sequence result
 	integer pos
 	integer cs
 	integer ns

@@ -3902,8 +3902,16 @@ The forms available are ...
 : causes the previously saved state to be restored.
 
 ; ##without warning strict##
-: overrides the -STRICT command line option, but only until the end of the
-  next function or procedure.
+: overrides some of the warnings that the -STRICT command line option tests for,
+  but only until the end of the next function or procedure. The warnings overridden
+  are
+  * default_arg_type
+  * not_used
+  * short_circuit
+  * not_reached
+  * empty_case
+  * no_case_else
+
 
 The **with/without warnings** directives will have no effect if the
 ##-STRICT## command line switch is used. The latter turns on all warnings
@@ -3946,6 +3954,9 @@ temporarily affected by the "##without warning strict##" directive.
 | ##empty_case## | In ##switch## that have ##without fallthru##, an empty case
                    block will result in no code being executed within the switch
                    statement.
+| ##default_case## | A ##switch## that does not have a ##case else## clause.
+| ##default_arg_type## | Reserved (not in use yet)
+| ##deprecated## | Reserved (not in use yet)
 | ##all## | Turns all warnings on. They can still be disabled by
                with/without warning directives.
 

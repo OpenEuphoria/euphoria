@@ -419,13 +419,10 @@ export constant warning_flags = {
 	mixed_profile_warning_flag,
 	empty_case_warning_flag,
 	no_case_else_warning_flag,
+	def_arg_type_warning_flag,
 	deprecated_warning_flag,
 	all_warning_flag
 }
-
-export constant strict_only_warnings = {
-	def_arg_type_warning_flag
-	}
 
 export constant warning_names = {
 	"none",
@@ -442,9 +439,20 @@ export constant warning_names = {
 	"mixed_profile",
 	"empty_case",
 	"default_case",
+	"default_arg_type",
 	"deprecated",
 	"all"
 }
+
+export constant strict_only_warnings = {
+	def_arg_type_warning_flag,
+	not_used_warning_flag,
+	short_circuit_warning_flag,
+	not_reached_warning_flag,
+	empty_case_warning_flag,
+	no_case_else_warning_flag,
+	$
+	}
 
 export integer Strict_is_on = 0
 export integer Strict_Override = 0
