@@ -646,7 +646,6 @@ end procedure
 
 ---
 function find_opt(sequence opts, sequence opt_style, object cmd_text)
-	integer slash
 	sequence opt_name
 	object opt_param
 	integer param_found = 0
@@ -973,7 +972,10 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					else
 						crash("PAUSE_MSG was given to cmd_parse with no actually message text")
 					end if
-
+					
+				case else
+					crash(sprintf("Unrecognised cmdline PARSE OPTION - %d", parse_options[i]) )
+					
 			end switch
 			i += 1
 		end while
@@ -1023,7 +1025,6 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 
 		if cmd[1] = '@' and use_at then
 			object at_cmds
-			sequence at_file
 			integer j
 
 			if length(cmd) > 2 and cmd[2] = '@' then
@@ -1032,7 +1033,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				if equal(at_cmds, -1) then
 					-- File didn't exist but this is not an error, so just
 					-- remove it from the commands.
-					cmds = remove(cmds, arg_idx)
+					cmds = eu:remove(cmds, arg_idx)
 					arg_idx -= 1
 					continue
 				end if
