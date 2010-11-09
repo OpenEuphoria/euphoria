@@ -481,11 +481,11 @@ report: .SYMBOLIC
 	cd ..\source
 
 tester: .SYMBOLIC 
-	wmake $(BUILDDIR)\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
+	wmake -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
 
 	
 !ifdef BUILD_TOOLS
-$(BUILDDIR)\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
+$(BUILDDIR)\eutestdr\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 	cd $(BUILDDIR)\eutestdr	
 	$(EUBIN)\euc -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
 
