@@ -216,8 +216,7 @@ public type map(object obj_p)
 	return 1
 end type
 
-constant maxInt = #3FFFFFFF,
-         maxAutoSize = floor( (maxInt - 1 )  / 3.5 )
+constant maxInt = #3FFFFFFF
 
 --****
 -- === Routines
@@ -809,6 +808,8 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				
 			case LEAVE then
 				-- do nothing
+				operation_p = operation_p
+				
 			case else
 				crash("Unknown operation given to map.e:put()")
 				
@@ -1504,7 +1505,7 @@ public function load_map(object file_name_p)
 			line_ = gets(file_handle_)
 		end while
 	else
-		object _ = seek(file_handle_, 0)
+		seek(file_handle_, 0)
 		line_  = deserialize(file_handle_)
 		if atom(line_) then
 			-- failed to decode the file.
