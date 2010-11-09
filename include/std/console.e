@@ -223,7 +223,7 @@ ifdef WIN32_GUI then
     end procedure
 
 elsedef
-
+	without warning strict
 	public procedure maybe_any_key(sequence prompt="", integer con=1)
     end procedure
 
@@ -610,7 +610,7 @@ end procedure
 --   [[:display_text_image]], [[:get_screen_char]]
 
 public function save_text_image(text_point top_left, text_point bottom_right)
-	sequence image, row_chars, vc
+	sequence image, row_chars
 
 	image = {}
 	for row = top_left[1] to bottom_right[1] do
