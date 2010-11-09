@@ -106,6 +106,7 @@ function findFile( sequence fName, integer showWarning = verbose )
     if find(fName[length(fName)], {10, 13}) then
 		fName = fName[1..length(fName)-1]
     end if
+    
     for i = 1 to length( Place ) do
 		if sequence( dir( Place[i] & fName ) ) then
 			ifdef WINDOWS then
@@ -169,7 +170,6 @@ function getIncludeName( sequence data )
 		nameSpace = data[at..$]
 		data = data[1..at-1]
 	end if
-
 	return {data,nameSpace,includeType}
 
 end function
@@ -207,14 +207,16 @@ function convertAbsoluteToRelative( sequence name )
 end function
 
 -----------------------------------------------------------------------------
-function parseFile( sequence fName )
+function parseFile( sequence fName, sequence fromPath = "" )
 
 	integer inFile, outFile
 	sequence newIncludeName, newfName, nameSpace, includeType, includeName
 	object data
 
 	included = append( included, fName )
-
+	
+	inFile = -1
+	
 	-- find the file
 	sequence includeFile = convertAbsoluteToRelative( fName )
 	sequence includePath = ""
@@ -225,12 +227,21 @@ function parseFile( sequence fName )
 		end if
 	end for
 	
-	fName = findFile( fName )
+	if length( fromPath ) then
+		sequence tryName = findFile( slashifier( fromPath ) & fName )
+		if file_exists( tryName ) then
+			includePath = fromPath
+			includeFile = slashifier( fromPath ) & fName
+			fName = includeFile
+		end if
+	end if
 	
+	fName = findFile( fName )
 	inFile = open( fName, "r" )
 	
     if inFile = -1 then
 		included = remove( included, length( included ) )
+		printf(1, "Error finding file: %s\n", { fName } )
 		return includeFile
     end if
 
@@ -245,8 +256,8 @@ function parseFile( sequence fName )
 	outFile = open( outputDir & SLASH & includeFile, "w" )
 
 	if outFile = -1 then
-	printf(1, "Warning: Unable to open %s for writing\n",
-		{outputDir & SLASH & includeFile })
+		printf(1, "Warning: Unable to open %s for writing\n",
+			{outputDir & SLASH & includeFile })
 	end if
 	
 	while 1 do        
@@ -268,19 +279,26 @@ function parseFile( sequence fName )
 
 			-- already part of the file?
 			newIncludeName = includeName
+			
 			if not find( includeName, included ) then
 				-- include the file
-				newIncludeName = parseFile( includeName )
+				newIncludeName = parseFile( includeName, includePath )
 				
 			elsif absolute_path( includeName ) then
 				newIncludeName = convertAbsoluteToRelative( includeName )
 				
 			end if
 			
-			if eu:compare( includeName, newIncludeName ) then
+			if absolute_path( includeName ) and eu:compare( includeName, newIncludeName ) then
 				integer ix = match( newIncludeName, data )
+				if verbose then
+					printf(1, "rewriting include with absolute path: %s", { data } )'
+				end if
 				data = replace( data, "include ", 1, ix-1 )
 			end if
+			
+		elsif length( includeName ) then
+			printf(1, "Error finding include file %s\n", { includeName } )
 		end if
 		if outFile != -1 then
 			puts( outFile, data )
