@@ -104,7 +104,7 @@ integer verbose = TEST_SHOW_FAILED_ONLY
 integer abort_on_fail = 0
 integer wait_on_summary = 0
 integer accumulate_on_summary = 0
-integer logging = 0, log_fh = 0
+integer log_fh = 0
 
 --
 -- Private utility functions
@@ -534,7 +534,8 @@ include std/error.e
 function test_crash( object o )
 	test_fail( "unittesting crashed" )
 	test_report()
-	return 0
+	o = 0
+	return o
 end function
 crash_routine( routine_id( "test_crash" ) )
 
