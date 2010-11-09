@@ -68,7 +68,17 @@ end type
 
 public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-	return a > 0 and a <= MAX_ADDR and floor(a) = a
+	if not atom(a) then
+		return 0
+	end if
+	
+	if not integer(a)then
+		if floor(a) != a then
+			return 0
+		end if
+	end if
+	
+	return a > 0 and a <= MAX_ADDR
 end type
 
 -- Internal use of the library only.  free() calls this.  It works with
@@ -740,11 +750,9 @@ public integer check_calls = 1
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
-
+without warning strict
 public procedure register_block(atom block_addr, atom block_len, integer protection )
-	-- NOP to avoid strict lint
-	block_addr = block_addr
-	block_len = block_len
+	-- Only implemented in safe.e
 end procedure
 
 
@@ -770,10 +778,9 @@ end procedure
 -- 
 -- See Also:
 --   [[:register_block]], [[:safe.e]]
-
+without warning strict
 public procedure unregister_block(atom block_addr)
-	-- NOP to avoid strict lint
-	block_addr =  block_addr
+	-- Only implemented in safe.e
 end procedure
 
 --**
@@ -795,15 +802,20 @@ end procedure
 --
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
-
+without warning strict
 public function safe_address(atom start, integer len, positive_int action)
+	-- Only implemented in safe.e
 	return 1
 end function
 
+without warning strict
 public procedure check_all_blocks()
+	-- Only implemented in safe.e
 end procedure
 
+without warning strict
 export function prepare_block( atom addr, integer a, integer protection )
+	-- Only implemented in safe.e
 	return addr
 end function
 
