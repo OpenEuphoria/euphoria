@@ -1408,7 +1408,6 @@ public function format(sequence format_pattern, object arg_list = {})
 	integer in_token
 	integer tch
 	integer i
-	integer tstart
 	integer tend
 	integer cap
 	integer align
@@ -1444,7 +1443,6 @@ public function format(sequence format_pattern, object arg_list = {})
 
 
 	i = 0
-	tstart = 0
 	tend = 0
 	argl = 0
 	spacer = 0
@@ -1455,7 +1453,6 @@ public function format(sequence format_pattern, object arg_list = {})
     	if not in_token then
     		if tch = '[' then
     			in_token = 1
-    			tstart = i
     			tend = 0
 				cap = 0
 				align = 0
@@ -1491,7 +1488,6 @@ public function format(sequence format_pattern, object arg_list = {})
 	    				i += 1
 	    				if format_pattern[i] = ']' then
 	    					in_token = 0
-	    					tstart = 0
 	    					tend = 0
 	    					exit
 	    				end if
@@ -2016,7 +2012,6 @@ end function
 --
 
 public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
-	integer idx = 1
 	integer db_res
 	object lMsgText
 	sequence dbname
