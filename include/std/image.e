@@ -201,11 +201,9 @@ end function
 --   [[:save_bitmap]]
 
 public function read_bitmap(sequence file_name)
-	atom Size 
-	integer Type, X_hot, Y_hot, Planes, BitCount
+	integer Planes, BitCount
 	atom Width, Height, Compression, OffBits, SizeHeader, 
-		 SizeImage, XPelsPerMeter, YPelsPerMeter, ClrUsed,
-		 ClrImportant, NumColors
+		 NumColors
 	sequence Palette, Bits, two_d_bits
 
 	error_code = 0
@@ -213,10 +211,11 @@ public function read_bitmap(sequence file_name)
 	if fn = -1 then
 		return BMP_OPEN_FAILED
 	end if
-	Type = get_word()
-	Size = get_dword()
-	X_hot = get_word()
-	Y_hot = get_word()
+	
+	get_word() -- Size
+	get_dword() -- Type
+	get_word() -- X Hotspot
+	get_word() -- Y Hotspot
 	OffBits = get_dword()
 	SizeHeader = get_dword()
 
@@ -230,11 +229,11 @@ public function read_bitmap(sequence file_name)
 			close(fn)
 			return BMP_UNSUPPORTED_FORMAT
 		end if
-		SizeImage = get_dword()
-		XPelsPerMeter = get_dword()
-		YPelsPerMeter = get_dword()
-		ClrUsed = get_dword()
-		ClrImportant = get_dword()
+		get_dword() -- Size of Image
+		get_dword() -- X Pels/Meter
+		get_dword() -- Y Pels/Meter
+		get_dword() -- Color Used
+		get_dword() -- Color Important
 		NumColors = (OffBits - SizeHeader - BMPFILEHDRSIZE) / 4
 		if NumColors < 2 or NumColors > 256 then
 			close(fn)
@@ -248,7 +247,6 @@ public function read_bitmap(sequence file_name)
 		Planes = get_word()
 		BitCount = get_word()
 		NumColors = (OffBits - SizeHeader - BMPFILEHDRSIZE) / 3
-		SizeImage = row_bytes(BitCount, Width) * Height
 		Palette = get_rgb_block(NumColors, 3) 
 	else
 		close(fn)
@@ -281,7 +279,6 @@ type positive_atom(atom x)
 end type
 
 integer numXPixels, numYPixels, bitCount, numRowBytes
-integer startXPixel =0, startYPixel = 0, endYPixel = 0
 
 type region(object r)
 	-- a region on the screen
