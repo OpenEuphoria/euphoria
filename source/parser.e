@@ -2335,6 +2335,7 @@ procedure Case_statement()
 						if SymTab[symi][S_CODE] then
 							tok[T_SYM] = SymTab[symi][S_CODE]
 						end if
+						SymTab[symi][S_USAGE] = or_bits( SymTab[symi][S_USAGE], U_READ )
 					end if
 				end if
 			end if
