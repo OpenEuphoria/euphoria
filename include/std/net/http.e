@@ -12,6 +12,7 @@ constant USER_AGENT_HEADER = sprintf("User-Agent: Euphoria-HTTP/%d.%d\r\n", {
 		version_major(), version_minor() })
 
 enum R_HOST, R_PORT, R_PATH, R_REQUEST
+constant FR_SIZE = 4
 
 --****
 -- === Error Codes
@@ -45,6 +46,7 @@ constant ENCODING_STRINGS = {
 
 function format_base_request(sequence request_type, sequence url, object headers)
 	sequence request = ""
+	sequence formatted_request
 
 	object parsedUrl = url:parse(url)
 	if atom(parsedUrl) then
@@ -97,7 +99,12 @@ function format_base_request(sequence request_type, sequence url, object headers
 		request &= "Connection: close\r\n"
 	end if
 
-	return { host, port, path, request }
+	formatted_request = repeat(0, FR_SIZE)
+	formatted_request[R_HOST] = host
+	formatted_request[R_PORT] = port
+	formatted_request[R_PATH] = path
+	formatted_request[R_REQUEST] = request
+	return formatted_request
 end function
 
 --
@@ -120,6 +127,7 @@ function form_urlencode(sequence kvpairs)
 	return data
 end function
 
+without warning strict -- routine not implemented yet.
 function multipart_form_data_encode(sequence kvpairs)
 	return ""
 end function
@@ -148,7 +156,6 @@ function execute_request(sequence host, integer port, sequence request, integer 
 	atom start_time = time()
 	integer got_header = 0, content_length = 0
 	sequence content = ""
-	sequence body = ""
 	sequence headers = {}
 	while time() - start_time < timeout label "top" do
 		if got_header and length(content) = content_length then
@@ -219,6 +226,9 @@ end function
 
 public function http_post(sequence url, object data, object headers = 0,
 		integer follow_redirects = 10, integer timeout = 15)
+		
+	follow_redirects = follow_redirects -- Not used yet.
+	
 	if not sequence(data) or length(data) = 0 then
 		return ERR_INVALID_DATA
 	end if
@@ -285,6 +295,9 @@ end function
 public function http_get(sequence url, object headers = 0, integer follow_redirects = 10,
 		integer timeout = 15)
 	object request = format_base_request("GET", url, headers)
+	
+	follow_redirects = follow_redirects -- Not used yet.
+	
 	if atom(request) then
 		return request
 	end if
