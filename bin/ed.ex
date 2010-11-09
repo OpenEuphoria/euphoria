@@ -2332,7 +2332,7 @@ procedure ed(sequence command)
 	else
 		file_name = get_err_line()
 	end if
-	wrap(0)
+	graphics:wrap(0)
 	if length(file_name) = 0 then
 		-- we still don't know the file name - so ask user
 		puts(SCREEN, "file name: ")
