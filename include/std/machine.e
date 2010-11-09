@@ -590,7 +590,7 @@ end function
 --
 public type std_library_address( object addr ) 
 	ifdef not SAFE then
-		return 1
+		return atom(addr)
 	elsedef
 		if not atom(addr) then
 			return 0
