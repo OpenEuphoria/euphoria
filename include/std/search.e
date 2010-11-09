@@ -1228,7 +1228,6 @@ end function
 -- </eucode>
 --
 public function vlookup(object find_item, sequence grid_data, integer source_col, integer target_col, object def_value = 0)
-    integer lPosn
 
     for i = 1 to length(grid_data) do
     	if atom(grid_data[i]) then
