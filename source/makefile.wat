@@ -487,7 +487,7 @@ tester: .SYMBOLIC
 !ifdef BUILD_TOOLS
 $(BUILDDIR)\eutestdr\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 	cd $(BUILDDIR)\eutestdr	
-	$(EUBIN)\euc -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
+	$(EUBIN)\euc -con -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
 
 !endif #BUILD_TOOLS
 

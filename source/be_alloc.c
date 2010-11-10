@@ -430,13 +430,6 @@ char *EMalloc(unsigned long nbytes)
 	long size;
 #endif
 
-#if defined(EUNIX)
-
-		p = malloc(nbytes);
-		assert(p);
-		assert(((unsigned int)p & 7) == 0);
-		return p;
-#else
 #ifdef HEAP_CHECK
 	check_pool();
 #endif
@@ -550,7 +543,6 @@ char *EMalloc(unsigned long nbytes)
 		return p;
 #endif
 	} while (TRUE);
-#endif // !EUNIX
 }
 
 void EFree(char *p)
@@ -561,10 +553,6 @@ void EFree(char *p)
 	register struct block_list *list;
 
 
-#if defined(EUNIX)
-		free(p);
-		return;
-#else
 #ifdef HEAP_CHECK
 	check_pool();
 
@@ -611,9 +599,9 @@ void EFree(char *p)
 		list->first = (free_block_ptr)p;
 		cache_size++;
 	}
-#endif // linux
 
 }
+
 #else
 #if !defined(EWINDOWS) && !defined(EUNIX)
 // Version of allocation routines for systems that might not return allocations
@@ -737,11 +725,6 @@ char *ERealloc(char *orig, unsigned long newsize)
 	unsigned long oldsize;
 	int res;
 
-#if defined(EUNIX)
-
-	// we always have 8-alignment
-	return realloc(orig, newsize);  // should do bookkeeping on block size?
-#else
 	p = orig;
 	#if defined(EALIGN4)
 	if (align4 && *(int *)(p-4) == MAGIC_FILLER)
@@ -798,7 +781,6 @@ char *ERealloc(char *orig, unsigned long newsize)
 	}
 	EFree(orig);
 	return q;
-#endif
 }
 #endif // !ESIMPLE_MALLOC
 
