@@ -89,4 +89,15 @@ function fwd_noassign()
 	return 1
 end function
 
+test_equal( "call forward function with default parameter that is forward referenced, plus inlined",
+	1, fwd_inlined_default_fwd_param() )
+
+function fwd_inlined_default_fwd_param( object x = bar() )
+	return 1
+end function
+
+function bar()
+	return 1
+end function
+
 test_report()
