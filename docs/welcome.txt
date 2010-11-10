@@ -214,10 +214,7 @@ end for
 
 === Discover Euphoria
 
-Ready to get started? Click over to the [[:Quick Start]] guide, which has
-directions for installing Euphoria.
-
-Want more information? Find it at [[http://www.OpenEuphoria.org | OpenEuphoria.org]],
+For more information, visit [[http://www.OpenEuphoria.org | OpenEuphoria.org]],
 and be sure to join the active [[http://openeuphoria.org/forum/index.wc|discussion forum]].
 
 === Disclaimer
