@@ -984,7 +984,7 @@ end function
 --   include std/regex.e as re
 --   constant re_name = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 --
---   object matches = re:match_all(re_name, "John Doe and Jane Doe")
+--   object matches = re:all_matches(re_name, "John Doe and Jane Doe")
 --   -- matches is:
 --   -- {
 --   --   {             -- first match
@@ -999,7 +999,7 @@ end function
 --   --   }
 --   -- }
 --
---   matches = re:match_all(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
+--   matches = re:all_matches(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
 --   -- matches is:
 --   -- {
 --   --   {                         -- first match
