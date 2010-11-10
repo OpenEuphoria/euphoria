@@ -1032,15 +1032,18 @@ public function all_matches(regex re, string haystack, integer from=1, option_sp
 	for i = 1 to length(match_data) do
 		for j = 1 to length(match_data[i]) do
 			sequence tmp
-			if match_data[i][j][1] = 0 then
-				tmp = ""
+			integer a,b
+			a = match_data[i][j][1]
+			if a = 0 then
+				match_data[i][j] = ""
 			else
-				tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
-			end if
-			if str_offsets then
-				match_data[i][j] = { tmp, match_data[i][j][1], match_data[i][j][2] }
-			else
-				match_data[i][j] = tmp
+				b = match_data[i][j][2]
+				tmp = haystack[a..b]
+				if str_offsets then
+					match_data[i][j] = { tmp, a, b }
+				else
+					match_data[i][j] = tmp
+				end if
 			end if
 		end for
 	end for
@@ -1100,8 +1103,14 @@ public function split_limit(regex re, string text, integer limit=0, integer from
 	result = repeat(0, limit)
 	
 	for i = 1 to limit do
-		result[i] = text[last..match_data[i][1][1] - 1]
-		last = match_data[i][1][2] + 1
+		integer a
+		a = match_data[i][1][1]
+		if a = 0 then
+			result[i] = ""
+		else
+			result[i] = text[last..a - 1]
+			last = match_data[i][1][2] + 1
+		end if
 	end for
 	
 	if last < length(text) then
