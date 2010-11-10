@@ -1031,7 +1031,12 @@ public function all_matches(regex re, string haystack, integer from=1, option_sp
 		
 	for i = 1 to length(match_data) do
 		for j = 1 to length(match_data[i]) do
-			sequence tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
+			sequence tmp
+			if equal(match_data[i][j],{0,0}) then
+				tmp = ""
+			else
+				tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
+			end if
 			if str_offsets then
 				match_data[i][j] = { tmp, match_data[i][j][1], match_data[i][j][2] }
 			else
