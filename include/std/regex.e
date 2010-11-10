@@ -1230,20 +1230,19 @@ end function
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
---   The function rid.  Must take one sequence parameter.  The function needs to accept an object
--- and return a string.  The function will be passed a string of the first entire match first.  It
--- will then be passed the capturing groups.  If a match succeeds with groups that don't exist, 
--- the routine will be passed a zero for these groups.  This may help if the routine must handle
--- different groups differently.  If the sub-group does exist, it will be passed the matching string
+--   The function rid.  Must take one sequence parameter.  The function needs to accept a sequence
+-- of strings and return a string.  For each match, the function will be passed a sequence of 
+-- strings.  The first string is the entire match the subsequent strings are for the capturing groups.  
+-- If a match succeeds with groups that don't exist, that place will contain a 0. If the sub-group 
+-- does exist, the palce will contain the matching group string.
 -- for that group.
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
 --
--- Example 1:
--- <eucode>
--- include std/regex.e as re
--- function my_convert(object params)
+-- Examples:
+-- include std/text.e 
+-- function my_convert(sequence params)
 --     switch params[1] do
 --         case "1" then
 --             return "one "
@@ -1251,18 +1250,29 @@ end function
 --             return "two "
 --         case else
 --             return "unknown "
---         case 0 then 
---             -- non existent subgroup
---             return ""
 --     end switch
 -- end function
---
+-- 
 -- regex r = re:new(`\d`)
 -- sequence result = re:find_replace_callback(r, "125",routine_id("my_convert"))
 -- -- result = "one two unknown "
+-- 
+-- 
+-- integer missing_data_flag = 0
+-- regex r2 = re:new(`[A-Z][a-z]+ ([A-Z][a-z]+)?`)
+-- function my_toupper( sequence params)
+--       -- here params[2] may be 0.
+--       return upper( params[1] )
+-- end function
+-- 
+-- result = find_replace_callback(r2, "John Doe", routine_id("my_toupper"))
+-- -- params[2] is "Doe"
+-- -- result = "JOHN DOE"
+-- printf(1, "result=%s\n", {result} )
+-- result = find_replace_callback(r2, "Mary", routine_id("my_toupper"))
+-- -- result = "MARY"
 -- </eucode>
 --
-
 public function find_replace_callback(regex ex, string text, integer rid, integer limit=0,
                 integer from=1, option_spec options=DEFAULT)
 	if sequence(options) then 
@@ -1278,7 +1288,7 @@ public function find_replace_callback(regex ex, string text, integer rid, intege
 	for i = 1 to limit do
 		sequence params = repeat(0, length(match_data[i]))
 		for j = 1 to length(match_data[i]) do
-			if match_data[i][j][1] = 0 then
+			if match_data[i][j][2] = 0 then
 				params[j] = 0
 			else
 				params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
