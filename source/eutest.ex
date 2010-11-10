@@ -7,6 +7,11 @@
 --       their own project pages. Further, it will simplify the output
 --       code quite a bit
 
+-- Increment version number with each release, not really with each change
+-- in the SCM
+
+constant APP_VERSION = "1.0.0"
+
 include std/pretty.e
 include std/sequence.e
 include std/sort.e
@@ -50,8 +55,9 @@ constant cmdopts = {
 	{ "eub", 0, "path to backend runner", { NO_CASE, HAS_PARAMETER, "eub" } },
 	{ "all", 0, "show tests that pass and fail", {} },
 	{ "failed", 0, "show tests that fail only", {} },
-	{ "wait", 0, "Wait on summary", {} },	
+	{ "wait", 0, "Wait on summary", {} },
 	{ "accumulate", 0, "Count the individual tests in each file", {} },
+	{ "v", "version", "Display the version number", {} },
 	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
@@ -1278,6 +1284,10 @@ procedure main()
 				
 			case "eub" then
 				eub_path = "-eub " & val
+			
+			case "version" then
+				printf(1, "EuTest v%s\n", { APP_VERSION })
+				abort(0)
 
 			case OPT_EXTRAS then
 				if length( val ) then
