@@ -1032,7 +1032,7 @@ public function all_matches(regex re, string haystack, integer from=1, option_sp
 	for i = 1 to length(match_data) do
 		for j = 1 to length(match_data[i]) do
 			sequence tmp
-			if equal(match_data[i][j],{0,0}) then
+			if match_data[i][j][1] = 0 then
 				tmp = ""
 			else
 				tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
@@ -1221,13 +1221,20 @@ end function
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
+--   The function rid.  Must take one sequence parameter.  The function needs to accept an object
+-- and return a string.  The function will be passed a string of the first entire match first.  It
+-- will then be passed the capturing groups.  If a match succeeds with groups that don't exist, 
+-- the routine will be passed a zero for these groups.  This may help if the routine must handle
+-- different groups differently.  If the sub-group does exist, it will be passed the matching string
+-- for that group.
+--
 -- Returns:
 --   A **sequence**, the modified ##text##.
 --
 -- Example 1:
 -- <eucode>
 -- include std/regex.e as re
--- function my_convert(sequence params)
+-- function my_convert(object params)
 --     switch params[1] do
 --         case "1" then
 --             return "one "
@@ -1235,6 +1242,9 @@ end function
 --             return "two "
 --         case else
 --             return "unknown "
+--         case 0 then 
+--             -- non existent subgroup
+--             return ""
 --     end switch
 -- end function
 --
@@ -1259,7 +1269,11 @@ public function find_replace_callback(regex ex, string text, integer rid, intege
 	for i = 1 to limit do
 		sequence params = repeat(0, length(match_data[i]))
 		for j = 1 to length(match_data[i]) do
-			params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
+			if match_data[i][j][1] = 0 then
+				params[j] = 0
+			else
+				params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
+			end if
 		end for
 		
 		replace_data[i] = call_func(rid, { params })
