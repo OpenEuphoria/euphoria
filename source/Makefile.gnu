@@ -546,7 +546,7 @@ ifeq "$(EMINGW)" "1"
 endif
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
-	cd ../docs/ && $(EUDOC)  -v -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
+	cd ../docs/ && $(EUDOC) --strip=2 -v -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
 
 $(BUILDDIR)/docs/eu400_0001.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images

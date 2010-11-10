@@ -681,7 +681,7 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 !endif
 
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
-	$(EUDOC) -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
+	$(EUDOC) --strip=2 -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
 
 $(BUILDDIR)\html\js : .EXISTSONLY $(BUILDDIR)\html  
 	mkdir $^@
