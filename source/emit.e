@@ -662,6 +662,12 @@ export function Last_pc()
 	return last_pc
 end function
 
+export procedure move_last_pc( integer amount )
+	if last_pc > 0 then
+		last_pc += amount
+	end if
+end procedure
+
 export procedure clear_last()
 	last_op = 0
 	last_pc = 0
@@ -913,7 +919,7 @@ export procedure emit_op(integer op)
 			emit_addr(c)
 			emit_temp( c, NEW_REFERENCE )
 		end if
-
+		
 	elsif op = WARNING then
 		assignable = FALSE
 	    a = Pop()

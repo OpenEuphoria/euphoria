@@ -256,6 +256,11 @@ procedure patch_forward_call( token tok, integer ref )
 		end if
 	end for
 	
+	-- In case anything was inlined, we need to shift the code so it's correct for its
+	-- final place in the original code, since we've been building this stream of IL
+	-- from an empty sequence, rather than actually inline with the function call.
+	shift( -pc, pc-1 )
+	
 	sequence new_code = Code
 	Code = orig_code
 	
@@ -283,8 +288,8 @@ procedure patch_forward_call( token tok, integer ref )
 	if is_func then
 		new_code &= target
 	end if
-	
 	replace_code( new_code, pc, next_pc - 1, code_sub )
+	
 	reset_code()
 	
 	-- mark this one as resolved already

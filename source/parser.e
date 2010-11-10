@@ -550,9 +550,10 @@ function read_recorded_token(integer n)
 		if use_private_list then
 			p = find( Recorded[n], private_list)
 			if p > 0 then -- the value of this parameter is known, use it
-
+			
 				if TRANSLATE
-				and SymTab[private_sym[p]][S_MODE] = M_TEMP
+				and (private_sym[p] < 0
+				or SymTab[private_sym[p]][S_MODE] = M_TEMP)
 				then
 					-- we're reusing a temp in a default parameter
 					-- This will ensure we get an extra reference and that
@@ -1007,6 +1008,8 @@ procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
 	op_info1 = proc
 	if tok_id = QUALIFIED_VARIABLE then
 		set_qualified_fwd( SymTab[proc][S_FILE_NO] )
+	else
+		set_qualified_fwd( -1 )
 	end if
 	emit_op( opcode )
 	if not TRANSLATE then
@@ -4416,6 +4419,25 @@ procedure ExecCommand()
 	StraightenBranches()  -- straighten top-level
 end procedure
 
+function undefined_var( token tok, integer scope )
+	token forward = next_token()
+		switch forward[T_ID] do
+			case LEFT_ROUND then
+				StartSourceLine( TRUE )
+				Forward_call( tok )
+				return 1
+
+			case VARIABLE then
+				putback( forward )
+				Global_declaration( tok[T_SYM], scope )
+				return 1
+
+			case else
+				putback( forward )
+				return 0
+		end switch
+end function
+
 export procedure real_parser(integer nested)
 -- top level of the parser - command level
 	token tok
@@ -4430,22 +4452,9 @@ export procedure real_parser(integer nested)
 		tok = next_token()
 		id = tok[T_ID]
 		if id = VARIABLE or id = QUALIFIED_VARIABLE then
-			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED then
-				token forward = next_token()
-				switch forward[T_ID] do
-					case LEFT_ROUND then
-						StartSourceLine( TRUE )
-						Forward_call( tok )
-						continue
-
-					case VARIABLE then
-						putback( forward )
-						Global_declaration( tok[T_SYM], SC_LOCAL )
-						continue
-
-					case else
-						putback( forward )
-				end switch
+			if SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED
+			and undefined_var( tok, SC_LOCAL ) then
+				continue
 			end if
 			StartSourceLine(TRUE)
 			Assignment(tok)
@@ -4481,21 +4490,23 @@ export procedure real_parser(integer nested)
 
 			elsif id = PROCEDURE or id = FUNCTION or id = TYPE_DECL then
 				SubProg(id, scope )
+				
 
 			elsif (scope = SC_PUBLIC) and id = INCLUDE then
 				IncludeScan( 1 )
 				PushGoto()
+			elsif (id = VARIABLE or id = QUALIFIED_VARIABLE)
+			and SymTab[tok[T_SYM]][S_SCOPE] = SC_UNDEFINED
+			and undefined_var( tok, scope ) then
+			
+				continue
+				
+			elsif scope = SC_GLOBAL then
+				CompileErr( 18 )
 			else
-				if id = VARIABLE or id = QUALIFIED_VARIABLE then
-					UndefinedVar(tok[T_SYM])
-				end if
-				if scope = SC_GLOBAL then
-					CompileErr( 18 )
-				else
-					CompileErr( 16 )
-				end if
+				CompileErr( 16 )
 			end if
-
+			
 		elsif id = TYPE or id = QUALIFIED_TYPE then
 			token test = next_token()
 			putback( test )

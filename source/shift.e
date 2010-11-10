@@ -15,6 +15,7 @@ include global.e
 include symtab.e
 include fwdref.e
 include error.e
+include emit.e
 
 export enum
 	FIXED_SIZE,
@@ -352,30 +353,31 @@ export procedure shift( integer start, integer amount, integer bound = start )
 
 	integer pc = 1
 	integer op
+	integer finish = start + amount - 1
 	while pc <= length( Code ) do
-		op = Code[pc]
-		for i = 1 to length( op_info[op][OP_ADDR] ) do
+		if pc < start or pc > finish then
+			op = Code[pc]
+			for i = 1 to length( op_info[op][OP_ADDR] ) do
 
-			switch op with fallthru do
-				case SWITCH then
-				case SWITCH_I then
-				case SWITCH_SPI then
-				case SWITCH_RT then
-					-- these have relative jumps, so we treat them specially
-					shift_switch( pc, start, amount )
-					break
+				switch op with fallthru do
+					case SWITCH then
+					case SWITCH_I then
+					case SWITCH_SPI then
+					case SWITCH_RT then
+						-- these have relative jumps, so we treat them specially
+						shift_switch( pc, start, amount )
+						break
 
-				case else
-					shift_addr( pc + op_info[op][OP_ADDR][i], amount, start, bound )
+					case else
+						shift_addr( pc + op_info[op][OP_ADDR][i], amount, start, bound )
 
-			end switch
-			if find( op, {} ) then
-
-			end if
-		end for
+				end switch
+			end for
+		end if
 		pc = advance( pc )
 	end while
 	shift_fwd_refs( start, amount )
+	move_last_pc( amount )
 end procedure
 
 export procedure insert_code( sequence code, integer index )
@@ -385,7 +387,7 @@ end procedure
 
 export procedure replace_code( sequence code, integer start, integer finish )
 	Code = replace( Code, code, start, finish )
-	shift( start , length( code ) - (finish - start + 1), finish )
+	shift( start, length( code ) - (finish - start + 1), finish )
 end procedure
 
 --**
