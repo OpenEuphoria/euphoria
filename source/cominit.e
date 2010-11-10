@@ -45,7 +45,6 @@ constant COMMON_OPTIONS = {
 	{ "pf",        0, GetMsgText(287,0), { NO_CASE } },
 	{ "strict",    0, GetMsgText(288,0), { NO_CASE } },
 	{ "test",      0, GetMsgText(289,0), { NO_CASE } },
-	{ "version", "v", GetMsgText(290,0), { NO_CASE } },
 	{ "v", "version", GetMsgText(290,0), { NO_CASE } },
 	{ "w",         0, GetMsgText(291,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
 	{ "wf",        0, GetMsgText(292,0), { NO_CASE, HAS_PARAMETER, "filename" } },
