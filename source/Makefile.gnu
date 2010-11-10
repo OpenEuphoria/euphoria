@@ -592,7 +592,7 @@ test : EUCOMPILEDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)	
 test : C_INCLUDE_PATH=$(TRUNKDIR):..:$(C_INCLUDE_PATH)
 test : LIBRARY_PATH=$(%LIBRARY_PATH)
-test : $(BUILDDIR)/ecp.dat
+test : 
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc -verbose \
@@ -603,7 +603,7 @@ test :
 		$(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
-testeu : $(BUILDDIR)/ecp.dat
+testeu : 
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) $(EXE) ../source/eutest.ex -i ../include -cc gcc -exe "$(CYPBUILDDIR)/$(EEXU) -batch $(CYPTRUNKDIR)/source/eu.ex" $(TESTFILE)
 
 test-311 :
@@ -676,7 +676,7 @@ endif
 	           ../bin/ascii.ex \
 	           ../bin/bugreport.ex \
 	           ../bin/buildcpdb.ex \
-	           $(BUILDDIR)/ecp.dat \
+	           ../bin/ecp.dat \
 	           ../bin/eprint.ex \
 	           ../bin/eucoverage.ex \
 	           ../bin/guru.ex \
