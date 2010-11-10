@@ -287,4 +287,11 @@ procedure test_references()
 end procedure
 test_references()
 
+-- ticket:350 test
+re = re:new(`fixes(\?)? ticket ([0-9]+)`, re:CASELESS)
+test_equal("ticket #350", {
+	{ "fixes? ticket 384", "?", "384" }, 
+	{ "fixes ticket 999", "", "999" }
+}, re:all_matches(re, "fixes? ticket 384, fixes ticket 999"))
+
 test_report()
