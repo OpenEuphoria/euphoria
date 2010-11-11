@@ -294,4 +294,41 @@ test_equal("ticket #350", {
 	{ "fixes ticket 999", "", "999" }
 }, re:all_matches(re, "fixes? ticket 384, fixes ticket 999"))
 
+-- ticket:363 test
+regex re_full_name = re:new(`[A-Z][a-z]+ ?([A-Z][a-z]+)?`)
+
+-- Displays the number of captured groups and displays where the first missing group is.
+-- A missing group is a group that doesn't exist.
+-- The first missing group is 0, if there are no missing groups.
+function info(sequence params )
+	integer missing = eu:find(0,params)
+	--return sprintf("group count: %d.  The missing group is at %d.\n", 
+	return {length(params)-1, missing}
+end function
+
+-- Test and display values.
+procedure testfrc(sequence rexp, sequence str)
+	--printf(1, "re:find_replace_callback(%s,%s,...)\n", {rexp,str})
+	--puts(1,re:find_replace_callback(rexp, str, routine_id("info")) )
+	
+end procedure
+
+
+test_equal("ticket 362 #1",{1,0},re:find_replace_callback(re_full_name, "John Doe", 
+	routine_id("info"))) -- one group and its matched
+test_equal("ticket 362 #2",{1,2},re:find_replace_callback(re_full_name, "Mary ", 
+	routine_id("info"))) -- one group first group not matched
+-- why 0,0?
+constant data_ext = re:new(`([A-Z][a-z]+)? ?([A-Z][a-z]+)? ([0-9-]+)?`)
+test_equal("ticket 362 #3",{3,4},re:find_replace_callback(data_ext, "Micheal Jackson ",
+	routine_id("info"))) -- Three groups.  phone number, index value 4, is not matched.
+-- why 2,0?	
+test_equal("ticket 362 #4",{3,3},re:find_replace_callback(data_ext, "Cher 555-1212",
+	routine_id("info"))) -- Three groups, but last name, index value 3, not matched.
+constant message = "fixes? ticket 348, fixes ticket 999" 
+constant re_ticket = re:new(`fixes(\?)? ticket ([0-9]+)`, re:CASELESS) 
+	
+test_equal("ticket 362 #5",{2,0} & ", " & {2,2},re:find_replace_callback(re_ticket, message,
+	routine_id("info")))
+? re:find(re:new(`(Hello)?( World)?`), "") 
 test_report()
