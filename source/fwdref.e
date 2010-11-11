@@ -232,6 +232,7 @@ procedure patch_forward_call( token tok, integer ref )
 	integer param_sym = sub
 	sequence params = repeat( 0, args )
 	sequence orig_code = code
+	sequence orig_linetable = LineTable
 	Code = {}
 	for i = pc + 3 to pc + args + 2 do
 		defarg += 1
@@ -263,6 +264,7 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	sequence new_code = Code
 	Code = orig_code
+	LineTable = orig_linetable
 	
 	set_dont_read( 0 )
 	current_file_no = real_file
@@ -288,7 +290,12 @@ procedure patch_forward_call( token tok, integer ref )
 	if is_func then
 		new_code &= target
 	end if
-	replace_code( new_code, pc, next_pc - 1, code_sub )
+	
+	if pc = next_pc - 1 then
+		insert_code( new_code, pc, code_sub )
+	else
+		replace_code( new_code, pc, next_pc - 1, code_sub )
+	end if
 	
 	reset_code()
 	
