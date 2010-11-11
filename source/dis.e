@@ -66,7 +66,7 @@ function names( sequence n )
 	for i = 1 to length(n) do
 		if n[i] then
 			if n[i] < 0 then
-				nl = append( nl, '-' & name_or_literal(-n[i]))
+				nl = append( nl, sprintf( "[UNRESOLVED FORWARD REFERENCE: %d]", -n[i] ) )
 			else
 				nl = append( nl, name_or_literal(n[i]))
 			end if

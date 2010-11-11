@@ -290,12 +290,8 @@ procedure patch_forward_call( token tok, integer ref )
 	if is_func then
 		new_code &= target
 	end if
-	
-	if pc = next_pc - 1 then
-		insert_code( new_code, pc, code_sub )
-	else
-		replace_code( new_code, pc, next_pc - 1, code_sub )
-	end if
+
+	replace_code( new_code, pc, next_pc - 1, code_sub )
 	
 	reset_code()
 	
@@ -410,13 +406,13 @@ procedure patch_forward_case( token tok, integer ref )
 	if not cx then
 		cx = find( { -ref }, case_values )
 	end if
-
-	ifdef DEBUG then	
+	
+ 	ifdef DEBUG then	
 	if not cx then
+		prep_forward_error( ref )
 		InternalErr( 261, { fr[FR_NAME] } )
 	end if
 	end ifdef
-	
 	
 	integer negative = 0
 	if case_values[cx][1] < 0 then
@@ -456,6 +452,11 @@ procedure patch_forward_type_check( token tok, integer ref )
 	else 
 		prep_forward_error( ref )
 		InternalErr( 262, { TYPE_CHECK, TYPE_CHECK_FORWARD, fr[FR_OP] })
+	end if
+	
+	if which_type < 0 then
+		-- not yet...
+		return
 	end if
 	
 	set_code( ref )
@@ -668,7 +669,6 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			continue
 		end if
 		token tok = find_reference( fr )
-		
 		if tok[T_ID] = IGNORED then
 			errors &= ref
 			continue
@@ -734,7 +734,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 				-- ?? what is it?
 				InternalErr( 263, {fr[FR_TYPE], fr[FR_NAME]})
 		end switch
-		if sequence( forward_references[ref] ) then
+		if report_errors and sequence( forward_references[ref] ) then
 			errors &= ref
 		end if
 		
@@ -765,6 +765,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if length(msg) > 0 then
 			CompileErr( 74, {msg} )
 		end if
+
 	end if
 end procedure
 
@@ -778,7 +779,16 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 			if forward_references[active_references[i]][FR_PC] >= pc then
 				if forward_references[active_references[i]][FR_PC] > 1 then
 					forward_references[active_references[i]][FR_PC] += amount
+					
+					if forward_references[active_references[i]][FR_TYPE] = CASE
+					and forward_references[active_references[i]][FR_DATA] >= pc then
+						-- the FR_DATA info tracks the pc for the switch statement for the case
+						forward_references[active_references[i]][FR_DATA] += amount
+					end if
+				
 				end if
+				
+				
 			else
 				exit
 			end if
