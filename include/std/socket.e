@@ -53,7 +53,7 @@ end function
 --**
 -- No error occurred.
 
-public constant OK                      = 0
+public constant OK = 0
 
 --**
 -- Permission has been denied. This can happen when using a send_to call on a broadcast
@@ -64,42 +64,42 @@ public constant OK                      = 0
 -- May occur on a Unix Domain Socket when the socket directory or file could not be
 -- accessed due to security.
 
-public constant ERR_ACCESS              = -1
+public constant ERR_ACCESS = -1
 
 --**
 -- Address is already in use.
 
-public constant ERR_ADDRINUSE           = -2
+public constant ERR_ADDRINUSE = -2
 
 --**
 -- The specified address is not a valid local IP address on this computer.
 
-public constant ERR_ADDRNOTAVAIL        = -3
+public constant ERR_ADDRNOTAVAIL = -3
 
 --**
 -- Address family not supported by the protocol family.
 
-public constant ERR_AFNOSUPPORT         = -4
+public constant ERR_AFNOSUPPORT = -4
 
 --**
 -- Kernel resources to complete the request are temporarly unavailable.
 
-public constant ERR_AGAIN               = -5
+public constant ERR_AGAIN = -5
 
 --**
 -- Operation is already in progress.
 
-public constant ERR_ALREADY             = -6
+public constant ERR_ALREADY = -6
 
 --**
 -- Software has caused a connection to be aborted.
 
-public constant ERR_CONNABORTED         = -7
+public constant ERR_CONNABORTED = -7
 
 --**
 -- Connection was refused.
 
-public constant ERR_CONNREFUSED         = -8
+public constant ERR_CONNREFUSED = -8
 
 --**
 -- An incomming connection was supplied however it was terminated by the remote peer.
@@ -109,27 +109,27 @@ public constant ERR_CONNRESET           = -9
 --**
 -- Destination address required.
 
-public constant ERR_DESTADDRREQ         = -10
+public constant ERR_DESTADDRREQ = -10
 
 --**
 -- Address creation has failed internally.
 
-public constant ERR_FAULT               = -11
+public constant ERR_FAULT = -11
 
 --**
 -- No route to the host specified could be found.
 
-public constant ERR_HOSTUNREACH         = -12
+public constant ERR_HOSTUNREACH = -12
 
 --**
 -- A blocking call is inprogress.
 
-public constant ERR_INPROGRESS          = -13
+public constant ERR_INPROGRESS = -13
 
 --**
 -- A blocking call was cancelled or interrupted.
 
-public constant ERR_INTR                = -14
+public constant ERR_INTR = -14
 
 --**
 -- An invalid sequence of command calls were made, for instance trying to ##accept##
@@ -146,7 +146,7 @@ public constant ERR_IO = -16
 --**
 -- Socket is already connected.
 
-public constant ERR_ISCONN              = -17
+public constant ERR_ISCONN = -17
 
 --**
 -- An empty pathname was specified. (Unix Domain Socket).
@@ -161,13 +161,13 @@ public constant ERR_LOOP = -19
 --**
 -- The queue is not empty upon routine call.
 
-public constant ERR_MFILE               = -20
+public constant ERR_MFILE = -20
 
 --**
 -- Message is too long for buffer size. This would indicate an internal error to
 -- Euphoria as Euphoria sets a dynamic buffer size.
 
-public constant ERR_MSGSIZE             = -21
+public constant ERR_MSGSIZE = -21
 
 --**
 -- Component of the path name exceeded 255 characters or the entire path
@@ -178,17 +178,17 @@ public constant ERR_NAMETOOLONG = -22
 --**
 -- The network subsystem is down or has failed
 
-public constant ERR_NETDOWN             = -23
+public constant ERR_NETDOWN = -23
 
 --**
 -- Network has dropped it's connection on reset.
 
-public constant ERR_NETRESET            = -24
+public constant ERR_NETRESET = -24
 
 --**
 -- Network is unreachable.
 
-public constant ERR_NETUNREACH          = -25
+public constant ERR_NETUNREACH = -25
 
 --**
 -- Not a file. (Unix Domain Sockets).
@@ -198,7 +198,7 @@ public constant ERR_NFILE = -26
 --**
 -- No buffer space is available.
 
-public constant ERR_NOBUFS              = -27
+public constant ERR_NOBUFS = -27
 
 --**
 -- Named socket does not exist. (Unix Domain Socket).
@@ -208,37 +208,37 @@ public constant ERR_NOENT = -28
 --**
 -- Socket is not connected.
 
-public constant ERR_NOTCONN             = -29
+public constant ERR_NOTCONN = -29
 
 --**
 -- Component of the path prefix is not a directory. (Unix Domain Socket).
 
-public constant ERR_NOTDIR  = -30
+public constant ERR_NOTDIR = -30
 
 --**
 -- Socket system is not initialized (Windows only)
 
-public constant ERR_NOTINITIALISED      = -31
+public constant ERR_NOTINITIALISED = -31
 
 --**
 -- The descriptor is not a socket.
 
-public constant ERR_NOTSOCK             = -32
+public constant ERR_NOTSOCK = -32
 
 --**
 -- Operation is not supported on this type of socket.
 
-public constant ERR_OPNOTSUPP           = -33
+public constant ERR_OPNOTSUPP = -33
 
 --**
 -- Protocol not supported.
 
-public constant ERR_PROTONOSUPPORT      = -34
+public constant ERR_PROTONOSUPPORT = -34
 
 --**
 -- Protocol is the wrong type for the socket.
 
-public constant ERR_PROTOTYPE           = -35
+public constant ERR_PROTOTYPE = -35
 
 --**
 -- The name would reside on a read-only file system. (Unix Domain Socket).
@@ -249,22 +249,22 @@ public constant ERR_ROFS = -36
 -- The socket has been shutdown. Possibly a send/receive call after a shutdown took
 -- place.
 
-public constant ERR_SHUTDOWN            = -37
+public constant ERR_SHUTDOWN = -37
 
 --**
 -- Socket type is not supported.
 
-public constant ERR_SOCKTNOSUPPORT      = -38
+public constant ERR_SOCKTNOSUPPORT = -38
 
 --**
 -- Connection has timed out.
 
-public constant ERR_TIMEDOUT            = -39
+public constant ERR_TIMEDOUT = -39
 
 --**
 -- The operation would block on a socket marked as non-blocking.
 
-public constant ERR_WOULDBLOCK          = -40
+public constant ERR_WOULDBLOCK = -40
 
 --****
 -- === Socket Backend Constants
@@ -280,10 +280,10 @@ public constant
 	-- the backend returns this value
 	ESOCK_UNDEFINED_VALUE	= -9999,
 	--** if the backend doesn't recognize the flag in question
-	ESOCK_UNKNOWN_FLAG	= -9998,
-	ESOCK_TYPE_AF		= 1,
-	ESOCK_TYPE_TYPE		= 2,
-	ESOCK_TYPE_OPTION	= 3
+	ESOCK_UNKNOWN_FLAG	    = -9998,
+	ESOCK_TYPE_AF		    = 1,
+	ESOCK_TYPE_TYPE		    = 2,
+	ESOCK_TYPE_OPTION	    = 3
 
 --****
 -- === Socket Type Euphoria Constants
@@ -298,39 +298,39 @@ public constant
 public constant
 	--**
 	-- Address family is unspecified
-	EAF_UNSPEC=6,
+	EAF_UNSPEC = 6,
 	--**
 	-- Local communications
-	EAF_UNIX=1,
+	EAF_UNIX = 1,
 	--**
 	-- IPv4 Internet protocols
-	EAF_INET=2,
+	EAF_INET = 2,
 	--**
 	-- IPv6 Internet protocols
-	EAF_INET6=3,
+	EAF_INET6 = 3,
 	--**
 	-- Appletalk
-	EAF_APPLETALK=4,
+	EAF_APPLETALK = 4,
 	--**
 	-- Bluetooth (currently Windows-only)
-	EAF_BTH=5,
+	EAF_BTH = 5,
 	--**
 	-- Provides sequenced, reliable, two-way, connection-based byte streams.
 	-- An out-of-band data transmission mechanism may be supported.
-	ESOCK_STREAM=1,
+	ESOCK_STREAM = 1,
 	--**
 	-- Supports datagrams (connectionless, unreliable messages of a
 	-- fixed maximum length).
-	ESOCK_DGRAM=2,
+	ESOCK_DGRAM = 2,
 	--**
 	-- Provides raw network protocol access.
-	ESOCK_RAW=3,
+	ESOCK_RAW = 3,
 	--**
 	-- Provides a reliable datagram layer that does not guarantee ordering.
-	ESOCK_RDM=4,
+	ESOCK_RDM = 4,
 	--**
 	-- Obsolete and should not be used in new programs
-	ESOCK_SEQPACKET=5
+	ESOCK_SEQPACKET = 5
 
 --****
 -- === Socket Type Constants
@@ -600,14 +600,14 @@ public constant
     -- type [[:SOCK_STREAM]]); the underlying protocol must also support
 	-- out-of-band data.
 
-	MSG_OOB       = #1,
+	MSG_OOB = #1,
 
 	--**
 	-- This flag causes the receive operation to return data from the
     -- beginning of the receive queue without removing that data from the
     -- queue.  Thus, a subsequent receive call will return the same data.
 
-	MSG_PEEK      = #2,
+	MSG_PEEK = #2,
 
 	--**
 	-- Don't use a gateway to send out the packet, only send to hosts on
@@ -617,33 +617,33 @@ public constant
 
 	MSG_DONTROUTE = #4,
 
-	MSG_TRYHARD   = #4,
+	MSG_TRYHARD = #4,
 
 	--**
 	-- indicates that some control data were discarded due to lack of space in
     -- the buffer for ancillary data.
 
-	MSG_CTRUNC    = #8,
+	MSG_CTRUNC = #8,
 
-	MSG_PROXY     = #10,
+	MSG_PROXY = #10,
 
 	--**
 	-- indicates that the trailing portion of a datagram was discarded because
     -- the datagram was larger than the buffer supplied.
 
-	MSG_TRUNC     = #20,
+	MSG_TRUNC = #20,
 
 	--**
 	-- Enables non-blocking operation; if the operation would block, EAGAIN
 	-- or EWOULDBLOCK is returned.
 
-	MSG_DONTWAIT  = #40,
+	MSG_DONTWAIT = #40,
 
 	--**
 	-- Terminates a record (when this notion is supported, as for sockets of
     -- type [[:SOCK_SEQPACKET]]).
 
-	MSG_EOR       = #80,
+	MSG_EOR = #80,
 
 	--**
 	-- This flag requests that the operation block until the full request is
@@ -651,11 +651,11 @@ public constant
     -- if a signal is caught, an error or disconnect occurs, or the next data
     -- to be received is of a different type than that returned.
 
-	MSG_WAITALL   = #100,
+	MSG_WAITALL = #100,
 
-	MSG_FIN       = #200,
+	MSG_FIN = #200,
 
-	MSG_SYN       = #400,
+	MSG_SYN = #400,
 
 	--**
 	-- Tell the link layer that forward progress happened: you got a
@@ -664,29 +664,29 @@ public constant
     -- Only valid on [[:SOCK_DGRAM]] and [[:SOCK_RAW]] sockets and currently only
     -- implemented for IPv4 and IPv6.
 
-	MSG_CONFIRM   = #800,
+	MSG_CONFIRM = #800,
 
-	MSG_RST       = #1000,
+	MSG_RST = #1000,
 
 	--**
 	-- indicates that no data was received but an extended error from the
     -- socket error queue.
 
-	MSG_ERRQUEUE  = #2000,
+	MSG_ERRQUEUE = #2000,
 
 	--**
 	-- Requests not to send SIGPIPE on errors on stream oriented sockets when
     -- the other end breaks the connection. The EPIPE error is still
     -- returned.
 
-	MSG_NOSIGNAL  = #4000,
+	MSG_NOSIGNAL = #4000,
 
 	--**
 	-- The caller has more data to send. This flag is used with TCP sockets
     -- to obtain the same effect as the TCP_CORK socket option, with the
 	-- difference that this flag can be set on a per-call basis.
 
-	MSG_MORE      = #8000
+	MSG_MORE = #8000
 
 --****
 -- === Server and Client sides
@@ -710,10 +710,21 @@ export enum
 --
 
 public type socket(object o)
-	if not sequence(o) then return 0 end if
-	if not length(o) = 2 then return 0 end if
-	if not atom(o[1]) then return 0 end if
-	if not atom(o[2]) then return 0 end if
+	if not sequence(o) then 
+        return 0 
+    end if
+	
+    if not length(o) = 2 then 
+        return 0 
+    end if
+	
+    if not atom(o[1]) then 
+        return 0 
+    end if
+	
+    if not atom(o[2]) then 
+        return 0 
+    end if
 
 	return 1
 end type
@@ -722,6 +733,7 @@ procedure delete_socket(object o)
 	if not socket(o) then
 		return
 	end if
+
 	if o[SOCKET_SOCKADDR_IN] = 0 then
 		return
 	end if
@@ -762,8 +774,11 @@ integer delete_socket_rid = routine_id("delete_socket")
 
 public function create(integer family, integer sock_type, integer protocol)
 	object o = machine_func(M_SOCK_SOCKET, { family, sock_type, protocol })
-	if atom(o) then return o end if
-	return delete_routine(o, delete_socket_rid)
+	if atom(o) then
+        return o 
+    end if
+	
+    return delete_routine(o, delete_socket_rid)
 end function
 
 --**
