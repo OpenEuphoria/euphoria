@@ -13,9 +13,10 @@
 #:%%splitname = eu400
 #:%%splitlevel = 2
 :%%toclevel = 3
+:%%output=index
 :<<TOC level=1>>
 ########
-:%%output=index
+:%%output=intro
 := Euphoria Programming Language v4.0
 :<<LEVELTOC level=1 depth=4>>
 
