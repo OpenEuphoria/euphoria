@@ -739,11 +739,30 @@ end function
 --     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
---   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in rare cases this number may need to be increased in order to accomodate complex regex expressions.
+--   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in 
+--        rare cases this number may need to be increased in order to accomodate complex regex 
+--        expressions.
 --
 -- Returns:
---   An **object**, which is either an atom of 0, meaning nothing matched or a sequence of matched pairs.
---   For the explanation of the returned sequence, please see the first example.
+--   An **object**, which is either an atom of 0, meaning nothing matched or a sequence of 
+--   index pairs.  These index pairs may be fewer than the number of groups specified.  These
+--   index pairs may be the invalid index pair {0,0}.
+--
+--   The first pair is the starting and ending indeces of the sub-string that matches the 
+--   expression.  This pair may be followed by indeces of the groups.  The groups are 
+--   subexpressions in the regular expression surrounded by parenthesis ().  
+--
+--   Now, it is possible to get a match without having all of the groups match.
+--   This can happen when there is a quantifier after a group.  For example: '([01])*' or '([01])?'.
+--   In this case, the returned sequence of pairs will be missing the last group indeces for
+--   which there is no match.   
+--   However, if the missing group is followed by a group that *does* match, {0,0} will be 
+--   used as a place holder.
+--   You can ensure your groups match when your expression matches by keeping quantifiers 
+--   inside your groups: 
+--   For example use: '([01]?)' instead of '([01])?'
+--
+--
 --
 -- Example 1:
 --   <eucode>
@@ -1034,15 +1053,15 @@ public function all_matches(regex re, string haystack, integer from=1, option_sp
 			integer a,b
 			a = match_data[i][j][1]
 			if a = 0 then
-				match_data[i][j] = ""
+				tmp = ""
 			else
 				b = match_data[i][j][2]
 				tmp = haystack[a..b]
-				if str_offsets then
-					match_data[i][j] = { tmp, a, b }
-				else
-					match_data[i][j] = tmp
-				end if
+			end if
+			if str_offsets then
+				match_data[i][j] = { tmp, a, b }
+			else
+				match_data[i][j] = tmp
 			end if
 		end for
 	end for
@@ -1287,7 +1306,7 @@ public function find_replace_callback(regex ex, string text, integer rid, intege
 	for i = 1 to limit do
 		sequence params = repeat(0, length(match_data[i]))
 		for j = 1 to length(match_data[i]) do
-			if match_data[i][j][2] = 0 then
+			if equal(match_data[i][j],{0,0}) then
 				params[j] = 0
 			else
 				params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
