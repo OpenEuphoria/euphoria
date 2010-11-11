@@ -15,7 +15,7 @@
 :%%toclevel = 3
 :<<TOC level=1>>
 ########
-:%%output=top
+:%%output=index
 := Euphoria Programming Language v4.0
 :<<LEVELTOC level=1 depth=4>>
 
@@ -25,21 +25,21 @@
 #TODO: other release notes
 
 ########
-:%%output=top
+:%%output=setup
 := Installation & Setup
 :<<LEVELTOC level=1 depth=4>>
 
 ../docs/refman_1.txt
 
 ########
-:%%output=top
+:%%output=langref
 := Language Reference
 :<<LEVELTOC depth=2>>
 
 ../docs/refman_2.txt
 
 ########
-:%%output=top
+:%%output=syntax
 := Formal Syntax
 :<<LEVELTOC level=1 depth=2>>
 
@@ -47,7 +47,7 @@
 ../docs/internals.txt
 
 ########
-:%%output=top
+:%%output=miniguide
 := Mini-Guides
 :<<LEVELTOC level=1 depth=2>>
 
@@ -63,7 +63,7 @@
 ../docs/perform.txt
 
 ########
-:%%output=top
+:%%output=tools
 := Included Tools
 :<<LEVELTOC level=1 depth=2>>
 
@@ -74,7 +74,7 @@
 ../docs/eudist.txt
 
 ########
-:%%output=top
+:%%output=gen_routines
 := General Routine Reference
 :<<LEVELTOC level=1 depth=2>>
 
@@ -96,7 +96,7 @@
 ../include/std/utils.e
 
 ########
-:%%output=top
+:%%output=seq_routines
 := Sequence Centric Routines
 :<<LEVELTOC level=1 depth=2>>
 
@@ -108,7 +108,7 @@
 ../include/std/sort.e
 
 ########
-:%%output=top
+:%%output=str_routines
 := String Centric Routines
 :<<LEVELTOC level=1 depth=2>>
 
@@ -121,7 +121,7 @@
 ../include/std/wildcard.e
 
 ########
-:%%output=top
+:%%output=data_routines
 := Data Structures
 :<<LEVELTOC level=1 depth=2>>
 
@@ -132,7 +132,7 @@
 ../include/std/stack.e
 
 ########
-:%%output=top
+:%%output=net_routines
 := Networking Routines
 :<<LEVELTOC level=1 depth=2>>
 
@@ -143,7 +143,7 @@
 ../include/std/net/url.e
 
 ########
-:%%output=top
+:%%output=lowlvl_routines
 := Low Level Routines
 :<<LEVELTOC level=1 depth=2>>
 
@@ -156,7 +156,7 @@
 ../include/std/memconst.e
 
 ########
-:%%output=top
+:%%output=graph_routines
 := Graphics
 :<<LEVELTOC level=1 depth=2>>
 
@@ -165,7 +165,7 @@
 ../include/std/image.e
 
 ########
-:%%output=top
+:%%output=eu_routines
 := Euphoria Routines
 :<<LEVELTOC level=1 depth=2>>
 
@@ -176,7 +176,7 @@
 ../include/std/unittest.e
 
 ########
-:%%output=top
+:%%output=win_routines
 := Windows Routines
 :<<LEVELTOC level=1 depth=2>>
 
@@ -184,14 +184,14 @@
 ../include/std/win32/sounds.e
 
 ########
-:%%output=top
+:%%output=unsupported
 := Unsuppored Features
 :<<LEVELTOC level=1 depth=2>>
 
 ../docs/unsupported.txt
 
 ########
-:%%output=top
+:%%output=relnotes
 := Release Notes
 :<<LEVELTOC level=1 depth=2>>
 
@@ -203,6 +203,6 @@
 
 
 ########
-:%%output=top
+:%%output=key_index
 := Index
 :<<INDEX search>>
