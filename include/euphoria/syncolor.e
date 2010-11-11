@@ -68,6 +68,8 @@ public procedure set_colors(sequence pColorList)
 				STRING_COLOR  = pColorList[i][2]
 			case "BRACKET" then
 				BRACKET_COLOR  = pColorList[i][2]
+			case else
+				printf(2, "syncolor.e: Unknown color name '%s', ignored.\n", {lColorName})
 		end switch
 	end for
 end procedure

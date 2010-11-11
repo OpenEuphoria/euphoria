@@ -209,39 +209,39 @@ end procedure
 ---------------------------------------------------------------------------------
 
 type White_Char(object c)
-	return (Look >= 0) and (Look <= ' ')
+	return integer(c) and (c >= 0) and (c <= ' ')
 end type
 
 type Digit_Char(object c)
-	return (('0' <= c) and (c <= '9')) or (c = '_')
+	return integer(c) and ((('0' <= c) and (c <= '9')) or (c = '_'))
 end type
 
 type uHex_Char(object c)
-	return ('A' <= c) and (c <= 'F')
+	return integer(c) and ('A' <= c) and (c <= 'F')
 end type
 
 type lHex_Char(object c)
-	return ('a' <= c) and (c <= 'f')
+	return integer(c) and ('a' <= c) and (c <= 'f')
 end type
 
 type Hex_Char(object c)
-	return Digit_Char(c) or uHex_Char(c) or lHex_Char(c)
+	return integer(c) and (Digit_Char(c) or uHex_Char(c) or lHex_Char(c))
 end type
 
 type uAlpha_Char(object c)
-	return ('A' <= c) and (c <= 'Z')
+	return integer(c) and ('A' <= c) and (c <= 'Z')
 end type
 
 type lAlpha_Char(object c)
-	return ('a' <= c) and (c <= 'z')
+	return integer(c) and ('a' <= c) and (c <= 'z')
 end type
 
 type Alpha_Char(object c)
-	return uAlpha_Char(c) or lAlpha_Char(c)
+	return integer(c) and (uAlpha_Char(c) or lAlpha_Char(c))
 end type
 
 type Alphanum_Char(object c)
-	return Alpha_Char(c) or Digit_Char(c)
+	return integer(c) and (Alpha_Char(c) or Digit_Char(c))
 end type
 
 type Identifier_Char(object c)
@@ -548,6 +548,9 @@ function hex_string(sequence textdata, integer string_type)
 			maxnibbles = 4
 		case 'U' then
 			maxnibbles = 8
+		case else
+			printf(2, "tokenize.e: Unknown base code '%s', ignored.\n", {string_type})
+
 	end switch
 
 	string_text = ""
