@@ -1,6 +1,11 @@
 -- (c) Copyright - See License.txt
 --
 -- Instruments euphoria source code for code coverage analysis
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
 
 export enum 
 	COVERAGE_SUPPRESS,
