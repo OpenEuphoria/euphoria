@@ -57,7 +57,7 @@ constant cmdopts = {
 	{ "failed", 0, "show tests that fail only", {} },
 	{ "wait", 0, "Wait on summary", {} },
 	{ "accumulate", 0, "Count the individual tests in each file", {} },
-	{ "v", "version", "Display the version number", {} },
+	{ "v", "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
 	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
@@ -1285,10 +1285,6 @@ procedure main()
 			case "eub" then
 				eub_path = "-eub " & val
 			
-			case "version" then
-				printf(1, "EuTest v%s\n", { APP_VERSION })
-				abort(0)
-
 			case OPT_EXTRAS then
 				if length( val ) then
 					files = build_file_list( val )
