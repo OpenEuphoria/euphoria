@@ -765,8 +765,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if length(msg) > 0 then
 			CompileErr( 74, {msg} )
 		end if
-
+		
 	end if
+	clear_last()
 end procedure
 
 export function might_be_fwdref( sequence name )
