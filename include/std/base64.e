@@ -86,9 +86,6 @@ integer len, oidx, prev, case4, tmp, inch
 sequence result
      
      len=length(in)
-     if len > 57 then
-	return -1
-     end if
      --#
      --# start with a full-length sequence of pads;
      --# then decrement oidx to leave rqd pads in place
