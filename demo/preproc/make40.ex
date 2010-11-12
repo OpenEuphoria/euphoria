@@ -232,6 +232,14 @@ end function
 -----------------------------------------------------------------------------
 function replaceWord( sequence word )
 
+    -- replace obsolete builtin functions with valid names, so
+    -- the resulting program does not crash with unresolved symbols
+    if equal(word, "pixel") then
+    	word = "compare"
+    elsif equal(word, "get_pixel") then
+    	word = "length"
+    end if
+
     if find(word, keywords&builtins) and
     not find(word, old_keywords&old_builtins) then
     	return "__" & word
