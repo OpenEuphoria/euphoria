@@ -119,6 +119,7 @@
 #../include/std/unicode.e
 #../include/std/ucstypes.e
 ../include/std/wildcard.e
+../include/std/base64.e
 
 ########
 :%%output=data_routines

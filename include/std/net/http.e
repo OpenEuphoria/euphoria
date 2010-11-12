@@ -12,9 +12,13 @@ include std/net/dns.e
 include std/sequence.e
 include std/text.e
 include std/convert.e
+include std/rand.e
+include std/base64.e
+
 include euphoria/info.e
 
-constant USER_AGENT_HEADER = sprintf("User-Agent: Euphoria-HTTP/%d.%d\r\n", {
+constant USER_AGENT_HEADER = 
+	sprintf("User-Agent: Euphoria-HTTP/%d.%d\r\n", {
 		version_major(), version_minor() })
 
 enum R_HOST, R_PORT, R_PATH, R_REQUEST
@@ -40,6 +44,14 @@ public enum by -1
 public enum
 	FORM_URLENCODED,
 	MULTIPART_FORM_DATA
+	
+public enum
+	--**
+	-- No encoding is necessary
+	ENCODE_NONE = 0,
+	--**
+	-- Use Base64 encoding
+	ENCODE_BASE64
 
 constant ENCODING_STRINGS = {
 	"application/x-www-form-urlencoded",
@@ -127,15 +139,58 @@ function form_urlencode(sequence kvpairs)
 			data &= "&"
 		end if
 
-		data &= kvpair[1] & "=" & encode(kvpair[2])
+		data &= kvpair[1] & "=" & url:encode(kvpair[2])
 	end for
 
 	return data
 end function
 
-without warning strict -- routine not implemented yet.
-function multipart_form_data_encode(sequence kvpairs)
-	return ""
+function multipart_form_data_encode(sequence kvpairs, sequence boundary)
+	sequence data = ""
+	
+	for i = 1 to length(kvpairs) do
+		object kvpair = kvpairs[i]
+
+		integer enctyp = ENCODE_NONE
+		sequence mimetyp = ""
+		
+		if i > 1 then
+			data &= "\r\n"
+		end if
+		
+		data &= "--" & boundary & "\r\n"
+		data &= "Content-Disposition: form-data; name=\"" & kvpair[1] & "\""
+		if length(kvpair) = 5 then
+			data &= "; filename=\"" & kvpair[3] & "\"\r\n"
+			data &= "Content-Type: " & kvpair[4] & "\r\n"
+			
+			switch kvpair[5] do
+				case ENCODE_NONE then
+				case ENCODE_BASE64 then
+					data &= "Content-Transfer-Encoding: base64\r\n"
+					kvpair[2] = base64:encode(kvpair[2], 76)
+			end switch
+		else
+			data &= "\r\n"
+		end if	
+			
+		data &= "\r\n" & kvpair[2]
+	end for
+
+	return data & "\r\n--" & boundary & "--"
+end function
+
+constant rand_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+constant rand_chars_len = length(rand_chars)
+
+function random_boundary(integer len)
+	sequence boundary = repeat(0, len)
+	
+	for i = 1 to len do
+		boundary[i] = rand_chars[rand(rand_chars_len)]
+	end for
+	
+	return boundary
 end function
 
 --
@@ -216,6 +271,13 @@ end function
 --**
 -- Post data to a HTTP resource.
 --
+-- Parameters:
+--   * ##url##     - URL to send post request to
+--   * ##data##    - Form data (described later)
+--   * ##headers## - Additional headers added to request
+--   * ##follow_redirects## - Maximum redirects to follow
+--   * ##timeout## - Maximum number of seconds to wait for a response
+--
 -- Returns:
 --   An integer error code or a 2 element sequence. Element 1 is a sequence
 --   of key/value pairs representing the result header information. element
@@ -225,6 +287,37 @@ end function
 --
 --   If result is a positive integer, that represents a HTTP error value from
 --   the server.
+--
+-- Data Sequence:
+--  This sequence should contain key value pairs representing the expected form
+--  elements of the called URL. For a simple url-encoded form:
+--
+--  <eucode>
+--  { {"name", "John Doe"}, {"age", "22"}, {"city", "Small Town"}}
+--  </eucode>
+--
+--  All Keys and Values should be a sequence.
+--
+--  If the post requires multipart form encoding then the sequence is a little
+--  different. The first element of the data sequence must be [[:MULTIPART_FORM_DATA]].
+--  All subsequent field values should be key/value pairs as described above **except**
+--  for a field representing a file upload. In that case the sequence should be:
+--
+--  ##{ FIELD-NAME, FILE-VALUE, FILE-NAME, MIME-TYPE, ENCODING-TYPE }##
+--
+--  Encoding type can be
+--    * [[:ENCODE_NONE]]
+--    * [[:ENCODED_BASE64]]
+--
+--  An example for a multipart form encoded post request data sequence
+--
+--  <eucode>
+--  { 
+--    { "name", "John Doe" }, 
+--    { "avatar", file_content, "me.png", "image/png", ENCODE_BASE64 },
+--    { "city", "Small Town" }
+--  }
+--  </eucode>
 --
 -- See Also:
 --   [[:http_get]]
@@ -264,16 +357,19 @@ public function http_post(sequence url, object data, object headers = 0,
 	-- If we have key/value pairs then we will need to encode that data
 	-- according to our data_type.
 
+	sequence content_type = ENCODING_STRINGS[data_type]
 	if sequence(data[1]) then
 		-- We have key/value pairs
 		if data_type = FORM_URLENCODED then
 			data = form_urlencode(data)
 		else
-			data = multipart_form_data_encode(data)
+			sequence boundary = random_boundary(20)
+			content_type &= "; boundary=" & boundary
+			data = multipart_form_data_encode(data, boundary)
 		end if
 	end if
 
-	request[R_REQUEST] &= sprintf("Content-Type: %s\r\n", { ENCODING_STRINGS[data_type] })
+	request[R_REQUEST] &= sprintf("Content-Type: %s\r\n", { content_type })
 	request[R_REQUEST] &= sprintf("Content-Length: %d\r\n", { length(data) })
 	request[R_REQUEST] &= "\r\n"
 	request[R_REQUEST] &= data
