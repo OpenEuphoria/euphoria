@@ -2789,7 +2789,7 @@ end function
 -- Parameters:
 --		# ##source_data## : a sequence, the data that might contain elements from ##current_items##
 --		# ##current_items## : a sequence, the set of items to look for in ##source_data##. Matching
---                            data is replaced with the correspoding data from ##new_items##.
+--                            data is replaced with the corresponding data from ##new_items##.
 --		# ##new_items## : a sequence, the set of replacement data for any matches found.
 --		# ##start## : an integer, the starting point of the search. Defaults to 1.
 --		# ##limit## : an integer, the maximum number of replacements to be made. 
@@ -2834,7 +2834,7 @@ end function
 -- </eucode>
 --
 -- Another thing to note is that when using this syntax, you can still mix together
--- atoms and seqeuences.
+-- atoms and sequences.
 --
 -- <eucode>
 --   res = transmute("the school shoes", {{}, "sh", 't', "sch"}, {{}, 'x', "TH", "SCH"})
