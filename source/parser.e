@@ -677,7 +677,7 @@ function Expr_list()
 		short_circuit -= 1
 		while TRUE do
 			gListItem &= 1
-			call_proc(forward_expr, {})
+			Expr()
 			n += gListItem[$]
 			gListItem = gListItem[1 .. $-1]
 			tok = next_token()
@@ -2361,8 +2361,7 @@ procedure Case_statement()
 			exit
 
 		elsif fwd then
-			integer fwdref
-			fwdref = new_forward_reference( CASE, fwd )
+			integer fwdref = new_forward_reference( CASE, fwd )
 			add_case( {fwdref}, sign )
 			fwd:set_data( fwdref, switch_stack[$][SWITCH_PC] )
 
@@ -2534,7 +2533,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 			update_translator_info( cases, all_ints, has_integer, has_atom, has_sequence )
 		end if
 	end if
-
+	
 	-- convert to relative offsets
 	SymTab[jump_table][S_OBJ] = switch_stack[$][SWITCH_JUMP_TABLE] - switch_pc
 
@@ -4701,7 +4700,6 @@ export procedure real_parser(integer nested)
 		end if
 		flush_temps()
 	end while
-
 	emit_op(RETURNT)
 	clear_last()
 	StraightenBranches()

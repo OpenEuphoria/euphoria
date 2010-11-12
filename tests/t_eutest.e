@@ -6,7 +6,7 @@ include std/filesys.e
 -- doesn't make any sense to bother translating this...
 ifdef EUI then
 sequence eutest = ".." & SLASH &".." & SLASH & "source" & SLASH & "eutest.ex"
-sequence incdir = ".." & SLASH & "include"
+sequence incdir = ".." & SLASH & ".." & SLASH & "include"
 sequence exe    = command_line()
 exe = exe[1]
 

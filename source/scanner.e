@@ -86,7 +86,9 @@ export procedure set_qualified_fwd( integer fwd )
 end procedure
 
 export function get_qualified_fwd()
-	return qualified_fwd
+	integer fwd = qualified_fwd
+	set_qualified_fwd( -1 )
+	return fwd
 end function
 
 -- list of source lines & execution counts
@@ -774,6 +776,9 @@ procedure IncludePush()
 		update_include_matrix( idx, current_file_no )
 		public_include = FALSE
 		read_line() -- we can't return without reading a line first
+		if not find( idx, file_include_depend[current_file_no] ) and not finished_files[idx] then
+			file_include_depend[current_file_no] &= idx
+		end if
 		return -- ignore it
 	end if
 	
@@ -833,6 +838,9 @@ end ifdef
 	end if
 	known_files = append(known_files, new_include_name)
 	known_files_hash &= new_hash
+	finished_files &= 0
+	file_include_depend = append( file_include_depend, { length( known_files ) } )
+	file_include_depend[current_file_no] &= length( known_files )
 	check_coverage()
 	default_namespaces &= 0
 	
@@ -848,13 +856,28 @@ end ifdef
 	default_namespace( )
 end procedure
 
-
+procedure update_include_completion( integer file_no )
+	for i = 1 to length( file_include_depend ) do
+		if length( file_include_depend[i] ) then
+			integer fx = find( file_no, file_include_depend[i] )
+			if fx then
+				file_include_depend[i] = remove( file_include_depend[i], fx )
+				if not length( file_include_depend[i] ) then
+					finished_files[i] = 1
+					if i != file_no then
+						update_include_completion( i )
+					end if
+				end if
+			end if
+		end if
+	end for
+end procedure
 
 
 export function IncludePop()
 -- stop reading from current source file and restore info for previous file
 -- (if any)
-	sequence top
+	update_include_completion( current_file_no )
 	Resolve_forward_references()
 	HideLocals()
 
@@ -867,7 +890,7 @@ export function IncludePop()
 		return FALSE  -- the end
 	end if
 
-	top = IncludeStk[$]
+	sequence top = IncludeStk[$]
 
 	current_file_no    = top[FILE_NO]
 	line_number        = top[LINE_NO]
@@ -1418,7 +1441,7 @@ export function Scanner()
 
 
 				if tok[T_ID] = NAMESPACE then -- known namespace
-					qualified_fwd = SymTab[tok[T_SYM]][S_OBJ]
+					set_qualified_fwd( SymTab[tok[T_SYM]][S_OBJ] )
 
 					-- skip whitespace
 					ch = getch()
@@ -1469,8 +1492,13 @@ export function Scanner()
 						elsif tok[T_ID] = TYPE then
 							tok[T_ID] = QUALIFIED_TYPE
 						end if
-
+						
 					end if
+					
+					if atom( tok[T_SYM] ) and  SymTab[tok[T_SYM]][S_SCOPE] != SC_UNDEFINED then
+						set_qualified_fwd( -1 )
+					end if
+						
 				else -- not a namespace, but an overriding var
 					ungetch()
 				    if Parser_mode = PAM_RECORD then
@@ -1490,7 +1518,7 @@ export function Scanner()
 		            end if
 				end if
 			else -- not a known namespace
-				qualified_fwd = -1
+				set_qualified_fwd( -1 )
 			    if Parser_mode = PAM_RECORD then
 	                Ns_recorded_sym &= 0
 						Recorded = append(Recorded, yytext)
@@ -2082,7 +2110,7 @@ export procedure IncludeScan( integer is_public )
 
 					ungetch()
 					s = keyfind(gtext, -1, , 1)
-					if not find(s[T_ID], ADDR_TOKS) then
+					if not find(s[T_ID], ID_TOKS) then
 						CompileErr(36)
 					end if
 					new_include_space = NameSpace_declaration(s[T_SYM])
