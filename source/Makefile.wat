@@ -701,12 +701,12 @@ $(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\ht
 $(BUILDDIR)\html\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\html\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+$(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
-htmldoc : .SYMBOLIC $(BUILDDIR)\html\eu400_0001.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
+htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 
@@ -716,11 +716,11 @@ $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
 		-e "LEVELTOC depth=2" "LEVELTOC depth=0"  $(BUILDDIR)\euphoria.txt > $(BUILDDIR)\euphoria-pdf.txt
 	
 
-$(BUILDDIR)\pdf\eu400_0001.html : $(BUILDDIR)\euphoria-pdf.txt
+$(BUILDDIR)\pdf\index.html : $(BUILDDIR)\euphoria-pdf.txt
 	-mkdir $(BUILDDIR)\pdf
 	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=pdf-template.html -o$(BUILDDIR)\pdf -htmldoc $(BUILDDIR)\euphoria-pdf.txt
 
-$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\eu400_0001.html
-	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\eu400_0001.html
+$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\index.html
+	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\index.html
 
 
