@@ -2,6 +2,7 @@
 -- == Command Line Handling
 --
 -- <<LEVELTOC level=2 depth=4>>
+
 namespace cmdline
 
 include std/text.e
@@ -42,7 +43,12 @@ public constant
 	MULTIPLE      = '*',
 
 	--** This option switch triggers the 'help' display. See [[:cmd_parse]]
-	HELP          = 'h'
+	HELP          = 'h',
+
+    --** This option switch sets the program version information. If this option
+    -- is chosen by the user cmd_parse will display the program version information
+    -- and exit with a zero error code.
+    VERSIONING    = 'v'
 
 public constant
 	NO_HELP       = -2
@@ -125,7 +131,6 @@ public enum
 	--  any earlier occurrences of it. See [[:cmd_parse]]
 	OPT_REV
 
-
 public constant
 	--**
 	--   The extra parameters on the cmd line, not associated with any
@@ -134,12 +139,12 @@ public constant
 
 -- Record fields in 'opts' argument.
 enum
-	SHORTNAME = 1,
-	LONGNAME = 2,
+	SHORTNAME   = 1,
+	LONGNAME    = 2,
 	DESCRIPTION = 3,
-	OPTIONS = 4,
-	CALLBACK = 5,
-	MAPNAME = 6
+	OPTIONS     = 4,
+	CALLBACK    = 5,
+	MAPNAME     = 6
 
 sequence pause_msg = ""
 
@@ -471,9 +476,7 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 			puts(1, "\n")
 		end if
 	end if
-
 end procedure
-
 
 --****
 -- === Routines
@@ -644,7 +647,6 @@ public procedure show_help(sequence opts, object add_help_rid=-1, sequence cmds 
 	local_help(opts, add_help_rid, cmds, 0)
 end procedure
 
----
 function find_opt(sequence opts, sequence opt_style, object cmd_text)
 	sequence opt_name
 	object opt_param
@@ -897,12 +899,13 @@ end function
 -- end function
 --
 -- option_definition = {
--- { "v", "verbose", "Verbose output",{NO_PARAMETER},routine_id("opt_verbose")},
--- { "h", "hash", "Calculate hash values",{NO_PARAMETER}, -1},
--- { "o", "output",  "Output filename",{MANDATORY, HAS_PARAMETER, ONCE} , 
---                                          routine_id("opt_output_filename") },
---     { "i", "import",  "An import path", {HAS_PARAMETER, MULTIPLE}, -1 },
---     {  0,  0, 0, 0, routine_id("opt_extras")}
+--     { "v", "verbose", "Verbose output",   { NO_PARAMETER }, routine_id("opt_verbose") },
+--     { "h", "hash",    "Calc hash values", { NO_PARAMETER }, -1 },
+--     { "o", "output",  "Output filename",  { MANDATORY, HAS_PARAMETER, ONCE } , 
+--                                             routine_id("opt_output_filename") },
+--     { "i", "import",  "An import path",   { HAS_PARAMETER, MULTIPLE}, -1 },
+--     { "v", "version", "Display version",  { VERSIONING, "myprog v1.0" } },
+--     {  0, 0, 0, 0, routine_id("opt_extras")}
 -- }
 --
 -- map:map opts = cmd_parse(option_definition)
@@ -1188,6 +1191,17 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				map:put(parsed_opts, opt[MAPNAME], param, map:APPEND)
 			end if
 		end if
+
+        if find(VERSIONING, opt[OPTIONS]) then
+            integer ver_pos = find(VERSIONING, opt[OPTIONS]) + 1
+            if length(opt[OPTIONS]) >= ver_pos then
+                printf(1, "%s\n", { opt[OPTIONS][ver_pos] })
+                abort(0)
+            else
+                crash("help options are incorrect,\n" &
+                    "VERSIONING was used with no version string supplied")
+            end if
+        end if
 	end while
 
 	-- Check that all mandatory options have been supplied.
