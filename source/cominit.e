@@ -227,9 +227,7 @@ export procedure handle_common_options(m:map opts)
 				TempWarningName = val
 			  	error:warning_file(TempWarningName)
 
-			case "v" then
-				fallthru
-			case "version" then
+			case "v", "version" then
 				show_banner()
 				if find("WIN32_GUI", OpDefines) then
 					if not batch_job then
