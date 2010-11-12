@@ -1,6 +1,12 @@
 namespace memconst
 
 --****
+-- == Memory Constants
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
+
+--****
 -- === Microsoft Windows Memory Protection Constants === @[microsoftsmemoryprotectionconstants]
 -- These constant names are taken right from Microsoft's Memory Protection constants.
 

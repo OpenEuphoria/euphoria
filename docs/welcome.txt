@@ -1,3 +1,4 @@
+%%output=quick_over
 == Quick Overview
 
 Welcome to the Euphoria programming language!
@@ -59,6 +60,7 @@ Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
 **D**eployment **S**oftware (//RDS//).
 There are now enthusiastic users around the world.
 
+%%output=intro
 == Introduction
 :<<LEVELTOC level=2 depth=4>>
 
@@ -208,9 +210,6 @@ end for
 -- this is a comment line
 -- above is a 'for loop' example
 </eucode>
-
-
-
 
 === Discover Euphoria
 

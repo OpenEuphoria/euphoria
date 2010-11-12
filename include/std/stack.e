@@ -1,13 +1,11 @@
--- (c) Copyright - See License.txt
---
-namespace stack
-
 --****
 -- == Stack
 --
--- **Page Contents**
---
 -- <<LEVELTOC level=2 depth=4>>
+
+-- (c) Copyright - See License.txt
+
+namespace stack
 
 include std/error.e
 include std/eumem.e

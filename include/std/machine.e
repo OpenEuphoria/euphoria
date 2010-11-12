@@ -1,5 +1,11 @@
--- (c) Copyright - See License.txt
+--****
+-- == Machine Level Access
 --
+-- <<LEVELTOC level=2 depth=4>>
+--
+
+-- (c) Copyright - See License.txt
+
 namespace machine
 
 public include std/memconst.e

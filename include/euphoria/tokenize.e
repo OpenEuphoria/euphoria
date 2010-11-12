@@ -1,6 +1,8 @@
 --****
 -- == Euphoria Source Tokenizer
 --
+-- <<LEVELTOC level=2 depth=4>>
+--
 -- Todo:
 --
 -- * Consider distinguish between full line comments and end of line comments
@@ -13,7 +15,6 @@ include keywords.e
 include std/io.e
 include std/types.e
 include std/filesys.e
-
 
 --****
 -- === tokenize return sequence key

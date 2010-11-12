@@ -1,4 +1,10 @@
-namespace http2
+--****
+-- == HTTP Client
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
+
+namespace http
 
 include std/socket.e as sock
 include std/net/url.e as url

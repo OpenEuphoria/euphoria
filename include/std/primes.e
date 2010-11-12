@@ -4,7 +4,6 @@ namespace primes
 
 --****
 -- == Prime Numbers
--- **Page Contents**
 --
 -- <<LEVELTOC level=2 depth=4>>
 

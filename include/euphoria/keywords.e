@@ -3,8 +3,14 @@
 --
 -- Keywords and routines built in to Euphoria.
 --
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 namespace keywords
+
+--****
+-- === Constants
+--
 
 --**
 -- Sequence of Euphoria keywords

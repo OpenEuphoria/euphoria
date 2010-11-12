@@ -4,7 +4,6 @@ namespace text
 
 --****
 -- == Text Manipulation
--- **Page Contents**
 --
 -- <<LEVELTOC level=2 depth=4>>
 --

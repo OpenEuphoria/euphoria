@@ -1,4 +1,4 @@
-
+%%output=install
 == Installation
 :<<LEVELTOC level=2 depth=4>>
 
@@ -36,6 +36,7 @@ executables into ##/usr/bin##, ##/usr/share/euphoria## and
 ##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
 
+%%output=post_install
 == Post Install
 :<<LEVELTOC level=2 depth=4>>
 
@@ -137,6 +138,7 @@ specified on that switch is processed before subsequent lines in the old file.
 same file are ignored.
 
 
+%%output=examples
 == Example Programs
 :<<LEVELTOC level=2 depth=4>>
 
@@ -386,6 +388,7 @@ Once you get used to it, you'll be developing programs //much// faster in Euphor
 could in Perl, Java, C/C~+~+ or any other language that we are aware of.
 
 
+%%output=creating_eu_progs
 == Creating Euphoria programs
 :<<LEVELTOC level=2 depth=4>>
 
@@ -512,6 +515,7 @@ from a console shell that you have opened from //Windows//. By "associating"
 files with ##euiw.exe##. You will then be able to double click a Euphoria source
 file to run it. The installer will perform this operation for you, if you wish.
 
+%%output=editing_source
 == Editing a Program
 
 You can use any text editor to edit a Euphoria program. However, Euphoria comes
@@ -552,6 +556,7 @@ distributed with Euphoria. There is a list of other editors at the
 [[wiki:Editors|OpenEuphoria web site]], many of which include extra
 features such as syntax highlighting.
 
+%%output=distributing
 == Distributing a Program
 
 Euphoria provides you with 4 distinct ways of distributing a program.
@@ -585,7 +590,7 @@ Finally, with the [[:Euphoria To C Translator]], you can translate your
 Euphoria program into C and then compile it with a C compiler to get an
 executable program.
 
-
+%%output=command_switches
 == Command line switches
 :<<LEVELTOC level=2 depth=4>>
 

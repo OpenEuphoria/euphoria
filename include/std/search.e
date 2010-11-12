@@ -4,7 +4,6 @@ namespace search
 
 --****
 -- == Searching
--- **Page Contents**
 --
 -- <<LEVELTOC level=2 depth=4>>
 

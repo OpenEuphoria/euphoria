@@ -4,7 +4,6 @@ namespace stats
 
 --****
 -- == Statistics
--- **Page Contents**
 --
 -- <<LEVELTOC level=2 depth=4>>
 --

@@ -4,7 +4,9 @@
 -- Machine Level Programming (386/486/Pentium)
 
 --****
--- === safe.e
+-- == Safe Machine Level Access
+--
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- This is a slower DEBUGGING VERSION of machine.e
 --

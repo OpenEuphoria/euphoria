@@ -1,3 +1,4 @@
+%%output=lang_def
 == Definition
 :<<LEVELTOC level=2 depth=4>>
 === Objects === @[predefined types]
@@ -1083,6 +1084,7 @@ with slightly different rules. Watch out for ##and## and ##or##, or
 The equals symbol ##'='## used in an [[:assignment statement]] is not an
 operator, it's just part of the syntax of the language.
 
+%%output=lang_decl
 == Declarations
 :<<LEVELTOC level=2 depth=4>>
 === Identifiers
@@ -2277,6 +2279,7 @@ If an identifier is declared global, public or export, but not override, and
 there is a built-in of the same name, Euphoria will not assume an override, and
 will choose the built-in. A warning will be generated whenever this happens.
 
+%%output=lang_assignment
 == Assignment statement
 :<<LEVELTOC level=2 depth=4>>
 An **assignment statement** assigns the value of an expression to
@@ -2388,6 +2391,7 @@ copy of itself on the right side.
 You cannot use assignment with operators while declaring a variable, because
 that variable is not initialized when you perform the assignment.
 
+%%output=lang_branch
 == Branching Statements
 :<<LEVELTOC level=2 depth=4>>
 @[then|] @[else|]
@@ -2914,7 +2918,7 @@ ifdef WIN then
 end ifdef
 </eucode>
 
-
+%%output=lang_loop
 == Loop statements
 :<<LEVELTOC level=2 depth=4>>
 
@@ -3086,6 +3090,7 @@ increment is specified then +1 is assumed. The limit and increment values are
 established only on entering the loop, and are not affected by anything that
 happens during the execution of the loop.
 
+%%output=lang_flow
 == Flow control statements
 :<<LEVELTOC level=2 depth=4>>
 
@@ -3490,6 +3495,7 @@ while 1 label "top" with entry do -- WRONG
 while 1 with entry label "top" do -- CORRECT
 </eucode>
 
+%%output=lang_short_circuit
 == Short-Circuit Evaluation == @[short-circuit]
 :<<LEVELTOC level=2 depth=4>>
 
@@ -3590,6 +3596,7 @@ at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used in
 if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
+%%output=lang_toplevel
 == Special Top-Level Statements == @[special statements]
 :<<LEVELTOC level=2 depth=4>>
 

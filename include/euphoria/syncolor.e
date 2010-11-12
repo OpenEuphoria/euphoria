@@ -13,6 +13,9 @@
 --		BUILTIN_COLOR
 --		 STRING_COLOR
 --		BRACKET_COLOR  (a sequence of colors)
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 namespace syncolor
 
@@ -50,6 +53,10 @@ enum
 	NEW_LINE
 
 sequence char_class
+
+--****
+-- === Routines
+--
 
 public procedure set_colors(sequence pColorList)
 	sequence lColorName

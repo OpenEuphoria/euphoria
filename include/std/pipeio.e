@@ -1,9 +1,11 @@
 namespace pipeio
 
 --****
--- === Pipe Input/Output
+-- == Pipe Input/Output
 --
--- ==== Notes
+-- <<LEVELTOC level=2 depth=4>>
+--
+-- === Notes
 -- Due to a bug, Euphoria does not handle STDERR properly
 -- STDERR cannot captured for Euphoria programs (other programs will work fully)
 -- The IO functions currently work with file handles, a future version might wrap them in streams

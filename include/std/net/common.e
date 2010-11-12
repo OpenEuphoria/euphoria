@@ -1,5 +1,8 @@
 --****
 -- == Common Internet Routines
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 -- Copyright (c) 2009 by OpenEuphoria Group.
 
@@ -10,7 +13,7 @@ include std/sequence.e as seq
 include std/get.e
 
 constant
-	DEFAULT_PORT=80,
+	DEFAULT_PORT = 80,
 	re_ip = re:new("""^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\:[0-9]+)?$"""),
 	re_http_url = re:new("""(http|https|ftp|ftps|gopher|gophers)://([^/]+)(/[^?]+)?(\?.*)?""", re:CASELESS),
 	re_mail_url = re:new("""(mailto):(([^@]+)@([^?]+))(\?.*)?""")
