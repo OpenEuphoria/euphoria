@@ -483,7 +483,7 @@ source-tarball : source
 	cp backend.ex   $(BUILDDIR)/$(SOURCEDIR)/source
 	cp *.e          $(BUILDDIR)/$(SOURCEDIR)/source
 	cp Makefile.gnu    $(BUILDDIR)/$(SOURCEDIR)/source
-	cp makefile.wat    $(BUILDDIR)/$(SOURCEDIR)/source
+	cp Makefile.wat    $(BUILDDIR)/$(SOURCEDIR)/source
 	cp configure    $(BUILDDIR)/$(SOURCEDIR)/source
 	cp ../include/euphoria.h $(BUILDDIR)/$(SOURCEDIR)/include
 	cp *.h          $(BUILDDIR)/$(SOURCEDIR)/source
