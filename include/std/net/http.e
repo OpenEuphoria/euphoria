@@ -268,6 +268,9 @@ function execute_request(sequence host, integer port, sequence request, integer 
 	return { headers, content }
 end function
 
+--****
+-- === Get/Post Routines
+
 --**
 -- Post data to a HTTP resource.
 --

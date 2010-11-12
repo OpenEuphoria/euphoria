@@ -67,6 +67,10 @@ constant next  = { 1, 1, 1, 0 } --# increment by 3 every 4 iterations
 constant nc3   = { 3, 1, 2 }    --# 321321321321...
 constant ldrop = { 2, 1, 1 }    --# to drop len by 4 every 3 output
 
+--****
+-- === Routines
+--
+
 --**
 -- Encode to base64  (See also RFC 2045)
 --
