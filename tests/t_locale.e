@@ -8,7 +8,6 @@ end ifdef
 include std/unittest.e
 include std/mathcons.e
 
-ifdef not DOS32 then
 sequence locale
 
 locale = "en_US"
@@ -17,6 +16,7 @@ locale = "en_US"
 integer ix = set( "" )
 sequence native_locale = l:get()
 ix = find( '.', native_locale )
+
 sequence encoding
 if ix then
 	encoding = native_locale[ix..$]
@@ -24,9 +24,17 @@ else
 	encoding = ""
 end if
 
+
 test_true("set()", l:set("C"))
 test_equal("set/get", lcc:decanonical("C"), lcc:decanonical(l:get()))
-if l:set(locale & encoding) then
+
+integer has_locale = l:set(locale & encoding)
+if not has_locale then
+	encoding = ".US-ASCII"
+	has_locale = l:set(locale & ".US-ASCII")
+end if
+
+if has_locale then
 	test_equal("set/get en_US", lcc:decanonical(locale & encoding), lcc:decanonical(l:get()))
 	test_equal("money", "$1,020.50", l:money(1020.50))
 	test_equal("number", "1,020.50", l:number(1020.5))
@@ -97,8 +105,5 @@ test_equal("translate() #9", "This is an example of some \n  translation text th
 
 test_equal("trsprintf #1", "Hola, Bob!",  trsprintf("greeting", {       "hello", "Bob"}))
 test_equal("trsprintf #2", "hello, Bob!", trsprintf("greeting", {"__" & "hello", "Bob"}))
-
-
-end ifdef
 
 test_report()
