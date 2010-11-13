@@ -1116,7 +1116,6 @@ static object user_allocate(object x)
 	nbytes = get_int(x);
 	addr = EMalloc(nbytes);
 #ifdef EUNIX
-#ifndef EBSD
 	// make it executable
 	gp1 = pagesize-1;
 	first = (unsigned)addr & (~gp1); // start of page
@@ -1124,7 +1123,6 @@ static object user_allocate(object x)
 	last = last | gp1; // end of page
 	mprotect((void *)first, last - first + 1,
 			 PROT_READ+PROT_WRITE+PROT_EXEC);
-#endif
 #endif
 
 	return MAKE_UINT(addr);

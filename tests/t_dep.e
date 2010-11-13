@@ -62,13 +62,19 @@ atom rexec, rdata
 atom x,y
 object void
 
+integer use_stdcall
+ifdef UNIX then
+	use_stdcall = 0
+elsedef
+	use_stdcall = 1
+end ifdef
 
 -- machine code taken from callmach.ex
 multiply_code = {
    -- int argument is at stack offset +4, double is at +8 
    #DB, #44, #24, #04,        -- fild  dword ptr +4[esp]
    #DC, #4C, #24, #08,        -- fmul  qword ptr +8[esp]
-   #C2, #0C * (platform() != LINUX), #00  -- ret C -- pop 12 (or 0) bytes 
+   #C2, #0C * use_stdcall, #00  -- ret C -- pop 12 (or 0) bytes 
 					   -- off the stack
     }
 
