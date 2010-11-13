@@ -1993,35 +1993,11 @@ public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 --     [[:replace]], [[:remove_all]]
 
 public function replace_all(sequence source, object olddata, object newdata)
-	integer startpos
-	integer endpos
-	integer adj_old
-	integer adj_new
-	
-	if atom(olddata) then
-		olddata = {olddata} -- match_from requires a sequence.
-	end if
-
 	if length(olddata) = 0 then
 		return source
+	else
+		return match_replace(olddata, source, newdata)
 	end if
-	
-	if atom(newdata) then
-		newdata = {newdata}
-	end if
-
-	adj_old = length(olddata) - 1
-	adj_new = length(newdata)
-	endpos = 1
-	while startpos != 0 with entry do
-		endpos = startpos + adj_old
-		source = replace(source, newdata, startpos, endpos)
-		endpos = startpos + adj_new
-	entry
-		startpos = match_from(olddata, source, endpos)
-	end while
-
-	return source
 end function
 
 --**
