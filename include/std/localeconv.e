@@ -795,7 +795,7 @@ end ifdef
 
 public function canonical(sequence new_locale)
 	integer w, ws, p, n
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if find('.', new_locale) then
 			new_locale = new_locale[1..find('.', new_locale)-1]
 		end if
@@ -814,7 +814,7 @@ public function canonical(sequence new_locale)
 		return new_locale
 	end if
 	new_locale = locale_canonical[n]
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if find('.', new_locale) then
 			new_locale = new_locale[1..find('.', new_locale)-1]
 		end if
@@ -836,7 +836,7 @@ end function
 
 public function decanonical(sequence new_locale)
 	integer w, ws, p, n
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if find('.', new_locale) then
 			new_locale = new_locale[1..find('.', new_locale)-1]
 		end if
@@ -855,7 +855,7 @@ public function decanonical(sequence new_locale)
 		return new_locale
 	end if
 	new_locale = platform_locale[n]
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if find('.', new_locale) then
 			new_locale = new_locale[1..find('.', new_locale)-1]
 		end if
@@ -868,7 +868,7 @@ end function
 
 public function canon2win(sequence new_locale)
 	integer w
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if find('.', new_locale) then
 			new_locale = new_locale[1..find('.', new_locale)-1]
 		end if
@@ -879,7 +879,7 @@ public function canon2win(sequence new_locale)
 		return "C"
 	end if
 	new_locale = w32_names[w]
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if find('.', new_locale) then
 			new_locale = new_locale[1..find('.', new_locale)-1]
 		end if

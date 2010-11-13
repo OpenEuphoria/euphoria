@@ -26,33 +26,36 @@ ifdef UNIX then
 end ifdef
 
 ifdef SUNOS then
-	test_equal("SunOS test", 5, platform())
+	test_equal("SunOS test", SUNOS, platform())
 end ifdef
 
 ifdef OSX then
-    test_equal("OSX test", 4, platform())
+    test_equal("OSX test", OSX, platform())
 end ifdef
 
 ifdef FREEBSD then
-	test_equal("FREEBSD test", 8, platform())
+	test_equal("FREEBSD test", FREEBSD, platform())
 end ifdef
 
 ifdef LINUX then
-	test_equal("LINUX test", 3, platform())
+	test_equal("LINUX test", LINUX, platform())
 end ifdef
 
-ifdef WIN32 then
-	test_equal("WIN32 test", 2, platform())
+ifdef WINDOWS then
+	test_equal("WIN32 test", WIN32, platform())
 end ifdef
 
 ifdef DOS32 then
 	test_equal("DOS32 test", 1, platform())
 end ifdef
 
-ifdef EU40000 then
-    test_pass("EU40000")
+
+
+
+ifdef EU40001 then
+    test_pass("EU40001")
 elsedef
-    test_fail("EU40000")
+    test_fail("EU40001")
 end ifdef
 
 ifdef EU400 then

@@ -9,10 +9,10 @@ elsedef
 	without type_check
 end ifdef
 
-ifdef EU40000 then
+ifdef not BITS32 and not BITS64 then
 	with define X86
 	with define LITTLE_ENDIAN
-	with define ARCH32
+	with define BITS32
 end ifdef
 
 include std/os.e
@@ -22,7 +22,7 @@ include std/io.e
 constant M_DEFINES      = 98
 
 public constant
-	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
+	DEFAULT_EXTS = { ".ex", ".exw", ".ex" }
 
 -- For cross-translation:
 public integer
@@ -36,7 +36,7 @@ public integer
 	INETBSD  = 0, TNETBSD  = 0
 
 -- operating system:
-ifdef WIN32 then
+ifdef WINDOWS then
 	IWINDOWS = 1
 	TWINDOWS = 1
 
@@ -130,7 +130,7 @@ export type enum byte_sex
 end type
 export constant byte_sex_defines = { "BIG_ENDIAN", "LITTLE_ENDIAN" }
 
-export constant word_size_defines = repeat(0,31) & {"ARCH32"} & repeat(0,31) & {"ARCH64"}
+export constant word_size_defines = repeat(0,31) & {"BITS32"} & repeat(0,31) & {"BITS64"}
 
 export integer iset   = 0
 export integer endian = 0
@@ -164,9 +164,9 @@ public function GetPlatformDefines(integer for_translator = 0)
 		end if
 		
 		if find(word_size,{32,64})=0 then
-			ifdef ARCH32 then
+			ifdef BITS32 then
 				word_size = 32
-			elsifdef ARCH64 then
+			elsifdef BITS64 then
 				word_size = 64
 			end ifdef
 		end if
@@ -191,17 +191,28 @@ public function GetPlatformDefines(integer for_translator = 0)
 		if endian then
 			local_defines &= { byte_sex_defines[endian] }
 		end if
+		puts(1,"Building defines from options\n")		
 		
 	else
-	
-		local_defines &= machine_func(M_DEFINES,{})
-		
+		ifdef EU4_00_00 or ARCH32 then
+			local_defines &= { "X86", "LITTLE_ENDIAN", "BITS32" }
+			--puts(1, "Building defines because this is 4.0.0.\n")
+		elsedef
+			local_defines &= machine_func(M_DEFINES,{})
+			--puts(1,"Building defines using machine_call\n")		
+		end ifdef
 	end if
 	
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
 		local_defines &= {"WINDOWS" }
-		if find( "ARCH32", local_defines ) then
-			local_defines &= { "WIN32" }
+		
+		--puts(1,"__LOCAL DEFINES___" & 10)
+		for i = 1 to length(local_defines) do
+			--puts(1, local_defines[i] & 10)
+		end for
+		--puts(1,"__END__\n")
+		if find( "BITS32", local_defines ) != 0 then
+			local_defines &= { "WIN32" }			
 		end if
 		sequence lcmds = command_line()
 		
@@ -245,9 +256,9 @@ public function GetPlatformDefines(integer for_translator = 0)
 				sk = 0
 			end if
 			if sk = 2 then
-				local_defines &= { "WIN32_GUI" }
+				local_defines &= { "WIN32_GUI", "GUI" }
 			elsif sk = 3 then
-				local_defines &= { "WIN32_CONSOLE" }
+				local_defines &= { "WIN32_CONSOLE", "CONSOLE" }
 			else
 				local_defines &= { "WIN32_UNKNOWN" }
 			end if
@@ -265,10 +276,8 @@ public function GetPlatformDefines(integer for_translator = 0)
 		local_defines &= { "UNIX", "BSD", "NETBSD"}
 	elsif (IBSD and not for_translator) or (TBSD and for_translator) then
 		local_defines &= {"UNIX", "BSD", "FREEBSD"}
-	end if
-
-
-		
+	end if	
+	
 	-- So the translator knows what to strip from defines if translating
 	-- to a different platform
 	return { "_PLAT_START" } & local_defines & { "_PLAT_STOP" }

@@ -364,7 +364,7 @@ end function
 --
 ------------------------------------------------------------------------------------------
 
-ifdef WIN32 then
+ifdef WINDOWS then
 constant
 	lib = open_dll("MSVCRT.DLL"),
 	lib2 = open_dll("KERNEL32.DLL"),
@@ -502,7 +502,7 @@ public function set(sequence new_locale)
 	end if
 
 	ign = (ign != NULL)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if ign then
 			current_locale = new_locale
 		end if
@@ -529,7 +529,7 @@ public function get()
 	end if
 
 	r = peek_string(p)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if equal(lcc:decanonical(r), lcc:decanonical(current_locale)) then
 			return current_locale
 		end if
@@ -567,7 +567,7 @@ public function money(object amount)
 			pResult = allocate(4 * 160)
 			pTmp = allocate_string("%n")
 			size = c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
-		elsifdef WIN32 then
+		elsifdef WINDOWS then
 			pResult = allocate(4 * 160)
 			pTmp = allocate_string(sprintf("%.8f", {amount}))
 			size = c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
@@ -619,7 +619,7 @@ public function number(object num)
 			return text:format("[,,]", num)
 		end if
 		
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		atom lpFormat
 		if f_strfnum != -1 then
 			pResult = allocate(4 * 160)

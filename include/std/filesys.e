@@ -30,7 +30,7 @@ constant
 	M_CURRENT_DIR = 23,
 	M_CHDIR       = 63
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant lib = open_dll("kernel32")
 
 elsifdef LINUX then
@@ -44,7 +44,7 @@ elsifdef OSX then
 
 end ifdef
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
 		C_BOOL)
 	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
@@ -618,7 +618,7 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 
 	ifdef UNIX then
 		ret = not c_func(xCreateDirectory, {pname, mode})
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		ret = c_func(xCreateDirectory, {pname, 0})
 		mode = mode -- get rid of not used warning
 	end ifdef
@@ -786,7 +786,7 @@ public function clear_directory(sequence path, integer recurse = 1)
 		return 0 -- Nothing specified to clear. Not safe to assume anything.
 		         -- (btw, not allowed to clear root directory)
 	end if
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if length(path) = 2 then
 			if path[2] = ':' then
 				return 0 -- nothing specified to delete
@@ -869,7 +869,7 @@ public function remove_directory(sequence dir_name, integer force=0)
 		            -- (not allowed to delete root directory btw)
 	end if
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if length(dir_name) = 2 then
 			if dir_name[2] = ':' then
 				return 0 -- nothing specified to delete
@@ -1510,7 +1510,7 @@ public function file_exists(object name)
 		return 0
 	end if
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom pName = allocate_string(name)
 		atom r = c_func(xGetFileAttributes, {pName})
 		free(pName)
@@ -1581,7 +1581,7 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 		end if
 	end if
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom psrc = allocate_string(src)
 		atom pdest = allocate_string(dest)
 		integer success = c_func(xCopyFile, {psrc, pdest, not overwrite})
@@ -1993,7 +1993,7 @@ public function disk_metrics(object disk_path)
 	atom path_addr = 0
 	atom metric_addr = 0
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if sequence(disk_path) then 
 			path_addr = allocate_string(disk_path) 
 		else 
@@ -2079,7 +2079,7 @@ end function
 public function disk_size(object disk_path) 
 	sequence disk_size = {0,0,0, disk_path}
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		sequence result 
 		atom bytes_per_cluster
 		
@@ -2292,7 +2292,7 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 		if atom(envtmp) then
 			envtmp = getenv("TMP")
 		end if
-		ifdef WIN32 then			
+		ifdef WINDOWS then			
 			if atom(envtmp) then
 				envtmp = "C:\\temp\\"
 			end if

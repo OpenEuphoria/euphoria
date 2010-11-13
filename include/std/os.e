@@ -106,7 +106,7 @@ public function get_pid()
 	end ifdef
 end function
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant M_UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
 elsifdef UNIX then
 	constant M_UNAME = 76
@@ -146,7 +146,7 @@ end ifdef
 -- On non Unix platforms, calling the machine_func() directly returns 0.
 
 public function uname()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom buf
 		sequence sbuf
 		integer maj, mine, build, plat
@@ -225,7 +225,7 @@ end function
 -- An **integer**, 1 if host system is a newer Windows (NT/2K/XP/Vista), else 0.
 
 public function is_win_nt()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		sequence s
 		s = uname()
 		return equal(s[1], "WinNT")
@@ -331,7 +331,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  ifdef WIN32 then
+--  ifdef WINDOWS then
 --     -- call system Beep routine
 --     err = c_func(Beep, {0,0})
 -- elsedef

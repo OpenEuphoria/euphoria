@@ -2519,9 +2519,8 @@ but ##EU5## will be defined.
 
 * **WIN32_CONSOLE** - Platform is Windows and is being executed
   with the Console version of the interpreter (eui.exe)
-* **WIN32_GUI** - Platform is Windows and is being executed with
+* **WIN32_GUI**     - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
-* **WIN32** - Platform is Windows (GUI or Console)
 * **WINDOWS** - Platform is any platform that was derived from Windows
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
@@ -2530,8 +2529,16 @@ but ##EU5## will be defined.
 * **OPENBSD** - Platform is OpenBSD
 * **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, SunOS and OS X)
 * **UNIX** - Platform is any Unix
-* **INTEL32** - The computer is an Intel compatible 32-bit processor or running in 32-bit mode.
-* **LITTLE_ENDIAN** - The computer stores integers in little endian format
+* **BITS32** - The computer is using a 32-bit processor.
+* **BITS64** - The computer is using a 64-bit processor.
+* **LITTLE_ENDIAN** - The computer stores integers in little endian format.  Under translation
+	this will not be set on bi-endian computers.
+* **BIG_ENDIAN** - The computer stores integers in big endian format.  Under translation
+	this will not be set on bi-endian computers.
+* **X86**    - The computer can use the instruction set found in intel 386 CPUs.
+* **ARM**    - The computer can use the instruction set found in ARM CPUs.
+* **X86_64** - The computer can use the instruction set found in X86_64 platform CPUs.
+* **ITANIUM**- The computer can use the instruction set found in ITANIUM platform CPUs.	
 
 ==== Application Definitions
 
@@ -2623,7 +2630,7 @@ applications.
 
 You should surround code that is not portable with ##ifdef## like:
 <eucode>
-ifdef WIN32 then
+ifdef WINDOWS then
    -- Windows specific code.
 elsedef
    include std/error.e
@@ -2642,7 +2649,7 @@ end ifdef
 
 -- define exported and public constants and procedures for
 -- OSX as well
-ifdef WIN32 or OSX then
+ifdef WINDOWS or OSX then
     -- OSX is not supported but we define public symbols for it anyhow.
 </eucode>
 
@@ -2667,7 +2674,7 @@ end for
 sequence os_name
 ifdef UNIX then
     include unix_ftp.e
-elsifdef WIN32 then
+elsifdef WINDOWS then
     include win32_ftp.e
 elsedef
     crash("Operating system is not supported")

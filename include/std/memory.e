@@ -870,7 +870,7 @@ with warning
 --**
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return (DEP_really_works and use_DEP)
 	end ifdef
 
@@ -880,7 +880,7 @@ end function
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if dep_works() then
 			c_func(VirtualFree_rid, { addr, size*wordsize, MEM_RELEASE })
 		else

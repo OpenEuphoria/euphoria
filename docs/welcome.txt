@@ -101,7 +101,7 @@ Euphoria programs that you write.
 
 === Requirements
 
-To run the //WIN32// version of Euphoria, you need Windows 95 or any later
+To run the //Windows// version of Euphoria, you need Windows 95 or any later
 version of Windows.  It runs fine on XP and Vista.
 
 To run the //Linux// version of Euphoria you need any reasonably up-to-date

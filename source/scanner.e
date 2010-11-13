@@ -586,7 +586,7 @@ function same_name(sequence a, sequence b)
 		if length(a) != length(b) then
 			return FALSE
 		else
-			ifdef WIN32 then
+			ifdef WINDOWS then
 				return win_compare(a,b)
 			elsedef
 				return dos_compare(a,b)

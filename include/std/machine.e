@@ -447,7 +447,7 @@ end function
 -- [[:machine_func]]
 
 
-ifdef WIN32 then
+ifdef WINDOWS then
 
 	atom kernel_dll, memDLL_id, 
 		VirtualAlloc_rid, 
@@ -489,7 +489,7 @@ elsifdef UNIX then
 	public constant PAGE_SIZE = c_func( getpagesize_rid, {} )
 end ifdef
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	function VirtualAlloc( atom addr, atom size, atom allocation_type, atom protect_ )
 		atom r1
 		r1 = c_func( VirtualAlloc_rid, {addr, size, allocation_type, protect_ } )
@@ -591,7 +591,7 @@ public type std_library_address( atom addr )
 	end ifdef
 end type
 
-ifdef WIN32 then
+ifdef WINDOWS then
 std_library_address oldprotptr = allocate_data(4)
 end ifdef
 
@@ -658,7 +658,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		first_protection = PAGE_READ_WRITE
 	end if
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if dep_works() then
 			iaddr = eu:c_func(VirtualAlloc_rid, 
 				{ 0, size+BORDER_SPACE*2, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
@@ -695,7 +695,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 	end switch
 	
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		ifdef SAFE then
 			-- here we can take away write access
 			-- from true_protection if protection doesn't have it.

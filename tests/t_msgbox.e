@@ -1,6 +1,6 @@
 include std/unittest.e
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	include std/win32/msgbox.e
 end ifdef
 

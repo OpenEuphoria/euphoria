@@ -25,7 +25,7 @@ elsifdef FREEBSD or SUNOS or OPENBSD then
 elsifdef OSX then
 	constant gmtime_ = define_c_func(open_dll("libc.dylib"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_func(open_dll("libc.dylib"), "time", {C_POINTER}, C_INT)
-elsifdef WIN32 then
+elsifdef WINDOWS then
 	constant gmtime_ = define_c_func(open_dll("msvcrt.dll"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_proc(open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {C_POINTER})
 end ifdef
@@ -33,7 +33,7 @@ end ifdef
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
 
 function time()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom ptra, valhi, vallow, deltahi, deltalow
 		deltahi = 27111902
 		deltalow = 3577643008

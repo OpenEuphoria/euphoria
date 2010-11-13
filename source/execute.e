@@ -35,7 +35,7 @@ include scanner.e
 include mode.e as mode
 include intinit.e
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	include std/machine.e as dep
 end ifdef
 
@@ -434,7 +434,7 @@ procedure trace_back(sequence msg)
 					exit
 				else
 					both_puts("^^^ call-back from ")
-					ifdef WIN32 then
+					ifdef WINDOWS then
 						both_puts("Windows\n")
 					elsedef
 						both_puts("external program\n")
@@ -577,7 +577,7 @@ end procedure
 
 procedure quit_after_error()
 -- final termination
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if not batch_job then
 			puts(2, "\nPress Enter...\n")
 			getc(0)
@@ -3384,7 +3384,7 @@ constant
 	M_ALLOC = 16
 
 function alloc(integer size, integer depq)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if depq then
 			return dep:allocate_protect(size, 1, PAGE_EXECUTE_READWRITE)
 		end if
@@ -3392,7 +3392,7 @@ function alloc(integer size, integer depq)
 	return machine_func(M_ALLOC, size)
 end function
 function callback(object a, integer depq)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if depq then
 			-- this is necessary because machine_func() doesn't
 			-- handle the DEP support required to make call_back()

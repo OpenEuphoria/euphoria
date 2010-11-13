@@ -2634,8 +2634,10 @@ static object get_byte_sex() {
 	value = 0xDEADBEEF;
 	if (*vpc == 0xDE) {// big endian
 		return NewString("BIG_ENDIAN");
-	} else { 		
+	} else if (*vpc == 0xEF) { 		
 		return NewString("LITTLE_ENDIAN");
+	} else {
+		RTFatal("This computer has no known byte sex.");
 	}
 }
 
@@ -2643,19 +2645,26 @@ static object get_byte_sex() {
 object get_machine_architecture_defines() {
 	struct s1 * arch_defines;
 #if ARCH==x86
-	arch_defines = NewS1(3);	
-	arch_defines->base[1] = NewString("ARCH32");
-	arch_defines->base[2] = NewString("LITTLE_ENDIAN");
-	arch_defines->base[3] = NewString("X86");
+	arch_defines = NewS1(4);	
+	arch_defines->base[2] = NewString("BITS32");
+	arch_defines->base[3] = NewString("LITTLE_ENDIAN");
+	arch_defines->base[4] = NewString("X86");
 #elif ARCH==x86_64
-	arch_defines = NewS1(2);	
-	arch_defines->base[1] = NewString("ARCH32");
-	arch_defines->base[2] = NewString("X86_64");	
+	arch_defines = NewS1(3);
+	arch_defines->base[2] = NewString("BITS64");
+	arch_defines->base[3] = NewString("X86_64");	
 #elif ARCH==ARM
-	arch_defines = NewS1(3);	
-	arch_defines->base[1] = NewString("ARCH32");
-	arch_defines->base[2] = NewString("LITTLE_ENDIAN");
-	arch_defines->base[2] = NewString("ARM");	
+	arch_defines = NewS1(4);	
+	arch_defines->base[2] = NewString("BITS32");
+	arch_defines->base[3] = NewString("LITTLE_ENDIAN");
+	arch_defines->base[4] = NewString("ARM");
+#else
+	arch_defines = NewS1(0);
+#endif
+#ifdef __GNUC__
+	arch_defines->base[1] = NewString("__GNUC__");
+#elif EWATCOM
+	arch_defines->base[1] = NewString("__WATCOMC__");	
 #endif
 	return MAKE_SEQ(arch_defines);
 }
@@ -2753,7 +2762,7 @@ object machine(object opcode, object x)
 				break;
 			case M_FREE:
 				addr = get_pos_int("free", x);
-				if (addr != NULL) {
+				if (addr != 0) {
 					EFree((char *)addr);
 				}
 				return ATOM_0;

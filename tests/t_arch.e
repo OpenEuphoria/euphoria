@@ -1,10 +1,10 @@
 include std/unittest.e
 include std/machine.e
 
-ifdef ARCH32 or ARCH64 then
-	test_pass("ARCH symbol")
+ifdef BITS32 or BITS64 then
+	test_pass("BITS symbol")
 elsedef
-	test_fail("ARCH symbol")
+	test_fail("BITS symbol")
 end ifdef
 
 ifdef X86 or X86_64 or ARM or ITANIUM then

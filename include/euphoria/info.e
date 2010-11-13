@@ -29,7 +29,7 @@ constant version_info = machine_func(M_EU_INFO, {})
 public function platform_name()
 ifdef DOS32 then
 	return "DOS"
-elsifdef WIN32 then
+elsifdef WINDOWS then
 	return "Windows"
 elsifdef LINUX then
 	return "Linux"

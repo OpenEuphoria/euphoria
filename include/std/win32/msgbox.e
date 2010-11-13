@@ -93,7 +93,7 @@ public constant
 atom lib
 integer msgbox_id, get_active_id
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	lib = open_dll("user32.dll")
 	msgbox_id = define_c_func(lib, "MessageBoxA", {C_UINT, C_POINTER, 
 												   C_POINTER, C_UINT}, C_INT)

@@ -14,7 +14,7 @@ include std/text.e
 include std/sequence.e
 include std/error.e
 public include std/unicode.e
-ifdef EU40000 then
+ifdef EU4_00_00 then
 	with define LITTLE_ENDIAN
 end ifdef
 constant M_SEEK  = 19,
@@ -1287,7 +1287,7 @@ end type
 -- host endian constants meaning
 -- you don't need to change
 -- the byte/sex.
-ifdef LITTLE_ENDIAN or EU40000 then
+ifdef LITTLE_ENDIAN or EU4_00_00 then
 	--** 16-bit host endian
 	constant UTF_16HE = UTF_16LE,
 	--** 32-bit host endian

@@ -16,7 +16,7 @@ include std/dll.e
 include std/machine.e
 include std/error.e
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant
 		kernel32 = open_dll("kernel32.dll"),
 		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
@@ -94,7 +94,7 @@ atom os_errno = 0
 
 -- Common functions
 function get_errno()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return c_func(iGetLastError,{})
 	elsedef
 		return peek4u(ERRNO)
@@ -134,7 +134,7 @@ end type
 public function close(atom fd)
 	atom ret
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		ret=c_func(iCloseHandle,{fd})
 	elsedef
 		ret=c_func(CLOSE, {fd})
@@ -170,7 +170,7 @@ public procedure kill(process p, atom signal=15)
 	ret=close(p[STDERR])
 	
 	--Error may result, but it is usually just because the process has already ended.
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		--Not how to handle "signal", so its ignored on Windows for now
 		ret=c_func(iTerminateProcess,{p[PID],signal and 0})
 	elsedef
@@ -182,7 +182,7 @@ function os_pipe()
 	sequence handles
 	atom ret
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom psaAttrib, phWriteToPipe, phReadFromPipe
 		
 		psaAttrib = allocate(SA_SIZE+2*4)
@@ -231,7 +231,7 @@ public function read(atom fd, integer bytes)
 		ret, ReadCount,
 		buf = allocate(bytes)
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom pReadCount=allocate(4)
 		ret = c_func(iReadFile,{fd,buf,bytes,pReadCount,0})
 		ReadCount=peek4u(pReadCount)
@@ -272,7 +272,7 @@ public function write(atom fd, sequence str)
 		buf = allocate_string(str),
 		ret,WrittenCount
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom pWrittenCount=allocate(4)
 		ret=c_func(iWriteFile,{fd,buf,length(str),pWrittenCount,0})
 		WrittenCount=peek4u(pWrittenCount)
@@ -311,7 +311,7 @@ public function error_no()
 	return os_errno
 end function
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	--WIN32-specific functions
 	function GetStdHandle(atom device)
 		return c_func(iGetStdHandle,{device})

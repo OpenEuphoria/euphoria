@@ -2518,7 +2518,7 @@ public function db_compress()
 	-- rename database as .tmp
 	ifdef UNIX then
 		system( "mv \"" & new_path & "\" \"" & old_path & '"', 2)
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		system("ren \"" & new_path & "\" \"" & filename(old_path) & '"', 2)
 	end ifdef
 
@@ -2528,7 +2528,7 @@ public function db_compress()
 		-- failed, move it back to .edb
 		ifdef UNIX then
 			system( "mv \"" & old_path & "\" \"" & new_path & '"', 2)
-		elsifdef WIN32 then
+		elsifdef WINDOWS then
 			system("ren \"" & old_path & "\" \"" & filename(new_path) & '"', 2)
 		end ifdef
 

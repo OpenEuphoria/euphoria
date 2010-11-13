@@ -257,7 +257,7 @@ public constant ERR_WOULDBLOCK          = -40
 -- the [[:create]] function.
 --
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	public constant
 		--**
 		-- Address family is unspecified

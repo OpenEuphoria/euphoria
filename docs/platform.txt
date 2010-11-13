@@ -6,11 +6,11 @@
 
 ==== Architecture
 
-Currently all EUPHORIA implementations all run on the same architecture: INTEL32.  For this reason, there is always a symbol defined 'INTEL32.'  Machine code that will be executed in memory is INTEL32 specific and you should mark it with "ifdef INTEL32."
+Currently all EUPHORIA implementations all run on the same architecture: X86.  For this reason, there is always a symbol defined 'X86.'  Machine code that will be executed in memory is X86 specific and you should mark it with "ifdef X86."
 
 <eucode>
 atom f1 = allocate(24)
-ifdef INTEL32 then
+ifdef X86 then
     --warning machine code ahead!
     global constant sin_cos_asm = allocate_code(
     {
@@ -25,7 +25,7 @@ ifdef INTEL32 then
 end ifdef
 </eucode>
 
-The code will only run on a 386 compatible processor (INTEL32).  It was found in testing it was faster to use the support routines ##sin## and ##cos##.
+The code will only run on a 386 compatible processor (X86).  It was found in testing it was faster to use the support routines ##sin## and ##cos##.
 
 ==== Endianness
 
@@ -129,7 +129,7 @@ end switch
 Another way is to use parse-time evaluation using ifdefs.  
 
 <eucode>
-ifdef WIN32 then
+ifdef WINDOWS then
   -- Windows code
 elsifdef LINUX then
   -- LINUX code
@@ -186,7 +186,7 @@ add_code = {
 
 This is machine code to be put into memory as an example from ##demo/callmach.ex##.  Here
 if ##platform() = WIN32## is true, then the code will pop 8 bytes off of the stack, if not
-it will pop 0 bytes off of the stack.  This has to be done because of where the function call conventions are implemented in the various compilers.  We use Watcom C for WIN32 and GCC for the others.  Now if the programmer had put an unexistent symbol, such as ARCH64, the parser would stop, point out the error, and I the programmer would then fix it.
+it will pop 0 bytes off of the stack.  This has to be done because of where the function call conventions are implemented in the various compilers.  We use Watcom C for WIN32 and GCC for the others.  Now if the programmer had put an unexistent symbol, such as BITS64, the parser would stop, point out the error, and I the programmer would then fix it.
 
 
 === The Discontinued DOS32 Platform

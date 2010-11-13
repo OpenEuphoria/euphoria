@@ -30,7 +30,7 @@ export constant EGPM = 0     -- GPM mouse support on Linux
 export integer con -- Windows console option for BIND
 
 export sequence version_name
-ifdef WIN32 then
+ifdef WINDOWS then
 	version_name = "WIN32"
 elsifdef LINUX then
 	version_name = "Linux"

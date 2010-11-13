@@ -168,7 +168,7 @@ end procedure
 export procedure Cleanup(integer status)
 	integer w, show_error = 0
 
-	ifdef WIN32 or UNIX then
+	ifdef WINDOWS or UNIX then
 		show_error = 1
 	end ifdef
 	if src_file >= 0 then
