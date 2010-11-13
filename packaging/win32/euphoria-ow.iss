@@ -189,7 +189,7 @@ Root: HKCR; Subkey: ".err"; ValueType: string; ValueName: ""; ValueData: "EUErro
 Root: HKCR; Subkey: "EUErrorFile"; ValueType: string; ValueName: ""; ValueData: "Euphoria Error File"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUErrorFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euinc.ico,1"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUErrorFile\shell\debug"; ValueType: string; ValueName: ""; ValueData: "debug what created this file"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUErrorFile\shell\debug\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euiw.exe"" ""{app}\bin\ed.ex"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUErrorFile\shell\debug\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""{app}\bin\ed.ex"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 [Messages]
 FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex and .exw programs by double-clicking them, or (after reboot) by typing:%n     eui filename.ex%nor%n     euiw filename.ex/euw%non a command-line.
