@@ -2604,13 +2604,9 @@ object CallBack(object x)
 	addr = (unsigned)copy_addr;
 	/* Make memory executable. */
 #ifdef EUNIX
-#ifndef EBSD
 	int er;
-	if ((er = mprotect((void*)(addr & ~(pagesize-1)),  // start of page
-			 pagesize,  // one page
-			 PROT_READ+PROT_WRITE+PROT_EXEC)) != 0)
+	if ((er = mprotect((void*)(addr), CALLBACK_SIZE, PROT_READ+PROT_WRITE+PROT_EXEC)) != 0)
 		RTFatal("Internal error: CallBack mprotect failed (%d).", er);
-#endif
 #endif	
 
 	/* Return new address. */
@@ -2708,12 +2704,6 @@ object eu_uname()
 
 #ifdef EWINDOWS
 long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p) {
-	is_batch = console_application();
-#ifdef ERUNTIME
-	RTFatal("A machine-level exception occurred during execution of your program");
-#else
-	RTFatal("A machine-level exception occurred during execution of this statement");
-#endif
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif
@@ -2721,7 +2711,9 @@ long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p) {
 void Machine_Handler(int sig_no)
 /* illegal instruction, segmentation violation */
 {
-	UNUSED( sig_no );
+#ifdef WINDOWS
+	is_batch = console_application();
+#endif
 #ifdef ERUNTIME
 	RTFatal("A machine-level exception occurred during execution of your program");
 #else
