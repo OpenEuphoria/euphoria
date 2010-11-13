@@ -35,3 +35,109 @@ executables into ##/usr/bin##, ##/usr/share/euphoria## and
 ##shroud## and ##bind## are also installed.  It will also create
 ##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
+
+%%output=post_install
+== Post Install
+
+When installed, the ##euphoria## directory will look something like this:
+
+* ##\euphoria##
+** readme.doc
+** readme.htm
+** License.txt
+** ##\bin## - Interpreters ##eui.exe## and ##euiw.exe##. Translator
+    ##euc.exe##. Or on //Linux/FreeBSD//,
+    Interpreter ##eui## and Translator ##euc##. There are also utility
+    programs such as ##ed.bat##, ##guru.bat##, etc.
+** ##\include## - standard include files
+*** ##\include\std## - the standard Euphoria library include files, e.g.
+     ##file.e##, ##sequence.e##
+** ##\source## - the complete source code (interpreter, translator, binder)
+** ##\docs## - plain text, man pages, html documentation files
+** ##\tutorial## - small tutorial programs to help you learn Euphoria
+** ##\demo## - generic demo programs that run on all platforms
+*** ##\win32## - //WIN32//-specific demo programs (optional)
+*** ##\unix## - //Linux/FreeBSD/OS X//-specific demo programs (optional)
+*** ##\langwar## - language war game for //Linux/FreeBSD/OS X//
+*** ##\bench## - benchmark programs
+
+The //Linux// subdirectory is not included in the //Windows// distribution,
+and the ##win32## subdirectories are not included in the
+ //Linux/FreeBSD// distribution. In this manual, directory names are shown
+ using backslash (**\**). //Linux/FreeBSD// users should substitute forward
+ slash (**/**).
+
+%%output=configuration
+== Set Up the Euphoria Configuration File (eu.cfg)
+
+Euphoria supports reading command line switches from configuration files. The 
+default name for the configuration file is ##eu.cfg##. However you can specify
+different ones by using the ##-C## switch.
+
+=== Configuration file format
+
+The configuration file is a text file. Each line in the file is either a command
+line switch, a section header, an include path or a comment.
+* Comments are lines that begin with a double dash {{{"--"}}}. Everything on the
+line is ignored.
+* A section header is a //name// enclosed in square brackets. eg. 
+##[interpret]##.
+** There are a number of predefined sections.
+** The lines in a section are only added to the command line switches if they
+ apply to the mode that Euphoria is running in.
+*** [win32] Applies to Windows platform only.
+*** [unix] Applies to any Unix platform only.
+*** [interpret] Applies to the interpreter running in any platform.
+*** [translate] Applies to the translator running in any platform.
+*** [bind] Applies to the binder running in any platform.
+*** [interpret:win32] Applies to the interpreter when running under //Windows// 
+only.
+*** [interpret:unix] Applies to the interpreter when running under //Unix// 
+only.
+*** [translate:win32] Applies to the translator when running under //Windows// 
+only.
+*** [translate:unix] Applies to the translator when running under //Unix// only.
+*** [bind:win32] Applies to the binder when running under //Windows// only.
+*** [bind:unix] Applies to the binder when running under //Unix// only.
+*** [all] Applies to all running modes.
+** All configuration lines before the first section header are assumed to be the
+##[all]## section.
+** You can have any number of section headers, but only the predefined ones are
+used. All lines in other sections are treated as comments.
+* A command line switch is a line that begins with a single dash. The entire 
+line is added to the actual command line as if it was originally there.
+* An include path is any other line that is not one of the above. The string 
+##-I## is prepended to the line and then it is added to the command line.
+
+=== Config File Locations
+
+When Euphoria starts up, it looks for configuration files in the following 
+order:
+* For //Windows// systems
+## ~%ALLUSERSPROFILE~%\euphoria\eu.cfg
+## ~%APPDATA~%\euphoria\eu.cfg
+## ~%EUDIR~%\eu.cfg
+## ~%HOMEDRIVE~%\~%HOMEPATH~%\eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
+## Command line -C switches
+* For //Unix// systems
+## /etc/euphoria/eu.cfg
+## ${EUDIR}/eu.cfg
+## ${HOME}/.eu.cfg
+## From where ever the executable is run from "<exepath>/eu.cfg"
+## Current working directory - "./eu.cfg"
+## Command line -C switches
+
+=== Config File Notes
+
+* Euphoria processes every configuration file found, and in the order described 
+above. This means that settings specified in earlier configuration files may be 
+overridden by subsequent configuration files. For example, a configuration file 
+in the current directory will override the same settings in a configuration file
+in the executable's directory.
+* If a configuration file contains a ##-C## switch, the new configuration file
+specified on that switch is processed before subsequent lines in the old file.
+* A configuration file is only ever processed once. Additional references to the
+same file are ignored.
+

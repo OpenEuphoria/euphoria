@@ -36,7 +36,7 @@
 := Using Euphoria
 :<<LEVELTOC level=1 depth=4>>
 
-../docs/using.txt
+../docs/using_euphoria.txt
 
 ########
 :%%output=langref_index
