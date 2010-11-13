@@ -1,0 +1,37 @@
+%%output=installing_euphoria
+== Installation
+:<<LEVELTOC level=2 depth=4>>
+
+To install Euphoria, consult the instructions below for your particular 
+operating system.
+
+=== Windows
+
+To install Euphoria on //Windows//, visit the following URL:
+
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
+
+Download the lastest //Windows// installer found under the Binary Releases 
+heading of the Current version of Euphoria. Run the program and follow the 
+prompts to get Euphoria installed.
+   
+The installer copies the required files and adds ##euphoria\bin## to your path.
+It also sets the environment variable **EUDIR** to the Euphoria directory.
+
+=== Linux and FreeBSD
+
+Euphoria may be installed using either the gzipped tarball, or from a
+distribution specific package, if available.
+
+The gzipped tarball is laid out similarly to the //Windows// directory 
+structure.
+You'll need to manually edit ##/etc/profile## so the ##PATH## contains
+##euphoria\bin##, and either create a ##eu.cfg## file or set up ##EUDIR##
+and ##EUINC##.
+
+The packaged version installs Euphoria in a more //Unix//-like way, putting the
+executables into ##/usr/bin##, ##/usr/share/euphoria## and
+##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eub##,
+##shroud## and ##bind## are also installed.  It will also create
+##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
+directory in ##/usr/share/euphoria/include##.

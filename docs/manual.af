@@ -25,11 +25,18 @@
 #TODO: other release notes
 
 ########
-:%%output=beginning
-:= Beginning with Euphoria
+:%%output=installation
+:= Installing Euphoria
 :<<LEVELTOC level=1 depth=4>>
 
-../docs/refman_1.txt
+../docs/installing.txt
+
+########
+:%%output=using
+:= Using Euphoria
+:<<LEVELTOC level=1 depth=4>>
+
+../docs/using.txt
 
 ########
 :%%output=langref_index
