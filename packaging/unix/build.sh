@@ -1,17 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #
 # Ensure a directory name was given as a command line option
 #
 
-if [ "$1" = "" ]; then
-	echo Usage: build.sh DIR-NAME
+if [ "$1" = "" ] || [ "$2" = "" ]; then
+	echo Usage: build.sh PLATFORM TAG-NAME
         exit
 fi
 
-REL_NAME=euphoria-$1
+PLATFORM=$1
+TAG=$2
+REL_NAME=euphoria-${TAG}-${PLATFORM}
 
-svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tags/$1 ${REL_NAME}
+svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tags/${TAG} ${REL_NAME}
 
 cd ${REL_NAME}/bin
 rm -f *.bat *.ico make31.exw *.exe
