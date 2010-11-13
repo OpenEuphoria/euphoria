@@ -79,7 +79,7 @@ Source: "cleanbranch\include\machine.e"; DestDir: {tmp}; Flags: ignoreversion de
 Source: "cleanbranch\include\dll.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\keywords.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\syncolor.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\docs\setupae.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; Files to Install
 ; Root
@@ -191,7 +191,7 @@ FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can 
 
 [Run]
 ;Update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME
-Filename: "{tmp}\euiw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
+Filename: "{tmp}\euiw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\autoexec_update.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
 
 [Code]
 var
