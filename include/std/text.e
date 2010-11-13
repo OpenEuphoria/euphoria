@@ -2023,7 +2023,6 @@ public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBa
 	end if
 	for i = 1 to length(LocalQuals) do
 		dbname = DBBase & "_" & LocalQuals[i] & ".edb"
-		printf(1, "dbname=%s\n", { dbname })
 		db_res = db_select(	locate_file( dbname ), DB_LOCK_READ_ONLY)
 		if db_res = DB_OK then
 			db_res = db_select_table("1")
@@ -2039,7 +2038,6 @@ public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBa
 	-- Next, scan through the generic db
 	if atom(lMsgText) then
 		dbname = locate_file( DBBase & ".edb" )
-		printf(1, "dbname=%s\n", { dbname })
 		db_res = db_select(	dbname, DB_LOCK_READ_ONLY)
 		if db_res = DB_OK then
 			db_res = db_select_table("1")
