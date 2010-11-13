@@ -40,9 +40,9 @@
 
 #ifdef EBSD
 #define NAME_MAX 255
-#else
-#include <sys/mman.h>
 #endif
+
+#include <sys/mman.h>
 
 #ifdef EGPM
 #include <gpm.h>
