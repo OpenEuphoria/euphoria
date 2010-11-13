@@ -6,6 +6,7 @@
 namespace base64
 
 include std/sequence.e
+include std/search.e
 
 constant aleph = {
 	'A','B','C','D','E','F','G','H','I','J','K','L','M',
@@ -155,7 +156,7 @@ public function decode(sequence in)
 	sequence ccha
 
 	-- TODO: Surely this is not the most efficient way of doing this
-	in = replace_all(in, "\r\n", "")
+	in = match_replace("\r\n", in, "")
 
 	len = length(in)
 	if remainder(len, 4) != 0 then

@@ -1961,46 +1961,6 @@ public constant STDFLTR_ALPHA = routine_id("filter_alpha")
 --     [[:splice]], [[:remove]], [[:remove_all]]
 
 --**
--- Description:
--- Replaces all occurrences of ##olddata## with ##newdata##
---
--- Parameters:
---   # ##source## : the sequence in which replacements will be done.
---   # ##olddata## : the sequence/item which is going to be replaced. If this
---                 is an empty sequence, the ##source## is returned as is.
---   # ##newdata## : the sequence/item which will be the replacement.
---
--- Returns:
---		A **sequence**, which is made of ##source## with all ##olddata## occurrences
---      replaced by ##newdata##.
---
--- Comments:
---   This also removes all ##olddata## occurrences when ##newdata## is "".
---
--- Example:
--- <eucode>
--- s = replace_all("abracadabra", 'a', 'X')
--- -- s is now "XbrXcXdXbrX"
--- s = replace_all("abracadabra", "ra", 'X')
--- -- s is now "abXcadabX"
--- s = replace_all("abracadabra", "a", "aa")
--- -- s is now "aabraacaadaabraa"
--- s = replace_all("abracadabra", "a", "")
--- -- s is now "brcdbr"
--- </eucode>
---
--- See Also:
---     [[:replace]], [[:remove_all]]
-
-public function replace_all(sequence source, object olddata, object newdata)
-	if length(olddata) = 0 then
-		return source
-	else
-		return match_replace(olddata, source, newdata)
-	end if
-end function
-
---**
 -- Picks out from a sequence a set of elements according to the supplied set of indexes.
 --
 -- Parameters:
@@ -2732,11 +2692,10 @@ end function
 -- Examples:
 -- <eucode>
 -- res = transform(" hello    ", {
---                       {routine_id("trim"), " ",0},
---                       routine_id("upper"),
---                       {routine_id("replace_all"), "O", "A"}
---                   })
--- --> "HELLA"
+--     { routine_id("trim"), " ", 0 },
+--     routine_id("upper")
+-- })
+-- --> "HELLO"
 -- </eucode>
 
 public function transform( sequence source_data, object transformer_rids)

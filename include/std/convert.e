@@ -5,9 +5,12 @@
 -- <<LEVELTOC level=2 depth=4>>
 --
 namespace convert
+
 include std/types.e
 include std/sequence.e
 include std/text.e
+include std/search.e
+
 constant
 	M_A_TO_F64 = 46,
 	M_F64_TO_A = 47,
@@ -841,8 +844,8 @@ public function to_string(object data_in, integer string_quote = 0, integer embe
 		if string_quote = 0 then
 			return data_in
 		end if
-		data_in = replace_all(data_in, `\`, `\\`)
-		data_in = replace_all(data_in, {string_quote}, `\` & string_quote)
+		data_in = match_replace(`\`, data_in, `\\`)
+		data_in = match_replace({string_quote}, data_in, `\` & string_quote)
 		return string_quote & data_in & string_quote
 	end if
 	

@@ -4693,7 +4693,7 @@ export procedure real_parser(integer nested)
 					CompileErr(17, {find_token_text(tok[T_ID])})
 				end if
 
-				CompileErr(117, {replace_all(find_token_text(id), "'", "")})
+				CompileErr(117, { match_replace(",", find_token_text(id), "") })
 
 			end if
 

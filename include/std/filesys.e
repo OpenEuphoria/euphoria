@@ -543,7 +543,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	
 	-- trim any trailing blanks or '\' '/' characters from the path
 	ifdef not UNIX then
-		path_name = replace_all(path_name, '/', '\\')
+		path_name = match_replace('/', path_name, '\\')
 	end ifdef
 	path_name = trim_tail(path_name, {' ', SLASH, '\n'})
 	user_data[1] = path_name
@@ -1128,10 +1128,10 @@ public function pathinfo(sequence path, integer std_slash = 0)
 			elsedef
 			sequence from_slash = "/"
 			end ifdef
-			dir_name = replace_all(dir_name, from_slash, std_slash)
+			dir_name = match_replace(from_slash, dir_name, std_slash)
 		else
-			dir_name = replace_all(dir_name, "\\", std_slash)
-			dir_name = replace_all(dir_name, "/", std_slash)
+			dir_name = match_replace("\\", dir_name, std_slash)
+			dir_name = match_replace("/", dir_name, std_slash)
 		end if
 	end if
 
@@ -1633,9 +1633,9 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 		-- unix style slashes with windows style ones.
 		base_paths = lower(base_paths)
 		for i = 1 to length(base_paths) do
-			base_paths[i] = replace_all(base_paths[i], `/`, `\`)
+			base_paths[i] = match_replace('/', base_paths[i], `\`)
 		end for
-		expanded_path = replace_all(expanded_path, `/`, `\`)
+		expanded_path = match_replace('/', expanded_path, `\`)
 	end ifdef
 	
 	-- The first pass is to see if the parameter begins with any of the base paths.

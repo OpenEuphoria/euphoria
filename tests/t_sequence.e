@@ -567,13 +567,6 @@ test_equal( "remove in place 2,3", "367890", in_place )
 in_place = remove( in_place, 5, 6 )
 test_equal( "remove in place 5,6", "3678", in_place )
 
--- replace_all
-test_equal("replace_all #1", "XbrXcXdXbrX", replace_all("abracadabra", 'a', 'X'))
-test_equal("replace_all #2", "abXcadabX", replace_all("abracadabra", "ra", 'X'))
-test_equal("replace_all #3", "aabraacaadaabraa", replace_all("abracadabra", "a", "aa"))
-test_equal("replace_all #4", "brcdbr", replace_all("abracadabra", "a", ""))
-test_equal("replace_all #5", "abracadabra", replace_all("abracadabra", "", "X"))
-
 test_equal("columnize #1", {{1,3,5}, {2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6}}))
 test_equal("columnize #2", {{1,3,5}, {2,4,6}, {0,0,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}))
 test_equal("columnize #3", {{1,3,5}, {2,4,6}, {-999,-999,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}},,-999))
@@ -606,7 +599,7 @@ test_equal("combine 1c", {}, combine(""))
 test_equal("combine 2c", '1', combine("1"))
 
 -- transforming
-test_equal("transform", "HELLA", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper"), {routine_id("replace_all"), "O", "A"}}))
+test_equal("transform", "HELLO", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper")}))
 test_equal("transform 1c", "HELLO", transform("hello",routine_id("upper")))
 
 -- mapping
