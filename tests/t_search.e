@@ -61,6 +61,10 @@ test_equal("rmatch() #9",13, rmatch("the", "the dog ate the steak from the table
 test_equal("match_replace() string", "John Smith", match_replace("Doe", "John Doe","Smith",  0))
 test_equal("match_replace() sequence", {1,1,1,1,1}, match_replace({5,2},{1,5,2,5,2},  {1,1}, 0))
 test_equal("match_replace() max set", "BBBAAA", match_replace("A", "AAAAAA","B",  3))
+test_equal("match_replace() atom with atom", "XbrXcXdXbrX", match_replace('a', "abracadabra", 'X'))
+test_equal("match_replace() slice with atom", "abXcadabX", match_replace("ra", "abracadabra", 'X'))
+test_equal("match_replace() slice with null", "brcdbr", match_replace("a", "abracadabra", ""))
+test_equal("match_replace() -ve max", "abracadabra", match_replace("a", "abracadabra", "A", -2))
 
 test_equal("find_replace() letter", "John Dot", find_replace('e', "John Doe",'t',  0))
 test_equal("find_replace() number", {1,1,2,1,2}, find_replace(5,{1,5,2,5,2}, 1, 0))

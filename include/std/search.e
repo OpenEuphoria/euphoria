@@ -691,12 +691,31 @@ end function
 -- -- s is "\\euphoria\\demo/unix"
 -- </eucode>
 --
+-- Example 4:
+-- s = match_replace('a', "abracadabra", 'X')
+-- -- s is now "XbrXcXdXbrX"
+-- s = match_replace("ra", "abracadabra", 'X')
+-- -- s is now "abXcadabX"
+-- s = match_replace("a", "abracadabra", "aa")
+-- -- s is now "aabraacaadaabraa"
+-- s = match_replace("a", "abracadabra", "")
+-- -- s is now "brcdbr"
+--
 -- See Also:
 --		[[:find]], [[:replace]], [[:regex:find_replace]], [[:find_replace]]
 
 public function match_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
-	integer posn, needle_len, replacement_len
+	integer posn
+	integer needle_len
+	integer replacement_len
+	integer scan_from
+	
+	if max = 0 then
+		max = length(haystack)
+	elsif max < 0 then
+		return haystack
+	end if
 	
 	if atom(needle) then
 		needle = {needle}
@@ -705,20 +724,20 @@ public function match_replace(object needle, sequence haystack, object replaceme
 		replacement = {replacement}
 	end if
 
-	needle_len = length(needle)
+	needle_len = length(needle) - 1
 	replacement_len = length(replacement)
 
-	posn = match(needle, haystack)
-	while posn do
-		haystack = haystack[1..posn-1] & replacement & 
-			haystack[posn + needle_len .. $]
-		posn = match_from(needle, haystack, posn + replacement_len)
+	scan_from = 1
+	while posn with entry do
+		haystack = replace(haystack, replacement, posn, posn + needle_len)
 
 		max -= 1
-
 		if max = 0 then
 			exit
 		end if
+		scan_from = posn + replacement_len
+	entry
+		posn = match(needle, haystack, scan_from)
 	end while
 
 	return haystack
