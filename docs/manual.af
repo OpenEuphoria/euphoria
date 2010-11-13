@@ -90,14 +90,10 @@
 ../include/std/datetime.e
 ../include/std/filesys.e
 ../include/std/io.e
-../include/std/math.e
-../include/std/mathcons.e
-../include/std/rand.e
 ../include/std/mouse.e
 ../include/std/os.e
 ../include/std/pipeio.e
 ../include/std/pretty.e
-../include/std/stats.e
 ../include/std/task.e
 ../include/std/types.e
 ../include/std/utils.e
@@ -127,6 +123,16 @@
 #../include/std/ucstypes.e
 ../include/std/wildcard.e
 ../include/std/base64.e
+
+########
+:%%output=math_routines
+:= Math
+:<<LEVELTOC level=1 depth=2>>
+
+../include/std/math.e
+../include/std/mathcons.e
+../include/std/rand.e
+../include/std/stats.e
 
 ########
 :%%output=data_routines
