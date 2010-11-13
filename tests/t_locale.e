@@ -31,7 +31,7 @@ test_equal("set/get", lcc:decanonical("C"), lcc:decanonical(l:get()))
 integer has_locale = l:set(locale & encoding)
 if not has_locale then
 	encoding = ".US-ASCII"
-	has_locale = l:set(locale & ".US-ASCII")
+	has_locale = l:set(locale & encoding)
 end if
 
 if has_locale then
