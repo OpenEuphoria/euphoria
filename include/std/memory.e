@@ -894,7 +894,7 @@ export function dep_works()
 		return (DEP_really_works and use_DEP)
 	end ifdef
 
-	return 0
+	return 1
 end function
 
 export atom VirtualFree_rid

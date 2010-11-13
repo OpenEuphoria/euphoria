@@ -749,7 +749,7 @@ export function dep_works()
 	ifdef WINDOWS then
 		return DEP_really_works		
 	elsedef
-		return 0
+		return 1
 	end ifdef
 end function
 
@@ -790,7 +790,7 @@ public function info()
 	integer tm = 0 
 	for i = 1 to length( safe_address_list ) do 
 		tm += safe_address_list[i][BLOCK_LENGTH] 
-	end for 
+	end for
 	return sprintf(""" 
 Total memory allocations %10d 
 Total memory allocated   %10dB""", 
