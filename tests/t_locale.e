@@ -35,12 +35,12 @@ if l:set(locale & encoding) then
 	test_equal("large integer", "9,999,999,999,999", l:number(9_999_999_999_999))
 else
 	-- can not test, maybe emit a warning?
-	puts(1, "warning can not test en_US locale, testing against C locale..")
+	puts(1, "warning can not test en_US locale, testing against C locale..\n")
 	test_equal("money", "1020.50", l:money(1020.50))
 	test_equal("number", "1020.50", l:number(1020.5))
 	test_equal("integer", "1020", l:number(1020))
-	test_equal("number", "1,020.10", l:number(1020.1))
-	test_equal("large integer", "9,999,999,999,999", l:number(9_999_999_999_999))
+	test_equal("number", "1020.10", l:number(1020.1))
+	test_equal("large integer", "9999999999999", l:number(9_999_999_999_999))
 end if
 
 d:datetime dt1
