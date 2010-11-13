@@ -34,7 +34,7 @@ The keys and data parts are stored in a compact form, but //no// accuracy is
 lost when saving or restoring floating-point numbers or //any// other Euphoria 
 data.
 
-##database.e## will work as is, on all platforms. EDS database files can be 
+##std/eds.e## will work as is, on all platforms. EDS database files can be 
 copied and shared between programs running on all platforms as well. When 
 sharing EDS database files, be sure to make an exact byte-for-byte copy using 
 "binary" mode copying, rather than "text" or "ASCII" mode, which could change 
