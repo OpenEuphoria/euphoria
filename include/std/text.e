@@ -1393,10 +1393,10 @@ end function
 --
 -- format("Today is [{day}], the [{date}]", {"date=10/Oct/2012", "day=Wednesday"})
 -- -- "Today is Wednesday, the 10/Oct/2012"
--- </eucode>
 --
 -- format("'A' is [T]", 65)
 -- -- `'A' is A`
+-- </eucode>
 --
 -- See Also:
 --   [[:sprintf]]
