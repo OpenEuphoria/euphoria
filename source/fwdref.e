@@ -234,6 +234,9 @@ procedure patch_forward_call( token tok, integer ref )
 	sequence orig_code = code
 	sequence orig_linetable = LineTable
 	Code = {}
+	integer old_temps_allocated = temps_allocated
+	temps_allocated = 0
+	
 	for i = pc + 3 to pc + args + 2 do
 		defarg += 1
 		param_sym = SymTab[param_sym][S_NEXT]
@@ -256,6 +259,9 @@ procedure patch_forward_call( token tok, integer ref )
 			params[defarg] = code[i]
 		end if
 	end for
+	
+	SymTab[code_sub][S_STACK_SPACE] += temps_allocated
+	temps_allocated = old_temps_allocated
 	
 	-- In case anything was inlined, we need to shift the code so it's correct for its
 	-- final place in the original code, since we've been building this stream of IL
