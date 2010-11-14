@@ -409,7 +409,7 @@ function interpret_fail( sequence cmd, sequence filename,  sequence fail_list )
 end function
 
 function translate( sequence filename, sequence fail_list )
-	printf(1, "translating, compiling, and executing executable: %s\n", {filename})
+	printf(1, " translating %s:", {filename})
 	total += 1
 	sequence cmd = sprintf("%s %s %s %s -D UNITTEST -D EC -batch %s",
 		{ translator, library, compiler, translator_options, filename })
@@ -417,52 +417,39 @@ function translate( sequence filename, sequence fail_list )
 	integer status = system_exec(cmd, 0)
 
 	filename = filebase(filename)
+
 	integer log_where = 0
 	if status = 0 then
 		sequence exename = filename & dexe
 
-		void = delete_file(exename)
 		void = delete_file("cw.err")
-		verbose_printf(1, "compiling %s%s\n", {filename, ".c"})
-
-		object emake_outcome = run_emake()
-		if equal(emake_outcome, 0) then
-			verbose_printf(1, "executing %s:\n", {exename})
-			cmd = sprintf("./%s %s", {exename, test_options})
-			status = invoke(cmd, exename,  E_EXECUTE) 
-			if status then
-				failed += 1
-				fail_list = append(fail_list, "translated" & " " & exename)
-			else
-				object token
-				if logging_activated then
-					token = check_log(log_where)
-				else
-					token = 0
-				end if
-
-				if sequence(token) then
-					failed += 1
-					fail_list = append(fail_list, "translated" & " " & exename)					
-					error(exename, E_EXECUTE, token, {}, "ex.err")
-				else
-					log_where = token
-					error(exename, E_NOERROR, "all tests successful", {})
-				end if -- sequence(token)
-			end if
-			
-			void = delete_file(exename)
-		else
+		verbose_printf(1, "executing %s:\n", {exename})
+		cmd = sprintf("./%s %s", {exename, test_options})
+		status = invoke(cmd, exename,  E_EXECUTE) 
+		if status then
 			failed += 1
-			fail_list = append(fail_list, "compiling " & filename)					
-			if sequence(emake_outcome) then
-				error(exename, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4])
-				status = emake_outcome[3][1]
+			fail_list = append(fail_list, "translated" & " " & exename)
+		else
+			object token
+			if logging_activated then
+				token = check_log(log_where)
 			else
-				error(exename, E_COMPILE, 
-					"program could not be compiled. Compilation process exited with status %d", {emake_outcome})
+				token = 0
 			end if
+
+			if sequence(token) then
+				failed += 1
+				fail_list = append(fail_list, "translated" & " " & exename)					
+				error(exename, E_EXECUTE, token, {}, "ex.err")
+			else
+				log_where = token
+				error(exename, E_NOERROR, "all tests successful", {})
+			end if -- sequence(token)
+
+			puts(1, "\n")
 		end if
+		
+		void = delete_file(exename)
 	else
 		failed += 1
 		fail_list = append(fail_list, "translating " & filename)
@@ -602,7 +589,7 @@ function test_file( sequence filename, sequence fail_list )
 end function
 
 sequence interpreter_options = ""
-sequence translator_options = "-emake "
+sequence translator_options = " -silent "
 sequence test_options = ""
 sequence translator = "", library = "", compiler = ""
 sequence interpreter_os_name
