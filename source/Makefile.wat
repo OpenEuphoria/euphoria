@@ -4,7 +4,6 @@
 #
 #     Run "configure.bat --help" for a list of options.
 #
-#
 # Syntax:
 #   Interpreter (euiw.exe, eui.exe)  : wmake interpreter
 #   Translator            (euc.exe)  : wmake translator
@@ -460,13 +459,13 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) $(TEST_EXTRA) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
+	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
 	cd ..\source
 
 coverage : .SYMBOLIC code-page-db
 	cd ..\tests
 	-copy $(BUILDDIR)\ecp.dat .
-	$(EUTEST) -verbose -i ..\include -exe "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(LIST)
+	$(EUTEST) $(VERBOSE_TESTS) -i ..\include -exe "$(FULLBUILDDIR)\eui.exe" -coverage-db $(FULLBUILDDIR)\unit-test.edb -coverage $(TRUNKDIR)\include -coverage-pp "$(EXE) -i $(TRUNKDIR)\include $(TRUNKDIR)\bin\eucoverage.ex" -coverage-erase $(LIST)
 	-del ecp.dat
 	cd ..\source
 
@@ -476,7 +475,7 @@ report: .SYMBOLIC
 ..\reports\report.html: $(EU_ALL_FILES)
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	-$(EUTEST) -verbose -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
+	-$(EUTEST) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -log $(LIST)
 	$(EUTEST) -process-log -html > ..\reports\report.html
 	cd ..\source
 

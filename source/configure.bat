@@ -110,6 +110,12 @@ IF "%1" == "--release" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--verbose-tests" (
+	echo VERBOSE_TESTS = -verbose >> config.wat
+	SHIFT
+	GOTO EndLoop
+)
+
 IF "%1" == "--help" (
 	GOTO Help
 )
@@ -263,6 +269,9 @@ echo.
 echo     --use-source-translator
 echo                         Interpret the translator's source rather than
 echo                         using the already built translator (default)
+echo.
+echo     --verbose-tests
+echo                         Cause eutest to use the -verbose flag during testing
 echo.
 echo.
 echo Developer Options:
