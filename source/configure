@@ -1,4 +1,7 @@
 #!/bin/sh
+
+CONFIG_FILE=config.gnu
+
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
@@ -33,87 +36,87 @@ fi
 
 
 
-echo "# File generated from configure" > Makefile.eu
+echo "# File generated from configure" > ${CONFIG_FILE}
 
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
+	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
+	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
 elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
-	echo ARCH=ARM >> "$PREFIX"Makefile.eu
+	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
 fi
 
 
 
 
 if test $UNAME_SYSTEM = "Linux"; then
-	echo EBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX=1 >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "MS-DOS"; then
-	echo EBSD= >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
-	echo SHELL=bash >> "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP=1 >> "$PREFIX"${CONFIG_FILE}
+	echo SHELL=bash >> "$PREFIX"${CONFIG_FILE}
 	cp Makefile.gnu "$PREFIX"../tests/Makefile.gnu
 elif test $UNAME_SYSTEM = "WINDOWS"; then
-	echo EBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW=1 >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "SunOS"; then
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ESUNOS=1 >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "OpenBSD"; then
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD=1 >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "NetBSD"; then
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
-	echo ENETBSD=1 >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 else
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
 	if test $UNAME_SYSTEM = "Darwin"; then
-		echo EOSX=1 >> "$PREFIX"Makefile.eu
+		echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
 	else
-		echo EOSX= >> "$PREFIX"Makefile.eu
+		echo EOSX= >> "$PREFIX"${CONFIG_FILE}
 	fi
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 fi
 # default use source
 export EC="eui ec.ex"
@@ -124,7 +127,7 @@ export CC=gcc
 while [ "$1" != "" ]; do
     case $1 in
     	--plat )
-		echo "PLAT=$2" >> "$PREFIX"Makefile.eu
+		echo "PLAT=$2" >> "$PREFIX"${CONFIG_FILE}
 		shift
 	;;
 	--watcom )
@@ -147,16 +150,16 @@ while [ "$1" != "" ]; do
 			if test $LEN -gt 85; then
 				if test $UNAME_SYSTEM = "MS-DOS"; then
 					echo "Cannot configure with such a long path for DJGPP."
-					rm "$PREFIX"Makefile.eu
+					rm "$PREFIX"${CONFIG_FILE}
 					exit
 				fi
 			fi
-			echo "EUBIN=$2" >> "$PREFIX"Makefile.eu
+			echo "EUBIN=$2" >> "$PREFIX"${CONFIG_FILE}
 			EUBIN=$2
 			shift
 		;;
         --full )
-			echo RELEASE=1 >> "$PREFIX"Makefile.eu
+			echo RELEASE=1 >> "$PREFIX"${CONFIG_FILE}
         ;;
 
         --build )
@@ -164,10 +167,10 @@ while [ "$1" != "" ]; do
 			shift
 		;;
         --debug )
-			echo EDEBUG=1 >> "$PREFIX"Makefile.eu
+			echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
         ;;
 		--prefix )
-			echo "PREFIX=$2" >> Makefile.eu
+			echo "PREFIX=$2" >> ${CONFIG_FILE}
 			shift
 		;;
 	--use-binary-translator )
@@ -178,17 +181,17 @@ while [ "$1" != "" ]; do
 		;;
 	--release )
 		shift
-		echo EREL_TYPE=-DEREL_TYPE=\"$1\" >> Makefile.eu
+		echo EREL_TYPE=-DEREL_TYPE=\"$1\" >> ${CONFIG_FILE}
 		;;
 	--verbose-tests )
-		echo VERBOSE_TESTS=-verbose >> Makefile.eu
+		echo VERBOSE_TESTS=-verbose >> ${CONFIG_FILE}
 		;;
 	--rootdir )
 		shift
-		echo ROOTDIR=$1 >> Makefile.eu
+		echo ROOTDIR=$1 >> ${CONFIG_FILE}
 		;;
 	--wkhtmltopdf )
-		echo WKHTMLTOPDF=1 >> Makefile.eu
+		echo WKHTMLTOPDF=1 >> ${CONFIG_FILE}
 		;;
 		* )
 			echo "Unknown option '$1'"
@@ -253,31 +256,31 @@ fi
 rm nothing.ex
 
 if [ "x$EUPHORIA" = "x1" ]; then
-	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
+	echo EUPHORIA=1 >> "$PREFIX"${CONFIG_FILE}
 else
-	echo EUPHORIA=0 >> "$PREFIX"Makefile.eu
+	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}
 fi
 if test $UNAME_SYSTEM = "MS-DOS"; then
 	# "Information: Managed memory always on for DJGPP."
-	echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu
-	echo ALIGN4=1 >> "$PREFIX"Makefile.eu
+	echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ALIGN4=1 >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "WINDOWS"; then
 	# MANAGED_MEM and ALIGN4 are on by default for Windows
 	# and only Windows
 	if [ "x$MANAGED_MEM" = "x" ]; then
-		echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu
+		echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}
 	else
-		echo MANAGED_MEM=0 >> "$PREFIX"Makefile.eu
+		echo MANAGED_MEM=0 >> "$PREFIX"${CONFIG_FILE}
 	fi
 	if [ "x$ALIGN4" = "x" ]; then
-		echo ALIGN4=0 >> "$PREFIX"Makefile.eu
+		echo ALIGN4=0 >> "$PREFIX"${CONFIG_FILE}
 	else
-		echo ALIGN4=1 >> "$PREFIX"Makefile.eu
+		echo ALIGN4=1 >> "$PREFIX"${CONFIG_FILE}
 	fi
 fi
-echo "CC=$CC" >> "$PREFIX"Makefile.eu
+echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
 if [ "$EC" != "" ]; then
-	echo "TRANSLATE=$EC" >> "$PREFIX"Makefile.eu
+	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
 fi
 export PWD=`pwd`
 export PPWD=`cd .. && pwd`
@@ -292,15 +295,15 @@ fi
 export TRUNKDIR=$PPWD
 mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
-echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
-echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
+echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 if [ "$USECYPPATH" = "true" ]; then
-echo CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR` >> "$PREFIX"Makefile.eu
-echo CYPBUILDDIR=`cygpath -a -m $BUILDDIR` >> "$PREFIX"Makefile.eu
+echo CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR` >> "$PREFIX"${CONFIG_FILE}
+echo CYPBUILDDIR=`cygpath -a -m $BUILDDIR` >> "$PREFIX"${CONFIG_FILE}
 else
-echo CYPTRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
-echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
+echo CYPTRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 fi
-echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"Makefile.eu
+echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile

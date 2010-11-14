@@ -32,8 +32,10 @@
 #   PDF docs also require htmldoc
 #
 
+CONFIG_FILE = config.gnu
+
 ifndef CONFIG
-CONFIG = Makefile.eu
+CONFIG = $(CONFIG_FILE)
 endif
 
 PCRE_CC=$(CC)
@@ -578,7 +580,7 @@ testeu :
 
 test-311 :
 	cd ../tests/311 && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc -verbose \
+		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
@@ -737,14 +739,14 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	
 endif
 
-$(BUILDDIR)/$(OBJDIR)/back/%.o : %.c Makefile.eu
+$(BUILDDIR)/$(OBJDIR)/back/%.o : %.c $(CONFIG_FILE)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
-$(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c Makefile.eu
+$(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c $(CONFIG_FILE)
 	$(CC) -c -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.o
 	$(CC) -S -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
 
-$(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c Makefile.eu
+$(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c $(CONFIG_FILE) 
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
 	
 ifdef PCRE_OBJECTS	
