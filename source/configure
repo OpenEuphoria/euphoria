@@ -180,6 +180,9 @@ while [ "$1" != "" ]; do
 		shift
 		echo EREL_TYPE=-DEREL_TYPE=\"$1\" >> Makefile.eu
 		;;
+	--verbose-tests )
+		echo VERBOSE_TESTS=-verbose >> Makefile.eu
+		;;
 	--rootdir )
 		shift
 		echo ROOTDIR=$1 >> Makefile.eu
@@ -222,6 +225,8 @@ while [ "$1" != "" ]; do
 			echo "                        Interpret the translator's source rather"
 			echo "                        than using the already built translator"
 			echo "                        (default)"
+			echo "    --verbose-tests     cause the 'test' target to use the verbose flag"
+			echo "                        with eutest"
 			echo "    --wkhtmltopdf                                              "
 			echo "                        build pdf documentation with wkhtmltopdf"
 			echo "                        instead of the default htmldoc"

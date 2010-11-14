@@ -1,4 +1,4 @@
-# GNU Makefile for Euphoria (Linux and FreeBSD)
+# GNU Makefile for Euphoria Unix systems
 #
 # NOTE: This is meant to be used with GNU make,
 #       so on BSD, you should use gmake instead
@@ -6,39 +6,9 @@
 #
 # Syntax:
 #
+#   You must run configure before building
+#
 #   Configure the make system :  ./configure
-#
-#   You must run configure
-#   before building
-#
-#  Configure options:
-#
-#     --without-euphoria      Use this option if you are building Euphoria 
-#		     with only a C compiler.
-# 
-#     --eubin <dir>   Use this option to specify the location of the interpreter
-#		     binary to use to translate the front end.  The default
-#		     is ../bin
-#
-#     --no-managed-mem   Use this option to turn EUPHORIA's memory cache off in
-#		     the targets for Windows
-#
-#     --align4   Use this option to enable support for non-8-byte-aligned
-#		     malloc in the targets for Windows
-#
-#     --debug	 Use this option to turn on debugging symbols
-#
-#
-#     --full	  Use this option to so EUPHORIA doesn't report itself
-#		     as a development version.
-#
-#     --plat value   set the OS that the translator will translate the code to.
-#            values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD.
-#
-#     --watcom   Use this so the translator will create C code for Watcom C.
-#
-#     --cc  value         set this to the name of your GNU C compiler file name if its 
-#                        name is not 'gcc'
 #
 #   Clean up binary files     :  make clean
 #   Clean up binary and       :  make distclean
@@ -595,7 +565,7 @@ test : LIBRARY_PATH=$(%LIBRARY_PATH)
 test : 
 test :  
 	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
-		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc -verbose \
+		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind ../source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
