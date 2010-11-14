@@ -252,7 +252,9 @@ export procedure transoptions()
 			output_dir &= '/'
 		end if
 
-		printf(1, "Build directory: %s\n", { output_dir })
+		if not silent then
+			printf(1, "Build directory: %s\n", { output_dir })
+		end if
 		remove_output_dir = 1
 	end if
 
