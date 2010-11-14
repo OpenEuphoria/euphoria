@@ -33,6 +33,10 @@
 #include "be_execute.h"
 #include "be_socket.h"
 
+#ifdef ELINUX
+#include <malloc.h>
+#endif
+
 #ifdef EUNIX
 
 #include <strings.h>
@@ -1109,13 +1113,13 @@ static object user_allocate(object x)
 {
 	int nbytes;
 	char *addr;
-#ifdef EUNIX
+#ifdef EBSD
 	unsigned first, last, gp1;
 #endif
 
 	nbytes = get_int(x);
+#ifdef EBSD
 	addr = EMalloc(nbytes);
-#ifdef EUNIX
 	// make it executable
 	gp1 = pagesize-1;
 	first = (unsigned)addr & (~gp1); // start of page
@@ -1123,6 +1127,11 @@ static object user_allocate(object x)
 	last = last | gp1; // end of page
 	mprotect((void *)first, last - first + 1,
 			 PROT_READ+PROT_WRITE+PROT_EXEC);
+#elif defined(ELINUX)
+	addr = (char*) memalign( pagesize, nbytes );
+	mprotect( addr, nbytes, PROT_EXEC | PROT_READ | PROT_WRITE );
+#else
+	addr = EMalloc(nbytes);
 #endif
 
 	return MAKE_UINT(addr);
@@ -2563,7 +2572,9 @@ object CallBack(object x)
 		   supports VirtualAlloc() always returning 0. */
 		if (copy_addr == NULL)
 			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
-#	else /* ndef EWNIDOWS */
+#	elif defined(ELINUX) /* ndef EWNIDOWS */
+			copy_addr = memalign( pagesize, CALLBACK_SIZE );
+#	else
 		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);		
 #	endif /* ndef EWINDOWS */
 
@@ -2602,9 +2613,8 @@ object CallBack(object x)
 	addr = (unsigned)copy_addr;
 	/* Make memory executable. */
 #ifdef EUNIX
-	int er;
-	if ((er = mprotect((void*)(addr), CALLBACK_SIZE, PROT_READ+PROT_WRITE+PROT_EXEC)) != 0)
-		RTFatal("Internal error: CallBack mprotect failed (%d).", er);
+	if ( mprotect((void*)(addr), CALLBACK_SIZE, PROT_READ+PROT_WRITE+PROT_EXEC) )
+		RTFatal("Internal error: CallBack mprotect failed (%d).", errno);
 #endif	
 
 	/* Return new address. */
