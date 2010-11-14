@@ -1,11 +1,9 @@
--- (c) Copyright - See License.txt
---
-namespace search
-
 --****
 -- == Searching
 --
 -- <<LEVELTOC level=2 depth=4>>
+
+namespace search
 
 include std/error.e
 include std/types.e
@@ -597,7 +595,8 @@ public function rfind(object needle, sequence haystack, integer start=length(hay
 end function
 
 --**
--- Finds a "needle" in a "haystack", and replace any, or only the first few, occurrences with a replacement.
+-- Finds ##needle## in the ##haystack##, and replaces all or upto ##max## 
+-- occurrences with ##replacement##.
 --
 -- Parameters:
 --
@@ -637,8 +636,8 @@ end function
 
 public function find_replace(object needle, sequence haystack, object replacement, 
 			integer max=0)
-
 	integer posn = 0
+
 	while posn != 0 entry do 
 		haystack[posn] = replacement
 		max -= 1

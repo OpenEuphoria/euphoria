@@ -1,11 +1,15 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Graphics - Cross Platform
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace graphics
+
+include std/types.e
+
+public include std/console.e
+public include std/graphcst.e
 
 constant
 	M_GRAPHICS_MODE  = 5,
@@ -14,10 +18,6 @@ constant
 	M_SET_T_COLOR    = 9,
 	M_SET_B_COLOR    = 10,
 	M_GET_POSITION   = 25
-
-public include std/console.e
-public include std/graphcst.e
-include std/types.e
 
 --****
 -- === Routines

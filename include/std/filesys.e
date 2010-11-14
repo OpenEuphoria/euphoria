@@ -1,27 +1,25 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == File System
 --
 -- Cross platform file operations for Euphoria
 --
 -- <<LEVELTOC level=2 depth=4>>
+
 namespace filesys
 
-include std/dll.e
-
-include std/machine.e
-include std/wildcard.e
-include std/sort.e
-include std/search.e
-include std/machine.e
-include std/sequence.e
-include std/types.e
-include std/text.e
-include std/io.e
 include std/datetime.e as dt
+include std/dll.e
+include std/io.e
+include std/machine.e
+include std/machine.e
 include std/map.e
 include std/math.e
+include std/search.e
+include std/sequence.e
+include std/sort.e
+include std/text.e
+include std/types.e
+include std/wildcard.e
 
 ifdef UNIX then
 	include std/get.e -- for disk_size()

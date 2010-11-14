@@ -1,9 +1,7 @@
--- (c) Copyright - See License.txt
---
-
 --****
 -- === Error Code Constants
 --
+
 namespace graphcst
 
 public enum

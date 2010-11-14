@@ -6,14 +6,15 @@
 
 namespace http
 
-include std/socket.e as sock
-include std/net/url.e as url
-include std/net/dns.e
-include std/sequence.e
-include std/text.e
+include std/base64.e
 include std/convert.e
 include std/rand.e
-include std/base64.e
+include std/sequence.e
+include std/socket.e as sock
+include std/text.e
+
+include std/net/dns.e
+include std/net/url.e as url
 
 include euphoria/info.e
 

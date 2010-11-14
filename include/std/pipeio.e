@@ -1,5 +1,3 @@
-namespace pipeio
-
 --****
 -- == Pipe Input/Output
 --
@@ -13,10 +11,11 @@ namespace pipeio
 -- stream_select() function.
 --
 
---Includes
+namespace pipeio
+
 include std/dll.e
-include std/machine.e
 include std/error.e
+include std/machine.e
 
 ifdef WIN32 then
 	constant

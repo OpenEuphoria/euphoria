@@ -1,22 +1,21 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Euphoria Database (EDS)
 --
 -- <<LEVELTOC level=2 depth=4>>
+
 namespace eds
 
-include std/error.e
 include std/convert.e
-include std/io.e
+include std/datetime.e
+include std/error.e
 include std/filesys.e
 include std/get.e
-include std/pretty.e
+include std/io.e
 include std/machine.e
-include std/sequence.e
-include std/datetime.e
-include std/text.e
 include std/math.e
+include std/pretty.e
+include std/sequence.e
+include std/text.e
 include std/types.e
 
 --****

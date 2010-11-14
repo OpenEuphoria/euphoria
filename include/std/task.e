@@ -1,5 +1,3 @@
-namespace task
-
 --****
 -- == Multi-tasking
 --
@@ -20,6 +18,8 @@ namespace task
 -- in future versions of OpenEuphoria.
 -- 
 -- === Routines
+
+namespace task
 
 constant M_SLEEP = 64
 

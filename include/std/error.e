@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
-
 --****
 -- == Errors and Warnings
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
 -- === Routines
+
 namespace error
 
 constant

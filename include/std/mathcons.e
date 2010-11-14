@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
-namespace mathcons
-
 --****
 -- == Math Constants
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace mathcons
 
 --****
 -- === Constants

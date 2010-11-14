@@ -1,15 +1,15 @@
--- (c) Copyright - See License.txt
 --****
 -- == Dynamic Linking to external code
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace dll
 
 include std/convert.e
+include std/error.e
 include std/machine.e
 include std/math.e
-include std/error.e
 include std/types.e
 
 --****

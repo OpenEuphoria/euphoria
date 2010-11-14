@@ -1,8 +1,3 @@
--- (c) Copyright - See License.txt
---
--- Euphoria 4.0
--- Machine Level Programming (386/486/Pentium)
-
 --****
 -- == Safe Machine Level Access
 --
@@ -55,8 +50,7 @@
 
 namespace safe
 
-atom allocation_num
-allocation_num = 0
+atom allocation_num = 0
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1

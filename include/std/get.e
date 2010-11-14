@@ -1,16 +1,14 @@
--- (c) Copyright - See License.txt
---
-namespace stdget
-
-include std/io.e
-include std/error.e
-
 --****
 -- == Input Routines
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
 --
+
+namespace stdget
+
+include std/error.e
+include std/io.e
 
 --****
 -- === Error Status Constants

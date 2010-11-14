@@ -1,14 +1,3 @@
--- (c) Copyright - See License.txt
-namespace regex
-
-include std/math.e
-include std/text.e
-include std/types.e
-include std/flags.e as flags
-include std/error.e
-include std/search.e
-include std/machine.e
-
 --****
 -- == Regular Expressions
 --
@@ -30,6 +19,7 @@ include std/machine.e
 --   expressions for just about any task).
 -- * [[WikiPedia Regular Expression Article -> http://en.wikipedia.org/wiki/Regular_expression]]
 -- * [[Man page of PCRE in HTML -> http://www.slabihoud.de/software/archives/pcrecompat.html]]
+--
 -- === General Use
 --
 -- Many functions take an optional ##options## parameter. This parameter can be either
@@ -42,6 +32,16 @@ include std/machine.e
 -- All strings passed into this library must be either 8-bit per character strings or
 -- UTF which uses multiple bytes to encode UNICODE characters. You can
 -- use UTF8 encoded UNICODE strings when you pass the UTF8 option.
+
+namespace regex
+
+include std/error.e
+include std/flags.e as flags
+include std/machine.e
+include std/math.e
+include std/search.e
+include std/text.e
+include std/types.e
 
 enum 
 	M_PCRE_COMPILE          = 68,

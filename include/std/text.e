@@ -1,28 +1,26 @@
--- (c) Copyright - See License.txt
---
-namespace text
-
 --****
 -- == Text Manipulation
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
 
+namespace text
+
+include std/convert.e
+include std/convert.e
+include std/eds.e
+include std/error.e
+include std/filesys.e
+include std/io.e
+include std/math.e
+include std/pretty.e
+include std/search.e
+include std/sequence.e
+include std/serialize.e
+include std/types.e
+
 --****
 -- === Routines
-
-include std/filesys.e
-include std/types.e
-include std/sequence.e
-include std/io.e
-include std/search.e
-include std/convert.e
-include std/serialize.e
-include std/pretty.e
-include std/error.e
-include std/eds.e
-include std/convert.e
-include std/math.e
 
 --****
 -- Signature:

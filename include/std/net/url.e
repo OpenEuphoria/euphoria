@@ -14,12 +14,12 @@ include std/map.e
 -- 
 
 constant 
-		PAIR_SEP_A = '&',
-		PAIR_SEP_B = ';',
-		HEX_SIG    = '%',
-		WHITESPACE = '+',
-		VALUE_SEP  = '=',
-		$
+	PAIR_SEP_A = '&',
+	PAIR_SEP_B = ';',
+	HEX_SIG    = '%',
+	WHITESPACE = '+',
+	VALUE_SEP  = '=',
+	$
 
 --**
 -- Parse a query string into a map
@@ -83,7 +83,13 @@ public function parse_querystring(object query_string)
 	return the_map
 end function
 
-public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWORD, 
+public enum 
+	URL_PROTOCOL, 
+	URL_HOSTNAME, 
+	URL_PORT, 
+	URL_PATH,
+	URL_USER,
+	URL_PASSWORD, 
 	URL_QUERY_STRING
 
 --**

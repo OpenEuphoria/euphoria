@@ -1,5 +1,3 @@
--- (c) Copyright - See License.txt
-
 --****
 -- ==  Locale Routines
 --
@@ -7,20 +5,19 @@
 
 namespace locale
 
-include std/dll.e
-include std/machine.e
-include std/error.e
-include std/datetime.e as dt
-include std/text.e
-include std/io.e
-include std/map.e
-include std/localeconv.e as lcc
-include std/lcid.e as lcid
 include std/convert.e
+include std/datetime.e as dt
+include std/dll.e
+include std/error.e
 include std/filesys.e
+include std/io.e
+include std/lcid.e as lcid
+include std/localeconv.e as lcc
+include std/machine.e
+include std/map.e
 include std/mathcons.e
 include std/search.e
-
+include std/text.e
 
 ------------------------------------------------------------------------------------------
 --

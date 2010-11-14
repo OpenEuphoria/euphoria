@@ -1,7 +1,3 @@
--- (c) Copyright - See License.txt
---
-namespace mouse
-
 --****
 -- == Mouse
 --
@@ -9,11 +5,13 @@ namespace mouse
 --
 -- === Requirements
 --
--- * //Linux// ~-- you need GPM server to be running
+-- * //Linux//   ~-- you need GPM server to be running
 -- * //Windows// ~-- not implemented yet for the text console
 -- * //FreeBSD// ~-- not implemented
--- * //OS X// ~-- not implemented
+-- * //OS X//    ~-- not implemented
 --
+
+namespace mouse
 
 --****
 -- === Constants

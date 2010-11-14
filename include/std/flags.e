@@ -1,5 +1,3 @@
--- (c) Copyright - See License.txt
-
 --****
 -- == Flags
 --
@@ -9,6 +7,7 @@
 namespace flags
 
 include std/map.e
+
 object one_bit_numbers = map:new()
 
 put(one_bit_numbers, 0b0000_0000_0000_0000_0000_0000_0000_0001, 1)

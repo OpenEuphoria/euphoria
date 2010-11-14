@@ -1,15 +1,16 @@
-namespace sockets
-
 --****
 -- == Core Sockets
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
 
+namespace sockets
+
 include std/get.e
-include std/regex.e as re
 include std/machine.e as mem
+include std/regex.e as re
 include std/sequence.e as seq
+
 include std/net/common.e
 
 enum

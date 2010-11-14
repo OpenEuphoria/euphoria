@@ -1,15 +1,15 @@
-	-- (c) Copyright - See License.txt
 --****
 -- == Data type conversion
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace convert
 
-include std/types.e
+include std/search.e
 include std/sequence.e
 include std/text.e
-include std/search.e
+include std/types.e
 
 constant
 	M_A_TO_F64 = 46,

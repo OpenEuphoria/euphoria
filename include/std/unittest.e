@@ -1,7 +1,3 @@
--- (c) Copyright - See License.txt
---
-namespace unittest
-
 --****
 -- == Unit Testing Framework
 --
@@ -69,18 +65,21 @@ namespace unittest
 -- When included in your program, unittest.e sets a crash handler to log a crash 
 -- as a failure.
 
+namespace unittest
+
+include std/console.e
+include std/error.e
+include std/filesys.e
+include std/io.e
+include std/math.e
+include std/pretty.e
+include std/search.e
+include std/types.e
+
 --****
 -- === Constants
 --
 
-include std/io.e
-include std/pretty.e
-include std/search.e
-include std/filesys.e
-include std/math.e
-include std/types.e
-include std/error.e
-include std/console.e
 --
 -- Public Variables
 --

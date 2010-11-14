@@ -1,11 +1,9 @@
--- (c) Copyright - See License.txt
---
-namespace types
-
 --****
 -- == Types - Extended
 --
 -- <<LEVELTOC level=2 depth=4>>
+
+namespace types
 
 --**
 -- Object not assigned
@@ -22,7 +20,6 @@ public constant OBJ_ATOM = 2
 --**
 -- Object is sequence
 public constant OBJ_SEQUENCE = 3
-
 
 --****
 -- Signature:
@@ -50,7 +47,6 @@ public constant OBJ_SEQUENCE = 3
 -- See Also:
 -- [[:sequence]](), [[:integer]](), [[:atom]]()
 
-
 --****
 -- Signature:
 -- <built-in> type integer(object x)
@@ -73,7 +69,6 @@ public constant OBJ_SEQUENCE = 3
 -- See Also:
 -- [[:sequence]](), [[:object]](), [[:atom]]()
 
-
 --****
 -- Signature:
 -- <built-in> type atom(object x)
@@ -95,7 +90,6 @@ public constant OBJ_SEQUENCE = 3
 --
 -- See Also:
 -- [[:sequence]](), [[:object]](), [[:integer]]()
-
 
 --****
 -- Signature:

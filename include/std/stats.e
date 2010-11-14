@@ -1,7 +1,3 @@
--- (c) Copyright - See License.txt
---
-namespace stats
-
 --****
 -- == Statistics
 --
@@ -9,9 +5,11 @@ namespace stats
 --
 -- === Routines
 
+namespace stats
+
 include std/math.e
-include std/sort.e
 include std/sequence.e
+include std/sort.e
 
 
 --**

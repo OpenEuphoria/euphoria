@@ -1,5 +1,3 @@
-namespace memory
-
 --****
 -- == Memory Management - Low-Level
 --
@@ -37,6 +35,8 @@ namespace memory
 -- file.
 --
 
+namespace memory
+
 public include std/memconst.e
 
 -- biggest address on a 32-bit machine
@@ -51,7 +51,6 @@ end ifdef
 without warning &= (not_used)
 
 public integer edges_only 
-
 
 --**
 -- Positive integer type

@@ -1,13 +1,9 @@
--- (c) Copyright - See License.txt
---
-
 --****
 -- == utils
 --
 -- <<LEVELTOC level=2 depth=4>>
 
 namespace utils
-
 
 --**
 -- Used to embed an 'if' test inside an expression.

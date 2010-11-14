@@ -1,13 +1,10 @@
--- (c) Copyright - See License.txt
---
-
-namespace random
-
 --****
 -- == Random Numbers
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace random
 
 --****
 -- Signature:

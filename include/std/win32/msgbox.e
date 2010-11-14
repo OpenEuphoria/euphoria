@@ -1,10 +1,9 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Windows Message Box
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace msgbox
 
 include std/dll.e

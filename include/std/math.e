@@ -1,5 +1,3 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Math
 --

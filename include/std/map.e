@@ -1,8 +1,3 @@
--- (c) Copyright - See License.txt
---
-
-namespace map
-
 --****
 -- == Map (hash table)
 --
@@ -43,21 +38,23 @@ namespace map
 -- the initial size of the map, it is automatically converted to a //large// map.
 --
 
-include std/get.e
-include std/primes.e
+namespace map
+
 include std/convert.e
+include std/datetime.e
+include std/error.e
+include std/eumem.e
+include std/get.e
+include std/io.e
 include std/math.e
+include std/pretty.e
+include std/primes.e
+include std/search.e
+include std/serialize.e
+include std/sort.e
 include std/stats.e as stats
 include std/text.e
-include std/search.e
 include std/types.e
-include std/pretty.e
-include std/eumem.e
-include std/error.e
-include std/sort.e
-include std/serialize.e
-include std/datetime.e
-include std/io.e
 
 enum
 	 TYPE_TAG,       -- ==> 'tag' for map type

@@ -1,5 +1,3 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Date/Time
 --
@@ -7,11 +5,11 @@
 
 namespace datetime
 
-include std/machine.e
 include std/dll.e
-include std/sequence.e
-include std/get.e
 include std/error.e
+include std/get.e
+include std/machine.e
+include std/sequence.e
 include std/types.e
 
 ifdef LINUX then

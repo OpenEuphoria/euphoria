@@ -1,11 +1,9 @@
--- (c) Copyright - See License.txt
---
-namespace serialize
-
 --****
 -- == Serialization of Euphoria Objects
 --
 -- <<LEVELTOC level=2 depth=4>>
+
+namespace serialize
 
 include std/convert.e
 include std/machine.e

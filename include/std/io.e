@@ -1,5 +1,3 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == I/O
 --
@@ -7,13 +5,13 @@
 
 namespace io
 
-include std/sort.e
-include std/wildcard.e
-include std/types.e
-include std/machine.e
-include std/text.e
-include std/sequence.e
 include std/error.e
+include std/machine.e
+include std/sequence.e
+include std/sort.e
+include std/text.e
+include std/types.e
+include std/wildcard.e
 include std/search.e
 
 constant M_SEEK  = 19,

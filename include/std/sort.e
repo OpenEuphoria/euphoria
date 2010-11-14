@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
-namespace stdsort
-
 --****
 -- == Sorting
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace stdsort
 
 --****
 -- === Constants

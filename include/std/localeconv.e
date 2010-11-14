@@ -1,5 +1,3 @@
--- (c) Copyright - See License.txt
---
 namespace localconv
 
 --****
@@ -872,23 +870,28 @@ end function
 
 public function canon2win(sequence new_locale)
 	integer w, n
+
 	ifdef WIN32 then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))
 		end if
 	end ifdef
+
 	w = find(new_locale, posix_names)
 	if w = 0 then
 		-- unknown
 		return "C"
 	end if
+
 	new_locale = w32_names[w]
+
 	ifdef WIN32 then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))
 		end if
 	end ifdef
+
 	return new_locale
 end function

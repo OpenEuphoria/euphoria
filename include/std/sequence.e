@@ -1,16 +1,14 @@
--- (c) Copyright - See License.txt
---
-namespace stdseq
-
 --****
 -- == Sequence Manipulation
 --
 -- <<LEVELTOC level=2 depth=4>>
 
+namespace stdseq
+
 include std/error.e
+include std/math.e
 include std/search.e
 include std/sort.e
-include std/math.e
 include std/types.e
 
 --****

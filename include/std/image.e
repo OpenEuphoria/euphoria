@@ -1,16 +1,15 @@
--- (c) Copyright - See License.txt
---
-namespace image
-
-public include std/graphcst.e
-include std/convert.e
-include std/machine.e
-
 --****
 -- == Graphics - Image Routines
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace image
+
+include std/convert.e
+include std/machine.e
+
+public include std/graphcst.e
 
 constant BMPFILEHDRSIZE = 14
 constant OLDHDRSIZE = 12, NEWHDRSIZE = 40

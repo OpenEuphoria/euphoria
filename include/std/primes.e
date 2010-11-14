@@ -1,11 +1,9 @@
--- (c) Copyright - See License.txt
---
-namespace primes
-
 --****
 -- == Prime Numbers
 --
 -- <<LEVELTOC level=2 depth=4>>
+
+namespace primes
 
 include std/search.e
 
