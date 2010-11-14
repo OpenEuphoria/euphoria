@@ -2935,8 +2935,8 @@ procedure opLENGTH()
 			else
 				-- Fetch the current length from the struct
 				c_stmt ("if (IS_SEQUENCE(@))\n", Code[pc+1])
-				c_stmt ("    @ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
-				c_stmt ("else\n    @ = 1;\n", Code[pc+2])
+				c_stmt ("    @ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]}, Code[pc+2])
+				c_stmt ("else\n    @ = 1;\n", Code[pc+2], Code[pc+2])
 				target = {0, MAXLEN}
 			end if
 		else
