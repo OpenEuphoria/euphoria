@@ -181,7 +181,7 @@ it suitable for GUI applications.
 The manual will only reference ##eui## in examples and instructions; the
 reader is left to choose the correct interpreter.
 
-Euphoria runs on many platforms. When operating specific issues must be 
+Euphoria runs on many platforms. When operating system specific issues must be 
 described you will see these descriptions:
 
 * //Windows// will be a general reference to a family of Microsoft Windows
