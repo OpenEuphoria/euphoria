@@ -48,10 +48,6 @@
 
 #include <sys/mman.h>
 
-#ifdef EGPM
-#include <gpm.h>
-#endif
-
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -157,7 +153,6 @@ int control_c_count = 0;      /* number of control-c/control-break since
 int *profile_sample = NULL;
 volatile int sample_next = 0;
 
-int first_mouse = 1;  /* indicates if mouse function has been set up yet */
 int line_max; /* current number of text lines on screen */
 int col_max;  /* current number of text columns on screen */
 #ifdef EUNIX
@@ -168,9 +163,6 @@ struct videoconfig config;
 struct videoconfigEx configEx;
 
 int screen_lin_addr; /* screen segment */
-#ifdef EXTRA_STATS
-int mouse_ints = 0;  /* number of unused mouse interrupts */
-#endif
 char *crash_msg = NULL;  /* user's crash message or NULL */
 volatile int our_clock_ticks = 0; /* number of ticks at current rate */
 double clock_frequency = 0.0;    /* current clock interrupt rate. 0.0
@@ -188,15 +180,6 @@ extern int Argc;
 /********************/
 /* Local variables */
 /*******************/
-/* In DOS, this mouse data is locked in memory */
-#if defined(EGPM) || defined(EWINDOWS)
-static struct locked_data {
-	int lock;  /* = 0  semaphore */
-	int code;
-	int x;
-	int y;
-} mouse = {0,0,0,0};
-#endif
 
 char *version_name =
 #ifdef EWINDOWS
@@ -867,246 +850,6 @@ object SetBColor(object x)
 	return ATOM_1;
 }
 
-
-static object MousePointer(object x)
-{
-	UNUSED(x);
-	return ATOM_1;
-}
-static object MouseEvents(int interrupts)
-{
-	UNUSED(interrupts);
-	return ATOM_1;
-}
-int mouse_installed()
-{
-	return 0;
-}
-#ifndef EUNIX
-static void show_mouse_cursor(int x)
-{
-	UNUSED(x);
-}
-static void lock_mouse_pages()
-{
-}
-#endif
-
-#ifdef EUNIX
-#ifdef EGPM  // if GPM package is desired, - not available on FreeBSD
-/* Text Mode Mouse in Linux
- Codes:
-	buttons:
-		left = 4
-		middle = 2
-		right = 1
-
-	clicks:
-		0: single click
-		1: double click
-		2: triple click
-
-	vc always 1?
-
-	type:
-		move = 1
-		drag = 2   146?
-		down = 4   20?
-		up = 8     152?
-
-	xterm:
-		left-down: 409 32 x y
-		middle-down: 409 33 x y
-		right-down: 409 34 x y
-		*any* button-up: 409 35 x y
-		(can I report all 3 buttons went up?)
-
-		no move events are reported
-
-	x and y are origin (33,33) at top left of window
-*/
-
-int Mouse_Handler(Gpm_Event *event, void *clientdata) {
-// handles mouse events
-	mouse.lock = 1;
-	mouse.code = event->buttons; //FOR NOW
-	if (mouse.code == 32)
-		mouse.code = 4;
-	else if (mouse.code == 33)
-		mouse.code = 2;
-	else if (mouse.code == 34)
-		mouse.code = 1;
-	mouse.x = event->x;
-	mouse.y = event->y;
-	return -1;
-}
-
-static Gpm_Connect conn;
-
-void save_key(int key)
-// store a key in the buffer
-{
-	key_buff[key_write++] = key;
-	if (key_write >= KEYBUFF_SIZE)
-		key_write = 0;
-}
-
-int EscapeKey()
-// process Escape sequences (these only occur in xterm)
-// some keys are pushed back into key_buff
-{
-	int key;
-
-	nodelay(stdscr, TRUE); // don't get stuck waiting for next key
-	key = Gpm_Getch();
-	if (key == 91) {
-		key = Gpm_Getch();
-		if (key == 49) {
-			key = Gpm_Getch();
-			if (key >= 49 && key <= 52) {
-				Gpm_Getch();    // 126
-				key = 265+key-49; // F1..F4
-			}
-			else {
-				save_key(91);
-				save_key(49);
-				save_key(key);
-				key = 27;
-			}
-		}
-		else {
-			save_key(91);
-			save_key(49);
-			key = 27;
-		}
-	}
-	else {
-		save_key(key);
-		key = 27;
-	}
-	return key;
-}
-
-
-static object GetMouse()
-// Return the next mouse event, or -1
-// Linux version using GPM
-{
-	object final_result;
-	object_ptr obj_ptr;
-	s1_ptr result;
-	int key, action;
-
-	if (first_mouse) {
-		/* initialize GPM */
-		first_mouse = FALSE;
-		conn.eventMask = 0xFFFF; // unsigned short
-		conn.defaultMask = 0;
-		conn.minMod = 0;
-		conn.maxMod = ~0;
-		gpm_visiblepointer = 1;
-		//gpm_zerobased = 1;
-		gpm_handler = Mouse_Handler;
-		gpm_data = NULL;
-		Gpm_Open(&conn, 0);
-		final_result = ATOM_M1;
-	}
-	else if (mouse.lock) {
-		/* we picked up a mouse event via Mouse_Handler() */
-		mouse.lock = 0;
-		result = NewS1((long)3);
-		obj_ptr = result->base;
-
-		obj_ptr[1] = MAKE_INT(mouse.code);
-		obj_ptr[2] = MAKE_INT((mouse.y > 32) ? mouse.x-32 : mouse.x);
-		obj_ptr[3] = MAKE_INT((mouse.y > 32) ? mouse.y-32 : mouse.y);
-
-#ifdef EXTRA_STATS
-		mouse_ints--;
-#endif
-		mouse.code = 0;
-		final_result = MAKE_SEQ(result);
-	}
-	else {
-		/* check for a mouse event (or a key) */
-		nodelay(stdscr, TRUE);
-		noecho();
-		key = Gpm_Getch();
-		if (key == -1) {
-			final_result = ATOM_M1;
-		}
-		else if (key == 409) {
-			result = NewS1((long)3);
-			obj_ptr = result->base;
-			action = Gpm_Getch();
-			if (action == 32)
-				action = 4;
-			else if (action == 33)
-				action = 2;
-			else if (action == 34)
-				action = 1;
-			obj_ptr[1] = MAKE_INT(action);
-			obj_ptr[2] = MAKE_INT(Gpm_Getch()-32);
-			obj_ptr[3] = MAKE_INT(Gpm_Getch()-32);
-#ifdef EXTRA_STATS
-			mouse_ints--;
-#endif
-			mouse.code = 0;
-			final_result = MAKE_SEQ(result);
-		}
-		else if (key == 27) {
-			key = EscapeKey();
-			final_result = ATOM_M1;
-		}
-		else {
-			/* we picked up a character */
-			save_key(key);
-			final_result = ATOM_M1;
-		}
-		echo();
-		nodelay(stdscr, FALSE); // go back to normal setup
-	}
-	return final_result;
-}
-#endif // EGPM
-
-#else
-// not LINUX
-static object GetMouse()
-/* GET_MOUSE event built-in WIN32 */
-{
-	object_ptr obj_ptr;
-	s1_ptr result;
-
-	if (first_mouse) {
-		lock_mouse_pages();
-		first_mouse = 0;
-		if (mouse_installed()) {
-			show_mouse_cursor(0x1);
-			MouseEvents(MAKE_INT(0x0000FFFF));
-		}
-	}
-	if (mouse.lock) {
-		/* there's something in the queue */
-
-		result = NewS1((long)3);
-		obj_ptr = result->base;
-
-		mouse.lock = 2; /* critical section */
-		obj_ptr[1] = mouse.code;
-		obj_ptr[2] = mouse.x;
-		obj_ptr[3] = mouse.y;
-		mouse.lock = 0;
-
-#ifdef EXTRA_STATS
-		mouse_ints--;
-#endif
-		return MAKE_SEQ(result);
-	}
-	else
-		return ATOM_M1;
-}
-#endif
 
 static object user_allocate(object x)
 /* x is number of bytes to allocate */
@@ -2873,29 +2616,6 @@ object machine(object opcode, object x)
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return ATOM_0 + get_key(TRUE);
-				break;
-			case M_GET_MOUSE:
-				if (current_screen != MAIN_SCREEN)
-					MainScreen();
-#ifdef EUNIX
-#ifdef EGPM
-				return GetMouse();
-#else
-				return ATOM_M1;
-#endif
-#else
-				return GetMouse();
-#endif
-				break;
-			case M_MOUSE_EVENTS:
-				if (current_screen != MAIN_SCREEN)
-					MainScreen();
-				return MouseEvents(x);
-				break;
-			case M_MOUSE_POINTER:
-				if (current_screen != MAIN_SCREEN)
-					MainScreen();
-				return MousePointer(x);
 				break;
 			case M_ALLOC:
 				return user_allocate(x);

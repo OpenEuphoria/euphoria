@@ -4595,12 +4595,8 @@ void do_exec(int *start_pc)
 #endif
 					if (in_from_keyb) {
 #ifdef EUNIX
-#ifdef EGPM
-						b = mgetch(TRUE); // echo the character
-#else
 						echo_wait();
 						b = getc(stdin);
-#endif
 #else
 						b = wingetch();
 #endif

@@ -25,9 +25,6 @@
 #  include <time.h>
 #  include <sys/ioctl.h>
 #  include <sys/types.h>
-#  ifdef EGPM
-#    include <gpm.h>
-#  endif
 #else
 #  include <io.h>
 #  if !defined(EMINGW)
@@ -374,12 +371,6 @@ static int user_abort = FALSE; /* TRUE if abort() was called by user program */
 /**********************/
 /* Declared functions */
 /**********************/
-#ifdef EUNIX
-#ifdef EGPM
-int Mouse_Handler(Gpm_Event *, void *);
-#endif
-#endif
-
 
 /*********************/
 /* Defined functions */
@@ -3753,11 +3744,7 @@ object EGets(object file_no)
 		if (in_from_keyb) {
 #ifdef EUNIX
 			echo_wait();
-#ifdef EGPM
-			c = mgetch(TRUE);
-#else
 			c = getc(stdin);
-#endif
 #else
 			c = wingetch();
 #endif //EUNIX
@@ -3795,11 +3782,7 @@ object EGets(object file_no)
 				/* read next character */
 				if (in_from_keyb)
 #ifdef EUNIX
-#ifdef EGPM
-					c = mgetch(TRUE);
-#else
 					c = getc(stdin);
-#endif
 #else
 					c = wingetch();
 #endif
@@ -3845,11 +3828,7 @@ object EGets(object file_no)
 				if (f == stdin) {
 					if (in_from_keyb)
 #ifdef EUNIX
-#ifdef EGPM
-						c = mgetch(TRUE);
-#else
 						c = getc(stdin);
-#endif
 #else
 						c = wingetch();
 #endif
@@ -4547,14 +4526,7 @@ int get_key(int wait)
 #endif
 
 #ifdef EUNIX
-#ifdef EGPM
-		a = mgetch(wait);
-		if (a == ERR) {
-			a = -1;
-		}
-#else
 		a = nodelaych(wait); // no delay, no echo
-#endif
 		return a;
 #endif // EUNIX
 }
@@ -5562,15 +5534,6 @@ void Cleanup(int status)
 	if (current_screen != MAIN_SCREEN)
 		MainScreen();
 
-	if (!first_mouse) {
-#ifdef EUNIX
-#ifdef EGPM
-		Gpm_Close();
-#endif
-#else
-		(void) mouse_installed();
-#endif
-	}
 	/* conin might be closed here, if we were debugging */
 #ifndef ERUNTIME
 	if (warning_count && display_warnings) {
@@ -5796,59 +5759,6 @@ void key_gets(char *input_string)
 		}
 	}
 }
-
-#ifdef EUNIX
-// Circular buffer of keystrokes picked up by get_mouse().
-// It's empty when key_write equals key_read.
-char key_buff[KEYBUFF_SIZE];
-int key_write = 0;       // place where next key will be stored
-
-
-#ifdef EGPM
-static int key_read = 0; // place to read next key from
-static Gpm_Event event;  // mouse event
-
-int mgetch(int wait)
-// Return next key press. Process any mouse inputs transmitted
-// via pseudo key presses - they start with 409 in xterm.
-{
-	int key, x, y, action;
-
-	if (key_read != key_write) {
-		key = key_buff[key_read++];
-		if (key_read >= KEYBUFF_SIZE)
-			key_read = 0;
-	}
-	else {
-		while (1) {
-			key = Gpm_Getch();
-			if (key == 409) {
-				action = Gpm_Getch();
-				// call mouse handler
-				event.buttons = action;
-				event.x = Gpm_Getch()-32;
-				event.y = Gpm_Getch()-32;
-				Mouse_Handler(&event, NULL);
-				if (!wait) {
-					key = -1;
-					break;
-				}
-			}
-			else if (key == 27) {
-				// make this a routine and push keys back into key_buff
-				key = EscapeKey();
-				break;
-			}
-			else {
-				// normal key
-				break;
-			}
-		}
-	}
-	return key;
-}
-#endif
-#endif
 
 long find_from(object a, object bobj, object c)
 /* find object a as an element of sequence b starting from c*/
