@@ -113,10 +113,6 @@ include std/types.e
 --     An **integer**, 0 if ##needle## is not on ##haystack##, else the smallest index of an 
 -- element of ##haystack## that equals ##needle##.
 --
--- Comments:
---
--- ##find##() and [[:find_from]]() are identical, but you can omit giving ##find##() a starting point.
---
 -- Example 1:
 -- <eucode>
 -- location = find(11, {5, 8, 11, 2, 3})
@@ -131,44 +127,21 @@ include std/types.e
 -- </eucode>
 --
 -- See Also:
---     [[:find_from]], [[:match]], [[:match_from]], [[:compare]]
+--     [[:find_from]], [[:match]], [[:compare]]
 
 --****
 -- Signature:
 --     <built-in> function find_from(object needle, object haystack, integer start)
 --
--- Description:
---     Find the first occurrence of a "needle" as an element of a "haystack". Search starts at a specified index.
+-- Deprecated:
+--  Deprecated in version **4.0.0**
 --
---Parameters:
---		# ##needle## : an object whose presence is being queried
---		# ##haystack## : a sequence, which is being looked up for ##needle##
---		# ##start## : an integer, the index in ##haystack## at which to start searching.
+--  In Euphoria 4.0.0 we have the ability to default parameters to procedures and functions.
+--  The built-in [[:find]] therefore now has a ##start## parameter that is defaulted to the
+--  beginning of the sequence. Thus, [[:find]] can perform the identical functionality
+--  provided by ##find_from##. In an undetermined future release of Euphoria, ##find_from##
+--  will be removed.
 --
--- Returns:
---     An **integer**, 0 if ##needle## is not on ##haystack## past position ##start##, else the smallest index, not less than ##start##, of an element of ##haystack## that equals ##needle##.
---
--- Comments:
---     start may have any value from 1 to the length of ##haystack## plus 1. (Analogous to the
---     first index of a slice of ##haystack##).
---
--- ##find##() and [[:find_from]]() are identical, but you can omit giving ##find##() a starting point.
---
--- Example 1:
--- <eucode>
--- location = find_from(11, {11, 8, 11, 2, 3}, 2)
--- -- location is set to 3
--- </eucode>
---
--- Example 2:
--- <eucode>
--- names = {"mary", "rob", "george", "mary", ""}
--- location = find_from("mary", names, 3)
--- -- location is set to 4
--- </eucode>
---
--- See Also:
---     [[:find]], [[:match]], [[:match_from]], [[:compare]]
 
 --**
 -- Find any element from a list inside a sequence. Returns the location of the first hit.
@@ -832,10 +805,6 @@ end function
 -- Returns:
 --     An **integer**, 0 if no slice of ##haystack## is ##needle##, else the smallest index at which such a slice starts.
 --
--- Comments:
---
--- ##match##() and [[:match_from]]() are identical, but you can omit giving ##match##() a starting point.
---
 -- Example 1:
 -- <eucode>
 -- location = match("pho", "Euphoria")
@@ -843,37 +812,21 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:find]], [[:find_from]], [[:compare]], [[:match_from]], [[:wildcard:is_match]]
+--     [[:find]], [[:find_from]], [[:compare]], [[:wildcard:is_match]]
 
 --****
 -- Signature:
 --     <built-in> function match_from(sequence needle, sequence haystack, integer start)
 --
--- Description:
---     Try to match a "needle" against some slice of a "haystack", starting from some index.
+-- Deprecated:
+--  Deprecated in version **4.0.0**
 --
--- Parameters:
---		# ##needle## : an sequence whose presence as a sub-sequence is being queried
---		# ##haystack## : a sequence, which is being looked up for ##needle## as a sub-sequence
---		# ##start## : an integer, the index in ##haystack## at which to start searching.
+--  In Euphoria 4.0.0 we have the ability to default parameters to procedures and functions.
+--  The built-in [[:match]] therefore now has a ##start## parameter that is defaulted to the
+--  beginning of the sequence. Thus, [[:match]] can perform the identical functionality
+--  provided by ##match_from##. In an undetermined future release of Euphoria, ##match_from##
+--  will be removed.
 --
--- Returns:
---     An **integer**, 0 if no slice of ##haystack## with lower index at least ##start## is ##needle##, else the smallest such index.
---
--- Comments:
---     ##start## may have any value from 1 to the length of ##haystack## plus 1. (Just like the first
---     index of a slice of ##haystack##.)
---
--- ##match##() and [[:match_from]]() are identical, but you can omit giving ##match##() a starting point.
---
--- Example 1:
--- <eucode>
--- location = match_from("pho", "phoEuphoria", 4)
--- -- location is set to 6
--- </eucode>
---
--- See Also:
---     [[:find]], [[:find_from]], [[:match]], [[:compare]], [[:wildcard:is_match]], [[:regex:find]]
 
 --**
 -- Match all items of haystack in needle.
