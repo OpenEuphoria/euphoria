@@ -1,16 +1,7 @@
 == Version 1.3, June 1995:
 
+* You can now edit multiple files using multiple edit windows. 
+* 20 new library routines were added.
+* Graphics performance was greatly improved.
 
-<li>
- You can now edit multiple files using multiple edit windows. 
-
-<li>
- 20 new library routines were added.
-
-<li>
- Graphics performance was greatly improved.
-
-</ul>
-
-&nbsp;<br>
 
