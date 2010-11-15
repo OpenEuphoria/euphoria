@@ -393,22 +393,20 @@ procedure run()
 	outputDir = slashifier( outputDir )
 	
 	-- get input file
-	if length( inFileName ) != 1 then
-		puts(2, "You must specify a single file\n" )
+	if length( inFileName ) < 1 then
+		puts(2, "You must specify at least a single file\n" )
 		abort( 1 )
 	else
-		inFileName = inFileName[1]
-		
-		if eu:compare( pathname( inFileName ), current_dir() ) then
-			chdir( pathname( inFileName ) )
-			inFileName = filename( inFileName )
+		if eu:compare( pathname( inFileName[1] ), current_dir() ) then
+			chdir( pathname( inFileName[1] ) )
+			inFileName[1] = filename( inFileName[1] )
 		end if
 		
 	end if
 
     Place &= apply(stringifier(map:get(params, "include")), routine_id("slashifier"))
     
-	sequence default_config_file = slashifier( pathname( inFileName ) ) & "eu.cfg"
+	sequence default_config_file = slashifier( pathname( inFileName[1] ) ) & "eu.cfg"
 	if file_exists( default_config_file ) then
 		configFiles = prepend( configFiles, default_config_file )
 	end if
@@ -458,7 +456,9 @@ procedure run()
 	
 	printf(1, "Outputting files to directory: %s\n", {outputDir})
 		     
-	parseFile( inFileName )
+	for i = 1 to length(inFileName) do
+	parseFile( inFileName[i] )
+	end for
 	
 	printf(1, "\n%d files were found.\n", {length(included)})
 	if verbose then
