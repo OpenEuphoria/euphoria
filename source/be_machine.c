@@ -2441,6 +2441,28 @@ inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	return - (-radix & -v);
 }
 
+typedef unsigned char * page_ptr;
+
+unsigned char * new_page() {
+#ifdef EWINDOWS
+	return VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+#elif ELINUX
+	return memalign( pagesize, CALLBACK_SIZE );
+#elif EUNIX
+	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);			
+#endif
+}
+
+void set_page_to_read_execute_only(page_ptr page_addr) {
+#ifdef EWINDOWS
+	static unsigned long oldprot;
+	static unsigned long * oldprotptr = &oldprot;
+	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
+#elif EUNIX
+	mprotect(page_addr, pagesize, PROT_EXEC|PROT_READ);
+#endif
+}
+
 object CallBack(object x)
 /* return either a call-back address for routine id x
    x can be the routine id for stdcall, or {'+', routine_id} for cdecl
@@ -2452,14 +2474,15 @@ object CallBack(object x)
    the caller must search for the bytes {#78,#56,#34,#12}, allocate enough memory (call_back size)
    and to copy what is pointed to by the said address and then replace the searched for bytes with
    the replace value in the allocated memory.
+   
+   Assumption: pagesize is much bigger than CALLBACK_SIZE.
+   
    */
 {
-#ifdef EWINDOWS
 	static unsigned char *page_addr = NULL;
 	static unsigned int page_offset = 0;
 	static long call_increment = 0;
 	static long last_block_offset = 0;
-#endif
 	unsigned addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
@@ -2470,10 +2493,7 @@ object CallBack(object x)
 	s1_ptr x_ptr;
 	int convention;
 	int res;
-	unsigned long oldprot;
-	unsigned long * oldprotptr;
 	convention = C_CDECL;
-	oldprotptr = &oldprot;
 	not_patched = 1;
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
@@ -2539,8 +2559,8 @@ object CallBack(object x)
 	}
 
 	/* Now allocate memory that is executable or at least can be made to be ... */
-#	ifdef EWINDOWS
-		/* Here allocate and manage memory for 4kB is a lot to use when you
+	
+		/*	Here allocate and manage memory for 4kB is a lot to use when you
 			only use 92B.  Memory is allocated by VirtualAlloc() /pagesize/ bytes at a time.
 			So, we give pieces of this page on each call until there is not enough to complete
 			up to /CALLBACK_SIZE/ bytes.  When this happens we make the page unwritable and
@@ -2551,11 +2571,11 @@ object CallBack(object x)
 				// Grab next sub-block from the current block.
 				page_offset += call_increment;
 			} else {
-				// Change previously allocated block to read-only
-				VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
+				// Change previously allocated block to read+exec-only
+				set_page_to_read_execute_only(page_addr); // VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
 
 				// Allocate a new block
-				page_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+				page_addr = new_page(); // VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
 				page_offset = 0;
 			}
 		} else {
@@ -2563,25 +2583,23 @@ object CallBack(object x)
 			call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
 			last_block_offset = (pagesize - 2 * call_increment);
 
-			page_addr = VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+			page_addr = new_page(); //VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
 			page_offset = 0;
 		}
 
 		copy_addr = page_addr + page_offset;
+#	ifdef EWINDOWS		   
 		/* Assume we are running under some Windows that
-		   supports VirtualAlloc() always returning 0. */
+		   supports VirtualAlloc() always returning 0. 
+		   This has happened before in testing.  */
 		if (copy_addr == NULL)
-			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
-#	elif defined(ELINUX) /* ndef EWNIDOWS */
-			copy_addr = memalign( pagesize, CALLBACK_SIZE );
-#	else
-		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);		
+			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
 #	endif /* ndef EWINDOWS */
 
 
-	/* Check if the memory allocation worked. */
+	/* Check if the memory allocation worked. */	
 	if (copy_addr == NULL) {
-		RTFatal("Your program has run out of memory.\nOne moment please...");
+		SpaceMessage();
 	}
 
 	/* copy memory of the template to the newly allocated memory */
@@ -2610,12 +2628,7 @@ object CallBack(object x)
 		RTFatal("Internal error: CallBack routine id patch failed: missing magic.");
 	}
 	
-	addr = (unsigned)copy_addr;
-	/* Make memory executable. */
-#ifdef EUNIX
-	if ( mprotect((void*)(addr), CALLBACK_SIZE, PROT_READ+PROT_WRITE+PROT_EXEC) )
-		RTFatal("Internal error: CallBack mprotect failed (%d).", errno);
-#endif	
+	addr = (unsigned long)copy_addr;
 
 	/* Return new address. */
 	return MAKE_UINT(addr);

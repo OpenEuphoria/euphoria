@@ -388,7 +388,7 @@ static void Free_All()
 // }
 // #endif
 
-static void SpaceMessage()
+void SpaceMessage()
 {
 	/* should we free up something first, to ensure iprintf's work? */
 	RTFatal("Your program has run out of memory.\nOne moment please...");

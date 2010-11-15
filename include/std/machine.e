@@ -14,6 +14,7 @@ elsedef
 	public include std/memory.e as memory
 end ifdef
 
+include std/unix/mmap.e
 include std/dll.e
 include std/error.e
 include std/types.e
@@ -607,6 +608,52 @@ ifdef WIN32 then
 std_library_address oldprotptr = allocate_data(ADDRESS_LENGTH)
 end ifdef
 
+function local_allocate_protected_memory( integer s, integer first_protection )
+	ifdef WIN32 then
+		if dep_works() then
+			return eu:c_func(VirtualAlloc_rid, 
+				{ 0, s, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
+		else
+			return machine_func(M_ALLOC, s)
+		end if
+	elsifdef LINUX then
+		return machine_func(M_ALLOC, s)
+	elsifdef UNIX then
+		return mmap( 0, s, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
+	end ifdef
+end function
+
+-- return -1 for failure. 0 success  
+function local_change_protection_on_protected_memory( atom p, integer s, integer new_protection )
+	ifdef WIN32 then
+		if dep_works() then
+			if eu:c_func( VirtualProtect_rid, { p, s, new_protection , oldprotptr } ) = 0 then
+				-- 0 indicates failure here
+				return -1
+			end if
+		end if
+		return 0
+	elsifdef LINUX then
+		return 0
+	elsifdef UNIX then
+		return mprotect(p, s, new_protection)
+	end ifdef
+end function
+
+procedure local_free_protected_memory( atom p, integer s)
+	ifdef WINDOWS then
+		if dep_works() then
+			c_func(VirtualFree_rid, { p, s, MEM_RELEASE })
+		else
+			machine_func(M_FREE, {p})
+		end if
+	elsifdef LINUX then
+		machine_func(M_FREE, {p})
+	elsifdef UNIX then
+		munmap(p, s)
+	end ifdef
+end procedure
+
 --**
 -- Allocates and copies data into memory and gives it protection using
 -- [[:Standard Library Memory Protection Constants]] or
@@ -670,16 +717,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		first_protection = PAGE_READ_WRITE
 	end if
 
-	ifdef WIN32 then
-		if dep_works() then
-			iaddr = eu:c_func(VirtualAlloc_rid, 
-				{ 0, size+BORDER_SPACE*2, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
-		else
-			iaddr = machine_func(M_ALLOC, size+BORDER_SPACE*2)
-		end if
-	elsedef 
-		iaddr = machine_func(M_ALLOC, size+BORDER_SPACE*2)
-	end ifdef
+	iaddr = local_allocate_protected_memory( size+BORDER_SPACE*2, first_protection )
 	if iaddr = 0 then
 		return 0
 	end if
@@ -706,35 +744,29 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 			
 	end switch
 	
-
-	ifdef WIN32 then
-		ifdef SAFE then
-			-- here we can take away write access
-			-- from true_protection if protection doesn't have it.
-			-- true_protection must have read access though.
-			switch protection do
-				case PAGE_EXECUTE then
-					true_protection = PAGE_EXECUTE_READ
-					
-				case PAGE_EXECUTE_WRITECOPY  then
-					true_protection = PAGE_EXECUTE_READWRITE
-					
-				case PAGE_WRITECOPY, PAGE_NOACCESS then				
-					true_protection = PAGE_READONLY
-					
-				case else
-					true_protection = protection					
-			end switch
-		end ifdef
-		if dep_works() then
-			if eu:c_func( VirtualProtect_rid, { iaddr, size, true_protection , oldprotptr } ) = 0 then
-				-- 0 indicates failure here
-				c_func(VirtualFree_rid, { iaddr, size, MEM_RELEASE })
-				return 0
-			end if
-		end if
+	ifdef SAFE then
+		-- here we can take away write access
+		-- from true_protection if protection doesn't have it.
+		-- true_protection must have read access though.
+		switch protection do
+			case PAGE_EXECUTE then
+				true_protection = PAGE_EXECUTE_READ
+				
+			case PAGE_EXECUTE_WRITECOPY  then
+				true_protection = PAGE_EXECUTE_READWRITE
+				
+			case PAGE_WRITECOPY, PAGE_NOACCESS then				
+				true_protection = PAGE_READONLY
+				
+			case else
+				true_protection = protection					
+		end switch
 	end ifdef
-
+	
+	if local_change_protection_on_protected_memory( iaddr, size+BORDER_SPACE*2, true_protection ) = -1 then
+		local_free_protected_memory( iaddr, size+BORDER_SPACE*2 )
+	end if
+	
 	return eaddr
 end function
 
