@@ -74,7 +74,7 @@ print_sorted_list()     -- this command starts the program
 
 The above example contains a number of statements that are processed in order.
 ; ##include std/console.e## 
-: This  tells the Euphoria that this application needs
+: This tells Euphoria that this application needs
 access to the public symbols declared in the file
 'std/console.e'. This is referred to as a //library//
 file. In our case here, the application will be using
