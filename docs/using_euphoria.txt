@@ -360,7 +360,7 @@ your first line ends with the unix-style ##\n##, and not the
 file is shrouded, you must give the path to ##eub##, not ##eui##.
 
 You can also run ##bind## to combine your Euphoria program
-with ##eui## interpreter, to make a stand-alone executable file. With a
+with the ##eui## interpreter, to make a stand-alone executable file. With a
 stand-alone executable, you //can// redirect standard input and output. Binding
 is discussed further in [[:Distributing a Program]].
 
