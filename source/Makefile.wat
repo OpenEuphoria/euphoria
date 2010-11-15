@@ -12,6 +12,7 @@
 #   Code Page Database               : wmake code-page-db
 #   Create Documentation in HTML     : wmake htmldoc
 #   Create Documentation in PDF      : wmake pdfdoc
+#   Create online Documentation HTML : wmake manual
 #                                    
 #   Clean binaries, object files,    
 #   C files and configuration        : wmake clobber
@@ -682,6 +683,18 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
 	$(EUDOC) --strip=2 -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
 
+$(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
+	mkdir $^@
+
+$(BUILDDIR)\docs\images : .EXISTSONLY $(BUILDDIR)\docs 
+	mkdir $^@
+
+$(BUILDDIR)\docs: .EXISTSONLY
+	mkdir $^@
+	
+$(BUILDDIR)\docs\style.css : $(DOCDIR)\style.css
+	copy $(DOCDIR)\style.css $(BUILDDIR)\docs
+
 $(BUILDDIR)\html\js : .EXISTSONLY $(BUILDDIR)\html  
 	mkdir $^@
 
@@ -700,12 +713,27 @@ $(BUILDDIR)\html\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\ht
 $(BUILDDIR)\html\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\html\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
+$(BUILDDIR)\docs\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\docs\images
+	copy $(DOCDIR)\html\images\prev.png $^@
+	
+$(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\docs\images
+	copy $(DOCDIR)\html\images\next.png $^@
+
+$(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
+	cd $(TRUNKDIR)\docs
+	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
+
 $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
+manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
+
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
+
+htmldoc : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 
