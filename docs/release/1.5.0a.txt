@@ -1,73 +1,25 @@
 == Version 1.5a June 13, 1997:
 
-
-<li>
- Many operations and library routines were optimized. 
-
-
-<li>
-   **get_key()** is
-   100x faster when there is no key in the buffer.
-
-<li>
-   **get_all_palette()** is over 100x faster
-   and this makes **save_screen()** much faster.
-
-<li>
-   The following routines have now been built directly into
-   **ex.exe**, to avoid the overhead of
-   calling machine_proc() or
-   machine_func():
-   **pixel()**, 
-   **get_pixel()**,
-   **mem_set()**,
-   **mem_copy()**.
-
-<li>
-   **poke()** of a long sequence into memory,
-   other than video memory, is 50% faster.
-
-<li>
-   **pixel()** is 4x faster in mode 19.
-
-<li>
-   **get_pixel()** is faster in all modes.
-
-<li>
-   **display_image()** is about 30% faster in
-   most modes and up to 4x faster in mode 19, 
-   because <br>pixel() is faster.
-
-<li>
-   All arithmetic and bitwise operations applied to sequences of integers are 
-   now 29% faster.  
-
-<li>
-   a **&** b (concatenation) is 15% faster
-   in most cases, and is dramatically faster in the case where you grow a
-   very long sequence by concatenating many small sequences onto it. 
-
-<li>
-   **getc()** is 12% faster.
-
-<li>
-   **match()** is 8% faster in typical cases.
-
-<li>
-   **append()/prepend()** are 15% faster in
-   many cases.
-
-<li>
-   **find()** of an integer within a
-   sequence of integers is 64% faster.
-
-<li>
-   Formation of a 2-element sequence **{a,b}** is 11% faster.
-
-<li>
-   Internal copying of a shared sequence when it can no longer be shared is
-   15% faster.
-</ul>
-
-</ul>
+* Many operations and library routines were optimized. 
+* **get_key()** is 100x faster when there is no key in the buffer.
+* **get_all_palette()** is over 100x faster and this makes **save_screen()** much
+  faster.
+* The following routines have now been built directly into **ex.exe**, to avoid
+  the overhead of calling machine_proc() or machine_func(): **pixel()**,
+  **get_pixel()**, **mem_set()**, **mem_copy()**.
+* **poke()** of a long sequence into memory, other than video memory, is 50% faster.
+* **pixel()** is 4x faster in mode 19.
+* **get_pixel()** is faster in all modes.
+* **display_image()** is about 30% faster in most modes and up to 4x faster in
+  mode 19, because <br>pixel() is faster.
+* All arithmetic and bitwise operations applied to sequences of integers are now 29% faster.  
+* a **&** b (concatenation) is 15% faster in most cases, and is dramatically faster in the case 
+  where you grow a very long sequence by concatenating many small sequences onto it. 
+* **getc()** is 12% faster.
+* **match()** is 8% faster in typical cases.
+* **append()/prepend()** are 15% faster in many cases.
+* **find()** of an integer within a sequence of integers is 64% faster.
+* Formation of a 2-element sequence **{a,b}** is 11% faster.
+* Internal copying of a shared sequence when it can no longer be shared is 15%
+  faster.
 
