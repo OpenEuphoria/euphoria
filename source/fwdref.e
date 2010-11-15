@@ -110,7 +110,6 @@ procedure set_code( integer ref )
 	else
 		patch_current_sub = patch_code_sub
 	end if
-	
 end procedure
 
 procedure reset_code( )
@@ -237,6 +236,8 @@ procedure patch_forward_call( token tok, integer ref )
 	integer old_temps_allocated = temps_allocated
 	temps_allocated = 0
 	
+	integer pre_refs = length( forward_references )
+	
 	for i = pc + 3 to pc + args + 2 do
 		defarg += 1
 		param_sym = SymTab[param_sym][S_NEXT]
@@ -266,12 +267,12 @@ procedure patch_forward_call( token tok, integer ref )
 	-- In case anything was inlined, we need to shift the code so it's correct for its
 	-- final place in the original code, since we've been building this stream of IL
 	-- from an empty sequence, rather than actually inline with the function call.
+	integer temp_shifting_sub = shifting_sub
 	shift( -pc, pc-1 )
 	
 	sequence new_code = Code
 	Code = orig_code
 	LineTable = orig_linetable
-	
 	set_dont_read( 0 )
 	current_file_no = real_file
 	
@@ -299,6 +300,10 @@ procedure patch_forward_call( token tok, integer ref )
 
 	replace_code( new_code, pc, next_pc - 1, code_sub )
 	
+	for i = pre_refs + 1 to length( forward_references ) do
+		forward_references[i][FR_PC] += pc - 1
+	end for
+
 	reset_code()
 	
 	-- mark this one as resolved already
@@ -549,7 +554,6 @@ procedure patch_forward_type_check( token tok, integer ref )
 		end if
 		
 	end if
-	
 	resolved_reference( ref )
 	reset_code()
 end procedure
