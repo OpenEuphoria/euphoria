@@ -127,7 +127,7 @@ include std/types.e
 -- </eucode>
 --
 -- See Also:
---     [[:find_from]], [[:match]], [[:compare]]
+--     [[:find]], [[:match]], [[:compare]]
 
 --****
 -- Signature:
@@ -171,7 +171,7 @@ include std/types.e
 --   </eucode>
 --
 -- See Also:
---		[[:find]], [[:find_from]]
+--		[[:find]]
 
 public function find_any(object needles, sequence haystack, integer start=1)
 	if atom(needles) then
@@ -252,7 +252,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:find]], [[:find_from]], [[:find_any]]
+--		[[:find]], [[:find_any]]
 
 public function find_each(sequence needles, sequence haystack, integer start=1)
 	integer kx = 0
@@ -812,7 +812,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:find]], [[:find_from]], [[:compare]], [[:wildcard:is_match]]
+--     [[:find]], [[:compare]], [[:wildcard:is_match]]
 
 --****
 -- Signature:
