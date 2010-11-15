@@ -85,18 +85,18 @@ else
 	
 	if _ != -1 then
 		sequence send_data = "Hello, "
-		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("receive w/o newline", send_data, sock:receive(socket, 0))
+		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
+		test_equal("receive w/o newline", send_data, sock:receive(socket, MSG_NOSIGNAL))
 		
 		send_data = "world\n"
-		test_equal("send with newline", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("receive with newline", send_data, sock:receive(socket, 0))
+		test_equal("send with newline", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
+		test_equal("receive with newline", send_data, sock:receive(socket, MSG_NOSIGNAL))
 		
 		send_data = repeat('a', 511) & "\n"
-		test_equal("send large", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("receive large", send_data, sock:receive(socket, 0))
+		test_equal("send large", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
+		test_equal("receive large", send_data, sock:receive(socket, MSG_NOSIGNAL))
 		
-		_ = send(socket, "quit\n", 0)
+		_ = send(socket, "quit\n", MSG_NOSIGNAL)
 	end if
 
 	pipe:kill(p)
