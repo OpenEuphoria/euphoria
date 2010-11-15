@@ -1178,8 +1178,10 @@ static object Seek(object x)
 	x1 = *(((s1_ptr)x)->base+1);
 	x2 = *(((s1_ptr)x)->base+2);
 	file_no = CheckFileNumber(x1);
-	if (user_file[file_no].mode == EF_CLOSED)
-		RTFatal("file must be open for seek()");
+	if (user_file[file_no].mode == EF_CLOSED) {
+		return ATOM_1; // "file must be open for seek()"
+	}
+	
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2);
 	if (pos == -1)
@@ -1194,11 +1196,8 @@ static object Seek(object x)
 #endif
 	else
 		result = iseek(f, pos, SEEK_SET);
-	if (result > (IOFF)MAXINT || result < (IOFF)MININT) {
-		result = NewDouble((double)result);  // maximum 2 billion
-		return result;
-	} else
-		return MAKE_INT(result);
+	
+	return (!result ? ATOM_0 : ATOM_1);
 }
 
 // 2 implementations of dir()
