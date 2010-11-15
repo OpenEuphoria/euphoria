@@ -1,9 +1,4 @@
 == Version 1.2, March 1994:
 
-
-<li>
-  A problem that prevented Euphoria from running in a DOS prompt under 
-  Windows was eliminated.
-
-</ul>
+* A problem that prevented Euphoria from running in a DOS prompt under Windows was eliminated.
 
