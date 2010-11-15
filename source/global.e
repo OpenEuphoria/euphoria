@@ -444,13 +444,9 @@ export constant warning_names = {
 	"all"
 }
 
+-- These are warnings that can only be generated when Strict mode is on.
 export constant strict_only_warnings = {
 	def_arg_type_warning_flag,
-	not_used_warning_flag,
-	short_circuit_warning_flag,
-	not_reached_warning_flag,
-	empty_case_warning_flag,
-	no_case_else_warning_flag,
 	$
 	}
 
