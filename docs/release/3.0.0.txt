@@ -1,6 +1,4 @@
-
 == Version 3.0.0 October 17, 2006:
-
 
 With this release, Euphoria has become a totally **free**
 and totally **open source** product! RDS will continue to develop
@@ -18,164 +16,96 @@ change compared to the previous release.
 
 === Enhanced Features
  
-<ul>
-<li>
- **Cooperative Multitasking**. Rather than having just a single thread of execution,
- you can now create multiple tasks that run independently
- of one another. Each task has its own currently-executing statement,
- subroutine call-stack, and private variables for all routines on 
- its call-stack. Tasks share global and local variables but not private
- variables. At any point during its execution, a task can call task_yield()
- to transfer control to the Euphoria scheduler which will choose the next 
- task to run. When control returns to the original task, 
- execution will continue from the statement after task_yield().</li>
- <li>
- New Run-time routines:
- 
-task_create(), task_schedule(), task_yield(), task_suspend(),
- task_self(), task_list(), task_status(), task_clock_start(),
- task_clock_stop()</li>
- 
-<li>
- Use of the **ncurses** library has been eliminated for Linux 
- and FreeBSD. ncurses routines sometimes caused problems on some 
- Linux/FreeBSD systems.
-  The Euphoria backend now uses ANSI escape chars to 
-  get 2-d positioning and colors for a plain text-mode console.
-  Also, the use of libgpm (console mouse support) has been dropped on Linux. 
-  (It was never supported by Euphoria on FreeBSD). </li>
-    
-<li>
-  **Include files** with the same file name but a different path as an earlier
-  include, will no longer be ignored. To be ignored, an include must 
-  refer to the exact same file as an earlier include. 
-  (a new name space can still be defined, even
-   though the include file is not actually included again.)
-   On Linux/FreeBSD a case-sensitive file-name comparison is now used.
-   
-   There is possible (but unlikely) breakage of old code:
-   
-    
-   You might start including files 
-   that you did not intend to include, if you have a previously-ignored 
-   include statement for them in your code. 
-   Solution: Delete the undesired include statement.
-   
-   
-   If an include is incorrect (file is not
-   on the include search path), this error may have been hidden 
-   under the old system, if a correct include with the same file name 
-   (but different path) came earlier. Solution: Specify the correct path 
-   to the include file.</li>
-   
-<li>
-  There is no longer a limit on the number of **warnings** that can be
-  displayed. Instead, you will be given the chance to scroll through all the
-  warnings, 20 at a time. As before, if a ex.err file is created,
-  then all warnings will also be stored at the end of the ex.err file.
-  Thanks to Judith Evans.</li>
-
-<li>
-  <font color="#0066CC">**Translator**</font>: You can set the run-time stack size for your program
-  using the -stack nnnn option. The default stack size has been increased
-  for most of the supported C compilers, especially when your program
-  contains a call to task_create().</li>
-     
-<li>
- If a run-time error occurs and ex.err can't be opened,
- a check will be made to see if it's because you have
- **too many open files**. An appropriate message will then
- be issued. Several people ran into this situation.</li>
- 
-<li>
-  **execute.e**: Additional run-time error checks were added to several
-   run-time routines to allow the pure-Euphoria source interpreter 
-   to catch more errors itself, rather than letting the C-coded 
-   run-time routines used by the "real" interpreter or translator catch them.</li>
-       
-<li>
-  **pretty_print()**, option 3, now includes \t \r and \n as 
-  valid "ASCII range" characters. This increases the
-  likelihood of strings being displayed. Thanks to Juergen Luethje.</li>
-       
-<li>
-  The **ASCII 127** char will not be graphically displayed on Linux in 
-  trace or in default pretty_print(). It displays as a backspace when 
-  ANSI codes are used.</li>
-         
-<li>
-  **Binder** options are checked more strictly. e.g. -xxxoutxxx was dangerous
-  The binder now looks for match(x,y) = 1, rather than match(x,y) != 0.
-  The binder also avoids overwriting a source file when -out is used.
-  Thanks to Mike Sabal, Greg Haberek</li>
-   
-<li>We've switched to using transparent Euphoria icons. Thanks to Vincent Howell.</li>
- 
-<li>
-  Pure Euphoria interpreter (eu.ex): 
-  The "not initialized" message has been improved to:
-  "xyz has not been initialized"</li>
-  
-<li>
-  Many small improvements were made to the **documentation**. e.g. 
-  the use of a single atom value by multiple printf() formats was 
-  documented for the first time. Thanks to Pete Lomax.</li>
- 
-</ul> 
+* **Cooperative Multitasking**. Rather than having just a single thread of
+  execution, you can now create multiple tasks that run independently of one
+  another. Each task has its own currently-executing statement, subroutine
+  call-stack, and private variables for all routines on its call-stack. Tasks
+  share global and local variables but not private variables. At any point during
+  its execution, a task can call task_yield() to transfer control to the Euphoria
+  scheduler which will choose the next task to run. When control returns to the
+  original task, execution will continue from the statement after task_yield().
+* New Run-time routines: task_create(), task_schedule(), task_yield(),
+  task_suspend(), task_self(), task_list(), task_status(), task_clock_start(),
+  task_clock_stop()
+* Use of the **ncurses** library has been eliminated for Linux and FreeBSD.
+  ncurses routines sometimes caused problems on some Linux/FreeBSD systems.  The
+  Euphoria backend now uses ANSI escape chars to get 2-d positioning and colors
+  for a plain text-mode console.  Also, the use of libgpm (console mouse support)
+  has been dropped on Linux.  (It was never supported by Euphoria on FreeBSD). 
+* **Include files** with the same file name but a different path as an earlier
+  include, will no longer be ignored. To be ignored, an include must refer to the
+  exact same file as an earlier include.  (a new name space can still be defined,
+  even though the include file is not actually included again.) On Linux/FreeBSD
+  a case-sensitive file-name comparison is now used.\\
+  \\
+  There is possible (but unlikely) breakage of old code:\\
+  \\
+  You might start including files that you did not intend to include, if you have
+  a previously-ignored include statement for them in your code.  Solution: Delete
+  the undesired include statement.\\
+  \\
+  If an include is incorrect (file is not on the include search path), this error
+  may have been hidden under the old system, if a correct include with the same
+  file name (but different path) came earlier. Solution: Specify the correct path
+  to the include file.
+* There is no longer a limit on the number of **warnings** that can be displayed.
+  Instead, you will be given the chance to scroll through all the warnings, 20 at
+  a time. As before, if a ex.err file is created, then all warnings will also be
+  stored at the end of the ex.err file.  Thanks to Judith Evans.
+* **Translator**: You can set the run-time stack size for your program using the
+  -stack nnnn option. The default stack size has been increased for most of the
+  supported C compilers, especially when your program contains a call to
+  task_create().
+* If a run-time error occurs and ex.err can't be opened, a check will be made to
+  see if it's because you have **too many open files**. An appropriate message
+  will then be issued. Several people ran into this situation.
+* **execute.e**: Additional run-time error checks were added to several run-time
+  routines to allow the pure-Euphoria source interpreter to catch more errors
+  itself, rather than letting the C-coded run-time routines used by the "real"
+  interpreter or translator catch them.
+* **pretty_print()**, option 3, now includes \t \r and \n as valid "ASCII range"
+  characters. This increases the likelihood of strings being displayed. Thanks to
+  Juergen Luethje.
+* The **ASCII 127** char will not be graphically displayed on Linux in trace or
+  in default pretty_print(). It displays as a backspace when ANSI codes are used.
+* **Binder** options are checked more strictly. e.g. -xxxoutxxx was dangerous The
+  binder now looks for match(x,y) = 1, rather than match(x,y) != 0.  The binder
+  also avoids overwriting a source file when -out is used.  Thanks to Mike Sabal,
+  Greg Haberek
+* We've switched to using transparent Euphoria icons. Thanks to Vincent Howell.
+* Pure Euphoria interpreter (eu.ex): The "not initialized" message has been
+  improved to: "xyz has not been initialized"
+* Many small improvements were made to the **documentation**. e.g.  the use of a
+  single atom value by multiple printf() formats was documented for the first
+  time. Thanks to Pete Lomax.
 
 === Bug Fixes
 
-<ul> 
-<li>
-  **<font color="#009999">bug fixed: </font>**
-  <font color="#0066CC">**Translator**</font>: a Euphoria file 
-  named "main.e" or "init.e"
-   could possibly lead to a file naming conflict. The chance of a conflict
-   is now greatly reduced, and if a conflict occurs, a meaningful error
-   message will be issued.
-   Thanks to Vincent Howell.</li>
+* **bug fixed: ** **Translator**: a Euphoria file named "main.e" or "init.e"
+  could possibly lead to a file naming conflict. The chance of a conflict is now
+  greatly reduced, and if a conflict occurs, a meaningful error message will be
+  issued.  Thanks to Vincent Howell.
+* **bug fixed: ** **Translator**: using "interrupt" as a Euphoria variable name
+  caused a naming conflict when compiling with Watcom. Thanks to Louis Bryant.
+* **bug fixed: ** **Translator**: A backslash at the end of a Euphoria comment
+  could be considered a line continuation character by the C compiler. This could
+  result in incorrect code being generated. Thanks to Mark Honnor.
+* **bug fixed: ** **Translator**: A call to a Euphoria-coded routine in a .dll,
+  i.e. via c_func(), could cause a bug if the return type was sequence or object.
+  Thanks to Thomas Jansen.
+* **bug fixed:** If you pass file number -1 to **printf()** you will now get a
+  run-time error report.  In all previous releases, -1 would simply cause
+  printf() to produce no output. Thanks to Daniel Kluss.
+* **bug fixed:** scanner.e: Source lines longer than 10000 characters caused a
+  problem.  Also we were not checking for allocate() returning 0 in pack_source()
+  (i.e. out of memory condition). Thanks to Antonio Alessi.
+* **bug fixed:** **execute.e**: (pure Euphoria interpreter) In some cases slice
+  indexes were not being bounds checked before being used. eu.ex would crash
+  rather than report the error in the user's program.
+* **bug fixed:** Assignments of the form: **x[a][b..c] += expr** were likely to
+  trigger an erroneous subscript error in **execute.e**, the pure Euphoria
+  interpreter. Thanks to Vincent Howell.10813
+* **bug fixed:** **execute.e** did not handle fractional subscripts correctly in
+  some situations.  Thanks to C Bouzy and Vincent Howell.
 
-<li>
-  **<font color="#009999">bug fixed: </font>**
-  <font color="#0066CC">**Translator**</font>: using "interrupt" 
-   as a Euphoria variable name caused
-   a naming conflict when compiling with Watcom. Thanks to Louis Bryant.</li>
 
-<li>
-  **<font color="#009999">bug fixed: </font>**
-  <font color="#0066CC">**Translator**</font>: A backslash 
-  at the end of a Euphoria comment could be considered a 
-  line continuation character by the C compiler. This could result in
-  incorrect code being generated. Thanks to Mark Honnor.</li>
-    
-<li>
-  **<font color="#009999">bug fixed: </font>**
-  <font color="#0066CC">**Translator**</font>: A call to a Euphoria-coded
-  routine in a .dll, i.e. via c_func(), could cause a bug if the 
-  return type was sequence or object. Thanks to Thomas Jansen.</li>
-    
-<li>
-  **<font color="#009999">bug fixed:</font>** If you pass file number -1
-   to **printf()** you will now get a run-time error report. 
-   In all previous releases, -1 would simply cause printf() 
-   to produce no output. Thanks to Daniel Kluss.</li>
-    
-<li>
-  **<font color="#009999">bug fixed:</font>**
-   scanner.e: Source lines longer than 10000 characters caused a problem.
-   Also we were not checking for allocate() returning 0 
-   in pack_source() (i.e. out of memory condition). Thanks to Antonio Alessi.</li>
-
-<li>
-  **<font color="#009999">bug fixed:</font>** **execute.e**: (pure Euphoria
-  interpreter) In some cases slice 
-  indexes were not being bounds checked before being used. eu.ex would crash 
-  rather than report the error in the user's program.</li>
-<li>
-  **<font color="#009999">bug fixed:</font>** Assignments of the form: **x[a][b..c] += expr** were likely to trigger an erroneous subscript error in **execute.e**, the pure Euphoria interpreter. Thanks to Vincent Howell.10813</li>
-<li>
-  **<font color="#009999">bug fixed:</font>** **execute.e** 
-  did not handle fractional subscripts correctly in some situations. 
-  Thanks to C Bouzy and Vincent Howell.</li>
-
-</ul>

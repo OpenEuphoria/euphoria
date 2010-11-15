@@ -1,51 +1,32 @@
 == Version 3.0.2 February 9, 2007:
+
 This release fixes some important bugs in 3.0.1, and improves the source code documentation.
 
 === Bug Fixes
-<ul>
-<li>
-     **<font color="#009999">bug fixed: </font>**
-     **Translator: **
-     Programs translated to C and compiled for Windows 
-     would crash if they used the new multitasking feature.
-     (This worked in 3.0.0 but was broken accidentally in 3.0.1 
-     because some stack offsets changed.)</li>
-<li>
-    
-    **<font color="#009999">bug fixed: </font>**
-     **Interpreter: **
-    
-    In fairly rare situations, the interpreter for Windows might crash.
-    This was due to a bug in load_private_block() where it was freeing 
-    a block of memory and then returning a pointer into that block. 
-    In rare cases, a page of virtual memory might be removed from 
-    the heap by the Windows O/S before the block could be read. 
-    Thanks to Andy Serpa, 
-    Pete Lomax, Matt Lewis, Derek Parnell, and others for helping to 
-    pin-point the location of the bug.</li>
-  
-<li>
-    **<font color="#009999">bug fixed: </font>**
-     **Source Code: **
-    "\euphoria" was changed to to %EUDIR% in 4 .bat files in the
-    source directory. Thanks to Jaime Marcos.</li>
-    
-</ul>
+
+* **bug fixed: ** **Translator: ** Programs translated to C and compiled for
+  Windows would crash if they used the new multitasking feature.  (This worked in
+  3.0.0 but was broken accidentally in 3.0.1 because some stack offsets
+  changed.)
+* **bug fixed: ** **Interpreter: ** In fairly rare situations, the interpreter
+  for Windows might crash.  This was due to a bug in load_private_block() where
+  it was freeing a block of memory and then returning a pointer into that
+  block.  In rare cases, a page of virtual memory might be removed from the
+  heap by the Windows O/S before the block could be read.  Thanks to Andy
+  Serpa, Pete Lomax, Matt Lewis, Derek Parnell, and others for helping to
+  pin-point the location of the bug.
+* **bug fixed: ** **Source Code: ** "\euphoria" was changed to to %EUDIR% in 4 .bat 
+  files in the source directory. Thanks to Jaime Marcos.
 
 === Improved Documentation
-<ul>
-<li>
-A new document (translator.doc) was added to euphoria\source. It describes
-the internals of the Translator, with emphasis on the many optimizations
-that the Translator performs.</li>
-<li>
-    The user documentation was also improved in a few places.     </li>
-</ul>
+
+* A new document (translator.doc) was added to euphoria\source. It describes
+  the internals of the Translator, with emphasis on the many optimizations
+  that the Translator performs.
+* The user documentation was also improved in a few places.     
 
 === C Source Code Changes
-<ul>
-<li>
-    Matthew Lewis added a Linux/FreeBSD make file, and made source code 
-    changes to better support Open Watcom and a newer version of GCC.</li>
-</ul>  
+
+* Matthew Lewis added a Linux/FreeBSD make file, and made source code 
+  changes to better support Open Watcom and a newer version of GCC.
 

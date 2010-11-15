@@ -1,0 +1,136 @@
+== Version 2.5 Beta Release January 14, 2005:
+
+=== Improved Performance
+
+* The initial parse time (start-up time) of interpreted programs 
+  has been reduced, typically by 25% on newer machines, and 40% on older
+  machines, when compared to 2.5 alpha.  In the case of old machines running
+  very large programs, the start-up time can be 65% to 90% less, especially when
+  ##with trace## or ##with profile## are in effect.
+* Most of the optimizations were made to the Euphoria front-end 
+  source that's shared with the Public Domain source interpreter, so **eu.ex**
+  also has reduced parse times.
+* A major speed improvement was made in opASSIGN_SUBS() in the PD source 
+  interpreter. This operation handles assignments to subscripted sequences, and
+  is executed a lot. Thanks to Greg Haberek for showing the slowness.
+* **Translator**: In many more cases, the **Translator** now knows the type of all 
+  elements of a sequence. This is especially useful when the elements are known to be 
+  integers. Smaller and faster code is generated for accessing the elements, and freeing 
+  the sequence.
+* In most cases, the **Interpreter** and the **Translator** now evaluate
+  sequence-formation {a, b, c, ...} expressions once at compile-time, instead of
+  each time at run-time, when the elements are all constant integers (either
+  hard-coded numbers or symbols declared as constant). This saves time, and also
+  reduces code size for translated programs.
+* **database.e**: **db_select_table()** returns quickly if you happen to select
+  the table that's already selected. This can save a lot of time in situations
+  where it's not convenient for the application to keep track of which table is
+  currently selected.  Thanks to Derek Parnell.
+
+=== Enhanced Features
+
+* The **shrouder** will now supply a default **#!** (shebang) line at the top of
+  the **.il** file, if none was specified. Thanks to Kenneth Rhodes.
+* On **Linux**, the **shrouder** will give the **.il** file execute permission.
+  Thanks to Kenneth Rhodes.
+* On **Linux/FreeBSD** the **Binder** no longer creates bound executable programs
+  with a ".exe" extension. Now, no extension is used. This is compatible with the
+  **Translator**, and more in keeping with the standard on **Linux/FreeBSD**
+  systems. Thanks to Jerry Story.
+* **database.e**: Extra checks were added to some routines to give a more
+  meaningful error message when no table has been selected yet. Thanks to Derek
+  Parnell.
+* Several small improvements in the Source Code product and its documentation
+  make it easier to compile using Open Watcom and other compilers. Thanks to
+  Jean-Marc Duro.
+* The main source file is now closed right after the front-end finishes.  This
+  allows a program to edit or otherwise modify its own source.
+* The initial random seed value is now chosen more randomly
+  on **Windows**. Thanks to Yuku Sugianto.
+
+=== DOS/Windows Installation Program
+
+* The install program will set up ed.bat to run ed.ex with ex.exe on ME/98/95,
+  and exwc.exe on NT/2000/XP.
+* The **install** program will not change any existing file associations for
+  Euphoria file types. (If you install Euphoria in a new directory, you might
+  have to change these yourself.) Thanks to Juergen Luethje and others.
+* The Start Menu links created by the **install** program were wrong: exw was 
+  incorrectly pointing to **ecw.exe**, and ex was incorrectly pointing 
+  to **ec.exe**. Thanks to Yuku Sugianto.
+* It's ok now to have a blank in the path of the installation directory: e.g.
+  "C:\Program Files". Thanks to Rich.
+
+=== Bug Fixes
+
+* **bug fixed**: When building a Linux/FreeBSD .so file from Euphoria code that
+  contained **call_proc()** or **call_func()**, an undefined "~_~_stdcall" symbol
+  appeared in the C file by mistake. Thanks to Matt Lewis.
+* **bug fixed**: The opening message displayed by the Binder on Linux/FreeBSD and
+  on Windows was wrong.  Thanks to Kenneth Rhodes and Igor Kachan.
+* **bug fixed**: **routine_id()** was checking for symbols coming later in the
+  code. This happened in the Interpreter only, and only at the top-level, not
+  inside a routine.\\
+  This fix requires .il files shrouded with 2.5 alpha to be reshrouded
+  with 2.5 beta or later. Bound files are not a problem.
+* **bug fixed**: A complex expression on the left hand side of an assignment, involving 
+  nested use of ##$##, could crash. Thanks to Andy Serpa.
+* **bug fixed -  Translator: ** A call to **routine_id()** would sometimes search
+  past the end of a list and start reading garbage in memory. In most instances
+  this did not cause a problem, but in some cases it could cause a crash. Thanks
+  to Kenneth Rhodes.
+* **bug fixed -  Translator: ** In a rare situation, the 2.5 alpha Translator
+  could crash while attempting to optimize some code.
+* **bug fixed -  Translator: ** In a rare situation, at the end of execution of a
+  particular routine, the translated code would fail to free some space used for
+  a temporary value.  Thanks to Wolfgang Fritz.
+* **bug fixed**: After a compile error in **exw** you would have to hit Enter,
+  then a message would say: "Press Enter...".  (Things worked properly for
+  run-time errors).  Thanks to Tone Skoda.</li>
+* **bug fixed**: An incompatibility existed between the way that **abort(1)** was
+  handled in the Translator vs the Interpreter. Thanks to Juergen Luethje.
+* **bug fixed**: **save_text_image()**, when run by **exw** or **exwc**,
+  occasionally returned some garbage in the upper bits of the character
+  attributes. Thanks to Brian Broker.
+* **bug fixed**: The CAPS lock key generated a key code when using **ed** with
+  **exwc**. The key had the desired effect, but it caused **ed** to display a message 
+  at the top of the screen. **ed** will no longer display the message. Thanks Alex 
+  Caracatsanis.
+* **bug fixed**: **routine_id("")** would crash the Binder and Translator. Thanks
+  to Antonio Alessi.
+* **bug fixed**: A line longer than 200 chars crashed the **trace** display.
+ Thanks to Thomas Betterly.
+* **bug fixed**: Symbols declared as constant were not defined in the **trace**
+  window.  Thanks to Matthew Lewis.
+* **bug fixed**: **printf()** format strings were wrong in two error messages in
+  **execute.e** &nbsp;Thanks to Derek Parnell.
+* **bug fixed**: The caret (arrow) symbol, 
+  displayed in compile-time error messages, was shifted one position to the
+  right, when compared with version 2.4. This has been corrected.  Thanks to
+  Juergen Luethje.
+* **bug fixed**: For compatibility with the official Interpreter, routine id's 
+  now start at 0 instead of 1 in the PD source interpreter.
+
+=== Documentation
+
+* A paragraph was added to "Scope" discussing how you can override predefined
+  routines with your own variables and routines.  Thanks to Mike.
+* A warning was added to **open()** about the use of CON and CON.*, and other
+  file names that are reserved by DOS.  Thanks to Igor Kachan.
+* The fact that programs are now fully parsed before being executed was explained
+  better in the Reference Manual.
+* Obsolete uses of the phrase "Complete Edition" were removed from a few places
+  in the documentation. Thanks to Juergen Luethje.
+* Various documents were fixed where miscellaneous 2.4 information 
+  has now become now obsolete.
+* The Reference Manual said that the limit on nested include files was 10 deep.
+  It should have said 30 deep. Thanks to Darkvincentdude.
+* In the PD source interpreter, **eu.ex**, there was an error in the 
+  comments at the top. Thanks to Yuku Sugianto.
+* The fact that **crash_message()** is now only useful for run-time errors was
+  made clear. Thanks to Juergen Luethje.
+* A bad HTML link to the WIN32 API .hlp file was fixed.  Thanks to "Bro
+  George".
+* Many other minor clarifications were made.
+
+

@@ -213,8 +213,14 @@
 :@@(bugfix **$$(color #009999 bug fixed:)**)@
 :@@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
 
-../docs/relnotes400.txt
-
+../docs/release/4.0.0.txt
+../docs/release/3.1.1.txt
+../docs/release/3.1.0.txt
+../docs/release/3.0.2.txt
+../docs/release/3.0.1.txt
+../docs/release/3.0.0.txt
+../docs/release/2.5.0.txt
+../docs/release/2.5.0b.txt
 
 ########
 :%%output=key_index
