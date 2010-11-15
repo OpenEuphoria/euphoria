@@ -225,7 +225,15 @@
 ../docs/release/2.4.0.txt
 ../docs/release/2.4.0b.txt
 ../docs/release/2.4.0a.txt
-
+../docs/release/2.2.0.txt
+../docs/release.2.2.0b.txt
+../docs/release.2.2.0-linux.txt
+../docs/release.2.2.0b-linux.txt
+../docs/release.2.2.0a-linux.txt
+../docs/release.2.2.0-pa4.txt
+../docs/release.2.2.0-pa3.txt
+../docs/release.2.2.0-pa2.txt
+../docs/release.2.2.0-pa1.txt
 ../docs/release/2.3.0.txt
 ../docs/release/2.3.0b.txt
 ../docs/release/2.3.0a.txt

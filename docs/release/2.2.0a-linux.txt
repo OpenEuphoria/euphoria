@@ -1,88 +1,68 @@
 ==  Version 2.2 alpha-test release for Linux August 24, 1999:
 
-
 //Many of these features and bug fixes will also be made available 
 in Version 2.2 for **WIN32 + DOS32**//. 
 
-<li>
- The documentation has been brought up-to-date to include 
+*  The documentation has been brought up-to-date to include 
   **Linux**-specific information for library
   routines and Euphoria in general.
-<li>
- There is now a Complete Edition for
+*  There is now a Complete Edition for
   **Linux**, including
   **binding** and 
   **shrouding**. See
   **register\register.doc**.
-<li>
- There is now **text mode** mouse support using
+*  There is now **text mode** mouse support using
   **get_mouse()**. You must have **GPM
   server** running. It works in a text console or an **xterm** window.
-<li>
- **Linux:**
+*  **Linux:**
   **define_c_var(name)** will return the
   address of a global C variable in a shared library.
-<li>
- It was confirmed that you can call Euphoria routines from
+*  It was confirmed that you can call Euphoria routines from
   **Linux** C routines using exactly the same
   mechanism as in **WIN32** Euphoria.
   See **euphoria/demo/linux**.
-<li>
- An example of creating your own shared library routines and calling them from
+*  An example of creating your own shared library routines and calling them from
   Euphoria was added. See
   **euphoria/demo/linux**.
-<li>
- **All platforms: crash_file(file_name)** will
+*  **All platforms: crash_file(file_name)** will
   cause diagnostic messages to be written to **file_name** instead of
   **ex.err**. You can use 
   **crash_file("/dev/null")** to get
   diagnostics on screen but not in a file.<br>
   **crash_file("")** means
   "no diagnostics" (to screen or ex.err). 
-<li>
- **Trace** mode in **xterm** now detects
+*  **Trace** mode in **xterm** now detects
   the **F1/F2** keys.
-<li>
- **time()** now reports real "wall-clock" time,
+*  **time()** now reports real "wall-clock" time,
   not CPU time.
-<li>
- **search**,
+*  **search**,
   **guru** and
   **cdguru** now place their output in your
   $HOME directory instead of the current directory.
-<li>
- **#!** is now restricted to just the first line of a file.
-<li>
- **All platforms:** In **ed**, the
+*  **#!** is now restricted to just the first line of a file.
+*  **All platforms:** In **ed**, the
   **Esc n**, **Esc d**, **Esc f** and **Esc r** commands will
   immediately redisplay your last choice. You can press
   **up-arrow/down-arrow** to 
   see other choices, or clear the choice. If you start typing without
   editing, it will clear the choice and take your new input.
-<li>
- **free_console()** will set the terminal
+*  **free_console()** will set the terminal
   parameters back to normal. Normally, when running a Euphoria program the
   parameters are set the way that **curses** wants them and they are set
   back to normal when the program terminates.
   If your program needs to terminate
   in a strange way (other than calling abort()),
   **free_console()** should be called first. 
-<li>
- **bug fixed: <font color="#006699">get()</font>
+*  **bug fixed: <font color="#006699">get()</font>
   ** now considers '\r' to be a whitespace character. This is important when
   reading DOS files.
-<li>
- **All platforms: bug fixed:** It was not
+*  **All platforms: bug fixed:** It was not
   immediately issuing a **type_check** 
   failure when 1 was added to an integer variable that was set to the maximum
   value for an integer (1.07 billion). Thanks to Jeff Fielding.
-<li>
- **All platforms: bug fixed:** It was not
+*  **All platforms: bug fixed:** It was not
   always detecting an improperly-formed 
   exponent on a floating-point number. Thanks to Lionel Wong.
-<li>
- **All platforms:** The performance of the storage allocator has been 
+*  **All platforms:** The performance of the storage allocator has been 
   improved in certain cases. A bug that could cause the interpreter to 
   crash when you are almost out of memory has been fixed. 
-</ul>       
-
