@@ -14,7 +14,6 @@ elsedef
 	public include std/memory.e as memory
 end ifdef
 
-include std/unix/mmap.e
 include std/dll.e
 include std/error.e
 include std/types.e
@@ -614,12 +613,11 @@ function local_allocate_protected_memory( integer s, integer first_protection )
 			return eu:c_func(VirtualAlloc_rid, 
 				{ 0, s, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
 		else
-			return machine_func(M_ALLOC, s)
+			return machine_func(M_ALLOC, PAGE_SIZE)
 		end if
-	elsifdef LINUX then
-		return machine_func(M_ALLOC, s)
 	elsifdef UNIX then
-		return mmap( 0, s, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
+		return machine_func(M_ALLOC, PAGE_SIZE)
+--		return mmap( 0, PAGE_SIZE, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
 	end ifdef
 end function
 
@@ -633,10 +631,9 @@ function local_change_protection_on_protected_memory( atom p, integer s, integer
 			end if
 		end if
 		return 0
-	elsifdef LINUX then
-		return 0
 	elsifdef UNIX then
-		return mprotect(p, s, new_protection)
+		return 0
+--		return mprotect(p, s, new_protection)
 	end ifdef
 end function
 
@@ -647,10 +644,9 @@ procedure local_free_protected_memory( atom p, integer s)
 		else
 			machine_func(M_FREE, {p})
 		end if
-	elsifdef LINUX then
-		machine_func(M_FREE, {p})
 	elsifdef UNIX then
-		munmap(p, s)
+			machine_func(M_FREE, {p})
+--		munmap(p, s)
 	end ifdef
 end procedure
 
