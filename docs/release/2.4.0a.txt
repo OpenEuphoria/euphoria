@@ -1,4 +1,4 @@
-== Version 2.4 Alpha-test Release February 21, 2003:
+== Version 2.4 Alpha February 21, 2003:
 
 === New Features
 

@@ -1,0 +1,4 @@
+== Euphoria to C Translator Official June 5, 2001:
+
+* A couple of minor enhancements and bug fixes.
+

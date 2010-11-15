@@ -1,4 +1,4 @@
-== Version 2.5 Beta Release January 14, 2005:
+== Version 2.5 Beta January 14, 2005:
 
 === Improved Performance
 

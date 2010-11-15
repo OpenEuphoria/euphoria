@@ -1,4 +1,4 @@
-== Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
+== Version 2.1 WIN32 + DOS32 March 29, 1999:
 
 * Updates to the **trace** screen have been optimized. Unnecessary refreshes of
   the source code, and the variables on the trace screen, have been eliminated.

@@ -1,4 +1,4 @@
-== Version 2.2 pre-alpha #1 for Linux July 1, 1999:
+== Version 2.2 Pre Alpha #1 Linux July 1, 1999:
 
 * The first version of Euphoria for **Linux** was released.
 

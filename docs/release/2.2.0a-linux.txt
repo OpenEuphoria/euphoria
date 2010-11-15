@@ -1,4 +1,4 @@
-==  Version 2.2 alpha-test release for Linux August 24, 1999:
+==  Version 2.2 Alpha Linux August 24, 1999:
 
 //Many of these features and bug fixes will also be made available 
 in Version 2.2 for **WIN32 + DOS32**//. 

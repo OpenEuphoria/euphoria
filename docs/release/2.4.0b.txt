@@ -1,17 +1,10 @@
-== Version 2.4 Beta-test Release April 10, 2003:
+== Version 2.4 Beta April 10, 2003:
 
-
-This release updates the **Euphoria 
-Interpreter**, the **Euphoria To C 
-Translator**,
-and the **Interpreter Source Code** products,
-for **Windows**,
-**DOS**,
-**Linux** and
-**FreeBSD**.
+This release updates the **Euphoria Interpreter**, the **Euphoria To C
+Translator**, and the **Interpreter Source Code** products, for **Windows**,
+**DOS**, **Linux** and **FreeBSD**.
 
 === New Features
-
 
 * **bind** and
     **shroud** now have an option

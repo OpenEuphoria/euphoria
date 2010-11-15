@@ -1,4 +1,4 @@
-== Version 2.3 Official Release February 11, 2002:
+== Version 2.3 February 11, 2002:
 
 This release updates the Euphoria Interpreter, 
 the Euphoria To C Translator, and the Interpreter Source Code product,

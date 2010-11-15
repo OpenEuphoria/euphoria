@@ -1,4 +1,4 @@
-==  Version 2.0 Official Release March 25, 1998:
+==  Version 2.0 March 25, 1998:
 
 * The install procedure has changed. The Euphoria .zip file now contains a large
   ##bundle.dat## file that contains over 100 files. This makes it easier for

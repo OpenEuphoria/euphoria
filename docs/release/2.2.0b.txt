@@ -1,4 +1,4 @@
-== Version 2.2 Beta Release for WIN32+DOS32 December 23, 1999:
+== Version 2.2 Beta WIN32+DOS32 December 23, 1999:
 
 Most of the new library routines developed for Euphoria 2.2 on 
 Linux, have now been ported to WIN32 and DOS32. 

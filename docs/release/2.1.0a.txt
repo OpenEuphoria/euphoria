@@ -1,4 +1,4 @@
-== Version 2.1 alpha-test release January 15, 1999:
+== Version 2.1 Alpha January 15, 1999:
 
 * We've made a number of changes to the packaging, pricing, and registration incentives for the Euphoria product:
 ** The Dual-Platform (DOS32+WIN32) package, formerly $53 has been reduced to $39 U.S., effective immediately.

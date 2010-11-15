@@ -1,4 +1,4 @@
-== Version 2.2 Official Release for WIN32+DOS32 January 14, 2000:
+== Version 2.2 WIN32+DOS32 January 14, 2000:
 
 * Better error messages are now issued from the interpreter, and from
 the bind program, for some typical errors that users can make when 

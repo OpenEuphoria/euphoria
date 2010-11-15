@@ -1,4 +1,4 @@
-== Version 2.2 pre-alpha #3 for Linux July 8, 1999:
+== Version 2.2 Pre Alpha #3 Linux July 8, 1999:
 
 *  In an **xterm** window, **exu** will
   prompt you to hit **Enter** before it exits. Without this, **xterm**

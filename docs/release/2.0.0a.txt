@@ -1,4 +1,4 @@
-== Version 2.0 (alpha) November 5, 1997:
+== Version 2.0 Alpha November 5, 1997:
 
 * A **//new platform//** is now supported.  **exw.exe** will run Euphoria
   programs using the **WIN32** (Windows 32-bit) operating system. **ex.exe** will

@@ -1,4 +1,4 @@
-== Version 2.2 beta-test release for Linux October 22, 1999:
+== Version 2.2 Beta Linux October 22, 1999:
 
 //Most of these features and bug fixes will also be made available 
 in Version 2.2 for **WIN32 + DOS32**//. 

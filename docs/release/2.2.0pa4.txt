@@ -1,4 +1,4 @@
-==  Version 2.2 pre-alpha #4 for Linux July 15, 1999:
+==  Version 2.2 Pre Alpha #4 Linux July 15, 1999:
 
 * You can call C routines in **Linux**
   shared libraries (**.so** files). See

@@ -1,4 +1,4 @@
-== Version 2.1 beta-test release March 5, 1999:
+== Version 2.1 Beta March 5, 1999:
 
 * The rest of the files in the **euphoria\doc** directory have now been converted
   to HTML. Every **.doc** file in the **doc** directory now has a corresponding

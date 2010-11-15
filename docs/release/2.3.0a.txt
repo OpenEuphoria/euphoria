@@ -1,4 +1,4 @@
-== Version 2.3 Alpha Release November 30, 2001:
+== Version 2.3 Alpha November 30, 2001:
 
 This release updates the Euphoria Interpreter for WIN32, DOS32 and Linux.
 It also updates the Euphoria To C Translator for all platforms, 

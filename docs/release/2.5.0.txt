@@ -1,4 +1,4 @@
-== Version 2.5 Official Release March 8, 2005:
+== Version 2.5 March 8, 2005:
 
 === Enhanced Features
 

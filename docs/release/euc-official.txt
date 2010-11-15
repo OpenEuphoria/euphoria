@@ -1,4 +1,0 @@
-== Euphoria to C Translator Official Release June 5, 2001:
-
-* A couple of minor enhancements and bug fixes.
-

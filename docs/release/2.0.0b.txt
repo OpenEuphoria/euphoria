@@ -1,4 +1,4 @@
-==  Version 2.0 (beta) February 26, 1998:
+==  Version 2.0 Beta February 26, 1998:
 
 * The WIN32 interpreter, **exw.exe**, is now a **true WIN32 GUI** program. In 2.0
   alpha it was a WIN32 ##//console//## program that was always associated with a

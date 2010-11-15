@@ -1,4 +1,4 @@
-== Euphoria to C Translator Alpha Release September 6, 2000:
+== Euphoria to C Translator Alpha September 6, 2000:
 
 * The first release of the translator. It supports Euphoria version 2.2.
   It relies on WATCOM C for DOS and Windows, and GNU C for Linux. Prime sieve
