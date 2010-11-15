@@ -44,7 +44,7 @@ procedure parse_include(sequence path_name, sequence item)
 	end ifdef
 
 	integer keep = 0, idx = 1
-	object tokens = et_tokenize_file(fname)
+	object tokens = tokenize_file(fname)
 	tokens = tokens[1]
 
 	while idx <= length(tokens) do
@@ -91,7 +91,7 @@ procedure main(sequence args=command_line())
 		sequence fname = args[file_idx], locals = {}
 
 		printf(1, "Processing file: %s...\n", { fname })
-		object file_tokens = et_tokenize_file(fname)
+		object file_tokens = tokenize_file(fname)
 
 		file_tokens = file_tokens[1]
 		missed_inc = m:new()
