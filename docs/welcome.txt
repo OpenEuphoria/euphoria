@@ -43,7 +43,7 @@ effort and reducing syntax errors. This editor is written in Euphoria,
 and the source code is provided to you without restrictions. You are
 free to modify it, add features, and redistribute it as you wish.
 * Multi-platform
-** Euphoria programs run under Linux, FreeBSD, 32-bit //Windows//
+** Euphoria programs run under Linux, FreeBSD and Windows.
 * Stand-alone
 ** You can make a single, stand-alone executable
 file from your program.
