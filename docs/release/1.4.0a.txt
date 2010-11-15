@@ -1,0 +1,18 @@
+== Version 1.4a, July 1996:
+
+
+<li>
+ **crash_message()** library routine was
+ added.
+
+<li>
+ Programs **bound** by registered users
+ will now produce run-time error diagnostics regardless of the size of the
+ program.
+
+<li>
+ **shroud.bat** has a new option
+ ##-full_keywords##.
+
+</ul>
+

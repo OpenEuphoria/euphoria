@@ -1,0 +1,55 @@
+== Version 2.3 Official Release February 11, 2002:
+
+
+This release updates the Euphoria Interpreter, 
+the Euphoria To C Translator, and the Interpreter Source Code product,
+for all platforms.
+
+
+
+<li>
+ The DJGPP version of the interpreter source code now uses 
+ GNU C's dynamic labels, just like the Linux version. This allows
+ it to achieve full speed, without the need for any assembly-level 
+ tweaking. Thanks to Bernie Ryan.
+
+<li>
+ The Interpreter Source Code now includes an overview document
+ describing how the interpreter works.
+ 
+<li>
+ In the Complete Edition, bind.bat and bindw.bat now use exw to run
+ the binder/shrouder. This avoids problems with long filenames
+ on some systems. A console window will appear while the binder/shrouder
+ is running. Thanks to "void", Bruce Axtens, and others.
+
+<li>
+**bug fixed : **
+ Due to a bug in the WATCOM 10.6 C library, the ex and exw interpreters,
+ and code translated to C and compiled by Watcom, might get the wrong
+ result from Euphoria's where() function when the file was opened in 
+ append mode, and the file pointer was in the uncommitted (not written 
+ to disk yet) portion of the file. The bug has been worked around 
+ by having Euphoria flush() the file in this particular case, 
+ before calling the Watcom routine. Thanks to Bob Elia.
+
+<li>
+**bug fixed : **
+ A bug introduced in the binder for 2.3 beta, might cause
+ a function call on the last line of a program to be ignored.
+ Thanks to Wolfgang Fritz.
+
+<li>
+**bug fixed : **
+ Several Euphoria files in the WIN32+DOS32 distribution had Linux-style
+ line terminators (\n only). This made them hard to view using 
+ NotePad and some other editors. Thanks to Pete Lomax.
+
+<li>
+**bug fixed : **
+ If "with type_check" was turned on, ed.ex would get a type_check failure
+ when the Esc key was pressed. Thanks to Kenneth Orr.
+ 
+</ul>
+
+

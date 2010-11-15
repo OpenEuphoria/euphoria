@@ -1,0 +1,22 @@
+==  Version 2.2 pre-alpha #4 for Linux July 15, 1999:
+
+<li>
+ You can call C routines in **Linux**
+  shared libraries (**.so** files). See
+  **euphoria/demo/linux/callc.exu** for
+  some examples.
+<li>
+ If your program does not output anything to the **xterm** window, 
+  **exu** will not issue the "Press Enter"
+  prompt.
+<li>
+  **All platforms: ed** now lets you recall
+   previous top-line command text using **up-arrow** and **down-arrow**,
+   similar to doskey in DOS and the shell history in Linux. This works with
+   any strings that you type for **Esc n** (new file),
+   **Esc d** (Linux command), **Esc f** (find string) or
+   **Esc r** (replace string). In addition, you can now use
+   **arrow keys**, **Home**, **End**, **Delete** etc. to edit
+   strings before you press **Enter**. 
+</ul>       
+

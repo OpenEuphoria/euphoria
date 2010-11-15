@@ -1,0 +1,15 @@
+== Version 1.4b, October 1996:
+
+
+<li>
+ **mset.ex** has a more visible selector
+ box on it's grid. It has also been sped up.
+
+<li>
+ **ed.ex** now allows special characters
+ greater than ASCII 127 to be entered by pressing the **Alt** key and
+ typing digits on the numeric keypad.
+
+</ul>
+
+

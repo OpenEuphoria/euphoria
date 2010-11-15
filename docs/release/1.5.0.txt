@@ -1,0 +1,57 @@
+== Version 1.5 March 21, 1997:
+
+
+<li>
+ The following library routines were added. They are described fully
+   in **library.doc**.
+
+
+<li>
+        **allow_break()**
+<li>
+        **check_break()**
+<li>
+        **mem_copy()**
+<li>
+        **mem_set()**
+<li>
+        **atom_to_float32()**
+<li>
+        **atom_to_float64()**
+<li>
+        **float32_to_atom()**
+<li>
+        **float64_to_atom()**
+<li>
+        **get_all_palette()**
+<li>
+        **save_bitmap()**
+<li>
+        **save_screen()**
+<li>
+        **arctan()**
+<li>
+        **and_bits()**
+<li>
+        **or_bits()**
+<li>
+        **xor_bits()**
+<li>
+        **not_bits()**
+<li>
+	**get_vector()**
+<li>
+	**set_vector()**
+<li>
+	**lock_memory()**
+<li>
+	**tick_rate()**
+</ul>
+
+<li>
+ **with profile_time** (time profiling for
+ DOS32) was added.
+
+</ul>
+
+

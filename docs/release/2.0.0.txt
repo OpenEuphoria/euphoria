@@ -1,0 +1,19 @@
+==  Version 2.0 Official Release March 25, 1998:
+
+
+<li>
+ The install procedure has changed. The Euphoria .zip file now contains a 
+   large ##bundle.dat## file that contains over 100 files. This
+   makes it easier for people to locate the important files:
+   **readme.doc**,
+   **install.bat**, etc. 
+   that they should look at before installing. The .zip file is also 35K
+   smaller as a result.
+
+<li>
+ **shroud** will warn you to use
+ **bind/bindw** if you try to create a
+ shrouded source file with a name ending in "**.**exe".
+
+</ul>
+

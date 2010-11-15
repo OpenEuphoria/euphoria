@@ -1,0 +1,235 @@
+== Version 2.0 (alpha) November 5, 1997:
+
+
+<li>
+ A **//new platform//** is now supported.
+ **exw.exe** will run Euphoria programs using
+ the **WIN32** (Windows 32-bit) operating
+ system. **ex.exe** will run programs
+ using **DOS32** (extended DOS).
+ See **platform.doc** for further details.
+
+<li>
+ The following library routines have been introduced.
+
+ <_sul>**For both DOS32 and WIN32:
+
+ <table border=0 cellspacing=2 cellpadding=2>
+ 
+ <tr><td width=24 nowrap></td>
+   <td width=120 nowrap></td>
+   <td width=10></td>
+   <td></td>
+   </tr>
+ 
+ <_4clist
+   name="platform()"
+   pos=25
+   description="find out which platform you are executing on. (The 
+   PLATFORM constant is available in Euphoria 2.2 and later)."
+ >
+ 
+ <_4clist
+   name="routine_id()"
+   pos=25
+   description="get a small integer id number for a Euphoria procedure or
+    function."
+ >
+ 
+ <_4clist
+   name="call_proc()"
+   pos=25
+   description="call a Euphoria procedure by using its id."
+ >
+ 
+ <_4clist
+   name="call_func()"
+   pos=25
+   description="call a Euphoria function by using its id."
+ >
+ 
+ <_4clist
+   name="custom_sort()"
+   pos=25
+   description="sort a sequence using a compare function that you specify."
+ >
+ 
+ <_4clist
+   name="poke4()"
+   pos=25
+   description="store a number into 4 bytes of memory.
+     poke4(address, value) is at least 10x
+     faster than:
+     poke(address, int_to_bytes(value)).
+     poke4() also works with sequences of values."
+ >
+ 
+ <_4clist
+   name="peek4s()"
+   pos=25
+   description="read 4 bytes of memory as a signed integer (works on
+     sequences too)."
+ >
+ 
+ <_4clist
+   name="peek4u()"
+   pos=25
+   description="read 4 bytes of memory as an unsigned integer (works on
+     sequences too). peek4u(address) is 10x
+     faster than:
+     bytes_to_int(peek({address, 4}))."
+ >
+ 
+ <_4clist
+   name="allocate_string()"
+   pos=25
+   description="allocate and store a 0-terminated string in memory."
+ >
+
+</table>
+
+
+ <_sul>**For WIN32 only:
+
+ <table border=0 cellspacing=2 cellpadding=2>
+ 
+ <tr><td width=24 nowrap></td>
+   <td width=120 nowrap></td>
+   <td width=10></td>
+   <td></td>
+   </tr>
+ 
+ <_4clist
+   name="open_dll()"
+   pos=26
+   description="open a Windows **.**dll file."
+ >
+ 
+ <_4clist
+   name="define_c_proc()"
+   pos=26
+   description="define a C routine that will be called from Euphoria
+     (no value returned)."
+ >
+ 
+ <_4clist
+   name="define_c_func()"
+   pos=26
+   description="define a C routine that will be called from Euphoria
+     (a value will be returned)."
+ >
+ 
+ <_4clist
+   name="call_c_proc()"
+   pos=26
+   description="call a C routine from Euphoria (no value is returned)."
+ >
+ 
+ <_4clist
+   name="call_c_func()"
+   pos=26
+   description="call a C routine from Euphoria (a value is returned)."
+ >
+ 
+ <_4clist
+   name="call_back()"
+   pos=26
+   description="get a **//call-back address//**, so Windows can call
+     your Euphoria routine when the user interacts with your window."
+ >
+ 
+ <_4clist
+   name="message_box()"
+   pos=26
+   description="display a simple **Yes/No/Cancel** window."
+ >
+
+</table>
+
+<li>
+ New Demo programs:
+
+
+<li>
+**csort.ex**
+<li>
+**email.exw**
+<li>
+**window.exw**
+<li>
+**winwire.exw**
+<li>
+**dsearch.exw**
+</ul>
+
+<li>
+ New include files:
+
+ <table border=0 cellspacing=2 cellpadding=2>
+ 
+ <_4clist
+   name="safe.e"
+   pos=22
+   description="debug version of
+    **machine.e**"
+ >
+ 
+ <_4clist
+   name="misc.e"
+   pos=22
+   description="miscellaneous"
+ >
+ 
+ <_4clist
+   name="dll.e"
+   pos=22
+   description="dll access"
+ >
+ 
+ <_4clist
+   name="msgbox.e"
+   pos=22
+   description="Windows message box"
+ >
+
+</table>
+
+<li>
+ The following additional improvements have been made to the
+  **DOS32** version:
+
+
+<li>
+    On Pentium and higher systems, floating-point calculations are now
+    about 20% faster (and floating-point in
+    **exw** is a further 20%
+    faster than **ex** for 2.0).
+
+<li>
+    **printf()** to the screen, and
+    **print()** to the screen are both 
+    significantly faster in most cases.
+
+<li>
+    The **trace** screen is updated a bit
+    faster.
+
+<li>
+    The **time profile** is more accurate
+    regarding **getc()**.
+
+<li>
+    The **mset.ex** demo runs 30% faster.
+</ul>
+
+</ul>
+
+<hr>
+
+&nbsp;
+
+<_center>**
+<br>
+                      Highlights of Older Releases:<br>
+**</_center>
+

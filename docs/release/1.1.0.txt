@@ -1,0 +1,8 @@
+== Version 1.1, January 1994:
+
+
+<li>
+  Several language features and demo programs were added.
+
+</ul>
+

@@ -1,0 +1,23 @@
+== Version 2.1 Official Release for WIN32 + DOS32 March 29, 1999:
+
+<li>
+  Updates to the **trace** screen have been
+  optimized. Unnecessary refreshes of the source code, and the variables on
+  the trace screen, have been eliminated. When a refresh is necessary, it is
+  now slightly faster. This makes a noticeable difference in
+  **exw.exe**, and also in
+  **ex.exe** in
+  pixel-graphics modes. For 
+  **ex.exe** in 
+  text modes, it reduces screen flicker 
+  slightly.
+<li>
+  The **install** program no longer requires 
+  that your PATH be less than 128 characters. It will simply warn you if it 
+  isn't. Newer versions of DOS allow for a longer PATH. Thanks to Steve Adams.
+<li>
+  An extra error check was added to
+  **unregister_block()** in
+  **safe.e**. Thanks to David Guy.
+</ul>
+

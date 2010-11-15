@@ -1,0 +1,5 @@
+== Euphoria to C Translator Beta-2 Release May 8, 2001:
+
+* You can now use the translator to make a .dll file.
+
+

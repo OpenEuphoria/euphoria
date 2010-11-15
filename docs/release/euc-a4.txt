@@ -1,0 +1,5 @@
+== Euphoria to C Translator Alpha-4 Release December 14, 2000:
+
+* Pixel-graphics and mouse support was added for DJGPP C.
+
+
