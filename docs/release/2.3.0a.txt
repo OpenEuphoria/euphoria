@@ -4,149 +4,79 @@ This release updates the Euphoria Interpreter for WIN32, DOS32 and Linux.
 It also updates the Euphoria To C Translator for all platforms, 
 and it introduces a new product - the Euphoria Interpreter Source Code.
 
-
-<li>
-The registration incentives and prices have changed.
-
-<li>The Interpreter product now has just one option: 
-   WIN32, DOS32 //and// Linux, formerly $59, for just $39.
-
-<li>The Interpreter source code (minus a few registered features)
-    is now available for $49. See the a href=license.htm>source license</a>
-    and a href=register.htm>register.doc</a> for more details.
-<li>
-The Translator continues to cost $29.
-
-<li> When Public Domain users reach 300 statements, they will no longer
-lose the run-time error diagnostics. They will only lose the trace() facility.
-
-</ul>
-
-a href=register.htm>register.doc</a> has more details, including the
-requirements for getting a free upgrade.
-
-<li> 
- The Euphoria interpreter can now be built successfully by 6 different 
- C compilers on 3 platforms.
-
-<li> 
- New //namespace qualifiers// eliminate naming conflicts
- between identical global symbols declared in different include files.
- Also, local symbols will now override global symbols of the same name,
- rather than causing an error. See a href=refman_2.htm#42>Scope Rules</a>.
-
-<li> 
- The Complete Edition Interpreter product comes with a new 
- 2-pass binder/shrouder that eliminates all unused routines and constants,
- resulting in smaller executable files. It also has an option to bind 
- clear source, so you can get understandable error messages from your users.
- 
-<li> 
- A new environment variable, EUINC, has been introduced.
- If present, it specifies a list of additional directories that will be
- searched for include files. The directory containing the main file 
- is always searched first, then the directories in EUINC, 
- then euphoria\include.
-
-<li> 
- The Interpreter now supports a new trace mode, trace(3).
- It logs all executed Euphoria statements to a file, so 
- you'll be able to see the last statement that was 
- executed at the time of any crash, as well as the 499 statements 
- that preceded it.
- This is particularly helpful in the case of machine-level crashes
- where Euphoria is unable to write an ex.err file.
- Thanks to Matthew Lewis.
-
-<li> 
- The Euphoria interpreter can now pass Euphoria data - 
- atoms and sequences, to .dll files coded in Euphoria and built 
- by the Translator. Use the new E_ types in dll.e
-  
-<li> 
- On Linux we added RTLD_GLOBAL on the dlopen() call. This lets you link
- successfully with more shared libraries.
-   
-<li> 
- On Linux, when using the #! feature on the first line, 
- to make your source file directly executable, 
- you no longer need a .exu extension on your file.
- Linux programmers often prefer to have no extension on their executable files.
-
-<li> 
-  Windows callback routines written in Euphoria can now take 9
-  arguments (was 8). Thanks to Matt Lewis.
-
-<li> 
-  In addition to C_DOUBLE (8-byte floating point), C_FLOAT 
-  (4-byte floating-point) is now supported for arguments and 
-  return values from C routines. Thanks to David Guy.
-  
-<li> 
-  Windows .dlls opened with open_dll() are now closed automatically
-  when your program terminates. This avoids a tiny bit of memory leakage.
-  Thanks to Euman.
-  
-<li> 
-  safe.e has a new option to check just the edges of registered blocks
-  and not complain if other blocks of memory are used.
-
-<li> 
-  get_bytes() is 30% faster.
-
-<li> 
-  allocate_string() was speeded up. Thanks to Yuku Sugianto.
-
-<li> 
-  The mydata.ex demo program now uses an EDS database.
-    
-<li>
- **bug fixed -  Translator: ** 
-  When a global or local variable containing a sequence or floating-point
-  number was assigned the result of a function,
-  and at some point during the function call 
-  the global or local variable was overwritten, 
-  some corruption would take place, leading to a probable
-  crash later in the program. Thanks to Sergio Gelli.
-
-<li>**bug fixed -  Linux Interpreter: **
-programs of more than a few thousand lines had a chance (maybe 20%)
-of having one of their statements crash whenever it was executed.
-
-<li>**bug fixed - Interpreter: ** **s[i][j]...[k] = s**
- caused the interpreter to crash. i.e. an assignment of an entire sequence 
- to an element of an element of itself using 2 or more levels of 
- subscripting. Thanks to Henri Goffin.
-
-<li>**bug fixed -  Linux binder: ** (Kenneth Rhodes)  
-  Bound executable programs stored somewhere on the search path
-  would not run properly unless they were in the current directory
-  or unless you specified the full path to the executable.
-   
-<li>**bug fixed -  Binder: ** "with profile_time" in a 
-bound or shrouded program would cause a crash
-
-<li>**bug fixed -  DOS Interpreter: ** In image.e,
- put_screen_char() has been corrected to have:
-  **if overflow > 0 then ...** instead of: ** if overflow then ... **
-
-<li>**bug fixed -  Interpreter: ** 
-  A time optimization for slicing could in rare cases cause a lot of
-  wasted space. The optimization has been adjusted to handle those cases.
-  Thanks to Brian Clausing.
-
-<li>**bug fixed - safe.e: ** free() and free_low() 
-were not actually freeing the block of memory, and on Linux free() 
-could cause a segmentation violation. The same routines in 
-**machine.e** were ok.
-
-<li>**bug fixed - Translator for DJGPP: **A 
-  couple of minor differences from ex.exe in the display of text 
-  were corrected.
-
-<li>**bug fixed - define_c_var(): ** 
-works on WIN32 too. The documentation was corrected.  
-
-</ul>
+* The registration incentives and prices have changed.
+** The Interpreter product now has just one option: WIN32, DOS32 //and// Linux, 
+   formerly $59, for just $39.
+** The Interpreter source code (minus a few registered features)
+   is now available for $49. See the a href=license.htm>source license</a>
+   and a href=register.htm>register.doc</a> for more details.
+** The Translator continues to cost $29.
+** When Public Domain users reach 300 statements, they will no longer
+   lose the run-time error diagnostics. They will only lose the trace() facility.
+* The Euphoria interpreter can now be built successfully by 6 different 
+  C compilers on 3 platforms.
+* New //namespace qualifiers// eliminate naming conflicts between identical
+  global symbols declared in different include files.  Also, local symbols will
+  now override global symbols of the same name, rather than causing an error. 
+* The Complete Edition Interpreter product comes with a new 2-pass
+  binder/shrouder that eliminates all unused routines and constants, resulting in
+  smaller executable files. It also has an option to bind clear source, so you
+  can get understandable error messages from your users.
+* A new environment variable, EUINC, has been introduced.  If present, it
+  specifies a list of additional directories that will be searched for include
+  files. The directory containing the main file is always searched first, then
+  the directories in EUINC, then euphoria\include.
+* The Interpreter now supports a new trace mode, trace(3).  It logs all executed
+  Euphoria statements to a file, so you'll be able to see the last statement that
+  was executed at the time of any crash, as well as the 499 statements that
+  preceded it.  This is particularly helpful in the case of machine-level crashes
+  where Euphoria is unable to write an ex.err file.  Thanks to Matthew Lewis.
+* The Euphoria interpreter can now pass Euphoria data - atoms and sequences, to
+  .dll files coded in Euphoria and built by the Translator. Use the new E_ types
+  in dll.e
+* On Linux we added RTLD_GLOBAL on the dlopen() call. This lets you link
+  successfully with more shared libraries.
+* On Linux, when using the #! feature on the first line, to make your source file
+  directly executable, you no longer need a .exu extension on your file.  Linux
+  programmers often prefer to have no extension on their executable files.
+* Windows callback routines written in Euphoria can now take 9 arguments (was 8).
+  Thanks to Matt Lewis.
+* In addition to C_DOUBLE (8-byte floating point), C_FLOAT (4-byte
+  floating-point) is now supported for arguments and return values from C
+  routines. Thanks to David Guy.
+* Windows .dlls opened with open_dll() are now closed automatically when your
+  program terminates. This avoids a tiny bit of memory leakage.  Thanks to Euman.
+* safe.e has a new option to check just the edges of registered blocks and not
+  complain if other blocks of memory are used.
+* get_bytes() is 30% faster.
+* allocate_string() was speeded up. Thanks to Yuku Sugianto.
+* The mydata.ex demo program now uses an EDS database.
+* **bug fixed -  Translator: ** When a global or local variable containing a
+  sequence or floating-point number was assigned the result of a function, and at
+  some point during the function call the global or local variable was
+  overwritten, some corruption would take place, leading to a probable crash
+  later in the program. Thanks to Sergio Gelli.
+* **bug fixed -  Linux Interpreter: ** programs of more than a few thousand lines
+  had a chance (maybe 20%) of having one of their statements crash whenever it
+  was executed.
+* **bug fixed - Interpreter: ** **s[i][j]...[k] = s** caused the interpreter to
+  crash. i.e. an assignment of an entire sequence to an element of an element of
+  itself using 2 or more levels of subscripting. Thanks to Henri Goffin.
+* **bug fixed -  Linux binder: ** (Kenneth Rhodes)  Bound executable programs
+  stored somewhere on the search path would not run properly unless they were in
+  the current directory or unless you specified the full path to the executable.
+* **bug fixed -  Binder: ** "with profile_time" in a bound or shrouded program would cause a crash
+* **bug fixed -  DOS Interpreter: ** In image.e, put_screen_char() has been
+  corrected to have: **if overflow > 0 then ...** 
+  instead of: ** if overflow then ...**
+* **bug fixed -  Interpreter: ** A time optimization for slicing could in rare
+  cases cause a lot of wasted space. The optimization has been adjusted to handle
+  those cases.  Thanks to Brian Clausing.
+* **bug fixed - safe.e: ** free() and free_low() were not actually freeing
+  the block of memory, and on Linux free() could cause a segmentation violation.
+  The same routines in **machine.e** were ok.
+* **bug fixed - Translator for DJGPP: **A couple of minor differences from ex.exe
+  in the display of text were corrected.
+* **bug fixed - define_c_var():** works on WIN32 too. The documentation was corrected.  
 
 
