@@ -2446,7 +2446,7 @@ unsigned char * new_page() {
 #ifdef EWINDOWS
 	return VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
 #elif ELINUX
-	return memalign( pagesize, CALLBACK_SIZE );
+	return memalign( pagesize, pagesize );
 #elif EUNIX
 	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);			
 #endif
@@ -2459,6 +2459,16 @@ void set_page_to_read_execute_only(page_ptr page_addr) {
 	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
 #elif EUNIX
 	mprotect(page_addr, pagesize, PROT_EXEC|PROT_READ);
+#endif
+}
+
+void set_page_to_write(page_ptr page_addr) {
+#ifdef EWINDOWS
+	static unsigned long oldprot;
+	static unsigned long * oldprotptr = &oldprot;
+	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READWRITE, oldprotptr);
+#elif EUNIX
+	mprotect(page_addr, pagesize, PROT_EXEC | PROT_READ | PROT_WRITE );
 #endif
 }
 
@@ -2560,21 +2570,17 @@ object CallBack(object x)
 	/* Now allocate memory that is executable or at least can be made to be ... */
 	
 		/*	Here allocate and manage memory for 4kB is a lot to use when you
-			only use 92B.  Memory is allocated by VirtualAlloc() /pagesize/ bytes at a time.
+			only use 92B.  Memory is allocated by /pagesize/ bytes at a time.
 			So, we give pieces of this page on each call until there is not enough to complete
-			up to /CALLBACK_SIZE/ bytes.  When this happens we make the page unwritable and
-			allocate a new page.
+			up to /CALLBACK_SIZE/ bytes.
 			*/
 		if (page_addr != NULL) {
 			if (page_offset < last_block_offset) {
 				// Grab next sub-block from the current block.
 				page_offset += call_increment;
 			} else {
-				// Change previously allocated block to read+exec-only
-				set_page_to_read_execute_only(page_addr); // VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
-
 				// Allocate a new block
-				page_addr = new_page(); // VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+				page_addr = new_page();
 				page_offset = 0;
 			}
 		} else {
@@ -2585,7 +2591,7 @@ object CallBack(object x)
 			page_addr = new_page(); //VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
 			page_offset = 0;
 		}
-
+		
 		copy_addr = page_addr + page_offset;
 #	ifdef EWINDOWS		   
 		/* Assume we are running under some Windows that
@@ -2593,7 +2599,7 @@ object CallBack(object x)
 		   This has happened before in testing.  */
 		if (copy_addr == NULL)
 			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
-#	endif /* ndef EWINDOWS */
+#	endif /* def EWINDOWS */
 
 
 	/* Check if the memory allocation worked. */	
@@ -2601,12 +2607,15 @@ object CallBack(object x)
 		SpaceMessage();
 	}
 
-	/* copy memory of the template to the newly allocated memory */
+	/* Copy memory of the template to the newly allocated memory.
+	 * First we have to make the memory writable.
+	 */
+	set_page_to_write(page_addr);
     res = memcopy(copy_addr, CALLBACK_SIZE, (char *)addr, CALLBACK_SIZE);
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-
+	
 
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
@@ -2622,6 +2631,8 @@ object CallBack(object x)
 			break;
 		}
 	}
+	/* We're done writing, so protect the memory again...*/
+	set_page_to_read_execute_only(page_addr);
 	
 	if (not_patched) {
 		RTFatal("Internal error: CallBack routine id patch failed: missing magic.");
