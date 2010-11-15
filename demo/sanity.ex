@@ -623,10 +623,10 @@ object x, y
 	if find(0.0, {"", 0.0, 0, "ABC"}) != 2 then
 	crash(generic_msg)
 	end if
-	if find_from('D', x, 10.0) != length(x) then
+	if find('D', x, 10.0) != length(x) then
 	crash(generic_msg)
 	end if
-	if find_from('D', x, length(x)+1) != 0 then
+	if find('D', x, length(x)+1) != 0 then
 	crash(generic_msg)
 	end if
 	if match("EFGH", x) != 5 then
@@ -635,7 +635,7 @@ object x, y
 	if match({"AB", "CD"}, {0, 1, 3, {}, {"AB", "C"}, "AB", "CD", "EF"}) != 6 then
 	crash(generic_msg)
 	end if
-	if match_from("EU", "EUEUXXXEUXXX", 7) != 8 then
+	if match("EU", "EUEUXXXEUXXX", 7) != 8 then
 	crash(generic_msg)
 	end if
 	

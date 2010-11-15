@@ -2105,7 +2105,7 @@ public function split( sequence st, object delim=' ', integer no_empty = 0, inte
 
 		start = 1
 		while start <= length(st) do
-			pos = match_from(delim, st, start)
+			pos = match(delim, st, start)
 
 			if pos = 0 then
 				exit
@@ -2121,7 +2121,7 @@ public function split( sequence st, object delim=' ', integer no_empty = 0, inte
 	else
 		start = 1
 		while start <= length(st) do
-			pos = find_from(delim, st, start)
+			pos = find(delim, st, start)
 
 			if pos = 0 then
 				exit

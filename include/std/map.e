@@ -576,7 +576,7 @@ public function get(map the_map_p, object the_key_p, object default_value_p = 0)
 		if equal(the_key_p, init_small_map_key) then
 			from_ = 1
 			while from_ > 0 do
-				pos_ = find_from(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
+				pos_ = find(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
 				if pos_ then
 					if ram_space[the_map_p][FREE_LIST][pos_] = 1 then
 						return ram_space[the_map_p][VALUE_LIST][pos_]
@@ -747,7 +747,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				end if
 				from_ = index_ + 1
 			  entry
-				index_ = find_from(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
+				index_ = find(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
 			end while
 		else
 			index_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
@@ -930,7 +930,7 @@ public procedure remove(map the_map_p, object the_key_p)
 	else
 		from_ = 1
 		while from_ > 0 do
-			index_ = find_from(the_key_p, temp_map_[KEY_LIST], from_)
+			index_ = find(the_key_p, temp_map_[KEY_LIST], from_)
 			if index_ then
 				if temp_map_[FREE_LIST][index_] = 1 then
 					temp_map_[FREE_LIST][index_] = 0

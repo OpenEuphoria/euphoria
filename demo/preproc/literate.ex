@@ -41,11 +41,11 @@ while next_tag > 0 with entry do
 		out &= "/*\n" & in[pos..next_tag-1] & "*/\n"
 	end if
 
-	pos = match_from(END_TAG, in, next_tag) + length(END_TAG) 
+	pos = match(END_TAG, in, next_tag) + length(END_TAG) 
 
 	out &= in[next_tag + length(BEGIN_TAG)..pos - length(END_TAG) - 1] & "\n"
 entry
-	next_tag = match_from(BEGIN_TAG, in, pos)
+	next_tag = match(BEGIN_TAG, in, pos)
 end while
 
 out &= "/*\n" & in[pos..$] & "\n*/\n"

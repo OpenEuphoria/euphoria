@@ -340,13 +340,13 @@ procedure patch_forward_variable( token tok, integer ref )
 	end if
 	
 	set_code( ref )
-	integer vx = find_from( -ref, Code, fr[FR_PC] )
+	integer vx = find( -ref, Code, fr[FR_PC] )
 	if vx then
 		while vx do
 			-- subscript assignments might cause the
 			-- sym to be emitted multiple times
 			Code[vx] = sym
-			vx = find_from( -ref, Code, fr[FR_PC] )
+			vx = find( -ref, Code, fr[FR_PC] )
 		end while
 		resolved_reference( ref )
 	end if

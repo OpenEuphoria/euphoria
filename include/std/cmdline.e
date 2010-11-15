@@ -206,7 +206,7 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 			updated = 1
 		else
 			for j = 1 to length(opt[OPTIONS]) do
-				if find_from(opt[OPTIONS][j], opt[OPTIONS], j + 1) != 0 then
+				if find(opt[OPTIONS][j], opt[OPTIONS], j + 1) != 0 then
 					crash("cmd_opts: Duplicate processing options are not allowed in an option record.\n")
 				end if
 			end for

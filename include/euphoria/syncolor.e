@@ -290,7 +290,7 @@ label "MULTILINE_COMMENT"
 					seg_end = 1
 				end if
 				seg_flush(COMMENT_COLOR)
-				i = match_from("*/", line, seg_end)
+				i = match("*/", line, seg_end)
 				if i = 0 then
 					ram_space[state][S_MULTILINE_COMMENT] = 1
 					seg_end = length(line) - 1
@@ -317,7 +317,7 @@ label "BACKTICK_STRING"
 			end if
 
 			seg_flush(STRING_COLOR)
-			i = match_from("`", line, seg_end + 2)
+			i = match("`", line, seg_end + 2)
 			if i = 0 then
 				ram_space[state][S_STRING_BACKTICK] = 1
 				seg_end = length(line) - 1
@@ -334,7 +334,7 @@ label "MULTILINE_STRING"
 				seg_flush(STRING_COLOR)
 			
 				if seg_end + 3 < length(line) then
-					i = match_from(`"""`, line, seg_end + 3)
+					i = match(`"""`, line, seg_end + 3)
 					if i = 0 then
 						ram_space[state][S_STRING_TRIPLE] = 1
 						seg_end = length(line) - 1

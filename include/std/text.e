@@ -1257,7 +1257,7 @@ public function dequote(sequence text_in, object quote_pairs = {{"\"", "\""}}, i
 						pos += 1
 					end if
 				entry
-					pos = find_from(esc, text_in, pos)
+					pos = find(esc, text_in, pos)
 				end while
 				exit
 			end if

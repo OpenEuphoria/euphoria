@@ -38,7 +38,7 @@ while next_tag > 0 with entry do
 		out &= "\tresult &= \"\"\"" & in[pos..next_tag-1] & "\"\"\"\n"
 	end if
 
-	pos = match_from("%>", in, next_tag) + 2
+	pos = match("%>", in, next_tag) + 2
 	
 	sequence tag = trim(in[next_tag+2..pos-3])
 	
@@ -54,7 +54,7 @@ while next_tag > 0 with entry do
 	end switch
 
 entry
-	next_tag = match_from("<%", in, pos)
+	next_tag = match("<%", in, pos)
 end while
 
 out &= "\tresult &= \"\"\"" & in[pos..$] & "\"\"\"\n"

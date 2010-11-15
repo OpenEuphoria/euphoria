@@ -295,7 +295,7 @@ public function find_all(object needle, sequence haystack, integer start=1)
 		haystack[kx] = start
 		start += 1
 	entry
-		start = find_from(needle, haystack, start)
+		start = find(needle, haystack, start)
 	end while
 
 	haystack = remove( haystack, kx+1, length( haystack ) )
@@ -618,7 +618,7 @@ public function find_replace(object needle, sequence haystack, object replacemen
 			exit
 		end if
 	entry
-		posn = find_from(needle, haystack, posn + 1)
+		posn = find(needle, haystack, posn + 1)
 	end while
 
 	return haystack
@@ -856,7 +856,7 @@ public function match_all(sequence needle, sequence haystack, integer start=1)
 		haystack[kx] = start
 		start += length(needle)
 	entry
-		start = match_from(needle, haystack, start)
+		start = match(needle, haystack, start)
 	end while
 
 	haystack = remove( haystack, kx+1, length( haystack ) )
