@@ -196,7 +196,6 @@
 
 ../include/std/win32/msgbox.e
 ../include/std/win32/sounds.e
-../include/std/win32/filesysx.e
 
 ########
 :%%output=unsupported
