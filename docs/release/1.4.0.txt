@@ -1,42 +1,14 @@
 == Version 1.4, May 1996:
 
+* You can now convert any Euphoria program into a **stand-alone .exe** file.
+* The separate DOS4GW.EXE DOS extender file has been eliminated. 
+* Windows 95 long filename support.
+* Support for DOS software interrupts.
+* New utility programs: **key.ex**, **where.ex**, **ascii.ex**, **guru.ex**.
+* New demo program: **dosint.ex**.
+* New library routines: **set_rand()**, **use_vesa()**.
+* You can peek or poke an entire sequence of bytes.
+* Editor enhancements.
+* Reduction in space overhead for sequences.
 
-<li>
- You can now convert any Euphoria program into a
- **stand-alone .exe** file.
-
-<li>
- The separate DOS4GW.EXE DOS extender file has been eliminated. 
-
-<li>
- Windows 95 long filename support.
-
-<li>
- Support for DOS software interrupts.
-
-<li>
- New utility programs: **key.ex**,
- **where.ex**,
- **ascii.ex**,
- **guru.ex**.
-
-<li>
- New demo program: **dosint.ex**.
-
-<li>
- New library routines: **set_rand()**,
- **use_vesa()**.
-
-<li>
- You can peek or poke an entire sequence of bytes.
-
-<li>
- Editor enhancements.
-
-<li>
- Reduction in space overhead for sequences.
-
-</ul>
-
-&nbsp;<br>
 
