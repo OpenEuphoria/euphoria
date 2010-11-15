@@ -209,9 +209,9 @@ CREOLEHTML=creolehtml
 endif
 
 ifdef WKHTMLTOPDF
-HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/eu400*.html $(CYPBUILDDIR)/euphoria-4.0.pdf
+HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/index.html $(CYPBUILDDIR)/euphoria-4.0.pdf
 else
-HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/eu400*.html
+HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/index.html
 endif
 
 ifeq "$(TRANSLATE)" "euc"
@@ -520,16 +520,16 @@ endif
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
 	cd ../docs/ && $(EUDOC) --strip=2 -v -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
 
-$(BUILDDIR)/docs/eu400_0001.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
+$(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
 	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/docs/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
-manual : $(BUILDDIR)/docs/eu400_0001.html
+manual : $(BUILDDIR)/docs/index.html
 
-$(BUILDDIR)/html/eu400_0001.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
+$(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
 	 $(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
@@ -543,17 +543,17 @@ $(BUILDDIR)/html/js/scriptaculous.js: $(DOCDIR)/scriptaculous.js  $(BUILDDIR)/ht
 $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 	copy $(DOCDIR)/prototype.js $^@
 
-htmldoc : $(BUILDDIR)/html/eu400_0001.html
+htmldoc : $(BUILDDIR)/html/index.html
 
 $(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
 # 	cp  $(BUILDDIR)/euphoria.txt  $(BUILDDIR)/euphoria-pdf.txt
 	sed -e "s/splitlevel = 2/splitlevel = 1/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
 
-$(BUILDDIR)/pdf/eu400_0001.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
+$(BUILDDIR)/pdf/index.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
 	-mkdir -p $(BUILDDIR)/pdf
 	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
 
-$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/eu400_0001.html  $(DOCDIR)/pdf.css
+$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/index.html  $(DOCDIR)/pdf.css
 	cp $(CYPTRUNKDIR)/docs/pdf.css $(CYPBUILDDIR)/pdf/
 	$(HTML2PDF)
 
