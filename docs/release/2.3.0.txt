@@ -1,12 +1,12 @@
-== Version 2.3 February 11, 2002:
+== Version 2.3 February 11, 2002
 
-This release updates the Euphoria Interpreter, 
+This release updates the Euphoria Interpreter,
 the Euphoria To C Translator, and the Interpreter Source Code product,
 for all platforms.
 
-* The DJGPP version of the interpreter source code now uses 
+* The DJGPP version of the interpreter source code now uses
   GNU C's dynamic labels, just like the Linux version. This allows
-  it to achieve full speed, without the need for any assembly-level 
+  it to achieve full speed, without the need for any assembly-level
   tweaking. Thanks to Bernie Ryan.
 * The Interpreter Source Code now includes an overview document
   describing how the interpreter works.
@@ -17,10 +17,10 @@ for all platforms.
 * **bug fixed : **
   Due to a bug in the WATCOM 10.6 C library, the ex and exw interpreters,
   and code translated to C and compiled by Watcom, might get the wrong
-  result from Euphoria's where() function when the file was opened in 
-  append mode, and the file pointer was in the uncommitted (not written 
-  to disk yet) portion of the file. The bug has been worked around 
-  by having Euphoria flush() the file in this particular case, 
+  result from Euphoria's where() function when the file was opened in
+  append mode, and the file pointer was in the uncommitted (not written
+  to disk yet) portion of the file. The bug has been worked around
+  by having Euphoria flush() the file in this particular case,
   before calling the Watcom routine. Thanks to Bob Elia.
 * **bug fixed : **
   A bug introduced in the binder for 2.3 beta, might cause
@@ -28,7 +28,7 @@ for all platforms.
   Thanks to Wolfgang Fritz.
 * **bug fixed : **
   Several Euphoria files in the WIN32+DOS32 distribution had Linux-style
-  line terminators (\n only). This made them hard to view using 
+  line terminators (\n only). This made them hard to view using
   NotePad and some other editors. Thanks to Pete Lomax.
 * **bug fixed : **
   If "with type_check" was turned on, ed.ex would get a type_check failure

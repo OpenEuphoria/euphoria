@@ -1,4 +1,4 @@
-== Version 1.0 July 1993:
+== Version 1.0 July 1993
 
 Euphoria was first released after 3 years of research and development
 and 6 months of Beta testing. Many of the ideas behind Euphoria came

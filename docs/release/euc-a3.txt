@@ -1,4 +1,4 @@
-== Euphoria to C Translator Alpha-3 November 27, 2000:
+== Euphoria to C Translator Alpha-3 November 27, 2000
 
 * Some bugs were fixed. Some new features were added. Borland C++ is now supported.
 

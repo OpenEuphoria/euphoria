@@ -1,4 +1,4 @@
-== Version 3.0.2 February 9, 2007:
+== Version 3.0.2 February 9, 2007
 
 This release fixes some important bugs in 3.0.1, and improves the source code documentation.
 
@@ -15,7 +15,7 @@ This release fixes some important bugs in 3.0.1, and improves the source code do
   heap by the Windows O/S before the block could be read.  Thanks to Andy
   Serpa, Pete Lomax, Matt Lewis, Derek Parnell, and others for helping to
   pin-point the location of the bug.
-* **bug fixed: ** **Source Code: ** "\euphoria" was changed to to %EUDIR% in 4 .bat 
+* **bug fixed: ** **Source Code: ** "\euphoria" was changed to to %EUDIR% in 4 .bat
   files in the source directory. Thanks to Jaime Marcos.
 
 === Improved Documentation
@@ -23,10 +23,10 @@ This release fixes some important bugs in 3.0.1, and improves the source code do
 * A new document (translator.doc) was added to euphoria\source. It describes
   the internals of the Translator, with emphasis on the many optimizations
   that the Translator performs.
-* The user documentation was also improved in a few places.     
+* The user documentation was also improved in a few places.
 
 === C Source Code Changes
 
-* Matthew Lewis added a Linux/FreeBSD make file, and made source code 
+* Matthew Lewis added a Linux/FreeBSD make file, and made source code
   changes to better support Open Watcom and a newer version of GCC.
 

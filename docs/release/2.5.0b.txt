@@ -1,21 +1,21 @@
-== Version 2.5 Beta January 14, 2005:
+== Version 2.5 Beta January 14, 2005
 
 === Improved Performance
 
-* The initial parse time (start-up time) of interpreted programs 
+* The initial parse time (start-up time) of interpreted programs
   has been reduced, typically by 25% on newer machines, and 40% on older
   machines, when compared to 2.5 alpha.  In the case of old machines running
   very large programs, the start-up time can be 65% to 90% less, especially when
   ##with trace## or ##with profile## are in effect.
-* Most of the optimizations were made to the Euphoria front-end 
+* Most of the optimizations were made to the Euphoria front-end
   source that's shared with the Public Domain source interpreter, so **eu.ex**
   also has reduced parse times.
-* A major speed improvement was made in opASSIGN_SUBS() in the PD source 
+* A major speed improvement was made in opASSIGN_SUBS() in the PD source
   interpreter. This operation handles assignments to subscripted sequences, and
   is executed a lot. Thanks to Greg Haberek for showing the slowness.
-* **Translator**: In many more cases, the **Translator** now knows the type of all 
-  elements of a sequence. This is especially useful when the elements are known to be 
-  integers. Smaller and faster code is generated for accessing the elements, and freeing 
+* **Translator**: In many more cases, the **Translator** now knows the type of all
+  elements of a sequence. This is especially useful when the elements are known to be
+  integers. Smaller and faster code is generated for accessing the elements, and freeing
   the sequence.
 * In most cases, the **Interpreter** and the **Translator** now evaluate
   sequence-formation {a, b, c, ...} expressions once at compile-time, instead of
@@ -55,8 +55,8 @@
 * The **install** program will not change any existing file associations for
   Euphoria file types. (If you install Euphoria in a new directory, you might
   have to change these yourself.) Thanks to Juergen Luethje and others.
-* The Start Menu links created by the **install** program were wrong: exw was 
-  incorrectly pointing to **ecw.exe**, and ex was incorrectly pointing 
+* The Start Menu links created by the **install** program were wrong: exw was
+  incorrectly pointing to **ecw.exe**, and ex was incorrectly pointing
   to **ec.exe**. Thanks to Yuku Sugianto.
 * It's ok now to have a blank in the path of the installation directory: e.g.
   "C:\Program Files". Thanks to Rich.
@@ -73,7 +73,7 @@
   inside a routine.\\
   This fix requires .il files shrouded with 2.5 alpha to be reshrouded
   with 2.5 beta or later. Bound files are not a problem.
-* **bug fixed**: A complex expression on the left hand side of an assignment, involving 
+* **bug fixed**: A complex expression on the left hand side of an assignment, involving
   nested use of ##$##, could crash. Thanks to Andy Serpa.
 * **bug fixed -  Translator: ** A call to **routine_id()** would sometimes search
   past the end of a list and start reading garbage in memory. In most instances
@@ -93,8 +93,8 @@
   occasionally returned some garbage in the upper bits of the character
   attributes. Thanks to Brian Broker.
 * **bug fixed**: The CAPS lock key generated a key code when using **ed** with
-  **exwc**. The key had the desired effect, but it caused **ed** to display a message 
-  at the top of the screen. **ed** will no longer display the message. Thanks Alex 
+  **exwc**. The key had the desired effect, but it caused **ed** to display a message
+  at the top of the screen. **ed** will no longer display the message. Thanks Alex
   Caracatsanis.
 * **bug fixed**: **routine_id("")** would crash the Binder and Translator. Thanks
   to Antonio Alessi.
@@ -104,11 +104,11 @@
   window.  Thanks to Matthew Lewis.
 * **bug fixed**: **printf()** format strings were wrong in two error messages in
   **execute.e** &nbsp;Thanks to Derek Parnell.
-* **bug fixed**: The caret (arrow) symbol, 
+* **bug fixed**: The caret (arrow) symbol,
   displayed in compile-time error messages, was shifted one position to the
   right, when compared with version 2.4. This has been corrected.  Thanks to
   Juergen Luethje.
-* **bug fixed**: For compatibility with the official Interpreter, routine id's 
+* **bug fixed**: For compatibility with the official Interpreter, routine id's
   now start at 0 instead of 1 in the PD source interpreter.
 
 === Documentation
@@ -121,11 +121,11 @@
   better in the Reference Manual.
 * Obsolete uses of the phrase "Complete Edition" were removed from a few places
   in the documentation. Thanks to Juergen Luethje.
-* Various documents were fixed where miscellaneous 2.4 information 
+* Various documents were fixed where miscellaneous 2.4 information
   has now become now obsolete.
 * The Reference Manual said that the limit on nested include files was 10 deep.
   It should have said 30 deep. Thanks to Darkvincentdude.
-* In the PD source interpreter, **eu.ex**, there was an error in the 
+* In the PD source interpreter, **eu.ex**, there was an error in the
   comments at the top. Thanks to Yuku Sugianto.
 * The fact that **crash_message()** is now only useful for run-time errors was
   made clear. Thanks to Juergen Luethje.

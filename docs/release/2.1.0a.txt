@@ -1,17 +1,17 @@
-== Version 2.1 Alpha January 15, 1999:
+== Version 2.1 Alpha January 15, 1999
 
 * We've made a number of changes to the packaging, pricing, and registration incentives for the Euphoria product:
 ** The Dual-Platform (DOS32+WIN32) package, formerly $53 has been reduced to $39 U.S., effective immediately.
 ** The Single-Platform (DOS32-only) package, formerly $32, has been discontinued.
-** The printed manual has been discontinued. Instead, there is now an official HTML version of the manual, 
+** The printed manual has been discontinued. Instead, there is now an official HTML version of the manual,
    included with the Public Domain .zip file.
-** All useful 3rd-party include files, such as **Win32Lib.ew** and many others, will be "stamped" by RDS with a 
-   code number that makes them **//free//**, just like the files in **euphoria\include**. They will not add to your 
-   statement count, provided you do not significantly modify them. This will also allow 3rd-party developers to get 
+** All useful 3rd-party include files, such as **Win32Lib.ew** and many others, will be "stamped" by RDS with a
+   code number that makes them **//free//**, just like the files in **euphoria\include**. They will not add to your
+   statement count, provided you do not significantly modify them. This will also allow 3rd-party developers to get
    better diagnostic information from their users.
-** **Binding**, **shrouding** and **profiling** will now be part of the Complete Edition only. These are features 
+** **Binding**, **shrouding** and **profiling** will now be part of the Complete Edition only. These are features
    that beginners do not require, but serious users might find valuable.
-* Short-form assignment operators ##+=##, ##-=##, ##*=##, ##/=##, and ##&=## have been added. 
+* Short-form assignment operators ##+=##, ##-=##, ##*=##, ##/=##, and ##&=## have been added.
   For example, instead of saying:
   <eucode>
   count = count + 1
@@ -68,12 +68,12 @@
 ** Built-in to ex.exe/exw.exe:
 *** profile() - turns **profiling** **on/off** so you can focus your **profile** and
     **profile_time** runs on particular events within your program."
-*** system_exec() - gives you the exit code from calling a **.exe** or **.com** file, or another 
+*** system_exec() - gives you the exit code from calling a **.exe** or **.com** file, or another
     Euphoria program.
 *** equal() - compares any 2 Euphoria objects for equality. equivalent to: compare(a,b) = 0  but
     more readable.
 ** **Added to various include files:**
-*** walk_dir() - recursively goes through a directory and subdirectories, calling a routine that 
+*** walk_dir() - recursively goes through a directory and subdirectories, calling a routine that
     you supply.
 *** reverse() - returns a sequence in reverse order.
 *** sprint() - returns the string representation of any Euphoria object.
@@ -128,7 +128,7 @@
   2.25x faster when reading a sequence of integers from a file.
   [/quote]
 * **optimization:** **power(x,2)** is converted internally to x*x which is faster
-  in all cases, especially when x is a large integer or a f.p. number. 
+  in all cases, especially when x is a large integer or a f.p. number.
 * **optimization:** Thanks to Jiri Babor, **int_to_bits()** is at least 15%
   faster in most cases.
 * **optimization:**

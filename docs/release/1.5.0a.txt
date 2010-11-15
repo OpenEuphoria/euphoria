@@ -1,6 +1,6 @@
-== Version 1.5a June 13, 1997:
+== Version 1.5a June 13, 1997
 
-* Many operations and library routines were optimized. 
+* Many operations and library routines were optimized.
 * **get_key()** is 100x faster when there is no key in the buffer.
 * **get_all_palette()** is over 100x faster and this makes **save_screen()** much
   faster.
@@ -12,9 +12,9 @@
 * **get_pixel()** is faster in all modes.
 * **display_image()** is about 30% faster in most modes and up to 4x faster in
   mode 19, because <br>pixel() is faster.
-* All arithmetic and bitwise operations applied to sequences of integers are now 29% faster.  
-* a **&** b (concatenation) is 15% faster in most cases, and is dramatically faster in the case 
-  where you grow a very long sequence by concatenating many small sequences onto it. 
+* All arithmetic and bitwise operations applied to sequences of integers are now 29% faster.
+* a **&** b (concatenation) is 15% faster in most cases, and is dramatically faster in the case
+  where you grow a very long sequence by concatenating many small sequences onto it.
 * **getc()** is 12% faster.
 * **match()** is 8% faster in typical cases.
 * **append()/prepend()** are 15% faster in many cases.

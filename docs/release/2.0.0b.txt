@@ -1,4 +1,4 @@
-==  Version 2.0 Beta February 26, 1998:
+==  Version 2.0 Beta February 26, 1998
 
 * The WIN32 interpreter, **exw.exe**, is now a **true WIN32 GUI** program. In 2.0
   alpha it was a WIN32 ##//console//## program that was always associated with a
@@ -6,7 +6,7 @@
   only if your program needs one.  **exw** will automatically create a new
   console window the first time your program writes to the screen, reads from the
   keyboard, or calls any library routine that requires a console to work. The
-  console will disappear automatically when your program finishes execution. 
+  console will disappear automatically when your program finishes execution.
 * A new library routine, **free_console()**, will immediately delete the console
   window if you currently have one.
 * The Complete Edition of Euphoria now provides a **-scramble** option of
@@ -24,16 +24,16 @@
 * The average program now has 60K more memory available before having to use the
   swap file.
 * The limit on the size of a single procedure, function or type has been
-  eliminated. 
+  eliminated.
 * The limit on the size of a single top-level statement has been eliminated.
 * The limit on the total number of include files that can make up a program has
   been increased to 256 from 150.
 * Some **optimizations** were added. The following general forms of expression
-  are now faster: 
+  are now faster:
   <eucode>
-    2 * x 
-    x * 2 
-    1 + x 
+    2 * x
+    x * 2
+    1 + x
   </eucode>
   where x can be any expression, and have type atom or sequence.
 * There is a new documentation file, **perform.doc** with lots of tips for

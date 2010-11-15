@@ -1,4 +1,4 @@
-== Version 2.4 July 3, 2003:
+== Version 2.4 July 3, 2003
 
 * **define_c_proc()** and **define_c_func()** have been extended, so in
   addition to defining C routines in external .dll's and shared

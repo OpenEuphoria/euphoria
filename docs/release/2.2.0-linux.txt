@@ -1,10 +1,10 @@
-== Version 2.2 Linux November 22, 1999:
+== Version 2.2 Linux November 22, 1999
 
 * **All platforms: bug fixed:**
 If a Euphoria routine called itself recursively from inside a
-for-loop, and at one level of recursion the for-loop counted //up// 
-to an upper limit, and at another level of recursion the for-loop 
-counted //down// to a 
+for-loop, and at one level of recursion the for-loop counted //up//
+to an upper limit, and at another level of recursion the for-loop
+counted //down// to a
 lower limit, the for-loop would probably malfunction at one of the levels.
 Thanks to Delroy Gayle.
 * The documentation was improved in many places, especially with respect

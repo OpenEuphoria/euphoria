@@ -1,6 +1,6 @@
-==  Euphoria to C Translator Alpha-2 October 26, 2000:
+==  Euphoria to C Translator Alpha-2 October 26, 2000
 
-* Support for the Lcc C compiler for Windows was added. DJGPP C (DOS)  is partially 
+* Support for the Lcc C compiler for Windows was added. DJGPP C (DOS)  is partially
   supported (no pixel graphics).
 
 

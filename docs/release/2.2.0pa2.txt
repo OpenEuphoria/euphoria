@@ -1,4 +1,4 @@
-== Version 2.2 Pre Alpha #2 Linux July 6, 1999:
+== Version 2.2 Pre Alpha #2 Linux July 6, 1999
 
 * The **ncurses** library has been statically linked into
   **exu**.

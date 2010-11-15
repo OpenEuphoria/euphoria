@@ -1,25 +1,25 @@
-== Version 2.2 Beta WIN32+DOS32 December 23, 1999:
+== Version 2.2 Beta WIN32+DOS32 December 23, 1999
 
-Most of the new library routines developed for Euphoria 2.2 on 
-Linux, have now been ported to WIN32 and DOS32. 
+Most of the new library routines developed for Euphoria 2.2 on
+Linux, have now been ported to WIN32 and DOS32.
 These are: sleep(), chdir(), flush(), lock_file(), unlock_file(),
 crash_file(), get_screen_char() and put_screen_char(). For a
 description of these routines refer to the Linux release notes below,
 or <a href="library.htm">LIBRARY.DOC</a>.
 
-Some cross-platform bug fixes and other miscellaneous improvements 
+Some cross-platform bug fixes and other miscellaneous improvements
 were made during the Linux port. These bug fixes and improvements
 have now been ported back to WIN32+DOS32. See the Linux release notes (below).
 
-In addition, the following improvements have been made specifically 
+In addition, the following improvements have been made specifically
 for WIN32 and DOS32:
 
-* **exw.exe** now contains a Euphoria icon that is displayed 
+* **exw.exe** now contains a Euphoria icon that is displayed
 automatically by Windows. The icon was contributed by Gary Dumer.
 Registered users may change this icon when they bind a program.
 * **exw.exe** is now a compressed executable of just 73K (or so).
 It's compressed using the UPX compression tool for .exe files.
-* **ex.exe** has been updated with the latest release of 
+* **ex.exe** has been updated with the latest release of
 the CauseWay DOS extender. A problem where
 CauseWay would sometimes limit you to 64Mb of memory under
 some DOS configurations has been eliminated, and a few other minor
@@ -27,7 +27,7 @@ bugs were fixed.
 * **bug fixed:**
 The error traceback could sometimes crash or be misprinted when
 a type_check failure occurred. It could only happen when 1 was added to
-an expression, and the non-integer result of the expression 
+an expression, and the non-integer result of the expression
 was assigned to a variable declared as integer.
 * **bug fixed:**
 If text_rows() was called as the first routine needing a WIN32 console

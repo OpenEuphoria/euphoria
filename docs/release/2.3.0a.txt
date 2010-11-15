@@ -1,11 +1,11 @@
-== Version 2.3 Alpha November 30, 2001:
+== Version 2.3 Alpha November 30, 2001
 
 This release updates the Euphoria Interpreter for WIN32, DOS32 and Linux.
-It also updates the Euphoria To C Translator for all platforms, 
+It also updates the Euphoria To C Translator for all platforms,
 and it introduces a new product - the Euphoria Interpreter Source Code.
 
 * The registration incentives and prices have changed.
-** The Interpreter product now has just one option: WIN32, DOS32 //and// Linux, 
+** The Interpreter product now has just one option: WIN32, DOS32 //and// Linux,
    formerly $59, for just $39.
 ** The Interpreter source code (minus a few registered features)
    is now available for $49. See the a href=license.htm>source license</a>
@@ -13,11 +13,11 @@ and it introduces a new product - the Euphoria Interpreter Source Code.
 ** The Translator continues to cost $29.
 ** When Public Domain users reach 300 statements, they will no longer
    lose the run-time error diagnostics. They will only lose the trace() facility.
-* The Euphoria interpreter can now be built successfully by 6 different 
+* The Euphoria interpreter can now be built successfully by 6 different
   C compilers on 3 platforms.
 * New //namespace qualifiers// eliminate naming conflicts between identical
   global symbols declared in different include files.  Also, local symbols will
-  now override global symbols of the same name, rather than causing an error. 
+  now override global symbols of the same name, rather than causing an error.
 * The Complete Edition Interpreter product comes with a new 2-pass
   binder/shrouder that eliminates all unused routines and constants, resulting in
   smaller executable files. It also has an option to bind clear source, so you
@@ -67,7 +67,7 @@ and it introduces a new product - the Euphoria Interpreter Source Code.
   the current directory or unless you specified the full path to the executable.
 * **bug fixed -  Binder: ** "with profile_time" in a bound or shrouded program would cause a crash
 * **bug fixed -  DOS Interpreter: ** In image.e, put_screen_char() has been
-  corrected to have: **if overflow > 0 then ...** 
+  corrected to have: **if overflow > 0 then ...**
   instead of: ** if overflow then ...**
 * **bug fixed -  Interpreter: ** A time optimization for slicing could in rare
   cases cause a lot of wasted space. The optimization has been adjusted to handle
@@ -77,6 +77,6 @@ and it introduces a new product - the Euphoria Interpreter Source Code.
   The same routines in **machine.e** were ok.
 * **bug fixed - Translator for DJGPP: **A couple of minor differences from ex.exe
   in the display of text were corrected.
-* **bug fixed - define_c_var():** works on WIN32 too. The documentation was corrected.  
+* **bug fixed - define_c_var():** works on WIN32 too. The documentation was corrected.
 
 

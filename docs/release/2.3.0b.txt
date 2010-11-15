@@ -1,6 +1,6 @@
-== Version 2.3 Beta January 15, 2002:
+== Version 2.3 Beta January 15, 2002
 
-This release updates the Euphoria Interpreter, 
+This release updates the Euphoria Interpreter,
 the Euphoria To C Translator, and the Interpreter Source Code product,
 for all platforms.
 
@@ -9,12 +9,12 @@ for all platforms.
   user-defined routines.  Besides giving programmers more freedom, it will allow
   RDS to add new built-in routines in the future without breaking existing code.
 * The warning about having multiple global symbols with the same name
-  in different source files has been removed. It was felt to be unnecessary 
-  since you'll be asked to supply a namespace identifier if you actually 
+  in different source files has been removed. It was felt to be unnecessary
+  since you'll be asked to supply a namespace identifier if you actually
   make an ambiguous reference to a global symbol.
-* You can now have a trailing \ (or Linux /) on the end of all directory names 
+* You can now have a trailing \ (or Linux /) on the end of all directory names
   in **EUINC**, and you can have blanks in the directory name.
-* To eliminate confusion, the binder/shrouder will now delete the 
+* To eliminate confusion, the binder/shrouder will now delete the
   output file if a fatal error occurs during the bind or shroud.
 * Numerous improvements and corrections were made to the documentation.
   Thanks to Igor Kachan.
@@ -34,14 +34,14 @@ for all platforms.
   as a built-in function, without causing a lot of errors. Thanks to Martin
   Stachon (although he recommended a different solution).
 * **bug fixed -  Binder: ** Support for the new **EUINC** environment variable
-  has now been added to the binder. Thanks to Ross Boyd. 
+  has now been added to the binder. Thanks to Ross Boyd.
 * **bug fixed -  Binder: ** Appending resource files to a bound .exe didn't work
-  correctly when bind -clear was used. Thanks to Wolfgang Fritz. 
+  correctly when bind -clear was used. Thanks to Wolfgang Fritz.
 * **bug fixed -  Binder: ** When using the binder interactively, you would get a
   "variable not initialized" error when trying to substitute a different Windows
   icon. Thanks to Tony Steward.
-* **bug fixed -  Binder: ** In some cases the keyword "constant" would be dropped from 
-  the shrouded output, when the previous line of input had a 
+* **bug fixed -  Binder: ** In some cases the keyword "constant" would be dropped from
+  the shrouded output, when the previous line of input had a
   constant declaration ending in ']'. Thanks to Ross Boyd.
 * **bug fixed -  Binder: ** When a general expression, (not just a string in
   quotes), was used as the argument to routine_id(), local routines that were
@@ -52,11 +52,11 @@ for all platforms.
   file was missing.  Thanks to Ross Boyd.
 * **bug fixed -  Linux Binder:** The Linux search path bug for bound executables, supposedly fixed
   by the 2.3 alpha release, wasn't fixed properly. Fixed now.
-  Thanks to Kenneth Rhodes. 
+  Thanks to Kenneth Rhodes.
 * **bug fixed -  Linux Binder:** bindu -clear  and shroud -clear with a file
   containing DOS/Windows-style \r\n line terminators gave you errors "illegal
   character" when your shrouded program was run, and "not bound correctly" when
-  your bound file was run. 
+  your bound file was run.
 * **bug fixed -  Interpreter Source:** The link command for building the DOS
   interpreter with WATCOM C, listed a non-existent .obj file.
 

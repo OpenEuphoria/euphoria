@@ -1,4 +1,4 @@
-== Version 2.4 Beta April 10, 2003:
+== Version 2.4 Beta April 10, 2003
 
 This release updates the **Euphoria Interpreter**, the **Euphoria To C
 Translator**, and the **Interpreter Source Code** products, for **Windows**,
@@ -9,36 +9,36 @@ Translator**, and the **Interpreter Source Code** products, for **Windows**,
 * **bind** and
     **shroud** now have an option
     ##-out## for specifying the output file,
-    so you won't be prompted for it. Thanks to Jonas Temple, Rusty Davis 
+    so you won't be prompted for it. Thanks to Jonas Temple, Rusty Davis
     and others.
-  
+
 * **bind**
     and **shroud** now have an option
     ##-quiet## that suppresses normal messages
     and statistics, and therefore eliminates the window that normally pops up.
     Only errors are reported. Thanks to Jonas Temple.
 
-* The namespace error message that's issued when you refer to a global 
-    symbol that's defined in two or more files, now 
-    gives you a list of all the files where that symbol 
+* The namespace error message that's issued when you refer to a global
+    symbol that's defined in two or more files, now
+    gives you a list of all the files where that symbol
     has been defined. Thanks to Derek Parnell and Irv Mullins.
-  
+
 * **Translator**: In many cases,
     the C code generated for **remainder()**,
     integer multiplication, and **compare()**
     is smaller and faster.
 
-* **exw, ecw -wat**: Deallocation of space for huge numbers of small 
-    objects (atoms or small sequences) is much faster than in 2.4 alpha. 
+* **exw, ecw -wat**: Deallocation of space for huge numbers of small
+    objects (atoms or small sequences) is much faster than in 2.4 alpha.
     Thanks to Andy Serpa.
     (Note that //allocation// of huge numbers of small objects in **exw**,
-    or **ecw -wat**, became much faster in 2.4 alpha, 
+    or **ecw -wat**, became much faster in 2.4 alpha,
     and remains much faster.)
 
 * When an **ex.err** file is created,
     any warnings issued against the program will be listed at the end of
     the **ex.err** file. Thanks to Al Getz.
-  
+
 * The file name is now included in the warning message that you get for
     some of the common warnings (variable not used, variable not assigned to).
     Thanks to Al Getz.
@@ -46,13 +46,13 @@ Translator**, and the **Interpreter Source Code** products, for **Windows**,
 * **New Icon**: On
     **Windows**, Euphoria include files are
     now labelled with a gray-scale version of the Euphoria ##E)## icon.
-    This lets you easily distinguish the executable Euphoria files from the 
+    This lets you easily distinguish the executable Euphoria files from the
     include files. Thanks to Wolfgang Fritz.
-    
-* Out-of-bounds floating-point subscript values 
-    were being reported after rounding down to an integer. 
-    Now the value before rounding is reported. 
-  
+
+* Out-of-bounds floating-point subscript values
+    were being reported after rounding down to an integer.
+    Now the value before rounding is reported.
+
 * **Euphoria Database System (EDS)**:
     **db_rename_table()** now checks to see
     if the target table name already exists, before it renames a table.
@@ -60,26 +60,26 @@ Translator**, and the **Interpreter Source Code** products, for **Windows**,
 
 * The first value returned by **rand()**
     (in the absence of **set_rand()**)
-    is now more "random". Thanks to Yuku Sugianto. 
-  
+    is now more "random". Thanks to Yuku Sugianto.
+
 
 
 === Bug Fixes
 
 
 * **bug fixed**: Due to a change made in
-    2.4 alpha, the **dir()** routine 
-    for Borland and Lcc was concatenating the file attributes 
-    characters (if any)  to the file name field. 
+    2.4 alpha, the **dir()** routine
+    for Borland and Lcc was concatenating the file attributes
+    characters (if any)  to the file name field.
     Thanks to Dr. Juan R. Herguijuela.
-    
+
 * **bug fixed**: No error message was
     issued when ',' was followed immediately by ')' in a routine's parameter
     declaration list. Thanks to Brage Moris.
-  
+
 * **bug fixed**: Huge positive out-of-bounds
-    subscripts (over 2 billion) were reported as huge negative values. 
-    
+    subscripts (over 2 billion) were reported as huge negative values.
+
 * **bug fixed**:
     **repeat(0, size)**, where size was a
     huge positive floating-point number, incorrectly reported:
@@ -87,7 +87,7 @@ Translator**, and the **Interpreter Source Code** products, for **Windows**,
     "repetition count is too large". Thanks to Martin Stachon.
 
 * **bug fixed**:
-    **machine_proc(x, 5)**, where x was a huge 
+    **machine_proc(x, 5)**, where x was a huge
     floating-point number, incorrectly reported:
     "an integer was expected, not a sequence".
     Now it reports: "The first argument to machine_proc/func must be a small

@@ -1,10 +1,10 @@
-==  Version 2.2 Pre Alpha #4 Linux July 15, 1999:
+==  Version 2.2 Pre Alpha #4 Linux July 15, 1999
 
 * You can call C routines in **Linux**
   shared libraries (**.so** files). See
   **euphoria/demo/linux/callc.exu** for
   some examples.
-* If your program does not output anything to the **xterm** window, 
+* If your program does not output anything to the **xterm** window,
   **exu** will not issue the "Press Enter"
   prompt.
 *  **All platforms: ed** now lets you recall
@@ -14,4 +14,4 @@
    **Esc d** (Linux command), **Esc f** (find string) or
    **Esc r** (replace string). In addition, you can now use
    **arrow keys**, **Home**, **End**, **Delete** etc. to edit
-   strings before you press **Enter**. 
+   strings before you press **Enter**.

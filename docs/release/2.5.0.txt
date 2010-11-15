@@ -1,54 +1,54 @@
-== Version 2.5 March 8, 2005:
+== Version 2.5 March 8, 2005
 
 === Enhanced Features
 
 * The Source Code Product now includes the C code for interactive
   trace/debug and profiling. This was not provided in any previous release.
-* **Translator**: A new **-fastfp** 
-  option has been added for WATCOM/DOS (registered version only). 
-  This option can double the speed of a floating-point intensive, 
-  translated/compiled, program. The resulting .exe file requires a 
+* **Translator**: A new **-fastfp**
+  option has been added for WATCOM/DOS (registered version only).
+  This option can double the speed of a floating-point intensive,
+  translated/compiled, program. The resulting .exe file requires a
   Pentium class CPU, or a 386/486 with floating-point hardware.
-* **eu.ex**: execute.e now uses call-back machine code supplied by 
-  Matthew Lewis. As a result, there is no longer a limit on the number 
+* **eu.ex**: execute.e now uses call-back machine code supplied by
+  Matthew Lewis. As a result, there is no longer a limit on the number
   of call-backs a program can use.
-* **Translator**: There is now a **-keep** option that prevents the deletion 
-  of any C files or object files created during translation. Thanks to Matthew 
+* **Translator**: There is now a **-keep** option that prevents the deletion
+  of any C files or object files created during translation. Thanks to Matthew
   Lewis.
-* **Translator**: In order to handle huge programs without exceeding the limits of 
-  the C compiler, the translator will split init_.c into several pieces. Thanks to 
+* **Translator**: In order to handle huge programs without exceeding the limits of
+  the C compiler, the translator will split init_.c into several pieces. Thanks to
   Matthew Lewis.
 * **Translator**: Better checking is provided for incorrect command-line options.
-* **Translator**:  The translator avoids creating any files until it confirms that a 
-  valid source file has been provided on the command line, or via the interactive 
+* **Translator**:  The translator avoids creating any files until it confirms that a
+  valid source file has been provided on the command line, or via the interactive
   prompt.
 * **ed.ex**: **ed** will only call free_console() at the end of execution
-  on Linux or FreeBSD. It was causing a slight screen flicker on DOS/Windows, 
+  on Linux or FreeBSD. It was causing a slight screen flicker on DOS/Windows,
   and was not necessary.
 
 === Bug Fixes
 
-* **bug fixed**: The error traceback from a bound or shrouded program had garbage showing 
+* **bug fixed**: The error traceback from a bound or shrouded program had garbage showing
   for the file names and line numbers. This bug was introduced in the beta release.
-* **bug fixed**: Bound or shrouded programs were not starting off with a fresh random seed 
+* **bug fixed**: Bound or shrouded programs were not starting off with a fresh random seed
   value. Normal interpreted or translated programs were OK. Thanks to Michael Bolin.
-* **bug fixed**: The error traceback could be wrong if you (illegally) tried to pass a 
+* **bug fixed**: The error traceback could be wrong if you (illegally) tried to pass a
   sequence as the routine id for call_proc/func. Thanks to Mario Steele.
-* **bug fixed**: When displaying a large variable value during interactive trace, the first 
+* **bug fixed**: When displaying a large variable value during interactive trace, the first
   few lines might be printed in white, while the rest was printed in bright white.
   Thanks to Al Getz.
-* **bug fixed**: routine_id() of the form: routine_id("namespace:name") was not working 
-  correctly in the interpreter or in the PD source interpreter. The Translator was ok. 
+* **bug fixed**: routine_id() of the form: routine_id("namespace:name") was not working
+  correctly in the interpreter or in the PD source interpreter. The Translator was ok.
   This worked fine in 2.4 and earlier. Thanks to Verne Tice.
-* **bug fixed**: command_line() now shows the extra file name when the user types the file 
+* **bug fixed**: command_line() now shows the extra file name when the user types the file
   name interactively at the ex/exw/exu prompt. This is now compatible with 2.4 and earlier.
   Thanks to Bob Elia.
 * **bug fixed**: Warnings were not getting reported when a program ended with a call to abort(),
   or it ended with a fatal run-time error. Thanks to Juergen Luethje.
-* **bug fixed**: The platform() function is now evaluated in backend/backendw/backendu for .il 
-  files (rather than in the front-end of the shrouder). This allows a .il file to be 
-  portable to multiple platforms. In other situations, the interpreter 
-  and translator will continue to evaluate platform() in the front-end 
+* **bug fixed**: The platform() function is now evaluated in backend/backendw/backendu for .il
+  files (rather than in the front-end of the shrouder). This allows a .il file to be
+  portable to multiple platforms. In other situations, the interpreter
+  and translator will continue to evaluate platform() in the front-end
   for maximum efficiency. Thanks to Ken Rhodes
 
 === Documentation

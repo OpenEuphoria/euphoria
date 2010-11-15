@@ -1,12 +1,12 @@
-== Version 3.0.0 October 17, 2006:
+== Version 3.0.0 October 17, 2006
 
 With this release, Euphoria has become a totally **free**
 and totally **open source** product! RDS will continue to develop
 Euphoria with the aid of many additional clever programmers.
-The free download package now includes the Interpreter (with either 
-a C or a Euphoria-coded back-end), Binder/shrouder, fully-enabled 
-Translator, and the full source code for all of these. 
-Thousands of people can now examine the full source code for bugs, 
+The free download package now includes the Interpreter (with either
+a C or a Euphoria-coded back-end), Binder/shrouder, fully-enabled
+Translator, and the full source code for all of these.
+Thousands of people can now examine the full source code for bugs,
 performance improvements, and potential new features.
 
 Rather than having alpha, beta and official releases, we will now
@@ -15,7 +15,7 @@ more frequently, though each release will likely be a smaller
 change compared to the previous release.
 
 === Enhanced Features
- 
+
 * **Cooperative Multitasking**. Rather than having just a single thread of
   execution, you can now create multiple tasks that run independently of one
   another. Each task has its own currently-executing statement, subroutine
@@ -31,7 +31,7 @@ change compared to the previous release.
   ncurses routines sometimes caused problems on some Linux/FreeBSD systems.  The
   Euphoria backend now uses ANSI escape chars to get 2-d positioning and colors
   for a plain text-mode console.  Also, the use of libgpm (console mouse support)
-  has been dropped on Linux.  (It was never supported by Euphoria on FreeBSD). 
+  has been dropped on Linux.  (It was never supported by Euphoria on FreeBSD).
 * **Include files** with the same file name but a different path as an earlier
   include, will no longer be ignored. To be ignored, an include must refer to the
   exact same file as an earlier include.  (a new name space can still be defined,

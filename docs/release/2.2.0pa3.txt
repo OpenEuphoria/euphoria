@@ -1,10 +1,10 @@
-== Version 2.2 Pre Alpha #3 Linux July 8, 1999:
+== Version 2.2 Pre Alpha #3 Linux July 8, 1999
 
 *  In an **xterm** window, **exu** will
   prompt you to hit **Enter** before it exits. Without this, **xterm**
   restores the screen so fast that you don't see any output or error messages.
 *  An internal coding change was made to Euphoria's
-  **rand()** function. 
+  **rand()** function.
   (The algorithm has not changed.)
   Hopefully this will
   allow rand() to work on all distributions of
@@ -13,7 +13,7 @@
 *  **ed:** The **Esc h** command will
   display the Euphoria help files. This was broken in pre-alpha#2.
 *  In an **xterm** window, Euphoria's
-  **video_config()** now reports the correct 
+  **video_config()** now reports the correct
   number of lines and columns - this helps
   **ed** to work much better.
   **ed** will work with the initial size of

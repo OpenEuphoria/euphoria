@@ -1,4 +1,4 @@
-== Version 1.5 March 21, 1997:
+== Version 1.5 March 21, 1997
 
 * The following library routines were added. They are described fully
   in **library.doc**.

@@ -1,4 +1,4 @@
-== Version 2.5 Alpha Release November 15, 2004:
+== Version 2.5 Alpha Release November 15, 2004
 
 === New Features
 
@@ -9,25 +9,25 @@ interpreter**,
 100% compatible with the official RDS
 **Interpreter** on all platforms,
 is now provided. See **euphoria\source**.
-It's written 100% in Euphoria and has the same front-end as 
-the official RDS **Interpreter**. 
+It's written 100% in Euphoria and has the same front-end as
+the official RDS **Interpreter**.
 Since it's Public Domain, it may be
-used and modified for any purpose, including commercial or 
-closed-source applications. It can be bound into a single executable 
-file using the **Binder**, or translated 
-with the **Euphoria to C Translator** to 
+used and modified for any purpose, including commercial or
+closed-source applications. It can be bound into a single executable
+file using the **Binder**, or translated
+with the **Euphoria to C Translator** to
 get a much faster executable.
 
 <li>
 The official **Euphoria Interpreter** was
-re-written as 30% Euphoria (front-end), 
-and 70% hand-coded C (back-end). It was formerly 100% C, and the boundary 
-between front-end and back-end was fuzzy. 
+re-written as 30% Euphoria (front-end),
+and 70% hand-coded C (back-end). It was formerly 100% C, and the boundary
+between front-end and back-end was fuzzy.
 
 <li>
 The **Euphoria Translator** has been
-re-written as 100% Euphoria. It was formerly 100% C. It uses the same 
-front-end as the **Interpreter** and the 
+re-written as 100% Euphoria. It was formerly 100% C. It uses the same
+front-end as the **Interpreter** and the
 **Binder**. This reduces future maintenance
 costs, and helps catch subtle bugs (subscript out of bounds, uninitialized
 variable etc.)
@@ -36,23 +36,23 @@ variable etc.)
 The free Public Domain **Interpreter**
 (**ex.exe**,
 **exw.exe**,
-**exu**), 
+**exu**),
 now includes full support for **trace()**
 beyond 300 statements, and for **profiling**.
 Thus there is no longer a registered "Complete Edition"
-interpreter. However, registration is still required for the 
+interpreter. However, registration is still required for the
 **Binder / shrouder**.
 
 <li>
-A new **Binder** was developed 
+A new **Binder** was developed
 (100% in Euphoria). Since it shares the
 same front-end with the **Interpreter**
 and **Translator**,
-possible incompatibilities are avoided, and the future maintenance 
-cost has been greatly reduced. 
+possible incompatibilities are avoided, and the future maintenance
+cost has been greatly reduced.
 
 <li>
-A bound program can now provide a complete 
+A bound program can now provide a complete
 **ex.err** dump, without including any lines
 of source code in the **.exe** file.
 
@@ -60,15 +60,15 @@ of source code in the **.exe** file.
 Bound programs now start up immediately with no parsing required.
 
 <li>
-The **Binder** for 
+The **Binder** for
 **Windows** has a ##-con##
 option, so you can make a console application.
 
 <li>
 A separate **Interpreter back-end executable**
 was developed for use with the **Binder**.
-It executes intermediate code (**.il** files), 
-and is smaller than the **Interpreter**, 
+It executes intermediate code (**.il** files),
+and is smaller than the **Interpreter**,
 since it has no front-end (parser).
 This reduces the size of bound programs.
 
@@ -77,35 +77,35 @@ This reduces the size of bound programs.
  of the current sequence.
  Instead of saying s[length(s)], you can say s[$]. Instead of saying
  s[1..length(s)-1], you can say s[1..$-1]. More complicated expressions
- like s[i][$-5..$-1] are also possible. 
- 
+ like s[i][$-5..$-1] are also possible.
+
  **Note:** In order to implement
- this feature properly, a small incompatibility with version 2.4 was 
+ this feature properly, a small incompatibility with version 2.4 was
  introduced. A change was made to the order of evaluation of expressions
  in a multiply-subscripted assignment statement:
- 
+
  lhs_var[lhs_expr1][lhs_expr2]... = rhs_expr
- 
- 
- This change will cause a problem only if you are trying to modify 
+
+
+ This change will cause a problem only if you are trying to modify
  lhs_var via a function call, during the same statement that is
  assigning to lhs_var. You should change your code
- to perform any such function calls before you perform the 
+ to perform any such function calls before you perform the
  subscripted assignment, e.g.
- 
-    temp = rhs_expr<br>
-    lhs_var[lhs_expr1][lhs_expr2] = temp 
 
-  
+    temp = rhs_expr<br>
+    lhs_var[lhs_expr1][lhs_expr2] = temp
+
+
   The same would apply if one of the left-hand-side expressions contained
   a function call that tried to modify lhs_var.
-  
-  
-  This situation is very rare (and pretty weird), but a few examples have 
+
+
+  This situation is very rare (and pretty weird), but a few examples have
   been found.
 
 <li>
-  Programs now have the ability to get control after a crash 
+  Programs now have the ability to get control after a crash
   (a Euphoria-detected or machine-detected run-time error).
   Using **crash_routine()** you can specify
   the routine id's of one or more
@@ -113,36 +113,36 @@ This reduces the size of bound programs.
   critical data to disk, inform the user, inform the programmer, etc.
 
 <li>
- The library routines: **put_screen_char()**, 
+ The library routines: **put_screen_char()**,
  **get_screen_char()**,
  **save_text_image()**
   and **display_text_image()** have been
-  implemented for **Windows text-mode** 
-  consoles. These functions now work across all platforms. 
+  implemented for **Windows text-mode**
+  consoles. These functions now work across all platforms.
   Suggested by C.K. Lester.
 
 
 <li>
 **Translator**: All the files you need
 for translating Euphoria programs to C are now included in the
-main download packages for **DOS/Windows** 
+main download packages for **DOS/Windows**
 and **Linux/FreeBSD**. You just need
 one or more of the supported free C compilers.
 
 <li>
-**Translator**: The free Public Domain 
+**Translator**: The free Public Domain
 **Translator**
 (**ec.exe**,
 **ecw.exe**,
 **ecu**) now includes
-Euphoria statements as comments in the C source. It also supports 
+Euphoria statements as comments in the C source. It also supports
 **trace(3)**
-for debugging. When you register, you will eliminate the 
+for debugging. When you register, you will eliminate the
 initial message and delay on compiled programs.
 
 <li>
- **Translator**: 
- Some new optimizations will speed things up, and also reduce 
+ **Translator**:
+ Some new optimizations will speed things up, and also reduce
   the size of the C code. For example the code block:
   <eucode>        if //expression// then
            ...
@@ -154,29 +154,29 @@ initial message and delay on compiled programs.
   **Translator** can tell that //expression//
   will always be false. This can lead to further optimizations, such as
   a whole routine being deleted because there are no more calls to it.
-  An example where this is useful is when there is different code 
+  An example where this is useful is when there is different code
   for different platforms, e.g.
-  
+
   <eucode>        if platform() = DOS then ...
   </eucode>
   **while** //expression// and
-  **elsif** //expression// can also be 
-  optimized in the same way. When the expression is always true, the 
-  **if/while/elsif** 
+  **elsif** //expression// can also be
+  optimized in the same way. When the expression is always true, the
+  **if/while/elsif**
   test and jump are eliminated.
-  
+
 <li>
- **Translator**: A couple of additional small improvements were made in 
-  converting the source from C to Euphoria. They allow for slightly 
+ **Translator**: A couple of additional small improvements were made in
+  converting the source from C to Euphoria. They allow for slightly
   better optimization.
 
 <li>
  **Translator**: A minor adjustment lets
-  the Translator produce slightly 
-  fewer C files, while reducing the slight risk of creating a huge C 
-  file that's too big for the C compiler to handle. Also, some empty .c 
+  the Translator produce slightly
+  fewer C files, while reducing the slight risk of creating a huge C
+  file that's too big for the C compiler to handle. Also, some empty .c
   files that were sometimes created, have now been eliminated.
-  
+
 <li>
   **Translator**: The Translator for Windows
   has a new ##-con## option for making
@@ -189,7 +189,7 @@ initial message and delay on compiled programs.
   **emake.bat** will delete all the .c
   and .h files that were created
   by the Translator. This reduces clutter in the directory.
-  
+
 <li>
  The **install** program for
  **DOS/Windows**
@@ -198,9 +198,9 @@ initial message and delay on compiled programs.
 
 <li>
  **ed**:
-  **ed.bat** has been changed. It now runs 
+  **ed.bat** has been changed. It now runs
   ed.ex using **exwc.exe**.
-  Instead of using control-Home/control-End to move to the top/bottom 
+  Instead of using control-Home/control-End to move to the top/bottom
   of a file, use control-t/control-b.
   On **Windows** XP, this change gives
   **ed**
@@ -213,25 +213,25 @@ initial message and delay on compiled programs.
   **Linux** systems.
 
 <li>
-  The **Interpreter** 
+  The **Interpreter**
   **exw** no longer brings up a blank console
   window while performing **trace(3)**.
 
 <li>
   **pretty_print()** has a new option to
   limit the number of lines of output.
-  
+
 <li>
-  Both types of slashes (backslash, forward slash) 
+  Both types of slashes (backslash, forward slash)
   are now fully supported in pathnames on
   **DOS** and
   **Windows**.
   Backslash is the standard, but since Windows also supports
-  forward slash in most cases, Euphoria also now supports 
+  forward slash in most cases, Euphoria also now supports
   either slash in all situations, not just a few situations as before.
   On **Linux** and
   **FreeBSD** only forward slash is supported.
-  
+
 <li>
   The ##-m486## option was removed from the
   **gnuexu** batch file used in building the
@@ -244,27 +244,27 @@ initial message and delay on compiled programs.
 
 
 <li>
-  **bug fixed**: 
+  **bug fixed**:
   ##with profile## and similar
   **with/without** statements
-  caused an error when followed immediately by a comment, with no whitespace 
+  caused an error when followed immediately by a comment, with no whitespace
   before the start of the comment. Thanks to Daniel Kluss.
 
 <li>
   **bug fixed**:
   **ex.err** would sometimes report the wrong
-  value for a for-loop variable, when the for loop was used during a 
+  value for a for-loop variable, when the for loop was used during a
   recursive call. Thanks to Pete Lomax.
-  
+
 <li>
-  **bug fixed**: On Windows, using either 
-  the Interpreter, or translated code compiled by WATCOM, 
-  **dir()** caused an exception when given 
-  an argument that ended with "*.". This was due to a bug in the WATCOM 
+  **bug fixed**: On Windows, using either
+  the Interpreter, or translated code compiled by WATCOM,
+  **dir()** caused an exception when given
+  an argument that ended with "*.". This was due to a bug in the WATCOM
   routine used to implement dir(). Thanks to Daniel Kluss.
-  
+
 <li>
-  **bug fixed**: In 2.4, on ME/98/95 the 
+  **bug fixed**: In 2.4, on ME/98/95 the
   argument to **dir()** could no longer be a
   long file (or directory) name.
   This used to work in 2.3. (Note: On XP it can't be long).
@@ -273,43 +273,43 @@ initial message and delay on compiled programs.
 <li>
   **bug fixed -  Translator: **
   On Windows when you create a Euphoria .dll, the global routines need to be
-  called using the __stdcall convention. However indirect calls to those 
-  routines via **call_func()** and 
-  **call_proc()** from within the 
+  called using the __stdcall convention. However indirect calls to those
+  routines via **call_func()** and
+  **call_proc()** from within the
   same .dll, were using the __cdecl convention. Thanks to Andy Serpa.
-    
+
 <li>
   **bug fixed**: An error message referred to
   "printf()", when it should have referred to "sprintf()". Thanks to Al Getz.
-  
+
 <li>
   **bug fixed -  safe.e: **
-  Poking an empty sequence into a 1-byte block 
-  of allocated memory caused a false-alarm error message. 
+  Poking an empty sequence into a 1-byte block
+  of allocated memory caused a false-alarm error message.
   e.g. allocate_string("") &nbsp;
   Thanks to Bernie Ryan and Josef Jindra.
-  
+
 <li>
-  **bug fixed**: If you called 
+  **bug fixed**: If you called
   **repeat()** with a repetition count that
   was extremely close to the maximum size of a Euphoria integer
-  (1073741823), you would get a machine exception. You will now get 
+  (1073741823), you would get a machine exception. You will now get
   an "Out of memory" error from Euphoria. Thanks to Bob Elia.
-    
+
 <li>
   **bug fixed -  Translator: **
-  In some cases, when using the Translator to build 
-  a dll, WATCOM C would give the error message "statement required after 
+  In some cases, when using the Translator to build
+  a dll, WATCOM C would give the error message "statement required after
   label" near the end of EuInit(). Lcc also complained. Borland C did not
   complain, and things worked fine. Thanks to Matthew Lewis.
 
 <li>
   **bug fixed -  Interpreter: **
-  In programs larger than a couple of 
-  thousand statements, an assignment operation with subscripting 
-  on the left might cause a machine exception. The chance of this 
-  happening was about 1 in 1000. Any change to the program 
-  that shifted the offending statement's position in memory 
+  In programs larger than a couple of
+  thousand statements, an assignment operation with subscripting
+  on the left might cause a machine exception. The chance of this
+  happening was about 1 in 1000. Any change to the program
+  that shifted the offending statement's position in memory
   would cause the bug to go away.  For example,
   <eucode>        x[i] -= y
   </eucode>
@@ -326,19 +326,19 @@ initial message and delay on compiled programs.
 <li>
   **bug fixed -  EDS: **
   When **db_open()** opened a database file but
-  failed to secure an exclusive or shared lock on the file, 
+  failed to secure an exclusive or shared lock on the file,
   it was neglecting to close the file before returning a failure code.
 
 <li>
   **bug fixed -  ttt.ex: **
-  A moderately-long human name would damage the 
+  A moderately-long human name would damage the
   board grid. Thanks to Igor Kachan.
 
 <li>
-  **bug fixed**: The line number reported for 
-  run-time errors occurring in a short-circuited if-statement 
+  **bug fixed**: The line number reported for
+  run-time errors occurring in a short-circuited if-statement
   could be off slightly. Thanks to Kat.
-  
+
 <li>
   **bug fixed -  Translator: **
   The range of return values assumed for
@@ -349,7 +349,7 @@ initial message and delay on compiled programs.
   **bug fixed -  Translator: **
   The generated C code failed to free the storage for the for-loop variable
   when a return statement was executed inside a for-loop, and the loop variable
-  had a non-integer value. A similar problem could occur when there was 
+  had a non-integer value. A similar problem could occur when there was
   an ##else##, ##exit## or ##end while## immediately
   after the for-loop, and the loop variable value was not an integer.
 </ul>
@@ -359,7 +359,7 @@ initial message and delay on compiled programs.
 
 
 <li>
-  A document on a href=cgi.htm>CGI Applications in Euphoria</a> has 
+  A document on a href=cgi.htm>CGI Applications in Euphoria</a> has
   been added.
 <li>
   Thanks to Kenneth Rhodes,
@@ -368,14 +368,14 @@ initial message and delay on compiled programs.
   documentation.
 
 <li>
-  It's now mentioned that format strings 
+  It's now mentioned that format strings
   in **pretty_print()** could have additional
   text along with the format. Thanks to Juergen Luethje.
-  
+
 <li>
   The Reference manual now says that hex literals, such as #FFFFFFFF, are
   never considered to be negative numbers. Thanks to Juergen Luethje.
-  
+
 <li>
   **sprintf()/printf()**: It's documented
   that -1 prints as FFFFFFFF in %x format. Thanks to Juergen Luethje.
