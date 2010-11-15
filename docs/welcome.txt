@@ -33,9 +33,10 @@ values. Programs can be debugged quickly, easily and  more thoroughly.
 hidden. Programs are not aware of word-lengths, underlying bit-level
 representation of values, byte-order etc.
 * Debugger
-** A full-screen
-source debugger and an execution profiler are included, along with a
-full-screen, multi-file editor. On a color monitor, the editor displays
+** A full-screen source debugger and an execution profiler are included.
+* Editor
+** A full-screen, multi-file editor is also included.
+On a color monitor, the editor displays
 Euphoria programs in multiple colors, to highlight comments, reserved
 words, built-in functions, strings, and level of nesting of brackets.
 It optionally performs auto-completion of statements, saving you typing
