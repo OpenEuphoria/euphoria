@@ -719,12 +719,12 @@ $(BUILDDIR)\docs\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\do
 $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\docs\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
+$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
-$(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+$(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
@@ -732,8 +732,6 @@ $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js : $(BUILDDIR)\euphoria
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
-
-htmldoc : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 
