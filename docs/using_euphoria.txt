@@ -381,9 +381,9 @@ file to run it. The installer will perform this operation for you, if you wish.
 You can use any text editor to edit a Euphoria program. However, Euphoria comes
 with its own special editor that is written entirely in Euphoria. Type: ##ed##
 followed by the complete name of the file you wish to edit. You can use this
-editor to edit any kind of text file. When you edit a Euphoria file, some extra
+editor to edit any kind of text file. When you edit a Euphoria file some extra
 features such as color syntax highlighting and auto-completion of certain
-statements, are available to make your job easier.
+statements are available to make your job easier.
 
 Whenever you run a Euphoria program and get an error message, during
 compilation or execution, you can simply type ##ed## with no file name and you
@@ -431,7 +431,7 @@ In the first method you simply ship your users the interpreter along with your
 Euphoria source files including any Euphoria includes that may be necessary
 from the ##euphoria/include## directory. If the Euphoria source files and the
 interpreter are placed together in one directory then your user can run your
-program by typing ##eui## followed by the path of your main executable sort
+program by typing ##eui## followed by the path of your main executable source
 file. You might also provide a small ##.bat## file so people won't actually
 have to type the interpreter name. This method assumes that you are willing to
 share your Euphoria source code with your users.

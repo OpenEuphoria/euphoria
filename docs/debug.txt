@@ -205,7 +205,7 @@ make two separate runs.
 We ran the ##sieve8k.ex## benchmark program in ##demo\bench## under both types
 of profiling. The results are in ##sieve8k.pro## (execution-count profiling)
 and ##sieve8k.pro2## (time profiling).
-@[profile_file]
+@[profile]
 Execution-count profiling shows precisely how many times each statement in your
 program was executed. If the statement was never executed the count field will
 be blank.
