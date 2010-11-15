@@ -48,7 +48,7 @@ procedure parse_include(sequence path_name, sequence item)
 	tokens = tokens[1]
 
 	while idx <= length(tokens) do
-		if find(tokens[idx][TDATA], { "global", "export" }) then
+		if find(tokens[idx][TDATA], { "global", "export", "public" }) then
 			idx += 1
 			if find(tokens[idx][TDATA], { "procedure", "function", "type" }) then
 				idx += 1
