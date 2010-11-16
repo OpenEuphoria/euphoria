@@ -47,6 +47,8 @@ ps_options[LINE_BREAKS]   = 0
 function name_or_literal( integer sym )
 	if not sym then
 		return "[0: ???]"
+	elsif sym < 0 then
+		return sprintf("[UNRESOLVED FORWARD REFERENCE: %d]", sym )
 	elsif sym > length(SymTab) then
 		return sprintf("[_invalid_:%d]", sym )
 	elsif length(SymTab[sym]) = 1 then
@@ -65,11 +67,7 @@ function names( sequence n )
 	nl = {}
 	for i = 1 to length(n) do
 		if n[i] then
-			if n[i] < 0 then
-				nl = append( nl, sprintf( "[UNRESOLVED FORWARD REFERENCE: %d]", -n[i] ) )
-			else
-				nl = append( nl, name_or_literal(n[i]))
-			end if
+			nl = append( nl, name_or_literal(n[i]))
 		else
 			nl = append( nl, "[0]" )
 		end if
@@ -1282,8 +1280,13 @@ procedure opMACHINE_PROC()
 end procedure
 
 procedure opSWITCH()
-	il( sprintf( "%s: value %s cases %s jump %s else goto %d",
-		{opnames[Code[pc]]} & names(Code[pc+1..pc+3]) & Code[pc+4] ), 5)
+	if Code[pc] = SWITCH_SPI then
+		il( sprintf( "%s: value %s case offset %d jump %s else goto %d",
+			{opnames[Code[pc]], name_or_literal( Code[pc+1] ), Code[pc+2], name_or_literal( Code[pc+3] ), Code[pc+4] } ), 5)
+	else
+		il( sprintf( "%s: value %s cases %s jump %s else goto %d",
+			{opnames[Code[pc]]} & names(Code[pc+1..pc+3]) & Code[pc+4] ), 5)
+	end if
 	pc += 5
 end procedure
 
