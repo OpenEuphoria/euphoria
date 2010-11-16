@@ -12,5 +12,11 @@
 
 === Bug Fixes:
 
-* [[ticket:367]], ##[[:http_post]]## properly handles mutli-part form data
+* [[ticket:341]], Removed unused variables in the standard library.
+* [[ticket:367]], ##[[:http_post]]## properly handles multi-part form data.
+* [[ticket:372]], When an application ends, it closes all the opened files. However
+                  if it was ending due to an syntax error, it was closing those
+                  files before trying to access the already opened message text database,
+                  thus causing a seek() to fail and crash the application.
+* [[ticket:392]], ##[[:seek]]## was not returning the correct failure code on some errors.
 
