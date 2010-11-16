@@ -12,6 +12,7 @@ rem Set variables we will need to blank
 rem ============================================================
 SET ECBIN=
 SET DISABLED_MANAGED_MEM=
+SET SCP_CLIENT=pscp -C
 
 rem ============================================================
 rem Be sure to start with a blank config.wat
@@ -116,6 +117,18 @@ IF "%1" == "--verbose-tests" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--oe-username" (
+	echo OE_USERNAME=%2 >> config.wat
+	SHIFT
+	GOTO EndLoop
+)
+
+IF "%1" == "-scp-client" (
+	set SCP_CLIENT=%2
+	SHIFT
+	GOTO EndLoop
+)
+
 IF "%1" == "--help" (
 	GOTO Help
 )
@@ -132,6 +145,8 @@ rem Store our options to the config.wat file
 rem ============================================================
 
 :Continue
+
+echo SCP=%SCP_CLIENT% >> config.wat
 
 if "%HAS_EUBIN%" == "1" (
 SET NOEU=
@@ -242,6 +257,7 @@ echo                         be installed.  The default is EUDIR, or c:\euphoria
 echo                         if EUDIR is not set.
 echo.
 echo     --no-managed-mem    disable managed memory
+echo.
 echo     --align4            malloc allocates addresses that are
 echo                         always 4 byte aligned.
 echo.
@@ -252,7 +268,7 @@ echo.
 echo     --build value       set the build directory
 echo.
 echo     --full              Use this option to so EUPHORIA doesn't report itself
-echo 		             as a development version.
+echo                         as a development version.
 echo.
 echo     --release value     set the release type for the version string
 echo.
@@ -270,8 +286,13 @@ echo     --use-source-translator
 echo                         Interpret the translator's source rather than
 echo                         using the already built translator (default)
 echo.
-echo     --verbose-tests
-echo                         Cause eutest to use the -verbose flag during testing
+echo     --verbose-tests     Cause eutest to use the -verbose flag during testing
+echo.
+echo     --oe-username       Developer user name on openeuphoria.org for various scp
+echo                         operations such as manual upload
+echo.
+echo     --scp-client
+echo                         SCP program to use for scp uploads (default pscp)
 echo.
 echo.
 echo Developer Options:

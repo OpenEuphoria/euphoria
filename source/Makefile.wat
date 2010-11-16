@@ -731,6 +731,11 @@ $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-templat
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
+manual-upload: .SYMBOLIC manual
+	cd  $(BUILDDIR)\docs
+	$(SCP) *.html $(oe_username)@openeuphoria.org:/home/euweb/docs
+	cd $(TRUNKDIR)\source
+
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
