@@ -761,6 +761,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 	
 	if local_change_protection_on_protected_memory( iaddr, size+BORDER_SPACE*2, true_protection ) = -1 then
 		local_free_protected_memory( iaddr, size+BORDER_SPACE*2 )
+		eaddr = 0
 	end if
 	
 	return eaddr
