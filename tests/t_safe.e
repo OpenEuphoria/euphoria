@@ -74,7 +74,7 @@ ifdef LINUX then
 end ifdef
 
 addr = allocate( 4, 1 )
-addr = allocate( 4, 1 )
+addr = allocate( 4 )
 free( addr )
 
 export constant
