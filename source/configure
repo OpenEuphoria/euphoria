@@ -46,9 +46,6 @@ elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
 	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
 fi
 
-
-
-
 if test $UNAME_SYSTEM = "Linux"; then
 	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
@@ -118,60 +115,61 @@ else
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
 	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 fi
+
 # default use source
 export EC="eui ec.ex"
 export BUILDDIR=build
 export XLTTARGETCC=gcc
 export CC=gcc
+
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
-    	--plat )
+	--plat )
 		echo "PLAT=$2" >> "$PREFIX"${CONFIG_FILE}
 		shift
-	;;
+		;;
 	--watcom )
 		export XLTTARGETCC=wat
-	;;
+		;;
 	--cc )
 		export CC=$2
-	;;
-        --no-managed-mem )
+		;;
+	--no-managed-mem )
 		export MANAGED_MEM=0
-	;;
-        --align4 )
+		;;
+	--align4 )
 		export ALIGN4=1
-        ;;
-        --without-euphoria )
-			export EUPHORIA=0
-	;;
+		;;
+	--without-euphoria )
+		export EUPHORIA=0
+		;;
 	--eubin )
-			export LEN=`echo $2/eucd.exe | wc -c`
-			if test $LEN -gt 85; then
-				if test $UNAME_SYSTEM = "MS-DOS"; then
-					echo "Cannot configure with such a long path for DJGPP."
-					rm "$PREFIX"${CONFIG_FILE}
-					exit
-				fi
+		export LEN=`echo $2/eucd.exe | wc -c`
+		if test $LEN -gt 85; then
+			if test $UNAME_SYSTEM = "MS-DOS"; then
+				echo "Cannot configure with such a long path for DJGPP."
+				rm "$PREFIX"${CONFIG_FILE}
+				exit
 			fi
-			echo "EUBIN=$2" >> "$PREFIX"${CONFIG_FILE}
-			EUBIN=$2
-			shift
+		fi
+		echo "EUBIN=$2" >> "$PREFIX"${CONFIG_FILE}
+		EUBIN=$2
+		shift
 		;;
-        --full )
-			echo RELEASE=1 >> "$PREFIX"${CONFIG_FILE}
-        ;;
-
-        --build )
-			export BUILDDIR=$2
-			shift
+	--full )
+		echo RELEASE=1 >> "$PREFIX"${CONFIG_FILE}
 		;;
-        --debug )
-			echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
-        ;;
-		--prefix )
-			echo "PREFIX=$2" >> ${CONFIG_FILE}
-			shift
+	--build )
+		export BUILDDIR=$2
+		shift
+		;;
+	--debug )
+		echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
+		;;
+	--prefix )
+		echo "PREFIX=$2" >> ${CONFIG_FILE}
+		shift
 		;;
 	--use-binary-translator )
 		export EC="euc"
@@ -193,50 +191,50 @@ while [ "$1" != "" ]; do
 	--wkhtmltopdf )
 		echo WKHTMLTOPDF=1 >> ${CONFIG_FILE}
 		;;
-		* )
-			echo "Unknown option '$1'"
-			echo "Configures and prepares the euphoria source for building"
-			echo
- 			echo "configure [options]"
-			echo
-			echo "Options:"
-			echo "    --without-euphoria"
-			echo "    --eubin value"
-			echo "    --build value       set the build directory"
-			echo "    --full"
-			echo "    --release value     set the release type for the version string"
-			echo "    --debug             turn debugging on"
-			echo "    --prefix value      set the install directory (default /usr/local)"
-			echo "    --plat value        set the OS that we will translate to."
-			echo "           values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD."
-			echo "                                                               "
-			echo "    --watcom            set this so the translator will create C code for "
-			echo "                        Watcom C."
-			echo "   --no-managed-mem    disable managed memory"
-			echo "   --align4            malloc allocates addresses that are"
-			echo "                       always 4 byte aligned."
-			echo "   --eubin value       Use this option to specify the location of the"
-			echo "    --cc  value         set this to the name of your GNU C compiler file name if its "
-			echo "                        name is not 'gcc'"
-			echo "    --roodir value      the root dir to use for checking the svn revision"
-			echo "                        default is the parent directory"
-			echo "    --use-binary-translator"
-			echo "                        Use the already built translator rather"
-			echo "                        than interpreting its source           "
-			echo "                                                               "
-			echo "    --use-source-translator                                    "
-			echo "                        Interpret the translator's source rather"
-			echo "                        than using the already built translator"
-			echo "                        (default)"
-			echo "    --verbose-tests     cause the 'test' target to use the verbose flag"
-			echo "                        with eutest"
-			echo "    --wkhtmltopdf                                              "
-			echo "                        build pdf documentation with wkhtmltopdf"
-			echo "                        instead of the default htmldoc"
-			exit
-			;;
-    esac
-    shift
+	* )
+		echo "Unknown option '$1'"
+		echo "Configures and prepares the euphoria source for building"
+		echo
+		echo "configure [options]"
+		echo
+		echo "Options:"
+		echo "    --without-euphoria"
+		echo "    --eubin value"
+		echo "    --build value       set the build directory"
+		echo "    --full"
+		echo "    --release value     set the release type for the version string"
+		echo "    --debug             turn debugging on"
+		echo "    --prefix value      set the install directory (default /usr/local)"
+		echo "    --plat value        set the OS that we will translate to."
+		echo "           values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD."
+		echo "                                                               "
+		echo "    --watcom            set this so the translator will create C code for "
+		echo "                        Watcom C."
+		echo "   --no-managed-mem    disable managed memory"
+		echo "   --align4            malloc allocates addresses that are"
+		echo "                       always 4 byte aligned."
+		echo "   --eubin value       Use this option to specify the location of the"
+		echo "    --cc  value         set this to the name of your GNU C compiler file name if its "
+		echo "                        name is not 'gcc'"
+		echo "    --roodir value      the root dir to use for checking the svn revision"
+		echo "                        default is the parent directory"
+		echo "    --use-binary-translator"
+		echo "                        Use the already built translator rather"
+		echo "                        than interpreting its source           "
+		echo "                                                               "
+		echo "    --use-source-translator                                    "
+		echo "                        Interpret the translator's source rather"
+		echo "                        than using the already built translator"
+		echo "                        (default)"
+		echo "    --verbose-tests     cause the 'test' target to use the verbose flag"
+		echo "                        with eutest"
+		echo "    --wkhtmltopdf                                              "
+		echo "                        build pdf documentation with wkhtmltopdf"
+		echo "                        instead of the default htmldoc"
+		exit
+		;;
+	esac
+	shift
 done
 
 touch nothing.ex
@@ -260,6 +258,7 @@ if [ "x$EUPHORIA" = "x1" ]; then
 else
 	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}
 fi
+
 if test $UNAME_SYSTEM = "MS-DOS"; then
 	# "Information: Managed memory always on for DJGPP."
 	echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}
@@ -272,18 +271,23 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 	else
 		echo MANAGED_MEM=0 >> "$PREFIX"${CONFIG_FILE}
 	fi
+
 	if [ "x$ALIGN4" = "x" ]; then
 		echo ALIGN4=0 >> "$PREFIX"${CONFIG_FILE}
 	else
 		echo ALIGN4=1 >> "$PREFIX"${CONFIG_FILE}
 	fi
 fi
+
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
+
 if [ "$EC" != "" ]; then
 	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
 fi
+
 export PWD=`pwd`
 export PPWD=`cd .. && pwd`
+
 # The following works around a bug in djgpp's pwd
 # that at times returns the parent of the current
 # directory instead of the current directory.
@@ -292,18 +296,24 @@ if [ ! -e "$PPWD"/source ] && [ -e "$PWD"/source ]; then
 	echo "Information: Working around djgpp's PWD bug"
 	export PPWD=$PWD
 fi
+
 export TRUNKDIR=$PPWD
+
 mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
+
 echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
 echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+
 if [ "$USECYPPATH" = "true" ]; then
-echo CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR` >> "$PREFIX"${CONFIG_FILE}
-echo CYPBUILDDIR=`cygpath -a -m $BUILDDIR` >> "$PREFIX"${CONFIG_FILE}
+	echo CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR` >> "$PREFIX"${CONFIG_FILE}
+	echo CYPBUILDDIR=`cygpath -a -m $BUILDDIR` >> "$PREFIX"${CONFIG_FILE}
 else
-echo CYPTRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
-echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+	echo CYPTRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+	echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
 fi
 echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
+
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
+
