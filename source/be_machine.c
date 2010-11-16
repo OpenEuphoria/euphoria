@@ -59,7 +59,9 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-
+#ifndef MAP_ANONYMOUS
+#define MAP_ANONYMOUS MAP_ANON
+#endif
 
 #ifndef LOCK_SH
 #define LOCK_SH  1 /* shared lock */
