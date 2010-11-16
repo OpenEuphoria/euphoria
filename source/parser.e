@@ -2604,11 +2604,12 @@ procedure While_statement()
 -- Parse a while loop
 	integer bp1
 	integer bp2
-	integer exit_base
+	integer exit_base, next_base
 
 	Start_block( WHILE )
 
 	exit_base = length(exit_list)
+	next_base = length(continue_list)
 	entry_addr &= length(Code)+1
 	emit_op(NOP2) -- Entry_statement may patch this later
 	emit_addr(0)
@@ -2656,6 +2657,7 @@ procedure While_statement()
 	push_temps( temps )
 
 	Statement_list()
+	PatchNList(next_base)
 	tok_match(END)
 	tok_match(WHILE, END)
 
