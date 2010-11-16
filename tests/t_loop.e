@@ -125,8 +125,6 @@ idx += 1
 if idx < 25 then if idx < 20 then goto "LAB_A" else goto "LAB_B" end if end if
 test_equal( "goto-loop with two 'end-if's on one line", 26, idx )
 
-idx = 0
-
 for i = 1 to 5 label "loop1" do
 	while 1 do
 		continue "loop1"
