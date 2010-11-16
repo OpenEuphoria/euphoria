@@ -1438,6 +1438,7 @@ public function load_map(object input_file_name)
 	object data_key
 	sequence conv_res
 	atom new_map
+	sequence line_conts =   ",${"
 
 	if sequence(input_file_name) then
 		file_handle = open(input_file_name, "rb")
@@ -1511,11 +1512,13 @@ public function load_map(object input_file_name)
 				else
 					line_in = trim(line_in)
 				end if
-				
+
 				logical_line &= line_in
 					
 				if length(line_in) then
-					if line_in[$] != ',' and line_in[$] != '$' and line_in[$] != '{' then
+					if not find(line_in[$], line_conts) then
+						-- This line is not being continued.
+						
 						-- Remove any ",$" combinations.
 						logical_line = match_replace(`",$"`, logical_line, "")
 						logical_line = match_replace(`,$`, logical_line, "")
