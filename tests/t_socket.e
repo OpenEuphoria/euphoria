@@ -43,7 +43,7 @@ end ifdef
 --
 sequence list = command_line()
 sequence interpreter
-ifdef EC then
+ifdef EUC or EUB then
 	-- The tests test are here to test interpreters and libraries as we do not know where the
 	-- interpreter is we just quit.
 	test_report()
@@ -59,8 +59,9 @@ elsedef
 	end if
 end ifdef
 
+sequence port = sprintf("%d", rand(999) + 5000)
 object p = pipe:exec(interpreter & " " & build_commandline( option_switches() ) & 
-	" ../demo/sock_server.ex", pipe:create())
+	" ../demo/sock_server.ex " & port, pipe:create())
 if atom(p) then
 	test_fail("could not launch temporary server")
 else
@@ -68,7 +69,7 @@ else
 	sleep(1)
 
 	for i = 1 to 4 do
-		_ = sock:connect(socket, "127.0.0.1:5000")
+		_ = sock:connect(socket, "127.0.0.1:"&port)
 		if _ != 1 then
 			exit
 		end if
@@ -85,18 +86,18 @@ else
 	
 	if _ != -1 then
 		sequence send_data = "Hello, "
-		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("receive w/o newline", send_data, sock:receive(socket, 0))
+		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
+		test_equal("receive w/o newline", send_data, sock:receive(socket, MSG_NOSIGNAL))
 		
 		send_data = "world\n"
-		test_equal("send with newline", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("receive with newline", send_data, sock:receive(socket, 0))
+		test_equal("send with newline", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
+		test_equal("receive with newline", send_data, sock:receive(socket, MSG_NOSIGNAL))
 		
 		send_data = repeat('a', 511) & "\n"
-		test_equal("send large", length(send_data), sock:send(socket, send_data, 0))
-		test_equal("receive large", send_data, sock:receive(socket, 0))
+		test_equal("send large", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
+		test_equal("receive large", send_data, sock:receive(socket, MSG_NOSIGNAL))
 		
-		_ = send(socket, "quit\n", 0)
+		_ = send(socket, "quit\n", MSG_NOSIGNAL)
 	end if
 
 	pipe:kill(p)

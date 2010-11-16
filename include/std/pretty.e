@@ -1,10 +1,10 @@
-namespace pretty
-
 --****
 -- == Pretty Printing
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace pretty
 
 -- pretty print variables
 integer pretty_end_col, pretty_chars, pretty_start_col, pretty_level, 

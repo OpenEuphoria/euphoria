@@ -3,7 +3,8 @@
 -- of the comparison function to be used when sorting.
 
 include std/sort.e  -- contains custom_sort()
- 
+include std/console.e
+
 constant NAME = 1, 
 	 POPULATION = 2
 
@@ -47,3 +48,8 @@ for i = 1 to length(sorted_by_pop) do
 	   sorted_by_pop[i] & sorted_by_name[i])
 end for
 
+ifdef WIN32_GUI then
+    puts(1, "This program must be run from the command-line:\n\n")
+end ifdef
+
+maybe_any_key()

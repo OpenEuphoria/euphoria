@@ -82,6 +82,14 @@ val[X] = 0
 val[S][1] = val[X]
 test_equal( "assigning sequence elements release atom by refcount", 1, delete_count() )
 
+val = { repeat( 0, 4 ) }
+val[1][S] = {3}
+val[1][X] = delete_routine( 1, CUSTOM_DELETE )
+val[1][S][1] = val[1][X]
+val[1][X] = 0
+val[1][S][1] = val[1][X]
+test_equal( "assigning sequence elements release atom by refcount indirectly (simulating eu.ex)", 1, delete_count() )
+
 val = repeat( 4.4, 4 )
 
 val[X] = 3.0
@@ -98,7 +106,7 @@ end if
 val[X] = 0
 test_equal( "simulated eu.ex double deleted by derefs", 1, delete_count() )
 
-constant NOVALUE = -1.295837195871e307
+constant NOVALUE = -1.295837195872e307
 integer a, b, c, target, pc
 sequence Code
 val = repeat( NOVALUE, 10 )
@@ -131,5 +139,23 @@ end function
 
 test_equal( "temp with delete routine lost when used in default argument as an argument to another call", 
   1, is_sequence( repeat( 0, 2 ) ) )
+
+
+
+function assign_subs(sequence x, sequence subs, object rhs_val)
+	if length(subs) = 1 then
+		x[subs[1]] = rhs_val
+	else
+		x[subs[1]] = assign_subs(x[subs[1]], subs[2..$], rhs_val)
+	end if
+	return x
+end function
+
+val[S] = {0}   
+
+val = assign_subs( val, {S,1}, delete_routine(1, CUSTOM_DELETE) )
+val = {}
+
+test_equal( "recursive assign_subs", 1, delete_count() )
 
 test_report()

@@ -22,10 +22,12 @@ test_equal("trim() to empty", "", trim("  ", 32))
 test_equal("trim() almost empty", "a", trim(" a ", 32))
 test_equal("trim() nothing", "abcdef", trim("abcdef", 32))
 
+test_equal("lower() zero", 0, lower(0))
 test_equal("lower() atom", 'a', lower('A'))
 test_equal("lower() letters only", "john", lower("JoHN"))
 test_equal("lower() mixed text", "john 55 &%.", lower("JoHN 55 &%."))
 test_equal("lower() with \\0", "abc\0def", lower("abc" & 0 & "DEF"))
+test_equal("lower() nested", {'a', "bcd", 'e', "fg"}, lower({'A', "BcD", 'e', "fG"}))
 
 test_equal("upper() atom", 'A', upper('a'))
 test_equal("upper() letters only", "JOHN", upper("joHn"))
@@ -59,22 +61,25 @@ test_equal("proper #7", {"Abc", 3.1472}, proper({"abc", 3.1472}))
 
 -- keyvalues()
 sequence s
-s = keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
+s = keyvalues("foo=bar, qwe=1234,, asdf='contains space, comma, and equal(=)'")
 test_equal("keyvalues #1", { {"foo", "bar"}, {"qwe", "1234"}, {"asdf", "contains space, comma, and equal(=)"}}, s)
 
-s = keyvalues("abc fgh=ijk def")
-test_equal("keyvalues #2", { {"p[1]", "abc"}, {"fgh", "ijk"}, {"p[3]", "def"} }, s)
+s = keyvalues("abc fgh=ijk def, =")
+test_equal("keyvalues #2", { {"p[1]", "abc"}, {"fgh", "ijk"}, {"p[3]", "def"},{} }, s)
 
 s = keyvalues("abc=`'quoted'`")
 test_equal("keyvalues #3", { {"abc", "'quoted'"} }, s)
 
+s = keyvalues("'a b c'=quoted")
+test_equal("keyvalues #3a", { {"a b c", "quoted"} }, s)
+
 s = keyvalues("colors=(a=black, b=blue, c=red)")
 test_equal("keyvalues #4", { {"colors", {{"a", "black"}, {"b", "blue"},{"c", "red"}}  } }, s)
 
-s = keyvalues("colors={a=black, b=blue, c=red}")
+s = keyvalues("colors={ a=black, b=blue, c=red}")
 test_equal("keyvalues #4a", { {"colors", {"a=black", "b=blue","c=red"}}  } , s)
 
-s = keyvalues("colors=[a=black, b=blue, c=red]")
+s = keyvalues("colors  =  [a=black, b=blue, c=red]")
 test_equal("keyvalues #4b", { {"colors", {"a=black", "b=blue","c=red"}}  } , s)
 
 s = keyvalues("colors=(black=[0,0,0], blue=[0,0,FF], red=[FF,0,0])")
@@ -99,9 +104,11 @@ test_equal("keyvalues #9", { {"colors", {"black", "blue", "red"}}  }, s)
 s = keyvalues("colors=black, blue, red", "",,,"")
 test_equal("keyvalues #10", { {"colors", "black, blue, red"}  }, s)
 
-s = keyvalues("colors=[black, blue, red]\nanimals=[cat,dog, rabbit]\n")
+s = keyvalues("colors=[black, blue, red]\n  animals=  [cat,dog, rabbit]\n")
 test_equal("keyvalues #11", { {"colors", { "black", "blue", "red"}}, {"animals", { "cat", "dog", "rabbit"}  } }, s)
 
+s = keyvalues("colors=[black, blue, red]\nanimals=~{cat,dog, rabbit}\n")
+test_equal("keyvalues #11a", { {"colors", { "black", "blue", "red"}}, {"animals", "{cat,dog, rabbit}"  } }, s)
 
 set_encoding_properties("Test Encoded", "aeiouy", "AEIOUY")
 test_equal("Encoding #1", {"Test Encoded", "aeiouy", "AEIOUY"}, get_encoding_properties())
@@ -115,7 +122,7 @@ test_equal("Encoding #2", {"ASCII", "", ""}, get_encoding_properties())
 test_equal("Encoding uppercase #2", "THE CAT IN THE HAT", upper("the cat in the hat"))
 test_equal("Encoding lowercase #3", "the cat in the hat", lower("THE CAT IN THE HAT"))
 
-set_encoding_properties("1251")
+set_encoding_properties("../source/codepage/1251")
 object ec
 ec = get_encoding_properties()
 test_equal("Encoding #3", "Windows 1251 (Cyrillic)", ec[1])
@@ -126,13 +133,35 @@ test_equal("Encoding uppercase #4", {#80,#81,#8A,#8C,#8D,#8E,#8F,#A1,#A3,#A5,#A8
 
 set_encoding_properties("", "", "")
 
+set_encoding_properties("0737")
+
+ec = get_encoding_properties()
+test_equal("Encoding #5", "OEM 737 (Greek)", ec[1])
+test_equal("Encoding uppercase #5", "THE CAT IN THE HAT", upper("the cat in the hat"))
+-- Test greek characters
+test_equal("Encoding uppercase #6", {#80,#81,#82,#83,#84,#85,#86,#87,#88,#89,#8A,#8B,#8C,#8D,#8E,#8F,#90,#91,#92,#93,#94,#95,#96,#97,#EA,#EB,#EC,#F4,#ED,#EE,#EF,#F5,#E9},
+                              upper({#98,#99,#9A,#9B,#9C,#9D,#9E,#9F,#A0,#A1,#A2,#A3,#A4,#A5,#A6,#A7,#A8,#A9,#AB,#AC,#AD,#AE,#AF,#E0,#E1,#E2,#E3,#E4,#E5,#E6,#E7,#E8,#F0}))
+                              
+set_encoding_properties("", "", "")
+
+
 -- quote()
 test_equal("quote #1", "\"The small man\"", quote("The small man"))
 test_equal("quote #2", "(The small man)", quote("The small man", {"(", ")"} ))
 test_equal("quote #3", "(The ~(small~) man)", quote("The (small) man", {"(", ")"}, '~' ))
 test_equal("quote #4", "The (small) man", quote("The (small) man", {"(", ")"}, '~', "#" ))
 test_equal("quote #5", "(The #1 ~(small~) man)", quote("The #1 (small) man", {"(", ")"}, '~', "#" ))
-
+test_equal("quote #6", "", quote( "" ) )
+test_equal("quote #7", `"foo"`, quote( "foo", '\"' ) )
+test_equal("quote #8", `"foo"`, quote( "foo", "" ) )
+test_equal("quote #9", `"foo"`, quote( "foo", {`"`} ) )
+test_equal("quote #10", `"foo"`, quote( "foo", {'\"'}, '?' ) )
+test_equal("quote #11", "(The ~(small~) man)" , quote("The (small) man", {"(", ")"}, '~' ) )
+test_equal("quote #12", "(The ~~~(small~~~) man)" , quote("The ~(small~) man", {"(", ")"}, '~' ) )
+test_equal("quote #13", "$The ~$small~$ man$" , quote("The $small$ man", {"$"}, '~' ) )
+test_equal("quote #14", "$The ~~~$small~~~$ man$" , quote("The ~$small~$ man", {"$"}, '~' ) )
+test_equal("quote #15", repeat("\"The small man\"",2), quote( repeat("The small man", 2)))
+test_equal("quote #16", `(The ~(small~)! man)`, quote("The (small)! man", {"(", ")"}, '~', "#!" ))
 
 -- format()
 sequence res
@@ -341,6 +370,10 @@ res = format("[(z:8]", -117)
 exp  = "(000117)"
 test_equal("format 'AY'", exp, res)
 
+res = format("[(z:3]", -117)
+exp  = "17)"
+test_equal("format 'AY#2'", exp, res)
+
 res = format("[(]", 117)
 exp  = "117"
 test_equal("format 'AZ'", exp, res)
@@ -349,9 +382,21 @@ res = format("[(]", 117.2)
 exp  = "117.2"
 test_equal("format 'BA'", exp, res)
 
-res = format("Today is [u{day}:9], the [{date}]", {"date=09/Oct/2012", "day=Tuesday"})
-exp = "Today is TUESDAY  , the 09/Oct/2012"
+res = format("Today is [u{day}:9], the [{date], [{badname}]?", {"date=09/Oct/2012", "day=Tuesday"})
+exp = "Today is TUESDAY  , the 09/Oct/2012, ?"
 test_equal("format 'BB'", exp, res)
+
+res = format("[T]", 117)
+exp  = "u"
+test_equal("format 'BC'", exp, res)
+
+res = format("[T]", 117.45)
+exp  = "u"
+test_equal("format 'BC#2'", exp, res)
+
+res = format("[T]", "U")
+exp  = "U"
+test_equal("format 'BD'", exp, res)
 
 include std/os.e
 setenv("testenv", "AbCdEf")
@@ -361,7 +406,93 @@ test_equal("env", "AbCdEf", "AbCdEf")
 
 res = format("([lc%testenv%:20])")
 exp = "(       abcdef       )"
-test_equal("format 'BC'", exp, res)
+test_equal("format 'BE'", exp, res)
+
+res = format("[%testenv] symbol")
+exp = "AbCdEf symbol"
+test_equal("format 'BF'", exp, res)
+
+res = format("[%badname%] symbol")
+exp = " symbol"
+test_equal("format 'BG'", exp, res)
+
+res = format("[:08]", 0)
+exp = "00000000"
+test_equal("format 'BH'", exp, res)
+
+res = format("[b:3]", 0.0)
+exp  = "   "
+test_equal("format 'BI'", exp, res)
+
+res = format("hex is #[Xlz:8]", {1715.004})
+exp = "hex is #000006b3"
+test_equal("format 'BJ'", exp, res)
+
+res = format("hex is #[:04X]", {171.5004})
+exp = "hex is #00AB"
+test_equal("format 'BK'", exp, res)
+
+res = format("[(:07]", {-345.5004})
+exp = "5.5004)"
+test_equal("format 'BL'", exp, res)
+
+-- dequote()
+test_equal( "dequote empty", "", dequote( "" ) )
+test_equal( "dequote no pairs", `foo`, dequote( `"foo"`, "" ) )
+test_equal( "dequote atom pair", `foo`, dequote( `"foo"`, '\"' ) )
+test_equal( "dequote defaults 1", "The small man", dequote("\"The small man\"") )
+test_equal( "dequote defaults 2", "The small (? ) man", dequote("(The small ?(? ?) man)", {{"(",")"}}, '?') )
+
+test_equal( "dequote multiple strings", {"The small man","The small () man"}, 
+	dequote({"\"The small man\"", "(The small ?(?) man)"}, {{"(",")"},{"\"","\""}}, '?'))
+
+test_equal("trim 1c ", {4,4},  trim(" \t .\t", " \t\r\n", 1)  )
+test_equal("trim_head 1c ", 4,  trim_head(" \t .\t", " \t\r\n", 1)  )
+test_equal("trim_tail 1c ", 4,  trim_tail(" \t .\t", " \t\r\n", 1)  )
+
+test_equal("keyvalues 1c", { {"foo", "bar"}, {"qwe", "1234"}, {"asdf", "contains space, comma, and equal(=)"}},
+	keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
+ )
+
+test_equal("keyvalues 2c", { {"p[1]", "abc"}, {"fgh", "ijk"}, {"p[3]", "def"} },
+	keyvalues("abc fgh=ijk def")
+ )
+test_equal("keyvalues 3c", { {"abc", "'quoted'"} },
+	keyvalues("abc=`'quoted'`")
+ )
+test_equal("keyvalues 4c", {{"c", ""}}, keyvalues("c=`\t`"))
+test_equal("keyvalues 5c", {{"c", ""}}, keyvalues("c='\t'"))
+test_equal("keyvalues 6c", {}, keyvalues(""))
+test_equal("keyvalues 7c", {{"c", "=t"}},
+	keyvalues("c:=t", 0x3B)  --;
+ )
+test_equal("keyvalues 8c", {{"c", "t"}},
+	keyvalues("c=t",, 0x3D)  --=
+ )
+test_equal("keyvalues 9c", {{"c", "t"}},
+	keyvalues("c=t",,, 0x60)  --`
+ )
+test_equal("keyvalues ac",{{"c", "t"}},
+	keyvalues("c=\tt",,,, 0x09)  --\t
+ )
+
+ --need to also check is covered on more than one system
+test_equal("change case 1uc","", upper("") )
+test_equal("change case 1lc","", lower("") )
+-- curent default initial max on len of case change string
+test_equal("change case 2c",repeat('a',1024), lower(repeat('A',1024)) )
+
+test_equal("get_text unknown number", 0, get_text(-2))
+
+test_equal("get_text known number A", "Block comment from line [1] not terminated.", get_text(42,"two"))
+test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"}))
+test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"}))
+
+test_equal("wrap() #1", "Hello\nWorld", wrap("Hello World", 3))
+test_equal("wrap() #2", "Hello World, How\nare you doing?", 
+	wrap("Hello World, How are you doing?", 20))
+test_equal("wrap() #3", "Hello World,\nHow are you doing?",
+		wrap("Hello World, How are you doing?", 20, "\n", ","))
 
 test_report()
 

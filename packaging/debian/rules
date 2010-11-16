@@ -17,8 +17,7 @@ export DH_VERBOSE=1
 export DH_OPTIONS
 
 
-
-CFLAGS = -Wall -g
+include ../Makefile.eu
 
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
@@ -30,9 +29,9 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	cd source && ./configure --prefix /usr
+	echo TARGET configure-stamp - configuring the build
+	cd source && ./configure --prefix /usr $(CONFIG)
 	touch configure-stamp
-
 
 #Architecture 
 build: build-arch build-indep
@@ -40,16 +39,19 @@ build: build-arch build-indep
 build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp 
 	# Add here commands to compile the arch part of the package.
+	echo TARGET build-arch-stamp
 	$(MAKE) -C source
 	touch $@
 
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp 
 	# Add here commands to compile the indep part of the package.
+	echo TARGET build-index-stamp
 	$(MAKE) -C source htmldoc pdfdoc
 	touch $@
 
 clean:
+	echo TARGET clean
 	dh_testdir
 	dh_testroot
 	rm -f build-arch-stamp build-indep-stamp #CONFIGURE-STAMP#
@@ -61,6 +63,7 @@ clean:
 
 install: install-indep install-arch
 install-indep:
+	echo TARGET install-indep
 	dh_testdir
 	dh_testroot
 	dh_clean -k -i 
@@ -71,6 +74,7 @@ install-indep:
 	dh_install -i
 
 install-arch:
+	echo TARGET install-arch
 	dh_testdir
 	dh_testroot
 	dh_clean -k -s 
@@ -86,6 +90,7 @@ install-arch:
 # binary-arch/binary-indep
 # in another 'make' thread.
 binary-common:
+	echo TARGET binary-common
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
@@ -101,7 +106,7 @@ binary-common:
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo
-	dh_installman debian/eui.1 debian/euc.1 debian/eub.1 debian/eudis.1
+	dh_installman debian/eui.1 debian/euc.1 debian/eub.1 debian/eudis.1 debian/eudist.1
 	dh_link
 	dh_strip
 	dh_compress 
@@ -115,10 +120,12 @@ binary-common:
 	dh_builddeb -v
 # Build architecture independant packages using the common target.
 binary-indep: build-indep install-indep
+	echo TARGET binary-indep
 	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
 
 # Build architecture dependant packages using the common target.
 binary-arch: build-arch install-arch
+	echo TARGET binary-arch
 	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
 
 binary: binary-arch binary-indep

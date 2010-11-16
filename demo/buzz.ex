@@ -5,6 +5,8 @@
 -- buzz has lists of parts of sentences that it matches up at random.
 -- It will always make a grammatically correct sentence.
 
+include std/console.e
+
 constant leadins = {
 "Unfortunately",
 "In the final analysis,",
@@ -95,5 +97,5 @@ puts(1, "\n\t\tComputer Industry Forecast\n")
 puts(1, "\t\t--------------------------\n\n")
 display(buzz(8))
 puts(1, "\n\n")
-
+maybe_any_key()
 

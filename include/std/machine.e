@@ -1,32 +1,32 @@
--- (c) Copyright - See License.txt
+--****
+-- == Machine Level Access
 --
+-- <<LEVELTOC level=2 depth=4>>
+--
+
 namespace machine
+
+public include std/memconst.e
+
+ifdef SAFE then
+	public include std/safe.e as memory
+elsedef
+	public include std/memory.e as memory
+end ifdef
 
 include std/dll.e
 include std/error.e
-public include std/memconst.e
 include std/types.e
 
-ifdef SAFE then
-
-	public include std/safe.e as memory
-
-elsedef
-
-	public include std/memory.e as memory
-
-end ifdef
-
 integer FREE_ARRAY_RID
-
-type block_aligned( atom a )
-	return remainder(a,4096)=0
-end type
-
 
 --****
 -- === Memory allocation
 --
+
+--**
+-- The number of bytes required to hold a pointer.
+public constant ADDRESS_LENGTH = 4
 
 --**
 -- Allocate a contiguous block of data memory.
@@ -39,22 +39,25 @@ end type
 --
 -- Return:
 --   An **atom**, the address of the allocated memory or 0 if the memory
---   can't be allocated.
+--   can't be allocated. **NOTE** you must use either an atom or object to
+--   receive the returned value as sometimes the returned memory address is
+--   too larger for an integer to hold.
 --
 -- Comments:
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
--- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the pointer's reference count drops to zero.
--- When you are finished using the block, you should pass the address of the block to 
--- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
--- can be freed by calling [[:delete]], or when the pointer's reference count drops to zero.
--- This will free the block and make the memory available for other purposes. When 
--- your program terminates, the operating system will reclaim all memory for use with other 
--- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
--- For that purpose you may use ##[[:allocate_code]]()## instead. 
---
--- The address returned will be at least 4-byte aligned.
+-- * Since ##allocate##() acquires memory from the system, it is your responsiblity to 
+-- return that memory when your application is done with it. There are two ways to
+-- do that - automatically or manually.
+-- ** //Automatically// - If the ##cleanup## parameter is non-zero, then the memory
+-- is returned when the variable that receives the address goes out of scope **and**
+-- is not referenced by anything else. Alternatively you can force it be released by
+-- calling the [[:delete]]() function.
+-- ** //Manually// - If the ##cleanup## parameter is zero, then you must call the
+-- [[:free]]() function at some point in your program to release the memory back to the system.
+-- * When your program terminates, the operating system will reclaim
+-- all memory that your applicaiton acquired anyway.
+-- * An address returned by this function shouldn't be passed to ##[[:call]]()##.
+-- For that purpose you should use ##[[:allocate_code]]()## instead. 
+-- * The address returned will be at least 8-byte aligned.
 --
 -- Example 1:
 -- <eucode>
@@ -65,18 +68,18 @@ end type
 -- </eucode>
 --                  
 -- See Also:
---     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
+--     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]] [[:allocate_string]]
 
 public function allocate(positive_int n, boolean cleanup = 0)
 -- allocate memory block and add it to safe list
-	machine_addr iaddr
-	machine_addr eaddr	
+	atom iaddr --machine_addr iaddr
+	atom eaddr	
 	ifdef DATA_EXECUTE then
 		-- high level call:  No need to add BORDER_SPACE*2 here.
 		eaddr = machine:allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
 	elsedef	
 		iaddr = eu:machine_func(M_ALLOC, n+BORDER_SPACE*2)
-		eaddr = prepare_block(iaddr, n, PAGE_READ_WRITE )
+		eaddr = prepare_block( iaddr, n, PAGE_READ_WRITE )
 	end ifdef
 	if cleanup then
 		eaddr = delete_routine( eaddr, FREE_RID )
@@ -116,22 +119,21 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- atom pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
+-- atom pa
+-- pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
 -- </eucode>
 --
 -- See Also:
 --   [[:allocate_string_pointer_array]], [[:free_pointer_array]]
 
 public function allocate_pointer_array(sequence pointers, boolean cleanup = 0)
+
     atom pList
-
-    if atom(pointers) then
-        return 0
-    end if
-
-    pointers &= 0
-    pList = allocate(length(pointers) * 4)
+	integer len = length(pointers) * ADDRESS_LENGTH
+	
+    pList = allocate( (len + ADDRESS_LENGTH ) )
     poke4(pList, pointers)
+    poke4(pList + len, 0)
 	if cleanup then
 		return delete_routine( pList, FREE_ARRAY_RID )
 	end if
@@ -153,13 +155,14 @@ end function
 --   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
 
 public procedure free_pointer_array(atom pointers_array)
-	atom saved = pointers_array,
-		ptr = peek4u(pointers_array)
+	atom saved = pointers_array
+	atom ptr
 
-	while ptr do
+	while ptr with entry do
 		deallocate(ptr)
-
-		pointers_array+=4
+		pointers_array += ADDRESS_LENGTH
+		
+	entry
 		ptr = peek4u(pointers_array)
 	end while
 
@@ -205,7 +208,7 @@ end function
 --****
 -- == Indirect Routine Calling
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === SAFE mode
 --
@@ -446,7 +449,7 @@ end function
 -- See Also:
 -- [[:machine_func]]
 
-
+integer page_size = 0
 ifdef WIN32 then
 
 	atom kernel_dll, memDLL_id, 
@@ -474,20 +477,23 @@ ifdef WIN32 then
 		end if
 	end if
 
-	integer page_size = 0
+	
 	if GetSystemInfo_rid != -1 then
-		bordered_address system_info_ptr = allocate( 9 * 4 )
+		bordered_address system_info_ptr = allocate( 9 * ADDRESS_LENGTH )
 		if system_info_ptr != 0 then
 			c_proc( GetSystemInfo_rid, { system_info_ptr } )
-			page_size = peek4u( system_info_ptr + 4 )
+			page_size = peek4u( system_info_ptr + ADDRESS_LENGTH )
 			free( system_info_ptr )
 		end if
 	end if
-	public constant PAGE_SIZE = page_size
 elsifdef UNIX then
 	constant getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )	 
-	public constant PAGE_SIZE = c_func( getpagesize_rid, {} )
+	page_size = c_func( getpagesize_rid, {} )
 end ifdef
+
+--** 
+-- The operating system's memory page length in bytes.
+public constant PAGE_SIZE = page_size
 
 ifdef WIN32 then
 	function VirtualAlloc( atom addr, atom size, atom allocation_type, atom protect_ )
@@ -502,13 +508,16 @@ end ifdef
 
 --**
 -- protection constants type
-public type valid_memory_protection_constant( integer x )
-	return 0 != find( x, MEMORY_PROTECTION )
+public type valid_memory_protection_constant( object x )
+	return find( x, MEMORY_PROTECTION )
 end type
 
 --**
 -- page aligned address type
-public type page_aligned_address( atom a )
+public type page_aligned_address( object a )
+	if not atom(a) then
+		return 0
+	end if
 	return remainder( a, PAGE_SIZE ) = 0
 end type
 
@@ -583,17 +592,63 @@ end function
 -- Only values that satisfy this type may be passed into
 -- free or free_code.
 --
-public type std_library_address( atom addr ) 
+public type std_library_address( object addr ) 
 	ifdef not SAFE then
-		return 1
+		return atom(addr)
 	elsedef
+		if not atom(addr) then
+			return 0
+		end if
 		return (addr = 0) or bordered_address(addr)
 	end ifdef
 end type
 
 ifdef WIN32 then
-std_library_address oldprotptr = allocate_data(4)
+std_library_address oldprotptr = allocate_data(ADDRESS_LENGTH)
 end ifdef
+
+function local_allocate_protected_memory( integer s, integer first_protection )
+	ifdef WIN32 then
+		if dep_works() then
+			return eu:c_func(VirtualAlloc_rid, 
+				{ 0, s, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
+		else
+			return machine_func(M_ALLOC, PAGE_SIZE)
+		end if
+	elsifdef UNIX then
+		return machine_func(M_ALLOC, PAGE_SIZE)
+--		return mmap( 0, PAGE_SIZE, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
+	end ifdef
+end function
+
+-- return -1 for failure. 0 success  
+function local_change_protection_on_protected_memory( atom p, integer s, integer new_protection )
+	ifdef WIN32 then
+		if dep_works() then
+			if eu:c_func( VirtualProtect_rid, { p, s, new_protection , oldprotptr } ) = 0 then
+				-- 0 indicates failure here
+				return -1
+			end if
+		end if
+		return 0
+	elsifdef UNIX then
+		return 0
+--		return mprotect(p, s, new_protection)
+	end ifdef
+end function
+
+procedure local_free_protected_memory( atom p, integer s)
+	ifdef WINDOWS then
+		if dep_works() then
+			c_func(VirtualFree_rid, { p, s, MEM_RELEASE })
+		else
+			machine_func(M_FREE, {p})
+		end if
+	elsifdef UNIX then
+			machine_func(M_FREE, {p})
+--		munmap(p, s)
+	end ifdef
+end procedure
 
 --**
 -- Allocates and copies data into memory and gives it protection using
@@ -614,7 +669,7 @@ end ifdef
 -- An **address**,
 -- The function returns the address to the required memory
 -- or 0 if it fails.  This function is guaranteed to return memory on 
--- the 4 byte boundary.  It also guarantees that the memory returned with 
+-- the 8 byte boundary.  It also guarantees that the memory returned with 
 -- at least the protection given (but you may get more).
 --
 -- If you want to call ##allocate_protect( data, PAGE_READWRITE )##, you can use 
@@ -623,7 +678,7 @@ end ifdef
 -- If you want to call ##allocate_protect( data, PAGE_EXECUTE )##, you can use 
 -- [[:allocate_code()]] instead.  It is simpler.
 --
--- You mustn't use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
+-- You must not use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
 
 public function allocate_protect( object data, valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
 	-- set the actual protection for the OS to /true_protection/ in all cases
@@ -658,16 +713,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		first_protection = PAGE_READ_WRITE
 	end if
 
-	ifdef WIN32 then
-		if dep_works() then
-			iaddr = eu:c_func(VirtualAlloc_rid, 
-				{ 0, size+BORDER_SPACE*2, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
-		else
-			iaddr = machine_func(M_ALLOC, size+BORDER_SPACE*2)
-		end if
-	elsedef 
-		iaddr = machine_func(M_ALLOC, size+BORDER_SPACE*2)
-	end ifdef
+	iaddr = local_allocate_protected_memory( size+BORDER_SPACE*2, first_protection )
 	if iaddr = 0 then
 		return 0
 	end if
@@ -690,39 +736,34 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 			eu:poke4( eaddr, data )
 			
 		case else
-			crash("logic error: Wrong word size %d in allocate_protect", wordsize)
+			crash("Parameter error: Wrong word size %d in allocate_protect().", wordsize)
 			
 	end switch
 	
-
-	ifdef WIN32 then
-		ifdef SAFE then
-			-- here we can take away write access
-			-- from true_protection if protection doesn't have it.
-			-- true_protection must have read access though.
-			switch protection do
-				case PAGE_EXECUTE then
-					true_protection = PAGE_EXECUTE_READ
-					
-				case PAGE_EXECUTE_WRITECOPY  then
-					true_protection = PAGE_EXECUTE_READWRITE
-					
-				case PAGE_WRITECOPY, PAGE_NOACCESS then				
-					true_protection = PAGE_READONLY
-					
-				case else
-					true_protection = protection					
-			end switch
-		end ifdef
-		if dep_works() then
-			if eu:c_func( VirtualProtect_rid, { iaddr, size, true_protection , oldprotptr } ) = 0 then
-				-- 0 indicates failure here
-				c_func(VirtualFree_rid, { iaddr, size, MEM_RELEASE })
-				return 0
-			end if
-		end if
+	ifdef SAFE then
+		-- here we can take away write access
+		-- from true_protection if protection doesn't have it.
+		-- true_protection must have read access though.
+		switch protection do
+			case PAGE_EXECUTE then
+				true_protection = PAGE_EXECUTE_READ
+				
+			case PAGE_EXECUTE_WRITECOPY  then
+				true_protection = PAGE_EXECUTE_READWRITE
+				
+			case PAGE_WRITECOPY, PAGE_NOACCESS then				
+				true_protection = PAGE_READONLY
+				
+			case else
+				true_protection = protection					
+		end switch
 	end ifdef
-
+	
+	if local_change_protection_on_protected_memory( iaddr, size+BORDER_SPACE*2, true_protection ) = -1 then
+		local_free_protected_memory( iaddr, size+BORDER_SPACE*2 )
+		eaddr = 0
+	end if
+	
 	return eaddr
 end function
 

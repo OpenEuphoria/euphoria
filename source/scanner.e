@@ -14,11 +14,13 @@ include std/get.e
 include std/machine.e
 include std/search.e
 include std/sequence.e
+include std/text.e
+include std/map.e
 
 include global.e
 include common.e
 include platform.e
-include reswords.e
+include reswords.e as res
 include symtab.e
 include scinot.e
 include fwdref.e
@@ -84,7 +86,9 @@ export procedure set_qualified_fwd( integer fwd )
 end procedure
 
 export function get_qualified_fwd()
-	return qualified_fwd
+	integer fwd = qualified_fwd
+	set_qualified_fwd( -1 )
+	return fwd
 end function
 
 -- list of source lines & execution counts
@@ -107,8 +111,8 @@ export procedure InitLex()
 	char_class['\t'] = BLANK
 	char_class['+'] = PLUS
 	char_class['-'] = MINUS
-	char_class['*'] = MULTIPLY
-	char_class['/'] = DIVIDE
+	char_class['*'] = res:MULTIPLY
+	char_class['/'] = res:DIVIDE
 	char_class['='] = EQUALS
 	char_class['<'] = LESS
 	char_class['>'] = GREATER
@@ -128,7 +132,7 @@ export procedure InitLex()
 	char_class[']'] = RIGHT_SQUARE
 	char_class['$'] = DOLLAR
 	char_class[','] = COMMA
-	char_class['&'] = CONCAT
+	char_class['&'] = res:CONCAT
 	char_class['?'] = QUESTION_MARK
 	char_class['#'] = NUMBER_SIGN
 
@@ -411,15 +415,16 @@ function find_file(sequence fname)
 
 	-- We've got a relative path so we need to look into a few places. --
 	-- first try path from current file path
-	currdir = get_file_path( file_name[current_file_no] )
+	currdir = get_file_path( known_files[current_file_no] )
 	full_path = currdir & fname
 	if file_exists(full_path) then
 		return full_path
 	end if
 
 	-- next try main_path
-	if not equal(main_path, currdir) then
-		full_path = main_path & new_include_name
+	sequence mainpath = main_path[1..rfind(SLASH, main_path)]
+	if not equal(mainpath, currdir) then
+		full_path = mainpath & new_include_name
 		if file_exists(full_path) then
 			return full_path
 		end if
@@ -526,73 +531,16 @@ function path_open()
 	return fh
 end function
 
-function win_compare(sequence a,sequence b)
-	atom conv
-	integer rc
-
-	conv=allocate_string(a)
-	conv=c_func(char_upper,{conv}) -- conv is unchanged
-	a=peek({conv,length(a)})
-	poke(conv,b)
-	conv=c_func(char_upper,{conv}) -- conv is unchanged
-	rc = equal(a,peek({conv,length(a)}))
-	free(conv)
-	return rc
-end function
-
-function dos_compare(sequence a,sequence b)
-	integer ai,bi,c
-
-	for i=1 to length(a) do
-		ai=a[i]
-		bi=b[i]
-		if ai!=bi then -- do some work
-			c = xor_bits(ai,bi)
-			if c >= #40 then
-			-- either one of the chars is accented and not the other, or one is a letter and not the other
-				return FALSE
-			end if
-			-- both char are allowed in filenames and different
-			if ai<128 then  -- unaccented chars
-				if c != #20 or and_bits(ai,31)>26 then -- not case insensitive equal
-				-- if c=#20, then both chars ar in 'A'..#7F. Hence the need to filter out spurious positives from #7B..#7F.
-					return FALSE
-				end if
-			else  -- accented chars
-				if not fc_table then -- no capitalisation supported, chars differ
-					return FALSE
-				end if
-				-- speed things up by not always peeking twice
-				c = peek(fc_table+ai)
-				if c != ai then -- a[i] is lowercase
-					if c != bi then -- b[i] is neither of the allowed two
-						return FALSE
-					end if
-				else -- a[i] is uppercase, so check b[i] directly
-					if ai != peek(fc_table+bi) then -- different after uppercasing
-						return FALSE
-					end if
-				end if
-			end if
-		end if
-	end for
-	return TRUE
-end function
-
 function same_name(sequence a, sequence b)
 -- return TRUE if two file names (or paths) are equal
+	if length(a) != length(b) then
+		return FALSE
+	end if
+	
 	ifdef UNIX then
 		return equal(a, b) -- case sensitive
 	elsedef
-		if length(a) != length(b) then
-			return FALSE
-		else
-			ifdef WIN32 then
-				return win_compare(a,b)
-			elsedef
-				return dos_compare(a,b)
-			end ifdef
-		end if
+		return equal(upper(a), upper(b)) -- case insensitive
 	end ifdef
 end function
 
@@ -782,62 +730,58 @@ end procedure
 
 procedure IncludePush()
 -- start reading from new source file with given name
-	integer new_file, old_file_no
-	sequence new_name
+	integer new_file_handle, old_file_no
+	atom new_hash
+	integer idx
 
 	start_include = FALSE
 
-	new_file = path_open() -- sets new_include_name to full path
+	new_file_handle = path_open() -- sets new_include_name to full path
 
-	new_name = name_ext(new_include_name)
+	new_hash = hash(canonical_path(new_include_name,,1), HSIEH32)
 
-	for i = length(file_name) to 1 by -1 do
-		-- compare file names first to reduce calls to dir()
-		if same_name(new_name, name_ext(file_name[i])) and
-			equal(dir(new_include_name), dir(file_name[i]))
-		then
-			-- can assume we've included this file already
-			-- (Thanks to Vincent Howell.)
-			-- (currently, in a very rare case, it could be a
-			--  different file in another directory with the
-			--  same name, size and time-stamp down to the second)
-			if new_include_space != 0 then
-				SymTab[new_include_space][S_OBJ] = i -- but note any namespace
+	idx = find(new_hash, known_files_hash)
+	if idx then
+		-- can assume we've included this file already
+		if new_include_space != 0 then
+			SymTab[new_include_space][S_OBJ] = idx -- but note any namespace
 
-			end if
-			close(new_file)
-
-			if find( -i, file_include[current_file_no] ) then
-				-- it was included via export before, but we can now mark it as directly included
-				file_include[current_file_no][ find( -i, file_include[current_file_no] ) ] = i
-
-
-
-			elsif not find( i, file_include[current_file_no] ) then
-				-- don't reparse the file, but note that it was included here
-				file_include[current_file_no] &= i
-
-				-- also add anything that file exports
-				add_exports( i, current_file_no )
-
-				if public_include then
-
-					if not find( i, file_public[current_file_no] ) then
-						file_public[current_file_no] &= i
-						patch_exports( current_file_no )
-					end if
-
-				end if
-			end if
-			indirect_include[current_file_no][i] = OpIndirectInclude
-			add_include_by( current_file_no, i, public_include )
-			update_include_matrix( i, current_file_no )
-			public_include = FALSE
-			read_line() -- we can't return without reading a line first
-			return -- ignore it
 		end if
-	end for
+		close(new_file_handle)
 
+		if find( -idx, file_include[current_file_no] ) then
+			-- it was included via export before, but we can now mark it as directly included
+			file_include[current_file_no][ find( -idx, file_include[current_file_no] ) ] = idx
+
+
+
+		elsif not find( idx, file_include[current_file_no] ) then
+			-- don't reparse the file, but note that it was included here
+			file_include[current_file_no] &= idx
+
+			-- also add anything that file exports
+			add_exports( idx, current_file_no )
+
+			if public_include then
+
+				if not find( idx, file_public[current_file_no] ) then
+					file_public[current_file_no] &= idx
+					patch_exports( current_file_no )
+				end if
+
+			end if
+		end if
+		indirect_include[current_file_no][idx] = OpIndirectInclude
+		add_include_by( current_file_no, idx, public_include )
+		update_include_matrix( idx, current_file_no )
+		public_include = FALSE
+		read_line() -- we can't return without reading a line first
+		if not find( idx, file_include_depend[current_file_no] ) and not finished_files[idx] then
+			file_include_depend[current_file_no] &= idx
+		end if
+		return -- ignore it
+	end if
+	
 	if length(IncludeStk) >= INCLUDE_LIMIT then
 		CompileErr(104)
 	end if
@@ -882,22 +826,27 @@ procedure IncludePush()
 	end if
 
 ifdef STDDEBUG then
-	if not match("std/", new_name ) then
+	if not match("std" & SLASH, new_include_name) then
 		file_include[$] &= 2 -- include the unexported std library
 	end if
 end ifdef
 
-	src_file = new_file
+	src_file = new_file_handle
 	file_start_sym = last_sym
 	if current_file_no >= MAX_FILE then
 		CompileErr(126)
 	end if
-	file_name = append(file_name, new_include_name)
+	known_files = append(known_files, new_include_name)
+	known_files_hash &= new_hash
+	finished_files &= 0
+	file_include_depend = append( file_include_depend, { length( known_files ) } )
+	file_include_depend[current_file_no] &= length( known_files )
 	check_coverage()
 	default_namespaces &= 0
+	
 	update_include_matrix( length( file_include ), current_file_no )
 	old_file_no = current_file_no
-	current_file_no = length(file_name)
+	current_file_no = length(known_files)
 	line_number = 0
 	read_line()
 
@@ -907,13 +856,28 @@ end ifdef
 	default_namespace( )
 end procedure
 
-
+procedure update_include_completion( integer file_no )
+	for i = 1 to length( file_include_depend ) do
+		if length( file_include_depend[i] ) then
+			integer fx = find( file_no, file_include_depend[i] )
+			if fx then
+				file_include_depend[i] = remove( file_include_depend[i], fx )
+				if not length( file_include_depend[i] ) then
+					finished_files[i] = 1
+					if i != file_no then
+						update_include_completion( i )
+					end if
+				end if
+			end if
+		end if
+	end for
+end procedure
 
 
 export function IncludePop()
 -- stop reading from current source file and restore info for previous file
 -- (if any)
-	sequence top
+	update_include_completion( current_file_no )
 	Resolve_forward_references()
 	HideLocals()
 
@@ -926,7 +890,7 @@ export function IncludePop()
 		return FALSE  -- the end
 	end if
 
-	top = IncludeStk[$]
+	sequence top = IncludeStk[$]
 
 	current_file_no    = top[FILE_NO]
 	line_number        = top[LINE_NO]
@@ -1008,21 +972,55 @@ function GetHexChar( integer cnt, integer errno)
 	atom val
 	integer d
 	val = 0
-	for i = 1 to cnt do
-		d = find(getch(), "0123456789ABCDEFabcdef")
+	
+	while cnt > 0 do
+		d = find(getch(), "0123456789ABCDEFabcdef_")
 		if d = 0 then
 			CompileErr( errno )
 		end if
-		val = val * 16 + d - 1
-		if d > 16 then
-			val -= 6
+		if d != 23 then
+			val = val * 16 + d - 1
+			if d > 16 then
+				val -= 6
+			end if
+			cnt -= 1
 		end if
-	end for
+	end while
 	
 	return val
 end function
 
-function EscapeChar()
+function GetBinaryChar( integer delim )
+	atom val
+	integer d
+	sequence vchars = "01_ " & delim
+	integer cnt = 0
+	val = 0
+	while 1 do
+		d = find(getch(), vchars)
+		if d = 0 then
+			CompileErr( 343 )
+		end if
+		if d = 5 then
+			ungetch()
+			exit
+		end if
+		if d = 4 then
+			exit
+		end if
+		if d != 3 then
+			val = val * 2 + d - 1
+			cnt += 1
+		end if
+	end while
+	
+	if cnt = 0 then
+		CompileErr(343)
+	end if
+	return val
+end function
+
+function EscapeChar(integer delim)
 	atom c
 	
 	-- The cursor is currently at the next byte after the back-slash.
@@ -1031,29 +1029,39 @@ function EscapeChar()
 	switch c do
 		case 'n' then
 			c = 10 -- Newline
+			
 		case 't' then
 			c = 9 -- Tabulator
+			
 		case '"', '\\', '\'' then
 			-- Double Quote
 			-- Back slash
 			-- Single Quote
+			
 		case 'r' then
 			c = 13 -- Carriage Return
+			
 		case '0' then
 			c = 0 -- Null
+			
 		case 'e', 'E' then
 			c = 27 -- escape char.
+			
 		case 'x' then
 			-- Two Hex digits follow
-			c = GetHexChar(2, 155)
+			c = GetHexChar(2, 340)
 			
 		case 'u' then
 			-- Four Hex digits follow
-			c = GetHexChar(4, 155)
+			c = GetHexChar(4, 341)
 			
 		case 'U' then
 			-- Eight Hex digits follow
-			c = GetHexChar(8, 155)
+			c = GetHexChar(8, 342)
+			
+		case 'b' then
+			-- Any number of binary digits follow
+			c = GetBinaryChar(delim)
 			
 		case else
 			CompileErr(155)
@@ -1260,26 +1268,27 @@ function GetHexString(integer maxnibbles = 2)
 			exit
 		end if
 
-		digit = find(ch, "0123456789ABCDEFabcdef _\t\n\r")
+		digit = find(ch, "0123456789ABCDEFabcdef_ \t\n\r")
 		if digit = 0 then
 			CompileErr(329)
 		end if
-		if digit < 23 then
-			if digit > 16 then
-				digit -= 6
-			end if
-			if nibble = 1 then
-				val = digit - 1
-			else
-				val = val * 16 + digit - 1
-				if nibble = maxnibbles then
-					string_text &= val
-					val = -1
-					nibble = 0
+		if digit <= 23 then
+			if digit != 23 then
+				if digit > 16 then
+					digit -= 6
 				end if
+				if nibble = 1 then
+					val = digit - 1
+				else
+					val = val * 16 + digit - 1
+					if nibble = maxnibbles then
+						string_text &= val
+						val = -1
+						nibble = 0
+					end if
+				end if
+				nibble += 1
 			end if
-			nibble += 1
-
 		else
 			if val >= 0 then
 				-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
@@ -1296,6 +1305,63 @@ function GetHexString(integer maxnibbles = 2)
 	
 	if val >= 0 then	
 		-- Expecting 2nd hex digit but didn't get one, so assume we got everything.
+		string_text &= val
+	end if
+	
+	return string_text
+end function
+
+function GetBitString()
+	integer ch
+	integer digit
+	atom val
+	integer cline
+	integer bitcnt
+	sequence string_text
+
+	cline = line_number
+	string_text = ""
+	bitcnt = 1
+	val = -1
+	ch = getch()
+	while 1 do
+		if ch = END_OF_FILE_CHAR then
+			CompileErr(129, cline)
+		end if
+				
+		if ch = '"' then
+			exit
+		end if
+
+		digit = find(ch, "01_ \t\n\r")
+		if digit = 0 then
+			CompileErr(329)
+		end if
+		if digit <= 3 then
+			if digit != 3 then
+				if bitcnt = 1 then
+					val = digit - 1
+				else
+					val = val * 2 + digit - 1
+				end if
+				bitcnt += 1
+			end if
+		else
+			if val >= 0 then
+				-- Expecting more digits but didn't get any, so assume we got everything.
+				string_text &= val
+				val = -1
+			end if
+			bitcnt = 1
+			if ch = '\n' then
+				read_line()
+			end if
+		end if
+		ch = getch()
+	end while
+	
+	if val >= 0 then	
+		-- Expecting more digits but didn't get any, so assume we got everything.
 		string_text &= val
 	end if
 	
@@ -1327,15 +1393,20 @@ export function Scanner()
 			pch = ch
 			ch = getch()
 			if ch = '"' then
-				if pch = 'x' then
-					return {STRING, NewStringSym(GetHexString(2))}
-				end if
-				if pch = 'u' then
-					return {STRING, NewStringSym(GetHexString(4))}
-				end if
-				if pch = 'U' then
-					return {STRING, NewStringSym(GetHexString(8))}
-				end if
+				switch pch do
+					case 'x' then
+						return {STRING, NewStringSym(GetHexString(2))}
+				
+					case 'u' then
+						return {STRING, NewStringSym(GetHexString(4))}
+				
+					case 'U' then
+						return {STRING, NewStringSym(GetHexString(8))}
+						
+					case 'b' then
+						return {STRING, NewStringSym(GetBitString())}
+					
+				end switch
 			end if
 			
 			while id_char[ch] do
@@ -1370,7 +1441,7 @@ export function Scanner()
 
 
 				if tok[T_ID] = NAMESPACE then -- known namespace
-					qualified_fwd = SymTab[tok[T_SYM]][S_OBJ]
+					set_qualified_fwd( SymTab[tok[T_SYM]][S_OBJ] )
 
 					-- skip whitespace
 					ch = getch()
@@ -1421,8 +1492,13 @@ export function Scanner()
 						elsif tok[T_ID] = TYPE then
 							tok[T_ID] = QUALIFIED_TYPE
 						end if
-
+						
 					end if
+					
+					if atom( tok[T_SYM] ) and  SymTab[tok[T_SYM]][S_SCOPE] != SC_UNDEFINED then
+						set_qualified_fwd( -1 )
+					end if
+						
 				else -- not a namespace, but an overriding var
 					ungetch()
 				    if Parser_mode = PAM_RECORD then
@@ -1442,7 +1518,7 @@ export function Scanner()
 		            end if
 				end if
 			else -- not a known namespace
-				qualified_fwd = -1
+				set_qualified_fwd( -1 )
 			    if Parser_mode = PAM_RECORD then
 	                Ns_recorded_sym &= 0
 						Recorded = append(Recorded, yytext)
@@ -1640,7 +1716,7 @@ export function Scanner()
 				if ch = '"' then
 					exit
 				elsif ch = '\\' then
-					yytext &= EscapeChar()
+					yytext &= EscapeChar('"')
 				elsif ch = '\t' then
 					CompileErr(145)
 				else
@@ -1662,19 +1738,19 @@ export function Scanner()
 				return {PLUS, 0}
 			end if
 
-		elsif class = CONCAT then
+		elsif class = res:CONCAT then
 			ch = getch()
 			if ch = '=' then
 				return {CONCAT_EQUALS, 0}
 			else
 				ungetch()
-				return {CONCAT, 0}
+				return {res:CONCAT, 0}
 			end if
 
 		elsif class = NUMBER_SIGN then
 			i = 0
 			is_int = -1
-			while i < MAXINT_VAL/32 do
+			while i < MAXINT/32 do
 				ch = getch()
 				if char_class[ch] = DIGIT then
 					if ch != '_' then
@@ -1707,7 +1783,7 @@ export function Scanner()
 					CompileErr(97)
 				end if
 			else
-				if i >= MAXINT_VAL/32 then
+				if i >= MAXINT/32 then
 					d = i
 					is_int = FALSE
 					while TRUE do
@@ -1740,16 +1816,16 @@ export function Scanner()
 				end if
 			end if
 
-		elsif class = MULTIPLY then
+		elsif class = res:MULTIPLY then
 			ch = getch()
 			if ch = '=' then
 				return {MULTIPLY_EQUALS, 0}
 			else
 				ungetch()
-				return {MULTIPLY, 0}
+				return {res:MULTIPLY, 0}
 			end if
 
-		elsif class = DIVIDE then
+		elsif class = res:DIVIDE then
 			ch = getch()
 			if ch = '=' then
 				return {DIVIDE_EQUALS, 0}
@@ -1790,17 +1866,18 @@ export function Scanner()
 				end if
 			else
 				ungetch()
-				return {DIVIDE, 0}
+				return {res:DIVIDE, 0}
 			end if
-
 		elsif class = SINGLE_QUOTE then
 			atom ach = getch()
 			if ach = '\\' then
-				ach = EscapeChar()
+				ach = EscapeChar('\'')
 			elsif ach = '\t' then
 				CompileErr(145)
 			elsif ach = '\'' then
 				CompileErr(137)
+			elsif ach = '\n' then
+				CompileErr(68, {"character", "end of line"})
 			end if
 			if getch() != '\'' then
 				CompileErr(56)
@@ -1972,7 +2049,7 @@ export procedure IncludeScan( integer is_public )
 		ch = getch()
 		while not find(ch, {'\n', '\r', '"', END_OF_FILE_CHAR}) do
 			if ch = '\\' then
-				gtext &= EscapeChar()
+				gtext &= EscapeChar('"')
 			else
 				gtext &= ch
 			end if
@@ -2033,7 +2110,7 @@ export procedure IncludeScan( integer is_public )
 
 					ungetch()
 					s = keyfind(gtext, -1, , 1)
-					if not find(s[T_ID], ADDR_TOKS) then
+					if not find(s[T_ID], ID_TOKS) then
 						CompileErr(36)
 					end if
 					new_include_space = NameSpace_declaration(s[T_SYM])
@@ -2046,8 +2123,28 @@ export procedure IncludeScan( integer is_public )
 		else
 			CompileErr(100)
 		end if
-	else
+		
+	elsif find(ch, {'\n', '\r', END_OF_FILE_CHAR}) then
 		ungetch()
+		
+	elsif ch = '-' then
+		ch = getch()
+		if ch != '-' then
+			CompileErr(100)
+		end if
+		ungetch()
+		ungetch()
+		
+	elsif ch = '/' then
+		ch = getch()
+		if ch != '*' then
+			CompileErr(100)
+		end if
+		ungetch()
+		ungetch()
+		
+	else
+		CompileErr(100)
 	end if
 
 	start_include = TRUE -- let scanner know

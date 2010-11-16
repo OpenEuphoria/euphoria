@@ -1,9 +1,7 @@
-namespace task
-
 --****
 -- == Multi-tasking
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === General Notes
 --
@@ -20,6 +18,8 @@ namespace task
 -- in future versions of OpenEuphoria.
 -- 
 -- === Routines
+
+namespace task
 
 constant M_SLEEP = 64
 

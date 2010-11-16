@@ -1,18 +1,15 @@
--- (c) Copyright - See License.txt
---
-namespace stats
-
 --****
 -- == Statistics
--- **Page Contents**
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Routines
 
+namespace stats
+
 include std/math.e
-include std/sort.e
 include std/sequence.e
+include std/sort.e
 
 
 --**
@@ -36,12 +33,18 @@ include std/sequence.e
 --
 -- Example 1:
 --   <eucode>
---   ? small( {4,5,6,8,5,4,3,"text"}, 3 ) -- Ans: {4,1} (The 3rd smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 1 ) -- Ans: {3,7} (The 1st smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 7 ) -- Ans: {8,4} (The 7th smallest value)
---   ? small( {"def", "qwe", "abc", "try"}, 2 ) -- Ans: {"def", 1} (The 2nd smallest value)
---   ? small( {1,2,3,4}, -1) -- Ans: {} -- no-value
---   ? small( {1,2,3,4}, 10) -- Ans: {} -- no-value
+--   ? small( {4,5,6,8,5,4,3,"text"}, 3 ) 
+--     --> Ans: {4,1} (The 3rd smallest value)
+--   ? small( {4,5,6,8,5,4,3,"text"}, 1 ) 
+--     --> Ans: {3,7} (The 1st smallest value)
+--   ? small( {4,5,6,8,5,4,3,"text"}, 7 ) 
+--     --> Ans: {8,4} (The 7th smallest value)
+--   ? small( {"def", "qwe", "abc", "try"}, 2 ) 
+--     --> Ans: {"def", 1} (The 2nd smallest value)
+--   ? small( {1,2,3,4}, -1) 
+--     --> Ans: {} -- no-value
+--   ? small( {1,2,3,4}, 10) 
+--     --> Ans: {} -- no-value
 --   </eucode>
 --
 
@@ -289,14 +292,14 @@ end function
 -- }}}
 --
 -- Example 1:
---   <eucode>
---   ? stdev( {4,5,6,7,5,4,3,7} )                             -- Ans: 1.457737974
---   ? stdev( {4,5,6,7,5,4,3,7} ,, ST_FULLPOP)                -- Ans: 1.363589014
---   ? stdev( {4,5,6,7,5,4,3,"text"} , ST_IGNSTR)             -- Ans: 1.345185418
---   ? stdev( {4,5,6,7,5,4,3,"text"}, ST_IGNSTR, ST_FULLPOP ) -- Ans: 1.245399698
---   ? stdev( {4,5,6,7,5,4,3,"text"} , 0)                     -- Ans: 2.121320344
---   ? stdev( {4,5,6,7,5,4,3,"text"}, 0, ST_FULLPOP )         -- Ans: 1.984313483
---   </eucode>
+-- <eucode>
+-- ? stdev( {4,5,6,7,5,4,3,7} )                             -- Ans: 1.457737974
+-- ? stdev( {4,5,6,7,5,4,3,7} ,, ST_FULLPOP)                -- Ans: 1.363589014
+-- ? stdev( {4,5,6,7,5,4,3,"text"} , ST_IGNSTR)             -- Ans: 1.345185418
+-- ? stdev( {4,5,6,7,5,4,3,"text"}, ST_IGNSTR, ST_FULLPOP ) -- Ans: 1.245399698
+-- ? stdev( {4,5,6,7,5,4,3,"text"} , 0)                     -- Ans: 2.121320344
+-- ? stdev( {4,5,6,7,5,4,3,"text"}, 0, ST_FULLPOP )         -- Ans: 1.984313483
+-- </eucode>
 --
 -- See also:
 --   [[:average]], [[:avedev]]
@@ -379,12 +382,18 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7} ) -- Ans: 1.966666667
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7},, ST_FULLPOP ) -- Ans: 1.84375
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR  ) -- Ans: 1.99047619
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR,ST_FULLPOP ) -- Ans: 1.857777778
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0 ) -- Ans: 2.225
--- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0, ST_FULLPOP ) -- Ans: 2.0859375
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7} ) 
+--    --> Ans: 1.966666667
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,7},, ST_FULLPOP ) 
+--    --> Ans: 1.84375
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR  ) 
+--    --> Ans: 1.99047619
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, ST_IGNSTR,ST_FULLPOP ) 
+--    --> Ans: 1.857777778
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0 ) 
+--     --> Ans: 2.225
+-- ? avedev( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"}, 0, ST_FULLPOP ) 
+--    --> Ans: 2.0859375
 -- </eucode>
 --
 -- See also:
@@ -700,10 +709,6 @@ end function
 
 public function harmean(sequence data_set, object subseq_opt = ST_ALLNUM)
 	integer count_
-
-	if atom(data_set) then
-		return data_set
-	end if
 	
 	data_set = massage(data_set, subseq_opt)
 	
@@ -855,11 +860,11 @@ end function
 -- Example 1:
 --   <eucode>
 --   ? emovavg( {7,2,8,5,6}, 0.75 ) 
---    -- Ans: {5.25,2.8125,6.703125,5.42578125,5.856445313}
+--    -- Ans: {6.65,3.1625,6.790625,5.44765625,5.861914063}
 --   ? emovavg( {7,2,8,5,6}, 0.25 ) 
---    -- Ans: {1.75,1.8125,3.359375,3.76953125,4.327148438}
+--    -- Ans: {5.95,4.9625,5.721875,5.54140625,5.656054687}
 --   ? emovavg( {7,2,8,5,6}, -1 ) 
---    -- Ans: {2.333333333,2.222222222,4.148148148,4.432098765,4.95473251}
+--    -- Ans: {6.066666667,4.711111111,5.807407407,5.538271605,5.69218107}
 --   </eucode>
 --
 -- See also:
@@ -867,7 +872,6 @@ end function
 
 public function emovavg(object data_set, atom smoothing_factor)
 	atom lPrev
-	
 	if atom(data_set) then
 		data_set = {data_set}
 		
@@ -942,7 +946,7 @@ public function median(object data_set, object subseq_opt = ST_ALLNUM)
 	data_set = massage(data_set, subseq_opt)
 	
 	if length(data_set) = 0 then
-		return data_set[1]
+		return data_set
 	end if
 	
 	if length(data_set) < 3 then
@@ -1072,17 +1076,18 @@ end function
 --   [[:average]], [[:geomean]], [[:harmean]], [[:movavg]], [[:emovavg]]
 --
 
-public function mode(object data_set, object subseq_opt = ST_ALLNUM)
+public function mode(sequence data_set, object subseq_opt = ST_ALLNUM)
 	
 	sequence lCounts
 	sequence lRes
 	
 	data_set = massage(data_set, subseq_opt)
-
-	lCounts = raw_frequency(data_set, subseq_opt)
-	if length(lCounts) = 0 then
+	
+	if not length( data_set ) then
 		return {}
 	end if
+
+	lCounts = raw_frequency(data_set, subseq_opt)
 	
 	lRes = {lCounts[1][2]}
 	for i = 2 to length(lCounts) do
@@ -1117,7 +1122,7 @@ end function
 --
 -- Comments:
 --
--- For each of the items in #datum##, its central moment is calculated as ...
+-- For each of the items in ##datum##, its central moment is calculated as ...
 -- {{{
 --     CM = power( ITEM - AVG, MAGNITUDE)
 -- }}}
@@ -1142,13 +1147,13 @@ end function
 -- See also:
 --   [[:average]]
 --
-public function central_moment(object data_set, object datum, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
+public function central_moment(sequence data_set, object datum, integer order_mag = 1, object subseq_opt = ST_ALLNUM)
 
 	atom lMean
 	
 	data_set = massage(data_set, subseq_opt)
 
-	if atom(data_set) or length(data_set) = 0 then
+	if length(data_set) = 0 then
 		return 0
 	end if
 	
@@ -1239,8 +1244,8 @@ end function
 --
 -- Example 1:
 --   <eucode>
--- ? skewness("the cat is the hatter") --> -1.296820819
--- ? skewness("thecatisthehatter")     --> 0.1029393238
+-- ? skewness("the cat is the hatter") --> -1.36166186
+-- ? skewness("thecatisthehatter")     --> 0.1093730315
 --   </eucode>
 --
 -- See also:
@@ -1260,7 +1265,7 @@ public function skewness(object data_set, object subseq_opt = ST_ALLNUM)
 	return sum_central_moments(data_set, 3) / ((length(data_set) - 1) * power(stdev(data_set), 3))
 	
 end function
- 
+
 --**
 -- Returns a measure of the spread of values in a dataset when compared to a 
 -- //normal// probability curve. 

@@ -1,28 +1,12 @@
 == Ed - Euphoria Editor
-
-<<LEVELTOC depth=3>>
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
-The Euphoria download package includes a handy, text-mode editor, ed, that's
-written completely in Euphoria. Many people find ed convenient for editing
-Euphoria programs and other files, but there is no requirement that you use it.
-
-If you don't like **ed**, you have many alternatives. David Cuny's **EE
-editor** is a text-based editor for Euphoria that's also written in Euphoria. It
-has a friendly mouse-based user interface with drop down menus etc. It's
-available from the RDS Web site. There are several other Euphoria-oriented
-editors that run on Windows and support files for use with other editors
-with EUPHORIA.
-
-If you search for **Editor** in our Archive, you'll find many editors written
-**in** EUPHORIA or **for** EUPHORIA.  Some written **in** EUPHORIA and *for* EUPHORIA.
-In fact, //any// text editor can be used to edit a Euphoria program,
-such as vi, jEdit, Emacs, and even dinosaur applications like Windows NotePad.
-
-Among the editors you will find Judith's IDE and wxIDE: Integrated Development Environments.
-
-Do you still want to use this ##ed##?  Then read on...
+The Euphoria download package includes a handy, text-mode editor, **##ed##**, 
+that's written completely in Euphoria. Many people find ##ed## convenient for 
+editing Euphoria programs and other files, but there is no requirement that you 
+use it.
 
 === Summary
 
@@ -59,7 +43,8 @@ different parts of a single file.
 
 === Special Keys
 
-Some PC keys do not work in a Linux or FreeBSD or Windows text console, or in Telnet, and
+Some PC keys do not work in a Linux or FreeBSD or Windows text console, or in 
+Telnet, and
 some keys do not work in an xterm under X windows. Alternate keys have been
 provided. In some cases you might have to edit ed.ex to map
 the desired key to the desired function.  e.g. you'll have to use
@@ -166,14 +151,20 @@ A new kill-buffer is started, and the old buffer is lost, each time you move
 away and start deleting somewhere else. For example, cut a series of //lines//
 with //C-Delete//. Then move the cursor to where you want to paste the lines and
 press //Insert//. If you want to copy the lines, without destroying the original
-text, first //C-Delete// them, then immediately press //Insert// to re-insert them.
-Then move somewhere else and press //Insert// to insert them again, as many times as
-you like. You can also //Delete// a series of individual //characters//, move the
+text, first //C-Delete// them, then immediately press //Insert// to re-insert 
+them.
+Then move somewhere else and press //Insert// to insert them again, as many 
+times as
+you like. You can also //Delete// a series of individual //characters//, move 
+the
 cursor, and then paste the deleted characters somewhere else. Immediately
-press //Insert// after deleting if you want to copy without removing the original characters.
+press //Insert// after deleting if you want to copy without removing the 
+original characters.
 
-Once you have a kill-buffer, you can type //Esc n// to read in a new file, or you can
-press an //F-key// to select a new edit window. You can then insert your kill-buffer.
+Once you have a kill-buffer, you can type //Esc n// to read in a new file, or 
+you can
+press an //F-key// to select a new edit window. You can then insert your 
+kill-buffer.
 
 === Use of Tabs
 
@@ -214,13 +205,15 @@ appear to ed to be the //end of the file//.
 
 The end-of-line terminator on Linux/FreeBSD/OSX/SUNOS/OPENBSD/NETBSD
 is simply ##\n##. On Windows, text files have lines ending with ##\r\n##.
-If you copy a Windows file to Linux/FreeBSD and try to modify it, **ed** will give you a
+If you copy a Windows file to Linux/FreeBSD and try to modify it, **ed** will 
+give you a
 choice of either keeping the ##\r\n## terminators, or saving the file with
 ##\n## terminators.
 
 === Source Code
 
-The complete source code to this editor is in ##bin\ed.ex## and ##bin\syncolor.e##.
+The complete source code to this editor is in ##bin\ed.ex## and 
+##bin\syncolor.e##.
 You are welcome to make improvements. There is a section at the top of ##ed.ex##
 containing "user-modifiable" configuration parameters that you can adjust. The
 colors and the cursor size may need adjusting for some operating environments.

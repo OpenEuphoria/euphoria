@@ -1,16 +1,15 @@
-	-- (c) Copyright - See License.txt
---
 --****
 -- == Console
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
 namespace console
 
-include std/types.e
 include std/get.e
+include std/pretty.e
 include std/text.e
 include std/types.e
-include std/pretty.e
+
 public include std/graphcst.e
 
 -- machine() commands
@@ -51,10 +50,12 @@ public constant
 -- 		<built-in> function get_key()
 --
 -- Description:
---     Return the key that was pressed by the user, without waiting. Special codes are returned for the function keys, arrow keys etc.
+--     Return the key that was pressed by the user, without waiting. Special 
+--  codes are returned for the function keys, arrow keys etc.
 --
 -- Returns:
---		An **integer**, either -1 if no key waiting, or the code of the next key waiting in keyboard buffer.
+--		An **integer**, either -1 if no key waiting, or the code of the next key
+--  waiting in keyboard buffer.
 --
 -- Comments:
 --     The operating system can hold a small number of key-hits in its keyboard buffer.
@@ -222,7 +223,7 @@ ifdef WIN32_GUI then
     end procedure
 
 elsedef
-
+	without warning strict
 	public procedure maybe_any_key(sequence prompt="", integer con=1)
     end procedure
 
@@ -338,8 +339,12 @@ type text_point(sequence p)
 		   and p[1] <= 200 and p[2] <= 500 -- rough sanity check
 end type
 
-public type positive_int(integer x)
-	return x >= 1
+public type positive_int(object x)
+	if integer(x) and x >= 1 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --**
@@ -605,7 +610,7 @@ end procedure
 --   [[:display_text_image]], [[:get_screen_char]]
 
 public function save_text_image(text_point top_left, text_point bottom_right)
-	sequence image, row_chars, vc
+	sequence image, row_chars
 
 	image = {}
 	for row = top_left[1] to bottom_right[1] do
@@ -723,12 +728,12 @@ end procedure
 -- Comments:
 -- * If ##data_in## is an atom or integer, it is simply displayed.
 -- * If ##data_in## is a simple text string, then ##args## can be used to
---   produce a formatted output with ##data_in## providing the [[:format]] string and
+--   produce a formatted output with ##data_in## providing the [[:text:format]] string and
 --   ##args## being a sequence containing the data to be formatted.
 -- ** If the last character of ##data_in## is an underscore character then it
 -- is stripped off and ##finalnl## is set to zero. Thus ensuring that a new line
 -- is **not** output.
--- ** The formatting codes expected in ##data_in## are the ones used by [[:format]].
+-- ** The formatting codes expected in ##data_in## are the ones used by [[:text:format]].
 -- It is not mandatory to use formatting codes, and if ##data_in## does not contain
 -- any then it is simply displayed and anything in ##args## is ignored.
 -- * If ##data_in## is a sequence containing floating-point numbers, sub-sequences 
@@ -744,15 +749,22 @@ end procedure
 --
 -- Examples:
 -- <eucode>
--- display("Some plain text") -- Displays this string on the console plus a new line.
--- display("Your answer:",0)  -- Displays this string on the console without a new line.
+-- display("Some plain text") 
+--         -- Displays this string on the console plus a new line.
+-- display("Your answer:",0)  
+--        -- Displays this string on the console without a new line.
 -- display("cat")
--- display("Your answer:",,0) -- Displays this string on the console without a new line.
+-- display("Your answer:",,0) 
+--         -- Displays this string on the console without a new line.
 -- display("")
--- display("Your answer:_")   -- Displays this string, except the '_', on the console without a new line.
+-- display("Your answer:_")   
+--        -- Displays this string, 
+--        -- except the '_', on the console without a new line.
 -- display("dog")
--- display({"abc", 3.44554}) -- Displays the contents of 'res' on the console.
--- display("The answer to [1] was [2]", {"'why'", 42}) -- formats these with a new line.
+-- display({"abc", 3.44554}) 
+--        -- Displays the contents of 'res' on the console.
+-- display("The answer to [1] was [2]", {"'why'", 42}) 
+--        -- formats these with a new line.
 -- display("",2)
 -- display({51,362,71}, {1})
 -- </eucode>

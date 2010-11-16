@@ -1,6 +1,7 @@
 == The User Defined Pre-Processor
+:<<LEVELTOC level=2 depth=4>>
 
-Introduced in 4.0 beta 1, the user defined pre-processor opens a world
+The user defined **pre-processor**, developed by Jeremy Cowgar, opens a world
 of possibilities to the Euphoria programmer. In a sentence, it allows
 one to create (or use) a translation process that occurs transparently
 when a program is run. This mini-guide is going to explore the
@@ -85,7 +86,7 @@ let's
 run it, but first without a pre-processor hook defined.
 
 NOTE: Through this document I am going to assume that you are working in
-Windows.
+//Windows//.
 If not, you can make the appropriate changes to the shell type examples.
 
 {{{
@@ -201,7 +202,7 @@ something like this into it.
 Then you can execute any of those files directly without the ##-p##
 parameters on the command line. This ##eu.cfg## file can be local to a
 project, local to a user or global on a system. Please read about the
-[[:eu.cfg] file for more information.
+[[:eu.cfg]] file for more information.
 
 === DLL/Shared Library Interface
 
@@ -373,7 +374,7 @@ function/routine call, design by contract and more.
 
 ===== Other Ideas
 
-* Include a Windows .RC file that defines a dialog layout and generate
+* Include a //Windows// .RC file that defines a dialog layout and generate
 code that will create the dialog and interact with it.
 * Object Oriented system for Euphoria that translates into pure Euphoria
 code, thus has the raw speed of Euphoria.

@@ -1,6 +1,8 @@
 --****
 -- == URL handling
 -- 
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 namespace url
 
@@ -11,7 +13,13 @@ include std/map.e
 -- === Parsing
 -- 
 
-constant PAIR_SEP = {'&', ';'}, HEX_SIG = '%', WHITESPACE = '+', VALUE_SEP = '='
+constant 
+	PAIR_SEP_A = '&',
+	PAIR_SEP_B = ';',
+	HEX_SIG    = '%',
+	WHITESPACE = '+',
+	VALUE_SEP  = '=',
+	$
 
 --**
 -- Parse a query string into a map
@@ -30,38 +38,42 @@ constant PAIR_SEP = {'&', ';'}, HEX_SIG = '%', WHITESPACE = '+', VALUE_SEP = '='
 -- 
 
 public function parse_querystring(object query_string)
-	atom i, char
+	integer i, char
 	object tmp
-	sequence charbuf, fieldbuf, fname=""
+	sequence charbuf, fname=""
 	map:map the_map = map:new()
 
 	if atom(query_string) then
 		return the_map
 	end if
 
-	charbuf = {}  fieldbuf = {}  i = 1
+	charbuf = {}  
+	i = 1
 	while i <= length(query_string) do
 		char = query_string[i]  -- character we're working on
-		if equal(char, HEX_SIG) then
-			tmp = value("#" & query_string[i+1] & query_string[i+2])
-			charbuf &= tmp[2]
-			i += 3
-		elsif equal(char, WHITESPACE) then
-			charbuf &= " "
-			i += 1
-		elsif equal(char, VALUE_SEP) then
-			fname = charbuf
-			charbuf = {}
-			i += 1
-		elsif find(char, PAIR_SEP) then
-			map:put(the_map, fname, charbuf)
-			fname = {}
-			charbuf = {}
-			i += 1
-		else
-			charbuf &= char
-			i += 1
-		end if
+		switch char do
+			case HEX_SIG then
+				tmp = value("#" & query_string[i+1] & query_string[i+2])
+				charbuf &= tmp[2]
+				i += 2 -- skip over hex digits
+				
+			case WHITESPACE then
+				charbuf &= " "
+				
+			case VALUE_SEP then
+				fname = charbuf
+				charbuf = {}
+				
+			case PAIR_SEP_A, PAIR_SEP_B then
+				map:put(the_map, fname, charbuf)
+				fname = {}
+				charbuf = {}
+				
+			case else
+				charbuf &= char
+				
+		end switch
+		i += 1
 	end while
 
 	if length(fname) then
@@ -71,7 +83,13 @@ public function parse_querystring(object query_string)
 	return the_map
 end function
 
-public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWORD, 
+public enum 
+	URL_PROTOCOL, 
+	URL_HOSTNAME, 
+	URL_PORT, 
+	URL_PATH,
+	URL_USER,
+	URL_PASSWORD, 
 	URL_QUERY_STRING
 
 --**
@@ -99,7 +117,8 @@ public enum URL_PROTOCOL, URL_HOSTNAME, URL_PORT, URL_PATH, URL_USER, URL_PASSWO
 --   
 -- Example 1:
 -- <eucode>
--- sequence parsed = parse("http://user:pass@www.debian.org:80/index.html?name=John&age=39")
+-- sequence parsed = 
+--       parse("http://user:pass@www.debian.org:80/index.html?name=John&age=39")
 -- -- parsed is
 -- -- { 
 -- --     "http",

@@ -38,6 +38,12 @@ n0 = foo4( 6 )
 test_equal("with pseudo namespace #1", {1,2,3,4}, result4)
 test_equal("with pseudo namespace #2", 10 , n0)
 
+
+function forward_constant_default_param( atom val = EXPORT_CONSTANT )
+	return val
+end function
+test_equal( "forward constant default param", EXPORT_CONSTANT, forward_constant_default_param() )
+
 include fwd.e
 object a, b, c, d, e, f, g, h
 export atom fwd_var
@@ -80,6 +86,17 @@ test_pass( "forward type with param name reused from routine name" )
 
 fwd_noassign()
 function fwd_noassign()
+	return 1
+end function
+
+test_equal( "call forward function with default parameter that is forward referenced, plus inlined",
+	1, fwd_inlined_default_fwd_param() )
+
+function fwd_inlined_default_fwd_param( object x = bar() )
+	return 1
+end function
+
+function bar()
 	return 1
 end function
 

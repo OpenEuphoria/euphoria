@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
-namespace mathcons
-
 --****
 -- == Math Constants
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace mathcons
 
 --****
 -- === Constants
@@ -77,5 +75,8 @@ public constant
 	PINF     = 1E308 * 1000,
 	--**
 	-- Negative Infinity
-	MINF     = - PINF
+	MINF     = - PINF,
+	--**
+	-- sqrt(5)
+	SQRT5 = 2.23606_79774_99789_69641
 

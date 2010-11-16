@@ -1,0 +1,9 @@
+== Version 2.2 Pre Alpha #2 Linux July 6, 1999
+
+* The **ncurses** library has been statically linked into
+  **exu**.
+* **exu** is now a compressed executable (97K).
+* **bug fixed: <font color="#993333">ed</font>**
+  can now edit files with upper case letters in the name.
+* The fraction of a second delay when you press the **Esc** key in
+  **ed** has been removed.

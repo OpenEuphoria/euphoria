@@ -34,7 +34,7 @@ REM -- and was automatically removed for us.
 REM --
 
 echo Performing a SVN checkout...
-svn co -q http://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tags/%1 cleanbranch
+svn co -q http://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/%1 cleanbranch
 
 GOTO DoBuild
 
@@ -55,18 +55,23 @@ REM --
 
 :DoBuild
 echo Ensuring binaries are compressed
+upx ..\..\bin\creolehtml.exe
 upx ..\..\bin\eub.exe
+upx ..\..\bin\eubind.exe
 upx ..\..\bin\eubw.exe
 upx ..\..\bin\euc.exe
+upx ..\..\bin\eucoverage.exe
+upx ..\..\bin\eudoc.exe
 upx ..\..\bin\eui.exe
 upx ..\..\bin\euiw.exe
+upx ..\..\bin\eutest.exe
 
 echo Building our installer...
-"C:\Program Files\Inno Setup 5\ISCC.exe" /Q euphoria.iss
+ISCC.exe /Q euphoria.iss
 
 GOTO Done
 
 :NoTag
-echo Usage: build.bat TAG-NAME
+echo Usage: build.bat SVN-DIR (i.e. trunk, tags/4.0.0RC1, ...)
 
 :Done

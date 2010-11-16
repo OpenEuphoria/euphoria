@@ -9,6 +9,7 @@ elsedef
 end ifdef
 
 include std/search.e
+include std/filesys.e
 
 include global.e
 include c_out.e
@@ -372,6 +373,10 @@ export function NewTempSym( integer inlining = 0)
 		SymTab[p][S_MODE] = M_TEMP
 		SymTab[p][S_NEXT] = SymTab[CurrentSub][S_TEMPS]
 		SymTab[CurrentSub][S_TEMPS] = p
+		
+		if inlining then
+			SymTab[CurrentSub][S_STACK_SPACE] += 1
+		end if
 
 	elsif TRANSLATE then
 		-- found a free temp - make another with same name,
@@ -386,7 +391,6 @@ export function NewTempSym( integer inlining = 0)
 		SymTab[q][S_NEXT] = SymTab[CurrentSub][S_TEMPS]
 		SymTab[CurrentSub][S_TEMPS] = q
 		p = q
-
 	end if
 
 	if TRANSLATE then
@@ -706,8 +710,8 @@ ifdef STDDEBUG then
 								{ scanning_file, SymTab[tok[T_SYM]][S_FILE_NO] })
 							
 							symbol_resolution_warning = GetMsgText(232, 0, 
-										{name_ext(file_name[scanning_file]),
-										 name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])})
+										{name_ext(known_files[scanning_file]),
+										 name_ext(known_files[SymTab[tok[T_SYM]][S_FILE_NO]])})
 
 						end if
 						
@@ -757,16 +761,28 @@ end ifdef
 					elsif file_no = tok_file then
 						good = 1
 					else
-						switch scope with fallthru do
-						case SC_GLOBAL then
-							good = and_bits( ANY_INCLUDE, include_matrix[file_no][tok_file] )
-							break
-						case SC_PUBLIC then
-							good = and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file_no][tok_file] )
-							break
-						case SC_EXPORT then
-							good = and_bits( DIRECT_INCLUDE, include_matrix[file_no][tok_file] )
+						-- globals and publics can come from a file included by the namespace file
+						integer include_type = 0
+						switch scope do
+							case SC_GLOBAL then
+								if Resolve_unincluded_globals then
+									include_type = ANY_INCLUDE
+								else
+									include_type = DIRECT_OR_PUBLIC_INCLUDE
+								end if
+								good = and_bits( include_type, include_matrix[file_no][tok_file] )
+								
+							case SC_PUBLIC then
+								
+								if tok_file = current_file_no then
+									include_type = PUBLIC_INCLUDE
+								else
+									include_type = DIRECT_OR_PUBLIC_INCLUDE
+								end if
+								
+							
 						end switch
+						good = and_bits( include_type, include_matrix[file_no][tok_file] )
 					end if
 					
 					if good then
@@ -817,11 +833,11 @@ end ifdef
 			end if
 			-- Get list of files...
 			for i = 1 to length(dup_globals) do
-				msg_file = file_name[SymTab[dup_globals[i]][S_FILE_NO]]
+				msg_file = known_files[SymTab[dup_globals[i]][S_FILE_NO]]
 				msg &= "    " & msg_file & "\n"
 			end for
 
-			Warning(234, builtin_chosen_warning_flag, {b_name, file_name[scanning_file], msg})
+			Warning(234, builtin_chosen_warning_flag, {b_name, known_files[scanning_file], msg})
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -893,10 +909,10 @@ ifdef STDDEBUG then
 				end if
 end ifdef
 				symbol_resolution_warning = GetMsgText(233,0,
-									{name_ext(file_name[scanning_file]), 
+									{name_ext(known_files[scanning_file]), 
 									 line_number,
 									 word,
-									 name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]])
+									 name_ext(known_files[SymTab[gtok[T_SYM]][S_FILE_NO]])
 									 })
 		end if
 		return gtok
@@ -1034,7 +1050,7 @@ export procedure LintCheck(symtab_index s)
 	end if
 	
 
-	file = file_name[current_file_no]
+	file = abbreviate_path(known_files[current_file_no])
 	if warn_level = 3 then
 		if vscope = SC_LOCAL then
 			if current_file_no = SymTab[s][S_FILE_NO] then
@@ -1134,4 +1150,29 @@ end function
 
 export function sym_usage( symtab_index sym )
 	return SymTab[sym][S_USAGE]
+end function
+
+
+export function calc_stack_required( symtab_index sub )
+	integer required = SymTab[sub][S_NUM_ARGS]
+	integer arg = SymTab[sub][S_NEXT]
+	
+	for i = 1 to required do
+		arg = SymTab[arg][S_NEXT]
+	end for
+	
+	-- count the privates
+	while arg != 0 and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
+		required += 1
+		arg = SymTab[arg][S_NEXT]
+	end while
+	
+	-- count the temps
+	arg = SymTab[sub][S_TEMPS]
+	while arg != 0 do
+		required += 1
+		arg = SymTab[arg][S_NEXT]
+	end while
+	
+	return required
 end function

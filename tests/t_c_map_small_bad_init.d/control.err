@@ -1,0 +1,232 @@
+..\include\std\map.e:769 in procedure put() 
+Inappropriate initial operation given to map.e:put() 
+    the_map_p = 1
+    the_key_p = 1
+    the_value_p = 2
+    operation_p = 0
+    trigger_p = 100'd'
+    index_ = 0
+    bucket_ = <no value>
+    average_length_ = <no value>
+    from_ = <no value>
+    ret_ (from inlined routine 'calc_hash') = <no value>
+    max_hash_p (from inlined routine 'calc_hash') = <no value>
+    msg (from inlined routine 'crash') = {73'I',110'n',97'a',112'p',112'p',
+114'r',111'o',112'p',114'r',105'i',97'a',116't',101'e',32' ',105'i',110'n',
+105'i',116't',105'i',97'a',108'l',32' ',111'o',112'p',101'e',114'r',97'a',
+116't',105'i',111'o',110'n',32' ',103'g',105'i',118'v',101'e',110'n',32' ',
+116't',111'o',32' ',109'm',97'a',112'p',46'.',101'e',58':',112'p',117'u',
+116't',40'(',41')'}
+
+... called from t_c_map_small_bad_init.e:7 
+
+
+Global & Local Variables
+
+ ..\include\std\convert.e:
+    mem = 1300792
+    decimal_mark = 46'.'
+
+ ..\include\std\types.e:
+    Defined_Sets = {
+                     {98'b',99'c',100'd',102'f',103'g',104'h',106'j',107'k',
+108'l',109'm',110'n',112'p',113'q',114'r',115's',116't',118'v',119'w',120'x',
+121'y',122'z',66'B',67'C',68'D',70'F',71'G',72'H',74'J',75'K',76'L',77'M',
+78'N',80'P',81'Q',82'R',83'S',84'T',86'V',87'W',88'X',89'Y',90'Z'},
+                     {97'a',101'e',105'i',111'o',117'u',65'A',69'E',73'I',
+79'O',85'U'},
+                     {
+                       {48'0',57'9'},
+                       {65'A',70'F'},
+                       {97'a',102'f'}
+                     },
+                     {32' ',9,10,13,11,160},
+                     {
+                       {32' ',47'/'},
+                       {58':',63'?'},
+                       {91'[',96'`'},
+                       {123'{',126'~'}
+                     },
+                     {
+                       {32' ',126'~'}
+                     },
+                     {
+                       {32' ',126'~'},
+                       {32' ',32' '},
+                       {9,9},
+                       {10,10},
+                       {13,13},
+                       {8,8},
+                       {7,7}
+                     },
+                     {
+                       {97'a',122'z'}
+                     },
+                     {
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {48'0',57'9'},
+                       {97'a',122'z'},
+                       {65'A',90'Z'},
+                       {95'_',95'_'}
+                     },
+                     {
+                       {97'a',122'z'},
+                       {65'A',90'Z'}
+                     },
+                     {
+                       {0,127''}
+                     },
+                     {
+                       {0,31},
+                       {127'',127''}
+                     },
+                     {
+                       {48'0',57'9'}
+                     },
+                     {
+                       {33'!',126'~'}
+                     },
+                     {
+                       {0,255}
+                     },
+                     {95'_'},
+                     {1,0}
+                   }
+
+ ..\include\std\machine.e:
+    FREE_ARRAY_RID = 1
+    kernel_dll = 2088763392
+    memDLL_id = 2088763392
+    VirtualAlloc_rid = 19
+    VirtualProtect_rid = 20
+    GetLastError_rid = 22
+    GetSystemInfo_rid = 23
+    vaa = <no value>
+    page_size = 4096
+    system_info_ptr = <no value>
+    oldprotptr = 1349736
+
+ ..\include\std\get.e:
+    input_file = <no value>
+    input_string = <no value>
+    string_next = <no value>
+    ch = <no value>
+    leading_whitespace = <no value>
+
+ ..\include\std\filesys.e:
+    InitCurDir = {67'C',58':',92'\',80'P',114'r',111'o',106'j',101'e',99'c',
+116't',115's',92'\',101'e',117'u',95'_',112'p',114'r',111'o',106'j',92'\',
+101'e',117'u',52'4',48'0',92'\',116't',114'r',117'u',110'n',107'k',92'\',
+116't',101'e',115's',116't',115's',92'\'}
+    file_counters = {}
+
+ ..\include\std\serialize.e:
+    mem0 = 13274208
+    mem1 = 13274209
+    mem2 = 13274210
+    mem3 = 13274211
+
+ ..\include\std\pretty.e:
+    pretty_end_col = <no value>
+    pretty_chars = <no value>
+    pretty_start_col = <no value>
+    pretty_level = <no value>
+    pretty_file = <no value>
+    pretty_ascii = <no value>
+    pretty_indent = <no value>
+    pretty_ascii_min = <no value>
+    pretty_ascii_max = <no value>
+    pretty_line_count = <no value>
+    pretty_line_max = <no value>
+    pretty_dots = <no value>
+    pretty_line_breaks = <no value>
+    pretty_printing = <no value>
+    pretty_fp_format = <no value>
+    pretty_int_format = <no value>
+    pretty_line = <no value>
+
+ ..\include\std\eds.e:
+    current_db = -1
+    current_table_pos = -1
+    current_table_name = {}
+    db_names = {}
+    db_file_nums = {}
+    db_lock_methods = {}
+    current_lock = 0
+    key_pointers = {}
+    key_cache = {}
+    cache_index = {}
+    caching_option = 1
+    void = <no value>
+    vLastErrors = {}
+    mem0 = 13275048
+    mem1 = 13275049
+    mem2 = 13275050
+    mem3 = 13275051
+    memseq = {13275048,4}
+
+ ..\include\std\text.e:
+    lower_case_SET = {}
+    upper_case_SET = {}
+    encoding_NAME = {65'A',83'S',67'C',73'I',73'I'}
+    user32 = 2118189056
+    api_CharLowerBuff = 33'!'
+    api_CharUpperBuff = 34'"'
+    tm_size = 1024
+    temp_mem = 13149424
+
+ ..\include\std\io.e:
+    mem0 = 1345536
+    mem1 = 1345537
+    mem2 = 1345538
+    mem3 = 1345539
+
+ ..\include\std\unittest.e:
+    time_start = 0.297
+    time_test = 0.297
+    test_count = 0
+    tests_passed = 0
+    tests_failed = 0
+    filename = {116't',95'_',99'c',95'_',109'm',97'a',112'p',95'_',115's',
+109'm',97'a',108'l',108'l',95'_',98'b',97'a',100'd',95'_',105'i',110'n',
+105'i',116't',46'.',101'e'}
+    verbose = 1
+    abort_on_fail = 0
+    wait_on_summary = 0
+    accumulate_on_summary = 0
+    logging = 0
+    log_fh = 0
+    cmd = {
+            {67'C',58':',92'\',112'p',114'r',111'o',106'j',101'e',99'c',
+116't',115's',92'\',101'e',117'u',95'_',112'p',114'r',111'o',106'j',92'\',
+101'e',117'u',52'4',48'0',92'\',84'T',114'r',117'u',110'n',107'k',92'\',
+66'B',73'I',78'N',92'\',101'e',117'u',105'i',46'.',101'e',120'x',101'e'},
+            {116't',95'_',99'c',95'_',109'm',97'a',112'p',95'_',115's',109'm',
+97'a',108'l',108'l',95'_',98'b',97'a',100'd',95'_',105'i',110'n',105'i',
+116't',46'.',101'e'}
+          }
+    i = 3
+    func (from inlined routine 'crash_routine') = <no value>
+
+ ..\include\std\primes.e:
+    list_of_primes = {2,3}
+
+ ..\include\std\eumem.e:
+    ram_free_list = 0
+    free_rid = 7
+
+ ..\include\std\map.e:
+    threshold_size = 50'2'
+
+ t_c_map_small_bad_init.e:
+    the_map = 1
+    old_value_ (from inlined routine 'threshold') = <no value>
+
+

@@ -1,26 +1,27 @@
 
 == EuDOC - Source Documentation Tool
+:<<LEVELTOC level=2 depth=4>>
 
-<<LEVELTOC depth=3>>
+Writing and managing documentation for your programs is made 
+easier with the **##eudoc##** tool. ##eudoc##, written entirely in Euphoria, 
+converts text comments embedded in your program, as well as information
+about routines and identifiers, into documentation
+that can be saved in a variety of formats, including plain text and HTML.
 
-Write your documentation, in the form of comments, within the 
-source-code of your program. Euphoria comments do not slow down the 
-execution of programs. Documentation written inside source-code 
-introduces no speed penalty, but is very convenient.
+Since Euphoria comments do not slow down the 
+execution of programs, documentation written inside source-code 
+introduces no speed penalty but is very convenient.
 
-The **##eudoc##** program extracts documentation written inside 
-source-code, and will extract information about routines and identifiers.  
 ##eudoc## can also incorporate documentation written externally from 
-your source-code. This automates the creation of documentation and makes
-it easy to maintain.
+your source-code.
 
-Write your material using //Creole// style markup to format documention.
+You write your material using //Creole// style markup to format documention.
 This gives you creative control using elements like headers, fonts, 
-cross-references, tables... The **##creolehtml##** program takes the output 
-of ##eudoc## and produces html formatted documentation.
+cross-references, tables, etc. The **##creolehtml##** program takes the output 
+of ##eudoc## and produces HTML-formatted documentation.
 
-A third party program like ##htmldoc## may then be used to convert html 
-to pdf.
+A third party program like ##htmldoc## or ##wkhtmltopdf## may then be used to 
+convert HTML to PDF.
 
 === Documentation tags
 
@@ -62,8 +63,7 @@ in your documentation. The ##eudoc## program will extract the
 "signature" of a routine and combines it with the comments that you 
 write after this tag. 
 
-
-* Starting with the source-code file **favorite.ex** ... 
+* Starting with the source-code file **favorite.ex**: 
 
 <eucode>
 
@@ -76,7 +76,7 @@ end procedure
 	
 </eucode>
 
-* Executing **## eui eudoc favorite.ex -o foo.txt##** produces...
+* Executing **## eui eudoc favorite.ex -o foo.txt##** produces:
 
 {{{
 %%disallow={camelcase}
@@ -93,7 +93,7 @@ public procedure hello(sequence name)
   This is my favorite routine.
 }}}
 
-* Process with **## eui creolehtml foo.txt ##** ...
+* Process with **## eui creolehtml foo.txt ##**:
 
 
 \\  ** hello **
@@ -110,15 +110,16 @@ now.
 
 === Assembly file
 
-Large projects are managed using an //assembly file//, which is a list 
+Large projects are managed using an **assembly file**, which is a list 
 of files (source-code, and external) that will be incorporated into one 
 output file. Look at ##euphoria/docs/manual.af## for the file used to 
 produce this documentation.
 
 === Creole markup
 
-Creole is a text markup language used in wikis, such as the Euphoria 
-Wiki, and for documenting source-code. 
+Creole is a text markup language used in wikis, such as the 
+[[http://openeuphoria.org/wiki/view/home.wc|Euphoria Wiki]], 
+and for documenting source-code. 
 
 
 
@@ -170,21 +171,19 @@ for i=1 to 5 do
 end for
 </eucode>
 
-* More choices are described at the Euphoria Wiki.
+* More details can be found at the Euphoria Wiki under [[wiki:CreoleHelp|CreoleHelp]].
 
 === Documentation software
 
+The programs required for creating documentation are hosted 
+at [[http://sourceforge.net/projects/rapideuphoria/|]]SourceForge.
 
-The programs eudoc ... https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk
+eudoc: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk
 
-and creolehtml ... https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
+creolehtml: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
 
-are hosted at Source-Forge ... http://sourceforge.net/projects/rapideuphoria/
+[[wiki:Documenting40|More on using eudoc]]
 
+[[wiki:CreoleHelp|More on using Creole markup]]
 
-
-More on using eudoc... http://openeuphoria.org/wiki/euwiki.cgi?Documenting40
-
-More on using Creole markup... http://openeuphoria.org/wiki/euwiki.cgi?CreoleHelp
-
-The program htmldoc is found at... http://www.htmldoc.org/ and http://htmldoc-binaries.org/
+The program htmldoc is found at... http://www.htmldoc.org/ and http://htmldoc-binaries.org/.

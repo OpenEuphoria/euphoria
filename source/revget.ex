@@ -73,7 +73,7 @@ function is_current(object rev)
 		ix = match("return \"", line)
 		if ix then
 			ix += length("return \"")
-			jx = find_from('"', line, ix)
+			jx = find('"', line, ix)
 			if jx then
 				if equal(line[ix..jx-1], rev) then
 					current = 1
@@ -152,9 +152,9 @@ procedure rev_1_4()
 	sequence g
 	integer n
 
-	h = open(root_project_path & ".svn/entries", "r")
+	h = open(root_project_path & "/.svn/entries", "r")
 	if h = -1 then
-		h = open(root_project_path & "svn~1/entries", "r")
+		h = open(root_project_path & "/svn~1/entries", "r")
 	end if
 
 	if h = -1 then
@@ -217,9 +217,9 @@ procedure rev_1_3()
 	sequence f
 	object x
 
-	h = open(root_project_path & ".svn/entries", "r")
+	h = open(root_project_path & "/.svn/entries", "r")
 	if h = -1 then
-		h = open(root_project_path & "svn~1/entries", "r")
+		h = open(root_project_path & "/svn~1/entries", "r")
 	end if
 
 	if h = -1 then

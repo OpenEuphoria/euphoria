@@ -1,21 +1,19 @@
-; -- Inno Setup script to install Euphoria by Rapid Deployment Software
-
 [Setup]
 AppName=Euphoria
-AppVersion=4.0
-AppVerName=Euphoria v4.0
+AppVersion=4.0.0RC1
+AppVerName=Euphoria v4.0.0RC1
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
 AppUpdatesURL=http://openeuphoria.org
-DefaultDirName=C:\euphoria-40
+DefaultDirName=C:\euphoria-4.0
 DefaultGroupName=Euphoria 4.0
 AllowNoIcons=yes
 LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-40
+OutputBaseFilename=euphoria-4.0.0.RC1
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -25,22 +23,21 @@ InfoAfterFile=after.txt
 [Types]
 Name: "full"; Description: "Full installation";
 Name: "standard"; Description: "Standard installation";
+Name: "minimal"; Description: "Minimal installation";
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: comp_main; Description: "Core files"; Types: full standard custom; Flags: fixed
+Name: comp_main; Description: "Core files"; Types: full standard minimal custom; Flags: fixed
+Name: comp_docs; Description: "Documentation"; Types: full standard
 Name: comp_tools; Description: "Euphoria related tools"; Types: full standard;
 Name: comp_demos; Description: "Demonstration programs"; Types: full standard;
 Name: comp_source; Description: "Source code"; Types: full;
-Name: comp_tests; Description: "Unit tests"; Types: full standard;
+Name: comp_tests; Description: "Unit tests"; Types: full;
 Name: comp_tuts; Description: "Tutorials"; Types: full standard;
 
 [Tasks]
 Name: associate; Description: "&Associate file extensions"; Flags: unchecked
 Name: update_env; Description: "&Update environment"; Flags: unchecked
-
-;Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-;Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
 ; Save all Euphoria subdirectories to backup subdirectory (can't use recursesubdirs here)
@@ -82,73 +79,57 @@ Source: "cleanbranch\include\machine.e"; DestDir: {tmp}; Flags: ignoreversion de
 Source: "cleanbranch\include\dll.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\keywords.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\syncolor.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\docs\setupae.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; Files to Install
 ; Root
 Source: "cleanbranch\file_id.diz"; DestDir: {app}; Flags: ignoreversion;
 Source: "cleanbranch\license.txt"; DestDir: {app}; Flags: ignoreversion;
-Source: "cleanbranch\bin\bind.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "cleanbranch\bin\shroud.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
 ; Windows Binaries
+Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\bin\euinc.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\bin\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
 ; Windows Tools
-Source: "cleanbranch\bin\eutest.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\ed.bat"; DestDir: {app}\bin\; Flags: ignoreversion; MinVersion: 0,4.0; Components: comp_tools
+Source: "..\..\bin\creolehtml.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\eudoc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\eutest.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Generic Tools
 Source: "cleanbranch\bin\bin.doc"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\ed.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\lines.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\ascii.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\key.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\guru.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\where.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\search.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\eprint.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\lines.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\guru.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\eprint.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\cdguru.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\search.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\ascii.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\where.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\key.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\source\eutest.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\make31.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-;Source: "cleanbranch\bin\ecp.dat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
-Source: "cleanbranch\bin\buildcpdb.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "cleanbranch\bin\*.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "cleanbranch\bin\*.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Demos
-Source: "cleanbranch\demo\*.ex"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
-Source: "cleanbranch\demo\*.exw"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist; Components: comp_demos
-Source: "cleanbranch\demo\*.exd"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs skipifsourcedoesntexist; Components: comp_demos
-Source: "cleanbranch\demo\*.doc"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
-Source: "cleanbranch\demo\*.txt"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
+Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recursesubdirs; Components: comp_demos
+
+; Docs
+Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
+Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion; Components: comp_docs
 
 ; Includes
-Source: "cleanbranch\include\*.e"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs;
-Source: "cleanbranch\include\euphoria.h"; DestDir: {app}\include\; Flags: ignoreversion;
+Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs;
 
 ; Sources
-Source: "cleanbranch\source\*.*"; Excludes: up.bat; DestDir: {app}\source\; Flags: ignoreversion; Components: comp_source
-Source: "cleanbranch\source\codepage\*.*"; DestDir: {app}\bin\codepage; Flags: ignoreversion;
+Source: "cleanbranch\source\*.*"; DestDir: {app}\source\; Flags: ignoreversion recursesubdirs; Components: comp_source
 
 ; Test
 Source: "cleanbranch\tests\*.*"; DestDir: {app}\tests\; Flags: ignoreversion recursesubdirs; Components: comp_tests
 
 ; Tutorial
-Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion; Components: comp_tuts
+Source: "cleanbranch\tutorial\*.*"; DestDir: {app}\tutorial\; Flags: ignoreversion recursesubdirs; Components: comp_tuts
 
 ; Others
 Source: "cleanbranch\packaging\win32\setenv.bat"; DestDir: {app}; Flags: ignoreversion; Tasks: not update_env; AfterInstall: CreateEnvBatchFile()
@@ -157,7 +138,7 @@ Source: "cleanbranch\packaging\win32\setenv.bat"; DestDir: {app}; Flags: ignorev
 ; shortcut file to launch Rapid Euphoria website
 Filename: {app}\RapidEuphoria.url; Section: InternetShortcut; Key: URL; String: http://www.rapideuphoria.com
 Filename: {app}\OpenEuphoria.url; Section: InternetShortcut; Key: URL; String: http://openeuphoria.org
-Filename: {app}\EuphoriaManual.url; Section: InternetShortcut; Key: URL; String: http://openeuphoria.org/docs/
+Filename: {app}\EuphoriaManual.url; Section: InternetShortcut; Key: URL; String: http://openeuphoria.org/docs/eu400_0001.html
 
 [Icons]
 ; Icons (shortcuts) to display in the Start menu
@@ -198,12 +179,19 @@ Root: HKCR; Subkey: "EUCodeFile"; ValueType: string; ValueName: ""; ValueData: "
 Root: HKCR; Subkey: "EUCodeFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euinc.ico,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUCodeFile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\ed.bat"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
+;associate .err files to execute ED.bat
+Root: HKCR; Subkey: ".err"; ValueType: string; ValueName: ""; ValueData: "EUErrorFile"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUErrorFile"; ValueType: string; ValueName: ""; ValueData: "Euphoria Error File"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUErrorFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euinc.ico,1"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUErrorFile\shell\debug"; ValueType: string; ValueName: ""; ValueData: "debug what created this file"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUErrorFile\shell\debug\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""{app}\bin\ed.ex"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+
 [Messages]
-FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex, .exw and .exd programs by double-clicking them, or (after reboot) by typing:%n     euid filename.exd%nor%n     eui/exwc filename.ex/eui%non a command-line.
+FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex and .exw programs by double-clicking them, or (after reboot) by typing:%n     eui filename.ex%nor%n     euiw filename.ex/euw%non a command-line.
 
 [Run]
 ;Update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME
-Filename: "{tmp}\euiw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\setupae.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
+Filename: "{tmp}\euiw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\autoexec_update.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
 
 [Code]
 var

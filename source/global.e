@@ -11,6 +11,7 @@ end ifdef
 public include std/types.e 
 public include common.e
 include mode.e as mode
+include reswords.e
 
 export constant
 	INTERPRET = mode:get_interpret(),
@@ -28,6 +29,7 @@ export constant
 export constant EGPM = 0     -- GPM mouse support on Linux
 
 export integer con -- Windows console option for BIND
+export integer type_i -- for type checking where in the array a failure occured
 
 export sequence version_name
 ifdef WIN32 then
@@ -82,7 +84,12 @@ export constant
 	S_VARNUM = 16,    -- local variable number
 	
 	S_BLOCK = 17 - get_backend() * 7 -- Either the containing scope for a var or the main scope for a routine
-	
+
+-- for blocks only:
+export constant
+	S_FIRST_LINE = 18 - get_backend() * 7,  -- first line of the block
+	S_LAST_LINE  = 19 - get_backend() * 7   -- last line of the block
+
 -- for routines only:
 export constant
 	S_LINETAB = 18 - get_backend()*7,      -- Line table for traceback
@@ -144,9 +151,34 @@ export constant
 	                         -- external call, e.g. call to a DLL
 	S_HAS_DELETE = 54
 
+export procedure print_sym(integer s)
+	printf(1,"[%d]:\n", {s} )
+	object s_obj = SymTab[s][S_OBJ]
+	if equal(s_obj,NOVALUE) then 
+		puts(1,"S_OBJ=>NOVALUE\n")
+	else
+		puts(1,"S_OBJ=>")
+		? s_obj		
+	end if
+	puts(1,"S_MODE=>")
+	switch SymTab[s][S_MODE] do
+		case M_NORMAL then
+			puts(1,"M_NORMAL")
+		case M_TEMP then
+			puts(1,"M_TEMP")
+		case M_CONSTANT then
+			puts(1,"M_CONSTANT")
+		case M_BLOCK then
+			puts(1,"M_BLOCK")
+	end switch
+	puts(1,{10,10})
+end procedure
+	
+		
 export constant
 	SIZEOF_ROUTINE_ENTRY = 29 + 25 * TRANSLATE,
 	SIZEOF_VAR_ENTRY     = 17 + 37 * TRANSLATE,
+	SIZEOF_BLOCK_ENTRY   = 19 + 35 * TRANSLATE,
 	SIZEOF_TEMP_ENTRY    =  6 + 32 * TRANSLATE
 
 -- Permitted values for various symbol table fields
@@ -218,10 +250,8 @@ export enum
 export constant
 	MAXINT = #3FFFFFFF,
 	MININT = -MAXINT-1,   -- should be -ve
-	MININT_VAL = MININT,  -- these are redundant ...
-	MAXINT_VAL = MAXINT,
-	MININT_DBL = MININT_VAL,
-	MAXINT_DBL = MAXINT_VAL
+	MININT_DBL = MININT,
+	MAXINT_DBL = MAXINT
 
 export constant NOVALUE = -1.295837195871e307
 -- An unlikely number. If it occurs naturally,  there will be a slight loss of optimization
@@ -245,7 +275,7 @@ export type symtab_index(integer x)
 		return FALSE
 	end if
 	return find(length(SymTab[x]), {SIZEOF_VAR_ENTRY, SIZEOF_ROUTINE_ENTRY,
-						  SIZEOF_TEMP_ENTRY})
+						  SIZEOF_TEMP_ENTRY, SIZEOF_BLOCK_ENTRY})
 end type
 
 export type temp_index(integer x)
@@ -254,7 +284,7 @@ end type
 
 -- token fields
 export enum
-	T_ID,
+	T_ID, -- SEE reswords.e from ILLEGAL_CHAR .. NAMESPACE
 	T_SYM
 
 export type token(object t)
@@ -268,9 +298,56 @@ export type token(object t)
 	if not integer(t[T_ID]) then
 		return FALSE
 	end if
-	if symtab_index(t[T_SYM]) = 0 then
+	if t[T_ID] = VARIABLE and (t[T_SYM] < 0 or symtab_index(t[T_SYM])) then
+		return TRUE
+	end if
+	-- processed characters
+	if QUESTION_MARK <= t[T_ID] and t[T_ID] <= -1 then
+		return TRUE
+	end if
+	-- opcodes or EOF
+	if t[T_ID] >= 1 and t[T_ID] <= MAX_OPCODE then
+		return TRUE
+	end if
+	-- keywords that are not opcodes
+	if END <= t[T_ID] and t[T_ID] <=  ROUTINE then
+		if t[T_ID] != IGNORED and t[T_ID] < 500 and symtab_index(t[T_SYM]) = 0 then
+			return FALSE
+		end if
+		return TRUE
+	end if
+	if FUNC <= t[T_ID] and t[T_ID] <= NAMESPACE then
+		return TRUE
+	end if
+	return FALSE
+end type
+
+export type sequence_of_tokens(object x)
+	token t
+	if atom(x) then
 		return FALSE
 	end if
+	for i = 1 to length(x) do
+		type_i = i
+		t = x[i]
+	end for
+	return TRUE
+end type
+
+export type sequence_of_opcodes(object s)
+	integer oc
+	if atom(s) then
+		return FALSE
+	end if
+	for i = 1 to length(s) do
+		-- if calling like a function change this 
+		oc = s[i]
+		-- to this:
+		--type_i = i
+		--if not integer(s[i]) then
+		--	return FALSE
+		--end if
+	end for
 	return TRUE
 end type
 
@@ -342,13 +419,10 @@ export constant warning_flags = {
 	mixed_profile_warning_flag,
 	empty_case_warning_flag,
 	no_case_else_warning_flag,
+	def_arg_type_warning_flag,
 	deprecated_warning_flag,
 	all_warning_flag
 }
-
-export constant strict_only_warnings = {
-	def_arg_type_warning_flag
-	}
 
 export constant warning_names = {
 	"none",
@@ -365,9 +439,16 @@ export constant warning_names = {
 	"mixed_profile",
 	"empty_case",
 	"default_case",
+	"default_arg_type",
 	"deprecated",
 	"all"
 }
+
+-- These are warnings that can only be generated when Strict mode is on.
+export constant strict_only_warnings = {
+	def_arg_type_warning_flag,
+	$
+	}
 
 export integer Strict_is_on = 0
 export integer Strict_Override = 0
@@ -443,4 +524,15 @@ export sequence new_include_name  -- name of file to be included at end of line
 -- an index for GetMsgText in msgtext.e and for various routines in error.e
 export constant ENUM_FWD_REFERENCES_NOT_SUPPORTED = 331 
 
+export constant FIRST_USER_FILE = 3,
+                MAX_USER_FILE   = 40
 
+
+include fwdref.e
+				
+-- More general than a symtab_index, it could also be a forward reference encoded as a
+-- negative number.
+export type symtab_pointer(integer x)
+	return x = -1 or symtab_index(x) or forward_reference(x)
+end type
+				

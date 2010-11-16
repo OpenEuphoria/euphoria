@@ -7,6 +7,11 @@
 --       their own project pages. Further, it will simplify the output
 --       code quite a bit
 
+-- Increment version number with each release, not really with each change
+-- in the SCM
+
+constant APP_VERSION = "1.0.0"
+
 include std/pretty.e
 include std/sequence.e
 include std/sort.e
@@ -22,6 +27,7 @@ include std/types.e as types
 include std/map.e
 include std/cmdline.e
 include std/eds.e
+include std/regex.e
 
 constant cmdopts = {
 	{"exe", 0, "interpreter path", { NO_CASE, HAS_PARAMETER, "path-to-interpreter"} },
@@ -33,6 +39,7 @@ constant cmdopts = {
 	{"verbose", 0, "verbose output", {NO_CASE} },
 	{"process-log", 0, "", {NO_CASE} },
 	{"html", 0, "", {NO_CASE} },
+	{"html-file", 0, "output file for html log output", {NO_CASE, HAS_PARAMETER, "html output file"}},
 	{"i", 0, "include directory", {NO_CASE, MULTIPLE, HAS_PARAMETER, "directory"}},
 	{"d", 0, "define a preprocessor word", {NO_CASE, MULTIPLE, HAS_PARAMETER, "word"}},
 	{ "coverage",  0, "Indicate files or directories for which to gather coverage statistics", 
@@ -43,6 +50,14 @@ constant cmdopts = {
 		{ NO_CASE } },
 	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", {NO_CASE, HAS_PARAMETER, "path-to-eucoverage.ex"} },
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
+	{ "testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
+	{ "bind", 0, "path to bind.ex", { NO_CASE, HAS_PARAMETER, "bind.ex"} },
+	{ "eub", 0, "path to backend runner", { NO_CASE, HAS_PARAMETER, "eub" } },
+	{ "all", 0, "show tests that pass and fail", {} },
+	{ "failed", 0, "show tests that fail only", {} },
+	{ "wait", 0, "Wait on summary", {} },
+	{ "accumulate", 0, "Count the individual tests in each file", {} },
+	{ "v", "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
 	$ }
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
@@ -50,16 +65,20 @@ integer verbose_switch = 0
 object void
 integer ctcfh = 0
 sequence error_list = repeat({},4)
+sequence eub_path = ""
+sequence exclude_patterns = {}
 
 -- moved from do_test:
-integer log = 0
+integer logging_activated = 0
 integer failed = 0
 integer total
 sequence 
 	dexe = "", 
 	executable = ""
 
-enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_EUTEST
+object html_fn = 1
+
+enum E_NOERROR, E_INTERPRET, E_TRANSLATE, E_COMPILE, E_EXECUTE, E_BIND, E_BOUND, E_EUTEST
 
 type error_class(object i)
 	return integer(i) and i >= 1 and i <= E_EUTEST
@@ -131,7 +150,7 @@ function run_emake()
 		
 		elsif match("set ", line) = 1 then 
 			sequence pair
-			pair = split(line[5..$], "=")
+			pair = stdseq:split(line[5..$], "=")
 			pair = {setenv(pair[1], pair[2])}
 
 		elsif match("move ", line) = 1 or
@@ -216,14 +235,19 @@ end function
 -- returns the location in the log file if there has been
 -- writing to the log or or a string indicating which error 
 function check_log(integer log_where)
+
 	integer log_fd = open("unittest.log", "a")
+	atom pos
 					
 	if log_fd = -1  then
 		return "couldn't generate unittest.log"
-	elsif log_where = where(log_fd) then
-		close(log_fd)
-		return  "couldn't add to unittest.log"
-	end if
+	else
+		pos = where(log_fd)
+		if log_where = pos then
+			close(log_fd)
+			return  "couldn't add to unittest.log"
+		end if
+	end if	
 
 	log_where = where(log_fd)
 	close(log_fd)
@@ -241,25 +265,7 @@ procedure report_last_error(sequence filename)
 	end if
 end procedure
 
-function strip_path_junk(sequence err_data)
-	sequence path
-
-	path = err_data[1]
-	if find('/', path) or find('\\', path) then
-		for i = length(path) to 1 by -1 do	
-			if find(path[i], `\/`) then
-				err_data =  {path[1 .. i], path[i+1 .. $]} & err_data[2 .. $]
-				exit
-			end if
-		end for
-	else
-		err_data = prepend("", err_data)
-	end if
-
-	return err_data
-end function
-
-function prepare_error_file(sequence file_name)
+function prepare_error_file(object file_name)
 	integer pos
 	object file_data
 	
@@ -292,107 +298,118 @@ function prepare_error_file(sequence file_name)
 		end if
 	end for
 	
-	if length(file_data) > 0 then
-		file_data = strip_path_junk(file_data)
-	end if
-	return file_data
+    sequence path
+    if length(file_data) >= 2 then
+    	path = "\\/" & file_data[1]
+    	path = path[max(rfind('/', path) & rfind('\\', path))+1..$]
+    	file_data[1] = path
+    else
+    	-- Malformed error file
+    	file_data = 0
+    end if
+    
+    return file_data
 end function
 
-function check_errors( sequence filename, sequence control_error_file, sequence fail_list )
+function check_errors( sequence filename, sequence fail_list )
 	object expected_err
 	object actual_err
-	integer comparison
+	integer some_error = 0
 	
-	expected_err = prepare_error_file(control_error_file)
-	actual_err = prepare_error_file("ex.err")
-	if sequence(actual_err) and sequence(expected_err) then
-		-- N.B. Do not compare the first line as it contains PATH 
-		-- information which can vary from system to system.			
-		if not equal(actual_err[2..$], expected_err[2..$]) then
-			failed += 1
-			fail_list = append(fail_list, filename)
-	
-			if length(actual_err) and length(expected_err) then
-				error(filename, E_INTERPRET, "Unexpected ex.err.  Expected:\n----\n" &
-					"%s\n----\nbut got\n----\n%s\n----\n",
-					{join(expected_err,"\n"), join(actual_err, "\n")}, "ex.err")
-			elsif length(actual_err) then
-				error(filename, E_INTERPRET, "Unexpected empty control file.", {})
-			else
-				error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
-			end if
-		end if
-	elsif atom(actual_err) then
-		error(filename, E_INTERPRET, "No ex.err has been generated.", {})
-	else
-		error(filename, E_INTERPRET, "No control file was supplied.", {})
+	expected_err = prepare_error_file( find_error_file( filename ) )
+	if atom(expected_err) then
+		error(filename, E_INTERPRET, "No valid control file was supplied.", {})
+		some_error = 1
+	elsif length(expected_err) = 0 then
+		error(filename, E_INTERPRET, "Unexpected empty control file.", {})
+		some_error = 1
 	end if
 	
+	if not some_error then
+		actual_err = prepare_error_file("ex.err")
+		if atom(actual_err) then
+			error(filename, E_INTERPRET, "No valid ex.err has been generated.", {})
+			some_error = 1
+		elsif length(actual_err) = 0 then
+			error(filename, E_INTERPRET, "Unexpected empty ex.err.", {})
+			some_error = 1
+		end if
+	
+		if not some_error then
+			-- N.B. Do not compare the first line as it contains PATH 
+			-- information which can vary from system to system.			
+			if not equal(actual_err[2..$], expected_err[2..$]) then
+		
+				error(filename, E_INTERPRET, "Unexpected ex.err.  Expected:\n----\n" &
+						"%s\n----\nbut got\n----\n%s\n----\n",
+						{join(expected_err,"\n"), join(actual_err, "\n")}, "ex.err")
+				some_error = 1
+			end if
+		end if
+	end if
+	
+	if some_error then	
+		failed += 1
+		fail_list = append(fail_list, filename)
+	end if
 	return fail_list
 end function
 
-function open_error_file( sequence filename )
-	object control_error_file
+function find_error_file( sequence filename )
+	sequence control_error_file
+	sequence base_filename
+	
+	base_filename = filename[1 .. find('.', filename & '.') - 1] & ".d" & SLASH
+	
 	-- try tests/t_test.d/interpreter/UNIX/control.err
-	control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "interpreter" &
-		SLASH & interpreter_os_name & SLASH & "control.err"
-
-	if not file_exists(control_error_file) then
-		-- try tests/t_test/UNIX/control.err
-		control_error_file =  filename[1..find('.',filename&'.')-1] & ".d" & SLASH &
-			interpreter_os_name & SLASH & "control.err"
+	control_error_file =  base_filename & "interpreter" & SLASH & interpreter_os_name & SLASH & "control.err"
+	if file_exists(control_error_file) then
+		return control_error_file
+	end if
+	
+	-- try tests/t_test/UNIX/control.err
+	control_error_file =  base_filename & interpreter_os_name & SLASH & "control.err"
+	if file_exists(control_error_file) then
+		return control_error_file
 	end if
 
-	if not file_exists(control_error_file) then
-		-- try tests/t_test/control.err
-		control_error_file = filename[1..find('.',filename&'.')-1] & ".d" & SLASH & "control.err"
+	-- try tests/t_test/control.err
+	control_error_file = base_filename & "control.err"
+	if file_exists(control_error_file) then
+		return control_error_file
 	end if
 
-	if not file_exists(control_error_file) then
-		-- don't try anything
-		control_error_file = 0
-	end if
-	return control_error_file
+	return -1
 end function
 
-function interpret_fail( sequence cmd, sequence filename, object control_error_file, sequence fail_list )
+function interpret_fail( sequence cmd, sequence filename,  sequence fail_list )
 	integer status = system_exec(cmd, 2)
-	integer comparison
+	integer old_length
 	
-	if sequence(control_error_file) then 
-		-- Now we will compare the control error file to the newly created 
-		-- ex.err.  If ex.err doesn't exist or there is no match error()
-		-- is called and we add to the failed list.
-		comparison = length( fail_list )
-		fail_list = check_errors( filename, control_error_file, fail_list )
-		comparison = comparison != length( fail_list )
-	else	
-		-- no control_error_file. thus, there is nothing to compare to we go on as
-		-- if the files matched.
-		comparison = 0
-	end if  -- sequence(control_error_file)
+	-- Now we will compare the control error file to the newly created 
+	-- ex.err.  If ex.err doesn't exist or there is no match error()
+	-- is called and we add to the failed list.
+	old_length = length( fail_list )
+	fail_list = check_errors( filename, fail_list )
 
-	if comparison = 0 then
+	if old_length = length( fail_list ) then
+		-- No new errors found.
 		if status = 0 then
-			-- Here, we were expecting the test to fail.  Yet, we recieved a 0
-			-- error status. This is a failure for we should get some other number
-			-- for errors.
+			-- We were expecting the test program to crash, but it didn't.
 			failed += 1
 			fail_list = append(fail_list, filename)
 			error(filename, E_INTERPRET,
-				"The unit test exited with 0 while we expected a failure.", {})
+				"The unit test did not crash, which was unexpected.", {})
 		else						
-			error(filename, E_NOERROR, "The unit test failed in the expected manner. " &
+			error(filename, E_NOERROR, "The unit test crashed in the expected manner. " &
 				"Error status %d.", {status})
 		end if
-	else
-		-- error() has been called in the previous block if comparsion != 0
 	end if
 	return fail_list
 end function
 
 function translate( sequence filename, sequence fail_list )
-	printf(1, "translating, compiling, and executing executable: %s\n", {filename})
+	printf(1, " translating %s:", {filename})
 	total += 1
 	sequence cmd = sprintf("%s %s %s %s -D UNITTEST -D EC -batch %s",
 		{ translator, library, compiler, translator_options, filename })
@@ -400,56 +417,90 @@ function translate( sequence filename, sequence fail_list )
 	integer status = system_exec(cmd, 0)
 
 	filename = filebase(filename)
+
 	integer log_where = 0
 	if status = 0 then
 		sequence exename = filename & dexe
 
-		void = delete_file(exename)
 		void = delete_file("cw.err")
-		verbose_printf(1, "compiling %s%s\n", {filename, ".c"})
-
-		object emake_outcome = run_emake()
-		if equal(emake_outcome, 0) then
-			verbose_printf(1, "executing %s:\n", {exename})
-			cmd = sprintf("./%s %s", {exename, test_options})
-			status = invoke(cmd, exename,  E_EXECUTE) 
-			if status then
-				failed += 1
-				fail_list = append(fail_list, "translated" & " " & exename)
-			else
-				object token
-				if log then
-					token = check_log(log_where)
-				else
-					token = 0
-				end if
-
-				if sequence(token) then
-					failed += 1
-					fail_list = append(fail_list, "translated" & " " & exename)					
-					error(exename, E_EXECUTE, token, {}, "ex.err")
-				else
-					log_where = token
-					error(exename, E_NOERROR, "all tests successful", {})
-				end if -- sequence(token)
-			end if
-			
-			void = delete_file(exename)
-		else
+		verbose_printf(1, "executing %s:\n", {exename})
+		cmd = sprintf("./%s %s", {exename, test_options})
+		status = invoke(cmd, exename,  E_EXECUTE) 
+		if status then
 			failed += 1
-			fail_list = append(fail_list, "compiling " & filename)					
-			if sequence(emake_outcome) then
-				error(exename, E_COMPILE, emake_outcome[2], emake_outcome[3], emake_outcome[4])
-				status = emake_outcome[3][1]
+			fail_list = append(fail_list, "translated" & " " & exename)
+		else
+			object token
+			if logging_activated then
+				token = check_log(log_where)
 			else
-				error(exename, E_COMPILE, 
-					"program could not be compiled. Compilation process exited with status %d", {emake_outcome})
+				token = 0
 			end if
+
+			if sequence(token) then
+				failed += 1
+				fail_list = append(fail_list, "translated" & " " & exename)					
+				error(exename, E_EXECUTE, token, {}, "ex.err")
+			else
+				log_where = token
+				error(exename, E_NOERROR, "all tests successful", {})
+			end if -- sequence(token)
+
+			puts(1, "\n")
 		end if
+		
+		void = delete_file(exename)
 	else
 		failed += 1
 		fail_list = append(fail_list, "translating " & filename)
 		error(filename, E_TRANSLATE, "program translation terminated with a bad status %d", {status})                               
+	end if
+	report_last_error(filename)
+	return fail_list
+end function
+
+function bind( sequence filename, sequence fail_list )
+	sequence cmd = sprintf("%s %s -batch \"%s\" %s %s -batch -D UNITTEST %s",
+		{ executable, interpreter_options, binder, eub_path, interpreter_options, filename } )
+	
+	total += 1
+	verbose_printf(1, "CMD '%s'\n", {cmd})
+	integer status = system_exec(cmd, 0)
+
+	filename = filebase(filename)
+	integer log_where = 0
+	if status = 0 then
+		sequence exename = filename & dexe
+		verbose_printf(1, "executing %s:\n", {exename})
+		cmd = sprintf("./%s %s", {exename, test_options})
+		status = invoke(cmd, exename,  E_EXECUTE) 
+		if status then
+			failed += 1
+			fail_list = append(fail_list, "bound" & " " & exename)
+		else
+			object token
+			if logging_activated then
+				token = check_log(log_where)
+			else
+				token = 0
+			end if
+
+			if sequence(token) then
+				failed += 1
+				fail_list = append(fail_list, "bound" & " " & exename)					
+				error(exename, E_BOUND, token, {}, "ex.err")
+			else
+				log_where = token
+				error(exename, E_NOERROR, "all tests successful", {})
+			end if -- sequence(token)
+		end if
+			
+		void = delete_file(exename)
+		
+	else
+		failed += 1
+		fail_list = append(fail_list, "binding " & filename)
+		error(filename, E_BIND, "program binding terminated with a bad status %d", {status})                               
 	end if
 	report_last_error(filename)
 	return fail_list
@@ -462,9 +513,8 @@ function test_file( sequence filename, sequence fail_list )
 	void = delete_file("ex.err")
 	void = delete_file("cw.err")
 	
-	object control_error_file = open_error_file( filename )
 	sequence crash_option = ""
-	if match("t_c_", filename) = 1 or sequence(control_error_file) then
+	if match("t_c_", filename) = 1 then
 		crash_option = " -D CRASH "
 	end if
 	
@@ -474,16 +524,16 @@ function test_file( sequence filename, sequence fail_list )
 
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	
-	integer expected_status = 0
-	if match("t_c_", filename) = 1 or sequence(control_error_file) then
+	integer expected_status
+	if match("t_c_", filename) = 1 then
 		-- We expect this test to fail
 		expected_status = 1
-		fail_list = interpret_fail( cmd, filename, control_error_file, fail_list )
+		fail_list = interpret_fail( cmd, filename, fail_list )
 		
 	else -- not match(t_c_*.e)
 		-- in this branch error() is called once and only once in all sub-branches
-		status = invoke(cmd, filename, E_INTERPRET) -- error() called if status != 0
 		expected_status = 0
+		status = invoke(cmd, filename, E_INTERPRET) -- error() called if status != 0
 
 		if status then
 			failed += 1
@@ -491,7 +541,7 @@ function test_file( sequence filename, sequence fail_list )
 			-- error() called in invoke()
 		else
 			object token
-			if log then
+			if logging_activated then
 				token = check_log(log_where)
 			else
 				token = 0
@@ -527,6 +577,10 @@ function test_file( sequence filename, sequence fail_list )
 	
 	report_last_error(filename)
 	
+	if length(binder) and expected_status = 0 then
+		fail_list = bind( filename, fail_list )
+	end if
+	
 	if length(translator) and expected_status = 0 then
 		fail_list = translate( filename, fail_list )
 	end if
@@ -535,11 +589,12 @@ function test_file( sequence filename, sequence fail_list )
 end function
 
 sequence interpreter_options = ""
-sequence translator_options = "-emake "
+sequence translator_options = " -silent "
 sequence test_options = ""
 sequence translator = "", library = "", compiler = ""
 sequence interpreter_os_name
 
+sequence binder = ""
 sequence coverage_db    = ""
 sequence coverage_pp    = ""
 sequence coverage_erase = ""
@@ -565,10 +620,22 @@ procedure ensure_coverage()
 	db_close()
 	interpreter_options &= " -test"
 	for tx = 1 to length( tables ) do
+		
 		sequence table_name = tables[tx]
-		test_file( table_name[2..$], {} )
+		if not is_excluded( table_name[2..$] ) then
+			test_file( table_name[2..$], {} )
+		end if
 	end for
 end procedure
+
+function is_excluded( sequence file )
+	for i = 1 to length( exclude_patterns ) do
+		if regex:has_match( exclude_patterns[i], file ) then
+			return 1
+		end if
+	end for
+	return 0
+end function
 
 procedure process_coverage()
 	if not length( coverage_db ) then
@@ -590,7 +657,7 @@ end procedure
 
 procedure do_test( sequence files )
 	atom score
-	
+	integer first_counter = length(files)+1
 	integer log_fd = 0
 	sequence silent = ""
 	
@@ -601,7 +668,7 @@ procedure do_test( sequence files )
 	end if
 
 	sequence fail_list = {}
-	if log then
+	if logging_activated then
 		void = delete_file("unittest.dat")
 		void = delete_file("unittest.log")
 		void = delete_file("ctc.log")
@@ -613,7 +680,7 @@ procedure do_test( sequence files )
 		coverage_erase = ""
 	end for
 	
-	if log and ctcfh != -1 then
+	if logging_activated and ctcfh != -1 then
 		print(ctcfh, error_list)
 		puts(ctcfh, 10)
 
@@ -832,7 +899,7 @@ procedure html_out(sequence data)
 	switch data[1] do
 		case "file" then
 			unsummarized_files = append(unsummarized_files, data[2])
-			printf(1, html_table_head, { data[2], data[2] })
+			printf(html_fn, html_table_head, { data[2], data[2] })
 
 			integer err = find(data[2], error_list[1])
 			if err then
@@ -843,21 +910,21 @@ procedure html_out(sequence data)
 					color = "#ffaaaa"
 				end if
 
-				printf(1, html_table_error_row, { color, data[2], error_list[2][err] })
+				printf(html_fn, html_table_error_row, { color, data[2], error_list[2][err] })
 				
 				if sequence(error_list[4][err]) then
-					puts(1, html_table_error_content_begin)
+					puts(html_fn, html_table_error_content_begin)
 
 					for i = 1 to length(error_list[4][err]) do
-						printf(1,"%s\n", { text2html(error_list[4][err][i]) })
+						printf(html_fn,"%s\n", { text2html(error_list[4][err][i]) })
 					end for
 
-					puts(1, html_table_error_content_end)
+					puts(html_fn, html_table_error_content_end)
 				end if
 			end if
 
 		case "failed" then
-			printf(1, html_table_failed_row, {
+			printf(html_fn, html_table_failed_row, {
 				data[2],
 				sprint(data[5]),
 				sprint(data[3]),
@@ -873,14 +940,14 @@ procedure html_out(sequence data)
 				anum = sprintf("%f", data[3])
 			end if
 
-			printf(1, html_table_passed_row, { data[2], anum })
+			printf(html_fn, html_table_passed_row, { data[2], anum })
 
 		case "summary" then
 			if length(unsummarized_files) then
 				unsummarized_files = unsummarized_files[1..$-1] 
 			end if
 
-			printf(1, html_table_summary, {
+			printf(html_fn, html_table_summary, {
 				data[2],
 				data[3],
 				data[4],
@@ -892,7 +959,7 @@ end procedure
 procedure summarize_error(sequence message, error_class e, integer html)
 	if find(e, error_list[3]) then
 		if html then
-			printf(1,message & "<br>\nThese were:\n", {sum(error_list[3] = e)})
+			printf(html_fn,message & "<br>\nThese were:\n", {sum(error_list[3] = e)})
 		else
 			printf(1,message & "\nThese were:\n", {sum(error_list[3] = e)})
 		end if
@@ -900,7 +967,7 @@ procedure summarize_error(sequence message, error_class e, integer html)
 		for i = 1 to length(error_list[1]) do
 			if error_list[3][i] = e then
 				if html then
-					printf(1, "<a href='#%s'>%s</a>, ", repeat(error_list[1][i],2))
+					printf(html_fn, "<a href='#%s'>%s</a>, ", repeat(error_list[1][i],2))
 				else
 					printf(1, "%s, ", repeat(error_list[1][i],1))
 				end if
@@ -908,7 +975,7 @@ procedure summarize_error(sequence message, error_class e, integer html)
 		end for
 
 		if html then
-			puts(1, "<p>")
+			puts(html_fn, "<p>")
 		end if
 
 		puts(1, "\n")
@@ -927,6 +994,9 @@ procedure do_process_log( sequence cmds, integer html)
 	
 	if html then
 		out_r = routine_id("html_out")
+		if sequence( html_fn ) then
+			html_fn = open( html_fn, "w" )
+		end if
 	else
 		out_r = routine_id("ascii_out")
 	end if
@@ -958,14 +1028,15 @@ procedure do_process_log( sequence cmds, integer html)
 	other_files = error_list[1]
 
 	if html then
-		puts(1, "<html><body>\n")
+		puts(html_fn, "<html><body>\n")
 	end if
 
 	object content = read_file("unittest.log")
 	if atom(content) then
 		puts(1, "unittest.log could not be read\n")
-	else    
-		messages = split(content, "entry = ")
+	else 
+   
+		messages = stdseq:split( content,"entry = ")
 		for a = 1 to length(messages) do
 			if sequence(messages[a]) and equal(messages[a], "") then
 				continue
@@ -1019,6 +1090,8 @@ procedure do_process_log( sequence cmds, integer html)
 	summarize_error("Test files could not be translated.........: %d", E_TRANSLATE, html)
 	summarize_error("Translated test files could not be compiled: %d", E_COMPILE, html)
 	summarize_error("Compiled test files failed unexpectedly....: %d", E_EXECUTE, html)
+	summarize_error("Test files could not be bound..............: %d", E_BIND, html )
+	summarize_error("Bound test files failed unexpectedly.......: %d", E_BOUND, html )
 	summarize_error("Test files run successfully................: %d", E_NOERROR, html)
 	
 	if html then
@@ -1027,12 +1100,15 @@ procedure do_process_log( sequence cmds, integer html)
 				{ error_list[1][find(E_EUTEST, error_list[3])] })
 		end if
 
-		printf(1, html_table_final_summary, {
+		printf(html_fn, html_table_final_summary, {
 			total_passed + total_failed,
 			total_failed,
 			total_passed,
 			total_time
 		})
+		if html_fn != 1 then
+			close( html_fn )
+		end if
 	else
 		puts(1, repeat('*', 76) & "\n\n")
 		printf(1, "Overall: Total Tests: %04d  Failed: %04d  Passed: %04d Time: %f\n\n", {
@@ -1112,7 +1188,7 @@ end function
 
 procedure main()
 
-	sequence files = {}
+	object files = {}
 	
 	map opts = cmd_parse( cmdopts )
 	sequence keys = map:keys( opts )
@@ -1121,8 +1197,12 @@ procedure main()
 		object val = map:get(opts, param)
 		
 		switch param do
+			case "all","failed","wait","accumulate" then
+				test_options &= " -" & param		
+		
 			case "log" then
-				log = 1
+				logging_activated = 1
+				test_options &= " -log "
 				
 			case "verbose" then
 				verbose_switch = 1
@@ -1172,17 +1252,60 @@ procedure main()
 			case "coverage-exclude" then
 				for j = 1 to length( val ) do
 					interpreter_options &= sprintf(` -coverage-exclude "%s"`, {val[j]} )
+					object pattern = regex:new( val[j] )
+					if regex( pattern ) then
+						exclude_patterns = append( exclude_patterns, regex:new( val[j] ) )
+					else
+						printf(2, "invalid exclude pattern: [%s]\n", { val[j] } )
+					end if
 				end for
+
+			case "testopt" then
+				test_options &= " -" & val & " "
 				
-			case "extras" then
+			case "bind" then
+				binder = val
+				
+			case "html-file" then
+				html_fn = val
+				
+			case "eub" then
+				eub_path = "-eub " & val
+			
+			case OPT_EXTRAS then
 				if length( val ) then
 					files = build_file_list( val )
 				else
 					files = dir("t_*.e" )
+					if atom(files) then
+						files = {}
+					end if
 					for f = 1 to length( files ) do
 						files[f] = files[f][D_NAME]
 					end for
 					files = sort( files )
+					-- put the counter tests last to do
+					integer first_counter
+					integer last_counter
+					-- default values are chosen such that 
+					-- files are left alone if there are no 
+					-- counter tests.
+					first_counter = length(files)+1
+					last_counter = length(files)
+					for f = 1 to length(files) do
+						if match("t_c_", files[f])=1 then
+							first_counter = f
+							exit
+						end if
+					end for
+					for f = first_counter to length(files) do
+						if match("t_c_", files[f])!=1 then
+							last_counter = f-1
+							exit
+						end if
+					end for
+					files = remove(files,first_counter,last_counter) 
+						& files[first_counter..last_counter]
 				end if
 				
 		end switch

@@ -1,11 +1,7 @@
--- (c) Copyright - See License.txt
---
-namespace unittest
-
 --****
 -- == Unit Testing Framework
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Background
 -- Unit testing is the process of assuring that the smallest programming units
@@ -69,17 +65,21 @@ namespace unittest
 -- When included in your program, unittest.e sets a crash handler to log a crash 
 -- as a failure.
 
+namespace unittest
+
+include std/console.e
+include std/error.e
+include std/filesys.e
+include std/io.e
+include std/math.e
+include std/pretty.e
+include std/search.e
+include std/types.e
+
 --****
 -- === Constants
 --
 
-include std/io.e
-include std/pretty.e
-include std/search.e
-include std/filesys.e
-include std/math.e
-include std/types.e
-include std/error.e
 --
 -- Public Variables
 --
@@ -103,7 +103,7 @@ integer verbose = TEST_SHOW_FAILED_ONLY
 integer abort_on_fail = 0
 integer wait_on_summary = 0
 integer accumulate_on_summary = 0
-integer logging = 0, log_fh = 0
+integer log_fh = 0
 
 --
 -- Private utility functions
@@ -311,8 +311,14 @@ public procedure test_report()
 	
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
+		if wait_on_summary then
+			any_key("Press a key to exit")
+		end if
 		abort(0)
 	else
+		if wait_on_summary then
+			any_key("Press a key to exit")
+		end if
 		abort(tests_failed > 0)
 	end if
 end procedure
@@ -527,7 +533,8 @@ include std/error.e
 function test_crash( object o )
 	test_fail( "unittesting crashed" )
 	test_report()
-	return 0
+	o = 0
+	return o
 end function
 crash_routine( routine_id( "test_crash" ) )
 

@@ -13,8 +13,29 @@
    check conversion. We must allow the user to call machine_func/
    machine_proc directly, even if he passes integers in f.p. format */
 
-#include <stdio.h>
+#define _LARGEFILE64_SOURCE
 #include <stdlib.h>
+
+#include "global.h"
+#include "alldefs.h"
+#include "execute.h"
+#include "version.h"
+#include "be_runtime.h"
+#include "be_rterror.h"
+#include "be_main.h"
+#include "be_w.h"
+#include "be_runtime.h"
+#include "be_symtab.h"
+#include "be_machine.h"
+#include "be_pcre.h"
+#include "be_task.h"
+#include "be_alloc.h"
+#include "be_execute.h"
+#include "be_socket.h"
+
+#ifdef ELINUX
+#include <malloc.h>
+#endif
 
 #ifdef EUNIX
 
@@ -23,12 +44,10 @@
 
 #ifdef EBSD
 #define NAME_MAX 255
-#else
+#endif
+
 #include <sys/mman.h>
-#endif
-#ifdef EGPM
-#include <gpm.h>
-#endif
+
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -39,8 +58,8 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
-#include "global.h"
-#include "alloc.h"
+
+
 
 #ifndef LOCK_SH
 #define LOCK_SH  1 /* shared lock */
@@ -58,7 +77,7 @@ int emul_flock(fd, cmd)
 	struct flock f;
 
 	memset(&f, 0, sizeof(f));
-	
+
 	if (cmd & LOCK_UN)
 		f.l_type = F_UNLCK;
 	if (cmd & LOCK_SH)
@@ -74,6 +93,7 @@ int emul_flock(fd, cmd)
 
 #else // EUNIX
 
+#include <io.h>
 #include <direct.h>
 
 #ifdef EWATCOM
@@ -98,13 +118,9 @@ int emul_flock(fd, cmd)
 
 #include <signal.h>
 
-#include "alldefs.h"
-#include "alloc.h"
-#include "execute.h"
-#include "version.h"
-#include "be_runtime.h"
 
 extern char* get_svn_revision(); /* from rev.c */
+extern double eustart_time; /* from be_runtime.c */
 
 /*****************/
 /* Local defines */
@@ -125,7 +141,7 @@ HINSTANCE winInstance;
 #endif
 
 int is_batch = 0; /* batch mode? Should press enter be displayed? 1=no, 0=yes */
-unsigned char TempBuff[TEMP_SIZE]; /* buffer for error messages */
+char TempBuff[TEMP_SIZE]; /* buffer for error messages */
 
 int c_routine_next = 0;       /* index of next available element */
 int c_routine_size = 0;       /* number of c_routine structs allocated */
@@ -137,7 +153,6 @@ int control_c_count = 0;      /* number of control-c/control-break since
 int *profile_sample = NULL;
 volatile int sample_next = 0;
 
-int first_mouse = 1;  /* indicates if mouse function has been set up yet */
 int line_max; /* current number of text lines on screen */
 int col_max;  /* current number of text columns on screen */
 #ifdef EUNIX
@@ -148,9 +163,6 @@ struct videoconfig config;
 struct videoconfigEx configEx;
 
 int screen_lin_addr; /* screen segment */
-#ifdef EXTRA_STATS
-int mouse_ints = 0;  /* number of unused mouse interrupts */
-#endif
 char *crash_msg = NULL;  /* user's crash message or NULL */
 volatile int our_clock_ticks = 0; /* number of ticks at current rate */
 double clock_frequency = 0.0;    /* current clock interrupt rate. 0.0
@@ -163,63 +175,11 @@ unsigned current_bg_color = 0;
 extern char **Argv;
 extern int Argc;
 
-/**********************/
-/* Imported variables */
-/**********************/
-extern int pagesize;
-#ifdef EUNIX
-extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
-#endif
-extern double clock_period;
-extern symtab_ptr TopLevelSub;
-extern int eu_dll_exists;
-extern struct exe_routines backpointers;
-extern int clocks_per_sec;
-extern int clk_tck;
-extern char *TempErrName;
-extern char *TempWarningName;
-extern int display_warnings;
-extern int allow_break;
-extern int control_c_count;
-#ifndef ERUNTIME
-extern int sample_size;
-extern int Executing;
-extern int ProfileOn;
-extern int *tpc;
-#endif
-extern int current_screen;
-extern int screen_line, screen_col;
-extern int wrap_around;
-extern struct file_info user_file[];
-extern long seed1, seed2;
-extern int rand_was_set;
-extern int e_routine_next;
-extern symtab_ptr *e_routine;
 
-#ifdef EWINDOWS
-extern HANDLE console_output;
-#endif
-
-extern int have_console;
-extern symtab_ptr cb_routine[];
-extern object last_w_file_no;
-extern IFILE last_w_file_ptr;
 
 /********************/
 /* Local variables */
 /*******************/
-#ifndef EWINDOWS
-static unsigned int long_buff = 0;
-static unsigned int short_buff = 0;
-#endif
-
-/* In DOS, this mouse data is locked in memory */
-static struct locked_data {
-	int lock;  /* = 0  semaphore */
-	int code;
-	int x;
-	int y;
-} mouse = {0,0,0,0};
 
 char *version_name =
 #ifdef EWINDOWS
@@ -230,23 +190,6 @@ char *version_name =
 "Linux";
 #endif
 
-/**********************/
-/* Declared Functions */
-/**********************/
-IFILE which_file();
-void NewConfig();
-s1_ptr NewS1();
-char *getcwd();
-struct rccoord GetTextPositionP();
-void do_exec(int *);
-void AfterExecute(void);
-void Machine_Handler();
-object SetTColor();
-object SetBColor();
-
-object compile_pcre();
-object exec_pcre();
-int get_ovector_size(object);
 
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
@@ -273,10 +216,10 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len;
 	int real_len;
 	char *str;
-	
+
 	if (!overwrite && (getenv(name) != NULL))
 		return 0;
-		
+
 	len = strlen(name) + 1 + strlen(value);
 	str = EMalloc(len + 1); // NOTE: This is deliberately never freed until the application ends.
 	if (! str)
@@ -340,18 +283,21 @@ char *name_ext(char *s)
 		return s;
 }
 
-extern long get_int(object x)
+long get_int(object x)
 /* return an integer value if possible, truncated to 32 bits. */
 {
-	if (IS_ATOM_INT(x))
+	if (IS_ATOM_INT(x)){
 		return x;
+	}
 
-	if (IS_ATOM(x))
-		if (DBL_PTR(x)->dbl <= 0.0)
+	if (IS_ATOM(x)){
+		if (DBL_PTR(x)->dbl <= 0.0){
 			return (long)(DBL_PTR(x)->dbl);
-		else
+		}
+		else{
 			return (unsigned long)(DBL_PTR(x)->dbl);
-
+		}
+	}
 	RTFatal("an integer was expected, not a sequence");
 
 }
@@ -467,6 +413,7 @@ void NewConfig(int raise_console)
 	char *env_cols;
 	int x;
 	struct winsize ws;
+	UNUSED(raise_console);
 
 	config.mode = 3;
 	config.numxpixels = 0;
@@ -532,6 +479,7 @@ void NewConfig(int raise_console)
 static object Graphics_Mode(object x)
 /* x is the graphics mode */
 {
+	UNUSED(x);
 #if defined(EWINDOWS)
 	NewConfig(TRUE);
 #endif
@@ -588,10 +536,10 @@ static object Cursor(object x)
 static object TextRows(object x)
 /* text_rows built-in */
 {
-	int rows, new_rows;
 
 #ifdef EWINDOWS
 	COORD newsize;
+	int new_rows;
 
 	new_rows = get_int(x);
 	NewConfig(TRUE);
@@ -599,6 +547,8 @@ static object TextRows(object x)
 	newsize.Y = new_rows;
 	SetConsoleScreenBufferSize(console_output, newsize);
 	NewConfig(TRUE);
+#else
+	UNUSED(x);
 #endif
 	NewConfig(TRUE);
 	return MAKE_INT(line_max);
@@ -649,15 +599,6 @@ void do_scroll(int top, int bottom, int amount)
 // scroll the screen from top line to bottom line by amount
 // amount is positive => text moves up
 {
-	short r1, c1, r2, c2;
-	int i, j;
-	int newl;
-	int fg, bg, b, t, prev_t, prev_b;
-#if defined(EUNIX)
-	char c;
-	char linebuff[200 + 1];
-	int lbi;
-#endif
 
 #ifdef EWINDOWS
 	SMALL_RECT src, clip;
@@ -692,6 +633,20 @@ void do_scroll(int top, int bottom, int amount)
 #endif
 
 #ifdef EUNIX
+	short c1;
+	short r1;
+	int t;
+	int i;
+	int j;
+	int b;
+	int prev_t;
+	int prev_b;
+	int fg;
+	int newl;
+	int bg;
+	char c;
+	char linebuff[200 + 1];
+	int lbi;
 	// save the current position
 	r1 = screen_line;
 	c1 = screen_col;
@@ -719,7 +674,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetTColor(t);
 					prev_t = t;
 				}
@@ -729,7 +684,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetBColor(b);
 					prev_b = b;
 				}
@@ -764,7 +719,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetTColor(t);
 					prev_t = t;
 				}
@@ -774,7 +729,7 @@ void do_scroll(int top, int bottom, int amount)
 					  iputs(linebuff , stdout);
 					  iflush(stdout);
 					  lbi = 0;
-					} 
+					}
 					SetBColor(b);
 					prev_b = b;
 				}
@@ -805,7 +760,7 @@ void do_scroll(int top, int bottom, int amount)
 static object Scroll(object x)
 {
 	int amount, top, bottom;
-	int i;
+
 
 	x = (object)SEQ_PTR(x);
 	amount = get_int(*(((s1_ptr)x)->base+1));
@@ -857,20 +812,6 @@ object SetTColor(object x)
 	return ATOM_1;
 }
 
-#if defined(EMINGW)
-// temporary
-static long colors[16];
-#endif
-
-#if !defined(EUNIX) && !defined(EMINGW)
-static long colors[16] = {
-	_BLACK, _BLUE, _GREEN, _CYAN,
-	_RED, _MAGENTA, _BROWN, _WHITE,
-	_GRAY, _LIGHTBLUE, _LIGHTGREEN, _LIGHTCYAN,
-	_LIGHTRED, _LIGHTMAGENTA, _YELLOW, _BRIGHTWHITE
-};
-#endif
-
 object SetBColor(object x)
 /* SET BACKGROUND COLOR */
 {
@@ -878,7 +819,6 @@ object SetBColor(object x)
 #if defined(EUNIX)
 #define SBC_buflen (20)
 	char buff[SBC_buflen];
-	int bold;
 #endif
 
 #ifdef EWINDOWS
@@ -911,256 +851,18 @@ object SetBColor(object x)
 }
 
 
-static object MousePointer(object x)
-{
-	return ATOM_1;
-}
-static object MouseEvents(int interrupts)
-{
-	return ATOM_1;
-}
-int mouse_installed()
-{
-	return 0;
-}
-static void show_mouse_cursor(int x)
-{
-}
-static void lock_mouse_pages()
-{
-}
-
-#ifdef EUNIX
-#ifdef EGPM  // if GPM package is desired, - not available on FreeBSD
-/* Text Mode Mouse in Linux
- Codes:
-	buttons:
-		left = 4
-		middle = 2
-		right = 1
-
-	clicks:
-		0: single click
-		1: double click
-		2: triple click
-
-	vc always 1?
-
-	type:
-		move = 1
-		drag = 2   146?
-		down = 4   20?
-		up = 8     152?
-
-	xterm:
-		left-down: 409 32 x y
-		middle-down: 409 33 x y
-		right-down: 409 34 x y
-		*any* button-up: 409 35 x y
-		(can I report all 3 buttons went up?)
-
-		no move events are reported
-
-	x and y are origin (33,33) at top left of window
-*/
-
-int Mouse_Handler(Gpm_Event *event, void *clientdata) {
-// handles mouse events
-	mouse.lock = 1;
-	mouse.code = event->buttons; //FOR NOW
-	if (mouse.code == 32)
-		mouse.code = 4;
-	else if (mouse.code == 33)
-		mouse.code = 2;
-	else if (mouse.code == 34)
-		mouse.code = 1;
-	mouse.x = event->x;
-	mouse.y = event->y;
-	return -1;
-}
-
-static Gpm_Connect conn;
-extern char key_buff[];
-extern int key_write;
-
-void save_key(int key)
-// store a key in the buffer
-{
-	key_buff[key_write++] = key;
-	if (key_write >= KEYBUFF_SIZE)
-		key_write = 0;
-}
-
-int EscapeKey()
-// process Escape sequences (these only occur in xterm)
-// some keys are pushed back into key_buff
-{
-	int key;
-
-	nodelay(stdscr, TRUE); // don't get stuck waiting for next key
-	key = Gpm_Getch();
-	if (key == 91) {
-		key = Gpm_Getch();
-		if (key == 49) {
-			key = Gpm_Getch();
-			if (key >= 49 && key <= 52) {
-				Gpm_Getch();    // 126
-				key = 265+key-49; // F1..F4
-			}
-			else {
-				save_key(91);
-				save_key(49);
-				save_key(key);
-				key = 27;
-			}
-		}
-		else {
-			save_key(91);
-			save_key(49);
-			key = 27;
-		}
-	}
-	else {
-		save_key(key);
-		key = 27;
-	}
-	return key;
-}
-
-
-static object GetMouse()
-// Return the next mouse event, or -1
-// Linux version using GPM
-{
-	object final_result;
-	object_ptr obj_ptr;
-	s1_ptr result;
-	int key, action;
-
-	if (first_mouse) {
-		/* initialize GPM */
-		first_mouse = FALSE;
-		conn.eventMask = 0xFFFF; // unsigned short
-		conn.defaultMask = 0;
-		conn.minMod = 0;
-		conn.maxMod = ~0;
-		gpm_visiblepointer = 1;
-		//gpm_zerobased = 1;
-		gpm_handler = Mouse_Handler;
-		gpm_data = NULL;
-		Gpm_Open(&conn, 0);
-		final_result = ATOM_M1;
-	}
-	else if (mouse.lock) {
-		/* we picked up a mouse event via Mouse_Handler() */
-		mouse.lock = 0;
-		result = NewS1((long)3);
-		obj_ptr = result->base;
-
-		obj_ptr[1] = MAKE_INT(mouse.code);
-		obj_ptr[2] = MAKE_INT((mouse.y > 32) ? mouse.x-32 : mouse.x);
-		obj_ptr[3] = MAKE_INT((mouse.y > 32) ? mouse.y-32 : mouse.y);
-
-#ifdef EXTRA_STATS
-		mouse_ints--;
-#endif
-		mouse.code = 0;
-		final_result = MAKE_SEQ(result);
-	}
-	else {
-		/* check for a mouse event (or a key) */
-		nodelay(stdscr, TRUE);
-		noecho();
-		key = Gpm_Getch();
-		if (key == -1) {
-			final_result = ATOM_M1;
-		}
-		else if (key == 409) {
-			result = NewS1((long)3);
-			obj_ptr = result->base;
-			action = Gpm_Getch();
-			if (action == 32)
-				action = 4;
-			else if (action == 33)
-				action = 2;
-			else if (action == 34)
-				action = 1;
-			obj_ptr[1] = MAKE_INT(action);
-			obj_ptr[2] = MAKE_INT(Gpm_Getch()-32);
-			obj_ptr[3] = MAKE_INT(Gpm_Getch()-32);
-#ifdef EXTRA_STATS
-			mouse_ints--;
-#endif
-			mouse.code = 0;
-			final_result = MAKE_SEQ(result);
-		}
-		else if (key == 27) {
-			key = EscapeKey();
-			final_result = ATOM_M1;
-		}
-		else {
-			/* we picked up a character */
-			save_key(key);
-			final_result = ATOM_M1;
-		}
-		echo();
-		nodelay(stdscr, FALSE); // go back to normal setup
-	}
-	return final_result;
-}
-#endif // EGPM
-
-#else
-// not LINUX
-static object GetMouse()
-/* GET_MOUSE event built-in WIN32 */
-{
-	object_ptr obj_ptr;
-	s1_ptr result;
-
-	if (first_mouse) {
-		lock_mouse_pages();
-		first_mouse = 0;
-		if (mouse_installed()) {
-			show_mouse_cursor(0x1);
-			MouseEvents(MAKE_INT(0x0000FFFF));
-		}
-	}
-	if (mouse.lock) {
-		/* there's something in the queue */
-
-		result = NewS1((long)3);
-		obj_ptr = result->base;
-
-		mouse.lock = 2; /* critical section */
-		obj_ptr[1] = mouse.code;
-		obj_ptr[2] = mouse.x;
-		obj_ptr[3] = mouse.y;
-		mouse.lock = 0;
-
-#ifdef EXTRA_STATS
-		mouse_ints--;
-#endif
-		return MAKE_SEQ(result);
-	}
-	else
-		return ATOM_M1;
-}
-#endif
-
 static object user_allocate(object x)
 /* x is number of bytes to allocate */
 {
 	int nbytes;
 	char *addr;
-#ifdef EUNIX
+#ifdef EBSD
 	unsigned first, last, gp1;
 #endif
 
 	nbytes = get_int(x);
+#ifdef EBSD
 	addr = EMalloc(nbytes);
-#ifdef EUNIX
-#ifndef EBSD
 	// make it executable
 	gp1 = pagesize-1;
 	first = (unsigned)addr & (~gp1); // start of page
@@ -1168,14 +870,14 @@ static object user_allocate(object x)
 	last = last | gp1; // end of page
 	mprotect((void *)first, last - first + 1,
 			 PROT_READ+PROT_WRITE+PROT_EXEC);
-#endif
+#elif defined(ELINUX)
+	addr = (char*) memalign( pagesize, nbytes );
+	mprotect( addr, nbytes, PROT_EXEC | PROT_READ | PROT_WRITE );
+#else
+	addr = EMalloc(nbytes);
 #endif
 
-	// we don't allow -ve addresses, so can't use -ve Euphoria ints
-	if ((unsigned long)addr <= (unsigned)MAXINT_VAL)
-		return (unsigned long)addr;
-	else
-		return NewDouble((double)(unsigned long)addr);
+	return MAKE_UINT(addr);
 }
 
 static object Where(object x)
@@ -1219,8 +921,10 @@ static object Seek(object x)
 	x1 = *(((s1_ptr)x)->base+1);
 	x2 = *(((s1_ptr)x)->base+2);
 	file_no = CheckFileNumber(x1);
-	if (user_file[file_no].mode == EF_CLOSED)
-		RTFatal("file must be open for seek()");
+	if (user_file[file_no].mode == EF_CLOSED) {
+		return ATOM_1; // "file must be open for seek()"
+	}
+	
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2);
 	if (pos == -1)
@@ -1235,106 +939,249 @@ static object Seek(object x)
 #endif
 	else
 		result = iseek(f, pos, SEEK_SET);
-	if (result > (IOFF)MAXINT || result < (IOFF)MININT) {
-		result = NewDouble((double)result);  // maximum 2 billion
-		return result;
-	} else
-		return MAKE_INT(result);
+	
+	return (!result ? ATOM_0 : ATOM_1);
 }
 
 // 2 implementations of dir()
 
-#ifdef EWATCOM
-	// 2 of 3: WATCOM method
 
+#ifdef EWINDOWS
+	// 1 of 2: Windows
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
 	char path[MAX_FILE_NAME+1];
 	s1_ptr result, row;
-	struct dirent *direntp;
-	object_ptr obj_ptr, temp;
-	int last;
-	DIR *dirp;
+	object_ptr obj_ptr;
+	char attrs[16];
+	char *next_attr;
+	char *fp_buf;
+	WIN32_FIND_DATA file_info;
+	HANDLE next_file;
+	SYSTEMTIME file_time;
+	SYSTEMTIME local_time;
+	int findres;
+	int has_wildcards;
+/*
+typedef struct _WIN32_FIND_DATA {
+  DWORD    dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD    nFileSizeHigh;
+  DWORD    nFileSizeLow;
+  DWORD    dwReserved0;
+  DWORD    dwReserved1;
+  TCHAR    cFileName[MAX_PATH];
+  TCHAR    cAlternateFileName[14];
+} WIN32_FIND_DATA, *PWIN32_FIND_DATA, *LPWIN32_FIND_DATA;
 
+typedef struct _BY_HANDLE_FILE_INFORMATION {
+  DWORD    dwFileAttributes;
+  FILETIME ftCreationTime;
+  FILETIME ftLastAccessTime;
+  FILETIME ftLastWriteTime;
+  DWORD    dwVolumeSerialNumber;
+  DWORD    nFileSizeHigh;
+  DWORD    nFileSizeLow;
+  DWORD    nNumberOfLinks;
+  DWORD    nFileIndexHigh;
+  DWORD    nFileIndexLow;
+} BY_HANDLE_FILE_INFORMATION, *PBY_HANDLE_FILE_INFORMATION;
+
+typedef struct _SYSTEMTIME {
+  WORD wYear;
+  WORD wMonth;
+  WORD wDayOfWeek;
+  WORD wDay;
+  WORD wHour;
+  WORD wMinute;
+  WORD wSecond;
+  WORD wMilliseconds;
+} SYSTEMTIME, *PSYSTEMTIME;
+
+*/
 	/* x will be sequence if called via dir() */
 
 	if (SEQ_PTR(x)->length > MAX_FILE_NAME)
 		RTFatal("name for dir() is too long");
 
-	MakeCString(path, x, MAX_FILE_NAME+1);
+	MakeCString(path, x, MAX_FILE_NAME + 8); // Add a little extra space too.
 
-	last = strlen(path)-1;
-	while (last > 0 &&
-		   (path[last] == '\\' || path[last] == ' ' || path[last] == '\t')) {
-		last--;
+	// Convert any unix delims to Windows delim
+	has_wildcards = 0;
+	fp_buf = path;
+	while (*fp_buf)
+	{
+		if (*fp_buf == '/')
+		{
+			*fp_buf = '\\';
+		}
+		else
+		{
+			if (*fp_buf == '*' || *fp_buf == '?')
+			{
+				has_wildcards = 1;
+			}
+		}
+		fp_buf++;
 	}
 
-	if (last >= 1 && path[last-1] == '*' && path[last] == '.')
-		last--; // work around WATCOM bug when we have "*." at end
-
-	if (path[last] != ':')
-		path[last+1] = 0; // delete any trailing backslash - Watcom has problems
-						  // with wildcards and trailing backslashes together
-
-	dirp = opendir(path);
-	if (dirp == NULL) {
-		return ATOM_M1; /* couldn't open directory (or file) */
+	// Trim off trailing whitespace
+	// N.B. 'fp_buf' should now be pointing to the null terminator at this point.
+	fp_buf--;
+	while (fp_buf != path)
+	{
+		if (*fp_buf == ' ' || *fp_buf == '\t')
+		{
+			fp_buf--;
+		}
+		else
+		{
+			break;
+		}
 	}
+	fp_buf++;
+	*fp_buf = '\0'; // Mark end of C string
+
+	if (fp_buf == path)
+	{
+		// Empty path so assume current directory
+		strcpy(path, ".\\*");
+		has_wildcards = 1;
+	}
+	else
+	{
+		if (*(fp_buf-1) == '\\')
+		{
+			// Special case. If path has trailing slash, append an asterisk.
+			*fp_buf = '*';
+			has_wildcards = 1;
+			fp_buf++;
+			*fp_buf = '\0';
+		}
+	}
+
+	fp_buf = NULL;
+	next_file = FindFirstFile( path, &file_info);
+	if ( (next_file == INVALID_HANDLE_VALUE) ||
+		((file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
+			(has_wildcards == 0)) )
+	{
+		// Inital path could be a 'share' folder or
+		// a directory when no wildcards were used,
+		// so assume the caller wants to see inside the directory.
+		FindClose(next_file);
+		strcat(path, "\\*");
+		has_wildcards = 1;
+		next_file = FindFirstFile( path, &file_info);
+		if (next_file == INVALID_HANDLE_VALUE)
+		{
+			return ATOM_M1; /* couldn't open directory (or file) */
+		}
+	}
+
 
 	/* start with empty sequence as result */
 	result = (s1_ptr)NewString("");
 
-	for (;;) {
-		direntp = readdir(dirp);
-		if (direntp == NULL)
-			break; /* end of list */
+	findres = ~0;
+	while (findres != 0) {
 
-		/* create a length-9 sequence */
-		row = NewS1((long)9);
+		/* create a length-11 sequence */
+		row = NewS1((long)11);
 		obj_ptr = row->base;
-		obj_ptr[1] = NewString(direntp->d_name);
-		obj_ptr[2] = NewString("");
-		temp = &obj_ptr[2];
+		obj_ptr[1] = NewString(file_info.cFileName);
 
-		if (direntp->d_attr & _A_RDONLY)
-			Append(temp, *temp, MAKE_INT('r'));
-		if (direntp->d_attr & _A_HIDDEN)
-			Append(temp, *temp, MAKE_INT('h'));
-		if (direntp->d_attr & _A_SYSTEM)
-			Append(temp, *temp, MAKE_INT('s'));
-		if (direntp->d_attr & _A_VOLID)
-			Append(temp, *temp, MAKE_INT('v'));
-		if (direntp->d_attr & _A_SUBDIR)
-			Append(temp, *temp, MAKE_INT('d'));
-		if (direntp->d_attr & _A_ARCH)
-			Append(temp, *temp, MAKE_INT('a'));
+		next_attr = &attrs[0];
 
-		obj_ptr[3] = MAKE_INT(direntp->d_size);
-		if ((unsigned)obj_ptr[3] > (unsigned)MAXINT) {
-			// file size over 1Gb
-			obj_ptr[3] = NewDouble((double)(unsigned)obj_ptr[3]);
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
+			*next_attr++ = 'r';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+			*next_attr++ = 'h';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
+			*next_attr++ = 's';
+// 		if (direntp->d_attr & _A_VOLID)
+// 			*next_attr++ = 'v';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			*next_attr++ = 'd';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
+			*next_attr++ = 'a';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED)
+			*next_attr++ = 'c';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_ENCRYPTED)
+			*next_attr++ = 'e';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_NOT_CONTENT_INDEXED)
+			*next_attr++ = 'N';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_DEVICE)
+			*next_attr++ = 'D';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_OFFLINE)
+			*next_attr++ = 'O';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT)
+			*next_attr++ = 'R';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_SPARSE_FILE)
+			*next_attr++ = 'S';
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_TEMPORARY)
+			*next_attr++ = 'T';
+		#ifndef FILE_ATTRIBUTE_VIRTUAL
+		    // This Windows constant is not defined in some older compilers.
+            #define FILE_ATTRIBUTE_VIRTUAL  (0x00010000L)
+		#endif
+		if (file_info.dwFileAttributes & FILE_ATTRIBUTE_VIRTUAL)
+				*next_attr++ = 'V';
+
+		*next_attr = '\0';
+		obj_ptr[2] = NewString(attrs);
+
+		if (file_info.nFileSizeHigh == 0)
+		{
+			if (file_info.nFileSizeLow > MAXINT) {
+				obj_ptr[3] = NewDouble((double)file_info.nFileSizeLow);
+			} else {
+				obj_ptr[3] = MAKE_INT((int)file_info.nFileSizeLow);
+			}
+		}
+		else
+		{
+			obj_ptr[3] = NewDouble((double)file_info.nFileSizeHigh * ((double)(MAXDWORD) + 1.0) +
+			                       (double)file_info.nFileSizeLow);
 		}
 
-		obj_ptr[4] = 1980 + direntp->d_date/512;
-		obj_ptr[5] = (direntp->d_date/32) & 0x0F;
-		obj_ptr[6] = direntp->d_date & 0x01F;
+		FileTimeToSystemTime( &file_info.ftLastWriteTime, &file_time);
+		SystemTimeToTzSpecificLocalTime(NULL, &file_time, &local_time);
 
-		obj_ptr[7] = direntp->d_time/2048;
-		obj_ptr[8] = (direntp->d_time/32) & 0x03F;
-		obj_ptr[9] = (direntp->d_time & 0x01F) << 1;
+		obj_ptr[4] = local_time.wYear;
+		obj_ptr[5] = local_time.wMonth;
+		obj_ptr[6] = local_time.wDay;
+
+		obj_ptr[7] = local_time.wHour;
+		obj_ptr[8] = local_time.wMinute;
+		obj_ptr[9] = local_time.wSecond;
+		obj_ptr[10]= local_time.wMilliseconds;
+
+ 		if (file_info.cAlternateFileName[0] != '\0')
+ 		{
+			obj_ptr[11]= NewString(file_info.cAlternateFileName);
+ 		}
+ 		else
+ 		{
+			obj_ptr[11]= 0;
+		}
 
 		/* append row to overall result (ref count 1)*/
 		Append((object_ptr)&result, (object)result, MAKE_SEQ(row));
+
+		findres = FindNextFile( next_file, &file_info);
 	}
-	closedir(dirp);
+	FindClose(next_file);
 
 	return (object)result;
 }
 #endif
 
-#if defined(EUNIX) || defined(EMINGW)
-	// 3 of 3: Unix style with stat()
+#if defined(EUNIX)
+	// 2 of 2: Unix style with stat()
 static object Dir(object x)
 /* x is the name of a directory or file */
 {
@@ -1345,8 +1192,13 @@ static object Dir(object x)
 
 	DIR *dirp;
 	int r;
+#ifdef ELINUX
+	struct stat64 stbuf;
+#else
 	struct stat stbuf;
+#endif
 	struct tm *date_time;
+// TODO MinGW uses the Windows API version of Dir(), not the stat() version
 #if defined(EMINGW)
 #define full_name_size (MAX_FILE_NAME + 257)
 #else
@@ -1364,7 +1216,11 @@ static object Dir(object x)
 	dirp = opendir(path); // on Linux, path *must* be a directory
 
 	if (dirp == NULL) {
+#ifdef ELINUX
+		r = stat64(path, &stbuf);  // should be a file
+#else
 		r = stat(path, &stbuf);  // should be a file
+#endif
 		if (r == -1)
 			return ATOM_M1;
 	}
@@ -1379,8 +1235,8 @@ static object Dir(object x)
 				break; /* end of list */
 		}
 
-		/* create a length-9 sequence */
-		row = NewS1((long)9);
+		/* create a length-11 sequence */
+		row = NewS1((long)11);
 		obj_ptr = row->base;
 		if (dirp == NULL)
 			obj_ptr[1] = NewString(name_ext(path)); // just the name
@@ -1393,7 +1249,11 @@ static object Dir(object x)
 		if (dirp != NULL) {
 			snprintf(full_name, full_name_size, "%s/%s", path, direntp->d_name);
 			full_name[full_name_size] = 0; // ensure NULL
+#ifdef ELINUX
+			r = stat64(full_name, &stbuf);
+#else
 			r = stat(full_name, &stbuf);
+#endif
 		}
 		if (r == -1) {
 			obj_ptr[3] = 0;
@@ -1408,10 +1268,11 @@ static object Dir(object x)
 			if ((stbuf.st_mode & S_IFMT) == S_IFDIR)
 				Append(temp, *temp, MAKE_INT('d'));
 
-			obj_ptr[3] = stbuf.st_size;
-			if ((unsigned)obj_ptr[3] > (unsigned)MAXINT) {
-				// file size over 1Gb
-				obj_ptr[3] = NewDouble((double)(unsigned)obj_ptr[3]);
+			if( stbuf.st_size > MAXINT ){
+				obj_ptr[3] = NewDouble( (double) stbuf.st_size );
+			}
+			else{
+				obj_ptr[3] = (object) stbuf.st_size;
 			}
 
 			date_time = localtime(&stbuf.st_mtime);
@@ -1421,6 +1282,9 @@ static object Dir(object x)
 			obj_ptr[7] = date_time->tm_hour;
 			obj_ptr[8] = date_time->tm_min;
 			obj_ptr[9] = date_time->tm_sec;
+
+			obj_ptr[10]= 0; // Millisecs not implemented
+			obj_ptr[11]= 0; // Alternate name not used.
 		}
 
 		/* append row to overall result (ref count 1)*/
@@ -1455,11 +1319,13 @@ static object CurrentDir()
 static object PutScreenChar(object x)
 /* x is {line, col, {c1, a1, c2, a2, ...}} */
 {
-	unsigned c, attr, len;
-	unsigned cur_line, cur_column, line, column;
+	unsigned attr, len;
+	unsigned line, column;
+	unsigned fg, bg;
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
+	unsigned c;
 	char s1[2];
 	int save_line, save_col;
 #endif
@@ -1472,6 +1338,7 @@ static object PutScreenChar(object x)
 #if defined(EWINDOWS)
 	show_console();
 #endif
+
 	args = SEQ_PTR(x);
 	line =   get_int(*(args->base+1));
 	column = get_int(*(args->base+2));
@@ -1485,6 +1352,8 @@ static object PutScreenChar(object x)
 #ifdef EUNIX
 	save_line = screen_line;
 	save_col = screen_col;
+	fg = current_fg_color;
+	bg = current_bg_color;
 	SetPosition(line, column);
 	while (len > 0) {
 		c = get_pos_int("put_screen_char()", *p);
@@ -1500,6 +1369,14 @@ static object PutScreenChar(object x)
 		len -= 2;
 	}
 	SetPosition(save_line, save_col); // restore cursor location
+	
+	// reset colors to what they were before this call:
+	SetBColor( bg );
+	current_bg_color = bg;
+	
+	SetTColor( fg );
+	current_fg_color = fg;
+	
 	iflush(stdout);
 #endif
 
@@ -1516,19 +1393,20 @@ static object PutScreenChar(object x)
 		len -= 2;
 	}
 #endif
+	
 	return ATOM_1;
 }
 
 static object GetScreenChar(object x)
 /* return {character, attributes} at given (line, col) location */
 {
-	struct rccoord pos;
+
 	object_ptr obj_ptr;
 	s1_ptr result, x1;
-	unsigned c, cur_line, cur_column, line, column;
-	struct rccoord p;
+	unsigned line, column;
+
 #ifdef EWINDOWS
-	CONSOLE_SCREEN_BUFFER_INFO console_info;
+
 	int temp, att;
 	char ch[4];
 	COORD coords;
@@ -1559,8 +1437,8 @@ static object GetScreenChar(object x)
 #endif
 
 #ifdef EUNIX
-	if (line >= 1 && line <= line_max &&
-		column >= 1 && column <= col_max) {
+	if (line >= 1 && line <= (unsigned)line_max &&
+		column >= 1 && column <= (unsigned)col_max) {
 		obj_ptr[1] = screen_image[line-1][column-1].ascii;
 		obj_ptr[2] = (screen_image[line-1][column-1].fg_color & 15) |
 					 (screen_image[line-1][column-1].bg_color << 4);
@@ -1576,7 +1454,9 @@ static object GetScreenChar(object x)
 static object GetPosition()
 /* return {line, column} for cursor */
 {
+#ifdef EUNIX
 	struct rccoord pos;
+#endif
 	object_ptr obj_ptr;
 	s1_ptr result;
 #ifdef EWINDOWS
@@ -1617,9 +1497,14 @@ static object lock_file(object x)
 {
 	IFILE f;
 	int fd;
-	int r, t;
+	int r;
+#ifdef EUNIX
+	int t;
+#else
 	unsigned long first, last;
-	object fn, s;
+	object s;
+#endif
+	object fn;
 
 	// get 1st element of x - file number - assume x is a sequence of length 3
 	x = (object)SEQ_PTR(x);
@@ -1668,8 +1553,11 @@ static object unlock_file(object x)
 {
 	IFILE f;
 	int fd;
+#ifdef EWINDOWS
 	unsigned long first, last;
-	object fn, s;
+	object s;
+#endif
+	object fn;
 
 	// get 1st element of x - can assume x is a sequence of length 2
 	x = (object)SEQ_PTR(x);
@@ -1701,6 +1589,18 @@ static object unlock_file(object x)
 #endif // EMINGW
 #endif // EUNIX
 	return ATOM_1; // ignored
+}
+
+static object get_rand()
+/* Return the random generator's current seed values */
+{
+	s1_ptr result;
+
+	result = NewS1(2);
+	result->base[1] = seed1;
+	result->base[2] = seed2;
+
+	return MAKE_SEQ(result);
 }
 
 static object set_rand(object x)
@@ -1747,6 +1647,7 @@ static object set_rand(object x)
 static object use_vesa(object x)
 /* turn on/off vesa flag */
 {
+	UNUSED(x);
 	not_supported("use_vesa()");
 	return ATOM_1;
 }
@@ -1798,17 +1699,13 @@ static object warning_file(object x)
 	return ATOM_1;
 }
 
-static object do_crash(object x)
+static void do_crash(object x)
 {
 	char *message;
 
 	message = EMalloc(SEQ_PTR(x)->length + 1);
 	MakeCString(message, x, SEQ_PTR(x)->length + 1);
 	RTFatal(message);
-
-	EFree(message);
-
-	return ATOM_1;
 }
 
 static object change_dir(object x)
@@ -1828,7 +1725,6 @@ static object change_dir(object x)
 		return ATOM_0;
 }
 
-extern double Wait(double);
 static object e_sleep(object x)
 /* sleep for x seconds */
 {
@@ -1900,6 +1796,7 @@ object tick_rate(object x)
 /* Set new system clock tick (interrupt) rate.
    x may be int or double, >= 0. 0 means restore 18.2 rate. */
 {
+	UNUSED(x);
 	return ATOM_1;
 }
 
@@ -1910,12 +1807,13 @@ static object float_to_atom(object x, int flen)
 	object_ptr obj_ptr;
 	char fbuff[8];
 	double d;
+	s1_ptr s;
 
-	x = (object)SEQ_PTR(x);
-	len = ((s1_ptr)x)->length;
+	s = SEQ_PTR(x);
+	len = s->length;
 	if (len != flen)
 		RTFatal("sequence has wrong length");
-	obj_ptr = ((s1_ptr)x)->base+1;
+	obj_ptr = s->base+1;
 	for (i = 0; i < len; i++) {
 		fbuff[i] = (char)obj_ptr[i];
 	}
@@ -1959,7 +1857,7 @@ static object atom_to_float64(object x)
 	}
 	else
 		len = 0;
-	return fpsequence((char *)&d, len);
+	return fpsequence((uchar *)&d, len);
 }
 
 static object atom_to_float32(object x)
@@ -1977,7 +1875,7 @@ static object atom_to_float32(object x)
 	}
 	else
 		len = 0;
-	return fpsequence((char *)&f, len);
+	return fpsequence((uchar *)&f, len);
 }
 
 object memory_copy(object d, object s, object n)
@@ -2017,10 +1915,10 @@ int open_dll_count = 0;
 
 object OpenDll(object x)
 {
-	void (FAR WINAPI *proc_address)();
+
 	s1_ptr dll_ptr;
-	static unsigned char message[81];
-	unsigned char *dll_string;
+	static char message[81];
+	char *dll_string;
 	HINSTANCE lib;
 	int message_len;
 
@@ -2036,8 +1934,6 @@ object OpenDll(object x)
 		snprintf(message,80,"name for open_dll() is too long."
 			"  The name started with \"%s\".", dll_string);
 		RTFatal(message);
-		/*RTFatal("name for open_dll() is too long."
-			"  The name started with \"%s\".", dll_string);*/
 	}
 #ifdef EWINDOWS
 	lib = (HINSTANCE)LoadLibrary(dll_string);
@@ -2045,7 +1941,7 @@ object OpenDll(object x)
 	if (lib != NULL) {
 		if (open_dll_count >= open_dll_size) {
 			size_t newsize;
-			
+
 			open_dll_size += 100;
 			newsize = open_dll_size * sizeof(HINSTANCE);
 			if (open_dll_list == NULL) {
@@ -2066,12 +1962,7 @@ object OpenDll(object x)
 	lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
 
 #endif
-	if ((unsigned)lib <= (unsigned)MAXINT_VAL){
-			return MAKE_INT((unsigned long)lib);
-	}
-	else{
-		return NewDouble((double)(unsigned long)lib);
-	}
+	return MAKE_UINT(lib);
 }
 
 object DefineCVar(object x)
@@ -2080,9 +1971,9 @@ object DefineCVar(object x)
 	HINSTANCE lib;
 	object variable_name;
 	s1_ptr variable_ptr;
-	unsigned char *variable_string;
+	char *variable_string;
 	char *variable_address;
-	object arg_size, return_size;
+
 	unsigned addr;
 
 	// x will be a sequence if called from define_c_func/define_c_proc
@@ -2112,10 +2003,7 @@ object DefineCVar(object x)
 		return ATOM_M1;
 #endif
 	addr = (unsigned)variable_address;
-	if (addr <= (unsigned)MAXINT_VAL)
-		return MAKE_INT(addr);
-	else
-		return NewDouble((double)addr);
+	return MAKE_UINT(addr);
 }
 
 
@@ -2127,7 +2015,7 @@ object DefineC(object x)
 	HINSTANCE lib;
 	object routine_name;
 	s1_ptr routine_ptr;
-	unsigned char *routine_string;
+	char *routine_string;
 	int (*proc_address)();
 	object arg_size, return_size;
 	object_ptr arg;
@@ -2177,7 +2065,7 @@ object DefineC(object x)
 #endif
 		}
 		/* assign a sequence value to routine_ptr */
-		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %x", proc_address);
+		snprintf(TempBuff, TEMP_SIZE, "machine code routine at %p", proc_address);
 		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		routine_name = NewString(TempBuff);
 		routine_ptr = SEQ_PTR(routine_name);
@@ -2201,7 +2089,7 @@ object DefineC(object x)
 		proc_address = (int (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
-		
+
 #else
 #ifdef EUNIX
 		proc_address = (int (*)())dlsym((void *)lib, routine_string);
@@ -2272,14 +2160,12 @@ object DefineC(object x)
 }
 
 #if __GNUC__ == 4
-#define CALLBACK_SIZE 92
+#define CALLBACK_SIZE (96)
 #else
-#define CALLBACK_SIZE 80
+#define CALLBACK_SIZE (80)
 #endif
 
-#define EXECUTABLE_ALIGNMENT 4
-
-extern struct routine_list *rt00;
+#define EXECUTABLE_ALIGNMENT (4)
 
 #ifdef EWINDOWS
 typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned int flags, unsigned int protection);
@@ -2288,51 +2174,83 @@ typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned i
 /* Return the smallest multiple of p_radix that is at least as big as p_v.
 
 	Assumptions: p_radix must be a power of two.
-				p_v and p_radix must be < power(2,31) 
+				p_v and p_radix must be < power(2,31)
 */
 inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	signed int radix = (signed int)p_radix;
 	signed int v = (signed int)p_v;
-	
+
 	return - (-radix & -v);
 }
+
+typedef unsigned char * page_ptr;
+
+unsigned char * new_page() {
+#ifdef EWINDOWS
+	return VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+#elif ELINUX
+	return memalign( pagesize, pagesize );
+#elif EUNIX
+	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);			
+#endif
+}
+
+void set_page_to_read_execute_only(page_ptr page_addr) {
+#ifdef EWINDOWS
+	static unsigned long oldprot;
+	static unsigned long * oldprotptr = &oldprot;
+	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr);
+#elif EUNIX
+	mprotect(page_addr, pagesize, PROT_EXEC|PROT_READ);
+#endif
+}
+
+void set_page_to_write(page_ptr page_addr) {
+#ifdef EWINDOWS
+	static unsigned long oldprot;
+	static unsigned long * oldprotptr = &oldprot;
+	VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READWRITE, oldprotptr);
+#elif EUNIX
+	mprotect(page_addr, pagesize, PROT_EXEC | PROT_READ | PROT_WRITE );
+#endif
+}
+
 object CallBack(object x)
 /* return either a call-back address for routine id x
-   x can be the routine id for stdcall, or {'+', routine_id} for cdecl 
-   
+   x can be the routine id for stdcall, or {'+', routine_id} for cdecl
+
    or return a three element sequence containing a Read-Only machine address, the replace value
    needed (sym tab pointer), and the call_back size respectively so the caller can make its *own*
-   call-back address.  In this case x must be a sequence containing only a routine_id:   
+   call-back address.  In this case x must be a sequence containing only a routine_id:
    {routine_id} or a sequence containing a two element sequence {{'+',routine_id}} for cdecl.   And
    the caller must search for the bytes {#78,#56,#34,#12}, allocate enough memory (call_back size)
    and to copy what is pointed to by the said address and then replace the searched for bytes with
-   the replace value in the allocated memory. 
+   the replace value in the allocated memory.
+   
+   Assumption: pagesize is much bigger than CALLBACK_SIZE.
+   
    */
 {
+	static unsigned char *page_addr = NULL;
+	static unsigned int page_offset = 0;
+	static long call_increment = 0;
+	static long last_block_offset = 0;
 	unsigned addr;
 	int routine_id, i, num_args;
 	unsigned char *copy_addr;
-	static unsigned char *page_addr = NULL;
-	static unsigned int page_offset = 0;
+#ifndef ERUNTIME
 	symtab_ptr routine;
-	object_ptr obj_ptr;
-	void * replace_value;
-    s1_ptr result;
+#endif
+	int not_patched;
 	s1_ptr x_ptr;
 	int convention;
 	int res;
-	unsigned int oldprot;
-	unsigned int * oldprotptr;
 	convention = C_CDECL;
-	oldprotptr = &oldprot;
+	not_patched = 1;
 	/* Handle whether it is {'+', routine_id} or {routine_id}:
 	 * Set flags and extract routine id value. */
 	if (IS_SEQUENCE(x)) {
 		x_ptr = SEQ_PTR(x);
-		/*printf( "x_ptr->length=%d, IS_SEQUENCE(*(obj_ptr=x_ptr->base+1))=%d, "
-			"SEQ_PTR(*obj_ptr)->length=%d\n",
-		   x_ptr->length, IS_SEQUENCE(*(obj_ptr=(x_ptr->base+1))),SEQ_PTR(obj_ptr)->length );
-		fflush(stdout);*/
 		if (x_ptr->length != 2){
 			RTFatal("call_back() argument must be routine_id, or {'+', routine_id}");
 		}
@@ -2346,12 +2264,12 @@ object CallBack(object x)
 		convention = C_STDCALL;
 #endif
 	}
-	
+
 	/* Check routine_id value and get the number of arguments */
 #ifdef ERUNTIME
 	num_args = rt00[routine_id].num_args;
 #else
-	if ((unsigned)routine_id >= e_routine_next)
+	if (routine_id >= e_routine_next)
 		RTFatal("call_back: bad routine id\n");
 	routine = e_routine[routine_id];
 
@@ -2391,51 +2309,57 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
-	
+
 	/* Now allocate memory that is executable or at least can be made to be ... */
-#	ifdef EWINDOWS
-		/* Here allocate and manage memory for 4kB is a lot to use when you
-			only use 92B.  Memory is allocated by VirtualAlloc() /pagesize/ bytes at a time.
-			So, we give peices of this page on each call until there is not enough to complete
-			up to /CALLBACK_SIZE/ bytes.  When this happens we make the page unwritable and
-			allocate a new page.
+	
+		/*	Here allocate and manage memory for 4kB is a lot to use when you
+			only use 92B.  Memory is allocated by /pagesize/ bytes at a time.
+			So, we give pieces of this page on each call until there is not enough to complete
+			up to /CALLBACK_SIZE/ bytes.
 			*/
-		if (
-			page_addr == NULL || 
-			(
-				(page_addr + page_offset + roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT) >= pagesize) &&
-				(VirtualProtect(page_addr, pagesize, PAGE_EXECUTE_READ, oldprotptr ),1)
-			)
-			)
-			
-		 {
-			page_addr = copy_addr = VirtualAlloc( NULL, CALLBACK_SIZE, 
-				MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
-			page_offset = 0;
+		if (page_addr != NULL) {
+			if (page_offset < last_block_offset) {
+				// Grab next sub-block from the current block.
+				page_offset += call_increment;
+			} else {
+				// Allocate a new block
+				page_addr = new_page();
+				page_offset = 0;
+			}
 		} else {
-			copy_addr = page_addr + (page_offset += roundup(CALLBACK_SIZE,EXECUTABLE_ALIGNMENT));
+			// Set up 'constants' and initial block allocation
+			call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
+			last_block_offset = (pagesize - 2 * call_increment);
+
+			page_addr = new_page(); //VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+			page_offset = 0;
 		}
+		
+		copy_addr = page_addr + page_offset;
+#	ifdef EWINDOWS		   
 		/* Assume we are running under some Windows that
-		   supports VirtualAlloc() always returning 0. */
+		   supports VirtualAlloc() always returning 0. 
+		   This has happened before in testing.  */
 		if (copy_addr == NULL)
-			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
-#	else /* ndef EWNIDOWS */
-		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);
-#	endif /* ndef EWINDOWS */
+			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
+#	endif /* def EWINDOWS */
 
 
-	/* Check if the memory allocation worked. */
+	/* Check if the memory allocation worked. */	
 	if (copy_addr == NULL) {
-		RTFatal("Your program has run out of memory.\nOne moment please...");
+		SpaceMessage();
 	}
 
-	/* copy memory of the template to the newly allocated memory */
+	/* Copy memory of the template to the newly allocated memory.
+	 * First we have to make the memory writable.
+	 */
+	set_page_to_write(page_addr);
     res = memcopy(copy_addr, CALLBACK_SIZE, (char *)addr, CALLBACK_SIZE);
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
 	}
-
 	
+
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
@@ -2446,25 +2370,21 @@ object CallBack(object x)
 #else
 			*(symtab_ptr *)(copy_addr+i) = e_routine[routine_id];
 #endif
+			not_patched = 0;
 			break;
 		}
 	}
-
-	/* Make memory executable. */
-#ifdef EUNIX
-#ifndef EBSD
-	mprotect((unsigned)copy_addr & ~(pagesize-1),  // start of page
-			 pagesize,  // one page
-			 PROT_READ+PROT_WRITE+PROT_EXEC);
-#endif
-#endif
-	addr = (unsigned)copy_addr;
+	/* We're done writing, so protect the memory again...*/
+	set_page_to_read_execute_only(page_addr);
+	
+	if (not_patched) {
+		RTFatal("Internal error: CallBack routine id patch failed: missing magic.");
+	}
+	
+	addr = (unsigned long)copy_addr;
 
 	/* Return new address. */
-	if (addr <= (unsigned)MAXINT_VAL)
-		return MAKE_INT(addr);
-	else
-		return NewDouble((double)addr);
+	return MAKE_UINT(addr);
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
@@ -2516,13 +2436,14 @@ static object crash_routine(object x)
 object eu_info()
 {
 	s1_ptr s1;
-	s1 = NewS1(5);
+	s1 = NewS1(6);
 	s1->base[1] = MAJ_VER;
 	s1->base[2] = MIN_VER;
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
 	s1->base[5] = NewString(get_svn_revision());
-	return MAKE_SEQ(s1);
+        s1->base[6] = NewDouble(eustart_time);
+        return MAKE_SEQ(s1);
 }
 
 object eu_uname()
@@ -2555,19 +2476,24 @@ object eu_uname()
 #endif
 }
 
-#ifdef ERUNTIME
-void Machine_Handler(int sig_no)
-/* illegal instruction, segmentation violation */
-{
-	RTFatal("A machine-level exception occurred during execution of your program");
-}
-#else
-void Machine_Handler(int sig_no)
-/* illegal instruction, segmentation violation */
-{
-	RTFatal("A machine-level exception occurred during execution of this statement");
+#ifdef EWINDOWS
+long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p) {
+	return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif
+
+void Machine_Handler(int sig_no)
+/* illegal instruction, segmentation violation */
+{
+#ifdef WINDOWS
+	is_batch = console_application();
+#endif
+#ifdef ERUNTIME
+	RTFatal("A machine-level exception occurred during execution of your program");
+#else
+	RTFatal("A machine-level exception occurred during execution of this statement");
+#endif
+}
 
 #ifndef ERUNTIME
 extern struct IL fe;
@@ -2581,7 +2507,7 @@ object start_backend(object x)
 	long switch_len, i;
 	s1_ptr x_ptr;
 	char *w;
-	char **argv;
+
 
 
 	w = "backend";
@@ -2609,7 +2535,7 @@ object start_backend(object x)
 	switch_len = SEQ_PTR(fe.switches)->length;
 
 	for (i=1; i <= switch_len; i++) {
-		x_ptr = SEQ_PTR(fe.switches)->base[i];
+		x_ptr = (s1_ptr)(SEQ_PTR(fe.switches)->base[i]);
 		w = (char *)EMalloc(SEQ_PTR(x_ptr)->length + 1);
 		MakeCString(w, (object) x_ptr, SEQ_PTR(x_ptr)->length + 1);
 
@@ -2632,12 +2558,12 @@ object machine(object opcode, object x)
    a general Euphoria object as its parameters and it returns a
    Euphoria object as a result. */
 {
-	unsigned addr;
+	char *addr;
 	int temp;
 	char *dest;
 	char *src;
-	unsigned long nbytes;
-	int bval;
+
+
 	double d;
 
 	while (TRUE) {
@@ -2691,36 +2617,13 @@ object machine(object opcode, object x)
 					MainScreen();
 				return ATOM_0 + get_key(TRUE);
 				break;
-			case M_GET_MOUSE:
-				if (current_screen != MAIN_SCREEN)
-					MainScreen();
-#ifdef EUNIX
-#ifdef EGPM
-				return GetMouse();
-#else
-				return ATOM_M1;
-#endif
-#else
-				return GetMouse();
-#endif
-				break;
-			case M_MOUSE_EVENTS:
-				if (current_screen != MAIN_SCREEN)
-					MainScreen();
-				return MouseEvents(x);
-				break;
-			case M_MOUSE_POINTER:
-				if (current_screen != MAIN_SCREEN)
-					MainScreen();
-				return MousePointer(x);
-				break;
 			case M_ALLOC:
 				return user_allocate(x);
 				break;
 			case M_FREE:
-				addr = get_pos_int("free", x);
+				addr = (char *)get_pos_int("free", x);
 				if (addr != NULL) {
-					EFree((char *)addr);
+					EFree(addr);
 				}
 				return ATOM_0;
 				break;
@@ -2753,6 +2656,9 @@ object machine(object opcode, object x)
 				break;
 			case M_SET_RAND:
 				return set_rand(x);
+				break;
+			case M_GET_RAND:
+				return get_rand();
 				break;
 			case M_USE_VESA:
 				return use_vesa(x);
@@ -2900,7 +2806,8 @@ object machine(object opcode, object x)
 				break;
 
 			case M_CRASH:
-				return do_crash(x);
+				do_crash(x);
+				return ATOM_M1;
 				break;
 
 			case M_CHDIR:
@@ -2924,9 +2831,9 @@ object machine(object opcode, object x)
 				x = (object)SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 				dest = EMalloc(SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
-				MakeCString(dest, (object) *(((s1_ptr)x)->base+2), 
+				MakeCString(dest, (object) *(((s1_ptr)x)->base+2),
 							SEQ_PTR(((s1_ptr) x)->base[2])->length + 1);
 				temp = setenv(src, dest, *(((s1_ptr)x)->base+3));
 				EFree(dest);
@@ -2937,7 +2844,7 @@ object machine(object opcode, object x)
 			case M_UNSET_ENV:
 				x = (object) SEQ_PTR(x);
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
-				MakeCString(src, (object) *(((s1_ptr)x)->base+1), 
+				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
@@ -2994,6 +2901,9 @@ object machine(object opcode, object x)
 			case M_UNAME:
 				return eu_uname();
 
+			case M_SOCK_INFO:
+				return eusock_info(x);
+
 			case M_SOCK_GETSERVBYNAME:
 				return eusock_getservbyname(x);
 
@@ -3005,7 +2915,7 @@ object machine(object opcode, object x)
 
 			case M_SOCK_GETHOSTBYADDR:
 				return eusock_gethostbyaddr(x);
-				
+
 			case M_SOCK_ERROR_CODE:
 				return eusock_error_code();
 
@@ -3035,7 +2945,7 @@ object machine(object opcode, object x)
 
 			case M_SOCK_ACCEPT:
 				return eusock_accept(x);
-			
+
 			case M_SOCK_GETSOCKOPT:
 				return eusock_getsockopt(x);
 
@@ -3044,10 +2954,10 @@ object machine(object opcode, object x)
 
 			case M_SOCK_SELECT:
 				return eusock_select(x);
-                
+
             case M_SOCK_SENDTO:
                 return eusock_sendto(x);
-            
+
             case M_SOCK_RECVFROM:
                 return eusock_recvfrom(x);
 

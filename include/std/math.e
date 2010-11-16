@@ -1,9 +1,7 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Math
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 namespace math
 
@@ -1067,6 +1065,33 @@ end function
 --		[[:power]], [[:Operations on sequences]]
 --
 
+--**
+-- Computes the Nth Fibonacci Number
+--
+-- Parameters:
+--		# ##value## : an integer. The starting value to compute a Fibonacci Number from.
+--
+-- Returns:
+-- An **atom**,
+-- * The Fibonacci Number specified by value.
+--
+-- Comments:
+-- * Note that due to the limitations of the floating point implementation,
+-- only 'i' values less than 76 are accurate on Windows platforms, and 
+-- 69 on other platforms (due to rounding differences in the native C
+-- runtime libraries).
+--
+-- Example 1:
+-- <eucode>
+--   ? fib(6)
+-- -- output ... 
+-- -- 8
+-- </eucode>
+--
+public function fib(integer i)
+	return floor((power(PHI, i) / SQRT5) + 0.5)
+end function
+
 --****
 -- === Hyperbolic trigonometry
 --
@@ -1285,7 +1310,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:product]], [[:or_all]]
+--		[[:product]], [[:or_all]]
 
 public function sum(object a)
 	atom b
@@ -1325,7 +1350,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:sum]], [[:or_all]]
+--		[[:sum]], [[:or_all]]
 
 public function product(object a)
 	atom b
@@ -1364,7 +1389,7 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:can_add]], [[:sum]], [[:product]], [[:or_bits]]
+--		[[:sum]], [[:product]], [[:or_bits]]
 
 public function or_all	(object a)
 	atom b
@@ -1785,12 +1810,18 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? approx(10, 33.33 * 30.01 / 100) --> 0 because 10 and 10.002333 are within 0.005 of each other
--- ? approx(10, 10.001) -> 0 because 10 and 10.001 are within 0.005 of each other
--- ? approx(10, {10.001,9.999, 9.98, 10.04}) --> {0,0,1,-1}
--- ? approx({10.001,9.999, 9.98, 10.04}, 10) --> {0,0,-1,1}
--- ? approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}) --> {-1,{1,1},1,-1}
--- ? approx(23,32, 10) -> 0 because 23 and 32 are within 10 of each other.
+-- ? approx(10, 33.33 * 30.01 / 100) 
+--           --> 0 because 10 and 10.002333 are within 0.005 of each other
+-- ? approx(10, 10.001) 
+--           --> 0 because 10 and 10.001 are within 0.005 of each other
+-- ? approx(10, {10.001,9.999, 9.98, 10.04}) 
+--           --> {0,0,1,-1}
+-- ? approx({10.001,9.999, 9.98, 10.04}, 10) 
+--           --> {0,0,-1,1}
+-- ? approx({10.001,{9.999, 10.01}, 9.98, 10.04}, {10.01,9.99, 9.8, 10.4}) 
+--           --> {-1,{1,1},1,-1}
+-- ? approx(23,32, 10) 
+--           --> 0 because 23 and 32 are within 10 of each other.
 -- </eucode>
 --
 public function approx(object p, object q, atom epsilon = 0.005)

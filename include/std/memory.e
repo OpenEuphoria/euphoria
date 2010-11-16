@@ -1,9 +1,7 @@
-namespace memory
-
 --****
 -- == Memory Management - Low-Level
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Usage Notes
 --@[safe.e]
@@ -37,7 +35,13 @@ namespace memory
 -- file.
 --
 
+namespace memory
+
 public include std/memconst.e
+
+-- biggest address on a 32-bit machine
+constant MAX_ADDR = power(2, 32)-1
+
 include std/error.e
 
 ifdef DATA_EXECUTE then
@@ -48,14 +52,14 @@ without warning &= (not_used)
 
 public integer edges_only 
 
--- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
-
 --**
 -- Positive integer type
 
-export type positive_int(integer x)
-        return x >= 1
+export type positive_int(object x)
+	if not integer(x) then
+		return 0
+	end if
+    return x >= 1
 end type
 
 --**
@@ -63,7 +67,17 @@ end type
 
 public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-	return a > 0 and a <= MAX_ADDR and floor(a) = a
+	if not atom(a) then
+		return 0
+	end if
+	
+	if not integer(a)then
+		if floor(a) != a then
+			return 0
+		end if
+	end if
+	
+	return a > 0 and a <= MAX_ADDR
 end type
 
 -- Internal use of the library only.  free() calls this.  It works with
@@ -735,11 +749,9 @@ public integer check_calls = 1
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
-
+without warning strict
 public procedure register_block(atom block_addr, atom block_len, integer protection )
-	-- NOP to avoid strict lint
-	block_addr = block_addr
-	block_len = block_len
+	-- Only implemented in safe.e
 end procedure
 
 
@@ -765,10 +777,9 @@ end procedure
 -- 
 -- See Also:
 --   [[:register_block]], [[:safe.e]]
-
+without warning strict
 public procedure unregister_block(atom block_addr)
-	-- NOP to avoid strict lint
-	block_addr =  block_addr
+	-- Only implemented in safe.e
 end procedure
 
 --**
@@ -790,15 +801,20 @@ end procedure
 --
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
-
+without warning strict
 public function safe_address(atom start, integer len, positive_int action)
+	-- Only implemented in safe.e
 	return 1
 end function
 
+without warning strict
 public procedure check_all_blocks()
+	-- Only implemented in safe.e
 end procedure
 
+without warning strict
 export function prepare_block( atom addr, integer a, integer protection )
+	-- Only implemented in safe.e
 	return addr
 end function
 
@@ -806,7 +822,10 @@ export constant BORDER_SPACE = 0
 export constant leader = repeat('@', BORDER_SPACE)
 export constant trailer = repeat('%', BORDER_SPACE)
 
-export type bordered_address( atom addr )
+export type bordered_address( object addr )
+	if not atom(addr) then
+		return 0
+	end if
 	return 1
 end type
 
@@ -874,7 +893,7 @@ export function dep_works()
 		return (DEP_really_works and use_DEP)
 	end ifdef
 
-	return 0
+	return 1
 end function
 
 export atom VirtualFree_rid

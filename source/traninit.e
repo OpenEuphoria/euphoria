@@ -1,6 +1,6 @@
 --
 -- (c) Copyright - See License.txt
--- 
+--
 --****
 -- == traninit.e: Initialize the translator
 --
@@ -15,24 +15,24 @@
 -- variables and use the selected platform to determine which compiler must
 -- be used.
 
--- If you are translating to another platform, we expect you to take the 
+-- If you are translating to another platform, we expect you to take the
 -- C files and compile natively rather than using a cross compiler
 --
 -- From the GNU terminology there are three platforms ##target##, ##host##, and ##build##.
 -- For the translator that will be built using this file there are four:
 --
 -- |= GNU platform name |= Description |= Variable Names |
--- |##target##   | The newly translated and compiled translator will translate to 
+-- |##target##   | The newly translated and compiled translator will translate to
 --                 any target platform for this translator... | none|
 -- |##host##     | The platform of the host this translated compiled translator will run on.|
 --                 ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/## |
--- |##build##    | The platform where the building utilities make, wmake, compiler 
+-- |##build##    | The platform where the building utilities make, wmake, compiler
 --                 and assembler are run.| ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/##|
 -- |##translate##| The platform where the current translator is run on|platform()|
 --
 -- ifdef OSNAME and platform() is for our translation platform,
 -- TOSNAME is for the target platform.
--- We assume that the target platform is the same as our build platform.  
+-- We assume that the target platform is the same as our build platform.
 -- Thus, no cross compilers.
 
 
@@ -71,31 +71,30 @@ end function
 set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
-	{ "silent",        0, GetMsgText(177,0), { NO_CASE } },
-	{ "verbose",	   0, GetMsgText(319,0), { NO_CASE } },
-	{ "wat",           0, GetMsgText(178,0), { NO_CASE } },
-	{ "gcc",           0, GetMsgText(180,0), { NO_CASE } },
-	{ "cflags", 	   0, GetMsgText(323,0), { NO_CASE, HAS_PARAMETER, "flags" } },
-	{ "lflags", 	   0, GetMsgText(324,0), { NO_CASE, HAS_PARAMETER, "flags" } },
-	{ "com",           0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "con",           0, GetMsgText(182,0), { NO_CASE } },
-	{ "dll",           0, GetMsgText(183,0), { NO_CASE } },
-	{ "so",            0, GetMsgText(184,0), { NO_CASE } },
-	{ "plat",          0, GetMsgText(185,0), { NO_CASE, HAS_PARAMETER, "platform" } },
-	{ "lib",           0, GetMsgText(186,0), { NO_CASE, HAS_PARAMETER, "filename" } },
-	{ "fastfp",        0, GetMsgText(187,0), { NO_CASE } },
-	{ "stack",         0, GetMsgText(188,0), { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "debug",         0, GetMsgText(189,0), { NO_CASE } },
-	{ "maxsize",       0, GetMsgText(190,0), { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "keep",          0, GetMsgText(191,0), { NO_CASE } },
-	{ "makefile",      0, GetMsgText(192,0), { NO_CASE } },
-	{ "makefile-full", 0, GetMsgText(193,0), { NO_CASE } },
-	{ "cmakefile",     0, GetMsgText(194,0), { NO_CASE } },
-	{ "emake",         0, GetMsgText(195,0), { NO_CASE } },
-	{ "nobuild",       0, GetMsgText(196,0), { NO_CASE } },
-	{ "force-build",   0, GetMsgText(326,0), { NO_CASE } },
-	{ "builddir",      0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "o",             0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
+	{ "silent",           0, GetMsgText(177,0), { NO_CASE } },
+	{ "verbose",	      0, GetMsgText(319,0), { NO_CASE } },
+	{ "wat",              0, GetMsgText(178,0), { NO_CASE } },
+	{ "gcc",              0, GetMsgText(180,0), { NO_CASE } },
+	{ "cflags", 	      0, GetMsgText(323,0), { NO_CASE, HAS_PARAMETER, "flags" } },
+	{ "lflags", 	      0, GetMsgText(324,0), { NO_CASE, HAS_PARAMETER, "flags" } },
+	{ "com",              0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
+	{ "con",              0, GetMsgText(182,0), { NO_CASE } },
+	{ "dll",              0, GetMsgText(183,0), { NO_CASE } },
+	{ "so",               0, GetMsgText(184,0), { NO_CASE } },
+	{ "plat",             0, GetMsgText(185,0), { NO_CASE, HAS_PARAMETER, "platform" } },
+	{ "lib",              0, GetMsgText(186,0), { NO_CASE, HAS_PARAMETER, "filename" } },
+	{ "fastfp",           0, GetMsgText(187,0), { NO_CASE } },
+	{ "stack",            0, GetMsgText(188,0), { NO_CASE, HAS_PARAMETER, "size" } },
+	{ "debug",            0, GetMsgText(189,0), { NO_CASE } },
+	{ "maxsize",          0, GetMsgText(190,0), { NO_CASE, HAS_PARAMETER, "size" } },
+	{ "keep",             0, GetMsgText(191,0), { NO_CASE } },
+	{ "makefile",         0, GetMsgText(193,0), { NO_CASE } },
+	{ "makefile-partial", 0, GetMsgText(192,0), { NO_CASE } },
+	{ "emake",            0, GetMsgText(195,0), { NO_CASE } },
+	{ "nobuild",          0, GetMsgText(196,0), { NO_CASE } },
+	{ "force-build",      0, GetMsgText(326,0), { NO_CASE } },
+	{ "build-dir",        0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
+	{ "o",                0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
 }
 
 add_options( trans_opt_def )
@@ -129,13 +128,13 @@ export procedure transoptions()
 		switch key do
 			case "silent" then
 				silent = TRUE
-			
+
 			case "verbose" then
 				verbose = TRUE
-			
+
 			case "cflags" then
 				cflags = val
-			
+
 			case "lflags" then
 				lflags = val
 
@@ -157,8 +156,8 @@ export procedure transoptions()
 				OpDefines &= { "EUC_DLL" }
 
 			case "plat" then
-				switch upper(val) do				
-					-- please update comments in Makefile.gnu, Makefile.wat, configure and 
+				switch upper(val) do
+					-- please update comments in Makefile.gnu, Makefile.wat, configure and
 					-- configure.bat; and the help section in configure and configure.bat; and
 					-- the message 201 in msgtext.e if you add another platform.
 					case "WIN" then
@@ -217,14 +216,11 @@ export procedure transoptions()
 			case "keep" then
 				keep = TRUE
 
+			case "makefile-partial" then
+				build_system_type = BUILD_MAKEFILE_PARTIAL
+
 			case "makefile" then
-				build_system_type = BUILD_MAKEFILE
-
-			case "makefile-full" then
 				build_system_type = BUILD_MAKEFILE_FULL
-
-			case "cmakefile" then
-				build_system_type = BUILD_CMAKE
 
 			case "emake" then
 				build_system_type = BUILD_EMAKE
@@ -232,7 +228,7 @@ export procedure transoptions()
 			case "nobuild" then
 				build_system_type = BUILD_NONE
 
-			case "builddir" then
+			case "build-dir" then
 				output_dir = val
 				if find(output_dir[$], "/\\") = 0 then
 					output_dir &= '/'
@@ -246,7 +242,23 @@ export procedure transoptions()
 		end switch
 	end for
 
-	if length(map:get(opts, "extras")) = 0 then
+	if length(exe_name) and not absolute_path(exe_name) then
+		exe_name = current_dir() & SLASH & exe_name
+	end if
+
+	if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
+		output_dir = temp_file("." & SLASH, "build-", "")
+		if find(output_dir[$], "/\\") = 0 then
+			output_dir &= '/'
+		end if
+
+		if not silent then
+			printf(1, "Build directory: %s\n", { output_dir })
+		end if
+		remove_output_dir = 1
+	end if
+
+	if length(map:get(opts, OPT_EXTRAS)) = 0 then
 		-- No source supplied on command line
 		show_banner()
 		ShowMsg(2, 203)
@@ -256,7 +268,7 @@ export procedure transoptions()
 	end if
 
 	OpDefines &= { "EUC" }
-	
+
 	if host_platform() = WIN32 and not con_option then
 		OpDefines = append( OpDefines, "WIN32_GUI" )
 	end if
@@ -326,12 +338,12 @@ procedure InitBackEnd(integer c)
 
 			if atom(wat_path) then
 				if build_system_type = BUILD_DIRECT then
-					-- We know the building process will fail when the translator starts 
+					-- We know the building process will fail when the translator starts
 					-- calling the compiler.  So, the process fails here.
 					CompileErr(159)
 				else
 					-- In this case, the user has to call something to compile after the
-					-- translation.  The user may set up the environment after the translation or 
+					-- translation.  The user may set up the environment after the translation or
 					-- the environment may be on another machine on the network.
 					Warning(159, translator_warning_flag)
 				end if

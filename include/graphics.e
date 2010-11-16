@@ -101,37 +101,6 @@ type positive_int(integer x)
     return x >= 1
 end type
 
-type point(sequence x)
-    return length(x) = 2
-end type
-
-type point_sequence(sequence x)
-    return length(x) >= 2
-end type
-
-global procedure draw_line(color c, point_sequence xyarray)
--- draw a line connecting the 2 or more points
--- in xyarray: {{x1, y1}, {x2, y2}, ...}
--- using a certain color 
-    machine_proc(M_LINE, {c, 0, xyarray})
-end procedure
-
-global procedure polygon(color c,
-			 boolean fill,
-			 point_sequence xyarray)
--- draw a polygon using a certain color
--- fill the area if fill is TRUE
--- 3 or more vertices are given in xyarray
-    machine_proc(M_POLYGON, {c, fill, xyarray})
-end procedure
-
-global procedure ellipse(color c, boolean fill, point p1, point p2)
--- draw an ellipse with a certain color that fits in the
--- rectangle defined by diagonal points p1 and p2, i.e. 
--- {x1, y1} and {x2, y2}. The ellipse may be filled or just an outline.   
-    machine_proc(M_ELLIPSE, {c, fill, p1, p2})
-end procedure
-
 global function graphics_mode(mode m)
 -- try to set up a new graphics mode
 -- return 0 if successful, non-zero if failed
@@ -201,33 +170,5 @@ global procedure bk_color(color c)
     machine_proc(M_SET_B_COLOR, c)
 end procedure
 
-type mixture(sequence s)
-    return length(s) = 3 -- {red, green, blue}
-end type
-
-global function palette(color c, mixture s)
--- choose a new mix of {red, green, blue} to be shown on the screen for
--- color number c. Returns previous mixture as {red, green, blue}.
-    return machine_func(M_PALETTE, {c, s})
-end function
-
-global procedure all_palette(sequence s)
--- s is a sequence of the form: {{r,g,b},{r,g,b}, ...{r,g,b}}
--- that specifies new color intensities for the entire set of
--- colors in the current graphics mode.  
-    machine_proc(M_ALL_PALETTE, s)
-end procedure
-
--- Sound Effects --
-
-type frequency(integer x)
-    return x >= 0
-end type
-
-global procedure sound(frequency f)
--- turn on speaker at frequency f
--- turn off speaker if f is 0
-    machine_proc(M_SOUND, f)
-end procedure
 
 

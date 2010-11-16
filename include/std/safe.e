@@ -1,10 +1,7 @@
--- (c) Copyright - See License.txt
---
--- Euphoria 4.0
--- Machine Level Programming (386/486/Pentium)
-
 --****
--- === safe.e
+-- == Safe Machine Level Access
+--
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- This is a slower DEBUGGING VERSION of machine.e
 --
@@ -52,15 +49,15 @@
 -- that you list below, or add dynamically via register_block().
 
 namespace safe
-include std/error.e
-ifdef WINDOWS then
-	include std/win32/sounds.e
-end ifdef
-public include std/memconst.e
-ifdef DATA_EXECUTE then
-	public include std/machine.e as machine
-end ifdef
 
+atom allocation_num = 0
+
+-- biggest address on a 32-bit machine
+constant MAX_ADDR = power(2, 32)-1
+
+export constant BORDER_SPACE = 40
+export constant leader = repeat('@', BORDER_SPACE)
+export constant trailer = repeat('%', BORDER_SPACE)
 
 
 -- Some parameters you may wish to change:
@@ -100,15 +97,15 @@ public integer edges_only = (platform()=2)
 -- internal address
 -- addresses used for passing to and getting from low level machine_func calls and to a few
 -- local only routines.
-type int_addr(machine_addr a)
-	return 1
+type int_addr(object a)
+	return machine_addr(a)
 end type
 
 -- external address
 -- addresses used for passing to and getting from high level functions in machine.e and 
 -- public functions declared here.
-type ext_addr(machine_addr a)
-	return 1
+type ext_addr(object a)
+	return machine_addr(a)
 end type
 
 
@@ -123,30 +120,52 @@ enum BLOCK_ADDRESS, BLOCK_LENGTH, ALLOC_NUMBER, BLOCK_PROT
 with type_check
 
 constant OK = 1, BAD = 0
-constant M_ALLOC = 16,
-		 M_FREE = 17,
-		 M_SLEEP = 64
+constant
+	M_FREE = 17,
+	M_SLEEP = 64
+
+public include std/memconst.e
+ifdef DATA_EXECUTE then
+	public include std/machine.e as machine
+end ifdef
+include std/error.e
+ifdef WINDOWS then
+	include std/win32/sounds.e
+end ifdef
 
 puts(1, "\n\t\tUsing Debug Version of machine.e\n")
-machine_proc(M_SLEEP, 3)
-
--- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
+-- machine_proc(M_SLEEP, 3)
 
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
 
-export type positive_int(integer x)
-	return x >= 1
+export type positive_int(object x)
+	if not integer(x) then
+		return 0
+	end if
+    return x >= 1
 end type
 
-type natural(integer x)
+type natural(object x)
+	if not integer(x) then
+		return 0
+	end if
 	return x >= 0
 end type
 
-public type machine_addr(atom a)
+public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-	return a > 0 and a <= MAX_ADDR and floor(a) = a
+	if not atom(a) then
+		return 0
+	end if
+	
+	if not integer(a)then
+		if floor(a) != a then
+			return 0
+		end if
+	end if
+	
+	return a > 0 and a <= MAX_ADDR
 end type
 
 type far_addr(sequence a)
@@ -158,10 +177,6 @@ type low_machine_addr(atom a)
 -- a legal low machine address 
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
-
-export constant BORDER_SPACE = 40
-export constant leader = repeat('@', BORDER_SPACE)
-export constant trailer = repeat('%', BORDER_SPACE)
 
 export type bordered_address(ext_addr addr )
 	sequence l
@@ -503,8 +518,6 @@ override procedure mem_set(machine_addr target, atom value, natural len)
 	end if
 end procedure
 
-atom allocation_num
-allocation_num = 0
 
 procedure show_byte(atom m)
 -- display byte at memory location m
@@ -581,7 +594,7 @@ public procedure show_block(sequence block_info)
 			show_byte(i)
 		end if
 	end for 
-	die("")
+	die("safe.e: show_block()")
 end procedure
 
 public procedure check_all_blocks()
@@ -673,18 +686,16 @@ export function prepare_block(int_addr iaddr, positive_int n, natural protection
 	eaddr = iaddr + BORDER_SPACE
 	eu:poke(eaddr+n, trailer)
 	allocation_num += 1
---  if allocation_num = ??? then 
---      trace(1) -- find out who allocated this block number
---  end if
 	safe_address_list = prepend(safe_address_list, {eaddr, n, allocation_num, protection})
 	return eaddr
 end function
 
 -- Internal use of the library only.  free() calls this.  It works with
 -- only atoms and in the unSAFE implementation is different.
-export procedure deallocate(bordered_address a)
+export procedure deallocate(atom a)
 	-- free address a - make sure it was allocated
 	int_addr ia
+	
 	for i = 1 to length(safe_address_list) do
 		if safe_address_list[i][BLOCK_ADDRESS] = a then
 			-- check pre and post block areas
@@ -721,7 +732,9 @@ export procedure deallocate(bordered_address a)
 			return
 		end if
 	end for
-	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
+	if bordered_address( a ) then
+		die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
+	end if
 end procedure
 FREE_RID = routine_id("deallocate")
 
@@ -729,15 +742,14 @@ FREE_RID = routine_id("deallocate")
 export function dep_works()
 	ifdef WINDOWS then
 		return DEP_really_works		
+	elsedef
+		return 1
 	end ifdef
-
-	return 0
 end function
 
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	integer free_succeeded
 	sequence block
 
 	for i = 1 to length(safe_address_list) do
@@ -759,7 +771,7 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 
 	ifdef WINDOWS then
 		if dep_works() then
-			free_succeeded = c_func( VirtualFree_rid, 
+			c_func( VirtualFree_rid, 
 				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
 			return
 		end if
@@ -772,7 +784,7 @@ public function info()
 	integer tm = 0 
 	for i = 1 to length( safe_address_list ) do 
 		tm += safe_address_list[i][BLOCK_LENGTH] 
-	end for 
+	end for
 	return sprintf(""" 
 Total memory allocations %10d 
 Total memory allocated   %10dB""", 

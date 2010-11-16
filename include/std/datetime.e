@@ -1,33 +1,29 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Date/Time
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 
---
 namespace datetime
 
-
-include std/machine.e
 include std/dll.e
-include std/sequence.e
-include std/get.e
 include std/error.e
+include std/get.e
+include std/machine.e
+include std/sequence.e
 include std/types.e
 
 ifdef LINUX then
 	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_func(open_dll(""), "time", {C_POINTER}, C_INT)
-elsifdef FREEBSD or SUNOS or OPENBSD then
-	constant gmtime_ = define_c_func(open_dll("libc.so"), "gmtime", {C_POINTER}, C_POINTER)
-	constant time_ = define_c_func(open_dll("libc.so"), "time", {C_POINTER}, C_INT)
 elsifdef OSX then
 	constant gmtime_ = define_c_func(open_dll("libc.dylib"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_func(open_dll("libc.dylib"), "time", {C_POINTER}, C_INT)
 elsifdef WIN32 then
 	constant gmtime_ = define_c_func(open_dll("msvcrt.dll"), "gmtime", {C_POINTER}, C_POINTER)
 	constant time_ = define_c_proc(open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {C_POINTER})
+elsifdef UNIX then
+	constant gmtime_ = define_c_func(open_dll("libc.so"), "gmtime", {C_POINTER}, C_POINTER)
+	constant time_ = define_c_func(open_dll("libc.so"), "time", {C_POINTER}, C_INT)
 end ifdef
 
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
@@ -107,20 +103,21 @@ function isLeap(integer year) -- returns integer (0 or 1)
 end function
 
 function daysInMonth(integer year, integer month) -- returns a month_
-		if year = Gregorian_Reformation and month = 9 then
-				return 19
-		elsif month != 2 then
-				return DaysPerMonth[month]
-		else
-				return DaysPerMonth[month] + isLeap(year)
-		end if
+	if year = Gregorian_Reformation and month = 9 then
+		return 19
+	elsif month != 2 then
+		return DaysPerMonth[month]
+	else
+		return DaysPerMonth[month] + isLeap(year)
+	end if
 end function
 
 function daysInYear(integer year) -- returns a jday_ (355, 365 or 366)
-		if year = Gregorian_Reformation then
-				return 355
-		end if
-		return 365 + isLeap(year)
+	if year = Gregorian_Reformation then
+		return 355
+	end if
+	
+	return 365 + isLeap(year)
 end function
 
 -- Functions using the new data-types
@@ -254,34 +251,31 @@ end function
 --**
 -- Names of the months
 
-public sequence month_names = { "January", "February", "March", 
-				"April", "May", "June", 
-				"July", "August", "September",
-				"October", "November", "December" }
+public sequence month_names = { 
+	"January", "February", "March", "April", "May", "June", 
+	"July", "August", "September", "October", "November", "December" 
+}
 
 --**
 -- Abbreviations of month names
 
-public sequence month_abbrs = { "Jan", "Feb", "Mar", 
-				"Apr", "May", "Jun",
-				"Jul", "Aug", "Sep",
-				"Oct", "Nov", "Dec" }
+public sequence month_abbrs = { 
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec" 
+}
 
 --**
 -- Names of the days
 
-public sequence day_names = { "Sunday", "Monday", 
-			      "Tuesday", "Wednesday",
-			      "Thursday", "Friday",
-			      "Saturday" }
+public sequence day_names = { 
+	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+	"Saturday" 
+}
 
 --**
 -- Abbreviations of day names
 
-public sequence day_abbrs = { "Sun", "Mon", 
-							  "Tue", "Wed", 
-							  "Thu", "Fri", 
-							  "Sat" }
+public sequence day_abbrs = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 
 --**
 -- AM/PM
@@ -289,32 +283,79 @@ public sequence day_abbrs = { "Sun", "Mon",
 public sequence ampm = { "AM", "PM" }
 
 --****
--- === Constants
+-- === Date/Time type Accessors
+--
+-- These accessors can be used with the [[:datetime]] type.
+
+public enum	
+	--**
+	-- Year (full year, i.e. 2010, 1922, )
+	
+	YEAR, 
+	
+	--**
+	-- Month (1-12)
+	
+	MONTH, 
+	
+	--**
+	-- Day (1-31)
+	
+	DAY, 
+	
+	--**
+	-- Hour (0-23)
+	
+	HOUR,
+		
+	--**
+	-- Minute (0-59)
+	
+	MINUTE,
+		
+	--**
+	-- Second (0-59)
+	
+	SECOND
+
+--****
+-- === Intervals
+--
+-- These constant enums are to be used with the [[:add]] and [[:subtract]] routines.
 --
 
---**
--- Accessors
--- * ##YEAR##
--- * ##MONTH##
--- * ##DAY##
--- * ##HOUR##
--- * ##MINUTE##
--- * ##SECOND##
+public enum 
+	--**
+	-- Years
+	YEARS,
+		
+	--**
+	-- Months
+	MONTHS, 
 
-public enum YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
+	--**
+	-- Weeks
+	WEEKS, 
 
---**
--- Intervals
--- * ##YEARS##
--- * ##MONTHS##
--- * ##WEEKS##
--- * ##DAYS##
--- * ##HOURS##
--- * ##MINUTES##
--- * ##SECONDS##
--- * ##DATE##
+	--**
+	-- Days
+	DAYS,
+	
+	--**
+	-- Hours
+	HOURS,
+	
+	--**
+	-- Minutes
+	MINUTES, 
 
-public enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
+	--**
+	-- Seconds
+	SECONDS, 
+
+	--**
+	-- Date
+	DATE
 
 --****
 -- === Types
@@ -323,7 +364,7 @@ public enum YEARS, MONTHS, WEEKS, DAYS, HOURS, MINUTES, SECONDS, DATE
 -- datetime type
 --
 -- Parameters:
---              # ##obj## : any object, so no crash takes place.
+--   # ##obj## : any object, so no crash takes place.
 --
 -- Comments:
 -- A datetime type consists of a sequence of length 6 in the form
@@ -458,10 +499,11 @@ end type
 -- sequence.
 --
 -- Parameters:
---              # ##src## : a sequence which date() might have returned
+--   # ##src## : a sequence which date() might have returned
 --
 -- Returns:
---              A **sequence**, more precisely a **datetime** corresponding to the same moment in time.
+--   A **sequence**, more precisely a **datetime** corresponding to the same moment 
+--   in time.
 --
 -- Example 1:
 -- <eucode>
@@ -480,7 +522,8 @@ end function
 -- Create a new datetime value initialized with the current date and time
 --
 -- Returns:
---              A **sequence**, more precisely a **datetime** corresponding to the current moment in time.
+--   A **sequence**, more precisely a **datetime** corresponding to the current 
+--   moment in time.
 --
 -- Example 1:
 -- <eucode>
@@ -513,7 +556,10 @@ end function
 public function now_gmt()
 	sequence t1 = gmtime(time())
 
-	return {t1[TM_YEAR]+1900, t1[TM_MON]+1, t1[TM_MDAY], t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]}
+	return { 
+		t1[TM_YEAR] + 1900, t1[TM_MON] + 1, t1[TM_MDAY], 
+		t1[TM_HOUR], t1[TM_MIN], t1[TM_SEC]
+	}
 end function
 
 --**
@@ -522,12 +568,12 @@ end function
 -- !! TODO: test default parameter usage
 --
 -- Parameters:
---     # ##year## ~-- the full year.
---     # ##month## ~-- the month (1-12).
---     # ##day## ~-- the day of the month (1-31).
---     # ##hour## ~-- the hour (0-23) (defaults to 0)
---     # ##minute## ~-- the minute (0-59) (defaults to 0)
---     # ##second## ~-- the second (0-59) (defaults to 0)
+--   # ##year##   ~-- the full year.
+--   # ##month##  ~-- the month (1-12).
+--   # ##day##    ~-- the day of the month (1-31).
+--   # ##hour##   ~-- the hour (0-23) (defaults to 0)
+--   # ##minute## ~-- the minute (0-59) (defaults to 0)
+--   # ##second## ~-- the second (0-59) (defaults to 0)
 --
 -- Example 1:
 -- <eucode>
@@ -552,12 +598,10 @@ end function
 --**
 -- Create a new datetime value with a date of zeros.
 --
--- !! TODO: test
---
 -- Parameters:
---     # ##hour## : is the hour (0-23)
---     # ##minute## : is the minute (0-59)
---     # ##second## : is the second (0-59)
+--   # ##hour## : is the hour (0-23)
+--   # ##minute## : is the minute (0-59)
+--   # ##second## : is the second (0-59)
 --
 -- Example 1:
 -- <eucode>
@@ -576,10 +620,10 @@ end function
 -- Get the day of week of the datetime dt.
 --
 -- Parameters:
---              # ##dt## : a datetime to be queried.
+--    # ##dt## : a datetime to be queried.
 --
 -- Returns:
---              An **integer**, between 1 (Sunday) and 7 (Saturday).
+--    An **integer**, between 1 (Sunday) and 7 (Saturday).
 --
 -- Example 1:
 -- <eucode>
@@ -595,15 +639,16 @@ end function
 -- Get the Julian day of year of the supplied date.
 --
 -- Parameters:
---              # ##dt## : a datetime to be queried.
+--   # ##dt## : a datetime to be queried.
 --
 -- Returns:
---      An **integer**, between 1 and 366.
+--   An **integer**, between 1 and 366.
 --
 -- Comments:
---              For dates earlier than 1800, this routine may give inaccurate results if the date
--- applies to a country other than United Kingdom or a former colony thereof. The change from
--- Julian to Gregorian calendar took place much earlier in some other European countries.
+--   For dates earlier than 1800, this routine may give inaccurate results if the date
+--   applies to a country other than United Kingdom or a former colony thereof. The 
+--   change from Julian to Gregorian calendar took place much earlier in some other 
+--   European countries.
 --
 -- Example 1:
 -- <eucode>
@@ -619,10 +664,10 @@ end function
 -- Determine if ##dt## falls within leap year.
 --
 -- Parameters:
---              # ##dt## : a datetime to be queried.
+--   # ##dt## : a datetime to be queried.
 --
 -- Returns:
---     An **integer**, of 1 if leap year, otherwise 0.
+--   An **integer**, of 1 if leap year, otherwise 0.
 --
 -- Example 1:
 -- <eucode>
@@ -645,7 +690,7 @@ end function
 -- This takes into account leap year.
 --
 -- Parameters:
---              # ##dt## : a datetime to be queried.
+--   # ##dt## : a datetime to be queried.
 --
 -- Example 1:
 -- <eucode>
@@ -668,7 +713,7 @@ end function
 -- This takes into account leap year.
 --
 -- Parameters:
---     # ##dt## : a datetime to be queried.
+--   # ##dt## : a datetime to be queried.
 --
 -- Example 1:
 -- <eucode>
@@ -689,10 +734,10 @@ end function
 -- Convert a datetime value to the unix numeric format (seconds since ##EPOCH_1970##)
 --
 -- Parameters:
---              # ##dt## : a datetime to be queried.
+--   # ##dt## : a datetime to be queried.
 --
 -- Returns:
---              An **atom**, so this will not overflow during the winter 2038-2039.
+--   An **atom**, so this will not overflow during the winter 2038-2039.
 --
 --
 -- Example 1:
@@ -705,7 +750,7 @@ end function
 --     [[:from_unix]], [[:format]]
 
 public function to_unix(datetime dt)
-		return datetimeToSeconds(dt) - EPOCH_1970
+	return datetimeToSeconds(dt) - EPOCH_1970
 end function
 
 --**
@@ -715,7 +760,8 @@ end function
 --   # ##unix## : an atom, counting seconds elapsed since EPOCH.
 --
 -- Returns:
---   A **sequence**, more precisely a **datetime** representing the same moment in time.
+--   A **sequence**, more precisely a **datetime** representing the same moment 
+--   in time.
 --
 -- Example 1:
 -- <eucode>
@@ -727,7 +773,7 @@ end function
 --     [[:to_unix]], [[:from_date]], [[:now]], [[:new]]
 
 public function from_unix(atom unix)
-		return secondsToDateTime(EPOCH_1970 + unix)
+	return secondsToDateTime(EPOCH_1970 + unix)
 end function
 
 --**
@@ -735,38 +781,37 @@ end function
 --
 -- Parameters:
 --   # ##d## : a datetime which is to be printed out
---   # ##pattern## : a format string, similar to the ones sprintf() uses, but with some Unicode encoding.
---   The default is "%Y-%m-%d %H:%M:%S".
+--   # ##pattern## : a format string, similar to the ones sprintf() uses, but with 
+--     some Unicode encoding. The default is "%Y-%m-%d %H:%M:%S".
 --
 -- Returns:
 --  A **string**, with the date ##d## formatted according to the specification in ##pattern##.
 --
 -- Comments:
---
 -- Pattern string can include the following specifiers~:
 --
--- * ##~%%## ~--  a literal %
--- * ##%a## ~--  locale's abbreviated weekday name (e.g., Sun)
--- * ##%A## ~--  locale's full weekday name (e.g., Sunday)
--- * ##%b## ~--  locale's abbreviated month name (e.g., Jan)
--- * ##%B## ~--  locale's full month name (e.g., January)
--- * ##%C## ~--  century; like %Y, except omit last two digits (e.g., 21)
--- * ##%d## ~--  day of month (e.g, 01)
--- * ##%H## ~--  hour (00..23)
--- * ##%I## ~--  hour (01..12)
+-- * ##~%%## ~-- a literal %
+-- * ##%a## ~-- locale's abbreviated weekday name (e.g., Sun)
+-- * ##%A## ~-- locale's full weekday name (e.g., Sunday)
+-- * ##%b## ~-- locale's abbreviated month name (e.g., Jan)
+-- * ##%B## ~-- locale's full month name (e.g., January)
+-- * ##%C## ~-- century; like %Y, except omit last two digits (e.g., 21)
+-- * ##%d## ~-- day of month (e.g, 01)
+-- * ##%H## ~-- hour (00..23)
+-- * ##%I## ~-- hour (01..12)
 -- * ##%j## ~-- day of year (001..366)
--- * ##%k## ~--  hour ( 0..23)
--- * ##%l## ~--  hour ( 1..12)
--- * ##%m## ~--  month (01..12)
+-- * ##%k## ~-- hour ( 0..23)
+-- * ##%l## ~-- hour ( 1..12)
+-- * ##%m## ~-- month (01..12)
 -- * ##%M## ~-- minute (00..59)
 -- * ##%p## ~-- locale's equivalent of either AM or PM; blank if not known
--- * ##%P## ~--  like %p, but lower case
--- * ##%s## ~--  seconds since 1970-01-01 00:00:00 UTC
--- * ##%S## ~--  second (00..60)
--- * ##%u## ~--  day of week (1..7); 1 is Monday
--- * ##%w## ~--  day of week (0..6); 0 is Sunday
--- * ##%y## ~--  last two digits of year (00..99)
--- * ##%Y## ~--  year
+-- * ##%P## ~-- like %p, but lower case
+-- * ##%s## ~-- seconds since 1970-01-01 00:00:00 UTC
+-- * ##%S## ~-- second (00..60)
+-- * ##%u## ~-- day of week (1..7); 1 is Monday
+-- * ##%w## ~-- day of week (0..6); 0 is Sunday
+-- * ##%y## ~-- last two digits of year (00..99)
+-- * ##%Y## ~-- year
 --
 -- Example 1:
 -- <eucode>
@@ -973,6 +1018,9 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 					epos += 1
 				end while
 				
+				if spos > length(val) then
+					return -1
+				end if
 				got = value(val[spos .. epos-1], , GET_LONG_ANSWER)
 				if got[1] != GET_SUCCESS then
 					return -1
@@ -1120,14 +1168,15 @@ end function
 -- Compute the difference, in seconds, between two dates.
 --
 -- Parameters:
---              # ##dt1## : the end datetime
---              # ##dt2## : the start datetime
+--   # ##dt1## : the end datetime
+--   # ##dt2## : the start datetime
 --
 -- Returns:
---              An **atom**, the number of seconds elapsed from ##dt2## to ##dt1##.
+--   An **atom**, the number of seconds elapsed from ##dt2## to ##dt1##.
 --
 -- Comments:
---     ##dt2## is subtracted from ##dt1##, therefore, you can come up with a negative value.
+--   ##dt2## is subtracted from ##dt1##, therefore, you can come up with a negative 
+--   value.
 --
 -- Example 1:
 -- <eucode>

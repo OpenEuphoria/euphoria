@@ -21,6 +21,7 @@
 #endif
 #include "alldefs.h"
 #include "be_runtime.h"
+#include "be_w.h"
 
 /******************/
 /* Local defines  */

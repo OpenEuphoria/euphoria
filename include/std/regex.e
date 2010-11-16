@@ -1,22 +1,12 @@
--- (c) Copyright - See License.txt
-namespace regex
-
-include std/math.e
-include std/text.e
-include std/types.e
-include std/flags.e as flags
-include std/error.e
-include std/search.e
-
 --****
 -- == Regular Expressions
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Introduction
 --
 -- Regular expressions in Euphoria are based on the PCRE (Perl Compatible Regular Expressions)
--- library created by Philip Hazel.  
+-- library created by Philip Hazel.
 --
 -- This document will detail the Euphoria interface to Regular Expressions, not really
 -- regular expression syntax. It is a very complex subject that many books have been
@@ -29,6 +19,7 @@ include std/search.e
 --   expressions for just about any task).
 -- * [[WikiPedia Regular Expression Article -> http://en.wikipedia.org/wiki/Regular_expression]]
 -- * [[Man page of PCRE in HTML -> http://www.slabihoud.de/software/archives/pcrecompat.html]]
+--
 -- === General Use
 --
 -- Many functions take an optional ##options## parameter. This parameter can be either
@@ -42,33 +33,49 @@ include std/search.e
 -- UTF which uses multiple bytes to encode UNICODE characters. You can
 -- use UTF8 encoded UNICODE strings when you pass the UTF8 option.
 
-enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_MESSAGE=95, M_PCRE_GET_OVECTOR_SIZE=97
+namespace regex
+
+include std/error.e
+include std/flags.e as flags
+include std/machine.e
+include std/math.e
+include std/search.e
+include std/text.e
+include std/types.e
+
+enum 
+	M_PCRE_COMPILE          = 68,
+	M_PCRE_EXEC             = 70,
+	M_PCRE_REPLACE          = 71,
+	M_PCRE_ERROR_MESSAGE    = 95,
+	M_PCRE_GET_OVECTOR_SIZE = 97,
+	$
 
 --****
 -- === Option Constants
 --
 -- ==== Compile Time and Match Time
 --
--- When a regular expression object is created via ##new## we call also say it get's "compiled."  
+-- When a regular expression object is created via ##new## we call also say it get's "compiled."
 -- The options you may use for this are called "compile time" option constants.  Once
 -- the regular expression is created you can use the other functions that take this regular
 -- expression and a string.  These routines' options are called "match time" option constants.
 -- To not set any options at all, do not supply the options argument or supply [[:DEFAULT]].
--- 
+--
 -- ===== Compile Time Option Constants
 --
 --     The only options that may set at "compile time"; that is, to pass to ##new##;
---     are [[:ANCHORED]], [[:AUTO_CALLOUT]], [[:BSR_ANYCRLF]], [[:BSR_UNICODE]], [[:CASELESS]], 
---     [[:DEFAULT]], [[:DOLLAR_ENDONLY]], [[:DOTALL]], [[:DUPNAMES]], [[:EXTENDED]], [[:EXTRA]], 
---     [[:FIRSTLINE]], [[:MULTILINE]], [[:NEWLINE_CR]], [[:NEWLINE_LF]], [[:NEWLINE_CRLF]], 
---     [[:NEWLINE_ANY]], [[:NEWLINE_ANYCRLF]],  [[:NO_AUTO_CAPTURE]], [[:NO_UTF8_CHECK]], 
+--     are [[:ANCHORED]], [[:AUTO_CALLOUT]], [[:BSR_ANYCRLF]], [[:BSR_UNICODE]], [[:CASELESS]],
+--     [[:DEFAULT]], [[:DOLLAR_ENDONLY]], [[:DOTALL]], [[:DUPNAMES]], [[:EXTENDED]], [[:EXTRA]],
+--     [[:FIRSTLINE]], [[:MULTILINE]], [[:NEWLINE_CR]], [[:NEWLINE_LF]], [[:NEWLINE_CRLF]],
+--     [[:NEWLINE_ANY]], [[:NEWLINE_ANYCRLF]],  [[:NO_AUTO_CAPTURE]], [[:NO_UTF8_CHECK]],
 --     [[:UNGREEDY]], and [[:UTF8]].
 --
 --
 -- ===== Match Time Option Constants
 --
 --     Options that may be set at "match time" are [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
---     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]], 
+--     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]],
 --     [[:NOTEMPTY]], [[:NO_UTF8_CHECK]].  Routines that take match time option constants match,
 --     split or replace a regular expression against some string.
 --
@@ -80,7 +87,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 --
 -- Description:
 -- Forces matches to be only from the first place it is asked to
--- try to make a search.  
+-- try to make a search.
 -- In C, this is called PCRE_ANCHORED.
 -- This is passed to all routines including [[:new]].
 
@@ -100,7 +107,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 --
 -- Description:
 -- With this option only ASCII new line sequences are recognized as newlines.  Other UNICODE
--- newline sequences (encoded as UTF8) are not recognized as an end of line marker.  
+-- newline sequences (encoded as UTF8) are not recognized as an end of line marker.
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -117,7 +124,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant CASELESS
 --
 -- Description:
--- This will make your regular expression matches case insensitive.  With this 
+-- This will make your regular expression matches case insensitive.  With this
 -- flag for example, [a-z] is the same as [A-Za-z].
 -- This is passed to [[:new]].
 
@@ -147,14 +154,14 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- Signature:
 -- public constant DOLLAR_ENDONLY
 --
--- Description: 
+-- Description:
 -- If this bit is set, a dollar sign metacharacter in the pattern matches only
 -- at the end of the subject string. Without this option,  a  dollar sign  also
 -- matches  immediately before a newline at the end of the string (but not
 -- before any other newlines). Thus you must include the newline character
 -- in the pattern before the dollar sign if you want to match a line that contanis
--- a newline character.  
--- The DOLLAR_ENDONLY option  is  ignored if  MULTILINE  is  set.     
+-- a newline character.
+-- The DOLLAR_ENDONLY option  is  ignored if  MULTILINE  is  set.
 -- There is no way to set this option within a pattern.
 -- This is passed to [[:new]].
 
@@ -180,7 +187,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant EXTENDED
 --
 -- Description:
--- Whitespace and characters beginning with a hash mark to the end of the line 
+-- Whitespace and characters beginning with a hash mark to the end of the line
 -- in the pattern will be ignored when searching except when the whitespace or hash
 -- is escaped or in a character class.
 -- This is passed to [[:new]].
@@ -190,7 +197,7 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant EXTRA
 --
 -- Description:
--- When an alphanumeric follows a backslash(\) has no special meaning an 
+-- When an alphanumeric follows a backslash(\) has no special meaning an
 -- error is generated.
 -- This is passed to [[:new]].
 
@@ -271,8 +278,8 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 --
 -- Description:
 -- This indicates that beginning of the passed string does **NOT** start
--- at the **B**eginning **O**f a **L**ine (NOTBOL), so a carrot symbol (^) in the 
--- original pattern will not match the beginning of the string. 
+-- at the **B**eginning **O**f a **L**ine (NOTBOL), so a carrot symbol (^) in the
+-- original pattern will not match the beginning of the string.
 -- This is used by routines other than [[:new]].
 
 --****
@@ -281,8 +288,8 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 --
 -- Description:
 -- This indicates that end of the passed string does **NOT** end
--- at the **E**nd **O**f a **L**ine (NOTEOL), so a dollar sign ($) in the 
--- original pattern will not match the end of the string. 
+-- at the **E**nd **O**f a **L**ine (NOTEOL), so a dollar sign ($) in the
+-- original pattern will not match the end of the string.
 -- This is used by routines other than [[:new]].
 
 --****
@@ -319,10 +326,17 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- public constant PARTIAL
 --
 -- Description:
--- This option has no effect with these routines.  Refer to the C documentation
--- for what it does in C.
+-- This option has no effect on whether a match will occur or not.
+-- However, it does affect the error code generated by [[:find]] in the event of a failure:
+-- If for some pattern ##re##, and two strings ##s1## and ##s2##,
+-- ##find( re, s1 & s2 )## would return a match
+-- but both ##find( re, s1 )## and ##find( re, s2 )## would not,
+-- then ##find( re, s1, 1, PCRE_PARTIAL )##
+-- will return ##ERROR_PARTIAL## rather than ##ERROR_NOMATCH##.
+-- We say ##s1## has a *partial match* of ##re##.
+--
+-- Note that ##find( re, s2, 1, PCRE_PARTIAL )## will ##ERROR_NOMATCH##.
 -- In C, this constant is called PCRE_PARTIAL.
--- This is used by routines other than [[:new]].
 
 --****
 -- Signature:
@@ -334,9 +348,9 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 --****
 -- Signature:
 -- public constant UNGREEDY
--- This modifier sets the pattern such that quantifiers are 
--- not greedy by default, but become greedy if followed by a question mark.  
--- 
+-- This modifier sets the pattern such that quantifiers are
+-- not greedy by default, but become greedy if followed by a question mark.
+--
 -- Description:
 -- This is passed to [[:new]].
 
@@ -348,156 +362,156 @@ enum M_PCRE_COMPILE=68, M_PCRE_FREE, M_PCRE_EXEC, M_PCRE_REPLACE, M_PCRE_ERROR_M
 -- Makes strings passed in to be interpreted as a UTF8 encoded string.
 -- This is passed to [[:new]].
 
-public constant 
-        DEFAULT            = #00000000,
-        CASELESS           = #00000001,
-        MULTILINE          = #00000002,
-        DOTALL             = #00000004,
-        EXTENDED           = #00000008,
-        ANCHORED           = #00000010,
-        DOLLAR_ENDONLY     = #00000020,
-        EXTRA              = #00000040,
-        NOTBOL             = #00000080,
-        NOTEOL             = #00000100,
-        UNGREEDY           = #00000200,
-        NOTEMPTY           = #00000400,
-        UTF8               = #00000800,
-        NO_AUTO_CAPTURE    = #00001000,
-        NO_UTF8_CHECK      = #00002000,
-        AUTO_CALLOUT       = #00004000,
-        PARTIAL            = #00008000,
-        DFA_SHORTEST       = #00010000,
-        DFA_RESTART        = #00020000,
-        FIRSTLINE          = #00040000,
-        DUPNAMES           = #00080000,
-        NEWLINE_CR         = #00100000,
-        NEWLINE_LF         = #00200000,
-        NEWLINE_CRLF       = #00300000,
-        NEWLINE_ANY        = #00400000,
-        NEWLINE_ANYCRLF    = #00500000,
-        BSR_ANYCRLF        = #00800000,
-        BSR_UNICODE        = #01000000,
-        STRING_OFFSETS     = #0C000000
+public constant
+	DEFAULT            = #00000000,
+	CASELESS           = #00000001,
+	MULTILINE          = #00000002,
+	DOTALL             = #00000004,
+	EXTENDED           = #00000008,
+	ANCHORED           = #00000010,
+	DOLLAR_ENDONLY     = #00000020,
+	EXTRA              = #00000040,
+	NOTBOL             = #00000080,
+	NOTEOL             = #00000100,
+	UNGREEDY           = #00000200,
+	NOTEMPTY           = #00000400,
+	UTF8               = #00000800,
+	NO_AUTO_CAPTURE    = #00001000,
+	NO_UTF8_CHECK      = #00002000,
+	AUTO_CALLOUT       = #00004000,
+	PARTIAL            = #00008000,
+	DFA_SHORTEST       = #00010000,
+	DFA_RESTART        = #00020000,
+	FIRSTLINE          = #00040000,
+	DUPNAMES           = #00080000,
+	NEWLINE_CR         = #00100000,
+	NEWLINE_LF         = #00200000,
+	NEWLINE_CRLF       = #00300000,
+	NEWLINE_ANY        = #00400000,
+	NEWLINE_ANYCRLF    = #00500000,
+	BSR_ANYCRLF        = #00800000,
+	BSR_UNICODE        = #01000000,
+	STRING_OFFSETS     = #0C000000
 
-constant option_names = {  
-        { DEFAULT, "DEFAULT" },
-        { CASELESS, "CASELESS" },
-        { MULTILINE, "MULTILINE" },
-        { DOTALL, "DOTALL" },
-        { EXTENDED, "EXTENDED" },
-        { ANCHORED, "ANCHORED" },
-        { DOLLAR_ENDONLY, "DOLLAR_ENDONLY" },
-        { EXTRA, "EXTRA" },
-        { NOTBOL, "NOTBOL" },
-        { NOTEOL, "NOTEOL" },
-        { UNGREEDY, "UNGREEDY" },
-        { NOTEMPTY, "NOTEMPTY" },
-        { UTF8, "UTF8" },
-        { NO_AUTO_CAPTURE, "NO_AUTO_CAPTURE" },
-        { NO_UTF8_CHECK, "NO_UTF8_CHECK" },
-        { AUTO_CALLOUT, "AUTO_CALLOUT" },
-        { PARTIAL, "PARTIAL" },
-        { DFA_SHORTEST, "DFA_SHORTEST" },
-        { DFA_RESTART, "DFA_RESTART" },
-        { FIRSTLINE, "FIRSTLINE" },
-        { DUPNAMES, "DUPNAMES" },
-        { NEWLINE_CR, "NEWLINE_CR" },
-        { NEWLINE_LF, "NEWLINE_LF" },
-        { NEWLINE_CRLF, "NEWLINE_CRLF" },
-        { NEWLINE_ANY, "NEWLINE_ANY" },
-        { NEWLINE_ANYCRLF, "NEWLINE_ANYCRLF" },
-        { BSR_ANYCRLF, "BSR_ANYCRLF" },
-        { BSR_UNICODE, "BSR_UNICODE" },
-        { STRING_OFFSETS, "STRING_OFFSETS" }
-	}		
+constant option_names = {
+	{ DEFAULT,         "DEFAULT"         },
+	{ CASELESS,        "CASELESS"        },
+	{ MULTILINE,       "MULTILINE"       },
+	{ DOTALL,          "DOTALL"          },
+	{ EXTENDED,        "EXTENDED"        },
+	{ ANCHORED,        "ANCHORED"        },
+	{ DOLLAR_ENDONLY,  "DOLLAR_ENDONLY"  },
+	{ EXTRA,           "EXTRA"           },
+	{ NOTBOL,          "NOTBOL"          },
+	{ NOTEOL,          "NOTEOL"          },
+	{ UNGREEDY,        "UNGREEDY"        },
+	{ NOTEMPTY,        "NOTEMPTY"        },
+	{ UTF8,            "UTF8"            },
+	{ NO_AUTO_CAPTURE, "NO_AUTO_CAPTURE" },
+	{ NO_UTF8_CHECK,   "NO_UTF8_CHECK"   },
+	{ AUTO_CALLOUT,    "AUTO_CALLOUT"    },
+	{ PARTIAL,         "PARTIAL"         },
+	{ DFA_SHORTEST,    "DFA_SHORTEST"    },
+	{ DFA_RESTART,     "DFA_RESTART"     },
+	{ FIRSTLINE,       "FIRSTLINE"       },
+	{ DUPNAMES,        "DUPNAMES"        },
+	{ NEWLINE_CR,      "NEWLINE_CR"      },
+	{ NEWLINE_LF,      "NEWLINE_LF"      },
+	{ NEWLINE_CRLF,    "NEWLINE_CRLF"    },
+	{ NEWLINE_ANY,     "NEWLINE_ANY"     },
+	{ NEWLINE_ANYCRLF, "NEWLINE_ANYCRLF" },
+	{ BSR_ANYCRLF,     "BSR_ANYCRLF"     },
+	{ BSR_UNICODE,     "BSR_UNICODE"     },
+	{ STRING_OFFSETS,  "STRING_OFFSETS"  }
+}
 
 --****
 -- === Error Constants
 
 public constant
-        ERROR_NOMATCH        =  (-1),
-        ERROR_NULL           =  (-2),
-        ERROR_BADOPTION      =  (-3),
-        ERROR_BADMAGIC       =  (-4),
-        ERROR_UNKNOWN_OPCODE =  (-5),
-        ERROR_UNKNOWN_NODE   =  (-5),
-        ERROR_NOMEMORY       =  (-6),
-        ERROR_NOSUBSTRING    =  (-7),
-        ERROR_MATCHLIMIT     =  (-8),
-        ERROR_CALLOUT        =  (-9),
-        ERROR_BADUTF8        = (-10),
-        ERROR_BADUTF8_OFFSET = (-11),
-        ERROR_PARTIAL        = (-12),
-        ERROR_BADPARTIAL     = (-13),
-        ERROR_INTERNAL       = (-14),
-        ERROR_BADCOUNT       = (-15),
-        ERROR_DFA_UITEM      = (-16),
-        ERROR_DFA_UCOND      = (-17),
-        ERROR_DFA_UMLIMIT    = (-18),
-        ERROR_DFA_WSSIZE     = (-19),
-        ERROR_DFA_RECURSE    = (-20),
-        ERROR_RECURSIONLIMIT = (-21),
-        ERROR_NULLWSLIMIT    = (-22),
-        ERROR_BADNEWLINE     = (-23)
+	ERROR_NOMATCH        =  (-1),
+	ERROR_NULL           =  (-2),
+	ERROR_BADOPTION      =  (-3),
+	ERROR_BADMAGIC       =  (-4),
+	ERROR_UNKNOWN_OPCODE =  (-5),
+	ERROR_UNKNOWN_NODE   =  (-5),
+	ERROR_NOMEMORY       =  (-6),
+	ERROR_NOSUBSTRING    =  (-7),
+	ERROR_MATCHLIMIT     =  (-8),
+	ERROR_CALLOUT        =  (-9),
+	ERROR_BADUTF8        = (-10),
+	ERROR_BADUTF8_OFFSET = (-11),
+	ERROR_PARTIAL        = (-12),
+	ERROR_BADPARTIAL     = (-13),
+	ERROR_INTERNAL       = (-14),
+	ERROR_BADCOUNT       = (-15),
+	ERROR_DFA_UITEM      = (-16),
+	ERROR_DFA_UCOND      = (-17),
+	ERROR_DFA_UMLIMIT    = (-18),
+	ERROR_DFA_WSSIZE     = (-19),
+	ERROR_DFA_RECURSE    = (-20),
+	ERROR_RECURSIONLIMIT = (-21),
+	ERROR_NULLWSLIMIT    = (-22),
+	ERROR_BADNEWLINE     = (-23)
 
 public constant error_names = {
-        {ERROR_NOMATCH        ,"ERROR_NOMATCH"},
-        {ERROR_NULL           ,"ERROR_NULL"},
-        {ERROR_BADOPTION      ,"ERROR_BADOPTION"},
-        {ERROR_BADMAGIC       ,"ERROR_BADMAGIC"},
-        {ERROR_UNKNOWN_OPCODE ,"ERROR_UNKNOWN_OPCODE"},
-        {ERROR_UNKNOWN_NODE   ,"ERROR_UNKNOWN_NODE"},
-        {ERROR_NOMEMORY       ,"ERROR_NOMEMORY"},
-        {ERROR_NOSUBSTRING    ,"ERROR_NOSUBSTRING"},
-        {ERROR_MATCHLIMIT     ,"ERROR_MATCHLIMIT"},
-        {ERROR_CALLOUT        ,"ERROR_CALLOUT"},
-        {ERROR_BADUTF8        ,"ERROR_BADUTF8"},
-        {ERROR_BADUTF8_OFFSET ,"ERROR_BADUTF8_OFFSET"},
-        {ERROR_PARTIAL        ,"ERROR_PARTIAL"},
-        {ERROR_BADPARTIAL     ,"ERROR_BADPARTIAL"},
-        {ERROR_INTERNAL       ,"ERROR_INTERNAL"},
-        {ERROR_BADCOUNT       ,"ERROR_BADCOUNT"},
-        {ERROR_DFA_UITEM      ,"ERROR_DFA_UITEM"},
-        {ERROR_DFA_UCOND      ,"ERROR_DFA_UCOND"},
-        {ERROR_DFA_UMLIMIT    ,"ERROR_DFA_UMLIMIT"},
-        {ERROR_DFA_WSSIZE     ,"ERROR_DFA_WSSIZE"},
-        {ERROR_DFA_RECURSE    ,"ERROR_DFA_RECURSE"},
-        {ERROR_RECURSIONLIMIT ,"ERROR_RECURSIONLIMIT"},
-        {ERROR_NULLWSLIMIT    ,"ERROR_NULLWSLIMIT"},
-        {ERROR_BADNEWLINE     ,"ERROR_BADNEWLINE"}
+	{ERROR_NOMATCH,        "ERROR_NOMATCH"             },
+	{ERROR_NULL,           "ERROR_NULL"                },
+	{ERROR_BADOPTION,      "ERROR_BADOPTION"           },
+	{ERROR_BADMAGIC,       "ERROR_BADMAGIC"            },
+	{ERROR_UNKNOWN_OPCODE, "ERROR_UNKNOWN_OPCODE/NODE" },
+	{ERROR_UNKNOWN_NODE,   "ERROR_UNKNOWN_OPCODE/NODE" },
+	{ERROR_NOMEMORY,       "ERROR_NOMEMORY"            },
+	{ERROR_NOSUBSTRING,    "ERROR_NOSUBSTRING"         },
+	{ERROR_MATCHLIMIT,     "ERROR_MATCHLIMIT"          },
+	{ERROR_CALLOUT,        "ERROR_CALLOUT"             },
+	{ERROR_BADUTF8,        "ERROR_BADUTF8"             },
+	{ERROR_BADUTF8_OFFSET, "ERROR_BADUTF8_OFFSET"      },
+	{ERROR_PARTIAL,        "ERROR_PARTIAL"             },
+	{ERROR_BADPARTIAL,     "ERROR_BADPARTIAL"          },
+	{ERROR_INTERNAL,       "ERROR_INTERNAL"            },
+	{ERROR_BADCOUNT,       "ERROR_BADCOUNT"            },
+	{ERROR_DFA_UITEM,      "ERROR_DFA_UITEM"           },
+	{ERROR_DFA_UCOND,      "ERROR_DFA_UCOND"           },
+	{ERROR_DFA_UMLIMIT,    "ERROR_DFA_UMLIMIT"         },
+	{ERROR_DFA_WSSIZE,     "ERROR_DFA_WSSIZE"          },
+	{ERROR_DFA_RECURSE,    "ERROR_DFA_RECURSE"         },
+	{ERROR_RECURSIONLIMIT, "ERROR_RECURSIONLIMIT"      },
+	{ERROR_NULLWSLIMIT,    "ERROR_NULLWSLIMIT"         },
+	{ERROR_BADNEWLINE,     "ERROR_BADNEWLINE"          }
 }
-		
+
 constant all_options = or_all({
-	    DEFAULT            ,
-        CASELESS           ,
-        MULTILINE          ,
-        DOTALL             ,
-        EXTENDED           ,
-        ANCHORED           ,
-        DOLLAR_ENDONLY     ,
-        EXTRA              ,
-        NOTBOL             ,
-        NOTEOL             ,
-        UNGREEDY           ,
-        NOTEMPTY           ,
-        UTF8               ,
-        NO_AUTO_CAPTURE    ,
-        NO_UTF8_CHECK      ,
-        AUTO_CALLOUT       ,
-        PARTIAL            ,
-        DFA_SHORTEST       ,
-        DFA_RESTART        ,
-        FIRSTLINE          ,
-        DUPNAMES           ,
-        NEWLINE_CR         ,
-        NEWLINE_LF         ,
-        NEWLINE_CRLF       ,
-        NEWLINE_ANY        ,
-        NEWLINE_ANYCRLF    ,
-        BSR_ANYCRLF        ,
-        BSR_UNICODE        ,
-        STRING_OFFSETS})
-		
+	DEFAULT,
+	CASELESS,
+	MULTILINE,
+	DOTALL,
+	EXTENDED,
+	ANCHORED,
+	DOLLAR_ENDONLY,
+	EXTRA,
+	NOTBOL,
+	NOTEOL,
+	UNGREEDY,
+	NOTEMPTY,
+	UTF8,
+	NO_AUTO_CAPTURE,
+	NO_UTF8_CHECK,
+	AUTO_CALLOUT,
+	PARTIAL,
+	DFA_SHORTEST,
+	DFA_RESTART,
+	FIRSTLINE,
+	DUPNAMES,
+	NEWLINE_CR,
+	NEWLINE_LF,
+	NEWLINE_CRLF,
+	NEWLINE_ANY,
+	NEWLINE_ANYCRLF,
+	BSR_ANYCRLF,
+	BSR_UNICODE,
+	STRING_OFFSETS
+})
 
 --****
 -- === Create/Destroy
@@ -506,7 +520,7 @@ constant all_options = or_all({
 -- Regular expression type
 
 public type regex(object o)
-        return sequence(o)
+	return sequence(o)
 end type
 
 --**
@@ -514,6 +528,7 @@ end type
 --
 -- Although the functions do not use this type (they return an error instead),
 -- you can use this to check if your routine is receiving something sane.
+
 public type option_spec(object o)
 	if atom(o) then
 		if not integer(o) then
@@ -534,23 +549,25 @@ end type
 
 --**
 -- Converts an option spec to a string.
--- 
+--
 -- This can be useful for debugging what options were passed in.
 -- Without it you have to convert a number to hex and lookup the
 -- constants in the source code.
+
 public function option_spec_to_string(option_spec o)
 	return flags:flags_to_string(o, option_names)
 end function
 
 --**
--- Converts an regex error to a string. 
--- 
+-- Converts an regex error to a string.
+--
 -- This can be useful for debugging and even something rough to give to
--- the user incase of a regex failure.  It's preferable to 
+-- the user incase of a regex failure.  It's preferable to
 -- a number.
--- 
+--
 -- See Also:
 -- [[:error_message]]
+
 public function error_to_string(integer i)
 	if i >= 0 or i < -23 then
 		return sprintf("%d",{i})
@@ -564,10 +581,10 @@ end function
 --
 -- Parameters:
 --   # ##pattern## : a sequence representing a human readable regular expression
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Compile Time Option Constants]]. 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Compile Time Option Constants]].
 --
 -- Returns:
---   A **regex**, which other regular expression routines can work on or an atom to indicate an 
+--   A **regex**, which other regular expression routines can work on or an atom to indicate an
 --   error. If an error, you can call [[:error_message]] to get a detailed error message.
 --
 -- Comments:
@@ -581,7 +598,7 @@ end function
 --   <eucode>
 --   -- Bad Example
 --   include std/regex.e as re
---  
+--
 --   while sequence(line) do
 --       re:regex proper_name = re:new("[A-Z][a-z]+ [A-Z][a-z]+")
 --       if re:find(proper_name, line) then
@@ -608,8 +625,8 @@ end function
 --   </eucode>
 --
 -- Note:
---   For simple matches, the built-in Euphoria 
---   routine [[:eu:match]] and the library routine [[:wildcard:is_match]] 
+--   For simple matches, the built-in Euphoria
+--   routine [[:eu:match]] and the library routine [[:wildcard:is_match]]
 --   are often times easier to use and
 --   a little faster. Regular expressions are faster for complex searching/matching.
 --
@@ -617,12 +634,14 @@ end function
 --   [[:error_message]], [[:find]], [[:find_all]]
 
 public function new(string pattern, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
-        
-        -- concatenation ensures we really get a new sequence, and don't just use the
-        -- one passed in, which could be another regex previously created...this may
-        -- be a bug with the refcount/delete_instance/regex code
-        return machine_func(M_PCRE_COMPILE, { pattern, options })
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
+		
+	-- concatenation ensures we really get a new sequence, and don't just use the
+	-- one passed in, which could be another regex previously created...this may
+	-- be a bug with the refcount/delete_instance/regex code
+	return machine_func(M_PCRE_COMPILE, { pattern, options })
 end function
 
 --**
@@ -646,12 +665,12 @@ end function
 --
 
 public function error_message(object re)
-        return machine_func(M_PCRE_ERROR_MESSAGE, { re })
+	return machine_func(M_PCRE_ERROR_MESSAGE, { re })
 end function
 
 --****
 -- === Utility Routines
--- 
+--
 
 --**
 -- Escape special regular expression characters that may be entered into a search
@@ -662,13 +681,13 @@ end function
 --       {{{
 --   . \ + * ? [ ^ ] $ ( ) { } = ! < > | : -
 --       }}}
---       
+--
 -- Parameters:
 --   # ##s##: string sequence to escape
---       
+--
 -- Returns:
 --   An escaped ##sequence## representing ##s##.
---       
+--
 -- Example 1:
 -- <eucode>
 -- include std/regex.e as re
@@ -678,7 +697,7 @@ end function
 --
 
 public function escape(string s)
-        return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
+	return text:escape(s, ".\\+*?[^]$(){}=!<>|:-")
 end function
 
 --**
@@ -693,12 +712,12 @@ end function
 --
 
 public function get_ovector_size(regex ex, integer maxsize=0)
-        
-        integer m = machine_func(M_PCRE_GET_OVECTOR_SIZE, {ex})
-        if (m > maxsize) then
-                return maxsize
-        end if
-        return m+1
+	integer m = machine_func(M_PCRE_GET_OVECTOR_SIZE, {ex})
+	if (m > maxsize) then
+		return maxsize
+	end if
+	
+	return m+1
 end function
 
 --****
@@ -712,19 +731,38 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].  
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
 --     The only options that
 --     may be set when calling find are [[:ANCHORED]], [[:NEWLINE_CR]], [[:NEWLINE_LF]],
---     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]], 
+--     [[:NEWLINE_CRLF]], [[:NEWLINE_ANY]] [[:NEWLINE_ANYCRLF]] [[:NOTBOL]], [[:NOTEOL]],
 --     [[:NOTEMPTY]], and [[:NO_UTF8_CHECK]].
---     ##options## can be any match time option or a 
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
---   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in rare cases this number may need to be increased in order to accomodate complex regex expressions.
+--   # ##size## : internal (how large an array the C backend should allocate). Defaults to 90, in 
+--        rare cases this number may need to be increased in order to accomodate complex regex 
+--        expressions.
 --
 -- Returns:
---   An **object**, which is either an atom of 0, meaning nothing matched or a sequence of matched pairs.
---   For the explanation of the returned sequence, please see the first example.
+--   An **object**, which is either an atom of 0, meaning nothing matched or a sequence of 
+--   index pairs.  These index pairs may be fewer than the number of groups specified.  These
+--   index pairs may be the invalid index pair {0,0}.
+--
+--   The first pair is the starting and ending indeces of the sub-string that matches the 
+--   expression.  This pair may be followed by indeces of the groups.  The groups are 
+--   subexpressions in the regular expression surrounded by parenthesis ().  
+--
+--   Now, it is possible to get a match without having all of the groups match.
+--   This can happen when there is a quantifier after a group.  For example: '([01])*' or '([01])?'.
+--   In this case, the returned sequence of pairs will be missing the last group indeces for
+--   which there is no match.   
+--   However, if the missing group is followed by a group that *does* match, {0,0} will be 
+--   used as a place holder.
+--   You can ensure your groups match when your expression matches by keeping quantifiers 
+--   inside your groups: 
+--   For example use: '([01]?)' instead of '([01])?'
+--
+--
 --
 -- Example 1:
 --   <eucode>
@@ -742,12 +780,15 @@ end function
 --
 
 public function find(regex re, string haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
-        if sequence(options) then options = or_all(options) end if
-        if size < 0 then
-            size = 0
-        end if
-        
-        return machine_func(M_PCRE_EXEC, { re, haystack, options, from, size })
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
+	
+	if size < 0 then
+		size = 0
+	end if
+
+	return machine_func(M_PCRE_EXEC, { re, haystack, length(haystack), options, from, size })
 end function
 
 --**
@@ -761,8 +802,8 @@ end function
 --   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
 --
 -- Returns:
---   A **sequence** of **sequences** that were returned by [[:find]] and in the case of 
---   no matches this returns an empty **sequence**. 
+--   A **sequence** of **sequences** that were returned by [[:find]] and in the case of
+--   no matches this returns an empty **sequence**.
 --   Please see [[:find]] for a detailed description of each member of the return
 --   sequence.
 --
@@ -781,23 +822,32 @@ end function
 --   </eucode>
 --
 
-public function find_all(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
-
-        object result
-        sequence results = {}
-        while sequence(result) with entry do
-                results = append(results, result)
-                from = max(result) + 1
-
-                if from > length(haystack) then
-                        exit
-                end if
-        entry
-                result = find(re, haystack, from, options)
-        end while
-        
-        return results
+public function find_all(regex re, string haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
+	
+	if size < 0 then
+		size = 0
+	end if
+	
+	object result
+	sequence results = {}
+	atom pHaystack = allocate_string(haystack)
+	while sequence(result) with entry do
+		results = append(results, result)
+		from = max(result) + 1
+		
+		if from > length(haystack) then
+			exit
+		end if
+	entry
+		result = machine_func(M_PCRE_EXEC, { re, pHaystack, length(haystack), options, from, size })
+	end while
+	
+	free(pHaystack)
+	
+	return results
 end function
 
 --**
@@ -807,8 +857,8 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]]. 
---     ##options## can be any match time option or a 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
@@ -817,7 +867,7 @@ end function
 --
 
 public function has_match(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
-        return sequence(find(re, haystack, from, options))
+	return sequence(find(re, haystack, from, options))
 end function
 
 --**
@@ -828,7 +878,7 @@ end function
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
 --   # ##options## : defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
---     ##options## can be any match time option or a 
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
@@ -837,13 +887,13 @@ end function
 --
 
 public function is_match(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
-        object m = find(re, haystack, from, options)
-
-        if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
-                return 1
-        end if
-
-        return 0
+	object m = find(re, haystack, from, options)
+	
+	if sequence(m) and length(m) > 0 and m[1][1] = 1 and m[1][2] = length(haystack) then
+		return 1
+	end if
+	
+	return 0
 end function
 
 --**
@@ -853,14 +903,14 @@ end function
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
---   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]]. 
---     ##options## can be any match time option or STRING_OFFSETS or a 
+--   # ##options## : defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
+--     ##options## can be any match time option or STRING_OFFSETS or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
 -- Returns:
 --   Returns a **sequence** of strings, the first being the entire match and subsequent
---   items being each of the captured groups or **ERROR_NOMATCH** of there is no match. 
+--   items being each of the captured groups or **ERROR_NOMATCH** of there is no match.
 --   The size of the sequence is the number
 --   of groups in the expression plus one (for the entire match).
 --
@@ -894,45 +944,49 @@ end function
 --   [[:all_matches]]
 --
 public function matches(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
-        integer str_offsets = and_bits(STRING_OFFSETS, options)
-        object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
-
-        if atom(match_data) then return ERROR_NOMATCH end if
-
-        for i = 1 to length(match_data) do
-                sequence tmp 
-                if match_data[i][1] = 0 then
-                        tmp = ""
-                else
-                        tmp = haystack[match_data[i][1]..match_data[i][2]]
-                end if
-                if str_offsets then
-                        match_data[i] = { tmp, match_data[i][1], match_data[i][2] }
-                else
-                        match_data[i] = tmp
-                end if
-        end for
-
-        return match_data
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
+	integer str_offsets = and_bits(STRING_OFFSETS, options)
+	object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
+	
+	if atom(match_data) then 
+		return ERROR_NOMATCH 
+	end if
+			
+	for i = 1 to length(match_data) do
+		sequence tmp
+		if match_data[i][1] = 0 then
+			tmp = ""
+		else
+			tmp = haystack[match_data[i][1]..match_data[i][2]]
+		end if
+		if str_offsets then
+			match_data[i] = { tmp, match_data[i][1], match_data[i][2] }
+		else
+			match_data[i] = tmp
+		end if
+	end for
+	
+	return match_data
 end function
 
 --**
 -- Get the text of all matches
--- 
+--
 -- Parameters:
 --   # ##re## : a regex for a subject to be matched against
 --   # ##haystack## : a string in which to searched
 --   # ##from## : an integer setting the starting position to begin searching from. Defaults to 1
 --   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
---     ##options## can be any match time option or a 
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
 -- Returns:
---   Returns **ERROR_NOMATCH** if there are no matches, or a **sequence** of **sequences** of 
---   **strings** if there is at least one match. In each member sequence of the returned sequence, 
---   the first string is the entire match and subsequent items being each of the 
+--   Returns **ERROR_NOMATCH** if there are no matches, or a **sequence** of **sequences** of
+--   **strings** if there is at least one match. In each member sequence of the returned sequence,
+--   the first string is the entire match and subsequent items being each of the
 --   captured groups.  The size of the sequence is
 --   the number of groups in the expression plus one (for the entire match).  In other words,
 --   each member of the return value will be of the same structure of that is returned by
@@ -940,7 +994,7 @@ end function
 --
 --   If ##options## contains the bit [[:STRING_OFFSETS]], then the result is different.
 --   In each member sequence, instead of each member being a string each member is itself a sequence
---   containing the matched text, the starting index in ##haystack## and the ending 
+--   containing the matched text, the starting index in ##haystack## and the ending
 --   index in ##haystack##.
 --
 -- Example 1:
@@ -948,7 +1002,7 @@ end function
 --   include std/regex.e as re
 --   constant re_name = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 --
---   object matches = re:match_all(re_name, "John Doe and Jane Doe")
+--   object matches = re:all_matches(re_name, "John Doe and Jane Doe")
 --   -- matches is:
 --   -- {
 --   --   {             -- first match
@@ -963,7 +1017,7 @@ end function
 --   --   }
 --   -- }
 --
---   matches = re:match_all(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
+--   matches = re:all_matches(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
 --   -- matches is:
 --   -- {
 --   --   {                         -- first match
@@ -983,24 +1037,36 @@ end function
 --   [[:matches]]
 
 public function all_matches(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
-        integer str_offsets = and_bits(STRING_OFFSETS, options)
-        object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
+	integer str_offsets = and_bits(STRING_OFFSETS, options)
+	object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
+	
+	if length(match_data) = 0 then 
+		return ERROR_NOMATCH 
+	end if
+		
+	for i = 1 to length(match_data) do
+		for j = 1 to length(match_data[i]) do
+			sequence tmp
+			integer a,b
+			a = match_data[i][j][1]
+			if a = 0 then
+				tmp = ""
+			else
+				b = match_data[i][j][2]
+				tmp = haystack[a..b]
+			end if
+			if str_offsets then
+				match_data[i][j] = { tmp, a, b }
+			else
+				match_data[i][j] = tmp
+			end if
+		end for
+	end for
 
-        if length(match_data) = 0 then return ERROR_NOMATCH end if
-
-        for i = 1 to length(match_data) do
-                for j = 1 to length(match_data[i]) do
-                        sequence tmp = haystack[match_data[i][j][1]..match_data[i][j][2]]
-                        if str_offsets then
-                                match_data[i][j] = { tmp, match_data[i][j][1], match_data[i][j][2] }
-                        else
-                                match_data[i][j] = tmp
-                        end if
-                end for
-        end for
-
-        return match_data
+	return match_data
 end function
 
 --****
@@ -1014,19 +1080,20 @@ end function
 --   # ##text## : a string on which search and replace will apply
 --   # ##from## : optional start position
 --   # ##options## : options, defaults to [[:DEFAULT]]. See [[:Match Time Option Constants]].
---     ##options## can be any match time option or a 
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
 -- Returns:
 --   A **sequence** of string values split at the delimiter and if no delimiters were matched
 -- this **sequence** will be a one member sequence equal to ##{text}##.
---   
+--
 -- Example 1:
 -- <eucode>
 -- include std/regex.e as re
 -- regex comma_space_re = re:new(`,\s`)
--- sequence data = re:split(comma_space_re, "euphoria programming, source code, reference data")
+-- sequence data = re:split(comma_space_re, 
+--                          "euphoria programming, source code, reference data")
 -- -- data is
 -- -- {
 -- --   "euphoria programming",
@@ -1034,33 +1101,41 @@ end function
 -- --   "reference data"
 -- -- }
 -- </eucode>
--- 
+--
 
 public function split(regex re, string text, integer from=1, option_spec options=DEFAULT)
-        return split_limit(re, text, 0, from, options)
+	return split_limit(re, text, 0, from, options)
 end function
 
 public function split_limit(regex re, string text, integer limit=0, integer from=1, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
-        sequence match_data = find_all(re, text, from, options), result
-        integer last = 1
-
-        if limit = 0 or limit > length(match_data) then
-                limit = length(match_data)
-        end if
-
-        result = repeat(0, limit)
-
-        for i = 1 to limit do
-                result[i] = text[last..match_data[i][1][1] - 1]
-                last = match_data[i][1][2] + 1
-        end for
-
-        if last < length(text) then
-                result &= { text[last..$] }
-        end if
-
-        return result
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
+	sequence match_data = find_all(re, text, from, options), result
+	integer last = 1
+	
+	if limit = 0 or limit > length(match_data) then
+		limit = length(match_data)
+	end if
+	
+	result = repeat(0, limit)
+	
+	for i = 1 to limit do
+		integer a
+		a = match_data[i][1][1]
+		if a = 0 then
+			result[i] = ""
+		else
+			result[i] = text[last..a - 1]
+			last = match_data[i][1][2] + 1
+		end if
+	end for
+	
+	if last < length(text) then
+		result &= { text[last..$] }
+	end if
+	
+	return result
 end function
 
 --****
@@ -1076,7 +1151,7 @@ end function
 --   # ##replacement## : a string, used to replace each of the full matches
 --   # ##from## : optional start position
 --   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
---     ##options## can be any match time option or a 
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
@@ -1085,16 +1160,16 @@ end function
 --  return value will be the same as ##text## when it was passed in.
 --
 -- Special replacement operators:
--- 
--- * **##\##**  ~-- Causes the next character to lose its special meaning. 
--- * **##\n##** ~ -- Inserts a 0x0A (LF) character. 
--- * **##\r##** ~-- Inserts a 0x0D (CR) character. 
--- * **##\t##** ~-- Inserts a 0x09 (TAB) character. 
+--
+-- * **##\##**  ~-- Causes the next character to lose its special meaning.
+-- * **##\n##** ~ -- Inserts a 0x0A (LF) character.
+-- * **##\r##** ~-- Inserts a 0x0D (CR) character.
+-- * **##\t##** ~-- Inserts a 0x09 (TAB) character.
 -- * **##\1##** to **##\9##** ~-- Recalls stored substrings from registers (\1, \2, \3, to \9).
--- * **##\0##** ~-- Recalls entire matched pattern. 
--- * **##\u##** ~-- Convert next character to uppercase 
--- * **##\l##** ~-- Convert next character to lowercase 
--- * **##\U##** ~-- Convert to uppercase till ##\E## or ##\e## 
+-- * **##\0##** ~-- Recalls entire matched pattern.
+-- * **##\u##** ~-- Convert next character to uppercase
+-- * **##\l##** ~-- Convert next character to lowercase
+-- * **##\U##** ~-- Convert to uppercase till ##\E## or ##\e##
 -- * **##\L##** ~-- Convert to lowercase till ##\E## or ##\e##
 -- * **##\E##** or **##\e##** ~-- Terminate a ##{{{\\}}}U## or ##\L## conversion
 --
@@ -1102,18 +1177,19 @@ end function
 -- <eucode>
 -- include std/regex.e
 -- regex r = new(`([A-Za-z]+)\.([A-Za-z]+)`)
--- sequence details = find_replace(r, "hello.txt", `Filename: \U\1\e Extension: \U\2\e`)
+-- sequence details = find_replace(r, "hello.txt", 
+--                                         `Filename: \U\1\e Extension: \U\2\e`)
 -- -- details = "Filename: HELLO Extension: TXT"
 -- </eucode>
 --
 
 public function find_replace(regex ex, string text, sequence replacement, integer from=1,
-                option_spec options=DEFAULT)
-        return find_replace_limit(ex, text, replacement, -1, from, options)
+			option_spec options=DEFAULT)
+	return find_replace_limit(ex, text, replacement, -1, from, options)
 end function
 
 --**
--- Replaces up to ##limit## matches of ##ex## in ##text## except when ##limit## is 0.  When  
+-- Replaces up to ##limit## matches of ##ex## in ##text## except when ##limit## is 0.  When
 -- ##limit## is 0, this routine replaces all of the matches.
 --
 -- This function is identical to [[:find_replace]] except it allows you to limit the number of
@@ -1127,7 +1203,7 @@ end function
 --   # ##limit## : the number of matches to process
 --   # ##from## : optional start position
 --   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
---     ##options## can be any match time option or a 
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
 --
@@ -1138,24 +1214,27 @@ end function
 --   [[:find_replace]]
 --
 
-public function find_replace_limit(regex ex, string text, sequence replacement, 
-                        integer limit, integer from=1, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
+public function find_replace_limit(regex ex, string text, sequence replacement,
+			integer limit, integer from=1, option_spec options=DEFAULT)
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
 
-        return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, from, limit })
+    return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, 
+			from, limit })
 end function
 
 --**
--- When ##limit## is positive, 
--- this routine replaces up to ##limit## matches of ##ex## in ##text## with the 
+-- When ##limit## is positive,
+-- this routine replaces up to ##limit## matches of ##ex## in ##text## with the
 -- result of the user
 -- defined callback, ##rid##, and when ##limit## is 0, replaces
--- all matches of ##ex## in ##text## with the result of this user defined callback, ##rid##.  
+-- all matches of ##ex## in ##text## with the result of this user defined callback, ##rid##.
 --
 -- The callback should take one sequence.  The first member of this sequence will be a
--- a string 
--- representing the entire match and the subsequent members, if they exist, 
--- will be a strings 
+-- a string
+-- representing the entire match and the subsequent members, if they exist,
+-- will be a strings
 -- for the captured groups within the regular expression.
 --
 -- Parameters:
@@ -1165,19 +1244,25 @@ end function
 --   # ##limit## : the number of matches to process
 --   # ##from## : optional start position
 --   # ##options## : options, defaults to [[:DEFAULT]].  See [[:Match Time Option Constants]].
---     ##options## can be any match time option or a 
+--     ##options## can be any match time option or a
 --     sequence of valid options or it can be a value that comes from using or_bits on
 --     any two valid option values.
+--
+--   The function rid.  Must take one sequence parameter.  The function needs to accept a sequence
+-- of strings and return a string.  For each match, the function will be passed a sequence of 
+-- strings.  The first string is the entire match the subsequent strings are for the capturing groups.  
+-- If a match succeeds with groups that don't exist, that place will contain a 0. If the sub-group 
+-- does exist, the palce will contain the matching group string.
+-- for that group.
 --
 -- Returns:
 --   A **sequence**, the modified ##text##.
 --
--- Example 1:
--- <eucode>
--- include std/regex.e as re
+-- Examples:
+-- include std/text.e 
 -- function my_convert(sequence params)
 --     switch params[1] do
---         case "1" then 
+--         case "1" then
 --             return "one "
 --         case "2" then
 --             return "two "
@@ -1185,35 +1270,55 @@ end function
 --             return "unknown "
 --     end switch
 -- end function
---
+-- 
 -- regex r = re:new(`\d`)
--- sequence result = re:find_replace_callback(r, "125", routine_id("my_convert"))
+-- sequence result = re:find_replace_callback(r, "125",routine_id("my_convert"))
 -- -- result = "one two unknown "
+-- 
+-- 
+-- integer missing_data_flag = 0
+-- regex r2 = re:new(`[A-Z][a-z]+ ([A-Z][a-z]+)?`)
+-- function my_toupper( sequence params)
+--       -- here params[2] may be 0.
+--       return upper( params[1] )
+-- end function
+-- 
+-- result = find_replace_callback(r2, "John Doe", routine_id("my_toupper"))
+-- -- params[2] is "Doe"
+-- -- result = "JOHN DOE"
+-- printf(1, "result=%s\n", {result} )
+-- result = find_replace_callback(r2, "Mary", routine_id("my_toupper"))
+-- -- result = "MARY"
 -- </eucode>
 --
-
-public function find_replace_callback(regex ex, string text, integer rid, integer limit=0, 
+public function find_replace_callback(regex ex, string text, integer rid, integer limit=0,
                 integer from=1, option_spec options=DEFAULT)
-        if sequence(options) then options = or_all(options) end if
-        sequence match_data = find_all(ex, text, from, options), replace_data
+	if sequence(options) then 
+		options = or_all(options) 
+	end if
+	sequence match_data = find_all(ex, text, from, options), replace_data
+	
+	if limit = 0 or limit > length(match_data) then
+		limit = length(match_data)
+	end if
+	replace_data = repeat(0, limit)
 
-        if limit = 0 or limit > length(match_data) then
-                limit = length(match_data)
-        end if
-        replace_data = repeat(0, limit)
+	for i = 1 to limit do
+		sequence params = repeat(0, length(match_data[i]))
+		for j = 1 to length(match_data[i]) do
+			if equal(match_data[i][j],{0,0}) then
+				params[j] = 0
+			else
+				params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
+			end if
+		end for
+		
+		replace_data[i] = call_func(rid, { params })
+	end for
 
-        for i = 1 to limit do
-                sequence params = repeat(0, length(match_data[i]))
-                for j = 1 to length(match_data[i]) do
-                        params[j] = text[match_data[i][j][1]..match_data[i][j][2]]
-                end for
-
-                replace_data[i] = call_func(rid, { params })
-        end for
-
-        for i = limit to 1 by -1 do
-                text = replace(text, replace_data[i], match_data[i][1][1], match_data[i][1][2])
-        end for
-
-        return text
+	for i = limit to 1 by -1 do
+		text = replace(text, replace_data[i], match_data[i][1][1], match_data[i][1][2])
+	end for
+	
+	return text
 end function

@@ -23,8 +23,14 @@
 #include "symtab.h"
 #include "reswords.h"
 #include "be_runtime.h"
-#include "task.h"
+#include "be_task.h"
+#include "be_alloc.h"
+#include "be_machine.h"
 
+#ifndef ERUNTIME
+#include "be_execute.h"
+#include "be_symtab.h"
+#endif
 /*********************/
 /* Local definitions */
 /*********************/
@@ -44,26 +50,6 @@ int current_task;
 // Windows/Linux/FreeBSD
 double clock_period = 0.01;  // should check this at run-time
 
-/**********************/
-/* Imported variables */
-/**********************/
-extern unsigned char TempBuff[];
-
-extern struct routine_list *rt00;
-
-#ifndef ERUNTIME
-extern object_ptr expr_stack;
-extern object_ptr expr_max;  
-extern object_ptr expr_limit;
-extern int stack_size;
-extern object_ptr expr_top;
-extern int *tpc;
-extern symtab_ptr TopLevelSub;
-extern int **jumptab;
-extern int e_routine_next;
-extern symtab_ptr *e_routine;
-#endif
-
 /*******************/
 /* Local variables */
 /*******************/
@@ -72,22 +58,14 @@ static int clock_stopped = FALSE;
 static int id_wrap = FALSE; // have task id's wrapped around? (very rare)
 static double next_task_id = 1.0;
 
-extern int total_stack_size; // total amount of stack available 
-							 // OPTION STACK will be 8k higher than this)
-
 
 /*********************/
 /* Declared functions */
 /*********************/
-extern double current_time();
+
 #include "alldefs.h"
-
-extern void debug_dbl(double);
-void scheduler(double);
-extern struct routine_list _00[]; 
-void run_current_task( int );
-void init_task( int );
-
+static void init_task( int tx );
+static void run_current_task( int task );
 
 /*********************/
 /* Defined functions */
@@ -96,7 +74,7 @@ void init_task( int );
 void InitTask()
 // initialize the first (top-level) task - task id 0
 {   
-	object_ptr word;
+	
 	
 	tcb = (struct tcb *)EMalloc(sizeof(struct tcb)); // allocate one entry
 	tcb[0].rid = -1;
@@ -192,7 +170,6 @@ void terminate_task(int task)
 	}
 }
 
-extern double Wait(double t);
 double Wait(double t)
 // Wait for a while 
 {   
@@ -243,7 +220,8 @@ double Wait(double t)
 	return now;
 }
 
-
+// Created by the translator:
+extern struct routine_list _00[];
 static void call_task(int rid, object args) 
 /* translated code: call a task for the first time, passing its arguments */
 {
@@ -473,7 +451,7 @@ static int which_task(double tid)
 // find internal task number, given external task id
 {   
 	int i;
-	char buff[40];
+
 	
 	for (i = 0; i < tcb_size; i++) {
 		if (tcb[i].tid == tid) {
@@ -709,13 +687,13 @@ object task_create(object r_id, object args)
 	struct tcb *new_entry;
 	int recycle, recycle_size, i, j, proc_args;
 	double id, t;
-	int size;
-	object_ptr word;
+	
+	
 	
 	r_id = (object)get_pos_int("task_create", r_id);
 
   
-	if ((unsigned)(r_id) >= e_routine_next)
+	if ( r_id >= e_routine_next)
 		RTFatal("invalid routine id");
 	sub = e_routine[r_id];
 	
@@ -844,11 +822,11 @@ object ctask_create(object r_id, object args)
 // Create a new task for translated code - return a double task id - assumed by Translator
 {
 	
-	symtab_ptr sub;
+	
 	struct tcb *new_entry;
 	int recycle, i, j, proc_args;
 	double id, t;
-	object_ptr word;
+	
 	
 	r_id = (object)get_pos_int("task_create", r_id);
 
@@ -1005,7 +983,7 @@ void run_task( int tx ){
 #endif // !ERUNTIME 
 	{ // TRANSLATED_TASK
 		
-		if (tcb[earliest_task].impl.translated.task == NULL) {
+		if ( (tcb[earliest_task].impl.translated.task == (TASK_HANDLE)NULL) ){
 			// first time we are running this task
 			init_task( earliest_task );
 			
@@ -1019,7 +997,7 @@ void run_task( int tx ){
 
 #ifdef EWINDOWS
 
-void run_current_task( int task ){
+static void run_current_task( int task ){
 	current_task = task;
 	SwitchToFiber( tcb[current_task].impl.translated.task );
 }
@@ -1030,9 +1008,9 @@ void WINAPI exec_task( void *task ){
 	call_task( t->rid, t->args );
 }
 
-void init_task( int tx ){
+static void init_task( int tx ){
 	// fibers...
-	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, tx );
+	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, (void *)tx );
 }
 
 #else
@@ -1051,18 +1029,19 @@ void wait_for_task( int task ){
  * This is where a new thread/task starts.  It waits for its turn before
  * calling the task's procedure.
  */
-void start_task( void *task ){
+void *start_task( void *task ){
 	wait_for_task( (int) task );
 	call_task( tcb[(int)task].rid, tcb[(int)task].args );
+	return task;
 }
 
 /**
  * Creates the thread where the new task will run.
  */
 
-void init_task( int tx ){
+static void init_task( int tx ){
 	int ret;
-	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, tx );
+	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
 	// TODO error handling
 }
 
@@ -1070,7 +1049,7 @@ void init_task( int tx ){
  * Changes the value of the current_task to @task, then signals the waiting 
  * threads to see if they should be running, after which it calls wait_for_task().
  */
-void run_current_task( int task ){
+static void run_current_task( int task ){
 	int this_task = current_task;
 	current_task = task;
 	pthread_cond_broadcast( &task_condition );
@@ -1090,6 +1069,7 @@ void scheduler(double now)
 	int p;
 
 	// first check the real-time tasks
+	stack_top = 0; // so the compiler thinks it's used.
 	
 	// find the task with the earliest MAX_TIME
 	earliest_task = rt_first;

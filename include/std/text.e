@@ -1,28 +1,26 @@
--- (c) Copyright - See License.txt
---
-namespace text
-
 --****
 -- == Text Manipulation
--- **Page Contents**
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace text
+
+include std/convert.e
+include std/convert.e
+include std/eds.e
+include std/error.e
+include std/filesys.e
+include std/io.e
+include std/math.e
+include std/pretty.e
+include std/search.e
+include std/sequence.e
+include std/serialize.e
+include std/types.e
 
 --****
 -- === Routines
-
-include std/filesys.e
-include std/types.e
-include std/sequence.e
-include std/io.e
-include std/search.e
-include std/convert.e
-include std/serialize.e
-include std/pretty.e
-include std/error.e
-include std/eds.e
-include std/convert.e
 
 --****
 -- Signature:
@@ -91,9 +89,6 @@ include std/convert.e
 --    [[:sprintf]], [[:printf]]
 
 public function sprint(object x)
--- Return the string representation of any Euphoria data object.
--- This is the same as the output from print(1, x) or '?', but it's
--- returned as a string sequence rather than printed.
 	sequence s
 
 	if atom(x) then
@@ -235,6 +230,8 @@ end function
 -- -- s is "Sentence read from a file"
 -- s = trim("\r\nSentence read from a file\r\n", "\r\n", TRUE)
 -- -- s is {3,27}
+-- s = trim(" This is a sentence.\n")  -- Default is to trim off all " \t\r\n"
+-- -- s is "This is a sentence."
 -- </eucode>
 --
 -- See Also:
@@ -279,8 +276,9 @@ public function trim(sequence source, object what=" \t\r\n", integer ret_index =
 	end if
 end function
 
-
-constant TO_LOWER = 'a' - 'A'
+ifdef UNIX then
+	constant TO_LOWER = 'a' - 'A'
+end ifdef
 
 sequence lower_case_SET = {}
 sequence upper_case_SET = {}
@@ -437,61 +435,58 @@ end procedure
 -- See Also:
 --   [[:lower]], [[:upper]], [[:set_encoding_properties]]
 --
+
 public function get_encoding_properties( )
 	return {encoding_NAME, lower_case_SET, upper_case_SET}
 end function
 
-
 ifdef WINDOWS then
-include std/dll.e
-include std/machine.e
-include std/types.e
-atom
-	user32 = open_dll( "user32.dll"),
-    api_CharLowerBuff = define_c_func(user32, "CharLowerBuffA", {C_POINTER, C_INT}, C_INT),
-    api_CharUpperBuff = define_c_func(user32, "CharUpperBuffA", {C_POINTER, C_INT}, C_INT),
-    tm_size = 1024,
-    temp_mem = allocate(1024)
+	include std/dll.e
+	include std/machine.e
+	include std/types.e
+	atom
+		user32 = open_dll( "user32.dll"),
+		api_CharLowerBuff = define_c_func(user32, "CharLowerBuffA", {C_POINTER, C_INT}, C_INT),
+		api_CharUpperBuff = define_c_func(user32, "CharUpperBuffA", {C_POINTER, C_INT}, C_INT),
+		tm_size = 1024,
+		temp_mem = allocate(1024)
 
-function change_case(object x, object api)
-	sequence changed_text
-	integer single_char = 0
-	integer len
-
-	if not string(x) then
-		if atom(x) then
-			if x = 0 then
-				return 0
+	function change_case(object x, object api)
+		sequence changed_text
+		integer single_char = 0
+		integer len
+	
+		if not string(x) then
+			if atom(x) then
+				if x = 0 then
+					return 0
+				end if
+				x = {x}
+				single_char = 1
+			else
+				for i = 1 to length(x) do
+					x[i] = change_case(x[i], api)
+				end for
+				return x
 			end if
-			x = {x}
-			single_char = 1
-		else
-			for i = 1 to length(x) do
-				x[i] = change_case(x[i], api)
-			end for
+		end if
+		if length(x) = 0 then
 			return x
 		end if
-	end if
-	if length(x) = 0 then
-		return x
-	end if
-	if length(x) >= tm_size then
-		tm_size = length(x) + 1
-		free(temp_mem)
-		temp_mem = allocate(tm_size)
-	end if
-	poke(temp_mem, x)
-	len = c_func(api, {temp_mem, length(x)} )
-	if len < 1 then
-		len = length(x)
-	end if
-	changed_text = peek({temp_mem, len})
-	if single_char then
-		return changed_text[1]
-	else
-		return changed_text
-	end if
-end function
+		if length(x) >= tm_size then
+			tm_size = length(x) + 1
+			free(temp_mem)
+			temp_mem = allocate(tm_size)
+		end if
+		poke(temp_mem, x)
+		len = c_func(api, {temp_mem, length(x)} )
+		changed_text = peek({temp_mem, len})
+		if single_char then
+			return changed_text[1]
+		else
+			return changed_text
+		end if
+	end function
 end ifdef
 
 --**
@@ -527,8 +522,8 @@ end ifdef
 --
 -- See Also:
 --   [[:upper]], [[:proper]], [[:set_encoding_properties]], [[:get_encoding_properties]]
+
 public function lower(object x)
--- convert atom or sequence to lower case
 	if length(lower_case_SET) != 0 then
 		return mapping(x, upper_case_SET, lower_case_SET)
 	end if
@@ -575,7 +570,6 @@ end function
 --     [[:lower]], [[:proper]], [[:set_encoding_properties]], [[:get_encoding_properties]]
 
 public function upper(object x)
--- convert atom or sequence to upper case
 	if length(upper_case_SET) != 0 then
 		return mapping(x, lower_case_SET, upper_case_SET)
 	end if
@@ -603,7 +597,6 @@ end function
 -- same level, meaning that sub-sequences could be converted if they are
 -- actually text sequences.
 --
---
 -- Example 1:
 -- <eucode>
 -- s = proper("euphoria programming language")
@@ -624,7 +617,6 @@ end function
 --     [[:lower]] [[:upper]]
 
 public function proper(sequence x)
--- Converts text to lowercase and makes each word start with an uppercase.
 	integer pos
 	integer inword
 	integer convert
@@ -746,8 +738,13 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- s = keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
--- -- s is { {"foo", "bar"}, {"qwe", "1234"}, {"asdf", "contains space, comma, and equal(=)"}}
+-- s= keyvalues("foo=bar, qwe=1234, asdf='contains space, comma, and equal(=)'")
+-- -- s is 
+-- -- {
+-- --   {"foo", "bar"}, 
+-- --   {"qwe", "1234"}, 
+-- --   {"asdf", "contains space, comma, and equal(=)"}
+-- --  }
 -- </eucode>
 --
 -- Example 2:
@@ -767,7 +764,11 @@ end function
 -- s = keyvalues("colors=(a=black, b=blue, c=red)")
 -- -- s is { {"colors", {{"a", "black"}, {"b", "blue"},{"c", "red"}}  } }
 -- s = keyvalues("colors=(black=[0,0,0], blue=[0,0,FF], red=[FF,0,0])")
--- -- s is { {"colors", {{"black",{"0", "0", "0"}}, {"blue",{"0", "0", "FF"}},{"red", {"FF","0","0"}}}} }
+-- -- s is 
+-- -- { {"colors", 
+-- --   {{"black",{"0", "0", "0"}}, 
+-- --   {"blue",{"0", "0", "FF"}},
+-- --   {"red", {"FF","0","0"}}}} }
 -- </eucode>
 --
 -- Example 5:
@@ -786,9 +787,8 @@ end function
 -- </eucode>
 
 public function keyvalues(sequence source, object pair_delim = ";,",
-                          object kv_delim = ":=", object quotes =  "\"'`",
-                          object whitespace = " \t\n\r", integer haskeys = 1)
-
+			object kv_delim = ":=", object quotes =  "\"'`",
+			object whitespace = " \t\n\r", integer haskeys = 1)
 	sequence lKeyValues
 	sequence value_
 	sequence key_
@@ -904,6 +904,7 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 			lBracketed = {}
 			while pos_ <= length(source) do
 				lChar = source[pos_]
+				
 				if length(lBracketed) = 0 and find(lChar, quotes) != 0 then
 					if lChar = lQuote then
 						-- End of quoted span
@@ -914,11 +915,11 @@ public function keyvalues(sequence source, object pair_delim = ";,",
 						lQuote = lChar
 						lChar = -1
 					end if
-				elsif find(lChar, lStartBracket) > 0 then
+				elsif length(value_) = 1 and value_[1] = '~' and find(lChar, lStartBracket) > 0 then
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
 
-				elsif length(value_) = 1 and value_[1] = '~' and find(lChar, lStartBracket) > 0 then
+				elsif find(lChar, lStartBracket) > 0 then
 					lBPos = find(lChar, lStartBracket)
 					lBracketed &= lEndBracket[lBPos]
 
@@ -1076,7 +1077,7 @@ end function
 -- Example 3:
 -- <eucode>
 -- s = quote("The (small) man", {"(", ")"}, '~' )
--- -- 's' now contains '(the ~(small~) man)'
+-- -- 's' now contains '(The ~(small~) man)'
 -- </eucode>
 --
 -- Example 4:
@@ -1155,24 +1156,24 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 			-- Simple case where both open and close quote are the same.
 			if match(quote_pair[1], text_in) then
 				if match(esc & quote_pair[1], text_in) then
-					text_in = replace_all(text_in, esc, esc & esc)
+					text_in = match_replace(esc, text_in, esc & esc)
 				end if
-				text_in = replace_all(text_in, quote_pair[1], esc & quote_pair[1])
+				text_in = match_replace(quote_pair[1], text_in, esc & quote_pair[1])
 			end if
 		else
 			if match(quote_pair[1], text_in) or
 			   match(quote_pair[2], text_in) then
 				if match(esc & quote_pair[1], text_in) then
-					text_in = replace_all(text_in, esc & quote_pair[1], esc & esc & esc & quote_pair[1])
+					text_in = match_replace(esc & quote_pair[1], text_in, esc & esc & quote_pair[1])
 				end if
-				text_in = replace_all(text_in, quote_pair[1], esc & quote_pair[1])
+				text_in = match_replace(quote_pair[1], text_in, esc & quote_pair[1])
 			end if
 
 			if match(quote_pair[2], text_in) then
 				if match(esc & quote_pair[2], text_in) then
-					text_in = replace_all(text_in, esc & quote_pair[2], esc & esc & esc & quote_pair[2])
+					text_in = match_replace(esc & quote_pair[2], text_in, esc & esc & quote_pair[2])
 				end if
-				text_in = replace_all(text_in, quote_pair[2], esc & quote_pair[2])
+				text_in = match_replace(quote_pair[2], text_in, esc & quote_pair[2])
 			end if
 		end if
 	end if
@@ -1186,7 +1187,9 @@ end function
 --
 -- Parameters:
 --   # ##text_in## : The string or set of strings to de-quote.
---   # ##quote_pairs## : A set of one or more sub-sequences of two strings.
+--   # ##quote_pairs## : A set of one or more sub-sequences of two strings,
+--              or an atom representing a single character to be used as 
+--              both the open and close quotes.
 --              The first string in each sub-sequence is the opening
 --              quote to look for, and the second string is the closing quote.
 --              The default is {{{"\"", "\""}}} which means that the output is
@@ -1202,29 +1205,30 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- Using the defaults.
--- s = quote("\"The small man\"")
+-- s = dequote("\"The small man\"")
 -- -- 's' now contains "The small man"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- -- Using the defaults.
--- s = quote("(The small ?(?) man)", {{"[","]"}}, '?')
+-- s = dequote("(The small ?(?) man)", {{"(",")"}}, '?')
 -- -- 's' now contains "The small () man"
 -- </eucode>
 --
-public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, integer esc = -1)
+
+public function dequote(sequence text_in, object quote_pairs = {{"\"", "\""}}, integer esc = -1)
 
 	if length(text_in) = 0 then
 		return text_in
 	end if
 
 	if atom(quote_pairs) then
-		quote_pairs = {{quote_pairs}, {quote_pairs}}
+		quote_pairs = {{{quote_pairs}, {quote_pairs}}}
 	elsif length(quote_pairs) = 1 then
 		quote_pairs = {quote_pairs[1], quote_pairs[1]}
 	elsif length(quote_pairs) = 0 then
-		quote_pairs = {"\"", "\""}
+		quote_pairs = {{"\"", "\""}}
 	end if
 
 	if sequence(text_in[1]) then
@@ -1253,7 +1257,7 @@ public function dequote(object text_in, sequence quote_pairs = {{"\"", "\""}}, i
 						pos += 1
 					end if
 				entry
-					pos = find_from(esc, text_in, pos)
+					pos = find(esc, text_in, pos)
 				end while
 				exit
 			end if
@@ -1325,6 +1329,8 @@ end function
 --                N.B. if hex or binary output was specified, the \\
 --                separators are every 4 digits otherwise they are \\
 --                every three digits. |
+-- |  T         | If the argument is a number it is output as a text character, \\
+--                otherwise it is output as text string |
 --
 -- Clearly, certain combinations of these qualifier codes do not make sense and in
 -- those situations, the rightmost clashing code is used and the others are ignored.
@@ -1385,6 +1391,9 @@ end function
 --
 -- format("Today is [{day}], the [{date}]", {"date=10/Oct/2012", "day=Wednesday"})
 -- -- "Today is Wednesday, the 10/Oct/2012"
+--
+-- format("'A' is [T]", 65)
+-- -- `'A' is A`
 -- </eucode>
 --
 -- See Also:
@@ -1396,7 +1405,6 @@ public function format(sequence format_pattern, object arg_list = {})
 	integer in_token
 	integer tch
 	integer i
-	integer tstart
 	integer tend
 	integer cap
 	integer align
@@ -1415,12 +1423,14 @@ public function format(sequence format_pattern, object arg_list = {})
 	integer hexout
 	integer binout
 	integer tsep
+	integer istext
 	object prevargv
 	object currargv
 	sequence idname
 	object envsym
 	object envvar
-
+	integer ep
+	
 	if atom(arg_list) then
 		arg_list = {arg_list}
 	end if
@@ -1430,7 +1440,6 @@ public function format(sequence format_pattern, object arg_list = {})
 
 
 	i = 0
-	tstart = 0
 	tend = 0
 	argl = 0
 	spacer = 0
@@ -1441,7 +1450,6 @@ public function format(sequence format_pattern, object arg_list = {})
     	if not in_token then
     		if tch = '[' then
     			in_token = 1
-    			tstart = i
     			tend = 0
 				cap = 0
 				align = 0
@@ -1458,6 +1466,7 @@ public function format(sequence format_pattern, object arg_list = {})
     			binout = 0
     			trimming = 0
     			tsep = 0
+    			istext = 0
     			idname = ""
     			envvar = ""
     			envsym = ""
@@ -1476,7 +1485,6 @@ public function format(sequence format_pattern, object arg_list = {})
 	    				i += 1
 	    				if format_pattern[i] = ']' then
 	    					in_token = 0
-	    					tstart = 0
 	    					tend = 0
 	    					exit
 	    				end if
@@ -1514,6 +1522,9 @@ public function format(sequence format_pattern, object arg_list = {})
 
 	    		case '?' then
 	    			alt = 1
+
+	    		case 'T' then
+	    			istext = 1
 
 	    		case ':' then
 	    			while i < length(format_pattern) do
@@ -1564,10 +1575,12 @@ public function format(sequence format_pattern, object arg_list = {})
     				end if
 
     				for j = 1 to length(arg_list) do
-    					if begins(idname, arg_list[j]) then
-    						if argn = 0 then
-    							argn = j
-    							exit
+    					if sequence(arg_list[j]) then
+    						if begins(idname, arg_list[j]) then
+    							if argn = 0 then
+    								argn = j
+    								exit
+    							end if
     						end if
     					end if
     					if j = length(arg_list) then
@@ -1654,8 +1667,12 @@ public function format(sequence format_pattern, object arg_list = {})
 						end if
 						
 					elsif integer(arg_list[argn]) then
-						if bwz != 0 and arg_list[argn] = 0 then
-							argtext = ""
+						if istext then
+							argtext = {and_bits(0xFFFF_FFFF, abs(arg_list[argn]))}
+							
+						elsif bwz != 0 and arg_list[argn] = 0 then
+							argtext = repeat(' ', width)
+							
 						elsif binout = 1 then
 							argtext = reverse(int_to_bits(arg_list[argn], 32)) + '0'
 							for ib = 1 to length(argtext) do
@@ -1668,18 +1685,14 @@ public function format(sequence format_pattern, object arg_list = {})
 						elsif hexout = 0 then
 							argtext = sprintf("%d", arg_list[argn])
 							if zfill != 0 and width > 0 then
-								if length(argtext) > 0 then
-									if argtext[1] = '-' then
-										if width > length(argtext) then
-											argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
-										end if
-									else
-										if width > length(argtext) then
-											argtext = repeat('0', width - length(argtext)) & argtext
-										end if
+								if argtext[1] = '-' then
+									if width > length(argtext) then
+										argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
 									end if
 								else
-									argtext = repeat('0', width - length(argtext)) & argtext
+									if width > length(argtext) then
+										argtext = repeat('0', width - length(argtext)) & argtext
+									end if
 								end if
 							end if
 							
@@ -1699,6 +1712,8 @@ public function format(sequence format_pattern, object arg_list = {})
 										if argtext[2] = '0' then
 											argtext = '(' & argtext[3..$] & ')'
 										else
+											-- Don't need the '(' prefix as its just going to
+											-- be trunctated to fit the requested width.
 											argtext = argtext[2..$] & ')'
 										end if
 									end if
@@ -1714,8 +1729,9 @@ public function format(sequence format_pattern, object arg_list = {})
 						end if
 
 					elsif atom(arg_list[argn]) then
-						if bwz != 0 and arg_list[argn] = 0 then
-							argtext = ""
+						if istext then
+							argtext = {and_bits(0xFFFF_FFFF, abs(floor(arg_list[argn])))}
+							
 						else
 							if hexout then
 								argtext = sprintf("%x", arg_list[argn])
@@ -1726,17 +1742,19 @@ public function format(sequence format_pattern, object arg_list = {})
 								end if
 							else
 								argtext = trim(sprintf("%15.15g", arg_list[argn]))
+								-- Remove any leading 0 after e+
+								while ep != 0 with entry do
+									argtext = remove(argtext, ep+2)
+								entry
+									ep = match("e+0", argtext)
+								end while
 								if zfill != 0 and width > 0 then
-									if length(argtext) > 0 then
-										if width > length(argtext) then
-											if argtext[1] = '-' then
-												argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
-											else
-												argtext = repeat('0', width - length(argtext)) & argtext
-											end if
+									if width > length(argtext) then
+										if argtext[1] = '-' then
+											argtext = '-' & repeat('0', width - length(argtext)) & argtext[2..$]
+										else
+											argtext = repeat('0', width - length(argtext)) & argtext
 										end if
-									else
-										argtext = repeat('0', width - length(argtext)) & argtext
 									end if
 								end if
 								if arg_list[argn] > 0 then
@@ -1783,15 +1801,20 @@ public function format(sequence format_pattern, object arg_list = {})
 							if string(tempv) then
 								argtext = tempv
 							elsif integer(tempv) then
-								if bwz != 0 and tempv = 0 then
-									argtext = ""
+								if istext then
+									argtext = {and_bits(0xFFFF_FFFF, abs(tempv))}
+							
+								elsif bwz != 0 and tempv = 0 then
+									argtext = repeat(' ', width)
 								else
 									argtext = sprintf("%d", tempv)
 								end if
 
 							elsif atom(tempv) then
-								if bwz != 0 and tempv = 0 then
-									argtext = ""
+								if istext then
+									argtext = {and_bits(0xFFFF_FFFF, abs(floor(tempv)))}
+								elsif bwz != 0 and tempv = 0 then
+									argtext = repeat(' ', width)
 								else
 									argtext = trim(sprintf("%15.15g", tempv))
 								end if
@@ -1805,6 +1828,12 @@ public function format(sequence format_pattern, object arg_list = {})
 										{2,0,1,1000,"%d","%.15g",32,127,1,0}
 										)
 						end if
+						-- Remove any leading 0 after e+
+						while ep != 0 with entry do
+							argtext = remove(argtext, ep+2)
+						entry
+							ep = match("e+0", argtext)
+						end while
 					end if
 	    			currargv = arg_list[argn]
     			end if
@@ -1963,7 +1992,7 @@ end function
 --
 -- Returns:
 -- A string **sequence**, the text associated with the message number and locale.\\
--- An **integer**, if not associated text can be found.
+-- The **integer** zero, if associated text can not be found for any reason.
 --
 -- Comments:
 -- * This first scans the database(s) linked to the locale codes supplied.
@@ -1978,16 +2007,21 @@ end function
 -- looks for keys in the format {"", msgnum}, and if that fails it looks for a
 -- key of just the msgnum.
 --
-public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
-	integer idx = 1
+
+public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
 	integer db_res
 	object lMsgText
+	sequence dbname
 
 	db_res = -1
 	lMsgText = 0
 	-- First, scan through the specialized local dbs
+	if string(LocalQuals) and length(LocalQuals) > 0 then
+		LocalQuals = {LocalQuals}
+	end if
 	for i = 1 to length(LocalQuals) do
-		db_res = db_select(	locate_file( DBBase & "_" & LocalQuals[i] & ".edb" ), DB_LOCK_NO)
+		dbname = DBBase & "_" & LocalQuals[i] & ".edb"
+		db_res = db_select(	locate_file( dbname ), DB_LOCK_READ_ONLY)
 		if db_res = DB_OK then
 			db_res = db_select_table("1")
 			if db_res = DB_OK then
@@ -2001,7 +2035,8 @@ public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBB
 
 	-- Next, scan through the generic db
 	if atom(lMsgText) then
-		db_res = db_select(	locate_file( DBBase & ".edb" ), DB_LOCK_NO)
+		dbname = locate_file( DBBase & ".edb" )
+		db_res = db_select(	dbname, DB_LOCK_READ_ONLY)
 		if db_res = DB_OK then
 			db_res = db_select_table("1")
 			if db_res = DB_OK then
@@ -2020,8 +2055,107 @@ public function get_text( integer MsgNum, sequence LocalQuals = {}, sequence DBB
 			end if
 		end if
 	end if
-
-	return lMsgText
-
+	if atom(lMsgText) then
+		return 0
+	else
+		return lMsgText
+	end if
 end function
 
+--**
+-- Wrap text
+--
+-- Parameters:
+--   * ##content##   - sequence content to wrap
+--   * ##width##     - width to wrap at, defaults to 78
+--   * ##wrap_with## - sequence to wrap with, defaults to "\n"
+--   * ##wrap_at##   - sequence of characters to wrap at, defaults to space and tab
+--
+-- Returns:
+--   Sequence containing wrapped text
+--
+-- Example 1:
+-- <eucode>
+-- sequence result = wrap("Hello, World")
+-- -- result = "Hello, World"
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- sequence msg = "Hello, World. Today we are going to learn about apples."
+-- sequence result = wrap(msg, 40)
+-- -- result =
+-- --   "Hello, World. today we are going to\n"
+-- --   "learn about apples."
+-- </eucode>
+--
+-- Example 3:
+-- <eucode>
+-- sequence msg = "Hello, World. Today we are going to learn about apples."
+-- sequence result = wrap(msg, 40, "\n    ")
+-- -- result =
+-- --   "Hello, World. today we are going to\n"
+-- --   "    learn about apples."
+-- </eucode>
+--
+-- Example 4:
+-- <eucode>
+-- sequence msg = "Hello, World. This, Is, A, Dummy, Sentence, Ok, World?"
+-- sequence result = wrap(msg, 30, "\n", ",")
+-- -- result = 
+-- --   "Hello, World. This, Is, A,"
+-- --   "Dummy, Sentence, Ok, World?"
+-- </eucode>
+
+public function wrap(sequence content, integer width = 78, sequence wrap_with = "\n",
+			sequence wrap_at = " \t")
+	if length(content) < width then
+		return content
+	end if
+
+	sequence result = ""
+	
+	while length(content) do
+		-- Find the first whitespace before width
+		integer split_at = 0
+		for i = width to 1 by -1 do
+			if find(content[i], wrap_at) then
+				split_at = i
+				exit
+			end if
+		end for
+	
+		if split_at = 0 then
+			-- Cannot split at width or less, try the closest thing to width
+			for i = width to length(content) do
+				if find(content[i], wrap_at) then
+					split_at = i
+					exit
+				end if
+			end for
+		
+			-- Didn't find any place to split, attache the entire string
+			if split_at = 0 then
+				if length(result) then
+					result &= wrap_with
+				end if
+				
+				result &= content
+				exit
+			end if
+		end if
+	
+		if length(result) then
+			result &= wrap_with
+		end if
+	
+		result &= trim(content[1..split_at])
+		content = trim(content[split_at + 1..$])
+		if length(content) < width then
+			result &= wrap_with & content
+			exit
+		end if
+	end while
+
+	return result
+end function

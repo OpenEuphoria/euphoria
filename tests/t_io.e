@@ -189,6 +189,19 @@ for i = 1 to length(tmp) do
 end for
 test_equal( "process lines #3", tmp, alt_tmp)
 
+
+test_equal( "Seek STDIN",  1, seek(0, 0))
+test_equal( "Seek STDOUT", 1, seek(1, 0))
+test_equal( "Seek STDERR", 1, seek(2, 0))
+
+integer fh
+
+fh = open("file.txt", "r")
+test_equal( "Seek opened file", 0, seek(fh, -1))
+close(fh)
+test_equal( "Seek closed file", 1, seek(fh, -1))
+
+
 delete_file("file.txt")
 delete_file("filea.txt")
 delete_file("fileb.txt")

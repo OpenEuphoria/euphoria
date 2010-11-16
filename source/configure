@@ -1,14 +1,29 @@
 #!/bin/sh
+
+CONFIG_FILE=config.gnu
+
 UNAME_SYSTEM=`(uname -s) 2>/dev/null`  || UNAME_SYSTEM=unknown
 UNAME_MACHINE=`(uname -m) 2>/dev/null` || UNAME_MACHINE=unknown
 
+# If under Cygwin, we have 2 sets of paths: the normal TRUNKDIR/BUILDDIR/INCDIR
+# defined by the Cygwin path (/cygdrive/c/dir/file) as well as the CYP- versions
+# (c:/dir/file). The normal variables are used by make itself, which can't
+# handle the mixed-mode path and can only deal with pure Cygwin ones.
+# (These are also used by the various utilities ike cp, gcc, etc, even though
+# they can handle either format). The CYP- versions are used whenever we call
+# eui, euc, or an euphoria program, as these can only handle mixed-mode paths.
 
+USECYPPATH="false"
 
 if echo "$UNAME_SYSTEM" | grep CYGWIN > /dev/null; then
 	# for now, we build with -mno-cygwin under cygwin, so this is treated
 	# identically to MinGW
 	# A true exu.exe should probably set UNAME_SYSTEM="CYGWIN"
 	UNAME_SYSTEM=WINDOWS
+	# However, since we use absolute paths and Cygwin's make can't deal with
+	# mixed-mode paths (C:/dir/file) the way MSYS's make can, we turn
+	# CYPPATH on
+	USECYPPATH="true"
 elif echo "$UNAME_SYSTEM" | grep MINGW > /dev/null; then
 	UNAME_SYSTEM=WINDOWS
 fi
@@ -21,136 +36,142 @@ fi
 
 
 
-echo "# File generated from configure" > Makefile.eu
+echo "# File generated from configure" > ${CONFIG_FILE}
 
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
+	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"Makefile.eu
+	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
 elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
-	echo ARCH=ARM >> "$PREFIX"Makefile.eu
+	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
 fi
-
-
-
 
 if test $UNAME_SYSTEM = "Linux"; then
-	echo EBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX=1 >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "MS-DOS"; then
-	echo EBSD= >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP=1 >> "$PREFIX"Makefile.eu
-	echo SHELL=bash >> "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP=1 >> "$PREFIX"${CONFIG_FILE}
+	echo SHELL=bash >> "$PREFIX"${CONFIG_FILE}
 	cp Makefile.gnu "$PREFIX"../tests/Makefile.gnu
 elif test $UNAME_SYSTEM = "WINDOWS"; then
-	echo EBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW=1 >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "SunOS"; then
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ESUNOS=1 >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "OpenBSD"; then
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
-	echo ENETBSD= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD=1 >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "NetBSD"; then
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
-	echo ENETBSD=1 >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo EOSX= >> "$PREFIX"Makefile.eu
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ENETBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 else
-	echo EBSD=1 >> "$PREFIX"Makefile.eu
+	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
 	if test $UNAME_SYSTEM = "Darwin"; then
-		echo EOSX=1 >> "$PREFIX"Makefile.eu                                   
+		echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
 	else
-		echo EOSX= >> "$PREFIX"Makefile.eu
+		echo EOSX= >> "$PREFIX"${CONFIG_FILE}
 	fi
-	echo ESUNOS= >> "$PREFIX"Makefile.eu
-	echo EOPENBSD= >> "$PREFIX"Makefile.eu
-	echo ELINUX= >> "$PREFIX"Makefile.eu
-	echo EMINGW= >> "$PREFIX"Makefile.eu
-	echo EDJGPP= >> "$PREFIX"Makefile.eu
+	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
+	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
+	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
+	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
+	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 fi
+
 # default use source
 export EC="eui ec.ex"
 export BUILDDIR=build
 export XLTTARGETCC=gcc
 export CC=gcc
+
+SCP="scp -C"
+
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
-    	--plat )
-		echo "PLAT=$2" >> "$PREFIX"Makefile.eu
+	--plat )
+		echo "PLAT=$2" >> "$PREFIX"${CONFIG_FILE}
 		shift
-	;;
+		;;
 	--watcom )
 		export XLTTARGETCC=wat
-	;;
+		;;
 	--cc )
 		export CC=$2
-	;;
-        --without-euphoria )
-			export EUPHORIA=0
-        ;;
+		;;
+	--no-managed-mem )
+		export MANAGED_MEM=0
+		;;
+	--align4 )
+		export ALIGN4=1
+		;;
+	--without-euphoria )
+		export EUPHORIA=0
+		;;
 	--eubin )
-			export LEN=`echo $2/eucd.exe | wc -c`
-			if test $LEN -gt 85; then
-				if test $UNAME_SYSTEM = "MS-DOS"; then
-					echo "Cannot configure with such a long path for DJGPP."
-					rm "$PREFIX"Makefile.eu
-					exit
-				fi
+		export LEN=`echo $2/eucd.exe | wc -c`
+		if test $LEN -gt 85; then
+			if test $UNAME_SYSTEM = "MS-DOS"; then
+				echo "Cannot configure with such a long path for DJGPP."
+				rm "$PREFIX"${CONFIG_FILE}
+				exit
 			fi
-			echo "EUBIN=$2" >> "$PREFIX"Makefile.eu
-			EUBIN=$2
-			shift
+		fi
+		echo "EUBIN=$2" >> "$PREFIX"${CONFIG_FILE}
+		EUBIN=$2
+		shift
 		;;
-        --full )
-			echo RELEASE=1 >> "$PREFIX"Makefile.eu
-        ;;
-	
-        --build )
-			export BUILDDIR=$2
-			shift
+	--full )
+		echo RELEASE=1 >> "$PREFIX"${CONFIG_FILE}
 		;;
-        --debug )
-			echo EDEBUG=1 >> "$PREFIX"Makefile.eu
-        ;;
-		--prefix )
-			echo "PREFIX=$2" >> Makefile.eu
-			shift
+	--build )
+		export BUILDDIR=$2
+		shift
+		;;
+	--debug )
+		echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
+		;;
+	--prefix )
+		echo "PREFIX=$2" >> ${CONFIG_FILE}
+		shift
 		;;
 	--use-binary-translator )
 		export EC="euc"
@@ -158,39 +179,73 @@ while [ "$1" != "" ]; do
 	--use-source-translator )
 		export EC="eui ec.ex"
 		;;
-		* )
-			echo "Unknown option '$1'"
-			echo "Configures and prepares the euphoria source for building"
-			echo
- 			echo "configure [options]"
-			echo
-			echo "Options:"
-			echo "    --without-euphoria"
-			echo "    --eubin value"
-			echo "    --build value       set the build directory"
-			echo "    --full"
-			echo "    --debug             turn debugging on"
-			echo "    --prefix value      set the install directory (default /usr/local)"
-			echo "    --plat value        set the OS that we will translate to."
-			echo "           values can be: WIN, OSX, LINUX, FREEBSD, SUNOS, OPENBSD or NETBSD."
-			echo "    --watcom            set this so the translator will create C code for "
-			echo "                        Watcom C."
-			echo "    --cc  value         set this to the name of your GNU C compiler file name if its "
-			echo "                        name is not 'gcc'"
-			echo "Press ENTER to continue" 
-			read
-			echo "    --use-binary-translator"
-			echo "                        Use the already built translator rather"
-			echo "                        than interpreting its source           "
-			echo "                                                               "
-			echo "    --use-source-translator                                    "
-			echo "                        Interpret the translator's source rather"
-			echo "                        than using the already built translator"
-			echo "                        (default)"
-			exit
-			;;
-    esac
-    shift
+	--release )
+		shift
+		echo EREL_TYPE=-DEREL_TYPE=\"$1\" >> ${CONFIG_FILE}
+		;;
+	--verbose-tests )
+		echo VERBOSE_TESTS=-verbose >> ${CONFIG_FILE}
+		;;
+	--rootdir )
+		shift
+		echo ROOTDIR=$1 >> ${CONFIG_FILE}
+		;;
+	--wkhtmltopdf )
+		echo WKHTMLTOPDF=1 >> ${CONFIG_FILE}
+		;;
+	--oe-username )
+		shift
+		echo OE_USERNAME=$1 >> ${CONFIG_FILE}
+		;;
+	--scp )
+		shift
+		SCP=$1
+		;;
+	* )
+		echo "Unknown option '$1'"
+		echo "Configures and prepares the euphoria source for building"
+		echo
+		echo "configure [options]"
+		echo
+		echo "Options:"
+		echo "   --without-euphoria"
+		echo "   --eubin value"
+		echo "   --build value       set the build directory"
+		echo "   --full"
+		echo "   --release value     set the release type for the version string"
+		echo "   --debug             turn debugging on"
+		echo "   --prefix value      set the install directory (default /usr/local)"
+		echo "   --plat value        set the OS that we will translate to."
+		echo "                       values can be: WIN, OSX, LINUX, FREEBSD, SUNOS,"
+		echo "                       OPENBSD or NETBSD."
+		echo "   --watcom            set this so the translator will create C code for"
+		echo "                       Watcom C."
+		echo "   --no-managed-mem    disable managed memory"
+		echo "   --align4            malloc allocates addresses that are"
+		echo "                       always 4 byte aligned."
+		echo "   --eubin value       Use this option to specify the location of the"
+		echo "   --cc value          set this to the name of your GNU C compiler file name if its "
+		echo "                       name is not 'gcc'"
+		echo "   --roodir value      the root dir to use for checking the svn revision"
+		echo "                       default is the parent directory"
+		echo "   --use-binary-translator"
+		echo "                       Use the already built translator rather"
+		echo "                       than interpreting its source           "
+		echo "   --use-source-translator                                    "
+		echo "                       Interpret the translator's source rather"
+		echo "                       than using the already built translator"
+		echo "                       (default)"
+		echo "   --verbose-tests     cause the 'test' target to use the verbose flag"
+		echo "                       with eutest"
+		echo "   --wkhtmltopdf       build pdf documentation with wkhtmltopdf"
+		echo "                       instead of the default htmldoc"
+		echo "   --oe-username value Developer user name on openeuphoria.org for various scp"
+		echo "                       operations such as manual upload"
+		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
+		exit
+		;;
+	esac
+	shift
 done
 
 touch nothing.ex
@@ -198,7 +253,9 @@ touch nothing.ex
 # the device file /dev/null. [works on Mingw too.]
 if [ "x$EUBIN" = "x" ]; then
 	if eui nothing.ex 2> /dev/null; then
-		export EUPHORIA=1
+		if [ "x$EUPHORIA" = "x" ]; then
+			export EUPHORIA=1
+		fi
 	else
 		export EUPHORIA=0
 	fi
@@ -208,22 +265,41 @@ fi
 rm nothing.ex
 
 if [ "x$EUPHORIA" = "x1" ]; then
-	echo EUPHORIA=1 >> "$PREFIX"Makefile.eu
+	echo EUPHORIA=1 >> "$PREFIX"${CONFIG_FILE}
 else
-	echo EUPHORIA=0 >> "$PREFIX"Makefile.eu
+	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}
 fi
-if [ "x$MANAGED_MEM" = "x" ]; then
-        if test $UNAME_SYSTEM = "MS-DOS"; then
-        	echo "Information: Managed memory always on for DJGPP."
-		echo MANAGED_MEM=1 >> "$PREFIX"Makefile.eu 
-	fi	
+
+if test $UNAME_SYSTEM = "MS-DOS"; then
+	# "Information: Managed memory always on for DJGPP."
+	echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}
+	echo ALIGN4=1 >> "$PREFIX"${CONFIG_FILE}
+elif test $UNAME_SYSTEM = "WINDOWS"; then
+	# MANAGED_MEM and ALIGN4 are on by default for Windows
+	# and only Windows
+	if [ "x$MANAGED_MEM" = "x" ]; then
+		echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}
+	else
+		echo MANAGED_MEM=0 >> "$PREFIX"${CONFIG_FILE}
+	fi
+
+	if [ "x$ALIGN4" = "x" ]; then
+		echo ALIGN4=0 >> "$PREFIX"${CONFIG_FILE}
+	else
+		echo ALIGN4=1 >> "$PREFIX"${CONFIG_FILE}
+	fi
 fi
-echo "CC=$CC" >> "$PREFIX"Makefile.eu
+
+echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
+echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
+
 if [ "$EC" != "" ]; then
-	echo "TRANSLATE=$EC" >> "$PREFIX"Makefile.eu
+	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
 fi
+
 export PWD=`pwd`
 export PPWD=`cd .. && pwd`
+
 # The following works around a bug in djgpp's pwd
 # that at times returns the parent of the current
 # directory instead of the current directory.
@@ -232,11 +308,24 @@ if [ ! -e "$PPWD"/source ] && [ -e "$PWD"/source ]; then
 	echo "Information: Working around djgpp's PWD bug"
 	export PPWD=$PWD
 fi
+
 export TRUNKDIR=$PPWD
+
 mkdir -p $BUILDDIR
 export BUILDDIR=`cd "$BUILDDIR" && pwd`
-echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"Makefile.eu
-echo BUILDDIR=$BUILDDIR >> "$PREFIX"Makefile.eu
-echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"Makefile.eu
+
+echo TRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+echo BUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+
+if [ "$USECYPPATH" = "true" ]; then
+	echo CYPTRUNKDIR=`cygpath -a -m $TRUNKDIR` >> "$PREFIX"${CONFIG_FILE}
+	echo CYPBUILDDIR=`cygpath -a -m $BUILDDIR` >> "$PREFIX"${CONFIG_FILE}
+else
+	echo CYPTRUNKDIR=$TRUNKDIR >> "$PREFIX"${CONFIG_FILE}
+	echo CYPBUILDDIR=$BUILDDIR >> "$PREFIX"${CONFIG_FILE}
+fi
+echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
+
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
+

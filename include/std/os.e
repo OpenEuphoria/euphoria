@@ -1,16 +1,15 @@
-namespace os
-
 --****
 -- == Operating System Helpers
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
-include std/sequence.e
-include std/text.e
-include std/machine.e
+namespace os
 
 include std/dll.e
+include std/machine.e
+include std/sequence.e
+include std/text.e
 
 ifdef UNIX then
 

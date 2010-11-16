@@ -1,4 +1,5 @@
 include std/socket.e as sock
+include std/console.e as con
 
 sock:socket server = sock:create(sock:AF_INET, sock:SOCK_DGRAM, 0)
 if sock:bind(server, "0.0.0.0:27015") != sock:OK then
@@ -16,3 +17,4 @@ else
 end if
 
 sock:close(server)
+con:maybe_any_key()

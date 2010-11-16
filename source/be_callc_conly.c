@@ -39,13 +39,11 @@
 #endif
 #include "alldefs.h"
 #include "be_runtime.h"
+#include "be_machine.h"
 
 /**********************/
 /* Imported variables */
 /**********************/
-extern unsigned char TempBuff[];
-extern int c_routine_next;         /* index of next available element */
-extern struct arg_info *c_routine; /* array of c_routine structs */
 
 /*******************/
 /* Local variables */
@@ -652,12 +650,6 @@ object call_c(int func, object proc_ad, object arg_list)
 #include "alldefs.h"
 #include "be_runtime.h"
 
-/**********************/
-/* Imported variables */
-/**********************/
-extern unsigned char TempBuff[];
-extern int c_routine_next;         /* index of next available element */
-extern struct arg_info *c_routine; /* array of c_routine structs */
 
 /*******************/
 /* Local variables */

@@ -2,12 +2,19 @@ object _ = 0
 
 include std/socket.e as sock
 include std/text.e
+include std/console.e
+
+sequence port = "5000"
+if length(command_line()) > 2 then
+	port = command_line()
+	port = port[3]
+end if
 
 ifdef OSX then
 	-- I couldn't bind to 127.0.0.1 under OS X for some reason
-	constant addr = "0.0.0.0:5000"
+	constant addr = "0.0.0.0:"&port
 elsedef
-	constant addr = "127.0.0.1:5000"
+	constant addr = "127.0.0.1:"&port
 end ifdef
 
 sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
@@ -47,3 +54,4 @@ end while
 
 sock:shutdown(server)
 puts(1, "Server closed\n")
+maybe_any_key()

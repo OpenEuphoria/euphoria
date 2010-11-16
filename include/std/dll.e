@@ -1,15 +1,15 @@
--- (c) Copyright - See License.txt
 --****
 -- == Dynamic Linking to external code
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace dll
 
 include std/convert.e
+include std/error.e
 include std/machine.e
 include std/math.e
-include std/error.e
 include std/types.e
 
 --****
@@ -149,7 +149,8 @@ constant M_OPEN_DLL  = 50,
 -- Example 2:
 -- <eucode>
 -- atom mysql_lib
--- mysql_lib = open_dll({"libmysqlclient.so", "libmysqlclient.so.15", "libmysqlclient.so.15.0"})
+-- mysql_lib = open_dll({"libmysqlclient.so", "libmysqlclient.so.15", 
+--                      "libmysqlclient.so.15.0"})
 -- if mysql_lib = 0 then
 --   puts(1, "Couldn't find the mysql client library\n")
 -- end if

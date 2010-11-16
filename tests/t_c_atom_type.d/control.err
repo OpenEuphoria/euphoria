@@ -1,0 +1,14 @@
+t_c_atom_type.e:4
+<0025>:: found ... reserved word ... but was expecting an identifier name
+atom type foo
+         ^
+
+
+--- Defined Words ---
+EU4
+EU400
+EU40000
+UNIX
+LINUX
+EUI
+-------------------

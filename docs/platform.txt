@@ -1,13 +1,17 @@
 == Platform Specific Issues
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
 OpenEuphoria currently supports Euphoria on many different
-//platforms//. More platforms will be added in the future.
+**platforms**. More platforms will be added in the future.
 
-**Windows ,,(tm),,** in particular, the 32-bit version of
-Windows that is used on Windows 95/98/ME, as well as NT/2000/XP and
+
+**Windows** in particular, the 32-bit version of
+Windows that is used on Windows 95/98/ME, as well as NT/2000/XP/Vista/7 and
 later systems.
+
+
 
 **Linux**. Linux is based on the UNIX operating
 system. It has recently become very popular  on PCs. There are many
@@ -26,25 +30,33 @@ following due to it's ease of use and power.
 **Sun OS**.  Sun OS was developed by and is owned
 by SUN Microsystems Inc.  It is also based on UNIX.
 
-**Open BSD**. Open BSD is also a UNIX-like
+**OpenBSD**. Open BSD is also a UNIX-like
 Operating System and is developed by volunteers.
 
-**Net BSD**. Net BSD is also a UNIX-like
+**NetBSD**. Net BSD is also a UNIX-like
 Operating System  and is designed to be easily  portable to other
 hardware platforms.
+
+
 
 Euphoria source files use various file extensions. The common
 extensions are:
 
+|=extension |= application |
 | .e | Euphoria include file |
 | .ew | Euphoria include file for a Windowed (GUI) application only |
-| .ex | Console main program file |
-| .exw | Windowed (GUI) main program file |
+| .ex | Console main program file \\or any executable program |
+| .exw | Windowed (GUI) main program file\\or a //Windows// specific program |
+| .exu | Unix specific program |
 
-The Euphoria for Windows installation file contains **eui.exe**. It runs
-Euphoria programs on the Windows 32bit platform.
+It is convenient to use these file extensions, but they are not
+mandatory. 
 
-The Euphoria for Linux .tar file contains only **eui**. It runs
+
+The Euphoria for //Windows// installation file contains **eui.exe**. It runs
+Euphoria programs on the //Windows// 32bit platform.
+
+The Euphoria for //Linux// .tar file contains only **eui**. It runs
 Euphoria programs on the Linux platform.
 
 Other versions of Euphoria are installed by first installing the Linux
@@ -53,16 +65,18 @@ that Operating System, then rebuilding the other binaries from the source.
 
 Sometimes you'll find that the majority of your code will be the
 same on all platforms, but some small parts will have to be
-written differently for each platform. Use the [[:platform]] built-in function to
-tell you which platform you are currently running on.
+written differently for each platform. Use the [[:ifdef]] statement 
+to tell you 
+[[http://openEuphoria.org/docs/eu400_0021.html#_137_platformdefinitions|which platform you are currently running on]].
 
-If you want to decide which platform you are running on, [[:platform]] fits the bill nicely:
+You can also use the [[:platform]] and [[:platform_name]] functions:
 
 <eucode>
 printf(1, "Our platform number is: %d", {platform()})
 </eucode>
 
-The evaluation of ##platform## occurs at 'runtime', you may even use a switch statement with it.
+The evaluation of ##platform## occurs at 'runtime', you may even use a switch 
+statement with it.
 
 <eucode>
 switch platform() do
@@ -92,7 +106,14 @@ elsedef
 end ifdef
 </eucode>
 
-With parse-time evalution you get faster execution, for there is no conditional in the final code.  You can put this deeply inside a loop without penalty.  You can test for UNIX to see if the platform has UNIX like properties and thus will work on new UNIX like platforms without modification.  You can even put statements that are top-level, such as constant and routine defintions.  However, since the interpreter skips over the platforms you are not running on, syntax errors can hide in this construct and if you misspell an OS name you will not get warned.
+With parse-time evalution you get faster execution, for there is no conditional 
+in the final code.  You can put this deeply inside a loop without penalty.  You 
+can test for //UNIX// to see if the platform has //UNIX// like properties and 
+thus will work on new //UNIX// like platforms without modification.  You can 
+even put statements that are top-level, such as constant and routine defintions.  
+However, since the interpreter skips over the platforms you are not running on, 
+syntax errors can hide in this construct and if you misspell an OS name you will 
+not get warned.
 
 <eucode>
 ifdef UNIX then
@@ -107,7 +128,7 @@ ifdef UNIX then
 		public constant SHARED_LIB_EXT = "so"
 	end ifdef
         
-	public constant FOO =  SLASH == PATHSEP -- this has hidden syntax error
+	public constant FOO =  SLASH == PATHSEP -- this has a hidden syntax error
 	
 elsifdef WINDOWS then
 
@@ -118,51 +139,85 @@ elsifdef WINDOWS then
 	public constant NULLDEVICE = "NUL:"
 	public constant SHARED_LIB_EXT = "dll"
 	
-elsifdef TRASHOS then  -- this symbol is never defiend no error here either
+elsifdef TRASHOS then  -- this symbol is never defined -- no error here either
        
 end ifdef
 </eucode>
 
-In this above example, we have constant declarations which are different according to OS such things.  The line with FOO has a syntax error but your interpreter will not catch it if you are running WINDOWS.  There is no OS with the name 'TRASHOS'.  I simply made it up and this construct will not warn you about mistakes like these.
+In this above example, we have constant declarations which are different 
+according to OS such things.  The line with FOO has a syntax error but your 
+interpreter will not catch it if you are running //WINDOWS//.  There is no OS 
+with the name 'TRASHOS'.  I simply made it up and this construct will not warn 
+you about mistakes like these.
 
-Run-time evalution provides you something that is always syntax-checked and you can even make expressions using comparatives to avoid both parse-time and run-time branching all together.
+Run-time evalution provides you something that is always syntax-checked and you 
+can even make expressions using comparatives to avoid both parse-time and 
+run-time branching all together.
 
 <eucode>
 add_code = {
-       -- first int argument is at stack offset +4, 2nd int is at +8 
-       #8B, #44, #24, #04,        -- mov   eax, +4[esp]
-       #03, #44, #24, #08,        -- add   eax, +8[esp]
-       #C2, #00, #08 * (platform() = WIN32) -- ret 8  -- pop 8 bytes off the stack
+    -- first int argument is at stack offset +4, 2nd int is at +8 
+       #8B, #44, #24, #04,                  -- mov   eax, +4[esp]
+       #03, #44, #24, #08,                  -- add   eax, +8[esp]
+       #C2, #00, #08 * (platform() = WIN32) -- ret 8  
+                                            -- pop 8 bytes off the stack
 }
 </eucode>
 
-This is machine code to be put into memory as an example from ##demo/callmach.ex##.  Here
-if ##platform() = WIN32## is true, then the code will pop 8 bytes off of the stack, if not
-it will pop 0 bytes off of the stack.  This has to be done because of where the function call conventions are implemented in the various compilers.  We use Watcom C for WIN32 and GCC for the others.  Now if the programmer had put an unexistent symbol, such as ARCH64, the parser would stop, point out the error, and I the programmer would then fix it.
+This is machine code to be put into memory as an example from 
+##demo/callmach.ex##.  Here if ##platform() = WIN32## is true, then the code 
+will pop 8 bytes off of the stack, if not it will pop 0 bytes off of the stack.  
+This has to be done because of where the function call conventions are 
+implemented in the various compilers.  We use Watcom C for WIN32 and GCC for the 
+others.  Now if the programmer had put a non-existent symbol, such as ARCH64, the 
+parser would stop, point out the error, and the programmer would then fix it.
 
 
 === The Discontinued DOS32 Platform
 
-This platform is no longer supported the ##DOS32## platform are computers without Windows and though people could still use the EUPHORIA binaries built for this platform on Windows, it was slower than and lacked features available on binaries built for the ##WIN32## platform.
+This platform is no longer supported.  
 
-The binaries for this platform had support for low-level graphics and though DOS was 16-bit, the EUPHORIA binaries for ##DOS32## used techniques that allowed you to use 32-bit addresses transparently, hence the name of the platform: ##DOS32##.  However, in this platform you couldn't use dynamically loaded libraries and filenames had to be in a format of: eight letters, a dot, and three letters when creating a file.  You couldn't use the Windowing system even if your computer had Windows.  You were limited to full-sreen mode and the console.
+Those interested in writing DOS programs in Euphoria may use version 3.1
+downloadable from SourceForge. Interested DOS developers are welcome to use the 
+available open source code to produce an updated Euphoria version.
+
+The ##DOS32## platform was for computers 
+without //Windows// OS, and though people could still use the Euphoria binaries 
+built for this platform on //Windows//, it was slower than and lacked features 
+available on binaries built for the ##WIN32## platform.
+
+The binaries for this platform had support for low-level graphics and though 
+DOS was 16-bit, the Euphoria binaries for ##DOS32## used techniques that allowed 
+you to use 32-bit addresses transparently, hence the name of the platform: 
+##DOS32##.  However, in this platform you could not use dynamically loaded 
+libraries and filenames had to be in a format of: eight letters, a dot, and 
+three letters when creating a file.  You could not use the Windowing system even
+if your computer had //Windows//.  You were limited to full-sreen mode graphics and 
+the text console.
 
 === The WIN32 Platform
 
-With the ##WIN32## platform, your programs can still use the ##//console//## but you are no longer limited to the console.  Because most library routines work the same way on each platform most text mode programs can be run using the console interpreter of any platform without any change.
+With the ##WIN32## platform, your programs can still use the 
+##//text console//##.  Because most library routines work the same way on each 
+platform most text mode programs can be run using the console interpreter of any
+platform without any change.
 
-Since the EUPHORIA interpreter can work directly with your OS you can also create GUI programs.
-You can use a user submitted library from the archive or handle calls directly into the DLLs.  
-There are high-level graphics libraries for Direct3D and OpenGL available from the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
+Since the Euphoria interpreter can work directly with your OS you can also 
+create GUI programs. You can use a user submitted library from the archive or 
+handle calls directly into the DLLs.  
+There are high-level graphics libraries for Direct3D and OpenGL available from 
+the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
 
 A console window will be created automatically when a WIN32 Euphoria program
-first outputs something to the screen or reads from the keyboard.  If your program
-is displaying a screen.  You will also see a console window when you read standard input or write to
-standard output, even when these have been redirected to files. The console
+first outputs something to the screen or reads from the keyboard.  If your 
+program is displaying a screen, you will also see a console window when you read
+standard input or write to standard output, even when these have been redirected
+to files. The console
 will disappear when your program finishes execution, or via a call to
 [[:free_console]].
-It might help to put the following statements at the top of
-your EUPHORIA program:
+
+If you don't want a console to appear, it might help to put the following 
+statements at the top of your Euphoria program:
 
 <eucode>
 -- Now, when there is input or output to the console we will get an error
@@ -171,50 +226,63 @@ close(STDOUT)
 close(STDIN)
 </eucode>
 
+Now with these lines the interpreter is forced to give you a runtime error, 
+report where in the program the standard input or output is used.  It can be 
+hard to find the offending I/O statement in programs that contain many commented
+out or debug mode only console I/O statements.
 
-If you actually use the console, and there is something on the console that you want your
-user to read, you should prompt him and wait for his input before terminating.
+If you actually *want* to use the console, and there is something on the console
+that you want your
+user to read, you should prompt them and wait for his input before terminating.
 To prevent the console from quickly disappearing you might include a statement
 such as:
 
 <eucode>
-puts(1,"Press Enter to close this Window\n")
-if getc(0) then
-end if
+include std/console.e
+
+any_key("Press any key to close this Window")
 </eucode>
-which will wait for the user enter something.
+which will wait for the user enters something.
 
-If you want to run an interpreted Euphoria program to use the current console use eui.exe but if you want it to create a new console Window use euiw.exe.
+If you want to run an interpreted Euphoria program to use the current console 
+use ##eui.exe## but if you want it to create a new console window use 
+##euiw.exe##.
 
-Programs translated on by the translator for this platform, will also pop up a new console when
-ever input is asked for our output is sent to the screen unless you specify the ##-CON## option.
+Programs translated by the translator for this platform will also pop up a 
+new console whenever input is asked for our output is sent to the screen unless
+you specify the ##-CON## option.
 
-When running an interpreter or translator for the WIN32 platform, ##platform## returns WIN32 and a parsetime branch (with ifdef/end ifdef) with ##WINDOWS## will be followed.
+When running an interpreter or translator for the WIN32 platform, ##platform## 
+returns WIN32 and a parsetime branch (with ifdef/end ifdef) with ##WINDOWS## 
+will be followed.
+
+
 
 ==== High-Level WIN32 Programming
 
 Thanks to **David Cuny**, **Derek Parnell**, **Judith Evans**
 and many others, there's a package called **Win32Lib** that
-you can use to develop Windows GUI applications in Euphoria. It's
+you can use to develop //Windows// GUI applications in Euphoria. It's
 remarkably easy to learn and use, and comes with good documentation and
 many small example programs.  
 
-If you have a SVN client, you can get a Euphoria version 4.0 compatible Win32lib via SVN at:
-[[ https://win32libex.svn.sourceforge.net/svnroot/win32libex/trunk ]].  Get version 68.
+If you have a SVN client, you can get a Euphoria version 4.0-compatible Win32lib
+ at:
+[[ https://win32libex.svn.sourceforge.net/svnroot/win32libex/trunk ]].  Get 
+version 68.
 
 There is also an **IDE**, by Judith Evans for use with **Win32lib**. 
 [[ https://euvide.svn.sourceforge.net/svnroot/euvide ]].
 
-**Andrea Cini** has also developed a similar, somewhat smaller package
-called **EuWinGUI**. It's also available from our site.
+!!**Andrea Cini** has also developed a similar, somewhat smaller package
+!!called **EuWinGUI**. It's also available from the RapidEuphoria web site.
 
 **Matt Lewis** has developed a wrapper for the wxWidgets library for
-EUPHORIA: wxEuphoria.  It is cross-platform.
+Euphoria: wxEuphoria.  It is cross-platform.
 
-You can download WxEUPHORIA, EuWinGUI, Win32Lib and Judith's IDE
+You can download WxEuphoria, 
+Win32Lib and Judith's IDE
 from the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
-
-There are also graphics routines available for 
 
 
 ==== Low-Level WIN32 Programming
@@ -231,7 +299,8 @@ Windows programming, in particular the WIN32 Application Program Interface
 (API), including the C structures defined by the API. There is a large
 WIN32.HLP file (c) Microsoft that is available with many programming tools
 for Windows. There are numerous books available on the
-subject of WIN32 programming for {{{C/C++}}}. You can adapt most of what you find
+subject of WIN32 programming for {{{C/C++}}}. You can adapt most of what you 
+find
 in those books to the world of Euphoria programming for WIN32.
 A good book is **//{{{Programming Windows}}} by Charles Petzold//**.
 
@@ -247,15 +316,17 @@ in multiple colors and at any line or column position.
 Just as in WIN32, you can call C routines in shared libraries
 and C code can call back to your Euphoria routines.
 
-Pete Eberlein has created a EUPHORIA interface to the low level graphics library **svgalib**. 
-The **svgalib** has not had a stable release in more than 8 years.  This may not be supported on all Unix platforms.  Alternatively, you can get a EUPHORIA interface to high level graphics library **OpenGL** from the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
-OpenGL also works with Windows.
+You can get a Euphoria 
+interface to high level graphics library **OpenGL** from the 
+[[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
+OpenGL also works with //Windows//.
 
-Easy X windows GUI programming is available using either Irv Mullin's
+Easy X-windows GUI programming is available using either Irv Mullin's
 EuGTK interface to the GTK GUI library, or wxEuphoria developed by
 Matt Lewis. wxEuphoria also runs on Windows.
 
-When porting code from Windows to Unix, you'll notice the following differences:
+When porting code from //Windows// to //Unix//, you'll notice the following 
+differences:
 
 * Some of the numbers assigned to the 16 main colors in graphics.e
 are different. If you use the constants defined in graphics.e you won't
@@ -275,20 +346,25 @@ command. e.g. "DEL" becomes "rm", and "MOVE" becomes "mv".  Often you
 can use a standard library call instead and it will be portable across platforms.
 For example you can use [[:filesys:create_directory]] or [[:filesys:delete_file]].
 
-When running an interpreter or translator for a UNIX platform, ##platform## will return one of the several symbols for UNIX and a parsetime branch (with ifdef/end ifdef) with ##UNIX## and the symbol that is that of the specific OS will be followed.
+When running an interpreter or translator for a //UNIX// platform, ##platform## 
+will return one of the several symbols for //UNIX// and a parsetime branch (with
+ifdef/end ifdef) with ##UNIX## and the symbol that is that of the specific OS 
+will be followed.
 
 === Interfacing with C Code
 
-On WIN32 and Unix it's possible to interface Euphoria code with C code. Your Euphoria
-program can call C routines and read and write C variables. C routines can even call
-("callback") your Euphoria routines. The C code must reside in a dynamic link or shared
-library. By interfacing with dynamic link libraries and shared libraries, you can
+On WIN32 and Unix it's possible to interface Euphoria code with C code. Your 
+Euphoria program can call C routines and read and write C variables. C routines 
+can even call ("callback") your Euphoria routines. The C code must reside in a 
+dynamic link or shared library. By interfacing with dynamic link libraries and 
+shared libraries, you can
 access the full programming interface on these systems.
 
-Using the Euphoria to C Translator, you can translate Euphoria routines to C, and compile
-them into a shared library file. You can pass Euphoria atoms and sequences to these
-compiled Euphoria routines, and receive Euphoria data as a result. Translated/compiled
-routines typically run much faster than interpreted routines. For more information, see
+Using the Euphoria to C Translator, you can translate Euphoria routines to C, 
+and compile them into a shared library file. You can pass Euphoria atoms and 
+sequences to these compiled Euphoria routines, and receive Euphoria data as a 
+result. Translated/compiled routines typically run much faster than interpreted 
+routines. For more information, see
 the [[:Translator -> "Euphoria to C Translator"]].
 
 ==== Calling C Functions
@@ -329,7 +405,7 @@ See [[:c_func]], [[:c_proc]], [[:define_c_func]], [[:define_c_proc]], [[:open_dl
 
 See ##**demo\win32**## or ##**demo/linux**## for example programs.
 
-On Windows there is more than one C calling convention.
+On //Windows// there is more than one C calling convention.
 The Windows API routines all use the **{{{__stdcall}}}** convention.
 Most C compilers however have **{{{__cdecl}}}** as their default.
 {{{__cdecl}}} allows for variable numbers of arguments to be passed.
@@ -343,7 +419,7 @@ You can examine a ##dll## file by right-clicking on it, and choosing
 routines that the ##dll## exports.
 
 To find out which **.**dll file contains a particular WIN32 C function,
-run **euphoria\demo\win32\dsearch.exw**
+run **Euphoria\demo\win32\dsearch.exw**
 
 ==== Accessing C Variables
 
@@ -435,8 +511,8 @@ which will give you a big advantage over those forced to code in C.
 
 ==== Call-backs to your Euphoria routines
 
-When you create a window, the Windows operating system will need to call your
-Euphoria routine.  
+When you create a window, the //Windows// operating system will need to call 
+your Euphoria routine.  
 To set this up, you must get a 32-bit "call-back"
 address for your routine and give it to Windows. For example (taken from
 **demo\win32\window.exw**):
@@ -457,7 +533,7 @@ argument to the [[:call_back]] function.
 In the example above, The 32-bit //call-back address//, ##WndProcAddress##,
 can be stored in a C structure and passed to Windows via the
 ~RegisterClass() C API function.\\
-**This gives Windows the ability to call the Euphoria routine, ~WndProc(),
+**This gives //Windows// the ability to call the Euphoria routine, ~WndProc(),
 whenever the user performs an action on a certain class of window.**
 Actions include clicking the mouse, typing a key, resizing the window etc.\\
 //See the **window.exw** demo program for the whole story.//
@@ -535,5 +611,5 @@ other place in your Euphoria program).
 
 A call-back address can be passed to the UNIX signal()
 function to specify a Euphoria routine to handle various signals (e.g. SIGTERM).
-It can also be passed to C routines such as qsort(), to specify a Euphoria
+It can also be passed to C routines such as ##qsort##(), to specify a Euphoria
 comparison function.

@@ -1,19 +1,15 @@
--- (c) Copyright - See License.txt
--- wildcard.e
-namespace wildcard
-
 --****
 -- == Wildcard Matching
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace wildcard
+
+include std/text.e as txt
 
 --****
 -- === Routines
-
-include std/text.e as txt -- upper/lower
-
-
 
 --**
 -- Return a text pattern

@@ -32,6 +32,7 @@ include cominit.e
 include pathopen.e
 include preproc.e
 include msgtext.e
+include intinit.e
 
 sequence misc
 integer il_file = 0
@@ -134,7 +135,7 @@ procedure InputIL()
 	AnyStatementProfile = misc[3]
 	sample_size = misc[4]
 	gline_number = misc[5]
-	file_name = misc[6]
+	known_files = misc[6]
 	
 	SymTab = fdecompress(0)
 	slist = fdecompress(0)
@@ -147,6 +148,8 @@ sequence cl
 object filename
 
 cl = command_line()
+Argv = cl
+Argc = length( Argv )
 
 -- open our own .exe file
 ifdef UNIX then

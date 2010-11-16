@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH EUBIND 1 "January 8, 2008"
+.TH EUBIND 1 "October 20, 2010"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -16,7 +16,7 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-bind \- Creates standalone euphoria executables
+eubind \- Creates standalone euphoria executables
 .SH SYNOPSIS
 .B bind
 .RB [\| \-i
@@ -29,8 +29,8 @@ bind \- Creates standalone euphoria executables
 .br
 .SH DESCRIPTION
 This manual page documents briefly the
-.B bind
-command.  bind is used for creating standalone executables from euphoria 
+.B eubind
+command.  eubind is used for creating standalone executables from euphoria 
 programs.  The code is parsed and converted to euphoria IL code, and combined
 with the compiled backend.  The result is a file that can be run on its own,
 without the euphoria interpreter.
@@ -40,7 +40,7 @@ without the euphoria interpreter.
 .B \-i path
 Specifies an additional include path to the interpreter.
 .TP
-.B \-c path-to-euinc.conf
+.B \-c path-to-eu.cfg
 Specifies a configuration file to be read in to specify additional
 include paths for the interpreter.
 .TP
@@ -48,6 +48,32 @@ include paths for the interpreter.
 Defines a tag as being set. Tags are processed by 
 .B ifdef
 blocks.
+.TP
+.B  \-eub path-to-backend
+Allows specification of the backend runner to use
+besides the default, installed version.
+.TP
+.B -full_debug 
+Make a somewhat larger .il file that contains enough debug 
+information to provide a full ex.err dump when a crash occurs. Normally, 
+variable names and line-number information is stripped out of the .il file, so 
+the ex.err will simply have "no-name" where each variable name should be, 
+and line numbers will only be accurate to the start of a routine or the start of
+a file. Only the private variable values are shown, not the global or local 
+values. In addition to saving space, some people might prefer that the shrouded
+file, and any ex.err file, not expose as much information.
+.TP
+.B -list
+Outputs the list of deleted symbols to a file.
+.TP
+.B -out executable_file
+This option lets you choose the name of the 
+executable file created by the binder. Without this option, ##eubind## will 
+choose a name based on the name of the main Euphoria source file.
+.TP
+.B -quiet
+Suppress normal messages and statistics. Only report errors.
+
 .\" TeX users may be more comfortable with the \fB<whatever>\fP and
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
@@ -55,7 +81,7 @@ blocks.
 .SH SEE ALSO
 .BR eui (1),
 .BR euc (1),
-.BR shroud (1)
+.BR eushroud (1)
 .BR eub (1)
 .br
 The programs are documented fully

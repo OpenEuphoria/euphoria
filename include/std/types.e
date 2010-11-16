@@ -1,11 +1,9 @@
--- (c) Copyright - See License.txt
---
-namespace types
-
 --****
 -- == Types - Extended
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
+namespace types
 
 --**
 -- Object not assigned
@@ -23,10 +21,9 @@ public constant OBJ_ATOM = 2
 -- Object is sequence
 public constant OBJ_SEQUENCE = 3
 
-
 --****
 -- Signature:
--- <built-in> function object(object x)
+-- <built-in> type object(object x)
 --
 -- Description:
 -- Returns information about the object type of the supplied argument ##x##.
@@ -50,10 +47,9 @@ public constant OBJ_SEQUENCE = 3
 -- See Also:
 -- [[:sequence]](), [[:integer]](), [[:atom]]()
 
-
 --****
 -- Signature:
--- <built-in> function integer(object x)
+-- <built-in> type integer(object x)
 --
 -- Description:
 -- Tests the supplied argument ##x## to see if it is an integer or not.
@@ -73,10 +69,9 @@ public constant OBJ_SEQUENCE = 3
 -- See Also:
 -- [[:sequence]](), [[:object]](), [[:atom]]()
 
-
 --****
 -- Signature:
--- <built-in> function atom(object x)
+-- <built-in> type atom(object x)
 --
 -- Description:
 -- Tests the supplied argument ##x## to see if it is an atom or not.
@@ -96,10 +91,9 @@ public constant OBJ_SEQUENCE = 3
 -- See Also:
 -- [[:sequence]](), [[:object]](), [[:integer]]()
 
-
 --****
 -- Signature:
--- <built-in> function sequence( object x)
+-- <built-in> type sequence( object x)
 --
 -- Description:
 -- Tests the supplied argument ##x## to see if it is a sequence or not.
@@ -183,7 +177,8 @@ public enum
 -- -- FALSE, not every char is in the range 'A' to 'C'
 --
 -- char_test("Harry", {{'a', 'z'}, {'D', 'J'}})
--- -- TRUE, every char is either in the range 'a' to 'z', or in the range 'D' to 'J'
+-- -- TRUE, every char is either in the range 'a' to 'z', 
+-- --       or in the range 'D' to 'J'
 --
 -- char_test("Potter", "novel")
 -- -- FALSE, not every character is in the set 'n', 'o', 'v', 'e', 'l'
@@ -195,24 +190,36 @@ public function char_test(object test_data, sequence char_set)
 	if integer(test_data) then
 		if sequence(char_set[1]) then
 			for j = 1 to length(char_set) do
-				if test_data >= char_set[j][1] and test_data <= char_set[j][2] then return TRUE end if
+				if test_data >= char_set[j][1] and test_data <= char_set[j][2] then 
+					return TRUE 
+				end if
 			end for
 			return FALSE
 		else
 			return find(test_data, char_set) > 0
 		end if
 	elsif sequence(test_data) then
-		if length(test_data) = 0 then return FALSE end if
+		if length(test_data) = 0 then 
+			return FALSE 
+		end if
 		for i = 1 to length(test_data) label "NXTCHR" do
-			if sequence(test_data[i]) then return FALSE end if
-			if not integer(test_data[i]) then return FALSE end if
+			if sequence(test_data[i]) then 
+				return FALSE
+			end if
+			if not integer(test_data[i]) then 
+				return FALSE
+			end if
 			lChr = test_data[i]
 			if sequence(char_set[1]) then
 				for j = 1 to length(char_set) do
-					if lChr >= char_set[j][1] and lChr <= char_set[j][2] then continue "NXTCHR" end if
+					if lChr >= char_set[j][1] and lChr <= char_set[j][2] then
+						continue "NXTCHR" 
+					end if
 				end for
 			else
-				if find(lChr, char_set) > 0 then continue "NXTCHR" end if
+				if find(lChr, char_set) > 0 then
+					continue "NXTCHR"
+				end if
 			end if
 			return FALSE
 		end for
@@ -1080,6 +1087,7 @@ end type
 -- string({1, 2, "abc'6"}) -- FALSE (contains a sequence)
 -- string({1, 2, 9.7})    -- FALSE (contains a non-integer)
 -- string({1, 2, 'a'})    -- TRUE
+-- string({1, 2, 'a', 0}) -- TRUE (even though it contains a null byte)
 -- string({1, -2, 'a'})   -- FALSE (contains a negative integer)
 -- string({})            -- TRUE
 -- </eucode>
@@ -1101,3 +1109,51 @@ public type string( object x )
 	end for
 	return 1
 end type
+
+--**
+-- Returns:
+--  TRUE if argument is a sequence that only contains zero or more non-null byte characters.
+--
+-- Comment:
+-- A non-null byte 'character' is defined as a integer in the range [1 to 255].
+--
+-- Example 1:
+-- <eucode>
+-- cstring(-1)            -- FALSE (not a sequence)
+-- cstring("abc'6")       -- TRUE (all single byte characters)
+-- cstring({1, 2, "abc'6"}) -- FALSE (contains a sequence)
+-- cstring({1, 2, 9.7})    -- FALSE (contains a non-integer)
+-- cstring({1, 2, 'a'})    -- TRUE
+-- cstring({1, 2, 'a', 0}) -- FALSE (contains a null byte)
+-- cstring({1, -2, 'a'})   -- FALSE (contains a negative integer)
+-- cstring({})            -- TRUE
+-- </eucode>
+public type cstring( object x )
+	if not sequence(x) then
+		return 0
+	end if
+
+	for i = 1 to length(x) do
+		if not integer(x[i]) then
+			return 0
+		end if
+		if x[i] <= 0 then
+			return 0
+		end if
+		if x[i] > 255 then
+			return 0
+		end if
+	end for
+	return 1
+end type
+
+--**
+-- value returned from [[:routine_id]]()
+-- when the routine doesm't exist or is out of scope.
+-- this is typically seen as -1 in legacy code.
+public constant INVALID_ROUTINE_ID = routine_id("INVALID_ROUTINE_ID")
+
+--**
+-- to be used as a flag for no [[:routine_id]]() supplied.
+public constant NO_ROUTINE_ID = -99999
+

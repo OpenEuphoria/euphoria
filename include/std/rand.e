@@ -1,34 +1,29 @@
--- (c) Copyright - See License.txt
---
-
-namespace random
-
 --****
 -- == Random Numbers
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace random
 
 --****
 -- Signature:
 -- <built-in> function rand(object maximum)
 --
 -- Description:
---   Return a random positive integer.
+--   Return a random integral value.
 --
 -- Parameters:
 -- 		# ##maximum## : an atom, a cap on the value to return.
 --
 -- Returns:
---		An **integer**, from 1 to ##maximum##.
---
--- Errors:
---		If [[:ceil]](##maximum##) is not a positive integer <= 1073741823,
---      an error will occur. It must also be at least 1.
+--		An **atom**, from 1 to ##maximum##.
 --
 -- Comments:
---   This function may be applied to an atom or to all elements of a sequence.
---	 In order to get reproducible results from this function, you should call 
+--	* The minimum value of ##maximum## is 1.
+--  * The maximum value that can possibly be returned is #FFFFFFFF (4_294_967_295)
+--  * This function may be applied to an atom or to all elements of a sequence.
+--	* In order to get reproducible results from this function, you should call 
 --   [[:set_rand]]() with a reproducible value prior.
 --
 -- Example 1:
@@ -45,14 +40,11 @@ namespace random
 -- Return a random integer from a specified inclusive integer range.
 --
 -- Parameters:
---		# ##lo## : an integer, the lower bound of the range
---		# ##hi## : an integer, the upper bound of the range.
+--		# ##lo## : an atom, the lower bound of the range
+--		# ##hi## : an atom, the upper bound of the range.
 --
 -- Returns:
---		An **integer**, randomly drawn between ##lo## and ##hi## inclusive.
---
--- Errors:
---		If ##lo## is not less than ##hi##, an error will occur.
+--		An **atom**, randomly drawn between ##lo## and ##hi## inclusive.
 --
 -- Comments:
 --   This function may be applied to an atom or to all elements of a sequence.
@@ -68,7 +60,7 @@ namespace random
 -- See Also:
 --	[[:rand]], [[:set_rand]], [[:rnd]]
 
-public function rand_range(integer lo, integer hi)
+public function rand_range(atom lo, atom hi)
 
 	if lo > hi then
 		integer temp = hi
@@ -76,13 +68,18 @@ public function rand_range(integer lo, integer hi)
 		lo = temp
 	end if
 	
-	lo -= 1
-	hi -= lo
-
-   return lo + rand(hi)
+	if not integer(lo) or not integer(hi) then
+   		hi = rnd() * (hi - lo)
+   	else
+		lo -= 1
+   		hi = rand(hi - lo)
+   	end if
+   	
+   	return lo + hi
 end function
 
-constant M_SET_RAND = 35
+constant M_SET_RAND = 35,
+         M_GET_RAND = 98
 
 --**
 -- Return a random floating point number in the range 0 to 1.
@@ -101,7 +98,7 @@ constant M_SET_RAND = 35
 -- <eucode>
 -- set_rand(1001)
 -- s = rnd()
---   -- s is 0.2634879318
+--   -- s is 0.6277338201
 -- </eucode>
 --
 -- See Also:
@@ -110,10 +107,11 @@ constant M_SET_RAND = 35
 public function rnd()
 	atom a,b,r
 
-	 a = rand(#3FFFFFFF)
+	 a = rand(#FFFFFFFF)
 	 if a = 1 then return 0 end if
-	 b = rand(#3FFFFFFF)
+	 b = rand(#FFFFFFFF)
 	 if b = 1 then return 0 end if
+
 	 if a > b then
 	 	r = b / a
 	 else
@@ -140,7 +138,7 @@ end function
 -- <eucode>
 -- set_rand(1001)
 -- s = rnd_1()
---   -- s is 0.2634879318
+--   -- s is 0.6277338201
 -- </eucode>
 --
 -- See Also:
@@ -217,6 +215,33 @@ public procedure set_rand(object seed)
 end procedure
 
 --**
+-- Retrieves the current values of the random generator's seeds.
+--
+-- Returns:
+--    a sequence. A 2-element sequence containing the values of the two internal seeds.
+--
+-- Comments:
+-- You can use this to save the current seed values so that you can later reset them
+-- back to a known state.
+--
+-- Example 1:
+-- <eucode>
+--  sequence seeds
+--  seeds = get_rand()
+--  some_func() -- Which might set the seeds to anything.
+--- set_rand(seeds) -- reset them back to whatever they were
+--                  -- before calling 'some_func()'.
+--  </eucode>
+-- 
+-- See Also:
+--		[[:set_rand]]
+
+public function get_rand()
+-- Get the generator's current seed values.
+	return machine_func(M_GET_RAND, {})
+end function
+
+--**
 -- Simulates the probability of a desired outcome.
 --
 -- Parameters:
@@ -269,15 +294,19 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- res = roll(1, 2) -- Simulate a coin toss.
--- res = roll({1,6}) -- Try for a 1 or a 6 from a standard die toss.
--- res = roll({1,2,3,4}, 20) -- Looking for any number under 5 from a 20-sided die.
+-- res = roll(1, 2) 
+--       --> Simulate a coin toss.
+-- res = roll({1,6}) 
+--       --> Try for a 1 or a 6 from a standard die toss.
+-- res = roll({1,2,3,4}, 20) 
+--       --> Looking for any number under 5 from a 20-sided die.
 -- </eucode>
 -- 
 -- See Also:
 --		[[:rnd]], [[:chance]]
 public function roll(object desired, integer sides = 6)
 	integer rolled
+	
 	if sides < 2 then
 		return 0
 	end if
@@ -285,9 +314,9 @@ public function roll(object desired, integer sides = 6)
 		desired = {desired}
 	end if
 	
-	rolled =  find( rand(sides), desired)
-	if rolled then
-		return desired[rolled]
+	rolled =  rand(sides)
+	if find(rolled, desired) then
+		return rolled
 	else
 		return 0
 	end if
@@ -315,11 +344,16 @@ end function
 -- Example 1:
 -- <eucode>
 -- set_rand("example")
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1)})  --> "t"
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 5)})  --> "flukq"
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", -1)}) --> ""
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 26)}) --> "kghrsxmjoeubaywlzftcpivqnd"
--- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 25)}) --> "omntrqsbjguaikzywvxflpedc"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 1)})  
+--      --> "t"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 5)})  
+--      --> "flukq"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", -1)}) 
+--      --> ""
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 26)}) 
+--      --> "kghrsxmjoeubaywlzftcpivqnd"
+-- printf(1, "%s\n", { sample("abcdefghijklmnopqrstuvwxyz", 25)}) 
+--     --> "omntrqsbjguaikzywvxflpedc"
 -- </eucode>
 --
 -- Example 2:

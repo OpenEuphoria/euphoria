@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Pseudo Memory
 --
 --
 -- One use is to emulate PBR, such as Euphoria's map and stack types.
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 
 namespace eumem
 

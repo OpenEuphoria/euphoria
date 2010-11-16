@@ -1,14 +1,19 @@
 include std/machine.e
 include std/math.e
 include std/unittest.e
-
+include std/convert.e
 test_equal("gcd", 17, gcd(1999*3*17,1993*17*7))
-  
+test_equal("gcd 1c ", 1,  gcd(-4, -1)  )
+
 test_equal("is_even #1", 1, is_even(12) )
 test_equal("is_even #2", 0, is_even(7) )
 test_equal("is_even_obj", {1,0}, is_even_obj({2,3}) )
+test_not_equal("is_even_obj 1c ", 0,  is_even_obj(4.0)  )
+test_equal("is_even_obj 2c ", 0,  is_even_obj(4.1)  )
 
 test_equal("or_all", and_bits(#DEADBEE5,-1), or_all({#D000_0000,#0E00_0000,#00AD0000,#BEE5}))
+test_equal("or_all 1c ", 1,  or_all(1) )
+test_equal("or_all 2c ", 7,  or_all({1, {2,4}}) )
 
 test_equal("ceil() integer", 5, ceil(5))
 test_equal("ceil() float #1", 4, ceil(4.0))
@@ -29,6 +34,7 @@ test_equal("round() (default) float #1", 5, round(4.6))
 test_equal("round() (default) float #2", 5, round(4.5))
 test_equal("round() (default) float #3", 4, round(4.4))
 test_equal("round() (default) sequence", {1,2,3,4}, round({0.5, 2.1, 2.9, 3.6}))
+test_equal("round 1c ", "1234",  round("1234", "xxxx" ) )
 
 test_equal("sign() integer #1", 1, sign(10))
 test_equal("sign() integer #2", -1, sign(-10))
@@ -52,6 +58,7 @@ test_equal("sum() two sequences",
     {2,4,5,6,    2,2.2,{6.3},    1.1,0.4,{3.6},   {2},{2.2},{6.3},  {6},#C000001}, 
     {1,4,2,3,    1,2  ,3    ,    0.1,0.2, 0.3,    {1},{2},  {3},    {2},#C000000} 
   + {1,0,3,3,    1,0.2,{3.3},      1,0.2,{3.3},    1, 0.2,  {3.3},  {4},       1} ) 
+test_equal("sum 1c ", 7,   sum({1, {2,4}}) )
 
 test_equal("min() integer", 5, min(5))
 test_equal("min() sequence", 3, min({5,8,3,100,32}))
@@ -88,6 +95,26 @@ test_equal("rad2deg() #3", "0.9998113525,28.6478897565", sprintf("%.10f,%.10f", 
 
 test_equal("exp() #1", 7.389056, round(exp(2), 1000000))
 test_equal("exp() #2", 9.97418, round(exp(2.3), 100000))
+
+function using_gcc()
+	-- right now we don't have a good way to check the compiler used
+	-- from euphoria code
+	return equal(308061521170130,fib(71))
+end function
+
+-- Because it doesn't take long to calculate, let's test all valid input args.
+if using_gcc() then
+	for i = 1 to 69 do
+		test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
+	end for
+	for i = 71 to 74 do
+		test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
+	end for
+else
+	for i = 1 to 74 do
+		test_equal(sprintf("fib %d",i), fib(i - 1) + fib(i), fib(i + 1))
+	end for
+end if
 
 test_equal("atan2() #1", "1.2837139576", sprintf("%.10f", atan2(10.5, 3.1)))
 test_equal("atan2() #2", "-0.0927563202", sprintf("%.10f", atan2(-0.4, 4.3)))
@@ -133,6 +160,7 @@ test_equal ("mod() #10", -33.218, mod(-a,-n))
 test_equal("product:6!", 720, product({1,2,3,4,5,6}))
 test_equal("product(1)",   1, product({}))
 test_equal("product deep sequence", 100, product({{2,5},{2,5}}))
+test_equal("product 1c ", 4,  product(4.0)  )
 
 
 test_equal("rem() #1", sign(a)  * 33.218, remainder( a, n))
@@ -151,10 +179,10 @@ test_equal("shift_bits left #2",   0, shift_bits(0, -9))
 test_equal("shift_bits left #3", 512, shift_bits(4, -7))
 test_equal("shift_bits left #4", 128, shift_bits(8, -4))
 test_equal("shift_bits left #5", 0x213D5600, shift_bits(0xFE427AAC, -7))
-test_equal("shift_bits left #6", -56 /* 0xFFFFFFC8*/, shift_bits(-7, -3))
+test_equal("shift_bits left #6", 0xFFFFFFC8, shift_bits(-7, -3))
 
 test_equal("shift_bits zero #1",  184, shift_bits(184.464, 0))
-test_equal("shift_bits zero #2",  -1530494977 /* 0xA4C67FFF*/ , shift_bits(999_999_999_999_999, 0))
+test_equal("shift_bits zero #2",  0xA4C67FFF , shift_bits(999_999_999_999_999, 0))
 
 test_equal("shift_bits right #1",  23, shift_bits(184, 3))
 test_equal("shift_bits right #2",  12, shift_bits(48, 2))
@@ -165,17 +193,17 @@ test_equal("shift_bits right #6", 0x1FFFFFFF, shift_bits(-7, 3))
 test_equal("shift_bits seq", {0x00000000, 0x00000000, 0x00000001, 0x00001E0F, 0x000000CF, 0x0FFFF791},  
 							shift_bits({3,5,17,123123,3321,-34535}, 4))
 
-test_equal("rotate bits #1", -16 /* 0xFFFFFFF0 */,  rotate_bits(0x7FFFFFF8, -1))
-test_equal("rotate bits #2", -121/* 0xFFFFFF87 */,  rotate_bits(0x7FFFFFF8, -4))
-test_equal("rotate bits #3", -1921/* 0xFFFFF87F */,  rotate_bits(0x7FFFFFF8, -8))
+test_equal("rotate bits #1", 0xFFFFFFF0,  rotate_bits(0x7FFFFFF8, -1))
+test_equal("rotate bits #2", 0xFFFFFF87,  rotate_bits(0x7FFFFFF8, -4))
+test_equal("rotate bits #3", 0xFFFFF87F,  rotate_bits(0x7FFFFFF8, -8))
 test_equal("rotate bits #4", 0x3FFFFFFC,  rotate_bits(0x7FFFFFF8, -31))
 test_equal("rotate bits #5", 0x7FFFFFF8,  rotate_bits(0x7FFFFFF8, -32))
 test_equal("rotate bits #6", 0x3FFFFFFC,  rotate_bits(0x7FFFFFF8, 1))
-test_equal("rotate bits #7", -2013265921/* 0x87FFFFFF */,  rotate_bits(0x7FFFFFF8, 4))
-test_equal("rotate bits #8", -125829121/* 0xF87FFFFF */,  rotate_bits(0x7FFFFFF8, 8))
-test_equal("rotate bits #9", -16 /* 0xFFFFFFF0 */,  rotate_bits(0x7FFFFFF8, 31))
+test_equal("rotate bits #7", 0x87FFFFFF,  rotate_bits(0x7FFFFFF8, 4))
+test_equal("rotate bits #8", 0xF87FFFFF,  rotate_bits(0x7FFFFFF8, 8))
+test_equal("rotate bits #9", 0xFFFFFFF0,  rotate_bits(0x7FFFFFF8, 31))
 test_equal("rotate bits #A", 0x7FFFFFF8,  rotate_bits(0x7FFFFFF8, 32))
-test_equal("rotate bits #B", {0x30000000, 0x50000000, 0x10000001, 0x30001E0F, -1879047985 /* 0x900000CF */ ,-1610614895 /* 0x9FFFF791 */}, 
+test_equal("rotate bits #B", {0x30000000, 0x50000000, 0x10000001, 0x30001E0F, 0x900000CF, 0x9FFFF791}, 
 							 rotate_bits({3,5,17,123123,3321,-34535}, 4))
 
 test_equal("sinh", 0.75, sinh(LN2))
@@ -186,6 +214,9 @@ test_equal("tanh", 0.46211715726000975850231848364367, tanh(0.5))
 test_equal("arctanh", log(3)/2, arctanh(0.5))
 test_equal("arccos", 0, arccos(1.0) )
 test_equal("arcsin", HALFPI, arcsin(1.0) )
+test_equal("trig_range 1c ", {1.104, {1.104}}, round(arccos({.45, {.45}}), 1e4)  )
+test_equal("abs_below_1 1c ", {.4847, {.4847}}, round(arctanh({.45, {.45}}), 1e4)  )
+test_equal("not_below_1 1c ", {0.9163, {.9163}}, round(arccosh({1.45, {1.45}}), 1e4)  )
 
 
 
@@ -242,5 +273,9 @@ test_equal("ensure_in_list #3", 100, ensure_in_list(1, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #4", 100, ensure_in_list(100, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #5", -6, ensure_in_list(-6, {100, 2, 45, 9, 17, -6}))
 test_equal("ensure_in_list #6", 9, ensure_in_list(9, {100, 2, 45, 9, 17, -6}))
+
+test_equal("not_bits int #1", repeat(1,32), int_to_bits(not_bits(0),32))
+
+test_equal("not_bits dbl #1", repeat(1,32), int_to_bits(not_bits(0.1),32))
 
 test_report()

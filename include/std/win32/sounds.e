@@ -1,12 +1,9 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == Windows Sound
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
  
-
 namespace sound
 
 include std/dll.e

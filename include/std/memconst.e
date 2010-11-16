@@ -1,3 +1,9 @@
+--****
+-- == Memory Constants
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
+
 namespace memconst
 
 --****
@@ -123,8 +129,8 @@ export constant MEMORY_PROTECTION = {
 	PAGE_NOACCESS
 }
 
-export type valid_memory_protection_constant( integer x )
-	return 0 != find( x, MEMORY_PROTECTION )
+export type valid_memory_protection_constant( object x )
+	return find( x, MEMORY_PROTECTION )
 end type
 
 
@@ -145,11 +151,12 @@ export function test_write( valid_memory_protection_constant protection )
 	ifdef UNIX then
 		-- take advantage of the use of bit fields in UNIX for protections
 		return and_bits(PROT_WRITE,protection) != 0
+	elsedef
+		return find( protection, { PAGE_EXECUTE_READWRITE,
+				PAGE_EXECUTE_WRITECOPY,
+			PAGE_WRITECOPY,
+		PAGE_READWRITE})
 	end ifdef
-	return find( protection, { PAGE_EXECUTE_READWRITE,
-		 	PAGE_EXECUTE_WRITECOPY,
-		 PAGE_WRITECOPY,
-	PAGE_READWRITE})
 end function
 
 export function test_exec( valid_memory_protection_constant protection )
@@ -157,16 +164,17 @@ export function test_exec( valid_memory_protection_constant protection )
 	ifdef UNIX then
 		-- take advantage of the use of bit fields in UNIX for protections
 		return and_bits(PROT_EXEC,protection) != 0
+	elsedef
+		return find(protection,{PAGE_EXECUTE,
+			PAGE_EXECUTE_READ,
+			PAGE_EXECUTE_READWRITE,
+			PAGE_EXECUTE_WRITECOPY})
 	end ifdef
-	return find(protection,{PAGE_EXECUTE,
-		PAGE_EXECUTE_READ,
-		PAGE_EXECUTE_READWRITE,
-		PAGE_EXECUTE_WRITECOPY})
 end function
 
 
-export type valid_wordsize( integer i )
-	return find(i, {1,2,4})!=0
+export type valid_wordsize( object i )
+	return find(i, {1,2,4})
 end type
 
 export integer DEP_really_works = 0

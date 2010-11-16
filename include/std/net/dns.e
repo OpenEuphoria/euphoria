@@ -1,18 +1,16 @@
 --****
 -- == DNS
 --
--- Based on EuNet project, version 1.3.2 at SourceForge.
---
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
 namespace dns
 
-include std/socket.e
 include std/get.e
+include std/socket.e
 
-constant BLOCK_SIZE = 4096
-enum M_SOCK_GETHOSTBYNAME=79, M_SOCK_GETHOSTBYADDR
+--constant BLOCK_SIZE = 4096
+enum M_SOCK_GETHOSTBYNAME = 79, M_SOCK_GETHOSTBYADDR
 
 --****
 -- ===  Constants
@@ -238,7 +236,6 @@ function unix_dnsquery(sequence dname, integer q_type)
 	
 end function
 
-
 function windows_dnsquery(sequence dname, integer q_type, atom options)
 	-- NOTE: This function does not work on Windows versions below Windows 2000.
 	
@@ -312,7 +309,6 @@ function windows_dnsquery(sequence dname, integer q_type, atom options)
 	
 end function
 
-
 --**
 -- Query DNS info.
 --
@@ -350,7 +346,7 @@ public function dnsquery(sequence dname, integer q_type, atom options)
 	ifdef WIN32 then
 		return windows_dnsquery(dname, q_type, options)
 	elsifdef UNIX then
-		return unix_dnsquery(dname,q_type)
+		return unix_dnsquery(dname, q_type)
 	end ifdef
 	
 	return -999 -- TODO: -999 or -1?

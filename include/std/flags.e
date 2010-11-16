@@ -1,10 +1,13 @@
--- (c) Copyright - See License.txt
+--****
+-- == Flags
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 namespace flags
---****
--- == flags
 
 include std/map.e
+
 object one_bit_numbers = map:new()
 
 put(one_bit_numbers, 0b0000_0000_0000_0000_0000_0000_0000_0001, 1)
@@ -40,6 +43,10 @@ put(one_bit_numbers, 0b0010_0000_0000_0000_0000_0000_0000_0000, 30)
 put(one_bit_numbers, 0b0100_0000_0000_0000_0000_0000_0000_0000, 31)
 put(one_bit_numbers, 0b1000_0000_0000_0000_0000_0000_0000_0000, 32)
 
+--****
+-- == Routines
+--
+
 --**
 -- Tests if the supplied value has only a single bit on in its representation.
 -- Parameters:
@@ -55,11 +62,11 @@ put(one_bit_numbers, 0b1000_0000_0000_0000_0000_0000_0000_0000, 32)
 -- ? which_bit(2) --> 2
 -- ? which_bit(0) --> 0
 -- ? which_bit(3) --> 0
--- ? which_bit(4) --> 3
--- ? which_bit(17) --> 0
--- ? which_bit(1.7) --> 0
--- ? which_bit(-2) --> 0
--- ? which_bit("one") --> 0
+-- ? which_bit(4)          --> 3
+-- ? which_bit(17)         --> 0
+-- ? which_bit(1.7)        --> 0
+-- ? which_bit(-2)         --> 0
+-- ? which_bit("one")      --> 0
 -- ? which_bit(0x80000000) --> 32
 -- </eucode>
 

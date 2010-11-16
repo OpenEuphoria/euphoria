@@ -1,0 +1,41 @@
+== Version 2.1 Beta March 5, 1999
+
+* The rest of the files in the **euphoria\doc** directory have now been converted
+  to HTML. Every **.doc** file in the **doc** directory now has a corresponding
+  **.htm** file in the **euphoria\html** directory. Many improvements and
+  clarifications were made to the documentation.
+* You will now be warned when you have code that comes immediately after an
+  **exit**, **return** or **abort()** statement. This code can never be executed.
+  Suggested by Gabriel Boehme.
+* **safe.e** no longer includes **graphics.e**. This eliminates possible naming
+  conflicts when **safe.e** is substituted for **machine.e**.
+* Using code supplied by David Guy, **safe.e** will now let you add or remove
+  externally-allocated blocks of memory on the "safe address list". **See the new
+  library routines:** **register_block()** and **unregister_block()**.
+* **message_box()** now uses the **handle of the active window** rather than
+  NULL. This forces the user to reply to your message before he can continue to
+  interact with your program.  He won't be prevented from interacting with other
+  programs. Thanks to Austin C.
+* **get()** and **value()** have been sped up by a further 5% thanks to Gabriel
+  Boehme.
+* **exw.exe** has been made less likely to crash mysteriously when attacked by a
+  virus.
+* **sanity.ex** now checks your installation of Euphoria. You'll be warned if
+  your PATH or EUDIR variables are not set, or your **ex.exe**, **exw.exe**,
+  **pdex.exe**, or **pdexw.exe** files have been corrupted or not installed
+  correctly in **euphoria\bin**.
+* The security of **bound** and **scrambled** programs has been tightened some
+  more. Thanks to Rusty Davis.
+* To save space in **euphor21.zip**, the **install** program now //generates//
+  the HTML and DOC files from a common source, using Junko Miura's
+  **documentation generator**. In the process, the generator is deleted, but you
+  can download it from the RDS site.
+* When a **type_check** failure occurs you'll be warned if the type erroneously
+  returned a //sequence// for it's "true/false" result. Previously, a sequence
+  result was simply reported as a type_check failure. Suggested by Ralf
+  Nieuwenhuijsen.
+* The code for **demo\win32\winwire.exw** was cleaned up considerably.
+* The **install** program will warn you to change your **autoexec.bat** file when
+  you install a new release of Euphoria onto a //different// drive.
+
+

@@ -221,11 +221,8 @@ export function load_euphoria_config( sequence file )
 		file &= "eu.cfg"
 	end if
 	
-	conf_path = canonical_path( file )
+	conf_path = canonical_path( file,,1 )
 	-- Prevent recursive configuration loads.
-	ifdef not UNIX then
-		conf_path = lower(conf_path)
-	end ifdef
 	if find(conf_path, seen_conf) != 0 then
 		return {}
 	end if
@@ -438,7 +435,7 @@ export function ConfPath(sequence file_name)
 end function
 
 export function ScanPath(sequence file_name,sequence env,integer flag)
--- returns -1 if no path in geenv(env) leads to file_name, else {full_path,handle}
+-- returns -1 if no path in getenv(env) leads to file_name, else {full_path,handle}
 -- if flag is 1, the include_subfolder constant is prepended to filename
 	object inc_path
 	sequence full_path, file_path, strings

@@ -1,0 +1,45 @@
+/* p {  font-face : "Palatino Linotype" ;  font-size : 18px ;  } */
+
+  pre { padding-left: 1ex;
+	width: 100%;
+    background-color: rgb(234, 242, 234);
+    }
+
+  h1 { color: rgb(000, 000, 255);
+    font-size: 42px;
+    }
+
+  h2 { color: rgb(255, 255, 255);
+    background-color: rgb(0, 0, 255);
+    }
+
+h3 { color : rgb(0.0,0) ;
+     background-color : rgb(200,200,255) ;
+     margin-left : 50 px;
+     font-size : 20px ;
+   }
+
+h4 { color : #fff ;
+     background-color : #aaa ;
+     font-size : 20px  ;
+   }
+
+div {margin-left : 20px ; }
+div.toc_2 { margin-left : 60px ; color : #00F ;}
+div.toc_3 { margin-left : 100px ;  }
+
+div.toc_4 {
+            color : rgb( 200, 000, 000 ) ;
+            margin-left : 140px ;
+          }
+
+
+div.floatleft {
+                color : rgb( 200, 000, 200 ) ;
+                float : left ;
+              }
+
+div.floatright {
+                 color : rgb( 200, 000, 000 ) ;
+                 float : right ;
+            }

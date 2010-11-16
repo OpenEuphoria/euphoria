@@ -56,7 +56,7 @@ struct symtab_entry {
 	union {
 		struct {
 			// for variables only: 
-		   char dummy;
+		   struct symtab_entry *declared_in;
 		} var;
 		struct {
 			// for subprograms only: 
@@ -70,6 +70,11 @@ struct symtab_entry {
 			unsigned int stack_space; // set by fe - stack required 
 			struct symtab_entry *block; // the scope for the routine
 		} subp;
+		struct {
+			// for blocks only:
+			unsigned long first_line;
+			unsigned long last_line;
+		} block;
 		
 	} u;
 	

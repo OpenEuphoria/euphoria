@@ -1,0 +1,456 @@
+== Version 2.4 Alpha February 21, 2003
+
+=== New Features
+
+*  Most machine-level exceptions (peek/poke to bad addresses etc.)
+  in both the main program and in .dlls, are now caught by
+  **exw**
+  and **exu**,
+  and reported in the usual way, with a full traceback and
+  **ex.err**
+  variable dump. This is a great improvement over the cryptic
+  machine-level messages you used to get (and still get when using
+  compiled languages, and most interpreted languages) about
+  "segmentation violation", "illegal instruction" etc.).
+  Thanks to Martin Stachon.
+
+*  In addition to ##__stdcall##, the C ##__cdecl## calling
+  convention
+  is now supported for calls to C routines in .dll's and also call-backs
+  to Euphoria routines from C code.
+
+*  Euphoria's support for DOS long filenames has been extended to
+  Windows XP.
+
+*  The **trace** screen shows you large
+  sequences in pretty-print display on a separate
+  screen. You can scroll through the whole sequence.
+
+*  **pretty_print()** was added to
+  **misc.e**.
+  It lets you display Euphoria objects
+  with a nice, readable structured display, and many formatting options.
+
+*  Pretty-printing of sequences is now done in
+  **ex.err**,
+  the **?** command, and
+  **db_dump()**.
+
+*  **Euphoria Database System (EDS)**:
+  **db_rename_table(name, new_name)**
+  was added to **database.e**.
+  This routine was submitted by Jordah Ferguson, and included
+  with only trivial changes.
+
+*  **Linux/FreeBSD**:
+  **system()** no longer initializes
+  curses when there is no console window yet. Thanks to Daniel Johnson.
+
+*  The number of levels of nested include files has been raised to 30 (from 10).
+  Thanks to Tone Skoda.
+
+*  Include statement path names can have double-quotes around them,
+  so paths containing blanks can be handled correctly. This was
+  actually implemented for 2.3 but never documented.
+
+*  **exw.exe**, and any executables
+  produced by the **Translator** with Watcom,
+  now have the subsystem set to 4.0 instead of 3.1. This improves the
+  appearance of GUI's in some cases. The utility
+  **make31.exw** will
+  create a version of **exw.exe** that
+  supports Windows GUI 3.1 as before,
+  in the unlikely case that there are compatibility problems with
+  Euphoria 2.3. Thanks to H. W. Overman, Brian Broker and others for
+  recommending this change.
+
+*  **makecon.exw** - will create a version
+  of **exw.exe** that
+  operates as a console application - no console window is popped up,
+  and **stdin/stdout** can be redirected
+
+*  **trace(1 2 and 3)** are now allowed
+  with **bind -clear**
+  (still not allowed with **shrouded bind**
+  for security reasons). Thanks to Jonas Temple.
+
+*
+  **Translator**: You can now make a
+  Euphoria .dll using Lcc and interface it with interpreted programs running
+  under **exw**, and translated programs
+  using Borland and Watcom. Previously, the main program had to also be
+  compiled with Lcc.
+
+*  The **Translator** no longer uses
+  the **-m486** or **-mpentium** options available with
+  GCC and DJGPP.
+  These options were causing warnings, and the C compiler apparently
+  sets the machine model correctly by itself. Thanks to Kenneth Rhodes.
+
+*  The **Translator** will now perform
+  automatic calls
+  to user-defined types, in the
+  unusual case where the type routine has side-effects (it sets global
+  variables, performs I/O etc.). Thanks to Andy Serpa.
+
+*  **euphoria\demo\bench** compares
+  the
+  **Euphoria Interpreter** and the
+  **Euphoria To C Translator** against
+  more than 20 other interpreted languages.
+
+
+
+=== Porting Activity
+
+* We ported the **Interpreter**
+  and **Translator**
+  to **FreeBSD.**
+  The source now has several C #ifdef's for FreeBSD.
+
+* Andy Cranston has ported Euphoria to HP Unix, and he plans to do
+  Sun Unix.
+
+
+
+=== Optimizations
+
+==== Interpreter
+
+
+*  Typical large slices are faster.
+  About 30% faster for slices from about 100 to 50000 in length.
+  (Overhead dominates for smaller slices, and lack of caching
+  affects larger slices.)
+  This assumes the slice is mostly integers (usually true),
+  and an actual copy of the data is made (usually true since v1.4b).
+
+* Statements that contain multiple ##&## concatenations are much faster.
+
+  {{{        e.g. instead of:
+             **result = a & b & c**
+             being evaluated as:
+               1. copy a and b into temp
+               2. copy temp and c into result
+                  (a and b are effectively copied twice!)
+
+             We now do:
+               1. copy a and b and c directly into result
+  }}}
+
+  So there is less copying of data and fewer temp sequences to create.
+  The more ##&## operators in an
+  expression, the greater the speed-up. e.g. with 3
+  ##&## operators some of the data
+  was copied 3 times, etc.
+  Jordah Ferguson pointed out that this was slow.
+
+* The time overhead involved in calling and returning from a
+  Euphoria call-back routine has been reduced by about 10 percent.
+
+* In **exw** and **ecw -wat**, allocation of space for large numbers of
+  objects is faster. It can be tremendously faster when hundreds of
+  thousands or millions of objects are involved.
+
+* Better UPX compression has chopped a few K off
+  **exw.exe** vs. 2.3
+  (even though new code was added). Thanks to Wolfgang Fritz
+
+
+==== Euphoria Database System
+
+* Keys and records are read faster due to a faster
+  **decompress()** routine.
+  Almost twice as fast when the key or record data to be retrieved
+  consists mainly of sequences of characters or small integers.
+  This case is quite common.
+
+* Allocating new space in a database is much faster, up to 4x faster,
+  especially in large databases with a large list of free blocks
+
+* Inserting and deleting records in huge tables is now much faster.
+  Combined with the speeded-up slices in Euphoria 2.4,
+  **database.e** is
+  now about 25% faster for a table with 10,000 records and
+  over 3x faster for a table with 100,000 records.
+  This really only matters if you are trying to insert/delete hundreds
+  of records per second. In the typical case of a human operator
+  entering data via GUI, you would never notice the insert/delete time
+  for one record (a few milliseconds). Derek Parnell pointed out the
+  slowness.
+
+* **db_select_table()** is significantly
+  faster.
+
+* **get4()** is faster which speeds up
+  everything.
+
+==== Other Optimizations
+
+* **bytes_to_int()** in
+  **machine.e** is now more than twice as fast.
+
+* **gets()** is about 5% faster
+
+* **sort()** and
+  **custom_sort()** are a few percent faster.
+  Thanks to Ricardo Forno for tweaking the Shell sort algorithm.
+
+* Several additional optimizations have been added to the
+  **Translator**.
+  It produces executables that are faster and smaller
+  than version 2.3. The 2.4 Translator has been successfully tested
+  on hundreds of thousands of lines of Euphoria code, and there are
+  currently no known code generation bugs. Some Translator
+  benchmark results are in
+  **euphoria\demo\bench**.
+
+
+=== Bug Fixes
+
+
+==== Source Code
+
+
+* **bug fixed**: The
+  **gnubsd** batch file referred to
+  **syncolor.c** and
+  **syncolor.o**.
+  (**gnuexu** was ok.)
+
+* **bug fixed**: Karl Bochert pointed out a necessary C coding
+  change to make **poke()** work with
+  the latest version of Lcc. The change
+  corrected the **Translator** (with
+  recent versions of Lcc) and the **Interpreter
+  Source Code** (compiled with Lcc)
+
+
+==== Interpreter
+
+
+* **bug fixed**: A crash might occur in situations where a call-back routine
+  indirectly called itself recursively. Thanks to Matthew Lewis
+  and George Papadopoulos.
+
+* **bug fixed**: In for-loops at the top-level of a program
+  (outside of any routine),
+  that incremented the loop variable by an integer other than the default
+  of +1, ##end for## was taking up to
+  15x longer than necessary due to a
+  bug fix that was made back in November 1999. Only the
+  ##end for##
+  itself was slow, not the code contained in the body of the loop.
+  Antoine Tammer detected this.
+
+* **bug fixed**: On XP, when you open a new DOS window that has more than 25 lines,
+  the Virtual DOS Machine (VDM) is at first confused about the true number
+  of lines. The first time (only) when you ran a Euphoria program in
+  that window, if you ran it near the very bottom of the screen, the output
+  might disappear, or the VDM or Euphoria might report an error etc.
+  Euphoria (**ex.exe**) now detects the
+  rare cases when VDM is
+  confused and clears the screen, which clears up the confusion.
+  A similar problem existed on NT, and was fixed a few years ago.
+
+* **bug fixed**: The interpreter was referring
+  to "call back from Windows" in **ex.err**,
+  even on Linux or FreeBSD. It now says "call-back from external source"
+  on those systems. Thanks to Pete Eberlein.
+
+* **bug fixed**: When an include file couldn't
+  be found, the error message
+  referred to "euphoria\include". It now uses %EUDIR%\include
+
+* **bug fixed**: An error message will no longer be generated on any platform
+  for ##without profile_time##. Thanks to Alan Oxley.
+
+
+==== Translator
+
+
+* **bug fixed**: When assigning
+  the result of an arithmetic calculation (typically multiply)
+  involving two integers, to a variable declared as atom,
+  where the atom variable had already (in the same basic block)
+  been assigned an integer value, the Translator might
+  not output any code to check for integer overflow (result outside
+  of +/- one billion). This could cause a crash. Thanks to Andy Serpa.
+
+* **bug fixed**: DJGPP strip.exe command
+  in **emake.bat** would fail on XP,2000 due to
+  a bug in DJGPP.
+  Now **emake.bat** has: **SET LFN=n**
+  to work around the bug in strip.exe
+
+* **bug fixed**: Translated code compiled
+  with Borland C was not producing
+  INF's and NAN's, like Watcom and Lcc. Rather, it was crashing when
+  a floating-point overflow (over 1e308), or an undefined f.p.
+  result was calculated. The **Interpreter Source
+  Code** was also
+  corrected for those who wish to compile **exw.exe**
+   using Borland.
+  Thanks to Andy Serpa.
+
+* **bug fixed**: In the first basic block
+  of a Euphoria routine (i.e. before any control-flow statements),
+  **peek4u()**, <font color="#006699">
+  **peek4s()**, and the
+  "add integer 1" operation, would sometimes neglect to check for
+  possible 31-bit integer overflow when assigning to a private variable
+  declared as atom, unless the variable had been previously
+  initialized. Thanks to Mike Duffy.
+
+* **bug fixed**: In some cases, when
+  assigning a sequence element
+  to a variable declared as integer, and known to have an integer value
+  at this point, the case where the element was an integer value stored
+  in C double form was not handled correctly.
+
+* **bug fixed**: In rare cases, the
+  translator might output two unary minus operators
+  in a row, which would be parsed by a C compiler as the
+  C decrement operator "--".
+
+* **bug fixed**: Euphoria .dll's were not
+  always correctly freeing storage
+  allocated by the main program, and vice versa. Memory could be wasted,
+  and you might get a machine-level crash. Thanks to H. W. Overman.
+
+  **Note:** Due to this fix, any Euphoria .dll's created with the
+  Translator version 2.3 or earlier, must be re-translated with 2.4,
+  and re-compiled, in order to interface with the Euphoria 2.4 (or later)
+  interpreter or translated code. New .dll's created with version 2.4
+  or later, will not work with the interpreter version 2.3 or earlier,
+  except in trivial cases.
+
+* **bug fixed**: The
+  **sleep(x)** function was only sleeping
+  for x milliseconds
+  when using the Lcc run-time library. It now sleeps for x seconds,
+  to conform with the Euphoria documentation for
+  **sleep()**. Thanks to Wolfgang Fritz.
+
+* **bug fixed**: On some versions of Linux, a translated/compiled Euphoria
+  program would crash if standard output was redirected, e.g. for CGI
+
+* **bug fixed**: On some versions of Linux, a translated/compiled Euphoria
+  program would crash if machine(M_GET_SCREEN_CHAR, {row, col}) were called.
+
+* **bug fixed**: In some cases the code was not correct when an
+  integer variable was assigned the unary minus of an atom variable.
+
+* **bug fixed**: In a very rare case, an uninitialized value in memory
+  might be used to determine if a literal floating-point value should be
+  treated as an integer or not. Incorrect code could result.
+
+
+
+==== Binder
+
+
+
+* **bug fixed**: The binder would crash
+  after seeing a comment with no new-line character, just EOF, on the last
+  line of a file. Some versions of Win32Lib.ew had this.
+   Thanks to Henri Goffin.
+
+* **bug fixed**: The usage report of
+  **bind**/<font color="#993333">**shroud**
+   still said "-scramble", instead of "-clear" and had other
+  errors for Linux/FreeBSD. Thanks to Chris Bensler.
+
+* **bug fixed**:
+  **bind/shroud -clear** might neglect to
+  rename a private variable, when an earlier local variable gets renamed
+  into the same name. Thanks to Pete Lomax.
+
+* **bug fixed**: When an include file was
+  missing ##\n## on the last line,
+  **bind/shroud -clear** might neglect to leave some whitespace
+  before the next word in the main file. Thanks to Pete Lomax.
+
+* **bug fixed**: If you defined a constant
+   that was never used, and
+   it was defined using an expression that contained a binary
+   minus operator, a syntax error could occur in the bound or
+   shrouded file that you create. Thanks to Chris Bensler.
+
+==== Library Routines
+
+* **bug fixed**:
+  **walk_dir("/",...)** would fail on Linux.
+  Thanks to Ricardo Forno.
+
+* **bug fixed**:
+  **db_compress()** of EDS had an error
+  if the database file or it's path contained a blank character. A
+  blank is ok now on all platforms except DOS. Thanks to Virtual B.
+
+* **bug fixed**:
+  **wildcard_file()** in
+  **euphoria\include\wildcard.e** is now case
+  sensitive on Linux/FreeBSD (but is still case insensitive on DOS/Windows).
+  Thanks to Jeff Fielding.
+
+* **bug fixed**:
+  **dir()** was not always reporting file
+  sizes greater than 1 Gb correctly. It now handles up to 4 Gb. Arithmetic
+  performed on the file size would probably fail. Thanks to Ricardo Forno.
+
+* **bug fixed**:
+  **where()** was not always reporting file
+  positions greater than 1 Gb
+  correctly. Arithmetic performed on the position would probably fail.
+  It now handles up to 2 Gb.
+
+* **bug fixed**:
+  **ex, exw, ec -wat, ecw -wat**: The
+  **dir()** function for
+  DOS and Windows was not handling wildcards correctly when a backslash
+  appeared at the end of the file or directory path. Thanks to Juergen Luethje.
+
+==== Namespace Feature
+
+
+* **bug fixed**: If you tried to declare a
+  new variable, using a namespace
+  qualifier, e.g. **integer y:x** (which is illegal)
+  it wouldn't complain, and would just ignore the "y:" part,
+  as long as y:x was a routine (not a variable) in an earlier file.
+  This is now caught as an error. Thanks to Martin Stachon.
+
+* **bug fixed**: When declaring the type of a parameter, using a global type that was
+  defined in more than one file, you would get an unclear error
+  message stating "a type is expected here". Now you'll get a
+  message pointing out that the type requires a namespace identifier
+  to resolve it. Thanks to Juergen Luethje.
+
+* **bug fixed**: The error message that you get if you specify a namespace
+  qualifier and a ':', but you neglect to follow it with a properly-formed
+  identifier, has been improved.  Thanks to Carl White.
+
+==== Demo Programs
+
+* **bug fixed**:
+  In the **window.exw** demo program,
+  **allocate(64)** and
+  **allocate(16)**
+  caused a storage leak. Thanks to Wolfgang Fritz and Jordah Ferguson.
+
+==== Trace/Debug
+
+
+* **bug fixed**: When
+  **trace(0)** was executed, followed later by
+  **trace(1)**, with no
+  screen I/O in between, the values of some variables on the trace screen
+  were not updated. Thanks to Ricardo Forno.
+
+* **bug fixed**:
+  **with trace** /
+  **with profile** /
+  **trace(3)**, used all together,
+  produced garbage source lines in
+  **ctrace.out**. Thanks to Kat.

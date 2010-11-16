@@ -1,4 +1,5 @@
 == Binding and Shrouding
+:<<LEVELTOC level=2 depth=4>>
 
 === The Shroud Command
 
@@ -8,19 +9,20 @@
 eushroud [-full_debug] [-list] [-quiet] [-out shrouded_file] filename.ex[w/u]
 }}}
 
-The ##shroud## command converts a Euphoria program, typically consisting of a main
-file plus many include files, into a single, compact file. A single file is not only convenient,
-it allows you to give people your program to use, without giving them your source code.
+The **##shroud##** command converts a Euphoria program, typically consisting of a 
+main file plus many include files, into a single, compact file. A single file is
+easier to distribute, and it allows you to distribute your program to others without 
+releasing your source code.
 
 A shrouded file does not contain any Euphoria source code statements. Rather,
-it contains a low-level intermediate language (IL) that is executed by the
+it contains a low-level **Intermediate Language** (IL) that is executed by the
 back-end of the interpreter. A shrouded file does not require any parsing. It
 starts running immediately, and with large programs you will see a quicker
 start-up time. Shrouded files must be run using the interpreter back-end:
 ##eubw.exe## (//Windows//) or ##eub.exe##
-(//UNIX//).  This backend is freely available, and you can give it to
+(//Unix//).  This backend is freely available, and you can give it to
 any of your users who need it. It's stored in ##euphoria\bin## in the Euphoria
-interpreter package. You can run your .il file with:
+interpreter package. You can run your ##.il## file with:
 
 On //Windows// use:
 
@@ -35,26 +37,28 @@ On //Unix// use:
 eub myprog.il
 }}}
 
-Although it does not contain any source statements, a .il file will generate a useful
-##ex.err## dump in case of a run-time error.
+Although it does not contain any source statements, a ##.il## file will generate a 
+useful ##ex.err## dump in case of a run-time error.
 
-The shrouder will remove any routines and variables that your program doesn't use.
-This will give you a smaller .il file. There are often a great number of unused routines
-and unused variables. For example your program might include several 3rd party include
-files, plus some standard files from ##euphoria\include##, but only use a few
-items from each file. The unused items will be deleted.
+The shrouder will remove any routines and variables that your program doesn't 
+use. This will give you a smaller ##.il## file. There are often a great number of 
+unused routines and unused variables. For example, your program might include 
+several third party include files, plus some standard files from 
+##euphoria\include##, but only use a few items from each file. The unused items 
+will be deleted.
 
 ==== Options
 
-* **-full_debug**: Make a somewhat larger .il file that contains enough debug information to
-  provide a full ##ex.err## dump when a crash occurs.Normally, variable names and line-number
-  information is stripped out of the .il file, so the ##ex.err## will simply have "no-name"
-  where each variable name should be, and line numbers will only be accurate to the start of
-  a routine or the start of a file. Only the private variable values are shown, not the global
-  or local values. In addition to saving space, some people might prefer that the shrouded
-  file, and any ##ex.err## file, not expose as much information.
-* **-list**: Produce a listing in **deleted.txt** of the routines and constants that were
-  deleted.
+* **-full_debug**: Make a somewhat larger .il file that contains enough debug 
+information to provide a full ##ex.err## dump when a crash occurs. Normally, 
+variable names and line-number information is stripped out of the .il file, so 
+the ##ex.err## will simply have "no-name" where each variable name should be, 
+and line numbers will only be accurate to the start of a routine or the start of
+a file. Only the private variable values are shown, not the global or local 
+values. In addition to saving space, some people might prefer that the shrouded
+file, and any ##ex.err## file, not expose as much information.
+* **-list**: Produce a listing in **deleted.txt** of the routines and constants 
+that were deleted.
 * **-quiet**: Suppress normal messages and statistics. Only report errors.
 * **-out shrouded_file**: Write the output to ##shrouded_file##.
 
@@ -66,14 +70,17 @@ and will add a ###!## line at the top, that will run ##eub.exe.## You
 can override this ###!## line by specifying your own ###!##
 line at the top of your main Euphoria file.
 
-Always keep a copy of your original source. There's no way to recover it from a shrouded file.
+Always keep a copy of your original source. There's no way to recover it from a 
+shrouded file.
 
 === The Bind Command
 
 ==== Synopsis:
 
 {{{
-eubind [-c config-file] [-con] [-copyright] [-full_debug] [-i dir] [-icon file] [-list] [-quiet] [-out executable_file] [-shroud_only [filename.ex]
+eubind [-c config-file] [-con] [-copyright] [-eub path-to-backend] 
+       [-full_debug] [-i dir] [-icon file] [-list] [-quiet] 
+       [-out executable_file] [-shroud_only [filename.ex]
 }}}
 
 
@@ -91,28 +98,34 @@ source statements are not there.
 
 ==== Options:
 
-* **-c config-file**: A euphoria config file to use when binding.
-* **-con**: **(Windows only)**: This option will create a //Windows// console program instead
-  of a //Windows GUI// program. Console programs can access standard input and output, and
-  they work within the current console window, rather than popping up a new one.
-* **-full_debug**: Same as ##shroud## above. If Euphoria detects an error, your executable will
-  generate either a partial, or a full, ##ex.err## dump, according to this option.
-* **-i dir**: A directory to add to the paths to use for searching for included files.
-* **-icon filename[.ico]**: **(Windows only)** When you bind a program, you can patch in
-  your own customized icon, overwriting the one in ##euiw.exe##. ##eui.exe## contains a 32x32
-  icon using 256 colors. It resembles an **E)** shape. //Windows// will display this shape
-  beside ##euiw.exe##, and beside your bound program, in file listings. You can also load this
-  icon as a resource, using the name "euiw" (see ##euphoria\demo\win32\window.exw## for an
-  example). When you bind your program, you can substitute your own 32x32 256-color icon file
-  of size 2238 bytes or less. Other dimensions may also work as long as the file is 2238 bytes
-  or less. The file must contain a single icon image (//Windows// will create a smaller or
-  larger image as necessary). The default **E)** icon file, ##euphoria.ico##, is included in
-  the ##euphoria\bin## directory.
+* **-c config-file**: A Euphoria config file to use when binding.
+* **-con**: **(//Windows// only)**: This option will create a //Windows// 
+console program instead of a //Windows GUI// program. Console programs can 
+access standard input and output, and they work within the current console 
+window, rather than popping up a new one.
+* **-eub path-to-backend** Allows specification of the backend runner to use
+instead of the default, installed version.
+* **-full_debug**: Same as ##shroud## above. If Euphoria detects an error, your 
+executable will generate either a partial, or a full, ##ex.err## dump, according
+to this option.
+* **-i dir**: A directory to add to the paths to use for searching for included 
+files.
+* **-icon filename[.ico]**: **(//Windows// only)** When you bind a program, you 
+can patch in your own customized icon, overwriting the one in ##euiw.exe##. 
+##eui.exe## contains a 32x32 icon using 256 colors. It resembles an **E)** 
+shape. //Windows// will display this shape beside ##euiw.exe##, and beside your 
+bound program, in file listings. You can also load this icon as a resource, 
+using the name "euiw" (see ##euphoria\demo\win32\window.exw## for an example). 
+When you bind your program, you can substitute your own 32x32 256-color icon 
+file of size 2238 bytes or less. Other dimensions may also work as long as the 
+file is 2238 bytes or less. The file must contain a single icon image 
+(//Windows// will create a smaller or larger image as necessary). The default 
+**E)** icon file, ##euphoria.ico##, is included in the ##euphoria\bin## directory.
 * **-list**: Same as ##shroud## above.
 * **-quiet**: Same as ##shroud## above.
-* **-out executable_file**: This option lets you choose the name of the executable file
-  created by the binder. Without this option, ##eubind## will choose a name based on the name
-  of the main Euphoria source file.
+* **-out executable_file**: This option lets you choose the name of the 
+executable file created by the binder. Without this option, ##eubind## will 
+choose a name based on the name of the main Euphoria source file.
 
 A one-line Euphoria program will result in an executable file as large as the
 back-end you are binding with, but the size increases very slowly as you add to
@@ -120,20 +133,23 @@ your program. **When bound, the entire Euphoria editor,
 ##ed.ex##, adds only 27K to the size of the back-end.** 
 
 The first two items returned by [[:command_line]]() will be
-slightly different when your program is bound. See the procedure description for the details.
+slightly different when your program is bound. See the procedure description for
+the details.
 
-A **bound executable** file //can// handle standard input and output redirection. e.g.
+A **bound executable** file //can// handle standard input and output 
+redirection. e.g.
 
 {{{
 myprog.exe < file.in > file.out
 }}}
 
-If you were to write a small ##.bat## file, say ##myprog.bat##, that contained the line
-"##eui myprog.ex##" you would //not// be able to redirect input and output. The following
-will not work:
+If you were to write a small ##.bat## file, say ##myprog.bat##, that contained 
+the line "##eui myprog.ex##" you would //not// be able to redirect input and 
+output. The following will not work:
 
 {{{
 myprog.bat < file.in > file.out
 }}}
 
-You //could// however use redirection on individual lines //within// the ##.bat## file.
+You //could// however use redirection on individual lines //within// the 
+##.bat## file.

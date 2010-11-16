@@ -42,7 +42,7 @@ end function
 
 public procedure add_preprocessor(sequence file_ext, object command=0, object params=0)
 	if atom(command) then
-		sequence tmp = split(file_ext, ":")
+		sequence tmp = split( file_ext, ":")
 		file_ext = tmp[1]
 		command = tmp[2]
 		if length(tmp) >= 3 then
@@ -50,7 +50,7 @@ public procedure add_preprocessor(sequence file_ext, object command=0, object pa
 		end if
 	end if
 
-	sequence file_exts = split(file_ext, ",")
+	sequence file_exts = split( file_ext, "," )
 	
 	if atom(params) then
 		params = ""
@@ -114,20 +114,20 @@ public function maybe_preprocess(sequence fname)
 			integer dll_id = open_dll(cmd)
 			if dll_id = -1 then
 				CompileErr(sprintf("Preprocessor shared library '%s' could not be loaded\n",
-					{ pp[PP_COMMAND] }))
+					{ pp[PP_COMMAND] }),,1)
 			end if
 
 			rid = define_c_func(dll_id, "preprocess", { E_SEQUENCE, E_SEQUENCE, E_SEQUENCE }, 
 				E_INTEGER)
 			if rid = -1 then
-				CompileErr("Preprocessor entry point cound not be found\n")
+				CompileErr("Preprocessor entry point cound not be found\n",,1)
 			end if
 
 			preprocessors[pp_id][PP_RID] = rid
 		end if
 		
 		if c_func(rid, { fname, post_fname, pp[PP_PARAMS] }) != 0 then
-			CompileErr("Preprocessor call failed\n")
+			CompileErr("Preprocessor call failed\n",,1)
 		end if
 	else
 		if equal(fileext(cmd), "ex") then
@@ -136,8 +136,9 @@ public function maybe_preprocess(sequence fname)
 
 		cmd &= sprintf(" -i %s -o %s %s", { fname, post_fname, pp[PP_PARAMS] })
 			
-		if system_exec(cmd, 2) then
-			CompileErr(sprintf("Preprocessor command failed: %s\n", { cmd }))
+		integer result = system_exec(cmd, 2)
+		if result != 0 then
+			CompileErr(sprintf("Preprocessor command failed (%d): %s\n", { result, cmd } ),,1)
 		end if
 	end if
 	

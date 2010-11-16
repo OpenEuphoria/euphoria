@@ -1,8 +1,13 @@
 object _ = 0
+without warning
 
 include std/console.e
 include std/socket.e as sock
 
+override procedure abort(integer x)
+	maybe_any_key()
+	eu:abort(x)
+end procedure
 sock:socket sock = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
 
 if sock:connect(sock, "127.0.0.1:5000") != sock:OK then
@@ -25,3 +30,5 @@ while 1 do
 end while
 
 sock:close(sock)
+maybe_any_key()
+

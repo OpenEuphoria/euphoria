@@ -15,7 +15,7 @@
 #include <windows.h>
 #endif
 #include "alldefs.h"
-#include "alloc.h"
+#include "be_alloc.h"
 
 /**********************/
 /* Imported variables */

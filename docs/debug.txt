@@ -1,23 +1,23 @@
 == Debugging and Profiling
 
-<<LEVELTOC depth=3>>
+<<LEVELTOC level=2 depth=4>>
 
 === Debugging
 
 Extensive run-time checking provided by the Euphoria interpreter catches many
 bugs that in other languages might take hours of your time to track down. When
 the interpreter catches an error, you will always get a brief report on your
-screen, and a detailed report in a file called ex.err. These reports include a
-full English description of what happened, along with a call-stack traceback.
-The file **ex.err** will also have a dump of all variable values, and
+screen, and a detailed report in a file called ##ex.err##. These reports include
+a full English description of what happened, along with a call-stack traceback.
+The file ##ex.err## will also have a dump of all variable values, and
 optionally a list of the most recently executed statements. For extremely large
-sequences, only a partial dump is shown. If the name **ex.err** is not convenient, or
-if a nondefault path is required, you can choose another file name, anywhere on your
-system, by calling [[:crash_file]]().
+sequences, only a partial dump is shown. If the name ##ex.err## is not 
+convenient, or if a nondefault path is required, you can choose another file 
+name, anywhere on your system, by calling [[:crash_file]]().
 
 In addition, you are able to create [[:udt "user-defined types"]] that precisely
-determine the set of legal values for each of your variables. An error report will
-occur the moment that one of your variables is assigned an illegal value.
+determine the set of legal values for each of your variables. An error report 
+will occur the moment that one of your variables is assigned an illegal value.
 
 Sometimes a program will misbehave without failing any run-time checks. In any
 programming language it may be a good idea to simply study the source code and
@@ -33,8 +33,9 @@ program without waiting for a re-compile/re-link.
 The interpreter provides you with additional powerful tools for debugging.
 Using ##trace(1)## you can **//trace//** the execution of your program on one
 screen while you witness the output of your program on another.  ##trace(2)## is
-the same as ##trace(1)## but the trace screen will be in monochrome. Finally, using
-##trace(3)##, you can log all executed statements to a file called **ctrace.out**.
+the same as ##trace(1)## but the trace screen will be in monochrome. Finally, 
+using ##trace(3)##, you can log all executed statements to a file called 
+**ctrace.out**.
 
 The **with/without trace** special statements select the parts
 of your program that are available for tracing. Often you will simply insert a
@@ -45,27 +46,28 @@ these routines after each assignment to a variable.  At other times, you may
 know exactly which routine or routines you are interested in tracing, and you
 will want to select only these ones. Of course, once you are in the trace
 window, you can  skip viewing the execution of any routine by pressing
-down-arrow on the keyboard rather than Enter. However, once inside a routine, you must step
-through till it returns, even if stepping in was an mistake.
+down-arrow on the keyboard rather than Enter. However, once inside a routine, 
+you must step through till it returns, even if stepping in was an mistake.
 
-Only traceable lines can appear in **ctrace.out** or in **ex.err** as "Traced
+Only traceable lines can appear in ##ctrace.out## or in ##ex.err## as "Traced
 lines leading up to the failure", should a run-time error occur.  If you want
 this information and didn't get it, you should insert a with trace and then
 rerun your program.  Execution will be slower when lines compiled with trace
 are executed, especially when ##trace(3)## is used.
 
 After you have predetermined the lines that are traceable, your program must
-then dynamically cause the trace facility to be activated by executing a [[:trace]]() statement.  You could simply say:
+then dynamically cause the trace facility to be activated by executing a 
+[[:trace]]() statement.  You could simply say:
 
 <eucode>
 with trace
 trace(1)
 </eucode>
 
-However, you cannot dynamically set or free breakpoints while tracing. You must abort program,
-edit, change setting, save and run again.
+However, you cannot dynamically set or free breakpoints while tracing. You must 
+abort program, edit, change setting, save and run again.
 
-at the top of your program, so you can start tracing from the beginning of
+At the top of your program, so you can start tracing from the beginning of
 execution. More commonly, you will want to trigger tracing when a certain
 routine is entered, or when some condition arises. e.g.
 
@@ -78,10 +80,11 @@ end if
 You can turn off tracing by executing a ##trace(0)##
 statement. You can also turn it off interactively by typing 'q' to quit
 tracing. Remember that with trace must appear **//outside//** of any routine,
-whereas trace() can appear **//inside//** a routine **//or outside//**.
+whereas ##trace##() can appear **//inside//** a routine **//or outside//**.
 
-You might want to turn on tracing from within a [[:type -> types]]. Suppose you run your program and it fails,
-with the **ex.err** file showing that one of your variables has been set to a
+You might want to turn on tracing from within a [[:type -> types]]. Suppose you 
+run your program and it fails, with the ##ex.err## file showing that one of your
+variables has been set to a
 strange, although not illegal value, and you wonder how it could have happened.
 Simply create a type for that variable that
 executes ##trace(1)## if the value being assigned to the variable is the strange
@@ -98,15 +101,16 @@ type positive_int(integer x)
 end type
 </eucode>
 
-When ##positive_int()## returns, you will see the exact statement that caused your
-variable to be set to the strange value, and you will be able to check the
+When ##positive_int()## returns, you will see the exact statement that caused 
+your variable to be set to the strange value, and you will be able to check the
 values of other variables.  You will also be able to check the output screen to
 see what has happened up to this precise moment. If you define positive_int()
-so it returns 0 for the strange value (99) instead of 1, you can force a
-diagnostic dump into **ex.err**.
+so it returns zero for the strange value (99) instead of one, you can force a
+diagnostic dump into ##ex.err##.
 
-Remember that the argument to ##trace()## does not need to be a constant. It only needs to be 0,
-1, 2 or 3, but these values may be the result from any expression passed to ##trace##().
+Remember that the argument to ##trace()## does not need to be a constant. It 
+only needs to be 0, 1, 2 or 3, but these values may be the result from any 
+expression passed to ##trace##().
 Other values will cause ##trace()## to fail.
 
 
@@ -116,8 +120,9 @@ When a ##trace(1)## or ##trace(2)## statement is
 executed by the interpreter, your main output screen is saved and a **trace
 screen** appears.  It shows a view of your program with the statement that will
 be executed next highlighted, and several statements before and after showing
-as well. You cannot scroll the window further up or down though. Several lines at the bottom
-of the screen are reserved for displaying variable names and values. The top line shows the commands that you can enter at this point:
+as well. You cannot scroll the window further up or down though. Several lines 
+at the bottom of the screen are reserved for displaying variable names and 
+values. The top line shows the commands that you can enter at this point:
 
 |= Command |= Action |
 | | |
@@ -143,7 +148,7 @@ characters (32-127) are displayed along with the ASCII character itself. The
 ASCII character will be in a different color (or in quotes in a mono display).
 This is done for all variables, since Euphoria does not know in general whether
 you are thinking of a number as an ASCII character or not. You will also see
-ASCII characters (in quotes) in **ex.err**. This can make for a rather "busy"
+ASCII characters (in quotes) in ##ex.err##. This can make for a rather "busy"
 display, but the ASCII information is often very useful.
 
 The trace screen adopts the same graphics mode as the main output screen.  This
@@ -151,53 +156,56 @@ makes flipping between them quicker and easier.
 
 When a traced program requests keyboard input, the main output screen will
 appear, to let you type your input as you normally would. This works fine for a
-[[:gets]]() (read one line) input.  When a [[:get_key]]() (quickly sample the keyboard) is
-called you will be given 8 seconds to type a character, otherwise it is assumed
-that there is no input for this call to get_key(). This allows you to test the
-case of input and also the case of no input for get_key().
+[[:gets]]() (read one line) input.  When a 
+[[:get_key]]() (quickly sample the keyboard) is
+called you will be given 8 seconds to type a character, otherwise it is 
+assumed that there is no input for this call to ##get_key##(). This allows you 
+to test the case of input and also the case of no input for ##get_key##().
 
 === The Trace File
 
-When your program calls trace(3), tracing to a file is activated.  The file,
-**ctrace.out** will be created in the current directory.  It contains the last
+When your program calls ##trace(3)##, tracing to a file is activated.  The file,
+**##ctrace.out##** will be created in the current directory.  It contains the last
 500 Euphoria statements that your program executed.  It is set up as a circular
 buffer that holds a maximum of 500 statements. Whenever the end of
 **ctrace.out** is reached, the next statement is written back at the beginning.
 The very last statement executed is always followed by "=== THE END ===".
 Because it's circular, the last statement executed could appear anywhere in
-**ctrace.out**.  The statement coming after "=== THE END ===" is the
+##ctrace.out##.  The statement coming after "=== THE END ===" is the
 500th-last.
 
-This form of tracing is supported by both the Interpreter and the the Euphoria
-To C Translator.  It is particularly useful when a machine-level error occurs
-that prevents Euphoria from writing out an **ex.err** diagnostic file. By
+This form of tracing is supported by both the interpreter and the the Euphoria
+to C translator.  It is particularly useful when a machine-level error occurs
+that prevents Euphoria from writing out an ##ex.err## diagnostic file. By
 looking at the last statement executed, you may be able to guess why the
-program crashed. Perhaps the last statement was a ##poke##() into an illegal area
+program crashed. Perhaps the last statement was a ##poke##() into an 
+illegal area
 of memory. Perhaps it was a call to a C routine. In some cases it might be a
-bug in the interpreter or the Translator.
+bug in the interpreter or the translator.
 
-The source code for a statement is written to **ctrace.out**, and flushed, just
+The source code for a statement is written to ##ctrace.out##, and flushed, just
 //before// the statement is performed, so the crash will likely have happened
 //during// execution of the final statement that you see in **ctrace.out**.
 
 === Profiling
 
-If you specify a ##with profile## or ##with profile_time## (//Windows// only) directive,
+If you specify a ##with profile## or ##with profile_time## (//Windows// only) 
+directive,
 then a special listing of your program, called a
-//profile//, will be produced by the interpreter when your program finishes
-execution.  This listing is written to the file **ex.pro** in the current
+**profile**, will be produced by the interpreter when your program finishes
+execution.  This listing is written to the file **##ex.pro##** in the current
 directory.
 
-There are two types of profiling available: **execution-count profiling**, and
-**time profiling**.  You get execution-count profiling when you specify with
-profile. You get time profiling when you specify with ##profile_time##.  You can't
-mix the two types of profiling in a single run of your program.  You need to
+There are two types of profiling available: execution-count profiling, and
+time profiling.  You get **execution-count** profiling when you specify with
+profile. You get **time profiling** when you specify with ##profile_time##.  You can
+not mix the two types of profiling in a single run of your program.  You need to
 make two separate runs.
 
-We ran the **sieve8k.ex** benchmark program in **demo\bench** under both types
-of profiling. The results are in **sieve8k.pro** (execution-count profiling)
-and **sieve8k.pro2** (time profiling).
-@[profile_file]
+We ran the ##sieve8k.ex## benchmark program in ##demo\bench## under both types
+of profiling. The results are in ##sieve8k.pro## (execution-count profiling)
+and ##sieve8k.pro2## (time profiling).
+@[profile]
 Execution-count profiling shows precisely how many times each statement in your
 program was executed. If the statement was never executed the count field will
 be blank.
@@ -208,35 +216,38 @@ profiling your program. If a statement was never sampled, the percentage field
 will be blank. If you see 0.00 it means the statement was sampled, but not
 enough to get a score of 0.01.
 
-Only statements compiled with profile or with profile_time are shown in the
-listing. Normally you will specify either with profile or with profile_time at
-the top of your main **.ex** file, so you can get a complete listing.  View
+Only statements compiled ##with profile## or ##with profile_time## are shown in 
+the listing. Normally you will specify either ##with profile## or 
+##with profile_time## at
+the top of your main ##.ex##* file, so you can get a complete listing.  View
 this file with the Euphoria editor to see a color display.
 
 Profiling can help you in many ways:
 
-* it lets you see which statements are heavily executed, as a clue to speeding up your
-  program
-* it lets you verify that your program is actually working the way you intended
-* it can provide you with statistics about the input data
-* it lets you see which sections of code were never tested ~-- don't let your users be the
-  first!
+* It lets you see which statements are heavily executed, as a clue to speeding 
+up your program
+* It lets you verify that your program is actually working the way you intended
+* It can provide you with statistics about the input data
+* It lets you see which sections of code were never tested ~-- don't let your 
+users be the first!
 
 Sometimes you will want to focus on a particular action performed by your
 program. For example, in the **Language War** game, we found that the game in
 general was fast enough, but when a planet exploded, shooting 2500 pixels off
 in all directions, the game slowed down. We wanted to speed up the explosion
-routine. We didn't care about the rest of the code. The solution was to call ##profile(0)##
+routine. We did not care about the rest of the code. The solution was to call 
+##profile(0)##
 at the beginning of Language War,
 just after ##with profile_time##, to turn off profiling, and then to call
-##profile(1)## at the beginning of the explosion routine and ##profile(0)## at the end
+##profile(1)## at the beginning of the explosion routine and ##profile(0)## at 
+the end
 of the routine. In this way we could run the game, creating numerous
 explosions, and logging a lot of samples, just for the explosion effect. If
 samples were charged against other lower-level routines, we knew that those
 samples occurred during an explosion. If we had simply profiled the whole
 program, the picture would not have been clear, as the lower-level routines
-would also have been used for moving ships, drawing phasors etc. ##profile##() can
-help in the same way when you do execution-count profiling.
+would also have been used for moving ships, drawing phasors etc. ##profile##() 
+can help in the same way when you do execution-count profiling.
 
 === Some Further Notes on Time Profiling
 
@@ -244,7 +255,7 @@ With each click of the system clock, an interrupt is generated. When you
 specify ##with profile_time## Euphoria will sample your program to see which
 statement is being executed at the exact moment that each interrupt occurs.
 
-Each sample requires 4 bytes of memory and buffer space is normally reserved
+Each sample requires four bytes of memory and buffer space is normally reserved
 for 25000 samples. If you need more than 25000 samples you can request it:
 
 <eucode>
@@ -261,17 +272,17 @@ process the samples accumulated so far, and free up the buffer for more
 samples. In this way the profile can be based on more samples than you have
 actually reserved space for.
 
-The percentages shown in the left margin of **ex.pro**, are calculated by
+The percentages shown in the left margin of ##ex.pro##, are calculated by
 dividing the number of times that a particular statement was sampled, by the
 total number of samples taken. e.g. if a statement were sampled 50 times out of
 a total of 500 samples, then a value of 10.0 (10 per cent) would appear in the
-margin beside that statement. When profiling is disabled with profile(0),
+margin beside that statement. When profiling is disabled with ##profile(0)##,
 interrupts are ignored, no samples are taken and the total number of samples
 does not increase.
 
 By taking more samples you can get more accurate results. However, one
 situation to watch out for is the case where a program synchronizes itself to
-the clock interrupt, by waiting for [[:time]]() to
+the clock interrupt, by waiting for ##[[:time]]##() to
 advance. The statements executed just after the point where the clock advances
 might //never// be sampled, which could give you a very distorted picture. e.g.
 
@@ -281,7 +292,7 @@ end while
 x += 1 -- This statement will never be sampled
 </eucode>
 
-Sometimes you will see a significant percentage beside a return statement.
+Sometimes you will see a significant percentage beside a ##return## statement.
 This is usually due to time spent deallocating storage for temporary and
 private variables used within the routine. Significant storage deallocation
 time can also occur when you assign a new value to a large sequence.

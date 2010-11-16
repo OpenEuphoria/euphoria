@@ -1,50 +1,24 @@
-== Licensing
-
-This product is free and open source, and has benefited from the contributions
-of many people. You have complete royalty-free rights to distribute any
-Euphoria programs that you develop. You are also free to distribute the interpreter,
-backend and even translator. You can can ##shroud## or ##bind## your
-program and distribute the resulting files royalty-free.
-
-You may incorporate any Euphoria source files from this package into your
-program, either "as is" or with your modifications. (You will probably need at
-least a few of the standard ##euphoria\include## files  in any large program).
-
-We would appreciate it if you told people that your program was developed using
-Euphoria, and gave them the address: [[http://www.rapideuphoria.com]] of our
-Web page, but we do not require any such acknowledgment.
-
-Icon files, such as ##euphoria.ico## in ##euphoria\bin##, may be distributed
-with or without your changes.
-
-The high-speed version of the Euphoria Interpreter back-end is written in ANSI
-C, and can be compiled with many different C compilers. The complete source
-code is in ##euphoria\source##, along with ##execute.e##, the alternate,
-Euphoria-coded back-end. The generous [[:Euphoria License|Open source License]]
-allows both personal and commercial use, and unlike many other open source
-licenses, your changes do not have to be made open source.
-
-Some additional 3rd-party legal restrictions might apply when you use the
-[[:Euphoria To C Translator]].
-
-
-
 == Euphoria Credits
+:<<LEVELTOC level=2 depth=4>>
 
 Euphoria has been continuously developed since it was started in 1993
-by Robert Craig. In 2006 version 3.0 was released as open source. Various
-releases were made to the 3.x series and then in 2009 version 4.0 was
-released... Euphoria's biggest release ever.
+by Robert Craig. In 2006, version 3.0 was released as open source. Various
+releases were made to the 3.x series and then in 2009, development on [[Euphoria4|version 4.0]] was
+begun. Euphoria 4 is expected to be released in early 2011.
 
-It has taken quite a few people to get thus far and we would like to
+It has taken quite a few people to get this far and we would like to
 recognize them here. Authors/Contributors are listed in alphabetical 
 order by their last name.
+
+For an up-to-date listing, see the [[wiki:EuphoriaContributors|EuphoriaContributors]]
+ page at the [[http://openeuphoria.org/wiki/view/home.wc|OpenEuphoria Wiki]].
 
 === Current Authors
 
   * Jim Brown
   * Tom Ciplijauskas
   * Jeremy Cowgar
+  * C. K. Lester
   * Matthew Lewis
   * Derek Parnell
   * Shawn Pringle
@@ -62,7 +36,6 @@ order by their last name.
   * CoJaBo
   * Jason Gade
   * Ryan Johnson
-  * Christopher Lester
   * Marco Antonio Achury Palma
   * Michael Sabal
   * Kathy Smith

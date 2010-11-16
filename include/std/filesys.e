@@ -1,25 +1,25 @@
--- (c) Copyright - See License.txt
---
 --****
 -- == File System
 --
 -- Cross platform file operations for Euphoria
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
 namespace filesys
 
-include std/dll.e
-
-include std/machine.e
-include std/wildcard.e
-include std/sort.e
-include std/search.e
-include std/machine.e
-include std/sequence.e
-include std/types.e
-include std/text.e
-include std/io.e
 include std/datetime.e as dt
+include std/dll.e
+include std/io.e
+include std/machine.e
+include std/machine.e
+include std/map.e
+include std/math.e
+include std/search.e
+include std/sequence.e
+include std/sort.e
+include std/text.e
+include std/types.e
+include std/wildcard.e
 
 ifdef UNIX then
 	include std/get.e -- for disk_size()
@@ -30,36 +30,18 @@ constant
 	M_CURRENT_DIR = 23,
 	M_CHDIR       = 63
 
-ifdef WIN32 then
+ifdef WIN32 then	
 	constant lib = open_dll("kernel32")
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
-		C_BOOL)
-	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
-	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
-	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
-		{C_POINTER, C_POINTER}, C_BOOL)
-	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
-	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
-	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
-		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
 
 elsifdef LINUX then
 	constant lib = open_dll("")
 
-elsifdef FREEBSD or SUNOS or OPENBSD then
-	constant lib = open_dll("libc.so")
-	
 elsifdef OSX then
 	constant lib = open_dll("libc.dylib")
 
-elsedef
-	constant xCopyFile          = -1
-	constant xMoveFile          = -1
-	constant xDeleteFile        = -1
-	constant xCreateDirectory   = -1
-	constant xRemoveDirectory   = -1
-	constant xGetFileAttributes = -1
-
+elsifdef UNIX then
+	constant lib = open_dll("libc.so")
+	
 end ifdef
 
 ifdef LINUX then
@@ -75,6 +57,24 @@ ifdef UNIX then
 	constant xCreateDirectory = define_c_func(lib, "mkdir", {C_POINTER, C_INT}, C_INT)
 	constant xRemoveDirectory = define_c_func(lib, "rmdir", {C_POINTER}, C_INT)
 	constant xGetFileAttributes = define_c_func(lib, "access", {C_POINTER, C_INT}, C_INT)
+elsifdef WIN32 then
+	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
+		C_BOOL)
+	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
+	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
+	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
+		{C_POINTER, C_POINTER}, C_BOOL)
+	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
+	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
+	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
+		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
+elsedef
+	constant xCopyFile          = -1
+	constant xMoveFile          = -1
+	constant xDeleteFile        = -1
+	constant xCreateDirectory   = -1
+	constant xRemoveDirectory   = -1
+	constant xGetFileAttributes = -1
 end ifdef
 
 
@@ -185,7 +185,9 @@ public enum
 	D_DAY,
 	D_HOUR,
 	D_MINUTE,
-	D_SECOND
+	D_SECOND,
+	D_MILLISECOND,
+	D_ALTNAME
 
 --**
 -- Bad path error code. See [[:walk_dir]]
@@ -217,7 +219,8 @@ public constant W_BAD_PATH = -1 -- error code
 -- you may have multiple entries.
 -- 
 -- Each entry contains the name, attributes and file size as well as
--- the year, month, day, hour, minute and second of the last modification.
+-- the time of the last modification.
+--
 -- You can refer to the elements of an entry with the following constants:
 --  
 -- <eucode>
@@ -231,7 +234,9 @@ public constant W_BAD_PATH = -1 -- error code
 --     D_DAY        = 6,
 --     D_HOUR       = 7,
 --     D_MINUTE     = 8,
---     D_SECOND     = 9
+--     D_SECOND     = 9,
+--     D_MILLISECOND = 10,
+--     D_ALTNAME    = 11
 -- </eucode>
 --
 -- The attributes element is a string sequence containing characters chosen from:
@@ -241,8 +246,17 @@ public constant W_BAD_PATH = -1 -- error code
 -- | 'r'         | read only file
 -- | 'h'         | hidden file
 -- | 's'         | system file
--- | 'v'         | volume-id entry
+-- | 'v'         | volume-id entry 
 -- | 'a'         | archive file
+-- | 'c'         | compressed file
+-- | 'e'         | encrypted file
+-- | 'N'         | not indexed
+-- | 'D'         | a device name
+-- | 'O'         | offline
+-- | 'R'         | reparse point or symbolic link
+-- | 'S'         | sparse file
+-- | 'T'         | temporary file
+-- | 'V'         | virtual file
 --
 -- A normal file without special attributes would just have an empty string, "", in this field.
 --
@@ -250,12 +264,14 @@ public constant W_BAD_PATH = -1 -- error code
 -- 
 -- This function is often used just to test if a file or directory exists.
 -- 
--- Under //WIN32//, st can have a long file or directory name anywhere in 
+-- Under //WIN32//, the argument can have a long file or directory name anywhere in 
 -- the path.
 -- 
--- Under //Unix//, the only attribute currently available is 'd'.
+-- Under //Unix//, the only attribute currently available is 'd' and the milliseconds
+-- are always zero.
 -- 
--- //WIN32//: The file name returned in D_NAME will be a long file name.
+-- //WIN32//: The file name returned in [D_NAME] will be a long file name. If [D_ALTNAME]
+-- is not zero, it contains the 'short' name of the file.
 --
 -- Example 1:
 -- <eucode>
@@ -364,7 +380,7 @@ end function
 -- 
 -- The [[:current_dir]]() function will return the name of the current directory.
 -- 
--- On //WIN32// the current directory is a public property shared
+-- On //Windows// the current directory is a public property shared
 -- by all the processes running under one shell. On //Unix// a subprocess
 -- can change the current directory for itself, but this won't
 -- affect the current directory of its parent process.
@@ -461,11 +477,11 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 --     if find('d', item[D_ATTRIBUTES]) then
 --         return 0 -- Ignore directories
 --     end if
---     if not find(fileext(item[D_NAME]), {"c,h,cpp,hpp,cp"}) then
+--     if not find(fileext(item[D_NAME]), {"c","h","cpp","hpp","cp"}) then
 --         return 0 -- ignore non-C/C++ files
 --     end if
 --     printf(STDOUT, "%s%s%s: %d\n",
---            {path_name, SLASH, item[D_NAME], item[D_SIZE]})
+--            {path_name, {SLASH}, item[D_NAME], item[D_SIZE]})
 --     return 0 -- keep going
 -- end function
 --
@@ -480,13 +496,14 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 --  return sort_columns(d, {-D_SIZE})
 -- end function
 --
--- exit_code = walk_dir("C:\\MYFILES\\", routine_id("look_at"), TRUE, routine_id("mysort"))
+-- exit_code = walk_dir("C:\\MYFILES\\", routine_id("look_at"), TRUE, 
+--                                                         routine_id("mysort"))
 -- </eucode>
 --
 -- See Also:
 --   [[:dir]], [[:sort]], [[:sort_columns]]
 
-public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = -1)
+public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = NO_ROUTINE_ID)
 	object d, abort_now
 	object orig_func
 	sequence user_data = {path_name, 0}
@@ -506,7 +523,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	end if
 
 	-- get the full directory information
-	if not equal(dir_source, -1) then
+	if not equal(dir_source, NO_ROUTINE_ID) then
 		if atom(source_orig_func) then
 			d = call_func(dir_source, {path_name})
 		else
@@ -524,7 +541,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	
 	-- trim any trailing blanks or '\' '/' characters from the path
 	ifdef not UNIX then
-		path_name = replace_all(path_name, '/', '\\')
+		path_name = match_replace('/', path_name, '\\')
 	end ifdef
 	path_name = trim_tail(path_name, {' ', SLASH, '\n'})
 	user_data[1] = path_name
@@ -580,12 +597,14 @@ end function
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
 -- 
--- -- This example will also create "myapp/" and "myapp/interface/" if they don't exist.
+-- -- This example will also create "myapp/" and "myapp/interface/" 
+-- -- if they don't exist.
 -- if not create_directory("myapp/interface/letters") then
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
 --
--- -- This example will NOT create "myapp/" and "myapp/interface/" if they don't exist.
+-- -- This example will NOT create "myapp/" and "myapp/interface/" 
+-- -- if they don't exist.
 -- if not create_directory("myapp/interface/letters",,0) then
 --		crash("Filesystem problem - could not create the new folder")
 -- end if
@@ -599,7 +618,7 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 	integer pos
 
 	if length(name) = 0 then
-		return 1
+		return 0 -- failed
 	end if
 	
 	-- Remove any trailing slash.
@@ -627,6 +646,35 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 end function
 
 --**
+-- Create a new file.
+--
+-- Parameters:
+-- 		# ##name## : a sequence, the name of the new file to create
+--
+-- Returns:
+--     An **integer**, 0 on failure, 1 on success.
+--
+-- Comments:
+-- * The created file will be empty, that is it has a length of zero.
+-- * The created file will not be open when this returns.
+--
+-- Example 1:
+-- <eucode>
+-- if not create_file("the_new_file") then
+--		crash("Filesystem problem - could not create the new file")
+-- end if
+-- </eucode>
+--
+-- See Also:
+-- 	[[:create_directory]]
+
+public function create_file(sequence name)
+	integer fh = open(name, "wb")
+	close(fh)
+	return (fh != -1)
+end function
+
+--**
 -- Delete a file.
 --
 -- Parameters:
@@ -636,6 +684,7 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 
 public function delete_file(sequence name)
+
 	atom pfilename = allocate_string(name)
 	integer success = c_func(xDeleteFile, {pfilename})
 		
@@ -684,7 +733,6 @@ public function curdir(integer drive_id = 0)
 	ifdef not LINUX then
 	    sequence lOrigDir = ""
 	    sequence lDrive
-	    object void
 	
 	    if t_alpha(drive_id) then
 		    lOrigDir =  current_dir()
@@ -700,7 +748,7 @@ public function curdir(integer drive_id = 0)
     lCurDir = current_dir()
 	ifdef not LINUX then
 		if length(lOrigDir) > 0 then
-	    	void = chdir(lOrigDir[1..2])
+	    	chdir(lOrigDir[1..2])
 	    end if
 	end ifdef
 
@@ -776,6 +824,7 @@ end function
 public function clear_directory(sequence path, integer recurse = 1)
 	object files
 	integer ret
+
 	if length(path) > 0 then
 		if path[$] = SLASH then
 			path = path[1 .. $-1]
@@ -799,33 +848,68 @@ public function clear_directory(sequence path, integer recurse = 1)
 	if atom(files) then
 		return 0
 	end if
-	if not equal(files[1][D_NAME], ".") then
-		return 0 -- Supplied name was not a directory
-	end if
+	
+	ifdef WINDOWS then
+		if length( files ) < 3 then
+			return 0 -- Supplied name was not a directory
+		end if
+		if not equal(files[1][D_NAME], ".") then
+			return 0 -- Supplied name was not a directory
+		end if
+		if not eu:find('d', files[1][D_ATTRIBUTES]) then
+			return 0 -- Supplied name was not a directory
+		end if
+	elsedef
+		if length( files ) < 2 then
+			return 0 -- not a directory
+		end if
+	end ifdef
 	
 	ret = 1
 	path &= SLASH
 	
-	for i = 1 to length(files) do
-		if eu:find(files[i][D_NAME], {".", ".."}) then
-			continue
-		elsif eu:find('d', files[i][D_ATTRIBUTES]) then
-			if recurse then
-				integer cnt = clear_directory(path & files[i][D_NAME], recurse)
-				if cnt = 0 then
+	ifdef WINDOWS then
+		for i = 3 to length(files) do
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+				if recurse then
+					integer cnt = clear_directory(path & files[i][D_NAME], recurse)
+					if cnt = 0 then
+						return 0
+					end if
+					ret += cnt
+				else
+					continue
+				end if
+			else
+				if delete_file(path & files[i][D_NAME]) = 0 then
 					return 0
 				end if
-				ret += cnt
-			else
+				ret += 1
+			end if
+		end for
+	elsedef
+		for i = 1 to length(files) do
+			if files[i][D_NAME][1] = '.' then
 				continue
 			end if
-		else
-			if delete_file(path & files[i][D_NAME]) = 0 then
-				return 0
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+				if recurse then
+					integer cnt = clear_directory(path & files[i][D_NAME], recurse)
+					if cnt = 0 then
+						return 0
+					end if
+					ret += cnt
+				else
+					continue
+				end if
+			else
+				if delete_file(path & files[i][D_NAME]) = 0 then
+					return 0
+				end if
+				ret += 1
 			end if
-			ret += 1
-		end if
-	end for
+		end for
+	end ifdef
 	return ret
 end function
 
@@ -881,20 +965,43 @@ public function remove_directory(sequence dir_name, integer force=0)
 	if atom(files) then
 		return 0
 	end if
-	if not equal(files[1][D_NAME], ".") then
+	if length( files ) < 2 then
 		return 0	-- Supplied dir_name was not a directory
 	end if
+	ifdef WINDOWS then
 	
+		if not equal(files[1][D_NAME], ".") then
+			return 0 -- Supplied name was not a directory
+		end if
+		if not eu:find('d', files[1][D_ATTRIBUTES]) then
+			return 0 -- Supplied name was not a directory
+		end if
+		if length(files) > 2 then
+			if not force then
+				return 0 -- Directory is not already emptied.
+			end if
+		end if
+	end ifdef
 	
 	dir_name &= SLASH
-	
-	for i = 1 to length(files) do
-		if eu:find(files[i][D_NAME], {".", ".."}) then
-			continue
-			
-		elsif not force then
-			return 0
-		else
+	ifdef WINDOWS then
+		for i = 3 to length(files) do
+			if eu:find('d', files[i][D_ATTRIBUTES]) then
+				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
+			else
+				
+				ret = delete_file(dir_name & files[i][D_NAME])
+			end if
+			if not ret then
+				return 0
+			end if
+
+		end for
+	elsedef
+		for i = 1 to length(files) do
+			if find( files[i][D_NAME], {".",".."}) then
+				continue
+			end if
 			if eu:find('d', files[i][D_ATTRIBUTES]) then
 				ret = remove_directory(dir_name & files[i][D_NAME] & SLASH, force)
 			else
@@ -903,9 +1010,8 @@ public function remove_directory(sequence dir_name, integer force=0)
 			if not ret then
 				return 0
 			end if
-		end if
-	end for
-	
+		end for
+	end ifdef
 	pname = allocate_string(dir_name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
@@ -1020,10 +1126,10 @@ public function pathinfo(sequence path, integer std_slash = 0)
 			elsedef
 			sequence from_slash = "/"
 			end ifdef
-			dir_name = replace_all(dir_name, from_slash, std_slash)
+			dir_name = match_replace(from_slash, dir_name, std_slash)
 		else
-			dir_name = replace_all(dir_name, "\\", std_slash)
-			dir_name = replace_all(dir_name, "/", std_slash)
+			dir_name = match_replace("\\", dir_name, std_slash)
+			dir_name = match_replace("/", dir_name, std_slash)
 		end if
 	end if
 
@@ -1063,6 +1169,41 @@ public function dirname(sequence path, integer pcd = 0)
 		end if
 	end if
 	return data[1]
+end function
+
+--**
+-- Return the directory name of a fully qualified filename
+--
+-- Parameters:
+-- 		# ##path## : the path from which to extract information
+--      # ##pcd## : If not zero and there is no directory name in ##path##
+--                 then "." is returned. The default (0) will just return
+--                 any directory name in ##path##.
+--
+-- Returns:
+-- 		A **sequence**, the full file name part of ##path##.
+--
+-- Comments:
+-- The host operating system path separator is used.
+--
+-- Example 1:
+-- <eucode>
+-- fname = dirname("/opt/euphoria/docs/readme.txt")
+-- -- fname is "/opt/euphoria/docs"
+-- </eucode>
+--
+-- See Also:
+--   [[:driveid]], [[:filename]], [[:pathinfo]]
+
+public function pathname(sequence path)
+	sequence data
+	integer stop
+	
+	data = canonical_path(path)
+	stop = rfind(SLASH, data)
+	
+	return data[1 .. stop - 1]
+
 end function
 
 --**
@@ -1188,7 +1329,8 @@ end function
 --
 -- Example:
 -- <eucode>
---  -- ensure that the supplied path has an extension, but if it doesn't use "tmp".
+--  -- ensure that the supplied path has an extension, 
+--  -- but if it doesn't use "tmp".
 -- theFile = defaultext(UserFileName, "tmp")
 -- </eucode>
 --
@@ -1205,7 +1347,7 @@ public function defaultext( sequence path, sequence defext)
 			-- There is a dot in the file name part
 			return path
 		end if
-		if path[i] = SLASH then
+		if find(path[i], SLASHES) then
 			if i = length(path) then
 				-- No file name in supplied path
 				return path
@@ -1246,7 +1388,10 @@ end function
 -- ? absolute_path("local/abc.txt") -- returns 0
 -- ? absolute_path("abc.txt") -- returns 0
 -- ? absolute_path("c:..\\abc") -- returns 0
--- -- The next two examples return 0 on Unix platforms and 1 on Microsoft platforms
+--
+-- -- The next two examples return 
+-- -- 0 on Unix platforms and 
+-- -- 1 on Microsoft platforms
 -- ? absolute_path("c:\\windows\\system32\\abc")
 -- ? absolute_path("c:/windows/system32/abc")
 -- </eucode>
@@ -1289,6 +1434,10 @@ end function
 --  # ##directory_given## : An integer. This is zero if ##path_in## is 
 --  to be interpreted as a file specification otherwise it is assumed to be a
 --  directory specification. The default is zero.
+--  # ##no_case## : An integer. Only applies to the Windows platform. If zero (the default) 
+--  the path name is returned using the same case as supplied, otherwise the
+--  returned value is all in lowercase.
+--  
 --
 -- Returns:
 --     A **sequence**, the full path and file name.
@@ -1296,6 +1445,10 @@ end function
 -- Comment:
 -- * In non-Unix systems, the result is always in lowercase.
 -- * The supplied file/directory does not have to actually exist.
+-- * ##path_in## can be enclosed in quotes, which will be stripped off.
+-- * If ##path_in## begins with a tilde '~~' then that is replaced by the
+--   contents of $HOME in unix platforms and %HOMEDRIVE%%HOMEPATH% in Windows.
+-- * In Windows, all '/' characters are replaced by '\' characters.
 -- * Does not (yet) handle UNC paths or unix links.
 --
 --
@@ -1306,11 +1459,10 @@ end function
 -- -- res is now "/usr/foo/abc.def"
 -- </eucode>
 
-public function canonical_path(sequence path_in, integer directory_given = 0)
+public function canonical_path(sequence path_in, integer directory_given = 0, integer no_case = 0)
     sequence lPath = ""
     integer lPosA = -1
     integer lPosB = -1
-    integer lPosC = -1
     sequence lLevel = ""
     sequence lHome
 
@@ -1383,16 +1535,18 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 	
 	-- Replace all instances of "/./" with "/"
 	lLevel = SLASH & '.' & SLASH
+	lPosA = 1
 	while( lPosA != 0 ) with entry do
-		lPath = lPath[1..lPosA-1] & lPath[lPosA + 2 .. $]
+		lPath = eu:remove(lPath, lPosA, lPosA + 1)
 		
 	  entry
-		lPosA = match(lLevel, lPath)
+		lPosA = match(lLevel, lPath, lPosA )
 	end while
 	
 	-- Replace all instances of "X/Y/../" with "X/"
 	lLevel = SLASH & ".." & SLASH
 	
+	lPosB = 1
 	while( lPosA != 0 ) with entry do
 		-- Locate preceding directory separator.
 		lPosB = lPosA-1
@@ -1402,20 +1556,126 @@ public function canonical_path(sequence path_in, integer directory_given = 0)
 		if (lPosB <= 0) then
 			lPosB = 1
 		end if
-		
-		lPath = lPath[1..lPosB-1] & lPath[lPosA + 3 .. $]
+		lPath = eu:remove(lPath, lPosB, lPosA + 2)
 		
 	  entry
-		lPosA = match(lLevel, lPath)
+		lPosA = match(lLevel, lPath, lPosB )
 	end while
 	
-	ifdef not UNIX then
-		lPath = lower(lDrive & lPath)
+	ifdef WINDOWS then
+		lPath = lDrive & lPath
+		if no_case then
+			lPath = lower(lPath)
+		end if
 	end ifdef
 	
 	return lPath
 end function
 
+
+--**
+-- Returns a path string to the supplied file which is shorter than the 
+-- given path string.
+--
+-- Parameters:
+--	# ##orig_path## : A sequence. This is the path to a file.
+--  # ##base_paths## : A sequence. This is an optional list of paths that may
+--  prefix the original path. The default is an empty list.
+--
+-- Returns:
+--     A **sequence**, an equivalent path to ##orig_path## which is shorter 
+--     than the supplied path. If a shorter one cannot be formed, then the
+--     original path is returned.
+--
+-- Comment:
+-- * This function is primarily used to get the shortest form of a file path
+--   for output to a file or screen.
+-- * It works by first trying to find if the ##orig_path## begins with any
+--   of the ##base_paths##. If so it returns the parameter minus the
+--   base path prefix.
+-- * Next it checks if the ##orig_path## begins with the current directory path.
+--   If so it returns the parameter minus the current directory path.
+-- * Next it checks if it can form a relative path from the current directory
+--   to the supplied file which is shorter than the parameter string.
+-- * Failing all of that, it returns the original parameter.
+-- * In Windows, the shorter result is always in lowercase and has all '/' 
+--   characters are replaced by '\' characters.
+-- * The supplied path does not have to actually exist.
+-- * ##orig_path## can be enclosed in quotes, which will be stripped off.
+-- * If ##orig_path## begins with a tilde '~~' then that is replaced by the
+--   contents of $HOME in unix platforms and %HOMEDRIVE%%HOMEPATH% in Windows.
+--
+--
+-- Example 1:
+-- <eucode>
+-- -- Assuming the current directory is "/usr/foo/bar" 
+-- res = abbreviate_path("/usr/foo/abc.def")
+-- -- res is now "../abc.def"
+-- res = abbreviate_path("/usr/foo/bar/inc/abc.def")
+-- -- res is now "inc/abc.def"
+-- res = abbreviate_path("abc.def", {"/usr/foo"})
+-- -- res is now "bar/abc.def"
+-- </eucode>
+
+public function abbreviate_path(sequence orig_path, sequence base_paths = {})
+	sequence expanded_path
+
+	-- Get full path of the parameter
+	expanded_path = canonical_path(orig_path,,1)
+	
+	-- Add the current directory onto the list of base search paths.
+	base_paths = append(base_paths, curdir())
+	
+	ifdef WINDOWS then
+		-- normalize for windows by setting all to lowercase and replacing any
+		-- unix style slashes with windows style ones.
+		base_paths = lower(base_paths)
+		for i = 1 to length(base_paths) do
+			base_paths[i] = match_replace('/', base_paths[i], `\`)
+		end for
+		expanded_path = match_replace('/', expanded_path, `\`)
+	end ifdef
+	
+	-- The first pass is to see if the parameter begins with any of the base paths.
+	for i = 1 to length(base_paths) do
+		if begins(base_paths[i], expanded_path) then
+			-- Found one, so strip it off and return the remainder.
+			return expanded_path[length(base_paths[i]) + 1 .. $]
+		end if
+	end for
+	
+	-- Second pass is to try and find the given path, relative to the current directory.
+	ifdef WINDOWS then
+		-- If not on same drive just return what was supplied.
+		if not equal(base_paths[$][1], expanded_path[1]) then
+			return orig_path
+		end if
+	end ifdef
+	
+	-- Separate the current dir into its component directories.
+	base_paths = split(base_paths[$], SLASH)
+	-- Separate full given path into its components.
+	expanded_path = split(expanded_path, SLASH)
+	
+	-- locate where the two paths begin to get different.
+	for i = 1 to min({length(expanded_path), length(base_paths) - 1}) do
+		if not equal(expanded_path[i], base_paths[i]) then
+			-- Create a new path by backing up from the current dir to
+			-- the point of difference and tacking on the remainder of the
+			-- parameter's path.
+			expanded_path = repeat("..", length(base_paths) - i) & expanded_path[i .. $]
+			expanded_path = join(expanded_path, SLASH)
+			if length(expanded_path) < length(orig_path) then
+				-- If the result is actually smaller then we abbreviated it.
+		  		return expanded_path
+			end if
+			exit
+		end if
+	end for
+	
+	-- If all else fails, just return the original data.
+	return orig_path
+end function
 
 --****
 -- === File Types
@@ -1447,9 +1707,11 @@ public function file_type(sequence filename)
 object dirfil
 	if eu:find('*', filename) or eu:find('?', filename) then return FILETYPE_UNDEFINED end if
 	
-	if length(filename) = 2 and filename[2] = ':' then
-		filename &= "\\"
-	end if
+	ifdef WINDOWS then
+		if length(filename) = 2 and filename[2] = ':' then
+			filename &= "\\"
+		end if
+	end ifdef
 	
 	dirfil = dir(filename)
 	if sequence(dirfil) then
@@ -1619,8 +1881,8 @@ end function
 -- Rename a file.
 -- 
 -- Parameters:
--- 		# ##src## : a sequence, the name of the file or directory to rename.
--- 		# ##dest## : a sequence, the new name for the renamed file
+-- 		# ##old_name## : a sequence, the name of the file or directory to rename.
+-- 		# ##new_name## : a sequence, the new name for the renamed file
 --		# ##overwrite## : an integer, 0 (the default) to prevent renaming if destination file exists,
 --                                   1 to delete existing destination file first
 --
@@ -1628,7 +1890,7 @@ end function
 --     An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
--- 	*	If ##dest## contains a path specification, this is equivalent to moving the file, as 
+-- 	*	If ##new_name## contains a path specification, this is equivalent to moving the file, as 
 -- 		well as possibly changing its name. However, the path must be on the same drive for 
 -- 		this to work.
 -- * If ##overwrite## was requested but the rename fails, any existing destination
@@ -1637,24 +1899,24 @@ end function
 -- See Also:
 -- [[:move_file]], [[:copy_file]]
 
-public function rename_file(sequence src, sequence dest, integer overwrite=0)
+public function rename_file(sequence old_name, sequence new_name, integer overwrite=0)
 	atom psrc, pdest, ret
 	sequence tempfile = ""
-	
+
 	if not overwrite then
-		if file_exists(dest) then
+		if file_exists(new_name) then
 			return 0
 		end if
 	else
-		if file_exists(dest) then
-			tempfile = temp_file(dest)
-			ret = move_file(dest, tempfile)
+		if file_exists(new_name) then
+			tempfile = temp_file(new_name)
+			ret = move_file(new_name, tempfile)
 		end if
 	end if
 	
 	
-	psrc = allocate_string(src)
-	pdest = allocate_string(dest)
+	psrc = allocate_string(old_name)
+	pdest = allocate_string(new_name)
 	ret = c_func(xMoveFile, {psrc, pdest})
 		
 	ifdef UNIX then
@@ -1667,7 +1929,7 @@ public function rename_file(sequence src, sequence dest, integer overwrite=0)
 		if not ret then
 			if length(tempfile) > 0 then
 				-- rename was unsuccessful so restore from tempfile
-				ret = move_file(tempfile, dest)
+				ret = move_file(tempfile, new_name)
 			end if
 		end if
 		delete_file(tempfile)
@@ -1872,8 +2134,10 @@ end function
 -- <eucode>
 --  res = locate_file("abc.def", {"/usr/bin", "/u2/someapp", "/etc"})
 --  res = locate_file("abc.def", "/usr/bin:/u2/someapp:/etc")
---  res = locate_file("abc.def") -- Scan default locations.
---  res = locate_file("abc.def", , "app") -- Scan the 'app' sub directory in the default locations.
+--  res = locate_file("abc.def") 
+--        -- Scan default locations.
+--  res = locate_file("abc.def", , "app") 
+--        -- Scan the 'app' sub directory in the default locations.
 -- </eucode>
 
 public function locate_file(sequence filename, sequence search_list = {}, sequence subdir = {})
@@ -1993,7 +2257,7 @@ public function disk_metrics(object disk_path)
 	atom path_addr = 0
 	atom metric_addr = 0
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if sequence(disk_path) then 
 			path_addr = allocate_string(disk_path) 
 		else 
@@ -2013,7 +2277,8 @@ public function disk_metrics(object disk_path)
 	 
 		free({path_addr, metric_addr}) 
 	elsifdef UNIX then
-		sequence disk_size = {0,0,0}
+	
+		sequence size_of_disk = {0,0,0}
 
 		atom bytes_per_cluster
 		atom psrc, ret, psrcbuf
@@ -2045,16 +2310,16 @@ public function disk_metrics(object disk_path)
 			return result 
 		end if
 
-		disk_size = disk_size(disk_path)
-
+		size_of_disk = disk_size(disk_path)
+		
 		-- this is hardcoded for now, but may be x86 specific
 		-- on other Unix platforms that run on non x86 hardware, this
 		-- may need to be changed - there is no portable way to get this
 		result[BYTES_PER_SECTOR] = 512
 
 		result[SECTORS_PER_CLUSTER] = bytes_per_cluster / result[BYTES_PER_SECTOR]
-		result[TOTAL_NUMBER_OF_CLUSTERS] = disk_size[TOTAL_BYTES] / bytes_per_cluster
-		result[NUMBER_OF_FREE_CLUSTERS] = disk_size[FREE_BYTES] / bytes_per_cluster
+		result[TOTAL_NUMBER_OF_CLUSTERS] = size_of_disk[TOTAL_BYTES] / bytes_per_cluster
+		result[NUMBER_OF_FREE_CLUSTERS] = size_of_disk[FREE_BYTES] / bytes_per_cluster
 
 	end ifdef 
 	
@@ -2073,7 +2338,8 @@ end function
 -- Example 1:
 -- <eucode>
 -- res = disk_size("C:\\")
--- printf(1, "Drive %s has %3.2f%% free space\n", {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
+-- printf(1, "Drive %s has %3.2f%% free space\n", 
+--                                   {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
 -- </eucode>
 
 public function disk_size(object disk_path) 
@@ -2124,11 +2390,11 @@ public function disk_size(object disk_path)
 			
 		end while
 
-		data = get(temph)
+		data = stdget:get(temph)
 		disk_size[TOTAL_BYTES] = data[2] * 1024
-		data = get(temph)
+		data = stdget:get(temph)
 		disk_size[USED_BYTES] = data[2] * 1024
-		data = get(temph)
+		data = stdget:get(temph)
 		disk_size[FREE_BYTES] = data[2] * 1024
 		disk_size[4] = filesys
 
@@ -2224,23 +2490,24 @@ end function
 -- Example 1:
 -- <eucode>
 -- res = dir_size("/usr/localbin")
--- printf(1, "Directory %s contains %d files\n", {"/usr/localbin", res[COUNT_FILES]})
+-- printf(1, "Directory %s contains %d files\n", 
+--                                          {"/usr/localbin", res[COUNT_FILES]})
 -- for i = 1 to length(res[COUNT_TYPES]) do
---   printf(1, "  Type: %s (%d files %d bytes)\n", {res[COUNT_TYPES][i][EXT_NAME],
---                                                  res[COUNT_TYPES][i][EXT_COUNT],
---                                                  res[COUNT_TYPES][i][EXT_SIZE]})
+--   printf(1, "  Type: %s (%d files %d bytes)\n", 
+--               {res[COUNT_TYPES][i][EXT_NAME],
+--               res[COUNT_TYPES][i][EXT_COUNT],
+--               res[COUNT_TYPES][i][EXT_SIZE]})
 -- end for
 -- </eucode>
 
 public function dir_size(sequence dir_path, integer count_all = 0)
-	integer ok 
 	sequence fc
 
 	-- We create our own instance of the global 'file_counters' to use in case
 	-- the application is using threads.
 	
 	file_counters = append(file_counters, {0,0,0,{}})
-	ok = walk_dir(dir_path, {routine_id("count_files"), {count_all, length(file_counters)}}, 0)
+	walk_dir(dir_path, {routine_id("count_files"), {count_all, length(file_counters)}}, 0)
 	
 	fc = file_counters[$]
 	file_counters = file_counters[1 .. $-1]
@@ -2338,16 +2605,184 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 	end while
 	
 	if reserve_temp then
-		integer ret
 		-- Reserve the name by creating an empty file.
 		if not file_exists(temp_location) then
 			if create_directory(temp_location) = 0 then
 				return ""
 			end if
 		end if
-		ret = write_file(randname, "")
+		write_file(randname, "")
 	end if
 	
 	return randname
 	
 end function
+
+
+--**
+-- Returns a checksum value for the specified file.
+--
+-- Parameters:
+--	# ##filename## : A sequence. The name of the file whose checksum you want.
+--  # ##size## : An integer. The number of atoms to return. Default is 4 
+--  # ##usename##: An integer. If not zero then the actual text of ##filename## will
+--  affect the resulting checksum. The default (0) will not use the name of
+--  the file.
+--  # ##return_text##: An integer. If not zero, the check sum is returned as a
+--  text string of hexadecimal digits otherwise (the default) the check sum
+--  is returned as a sequence of ##size## atoms.
+--
+-- Returns:
+--     A **sequence** containing ##size## atoms.
+--                  
+-- Comments:
+--  * The larger the ##size## value, the more unique will the checksum be. For 
+-- most files and uses, a single atom will be sufficient as this gives a 32-bit
+-- file signature. However, if you require better proof that the content of two
+-- files are different then use higher values for ##size##. For example, 
+-- ##size = 8 gives you 256 bits of file signature.
+-- * If ##size## is zero or negative, an empty sequence is returned.
+-- * All files of zero length will return the same checksum value when ##usename##
+--  is zero.
+--
+-- Example 1:
+-- <eucode>
+--  -- Example values. The exact values depend on the contents of the file.
+--  ? checksum("myfile", 1) --> {92837498}
+--  ? checksum("myfile", 2) --> {1238176, 87192873}
+--  ? checksum("myfile", 2,,1) --> "0012E480 05327529"
+--  ? checksum("myfile", 4) --> {23448, 239807, 79283749, 427370}
+--  ? checksum("myfile")    --> {23448, 239807, 79283749, 427370} -- default
+-- </eucode>
+
+public function checksum(sequence filename, integer size = 4, integer usename = 0, integer return_text = 0)
+	integer fn
+	sequence cs
+	sequence hits
+	integer ix	
+	atom jx
+	atom fx
+	sequence data
+	integer nhit
+	integer nmiss
+	
+	if size <= 0 then
+		-- No checksum can be done.
+		return {}
+	end if
+	fn = open(filename, "rb")
+	if fn = -1 then
+		-- No checksum can be done.
+		return {}
+	end if
+	
+	-- Initialize the result array based on the file's length and size of the array.
+	jx = file_length(filename)
+	cs = repeat(jx, size)
+	for i = 1 to size do
+		cs[i] = hash(i + size, cs[i])
+	end for
+
+	-- If filename is to be used, then seed each checksum bucket with a character
+	-- from the file name plus the hash of the entire name. All buckets and
+	-- every character is used to do this.	
+	if usename != 0 then
+		nhit = 0
+		nmiss = 0
+		hits = {0,0}
+		fx = hash(filename, HSIEH32) -- Get a hash value for the whole name.
+		while find(0, hits) do
+			-- find next character to use.
+			nhit += 1
+			if nhit > length(filename) then
+				nhit = 1
+				hits[1] = 1
+			end if
+			-- find next bucket to use.
+			nmiss += 1
+			if nmiss > length(cs) then
+				nmiss = 1
+				hits[2] = 1
+			end if
+			
+			-- adjust the bucket's seed value
+			cs[nmiss] = hash(filename[nhit], xor_bits(fx, cs[nmiss]))
+		end while -- repeat until every bucket and every character has been used.
+	end if
+	
+	hits = repeat(0, size)
+	if jx != 0 then
+		-- File is not empty file.
+	
+		-- Process the file, one set of bytes at a time
+		-- The size of the byte set is dependant on the file length and the check sum length requested,
+		-- and it is some value between 7 and 14 bytes long.
+		data = repeat(0, remainder( hash(jx * jx / size , HSIEH32), 8) + 7)
+		
+	
+		while data[1] != -1 with entry do
+			-- Determine which array entry gets affected. 
+			-- Depends on the current byte value, array size and initial file length
+			jx = hash(jx, data)
+			ix = remainder(jx, size) + 1
+			-- Change the index offset determinant for the next byte.
+			
+			-- flip some bits in the array, based on the byte set and current hash.
+			cs[ix] = xor_bits(cs[ix], hash(data, HSIEH32))
+			hits[ix] += 1
+							
+		entry
+			-- get the next set of bytes.
+			-- Note that if a file ends before the 'set' is filled,
+			-- this algorithm still uses the -1 values as if it were
+			-- data from the file. This is by design to speed up the
+			-- calculations.
+			for i = 1 to length(data) do
+				data[i] = getc(fn)
+			end for
+		end while
+	
+		-- Check for the situation where not all the check sum buckets have been
+		-- updated. In this situation, use the affected buckets to update the ones
+		-- not yet affected.
+		nhit = 0
+		while nmiss with entry do
+			-- Find next 'affected' bucket to use.
+			while 1 do
+				nhit += 1
+				if nhit > length(hits) then
+					nhit = 1
+				end if
+				if hits[nhit] != 0 then
+					exit
+				end if
+			end while
+			
+			-- Update the missed one.
+			cs[nmiss] = hash(cs[nmiss], cs[nhit])
+			hits[nmiss] += 1
+		entry
+			-- Find next missed bucket.
+			nmiss = find(0, hits)	
+		end while
+	
+	end if
+
+	close(fn)
+	if return_text then
+		-- Convert set of atoms to fixed length (8) hex strings.
+		sequence cs_text = ""
+		for i = 1 to length(cs) do
+			cs_text &= text:format("[:08X]", cs[i])
+			if i != length(cs) then
+				-- Add a space in between each 8-digit set
+				cs_text &= ' '
+			end if
+		end for
+		return cs_text
+	else
+		return cs
+	end if
+
+end function
+

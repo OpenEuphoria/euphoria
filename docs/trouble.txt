@@ -1,20 +1,22 @@
 == Euphoria Trouble-Shooting Guide
+:<<LEVELTOC level=2 depth=4>>
 
 If you get stuck, here are some things you can do:
 
-# Type: ##guru## followed by some keywords associated with your problem. For example,
-  ##guru declare global include##
+# Type: ##guru## followed by some keywords associated with your problem. For 
+example, ##guru declare global include##
 # Check the list of common problems ([[:Common Problems and Solutions]]).
-# Read the relevant parts of the documentation, i.e. [[:Euphoria Programming Language v4.0]] or
-[[:General Routine Reference]].
+# Read the relevant parts of the documentation, i.e. 
+[[:Euphoria Programming Language v4.0]] or [[:General Routine Reference]].
 # Try running your program with trace:
 <eucode>
 with trace
 trace(1)
 </eucode>
-# The [[http://www.rapideuphoria.com/listserv.htm|Euphoria Mailing List]] has a search facility. You can search
-  the archive of all previous messages. There's a good chance that your question has already been discussed.
-# Post a message on the mailing list.
+# The [[http://openeuphoria.org/forum/index.wc|Euphoria Forum]] has a 
+search facility. You can search the archive of all previous messages. There is a
+good chance that your question has already been discussed.
+# Post a message on the forum.
 # Visit the Euphoria IRC channel, [[irc://irc.freenode.net/#euphoria]].
 
 === Common Problems and Solutions
@@ -26,8 +28,8 @@ Here are some commonly reported problems and their solutions.
 //I ran my program with ##euiw.exe## and the console window disappeared
 before I could read the output.//
 
-The console window will only appear if required, and will disappear immediately when your program
-finishes execution. Perhaps you should code something like:
+The console window will only appear if required, and will disappear immediately 
+when your program finishes execution. Perhaps you should code something like:
 
 <eucode>
 puts(1, "\nPress Enter\n")
@@ -40,7 +42,8 @@ You may also run your console program with ##eui.exe##.
 
 ==== Press Enter
 
-//At the end of execution of my program, I see "Press Enter" and I have to hit the Enter key. How do I get rid of that?//
+//At the end of execution of my program, I see "Press Enter" and I have to hit 
+the Enter key. How do I get rid of that?//
 
 Call [[:free_console]] just before your program terminates.
 
@@ -54,22 +57,23 @@ free_console()
 
 //My Euphoria CGI program hangs or has no output//
 
-# Make sure that you are using the ##-batch## parameter to ##eui##. This causes Euphoria to
-not present the normal "Press any key to continue..." prompt when a warning or error occurs. The
-web server will not respond to this prompt and your application will hang waiting for ENTER to be
-pressed.
-# Use the ##-wf## parameter to write all warnings to a file instead of the console. The warnings that
-Euphoria will write to the console may interfer with the actual output of your web content.
-# Look for an ex.err file in your cgi-bin directory. Turn on ##with trace## / ##trace(3)## to see 
-what statements are executed (see ##ctrace.out## in your
-cgi-bin). On Windows you should always use ##eui.exe##
+# Make sure that you are using the ##-batch## parameter to ##eui##. This causes 
+Euphoria to not present the normal "Press any key to continue..." prompt when a 
+warning or error occurs. The web server will not respond to this prompt and your
+application will hang waiting for ENTER to be pressed.
+# Use the ##-wf## parameter to write all warnings to a file instead of the 
+console. The warnings that Euphoria will write to the console may interfere with 
+the actual output of your web content.
+# Look for an ex.err file in your cgi-bin directory. Turn on 
+##with trace## / ##trace(3)## to see  what statements are executed (see 
+##ctrace.out## in your cgi-bin). On //Windows// you should always use ##eui.exe##
 to run CGI programs, or you may have problems with standard output. With
 Apache Web Server, you can have a first line in your program of:
 #!.\eui.exe to run your program using eui.exe in the current (cgi-bin)
 directory. Be careful that your first line ends with the line breaking characters
-appropriate for your platform, or the ###!## won't be handled correctly. You must also set the
-execute permissions on your program correctly, and ##ex.err## and ctrace.out
-must be writeable by the server process or they won't be updated.
+appropriate for your platform, or the ###!## won't be handled correctly. You 
+must also set the execute permissions on your program correctly, and ##ex.err## 
+and ctrace.out must be writable by the server process or they won't be updated.
 
 
 ==== Read/Write Ports?
@@ -92,24 +96,25 @@ main procedure and start execution.
 //I'm trying to call a routine documented in ##library.doc##, but it keeps
 saying the routine has not been declared.//
 
-Did you remember to include the necessary ##.e## file from
-the ##euphoria\include## directory? If the syntax of the routine says for example,
-"##include graphics.e##", then your program must have "##include
-graphics.e##" (without the quotes) before the place where you first call the routine.
+Did you remember to include the necessary ##.e## file from the 
+##euphoria\include## directory? If the syntax of the routine says for example,
+"##include\std\graphics.e##", then your program must have 
+"##include\std\graphics.e##" (without the quotes) before the place where you 
+first call the routine.
 
 ==== Routine not declared, my file
 
 //I have an include file with a routine in it that I want to call, but when I
-try to call the routine it says the routine has not been declared. But it **has**
-been declared.//
+try to call the routine it says the routine has not been declared. But it 
+**has** been declared.//
 
-Did you remember to define the routine as ##public##, ##export## or possibly ##global##?
-If not, the routine is not visible outside of its own file.
+Did you remember to define the routine as ##public##, ##export## or possibly 
+##global##? If not, the routine is not visible outside of its own file.
 
 ==== After user input, left margin problem
 
-//After inputting a string from the user with ##gets##(), the next line that comes
-out on the screen does not start at the left margin.//
+//After inputting a string from the user with ##gets##(), the next line that 
+comes out on the screen does not start at the left margin.//
 
 Your program should output a //new-line// character e.g.
 
@@ -155,8 +160,9 @@ or use [[:number]]:
 
 <eucode>
 include std/locale.e as locale
-string = locale:number(10) -- string is probably "10.00" if called in the U.S.
-                           -- It depends on the locale preferences set on your computer.
+string = locale:number(10) 
+         -- string is probably "10.00" if called in the U.S.
+         -- It depends on the locale preferences set on your computer.
 </eucode>
 
 Number formats according to the locale setting on your computer and
@@ -185,12 +191,12 @@ Remove that earlier declaration or change the name of your loop variable.
 //I get the message "unknown escape character" on a line where I am trying
 to specify a file name.//
 
-**Do not** say ##"C:\TMP\MYFILE"##. You need to say ##"C:~\~\TMP~\~\MYFILE"## or use back-quotes ##`C:~\TMP~\MYFILE`##.
+**Do not** say ##"C:\TMP\MYFILE"##. You need to say ##"C:~\~\TMP~\~\MYFILE"## 
+or use back-quotes ##`C:~\TMP~\MYFILE`##.
 
-Backslash is used for
-escape characters such as ##\n## or ##\t##. To specify a single backslash in a string you need
-to type ##~\~\##. Therefore, say ##"C:~\~\TMP~\~\MYFILE"## instead of
-##"C:\TMP\MYFILE"##
+Backslash is used for escape characters such as ##\n## or ##\t##. To specify a 
+single backslash in a string you need to type ##~\~\##. Therefore, say 
+##"C:~\~\TMP~\~\MYFILE"## instead of ##"C:\TMP\MYFILE"##
 
 ==== Only first character in printf
 
@@ -212,8 +218,8 @@ printf(1, "Hello, %s!\n", {mystring})
 
 ==== Only 10 significant digits during printing
 
-//When I print numbers using [[:printf]] or [[:? ->q_print]] only 10 significant digits are
-displayed.//
+//When I print numbers using [[:printf]] or [[:? ->q_print]] only 10 significant
+digits are displayed.//
 
 Euphoria normally only shows about 10 digits. Internally, all
 calculations are performed using at least 15 significant digits. To see

@@ -1,54 +1,58 @@
 == Euphoria To C Translator
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
-The Euphoria to C Translator will translate any Euphoria program into
-equivalent C source code.
+The **Euphoria to C Translator** (translator) will translate any Euphoria 
+program into equivalent C source code.
 
-There are versions of the translator for //Windows// and //UNIX// like 
-Operating Systems. After translating a Euphoria program to C, you
+There are versions of the translator for //Windows// and //Unix// 
+operating Systems. After translating a Euphoria program to C, you
 can compile and link using one of the supported C compilers. This will give
 you an executable file that will typically run much faster than if you used
 the Euphoria interpreter.
 
-The translator can translate/compile **itself** into an executable file for
-each platform. The translator is also used in translating/compiling the
-front-end portion of the interpreter. The source code for the Translator is in
-##euphoria\source##. It's written 100% in Euphoria.
+The translator can translate and then compile //itself// into an executable file
+for each platform. The translator is also used in translating/compiling the
+front-end portion of the interpreter. The source code for the translator is in
+##euphoria\source##. It is written 100% in Euphoria.
 
 === C Compilers Supported
 
-The **Translator** currently works with GNU C on //UNIX// like OSes,
+The **Translator** currently works with GNU C on //Unix//-like OSes,
 GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
-or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the -gcc option
+or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the ##-gcc## option
 and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
 These are all **free** compilers.
 
-GNU C will exist already on your UNIX system. The others can be
+GNU C will exist already on your //Unix// system. The others can be
 downloaded from their respective Web sites.
 
 ==== Notes:
 
-* Warnings are turned off when compiling with ##emake.bat##. If you turn them on, you may see some
+* Warnings are turned off when compiling with ##emake.bat##. If you turn them 
+on, you may see some
  harmless messages about variables declared but not used, labels defined but
  not used, function prototypes not declared etc.
-* Options bor and lcc for previously supported compilers on //Windows// no longer work. 
-* For the -gcc option on //Windows// you will need a ##libeu.a## compiled with //minGW// or //Cygwin//.
- the official distribution may only contain ##eu.lib## compiled with //Watcom//.
- also, the -stack and -con options may not produce the expected result with //GCC C//.
-* currently only 32 bit compiles are supported on 64 bit platforms.
+* Options ##-bor## and ##-lcc## for previously supported compilers on 
+//Windows// no longer work. 
+* For the ##-gcc## option on //Windows// you will need a ##libeu.a## compiled 
+with //minGW// or //Cygwin//. The official distribution may only contain 
+##eu.lib## compiled with //Watcom//. Also, the ##-stack## and ##-con## options 
+may not produce the expected result with //GCC C//.
+* Currently, only 32-bit compilers are supported on 64-bit platforms.
 
 === How to Run the Translator
 
-Running the **Translator** is similar to running
-the **Interpreter**.
-On Windows you would type:
+Running the **Translator** is similar to running the **Interpreter**.
+
+On //Windows// you would type:
 
 {{{
 euc taskwire.exw
 }}}
 
-On UNIX you would type:
+On //Unix// you would type:
 
 {{{
 euc qsort.ex
@@ -79,13 +83,14 @@ When you run ##allsorts.exe##, it should run the same as if you had typed:
 ##eui allsorts##
 
 to run it with the **Interpreter**, except that it should run faster, showing
-reduced times for the various sorting algorithms in ##euphoria\demo\allsorts.ex##.
+reduced times for the various sorting algorithms in 
+##euphoria\demo\allsorts.ex##.
 
 After creating your executable file, emake removes all the C files that were
 created. If you want to look at these files, run the translator again and look
 at the files before running emake.
 
-==== Note to UNIX users:
+==== Note to Unix users:
 
 The files will be called ##emake## and ##shell##, and you type ##./emake## to
 perform the compiles and link, and **./shell** to run the shell sort program.
@@ -107,7 +112,8 @@ euc -gcc pretend.exw
 }}}
 
 Note: //Watcom// is the default on //Windows// and -wat is assumed.
-Normally, after building your ##.exe## file, the **emake** batch file will delete
+Normally, after building your ##.exe## file, the **emake** batch file will 
+delete
 all C files and object files produced by the Translator. If you want **emake**
 to keep these files, add the ##-keep## option to the Translator command-line.
 e.g.
@@ -175,9 +181,11 @@ euc -lib decu.a myapp.ex
 -plat SUNOS
 }}}
 
-Use one of these options to translate code into C for the specified platform.  The default will always be the native
+Use one of these options to translate code into C for the specified platform.  
+The default will always be the native
 platform of the translator that is executed, so ##euc.exe## will default
-to Windows, and ##euc## will default to the platform upon which it was built.
+to //Windows//, and ##euc## will default to the platform upon which it was 
+built.
 
 The resulting output can be compiled by the appropriate compiler on the
 specified platform, or, possibly a cross platform compiler, if you have
@@ -185,8 +193,8 @@ one configured.
 
 === Dynamic Link Libraries (Shared Libraries)
 
-Simply by adding ##-dll## to the command line, the **Translator** will build a shared dynamically loading library instead of an executable
-program.
+Simply by adding ##-dll## to the command line, the **Translator** will build a 
+shared dynamically loading library instead of an executable program.
 
 You can translate and compile a set of useful Euphoria routines, and share
 them with other people, without giving them your source. Furthermore, your
@@ -195,46 +203,52 @@ translated/compiled and interpreted programs will be able to use your library.
 
 Only the global Euphoria procedures and functions, i.e. those declared with
 the "##global##", "##public##" or "##export##" keyword, will be exported from
-the shared dyanmically loaded library.
+the shared dynamically loaded library.
 
-Any Euphoria program, whether translated/compiled or interpreted, can link
-with a Euphoria shared dynamically loading library using the same mechanism that lets you link with a shared dynamically loading library written in C. The program first calls [[:open_dll]]() to open the
+Any Euphoria program, whether translated or compiled or interpreted, can link
+with a Euphoria shared dynamically loading library using the same mechanism that
+lets you link with a shared dynamically loading library written in C. The 
+program first calls [[:open_dll]]() to open the
 file, then it calls [[:define_c_func]]() or [[:define_c_proc]]() for
 any routines that it wants to call. It calls these routines using [[:c_func]]()
 and [[:c_proc]]().
 
-The routine names exported from a Euphoria shared dynamically loading library will vary depending on which C
-compiler you use.
+The routine names exported from a Euphoria shared dynamically loading library 
+will vary depending on which C compiler you use.
 
-GNU C on UNIX exports the names exactly as they appear in the C
+GNU C on Unix exports the names exactly as they appear in the C
 code produced by the **Translator**, e.g. a Euphoria routine
 
 {{{
 global procedure foo(integer x, integer y)
 }}}
 
-would be exported as "##_0foo##" or maybe "##_1foo##" etc. The underscore and digit
-are added to prevent naming conflicts. The digit refers to the Euphoria file
-where the identifier is defined. The main file is numbered as 0. The include files
-are numbered in the order they are encountered by the compiler. You should
-check the C source to be sure.
+would be exported as "##_0foo##" or maybe "##_1foo##" etc. The underscore and 
+digit are added to prevent naming conflicts. The digit refers to the Euphoria 
+file where the identifier is defined. The main file is numbered as 0. The 
+include files are numbered in the order they are encountered by the compiler. 
+You should check the C source to be sure.
 
-For Watcom the **Translator** also creates an EXPORT command, added to ##objfiles.lnk##
-for each exported identifier, so ##foo()## would be exported as "##foo##".
+For Watcom, the **Translator** also creates an EXPORT command, added to 
+##objfiles.lnk## for each exported identifier, so ##foo()## would be exported as
+"##foo##".
 
 With Watcom you can edit the ##objfiles.lnk## file, and
 rerun ##emake.bat##, to rename the exported identifiers, or remove ones that you
 don't want to export.
 
 Having nice exported names is not critical, since the name need only appear
-once in each Euphoria program that uses the shared dynamically loading library, i.e. in a single
-[[:define_c_func]]() or [[:define_c_proc]]() statement. The author of a shared dynamically loading library
+once in each Euphoria program that uses the shared dynamically loading library, 
+i.e. in a single [[:define_c_func]]() or [[:define_c_proc]]() statement. The 
+author of a shared dynamically loading library
 should probably provide his users with a Euphoria include file containing the
 necessary [[:define_c_func]]() and [[:define_c_proc]]() statements, and he might
 even provide a set of Euphoria "wrapper" routines to call the routines in the
 shared dynamically loading library.
 
-When you call [[:open_dll]](), any top-level Euphoria statements in the shared dynamically loading library will be executed automatically, just like a normal program. This gives the
+When you call [[:open_dll]](), any top-level Euphoria statements in the shared 
+dynamically loading library will be executed automatically, just like a normal 
+program. This gives the
 library a chance to initialize its data structures prior to the first call to
 a library routine. For many libraries no initialization is required.
 
@@ -243,7 +257,9 @@ Euphoria object as a result, you will need to use the following constants in
 ##euphoria\include\dll.e##:
 
 <eucode>
--- Euphoria types for shared dynamically loading library arguments and return values:
+-- Euphoria types for shared dynamically loading library arguments 
+-- and return values:
+
 global constant
     E_INTEGER = #06000004,
     E_ATOM    = #07000004,
@@ -251,19 +267,23 @@ global constant
     E_OBJECT  = #09000004
 </eucode>
 
-Use these in **define_c_proc()** and **define_c_func()** just as you currently
+Use these in ##define_c_proc##() and ##define_c_func##() just as you currently
 use ##C_INT##, ##C_UINT## etc. to call C shared dynamically loading libraries.
 
 Currently, file numbers returned by [[:open]](), and routine id's returned by
 [[:routine_id]](), can be passed and returned, but the library and the main
 program each have their own separate ideas of what these numbers mean. Instead
 of passing the file number of an open file, you could instead pass the file
-name and let the shared dynamically loading library open it. Unfortunately there is no simple solution for passing routine id's. This might be fixed in the future.
+name and let the shared dynamically loading library open it. Unfortunately there
+is no simple solution for passing routine id's. This might be fixed in the 
+future.
 
-A Euphoria shared dynamically loading library currently may not execute any multitasking operations.
-The Translator will give you an error message about this.
+A Euphoria shared dynamically loading library currently may not execute any 
+multitasking operations. The Translator will give you an error message about 
+this.
 
-Euphoria shared dynamically loading library can also be used by C programs as long as only 31-bit
+Euphoria shared dynamically loading library can also be used by C programs as 
+long as only 31-bit
 integer values are exchanged. If a 32-bit pointer or integer must be passed,
 and you have the source to the C program, you could pass the value in two
 separate 16-bit integer arguments (upper 16 bits and lower 16 bits), and then
@@ -340,9 +360,8 @@ with this **Translator** without modifying an RDS translator library file, may
 be distributed royalty-free. You are free to incorporate any Euphoria files
 provided by RDS into your application.
 
-In general, if you wish to use Euphoria code written by 3rd parties, you had
-better honor any restrictions that apply. If in doubt, you should ask for
-permission.
+In general, if you wish to use Euphoria code written by 3rd parties, please
+honor any restrictions that apply. If in doubt, you should ask for permission.
 
 On //Linux//, //FreeBSD//, the GNU Library licence
 will normally not affect programs created with this **Translator**. Simply
@@ -361,7 +380,8 @@ program. They ask for, but do not require, some acknowledgement.
 
 This is what we believe to be the case. We are not lawyers. If it's important
 to you, you should read **all** licences and the legal comments in them,
-to form your own judgement. You may need to get professional legal opinion as well.
+to form your own judgment. You may need to get professional legal opinion as 
+well.
 
 === Frequently Asked Questions
 
@@ -390,9 +410,9 @@ Typical user-defined types will not slow you down. Since your program is
 supposed to be free of type_check errors, types are ignored by the Translator,
 unless you call them directly with normal function calls. The one exception is
 when a user-defined type routine has side-effects (i.e. it sets a global
-variable, performs pokes into memory, I/O etc.). In that case, if **with
-type_check** is in effect, the Translator will issue code to call the type
-routine and report any type_check failure that results.
+variable, performs pokes into memory, I/O etc.). In that case, if 
+##with type_check## is in effect, the Translator will issue code to call the 
+type routine and report any type_check failure that results.
 
 On //Windows// we have left out the ##/ol## loop optimization for
 Watcom's ##wcc386##. We found in a couple of rare cases that this option led
@@ -430,7 +450,7 @@ Euphoria file to avoid stressing the C compiler. It won't however, break a
 large routine into smaller routines.
 
 
-Post bug reports on EUforum.
+Post bug reports on [[http://www.openeuphoria.org/forum/index.wc|EUforum]].
 
 In particular, report any program that does not run the same when compiled as
 it does when interpreted.

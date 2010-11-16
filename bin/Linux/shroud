@@ -1,1 +1,0 @@
-eui $EUDIR/source/bind.ex -shroud_only $@

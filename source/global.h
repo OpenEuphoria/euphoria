@@ -6,6 +6,28 @@
 
 #ifndef H_GLOBAL
 #define H_GLOBAL
+
+#ifdef EWINDOWS
+#include <windows.h>
+#endif
+#ifdef EWATCOM
+#include <graph.h>
+#endif
+
+#define UNUSED(expr) do { (void)(expr); } while (0)
+
+typedef unsigned char   uchar;
+typedef signed   char   schar;
+
+#include <stdarg.h>
+
+#define _LARGEFILE64_SOURCE
+
+#include <stdio.h>
+
+#include "object.h"
+#include "symtab.h"
+
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
 #if defined(ELINUX)
 	/* use glibc 64bit variants */
@@ -42,7 +64,7 @@
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
-#elif defined(EWATCOM)
+#elif defined(EWINDOWS) && !defined(EMINGW)
 #	define IFILE FILE*
 #	define IOFF __int64
 #	define iopen fopen
@@ -60,6 +82,7 @@
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
+#   include <windef.h>
 #elif defined(EBSD) || defined(EOSX)
 	/* 64bit support is automatic */
 #	define IFILE FILE*
@@ -101,6 +124,17 @@
 #undef FALSE
 #define TRUE  1
 #define FALSE 0
+
+struct replace_block;
+typedef struct replace_block *replace_ptr;
+
+#ifdef INT_CODES
+	typedef int opcode_type;
+	#define opcode(x) (x)
+#else
+	typedef int *opcode_type;
+	#define opcode(x) jumptab[x-1]
+#endif
 
 /* screens */
 #define MAIN_SCREEN 1
@@ -174,18 +208,18 @@ struct videoconfigEx {
 #define __cdecl
 #else
 /* So WATCOM debugger will work better: */
-#ifndef EXTRA_CHECK
-#pragma aux RTFatal aborts;
-#pragma aux CompileErr aborts;
-#pragma aux SafeErr aborts;
-#pragma aux RTInternal aborts;
-#pragma aux InternalErr aborts;
-#pragma aux SpaceMessage aborts;
-#pragma aux Cleanup aborts;
-#endif
+ #ifndef EXTRA_CHECK
+  #pragma aux RTFatal aborts;
+  #pragma aux CompileErr aborts;
+  #pragma aux SafeErr aborts;
+  #pragma aux RTInternal aborts;
+  #pragma aux InternalErr aborts;
+  #pragma aux SpaceMessage aborts;
+  #pragma aux Cleanup aborts;
+ #endif
 #endif
 
-#ifdef EWINDOWS
+#ifdef EWINDOWS 
 // Use Heap functions for everything.
 extern unsigned default_heap;
 #define malloc(n) HeapAlloc((void *)default_heap, 0, n)
@@ -194,6 +228,8 @@ extern unsigned default_heap;
 
 
 #endif
+
+void show_console();
 
 extern int is_batch;
 
@@ -226,7 +262,10 @@ struct EuViewPort
 	int display_size;   	/* number of slots for variables */
 };
 
-int memcopy( void *dest, size_t avail, void *src, size_t len);
-long copy_string(char *dest, char *src, size_t bufflen);
-long append_string(char *dest, char *src, size_t bufflen);
+#ifdef EWINDOWS
+	int wingetch();
+	int MyReadConsoleChar();
+	void EClearLines(int first_line, int last_line, int len, WORD attributes);
+#endif
+
 #endif // H_GLOBAL

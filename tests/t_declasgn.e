@@ -30,7 +30,9 @@ warning("Useless code")
 without warning &= (short_circuit)
 if n and f()=7 then end if
 
-warning_file("warning.lst")
+ifdef EUI then
+	warning_file("warning.lst")
+end ifdef
 integer n1
 procedure bar()
 	integer nha = 2

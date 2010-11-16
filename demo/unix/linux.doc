@@ -12,6 +12,6 @@
             shared library is in Mylib.c. The shared library itself is
             mylib.so. You can rebuild the shared library using:
 
-                    gcc -shared Mylib.c -o mylib.so
+                    gcc -shared Mylib.c -fPIC -m32 -o mylib.so
              
             You'll definitely need to do this on FreeBSD.

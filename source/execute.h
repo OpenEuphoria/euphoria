@@ -1,4 +1,4 @@
-/*****************************************************************************/
+// /*****************************************************************************/
 /*                                                                           */
 /*                    INCLUDE FILE FOR RUN TIME DATA TYPES                   */
 /*                                                                           */
@@ -10,11 +10,11 @@
 
 /* an object is represented as a 32-bit value as follows:
 
-		unused  : 011xxxxx xxxxxxxx xxxxxxxx xxxxxxxx 
+		unused  : 011xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 		unused  : 010xxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 
 		TOO_BIG:  01000000 00000000 00000000 00000000   (just too big for INT)
-		
+
 	   +ATOM-INT: 001vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
 	   +ATOM-INT: 000vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
 	   -ATOM-INT: 111vvvvv vvvvvvvv vvvvvvvv vvvvvvvv   (31-bit integer value)
@@ -26,19 +26,23 @@
 
 		SEQUENCE: 100ppppp pppppppp pppppppp pppppppp   (29-bit pointer)
 
-   We ensure 8-byte alignment for s1 and dbl blocks - lower 3 bits 
+   We ensure 8-byte alignment for s1 and dbl blocks - lower 3 bits
    aren't needed - only 29 bits are stored.
 */
 
 /* NO VALUE objects can occur only in a few well-defined places,
    so we can simplify some tests. For speed we first check for ATOM-INT
-   since that's what most objects are. */ 
+   since that's what most objects are. */
 
 #define NOVALUE      ((long)0xbfffffffL)
 #define TOO_BIG_INT  ((long)0x40000000L)
 #define HIGH_BITS    ((long)0xC0000000L)
 #define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
 #define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
+
+#define MAKE_UINT(x) ((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL \
+                          ? (unsigned long)x : \
+                            NewDouble((double)(unsigned long)x)))
 
 /* these are obsolete */
 #define INT_VAL(x)        ((int)(x))
@@ -58,10 +62,8 @@
 #undef MININT
 #define MININT     (long)0xC0000000
 #define MAXINT     (long)0x3FFFFFFF
-#define MININT_VAL MININT
-#define MININT_DBL ((double)MININT_VAL)
-#define MAXINT_VAL MAXINT
-#define MAXINT_DBL ((double)MAXINT_VAL)
+#define MININT_DBL ((double)MININT)
+#define MAXINT_DBL ((double)MAXINT)
 #define INT23      (long)0x003FFFFFL
 #define INT16      (long)0x00007FFFL
 #define INT15      (long)0x00003FFFL
@@ -70,39 +72,9 @@
 #define ATOM_1     1
 #define ATOM_2     2
 
-typedef long object;
-typedef object *object_ptr;
 
-struct cleanup;
-typedef struct cleanup *cleanup_ptr;
-typedef void(*cleanup_func)(object);
+#include "object.h"
 
-struct cleanup {
-	long type;
-	union func_union{
-		long rid;
-		cleanup_func builtin;
-	} func;
-	cleanup_ptr next;
-};
-
-
-
-struct s1 {                        /* a sequence header block */
-	object_ptr base;               /* pointer to (non-existent) 0th element */
-	long length;                   /* number of elements */
-	long ref;                      /* reference count */
-	long postfill;                 /* number of post-fill objects */
-	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
-}; /* total 20 bytes */
-
-struct d {                         /* a double precision number */
-	double dbl;                    /* double precision value */
-	long ref;                      /* reference count */
-	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
-}; /* total 16 bytes */
-
-#define D_SIZE (sizeof(struct d))  
 
 /* **** Important Note ****
   The offset of the 'ref' field in the 'struct d' and the 'struct s1' must
@@ -114,7 +86,7 @@ struct symtab_entry;
 
 /* 'routine_list' must always be identical to definition in euphoria\include\euphoria.h
 */
-struct routine_list {   
+struct routine_list {
 	char *name;
 	int (*addr)();
 	int seq_num;
@@ -132,11 +104,8 @@ struct ns_list {
 	int file_num;
 };
 
-typedef struct d  *d_ptr;
-typedef struct s1 *s1_ptr;
-
 struct sline {      /* source line table entry */
-	char *src;               /* text of line, 
+	char *src;               /* text of line,
 								first 4 bytes used for count when profiling */
 	unsigned short line;     /* line number within file */
 	unsigned char file_no;   /* file number */
@@ -158,15 +127,7 @@ struct replace_block {
 	object_ptr stop;
 	object_ptr target;
 };
-typedef struct replace_block *replace_ptr;
 
-#ifdef INT_CODES
-typedef int opcode_type;
-#define opcode(x) (x)
-#else
-typedef int *opcode_type;
-#define opcode(x) jumptab[x-1]
-#endif
 
 #define UNKNOWN -1
 
@@ -177,10 +138,10 @@ typedef int *opcode_type;
 #define MAKE_DBL(x) ( (object) (((unsigned long)(x) >> 3) + (long)0xA0000000) )
 #define DBL_PTR(ob) ( (d_ptr)  (((unsigned long)(ob)) << 3) )
 #define MAKE_SEQ(x) ( (object) (((unsigned long)(x) >> 3) + (long)0x80000000) )
-#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) ) 
+#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) )
 
 /* ref a double or a sequence (both need same 3 bit shift) */
-#define RefDS(a) ++(DBL_PTR(a)->ref)    
+#define RefDS(a) ++(DBL_PTR(a)->ref)
 
 /* ref a general object */
 #define Ref(a) if (IS_DBL_OR_SEQUENCE(a)) { RefDS(a); }
@@ -213,7 +174,7 @@ typedef int *opcode_type;
 struct file_info {
 	IFILE fptr;  // C FILE pointer
 	int mode;    // file mode
-}; 
+};
 
 struct arg_info {
 	int (*address)();     // pointer to C function
@@ -313,7 +274,7 @@ struct char_cell {
 
 #define LOW_MEMORY_MAX ((unsigned)0x0010FFEF)
 // It used to be ((unsigned)0x000FFFFF)
-// but I found putsxy accessing ROM font above here 
+// but I found putsxy accessing ROM font above here
 // successfully on Millennium. It got the address from a DOS interrupt.
 
 #define DOING_SPRINTF -9999999 // indicates sprintf rather than printf
@@ -323,7 +284,7 @@ struct char_cell {
 #define M_SOUND               1
 #define M_LINE                2
 #define M_PALETTE             3
-#define M_PIXEL               4 // obsolete, but keep for now
+#define M_SOCK_INFO           4
 #define M_GRAPHICS_MODE       5
 #define M_CURSOR              6
 #define M_WRAP                7
@@ -340,7 +301,7 @@ struct char_cell {
 #define M_ELLIPSE            18
 #define M_SEEK               19
 #define M_WHERE              20
-#define M_GET_PIXEL          21 // obsolete, but keep for now
+#define M_REUSE_2            21 // REUSE
 #define M_DIR                22
 #define M_CURRENT_DIR        23
 #define M_MOUSE_POINTER      24
@@ -417,6 +378,7 @@ struct char_cell {
 #define M_PCRE_ERROR_MESSAGE 95
 #define M_SOCK_ERROR_CODE    96
 #define M_PCRE_GET_OVECTOR_SIZE 97
+#define M_GET_RAND           98
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

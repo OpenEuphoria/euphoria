@@ -9,6 +9,8 @@
 /******************/
 /* Included files */
 /******************/
+#define _LARGE_FILE_API
+#define _LARGEFILE64_SOURCE
 #include <stdio.h>
 #include <stdarg.h>
 #include <setjmp.h>
@@ -23,8 +25,6 @@
 
 #ifdef EUNIX
 #include <sys/ioctl.h>
-#endif
-#ifdef EOSX
 #include <unistd.h>
 #endif
 
@@ -32,16 +32,20 @@
 #include <string.h>
 #ifdef EWINDOWS
 #include <windows.h>
-extern HANDLE console_output;
 #endif
 
 #include "alldefs.h"
+#include "be_rterror.h"
 #include "be_runtime.h"
 #include "global.h"
-#include "task.h"
-
-void GetViewPort(struct EuViewPort *vp);
-
+#include "be_task.h"
+#include "be_w.h"
+#include "be_machine.h"
+#include "be_execute.h"
+#include "be_symtab.h"
+#include "be_alloc.h"
+#include "be_syncolor.h"
+#include "be_task.h"
 
 /******************/
 /* Local defines  */
@@ -72,69 +76,6 @@ struct display_slot {
 };
 
 /**********************/
-/* Imported variables */
-/**********************/
-extern int tcb_size;
-extern struct tcb *tcb;
-extern int current_task;
-extern int warning_count;
-extern char **warning_list;
-extern int crash_count;
-extern symtab_ptr *e_routine;
-extern int **jumptab;
-extern char *last_traced_line;
-extern int Executing;
-extern int gameover;
-extern int current_screen;
-extern int allow_break;
-extern int control_c_count; 
-#ifdef EUNIX
-extern unsigned current_fg_color, current_bg_color;
-extern int consize_ioctl;
-#endif
-extern int bound;
-extern int print_chars;
-extern int stack_size;
-extern int screen_line, screen_col;
-extern int screen_lin_addr;
-extern int max_stack_per_call;
-extern object_ptr expr_stack; 
-extern object_ptr expr_top;
-extern unsigned char TempBuff[];
-extern object_ptr frame_base;
-extern int *tpc;
-extern object_ptr *frame_base_ptr;
-extern jmp_buf env;
-extern struct sline *slist;
-extern char **file_name;
-extern unsigned line_number;
-extern long gline_number;
-extern int start_line;
-extern int TraceBeyond;
-extern int TraceStack;
-extern symtab_ptr TopLevelSub;
-extern int TraceOn;
-extern IFILE TempErrFile;
-extern char *TempErrName;
-extern struct videoconfig config;
-extern int wrap_around;
-extern int in_from_keyb;
-extern char *crash_msg;
-
-#ifdef EWINDOWS
-extern void SaveNormal();
-extern void SaveTrace();
-extern void RestoreNormal();
-extern void RestoreTrace();
-#endif
-
-#ifdef EUNIX
-extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
-extern struct char_cell alt_image_main[MAX_LINES][MAX_COLS];
-extern struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
-#endif
-
-/**********************/
 /* Exported variables */
 /**********************/
 //int caught_interrupt = FALSE;   /* did we receive an interrupt? */
@@ -150,44 +91,44 @@ char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
 /*******************/
 /* Local variables */
 /*******************/
-static char FErrBuff[300];
+
+#ifndef BACKEND
+#ifdef EUNIX
 static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
-//#ifdef EUNIX
-//static WINDOW *var_scr = NULL;      // variable display screen
-//static WINDOW *debug_scr = NULL;    // debug screen
-//static WINDOW *main_scr  = NULL;    // main screen
-//#endif
-static char *DebugScreenSave = NULL;   /* place to save debug screen */
+#endif
+
 static struct rccoord MainPos; /* text position save area */
 static int MainWrap;  /* Main wrap mode */
-static int main_screen_col = 1;
-static int debug_screen_col = 1;
+static char *DebugScreenSave = NULL;   /* place to save debug screen */
 static int main_screen_line = 1;
 static int debug_screen_line = 1;
+static int main_screen_col = 1;
+static int debug_screen_col = 1;
+
+								/* list of display slots */
+static long highlight_line;     /* current line on debug screen */
+static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
+static long tstamp = 1; /* time stamp for deleting vars on display */
+static IFILE conin; 
+
+#endif
+
 static int first_debug;           /* first time into debug screen */
 static long trace_line;      /* current traced line */
 
-static long highlight_line;     /* current line on debug screen */
 
-static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
-								/* list of display slots */
-static long tstamp = 1; /* time stamp for deleting vars on display */
-static IFILE conin; 
 
 /**********************/
 /* Declared functions */
 /**********************/
-symtab_ptr Locate();
-#include "alloc.h"
+#ifndef BACKEND
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();
 struct rccoord GetTextPositionP();
 static void ShowName();
-void UpdateGlobals();
-void EraseSymbol();
-symtab_ptr RTLookup();
+#endif
 
 /*********************/
 /* Defined functions */
@@ -232,6 +173,7 @@ void InitDebug()
 	trace_line = 0;
 }
 
+#ifndef BACKEND
 static void set_bk_color(int c)
 /* set the background color for color displays 
    otherwise just leave the background as black */
@@ -279,7 +221,6 @@ static void set_bk_color(int c)
 	SetBColor(MAKE_INT(col));
 }
 
-#ifndef BACKEND
 static int OffScreen(long line_num)
 /* return TRUE if line_num is off (or almost off) the TRACE window */
 {
@@ -592,7 +533,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			copy_string( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			snprintf(val_string,  DV_len, "%ld", iv);
+			snprintf(val_string,  DV_len, "%ld", (long)iv);
 			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
@@ -746,7 +687,7 @@ void UpdateGlobals()
 				sym = sym->next;
 			}       
 		}
-		else if (dsym->scope > S_PRIVATE && !PrivateName(dsym->name, proc)
+		else if ((dsym->scope > S_PRIVATE && !PrivateName(dsym->name, proc))
 				 || ValidPrivate(dsym, proc)) {
 			/* skip redundant slots */
 			do {
@@ -765,7 +706,7 @@ void ShowDebug()
 /* switch to debug screen from main screen */
 {
 	int i;
-	long size;
+	
 	struct EuViewPort vp;
 
 	if (current_screen == DEBUG_SCREEN)
@@ -839,21 +780,21 @@ static void DebugCommand()
 #ifdef EUNIX
 		// must handle ANSI codes
 		if (c == 27) {
-			c = get_key();
+			c = get_key(TRUE);
 			if (c == 91) {
-				c = get_key();
+				c = get_key(TRUE);
 				if (c == 66) {
 					c = DOWN_ARROW;
 				}
 				else if (c == 49) {
-					c = get_key();
+					c = get_key(TRUE);
 					if (c == 49) {
 						c = FLIP_TO_MAIN;
-						get_key();  // 126
+						get_key(TRUE);  // 126
 					}
 					else if (c == 50) {
 						c = FLIP_TO_DEBUG;
-						get_key(); // 126
+						get_key(TRUE); // 126
 					}
 				}
 			}
@@ -996,7 +937,7 @@ static void ShowName()
 	}
 
 	name_len = strlen(name);
-	name_ptr = RTLookup(name+i, slist[trace_line].file_no, tpc, NULL, 999999999); 
+	name_ptr = RTLookup(name+i, slist[trace_line].file_no, tpc, NULL, fe.st[0].obj, trace_line ); 
 	if (name_ptr == NULL || name_ptr->token != VARIABLE) {
 		SetPosition(prompt, 18 + name_len);
 		screen_output(NULL, "- not defined at this point");
@@ -1098,7 +1039,7 @@ static int screen_err_out;
 #define TPTEMP_BUFF_SIZE (800)
 static char TPTempBuff[TPTEMP_BUFF_SIZE]; // TempBuff might contain the error message
 
-static sf_output(char *string)
+static void sf_output(char *string)
 // output error info to ex.err and optionally to the screen
 {
 	iprintf(TempErrFile, "%s", string);
@@ -1148,8 +1089,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 // s_ptr is symbol involved in error
 {
 	int *new_pc;
-	symtab_ptr current_proc, prev_proc, sym;
-	object_ptr obj_ptr;
+	symtab_ptr current_proc;
+	
 	int levels, skipping, dash_count, i, task, show_message;
 	char *routine_name;
 	
@@ -1180,7 +1121,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 					 tcb[current_task].tid, routine_name);
 			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
-			if (strlen(TPTempBuff) < dash_count) {
+			if ((int)strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
 			}
 			if (dash_count < 1) {
@@ -1312,7 +1253,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 	RecentLines();
 }
 
-#ifdef EXTRA_CHECK
+#if defined(EXTRA_CHECK) || defined(HEAP_CHECK)
+#ifdef RUNTIME
 void RTInternal(char *msg, ...)
 {
 	va_list ap;
@@ -1351,6 +1293,7 @@ void RTInternal_va(char *msg, va_list ap)
 	if (buf) EFree(msgtext);
 	Cleanup(1);
 }
+#endif
 #endif
 
 #define CUE_bufflen (200)
@@ -1410,6 +1353,10 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	Cleanup(1);
 }
 
+#ifdef EUNIX
+void CleanUpError(char *msg, symtab_ptr s_ptr, ...) __attribute__ ((noreturn));
+#endif
+
 void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 {
 	va_list ap;
@@ -1417,6 +1364,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 	CleanUpError_va(msg, s_ptr, ap);
 	va_end(ap);
 }
+
 
 void RTFatalType(int *pc)
 /* handle type-check failures */
@@ -1448,7 +1396,7 @@ void BadSubscript(object subs, long length)
 	char subs_buff[BadSubscript_bufflen];
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, BadSubscript_bufflen, "%d", subs);
+		snprintf(subs_buff, BadSubscript_bufflen, "%d", (int)subs);
 	else
 		snprintf(subs_buff, BadSubscript_bufflen, "%.10g", DBL_PTR(subs)->dbl);
 	subs_buff[BadSubscript_bufflen - 1] = 0; // ensure NULL
@@ -1473,7 +1421,7 @@ void RangeReading(object subs, int len)
 	char subs_buff[RangeReading_buflen];
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, RangeReading_buflen, "%d", subs);
+		snprintf(subs_buff, RangeReading_buflen, "%d", (int)subs);
 	else
 		snprintf(subs_buff, RangeReading_buflen, "%.10g", DBL_PTR(subs)->dbl);
 	subs_buff[RangeReading_buflen - 1] = 0; // ensure NULL
@@ -1494,13 +1442,10 @@ void atom_condition()
 
 /* signal handlers */
 
-#ifdef EWINDOWS
-extern void DisableControlCHandling(); // be_w.c
-#endif
-
 void INT_Handler(int sig_no)
 /* control-c, control-break */
 {
+	UNUSED(sig_no);
 	if (!allow_break) {
 		signal(SIGINT, INT_Handler);
 		control_c_count++;
@@ -1530,9 +1475,6 @@ signed int vsnprintf(char * buf, size_t size, char * fmt, va_list list ) {
 	return vsprintf(buf,fmt,list);	
 }
 #endif
-
-extern int line_max;
-extern int col_max;
 
 void GetViewPort(struct EuViewPort *vp)
 {

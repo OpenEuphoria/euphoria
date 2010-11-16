@@ -1,5 +1,3 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
-
 --****
 -- == Syntax Coloring
 --
@@ -15,11 +13,15 @@
 --		BUILTIN_COLOR
 --		 STRING_COLOR
 --		BRACKET_COLOR  (a sequence of colors)
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 namespace syncolor
 
 include std/text.e
 include std/wildcard.e
+include std/eumem.e as mem
 
 include keywords.e
 
@@ -28,21 +30,33 @@ integer NORMAL_COLOR,
 		KEYWORD_COLOR,
 		BUILTIN_COLOR,
 		STRING_COLOR
+
 sequence BRACKET_COLOR
 
+enum
+	S_STRING_TRIPLE,
+	S_STRING_BACKTICK,
+	S_MULTILINE_COMMENT,
+	S_BRACKET_LEVEL
 
 -- character classes
-enum 
+enum
 	DIGIT,
 	OTHER,
 	LETTER,
 	BRACKET,
 	QUOTE,
+	BACKTICK,
 	DASH,
+	FORWARD_SLASH,
 	WHITE_SPACE,
 	NEW_LINE
 
 sequence char_class
+
+--****
+-- === Routines
+--
 
 public procedure set_colors(sequence pColorList)
 	sequence lColorName
@@ -61,6 +75,8 @@ public procedure set_colors(sequence pColorList)
 				STRING_COLOR  = pColorList[i][2]
 			case "BRACKET" then
 				BRACKET_COLOR  = pColorList[i][2]
+			case else
+				printf(2, "syncolor.e: Unknown color name '%s', ignored.\n", {lColorName})
 		end switch
 	end for
 end procedure
@@ -90,11 +106,13 @@ public procedure init_class()
 	char_class['}'] = BRACKET
 	char_class['\''] = QUOTE
 	char_class['"'] = QUOTE
+	char_class['`'] = BACKTICK
 	char_class[' '] = WHITE_SPACE
 	char_class['\t'] = WHITE_SPACE
 	char_class['\r'] = WHITE_SPACE
 	char_class['\n'] = NEW_LINE
 	char_class['-'] = DASH
+	char_class['/'] = FORWARD_SLASH
 end procedure
 
 constant DONT_CARE = -1  -- any color is ok - blanks, tabs
@@ -119,34 +137,90 @@ procedure seg_flush(integer new_color)
 	end if
 end procedure
 
-public function SyntaxColor(sequence pline)
+function default_state()
+	return {
+		0, -- S_MULTILINE_COMMENT
+		0, -- S_STRING_TRIPLE
+		0, -- S_STRING_BACKTICK
+		0  -- S_BRACKET_LEVEL
+	}
+end function
+
+atom g_state = eumem:malloc()
+ram_space[g_state] = default_state()
+
+--**
+-- Create a new colorizer state
+--
+-- See Also:
+--   [[:reset]], [[:SyntaxColor]]
+--
+
+public function new()
+	atom state = mem:malloc()
+	reset(state)
+	return state
+end function
+
+--**
+-- Reset the state to begin parsing a new file
+--
+-- See Also:
+--   [[:new]], [[:SyntaxColor]]
+--
+
+public procedure reset(atom state = g_state)
+	ram_space[state] = default_state()
+end procedure
+
+--**
+-- Parse Euphoria code into tokens of like colors.
+--
 -- Break up a new-line terminated line into colored text segments identifying the
--- various parts of the Euphoria language.
--- Consecutive characters of the same color are all placed in the
--- same 'segment' - seg_start..seg_end.
--- A sequence is returned that looks like:
---	   {{color1, "text1"}, {color2, "text2"}, ... }
-	integer class, last, i, c, bracket_level
+-- various parts of the Euphoria language. Consecutive characters of the same color
+-- are all placed in the same 'segment' - seg_start..seg_end.
+--
+-- Returns:
+--   A sequence that looks like:
+--   <eucode>
+--	 {{color1, "text1"}, {color2, "text2"}, ... }
+--   </eucode>
+--
+
+public function SyntaxColor(sequence pline, atom state=g_state)
+	integer class, last, i, c
 	sequence word
 
 	-- Ensure we have a new-line to end this one.
 	if length(pline) > 0 and pline[$] != '\n' then
 		pline &= '\n'
 	end if
+
 	-- Don't bother if the line is empty
 	if length(pline) < 2 then
 		return {}
 	end if
-	
+
 	line = pline
 	current_color = DONT_CARE
-	bracket_level = 0
 	seg_start = 1
 	seg_end = 0
 	color_segments = {}
 
+	-- TOOD: Hackery?
+	if ram_space[state][S_MULTILINE_COMMENT] then
+		goto "MULTILINE_COMMENT"
+
+	elsif ram_space[state][S_STRING_TRIPLE] then
+		goto "MULTILINE_STRING"
+
+	elsif ram_space[state][S_STRING_BACKTICK] then
+		goto "BACKTICK_STRING"
+
+	end if
+
 	while 1 do
-		c = line[seg_end+1]
+		c = line[seg_end + 1]
 		class = char_class[c]
 
 		if class = WHITE_SPACE then
@@ -180,18 +254,21 @@ public function SyntaxColor(sequence pline)
 
 		elsif class = BRACKET then
 			if find(c, "([{") then
-				bracket_level += 1
+				ram_space[state][S_BRACKET_LEVEL] += 1
 			end if
-			if bracket_level >= 1 and
-			   bracket_level <= length(BRACKET_COLOR)
+
+			if ram_space[state][S_BRACKET_LEVEL] >= 1 and
+			   ram_space[state][S_BRACKET_LEVEL] <= length(BRACKET_COLOR)
 			then
-				seg_flush(BRACKET_COLOR[bracket_level])
+				seg_flush(BRACKET_COLOR[ram_space[state][S_BRACKET_LEVEL]])
 			else
 				seg_flush(NORMAL_COLOR)
 			end if
+
 			if find(c, ")]}") then
-				bracket_level -= 1
+				ram_space[state][S_BRACKET_LEVEL] -= 1
 			end if
+
 			seg_end += 1
 
 		elsif class = NEW_LINE then
@@ -206,30 +283,96 @@ public function SyntaxColor(sequence pline)
 			seg_flush(NORMAL_COLOR)
 			seg_end += 1
 
-		else  -- QUOTE
-			i = seg_end + 2
-			while i < length(line) do
-				if line[i] = c then
-					i += 1
-					exit
-				elsif line[i] = '\\' then
-					if i < length(line)-1 then
-						i += 1 -- ignore escaped char
-					end if
+		elsif class = FORWARD_SLASH then
+			if line[seg_end + 2] = '*' then
+label "MULTILINE_COMMENT"
+				if seg_end = 0 then
+					seg_end = 1
 				end if
-				i += 1
-			end while
+				seg_flush(COMMENT_COLOR)
+				i = match("*/", line, seg_end)
+				if i = 0 then
+					ram_space[state][S_MULTILINE_COMMENT] = 1
+					seg_end = length(line) - 1
+					exit
+				end if
+			
+				integer old_seg_end = seg_end + 2
+				seg_end = i + 1
+				
+				if old_seg_end < i and match("/*", line[old_seg_end..i]) then
+					goto "MULTILINE_COMMENT"
+				end if
+			
+				ram_space[state][S_MULTILINE_COMMENT] = 0
+			else
+				seg_flush(NORMAL_COLOR)
+				seg_end += 1
+			end if
+
+		elsif class = BACKTICK then
+label "BACKTICK_STRING"
+			if seg_end = 0 then
+				seg_end = 1
+			end if
+
 			seg_flush(STRING_COLOR)
-			seg_end = i - 1
+			i = match("`", line, seg_end + 2)
+			if i = 0 then
+				ram_space[state][S_STRING_BACKTICK] = 1
+				seg_end = length(line) - 1
+				exit
+			end if
+
+			seg_end = i
+			ram_space[state][S_STRING_BACKTICK] = 0
+
+		else  -- QUOTE
+			if line[seg_end + 2] = '"' and line[seg_end + 3] = '"' then
+label "MULTILINE_STRING"
+				seg_end += 1
+				seg_flush(STRING_COLOR)
+			
+				if seg_end + 3 < length(line) then
+					i = match(`"""`, line, seg_end + 3)
+					if i = 0 then
+						ram_space[state][S_STRING_TRIPLE] = 1
+						seg_end = length(line) - 1
+						exit
+					end if
+				else
+					i = length(line)
+					exit
+				end if
+
+				seg_end = i + 2
+				ram_space[state][S_STRING_TRIPLE] = 0
+			else
+				i = seg_end + 2
+				while i < length(line) do
+					if line[i] = c then
+						i += 1
+						exit
+					elsif line[i] = '\\' then
+						if i < length(line)-1 then
+							i += 1 -- ignore escaped char
+						end if
+					end if
+					i += 1
+				end while
+				seg_flush(STRING_COLOR)
+				seg_end = i - 1
+			end if
 		end if
 	end while
-	
+
 	-- add the final piece:
 	if current_color = DONT_CARE then
 		current_color = NORMAL_COLOR
 	end if
-	
+
 	return append(color_segments, {current_color, line[seg_start..seg_end]})
 end function
 
+new()
 init_class()

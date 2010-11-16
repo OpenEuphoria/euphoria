@@ -1,10 +1,15 @@
-	-- (c) Copyright - See License.txt
 --****
 -- == Data type conversion
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
 namespace convert
+
+include std/search.e
+include std/sequence.e
+include std/text.e
+include std/types.e
 
 constant
 	M_A_TO_F64 = 46,
@@ -360,6 +365,7 @@ end function
 -- * The text can have any number of underscores, all of which are ignored.
 -- * The text can have one leading '-', indicating a negative number.
 -- * The text can have any number of underscores, all of which are ignored.
+-- * Any other characters in the text stops the parsing and returns the value thus far.
 --
 -- Example 1:
 -- <eucode>
@@ -541,19 +547,21 @@ end function
 --
 -- Examples:
 -- <eucode>
---     object val
---     val = to_number("12.34", 1)  ---> {12.34, 0} -- No errors.
---     val = to_number("12.34", -1)  ---> 12.34 -- No errors.
---     val = to_number("12.34a", 1) ---> {12.34, 6} -- Error at position 6
---     val = to_number("12.34a", -1) ---> {6} -- Error at position 6
---     val = to_number("12.34a")  ---> 0 because its not a valid number
---     val = to_number("#f80c") --> 63500
---     val = to_number("#f80c.7aa") --> 63500.47900390625
---     val = to_number("@1703") --> 963
---     val = to_number("!101101") --> 45
---     val = to_number("12_583_891") --> 12583891
---     val = to_number("12_583_891%") --> 125838.91
---     val = to_number("12,583,891%%") --> 12583.891
+-- object val
+-- val = to_number("12.34")      ---> 12.34 -- No errors and no error return needed.
+-- val = to_number("12.34", 1)   ---> {12.34, 0} -- No errors.
+-- val = to_number("12.34", -1)  ---> 12.34 -- No errors.
+-- val = to_number("12.34a", 1)  ---> {12.34, 6} -- Error at position 6
+-- val = to_number("12.34a", -1) ---> {6} -- Error at position 6
+-- val = to_number("12.34a")     ---> 0 because its not a valid number
+--
+-- val = to_number("#f80c")        --> 63500
+-- val = to_number("#f80c.7aa")    --> 63500.47900390625
+-- val = to_number("@1703")        --> 963
+-- val = to_number("!101101")      --> 45
+-- val = to_number("12_583_891")   --> 12583891
+-- val = to_number("12_583_891%")  --> 125838.91
+-- val = to_number("12,583,891%%") --> 12583.891
 -- </eucode>
 
 
@@ -634,11 +642,11 @@ public function to_number( sequence text_in, integer return_bad_pos = 0)
 
 			case '.', ',' then
 				if lLastDigit = 0 then
-	            	if decimal_mark = lChar then
-		                if lDotFound = 0 then
-			                lDotFound = 1
-				        else
-					        lBadPos = i
+					if decimal_mark = lChar then
+						if lDotFound = 0 then
+							lDotFound = 1
+						else
+							lBadPos = i
 						end if
 					else
 						-- Ignore it
@@ -648,21 +656,17 @@ public function to_number( sequence text_in, integer return_bad_pos = 0)
 				end if
 
 			case '%' then
-				if lDigitCount >= 0 then
-					lLastDigit = lDigitCount
-					if lPercent = 1 then
-						lPercent = 100
-					else
-						if text_in[i-1] = '%' then
-							lPercent *= 10 -- Yes ten not one hundred.
-						else
-							lBadPos = i
-						end if
-					end if
+				lLastDigit = lDigitCount
+				if lPercent = 1 then
+					lPercent = 100
 				else
-					lBadPos = i
+					if text_in[i-1] = '%' then
+						lPercent *= 10 -- Yes ten not one hundred.
+					else
+						lBadPos = i
+					end if
 				end if
-
+				
 			case '\t', ' ', #A0 then
 				if lDigitCount = 0 then
 					-- skip it
@@ -766,15 +770,16 @@ end function
 --
 -- Examples:
 -- <eucode>
--- ? to_integer(12)       --> 12
--- ? to_integer(12.4)     --> 12
--- ? to_integer("12")     --> 12
--- ? to_integer("12.9")   --> 12
--- ? to_integer("a12")    --> 0 (not a valid number)
--- ? to_integer("a12",-1) --> -1 (not a valid number)
--- ? to_integer({"12"})   --> 0 (sub-sequence found)
--- ? to_integer(#3FFFFFFF)   --> 1073741823
--- ? to_integer(#3FFFFFFF + 1)   --> 0 (too big for a Euphoria integer)
+-- ? to_integer(12)            --> 12
+-- ? to_integer(12.4)          --> 12
+-- ? to_integer("12")          --> 12
+-- ? to_integer("12.9")        --> 12
+--
+-- ? to_integer("a12")         --> 0 (not a valid number)
+-- ? to_integer("a12",-1)      --> -1 (not a valid number)
+-- ? to_integer({"12"})        --> 0 (sub-sequence found)
+-- ? to_integer(#3FFFFFFF)     --> 1073741823
+-- ? to_integer(#3FFFFFFF + 1) --> 0 (too big for a Euphoria integer)
 -- </eucode>
 
 public function to_integer(object data_in, integer def_value = 0)
@@ -797,5 +802,73 @@ public function to_integer(object data_in, integer def_value = 0)
 		return floor(lResult[1])
 	end if
 
+end function
+
+--**
+-- Converts an object into a text string.
+--
+-- Parameters:
+-- # ##data_in## : Any Euphoria object.
+-- # ##string_quote## : An integer. If not zero (the default) this will be used to
+--   enclose ##data_in##, if it is already a string. 
+-- # ##embed_string_quote## : An integer. This will be used to
+--   enclose any strings embedded inside ##data_in##. The default is '"'
+--
+-- Returns:
+-- A **sequence**. This is the string repesentation of data_in.
+--
+-- Comments:
+-- * The returned value is guaranteed to be a displayable text string.
+-- * ##string_quote## is only used if ##data_in## is already a string. In this case,
+--   all occurances of ##string_quote## already in ##data_in## are prefixed with
+--   the '\' escape character, as are any preexisting escape characters. Then 
+--   ##string_quote## is added to both ends of ##data_in##, resulting in a quoted
+--   string.
+-- * ##embed_string_quote## is only used if ##data_in## is a sequence that contains
+--   strings. In this case, it is used as the enclosing quote for embedded strings.
+--
+-- Examples:
+-- <eucode>
+-- ? to_string(12)       --> 12
+-- ? to_string("abc")       --> abc
+-- ? to_string("abc",'"')       --> "abc"
+-- ? to_string(`abc\"`,'"')       --> "abc\\\""
+-- ? to_string({12,"abc",{4.5, -99}})       --> {12, "abc", {4.5, -99}}
+-- ? to_string({12,"abc",{4.5, -99}},,0)       --> {12, abc, {4.5, -99}}
+-- </eucode>
+
+public function to_string(object data_in, integer string_quote = 0, integer embed_string_quote = '"')
+	sequence data_out
+	
+	if string(data_in) then
+		if string_quote = 0 then
+			return data_in
+		end if
+		data_in = match_replace(`\`, data_in, `\\`)
+		data_in = match_replace({string_quote}, data_in, `\` & string_quote)
+		return string_quote & data_in & string_quote
+	end if
+	
+	if atom(data_in) then
+		if integer(data_in) then
+			return sprintf("%d", data_in)
+		end if
+		data_in = trim_tail(sprintf("%.15f", data_in), '0')
+		if data_in[$] = '.' then
+			data_in = remove(data_in, length(data_in))
+		end if
+		return data_in
+	end if
+	
+	data_out = "{"
+	for i = 1 to length(data_in) do
+		data_out &= to_string(data_in[i], embed_string_quote)
+		if i != length(data_in) then
+			data_out &= ", "
+		end if
+	end for
+	data_out &= '}'
+	
+	return data_out
 end function
 

@@ -1,6 +1,6 @@
 CAUTION:
 
-This is a BETA release. This means that Euphoria may not yet be stable, it may
+This is a Release Candidate. This means that Euphoria may not yet be stable, it may
 crash and it may cause problems. This version of Euphoria is only for testing
 purposes.
 

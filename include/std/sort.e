@@ -1,12 +1,10 @@
--- (c) Copyright - See License.txt
---
-namespace stdsort
-
 --****
 -- == Sorting
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace stdsort
 
 --****
 -- === Constants
@@ -31,7 +29,6 @@ public constant
 	--** Reverses the sense of the order returned by a custom comparison routine.
 	REVERSE_ORDER = DESCENDING
 
-include std/text.e -- upper()
 
 --****
 -- === Routines
@@ -320,7 +317,7 @@ function column_compare(object a, object b, object cols)
 		if column <= length(a) then
 			if column <= length(b) then
 				if not equal(a[column], b[column]) then
-					return sign * eu:compare(upper(a[column]), upper(b[column]))
+					return sign * eu:compare(a[column], b[column])
 				end if
 			else
 				return sign * -1

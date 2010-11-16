@@ -1,11 +1,16 @@
 --****
 -- == Keyword Data
-
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
 -- Keywords and routines built in to Euphoria.
+--
+-- <<LEVELTOC level=2 depth=4>>
+--
 
 namespace keywords
+
+--****
+-- === Constants
+--
 
 --**
 -- Sequence of Euphoria keywords
@@ -62,7 +67,7 @@ public constant keywords = {
 -- Sequence of Euphoria's built-in function names
 
 public constant builtins = {
-    "?",
+	"?",
 	"abort",
 	"and_bits",
 	"append",

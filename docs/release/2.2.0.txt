@@ -1,0 +1,9 @@
+== Version 2.2 WIN32+DOS32 January 14, 2000
+
+* Better error messages are now issued from the interpreter, and from
+the bind program, for some typical errors that users can make when
+binding a program.
+* The documentation has been improved in a few places.
+* The **window.exw** demo program shows how to load the
+Euphoria icon contained in exw.exe.
+* Language War uses Jiri Babor's improved version of **putsxy.e**.

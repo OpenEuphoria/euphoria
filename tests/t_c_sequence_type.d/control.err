@@ -1,5 +1,5 @@
 t_c_sequence_type.e:4
-<0330>:: Only enums may be declared as types
+<0025>:: found ... reserved word ... but was expecting an identifier name
 sequence type foo
              ^
 

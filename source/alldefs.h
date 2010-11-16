@@ -2,5 +2,4 @@
 #include "execute.h"
 #include "symtab.h"
 #include "reswords.h"
-#include "alloc.h"
 

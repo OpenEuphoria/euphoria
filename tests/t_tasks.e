@@ -7,7 +7,7 @@ include std/math.e
 sequence vResults
 sequence xResults
 integer fc = 0
-with trace
+
 function calchash(integer ch, atom prevhash)
 	ch += 1
 	prevhash = xor_bits(prevhash * 3, ch * (ch + 1) * 5) + ch
@@ -93,6 +93,9 @@ task_schedule(task_create( routine_id("monitor"), {}), 1)
 object dirlist
 
 dirlist = dir("*.*")
+if length(dirlist) > 5 then
+	dirlist = dirlist[1..5]
+end if
 
 vResults = {}
 for i = 1 to length(dirlist) do

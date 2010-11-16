@@ -134,9 +134,11 @@ export function ShowWarnings()
 			if errfile = STDERR then
 				if remainder(i, 20) = 0 then
 					ShowMsg(errfile, 206)
-					c = getc(0)
-					if c = 'q' then
-						exit
+					if batch_job = 0 then
+						c = getc(0)
+						if c = 'q' then
+							exit
+						end if
 					end if
 				end if
 			end if
@@ -184,7 +186,11 @@ export procedure Cleanup(integer status)
 			getc(0) -- wait
 		end if
 	end if
-	
+
+	-- Close all files now.	
+	for fh = FIRST_USER_FILE to MAX_USER_FILE - 1 do
+		close(fh)
+	end for
 	abort(status)
 end procedure
 
@@ -206,7 +212,7 @@ end procedure
 --**
 -- Show place where syntax error occurred
 procedure ShowErr(integer f)
-	if length(file_name) = 0 then
+	if length(known_files) = 0 then
 		return
 	end if
 
@@ -229,7 +235,7 @@ end procedure
 
 --**
 -- Handle fatal compilation errors
-export procedure CompileErr(object msg, object args = {})
+export procedure CompileErr(object msg, object args = {}, integer preproc = 0 )
 	sequence errmsg
 
 	if integer(msg) then
@@ -239,8 +245,8 @@ export procedure CompileErr(object msg, object args = {})
 	msg = format(msg, args)
 
 	Errors += 1
-	if length(file_name) then
-		errmsg = sprintf("%s:%d\n%s\n", {file_name[current_file_no],
+	if not preproc and length(known_files) then
+		errmsg = sprintf("%s:%d\n%s\n", {known_files[current_file_no],
 					 line_number, msg})
 	else
 		errmsg = msg
@@ -248,23 +254,29 @@ export procedure CompileErr(object msg, object args = {})
 			errmsg &= '\n'
 		end if
 	end if
-
-	-- try to open err file *before* displaying diagnostics on screen
-	OpenErrFile() -- exits if error filename is ""
+	
+	if not preproc then
+		-- try to open err file *before* displaying diagnostics on screen
+		OpenErrFile() -- exits if error filename is ""
+	end if
 	screen_output(STDERR, errmsg)
-	ShowErr(STDERR)
+	
+	if not preproc then
+		ShowErr(STDERR)
 
-	puts(TempErrFile, errmsg)
+		puts(TempErrFile, errmsg)
 
-	ShowErr(TempErrFile)
+		ShowErr(TempErrFile)
 
-	ShowWarnings()
+		ShowWarnings()
 
-	ShowDefines(TempErrFile)
+		ShowDefines(TempErrFile)
 
-	close(TempErrFile)
-	TempErrFile = -2
-	Cleanup(1)
+		close(TempErrFile)
+		TempErrFile = -2
+		Cleanup(1)
+	end if
+	
 end procedure
 
 --**
@@ -287,7 +299,7 @@ export procedure InternalErr(integer  msgno, object args = {})
 	if TRANSLATE then
 		screen_output(STDERR, GetMsgText(211, 1, {msg}))
 	else
-		screen_output(STDERR, GetMsgText(212, 1, {file_name[current_file_no], line_number, msg}))
+		screen_output(STDERR, GetMsgText(212, 1, {known_files[current_file_no], line_number, msg}))
 	end if
 
 	if not batch_job then

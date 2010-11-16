@@ -1,9 +1,9 @@
-namespace pipeio
-
 --****
--- === Pipe Input/Output
+-- == Pipe Input/Output
 --
--- ==== Notes
+-- <<LEVELTOC level=2 depth=4>>
+--
+-- === Notes
 -- Due to a bug, Euphoria does not handle STDERR properly
 -- STDERR cannot captured for Euphoria programs (other programs will work fully)
 -- The IO functions currently work with file handles, a future version might wrap them in streams
@@ -11,10 +11,11 @@ namespace pipeio
 -- stream_select() function.
 --
 
---Includes
+namespace pipeio
+
 include std/dll.e
-include std/machine.e
 include std/error.e
+include std/machine.e
 
 ifdef WIN32 then
 	constant
@@ -161,20 +162,19 @@ end function
 --
 
 public procedure kill(process p, atom signal=15)
-	atom ret
 
 	--Close the pipes
 	--If any fail its probably just because they were already closed, so that is ignored
-	ret=close(p[STDIN])
-	ret=close(p[STDOUT])
-	ret=close(p[STDERR])
+	close(p[STDIN])
+	close(p[STDOUT])
+	close(p[STDERR])
 	
 	--Error may result, but it is usually just because the process has already ended.
 	ifdef WIN32 then
 		--Not how to handle "signal", so its ignored on Windows for now
-		ret=c_func(iTerminateProcess,{p[PID],signal and 0})
+		c_func(iTerminateProcess,{p[PID],signal and 0})
 	elsedef
-		ret=c_func(KILL, {p[PID], signal})
+		c_func(KILL, {p[PID], signal})
 	end ifdef
 end procedure
 
@@ -254,11 +254,11 @@ public function read(atom fd, integer bytes)
 	return data
 end function
 
---****
+--**
 -- Write ##bytes## to handle ##fd##
 --
 -- Returns:
---   A **integer**, number of bytes written, or -1 on error
+--   An **integer**, number of bytes written, or -1 on error
 --
 -- Example 1:
 -- <eucode>
@@ -322,9 +322,8 @@ ifdef WIN32 then
 	end function
 	
 	procedure CloseAllHandles(sequence handles)
-	atom ret
 	   for i = 1 to length(handles) do
-	     ret=close(handles[i])
+	     close(handles[i])
 	   end for
 	end procedure
 	
@@ -374,8 +373,6 @@ ifdef WIN32 then
 	  StdOutPipe = {},
 	  StdErrPipe = {}
 	  
-	object fnVal
-
 	  -- capture child process std input
 	    StdInPipe = os_pipe()
 	    if atom(StdInPipe) then return -1 end if
@@ -401,9 +398,9 @@ ifdef WIN32 then
 	    hChildStdErrWr = StdErrPipe[PIPE_WRITE_HANDLE]
 	    hChildStdErrRd = StdErrPipe[PIPE_READ_HANDLE]
 
-	    fnVal = SetHandleInformation(StdInPipe[PIPE_WRITE_HANDLE],HANDLE_FLAG_INHERIT,0)
-	    fnVal = SetHandleInformation(StdOutPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
-	    fnVal = SetHandleInformation(StdErrPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    SetHandleInformation(StdInPipe[PIPE_WRITE_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    SetHandleInformation(StdOutPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    SetHandleInformation(StdErrPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
 
 	  return {{hChildStdInWr,hChildStdOutRd,hChildStdErrRd},
 	         {hChildStdInRd,hChildStdOutWr,hChildStdErrWr}}
@@ -428,7 +425,6 @@ ifdef WIN32 then
 	object fnVal
 	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr, -- handles used by child process
 	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd  -- handles used by parent process
-	atom ret
 	
 	hChildStdInWr = pipe[1][1]
 	hChildStdOutRd = pipe[1][2]
@@ -445,15 +441,15 @@ ifdef WIN32 then
 	    return -1
 	  end if
 	  hChildProcess = fnVal[1]
-	  ret=close(fnVal[2]) -- hChildThread not needed.
+	  close(fnVal[2]) -- hChildThread not needed.
 	
-	     ret=close(hChildStdInRd)
+	  close(hChildStdInRd)
 	  
-	     ret=close(hChildStdOutWr)
+	  close(hChildStdOutWr)
 	  
-	     ret=close(hChildStdErrWr)
+	  close(hChildStdErrWr)
 	  
-	  return {hChildStdInWr,hChildStdOutRd,hChildStdErrRd,hChildProcess}
+	  return {hChildStdInWr, hChildStdOutRd, hChildStdErrRd, hChildProcess}
 	
 	end function
 

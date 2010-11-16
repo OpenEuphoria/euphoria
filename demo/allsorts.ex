@@ -370,17 +370,15 @@ procedure all_sorts()
 	min_value = 1
 	max_value = 100
 
-    measure("bubble_sort")
-    measure("simple_sort")
-    measure("insertion_sort")
+	measure("bubble_sort")
+	measure("simple_sort")
+	measure("insertion_sort")
 	measure("merge_sort")
 	measure("quick_sort")
 	measure("hybrid_sort")  
 	measure("great_sort")
 	measure("shell_sort")
 	measure("bucket_sort")      
-
-	any_key()
 
 end procedure
 

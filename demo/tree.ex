@@ -17,6 +17,9 @@
 --   we should have fewer comparisons to make.
 
 without type_check
+without warning
+
+include std/console.e
 
 constant EOF = -1
 constant TRUE = 1
@@ -113,4 +116,4 @@ t = time() -t      -- Stop timer
 puts(STANDARD_OUT,"\n\n")
 printTree(root)
 printf(2, "\n%.2f seconds\n\n", t)
-
+maybe_any_key()

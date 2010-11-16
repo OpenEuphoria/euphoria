@@ -9,6 +9,7 @@ ifdef ETYPE_CHECK then
 elsedef
 	without type_check
 end ifdef
+include std/filesys.e
 
 include global.e
 include parser.e
@@ -109,7 +110,6 @@ procedure set_code( integer ref )
 	else
 		patch_current_sub = patch_code_sub
 	end if
-	
 end procedure
 
 procedure reset_code( )
@@ -140,7 +140,9 @@ end procedure
 
 sequence fwd_private_sym  = {}
 sequence fwd_private_name = {}
-export procedure add_private_symbol( symtab_index sym, sequence name )
+-- add a private symbol which could be a forward reference or an already
+-- known symbol.
+export procedure add_private_symbol( symtab_pointer sym, sequence name )
 	
 	fwd_private_sym &= sym
 	fwd_private_name = append( fwd_private_name, name )
@@ -199,7 +201,7 @@ procedure patch_forward_call( token tok, integer ref )
 	if is_func and fr[FR_OP] = PROC then
 		-- an unused forward function call!
 		-- need to convert from a PROC_FORWARD to a FUNC_FORWARD
-		symtab_index temp_target = NewTempSym()
+		symtab_index temp_target = NewTempSym( TRUE )
 		sequence converted_code = 
 			FUNC_FORWARD 
 			& Code[pc+1..pc+2+supplied_args] 
@@ -210,7 +212,6 @@ procedure patch_forward_call( token tok, integer ref )
 
 		code = Code
 	end if
-	
 	next_pc +=
 		  3                         -- op, sym, #args
 		+ supplied_args             -- # args emitted
@@ -230,7 +231,13 @@ procedure patch_forward_call( token tok, integer ref )
 	integer param_sym = sub
 	sequence params = repeat( 0, args )
 	sequence orig_code = code
+	sequence orig_linetable = LineTable
 	Code = {}
+	integer old_temps_allocated = temps_allocated
+	temps_allocated = 0
+	
+	integer pre_refs = length( forward_references )
+	
 	for i = pc + 3 to pc + args + 2 do
 		defarg += 1
 		param_sym = SymTab[param_sym][S_NEXT]
@@ -254,9 +261,18 @@ procedure patch_forward_call( token tok, integer ref )
 		end if
 	end for
 	
+	SymTab[code_sub][S_STACK_SPACE] += temps_allocated
+	temps_allocated = old_temps_allocated
+	
+	-- In case anything was inlined, we need to shift the code so it's correct for its
+	-- final place in the original code, since we've been building this stream of IL
+	-- from an empty sequence, rather than actually inline with the function call.
+	integer temp_shifting_sub = shifting_sub
+	shift( -pc, pc-1 )
+	
 	sequence new_code = Code
 	Code = orig_code
-	
+	LineTable = orig_linetable
 	set_dont_read( 0 )
 	current_file_no = real_file
 	
@@ -274,15 +290,20 @@ procedure patch_forward_call( token tok, integer ref )
 		current_file_no = from_file
 		line_number = line
 		CompileErr( 158,
-			{ file_name[from_file], line, routine_type, name, args, supplied_args + extra_default_args }  )
+			{ known_files[from_file], line, routine_type, name, args, supplied_args + extra_default_args }  )
 	end if
 	
 	new_code &= PROC & sub & params
 	if is_func then
 		new_code &= target
 	end if
-	
+
 	replace_code( new_code, pc, next_pc - 1, code_sub )
+	
+	for i = pre_refs + 1 to length( forward_references ) do
+		forward_references[i][FR_PC] += pc - 1
+	end for
+
 	reset_code()
 	
 	-- mark this one as resolved already
@@ -319,13 +340,13 @@ procedure patch_forward_variable( token tok, integer ref )
 	end if
 	
 	set_code( ref )
-	integer vx = find_from( -ref, Code, fr[FR_PC] )
+	integer vx = find( -ref, Code, fr[FR_PC] )
 	if vx then
 		while vx do
 			-- subscript assignments might cause the
 			-- sym to be emitted multiple times
 			Code[vx] = sym
-			vx = find_from( -ref, Code, fr[FR_PC] )
+			vx = find( -ref, Code, fr[FR_PC] )
 		end while
 		resolved_reference( ref )
 	end if
@@ -396,13 +417,13 @@ procedure patch_forward_case( token tok, integer ref )
 	if not cx then
 		cx = find( { -ref }, case_values )
 	end if
-
-	ifdef DEBUG then	
+	
+ 	ifdef DEBUG then	
 	if not cx then
+		prep_forward_error( ref )
 		InternalErr( 261, { fr[FR_NAME] } )
 	end if
 	end ifdef
-	
 	
 	integer negative = 0
 	if case_values[cx][1] < 0 then
@@ -444,6 +465,11 @@ procedure patch_forward_type_check( token tok, integer ref )
 		InternalErr( 262, { TYPE_CHECK, TYPE_CHECK_FORWARD, fr[FR_OP] })
 	end if
 	
+	if which_type < 0 then
+		-- not yet...
+		return
+	end if
+	
 	set_code( ref )
 	
 	integer pc = fr[FR_PC]
@@ -465,7 +491,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 			if which_type != object_type then
 				if SymTab[which_type][S_EFFECT] then
 					-- only call user-defined types that have side-effects
-					integer c = NewTempSym()
+					integer c = NewTempSym( TRUE )
 					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc, fr[FR_SUBPROG] )
 					pc += 5
 				end if
@@ -501,7 +527,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 						
 						pc += 2
 					end if
-					symtab_index c = NewTempSym()
+					symtab_index c = NewTempSym( TRUE )
 					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc, fr[FR_SUBPROG] )
 					pc += 4
 					
@@ -528,7 +554,6 @@ procedure patch_forward_type_check( token tok, integer ref )
 		end if
 		
 	end if
-	
 	resolved_reference( ref )
 	reset_code()
 end procedure
@@ -577,6 +602,22 @@ export procedure register_forward_type( symtab_index sym, integer ref )
 	forward_references[ref][FR_DATA] &= sym
 end procedure
 
+
+-- TRUE if ref is a forward reference encoded as a negative number.
+export type forward_reference( integer ref )
+	if 0 > ref and ref >= -length( forward_references ) then
+		ref = -ref
+		if integer(forward_references[ref][FR_FILE]) and
+			integer(forward_references[ref][FR_PC]) then
+				return 1
+		else
+			return 0
+		end if
+	else
+		return 0
+	end if
+end type
+
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
 	
 	integer 
@@ -611,9 +652,17 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	if op = GOTO then
 		forward_references[ref][FR_DATA] = { sym }
 	end if
-	active_references &= ref
-	active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
-	fwdref_count += 1
+	
+	-- If we're recording tokens (for a default parameter), this ref will never 
+	-- get resolved.  So ignore it for now, and when someone actually calls
+	-- the routine, it will be resolved normally then.
+	if  Parser_mode != PAM_RECORD then
+		
+		active_references &= ref
+		active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
+		fwdref_count += 1
+	end if
+	
 	return ref
 end function
 
@@ -630,23 +679,18 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 			continue
 		end if
 		token tok = find_reference( fr )
-		
 		if tok[T_ID] = IGNORED then
 			errors &= ref
 			continue
 		end if
-		
-		sequence fname = file_name[fr[FR_FILE]]
-		sequence cname = file_name[current_file_no]
 		
 		-- found a match...
 		integer code_sub = fr[FR_SUBPROG]
 		integer fr_type  = fr[FR_TYPE]
 		integer sym_tok
 		
-		switch fr_type with fallthru label "fr_type" do
-			case PROC then
-			case FUNC then
+		switch fr_type label "fr_type" do
+			case PROC, FUNC then
 				
 				sym_tok = SymTab[tok[T_SYM]][S_TOKEN]
 				if sym_tok = TYPE then
@@ -657,9 +701,8 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 						forward_error( tok, ref )
 					end if
 				end if
-				switch sym_tok with fallthru do
-					case PROC then
-					case FUNC then
+				switch sym_tok do
+					case PROC, FUNC then
 						patch_forward_call( tok, ref )
 						break "fr_type"
 												
@@ -674,10 +717,8 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 					errors &= ref
 					continue
 				end if
-				switch sym_tok with fallthru do
-					case CONSTANT then
-					case ENUM then
-					case VARIABLE then
+				switch sym_tok do
+					case CONSTANT, ENUM, VARIABLE then
 						patch_forward_variable( tok, ref )
 						break "fr_type"
 					case else
@@ -686,28 +727,24 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 
 			case TYPE_CHECK then
 				patch_forward_type_check( tok, ref )
-				break
 			
 			case GLOBAL_INIT_CHECK then
 				patch_forward_init_check( tok, ref )
-				break
 			
 			case CASE then
 				patch_forward_case( tok, ref )
-				break
 				
 			case TYPE then
 				patch_forward_type( tok, ref )
-				break
 			
 			case GOTO then
 				patch_forward_goto( tok, ref )
-				break
+				
 			case else
 				-- ?? what is it?
 				InternalErr( 263, {fr[FR_TYPE], fr[FR_NAME]})
 		end switch
-		if sequence( forward_references[ref] ) then
+		if report_errors and sequence( forward_references[ref] ) then
 			errors &= ref
 		end if
 		
@@ -717,16 +754,17 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		sequence msg = ""
 		sequence errloc
 		
-		for e = 1 to length( errors ) do
+		for e = length(errors) to 1 by -1 do
 			sequence ref = forward_references[errors[e]]
 			if (ref[FR_TYPE] = TYPE_CHECK and ref[FR_OP] = TYPE_CHECK) or ref[FR_TYPE] = GLOBAL_INIT_CHECK then
 				-- these checks end up looking like duplicate errors
 				continue
 
 			else
-				errloc = sprintf("\t%s (%d): %s\n", {file_name[ref[FR_FILE]], ref[FR_LINE], ref[FR_NAME]} )
+				errloc = sprintf("\t%s (%d): %s\n", {abbreviate_path(known_files[ref[FR_FILE]]), ref[FR_LINE], ref[FR_NAME]} )
 				if not match(errloc, msg) then
 					msg &= errloc
+					prep_forward_error( errors[e] )
 				end if
 			end if
 			ThisLine    = ref[FR_THISLINE]
@@ -737,7 +775,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if length(msg) > 0 then
 			CompileErr( 74, {msg} )
 		end if
+		
 	end if
+	clear_last()
 end procedure
 
 export function might_be_fwdref( sequence name )
@@ -750,7 +790,16 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 			if forward_references[active_references[i]][FR_PC] >= pc then
 				if forward_references[active_references[i]][FR_PC] > 1 then
 					forward_references[active_references[i]][FR_PC] += amount
+					
+					if forward_references[active_references[i]][FR_TYPE] = CASE
+					and forward_references[active_references[i]][FR_DATA] >= pc then
+						-- the FR_DATA info tracks the pc for the switch statement for the case
+						forward_references[active_references[i]][FR_DATA] += amount
+					end if
+				
 				end if
+				
+				
 			else
 				exit
 			end if

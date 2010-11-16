@@ -10,54 +10,53 @@
 # Output file generation options
 :@@(title Euphoria v4.0)@
 :%%maxnumlevel = 4
-:%%splitname = eu400
-:%%splitlevel = 2
 :%%toclevel = 3
-:<<TOC level=3>>
-
+:%%output=index
+:<<TOC level=1>>
 ########
+:%%output=eu_intro
 := Euphoria Programming Language v4.0
-:<<LEVELTOC depth=2>>
+:<<LEVELTOC level=1 depth=4>>
 
 ../docs/welcome.txt
-../docs/c.txt
-../docs/install.txt
-../docs/what2do.txt
+../docs/licensing.txt
+../License.txt <nowiki
+../docs/credits.txt
 #TODO: other release notes
 
 ########
-:= Euphoria License
-:<<LEVELTOC depth=2>>
+:%%output=installation
+:= Installing Euphoria
+:<<LEVELTOC level=1 depth=4>>
 
-:== Euphoria License 
-:----
-../License.txt <nowiki
-:----
-
-../docs/credits.txt
+../docs/installing.txt
 
 ########
-:= Quick Start
-:<<LEVELTOC depth=2>>
+:%%output=using
+:= Using Euphoria
+:<<LEVELTOC level=1 depth=4>>
 
-../docs/refman_1.txt
+../docs/using_euphoria.txt
 
 ########
+:%%output=langref_index
 := Language Reference
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC depth=2>>
 
 ../docs/refman_2.txt
 
 ########
+:%%output=syntax
 := Formal Syntax
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../docs/syntax.txt
 ../docs/internals.txt
 
 ########
+:%%output=miniguide
 := Mini-Guides
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../docs/debug.txt
 ../docs/bind.txt
@@ -71,37 +70,37 @@
 ../docs/perform.txt
 
 ########
+:%%output=tools
 := Included Tools
-:<<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../docs/eutest.txt
 ../docs/eudoc.txt
 ../docs/ed.txt
+../docs/dis.txt
+../docs/eudist.txt
 
 ########
+:%%output=gen_routines
 := General Routine Reference
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/cmdline.e
 ../include/std/console.e
 ../include/std/datetime.e
 ../include/std/filesys.e
 ../include/std/io.e
-../include/std/math.e
-../include/std/mathcons.e
-../include/std/rand.e
-../include/std/mouse.e
 ../include/std/os.e
 ../include/std/pipeio.e
 ../include/std/pretty.e
-../include/std/stats.e
 ../include/std/task.e
 ../include/std/types.e
 ../include/std/utils.e
 
 ########
+:%%output=seq_routines
 := Sequence Centric Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/convert.e
 ../include/std/get.e
@@ -111,31 +110,44 @@
 ../include/std/sort.e
 
 ########
+:%%output=str_routines
 := String Centric Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/locale.e
 ../include/std/localeconv.e
 ../include/std/regex.e
 ../include/std/text.e
-../include/std/unicode.e
-../include/std/ucstypes.e
+#../include/std/unicode.e
+#../include/std/ucstypes.e
 ../include/std/wildcard.e
+../include/std/base64.e
 
 ########
+:%%output=math_routines
+:= Math
+:<<LEVELTOC level=1 depth=2>>
+
+../include/std/math.e
+../include/std/mathcons.e
+../include/std/rand.e
+../include/std/stats.e
+
+########
+:%%output=data_routines
 := Data Structures
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/eds.e
 ../include/std/primes.e
 ../include/std/flags.e
 ../include/std/map.e
 ../include/std/stack.e
-../include/std/sets.e
 
 ########
+:%%output=net_routines
 := Networking Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/socket.e
 ../include/std/net/common.e
@@ -144,8 +156,9 @@
 ../include/std/net/url.e
 
 ########
+:%%output=lowlvl_routines
 := Low Level Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/dll.e
 ../include/std/error.e
@@ -154,19 +167,20 @@
 ../include/std/memory.e
 ../include/std/safe.e
 ../include/std/memconst.e
-../include/std/unix/mmap.e
 
 ########
+:%%output=graph_routines
 := Graphics
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/graphcst.e
 ../include/std/graphics.e
 ../include/std/image.e
 
 ########
+:%%output=eu_routines
 := Euphoria Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/euphoria/info.e
 ../include/euphoria/keywords.e
@@ -175,22 +189,78 @@
 ../include/std/unittest.e
 
 ########
+:%%output=win_routines
 := Windows Routines
-: <<LEVELTOC depth=3>>
+:<<LEVELTOC level=1 depth=2>>
 
 ../include/std/win32/msgbox.e
 ../include/std/win32/sounds.e
 
 ########
+:%%output=unsupported
+:= Unsuppored Features
+:<<LEVELTOC level=1 depth=2>>
+
+../docs/unsupported.txt
+
+########
+:%%output=relnotes
 := Release Notes
-: <<LEVELTOC depth=2>>
+:<<LEVELTOC level=1 depth=2>>
 
 :@@(color <<font color="$(1)" text=`$(+)`>>)@
 :@@(bugfix **$$(color #009999 bug fixed:)**)@
 :@@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
 
-../docs/relnotes400.txt
-
+#../docs/release/4.0.0.txt
+../docs/release/4.0.0.rc2.txt
+../docs/release/4.0.0.rc1.txt
+../docs/release/3.1.1.txt
+../docs/release/3.1.0.txt
+../docs/release/3.0.2.txt
+../docs/release/3.0.1.txt
+../docs/release/3.0.0.txt
+../docs/release/2.5.0.txt
+../docs/release/2.5.0b.txt
+../docs/release/2.4.0.txt
+../docs/release/2.4.0b.txt
+../docs/release/2.4.0a.txt
+../docs/release/2.3.0.txt
+../docs/release/2.3.0b.txt
+../docs/release/2.3.0a.txt
+../docs/release/euc.txt
+../docs/release/euc-b2.txt
+../docs/release/euc-b1.txt
+../docs/release/euc-a3.txt
+../docs/release/euc-a3.txt
+../docs/release/euc-a2.txt
+../docs/release/euc-a1.txt
+../docs/release/2.2.0.txt
+../docs/release/2.2.0b.txt
+../docs/release/2.2.0-linux.txt
+../docs/release/2.2.0b-linux.txt
+../docs/release/2.2.0a-linux.txt
+../docs/release/2.2.0pa4.txt
+../docs/release/2.2.0pa3.txt
+../docs/release/2.2.0pa2.txt
+../docs/release/2.2.0pa1.txt
+../docs/release/2.1.0.txt
+../docs/release/2.1.0b.txt
+../docs/release/2.1.0a.txt
+../docs/release/2.0.0.txt
+../docs/release/2.0.0b.txt
+../docs/release/2.0.0a.txt
+../docs/release/1.5.0.txt
+../docs/release/1.5.0a.txt
+../docs/release/1.4.0.txt
+../docs/release/1.4.0b.txt
+../docs/release/1.4.0a.txt
+../docs/release/1.3.0.txt
+../docs/release/1.2.0.txt
+../docs/release/1.1.0.txt
+../docs/release/1.0.0.txt
 
 ########
+:%%output=key_index
 := Index
+:<<INDEX search>>
