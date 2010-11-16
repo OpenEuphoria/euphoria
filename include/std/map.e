@@ -1515,7 +1515,7 @@ public function load_map(object input_file_name)
 				logical_line &= line_in
 					
 				if length(line_in) then
-					if line_in[$] != ',' and line_in[$] != '$' then
+					if line_in[$] != ',' and line_in[$] != '$' and line_in[$] != '{' then
 						-- Remove any ",$" combinations.
 						logical_line = match_replace(`",$"`, logical_line, "")
 						logical_line = match_replace(`,$`, logical_line, "")
