@@ -212,7 +212,6 @@ sequence Alias_Details = {}
 
 --****
 -- === Variables
---
 
 --**
 -- **Exception handler**\\
@@ -1447,8 +1446,10 @@ function table_find(sequence name)
 	return -1
 end function
 
+--****
+-- === Managing tables
+
 --**
---==== Managing tables
 -- Parameters:
 -- 		# ##name## : a sequence which defines the name of the new current table.
 --
