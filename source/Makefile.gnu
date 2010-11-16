@@ -426,13 +426,10 @@ endif
 
 euisource : $(BUILDDIR)/intobj/main-.c be_rev.c
 euisource :  EU_TARGET = int.ex
-euisource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 eucsource : $(BUILDDIR)/transobj/main-.c  be_rev.c
 eucsource :  EU_TARGET = ec.ex
-eucsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h 
 backendsource : $(BUILDDIR)/backobj/main-.c  be_rev.c
 backendsource :  EU_TARGET = backend.ex
-backendsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 source : builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -469,17 +466,6 @@ source-tarball : source
 .PHONY : backendsource
 .PHONY : source
 
-
-$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
-	$(EXE) -i $(CYPTRUNKDIR)/include coverage.ex $(CYPBUILDDIR)/$(OBJDIR)
-
-$(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
-$(BUILDDIR)/transobj/back/be_execute.o : $(BUILDDIR)/transobj/back/coverage.h
-$(BUILDDIR)/backobj/back/be_execute.o : $(BUILDDIR)/backobj/back/coverage.h
-
-$(BUILDDIR)/intobj/back/be_runtime.o : $(BUILDDIR)/intobj/back/coverage.h
-$(BUILDDIR)/transobj/back/be_runtime.o : $(BUILDDIR)/transobj/back/coverage.h
-$(BUILDDIR)/backobj/back/be_runtime.o : $(BUILDDIR)/backobj/back/coverage.h
 
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
 $(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
@@ -530,6 +516,9 @@ $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDI
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
 manual : $(BUILDDIR)/docs/index.html
+
+manual-upload : manual
+	$(SCP) $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
 
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
