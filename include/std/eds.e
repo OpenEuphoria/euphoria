@@ -1923,7 +1923,7 @@ function key_value(atom ptr)
 end function
 
 --****
---==== Managing Records
+-- === Managing Records
 
 --**
 -- Find the record in the current table with supplied key.
