@@ -2,7 +2,7 @@
 
 === Deprecation:
 
-* ##[[:find_from]]## and ##[[:match_from]]## have been deprecated. ##[[:from]]## and ##[[:match]]## 
+* ##[[:find_from]]## and ##[[:match_from]]## have been deprecated. ##[[:find]]## and ##[[:match]]## 
   accept an optional argument (##start##) allowing these functions to be a 100% drop in
   replacement.
 
@@ -12,5 +12,5 @@
 
 === Bug Fixes:
 
-* [[ticket:367]], ##[[:http_post]]()## properly handles mutli-part form data
+* [[ticket:367]], ##[[:http_post]]## properly handles mutli-part form data
 
