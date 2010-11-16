@@ -1427,105 +1427,132 @@ end procedure
 -- See Also:
 --		[[:new]], [[:save_map]]
 --
-public function load_map(object file_name_p)
-	integer file_handle_
-	object line_
-	integer comment_
-	integer delim_
-	object value_
-	object key_
-	sequence conv_res_
-	atom new_map_
 
-	if sequence(file_name_p) then
-		file_handle_ = open(file_name_p, "rb")
+public function load_map(object input_file_name)
+	integer file_handle
+	object line_in
+	object logical_line
+	integer has_comment
+	integer delim_pos
+	object data_value
+	object data_key
+	sequence conv_res
+	atom new_map
+
+	if sequence(input_file_name) then
+		file_handle = open(input_file_name, "rb")
 	else
-		file_handle_ = file_name_p
+		file_handle = input_file_name
 	end if
-	if file_handle_ = -1 then
+	if file_handle = -1 then
 		return -1
 	end if
 	
-	new_map_ = new(threshold_size) -- Assume a small map initially.
+	new_map = new(threshold_size) -- Assume a small map initially.
 
-	-- Look for a non-printable byte in the first 10 bytes. If none are found then this is a text-formated
-	-- file otherwise it is a 'raw' saved file.
+	-- Look for a non-printable byte in the first 10 bytes. If none are found
+	-- then this is a text-formated file otherwise it is a 'raw' saved file.
 	
 	for i = 1 to 10 do
-		delim_ = getc(file_handle_)
-		if delim_ = -1 then 
+		delim_pos = getc(file_handle)
+		if delim_pos = -1 then 
 			exit
 		end if
-	    if not t_print(delim_) then 
-	    	if not t_space(delim_) then
+	    if not t_print(delim_pos) then 
+	    	if not t_space(delim_pos) then
 	    		exit
 	    	end if
 	    end if
-	    delim_ = -1
+	    delim_pos = -1
 	end for
 	
-	if delim_ = -1 then
+	if delim_pos = -1 then
 	-- A text format file
-		close(file_handle_)
-		file_handle_ = open(file_name_p, "r")
-		while sequence(line_) with entry do
-			comment_ = rmatch("--", line_)
-			if comment_ != 0 then
-				line_ = trim(line_[1..comment_-1])
-			end if
-			delim_ = find('=', line_)
-			if delim_ > 0 then
-				key_ = trim(line_[1..delim_-1])
-				if length(key_) > 0 then
-					key_ = match_replace("\\-", key_, "-")
-					if not t_alpha(key_[1]) then
-						conv_res_ = value(key_,,GET_LONG_ANSWER)
-						if conv_res_[1] = GET_SUCCESS then
-							if conv_res_[3] = length(key_) then
-								key_ = conv_res_[2]
+		close(file_handle)
+		file_handle = open(input_file_name, "r")
+		
+		while sequence(logical_line) with entry do
+			delim_pos = find('=', logical_line)
+			if delim_pos > 0 then
+				data_key = trim(logical_line[1..delim_pos-1])
+				if length(data_key) > 0 then
+					data_key = match_replace("\\-", data_key, "-")
+					if not t_alpha(data_key[1]) then
+						conv_res = value(data_key,,GET_LONG_ANSWER)
+						if conv_res[1] = GET_SUCCESS then
+							if conv_res[3] = length(data_key) then
+								data_key = conv_res[2]
 							end if
 						end if
 					end if
 									
-					value_ = trim(line_[delim_+1..$])
-					value_ = match_replace("\\-", value_, "-")
-					conv_res_ = value(value_,,GET_LONG_ANSWER)
-					if conv_res_[1] = GET_SUCCESS then
-						if conv_res_[3] = length(value_) then
-							value_ = conv_res_[2]
+					data_value = trim(logical_line[delim_pos+1..$])
+					data_value = match_replace("\\-", data_value, "-")
+					conv_res = value(data_value,,GET_LONG_ANSWER)
+					if conv_res[1] = GET_SUCCESS then
+						if conv_res[3] = length(data_value) then
+							data_value = conv_res[2]
 						end if
 					end if
-					put(new_map_, key_, value_)
+					put(new_map, data_key, data_value)
 				end if
 			end if
 		  entry
-			line_ = gets(file_handle_)
+			logical_line = -1
+			while sequence(line_in) with entry do
+			
+				if atom(logical_line) then
+					logical_line = ""
+				end if
+				
+				has_comment = rmatch("--", line_in)
+				if has_comment != 0 then
+					line_in = trim(line_in[1..has_comment-1])
+				else
+					line_in = trim(line_in)
+				end if
+				
+				logical_line &= line_in
+					
+				if length(line_in) then
+					if line_in[$] != ',' and line_in[$] != '$' then
+						-- Remove any ",$" combinations.
+						logical_line = match_replace(`",$"`, logical_line, "")
+						logical_line = match_replace(`,$`, logical_line, "")
+						exit
+					end if
+				end if
+
+			entry
+				line_in = gets(file_handle)
+			end while
+						
 		end while
 	else
-		seek(file_handle_, 0)
-		line_  = deserialize(file_handle_)
-		if atom(line_) then
+		seek(file_handle, 0)
+		line_in  = deserialize(file_handle)
+		if atom(line_in) then
 			-- failed to decode the file.
 			return -2
 		end if
-		if line_[1] = 1 then
+		if line_in[1] = 1 then
 			-- Saved Map Format version 1
-			key_   = deserialize(file_handle_)
-			value_ =  deserialize(file_handle_)
+			data_key   = deserialize(file_handle)
+			data_value =  deserialize(file_handle)
 			
-			for i = 1 to length(key_) do
-				put(new_map_, key_[i], value_[i])
+			for i = 1 to length(data_key) do
+				put(new_map, data_key[i], data_value[i])
 			end for
 		else
 			-- Bad file format
 			return -2
 		end if
 	end if
-	if sequence(file_name_p) then
-		close(file_handle_)
+	if sequence(input_file_name) then
+		close(file_handle)
 	end if
-	optimize(new_map_)
-	return new_map_
+	optimize(new_map)
+	return new_map
 end function
 
 --**
@@ -1564,6 +1591,33 @@ end function
 -- comments to the saved map. Also, any blank lines are ignored too.
 --
 -- All text after the '=' symbol is assumed to be the map item's value data.
+--
+-- Because some map data can be rather long, it is possible to split the text into
+-- multiple lines, which will be considered by [[:load_map]] as a single //logical//
+-- line. If an line ends with a comma (,) or a dollar sign ($), then the next actual
+-- line is appended to the end of it. After all these physical lines have been
+-- joined into one logical line, all combinations of `",$"` and `,$` are removed.
+--
+-- For example:
+-- {{{
+-- one = {"first",
+--        "second",
+--        "third",
+--        $
+--       }
+-- second = "A long text ",$
+--        "line that has been",$
+--        " split into three lines"
+-- third = {"first",
+--        "second",
+--        "third"}
+-- }}}
+-- is equivalent to
+-- {{{
+-- one = {"first","second","third"}
+-- second = "A long text line that has been split into three lines"
+-- third = {"first","second","third"}
+-- }}}
 --
 -- The SM_RAW type saves the map in an efficient manner. It is generally smaller
 -- than the text format and is faster to process, but it is not human readable and
