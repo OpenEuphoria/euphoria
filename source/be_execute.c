@@ -65,7 +65,7 @@
 #include "be_symtab.h"
 #include "be_w.h"
 #include "be_callc.h"
-#include "coverage.h"
+#include "be_coverage.h"
 #include "be_execute.h"
 
 /******************/

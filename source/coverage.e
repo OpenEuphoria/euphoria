@@ -276,7 +276,7 @@ procedure process_lines()
 	end for
 end procedure
 
-export procedure cover_line( integer gline_number )
+export function cover_line( integer gline_number )
 	if atom(slist[$]) then
 		slist = s_expand(slist)
 	end if
@@ -286,12 +286,14 @@ export procedure cover_line( integer gline_number )
 		integer line = sline[LINE]
 		map:put( line_map[file], line, 1, map:ADD )
 	end if
-end procedure
+	return 0
+end function
 
-export procedure cover_routine( symtab_index sub )
+export function cover_routine( symtab_index sub )
 	integer file_no = SymTab[sub][S_FILE_NO]
 	map:put( routine_map[file_coverage[file_no]], sym_name( sub ), 1, map:ADD )
-end procedure
+	return 0
+end function
 
 export function has_coverage()
 	return length( covered_files )
@@ -305,3 +307,6 @@ or routine_id("cover_routine") = -1
 or routine_id("write_coverage_db") = -1 then
 	puts(2, "error: missing coverage routines\n")
 end if
+
+constant M_SET_COVERAGE = 36
+machine_proc(M_SET_COVERAGE, {routine_id("cover_line"),routine_id("cover_routine"),routine_id("write_coverage_db")})

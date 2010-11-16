@@ -32,6 +32,7 @@
 #include "be_alloc.h"
 #include "be_execute.h"
 #include "be_socket.h"
+#include "be_coverage.h"
 
 #ifdef ELINUX
 #include <malloc.h>
@@ -1644,14 +1645,6 @@ static object set_rand(object x)
 	return ATOM_1;
 }
 
-static object use_vesa(object x)
-/* turn on/off vesa flag */
-{
-	UNUSED(x);
-	not_supported("use_vesa()");
-	return ATOM_1;
-}
-
 static object crash_message(object x)
 /* record user's message in case of a crash */
 {
@@ -1706,6 +1699,25 @@ static void do_crash(object x)
 	message = EMalloc(SEQ_PTR(x)->length + 1);
 	MakeCString(message, x, SEQ_PTR(x)->length + 1);
 	RTFatal(message);
+}
+
+static void set_coverage(object x)
+{
+	object line, routine, wwrite;
+
+	if IS_ATOM(x) {
+		RTFatal("set_coverage expected a sequence");
+	}
+
+	if (SEQ_PTR(x)->length != 3) {
+		RTFatal("set_coverage expected a sequence of length 3");
+	}
+
+	line = get_pos_int("set_coverage", SEQ_PTR(x)->base[1]);
+	routine = get_pos_int("set_coverage", SEQ_PTR(x)->base[2]);
+	wwrite = get_pos_int("set_coverage", SEQ_PTR(x)->base[3]);
+
+	SET_COVERAGE((int)line, (int)routine, (int)wwrite);
 }
 
 static object change_dir(object x)
@@ -2387,6 +2399,119 @@ object CallBack(object x)
 	return MAKE_UINT(addr);
 }
 
+unsigned internal_general_call_back(
+		  int cb_routine,
+						   unsigned arg1, unsigned arg2, unsigned arg3,
+						   unsigned arg4, unsigned arg5, unsigned arg6,
+						   unsigned arg7, unsigned arg8, unsigned arg9)
+/* general call-back routine: 0 to 9 args */
+{
+	int num_args;
+	int (*addr)();
+
+// translator call-back
+	num_args = rt00[cb_routine].num_args;
+	addr = rt00[cb_routine].addr;
+	if (num_args >= 1) {
+	  call_back_arg1->obj = make_atom32((unsigned)arg1);
+	  if (num_args >= 2) {
+		call_back_arg2->obj = make_atom32((unsigned)arg2);
+		if (num_args >= 3) {
+		  call_back_arg3->obj = make_atom32((unsigned)arg3);
+		  if (num_args >= 4) {
+			call_back_arg4->obj = make_atom32((unsigned)arg4);
+			if (num_args >= 5) {
+			  call_back_arg5->obj = make_atom32((unsigned)arg5);
+			  if (num_args >= 6) {
+				call_back_arg6->obj = make_atom32((unsigned)arg6);
+				if (num_args >= 7) {
+				  call_back_arg7->obj = make_atom32((unsigned)arg7);
+				  if (num_args >= 8) {
+					call_back_arg8->obj = make_atom32((unsigned)arg8);
+					if (num_args >= 9) {
+					  call_back_arg9->obj = make_atom32((unsigned)arg9);
+					}
+				  }
+				}
+			  }
+			}
+		  }
+		}
+	  }
+	}
+	switch (num_args) {
+		case 0:
+			call_back_result->obj = (*addr)();
+			break;
+		case 1:
+			call_back_result->obj = (*addr)(call_back_arg1->obj);
+			break;
+		case 2:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj);
+			break;
+		case 3:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj,
+											call_back_arg3->obj);
+			break;
+		case 4:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj,
+											call_back_arg3->obj,
+											call_back_arg4->obj);
+			break;
+		case 5:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj,
+											call_back_arg3->obj,
+											call_back_arg4->obj,
+											call_back_arg5->obj);
+			break;
+		case 6:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj,
+											call_back_arg3->obj,
+											call_back_arg4->obj,
+											call_back_arg5->obj,
+											call_back_arg6->obj);
+			break;
+		case 7:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj,
+											call_back_arg3->obj,
+											call_back_arg4->obj,
+											call_back_arg5->obj,
+											call_back_arg6->obj,
+											call_back_arg7->obj);
+			break;
+		case 8:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj,
+											call_back_arg3->obj,
+											call_back_arg4->obj,
+											call_back_arg5->obj,
+											call_back_arg6->obj,
+											call_back_arg7->obj,
+											call_back_arg8->obj);
+			break;
+		case 9:
+			call_back_result->obj = (*addr)(call_back_arg1->obj,
+											call_back_arg2->obj,
+											call_back_arg3->obj,
+											call_back_arg4->obj,
+											call_back_arg5->obj,
+											call_back_arg6->obj,
+											call_back_arg7->obj,
+											call_back_arg8->obj,
+											call_back_arg9->obj);
+			break;
+	}
+
+	// Don't do get_pos_int() for crash handler
+	return (unsigned)get_pos_int("internal-call-back", call_back_result->obj);
+}
+
 int *crash_list = NULL;    // list of routines to call when there's a crash
 int crash_routines = 0;    // number of routines
 int crash_size = 0;        // space allocated for crash_list
@@ -2660,9 +2785,6 @@ object machine(object opcode, object x)
 			case M_GET_RAND:
 				return get_rand();
 				break;
-			case M_USE_VESA:
-				return use_vesa(x);
-				break;
 			case M_CRASH_MESSAGE:
 				return crash_message(x);
 				break;
@@ -2808,6 +2930,11 @@ object machine(object opcode, object x)
 			case M_CRASH:
 				do_crash(x);
 				return ATOM_M1;
+				break;
+
+			case M_SET_COVERAGE:
+				set_coverage(x);
+				return ATOM_1;
 				break;
 
 			case M_CHDIR:

@@ -316,7 +316,7 @@ struct char_cell {
 #define M_FREE_LOW           33
 #define M_INTERRUPT          34
 #define M_SET_RAND           35
-#define M_USE_VESA           36
+#define M_SET_COVERAGE       36
 #define M_CRASH_MESSAGE      37
 #define M_TICK_RATE          38
 #define M_GET_VECTOR         39
