@@ -122,6 +122,8 @@ export BUILDDIR=build
 export XLTTARGETCC=gcc
 export CC=gcc
 
+SCP="scp -C"
+
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
@@ -191,6 +193,14 @@ while [ "$1" != "" ]; do
 	--wkhtmltopdf )
 		echo WKHTMLTOPDF=1 >> ${CONFIG_FILE}
 		;;
+	--oe-username )
+		shift
+		echo OE_USERNAME=$1 >> ${CONFIG_FILE}
+		;;
+	--scp )
+		shift
+		SCP=$1
+		;;
 	* )
 		echo "Unknown option '$1'"
 		echo "Configures and prepares the euphoria source for building"
@@ -231,6 +241,9 @@ while [ "$1" != "" ]; do
 		echo "    --wkhtmltopdf                                              "
 		echo "                        build pdf documentation with wkhtmltopdf"
 		echo "                        instead of the default htmldoc"
+		echo "   --oe-username        Developer user name on openeuphoria.org for various scp"
+		echo "                        operations such as manual upload"
+		echo "   --scp-client         SCP program to use for scp uploads (default scp -C)"
 		exit
 		;;
 	esac
@@ -280,6 +293,7 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 fi
 
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
+echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
 
 if [ "$EC" != "" ]; then
 	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}

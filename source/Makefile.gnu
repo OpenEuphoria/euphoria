@@ -529,6 +529,9 @@ $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDI
 
 manual : $(BUILDDIR)/docs/index.html
 
+manual-upload : manual
+	$(SCP) $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
+
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
