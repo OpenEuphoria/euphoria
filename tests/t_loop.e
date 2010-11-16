@@ -130,7 +130,7 @@ for i = 1 to 5 label "loop1" do
 		continue "loop1"
 	end while
 end for
-test_equal("continue to parent loop, ticket:396", 1, 1)
+test_pass("continue to parent loop, ticket:396")
 
 test_report()
 
