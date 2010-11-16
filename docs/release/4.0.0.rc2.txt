@@ -1,0 +1,16 @@
+== Version 4.0.0 Release Candidate 2 (Scheduled for November 18th, 2010)
+
+=== Deprecation:
+
+* ##[[:find_from]]## and ##[[:match_from]]## have been deprecated. ##[[:from]]## and ##[[:match]]## 
+  accept an optional argument (##start##) allowing these functions to be a 100% drop in
+  replacement.
+
+=== Removed
+
+* ##mouse.e## and ##std/mouse.e## [[ticket:376]]
+
+=== Bug Fixes:
+
+* [[ticket:367]], ##[[:http_post]]()## properly handles mutli-part form data
+

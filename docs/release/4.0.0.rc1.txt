@@ -1,0 +1,137 @@
+== Version 4.0.0 Release Candidate 1 November 8th, 2010
+
+The release of Euphoria 4.0 is like no other. It's updates are massive. The change log
+here is not designed to detail every minor change that has taken place during the 4.0
+development cycle. Included in this release note are the language changes only.
+
+The entire standard library is brand new. The manual should be consulted to learn about
+the new standard library, it's changes are not documented here as it would just be a
+duplicate of the manual API sections. We will, however, mention a few major additions
+to the API library that has required binary changes in the backend:
+
+==== Major Library Additions
+
+* Dictionary Type
+* Regular Expressions
+* Sockets
+
+=== Contributors
+
+Another thing you will notice that is slightly different about this release note is that
+we are not attributing "Change ABC" to person "DEF." Many of the changes made have been
+an iterative process involving many people. Euphoria 4.0 has had a large number of
+contributors. We will, however, list all those that have contributed, the list is in
+last name alphabetical order:
+
+* Jiri Babor
+* Chris Bensler
+* Jim C. Brown
+* CoJaBo
+* Jeremy Cowgar
+* Robert Craig
+* Chris Cuvier
+* Jason Glade
+* Ryan W. Johnson
+* C.K. Lester
+* Matthew Lewis
+* Junko Miura
+* Marco Antonio Achury Palma
+* Derek Parnell
+* Shawn Pringle
+* Michael Sabal
+* Kathy Smith
+* Yuku (Aku)
+
+If we have forgotten your name, please forgive us and bring it to our attention, the
+addition will be made promptly.
+
+=== Bug Fixes
+
+* $$(bugfix) 1855414. ##open()## max path length is now determined by the underlying
+  operating system and not a generic default. ##open()## also now returns -1 when the
+  filename is too long instead of causing a fatal error.
+* $$(bugfix) 1608870. ##dir()## now handles *.abc correctly, not showing a file ending
+  with .abcd. ##dir()## also now supports wildcard characters (* and ?) on all platforms.
+
+=== Changes
+
+* DOS support has been withdrawn. OpenEuphoria from version 4 onwards will not be specifically
+  supporting DOS editions of the language.
+* Comments may now be embedded in data passed to **value()** in **get.e**.
+* Documentation moved to a new format.
+
+=== New Programs
+
+* ##eutest## - Unit testing system for Euphoria
+
+=== New Features
+
+* New standard include files are in ##include/std## to resolve many conflicts.
+* Include file names with accent characters now supported.
+* Enhanced symbol resolution to take into account information regarding which files were
+  included by which files.
+* Namespaces for a source file now can be used for identifiers in the specified file and for
+  global identifiers in all files included by the specified file.
+* Command line arguments for the translator allow for creating binaries with debugging
+  symbols, and to specify a different runtime library.
+* In trace mode, '?' will show the last defined variable of the requested name.
+* Include directories can now be specified based on command line arguments and config files
+  in addition to environment variables.
+* Improved accuracy in scanning numbers in scientific notation. Scanned numbers are accurate
+  to the full precision of the IEEE 754 floating point standard.
+* New **loop do** ... **until** //condition// end loop construct, which differs from a while loop
+  in that it performs its test at the end of the block, rather than at the start.
+* New keywords to give greater control over the instruction flow:
+** **continue**: start next iteration of a loop;
+** **retry**: restarts the current iteration of a loop
+** **entry**: marks the entry point into a loop, skipping initial test
+** **break**: exit an if block or switch block
+** **goto**: jump to a label that is in the same scope
+* The **exit**, **break**, **continue** and **retry** keywords now can take an optional
+  parameter, which enables to exit several blocks at a time, or (re)starting an iteration of
+  a loop which is not the innermost one.
+* Block headers now may mention a label. This label can be used as the optional parameter of
+  flow control keywords.
+* Variables can now be initialized right on the spot at which they are declared, just like
+  constants.
+* Any routine parameter can be defaulted, i.e. given a default value that is plugged in if
+  omitted on a call. Any expression can be used, and parameters of the same call can even be
+  used.
+* New **switch** ... **end switch** construct, which more efficiently implements a series
+  of **elsif**, using the compact **case** statement.
+* **Unit testing added to Euphoria**.
+* Condition compiling keywords (**ifdef**, **elsifdef**, **end ifdef**) and **with
+  define=xyz** or command line **-D XYZ** to insert/omit code in interpreter IL code and
+  in translated C code.
+* New enum keyword that allows for //parse time// sequential constant creation.
+* The namespace **eu** is predefined, and can be used to fully qualify built-in routines.
+* ##with warning## has been enhanced in order to individually turn warnings on or
+  off.
+* New scope: **export**.  Identifiers with the export scope can only be seen from files that:
+## directly include the file where the identifiers are defined
+* New scope: **public**.  Identifiers with the public scope can only be seen from files that:
+## directly include the file where the identifiers are defined
+## directly include a file that uses the "public include file.e" construct to pass public
+   identifiers
+* Routine resolution changes
+## Routines the same name as an internal no longer override the internal by default. You
+   must use the keyword **override**.
+## An unqualified call to routine that exists as an internal calls the internal unless
+   overridden with the override keyword. global, public and export functions are not called. A
+   namespace must be used.
+* ##-STRICT## option added that will display **all** warnings regardless of the file's
+  ##with/without warning## setting.
+* ##-BATCH## option designed to run in an automated environment. Causes any
+  "Press Enter" type prompt due to error to be suppressed. Exit code will be
+  1 on success, 0 on failure as normal.
+* ##-TEST## option allows for editing/IDE environments to perform a syntax
+  check on the euphoria code in question. Causes euphoria interpreter to do
+  all parsing, syntax checking, etc... but does not execute the code. Exit
+  code will be 1 on success, 0 on failure as normal. Editors/IDE's may need
+  both -test and -batch.
+* dis.ex (in the source directory) will parse a euphoria program and output the symbol table
+  and the IL code in a readable format.
+* Variables may be in any part of a routine, or in **for**, **while**, **if**, **loop** and
+  **switch** blocks, in which case the scope of the variable ends when its block ends.
+
+
