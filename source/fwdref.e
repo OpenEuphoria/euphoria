@@ -236,8 +236,8 @@ procedure patch_forward_call( token tok, integer ref )
 	integer old_temps_allocated = temps_allocated
 	temps_allocated = 0
 	
-	integer pre_refs = length( forward_references )
-	
+	integer pre_refs = length( active_references )
+	sequence old_fwd_params = {}
 	for i = pc + 3 to pc + args + 2 do
 		defarg += 1
 		param_sym = SymTab[param_sym][S_NEXT]
@@ -300,8 +300,8 @@ procedure patch_forward_call( token tok, integer ref )
 
 	replace_code( new_code, pc, next_pc - 1, code_sub )
 	
-	for i = pre_refs + 1 to length( forward_references ) do
-		forward_references[i][FR_PC] += pc - 1
+	for i = pre_refs + 1 to length( active_references ) do
+		forward_references[active_references[i]][FR_PC] += pc - 1
 	end for
 
 	reset_code()
@@ -642,7 +642,11 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	
 	forward_references[ref][FR_FILE]      = current_file_no
 	forward_references[ref][FR_SUBPROG]   = CurrentSub
-	forward_references[ref][FR_PC]        = length( Code ) + 1
+	
+	if fwd_op != TYPE then
+		forward_references[ref][FR_PC]        = length( Code ) + 1
+	end if
+	
 	forward_references[ref][FR_LINE]      = fwd_line_number
 	forward_references[ref][FR_THISLINE]  = ForwardLine
 	forward_references[ref][FR_BP]        = forward_bp
@@ -662,7 +666,6 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 		active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
 		fwdref_count += 1
 	end if
-	
 	return ref
 end function
 
@@ -790,7 +793,6 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 			if forward_references[active_references[i]][FR_PC] >= pc then
 				if forward_references[active_references[i]][FR_PC] > 1 then
 					forward_references[active_references[i]][FR_PC] += amount
-					
 					if forward_references[active_references[i]][FR_TYPE] = CASE
 					and forward_references[active_references[i]][FR_DATA] >= pc then
 						-- the FR_DATA info tracks the pc for the switch statement for the case
@@ -798,10 +800,6 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 					end if
 				
 				end if
-				
-				
-			else
-				exit
 			end if
 		end if
 	end for
