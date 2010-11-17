@@ -29,8 +29,8 @@
 * [[ticket:367]], ##[[:http_post]]## properly handles multi-part form data.
 * [[ticket:372]], When an application ends, it closes all the opened files. 
                   However if it was ending due to an syntax error, it was
-                  closing those files before trying to access the already
-                  opened message text database, thus causing a seek() to fail
+                  closing those files before trying to access the message 
+		  text database that had been opened, thus causing a seek() to fail
                   and crash the application.
 * [[ticket:378]], On Linux and FreeBSD, the socket tests failed to detect the
                   correct error code.

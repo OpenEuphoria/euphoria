@@ -2207,7 +2207,7 @@ void set_page_to_read_execute_only(page_ptr page_addr) {
 #endif
 }
 
-void set_page_to_write(page_ptr page_addr) {
+void set_page_to_read_write_execute(page_ptr page_addr) {
 #ifdef EWINDOWS
 	static unsigned long oldprot;
 	static unsigned long * oldprotptr = &oldprot;
@@ -2314,36 +2314,36 @@ object CallBack(object x)
 
 	/* Now allocate memory that is executable or at least can be made to be ... */
 	
-		/*	Here allocate and manage memory for 4kB is a lot to use when you
-			only use 92B.  Memory is allocated by /pagesize/ bytes at a time.
-			So, we give pieces of this page on each call until there is not enough to complete
-			up to /CALLBACK_SIZE/ bytes.
-			*/
-		if (page_addr != NULL) {
-			if (page_offset < last_block_offset) {
-				// Grab next sub-block from the current block.
-				page_offset += call_increment;
-			} else {
-				// Allocate a new block
-				page_addr = new_page();
-				page_offset = 0;
-			}
+	/*	Here allocate and manage memory for 4kB is a lot to use when you
+		only use 92B.  Memory is allocated by /pagesize/ bytes at a time.
+		So, we give pieces of this page on each call until there is not enough to complete
+		up to /CALLBACK_SIZE/ bytes.
+		*/
+	if (page_addr != NULL) {
+		if (page_offset < last_block_offset) {
+			// Grab next sub-block from the current block.
+			page_offset += call_increment;
 		} else {
-			// Set up 'constants' and initial block allocation
-			call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
-			last_block_offset = (pagesize - 2 * call_increment);
-
-			page_addr = new_page(); //VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+			// Allocate a new block
+			page_addr = new_page();
 			page_offset = 0;
 		}
-		
-		copy_addr = page_addr + page_offset;
+	} else {
+		// Set up 'constants' and initial block allocation
+		call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
+		last_block_offset = (pagesize - 2 * call_increment);
+
+		page_addr = new_page(); //VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+		page_offset = 0;
+	}
+	
+	copy_addr = page_addr + page_offset;
 #	ifdef EWINDOWS		   
-		/* Assume we are running under some Windows that
-		   supports VirtualAlloc() always returning 0. 
-		   This has happened before in testing.  */
-		if (copy_addr == NULL)
-			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
+	/* Assume we are running under some Windows that
+	   supports VirtualAlloc() always returning 0. 
+	   This has happened before in testing.  */
+	if (copy_addr == NULL)
+		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
 #	endif /* def EWINDOWS */
 
 
@@ -2355,7 +2355,7 @@ object CallBack(object x)
 	/* Copy memory of the template to the newly allocated memory.
 	 * First we have to make the memory writable.
 	 */
-	set_page_to_write(page_addr);
+	set_page_to_read_write_execute(page_addr);
     res = memcopy(copy_addr, CALLBACK_SIZE, (char *)addr, CALLBACK_SIZE);
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);

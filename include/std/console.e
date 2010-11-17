@@ -22,8 +22,14 @@ constant
 	M_FREE_CONSOLE = 54,
 	M_GET_SCREEN_CHAR = 58,
 	M_PUT_SCREEN_CHAR = 59,
+	M_OPEN_DLL = 50,
+	M_DEFINE_C  = 51,
+	M_ALLOC = 16,
+	C_POINTER = #02000004, 
+	C_INT = #02000004,
 	$
 
+	
 --****
 -- === Cursor Style Constants
 --
@@ -190,7 +196,29 @@ public procedure any_key(sequence prompt="Press Any Key to continue...", integer
 	puts(con, "\n")
 end procedure
 
-ifdef WIN32_GUI then
+constant kernel_dll = machine_func(M_OPEN_DLL,"kernel32.dll") -- -1 on UNIX
+constant xGetConsoleProcessList =
+machine_func(M_DEFINE_C,{kernel_dll,"GetConsoleProcessList",{C_POINTER,C_INT},C_INT})
+	-- -1 on UNIX
+
+constant
+	UI_GUI = 2,
+	UI_CON = 3
+constant UI_STRS = { "" , "UI_GUI", "UI_CON" }
+function iscon()
+	ifdef WIN32_GUI then -- euiw.exe on Windows
+		return UI_GUI
+	elsedef -- eui on any OS
+		if xGetConsoleProcessList != -1 then
+			atom data_ptr = machine_func(M_ALLOC,4 * 3)
+			integer count = c_func( xGetConsoleProcessList, {data_ptr, 3} )
+			if count = 1 then
+				return UI_GUI
+			end if
+		end if
+		return UI_CON
+	end ifdef
+end function
 
 --**
 -- Description:
@@ -218,16 +246,12 @@ ifdef WIN32_GUI then
 -- See Also:
 -- 	[[:wait_key]]
 
-    public procedure maybe_any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
-        any_key(prompt, con)
-    end procedure
+public procedure maybe_any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
+	if iscon() = UI_GUI then
+		any_key(prompt, con)
+	end if
+end procedure
 
-elsedef
-	without warning strict
-	public procedure maybe_any_key(sequence prompt="", integer con=1)
-    end procedure
-
-end ifdef
 
 --**
 -- Description:
