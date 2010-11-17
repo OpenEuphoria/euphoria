@@ -26,6 +26,7 @@ include reswords.e
 include symtab.e
 include scanner.e
 include fwdref.e
+include c_out.e
 
 include dox.e as dox
 
@@ -1502,32 +1503,53 @@ constant TEMP_USAGES = {
 	"T_UNKNOWN",
 	"T_USED"
 	}
+
+map:map gtypes = map:new()
+map:put( gtypes, TYPE_NULL, "TYPE_NULL" )
+map:put( gtypes, TYPE_INTEGER, "TYPE_INTEGER" )
+map:put( gtypes, TYPE_DOUBLE, "TYPE_DOUBLE" )
+map:put( gtypes, TYPE_ATOM, "TYPE_ATOM" )
+map:put( gtypes, TYPE_SEQUENCE, "TYPE_SEQUENCE" )
+map:put( gtypes, TYPE_OBJECT, "TYPE_OBJECT" )
+
 function format_symbol( sequence symbol )
 	if symbol[S_MODE] = M_TEMP then
 		symbol[S_USAGE] = TEMP_USAGES[symbol[S_USAGE]]
 	else
-		switch symbol[S_USAGE] with fallthru do
+		switch symbol[S_USAGE] do
 		case U_UNUSED then
 			symbol[S_USAGE] = "U_UNUSED"
-			break
 		case U_DELETED then
 			symbol[S_USAGE] = "U_DELETED"
-			break
-		case U_READ then
-		case U_WRITTEN then
+		case U_READ, U_WRITTEN then
 			symbol[S_USAGE] = USAGES[symbol[S_USAGE]]
-			break
 		case 3 then
 			symbol[S_USAGE] = "U_READ + U_WRITTEN"
-			break
 		case else
 			symbol[S_USAGE] = "Usage Unknown"
 		end switch
+		
+		if length( symbol ) >= S_TOKEN and symbol[S_TOKEN] = VARIABLE then
+			if length( symbol ) >= S_VTYPE then
+				integer vtype = symbol[S_VTYPE]
+				if vtype > 0 then
+					symbol[S_VTYPE] = sym_name( vtype )
+				else
+					symbol[S_VTYPE] = sprintf( "Unknown Type: %d", vtype )
+				end if
+			end if
+			if TRANSLATE then
+				symbol[S_GTYPE] = map:get( gtypes, symbol[S_GTYPE], sprintf( "Unknown GType: %d", symbol[S_GTYPE] ) )
+				symbol[S_ARG_TYPE] = map:get( gtypes, symbol[S_ARG_TYPE], sprintf( "Unknown GType: %d", symbol[S_ARG_TYPE] ) )
+				symbol[S_ARG_TYPE_NEW] = map:get( gtypes, symbol[S_ARG_TYPE_NEW], sprintf( "Unknown GType: %d", symbol[S_ARG_TYPE_NEW] ) )
+			end if
+		end if
 	end if
 	symbol[S_MODE] = MODES[symbol[S_MODE]]
 	if symbol[S_SCOPE] then
 		symbol[S_SCOPE] = SCOPES[symbol[S_SCOPE]]
 	end if
+	
 
 	return symbol
 end function
