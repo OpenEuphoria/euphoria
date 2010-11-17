@@ -18,7 +18,7 @@ include std/search.e
 include std/sequence.e
 include std/sort.e
 include std/text.e
-include std/types.e
+public include std/types.e
 include std/wildcard.e
 
 ifdef UNIX then
