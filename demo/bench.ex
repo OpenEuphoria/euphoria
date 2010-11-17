@@ -4,6 +4,7 @@ without warning
 
 override procedure abort(integer x)
 	maybe_any_key()
+
 	eu:abort(x)
 end procedure
 
@@ -24,4 +25,3 @@ procedure main(sequence cmds=command_line())
 end procedure
 
 main()
-maybe_any_key()
