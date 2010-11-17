@@ -118,6 +118,12 @@ sequence vOpts = {
 
 object vOptMap
 
+without warning
+override procedure abort(integer errcode)
+	maybe_any_key("\nPress Any Key to Continue...")
+	eu:abort(errcode)
+end procedure
+
 procedure main()
 	sequence lDicts
 	object lFileList
@@ -214,8 +220,6 @@ procedure main()
 	end for
 	close(outputHandle)
 	writefln("See '[1]' for statistics and table contents", {vOutPath})
-	maybe_any_key()
-
 end procedure
 
 main()
