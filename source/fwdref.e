@@ -10,6 +10,7 @@ elsedef
 	without type_check
 end ifdef
 include std/filesys.e
+include std/map.e
 
 include global.e
 include parser.e
@@ -21,12 +22,15 @@ include reswords.e
 include block.e
 include emit.e
 
+
 -- Tracking forward references
 sequence 
 	forward_references  = {},
 	active_references   = {},
-	active_refnames     = {},
+	toplevel_references = {},
 	inactive_references = {}
+
+map:map active_refnames = map:new()
 
 enum
 	FR_TYPE,
@@ -79,15 +83,29 @@ procedure replace_code( sequence code, integer start, integer finish, integer su
 end procedure
 
 procedure resolved_reference( integer ref )
-	forward_references[ref] = 0
-	integer ix = find( ref, active_references )
-	if ix then
-		active_references = remove( active_references, ix, ix )
-		active_refnames   = remove( active_refnames, ix, ix )
-		inactive_references &= ref
+	integer file = forward_references[ref][FR_FILE]
+	integer 
+		tx = 0,
+		ax = 0
+	
+	if forward_references[ref][FR_SUBPROG] = TopLevelSub then
+		tx = find( ref, toplevel_references[file] )
+	else
+		ax = find( ref, active_references[file] )
+	end if
+	
+	if ax then
+		active_references[file] = remove( active_references[file], ax )
+	
+	elsif tx then
+		toplevel_references[file] = remove( toplevel_references[file], tx )
+		
 	else
 		InternalErr( 260 )
 	end if
+	map:put( active_refnames, forward_references[ref], 1, map:SUBTRACT )
+	inactive_references &= ref
+	forward_references[ref] = 0
 end procedure
 
 sequence patch_code_temp = {}
@@ -198,6 +216,12 @@ procedure patch_forward_call( token tok, integer ref )
 	integer supplied_args = code[pc+2]
 	sequence name = fr[FR_NAME]
 	
+	if Code[pc] != FUNC_FORWARD and Code[pc] != PROC_FORWARD then
+		prep_forward_error( ref )
+		CompileErr( "The forward call to [4] wasn't where we thought it would be: [1]:[2]:[3]",
+			{ known_files[current_file_no], sym_name( fr[FR_SUBPROG] ), fr[FR_LINE], fr[FR_NAME] })
+	end if
+	
 	if is_func and fr[FR_OP] = PROC then
 		-- an unused forward function call!
 		-- need to convert from a PROC_FORWARD to a FUNC_FORWARD
@@ -236,7 +260,7 @@ procedure patch_forward_call( token tok, integer ref )
 	integer old_temps_allocated = temps_allocated
 	temps_allocated = 0
 	
-	integer pre_refs = length( active_references )
+	integer pre_refs = length( active_references[fr[FR_FILE]] )
 	sequence old_fwd_params = {}
 	for i = pc + 3 to pc + args + 2 do
 		defarg += 1
@@ -300,8 +324,8 @@ procedure patch_forward_call( token tok, integer ref )
 
 	replace_code( new_code, pc, next_pc - 1, code_sub )
 	
-	for i = pre_refs + 1 to length( active_references ) do
-		forward_references[active_references[i]][FR_PC] += pc - 1
+	for i = pre_refs + 1 to length( active_references[fr[FR_FILE]] ) do
+		forward_references[active_references[fr[FR_FILE]][i]][FR_PC] += pc - 1
 	end for
 
 	reset_code()
@@ -661,21 +685,28 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	-- get resolved.  So ignore it for now, and when someone actually calls
 	-- the routine, it will be resolved normally then.
 	if  Parser_mode != PAM_RECORD then
-		
-		active_references &= ref
-		active_refnames = append( active_refnames, forward_references[ref][FR_NAME] )
+		if CurrentSub = TopLevelSub then
+			if length( toplevel_references ) < current_file_no then
+				toplevel_references &= repeat( {}, current_file_no - length( toplevel_references ) )
+			end if
+			toplevel_references[current_file_no] &= ref
+		else
+			if length( active_references ) < current_file_no then
+				active_references &= repeat( {}, current_file_no - length( active_references ) )
+			end if
+			active_references[current_file_no] &= ref
+		end if
+		map:put( active_refnames, forward_references[ref][FR_NAME], 1, map:ADD )
 		fwdref_count += 1
 	end if
 	return ref
 end function
 
-export procedure Resolve_forward_references( integer report_errors = 0 )
-	sequence errors = {}
-	sequence code = {}
-	integer unincluded_ok = get_resolve_unincluded_globals()
+function resolve_file( sequence refs, integer report_errors, integer unincluded_ok )
 	
-	for ar = length( active_references ) to 1 by -1 do
-		integer ref = active_references[ar]
+	sequence errors = {}
+	for ar = length( refs ) to 1 by -1 do
+		integer ref = refs[ar]
 		
 		sequence fr = forward_references[ref]
 		if include_matrix[fr[FR_FILE]][current_file_no] = NOT_INCLUDED and not unincluded_ok then
@@ -752,7 +783,31 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		end if
 		
 	end for
+	return errors
+end function
+
+export procedure Resolve_forward_references( integer report_errors = 0 )
+	sequence errors = {}
+	integer unincluded_ok = get_resolve_unincluded_globals()
 	
+	if length( active_references ) < length( known_files ) then
+		active_references &= repeat( {}, length( known_files ) - length( active_references ) )
+	end if
+	
+	if length( toplevel_references ) < length( known_files ) then
+		toplevel_references &= repeat( {}, length( known_files ) - length( toplevel_references ) )
+	end if
+	
+	for i = 1 to length( active_references ) do
+		if (length( active_references[i] ) or length(toplevel_references[i])) 
+		and (i = current_file_no or finished_files[i] or unincluded_ok)
+		then
+			
+			errors &= resolve_file( active_references[i],   report_errors, unincluded_ok )
+			errors &= resolve_file( toplevel_references[i], report_errors, unincluded_ok )
+		end if
+	end for
+		
 	if report_errors and length( errors ) then
 		sequence msg = ""
 		sequence errloc
@@ -778,29 +833,51 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if length(msg) > 0 then
 			CompileErr( 74, {msg} )
 		end if
-		
+	elsif report_errors then
+		-- free up some space
+		forward_references  = {}
+		active_references   = {}
+		toplevel_references = {}
+		inactive_references = {}
+		map:clear( active_refnames )
 	end if
 	clear_last()
 end procedure
 
 export function might_be_fwdref( sequence name )
-	return find( name, active_refnames )
+	return map:get( active_refnames, name, 0 )
 end function
 
-export procedure shift_fwd_refs( integer pc, integer amount )
-	for i = length( active_references ) to 1 by -1 do
-		if forward_references[active_references[i]][FR_SUBPROG] = shifting_sub then
-			if forward_references[active_references[i]][FR_PC] >= pc then
-				if forward_references[active_references[i]][FR_PC] > 1 then
-					forward_references[active_references[i]][FR_PC] += amount
-					if forward_references[active_references[i]][FR_TYPE] = CASE
-					and forward_references[active_references[i]][FR_DATA] >= pc then
+procedure shift_these( sequence refs, integer pc, integer amount )
+	for i = length( refs ) to 1 by -1 do
+		sequence fr = forward_references[refs[i]]
+		if fr[FR_SUBPROG] = shifting_sub then
+			if fr[FR_PC] >= pc then
+				if fr[FR_PC] > 1 then
+					fr[FR_PC] += amount
+					if fr[FR_TYPE] = CASE
+					and fr[FR_DATA] >= pc then
 						-- the FR_DATA info tracks the pc for the switch statement for the case
-						forward_references[active_references[i]][FR_DATA] += amount
+						fr[FR_DATA] += amount
 					end if
-				
+					forward_references[refs[i]] = fr
 				end if
 			end if
 		end if
 	end for
+end procedure
+
+export procedure shift_fwd_refs( integer pc, integer amount )
+	if not shifting_sub then
+		return
+	end if
+	
+	if shifting_sub = TopLevelSub then
+		for file = 1 to length( toplevel_references ) do
+			shift_these( toplevel_references[file], pc, amount )
+		end for
+	else
+		integer file = SymTab[shifting_sub][S_FILE_NO]
+		shift_these( active_references[file],   pc, amount )
+	end if
 end procedure
