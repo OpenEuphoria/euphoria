@@ -2161,10 +2161,14 @@ object DefineC(object x)
 	return c_routine_next++;
 }
 
+#ifdef EOSX
+#define CALLBACK_SIZE (108)
+#else
 #if __GNUC__ == 4
 #define CALLBACK_SIZE (96)
 #else
 #define CALLBACK_SIZE (80)
+#endif
 #endif
 
 #define EXECUTABLE_ALIGNMENT (4)
