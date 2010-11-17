@@ -99,5 +99,4 @@ end procedure
 
 clear_screen()
 place_queen({})
-maybe_any_key()
 
