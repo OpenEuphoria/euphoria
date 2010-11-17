@@ -1,19 +1,15 @@
 --****
 -- === lines.ex - Source Code Line Tally
 --
--- Count the number of lines, non-blank lines, non-blank/non-comment lines,
--- and characters in a text file or bunch of text files in the 
--- current directory.
---
 
 include std/cmdline.e
 include std/filesys.e
 include std/io.e
 include std/map.e
 include std/regex.e as re
+include std/search.e
 include std/sequence.e
 include std/text.e
-include std/types.e
 include std/utils.e
 include std/wildcard.e
 
@@ -27,11 +23,11 @@ function scan(integer fh, integer size)
 	object line
 
 	while sequence(line) with entry do
+		line = trim(line)
 		lines += 1
-		if not t_space(line) then
+		if length(line) then
 			nb_lines += 1
-			integer c = match("--", line)
-			if not c or not t_space(line[1..c-1]) then
+			if not begins("--", line) then
 				nb_nc_lines += 1
 			end if
 		end if
@@ -39,13 +35,14 @@ function scan(integer fh, integer size)
 		line = gets(fh)
 	end while
 	
-	return { lines, nb_lines, nb_nc_lines, size }
+	return { lines, nb_lines, nb_nc_lines, 100 * ((nb_lines - nb_nc_lines) / lines), size }
 end function
 
 procedure process_all_files(sequence file_names)
-	sequence count, total_count = { 0, 0, 0, 0 }
+	sequence count, total_count = { 0, 0, 0, 0, 0 }
 
-	puts(SCREEN, "lines  nb-lines  nb-nc-lines  chars\n")
+	puts(SCREEN, " lines non-blank      code  cmt     chars filename\n")
+	puts(SCREEN, "--------------------------------------------------\n")
 	for i = 1 to length(file_names) do
 		integer fileNum = open(file_names[i], "r")   
 		if fileNum = -1 then
@@ -53,13 +50,15 @@ procedure process_all_files(sequence file_names)
 		else
 			count = scan(fileNum, file_length(file_names[i]))
 			total_count = total_count + count
-			printf(SCREEN, "%5d%8d   %8d   %8d   %s\n", count & {file_names[i]})
+			printf(SCREEN, "%6d %9d %9d %3d%% %9d %s\n", count & {file_names[i]})
 			close(fileNum)
 		end if
 	end for
 
 	if length(file_names) > 1 then
-		printf(SCREEN, "%5d%8d   %8d   %8d   total\n", total_count)
+		total_count[4] = 100 * ((total_count[2] - total_count[3]) / total_count[1])
+		puts(SCREEN, "--------------------------------------------------\n")
+		printf(SCREEN, "%6d %9d %9d %3d%% %9d total\n", total_count)
 	end if
 end procedure
 
@@ -75,10 +74,8 @@ procedure lines(sequence file_spec)
 		for i = 1 to length(dir_names) do
 			if not find('d', dir_names[i][D_ATTRIBUTES]) then
 				sequence name = dir_names[i][D_NAME]
-				if wildcard_file(file_spec[f], name) then 
-					if not find(name, file_names) then
-						file_names = append(file_names, name)
-					end if
+				if wildcard_file(file_spec[f], name) and not find(name, file_names) then 
+					file_names = append(file_names, name)
 				end if
 			end if
 		end for

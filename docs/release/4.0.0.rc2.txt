@@ -66,5 +66,9 @@
   {{{
   euc -build-dir my-build hello.ex
   }}} which will automatically keep the build directory since it was user specified.
+* Converted ##bin/lines.ex## to use new language constructs and the standard library
+  as an example of how an application take advantage of 4.0. Code base went from 591
+  lines of code to 195 lines of code. Bugs were fixed, comment percentage calculations
+  and header/footer lines were added in the new, smaller version as well.
 
 
