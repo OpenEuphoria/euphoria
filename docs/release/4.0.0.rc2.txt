@@ -19,7 +19,7 @@
                   they create temps.
 * [[ticket:352]], A function with a defaulted parameter that is both forward
                   referenced and inlined no longer crashes.
-* [[ticket:352]], The programs eutest, creolehtml, and eudoc now all support a
+* [[ticket:358]], The programs eutest, creolehtml, and eudoc now all support a
                   command line option to display their version number.
 * [[ticket:362]], The handing of regular expressions which match the text but
                   didn't have any matching sub-groups was not correct nor
@@ -36,4 +36,25 @@
                   correct error code.
 * [[ticket:392]], ##[[:seek]]## was not returning the correct failure code on
                   some errors.
+* [[ticket:396]], Continue operations are now properly back patched.
+* [[ticket:391]], Watcom build system was lacking the ability to build the manual.
+* [[ticket:118]], ##object()## tests now function properly when translated.
+* [[ticket:169]], ##[[:find_nested]]## no longer defaults the ##rtn_id## parameter
+                  to ##-1## as that is the "invalid" return value of [[:routine_id]]
+                  in which case a typo in your routine id would be silently ignored
+* [[ticket:335]], ##eui## now only accepts -v, ~-~-version as parameters to display
+                  the version number instead of -v, ~-~-v, -version and ~-~-version.
+* Too numerous to list: Many documentation typo, spelling mistakes and formatting
+  errors have been corrected.
+
+=== Enhancements/Changes:
+
+* [[ticket:334]], OS/X, FreeBSD and Linux distribution build scripts are now
+                  combined for easier maintenance.
+* [[ticket:371]], ##remove_all## has been removed as it was a duplicate of the
+                  more powerful [[:match_replace]] routine.
+* [[ticket:341]], [[ticket:344]], Many unused variables have been cleaned up in the 
+                  standard library.
+* ##manual-upload## target was added to GNU and Watcom makefiles
+
 
