@@ -29,12 +29,6 @@ constant t = time()
 constant cmd_line = command_line()
 object y
 
-procedure the_end()
-	puts(msg, "Press Enter to continue\n")
-	gets(0)
-	abort(0)
-end procedure
-
 constant epsilon = 1e-10 -- allow for small floating point inaccuracy
 
 procedure show(object x, object y)
@@ -993,7 +987,7 @@ procedure reboot_msg()
 	end ifdef
 	
 	puts(msg, "See INSTALL.DOC\n")
-	the_end()
+	abort(1)
 end procedure
 
 procedure check_install(integer doit)
@@ -1164,7 +1158,6 @@ global procedure sanity()
 		message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
 	elsedef
 		puts(msg, "\nPASSED (100%)\n")
-		the_end()    
 	end ifdef
 end procedure
 
