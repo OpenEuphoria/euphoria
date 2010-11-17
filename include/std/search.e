@@ -6,7 +6,7 @@
 namespace search
 
 include std/error.e
-include std/types.e
+public include std/types.e
 
 --****
 -- === Equality
