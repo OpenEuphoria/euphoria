@@ -54,4 +54,3 @@ end while
 
 sock:shutdown(server)
 puts(1, "Server closed\n")
-maybe_any_key()

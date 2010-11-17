@@ -30,5 +30,4 @@ while 1 do
 end while
 
 sock:close(sock)
-maybe_any_key()
 
