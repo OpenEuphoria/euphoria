@@ -46,6 +46,8 @@
                   the version number instead of -v, ~-~-v, -version and ~-~-version.
 * Too numerous to list: Many documentation typo, spelling mistakes and formatting
   errors have been corrected.
+* [[ticket:402]], ##[[:maybe_any_key]]## now works when run from the command line version
+  of EUPHORIA even when run without a command-line shell.
 
 === Enhancements/Changes:
 
