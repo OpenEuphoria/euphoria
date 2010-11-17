@@ -29,7 +29,7 @@ without type_check
 
 include std/filesys.e
 include std/wildcard.e
-include std/graphics.e
+include std/graphics.e as g
 include std/sort.e
 include std/sequence.e
 include std/text.e
@@ -342,13 +342,13 @@ procedure print_chunk_list()
 		    chunk_list[i][2], 100 * chunk_list[i][1] + 0.5})
 	text_color(WHITE)
 	chunk = chunk_list[i][3]
-	wrap(FALSE)
+	g:wrap(FALSE)
 	for j = 1 to length(chunk) do
 	    line = clean(chunk[j])
 	    highlight(line)
 	    puts(log_file, line)        
 	end for
-	wrap(TRUE)
+	g:wrap(TRUE)
     end for
     if length(chunk_list) > 1 then
 	text_color(GREEN)
@@ -400,14 +400,14 @@ procedure scan(sequence file_name)
     doc_file = euphoria and match(".doc", fast_lower(file_name)) 
     
     -- update display
-    wrap(FALSE)
+    g:wrap(FALSE)
     position(count_line, 1)
     for i = 1 to length(word_list) do
 	printf(SCREEN, "%s:%d ", {word_list[i], word_count[i]})
     end for
     position(count_line+1, 1)
     puts(SCREEN, "searching: " & file_name & repeat(' ', 80) & '\r')
-    wrap(TRUE)
+    g:wrap(TRUE)
     
     new_chunk = TRUE
     while TRUE do
