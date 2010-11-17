@@ -6,6 +6,7 @@
 namespace search
 
 include std/error.e
+
 public include std/types.e
 
 --****
