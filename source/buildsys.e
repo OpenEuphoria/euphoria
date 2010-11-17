@@ -652,7 +652,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 				if status != 0 then
 					ShowMsg(2, 164, { generated_files[i] })
 					ShowMsg(2, 165, { status, cmd })
-					abort(1)
+					goto "build_direct_cleanup"
 				end if
 			elsif match(".o", generated_files[i]) then
 				objs &= " " & generated_files[i]
@@ -681,7 +681,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 
 		case else
 			ShowMsg(2, 167, { compiler_type })
-			abort(1)
+			goto "build_direct_cleanup"
 	end switch
 
 	if not silent then
@@ -696,9 +696,10 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 	if status != 0 then
 		ShowMsg(2, 168, { exe_name })
 		ShowMsg(2, 169, { status, cmd })
-		abort(1)
+		goto "build_direct_cleanup"
 	end if
 
+label "build_direct_cleanup"
 	if keep = 0 then
 		for i = 1 to length(generated_files) do
 			delete_file(generated_files[i])

@@ -46,7 +46,6 @@
 #   The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
 #   The default for SVN_REV is 'xxx'.
 #
-#
 #   Options:
 #                   MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
 #                                 The default is to use straight HeapAlloc/HeapFree calls. 
@@ -73,7 +72,6 @@
 #              TESTFILE or LIST:  Set either of these to set narrow the list of unit test files for
 #                                 either the test target or the testeu target.
 #
-#
 # ex:
 # 	wmake testeu I_EXTRA="-D ETYPE_CHECK" TEST_EXTRA="-log"
 #
@@ -84,12 +82,11 @@
 #
 #       Create a copy of eu.lib with debugging on.
 #
-#
 # ex:   wmake test LIST="t_switch.e t_math.e"
 #
 #       Run eutest on only two unit test files.
 #
-#
+
 !ifndef CONFIG
 CONFIG=config.wat
 !endif

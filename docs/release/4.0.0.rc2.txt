@@ -60,4 +60,11 @@
                   standard library.
 * ##manual-upload## target was added to GNU and Watcom makefiles
 * Formatted ##buzz.ex## example
+* ##euc## will always remove it's temporary build directory unless the ##-keep##
+  option is supplied. If one wants to keep the build directory for some reason, they
+  sould probably use ##-build-dir## as well, for example:
+  {{{
+  euc -build-dir my-build hello.ex
+  }}} which will automatically keep the build directory since it was user specified.
+
 
