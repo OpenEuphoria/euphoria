@@ -25,8 +25,6 @@ procedure main(sequence args = command_line())
 	end if
 
 	printf(1, "%s\n", { data[2] })
-
-	maybe_any_key()
 end procedure
 
 main()
