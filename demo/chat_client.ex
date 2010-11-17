@@ -84,4 +84,3 @@ procedure main(sequence args)
 end procedure
 
 main(command_line())
-maybe_any_key()

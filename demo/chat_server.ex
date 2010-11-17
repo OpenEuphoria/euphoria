@@ -2,6 +2,7 @@ object _ = 0
 
 include std/socket.e as sock
 include std/text.e
+include std/console.e
 
 object clients = {}, nicks = {}
 
@@ -39,6 +40,7 @@ procedure main(sequence args)
 		printf(1, "Could not bind server to %s, error=%d\n", { addr, sock:error_code() })
 		puts(1, "You may try another IP and/or port:\n")
 		puts(1, "  Usage: eui chat_sever.ex [IP:PORT]\n")
+		maybe_any_key()
 		abort(1)
 	end if
 
