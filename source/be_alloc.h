@@ -206,4 +206,5 @@ extern object NewDouble(double d);
 extern long copy_string(char *dest, char *src, size_t bufflen);
 extern long append_string(char *dest, char *src, size_t bufflen);
 
+extern void SpaceMessage();
 #endif
