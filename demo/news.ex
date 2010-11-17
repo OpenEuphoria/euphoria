@@ -137,5 +137,4 @@ end while
 text_color(WHITE)
 position(2*length(URLs)+3, 1)
 puts(1, "\nAll Done!\n")
-maybe_any_key()
 
