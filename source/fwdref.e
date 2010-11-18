@@ -26,6 +26,7 @@ include emit.e
 -- Tracking forward references
 sequence 
 	forward_references  = {},
+	active_subprogs     = {},
 	active_references   = {},
 	toplevel_references = {},
 	inactive_references = {}
@@ -83,20 +84,28 @@ procedure replace_code( sequence code, integer start, integer finish, integer su
 end procedure
 
 procedure resolved_reference( integer ref )
-	integer file = forward_references[ref][FR_FILE]
+	integer 
+		file    = forward_references[ref][FR_FILE],
+		subprog = forward_references[ref][FR_SUBPROG]
+	
 	integer 
 		tx = 0,
-		ax = 0
+		ax = 0,
+		sp = 0
 	
 	if forward_references[ref][FR_SUBPROG] = TopLevelSub then
 		tx = find( ref, toplevel_references[file] )
 	else
-		ax = find( ref, active_references[file] )
+		sp = find( subprog, active_subprogs[file] )
+		ax = find( ref, active_references[file][sp] )
 	end if
 	
 	if ax then
-		active_references[file] = remove( active_references[file], ax )
-	
+		active_references[file][sp] = remove( active_references[file][sp], ax )
+		if not length( active_references[file][sp] ) then
+			active_references[file] = remove( active_references[file], sp )
+			active_subprogs[file]   = remove( active_subprogs[file],   sp )
+		end if
 	elsif tx then
 		toplevel_references[file] = remove( toplevel_references[file], tx )
 		
@@ -260,7 +269,16 @@ procedure patch_forward_call( token tok, integer ref )
 	integer old_temps_allocated = temps_allocated
 	temps_allocated = 0
 	
-	integer pre_refs = length( active_references[fr[FR_FILE]] )
+	integer ar_sp = find( code_sub, active_subprogs[current_file_no] )
+	integer pre_refs
+	
+	if code_sub = TopLevelSub then
+		pre_refs = length( toplevel_references[current_file_no] )
+	else
+		ar_sp = find( code_sub, active_subprogs[current_file_no] )
+		pre_refs = length( active_references[current_file_no][ar_sp] )
+	end if
+	
 	sequence old_fwd_params = {}
 	for i = pc + 3 to pc + args + 2 do
 		defarg += 1
@@ -300,21 +318,18 @@ procedure patch_forward_call( token tok, integer ref )
 	set_dont_read( 0 )
 	current_file_no = real_file
 	
-	integer from_file = fr[FR_FILE]
-	integer line      = fr[FR_LINE]
-	sequence routine_type
-	
-	if is_func then 
-		routine_type = "function"
-	else
-		routine_type = "procedure"
-	end if
-	
 	if args != ( supplied_args + extra_default_args ) then
-		current_file_no = from_file
-		line_number = line
+		sequence routine_type
+		
+		if is_func then 
+			routine_type = "function"
+		else
+			routine_type = "procedure"
+		end if
+		current_file_no = fr[FR_FILE]
+		line_number = fr[FR_LINE]
 		CompileErr( 158,
-			{ known_files[from_file], line, routine_type, name, args, supplied_args + extra_default_args }  )
+			{ known_files[current_file_no], line_number, routine_type, name, args, supplied_args + extra_default_args }  )
 	end if
 	
 	new_code &= PROC & sub & params
@@ -324,10 +339,16 @@ procedure patch_forward_call( token tok, integer ref )
 
 	replace_code( new_code, pc, next_pc - 1, code_sub )
 	
-	for i = pre_refs + 1 to length( active_references[fr[FR_FILE]] ) do
-		forward_references[active_references[fr[FR_FILE]][i]][FR_PC] += pc - 1
-	end for
-
+	if code_sub = TopLevelSub then
+		for i = pre_refs + 1 to length( toplevel_references[fr[FR_FILE]] ) do
+			forward_references[toplevel_references[fr[FR_FILE]]][FR_PC] += pc - 1
+		end for
+	else
+		for i = pre_refs + 1 to length( active_references[fr[FR_FILE]][ar_sp] ) do
+			forward_references[active_references[fr[FR_FILE]][ar_sp][i]][FR_PC] += pc - 1
+		end for
+	end if
+	
 	reset_code()
 	
 	-- mark this one as resolved already
@@ -693,8 +714,16 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 		else
 			if length( active_references ) < current_file_no then
 				active_references &= repeat( {}, current_file_no - length( active_references ) )
+				active_subprogs   &= repeat( {}, current_file_no - length( active_subprogs ) )
 			end if
-			active_references[current_file_no] &= ref
+			integer sp = find( CurrentSub, active_subprogs[current_file_no] )
+			if not sp then
+				active_subprogs[current_file_no] &= CurrentSub
+				sp = length( active_subprogs[current_file_no] )
+				
+				active_references[current_file_no] = append( active_references[current_file_no], {} )
+			end if
+			active_references[current_file_no][sp] &= ref
 		end if
 		map:put( active_refnames, forward_references[ref][FR_NAME], 1, map:ADD )
 		fwdref_count += 1
@@ -792,18 +821,21 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 	
 	if length( active_references ) < length( known_files ) then
 		active_references &= repeat( {}, length( known_files ) - length( active_references ) )
+		active_subprogs   &= repeat( {}, length( known_files ) - length( active_subprogs ) )
 	end if
 	
 	if length( toplevel_references ) < length( known_files ) then
 		toplevel_references &= repeat( {}, length( known_files ) - length( toplevel_references ) )
 	end if
 	
-	for i = 1 to length( active_references ) do
-		if (length( active_references[i] ) or length(toplevel_references[i])) 
+	for i = 1 to length( active_subprogs ) do
+		if (length( active_subprogs[i] ) or length(toplevel_references[i])) 
 		and (i = current_file_no or finished_files[i] or unincluded_ok)
 		then
 			
-			errors &= resolve_file( active_references[i],   report_errors, unincluded_ok )
+			for j = length( active_references[i] ) to 1 by -1 do
+				errors &= resolve_file( active_references[i][j], report_errors, unincluded_ok )
+			end for
 			errors &= resolve_file( toplevel_references[i], report_errors, unincluded_ok )
 		end if
 	end for
@@ -851,19 +883,37 @@ end function
 procedure shift_these( sequence refs, integer pc, integer amount )
 	for i = length( refs ) to 1 by -1 do
 		sequence fr = forward_references[refs[i]]
+		forward_references[refs[i]] = 0
 		if fr[FR_SUBPROG] = shifting_sub then
 			if fr[FR_PC] >= pc then
-				if fr[FR_PC] > 1 then
-					fr[FR_PC] += amount
-					if fr[FR_TYPE] = CASE
-					and fr[FR_DATA] >= pc then
-						-- the FR_DATA info tracks the pc for the switch statement for the case
-						fr[FR_DATA] += amount
-					end if
-					forward_references[refs[i]] = fr
+				fr[FR_PC] += amount
+				if fr[FR_TYPE] = CASE
+				and fr[FR_DATA] >= pc then
+					-- the FR_DATA info tracks the pc for the switch statement for the case
+					fr[FR_DATA] += amount
 				end if
 			end if
 		end if
+		forward_references[refs[i]] = fr
+	end for
+end procedure
+
+-- duplicates the above, but we don't need to compare subprogs
+procedure shift_top( sequence refs, integer pc, integer amount )
+	for i = length( refs ) to 1 by -1 do
+		sequence fr = forward_references[refs[i]]
+		forward_references[refs[i]] = 0
+		if fr[FR_PC] >= pc then
+-- 			if fr[FR_PC] > 1 then
+				fr[FR_PC] += amount
+				if fr[FR_TYPE] = CASE
+				and fr[FR_DATA] >= pc then
+					-- the FR_DATA info tracks the pc for the switch statement for the case
+					fr[FR_DATA] += amount
+				end if
+-- 			end if
+		end if
+		forward_references[refs[i]] = fr
 	end for
 end procedure
 
@@ -874,10 +924,11 @@ export procedure shift_fwd_refs( integer pc, integer amount )
 	
 	if shifting_sub = TopLevelSub then
 		for file = 1 to length( toplevel_references ) do
-			shift_these( toplevel_references[file], pc, amount )
+			shift_top( toplevel_references[file], pc, amount )
 		end for
 	else
 		integer file = SymTab[shifting_sub][S_FILE_NO]
-		shift_these( active_references[file],   pc, amount )
+		integer sp   = find( shifting_sub, active_subprogs[file] )
+		shift_these( active_references[file][sp], pc, amount )
 	end if
 end procedure
