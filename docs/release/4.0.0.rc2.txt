@@ -1,4 +1,4 @@
-== Version 4.0.0 Release Candidate 2 (Scheduled for November 18th, 2010)
+== Version 4.0.0 Release Candidate 2 (Release Date TBD)
 
 === Deprecation:
 
@@ -70,5 +70,6 @@
   as an example of how an application take advantage of 4.0. Code base went from 591
   lines of code to 195 lines of code. Bugs were fixed, comment percentage calculations
   and header/footer lines were added in the new, smaller version as well.
+* Moved network demos from ##demos/## to ##demos/net## for better organization.
 
 

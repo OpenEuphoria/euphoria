@@ -149,15 +149,14 @@ rem ============================================================
 echo SCP=%SCP_CLIENT% >> config.wat
 
 if "%HAS_EUBIN%" == "1" (
-SET NOEU=
+	SET NOEU=
 ) else (
-wtouch nothing.ex
-eui nothing.ex 2> NUL
-if "%ERRORLEVEL%" == "9009" (
-    set NOEU=1
-) else (
-    set NOEU=
-)
+	eui.exe -? 1> NUL 2> NUL
+	if "%ERRORLEVEL%" == "9009" (
+		set NOEU=1
+	) else (
+		set NOEU=
+	)
 )
 
 echo ARCH=ix86 >> config.wat
