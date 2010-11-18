@@ -728,6 +728,7 @@ procedure next_token()
 	-- scan_white returns TRUE if it hit a T_NEWLINE
 	if scan_white() then
 		if IGNORE_NEWLINES then next_token() end if
+		scan_char() -- advanced past this newline
 		return
 	end if
 
@@ -740,13 +741,14 @@ procedure next_token()
 	if Token[TTYPE] then
 		-- handle delimiters and special cases
 		Token[TTYPE] += T_DELIMITER-1
-		Token[TDATA] = {Look}
+		Token[TDATA] = { Look }
 
 		scan_char()
 
 		if (Token[TTYPE] = T_LBRACKET) then
 			-- must check before T_PERIOD
 			SUBSCRIPT += 1 -- push subscript stack counter
+
 		elsif (Token[TTYPE] = T_RBRACKET) then
 			-- must check before T_PERIOD
 			SUBSCRIPT -= 1 -- pop subscript stack counter
@@ -857,7 +859,7 @@ public function tokenize_string(sequence code)
 	if (Look = '#') and (source_text[sti+1] = '!') then
 		sti += 1
 		scan_char()
-		if scan_white() then end if
+		scan_white()
 		Token[TTYPE] = T_SHBANG
 		while Look != EOL do
 			Token[TDATA] &= Look
