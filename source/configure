@@ -248,11 +248,10 @@ while [ "$1" != "" ]; do
 	shift
 done
 
-touch nothing.ex
 # if eui doesn't exist the error message goes into
 # the device file /dev/null. [works on Mingw too.]
 if [ "x$EUBIN" = "x" ]; then
-	if eui nothing.ex 2> /dev/null; then
+	if eui -? 1> /dev/null 2> /dev/null; then
 		if [ "x$EUPHORIA" = "x" ]; then
 			export EUPHORIA=1
 		fi
@@ -262,7 +261,6 @@ if [ "x$EUBIN" = "x" ]; then
 else
 	export EUPHORIA=1
 fi
-rm nothing.ex
 
 if [ "x$EUPHORIA" = "x1" ]; then
 	echo EUPHORIA=1 >> "$PREFIX"${CONFIG_FILE}
