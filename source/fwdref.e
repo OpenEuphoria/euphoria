@@ -44,6 +44,7 @@ enum
 	FR_BP,
 	FR_QUALIFIED,
 	FR_OP,
+	FR_HASHVAL,
 --	FR_PRIVATE_LIST, -- not used yet
 	FR_DATA  -- extra info
 
@@ -625,7 +626,7 @@ function find_reference( sequence fr )
 	integer ix = find( ':', name )
 	if ix then
 		sequence ns = name[1..ix-1]
-		token ns_tok = keyfind( ns, ns_file, file, 1 )
+		token ns_tok = keyfind( ns, ns_file, file, 1, fr[FR_HASHVAL] )
 		if ns_tok[T_ID] != NAMESPACE then
 			return ns_tok
 		end if
@@ -634,7 +635,7 @@ function find_reference( sequence fr )
 	end if
 	
 	No_new_entry = 1
-	token tok = keyfind( name, ns_file, file )
+	token tok = keyfind( name, ns_file, file, , fr[FR_HASHVAL] )
 	No_new_entry = 0
 	return tok
 end function
@@ -681,8 +682,17 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	forward_references[ref][FR_TYPE]      = fwd_op
 	if sym < 0 then
 		forward_references[ref][FR_NAME] = forward_references[-sym][FR_NAME]
+		forward_references[ref][FR_HASHVAL] = forward_references[-sym][FR_HASHVAL]
 	else
 		forward_references[ref][FR_NAME] = SymTab[sym][S_NAME]
+		integer hashval = SymTab[sym][S_HASHVAL]
+		if 0 = hashval then
+			forward_references[ref][FR_HASHVAL] = hashfn( forward_references[ref][FR_NAME] )
+		else
+			forward_references[ref][FR_HASHVAL] = hashval
+		end if
+		
+		
 	end if
 	
 	forward_references[ref][FR_FILE]      = current_file_no

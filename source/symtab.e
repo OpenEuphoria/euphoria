@@ -616,7 +616,7 @@ end function
 
 export integer No_new_entry = 0
 export function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0, 
-	integer hashval = 0)
+						integer hashval = hashfn( word ) )
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier.
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL.
@@ -634,9 +634,6 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 	symbol_resolution_warning = ""
 	st_builtin = 0
 
--- 	if not hashval then
-		hashval = hashfn(word)
--- 	end if
 	ifdef EUDIS then
 		bucket_hits[hashval] += 1
 	end ifdef
