@@ -9,6 +9,7 @@ ifdef ETYPE_CHECK then
 elsedef
 	without type_check
 end ifdef
+without type_check
 include std/filesys.e
 include std/map.e
 
@@ -665,7 +666,6 @@ export type forward_reference( integer ref )
 end type
 
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
-	
 	integer 
 		ref, 
 		len = length( inactive_references )
@@ -690,8 +690,8 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 			forward_references[ref][FR_HASHVAL] = hashfn( forward_references[ref][FR_NAME] )
 		else
 			forward_references[ref][FR_HASHVAL] = hashval
+			remove_symbol( sym )
 		end if
-		
 		
 	end if
 	

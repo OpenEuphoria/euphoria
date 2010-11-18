@@ -966,6 +966,7 @@ procedure Forward_var( token tok, integer init_check = -1, integer op = tok[T_ID
 	if init_check != -1 then
 		Forward_InitCheck( tok, init_check )
 	end if
+	
 end procedure
 
 procedure Forward_call(token tok, integer opcode = PROC_FORWARD )

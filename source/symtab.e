@@ -48,8 +48,8 @@ export function hashfn(sequence name)
 	if len = 3 then
 		val = val * 32 + name[2]
 	elsif len > 3 then
-		val = val * 32 + name[2]
-		val = val * 32 + name[$-1]
+		val = val * 32 + name[2] -- val = val * 32 + name[2]
+		val = val * 32 + name[$-1] -- val = val * 32 + name[$-1]
 	end if
 	return remainder(val, NBUCKETS) + 1
 end function
@@ -62,15 +62,19 @@ export procedure remove_symbol( symtab_index sym )
 	
 	hash = SymTab[sym][S_HASHVAL]
 	st_ptr = buckets[hash]
-	while st_ptr != sym do
+	
+	while st_ptr and st_ptr != sym do
 		st_ptr = SymTab[st_ptr][S_SAMEHASH]
 	end while
-	if st_ptr = buckets[hash] then
-		-- it was the last one, and in the bucket
-		buckets[hash] = SymTab[st_ptr][S_SAMEHASH]
-	else
-		-- we're somewhere in the chain
-		SymTab[st_ptr][S_SAMEHASH] = SymTab[sym][S_SAMEHASH]
+	
+	if st_ptr then
+		if st_ptr = buckets[hash] then
+			-- it was the last one, and in the bucket
+			buckets[hash] = SymTab[st_ptr][S_SAMEHASH]
+		else
+			-- we're somewhere in the chain
+			SymTab[st_ptr][S_SAMEHASH] = SymTab[sym][S_SAMEHASH]
+		end if
 	end if
 end procedure
 
@@ -949,6 +953,7 @@ end ifdef
 	tok = {VARIABLE, NewEntry(word, 0, defined,
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
+	
 	if file_no != -1 then
 		SymTab[tok[T_SYM]][S_FILE_NO] = file_no
 	end if
