@@ -71,5 +71,10 @@
   lines of code to 195 lines of code. Bugs were fixed, comment percentage calculations
   and header/footer lines were added in the new, smaller version as well.
 * Moved network demos from ##demos/## to ##demos/net## for better organization.
+* ##euphoria/tokenize.e## BLANK concept has changed. tokenize use to consume all newlines
+  and only report double blanks. It now simply tokenizes the data and returns a newline
+  if requested. ##keep_blanks## has been renamed to ##[[:keep_newlines]]## and 
+  ##T_BLANK## has been renamed to ##[[:T_NEWLINE]]##. Thus the tokenizer doesn't perform
+  any 'parser' functions, it simply tokenizes the source.
 
 
