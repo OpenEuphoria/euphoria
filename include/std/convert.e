@@ -829,12 +829,13 @@ end function
 --
 -- Examples:
 -- <eucode>
--- ? to_string(12)       --> 12
--- ? to_string("abc")       --> abc
--- ? to_string("abc",'"')       --> "abc"
--- ? to_string(`abc\"`,'"')       --> "abc\\\""
--- ? to_string({12,"abc",{4.5, -99}})       --> {12, "abc", {4.5, -99}}
--- ? to_string({12,"abc",{4.5, -99}},,0)       --> {12, abc, {4.5, -99}}
+-- include std/console.e
+-- display( to_string(12))       --> 12
+-- display( to_string("abc"))       --> abc
+-- display( to_string("abc",'"'))       --> "abc"
+-- display( to_string(`abc\"`,'"'))       --> "abc\\\""
+-- display( to_string({12,"abc",{4.5, -99}}))       --> {12, "abc", {4.5, -99}}
+-- display( to_string({12,"abc",{4.5, -99}},,0))       --> {12, abc, {4.5, -99}}
 -- </eucode>
 
 public function to_string(object data_in, integer string_quote = 0, integer embed_string_quote = '"')
