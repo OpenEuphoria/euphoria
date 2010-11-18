@@ -917,19 +917,19 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 	int i;
 	object_ptr op, se;
 
-	if (s1->ref == 1 && *target == (object)s1) {
+	if (s1->ref == 1 && *target == MAKE_SEQ(s1)) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
 
 		// First, dereference all existing elements after the new end position.
-		for (op = (s1->base+reqlen), se = s1->base + s1->length; op < se; op++)
+		for (op = (s1->base+reqlen), se = s1->base + s1->length + 1; op < se; op++)
 			DeRef(*op);
 
 		// Mark the 'end-of-sequence'
 		*(s1->base+reqlen) = NOVALUE;
 
 		// Update the post-fill count.
-		s1->postfill += (s1->length - reqlen + 2);
+		s1->postfill += (s1->length - reqlen + 1);
 
 		// Adjust the new length.
 		s1->length = reqlen-1;
