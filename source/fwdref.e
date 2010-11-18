@@ -103,13 +103,27 @@ procedure resolved_reference( integer ref )
 	end if
 	
 	if ax then
-		active_references[file][sp] = remove( active_references[file][sp], ax )
+		sequence r = active_references[file][sp] 
+		active_references[file][sp] = 0
+		r = remove( r, ax )
+		active_references[file][sp] = r
+		
 		if not length( active_references[file][sp] ) then
-			active_references[file] = remove( active_references[file], sp )
-			active_subprogs[file]   = remove( active_subprogs[file],   sp )
+			r = active_references[file]
+			active_references[file] = 0
+			r = remove( r, sp )
+			active_references[file] = r
+			
+			r = active_subprogs[file]
+			active_subprogs[file] = 0
+			r = remove( r,   sp )
+			active_subprogs[file] = r
 		end if
 	elsif tx then
-		toplevel_references[file] = remove( toplevel_references[file], tx )
+		sequence r = toplevel_references[file]
+		toplevel_references[file] = 0
+		r = remove( r, tx )
+		toplevel_references[file] = r
 		
 	else
 		InternalErr( 260 )
