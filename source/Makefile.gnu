@@ -155,7 +155,7 @@ endif
 
 ifdef COVERAGE
 COVERAGEFLAG=-fprofile-arcs -ftest-coverage
-DEBUG_FLAGS=-g3 -O0 -Wall
+DEBUG_FLAGS=-g3 -O0
 COVERAGELIB=-lgcov
 endif
 
