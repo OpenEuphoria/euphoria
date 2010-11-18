@@ -49,7 +49,7 @@ procedure main()
 	atom t2 = time()
 
 	if iterations > 1 then
-		printf(1, "total time %f, per %f\n", { t2 - t1, (t2 - t1) / iterations })
+		printf(1, "total time %f, avg per iteration %f\n", { t2 - t1, (t2 - t1) / iterations })
 	else
 		printf(1, "Time = %f\n", { t2 - t1 })
 	end if
