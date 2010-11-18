@@ -49,6 +49,8 @@
 * Too numerous to list: Many documentation typo, spelling mistakes and formatting
   errors have been corrected.
 * Removed many unnecessary ##[[:maybe_any_key]]## uses from the general demos
+* [[ticket:409]], Calls to ##Head()## that should have altered the sequence in place
+                  did not, resulting in slower code.
 
 === Enhancements/Changes:
 
