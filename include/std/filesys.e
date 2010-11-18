@@ -2546,9 +2546,10 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  ? temp_file("/usr/space", "myapp", "tmp") --> /usr/space/myapp736321.tmp
---  ? temp_file() --> /tmp/277382._T_
---  ? temp_file("/users/me/abc.exw") --> /users/me/992831._T_
+--  sequence x
+--  x = temp_file("/usr/space", "myapp", "tmp") --> /usr/space/myapp736321.tmp
+--  x = temp_file() --> /tmp/277382._T_
+--  x = temp_file("/users/me/abc.exw") --> /users/me/992831._T_
 -- </eucode>
 
 public function temp_file(sequence temp_location = "", sequence temp_prefix = "", sequence temp_extn = "_T_", integer reserve_temp = 0)
@@ -2649,11 +2650,12 @@ end function
 -- Example 1:
 -- <eucode>
 --  -- Example values. The exact values depend on the contents of the file.
---  ? checksum("myfile", 1) --> {92837498}
---  ? checksum("myfile", 2) --> {1238176, 87192873}
---  ? checksum("myfile", 2,,1) --> "0012E480 05327529"
---  ? checksum("myfile", 4) --> {23448, 239807, 79283749, 427370}
---  ? checksum("myfile")    --> {23448, 239807, 79283749, 427370} -- default
+--  include std/console.e
+--  display( checksum("myfile", 1) ) --> {92837498}
+--  display( checksum("myfile", 2) ) --> {1238176, 87192873}
+--  display( checksum("myfile", 2,,1)) --> "0012E480 05327529"
+--  display( checksum("myfile", 4) ) --> {23448, 239807, 79283749, 427370}
+--  display( checksum("myfile") )    --> {23448, 239807, 79283749, 427370} -- default
 -- </eucode>
 
 public function checksum(sequence filename, integer size = 4, integer usename = 0, integer return_text = 0)

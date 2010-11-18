@@ -32,7 +32,7 @@ public enum
 	T_EOF,
 	T_NULL,
 	T_SHBANG,
-	T_BLANK,
+	T_NEWLINE,
 	T_COMMENT,
 	T_NUMBER,
 	--**
@@ -129,7 +129,8 @@ public enum
 	ERR_HEX_STRING,
 	$
 
-constant ERROR_STRING = { -- use et_error_string(code) to retrieve these
+-- use error_string(code) to retrieve these
+constant ERROR_STRING = { 
 	"Failed to open file",
 	"Expected an escape character",
 	"End of line reached without closing \' char",
@@ -166,17 +167,17 @@ end function
 --****
 -- === get/set options
 
-integer IGNORE_BLANKS	= TRUE
+integer IGNORE_NEWLINES	= TRUE
 integer IGNORE_COMMENTS = TRUE
 integer STRING_NUMBERS	= FALSE
 
 --**
--- Return blank lines as tokens.
+-- Return new lines as tokens.
 --
 -- default is FALSE
 
-public procedure keep_blanks(integer val = 1)
-	IGNORE_BLANKS = not val
+public procedure keep_newlines(integer val = 1)
+	IGNORE_NEWLINES = not val
 end procedure
 
 --**
@@ -271,43 +272,51 @@ function lookahead(integer dist = 1)
 	end if
 end function
 
-function scan_white() -- returns TRUE if a blank line was parsed
- integer lastLF
-	Token[TTYPE] = T_BLANK
+-- returns TRUE if a newline was parsed
+function scan_white()
+	Token[TTYPE] = T_NEWLINE
 	Token[TDATA] = ""
-	lastLF = (Look = EOL)
+
 	while White_Char(Look) do
 		scan_char()
-		if lastLF and (Look = EOL) then
+		if Look = EOL then
 			return TRUE
 		end if
 	end while
+
 	return FALSE
 end function
 
 function scan_multicomment()
 	Token[TTYPE] = T_COMMENT
-	Token[TDATA] = "/*"
+	Token[TDATA] = "/"
 	Token[TFORM] = TF_COMMENT_MULTIPLE
+
 	while 1 do
-		if (Look = EOF) then report_error(ERR_EOF) return TRUE end if
-		if (Look = '*') then
-			if (source_text[sti + 1] = '/') then
-				exit
-			end if
+		if (Look = EOF) then
+			report_error(ERR_EOF)
+			return TRUE 
 		end if
+
+		if (Look = '*') and source_text[sti + 1] = '/' then
+			Token[TDATA] &= "*/"
+
+			scan_char() -- skip the */
+			scan_char()
+			exit
+		end if
+
 		Token[TDATA] &= Look
 		scan_char()
 	end while
-	scan_char() -- skip the *
-	scan_char()
+
 	return TRUE
 end function
 
 constant QFLAGS = "t\\r\'n\""
 
 procedure scan_escaped_char()
- integer f
+	integer f
 	Token[TDATA] &= Look
 	if (Look = '\\') then
 		scan_char()
@@ -332,7 +341,10 @@ function scan_qchar()
 end function
 
 function scan_string()
-	if (Look != '"') then return FALSE end if
+	if (Look != '"') then 
+		return FALSE 
+	end if
+
 	if sti + 3 < length(source_text) then
 		if equal(source_text[sti .. sti + 2], "\"\"\"") then
 			-- Got a raw string
@@ -341,6 +353,7 @@ function scan_string()
 			Token[TFORM] = TF_STRING_TRIPLE
 			sti += 2
 			scan_char()
+
 			while (sti < length(source_text) - 2) and
 				not equal(source_text[sti .. sti +2], "\"\"\"")
 			do
@@ -352,12 +365,15 @@ function scan_string()
 				Token[TDATA] &= Look
 				scan_char()
 			end while
+
 			if sti > length(source_text) - 2 then
 				report_error(ERR_EOF)
 				return TRUE
 			end if
+
 			sti += 2
 			scan_char()
+
 			return TRUE
 		end if
 	end if
@@ -366,12 +382,22 @@ function scan_string()
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
 	Token[TFORM] = TF_STRING_SINGLE
-	while (Look != '\"') do
-		if (Look = EOL) then report_error(ERR_EOL_STRING) return TRUE end if
+
+	while (Look != '"') do
+		if (Look = EOL) then 
+			report_error(ERR_EOL_STRING) 
+			return TRUE
+		end if
+
 		scan_escaped_char()
-		if ERR then return TRUE end if
+
+		if ERR then 
+			return TRUE
+		end if
 	end while
+
 	scan_char()
+
 	return TRUE
 end function
 
@@ -551,7 +577,6 @@ function hex_string(sequence textdata, integer string_type)
 			maxnibbles = 8
 		case else
 			printf(2, "tokenize.e: Unknown base code '%s', ignored.\n", {string_type})
-
 	end switch
 
 	string_text = ""
@@ -690,8 +715,19 @@ procedure next_token()
 	Token[TLPOS] = LPos
 	Token[TFORM] = -1
 
+	if Look = EOL and not IGNORE_NEWLINES then
+		-- We have a left over EOL, process it
+		Token[TDATA] = ""
+		Token[TTYPE] = T_NEWLINE
+
+		scan_char() -- advance past this newline
+
+		return
+	end if
+
+	-- scan_white returns TRUE if it hit a T_NEWLINE
 	if scan_white() then
-		if IGNORE_BLANKS then next_token() end if
+		if IGNORE_NEWLINES then next_token() end if
 		return
 	end if
 
@@ -834,14 +870,14 @@ public function tokenize_string(sequence code)
 	next_token()
 	if not ERR then
 		while Token[TTYPE] != T_EOF do
-			tokens &={ Token }
+			tokens &= { Token }
 			next_token()
 			if ERR then exit end if
 		end while
-		tokens &={ Token }
+		tokens &= { Token }
 	end if
 
-	return {tokens,ERR,ERR_LNUM, ERR_LPOS}
+	return { tokens, ERR, ERR_LNUM, ERR_LPOS }
 end function
 
 public function tokenize_file(sequence fname)
