@@ -143,7 +143,7 @@ DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
 endif
 
 ifdef EPROFILE
-PROFILE_FLAGS=-pg
+PROFILE_FLAGS=-pg -g
 ifndef EDEBUG
 DEBUG_FLAGS=$(EOSMING)
 endif

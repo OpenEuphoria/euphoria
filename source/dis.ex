@@ -11,6 +11,8 @@
 -- default output dir: eudox
 -- stdlib suppressed by default
 
+with define EUDIS
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef
