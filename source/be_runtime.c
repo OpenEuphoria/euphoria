@@ -957,7 +957,7 @@ void Tail(s1_ptr s1, int start, object_ptr target)
 	object_ptr ss, op, se;
 
 	newlen = s1->length - start + 1;
-	if (s1->ref == 1 && (object)s1 == *target) {
+	if (s1->ref == 1 && MAKE_SEQ(s1) == *target) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
 
