@@ -736,11 +736,11 @@ procedure next_token()
 		return
 	end if
 
-	Token[TTYPE] = find(Look,Delimiters)
+	Token[TTYPE] = find(Look, Delimiters)
 
 	if Token[TTYPE] then
 		-- handle delimiters and special cases
-		Token[TTYPE] += T_DELIMITER-1
+		Token[TTYPE] += T_DELIMITER - 1
 		Token[TDATA] = { Look }
 
 		scan_char()
@@ -756,8 +756,9 @@ procedure next_token()
 		elsif (Look = '=') and (Token[TTYPE] <= T_SINGLE_OPS) then
 			-- is a valid double op
 			-- double operators: += -= *= /= etc..
-			Token[TTYPE] -= T_DOUBLE_OPS
+			Token[TTYPE] -= T_DOUBLE_OPS - 3
 			Token[TDATA] &= Look
+
 			scan_char()
 
 		elsif (Token[TTYPE] = T_PERIOD) then
