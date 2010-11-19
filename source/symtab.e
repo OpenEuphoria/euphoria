@@ -539,7 +539,7 @@ export procedure MarkTargets(symtab_index s, integer attribute)
 		else
 			sname = string[colon+1..$]  -- ignore namespace part
 			while length(sname) and sname[1] = ' ' or sname[1] = '\t' do
-				sname = sname[2..$]
+				sname = tail( sname, length( sname ) -1 )
 			end while
 		end if
 
@@ -871,8 +871,8 @@ ifdef STDDEBUG then
 		integer dx = 1
 		while dx <= length( dup_globals ) do
 			if SymTab[dup_globals[dx]][S_SCOPE] = SC_EXPORT then
-				dup_globals = dup_globals[1..dx-1] & dup_globals[dx+1..$]
-				in_include_path = in_include_path[1..dx-1] & in_include_path[dx+1..$]
+				dup_globals = remove( dup_globals, dx )
+				in_include_path = remove( in_include_path, dx )
 			else
 				dx += 1
 			end if
@@ -887,8 +887,8 @@ end ifdef
 			if in_include_path[ix] then
 				ix += 1
 			else
-				dup_globals = dup_globals[1..ix-1] & dup_globals[ix+1..$]
-				in_include_path = in_include_path[1..ix-1] & in_include_path[ix+1..$]
+				dup_globals     = remove( dup_globals, ix )
+				in_include_path = remove( in_include_path, ix )
 			end if
 		end while
 

@@ -1225,14 +1225,14 @@ procedure Factor()
 					putback(tok)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = current_sequence[1..$-1]
+					current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 					emit_op(RHS_SUBS) -- current_sequence will be updated
 				end if
 				factors = save_factors
 				lhs_subs_level = save_lhs_subs_level
 				tok = next_token()
 			end while
-			current_sequence = current_sequence[1..$-1]
+			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 			putback(tok)
 			short_circuit += 1
 
@@ -1557,7 +1557,7 @@ procedure Assignment(token left_var)
 		subs_depth += 1
 		if lhs_ptr then
 			-- multiple lhs subscripts, evaluate first n-1 of them with this
-			current_sequence = current_sequence[1..$-1]
+			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 			if subs = 1 then
 				-- first subscript of 2 or more
 				subs1_patch = length(Code)+1
@@ -1703,7 +1703,7 @@ procedure Assignment(token left_var)
 		end if
 	end if
 
-	current_sequence = current_sequence[1..$-1]
+	current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 
 	if not TRANSLATE then
 		if OpTrace then
