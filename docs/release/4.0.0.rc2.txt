@@ -78,5 +78,5 @@
   if requested. ##keep_blanks## has been renamed to ##[[:keep_newlines]]## and 
   ##T_BLANK## has been renamed to ##[[:T_NEWLINE]]##. Thus the tokenizer doesn't perform
   any 'parser' functions, it simply tokenizes the source.
-
+* Speed improvements to map:put()
 
