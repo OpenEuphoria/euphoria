@@ -183,27 +183,29 @@ constant BLANK_ENTRY = repeat(0, SIZEOF_TEMP_ENTRY)
 
 export function tmp_alloc()
 -- return SymTab index for a new temporary var/literal constant
-	symtab_index new
-
-	SymTab = append(SymTab, BLANK_ENTRY)
-	new = length(SymTab)
-	SymTab[new][S_USAGE] = T_UNKNOWN
+	sequence new_entry = repeat( 0, SIZEOF_TEMP_ENTRY )
+	
+	
+	
+	new_entry[S_USAGE] = T_UNKNOWN
 
 	if TRANSLATE then
-		SymTab[new][S_GTYPE] = TYPE_OBJECT
-		SymTab[new][S_OBJ_MIN] = MININT
-		SymTab[new][S_OBJ_MAX] = MAXINT
-		SymTab[new][S_SEQ_LEN] = NOVALUE
-		SymTab[new][S_SEQ_ELEM] = TYPE_OBJECT  -- other fields set later
+		new_entry[S_GTYPE] = TYPE_OBJECT
+		new_entry[S_OBJ_MIN] = MININT
+		new_entry[S_OBJ_MAX] = MAXINT
+		new_entry[S_SEQ_LEN] = NOVALUE
+		new_entry[S_SEQ_ELEM] = TYPE_OBJECT  -- other fields set later
 		if length(temp_name_type)+1 = 8087 then
 			-- don't use _8087 - it conflicts with WATCOM
 			temp_name_type = append(temp_name_type, {0, 0})
 		end if
 		temp_name_type = append(temp_name_type, TYPES_OBNL)
-		SymTab[new][S_TEMP_NAME] = length(temp_name_type)
+		new_entry[S_TEMP_NAME] = length(temp_name_type)
 	end if
+	
+	SymTab = append(SymTab, new_entry )
 
-	return new
+	return length( SymTab )
 end function
 
 function PrivateName(sequence name, symtab_index proc)
