@@ -627,7 +627,7 @@ function next_token()
 
 	if length(backed_up_tok) > 0 then
 		t = backed_up_tok[$]
-		backed_up_tok = backed_up_tok[1 .. $-1]
+		backed_up_tok = remove( backed_up_tok, length( backed_up_tok ) )
 	elsif Parser_mode = PAM_PLAYBACK then
 		if canned_index <= length(canned_tokens) then
 			t = canned_tokens[canned_index]
