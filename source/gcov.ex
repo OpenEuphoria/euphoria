@@ -94,7 +94,6 @@ procedure write_index( sequence coveragedir, sequence objectdir, sequence stats 
 	puts( index, "<tr><td>File</td><td>Lines</td><td>Executed</td><td>%</td></tr>\n" )
 	for i = 1 to length(stats) do
 		atom  pct = 100
-		? stats[i]
 		if stats[i][3] then
 			pct = stats[i][4] / stats[i][3] * 100
 		end if
@@ -118,12 +117,13 @@ function process_builddir( sequence builddir, sequence objectdir, sequence cover
 		sequence 
 			source = sourcedir & '/' & source_files[i][D_NAME] & ".gcov",
 			target = coveragedir & objectdir & "/back"
-		
-		system( sprintf(`mv "%s" "%s"`,{source, target}), 2 )
-		
-		object result = write_html( target & '/' &  source_files[i][D_NAME] & ".gcov")
-		if sequence( result ) then
-			stats = append( stats, prepend( result, source_files[i][D_NAME] ) )
+		if file_exists( source ) then
+			system( sprintf(`mv "%s" "%s"`,{source, target}), 2 )
+			
+			object result = write_html( target & '/' &  source_files[i][D_NAME] & ".gcov")
+			if sequence( result ) then
+				stats = append( stats, prepend( result, source_files[i][D_NAME] ) )
+			end if
 		end if
 	end for
 	
