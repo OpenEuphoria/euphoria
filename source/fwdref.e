@@ -11,7 +11,6 @@ elsedef
 end ifdef
 without type_check
 include std/filesys.e
-include std/map.e
 
 include global.e
 include parser.e
@@ -32,7 +31,6 @@ sequence
 	toplevel_references = {},
 	inactive_references = {}
 
-map:map active_refnames = map:new()
 
 enum
 	FR_TYPE,
@@ -128,7 +126,6 @@ procedure resolved_reference( integer ref )
 	else
 		InternalErr( 260 )
 	end if
-	map:put( active_refnames, forward_references[ref], 1, map:SUBTRACT )
 	inactive_references &= ref
 	forward_references[ref] = 0
 end procedure
@@ -749,7 +746,6 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 			end if
 			active_references[current_file_no][sp] &= ref
 		end if
-		map:put( active_refnames, forward_references[ref][FR_NAME], 1, map:ADD )
 		fwdref_count += 1
 	end if
 	return ref
@@ -895,14 +891,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		active_references   = {}
 		toplevel_references = {}
 		inactive_references = {}
-		map:clear( active_refnames )
 	end if
 	clear_last()
 end procedure
-
-export function might_be_fwdref( sequence name )
-	return map:get( active_refnames, name, 0 )
-end function
 
 procedure shift_these( sequence refs, integer pc, integer amount )
 	for i = length( refs ) to 1 by -1 do

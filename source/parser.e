@@ -277,7 +277,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 		   (SymTab[sym][S_SCOPE] = SC_PRIVATE and
 		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS])) then
 			if sym < 0 or (SymTab[sym][S_INITLEVEL] = -1)
-			or (SymTab[sym][S_SCOPE] != SC_PRIVATE and and_bits(SymTab[CurrentSub][S_USAGE], U_FORWARD ))
+			or (SymTab[sym][S_SCOPE] != SC_PRIVATE)
 			then
 				if ref then
 					if sym > 0 and (SymTab[sym][S_SCOPE] = SC_UNDEFINED) then
@@ -291,7 +291,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 				end if
 				if sym > 0 
 				and (short_circuit <= 0 or short_circuit_B = FALSE)
-				and not (SymTab[sym][S_SCOPE] != SC_PRIVATE and and_bits(SymTab[CurrentSub][S_USAGE], U_FORWARD )) then
+				and not (SymTab[sym][S_SCOPE] != SC_PRIVATE) then
 					
 					if CurrentSub != TopLevelSub 
 					or current_file_no = length( known_files ) then
@@ -3926,11 +3926,6 @@ procedure SubProg(integer prog_type, integer scope)
 	SymTab[p][S_TEMPS] = 0
 	SymTab[p][S_RESIDENT_TASK] = 0
 	SymTab[p][S_SAVED_PRIVATES] = {}
-
-	if might_be_fwdref( SymTab[p][S_NAME] ) then
-		SymTab[p][S_USAGE] = or_bits( SymTab[p][S_USAGE], U_FORWARD )
-	end if
-
 	
 	if type_enum then
 		SymTab[p][S_FIRSTLINE] = type_enum_gline
