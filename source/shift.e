@@ -270,14 +270,18 @@ function op_size( integer pc, sequence code = Code )
 		switch op with fallthru do
 			case PROC then
 			case PROC_TAIL then
-				return SymTab[code[pc+1]][S_NUM_ARGS] + 2 + (SymTab[code[pc+1]][S_TOKEN] != PROC)
+				info = SymTab[code[pc+1]]
+				return info[S_NUM_ARGS] + 2 + (info[S_TOKEN] != PROC)
 			case PROC_FORWARD then
-				return code[pc+2] + 3
+				op = code[pc+2]
+				return op + 3
 			case FUNC_FORWARD then
-				return code[pc+2] + 4
+				op = code[pc+2]
+				return op + 4
 			case RIGHT_BRACE_N then
 			case CONCAT_N then
-				return 3 + code[pc+1]
+				op = code[pc+1]
+				return op + 3
 			case else
 				InternalErr( 269, {op} )
 		end switch
@@ -424,7 +428,7 @@ export function get_ops( integer pc, integer offset, integer num_ops = 1, sequen
 		num_ops -= 1
 	end while
 	if num_ops then
-		ops = ops[1..$-num_ops]
+		ops = head( ops, length( ops ) - num_ops )
 	end if
 	return ops
 end function
