@@ -290,7 +290,8 @@ function op_size( integer pc, sequence code = Code )
 end function
 
 export function advance( integer pc, sequence code = Code )
-	return pc + op_size( pc, code )
+	pc += op_size( pc, code )
+	return pc
 end function
 
 procedure shift_switch( integer pc, integer start, integer amount )
@@ -367,10 +368,12 @@ export procedure shift( integer start, integer amount, integer bound = start )
 	integer pc = 1
 	integer op
 	integer finish = start + amount - 1
-	while pc <= length( Code ) do
+	integer len = length( Code )
+	while pc <= len do
 		if pc < start or pc > finish then
 			op = Code[pc]
-			for i = 1 to length( op_info[op][OP_ADDR] ) do
+			sequence addrs = op_info[op][OP_ADDR]
+			for i = 1 to length( addrs ) do
 
 				switch op with fallthru do
 					case SWITCH then
@@ -382,7 +385,7 @@ export procedure shift( integer start, integer amount, integer bound = start )
 						break
 
 					case else
-						int = op_info[op][OP_ADDR][i]
+						int = addrs[i]
 						shift_addr( pc + int, amount, start, bound )
 
 				end switch
