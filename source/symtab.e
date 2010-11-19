@@ -42,14 +42,28 @@ export function hashfn(sequence name)
 -- hash function for symbol table
 	integer len
 	integer val -- max is 268,448,190+len
+	integer int
 
 	len = length(name)
-	val = name[1] * 2 + name[$] * 256 +  len
+	
+	val = name[1]
+	int = name[$]
+	int *= 256
+	val *= 2
+	val += int + len
+	
 	if len = 3 then
-		val = val * 32 + name[2]
+		val *= 32
+		int = name[2]
+		val += int
 	elsif len > 3 then
-		val = val * 32 + name[2] -- val = val * 32 + name[2]
-		val = val * 32 + name[$-1] -- val = val * 32 + name[$-1]
+		val *= 32
+		int = name[2]
+		val += int
+		
+		val *= 32
+		int = name[$-1]
+		val += int
 	end if
 	return remainder(val, NBUCKETS) + 1
 end function
