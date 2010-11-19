@@ -263,28 +263,29 @@ init_op_info()
 function op_size( integer pc, sequence code = Code )
 	integer op = code[pc]
 	sequence info = op_info[op]
-
-	if info[OP_SIZE_TYPE] = FIXED_SIZE then
-		return info[OP_SIZE]
+	integer int = info[OP_SIZE_TYPE]
+	
+	if int = FIXED_SIZE then
+		int = info[OP_SIZE]
+		return int
 	else
-		switch op with fallthru do
-			case PROC then
-			case PROC_TAIL then
+		switch op do
+			case PROC, PROC_TAIL then
 				info = SymTab[code[pc+1]]
 				return info[S_NUM_ARGS] + 2 + (info[S_TOKEN] != PROC)
 			case PROC_FORWARD then
-				op = code[pc+2]
-				return op + 3
+				int = code[pc+2]
+				int += 3
 			case FUNC_FORWARD then
-				op = code[pc+2]
-				return op + 4
-			case RIGHT_BRACE_N then
-			case CONCAT_N then
-				op = code[pc+1]
-				return op + 3
+				int = code[pc+2]
+				int += 4
+			case RIGHT_BRACE_N, CONCAT_N then
+				int = code[pc+1]
+				int += 3
 			case else
 				InternalErr( 269, {op} )
 		end switch
+		return int
 	end if
 end function
 
@@ -320,20 +321,25 @@ procedure shift_switch( integer pc, integer start, integer amount )
 end procedure
 
 procedure shift_addr( integer pc, integer amount, integer start, integer bound )
+	integer int
 	if atom( Code[pc] ) then
-		if Code[pc] >= start then
-			if Code[pc] < bound then
+		int = Code[pc]
+		if int >= start then
+			if int < bound then
 				Code[pc] = start
 			else
-				Code[pc] += amount
+				int += amount
+				Code[pc] = int
 			end if
 		end if
 	else
-		if Code[pc][2] >= start then
-			if Code[pc][2] < bound then
+		int = Code[pc][2]
+		if int >= start then
+			if int < bound then
 				Code[pc][2] = start
 			else
-				Code[pc][2] += amount
+				int += amount
+				Code[pc][2] = int
 			end if
 		end if
 	end if
@@ -346,12 +352,15 @@ export procedure shift( integer start, integer amount, integer bound = start )
 		return
 	end if
 
+	integer int
 	for i = length( LineTable ) to 1 by -1 do
-		if LineTable[i] > 0 then
-			if LineTable[i] < start then
-			exit
+		int = LineTable[i]
+		if int > 0 then
+			if int < start then
+				exit
 			end if
-			LineTable[i] += amount
+			int += amount
+			LineTable[i] = int
 		end if
 	end for
 
@@ -373,7 +382,8 @@ export procedure shift( integer start, integer amount, integer bound = start )
 						break
 
 					case else
-						shift_addr( pc + op_info[op][OP_ADDR][i], amount, start, bound )
+						int = op_info[op][OP_ADDR][i]
+						shift_addr( pc + int, amount, start, bound )
 
 				end switch
 			end for
