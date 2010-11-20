@@ -53,7 +53,9 @@
                   did not, resulting in slower code.
 * [[ticket:343]], Resolution of unqualified symbols from other files is deferred until
                   all files that could cause symbol resolution conflicts have been read.
-
+* [[ticket:349]], Fixed resolution of qualified public symbols when the namespace points
+                  to the wrong file, but the namespace file directly includes the file with
+                  the actual routine
 === Enhancements/Changes:
 
 * [[ticket:334]], OS/X, FreeBSD and Linux distribution build scripts are now
