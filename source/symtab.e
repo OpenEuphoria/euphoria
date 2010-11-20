@@ -802,17 +802,15 @@ end ifdef
 								else
 									include_type = DIRECT_OR_PUBLIC_INCLUDE
 								end if
-								good = and_bits( include_type, include_matrix[file_no][tok_file] )
 								
 							case SC_PUBLIC then
 								
-								if tok_file = current_file_no then
+								if tok_file != file_no then
 									include_type = PUBLIC_INCLUDE
 								else
 									include_type = DIRECT_OR_PUBLIC_INCLUDE
 								end if
 								
-							
 						end switch
 						good = and_bits( include_type, include_matrix[file_no][tok_file] )
 					end if
