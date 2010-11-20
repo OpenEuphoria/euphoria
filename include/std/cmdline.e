@@ -1279,7 +1279,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- sequence opts = parse_commandline("-v -f '%Y-%m-%d %H:%M')
+-- sequence opts = parse_commandline("-v -f '%Y-%m-%d %H:%M'")
 -- -- opts = { "-v", "-f", "%Y-%m-%d %H:%M" }
 -- </eucode>
 --
