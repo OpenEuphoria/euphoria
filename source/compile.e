@@ -5052,14 +5052,17 @@ procedure opREMOVE()
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
 	c_stmt0("if (start > len || start > stop || stop<0) {\n")
-	c_stmt("RefDS(@);\n", {Code[pc+1]})
-	c_stmt("DeRef(@);\n", {Code[pc+4]})
-	c_stmt("@ = @;\n",{Code[pc+4], Code[pc+1]})
+	if Code[pc+1] != Code[pc+4] then
+		-- only do this if it's a different target...
+		c_stmt("RefDS(@);\n", {Code[pc+1]})
+		c_stmt("DeRef(@);\n", {Code[pc+4]})
+		c_stmt("@ = @;\n",{Code[pc+4], Code[pc+1]})
+	end if
 	c_stmt0("}\n")
 	c_stmt0("else if (start < 2) {\n")
 	c_stmt0("if (stop >= len) {\n")
-	c_stmt("DeRef(@);\n", {Code[pc+4]})
-	c_stmt("@ = MAKE_SEQ(NewS1(0));\n",{Code[pc+4]})
+	-- use Head() here, which might result in an in-place modification
+	c_stmt("Head( SEQ_PTR(@), start, &@ );\n", { Code[pc+1], Code[pc+4] })
 	c_stmt0("}\n")
 	c_stmt("else Tail(SEQ_PTR(@), stop+1, &@);\n",{Code[pc+1], Code[pc+4]})
 	c_stmt0("}\n")

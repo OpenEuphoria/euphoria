@@ -9,8 +9,8 @@ ifdef ETYPE_CHECK then
 elsedef
 	without type_check
 end ifdef
+without type_check
 include std/filesys.e
-include std/map.e
 
 include global.e
 include parser.e
@@ -31,7 +31,6 @@ sequence
 	toplevel_references = {},
 	inactive_references = {}
 
-map:map active_refnames = map:new()
 
 enum
 	FR_TYPE,
@@ -44,6 +43,7 @@ enum
 	FR_BP,
 	FR_QUALIFIED,
 	FR_OP,
+	FR_HASHVAL,
 --	FR_PRIVATE_LIST, -- not used yet
 	FR_DATA  -- extra info
 
@@ -101,18 +101,31 @@ procedure resolved_reference( integer ref )
 	end if
 	
 	if ax then
-		active_references[file][sp] = remove( active_references[file][sp], ax )
+		sequence r = active_references[file][sp] 
+		active_references[file][sp] = 0
+		r = remove( r, ax )
+		active_references[file][sp] = r
+		
 		if not length( active_references[file][sp] ) then
-			active_references[file] = remove( active_references[file], sp )
-			active_subprogs[file]   = remove( active_subprogs[file],   sp )
+			r = active_references[file]
+			active_references[file] = 0
+			r = remove( r, sp )
+			active_references[file] = r
+			
+			r = active_subprogs[file]
+			active_subprogs[file] = 0
+			r = remove( r,   sp )
+			active_subprogs[file] = r
 		end if
 	elsif tx then
-		toplevel_references[file] = remove( toplevel_references[file], tx )
+		sequence r = toplevel_references[file]
+		toplevel_references[file] = 0
+		r = remove( r, tx )
+		toplevel_references[file] = r
 		
 	else
 		InternalErr( 260 )
 	end if
-	map:put( active_refnames, forward_references[ref], 1, map:SUBTRACT )
 	inactive_references &= ref
 	forward_references[ref] = 0
 end procedure
@@ -625,7 +638,7 @@ function find_reference( sequence fr )
 	integer ix = find( ':', name )
 	if ix then
 		sequence ns = name[1..ix-1]
-		token ns_tok = keyfind( ns, ns_file, file, 1 )
+		token ns_tok = keyfind( ns, ns_file, file, 1, fr[FR_HASHVAL] )
 		if ns_tok[T_ID] != NAMESPACE then
 			return ns_tok
 		end if
@@ -634,7 +647,7 @@ function find_reference( sequence fr )
 	end if
 	
 	No_new_entry = 1
-	token tok = keyfind( name, ns_file, file )
+	token tok = keyfind( name, ns_file, file, , fr[FR_HASHVAL] )
 	No_new_entry = 0
 	return tok
 end function
@@ -664,7 +677,6 @@ export type forward_reference( integer ref )
 end type
 
 export function new_forward_reference( integer fwd_op, symtab_index sym, integer op = fwd_op  )
-	
 	integer 
 		ref, 
 		len = length( inactive_references )
@@ -681,8 +693,17 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 	forward_references[ref][FR_TYPE]      = fwd_op
 	if sym < 0 then
 		forward_references[ref][FR_NAME] = forward_references[-sym][FR_NAME]
+		forward_references[ref][FR_HASHVAL] = forward_references[-sym][FR_HASHVAL]
 	else
 		forward_references[ref][FR_NAME] = SymTab[sym][S_NAME]
+		integer hashval = SymTab[sym][S_HASHVAL]
+		if 0 = hashval then
+			forward_references[ref][FR_HASHVAL] = hashfn( forward_references[ref][FR_NAME] )
+		else
+			forward_references[ref][FR_HASHVAL] = hashval
+			remove_symbol( sym )
+		end if
+		
 	end if
 	
 	forward_references[ref][FR_FILE]      = current_file_no
@@ -725,7 +746,6 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 			end if
 			active_references[current_file_no][sp] &= ref
 		end if
-		map:put( active_refnames, forward_references[ref][FR_NAME], 1, map:ADD )
 		fwdref_count += 1
 	end if
 	return ref
@@ -871,14 +891,9 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		active_references   = {}
 		toplevel_references = {}
 		inactive_references = {}
-		map:clear( active_refnames )
 	end if
 	clear_last()
 end procedure
-
-export function might_be_fwdref( sequence name )
-	return map:get( active_refnames, name, 0 )
-end function
 
 procedure shift_these( sequence refs, integer pc, integer amount )
 	for i = length( refs ) to 1 by -1 do

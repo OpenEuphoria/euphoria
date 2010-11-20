@@ -15,6 +15,7 @@ include std/map.e
 include dot.e
 include std/sort.e
 include std/cmdline.e
+include std/math.e
 
 include mode.e as mode
 include cominit.e
@@ -1626,33 +1627,55 @@ procedure save_il( sequence name )
 
 	st = open( sprintf("%shash", { name }), "wb" )
 	sequence bucket = repeat( "", length( buckets ) )
+	sequence end_size = repeat( "", length( buckets ) )
+	sequence bucket_reps = repeat( "", length( buckets ) ) 
+	for i = 1 to length( buckets ) do
+		integer size = 0
+		integer s = buckets[i]
+		while s do
+			size += 1
+			s = SymTab[s][S_SAMEHASH]
+		end while
+		end_size[i] = size
+	end for
 	used_buckets = 0
 	symcnt = 0
 	bucket_usage = {}
+	
 	for i = 1 to length( SymTab ) do
 		if length( SymTab[i] ) >= S_HASHVAL and SymTab[i][S_HASHVAL] then
-			if not find( SymTab[i][S_NAME], bucket[SymTab[i][S_HASHVAL]] ) then
-				bucket[SymTab[i][S_HASHVAL]] = append( bucket[SymTab[i][S_HASHVAL]], SymTab[i][S_NAME] )
+			integer h = SymTab[i][S_HASHVAL]
+			integer bx = find( SymTab[i][S_NAME], bucket[h] )
+			if not bx then
+				bucket[h] = append( bucket[h], SymTab[i][S_NAME] )
+				bucket_reps[h] &= 1
+			else
+				bucket_reps[h][bx] += 1
 			end if
 		end if
 	end for
 
 	for i = 1 to length( bucket ) do
-		bucket[i] = length(bucket[i]) & i & bucket[i]
+		for j = 1 to length( bucket[i] ) do
+			bucket[i][j] = sprintf( "[%d:%s]", {bucket_reps[i][j], bucket[i][j]})
+		end for
+		bucket[i] = sum(bucket_reps[i]) & i & bucket[i]
 	end for
+	
 	bucket = sort(bucket, DESCENDING)
 	bucket_usage = repeat(0, bucket[1][1])
+	puts(st, "Bucket size / hashval / Ending Size / hits : contents\n" )
 	for i = 1 to length( bucket ) do
 		if bucket[i][1] > 0 then
 			used_buckets += 1
 			symcnt += bucket[i][1]
 			bucket_usage[bucket[i][1]] += 1
-			printf( st, "%03d %05d: ", bucket[i][1..2] )
+			printf( st, "%5d %5d %5d %5d: ", bucket[i][1..2] & end_size[i] & bucket_hits[i] )
 			for j = 3 to length( bucket[i] ) do
 				if j > 3 then
 					puts( st, ", " )
 				end if
-				puts( st, bucket[i][j] )
+				printf( st, "%s", {bucket[i][j]} )
 			end for
 			puts( st, '\n' )
 		end if
@@ -1665,6 +1688,28 @@ procedure save_il( sequence name )
 		printf( st, "Symbols / bucket: %4.2f\n", symcnt / used_buckets)
 		for i = 1 to length(bucket_usage) do
 			printf( st, "Len %2d : %d\n", {i, bucket_usage[i]})
+		end for
+		
+		sequence hit_counts = {}
+		for i = 1 to length( bucket_hits ) do
+			integer hits = bucket_hits[i] + 1 -- could be 0
+			if length( hit_counts ) < hits then
+				hit_counts &= repeat( 0, hits - length( hit_counts ) )
+			end if
+			hit_counts[hits] += 1
+		end for
+		
+		for i = 1 to length( hit_counts ) do
+			hit_counts[i] = { i-1, hit_counts[i] }
+		end for
+		
+		puts( st, "\nBucket search frequency counts (hits : # buckets):\n" )
+-- 		hit_counts = sort( hit_counts )
+		for i = length( hit_counts ) to 1 by -1 do
+			if hit_counts[i][2] then
+				printf( st, "%6d: %d\n", hit_counts[i]  )
+			end if
+			
 		end for
 	end if
 

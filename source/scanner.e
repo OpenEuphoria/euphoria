@@ -240,7 +240,8 @@ export function fetch_line(integer start)
 		end if
 		line[n] = c
 	end while
-	return line[1..n]
+	line = remove( line, n+1, length( line ) )
+	return line
 end function
 
 export procedure AppendSourceLine()

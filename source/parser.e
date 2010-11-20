@@ -277,7 +277,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 		   (SymTab[sym][S_SCOPE] = SC_PRIVATE and
 		   SymTab[sym][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS])) then
 			if sym < 0 or (SymTab[sym][S_INITLEVEL] = -1)
-			or (SymTab[sym][S_SCOPE] != SC_PRIVATE and and_bits(SymTab[CurrentSub][S_USAGE], U_FORWARD ))
+			or (SymTab[sym][S_SCOPE] != SC_PRIVATE)
 			then
 				if ref then
 					if sym > 0 and (SymTab[sym][S_SCOPE] = SC_UNDEFINED) then
@@ -291,7 +291,7 @@ procedure InitCheck(symtab_index sym, integer ref)
 				end if
 				if sym > 0 
 				and (short_circuit <= 0 or short_circuit_B = FALSE)
-				and not (SymTab[sym][S_SCOPE] != SC_PRIVATE and and_bits(SymTab[CurrentSub][S_USAGE], U_FORWARD )) then
+				and not (SymTab[sym][S_SCOPE] != SC_PRIVATE) then
 					
 					if CurrentSub != TopLevelSub 
 					or current_file_no = length( known_files ) then
@@ -627,7 +627,7 @@ function next_token()
 
 	if length(backed_up_tok) > 0 then
 		t = backed_up_tok[$]
-		backed_up_tok = backed_up_tok[1 .. $-1]
+		backed_up_tok = remove( backed_up_tok, length( backed_up_tok ) )
 	elsif Parser_mode = PAM_PLAYBACK then
 		if canned_index <= length(canned_tokens) then
 			t = canned_tokens[canned_index]
@@ -966,6 +966,7 @@ procedure Forward_var( token tok, integer init_check = -1, integer op = tok[T_ID
 	if init_check != -1 then
 		Forward_InitCheck( tok, init_check )
 	end if
+	
 end procedure
 
 procedure Forward_call(token tok, integer opcode = PROC_FORWARD )
@@ -1224,14 +1225,14 @@ procedure Factor()
 					putback(tok)
 					tok_match(RIGHT_SQUARE)
 					subs_depth -= 1
-					current_sequence = current_sequence[1..$-1]
+					current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 					emit_op(RHS_SUBS) -- current_sequence will be updated
 				end if
 				factors = save_factors
 				lhs_subs_level = save_lhs_subs_level
 				tok = next_token()
 			end while
-			current_sequence = current_sequence[1..$-1]
+			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 			putback(tok)
 			short_circuit += 1
 
@@ -1556,7 +1557,7 @@ procedure Assignment(token left_var)
 		subs_depth += 1
 		if lhs_ptr then
 			-- multiple lhs subscripts, evaluate first n-1 of them with this
-			current_sequence = current_sequence[1..$-1]
+			current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 			if subs = 1 then
 				-- first subscript of 2 or more
 				subs1_patch = length(Code)+1
@@ -1702,7 +1703,7 @@ procedure Assignment(token left_var)
 		end if
 	end if
 
-	current_sequence = current_sequence[1..$-1]
+	current_sequence = head( current_sequence, length( current_sequence ) - 1 )
 
 	if not TRANSLATE then
 		if OpTrace then
@@ -3925,11 +3926,6 @@ procedure SubProg(integer prog_type, integer scope)
 	SymTab[p][S_TEMPS] = 0
 	SymTab[p][S_RESIDENT_TASK] = 0
 	SymTab[p][S_SAVED_PRIVATES] = {}
-
-	if might_be_fwdref( SymTab[p][S_NAME] ) then
-		SymTab[p][S_USAGE] = or_bits( SymTab[p][S_USAGE], U_FORWARD )
-	end if
-
 	
 	if type_enum then
 		SymTab[p][S_FIRSTLINE] = type_enum_gline
