@@ -51,6 +51,8 @@
 * Removed many unnecessary ##[[:maybe_any_key]]## uses from the general demos
 * [[ticket:409]], Calls to ##Head()## that should have altered the sequence in place
                   did not, resulting in slower code.
+* [[ticket:343]], Resolution of unqualified symbols from other files is deferred until
+                  all files that could cause symbol resolution conflicts have been read.
 
 === Enhancements/Changes:
 
