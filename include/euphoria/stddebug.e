@@ -20,7 +20,6 @@ include std/machine.e
 include std/map.e
 include std/math.e
 include std/memory.e
-include std/mouse.e
 include std/net/common.e
 include std/net/dns.e
 include std/net/http.e
