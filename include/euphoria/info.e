@@ -221,9 +221,9 @@ end function
 
 public function pcre_copyright()
 	return {
-		"PCRE v7.8",
+		"PCRE v8.10",
 		`
-________Copyright (c) 1997-2008 University of Cambridge
+________Copyright (c) 1997-2010 University of Cambridge
 		All Rights Reserved
 		`
 	}
