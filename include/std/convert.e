@@ -7,9 +7,7 @@
 namespace convert
 
 include std/search.e
-include std/sequence.e
 include std/text.e
-include std/types.e
 
 constant
 	M_A_TO_F64 = 46,
@@ -845,8 +843,8 @@ public function to_string(object data_in, integer string_quote = 0, integer embe
 		if string_quote = 0 then
 			return data_in
 		end if
-		data_in = match_replace(`\`, data_in, `\\`)
-		data_in = match_replace({string_quote}, data_in, `\` & string_quote)
+		data_in = search:match_replace(`\`, data_in, `\\`)
+		data_in = search:match_replace({string_quote}, data_in, `\` & string_quote)
 		return string_quote & data_in & string_quote
 	end if
 	
@@ -854,7 +852,7 @@ public function to_string(object data_in, integer string_quote = 0, integer embe
 		if integer(data_in) then
 			return sprintf("%d", data_in)
 		end if
-		data_in = trim_tail(sprintf("%.15f", data_in), '0')
+		data_in = text:trim_tail(sprintf("%.15f", data_in), '0')
 		if data_in[$] = '.' then
 			data_in = remove(data_in, length(data_in))
 		end if
