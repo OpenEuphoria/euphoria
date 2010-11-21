@@ -393,7 +393,7 @@ screen.
 
 Under //Windows// you can associate ##ed.bat## with various kinds of text files
 that you want to edit. Color syntax highlighting is provided for ##.ex##,
-##.exw##, ##.exd##, ##.e## and ##.pro## ([[:profile_file "profile files"]]).
+##.exw##, ##.exd##, ##.e## and ##.pro## ([[:Profiling "profile files"]]).
 
 Most keys that you type are inserted into the file at the cursor position. Hit
 the ##Esc## key once to get a menu bar of special commands. The arrow keys, and

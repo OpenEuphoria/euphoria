@@ -5,6 +5,9 @@
 
 namespace utils
 
+--****
+-- === Routines
+
 --**
 -- Used to embed an 'if' test inside an expression.
 --
