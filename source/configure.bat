@@ -123,7 +123,7 @@ IF "%1" == "--oe-username" (
 	GOTO EndLoop
 )
 
-IF "%1" == "-scp-client" (
+IF "%1" == "--scp-client" (
 	set SCP_CLIENT=%2
 	SHIFT
 	GOTO EndLoop

@@ -197,7 +197,7 @@ while [ "$1" != "" ]; do
 		shift
 		echo OE_USERNAME=$1 >> ${CONFIG_FILE}
 		;;
-	--scp )
+	--scp-client )
 		shift
 		SCP=$1
 		;;
