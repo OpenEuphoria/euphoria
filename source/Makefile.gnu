@@ -499,7 +499,7 @@ $(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 $(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
 	@$(ECHO) making $(EECU)
 	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
-
+	
 backend : builddirs
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -664,30 +664,76 @@ endif
 	           *.e \
 	           be_*.c \
 	           *.h
-	# helper script for running dis.ex
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eudis
-	echo eui $(PREFIX)/share/euphoria/source/dis.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eudis
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eudis
-	# helper script for binding programs
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eubind
-	echo eui $(PREFIX)/share/euphoria/source/bind.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eubind
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eubind
+
+
+EUDIS=eudis
+EUBIND=eubind
+EUSHROUD=eushroud
+EUTEST=eutest
+EUCOVERAGE=eucoverage
+EUDIST=eudist
+
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUDIST)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(TRUNKDIR)/source/eudist.ex
+
+$(BUILDDIR)/$(EUDIS) : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
+$(BUILDDIR)/$(EUDIS) : $(EU_CORE_FILES) 
+$(BUILDDIR)/$(EUDIS) : $(EU_INTERPRETER_FILES)
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUDIS)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		-makefile \
+		-debug \
+		$(TRUNKDIR)/source/dis.ex
+	$(MAKE) -C $(BUILDDIR)/eudis-build -j3 -f dis.mak
+
+$(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUBIND)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(TRUNKDIR)/source/bind.ex
+
+$(BUILDDIR)/$(EUTEST) : $(TRUNKDIR)/source/eutest.ex
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUTEST)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(TRUNKDIR)/source/eutest.ex
+
+$(BUILDDIR)/$(EUCOVERAGE) : $(TRUNKDIR)/bin/eucoverage.ex
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(TRUNKDIR)/bin/eucoverage.ex
+
+EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
+	$(BUILDDIR)/$(EUDIS) \
+	$(BUILDDIR)/$(EUBIND) \
+	$(BUILDDIR)/$(EUTEST) \
+	$(BUILDDIR)/$(EUCOVERAGE)
+
+tools : $(EU_TOOLS)
+
+clean-tools :
+	-rm $(EU_TOOLS)
+
+install-tools :
+	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)/$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)/$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)/$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)/$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)/$(PREFIX)/bin/
 	# helper script for shrouding programs
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
-	echo eui $(PREFIX)/share/euphoria/source/bind.ex -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
+	echo eubind $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
-	# helper script for eutest
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eutest
-	echo eui $(PREFIX)/share/euphoria/source/eutest.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eutest
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eutest
-	# helper script for eucoverage
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eucoverage
-	echo eui $(PREFIX)/share/euphoria/bin/eucoverage.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eucoverage
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eucoverage
-	# helper script for running eudist.ex
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eudist
-	echo eui $(PREFIX)/share/euphoria/source/eudist.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eudist
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eudist
 	
 
 install-docs :

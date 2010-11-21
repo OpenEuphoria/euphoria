@@ -1725,16 +1725,6 @@ procedure InitBackEnd( object ignore )
     -- set up operations
     operation = repeat(-1, length(opnames))
 
-	while 2 <= length(Argv) do
-		if Argv[2][1] != '-' and
-		(match("dis", Argv[2]) = 1
-		or match( SLASH & "dis", Argv[2] ) ) then
-			exit
-		end if
-		Argv = eu:remove( Argv, 2, 2 )
-	end while
-	Argc = length(Argv)
-
 	if not TRANSLATE then
 		intoptions()
 	else
