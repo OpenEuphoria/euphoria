@@ -664,7 +664,7 @@ end function
 -- See Also:
 --		[[:remove]], [[:has]],  [[:nested_put]]
 
-public procedure put(map the_map_p, object the_key_p, object the_value_p, integer operation_p = PUT, integer trigger_p = 100 )
+public procedure put(map the_map_p, object the_key_p, object the_value_p, integer operation_p = map:PUT, integer trigger_p = 100 )
 	integer index_
 	integer bucket_
 	atom average_length_
