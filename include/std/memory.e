@@ -42,7 +42,7 @@ public include std/memconst.e
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
-include std/error.e
+-- include std/error.e
 
 ifdef DATA_EXECUTE then
 	include std/machine.e
@@ -89,9 +89,9 @@ export procedure deallocate(atom addr)
 			return
 		end if
 	end ifdef
-   	machine_proc(M_FREE, addr)
+   	machine_proc( memconst:M_FREE, addr)
 end procedure
-FREE_RID = routine_id("deallocate")
+memconst:FREE_RID = routine_id("deallocate")
 
 
 --****
@@ -889,7 +889,7 @@ with warning
 --**
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return (DEP_really_works and use_DEP)
 	end ifdef
 
@@ -899,13 +899,13 @@ end function
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if dep_works() then
 			c_func(VirtualFree_rid, { addr, size*wordsize, MEM_RELEASE })
 		else
-			machine_proc(M_FREE,addr)
+			machine_proc( memconst:M_FREE, addr)
 		end if
 	elsedef
-		machine_proc(M_FREE,addr)
+		machine_proc( memconst:M_FREE, addr)
 	end ifdef
 end procedure
