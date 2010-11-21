@@ -311,7 +311,7 @@ end function
 --
 --  Encoding type can be
 --    * [[:ENCODE_NONE]]
---    * [[:ENCODED_BASE64]]
+--    * [[:ENCODE_BASE64]]
 --
 --  An example for a multipart form encoded post request data sequence
 --

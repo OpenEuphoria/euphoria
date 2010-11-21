@@ -281,7 +281,7 @@ QQ = """This text contains a back quote ` """ & `and """ for some reason.`
  tab, newline, carriage-return. Anything else is invalid.
 # an underscore is simply ignored, as if it was never there. It is used to aid
  readability.
-# each set of contiguous binary digits represent a single sequence element
+# each set of contiguous binary digits represents a single sequence element
 # they can span multiple lines
 # The non-digits  are treated as punctuation and used to delimit individual
   values.
@@ -296,7 +296,7 @@ b"1 10 11_0100 01010110_01111000" == {0x01, 0x02, 0x34, 0x5678}
  tab, newline, carriage-return. Anything else is invalid.
 # An underscore is simply ignored, as if it was never there. It is used to aid
  readability.
-# Each pair of contiguous hex digits represent a single sequence element with a
+# Each pair of contiguous hex digits represents a single sequence element with a
  value from 0 to 255
 # They can span multiple lines
 # The non-digits are treated as punctuation and used to delimit individual
@@ -327,7 +327,7 @@ sequence of characters, and {} to suggest some other kind of sequence.
 
 An **individual character** is an **atom**. It must be entered using single
 quotes. There is a difference between an individual character (which is an
-atom), and a character string of length-1 (which is a sequence). e.g.
+atom), and a character string of length 1 (which is a sequence). e.g.
 
 <eucode>
 'B'   -- equivalent to the atom 66 - the ASCII code for B
@@ -356,8 +356,8 @@ Special characters may be entered using a back-slash:
 | \0       | null |
 | \e       | escape |
 | \E       | escape |
-| \b/d..d/ | A binary coded value, The 'b is followed by 1 or more binary digits. \\
-             Inside strings, use the space character to delimit end a binary value.
+| \b/d..d/ | A binary coded value, the \b is followed by 1 or more binary digits. \\
+             Inside strings, use the space character to delimit or end a binary value.
 | \x/hh/   | A 2-hex-digit value, e.g. "\x5F" ==> {95} |
 | \u/hhhh/ | A 4-hex-digit value, e.g. "\u2A7C" ==> {10876} |
 | \U/hhhhhhhh/ | An 8-hex-digit value, e.g. "\U8123FEDC" ==> {2166619868} |
@@ -926,9 +926,9 @@ they are actually implemented much more efficiently than that.
 
 ===== length(sequence s)
 
-Returns the length of a sequence s1.
+Returns the length of a sequence s.
 
-This is the number of elements in s1. Some of these elements may be
+This is the number of elements in s. Some of these elements may be
 sequences that contain elements of their own, but ##length## just gives you the
 "top-level" count. Note however that the length of an atom is always ##1##.
 e.g.
@@ -940,7 +940,7 @@ length({})                  -- 0
 length(5)                   -- 1
 </eucode>
 
-===== repeat(object o1, integer times)
+===== repeat(object o1, integer count)
 
 Returns a sequence that consists of an item repeated count times.
 e.g.
@@ -3513,7 +3513,7 @@ than 0. It will know that the overall result is false regardless. Similarly,
 if a < 0 or b > 0 then ...
 </eucode>
 
-if a < 0 is true, then Euphoria will immediately decide that the result true,
+if a < 0 is true, then Euphoria will immediately decide that the result is true,
 without testing the value of b, since the result of this test would be
 irrelevant.
 
@@ -3542,7 +3542,7 @@ you will get a compile-time warning. Older versions (pre-2.1) of Euphoria did
 not use [[:short-circuit]] evaluation, and it's possible that some
 old code will no longer work correctly, although a search of the Euphoria
 archives did not turn up any programs that depend on side-effects in this
-way, but other Euphoria code might do.
+way, but other Euphoria code might do so.
 
 The expression, B, could contain something that would normally cause a run-time
 error. If Euphoria skips the evaluation of B, the error will not be discovered.
