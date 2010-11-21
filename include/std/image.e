@@ -7,7 +7,6 @@
 namespace image
 
 include std/convert.e
-include std/machine.e
 
 public include std/graphcst.e
 
