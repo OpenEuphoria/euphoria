@@ -10,7 +10,7 @@ include std/error.e
 include std/io.e
 include std/map.e
 include std/os.e
-include std/sequence.e as seq
+include std/sequence.e
 include std/text.e
 include std/types.e
 
@@ -150,7 +150,7 @@ sequence pause_msg = ""
 
 procedure local_abort(integer lvl)
 	if length(pause_msg) != 0 then
-		any_key(pause_msg, 1)
+		console:any_key(pause_msg, 1)
 	end if
 
 	abort(lvl)
@@ -181,7 +181,7 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 
 		if atom(opt[LONGNAME]) and atom(opt[SHORTNAME]) then
 			if lExtras != 0 then
-				crash("cmd_opts: There must be less than two 'extras' option records.\n")
+				error:crash("cmd_opts: There must be less than two 'extras' option records.\n")
 			else
 				lExtras = i
 				if atom(opt[MAPNAME]) then
@@ -207,31 +207,31 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 		else
 			for j = 1 to length(opt[OPTIONS]) do
 				if find(opt[OPTIONS][j], opt[OPTIONS], j + 1) != 0 then
-					crash("cmd_opts: Duplicate processing options are not allowed in an option record.\n")
+					error:crash("cmd_opts: Duplicate processing options are not allowed in an option record.\n")
 				end if
 			end for
 
 			if find(HAS_PARAMETER, opt[OPTIONS]) then
 				if find(NO_PARAMETER, opt[OPTIONS]) then
-					crash("cmd_opts: Cannot have both HAS_PARAMETER and NO_PARAMETER in an option record.\n")
+					error:crash("cmd_opts: Cannot have both HAS_PARAMETER and NO_PARAMETER in an option record.\n")
 				end if
 			end if
 
 			if find(HAS_CASE, opt[OPTIONS]) then
 				if find(NO_CASE, opt[OPTIONS]) then
-					crash("cmd_opts: Cannot have both HAS_CASE and NO_CASE in an option record.\n")
+					error:crash("cmd_opts: Cannot have both HAS_CASE and NO_CASE in an option record.\n")
 				end if
 			end if
 
 			if find(MANDATORY, opt[OPTIONS]) then
 				if find(OPTIONAL, opt[OPTIONS]) then
-					crash("cmd_opts: Cannot have both MANDATORY and OPTIONAL in an option record.\n")
+					error:crash("cmd_opts: Cannot have both MANDATORY and OPTIONAL in an option record.\n")
 				end if
 			end if
 
 			if find(ONCE, opt[OPTIONS]) then
 				if find(MULTIPLE, opt[OPTIONS]) then
-					crash("cmd_opts: Cannot have both ONCE and MULTIPLE in an option record.\n")
+					error:crash("cmd_opts: Cannot have both ONCE and MULTIPLE in an option record.\n")
 				end if
 			end if
 
@@ -276,7 +276,7 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 		if sequence(opt[SHORTNAME]) then
 			for j = i + 1 to length(opts) do
 				if equal(opt[SHORTNAME], opts[j][SHORTNAME]) then
-					crash("cmd_opts: Duplicate Short Names (%s) are not allowed in an option record.\n",
+					error:crash("cmd_opts: Duplicate Short Names (%s) are not allowed in an option record.\n",
 						{ opt[SHORTNAME]})
 				end if
 			end for
@@ -285,7 +285,7 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 		if sequence(opt[LONGNAME]) then
 			for j = i + 1 to length(opts) do
 				if equal(opt[LONGNAME], opts[j][LONGNAME]) then
-					crash("cmd_opts: Duplicate Long Names (%s) are not allowed in an option record.\n",
+					error:crash("cmd_opts: Duplicate Long Names (%s) are not allowed in an option record.\n",
 						{opt[LONGNAME]})
 				end if
 			end for
@@ -433,7 +433,7 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 				cmd &= ']'
 			end if
 		end if
-		puts(1, "   " & pad_tail(cmd, pad_size))
+		puts(1, "   " & stdseq:pad_tail(cmd, pad_size))
 		puts(1, opts[i][DESCRIPTION] & '\n')
 	end for
 
@@ -462,7 +462,7 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 	else
 		if length(add_help_rid) > 0 then
 			puts(1, "\n")
-			if t_display(add_help_rid) then
+			if types:t_display(add_help_rid) then
 				add_help_rid = {add_help_rid}
 			end if
 			
@@ -699,16 +699,16 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 	end for
 
 	if param_found then
-		if find(lower(opt_param), {"1", "on", "yes", "y", "true", "ok", "+"}) then
+		if find( text:lower(opt_param), {"1", "on", "yes", "y", "true", "ok", "+"}) then
 			opt_param = 1
-		elsif find(lower(opt_param), {"0", "off", "no", "n", "false", "-"}) then
+		elsif find( text:lower(opt_param), {"0", "off", "no", "n", "false", "-"}) then
 			opt_param = 0
 		end if
 	end if
 
 	for i = 1 to length(opts) do
 		if find(NO_CASE,  opts[i][OPTIONS]) then
-			if not equal(lower(opt_name), lower(opts[i][opt_style[1]])) then
+			if not equal( text:lower(opt_name), lower(opts[i][opt_style[1]])) then
 				continue
 			end if
 		else
@@ -950,7 +950,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 						i += 1
 						add_help_rid = parse_options[i]
 					else
-						crash("HELP_RID was given to cmd_parse with no routine_id")
+						error:crash("HELP_RID was given to cmd_parse with no routine_id")
 					end if
 
 				case VALIDATE_ALL then
@@ -973,11 +973,11 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 						i += 1
 						pause_msg = parse_options[i]
 					else
-						crash("PAUSE_MSG was given to cmd_parse with no actually message text")
+						error:crash("PAUSE_MSG was given to cmd_parse with no actually message text")
 					end if
 					
 				case else
-					crash(sprintf("Unrecognised cmdline PARSE OPTION - %d", parse_options[i]) )
+					error:crash(sprintf("Unrecognised cmdline PARSE OPTION - %d", parse_options[i]) )
 					
 			end switch
 			i += 1
@@ -1009,10 +1009,10 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 				help_opts = append(help_opts, opts[i][LONGNAME])
 			end if
 			if find(NO_CASE, opts[i][OPTIONS]) then
-				help_opts = lower(help_opts)
+				help_opts = text:lower(help_opts)
 				arg_idx = length(help_opts)
 				for j = 1 to arg_idx do
-					help_opts = append(help_opts, upper(help_opts[j]))
+					help_opts = append( help_opts, text:upper(help_opts[j]) )
 				end for
 			end if
 		end if
@@ -1054,7 +1054,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			j = 0
 			while j < length(at_cmds) do
 				j += 1
-				at_cmds[j] = trim(at_cmds[j])
+				at_cmds[j] = text:trim(at_cmds[j])
 				if length(at_cmds[j]) = 0 then
 					at_cmds = at_cmds[1 .. j-1] & at_cmds[j+1 ..$]
 					j -= 1
@@ -1067,7 +1067,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					at_cmds[j] = at_cmds[j][2 .. $-1]
 
 				elsif at_cmds[j][1] = '\'' and at_cmds[j][$] = '\'' and length(at_cmds[j]) >= 2 then
-					sequence cmdex = split(at_cmds[j][2 .. $-1],' ', 1) -- Empty words removed.
+					sequence cmdex = stdseq:split(at_cmds[j][2 .. $-1],' ', 1) -- Empty words removed.
 
 					at_cmds = replace(at_cmds, cmdex, j)
 					j = j + length(cmdex) - 1
@@ -1081,7 +1081,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			continue
 		end if
 
-		if (opts_done or find(cmd[1], CMD_SWITCHES) = 0 or length(cmd) = 1)
+		if (opts_done or find(cmd[1], os:CMD_SWITCHES) = 0 or length(cmd) = 1)
 		then
 			map:put(parsed_opts, OPT_EXTRAS, cmd, map:APPEND)
 			has_extra = 1
@@ -1198,7 +1198,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
                 printf(1, "%s\n", { opt[OPTIONS][ver_pos] })
                 abort(0)
             else
-                crash("help options are incorrect,\n" &
+                error:crash("help options are incorrect,\n" &
                     "VERSIONING was used with no version string supplied")
             end if
         end if
@@ -1264,7 +1264,7 @@ end function
 --   [[:parse_commandline]], [[:system]], [[:system_exec]], [[:command_line]]
 
 public function build_commandline(sequence cmds)
-	return flatten(quote( cmds,,'\\'," " ), " ")
+	return stdseq:flatten( text:quote( cmds,,'\\'," " ), " ")
 end function
 
 --**
