@@ -6,10 +6,8 @@
 
 namespace dll
 
-include std/convert.e
 include std/error.e
 include std/machine.e
-include std/math.e
 include std/types.e
 
 --****
@@ -160,7 +158,7 @@ constant M_OPEN_DLL  = 50,
 --     [[:define_c_func]], [[:define_c_proc]], [[:define_c_var]], [[:c_func]], [[:c_proc]]
 
 public function open_dll(sequence file_name)
-	if length(file_name) > 0 and string(file_name) then
+	if length(file_name) > 0 and types:string(file_name) then
 		return machine_func(M_OPEN_DLL, file_name)
 	end if
 
@@ -275,8 +273,8 @@ end function
 
 public function define_c_proc(object lib, object routine_name, 
 							  sequence arg_types)
-	if atom(routine_name) and not safe_address(routine_name, 1, A_EXECUTE) then
-        crash("A C function is being defined from Non-executable memory.")
+	if atom(routine_name) and not machine:safe_address(routine_name, 1, machine:A_EXECUTE) then
+        error:crash("A C function is being defined from Non-executable memory.")
 	end if			
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, 0})
 end function
@@ -372,8 +370,8 @@ end function
 
 public function define_c_func(object lib, object routine_name,
 							  sequence arg_types, atom return_type)
-	  if atom(routine_name) and not safe_address(routine_name, 1, A_EXECUTE) then
-	      crash("A C function is being defined from Non-executable memory.")
+	  if atom(routine_name) and not machine:safe_address(routine_name, 1, machine:A_EXECUTE) then
+	      error:crash("A C function is being defined from Non-executable memory.")
 	  end if			
 	  return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
