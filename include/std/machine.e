@@ -70,7 +70,7 @@ public constant ADDRESS_LENGTH = 4
 -- See Also:
 --     [[:free]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]] [[:allocate_string]]
 
-public function allocate(positive_int n, boolean cleanup = 0)
+public function allocate( memory:positive_int n, types:boolean cleanup = 0)
 -- allocate memory block and add it to safe list
 	atom iaddr --machine_addr iaddr
 	atom eaddr	
@@ -78,11 +78,11 @@ public function allocate(positive_int n, boolean cleanup = 0)
 		-- high level call:  No need to add BORDER_SPACE*2 here.
 		eaddr = machine:allocate_protect( n, 1, PAGE_READ_WRITE_EXECUTE )
 	elsedef	
-		iaddr = eu:machine_func(M_ALLOC, n+BORDER_SPACE*2)
-		eaddr = prepare_block( iaddr, n, PAGE_READ_WRITE )
+		iaddr = eu:machine_func( memconst:M_ALLOC, n + memory:BORDER_SPACE * 2)
+		eaddr = memory:prepare_block( iaddr, n, PAGE_READ_WRITE )
 	end ifdef
 	if cleanup then
-		eaddr = delete_routine( eaddr, FREE_RID )
+		eaddr = delete_routine( eaddr, memconst:FREE_RID )
 	end if
 	return eaddr
 end function
@@ -91,14 +91,14 @@ end function
 -- Allocate n bytes of memory and return the address.
 -- Free the memory using free() below.
 
-public function allocate_data(positive_int n, boolean cleanup = 0)
+public function allocate_data( memory:positive_int n, types:boolean cleanup = 0)
 -- allocate memory block and add it to safe list
-	machine_addr a
+	memory:machine_addr a
 	bordered_address sla
-	a = eu:machine_func(M_ALLOC, n+BORDER_SPACE*2)
-	sla = prepare_block(a, n, PAGE_READ_WRITE )
+	a = eu:machine_func( memconst:M_ALLOC, n+BORDER_SPACE*2)
+	sla = memory:prepare_block(a, n, PAGE_READ_WRITE )
 	if cleanup then
-		return delete_routine( sla, FREE_RID )
+		return delete_routine( sla, memconst:FREE_RID )
 	else
 		return sla
 	end if
@@ -126,7 +126,7 @@ end function
 -- See Also:
 --   [[:allocate_string_pointer_array]], [[:free_pointer_array]]
 
-public function allocate_pointer_array(sequence pointers, boolean cleanup = 0)
+public function allocate_pointer_array(sequence pointers, types:boolean cleanup = 0)
 
     atom pList
 	integer len = length(pointers) * ADDRESS_LENGTH
@@ -159,7 +159,7 @@ public procedure free_pointer_array(atom pointers_array)
 	atom ptr
 
 	while ptr with entry do
-		deallocate(ptr)
+		memory:deallocate( ptr )
 		pointers_array += ADDRESS_LENGTH
 		
 	entry
@@ -192,7 +192,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- See Also:
 --   [[:free_pointer_array]]
 
-public function allocate_string_pointer_array(object string_list, boolean cleanup = 0)
+public function allocate_string_pointer_array(object string_list, types:boolean cleanup = 0)
 	for i = 1 to length(string_list) do
 		string_list[i] = allocate_string(string_list[i])
 	end for
@@ -450,22 +450,20 @@ end function
 -- [[:machine_func]]
 
 integer page_size = 0
-ifdef WIN32 then
+ifdef WINDOWS then
 
 	atom kernel_dll, memDLL_id, 
 		VirtualAlloc_rid, 
 		-- VirtualLock_rid, VirtualUnlock_rid,
 		VirtualProtect_rid, GetLastError_rid, GetSystemInfo_rid
 
-	memDLL_id = open_dll( "kernel32.dll" )
+	memDLL_id = dll:open_dll( "kernel32.dll" )
 	kernel_dll = memDLL_id
-	VirtualAlloc_rid = define_c_func( memDLL_id, "VirtualAlloc", { C_POINTER, C_SIZE_T, C_DWORD, C_DWORD }, C_POINTER )
-	VirtualProtect_rid = define_c_func( memDLL_id, "VirtualProtect", { C_POINTER, C_SIZE_T, C_DWORD, C_POINTER }, C_BOOL )
-	VirtualFree_rid = define_c_func( kernel_dll, "VirtualFree", { C_POINTER, C_SIZE_T, C_DWORD }, C_BOOL )
-	-- VirtualLock_rid = define_c_func( memDLL_id, "VirtualLock", { C_POINTER, C_SIZE_T }, C_BOOL )
-	-- VirtualUnlock_rid = define_c_func( memDLL_id, "VirtualUnlock", { C_POINTER, C_SIZE_T }, C_BOOL )
-	GetLastError_rid = define_c_func( kernel_dll, "GetLastError", {}, C_DWORD )
-	GetSystemInfo_rid = define_c_proc( kernel_dll, "GetSystemInfo", { C_POINTER } )
+	VirtualAlloc_rid = dll:define_c_func( memDLL_id, "VirtualAlloc", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD, dll:C_DWORD }, dll:C_POINTER )
+	VirtualProtect_rid = dll:define_c_func( memDLL_id, "VirtualProtect", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD, dll:C_POINTER }, dll:C_BOOL )
+	VirtualFree_rid = dll:define_c_func( kernel_dll, "VirtualFree", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD }, dll:C_BOOL )
+	GetLastError_rid = dll:define_c_func( kernel_dll, "GetLastError", {}, dll:C_DWORD )
+	GetSystemInfo_rid = dll:define_c_proc( kernel_dll, "GetSystemInfo", { dll:C_POINTER } )
 	if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 
 		and GetLastError_rid != -1 and GetSystemInfo_rid != -1
 		then
@@ -487,7 +485,7 @@ ifdef WIN32 then
 		end if
 	end if
 elsifdef UNIX then
-	constant getpagesize_rid = define_c_func( -1, "getpagesize", { }, C_UINT )	 
+	constant getpagesize_rid = dll:define_c_func( -1, "getpagesize", { }, dll:C_UINT )	 
 	page_size = c_func( getpagesize_rid, {} )
 end ifdef
 
@@ -509,7 +507,7 @@ end ifdef
 --**
 -- protection constants type
 public type valid_memory_protection_constant( object x )
-	return find( x, MEMORY_PROTECTION )
+	return find( x, memconst:MEMORY_PROTECTION )
 end type
 
 --**
@@ -522,15 +520,15 @@ public type page_aligned_address( object a )
 end type
 
 public function is_DEP_supported()
-	return DEP_really_works
+	return memconst:DEP_really_works
 end function
 
 public function is_using_DEP()
-	return use_DEP
+	return memconst:use_DEP
 end function
 
 public procedure DEP_on(integer value)
-	use_DEP = value
+	memconst:use_DEP = value
 end procedure
 
 --****
@@ -568,7 +566,7 @@ end procedure
 -- See Also:
 -- [[:allocate]], [[:free_code]], [[:allocate_protect]]
 
-public function allocate_code( object data, valid_wordsize wordsize = 1 )
+public function allocate_code( object data, memconst:valid_wordsize wordsize = 1 )
 
 	return allocate_protect( data, wordsize, PAGE_EXECUTE )
 
@@ -616,7 +614,7 @@ function local_allocate_protected_memory( integer s, integer first_protection )
 			return machine_func(M_ALLOC, PAGE_SIZE)
 		end if
 	elsifdef UNIX then
-		return machine_func(M_ALLOC, PAGE_SIZE)
+		return machine_func( memconst:M_ALLOC, PAGE_SIZE)
 --		return mmap( 0, PAGE_SIZE, protection, or_bits(MAP_PRIVATE,MAP_ANONYMOUS), -1, 0 )
 	end ifdef
 end function
@@ -645,7 +643,7 @@ procedure local_free_protected_memory( atom p, integer s)
 			machine_func(M_FREE, {p})
 		end if
 	elsifdef UNIX then
-			machine_func(M_FREE, {p})
+			machine_func( memconst:M_FREE, {p})
 --		munmap(p, s)
 	end ifdef
 end procedure
@@ -680,7 +678,7 @@ end procedure
 --
 -- You must not use [[:free()]] on memory returned from this function, instead use [[:free_code()]].
 
-public function allocate_protect( object data, valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
+public function allocate_protect( object data, memconst:valid_wordsize wordsize = 1, valid_memory_protection_constant protection )
 	-- set the actual protection for the OS to /true_protection/ in all cases
 	-- /protection/ is put into the checking system if it is there using SAFE
 	
@@ -713,13 +711,13 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		first_protection = PAGE_READ_WRITE
 	end if
 
-	iaddr = local_allocate_protected_memory( size+BORDER_SPACE*2, first_protection )
+	iaddr = local_allocate_protected_memory( size + memory:BORDER_SPACE * 2, first_protection )
 	if iaddr = 0 then
 		return 0
 	end if
 	
 	-- eaddr is set here
-	eaddr = prepare_block( iaddr, size, protection )
+	eaddr = memory:prepare_block( iaddr, size, protection )
 
 	if eaddr = 0 or atom( data ) then
 		return eaddr
@@ -736,7 +734,7 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 			eu:poke4( eaddr, data )
 			
 		case else
-			crash("Parameter error: Wrong word size %d in allocate_protect().", wordsize)
+			error:crash("Parameter error: Wrong word size %d in allocate_protect().", wordsize)
 			
 	end switch
 	
@@ -759,8 +757,8 @@ public function allocate_protect( object data, valid_wordsize wordsize = 1, vali
 		end switch
 	end ifdef
 	
-	if local_change_protection_on_protected_memory( iaddr, size+BORDER_SPACE*2, true_protection ) = -1 then
-		local_free_protected_memory( iaddr, size+BORDER_SPACE*2 )
+	if local_change_protection_on_protected_memory( iaddr, size + memory:BORDER_SPACE * 2, true_protection ) = -1 then
+		local_free_protected_memory( iaddr, size + memory:BORDER_SPACE * 2 )
 		eaddr = 0
 	end if
 	
@@ -807,7 +805,7 @@ public function poke_string(atom buffaddr, integer buffsize, sequence s)
 		return 0
 	end if
 	
-	if not string(s) then
+	if not types:string(s) then
 		return 0
 	end if
 	
@@ -908,7 +906,7 @@ end function
 -- See Also:
 --              [[:allocate]], [[:allocate_wstring]]
 
-public function allocate_string(sequence s, boolean cleanup = 0 )
+public function allocate_string(sequence s, types:boolean cleanup = 0 )
 	atom mem
 	
 	mem = allocate( length(s) + 1) -- Thanks to Igor
@@ -917,7 +915,7 @@ public function allocate_string(sequence s, boolean cleanup = 0 )
 		poke(mem, s)
 		poke(mem+length(s), 0)  -- Thanks to Aku
 		if cleanup then
-			mem = delete_routine( mem, FREE_RID )
+			mem = delete_routine( mem, memconst:FREE_RID )
 		end if
 	end if
 
@@ -936,7 +934,7 @@ end function
 -- See Also:
 -- [[:allocate_string]]
 --
-public function allocate_wstring(sequence s, boolean cleanup = 0 )
+public function allocate_wstring(sequence s, types:boolean cleanup = 0 )
 	atom mem
 	
 	mem = allocate( 2 * (length(s) + 1) )
@@ -944,7 +942,7 @@ public function allocate_wstring(sequence s, boolean cleanup = 0 )
 		poke2(mem, s)
 		poke2(mem + length(s)*2, 0)
 		if cleanup then
-			mem = delete_routine( mem, FREE_RID )
+			mem = delete_routine( mem, memconst:FREE_RID )
 		end if
 	end if
 	
@@ -1003,17 +1001,17 @@ end function
 -- See Also:
 --     [[:allocate]], [[:free_code]]
 public procedure free(object addr)
-	if number_array (addr) then
-		if ascii_string(addr) then
-			crash("free(\"%s\") is not a valid address", {addr})
+	if types:number_array (addr) then
+		if types:ascii_string(addr) then
+			error:crash("free(\"%s\") is not a valid address", {addr})
 		end if
 		
 		for i = 1 to length(addr) do
-			deallocate(addr[i])
+			memory:deallocate( addr[i] )
 		end for
 		return
 	elsif sequence(addr) then
-		crash("free() called with nested sequence")
+		error:crash("free() called with nested sequence")
 	end if
 	
 	if addr = 0 then
@@ -1022,9 +1020,9 @@ public procedure free(object addr)
 		return
 	end if
 
-	deallocate(addr)
+	memory:deallocate( addr )
 end procedure
-FREE_RID = routine_id("free")
+memconst:FREE_RID = routine_id("free")
 
 
 --****
