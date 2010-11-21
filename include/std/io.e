@@ -7,12 +7,9 @@ namespace io
 
 include std/error.e
 include std/machine.e
-include std/sequence.e
-include std/sort.e
 include std/text.e
-include std/types.e
-include std/wildcard.e
 include std/search.e
+include std/types.e
 
 constant M_SEEK  = 19,
 		 M_WHERE = 20,
@@ -447,7 +444,7 @@ end function
 
 
 atom mem0, mem1, mem2, mem3
-mem0 = allocate(4)
+mem0 = machine:allocate(4)
 mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3
@@ -1383,7 +1380,7 @@ public function read_file(object file, integer as_text = BINARY_MODE)
 	end if
 
 	-- Convert Windows endings
-	ret = match_replace({13,10}, ret, {10})
+	ret = search:match_replace({13,10}, ret, {10})
 	if length(ret) > 0 then
 		if ret[$] != 10 then
 			ret &= 10
@@ -1454,14 +1451,14 @@ public function write_file(object file, sequence data, integer as_text = BINARY_
 
 		if as_text = TEXT_MODE then
 			-- Standardize all line endings
-			data = match_replace({13,10}, data, {10})
+			data = search:match_replace({13,10}, data, {10})
 
 		elsif as_text = UNIX_TEXT then
-			data = match_replace({13,10}, data, {10})
+			data = search:match_replace({13,10}, data, {10})
 
 		elsif as_text = DOS_TEXT then
-			data = match_replace({13,10}, data, {10})
-			data = match_replace({10}, data, {13,10})
+			data = search:match_replace({13,10}, data, {10})
+			data = search:match_replace({10}, data, {13,10})
 		end if
 	end if
 
@@ -1576,7 +1573,7 @@ public procedure writef(object fm, object data={}, object fn = 1, object data_no
 		real_fn = open(fn, out_style)
 		
 		if real_fn = -1 then
-			crash("Unable to write to '%s'", {fn})
+			error:crash("Unable to write to '%s'", {fn})
 		end if
 		close_fn = 1
 	else
@@ -1584,11 +1581,11 @@ public procedure writef(object fm, object data={}, object fn = 1, object data_no
 	end if
 	
 	if equal(data_not_string, 0) then
-		if t_display(data) then
+		if types:t_display(data) then
 			data = {data}
 		end if
 	end if
-    puts(real_fn, format(fm, data))
+    puts(real_fn, text:format( fm, data ) )
     if close_fn then
     	close(real_fn)
     end if
