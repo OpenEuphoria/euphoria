@@ -195,13 +195,13 @@ public function console_colors(sequence colorset = {})
 	if length(colorset[FGSET]) != 16 then
 	   	return currentset
 	end if
-	if not char_test(colorset[FGSET], {{0,15}} ) then
+	if not types:char_test( colorset[FGSET], {{0,15}} ) then
 	   	return currentset
 	end if
 	if length(colorset[BGSET]) != 16 then
 	   	return currentset
 	end if
-	if not char_test(colorset[BGSET], {{0,15}} ) then
+	if not types:char_test( colorset[BGSET], {{0,15}} ) then
 	   	return currentset
 	end if
 		
@@ -266,8 +266,8 @@ end procedure
 --   [[:clear_screen]], [[:text_rows]]
 
 public procedure scroll(integer amount, 
-						positive_int top_line, 
-						positive_int bottom_line)
+						console:positive_int top_line, 
+						console:positive_int bottom_line)
 	machine_proc(M_SCROLL, {amount, top_line, bottom_line})
 end procedure
 
