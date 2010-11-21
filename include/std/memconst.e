@@ -10,7 +10,7 @@ namespace memconst
 -- === Microsoft Windows Memory Protection Constants === @[microsoftsmemoryprotectionconstants]
 -- These constant names are taken right from Microsoft's Memory Protection constants.
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	--**
 	-- You may run the data in this page
 	public constant PAGE_EXECUTE = #10
