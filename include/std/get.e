@@ -463,14 +463,14 @@ public constant
 
 function get_value(object target, integer start_point, integer answer_type)
 	if answer_type != GET_SHORT_ANSWER and answer_type != GET_LONG_ANSWER then
-		crash("Invalid type of answer, please only use %s (the default) or %s.", {"GET_SHORT_ANSWER", "GET_LONG_ANSWER"})
+		error:crash("Invalid type of answer, please only use %s (the default) or %s.", {"GET_SHORT_ANSWER", "GET_LONG_ANSWER"})
 	end if
 	if atom(target) then -- get()
 		input_file = target
 		if start_point then
-		    if seek(target, where(target)+start_point) then
-			    crash("Initial seek() for get() failed!")
-		    end if
+			if io:seek(target, io:where(target)+start_point) then
+				error:crash("Initial seek() for get() failed!")
+			end if
 		end if
 		string_next = 1
 		input_string = 0
