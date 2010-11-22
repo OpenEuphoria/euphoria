@@ -706,6 +706,7 @@ public integer check_calls = 1
 --****
 -- === Safe memory access
 
+without warning strict
 --**
 -- Description: Add a block of memory to the list of safe blocks maintained
 -- by safe.e (the debug version of memory.e). The block starts at address a.
@@ -749,12 +750,12 @@ public integer check_calls = 1
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
-without warning strict
+
 public procedure register_block(atom block_addr, atom block_len, integer protection )
 	-- Only implemented in safe.e
 end procedure
 
-
+without warning strict
 --**
 -- Remove a block of memory from the list of safe blocks maintained by safe.e
 -- (the debug version of memory.e).
@@ -777,11 +778,12 @@ end procedure
 -- 
 -- See Also:
 --   [[:register_block]], [[:safe.e]]
-without warning strict
+
 public procedure unregister_block(atom block_addr)
 	-- Only implemented in safe.e
 end procedure
 
+without warning strict
 --**
 -- Scans the list of registered blocks for any corruption.
 --
@@ -801,7 +803,7 @@ end procedure
 --
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
-without warning strict
+
 public function safe_address(atom start, integer len, positive_int action)
 	-- Only implemented in safe.e
 	return 1

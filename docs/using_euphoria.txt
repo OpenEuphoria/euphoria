@@ -464,7 +464,7 @@ this is achieved by clicking the ##Start## button and selecting ##Run...##, or h
 
 Command line switches may be changed or added, one at a time.
 
-@[batch_command_line]
+@[batch_command_line|]
 ; ##-BATCH## (all)
 : Executes the program but if any error occurs, the "Press Enter" prompt is
   not presented. The exit code will be set to 1 on error, 0 on success. This
@@ -473,7 +473,7 @@ Command line switches may be changed or added, one at a time.
 ; ##-COPYRIGHT## (all)
 : Displays the copyright banner for euphoria.
 
-@[eu.cfg]
+@[eu.cfg|]
 ; ##-C config_file## (all)
 : Specifies either a file name or the path for where the default file called
   eu.cfg exists. The configuration file which holds a set of additional

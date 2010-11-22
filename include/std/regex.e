@@ -309,7 +309,7 @@ enum
 -- Turn off checking for the validity of your UTF string.  Use this
 -- with caution.  An invalid utf8 string with this option could **crash**
 -- your program.  Only use this if you know the string is a valid utf8 string.
--- See [[:unicode:validate]].
+-- !!See [[:unicode:validate]].
 -- This is passed to all routines including [[:new]].
 
 --****
