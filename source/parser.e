@@ -41,6 +41,7 @@ constant SCOPE_TYPES = {SC_LOCAL, SC_GLOBAL, SC_PUBLIC, SC_EXPORT, SC_UNDEFINED}
 -- Local variables
 --*****************
 sequence branch_list = {}
+sequence branch_stack = {}
 
 integer short_circuit = 0  -- are we doing short-circuit code?
 						   -- > 0 means yes - if/elsif/while but not
@@ -179,10 +180,16 @@ procedure EnterTopLevel( integer end_line_table = 1 )
 	previous_op = -1
 	CurrentSub = TopLevelSub
 	clear_last()
+	if length( branch_stack ) then
+		branch_list = branch_stack[$]
+		branch_stack = tail( branch_stack )
+	end if
 end procedure
 
 procedure LeaveTopLevel()
 -- prepare to resume compiling normal subprograms
+	branch_stack = append( branch_stack, branch_list )
+	branch_list = {}
 	PushGoto()
 	LastLineNumber = -1
 	SymTab[TopLevelSub][S_LINETAB] = LineTable
@@ -340,6 +347,9 @@ procedure StraightenBranches()
 		return -- do it in back-end
 	end if
 	for i = length(branch_list) to 1 by -1 do
+		if branch_list[i] > length(Code) then
+			CompileErr("wtf")
+		end if
 		target = Code[branch_list[i]]
 		if target <= length(Code) and target > 0 then
 			br = Code[target]
@@ -4158,6 +4168,7 @@ procedure SubProg(integer prog_type, integer scope)
 		max_stack_per_call = temps_allocated + param_num
 	end if
 	param_num = -1
+	
 	StraightenBranches()
 	check_inline( p )
 	param_num = -1
