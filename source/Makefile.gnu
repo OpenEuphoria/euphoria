@@ -209,7 +209,7 @@ CREOLEHTML=creolehtml
 endif
 
 ifdef WKHTMLTOPDF
-HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/index.html $(CYPBUILDDIR)/euphoria-4.0.pdf
+HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/euphoria-pdf.html $(CYPBUILDDIR)/euphoria-4.0.pdf
 else
 HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/index.html
 endif
@@ -518,8 +518,11 @@ ifeq "$(EMINGW)" "1"
 endif
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
-	cd ../docs/ && $(EUDOC) --strip=2 -v -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
+	cd ../docs/ && $(EUDOC) --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
 
+$(BUILDDIR)/euphoria-pdf.txt : $(EU_DOC_SOURCE)
+	cd ../docs/ && $(EUDOC) --single --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria-pdf.txt
+	
 $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
@@ -548,15 +551,11 @@ $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 
 htmldoc : $(BUILDDIR)/html/index.html
 
-$(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
-# 	cp  $(BUILDDIR)/euphoria.txt  $(BUILDDIR)/euphoria-pdf.txt
-	sed -e "s/splitlevel = 2/splitlevel = 1/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
-
-$(BUILDDIR)/pdf/index.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
+$(BUILDDIR)/pdf/euphoria-pdf.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
 	-mkdir -p $(BUILDDIR)/pdf
 	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
 
-$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/index.html  $(DOCDIR)/pdf.css
+$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/euphoria-pdf.html  $(DOCDIR)/pdf.css
 	cp $(CYPTRUNKDIR)/docs/pdf.css $(CYPBUILDDIR)/pdf/
 	$(HTML2PDF)
 
@@ -687,10 +686,7 @@ $(BUILDDIR)/$(EUDIS) : $(EU_INTERPRETER_FILES)
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile \
-		-debug \
 		$(TRUNKDIR)/source/dis.ex
-	$(MAKE) -C $(BUILDDIR)/eudis-build -j3 -f dis.mak
 
 $(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
