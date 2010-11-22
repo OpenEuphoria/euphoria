@@ -772,9 +772,6 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
 			return
 		end if
-	elsedef
-		c_func( VirtualFree_rid, 
-			{ addr-BORDER_SPACE, size*wordsize } )
 	end ifdef
 	machine_proc(M_FREE, addr-BORDER_SPACE)
 end procedure
