@@ -341,7 +341,7 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend code-page-db
+all : interpreter translator library debug-library backend code-page-db binder
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
@@ -415,12 +415,15 @@ ifeq "$(EUPHORIA)" "1"
 endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
+binder : builddirs $(BUILDDIR)/$(EECU) $(EUBIND)
+
 .PHONY : library debug-library
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
 .PHONY : code-page-db
+.PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c be_rev.c
 euisource :  EU_TARGET = int.ex
@@ -572,9 +575,9 @@ test :
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
-		-bind ../source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-bind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
-		$(TESTFILE)
+		-verbose $(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
 testeu : 
@@ -711,7 +714,6 @@ $(BUILDDIR)/$(EUCOVERAGE) : $(TRUNKDIR)/bin/eucoverage.ex
 
 EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
 	$(BUILDDIR)/$(EUDIS) \
-	$(BUILDDIR)/$(EUBIND) \
 	$(BUILDDIR)/$(EUTEST) \
 	$(BUILDDIR)/$(EUCOVERAGE)
 
@@ -728,7 +730,7 @@ install-tools :
 	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)/$(PREFIX)/bin/
 	# helper script for shrouding programs
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
-	echo eubind $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
+	echo eubind -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
 	
 

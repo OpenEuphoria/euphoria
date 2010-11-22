@@ -320,6 +320,7 @@ all :  .SYMBOLIC
 	wmake -h interpreter $(VARS)
 	wmake -h translator $(VARS)
 	wmake -h backend $(VARS)
+	wmake -h binder $(VARS)
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
@@ -457,7 +458,7 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
+	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
 	cd ..\source
 
 coverage : .SYMBOLIC code-page-db
@@ -480,6 +481,10 @@ report: .SYMBOLIC
 tester: .SYMBOLIC 
 	wmake -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
 
+binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
+
+$(BUILDDIR)\eubind.exe : translator library
+	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 	
 !ifdef BUILD_TOOLS
 $(BUILDDIR)\eutestdr\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back

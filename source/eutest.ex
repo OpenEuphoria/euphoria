@@ -51,7 +51,7 @@ constant cmdopts = {
 	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", {NO_CASE, HAS_PARAMETER, "path-to-eucoverage.ex"} },
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
 	{ "testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
-	{ "bind", 0, "path to bind.ex", { NO_CASE, HAS_PARAMETER, "bind.ex"} },
+	{ "bind", 0, "path to eubind", { NO_CASE, HAS_PARAMETER, "bind.ex"} },
 	{ "eub", 0, "path to backend runner", { NO_CASE, HAS_PARAMETER, "eub" } },
 	{ "all", 0, "show tests that pass and fail", {} },
 	{ "failed", 0, "show tests that fail only", {} },
@@ -460,8 +460,8 @@ function translate( sequence filename, sequence fail_list )
 end function
 
 function bind( sequence filename, sequence fail_list )
-	sequence cmd = sprintf("%s %s -batch \"%s\" %s %s -batch -D UNITTEST %s",
-		{ executable, interpreter_options, binder, eub_path, interpreter_options, filename } )
+	sequence cmd = sprintf("\"%s\" %s %s -batch -D UNITTEST %s",
+		{ binder, eub_path, interpreter_options, filename } )
 	
 	total += 1
 	verbose_printf(1, "CMD '%s'\n", {cmd})
