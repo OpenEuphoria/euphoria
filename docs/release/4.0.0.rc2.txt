@@ -56,6 +56,9 @@
 * [[ticket:349]], Fixed resolution of qualified public symbols when the namespace points
                   to the wrong file, but the namespace file directly includes the file with
                   the actual routine
+* [[ticket:425]], Fixed crash when branches were inlined into the top level
+* [[ticket:426]], Eutest uses binary binder
+
 === Enhancements/Changes:
 
 * [[ticket:334]], OS/X, FreeBSD and Linux distribution build scripts are now
