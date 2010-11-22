@@ -634,6 +634,7 @@ install :
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)/$(PREFIX)/bin/
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 endif
@@ -725,7 +726,6 @@ clean-tools :
 install-tools :
 	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)/$(PREFIX)/bin/
 	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)/$(PREFIX)/bin/
-	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)/$(PREFIX)/bin/
 	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)/$(PREFIX)/bin/
 	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)/$(PREFIX)/bin/
 	# helper script for shrouding programs
