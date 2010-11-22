@@ -194,8 +194,8 @@ includes Linux, FreeBSD, Mac OS X,... You will see the constant ##UNIX## used
 for Unix specific code. 
 
 Directory names in //Windows// use ##\## separators, while //Unix// systems use ##/##.
-//Unix// users should substitute {{{ / }}} when they examine sample code.
-Hint: //Windows// users can now use {{ / }} in directory names.
+//Unix// users should substitute ##/## when they examine sample code.
+Hint: //Windows// users can now use ##/## in directory names.
 
 Operating system names are often trademarks. There is no intent to infringe on 
 their owner rights.
