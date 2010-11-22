@@ -125,9 +125,6 @@ constant
 	M_SLEEP = 64
 
 public include std/memconst.e
-ifdef DATA_EXECUTE then
-	public include std/machine.e as machine
-end ifdef
 include std/error.e
 ifdef WINDOWS then
 	include std/win32/sounds.e
@@ -304,7 +301,7 @@ procedure die(sequence msg)
 		end ifdef
 		machine_func(M_SLEEP,0.1)
 	end for
-	crash(msg)
+	error:crash(msg)
 end procedure
 
 function bad_address(atom a)
@@ -775,6 +772,9 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
 			return
 		end if
+	elsedef
+		c_func( VirtualFree_rid, 
+			{ addr-BORDER_SPACE, size*wordsize } )
 	end ifdef
 	machine_proc(M_FREE, addr-BORDER_SPACE)
 end procedure
