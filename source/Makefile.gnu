@@ -756,7 +756,7 @@ endif
 uninstall-docs :
 	-rm -rf $(PREFIX)/share/doc/euphoria
 
-.PHONY : install install-docs
+.PHONY : install install-docs install-tools
 .PHONY : uninstall uninstall-docs
 
 ifeq "$(EUPHORIA)" "1"

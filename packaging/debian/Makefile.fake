@@ -22,8 +22,8 @@
 #   The make process will adjust common.e to set EBSD to the
 #   correct value.  To reset this value, run gmake clean.
 export
-all clean library interpreter translator backend source install install-docs uninstall distclean :
+all clean library interpreter translator backend source install install-docs uninstall distclean tools install-tools :
 	cd source && $(MAKE) $@
 
 
-.PHONY : all clean library interpreter translator backend source install install-docs uninstall distclean
+.PHONY : all clean library interpreter translator backend source install install-docs uninstall distclean tools install-tools
