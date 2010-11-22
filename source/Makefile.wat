@@ -678,7 +678,10 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 !endif
 
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
-	$(EUDOC) --strip=2 -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
+	$(EUDOC) --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
+
+$(BUILDDIR)\euphoria-single.txt : $(EU_DOC_SOURCE)
+	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria-single.txt
 
 $(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
 	mkdir $^@
@@ -717,40 +720,28 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 	copy $(DOCDIR)\html\images\next.png $^@
 
 $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
-	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
-	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
-	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
-	cd $(TRUNKDIR)\source
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 manual-upload: .SYMBOLIC manual
-	cd  $(BUILDDIR)\docs
-	$(SCP) *.html $(oe_username)@openeuphoria.org:/home/euweb/docs
-	cd $(TRUNKDIR)\source
+	$(SCP) $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
 
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 
-$(BUILDDIR)\euphoria-single.txt : $(EU_DOC_SOURCE)
-	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria-single.txt
-
 $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria-single.txt
-	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "toclevel = 3" "toclevel = 0" &
+	$(BUILDDIR)\eui.exe $(TRUNKDIR)\demo\eused.ex -e "toclevel = 3" "toclevel = 0" &
 		-e "TOC level=3" "TOC level=0" -e "LEVELTOC depth=2" "LEVELTOC depth=0" &
 		$(BUILDDIR)\euphoria-single.txt > $(BUILDDIR)\euphoria-pdf.txt
 
 $(BUILDDIR)\euphoria-pdf.html : $(BUILDDIR)\euphoria-pdf.txt
-	cd $(DOCSDIR)
 	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=$(DOCSDIR)\pdf-template.html -o$(BUILDDIR) -htmldoc $(BUILDDIR)\euphoria-pdf.txt
-	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.html
-	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\euphoria-pdf.html
-
+	htmldoc --size letter -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\euphoria-pdf.html
 
