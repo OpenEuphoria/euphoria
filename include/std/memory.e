@@ -42,8 +42,6 @@ public include std/memconst.e
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
--- include std/error.e
-
 ifdef DATA_EXECUTE then
 	include std/machine.e
 end ifdef
