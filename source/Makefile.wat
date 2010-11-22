@@ -718,12 +718,12 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 
 $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
 	cd $(TRUNKDIR)\docs
-	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
+	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
-	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
@@ -737,17 +737,20 @@ htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 
-$(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
-	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "splitlevel = 2" "splitlevel = 0" &
-		-e "toclevel = 3" "toclevel = 0" -e "TOC level=3" "TOC level=0" &
-		-e "LEVELTOC depth=2" "LEVELTOC depth=0"  $(BUILDDIR)\euphoria.txt > $(BUILDDIR)\euphoria-pdf.txt
-	
+$(BUILDDIR)\euphoria-single.txt : $(EU_DOC_SOURCE)
+	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria-single.txt
 
-$(BUILDDIR)\pdf\index.html : $(BUILDDIR)\euphoria-pdf.txt
-	-mkdir $(BUILDDIR)\pdf
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=pdf-template.html -o$(BUILDDIR)\pdf -htmldoc $(BUILDDIR)\euphoria-pdf.txt
+$(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria-single.txt
+	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "toclevel = 3" "toclevel = 0" &
+		-e "TOC level=3" "TOC level=0" -e "LEVELTOC depth=2" "LEVELTOC depth=0" &
+		$(BUILDDIR)\euphoria-single.txt > $(BUILDDIR)\euphoria-pdf.txt
 
-$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\index.html
-	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\index.html
+$(BUILDDIR)\euphoria-pdf.html : $(BUILDDIR)\euphoria-pdf.txt
+	cd $(DOCSDIR)
+	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=$(DOCSDIR)\pdf-template.html -o$(BUILDDIR) -htmldoc $(BUILDDIR)\euphoria-pdf.txt
+	cd $(TRUNKDIR)\source
+
+$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.html
+	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\euphoria-pdf.html
 
 

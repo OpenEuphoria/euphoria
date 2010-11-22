@@ -84,5 +84,10 @@
   any 'parser' functions, it simply tokenizes the source.
 * Speed improvements to map:put()
 * Demoted several "bin" programs to demos including:
+** ##ascii.ex##
 ** ##eused.ex##
+** ##guru.ex##
+** ##search.ex##
+** ##where.ex##
+
 
