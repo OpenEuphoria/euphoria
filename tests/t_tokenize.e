@@ -20,5 +20,13 @@ test_equal("tok_parse str val", "John",     tokens[1][3][TDATA])
 tokens = tokenize_string("puts(1, `hello`)")
 test_equal("tok_parse `hello` (#429)", "hello", tokens[1][5][TDATA])
 
+-- ticket:430
+tokens = tokenize_string("`\\n\nHello`")
+test_equal("tok_parse `\\nHello` (#430)", "\\n\nHello", tokens[1][1][TDATA])
+
+-- ticket:431
+tokens = tokenize_string("`\\x44`")
+test_equal("tok_parse `\\x44Hello` (#431)", "\\x44Hello", tokens[1][1][TDATA])
+
 test_report()
 
