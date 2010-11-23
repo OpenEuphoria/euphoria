@@ -62,25 +62,25 @@ constant verbs = {
 
 -- generate a paragraph containing n sentences of pure nonsense
 function buzz(integer n)
-    sequence paragraph = ""
-
-    for i = 1 to n do
-	paragraph &= leadins [rand(length(leadins))]  & " " &
-		     subjects[rand(length(subjects))] & " " &
-		     verbs   [rand(length(verbs))]    & " " &
-		     subjects[rand(length(subjects))] & ". "
-    end for
-
-    return paragraph
+	sequence paragraph = ""
+	
+	for i = 1 to n do
+		paragraph &= leadins[rand(length(leadins))] & " " &
+			subjects[rand(length(subjects))] & " " &
+			verbs[rand(length(verbs))] & " " &
+			subjects[rand(length(subjects))] & ". "
+	end for
+	
+	return paragraph
 end function
 
 -- neatly display a paragraph
 procedure display(sequence paragraph)
-    integer column = 1
-    sequence line = ""
-
+	integer column = 1
+	sequence line = ""
+	
 	for i = 1 to length(paragraph) do
-		line &= paragraph[i]  -- faster to print a whole line at a time
+		line &= paragraph[i] -- faster to print a whole line at a time
 		column += 1
 		if column > 65 and (paragraph[i] = ' ' or paragraph[i] = '-') then
 			puts(1, line & '\n')
