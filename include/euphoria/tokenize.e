@@ -3,11 +3,6 @@
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
--- Todo:
---
--- * Consider distinguish between full line comments and end of line comments
---   option to specify which end of line char/s are used to indicate new lines
---
 
 namespace tokenize
 
