@@ -37,5 +37,14 @@ tokens = tokenize_string("integer a = #00A, b = 003")
 test_equal("tok_parse (#434) #1", "#00A", tokens[1][4][TDATA])
 test_equal("tok_parse (#434) #2", "003", tokens[1][8][TDATA])
 
+-- ticket:435
+tokenize:string_numbers()
+tokens = tokenize_string("0b010, 0t017, 0d019, 0x01F")
+test_equal("tok_parse (#435) #1", "0b010", tokens[1][1][TDATA])
+test_equal("tok_parse (#435) #2", "0t017", tokens[1][3][TDATA])
+test_equal("tok_parse (#435) #3", "0d019", tokens[1][5][TDATA])
+test_equal("tok_parse (#435) #4", "0x01F", tokens[1][7][TDATA])
+
+
 test_report()
 
