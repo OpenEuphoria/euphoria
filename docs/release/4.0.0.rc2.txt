@@ -59,6 +59,7 @@
 * [[ticket:425]], Fixed crash when branches were inlined into the top level
 * [[ticket:426]], Eutest uses binary binder
 * [[ticket:429]], ##tokenize.e## no longer drops the first character of a backtick string
+* [[ticket:431]], ##tokenize.e## properly parses \xXX escapes
 
 === Enhancements/Changes:
 

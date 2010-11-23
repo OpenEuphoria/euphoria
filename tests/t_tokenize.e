@@ -25,8 +25,11 @@ tokens = tokenize_string("`\\n\nHello`")
 test_equal("tok_parse `\\nHello` (#430)", "\\n\nHello", tokens[1][1][TDATA])
 
 -- ticket:431
-tokens = tokenize_string("`\\x44`")
-test_equal("tok_parse `\\x44Hello` (#431)", "\\x44Hello", tokens[1][1][TDATA])
+tokenize:keep_newlines()
+tokens = tokenize_string("abc=`\\x44Hello`\n? abc")
+test_equal("tok_parse (#431) #1", 7, length(tokens[1]))
+test_equal("tok_parse (#431) #2", `\x44Hello`, tokens[1][3][TDATA])
+test_equal("tok_parse (#431) #3", T_QPRINT, tokens[1][5][TTYPE])
 
 test_report()
 

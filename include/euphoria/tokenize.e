@@ -880,9 +880,10 @@ public function tokenize_string(sequence code)
 		while Token[TTYPE] != T_EOF do
 			tokens &= { Token }
 			next_token()
-			if ERR then exit end if
+			if ERR then
+				exit 
+			end if
 		end while
-		tokens &= { Token }
 	end if
 
 	return { tokens, ERR, ERR_LNUM, ERR_LPOS }
