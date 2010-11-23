@@ -445,9 +445,9 @@ function scan_hex()
 	if (Look != '#') then
 		return FALSE
 	end if
-	
-	integer startSti = sti
 
+	integer startSti = sti
+	
 	scan_char()
 
 	if not Hex_Char(Look) then
@@ -455,20 +455,24 @@ function scan_hex()
 	end if
 
 	Token[TTYPE] = T_NUMBER
-	Token[TDATA] = hex_val(Look)
 	Token[TFORM] = TF_HEX
 
-	scan_char()
-
-	while Hex_Char(Look) do
-		if Look != '_' then
-			Token[TDATA] = Token[TDATA] * 16 + hex_val(Look)
-		end if
-		scan_char()
-	end while
-
 	if STRING_NUMBERS then
+		while Hex_Char(Look) do
+			scan_char()
+		end while
+		
 		Token[TDATA] = source_text[startSti .. sti - 1]
+	else
+		Token[TDATA] = hex_val(Look)
+		scan_char()
+
+		while Hex_Char(Look) do
+			if Look != '_' then
+				Token[TDATA] = Token[TDATA] * 16 + hex_val(Look)
+			end if
+			scan_char()
+		end while
 	end if
 
 	return TRUE
@@ -536,30 +540,44 @@ function scan_number()
 		return FALSE
 	end if
 	
-	integer startSti = sti
-
 	Token[TTYPE] = T_NUMBER
-	Token[TDATA] = scan_integer()
 	Token[TFORM] = TF_INT
 
-	if not SUBSCRIPT then
-		v = Token[TDATA]
-		if Look = '.' then
-			scan_char()
-
-			Token[TDATA] = scan_fraction(Token[TDATA])
-			if ERR then return TRUE end if
-		end if
-
-		Token[TDATA] = scan_exponent(Token[TDATA])
-
-		if v != Token[TDATA] then
-			Token[TFORM] = TF_ATOM
-		end if
-	end if
-
 	if STRING_NUMBERS then
+		integer startSti = sti
+
+		while Digit_Char(Look) do
+			scan_char()
+		end while
+		
+		if Look = '.' then
+			Token[TFORM] = TF_ATOM
+			scan_char()
+			
+			while Digit_Char(Look) do
+				scan_char()
+			end while
+		end if
+		
 		Token[TDATA] = source_text[startSti .. sti - 1]
+	else
+		Token[TDATA] = scan_integer()
+
+		if not SUBSCRIPT then
+			v = Token[TDATA]
+			if Look = '.' then
+				scan_char()
+	
+				Token[TDATA] = scan_fraction(Token[TDATA])
+				if ERR then return TRUE end if
+			end if
+
+			Token[TDATA] = scan_exponent(Token[TDATA])
+	
+			if v != Token[TDATA] then
+				Token[TFORM] = TF_ATOM
+			end if
+		end if
 	end if
 
 	return TRUE
