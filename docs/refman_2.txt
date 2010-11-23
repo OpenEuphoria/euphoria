@@ -722,7 +722,8 @@ to make up an enum that names the various fields. This will make your program
 easier to read. For the example above you might have:
 
 <eucode>
-enum NAME, FIRST_NAME, LAST_NAME, SALARY, AGE, WEIGHT
+enum NAME, SALARY, AGE, WEIGHT
+enum FIRST_NAME, LAST_NAME
 
 employees = {
     {{"John","Smith"}, 45000, 27, 185.5},   -- a[1]
