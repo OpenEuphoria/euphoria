@@ -15,6 +15,7 @@ include keywords.e
 include std/io.e
 include std/types.e
 include std/filesys.e
+include std/text.e
 
 --****
 -- === tokenize return sequence key
@@ -937,15 +938,32 @@ public procedure show_tokens(integer fh, sequence tokens)
 	for i = 1 to length(tokens) do
 		switch tokens[i][TTYPE] do
 			case T_STRING then
-				printf(fh, "TF_STRING (%s): [[[%s]]]\n", { 
+				printf(fh, "T_STRING %20s : [[[%s]]]\n", { 
 					token_forms[tokens[i][TFORM]], tokens[i][TDATA] 
 				})
 
+			case T_NUMBER then
+				object v = tokens[i][TDATA]
+				if integer(v) then
+					v = sprintf("%d", { v })
+				elsif atom(v) then
+					v = sprintf("%f", { v })
+				end if
+
+				printf(fh, "T_NUMBER %20s : %s\n", { 
+					token_forms[tokens[i][TFORM]], v
+				})
+
+			case T_NEWLINE then
+				printf(fh, "T_NEWLINE                     : \\n\n", {})
+
 			case else
-				if tokens[i][TTYPE] < 1 then
-					printf(fh, "Unknown (%d)\n", { tokens[i][TTYPE] })
+				if tokens[i][TTYPE] < 1 or tokens[i][TTYPE] > length(token_names) then
+					printf(fh, "UNKNOWN                       : %d\n", { tokens[i][TTYPE] })
 				else
-					printf(fh, "%s\n", { token_names[tokens[i][TTYPE]] })
+					printf(fh, "%-29s : %s\n", { 
+						token_names[tokens[i][TTYPE]], tokens[i][TDATA]
+					})
 				end if
 		end switch
 	end for
