@@ -6,11 +6,13 @@
 
 namespace tokenize
 
-include keywords.e
-include std/io.e
-include std/types.e
+include std/convert.e
 include std/filesys.e
+include std/io.e
 include std/text.e
+include std/types.e
+
+include keywords.e
 
 --****
 -- === tokenize return sequence key
@@ -529,8 +531,6 @@ function scan_exponent(atom v)
 end function
 
 function scan_number()
-	atom v
-
 	if not Digit_Char(Look) then
 		return FALSE
 	end if
@@ -556,6 +556,8 @@ function scan_number()
 		
 		Token[TDATA] = source_text[startSti .. sti - 1]
 	else
+		atom v
+
 		Token[TDATA] = scan_integer()
 
 		if not SUBSCRIPT then
@@ -576,6 +578,47 @@ function scan_number()
 	end if
 
 	return TRUE
+end function
+
+function scan_prefixed_number()
+	if not (Look = '0') then
+		return FALSE
+	end if
+
+	integer pfxCh = lookahead(1)
+	if find(pfxCh, "btdx") = 0 then
+		return FALSE
+	end if
+
+	integer firstCh = lookahead(2)
+	if Digit_Char(firstCh) or Hex_Char(firstCh) then
+		integer startSti = sti
+
+		scan_char() -- skip the leading zero
+		scan_char() -- skip prefix character
+
+		Token[TTYPE] = T_NUMBER
+
+		if pfxCh = 'x' then
+			Token[TFORM] = TF_HEX
+		else
+			Token[TFORM] = TF_INT
+		end if
+
+		while Hex_Char(Look) or Digit_Char(Look) do
+			scan_char()
+		end while
+
+		if STRING_NUMBERS then
+			Token[TDATA] = source_text[startSti .. sti - 1]
+		else
+			Token[TDATA] = to_number(source_text[startSti + 2 .. sti - 1])
+		end if
+
+		return TRUE
+	end if
+
+	return FALSE
 end function
 
 function hex_string(sequence textdata, integer string_type)
@@ -836,6 +879,8 @@ procedure next_token()
 	elsif scan_string() then
 
 	elsif scan_multistring() then
+
+	elsif scan_prefixed_number() then
 
 	elsif scan_hex() then
 

@@ -62,6 +62,11 @@
 * [[ticket:431]], ##tokenize.e## properly parses \xXX escapes
 * [[ticket:434]], ##tokenize.e## no longer strips leading zeros on numbers when using
                   the ##[[:string_numbers]]## option.
+* [[ticket:435]], ##tokenize.e## handles 0?NN numbers properly now. Returns 
+                  ##[[:T_NUMBER]]## as the token type and either ##[[:TF_INT]]##
+                  or ##[[:TF_HEX]]## as the form. If ##[[:string_numbers]]## is
+                  enabled, the prefix is returned as part of the string, i.e.
+                  {{{integer a = 0b0101}}} will return ##"0b0101"##.
 
 === Enhancements/Changes:
 

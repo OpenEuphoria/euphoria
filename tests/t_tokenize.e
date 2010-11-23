@@ -45,6 +45,5 @@ test_equal("tok_parse (#435) #2", "0t017", tokens[1][3][TDATA])
 test_equal("tok_parse (#435) #3", "0d019", tokens[1][5][TDATA])
 test_equal("tok_parse (#435) #4", "0x01F", tokens[1][7][TDATA])
 
-
 test_report()
 
