@@ -404,19 +404,24 @@ end function
 function scan_multistring()
 	integer end_of_string
 
-	if (Look != '`') then return FALSE end if
+	if (Look != '`') then
+		return FALSE
+	end if
 
 	scan_char()
 	end_of_string = '`'
-	scan_char()
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
 	Token[TFORM] = TF_STRING_BACKTICK
 
 	while (Look != end_of_string) do
-		if (Look = EOF) then report_error(ERR_EOF) return TRUE end if
+		if (Look = EOF) then
+			report_error(ERR_EOF)
+			return TRUE
+		end if
 
 		Token[TDATA] &= Look
+
 		scan_char()
 	end while
 
