@@ -60,6 +60,8 @@
 * [[ticket:426]], Eutest uses binary binder
 * [[ticket:429]], ##tokenize.e## no longer drops the first character of a backtick string
 * [[ticket:431]], ##tokenize.e## properly parses \xXX escapes
+* [[ticket:434]], ##tokenize.e## no longer strips leading zeros on numbers when using
+                  the ##[[:string_numbers]]## option.
 
 === Enhancements/Changes:
 

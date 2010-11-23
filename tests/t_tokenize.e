@@ -31,5 +31,11 @@ test_equal("tok_parse (#431) #1", 7, length(tokens[1]))
 test_equal("tok_parse (#431) #2", `\x44Hello`, tokens[1][3][TDATA])
 test_equal("tok_parse (#431) #3", T_QPRINT, tokens[1][5][TTYPE])
 
+-- ticket:434
+tokenize:string_numbers()
+tokens = tokenize_string("integer a = #00A, b = 003")
+test_equal("tok_parse (#434) #1", "#00A", tokens[1][4][TDATA])
+test_equal("tok_parse (#434) #2", "003", tokens[1][8][TDATA])
+
 test_report()
 

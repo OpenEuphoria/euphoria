@@ -445,6 +445,8 @@ function scan_hex()
 	if (Look != '#') then
 		return FALSE
 	end if
+	
+	integer startSti = sti
 
 	scan_char()
 
@@ -466,8 +468,7 @@ function scan_hex()
 	end while
 
 	if STRING_NUMBERS then
-		 -- convert back to string format
-		Token[TDATA] = sprintf("#%x",{Token[TDATA]})
+		Token[TDATA] = source_text[startSti .. sti - 1]
 	end if
 
 	return TRUE
@@ -534,6 +535,8 @@ function scan_number()
 	if not Digit_Char(Look) then
 		return FALSE
 	end if
+	
+	integer startSti = sti
 
 	Token[TTYPE] = T_NUMBER
 	Token[TDATA] = scan_integer()
@@ -556,11 +559,7 @@ function scan_number()
 	end if
 
 	if STRING_NUMBERS then
-		if Token[TFORM] = TF_INT then
-			Token[TDATA] = sprintf("%d",{Token[TDATA]})
-		else
-			Token[TDATA] = sprintf("%g",{Token[TDATA]})
-		end if
+		Token[TDATA] = source_text[startSti .. sti - 1]
 	end if
 
 	return TRUE
