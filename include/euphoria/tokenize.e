@@ -77,7 +77,7 @@ public enum
 	T_SLICE,
 	--****
 	-- === T_NUMBER formats and T_types
-	TF_HEX,
+	TF_HEX = 1,
 	TF_INT,
 	TF_ATOM,
 	TF_STRING_SINGLE,
@@ -891,3 +891,57 @@ public function tokenize_file(sequence fname)
 
 	return tokenize_string(txt)
 end function
+
+--****
+-- === Debugging
+--
+
+--**
+-- Sequence containing token names for debugging
+
+public constant token_names = {
+	"T_EOF", "T_NULL", "T_SHBANG", "T_NEWLINE", "T_COMMENT", "T_NUMBER", "T_CHAR", "T_STRING",
+	"T_IDENTIFIER", "T_KEYWORD", "T_PLUSEQ", "T_MINUSEQ", "T_MULTIPLYEQ", "T_DIVIDEEQ", "T_LTEQ", 
+	"T_GTEQ", "T_NOTEQ", "T_CONCATEQ", "T_PLUS", "T_MINUS", "T_MULTIPLY", "T_DIVIDE", "T_LT", "T_GT", 
+	"T_NOT", "T_CONCAT", "T_EQ", "T_LPAREN", "T_RPAREN", "T_LBRACE", "T_RBRACE", "T_LBRACKET",
+	"T_RBRACKET", "T_QPRINT", "T_COMMA", "T_PERIOD", "T_COLON", "T_DOLLAR", "T_SLICE"
+}
+
+public constant token_forms = {
+	"TF_HEX", "TF_INT", "TF_ATOM", "TF_STRING_SINGLE", "TF_STRING_TRIPPLE",
+	"TF_STRING_BACKTICK", "TF_STRING_HEX", "TF_COMMENT_SINGLE", "TF_COMMENT_MULTIPLE"
+}
+
+--**
+-- Print token names and data for each token in `tokens` to the file handle `fh`
+--
+-- Parameters:
+--   * ##fh## - file handle to print information to
+--   * ##tokens## - token sequence to print
+--
+-- Comments:
+--   This does not take direct output from ##[[:tokenize_string]]## or ##[[:tokenize_file]]##. Instead
+--   they take the first element of their return value, the token stream only.
+--
+-- See Also:
+--   [[:tokenize_string]], [[:tokenize_file]]
+--
+
+public procedure show_tokens(integer fh, sequence tokens)
+	for i = 1 to length(tokens) do
+		switch tokens[i][TTYPE] do
+			case T_STRING then
+				printf(fh, "TF_STRING (%s): [[[%s]]]\n", { 
+					token_forms[tokens[i][TFORM]], tokens[i][TDATA] 
+				})
+
+			case else
+				if tokens[i][TTYPE] < 1 then
+					printf(fh, "Unknown (%d)\n", { tokens[i][TTYPE] })
+				else
+					printf(fh, "%s\n", { token_names[tokens[i][TTYPE]] })
+				end if
+		end switch
+	end for
+end procedure
+
