@@ -24,8 +24,17 @@ elsifdef BIG_ENDIAN then
 elsifdef EC then
 	-- translated sometimes neither symbol is defined
 	-- No Endian Symbol check with translator
-elsedef
+elsedef -- endian symbol is detected at runtime however 
+	-- on the interpreter...
 	test_fail("Endian Symbol check")
+end ifdef
+
+ifdef __GNUC__ then
+	test_pass("Compiler defined word")
+elsifdef __WATCOMC__ then
+	test_pass("Compiler defined word")
+elsedef
+	test_fail("Compiler defined word")
 end ifdef
 test_report()
 
