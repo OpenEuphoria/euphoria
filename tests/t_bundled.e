@@ -1,5 +1,6 @@
 include std/unittest.e
 
+ifdef EUI then
 sequence base_demos = {
 	"allsorts.ex",
 	"animal.ex",
@@ -96,5 +97,7 @@ for i = 1 to length(bins) do
 	integer r = system_exec(sprintf("%s -test ../bin/%s", { cline[1], bins[i] }))
 	test_false(sprintf("bin -test %s", { bins[i] }), r)
 end for
+
+end ifdef
 
 test_report()
