@@ -67,6 +67,8 @@
                   or ##[[:TF_HEX]]## as the form. If ##[[:string_numbers]]## is
                   enabled, the prefix is returned as part of the string, i.e.
                   {{{integer a = 0b0101}}} will return ##"0b0101"##.
+* [[ticket:439]], ##tokenize.e## fixed breakage with slice operator due to new string
+                  number parsing.
 
 === Enhancements/Changes:
 

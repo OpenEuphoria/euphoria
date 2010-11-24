@@ -545,7 +545,7 @@ function scan_number()
 			scan_char()
 		end while
 		
-		if Look = '.' then
+		if Look = '.' and lookahead(1) != '.' then
 			Token[TFORM] = TF_ATOM
 			scan_char()
 			
