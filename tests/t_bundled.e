@@ -37,7 +37,6 @@ sequence base_demos = {
 	"net/wget.ex",
 	"preproc/datesub.ex",
 	"preproc/etml.ex",
-	"preproc/etmltest.ex",
 	"preproc/literate.ex",
 	"preproc/make40.ex",
 	$
