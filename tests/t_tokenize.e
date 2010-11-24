@@ -45,5 +45,18 @@ test_equal("tok_parse (#435) #2", "0t017", tokens[1][3][TDATA])
 test_equal("tok_parse (#435) #3", "0d019", tokens[1][5][TDATA])
 test_equal("tok_parse (#435) #4", "0x01F", tokens[1][7][TDATA])
 
+-- ticket:439
+tokenize:string_numbers() 
+tokens = tokenize_string("abc = x[1..5]") 
+ 
+test_equal("tok_parse 1..5 #1",   "1", tokens[1][5][TDATA]) 
+test_equal("tok_parse 1..5 #2",   "..", tokens[1][6][TDATA]) 
+test_equal("tok_parse 1..5 #3",   "5", tokens[1][7][TDATA]) 
+ 
+tokenize:string_numbers() 
+tokens = tokenize_string("abc = x[1..$]") 
+ 
+test_equal("tok_parse [1..$] #1",   "$", tokens[1][7][TDATA]) 
+
 test_report()
 
