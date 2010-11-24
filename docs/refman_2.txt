@@ -1477,6 +1477,10 @@ enum set, and it
 returns a positive integer when the argument is a member. The value returned is
 the ordinal number of
 the member in the enum's definition, regardless of what the member's value is.
+As an exception to this, if two enums share the same value, then they will
+share the same ordinal number. The ordinal numbers of enums surrounding these
+will continue to increment as if every enum had a unique ordinal number,
+causing some numbers to be skipped.
 
 For example,
 <eucode>
@@ -1493,6 +1497,19 @@ constant color_names = {"rouge", "vert", "noir", "bleu", "rose"}
 puts(1, color_names[color(BLUE)]) --> bleu
 
 </eucode>
+
+But with the exception, 
+<eucode>
+enum type color RED, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
+? color(RED) --> 1
+? color(GREEN) --> 2
+? color(BLACK) --> 1
+? color(BLUE) --> 4
+? color(PINK) --> 5
+</eucode>
+
+Note that none of the enums have an ordinal number with a value of 3. This is
+simply skipped.
 
 By default, unless an enum member is being specifically set to some value, its
 value
