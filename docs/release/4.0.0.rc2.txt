@@ -104,5 +104,5 @@
 ** ##guru.ex##
 ** ##search.ex##
 ** ##where.ex##
-
+* All demos and bundled bin programs are unit tested to ensure at least eui -test passes
 
