@@ -291,9 +291,9 @@ function scan(sequence file_name, atom file_size, sequence string)
     integer fileNum, found
     boolean found_in_file
     
-    wrap(FALSE)
+    graphics:wrap(FALSE)
     puts(SCREEN, file_name & ':' & repeat(' ', 80) & '\r')
-    wrap(TRUE)
+    graphics:wrap(TRUE)
     fileNum = open(file_name, "rb")   
     if fileNum = -1 then
 	no_open += 1

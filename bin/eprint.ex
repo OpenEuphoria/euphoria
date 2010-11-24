@@ -14,6 +14,7 @@
 --   and if you want to print in condensed mode.
 
 include std/wildcard.e
+include std/text.e
 
 constant TRUE = 1, FALSE = 0
 constant KEYB = 0, DISPLAY = 1, ERROR = 2
