@@ -58,5 +58,13 @@ tokens = tokenize_string("abc = x[1..$]")
  
 test_equal("tok_parse [1..$] #1",   "$", tokens[1][7][TDATA]) 
 
+-- ticket:440
+tokenize:string_numbers(0) 
+tokens = tokenize_string("abc = 21 * .001 + 1e-1") 
+ 
+test_equal("tok_parse 1e #1", 21, tokens[1][3][TDATA]) 
+test_equal("tok_parse 1e #2", 0.001, tokens[1][5][TDATA]) 
+test_equal("tok_parse 1e #3", 1e-1, tokens[1][7][TDATA]) 
+
 test_report()
 
