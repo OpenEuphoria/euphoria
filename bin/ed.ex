@@ -2256,8 +2256,14 @@ procedure edit_file()
 					insert_kill_buffer()
 
 				elsif key = BS then
-					arrow_left()
-					delete_char()
+					if b_col > 1 then
+						arrow_left()
+						delete_char()
+					elsif b_line > 1 then
+						arrow_up()
+						goto_line(b_line, length(buffer[b_line]))
+						delete_char()						
+					end if
 
 				elsif key = HOME then
 					b_col = 1
