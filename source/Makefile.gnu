@@ -417,7 +417,7 @@ endif
 
 EUBIND=eubind
 
-binder : builddirs $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EUBIND)
+binder : translator $(BUILDDIR)/$(EUBIND)
 
 .PHONY : library debug-library
 .PHONY : builddirs
@@ -787,6 +787,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	
 endif
 
+ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c $(CONFIG_FILE)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
@@ -796,7 +797,7 @@ $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c $(CONFIG_FILE)
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c $(CONFIG_FILE) 
 	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o
-	
+endif
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
 	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG)
