@@ -69,6 +69,8 @@
                   {{{integer a = 0b0101}}} will return ##"0b0101"##.
 * [[ticket:439]], ##tokenize.e## fixed breakage with slice operator due to new string
                   number parsing.
+* ##net/http.e## now properly handles ##{ {key,value}, ...}##, ##{ encoding_type, {key,val}, ...}##
+  and already encoded string data, ##"name=John%20Doe"##.
 
 === Enhancements/Changes:
 

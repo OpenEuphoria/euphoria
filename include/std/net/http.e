@@ -12,6 +12,7 @@ include std/rand.e
 include std/sequence.e
 include std/socket.e as sock
 include std/text.e
+include std/types.e
 
 include std/net/dns.e
 include std/net/url.e as url
@@ -342,15 +343,15 @@ public function http_post(sequence url, object data, object headers = 0,
 	end if
 
 	integer data_type
-	if atom(data[1]) then
+	if ascii_string(data) or sequence(data[1]) then
+		data_type = FORM_URLENCODED
+	else
 		if data[1] < 1 or data[1] > 2 then
 			return ERR_INVALID_DATA_ENCODING
 		end if
 
 		data_type = data[1]
 		data = data[2]
-	else
-		data_type = FORM_URLENCODED
 	end if
 
 	-- data now contains either a string sequence already encoded or
