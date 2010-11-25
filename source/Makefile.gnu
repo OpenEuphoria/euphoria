@@ -354,22 +354,22 @@ BUILD_DIRS=\
 	$(BUILDDIR)/libobj/ \
 	$(BUILDDIR)/backobj/
 
-distclean : clean
-	-rm -f $(CONFIG)
-	-rm -f Makefile
 
 clean : 	
 	-rm -fr $(BUILDDIR)
 	-rm -fr $(BUILDDIR)/backobj
 	-rm -f be_rev.c
 
+clobber distclean : clean
+	-rm -f $(CONFIG)
+	-rm -f Makefile
+	-rm -fr $(BUILDDIR)
+
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
 endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
 	
-clobber : distclean
-	-rm -fr $(BUILDDIR)
 
 .PHONY : clean distclean clobber all htmldoc manual
 
@@ -415,7 +415,9 @@ ifeq "$(EUPHORIA)" "1"
 endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-binder : builddirs $(BUILDDIR)/$(EECU) $(EUBIND)
+EUBIND=eubind
+
+binder : builddirs $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EUBIND)
 
 .PHONY : library debug-library
 .PHONY : builddirs
@@ -670,7 +672,6 @@ endif
 
 
 EUDIS=eudis
-EUBIND=eubind
 EUSHROUD=eushroud
 EUTEST=eutest
 EUCOVERAGE=eucoverage
