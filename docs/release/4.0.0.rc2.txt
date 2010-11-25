@@ -101,6 +101,7 @@
 * Added ##show_tokens##, ##token_names## and ##token_forms## to ##euphoria/tokenize.e## to
   help in debugging both tokenize internal routines and applications that make use of
   ##euphoria/tokenize.e##
+* Installer now creates a eu.cfg directory in EUDIR/bin
 * Speed improvements to map:put()
 * Demoted several "bin" programs to demos including:
 ** ##ascii.ex##
