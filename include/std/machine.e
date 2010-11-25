@@ -461,7 +461,8 @@ ifdef WINDOWS then
 	kernel_dll = memDLL_id
 	VirtualAlloc_rid = dll:define_c_func( memDLL_id, "VirtualAlloc", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD, dll:C_DWORD }, dll:C_POINTER )
 	VirtualProtect_rid = dll:define_c_func( memDLL_id, "VirtualProtect", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD, dll:C_POINTER }, dll:C_BOOL )
-	VirtualFree_rid = dll:define_c_func( kernel_dll, "VirtualFree", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD }, dll:C_BOOL )
+	-- set exported
+	memory:VirtualFree_rid = dll:define_c_func( kernel_dll, "VirtualFree", { dll:C_POINTER, dll:C_SIZE_T, dll:C_DWORD }, dll:C_BOOL )
 	GetLastError_rid = dll:define_c_func( kernel_dll, "GetLastError", {}, dll:C_DWORD )
 	GetSystemInfo_rid = dll:define_c_proc( kernel_dll, "GetSystemInfo", { dll:C_POINTER } )
 	if VirtualAlloc_rid != -1 and VirtualProtect_rid != -1 

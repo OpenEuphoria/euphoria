@@ -50,6 +50,7 @@ IF "%1" =="--no-managed-mem" (
 IF "%1" =="--eubin" (
 	echo EUBIN=%2 >> config.wat
         SET HAS_EUBIN=1
+	SET THIS_EUBIN=%2\
 	SHIFT
 	GOTO EndLoop
 )
@@ -133,6 +134,8 @@ IF "%1" == "--help" (
 	GOTO Help
 )
 
+
+
 echo Unknown option '%1'
 GOTO Help
 
@@ -158,6 +161,7 @@ if "%HAS_EUBIN%" == "1" (
 		set NOEU=
 	)
 )
+
 
 echo ARCH=ix86 >> config.wat
 
@@ -208,6 +212,30 @@ rem Going back to the source directory
 rem ============================================================
 
 cd %TRUNKDIR%\source
+
+rem ============================================================
+rem Determining where creolehtml and eudoc are
+rem ============================================================
+if exist %THIS_EUBIN%eudoc.exe (
+    echo EUDOC=%THIS_EUBIN%eudoc.exe >> config.wat
+) else (
+    if exist eudoc\eudoc.ex (
+	echo EUDOC=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\eudoc.ex >> config.wat
+    ) else (
+	echo EUDOC=eudoc.ex >> config.wat
+    )
+)
+
+if exist %THIS_EUBIN%creolehtml.exe (
+    echo CREOLEHTML=%THIS_EUBIN%creolehtml.exe >> config.wat
+) else (
+    if exist eudoc\creole\creolehtml.ex (
+	echo CREOLEHTML=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\creole\creolehtml.ex >> config.wat
+    ) else (
+	echo CREOLEHTML=creolehtml.ex >> config.wat
+    )
+)
+
 
 rem ============================================================
 rem Writing our final configuration vars
