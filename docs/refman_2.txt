@@ -516,9 +516,7 @@ not 6       -- 0 (false)
 These operators can also be applied to sequences. See below.
 
 In some cases [[:short-circuit]] evaluation will be used for expressions
-containing ##and## or ##or##. Specifically, short circuiting applies inside
-decision taking statements, like the [[:if statement]], [[:while statement]] or
-[[:loop statements]]. More on this later.
+containing ##and## or ##or##. Specifically, short circuiting applies inside decision making expressions.  These are found in the [[:if statement]], [[:while statement]] and the [[:loop until statement]].  More on this later.
 
 ==== Arithmetic Operators
 
@@ -3601,8 +3599,9 @@ will terminate immediately when i <= length(s) becomes false. Euphoria will not
 evaluate s[i] != 'a' and will not evaluate s[i] != 'A'. No subscript error will
 occur.
 
-**Short-circuit** evaluation of ##and## and ##or## takes place for if,
-elsif, until and while conditions only.  It is not used in other contexts. For
+**Short-circuit** evaluation of ##and## and ##or## takes place inside decision 
+making expressions.  These are found in the [[:if statement]], [[:while statement]] 
+and the [[:loop until statement]].  It is not used in other contexts. For
 example, the assignment statement:
 
 <eucode>
