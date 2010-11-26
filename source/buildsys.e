@@ -702,9 +702,12 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 label "build_direct_cleanup"
 	if keep = 0 then
 		for i = 1 to length(generated_files) do
-			delete_file(generated_files[i])
+			if verbose then
+				ShowMsg(1, 347, { generated_files[i] })
+			end if
+			if delete_file(generated_files[i]) then
+			end if
 		end for
-
 		if remove_output_dir then
 			chdir(cwd)
 
