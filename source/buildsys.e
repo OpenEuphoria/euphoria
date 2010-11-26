@@ -705,9 +705,9 @@ label "build_direct_cleanup"
 			if verbose then
 				ShowMsg(1, 347, { generated_files[i] })
 			end if
-			if delete_file(generated_files[i]) then
-			end if
+			delete_file(generated_files[i])
 		end for
+
 		if remove_output_dir then
 			chdir(cwd)
 
