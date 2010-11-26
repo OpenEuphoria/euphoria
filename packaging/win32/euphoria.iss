@@ -148,7 +148,6 @@ Name: {group}\Euphoria Manual in PDF; Filename: {app}\docs\euphoria-4.0.pdf;  Ic
 Name: {group}\Euphoria Manual on the Web; IconFilename: {app}\bin\euinc.ico; Filename: {app}\EuphoriaManual.url
 Name: {group}\Euphoria Website;  IconFilename: {app}\bin\euinc.ico; Filename: {app}\RapidEuphoria.url
 Name: {group}\Euphoria User Community (Forums and Wiki);  IconFilename: {app}\bin\euinc.ico; Filename: {app}\OpenEuphoria.url
-Name: {group}\Euphoria Editor;  IconFilename: {app}\bin\euinc.ico; Filename: {app}\bin\ed.bat
 Name: "{group}\{cm:UninstallProgram,Euphoria}"; Filename: "{uninstallexe}"
 
 [UninstallDelete]
@@ -172,26 +171,8 @@ Root: HKCR; Subkey: "EUWinApp\shell\translate\command"; ValueType: string; Value
 Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUConsoleApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Console App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eui.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-; Comment out the next line and uncomment the next two consecutive lines to make command line 
-; demos pause when run on 9x computers from the GUI...
 Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-;Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; MinVersion: 0, 5.1; Tasks: associate
-;Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euiw.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; OnlyBelowVersion: 0, 5.1; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euc.exe"" -CON ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-
-;associate .e, .ew files to be called by ED.bat
-Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUCodeFile"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: ".ew"; ValueType: string; ValueName: ""; ValueData: "EUCodeFile"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUCodeFile"; ValueType: string; ValueName: ""; ValueData: "Euphoria Code File"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUCodeFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euinc.ico,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUCodeFile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\ed.bat"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-
-;associate .err files to execute ED.bat
-Root: HKCR; Subkey: ".err"; ValueType: string; ValueName: ""; ValueData: "EUErrorFile"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUErrorFile"; ValueType: string; ValueName: ""; ValueData: "Euphoria Error File"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUErrorFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euinc.ico,1"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUErrorFile\shell\debug"; ValueType: string; ValueName: ""; ValueData: "debug what created this file"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUErrorFile\shell\debug\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""{app}\bin\ed.ex"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 [Messages]
 FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex and .exw programs by double-clicking them, or (after reboot) by typing:%n     eui filename.ex%nor%n     euiw filename.ex/euw%non a command-line.
@@ -199,6 +180,7 @@ FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can 
 [Run]
 ;Update EUDIR and PATH in AUTOEXEC.bat for Win 95,98 and ME
 Filename: "{tmp}\euiw.exe"; Description: "Update AUTOEXEC.bat"; Parameters: """{tmp}\autoexec_update.exw"" ""{app}"""; StatusMsg: "Updating AUTOEXEC.BAT ..."; MinVersion: 4.0,0
+
 [Code]
 var
 	backupDir : String;
@@ -207,28 +189,6 @@ procedure CreateEnvBatchFile();
 begin
 	SaveStringToFile(ExpandConstant('{app}\setenv.bat'), #13#10 + 
 		ExpandConstant('SET EUDIR={app}') + #13#10 + 'SET PATH=%EUDIR%\bin;%PATH%' + #13#10, True);
-end;
-
-procedure CurStepChanged(CurStep: TSetupStep);
-	var
-		cfgfile : String;
-		could_delete : Boolean;
-begin
-	cfgfile :=	ExpandConstant('{app}\bin\eu.cfg');
-	could_delete := true;
-	if (CurStep = ssPostInstall) and could_delete then
-		begin
-		if FileExists(cfgfile) then
-			begin
-			could_delete := deleteFile(cfgfile);
-			end;
-		if could_delete then
-			begin
-			SaveStringToFile(cfgfile,ExpandConstant('--Default Euphoria Configuration File' + 
-				#10#13 + '[interpret]' + #10#13 + '-eudir {app}' + #10#13 + '[translate]' + 
-				#10#13 + '-eudir {app}'), True);
-			end;
-		end;
 end;
 
 function GetBackupPath(Param: String) : String;
