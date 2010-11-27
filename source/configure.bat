@@ -44,22 +44,22 @@ IF "%1" =="--prefix" (
 )
 IF "%1" =="--no-managed-mem" (
 	echo MANAGED_MEM=0 >> config.wat
-        SET DISABLED_MANAGED_MEM=1
+    SET DISABLED_MANAGED_MEM=1
 	GOTO EndLoop
 )
 IF "%1" =="--eubin" (
 	echo EUBIN=%2 >> config.wat
-        SET HAS_EUBIN=1
+    SET HAS_EUBIN=1
 	SET THIS_EUBIN=%2\
 	SHIFT
 	GOTO EndLoop
 )
 IF "%1" =="--use-binary-translator" (
-    	SET ECBIN=1
+    SET ECBIN=1
 	GOTO EndLoop
 )
 IF "%1" =="--use-source-translator" (
-    	SET ECBIN=0
+    SET ECBIN=0
 	GOTO EndLoop
 )
 IF "%1" =="--build" (
@@ -68,7 +68,7 @@ IF "%1" =="--build" (
 	GOTO EndLoop
 )
 IF "%1" =="--plat" (
-    	echo PLAT=%2  >> config.wat
+    echo PLAT=%2  >> config.wat
 	SHIFT
 	GOTO EndLoop
 )
@@ -134,8 +134,6 @@ IF "%1" == "--help" (
 	GOTO Help
 )
 
-
-
 echo Unknown option '%1'
 GOTO Help
 
@@ -161,7 +159,6 @@ if "%HAS_EUBIN%" == "1" (
 		set NOEU=
 	)
 )
-
 
 echo ARCH=ix86 >> config.wat
 
@@ -216,26 +213,29 @@ cd %TRUNKDIR%\source
 rem ============================================================
 rem Determining where creolehtml and eudoc are
 rem ============================================================
-if exist %THIS_EUBIN%eudoc.exe (
-    echo EUDOC=%THIS_EUBIN%eudoc.exe >> config.wat
-) else (
-    if exist eudoc\eudoc.ex (
-	echo EUDOC=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\eudoc.ex >> config.wat
-    ) else (
-	echo EUDOC=eudoc.ex >> config.wat
-    )
-)
+rem if exist %THIS_EUBIN%eudoc.exe (
+rem 	echo EUDOC=%THIS_EUBIN%eudoc.exe >> config.wat
+rem ) else (
+rem 	if exist eudoc\eudoc.ex (
+rem 		echo EUDOC=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\eudoc.ex >> config.wat
+rem 	) else (
+rem 		echo EUDOC=eudoc.ex >> config.wat
+rem 	)
+rem )
 
-if exist %THIS_EUBIN%creolehtml.exe (
-    echo CREOLEHTML=%THIS_EUBIN%creolehtml.exe >> config.wat
-) else (
-    if exist eudoc\creole\creolehtml.ex (
-	echo CREOLEHTML=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\creole\creolehtml.ex >> config.wat
-    ) else (
-	echo CREOLEHTML=creolehtml.ex >> config.wat
-    )
-)
+echo EUDOC=eudoc.exe >> config.wat
 
+rem if exist %THIS_EUBIN%creolehtml.exe (
+rem 	echo CREOLEHTML=%THIS_EUBIN%creolehtml.exe >> config.wat
+rem ) else (
+rem 	if exist eudoc\creole\creolehtml.ex (
+rem 		echo CREOLEHTML=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\creole\creolehtml.ex >> config.wat
+rem 	) else (
+rem 		echo CREOLEHTML=creolehtml.ex >> config.wat
+rem 	)
+rem )
+
+echo CREOLEHTML=creolehtml.exe >> config.wat
 
 rem ============================================================
 rem Writing our final configuration vars
