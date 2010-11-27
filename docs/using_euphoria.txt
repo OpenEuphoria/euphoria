@@ -464,6 +464,10 @@ this is achieved by clicking the ##Start## button and selecting ##Run...##, or h
 
 Command line switches may be changed or added, one at a time.
 
+In the table below, ##(all)## indicates that the given switch applies to the Interpreter,
+Translator and Binder. Use of ##(interpreter)##, ##(translator)## and/or ##(binder)##
+indicates that the referenced switch applies only to that execution mode.
+
 @[batch_command_line|]
 ; ##-BATCH## (all)
 : Executes the program but if any error occurs, the "Press Enter" prompt is
