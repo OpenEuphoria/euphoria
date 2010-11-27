@@ -73,6 +73,8 @@
                   number parsing.
 * ##net/http.e## now properly handles ##{ {key,value}, ...}##, ##{ encoding_type, {key,val}, ...}##
   and already encoded string data, ##"name=John%20Doe"##.
+* [[ticket:417]], Accidental inclusion of TOC was removed
+* [[ticket:418]], ##-debug## ##eu.cfg## switch text was corrected
 
 === Enhancements/Changes
 

@@ -488,7 +488,7 @@ Command line switches may be changed or added, one at a time.
   Words can also be defined via the [[:with / without define]] directive.
 
 ; ##-DEBUG## (translator)
-: The translated euphoria code will include 
+: Enable debug mode for the generated code. 
 
 ; ##-DLL, -SO## (translator)
 : Compiles and links the translated euphoria code into a DLL, SO or DYLIB 
