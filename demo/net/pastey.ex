@@ -1,3 +1,5 @@
+--****
+-- === net/pastey.ex
 --
 -- This demo sends a euphoria source code file to
 -- http://euphoria.pastey.net for discussion on IRC

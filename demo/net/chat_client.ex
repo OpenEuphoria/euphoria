@@ -1,3 +1,9 @@
+--****
+-- === net/chat_client.ex
+--
+-- socket example that connects to the multi-user chat_server.ex application.
+--
+
 object _ = 0
 
 include std/console.e

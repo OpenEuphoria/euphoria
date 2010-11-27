@@ -1,3 +1,9 @@
+--****
+-- === net/chat_server.ex
+--
+-- socket example that shows off using non-blocking sockets and a multi-user server 
+-- w/no threads needed.
+
 object _ = 0
 
 include std/socket.e as sock

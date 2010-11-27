@@ -1,6 +1,15 @@
+--****
+-- === where.ex
+--
 -- search the PATH for all occurrences of a file
--- usage:  where filename
+--
+-- ==== Usage
+-- {{{
+-- where filename
+-- }}}
+--
 -- (give complete file name including .exe .bat etc.)
+--
 
 include std/filesys.e
 include std/os.e

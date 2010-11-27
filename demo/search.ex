@@ -1,7 +1,14 @@
+--****
+-- === search.ex
+--
 -- This program searches for a string in files of the current directory 
 -- and subdirectories.
--- usage:  
---      search [string] 
+--
+-- 
+-- ==== Usage
+-- {{{
+-- search [string] 
+-- }}}
 --
 -- If you don't supply a string on the command line you will be prompted 
 -- for it. The string may contain * and ? wildcard characters and so may 
@@ -9,21 +16,26 @@
 -- displayed on the screen, and also recorded in %EUDIR%/SEARCH.OUT 
 -- (DOS/Windows), or in $HOME/search.out (Linux).
 -- Some statistics are printed at the end.
--- Example:
 --
---   C:\> search
---   string: p?oc*re
---   match case? (n)
---   file-spec (*.*): *.e *.ex
---   scan subdirectories? (y)
+-- ==== Example
+-- {{{
+-- C:\> search
+-- string: p?oc*re
+-- match case? (n)
+-- file-spec (*.*): *.e *.ex
+-- scan subdirectories? (y)
+-- }}}
 --
--- Note: if you just hit Enter instead of supplying a string to search for,
+-- ==== Note
+--
+-- If you just hit Enter instead of supplying a string to search for,
 -- the program will simply print any file names that match your file-spec.
 -- This is a good way to search for a file, when you can't remember which
 -- directory you put it in.
+--
 
--------- some user-modifiable parameters: 
-
+--- some user-modifiable parameters: 
+--
 -- when you search "*.*" the following files 
 -- will be skipped (to save time):
 

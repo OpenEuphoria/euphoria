@@ -1,7 +1,10 @@
-----------------------
--- GUESS THE ANIMAL --
-----------------------
--- How it Works:
+--****
+-- === animal.ex
+--
+-- Guess the Animal game. It learns as you play.
+--
+-- ==== How it Works
+--
 -- animal.ex builds up a tree structure that tells it what
 -- question to ask, and which branch to follow in the tree
 -- depending on whether the answer is Yes or No.

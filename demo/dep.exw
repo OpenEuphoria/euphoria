@@ -1,3 +1,9 @@
+--****
+-- === dep.exw
+--
+-- Perform a simple DEP test on your system
+--
+
 include std/machine.e
 include std/dll.e
 include std/os.e

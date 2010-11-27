@@ -1,3 +1,5 @@
+--****
+-- === news.ex
 --
 -- Search news pages
 --
@@ -6,10 +8,16 @@
 -- Each page is handled by a separate Euphoria task running
 -- in parallel with several other tasks.
 --
--- Usage:
---	  eui news.ex string
+-- ==== Usage
+-- {{{
+-- eui news.ex string
+-- }}}
+--
 -- or:
---	  eui news.ex "a multi-word phrase"
+--
+-- {{{
+-- eui news.ex "a multi-word phrase"
+-- }}}
 --
 -- Search is case insensitive.
 --
@@ -21,6 +29,7 @@
 -- to a delayed response from a particular server, the program can easily
 -- switch to another task that is not blocked. The program quits after a
 -- period of 10-15 seconds with no progress made on any page.
+--
 
 include std/console.e  -- for maybe_any_key()
 include std/graphics.e -- for all the pretty screen formatting and colors

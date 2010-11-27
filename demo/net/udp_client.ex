@@ -1,3 +1,9 @@
+--****
+-- === net/udp_client.ex
+--
+-- Simple UDP client. Be sure to launch ##udp_server.ex## first!
+--
+
 include std/socket.e as sock
 include std/console.e as con
 

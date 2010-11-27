@@ -1,6 +1,9 @@
--- Demo of custom_sort(), routine_id()
--- The Euphoria custom_sort routine is passed the routine id
--- of the comparison function to be used when sorting.
+--****
+-- === csort.ex
+--
+-- Demo of custom_sort(), routine_id() The Euphoria custom_sort routine is passed the 
+-- routine id of the comparison function to be used when sorting.
+--
 
 include std/sort.e -- contains custom_sort()
 include std/console.e

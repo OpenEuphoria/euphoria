@@ -1,3 +1,9 @@
+--****
+-- === regexps.ex
+--
+-- Shows off some simple regular expression operations
+--
+
 include std/regex.e as re
 include std/console.e
 

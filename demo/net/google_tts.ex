@@ -1,8 +1,18 @@
 #!/usr/bin/env eui
+--****
+-- === net/google_tts.ex
 --
 -- Use the Google TTS service to create an MP3 file
 -- of the text given on the command line
 --
+-- ==== Usage
+-- {{{
+-- eui google_tts.ex Hello World
+-- }}}
+--
+-- Then open in your MP3 player the resulting ##google_tts.mp3## file.
+--
+
 include std/net/http.e
 include std/net/url.e
 include std/sequence.e

@@ -1,3 +1,10 @@
+--****
+-- === pipes.ex
+--
+-- Starts a sub-process and communicates to it via piped io.
+-- The sub process is ##pipe_sub.ex##
+--
+
 include std/pipeio.e as pipe
 include std/console.e
 without warning

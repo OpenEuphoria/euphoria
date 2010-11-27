@@ -1,3 +1,10 @@
+--****
+-- === net/sock_server.ex
+--
+-- Very simple socket server. Launch and then execute ##sock_client.ex## to see it in
+-- action.
+--
+
 object _ = 0
 
 include std/socket.e as sock

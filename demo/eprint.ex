@@ -1,17 +1,26 @@
-		------------------------------------
-		-- Print a Euphoria program       --
-		-- (doesn't work yet under Linux) --
-		------------------------------------
-
+--****
+-- === eprint.ex
+--
+-- Print a Euphoria program
+--
 -- This works with HP PCL printers.
 -- You can change control codes (bold, italics etc) for other printers.
 -- If you have a color printer you can choose colors,
 -- otherwise you will simply get keywords in bold, comments in italics.
 -- You can print non-Euphoria files too.
-
--- usage: eprint filename
---   You will be asked if you want to print in color, 
---   and if you want to print in condensed mode.
+--
+-- ==== Usage
+-- {{{
+-- eprint filename
+--- }}}
+--
+-- You will be asked if you want to print in color, 
+-- and if you want to print in condensed mode.
+--
+-- ==== Note
+--
+-- Doesn't yet work under Linux
+--
 
 include std/wildcard.e
 include std/text.e

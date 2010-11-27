@@ -1,3 +1,10 @@
+--****
+-- === net/sock_client.ex
+-- 
+-- Simple example of how to connect to a socket. Be sure to launch ##sock_server.ex##
+-- first.
+--
+
 object _ = 0
 without warning
 

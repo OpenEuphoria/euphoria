@@ -1,9 +1,7 @@
+--****
+-- === net/httpd.ex
 --
 -- Simple web server written in Euphoria
---
--- Note, this is not designed to be used in production, nor is
--- it designed to ever be completed. It is a simple example of
--- the socket routines that are part of the standard library.
 --
 -- Try accessing http://localhost:8080/httpd.ex or add a few
 -- HTML and Image files to the current directory and access
@@ -12,7 +10,15 @@
 -- You can change what IP and Port are bound to for the server
 -- by specifying it on the command line:
 --
---   eui httpd.ex 0.0.0.0:9090
+-- {{{
+-- eui httpd.ex 0.0.0.0:9090
+-- }}}
+--
+-- ==== Notes
+--
+-- This is not designed to be used in production, nor is
+-- it designed to ever be completed. It is a simple example of
+-- the socket routines that are part of the standard library.
 --
 
 include std/error.e

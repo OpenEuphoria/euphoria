@@ -1,15 +1,17 @@
-----------------------------------------
--- Sorting Algorithms in Euphoria     --
-----------------------------------------
--- Notes:
-
+--****
+-- === allsorts.ex
+-- Comparison of different sorting algorithms.
+--
+-- ==== Notes
+--
 -- The slower sorts will be omitted after a while. 
-
+--
 -- Bucket sort looks really good, but remember that the other sorts are 
 -- generic, and can handle integers, floating-point numbers, strings, etc.
 -- Bucket sort can only sort integers, and the integers need to be 
 -- in a reasonably small, well-defined range, as is the case in this
 -- benchmark. It also uses more memory than some of the other sorts.
+--
 
 without type_check
 

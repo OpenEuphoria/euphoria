@@ -1,9 +1,13 @@
--- Buzzword Generator
--- Add your own phrases!
-
--- How it Works:
+--****
+-- === buzz.ex
+--
+-- Buzzword Generator. Try adding your own phrases!
+--
+-- ==== How it Works
+--
 -- buzz has lists of parts of sentences that it matches up at random.
 -- It will always make a grammatically correct sentence.
+--
 
 include std/console.e
 

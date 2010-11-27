@@ -1,4 +1,11 @@
---test terminal colours - seems to be working on some terminals, but not others 
+--****
+-- === color.ex
+--
+-- Test terminal colours
+--
+-- ==== Note
+--
+-- Seems to be working on some terminals, but not others
 
 include std/graphics.e
 include std/graphcst.e

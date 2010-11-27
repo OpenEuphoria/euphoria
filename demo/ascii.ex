@@ -1,5 +1,7 @@
--- Display ASCII / code page chart
--- in 50 lines-per-screen mode
+--****
+-- === ascii.ex
+--
+-- Display ASCII / code page chart in 50 lines-per-screen mode
 
 include std/graphics.e
 include std/graphcst.e

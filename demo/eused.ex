@@ -1,4 +1,16 @@
--- a sed-like utility for euphoria
+--****
+-- === eused.ex
+--
+-- A sed-like utility for Euphoria.
+--
+-- ==== Usage
+-- 
+-- {{{
+-- eui eused.ex <pattern> <replacement> [input file]
+-- eui eused.ex -e <pattern 1> <replacement 1> \
+--     [-e <pattern n> <replacement n>...] [input file]
+-- }}}
+---
 
 include std/regex.e
 include std/cmdline.e

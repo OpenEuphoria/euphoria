@@ -1,3 +1,15 @@
+--****
+-- === net/wget.ex
+--
+-- WGet clone, a URL downloaded.
+--
+-- ==== Usage
+--
+-- {{{
+-- eui wget http://openeuphoria.org
+-- }}}
+--
+
 include std/console.e
 include std/net/http.e
 without warning

@@ -1,20 +1,27 @@
+--****
+-- === tree.ex
+--
 -- Count frequencies of words in standard input.
 -- Uses a binary tree to speed lookups and write
 -- an alphabetic listing to standard output.
-
--- usage: 
---        eui tree < file1 
+--
+-- ==== Usage
+-- {{{
+-- eui tree < file1 
+-- }}}
 --
 -- You can direct standard output to a file with '>'
-
--- How it Works:
--- * tree.ex reads in words from a text file and inserts them
---   alphabetically into a Euphoria sequence that is being used
---   as a "tree". The tree data structure is created by nesting
---   sequences inside one another to whatever depth is required.
---   Looking up a word in a tree is generally faster than searching
---   through a linear list, since unless the tree is very lop-sided,
---   we should have fewer comparisons to make.
+--
+-- ==== How it Works
+--
+-- tree.ex reads in words from a text file and inserts them
+-- alphabetically into a Euphoria sequence that is being used
+-- as a "tree". The tree data structure is created by nesting
+-- sequences inside one another to whatever depth is required.
+-- Looking up a word in a tree is generally faster than searching
+-- through a linear list, since unless the tree is very lop-sided,
+-- we should have fewer comparisons to make.
+--
 
 without type_check
 without warning

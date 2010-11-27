@@ -1,13 +1,6 @@
--- Guru
--- usage:
--- to search EUPHORIA directories:
---        guru word1 word2 word3 ...
-
--- Euphoria .doc and other files are searched. .htm files are skipped.
-
--- to search the current directory and all subdirectories:
---      cdguru word1 word2 word3 ...
-
+--****
+-- === guru.ex
+--
 -- Searches for the best articles that contain the words that you type.
 -- Each word can contain * and ? wildcard characters.
 -- The articles are given a score and presented to you sorted by score.
@@ -15,15 +8,33 @@
 -- your words, rather than just several occurrences of one of your words.
 -- Some very common words are ignored (see noise_words).
 -- e.g.
---        guru sequence* atom *pend g?r?
-
+-- {{{
+-- guru sequence* atom *pend g?r?
+-- }}}
+--
 -- Results are displayed on screen and also saved in "c:\guru.out"
 -- or $HOME/guru.out (Linux).
--- Hints - remember to add * to words that can be pluralized or have 
---         many different endings.
---       - enter an important word twice to double the value of that word  
---       - If you get a "Critical Error", type 'i' for ignore. It just
---         means that a file is currently locked by another application.
+--
+-- ==== Hints
+-- * remember to add * to words that can be pluralized or have many different endings.
+-- * enter an important word twice to double the value of that word  
+-- * If you get a "Critical Error", type 'i' for ignore. It just
+--   means that a file is currently locked by another application.
+--
+-- ==== Usage
+--
+-- to search EUPHORIA directories:
+-- {{{
+-- guru word1 word2 word3 ...
+-- }}}
+--
+-- Euphoria .doc and other files are searched. .htm files are skipped.
+--
+-- To search the current directory and all subdirectories:
+-- {{{
+-- cdguru word1 word2 word3 ...
+-- }}}
+--
 
 without type_check
 
