@@ -370,7 +370,7 @@ Note that you can use the underscore character ##'_'## inside the
 values to aid readability, e.g. ##"\U8123_FEDC" ==> {2166619868}##
 
 === Identifiers
-:<<LEVELTOC level=2 depth=4>>
+
 An identifier is just the name you give something in your program. This can be
 a variable, constant, function, procedure, parameter, or namespace. An identifier
 must begin with either a letter or an underscore, then followed by zero or more
