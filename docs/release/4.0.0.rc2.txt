@@ -1,6 +1,6 @@
 == Version 4.0.0 Release Candidate 2 (Release Date TBD)
 
-=== Deprecation:
+=== Deprecation
 
 * ##[[:find_from]]## and ##[[:match_from]]## have been deprecated. ##[[:find]]## and 
   ##[[:match]]## accept an optional argument (##start##) allowing these functions to be a
@@ -12,7 +12,7 @@
 * Support for alternate style eu.cfg sections, i.e. bind:unix and unix:bind were 
   previously supported, now only the documented method: bind:unix is accepted.
 
-=== Bug Fixes:
+=== Bug Fixes
 
 * [[ticket:118]], ##object()## tests now function properly when translated.
 * [[ticket:169]], ##[[:find_nested]]## no longer defaults the ##rtn_id## parameter
@@ -74,7 +74,7 @@
 * ##net/http.e## now properly handles ##{ {key,value}, ...}##, ##{ encoding_type, {key,val}, ...}##
   and already encoded string data, ##"name=John%20Doe"##.
 
-=== Enhancements/Changes:
+=== Enhancements/Changes
 
 * [[ticket:334]], OS/X, FreeBSD and Linux distribution build scripts are now
                   combined for easier maintenance.
@@ -117,3 +117,5 @@
 * Removed ##analyze.ex## as it never was a finished, deployable product
 * eu.cfg "win32" sections ([win32], [bind:win32], [translate:win32], [bind:win32]) have
   now all been changed to "windows", not "win32"
+* Removed demo/demo.doc and instead included in the header of each demo program what
+  they do and included them into a section in the manual about demos.
