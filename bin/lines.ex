@@ -14,7 +14,8 @@ include std/utils.e
 include std/wildcard.e
 
 constant inc_line = re:new(`^\s*(public\s*)?include\s+("[^"]+"|[^ ]+)`)
-constant SCREEN = 1, INC_PATHS = include_paths(1)
+constant SCREEN = 1
+sequence INC_PATHS = include_paths(1)
 sequence global_program = ""
 
 -- count lines, non-blank lines, characters
@@ -50,7 +51,8 @@ procedure process_all_files(sequence file_names)
 		else
 			count = scan(fileNum, file_length(file_names[i]))
 			total_count = total_count + count
-			printf(SCREEN, "%6d %9d %9d %3d%% %9d %s\n", count & {file_names[i]})
+			printf(SCREEN, "%6d %9d %9d %3d%% %9d %s\n", count & { 
+				abbreviate_path(file_names[i]) })
 			close(fileNum)
 		end if
 	end for
@@ -186,6 +188,7 @@ procedure main()
 	sequence files = map:get(cmdopts, OPT_EXTRAS)
 
 	if map:get(cmdopts, "i", 0) then
+		INC_PATHS = prepend(INC_PATHS, pathname(canonical_path(files[1])))
 		scan_program(files[1])
 	else
 		lines(files)
