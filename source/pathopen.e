@@ -312,28 +312,28 @@ export function load_euphoria_config( sequence file )
 				case "translate" then
 					needed = TRANSLATE
 					
-				case "translate:win32", "win32:translate" then
+				case "translate:win32" then
 					needed = TRANSLATE and TWINDOWS
 					
-				case "translate:unix", "unix:translate" then
+				case "translate:unix" then
 					needed = TRANSLATE and TUNIX
 					
 				case "interpret" then
 					needed = INTERPRET
 					
-				case "interpret:win32", "win32:interpret" then
+				case "interpret:win32" then
 					needed = INTERPRET and TWINDOWS
 			
-				case "interpret:unix", "unix:interpret" then
+				case "interpret:unix" then
 					needed = INTERPRET and TUNIX
 					
 				case "bind" then
 					needed = BIND
 					
-				case "bind:win32", "win32:bind" then
+				case "bind:win32" then
 					needed = BIND and TWINDOWS
 			
-				case "bind:unix", "unix:bind" then
+				case "bind:unix" then
 					needed = BIND and TUNIX
 			
 			end switch
