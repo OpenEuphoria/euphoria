@@ -2577,44 +2577,53 @@ object machine(object opcode, object x)
 			case M_COMPLETE:
 				return MAKE_INT(COMPLETE_MAGIC);
 				break;
+				
 			case M_SET_T_COLOR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return SetTColor(x);
 				break;
+				
 			case M_SET_B_COLOR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return SetBColor(x);
 				break;
+				
 			case M_GRAPHICS_MODE:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Graphics_Mode(x);
 				break;
+				
 			case M_VIDEO_CONFIG:
 				return Video_config(); /* 0 args */
 				break;
+				
 			case M_CURSOR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Cursor(x);
 				break;
+				
 			case M_TEXTROWS:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return TextRows(x);
 				break;
+				
 			case M_WRAP:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Wrap(x);
 				break;
+				
 			case M_SCROLL:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Scroll(x);
 				break;
+				
 			case M_WAIT_KEY:
 #if defined(EWINDOWS)
 				show_console();
@@ -2623,9 +2632,11 @@ object machine(object opcode, object x)
 					MainScreen();
 				return ATOM_0 + get_key(TRUE);
 				break;
+				
 			case M_ALLOC:
 				return user_allocate(x);
 				break;
+				
 			case M_FREE:
 				addr = (char *)get_pos_int("free", x);
 				if (addr != NULL) {
@@ -2633,80 +2644,100 @@ object machine(object opcode, object x)
 				}
 				return ATOM_0;
 				break;
+				
 			case M_SEEK:
 				return Seek(x);
 				break;
+				
 			case M_WHERE:
 				return Where(x);
 				break;
+				
 			case M_DIR:
 				return Dir(x);
 				break;
+				
 			case M_CURRENT_DIR:
 				return CurrentDir();
 				break;
+				
 			case M_GET_POSITION:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return GetPosition();
 				break;
+				
 			case M_GET_SCREEN_CHAR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return GetScreenChar(x);
 				break;
+				
 			case M_PUT_SCREEN_CHAR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return PutScreenChar(x);
 				break;
+				
 			case M_SET_RAND:
 				return set_rand(x);
 				break;
+				
 			case M_GET_RAND:
 				return get_rand();
 				break;
+				
 			case M_USE_VESA:
 				return use_vesa(x);
 				break;
+				
 			case M_CRASH_MESSAGE:
 				return crash_message(x);
 				break;
+				
 			case M_TICK_RATE:
 				return tick_rate(x);
 				break;
+				
 			case M_ALLOW_BREAK:
 				allow_break = get_int(x);
 				return ATOM_1;
 				break;
+				
 			case M_CHECK_BREAK:
 				temp = control_c_count;
 				control_c_count = 0;
 				return MAKE_INT(temp);
 				break;
+				
 			case M_MEM_COPY:
 				/* obsolete, but keep it */
 				x = (object)SEQ_PTR(x);
 				return memory_copy(*(((s1_ptr)x)->base+1),
-								   *(((s1_ptr)x)->base+2),
-								   *(((s1_ptr)x)->base+3));
+						*(((s1_ptr)x)->base+2),
+						*(((s1_ptr)x)->base+3));
 				break;
+				
 			case M_MEM_SET:
 				/* obsolete, but keep it */
 				x = (object)SEQ_PTR(x);
 				return memory_set(*(((s1_ptr)x)->base+1),
-								  *(((s1_ptr)x)->base+2),
-								  *(((s1_ptr)x)->base+3));
+						*(((s1_ptr)x)->base+2),
+						*(((s1_ptr)x)->base+3));
 				break;
+				
 			case M_A_TO_F64:
 				return atom_to_float64(x);
 				break;
+				
 			case M_A_TO_F32:
 				return atom_to_float32(x);
 				break;
+
 			case M_F64_TO_A:
 				return float_to_atom(x, 8);
 				break;
+				
 			case M_F32_TO_A:
 				return float_to_atom(x, 4);
 				break;
@@ -2901,6 +2932,7 @@ object machine(object opcode, object x)
 			case M_PCRE_GET_OVECTOR_SIZE:
 				return get_ovector_size(x);
 				break;
+
 			case M_EU_INFO:
 				return eu_info();
 
