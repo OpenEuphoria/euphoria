@@ -303,7 +303,7 @@ export function load_euphoria_config( sequence file )
 				case "all" then
 					needed = 1
 					
-				case "win32" then
+				case "windows" then
 					needed = TWINDOWS
 			
 				case "unix" then
@@ -312,7 +312,7 @@ export function load_euphoria_config( sequence file )
 				case "translate" then
 					needed = TRANSLATE
 					
-				case "translate:win32" then
+				case "translate:windows" then
 					needed = TRANSLATE and TWINDOWS
 					
 				case "translate:unix" then
@@ -321,7 +321,7 @@ export function load_euphoria_config( sequence file )
 				case "interpret" then
 					needed = INTERPRET
 					
-				case "interpret:win32" then
+				case "interpret:windows" then
 					needed = INTERPRET and TWINDOWS
 			
 				case "interpret:unix" then
@@ -330,7 +330,7 @@ export function load_euphoria_config( sequence file )
 				case "bind" then
 					needed = BIND
 					
-				case "bind:win32" then
+				case "bind:windows" then
 					needed = BIND and TWINDOWS
 			
 				case "bind:unix" then

@@ -115,3 +115,5 @@
 ** ##where.ex##
 * All demos and bundled bin programs are unit tested to ensure at least eui -test passes
 * Removed ##analyze.ex## as it never was a finished, deployable product
+* eu.cfg "win32" sections ([win32], [bind:win32], [translate:win32], [bind:win32]) have
+  now all been changed to "windows", not "win32"
