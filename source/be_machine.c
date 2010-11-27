@@ -2448,8 +2448,8 @@ object eu_info()
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
 	s1->base[5] = NewString(get_svn_revision());
-        s1->base[6] = NewDouble(eustart_time);
-        return MAKE_SEQ(s1);
+	s1->base[6] = NewDouble(eustart_time);
+	return MAKE_SEQ(s1);
 }
 
 object eu_uname()
