@@ -105,10 +105,11 @@
 * Speed improvements to map:put()
 * Demoted several "bin" programs to demos including:
 ** ##ascii.ex##
+** ##eprint.ex##
 ** ##eused.ex##
 ** ##guru.ex##
+** ##key.ex##
 ** ##search.ex##
 ** ##where.ex##
-** ##key.ex##
 * All demos and bundled bin programs are unit tested to ensure at least eui -test passes
 * Removed ##analyze.ex## as it never was a finished, deployable product
