@@ -697,9 +697,6 @@ $(BUILDDIR)\docs\images : .EXISTSONLY $(BUILDDIR)\docs
 $(BUILDDIR)\docs: .EXISTSONLY
 	mkdir $^@
 	
-$(BUILDDIR)\docs\style.css : $(DOCDIR)\style.css
-	copy $(DOCDIR)\style.css $(BUILDDIR)\docs
-
 $(BUILDDIR)\html\js : .EXISTSONLY $(BUILDDIR)\html  
 	mkdir $^@
 
@@ -728,7 +725,7 @@ $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
 	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
-	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	$(CREOLEHTML) -A=ON -t=offline-template.html -d=..\docs\ -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
