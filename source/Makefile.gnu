@@ -341,7 +341,7 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend code-page-db binder
+all : interpreter translator library debug-library backend binder
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
@@ -653,23 +653,20 @@ endif
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/tutorial ../tutorial/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/bin \
 	           ../bin/ed.ex \
-	           ../bin/ascii.ex \
 	           ../bin/bugreport.ex \
 	           ../bin/buildcpdb.ex \
 	           ../bin/ecp.dat \
-	           ../bin/eprint.ex \
 	           ../bin/eucoverage.ex \
-	           ../bin/guru.ex \
-	           ../bin/key.ex \
-	           ../bin/lines.ex \
-	           ../bin/search.ex \
-	           ../bin/where.ex
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
+	           ../bin/lines.ex
+	install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
 	           *.ex \
 	           *.e \
 	           be_*.c \
 	           *.h
-
+	# helper script for shrouding programs
+	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
+	echo eubind -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
+	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
 
 EUDIS=eudis
 EUSHROUD=eushroud
@@ -729,10 +726,7 @@ install-tools :
 	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)/$(PREFIX)/bin/
 	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)/$(PREFIX)/bin/
 	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)/$(PREFIX)/bin/
-	# helper script for shrouding programs
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
-	echo eubind -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
+	
 	
 
 install-docs :
