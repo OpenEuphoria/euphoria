@@ -59,7 +59,7 @@
 :<<LEVELTOC level=1 depth=2>>
 
 :%%output=demos
-:== Demos
+:== Bundled Demos
 :<<LEVELTOC level=2 depth=3>>
 ../demo/allsorts.ex
 ../demo/animal.ex
