@@ -9,9 +9,11 @@ sequence base_demos = {
 	"callmach.ex",
 	"color.ex",
 	"csort.ex",
+	"eprint.ex",
 	"eused.ex",
 	"guru.ex",
 	"hash.ex",
+	"key.ex",
 	"loaddb.ex",
 	"mydata.ex",
 	"news.ex",
@@ -29,7 +31,6 @@ sequence base_demos = {
 	"net/chat_server.ex",
 	"net/google_tts.ex",
 	"net/httpd.ex",
-	"net/irc_chat.ex",
 	"net/pastey.ex",
 	"net/sock_client.ex",
 	"net/sock_server.ex",
@@ -65,14 +66,11 @@ end ifdef
 constant demos = base_demos & additional_demos
 
 constant base_bins = {
-	"analyze.ex",
 	"bench.ex",
 	"bugreport.ex",
 	"buildcpdb.ex",
 	"ed.ex",
-	"eprint.ex",
 	"eucoverage.ex",
-	"key.ex",
 	"lines.ex",
 	$
 }
