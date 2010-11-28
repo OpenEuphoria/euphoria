@@ -5582,7 +5582,7 @@ procedure opPOKE()
 -- should optimize constant address
 
 	if TypeIsIn(Code[pc+1], TYPES_AO) then
-		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
+		c_stmt("if (IS_ATOM_INT(@)){\n", Code[pc+1])
 	end if
 
 	if TypeIsIn(Code[pc+1], TYPES_IAO) then
@@ -5596,7 +5596,8 @@ procedure opPOKE()
 	end if
 
 	if TypeIsIn(Code[pc+1], TYPES_AO) then
-		c_stmt0("else\n")
+		c_stmt0("}\n" )
+		c_stmt0("else {\n")
 	end if
 
 	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
@@ -5611,7 +5612,11 @@ procedure opPOKE()
 						   Code[pc+1])
 		end if
 	end if
-
+	
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
+		c_stmt0("}\n" )
+	end if
+	
 	if TypeIsIn(Code[pc+2], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
 	end if
