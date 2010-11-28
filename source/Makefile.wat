@@ -725,10 +725,10 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 	copy $(DOCDIR)\html\images\next.png $^@
 
 $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
+	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
@@ -745,7 +745,7 @@ $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria-single.txt
 		$(BUILDDIR)\euphoria-single.txt > $(BUILDDIR)\euphoria-pdf.txt
 
 $(BUILDDIR)\euphoria-pdf.html : $(BUILDDIR)\euphoria-pdf.txt
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=pdf-template.html -o$(BUILDDIR) -htmldoc $(BUILDDIR)\euphoria-pdf.txt
+	$(CREOLEHTML) -A=ON -t=$(TRUNKDIR)\docs\pdf-template.html -o$(BUILDDIR) -htmldoc $(BUILDDIR)\euphoria-pdf.txt
 
 $(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.html
 	htmldoc --size letter -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\euphoria-pdf.html
