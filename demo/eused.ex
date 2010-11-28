@@ -10,7 +10,7 @@
 -- eui eused.ex -e <pattern 1> <replacement 1> \
 --     [-e <pattern n> <replacement n>...] [input file]
 -- }}}
----
+--
 
 include std/regex.e
 include std/cmdline.e

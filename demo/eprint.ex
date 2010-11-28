@@ -12,7 +12,7 @@
 -- ==== Usage
 -- {{{
 -- eprint filename
---- }}}
+-- }}}
 --
 -- You will be asked if you want to print in color, 
 -- and if you want to print in condensed mode.
