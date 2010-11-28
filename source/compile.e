@@ -4908,7 +4908,7 @@ procedure splins()
 	c_stmt0("s1_ptr assign_space;\n")
 	--c_stmt0("_2 = (object_ptr)pc[3];\n")
 	--c_stmt("_2 = (object_ptr)@;\n",{Code[pc+3]})
-	if not TypeIsNot(Code[pc+2],TYPE_SEQUENCE) then
+	if not TypeIsNot(Code[pc+2],TYPE_ATOM) then
 		c_stmt("if (IS_SEQUENCE(@))\n",{Code[pc+3]})
 		c_stmt0("RTFatal(\"Third argument to splice/insert() must be an atom\");\n")
 	end if
@@ -4931,17 +4931,31 @@ procedure opSPLICE()
 		c_stmt( "Concat(&@,@,@);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 	c_stmt0( "}\n")
 	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
-		--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
+		c_stmt( "if( @ != @ || SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
+			--  not in place: need to deref the target and ref the orig seq
+			c_stmt( "DeRef( @ );\n", Code[pc+4] )
+			-- ensures that Add_internal_space will make a copy
+			c_stmt( "RefDS( @ );\n", Code[pc+1] )
+		c_stmt0( "}\n" )
 		c_stmt("assign_space = Add_internal_space( @, insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
 		c_stmt0("assign_slice_seq = &assign_space;\n")
 		c_stmt("assign_space = Copy_elements( insert_pos, SEQ_PTR(@), @ == @ );\n",{Code[pc+2], Code[pc+1], Code[pc+4]})
 		c_stmt("@ = MAKE_SEQ( assign_space );\n",{Code[pc+4]})
 	c_stmt0("}\n")
 	c_stmt0( "else {\n" )
-		c_stmt("RefDS( @ );\n", Code[pc+1] )
-		c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt( "if( @ != @ && SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
+			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt0("}\n")
+		c_stmt0("else {\n")
+			c_stmt("DeRef( @ );\n", Code[pc+4] )
+			c_stmt("RefDS( @ );\n", Code[pc+1] )
+			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	c_stmt0("}\n")
+	
+	-- splins() starts a block that we need to close:
+	c_stmt0("}\n")
+	
 	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
 		t = or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2]))
 	elsif TypeIs(Code[pc+2], TYPE_ATOM) then
