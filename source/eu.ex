@@ -11,6 +11,8 @@
 -- which uses the same Euphoria-coded front-end, combined 
 -- with a high-performance back-end carefully hand-coded in C.
 
+with define EU_EX
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef

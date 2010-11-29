@@ -2172,3 +2172,9 @@ export procedure main_file()
 		default_namespace( )
 	end ifdef
 end procedure
+
+export procedure cleanup_open_includes()
+	for i = 1 to length( IncludeStk ) do
+		close( IncludeStk[i][FILE_PTR] )
+	end for
+end procedure

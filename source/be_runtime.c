@@ -5521,7 +5521,11 @@ void Cleanup(int status)
 #endif
 
 	gameover = TRUE;
-
+#ifndef ERUNTIME
+	if( !WRITE_COVERAGE_DB() ){
+		screen_output(stderr, "\nUnable to open coverage database!\n");
+	}
+#endif
 	/* Close all user-opened files */
 	for (fh = FIRST_USER_FILE; fh < MAX_USER_FILE; fh++) {
 		EClose(fh);
@@ -5599,9 +5603,6 @@ void Cleanup(int status)
 	EndGraphics();
 
 #ifndef ERUNTIME
-	if( !WRITE_COVERAGE_DB() ){
-		screen_output(stderr, "\nUnable to open coverage database!\n");
-	}
 #ifdef EXTRA_STATS
 	Stats();
 #endif

@@ -16,6 +16,7 @@ include global.e
 include reswords.e
 include msgtext.e
 include coverage.e
+include scanner.e
 
 integer Errors = 0 -- number of errors detected during compile
 
@@ -171,9 +172,14 @@ end procedure
 export procedure Cleanup(integer status)
 	integer w, show_error = 0
 	
-	ifdef WIN32 or UNIX then
-		show_error = 1
+	ifdef EU_EX then
+		-- normally the backend calls this, but execute.e needs us to call
+		-- it here:
+		write_coverage_db()
 	end ifdef
+	
+	show_error = 1
+	
 	if src_file >= 0 then
 		close(src_file)
 		src_file = -1
@@ -188,9 +194,7 @@ export procedure Cleanup(integer status)
 	end if
 
 	-- Close all files now.	
-	for fh = FIRST_USER_FILE to MAX_USER_FILE - 1 do
-		close(fh)
-	end for
+	cleanup_open_includes()
 	abort(status)
 end procedure
 

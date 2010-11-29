@@ -77,10 +77,14 @@ export procedure init_coverage()
 end procedure
 
 procedure write_map( map coverage, sequence table_name )
-	if db_select_table( table_name ) != DB_OK then
-		if db_create_table( table_name ) != DB_OK then
-			CompileErr( 336, {table_name} )
+	if db_select( coverage_db_name, DB_LOCK_EXCLUSIVE) = DB_OK then
+		if db_select_table( table_name ) != DB_OK then
+			if db_create_table( table_name ) != DB_OK then
+				CompileErr( 336, {table_name} )
+			end if
 		end if
+	else
+		CompileErr( 336, {table_name} )
 	end if
 	
 	sequence keys = map:keys( coverage )
@@ -107,7 +111,7 @@ export function write_coverage_db()
 		return 1
 	end if
 	
-	if DB_OK != db_open( coverage_db_name ) then
+	if DB_OK != db_open( coverage_db_name, DB_LOCK_EXCLUSIVE) then
 		if DB_OK != db_create( coverage_db_name ) then
 			printf(2, "error opening %s\n", {coverage_db_name})
 			return 0
@@ -115,7 +119,6 @@ export function write_coverage_db()
 	end if
 	
 	process_lines()
-	
 	for tx = 1 to length( routine_map ) do
 		write_map( routine_map[tx], 'r' & covered_files[tx] )
 		write_map( line_map[tx],    'l' & covered_files[tx] )
