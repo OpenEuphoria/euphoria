@@ -293,17 +293,35 @@ function standardize_opts(sequence opts, integer add_help_options = 1)
 	end for
 
 	-- Insert the default 'help' option	if one is not already there.
-	integer has_help = 0
+	integer has_help = 0, has_help_h = 0, has_help_help = 0, has_help_question = 0
 	for i = 1 to length(opts) do
 		if find(HELP, opts[i][OPTIONS]) then
 			has_help = 1
-			exit
+		end if
+		
+		if equal(opts[i][SHORTNAME], "h") then
+			has_help_h = 1
+		elsif equal(opts[i][SHORTNAME], "?") then
+			has_help_question = 1
+		end if
+		
+		if equal(opts[i][LONGNAME], "help") then
+			has_help_help = 1
 		end if
 	end for
-
+	
 	if not has_help and add_help_options then
-		opts = append(opts, {"h", "help", "Display the command options", {HELP}, -1})
-		opts = append(opts, {"?", 0, "Display the command options", {HELP}, -1})
+		if not has_help_h and not has_help_help then
+			opts = append(opts, {"h", "help", "Display the command options", {HELP}, -1})
+		elsif not has_help_h then
+			opts = append(opts, {"h", 0, "Display the command options", {HELP}, -1})
+		elsif not has_help_help then
+			opts = append(opts, {0, "help", "Display the command options", {HELP}, -1})
+		end if
+		
+		if not has_help_question then			
+			opts = append(opts, {"?", 0, "Display the command options", {HELP}, -1})
+		end if
 
 		-- We have to standardize the above additions
 		opts = standardize_opts(opts, 0)

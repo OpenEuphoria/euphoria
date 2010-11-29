@@ -77,6 +77,8 @@
 * [[ticket:418]], ##-debug## ##eu.cfg## switch text was corrected
 * [[ticket:418]], Clarified what (all) and (translator) means
 * [[ticket:448]], Fixed ##splice()## translation.
+* ##std/cmdline.e## no longer adds duplicate help parameters if the standard switch names
+  have been added by the user.
 
 === Enhancements/Changes
 
