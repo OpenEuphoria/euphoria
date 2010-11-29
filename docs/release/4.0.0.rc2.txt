@@ -79,6 +79,9 @@
 * [[ticket:448]], Fixed ##splice()## translation.
 * ##std/cmdline.e## no longer adds duplicate help parameters if the standard switch names
   have been added by the user.
+* ##std/cmdline.e## now properly adheres to the NO_HELP parameter, i.e. 
+  ##cmd_parse(opts, NO_HELP)## will cause the -h, -? and ~-~-help to not be added by
+  ##cmd_parse##.
 
 === Enhancements/Changes
 

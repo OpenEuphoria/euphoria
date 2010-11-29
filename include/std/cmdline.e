@@ -970,6 +970,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					else
 						error:crash("HELP_RID was given to cmd_parse with no routine_id")
 					end if
+				
+				case NO_HELP then
+					add_help_rid = NO_HELP
 
 				case VALIDATE_ALL then
 					validation = VALIDATE_ALL
@@ -1005,7 +1008,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		add_help_rid = parse_options
 	end if
 
-	opts = standardize_opts(opts)
+	opts = standardize_opts(opts, not equal(add_help_rid, NO_HELP))
 
 	call_count = repeat(0, length(opts))
 
