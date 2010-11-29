@@ -531,7 +531,7 @@ $(BUILDDIR)/euphoria-pdf.txt : $(EU_DOC_SOURCE)
 $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
-	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
+	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o=$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/docs/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
@@ -543,7 +543,7 @@ manual-upload : manual
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
-	 $(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
+	 $(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o=$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/html
@@ -558,7 +558,7 @@ htmldoc : $(BUILDDIR)/html/index.html
 
 $(BUILDDIR)/pdf/euphoria-pdf.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
 	-mkdir -p $(BUILDDIR)/pdf
-	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
+	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o=$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
 
 $(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/euphoria-pdf.html  $(DOCDIR)/pdf.css
 	cp $(CYPTRUNKDIR)/docs/pdf.css $(CYPBUILDDIR)/pdf/
