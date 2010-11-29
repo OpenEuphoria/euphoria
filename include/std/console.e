@@ -25,10 +25,58 @@ constant
 	M_OPEN_DLL = 50,
 	M_DEFINE_C  = 51,
 	M_ALLOC = 16,
+	M_FREE = 17,
 	C_POINTER = #02000004, 
 	C_INT = #02000004,
 	$
 
+--
+-- Local code to determine if we are running in a console or GUI application
+--
+
+constant
+	UI_GUI = 2,
+	UI_CON = 3
+
+constant UI_STRS = { "" , "UI_GUI", "UI_CON" }
+
+ifdef WINDOWS then
+	
+	constant 
+		kernel_dll = machine_func(M_OPEN_DLL, "kernel32.dll"),
+		xGetConsoleProcessList = machine_func(M_DEFINE_C, { 
+			kernel_dll, "GetConsoleProcessList", { C_POINTER, C_INT }, C_INT })
+
+	-- Determine if we are in a console or not
+	function iscon()
+		ifdef WIN32_GUI then 
+			
+			-- euiw.exe on Windows
+			return UI_GUI
+			
+		elsedef
+			
+			atom data_ptr = machine_func(M_ALLOC, 4 * 3)
+			integer count = c_func(xGetConsoleProcessList, { data_ptr, 3 })
+			machine_func(M_FREE, { data_ptr })
+			if count = 1 then
+				return UI_GUI
+			end if
+			
+			return UI_CON
+			
+		end ifdef	
+	end function
+	
+elsedef
+
+	-- For all other platforms we cannot tell, simply return UI_CON
+	
+	function iscon()
+		return UI_CON
+	end function
+	
+end ifdef
 	
 --****
 -- === Cursor Style Constants
@@ -195,30 +243,6 @@ public procedure any_key(sequence prompt="Press Any Key to continue...", integer
 	wait_key()
 	puts(con, "\n")
 end procedure
-
-constant kernel_dll = machine_func(M_OPEN_DLL,"kernel32.dll") -- -1 on UNIX
-constant xGetConsoleProcessList =
-machine_func(M_DEFINE_C,{kernel_dll,"GetConsoleProcessList",{C_POINTER,C_INT},C_INT})
-	-- -1 on UNIX
-
-constant
-	UI_GUI = 2,
-	UI_CON = 3
-constant UI_STRS = { "" , "UI_GUI", "UI_CON" }
-function iscon()
-	ifdef WIN32_GUI then -- euiw.exe on Windows
-		return UI_GUI
-	elsedef -- eui on any OS
-		if xGetConsoleProcessList != -1 then
-			atom data_ptr = machine_func(M_ALLOC,4 * 3)
-			integer count = c_func( xGetConsoleProcessList, {data_ptr, 3} )
-			if count = 1 then
-				return UI_GUI
-			end if
-		end if
-		return UI_CON
-	end ifdef
-end function
 
 --**
 -- Description:
