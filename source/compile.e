@@ -2452,12 +2452,17 @@ procedure opRHS_SUBS()
 
 	-- _2 has the sequence
 	if TypeIsNot( subs, TYPE_INTEGER) then
-		c_stmt("if (!IS_ATOM_INT(@))\n", subs )
+		c_stmt("if (!IS_ATOM_INT(@)){\n", subs )
 		c_stmt("@ = (int)*(((s1_ptr)_2)->base + (int)(DBL_PTR(@)->dbl));\n",
 				{ target, subs })
-		c_stmt0("else\n")
+		c_stmt0("}\n")
+		c_stmt0("else{\n")
 	end if
 	c_stmt("@ = (int)*(((s1_ptr)_2)->base + @);\n", {target, subs} )
+	
+	if TypeIsNot( subs, TYPE_INTEGER) then
+		c_stmt0("}\n")
+	end if
 
 	if op = PASSIGN_OP_SUBS then -- simplified
 		LeftSym = TRUE
@@ -3222,8 +3227,9 @@ procedure opPLUS1()
 				-- destroy any value, check for overflow
 				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val,
 								  target_elem, HasDelete( Code[pc+3] ) )
-				c_stmt("if (@ > MAXINT)\n", Code[pc+3])
+				c_stmt("if (@ > MAXINT){\n", Code[pc+3])
 				c_stmt("@ = NewDouble((double)@);\n", {Code[pc+3], Code[pc+3]})
+				c_stmt0("}\n")
 			end if
 		end if
 	end if
@@ -3831,8 +3837,8 @@ procedure opMINUS()
 	gencode = "@ = binary_op(MINUS, @, @);\n"
 	intcode2 ="@1 = @2 - @3;\n"
 	intcode = "@1 = @2 - @3;\n"
-	intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0)\n" &
-					"@1 = NewDouble((double)@1);\n"
+	intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+					"@1 = NewDouble((double)@1);\n}\n"
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
@@ -4227,11 +4233,12 @@ procedure opFOR()
 			LeftSym = TRUE
 			if TypeIs(Code[pc+5], TYPE_INTEGER) and
 			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @)\n", {Code[pc+5], Code[pc+2]})
+				c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
 			else
-				c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
+				c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
 			end if
 			Goto(Code[pc+6])
+			c_stmt0("}\n")
 			if range1[MIN] != NOVALUE then
 				SymTab[Code[pc+5]][S_OBJ_MIN] = range1[MIN]
 				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
@@ -4242,11 +4249,12 @@ procedure opFOR()
 			LeftSym = TRUE
 			if TypeIs(Code[pc+5], TYPE_INTEGER) and
 			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ < @)\n", {Code[pc+5], Code[pc+2]})
+				c_stmt("if (@ < @){\n", {Code[pc+5], Code[pc+2]})
 			else
-				c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
+				c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
 			end if
 			Goto(Code[pc+6])
+			c_stmt0("}\n")
 			if range1[MIN] != NOVALUE then
 				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
 				SymTab[Code[pc+5]][S_OBJ_MAX] = range1[MAX]
@@ -4259,12 +4267,13 @@ procedure opFOR()
 			LeftSym = TRUE
 			if TypeIs(Code[pc+5], TYPE_INTEGER) and
 			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @)\n", {Code[pc+5], Code[pc+2]})
+				c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
 			else
-				c_stmt("if (binary_op_a(GREATER, @, @))\n",
+				c_stmt("if (binary_op_a(GREATER, @, @)){\n",
 											   {Code[pc+5], Code[pc+2]})
 			end if
 			Goto(Code[pc+6])
+			c_stmt0("}\n")
 			c_stmt0("}\n")
 			c_stmt0("else {\n")
 			LeftSym = TRUE
@@ -4272,10 +4281,11 @@ procedure opFOR()
 			   TypeIs(Code[pc+2], TYPE_INTEGER) then
 				c_stmt("if (@ < @)\n", {Code[pc+5], Code[pc+2]})
 			else
-				c_stmt("if (binary_op_a(LESS, @, @))\n",
+				c_stmt("if (binary_op_a(LESS, @, @)){\n",
 											   {Code[pc+5], Code[pc+2]})
 			end if
 			Goto(Code[pc+6])
+			c_stmt0("}\n")
 			if range1[MIN] != NOVALUE then
 				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
 				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
@@ -4291,18 +4301,21 @@ procedure opFOR()
 		Goto(Code[pc+6])
 		c_stmt0("}\n")
 		c_stmt("else if (IS_ATOM_INT(@)) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
+		c_stmt("if (binary_op_a(LESS, @, @){)\n", {Code[pc+5], Code[pc+2]})
 		Goto(Code[pc+6])
+		c_stmt0("}\n")
 		c_stmt0("}\n")
 
 		c_stmt0("else {\n")
 		c_stmt("if (DBL_PTR(@)->dbl >= 0.0) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
+		c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
 		Goto(Code[pc+6])
 		c_stmt0("}\n")
+		c_stmt0("}\n")
 		c_stmt0("else {\n")
-		c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
+		c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
 		Goto(Code[pc+6])
+		c_stmt0("}\n")
 		c_stmt0("}\n")
 		c_stmt0("}\n")
 
@@ -4334,8 +4347,8 @@ procedure opENDFOR_GENERAL()
 
 	-- rvalue for CName should be ok - we've initialized loop var
 	intcode = "@1 = @2 + @3;\n" &
-			  "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0) \n" &
-			  "@1 = NewDouble((double)@1);\n"
+			  "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+			  "@1 = NewDouble((double)@1);\n}\n"
 
 	if TypeIs(Code[pc+3], TYPE_INTEGER) and
 	   TypeIs(Code[pc+4], TYPE_INTEGER) then
@@ -4973,8 +4986,9 @@ end procedure
 
 procedure opINSERT()
 	splins() -- _0 = obj_ptr
-	c_stmt0( "if (insert_pos <= 0)\n" )
+	c_stmt0( "if (insert_pos <= 0){\n" )
 	c_stmt( "Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0( "}\n" )
 
 	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
 		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
