@@ -200,28 +200,6 @@ begin
 		ExpandConstant('SET EUDIR={app}') + #13#10 + 'SET PATH=%EUDIR%\bin;%PATH%' + #13#10, True);
 end;
 
-procedure CurStepChanged(CurStep: TSetupStep);
-	var
-		cfgfile : String;
-		could_delete : Boolean;
-begin
-	cfgfile :=	ExpandConstant('{app}\bin\eu.cfg');
-	could_delete := true;
-	if (CurStep = ssPostInstall) and could_delete then
-		begin
-		if FileExists(cfgfile) then
-			begin
-			could_delete := deleteFile(cfgfile);
-			end;
-		if could_delete then
-			begin
-			SaveStringToFile(cfgfile,ExpandConstant('--Default Euphoria Configuration File' + 
-				(#13#10) + '[interpret]' + #13#10 + '-eudir {app}\include' + #13#10 + '[translate]' + 
-				(#13#10) + '-i {app}\include'), True);
-			end;
-		end;
-end;
-
 function GetBackupPath(Param: String) : String;
 begin
 	if Length(backupDir) = 0 then
