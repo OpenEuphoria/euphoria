@@ -58,7 +58,7 @@ ifdef WINDOWS then
 			
 			atom data_ptr = machine_func(M_ALLOC, 4 * 3)
 			integer count = c_func(xGetConsoleProcessList, { data_ptr, 3 })
-			machine_func(M_FREE, { data_ptr })
+			machine_proc(M_FREE, { data_ptr })
 			if count = 1 then
 				return UI_GUI
 			end if
