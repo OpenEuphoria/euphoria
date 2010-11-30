@@ -691,7 +691,7 @@ object call_c(int func, object proc_ad, object arg_list)
 
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
-	if ( proc_index >= c_routine_next) {
+	if (proc_index >= (unsigned)c_routine_next) {
 		sprintf(TempBuff, "c_proc/c_func: bad routine number (%ld)", proc_index);
 		RTFatal(TempBuff);
 	}
