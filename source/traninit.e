@@ -99,22 +99,25 @@ sequence trans_opt_def = {
 
 add_options( trans_opt_def )
 
-procedure translator_help()
-	ShowMsg(1, 199)
-	show_help( get_common_options(), NO_HELP)
-	ShowMsg(1, 200)
-	show_help(trans_opt_def, NO_HELP)
-end procedure
+-- procedure translator_help()
+-- 	ShowMsg(1, 199)
+-- 	show_help( get_common_options(), NO_HELP)
+-- 	ShowMsg(1, 200)
+-- 	show_help(trans_opt_def, NO_HELP)
+-- end procedure
 
 --**
 -- Process the translator command-line options
 
 export procedure transoptions()
+	sequence tranopts
+	
 	Argv &= GetDefaultArgs()
 
 	Argv = expand_config_options(Argv)
 	Argc = length(Argv)
-	map:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
+	tranopts = get_options()
+	map:map opts = cmd_parse( tranopts, , Argv)
 
 	handle_common_options(opts)
 
@@ -262,7 +265,8 @@ export procedure transoptions()
 		-- No source supplied on command line
 		show_banner()
 		ShowMsg(2, 203)
-		translator_help()
+		-- translator_help()
+		show_help(tranopts,, Argv)
 
 		abort(1)
 	end if

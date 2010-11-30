@@ -52,7 +52,7 @@ constant optional_data = `
 write_file("extra.txt", extra_data, DOS_TEXT)
 write_file("optional.txt", optional_data, DOS_TEXT)
 delete_file("nofile.txt") -- Ensure that this does not exist.
-map:map opts = cmd_parse(option_defs, routine_id("opt_help"), 
+map:map opts = cmd_parse(option_defs, , 
 				{"eui", 
 				 "app.ex", 
 				 "-d", 
@@ -140,10 +140,10 @@ map = cmd_parse({{"v", "verbose", "Verbose output", {}}}, { NO_VALIDATION_AFTER_
 test_false("cmd_parse bug #2792895 ( NO_VAILDATION_AFTER_FIRST_EXTRA, { eui, bug, -? }) calls help",
 	bug_help_called)
 
-cmd_parse( {{ 0, "html", "html output", { NO_PARAMETER }}}, -1, { "eui", "bug", "--html" })
+cmd_parse( {{ 0, "html", "html output", { NO_PARAMETER }}}, , { "eui", "bug", "--html" })
 test_pass("cmd_parse bug #2792287")
 
-cmd_parse( {{ "i", 0, "include dir", { HAS_PARAMETER }}}, -1, { "eui", "eui", "-i",
+cmd_parse( {{ "i", 0, "include dir", { HAS_PARAMETER }}}, , { "eui", "eui", "-i",
 	"/usr/euphoria", "bug.ex" })
 test_pass("cmd_parse bug #2789982")
 
