@@ -78,6 +78,7 @@
 * [[ticket:418]], Clarified what (all) and (translator) means
 * [[ticket:448]], Fixed ##splice()## translation.
 * [[ticket:453]], Reworked the way open files are cleaned up so that coverage works properly
+* The euphoria coded backend (eu.ex) in some cases did not handle recursive calls correctly.
 
 === Enhancements/Changes
 
