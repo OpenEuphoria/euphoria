@@ -48,7 +48,6 @@ sequence additional_demos = {}
 ifdef WINDOWS then
 	additional_demos = {
 		"win32/dsearch.exw",
-		"win32/email.exw",
 		"win32/taskwire.exw",
 		"win32/window.exw",
 		"win32/winwire.exw",
