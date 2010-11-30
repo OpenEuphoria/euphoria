@@ -247,7 +247,7 @@ procedure patch_forward_call( token tok, integer ref )
 	if is_func and fr[FR_OP] = PROC then
 		-- an unused forward function call!
 		-- need to convert from a PROC_FORWARD to a FUNC_FORWARD
-		symtab_index temp_target = NewTempSym( TRUE )
+		symtab_index temp_target = NewTempSym()
 		sequence converted_code = 
 			FUNC_FORWARD 
 			& Code[pc+1..pc+2+supplied_args] 
@@ -549,7 +549,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 			if which_type != object_type then
 				if SymTab[which_type][S_EFFECT] then
 					-- only call user-defined types that have side-effects
-					integer c = NewTempSym( TRUE )
+					integer c = NewTempSym()
 					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc, fr[FR_SUBPROG] )
 					pc += 5
 				end if
@@ -585,7 +585,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 						
 						pc += 2
 					end if
-					symtab_index c = NewTempSym( TRUE )
+					symtab_index c = NewTempSym()
 					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc, fr[FR_SUBPROG] )
 					pc += 4
 					
