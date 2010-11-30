@@ -31,12 +31,14 @@ export sequence warning_list = {}
 
 --**
 -- output messages to the screen or a file
+
 export procedure screen_output(integer f, sequence msg)
 	puts(f, msg)
 end procedure
 
 --**
 -- add a warning message to the list
+
 export procedure Warning(object msg, integer mask, sequence args = {})
 	integer orig_mask
 	sequence text, w_name
@@ -98,6 +100,7 @@ end procedure
 
 --**
 -- print the warnings to the screen (or ex.err)
+
 export function ShowWarnings()
 	integer c
 	integer errfile
@@ -133,13 +136,11 @@ export function ShowWarnings()
 		for i = 1 to length(warning_list) do
 			puts(errfile, warning_list[i])
 			if errfile = STDERR then
-				if remainder(i, 20) = 0 then
+				if remainder(i, 20) = 0 and batch_job = 0 and test_only = 0 then
 					ShowMsg(errfile, 206)
-					if batch_job = 0 then
-						c = getc(0)
-						if c = 'q' then
-							exit
-						end if
+					c = getc(0)
+					if c = 'q' then
+						exit
 					end if
 				end if
 			end if
@@ -171,7 +172,7 @@ end procedure
 -- clean things up before quitting
 export procedure Cleanup(integer status)
 	integer w, show_error = 0
-	
+
 	ifdef EU_EX then
 		-- normally the backend calls this, but execute.e needs us to call
 		-- it here:
@@ -187,7 +188,7 @@ export procedure Cleanup(integer status)
 	
 	w = ShowWarnings()
 	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
-		if not batch_job then
+		if not batch_job and not test_only then
 			screen_output(STDERR, GetMsgText(208,0))
 			getc(0) -- wait
 		end if
@@ -306,7 +307,7 @@ export procedure InternalErr(integer  msgno, object args = {})
 		screen_output(STDERR, GetMsgText(212, 1, {known_files[current_file_no], line_number, msg}))
 	end if
 
-	if not batch_job then
+	if not batch_job and not test_only then
 		screen_output(STDERR, GetMsgText(208, 0))
 		getc(0)
 	end if

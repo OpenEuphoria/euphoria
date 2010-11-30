@@ -71,7 +71,7 @@ object eub_path = 0
 procedure fatal(sequence msg)
 -- fatal error during bind
 	puts(2, msg & '\n')
-	if not batch_job then
+	if not batch_job and not test_only then
 		ShowMsg(2, 242)
 		getc(0)
 	end if

@@ -3912,7 +3912,7 @@ static void the_end()
 	int i;
 	int c;
 
-	if (is_batch == 0 && print_file == NULL && print_pretty) {
+	if (is_batch == 0 && is_test == 0 && print_file == NULL && print_pretty) {
 		/* pretty printing to screen - prompt the user */
 		screen_output(print_file, "\n");
 		screen_output(print_file, "* Press Enter to continue, or q to quit\n");
@@ -5544,7 +5544,8 @@ void Cleanup(int status)
 		if (TempWarningName) {
 			wrnf = iopen(TempWarningName,"w");
 			if (wrnf != NULL) {
-				for (i = 0; i < warning_count; i++) iprintf(wrnf,"%s",warning_list[i]);
+				for (i = 0; i < warning_count; i++)
+					iprintf(wrnf,"%s",warning_list[i]);
 				iclose(wrnf);
 			}
 			else
@@ -5556,7 +5557,7 @@ void Cleanup(int status)
 			screen_output(stderr, "\n");
 			for (i = 0; i < warning_count; i++) {
 				screen_output(stderr, warning_list[i]);
-				if (((i+1) % 20) == 0 && is_batch == 0) {
+				if (((i+1) % 20) == 0 && is_batch == 0 && is_test == 0) {
 					screen_output(stderr, "\nPress Enter to continue, q to quit\n");
 #ifdef EWINDOWS
 					c = wingetch();
@@ -5577,19 +5578,18 @@ void Cleanup(int status)
 #endif
 
 #ifdef EUNIX
-	if (is_batch == 0 && have_console && (
-		config.numtextrows < 24 ||
-		config.numtextrows > 25 ||
-		config.numtextcols != 80 ||
-		((xterm = getenv("TERM")) != NULL &&
-		  strcmp_ins(xterm, "xterm") == 0))) {
+	if (is_batch == 0 && is_test == 0 && have_console &&
+		(config.numtextrows < 24 || config.numtextrows > 25 || config.numtextcols != 80 ||
+			((xterm = getenv("TERM")) != NULL &&
+		  		strcmp_ins(xterm, "xterm") == 0))) 
+	{
 		screen_output(stderr, "\n\nPress Enter...\n");
 		getc(stdin);
 	}
 #endif
 
 #ifdef EWINDOWS
-	if (is_batch == 0 && TempWarningName == NULL && display_warnings &&
+	if (is_batch == 0 && is_test == 0 && TempWarningName == NULL && display_warnings &&
 		(warning_count || (status && !user_abort)))
 	{
 		// we will have a console if we showed an error trace back or

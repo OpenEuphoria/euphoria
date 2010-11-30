@@ -334,7 +334,7 @@ procedure BackEnd(integer il_file)
 	if Argc > 2 then
 		Argv = {Argv[1]} & Argv[3 .. Argc]
 	end if
-	
+
 	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv })
 end procedure
 mode:set_backend( routine_id("BackEnd") )

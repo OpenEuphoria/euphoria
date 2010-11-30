@@ -160,7 +160,6 @@ export procedure handle_common_options(m:map opts)
 
 			case "test" then
 				test_only = 1
-				batch_job = 1
 
 			case "strict" then
 				Strict_is_on = 1
@@ -230,7 +229,7 @@ export procedure handle_common_options(m:map opts)
 			case "v", "version" then
 				show_banner()
 				if find("WIN32_GUI", OpDefines) then
-					if not batch_job then
+					if not batch_job and not test_only then
 						any_key(GetMsgText(278,0), 2)
 					end if
 				end if
@@ -240,7 +239,7 @@ export procedure handle_common_options(m:map opts)
 			case "copyright" then
 				show_copyrights()
 				if find("WIN32_GUI", OpDefines) then
-					if not batch_job then
+					if not batch_job and not test_only then
 						any_key(GetMsgText(278,0), 2)
 					end if
 				end if

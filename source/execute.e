@@ -586,12 +586,12 @@ end procedure
 procedure quit_after_error()
 -- final termination
 	write_coverage_db()
+	
 	ifdef WINDOWS then
-		if not batch_job then
+		if not batch_job and not test_only then
 			puts(2, "\nPress Enter...\n")
 			getc(0)
 		end if
-
 	end ifdef
 
 	abort(1)

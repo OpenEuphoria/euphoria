@@ -124,3 +124,4 @@
   now all been changed to "windows", not "win32"
 * Removed demo/demo.doc and instead included in the header of each demo program what
   they do and included them into a section in the manual about demos.
+* ##-test## parameter now displays warnings as well as errors

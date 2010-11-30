@@ -47,7 +47,7 @@ export procedure intoptions()
 	sequence pause_msg = ""
 
 	if find("WIN32_GUI", OpDefines) then
-		if not batch_job then
+		if not batch_job and not test_only then
 			pause_msg = GetMsgText(278,0)
 		end if
 	end if
@@ -97,7 +97,7 @@ export procedure intoptions()
 		ShowMsg(2, 249)
 		show_help( get_options() )
 		if find("WIN32_GUI", OpDefines) then
-			if not batch_job then
+			if not batch_job and not test_only then
 				any_key(pause_msg, 2)
 			end if
 		end if

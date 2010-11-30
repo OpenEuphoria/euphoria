@@ -142,7 +142,8 @@ extern double eustart_time; /* from be_runtime.c */
 HINSTANCE winInstance;
 #endif
 
-int is_batch = 0; /* batch mode? Should press enter be displayed? 1=no, 0=yes */
+int is_batch = 0; /* batch mode? 1=no, 0=yes */
+int is_test  = 0; /* test mode? 1=no, 0=yes */
 char TempBuff[TEMP_SIZE]; /* buffer for error messages */
 
 int c_routine_next = 0;       /* index of next available element */
@@ -2547,6 +2548,8 @@ object start_backend(object x)
 
 		if (stricmp(w, "-batch") == 0) {
 			is_batch = 1;
+		} else if (stricmp(w, "-test") == 0) {
+			is_test = 1;
 		}
 		EFree(w);
 	}
