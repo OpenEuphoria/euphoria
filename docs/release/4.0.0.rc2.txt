@@ -47,7 +47,9 @@
 * [[ticket:396]], Continue operations are now properly back patched.
 * [[ticket:391]], Watcom build system was lacking the ability to build the manual.
 * [[ticket:402]], ##[[:maybe_any_key]]## now works when run from the command line version
-  of EUPHORIA even when run without a command-line shell.
+                  of EUPHORIA even when run without a command-line shell.
+* [[ticket:457]], cmd_parse() now correctly honors the NO_HELP option and allows
+                  the coder to override the default help switches.
 * Too numerous to list: Many documentation typo, spelling mistakes and formatting
   errors have been corrected.
 * Removed many unnecessary ##[[:maybe_any_key]]## uses from the general demos
