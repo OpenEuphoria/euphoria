@@ -81,6 +81,7 @@
 * [[ticket:448]], Fixed ##splice()## translation.
 * [[ticket:453]], Reworked the way open files are cleaned up so that coverage works properly
 * The euphoria coded backend (eu.ex) in some cases did not handle recursive calls correctly.
+* [[ticket:461]], Fixed error checking for invalid C routines for c_func / c_proc.
 
 === Enhancements/Changes
 
