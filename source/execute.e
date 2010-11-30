@@ -344,8 +344,15 @@ procedure restore_privates(symtab_index this_routine)
 			-- private vars
 			arg = SymTab[this_routine][S_NEXT]
 			private_block = {}
-			while arg != 0 and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
-				private_block = append(private_block, val[arg])
+			-- save privates
+			while arg != 0 
+			and (SymTab[arg][S_SCOPE] <= SC_PRIVATE 
+				or SymTab[arg][S_SCOPE] = SC_LOOP_VAR
+				or SymTab[arg][S_SCOPE] = SC_UNDEFINED) do
+				
+				if SymTab[arg][S_SCOPE] != SC_UNDEFINED then
+					private_block = append(private_block, val[arg])
+				end if
 				arg = SymTab[arg][S_NEXT]
 			end while
 
@@ -365,9 +372,15 @@ procedure restore_privates(symtab_index this_routine)
 		-- private vars
 		base = 1
 		arg = SymTab[this_routine][S_NEXT]
-		while arg and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
-			val[arg] = private_block[base]
-			base += 1
+		while arg != 0 
+		and (SymTab[arg][S_SCOPE] <= SC_PRIVATE 
+			or SymTab[arg][S_SCOPE] = SC_LOOP_VAR
+			or SymTab[arg][S_SCOPE] = SC_UNDEFINED) do
+			
+			if SymTab[arg][S_SCOPE] != SC_UNDEFINED then
+				val[arg] = private_block[base]
+				base += 1
+			end if
 			arg = SymTab[arg][S_NEXT]
 		end while
 
@@ -1219,10 +1232,16 @@ procedure opPROC()
 		end for
 
 		-- save privates
-		while arg != 0 and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
-			private_block[p] = val[arg]
-			p += 1
-			val[arg] = NOVALUE  -- necessary?
+		while arg != 0 
+		and (SymTab[arg][S_SCOPE] <= SC_PRIVATE 
+			or SymTab[arg][S_SCOPE] = SC_LOOP_VAR
+			or SymTab[arg][S_SCOPE] = SC_UNDEFINED) do
+			
+			if SymTab[arg][S_SCOPE] != SC_UNDEFINED then
+				private_block[p] = val[arg]
+				p += 1
+				val[arg] = NOVALUE  -- necessary?
+			end if
 			arg = SymTab[arg][S_NEXT]
 		end while
 
@@ -1234,7 +1253,7 @@ procedure opPROC()
 			val[arg] = NOVALUE -- necessary?
 			arg = SymTab[arg][S_NEXT]
 		end while
-
+		
 		-- save this block of private data
 		save_private_block(sub, private_block)
 	else
