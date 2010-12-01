@@ -265,7 +265,7 @@ test_true( "driveid returns sequence", sequence( filesys:driveid( current_dir() 
 -- temp_file()
 --
 
-sequence tmp_name 
+sequence tmp_name
 
 tmp_name = temp_file("..")
 test_true("temp_file .. directory prefix", begins("..", tmp_name))
