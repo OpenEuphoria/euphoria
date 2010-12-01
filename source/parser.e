@@ -1373,6 +1373,8 @@ function rexpr()
 end function
 
 constant boolOps = {OR, AND, XOR}
+export sequence ExprLine
+export integer expr_bp
 procedure Expr()
 -- Parse a general expression
 -- Use either short circuit or full evaluation.
@@ -1380,6 +1382,8 @@ procedure Expr()
 	integer id
 	integer patch
 
+	ExprLine = ThisLine
+	expr_bp = bp
 	id = -1
 	patch = 0
 	while TRUE do

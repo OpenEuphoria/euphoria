@@ -1051,8 +1051,8 @@ export procedure emit_op(integer op)
 				-- we might know the constant's value at compile time
 				if sequence( SymTab[c][S_OBJ] ) then
 					-- type check error!
-					ThisLine = ForwardLine
-					bp = forward_bp
+					ThisLine = ExprLine
+					bp = expr_bp
 					CompileErr( 346 )
 					
 				elsif SymTab[c][S_OBJ] = NOVALUE then
