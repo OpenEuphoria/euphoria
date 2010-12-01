@@ -17,20 +17,20 @@ include std/dll.e
 include std/error.e
 include std/machine.e
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant
-		kernel32 = open_dll("kernel32.dll"),
+		kernel32 = dll:open_dll("kernel32.dll"),
 		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
-		iCreatePipe = define_c_func(kernel32,"CreatePipe",{C_POINTER,C_POINTER,C_POINTER,C_DWORD},C_BOOL),
-		iReadFile = define_c_func(kernel32,"ReadFile",{C_UINT,C_POINTER,C_DWORD,C_POINTER,C_POINTER},C_BOOL),
-		iWriteFile = define_c_func(kernel32,"WriteFile",{C_UINT,C_POINTER,C_DWORD,C_POINTER,C_POINTER},C_BOOL),
-		iCloseHandle = define_c_func(kernel32,"CloseHandle",{C_UINT},C_BOOL),
-		iTerminateProcess=define_c_func(kernel32,"TerminateProcess",{C_UINT,C_UINT},C_BOOL),
-		iGetLastError = define_c_func(kernel32,"GetLastError",{},C_DWORD),
-		iGetStdHandle = define_c_func(kernel32,"GetStdHandle",{C_DWORD},C_UINT),
-		iSetHandleInformation = define_c_func(kernel32,"SetHandleInformation",{C_UINT,C_DWORD,C_DWORD},C_BOOL),
-		iCreateProcess = define_c_func(kernel32,"CreateProcessA",{C_POINTER,C_POINTER,C_POINTER,
-			C_POINTER,C_BOOL,C_DWORD,C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_BOOL)
+		iCreatePipe = dll:define_c_func(kernel32,"CreatePipe",{dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,dll:C_DWORD},dll:C_BOOL),
+		iReadFile = dll:define_c_func(kernel32,"ReadFile",{dll:C_UINT,dll:C_POINTER,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL),
+		iWriteFile = dll:define_c_func(kernel32,"WriteFile",{dll:C_UINT,dll:C_POINTER,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL),
+		iCloseHandle = dll:define_c_func(kernel32,"CloseHandle",{dll:C_UINT},dll:C_BOOL),
+		iTerminateProcess=dll:define_c_func(kernel32,"TerminateProcess",{dll:C_UINT,dll:C_UINT},dll:C_BOOL),
+		iGetLastError = dll:define_c_func(kernel32,"GetLastError",{},dll:C_DWORD),
+		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD},dll:C_UINT),
+		iSetHandleInformation = dll:define_c_func(kernel32,"SetHandleInformation",{dll:C_UINT,dll:C_DWORD,dll:C_DWORD},dll:C_BOOL),
+		iCreateProcess = dll:define_c_func(kernel32,"CreateProcessA",{dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,
+			dll:C_POINTER,dll:C_BOOL,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL)
 	
 	constant
 -- 		STD_INPUT_HANDLE = -10,
@@ -52,17 +52,17 @@ ifdef WIN32 then
 elsedef
 	--*NIX-specific constants
 	constant
-		STDLIB = open_dll({ "libc.so", "libc.dylib", "" }),
-		PIPE   = define_c_func(STDLIB, "pipe",   {C_POINTER}, C_INT),
-		READ   = define_c_func(STDLIB, "read",   {C_INT, C_POINTER, C_INT}, C_INT),
-		WRITE  = define_c_func(STDLIB, "write",  {C_INT, C_POINTER, C_INT}, C_INT),
-		CLOSE  = define_c_func(STDLIB, "close",  {C_INT}, C_INT),
-		DUP2   = define_c_func(STDLIB, "dup2",   {C_INT, C_INT}, C_INT),
-		KILL   = define_c_func(STDLIB, "kill",   {C_INT, C_INT}, C_INT),
-		FORK   = define_c_func(STDLIB, "fork",   {}, C_INT),
-		EXECV  = define_c_func(STDLIB, "execv",  {C_POINTER, C_POINTER}, C_INT),
-		SIGNAL = define_c_func(STDLIB, "signal", {C_INT, C_POINTER}, C_POINTER),
-		ERRNO  = define_c_var( STDLIB, "errno"),
+		STDLIB = dll:open_dll({ "libc.so", "libc.dylib", "" }),
+		PIPE   = dll:define_c_func(STDLIB, "pipe",   {dll:C_POINTER}, dll:C_INT),
+		READ   = dll:define_c_func(STDLIB, "read",   {dll:C_INT, dll:C_POINTER, dll:C_INT}, dll:C_INT),
+		WRITE  = dll:define_c_func(STDLIB, "write",  {dll:C_INT, dll:C_POINTER, dll:C_INT}, dll:C_INT),
+		CLOSE  = dll:define_c_func(STDLIB, "close",  {dll:C_INT}, dll:C_INT),
+		DUP2   = dll:define_c_func(STDLIB, "dup2",   {dll:C_INT, dll:C_INT}, dll:C_INT),
+		KILL   = dll:define_c_func(STDLIB, "kill",   {dll:C_INT, dll:C_INT}, dll:C_INT),
+		FORK   = dll:define_c_func(STDLIB, "fork",   {}, dll:C_INT),
+		EXECV  = dll:define_c_func(STDLIB, "execv",  {dll:C_POINTER, dll:C_POINTER}, dll:C_INT),
+		SIGNAL = dll:define_c_func(STDLIB, "signal", {dll:C_INT, dll:C_POINTER}, dll:C_POINTER),
+		ERRNO  = dll:define_c_var( STDLIB, "errno"),
 		FAIL   = -1
 	
 	enum
@@ -95,7 +95,7 @@ atom os_errno = 0
 
 -- Common functions
 function get_errno()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return c_func(iGetLastError,{})
 	elsedef
 		return peek4u(ERRNO)
@@ -135,7 +135,7 @@ end type
 public function close(atom fd)
 	atom ret
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		ret=c_func(iCloseHandle,{fd})
 	elsedef
 		ret=c_func(CLOSE, {fd})
@@ -170,7 +170,7 @@ public procedure kill(process p, atom signal=15)
 	close(p[STDERR])
 	
 	--Error may result, but it is usually just because the process has already ended.
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		--Not how to handle "signal", so its ignored on Windows for now
 		c_func(iTerminateProcess,{p[PID],signal and 0})
 	elsedef
@@ -182,21 +182,21 @@ function os_pipe()
 	sequence handles
 	atom ret
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom psaAttrib, phWriteToPipe, phReadFromPipe
 		
-		psaAttrib = allocate(SA_SIZE+2*4)
+		psaAttrib = machine:allocate(SA_SIZE+2*4)
 		poke4(psaAttrib,{SA_SIZE,0,1})
 		phWriteToPipe = psaAttrib+SA_SIZE
 		phReadFromPipe = psaAttrib+SA_SIZE+4
 		ret = c_func(iCreatePipe,{phReadFromPipe,phWriteToPipe,psaAttrib,0})
 		handles = peek4u({phWriteToPipe,2})
-		free(psaAttrib)
+		machine:free(psaAttrib)
 	elsedef
-		atom cmd = allocate(8)
+		atom cmd = machine:allocate(8)
 		ret = c_func(PIPE,{cmd})
 		handles = peek4u({cmd,2})
-		free(cmd)
+		machine:free(cmd)
 	end ifdef
 	
 	if ret = FAIL then
@@ -231,11 +231,11 @@ public function read(atom fd, integer bytes)
 		ret, ReadCount,
 		buf = allocate(bytes)
 	
-	ifdef WIN32 then
-		atom pReadCount=allocate(4)
+	ifdef WINDOWS then
+		atom pReadCount=machine:allocate(4)
 		ret = c_func(iReadFile,{fd,buf,bytes,pReadCount,0})
 		ReadCount=peek4u(pReadCount)
-		free(pReadCount)
+		machine:free(pReadCount)
 	elsedef
 		ret = c_func(READ, {fd, buf, bytes})
 		ReadCount=ret
@@ -243,13 +243,13 @@ public function read(atom fd, integer bytes)
 	
 	if ret = FAIL then
 		os_errno = get_errno()
-		free(buf)
+		machine:free(buf)
 		return ""
 	end if
 	
 	data=peek({buf,ReadCount})
 	
-	free(buf)
+	machine:free(buf)
 	
 	return data
 end function
@@ -272,17 +272,17 @@ public function write(atom fd, sequence str)
 		buf = allocate_string(str),
 		ret,WrittenCount
 	
-	ifdef WIN32 then
-		atom pWrittenCount=allocate(4)
+	ifdef WINDOWS then
+		atom pWrittenCount=machine:allocate(4)
 		ret=c_func(iWriteFile,{fd,buf,length(str),pWrittenCount,0})
 		WrittenCount=peek4u(pWrittenCount)
-		free(pWrittenCount)
+		machine:free(pWrittenCount)
 	elsedef
 		ret = c_func(WRITE, {fd, buf, length(str)})
 		WrittenCount=ret
 	end ifdef
 	
-	free(buf)
+	machine:free(buf)
 	
 	if ret = FAIL then
 		os_errno = get_errno()
@@ -293,7 +293,7 @@ public function write(atom fd, sequence str)
 end function
 
 procedure error()
-    crash(sprintf("Errno = %d", os_errno))
+    error:crash(sprintf("Errno = %d", os_errno))
 end procedure
 
 --**
@@ -311,7 +311,7 @@ public function error_no()
 	return os_errno
 end function
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	--WIN32-specific functions
 	function GetStdHandle(atom device)
 		return c_func(iGetStdHandle,{device})
@@ -332,19 +332,19 @@ ifdef WIN32 then
 	atom pPI, pSUI, pCmdLine
 	sequence ProcInfo
 	
-	   pCmdLine = allocate_string(CommandLine)
-	   pPI = allocate(PROCESS_INFORMATION_SIZE)
+	   pCmdLine = machine:allocate_string(CommandLine)
+	   pPI = machine:allocate(PROCESS_INFORMATION_SIZE)
 	   mem_set(pPI,0,PROCESS_INFORMATION_SIZE)
-	   pSUI = allocate(STARTUPINFO_SIZE)
+	   pSUI = machine:allocate(STARTUPINFO_SIZE)
 	   mem_set(pSUI,0,STARTUPINFO_SIZE)
 	   poke4(pSUI,STARTUPINFO_SIZE)
 	   poke4(pSUI+SUIdwFlags,or_bits(STARTF_USESTDHANDLES,STARTF_USESHOWWINDOW))
 	   poke4(pSUI+SUIhStdInput,StdHandles)
 	   fnVal = c_func(iCreateProcess,{0,pCmdLine,0,0,1,0,0,0,pSUI,pPI})
-	   free(pCmdLine)
-	   free(pSUI)
+	   machine:free(pCmdLine)
+	   machine:free(pSUI)
 	   ProcInfo = peek4u({pPI,4})
-	   free(pPI)
+	   machine:free(pPI)
 	   if not fnVal then
 	     return 0
 	   end if
@@ -482,15 +482,15 @@ elsedef
 		sequence vbufseq
 		atom r
 		
-		sbuf = allocate_string(s)
+		sbuf = machine:allocate_string(s)
 		vbufseq = {sbuf}--http://www.cs.toronto.edu/~demke/369S.07/OS161_man/syscall/execv.html
 		
 		for i = 1 to length(v) do
-			vbufseq &= allocate_string(v[i])
+			vbufseq &= machine:allocate_string(v[i])
 		end for
 		
 		vbufseq &= 0
-		vbuf = allocate(length(vbufseq)*4)
+		vbuf = machine:allocate(length(vbufseq)*4)
 		poke4(vbuf, vbufseq)
 		r = c_func(EXECV, {sbuf, vbuf}) -- execv() should never return
 		os_errno = peek4u(ERRNO)
