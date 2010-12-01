@@ -85,6 +85,7 @@
 * [[ticket:465]], Fixed stack space calculations for forward proc to func conversion and type checks.
 * [[ticket:466]], Fixed line reporting on compile time type check error.
 * [[:connect]] return value was documented incorrectly.
+* [[ticket:464]], Fixed translated for loops that could result in incorrectly emitted brackets
 
 === Enhancements/Changes
 
