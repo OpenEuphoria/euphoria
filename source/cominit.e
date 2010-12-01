@@ -223,6 +223,54 @@ export function merge_parameters(sequence a, sequence b, sequence opts)
 		end if
 	end while
 	
+		
+	integer first_extra = 0
+	
+	i = 1
+	
+	-- We know the first extra is not in a (DefaultArgs)
+	while i <= length(b) do
+		sequence opt = b[i]
+		
+		-- can't be a parameter
+		if length(opt) = 1 then
+			first_extra = i
+			exit
+		end if
+		
+		sequence this_opt = {}
+		if opt[2] = '-' then
+			this_opt = find_opt(LONGNAME, opt[3..$], opts)
+		elsif opt[1] = '-' or opt[1] = '/' then
+			this_opt = find_opt(SHORTNAME, opt[2..$], opts)
+		else
+			first_extra = i
+			exit
+		end if
+		
+		if length(this_opt) then
+			if find(HAS_PARAMETER, this_opt[OPTIONS]) then
+				i += 1
+			end if
+		end if
+				
+		i += 1
+	end while
+	
+	if first_extra then
+		sequence result = {}
+		
+		if first_extra > 1 then
+			result = splice( b, a, first_extra ) --b[1..first_extra - 1] & a & b[first_extra..$]
+		else
+			-- no user supplied parameters
+			result = a & b
+		end if
+		
+		return result
+	end if
+	
+	-- No extras, system will prob fail w/a help message later
 	return a & b
 end function
 
