@@ -302,7 +302,7 @@ constant StdErrMsgs = {
 	{286, "Setup a pre-processor"},
 	{287, "Force pre-processing regardless of cache state"},
 	{288, "Enable all warnings"},
-	{289, "Test syntax only, do not execute. Implies batch mode."},
+	{289, "Test syntax only, do not execute."},
 	{290, "Display the version number"},
 	{291, "Defines warning level"},
 	{292, "Write all warnings to the given file instead of STDOUT"},
