@@ -4195,131 +4195,129 @@ procedure opFOR()
 
 	loop_stack &= {{Code[pc+5], FOR, pc+7}} -- loop var, type, Label
 	integer is_loop_var = find( SymTab[Code[pc+5]][S_SCOPE] , {SC_LOOP_VAR, SC_GLOOP_VAR})
-	if is_loop_var then
-		-- inlined loop vars are regular vars
-		c_stmt0("{\n")
-		c_stmt("int @;\n", Code[pc+5])
-	else
-		c_stmt0("{\n")
-	end if
-
-	CRef(Code[pc+3])
-	c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
-
-	Label(pc+7)
-
-	inc = ObjMinMax(Code[pc+1])
-	if TypeIs(Code[pc+1], TYPE_INTEGER) then
-		-- increment is an integer
-
-		if TypeIs(Code[pc+3], TYPE_INTEGER) and
-		   TypeIs(Code[pc+2], TYPE_INTEGER) then
-			-- loop var is an integer
-			range1 = ObjMinMax(Code[pc+3])  -- start
-			range2 = ObjMinMax(Code[pc+2])  -- limit
-			SymTab[Code[pc+5]][S_GTYPE] = TYPE_INTEGER
-		else
-			range1 = {NOVALUE, NOVALUE}
-			if TypeIs(Code[pc+3], TYPE_DOUBLE) then
-				SymTab[Code[pc+5]][S_GTYPE] = TYPE_DOUBLE
-			else
-				SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
-			end if
-			SymTab[Code[pc+5]][S_OBJ] = NOVALUE
+	c_stmt0("{\n")
+		if is_loop_var then
+			-- inlined loop vars are regular vars
+			c_stmt("int @;\n", Code[pc+5])
 		end if
 
-		if inc[MIN] >= 0 then
-			-- going up
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
+		CRef(Code[pc+3])
+		c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
+
+		Label(pc+7)
+
+		inc = ObjMinMax(Code[pc+1])
+		if TypeIs(Code[pc+1], TYPE_INTEGER) then
+			-- increment is an integer
+
+			if TypeIs(Code[pc+3], TYPE_INTEGER) and
+			TypeIs(Code[pc+2], TYPE_INTEGER) then
+				-- loop var is an integer
+				range1 = ObjMinMax(Code[pc+3])  -- start
+				range2 = ObjMinMax(Code[pc+2])  -- limit
+				SymTab[Code[pc+5]][S_GTYPE] = TYPE_INTEGER
 			else
-				c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			c_stmt0("}\n")
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = range1[MIN]
-				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+				range1 = {NOVALUE, NOVALUE}
+				if TypeIs(Code[pc+3], TYPE_DOUBLE) then
+					SymTab[Code[pc+5]][S_GTYPE] = TYPE_DOUBLE
+				else
+					SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
+				end if
+				SymTab[Code[pc+5]][S_OBJ] = NOVALUE
 			end if
 
-		elsif inc[MAX] < 0 then
-			-- going down
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ < @){\n", {Code[pc+5], Code[pc+2]})
+			if inc[MIN] >= 0 then
+				-- going up
+				LeftSym = TRUE
+				if TypeIs(Code[pc+5], TYPE_INTEGER) and
+				TypeIs(Code[pc+2], TYPE_INTEGER) then
+					c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
+				else
+					c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
+				end if
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				if range1[MIN] != NOVALUE then
+					SymTab[Code[pc+5]][S_OBJ_MIN] = range1[MIN]
+					SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+				end if
+
+			elsif inc[MAX] < 0 then
+				-- going down
+				LeftSym = TRUE
+				if TypeIs(Code[pc+5], TYPE_INTEGER) and
+				TypeIs(Code[pc+2], TYPE_INTEGER) then
+					c_stmt("if (@ < @){\n", {Code[pc+5], Code[pc+2]})
+				else
+					c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
+				end if
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				if range1[MIN] != NOVALUE then
+					SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
+					SymTab[Code[pc+5]][S_OBJ_MAX] = range1[MAX]
+				end if
+
 			else
-				c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			c_stmt0("}\n")
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
-				SymTab[Code[pc+5]][S_OBJ_MAX] = range1[MAX]
+				-- integer, but value could be + or -
+				c_stmt("if (@ >= 0) {\n", Code[pc+1])
+
+					LeftSym = TRUE
+					if TypeIs(Code[pc+5], TYPE_INTEGER) and
+					TypeIs(Code[pc+2], TYPE_INTEGER) then
+						c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
+					else
+						c_stmt("if (binary_op_a(GREATER, @, @)){\n",
+													{Code[pc+5], Code[pc+2]})
+					end if
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+				c_stmt0("}\n")
+				c_stmt0("else {\n")
+					LeftSym = TRUE
+					if TypeIs(Code[pc+5], TYPE_INTEGER) and
+					TypeIs(Code[pc+2], TYPE_INTEGER) then
+						c_stmt("if (@ < @) {\n", {Code[pc+5], Code[pc+2]})
+					else
+						c_stmt("if (binary_op_a(LESS, @, @)){\n",
+													{Code[pc+5], Code[pc+2]})
+					end if
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+					if range1[MIN] != NOVALUE then
+						SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
+						SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+					end if
+				c_stmt0("}\n")
 			end if
 
 		else
-			-- integer, but value could be + or -
+			-- increment type is not known to be integer
+
 			c_stmt("if (@ >= 0) {\n", Code[pc+1])
+				c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				c_stmt("else if (IS_ATOM_INT(@)) {\n", Code[pc+1])
+					c_stmt("if (binary_op_a(LESS, @, @){)\n", {Code[pc+5], Code[pc+2]})
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+				c_stmt0("}\n")
 
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
-			else
-				c_stmt("if (binary_op_a(GREATER, @, @)){\n",
-											   {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			c_stmt0("}\n")
-			c_stmt0("}\n")
-			c_stmt0("else {\n")
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ < @)\n", {Code[pc+5], Code[pc+2]})
-			else
-				c_stmt("if (binary_op_a(LESS, @, @)){\n",
-											   {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			c_stmt0("}\n")
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
-				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
-			end if
-			c_stmt0("}\n")
+				c_stmt0("else {\n")
+					c_stmt("if (DBL_PTR(@)->dbl >= 0.0) {\n", Code[pc+1])
+						c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
+							Goto(Code[pc+6])
+						c_stmt0("}\n")
+					c_stmt0("}\n")
+					c_stmt0("else {\n")
+						c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
+							Goto(Code[pc+6])
+						c_stmt0("}\n")
+					c_stmt0("}\n")
+				c_stmt0("}\n")
+
 		end if
-
-	else
-		-- increment type is not known to be integer
-
-		c_stmt("if (@ >= 0) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt("else if (IS_ATOM_INT(@)) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(LESS, @, @){)\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt0("}\n")
-
-		c_stmt0("else {\n")
-		c_stmt("if (DBL_PTR(@)->dbl >= 0.0) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt0("}\n")
-		c_stmt0("else {\n")
-		c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt0("}\n")
-		c_stmt0("}\n")
-
-	end if
 
 	pc += 7
 
