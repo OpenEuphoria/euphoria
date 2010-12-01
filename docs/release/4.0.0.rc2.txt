@@ -84,6 +84,7 @@
 * [[ticket:461]], Fixed error checking for invalid C routines for c_func / c_proc.
 * [[ticket:465]], Fixed stack space calculations for forward proc to func conversion and type checks.
 * [[ticket:466]], Fixed line reporting on compile time type check error.
+* [[:connect]] return value was documented incorrectly.
 
 === Enhancements/Changes
 
@@ -132,3 +133,4 @@
   they do and included them into a section in the manual about demos.
 * ##-test## parameter now displays warnings as well as errors
 * Translator speed optimizations.
+* Improved logging and error checking for sock_server.ex demo
