@@ -412,7 +412,7 @@ end function
 function translate( sequence filename, sequence fail_list )
 	printf(1, " translating %s:", {filename})
 	total += 1
-	sequence cmd = sprintf("%s %s %s %s -D UNITTEST -D EC -batch %s",
+	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s",
 		{ translator, library, compiler, translator_options, filename })
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	integer status = system_exec(cmd, 0)
@@ -461,7 +461,7 @@ function translate( sequence filename, sequence fail_list )
 end function
 
 function bind( sequence filename, sequence fail_list )
-	sequence cmd = sprintf("\"%s\" %s %s -batch -D UNITTEST %s",
+	sequence cmd = sprintf("\"%s\" %s %s -batch -d UNITTEST %s",
 		{ binder, eub_path, interpreter_options, filename } )
 	
 	total += 1
@@ -516,11 +516,11 @@ function test_file( sequence filename, sequence fail_list )
 	
 	sequence crash_option = ""
 	if match("t_c_", filename) = 1 then
-		crash_option = " -D CRASH "
+		crash_option = " -d CRASH "
 	end if
 	
 	printf(1, "interpreting %s:\n", {filename})
-	sequence cmd = sprintf("%s %s %s -D UNITTEST -batch %s%s %s",
+	sequence cmd = sprintf("%s %s %s -d UNITTEST -batch %s%s %s",
 		{ executable, interpreter_options, coverage_erase, crash_option, filename, test_options })
 
 	verbose_printf(1, "CMD '%s'\n", {cmd})

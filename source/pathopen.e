@@ -288,11 +288,11 @@ export function load_euphoria_config( sequence file )
 						end if
 					end if
 				else
-					arg = "-I"
+					arg = "-i"
 					parm = in
 				end if
 			else
-				arg = "-I"
+				arg = "-i"
 				parm = in
 			end if
 		end if
@@ -339,8 +339,7 @@ export function load_euphoria_config( sequence file )
 			end switch
 			
 			if needed then
-				arg = upper(arg)
-				if equal(arg, "-C") then
+				if equal(arg, "-c") then
 					if length(parm) > 0 then
 						new_args &= load_euphoria_config(parm)
 					end if
