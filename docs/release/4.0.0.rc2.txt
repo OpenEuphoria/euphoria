@@ -86,6 +86,7 @@
 * [[ticket:466]], Fixed line reporting on compile time type check error.
 * [[:connect]] return value was documented incorrectly.
 * [[ticket:464]], Fixed translated for loops that could result in incorrectly emitted brackets
+* [[ticket:469]], Fixed translated block comments
 
 === Enhancements/Changes
 
