@@ -62,7 +62,7 @@ public function calc_primes(integer approx_limit, atom time_limit_p = 10)
 
 	-- First we check to see if we have already got the requested value.	
 	if approx_limit <= list_of_primes[$] then
-		pos_ = binary_search(approx_limit, list_of_primes)
+		pos_ = search:binary_search(approx_limit, list_of_primes)
 		if pos_ < 0 then
 			pos_ = (-pos_)
 		end if
@@ -76,7 +76,7 @@ public function calc_primes(integer approx_limit, atom time_limit_p = 10)
 	
 	-- Calculate the largest possible factor for the largest known prime, and its index.
 	maxf_ = floor(power(candidate_, 0.5))
-	maxf_idx = binary_search(maxf_, list_of_primes)
+	maxf_idx = search:binary_search(maxf_, list_of_primes)
 	if maxf_idx < 0 then
 		maxf_idx = (-maxf_idx)
 		maxf_ = list_of_primes[maxf_idx]
@@ -192,9 +192,9 @@ public function next_prime(integer n, object fail_signal_p = -1, atom time_out_p
 	end if
 	-- Assumes that most searches will be less than about 1000
 	if n < 1009 and 1009 <= list_of_primes[$] then
-		i = binary_search(n, list_of_primes, ,169)
+		i = search:binary_search(n, list_of_primes, ,169)
 	else
-		i = binary_search(n, list_of_primes)
+		i = search:binary_search(n, list_of_primes)
 	end if
 	if i < 0 then
 		i = (-i)
@@ -235,7 +235,7 @@ public function prime_list(integer top_prime_p = 0)
 		list_of_primes = calc_primes(top_prime_p, 5)
 	end if
 	
-	index_ = binary_search(top_prime_p, list_of_primes)
+	index_ = search:binary_search(top_prime_p, list_of_primes)
 	if index_ < 0 then
 		index_ = - index_
 	end if
