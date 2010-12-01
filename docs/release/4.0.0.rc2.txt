@@ -83,6 +83,7 @@
 * The euphoria coded backend (eu.ex) in some cases did not handle recursive calls correctly.
 * [[ticket:461]], Fixed error checking for invalid C routines for c_func / c_proc.
 * [[ticket:465]], Fixed stack space calculations for forward proc to func conversion and type checks.
+* [[ticket:466]], Fixed line reporting on compile time type check error.
 
 === Enhancements/Changes
 
