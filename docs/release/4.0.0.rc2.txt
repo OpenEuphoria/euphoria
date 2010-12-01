@@ -87,6 +87,12 @@
 * [[:connect]] return value was documented incorrectly.
 * [[ticket:464]], Fixed translated for loops that could result in incorrectly emitted brackets
 * [[ticket:469]], Fixed translated block comments
+* [[ticket:467]], Fixed interpreter, translator and binder for handling multiple parameters
+                  when one comes from a eu.cfg file and the other from the command line, but
+                  the given option was designed to only be used ONCE, such as -batch
+* ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
+* ##std/cmdline.e##, ##cmd_parse## sets the NO_PARAMETER option when option does not have HAS_PARAMETER.
+* ##std/cmdline.e##, ##cmd_parse## sets the ONCE option when option does not have MULTIPLE.
 
 === Enhancements/Changes
 

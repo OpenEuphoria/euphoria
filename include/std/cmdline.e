@@ -335,7 +335,22 @@ function standardize_opts(sequence opts, integer auto_help_switches)
 			opts = standardize_opts(opts, 0)
 		end if
 	end if
-
+	
+	-- Patch a few either/or cases
+	for i = 1 to length(opts) do
+		if not find(HAS_PARAMETER, opts[i][OPTIONS]) then
+			opts[i][OPTIONS] &= NO_PARAMETER
+		end if
+		
+		if not find(MULTIPLE, opts[i][OPTIONS]) and not find(ONCE, opts[i][OPTIONS]) then
+			opts[i][OPTIONS] &= ONCE
+		end if
+		
+		if not find(HAS_CASE, opts[i][OPTIONS]) and not find(NO_CASE, opts[i][OPTIONS]) then
+			opts[i][OPTIONS] &= NO_CASE
+		end if
+	end for
+	
 	return opts
 end function
 
@@ -760,7 +775,7 @@ function find_opt(sequence opts, sequence opt_style, object cmd_text)
 
 	for i = 1 to length(opts) do
 		if find(NO_CASE,  opts[i][OPTIONS]) then
-			if not equal( text:lower(opt_name), lower(opts[i][opt_style[1]])) then
+			if not equal( text:lower(opt_name), text:lower(opts[i][opt_style[1]])) then
 				continue
 			end if
 		else
@@ -1005,7 +1020,7 @@ end function
 -- See Also:
 --   [[:show_help]], [[:command_line]]
 
-public function cmd_parse(sequence opts, object parse_options={}, sequence cmds = command_line())
+public function cmd_parse(sequence opts, object parse_options = {}, sequence cmds = command_line())
 	integer arg_idx, opts_done
 	sequence cmd
 	object param
@@ -1025,7 +1040,6 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		parse_options = {parse_options}
 	end if
 	
-
 	while po <= length(parse_options) do
 		switch parse_options[po] do
 			case HELP_RID then
@@ -1070,15 +1084,10 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 	end while
 
 	opts = standardize_opts(opts, auto_help)
-
 	call_count = repeat(0, length(opts))
 
 	map:map parsed_opts = map:new()
-
 	map:put(parsed_opts, OPT_EXTRAS, {})
-
-	arg_idx = 2
-	opts_done = 0
 
 	-- Find if there are any help options.
 	help_opts = {}
@@ -1101,6 +1110,9 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 			end if
 		end if
 	end for
+
+	arg_idx = 2
+	opts_done = 0
 
 	while arg_idx < length(cmds) do
 		arg_idx += 1
@@ -1220,8 +1232,10 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 		end if
 
 		sequence opt = opts[find_result[1]]
+		integer map_add_operation = map:ADD
 
 		if find(HAS_PARAMETER, opt[OPTIONS]) != 0 then
+			map_add_operation = map:APPEND
 			if length(find_result) < 4 then
 				arg_idx += 1
 				if arg_idx <= length(cmds) then
@@ -1272,7 +1286,7 @@ public function cmd_parse(sequence opts, object parse_options={}, sequence cmds 
 					map:put(parsed_opts, opt[MAPNAME], param)
 				end if
 			else
-				map:put(parsed_opts, opt[MAPNAME], param, map:APPEND)
+				map:put(parsed_opts, opt[MAPNAME], param, map_add_operation)
 			end if
 		end if
 

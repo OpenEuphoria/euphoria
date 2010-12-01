@@ -123,8 +123,6 @@ procedure main()
 	argv = command_line()
 
 	if BIND then
-		argv &= GetDefaultArgs()
-		argv = expand_config_options(argv)
 		argv = extract_options(argv)
 	end if
 
