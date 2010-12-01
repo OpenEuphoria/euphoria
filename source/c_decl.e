@@ -994,7 +994,6 @@ export procedure DeclareRoutineList()
 			end if
 			seq_num += 1
 		end for
-		s = SymTab[s][S_NEXT]
 	end for
 	if not first then
 		c_puts(",\n")
