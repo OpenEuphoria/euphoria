@@ -2189,6 +2189,7 @@ procedure opSTARTLINE()
 -- common in Translator, not in Interpreter
 	sequence line
 	integer offset
+	integer close_comment = 1
 
 	c_putc('\n')
 	offset = slist[Code[pc+1]][SRC]
@@ -2203,10 +2204,11 @@ procedure opSTARTLINE()
 		c_puts("\");\n")
 
 	else
-		if not match("*/", line ) then
+		if not match("*/", line ) and not match( "/*", line ) then
 			c_stmt0("/** ")
 		else
 			c_stmt0("//")
+			close_comment = 0
 		end if
 		for i = length(line) to 1 by -1 do
 			if not find(line[i], " \t\r\n") then
@@ -2218,7 +2220,9 @@ procedure opSTARTLINE()
 			end if
 		end for
 		c_puts(line)
-		c_puts("*/\n")
+		if close_comment then
+			c_puts("*/\n")
+		end if
 	end if
 	pc += 2
 end procedure
