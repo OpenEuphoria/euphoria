@@ -244,6 +244,9 @@ procedure patch_forward_call( token tok, integer ref )
 			{ known_files[current_file_no], sym_name( fr[FR_SUBPROG] ), fr[FR_LINE], fr[FR_NAME] })
 	end if
 	
+	integer old_temps_allocated = temps_allocated
+	temps_allocated = 0
+	
 	if is_func and fr[FR_OP] = PROC then
 		-- an unused forward function call!
 		-- need to convert from a PROC_FORWARD to a FUNC_FORWARD
@@ -279,8 +282,7 @@ procedure patch_forward_call( token tok, integer ref )
 	sequence orig_code = code
 	sequence orig_linetable = LineTable
 	Code = {}
-	integer old_temps_allocated = temps_allocated
-	temps_allocated = 0
+	
 	
 	integer ar_sp = find( code_sub, active_subprogs[current_file_no] )
 	integer pre_refs
@@ -586,6 +588,7 @@ procedure patch_forward_type_check( token tok, integer ref )
 						pc += 2
 					end if
 					symtab_index c = NewTempSym()
+					SymTab[fr[FR_SUBPROG]][S_STACK_SPACE] += 1
 					insert_code( { PROC, which_type, var, c, TYPE_CHECK }, pc, fr[FR_SUBPROG] )
 					pc += 4
 					
