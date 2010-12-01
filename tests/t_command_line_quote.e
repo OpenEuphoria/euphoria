@@ -40,7 +40,7 @@ ifdef not EUB then
  		cmds = { interpreter,
  			"print_command_line.ex" } & command_arrays[i]
 		cmdline = build_commandline( splice( cmds, option_switches(), 2 ) )
- 		system( cmdline, 2 )
+		system_exec( cmdline, 2 )
  		fd = open( "command_line.txt", "r" )
  		if fd != -1 then
  			 get_data = get(fd)
@@ -49,6 +49,8 @@ ifdef not EUB then
  				test_equal( sprintf("command_line_quote(%s)",{pretty_sprint(command_arrays)}), cmds, x )
  			 end if
  			 close(fd)
+ 		else
+			test_fail(  sprintf("command_line_quote #%d)",i) )
  		end if
  		if delete_file("command_line.txt") then end if
 	end for
