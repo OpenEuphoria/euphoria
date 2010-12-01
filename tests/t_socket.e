@@ -61,7 +61,7 @@ end ifdef
 
 sequence port = sprintf("%d", rand(999) + 5000)
 object p = pipe:exec(interpreter & " " & build_commandline( option_switches() ) & 
-	" ../demo/sock_server.ex " & port, pipe:create())
+	" ../demo/net/sock_server.ex " & port, pipe:create())
 if atom(p) then
 	test_fail("could not launch temporary server")
 else
