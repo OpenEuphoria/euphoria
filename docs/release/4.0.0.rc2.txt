@@ -82,6 +82,7 @@
 * [[ticket:453]], Reworked the way open files are cleaned up so that coverage works properly
 * The euphoria coded backend (eu.ex) in some cases did not handle recursive calls correctly.
 * [[ticket:461]], Fixed error checking for invalid C routines for c_func / c_proc.
+* [[ticket:465]], Fixed stack space calculations for forward proc to func conversion and type checks.
 
 === Enhancements/Changes
 
@@ -129,3 +130,4 @@
 * Removed demo/demo.doc and instead included in the header of each demo program what
   they do and included them into a section in the manual about demos.
 * ##-test## parameter now displays warnings as well as errors
+* Translator speed optimizations.
