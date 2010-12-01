@@ -341,7 +341,8 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend binder
+all : interpreter translator library debug-library backend
+all : binder
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
@@ -688,14 +689,14 @@ else
 	MINGW_FLAGS=
 endif
 
-$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
-$(BUILDDIR)/$(EUDIS) : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
+$(BUILDDIR)/$(EUDIS) : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e translator library
 $(BUILDDIR)/$(EUDIS) : $(EU_CORE_FILES) 
 $(BUILDDIR)/$(EUDIS) : $(EU_INTERPRETER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
@@ -704,21 +705,21 @@ $(BUILDDIR)/$(EUDIS) : $(EU_INTERPRETER_FILES)
 		-lib "$(BUILDDIR)/eu.a" \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
 
-$(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex
+$(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex translator library
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
 
-$(BUILDDIR)/$(EUTEST) : $(TRUNKDIR)/source/eutest.ex
+$(BUILDDIR)/$(EUTEST) : $(TRUNKDIR)/source/eutest.ex translator library
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
 
-$(BUILDDIR)/$(EUCOVERAGE) : $(TRUNKDIR)/bin/eucoverage.ex
+$(BUILDDIR)/$(EUCOVERAGE) : $(TRUNKDIR)/bin/eucoverage.ex translator library
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
