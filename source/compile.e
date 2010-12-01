@@ -2222,6 +2222,8 @@ procedure opSTARTLINE()
 		c_puts(line)
 		if close_comment then
 			c_puts("*/\n")
+		else
+			c_puts("\n")
 		end if
 	end if
 	pc += 2
