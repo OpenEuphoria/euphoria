@@ -6,8 +6,9 @@
 -- of translated code and this method 
 -- below is a fork bomb when run as compiled translated C code. 
 
+include std/unittest.e
 ifdef EUI then
-	include std/unittest.e
+	
 	include std/io.e
 	include std/filesys.e
 	include std/pretty.e
