@@ -70,7 +70,7 @@ else
 
 	for i = 1 to 4 do
 		_ = sock:connect(socket, "127.0.0.1:"&port)
-		if _ != 1 then
+		if _ = 0 then
 			exit
 		end if
 		if i = 4 then
@@ -84,7 +84,7 @@ else
 		end if
 	end for
 	
-	if _ != -1 then
+	if _ = 0 then
 		sequence send_data = "Hello, "
 		test_equal("send w/o newline", length(send_data), sock:send(socket, send_data, MSG_NOSIGNAL))
 		test_equal("receive w/o newline", send_data, sock:receive(socket, MSG_NOSIGNAL))
