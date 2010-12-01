@@ -6,15 +6,24 @@
 --
 
 object _ = 0
+include std/error.e
+crash_file("sock_server.err")
 
 include std/socket.e as sock
 include std/text.e
 include std/console.e
 
+integer logfn = 1
 sequence port = "5000"
-if length(command_line()) > 2 then
-	port = command_line()
+sequence cmd = command_line()
+display( cmd )
+if length( cmd ) > 2 then
+	port = cmd
 	port = port[3]
+end if
+
+if length( cmd ) > 3 then
+	logfn = open( cmd[4], "w" )
 end if
 
 ifdef OSX then
@@ -25,22 +34,25 @@ elsedef
 end ifdef
 
 sock:socket server = sock:create(sock:AF_INET, sock:SOCK_STREAM, 0)
-if sock:bind(server, addr) != sock:OK then
-	printf(1, "Could not bind server to %s, error=%d\n", { addr, sock:error_code() })
-	abort(1)
+if equal( server, -1 ) or sock:bind(server, addr) != sock:OK then
+	sequence msg = sprintf( "Could not bind server to %s, error=%d\n", { addr, sock:error_code() })
+	if logfn != 1 then
+		puts( logfn, msg )
+	end if
+	crash( msg )
 end if
 
 object client
 
 while sock:listen(server, 10) = sock:OK label "MAIN" do
-	printf(1, "Waiting for connections on %s\n", { addr })
+	printf(logfn, "Waiting for connections on %s\n", { addr })
 	
 	-- what do we do if we want to shut down the server?
 	-- do we have to use Ctrl+Break?! Is there no other way?
 	
 	client = sock:accept(server)
 	if sequence(client) then
-		puts(1, "Connection from " & client[2] & "\n")
+		puts( logfn, "Connection from " & client[2] & "\n")
 		while 1 do
 			object got_data = sock:receive(client[1], 0)
 			if atom(got_data) then
@@ -48,7 +60,7 @@ while sock:listen(server, 10) = sock:OK label "MAIN" do
 				continue "MAIN"
 			end if
 
-			printf(1, "Client sent: %s\n", { trim(got_data) })
+			printf( logfn, "Client sent: %s\n", { trim(got_data) })
 			if equal("quit\n", got_data) then
 				sock:close(client[1])
 				exit "MAIN"
@@ -60,4 +72,4 @@ while sock:listen(server, 10) = sock:OK label "MAIN" do
 end while
 
 sock:shutdown(server)
-puts(1, "Server closed\n")
+puts( logfn, "Server closed\n")
