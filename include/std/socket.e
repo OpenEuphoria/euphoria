@@ -986,7 +986,8 @@ end function
 --   # ##port## : port number
 --
 -- Returns:
---   An **integer**, 0 for success and -1 on failure.
+--   An **integer**, 0 for success and non-zero on failure.  On Windows, the value
+--   of ##WSAGetLastError()##, otherwise, the value of ##errno##.
 --
 -- Comments:
 --   ##address## can contain a port number. If it does not, it has to be supplied
