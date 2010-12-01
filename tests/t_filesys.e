@@ -236,6 +236,10 @@ copy_file( "t_filesys.e", "checksum-t_filesys.e", 1 )
 for i = 1 to 4 do
 	test_not_equal( sprintf("checksum diff %d", i), checksum( "t_filesys.e", i ), checksum( "t_ifdef.e", i ) )
 	test_equal(     sprintf("checksum same %d", i), checksum( "t_filesys.e", i ), checksum( "checksum-t_filesys.e", i ) )
+	
+	test_equal(     sprintf("checksum same with name and text %d", i), checksum( "t_filesys.e", i, 1, 1 ), checksum( "t_filesys.e", i, 1, 1 ) )
+	test_not_equal( sprintf("checksum with name %d vs not with name diff", i), checksum( "t_filesys.e", i ), checksum( "checksum-t_filesys.e", i, 1 ) )
+	
 end for
 delete_file( "checksum-t_filesys.e" )
 
@@ -248,6 +252,9 @@ test_equal( "abbreviate_path with extra non matching paths 1",
 	"tests" & SLASH & "t_filesys.e",  
 	abbreviate_path( canonical_path( "t_filesys.e" ), { "foo", canonical_path( ".." & SLASH ) } ) )
 
+test_equal( "abbreviate_path with non matching paths 1", 
+	SLASH & "baz" & SLASH & "tests" & SLASH & "t_filesys.e",  
+	abbreviate_path( canonical_path( "/baz/tests/t_filesys.e" ) ) )
 
 test_equal( "pathname", current_dir(), pathname( current_dir() & SLASH & "t_filesys.e" ) )
 
