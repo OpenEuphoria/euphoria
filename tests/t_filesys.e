@@ -2,9 +2,10 @@ sequence initial_directory = current_dir() & SLASH
 
 include std/filesys.e
 include std/io.e
-include std/unittest.e
-include std/text.e
+include std/search.e
 include std/sort.e
+include std/text.e
+include std/unittest.e
 
 sequence fullname, pname, fname, fext, eolsep, driveid
 integer sep
@@ -259,6 +260,22 @@ test_equal( "abbreviate_path with non matching paths 1",
 test_equal( "pathname", current_dir(), pathname( current_dir() & SLASH & "t_filesys.e" ) )
 
 test_true( "driveid returns sequence", sequence( filesys:driveid( current_dir() ) ) )
+
+--
+-- temp_file()
+--
+
+sequence tmp_name 
+
+tmp_name = temp_file("..")
+test_true("temp_file .. directory prefix", begins("..", tmp_name))
+
+tmp_name = filename(temp_file( , "T_", "TMP"))
+test_true("temp_file T_ prefix", begins("T_", tmp_name))
+test_true("temp file .TMP extension", ends(".TMP", tmp_name))
+
+tmp_name = filename(temp_file( , , ""))
+test_false("temp_file no extension", find('.', tmp_name))
 
 test_report()
 

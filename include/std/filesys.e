@@ -2597,9 +2597,12 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 		temp_location &= SLASH
 	end if
 	
+	if length(temp_extn) and temp_extn[1] != '.' then
+		temp_extn = '.' & temp_extn
+	end if
 	
 	while 1 do
-		randname = sprintf("%s%s%06d.%s", {temp_location, temp_prefix, rand(1_000_000) - 1, temp_extn})
+		randname = sprintf("%s%s%06d%s", {temp_location, temp_prefix, rand(1_000_000) - 1, temp_extn})
 		if not file_exists( randname ) then
 			exit
 		end if
