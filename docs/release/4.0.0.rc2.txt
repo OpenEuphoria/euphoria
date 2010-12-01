@@ -142,3 +142,4 @@
 * ##-test## parameter now displays warnings as well as errors
 * Translator speed optimizations.
 * Improved logging and error checking for sock_server.ex demo
+* Renamed ##bin/lines.ex## to ##bin/euloc.ex## since it's more Euphoria centric now.

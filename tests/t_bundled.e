@@ -70,7 +70,7 @@ constant base_bins = {
 	"buildcpdb.ex",
 	"ed.ex",
 	"eucoverage.ex",
-	"lines.ex",
+	"euloc.ex",
 	$
 }
 
