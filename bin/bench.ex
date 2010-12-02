@@ -6,9 +6,10 @@ include std/map.e
 
 without warning
 
+constant VERSION = "1.0"
+
 override procedure abort(integer x)
 	maybe_any_key()
-
 	eu:abort(x)
 end procedure
 
@@ -19,8 +20,9 @@ end ifdef
 
 procedure main()
 	sequence opts = {
-		{ "i", "iterations", "Number of iterations (default 1)", { HAS_PARAMETER, "count" }},
-		{ 0, "verbose", "Verbose (timing for each iteration)", { NO_PARAMETER }}
+		{ "i", "iterations", "Number of iterations (default 1)", { HAS_PARAMETER, "count" } },
+		{ 0, "verbose", "Verbose (timing for each iteration)", { NO_PARAMETER } },
+		{ 0, "version", "Display version number", { VERSIONING, "eubench v" & VERSION } }
 	}
 	map o = cmd_parse(opts)
 
