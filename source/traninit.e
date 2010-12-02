@@ -256,7 +256,7 @@ export procedure transoptions()
 			end if
 	
 			if not silent then
-				printf(1, "Build directory: %s\n", { output_dir })
+				printf(1, "Build directory: %s\n", { abbreviate_path(output_dir) })
 			end if
 			remove_output_dir = 1
 		end if
