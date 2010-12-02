@@ -569,8 +569,7 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
-	wrc -q -ad eui.rc $(BUILDDIR)\euc.exe
-
+	wrc -q -ad euc.rc $(BUILDDIR)\euc.exe
 
 translator : .SYMBOLIC
     @echo ------- TRANSLATOR -----------
@@ -585,10 +584,10 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option caseexact
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\eub.lbc file %i
-	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
-	wrc -q -ad eui.rc $(BUILDDIR)\eubw.exe
 	wlink $(DEBUGLINK) SYS nt op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
-	wrc -q -ad eui.rc $(BUILDDIR)\eub.exe
+	wrc -q -ad eub.rc $(BUILDDIR)\eub.exe
+	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
+	wrc -q -ad eubw.rc $(BUILDDIR)\eubw.exe
 
 backend : .SYMBOLIC backendflag
     @echo ------- BACKEND -----------
