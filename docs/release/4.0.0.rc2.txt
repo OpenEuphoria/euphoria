@@ -150,3 +150,4 @@
 * Improved logging and error checking for sock_server.ex demo
 * Renamed ##bin/lines.ex## to ##bin/euloc.ex## since it's more Euphoria centric now.
 * Removed left-over translator command line parameter ##-fastfp## which was for DOS only.
+* Reuse memory buffer in HSIEH32 hash implementation
