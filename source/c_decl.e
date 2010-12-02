@@ -74,8 +74,7 @@ export integer LeftSym = FALSE   -- to force name to appear, not value
 
 export boolean
 	dll_option = FALSE,
-	con_option = FALSE,
-	fastfp = FALSE
+	con_option = FALSE
 
 --**
 -- Sequence to contain files that are generated and should be delt with

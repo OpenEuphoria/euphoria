@@ -11,7 +11,8 @@ include std/text.e
 
 include common.e
 
--- don't change this please
+-- don't change this please, but please look for -deleted- items before adding new options
+-- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
 	{  0, "Unknown message code"},
 	{  1, "[1] is missing defined word before 'or'"},
@@ -106,7 +107,7 @@ constant StdErrMsgs = {
 	{ 90, "found [1] '[2]' but was expecting a parameter name instead."},
 	{ 91, "found [1] but expected 'else', an atom, string, constant or enum"},
 	{ 92, "found [1] but was expecting a parameter name instead."},
-	{ 93, "Fast FP option only available for DOS"},
+	{ 93, "-deleted-"},
 	{ 94, "fractional part of number is missing"},
 	{ 95, "file name is missing"},
 	{ 96, "Goto statement without a string label."},
@@ -200,7 +201,7 @@ constant StdErrMsgs = {
 	{184, "Create a shared library"},
 	{185, "Set the platform for the translated code"},
 	{186, "Use a non-standard library"},
-	{187, "Enable hardware FPU (DOS option only)"},
+	{187, "-deleted-"},
 	{188, "Set the stack size (Watcom)"},
 	{189, "Enable debug mode for generated code"},
 	{190, "Set the number of C statements per generated file before splitting."},

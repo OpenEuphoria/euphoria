@@ -96,7 +96,8 @@
 * [[ticket:471]], When using the ##-lib## parameter to ##euc##, it's canoncial path is used
                   and it's existance is checked before translation has begun to prevent wasting
                   time only to find the linker fails.
-* [[ticket:472]], eui --help display is now in a logical display.
+* [[ticket:472]], eui --help display is now in a logical display order.
+* [[ticket:473]], euc --help display is now in a logical display order.
 
 === Enhancements/Changes
 
@@ -147,3 +148,4 @@
 * Translator speed optimizations.
 * Improved logging and error checking for sock_server.ex demo
 * Renamed ##bin/lines.ex## to ##bin/euloc.ex## since it's more Euphoria centric now.
+* Removed left-over translator command line parameter ##-fastfp## which was for DOS only.

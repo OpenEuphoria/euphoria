@@ -84,7 +84,6 @@ sequence trans_opt_def = {
 	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
 	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
 	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
-	{ "fastfp",           0, GetMsgText(187,0), { } },
 	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
 	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
 	{ "keep",             0, GetMsgText(191,0), { } },
@@ -194,9 +193,6 @@ export procedure transoptions()
 					ShowMsg(2, 348, { val })
 					abort(1)
 				end if
-
-			case "fastfp" then
-				fastfp = TRUE
 
 			case "stack" then
 				sequence tmp = value(val)
@@ -369,10 +365,6 @@ procedure InitBackEnd(integer c)
 			CompileErr(150)
 
 	end switch
-
-	if fastfp then
-		CompileErr(93)
-	end if
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
