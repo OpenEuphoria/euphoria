@@ -744,7 +744,7 @@ $(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria-single.txt
 		$(BUILDDIR)\euphoria-single.txt > $(BUILDDIR)\euphoria-pdf.txt
 
 $(BUILDDIR)\euphoria-pdf.html : $(BUILDDIR)\euphoria-pdf.txt
-	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\pdf-template.html -o=$(BUILDDIR) -htmldoc $(BUILDDIR)\euphoria-pdf.txt
+	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\pdf-template.html -o=$(BUILDDIR) --htmldoc $(BUILDDIR)\euphoria-pdf.txt
 
 $(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.html
 	htmldoc --size letter -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\euphoria-pdf.html
