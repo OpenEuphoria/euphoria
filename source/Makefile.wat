@@ -512,9 +512,9 @@ $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_COR
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc file %i
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\eui.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eui.exe
+	wrc -q -ad eui.rc $(BUILDDIR)\eui.exe
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\euiw.exe
-	wrc -q -ad exw.res $(BUILDDIR)\euiw.exe
+	wrc -q -ad eui.rc $(BUILDDIR)\euiw.exe
 
 interpreter : .SYMBOLIC
 	wmake -h $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -569,7 +569,7 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
-	wrc -q -ad exw.res $(BUILDDIR)\euc.exe
+	wrc -q -ad eui.rc $(BUILDDIR)\euc.exe
 
 
 translator : .SYMBOLIC
@@ -586,9 +586,9 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\eub.lbc file %i
 	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eubw.exe
+	wrc -q -ad eui.rc $(BUILDDIR)\eubw.exe
 	wlink $(DEBUGLINK) SYS nt op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eub.exe
+	wrc -q -ad eui.rc $(BUILDDIR)\eub.exe
 
 backend : .SYMBOLIC backendflag
     @echo ------- BACKEND -----------
