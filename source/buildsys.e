@@ -686,7 +686,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 
 	if not silent then
 		if not verbose then
-			ShowMsg(1, 166, { exe_name })
+			ShowMsg(1, 166, { abbreviate_path(exe_name) })
 		else
 			ShowMsg(1, 166, { cmd })
 		end if

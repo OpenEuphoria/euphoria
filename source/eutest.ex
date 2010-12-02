@@ -590,7 +590,7 @@ function test_file( sequence filename, sequence fail_list )
 end function
 
 sequence interpreter_options = ""
-sequence translator_options = " -silent "
+sequence translator_options = ""
 sequence test_options = ""
 sequence translator = "", library = "", compiler = ""
 sequence interpreter_os_name
