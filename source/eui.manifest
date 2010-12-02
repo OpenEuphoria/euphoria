@@ -3,10 +3,9 @@
 <assemblyIdentity
     version="0.64.1.0"
     processorArchitecture="x86"
-    name="eui"
+    name="euphoria"
     type="win32"
 />
-<description>Euphoria Interpreter (console)</description>
 <dependency>
     <dependentAssembly>
         <assemblyIdentity
