@@ -93,6 +93,9 @@
 * ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
 * ##std/cmdline.e##, ##cmd_parse## sets the NO_PARAMETER option when option does not have HAS_PARAMETER.
 * ##std/cmdline.e##, ##cmd_parse## sets the ONCE option when option does not have MULTIPLE.
+* [[ticket:471]], When using the ##-lib## parameter to ##euc##, it's canoncial path is used
+                  and it's existance is checked before translation has begun to prevent wasting
+                  time only to find the linker fails.
 
 === Enhancements/Changes
 

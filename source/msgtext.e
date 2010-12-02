@@ -361,6 +361,7 @@ constant StdErrMsgs = {
 	{345, "Path to backend runner to use for binding" },
 	{346, "Type check error:  assigning a sequence to an atom" },
 	{347, "deleting [1]..." },
+	{348, "User supplied library does not exist:\n    [1]"},
 	$
 }
 

@@ -195,7 +195,11 @@ export procedure transoptions()
 				end switch
 
 			case "lib" then
-				user_library = val
+				user_library = canonical_path(val)
+				if not file_exists(user_library) then
+					ShowMsg(2, 348, { val })
+					abort(1)
+				end if
 
 			case "fastfp" then
 				fastfp = TRUE
