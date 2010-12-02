@@ -33,24 +33,26 @@ export sequence src_name = ""
 export sequence switches = {}
 
 constant COMMON_OPTIONS = {
-	{ "batch",     0, GetMsgText(279,0), { } },
-	{ "c",         0, GetMsgText(280,0), { MULTIPLE, HAS_PARAMETER, "filename" } },
-	{ "copyright", 0, GetMsgText(281,0), { } },
-	{ "d",         0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
 	{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
+	{ "c",         0, GetMsgText(280,0), { MULTIPLE, HAS_PARAMETER, "filename" } },
 	{ "i",         0, GetMsgText(283,0), { MULTIPLE, HAS_PARAMETER, "dir" } },
+	{ "d",         0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
 	{ "l",         0, GetMsgText(284,0), { MULTIPLE, HAS_PARAMETER, "local" } },
 	{ "ldb",       0, GetMsgText(285,0), { HAS_PARAMETER, "localdb" } },
 	{ "p",         0, GetMsgText(286,0), { MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
 	{ "pf",        0, GetMsgText(287,0), { } },
-	{ "strict",    0, GetMsgText(288,0), { } },
-	{ "test",      0, GetMsgText(289,0), { } },
-	{ "v", "version", GetMsgText(290,0), { } },
 	{ "w",         0, GetMsgText(291,0), { MULTIPLE, HAS_PARAMETER, "name" } },
 	{ "wf",        0, GetMsgText(292,0), { HAS_PARAMETER, "filename" } },
 	{ "x",         0, GetMsgText(293,0), { MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "batch",     0, GetMsgText(279,0), { } },
+	{ "strict",    0, GetMsgText(288,0), { } },
+	{ "test",      0, GetMsgText(289,0), { } },
+	{ "copyright", 0, GetMsgText(281,0), { } },
+	{ "v", "version", GetMsgText(290,0), { } },
  	$
 }
+
+constant COMMON_OPTIONS_SPLICE_IDX = length(COMMON_OPTIONS) - 1
 
 sequence options = {}
 add_options( COMMON_OPTIONS )
@@ -58,7 +60,8 @@ add_options( COMMON_OPTIONS )
 --**
 -- Add options to be parsed.
 export procedure add_options( sequence new_options )
-	options &= new_options
+	options = splice(options, new_options, COMMON_OPTIONS_SPLICE_IDX)
+	--options &= new_options
 end procedure
 
 --**
