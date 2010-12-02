@@ -68,13 +68,11 @@
 namespace unittest
 
 include std/console.e
-include std/error.e
 include std/filesys.e
 include std/io.e
 include std/math.e
 include std/pretty.e
 include std/search.e
-include std/types.e
 
 --****
 -- === Constants
@@ -115,9 +113,9 @@ procedure add_log(object data)
 	end if
 
 	puts(log_fh, "entry = ")
-	pretty_print(log_fh, data, {2, 2, 1, 78, "%d", "%.15g"})
+	pretty:pretty_print(log_fh, data, {2, 2, 1, 78, "%d", "%.15g"})
 	puts(log_fh, "\n")
-	flush(log_fh)
+	io:flush(log_fh)
 end procedure
 
 procedure test_failed(sequence name, object a, object b, integer TF = 0)
@@ -130,7 +128,7 @@ procedure test_failed(sequence name, object a, object b, integer TF = 0)
 				puts(2, "FALSE")
 			end if
 		else
-			pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
+			pretty:pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
 		end if
 		puts(2, " but got: ")
 		if TF and integer(b) then
@@ -140,7 +138,7 @@ procedure test_failed(sequence name, object a, object b, integer TF = 0)
 				puts(2, "FALSE")
 			end if
 		else
-			pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
+			pretty:pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
 		end if
 		puts(2, "\n")
 	end if
@@ -312,12 +310,12 @@ public procedure test_report()
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
 		if wait_on_summary then
-			any_key("Press a key to exit")
+			console:any_key("Press a key to exit")
 		end if
 		abort(0)
 	else
 		if wait_on_summary then
-			any_key("Press a key to exit")
+			console:any_key("Press a key to exit")
 		end if
 		abort(tests_failed > 0)
 	end if
@@ -367,7 +365,7 @@ public procedure test_equal(sequence name, object expected, object outcome)
 		success = 1	
 	elsif equal(0*expected, 0*outcome) then
 		-- for complicated sequences values
-		success = max(abs(expected-outcome)) < 1e-9
+		success = math:max( math:abs( expected - outcome ) ) < 1e-9
 	else
 		success = 0
 	end if
@@ -404,7 +402,7 @@ public procedure test_not_equal(sequence name, object a, object b)
 			success = ((b-a) >= 1e-9)
 		end if
 	end if
-	a = "anything but '" & pretty_sprint( a, {2,2,1,78,"%d", "%.15g"}) & "'"
+	a = "anything but '" & pretty:pretty_sprint( a, {2,2,1,78,"%d", "%.15g"}) & "'"
 	record_result(success, name, a, b)
 end procedure
 
@@ -503,8 +501,8 @@ filename = cmd[2]
 
 
 -- strip off path information
-while find( SLASH, filename ) do
-	filename = filename[find( SLASH, filename )+1..$]
+while find( filesys:SLASH, filename ) do
+	filename = filename[find( filesys:SLASH, filename )+1..$]
 end while
 
 for i = 3 to length(cmd) do
@@ -514,7 +512,7 @@ for i = 3 to length(cmd) do
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 	elsif equal(cmd[i], "-wait") then
 		set_wait_on_summary(1)
-	elsif begins(cmd[i], "-accumulate") then
+	elsif search:begins(cmd[i], "-accumulate") then
 		set_accumulate_summary(1)
 	elsif equal(cmd[i], "-log") then
 		log_fh = open("unittest.log", "a")
