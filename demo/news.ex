@@ -1,196 +1,149 @@
+--****
+-- === news.ex
+--
 -- Search news pages
-
--- All this demo does is read several Web pages in parallel 
--- and report on the number of occurences of a word or phrase.
+--
+-- All this demo does is read several Web pages in parallel
+-- and report on the number of occurrences of a word or phrase.
 -- Each page is handled by a separate Euphoria task running
 -- in parallel with several other tasks.
-
--- usage:
---    exw news.exu string
+--
+-- ==== Usage
+-- {{{
+-- eui news.ex string
+-- }}}
+--
 -- or:
---    exw news.exu "a multi-word phrase"
--- (case insensitive search)
-
--- On Linux/FreeBSD use exu instead of exw.
-
--- This demo uses Euphoria's new multitasking feature. It can run
--- on Linux, FreeBSD, or Windows, without change.
--- It creates multiple wget background processes, each retrieving one Web page.
-
--- You can get a version of wget for Windows from:
--- http://www.gnu.org/software/wget/wget.html
--- Linux and FreeBSD systems will probably already have it.
-
--- A Euphoria task is assigned to each instance of wget, searching the 
--- Web page text as it arrives. In this way, when a task is blocked due 
--- to a delayed response from a particular server, the program can easily 
--- switch to another task that is not blocked. The program quits after a 
+--
+-- {{{
+-- eui news.ex "a multi-word phrase"
+-- }}}
+--
+-- Search is case insensitive.
+--
+-- This demo uses Euphoria's multitasking feature. It can run without change on all
+-- platforms supported by OpenEuphoria.
+--
+-- A Euphoria task is assigned to each instance URL query, searching the
+-- Web page text as it arrives. In this way, when a task is blocked due
+-- to a delayed response from a particular server, the program can easily
+-- switch to another task that is not blocked. The program quits after a
 -- period of 10-15 seconds with no progress made on any page.
+--
 
-include std/wildcard.e
-include std/graphics.e
-include std/text.e
-include std/os.e
-
-sequence cl
-sequence search_phrase
-
-cl = command_line()
-if length(cl) >= 3 then
-    search_phrase = cl[3]
-else
-    puts(1, "Usage:\n")
-    puts(1, "       exw news.exu search-phrase\n")
-    if getc(0) then
-    end if
-    abort(1)
-end if
+include std/console.e  -- for maybe_any_key()
+include std/graphics.e -- for all the pretty screen formatting and colors
+include std/io.e       -- for write_file()
+include std/net/http.e -- for get_url()
+include std/search.e   -- for match_all()
+include std/text.e	   -- for upper()
 
 -- news sources
-sequence URLs
-URLs = {
-    "http://www.cbc.ca/news/",
-    "http://www.juancole.com/",
-    "http://www.abc.net.au/",
-    "http://abcnews.go.com/",
-    "http://english.aljazeera.net/HomePage",
-    "http://news.bbc.co.uk/",
-    "http://www.cbsnews.com/",
-    "http://cnn.com/",
-    "http://www.democracynow.org/index.pl",
-    "http://www.foxnews.com/",
-    "http://www.guardian.co.uk/",
-    "http://www.msnbc.msn.com/",
-    "http://www.reuters.com/",
-    "http://www.whatreallyhappened.com/",
-    "http://news.yahoo.com/"
+constant URLs = { -- feel free to add or delete your own. They need not be news.
+	"http://www.cbc.ca/news/",
+	"http://www.juancole.com/",
+	"http://www.abc.net.au/",
+	"http://abcnews.go.com/",
+	"http://english.aljazeera.net/HomePage",
+	"http://news.bbc.co.uk/",
+	"http://www.cbsnews.com/",
+	"http://cnn.com/",
+	"http://www.democracynow.org/index.pl",
+	"http://www.foxnews.com/",
+	"http://www.guardian.co.uk/",
+	"http://www.msnbc.msn.com/",
+	"http://www.reuters.com/",
+	"http://www.whatreallyhappened.com/",
+	"http://news.yahoo.com/"
 }
 
-sequence null_device, del_cmd
-
-if platform() = LINUX then
-    URLs = URLs[1..9] -- less room on screen
-    null_device = "/dev/null"
-    del_cmd = "rm"
-else
-    null_device = "NUL"
-    del_cmd = "del"
-end if
-
-integer progress, quit
-
-procedure search_url(sequence url, sequence string)
--- download a Web page and search it for a string   
-    integer f, hits
-    integer line_count
-    object line
-    sequence mytemp, ustring
-    
-    position(task_self()*2+1, 1)
-    printf(1, "task %2.0f: %s\n         waiting for wget...", {task_self(), url})
-    
-    ustring = upper(string)
-    hits = 0
-    
-    -- run a copy of wget as a background process
-    mytemp = sprintf("newstemp%.0f.html", task_self())
-    system(sprintf("wget -q -b -O %s %s > %s", {mytemp, url, null_device}), 2)
-    
-    f = -1
-    while f = -1 do
-	-- wait until file exists
-	if quit then
-	    return
-	end if
-    
-	task_schedule(task_self(), {1.0, 2.0})
-	task_yield()
-	f = open(mytemp, "rb")
-    end while
-
-    position(task_self()*2+2, 1)
-    text_color(BRIGHT_RED)
-    puts(1, "         waiting for data...")
-    text_color(WHITE)
-    
-    line_count = 0
-    while 1 do
-	line = gets(f)
-	if atom(line) then
-	    -- could be actual end-of-file, or maybe there's more coming
-	    task_schedule(task_self(), {1.0, 1.5})
-	    while 1 do
-		line = gets(f)
-		if sequence(line) then
-		    exit -- more data came in
-		end if
-		if quit then
-		    return -- we've been told to quit
-		end if  
-		task_yield()
-	    end while
-	end if
-	
-	if match(ustring, upper(line)) then
-	    hits += 1
-	end if
-	
-	line_count += 1
-	position(task_self()*2+2, 1)
-	text_color(BRIGHT_GREEN)
-	printf(1, "         matched %d lines out of %d   ", {hits, line_count})
+-- Download a web page and search if for a string
+procedure search_url(sequence url, sequence search_term)
+	position(task_self() * 2 + 1, 1)
 	text_color(WHITE)
-	progress = 1
-	-- this yield is not necessary, but it 
-	-- lets you see the parallelism better
-	task_schedule(task_self(), 1)
-	task_yield()
-    end while
+	printf(1, "task %2.0f: %s\n", { task_self(), url })
+	text_color(BRIGHT_BLUE)
+	puts(1, "        waiting for the internet...        ")
+	text_color(WHITE)
+
+	sequence mytemp = http_get(url) -- go get the url
+
+	while equal(mytemp,"") do
+		-- get_url hasn't returned yet but it has yielded to the task system.
+		if quit then
+			return
+		end if
+
+		-- give some time to other tasks
+		task_yield()
+	end while
+
+	write_file(sprintf("newstemp%.0f.html", task_self()), mytemp[2])
+
+	position(task_self() * 2 + 2, 1)
+	text_color(BRIGHT_RED)
+	puts(1, "    !! Timed Out !!                    ")
+
+	integer line_count = 0
+
+ 	if quit then
+		return -- we've been told to quit by timeout below
+	end if
+
+	object found = match_all(upper(search_term), upper(mytemp[2]))
+	if sequence(found) then
+		found = length(found) -- found what we were searching for!
+	else
+		found = 0
+	end if
+
+	line_count += 1
+	position(task_self() * 2 + 2, 1)
+	text_color(BRIGHT_GREEN)
+	printf(1, "        found %d instances    ", { found })
 end procedure
 
-integer t
+sequence search_phrase
+integer quit = 0
+
+-- global time for all URLs to have arrived and been searched.
+atom time_out = time() + 45
+
+sequence cmds = command_line()
+if length(cmds) >= 3 then
+	search_phrase = cmds[3]
+else
+	puts(1, "Usage:\n")
+	puts(1, "    eui news.ex search-phrase\n")
+	maybe_any_key()
+	abort(1)
+end if
 
 for i = 1 to length(URLs) do
-    t = task_create(routine_id("search_url"), {URLs[i], search_phrase})
-    task_schedule(t, 1)
+	-- Create the task
+	integer t = task_create(routine_id("search_url"), { URLs[i], search_phrase })
+
+	-- Schedule it for every one second
+	task_schedule(t, 1)
 end for
 
-system(del_cmd & " newstemp*.html > " & null_device, 2)
 clear_screen()
-if text_rows(43) then
-end if
-puts(1, "Looking for lines containing \"" & search_phrase & "\"")
+if text_rows(43) then end if
+printf(1, `Looking for lines containing "%s"`, { search_phrase })
 
-atom time_out
-time_out = time() + 45
-task_schedule(0, {2.5, 3.0}) -- check the time every 2.5 to 3.0 seconds
-
-quit = 0
-while 1 do
-    progress = 0
-    task_yield()
-    if progress then
-	-- quit 10 seconds after no more lines are read
-	-- from any file by any task
-	time_out = time() + 10
-    else
-	if time() > time_out then
-	    exit
-	end if
-    end if
-end while
-
-quit = 1 -- signal all tasks to report any final results and terminate
-
+-- the main loop for this main parent task --
+-- are there still any tasks running besides this one main task?
 while length(task_list()) > 1 do
-    task_yield()
+	-- check the time every 1 to 2 seconds, it's not critical
+	task_schedule(task_self(), { 1, 2 })
+	task_yield() -- give them some time
+
+	if time() > time_out then -- are they stalled? Running over the time limit?
+	   quit = 1 -- the flag for all tasks to report any final results and terminate
+	end if
 end while
 
+text_color(WHITE)
 position(2*length(URLs)+3, 1)
-puts(1, "\nAll Done.\n")
-
-if getc(0) then
-end if
-
-system(del_cmd & " wget-log* > " & null_device, 2)
+puts(1, "\nAll Done!\n")
 

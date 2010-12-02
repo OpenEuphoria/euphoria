@@ -1,0 +1,11 @@
+<%@ include std/text.e %>
+
+<html>
+	<head><title>Hello, <%= name %></title></head>
+	<body>
+		<h1>Say Hello</h1>
+		<% for i = 1 to 10 do %>
+			<p>Hello, <%= name %>!</p>
+			<% end for %>
+	</body>
+</html>

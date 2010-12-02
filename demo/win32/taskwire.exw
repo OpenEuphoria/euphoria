@@ -1,15 +1,14 @@
-		-----------------------------------------
-		--       3-D Wire Frame Picture        --
-		--  * * WIN32 Multitasking Version * * --
-		-----------------------------------------
-
+--****
+-- === win32/taskwire.exw
+--
+-- 3-D Wire Frame Picture. Windows Multitasking Version
+--
 -- Run in a window or in full screen.
-
+--
 -- In a window, just close the window to stop it.
-
+--
 -- When running in Full Screen, press any key to stop.
--- Make a full-screen DOS window to clear up your screen.
-
+--
 
 constant NTASKS = 9 -- number of E's spinning simultaneously.
 		    -- each E is controlled by a separate Euphoria task.

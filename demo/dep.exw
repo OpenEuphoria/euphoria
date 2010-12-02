@@ -1,0 +1,57 @@
+--****
+-- === dep.exw
+--
+-- Perform a simple DEP test on your system
+--
+
+include std/machine.e
+include std/dll.e
+include std/os.e
+include std/console.e
+include std/error.e
+ifdef WINDOWS then
+	include std/win32/msgbox.e
+end ifdef
+ifdef WIN32_CONSOLE or UNIX then
+with define CONSOLE
+end ifdef
+type valid_rid(integer x)
+	return x > -1 
+end type
+
+-- setup add code
+constant add_code = {
+       -- first int argument is at stack offset +4, 2nd int is at +8 
+       #8B, #44, #24, #04,        -- mov   eax, +4[esp]
+       #03, #44, #24, #08,        -- add   eax, +8[esp]
+       #C2, #00, #08              -- ret 8  -- pop 8 bytes off the stack
+}
+atom non_executable_memory = allocate(length(add_code))
+valid_rid r = define_c_func("", non_executable_memory, {C_INT, C_INT}, C_INT)
+
+procedure display(sequence message, sequence caption)
+	integer ok
+	ifdef CONSOLE then
+		clear_screen()
+		puts(1, message & 10 )
+	elsedef
+		free_console()
+		ok = message_box(message,caption,MB_OK)
+	end ifdef
+end procedure
+
+function display_DEP_successful_message(integer i)
+	display( "DEP is working on your system.", "Good News" )
+	abort(0)
+	return 0
+end function
+valid_rid dDEPsm = routine_id("display_DEP_successful_message")
+
+integer x = -17, w = 80
+
+poke(non_executable_memory,add_code) 
+crash_routine(dDEPsm)
+c_func(r, {x, w})
+display("DEP is not working on your system.","Bad News")
+
+

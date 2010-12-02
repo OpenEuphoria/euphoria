@@ -1,4 +1,18 @@
+--****
+-- === pipes.ex
+--
+-- Starts a sub-process and communicates to it via piped io.
+-- The sub process is ##pipe_sub.ex##
+--
+
 include std/pipeio.e as pipe
+include std/console.e
+without warning
+
+override procedure abort(integer x)
+	maybe_any_key()
+	eu:abort(x)
+end procedure
 
 object z = pipe:create()
 object p = pipe:exec("eui pipe_sub.ex", z)
@@ -22,3 +36,5 @@ puts(1,"read from child pipe: \""&c&"\"")
 pipe:kill(p)
 
 puts(1,"\n\n")
+maybe_any_key()
+

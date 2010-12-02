@@ -1,4 +1,11 @@
+--****
+-- === regexps.ex
+--
+-- Shows off some simple regular expression operations
+--
+
 include std/regex.e as re
+include std/console.e
 
 procedure show_matches(sequence matches, sequence str)
 	for i = 1 to length(matches)  do
@@ -21,5 +28,5 @@ r = re:new("([A-Z][a-z]+) ([A-Z][a-z]+)")
 show_matches(re:find_all(r, str), str)
 printf(1, "\nConverting First Name Last Name to Last, First in:\n%s\n", { str })
 
-puts(1, re:find_replace(r, str, #/\2, \1/) & "\n")
-
+puts(1, re:find_replace(r, str, `\2, \1`) & "\n")
+maybe_any_key()
