@@ -6,7 +6,9 @@
 
 namespace wildcard
 
-include std/text.e as txt
+ifdef not UNIX then
+	include std/text.e
+end ifdef
 
 --****
 -- === Routines
@@ -220,8 +222,8 @@ end function
 
 public function wildcard_file(sequence pattern, sequence filename)
 	ifdef not UNIX then
-		pattern = txt:upper(pattern)
-		filename = txt:upper(filename)
+		pattern = text:upper(pattern)
+		filename = text:upper(filename)
 	end ifdef
 	
 	if not find('.', pattern) then
