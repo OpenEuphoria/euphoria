@@ -713,7 +713,7 @@ label "build_direct_cleanup"
 
 			-- remove the trailing slash
 			if not remove_directory(output_dir) then
-				ShowMsg(2, 194, { output_dir })
+				ShowMsg(2, 194, { abbreviate_path(output_dir) })
 			end if
 		end if
 	end if
