@@ -71,40 +71,34 @@ end function
 set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
-	{ "silent",           0, GetMsgText(177,0), { } },
-	{ "verbose",	      0, GetMsgText(319,0), { } },
-	{ "wat",              0, GetMsgText(178,0), { } },
-	{ "gcc",              0, GetMsgText(180,0), { } },
-	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
-	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
-	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
+	{ "debug",            0, GetMsgText(189,0), { } },
+	{ "plat",             0, GetMsgText(185,0), { HAS_PARAMETER, "platform" } },
 	{ "con",              0, GetMsgText(182,0), { } },
 	{ "dll",              0, GetMsgText(183,0), { } },
 	{ "so",               0, GetMsgText(184,0), { } },
-	{ "plat",             0, GetMsgText(185,0), { HAS_PARAMETER, "platform" } },
+	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
+	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
+	{ "wat",              0, GetMsgText(178,0), { } },
+	{ "gcc",              0, GetMsgText(180,0), { } },
+	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
+	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
+	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
 	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
 	{ "fastfp",           0, GetMsgText(187,0), { } },
 	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
-	{ "debug",            0, GetMsgText(189,0), { } },
 	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
 	{ "keep",             0, GetMsgText(191,0), { } },
-	{ "makefile",         0, GetMsgText(193,0), { } },
-	{ "makefile-partial", 0, GetMsgText(192,0), { } },
-	{ "emake",            0, GetMsgText(195,0), { } },
 	{ "nobuild",          0, GetMsgText(196,0), { } },
 	{ "force-build",      0, GetMsgText(326,0), { } },
-	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
-	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } }
+	{ "emake",            0, GetMsgText(195,0), { } },
+	{ "makefile",         0, GetMsgText(193,0), { } },
+	{ "makefile-partial", 0, GetMsgText(192,0), { } },
+	{ "silent",           0, GetMsgText(177,0), { } },
+	{ "verbose",	      0, GetMsgText(319,0), { } },
+	$
 }
 
 add_options( trans_opt_def )
-
--- procedure translator_help()
--- 	ShowMsg(1, 199)
--- 	show_help( get_common_options(), NO_HELP)
--- 	ShowMsg(1, 200)
--- 	show_help(trans_opt_def, NO_HELP)
--- end procedure
 
 --**
 -- Process the translator command-line options

@@ -210,7 +210,7 @@ constant StdErrMsgs = {
 	{194, "Could not remove directory [1]"},
 	{195, "Generate a emake/emake.bat file to build project"},
 	{196, "Do not build the project nor write a build file"},
-	{197, "Generate/compile all files in 'builddir'"},
+	{197, "Generate/compile all files in 'dir'"},
 	{198, "Set the output filename"},
 	{199, "euc.exe [options] file.ex...\n common options:"},
 	{200, "\n translator options:"},
