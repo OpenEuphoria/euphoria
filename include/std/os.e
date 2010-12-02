@@ -1,17 +1,24 @@
 --****
 -- == Operating System Helpers
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
-include std/sequence.e
-include std/text.e
+namespace os
+
+ifdef WINDOWS then
+	include std/dll.e
+end ifdef
 include std/machine.e
 
-ifdef DOS32 then
-	include std/dos/interrup.e
-elsedef
-	include std/dll.e
+ifdef UNIX then
+
+	public constant CMD_SWITCHES = "-"
+
+elsifdef WINDOWS then
+
+	public constant CMD_SWITCHES = "-/"
+
 end ifdef
 
 constant
@@ -23,27 +30,25 @@ constant
 -- === Operating System Constants
 --
 
-public constant
-	DOS32	= 1,
-	WIN32	= 2,
-	LINUX	= 3,
-	FREEBSD = 3,
-	OSX	    = 4,
-	SUNOS	= 5,
-	OPENBSD = 6,
-	NETBSD  = 7
+public enum
+	WIN32 = 2,
+	LINUX,
+	OSX,
+	SUNOS,
+	OPENBSD,
+	NETBSD,
+	FREEBSD
 
 --****
 -- These constants are returned by the [[:platform]] function.
 --
--- * DOS32   - Host operating system is DOS
--- * WIN32   - Host operating system is Windows
--- * LINUX   - Host operating system is Linux **or** FreeBSD
--- * FREEBSD - Host operating system is Linux **or** FreeBSD
--- * OSX     - Host operating system is Mac OS X
--- * SUNOS   - Host operating system is Sun's OpenSolaris
--- * OPENBSD - Host operating system is OpenBSD
--- * NETBSD  - Host operating system is NetBSD
+-- * ##WIN32##   ~-- Host operating system is Windows
+-- * ##LINUX##   ~-- Host operating system is Linux
+-- * ##FREEBSD## ~-- Host operating system is FreeBSD
+-- * ##OSX##     ~-- Host operating system is Mac OS X
+-- * ##SUNOS##   ~-- Host operating system is Sun's OpenSolaris
+-- * ##OPENBSD## ~-- Host operating system is OpenBSD
+-- * ##NETBSD##  ~-- Host operating system is NetBSD
 --
 -- Note:
 --   Via the [[:platform]] call, there is no way to determine if you are on Linux
@@ -60,7 +65,7 @@ public constant
 constant M_INSTANCE = 55
 
 --**
--- Return ##hInstance## on //Windows//, Process ID (pid) on //Unix// and 0 on //DOS//
+-- Return ##hInstance## on //Windows// and Process ID (pid) on //Unix//.
 --
 -- Comments:
 -- On //Windows// the ##hInstance## can be passed around to various
@@ -70,8 +75,38 @@ public function instance()
 	return machine_func(M_INSTANCE, 0)
 end function
 
-ifdef WIN32 then
-	constant M_UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
+ifdef WINDOWS then
+	atom cur_pid = -1
+end ifdef
+
+--**
+-- Return the ID of the current Process (pid)
+--
+-- Returns: 
+-- An atom: The current process' id.
+--
+-- Example:
+-- <eucode>
+-- mypid = get_pid()
+-- </eucode>
+
+public function get_pid()
+	ifdef UNIX then
+		return machine_func(M_INSTANCE, 0)
+	elsifdef WINDOWS then
+		if cur_pid = -1 then
+			cur_pid = dll:define_c_func( dll:open_dll("kernel32.dll"), "GetCurrentProcessId", {}, dll:C_DWORD)
+			if cur_pid >= 0 then
+				cur_pid = c_func(cur_pid, {})
+			end if
+		end if
+		
+		return cur_pid
+	end ifdef
+end function
+
+ifdef WINDOWS then
+	constant M_UNAME = dll:define_c_func( dll:open_dll("kernel32.dll"), "GetVersionExA", { dll:C_POINTER }, dll:C_INT)
 elsifdef UNIX then
 	constant M_UNAME = 76
 end ifdef
@@ -82,9 +117,6 @@ end ifdef
 -- Returns:
 --    A **sequence**, starting with the OS name. If identification fails, returns
 --    an OS name of UNKNOWN. Extra information depends on the OS.
---
---    On DOS, returns an OS name of "DOS" as well as a string representing the
---    DOS version number (e.g. "5.0").
 --
 --    On Unix, returns the same information as the uname() syscall in the same
 --    order as the struct utsname. This information is:
@@ -113,11 +145,11 @@ end ifdef
 -- On non Unix platforms, calling the machine_func() directly returns 0.
 
 public function uname()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom buf
 		sequence sbuf
 		integer maj, mine, build, plat
-		buf = allocate(148)
+		buf = machine:allocate(148)
 		poke4(buf, 148)
 		if c_func(M_UNAME, {buf}) then
 			maj = peek4u(buf+4)
@@ -169,8 +201,10 @@ public function uname()
 			end if
 			sbuf = append(sbuf, peek_string(buf+20))
 			sbuf &= {plat, build, mine, maj}
+			machine:free( buf )
 			return sbuf
 		else
+			machine:free( buf )
 			return {}
 		end if
 	elsifdef UNIX then
@@ -180,13 +214,6 @@ public function uname()
 		else
 			return o
 		end if
-	elsifdef DOS32 then
-    	sequence reg_list
-	    reg_list = repeat(0,10)
-    	reg_list[REG_AX] = #3000
-	    reg_list = dos_interrupt(#21,reg_list)
-		return {"DOS", sprintf("%g", remainder(reg_list[REG_AX],256) + 
-			floor(reg_list[REG_AX]/256)/100)}
 	elsedef
 		return {"UNKNOWN"} --TODO
 	end ifdef
@@ -199,7 +226,7 @@ end function
 -- An **integer**, 1 if host system is a newer Windows (NT/2K/XP/Vista), else 0.
 
 public function is_win_nt()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		sequence s
 		s = uname()
 		return equal(s[1], "WinNT")
@@ -213,15 +240,15 @@ end function
 -- <built-in> function getenv(sequence var_name)
 --
 -- Description:
--- Return the value of an environment variable. 
+-- Return the value of an environment variable.
 --
 -- Parameters:
--- 		# ##var_name##: a string, the name of the variable being queried.
+-- 		# ##var_name## : a string, the name of the variable being queried.
 --
 -- Returns:
 --		An **object**, -1 if the variable does not exist, else a sequence holding its value.
 --
--- Comments: 
+-- Comments:
 --
 -- Both the argument and the return value, may, or may not be, case sensitive. You might need to test this on your own system.
 --
@@ -230,8 +257,8 @@ end function
 --  e = getenv("EUDIR")
 -- -- e will be "C:\EUPHORIA" -- or perhaps D:, E: etc.
 -- </eucode>
--- 
--- See Also:   
+--
+-- See Also:
 -- [[:setenv]], [[:command_line]]
 
 --**
@@ -239,9 +266,9 @@ end function
 --
 -- Parameters:
 --
--- # ##name##: a string, the environment variable name
--- # ##val##: a string, the value to set to
--- # ##overwrite##: an integer, nonzero to overwrite an existing variable, 0 to disallow this.
+-- # ##name## : a string, the environment variable name
+-- # ##val## : a string, the value to set to
+-- # ##overwrite## : an integer, nonzero to overwrite an existing variable, 0 to disallow this.
 --
 -- Example 1:
 -- <eucode>
@@ -261,7 +288,7 @@ end function
 -- Unset an environment variable
 --
 -- Parameters:
--- * ##name## - name of environment variable to unset
+-- # ##name## : name of environment variable to unset
 --
 -- Example 1:
 -- <eucode>
@@ -280,48 +307,41 @@ end function
 -- <built-in> function platform()
 --
 -- Description:
--- Indicates the platform that the program is being executed on: DOS32, WIN32, Linux/FreeBSD or OS X.
+-- Indicates the platform that the program is being executed on.
 --
 -- Returns:
--- A small **integer**:
+-- An **integer**,
 -- <eucode>
--- global constant
---     DOS32   = 1,
---     WIN32   = 2,
---     LINUX   = 3,
---     FREEBSD = 3, -- NOTE: take notices, same as LINUX.
---     OSX     = 4,
---     SUNOS   = 5
+-- public constant
+--     WIN32,
+--     LINUX,
+--     FREEBSD,
+--     OSX,
+--     SUNOS,
+--	   OPENBSD,
+--     NETBSD,
+--     FREEBSD
 -- </eucode>
 --
 -- Comments:
 -- The [[:ifdef statement]] is much more versatile and in most cases supersedes ##platform##().
 --
--- When ex.exe is running, the platform is //DOS32//. When exw.exe is running the platform is //WIN32//. 
--- When exu is running the platform is //LINUX//, //FreeBSD//, //OS X// or //SunOS//.
---
---  ##platform##() used to be the way to execute different code depending on which platform the program is running on.
--- Additional platforms will be added as Euphoria is ported to new machines and operating environments.
+-- ##platform##() used to be the way to execute different code depending on which platform the program
+-- is running on. Additional platforms will be added as Euphoria is ported to new machines and
+-- operating environments.
 --
 -- Example 1:
 -- <eucode>
---  if platform() = WIN32 then
+--  ifdef WIN32 then
 --     -- call system Beep routine
 --     err = c_func(Beep, {0,0})
--- elsif platform() = DOS32 then
---     -- make beep
---     sound(500)
---     t = time()
---     while time() < t + 0.5 do
---     end while
---     sound(0)
--- else
+-- elsedef
 --     -- do nothing (Linux/FreeBSD)
 -- end if
 -- </eucode>
 --
--- See Also: 
--- [[:platform.txt]], [[:ifdef statement]]
+-- See Also:
+-- [[:Platform-Specific Issues]], [[:ifdef statement]]
 
 
 --****
@@ -330,14 +350,14 @@ end function
 
 --****
 -- Signature:
--- <built-in> procedure system(sequence command, integer mode)
+-- <built-in> procedure system(sequence command, integer mode=0)
 --
 -- Description:
--- Pass a command string to the operating system command interpreter. 
+-- Pass a command string to the operating system command interpreter.
 --
 -- Parameters:
---		# ##command##: a string to be passed to the shell
---		# ##mode##: an integer, indicating the manner in which to return from the call.
+--		# ##command## : a string to be passed to the shell
+--		# ##mode## : an integer, indicating the manner in which to return from the call.
 --
 -- Errors:
 -- ##command## should not exceed 1,024 characters.
@@ -351,28 +371,11 @@ end function
 -- ##mode## = 2 should only be used when it is known that the command executed by ##system##() will not change the graphics mode.
 --
 -- You can use Euphoria as a sophisticated "batch" (.bat) language by making calls to ##system##() and ##system_exec##().
--- 
--- ##system##() will start a new DOS or Linux/FreeBSD shell.
--- 
--- ##system##() allows you to use command-line redirection of standard input and output in  
--- ##command##.
 --
--- Under //DOS32//, a Euphoria program will start off using extended memory. 
--- If extended memory runs out the program will consume conventional memory. 
--- If conventional memory runs out it will use virtual memory, i.e. swap space on disk. 
--- The //DOS// command run by ##system##() will fail if there is not enough conventional memory available.
--- To avoid this situation you can reserve some conventional (low) memory by typing:
---  {{{
---      SET CAUSEWAY=LOWMEM:xxx
---  }}}
---  
---  where ##xxx## is the number of K of conventional memory to reserve. Type this before running your program. 
--- You can also put this in autoexec.bat, or in a .bat file that runs your program. For example:
--- {{{
---      SET CAUSEWAY=LOWMEM:80
---     ex myprog.ex
--- }}}
---  This will reserve 80K of conventional memory, which should be enough to run simple //DOS //commands like COPY, MOVE, MKDIR etc.
+-- ##system##() will start a new command shell.
+--
+-- ##system##() allows you to use command-line redirection of standard input and output in
+-- ##command##.
 --
 -- Example 1:
 -- <eucode>
@@ -380,28 +383,28 @@ end function
 -- -- note use of double backslash in literal string to get
 -- -- single backslash
 -- </eucode>
--- 
--- Example 2:  
+--
+-- Example 2:
 -- <eucode>
---  system("ex \\test\\myprog.ex < indata > outdata", 2)
+--  system("eui \\test\\myprog.ex < indata > outdata", 2)
 -- -- executes myprog by redirecting standard input and
 -- -- standard output
 -- </eucode>
--- 
+--
 -- See Also:
 -- [[:system_exec]], [[:command_line]], [[:current_dir]], [[:getenv]]
 --
 
 --****
 -- Signature:
--- <built-in> function system_exec(sequence command, integer mode)
+-- <built-in> function system_exec(sequence command, integer mode=0)
 --
--- Description: 
+-- Description:
 -- Try to run the a shell executable command
 --
 -- Parameters:
---		# ##command##: a string to be passed to the shell, representing an executable command
---		# ##mode##: an integer, indicating the manner in which to return from the call.
+--		# ##command## : a string to be passed to the shell, representing an executable command
+--		# ##mode## : an integer, indicating the manner in which to return from the call.
 --
 -- Returns:
 -- An **integer**, basically the exit/return code from the called process.
@@ -412,30 +415,30 @@ end function
 -- Comments:
 --
 -- Allowable values for ##mode## are:
--- * 0: the previous graphics mode is restored and the screen is cleared.
--- * 1: a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
--- * 2: the graphics mode is not restored and the screen is not cleared.
+-- * 0 ~-- the previous graphics mode is restored and the screen is cleared.
+-- * 1 ~-- a beep sound will be made and the program will wait for the user to press a key before the previous graphics mode is restored.
+-- * 2 ~-- the graphics mode is not restored and the screen is not cleared.
 --
 -- If it is not possible to run the program, ##system_exec##() will return -1.
 --
--- On //DOS32// or //WIN32//, ##system_exec##() will only run .exe and .com programs. 
--- To run .bat files, or built-in DOS commands, you need [[:system]](). Some commands, 
+-- On //WIN32//, ##system_exec##() will only run .exe and .com programs.
+-- To run .bat files, or built-in shell commands, you need [[:system]](). Some commands,
 -- such as DEL, are not programs, they are actually built-in to the command interpreter.
 --
--- On //DOS32// and //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
+-- On //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
 -- Nor does it allow you to quote strings that contain blanks, such as file names.
 --
--- exit codes from DOS or Windows programs are normally in the range 0 to 255, with 0 indicating "success". 
--- 
+-- exit codes from Windows programs are normally in the range 0 to 255, with 0 indicating "success".
+--
 -- You can run a Euphoria program using ##system_exec##(). A Euphoria program can return an exit code using [[:abort]]().
--- 
--- ##system_exec##() does not start a new //DOS// shell.
---  
--- Example 1:  
+--
+-- ##system_exec##() does not start a new command shell.
+--
+-- Example 1:
 -- <eucode>
 --  integer exit_code
 -- exit_code = system_exec("xcopy temp1.dat temp2.dat", 2)
--- 
+--
 -- if exit_code = -1 then
 --     puts(2, "\n couldn't run xcopy.exe\n")
 -- elsif exit_code = 0 then
@@ -444,11 +447,11 @@ end function
 --     printf(2, "\n xcopy failed with code %d\n", exit_code)
 -- end if
 -- </eucode>
---  
--- Example 2:  
+--
+-- Example 2:
 -- <eucode>
 --  -- executes myprog with two file names as arguments
--- if system_exec("ex \\test\\myprog.ex indata outdata", 2) then
+-- if system_exec("eui \\test\\myprog.ex indata outdata", 2) then
 --     puts(2, "failure!\n")
 -- end if
 -- </eucode>
@@ -464,13 +467,10 @@ end function
 -- Suspend thread execution. for ##t## seconds.
 --
 -- Parameters:
--- # ##t##: an atom, the number of seconds for which to sleep.
+-- # ##t## : an atom, the number of seconds for which to sleep.
 --
 -- Comments:
--- On //Windows// and //Unix//, the operating system will suspend your process and
--- schedule other processes. On //DOS//, your program will go into a busy loop for
--- ##t## seconds, during which time other processes may run, but they will compete
--- with your process for the CPU.
+-- The operating system will suspend your process and schedule other processes.
 --
 -- With multiple tasks, the whole program sleeps, not just the current task. To make
 -- just the current task sleep, you can call ##[[:task_schedule]]([[:task_self]](), {i, i})##
@@ -484,7 +484,7 @@ end function
 -- </eucode>
 --
 -- See Also:
---     [[:task_schedule]], [[:tick_rate]], [[:task_yield]], [[:task_delay]]
+--     [[:task_schedule]], [[:task_yield]], [[:task_delay]]
 
 public procedure sleep(atom t)
 -- go to sleep for t seconds
@@ -493,132 +493,4 @@ public procedure sleep(atom t)
 		machine_proc(M_SLEEP, t)
 	end if
 end procedure
-
-constant
- 	M_SOUND      = 1,
-	M_TICK_RATE = 38
-
-
---**
--- Frequency Type
-
-public type frequency(integer x)
-	return x >= 0
-end type
-
---**
--- Turn on the PC speaker at a specified frequency 
---
--- Parameters:
--- 		# ##f##: frequency of sound. If ##f## is 0 the speaker will be turned off.
---
--- Comments:
---
--- On //Windows// and //Unix// platforms, no sound will be made.
---
--- Example 1:
--- <eucode>
--- sound(1000) -- starts a fairly high pitched sound
--- </eucode>
-
-public procedure sound(frequency f)
--- turn on speaker at frequency f
--- turn off speaker if f is 0
-	machine_proc(M_SOUND, f)
-end procedure
-
---**
--- Specify the number of clock-tick interrupts per second.
---
--- Parameters:
--- 		# ##rate##, an atom, the number of ticks by seconds.
---
--- Errors:
--- The rate must not be greater than the inverse frequency of the motherboard clock, at 1193181 2/3 Hz.
---
--- Comments:
---
--- This setting determines the precision of the time() library routine.
--- It also affects the sampling rate for time profiling.
---
--- ##tick_rate## is effective under //DOS// only, and is a no-op elsewhere.
--- Under //DOS//, the tick rate is 18.2 ticks per second. Under //WIN32//,
--- it is always 100 ticks per second.
---
--- ##tick_rate##() can increase the setting above the default value. As a
--- special case, ##tick_rate(0)## resets //DOS// to the default tick rates.
---
--- If a program runs in a DOS window with a tick rate other than 18.2, the
--- time() function will not advance unless the window is the active window. 
---
--- With a tick rate other than 18.2, the time() function on DOS takes about
--- 1/100 the usual time that it needs to execute. On Windows and FreeBSD,
--- time() normally executes very quickly.
--- 
--- While ex.exe is running, the system will maintain the correct time of day.
--- However if ex.exe should crash (e.g. you see a "CauseWay..." error)
--- while the tick rate is high, you (or your user) may need to reboot the
--- machine to restore the proper rate. If you don't, the system time may
--- advance too quickly. This problem does not occur on Windows 95/98/NT,
--- only on DOS or Windows 3.1. You will always get back the correct time
--- of day from the battery-operated clock in your system when you boot up
--- again. 
---  
--- Example 1:
--- <eucode>
--- tick_rate(100)
--- -- time() will now advance in steps of .01 seconds
--- -- instead of the usual .055 seconds
--- </eucode>
--- 
--- See Also: 
---		[[:time]], [[:Debugging and profiling]]
---
-
-public procedure tick_rate(atom rate)
-	machine_proc(M_TICK_RATE, rate)
-end procedure
-
---****
--- Signature:
--- <built-in> function include_paths(integer convert)
---
--- Description:
--- Returns the list of include paths, in the order in which they are searched
---
--- Parameters:
---    # ##convert##: an integer, nonzero to include converted path entries
---    that were not validated yet.
---
--- Returns:
---	A **sequence** of strings, ach holding a fully qualified include path.
---
--- Comments:
---
--- ##convert## is checked only under //Windows//. If a path has accented characters in it, then 
--- it may or may not be valid to convert those to the OEM code page. Setting ##convert## to a nonzero value
--- will force conversion for path entries that have accents and which have not been checked to be valid yet.
--- The extra entries, if any, are returned at the end of the returned sequence.
---
--- The paths are ordered in the order they are searched: 
--- # current directory
--- # configuration file,
--- # command line switches,
--- # EUINC
--- # a default based on EUDIR.
---
--- Example 1:
--- <eucode>
--- sequence s = include_paths(0)
--- -- s might contain
--- {
---   "/usr/euphoria/tests",
---   "/usr/euphoria/include",
---   "./include",
---   "../include"
--- }
--- </eucode>
---
--- See Also:
--- [[:euinc.conf]], [[:include]], [[:option_switches]]
 

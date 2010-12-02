@@ -74,16 +74,63 @@ while idx < 2 do
 end while
 test_equal("while nested continue", {{1,1},{1,5},{2,1},{2,5}}, a)
 
-ifdef EC then
-	function foo( sequence x )
-		for i = 1 to length(x) do if atom(x[i]) then return 0 end if end for
-		return 1
-	end function
-	
-	test_equal( "translated for loop with if on one line #1", 0, foo("abc") )
-	test_equal( "translated for loop with if on one line #2", 1, foo( {{2}, {3}} ) )
+idx = 0
+idx2 = 0
+loop do
+	idx += 1
+	if and_bits( 1, idx ) then
+		continue
+	end if
+	idx2 += 1
+	until idx = 3
+end loop
+test_equal( "loop..until with continue", 1, idx2 )
 
-end ifdef
+
+function foo( sequence x )
+	for i = 1 to length(x) do if atom(x[i]) then return 0 end if end for
+	return 1
+end function
+
+test_equal( "for loop with if on one line #1", 0, foo("abc") )
+test_equal( "for loop with if on one line #2", 1, foo( {{2}, {3}} ) )
+
+idx = 0
+for i = 1 to 5 do
+	for j = 1 to 5 do
+		idx += 1
+end for	end for
+test_equal( "for loop with two 'end for's on one line", 25, idx )
+
+idx = 0
+while idx < 25 do
+	while idx < 25 do
+		idx += 1
+end while	end while
+test_equal( "while loop with two 'end while's on one line", 25, idx )
+
+idx = 0
+loop do
+	loop do
+		idx += 1
+		until idx >= 25	end loop until idx = 30 end loop
+test_equal( "loop-until with two 'until's on one line", 30, idx )
+
+
+idx = 0
+label "LAB_B"
+idx += 1
+label "LAB_A"
+idx += 1
+if idx < 25 then if idx < 20 then goto "LAB_A" else goto "LAB_B" end if end if
+test_equal( "goto-loop with two 'end-if's on one line", 26, idx )
+
+for i = 1 to 5 label "loop1" do
+	while 1 do
+		continue "loop1"
+	end while
+end for
+test_pass("continue to parent loop, ticket:396")
 
 test_report()
 

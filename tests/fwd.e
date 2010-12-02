@@ -4,6 +4,8 @@ include std/unittest.e
 
 include t_fwd.e
 
+export constant EXPORT_CONSTANT = 1
+
 export procedure foo2(integer a)
 	result2 = 123
 end procedure

@@ -4,8 +4,8 @@
 
 -- Alphabetically sorts the lines in a text file.
 -- usage: 
---          ex filesort < source > dest
--- If you read from the keyboard, use control-Z (on DOS) to quit
+puts(1, "Usage : eui filesort < source > dest\n")
+puts(1, "        If you read from the keyboard, use control-Z (on DOS) to quit\n")
 
 include std/sort.e  -- This pulls in the standard Euphoria generic sort routine. It 
 		-- will sort any type of data. e.g. sort({5, 1, 8, 9, 4}) or

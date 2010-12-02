@@ -1,0 +1,15 @@
+t_fwd_enum_type.e:11
+<0331>:: Forward references are not supported for enums
+	THURSDAY = foo,
+	             ^
+
+
+--- Defined Words ---
+EU4
+EU400
+EU40000
+WINDOWS
+WIN32
+WIN32_CONSOLE
+EUI
+-------------------

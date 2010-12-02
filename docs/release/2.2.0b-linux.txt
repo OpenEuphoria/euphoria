@@ -1,0 +1,33 @@
+== Version 2.2 Beta Linux October 22, 1999
+
+//Most of these features and bug fixes will also be made available
+in Version 2.2 for **WIN32 + DOS32**//.
+
+* **platform()** has been moved from misc.e into exu to eliminate
+the function call overhead. platform() now takes zero time to compute.
+The compiler simply plugs in the appropriate constant value.
+*  **lock_file()**
+ and **unlock_file()** have been added
+ to allow multiple processes
+ to share access to files. This can be important in CGI programming and
+ other areas.
+* **flush()** will force the contents of the memory buffer out to a file or device.
+* **chdir()** will change to a new current directory and let you know if it
+was successful.
+* **sleep()** will suspend execution of your program for a number of seconds,
+and let the operating system schedule another process.
+* **put_screen_char()** will write a character and its attributes (colors etc.)
+to the screen.
+* **get_screen_char()** will read a character and its attributes from the screen.
+* **save_text_image()** now works on Linux (as well as DOS32). It copies
+a rectangular text image from the screen.
+* **display_text_image()** now works under Linux (as well as DOS32).
+It writes a rectangular text image to the screen.
+
+* The "short-circuit" warning now gives the filename and line number of the
+  possibly short-circuited call. Minor clarifications were made in some
+  other error messages as well.
+* Minor improvements were made to **ed** and **search**.
+* A portability problem in **how2reg.ex** was fixed.
+* **exu** is compressed better. It's actually a bit smaller now,
+although functionality has been added to it.

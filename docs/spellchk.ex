@@ -8,11 +8,11 @@
 --     sort < yourDictionary > sortedDictionary
 -- before using spellchk.
 --
--- Usage:   ex spellchk yourFileName dictionaryFileName
+-- Usage:   eui spellchk yourFileName dictionaryFileName
 --       or
---          ex spellchk yourFileName   <-- use default dictionary: WORDS.TXT
+--          eui spellchk yourFileName   <-- use default dictionary: WORDS.TXT
 --       or
---          ex spellchk                <-- to enter file names as the response
+--          eui spellchk                <-- to enter file names as the response
 --
 -- Spell check is case-insensitive.
 

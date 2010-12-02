@@ -1,12 +1,25 @@
 --****
 -- == Multi-tasking
--- **Page Contents**
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
-
---****
+-- === General Notes
+--
+-- For a complete overview of the task system, please see the mini-guide 
+-- [[:Multitasking in Euphoria]].
+-- 
+-- === Warning
+-- 
+-- The task system does not yet function in a shared library. Task routine
+-- calls that are compiled into a shared library are emitted as a NOP (no
+-- operation) and will therefore have no effect.
+-- 
+-- It is planned to allow the task system to function in shared libraries
+-- in future versions of OpenEuphoria.
+-- 
 -- === Routines
+
+namespace task
 
 constant M_SLEEP = 64
 
@@ -14,7 +27,7 @@ constant M_SLEEP = 64
 -- Suspends a task for a short period, allowing other tasks to run in the meantime.
 --
 -- Parameters:
---		# ##delaytime##: an atom, the duration of the delay in seconds.
+--		# ##delaytime## : an atom, the duration of the delay in seconds.
 --
 -- Comments:
 --
@@ -98,8 +111,8 @@ end procedure
 -- Create a new task, given a home procedure and the arguments passed to it.
 --
 -- Parameters:
--- 		# ##rid##: an integer, the routine_id of a user-defined Euphoria procedure.
--- 		# ##args##: a sequence, the list of arguments that will be passed to this procedure when the task starts executing.
+-- 		# ##rid## : an integer, the routine_id of a user-defined Euphoria procedure.
+-- 		# ##args## : a sequence, the list of arguments that will be passed to this procedure when the task starts executing.
 --
 -- Returns:
 -- An **atom**, a task identifier, created by the system. It can be used to identify this task to the other Euphoria multitasking routines.
@@ -139,7 +152,7 @@ end procedure
 -- Get a sequence containing the task id's for all active or suspended tasks.
 --
 -- Returns:
--- A **sequence** of atoms, the list of all task that are or may be scheduled.
+-- A **sequence**, of atoms, the list of all task that are or may be scheduled.
 --
 -- Comments: 
 --
@@ -170,20 +183,22 @@ end procedure
 -- Schedule a task to run using a scheduling parameter. 
 --
 -- Parameters:
---		# ##task_id##: an atom, the identifier of a task that did not terminate yet.
---		# ##schedule##: an object, describing when and how often to run the task.
+--		# ##task_id## : an atom, the identifier of a task that did not terminate yet.
+--		# ##schedule## : an object, describing when and how often to run the task.
 --
 -- Comments:
 --
 -- ##task_id## must have been returned by [[:task_create]]().
 --
--- The task scheduler, which is built-in to the Euphoria run-time system, will use ##schedule 
+-- The task scheduler, which is built-in to the Euphoria run-time system, 
+-- will use ##schedule## 
 -- as a guide when scheduling this task. It may not always be possible to achieve the desired 
 -- number of consecutive runs, or the desired time frame. For instance, a task might take so 
 -- long before yielding control, that another task misses its desired time window.
 --
 -- ##schedule## is being interpreted as follows:
--- ===== ##schedule## is an integer
+--
+-- ##schedule## is an integer:
 --
 -- This defines ##task_id## as time shared, and tells the task scheduler how many times it
 -- should the task in one burst before it considers running other tasks. ##schedule## must be greater than zero then.
@@ -192,8 +207,8 @@ end procedure
 -- while decreasing the percentage given to other time-shared tasks. Use trial and error to find the optimal trade off. 
 -- It will also increase the efficiency of the program, since each actual task switch wastes a bit of time.
 --
--- ===== ##schedule is a sequence
--- -
+-- ##schedule## is a sequence:
+-- 
 -- In this case, it must be a pair of positive atoms, the first one not being less than the second one.
 -- This defines ##task_id## as a real time task.
 -- The pair states the minimum and maximum times, in seconds, to wait before running the task. 
@@ -214,9 +229,8 @@ end procedure
 -- [[:sleep]]() lets the operating system run other programs.
 --
 -- The min and max values can be fractional. If the min value is smaller than the resolution of the scheduler's clock 
--- (currently 0.01 seconds on //Windows// or // Unix//, and 0.55 seconds on //DOS// unless [[:tick_rate]]() is called)
--- then accurate time scheduling cannot be performed, but the scheduler will try to run the task 
--- several times in a row to approximate what is desired.
+-- (currently 0.01 seconds on //Windows// or // Unix//) then accurate time scheduling cannot be performed, but the 
+-- scheduler will try to run the task several times in a row to approximate what is desired.
 --
 -- For example, if you ask for a min time of 0.002 seconds, then the scheduler will try to run your task 
 -- .01/.002 = 5 times in a row before waiting for the clock to "click" ahead by .01. 
@@ -278,13 +292,13 @@ end procedure
 -- Return the status of a task.
 --
 -- Parameters:
--- 		# ##yask_id##: an atom, the id of the task being queried.
+-- 		# ##task_id## : an atom, the id of the task being queried.
 --
--- Retirns:
--- An **integer**:
--- * -1: task does not exist, or terminated
--- * 0 : task is suspended
--- * 1 : task is active
+-- Returns:
+-- An **integer**,
+-- * -1 ~-- task does not exist, or terminated
+-- * 0 ~-- task is suspended
+-- * 1 ~-- task is active
 --
 -- Comments:
 --
@@ -316,7 +330,7 @@ end procedure
 -- Suspend execution of a task.
 --
 -- Parameters:
--- 		# ##task_id##: an atom, the id of the task to suspend.
+-- 		# ##task_id## : an atom, the id of the task to suspend.
 --
 -- Comments:
 --
@@ -389,7 +403,7 @@ end procedure
 -- -- every 1.7 to 1.8 seconds throughout the game.
 -- -- It deducts either 3 units or 13 units of life support energy each time.
 -- 
--- <built-in> procedure task_life()
+-- procedure task_life()
 -- -- independent task: subtract life support energy 
 --     while TRUE do
 --         if shuttle then

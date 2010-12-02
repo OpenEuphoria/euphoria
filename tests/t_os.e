@@ -11,5 +11,7 @@ test_equal("getenv() #4", "2", getenv("EUTEST_EXAMPLE"))
 test_equal("unsetenv()", 1, unsetenv("EUTEST_EXAMPLE"))
 test_equal("getenv() #5", -1, getenv("EUTEST_EXAMPLE"))
 
+test_true( "get_pid()", get_pid() > 0)
+
 test_report()
 

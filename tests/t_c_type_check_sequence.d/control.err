@@ -1,0 +1,5 @@
+t_c_type_check_sequence.e:10
+type_check failure, aSequence is 30.5 
+
+
+Global & Local Variables

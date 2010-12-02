@@ -16,9 +16,9 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-eubind \- Creates standalone euphoria executables
+bind \- Creates standalone euphoria executables
 .SH SYNOPSIS
-.B eushroud
+.B shroud
 .RB [\| \-i
 .IR path ]
 .RB [\| \-c
@@ -29,8 +29,8 @@ eubind \- Creates standalone euphoria executables
 .br
 .SH DESCRIPTION
 This manual page documents briefly the
-.B eubind
-command.  eubind is used for creating standalone executables from euphoria 
+.B bind
+command.  bind is used for creating standalone executables from euphoria 
 programs.  The code is parsed and converted to euphoria IL code, and combined
 with the compiled backend.  The result is a file that can be run on its own,
 without the euphoria interpreter.
@@ -40,7 +40,7 @@ without the euphoria interpreter.
 .B \-i path
 Specifies an additional include path to the interpreter.
 .TP
-.B \-c path-to-euinc.conf
+.B \-c path-to-eu.cfg
 Specifies a configuration file to be read in to specify additional
 include paths for the interpreter.
 .TP
@@ -52,10 +52,10 @@ blocks.
 .\" \fI<whatever>\fP escape sequences to invode bold face and italics, 
 .\" respectively.
 .SH SEE ALSO
-.BR exu (1),
-.BR ecu (1),
-.BR eushroud (1)
-.BR eubackend (1)
+.BR eui (1),
+.BR euc (1),
+.BR shroud (1)
+.BR eub (1)
 .br
 The programs are documented fully
 in /usr/share/euphoria/html

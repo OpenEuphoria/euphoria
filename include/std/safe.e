@@ -1,10 +1,7 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
--- Euphoria 3.1
--- Machine Level Programming (386/486/Pentium)
-
 --****
--- === safe.e
+-- == Safe Machine Level Access
+--
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- This is a slower DEBUGGING VERSION of machine.e
 --
@@ -20,11 +17,11 @@
 -- </eucode>
 -- in your main program, before the statement including machine.e.
 --
--- 3. If necessary, call register_block(address, length) to add additional
+-- 3. If necessary, call register_block(address, length, memory_protection) to add additional
 --    "external" blocks of memory to the safe_address_list. These are blocks 
---    of memory that are safe to read/write but which you did not acquire 
---    through Euphoria's allocate() or allocate_low(). Call 
---    unregister_block(address) when you want to prevent further access to
+--    of memory that are safe to use but which you did not acquire 
+--    through Euphoria's allocate(), allocate_data(), allocate_code() or memory_protect(). Call 
+--    unregister_block(address) when you want to prevent further access to 
 --    an external block.
 --
 -- 4. Run your program. It might be 10x slower than normal but it's
@@ -35,7 +32,7 @@
 --    There will be a "divide by zero" traceback in ex.err 
 --    so you can find the statement that is making the illegal memory access.
 --
--- 6. To switch between normal and debig bversions, simply comment in or out the 
+-- 6. To switch between normal and debug versions, simply comment in or out the 
 -- "with define SAFE" directive. In means debugging and out means normal.
 -- Alternatively, you can use -D SAFE as a switch on the command line (debug) or not (normal).
 --
@@ -45,11 +42,23 @@
 -- routines: 
 --     poke, peek, poke4, peek4s, peek4u, call, mem_copy, and mem_set
 -- and it provides alternate versions of:
---     allocate, allocate_low, free, free_low
+--     allocate, free
 --
 -- Your program will only be allowed to read/write areas of memory
 -- that it allocated (and hasn't freed), as well as areas in low memory
 -- that you list below, or add dynamically via register_block().
+
+namespace safe
+
+atom allocation_num = 0
+
+-- biggest address on a 32-bit machine
+constant MAX_ADDR = power(2, 32)-1
+
+export constant BORDER_SPACE = 40
+export constant leader = repeat('@', BORDER_SPACE)
+export constant trailer = repeat('%', BORDER_SPACE)
+
 
 -- Some parameters you may wish to change:
 
@@ -59,7 +68,7 @@
 -- Comments:
 --
 -- If this integer is 1, (the default), check all blocks for edge corruption after each
--- [[:call]](), [[:dos_interrupt]](), [[:c_proc]]() or [[:c_func]]().
+-- [[:call]](), [[:c_proc]]() or [[:c_func]]().
 -- To save time, your program can turn off this checking by setting check_calls to 0.
 
 public integer check_calls = 1
@@ -73,50 +82,87 @@ public integer check_calls = 1
 -- leader or trailer areas just outside each registered block, and don't complain about 
 -- addresses that are far out of bounds (it's probably a legitimate block from another source)
 --
--- For a stronger check, set this to 0 if your program will never read/write an unregistered block of memory.
+-- For a stronger check, set this to 0 if your program will never read/write an 
+-- unregistered block of memory.
 --
 -- On //WIN32// people often use unregistered blocks.
 public integer edges_only = (platform()=2) 
 				  
+-- Constants that tell us what we are about to try to do: read, write or execute memory.  
+-- They should be distinct from PERM_EXEC, etc...
+-- These are not permission constants.
 
--- from misc.e and graphics.e:
-constant M_SOUND = 1
+-- Internal types for understanding more than type-checking:
+
+-- internal address
+-- addresses used for passing to and getting from low level machine_func calls and to a few
+-- local only routines.
+type int_addr(object a)
+	return machine_addr(a)
+end type
+
+-- external address
+-- addresses used for passing to and getting from high level functions in machine.e and 
+-- public functions declared here.
+type ext_addr(object a)
+	return machine_addr(a)
+end type
+
 
 -- Include the starting address and length of any 
 -- acceptable areas of memory for peek/poke here. 
 -- Set allocation number to 0.
+-- This symbol is *only* available from std/machine.e when SAFE is defined.
 public sequence safe_address_list = {}
+
+enum BLOCK_ADDRESS, BLOCK_LENGTH, ALLOC_NUMBER, BLOCK_PROT
 
 with type_check
 
-puts(1, "\n\t\tUsing Debug Version of machine.e\n")
-atom t
-t = time()
-while time() < t + 3 do
-end while
-
 constant OK = 1, BAD = 0
-constant M_ALLOC = 16,
-		 M_FREE = 17,
-		 M_LOCK_MEMORY = 41
+constant
+	M_FREE = 17,
+	M_SLEEP = 64
 
--- biggest address on a 32-bit machine
-constant MAX_ADDR = power(2, 32)-1
+public include std/memconst.e
+include std/error.e
+ifdef WINDOWS then
+	include std/win32/sounds.e
+end ifdef
+
+puts(1, "\n\t\tUsing Debug Version of machine.e\n")
+-- machine_proc(M_SLEEP, 3)
 
 -- biggest address accessible to 16-bit real mode
 constant LOW_ADDR = power(2, 20)-1
 
-type positive_int(integer x)
-	return x >= 1
+export type positive_int(object x)
+	if not integer(x) then
+		return 0
+	end if
+    return x >= 1
 end type
 
-type natural(integer x)
+type natural(object x)
+	if not integer(x) then
+		return 0
+	end if
 	return x >= 0
 end type
 
-type machine_addr(atom a)
+public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-	return a > 0 and a <= MAX_ADDR and floor(a) = a
+	if not atom(a) then
+		return 0
+	end if
+	
+	if not integer(a)then
+		if floor(a) != a then
+			return 0
+		end if
+	end if
+	
+	return a > 0 and a <= MAX_ADDR
 end type
 
 type far_addr(sequence a)
@@ -129,12 +175,39 @@ type low_machine_addr(atom a)
 	return a > 0 and a <= LOW_ADDR and floor(a) = a
 end type
 
-public constant BORDER_SPACE = 40
-public constant leader = repeat('@', BORDER_SPACE)
-public constant trailer = repeat('%', BORDER_SPACE)
+export type bordered_address(ext_addr addr )
+	sequence l
+	for i = 1 to length(safe_address_list) do
+		if safe_address_list[i][BLOCK_ADDRESS] = addr then
+			l = eu:peek( {addr - BORDER_SPACE, BORDER_SPACE} )
+			return equal(l, leader)
+		end if
+	end for
+	return 0
+end type
 
-function safe_address(atom start, integer len)
+-- Return true if /action/ is not allowed when memory has /protection/
+function does_not_permit(valid_memory_protection_constant protection, positive_int action)
+	if action = A_READ and not test_read( protection ) then
+		return 1
+	elsif action = A_WRITE and not test_write( protection ) then
+		return 1
+	elsif action = A_EXECUTE and not test_exec( protection ) then
+		return 1
+	else
+		return 0
+	end if
+end function
+
+-- Return true if /action/ is allowed when memory has /protection/
+function permits(valid_memory_protection_constant protection, positive_int action)
+	return not does_not_permit(protection,action)
+end function
+
+public function safe_address(machine_addr start, natural len, positive_int action )
 -- is it ok to read/write all addresses from start to start+len-1?
+-- Note:  This routine is available from std/machine.e *only* when SAFE
+-- is defined.
 	atom block_start, block_upper, upper
 	sequence block
 	
@@ -146,16 +219,18 @@ function safe_address(atom start, integer len)
 	-- search the list of safe memory blocks:
 	for i = 1 to length(safe_address_list) do
 		block = safe_address_list[i]
-		block_start = block[1]
+		block_start = block[BLOCK_ADDRESS]
 		if edges_only then
 			-- addresses are considered safe as long as 
-			-- they aren't in any block's border zone
+			-- they aren't in any block's border zone and
+			-- if they are in a block, the action is permitted
+			-- for that block's protection
 			if start <= 3 then
 				return BAD -- null pointer (or very small address)
 			end if
-			if block[3] >= 1 then
+			if block[ALLOC_NUMBER] >= 1 then
 				-- an allocated block with a border area
-				block_upper = block_start + block[2]
+				block_upper = block_start + block[BLOCK_LENGTH]
 				if (start >= block_start - BORDER_SPACE and 
 					start < block_start) or 
 				   (start >= block_upper and 
@@ -173,11 +248,19 @@ function safe_address(atom start, integer len)
 					return BAD
 				end if
 			end if
+			if ( (block_start <= start and start <= block_upper) or
+				(block_start <= upper and upper <= block_upper)  )
+				and
+				does_not_permit( block[BLOCK_PROT], action )
+				then
+				return BAD
+			end if
 		else
 			-- addresses are considered safe as long as 
 			-- they are inside an allocated or registered block
+			-- whose protection permits the current action.
 			if start >= block_start then 
-				block_upper = block_start + block[2]
+				block_upper = block_start + block[BLOCK_LENGTH]
 				if upper <= block_upper then
 					if i > 1 then
 						-- move block i to the top and move 1..i-1 down
@@ -189,7 +272,11 @@ function safe_address(atom start, integer len)
 						end if
 						safe_address_list[1] = block
 					end if
-					return OK
+					if does_not_permit( block[BLOCK_PROT], action ) then
+						return BAD
+					else
+						return OK
+					end if
 				end if
 			end if
 		end if
@@ -201,30 +288,20 @@ function safe_address(atom start, integer len)
 	end if
 end function
 
-public procedure die(sequence msg)
+procedure die(sequence msg)
 -- Terminate with a message.
 -- makes warning beeps first so you can see what's happening on the screen
-	atom t
-	
-	for i = 1 to 7 do
-		machine_proc(M_SOUND, 1000)
-		t = time()
-		while time() < t + .1 do
-		end while
-		machine_proc(M_SOUND, 0)
-		t = time()
-		while time() < t + .1 do
-		end while
+	for i = 1 to 3 do
+		ifdef WINDOWS then
+			sound()
+		end ifdef
+		machine_func(M_SLEEP,0.1)
+		ifdef WINDOWS then
+			sound(0)
+		end ifdef
+		machine_func(M_SLEEP,0.1)
 	end for
-	puts(1, "\n *** Press Enter *** ")
-	if getc(0) then
-	end if
-	if machine_func(5, -1) then -- graphics_mode
-	end if
-	puts(1, "\n\n" & msg & "\n\n")
-	if getc(0) then
-	end if
-	? 1/0 -- force traceback
+	error:crash(msg)
 end procedure
 
 function bad_address(atom a)
@@ -232,7 +309,7 @@ function bad_address(atom a)
 	return sprintf(" ADDRESS!!!! %d (#%08x)", {a, a})
 end function
 
-without warning
+without warning &= (override)
 
 override function peek(object x)
 -- safe version of peek 
@@ -246,7 +323,7 @@ override function peek(object x)
 		len = x[2]
 		a = x[1]
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_READ) then
 		return eu:peek(x)
 	else
 		die("BAD PEEK" & bad_address(a))
@@ -265,14 +342,12 @@ override function peeks(object x)
 		len = x[2]
 		a = x[1]
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_READ) then
 		return eu:peeks(x)
 	else
 		die("BAD PEEK" & bad_address(a))
 	end if
 end function
-
-without warning
 
 override function peek2u(object x)
 -- safe version of peek 
@@ -286,7 +361,7 @@ override function peek2u(object x)
 		len = x[2] * 2
 		a = x[1]
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_READ) then
 		return eu:peek2u(x)
 	else
 		die("BAD PEEK2U" & bad_address(a))
@@ -305,7 +380,7 @@ override function peek2s(object x)
 		len = x[2] * 2
 		a = x[1]
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_READ) then
 		return eu:peek2s(x)
 	else
 		die("BAD PEEK2S" & bad_address(a))
@@ -324,7 +399,7 @@ override function peek4s(object x)
 		len = x[2]*4
 		a = x[1]
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_READ) then
 		return eu:peek4s(x)
 	else
 		die("BAD PEEK4S" & bad_address(a))
@@ -343,14 +418,14 @@ override function peek4u(object x)
 		len = x[2]*4
 		a = x[1]
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_READ) then
 		return eu:peek4u(x)
 	else
 		die("BAD PEEK4U" & bad_address(a))
 	end if
 end function
 
-without warning
+
 override function peek_string(object x)
 -- safe version of peek_string 
 	integer len
@@ -358,7 +433,7 @@ override function peek_string(object x)
 	
 	len = 1
 	while 1 do
-		if safe_address( a, len ) then
+		if safe_address( a, len, A_READ ) then
 			if not eu:peek( a + len - 1 ) then
 				exit
 			else
@@ -381,7 +456,7 @@ override procedure poke(atom a, object v)
 	else
 		len = length(v)
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_WRITE) then
 		eu:poke(a, v)
 	else
 		die("BAD POKE" & bad_address(a))
@@ -397,7 +472,7 @@ override procedure poke2(atom a, object v)
 	else
 		len = length(v) * 2
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_WRITE) then
 		eu:poke2(a, v)
 	else
 		die("BAD POKE" & bad_address(a))
@@ -413,7 +488,7 @@ override procedure poke4(atom a, object v)
 	else
 		len = length(v)*4
 	end if
-	if safe_address(a, len) then
+	if safe_address(a, len, A_WRITE) then
 		eu:poke4(a, v)
 	else
 		die("BAD POKE4" & bad_address(a))
@@ -422,9 +497,9 @@ end procedure
 
 override procedure mem_copy(machine_addr target, machine_addr source, natural len)
 -- safe mem_copy
-	if not safe_address(target, len) then 
+	if not safe_address(target, len, A_WRITE) then 
 		die("BAD MEM_COPY TARGET" & bad_address(target))
-	elsif not safe_address(source, len) then
+	elsif not safe_address(source, len, A_READ) then
 		die("BAD MEM_COPY SOURCE" & bad_address(source))
 	else
 		eu:mem_copy(target, source, len)
@@ -433,15 +508,13 @@ end procedure
 
 override procedure mem_set(machine_addr target, atom value, natural len)
 -- safe mem_set
-	if safe_address(target, len) then
+	if safe_address(target, len, A_WRITE) then
 		eu:mem_set(target, value, len)
 	else
 		die("BAD MEM_SET" & bad_address(target))
 	end if
 end procedure
 
-atom allocation_num
-allocation_num = 0
 
 procedure show_byte(atom m)
 -- display byte at memory location m
@@ -518,13 +591,13 @@ public procedure show_block(sequence block_info)
 			show_byte(i)
 		end if
 	end for 
-	die("")
+	die("safe.e: show_block()")
 end procedure
 
 public procedure check_all_blocks()
 -- Check all allocated blocks for corruption of the leader and trailer areas. 
 	integer n
-	atom a
+	ext_addr a
 	sequence block
 	
 	for i = 1 to length(safe_address_list) do
@@ -539,14 +612,14 @@ public procedure check_all_blocks()
 			elsif not equal(trailer, 
 						 eu:peek({a+n, BORDER_SPACE})) then
 				show_block(block)
-			end if          
+			end if
 		end if
 	end for
 end procedure
 
-override procedure call(atom addr)
+override procedure call(machine_addr addr)
 -- safe call - machine code must start in block that we own
-	if safe_address(addr, 1) then
+	if safe_address(addr, 1, A_EXECUTE) then
 		eu:call(addr)
 		if check_calls then
 			check_all_blocks() -- check for any corruption
@@ -573,18 +646,23 @@ override function c_func(integer i, sequence s)
 	return r
 end function
 
-public procedure register_block(machine_addr block_addr, positive_int block_len)
+public procedure register_block(machine_addr block_addr, positive_int block_len, valid_memory_protection_constant memory_protection = PAGE_READ_WRITE )
 -- register an externally-acquired block of memory as being safe to use
 	allocation_num += 1
-	safe_address_list = prepend(safe_address_list, {block_addr, block_len,
-	   -allocation_num})
+    for i = 1 to length(safe_address_list) do
+	if safe_address_list[i][BLOCK_ADDRESS] = block_addr then
+	    die("ATTEMPT TO REGISTER A NON-EXTERNAL BLOCK.")
+	end if
+    end for
+    safe_address_list = prepend(safe_address_list, {block_addr, block_len,
+       -allocation_num,memory_protection})
 end procedure
 
 public procedure unregister_block(machine_addr block_addr)
 -- remove an external block of memory from the safe address list
 	for i = 1 to length(safe_address_list) do
-		if safe_address_list[i][1] = block_addr then
-			if safe_address_list[i][3] >= 0 then
+		if safe_address_list[i][BLOCK_ADDRESS] = block_addr then
+			if safe_address_list[i][ALLOC_NUMBER] >= 0 then
 				die("ATTEMPT TO UNREGISTER A NON-EXTERNAL BLOCK")
 			end if
 			safe_address_list = safe_address_list[1..i-1] &
@@ -595,67 +673,129 @@ public procedure unregister_block(machine_addr block_addr)
 	die("ATTEMPT TO UNREGISTER A BLOCK THAT WAS NOT REGISTERED!")
 end procedure
 
-public function prepare_block(atom a, integer n)
+export function prepare_block(int_addr iaddr, positive_int n, natural protection)
+	ext_addr eaddr
 -- set up an allocated block so we can check it for corruption
-	if a = 0 then
+	if iaddr = 0 then
 		die("OUT OF MEMORY!")
 	end if
-	eu:poke(a, leader)
-	a += BORDER_SPACE
-	eu:poke(a+n, trailer)
+	eu:poke(iaddr, leader)
+	eaddr = iaddr + BORDER_SPACE
+	eu:poke(eaddr+n, trailer)
 	allocation_num += 1
---  if allocation_num = ??? then 
---      trace(1) -- find out who allocated this block number
---  end if  
-	safe_address_list = prepend(safe_address_list, {a, n, allocation_num})
-	return a
+	safe_address_list = prepend(safe_address_list, {eaddr, n, allocation_num, protection})
+	return eaddr
 end function
 
-public function allocate(positive_int n)
--- allocate memory block and add it to safe list
-	atom a
-
-	a = machine_func(M_ALLOC, n+BORDER_SPACE*2)
-	return prepare_block(a, n)
-end function
-
-public procedure free(machine_addr a)
--- free address a - make sure it was allocated
-	integer n
+-- Internal use of the library only.  free() calls this.  It works with
+-- only atoms and in the unSAFE implementation is different.
+export procedure deallocate(atom a)
+	-- free address a - make sure it was allocated
+	int_addr ia
 	
 	for i = 1 to length(safe_address_list) do
-		if safe_address_list[i][1] = a then
+		if safe_address_list[i][BLOCK_ADDRESS] = a then
 			-- check pre and post block areas
-			if safe_address_list[i][3] <= 0 then
+			integer n
+			ia = a-BORDER_SPACE
+			if safe_address_list[i][ALLOC_NUMBER] <= 0 then
 				die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
 			end if
-			n = safe_address_list[i][2]
-			if not equal(leader, eu:peek({a-BORDER_SPACE, BORDER_SPACE})) then
+			n = safe_address_list[i][BLOCK_LENGTH]
+			if not equal(leader, eu:peek({ia, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
 			elsif not equal(trailer, eu:peek({a+n, BORDER_SPACE})) then
 				show_block(safe_address_list[i])
-			end if          
-			machine_proc(M_FREE, a-BORDER_SPACE)
+			end if
+			ifdef DATA_EXECUTE then
+				ifdef WINDOWS then
+					if dep_works() then
+						eu:c_func( VirtualFree_rid, { ia, n, MEM_RELEASE } )
+					else
+						eu:machine_proc(M_FREE, ia)
+					end if
+				elsedef
+					eu:machine_proc(M_FREE, ia)			
+				end ifdef
+			elsedef
+				if safe_address_list[i][BLOCK_PROT] != PAGE_READ_WRITE then
+					die("ATTEMPT TO FREE WITH free() A BLOCK " &
+						"THAT WAS ALLOCATED BY allocate_protect()!") 
+				end if
+				eu:machine_proc(M_FREE, ia)
+			end ifdef
 			-- remove it from list
-			safe_address_list = 
-						safe_address_list[1..i-1] &
-						safe_address_list[i+1..$]
+			safe_address_list = remove(safe_address_list, i)
 			return
 		end if
 	end for
-	die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
-end procedure
-
-public function allocate_string(sequence s)
--- create a C-style null-terminated string in memory
-	atom mem
-	
-	mem = allocate(length(s) + 1)
-	if mem then
-		poke(mem, s)
-		poke(mem+length(s), 0)  -- Thanks to Aku
+	if bordered_address( a ) then
+		die("ATTEMPT TO FREE USING AN ILLEGAL ADDRESS!")
 	end if
-	return mem
+end procedure
+FREE_RID = routine_id("deallocate")
+
+-- Returns 1 if the DEP executing data only memory would cause an exception
+export function dep_works()
+	ifdef WINDOWS then
+		return DEP_really_works		
+	elsedef
+		return 1
+	end ifdef
 end function
 
+export atom VirtualFree_rid
 
+public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
+	sequence block
+
+	for i = 1 to length(safe_address_list) do
+		block = safe_address_list[i] 
+		if block[BLOCK_ADDRESS] = addr then
+			if safe_address_list[i][ALLOC_NUMBER] <= 0 then
+				die("ATTEMPT TO FREE A BLOCK THAT WAS NOT ALLOCATED!")
+			end if
+			integer n = safe_address_list[i][BLOCK_LENGTH]
+			if not equal(leader, eu:peek({addr-BORDER_SPACE, BORDER_SPACE})) then
+				show_block(safe_address_list[i])
+			elsif not equal(trailer, eu:peek({addr+n, BORDER_SPACE})) then
+				show_block(safe_address_list[i])
+			end if
+			safe_address_list = remove( safe_address_list, i )
+			exit
+		end if
+	end for
+
+	ifdef WINDOWS then
+		if dep_works() then
+			c_func( VirtualFree_rid, 
+				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
+			return
+		end if
+	end ifdef
+	machine_proc(M_FREE, addr-BORDER_SPACE)
+end procedure
+
+-- Shawn's custom stuff:
+public function info() 
+	integer tm = 0 
+	for i = 1 to length( safe_address_list ) do 
+		tm += safe_address_list[i][BLOCK_LENGTH] 
+	end for
+	return sprintf(""" 
+Total memory allocations %10d 
+Total memory allocated   %10dB""", 
+	{ length(safe_address_list), tm } ) 
+end function 
+ 
+public function memory_used() 
+	integer tm = 0 
+	for i = 1 to length( safe_address_list ) do 
+		tm += safe_address_list[i][BLOCK_LENGTH] 
+	end for 
+	return tm 
+end function 
+ 
+public function allocations() 
+	return length( safe_address_list ) 
+end function 

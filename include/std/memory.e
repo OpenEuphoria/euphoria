@@ -1,13 +1,10 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
-
 --****
 -- == Memory Management - Low-Level
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Usage Notes
---
+--@[safe.e]
 -- This file is not normally included directly. The normal approach is to
 -- ##include std/machine.e##, which will automatically include either this file
 -- or ##std/safe.e## if the SAFE symbol has been defined.
@@ -32,277 +29,68 @@
 -- a bit of overhead) you *must* pass valid arguments or Euphoria could crash.
 --
 -- Some example programs to look at:
---   * ##demo/callmach.ex##      - calling a machine language routine
---   * ##demo/dos32/hardint.ex## - setting up a hardware interrupt handler
---   * ##demo/dos32/dosint.ex##  - calling a DOS software interrupt
+--   * ##demo/callmach.ex##      ~-- calling a machine language routine
 --
 -- See also ##include/safe.e##. It's a safe, debugging version of this
 -- file.
 --
 
-constant
-        M_ALLOC = 16,
-        M_FREE = 17
+namespace memory
+
+public include std/memconst.e
 
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
-integer 
-	FREE_RID,
-	FREE_ARRAY_RID
+ifdef DATA_EXECUTE then
+	include std/machine.e
+end ifdef
+
+without warning &= (not_used)
+
+public integer edges_only 
 
 --**
 -- Positive integer type
 
-public type positive_int(integer x)
-        return x >= 1
+export type positive_int(object x)
+	if not integer(x) then
+		return 0
+	end if
+    return x >= 1
 end type
 
 --**
 -- Machine address type
 
-public type machine_addr(atom a)
+public type machine_addr(object a)
 -- a 32-bit non-null machine address 
-        return a > 0 and a <= MAX_ADDR and floor(a) = a
-end type
-
-
---****
--- === Memory allocation
---
-
---**
--- Allocate a contiguous block of data memory.
---
--- Parameters:
---              # ##n##, a positive integer, the size of the requested block.
---              # ##cleanup##, an integer, if non-zero, then the returned pointer will be
---                automatically freed when its reference count drops to zero, or
---                when passed as a parameter to [[:delete]].
---
--- Return:
---              An **atom**, the address of the allocated memory or 0 if the memory
--- can't be allocated.
---
--- Comments:
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
--- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the ponter's reference count drops to zero.
-
--- When you are finished using the block, you should pass the address of the block to 
--- ##[[:free]]()## if ##cleanup## is zero. If ##cleanup## is non-zero, then the memory
---can be freed by calling [[:delete]], or when the ponter's reference count drops to zero.
--- This will free the block and make the memory available for other purposes. When 
--- your program terminates, the operating system will reclaim all memory for use with other 
--- programs.  An address returned by this function shouldn't be passed to ##[[:call]]()##.
--- For that purpose you may use ##[[:allocate_code]]()## instead. 
---
--- The address returned will be at least 4-byte aligned.
---
--- Example 1:
--- <eucode>
--- buffer = allocate(100)
--- for i = 0 to 99 do
---     poke(buffer+i, 0)
--- end for
--- </eucode>
---                  
--- See Also:
---     [[:free]], [[:allocate_low]], [[:peek]], [[:poke]], [[:mem_set]], [[:allocate_code]]
-
-public function allocate(positive_int n, integer cleanup = 0)
--- Allocate n bytes of memory and return the address.
--- Free the memory using free() below.
-	if cleanup then
-		return delete_routine( machine_func(M_ALLOC, n ), FREE_RID )
-	else
-		return machine_func(M_ALLOC, n)
+	if not atom(a) then
+		return 0
 	end if
-end function
-
-
---**
--- Allocate a C-style null-terminated string in memory
---
--- Parameters:
---              # ##s##, a sequence, the string to store in RAM.
---              # ##cleanup##, an integer, if non-zero, then the returned pointer will be
---                automatically freed when its reference count drops to zero, or
---                when passed as a parameter to [[:delete]].  
---
--- Returns:
---              An **atom**, the address of the memory block where the string was
--- stored, or 0 on failure.
--- Comments:
--- Only the 8 lowest bits of each atom in ##s## is stored. Use
--- ##allocate_wstring##()  for storing double byte encoded strings.
---
--- There is no allocate_string_low() function. However, you could easily
--- craft one by adapting the code for ##allocate_string##.
---
--- Since ##allocate_string##() allocates memory, you are responsible to
--- [[:free]]() the block when done with it if ##cleanup## is zero.
--- If ##cleanup## is non-zero, then the memory can be freed by calling
--- [[:delete]], or when the ponter's reference count drops to zero.
---
--- Example 1:
--- <eucode>
---  atom title
---
--- title = allocate_string("The Wizard of Oz")
--- </eucode>
--- 
--- See Also:
---              [[:allocate]], [[:allocate_low]], [[:allocate_wstring]]
-public function allocate_string(sequence s, integer cleanup = 0 )
-	atom mem
 	
-	mem = machine_func(M_ALLOC, length(s) + 1) -- Thanks to Igor
-	
-	if mem then
-		poke(mem, s)
-		poke(mem+length(s), 0)  -- Thanks to Aku
-		if cleanup then
-			mem = delete_routine( mem, FREE_RID )
+	if not integer(a)then
+		if floor(a) != a then
+			return 0
 		end if
 	end if
+	
+	return a > 0 and a <= MAX_ADDR
+end type
 
-	return mem
-end function
-
---**
--- Allocate a NULL terminated pointer array.
---
--- Parameters:
---   # #pointers# - A sequence of pointers to add to the pointer array.
---   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
---     automatically freed when its reference count drops to zero, or
---     when passed as a parameter to [[:delete]]
---
--- Comments:
---   This function adds the NULL terminator.
---
--- Example 1:
--- <eucode>
--- atom pa = allocate_pointer_array({ allocate_string("1"), allocate_string("2") })
--- </eucode>
---
--- See Also:
---   [[:allocate_string_pointer_array]], [[:free_pointer_array]]
-
-public function allocate_pointer_array(sequence pointers, integer cleanup = 0)
-    atom pList
-
-    if atom(pointers) then
-        return 0
-    end if
-
-    pointers &= 0
-    pList = allocate(length(pointers) * 4)
-    poke4(pList, pointers)
-	if cleanup then
-		return delete_routine( pList, FREE_ARRAY_RID )
-	end if
-    return pList
-end function
-
---**
--- Allocate a C-style null-terminated array of strings in memory
---
--- Parameters:
---   # #string_list# - sequence of strings to store in RAM.
---   # ##cleanup##, an integer, if non-zero, then the returned pointer will be
---     automatically freed when its reference count drops to zero, or
---     when passed as a parameter to [[:delete]]
---
--- Returns:
---   An **atom**, the address of the memory block where the string pointer
---   array was stored.
---
--- Example 1:
--- <eucode>
--- atom p = allocate_string_pointer_array({ "One", "Two", "Three" })
--- -- Same as C: char *p = { "One", "Two", "Three", NULL };
--- </eucode>
---
--- See Also:
---   [[:free_pointers_array]]
-
-public function allocate_string_pointer_array(object string_list, integer cleanup = 0)
-	for i = 1 to length(string_list) do
-		string_list[i] = allocate_string(string_list[i])
-	end for
-
-	if cleanup then
-		return delete_routine( allocate_pointer_array(string_list), FREE_ARRAY_RID )
-	else
-		return allocate_pointer_array(string_list)
-	end if
-end function
-
---**
--- Free up a previously allocated block of memory.
--- @[machine:free]
---
--- Parameters:
---              # ##addr##, an atom, the address of a block to free.
--- block, i.e. the address that was returned by ##[[:allocate]]()##.
---
--- Comments:
---   Use ##free()## to recycle blocks of memory during execution. This will reduce the chance of 
---   running out of memory or getting into excessive virtual memory swapping to disk. Do not 
---   reference a block of memory that has been freed. When your program terminates, all 
---   allocated memory will be returned to the system.
--- 
---   Do not use ##free()## to deallocate memory that was allocated using ##[[:allocate_low]]()##. 
---   Use ##[[:free_low]]()## for this purpose.
---
--- ##addr## must have been allocated previously using [[:allocate]](). You
--- cannot use it to relinquish part of a block. Instead, you have to allocate
--- a block of the new size, copy useful contents from old block there and
--- then free() the old block.  If the memory was allocated and automatic cleanup
--- was specified, then do not call ##free()## directly.  Instead, use [[:delete]].
---
--- Example 1:
---   ##demo/callmach.ex##
---
--- See Also:
---     [[:allocate]], [[:free_low]], [[:free_code]]
-
-public procedure free(machine_addr addr)
-        machine_proc(M_FREE, addr)
+-- Internal use of the library only.  free() calls this.  It works with
+-- only atoms and in the SAFE implementation is different.
+export procedure deallocate(atom addr)
+	ifdef DATA_EXECUTE and WINDOWS then
+		if dep_works() then
+			c_func( VirtualFree_rid, { addr, 1, MEM_RELEASE } )
+			return
+		end if
+	end ifdef
+   	machine_proc( memconst:M_FREE, addr)
 end procedure
-FREE_RID = routine_id("free")
+memconst:FREE_RID = routine_id("deallocate")
 
---**
--- Free a NULL terminated pointers array.
---
--- Parameters:
---   # #pointers_array# - memory address of where the NULL terminated array exists at.
---
--- Comments:
---   This is for NULL terminated lists, such as allocated by [[:allocate_pointer_array]].
---   Do not call ##free_pointer_array()## for a pointer that was allocated to be cleaned
---   up automatically.  Instead, use [[:delete]].
---
--- See Also:
---   [[:allocate_pointer_array]], [[:allocate_string_pointer_array]]
-
-public procedure free_pointer_array(atom pointers_array)
-	atom saved = pointers_array,
-		ptr = peek4u(pointers_array)
-
-	while ptr do
-		free(ptr)
-
-		pointers_array+=4
-		ptr = peek4u(pointers_array)
-	end while
-
-	free(saved)
-end procedure
-FREE_ARRAY_RID = routine_id("free_pointer_array")
 
 --****
 -- === Reading from, Writing to, and Calling into Memory
@@ -315,9 +103,9 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one byte at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one byte at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## bytes at ##addr##
 --
 -- Returns:
 --              An **object**, either an integer if the input was a single address,
@@ -326,8 +114,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --
 -- Errors:
 --
---      Peek()ing in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+-- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -355,8 +143,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2u]]
+--  [[:poke]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]],
+--  [[:peek2u]]
 --
 
 --****
@@ -367,9 +155,9 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Fetches a byte, or some bytes, from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one byte at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## bytes at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## : to fetch one byte at ##addr##, or
+--              ** a pair {##addr,len}## : to fetch ##len## bytes at ##addr##
 --
 -- Returns:
 --
@@ -379,8 +167,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --
 -- Errors:
 --
---      Peek()ing in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+-- [[:peek | Peeking]] in memory you don't own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -390,7 +178,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
 --
--- It is faster to read several bytes at once using the second form of peek()
+-- It is faster to read several bytes at once using the second form of ##peek##()
 -- than it is to read one byte at a time in a loop. The returned sequence has
 -- the length you asked for on input.
 -- 
@@ -410,8 +198,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- 
 -- See Also:
 --
---  [[:poke]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2s]], [[peek]]
+--  [[:poke]], [[:peek4s]], [[:allocate]], [[:free]], 
+--  [[:peek2s]], [[:peek]]
 --
 
 --****
@@ -423,25 +211,22 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## words at ##addr##
+--   # ##addr_n_length## : an object, either of
+--   ** an atom ##addr## ~-- to fetch one word at ##addr##, or
+--   ** a pair ##{ addr, len}##, to fetch ##len## words at ##addr##
 --
 -- Returns:
---
---              An **object**, either an integer if the input was a single address,
+-- An **object**, either an integer if the input was a single address,
 -- or a sequence of integers if a sequence was passed. In both cases,
 -- integers returned are double words, in the range -32768..32767.
 --
 -- Errors:
---
---      Peek()ing in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e i,clude file can catch this sort of issues.
+-- Peeking in memory you don't own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
 -- Comments: 
---
 -- Since addresses are 32-bit numbers, they can be larger than the largest
 -- value of type integer (31-bits). Variables that hold an address should
 -- therefore be declared as atoms.
@@ -470,8 +255,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- 
 -- See Also:
 --
---  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2u]]
+--  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]]
+--  [[:peek2u]]
 --
 
 --****
@@ -483,9 +268,9 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one double word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
 --
 -- Returns:
 --              An **object**, either an integer if the input was a single address,
@@ -493,8 +278,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- integers returned are words, in the range 0..65535.
 --
 -- Errors:
---      Peek()ing in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+--      Peek() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -519,15 +304,17 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- <eucode>
 -- -- The following are equivalent:
 -- -- method 1
+-- Get 4 2-byte numbers starting address 100.
 -- s = {peek2u(100), peek2u(102), peek2u(104), peek2u(106)}
 --
 -- -- method 2
+-- Get 4 2-byte numbers starting address 100.
 -- s = peek2u({100, 4})
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek4u]]
+--  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]]
+--  [[:peek4u]]
 --
 
 --****
@@ -539,18 +326,18 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one double word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--   # ##addr_n_length## : an object, either of
+--   ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--   ** a pair ##{ addr, len }## ~-- to fetch ##len## double words at ##addr##
 --
 -- Returns:
 -- An **object**, either an atom if the input was a single address, or a
 -- sequence of atoms if a sequence was passed. In both cases, atoms returned
--- are double words, in the range 0..power(2,32)-1.
+-- are double words, in the range -power(2,31)..power(2,31)-1.
 --
 -- Errors:
--- Peek()ing in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e i,clude file can catch this sort of issues.
+-- Peeking in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -561,15 +348,15 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- therefore be declared as atoms.
 --
 -- It is faster to read several double words at once using the second form
--- of peek() than it is to read one double word at a time in a loop. The
+-- of ##peek##() than it is to read one double word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 -- 
 -- Remember that ##peek4s##() takes just one argument, which in the second
 -- form is actually a 2-element sequence.
 --
--- The only difference between ##peek4s##() and [[peek4u]]() is how double
+-- The only difference between ##peek4s##() and [[:peek4u]]() is how double
 -- words with the highest bit set are returned. ##peek4s##() assumes them to
--- be negative, while [[peek4u]]() just assumes them to be large and positive.
+-- be negative, while [[:peek4u]]() just assumes them to be large and positive.
 --
 -- Example 1:
 -- <eucode>
@@ -582,8 +369,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- </eucode>
 -- 
 -- See Also: 
--- [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2s]]
+-- [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]],
+-- [[:peek2s]]
 --
 
 --****
@@ -591,23 +378,22 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- <built-in> function peek4u(object addr_n_length)
 --
 -- Description:
--- Fetches an //unsigned// double word, or some //unsigned// dounle words,
+-- Fetches an //unsigned// double word, or some //unsigned// double words,
 -- from an address in memory.
 --
 -- Parameters:
---              # ##addr_n_length##, an object, either of
---              ** an atom ##addr##, to fetch one double word at ##addr##, or
---              ** a pair {##addr,len}##, to fetch ##len## double words at ##addr##
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
 --
 -- Returns:
 --              An **object**, either an atom if the input was a single address, or
 -- a sequence of atoms if a sequence was passed. In both cases, atoms
--- returned are double words, in the range 
--- -power(2,31)..power(2,31)-1.
+-- returned are double words, in the range 0..power(2,32)-1. 
 --
 -- Errors:
---      Peek()ing in memory you don't own may be blocked by the OS, and cause
--- a machine exception. The safe.e include file can catch this sort of issues.
+--      Peek() in memory you don't own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- When supplying a {address, count} sequence, the count must not be negative.
 --
@@ -618,7 +404,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- therefore be declared as atoms.
 --
 -- It is faster to read several double words at once using the second form 
--- of peek() than it is to read one double word at a time in a loop. The
+-- of ##peek##() than it is to read one double word at a time in a loop. The
 -- returned sequence has the length you asked for on input.
 -- 
 -- Remember that ##peek4u##() takes just one argument, which in the second
@@ -640,8 +426,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:allocate_low]],
--- [[:free_low]], [[:peek2u]]
+--  [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]]
 --
 
 --****
@@ -649,21 +434,21 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- <built-in> procedure peek_string(atom addr)
 --
 -- Description:
--- Read an ASCIZ string in RAM, starting from a supplied address.
+-- Read an ASCII string in RAM, starting from a supplied address.
 --
 -- Parameters:
---              # ##addr#: an atom, the address at whuich to start reading.
+--              # ##addr## : an atom, the address at which to start reading.
 --
 -- Returns:
--- A **sequence** of bytes, the string that could be read.
+-- A **sequence**, of bytes, the string that could be read.
 --
 -- Errors:
--- Further, peek()ing memory that doesn't belong to your process is something the operating
+-- Further, ##peek##() memory that doesn't belong to your process is something the operating
 -- system could prevent, and you'd crash with a machine level exception.
 --
 -- Comments:
 --
--- An ASCIZ string is any sequence of bytes and ends with a 0 byte.
+-- An ASCII string is any sequence of bytes and ends with a 0 byte.
 -- If you ##peek_string##() at some place where there is no string, you will get a sequence of garbage.
 --
 -- See Also:
@@ -678,12 +463,12 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Stores one or more bytes, starting at a memory location.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to store
---              # ##x##, an object, either a byte or a non empty sequence of bytes.
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either a byte or a non empty sequence of bytes.
 --
 -- Errors:
---      Poke()ing in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. The -D SAFE option will make ##poke()## catch this sort of issues.
 --
 -- Comments:
 --
@@ -693,10 +478,10 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- It is faster to write several bytes at once by poking a sequence of values,
 -- than it is to write one byte at a time in a loop. 
 -- 
--- Writing to the screen memory with poke() can be much faster than using
--- puts() or printf(), but the programming is more difficult. In most cases
--- the speed is not needed. For example, the Euphoria editor, ed, never uses
--- poke().
+-- Writing to the screen memory with ##poke##() can be much faster than using
+-- ##puts##() or ##printf##(), but the programming is more difficult. In most cases
+-- the speed is not needed. For example, the Euphoria editor, ##ed##, never uses
+-- ##poke##().
 --  
 -- Example 1:
 -- <eucode>
@@ -716,7 +501,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- 
 -- See Also:
 -- [[:peek]], [[:peeks]], [[:poke4]], [[:allocate]], [[:free]], [[:poke2]], [[:call]],
--- [[[:mem_copy]]], [[:mem_set]]
+-- [[:mem_copy]], [[:mem_set]]
 --
 
 --****
@@ -727,24 +512,24 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Stores one or more words, starting at a memory location.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to store
---              # ##x##, an object, either a word or a non empty sequence of words.
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either a word or a non empty sequence of words.
 --
 -- Errors:
---      Poke()ing in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- Comments: 
 --
--- There is no point in having poke2s() or poke2u(). For example, both 32768
--- and -32768 are stored as #F000 when stored as words. It' up to whoever
+-- There is no point in having ##poke2s##() or ##poke2u##(). For example, both 32768
+-- and -32768 are stored as #F000 when stored as words. It's up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several words at once by poking a sequence of
 -- values, than it is to write one words at a time in a loop.
 -- 
--- Writing to the screen memory with poke2() can be much faster than using
--- puts() or printf(), but the programming is more difficult. In most cases
+-- Writing to the screen memory with ##poke2##() can be much faster than using
+-- ##puts##() or ##printf##(), but the programming is more difficult. In most cases
 -- the speed is not needed. For example, the Euphoria editor, ed, never uses
 -- poke2().
 --  
@@ -777,18 +562,18 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Stores one or more double words, starting at a memory location.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to store
---              # ##x##, an object, either a double word or a non empty sequence of
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either a double word or a non empty sequence of
 -- double words.
 --
 -- Errors:
---      Poke()ing in memory you don't own may be blocked by the OS, and cause a
--- machine exception. The safe.e include file can catch this sort of issues.
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
 --
 -- Comments: 
 --
 -- There is no point in having poke4s() or poke4u(). For example, both
--- +power(2,31) and -power(2,31) are stored as #F0000000. It' up to whoever
+-- +power(2,31) and -power(2,31) are stored as #F0000000. It's up to whoever
 -- reads the value to figure it out.
 --
 -- It is faster to write several double words at once by poking a sequence
@@ -826,13 +611,13 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- Signature:
 -- <built-in> procedure mem_copy(atom destination, atom origin, integer len)
 --
--- Descripotion:
+-- Description:
 -- Copy a block of memory from an address to another.
 --
 -- Parameters:
---              # ##destination##, an atom, the address at which data is to be copied
---              # ##origin##, an atom, the address from which data is to be copied
---              # ##len##, an integer, how many bytes are to be copied.
+--              # ##destination## : an atom, the address at which data is to be copied
+--              # ##origin## : an atom, the address from which data is to be copied
+--              # ##len## : an integer, how many bytes are to be copied.
 --
 -- Comments: 
 --
@@ -859,12 +644,12 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- <built-in> procedure mem_set(atom destination, integer byte_value, integer how_many))
 --
 -- Description:
--- Sets a contiguous range of memory ocations to a single value.
+-- Sets a contiguous range of memory locations to a single value.
 --
 -- Parameters:
---              # ##destination##, an atom, the address starting the range to set.
---              # ##byte_value##, an integer, the value to copy at all addresses in the range.
---              # ##how_many##, an integer, how many bytes are to be set.
+--              # ##destination## : an atom, the address starting the range to set.
+--              # ##byte_value## : an integer, the value to copy at all addresses in the range.
+--              # ##how_many## : an integer, how many bytes are to be set.
 --
 -- Comments:
 --
@@ -892,7 +677,7 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --  Call a machine language routine which was stored in memory prior.
 --
 -- Parameters:
---              # ##addr##, an atom, the address at which to transfer execution control.
+--              # ##addr## : an atom, the address at which to transfer execution control.
 --
 -- Comments:
 --
@@ -901,8 +686,8 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 -- The routine should save and restore any registers that it uses.
 --
 -- You can allocate a block of memory for the routine and then poke in the
--- bytes of machine code using ##allocate_code()##. You might allocate other blocks of memory for data
--- and parameters that the machine code can operate on using ##allocate()##. The addresses of these
+-- bytes of machine code using ##allocate_code##(). You might allocate other blocks of memory for data
+-- and parameters that the machine code can operate on using ##allocate##(). The addresses of these
 -- blocks could be part of the machine code.
 --
 -- If your machine code uses the stack, use ##c_proc##() instead of ##call##().
@@ -914,31 +699,35 @@ FREE_ARRAY_RID = routine_id("free_pointer_array")
 --              [[:allocate_code]], [[:free_code]], [[:c_proc]], [[:define_c_proc]]
 
 without warning
-integer check_calls = 1
+public integer check_calls = 1
 
 --****
 -- === Safe memory access
 
+without warning strict
 --**
 -- Description: Add a block of memory to the list of safe blocks maintained
--- by safe.e (the debug version of machine.e). The block starts at address a.
+-- by safe.e (the debug version of memory.e). The block starts at address a.
 -- The length of the block is i bytes.
 --
 -- Parameters:
---              # ##block_addr##, an atom, the start address of the block
---              # ##block_len##, an integer, the size of the block.
+--              # ##block_addr## : an atom, the start address of the block
+--              # ##block_len## : an integer, the size of the block.
+--              # ##protection## : a constant integer, of the memory 
+--                  protection constants found in machine.e, that describes
+--                  what access we have to the memory. 
 --
 -- Comments: 
 --
--- In memory.e, this procedure does nothing. It is there simply to simpify
--- switching between the normal and debu version of the library.
+-- In memory.e, this procedure does nothing. It is there to simplify
+-- switching between the normal and debug version of the library.
 --
 -- This routine is only meant to be used for debugging purposes. safe.e
 -- tracks the blocks of memory that your program is allowed to 
--- [[:peek]](), [[:poke]](), [[mem_copy]]() etc. These are normally just the
--- blocks that you have allocated using Euphoria's [[:allocate]]() or
--- [[:allocate_low]]() routines, and which you have not yet freed using
--- Euphoria's [[:free]]() or [[:free_low]](). In some cases, you may acquire
+-- [[:peek]](), [[:poke]](), [[:mem_copy]]() etc. These are normally just the
+-- blocks that you have allocated using Euphoria's [[:allocate]]() 
+-- routine, and which you have not yet freed using
+-- Euphoria's [[:free]](). In some cases, you may acquire
 -- additional, external, blocks of memory, perhaps as a result of calling a
 -- C routine. 
 --
@@ -960,23 +749,21 @@ integer check_calls = 1
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
 
-public procedure register_block(atom block_addr, atom block_len)
-	-- NOP to avoid strict lint
-	block_addr = block_addr
-	block_len = block_len
+public procedure register_block(atom block_addr, atom block_len, integer protection )
+	-- Only implemented in safe.e
 end procedure
 
-
+without warning strict
 --**
 -- Remove a block of memory from the list of safe blocks maintained by safe.e
--- (the debug version of machine.e).
+-- (the debug version of memory.e).
 --
 -- Parameters:
---              # ##block_addr##, an atom, the start address of the block
+--              # ##block_addr## : an atom, the start address of the block
 --
 -- Comments: 
 --
--- In memory.e, this procedure does nothing. It is there simply to simpify
+-- In memory.e, this procedure does nothing. It is there to simplify
 -- switching between the normal and debug version of the library.
 --
 -- This routine is only meant to be used for debugging purposes. Use it to
@@ -988,20 +775,20 @@ end procedure
 --  See [[:register_block]]() for further comments and an example.
 -- 
 -- See Also:
---   [[:register_block]], [[safe.e]]
+--   [[:register_block]], [[:safe.e]]
 
 public procedure unregister_block(atom block_addr)
-	-- NOP to avoid strict lint
-	block_addr =  block_addr
+	-- Only implemented in safe.e
 end procedure
 
+without warning strict
 --**
 -- Scans the list of registered blocks for any corruption.
 --
 -- Comments:
 --
 -- safe.e maintains a list of acquired memory blocks. Those gained through
--- allocate() or allocate_low() are automatically included. Any other block,
+-- allocate() are automatically included. Any other block,
 -- for debugging purposes, must be registered by [[:register_block]]()
 -- and unregistered by [[:unregister_block]]().
 --
@@ -1015,12 +802,38 @@ end procedure
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
 
+public function safe_address(atom start, integer len, positive_int action)
+	-- Only implemented in safe.e
+	return 1
+end function
+
+without warning strict
 public procedure check_all_blocks()
+	-- Only implemented in safe.e
 end procedure
+
+without warning strict
+export function prepare_block( atom addr, integer a, integer protection )
+	-- Only implemented in safe.e
+	return addr
+end function
+
+export constant BORDER_SPACE = 0
+export constant leader = repeat('@', BORDER_SPACE)
+export constant trailer = repeat('%', BORDER_SPACE)
+
+export type bordered_address( object addr )
+	if not atom(addr) then
+		return 0
+	end if
+	return 1
+end type
+
+
 with warning
 
--- ****
--- === Automatic Resource Management
+--****
+--=== Automatic Resource Management
 --
 -- Euphoria objects are automatically garbage collected when they are no
 -- longer referenced anywhere.  Euphoria also provides the ability to manage 
@@ -1028,9 +841,9 @@ with warning
 -- handles, allocated memory, or other euphoria objects.  There are two built-in
 -- routines for managing these external resources.
 
---**
+--****
 -- Signature:
--- <built-in>function delete_routine( object x, integer rid )
+-- <built-in> function delete_routine( object x, integer rid )
 -- 
 -- Description:
 -- Associates a routine for cleaning up after a euphoria object.
@@ -1049,15 +862,16 @@ with warning
 -- 
 -- The second way for the delete routine to be called is when its
 -- reference count is reduced to 0.  Before its memory is freed, the
--- delete routine is called.
+-- delete routine is called. A default delete will be used if the cleanup 
+-- parameter to one of the [[:allocate]] routines is true. 
 -- 
 -- delete_routine() may be called multiple times for the same object.
 -- In this case, the routines are called in reverse order compared to
 -- how they were associated.
 
---**
+--****
 -- Signature:
--- <built-in>procedure delete( object x )
+-- <built-in> procedure delete( object x )
 -- 
 -- Description:
 -- Calls the cleanup routines associated with the object, and removes the
@@ -1071,3 +885,27 @@ with warning
 -- After the cleanup routines are called, the value of the object is 
 -- unchanged, though the cleanup routine will no longer be associated
 -- with the object.
+
+--**
+-- Returns 1 if the DEP executing data only memory would cause an exception
+export function dep_works()
+	ifdef WINDOWS then
+		return (DEP_really_works and use_DEP)
+	end ifdef
+
+	return 1
+end function
+
+export atom VirtualFree_rid
+
+public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
+	ifdef WINDOWS then
+		if dep_works() then
+			c_func(VirtualFree_rid, { addr, size*wordsize, MEM_RELEASE })
+		else
+			machine_proc( memconst:M_FREE, addr)
+		end if
+	elsedef
+		machine_proc( memconst:M_FREE, addr)
+	end ifdef
+end procedure

@@ -9,13 +9,14 @@ if [ "$1" = "" ]; then
         exit
 fi
 
-rm -f euphoria-4.0a3.tar.gz
-rm -rf cleanbranch
-svn co https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/$1 cleanbranch
+rm -f euphoria-$1.tar.gz
+svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tags/$1 euphoria-src-$1
 
-find cleanbranch -name .svn -exec rm -rf {} \;
+cd euphoria-$1/bin
+rm -f *.bat *.ico make31.exw *.exe
+chmod ug+rwx,o+rx Linux/*
+cp Linux/* .
+rm -rf Linux FreeBSD
+cd ../
 
-mv cleanbranch euphoria-src-4.0a3
-
-tar czf euphoria-src-4.0a3.tar.gz euphoria-src-4.0a3
-zip -r euphoria-src-4.0a3.zip euphoria-src-4.0a3
+tar czf euphoria-src-$1.tar.gz euphoria-src-$1

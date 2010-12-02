@@ -1,4 +1,4 @@
-This package was debianized by Matt Lewis <matthewwalkerlewis@gmail.com> on
+This package was debianized by Matt Lewis <mattlewis@openeuphoria.org> on
 Sat, 29 Dec 2007 21:28:05 -0500.
 
 It was downloaded from <http://sourceforge.net/projects/rapideuphoria>
@@ -22,6 +22,6 @@ License:
     and/or sell copies of the Software, and to permit persons to whom the 
     Software is furnished to do so.
 
-The Debian packaging is (C) 2007, Matt Lewis <matthewwalkerlewis@gmail.com> and
+The Debian packaging is (C) 2007, Matt Lewis <matthlewis@openeuphoria.org> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
 

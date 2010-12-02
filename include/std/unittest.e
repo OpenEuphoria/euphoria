@@ -1,9 +1,7 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
 --****
 -- == Unit Testing Framework
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Background
 -- Unit testing is the process of assuring that the smallest programming units
@@ -46,7 +44,7 @@
 -- In this example, we use the ##test_equal## function to record the result of
 -- a test. The first parameter is the name of the test, which can be anything
 -- and is displayed if the test fails. The second parameter is the expected
--- result - what we expect the function being tested to return. The third
+-- result ~-- what we expect the function being tested to return. The third
 -- parameter is the actual result returned by the function being tested. This
 -- is usually written as a call to the function itself.
 --
@@ -60,18 +58,25 @@
 -- display each test run, regardless of whether it fails or not.
 --
 -- After running a series of tests, you can get a summary displayed by calling
--- the ##test_report()## procedure. To get a better feel for unit testing, have
+-- the ##test_report##() procedure. To get a better feel for unit testing, have
 -- a look at the provided test cases for the standard library in the //tests//
 -- directory.
+--
+-- When included in your program, unittest.e sets a crash handler to log a crash 
+-- as a failure.
+
+namespace unittest
+
+include std/console.e
+include std/filesys.e
+include std/io.e
+include std/math.e
+include std/pretty.e
+include std/search.e
 
 --****
 -- === Constants
 --
-
-include std/io.e
-include std/pretty.e
-include std/search.e
-include std/filesys.e
 
 --
 -- Public Variables
@@ -96,7 +101,7 @@ integer verbose = TEST_SHOW_FAILED_ONLY
 integer abort_on_fail = 0
 integer wait_on_summary = 0
 integer accumulate_on_summary = 0
-integer logging = 0, log_fh = 0
+integer log_fh = 0
 
 --
 -- Private utility functions
@@ -108,17 +113,33 @@ procedure add_log(object data)
 	end if
 
 	puts(log_fh, "entry = ")
-	pretty_print(log_fh, data, {2, 2, 1, 78, "%d", "%.15g"})
+	pretty:pretty_print(log_fh, data, {2, 2, 1, 78, "%d", "%.15g"})
 	puts(log_fh, "\n")
-	flush(log_fh)
+	io:flush(log_fh)
 end procedure
 
-procedure test_failed(sequence name, object a, object b)
+procedure test_failed(sequence name, object a, object b, integer TF = 0)
 	if verbose >= TEST_SHOW_FAILED_ONLY then
 		printf(2, "  failed: %s, expected: ", {name})
-		pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
+		if TF then
+			if not equal(a,0) then
+				puts(2, "TRUE")
+			else
+				puts(2, "FALSE")
+			end if
+		else
+			pretty:pretty_print(2, a, {2,2,1,78,"%d", "%.15g"})
+		end if
 		puts(2, " but got: ")
-		pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
+		if TF and integer(b) then
+			if not equal(b,0) then
+				puts(2, "TRUE")
+			else
+				puts(2, "FALSE")
+			end if
+		else
+			pretty:pretty_print(2, b, {2,2,1,78,"%d", "%.15g"})
+		end if
 		puts(2, "\n")
 	end if
 
@@ -155,16 +176,16 @@ end procedure
 -- Set the amount of information that is returned about passed and failed tests.
 --
 -- Parameters:
--- # ##verbosity##: an atom which takes predefined values for verbosity levels.
+-- # ##verbosity## : an atom which takes predefined values for verbosity levels.
 --
 -- Comments:
 -- The following values are allowable for ##verbosity##:
--- * TEST_QUIET = 0,
--- * TEST_SHOW_FAILED_ONLY = 1
--- * TEST_SHOW_ALL = 2
+-- * ##TEST_QUIET## ~--  0,
+-- * ##TEST_SHOW_FAILED_ONLY## ~--  1
+-- * ##TEST_SHOW_ALL## ~-- 2
 --
--- However, anything less than TEST_SHOW_FAILED_ONLY is treated as TEST_QUIET, and everything
--- above TEST_SHOW_ALL is treated as TEST_SHOW_ALL.
+-- However, anything less than ##TEST_SHOW_FAILED_ONLY## is treated as ##TEST_QUIET##, and everything
+-- above ##TEST_SHOW_ALL## is treated as ##TEST_SHOW_ALL##.
 --
 -- * At the lowest verbosity level, only the score is shown, ie the ratio passed tests/total tests.
 -- * At the medium level, in addition, failed tests display their name, the expected outcome and
@@ -187,7 +208,7 @@ end procedure
 -- Request the test report to pause before exiting.
 --
 -- Parameters:
---		# ##to_wait##: an integer, zero not to wait, nonzero to wait.
+--		# ##to_wait## : an integer, zero not to wait, nonzero to wait.
 --
 -- Comments:
 -- Depending on the environment, the test results may be invisible if
@@ -205,10 +226,10 @@ end procedure
 -- Request the test report to save run stats in "unittest.dat" before exiting.
 --
 -- Parameters:
---		# ##accumulate##: an integer, zero not to accumulate, nonzero to accumulate.
+--		# ##accumulate## : an integer, zero not to accumulate, nonzero to accumulate.
 --
 -- Comments:
--- The file "unittest.dat" is appened to with {t,f}\\
+-- The file "unittest.dat" is appended to with {t,f}\\
 -- : where
 -- :: //t// is total number of tests run
 -- :: //f// is the total number of tests that failed
@@ -222,7 +243,7 @@ end procedure
 -- Set behavior on test failure, and return previous value.
 --
 -- Parameters:
---		# ##abort_test##: an integer, the new value for this setting.
+--		# ##abort_test## : an integer, the new value for this setting.
 --
 -- Returns:
 -- 		An **integer**, the previous value for the setting.
@@ -288,19 +309,25 @@ public procedure test_report()
 	
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
+		if wait_on_summary then
+			console:any_key("Press a key to exit")
+		end if
 		abort(0)
 	else
+		if wait_on_summary then
+			console:any_key("Press a key to exit")
+		end if
 		abort(tests_failed > 0)
 	end if
 end procedure
 
-procedure record_result(integer success, sequence name, object a, object b)
+procedure record_result(integer success, sequence name, object a, object b, integer TF = 0)
 	test_count += 1
 
 	if success then
 		test_passed(name)
 	else
-		test_failed(name, a, b)
+		test_failed(name, a, b, TF)
 	end if
 end procedure
 
@@ -312,14 +339,13 @@ end procedure
 -- Records whether a test passes by comparing two values.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##expected##: an object, the expected outcome of some action
---		# ##outcome##: an object, some actual value that should equal the reference ##expected##.
+--		# ##name## : a string, the name of the test
+--		# ##expected## : an object, the expected outcome of some action
+--		# ##outcome## : an object, some actual value that should equal the reference ##expected##.
 --
 -- Comments:
 --
--- * For atoms, a fuzz of 1e-9 is used to assess equality.
--- * For sequences, no such fuzz is implemented.
+-- * For floating point numbers, a fuzz of 1e-9 is used to assess equality.
 --
 -- A test is recorded as passed if equality holds between ##expected## and ##outcome##. The latter
 -- is typically a function call, or a variable that was set by some prior action.
@@ -329,19 +355,21 @@ end procedure
 -- reports.
 --
 -- See Also:
--- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_equal(sequence name, object expected, object outcome)
 	integer success
-	if sequence(expected) or sequence(outcome) then
-		success = equal(expected,outcome)
+
+	if equal(expected, outcome ) then
+		-- for inf and -inf simple values
+		success = 1	
+	elsif equal(0*expected, 0*outcome) then
+		-- for complicated sequences values
+		success = math:max( math:abs( expected - outcome ) ) < 1e-9
 	else
-		if expected > outcome then
-			success = ((expected-outcome) < 1e-9)
-		else
-			success = ((outcome-expected) < 1e-9)
-		end if
+		success = 0
 	end if
+			
 	record_result(success, name, expected, outcome)
 end procedure
 
@@ -349,9 +377,9 @@ end procedure
 -- Records whether a test passes by comparing two values.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##expected##: an object, the expected outcome of some action
---		# ##outcome##: an object, some actual value that should equal the reference ##expected##.
+--		# ##name## : a string, the name of the test
+--		# ##expected## : an object, the expected outcome of some action
+--		# ##outcome## : an object, some actual value that should equal the reference ##expected##.
 --
 -- Comments:
 -- * For atoms, a fuzz of 1e-9 is used to assess equality.
@@ -361,7 +389,7 @@ end procedure
 -- latter is typically a function call, or a variable that was set by some prior action.
 --
 -- See Also:
--- [[:test_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_true]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_not_equal(sequence name, object a, object b)
 	integer success
@@ -374,81 +402,98 @@ public procedure test_not_equal(sequence name, object a, object b)
 			success = ((b-a) >= 1e-9)
 		end if
 	end if
+	a = "anything but '" & pretty:pretty_sprint( a, {2,2,1,78,"%d", "%.15g"}) & "'"
 	record_result(success, name, a, b)
 end procedure
 
 --**
--- Records whether a test passes by comparing two values.
+-- Records whether a test passes.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##outcome##: an object, some actual value that should not be zero.
+--		# ##name## : a string, the name of the test
+--		# ##outcome## : an object, some actual value that should not be zero.
 --
 -- Comments:
 -- This assumes an expected value different from 0. No fuzz is applied when checking whether an
 -- atom is zero or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
 
 public procedure test_true(sequence name, object outcome)
-	integer success
-	if sequence(outcome) then
-		success = 0
+	record_result(not equal(outcome,0), name, 1, outcome, 1 )
+end procedure
+
+--**
+-- Records whether a test passes. If it fails, the program also fails.
+--
+-- Parameters:
+--		# ##name## : a string, the name of the test
+--		# ##outcome## : an object, some actual value that should not be zero.
+--
+-- Comments:
+-- This is identical to ##test_true()## except that if the test fails, the
+-- program will also be forced to fail at this point.
+--
+-- See Also:
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
+
+public procedure assert(object name, object outcome)
+	if sequence(name) then
+		test_true(name, outcome)
+		if equal(outcome,0) then
+			crash(name)
+		end if
 	else
-		success = (outcome != 0)
+		test_true(outcome, name)
+		if equal(name,0) then
+			crash(outcome)
+		end if
 	end if
-	record_result(success, name, 1, outcome )
 end procedure
 
 --**
 -- Records whether a test passes by comparing two values.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
---		# ##outcome##: an object, some actual value that should be zero
+--		# ##name## : a string, the name of the test
+--		# ##outcome## : an object, some actual value that should be zero
 --
 -- Comments:
 -- This assumes an expected value of 0. No fuzz is applied when checking whether an atom is zero
 -- or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_false(sequence name, object outcome)
-	integer success
-	if not integer(outcome) then
-		success = 0
-	else
-		success = (outcome = 0)
-	end if
-	record_result(success, name, 0, outcome)
+	record_result(equal(outcome, 0), name, 0, outcome, 1)
 end procedure
 
 --**
 -- Records that a test failed.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
+--		# ##name## : a string, the name of the test
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_pass]]
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_pass]]
 
 public procedure test_fail(sequence name)
-	record_result(0, name, 1, 0)
+	record_result(0, name, 1, 0, 1)
 end procedure
 
 --**
 -- Records that a test passed.
 --
 -- Parameters:
---		# ##name##: a string, the name of the test
+--		# ##name## : a string, the name of the test
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[test_fail]]
+-- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_fail]]
 
 public procedure test_pass(sequence name)
-	record_result(1, name, 1, 1)
+	record_result(1, name, 1, 1, 1)
 end procedure
 
 sequence cmd = command_line()
@@ -456,8 +501,8 @@ filename = cmd[2]
 
 
 -- strip off path information
-while find( SLASH, filename ) do
-	filename = filename[find( SLASH, filename )+1..$]
+while find( filesys:SLASH, filename ) do
+	filename = filename[find( filesys:SLASH, filename )+1..$]
 end while
 
 for i = 3 to length(cmd) do
@@ -467,7 +512,7 @@ for i = 3 to length(cmd) do
 		set_test_verbosity(TEST_SHOW_FAILED_ONLY)
 	elsif equal(cmd[i], "-wait") then
 		set_wait_on_summary(1)
-	elsif begins(cmd[i], "-accumulate") then
+	elsif search:begins(cmd[i], "-accumulate") then
 		set_accumulate_summary(1)
 	elsif equal(cmd[i], "-log") then
 		log_fh = open("unittest.log", "a")
@@ -478,3 +523,17 @@ for i = 3 to length(cmd) do
 		add_log({"file", filename})
 	end if
 end for
+
+ifdef not CRASH then
+
+include std/error.e
+
+function test_crash( object o )
+	test_fail( "unittesting crashed" )
+	test_report()
+	o = 0
+	return o
+end function
+crash_routine( routine_id( "test_crash" ) )
+
+end ifdef

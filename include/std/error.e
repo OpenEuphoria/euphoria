@@ -1,12 +1,11 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
-
 --****
 -- == Errors and Warnings
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 -- === Routines
+
+namespace error
 
 constant
 	M_CRASH_MESSAGE = 37,
@@ -16,11 +15,11 @@ constant
 	M_WARNING_FILE = 72
 
 --**
--- Crash running program, displaying a formatted error message the way printf() does.
+-- Crash running program, displaying a formatted error message the way ##printf##() does.
 --
 -- Parameters:
--- 		# ##fmt##: a sequence representing the message text. It may have format specifiers in it
---		# ##data##: an object, defaulted to {}.
+-- 		# ##fmt## : a sequence representing the message text. It may have format specifiers in it
+--		# ##data## : an object, defaulted to {}.
 --
 -- Comments:
 -- 		The actual message being shown, both on standard error and in ex.err (or whatever 
@@ -30,14 +29,15 @@ constant
 -- Example 1:
 -- <eucode>
 -- if PI = 3 then
---     crash("The whole structure of universe just changed - please reload solar_system.ex")
+--     crash("The structure of universe just changed -- reload solar_system.ex")
 -- end if
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- if token = end_of_file then
---     crash("Test file #%d is bad, text read so far is %s\n", {file_number, read_so_far})
+--     crash("Test file #%d is bad, text read so far is %s\n", 
+--                                                   {file_number, read_so_far})
 -- end if
 -- </eucode>
 --
@@ -55,7 +55,7 @@ end procedure
 -- that Euphoria has to shut down your program due to an error.
 --
 -- Parameters:
---     # ##msg##: a sequence to display. It must only contain printable characters.
+--     # ##msg## : a sequence to display. It must only contain printable characters.
 --
 -- Comments:
 --     There can be as many calls to ##crash_message##() as needed in a program. Whatever was defined
@@ -65,7 +65,8 @@ end procedure
 -- <eucode>
 -- crash_message("The password you entered must have at least 8 characters.")
 -- pwd_key = input_text[1..8]
--- -- if ##input_text## is too short, user will get a more meaningful message than 
+-- -- if ##input_text## is too short, 
+-- -- user will get a more meaningful message than 
 -- -- "index out of bounds".
 -- </eucode>
 --
@@ -81,7 +82,7 @@ end procedure
 -- any diagnostic information to be written.
 --
 -- Parameters:
--- 		# ##file_path##: a sequence, the new error and traceback file path.
+-- 		# ##file_path## : a sequence, the new error and traceback file path.
 --
 -- Comments:
 -- 		There can be as many calls to ##crash_file##() as needed. Whatever was defined last will be used
@@ -102,19 +103,19 @@ end procedure
 -- Abort execution of the program. 
 --
 -- Parameters:
--- 		# ##error##: an integer, the exit code to return.
+-- 		# ##error## : an integer, the exit code to return.
 --
 -- Comments:
--- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a succsful completion.
+-- ##error## is expected to lie in the 0..255 range. 0 is usually interpreted as the sign of a successful completion.
 --
--- Other values can indicate various kinds of errors. DOS batch (.bat) programs can read 
+-- Other values can indicate various kinds of errors. Windows batch (.bat) programs can read 
 -- this value using the errorlevel feature. Non integer values are rounded down.
 -- A Euphoria program can read this value using [[:system_exec]]().
 --
 -- ##abort##() is useful when a program is many levels deep in subroutine calls, and execution must end immediately,
 -- perhaps due to a severe error that has been detected.
 --
--- If you don't use ##abort##(), ex.exe/exw.exe/exu will normally return an exit status code of 0. 
+-- If you don't use ##abort##(), the interpreter will normally return an exit status code of 0.
 -- If your program fails with a Euphoria-detected compile-time or run-time error then a code of 1 is returned.
 --  
 -- Example 1:
@@ -134,7 +135,7 @@ end procedure
 -- Specify a file path where to output warnings. 
 --
 -- Parameters:
--- 		# ##file_path##: an object indicating where to dump any warning that were produced.
+-- 		# ##file_path## : an object indicating where to dump any warning that were produced.
 --
 -- Comments:
 --   By default, warnings are displayed on the standard error, and require pressing the 
@@ -172,7 +173,7 @@ end procedure
 -- Causes the specified warning message to be displayed as a regular warning.
 --
 -- Parameters:
--- 		# ##message##: a double quoted litteral string, the text to display.
+-- 		# ##message## : a double quoted literal string, the text to display.
 --
 -- Comments:
 --
@@ -181,13 +182,13 @@ end procedure
 -- that code you didn't write.
 -- 
 -- This is what ##warning##(), in a limited way, does. It enables to generate custom warnings in
--- code that will include yours. Of course, you can also geenrate warnings in your own code, for
+-- code that will include yours. Of course, you can also generate warnings in your own code, for
 -- instance as a kind of memo. The [[:On/off options|without warning]] top level statement disables such warnings.
 --
 -- The warning is issued with the ##custom_warning## level. This level is enabled by default, 
 -- but can be turned off any time.
 --
--- Using any kind of expression in ##message## will esult in a blank warning text.
+-- Using any kind of expression in ##message## will result in a blank warning text.
 -- 
 -- Example 1:
 -- 
@@ -220,13 +221,13 @@ end procedure
 -- Specify a function to be called when an error takes place at run time.
 --
 -- Parameters:
--- 		# ##func##: an integer, the routine_id of the function to link in.
+-- 		# ##func## : an integer, the routine_id of the function to link in.
 --
 -- Comments:
 --   The supplied function must have only one parameter, which should be integer or more general. 
 --   Defaulted parameters in crash routines are not supported yet.
 --
---   Euphoria maintains a linked list of routines to execute upon a crash. crash_routine() adds 
+--   Euphoria maintains a linked list of routines to execute upon a crash. ##crash_routine##() adds 
 --   a new function to the list. The routines defined first are executed last. You cannot unlink
 --   a routine once it is linked, nor inspect the crash routine chain.
 --
@@ -248,7 +249,7 @@ end procedure
 -- </eucode>
 --
 -- See Also:
--- 	[[:crash_file]], [[:routine_id]], [[:Debugging and profiling]]
+-- 	[[:crash_file]], [[:routine_id]], [[:Debugging and Profiling]]
 
 public procedure crash_routine(integer func)
 	machine_proc(M_CRASH_ROUTINE, func)

@@ -1,0 +1,165 @@
+== basics ==
+
+The syntax of Euphoria is described using BNF notation.
+
+
+<eucode>
+ALPHA ==: ('a' - 'z') | ('A' - 'Z')
+DIGIT ==: ('0' - '9')
+USCORE ==: '_'
+
+INDENTIFIER ==: ( ALPHA | USCORE ) [(AlPHA | DIGIT | USCORE) ... ]
+
+NUMEXPR ==: (an expression that evaluates to an atom)
+
+STREXPR ==: (an expression that evaluates to a string sequence)
+
+SEQEXPR ==: (an expression that evaluates to an sequence)
+
+BOOLEXPR ==: (an expression that evaluates to an atom in which zero represents 
+              falsehood and non-zero represents truth)
+
+EXPR ==:
+
+STATEMENT ==: 
+
+STMTBLK ==: STATEMENT [STATEMENT ...]
+
+LABEL       ==:  'label' STRINGLIT
+
+LISTDELIM   ==:  ','
+
+STRINGLIT   ==: SIMPLESTRINGLIT | RAWSTRINGLIT
+
+SIMPLESTRINGLIT ==: SSLITSTART [ (CHAR | ESCCHAR) ... ] SSLITEND
+SSLITSTART  ==: '"'
+SSLITEND    ==: '"'
+CHAR        ==: (any byte value)
+ESCCHAR     ==: ESCLEAD ( 't' | 'n' | 'r' | '\' | '"' \ ''')
+ESCLEAD     ==: '\'
+
+RAWSTRINGLIT ==: DQRAWSTRING | BQRAWSTRING
+DQRAWSTRING ==: '"""' [ MARGINSTR ] [CHAR ...] '"""'
+BQRAWSTRING ==: '`' [ MARGINSTR ] [CHAR ...] '`'
+MARGINSTR  ==: '_' ...
+</eucode>
+
+== statements ==
+=== directives ===
+[[:INCLUDESTMT]]\\
+
+=== flow control ===
+[[:IFSTMT]]\\
+[[:SWITCHSTMT]]\\
+[[:BREAKSTMT]]\\
+[[:CONTINUESTMT]]\\
+[[:RETRYSTMT]]\\
+[[:EXITSTMT]]\\
+[[:FALLTHRUSTMT]]\\
+[[:FORSTMT]]\\
+[[:WHILESTMT]]\\
+[[:LOOPSTMT]]\\
+[[:GOTOSTMT]]\\
+
+!!splice
+
+== include == @[INCLUDESTMT]
+<eucode>
+ INCLUDESTMT  ==:  'include' FILEREF [ 'as' NAMESPACE ] EOL
+ FILEREF  ==:  A file path that may be enclosed in double-quotes. 
+ NAMESPACE ==: IDENTIFIER  
+</eucode>
+**NOTE** that after the file reference, the only text allowed is the keyword 
+'as' or the start of a comment. Nothing else is permitted on the same text line.
+
+    See Also: [[:include statement]]
+
+== sequence slice == @[SLICING]
+<eucode>
+SLICE      ==: SLICESTART INTEXPRESSION SLICEDELIM INTEXPRESSION SLICEEND
+SLICESTART ==: '['
+SLICEDELIM ==: '..'
+SLICEEND   ==: ']'
+</eucode>
+    See Also: [[:Slicing of Sequences]]
+
+== if == @[IFSTMT]
+<eucode>
+ IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF 
+ IFTEST  ==:  'if' ATOMEXPR [ LABEL ] 'then' [ STMTBLOCK ] 
+ ELSIF   ==:  'elsif' ATOMEXPR 'then' [ STMTBLOCK ] 
+ ELSE    ==:  'else' [ STMTBLOCK ] 
+ ENDIF   ==:  'end' 'if' 
+</eucode>
+    See Also: [[:if statement]]
+
+== switch == @[SWITCHSTMT]
+<eucode>
+ SWITCHSTMT  ==:  SWITCHTEST CASE [ CASE ...] [ CASEELSE ] [ ENDSWITCH ]
+ SWITCHTEST  ==:  'switch' EXPRESSION [ WITHFALL ] [ LABEL ] 'do'
+ WITHFALL    ==:  ('with' | 'without') 'fallthru'
+ CASE        ==:  'case' CASELIST 'then' [ STMTBLOCK ]
+ CASELIST    ==:  EXPRESSION [(LISTDELIM EXPRESSION) ...]
+ CASEELSE    ==:  'case' 'else'
+ ENDSWITCH   ==:  'end' 'switch'
+</eucode>
+    See Also: [[:switch statement]]
+
+== break == @[BREAKSTMT]
+<eucode>
+ BREAKSTMT       ==:  'break' [ STRINGLIT ]
+</eucode>
+    See Also: [[:break statement]]
+
+== continue == @[CONTINUESTMT]
+<eucode>
+ CONTINUESTMT       ==:  'continue' [ STRINGLIT ]
+</eucode>
+    See Also: [[:continue statement]]
+
+== retry == @[RETRYSTMT]
+<eucode>
+ RETRYSTMT       ==:  'retry' [ STRINGLIT ]
+</eucode>
+    See Also: [[:retry statement]]
+
+== exit == @[EXITSTMT]
+<eucode>
+ EXITSTMT       ==:  'exit' [ STRINGLIT ]
+</eucode>
+    See Also: [[:exit statement]]
+
+== fallthru == @[FALLTHRUSTMT]
+<eucode>
+ FALLTHRUSTMT       ==:  'fallthru'
+</eucode>
+    See Also: [[:switch statement]]
+
+== for == @[FORSTMT]
+<eucode>
+ FORSTMT ==: 'for' FORIDX [ LABEL ] 'do' [STMTBLK] 'end' 'for'
+ FORIDX  ==: IDENTIFIER '=' NUMEXPR 'to' NUMEXPR ['by' NUMEXPR]
+</eucode>
+    See Also: [[:for statement]]
+
+== while == @[WHILESTMT]
+<eucode>
+WHILESTMT ==: 
+        'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
+WITHENTRY ==: 'with' 'entry'
+ENTRY ==: 'entry' [STMTBLK]
+</eucode>
+   See Also: [[:while statement]]
+
+== loop == @[LOOPSTMT]
+<eucode>
+LOOPSTMT ==: 
+   'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
+</eucode>
+   See Also: [[:loop until statement]]
+
+== goto == @[GOTOSTMT]
+<eucode>
+ GOTOSMT ==: 'goto' LABEL
+</eucode>
+  See Also: [[:goto statement]]

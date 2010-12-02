@@ -1,9 +1,8 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
-
 --****
 -- === Error Code Constants
 --
+
+namespace graphcst
 
 public enum
 	BMP_SUCCESS,
@@ -23,60 +22,114 @@ public enum
 	VC_XPIXELS,
 	VC_YPIXELS,
 	VC_NCOLORS,
-	VC_PAGES
+	VC_PAGES,
+	VC_SCRNLINES,
+	VC_SCRNCOLS
+
+-- COLOR values -- for characters and pixels
+	--** in graphics modes BLACK is "transparent"
+
 
 --****
 -- ==== Colors
 --
 
--- COLOR values -- for characters and pixels
 public constant
-	--** in graphics modes this is "transparent"
-	BLACK = 0,
-	GREEN = 2,
-	MAGENTA = 5,
-	WHITE = 7,
-	GRAY  = 8,
-	BRIGHT_GREEN = 10,
+	BLACK          =  0,
+	BLUE           =  1,
+	GREEN          =  2,
+	CYAN           =  3,
+	RED            =  4,
+	MAGENTA        =  5,
+	BROWN          =  6,
+	WHITE          =  7,
+	GRAY           =  8,
+	BRIGHT_BLUE    =  9,
+	BRIGHT_GREEN   = 10,
+	BRIGHT_CYAN    = 11,
+	BRIGHT_RED     = 12,
 	BRIGHT_MAGENTA = 13,
-	BRIGHT_WHITE = 15
+	YELLOW         = 14,
+	BRIGHT_WHITE   = 15,
+	$
 
-public integer BLUE, CYAN, RED, BROWN, BRIGHT_BLUE, BRIGHT_CYAN,
-	BRIGHT_RED, YELLOW
-
-ifdef UNIX then
-	BLUE        =  4
-	CYAN        =  6
-	RED         =  1
-	BROWN       =  3
-	BRIGHT_BLUE = 12
-	BRIGHT_CYAN = 14
-	BRIGHT_RED  =  9
-	YELLOW      = 11
-elsedef
-	BLUE        =  1
-	CYAN        =  3
-	RED         =  4
-	BROWN       =  6
-	BRIGHT_BLUE =  9
-	BRIGHT_CYAN = 11
-	BRIGHT_RED  = 12
-	YELLOW      = 14
+ifdef WINDOWS then
+export sequence true_fgcolor = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,
+                                16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31}
+export sequence true_bgcolor = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,
+                                16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31}
+-- 	BLACK          =  0,
+-- 	BLUE           =  1,
+-- 	GREEN          =  2,
+-- 	CYAN           =  3,
+-- 	RED            =  4,
+-- 	MAGENTA        =  5,
+-- 	BROWN          =  6,
+-- 	WHITE          =  7,
+-- 	GRAY           =  8,
+-- 	BRIGHT_BLUE    =  9,
+-- 	BRIGHT_GREEN   = 10,
+-- 	BRIGHT_CYAN    = 11,
+-- 	BRIGHT_RED     = 12,
+-- 	BRIGHT_MAGENTA = 13,
+-- 	YELLOW         = 14,
+-- 	BRIGHT_WHITE   = 15,
+elsifdef OSX then
+export sequence true_fgcolor = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
+                                16,20,18,22,17,21,19,23,24,28,26,28,25,29,17,31}
+export sequence true_bgcolor = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
+                                16,20,18,22,17,21,19,23,24,28,26,28,25,29,17,31}
+-- 	BLACK          =  0,
+-- 	RED            =  1,
+-- 	GREEN          =  2,
+-- 	BROWN          =  3,
+-- 	BLUE           =  4,
+-- 	MAGENTA        =  5,
+-- 	CYAN           =  6,
+-- 	WHITE          =  7,
+-- 	GRAY           =  8,
+-- 	BRIGHT_RED     =  9,
+-- 	BRIGHT_GREEN   = 10,
+-- 	YELLOW         = 11,
+-- 	BRIGHT_BLUE    = 12,
+-- 	BRIGHT_MAGENTA = 13,
+-- 	BRIGHT_CYAN    = 14,
+-- 	BRIGHT_WHITE   = 15,
+elsifdef UNIX then
+export sequence true_fgcolor = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
+                                16,20,18,22,17,21,19,23,24,28,26,28,25,29,17,31}
+export sequence true_bgcolor = { 0, 4, 2, 6, 1, 5, 3, 7, 8,12,10,14, 9,13,11,15,
+                                16,20,18,22,17,21,19,23,24,28,26,28,25,29,17,31}
+-- 	BLACK          =  0,
+-- 	RED            =  1,
+-- 	GREEN          =  2,
+-- 	BROWN          =  3,
+-- 	BLUE           =  4,
+-- 	MAGENTA        =  5,
+-- 	CYAN           =  6,
+-- 	WHITE          =  7,
+-- 	GRAY           =  8,
+-- 	BRIGHT_RED     =  9,
+-- 	BRIGHT_GREEN   = 10,
+-- 	YELLOW         = 11,
+-- 	BRIGHT_BLUE    = 12,
+-- 	BRIGHT_MAGENTA = 13,
+-- 	BRIGHT_CYAN    = 14,
+-- 	BRIGHT_WHITE   = 15,
 end ifdef
 
---** Add to color to get blinking text
+--** 
+-- Add to color to get blinking text
 public constant BLINKING = 16
 
 public constant BYTES_PER_CHAR = 2
 
-ifdef DOS32 then
-	public constant
-		COLOR_TEXT_MEMORY = #B8000,
-		MONO_TEXT_MEMORY = #B0000
-end ifdef
-
-public type color(integer x)
-	return x >= 0 and x <= 255
+public type color(object x)
+	if integer(x) and x >= 0 and x <= 255 then
+		return 1
+	else
+		return 0
+	end if
 end type
 
 --****
@@ -91,10 +144,15 @@ end type
 -- custom colors. Intensities must be from 0 (weakest) to 63 (strongest). Thus, the brightest
 -- white is {63, 63, 63}.
 
-public type mixture(sequence s)
+public type mixture(object s)
+	if atom(s) then
+		return 0
+	end if
+	
 	if length(s) != 3 then
 		return 0
 	end if
+	
 	for i=1 to 3 do
 		if not integer(s[i]) then
 			return 0
@@ -113,43 +171,41 @@ constant
 -- Return a description of the current video configuration:
 --
 -- Returns:
--- 		A **sequence** of 8 nonnegative integers, laid out as follows:
---	# color monitor?: 1 0 if monochrome, 1 otherwise
+-- 		A **sequence**, of 10 non-negative integers, laid out as follows:
+--	# color monitor? ~-- 1 0 if monochrome, 1 otherwise
 --	# current video mode
--- 	# number of text rows
--- 	# number of text columns
+-- 	# number of text rows in console buffer
+-- 	# number of text columns in console buffer
 --	# screen width in pixels
 --	# screen height in pixels
 --	# number of colors
 --	# number of display pages
+-- 	# number of text rows for current screen size
+-- 	# number of text columns for current screen size
 --
 -- Comments:
 --
 -- A public enum is available for convenient access to the returned configuration data:
--- <eucode>
--- public constant
---     VC_COLOR   = 1,
---     VC_MODE    = 2,
---     VC_LINES   = 3,
---     VC_COLUMNS = 4,
---     VC_XPIXELS = 5,
---     VC_YPIXELS = 6,
---     VC_NCOLORS = 7,
---     VC_PAGES   = 8
--- </eucode>
+--     * ##VC_COLOR##
+--     * ##VC_MODE##
+--     * ##VC_LINES##
+--     * ##VC_COLUMNS##
+--     * ##VC_XPIXELS##
+--     * ##VC_YPIXELS##
+--     * ##VC_NCOLORS##
+--     * ##VC_PAGES##
+--     * ##VC_LINES##
+--     * ##VC_COLUMNS##
+--     * ##VC_SCRNLINES##
+--     * ##VC_SCRNCOLS##
+--
 -- This routine makes it easy for you to parameterize a program so it will work in many
 -- different graphics modes.
 --
--- On the PC there are two types of graphics mode. The first type, text mode, lets you
--- print text only. The second type, pixel-graphics mode, lets you plot pixels, or points,
--- in various colors, as well as text. You can tell that you are in a text mode, because
--- the ##VC_XPIXELS## and ##VC_YPIXELS## fields will be 0. Library routines such as
--- [[:polygon]], [[:draw_line]], and [[:ellipse]] only work in a pixel-graphics mode.
---
 -- Example:
 -- <eucode>
--- -- vc = video_config()  -- in mode 3 with 25-lines of text:
--- -- vc is {1, 3, 25, 80, 0, 0, 32, 8}
+-- vc = video_config()
+-- -- vc could be {1, 3, 300, 132, 0, 0, 32, 8, 37, 90}
 -- </eucode>
 --
 -- See Also:
@@ -159,3 +215,17 @@ public function video_config()
 	return machine_func(M_VIDEO_CONFIG, 0)
 end function
 
+
+--****
+-- Color Set Selection
+--
+public enum
+	--** 
+	-- Foreground ( text) set of colors
+	FGSET,
+	
+	--**
+	-- Background set of colors
+	BGSET,
+	
+	$

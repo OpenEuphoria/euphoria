@@ -1,15 +1,14 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
--- dll.e
 --****
 -- == Dynamic Linking to external code
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
-include std/convert.e
-include std/machine.e
-include std/math.e
+namespace dll
+
 include std/error.e
+include std/machine.e
+include std/types.e
 
 --****
 -- === C Type Constants
@@ -23,29 +22,54 @@ include std/error.e
 --   [[:define_c_proc]], [[:define_c_func]], [[:define_c_var]]
 
 public constant
-	--** char
+	--** char  8-bits
 	C_CHAR    = #01000001,
-	--** unsigned char
+	--** byte  8-bits
+	C_BYTE    = #01000001,
+	--** unsigned char 8-bits
 	C_UCHAR   = #02000001,
-	--** short
+	--** ubyte 8-bits
+	C_UBYTE   = #02000001,
+	--** short 16-bits
 	C_SHORT   = #01000002,
-	--** unsigned short
+	--** word 16-bits
+	C_WORD   = #01000002,
+	--** unsigned short 16-bits
 	C_USHORT  = #02000002,
-	--** int
+	--** int 32-bits
 	C_INT     = #01000004,
-	--** unsigned int
+	--** bool 32-bits
+	C_BOOL    = C_INT,
+	--** unsigned int 32-bits
 	C_UINT    = #02000004,
-	--** long
+	--** size_t 32-bits
+	C_SIZE_T  = C_UINT,
+	--** long 32-bits
 	C_LONG    = C_INT,
-	--** unsigned long
+	--** unsigned long 32-bits
 	C_ULONG   = C_UINT,
-	--** any valid pointer
-	C_POINTER = C_ULONG,
-	--** float
+	--** any valid pointer 32-bits
+	C_POINTER = C_UINT,
+	--** handle 32-bits
+	C_HANDLE  = C_UINT,
+	--** hwnd 32-bits
+	C_HWND    = C_UINT,
+	--** dword 32-bits
+	C_DWORD   = C_UINT,
+	--** wparam 32-bits
+	C_WPARAM  = C_LONG,
+	--** lparam 32-bits
+	C_LPARAM  = C_LONG,
+	--** hresult 32-bits
+	C_HRESULT = C_LONG,
+	--** float 32-bits
 	C_FLOAT   = #03000004,
-	--** double
-	C_DOUBLE  = #03000008
-
+	--** double 64-bits
+	C_DOUBLE  = #03000008,
+	--** dwordlong 64-bits
+	C_DWORDLONG  = #03000008,
+	$
+	
 --****
 -- === External Euphoria Type Constants
 -- These are used for arguments to and the return value from a Euphoria shared
@@ -83,7 +107,7 @@ constant M_OPEN_DLL  = 50,
 -- (.so) file. 
 --
 -- Parameters:
---   # ##file_name##: a sequence, the name of the shared library to open or a sequence of filename's
+--   # ##file_name## : a sequence, the name of the shared library to open or a sequence of filename's
 --     to try to open.
 --
 -- Returns:
@@ -103,8 +127,8 @@ constant M_OPEN_DLL  = 50,
 --   file names to try, the first successful library loaded will be returned. If no library
 --   could be loaded, 0 will be returned after exhausting the entire list of file names.
 --
---   The value returned by open_dll() can be passed to define_c_proc(), define_c_func(),
---   or define_c_var().
+--   The value returned by ##open_dll##() can be passed to ##define_c_proc##(), ##define_c_func##(),
+--   or ##define_c_var##().
 -- 
 --   You can open the same .dll or .so file multiple times. No extra memory is used and you'll
 --   get the same number returned each time.
@@ -123,7 +147,8 @@ constant M_OPEN_DLL  = 50,
 -- Example 2:
 -- <eucode>
 -- atom mysql_lib
--- mysql_lib = open_dll({"libmysqlclient.so", "libmysqlclient.so.15", "libmysqlclient.so.15.0"})
+-- mysql_lib = open_dll({"libmysqlclient.so", "libmysqlclient.so.15", 
+--                      "libmysqlclient.so.15.0"})
 -- if mysql_lib = 0 then
 --   puts(1, "Couldn't find the mysql client library\n")
 -- end if
@@ -133,7 +158,7 @@ constant M_OPEN_DLL  = 50,
 --     [[:define_c_func]], [[:define_c_proc]], [[:define_c_var]], [[:c_func]], [[:c_proc]]
 
 public function open_dll(sequence file_name)
-	if length(file_name) > 0 and atom(file_name[1]) then
+	if length(file_name) > 0 and types:string(file_name) then
 		return machine_func(M_OPEN_DLL, file_name)
 	end if
 
@@ -152,22 +177,20 @@ end function
 --**
 -- Gets the address of a symbol in a shared library or in RAM.
 --
--- Platform:
---	not //DOS//
---
 -- Parameters:
--- 		 # ##lib##: an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
--- 		# ##variable_name##: a sequence, the name of a public C variable defined within the library.
+--   # ##lib## : an atom, the address of a Linux or FreeBSD shared library, or Windows .dll, as returned by open_dll().
+--   # ##variable_name## : a sequence, the name of a public C variable defined within the library.
 --
 -- Returns:
---		An **atom**, the memory address of ##variable_name##.
+--   An **atom**, the memory address of ##variable_name##.
 --
 -- Comments:
---     Once you have the address of a C variable, and you know its type, you can use peek()
---     and poke() to read or write the value of the variable. You can in the same way obtain 
--- the address of a C function and pass it to any external routine that requires a callback address.
+--   Once you have the address of a C variable, and you know its type, you can use ##peek##()
+--   and ##poke##() to read or write the value of the variable. You can in the same way obtain 
+--   the address of a C function and pass it to any external routine that requires a callback address.
 --
---     For an example, see ##euphoria/demo/linux/mylib.exu##
+-- Example:
+-- see ##euphoria/demo/linux/mylib.ex##
 --
 -- See Also:
 --     [[:c_proc]], [[:define_c_func]], [[:c_func]], [[:open_dll]]
@@ -181,9 +204,9 @@ end function
 -- wish to call as a procedure from your Euphoria program. 
 --
 -- Parameters:
--- 		# ##lib##: an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
--- 		# ##routine_name##: an object, either the name of a procedure in a shared object or the machine address of the procedure.
--- 		# ##argtypes##: a sequence of type constants.
+-- 		# ##lib## : an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
+-- 		# ##routine_name## : an object, either the name of a procedure in a shared object or the machine address of the procedure.
+-- 		# ##argtypes## : a sequence of type constants.
 --
 -- Returns:
 -- 		A small **integer**, known as a routine id, will be returned.
@@ -250,6 +273,9 @@ end function
 
 public function define_c_proc(object lib, object routine_name, 
 							  sequence arg_types)
+	if atom(routine_name) and not machine:safe_address(routine_name, 1, machine:A_EXECUTE) then
+        error:crash("A C function is being defined from Non-executable memory.")
+	end if			
 	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, 0})
 end function
 
@@ -258,10 +284,10 @@ end function
 -- a value. 
 --
 -- Parameters:
--- 		# ##lib##: an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
--- 		# ##routine_name##: an object, either the name of a procedure in a shared object or the machine address of the procedure.
--- 		# ##argtypes##: a sequence of type constants.
--- 		# ##return_type##: an atom, indicating what type the function will return.
+-- 		# ##lib## : an object, either an entry point returned as an atom by [[:open_dll]](), or "" to denote a routine the RAM address is known.
+-- 		# ##routine_name## : an object, either the name of a procedure in a shared object or the machine address of the procedure.
+-- 		# ##argtypes## : a sequence of type constants.
+-- 		# ##return_type## : an atom, indicating what type the function will return.
 --
 -- Returns:
 -- 		A small **integer**, known as a routine id, will be returned.
@@ -282,7 +308,7 @@ end function
 -- 
 -- When defining a machine code routine, x1 must be the empty sequence, "" or {}, and x2
 -- indicates the address of the machine code routine. You can poke the bytes of machine code
--- into a block of memory reserved using allocate(). On Windows, the machine code routine is
+-- into a block of memory reserved using ##allocate##(). On Windows, the machine code routine is
 -- normally expected to follow the stdcall calling convention, but if you wish to use the
 -- cdecl convention instead, you can code {'+', address} instead of address for x2.
 --
@@ -309,19 +335,14 @@ end function
 -- If you are not interested in using the value returned by the C function, you should 
 -- instead define it with [[:define_c_proc]]() and call it with [[:c_proc]]().
 -- 
--- If you use exw to call a cdecl C routine that returns a floating-point value, it might not 
--- work. This is because the Watcom C compiler (used to build exw) has a non-standard way of 
+-- If you use euiw to call a cdecl C routine that returns a floating-point value, it might not 
+-- work. This is because the Watcom C compiler (used to build euiw) has a non-standard way of 
 -- handling cdecl floating-point return values.
 --
 -- Passing floating-point values to a machine code routine will be faster if you use 
--- c_func() rather than call() to call the routine, since you won't have to use 
--- atom_to_float64() and poke() to get the floating-point values into memory.
+-- ##c_func##() rather than ##call##() to call the routine, since you won't have to use 
+-- ##atom_to_float64##() and ##poke##() to get the floating-point values into memory.
 -- 
--- ex.exe (DOS) uses calls to WATCOM floating-point routines (which then use hardware 
--- floating-point instructions if available), so floating-point values are generally passed 
--- and returned in integer register-pairs rather than floating-point registers. You'll have 
--- to disassemble some Watcom code to see how it works.
---
 -- Example 1:
 -- <eucode>
 -- atom user32
@@ -349,19 +370,22 @@ end function
 
 public function define_c_func(object lib, object routine_name,
 							  sequence arg_types, atom return_type)
-	return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
+	  if atom(routine_name) and not machine:safe_address(routine_name, 1, machine:A_EXECUTE) then
+	      error:crash("A C function is being defined from Non-executable memory.")
+	  end if			
+	  return machine_func(M_DEFINE_C, {lib, routine_name, arg_types, return_type})
 end function
 
 --****
 -- Signature:
--- <built-in> function c_func(integer rid, sequence args)
+-- <built-in> function c_func(integer rid, sequence args={})
 --
 -- Description:
 -- Call a C function, or machine code function, or translated/compiled Euphoria function by routine id. 
 --
 -- Parameters:
---		# ##rid##: an integer, the routine_id of the external function being called.
---		# ##args##: a sequence, the list of parameters to pass to the function
+--		# ##rid## : an integer, the routine_id of the external function being called.
+--		# ##args## : a sequence, the list of parameters to pass to the function
 --
 -- Returns:
 --	An **object**, whose type and meaning was defined on calling [[:define_c_func]]().
@@ -403,19 +427,19 @@ end function
 --
 -- See Also: 
 --
--- [[:c_func]], [[:define_c_proc]], [[:open_dll]], [[../docs/platform.txt]]
+-- [[:c_proc]], [[:define_c_proc]], [[:open_dll]], [[:Platform-Specific Issues]]
 --        
 
 --****
 -- Signature:
--- <built-in> procedure c_proc(integer rid, sequence args)
+-- <built-in> procedure c_proc(integer rid, sequence args={})
 --
 -- Description:
 -- Call a C void function, or machine code function, or translated/compiled Euphoria procedure by routine id.
 --
 -- Parameters:
---		# ##rid##: an integer, the routine_id of the external function being called.
---		# ##args##: a sequence, the list of parameters to pass to the function
+--		# ##rid## : an integer, the routine_id of the external function being called.
+--		# ##args## : a sequence, the list of parameters to pass to the function
 --
 -- Errors:
 -- If ##rid## is not a valid routine id, or the arguments do not match the prototype of
@@ -448,25 +472,16 @@ end function
 -- </eucode>
 --
 -- See Also:
--- [[:c_proc]], [[:define_c_func]], [[:open_dll]], [[../docs/platform.txt]]
+-- [[:c_func]], [[:define_c_func]], [[:open_dll]], [[:Platform-Specific Issues]]
 -- 
 
 constant M_CALL_BACK = 52
-constant EXECUTABLE_ALIGNMENT = 4 -- can we execute on 2 mod 4 or even odd 
-                                -- addresses?
-constant call_back_size = 92 -- maximum value of C based Euphoria and the 
-                             -- Euphoria based Euphoria.
-atom page_addr = 0
-atom page_offset = 0
 
 --**
 -- Get a machine address for an Euphoria procedure.
 --
--- Platform:
---   not //DOS//
---
 -- Parameters:
---   # ##id##: an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
+--   # ##id## : an object, either the id returned by [[:routine_id]] for the function/procedure, or a pair {'+', id}.
 --
 -- Returns:
 --   An **atom**, the address of the machine code of the routine. It can be
@@ -499,40 +514,15 @@ atom page_offset = 0
 --   process that has used too much CPU time.
 --
 --   A call-back routine that uses the cdecl convention and returns a floating-point result,
---   might not work with exw. This is because the Watcom C compiler (used to build exw) has
+--   might not work with euiw. This is because the Watcom C compiler (used to build euiw) has
 --   a non-standard way of handling cdecl floating-point return values.
 --
 -- Example 1: 
---   See: ##demo\win32\window.exw##, ##demo\linux\qsort.exu##
+--   See: ##demo\win32\window.exw##, ##demo\linux\qsort.ex##
 --
 -- See Also:
 --     [[:routine_id]]
 
 public function call_back(object id)
-	ifdef not WIN32 then
-		-- save speed for OSes that do not have DEP.
 		return machine_func(M_CALL_BACK, id)
-	elsedef
-		sequence s, code, rep
-		atom addr, size, repi
-
-		s = machine_func(M_CALL_BACK, {id})
-		addr = s[1]
-		rep =  int_to_bytes( s[2] )
-		size = s[3]
-		code = peek( {addr, size} )
-		repi = match( {#78, #56, #34, #12 }, code[5..$-4] ) + 4
-		if repi = 4 then
-			crash("Cannot generate call_back address.")
-		end if
-		if page_addr = 0 or page_addr + page_offset + call_back_size >= PAGE_SIZE then
-			page_addr = allocate_protect( code[1..repi-1] & rep & code[repi+4..length(code)], PAGE_EXECUTE_READWRITE )
-			page_offset = 0
-		else
-			-- align for execution (need 8-byte?) and put after the previous call back
-			page_offset += EXECUTABLE_ALIGNMENT* ceil( size / EXECUTABLE_ALIGNMENT )
-			poke( page_addr + page_offset, code[1..repi-1] & rep & code[repi+4..length(code)] )
-		end if
-		return page_offset + page_addr
-	end ifdef
 end function

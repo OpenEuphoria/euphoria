@@ -18,7 +18,7 @@ ifdef hello then
 end ifdef
 
 ifdef UNIX then
-    if platform() >= 3 and platform() <= 5 then
+    if platform() >= 3 then
 		test_pass("UNIX test")
 	else
 		test_fail("UNIX test")
@@ -34,7 +34,7 @@ ifdef OSX then
 end ifdef
 
 ifdef FREEBSD then
-	test_equal("FREEBSD test", 3, platform())
+	test_equal("FREEBSD test", 8, platform())
 end ifdef
 
 ifdef LINUX then
@@ -45,20 +45,16 @@ ifdef WIN32 then
 	test_equal("WIN32 test", 2, platform())
 end ifdef
 
-ifdef DOS32 then
-	test_equal("DOS32 test", 1, platform())
+ifdef EU4_0_0 then
+    test_pass("EU4_0_0")
+elsedef
+    test_fail("EU4_0_0")
 end ifdef
 
-ifdef EU40000 then
-    test_pass("EU40000")
+ifdef EU4_0 then
+	test_pass("EU4_0")
 elsedef
-    test_fail("EU40000")
-end ifdef
-
-ifdef EU400 then
-	test_pass("EU400")
-elsedef
-	test_fail("EU400")
+	test_fail("EU4_0")
 end ifdef
 
 ifdef EU4 then
@@ -67,6 +63,4 @@ elsedef
 	test_fail("EU4")
 end ifdef
 
-
 test_report()
-

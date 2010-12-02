@@ -1,22 +1,18 @@
 --****
 -- == DNS
 --
--- Based on EuNet project, version 1.3.2 at SourceForge.
---
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
 
-ifdef DOS32 then
-	include std/error.e
+namespace dns
 
-	crash("net/dns is not supported on the DOS platform")
-end ifdef
-
-include std/socket.e
+/*
 include std/get.e
+include std/socket.e
+*/
 
-constant BLOCK_SIZE = 4096
-enum M_SOCK_GETHOSTBYNAME=79, M_SOCK_GETHOSTBYADDR
+--constant BLOCK_SIZE = 4096
+enum M_SOCK_GETHOSTBYNAME = 79, M_SOCK_GETHOSTBYADDR
 
 --****
 -- ===  Constants
@@ -95,7 +91,7 @@ function _socket_trim(sequence s)
 	while c <= length(s) and rs[c] <= 32 do
 		c = c + 1
 	end while
-	rs = rs[c..length(rs)]
+	rs = rs[c .. $]
 	c = length(rs)
 	while c > 0 and rs[c] <= 32 do
 		c = c - 1
@@ -242,7 +238,6 @@ function unix_dnsquery(sequence dname, integer q_type)
 	
 end function
 
-
 function windows_dnsquery(sequence dname, integer q_type, atom options)
 	-- NOTE: This function does not work on Windows versions below Windows 2000.
 	
@@ -316,14 +311,13 @@ function windows_dnsquery(sequence dname, integer q_type, atom options)
 	
 end function
 
-
 --**
 -- Query DNS info.
 --
 -- Parameters:
---		# ##dname##: a string, the name to look up
---		# ##q_type##: an integer, the type of lookup requested
---		# ##options##: an atom,
+--		# ##dname## : a string, the name to look up
+--		# ##q_type## : an integer, the type of lookup requested
+--		# ##options## : an atom,
 --
 -- Returns:
 --     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
@@ -354,7 +348,7 @@ public function dnsquery(sequence dname, integer q_type, atom options)
 	ifdef WIN32 then
 		return windows_dnsquery(dname, q_type, options)
 	elsifdef UNIX then
-		return unix_dnsquery(dname,q_type)
+		return unix_dnsquery(dname, q_type)
 	end ifdef
 	
 	return -999 -- TODO: -999 or -1?
@@ -370,8 +364,8 @@ end function
 -- domain_name.
 --
 -- Parameters:
---		# ##dname##: a string, the name to look up
---		# ##options##: an atom,
+--		# ##dname## : a string, the name to look up
+--		# ##options## : an atom,
 --
 -- Returns:
 --
@@ -408,8 +402,8 @@ end function
 -- domain_name.
 --
 -- Parameters:
---		# ##dname##: a string, the name to look up
---		# ##options##: an atom,
+--		# ##dname## : a string, the name to look up
+--		# ##options## : an atom,
 --
 -- Returns:
 --     An **object**, either a negative integer on error, or a sequence of sequences in the form {{string ip_address, integer query_type, integer priority},...}.
@@ -447,7 +441,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 		svcport, cpos
 	sequence rtn, val
 	
-	hints = hints -- TODO -- not imlemented.
+	hints = hints -- TODO -- not implemented.
 	addrinfo = allocate(32)
 	poke(addrinfo,repeat(0,32))
 	if sequence(node) then
@@ -505,7 +499,7 @@ function unix_getaddrinfo(object node, object service, object hints)
 	elsif svcport > 0 then
 		cpos = find(':',rtn[1][5])
 		if cpos = 0 or cpos = length(rtn[1][5]) or
-				eu:compare(rtn[1][5][length(rtn[1][5])-1..length(rtn[1][5])],":0")=0 then
+				eu:compare(rtn[1][5][$ - 1 .. $],":0")=0 then
 			if cpos = 0 then
 				rtn[1][5] = rtn[1][5] & sprintf(":%d",svcport)
 			else
@@ -527,12 +521,12 @@ end function
 -- Retrieve information about a given server name and named service.
 --
 -- Parameters:
---   # ##node##: an object, ???
---   # ##service##: an object, ???
---   # ##hints##: an object, currently not used
+--   # ##node## : an object, ???
+--   # ##service## : an object, ???
+--   # ##hints## : an object, currently not used
 --
 -- Returns:
---   A **sequence** of sequences containing the requested information.
+--   A **sequence**, of sequences containing the requested information.
 --   The inner sequences have fields that can be accessed with public constants
 --
 -- * ADDR_FLAGS
@@ -572,13 +566,13 @@ end function
 -- Get the host information by name.
 --
 -- Parameters:
---   # ##name##: host name
+--   # ##name## : host name
 --
 -- Returns:
---   A ##sequence## containing
+--   A ##sequence##, containing
 --   <eucode>
 --   {
---     offical name,
+--     official name,
 --     { alias1, alias2, ... },
 --     { ip1, ip2, ... },
 --     address_type
@@ -611,13 +605,13 @@ end function
 -- Get the host information by address.
 --
 -- Parameters:
---   # ##address##: host address
+--   # ##address## : host address
 --
 -- Returns:
---   A ##sequence## containing
+--   A ##sequence##, containing
 --   <eucode>
 --   {
---     offical name,
+--     official name,
 --     { alias1, alias2, ... },
 --     { ip1, ip2, ... },
 --     address_type

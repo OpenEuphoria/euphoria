@@ -1,3 +1,6 @@
+#ifndef EUPHORIA_H_
+#define EUPHORIA_H_
+
 /* Euphoria
    C include file for Euphoria programs 
    that have been translated to C */
@@ -5,6 +8,8 @@
 #undef _segment
 #undef _self
 #undef _dos_ds
+
+#include <stdio.h>
 
 /***************************************************************************
 *
@@ -18,6 +23,10 @@
 	    |<----------------ATOM_DBL-------[-3*2^29..4*2^29)------------>o
 -->|        |<-- IS_SEQUENCE [-4*2^29..-3*2^29)
 -->|                 o<--- IS_DBL_OR_SEQUENCE [-4*2^29..-2*2^29-1)
+-->|sequence|<-------
+----------->| double |<-----------------------------------------------------
+                     |<--------     integer    --------->|
+   |<--------------------- object ---------------------->|		     
 *
 ****************************************************************************/
 
@@ -36,6 +45,9 @@
 #define MAXINT_VAL MAXINT
 #define MAXINT_DBL ((double)MAXINT_VAL)
 #define INT15      (long)0x00003FFFL
+
+#undef MAKE_UINT
+#define MAKE_UINT(x)	((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL  ? (unsigned int)x : NewDouble((double)(unsigned int)x)))
 
 #define LOW_MEMORY_MAX ((unsigned)0x0010FFEF)
 
@@ -57,6 +69,7 @@ struct cleanup {
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
+	CLEAN_UDT_RT,
 	CLEAN_PCRE,
 	CLEAN_FILE
 };
@@ -91,28 +104,6 @@ struct ns_list {
 	int ns_num;
 	int seq_num;
 	int file_num;
-};
-
-struct tcb {
-	int rid;
-	double tid;
-	int type;
-	int status;
-	double start;
-	double min_inc;
-	double max_inc;
-	double min_time;
-	double max_time;
-	int runs_left;
-	int runs_max;
-	int next;
-	object args;
-	int *pc;
-	object_ptr expr_stack;
-	object_ptr expr_max;
-	object_ptr expr_limit;
-	object_ptr expr_top;
-	int stack_size;
 };
 
 typedef struct d  *d_ptr;
@@ -169,6 +160,16 @@ typedef struct s1 *s1_ptr;
 #define FLOOR     83
 #define XOR      154
 
+struct replace_block {
+	object_ptr copy_to;
+	object_ptr copy_from;
+	object_ptr start;
+	object_ptr stop;
+	object_ptr target;
+};
+
+typedef struct replace_block *replace_ptr;
+
 int wingetch();
 int call_c();
 int Command_Line();
@@ -196,17 +197,16 @@ int compare(int, int);
 unsigned long get_pos_int(char *, int);
 int memory_set(int, int, int);
 int memory_copy(int, int, int);
-int getc(void *);
 int EOpen(int, int,int);
 void EClose(int);
 int EPrintf(int, int, int);
 void EPuts(int, int);
-void Concat(int *, int, s1_ptr);
-void Concat_N(int *, int **, int);
+void Concat(int *, int, int);
+void Concat_N(int *, int *, int);
 void Append(int *, int, int);
 void Prepend(int *, int, int);
-int EGetenv(s1_ptr);
-void RHS_Slice(s1_ptr, int, int);
+object EGetEnv(object name);
+void RHS_Slice(int, int, int);
 int find(int, int);
 int e_match(int, int);
 void ctrace(char *);
@@ -222,7 +222,11 @@ int Pixel(int, int);
 int Get_Pixel(int);
 void shift_args(int, char**);
 int NewString(char *);
+#ifdef __GNUC__
+#if !defined(EMINGW) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
 char *malloc(int);
+#endif
+#endif
 void eu_startup();
 void exit(int);
 int CRoutineId(int, int, int);
@@ -235,7 +239,92 @@ void Position(int, int);
 int CommandLine(void);
 void system_call(int, int);
 void RTFatal(char *);
-int e_match_from(int,int,int);
-int find_from(int,int,int);
-void Replace(int);
+
+// be_alloc:
 char *TransAlloc(unsigned long);
+
+// be_decompress:
+object decompress(unsigned int c);
+
+// be_runtime:
+extern void *xstdin;
+extern object *rhs_slice_target;
+extern s1_ptr *assign_slice_seq;
+#define IFILE FILE*
+extern object last_w_file_no;
+extern IFILE last_w_file_ptr;
+extern object last_r_file_no;
+extern IFILE last_r_file_ptr;
+extern int insert_pos;;
+
+int find_from(int,int,int);
+long e_match_from(object aobj, object bobj, object c);
+void Tail(s1_ptr , int , object_ptr );
+void Head(s1_ptr , int , object_ptr );
+object Remove_elements(int start, int stop, int in_place );
+s1_ptr Add_internal_space(object a,int at,int len);
+object system_exec_call(object command, object wait);
+s1_ptr Copy_elements(int start,s1_ptr source, int replace );
+object Insert(object a,object b,int pos);
+object calc_hash(object a, object b);
+object Dxor_bits(d_ptr a, d_ptr b);
+object not_bits(long a);
+object Date();
+cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
+cleanup_ptr DeleteRoutine( int e_index );
+void DeRef1(int a);
+void Replace(replace_ptr rb);
+void UserCleanup(int);
+
+#define TASK_HANDLE int
+
+// be_task:
+struct interpreted_task{
+	int *pc;         // program counter for this task
+	object_ptr expr_stack; // call stack for this task
+	object_ptr expr_max;   // current top limit of stack
+	object_ptr expr_limit; // don't start a new routine above this
+	object_ptr expr_top;   // stack pointer
+	int stack_size;        // current size of stack
+};
+
+struct translated_task{
+	TASK_HANDLE task;
+	
+};
+
+// Task Control Block - sync with euphoria\include\euphoria.h
+struct tcb {
+	int rid;         // routine id
+	double tid;      // external task id
+	int type;        // type of task: T_REAL_TIME or T_TIME_SHARED
+	int status;      // status: ST_ACTIVE, ST_SUSPENDED, ST_DEAD
+	double start;    // start time of current run
+	double min_inc;  // time increment for min
+	double max_inc;  // time increment for max 
+	double min_time; // minimum activation time
+					 // or number of executions remaining before sharing
+	double max_time; // maximum activation time (determines task order)
+	int runs_left;   // number of executions left in this burst
+	int runs_max;    // maximum number of executions in one burst
+	int next;        // index of next task of the same kind
+	object args;     // args to call task procedure with at startup
+	
+	int mode;  // TRANSLATED_TASK or INTERPRETED_TASK
+	union task_impl {
+		struct interpreted_task interpreted;
+		struct translated_task translated;
+	} impl;
+	
+};
+
+extern int tcb_size;
+extern int current_task;
+extern double clock_period;
+void task_yield();
+extern struct tcb *tcb;
+
+// be_w:
+extern int in_from_keyb;
+extern int TraceOn;
+#endif

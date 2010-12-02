@@ -6,4 +6,9 @@ hello Hola
 world Mundo
 greeting %s, %s!
 
+help text = &
+This is an example of some &
+  translation text that spans &
+   multiple lines.
+
 # End of example PO #2

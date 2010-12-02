@@ -6,8 +6,8 @@ include std/datetime.e as d
 end ifdef
 
 include std/unittest.e
+include std/mathcons.e
 
-ifdef not DOS32 then
 sequence locale
 
 locale = "en_US"
@@ -16,6 +16,7 @@ locale = "en_US"
 integer ix = set( "" )
 sequence native_locale = l:get()
 ix = find( '.', native_locale )
+
 sequence encoding
 if ix then
 	encoding = native_locale[ix..$]
@@ -23,9 +24,17 @@ else
 	encoding = ""
 end if
 
+
 test_true("set()", l:set("C"))
 test_equal("set/get", lcc:decanonical("C"), lcc:decanonical(l:get()))
-if l:set(locale & encoding) then
+
+integer has_locale = l:set(locale & encoding)
+if not has_locale then
+	encoding = ".US-ASCII"
+	has_locale = l:set(locale & encoding)
+end if
+
+if has_locale then
 	test_equal("set/get en_US", lcc:decanonical(locale & encoding), lcc:decanonical(l:get()))
 	test_equal("money", "$1,020.50", l:money(1020.50))
 	test_equal("number", "1,020.50", l:number(1020.5))
@@ -34,12 +43,12 @@ if l:set(locale & encoding) then
 	test_equal("large integer", "9,999,999,999,999", l:number(9_999_999_999_999))
 else
 	-- can not test, maybe emit a warning?
-	puts(1, "warning can not test en_US locale, testing against C locale..")
+	puts(1, "warning can not test en_US locale, testing against C locale..\n")
 	test_equal("money", "1020.50", l:money(1020.50))
 	test_equal("number", "1020.50", l:number(1020.5))
 	test_equal("integer", "1020", l:number(1020))
-	test_equal("number", "1,020.10", l:number(1020.1))
-	test_equal("large integer", "9,999,999,999,999", l:number(9_999_999_999_999))
+	test_equal("number", "1020.10", l:number(1020.1))
+	test_equal("large integer", "9999999999999", l:number(9_999_999_999_999))
 end if
 
 d:datetime dt1
@@ -54,24 +63,47 @@ test_equal("datetime", "Sunday, May 04, 2008",
 --
 ------------------------------------------------------------------------------------------
 
-l:set_lang_path("") -- current director
+l:set_lang_path("") -- current directory
 test_equal("set_lang_path/get_lang_path", "", l:get_lang_path())
 
-test_true("lang_load() #1", l:lang_load("test"))
-test_equal("w() #1", "Hello", l:w("hello"))
-test_equal("w() #2", "World", l:w("world"))
-test_equal("w() #3", "%s, %s!", l:w("greeting"))
-test_equal("w() sprintf() #1", "Hello, World!",
-    sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
-test_equal("w() long message #1", "Hello %s,\nI hope you enjoy this email!",
-    l:w("long_message"))
+object langmap 
 
-test_true("lang_load() #2", l:lang_load("test2"))
-test_equal("w() #4", "Hola", l:w("hello"))
-test_equal("w() #5", "Mundo", l:w("world"))
-test_equal("w() #6", "%s, %s!", l:w("greeting"))
-test_equal("w() sprintf() #2", "Hola, Mundo!",
-    sprintf(l:w("greeting"), {l:w("hello"), l:w("world")}))
-end ifdef
+langmap =  l:lang_load("test")
+test_true("lang_load() #1", sequence(langmap) and length(langmap) = 2)
+
+test_equal("translate() #1", "Hello", l:translate("hello",langmap))
+
+test_equal("translate() #2a", -1,      l:translate("world",, -1))
+l:set_def_lang(langmap)
+test_equal("translate() #2b", "World", l:translate("world",, -1))
+
+test_equal("translate() #3", "%s, %s!", l:translate("greeting"))
+test_equal("translate() sprintf() #1", "Hello, World!",
+    sprintf(l:translate("greeting"), {l:translate("hello"), l:translate("world")}))
+test_equal("translate() long message #1", "Hello %s,\nI hope you enjoy this email!",
+    l:translate("long_message"))
+
+
+l:set_def_lang(l:lang_load("test2"))
+test_equal("translate() #4a", "Hola", l:translate("hello"))
+
+-- Reverse translation
+test_equal("translate() #4b", "hello", l:translate("Hola",,,1))
+
+test_equal("translate() #5", "Mundo", l:translate("world"))
+test_equal("translate() #6", "%s, %s!", l:translate("greeting"))
+test_equal("translate() sprintf() #2", "Hola, Mundo!",
+    sprintf(l:translate("greeting"), {l:translate("hello"), l:translate("world")}))
+    
+test_equal("translate() #7", -1, l:translate("g'day",, -1))
+test_equal("translate() #8", "", l:translate("g'day"))
+test_equal("translate() #8a", "g'day", l:translate("g'day",, PINF))
+
+test_equal("translate() #9", "This is an example of some \n  translation text that spans \n   multiple lines.", l:translate("help text"))
+
+
+
+test_equal("trsprintf #1", "Hola, Bob!",  trsprintf("greeting", {       "hello", "Bob"}))
+test_equal("trsprintf #2", "hello, Bob!", trsprintf("greeting", {"__" & "hello", "Bob"}))
 
 test_report()

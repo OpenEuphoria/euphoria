@@ -242,7 +242,7 @@ constant
 	E = {1,2,"3"}
 
 function rt_int_switch( object x )
-	switch x with fallthru do
+	switch x do
 		case A then
 			return A
 		case D then
@@ -253,7 +253,7 @@ function rt_int_switch( object x )
 end function
 
 function rt_switch( object x )
-	switch x with fallthru do
+	switch x do
 		case D then
 			return D
 		case E then
@@ -267,6 +267,7 @@ test_equal( "rt int switch #1", D, rt_int_switch( D ) )
 test_equal( "rt int switch #2", A, rt_int_switch( A ) )
 test_equal( "rt int switch #3", "else", rt_int_switch( 0 ) )
 test_equal( "rt int switch #4", "else", rt_int_switch( "" ) )
+test_equal( "rt int switch #5", "else", rt_int_switch( 2 ) )
 
 test_equal( "rt switch #1", D, rt_switch( D ) )
 test_equal( "rt switch #2", E, rt_switch( E ) )
@@ -317,6 +318,48 @@ test_equal("swith without fallthru 2", {2}, s_wo_f( 2 ) )
 test_equal("swith without fallthru 3", {2}, s_wo_f( 3 ) )
 test_equal("swith without fallthru 4", {4}, s_wo_f( 4 ) )
 test_equal("swith without fallthru 5", {6, 1}, s_wo_f( 5 ) )
+
+function my_convert_tmp(sequence params) 
+	switch params[1] do 
+		case "1" then 
+			return "one " 
+		case "2" then 
+			return "two " 
+		case else 
+			return "unknown " 
+	end switch 
+end function 
+
+function my_convert_seq(sequence params) 
+	sequence p1 = params[1]
+	switch p1 do 
+		case "1" then 
+			return "one " 
+		case "2" then 
+			return "two " 
+		case else 
+			return "unknown " 
+	end switch 
+end function
+
+function my_convert_seq_no_else(sequence params) 
+	switch params[1] do 
+		case "1" then 
+			return "one " 
+		case "2" then 
+			return "two " 
+	end switch
+	return "unknown " 
+end function
+
+constant routine_name = { "my_convert_tmp", "my_convert_seq", "my_convert_seq_no_else" }
+include std/regex.e as re
+regex r = re:new(`\d`) 
+
+for i = 1 to length( routine_name ) do
+	sequence result = re:find_replace_callback(r, "125", routine_id( routine_name[i] )) 
+	test_equal( "replace callback using switch with " & routine_name[i], "one two unknown ", result )
+end for
 
 test_report()
       

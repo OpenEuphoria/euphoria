@@ -1,55 +1,43 @@
 --****
--- === Pipe Input/Output
+-- == Pipe Input/Output
 --
--- ==== Notes
+-- <<LEVELTOC level=2 depth=4>>
+--
+-- === Notes
 -- Due to a bug, Euphoria does not handle STDERR properly
 -- STDERR cannot captured for Euphoria programs (other programs will work fully)
--- Pipes does not work on DOS, as it relies on multitasking being possible
 -- The IO functions currently work with file handles, a future version might wrap them in streams
 -- so that they can be used directly alongside other file/socket/other-streams with a
 -- stream_select() function.
+--
 
---Namespace
-namespace pipe
+namespace pipeio
 
---Includes
 include std/dll.e
-include std/machine.e
 include std/error.e
+include std/machine.e
 
-ifdef DOS32 then
-	include std/io.e
-
-	constant FAIL = 0
-	enum
-		READ,
-		WRITE,
-		CLOSE,
-		PIPE,
-		KILL,
-		ERRNO
-
-elsifdef WIN32 then
+ifdef WINDOWS then
 	constant
-		kernel32 = open_dll("kernel32.dll"),
-		iCreatePipe = define_c_func(kernel32,"CreatePipe",{C_POINTER,C_POINTER,C_POINTER,C_INT},C_INT),
-		iReadFile = define_c_func(kernel32,"ReadFile",{C_UINT,C_POINTER,C_UINT,C_POINTER,C_POINTER},C_INT),
-		iWriteFile = define_c_func(kernel32,"WriteFile",{C_INT,C_POINTER,C_INT,C_POINTER,C_POINTER},C_INT),
-		iCloseHandle = define_c_func(kernel32,"CloseHandle",{C_INT},C_INT),
-		iTerminateProcess=define_c_func(kernel32,"TerminateProcess",{C_UINT,C_UINT},C_INT),
-		iGetLastError = define_c_func(kernel32,"GetLastError",{},C_INT),
-		iGetStdHandle = define_c_func(kernel32,"GetStdHandle",{C_INT},C_INT),
-		iSetHandleInformation = define_c_func(kernel32,"SetHandleInformation",{C_UINT,C_UINT,C_UINT},C_INT),
-		iCreateProcess = define_c_func(kernel32,"CreateProcessA",{C_POINTER,C_POINTER,C_POINTER,
-			C_POINTER,C_UINT,C_UINT,C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_UINT),
-		iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT)
+		kernel32 = dll:open_dll("kernel32.dll"),
+		--iGetExitCodeProcess=define_c_func(kernel32,"GetExitCodeProcess",{C_UINT,C_POINTER},C_INT),
+		iCreatePipe = dll:define_c_func(kernel32,"CreatePipe",{dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,dll:C_DWORD},dll:C_BOOL),
+		iReadFile = dll:define_c_func(kernel32,"ReadFile",{dll:C_UINT,dll:C_POINTER,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL),
+		iWriteFile = dll:define_c_func(kernel32,"WriteFile",{dll:C_UINT,dll:C_POINTER,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL),
+		iCloseHandle = dll:define_c_func(kernel32,"CloseHandle",{dll:C_UINT},dll:C_BOOL),
+		iTerminateProcess=dll:define_c_func(kernel32,"TerminateProcess",{dll:C_UINT,dll:C_UINT},dll:C_BOOL),
+		iGetLastError = dll:define_c_func(kernel32,"GetLastError",{},dll:C_DWORD),
+		iGetStdHandle = dll:define_c_func(kernel32,"GetStdHandle",{dll:C_DWORD},dll:C_UINT),
+		iSetHandleInformation = dll:define_c_func(kernel32,"SetHandleInformation",{dll:C_UINT,dll:C_DWORD,dll:C_DWORD},dll:C_BOOL),
+		iCreateProcess = dll:define_c_func(kernel32,"CreateProcessA",{dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,
+			dll:C_POINTER,dll:C_BOOL,dll:C_DWORD,dll:C_POINTER,dll:C_POINTER,dll:C_POINTER,dll:C_POINTER},dll:C_BOOL)
 	
 	constant
-		STD_INPUT_HANDLE = -10,
-		STD_OUTPUT_HANDLE = -11,
-		STD_ERROR_HANDLE = -12,
-		FILE_INVALID_HANDLE = -1,
-		ERROR_BROKEN_PIPE = 109,
+-- 		STD_INPUT_HANDLE = -10,
+-- 		STD_OUTPUT_HANDLE = -11,
+-- 		STD_ERROR_HANDLE = -12,
+-- 		FILE_INVALID_HANDLE = -1,
+-- 		ERROR_BROKEN_PIPE = 109,
 		SA_SIZE = 12,
 		PIPE_WRITE_HANDLE = 1, PIPE_READ_HANDLE=2,
 		HANDLE_FLAG_INHERIT=1,
@@ -64,17 +52,17 @@ elsifdef WIN32 then
 elsedef
 	--*NIX-specific constants
 	constant
-		STDLIB = open_dll({ "libc.so", "libc.dylib", "" }),
-		PIPE   = define_c_func(STDLIB, "pipe",   {C_POINTER}, C_INT),
-		READ   = define_c_func(STDLIB, "read",   {C_INT, C_POINTER, C_INT}, C_INT),
-		WRITE  = define_c_func(STDLIB, "write",  {C_INT, C_POINTER, C_INT}, C_INT),
-		CLOSE  = define_c_func(STDLIB, "close",  {C_INT}, C_INT),
-		DUP2   = define_c_func(STDLIB, "dup2",   {C_INT, C_INT}, C_INT),
-		KILL   = define_c_func(STDLIB, "kill",   {C_INT, C_INT}, C_INT),
-		FORK   = define_c_func(STDLIB, "fork",   {}, C_INT),
-		EXECV  = define_c_func(STDLIB, "execv",  {C_POINTER, C_POINTER}, C_INT),
-		SIGNAL = define_c_func(STDLIB, "signal", {C_INT, C_POINTER}, C_POINTER),
-		ERRNO  = define_c_var( STDLIB, "errno"),
+		STDLIB = dll:open_dll({ "libc.so", "libc.dylib", "" }),
+		PIPE   = dll:define_c_func(STDLIB, "pipe",   {dll:C_POINTER}, dll:C_INT),
+		READ   = dll:define_c_func(STDLIB, "read",   {dll:C_INT, dll:C_POINTER, dll:C_INT}, dll:C_INT),
+		WRITE  = dll:define_c_func(STDLIB, "write",  {dll:C_INT, dll:C_POINTER, dll:C_INT}, dll:C_INT),
+		CLOSE  = dll:define_c_func(STDLIB, "close",  {dll:C_INT}, dll:C_INT),
+		DUP2   = dll:define_c_func(STDLIB, "dup2",   {dll:C_INT, dll:C_INT}, dll:C_INT),
+		KILL   = dll:define_c_func(STDLIB, "kill",   {dll:C_INT, dll:C_INT}, dll:C_INT),
+		FORK   = dll:define_c_func(STDLIB, "fork",   {}, dll:C_INT),
+		EXECV  = dll:define_c_func(STDLIB, "execv",  {dll:C_POINTER, dll:C_POINTER}, dll:C_INT),
+		SIGNAL = dll:define_c_func(STDLIB, "signal", {dll:C_INT, dll:C_POINTER}, dll:C_POINTER),
+		ERRNO  = dll:define_c_var( STDLIB, "errno"),
 		FAIL   = -1
 	
 	enum
@@ -95,21 +83,20 @@ public enum
 	--** Process ID
 	PID
 
+--
 public enum
 	--** Set of pipes that are for the use of the parent
 	PARENT,
 	--** Set of pipes that are given to the child - should not be used by the parent
 	CHILD
 
+--
 atom os_errno = 0
-
 
 -- Common functions
 function get_errno()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return c_func(iGetLastError,{})
-	elsifdef DOS32 then
-		return 1
 	elsedef
 		return peek4u(ERRNO)
 	end ifdef
@@ -137,26 +124,18 @@ end type
 -- Close handle fd
 --
 -- Returns:
---   0 on success, -1 on failure
+--   An **integer**, 0 on success, -1 on failure
 --
 -- Example 1:
 -- <eucode>
--- integer status=pipe:close(p[STDIN])
+-- integer status = pipeio:close(p[STDIN])
 -- </eucode>
 --
 
 public function close(atom fd)
 	atom ret
 
-	ifdef DOS32 then
-		if fd = -2 then
-			return 0
-		end if
-		eu:close(fd)
-		return 0
-	end ifdef
-
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		ret=c_func(iCloseHandle,{fd})
 	elsedef
 		ret=c_func(CLOSE, {fd})
@@ -178,29 +157,24 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- pipe:kill(p)
+-- kill(p)
 -- </eucode>
 --
 
 public procedure kill(process p, atom signal=15)
-	atom ret
 
-	ifdef DOS32 then
-		return -- nop
-	end ifdef
-	
 	--Close the pipes
 	--If any fail its probably just because they were already closed, so that is ignored
-	ret=close(p[STDIN])
-	ret=close(p[STDOUT])
-	ret=close(p[STDERR])
+	close(p[STDIN])
+	close(p[STDOUT])
+	close(p[STDERR])
 	
 	--Error may result, but it is usually just because the process has already ended.
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		--Not how to handle "signal", so its ignored on Windows for now
-		ret=c_func(iTerminateProcess,{p[PID],0})
+		c_func(iTerminateProcess,{p[PID],signal and 0})
 	elsedef
-		ret=c_func(KILL, {p[PID], signal})
+		c_func(KILL, {p[PID], signal})
 	end ifdef
 end procedure
 
@@ -208,21 +182,21 @@ function os_pipe()
 	sequence handles
 	atom ret
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom psaAttrib, phWriteToPipe, phReadFromPipe
 		
-		psaAttrib = allocate(SA_SIZE+2*4)
+		psaAttrib = machine:allocate(SA_SIZE+2*4)
 		poke4(psaAttrib,{SA_SIZE,0,1})
 		phWriteToPipe = psaAttrib+SA_SIZE
 		phReadFromPipe = psaAttrib+SA_SIZE+4
 		ret = c_func(iCreatePipe,{phReadFromPipe,phWriteToPipe,psaAttrib,0})
 		handles = peek4u({phWriteToPipe,2})
-		free(psaAttrib)
+		machine:free(psaAttrib)
 	elsedef
-		atom cmd = allocate(8)
+		atom cmd = machine:allocate(8)
 		ret = c_func(PIPE,{cmd})
 		handles = peek4u({cmd,2})
-		free(cmd)
+		machine:free(cmd)
 	end ifdef
 	
 	if ret = FAIL then
@@ -240,23 +214,16 @@ end function
 -- Read ##bytes## bytes from handle ##fd##
 --
 -- Returns:
---   sequence containing data, an empty sequence on EOF or an error code.
+--   A **sequence**, containing data, an empty sequence on EOF or an error code.
 --   Similar to [[:get_bytes]].
 --
 -- Example 1:
 -- <eucode>
--- sequence data=pipe:read(p[STDOUT],256)
+-- sequence data=read(p[STDOUT],256)
 -- </eucode>
 --
 
 public function read(atom fd, integer bytes)
-	ifdef DOS32 then
-		if fd = -2 then
-			return ""
-		end if
-		return get_bytes(fd, bytes)
-	end ifdef
-
 	if bytes=0 then return "" end if
 
 	sequence data
@@ -264,11 +231,11 @@ public function read(atom fd, integer bytes)
 		ret, ReadCount,
 		buf = allocate(bytes)
 	
-	ifdef WIN32 then
-		atom pReadCount=allocate(4)
+	ifdef WINDOWS then
+		atom pReadCount=machine:allocate(4)
 		ret = c_func(iReadFile,{fd,buf,bytes,pReadCount,0})
 		ReadCount=peek4u(pReadCount)
-		free(pReadCount)
+		machine:free(pReadCount)
 	elsedef
 		ret = c_func(READ, {fd, buf, bytes})
 		ReadCount=ret
@@ -276,54 +243,46 @@ public function read(atom fd, integer bytes)
 	
 	if ret = FAIL then
 		os_errno = get_errno()
-		free(buf)
+		machine:free(buf)
 		return ""
 	end if
 	
 	data=peek({buf,ReadCount})
 	
-	free(buf)
+	machine:free(buf)
 	
 	return data
 end function
 
---****
+--**
 -- Write ##bytes## to handle ##fd##
 --
 -- Returns:
---   number of bytes written, or -1 on error
+--   An **integer**, number of bytes written, or -1 on error
 --
 -- Example 1:
 -- <eucode>
--- integer bytes_written=pipe:write(p[STDIN],"Hello World!")
+-- integer bytes_written = write(p[STDIN],"Hello World!")
 -- </eucode>
 --
 
 public function write(atom fd, sequence str)
-	ifdef DOS32 then
-		if fd = -2 then
-			return length(str)
-		end if
-		puts(fd, str)
-		return length(str)
-	end ifdef
-
 	atom
 	--	fd = p[2],
 		buf = allocate_string(str),
 		ret,WrittenCount
 	
-	ifdef WIN32 then
-		atom pWrittenCount=allocate(4)
+	ifdef WINDOWS then
+		atom pWrittenCount=machine:allocate(4)
 		ret=c_func(iWriteFile,{fd,buf,length(str),pWrittenCount,0})
 		WrittenCount=peek4u(pWrittenCount)
-		free(pWrittenCount)
+		machine:free(pWrittenCount)
 	elsedef
 		ret = c_func(WRITE, {fd, buf, length(str)})
 		WrittenCount=ret
 	end ifdef
 	
-	free(buf)
+	machine:free(buf)
 	
 	if ret = FAIL then
 		os_errno = get_errno()
@@ -334,7 +293,7 @@ public function write(atom fd, sequence str)
 end function
 
 procedure error()
-    crash(sprintf("Errno = %d", os_errno))
+    error:crash(sprintf("Errno = %d", os_errno))
 end procedure
 
 --**
@@ -345,14 +304,14 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
--- integer error=pipe:error_no()
+-- integer error = error_no()
 -- </eucode>
 --
 public function error_no()
 	return os_errno
 end function
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	--WIN32-specific functions
 	function GetStdHandle(atom device)
 		return c_func(iGetStdHandle,{device})
@@ -363,9 +322,8 @@ ifdef WIN32 then
 	end function
 	
 	procedure CloseAllHandles(sequence handles)
-	atom ret
 	   for i = 1 to length(handles) do
-	     ret=close(handles[i])
+	     close(handles[i])
 	   end for
 	end procedure
 	
@@ -374,19 +332,19 @@ ifdef WIN32 then
 	atom pPI, pSUI, pCmdLine
 	sequence ProcInfo
 	
-	   pCmdLine = allocate_string(CommandLine)
-	   pPI = allocate(PROCESS_INFORMATION_SIZE)
+	   pCmdLine = machine:allocate_string(CommandLine)
+	   pPI = machine:allocate(PROCESS_INFORMATION_SIZE)
 	   mem_set(pPI,0,PROCESS_INFORMATION_SIZE)
-	   pSUI = allocate(STARTUPINFO_SIZE)
+	   pSUI = machine:allocate(STARTUPINFO_SIZE)
 	   mem_set(pSUI,0,STARTUPINFO_SIZE)
 	   poke4(pSUI,STARTUPINFO_SIZE)
 	   poke4(pSUI+SUIdwFlags,or_bits(STARTF_USESTDHANDLES,STARTF_USESHOWWINDOW))
 	   poke4(pSUI+SUIhStdInput,StdHandles)
 	   fnVal = c_func(iCreateProcess,{0,pCmdLine,0,0,1,0,0,0,pSUI,pPI})
-	   free(pCmdLine)
-	   free(pSUI)
+	   machine:free(pCmdLine)
+	   machine:free(pSUI)
 	   ProcInfo = peek4u({pPI,4})
-	   free(pPI)
+	   machine:free(pPI)
 	   if not fnVal then
 	     return 0
 	   end if
@@ -396,14 +354,14 @@ ifdef WIN32 then
 	--WIN32 version of create()
 
 	--**
-	-- Create pipes for interprocess communication
+	-- Create pipes for inter-process communication
 	--
 	-- Returns:
-	--   Returns process handles { {parent side pipes},{child side pipes} }
+	--   A **handle**, process handles { {parent side pipes},{child side pipes} }
 	--
 	-- Example 1:
 	-- <eucode>
-	-- object p=pipe:exec("dir", pipe:create())
+	-- object p = exec("dir", create())
 	-- </eucode>
 	--
 	public function create()
@@ -415,9 +373,7 @@ ifdef WIN32 then
 	  StdOutPipe = {},
 	  StdErrPipe = {}
 	  
-	object fnVal
-
-	  -- capture chid process std input
+	  -- capture child process std input
 	    StdInPipe = os_pipe()
 	    if atom(StdInPipe) then return -1 end if
 	    hChildStdInRd = StdInPipe[PIPE_READ_HANDLE]
@@ -442,9 +398,9 @@ ifdef WIN32 then
 	    hChildStdErrWr = StdErrPipe[PIPE_WRITE_HANDLE]
 	    hChildStdErrRd = StdErrPipe[PIPE_READ_HANDLE]
 
-	    fnVal = SetHandleInformation(StdInPipe[PIPE_WRITE_HANDLE],HANDLE_FLAG_INHERIT,0)
-	    fnVal = SetHandleInformation(StdOutPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
-	    fnVal = SetHandleInformation(StdErrPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    SetHandleInformation(StdInPipe[PIPE_WRITE_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    SetHandleInformation(StdOutPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
+	    SetHandleInformation(StdErrPipe[PIPE_READ_HANDLE],HANDLE_FLAG_INHERIT,0)
 
 	  return {{hChildStdInWr,hChildStdOutRd,hChildStdErrRd},
 	         {hChildStdInRd,hChildStdOutWr,hChildStdErrWr}}
@@ -457,11 +413,11 @@ ifdef WIN32 then
 	-- Open process with command line cmd
 	--
 	-- Returns:
-	--   Returns process handles { [[:PID]], [[:STDIN]], [[:STDOUT]], [[:STDERR]] }
+	--   A **handle**, process handles { [[:PID]], [[:STDIN]], [[:STDOUT]], [[:STDERR]] }
 	--
 	-- Example 1:
 	-- <eucode>
-	-- object p=pipe:exec("dir", pipe:create())
+	-- object p = exec("dir", create())
 	-- </eucode>
 	--
 
@@ -469,7 +425,6 @@ ifdef WIN32 then
 	object fnVal
 	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr, -- handles used by child process
 	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd  -- handles used by parent process
-	atom ret
 	
 	hChildStdInWr = pipe[1][1]
 	hChildStdOutRd = pipe[1][2]
@@ -486,28 +441,20 @@ ifdef WIN32 then
 	    return -1
 	  end if
 	  hChildProcess = fnVal[1]
-	  ret=close(fnVal[2]) -- hChildThread not needed.
+	  close(fnVal[2]) -- hChildThread not needed.
 	
-	     ret=close(hChildStdInRd)
+	  close(hChildStdInRd)
 	  
-	     ret=close(hChildStdOutWr)
+	  close(hChildStdOutWr)
 	  
-	     ret=close(hChildStdErrWr)
+	  close(hChildStdErrWr)
 	  
-	  return {hChildStdInWr,hChildStdOutRd,hChildStdErrRd,hChildProcess}
+	  return {hChildStdInWr, hChildStdOutRd, hChildStdErrRd, hChildProcess}
 	
-	end function
-elsifdef DOS32 then
-	public function create()
-		return {{open("tempfile.tmp", "wb"),-2,-2},{-2,-2,-2}}
 	end function
 
-	public function exec(sequence cmd, sequence pipe)
-		close(pipe[1][1])
-		system(cmd&" < tempfile.tmp > tempfil2.tmp", 2)
-		return {-2,open("tempfil2.tmp", "rb"),-2,0}
-	end function
 elsedef
+
 	--*NIX-specific functions
 	function os_dup2(atom oldfd, atom newfd)
 		atom r = c_func(DUP2, {oldfd, newfd})
@@ -535,15 +482,15 @@ elsedef
 		sequence vbufseq
 		atom r
 		
-		sbuf = allocate_string(s)
+		sbuf = machine:allocate_string(s)
 		vbufseq = {sbuf}--http://www.cs.toronto.edu/~demke/369S.07/OS161_man/syscall/execv.html
 		
 		for i = 1 to length(v) do
-			vbufseq &= allocate_string(v[i])
+			vbufseq &= machine:allocate_string(v[i])
 		end for
 		
 		vbufseq &= 0
-		vbuf = allocate(length(vbufseq)*4)
+		vbuf = machine:allocate(length(vbufseq)*4)
 		poke4(vbuf, vbufseq)
 		r = c_func(EXECV, {sbuf, vbuf}) -- execv() should never return
 		os_errno = peek4u(ERRNO)
@@ -664,7 +611,7 @@ elsedef
 	
 	--See docs above in WIN32 version
 	public function exec(sequence cmd, sequence pipe)
-		--*NIX needs exe and args seperated,
+		--*NIX needs exe and args separated,
 		--but for Windows compatibility, we need to accept a command line
 		
 		--PHP's proc_open() does it this way.

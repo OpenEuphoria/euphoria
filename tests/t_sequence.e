@@ -29,7 +29,6 @@ sequence dup = hs
 hs = head(hs, 2)
 test_equal("head() single ref a", "Jo", hs)
 test_equal("head() single ref b", "Joh", dup)
---test_equal("head() bad len", "Joh", head(hs, -3))
 test_equal("head() string default", "J", head("John Doe"))
 test_equal("head() string", "John", head("John Doe", 4))
 test_equal("head() sequence", {1,2,3}, head({1,2,3,4,5,6}, 3))
@@ -42,6 +41,7 @@ test_equal("mid() nested sequence", {{3,4},{5,6}}, mid({{1,2},{3,4},{5,6},{7,8}}
 test_equal("mid() bounds #1", {2,3}, mid({1,2,3}, 2, 50))
 test_equal("mid() bounds #2",{1,2},mid({1,2,3},0,2))
 test_equal("mid() bounds #3",{1,2},mid({1,2,3},1,-1))
+test_equal("mid 1c", "", mid("John", 5, 4)  )
 
 test_equal("slice() string", "Middle", slice("John Middle Doe", 6, 11))
 test_equal("slice() string, zero end", "Middle Doe", slice("John Middle Doe", 6, 0))
@@ -49,6 +49,10 @@ test_equal("slice() string, neg end", "Middle", slice("John Middle Doe", 6, -4))
 test_equal("slice() sequence", {2,3}, slice({1,2,3,4}, 2, 3))
 test_equal("slice() nested sequence", {{3,4},{5,6}}, slice({{1,2},{3,4},{5,6},{7,8}}, 2, 3))
 test_equal("slice() bounds", "Middle Doe", slice("John Middle Doe", 6, 50))
+test_equal("slice() def start", "John ", slice("John Middle Doe", , 5))
+test_equal("slice() def end", "Middle Doe", slice("John Middle Doe", 6))
+test_equal("slice 1c", "it", slice("it", 0, 0))
+test_equal("slice 2c", "", slice("it", 2, 1))
 
 test_equal("tail() string default", "ohn Middle Doe", tail("John Middle Doe"))
 test_equal("tail() string", "Doe", tail("John Middle Doe", 3))
@@ -56,19 +60,21 @@ test_equal("tail() sequence", {3,4}, tail({1,2,3,4}, 2))
 test_equal("tail() nested sequence", {{3,4},{5,6}}, tail({{1,2},{3,4},{5,6}}, 2))
 test_equal("tail() bounds", {1,2,3,4}, tail({1,2,3,4}, 50))
 
+test_equal("split() simple string no empty", {"John","Middle","Doe"}, split(" John  Middle  Doe  ",,1))
 test_equal("split() simple string", {"a","b","c"}, split("a,b,c", ","))
 test_equal("split() sequence", {{1},{2},{3},{4}}, split({1,0,2,0,3,0,4}, 0))
-test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"}, 0))
-test_equal("split() limit set", {"a", "b,c"}, split("a,b,c", ',', 1))
+test_equal("split() nested sequence", {{"John"}, {"Doe"}}, split({"John", 0, "Doe"},0))
+test_equal("split() limit set", {"a", "b,c"}, split("a,b,c",',',, 1))
 test_equal("split() single sequence delimiter",{"while 1 "," end while ",""},
-	split("while 1 do end while do","do"))
+	split("while 1 do end while do", "do"))
 test_equal("split() an empty string", {}, split("", ","))
 test_equal("split() using an empty delimiter", {"1","2","3"}, split("123", ""))
-test_equal("split() using an empty delimiter and limit", {"1","23"}, split("123", "", 1))
+test_equal("split() using an empty delimiter and limit", {"1","23"}, split("123","",, 1))
 
 test_equal("split_any()", {"a", "b", "c"}, split_any("a,b.c", ",."))
-test_equal("split_any() limit", {"a", "b", "c|d"},
-    split_any("a,b.c|d", ",.|", 2))
+test_equal("split_any() limit", {"a", "b", "c|d"}, split_any("a,b.c|d", ",.|", 2))
+test_equal("split_any() no empty", {"a", "b", "c"}, split_any(",a,,b...c.", ",.",,1))
+test_equal("split_any 1c", {"a","c"}, split_any("abc", 0x62))
 
 test_equal("join() simple string default", "a b c", join({"a", "b", "c"}))
 test_equal("join() simple string", "a,b,c", join({"a", "b", "c"}, ","))
@@ -96,11 +102,22 @@ test_equal("remove_all() 1", {2,3,4,3,2}, remove_all(1,{1,2,3,1,4,3,1,2,1}))
 test_equal("remove_all() 2", "Ask what you can do for your country.", 
            remove_all('x',"xAxsk whxat you caxn do for yoxur countryx.x"))
 
+test_equal("remove_all 1c", "it", remove_all("s", "it"))
+test_equal("remove_all 2c", "itit", remove_all('s', "sitsit"))
+test_equal("remove_all 3c", "sitsit", remove_all("si", "sitsit"))
+
+test_equal("retain_all", {1,1,3,1,3}, retain_all( {1,3,5}, {1,2,4,1,3,2,4,1,2,3} ))
+test_equal("retain_all no match", {}, retain_all( 7, {1,2,4,1,3,2,4,1,2,3} ))
+test_equal("retain_all all match",{1,2,4,1,3,2,4,1,2,3} , retain_all( {1,2,3,4}, {1,2,4,1,3,2,4,1,2,3} ))
+test_equal("retain_all no objects",{} , retain_all( {}, {1,2,4,1,3,2,4,1,2,3} ))
+test_equal("retain_all 1c", {}, retain_all( {1,3,5}, {} ))
+
 test_equal("insert() integer sequence", {1,2,3}, insert({1,3}, 2, 2))
 test_equal("insert() string", {'J','o',"h",'n'}, insert("Jon", "h", 3))
 
 test_equal("splice() integer sequence", {1,2,3}, splice({1,3}, 2, 2))
 test_equal("splice() string", "John", splice("Jon", "h", 3))
+test_equal("splice() string", "Johhhhhhhhhhn", splice("Jon", "hhhhhhhhhh", 3))
 
 test_equal("patch() beyond target","John Doe  abc",patch("John Doe", "abc",11))
 test_equal("patch() overlap target right","John Doabc",patch("John Doe", "abc",8))
@@ -198,11 +215,30 @@ test_equal("pad_tail() #2", "ABC", pad_tail("ABC", 3))
 test_equal("pad_tail() #3", "ABC", pad_tail("ABC", 1))
 test_equal("pad_tail() #4", "ABC...", pad_tail("ABC", 6, '.'))
 
-test_equal("chunk() sequence", {{1,2,3}, {4,5,6}}, chunk({1,2,3,4,5,6}, 3))
-test_equal("chunk() string", {"AB", "CD", "EF"}, chunk("ABCDEF", 2))
-test_equal("chunk() odd size", {"AB", "CD", "E"}, chunk("ABCDE", 2))
-test_equal("chunk() empty", {""}, chunk("", 2))
-test_equal("chunk() bad size", {"ABCDE"}, chunk("ABCDE", 0))
+test_equal("breakup(int, BK_LEN) sequence", {{1,2,3}, {4,5,6}}, breakup({1,2,3,4,5,6}, 3))
+test_equal("breakup(int, BK_LEN) string", {"AB", "CD", "EF"}, breakup("ABCDEF", 2))
+test_equal("breakup(int, BK_LEN) odd size", {"AB", "CD", "E"}, breakup("ABCDE", 2))
+test_equal("breakup(int, BK_LEN) empty", {""}, breakup("", 2))
+test_equal("breakup(int, BK_LEN) bad size 1", {"ABCDE"}, breakup("ABCDE", 0))
+test_equal("breakup(int, BK_LEN) bad size 2", {"ABCDE"}, breakup("ABCDE", 99))
+
+test_equal("breakup(int, BK_PIECES) sequence", {{1,2,3},{4,5,6}, {7,8,9}}, breakup({1,2,3,4,5,6,7,8,9}, 3, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) sequence", {{1,2,3,4}, {5,6,7}, {8, 9,10}}, breakup({1,2,3,4,5,6,7,8,9,10}, 3, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) sequence", {{1,2,3,4}, {5,6,7,8}, {9,10,11}}, breakup({1,2,3,4,5,6,7,8,9,10,11}, 3, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) string", {"ABC", "DEF"}, breakup("ABCDEF", 2, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) odd size", {"ABC", "DE"}, breakup("ABCDE", 2, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) empty", {""}, breakup("", 2, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) bad size 1", {"ABCDE"}, breakup("ABCDE", 0, BK_PIECES))
+test_equal("breakup(int, BK_PIECES) bad size 2", {"A", "B", "C", "D", "E"}, breakup("ABCDE", 99, BK_PIECES))
+
+test_equal("breakup(int, CUSTOM) sequence", {{1}, {2,3}, {4,5,6}}, breakup({1,2,3,4,5,6}, {1,2,3}))
+test_equal("breakup(int, CUSTOM) string", {"", "ABCD", "E", "FGHI"}, breakup("ABCDEFGHI", {0,4,1}))
+test_equal("breakup(int, CUSTOM) odd size", {"ABCD", "E", ""}, breakup("ABCDE", {4,1,0}))
+test_equal("breakup(int, CUSTOM) odd size 2", {"ABCD", "E", "", "", "F"}, breakup("ABCDEF", {4,1,0,0}))
+test_equal("breakup(int, CUSTOM) empty", {""}, breakup("", {4}))
+test_equal("breakup(int, CUSTOM) bad size 1", {"", "ABCDE"}, breakup("ABCDE", {0}))
+test_equal("breakup(int, CUSTOM) bad size 2", {"ABCDE"}, breakup("ABCDE", {99}))
+test_equal("breakup(int, CUSTOM) bad size 3", {"ABCDE"}, breakup("ABCDE", {}))
 
 test_equal("flatten() nested", {1,2,3}, flatten({{1}, {2}, {3}}))
 test_equal("flatten() deeply nested", {1,2,3}, flatten({{{{1}}}, 2, {{{{{3}}}}}}))
@@ -211,15 +247,45 @@ test_equal("flatten() empty", "", flatten({{"", {""}},{{}}}))
 
 test_equal("flatten() nested text delim", "abc def g h i", flatten({"abc", "def", "g h i"}, " "))
 test_equal("flatten() nested no delim", "abcdefg h i", flatten({"abc", "def", "g h i"}, ""))
-test_equal("flatten() nested char delim", "abc,def,g h i", flatten({"abc", "def", "g h i"}, ','))
+test_equal("flatten() nested char delim", "abc,def,g h i", flatten({"abc", "def", "g h i"}, ","))
 
-test_equal("vslice() #1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
-test_equal("vslice() #2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
+test_equal("vslice 1", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
+test_equal("vslice 2", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1))
+test_equal("vslice 3", {1,2,3}, vslice({{5,1}, {5,2}, {5,3}}, 2))
+test_equal("vslice 4", {5,5,5}, vslice({{5,1}, {5,2}, {5,3}}, 1, {}))
+test_equal("vslice 5", {6,6,6}, vslice({{5,1}, {5,2}, {5,3}}, 3, {6}))
+test_equal("vslice 6", {1,6,3}, vslice({{5,1}, {5}, {5,3}}, 2, {6}))
+test_equal("vslice 7", {1,6,6}, vslice({{5,1}, {5}, {9}}, 2, {6}))
+test_equal("vslice 8", {1,6,4}, vslice({{5,1}, {5}, {9}}, 2, {6,4}))
+test_equal("vslice 9", {6},     vslice({0}, 2, {6,4}))
 
-test_equal("can_add #1",0,can_add({{1,2},{3,4}},{5,6,7}))
-test_equal("can_add #2",1,can_add({{1,2},{3,4}},{{5,6},7}))
 
-test_equal("linear",{{1,5},{4,8},{7,11},{10,14}},linear({1,5},3,4))
+test_equal("binop_ok #1",  0, binop_ok({{1,2},{3,4}}, {5,6,7}))
+test_equal("binop_ok #2",  0, binop_ok({{1,2},{3,4}}, {5,{6,7,8}}))
+test_equal("binop_ok #3",  1, binop_ok({{1,2},{3,4}}, {{5,6},7}))
+test_equal("binop_ok #4",  1, binop_ok({{1,2},{3,4}}, 5))
+test_equal("binop_ok #5",  1, binop_ok(5, {{1,2},{3,4}}))
+test_equal("binop_ok #6",  1, binop_ok(1, 2))
+
+test_equal("series 1+", {{1,5},{4,8},{7,11},{10,14}},    series({1,5},  3, 3))
+test_equal("series 2+", 0,                               series({1,2,3},1, -1 ) )
+test_equal("series 3+", {{1,2,3}, {5,1,13}, {9,0,23}},   series({1,2,3}, {4,-1,10}, 2))
+test_equal("series 4+", {{1,2,3}},                       series({1,2,3}, 1, 0 ) )
+test_equal("series 5+", {1, {2,3,4}, {3,5,7}, {4,7,10}}, series(1, {1,2,3}, 3 ) )
+test_equal("series 6+", {1, 5, 9, 13, 17, 21},           series(1, 4, 5 ) )
+test_equal("series 7+", 0,                               series({1,2}, {1,2,3}, 3 ) )
+test_equal("series 8+", {12, 9, 6, 3},                   series( 12, -3, 3 ) )
+
+test_equal("series 1*", {{1,5},{3,15},{9,45},{27,135}},  series({1,5},  3, 3, '*'))
+test_equal("series 2*", 0,                               series({1,2,3},1, -1, '*' ) )
+test_equal("series 3*", {{1,2,3}, {4,-2,30}, {16,2,300}},series({1,2,3}, {4,-1,10}, 2, '*'))
+test_equal("series 4*", {{1,2,3}},                       series({1,2,3}, 1, 0, '*' ) )
+test_equal("series 5*", {1, {1,2,3}, {1,4,9}, {1,8,27}}, series(1, {1,2,3}, 3, '*' ) )
+test_equal("series 6*", {1, 4, 16, 64, 256, 1024},       series(1, 4, 5, '*' ) )
+test_equal("series 7*", 0,                               series({1,2}, {1,2,3}, 3, '*' ) )
+test_equal("series 8*", {12, 6, 3, 1.5},                 series( 12, 0.5, 3, '*' ) )
+
+test_equal("series 1?", 0,                               series({1,2}, {1,2,3}, 3, '?' ) )
 
 sequence s
 s={0,1,2,3,{"aaa",{{3},{1},{2}},"ccc"},4}
@@ -227,6 +293,9 @@ test_equal("fetch",{2},fetch(s,{5,2,3}))
 test_equal("store",{0,1,2,3,{"aaa",{{3},{1},{98,98,98}},"ccc"},4},store(s,{5,2,3},"bbb"))
 
 test_equal("repeat_pattern",{1,2,1,2,1,2,1,2},repeat_pattern({1,2},4))
+test_equal("repeat_pattern 1c", {}, repeat_pattern("it", 0))
+
+
 sequence vect,coords
 vect={{21,22,23},{4,5,6,7},{8,9,0},{10,-1,-2,-3}}
 coords={{2,1},{1,3},{2}}
@@ -287,6 +356,12 @@ test_not_equal("replace() 2,5 #3a", "/--omeething         ", replace("//somethin
 test_not_equal("replace() 2,5 #3b", "/--eething         ", replace("//something                                            ", "--", 2, 5))
 test_not_equal("replace() 2,5 #3c", " --someething         ", replace(" //something                                           ", "--", 2, 3))
 
+test_equal("reverse 1c", "tegrat", reverse("target", -1))
+test_equal("reverse 2c", "target", reverse("target", 2, 1))
+test_equal("reverse 3c", "tategr", reverse("target", 3, 0))
+test_equal("reverse 4c", "tategr", reverse("target", 3, 7))
+test_equal("reverse 5c", "target", reverse("target", 7))
+
 test_equal("pivot #1", {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}, pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 ))
 test_equal("pivot #2", {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}, pivot( {4, 1, -4, 6, -1, -7, 9, 10} ) )
 test_equal("pivot #3", {{}, {}, {5}}, pivot( 5 ) )
@@ -295,44 +370,82 @@ test_equal("pivot #5", {{5}, {}, {}}, pivot( 5, 10 ) )
 test_equal("pivot #6", {{}, {}, {}}, pivot( {}) )
 test_equal("pivot #7", {{"abc", "bcd"}, {}, {"def", "efg", "cdf"}}, pivot( {"abc", "def", "bcd", "efg", "cdf"}, "cat") )
 
-function gt_ten(integer a)
-	return a > 10
+
+function mask_nums(atom a, object t)
+    if sequence(t) then
+        return 0
+    end if
+    return and_bits(a, t) != 0
 end function
 
-test_equal("filter #1", {20,30,40}, filter({1,2,3,20,4,30,6,40,6}, routine_id("gt_ten")))
-test_equal("apply #1", {"1","2","3","4"}, apply({1,2,3,4}, routine_id("sprint")))
+function even_nums(atom a, object t)
+    return and_bits(a,1) = 0
+end function
+
+constant data = {5,8,20,19,3,2,10}
+test_equal("filter #1", {5,19,3}, filter(data, routine_id("mask_nums"), 1))
+test_equal("filter #2", {19, 3, 2, 10}, filter(data, routine_id("mask_nums"), 2))
+test_equal("filter #3", {8, 20, 2, 10}, filter(data, routine_id("even_nums")))
+
+test_equal("filter in lt", {5,3,2}, filter(data, "lt", 8))
+test_equal("filter in <", {5,3,2}, filter(data, "<", 8))
+test_equal("filter in le", {5,8,3,2}, filter(data, "le", 8))
+test_equal("filter in <=", {5,8,3,2}, filter(data, "<=", 8))
+test_equal("filter in eq", {8}, filter(data, "eq", 8))
+test_equal("filter in =", {8}, filter(data, "=", 8))
+test_equal("filter in ==", {8}, filter(data, "==", 8))
+test_equal("filter in ne", {5,20,19,3,2,10}, filter(data, "ne", 8))
+test_equal("filter in !=", {5,20,19,3,2,10}, filter(data, "!=", 8))
+test_equal("filter in gt", {20,19,10}, filter(data, "gt", 8))
+test_equal("filter in >", {20,19,10}, filter(data, ">", 8))
+test_equal("filter in ge", {8,20,19,10}, filter(data, "ge", 8))
+test_equal("filter in >=", {8,20,19,10}, filter(data, ">=", 8))
+
+-- Using 'in' and 'out' with sets.
+test_equal("filter in set", {5,8,3}, filter(data, "in", {3,4,5,6,7,8}))
+test_equal("filter out set", {20,19,2,10}, filter(data, "out", {3,4,5,6,7,8}))
+
+-- Using 'in' and 'out' with ranges.
+test_equal("filter in [] range", {5,8,3}, filter(data, "in",  {3,8}, "[]"))
+test_equal("filter in [) range", {5,3}, filter(data, "in",  {3,8}, "[)")) 
+test_equal("filter in (] range", {5,8}, filter(data, "in",  {3,8}, "(]")) 
+test_equal("filter in () range", {5}, filter(data, "in",  {3,8}, "()")) 
+test_equal("filter out [] range", {20,19,2,10}, filter(data, "out", {3,8}, "[]")) 
+test_equal("filter out [) range", {8,20,19,2,10}, filter(data, "out", {3,8}, "[)")) 
+test_equal("filter out (] range", {20,19,3,2,10}, filter(data, "out", {3,8}, "(]")) 
+test_equal("filter out () range", {8,20,19,3,2,10}, filter(data, "out", {3,8}, "()")) 
+test_equal("filter STDFLTR_ALPHA", "abc",
+		filter("123abc123", STDFLTR_ALPHA, {})
+	)
+
+constant data1 = {5,8,20,19,3,2,10}
+test_equal("filter 1c", {5,8,3}, filter(data1, "in", {3,4,5,6,7,8}))
+test_equal("filter 2c", {20,19,2,10}, filter(data1, "out", {3,4,5,6,7,8}))
+test_equal("filter3c", {}, filter({}, "in"))
+
+test_equal("sim_index 0c", 0.08784, round(sim_index("sit", "sin"), 1e5))
+test_equal("sim_index 1c", 0.32394, round(sim_index("sit", "sat"), 1e5))
+test_equal("sim_index 2c", 0.34324, round(sim_index("sit", "skit"), 1e5))
+test_equal("sim_index 3c", 0.68293, round(sim_index("sit", "its"), 1e5))
+
+test_equal("minsize 1c", {4,3,6,2,7,1,2,-1,-1,-1}, minsize({4,3,6,2,7,1,2}, 10, -1))
+test_equal("minsize 2c", {4,3,6,2,7,1,2}, minsize({4,3,6,2,7,1,2}, 5, -1))
 
 
-test_equal("is_in_range #1", 0, is_in_range(1, {}))
-test_equal("is_in_range #2", 0, is_in_range(1, {1}))
-test_equal("is_in_range #3", 0, is_in_range(1, {2,9}))
-test_equal("is_in_range #4", 0, is_in_range(10, {2,9}))
-test_equal("is_in_range #5", 1, is_in_range(2, {2,9}))
-test_equal("is_in_range #6", 1, is_in_range(9, {2,9}))
-test_equal("is_in_range #7", 1, is_in_range(5, {2,9}))
+function quiksort(sequence s)
+	if length(s) < 2 then
+		return s
+	end if
+	return quiksort( filter(s[2..$], "<=", s[1]) ) & s[1] & quiksort(filter(s[2..$], ">", s[1]))
+end function
+test_equal("qs", {0,1,2,2,4,4,4,5,5,7,7,8,9,32,54,67,445}, 
+				quiksort( {5,4,7,2,4,9,1,0,4,32,7,54,2,5,8,445,67} ))
 
-test_equal("set_in_range #1", 1, set_in_range(1, {}))
-test_equal("set_in_range #2", 1, set_in_range(1, {1}))
-test_equal("set_in_range #3", 2, set_in_range(1, {2,9}))
-test_equal("set_in_range #4", 9, set_in_range(10, {2,9}))
-test_equal("set_in_range #5", 2, set_in_range(2, {2,9}))
-test_equal("set_in_range #6", 9, set_in_range(9, {2,9}))
-test_equal("set_in_range #7", 5, set_in_range(5, {2,9}))
 
-test_equal("is_in_list #1", 0, is_in_list(1, {}))
-test_equal("is_in_list #2", 1, is_in_list(1, {1}))
-test_equal("is_in_list #3", 0, is_in_list(1, {100, 2, 45, 9, 17, -6}))
-test_equal("is_in_list #4", 1, is_in_list(100, {100, 2, 45, 9, 17, -6}))
-test_equal("is_in_list #5", 1, is_in_list(-6, {100, 2, 45, 9, 17, -6}))
-test_equal("is_in_list #6", 1, is_in_list(9, {100, 2, 45, 9, 17, -6}))
-
-test_equal("set_in_list #1", 1, set_in_list(1, {}))
-test_equal("set_in_list #2", 1, set_in_list(1, {1}))
-test_equal("set_in_list #3", 100, set_in_list(1, {100, 2, 45, 9, 17, -6}))
-test_equal("set_in_list #4", 100, set_in_list(100, {100, 2, 45, 9, 17, -6}))
-test_equal("set_in_list #5", -6, set_in_list(-6, {100, 2, 45, 9, 17, -6}))
-test_equal("set_in_list #6", 9, set_in_list(9, {100, 2, 45, 9, 17, -6}))
-
+function sprinter(object a, object t)
+	return sprint(a + t)
+end function
+test_equal("apply #1", {"8","9","10","11"}, apply({1,2,3,4}, routine_id("sprinter"), 7))
 
 
 include std/math.e
@@ -455,12 +568,69 @@ test_equal( "remove in place 2,3", "367890", in_place )
 in_place = remove( in_place, 5, 6 )
 test_equal( "remove in place 5,6", "3678", in_place )
 
--- replace_all
-test_equal("replace_all #1", "XbrXcXdXbrX", replace_all("abracadabra", 'a', 'X'))
-test_equal("replace_all #2", "abXcadabX", replace_all("abracadabra", "ra", 'X'))
-test_equal("replace_all #3", "aabraacaadaabraa", replace_all("abracadabra", "a", "aa"))
-test_equal("replace_all #4", "brcdbr", replace_all("abracadabra", "a", ""))
-test_equal("replace_all #5", "abracadabra", replace_all("abracadabra", "", "X"))
+test_equal("columnize #1", {{1,3,5}, {2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6}}))
+test_equal("columnize #2", {{1,3,5}, {2,4,6}, {0,0,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}))
+test_equal("columnize #3", {{1,3,5}, {2,4,6}, {-999,-999,7}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}},,-999))
+test_equal("columnize #4", {{2,4,6}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, 2))
+test_equal("columnize #5", {{2,4,6},{1,3,5}}, columnize({{1, 2}, {3, 4}, {5, 6, 7}}, {2,1}))
+test_equal("columnize #6", {"adg", "beh", "cfi"}, columnize({"abc", "def", "ghi"}))
+test_equal("columnize 1c", {"adg", "beh", "cfi" }, columnize({"abc", "def", "ghi"}) )
+test_equal("columnize 2c", {"ac", {'d',0}}, columnize({"ad", "c"}) )
+
+
+
+test_equal("remove_subseq #1", {4, 6, 0.1, 4}, remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, SEQ_NOALT))
+test_equal("remove_subseq #2", {4, 6, -1, 0.1, -1, 4}, remove_subseq({4,6,"Apple",0.1, {1,2,3}, 4}, -1))
+test_equal("remove_subseq #3", {14, 16, 9, 0.1, 1, 2, 3, 4}, remove_subseq({14,16,9,0.1,1,2,3,4}, SEQ_NOALT))
+
+include std/sort.e as sort
+sequence rds = { 4,7,9,7,2,5,5,9,0,4,4,5,6,5}
+test_equal("remove_dups inplace", {4,7,9,2,5,0,6}, remove_dups(rds, RD_INPLACE))
+test_equal("remove_dups sort",    {0,2,4,5,6,7,9}, remove_dups(rds, RD_SORT))
+test_equal("remove_dups presorted #1", {4,7,9,7,2,5,9,0,4,5,6,5}, remove_dups(rds, RD_PRESORTED))
+test_equal("remove_dups presorted #2", {0,2,4,5,6,7,9}, remove_dups(sort(rds), RD_PRESORTED))
+
+test_equal("combine #1s", {"cat","dog","fish","snail","whale","wolf","worm"}, combine({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}))
+test_equal("combine #1u", {"cat", "dog", "fish", "whale", "wolf", "snail", "worm"}, combine({ {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}, COMBINE_UNSORTED))
+test_equal("combine #2s", {0,2,4,4,5,5,5,6,7,7,9,9}, combine({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}))
+test_equal("combine #2u", {4,7,9,7,2,5,9,0,4,5,6,5}, combine({ {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}, COMBINE_UNSORTED))
+test_equal("combine #3s", "aaacdeffghhiilllmnooorsstwww", combine({"cat", "dog","fish", "whale", "wolf", "snail", "worm"}))
+test_equal("combine #3u", "catdogfishwhalewolfsnailworm", combine({"cat", "dog","fish", "whale", "wolf", "snail", "worm"}, COMBINE_UNSORTED))
+test_equal("combine 1c", {}, combine(""))
+test_equal("combine 2c", '1', combine("1"))
+
+-- transforming
+test_equal("transform", "HELLO", transform(" hello    ", {{routine_id("trim"), " ",0},routine_id("upper")}))
+test_equal("transform 1c", "HELLO", transform("hello",routine_id("upper")))
+
+-- mapping
+test_equal("mapping A", "ThE CAt In thE HAt", mapping("The Cat in the Hat", "aeiou", "AEIOU"))
+test_equal("mapping B", "u cut uto this brewn nat", mapping("a cat ate this brown nut", "aeiou", "uoiea"))
+test_equal("mapping C", "a23456789", mapping("123456789", "123", "a"))
+test_equal("mapping D", {'a','b',{'c',4},5}, mapping({1,2,{3,4},5}, {1,2,3}, "abc"))
+test_equal("mapping E", "312", mapping({"one", "two", "three"}, {"two", "three", "one"}, "123", 1))
+
+-- remove_item
+test_equal("remove_item #1", {3,4,2}, remove_item( 1, {3,4,2,1} ))
+test_equal("remove_item #2", {3,4,2,1}, remove_item( 5, {3,4,2,1} ))
+test_equal("remove_item 1c", "itsit", remove_item('s', "sitsit"))
+test_equal("remove_item 2c", "itit", remove_item('s', "itsit"))
+
+-- transmute()
+test_equal("transmute Comp:sub Repl:item", "2e 3ool 1oes", transmute("the school shoes", {{}, "sh", "th", "sch"}, "123"))
+test_equal("transmute Comp:sub Repl:seq", "THe SCHool SHoes", transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, "SH", "TH", "SCH"}))
+test_equal("transmute Comp:sub Remove", "e ool oes", transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, "", "", ""}))
+test_equal("transmute Comp:sub Repl:mixed", "THe SCHool xoes", transmute("the school shoes", {{}, "sh", "th", "sch"}, {{}, 'x', "TH", "SCH"}))
+test_equal("transmute Comp:item Repl:item", "JIhn SmOth UnjIAs EncIIkUd YpplUs.", transmute("John Smith enjoys uncooked apples.", "aeiouy", "YUOIEA"))
+test_equal("transmute Comp:item Repl:seq", "J'O'hn Sm'I'th 'E'nj'O''Y's 'U'nc'O''O'k'E'd 'A'ppl'E's.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "'A'", "'E'", "'I'", "'O'", "'U'", "'Y'"}))
+test_equal("transmute Comp:item Remove", "Jhn Smth njs nckd ppls.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "", "", "", "", "", ""}))
+test_equal("transmute Comp:item Repl:mixed", "JOWhn Smth 1njOW{}s 2ncOWOWk1d AAppl1s.", transmute("John Smith enjoys uncooked apples.", "aeiouy", {{}, "AA", '1', "", "OW", '2', "{}"}))
+
+
+-- added at r3525, crashing the translator
+s = { {{1}}, {1} } + 1
+s = s[1][1]
+test_equal("RHS SUBS self assignment", 2,  s[1] )
 
 test_report()
 

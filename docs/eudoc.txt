@@ -1,6 +1,189 @@
 
 == EuDOC - Source Documentation Tool
+:<<LEVELTOC level=2 depth=4>>
 
-<<LEVELTOC depth=3>>>
+Writing and managing documentation for your programs is made 
+easier with the **##eudoc##** tool. ##eudoc##, written entirely in Euphoria, 
+converts text comments embedded in your program, as well as information
+about routines and identifiers, into documentation
+that can be saved in a variety of formats, including plain text and HTML.
 
-**TODO**
+Since Euphoria comments do not slow down the 
+execution of programs, documentation written inside source-code 
+introduces no speed penalty but is very convenient.
+
+##eudoc## can also incorporate documentation written externally from 
+your source-code.
+
+You write your material using //Creole// style markup to format documention.
+This gives you creative control using elements like headers, fonts, 
+cross-references, tables, etc. The **##creolehtml##** program takes the output 
+of ##eudoc## and produces HTML-formatted documentation.
+
+A third party program like ##htmldoc## or ##wkhtmltopdf## may then be used to 
+convert HTML to PDF.
+
+=== Documentation tags
+
+Documentation is embedded in source-code using the Euphoria line 
+//(// **--** //)// comments. Two special tags, {{{--**** }}} and 
+{{{ --** }}} distinguish documentation from comments that will not be 
+extracted.
+
+=== Generic documentation
+
+"Generic" documentation starts with the //(// {{{ --**** }}} //)// tag, 
+continues with lines starting with {{{ -- }}} in the first column, and 
+ends with the next blank line. The tags and {{{--}}} will not appear in 
+the documentation.
+
+<eucode>
+--****
+-- generic text, thus tagged, will be extracted by eudoc
+-- write your documentation here...
+--
+
+-- blank line is a terminator, this line is not included
+</eucode> 
+ 
+Produces...
+
+{{{
+generic text, thus tagged, will be extracted by eudoc
+write your documentation here...
+
+}}} 
+ 
+ 
+=== Source documentation 
+ 
+"Source" documentation starts with the //(// {{{ --** }}} //)// tag. 
+Locate them before a routine or identifier that you wish to be described
+in your documentation. The ##eudoc## program will extract the 
+"signature" of a routine and combines it with the comments that you 
+write after this tag. 
+
+* Starting with the source-code file **favorite.ex**: 
+
+<eucode>
+
+--**
+-- this is my favorite routine
+
+public procedure hello( sequence name )
+   printf(1, "Hello %s!", {name} )
+end procedure
+	
+</eucode>
+
+* Executing **## eui eudoc favorite.ex -o foo.txt##** produces:
+
+{{{
+%%disallow={camelcase}
+
+!!CONTEXT:favorite.ex
+
+@[hello|]
+==== hello
+<eucode>
+include favorite.ex
+public procedure hello(sequence name)
+</eucode>
+
+  This is my favorite routine.
+}}}
+
+* Process with **## eui creolehtml foo.txt ##**:
+
+
+\\  ** hello **
+<eucode>
+include favorite.ex
+public procedure hello(sequence name)
+</eucode>
+
+  This is my favorite routine.
+
+* If you examine the source-code included with Euphoria you will realize
+how these steps were used to create the documentation you are reading 
+now. 
+
+=== Assembly file
+
+Large projects are managed using an **assembly file**, which is a list 
+of files (source-code, and external) that will be incorporated into one 
+output file. Look at ##euphoria/docs/manual.af## for the file used to 
+produce this documentation.
+
+=== Creole markup
+
+Creole is a text markup language used in wikis, such as the 
+[[http://openeuphoria.org/wiki/view/home.wc|Euphoria Wiki]], 
+and for documenting source-code. 
+
+
+
+* Common Creole tags are:
+
+{{{
+= Title
+
+== Section
+
+//italic// **bold** ##fixed##
+
+* bullet
+* lists are
+* easy to produce
+
+
+||  tables || are |
+| easy to produce |  //with bold headers// |
+
+<eucode>
+-- euphoria code is colorized
+for i=1 to 5 do	 
+   ? i
+end for
+</eucode>
+}}}
+
+* The previous tags will produce html that looks like...
+
+
+\\ ** Title **
+\\ ** Section **
+
+//italic// **bold** ##fixed##
+
+* bullet
+* lists are
+* easy to produce
+
+
+||  tables || are |
+| easy to produce |  //with bold headers// |
+
+<eucode>
+-- euphoria code is colorized
+for i=1 to 5 do	 
+   ? i
+end for
+</eucode>
+
+* More details can be found at the Euphoria Wiki under [[wiki:CreoleHelp|CreoleHelp]].
+
+=== Documentation software
+
+The programs required for creating documentation are hosted 
+at [[http://sourceforge.net/projects/rapideuphoria/|]]SourceForge.
+
+eudoc: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk
+
+creolehtml: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
+
+[[wiki:Documenting40|More on using eudoc]]
+
+[[wiki:CreoleHelp|More on using Creole markup]]
+
+The program htmldoc is found at... http://www.htmldoc.org/ and http://htmldoc-binaries.org/.

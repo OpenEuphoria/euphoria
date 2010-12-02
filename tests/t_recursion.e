@@ -6,7 +6,7 @@ include std/unittest.e
 --
 --   contributed by Derek Parnell
 --
---   run: exu ackermann.ex [N=1]
+--   run: eui ackermann.ex [N=1]
 
 function Ack(integer M, integer N) 
     if M = 0 then

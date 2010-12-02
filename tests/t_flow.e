@@ -42,7 +42,8 @@ loop entry do
 	n+=2
 	p+=1 
 	loops=append(loops,{n,p})
-until n>10
+	until n>10
+end loop
 if n>0 then
 	if p=1 then
 		p=-1
@@ -82,7 +83,8 @@ loop do
 	idx += 1
 	if idx > 10 then exit end if
 	idx2 = idx
-until 0
+	until 0
+end loop
 test_equal("until 0", {11,10}, {idx,idx2})
 
 idx = 1
@@ -91,7 +93,8 @@ loop do
 	idx += 1
 	if idx > 10 then exit end if
 	idx2 = idx
-until 1
+	until 1
+end loop
 test_equal("until 1", {2,2}, {idx,idx2})
 
 idx = 1
@@ -111,6 +114,20 @@ while 1 do
 	idx2 = idx
 end while
 test_equal("while 1", {11,10}, {idx,idx2})
+
+idx = 0
+for i = 1 to 10 do
+	for j = 1 to 10 do
+		for k = 1 to 10 do
+			idx += 1
+			exit -1
+		end for
+		idx += 1
+	end for
+	idx += 1
+	exit
+end for
+test_equal( "exit negative index", 2, idx )
 
 test_report()
 

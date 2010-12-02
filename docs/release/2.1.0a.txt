@@ -1,0 +1,200 @@
+== Version 2.1 Alpha January 15, 1999
+
+* We've made a number of changes to the packaging, pricing, and registration incentives for the Euphoria product:
+** The Dual-Platform (DOS32+WIN32) package, formerly $53 has been reduced to $39 U.S., effective immediately.
+** The Single-Platform (DOS32-only) package, formerly $32, has been discontinued.
+** The printed manual has been discontinued. Instead, there is now an official HTML version of the manual,
+   included with the Public Domain .zip file.
+** All useful 3rd-party include files, such as **Win32Lib.ew** and many others, will be "stamped" by RDS with a
+   code number that makes them **//free//**, just like the files in **euphoria\include**. They will not add to your
+   statement count, provided you do not significantly modify them. This will also allow 3rd-party developers to get
+   better diagnostic information from their users.
+** **Binding**, **shrouding** and **profiling** will now be part of the Complete Edition only. These are features
+   that beginners do not require, but serious users might find valuable.
+* Short-form assignment operators ##+=##, ##-=##, ##*=##, ##/=##, and ##&=## have been added.
+  For example, instead of saying:
+  <eucode>
+  count = count + 1
+  </eucode>
+  You can now say:
+  <eucode>
+  count += 1
+  </eucode>
+  Instead of saying:
+  <eucode>
+  matrix[row][column] = matrix[row][column] * 5.0
+  </eucode>
+  You can say:
+  <eucode>
+  matrix[row][column] *= 5.0
+  </euuode>
+  Instead of saying:
+  <eucode>
+  test_scores[start..finish] = test_scores[start..finish] / 100
+  </eucode>
+  You can say:
+  <eucode>
+  test_scores[start..finish] /= 100
+  </eucode>
+* Euphoria now uses "short-circuit" evaluation of ##and## and ##or## expressions
+  in **if/elsif/while** conditions.  e.g. in an ##and## condition:
+  <eucode>
+  if A and B then ...
+  </eucode>
+  the interpreter will skip the evaluation of expression B whenever expression
+  A is 0 (false), since it knows that the overall result must be false. In an
+  ##or## condition:
+  <eucode>
+  while A or B do ...
+  </eucode>
+  the interpreter will skip the evaluation of expression B whenever
+  expression A is non-zero (true), since it knows that the overall result
+  must be true. \\
+  \\
+  Euphoria code written prior to version 2.1 may no longer work correctly if
+  expression B contains a function with **//side-effects//** such as setting a
+  global variable, doing I/O etc. In practice this kind of code is very rare,
+  but just in case, a warning will now be issued if a function with
+  side-effects might be short-circuited.  \\
+  \\
+  By skipping the evaluation of B, short-circuit evaluation is typically
+  faster, and will allow you to write statements such as:
+  <eucode>
+  if atom(x) or length(x)=1 then ...
+  </eucode>
+  that would generate an error on older versions of Euphoria whenever x was an
+  **atom**, since length() is not defined for atoms.
+* Several new routines were added.
+** Built-in to ex.exe/exw.exe:
+*** profile() - turns **profiling** **on/off** so you can focus your **profile** and
+    **profile_time** runs on particular events within your program."
+*** system_exec() - gives you the exit code from calling a **.exe** or **.com** file, or another
+    Euphoria program.
+*** equal() - compares any 2 Euphoria objects for equality. equivalent to: compare(a,b) = 0  but
+    more readable.
+** **Added to various include files:**
+*** walk_dir() - recursively goes through a directory and subdirectories, calling a routine that
+    you supply.
+*** reverse() - returns a sequence in reverse order.
+*** sprint() - returns the string representation of any Euphoria object.
+*** arcsin() - inverse trig function.
+*** arccos() - inverse trig function.
+*** get_bytes() - returns the next n bytes from a file.
+*** prompt_number() - prompts the user to enter a number.
+*** prompt_string() - prompts the user to enter a string.
+*** instance() - **WIN32:** returns the instance handle of the program.
+*** PI - the constant PI - 3.14159... was added to **misc.e**.
+* The main Euphoria documentation can now be viewed locally with a Web browser.
+  The plain-text files **refman.doc** and **library.doc** are still available in
+  the **doc** subdirectory, but we now have **refman.htm** and **library.htm** in
+  the new **html** subdirectory. We have developed a tool (written in Euphoria)
+  that lets us easily maintain both an up-to-date HTML version, and an up-to-date
+  plain-text version of **refman** and **library**.
+* The documentation has also been clarified and expanded in many places.
+* **WIN32:** you can create an **unlimited** number of Euphoria call-back
+  routines, as long as each routine is a function with 0 to 8 parameters. In version 2.0
+  you could only have one call-back routine and it had to have exactly 4 parameters.
+* The ##xor## keyword has been added to complement: **and/or/not** and
+  **xor_bits()** e.g.
+  <eucode>
+  if a xor b then...
+  </eucode>
+  ##xor## works on sequences too. It's similar to ##or##.
+* The **dir(path)** library routine now officially supports the use of
+  **wildcards *** and **?** in the path that you supply. This feature was always
+  available, but wasn't documented until now. e.g.
+  <eucode>
+  info = dir("mydata\\*.d?t")
+  </eucode>
+* **optimization:** Subroutine call+return overhead was reduced by an average of
+  30%. The speed-up occurs for all normal function/procedure/type calls,
+  user-defined type-checks, call_proc()/call_func() calls using a **routine id**,
+  and Windows call-backs. Only recursive calls cost the same as before.  Programs
+  with a reasonably-high frequency of calls can easily be 10% faster overall
+  because of this.
+* **optimization:** Branch ##//straightening//## has been implemented. The
+  compiler will optimize branches in the internal code such that a branch from
+  A->B where location B contains a branch to location C, will be optimized to a
+  direct branch from A->C. Even something like A->B->C->D can be straightened to
+  A->D. This often occurs in while-loops that contain if-statements.
+* **optimization:** In many cases, variable initialization checks are now
+  replaced by "no-ops" after the first check is performed. Euphoria was already
+  optimizing out many checks at compile-time.
+* **optimization:** **get()** and **value()** are now much faster in most cases
+  thanks to Jiri Babor and some further optimizations by RDS.  The new v2.1
+  **ex.exe** with the new v2.1 **get.e** is:
+  [quote]
+  1.45x faster reading a sequence of f.p. numbers from a file and<br>
+  2.25x faster when reading a sequence of integers from a file.
+  [/quote]
+* **optimization:** **power(x,2)** is converted internally to x*x which is faster
+  in all cases, especially when x is a large integer or a f.p. number.
+* **optimization:** Thanks to Jiri Babor, **int_to_bits()** is at least 15%
+  faster in most cases.
+* **optimization:**
+  Plotting a long sequence of pixels in 16-color graphics modes is about 3% faster.
+* **optimization:** **draw_line()** has been sped up by a few percent.
+* **Language War** has had a major face-lift. It now runs in **pixel-graphics
+  mode 18** (640 x 480 x 16 colors) instead of **text mode**. It also has
+  ##//fine-grain//## parallelism, i.e. virtually anything can happen in parallel
+  with anything else. Multiple torpedos, phasors etc can be drawn on the screen
+  simultaneously, while ships are moving, commands are being entered, things are
+  exploding etc. Even the timing needed for the PC speaker sound effects is
+  handled by the **task scheduler**. There are **//no//** time-delay "busy" loops
+  executed during the game. The galaxy scan now shows you a scaled picture of the
+  whole galaxy, rather than just a bunch of numbers.
+* The default print format for atoms was changed from "%g" to "%**.**10g".  This
+  format is used by print(), **?**, the **trace** facility, and **ex.err** dumps.
+  This allows large integers -9,999,999,999 to +9,999,999,999 to be printed as
+  integers, rather than as scientific notation. It also provides about 10 digits
+  of accuracy to be displayed on fractional numbers, rather than just 6. Art
+  Adamson and others made it clear that more digits should be displayed.
+* The state of all **with/without** settings is saved upon entering an **included
+  file**, and restored at the end of the **included file**. An included file can
+  change the settings, but they will be restored at the end of the included file.
+  e.g. warnings might be turned off just within the included file (and any files
+  it includes). As a result some programs now display warnings where none were
+  seen before.
+* Warnings are now displayed <_ba>//after//</_ba> your program finishes
+  execution, so they won't be erased by clear_screen(), graphics_mode() etc.
+  Some programs now show warnings where none were seen before.
+* The security of scrambled code and bound code has been improved thanks to ideas
+  contributed by Rusty Davis. When a bound program starts executing, a quick
+  integrity check will be made to detect any corruption or tampering.  It's still
+  ok to add data to the end of a **bound .exe** file, as long as your last line
+  is ##abort(x)##.
+* The **ed** editor now lets you view and edit beyond column 80.
+* **ed** has a new command: **Esc m** (modifications). It will show the
+  differences between the original file on disk and the current edit buffer. This
+  can be very useful when you've forgotten what changes you've made, and you are
+  wondering if it's safe to save them.
+* The **trace** window now provides an upper case **Q** command which lets the
+  program run to completion, ignoring any trace(1) commands. Lower case **q**
+  lets it run to the next trace(1).
+* **safe.e** (debug version of **machine.e**) has been enhanced. It will now
+  automatically catch additional cases where data is illegally written just
+  **//before//**, or just **//after//**, the boundaries of an allocated block of
+  memory. This can be particularly useful in **WIN32** where Windows might
+  overwrite one of your under-sized blocks. Without a tool such as **safe.e**,
+  this type of bug could take hours or even days to track down.
+* The **euphoria\tutorial** directory was created to hold several small tutorial
+  programs.
+* The limit on the number of open files was raised to 25 from 15.  Three of these
+  files are 0,1,2: standard-input, standard-output and standard-error, so you can
+  now have up to 22 of your own files open simultaneously. (As far as we know, no
+  one ever exceeded the old limit, but it seemed wise to raise it.)
+* When the user simply types ##ex## or ##exw## and is prompted for the name of
+  the Euphoria **.ex** or **.exw** file to run, **command_line()** will now be
+  updated to include the filename as the second command-line argument, just as if
+  the user had originally typed: ##ex filename##.  Thanks to Mathew Hounsell for
+  suggesting this.
+* **mset.ex** now saves pictures in **.bmp** format. Previously it was using a
+  non-standard, compressed format.
+* **lines.ex** (**lines.bat**) now reports non-blank/non-comment lines as well.
+  This is <_ba>//not//</_ba> the same as the "statement count" used by Euphoria
+  for the diagnostic limit, but it's usually within +/- 10%, assuming you write
+  one statement per line.
+* Numeric literals greater than 1e308 (roughly) are now set to **+/-** ##inf##.
+  They used to cause a compile-time error.
+
+

@@ -1,0 +1,5 @@
+t_c_type_check_integer.e:10
+type_check failure, aInteger is {10,20,30} 
+
+
+Global & Local Variables

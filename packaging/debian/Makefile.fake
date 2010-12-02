@@ -5,25 +5,25 @@
 #   Clean up binary and       :  make distclean
 #        translated files
 #   Everything                :  make
-#   Interpreter          (exu):  make interpreter
-#   Translator           (ecu):  make translator
-#   Translator Library (ecu.a):  make library
-#   Backend         (backendu):  make backend
+#   Interpreter          (eui):  make interpreter
+#   Translator           (euc):  make translator
+#   Translator Library  (eu.a):  make library
+#   Backend              (eub):  make backend
 #
 #  FreeBSD (6.2)
 #   NOTE:  Versions before 6.2 may not need EBSD=1
 #   Clean up                  :  gmake clean
 #   Everything                :  gmake
-#   Interpreter          (exu):  gmake interpreter EBSD=1
-#   Translator           (ecu):  gmake translator EBSD=1
-#   Translator Library (ecu.a):  gmake library
-#   Backend         (backendu):  gmake backend EBSD=1
+#   Interpreter          (eui):  gmake interpreter EBSD=1
+#   Translator           (euc):  gmake translator EBSD=1
+#   Translator Library  (eu.a):  gmake library
+#   Backend              (eub):  gmake backend EBSD=1
 #
 #   The make process will adjust common.e to set EBSD to the
 #   correct value.  To reset this value, run gmake clean.
 export
-all clean library interpreter translator backend source install uninstall distclean :
+all clean library interpreter translator backend source install install-docs uninstall distclean tools install-tools :
 	cd source && $(MAKE) $@
 
 
-.PHONY : all clean library interpreter translator backendu source install distclean
+.PHONY : all clean library interpreter translator backend source install install-docs uninstall distclean tools install-tools

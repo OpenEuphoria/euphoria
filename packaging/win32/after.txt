@@ -1,13 +1,12 @@
 After completing the installation:
 
-   1. Reboot your system.
+   1. Reboot your system (if you changed your environment).
 
-   2. View README.HTM and HTML\REFMAN.HTM.
+   2. View docs\euphoria-4.0.pdf OR docs\html\index.html
+	    (if you chose to install the documentation).
 
    3. Experiment with simple command-line programs first.
-      See EUPHORIA\TUTORIAL
+      See the tutorial directory
 
-   4. When you are ready to do Windows GUI programming, download
-      Win32Lib and IDE from RapidEuphoria.com.
-
-   5. If you want to uninstall Euphoria, see HTML\INSTALL.HTM
+   4. Join other Euphoria programmers on the OpenEuphoria
+	    community website, http://openeuphoria.org.

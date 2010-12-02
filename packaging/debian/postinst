@@ -20,14 +20,17 @@ set -e
 
 case "$1" in
     configure)
-        if [ -e /etc/euphoria/euinc.conf ]; then
-            if [ ! `grep -r ^/usr/share/euphoria/include$ /etc/euphoria/euinc.conf` ]; then
-                echo '/usr/share/euphoria/include' >> /etc/euphoria/euinc.conf
+        if [ -e /etc/euphoria/eu.cfg ]; then
+            if [ ! `grep -r ^/usr/share/euphoria/include$ /etc/euphoria/eu.cfg` ]; then
+                echo '/usr/share/euphoria/include' >> /etc/euphoria/eu.cfg
             fi
         else
-            echo '/usr/share/euphoria/include' > /etc/euphoria/euinc.conf
+            echo '/usr/share/euphoria/include' > /etc/euphoria/eu.cfg
         fi
         exit 0
+		if which install-docs >dev/nul 2>&1; then
+			install-docs -i /usr/share/doc-base/euphoria-manual
+		fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

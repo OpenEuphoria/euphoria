@@ -70,11 +70,21 @@ test_false("t_lower() #3", t_lower('A'))
 test_false("t_lower() #4", t_lower(13))
 test_false("t_lower() #5", t_lower("joH9"))
 
-test_true("t_print() #1", t_print('A'))
-test_true("t_print() #2", t_print(' '))
+test_true ("t_print() #1", t_print('A'))
+test_true ("t_print() #2", t_print(' '))
 test_false("t_print() #3", t_print(2))
 test_false("t_print() #4", t_print(200))
 test_false("t_print() #5", t_print({'a', '#', 7, 224}))
+test_true ("t_print() #6", t_print("abcdefg"))
+test_false("t_print() #7", t_print("abc\tefg"))
+
+test_true ("t_display() #1", t_display('A'))
+test_true ("t_display() #2", t_display(' '))
+test_false("t_display() #3", t_display(2))
+test_false("t_display() #4", t_display(200))
+test_false("t_display() #5", t_display({'a', '#', 7, 224}))
+test_true ("t_display() #6", t_display("abcdefg"))
+test_true ("t_display() #7", t_display("abc\tefg"))
 
 test_true("t_punct() #1", t_punct('.'))
 test_true("t_punct() #2", t_punct('~'))
@@ -356,6 +366,7 @@ test_false("integer_array({1, 2, \"abc\"})", integer_array({1, 2, "abc"}))
 test_false("integer_array({1, 2, 9.7)", integer_array({1, 2, 9.7}))
 test_true ("integer_array({1, 2, 'a')", integer_array({1, 2, 'a'}))
 test_true ("integer_array({})", integer_array({}))
+
 test_false("t_text(-1)", t_text(-1))
 test_true ("t_text(\"abc\")", t_text("abc"))
 test_false("t_text({1, 2, \"abc\"})", t_text({1, 2, "abc"}))
@@ -363,11 +374,69 @@ test_false("t_text({1, 2, 9.7)", t_text({1, 2, 9.7}))
 test_true ("t_text({1, 2, 'a')", t_text({1, 2, 'a'}))
 test_false("t_text({1, -2, 'a')", t_text({1, -2, 'a'}))
 test_true ("t_text({})", t_text({}))
+
 test_false("number_array(-1)", number_array(-1))
 test_true ("number_array(\"abc\")", number_array("abc"))
 test_false("number_array({1, 2, \"abc\"})", number_array({1, 2, "abc"}))
 test_true ("number_array({1, 2, 9.7)", number_array({1, 2, 9.7}))
 test_true ("number_array({1, 2, 'a')", number_array({1, 2, 'a'}))
 test_true ("number_array({})", number_array({}))
+
+test_false("ascii_string(-1)", ascii_string(-1))
+test_true ("ascii_string(\"abc\")", ascii_string("abc"))
+test_false ("ascii_string(\"abc§¶\")", ascii_string("abc§¶"))
+test_false("ascii_string({1, 2, \"abc\"})", ascii_string({1, 2, "abc"}))
+test_false("ascii_string({1, 2, 9.7)", ascii_string({1, 2, 9.7}))
+test_true ("ascii_string({1, 2, 'a')", ascii_string({1, 2, 'a'}))
+test_false("ascii_string({1, -2, 'a')", ascii_string({1, -2, 'a'}))
+test_true ("ascii_string({})", ascii_string({}))
+
+test_false("string(-1)", string(-1))
+test_true ("string(\"abc\")", string("abc"))
+test_true ("string(\"abc§¶\")", string("abc§¶"))
+test_false("string({1, 2, \"abc\"})", string({1, 2, "abc"}))
+test_false("string({1, 2, 9.7)", string({1, 2, 9.7}))
+test_true ("string({1, 2, 'a')", string({1, 2, 'a'}))
+test_true ("string({1, 2, 'a', 0)", string({1, 2, 'a', 0}))
+test_false("string({1, -2, 'a')", string({1, -2, 'a'}))
+test_true ("string({})", string({}))
+test_false("string({'a',256)", string({'a', 256}))
+
+test_false("cstring(-1)", cstring(-1))
+test_true ("cstring(\"abc\")", cstring("abc"))
+test_true ("cstring(\"abc§¶\")", cstring("abc§¶"))
+test_false("cstring({1, 2, \"abc\"})", cstring({1, 2, "abc"}))
+test_false("cstring({1, 2, 9.7)", cstring({1, 2, 9.7}))
+test_true ("cstring({1, 2, 'a')", cstring({1, 2, 'a'}))
+test_false("cstring({1, 2, 'a', 0)", cstring({1, 2, 'a', 0}))
+test_false("cstring({1, -2, 'a')", cstring({1, -2, 'a'}))
+test_true ("cstring({})", cstring({}))
+test_false("cstring({'a',256)", cstring({'a', 256}))
+
+test_false("sequence_array(-1)", sequence_array(-1))
+test_false("sequence_array(\"abc\")", sequence_array("abc"))
+test_false("sequence_array({1, 2, \"abc\"})", sequence_array({1, 2, "abc"}))
+test_false("sequence_array(1, 2, 9.7)", sequence_array({1, 2, 9.7}))
+test_false("sequence_array(1, 2, 'a')", sequence_array({1, 2, 'a'}))
+test_true ("sequence_array({})", sequence_array({}))
+test_true ("sequence_array({})", sequence_array({"abc", {3.4, 5, 92837.12312, "abc"}}))
+
+-- test for ignored type calls:
+object foo = 1
+atom( foo )
+test_pass( "ignored return for built-in type call at top level" )
+
+string( "" )
+test_pass( "ignored return for UDT type call at top level" )
+
+
+
+if 1 then
+	string( "" )
+	test_pass( "ignored return for UDT type call in statement list" )
+	
+	atom( 3 )
+	test_pass( "ignored return for built-in type call in statement list" )
+end if
 
 test_report()

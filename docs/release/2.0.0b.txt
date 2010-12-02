@@ -1,0 +1,68 @@
+==  Version 2.0 Beta February 26, 1998
+
+* The WIN32 interpreter, **exw.exe**, is now a **true WIN32 GUI** program. In 2.0
+  alpha it was a WIN32 ##//console//## program that was always associated with a
+  ##//console//## or DOS-window. A DOS-style console window will now be created
+  only if your program needs one.  **exw** will automatically create a new
+  console window the first time your program writes to the screen, reads from the
+  keyboard, or calls any library routine that requires a console to work. The
+  console will disappear automatically when your program finishes execution.
+* A new library routine, **free_console()**, will immediately delete the console
+  window if you currently have one.
+* The Complete Edition of Euphoria now provides a **-scramble** option of
+  **bind** and **shroud** to improve the security of programs that you
+  distribute.
+* You can now pass Euphoria **atoms** to C routines as 64-bit C double type
+  floating-point arguments, and you can receive a floating-point result back from
+  a C function.
+* **exw.exe (beta)** runs 10 to 15% faster than **exw.exe (alpha)** (based on
+  **sieve.ex**, **shell.ex**, etc.). The WATCOM C compiler was doing a bad job of
+  optimizing a critical section of the interpreter when building exw.exe, but was
+  producing excellent code when building **ex.exe**.  With some trivial changes
+  to the interpreter C code, WATCOM now produces excellent code for both
+  platforms.
+* The average program now has 60K more memory available before having to use the
+  swap file.
+* The limit on the size of a single procedure, function or type has been
+  eliminated.
+* The limit on the size of a single top-level statement has been eliminated.
+* The limit on the total number of include files that can make up a program has
+  been increased to 256 from 150.
+* Some **optimizations** were added. The following general forms of expression
+  are now faster:
+  <eucode>
+    2 * x
+    x * 2
+    1 + x
+  </eucode>
+  where x can be any expression, and have type atom or sequence.
+* There is a new documentation file, **perform.doc** with lots of tips for
+  performance-obsessed programmers.
+* If you call a C routine using **c_func()**, but you linked the C routine using
+  **define_c_proc()** you will get an error message. Similarly, if you call it
+  using **c_proc()**, but you linked it using **define_c_func()** you'll get an
+  error message. This restriction was documented, but not actually enforced in
+  2.0 alpha. Some programs written for the alpha release will have to be
+  corrected.
+* You will now see the actual name of the C or Euphoria routine that you were
+  attempting to call, when you get an error message from **call_proc()**,
+  **call_func()**, **c_proc()**, or **c_func()**.
+* A new **-clear_routines** option of **bind** and **shroud** will leave the
+  names of all routines unshrouded. This is necessary if your program calls
+  **routine_id()**. You'll be warned if you use routine_id() and do not choose
+  this option. (Registered users can use **-scramble** together with
+  **-clear_routines** to restore a high level of shrouding.)
+* If a name conflict arises with a global symbol, the **shrouder** will now warn
+  you, and then choose a new name. It used to abort with a message.
+* It is no longer possible to **trace** or **profile** shrouded code.
+* A new demo program, **hash.ex**, was added to **euphoria\demo**.
+* **freq.ex** was moved from **euphoria\bin** to **euphoria\demo** and renamed as
+  **tree.ex**.
+* A new documentation file, **bind.doc** describes all the features of
+  **bind.bat** and **shroud.bat**. The previous description in **refman.doc** has
+  been shrunk.
+* The file **overview.doc** gives a quick overview of all documentation files.
+* The description of **get_mouse()** in **library.doc** discusses the problem of
+  320-wide graphics modes (you must divide the x coordinate value by 2).
+
+

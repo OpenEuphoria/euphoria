@@ -1,0 +1,62 @@
+== Version 2.3 Beta January 15, 2002
+
+This release updates the Euphoria Interpreter,
+the Euphoria To C Translator, and the Interpreter Source Code product,
+for all platforms.
+
+* You can now override a Euphoria built-in routine with your own variable or
+  namespace identifier of the same name.  Previously this was only allowed for
+  user-defined routines.  Besides giving programmers more freedom, it will allow
+  RDS to add new built-in routines in the future without breaking existing code.
+* The warning about having multiple global symbols with the same name
+  in different source files has been removed. It was felt to be unnecessary
+  since you'll be asked to supply a namespace identifier if you actually
+  make an ambiguous reference to a global symbol.
+* You can now have a trailing \ (or Linux /) on the end of all directory names
+  in **EUINC**, and you can have blanks in the directory name.
+* To eliminate confusion, the binder/shrouder will now delete the
+  output file if a fatal error occurs during the bind or shroud.
+* Numerous improvements and corrections were made to the documentation.
+  Thanks to Igor Kachan.
+* Old, pre-ANSI function definitions in the interpreter source code,
+  have been updated to ANSI-style, which is more compatible with C++.
+* **bug fixed : ** With DJGPP C, when compiling code produced by the Translator,
+  or compiling the Interpreter source code, there was a memory allocation bug
+  that could waste a bit of time, or, in rare cases, cause a crash.
+* **bug fixed : ** On Windows, using the Interpreter, or a Translated program,
+  you were sometimes required to hit Enter twice to exit from a console window.
+  Thanks to Tone Skoda.
+* **bug fixed: ** The Euphoria dir() function, as implemented for Lcc or Borland,
+  did not handle directories properly when they had extra attributes set, such as
+  READ_ONLY. Thanks to Euman, who encountered the problem, and then showed how to
+  fix the Interpreter source code for dir().
+* **bug fixed: ** You can now declare a namespace identifier with the same name
+  as a built-in function, without causing a lot of errors. Thanks to Martin
+  Stachon (although he recommended a different solution).
+* **bug fixed -  Binder: ** Support for the new **EUINC** environment variable
+  has now been added to the binder. Thanks to Ross Boyd.
+* **bug fixed -  Binder: ** Appending resource files to a bound .exe didn't work
+  correctly when bind -clear was used. Thanks to Wolfgang Fritz.
+* **bug fixed -  Binder: ** When using the binder interactively, you would get a
+  "variable not initialized" error when trying to substitute a different Windows
+  icon. Thanks to Tony Steward.
+* **bug fixed -  Binder: ** In some cases the keyword "constant" would be dropped from
+  the shrouded output, when the previous line of input had a
+  constant declaration ending in ']'. Thanks to Ross Boyd.
+* **bug fixed -  Binder: ** When a general expression, (not just a string in
+  quotes), was used as the argument to routine_id(), local routines that were
+  potentially the target of that expression, might have their names changed
+  (unless -clear was used), thus causing routine_id() to return -1 at run-time.
+  Global routines were ok.
+* **bug fixed -  Binder: ** The binder/shrouder kept going even though an include
+  file was missing.  Thanks to Ross Boyd.
+* **bug fixed -  Linux Binder:** The Linux search path bug for bound executables, supposedly fixed
+  by the 2.3 alpha release, wasn't fixed properly. Fixed now.
+  Thanks to Kenneth Rhodes.
+* **bug fixed -  Linux Binder:** bindu -clear  and shroud -clear with a file
+  containing DOS/Windows-style \r\n line terminators gave you errors "illegal
+  character" when your shrouded program was run, and "not bound correctly" when
+  your bound file was run.
+* **bug fixed -  Interpreter Source:** The link command for building the DOS
+  interpreter with WATCOM C, listed a non-existent .obj file.
+

@@ -1,14 +1,14 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
-include std/graphcst.e
-include std/convert.e
-include std/machine.e
-
 --****
--- == Grapihcs - Image Routines
+-- == Graphics - Image Routines
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
 --
+
+namespace image
+
+include std/convert.e
+
+public include std/graphcst.e
 
 constant BMPFILEHDRSIZE = 14
 constant OLDHDRSIZE = 12, NEWHDRSIZE = 40
@@ -16,8 +16,23 @@ constant EOF = -1
 
 integer fn, error_code
 
-public type graphics_point(sequence p)
-	return length(p) = 2 and p[1] >= 0 and p[2] >= 0
+public type graphics_point(object p)
+	if atom(p) then
+		return 0
+	end if
+	if length(p) != 2 then
+		return 0
+	end if
+	
+	if not integer(p[1]) or p[1] < 0 then
+		return 0
+	end if
+	
+	if not integer(p[2]) or p[2] < 0 then
+		return 0
+	end if
+	
+	return 1
 end type
 
 function get_word()
@@ -147,18 +162,16 @@ end function
 -- Read a bitmap (.BMP) file into a 2-d sequence of sequences (image)
 --
 -- Parameters:
---		# ##file_name##: a sequence, the path to a .bmp file to read from. The extension is not assumed if missing.
+--		# ##file_name## : a sequence, the path to a .bmp file to read from. The extension is not assumed if missing.
 --
 -- Returns:
---   An **object**: on success, a sequence of the form ##{palette,image}##. On failure, an error code is returned.
+--   An **object**, on success, a sequence of the form ##{palette,image}##. On failure, an error code is returned.
 --
 -- Comments:
 -- In the returned value, the first element is a list of mixtures, each of which defines 
--- a color, and the second, a list of point rows. Each pixel in a row is represented by its color ubdex.
+-- a color, and the second, a list of point rows. Each pixel in a row is represented by its color index.
 --
 -- The file should be in the bitmap format. The most common variations of the format are supported. 
--- You can pass the palette to [[:all_palette]]() (after dividing it by 4 to scale it). 
--- The image can be passed to [[:display_image]]().
 --
 -- Bitmaps of 2, 4, 16 or 256 colors are supported. If the file is not in a good format, an error
 -- code (atom) is returned instead
@@ -179,20 +192,16 @@ end function
 -- x = read_bitmap("c:\\windows\\arcade.bmp")
 -- </eucode>
 --
--- note: double backslash needed to get single backslash in a string
---
--- Example 2: 
---	##demo/dos32/bitmap.ex##
+-- Note: 
+-- double backslash needed to get single backslash in a string
 --
 -- See Also: 
---		[[:palette]], [[:all_palette]], [[:display_image]], [[:save_bitmap]]
+--   [[:save_bitmap]]
 
 public function read_bitmap(sequence file_name)
-	atom Size 
-	integer Type, Xhot, Yhot, Planes, BitCount
+	integer Planes, BitCount
 	atom Width, Height, Compression, OffBits, SizeHeader, 
-		 SizeImage, XPelsPerMeter, YPelsPerMeter, ClrUsed,
-		 ClrImportant, NumColors
+		 NumColors
 	sequence Palette, Bits, two_d_bits
 
 	error_code = 0
@@ -200,10 +209,11 @@ public function read_bitmap(sequence file_name)
 	if fn = -1 then
 		return BMP_OPEN_FAILED
 	end if
-	Type = get_word()
-	Size = get_dword()
-	Xhot = get_word()
-	Yhot = get_word()
+	
+	get_word() -- Size
+	get_dword() -- Type
+	get_word() -- X Hotspot
+	get_word() -- Y Hotspot
 	OffBits = get_dword()
 	SizeHeader = get_dword()
 
@@ -217,11 +227,11 @@ public function read_bitmap(sequence file_name)
 			close(fn)
 			return BMP_UNSUPPORTED_FORMAT
 		end if
-		SizeImage = get_dword()
-		XPelsPerMeter = get_dword()
-		YPelsPerMeter = get_dword()
-		ClrUsed = get_dword()
-		ClrImportant = get_dword()
+		get_dword() -- Size of Image
+		get_dword() -- X Pels/Meter
+		get_dword() -- Y Pels/Meter
+		get_dword() -- Color Used
+		get_dword() -- Color Important
 		NumColors = (OffBits - SizeHeader - BMPFILEHDRSIZE) / 4
 		if NumColors < 2 or NumColors > 256 then
 			close(fn)
@@ -235,7 +245,6 @@ public function read_bitmap(sequence file_name)
 		Planes = get_word()
 		BitCount = get_word()
 		NumColors = (OffBits - SizeHeader - BMPFILEHDRSIZE) / 3
-		SizeImage = row_bytes(BitCount, Width) * Height
 		Palette = get_rgb_block(NumColors, 3) 
 	else
 		close(fn)
@@ -267,32 +276,7 @@ type positive_atom(atom x)
 	return x >= 1
 end type
 
-ifdef DOS32 then
-public include std/dos/image.e
-
-function DOS_scr_addr(sequence vc, text_point xy)
--- calculate address in DOS screen memory for a given line, column
-	atom screen_memory
-	integer page_size
-	
-	if vc[VC_MODE] = 7 then
-		screen_memory = MONO_TEXT_MEMORY
-	else
-		screen_memory = COLOR_TEXT_MEMORY
-	end if
-	page_size = vc[VC_LINES] * vc[VC_COLUMNS] * BYTES_PER_CHAR
-	page_size = 1024 * floor((page_size + 1023) / 1024)
-	screen_memory = screen_memory + get_active_page() * page_size
-	return screen_memory + ((xy[1]-1) * vc[VC_COLUMNS] + (xy[2]-1)) 
-						   * BYTES_PER_CHAR
-end function
-end ifdef
-
--- save_screen() and related functions were written by 
--- Junko C. Miura of Rapid Deployment Software.  
-
 integer numXPixels, numYPixels, bitCount, numRowBytes
-integer startXPixel =0, startYPixel = 0, endYPixel = 0
 
 type region(object r)
 	-- a region on the screen
@@ -375,20 +359,6 @@ procedure putOneRowImage(sequence x, integer numPixelsPerByte, integer shift)
 	end for
 end procedure
 
-procedure putImage()
--- Write image data packed according to the bitCount information, in the order
--- last row ... first row. Data for each row is padded to a 4-byte boundary.
-	sequence x
-	integer  numPixelsPerByte, shift
-	
-	numPixelsPerByte = 8 / bitCount
-	shift = power(2, bitCount)
-	for i = endYPixel to startYPixel by -1 do
-		x = get_pixel({startXPixel, i, numXPixels})
-		putOneRowImage(x, numPixelsPerByte, shift)
-	end for
-end procedure
-
 procedure putColorTable(integer numColors, sequence pal)
 -- Write color table information to the .BMP file. 
 -- palette data is given as a sequence {{r,g,b},..,{r,g,b}}, where each
@@ -428,8 +398,8 @@ end procedure
 -- Create a .BMP bitmap file, given a palette and a 2-d sequence of sequences of colors.
 --
 -- Parameters:
--- 		# ##palette_n_image##: a {palette, image} pair, like [[:read_bitmap()]] returns
--- 		# ##file_name##: a sequence, the name of the file to save to.
+-- 		# ##palette_n_image## : a {palette, image} pair, like [[:read_bitmap()]] returns
+-- 		# ##file_name## : a sequence, the name of the file to save to.
 --
 -- Returns:
 -- 		An **integer**, 0 on success.
@@ -437,7 +407,7 @@ end procedure
 -- Comments:
 --   This routine does the opposite of [[:read_bitmap]]().
 -- The first element of ##palette_n_image## is a sequence of [[:mixture]]s defining each 
--- color in the butmap. The second element is a sequence of sequences of pcolors. The inner 
+-- color in the bitmap. The second element is a sequence of sequences of colors. The inner 
 -- sequences must have the same length.
 --
 -- The result will be one of the following codes: 
@@ -449,22 +419,18 @@ end procedure
 --                          -- or invalid argument
 -- </eucode>
 --
--- If you use ##get_all_palette##() to get the palette before calling this function, you must 
--- multiply the returned intensity values by 4 before calling [[:save_bitmap]](). You might use
--- [[:save_image]]() to get the 2-d image.
---
--- save_bitmap() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with 
--- read_bitmap(). Windows Paintbrush and some other tools do not support 4-color bitmaps.
+-- 
+-- ##save_bitmap##() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with 
+-- ##read_bitmap##(). Windows Paintbrush and some other tools do not support 4-color bitmaps.
 --
 -- Example 1:
 -- <eucode>
--- paletteData = get_all_palette() * 4
 -- code = save_bitmap({paletteData, imageData},
 --                    "c:\\example\\a1.bmp")
 -- </eucode>
 --
 -- See Also:
---   [[:read_bitmap]], [[:save_image]], [[:save_screen]], [[:get_all_palette]]
+--   [[:read_bitmap]]
 
 public function save_bitmap(two_seq palette_n_image, sequence file_name)
 	sequence color, image
@@ -491,99 +457,4 @@ public function save_bitmap(two_seq palette_n_image, sequence file_name)
 	close(fn)
 	return error_code
 end function
-
-ifdef DOS32 then
---**
--- Capture the whole screen or a region of the screen, and create a Windows
--- bitmap (.BMP) file. 
---
--- Platform:
---		//DOS32//
---
--- Parameters:
--- 		# ##r##: an object, either 0 (whole screen) or a {top left, bottom right} pair
---        of {x,y} pairs of coordinates.
---		# ##file_name##: a sequence, the name of the save file.
---
--- Returns:
---		An **integer**, which is BMP_SUCCESS on success.
---
--- Comments:
--- The result will be one of the following codes:
--- <eucode>
--- public constant
---     BMP_SUCCESS = 0,
---     BMP_OPEN_FAILED = 1,
---     BMP_INVALID_MODE = 4 -- invalid graphics mode
---                          -- or invalid argument
--- </eucode>
---  
--- [[:save_screen]]() produces bitmaps of 2, 4, 16, or 256 colors and these can all be read with
--- [[:read_bitmap]](). Windows Paintbrush and some other tools do not support 4-color bitmaps.
---
--- save_screen() only works in pixel-graphics modes, not text modes.
---  
--- Example 1: 
--- <eucode> 
--- -- save whole screen:
--- code = save_screen(0, "c:\\example\\a1.bmp")
--- </eucode>
--- 
--- Example 2:  
--- <eucode>  
--- -- save part of screen:
--- err = save_screen({{0,0},{200, 15}}, "b1.bmp")
--- </eucode>
--- 
--- See Also:
---   [[:save_bitmap]], [[:save_image]], [[:read_bitmap]]
-
-public function save_screen(region r, sequence file_name)
-	sequence vc
-	integer numColors
-
-	error_code = BMP_SUCCESS
-	fn = open(file_name, "wb")
-	if fn = -1 then
-		return BMP_OPEN_FAILED
-	end if
-
-	vc = video_config()
-	if sequence(r) then
-		numXPixels = r[2][1] - r[1][1] + 1
-		numYPixels = r[2][2] - r[1][2] + 1
-		if r[2][1] >= vc[VC_XPIXELS] or r[2][2] >= vc[VC_YPIXELS] then
-			close(fn)
-			return BMP_INVALID_MODE   -- not a valid argument 
-		end if
-		startXPixel = r[1][1]
-		startYPixel = r[1][2]
-		endYPixel   = r[2][2]
-	else
-		numXPixels = vc[VC_XPIXELS]
-		numYPixels = vc[VC_YPIXELS]
-		startXPixel = 0
-		startYPixel = 0
-		endYPixel   = numYPixels - 1
-	end if
-	
-	if numXPixels <= 0 or numYPixels <= 0 then
-		-- not a valid graphics mode or not a valid argument
-		close(fn)
-		return BMP_INVALID_MODE
-	end if
-	
-	numColors = vc[VC_NCOLORS]
-	putBmpFileHeader(numColors)
-	
-	if error_code = BMP_SUCCESS then
-		putColorTable(numColors, get_all_palette()*4)
-	end if
-	if error_code = BMP_SUCCESS then
-		putImage()
-	end if
-	close(fn)
-	return error_code
-end function    
-end ifdef
 

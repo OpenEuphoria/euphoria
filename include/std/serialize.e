@@ -1,9 +1,9 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
---
 --****
 -- == Serialization of Euphoria Objects
 --
--- <<LEVELTOC depth=2>>
+-- <<LEVELTOC level=2 depth=4>>
+
+namespace serialize
 
 include std/convert.e
 include std/machine.e
@@ -30,7 +30,7 @@ constant MIN1B = -9,
 		 MIN4B = -power(2, 31)
 
 atom mem0, mem1, mem2, mem3
-mem0 = allocate(4)
+mem0 = machine:allocate(4)
 mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3
@@ -48,7 +48,7 @@ function deserialize_file(integer fh, integer c)
 -- read a serialized Euphoria object from disk
 
 	sequence s
-	integer len
+	atom len
 
 	if c = 0 then
 		c = getc(fh)
@@ -73,11 +73,11 @@ function deserialize_file(integer fh, integer c)
 			return get4(fh) + MIN4B
 
 		case F4B then
-			return float32_to_atom({getc(fh), getc(fh),
+			return convert:float32_to_atom({getc(fh), getc(fh),
 				getc(fh), getc(fh)})
 
 		case F8B then
-			return float64_to_atom({getc(fh), getc(fh),
+			return convert:float64_to_atom({getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh)})
@@ -88,6 +88,9 @@ function deserialize_file(integer fh, integer c)
 				len = getc(fh)
 			else
 				len = get4(fh)
+			end if
+			if len < 0  or not integer(len) then
+				return 0
 			end if
 			s = repeat(0, len)
 			for i = 1 to len do
@@ -141,11 +144,11 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 			return {getp4(sdata, pos) + MIN4B, pos + 4}
 
 		case F4B then
-			return {float32_to_atom({sdata[pos], sdata[pos+1],
+			return {convert:float32_to_atom({sdata[pos], sdata[pos+1],
 				sdata[pos+2], sdata[pos+3]}), pos + 4}
 
 		case F8B then
-			return {float64_to_atom({sdata[pos], sdata[pos+1],
+			return {convert:float64_to_atom({sdata[pos], sdata[pos+1],
 				sdata[pos+2], sdata[pos+3],
 				sdata[pos+4], sdata[pos+5],
 				sdata[pos+6], sdata[pos+7]}), pos + 8}
@@ -176,19 +179,21 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 	end switch
 end function
 
+--****
+-- === Routines
 
 --**
 -- Convert a serialized object in to a standard Euphoria object.
 --
 -- Parameters:
--- # ##sdata##, either a sequence containing one or more concatenated serialized objects or
+-- # ##sdata## : either a sequence containing one or more concatenated serialized objects or
 -- an open file handle. If this is a file handle, the current position in the
 -- file is assumed to be at a serialized object in the file.
--- # ##pos##, optional index into ##sdata##. If omitted 1 is assumed. The index must
+-- # ##pos## : optional index into ##sdata##. If omitted 1 is assumed. The index must
 -- point to the start of a serialized object.
 --
 -- Returns:
--- The return value depends on the input type. 
+-- The return **value**, depends on the input type. 
 -- * If ##sdata## is a file handle then
 -- this function returns a Euphoria object that had been stored in the file, and
 -- moves the current file to the first byte after the stored object.
@@ -295,10 +300,10 @@ end function
 -- Convert a standard Euphoria object in to a serialized version of it.
 --
 -- Parameters:
--- # ##euobj##, any Euphoria object.
+-- # ##euobj## : any Euphoria object.
 --
 -- Returns:
--- A sequence. This is the serialized version of the input object.
+-- A **sequence**, this is the serialized version of the input object.
 -- 
 -- Comments:
 -- A serialized object is one that has been converted to a set of byte values. This
@@ -363,18 +368,18 @@ public function serialize(object x)
 			return {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)}
 
 		else
-			return I4B & int_to_bytes(x-MIN4B)
+			return I4B & convert:int_to_bytes(x-MIN4B)
 
 		end if
 
 	elsif atom(x) then
 		-- floating point
-		x4 = atom_to_float32(x)
-		if x = float32_to_atom(x4) then
+		x4 = convert:atom_to_float32(x)
+		if x = convert:float32_to_atom(x4) then
 			-- can represent as 4-byte float
 			return F4B & x4
 		else
-			return F8B & atom_to_float64(x)
+			return F8B & convert:atom_to_float64(x)
 		end if
 
 	else
@@ -382,7 +387,7 @@ public function serialize(object x)
 		if length(x) <= 255 then
 			s = {S1B, length(x)}
 		else
-			s = S4B & int_to_bytes(length(x))
+			s = S4B & convert:int_to_bytes(length(x))
 		end if
 		for i = 1 to length(x) do
 			s &= serialize(x[i])
@@ -395,11 +400,11 @@ end function
 -- Saves a Euphoria object to disk in a binary format.
 --
 -- Parameters:
--- # ##data##, any Euphoria object.
--- # ##filename##, the name of the file to save it to.
+-- # ##data## : any Euphoria object.
+-- # ##filename## : the name of the file to save it to.
 --
 -- Returns:
--- An integer. 0 if the function fails, otherwise the number of bytes in the
+-- An **integer**, 0 if the function fails, otherwise the number of bytes in the
 -- created file.
 -- 
 -- Comments:
@@ -439,10 +444,10 @@ end function
 -- Restores a Euphoria object that has been saved to disk by [[:dump]].
 --
 -- Parameters:
--- # ##filename##, the name of the file to restore it from.
+-- # ##filename## : the name of the file to restore it from.
 --
 -- Returns:
--- An sequence. The first elemtn is the result code. If the result code is 0 
+-- A **sequence**, the first element is the result code. If the result code is 0
 -- then it means that the function failed, otherwise the restored data is in the 
 -- second element.
 -- 

@@ -124,5 +124,6 @@ test_true("Dump", size > 0)
 
 test_equal("Load", {1, objcache}, load("cust.dat"))
 
-object _ = delete_file("cust.dat")
+--object _ = delete_file("cust.dat")
+delete_file("cust.dat")
 test_report()

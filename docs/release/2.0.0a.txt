@@ -1,0 +1,54 @@
+== Version 2.0 Alpha November 5, 1997
+
+* A **//new platform//** is now supported.  **exw.exe** will run Euphoria
+  programs using the **WIN32** (Windows 32-bit) operating system. **ex.exe** will
+  run programs using **DOS32** (extended DOS).  See **platform.doc** for further
+  details.
+* The following library routines have been introduced.
+** For both DOS32 and WIN32:
+*** ##platform()## - find out which platform you are executing on. (The
+   PLATFORM constant is available in Euphoria 2.2 and later).
+*** ##routine_id()## - get a small integer id number for a Euphoria procedure or
+    function.
+*** ##call_proc()## - call a Euphoria procedure by using its id.
+*** ##call_func()## - call a Euphoria function by using its id.
+*** ##custom_sort()## - sort a sequence using a compare function that you specify.
+*** ##poke4()## - store a number into 4 bytes of memory.  poke4(address, value) is at least 10x
+    faster than: poke(address, int_to_bytes(value)).  poke4() also works with
+    sequences of values."
+*** ##peek4s()## - read 4 bytes of memory as a signed integer (works on sequences too).
+*** ##peek4u()## - read 4 bytes of memory as an unsigned integer (works on sequences too).
+    peek4u(address) is 10x faster than: bytes_to_int(peek({address, 4})).
+*** ##allocate_string()## - allocate and store a 0-terminated string in memory.
+** For WIN32 only:
+*** ##open_dll()## - open a Windows **.**dll file.
+*** ##define_c_proc()## - define a C routine that will be called from Euphoria (no value returned).
+*** ##define_c_func()## -define a C routine that will be called from Euphoria (a value will be
+    returned).
+*** ##call_c_proc()## - call a C routine from Euphoria (no value is returned).
+*** ##call_c_func()## - call a C routine from Euphoria (a value is returned).
+*** ##call_back()## - get a **//call-back address//**, so Windows can call your Euphoria routine when
+    the user interacts with your window."
+*** ##message_box()## - display a simple **Yes/No/Cancel** window.
+* New Demo programs:
+* **csort.ex**
+* **email.exw**
+* **window.exw**
+* **winwire.exw**
+* **dsearch.exw**
+* New include files:
+** ##safe.e## - debug version of **machine.e**"
+** ##misc.e## - miscellaneous
+** ##dll.e## - dll access
+** ##msgbox.e## - Windows message box
+* The following additional improvements have been made to the **DOS32** version:
+** On Pentium and higher systems, floating-point calculations are now about 20%
+   faster (and floating-point in **exw** is a further 20% faster than **ex** for
+   2.0).
+** **printf()** to the screen, and **print()** to the screen are both
+   significantly faster in most cases.
+** The **trace** screen is updated a bit faster.
+** The **time profile** is more accurate regarding **getc()**.
+** The **mset.ex** demo runs 30% faster.
+
+

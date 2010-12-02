@@ -1,3 +1,4 @@
+include std/graphics.e
 with trace
 trace(1)
 
@@ -12,6 +13,8 @@ trace(1)
 -- Step 1: Just to be neat - we'll clear the screen.
 -- First, press F1 then F2.
 -- Then press Enter:
+text_color(3)
+bk_color(7)
 clear_screen() 
 -- Check again with F1/F2 - was the screen cleared?
 
@@ -20,9 +23,13 @@ position(10, 30)
 -- Is the cursor now at 10,30? Press F1/F2
 
 -- Step 3: Display the text:
+text_color(3)
+bk_color(15)
 puts(1, "Hello World")  
 -- Is the text there? Press F1/F2
 
+text_color(7)
+bk_color(0)
 -- Step 4 Output 2 blank lines and we're done
 puts(1, "\n\n")
 

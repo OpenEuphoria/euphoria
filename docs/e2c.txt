@@ -1,112 +1,61 @@
 == Euphoria To C Translator
+:<<LEVELTOC level=2 depth=4>>
 
 === Introduction
 
-The Euphoria to C Translator will translate any Euphoria program into
-equivalent C source code.
+The **Euphoria to C Translator** (translator) will translate any Euphoria 
+program into equivalent C source code.
 
-There are versions of the translator for //Windows//, //DOS//, //Linux//,
-//FreeBSD// and //Mac OS X//. After translating a Euphoria program to C, you
+There are versions of the translator for //Windows// and //Unix// 
+operating Systems. After translating a Euphoria program to C, you
 can compile and link using one of the supported C compilers. This will give
 you an executable file that will typically run much faster than if you used
 the Euphoria interpreter.
 
-The translator can translate/compile **itself** into an executable file for
-each platform. The translator is also used in translating/compiling the
-front-end portion of the interpreter. The source code for the Translator is in
-##euphoria\source##. It's written 100% in Euphoria.
+The translator can translate and then compile //itself// into an executable file
+for each platform. The translator is also used in translating/compiling the
+front-end portion of the interpreter. The source code for the translator is in
+##euphoria\source##. It is written 100% in Euphoria.
 
 === C Compilers Supported
 
-The **Translator** currently works with GNU C on //Linux// or //FreeBSD//,
-with either [[http://www.openwatcom.org|Watcom C]] or
-[[http://www.delorie.com/djgpp/|DJGPP C]] on //DOS//, and with either Watcom 
-C, [[http://www.cs.virginia.edu/~lcc-win32/|Lcc]] or 
-[[http://www.borland.com/products/downloads/download_cbuilder.html|Borland 5.5]]
-on //Windows//. These are all **free** compilers.
+The **Translator** currently works with GNU C on //Unix//-like OSes,
+GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
+or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the ##-gcc## option
+and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
+These are all **free** compilers.
 
-GNU C will exist already on your Linux or FreeBSD system. The others can be
-downloaded from their respective Web sites. For Windows, we strongly recommend
-Watcom or Borland over Lcc. Lcc is still actively being developed and is
-getting better, but has some bugs that will make it difficult for you to
-compile a large Windows program correctly. Watcom and Borland are both rock
-solid. Watcom usually produces slightly smaller, slightly faster executables,
-but Borland compiles much faster.
-
-The Watcom DOS32 package includes the ~CauseWay DOS extender and file
-compressor. ~CauseWay is now open source and free. You can find out more about
-it at: [[http://www.devoresoftware.com]]
-
-##emake.bat## and ##objfiles.lnk## will link in the ~CauseWay extender
-automatically. Other DOS extenders, such as DOS4GW, do not work well with the
-**Translator**.
-
-The **Translator** looks for "WATCOM", "LCC", "BORLAND" or "DJGPP" as either
-environment variables or directories on your ##PATH##. It will generate an
-##emake.bat## file that invokes the appropriate compiler and linker.
+GNU C will exist already on your //Unix// system. The others can be
+downloaded from their respective Web sites.
 
 ==== Notes:
 
-* Unlike Watcom, DJGPP does not map DOS low memory into the same segment as
-other memory. Machine code routines written for the Watcom-based **Euphoria
-Interpreter** or **Translator** will not work with DJGPP, and will likely
-crash if they try to access low memory, such as video memory. Euphoria's
-##peek()##, ##poke()##, ##mem_copy()##, ##mem_set()## etc. //will// work
-correctly, as the **Translator** uses a special DJGPP macro to access low
-memory. You can port these machine code routines to DJGPP, but you'll need to
-consult the DJGPP docs for the possible ways of accessing low memory.
-* DJGPP fully supports long filenames for reading, writing and creation.
-Watcom doesn't support creation.
-* The Translator with DJGPP does not support use of the mouse.
-* The Allegro graphics library, that we use with DJGPP, seems to be much
-faster than the Watcom graphics library in many cases.
-* DJGPP supports a few more text modes, e.g. 35-line mode.
-* DJGPP lets the user abort a program at any time, by typing control-c.
-* The Lcc implementation ignores ##lock_file()## and ##unlock_file()##. They do nothing.
-* The **Translator** uses Lcc's ##-O## optimization
-flag in ##emake.bat##. This flag can sometimes add to Lcc's unreliability. If 
-your program 
-doesn't work, try passing
-##-lccopt-off## to the command line of ##ecu/ecw##. This will disable the use of the
-lcc optimization flag.
-* Warnings are turned off when compiling with ##emake.bat##. If you turn them on, you may see some
-harmless messages about variables declared but not used, labels defined but
-not used, function prototypes not declared etc.
-* On //Windows//, the Watcom linker might issue a warning that it can't open
-##graph.lib##. You can ignore this. ##graph.lib## is not used. There doesn't seem to
-be an easy way to suppress this message. The latest version of Open Watcom
-seems to have corrected this.
-* With Borland and Lcc, Windows console (text-mode) programs cannot read the
-F-keys or arrow keys, and you may have to hit the Enter key twice. There is no
-problem with GUI programs.
-* The Microsoft C~+~+ compiler for Windows is not yet supported. However you can
-probably import the C files generated by ##ecw.exe##, and the run-time library file for Borland,
-Lcc or Watcom into a Microsoft project, and compile/link with only minor
-glitches.
+* Warnings are turned off when compiling with ##emake.bat##. If you turn them 
+on, you may see some
+ harmless messages about variables declared but not used, labels defined but
+ not used, function prototypes not declared etc.
+* Options ##-bor## and ##-lcc## for previously supported compilers on 
+//Windows// no longer work. 
+* For the ##-gcc## option on //Windows// you will need a ##libeu.a## compiled 
+with //minGW// or //Cygwin//. The official distribution may only contain 
+##eu.lib## compiled with //Watcom//. Also, the ##-stack## and ##-con## options 
+may not produce the expected result with //GCC C//.
+* Currently, only 32-bit compilers are supported on 64-bit platforms.
 
 === How to Run the Translator
 
-Running the **Translator** is similar to running
-the **Interpreter**. On DOS you would type:
+Running the **Translator** is similar to running the **Interpreter**.
+
+On //Windows// you would type:
 
 {{{
-ec allsorts.ex
-
--- or  --
-
-ec allsorts
+euc taskwire.exw
 }}}
 
-On Windows you would type:
+On //Unix// you would type:
 
 {{{
-ecw taskwire.exw
-}}}
-
-On Linux/FreeBSD you would type:
-
-{{{
-ecu qsort.exu
+euc qsort.ex
 }}}
 
 but instead of running the ##allsorts.ex## program, the **Translator** will
@@ -131,79 +80,67 @@ and the C source files will have been removed to avoid clutter.
 
 When you run ##allsorts.exe##, it should run the same as if you had typed:
 
-##ex allsorts##
+##eui allsorts##
 
 to run it with the **Interpreter**, except that it should run faster, showing
-reduced times for the various sorting algorithms in ##euphoria\demo\allsorts.ex##.
+reduced times for the various sorting algorithms in 
+##euphoria\demo\allsorts.ex##.
 
 After creating your executable file, emake removes all the C files that were
 created. If you want to look at these files, run the translator again and look
 at the files before running emake.
 
-==== Note to Linux, FreeBSD and OSX users:
+==== Note to Unix users:
 
 The files will be called ##emake## and ##shell##, and you type ##./emake## to
 perform the compiles and link, and **./shell** to run the shell sort program.
-  
-==== Note to Borland and Lcc users:
 
-For Borland and Lcc there is no standard environment variable, so the
-**Translator** will search your ##PATH## variable looking for a likely
-compiler directory. It looks in standard places such as: ##..\LCC##, ##..\BCC##,
-##..\Borland##, etc. If you've installed in a nonstandard place you might have to
-rename your installation directory. To edit your ##PATH## variable on //Windows XP//,
-click: //Start Menu / Control Panel / Performance and Maintenance / System /
-Advanced / Environment Variables / User variables// for ... Then Select //PATH// and
-edit its value. Insert somewhere: ##C:\BORLAND\BCC55\BIN;## or ##C:\LCC\BIN;## Then
-click //OK// a couple of times to close the windows. The next DOS window you open
-should have the new value.
-     
 === Command-Line Options
 
 If you happen to have more than one C compiler for a given platform, you can
 select the one you want to use with a command-line option:
 
 {{{
--bor
--lcc
 -wat
--djg
+-gcc
 }}}
-	
-on the command line to **ec** or **ecw**. e.g.
+
+on the command line to **euc** or **euc**. e.g.
 
 {{{
-ecw -bor pretend.exw
+euc -gcc pretend.exw
 }}}
 
-Normally, after building your ##.exe## file, the **emake** batch file will delete
+Note: //Watcom// is the default on //Windows// and -wat is assumed.
+Normally, after building your ##.exe## file, the **emake** batch file will 
+delete
 all C files and object files produced by the Translator. If you want **emake**
 to keep these files, add the ##-keep## option to the Translator command-line.
 e.g.
 
 {{{
-ec -wat -keep sanity.ex
+euc -wat -keep sanity.ex
 }}}
 
-To make a //Windows// ##.dll## file, or //Linux// or //FreeBSD// ##.so## file, just
+To make a shared dynamically loading library, just
 add ##-dll## to the command line. e.g.
 
 {{{
-ecw -bor -dll mylib.ew
+euc -wat -dll mylib.ew
 }}}
 
 To make a //Windows// console program instead of a //Windows// GUI program,
 add ##-con## to the command line. e.g.
 
 {{{
-ecw -bor -con myprog.exw
+euc -wat -con myprog.exw
 }}}
 
 To increase or decrease the total amount of stack space reserved for your
 program, add ##-stack nnnn## to the command line. e.g.
 
 {{{
-ec -stack 100000 myprog.ex
+euc -stack 100000 myprog.ex
 }}}
 
 The total stack space (in bytes) that you specify will be divided up among all
@@ -217,39 +154,11 @@ calls that a task might need. At run-time, as your program creates more
 simultaneously-active tasks, the stack space allotted to each task will tend
 to decrease.
 
-When using LCC, sometimes the default optimization causes problems. You can
-disable this optimization by adding ##-lccopt-off## to the command
-line.
-
-{{{
-ecw -lcc -lccopt-off myprog.exw
-}}}
-
-To make a //DOS// program, compiled by WATCOM, that uses fast hardware
-floating-point instructions, add ##-fastfp## to the command line. e.g.
-
-{{{
-ec -wat -fastfp crunch.ex
-}}}
-
-By default, Euphoria for DOS calls routines to test if hardware floating-point
-instructions are available. If they are not, then slower software emulation
-code is used. When ##-fastfp## is specified, the compiled code will assume the
-existence of hardware floating-point. This can cause floating-point intensive
-programs to run about twice as fast, but they will fail to run at all on old
-486's and 386's that are lacking hardware floating-point support. With
-##-fastfp##, ##emake.bat## chooses faster WATCOM C compiler options, and
-##emake.bat## must also link in ##ecfastfp.lib## instead of ##ec.lib##.
-
-On all other platforms, Euphoria uses fast hardware floating-point
-instructions, and the operating system handles the case where hardware f.p. is
-missing.
-
 To compile your program with debugging information, usable with a debugger
 compatible with your compiler, use the ##-debug## option:
 
 {{{
-ecu -debug myapp.exu
+euc -debug myapp.ex
 }}}
 
 It is sometimes useful to link your translated code to a Euphoria runtime
@@ -259,31 +168,33 @@ additional debugging information when debugging translated Euphoria code. Note
 that only the default library is supplied. Use the ##-lib {library}## option:
 
 {{{
-ecu -lib decu.a myapp.exu
+euc -lib decu.a myapp.ex
 }}}
 
 {{{
--plat DOS
 -plat FREEBSD
 -plat LINUX
 -plat OSX
 -plat WIN
+-plat NETBSD
+-plat OPENBSD
+-plat SUNOS
 }}}
-Use one of these options to translate code for the specified platform, even
-if running on a different platform.  The default will always be the native
-platform of the translator that is executed, so ##ec.exe## will default to
-DOS, while ##ecw.exe## will default to windows, and ##ecu## will default
-to the platform upon which it was built.
 
-The resulting output can be compiled by the appropriate compiler on the 
+Use one of these options to translate code into C for the specified platform.  
+The default will always be the native
+platform of the translator that is executed, so ##euc.exe## will default
+to //Windows//, and ##euc## will default to the platform upon which it was 
+built.
+
+The resulting output can be compiled by the appropriate compiler on the
 specified platform, or, possibly a cross platform compiler, if you have
 one configured.
 
 === Dynamic Link Libraries (Shared Libraries)
 
-Simply by adding ##-dll## to the command line, the **Translator** will build a
-//Windows// ##.dll## (//Linux/FreeBSD// ##.so##) file instead of an executable
-program.
+Simply by adding ##-dll## to the command line, the **Translator** will build a 
+shared dynamically loading library instead of an executable program.
 
 You can translate and compile a set of useful Euphoria routines, and share
 them with other people, without giving them your source. Furthermore, your
@@ -291,58 +202,53 @@ routines will likely run much faster when translated and compiled. Both
 translated/compiled and interpreted programs will be able to use your library.
 
 Only the global Euphoria procedures and functions, i.e. those declared with
-the "##global##", "##public##" or "##export##" keyword, will be exported from 
-the ##.dll## (##.so##).
+the "##global##", "##public##" or "##export##" keyword, will be exported from
+the shared dynamically loaded library.
 
-Any Euphoria program, whether translated/compiled or interpreted, can link
-with a Euphoria ##.dll## (##.so##) using the same mechanism that lets you link with a
-##.dll## (##.so##) written in C. The program first calls [[:open_dll]]() to open the
-##.dll## or ##.so## file, then it calls [[:define_c_func]]() or [[:define_c_proc]]() for
+Any Euphoria program, whether translated or compiled or interpreted, can link
+with a Euphoria shared dynamically loading library using the same mechanism that
+lets you link with a shared dynamically loading library written in C. The 
+program first calls [[:open_dll]]() to open the
+file, then it calls [[:define_c_func]]() or [[:define_c_proc]]() for
 any routines that it wants to call. It calls these routines using [[:c_func]]()
 and [[:c_proc]]().
 
-The routine names exported from a Euphoria ##.dll## will vary depending on which C
-compiler you use.
+The routine names exported from a Euphoria shared dynamically loading library 
+will vary depending on which C compiler you use.
 
-GNU C on //Linux// or //FreeBSD// exports the names exactly as they appear in the C
+GNU C on Unix exports the names exactly as they appear in the C
 code produced by the **Translator**, e.g. a Euphoria routine
 
 {{{
 global procedure foo(integer x, integer y)
 }}}
 
-would be exported as "##_0foo##" or maybe "##_1foo##" etc. The underscore and digit
-are added to prevent naming conflicts. The digit refers to the Euphoria file
-where the identifier is defined. The main file is numbered as 0. The include files
-are numbered in the order they are encountered by the compiler. You should
-check the C source to be sure.
+would be exported as "##_0foo##" or maybe "##_1foo##" etc. The underscore and 
+digit are added to prevent naming conflicts. The digit refers to the Euphoria 
+file where the identifier is defined. The main file is numbered as 0. The 
+include files are numbered in the order they are encountered by the compiler. 
+You should check the C source to be sure.
 
-Lcc would export ##foo()## as "##~__0foo@8##", where 8 is the number of parameters (2)
-times 4. You can check the ##.def## file created by the **Translator** to see all
-the exported names.
+For Watcom, the **Translator** also creates an EXPORT command, added to 
+##objfiles.lnk## for each exported identifier, so ##foo()## would be exported as
+"##foo##".
 
-For Borland the **Translator** also creates a ##.def## file, but this ##.def## file
-renames the exported identifiers back into the same names that you used in your
-Euphoria source, so ##foo()## would be exported as "##foo##". 
-
-For Watcom the same renaming as with Borland occurs, but instead of a ##.def##
-file, an EXPORT command is added to ##objfiles.lnk## for each exported identifier.
-
-With Borland and Watcom you can edit the ##.def## or ##objfiles.lnk## file, and
+With Watcom you can edit the ##objfiles.lnk## file, and
 rerun ##emake.bat##, to rename the exported identifiers, or remove ones that you
-don't want to export. With Lcc you can remove identifiers but you can't rename
-them.
+don't want to export.
 
 Having nice exported names is not critical, since the name need only appear
-once in each Euphoria program that uses the .dll, i.e. in a single
-[[:define_c_func]]() or [[:define_c_proc]]() statement. The author of a .dll
+once in each Euphoria program that uses the shared dynamically loading library, 
+i.e. in a single [[:define_c_func]]() or [[:define_c_proc]]() statement. The 
+author of a shared dynamically loading library
 should probably provide his users with a Euphoria include file containing the
 necessary [[:define_c_func]]() and [[:define_c_proc]]() statements, and he might
 even provide a set of Euphoria "wrapper" routines to call the routines in the
-.dll.
+shared dynamically loading library.
 
-When you call [[:open_dll]](), any top-level Euphoria statements in the .dll or
-.so will be executed automatically, just like a normal program. This gives the
+When you call [[:open_dll]](), any top-level Euphoria statements in the shared 
+dynamically loading library will be executed automatically, just like a normal 
+program. This gives the
 library a chance to initialize its data structures prior to the first call to
 a library routine. For many libraries no initialization is required.
 
@@ -351,7 +257,9 @@ Euphoria object as a result, you will need to use the following constants in
 ##euphoria\include\dll.e##:
 
 <eucode>
--- Euphoria types for .dll (.so) arguments and return values:
+-- Euphoria types for shared dynamically loading library arguments 
+-- and return values:
+
 global constant
     E_INTEGER = #06000004,
     E_ATOM    = #07000004,
@@ -359,20 +267,23 @@ global constant
     E_OBJECT  = #09000004
 </eucode>
 
-Use these in **define_c_proc()** and **define_c_func()** just as you currently
-use ##C_INT##, ##C_UINT## etc. to call C .dll's and .so's.
+Use these in ##define_c_proc##() and ##define_c_func##() just as you currently
+use ##C_INT##, ##C_UINT## etc. to call C shared dynamically loading libraries.
 
 Currently, file numbers returned by [[:open]](), and routine id's returned by
 [[:routine_id]](), can be passed and returned, but the library and the main
 program each have their own separate ideas of what these numbers mean. Instead
 of passing the file number of an open file, you could instead pass the file
-name and let the .dll (.so) open it. Unfortunately there is no simple solution
-for passing routine id's. This might be fixed in the future.
+name and let the shared dynamically loading library open it. Unfortunately there
+is no simple solution for passing routine id's. This might be fixed in the 
+future.
 
-A Euphoria .dll or .so currently may not execute any multitasking operations.
-The Translator will give you an error message about this.
+A Euphoria shared dynamically loading library currently may not execute any 
+multitasking operations. The Translator will give you an error message about 
+this.
 
-Euphoria .dlls (.so's) can also be used by C programs as long as only 31-bit
+Euphoria shared dynamically loading library can also be used by C programs as 
+long as only 31-bit
 integer values are exchanged. If a 32-bit pointer or integer must be passed,
 and you have the source to the C program, you could pass the value in two
 separate 16-bit integer arguments (upper 16 bits and lower 16 bits), and then
@@ -381,17 +292,9 @@ combine the values in the Euphoria routine into the desired 32-bit atom.
 === Executable Size and Compression
 
 
-On DOS32 with Watcom, if the **Translator** finds the ~CauseWay files,
-##cwc.exe## and ##le23p.exe## in ##euphoria\bin##, it will add commands to
-##emake.bat## that will compress your executable file. If you don't want
-compression, you can edit ##emake.bat##, or remove or rename ##cwc.exe##
-and/or ##le23p.exe##.
-
-On //Linux//, //FreeBSD//, //Windows//, and //DOS32// with DJGPP, **emake**
-does not include a command to compress your executable file. If you want to do
-this we suggest you try the free UPX compressor. You can get UPX from:
-              
-[[http://upx.sourceforge.net]]
+**emake** does not include a command to compress your executable file.
+If you want to do this we suggest you try the free
+[[UPX -> http://upx.sourceforge.net]] compressor.
 
 Large Win32Lib-based .exe's produced by the Translator can be compressed by
 UPX to about 15% of their original size, and you won't notice any difference
@@ -402,7 +305,7 @@ the standard Euphoria include files. After deleting unused routines, it checks
 again for more routines that have now become unused, and so on. This can make
 a big difference, especially with Win32Lib-based programs where a large file
 is included, but many of the included routines are not used in a given
-program. 
+program.
 
 Nevertheless, your compiled executable file will likely be larger than the
 same Euphoria program bound with the interpreter **back-end**. This is partly
@@ -418,7 +321,7 @@ noted below, will run the same as with the **Interpreter** (but hopefully
 faster).
 
 The **Interpreter** and **Translator** share the same parser, so you will get
-the same syntax errors, variable not declared errors etc. with either one. 
+the same syntax errors, variable not declared errors etc. with either one.
 
 
 The **Interpreter** automatically expands the call stack (until memory is
@@ -428,7 +331,7 @@ Consult your compiler or linker manual if you want to increase the limit, for
 example if you have a recursive routine that might need thousands of levels of
 recursion. Modify the link command in ##emake.bat##. For Watcom C, use ##OPTION
 STACK=nnnn##, where nnnn is the number of bytes of stack space.
-  
+
 ==== Note:
 
 The **Translator** assumes that your program has no run-time errors in it that
@@ -448,29 +351,25 @@ translator-detected error message is displayed (and stored in ##ex.err##), you
 will also see the offending line of Euphoria source whenever ##with trace## is
 in effect. ##with trace## will slow your program down, and the slowdown can be
 extreme when ##trace(3)## is also in effect.
-  
+
 === Legal Restrictions
 
-As far as RDS is concerned, any executable programs or .dll's that you create
+As far as RDS is concerned, any executable programs or shared dynamically 
+loading libraries that you create
 with this **Translator** without modifying an RDS translator library file, may
 be distributed royalty-free. You are free to incorporate any Euphoria files
-provided by RDS into your application. 
-  
-In January 2000, the ~CauseWay DOS extender was donated to the public domain by
-Michael Devore. He has surrendered his copyright, and encourages anyone to use
-it freely, including for commercial use.
+provided by RDS into your application.
 
-In general, if you wish to use Euphoria code written by 3rd parties, you had
-better honor any restrictions that apply. If in doubt, you should ask for
-permission.
+In general, if you wish to use Euphoria code written by 3rd parties, please
+honor any restrictions that apply. If in doubt, you should ask for permission.
 
-On //Linux//, //FreeBSD// and DJGPP for //DOS32//, the GNU Library licence
+On //Linux//, //FreeBSD//, the GNU Library licence
 will normally not affect programs created with this **Translator**. Simply
 compiling with GNU C does not give the Free Software Foundation any
 jurisdiction over your program. If you statically link their libraries you
 will be subject to their Library licence, but the standard compile/link
 procedure in ##emake## does not statically link any FSF libraries, so there
-should be no problem. 
+should be no problem.
 
 
 The Allegro graphics library, used by DJGPP, is referred to as "Giftware" in
@@ -480,9 +379,9 @@ program. They ask for, but do not require, some acknowledgement.
 === Disclaimer:
 
 This is what we believe to be the case. We are not lawyers. If it's important
-to you, you should read the GNU Library licence, the legal comments in DJGPP,
-Lcc and Borland, and Michael Devore's read.me file on his site, to form your
-own judgement.
+to you, you should read **all** licences and the legal comments in them,
+to form your own judgment. You may need to get professional legal opinion as 
+well.
 
 === Frequently Asked Questions
 
@@ -493,14 +392,10 @@ mainly integer calculations, don't call run-time routines very often, and
 don't do much I/O will see the greatest improvement, currently up to about 5x
 faster. Other programs may see only a few percent improvement.
 
-The various C compilers are not equal in optimization ability. Watcom, GNU C
-and DJGPP produce the fastest code. Borland is fairly good. Lcc lags slightly
-behind the others, even when its ##-O## flag is used.
+The various C compilers are not equal in optimization ability.
 
-Borland compiles the fastest. Watcom compiles the slowest.
-   
 ==== What if I want to change the compile or link options in emake.bat?
-   
+
 Feel free to do so, however you should copy ##emake.bat## to your own file
 called (say) mymake.bat, then run mymake.bat after running the Translator.
 Occasionally the number of ##.c## files produced by the Translator could change.
@@ -510,35 +405,26 @@ Occasionally the number of ##.c## files produced by the Translator could change.
 It's important to declare variables as integer where possible. In general, it
 helps if you choose the most restrictive type possible when declaring a
 variable.
-   
+
 Typical user-defined types will not slow you down. Since your program is
 supposed to be free of type_check errors, types are ignored by the Translator,
 unless you call them directly with normal function calls. The one exception is
 when a user-defined type routine has side-effects (i.e. it sets a global
-variable, performs pokes into memory, I/O etc.). In that case, if **with
-type_check** is in effect, the Translator will issue code to call the type
-routine and report any type_check failure that results.
-   
-On //Windows// and //DOS// we have left out the ##/ol## loop optimization for
+variable, performs pokes into memory, I/O etc.). In that case, if 
+##with type_check## is in effect, the Translator will issue code to call the 
+type routine and report any type_check failure that results.
+
+On //Windows// we have left out the ##/ol## loop optimization for
 Watcom's ##wcc386##. We found in a couple of rare cases that this option led
 to incorrect machine code being emitted by the Watcom C compiler. If you add
 it back in to your own version of ##emake.bat## you might get a slight
-improvement in speed, with a slight risk of buggy code. For DJGPP you might
-try ##-O6## instead of -O2.
-   
-For //DOS// we use the Watcom ##/fpc## option which generates calls to
-run-time routines to perform floating-point operations. If the machine has
-floating-point hardware it will be used by the routine, otherwise software
-emulation will be used. This slows things down somewhat, and isn't needed on
-Pentiums, but it guarantees that your program will run on all 386 and 486
-machines, even if they lack floating-point hardware. The //DOS// run-time library,
-##ec.lib##, was built this way, so you can't simply remove this option. 
-   
+improvement in speed, with a slight risk of buggy code.
+
 On //Linux// or //FreeBSD// you could try the ##-O3## option of gcc instead of
 ##-O2##. It will "in-line" small routines, improving speed slightly, but
 creating a larger executable. You could also try the
-[[http://www.intel.com/cd/software/products/asmo-na/eng/compilers/clin/index.htm|Intel C~+~+ Compiler for Linux]]. It's compatible with GNU C, but some adjustments to
-##emake## might be required.
+[[http://www.intel.com/cd/software/products/asmo-na/eng/compilers/clin/index.htm|Intel C~+~+ Compiler for Linux]].
+It's compatible with GNU C, but some adjustments to ##emake## might be required.
 
 === Common Problems
 
@@ -550,9 +436,8 @@ of the supported C compilers, and the Translator is now quite stable.
 On //Windows//, if you call a C routine that uses the cdecl calling convention
 (instead of stdcall), you must specify a '##+##' character at the start of the
 routine's name in [[:define_c_proc]]() and [[:define_c_func]](). If you don't,
-the call may work when running the ##exw## Interpreter, but will probably fail
-(crash) when you translate and compile with Borland or Lcc.
-  
+the call may not work when running the ##eui## Interpreter.
+
 In some cases a huge Euphoria routine is translated to C, and it proves to be
 too large for the C compiler to process. If you run into this problem, make
 your Euphoria routine smaller and simpler. You can also try turning off C
@@ -563,9 +448,9 @@ on the size of a routine, or the size of a file, but most C compilers do. The
 Translator will automatically produce multiple small .c files from a large
 Euphoria file to avoid stressing the C compiler. It won't however, break a
 large routine into smaller routines.
-  
 
-Post bug reports on EUforum.
+
+Post bug reports on [[http://www.openeuphoria.org/forum/index.wc|EUforum]].
 
 In particular, report any program that does not run the same when compiled as
 it does when interpreted.

@@ -7,12 +7,11 @@
 		----------------------------------------------------------
 
 -- This program can be run with:
---     ex ed (quick response on 95/98/ME)
+--     eui  ed.ex (Windows or UNIX to use the current console Window)
 -- or
---     exu ed.ex  (Linux / FreeBSD)
--- or
---     exwc ed.ex (quicker response on XP 
---                 but some control-key combinations aren't recognized)
+--     euiw ed.ex (Windows will create a new Window you'll have to maximize)
+--  
+-- On XP some control-key combinations aren't recognized)
 --
 -- How it Works:
 -- * Using gets(), ed reads and appends each line of text into a 2-d "buffer",
@@ -32,6 +31,7 @@
 --   not even "aware" that there can be multiple-windows.
 
 without type_check -- makes it a bit faster
+without warning
 
 include std/graphics.e
 include std/graphcst.e
@@ -58,7 +58,7 @@ constant CONTROL_B = 2,
 		 CONTROL_T = 20,
 		 CONTROL_U = 21   -- alternate key for PAGE-UP in Linux
 		 
-constant CAPS_LOCK = 314  -- exwc only
+constant CAPS_LOCK = 314  -- eui only
 
 integer ESCAPE, CR, NUM_PAD_ENTER, BS, HOME, END, CONTROL_HOME, CONTROL_END,
 		PAGE_UP, PAGE_DOWN, INSERT, NUM_PAD_SLASH,
@@ -100,8 +100,7 @@ ifdef UNIX then
 	CONTROL_DELETE = DELETE -- key for line-delete 
 							-- (not available on some systems)
 	NUM_PAD_SLASH = -999  -- Please check on console and Xterm
-elsedef
-	-- DOS/Windows
+elsifdef WINDOWS then
 	SAFE_CHAR = 14
 	delete_cmd = "del "
 	compare_cmd = "fc /T "
@@ -110,8 +109,8 @@ elsedef
 	BS = 8
 	HOME = 327
 	END = 335
-	CONTROL_HOME = 375
-	CONTROL_END = 373
+	CONTROL_HOME = 583
+	CONTROL_END = 591
 	PAGE_UP = 329
 	PAGE_DOWN = 337
 	INSERT = 338
@@ -119,27 +118,17 @@ elsedef
 	XDELETE = -999 -- never
 	ARROW_LEFT = 331
 	ARROW_RIGHT = 333
-	CONTROL_ARROW_LEFT = 371
-	CONTROL_ARROW_RIGHT = 372
+	CONTROL_ARROW_LEFT = 587
+	CONTROL_ARROW_RIGHT = 589
 	ARROW_UP = 328
 	ARROW_DOWN = 336
 	F1 = 315
-	F10 = 324
-	
-	ifdef WIN32 then
-				F11 = 343
-				F12 = 344
-				NUM_PAD_ENTER = 284
-				NUM_PAD_SLASH = 309
-	elsedef
-				F11 = 389
-				F12 = 390
-				NUM_PAD_ENTER = 13
-				NUM_PAD_SLASH = -999 -- Never needed
-	end ifdef
-	
-	CONTROL_DELETE = 403 -- key for line-delete 
-						 -- (not available on some systems)
+	F10 = 324	
+	F11 = 343
+	F12 = 344
+	NUM_PAD_ENTER = 284
+	NUM_PAD_SLASH = 309	
+	CONTROL_DELETE = 595 -- key for line-delete 
 end ifdef
 
 
@@ -199,7 +188,7 @@ constant SHIFT = 4   -- 1..78 should be ok
 constant TEMPFILE = "editbuff.tmp" 
 
 constant ACCENT = 0  -- Set to 1 enables read accented characters from
-					 -- keyboard. Usefull to write on spanish keyboard, 
+					 -- keyboard. Useful to write on spanish keyboard, 
 					 -- may cause problems on Windows using us-international 
 					 -- keyboard layout
 
@@ -520,7 +509,6 @@ procedure DisplayLine(buffer_line bline, window_line sline, boolean all_clear)
 	end if
 end procedure
 
-without warning
 procedure DisplayWindow(positive_int bline, window_line sline)
 -- print a series of buffer lines, starting at sline on screen
 -- and continue until the end of screen, or end of buffer
@@ -546,7 +534,6 @@ procedure DisplayWindow(positive_int bline, window_line sline)
 		ClearLine(s)
 	end for
 end procedure
-with warning
 
 procedure set_position(natural window_line, positive_int column)
 -- Move cursor to a logical screen position within the window.
@@ -573,7 +560,7 @@ procedure set_position(natural window_line, positive_int column)
 	end if
 end procedure
 
-without warning
+
 function clean(sequence line)
 -- replace control characters with a graphics character
 -- Linux: replace CR-LF with LF (for now)
@@ -600,7 +587,7 @@ function clean(sequence line)
 	end for
 	return line
 end function
-with warning
+
 
 function add_line(file_number file_no)
 -- add a new line to the buffer
@@ -1370,7 +1357,7 @@ procedure new_screen_length()
 	if nlines then
 		screen_length = text_rows(nlines)
 		if screen_length != nlines then
-			sound(500)
+			--sound(500)
 		end if
 		w = window_number
 		save_state()
@@ -1378,7 +1365,7 @@ procedure new_screen_length()
 		refresh_other_windows(w)
 		restore_state(w)
 		if screen_length != nlines then
-			sound(0)
+			--sound(0)
 		end if
 	end if
 end procedure
@@ -1736,9 +1723,9 @@ procedure get_escape(boolean help)
 		first_bold("new ")
 		if dot_e then
 			ifdef UNIX then
-				first_bold("exu ")
+				first_bold("eui ")
 			elsedef
-				first_bold("ex ")
+				first_bold("eui ")
 			end ifdef
 		end if
 		first_bold("dos ")
@@ -1818,13 +1805,13 @@ procedure get_escape(boolean help)
 			end ifdef
 		end if
 		ifdef UNIX then
-			shell("exu \"" & file_name & "\"")
+			shell("eui \"" & file_name & "\"")
 		elsedef
 			if match(".exw", lower(file_name)) or 
 				  match(".ew",  lower(file_name)) then
-				shell("exw \"" & file_name & "\"")
+				shell("euiw \"" & file_name & "\"")
 			else
-				shell("ex \"" & file_name & "\"")
+				shell("eui \"" & file_name & "\"")
 			end if
 		end ifdef
 		goto_line(0, b_col)
@@ -1859,31 +1846,23 @@ procedure get_escape(boolean help)
 		self_command = getenv("EUDIR")
 		if atom(self_command) then
 			-- Euphoria hasn't been installed yet 
-			set_top_line("EUDIR not set. See install.doc")
+			set_top_line("EUDIR not set. See installation documentation.")
 		else    
-			if HOT_KEYS then
-				self_command = {ESCAPE, 'c', ESCAPE, 'n'} & self_command 
-			else
-				self_command = {ESCAPE, 'c', '\n', ESCAPE, 'n', '\n'} & self_command 
-			end if
-			self_command &= SLASH & "doc"
+			self_command &= SLASH & "docs"
 			if help then
 				set_top_line(
 				"That key does nothing - do you want to view the help text? ")
 				answer = key_gets("yn", {}) & ' '
-				if answer[1] != 'n' and answer[1] != 'N' then
-					answer = "e"
+				if answer[1] = 'n' or answer[1] = 'N' then
+					set_top_line("")
+				else
+					answer = "yes"
 				end if
 			else
-				set_top_line("ed.doc, refman.doc, or library.doc? (e, r or l): ")
-				answer = key_gets("erl", {}) & ' '
+				answer = "yes"
 			end if
-			if answer[1] = 'r' then
-				add_queue(self_command & SLASH & "refman.doc" & CR)
-			elsif answer[1] = 'e' then
-				add_queue(self_command & SLASH & "ed.doc" & CR)
-			elsif answer[1] = 'l' then
-				add_queue(self_command & SLASH & "library.doc" & CR)
+			if answer[1] = 'y' then
+				system(self_command & SLASH & "html" & SLASH & "index.html")
 			else
 				normal_video()
 			end if
@@ -2019,7 +1998,7 @@ procedure try_auto_complete(char key)
 				 leading_white &= '\t'
 			
 			elsif wordnum > 0 then
-				sound(1000)
+				--sound(1000)
 				-- expandable word (only word on line)
 
 				begin = expand_text[wordnum] & CR & leading_white
@@ -2036,8 +2015,8 @@ procedure try_auto_complete(char key)
 								  leading_white &
 								  "end " & expand_word[wordnum])
 				end if
-				delay(0.07) -- or beep is too short
-				sound(0)
+				--delay(0.07) -- or beep is too short
+				--sound(0)
 			end if
 		end if
 	end if
@@ -2277,8 +2256,14 @@ procedure edit_file()
 					insert_kill_buffer()
 
 				elsif key = BS then
-					arrow_left()
-					delete_char()
+					if b_col > 1 then
+						arrow_left()
+						delete_char()
+					elsif b_line > 1 then
+						arrow_up()
+						goto_line(b_line, length(buffer[b_line]))
+						delete_char()						
+					end if
 
 				elsif key = HOME then
 					b_col = 1
@@ -2336,8 +2321,8 @@ procedure ed(sequence command)
 -- start editing a new file
 -- ed.ex is executed by ed.bat
 -- command line will be:
---    ex ed.ex              - get filename from ex.err, or user
---    ex ed.ex filename     - filename specified
+--    eui ed.ex              - get filename from ex.err, or user
+--    eui ed.ex filename     - filename specified
 
 	file_number file_no
 
@@ -2353,7 +2338,7 @@ procedure ed(sequence command)
 	else
 		file_name = get_err_line()
 	end if
-	wrap(0)
+	graphics:wrap(0)
 	if length(file_name) = 0 then
 		-- we still don't know the file name - so ask user
 		puts(SCREEN, "file name: ")
@@ -2397,6 +2382,13 @@ procedure ed(sequence command)
 	
 	if multi_color then
 		init_class()
+		set_colors({
+				{"NORMAL", NORMAL_COLOR},
+				{"COMMENT", COMMENT_COLOR},
+				{"KEYWORD", KEYWORD_COLOR},
+				{"BUILTIN", BUILTIN_COLOR},
+				{"STRING", STRING_COLOR},
+				{"BRACKET", BRACKET_COLOR}})	
 	end if
 
 	file_name = file_name[1..length(file_name)-1] -- remove ' '
@@ -2440,8 +2432,6 @@ procedure ed_main()
 	config = video_config()
 
 	if config[VC_XPIXELS] > 0 then
-		if graphics_mode(3) then
-		end if
 		config = video_config()
 	end if
 
@@ -2458,7 +2448,7 @@ procedure ed_main()
 
 	while length(window_list) > 0 do
 		ed(cl)
-		cl = {"ex", "ed.ex" , file_name}
+		cl = {"eui", "ed.ex" , file_name}
 	end while
 
 	-- exit editor
@@ -2466,13 +2456,7 @@ procedure ed_main()
 	if screen_length != FINAL_LINES then
 		screen_length = text_rows(FINAL_LINES)
 	end if
-	cursor(UNDERLINE_CURSOR)
-	bk_color(BLACK)
-	text_color(WHITE)
-	position(screen_length, 1)
-	puts(SCREEN, BLANK_LINE)
-	position(screen_length, 1)
-	puts(SCREEN, "\n")
+	clear_screen()
 	ifdef UNIX then
 		free_console()
 	end ifdef

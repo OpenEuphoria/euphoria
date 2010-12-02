@@ -1,5 +1,5 @@
 t_c_ifdef_no_then.e:3
-end of file reached while processing ifdef
+<0082>:: expecting possibly 'then' not end of line
 ifdef NOT_DEFINED
                 ^
 
