@@ -100,6 +100,7 @@
 * [[ticket:473]], euc --help display is now in a logical display order.
 * [[ticket:475]], Fixed memory leak with interpreted [[:rand]]
 * [[ticket:405]], ##dis.ex## no longer creates a build directory for no reason.
+* [[ticket:476]], ##euc## can now translated single character base filenames, i.e. h.ex
 
 === Enhancements/Changes
 
