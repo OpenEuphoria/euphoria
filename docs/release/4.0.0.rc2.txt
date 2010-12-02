@@ -99,6 +99,7 @@
 * [[ticket:472]], eui --help display is now in a logical display order.
 * [[ticket:473]], euc --help display is now in a logical display order.
 * [[ticket:475]], Fixed memory leak with interpreted [[:rand]]
+* [[ticket:405]], ##dis.ex## no longer creates a build directory for no reason.
 
 === Enhancements/Changes
 
