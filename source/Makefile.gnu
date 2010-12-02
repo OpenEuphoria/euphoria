@@ -216,7 +216,7 @@ endif
 ifdef WKHTMLTOPDF
 HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/euphoria-pdf.html $(CYPBUILDDIR)/euphoria-4.0.pdf
 else
-HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/index.html
+HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/euphoria-pdf.html
 endif
 
 ifeq "$(TRANSLATE)" "euc"
@@ -578,7 +578,7 @@ htmldoc : $(BUILDDIR)/html/index.html
 
 $(BUILDDIR)/pdf/euphoria-pdf.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
 	-mkdir -p $(BUILDDIR)/pdf
-	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o=$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
+	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o=$(CYPBUILDDIR)/pdf --htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
 
 $(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/euphoria-pdf.html  $(DOCDIR)/pdf.css
 	cp $(CYPTRUNKDIR)/docs/pdf.css $(CYPBUILDDIR)/pdf/
