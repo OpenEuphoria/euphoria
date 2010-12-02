@@ -1191,7 +1191,7 @@ end function
 -- Add a file to the generated files list that will later be used for
 -- writing build files (emake, makefile, etc...)
 export procedure add_file(sequence filename, sequence eu_filename = "")
-	if match(".c", filename) = (length( filename ) - 1) then
+	if equal("c", fileext(filename)) then
 		filename = filename[1..$-2]
 	elsif match( ".h", filename ) = (length( filename ) - 1) then
 		generated_files = append(generated_files, filename)
@@ -1200,7 +1200,7 @@ export procedure add_file(sequence filename, sequence eu_filename = "")
 		end if
 		return
 	end if
-
+	
 	sequence obj_fname = filename, src_fname = filename & ".c"
 
 	if compiler_type = COMPILER_WATCOM then
