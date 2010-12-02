@@ -53,7 +53,7 @@ public function parse_querystring(object query_string)
 		char = query_string[i]  -- character we're working on
 		switch char do
 			case HEX_SIG then
-				tmp = value("#" & query_string[i+1] & query_string[i+2])
+				tmp = stdget:value("#" & query_string[i+1] & query_string[i+2])
 				charbuf &= tmp[2]
 				i += 2 -- skip over hex digits
 				
@@ -221,7 +221,7 @@ label "parse_domain"
         	port_end = length(url)
         end if
 
-		port = defaulted_value(url[port_colon+1..port_end], 0)
+		port = stdget:defaulted_value(url[port_colon+1..port_end], 0)
     end if
     
     -- Increment the position to the next element to parse
@@ -366,11 +366,11 @@ public function decode(sequence what)
         -- strip empty percent sign
         what = what[1..k-1] & what[k+1 .. $]
       elsif k+1 = length(what) then
-        what[k] = value("#0" & what[k+1])
+        what[k] = stdget:value("#0" & what[k+1])
         what[k] = what[k][2]
         what = what[1..k] & what[k+2 .. $]
       else
-        what[k] = value("#" & what[k+1..k+2])
+        what[k] = stdget:value("#" & what[k+1..k+2])
         what[k] = what[k][2]
         what = what[1..k] & what[k+3 .. $]
       end if
