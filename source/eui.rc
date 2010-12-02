@@ -1,6 +1,6 @@
 #define VER_PRODUCT_NAME      "eui console\0"
 #define VER_FILE_DESCRIPTION  "Euphoria Interpreter (Console)\0"
-#define VER_ORIGINAL_FILENAME "eui.exe"
+#define VER_ORIGINAL_FILENAME "eui.exe\0"
 
 #include "version_info.rc"
 

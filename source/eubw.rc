@@ -1,6 +1,6 @@
 #define VER_PRODUCT_NAME      "eub windowed\0"
 #define VER_FILE_DESCRIPTION  "Euphoria Backend (Windowed)\0"
-#define VER_ORIGINAL_FILENAME "eubw.exe"
+#define VER_ORIGINAL_FILENAME "eubw.exe\0"
 
 #include "version_info.rc"
 

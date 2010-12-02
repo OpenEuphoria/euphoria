@@ -1,6 +1,6 @@
 #define VER_PRODUCT_NAME      "euiw windowed\0"
 #define VER_FILE_DESCRIPTION  "Euphoria Interpreter (Windowed)\0"
-#define VER_ORIGINAL_FILENAME "euiw.exe"
+#define VER_ORIGINAL_FILENAME "euiw.exe\0"
 
 #include "version_info.rc"
 
