@@ -1190,14 +1190,16 @@ end function
 --**
 -- Add a file to the generated files list that will later be used for
 -- writing build files (emake, makefile, etc...)
+
 export procedure add_file(sequence filename, sequence eu_filename = "")
 	if equal("c", fileext(filename)) then
 		filename = filename[1..$-2]
-	elsif match( ".h", filename ) = (length( filename ) - 1) then
+	elsif equal("h", fileext(filename)) then
 		generated_files = append(generated_files, filename)
 		if build_system_type = BUILD_DIRECT then
 			outdated_files  = append(outdated_files, 0)
 		end if
+		
 		return
 	end if
 	
@@ -1208,7 +1210,7 @@ export procedure add_file(sequence filename, sequence eu_filename = "")
 	else
 		obj_fname &= ".o"
 	end if
-
+	
 	generated_files = append(generated_files, src_fname)
 	generated_files = append(generated_files, obj_fname)
 	if build_system_type = BUILD_DIRECT then
@@ -1363,7 +1365,6 @@ export procedure GenerateUserRoutines()
 			ShowMsg(1, 239,,0)
 		end if
 
-
 		if LAST_PASS = TRUE then
 			ShowMsg(1, 240)
 		else
@@ -1372,8 +1373,7 @@ export procedure GenerateUserRoutines()
 	end if
 	
 	check_file_routines()
-	
-	
+		
 	c_puts("// GenerateUserRoutines\n")
 	for file_no = 1 to length(known_files) do
 		if file_no = 1 or any_code(file_no) then
