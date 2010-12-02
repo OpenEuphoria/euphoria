@@ -568,6 +568,7 @@ op_temp_ref[ARCTAN]           = NEW_REFERENCE
 op_temp_ref[LOG]              = NEW_REFERENCE
 op_temp_ref[GETS]             = NEW_REFERENCE
 op_temp_ref[GETENV]           = NEW_REFERENCE
+op_temp_ref[RAND]             = NEW_REFERENCE
 
 procedure cont11ii(integer op, boolean ii)
 -- if ii is TRUE then integer arg always produces integer result
