@@ -2669,6 +2669,8 @@ static unsigned int hsieh32(char *data, int len, unsigned int starthash)
     return hash;
 }
 
+char *hsieh_tempstr  = 0;
+int   hsieh_tempsize = 0;
 static unsigned int calc_hsieh32(object a)
 {
 
@@ -2682,10 +2684,10 @@ static unsigned int calc_hsieh32(object a)
 
 	object_ptr ap;
 	object av;
-	char *tempstr;
 	char *sp;
 	int slen;
  	unsigned int lHashVal;
+	int has_string;
 
 
 
@@ -2705,7 +2707,7 @@ static unsigned int calc_hsieh32(object a)
 		lHashVal = slen;
 		ap = SEQ_PTR(a)->base;
 		// Check for a byte array first.
-		tempstr = 0;
+		has_string = 0;
 		while (slen > 0) {
 			av = *(++ap);
 			slen--;
@@ -2715,33 +2717,35 @@ static unsigned int calc_hsieh32(object a)
 
 			if (IS_ATOM_INT(av)) {
 				if (av >= 0 && av <= 255) {
-					if (tempstr == 0) {
-						tempstr = EMalloc(SEQ_PTR(a)->length + 4);
-						sp = tempstr;
+					if ( !has_string ){
+						if(hsieh_tempstr == 0 || ( (SEQ_PTR(a)->length) > hsieh_tempsize) ) {
+							hsieh_tempsize = SEQ_PTR(a)->length;
+							if( hsieh_tempstr != 0 ){
+								hsieh_tempstr = ERealloc( hsieh_tempstr, hsieh_tempsize );
+							}
+							else{
+								hsieh_tempstr = EMalloc( hsieh_tempsize );
+							}
+						}
+						sp = hsieh_tempstr;
+						has_string = 1;
 					}
+					
 					*sp = (char)av;
 					sp++;
 				}
 				else {
-					if (tempstr != 0) {
-						EFree(tempstr);
-						tempstr = 0;
-					}
+					has_string = 0;
 					break;
 				}
 			}
 			else {
-				if (tempstr != 0) {
-					EFree(tempstr);
-					tempstr = 0;
-				}
+				has_string = 0;
 				break;
 			}
 		}
-		if (tempstr != 0) {
-			lHashVal = hsieh32(tempstr, SEQ_PTR(a)->length, lHashVal);
-			EFree(tempstr);
-			tempstr = 0;
+		if (has_string != 0) {
+			lHashVal = hsieh32( hsieh_tempstr, SEQ_PTR(a)->length, lHashVal);
 		}
 		else {
 			slen = SEQ_PTR(a)->length;
