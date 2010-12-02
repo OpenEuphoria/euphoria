@@ -1,0 +1,29 @@
+1 VERSIONINFO
+FILEVERSION 4,0,0,1
+PRODUCTVERSION 4,0,0,1
+FILEFLAGS 0x0L
+FILEOS 0x4L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+BEGIN
+  BLOCK "StringFileInfo"
+    BEGIN
+      BLOCK "040904E4"
+        BEGIN
+          VALUE "CompanyName",      "OpenEuphoria Group\0"
+          VALUE "FileDescription",  VER_FILE_DESCRIPTION
+          VALUE "FileVersion",      "4.0.0.RC2\0"
+          VALUE "InternalName",     VER_ORIGINAL_FILENAME
+          VALUE "LegalCopyright",   "Copyright (c) 2010 by OpenEuphoria Group\0"
+          VALUE "LegalTrademarks1", "\0"
+          VALUE "LegalTrademarks2", "\0"
+          VALUE "OriginalFilename", VER_ORIGINAL_FILENAME
+          VALUE "ProductName",      VER_PRODUCT_NAME
+          VALUE "ProductVersion",   "4.0.0.RC2\0"
+        END
+    END
+  BLOCK "VarFileInfo"
+    BEGIN
+      VALUE "Translation", 0x409, 1200
+    END
+END

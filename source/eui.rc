@@ -1,2 +1,8 @@
-eui ICON Euphoria.ico
-1 24 "eui.manifest"
+#define VER_PRODUCT_NAME      "eui console\0"
+#define VER_FILE_DESCRIPTION  "Euphoria Interpreter (Console)\0"
+#define VER_ORIGINAL_FILENAME "eui.exe"
+
+#include "version_info.rc"
+
+eui ICON euphoria.ico
+1 24 "eu.manifest"
