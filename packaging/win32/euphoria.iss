@@ -219,7 +219,7 @@ begin
                  mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES
       then
         begin
-          SaveStringToFile(euCfgFname, incLine + #13#10, True);
+          SaveStringToFile(euCfgFname, #13#10 + '[all]' + #13#10 + incLine + #13#10, True);
         end
       else
         MsgBox('Please ensure ' + euCfgFname + ' contains:' + #13#10 +
