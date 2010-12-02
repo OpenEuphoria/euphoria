@@ -1,8 +1,14 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 
 -- Store front-end data structures in memory
 -- Called from (a) interpreter front-end
 --          or (b) backend.ex (using different s.t. offsets)
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
 
 include std/machine.e
 
@@ -14,6 +20,8 @@ include reswords.e
 include error.e
 include cominit.e
 include compress.e
+include symtab.e
+include coverage.e
 
 procedure InitBackEnd(integer x)
 	if not BIND then
@@ -28,8 +36,6 @@ constant ST_ENTRY_SIZE = 60  -- size (bytes) of back-end symbol table entry
 
 constant SOURCE_CHUNK = 10000 -- copied from scanner.e !!
 
-without warning
-
 constant
 	ST_OBJ            = 0,
 	ST_NEXT           = 4,
@@ -40,6 +46,15 @@ constant
 	ST_DUMMY          = 15,
 	ST_NAME           = 16,
 	ST_TOKEN          = 20,
+	
+	-- var:
+	ST_DECLARED_IN    = 24,
+	
+	-- block:
+	ST_FIRST_LINE     = 24,
+	ST_LAST_LINE      = 28,
+	
+	-- routine:
 	ST_CODE           = 24,
 	ST_LINETAB        = 28,
 	ST_FIRSTLINE      = 32,
@@ -49,7 +64,26 @@ constant
 	ST_SAVED_PRIVATES = 48,
 	ST_STACK_SPACE    = 52,
 	ST_BLOCK          = 56
-	
+
+function get_next( symtab_index sym )
+	if get_backend() then
+		while sym and 
+		((sequence(SymTab[sym]) and sym_scope( sym ) = SC_UNDEFINED) or atom( SymTab[sym] ) ) do
+			if sequence(SymTab[sym]) then
+				sym = SymTab[sym][S_NEXT]
+			else
+				sym = SymTab[sym]
+			end if
+		end while
+	else
+		while sym and sym_scope( sym ) = SC_UNDEFINED do
+			sym = SymTab[sym][S_NEXT]
+			
+		end while
+	end if
+	return sym
+end function
+
 procedure BackEnd(integer il_file)
 -- Store the required front-end data structures in memory.
 -- Offsets are used in some places rather than pointers.
@@ -81,13 +115,13 @@ procedure BackEnd(integer il_file)
 		-- "constant" variables are initialized with executable code
 		if atom(eentry) then
 			-- deleted
-			poke4(addr + ST_NEXT, eentry) -- NEXT
+			poke4(addr + ST_NEXT, get_next( eentry) ) -- NEXT
 			poke(addr + ST_MODE, M_TEMP) -- MODE
 			poke(addr + ST_SCOPE, SC_UNDEFINED)  -- SCOPE, must be > S_PRIVATE 
 			
 		
 		else
-			poke4(addr + ST_NEXT, eentry[S_NEXT])
+			poke4(addr + ST_NEXT, get_next( eentry[S_NEXT]) )
 			poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK])
 			poke(addr + ST_MODE, eentry[S_MODE])
 			poke(addr + ST_SCOPE, eentry[S_SCOPE])
@@ -102,7 +136,7 @@ procedure BackEnd(integer il_file)
 			if eentry[S_MODE] = M_NORMAL then
 				-- vars and routines
 				
-				if find(eentry[S_TOKEN], {PROC, FUNC, TYPE}) then
+				if find(eentry[S_TOKEN], RTN_TOKS) then
 					-- routines only
 					if sequence(eentry[S_CODE]) and (get_backend() or eentry[S_OPCODE]=0) then  
 						-- routines with code
@@ -128,18 +162,24 @@ procedure BackEnd(integer il_file)
 					poke4(addr + ST_STACK_SPACE, eentry[S_STACK_SPACE])
 					poke4(addr + ST_BLOCK, eentry[S_BLOCK])
 					
+				else
+					poke4(addr + ST_DECLARED_IN, eentry[S_BLOCK] )
 				end if
 				
 			elsif eentry[S_MODE] = M_BLOCK then
 				poke4(addr + ST_NEXT_IN_BLOCK, eentry[S_NEXT_IN_BLOCK] )
 				poke4(addr + ST_BLOCK, eentry[S_BLOCK])
+				if length(eentry) >= S_FIRST_LINE then
+					poke4(addr + ST_FIRST_LINE, eentry[S_FIRST_LINE] )
+					poke4(addr + ST_LAST_LINE, eentry[S_LAST_LINE] )
+				end if
 				
 			elsif (length(eentry) < S_NAME and eentry[S_MODE] = M_CONSTANT) or
 			(length(eentry) >= S_TOKEN and compare( eentry[S_OBJ], NOVALUE )) then
 				-- compress constants and literal values in memory
 				poke4(addr, length(lit_string))  -- record the current offset
 				lit_string &= compress(eentry[S_OBJ])
-
+				
 			end if
 
 		end if
@@ -190,7 +230,9 @@ procedure BackEnd(integer il_file)
 		end if
 	end for
 	
-	SymTab = {}  -- free up some space
+	if not has_coverage() then
+		SymTab = {}  -- free up some space
+	end if
 	
 	-- slist is in run-length compressed form
 	-- elements might be atoms (rep count), or 2 or 4 wide sequences
@@ -242,11 +284,13 @@ procedure BackEnd(integer il_file)
 			eentry[LINE-short] += 1
 		end for
 	end for
-
-	slist = {}  -- free up some space
+	
+	if not has_coverage() then
+		slist = {}  -- free up some space
+	end if
 	
 	-- store file names and other variables
-	other_strings = append(file_name, file_name_entered) & warning_list
+	other_strings = append(known_files, file_name_entered) & warning_list
 	string_size = 0
 	for i = 1 to length(other_strings) do
 		string_size += length(other_strings[i])+1
@@ -260,7 +304,7 @@ procedure BackEnd(integer il_file)
 	poke4(ms+16, gline_number)
 	poke4(ms+20, il_file)
 	poke4(ms+24, length(warning_list))
-	poke4(ms+28, length(file_name)) -- stored in 0th position
+	poke4(ms+28, length(known_files)) -- stored in 0th position
 	
 	fn = allocate(string_size)
 	
@@ -290,7 +334,7 @@ procedure BackEnd(integer il_file)
 	if Argc > 2 then
 		Argv = {Argv[1]} & Argv[3 .. Argc]
 	end if
-	
-	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv})
+
+	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv })
 end procedure
 mode:set_backend( routine_id("BackEnd") )

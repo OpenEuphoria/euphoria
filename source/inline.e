@@ -1,5 +1,12 @@
+-- (c) Copyright - See License.txt
 -- inline.e
 -- Inlining euphoria routines
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
 
 include std/sort.e
 include std/map.e as map
@@ -31,6 +38,7 @@ sequence
 	proc_vars,
 	inline_temps,
 	passed_params,
+	original_params,
 	inline_params,
 	assigned_params
 
@@ -209,7 +217,7 @@ function adjust_il( integer pc, integer op)
 		elsif sub then
 			inline_code[pc+i] = {INLINE_SUB}
 		else
-			if op != STARTLINE then
+			if op != STARTLINE and op != COVERAGE_LINE and op != COVERAGE_ROUTINE then
 				check_target( pc, op )
 				if not adjust_symbol( pc + i ) then
 					return 0
@@ -243,7 +251,7 @@ function is_literal( symtab_index sym )
 end function
 
 function file_and_name( symtab_index sym )
-	return sprintf("%s:%s:%d", {file_name[SymTab[sym][S_FILE_NO]], SymTab[sym][S_NAME], sym})
+	return sprintf("%s:%s:%d", {known_files[SymTab[sym][S_FILE_NO]], SymTab[sym][S_NAME], sym})
 end function
 
 function returnf( integer pc )
@@ -252,7 +260,7 @@ function returnf( integer pc )
 	if equal( inline_code[$], BADRETURNF ) then
 		if TRANSLATE then
 			inline_code[$] = NOP1
-		else
+		elsif SymTab[inline_sub][S_TOKEN] = PROC then
 			replace_code( {}, length(inline_code), length(inline_code) )
 		end if
 		
@@ -272,6 +280,12 @@ function returnf( integer pc )
 		
 		if ret_pc and eu:compare( inline_code[ret_pc-1], PRIVATE_INIT_CHECK ) then
 			inline_code[ret_pc] = {INLINE_TARGET}
+			
+			if equal( inline_code[ret_pc-1], REF_TEMP ) then
+				-- when returning a temp, a REF_TEMP is injected between the generating
+				-- expression and the return op
+				inline_code[ret_pc-2] = {INLINE_TARGET}
+			end if
 		else
 			code = {ASSIGN, generic_symbol( retsym ), {INLINE_TARGET}}
 		end if
@@ -344,11 +358,21 @@ function inline_op( integer pc )
 		return ok
 		
 	elsif op_info[op][OP_SIZE_TYPE] = FIXED_SIZE then
-	
+		switch op do
+			case SWITCH, SWITCH_RT, SWITCH_I, SWITCH_SPI then
+				-- make a copy of the jump table
+				symtab_index original_table = inline_code[pc + 3]
+				symtab_index jump_table = NewStringSym( {-2, length(SymTab) } )
+				SymTab[jump_table][S_OBJ] = SymTab[original_table][S_OBJ]
+				inline_code[pc+3] = jump_table
+		end switch
 		return adjust_il( pc, op )
 		
 	else
 		switch op with fallthru do
+			case REF_TEMP then
+				inline_code[pc+1] = {INLINE_TARGET}
+				
 			case CONCAT_N then
 			case RIGHT_BRACE_N then
 				
@@ -384,7 +408,7 @@ end procedure
 --    * OpTrace is on
 export procedure check_inline( symtab_index sub )
 	
-	if OpTrace then
+	if OpTrace or SymTab[sub][S_TOKEN] = TYPE then
 		return
 	end if
 	inline_sub      = sub
@@ -418,8 +442,12 @@ export procedure check_inline( symtab_index sub )
 		s = SymTab[s][S_NEXT]
 	end for
 	
-	while s != 0 and SymTab[s][S_SCOPE] <= SC_PRIVATE do
-		proc_vars &= s
+	while s != 0 and 
+	(sym_scope( s ) <= SC_PRIVATE or sym_scope( s ) = SC_UNDEFINED ) do
+		if sym_scope( s ) != SC_UNDEFINED then
+			proc_vars &= s
+		end if
+		
 		s = SymTab[s][S_NEXT]
 	end while
 	sequence backpatch_op = {}
@@ -451,11 +479,31 @@ export procedure check_inline( symtab_index sub )
 					end if
 				end for
 				
-			
+			case RIGHT_BRACE_N then
+				-- need to check to see if any temps are duplicated
+				sequence args = inline_code[pc+2..inline_code[pc+1] + pc + 1]
+				
+				for i = 1 to length(args) - 1 do
+					if find( args[i], args, i + 1 ) then
+						defer()
+						restore_code()
+						return
+					end if
+				end for
+				goto "inline op"
+				
+			case RIGHT_BRACE_2 then
+				if equal( inline_code[pc+1], inline_code[pc+2] ) then
+					defer()
+					restore_code()
+					return
+				end if
+				goto "inline op"
+				
 			case EXIT_BLOCK then
 				replace_code( "", pc, pc + 1 )
 				continue
-				
+			
 			case SWITCH_RT then
 				sequence values = SymTab[inline_code[pc+2]][S_OBJ]
 				for i = 1 to length( values ) do
@@ -496,10 +544,10 @@ procedure replace_temp( integer pc )
 	
 	if not inline_temps[temp_num] then
 		if TRANSLATE then
-			inline_temps[temp_num] = new_inline_var( -temp_num )
+			inline_temps[temp_num] = new_inline_var( -temp_num, 0 )
 		else
 			inline_temps[temp_num] = NewTempSym( TRUE )
-			Block_var( inline_temps[temp_num] )
+-- 			Block_var( inline_temps[temp_num] )
 		end if
 	end if
 	
@@ -518,6 +566,20 @@ function get_param_sym( integer pc )
 	
 	integer px = il[2]
 	return passed_params[px]
+end function
+
+function get_original_sym( integer pc )
+	object il = inline_code[pc]
+	if integer( il ) then
+		return inline_code[pc]
+	
+	elsif length( il ) = 1 then
+		return inline_target
+	
+	end if
+	
+	integer px = il[2]
+	return original_params[px]
 end function
 
 procedure replace_param( integer pc )
@@ -549,38 +611,59 @@ procedure fixup_special_op( integer pc )
 	end switch
 end procedure
 
-function new_inline_var( symtab_index s, integer reuse = 1 )
+constant INLINE_HASHVAL = NBUCKETS + 1
+function new_inline_var( integer ps, integer reuse = 1 )
+	-- create a new inline variable based on either a variable from the inlined routine
+	-- or a temporary (ps < 1).
+	-- if ps is positive use ps is taken to mean a symindex to a variable declared
+	-- in the inlined routine.  Otherwise it is taken to mean a temporary and the 
+	-- absolute value is used for naming the variable.
 	symtab_index 
 		var = 0, 
 		vtype
 	sequence name
+	symtab_index s
 	
 	if reuse then
-		var = map:nested_get( inline_var_map, { CurrentSub, s } )
+		var = map:nested_get( inline_var_map, { CurrentSub, ps } )
 	end if
 	
 	if not var then
-		if s > 0 then
-			if reuse then
-				name = sprintf( "pvt_%s_%s", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME]})
+		if ps > 0 then
+			s = ps
+			if TRANSLATE then
+				name = sprintf( "%s_inlined_%s", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME] })
 			else
-				name = sprintf( "pvt_%s_at%d_%s", {SymTab[s][S_NAME], inline_start, SymTab[inline_sub][S_NAME]})
+				name = sprintf( "%s (from inlined routine '%s'", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME] })
+			end if
+			
+			if reuse then
+				if not TRANSLATE then
+					name &= ")"
+				end if
+			else
+				if TRANSLATE then
+					name &= sprintf( "_at_%d", inline_start)
+				else
+					name &= sprintf( " at %d)", inline_start)
+				end if
 			end if
 			
 			vtype = SymTab[s][S_VTYPE]
 		else
+			name = sprintf( "%s_%d", {SymTab[inline_sub][S_NAME], -ps})
 			if reuse then
-				name = sprintf( "tmp_%d_%s", {-s, SymTab[inline_sub][S_NAME]})
+				name &= "__tmp"
 			else
-				name = sprintf( "tmp_%d_at%d_%s", {-s, inline_start, SymTab[inline_sub][S_NAME]})
+				name &= sprintf( "__tmp_at%d", inline_start)
 			end if
 			vtype = object_type
 		end if
 		if CurrentSub = TopLevelSub then
-			var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, 1, 0, vtype )
+			var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, INLINE_HASHVAL, 0, vtype )
 			
 		else
-			var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, 1, 0, vtype )
+			var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, INLINE_HASHVAL, 0, vtype )
 			SymTab[var][S_NEXT] = SymTab[last_param][S_NEXT]
 			SymTab[last_param][S_NEXT] = var
 			if last_param = last_sym then
@@ -594,13 +677,16 @@ function new_inline_var( symtab_index s, integer reuse = 1 )
 				param_num += 1
 			end if
 		end if
-		SymTab[var][S_USAGE] = U_READ + U_WRITTEN
+		SymTab[var][S_USAGE] = U_USED
 		if reuse then
-			map:nested_put( inline_var_map, {CurrentSub, s }, var )
+			map:nested_put( inline_var_map, {CurrentSub, ps }, var )
 		end if
 		
 	end if
 	Block_var( var )
+	if BIND then
+		add_ref( {VARIABLE, var} )
+	end if
 	return var
 end function
 
@@ -615,11 +701,12 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	sequence backpatches = SymTab[sub][S_INLINE][3]
 	
 	passed_params = {}
+	original_params = {}
 	proc_vars = {}
 	sequence prolog = {}
 	sequence epilog = {}
 	
-	push_block( EXIT_BLOCK, sprintf("Inline-%s from %s @ %d", 
+	Start_block( EXIT_BLOCK, sprintf("Inline-%s from %s @ %d", 
 		{SymTab[sub][S_NAME], SymTab[CurrentSub][S_NAME], start} ) )
 	
 	symtab_index s = SymTab[sub][S_NEXT]
@@ -633,7 +720,8 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	end for
 	
 	symtab_index last_sym = last_param
-	while last_sym and (SymTab[last_sym][S_SCOPE] <= SC_PRIVATE) do
+	while last_sym and 
+	(sym_scope( last_sym ) <= SC_PRIVATE or sym_scope( last_sym ) = SC_UNDEFINED ) do
 		last_param = last_sym
 		last_sym = SymTab[last_sym][S_NEXT]
 		varnum += 1
@@ -641,6 +729,8 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 	for p = SymTab[sub][S_NUM_ARGS] to 1 by -1 do
 		passed_params = prepend( passed_params, Pop() )
 	end for
+	
+	original_params = passed_params
 	
 	symtab_index int_sym = 0
 	for p = 1 to SymTab[sub][S_NUM_ARGS] do
@@ -650,34 +740,33 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		if ax or is_temp( param ) then
 			-- This param is left alone in the routine, but we don't
 			-- want the parser to re-use it as another temp
-			if not ax then
-				TempKeep( param )
-			else
-				varnum += 1
-				symtab_index var = new_inline_var( s )
-				prolog &= {ASSIGN, param, var}
-				if not int_sym then
-					int_sym = NewIntSym( 0 )
-				end if
-				
-				inline_start += 3
-				passed_params[p] = var
+			varnum += 1
+			symtab_index var = new_inline_var( s, 0 )
+			prolog &= {ASSIGN, param, var}
+			if not int_sym then
+				int_sym = NewIntSym( 0 )
 			end if
+			
+			inline_start += 3
+			passed_params[p] = var
 		end if
 		s = SymTab[s][S_NEXT]
 		
 	end for
 	
 	symtab_index final_target = 0
-	while s and SymTab[s][S_SCOPE] <= SC_PRIVATE do
-		-- make new vars for the privates of the routine
-		varnum += 1
-		symtab_index var = new_inline_var( s )
-		proc_vars &= var
-		if int_sym = 0 then
-			int_sym = NewIntSym( 0 )
+	while s and 
+	(sym_scope( s ) <= SC_PRIVATE or sym_scope( s ) = SC_UNDEFINED) do
+		if sym_scope( s ) != SC_UNDEFINED then
+			
+			-- make new vars for the privates of the routine
+			varnum += 1
+			symtab_index var = new_inline_var( s, 0 )
+			proc_vars &= var
+			if int_sym = 0 then
+				int_sym = NewIntSym( 0 )
+			end if
 		end if
-		
 		s = SymTab[s][S_NEXT]
 	end while
 	
@@ -697,9 +786,9 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			if TRANSLATE then
 				inline_target = new_inline_var( sub, 0 )
 				SymTab[inline_target][S_VTYPE] = object_type
+				Pop_block_var()
 			else
 				inline_target = NewTempSym()
-				
 			end if
 		end if
 		proc_vars &= inline_target
@@ -717,8 +806,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 			case ATOM_CHECK then
 			case SEQUENCE_CHECK then
 			case INTEGER_CHECK then
-				symtab_index sym = get_param_sym( check_pc + 1 )
-				
+				symtab_index sym = get_original_sym( check_pc + 1 )
 				if is_literal( sym ) then
 					integer check_result
 						
@@ -735,10 +823,11 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 						
 					else
 						-- TODO: make this more descriptive!
-						CompileErr("Type Check Error when inlining literal")
+						CompileErr(146)
 					end if
 					
 				elsif not is_temp( sym ) then
+				
 					if (op = INTEGER_CHECK and SymTab[sym][S_VTYPE] = integer_type )
 					or (op = SEQUENCE_CHECK and SymTab[sym][S_VTYPE] = sequence_type )
 					or (op = ATOM_CHECK and find( SymTab[sym][S_VTYPE], {integer_type, atom_type} ) ) then
@@ -786,7 +875,7 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 					break
 				
 				case else
-					InternalErr( sprintf("Unhandled inline type: %d", inline_type) )
+					InternalErr( 265, {inline_type} )
 			end switch
 		end if
 	end for
@@ -807,20 +896,18 @@ export function get_inlined_code( symtab_index sub, integer start, integer defer
 		
 		if final_target then
 			epilog &= { ASSIGN, inline_target, final_target }
+			emit_temp( final_target, NEW_REFERENCE )
 		else
 		
---		if int_sym 
---		and is_temp( inline_target )
---		and SymTab[sub][S_TOKEN] = TYPE then
 			-- This allows type checks to work properly, since they expect a 0/1 
 			-- object ptr immediately before.  The PRIVATE_INIT_CHECK is skipped, 
 			-- and is used since it takes a single symbol coming after it.
-		if not TRANSLATE then
-			epilog &= { ELSE, 0, PRIVATE_INIT_CHECK, inline_target }
-			epilog[$-2] = length(inline_code) + length(epilog) + inline_start + 1
-		end if
+			emit_temp( inline_target, NEW_REFERENCE )
+			if not TRANSLATE then
+				epilog &= { ELSE, 0, PRIVATE_INIT_CHECK, inline_target }
+				epilog[$-2] = length(inline_code) + length(epilog) + inline_start + 1
+			end if
 			
---		end if
 		end if
 	end if
 	
@@ -835,15 +922,6 @@ procedure defer_call()
 	end if
 end procedure
 
-function forward_params()
-	for i = length(cg_stack) - (SymTab[inline_sub][S_NUM_ARGS]-1) to length(cg_stack) do
-		if cg_stack[i] < 0 then
-			return 1
-		end if
-	end for
-	return 0
-end function
-
 -- Either emits an inline routine or emits a call to the routine
 -- if that can't be done.
 export procedure emit_or_inline()
@@ -855,14 +933,15 @@ export procedure emit_or_inline()
 		emit_op( PROC )
 		return
 		
-	elsif atom( SymTab[sub][S_INLINE] ) or forward_params() then
+	elsif atom( SymTab[sub][S_INLINE] ) or has_forward_params(sub) then
 		defer_call()
 		emit_op( PROC )
 		return
 	
 	end if
 	sequence code = get_inlined_code( sub, length(Code) )
-	Code &= code
+	emit_inline( code )
+	clear_last()
 	
 end procedure
 
@@ -871,7 +950,6 @@ end procedure
 -- inline what we can.
 export procedure inline_deferred_calls()
 	deferred_inlining = 1
-
 	for i = 1 to length( deferred_inline_decisions ) do
 		
 		if length( deferred_inline_calls[i] ) then
@@ -881,33 +959,45 @@ export procedure inline_deferred_calls()
 			if atom( SymTab[sub][S_INLINE] ) then
 				continue
 			end if
-			
 			for cx = 1 to length( deferred_inline_calls[i] ) do
 				integer ix = 1
 				symtab_index calling_sub = deferred_inline_calls[i][cx]
 				CurrentSub = calling_sub
 				Code = SymTab[calling_sub][S_CODE]
-				while ix and ix < length( Code ) with entry do
-					
-					if SymTab[sub][S_TOKEN] != PROC then
-						Push( Code[ix + SymTab[sub][S_NUM_ARGS] + 2] )
+				LineTable = SymTab[calling_sub][S_LINETAB]
+				sequence code = {}
+				
+				sequence calls = find_ops( 1, PROC )
+				integer is_func = SymTab[sub][S_TOKEN] != PROC 
+				integer offset = 0
+				for o = 1 to length( calls ) do
+					if calls[o][2][2] = sub then
+						ix = calls[o][1]
+						sequence op = calls[o][2]
+						integer size = length( op ) - 1
+						if is_func then
+							-- push the return target
+							Push( op[$] )
+							op = remove( op, length(op) )
+						end if
+						
+						-- push the parameters
+						for p = 3 to length( op ) do
+							Push( op[p] )
+						end for
+						code = get_inlined_code( sub, ix + offset - 1, 1 )
+						shift:replace_code( repeat( NOP1, length(code) ), ix + offset, ix + offset + size )
+						
+						-- prevent unwanted code shifting...the inlining process does this for us
+						Code = eu:replace( Code, code, ix + offset, ix + offset + length( code ) -1 )
+						offset += length(code) - size - 1
+						
 					end if
-					
-					for p = 2 to SymTab[sub][S_NUM_ARGS] + 1 do
-						Push( Code[ix + p] )
-					end for
-					
-					sequence code = get_inlined_code( sub, ix - 1, 1 )
-					shift:replace_code( 
-						repeat( NOP1, length( code )), ix, ix + 1 + SymTab[sub][S_NUM_ARGS] + (SymTab[sub][S_TOKEN] != PROC) )
-					Code = replace( Code, code, ix, ix + length(code) - 1 )
-				entry
-					ix = match_from( PROC & sub, Code, ix + 1 )
-				end while
+				end for
 				SymTab[calling_sub][S_CODE] = Code
+				SymTab[calling_sub][S_LINETAB] = LineTable
 			end for
 		end if
 	end for
---	delete( inline_var_map )
 end procedure
 

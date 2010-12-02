@@ -1,29 +1,21 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
---
+-- (c) Copyright - See License.txt
 -- Translator main file
 
- without type_check
+with define TRANSLATOR
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
+ifdef EPROFILE then
+	with profile
+end ifdef
 
 include mode.e
 set_mode("translate", 0 )
 
--- front-end
---include global.e
---include reswords.e
---include error.e
---include keylist.e
---include c_out.e
---include symtab.e
---include scanner.e
---include emit.e
---include parser.e
-
--- TRANSLATOR backend
---include c_decl.e
---include opnames.e
---include compile.e  
 include traninit.e
-
--- main program:
 include main.e
 

@@ -1,15 +1,16 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
 
 include std/machine.e
 include std/os.e
 include std/filesys.e
 include std/text.e
-
-ifdef DOS32 then
-	public include std\dos\memory.e
-	include std\dos\interrup.e
-end ifdef
 
 include global.e
 include common.e
@@ -20,30 +21,13 @@ integer convert_length
 export atom u32,fc_table,char_upper
 constant C_POINTER = #02000004
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	u32=machine_func(50,"user32.dll")
 	oem2char=machine_func(51,{u32,"OemToCharA",{C_POINTER,C_POINTER},C_POINTER})
 	char_upper=machine_func(51,{u32,"CharUpperA",{C_POINTER},C_POINTER})
 	convert_length=64
 	convert_buffer=allocate(convert_length)
 
-elsifdef DOS32 then
-	sequence regs
-	regs=repeat(0,10)
-	fc_table=allocate_low(5)
-	-- query filename country dependent capitalisation table pointer
-	regs[REG_DX]=and_bits(fc_table,15)
-	regs[REG_DS]=floor(fc_table/16)
-	regs[REG_AX]=#6504
-	regs=dos_interrupt(#21,regs)
-	if and_bits(regs[REG_FLAGS],1) then -- DOS earlier than 4.0, or something very wrong
-		free_low(fc_table)
-		fc_table=0
-	else -- turn received dword into a 32 bit address, altered so as to access it faster
-		regs=peek({fc_table+1,4})
-		free_low(fc_table)
-		fc_table=regs[1]+256*regs[2]+16*regs[3]+4096*regs[4]-126
-	end if
 end ifdef
 
 function convert_from_OEM(sequence s)
@@ -95,13 +79,13 @@ end function
 function check_cache(sequence env,sequence inc_path)
 	integer delim,pos
 
-	if not num_var then -- first time the vr is accessed, add cache entry
+	if not num_var then -- first time the var is accessed, add cache entry
 		cache_vars = append(cache_vars,env)
 		cache_strings = append(cache_strings,inc_path)
 		cache_substrings = append(cache_substrings,{})
 		cache_starts = append(cache_starts,{})
 		cache_ends = append(cache_ends,{})
-		ifdef WIN32 then
+		ifdef WINDOWS then
 			cache_converted = append(cache_converted,{})
 		end ifdef
 		num_var = length(cache_vars)
@@ -128,7 +112,7 @@ function check_cache(sequence env,sequence inc_path)
 						cache_substrings[num_var] = cache_substrings[num_var][1..pos]
 						cache_starts[num_var] = cache_starts[num_var][1..pos]
 						cache_ends[num_var] = cache_ends[num_var][1..pos]
-						ifdef WIN32 then
+						ifdef WINDOWS then
 							cache_converted[num_var] = cache_converted[num_var][1..pos]
 						end ifdef
 						delim = cache_ends[num_var][$]+1
@@ -219,7 +203,7 @@ export procedure add_include_directory( sequence path )
 end procedure
 
 sequence seen_conf = {}
-export function load_euinc_conf( sequence file )
+export function load_euphoria_config( sequence file )
 	integer fn
 	object in
 	integer spos, epos
@@ -229,19 +213,16 @@ export function load_euinc_conf( sequence file )
 	sequence parm
 	sequence section
 
-	-- If supplied 'file' is actually a directory name, look for 'euinc.conf' in that directory
+	-- If supplied 'file' is actually a directory name, look for 'eu.cfg' in that directory
 	if file_type(file) = FILETYPE_DIRECTORY then
 		if file[$] != SLASH then
 			file &= SLASH
 		end if
-		file &= "euinc.conf"
+		file &= "eu.cfg"
 	end if
 	
-	conf_path = canonical_path( file )
+	conf_path = canonical_path( file,,1 )
 	-- Prevent recursive configuration loads.
-	ifdef not UNIX then
-		conf_path = lower(conf_path)
-	end ifdef
 	if find(conf_path, seen_conf) != 0 then
 		return {}
 	end if
@@ -307,41 +288,60 @@ export function load_euinc_conf( sequence file )
 						end if
 					end if
 				else
-					arg = "-I"
+					arg = "-i"
 					parm = in
 				end if
 			else
-				arg = "-I"
+				arg = "-i"
 				parm = in
 			end if
 		end if
 		
 		if length(arg) > 0 then
 			integer needed = 0
-			switch section with fallthru do
+			switch section do
 				case "all" then
 					needed = 1
-					break
 					
+				case "windows" then
+					needed = TWINDOWS
+			
+				case "unix" then
+					needed = TUNIX
+			
 				case "translate" then
 					needed = TRANSLATE
-					break
+					
+				case "translate:windows" then
+					needed = TRANSLATE and TWINDOWS
+					
+				case "translate:unix" then
+					needed = TRANSLATE and TUNIX
 					
 				case "interpret" then
 					needed = INTERPRET
-					break
+					
+				case "interpret:windows" then
+					needed = INTERPRET and TWINDOWS
+			
+				case "interpret:unix" then
+					needed = INTERPRET and TUNIX
 					
 				case "bind" then
 					needed = BIND
-					break
 					
+				case "bind:windows" then
+					needed = BIND and TWINDOWS
+			
+				case "bind:unix" then
+					needed = BIND and TUNIX
+			
 			end switch
 			
 			if needed then
-				arg = upper(arg)
-				if equal(arg, "-C") then
+				if equal(arg, "-c") then
 					if length(parm) > 0 then
-						new_args &= load_euinc_conf(parm)
+						new_args &= load_euphoria_config(parm)
 					end if
 				else
 					new_args = append(new_args, arg)
@@ -362,41 +362,41 @@ end function
 export function GetDefaultArgs()
 	object env
 	sequence default_args = {}
-	sequence conf_file = "euinc.conf"
+	sequence conf_file = "eu.cfg"
 
 	if loaded_config_inc_paths then return "" end if
 	loaded_config_inc_paths = 1
-
+	
 	-- If a unix variant, this loads the config file from the current working directory
 	-- If Windows, this loads the config file from the same path as the binary. This
-	-- can be different, for instance the binary may be C:\euphoria\bin\exwc.exe but
-	-- you are loading it such as: C:\euphoria\demo> exwc demo.ex ... In this case
-	-- this command loads C:\euphoria\bin\euinc.conf not C:\euphoria\demo\euinc.conf
+	-- can be different, for instance the binary may be C:\euphoria\bin\eui.exe but
+	-- you are loading it such as: C:\euphoria\demo> eui demo.ex ... In this case
+	-- this command loads C:\euphoria\bin\eu.cfg not C:\euphoria\demo\eu.cfg
 	-- as it would under unix variants.
 	
 	-- platform specific
 	ifdef UNIX then
-		default_args &= load_euinc_conf( "/etc/euphoria/" & conf_file )
+		default_args &= load_euphoria_config( "/etc/euphoria/" & conf_file )
 		
 		env = getenv( "HOME" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( env & "/." & conf_file )
+			default_args &= load_euphoria_config( env & "/." & conf_file )
 		end if
 		
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		env = getenv( "ALLUSERSPROFILE" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( expand_path( "euphoria", env ) & conf_file )
+			default_args &= load_euphoria_config( expand_path( "euphoria", env ) & conf_file )
 		end if
 		
 		env = getenv( "APPDATA" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( expand_path( "euphoria", env ) & conf_file )
+			default_args &= load_euphoria_config( expand_path( "euphoria", env ) & conf_file )
 		end if
 
 		env = getenv( "HOMEPATH" )
 		if sequence(env) then
-			default_args &= load_euinc_conf( getenv( "HOMEDRIVE" ) & env & "\\" & conf_file )
+			default_args &= load_euphoria_config( getenv( "HOMEDRIVE" ) & env & "\\" & conf_file )
 		end if
 		
 	elsedef
@@ -404,11 +404,16 @@ export function GetDefaultArgs()
 	end ifdef
 	
 	-- From current working directory
-	default_args &= load_euinc_conf("./" & conf_file)
+	default_args &= load_euphoria_config("./" & conf_file)
 	
 	-- From where ever the executable is
 	env = strip_file_from_path( exe_path() )
-	default_args &= load_euinc_conf( env & conf_file )
+	default_args &= load_euphoria_config( env & conf_file )
+
+	env = get_eudir()
+	if sequence(env) then
+		default_args &= load_euphoria_config(env & "/" & conf_file)
+	end if
 
 	return default_args
 end function
@@ -429,7 +434,7 @@ export function ConfPath(sequence file_name)
 end function
 
 export function ScanPath(sequence file_name,sequence env,integer flag)
--- returns -1 if no path in geenv(env) leads to file_name, else {full_path,handle}
+-- returns -1 if no path in getenv(env) leads to file_name, else {full_path,handle}
 -- if flag is 1, the include_subfolder constant is prepended to filename
 	object inc_path
 	sequence full_path, file_path, strings
@@ -456,17 +461,17 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 		for i=1 to length(strings) do
 			full_path = strings[i]
 			file_path = full_path & file_name
-			try = open(file_path, "r")    
+			try = open_locked(file_path)    
 			if try != -1 then
 				return {file_path,try}
 			end if
-			ifdef WIN32 then 
+			ifdef WINDOWS then 
 				if sequence(cache_converted[num_var][i]) then
 					-- perhaps this path entry, which had never been checked valid, is so 
 					-- after conversion
 					full_path = cache_converted[num_var][i]
 					file_path = full_path & file_name
-					try = open(file_path, "r")
+					try = open_locked(file_path)
 					if try != -1 then
 						cache_converted[num_var][i] = 0
 						cache_substrings[num_var][i] = full_path
@@ -501,19 +506,19 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 				cache_starts[num_var] &= start_path
 				cache_ends[num_var] &= end_path
 				file_path = full_path & file_name  
-				try = open(file_path, "r")
+				try = open_locked(file_path)
 				if try != -1 then -- valid path, no point trying to convert
-					ifdef WIN32 then
+					ifdef WINDOWS then
 						cache_converted[num_var] &= 0
 					end ifdef
 					return {file_path,try}
 				end if
-				ifdef WIN32 then
+				ifdef WINDOWS then
 					if find(1, full_path>=128) then
 						-- accented characters, try converting them
 						full_path = convert_from_OEM(full_path)
 						file_path = full_path & file_name
-						try = open(file_path, "r")
+						try = open_locked(file_path)
 						if try != -1 then -- that was it; record translation as the valid path
 							cache_converted[num_var] &= 0
 							cache_substrings[num_var] = append(cache_substrings[num_var],full_path)
@@ -548,7 +553,6 @@ export function Include_paths(integer add_converted)
 		return include_Paths
 	end if
 
-
 	include_Paths = append(config_inc_paths, current_dir())
 	num_var = find("EUINC", cache_vars)
 	inc_path = getenv("EUINC")
@@ -559,9 +563,13 @@ export function Include_paths(integer add_converted)
 	if length(inc_path) then
 		inc_path = append(inc_path, PATH_SEPARATOR)
 	end if
+	object eudir_path = get_eudir()
+	if sequence(eudir_path) then
+		include_Paths = append(include_Paths, sprintf("%s/include", { eudir_path }))
+	end if
 
 	if status then
-		-- some paths are not convrted, how to check them?
+		-- some paths are not converted, how to check them?
 		if cache_complete[num_var] then
 			goto "cache done"
 		end if
@@ -585,7 +593,7 @@ export function Include_paths(integer add_converted)
 				cache_substrings[num_var] = append(cache_substrings[num_var],full_path)
 				cache_starts[num_var] &= start_path
 				cache_ends[num_var] &= end_path
-				ifdef WIN32 then
+				ifdef WINDOWS then
 					if find(1, full_path>=128) then
 						-- accented characters, try converting them. There is no guarantee that
 						-- the conversion is valid
@@ -606,7 +614,7 @@ label "cache done"
 	include_Paths &= cache_substrings[num_var]
 	cache_complete[num_var] = 1
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if add_converted then
 	    	for i=1 to length(cache_converted[num_var]) do
 	        	if sequence(cache_converted[num_var][i]) then
@@ -618,17 +626,21 @@ label "cache done"
 	return include_Paths
 end function
 
--- open a file by searching the user's PATH
+--**
+-- Find a euphoria file in the users PATH 
+--
+-- Parameters:
+--   # ##name##: filename to search for
+--	 
+-- Returns:
+--   Full path name of the found file or < 0 on error
 
-export function e_path_open(sequence name, sequence mode)
--- follow the search path, if necessary to open the main file
-	integer src_file
+export function e_path_find(sequence name)
 	object scan_result
 
-	-- try opening directly
-	src_file = open(name, mode)
-	if src_file != -1 then
-		return src_file        
+	-- try directly
+	if file_exists(name) then
+		return name
 	end if
 	
 	-- make sure that name is a simple name without '\' in it
@@ -638,13 +650,12 @@ export function e_path_open(sequence name, sequence mode)
 		end if
 	end for
 	
-	scan_result = ScanPath(name,"PATH",0)
-	if atom(scan_result) then
-		return -1
-	else
-		file_name[1] = scan_result[1]
-		return scan_result[2]
+	scan_result = ScanPath(name, "PATH", 0)
+	if sequence(scan_result) then
+		close(scan_result[2])
+		return scan_result[1]
 	end if
-	
+
+	return -1
 end function
 

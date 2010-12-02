@@ -1,8 +1,15 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Symbol Table Routines
 
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
 include std/search.e
+include std/filesys.e
 
 include global.e
 include c_out.e
@@ -10,14 +17,20 @@ include keylist.e
 include error.e
 include fwdref.e
 include reswords.e
+include block.e
+include msgtext.e
 
-constant NBUCKETS = 2003  -- prime helps
+export constant NBUCKETS = 2003  -- prime helps
 
-export sequence buckets = repeat(0, NBUCKETS)  -- hash buckets
+export sequence buckets = repeat(0, NBUCKETS + 1)  -- hash buckets
 export symtab_index object_type       -- s.t. index of object type
 export symtab_index atom_type         -- s.t. index of atom type
 export symtab_index sequence_type     -- s.t. index of sequence type
 export symtab_index integer_type      -- s.t. index of integer type
+
+ifdef EUDIS then
+export sequence bucket_hits = repeat( 0, NBUCKETS ) -- count how many times we look at each bucket
+end ifdef
 
 export symtab_index literal_init = 0
 export integer last_sym = 0
@@ -25,18 +38,32 @@ export integer last_sym = 0
 sequence lastintval = {}, lastintsym = {}
 sequence e_routine  = {}  -- sequence of symbol table pointers for routine_id
 
-function hashfn(sequence name)
+export function hashfn(sequence name)
 -- hash function for symbol table
 	integer len
 	integer val -- max is 268,448,190+len
+	integer int
 
 	len = length(name)
-	val = name[len] * 256 + name[1]*2 + len
-	if len >= 4 then
-		val = val * 64 + name[2]
-		val = val * 64 + name[3]
-	elsif len >= 3 then
-		val = val * 64 + name[2]
+	
+	val = name[1]
+	int = name[$]
+	int *= 256
+	val *= 2
+	val += int + len
+	
+	if len = 3 then
+		val *= 32
+		int = name[2]
+		val += int
+	elsif len > 3 then
+		val *= 32
+		int = name[2]
+		val += int
+		
+		val *= 32
+		int = name[$-1]
+		val += int
 	end if
 	return remainder(val, NBUCKETS) + 1
 end function
@@ -49,15 +76,19 @@ export procedure remove_symbol( symtab_index sym )
 	
 	hash = SymTab[sym][S_HASHVAL]
 	st_ptr = buckets[hash]
-	while st_ptr != sym do
+	
+	while st_ptr and st_ptr != sym do
 		st_ptr = SymTab[st_ptr][S_SAMEHASH]
 	end while
-	if st_ptr = buckets[hash] then
-		-- it was the last one, and in the bucket
-		buckets[hash] = SymTab[st_ptr][S_SAMEHASH]
-	else
-		-- we're somewhere in the chain
-		SymTab[st_ptr][S_SAMEHASH] = SymTab[sym][S_SAMEHASH]
+	
+	if st_ptr then
+		if st_ptr = buckets[hash] then
+			-- it was the last one, and in the bucket
+			buckets[hash] = SymTab[st_ptr][S_SAMEHASH]
+		else
+			-- we're somewhere in the chain
+			SymTab[st_ptr][S_SAMEHASH] = SymTab[sym][S_SAMEHASH]
+		end if
 	end if
 end procedure
 
@@ -65,7 +96,7 @@ end procedure
 -- nor connect it in the S_NEXT chain
 export function NewBasicEntry(sequence name, integer varnum, integer scope,
 				  integer token, integer hashval, symtab_index samehash,
-				  symtab_index type_sym)
+				  symtab_index type_sym )
 	
 	sequence new
 	
@@ -92,7 +123,6 @@ export function NewBasicEntry(sequence name, integer varnum, integer scope,
 
 		new[S_ARG_TYPE] = TYPE_OBJECT
 		new[S_ARG_TYPE_NEW] = TYPE_NULL
-
 		new[S_ARG_SEQ_ELEM] = TYPE_OBJECT
 		new[S_ARG_SEQ_ELEM_NEW] = TYPE_NULL
 
@@ -123,6 +153,7 @@ export function NewBasicEntry(sequence name, integer varnum, integer scope,
 	
 	new[S_HASHVAL] = hashval
 	new[S_SAMEHASH] = samehash
+	
 	new[S_OBJ] = NOVALUE -- important
 
 	-- add new symbol to the end of the symbol table
@@ -133,7 +164,7 @@ end function
 
 export function NewEntry(sequence name, integer varnum, integer scope,
 				  integer token, integer hashval, symtab_index samehash,
-				  symtab_index type_sym)
+				  symtab_index type_sym )
 -- Enter a symbol into the table at the next available position
 	symtab_index new = NewBasicEntry( name, varnum, scope, token, hashval, samehash, type_sym )
 
@@ -152,27 +183,29 @@ constant BLANK_ENTRY = repeat(0, SIZEOF_TEMP_ENTRY)
 
 export function tmp_alloc()
 -- return SymTab index for a new temporary var/literal constant
-	symtab_index new
-
-	SymTab = append(SymTab, BLANK_ENTRY)
-	new = length(SymTab)
-	SymTab[new][S_USAGE] = T_UNKNOWN
+	sequence new_entry = repeat( 0, SIZEOF_TEMP_ENTRY )
+	
+	
+	
+	new_entry[S_USAGE] = T_UNKNOWN
 
 	if TRANSLATE then
-		SymTab[new][S_GTYPE] = TYPE_OBJECT
-		SymTab[new][S_OBJ_MIN] = MININT
-		SymTab[new][S_OBJ_MAX] = MAXINT
-		SymTab[new][S_SEQ_LEN] = NOVALUE
-		SymTab[new][S_SEQ_ELEM] = TYPE_OBJECT  -- other fields set later
+		new_entry[S_GTYPE] = TYPE_OBJECT
+		new_entry[S_OBJ_MIN] = MININT
+		new_entry[S_OBJ_MAX] = MAXINT
+		new_entry[S_SEQ_LEN] = NOVALUE
+		new_entry[S_SEQ_ELEM] = TYPE_OBJECT  -- other fields set later
 		if length(temp_name_type)+1 = 8087 then
 			-- don't use _8087 - it conflicts with WATCOM
 			temp_name_type = append(temp_name_type, {0, 0})
 		end if
-		temp_name_type = append(temp_name_type, {TYPE_OBJECT, TYPE_NULL})
-		SymTab[new][S_TEMP_NAME] = length(temp_name_type)
+		temp_name_type = append(temp_name_type, TYPES_OBNL)
+		new_entry[S_TEMP_NAME] = length(temp_name_type)
 	end if
+	
+	SymTab = append(SymTab, new_entry )
 
-	return new
+	return length( SymTab )
 end function
 
 function PrivateName(sequence name, symtab_index proc)
@@ -195,7 +228,7 @@ export procedure DefinedYet(symtab_index sym)
 	if not find(SymTab[sym][S_SCOPE],
 				{SC_UNDEFINED, SC_MULTIPLY_DEFINED, SC_PREDEF}) then
 		if SymTab[sym][S_FILE_NO] = current_file_no then
-			CompileErr(sprintf("attempt to redefine %s.", {SymTab[sym][S_NAME]}))
+			CompileErr(31, {SymTab[sym][S_NAME]})
 		end if
 	end if
 end procedure
@@ -364,6 +397,10 @@ export function NewTempSym( integer inlining = 0)
 		SymTab[p][S_MODE] = M_TEMP
 		SymTab[p][S_NEXT] = SymTab[CurrentSub][S_TEMPS]
 		SymTab[CurrentSub][S_TEMPS] = p
+		
+		if inlining then
+			SymTab[CurrentSub][S_STACK_SPACE] += 1
+		end if
 
 	elsif TRANSLATE then
 		-- found a free temp - make another with same name,
@@ -378,7 +415,6 @@ export function NewTempSym( integer inlining = 0)
 		SymTab[q][S_NEXT] = SymTab[CurrentSub][S_TEMPS]
 		SymTab[CurrentSub][S_TEMPS] = q
 		p = q
-
 	end if
 
 	if TRANSLATE then
@@ -389,6 +425,7 @@ export function NewTempSym( integer inlining = 0)
 	SymTab[p][S_OBJ] = NOVALUE
 	SymTab[p][S_USAGE] = T_UNKNOWN
 	SymTab[p][S_SCOPE] = IN_USE
+--	Block_var( p )
 	return p
 end function
 
@@ -408,7 +445,7 @@ export procedure InitSymTab()
 							keylist[k][K_SCOPE],
 							keylist[k][K_TOKEN],
 							hashval, 0, 0)
-		if find(keylist[k][K_TOKEN], {PROC, FUNC, TYPE}) then
+		if find(keylist[k][K_TOKEN], RTN_TOKS) then
 			SymTab[st_index] = SymTab[st_index] &
 						repeat(0, SIZEOF_ROUTINE_ENTRY -
 								  length(SymTab[st_index]))
@@ -518,7 +555,7 @@ export procedure MarkTargets(symtab_index s, integer attribute)
 		else
 			sname = string[colon+1..$]  -- ignore namespace part
 			while length(sname) and sname[1] = ' ' or sname[1] = '\t' do
-				sname = sname[2..$]
+				sname = tail( sname, length( sname ) -1 )
 			end while
 		end if
 
@@ -598,7 +635,8 @@ export function get_resolve_unincluded_globals()
 end function
 
 export integer No_new_entry = 0
-export function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0 )
+export function keyfind(sequence word, integer file_no, integer scanning_file = current_file_no, integer namespace_ok = 0, 
+						integer hashval = hashfn( word ) )
 -- Uses hashing algorithm to try to match 'word' in the symbol
 -- table. If not found, 'word' must be a new user-defined identifier.
 -- If file_no is not -1 then file_no must match and symbol must be a GLOBAL.
@@ -606,7 +644,7 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 --              -1 => look at everything, and find the best resolution (probably a case statement)
 
 	sequence msg, b_name
-	integer hashval, scope, defined, ix
+	integer scope, defined, ix
 	symtab_index st_ptr, st_builtin
 	token tok, gtok
 	
@@ -616,13 +654,15 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 	symbol_resolution_warning = ""
 	st_builtin = 0
 
-	hashval = hashfn(word)
+	ifdef EUDIS then
+		bucket_hits[hashval] += 1
+	end ifdef
 	st_ptr = buckets[hashval]
 	integer any_symbol = namespace_ok = -1
 	while st_ptr do
-		if equal(word, SymTab[st_ptr][S_NAME]) 
-		and ( any_symbol or ( namespace_ok = (SymTab[st_ptr][S_TOKEN] = NAMESPACE) ) ) 
-		and SymTab[st_ptr][S_SCOPE] != SC_UNDEFINED then
+		if SymTab[st_ptr][S_SCOPE] != SC_UNDEFINED 
+		and equal(word, SymTab[st_ptr][S_NAME]) 
+		and ( any_symbol or ( namespace_ok = (SymTab[st_ptr][S_TOKEN] = NAMESPACE) ) ) then
 			-- name matches
 
 			tok = {SymTab[st_ptr][S_TOKEN], st_ptr}
@@ -654,17 +694,19 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 					end if
 
 					-- found global in another file
-					if Resolve_unincluded_globals or include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]]
+					if Resolve_unincluded_globals 
+					or (finished_files[scanning_file]
+					and include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]]) -- everything this file needs has been read in
 					or SymTab[st_ptr][S_TOKEN] = NAMESPACE then -- this allows the eu: namespace to work
 						gtok = tok
 						dup_globals &= st_ptr
-						in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 -- symbol_in_include_path( st_ptr, scanning_file, {} )
+						in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0
 					end if
 					break
 					-- continue looking for more globals with same name
 
-				case SC_EXPORT then
-				case SC_PUBLIC then
+				case SC_PUBLIC, SC_EXPORT then
+
 					if scanning_file = SymTab[st_ptr][S_FILE_NO] then
 						-- found export in current file
 						if BIND then
@@ -674,15 +716,18 @@ export function keyfind(sequence word, integer file_no, integer scanning_file = 
 						return tok
 					end if
 
-					if (scope = SC_PUBLIC and 
-						and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ))
-						or (scope = SC_EXPORT and
-						and_bits( DIRECT_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ))
+					if (finished_files[scanning_file] -- everything this file needs has been read in
+						or (namespace_ok and SymTab[st_ptr][S_TOKEN] = NAMESPACE)) -- resolve name spaces..probably shouldn't, but not sure how to get around this
+						and ((scope = SC_PUBLIC and  -- now we can look into the include relationship...
+							and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ))
+							or (scope = SC_EXPORT and
+							and_bits( DIRECT_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] )))
 					then
-						-- found public in another file 
+						-- found public or export in another file 
 						gtok = tok
 						dup_globals &= st_ptr
 						in_include_path &= include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] != 0 --symbol_in_include_path( st_ptr, scanning_file, {} )
+					
 					end if
 ifdef STDDEBUG then
 					if not and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[scanning_file][SymTab[st_ptr][S_FILE_NO]] ) and
@@ -696,11 +741,10 @@ ifdef STDDEBUG then
 							export_warnings = prepend( export_warnings,
 								{ scanning_file, SymTab[tok[T_SYM]][S_FILE_NO] })
 							
-							symbol_resolution_warning = {
-								sprintf("File '%s' uses public symbols from '%s', but does not include that file.",
-									{ name_ext(file_name[scanning_file]),
-									name_ext(file_name[SymTab[tok[T_SYM]][S_FILE_NO]])  })
-								,{word}}
+							symbol_resolution_warning = GetMsgText(232, 0, 
+										{name_ext(known_files[scanning_file]),
+										 name_ext(known_files[SymTab[tok[T_SYM]][S_FILE_NO]])})
+
 						end if
 						
 						
@@ -732,7 +776,6 @@ end ifdef
 				-- qualified - must match global symbol in specified file (or be in the file's
 				-- include path)
 				scope = SymTab[tok[T_SYM]][S_SCOPE]
-				
 				if not file_no then
 					-- internal eu namespace was used
 					if scope = SC_PREDEF then
@@ -744,22 +787,32 @@ end ifdef
 				else
 					integer tok_file = SymTab[tok[T_SYM]][S_FILE_NO]
 					integer good = 0
-					if scope = SC_PRIVATE then
+					if scope = SC_PRIVATE or scope = SC_PREDEF then
 						-- ignore this one
 						
 					elsif file_no = tok_file then
 						good = 1
 					else
-						switch scope with fallthru do
-						case SC_GLOBAL then
-							good = and_bits( ANY_INCLUDE, include_matrix[file_no][tok_file] )
-							break
-						case SC_PUBLIC then
-							good = and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[file_no][tok_file] )
-							break
-						case SC_EXPORT then
-							good = and_bits( DIRECT_INCLUDE, include_matrix[file_no][tok_file] )
+						-- globals and publics can come from a file included by the namespace file
+						integer include_type = 0
+						switch scope do
+							case SC_GLOBAL then
+								if Resolve_unincluded_globals then
+									include_type = ANY_INCLUDE
+								else
+									include_type = DIRECT_OR_PUBLIC_INCLUDE
+								end if
+								
+							case SC_PUBLIC then
+								
+								if tok_file != file_no then
+									include_type = PUBLIC_INCLUDE
+								else
+									include_type = DIRECT_OR_PUBLIC_INCLUDE
+								end if
+								
 						end switch
+						good = and_bits( include_type, include_matrix[file_no][tok_file] )
 					end if
 					
 					if good then
@@ -802,28 +855,19 @@ end ifdef
 			
 			b_name = SymTab[st_builtin][S_NAME]
 			builtin_warnings = append(builtin_warnings, b_name)
-			msg = "The built-in %s() in %s over rides the global/public %s() in:"
+			
 			if length(dup_globals) > 1 then
-				msg &= '\n'
+				msg = "\n"
+			else
+				msg = ""
 			end if
 			-- Get list of files...
 			for i = 1 to length(dup_globals) do
-				ifdef UNIX then
-					msg_file = file_name[SymTab[dup_globals[i]][S_FILE_NO]]
-				elsedef
-					msg_file = find_replace("/", file_name[SymTab[dup_globals[i]][S_FILE_NO]], '\\')
-				end ifdef
-				
-				msg_file = find_replace("%", msg_file, "%%")
-				if length(dup_globals) > 1 then
-					msg &= "    "
-				else
-					msg &= " "
-				end if
-				msg &= msg_file & "\n"
+				msg_file = known_files[SymTab[dup_globals[i]][S_FILE_NO]]
+				msg &= "    " & msg_file & "\n"
 			end for
 
-			Warning(msg, builtin_chosen_warning_flag, {b_name, file_name[scanning_file], b_name})
+			Warning(234, builtin_chosen_warning_flag, {b_name, known_files[scanning_file], msg})
 		end if
 
 		tok = {SymTab[st_builtin][S_TOKEN], st_builtin}
@@ -841,8 +885,8 @@ ifdef STDDEBUG then
 		integer dx = 1
 		while dx <= length( dup_globals ) do
 			if SymTab[dup_globals[dx]][S_SCOPE] = SC_EXPORT then
-				dup_globals = dup_globals[1..dx-1] & dup_globals[dx+1..$]
-				in_include_path = in_include_path[1..dx-1] & in_include_path[dx+1..$]
+				dup_globals = remove( dup_globals, dx )
+				in_include_path = remove( in_include_path, dx )
 			else
 				dx += 1
 			end if
@@ -857,8 +901,8 @@ end ifdef
 			if in_include_path[ix] then
 				ix += 1
 			else
-				dup_globals = dup_globals[1..ix-1] & dup_globals[ix+1..$]
-				in_include_path = in_include_path[1..ix-1] & in_include_path[ix+1..$]
+				dup_globals     = remove( dup_globals, ix )
+				in_include_path = remove( in_include_path, ix )
 			end if
 		end while
 
@@ -894,9 +938,12 @@ ifdef STDDEBUG then
 					return gtok
 				end if
 end ifdef
-				symbol_resolution_warning = {sprintf("%s:%d - identifier '%%s' in '%s' is not included",
-					{ name_ext(file_name[scanning_file]), line_number,
-					name_ext(file_name[SymTab[gtok[T_SYM]][S_FILE_NO]])}),{word}}
+				symbol_resolution_warning = GetMsgText(233,0,
+									{name_ext(known_files[scanning_file]), 
+									 line_number,
+									 word,
+									 name_ext(known_files[SymTab[gtok[T_SYM]][S_FILE_NO]])
+									 })
 		end if
 		return gtok
 	end if
@@ -921,6 +968,9 @@ end ifdef
 					   VARIABLE, hashval, buckets[hashval], 0)}
 	buckets[hashval] = tok[T_SYM]
 	
+	if file_no != -1 then
+		SymTab[tok[T_SYM]][S_FILE_NO] = file_no
+	end if
 	return tok  -- no ref on newly declared symbol
 end function
 
@@ -984,56 +1034,100 @@ end procedure
 
 export procedure LintCheck(symtab_index s)
 -- do some lint-like checks on s
-	integer u, n, warn_level
-	sequence vtype, place, problem, file
+	integer warn_level
+	sequence file
+	integer vscope
+	sequence vname
+	integer vusage 
+	
+	vusage = SymTab[s][S_USAGE]
+	vscope = SymTab[s][S_SCOPE]
+	vname = SymTab[s][S_NAME]
+	
+	switch vusage do
 
-	u = SymTab[s][S_USAGE]
-	ifdef UNIX then
-		file = file_name[current_file_no]
-	elsedef
-		file = find_replace("/", file_name[current_file_no], "\\")
-	end ifdef
+		case U_UNUSED then
+			warn_level = 1
+		
+		case U_WRITTEN then -- Set but never read
+			warn_level = 2
+			
+			if vscope > SC_LOCAL then
+				-- Exposed vars/consts can be read by other files.
+				warn_level = 0 
+			
+			elsif SymTab[s][S_MODE] = M_CONSTANT then
+				if not Strict_is_on then
+					-- Unused local constants are fairly common, so only report
+					-- on them if explictly required to.
+					warn_level = 0 
+				end if
+			end if
+		
+		case U_READ then -- Read but never set
+			if SymTab[s][S_VARNUM] >= SymTab[CurrentSub][S_NUM_ARGS] then
+		    	warn_level = 3
+		    else
+		    	-- Assume parameters have been assigned on entry.
+		    	warn_level = 0
+		    end if
+	    	
+	    case else
+	    	warn_level = 0
+	end switch
 
-	if SymTab[s][S_SCOPE] = SC_LOCAL then
-		if SymTab[s][S_MODE] = M_CONSTANT then
-			vtype = "local constant"
+	if warn_level = 0 then
+		return
+	end if
+	
+
+	file = abbreviate_path(known_files[current_file_no])
+	if warn_level = 3 then
+		if vscope = SC_LOCAL then
+			if current_file_no = SymTab[s][S_FILE_NO] then
+				Warning(226, no_value_warning_flag, {file,  vname})
+			end if
 		else
-			vtype = "local variable"
-		end if
-		place = ""
-
+			Warning(227, no_value_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+		end if			
 	else
-		n = SymTab[CurrentSub][S_NUM_ARGS]
-		if SymTab[s][S_VARNUM] < n then
-			vtype = "parameter"
+		if vscope = SC_LOCAL then
+			if current_file_no = SymTab[s][S_FILE_NO] then
+				if SymTab[s][S_MODE] = M_CONSTANT then
+					Warning(228, not_used_warning_flag, {file,  vname})
+					
+				elsif warn_level = 1 then
+					Warning(229, not_used_warning_flag, {file,  vname})
+					
+				else
+					Warning(320, not_used_warning_flag, {file,  vname})
+				end if
+			end if	
 		else
-			vtype = "private variable"
-		end if
-		place = " of " & SymTab[CurrentSub][S_NAME] & "()"
-
-	end if
-
-	if u != or_bits(U_READ, U_WRITTEN) then
-		warn_level = 0
-		if u = U_UNUSED or
-			 (u = U_WRITTEN and
-				(equal(vtype, "local constant")
-               or (equal(vtype, "parameter") and Strict_is_on) -- this is rarely a real problem
-				 ))
-				 then
-			problem = ""
-			warn_level = not_used_warning_flag
-
-		elsif u = U_READ then
-			problem = " is never assigned a value"
-		    warn_level = no_value_warning_flag
-		end if
-
-		if warn_level then
-			Warning(sprintf("%s '%%s'%s in file %s%s", {vtype, place, file, problem}),
-								warn_level,{SymTab[s][S_NAME]})
+			if SymTab[s][S_VARNUM] < SymTab[CurrentSub][S_NUM_ARGS] then
+				-- Parameters
+				if warn_level = 1 then
+					if Strict_is_on then
+						-- Only issue this warning if -strict is in play.
+						Warning(230, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+					end if
+				else
+					Warning(321, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+				end if
+			else
+				-- Private Vars
+				if warn_level = 1 then
+					if Strict_is_on then
+						-- Only issue this warning if -strict is in play.
+						Warning(231, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+					end if
+				else
+					Warning(322, not_used_warning_flag, {file,  vname, SymTab[CurrentSub][S_NAME]})
+				end if
+			end if		
 		end if
 	end if
+
 end procedure
 
 export procedure HideLocals()
@@ -1083,4 +1177,33 @@ end function
 
 export function sym_next_in_block( symtab_index sym )
 	return SymTab[sym][S_NEXT_IN_BLOCK]
+end function
+
+export function sym_usage( symtab_index sym )
+	return SymTab[sym][S_USAGE]
+end function
+
+
+export function calc_stack_required( symtab_index sub )
+	integer required = SymTab[sub][S_NUM_ARGS]
+	integer arg = SymTab[sub][S_NEXT]
+	
+	for i = 1 to required do
+		arg = SymTab[arg][S_NEXT]
+	end for
+	
+	-- count the privates
+	while arg != 0 and SymTab[arg][S_SCOPE] <= SC_PRIVATE do
+		required += 1
+		arg = SymTab[arg][S_NEXT]
+	end while
+	
+	-- count the temps
+	arg = SymTab[sub][S_TEMPS]
+	while arg != 0 do
+		required += 1
+		arg = SymTab[arg][S_NEXT]
+	end while
+	
+	return required
 end function

@@ -1,4 +1,4 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- The Translator - Acts as a Back-end to the standard Front-end.
 --
@@ -9,22 +9,35 @@
 -- is more precise and efficient. It doesn't actually emit the C code
 -- until the final pass.
 
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
+include std/types.e as t
 include std/filesys.e
 include std/io.e
+include std/sort.e
+include std/map.e as map
+include std/search.e
 
-include global.e
-include platform.e
-include mode.e as mode
+include buildsys.e
 include c_decl.e
 include c_out.e
 include cominit.e
 include compress.e
-include scanner.e
 include emit.e
-include opnames.e
-include symtab.e
-include reswords.e
 include error.e
+include global.e
+include mode.e as mode
+include opnames.e
+include platform.e
+include reswords.e as rw
+include scanner.e
+include symtab.e
+include shift.e
+include fwdref.e
 
 integer np, pc
 
@@ -39,7 +52,7 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 		 -- M_SOUND = 1,
 		 -- M_LINE = 2,
 		 M_PALETTE = 3,
-		 -- M_PIXEL = 4,       -- obsolete, but keep for now
+		 M_SOCK_INFO = 4,
 		 M_GRAPHICS_MODE = 5,
 		 -- M_CURSOR = 6,
 		 -- M_WRAP = 7,
@@ -56,7 +69,7 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 		 -- M_ELLIPSE = 18,
 		 M_SEEK = 19,
 		 M_WHERE = 20,
-		 -- M_GET_PIXEL = 21, -- obsolete, but keep for now
+		 -- M_REUSE_2 = 21, -- REUSE
 		 -- M_DIR = 22,
 		 M_CURRENT_DIR = 23,
 		 -- M_MOUSE_POINTER = 24,
@@ -103,6 +116,7 @@ constant M_COMPLETE = 0,    -- determine Complete Edition
 		-- M_BACKEND      = 65,
 		M_CRASH        = 67
 		--, M_WARNING_FILE = 72
+		-- M_GET_RAND     = 98
 
 
 constant INIT_CHUNK = 2500 -- maximum number of literals to
@@ -113,6 +127,100 @@ target = {0, 0}
 
 constant LOOP_VAR = 1 --, LOOP_TYPE = 2, LOOP_LABEL = 3
 sequence loop_stack
+
+-- Key:   temp sym
+-- Value: 1 = reference count incremented when created
+map:map dead_temp_walking = map:new()
+
+enum
+	NO_REFERENCE = 0,
+	NEW_REFERENCE = 1,
+	KEEP_IN_MAP = 0,
+	REMOVE_FROM_MAP = 1,
+	DISCARD_TEMP = 0,
+	SAVE_TEMP = 1
+
+/*
+	Scenarios:
+		Temp creation:
+		1. Temp is just a pointer to something (e.g., RHS_SUBS), no new references
+		2. Temp is a new reference (e.g., function result or slice)
+
+		Temp disposition:
+		A. Temp is consumed, and needs to be dereferenced (e.g., length not part of a $-op)
+		B. Temp is stored somewhere, and shouldn't be dereferenced
+
+			All temps get set to NOVALUE, * indicates dereference
+			A	B
+		1	-   ?
+		2	*   -
+
+*/
+
+--**
+-- Called when an assignment is made, or an object is created.
+-- Checks whether the sym is a temp, and records it if it is.
+-- If the object's reference count was incremented, then referenced
+-- should be NEW_REFERENCE, so that it can be cleaned up properly later.
+-- Otherwise, ##referenced## should be NO_REFERENCE.
+procedure create_temp( symtab_index sym, integer referenced )
+	if is_temp( sym ) then
+		map:put( dead_temp_walking, sym, referenced )
+	end if
+end procedure
+
+--**
+-- Disposes of a temp.  If keep = DISCARD_TEMP, then the temp will be
+-- dereferenced if its reference count was incremented when
+-- it was created.  If remove_from_map is REMOVE_FROM_MAP, then the temp will
+-- be cleared from the map.  If remove_from_map is KEEP_IN_MAP, then the
+-- temp will be left in the map.
+procedure dispose_temp( symtab_index sym, integer keep, integer remove_from_map )
+	if is_temp( sym ) then
+		integer referenced = map:get( dead_temp_walking, sym, 0 )
+		if remove_from_map then
+			map:remove( dead_temp_walking, sym )
+		end if
+
+		if referenced = NEW_REFERENCE
+		and keep = DISCARD_TEMP then
+			CDeRef( sym )
+		end if
+		c_stmt("@ = NOVALUE;\n", sym)
+		SetBBType( sym, TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
+	end if
+end procedure
+
+--**
+-- Normally not used by the translator, but may be used in some cases
+-- where a forward procedure call was transformed into a forward function
+-- call.
+procedure opDEREF_TEMP()
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	pc += 2
+end procedure
+
+--**
+-- Disposes ##count## temps starting at ##start## in the Code using
+-- the specified value of ##keep##.
+procedure dispose_temps( integer start, integer count, integer keep, integer remove_from_map )
+	for i = start to start + count - 1 do
+		dispose_temp( Code[i], keep, remove_from_map )
+	end for
+end procedure
+
+--**
+-- Calls [:dispose_temp] for all temps that have been queued, but not yet
+-- disposed with the specified keep value.
+procedure dispose_all_temps( integer keep, integer remove_from_map, integer except = 0 )
+	sequence syms = map:keys( dead_temp_walking )
+	for i = 1 to length( syms ) do
+		if except = syms[i] then
+			continue
+		end if
+		dispose_temp( syms[i], keep, remove_from_map )
+	end for
+end procedure
 
 function min(atom a, atom b)
 	if a < b then
@@ -141,27 +249,41 @@ end function
 function savespace()
 -- should try to save space and reduce complexity
    return length(loop_stack) = 0 and (CurrentSub = TopLevelSub or
-		  length(SymTab[CurrentSub][S_CODE]) > (MAX_CFILE_SIZE/2))
+		  length(SymTab[CurrentSub][S_CODE]) > (max_cfile_size/2))
 end function
 
 function BB_temp_type(integer var)
 -- return the local type for a temp *name*, based on BB info */
 	integer t, tn
+	object bbi
+	object st
 
 	tn = SymTab[var][S_TEMP_NAME]
 	for i = length(BB_info) to 1 by -1 do
-		if SymTab[BB_info[i][BB_VAR]][S_MODE] = M_TEMP and
-		   SymTab[BB_info[i][BB_VAR]][S_TEMP_NAME] = tn then
-			t = BB_info[i][BB_TYPE]
-			if t <= 0 or t > TYPE_OBJECT then
-				InternalErr("Bad BB_temp_type")
-			end if
-			return t
+		bbi = BB_info[i]
+		st = SymTab[bbi[BB_VAR]]
+		if st[S_MODE] != M_TEMP then
+			continue
 		end if
+
+		if st[S_TEMP_NAME] != tn then
+			continue
+		end if
+
+		t = bbi[BB_TYPE]
+
+		ifdef DEBUG then
+		if t <= 0 or t > TYPE_OBJECT then
+			InternalErr(250)
+		end if
+		end ifdef
+
+		return t
+
 	end for
 	-- no info in BB, so fall back to global temp name info
 	return or_type(TYPE_INTEGER,   -- for initialization = 0
-				   temp_name_type[SymTab[var][S_TEMP_NAME]][T_GTYPE])
+				   temp_name_type[tn][T_GTYPE])
 end function
 
 function BB_temp_elem(integer var)
@@ -176,9 +298,13 @@ function BB_temp_elem(integer var)
 			if t = TYPE_NULL then
 				t = TYPE_OBJECT
 			end if
+
+			ifdef DEBUG then
 			if t <= 0 or t > TYPE_OBJECT then
-				InternalErr("Bad BB_elem type")
+				InternalErr(251)
 			end if
+			end ifdef
+
 			return t
 		end if
 	end for
@@ -194,9 +320,13 @@ function BB_var_elem(integer var)
 		if SymTab[BB_info[i][BB_VAR]][S_MODE] = M_NORMAL and
 			BB_info[i][BB_VAR] = var then
 			t = BB_info[i][BB_ELEM]
+
+			ifdef DEBUG then
 			if t < 0 or t > TYPE_OBJECT then
-				InternalErr("Bad BB_elem")
+				InternalErr(252)
 			end if
+			end ifdef
+
 			if t = TYPE_NULL then   -- var has only been read
 				return TYPE_OBJECT
 			else
@@ -229,9 +359,13 @@ function SeqElem(integer x)
 
 	s = x
 	t = SymTab[s][S_SEQ_ELEM]
+
+	ifdef DEBUG then
 	if t < 0 or t > TYPE_OBJECT then
-		InternalErr("Bad seq_elem")
+		InternalErr(253)
 	end if
+	end ifdef
+
 	if SymTab[s][S_MODE] != M_NORMAL then
 		return t
 	end if
@@ -351,17 +485,54 @@ function forward_branch_into(integer addr1, integer addr2)
 	return FALSE
 end function
 
+map:map label_usage = map:new()
+enum
+	LABEL_UNKNOWN = 0,
+	LABEL_EMITTED,
+	LABEL_UNUSED,
+	LABEL_USED
+
+function can_emit_label( integer addr, integer r_label = 0 )
+	sequence label_key = { CurrentSub, addr, r_label }
+	integer usage = map:get( label_usage, label_key, LABEL_UNKNOWN )
+
+	switch usage do
+		case LABEL_UNKNOWN then
+			map:put( label_usage, label_key, LABEL_EMITTED )
+			return 1
+		case LABEL_EMITTED, LABEL_USED then
+			return 1
+		case else
+	end switch
+	return 0
+end function
+
+function prune_labels()
+	sequence labels = map:pairs( label_usage )
+	label_usage = map:new()
+	for i = 1 to length( labels ) do
+		if labels[i][2] = LABEL_UNUSED
+		or labels[i][2] = LABEL_EMITTED then
+			map:put( label_usage, labels[i][1], LABEL_UNUSED )
+		end if
+	end for
+	return map:size( label_usage )
+end function
+
 procedure Label(integer addr)
 -- emit a label, and start a new basic block
 	integer label_index
 
 	NewBB(0, E_ALL_EFFECT, 0)
-	label_index = find_label(addr)
-	ifdef DEBUG then
-		c_printf("L%x: // addr: %d pc: %d sub: %d op: %d\n", {label_index, addr, pc, CurrentSub, Code[pc]})
-	elsedef
-		c_printf("L%x: \n", label_index)
-	end ifdef
+
+	if can_emit_label( addr ) then
+		label_index = find_label(addr)
+		ifdef DEBUG then
+			c_printf("L%x: // addr: %d pc: %d sub: %d op: %d\n", {label_index, addr, pc, CurrentSub, Code[pc]})
+		elsedef
+			c_printf("L%x: \n", label_index)
+		end ifdef
+	end if
 end procedure
 
 procedure RLabel(integer addr)
@@ -369,8 +540,14 @@ procedure RLabel(integer addr)
 	integer label_index
 
 	NewBB(0, E_ALL_EFFECT, 0)
-	label_index = find_label(addr)
-	c_printf("R%x:\n", label_index)
+	if can_emit_label( addr, 1 ) then
+		label_index = find_label(addr)
+		ifdef DEBUG then
+			c_printf("R%x: // addr: %d pc: %d sub: %d op: %d\n", {label_index, addr, pc, CurrentSub, Code[pc]})
+		elsedef
+			c_printf("R%x:\n", label_index)
+		end ifdef
+	end if
 end procedure
 
 procedure Goto(integer addr)
@@ -395,7 +572,7 @@ procedure Goto(integer addr)
 		   not find(Code[addr-5], {ENDFOR_INT_UP1, ENDFOR_GENERAL})
 --         or
 --         SymTab[Code[addr-2]][S_GTYPE] = TYPE_INTEGER  -- could get subscript error
-			then
+		then
 			-- careful: general ENDFOR might emit a label followed by
 			-- code that shouldn't be skipped
 			if find(br, {ELSE, ENDWHILE, EXIT}) then
@@ -411,6 +588,7 @@ procedure Goto(integer addr)
 	label_index = find_label(addr)
 	c_stmt0("goto ")
 	c_printf("L%x; // [%d] %d\n", {label_index, pc, addr})
+	map:put( label_usage, { CurrentSub, addr, 0 }, LABEL_USED )
 end procedure
 
 procedure RGoto(integer addr)
@@ -418,6 +596,7 @@ procedure RGoto(integer addr)
 -- does not do branch straightening
 	c_stmt0("goto ")
 	c_printf("R%x;\n", find_label(addr))
+	map:put( label_usage, { CurrentSub, addr, 1 }, LABEL_USED )
 end procedure
 
 function BB_exist(integer var)
@@ -464,7 +643,7 @@ procedure CRef(integer v)
 	if TypeIs(v, TYPE_INTEGER) then
 		return
 	end if
-	if TypeIs(v, {TYPE_DOUBLE, TYPE_SEQUENCE}) then
+	if TypeIsIn(v, TYPES_DS) then
 		c_stmt0("RefDS(")
 	else
 		c_stmt0("Ref(") -- TYPE_ATOM, TYPE_OBJECT
@@ -480,7 +659,7 @@ procedure CRefn(integer v, integer n)
 		return
 	end if
 
-	if TypeIs(v, {TYPE_DOUBLE, TYPE_SEQUENCE}) then
+	if TypeIsIn(v, TYPES_DS) then
 		c_stmt0("RefDSn(")
 	else
 		c_stmt0("Refn(") -- TYPE_ATOM, TYPE_OBJECT
@@ -493,21 +672,44 @@ end procedure
 
 function target_differs(integer target, integer opnd1, integer opnd2,
 						integer opnd3)
--- see if target is not used as an operand - it can be DeRef'd early
-	if SymTab[target][S_MODE] = M_NORMAL then
-		return target != opnd1 and target != opnd2 and target != opnd3
+	integer tmode
+	integer tname
 
-	elsif SymTab[target][S_MODE] = M_TEMP then
-		if (opnd1 = 0 or
-			SymTab[target][S_TEMP_NAME] != SymTab[opnd1][S_TEMP_NAME]) and
-		   (opnd2 = 0 or
-			SymTab[target][S_TEMP_NAME] != SymTab[opnd2][S_TEMP_NAME]) and
-		   (opnd3 = 0 or
-			SymTab[target][S_TEMP_NAME] != SymTab[opnd3][S_TEMP_NAME]) then
-			return TRUE
-		else
+-- see if target is not used as an operand - it can be DeRef'd early
+	tmode = SymTab[target][S_MODE]
+	if tmode = M_NORMAL then
+		if target = opnd1 then
 			return FALSE
 		end if
+		if target = opnd2 then
+			return FALSE
+		end if
+		if target = opnd3 then
+			return FALSE
+		end if
+		return TRUE
+
+	elsif tmode = M_TEMP then
+		tname = SymTab[target][S_TEMP_NAME]
+		if opnd1 then
+			if tname = SymTab[opnd1][S_TEMP_NAME] then
+				return FALSE
+			end if
+		end if
+
+		if opnd2 then
+			if tname = SymTab[opnd2][S_TEMP_NAME] then
+				return FALSE
+			end if
+		end if
+
+		if opnd3 then
+			if tname = SymTab[opnd3][S_TEMP_NAME] then
+				return FALSE
+			end if
+		end if
+
+		return TRUE
 
 	else
 		return FALSE
@@ -529,7 +731,7 @@ procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
 	deref_exist = FALSE
 
 	if SymTab[v][S_MODE] = M_TEMP then
-		deref_type = BB_temp_type(v)
+		deref_type = TYPE_INTEGER
 		deref_elem_type = BB_temp_elem(v)
 
 	elsif SymTab[v][S_MODE] = M_NORMAL then
@@ -550,7 +752,7 @@ procedure CSaveStr(sequence target, integer v, integer a, integer b, integer c)
 				  IsParameter(v) or
 				  deref_exist)
 	if deref_type != TYPE_INTEGER then
-		if target_differs(v, a, b, c) then
+		if  target_differs(v, a, b, c) then
 			-- target differs from operands - can DeRef it immediately
 			if savespace() then
 				c_stmt0("DeRef1(")  -- less machine code
@@ -593,7 +795,7 @@ procedure CDeRefStr(sequence s)
 	end if
 
 	if not equal(s, deref_str) then
-		CompileErr("internal: deref problem")
+		CompileErr(106)
 	end if
 
 	if deref_type != TYPE_INTEGER then
@@ -657,7 +859,7 @@ procedure CDeRef(integer v)
 			c_stmt0("DeRef1(")  -- less machine code
 
 		else
-			if TypeIs(v, {TYPE_DOUBLE, TYPE_SEQUENCE}) and
+			if TypeIsIn(v, TYPES_DS) and
 				(IsParameter(v) or BB_exist(v)) then
 				-- safe: parameters are always initialized
 				if elem_type = TYPE_INTEGER then
@@ -680,7 +882,7 @@ procedure CDeRef(integer v)
 	LeftSym = TRUE
 	CName(v)
 	c_puts(");\n")
-	
+
 	if HasDelete( v ) then
 		NewBB(1, E_ALL_EFFECT, 0)
 	end if
@@ -694,12 +896,12 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		-- test for integer
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIsNot(Code[pc+1], {TYPE_DOUBLE, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_DS) then
 		-- handle integer
 		c_stmt("@ = ", Code[pc+2])
 		c_puts(op_int)
@@ -707,7 +909,7 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 		c_stmt("(@);\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("else\n")
 	end if
 
@@ -725,7 +927,9 @@ procedure CUnaryOp(integer pc, sequence op_int, sequence op_gen)
 	else
 		target_type = GType(Code[pc+1])
 	end if
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	SetBBType(Code[pc+2], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
+	create_temp( Code[pc+2], 1 )
 end procedure
 
 procedure seg_peek_string(integer target, integer source, integer mode)
@@ -1048,7 +1252,7 @@ function machine_func_type(integer x)
 					range = {-1, 1000}
 					return {TYPE_INTEGER, range}
 
-				elsif find(func_num, {M_WHERE, M_OPEN_DLL, M_CALLBACK,
+				elsif find(func_num, {M_WHERE, M_OPEN_DLL,
 									  M_DEFINE_VAR, M_INSTANCE, M_ALLOC,
 									  M_F64_TO_A, M_F32_TO_A}) then
 					return {TYPE_ATOM, novalue}
@@ -1106,7 +1310,7 @@ procedure main_temps()
 	while sp != 0 do
 		if SymTab[sp][S_SCOPE] != DELETED then
 			sequence name = sprintf("_%d", SymTab[sp][S_TEMP_NAME] )
-			if temp_name_type[SymTab[sp][S_TEMP_NAME]][T_GTYPE] != TYPE_NULL 
+			if temp_name_type[SymTab[sp][S_TEMP_NAME]][T_GTYPE] != TYPE_NULL
 			and not find( name, names ) then
 				c_stmt0("int ")
 				c_printf("%s", {name})
@@ -1189,7 +1393,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 			c_printf("%d;\n", result[MIN])
 		end if
 
-	elsif op = MULTIPLY then
+	elsif op = rw:MULTIPLY then
 
 		d1 = left_val[MIN] * right_val[MIN]
 		d2 = left_val[MIN] * right_val[MAX]
@@ -1257,7 +1461,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 		else
 			-- range of values - crude estimate
-			-- note: power(x,2) is changed to multiply in emit.c
+			-- note: power(x,2) is changed to ` in emit.c
 			-- so we try to handle powers up to 4
 			if right_val[MAX] <= 4 and right_val[MIN] >= 0 and
 				left_val[MAX] < 177 and left_val[MIN] > -177 then
@@ -1317,43 +1521,48 @@ procedure FinalDeRef(symtab_index sym)
 -- do final deref of a temp at end of a function, type or procedure
 	integer i, t
 
-	i = BB_temp_type(sym)
-	t = BB_temp_elem(sym)
-	if i != TYPE_INTEGER and i != TYPE_NULL then
-		LeftSym = TRUE
-		if i = TYPE_ATOM then
-			deref_buff = append(deref_buff, sym)
-
-		elsif i = TYPE_OBJECT then
-			if t = TYPE_INTEGER then
-				c_stmt("DeRefi(@);\n", sym)
-			else
+	if is_temp( sym ) then
+		i = BB_temp_type(sym)
+		t = BB_temp_elem(sym)
+	else
+		i = BB_temp_type(sym)
+		t = BB_temp_elem(sym)
+		if i != TYPE_INTEGER and i != TYPE_NULL then
+			LeftSym = TRUE
+			if i = TYPE_ATOM then
 				deref_buff = append(deref_buff, sym)
-			end if
 
-		elsif i = TYPE_SEQUENCE then
-			if t = TYPE_INTEGER then
-				c_stmt("DeRefDSi(@);\n", sym)
+			elsif i = TYPE_OBJECT then
+				if t = TYPE_INTEGER then
+					c_stmt("DeRefi(@);\n", sym)
+				else
+					deref_buff = append(deref_buff, sym)
+				end if
+
+			elsif i = TYPE_SEQUENCE then
+				if t = TYPE_INTEGER then
+					c_stmt("DeRefDSi(@);\n", sym)
+				else
+					c_stmt("DeRefDS(@);\n", sym)
+				end if
+
 			else
+				-- TYPE_DOUBLE
 				c_stmt("DeRefDS(@);\n", sym)
 			end if
 
-		else
-			-- TYPE_DOUBLE
-			c_stmt("DeRefDS(@);\n", sym)
-		end if
-
-		-- try to bundle sets of 5 DeRef's
-		if length(deref_buff) = DEREF_PACK then
-			LeftSym = TRUE
-			c_stmt("DeRef5(@", deref_buff[1])
-			for d = 2 to DEREF_PACK do
-				c_puts(", ")
+			-- try to bundle sets of 5 DeRef's
+			if length(deref_buff) = DEREF_PACK then
 				LeftSym = TRUE
-				CName(deref_buff[d])
-			end for
-			c_puts(");\n")
-			deref_buff = {}
+				c_stmt("DeRef5(@", deref_buff[1])
+				for d = 2 to DEREF_PACK do
+					c_puts(", ")
+					LeftSym = TRUE
+					CName(deref_buff[d])
+				end for
+				c_puts(");\n")
+				deref_buff = {}
+			end if
 		end if
 	end if
 end procedure
@@ -1464,31 +1673,33 @@ procedure unary_div(integer pc, integer target_type, sequence intcode,
 -- unary divide ops
 	CSaveStr("_0", Code[pc+3], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		-- handle integer
-		c_stmt(intcode, {Code[pc+3], Code[pc+1]})
+		c_stmt(intcode, {Code[pc+3], Code[pc+1]}, Code[pc+3])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
 		-- handle double or sequence
-		c_stmt(gencode, {Code[pc+3], Code[pc+1]})
+		c_stmt(gencode, {Code[pc+3], Code[pc+1]}, Code[pc+3])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
 	CDeRefStr("_0")
 	SetBBType(Code[pc+3], target_type, novalue, TYPE_OBJECT, HasDelete( Code[pc+3] ))
+	create_temp( Code[pc+3], NEW_REFERENCE )
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 end procedure
 
 function unary_optimize(integer pc, integer target_type, sequence target_val,
@@ -1496,11 +1707,11 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 -- handle a few special unary ops
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		-- handle integer
 		if Code[pc] = UMINUS then
 			if (target_type = TYPE_INTEGER or
@@ -1519,7 +1730,7 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 		c_stmt(intcode, {Code[pc+2], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -1529,12 +1740,14 @@ function unary_optimize(integer pc, integer target_type, sequence target_val,
 		c_stmt(gencode, {Code[pc+2], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
 	CDeRefStr("_0")
 	SetBBType(Code[pc+2], target_type, target_val, TYPE_OBJECT, HasDelete( Code[pc+2] ) )
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+2], 1 )
 	return pc + 3
 end function
 
@@ -1634,44 +1847,50 @@ function ifw(integer pc, sequence op, sequence intop)
 		c_stmt0("if (binary_op_a(")
 		c_puts(op)
 		temp_indent = -indent
-		c_stmt(", @, @))\n", {Code[pc+1], Code[pc+2]})
+		c_stmt(", @, @)){\n", {Code[pc+1], Code[pc+2]})
 	end if
-	temp_indent = 4
+	dispose_temps( pc+1, 2, DISCARD_TEMP, KEEP_IN_MAP )
 	Goto(Code[pc+3])
+	c_stmt0( "}\n" )
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	return pc + 4
 end function
 
-function binary_op(integer pc, integer iii, sequence target_val,
+function binary_op(integer pc, integer ResAlwaysInt, sequence target_val,
 				   sequence intcode, sequence intcode2, sequence intcode_extra,
 				   sequence gencode, sequence dblfn, integer atom_type)
 -- handle the completion of many binary ops
 	integer target_elem, target_type, np, check
 	boolean close_brace
+	symtab_index rhs1  = Code[pc+1]
+	symtab_index rhs2 = Code[pc+2]
+	symtab_index lhs = Code[pc+3]
 
 	target_elem = TYPE_OBJECT
+	create_temp( lhs, NEW_REFERENCE )
 
-	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
+	if TypeIs(rhs1, TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
-		if iii and
-			SeqElem(Code[pc+1]) = TYPE_INTEGER and
-			(TypeIs(Code[pc+2], TYPE_INTEGER) or
-			(TypeIs(Code[pc+2], TYPE_SEQUENCE) and
-			SeqElem(Code[pc+2]) = TYPE_INTEGER)) then
+		if ResAlwaysInt and
+			SeqElem(rhs1) = TYPE_INTEGER and
+			(TypeIs(rhs2, TYPE_INTEGER) or
+			(TypeIs(rhs2, TYPE_SEQUENCE) and
+			SeqElem(rhs2) = TYPE_INTEGER)) then
 			target_elem = TYPE_INTEGER
 		end if
 
-	elsif TypeIs(Code[pc+2], TYPE_SEQUENCE) then
+	elsif TypeIs(rhs2, TYPE_SEQUENCE) then
 		target_type = TYPE_SEQUENCE
-		if iii and
-			  SeqElem(Code[pc+2]) = TYPE_INTEGER and
-			  TypeIs(Code[pc+1], TYPE_INTEGER) then
+		if ResAlwaysInt and
+			  SeqElem(rhs2) = TYPE_INTEGER and
+			  TypeIs(rhs1, TYPE_INTEGER) then
 			target_elem = TYPE_INTEGER
 		end if
 
-	elsif TypeIs(Code[pc+1], TYPE_OBJECT) then
+	elsif TypeIs(rhs1, TYPE_OBJECT) then
 		target_type = TYPE_OBJECT
 
-	elsif TypeIs(Code[pc+2], TYPE_OBJECT) then
+	elsif TypeIs(rhs2, TYPE_OBJECT) then
 		target_type = TYPE_OBJECT
 
 	else
@@ -1679,79 +1898,82 @@ function binary_op(integer pc, integer iii, sequence target_val,
 
 	end if
 
-	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
+	CSaveStr("_0", lhs, rhs1, rhs2, 0)
 
 	close_brace = FALSE
 
 	check = 0
 
-	if TypeIs(Code[pc+1], TYPE_INTEGER) and
-	   TypeIs(Code[pc+2], TYPE_INTEGER) then
+	if TypeIs(rhs1, TYPE_INTEGER) and
+	   TypeIs(rhs2, TYPE_INTEGER) then
 		-- uncertain about neither
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
-						   MULTIPLY, FLOOR_DIV, POWER}) then
+						   rw:MULTIPLY, FLOOR_DIV, POWER}) then
 
 			np = pc + 4 + 2 * (Code[pc+4] = INTEGER_CHECK)
-			target = FoldInteger(Code[pc], Code[pc+3], Code[pc+1], Code[pc+2])
+			target = FoldInteger(Code[pc], lhs, rhs1, rhs2)
 			if target[MIN] != NOVALUE and
 			   target[MIN] = target[MAX] then
 				-- constant folding code was emitted
 				CDeRefStr("_0")
-				SetBBType(Code[pc+3], TYPE_INTEGER, target,
+				SetBBType(lhs, TYPE_INTEGER, target,
 									  TYPE_OBJECT, 0)
+				dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 				return np
 
-			elsif SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
-				  IntegerSize(np, Code[pc+3]) or
+			elsif SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
+				  IntegerSize(np, lhs) or
 				  target[MIN] != NOVALUE then
 				-- result will be an integer
-				c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 				CDeRefStr("_0")
 				if target[MIN] = NOVALUE then
 					target = novalue
 				end if
-				SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+				SetBBType(lhs, TYPE_INTEGER, target, TYPE_OBJECT, 0)
+				dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 				return np
 			end if
 		end if
 
-		c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+		c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 
-		if iii then
+		if ResAlwaysInt then
 			-- int operands => int result
-			SetBBType(Code[pc+3], TYPE_INTEGER, target_val, TYPE_OBJECT, 0)
+			SetBBType(lhs, TYPE_INTEGER, target_val, TYPE_OBJECT, 0)
 		else
-			SetBBType(Code[pc+3], TYPE_ATOM, novalue, TYPE_OBJECT, 0 )
+			SetBBType(lhs, TYPE_ATOM, novalue, TYPE_OBJECT, 0 )
 		end if
 
 		-- now that Code[pc+3]'s type and value have been updated:
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-			c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 		end if
 
 		CDeRefStr("_0")
 
+		dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 		return pc + 4
 
-	elsif TypeIs(Code[pc+2], TYPE_INTEGER) and
-		  TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	elsif TypeIs(rhs2, TYPE_INTEGER) and
+		  TypeIsIn(rhs1, TYPES_AO) then
 		-- uncertain about Code[pc+1] only
 		check = 1
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
-						   MULTIPLY, FLOOR_DIV}) and
-				(SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
-					IntegerSize(pc+4, Code[pc+3])) then
-			c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+						   rw:MULTIPLY, FLOOR_DIV}) and
+				(SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
+					IntegerSize(pc+4, lhs)) then
+			c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 
 		else
-			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem, 0)
+				SetBBType(lhs, GType(lhs), target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 			end if
 
 		end if
@@ -1760,47 +1982,47 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		c_stmt0("else {\n")
 		close_brace = TRUE
 
-	elsif TypeIs(Code[pc+1], TYPE_INTEGER) and
-		  TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+	elsif TypeIs(rhs1, TYPE_INTEGER) and
+		  TypeIsIn(rhs2, TYPES_AO) then
 		-- uncertain about Code[pc+2] only
 		check = 2
-		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
+		c_stmt("if (IS_ATOM_INT(@)) {\n", rhs2 )
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
-						   MULTIPLY, FLOOR_DIV}) and
+						   rw:MULTIPLY, FLOOR_DIV}) and
 						(SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
 						 IntegerSize(pc+4, Code[pc+3])) then
-			c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 		else
-			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]),
+				SetBBType(Code[pc+3], GType(lhs),
 									  target_val, target_elem, 0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 			end if
 		end if
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 		close_brace = TRUE
 
-	elsif TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) and
-		  TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+	elsif TypeIsIn(rhs1, TYPES_AO) and
+		  TypeIsIn(rhs2, TYPES_AO) then
 		-- uncertain about both types being TYPE_INTEGER or not
-		c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)) {\n", {Code[pc+1], Code[pc+2]})
+		c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)) {\n", {rhs1, rhs2})
 
 		if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I,
-						   MULTIPLY, FLOOR_DIV}) and
-						(SymTab[Code[pc+3]][S_GTYPE] = TYPE_INTEGER or
-						 IntegerSize(pc+4, Code[pc+3])) then
-			c_stmt(intcode2, {Code[pc+3], Code[pc+1], Code[pc+2]})
+						   rw:MULTIPLY, FLOOR_DIV}) and
+						(SymTab[lhs][S_GTYPE] = TYPE_INTEGER or
+						 IntegerSize(pc+4, lhs)) then
+			c_stmt(intcode2, {lhs, rhs1, rhs2}, lhs)
 
 		else
-			c_stmt(intcode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(intcode, {lhs, rhs1, rhs2}, lhs)
 			if find(Code[pc], {PLUS, PLUS_I, MINUS, MINUS_I}) then
-				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val, target_elem,0)
+				SetBBType(lhs, GType(lhs), target_val, target_elem,0)
 				-- now that Code[pc+3]'s value has been updated:
-				c_stmt(intcode_extra, {Code[pc+3], Code[pc+1], Code[pc+2]})
+				c_stmt(intcode_extra, {lhs, rhs1, rhs2}, lhs)
 			end if
 		end if
 		c_stmt0("}\n")
@@ -1808,111 +2030,111 @@ function binary_op(integer pc, integer iii, sequence target_val,
 		close_brace = TRUE
 	end if
 
-	if TypeIsNot(Code[pc+1], TYPE_INTEGER) or
-	   TypeIsNot(Code[pc+2], TYPE_INTEGER) then
+	if TypeIsNot(rhs1, TYPE_INTEGER) or
+	   TypeIsNot(rhs2, TYPE_INTEGER) then
 		if Code[pc] != FLOOR_DIV and
-		   TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-		   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+		   TypeIsNotIn(rhs1, TYPES_SO) and
+		   TypeIsNotIn(rhs2, TYPES_SO) then
 			-- both are known to be atoms and integer:integer
 			-- possibility has been handled - do it in-line
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
-				c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
+			   TypeIsIn(rhs1, TYPES_AO) then
+				c_stmt("if (IS_ATOM_INT(@)) {\n", rhs1)
 			end if
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+			   TypeIsIn(rhs1, TYPES_IAO) then
 				if length(dblfn) > 2 then
-					c_stmt("temp_d.dbl = (double)@;\n", Code[pc+1])
-					c_stmt("@ = ", Code[pc+3])
+					c_stmt("temp_d.dbl = (double)@;\n", rhs1)
+					c_stmt("@ = ", lhs, lhs)
 					c_puts(dblfn)
 					temp_indent = -indent
-					c_stmt("(&temp_d, DBL_PTR(@));\n", Code[pc+2])
+					c_stmt("(&temp_d, DBL_PTR(@));\n", rhs2)
 				else
-					c_stmt("@ = ", Code[pc+3])
+					c_stmt("@ = ", lhs, lhs)
 					temp_indent = -indent
 					if atom_type = TYPE_INTEGER then
-						c_stmt("((double)@ ", Code[pc+1])
+						c_stmt("((double)@ ", rhs1)
 					else
-						c_stmt("NewDouble((double)@ ", Code[pc+1])
+						c_stmt("NewDouble((double)@ ", rhs1)
 					end if
 					c_puts(dblfn)
 					temp_indent = -indent
-					c_stmt(" DBL_PTR(@)->dbl);\n", Code[pc+2])
+					c_stmt(" DBL_PTR(@)->dbl);\n", rhs2)
 				end if
 			end if
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+			   TypeIsIn(rhs1, TYPES_AO) then
 				c_stmt0("}\n")
 				c_stmt0("else {\n")
 			end if
 
-			if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
+			if TypeIsNot(rhs1, TYPE_INTEGER) then
 				if check != 2 and
-				   TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
-					c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
+				   TypeIsIn(rhs2, TYPES_AO) then
+					c_stmt("if (IS_ATOM_INT(@)) {\n", rhs2)
 				end if
 
 				if check != 2 and
-				   TypeIs(Code[pc+2], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+				   TypeIsIn(rhs2, TYPES_IAO) then
 					if length(dblfn) > 2 then
-						c_stmt("temp_d.dbl = (double)@;\n", Code[pc+2])
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("temp_d.dbl = (double)@;\n", rhs2)
+						c_stmt("@ = ", lhs, lhs)
 						c_puts(dblfn)
 						temp_indent = -indent
-						c_stmt("(DBL_PTR(@), &temp_d);\n", Code[pc+1])
+						c_stmt("(DBL_PTR(@), &temp_d);\n", rhs1)
 					else
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("@ = ", lhs, lhs)
 						temp_indent = -indent
 						if atom_type = TYPE_INTEGER then
-							c_stmt("(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("(DBL_PTR(@)->dbl ", rhs1)
 						else
-							c_stmt("NewDouble(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("NewDouble(DBL_PTR(@)->dbl ", rhs1)
 						end if
 						c_puts(dblfn)
 						temp_indent = -indent
-						c_stmt(" (double)@);\n", Code[pc+2])
+						c_stmt(" (double)@);\n", rhs2)
 					end if
 				end if
 
 				if check != 2 and
-				   TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+				   TypeIsIn(rhs2, TYPES_AO) then
 					c_stmt0("}\n")
 					c_stmt0("else\n")
 				end if
 
-				if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
+				if TypeIsNot(rhs2, TYPE_INTEGER) then
 					if length(dblfn) > 2 then
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("@ = ", lhs, lhs)
 						c_puts(dblfn)
 						temp_indent = -indent
 						c_stmt("(DBL_PTR(@), DBL_PTR(@));\n",
-											{Code[pc+1], Code[pc+2]})
+											{rhs1, rhs2})
 					else
-						c_stmt("@ = ", Code[pc+3])
+						c_stmt("@ = ", lhs, lhs)
 						temp_indent = -indent
 						if atom_type = TYPE_INTEGER then
-							c_stmt("(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("(DBL_PTR(@)->dbl ", rhs1)
 						else
-							c_stmt("NewDouble(DBL_PTR(@)->dbl ", Code[pc+1])
+							c_stmt("NewDouble(DBL_PTR(@)->dbl ", rhs1)
 						end if
 						c_puts(dblfn)
 						temp_indent = -indent
-						c_stmt(" DBL_PTR(@)->dbl);\n", Code[pc+2])
+						c_stmt(" DBL_PTR(@)->dbl);\n", rhs2)
 					end if
 				end if
 			end if
 
 			if check != 1 and
-			   TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+			   TypeIsIn(rhs1, TYPES_AO) then
 				c_stmt0("}\n")
 			end if
 
 		else
 			-- one might be a sequence - use general call
-			c_stmt(gencode, {Code[pc+3], Code[pc+1], Code[pc+2]})
+			c_stmt(gencode, {lhs, rhs1, rhs2}, lhs)
 
 		end if
 	end if
@@ -1922,7 +2144,9 @@ function binary_op(integer pc, integer iii, sequence target_val,
 	end if
 
 	CDeRefStr("_0")
-	SetBBType(Code[pc+3], target_type, target_val, target_elem, 0)
+	SetBBType(lhs, target_type, target_val, target_elem, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+
 	return pc + 4
 end function
 
@@ -1949,7 +2173,7 @@ procedure arg_list(integer i)
 end procedure
 
 -- common vars for do_exec ops
-integer iii, n, t, ov
+integer n, t, ov
 atom len
 integer const_subs
 symtab_index sub, sym
@@ -1965,20 +2189,27 @@ procedure opSTARTLINE()
 -- common in Translator, not in Interpreter
 	sequence line
 	integer offset
+	integer close_comment = 1
 
 	c_putc('\n')
 	offset = slist[Code[pc+1]][SRC]
 	line = fetch_line(offset)
 	if trace_called and
-	   and_bits(slist[Code[pc+1]][OPTIONS], SOP_TRACE) then
+		and_bits(slist[Code[pc+1]][OPTIONS], SOP_TRACE)
+	then
 		c_stmt0("ctrace(\"")
-		c_puts(name_ext(file_name[slist[Code[pc+1]][LOCAL_FILE_NO]]))
+		c_puts(name_ext(known_files[slist[Code[pc+1]][LOCAL_FILE_NO]]))
 		c_printf(":%d\t", slist[Code[pc+1]][LINE])
 		c_fixquote(line)
 		c_puts("\");\n")
 
 	else
-		c_stmt0("// ")
+		if not match("*/", line ) and not match( "/*", line ) then
+			c_stmt0("/** ")
+		else
+			c_stmt0("//")
+			close_comment = 0
+		end if
 		for i = length(line) to 1 by -1 do
 			if not find(line[i], " \t\r\n") then
 				if line[i] = '\\' then
@@ -1989,7 +2220,11 @@ procedure opSTARTLINE()
 			end if
 		end for
 		c_puts(line)
-		c_puts("\n")
+		if close_comment then
+			c_puts("*/\n")
+		else
+			c_puts("\n")
+		end if
 	end if
 	pc += 2
 end procedure
@@ -2017,7 +2252,7 @@ procedure opPROC_TAIL()
 		end if
 		sym = SymTab[sym][S_NEXT]
 	end for
-	
+
 	while sym != 0 and SymTab[sym][S_SCOPE] <= SC_PRIVATE do
 		if SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
 		   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
@@ -2029,13 +2264,14 @@ procedure opPROC_TAIL()
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
 		if SymTab[sym][S_SCOPE] != DELETED then
-			c_stmt( "DeRef( @ );\n", sym )
-			c_stmt( "@ = 0;\n", sym )
+			dispose_all_temps( 0, 1 )
+-- 			c_stmt( "DeRef( @ );\n", sym )
+-- 			c_stmt( "@ = 0;\n", sym )
 		end if
 		sym = SymTab[sym][S_NEXT]
 	end while
-	
-	
+
+
 	Goto( 1 )
 	pc += 2 + SymTab[sub][S_NUM_ARGS] + (SymTab[sub][S_TOKEN] != PROC)
 end procedure
@@ -2045,6 +2281,9 @@ procedure opPROC()
 -- generate code for a procedure/function call
 	symtab_index sub
 	integer n, t, p
+	object stnext
+	integer eltype
+	sequence temps = {}
 
 	sub = Code[pc+1]
 
@@ -2053,57 +2292,76 @@ procedure opPROC()
 	-- update argument types
 	p = SymTab[sub][S_NEXT]
 	for i = 1 to SymTab[sub][S_NUM_ARGS] do
+		stnext = SymTab[p]
 		t = Code[pc+1+i]
-		CRef(t)
-		SymTab[t][S_ONE_REF] = FALSE
-		SymTab[p][S_ARG_TYPE_NEW] = or_type(SymTab[p][S_ARG_TYPE_NEW], GType(t))
+		if is_temp( t ) then
+			temps &= t
+			if map:get( dead_temp_walking, t, NEW_REFERENCE ) = NO_REFERENCE then
+				CRef(t)
+			end if
+		else
+			CRef(t)
+		end if
 
-		if TypeIs(t, {TYPE_SEQUENCE, TYPE_OBJECT}) then
-			SymTab[p][S_ARG_MIN_NEW] = NOVALUE
-			SymTab[p][S_ARG_SEQ_ELEM_NEW] =
-								or_type(SymTab[p][S_ARG_SEQ_ELEM_NEW], SeqElem(t))
-			if SymTab[p][S_ARG_SEQ_LEN_NEW] = -NOVALUE then
-				SymTab[p][S_ARG_SEQ_LEN_NEW] = SeqLen(t)
-			elsif SymTab[p][S_ARG_SEQ_LEN_NEW] != SeqLen(t) then
-				SymTab[p][S_ARG_SEQ_LEN_NEW] = NOVALUE
+
+		SymTab[t][S_ONE_REF] = FALSE
+		stnext[S_ARG_TYPE_NEW] = or_type(stnext[S_ARG_TYPE_NEW], GType(t))
+
+		if TypeIsIn(t, TYPES_SO) then
+			stnext[S_ARG_MIN_NEW] = NOVALUE
+			eltype = SeqElem(t)
+			if eltype != stnext[S_ARG_SEQ_ELEM_NEW] then
+				eltype = or_type(stnext[S_ARG_SEQ_ELEM_NEW], eltype)
+				stnext[S_ARG_SEQ_ELEM_NEW] = eltype
+			end if
+
+			if stnext[S_ARG_SEQ_LEN_NEW] = -NOVALUE then
+				stnext[S_ARG_SEQ_LEN_NEW] = SeqLen(t)
+			elsif stnext[S_ARG_SEQ_LEN_NEW] != SeqLen(t) then
+				stnext[S_ARG_SEQ_LEN_NEW] = NOVALUE
 			end if
 
 		elsif TypeIs(t, TYPE_INTEGER) then
 			target = ObjMinMax(t)
-			if SymTab[p][S_ARG_MIN_NEW] = -NOVALUE then
+			if stnext[S_ARG_MIN_NEW] = -NOVALUE then
 				-- first value in this pass
-				SymTab[p][S_ARG_MIN_NEW] = target[MIN]
-				SymTab[p][S_ARG_MAX_NEW] = target[MAX]
+				stnext[S_ARG_MIN_NEW] = target[MIN]
+				stnext[S_ARG_MAX_NEW] = target[MAX]
 
-			elsif SymTab[p][S_ARG_MIN_NEW] != NOVALUE then
+			elsif stnext[S_ARG_MIN_NEW] != NOVALUE then
 				-- widen the range
-				if target[MIN] < SymTab[p][S_ARG_MIN_NEW] then
-					SymTab[p][S_ARG_MIN_NEW] = target[MIN]
+				if target[MIN] < stnext[S_ARG_MIN_NEW] then
+					stnext[S_ARG_MIN_NEW] = target[MIN]
 				end if
-				if target[MAX] > SymTab[p][S_ARG_MAX_NEW] then
-					SymTab[p][S_ARG_MAX_NEW] = target[MAX]
+				if target[MAX] > stnext[S_ARG_MAX_NEW] then
+					stnext[S_ARG_MAX_NEW] = target[MAX]
 				end if
 			end if
 
 		else
-			SymTab[p][S_ARG_MIN_NEW] = NOVALUE
+			stnext[S_ARG_MIN_NEW] = NOVALUE
 
 		end if
-
+		SymTab[p] = stnext
 		p = SymTab[p][S_NEXT]
 	end for
 
 	if SymTab[sub][S_TOKEN] != PROC then
 		p = Code[pc+n-1]
-		if SymTab[p][S_MODE] = M_NORMAL and find(SymTab[p][S_SCOPE], { SC_GLOBAL, SC_LOCAL, SC_EXPORT, SC_PUBLIC }) then
-			-- global/local might be modified during the call,
-			-- so complete the call before setting DeRef value
-			c_stmt("_0 = ", p)
+		if SymTab[p][S_MODE] = M_NORMAL then
+			if find(SymTab[p][S_SCOPE], { SC_GLOBAL, SC_LOCAL, SC_EXPORT, SC_PUBLIC }) then
+				-- global/local might be modified during the call,
+				-- so complete the call before setting DeRef value
+				c_stmt("_0 = ", p)
+			else
+				CSaveStr("_0", p, p, 0, 0)
+				c_stmt("@ = ", p)
+			end if
 		else
-			CSaveStr("_0", p, p, 0, 0)
 			c_stmt("@ = ", p)
 		end if
 		temp_indent = -indent
+
 	end if
 	LeftSym = TRUE
 	c_stmt("@", sub)
@@ -2121,12 +2379,15 @@ procedure opPROC()
 	end if
 
 	if SymTab[sub][S_TOKEN] != PROC then
-		if SymTab[p][S_MODE] = M_NORMAL and
-			find(SymTab[p][S_SCOPE], { SC_GLOBAL, SC_LOCAL, SC_EXPORT, SC_PUBLIC} ) then
-			CDeRef(p)  -- DeRef latest value, not old one
-			c_stmt("@ = _0;\n", p)
+		if SymTab[p][S_MODE] = M_NORMAL then
+			if find(SymTab[p][S_SCOPE], { SC_GLOBAL, SC_LOCAL, SC_EXPORT, SC_PUBLIC} ) then
+				CDeRef(p)  -- DeRef latest value, not old one
+				c_stmt("@ = _0;\n", p)
+			else
+				CDeRefStr("_0")
+			end if
 		else
-			CDeRefStr("_0")
+			create_temp( Code[pc+n-1], 1 )
 		end if
 
 		if SymTab[sub][S_GTYPE] = TYPE_INTEGER then
@@ -2148,9 +2409,16 @@ procedure opPROC()
 		end if
 		SymTab[Code[pc+n-1]][S_ONE_REF] = FALSE
 	end if
+
+	for i = 1 to length(temps) do
+		-- the proc will deref the parameter
+		dispose_temp( temps[i], SAVE_TEMP, REMOVE_FROM_MAP )
+	end for
 	pc += n
 end procedure
 
+constant ALL_RHS_SUBS = { RHS_SUBS, RHS_SUBS_I, RHS_SUBS_CHECK }
+symtab_pointer prev_rhs_subs_source = 0
 procedure opRHS_SUBS()
 -- RHS_SUBS / RHS_SUBS_CHECK / RHS_SUBS_I / ASSIGN_SUBS / PASSIGN_SUBS
 -- var[subs] op= expr
@@ -2158,80 +2426,106 @@ procedure opRHS_SUBS()
 -- pc+1 (or _3 from above) is the sequence
 -- pc+2 is the subscript
 -- pc+3 is the target
+	integer skip = 0
+	integer op  = Code[pc]
+	symtab_index
+		source = Code[pc+1],
+		subs   = Code[pc+2],
+		target = Code[pc+3]
+	symtab_pointer prev_opnd = 0
 
-	CSaveStr("_0", Code[pc+3], Code[pc+2], Code[pc+1], 0)
-	SymTab[Code[pc+3]][S_ONE_REF] = FALSE
+	if find( previous_op, ALL_RHS_SUBS ) then
+		-- prevent early dereference if self assigning
+		prev_opnd = prev_rhs_subs_source
 
-	if Code[pc] = ASSIGN_OP_SUBS or Code[pc] = PASSIGN_OP_SUBS then
-		if Code[pc] = PASSIGN_OP_SUBS then
+	else
+		prev_rhs_subs_source = source
+	end if
+
+	CSaveStr("_0", target, subs, source, prev_opnd )
+	SymTab[target][S_ONE_REF] = FALSE
+
+	switch op do
+		case PASSIGN_OP_SUBS then
 			c_stmt0("_2 = (int)SEQ_PTR(*(int *)_3);\n")
-		else
+		case ASSIGN_OP_SUBS then
 			c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
 			-- element type of pc[1] is changed
 			SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_OBJECT, 0 )
-		end if
-	else
-		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
-	end if
+		case else
+			c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
+	end switch
 
 	-- _2 has the sequence
-
-	if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
-		c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+2])
+	if TypeIsNot( subs, TYPE_INTEGER) then
+		c_stmt("if (!IS_ATOM_INT(@)){\n", subs )
 		c_stmt("@ = (int)*(((s1_ptr)_2)->base + (int)(DBL_PTR(@)->dbl));\n",
-				{Code[pc+3], Code[pc+2]})
-		c_stmt0("else\n")
+				{ target, subs })
+		c_stmt0("}\n")
+		c_stmt0("else{\n")
 	end if
-	c_stmt("@ = (int)*(((s1_ptr)_2)->base + @);\n", {Code[pc+3], Code[pc+2]})
+	c_stmt("@ = (int)*(((s1_ptr)_2)->base + @);\n", {target, subs} )
+	
+	if TypeIsNot( subs, TYPE_INTEGER) then
+		c_stmt0("}\n")
+	end if
 
-	if Code[pc] = PASSIGN_OP_SUBS then -- simplified
+	if op = PASSIGN_OP_SUBS then -- simplified
 		LeftSym = TRUE
-		c_stmt("Ref(@);\n", Code[pc+3])
+		if sym_mode( target ) = M_NORMAL then
+			c_stmt("Ref(@);\n", target )
+		end if
 		CDeRefStr("_0")
-		SetBBType(Code[pc+3],
+		SetBBType( target,
 						 TYPE_OBJECT,    -- we don't know the element type
 						 novalue, TYPE_OBJECT, 0)
 	else
-		if Code[pc] = RHS_SUBS_I then
+		if op = RHS_SUBS_I then
 			-- target is integer var - convert doubles to ints
-			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
-				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
-				c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+3])
-				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", {Code[pc+3], Code[pc+3]})
+			if SeqElem( source ) != TYPE_INTEGER then
+				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
+				c_stmt("if (!IS_ATOM_INT(@))\n", target )
+				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", { target, target } )
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT,
-				HasDelete( Code[pc+3] ) )
+			SetBBType( target, TYPE_INTEGER, novalue, TYPE_OBJECT,
+				HasDelete( target ) )
 
 		elsif Code[pc+4] = INTEGER_CHECK and Code[pc+5] = Code[pc+3] then
 			-- INTEGER_CHECK coming next
-			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
-				SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT,
-					HasDelete( Code[pc+3] ) )
-				c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+3])
-				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", {Code[pc+3], Code[pc+3]})
+			if SeqElem( source ) != TYPE_INTEGER then
+				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT,
+					HasDelete( target ) )
+				c_stmt("if (!IS_ATOM_INT(@)){\n", target )
+					c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", { target, target } )
+				c_stmt0("}\n")
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
-			pc += 2 -- skip INTEGER_CHECK
+			SetBBType( target, TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
+			skip = 2 -- skip INTEGER_CHECK
 
 		else
-			if SeqElem(Code[pc+1]) != TYPE_INTEGER then
+			if SeqElem( source ) != TYPE_INTEGER then
 				LeftSym = TRUE
-				if SeqElem(Code[pc+1]) = TYPE_OBJECT or
-				   SeqElem(Code[pc+1]) = TYPE_ATOM then
-					c_stmt("Ref(@);\n", Code[pc+3])
-				else
-					c_stmt("RefDS(@);\n", Code[pc+3])
+				if sym_mode( target ) = M_NORMAL then
+					if SeqElem( source ) = TYPE_OBJECT or
+					SeqElem( source ) = TYPE_ATOM then
+						c_stmt("Ref(@);\n", target )
+					else
+						c_stmt("RefDS(@);\n", target )
+					end if
 				end if
 			end if
 			CDeRefStr("_0")
-			SetBBType(Code[pc+3], SeqElem(Code[pc+1]), novalue, TYPE_OBJECT, 
-				HasDelete(Code[pc+1]) )
+			SetBBType( target, SeqElem( source ), novalue, TYPE_OBJECT,
+				HasDelete( source ) )
 		end if
 	end if
 
-	pc += 4
+	dispose_temp( source, DISCARD_TEMP, REMOVE_FROM_MAP )
+-- 	dispose_all_temps( DISCARD_TEMP, KEEP_IN_MAP )  -- ?? Why was this here
+	create_temp( target, NO_REFERENCE )
+	pc += 4 + skip
 end procedure
 
 procedure opNOP1()
@@ -2245,8 +2539,8 @@ procedure opNOP1()
 end procedure
 
 procedure opINTERNAL_ERROR()
-	InternalErr(sprintf("This opcode (%d) should never be emitted!  SubProg [%s]", 
-		{ Code[pc], SymTab[CurrentSub][S_NAME] } ))
+	InternalErr(254,
+		{ Code[pc], SymTab[CurrentSub][S_NAME] } )
 end procedure
 
 sequence switch_stack = {}
@@ -2311,6 +2605,7 @@ procedure opSWITCH_I()
 		c_stmt( "_0 = @;\n", Code[pc+1] )
 	end if
 
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	c_stmt0("switch ( _0 ){ \n" )
 	pc += 5
 
@@ -2321,21 +2616,9 @@ procedure opSWITCH()
 	-- pc+2 = cases seq
 	-- pc+3 = jump table  (ignored)
 	-- pc+4 = else offset (ignored)
-	integer is_int
-
 	switch_stack = append( switch_stack, { Code[pc], pc, 0 } )
-
-	is_int = BB_var_type(Code[pc+1]) != TYPE_INTEGER
-	if not is_int then
-		c_stmt( "_0 = @;\n", Code[pc+1] )
-	end if
-
 	c_stmt("_1 = find(@, @);\n", { Code[pc+1], Code[pc+2]})
-
-	if not is_int then
-		c_stmt( "DeRef(_0);\n", Code[pc+1] )
-	end if
-
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	c_stmt0("switch ( _1 ){ \n" )
 	pc += 5
 end procedure
@@ -2356,7 +2639,7 @@ procedure opSWITCH_RT()
 		end if
 		values[i] = c
 	end for
-	
+
 	if all_ints then
 		SymTab[Code[pc+2]][S_OBJ] = values
 		Code[pc] = SWITCH_I
@@ -2364,17 +2647,17 @@ procedure opSWITCH_RT()
 		-- don't increment pc, because we'll just let it go to opSWITCH_I
 		return
 	end if
-	
-	-- Need to turn this into a regular SWITCH, but the trick is that 
+
+	-- Need to turn this into a regular SWITCH, but the trick is that
 	-- the sequence needs to reference the actual literals / variables.
 	integer s = CurrentSub
 	sequence init_var = sprintf( "_%d_cases", Code[pc+2] )
-	while SymTab[s][S_NEXT] != 0 and compare( init_var, SymTab[s][S_NAME] ) do
+	while SymTab[s][S_NEXT] != 0 and eu:compare( init_var, SymTab[s][S_NAME] ) do
 		s = SymTab[s][S_NEXT]
 	end while
-	if compare( SymTab[s][S_NAME], init_var ) then
+	if eu:compare( SymTab[s][S_NAME], init_var ) then
 		-- need to add the variable
-		sequence eentry 
+		sequence eentry
 		eentry = repeat( 0, SIZEOF_VAR_ENTRY )
 		eentry[S_NAME]  = init_var
 		eentry[S_MODE]  = M_NORMAL
@@ -2384,7 +2667,7 @@ procedure opSWITCH_RT()
 		SymTab = append( SymTab, eentry )
 		SymTab[s][S_NEXT] = length( SymTab )
 	end if
-	
+
 	c_stmt( "if( @ == 0 ){\n", s )
 	c_stmt( "@ = 1;\n", s )
 	for i = 1 to length( cases ) do
@@ -2400,7 +2683,7 @@ procedure opSWITCH_RT()
 	end for
 	c_stmt0( "}\n" )
 	opSWITCH()
-	
+
 end procedure
 
 procedure opCASE()
@@ -2459,22 +2742,28 @@ procedure opIF()
 			c_stmt("if (@ <= 0) {\n", Code[pc+1]) -- quick test
 		end if
 		c_stmt("if (@ == 0) {\n", Code[pc+1])
+		dispose_temp( Code[pc+1], DISCARD_TEMP, KEEP_IN_MAP )
 		Goto(Code[pc+2])
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
-		c_stmt("if (!IS_ATOM_INT(@) && DBL_PTR(@)->dbl == 0.0)\n",
-						{Code[pc+1], Code[pc+1]})
-		Goto(Code[pc+2])
+			c_stmt("if (!IS_ATOM_INT(@) && DBL_PTR(@)->dbl == 0.0){\n",
+							{Code[pc+1], Code[pc+1]})
+				dispose_temp( Code[pc+1], DISCARD_TEMP, KEEP_IN_MAP )
+				Goto(Code[pc+2])
+			c_stmt0("}\n")
+			dispose_temp( Code[pc+1], DISCARD_TEMP, KEEP_IN_MAP )
 		c_stmt0("}\n")
 		if opcode = WHILE then
 			c_stmt0("}\n")
 		end if
+		dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 		pc += 3
 
 	elsif ObjValue(Code[pc+1]) != NOVALUE and
 		  ObjValue(Code[pc+1]) != 0 then
 		-- non-zero integer  - front-end can optimize this for "while 1"
 		-- no code to emit for test
+		dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 		pc += 3 -- if/while TRUE - skip the test and goto
 
 	elsif ObjValue(Code[pc+1]) = NOVALUE or
@@ -2482,7 +2771,16 @@ procedure opIF()
 		if ObjValue(Code[pc+1]) != 0 then  -- non-zero handled above
 			c_stmt("if (@ == 0)\n", Code[pc+1])
 		end if
-		Goto(Code[pc+2])
+		c_stmt0( "{\n" )
+			dispose_temp( Code[pc+1], 0, 0 )
+			Goto(Code[pc+2])
+		c_stmt0( "}\n" )
+		if ObjValue(Code[pc+1]) != 0 then  -- non-zero handled above
+			c_stmt0( "else\n" )
+		end if
+		c_stmt0( "{\n" )
+			dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+		c_stmt0( "}\n" )
 		pc += 3
 
 	elsif pc < Code[pc+2] then  -- it's 0, and this is a forward IF
@@ -2500,7 +2798,7 @@ procedure opINTEGER_CHECK()
 	symtab_index sym = Code[pc+1]
 	if SymTab[sym][S_MODE] = M_CONSTANT and integer( SymTab[sym][S_OBJ] ) then
 		-- do nothing: an inlined routine could cause this situation
-		
+
 	elsif BB_var_type(sym) != TYPE_INTEGER then
 		c_stmt("if (!IS_ATOM_INT(@)) {\n", sym)
 		LeftSym = TRUE
@@ -2527,15 +2825,19 @@ procedure opASSIGN_SUBS()
 -- Code[pc+3] has the source
 
 	const_subs = -1
+	symtab_index rhs = Code[pc+3]
 
 	-- get the subscript */
 
-	CRef(Code[pc+3]) -- takes care of ASSIGN_SUBS_I
-	SymTab[Code[pc+3]][S_ONE_REF] = FALSE
+	if not is_temp( rhs )
+	or map:get( dead_temp_walking, rhs, NEW_REFERENCE ) = NO_REFERENCE  then
+		CRef( rhs) -- takes care of ASSIGN_SUBS_I
+	end if
+	SymTab[rhs][S_ONE_REF] = FALSE
 
-	if Code[pc+1] = Code[pc+3] then
+	if Code[pc+1] = rhs then
 		-- must point to original sequence
-		c_stmt("_0 = @;\n", Code[pc+3])
+		c_stmt("_0 = @;\n", rhs)
 	end if
 
 	-- check for uniqueness
@@ -2578,24 +2880,35 @@ procedure opASSIGN_SUBS()
 		-- in ASSIGN_OP_SUBS above
 
 		c_stmt0("_1 = *(int *)_2;\n")
-		if Code[pc+1] = Code[pc+3] then
+		if Code[pc+1] = rhs then
 			c_stmt0("*(int *)_2 = _0;\n")
 		else
 			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
 		end if
+		if is_temp( Code[pc+3] ) then
+			c_stmt("if( _1 != @ ){\n", Code[pc+3] )
+		end if
+
 		c_stmt0("DeRef(_1);\n")
+
+		if is_temp( Code[pc+3] ) then
+			c_stmt0("}\n" )
+		end if
 
 	else
 		if SeqElem(Code[pc+1]) != TYPE_INTEGER then
 			c_stmt0("_1 = *(int *)_2;\n")
 		end if
 
-		if Code[pc+1] = Code[pc+3] then
-			c_stmt0("*(int *)_2 = _0;\n")
+		if Code[pc+1] = rhs then
+			c_stmt0("*(int *)_2 = _0;")
 		else
 			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
 		end if
 
+		if is_temp( Code[pc+3] ) then
+			c_stmt("if( _1 != @ ){\n", Code[pc+3] )
+		end if
 		if SeqElem(Code[pc+1]) != TYPE_INTEGER then
 			if SeqElem(Code[pc+1]) = TYPE_OBJECT or
 			   SeqElem(Code[pc+1]) = TYPE_ATOM then
@@ -2604,6 +2917,9 @@ procedure opASSIGN_SUBS()
 				c_stmt0("DeRefDS(_1);\n")
 			end if
 		end if
+		if is_temp( Code[pc+3] ) then
+			c_stmt0("}\n" )
+		end if
 		-- we can't say that all element types are GType(Code[pc+3])
 		-- at this point, but we must adjust the global view
 		-- of the element type. We shouldn't say TYPE_OBJECT either.
@@ -2611,57 +2927,116 @@ procedure opASSIGN_SUBS()
 		SetBBType(Code[pc+1], TYPE_SEQUENCE, target, GType(Code[pc+3]),
 			HasDelete(Code[pc+1]) )
 	end if
+	dispose_temp( rhs, SAVE_TEMP, REMOVE_FROM_MAP )
+	dispose_temp( Code[pc+1], SAVE_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
 procedure opLENGTH()
 -- LENGTH / PLENGTH
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	if opcode = LENGTH and
-	   TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
-		if SeqLen(Code[pc+1]) != NOVALUE then
-			-- we know the length
-			c_stmt("@ = ", Code[pc+2])
-			c_printf("%d;\n", SeqLen(Code[pc+1]))
-			target = repeat(SeqLen(Code[pc+1]), 2)
+	if opcode = LENGTH then
+		if TypeIsIn(Code[pc+1], TYPES_SO) then
+			-- For sequences and object we need to check the length.
+			if SeqLen(Code[pc+1]) != NOVALUE then
+				-- we know the length already, so no need for a runtime check.
+				c_stmt("@ = ", Code[pc+2])
+				c_printf("%d;\n", SeqLen(Code[pc+1]))
+				target = repeat(SeqLen(Code[pc+1]), 2)
+			else
+				-- Fetch the current length from the struct
+				c_stmt ("if (IS_SEQUENCE(@))\n", Code[pc+1])
+				c_stmt ("    @ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]}, Code[pc+2])
+				c_stmt ("else\n    @ = 1;\n", Code[pc+2], Code[pc+2])
+				target = {0, MAXLEN}
+			end if
 		else
-			c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
-			target = {0, MAXLEN}
+			c_stmt("@ = 1;\n", Code[pc+2])
+			target = {1,1}
 		end if
 		CDeRefStr("_0")
 		SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
-	else
-		if opcode = PLENGTH then
-			-- we have a pointer to a sequence
-			c_stmt("@ = SEQ_PTR(*(object_ptr)_3)->length;\n", Code[pc+2])
-		else
-			c_stmt("@ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]})
-		end if
+	else -- opcode = PLENGTH
+		-- we have a pointer to an argument
+		c_stmt0("if (IS_SEQUENCE(*(object_ptr)_3))\n")
+		c_stmt ("    @ = SEQ_PTR(*(object_ptr)_3)->length;\n", Code[pc+2])
+		c_stmt ("else\n    @ = 1;\n", Code[pc+2])
 		CDeRefStr("_0")
 		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 	end if
+
+	if dispose_length() then
+		dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	end if
+	create_temp( Code[pc+1], NO_REFERENCE )
+
 	pc += 3
 end procedure
 
-procedure opASSIGN()
-	CRef(Code[pc+1])
-	SymTab[Code[pc+1]][S_ONE_REF] = FALSE
-	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
-	
-	if SymTab[Code[pc+2]][S_MODE] != M_CONSTANT then
-		CDeRef(Code[pc+2])
+--**
+-- Returns 1 if a LENGTH op should dispose of its temp sequence
+function dispose_length()
+	symtab_index seq_sym = Code[pc+1]
+	if not is_temp( seq_sym ) then
+		return 0
 	end if
-	
-	c_stmt("@ = @;\n", {Code[pc+2], Code[pc+1]})
 
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
-		target[MIN] = SeqLen(Code[pc+1])
-		SetBBType(Code[pc+2], GType(Code[pc+1]), target, SeqElem(Code[pc+1]),
-			HasDelete( Code[pc+1] ) )
-	else
-		SetBBType(Code[pc+2], GType(Code[pc+1]), ObjMinMax(Code[pc+1]),
-				  TYPE_OBJECT, HasDelete( Code[pc+1] ) )
+	integer offset = 0
+	sequence op
+	while length( op ) and op[1] != STARTLINE and op[1] != RETURNT with entry do
+		integer opnum = op[1]
+		switch opnum do
+			case RHS_SUBS, RHS_SUBS_I, RHS_SUBS_CHECK, RHS_SLICE, PROC then
+				if find( seq_sym, op[2..$] ) then
+					return 0
+				end if
+		end switch
+	entry
+		offset += 1
+		op = get_ops( pc, offset )
+		if length( op ) then
+			op = op[1]
+		end if
+	end while
+
+	return 1
+end function
+
+procedure opASSIGN()
+	symtab_index
+		sourcesym = Code[pc+1],
+		targetsym = Code[pc+2]
+	integer
+		source_is_temp = is_temp( sourcesym ),
+		-- This will happen when we re-use a temp parameter that gets
+		-- used in a default parameter...we need the extra ref in this case
+		both_are_temps = source_is_temp and is_temp( targetsym )
+
+	if not source_is_temp or both_are_temps or map:get( dead_temp_walking, sourcesym, NO_REFERENCE ) = NO_REFERENCE then
+		CRef(sourcesym)
+		SymTab[Code[pc+1]][S_ONE_REF] = FALSE
+		SymTab[Code[pc+2]][S_ONE_REF] = FALSE
 	end if
+
+	if SymTab[targetsym][S_MODE] != M_CONSTANT then
+		CDeRef( targetsym )
+	end if
+
+	c_stmt("@ = @;\n", {targetsym, sourcesym})
+
+	if TypeIsIn(sourcesym, TYPES_SO) then
+		target[MIN] = SeqLen(Code[pc+1])
+		SetBBType(targetsym, GType(sourcesym), target, SeqElem(sourcesym),
+			HasDelete( sourcesym ) )
+	else
+		SetBBType(targetsym, GType(sourcesym), ObjMinMax(sourcesym),
+				  TYPE_OBJECT, HasDelete( sourcesym ) )
+	end if
+
+	if not both_are_temps then
+		dispose_temp( sourcesym, SAVE_TEMP, REMOVE_FROM_MAP )
+	end if
+
 	pc += 3
 end procedure
 
@@ -2733,8 +3108,9 @@ procedure opRIGHT_BRACE_N()
 			-- not same, or end of list
 			if n <= 6 then
 				if n > 0 then
-					CRefn(t, n+1)
-				else
+					CRefn(t, n+1 - (map:get( dead_temp_walking, t, NO_REFERENCE ) = NEW_REFERENCE ))
+
+				elsif map:get( dead_temp_walking, t, NO_REFERENCE ) = NO_REFERENCE then
 					CRef(t)
 				end if
 				while n >= 0 do
@@ -2765,19 +3141,28 @@ procedure opRIGHT_BRACE_N()
 	end for
 	target[MIN] = Code[pc+1]
 	SetBBType(Code[pc+len], TYPE_SEQUENCE, target, t, has_delete )
+	dispose_temps( pc + 2, Code[pc+1], SAVE_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+len], NEW_REFERENCE )
 	pc += 3 + Code[pc+1]
 end procedure
 
 procedure opRIGHT_BRACE_2()
 -- form a sequence of length 2
+	for i = pc + 1 to pc + 2 do
+		if not is_temp( Code[i] )
+		or map:get( dead_temp_walking, Code[i], NO_REFERENCE ) = NO_REFERENCE then
+			CRef(Code[i])
+		end if
+	end for
+
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt0("_1 = NewS1(2);\n")
 	c_stmt0("_2 = (int)((s1_ptr)_1)->base;\n")
 	c_stmt("((int *)_2)[1] = @;\n", Code[pc+2])
-	CRef(Code[pc+2])
+
 	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
 	c_stmt("((int *)_2)[2] = @;\n", Code[pc+1])
-	CRef(Code[pc+1])
+
 	SymTab[Code[pc+1]][S_ONE_REF] = FALSE
 	c_stmt("@ = MAKE_SEQ(_1);\n", Code[pc+3])
 	CDeRefStr("_0")
@@ -2785,6 +3170,8 @@ procedure opRIGHT_BRACE_2()
 	SetBBType(Code[pc+3], TYPE_SEQUENCE, target,
 			  or_type(GType(Code[pc+1]), GType(Code[pc+2])),
 			  HasDelete( Code[pc+1] ) or HasDelete( Code[pc+2] ) )
+	dispose_temps( pc+1, 2, SAVE_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -2797,13 +3184,13 @@ procedure opPLUS1()
 		target_type = TYPE_ATOM
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
 	np = pc + 4
 	target_val = novalue
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if TypeIs(Code[pc+1], TYPE_INTEGER) then
 			target_val = ObjMinMax(Code[pc+1])
 		end if
@@ -2846,39 +3233,56 @@ procedure opPLUS1()
 				-- destroy any value, check for overflow
 				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val,
 								  target_elem, HasDelete( Code[pc+3] ) )
-				c_stmt("if (@ > MAXINT)\n", Code[pc+3])
+				c_stmt("if (@ > MAXINT){\n", Code[pc+3])
 				c_stmt("@ = NewDouble((double)@);\n", {Code[pc+3], Code[pc+3]})
+				c_stmt0("}\n")
 			end if
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else\n")
 	end if
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
+		integer target_is_int = (not is_temp( Code[pc+3] )) and GType( Code[pc+3] ) = TYPE_INTEGER
+		if target_is_int then
+			c_stmt(sprintf("{ // coercing @ to an integer %d\n", GType(Code[pc+3])), Code[pc+3])
+			target_type = TYPE_INTEGER
+		end if
 		if Code[pc] = PLUS1 then
 			c_stmt("@ = binary_op(PLUS, 1, @);\n", {Code[pc+3], Code[pc+1]})
 		else
 			c_stmt("@ = 1+(long)(DBL_PTR(@)->dbl);\n", {Code[pc+3], Code[pc+1]})
+		end if
+		if target_is_int then
+			-- this could lead to overflow, but you should have found that while interpreting
+			c_stmt("if( !IS_ATOM_INT(@) ){\n", Code[pc+3] )
+			c_stmt("@ = (object)DBL_PTR(@)->dbl;\n", { Code[pc+3], Code[pc+3] })
+			c_stmt0("}\n")
+			c_stmt0("}\n")
 		end if
 	end if
 
 	CDeRefStr("_0")
 
 	SetBBType(Code[pc+3], target_type, target_val, target_elem, HasDelete( Code[pc+3] ) )
+	create_temp( Code[pc+3], NEW_REFERENCE )
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc = np
 end procedure
 
 procedure opRETURNT()
 -- return from top-level "procedure"
-	if cfile_size > MAX_CFILE_SIZE then
+	dispose_all_temps( 0, 1 )
+	if cfile_size > max_cfile_size then
 		c_stmt0("main")
 		c_printf("%d();\n", main_name_num)
 		c_stmt0("}\n")
 		main_name = sprintf("main-%d", main_name_num)
 		new_c_file(main_name)
+		--add_file(main_name)
 		c_stmt0("main")
 		c_printf("%d()\n", main_name_num)
 		c_stmt0("{\n")
@@ -2912,11 +3316,15 @@ procedure opLHS_SUBS()
 
 	else
 		-- LHS_SUBS1_COPY
+		c_stmt("Ref(@)\n", Code[pc+1])
 		c_stmt("DeRef(@);\n", Code[pc+4])
 		c_stmt("@ = @;\n", {Code[pc+4], Code[pc+1]})
-		c_stmt("Ref(@);\n", Code[pc+4])
+		if not is_temp( Code[pc+4] ) then
+			c_stmt("Ref(@);\n", Code[pc+4])
+		end if
 		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+4])
 		target[MIN] = SeqLen(Code[pc+1])
+		create_temp( Code[pc+4], NEW_REFERENCE )
 		SetBBType(Code[pc+4], TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete( Code[pc+1] ) )
 	end if
 
@@ -2946,6 +3354,8 @@ procedure opLHS_SUBS()
 	c_stmt("_3 = (int)(@ + ((s1_ptr)_2)->base);\n", Code[pc+2])
 	target[MIN] = -1
 	-- SetBBType(Code[pc+3], TYPE_SEQUENCE, target, TYPE_OBJECT)
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NO_REFERENCE )
 	pc += 5
 end procedure
 
@@ -2960,7 +3370,7 @@ procedure opASSIGN_OP_SLICE()
 		c_stmt0("assign_slice_seq = (s1_ptr *)_3;\n")
 		c_stmt("RHS_Slice(*(int *)_3, @, @);\n",
 			   {Code[pc+2], Code[pc+3]})
-			
+
 	else
 		c_stmt("assign_slice_seq = (s1_ptr *)&@;\n", Code[pc+1])
 		target[MIN] = -1
@@ -2971,6 +3381,8 @@ procedure opASSIGN_OP_SLICE()
 	end if
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	--length might be knowable
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+4], NEW_REFERENCE )
 	pc += 5
 end procedure
 
@@ -2992,6 +3404,8 @@ procedure opASSIGN_SLICE()
 		-- OR-in the element type
 	end if
 	c_stmt("AssignSlice(@, @, @);\n", {Code[pc+2], Code[pc+3], Code[pc+4]})
+	dispose_temps( pc+2, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+1], NEW_REFERENCE )
 	pc += 5
 end procedure
 
@@ -3021,6 +3435,8 @@ procedure opRHS_SLICE()
 	else
 		SetBBType(t, TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete(Code[pc+1]) )
 	end if
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+4], NEW_REFERENCE )
 	pc += 5
 end procedure
 
@@ -3046,6 +3462,15 @@ procedure opTYPE_CHECK()
 	pc += 1
 end procedure
 
+function is_temp( symtab_index sym )
+	if sym > 1 and sym <= length(SymTab)
+		and sym_mode( sym ) = M_TEMP
+		and equal( sym_obj( sym ), NOVALUE ) then
+		return 1
+	end if
+	return 0
+end function
+
 procedure opIS_AN_INTEGER()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 	if TypeIs(Code[pc+1], TYPE_INTEGER) then
@@ -3065,12 +3490,14 @@ procedure opIS_AN_INTEGER()
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure opIS_AN_ATOM()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAD) then
 		c_stmt("@ = 1;\n", Code[pc+2])
 	elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		c_stmt("@ = 0;\n", Code[pc+2])
@@ -3080,12 +3507,13 @@ procedure opIS_AN_ATOM()
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure opIS_A_SEQUENCE()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAD) then
 		c_stmt("@ = 0;\n", Code[pc+2])
 	elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		c_stmt("@ = 1;\n", Code[pc+2])
@@ -3095,46 +3523,85 @@ procedure opIS_A_SEQUENCE()
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure opIS_AN_OBJECT()
-	CDeRef(Code[pc+2])
-	c_stmt("@ = 1;\n", Code[pc+2])
-	target = {1, 1}
+	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
+	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
+		c_stmt("@ = 3;\n", Code[pc+2])
+	elsif TypeIs(Code[pc+1], TYPE_INTEGER) then
+		c_stmt("@ = 1;\n", Code[pc+2])
+	elsif TypeIs(Code[pc+1], TYPE_DOUBLE) then
+		c_stmt("if (IS_ATOM_INT(DoubleToInt(@)))\n", Code[pc+1])
+		c_stmt("@ = 1;\n", Code[pc+2])
+		c_stmt0("else\n")
+		c_stmt("@ = 2;\n", Code[pc+2])
+	else
+		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
+		c_stmt("@ = 1;\n", Code[pc+2])
+		c_stmt("else if (IS_ATOM_DBL(@)) {\n", Code[pc+1])
+		c_stmt(" if (IS_ATOM_INT(DoubleToInt(@))) {\n", Code[pc+1])
+		c_stmt(" @ = 1;\n", Code[pc+2])
+		c_stmt0(" } else {\n")
+		c_stmt(" @ = 2;\n", Code[pc+2])
+		c_stmt("} } else if (IS_SEQUENCE(@))\n", Code[pc+1])
+		c_stmt("@ = 3;\n", Code[pc+2])
+		c_stmt0("else\n")
+		c_stmt("@ = 0;\n", Code[pc+2])
+	end if
+	CDeRefStr("_0")
+	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 		-- ---------- start of unary ops -----------------
+procedure unary_type()
+	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) then
+		SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_OBJECT, 0 )
+
+	elsif TypeIsIn( Code[pc+2], TYPES_IAD ) then
+		SetBBType(Code[pc+2], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0 )
+
+	end if
+end procedure
 
 procedure opSQRT()
 	CUnaryOp(pc, "e_sqrt", "SQRT")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opSIN()
 	CUnaryOp(pc, "e_sin", "SIN")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opCOS()
 	CUnaryOp(pc, "e_cos", "COS")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opTAN()
 	CUnaryOp(pc, "e_tan", "TAN")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opARCTAN()
 	CUnaryOp(pc, "e_arctan", "ARCTAN")
+	unary_type()
 	pc += 3
 end procedure
 
 procedure opLOG()
 	CUnaryOp(pc, "e_log", "LOG")
+	unary_type()
 	pc += 3
 end procedure
 
@@ -3145,13 +3612,14 @@ end procedure
 
 procedure opFLOOR()
 	CUnaryOp(pc, "e_floor", "FLOOR")
+	SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, HasDelete( Code[pc+1] ) )
 	pc += 3
 end procedure
 
 		-- more unary ops - better optimization
 
 procedure opNOT_IFW()
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
@@ -3173,33 +3641,38 @@ procedure opNOT_IFW()
 			return
 		end if
 
-	elsif TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
-		c_stmt("if (@ != 0)\n", Code[pc+1])
+	elsif TypeIsIn(Code[pc+1], TYPES_AO) then
+		c_stmt("if (@ != 0){\n", Code[pc+1])
+		dispose_temp( Code[pc+1], DISCARD_TEMP, KEEP_IN_MAP )
 		Goto(Code[pc+2])
+		c_stmt0("}\n")
 
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
-		c_stmt("if (DBL_PTR(@)->dbl != 0.0)\n", Code[pc+1])
+		c_stmt("if (DBL_PTR(@)->dbl != 0.0){\n", Code[pc+1])
+		dispose_temp( Code[pc+1], DISCARD_TEMP, KEEP_IN_MAP )
 		Goto(Code[pc+2])
-	end if
-
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
 		c_stmt0("}\n")
 	end if
 
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
+		c_stmt0("}\n")
+	end if
+
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure opNOT()
 	gencode = "@ = unary_op(NOT, @);\n"
 	intcode = "@ = (@ == 0);\n"
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
 		target_type = GType(Code[pc+1])
 	else
 		target_type = TYPE_INTEGER
@@ -3211,7 +3684,7 @@ end procedure
 procedure opUMINUS()
 	gencode = "@ = unary_op(UMINUS, @);\n"
 	intcode2= "@1 = - @2;\n"    -- careful about -- occurring
-	intcode = "if (@2 == 0xC0000000)\n" &
+	intcode = "if ((unsigned long)@2 == 0xC0000000)\n" &
 			  "@1 = (int)NewDouble((double)-0xC0000000);\n" &
 			  "else\n" &
 			  "@1 = - @2;\n"    -- careful about -- occurring
@@ -3231,14 +3704,12 @@ end procedure
 procedure opRAND()
 	gencode = "@ = unary_op(RAND, @);\n"
 	intcode = "@ = good_rand() % ((unsigned)@) + 1;\n"
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
-		target_type = GType(Code[pc+1])
+	if TypeIs(Code[pc+1], TYPE_INTEGER) then
+ 		target_type = TYPE_INTEGER
+		target = ObjMinMax(Code[pc+1])
+		target_val = {1, target[MAX]}
 	else
-		target_type = TYPE_INTEGER
-		if TypeIs(Code[pc+1], TYPE_INTEGER) then
-			target = ObjMinMax(Code[pc+1])
-			target_val = {1, target[MAX]}
-		end if
+		target_type = GType(Code[pc+1])
 	end if
 
 	pc = unary_optimize(pc, target_type, target_val, intcode, intcode2,
@@ -3259,6 +3730,7 @@ procedure opDIV2()
 		target_type = GType(Code[pc+1])
 	end if
 	unary_div(pc, target_type, intcode, gencode)
+
 	pc += 4
 end procedure
 
@@ -3267,7 +3739,7 @@ procedure opFLOOR_DIV2()
 			  "@1 = unary_op(FLOOR, _1);\n" &
 			  "DeRef(_1);\n"
 	intcode = "@ = @ >> 1;\n"
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
 		target_type = GType(Code[pc+1])
 	elsif GType(Code[pc+1]) = TYPE_INTEGER then
 		target_type = TYPE_INTEGER
@@ -3276,6 +3748,7 @@ procedure opFLOOR_DIV2()
 	end if
 
 	unary_div(pc, target_type, intcode, gencode)
+
 	pc += 4
 end procedure
 
@@ -3342,14 +3815,14 @@ procedure opMULTIPLY()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="*"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opPLUS()
 -- PLUS / PLUS_I
+
 	gencode = "@ = binary_op(PLUS, @, @);\n"
 	intcode2= "@1 = @2 + @3;\n"
 	intcode = "@1 = @2 + @3;\n"
@@ -3359,9 +3832,9 @@ procedure opPLUS()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="+"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3370,15 +3843,14 @@ procedure opMINUS()
 	gencode = "@ = binary_op(MINUS, @, @);\n"
 	intcode2 ="@1 = @2 - @3;\n"
 	intcode = "@1 = @2 - @3;\n"
-	intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0)\n" &
-					"@1 = NewDouble((double)@1);\n"
+	intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+					"@1 = NewDouble((double)@1);\n}\n"
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="-"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3386,9 +3858,8 @@ procedure opOR()
 	gencode = "@ = binary_op(OR, @, @);\n"
 	intcode = "@ = (@ != 0 || @ != 0);\n"
 	atom_type = TYPE_INTEGER
-	iii = TRUE
 	dblfn="Dor"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3396,9 +3867,8 @@ procedure opXOR()
 	gencode = "@ = binary_op(XOR, @, @);\n"
 	intcode = "@ = ((@ != 0) != (@ != 0));\n"
 	atom_type = TYPE_INTEGER
-	iii = TRUE
 	dblfn="Dxor"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3406,9 +3876,8 @@ procedure opAND()
 	gencode = "@ = binary_op(AND, @, @);\n"
 	intcode = "@ = (@ != 0 && @ != 0);\n"
 	atom_type = TYPE_INTEGER
-	iii = TRUE
 	dblfn="Dand"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3425,9 +3894,8 @@ procedure opDIVIDE()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="/"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3449,13 +3917,13 @@ procedure opREMAINDER()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = TRUE
 	dblfn="Dremainder"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opFLOOR_DIV()
+	integer intresult
 	gencode = "_2 = binary_op(DIVIDE, @2, @3);\n" &
 			  "@1 = unary_op(FLOOR, _2);\n" &
 			  "DeRef(_2);\n"
@@ -3475,7 +3943,7 @@ procedure opFLOOR_DIV()
 	   NotInRange(Code[pc+1], MININT) and
 	   NotInRange(Code[pc+2], -1) then
 		intcode = intcode2
-		iii = TRUE
+		intresult = TRUE
 	else
 		intcode = "if (@3 > 0 && @2 >= 0) {\n" &
 				  "@1 = @2 / @3;\n" &
@@ -3487,36 +3955,33 @@ procedure opFLOOR_DIV()
 				  "else\n" &
 				  "@1 = NewDouble(temp_dbl);\n" &
 				  "}\n"
-		iii = FALSE
+		intresult = FALSE
 	end if
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, intresult, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opAND_BITS()
 	gencode = "@ = binary_op(AND_BITS, @, @);\n"
-	intcode = "@ = (@ & @);\n"
-	iii = TRUE
+	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 & (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dand_bits"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opOR_BITS()
 	gencode = "@ = binary_op(OR_BITS, @, @);\n"
-	intcode = "@ = (@ | @);\n"
-	iii = TRUE
+	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 | (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dor_bits"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
 procedure opXOR_BITS()
 	gencode = "@ = binary_op(XOR_BITS, @, @);\n"
-	intcode = "@ = (@ ^ @);\n"
-	iii = TRUE
+	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 ^ (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dxor_bits"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3528,9 +3993,8 @@ procedure opPOWER()
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
 	end if
-	iii = FALSE
 	dblfn="Dpower"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3538,13 +4002,12 @@ procedure opLESS()
 	gencode = "@ = binary_op(LESS, @, @);\n"
 	intcode = "@ = (@ < @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="<"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3552,13 +4015,12 @@ procedure opGREATER()
 	gencode = "@ = binary_op(GREATER, @, @);\n"
 	intcode = "@ = (@ > @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn=">"
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3566,13 +4028,12 @@ procedure opEQUALS()
 	gencode = "@ = binary_op(EQUALS, @, @);\n"
 	intcode = "@ = (@ == @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="=="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3580,13 +4041,12 @@ procedure opNOTEQ()
 	gencode = "@ = binary_op(NOTEQ, @, @);\n"
 	intcode = "@ = (@ != @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="!="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3594,13 +4054,12 @@ procedure opLESSEQ()
 	gencode = "@ = binary_op(LESSEQ, @, @);\n"
 	intcode = "@ = (@ <= @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn="<="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 
@@ -3608,13 +4067,12 @@ procedure opGREATEREQ()
 	gencode = "@ = binary_op(GREATEREQ, @, @);\n"
 	intcode = "@ = (@ >= @);\n"
 	atom_type = TYPE_INTEGER
-	if TypeIsNot(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) and
-	   TypeIsNot(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_SO) and
+	   TypeIsNotIn(Code[pc+2], TYPES_SO) then
 		target_val = {0, 1}
 	end if
-	iii = TRUE
 	dblfn = ">="
-	pc = binary_op(pc, iii, target_val, intcode, intcode2,
+	pc = binary_op(pc, TRUE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
 end procedure
 -- end of binary ops
@@ -3624,11 +4082,11 @@ end procedure
 procedure opSC1_AND()
 -- SC1_AND / SC1_AND_IF
 -- no need to store ATOM_0
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("if (@ == 0) {\n", Code[pc+1])
 		if Code[pc] = SC1_AND then
 			CDeRef(Code[pc+2])
@@ -3638,7 +4096,7 @@ procedure opSC1_AND()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -3653,7 +4111,7 @@ procedure opSC1_AND()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -3668,11 +4126,11 @@ end procedure
 procedure opSC1_OR()
 -- SC1_OR / SC1_OR_IF
 -- no need to store ATOM_1
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("if (@ != 0) {\n", Code[pc+1]) -- optimize this???
 		if Code[pc] = SC1_OR then
 			CDeRef(Code[pc+2])
@@ -3682,7 +4140,7 @@ procedure opSC1_OR()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
@@ -3697,7 +4155,7 @@ procedure opSC1_OR()
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -3715,15 +4173,15 @@ procedure opSC2_OR()
 -- SC2_OR / SC2_AND
 	CDeRef(Code[pc+2])
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("@ = (@ != 0);\n", {Code[pc+2], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("else\n", Code[pc+1])
 	end if
 
@@ -3743,122 +4201,133 @@ procedure opFOR()
 
 	loop_stack &= {{Code[pc+5], FOR, pc+7}} -- loop var, type, Label
 	integer is_loop_var = find( SymTab[Code[pc+5]][S_SCOPE] , {SC_LOOP_VAR, SC_GLOOP_VAR})
-	if is_loop_var then
-		-- inlined loop vars are regular vars
-		c_stmt0("{\n")
-		c_stmt("int @;\n", Code[pc+5])
-	else
-		c_stmt0("{\n")
-	end if
-
-	CRef(Code[pc+3])
-	c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
-
-	Label(pc+7)
-
-	inc = ObjMinMax(Code[pc+1])
-	if TypeIs(Code[pc+1], TYPE_INTEGER) then
-		-- increment is an integer
-
-		if TypeIs(Code[pc+3], TYPE_INTEGER) and
-		   TypeIs(Code[pc+2], TYPE_INTEGER) then
-			-- loop var is an integer
-			range1 = ObjMinMax(Code[pc+3])  -- start
-			range2 = ObjMinMax(Code[pc+2])  -- limit
-			SymTab[Code[pc+5]][S_GTYPE] = TYPE_INTEGER
-		else
-			range1 = {NOVALUE, NOVALUE}
-			SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
-			SymTab[Code[pc+5]][S_OBJ] = NOVALUE
+	c_stmt0("{\n")
+		if is_loop_var then
+			-- inlined loop vars are regular vars
+			c_stmt("int @;\n", Code[pc+5])
 		end if
 
-		if inc[MIN] >= 0 then
-			-- going up
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @)\n", {Code[pc+5], Code[pc+2]})
+		CRef(Code[pc+3])
+		c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
+
+		Label(pc+7)
+
+		inc = ObjMinMax(Code[pc+1])
+		if TypeIs(Code[pc+1], TYPE_INTEGER) then
+			-- increment is an integer
+
+			if TypeIs(Code[pc+3], TYPE_INTEGER) and
+			TypeIs(Code[pc+2], TYPE_INTEGER) then
+				-- loop var is an integer
+				range1 = ObjMinMax(Code[pc+3])  -- start
+				range2 = ObjMinMax(Code[pc+2])  -- limit
+				SymTab[Code[pc+5]][S_GTYPE] = TYPE_INTEGER
 			else
-				c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = range1[MIN]
-				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+				range1 = {NOVALUE, NOVALUE}
+				if TypeIs(Code[pc+3], TYPE_DOUBLE) then
+					SymTab[Code[pc+5]][S_GTYPE] = TYPE_DOUBLE
+				else
+					SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
+				end if
+				SymTab[Code[pc+5]][S_OBJ] = NOVALUE
 			end if
 
-		elsif inc[MAX] < 0 then
-			-- going down
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ < @)\n", {Code[pc+5], Code[pc+2]})
+			if inc[MIN] >= 0 then
+				-- going up
+				LeftSym = TRUE
+				if TypeIs(Code[pc+5], TYPE_INTEGER) and
+				TypeIs(Code[pc+2], TYPE_INTEGER) then
+					c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
+				else
+					c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
+				end if
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				if range1[MIN] != NOVALUE then
+					SymTab[Code[pc+5]][S_OBJ_MIN] = range1[MIN]
+					SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+				end if
+
+			elsif inc[MAX] < 0 then
+				-- going down
+				LeftSym = TRUE
+				if TypeIs(Code[pc+5], TYPE_INTEGER) and
+				TypeIs(Code[pc+2], TYPE_INTEGER) then
+					c_stmt("if (@ < @){\n", {Code[pc+5], Code[pc+2]})
+				else
+					c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
+				end if
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				if range1[MIN] != NOVALUE then
+					SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
+					SymTab[Code[pc+5]][S_OBJ_MAX] = range1[MAX]
+				end if
+
 			else
-				c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
-				SymTab[Code[pc+5]][S_OBJ_MAX] = range1[MAX]
+				-- integer, but value could be + or -
+				c_stmt("if (@ >= 0) {\n", Code[pc+1])
+
+					LeftSym = TRUE
+					if TypeIs(Code[pc+5], TYPE_INTEGER) and
+					TypeIs(Code[pc+2], TYPE_INTEGER) then
+						c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
+					else
+						c_stmt("if (binary_op_a(GREATER, @, @)){\n",
+													{Code[pc+5], Code[pc+2]})
+					end if
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+				c_stmt0("}\n")
+				c_stmt0("else {\n")
+					LeftSym = TRUE
+					if TypeIs(Code[pc+5], TYPE_INTEGER) and
+					TypeIs(Code[pc+2], TYPE_INTEGER) then
+						c_stmt("if (@ < @) {\n", {Code[pc+5], Code[pc+2]})
+					else
+						c_stmt("if (binary_op_a(LESS, @, @)){\n",
+													{Code[pc+5], Code[pc+2]})
+					end if
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+					if range1[MIN] != NOVALUE then
+						SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
+						SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+					end if
+				c_stmt0("}\n")
 			end if
 
 		else
-			-- integer, but value could be + or -
+			-- increment type is not known to be integer
+
 			c_stmt("if (@ >= 0) {\n", Code[pc+1])
+				c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				c_stmt("else if (IS_ATOM_INT(@)) {\n", Code[pc+1])
+					c_stmt("if (binary_op_a(LESS, @, @){)\n", {Code[pc+5], Code[pc+2]})
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+				c_stmt0("}\n")
 
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @)\n", {Code[pc+5], Code[pc+2]})
-			else
-				c_stmt("if (binary_op_a(GREATER, @, @))\n",
-											   {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			c_stmt0("}\n")
-			c_stmt0("else {\n")
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ < @)\n", {Code[pc+5], Code[pc+2]})
-			else
-				c_stmt("if (binary_op_a(LESS, @, @))\n",
-											   {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
-				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
-			end if
-			c_stmt0("}\n")
+				c_stmt0("else {\n")
+					c_stmt("if (DBL_PTR(@)->dbl >= 0.0) {\n", Code[pc+1])
+						c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
+							Goto(Code[pc+6])
+						c_stmt0("}\n")
+					c_stmt0("}\n")
+					c_stmt0("else {\n")
+						c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
+							Goto(Code[pc+6])
+						c_stmt0("}\n")
+					c_stmt0("}\n")
+				c_stmt0("}\n")
+
 		end if
-
-	else
-		-- increment type is not known to be integer
-
-		c_stmt("if (@ >= 0) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt("else if (IS_ATOM_INT(@)) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-
-		c_stmt0("else {\n")
-		c_stmt("if (DBL_PTR(@)->dbl >= 0.0) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt0("else {\n")
-		c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt0("}\n")
-
-	end if
 
 	pc += 7
+
+	-- Retry label
 	RLabel(pc)
 
 end procedure
@@ -3873,7 +4342,7 @@ procedure opENDFOR_GENERAL()
 	if Code[pc-1] != NOP1 then
 		Label(pc) -- for continue to work
 	end if
-	
+
 	CSaveStr("_0", Code[pc+3], Code[pc+3], Code[pc+4], 0)
 	-- always delay the DeRef
 
@@ -3882,8 +4351,8 @@ procedure opENDFOR_GENERAL()
 
 	-- rvalue for CName should be ok - we've initialized loop var
 	intcode = "@1 = @2 + @3;\n" &
-			  "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0) \n" &
-			  "@1 = NewDouble((double)@1);\n"
+			  "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+			  "@1 = NewDouble((double)@1);\n}\n"
 
 	if TypeIs(Code[pc+3], TYPE_INTEGER) and
 	   TypeIs(Code[pc+4], TYPE_INTEGER) then
@@ -3891,7 +4360,7 @@ procedure opENDFOR_GENERAL()
 		c_stmt("@1 = @2 + @3;\n", {Code[pc+3], Code[pc+3], Code[pc+4]})
 
 	elsif TypeIs(Code[pc+3], TYPE_INTEGER) and
-		  TypeIs(Code[pc+4], {TYPE_ATOM, TYPE_OBJECT}) then
+		  TypeIsIn(Code[pc+4], TYPES_AO) then
 			-- target and one operand are integers
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+4])
 		c_stmt("@1 = @2 + @3;\n", {Code[pc+3], Code[pc+3], Code[pc+4]})
@@ -3900,7 +4369,7 @@ procedure opENDFOR_GENERAL()
 		close_brace = TRUE
 
 	elsif TypeIs(Code[pc+4], TYPE_INTEGER) and
-		  TypeIs(Code[pc+3], {TYPE_ATOM, TYPE_OBJECT}) then
+		  TypeIsIn(Code[pc+3], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+3])
 		c_stmt(intcode, {Code[pc+3], Code[pc+3], Code[pc+4]})
 		c_stmt0("}\n")
@@ -3908,8 +4377,8 @@ procedure opENDFOR_GENERAL()
 		close_brace = TRUE
 	end if
 
-	if TypeIs(Code[pc+3], {TYPE_ATOM, TYPE_OBJECT}) and
-	   TypeIs(Code[pc+4], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+3], TYPES_AO) and
+	   TypeIsIn(Code[pc+4], TYPES_AO) then
 		-- uncertain about both types being TYPE_INTEGER or not
 		c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)) {\n",
 			   {Code[pc+3], Code[pc+4]})
@@ -4030,8 +4499,10 @@ procedure opCALL_PROC()
 			SymTab[Code[pc+3]][S_ONE_REF] = FALSE
 			-- hard to ever know the return type here
 			SetBBType(Code[pc+3], TYPE_OBJECT, novalue, TYPE_OBJECT, GDelete() )
+			create_temp( Code[pc+3], 1 )
 		end if
 	end if
+	dispose_temp( Code[pc+2], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3 + (Code[pc] = CALL_FUNC)
 end procedure
 
@@ -4049,55 +4520,62 @@ end procedure
 procedure opRETURNF()
 -- generate code for return from function
 	symtab_index sym, sub, ret
-	boolean doref
 	sequence x
+	object stsub
+	integer eltype
 
 	sub = Code[pc+1]
 	ret = Code[pc+3]
-	
+
+	if (not is_temp( ret ) and sym_scope( ret ) != SC_PRIVATE)
+	or map:get( dead_temp_walking, ret, NEW_REFERENCE ) != NEW_REFERENCE then
+		CRef( ret )
+	end if
+
 	-- update function return type, and sequence element type
-	SymTab[sub][S_GTYPE_NEW] = or_type(SymTab[sub][S_GTYPE_NEW],
+	stsub = SymTab[sub]
+	stsub[S_GTYPE_NEW] = or_type(stsub[S_GTYPE_NEW],
 									   GType(Code[pc+2]))
-	SymTab[sub][S_SEQ_ELEM_NEW] = or_type(SymTab[sub][S_SEQ_ELEM_NEW],
-											 SeqElem(Code[pc+2]))
+	eltype = SeqElem(Code[pc+2])
+	if eltype != stsub[S_SEQ_ELEM_NEW] then
+		eltype = or_type(stsub[S_SEQ_ELEM_NEW], eltype)
+		stsub[S_SEQ_ELEM_NEW] = eltype
+	end if
 
 	if GType(ret) = TYPE_INTEGER then
 		x = ObjMinMax(ret)
-		if SymTab[sub][S_OBJ_MIN_NEW] = -NOVALUE then
-			SymTab[sub][S_OBJ_MIN_NEW] = x[MIN]
-			SymTab[sub][S_OBJ_MAX_NEW] = x[MAX]
+		if stsub[S_OBJ_MIN_NEW] = -NOVALUE then
+			stsub[S_OBJ_MIN_NEW] = x[MIN]
+			stsub[S_OBJ_MAX_NEW] = x[MAX]
 
-		elsif SymTab[sub][S_OBJ_MIN_NEW] != NOVALUE then
-			if x[MIN] < SymTab[sub][S_OBJ_MIN_NEW] then
-				SymTab[sub][S_OBJ_MIN_NEW] = x[MIN]
+		elsif stsub[S_OBJ_MIN_NEW] != NOVALUE then
+			if x[MIN] < stsub[S_OBJ_MIN_NEW] then
+				stsub[S_OBJ_MIN_NEW] = x[MIN]
 			end if
-			if x[MAX] > SymTab[sub][S_OBJ_MAX_NEW] then
-				SymTab[sub][S_OBJ_MAX_NEW] = x[MAX]
+			if x[MAX] > stsub[S_OBJ_MAX_NEW] then
+				stsub[S_OBJ_MAX_NEW] = x[MAX]
 			end if
 		end if
 
 	elsif GType(ret) = TYPE_SEQUENCE then
-		if SymTab[sub][S_SEQ_LEN_NEW] = -NOVALUE then
-			SymTab[sub][S_SEQ_LEN_NEW] = SeqLen(ret)
-		elsif SymTab[sub][S_SEQ_LEN_NEW] != SeqLen(ret) then
-			SymTab[sub][S_SEQ_LEN_NEW] = NOVALUE
+		if stsub[S_SEQ_LEN_NEW] = -NOVALUE then
+			stsub[S_SEQ_LEN_NEW] = SeqLen(ret)
+		elsif stsub[S_SEQ_LEN_NEW] != SeqLen(ret) then
+			stsub[S_SEQ_LEN_NEW] = NOVALUE
 		end if
 
 	else
-		SymTab[sub][S_OBJ_MIN_NEW] = NOVALUE
-		SymTab[sub][S_SEQ_LEN_NEW] = NOVALUE
+		stsub[S_OBJ_MIN_NEW] = NOVALUE
+		stsub[S_SEQ_LEN_NEW] = NOVALUE
 
 	end if
-
-	doref = TRUE
+	SymTab[sub] = stsub
 
 	-- deref any active for-loop vars
 	for i = 1 to length(loop_stack) do
 		if loop_stack[i][LOOP_VAR] != 0 then
 			-- active for-loop var
-			if loop_stack[i][LOOP_VAR] = ret then
-				doref = FALSE
-			else
+			if loop_stack[i][LOOP_VAR] != ret then
 				CDeRef(loop_stack[i][LOOP_VAR])
 			end if
 		end if
@@ -4110,7 +4588,6 @@ procedure opRETURNF()
 		while sym != 0 do
 			if SymTab[sym][S_SCOPE] != DELETED and
 			   SymTab[sym][S_TEMP_NAME] = SymTab[ret][S_TEMP_NAME] then
-				doref = FALSE
 				exit
 			end if
 			sym = SymTab[sym][S_NEXT]
@@ -4123,16 +4600,11 @@ procedure opRETURNF()
 			if SymTab[sym][S_SCOPE] != SC_LOOP_VAR and
 			   SymTab[sym][S_SCOPE] != SC_GLOOP_VAR then
 				if sym = ret then
-					doref = FALSE
 					exit
 				end if
 			end if
 			sym = SymTab[sym][S_NEXT]
 		end while
-	end if
-
-	if doref then
-		CRef(ret)
 	end if
 
 	SymTab[ret][S_ONE_REF] = FALSE
@@ -4141,11 +4613,11 @@ procedure opRETURNF()
 	symtab_index block = Code[pc+2]
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	while block != sub_block do
-		exit_block( block )
+		exit_block( block, 0, ret )
 		block = SymTab[block][S_BLOCK]
 	end while
-	exit_block( sub_block )
-	
+	exit_block( sub_block, 0, ret )
+
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
 		if SymTab[sym][S_SCOPE] != DELETED then
@@ -4159,6 +4631,8 @@ procedure opRETURNF()
 	end while
 	FlushDeRef()
 
+	dispose_all_temps( 0, 0, ret )
+
 	c_stmt0("return ")
 	CName(ret)
 	c_puts(";\n")
@@ -4166,21 +4640,42 @@ procedure opRETURNF()
 	pc += 4
 end procedure
 
-procedure exit_block( symtab_index block )
+procedure exit_block( symtab_index block, integer no_value = 1, integer except_sym = 0, integer set_bb_type = 1 )
 	ifdef DEBUG then
 		c_puts(sprintf("\n// Exiting block %s\n", {SymTab[block][S_NAME]}))
 	end ifdef
+
 	sym = block
+	integer deref = 1
+
 	while sym != 0 with entry do
-		CDeRef(sym)
+		if sym != except_sym
+		and not find( sym_usage( sym ), {U_UNUSED, U_DELETED}) then
+
+			ifdef DEBUG then
+				c_puts(sprintf("\n// block var %s\n", {sym_name(sym)}))
+			end ifdef
+
+			if deref then
+				CDeRef(sym)
+			end if
+			if no_value and not except_sym and not TypeIs( sym, T_INTEGER ) then
+				c_stmt( "@ = NOVALUE;\n", sym )
+			end if
+
+			if set_bb_type then
+				-- set the type to an integer to prevent de-referencing
+				SetBBType(sym, TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
+			end if
+		end if
 	entry
 		sym = SymTab[sym][S_NEXT_IN_BLOCK]
 	end while
-	
+
 end procedure
 
 procedure opEXIT_BLOCK()
-	
+
 	exit_block( Code[pc+1] )
 	pc += 2
 end procedure
@@ -4197,14 +4692,14 @@ procedure opRETURNP()
 
 	-- deref the temps and privates
 	sub = Code[pc+1]
-	
+
 	symtab_index block = Code[pc+2]
 	symtab_index sub_block = SymTab[sub][S_BLOCK]
 	while block != sub_block do
-		exit_block( block )
+		exit_block( block, 0 )
 		block = SymTab[block][S_BLOCK]
 	end while
-	exit_block( sub_block )
+	exit_block( sub_block, 0 )
 
 	sym = SymTab[sub][S_TEMPS]
 	while sym != 0 do
@@ -4214,7 +4709,8 @@ procedure opRETURNP()
 		sym = SymTab[sym][S_NEXT]
 	end while
 	FlushDeRef()
-	c_stmt0("return 0;\n")
+	dispose_all_temps( 0, 0 )
+	c_stmt0("return;\n")
 	pc += 3
 end procedure
 
@@ -4250,15 +4746,17 @@ procedure opAPPEND()
 		preserve = or_type(SymTab[t][S_SEQ_ELEM_NEW], GType(Code[pc+2]))
 		SetBBType(t, TYPE_SEQUENCE, target,
 				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
-				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  HasDelete( t ) or HasDelete( Code[pc+1] )
 				  or HasDelete( Code[pc+2] ))
 		SymTab[t][S_SEQ_ELEM_NEW] = preserve
 	else
 		SetBBType(t, TYPE_SEQUENCE, target,
 				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
-				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  HasDelete( t ) or HasDelete( Code[pc+1] )
 				  or HasDelete( Code[pc+2] ))
 	end if
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -4281,15 +4779,17 @@ procedure opPREPEND()
 		preserve = or_type(SymTab[t][S_SEQ_ELEM_NEW], GType(Code[pc+2]))
 		SetBBType(t, TYPE_SEQUENCE, target,
 				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
-				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  HasDelete( t ) or HasDelete( Code[pc+1] )
 				  or HasDelete( Code[pc+2] ))
 		SymTab[t][S_SEQ_ELEM_NEW] = preserve
 	else
 		SetBBType(t, TYPE_SEQUENCE, target,
 				  or_type(SeqElem(Code[pc+1]), GType(Code[pc+2])),
-				  HasDelete( t ) or HasDelete( Code[pc+1] ) 
+				  HasDelete( t ) or HasDelete( Code[pc+1] )
 				  or HasDelete( Code[pc+2] ))
 	end if
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -4298,39 +4798,37 @@ procedure opCONCAT()
 	integer t, p3, preserve
 	atom j
 	sequence target
+	integer ones_an_object = TypeIs(Code[pc+1], TYPE_OBJECT) or
+	   TypeIs(Code[pc+2], TYPE_OBJECT)
 
-	if TypeIs(Code[pc+1], TYPE_OBJECT) or
-	   TypeIs(Code[pc+2], TYPE_OBJECT) then
+	if ones_an_object then
 		c_stmt("if (IS_SEQUENCE(@) && IS_ATOM(@)) {\n", {Code[pc+1], Code[pc+2]})
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_OBJECT, TYPE_SEQUENCE}) and
+	if TypeIsIn(Code[pc+1], TYPES_SO) and
 	   TypeIsNot(Code[pc+2], TYPE_SEQUENCE) then
 		CRef(Code[pc+2])
 		c_stmt("Append(&@, @, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
 	end if
 
-	if TypeIs(Code[pc+1], TYPE_OBJECT) or
-	   TypeIs(Code[pc+2], TYPE_OBJECT) then
+	if ones_an_object then
 		c_stmt0("}\n")
 		c_stmt("else if (IS_ATOM(@) && IS_SEQUENCE(@)) {\n",
 					  {Code[pc+1], Code[pc+2]})
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_OBJECT, TYPE_SEQUENCE}) and
+	if TypeIsIn(Code[pc+2], TYPES_SO) and
 	   TypeIsNot(Code[pc+1], TYPE_SEQUENCE) then
 		CRef(Code[pc+1])
 		c_stmt("Prepend(&@, @, @);\n", {Code[pc+3], Code[pc+2], Code[pc+1]})
 	end if
 
-	if TypeIs(Code[pc+1], TYPE_OBJECT) or
-	   TypeIs(Code[pc+2], TYPE_OBJECT) then
+	if ones_an_object then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIs(Code[pc+1], TYPE_OBJECT) or
-	   TypeIs(Code[pc+2], TYPE_OBJECT) or
+	if ones_an_object or
 		(TypeIs(Code[pc+1], TYPE_SEQUENCE) and
 		 TypeIs(Code[pc+2], TYPE_SEQUENCE)) or
 		   (TypeIsNot(Code[pc+1], TYPE_SEQUENCE) and
@@ -4339,15 +4837,11 @@ procedure opCONCAT()
 					   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	end if
 
-	if TypeIs(Code[pc+1], TYPE_OBJECT) or
-	   TypeIs(Code[pc+2], TYPE_OBJECT) then
-		c_stmt0("}\n")
-	end if
 
 	target = {0, 0}
 	-- compute length of result
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_ATOM}) and
-	   TypeIs(Code[pc+2], {TYPE_SEQUENCE, TYPE_ATOM}) then
+	if TypeIsIn(Code[pc+1], TYPES_AS) and
+	   TypeIsIn(Code[pc+2], TYPES_AS) then
 		if TypeIs(Code[pc+1], TYPE_ATOM) then
 			target[MIN] = 1
 		else
@@ -4388,7 +4882,7 @@ procedure opCONCAT()
 		-- global idea of sequence element type
 		preserve = or_type(SymTab[p3][S_SEQ_ELEM_NEW], t)
 		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t),
-			HasDelete( p3 ) or HasDelete( Code[pc+1] ) 
+			HasDelete( p3 ) or HasDelete( Code[pc+1] )
 				  or HasDelete( Code[pc+2] ))
 		SymTab[p3][S_SEQ_ELEM_NEW] = preserve
 
@@ -4397,16 +4891,30 @@ procedure opCONCAT()
 		-- global idea of sequence element type
 		preserve = or_type(SymTab[p3][S_SEQ_ELEM_NEW], j)
 		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t),
-			HasDelete( p3 ) or HasDelete( Code[pc+1] ) 
+			HasDelete( p3 ) or HasDelete( Code[pc+1] )
 				  or HasDelete( Code[pc+2] ))
 		SymTab[p3][S_SEQ_ELEM_NEW] = preserve
 
 	else
 		SetBBType(p3, TYPE_SEQUENCE, target, or_type(j, t),
-			HasDelete( p3 ) or HasDelete( Code[pc+1] ) 
+			HasDelete( p3 ) or HasDelete( Code[pc+1] )
 				  or HasDelete( Code[pc+2] ))
 
 	end if
+	if ones_an_object or
+		(TypeIs(Code[pc+1], TYPE_SEQUENCE) and
+		 TypeIs(Code[pc+2], TYPE_SEQUENCE)) or
+		   (TypeIsNot(Code[pc+1], TYPE_SEQUENCE) and
+			TypeIsNot(Code[pc+2], TYPE_SEQUENCE)) then
+		dispose_temp( Code[pc+1], DISCARD_TEMP, KEEP_IN_MAP )
+	end if
+
+	if ones_an_object then
+		c_stmt0("}\n")
+	end if
+
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 
 	pc += 4
 end procedure
@@ -4417,17 +4925,17 @@ procedure splins()
 	c_stmt0("s1_ptr assign_space;\n")
 	--c_stmt0("_2 = (object_ptr)pc[3];\n")
 	--c_stmt("_2 = (object_ptr)@;\n",{Code[pc+3]})
-	if not TypeIsNot(Code[pc+2],TYPE_SEQUENCE) then
+	if not TypeIsNot(Code[pc+2],TYPE_ATOM) then
 		c_stmt("if (IS_SEQUENCE(@))\n",{Code[pc+3]})
 		c_stmt0("RTFatal(\"Third argument to splice/insert() must be an atom\");\n")
 	end if
-	
+
 	if TypeIs( Code[pc+3], TYPE_INTEGER ) then
 		c_stmt("insert_pos = @;\n", Code[pc+3] )
 	else
 		c_stmt("insert_pos = IS_ATOM_INT(@) ? @ : DBL_PTR(@)->dbl;\n",{Code[pc+3],Code[pc+3],Code[pc+3]})
 	end if
-	
+
 -- 	CSaveStr("_0", Code[pc+4], Code[pc+1], Code[pc+2], 0)
 end procedure
 
@@ -4440,17 +4948,31 @@ procedure opSPLICE()
 		c_stmt( "Concat(&@,@,@);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 	c_stmt0( "}\n")
 	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
-		--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
-		c_stmt("assign_space = Add_internal_space(@,insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
+		c_stmt( "if( @ != @ || SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
+			--  not in place: need to deref the target and ref the orig seq
+			c_stmt( "DeRef( @ );\n", Code[pc+4] )
+			-- ensures that Add_internal_space will make a copy
+			c_stmt( "RefDS( @ );\n", Code[pc+1] )
+		c_stmt0( "}\n" )
+		c_stmt("assign_space = Add_internal_space( @, insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
 		c_stmt0("assign_slice_seq = &assign_space;\n")
-		c_stmt("assign_space = Copy_elements(insert_pos,SEQ_PTR(@), &@ );\n",{Code[pc+2], Code[pc+4]})
+		c_stmt("assign_space = Copy_elements( insert_pos, SEQ_PTR(@), @ == @ );\n",{Code[pc+2], Code[pc+1], Code[pc+4]})
 		c_stmt("@ = MAKE_SEQ( assign_space );\n",{Code[pc+4]})
 	c_stmt0("}\n")
 	c_stmt0( "else {\n" )
-		c_stmt("RefDS( @ );\n", Code[pc+1] )
-		c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt( "if( @ != @ && SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
+			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt0("}\n")
+		c_stmt0("else {\n")
+			c_stmt("DeRef( @ );\n", Code[pc+4] )
+			c_stmt("RefDS( @ );\n", Code[pc+1] )
+			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	c_stmt0("}\n")
+	
+	-- splins() starts a block that we need to close:
+	c_stmt0("}\n")
+	
 	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
 		t = or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2]))
 	elsif TypeIs(Code[pc+2], TYPE_ATOM) then
@@ -4461,14 +4983,17 @@ procedure opSPLICE()
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, t,
 		HasDelete( Code[pc+4] ) or HasDelete( Code[pc+2] )
 		or HasDelete( Code[pc+3] ) )
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+4], NEW_REFERENCE )
 	pc += 5
 end procedure
 
 procedure opINSERT()
 	splins() -- _0 = obj_ptr
-	c_stmt0( "if (insert_pos <= 0)\n" )
+	c_stmt0( "if (insert_pos <= 0){\n" )
 	c_stmt( "Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
-	
+	c_stmt0( "}\n" )
+
 	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
 		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
 		c_stmt("RefDS( @ );\n", { Code[pc+2] } )
@@ -4498,10 +5023,12 @@ procedure opINSERT()
 		c_stmt("@ = Insert(@,@,insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	end if
-	
+
 	c_stmt0("}\n")
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, or_type(SeqElem(Code[pc+1]),GType(Code[pc+2])),
 		HasDelete( Code[pc+1] ) or HasDelete( Code[pc+2] ) or HasDelete( Code[pc+4] ))
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+4], NEW_REFERENCE )
 	pc += 5
 end procedure
 
@@ -4520,6 +5047,8 @@ procedure opHEAD()
 	c_stmt0("}\n")
 	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
 		HasDelete( Code[pc+1] ) )
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -4540,6 +5069,8 @@ procedure opTAIL()
 	c_stmt0("}\n")
 	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
 		HasDelete(Code[pc+1]) )
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -4553,14 +5084,17 @@ procedure opREMOVE()
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
 	c_stmt0("if (start > len || start > stop || stop<0) {\n")
-	c_stmt("RefDS(@);\n", {Code[pc+1]})
-	c_stmt("DeRef(@);\n", {Code[pc+4]})
-	c_stmt("@ = @;\n",{Code[pc+4], Code[pc+1]})
+	if Code[pc+1] != Code[pc+4] then
+		-- only do this if it's a different target...
+		c_stmt("RefDS(@);\n", {Code[pc+1]})
+		c_stmt("DeRef(@);\n", {Code[pc+4]})
+		c_stmt("@ = @;\n",{Code[pc+4], Code[pc+1]})
+	end if
 	c_stmt0("}\n")
 	c_stmt0("else if (start < 2) {\n")
 	c_stmt0("if (stop >= len) {\n")
-	c_stmt("DeRef(@);\n", {Code[pc+4]})
-	c_stmt("@ = MAKE_SEQ(NewS1(0));\n",{Code[pc+4]})
+	-- use Head() here, which might result in an in-place modification
+	c_stmt("Head( SEQ_PTR(@), start, &@ );\n", { Code[pc+1], Code[pc+4] })
 	c_stmt0("}\n")
 	c_stmt("else Tail(SEQ_PTR(@), stop+1, &@);\n",{Code[pc+1], Code[pc+4]})
 	c_stmt0("}\n")
@@ -4570,17 +5104,19 @@ procedure opREMOVE()
 	c_stmt0("else {\n")
 	c_stmt0("assign_slice_seq = &assign_space;\n")
 	if Code[pc+1] = Code[pc+4] then
-		c_stmt("Remove_elements(start, stop, (SEQ_PTR(@)->ref == 1));\n", Code[pc+4])
+		c_stmt("@ = Remove_elements(start, stop, (SEQ_PTR(@)->ref == 1));\n", repeat( Code[pc+4], 2 ))
 	else
 		c_stmt0("_1 = Remove_elements(start, stop, 0);\n")
 		c_stmt("DeRef(@);\n", Code[pc+4])
 		c_stmt("@ = _1;\n", Code[pc+4])
 	end if
-	
+
 	c_stmt0("}\n")
 	c_stmt0("}\n")
 	SetBBType(Code[pc+4], TYPE_SEQUENCE, novalue, SeqElem(Code[pc+1]),
 		HasDelete(Code[pc+1]))
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+4], NEW_REFERENCE )
 	pc += 5
 end procedure
 
@@ -4594,24 +5130,26 @@ procedure opREPLACE()
 -- 		start     = Code[pc+3],
 -- 		stop      = Code[pc+4],
 -- 		target    = Code[pc+5]
-	
+
 	c_stmt0("{\n")
 		for i = 1 to 4 do
-			c_stmt(sprintf("int p%d = @;\n", i-1 ), Code[pc+i])
+			c_stmt(sprintf("int p%d = @;\n", i ), Code[pc+i])
 		end for
-		c_stmt0("int replace_params[5];\n")
-		for i = 0 to 3 do
-			c_stmt0(sprintf("replace_params[%d] = &p%d;\n", {i,i}))
-		end for
-		c_stmt("replace_params[4] = &@;\n", Code[pc+5] )
-		c_stmt0("Replace( &replace_params );\n")
-		
+		c_stmt0("struct replace_block replace_params;\n")
+		c_stmt0( "replace_params.copy_to   = &p1;\n" )
+		c_stmt0( "replace_params.copy_from = &p2;\n" )
+		c_stmt0( "replace_params.start     = &p3;\n" )
+		c_stmt0( "replace_params.stop      = &p4;\n" )
+		c_stmt(  "replace_params.target    = &@;\n", Code[pc+5] )
+		c_stmt0( "Replace( &replace_params );\n")
+
 		target[MIN] = SeqLen(Code[pc+1])
 		SetBBType(Code[pc+5], TYPE_SEQUENCE, {-1,-1}, or_type( SeqElem(Code[pc+1]), SeqElem(Code[pc+2])),
 			HasDelete( Code[pc+1] ) or HasDelete( Code[pc+2] ) )
-		
+
 	c_stmt0("}\n")
-	
+	dispose_temps( pc+1, 4, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+5], NEW_REFERENCE )
 	pc += 6
 end procedure
 
@@ -4641,6 +5179,8 @@ procedure opCONCAT_N()
 	c_printf(", %d);\n", n)
 	c_stmt0("}\n")
 	SetBBType(Code[pc+n+2], TYPE_SEQUENCE, novalue, t, has_delete)
+	dispose_temps( pc+2, n, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+n+2], NEW_REFERENCE )
 	pc += n+3
 end procedure
 
@@ -4656,6 +5196,9 @@ procedure opREPEAT()
 		SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, GType(Code[pc+1]),
 			HasDelete( Code[pc+1] ) )
 	end if
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
+
 	pc += 4
 end procedure
 
@@ -4664,6 +5207,7 @@ procedure opDATE()
 	c_stmt("@ = Date();\n", Code[pc+1])
 	target[MIN] = 8
 	SetBBType(Code[pc+1], TYPE_SEQUENCE, target, TYPE_INTEGER, 0)
+	create_temp( Code[pc+1], 1 )
 	pc += 2
 end procedure
 
@@ -4671,6 +5215,7 @@ procedure opTIME()
 	CDeRef(Code[pc+1]) -- Code[pc+1] not used in next expression
 	c_stmt("@ = NewDouble(current_time());\n", Code[pc+1])
 	SetBBType(Code[pc+1], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0)
+	create_temp( Code[pc+1], 1 )
 	pc += 2
 end procedure
 
@@ -4684,6 +5229,7 @@ end procedure
 
 procedure opPOSITION()
 	c_stmt("Position(@, @);\n", {Code[pc+1], Code[pc+2]})
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
@@ -4699,6 +5245,7 @@ procedure opEQUAL()
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
@@ -4709,6 +5256,8 @@ procedure opHASH()
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
 	SetBBType(Code[pc+3], TYPE_ATOM, target, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -4724,6 +5273,8 @@ procedure opCOMPARE()
 	CDeRefStr("_0")
 	target = {-1, 1}
 	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+
 	pc += 4
 end procedure
 
@@ -4734,6 +5285,7 @@ procedure opFIND()
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
 	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
@@ -4744,6 +5296,7 @@ procedure opFIND_FROM() -- extra 3rd atom arg
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
 	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 5
 end procedure
 
@@ -4754,6 +5307,7 @@ procedure opMATCH()
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
 	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
@@ -4764,15 +5318,16 @@ procedure opMATCH_FROM()
 	CDeRefStr("_0")
 	target = {0, MAXLEN}
 	SetBBType(Code[pc+4], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 5
 end procedure
 
 procedure opPEEK_STRING()
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = PEEK then
 			seg_peek1(Code[pc+2], Code[pc+1], 0)
 		elsif Code[pc] = PEEKS then
@@ -4814,17 +5369,20 @@ procedure opPEEK_STRING()
 		c_stmt0("}\n")
 		c_stmt("else if (IS_ATOM(@)) {\n", Code[pc+1])
 	end if
+
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+2], NEW_REFERENCE )
 end procedure
 
 procedure opPEEK()
 -- PEEK / PEEKS / PEEK2S / PEEK2U / PEEK4U / PEEK4S
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = PEEK then
 			seg_peek1(Code[pc+2], Code[pc+1], 0)
 		elsif Code[pc] = PEEKS then
@@ -4867,10 +5425,10 @@ procedure opPEEK()
 		c_stmt("else if (IS_ATOM(@)) {\n", Code[pc+1])
 	end if
 
-	if TypeIsNot(Code[pc+1], {TYPE_INTEGER, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
 		if find( Code[pc], { PEEK, PEEKS } ) then
 			seg_peek1(Code[pc+2], Code[pc+1], 1)
-		elsif find( Code[pc], {PEEK2S, PEEK2S}) then
+		elsif find( Code[pc], {PEEK2U, PEEK2S}) then
 			seg_peek2(Code[pc+2], Code[pc+1], 1)
 		elsif find( Code[pc], {PEEK4U, PEEK4S}) then
 
@@ -4893,7 +5451,7 @@ procedure opPEEK()
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -4901,7 +5459,7 @@ procedure opPEEK()
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_SO) then
 		-- sequence {start, length} */
 		c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+1])
 		if find( Code[pc], { PEEK, PEEKS })  then
@@ -4998,7 +5556,7 @@ procedure opPEEK()
 
 	CDeRefStr("_0")
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_DOUBLE}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAD) then
 		if Code[pc] = PEEK then
 			target = {0, 255}
 			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT,0 )
@@ -5032,7 +5590,8 @@ procedure opPEEK()
 		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
 
 	end if
-
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+2], NEW_REFERENCE )
 	pc += 3
 end procedure
 
@@ -5040,11 +5599,11 @@ procedure opPOKE()
 -- generate code for poke and poke4
 -- should optimize constant address
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
-		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
+		c_stmt("if (IS_ATOM_INT(@)){\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = POKE4 then
 			c_stmt("poke4_addr = (unsigned long *)@;\n", Code[pc+1])
 		elsif Code[pc] = POKE2 then
@@ -5054,11 +5613,12 @@ procedure opPOKE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
-		c_stmt0("else\n")
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
+		c_stmt0("}\n" )
+		c_stmt0("else {\n")
 	end if
 
-	if TypeIsNot(Code[pc+1], {TYPE_INTEGER, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
 		if Code[pc] = POKE4 then
 			c_stmt("poke4_addr = (unsigned long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
 						   Code[pc+1])
@@ -5070,12 +5630,16 @@ procedure opPOKE()
 						   Code[pc+1])
 		end if
 	end if
-
-	if TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+	
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
+		c_stmt0("}\n" )
+	end if
+	
+	if TypeIsIn(Code[pc+2], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+2], TYPES_IAO) then
 		if Code[pc] = POKE4 then
 			seg_poke4(Code[pc+2], 0)
 		elsif Code[pc] = POKE2 then
@@ -5093,7 +5657,7 @@ procedure opPOKE()
 		c_stmt("else if (IS_ATOM(@)) {\n", Code[pc+2])
 	end if
 
-	if TypeIsNot(Code[pc+2], {TYPE_INTEGER, TYPE_SEQUENCE}) then
+	if TypeIsNotIn(Code[pc+2], TYPES_IS) then
 		if Code[pc] = POKE4 then
 			seg_poke4(Code[pc+2], 1)
 		else
@@ -5101,7 +5665,7 @@ procedure opPOKE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+2], TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
@@ -5109,7 +5673,7 @@ procedure opPOKE()
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIs(Code[pc+2], {TYPE_SEQUENCE, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+2], TYPES_SO) then
 		c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+2])
 		c_stmt0("_1 = (int)((s1_ptr)_1)->base;\n")
 
@@ -5198,43 +5762,27 @@ procedure opPOKE()
 	if TypeIs(Code[pc+2], TYPE_OBJECT) then
 		c_stmt0("}\n")
 	end if
-
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure opMEM_COPY()
 	c_stmt("memory_copy(@, @, @);\n", {Code[pc+1], Code[pc+2], Code[pc+3]})
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
 procedure opMEM_SET()
 	c_stmt("memory_set(@, @, @);\n", {Code[pc+1], Code[pc+2], Code[pc+3]})
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
-procedure opPIXEL()
-	c_stmt("Pixel(@, @);\n", {Code[pc+1], Code[pc+2]})
-	pc += 3
-end procedure
-
-procedure opGET_PIXEL()
-	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-	c_stmt("@ = Get_Pixel(@);\n", {Code[pc+2], Code[pc+1]})
-	CDeRefStr("_0")
-	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
-		if SeqLen(Code[pc+1]) = 2 then
-			target = {0, 255}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
-		elsif SeqLen(Code[pc+1]) = 3 then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
-		else
-			SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
-		end if
-	else
-		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
-	end if
-	pc += 3
-end procedure
+function file_and_line()
+	integer ix = rfind( STARTLINE, Code, pc )
+	integer line = Code[ix+1]
+	return {known_files[slist[line][LOCAL_FILE_NO]], slist[line][LINE]}
+end function
 
 procedure opCALL()
 	c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
@@ -5242,11 +5790,13 @@ procedure opCALL()
 	c_stmt0("else\n")
 	c_stmt("_0 = (int)(unsigned long)(DBL_PTR(@)->dbl);\n", Code[pc+1])
 	c_stmt0("(*(void(*)())_0)();\n")
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
 end procedure
 
 procedure opSYSTEM()
 	c_stmt("system_call(@, @);\n", {Code[pc+1], Code[pc+2]})
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
@@ -5257,6 +5807,7 @@ procedure opSYSTEM_EXEC()
 	CDeRefStr("_0")
 	-- probably 0..255, but we can't be totally sure
 	SetBBType(Code[pc+3], TYPE_INTEGER, novalue, TYPE_OBJECT, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
@@ -5272,16 +5823,18 @@ procedure opOPEN()
 	else
 		SetBBType(Code[pc+4], TYPE_ATOM, target, TYPE_OBJECT, 1)
 	end if
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+4], NEW_REFERENCE )
 	pc += 5
 end procedure
 
 procedure opCLOSE()
 -- CLOSE / ABORT
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		if Code[pc] = ABORT then
 			c_stmt("UserCleanup(@);\n", Code[pc+1])
 		else
@@ -5289,7 +5842,7 @@ procedure opCLOSE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("else\n")
 	end if
 
@@ -5300,6 +5853,7 @@ procedure opCLOSE()
 			c_stmt("EClose((int)DBL_PTR(@)->dbl);\n", Code[pc+1])
 		end if
 	end if
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
 end procedure
 
@@ -5321,37 +5875,37 @@ procedure opGETC()
 	end if
 
 	c_stmt0("}\n")
-	if not TDOS then
-		c_stmt0("if (last_r_file_ptr == xstdin) {\n")
-		if TWINDOWS then
-			c_stmt0("show_console();\n")
-		end if
-		c_stmt0("if (in_from_keyb) {\n")
-		if TUNIX then
-			if EGPM then
-				c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
-			else
-				-- c_stmt("@ = getch(1);\n", Code[pc+2])   -- echo the character
-				c_stmt("@ = getc(xstdin);\n", Code[pc+2])   -- echo the character
-			end if
-		else
-			c_stmt("@ = wingetch();\n", Code[pc+2])
-		end if
-		c_stmt0("}\n")
-		c_stmt0("else\n")
-
-		-- don't bother with mygetc() - it might not be portable
-		-- to other DOS C compilers
-		c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
-
-		c_stmt0("}\n")
-		c_stmt0("else\n")
+	c_stmt0("if (last_r_file_ptr == xstdin) {\n")
+	if TWINDOWS then
+		c_stmt0("show_console();\n")
 	end if
+	c_stmt0("if (in_from_keyb) {\n")
+	if TUNIX then
+		if EGPM then
+			c_stmt("@ = mgetch(1);\n", Code[pc+2])  -- echo the character
+		else
+			-- c_stmt("@ = getch(1);\n", Code[pc+2])   -- echo the character
+			c_stmt("@ = getc((FILE*)xstdin);\n", Code[pc+2])   -- echo the character
+		end if
+	else
+		c_stmt("@ = wingetch();\n", Code[pc+2])
+	end if
+	c_stmt0("}\n")
+	c_stmt0("else\n")
+
+	-- don't bother with mygetc() - it might not be portable
+	-- to other DOS C compilers
+	c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
+
+	c_stmt0("}\n")
+	c_stmt0("else\n")
+
 	c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
 
 	CDeRefStr("_0")
 	target = {-1, 255}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
@@ -5361,12 +5915,14 @@ procedure opGETS()
 	c_stmt("@ = EGets(@);\n", {Code[pc+2], Code[pc+1]})
 	CDeRefStr("_0")
 	SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER, 0) -- N.B.
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+2], NEW_REFERENCE )
 	pc += 3
 end procedure
 
 procedure opGET_KEY()
 -- read an immediate key (if any) from the keyboard or return -1
-	if not TDOS and TWINDOWS then
+	if TWINDOWS then
 		c_stmt0("show_console();\n")
 	end if
 	CSaveStr("_0", Code[pc+1], 0, 0, 0)
@@ -5383,7 +5939,8 @@ procedure opCLEAR_SCREEN()
 end procedure
 
 procedure opPUTS()
-	c_stmt("EPuts(@, @);\n", {Code[pc+1], Code[pc+2]})
+	c_stmt("EPuts(@, @); // DJP \n", {Code[pc+1], Code[pc+2]})
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
@@ -5394,11 +5951,13 @@ procedure opPRINT()
 	else
 		c_stmt("StdPrint(@, @, 0);\n", {Code[pc+1], Code[pc+2]})
 	end if
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure opPRINTF()
 	c_stmt("EPrintf(@, @, @);\n", {Code[pc+1], Code[pc+2], Code[pc+3]})
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 4
 end procedure
 
@@ -5410,6 +5969,8 @@ procedure opSPRINTF()
 		   {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	SetBBType(Code[pc+3], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -5419,6 +5980,7 @@ procedure opCOMMAND_LINE()
 	c_stmt("@ = Command_Line();\n" , Code[pc+1])
 	CDeRefStr("_0")
 	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE, 0)
+	create_temp( Code[pc+1], NEW_REFERENCE )
 	pc += 2
 end procedure
 
@@ -5428,14 +5990,17 @@ procedure opOPTION_SWITCHES()
 	c_stmt("@ = _0switches;\n", Code[pc+1] )
 	CDeRefStr("_0")
 	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_SEQUENCE, 0)
+	create_temp( Code[pc+1], NEW_REFERENCE )
 	pc += 2
 end procedure
 
 procedure opGETENV()
-	CSaveStr("_0", Code[pc+2], 0, 0, 0)
+	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
 	c_stmt("@ = EGetEnv(@);\n", {Code[pc+2], Code[pc+1]})
 	CDeRefStr("_0")
 	SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_INTEGER, 0) -- N.B.
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+2], NEW_REFERENCE )
 	pc += 3
 end procedure
 
@@ -5446,24 +6011,34 @@ procedure opMACHINE_FUNC()
 	target = machine_func_type(Code[pc+1])
 	SetBBType(Code[pc+3], target[1], target[2],
 			  machine_func_elem_type(Code[pc+1]), 0)
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
 procedure opMACHINE_PROC()
 	c_stmt("machine(@, @);\n", {Code[pc+1], Code[pc+2]})
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure delete_double( symtab_index obj )
 	c_stmt("if(DBL_PTR(@)->cleanup != 0 ){\n", obj )
-		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
+		c_stmt("_1 = (int) ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
+	c_stmt0("}\n")
+	c_stmt("else if( !UNIQUE(DBL_PTR(@)) ){\n", obj )
+		CDeRef( obj )
+		c_stmt("@ = NewDouble( DBL_PTR(@)->dbl );\n", {obj, obj} )
 	c_stmt0("}\n")
 	c_stmt("DBL_PTR(@)->cleanup = (cleanup_ptr)_1;\n", obj )
 end procedure
 
 procedure delete_sequence( symtab_index obj )
 	c_stmt("if(SEQ_PTR(@)->cleanup != 0 ){\n", obj )
-		c_stmt("_1 = ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
+		c_stmt("_1 = (int) ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
+	c_stmt0("}\n")
+	c_stmt("else if( !UNIQUE(SEQ_PTR(@)) ){\n", obj )
+		c_stmt("@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {obj, obj} )
 	c_stmt0("}\n")
 	c_stmt("SEQ_PTR(@)->cleanup = (cleanup_ptr)_1;\n", obj )
 end procedure
@@ -5475,8 +6050,38 @@ end procedure
 
 procedure assign_delete_target( symtab_index target, symtab_index obj )
 	CDeRef( target )
-	c_stmt( "@ = @;\n", {target, obj})
-	if TypeIs( obj, {TYPE_SEQUENCE, TYPE_OBJECT}) then
+
+	if TypeIsIn( obj, TYPES_AO ) then
+		c_stmt( "if( IS_ATOM_INT(@) ){\n", obj )
+			promote_integer_delete( obj, target )
+		c_stmt0("}\n")
+		c_stmt0("else {\n")
+	end if
+
+	c_stmt( "if( !UNIQUE(SEQ_PTR(@)) ){\n", obj )
+		if TypeIs( obj, TYPE_DOUBLE ) then
+			c_stmt( "@ = NewDouble( DBL_PTR(@)->dbl );\n", {target, obj})
+		elsif TypeIs( obj, TYPE_SEQUENCE ) then
+			c_stmt( "@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {target, obj} )
+		else
+			c_stmt( "if( IS_ATOM_DBL( @ ) ){\n", obj )
+				c_stmt( "@ = NewDouble( DBL_PTR(@)->dbl );\n", {target, obj})
+			c_stmt0( "}\n")
+			c_stmt0( "else {\n" )
+				c_stmt("RefDS(@);\n", obj )
+				c_stmt( "@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {target, obj} )
+			c_stmt0( "}\n" )
+		end if
+	c_stmt0( "}\n")
+	c_stmt0( "else {\n" )
+		c_stmt( "@ = @;\n", {target, obj})
+	c_stmt0( "}\n")
+
+	if TypeIsIn( obj, TYPES_AO ) then
+		c_stmt0("}\n")
+	end if
+
+	if TypeIsIn( obj, TYPES_SO) then
 		SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
 	else
 		SetBBType(target, GType(obj), ObjMinMax(obj), TYPE_OBJECT, 1)
@@ -5486,31 +6091,31 @@ end procedure
 
 
 procedure DeleteRoutine( symtab_index rid )
-	c_stmt("_1 = _00[@].cleanup;", rid )
+	c_stmt("_1 = (int) _00[@].cleanup;\n", rid )
 	c_stmt0("if( _1 == 0 ){\n")
-		c_stmt0("_1 = TransAlloc( sizeof(struct cleanup) );\n")
+		c_stmt0("_1 = (int) TransAlloc( sizeof(struct cleanup) );\n")
 		c_stmt( "_00[@].cleanup = (cleanup_ptr)_1;\n", rid)
 	c_stmt0("}\n")
-	c_stmt0("((cleanup_ptr)_1)->type = CLEAN_UDT;\n")
+	c_stmt0("((cleanup_ptr)_1)->type = CLEAN_UDT_RT;\n")
 	c_stmt( "((cleanup_ptr)_1)->func.rid = @;\n", rid)
 	c_stmt0("((cleanup_ptr)_1)->next = 0;\n")
 end procedure
 
 procedure opDELETE_ROUTINE()
-	symtab_index 
+	symtab_index
 		obj = Code[pc+1],
 		rid = Code[pc+2],
 		target = Code[pc+3]
-	
-	if SymTab[obj][S_MODE] = M_TEMP 
-	and compare( SymTab[obj][S_OBJ], NOVALUE) then
+
+	if (sym_mode( obj ) = M_TEMP and eu:compare( sym_obj( obj ), NOVALUE ))
+	then
 		-- make a copy of a literal
 		DeleteRoutine( rid )
-		
+
 		if SymTab[target][S_MODE] != M_TEMP then
 			CDeRef( target )
 		end if
-		
+
 		object val = SymTab[obj][S_OBJ]
 		if atom(val) then
 			if integer(val) then
@@ -5524,12 +6129,13 @@ procedure opDELETE_ROUTINE()
 			c_stmt("RefDS(@);\n", obj )
 			c_stmt("_2 = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", obj )
 			c_stmt0("SEQ_PTR(_2)->cleanup = (cleanup_ptr)_1;\n")
-			SetBBType(target, GType(obj), {SeqLen(Code[pc+1]), 0}, SeqElem(obj), 1)
+			SetBBType(target, GType(obj), {SeqLen(obj), 0}, SeqElem(obj), 1)
 		end if
-		
+
 		c_stmt( "@ = _2;\n", target )
-		
+
 	else
+		-- b = (pc[1] != pc[3]) && (((symtab_ptr)pc[1])->mode != M_TEMP);
 		if TypeIs( obj, TYPE_INTEGER ) then
 			promote_integer_delete( obj, target )
 
@@ -5543,10 +6149,10 @@ procedure opDELETE_ROUTINE()
 		elsif obj != target then
 			assign_delete_target( target, obj )
 		end if
-		
-		
+
+
 		DeleteRoutine( rid )
---		c_stmt("_1 = DeleteRoutine( @ );\n", rid )
+
 		if TypeIs( target, TYPE_DOUBLE ) then
 			delete_double( target )
 		elsif TypeIs( target, TYPE_SEQUENCE ) then
@@ -5562,8 +6168,22 @@ procedure opDELETE_ROUTINE()
 				delete_sequence( target )
 			c_stmt0("}\n")
 		end if
+
+		if obj != target and sym_mode( obj ) = M_NORMAL then
+			if not TypeIs( obj, TYPE_INTEGER ) then
+				if TypeIsNotIn( obj, TYPES_DS ) then
+					c_stmt( "if( !IS_ATOM_INT(@) ){\n", obj )
+						c_stmt("RefDS(@);\n", target )
+					c_stmt0("}\n")
+				else
+					c_stmt("RefDS(@);\n", target )
+				end if
+
+			end if
+		end if
 	end if
-	
+	dispose_temps( pc+1, 2, SAVE_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
@@ -5578,7 +6198,7 @@ procedure opDELETE_OBJECT()
 	elsif TypeIs( obj, TYPE_DOUBLE ) then
 		c_stmt( "cleanup_double( DBL_PTR( @ ) );\n", obj )
 		SetBBType( obj, TYPE_DOUBLE, ObjValue(obj), TYPE_OBJECT, 0 )
-		
+
 	elsif not TypeIs( obj, TYPE_INTEGER ) then
 		c_stmt("if( IS_SEQUENCE(@) ){\n", obj )
 			c_stmt("cleanup_sequence(SEQ_PTR(@));\n", obj )
@@ -5587,6 +6207,7 @@ procedure opDELETE_OBJECT()
 			c_stmt("cleanup_double(DBL_PTR(@));\n", obj )
 		c_stmt0("}\n")
 	end if
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
 end procedure
 
@@ -5603,34 +6224,36 @@ procedure opC_FUNC()
 
 	SetBBType(Code[pc+4], TYPE_OBJECT, -- might be call to Euphoria routine
 			  novalue, TYPE_OBJECT, GDelete())
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+4], NEW_REFERENCE )
 	pc += 5
 end procedure
 
 procedure opC_PROC()
-	if not TDOS then
-		c_stmt("call_c(0, @, @);\n", {Code[pc+1], Code[pc+2]})
-	end if
+	c_stmt("call_c(0, @, @);\n", {Code[pc+1], Code[pc+2]})
 	-- [3] not used
+	dispose_temps( pc+1, 3, DISCARD_TEMP, REMOVE_FROM_MAP )
 	NewBB(1, E_ALL_EFFECT, 0) -- Windows call-back to Euphoria routine could occur
 	pc += 4
 end procedure
 
 procedure opTRACE()
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_INTEGER, TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_IAO) then
 		c_stmt("TraceOn = @;\n", Code[pc+1])
 	end if
 
-	if TypeIs(Code[pc+1], {TYPE_ATOM, TYPE_OBJECT}) then
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
 		c_stmt0("else\n")
 	end if
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
 		c_stmt("TraceOn = DBL_PTR(@)->dbl != 0.0;\n", Code[pc+1])
 	end if
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
 end procedure
 
@@ -5653,29 +6276,33 @@ tasks_created = FALSE
 
 procedure dll_tasking()
 	if dll_option then
-		CompileErr("Multitasking operations are not supported in a .dll or .so")
+		CompileErr(112)
 	end if
 end procedure
 
 procedure opTASK_CREATE()
 	dll_tasking()
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
-	c_stmt("@ = task_create(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
+	c_stmt("@ = ctask_create(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
 	CDeRefStr("_0")
 	SetBBType(Code[pc+3], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0) -- always TYPE_DOUBLE
 	tasks_created = TRUE
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+3], NEW_REFERENCE )
 	pc += 4
 end procedure
 
 procedure opTASK_SCHEDULE()
 	dll_tasking()
 	c_stmt("task_schedule(@, @);\n", {Code[pc+1], Code[pc+2]})
+	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
 procedure opTASK_YIELD()
-	dll_tasking()
-	c_stmt0("task_yield();\n")
+	if not dll_option then
+		c_stmt0("task_yield();\n")
+	end if
 	pc += 1
 end procedure
 
@@ -5684,12 +6311,14 @@ procedure opTASK_SELF()
 	CDeRef(Code[pc+1]) -- Code[pc+1] not used in next expression
 	c_stmt("@ = NewDouble(tcb[current_task].tid);\n", {Code[pc+1]})
 	SetBBType(Code[pc+1], TYPE_DOUBLE, novalue, TYPE_OBJECT, 0) -- always TYPE_DOUBLE
+	create_temp( Code[pc+1], NEW_REFERENCE )
 	pc += 2
 end procedure
 
 procedure opTASK_SUSPEND()
 	dll_tasking()
 	c_stmt("task_suspend(@);\n", {Code[pc+1]})
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
 end procedure
 
@@ -5698,6 +6327,7 @@ procedure opTASK_LIST()
 	CDeRef(Code[pc+1]) -- Code[pc+1] not used in next expression
 	c_stmt("@ = task_list();\n", {Code[pc+1]})
 	SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_DOUBLE, 0)
+	create_temp( Code[pc+1], NEW_REFERENCE )
 	pc += 2
 end procedure
 
@@ -5707,6 +6337,8 @@ procedure opTASK_STATUS()
 	c_stmt("@ = task_status(@);\n", {Code[pc+2], Code[pc+1]})
 	CDeRefStr("_0")
 	SetBBType(Code[pc+2], TYPE_INTEGER, {-1,+1}, TYPE_OBJECT, 0)
+	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( Code[pc+2], NEW_REFERENCE )
 	pc += 3
 end procedure
 
@@ -5732,926 +6364,584 @@ export procedure init_opcodes()
 	for i = 1 to length(opnames) do
 		name = opnames[i]
 		-- some similar ops are handled by a common routine
-		switch name with fallthru do
+		switch name do
 			case "AND_BITS" then
 				operation[i] = routine_id("opAND_BITS")
-				break
-				
-			
+
 			case "AND" then
 				operation[i] = routine_id("opAND")
-				break
-				
-			
+
 			case "APPEND" then
 				operation[i] = routine_id("opAPPEND")
-				break
-				
-			
+
 			case "ARCTAN" then
 				operation[i] = routine_id("opARCTAN")
-				break
-				
-			
+
 			case "ASSIGN_I" then
 				operation[i] = routine_id("opASSIGN_I")
-				break
-				
-			
+
 			case "ASSIGN_OP_SLICE" then
 				operation[i] = routine_id("opASSIGN_OP_SLICE")
-				break
-				
-			
+
 			case "ASSIGN_SLICE" then
 				operation[i] = routine_id("opASSIGN_SLICE")
-				break
-				
-			
+
 			case "ASSIGN_SUBS" then
 				operation[i] = routine_id("opASSIGN_SUBS")
-				break
-				
-			
+
 			case "ASSIGN" then
 				operation[i] = routine_id("opASSIGN")
-				break
-				
-			
+
 			case "ATOM_CHECK" then
 				operation[i] = routine_id("opATOM_CHECK")
-				break
-				
-			
+
 			case "BADRETURNF" then
 				operation[i] = routine_id("opBADRETURNF")
-				break
-				
-			
+
 			case "C_FUNC" then
 				operation[i] = routine_id("opC_FUNC")
-				break
-				
-			
+
 			case "C_PROC" then
 				operation[i] = routine_id("opC_PROC")
-				break
-				
-			
+
 			case "CALL_BACK_RETURN" then
 				operation[i] = routine_id("opCALL_BACK_RETURN")
-				break
-				
-			
+
 			case "CALL_PROC" then
 				operation[i] = routine_id("opCALL_PROC")
-				break
-				
-			
+
 			case "CALL" then
 				operation[i] = routine_id("opCALL")
-				break
-				
-			
+
 			case "CASE" then
 				operation[i] = routine_id("opCASE")
-				break
-				
-			
+
 			case "CLEAR_SCREEN" then
 				operation[i] = routine_id("opCLEAR_SCREEN")
-				break
-				
-			
+
 			case "CLOSE" then
 				operation[i] = routine_id("opCLOSE")
-				break
-				
-			
+
 			case "COMMAND_LINE" then
 				operation[i] = routine_id("opCOMMAND_LINE")
-				break
-				
-			
+
 			case "COMPARE" then
 				operation[i] = routine_id("opCOMPARE")
-				break
-				
-			
+
 			case "CONCAT_N" then
 				operation[i] = routine_id("opCONCAT_N")
-				break
-				
-			
+
 			case "CONCAT" then
 				operation[i] = routine_id("opCONCAT")
-				break
-				
-			
+
 			case "COS" then
 				operation[i] = routine_id("opCOS")
-				break
-				
-			
+
 			case "DATE" then
 				operation[i] = routine_id("opDATE")
-				break
-				
-			
+
 			case "DIV2" then
 				operation[i] = routine_id("opDIV2")
-				break
-				
-			
+
 			case "DIVIDE" then
 				operation[i] = routine_id("opDIVIDE")
-				break
-				
-			
+
 			case "ENDFOR_GENERAL" then
 				operation[i] = routine_id("opENDFOR_GENERAL")
-				break
-				
-			
+
 			case "EQUAL" then
 				operation[i] = routine_id("opEQUAL")
-				break
-				
-			
+
 			case "EQUALS_IFW_I" then
 				operation[i] = routine_id("opEQUALS_IFW_I")
-				break
-				
-			
+
 			case "EQUALS_IFW" then
 				operation[i] = routine_id("opEQUALS_IFW")
-				break
-				
-			
+
 			case "EQUALS" then
 				operation[i] = routine_id("opEQUALS")
-				break
-				
-			
+
 			case "EXIT" then
 				operation[i] = routine_id("opEXIT")
-				break
-				
-			
+
 			case "FIND_FROM" then
 				operation[i] = routine_id("opFIND_FROM")
-				break
-				
-			
+
 			case "FIND" then
 				operation[i] = routine_id("opFIND")
-				break
-				
-			
+
 			case "FLOOR_DIV" then
 				operation[i] = routine_id("opFLOOR_DIV")
-				break
-				
-			
+
 			case "FLOOR_DIV2" then
 				operation[i] = routine_id("opFLOOR_DIV2")
-				break
-				
-			
+
 			case "FLOOR" then
 				operation[i] = routine_id("opFLOOR")
-				break
-				
-			
+
 			case "FOR" then
 				operation[i] = routine_id("opFOR")
-				break
-				
-			
+
 			case "GET_KEY" then
 				operation[i] = routine_id("opGET_KEY")
-				break
-				
-			
-			case "GET_PIXEL" then
-				operation[i] = routine_id("opGET_PIXEL")
-				break
-				
-			
+
 			case "GETC" then
 				operation[i] = routine_id("opGETC")
-				break
-				
-			
+
 			case "GETENV" then
 				operation[i] = routine_id("opGETENV")
-				break
-				
-			
+
 			case "GETS" then
 				operation[i] = routine_id("opGETS")
-				break
-				
-			
+
 			case "GLABEL" then
 				operation[i] = routine_id("opGLABEL")
-				break
-				
-			
+
 			case "GLOBAL_INIT_CHECK" then
 				operation[i] = routine_id("opGLOBAL_INIT_CHECK")
-				break
-				
-			
+
 			case "GOTO" then
 				operation[i] = routine_id("opGOTO")
-				break
-				
-			
+
 			case "GREATER_IFW_I" then
 				operation[i] = routine_id("opGREATER_IFW_I")
-				break
-				
-			
+
 			case "GREATER_IFW" then
 				operation[i] = routine_id("opGREATER_IFW")
-				break
-				
-			
+
 			case "GREATER" then
 				operation[i] = routine_id("opGREATER")
-				break
-				
-			
+
 			case "GREATEREQ_IFW_I" then
 				operation[i] = routine_id("opGREATEREQ_IFW_I")
-				break
-				
-			
+
 			case "GREATEREQ_IFW" then
 				operation[i] = routine_id("opGREATEREQ_IFW")
-				break
-				
-			
+
 			case "GREATEREQ" then
 				operation[i] = routine_id("opGREATEREQ")
-				break
-				
-			
+
 			case "HASH" then
 				operation[i] = routine_id("opHASH")
-				break
-				
-			
+
 			case "HEAD" then
 				operation[i] = routine_id("opHEAD")
-				break
-				
-			
+
 			case "IF" then
 				operation[i] = routine_id("opIF")
-				break
-				
-			
+
 			case "INSERT" then
 				operation[i] = routine_id("opINSERT")
-				break
-				
-			
+
 			case "INTEGER_CHECK" then
 				operation[i] = routine_id("opINTEGER_CHECK")
-				break
-				
-			
+
 			case "IS_A_SEQUENCE" then
 				operation[i] = routine_id("opIS_A_SEQUENCE")
-				break
-				
-			
+
 			case "IS_AN_ATOM" then
 				operation[i] = routine_id("opIS_AN_ATOM")
-				break
-				
-			
+
 			case "IS_AN_INTEGER" then
 				operation[i] = routine_id("opIS_AN_INTEGER")
-				break
-				
-			
+
 			case "IS_AN_OBJECT" then
 				operation[i] = routine_id("opIS_AN_OBJECT")
-				break
-				
-			
+
 			case "LENGTH" then
 				operation[i] = routine_id("opLENGTH")
-				break
-				
-			
+
 			case "LESS_IFW_I" then
 				operation[i] = routine_id("opLESS_IFW_I")
-				break
-				
-			
+
 			case "LESS_IFW" then
 				operation[i] = routine_id("opLESS_IFW")
-				break
-				
-			
+
 			case "LESS" then
 				operation[i] = routine_id("opLESS")
-				break
-				
-			
+
 			case "LESSEQ_IFW_I" then
 				operation[i] = routine_id("opLESSEQ_IFW_I")
-				break
-				
-			
+
 			case "LESSEQ_IFW" then
 				operation[i] = routine_id("opLESSEQ_IFW")
-				break
-				
-			
+
 			case "LESSEQ" then
 				operation[i] = routine_id("opLESSEQ")
-				break
-				
-			
+
 			case "LHS_SUBS" then
 				operation[i] = routine_id("opLHS_SUBS")
-				break
-				
-			
+
 			case "LOG" then
 				operation[i] = routine_id("opLOG")
-				break
-				
-			
+
 			case "MACHINE_FUNC" then
 				operation[i] = routine_id("opMACHINE_FUNC")
-				break
-				
-			
+
 			case "MACHINE_PROC" then
 				operation[i] = routine_id("opMACHINE_PROC")
-				break
-				
-			
+
 			case "MATCH_FROM" then
 				operation[i] = routine_id("opMATCH_FROM")
-				break
-				
-			
+
 			case "MATCH" then
 				operation[i] = routine_id("opMATCH")
-				break
-				
-			
+
 			case "MEM_COPY" then
 				operation[i] = routine_id("opMEM_COPY")
-				break
-				
-			
+
 			case "MEM_SET" then
 				operation[i] = routine_id("opMEM_SET")
-				break
-				
-			
+
 			case "MINUS" then
 				operation[i] = routine_id("opMINUS")
-				break
-				
-			
+
 			case "MULTIPLY" then
 				operation[i] = routine_id("opMULTIPLY")
-				break
-				
-			
+
 			case "NOP1" then
 				operation[i] = routine_id("opNOP1")
-				break
-				
-			
+
 			case "NOPSWITCH" then
 				operation[i] = routine_id("opNOPSWITCH")
-				break
-				
-			
+
 			case "NOT_BITS" then
 				operation[i] = routine_id("opNOT_BITS")
-				break
-				
-			
+
 			case "NOT_IFW" then
 				operation[i] = routine_id("opNOT_IFW")
-				break
-				
-			
+
 			case "NOT" then
 				operation[i] = routine_id("opNOT")
-				break
-				
-			
+
 			case "NOTEQ_IFW_I" then
 				operation[i] = routine_id("opNOTEQ_IFW_I")
-				break
-				
-			
+
 			case "NOTEQ_IFW" then
 				operation[i] = routine_id("opNOTEQ_IFW")
-				break
-				
-			
+
 			case "NOTEQ" then
 				operation[i] = routine_id("opNOTEQ")
-				break
-				
-			
+
 			case "OPEN" then
 				operation[i] = routine_id("opOPEN")
-				break
-				
-			
+
 			case "OPTION_SWITCHES" then
 				operation[i] = routine_id("opOPTION_SWITCHES")
-				break
-				
-			
+
 			case "OR_BITS" then
 				operation[i] = routine_id("opOR_BITS")
-				break
-				
-			
+
 			case "OR" then
 				operation[i] = routine_id("opOR")
-				break
-				
-			
+
 			case "PEEK" then
 				operation[i] = routine_id("opPEEK")
-				break
-				
-			
-			case "PIXEL" then
-				operation[i] = routine_id("opPIXEL")
-				break
-				
-			
+
 			case "PLUS" then
 				operation[i] = routine_id("opPLUS")
-				break
-				
-			
+
 			case "PLUS1" then
 				operation[i] = routine_id("opPLUS1")
-				break
-				
-			
+
 			case "POKE" then
 				operation[i] = routine_id("opPOKE")
-				break
-				
-			
+
 			case "POSITION" then
 				operation[i] = routine_id("opPOSITION")
-				break
-				
-			
+
 			case "POWER" then
 				operation[i] = routine_id("opPOWER")
-				break
-				
-			
+
 			case "PREPEND" then
 				operation[i] = routine_id("opPREPEND")
-				break
-				
-			
+
 			case "PRINT" then
 				operation[i] = routine_id("opPRINT")
-				break
-				
-			
+
 			case "PRINTF" then
 				operation[i] = routine_id("opPRINTF")
-				break
-				
-			
+
 			case "PROC_TAIL" then
 				operation[i] = routine_id("opPROC_TAIL")
-				break
-				
-			
+
 			case "PROC" then
 				operation[i] = routine_id("opPROC")
-				break
-				
-			
+
 			case "PROFILE" then
 				operation[i] = routine_id("opPROFILE")
-				break
-				
-			
+
 			case "PUTS" then
 				operation[i] = routine_id("opPUTS")
-				break
-				
-			
+
 			case "RAND" then
 				operation[i] = routine_id("opRAND")
-				break
-				
-			
+
 			case "REMAINDER" then
 				operation[i] = routine_id("opREMAINDER")
-				break
-				
-			
+
 			case "REMOVE" then
 				operation[i] = routine_id("opREMOVE")
-				break
-				
-			
+
 			case "REPEAT" then
 				operation[i] = routine_id("opREPEAT")
-				break
-				
-			
+
 			case "REPLACE" then
 				operation[i] = routine_id("opREPLACE")
-				break
-				
-			
+
 			case "RETURNF" then
 				operation[i] = routine_id("opRETURNF")
-				break
-				
-			
+
 			case "RETURNP" then
 				operation[i] = routine_id("opRETURNP")
-				break
-				
-			
+
 			case "RETURNT" then
 				operation[i] = routine_id("opRETURNT")
-				break
-				
-			
+
 			case "RHS_SLICE" then
 				operation[i] = routine_id("opRHS_SLICE")
-				break
-				
-			
+
 			case "RHS_SUBS" then
 				operation[i] = routine_id("opRHS_SUBS")
-				break
-				
-			
+
 			case "RIGHT_BRACE_2" then
 				operation[i] = routine_id("opRIGHT_BRACE_2")
-				break
-				
-			
+
 			case "RIGHT_BRACE_N" then
 				operation[i] = routine_id("opRIGHT_BRACE_N")
-				break
-				
-			
+
 			case "ROUTINE_ID" then
 				operation[i] = routine_id("opROUTINE_ID")
-				break
-				
-			
+
 			case "SC1_AND" then
 				operation[i] = routine_id("opSC1_AND")
-				break
-				
-			
+
 			case "SC1_OR" then
 				operation[i] = routine_id("opSC1_OR")
-				break
-				
-			
+
 			case "SC2_OR" then
 				operation[i] = routine_id("opSC2_OR")
-				break
-				
-			
+
 			case "SIN" then
 				operation[i] = routine_id("opSIN")
-				break
-				
-			
+
 			case "SPACE_USED" then
 				operation[i] = routine_id("opSPACE_USED")
-				break
-				
-			
+
 			case "SPLICE" then
 				operation[i] = routine_id("opSPLICE")
-				break
-				
-			
+
 			case "SPRINTF" then
 				operation[i] = routine_id("opSPRINTF")
-				break
-				
-			
+
 			case "SQRT" then
 				operation[i] = routine_id("opSQRT")
-				break
-				
-			
+
 			case "STARTLINE" then
 				operation[i] = routine_id("opSTARTLINE")
-				break
-				
-			
+
 			case "SWITCH_RT" then
 				operation[i] = routine_id("opSWITCH_RT")
-				break
-				
-			
+
 			case "SWITCH" then
 				operation[i] = routine_id("opSWITCH")
-				break
-				
-			
+
 			case "SYSTEM_EXEC" then
 				operation[i] = routine_id("opSYSTEM_EXEC")
-				break
-				
-			
+
 			case "SYSTEM" then
 				operation[i] = routine_id("opSYSTEM")
-				break
-				
-			
+
 			case "TAIL" then
 				operation[i] = routine_id("opTAIL")
-				break
-				
-			
+
 			case "TAN" then
 				operation[i] = routine_id("opTAN")
-				break
-				
-			
+
 			case "TASK_CLOCK_START" then
 				operation[i] = routine_id("opTASK_CLOCK_START")
-				break
-				
-			
+
 			case "TASK_CLOCK_STOP" then
 				operation[i] = routine_id("opTASK_CLOCK_STOP")
-				break
-				
-			
+
 			case "TASK_CREATE" then
 				operation[i] = routine_id("opTASK_CREATE")
-				break
-				
-			
+
 			case "TASK_LIST" then
 				operation[i] = routine_id("opTASK_LIST")
-				break
-				
-			
+
 			case "TASK_SCHEDULE" then
 				operation[i] = routine_id("opTASK_SCHEDULE")
-				break
-				
-			
+
 			case "TASK_SELF" then
 				operation[i] = routine_id("opTASK_SELF")
-				break
-				
-			
+
 			case "TASK_STATUS" then
 				operation[i] = routine_id("opTASK_STATUS")
-				break
-				
-			
+
 			case "TASK_SUSPEND" then
 				operation[i] = routine_id("opTASK_SUSPEND")
-				break
-				
-			
+
 			case "TASK_YIELD" then
 				operation[i] = routine_id("opTASK_YIELD")
-				break
-				
-			
+
 			case "TIME" then
 				operation[i] = routine_id("opTIME")
-				break
-				
-			
+
 			case "TRACE" then
 				operation[i] = routine_id("opTRACE")
-				break
-				
-			
+
 			case "TYPE_CHECK" then
 				operation[i] = routine_id("opTYPE_CHECK")
-				break
-				
-			
+
 			case "UMINUS" then
 				operation[i] = routine_id("opUMINUS")
-				break
-				
-			
+
 			case "UPDATE_GLOBALS" then
 				operation[i] = routine_id("opUPDATE_GLOBALS")
-				break
-				
-			
+
 			case "XOR_BITS" then
 				operation[i] = routine_id("opXOR_BITS")
-				break
-				
-			
+
 			case "XOR" then
 				operation[i] = routine_id("opXOR")
-				break
-						
-			case "ASSIGN_OP_SUBS" then
-			case "PASSIGN_OP_SUBS" then
-			case "RHS_SUBS_CHECK" then
-			case "RHS_SUBS_I" then
+
+			case "ASSIGN_OP_SUBS", "PASSIGN_OP_SUBS", "RHS_SUBS_CHECK", "RHS_SUBS_I" then
 				operation[i] = routine_id("opRHS_SUBS")
-				break
-			
+
 			case "NOPWHILE" then
 				operation[i] = routine_id("opNOP1")
-				break
-				
+
 			case "WHILE" then
 				operation[i] = routine_id("opIF")
-				break
-				
+
 			case "SEQUENCE_CHECK" then
 				operation[i] = routine_id("opATOM_CHECK")
-				break
-				
-			case "ASSIGN_SUBS_CHECK" then
-			case "ASSIGN_SUBS_I" then
-            case "PASSIGN_SUBS" then
+
+			case "ASSIGN_SUBS_CHECK", "ASSIGN_SUBS_I", "PASSIGN_SUBS" then
 				operation[i] = routine_id("opASSIGN_SUBS")
-				break
-				
+
 			case "PLENGTH" then
 				operation[i] = routine_id("opLENGTH")
-				break
-				
-			case "ELSE" then
-			case "ENDWHILE" then
-			case "RETRY" then
+
+			case "ELSE", "ENDWHILE", "RETRY" then
 				operation[i] = routine_id("opEXIT")
-				break
-				
+
 			case "PLUS1_I" then
 				operation[i] = routine_id("opPLUS1")
-				break
-				
+
 			case "PRIVATE_INIT_CHECK" then
 				operation[i] = routine_id("opGLOBAL_INIT_CHECK")
-				break
-				
-			case "LHS_SUBS1" then
-			case "LHS_SUBS1_COPY" then
+
+			case "LHS_SUBS1", "LHS_SUBS1_COPY" then
 				operation[i] = routine_id("opLHS_SUBS")
-				break
-				
+
 			case "PASSIGN_OP_SLICE" then
 				operation[i] = routine_id("opASSIGN_OP_SLICE")
-				break
-				
+
 			case "PASSIGN_SLICE" then
 				operation[i] = routine_id("opASSIGN_SLICE")
-				break
-				
+
 			case "PLUS_I" then
 				operation[i] = routine_id("opPLUS")
-				break
-				
+
 			case "MINUS_I" then
 				operation[i] = routine_id("opMINUS")
-				break
-				
+
 			case "SC1_AND_IF" then
 				operation[i] = routine_id("opSC1_AND")
-				break
-				
+
 			case "SC1_OR_IF" then
 				operation[i] = routine_id("opSC1_OR")
-				break
-				
+
 			case "SC2_AND" then
 				operation[i] = routine_id("opSC2_OR")
-				break
-				
+
 			case "FOR_I" then
 				operation[i] = routine_id("opFOR")
-				break
-				
+
 			-- assume only these two ENDFORs are emitted by the front end
 			case "ENDFOR_INT_UP1" then
 				operation[i] = routine_id("opENDFOR_GENERAL")
-				break
-				
+
 			case "CALL_FUNC" then
 				operation[i] = routine_id("opCALL_PROC")
-				break
-				
-			case "PEEK4U" then
-			case "PEEK4S" then
-			case "PEEKS" then
-			case "PEEK2U" then
-			case "PEEK2S" then
-			case "PEEK_STRING" then
+
+			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING" then
 				operation[i] = routine_id("opPEEK")
-				break
-				
-			case "POKE4" then
-			case "POKE2" then
+
+			case "POKE4", "POKE2" then
 				operation[i] = routine_id("opPOKE")
-				break
-				
+
 			case "ABORT" then
 				operation[i] = routine_id("opCLOSE")
-				break
-				
+
 			case "QPRINT" then
 				operation[i] = routine_id("opPRINT")
-				break
-				
-			case "DISPLAY_VAR" then
-			case "ERASE_PRIVATE_NAMES" then
-			case "ERASE_SYMBOL" then
-			case "NOP2" then
+
+			case "DISPLAY_VAR", "ERASE_PRIVATE_NAMES", "ERASE_SYMBOL", "NOP2" then
 				operation[i] = routine_id("opPROFILE")
-				break
-				
-			case "SWITCH_SPI" then
-			case "SWITCH_I" then
+
+			case "SWITCH_SPI", "SWITCH_I" then
 				operation[i] = routine_id("opSWITCH_I")
-				break
-				
-			case "ENDFOR_INT_UP" then
-			case "ENDFOR_UP" then
-			case "SC2_NULL" then
-			case "ENDFOR_DOWN" then
-			case "ENDFOR_INT_DOWN1" then
-			case "ASSIGN_SUBS2" then
-			case "PLATFORM" then
-			case "ENDFOR_INT_DOWN" then
-			case "END_PARAM_CHECK" then
-			case "PROC_FORWARD" then
-			case "FUNC_FORWARD" then
-			case "TYPE_CHECK_FORWARD" then
+
+			case "ENDFOR_INT_UP",
+			     "ENDFOR_UP",
+			     "SC2_NULL",
+			     "ENDFOR_DOWN",
+			     "ENDFOR_INT_DOWN1",
+			     "ASSIGN_SUBS2",
+			     "PLATFORM",
+			     "ENDFOR_INT_DOWN",
+			     "END_PARAM_CHECK",
+			     "PROC_FORWARD",
+			     "FUNC_FORWARD",
+			     "TYPE_CHECK_FORWARD",
+				 "REF_TEMP",
+				 "NOVALUE_TEMP",
+				 "COVERAGE_LINE",
+				 "COVERAGE_ROUTINE" then
 				-- never emitted
 				operation[i] = routine_id("opINTERNAL_ERROR")
-				break
-			
+
 			case "DELETE_ROUTINE" then
 				operation[i] = routine_id("opDELETE_ROUTINE")
-				break
-			
+
 			case "DELETE_OBJECT" then
 				operation[i] = routine_id("opDELETE_OBJECT")
-				break
-			
+
 			case "EXIT_BLOCK" then
 				operation[i] = routine_id("opEXIT_BLOCK" )
-				break
-			
+
+			case "DEREF_TEMP" then
+				operation[i] = routine_id("opDEREF_TEMP")
+
 			case else
 				operation[i] = -1
 		end switch
 
+		ifdef DEBUG then
 		if operation[i] = -1 then
-			InternalErr("no routine id for " & name)
+			InternalErr(255, { name })
 		end if
-		
+		end ifdef
+
 	end for
 end procedure
-include std/sort.e
+
 procedure do_exec(integer start_pc)
 -- generate code, starting at pc
 	pc = start_pc
 	loop_stack = {}
 	label_map = {}
 	all_done = FALSE
-	
+	map:clear( dead_temp_walking )
 	if start_pc = 1 and CurrentSub != TopLevelSub then
 		if match( {PROC_TAIL, CurrentSub}, Code ) != 0 then
 			Label(1)
 		end if
 	end if
-	
+
 	while not all_done do
 		previous_previous_op = previous_op
 		previous_op = opcode
@@ -6669,8 +6959,8 @@ procedure do_exec(integer start_pc)
 		end ifdef
 		call_proc(operation[opcode], {})
 	end while
-	
-	
+
+
 end procedure
 
 export procedure Execute(symtab_index proc)
@@ -6678,7 +6968,7 @@ export procedure Execute(symtab_index proc)
 
 	CurrentSub = proc
 	Code = SymTab[CurrentSub][S_CODE]
-	
+
 	do_exec(1)
 
 	indent = 0
@@ -6697,14 +6987,14 @@ end function
 
 export function is_string( sequence s )
 	for i = 1 to length(s) do
-		if sequence(s[i]) or s[i] > 255  or s[i] < 0 then
+		if not integer(s[i]) or s[i] > 255  or s[i] <= 0 then
 			return 0
 		end if
 	end for
 	return 1
 end function
 
-export procedure escape_string( sequence string )
+export procedure escape_string( t:string string )
 	integer use_hex = FALSE
 	for elem = 1 to length(string) do
 		if (string[elem] < 32 or string[elem] > 127) and
@@ -6713,7 +7003,7 @@ export procedure escape_string( sequence string )
 			exit
 		end if
 	end for
-	
+
 	if use_hex then
 		for elem = 1 to length(string) do
 				c_puts(hex_char(string[elem]))
@@ -6759,7 +7049,7 @@ procedure init_string( symtab_index tp )
 	end if
 
 	escape_string( string )
-	
+
 	if decompress then
 		c_printf("\";\n\t_%d = decompress( 0 );\n", SymTab[tp][S_TEMP_NAME])
 	else
@@ -6767,31 +7057,39 @@ procedure init_string( symtab_index tp )
 	end if
 end procedure
 
-
-without warning
-procedure BackEnd(atom ignore)
+--**
 -- Translate the IL into C
+procedure BackEnd(atom ignore)
 	symtab_index tp
 	sequence string, init_name, switches, cmd_switch
 	integer tp_count, slash_ix
 	integer max_len
-	
+
+	write_checksum( c_code )
 	close(c_code)
+
 	emit_c_output = FALSE
 
 	slist = s_expand(slist)
-	
+
 	-- prevent conflicts
 	for i = TopLevelSub+1 to length(SymTab) do
 		if sequence(SymTab[i][S_NAME]) and find( SymTab[i][S_TOKEN], {VARIABLE, CONSTANT, ENUM}) then
 			SymTab[i][S_NAME] &= sprintf( "_%d", i )
 		end if
 	end for
-	
+
 	-- Perform Multiple Passes through the IL
 
-	Pass = 1
-	while Pass < LAST_PASS do
+	Pass = 0
+	LAST_PASS = FALSE
+	integer prev_updsym
+	integer updsym = 0
+	integer prev_unused_labels
+	integer unused_labels = 0
+	while not LAST_PASS do
+
+		Pass += 1
 		-- no output to .c files
 		main_temps()
 
@@ -6804,11 +7102,17 @@ procedure BackEnd(atom ignore)
 		DeclareRoutineList() -- forces routine_id target
 							-- parameter type info to TYPE_OBJECT
 
-		PromoteTypeInfo()    -- at very end after each FULL pass:
+		prev_updsym = updsym
+		updsym = PromoteTypeInfo()    -- at very end after each FULL pass:
 							-- promotes seq_elem_new, arg_type_new
 							-- for all symbols
 							-- sets U_DELETED, resets nrefs
-		Pass += 1
+
+		prev_unused_labels = unused_labels
+		unused_labels = prune_labels() -- eliminate unused goto labels
+		if updsym = prev_updsym and unused_labels = prev_unused_labels then
+			LAST_PASS = TRUE
+		end if
 	end while
 
 	-- Now, actually emit the C code */
@@ -6816,23 +7120,21 @@ procedure BackEnd(atom ignore)
 
 	c_code = open(output_dir & "main-.c", "w")
 	if c_code = -1 then
-		CompileErr("Can't open main-.c for output\n")
+		CompileErr(54)
 	end if
 
 	version()
 
-	if TDOS then
-		if sequence(dj_path) then
-			c_puts("#include <go32.h>\n")
-		end if
-	end if
 	c_puts("#include <time.h>\n")
-	c_puts("#include \"include" & SLASH & "euphoria.h\"\n")
+	c_puts("#include \"include/euphoria.h\"\n")
+	c_puts("#include \"main-.h\"\n\n")
 
 	if TUNIX then
 		c_puts("#include <unistd.h>\n")
+	elsif TWINDOWS then
+		c_puts("#include <Windows.h>\n")
 	end if
-	c_puts("#include \"main-.h\"\n\n")
+	c_puts("\n\n")
 	c_puts("int Argc;\n")
 	c_hputs("extern int Argc;\n")
 
@@ -6842,14 +7144,11 @@ procedure BackEnd(atom ignore)
 	if TWINDOWS then
 		c_puts("unsigned default_heap;\n")
 		if sequence(wat_path) then
-			c_puts("__declspec(dllimport) unsigned __stdcall GetProcessHeap(void);\n")
+			c_puts("/* this is in the header */\n")
+			c_puts("/*__declspec(dllimport) unsigned __stdcall GetProcessHeap(void)*/;\n")
 		else
-		c_puts("unsigned __stdcall GetProcessHeap(void);\n")
-	end if
-	end if
-
-	if TDOS and sequence(dj_path) then
-		c_hputs("extern __Go32_Info_Block _go32_info_block;\n")
+			c_puts("//\'test me!\' is this in the header?: unsigned __stdcall GetProcessHeap(void);\n")
+		end if
 	end if
 
 	c_puts("unsigned long *peek4_addr;\n")
@@ -6873,6 +7172,10 @@ procedure BackEnd(atom ignore)
 	c_puts("char *stack_base;\n")
 	c_hputs("extern char *stack_base;\n")
 
+	if TWINDOWS and not dll_option then
+			c_puts("extern long __stdcall Win_Machine_Handler(LPEXCEPTION_POINTERS p);\n")
+	end if
+
 	if total_stack_size = -1 then
 		-- user didn't set the option
 		if tasks_created then
@@ -6880,9 +7183,6 @@ procedure BackEnd(atom ignore)
 		else
 			total_stack_size = (248 + 8) * 1024
 		end if
-	end if
-	if TDOS and sequence(dj_path) then
-		c_printf("unsigned _stklen=%d;\n", total_stack_size)
 	end if
 	c_printf("int total_stack_size = %d;\n", total_stack_size)
 	c_hputs("extern int total_stack_size;\n")
@@ -6892,50 +7192,46 @@ procedure BackEnd(atom ignore)
 	end if
 
 	if TWINDOWS then
-	if dll_option then
-		if sequence(wat_path) then
-			c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
-			c_stmt0("\n")
+		if dll_option then
+			if sequence(wat_path) then
+				c_stmt0("\nint __stdcall _CRT_INIT (int, int, void *);\n")
+				c_stmt0("\n")
+			end if
+			c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
+		else
+			c_stmt0("\nint __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR szCmdLine, int iCmdShow)\n")
 		end if
-		c_stmt0("\nvoid EuInit()\n")  -- __declspec(dllexport) __stdcall
-	else
-		c_stmt0("\nvoid __stdcall WinMain(void *hInstance, void *hPrevInstance, char *szCmdLine, int iCmdShow)\n")
-	end if
 
-	elsif TUNIX then
-	if dll_option then
-		c_stmt0("\nvoid _init()\n")
-	else
-		c_stmt0("\nvoid main(int argc, char *argv[])\n")
-	end if
-
-	else
-	-- TDOS
-	c_stmt0("\nvoid main(int argc, char *argv[])\n")
-
+	else -- TUNIX
+		if dll_option then
+			c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
+		else
+			c_stmt0("\nvoid main(int argc, char *argv[])\n")
+		end if
 	end if
 	c_stmt0("{\n")
 
 	c_stmt0("s1_ptr _0switch_ptr;\n")
 
+
 	main_temps()
 
 	if TWINDOWS then
-	if dll_option then
-		c_stmt0("\nArgc = 0;\n")
-		c_stmt0("default_heap = GetProcessHeap();\n")
-		--c_stmt0("Backlink = bl;\n")
-	else
-		c_stmt0("int argc;\n")
-		c_stmt0("char **argv;\n\n")
-		c_stmt0("default_heap = GetProcessHeap();\n")
-		c_stmt0("argc = 1;\n")
-		c_stmt0("Argc = 1;\n")
-		c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
-		c_stmt0("winInstance = hInstance;\n")
-	end if
-
-	elsif TUNIX then
+		if dll_option then
+			c_stmt0("\nArgc = 0;\n")
+			c_stmt0("default_heap = GetProcessHeap();\n")
+			--c_stmt0("Backlink = bl;\n")
+		else
+			c_stmt0("int argc;\n")
+			c_stmt0("char **argv;\n\n")
+			c_stmt0("SetUnhandledExceptionFilter(Win_Machine_Handler);\n")
+			c_stmt0("default_heap = GetProcessHeap();\n")
+			c_stmt0("argc = 1;\n")
+			c_stmt0("Argc = 1;\n")
+			c_stmt0("argv = make_arg_cv(szCmdLine, &argc);\n")
+			c_stmt0("winInstance = hInstance;\n")
+		end if
+	else --TUNIX
 		if dll_option then
 			c_stmt0("\nArgc = 0;\n")
 		else
@@ -6943,10 +7239,6 @@ procedure BackEnd(atom ignore)
 			c_stmt0("Argv = argv;\n")
 		end if
 
-	else
-		-- TDOS
-		c_stmt0("Argc = argc;\n")
-		c_stmt0("Argv = argv;\n")
 	end if
 
 	if not dll_option then
@@ -6973,11 +7265,11 @@ procedure BackEnd(atom ignore)
 -- 	for i = 1 to length(file_include) do
 -- 		c_stmt0(sprintf("_02[%d] = (int*) malloc( 4 * %d );\n", {i, length(file_include[i]) + 1} ))
 -- 		c_stmt0(sprintf("_02[%d][0] = %d;\n", {i, length(file_include[i])}))
--- 
+--
 -- 		for j = 1 to length(file_include[i]) do
 -- 			c_stmt0(sprintf("_02[%d][%d] = %d;\n", {i,j, file_include[i][j]}) )
 -- 		end for
--- 
+--
 -- 	end for
 	c_puts("\n")
 
@@ -6985,21 +7277,21 @@ procedure BackEnd(atom ignore)
 	-- Complete Edition library gets out by mistake
 	if TWINDOWS then
 		if atom(wat_path) then
-			c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
+			c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
 		else
-			c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+			c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
 		end if
 	else
 		c_puts("#ifdef CLK_TCK\n")
-		c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+		c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
 		c_puts("#else\n")
-		c_stmt0("eu_startup(_00, _01, _02, 1, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
+		c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
 		c_puts("#endif\n")
 	end if
 
 	-- options_switch initialization
 	switches = get_switches()
-	c_stmt0(sprintf("_0switch_ptr = NewS1( %d );\n", length(switches) ))
+	c_stmt0(sprintf("_0switch_ptr = (s1_ptr) NewS1( %d );\n", length(switches) ))
 	for i = 1 to length(switches) do
 		cmd_switch = switches[i]
 		slash_ix = 1
@@ -7057,15 +7349,14 @@ procedure BackEnd(atom ignore)
 	end if
 
 	-- Final walk through user-defined routines, generating C code
-	start_emake()
-
 	GenerateUserRoutines()  -- needs init_name_num
 
+	write_checksum( c_code )
 	close(c_code)
 
 	c_code = open(output_dir & "init-.c", "a")
 	if c_code = -1 then
-		CompileErr("Can't open init-.c for append\n")
+		CompileErr(53)
 	end if
 
 -- declare all *used* constants, and local and global variables as ints
@@ -7079,9 +7370,11 @@ procedure BackEnd(atom ignore)
 	c_stmt0("void init_literal()\n{\n")
 	c_stmt0("extern unsigned char *string_ptr;\n")
 	c_stmt0("extern object decompress(unsigned int c);\n" )
+	c_stmt0("extern double sqrt();\n")
+	c_stmt0("setran(); /* initialize random generator seeds */\n")
+
 	-- initialize the (non-integer) literals
 	tp = literal_init
-	c_stmt0("extern double sqrt();\n")
 	tp_count = 0
 
 	while tp != 0 do
@@ -7093,10 +7386,12 @@ procedure BackEnd(atom ignore)
 			c_stmt0("}\n")
 			init_name = sprintf("init-%d", init_name_num)
 			new_c_file(init_name)
+			add_file(init_name)
 			c_stmt0("init_literal")
 			c_printf("%d()\n", init_name_num)
 			c_stmt0("{\n")
 			c_stmt0("extern double sqrt();\n")
+			c_stmt0("extern unsigned char *string_ptr;\n")
 			init_name_num += 1
 			tp_count = 0
 		end if
@@ -7113,11 +7408,11 @@ procedure BackEnd(atom ignore)
 		tp = SymTab[tp][S_NEXT]
 		tp_count += 1
 	end while
-	
+
 	for csym = TopLevelSub to length(SymTab) do
-		if compare( SymTab[csym][S_OBJ], NOVALUE ) then
+		if eu:compare( SymTab[csym][S_OBJ], NOVALUE ) then
 		if not integer( SymTab[csym][S_OBJ] ) then
-		if SymTab[csym][S_MODE] != M_TEMP then  
+		if SymTab[csym][S_MODE] != M_TEMP then
 			if tp_count > INIT_CHUNK then
 				-- close current .c and start a new one
 				c_stmt0("init_literal")
@@ -7125,6 +7420,7 @@ procedure BackEnd(atom ignore)
 				c_stmt0("}\n")
 				init_name = sprintf("init-%d", init_name_num)
 				new_c_file(init_name)
+				add_file(init_name)
 				c_stmt0("init_literal")
 				c_printf("%d()\n", init_name_num)
 				c_stmt0("{\n")
@@ -7132,12 +7428,12 @@ procedure BackEnd(atom ignore)
 				init_name_num += 1
 				tp_count = 0
 			end if
-			
+
 			-- non-integer constant
 			if sequence( SymTab[csym][S_OBJ] ) then
 				string = SymTab[csym][S_OBJ]
 				integer decompress = not is_string( string )
-				
+
 				if decompress then
 					-- it's a more complex object, so we'll compress
 					string = compress( string )
@@ -7147,11 +7443,11 @@ procedure BackEnd(atom ignore)
 					c_puts( SymTab[csym][S_NAME] )
 					c_puts(" = NewString(\"" )
 				end if
-			
+
 				escape_string( string )
-				
+
 				if decompress then
-					c_printf( "\"\n\t_%d", SymTab[csym][S_FILE_NO] )
+					c_printf( "\";\n\t_%d", SymTab[csym][S_FILE_NO] )
 					c_puts( SymTab[csym][S_NAME] )
 					c_printf(" = decompress( 0 );\n", SymTab[csym][S_TEMP_NAME])
 				else
@@ -7162,7 +7458,7 @@ procedure BackEnd(atom ignore)
 				c_puts( SymTab[csym][S_NAME] )
 				c_printf( " = NewDouble( %0.16f );\n", SymTab[csym][S_OBJ] )
 			end if
-			
+
 			tp_count += 1
 		end if
 		end if
@@ -7170,16 +7466,7 @@ procedure BackEnd(atom ignore)
 	end for
 	c_stmt0("}\n")
 
-	c_hputs("extern int TraceOn;\n")
-	c_hputs("extern object_ptr rhs_slice_target;\n")
-	c_hputs("extern s1_ptr *assign_slice_seq;\n")
-	c_hputs("extern object last_r_file_no;\n")
-	c_hputs("extern void *last_r_file_ptr;\n")
-	c_hputs("extern int in_from_keyb;\n")
-	c_hputs("extern void *xstdin;\n")
-	c_hputs("extern struct tcb *tcb;\n")
-	c_hputs("extern int current_task;\n")
-	c_hputs("extern int insert_pos;\n")
+
 	if TWINDOWS then
 		c_hputs("extern void *winInstance;\n\n")
 	end if
@@ -7187,40 +7474,7 @@ procedure BackEnd(atom ignore)
 	close(c_code)
 	close(c_h)
 
-	finish_emake()
-
-	if not silent then
-		if makefile_option = MAKE_SHORT then
-			screen_output(STDERR, "Project makefile was created.\n")
-			screen_output(STDERR, "To use, you must include the new .mak file into your " &
-				"own master Makefile.\n")
-
-		elsif makefile_option = MAKE_FULL then
-			screen_output(STDERR, "Project makefile was created.\n")
-
-		elsif makefile_option = CMAKE then
-			screen_output(STDERR, "Project CMake file was created.\n")
-			screen_output(STDERR, "To use, you must include the new .cmake file into your " &
-				"own master CMakeLists.txt file.\n")
-
-		else
-			screen_output(STDERR, sprintf("\n%d .c files were created.\n", cfile_count+2))
-			if TUNIX then
-				if dll_option then
-					screen_output(STDERR, "To build your shared library, type: ./emake\n")
-				else
-					screen_output(STDERR, "To build your executable file, type: ./emake\n")
-				end if
-			else
-				if dll_option then
-					screen_output(STDERR, "To build your .dll file, type: emake\n")
-				else
-					screen_output(STDERR, "To build your .exe file, type: emake\n")
-				end if
-			end if
-		end if
-	end if
-		
+	write_buildfile()
 end procedure
 mode:set_backend( routine_id("BackEnd") )
 

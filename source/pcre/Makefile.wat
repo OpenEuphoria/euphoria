@@ -4,24 +4,20 @@
 
 CC = wcc386
 
-BASEPATH=.
+BASEPATH=$(BUILDDIR)\pcre
 
-!include ..\config.wat
+!include $(CONFIG)
 !include objects.wat
+!ifeq DEBUG 1
+PCREDEBUG=/d2
+!endif
 
-.c.obj :
-    wcc386 -zq -oaxt $<
+all: $(BASEPATH) $(PCRE_OBJECTS) 
 
-all: config.h pcre.h $(PCRE_OBJECTS)
+# I wanted to put $(BASEPATH) here as a dependency for .c files but
+# watcom doesn't provide that functionality in inplicit rules... (sigh)
+.c.obj : .AUTODEPEND
+	wcc386 $(EOSTYPE) /zp4 /w0 /5r /ol $(PCREDEBUG) -zq -oaxt -DHAVE_CONFIG_H -DNO_RECURSE $< -fo=$@
 
-config.h: config.h.windows
-	copy config.h.windows config.h
-
-pcre.h: pcre.h.windows
-	copy pcre.h.windows pcre.h
-
-distclean : .SYMBOLIC clean
-	del /f/q config.h pcre.h
-	
-clean: .SYMBOLIC
-	del /f/q *.obj
+$(BASEPATH) : .EXISTSONLY $(BUILDDIR)
+	mkdir $(BASEPATH)

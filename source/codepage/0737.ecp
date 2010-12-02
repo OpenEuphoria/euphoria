@@ -286,6 +286,7 @@ FF = U+00A0 : NO-BREAK SPACE
 58 = 78
 59 = 79
 5A = 7A
+.
 80 = 98
 81 = 99
 82 = 9A
@@ -309,6 +310,7 @@ FF = U+00A0 : NO-BREAK SPACE
 94 = AD
 95 = AE
 96 = AF
+.
 97 = E0
 EA = E1
 EB = E2
@@ -319,4 +321,4 @@ EE = E6
 EF = E7
 F5 = E8
 E9 = F0
-
+-----

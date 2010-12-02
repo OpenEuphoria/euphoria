@@ -8,11 +8,11 @@ The back-end is written in Euphoria itself.
 
 To run a Euphoria program on a given platform:
 
-   ex eu.ex prog.ex          (DOS)
+   eui eu.ex prog.ex          (DOS)
    
-   exw eu.ex prog.exw        (Windows)
+   eui eu.ex prog.exw        (Windows)
    
-   exu eu.ex prog.exu        (Linux /FreeBSD)
+   eui eu.ex prog.exu        (Linux /FreeBSD)
 
 To bind the interpreter into a .exe for a given platform:
 
@@ -26,9 +26,9 @@ To translate the interpreter into a fast .exe for a given platform:
    
    ec [-wat] [-djg] eu.ex    (DOS)
 
-   ecw [-wat] eu.ex          (Windows)
+   euc [-wat] eu.ex          (Windows)
 
-   ecu eu.ex                 (Linux / FreeBSD)
+   euc eu.ex                 (Linux / FreeBSD)
 
 
 Files that make up the interpreter:

@@ -272,7 +272,7 @@ Arguments:
 	node_p = The node to delete.
 	
 Description:
-	First it destroys everying on the left then right, then is destroys the
+	First it destroys everything on the left then right, then is destroys the
 	supplied node. If the tree was created with a 'free_item' routine, it is
 	called for each node so that the user program can release any resources
 	that might be attached to the node's key or value.
@@ -676,7 +676,7 @@ Arguments:
 
 Description: This removes the entire tree from RAM. However, before doing so,
              it calls the user supplied free_item procedure for each node
-             so that the calling applicaiton can release any resources held
+             so that the calling application can release any resources held
              by any node.
 ------------------------------------------------------------------------------*/
 void* RBT_Destroy(rbt_tree* tree_p) 
@@ -889,7 +889,7 @@ int RBT_Find_Last(rbt_tree* tree_p, rbt_kv* data_p) {
 Procedure: RBT_Delete 
 
 Argments:
-	tree_p = The tree contianing the node to delete.
+	tree_p = The tree containing the node to delete.
 	data_p = Pointer to the structure which contains the key of the node to
 	         delete.
 Description: If the key's node exists, it is removed from the tree. However, 
@@ -982,7 +982,7 @@ void RBT_Delete(rbt_tree* tree, rbt_kv* data)
 	// Re-balance the tree.
 	fix_rb_state(tree, fixup_child);
 	
-	// Allow the applciation to free up resources.
+	// Allow the application to free up resources.
 	if (tree->free_item != 0)
 		tree->free_item(&(deleted_node_l->data)); // Don't care if user changes node.
 	

@@ -1,9 +1,10 @@
+-- (c) Copyright - See License.txt
 -- std.ex: Tool for helping with standard library migration.
 --
 -- Useful for finding where symbols may have changed from
 -- global to export.  This tool can help with other libraries,
--- too.  In each file, a special include file "std/all.e" is
--- added.  This includes all of the old standard library functionality,
+-- too.  In each file, a special include file "euphoria/stddebug.e"
+-- is added.  This includes all of the standard library functionality,
 -- but none of the symbols are exported.  The parser looks
 -- for matching export symbols that wouldn't normally be 
 -- visible to the code, and if that's the only option,

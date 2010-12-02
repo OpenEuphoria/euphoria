@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/*      (c) Copyright 2007 Rapid Deployment Software - See License.txt       */
+/*      (c) Copyright - See License.txt       */
 /*****************************************************************************/
 /*                                                                           */
 /*              Run Time Error Handler & Interactive Trace                   */
@@ -9,16 +9,23 @@
 /******************/
 /* Included files */
 /******************/
+#define _LARGE_FILE_API
+#define _LARGEFILE64_SOURCE
 #include <stdio.h>
 #include <stdarg.h>
 #include <setjmp.h>
 
 #ifndef EUNIX
-#  if !defined(ELCC) && !defined(EDJGPP) && !defined(EMINGW)
+#  if !defined(EMINGW)
 #    include <graph.h>
 #    include <bios.h>
 #  endif
 #  include <conio.h>
+#endif
+
+#ifdef EUNIX
+#include <sys/ioctl.h>
+#include <unistd.h>
 #endif
 
 #include <signal.h>
@@ -28,8 +35,17 @@
 #endif
 
 #include "alldefs.h"
+#include "be_rterror.h"
 #include "be_runtime.h"
-#include "alloc.h"
+#include "global.h"
+#include "be_task.h"
+#include "be_w.h"
+#include "be_machine.h"
+#include "be_execute.h"
+#include "be_symtab.h"
+#include "be_alloc.h"
+#include "be_syncolor.h"
+#include "be_task.h"
 
 /******************/
 /* Local defines  */
@@ -40,11 +56,14 @@
 #define MAX_VAR_LINES 7
 #define MAX_VARS_PER_LINE 6
 #define MAX_TRACEBACK 100 /* maximum number of levels of traceback to show */
+
 #ifdef EUNIX
 #define FLIP_TO_MAIN 265  /* F1 */
 #define FLIP_TO_DEBUG 266 /* F2 */
 #define DOWN_ARROW 258
+
 #else
+
 #define FLIP_TO_MAIN 315  /* F1 */
 #define FLIP_TO_DEBUG 316 /* F2 */
 #define DOWN_ARROW 336
@@ -55,71 +74,6 @@ struct display_slot {
 	long time_stamp;
 	object value_on_screen;
 };
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern int tcb_size;
-extern struct tcb *tcb;
-extern int current_task;
-extern int warning_count;
-extern char **warning_list;
-extern int crash_count;
-extern symtab_ptr *e_routine;
-extern int **jumptab;
-extern char *last_traced_line;
-extern int Executing;
-extern int gameover;
-extern int current_screen;
-extern int allow_break;
-extern int control_c_count; 
-#ifdef EUNIX
-extern unsigned current_fg_color, current_bg_color;
-#endif
-extern int bound;
-extern int print_chars;
-extern int line_max;
-extern int col_max;
-extern int stack_size;
-extern int screen_line, screen_col;
-extern int screen_lin_addr;
-extern int max_stack_per_call;
-extern object_ptr expr_stack; 
-extern object_ptr expr_top;
-extern unsigned char TempBuff[];
-extern object_ptr frame_base;
-extern int *tpc;
-extern object_ptr *frame_base_ptr;
-extern jmp_buf env;
-extern struct sline *slist;
-extern char **file_name;
-extern unsigned line_number;
-extern long gline_number;
-extern int start_line;
-extern int TraceBeyond;
-extern int TraceStack;
-extern symtab_ptr TopLevelSub;
-extern int TraceOn;
-extern IFILE TempErrFile;
-extern char *TempErrName;
-extern struct videoconfig config;
-extern int wrap_around;
-extern int in_from_keyb;
-extern char *crash_msg;
-
-#ifdef EWINDOWS
-extern void SaveNormal();
-extern void SaveTrace();
-extern void RestoreNormal();
-extern void RestoreTrace();
-extern unsigned default_heap;
-#endif
-
-#ifdef EUNIX
-extern struct char_cell screen_image[MAX_LINES][MAX_COLS];
-extern struct char_cell alt_image_main[MAX_LINES][MAX_COLS];
-extern struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
-#endif
 
 /**********************/
 /* Exported variables */
@@ -137,61 +91,44 @@ char *type_error_msg = "\ntype_check failure, ";   /* changeable message */
 /*******************/
 /* Local variables */
 /*******************/
-static char FErrBuff[300];
+
+#ifndef BACKEND
+#ifdef EUNIX
 static int MainCol;   /* Main foreground color */
 static int MainBkCol; /* Main background color */
-//#ifdef EUNIX
-//static WINDOW *var_scr = NULL;      // variable display screen
-//static WINDOW *debug_scr = NULL;    // debug screen
-//static WINDOW *main_scr  = NULL;    // main screen
-//#endif
-#ifdef EDOS
-static char *MainScreenSave = NULL;     /* place to save main screen */
-static int MainScreenSize = 0;
-static int DebugScreenSize = 0;
-static int DebugCol;   /* Debug foreground color */
-static int DebugBkCol; /* Debug background color */
-static struct rccoord DebugPos; /* Debug text position save area */
 #endif
-static char *DebugScreenSave = NULL;   /* place to save debug screen */
+
 static struct rccoord MainPos; /* text position save area */
 static int MainWrap;  /* Main wrap mode */
-static int main_screen_col = 1;
-static int debug_screen_col = 1;
+static char *DebugScreenSave = NULL;   /* place to save debug screen */
 static int main_screen_line = 1;
 static int debug_screen_line = 1;
+static int main_screen_col = 1;
+static int debug_screen_col = 1;
+
+								/* list of display slots */
+static long highlight_line;     /* current line on debug screen */
+static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
+static long tstamp = 1; /* time stamp for deleting vars on display */
+static IFILE conin; 
+
+#endif
+
 static int first_debug;           /* first time into debug screen */
 static long trace_line;      /* current traced line */
 
-static long highlight_line;     /* current line on debug screen */
 
-static int num_trace_lines;    /* number of lines for statements */
-static int var_lines;  /* number of lines for variables */
-static int vars_per_line;  /* number of var slots per line */
-static int display_size;   /* number of slots for variables */
-static struct display_slot display_list[MAX_VAR_LINES * MAX_VARS_PER_LINE]; 
-								/* list of display slots */
-static long tstamp = 1; /* time stamp for deleting vars on display */
-static IFILE conin; 
 
 /**********************/
 /* Declared functions */
 /**********************/
-symtab_ptr Locate();
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-#else
-#include "alloc.h"
-#endif
+#ifndef BACKEND
 static void screen_blank();
 static void SaveDebugImage();
 static void RestoreDebugImage();
 struct rccoord GetTextPositionP();
 static void ShowName();
-static int screen_size();
-void UpdateGlobals();
-void EraseSymbol();
-symtab_ptr RTLookup();
+#endif
 
 /*********************/
 /* Defined functions */
@@ -201,8 +138,9 @@ void OpenErrFile()
 // open the error diagnostics file - normally "ex.err"
 {
 	int n;
-	
-	TempErrFile = iopen(TempErrName, "w");
+
+	if (TempErrFile == NULL)	
+		TempErrFile = iopen(TempErrName, "w");
 	if (TempErrFile == NULL) {
 		if (strlen(TempErrName) > 0) {
 			screen_output(stderr, "Can't create error message file: ");
@@ -235,6 +173,7 @@ void InitDebug()
 	trace_line = 0;
 }
 
+#ifndef BACKEND
 static void set_bk_color(int c)
 /* set the background color for color displays 
    otherwise just leave the background as black */
@@ -252,11 +191,6 @@ static void set_bk_color(int c)
 	else {
 		col = _BLACK;
 	}
-#ifdef EDOS
-#ifndef EDJGPP
-	_setbkcolor(col);
-#endif
-#else
 	if (col == _WHITE)
 		col = 7;
 	else if (col == _BLACK)
@@ -285,17 +219,17 @@ static void set_bk_color(int c)
 		RTInternal("bad color!");
 #endif
 	SetBColor(MAKE_INT(col));
-#endif
 }
 
-#ifndef BACKEND
 static int OffScreen(long line_num)
 /* return TRUE if line_num is off (or almost off) the TRACE window */
 {
 	long new_highlight_line;
+	struct EuViewPort vp;
 
+	GetViewPort( &vp );
 	new_highlight_line = (long)highlight_line + line_num - trace_line;    
-	if (new_highlight_line >= num_trace_lines + BASE_TRACE_LINE - 1 || 
+	if (new_highlight_line >= vp.num_trace_lines + BASE_TRACE_LINE - 1 || 
 		new_highlight_line <= BASE_TRACE_LINE)
 		return TRUE;
 	else
@@ -329,15 +263,26 @@ static void DisplayLine(long n, int highlight)
 		line += 4;
 	if (line[0] == END_OF_FILE_CHAR) {
 #ifdef EUNIX
-		strlcat(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
+		append_string(TempBuff, "\376\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #else
-		strlcat(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
+		append_string(TempBuff, "\021\n", TEMP_SIZE - strlen(TempBuff) - 1);
 #endif
 		screen_output(NULL, TempBuff);
 	}
 	else {
-		strlcat(TempBuff, line, TEMP_SIZE - strlen(TempBuff) - 1); // must be <=200 chars
-		strlcat(TempBuff, "\n", TEMP_SIZE - strlen(TempBuff) - 1); // will end in \0
+		size_t bufsize;
+		long cb;
+		
+		bufsize = TEMP_SIZE - strlen(TempBuff) - 1;
+		cb = append_string(TempBuff, line, bufsize);
+		if (cb >= 0) {
+			// Add EOL to line data
+			copy_string(TempBuff + strlen(TempBuff), "\n", bufsize - cb);
+		}
+		else {
+			// data was truncated, so force EOL at end of buffer.
+			copy_string(TempBuff + TEMP_SIZE - 2, "\n", 2); // will end in \0
+		}
 		
 		if (color_trace && COLOR_DISPLAY) 
 			DisplayColorLine(TempBuff, string_color);
@@ -357,13 +302,13 @@ static void Refresh(long line_num, int vars_too)
 {
 	long first_line;
 	long i;
+	struct EuViewPort vp;
 	
-#ifdef EDOS
-	short int r1,c1,r2,c2;
-#endif
 #ifdef EWINDOWS
 	int top_attrib, bottom_attrib;
 #endif    
+	GetViewPort( &vp );
+	
 	/* blank trace part of screen only */
 	set_text_color(15);
 	set_bk_color(_WHITE);     
@@ -376,59 +321,38 @@ static void Refresh(long line_num, int vars_too)
 		top_attrib = 0+7;
 		bottom_attrib = 0+7;
 	}
-	EClearLines(2, 1+num_trace_lines, col_max, top_attrib);
+	EClearLines(2, 1 + vp.num_trace_lines, vp.columns, top_attrib);
 	if (vars_too)
-		EClearLines(2+num_trace_lines, line_max, col_max, bottom_attrib); 
+		EClearLines(2 + vp.num_trace_lines, vp.lines, vp.columns, bottom_attrib); 
 #endif
 
-#if defined(EUNIX) || defined(EDJGPP)
+#if defined(EUNIX)
 	if (vars_too && !(TEXT_MODE)) {
 		ClearScreen();
 	}
 	else {
-		//_settextwindow(2, c1, 1+num_trace_lines, c2);
-		blank_lines(1, num_trace_lines);
+		blank_lines(1, vp.num_trace_lines);
 	
 		if (vars_too) {
 			if (TEXT_MODE)
 				set_bk_color(_BLUE);
-			//_settextwindow(2+num_trace_lines, c1, r2, c2);
-			blank_lines(1+num_trace_lines, 
-						config.numtextrows-num_trace_lines-1);
+			blank_lines(1 + vp.num_trace_lines, 
+						config.numtextrows - vp.num_trace_lines - 1);
 		}
 	}
 #endif
 
-#if defined(EDOS) && defined(EWATCOM)
-	_gettextwindow(&r1, &c1, &r2, &c2);
-	if (vars_too && !(TEXT_MODE)) {
-		ClearScreen();
-	}
-	else {
-		_settextwindow(2, c1, 1+num_trace_lines, c2);
-
-		_clearscreen(_GWINDOW);
-		
-		if (vars_too) {
-			if (TEXT_MODE)
-				set_bk_color(_BLUE);
-			_settextwindow(2+num_trace_lines, c1, r2, c2);
-			_clearscreen(_GWINDOW);
-		}
-	}
-	_settextwindow(r1, c1, r2, c2);
-#endif    
 	if (vars_too) {
-		for (i = 0; i < display_size; i++)
+		for (i = 0; i < vp.display_size; i++)
 			display_list[i].value_on_screen = NOVALUE - 1;
 	}           
-	if (line_num < num_trace_lines)
+	if (line_num < vp.num_trace_lines)
 		first_line = 1;
-	else if (line_num <= gline_number - num_trace_lines + 1) {
-		first_line = line_num - (num_trace_lines / 2);
+	else if (line_num <= gline_number - vp.num_trace_lines + 1) {
+		first_line = line_num - (vp.num_trace_lines / 2);
 	}
 	else
-		first_line = gline_number - num_trace_lines + 1;
+		first_line = gline_number - vp.num_trace_lines + 1;
 
 	if (vars_too || slist[line_num].file_no != prev_file_no) {
 		SetPosition(1, 1);
@@ -442,7 +366,7 @@ static void Refresh(long line_num, int vars_too)
 		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		buffer_screen();
 		screen_output(NULL, TempBuff);
-		screen_blank(NULL, col_max-40);
+		screen_blank(NULL, vp.columns - 40);
 		screen_output(NULL, " \n");
 		flush_screen();
 		prev_file_no = slist[line_num].file_no;
@@ -450,7 +374,7 @@ static void Refresh(long line_num, int vars_too)
 	else
 		SetPosition(2, 1);
 		
-	for (i = first_line; i <= gline_number && i < first_line + num_trace_lines;
+	for (i = first_line; i <= gline_number && i < first_line + vp.num_trace_lines;
 		 i++) {    
 		if (slist[i].options & OP_TRACE) 
 			DisplayLine(i, i == line_num);
@@ -489,17 +413,6 @@ static void ShowTraceLine(long line_num)
 	}
 }
 
-static void gettextimage(char *buff, long size)
-/* save a text screen into buff */
-{
-	memcpy(buff, (char *)screen_lin_addr, size);
-}
-
-static void puttextimage(char *buff, long size)
-/* restore a text screen */
-{
-	memcpy((char *)screen_lin_addr, buff, size);
-}
 #endif //not BACKEND
 
 void MainScreen()
@@ -521,18 +434,6 @@ void MainScreen()
 		screen_copy(alt_image_main, screen_image); // restore main screen
 		screen_show();
 #endif
-#ifdef EDOS
-		puttextimage(MainScreenSave, MainScreenSize);
-#endif
-	}
-	else {
-		/* graphics mode */
-#ifdef EDOS
-#ifndef EDJGPP
-		/* TO BE COMPLETED FOR DJGPP */
-		_putimage(0, 0, MainScreenSave, _GPSET);
-#endif
-#endif
 	}
 	SetPosition(MainPos.row, MainPos.col);
 	debug_screen_col = screen_col;
@@ -540,15 +441,6 @@ void MainScreen()
 	screen_col = main_screen_col;
 	screen_line = main_screen_line;
 
-#ifdef EDOS
-#ifdef EDJGPP
-	SetTColor(MainCol);
-	SetBColor(MainBkCol);
-#else   
-	_settextcolor(MainCol);
-	_setbkcolor(MainBkCol);
-#endif
-#endif
 #ifdef EUNIX
 	SetTColor(MainCol);
 	SetBColor(MainBkCol);
@@ -567,7 +459,7 @@ static void LocateFail()
 
 #ifndef BACKEND
 static void ClearSlot(int i)
-/* mark a display slot as free */
+/* mark a display slot as available */
 {
 	display_list[i].sym = NULL;
 	display_list[i].time_stamp = 0;
@@ -592,10 +484,13 @@ static void SetVarPosition(int slot, int offset)
 /* set cursor position to start of variable display slot */
 {
 	int var_line, var_pos;
+	struct EuViewPort vp;
 
-	var_line = slot / vars_per_line;
-	var_pos = (slot - var_line * vars_per_line) * VAR_WIDTH; 
-	SetPosition(num_trace_lines + BASE_TRACE_LINE + NUM_PROMPT_LINES 
+	GetViewPort( &vp );
+	
+	var_line = slot / vp.vars_per_line;
+	var_pos = (slot - var_line * vp.vars_per_line) * VAR_WIDTH; 
+	SetPosition(vp.num_trace_lines + BASE_TRACE_LINE + NUM_PROMPT_LINES 
 				+ var_line + 1, var_pos + 1 + offset);
 }
 
@@ -618,24 +513,27 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	register int i, already_there;
 	int col, found, inc, len_required;
 	object val, screen_val;
+	struct EuViewPort vp;
+	
 #define DV_len (40)
 	char val_string[DV_len];
 	int add_char, iv;
 		
+	GetViewPort( &vp );
 	add_char = 0;
 	if (TEXT_MODE)
 		set_bk_color(_BLUE);
 
 	val = s_ptr->obj;
 	if (IS_SEQUENCE(val)) {
-		inc = vars_per_line;
+		inc = vp.vars_per_line;
 	}
 	else {
 		if (val == NOVALUE) 
-			strlcpy( val_string, "<no value>", DV_len);
+			copy_string( val_string, "<no value>", DV_len);
 		else if (IS_ATOM_INT(val)) {
 			iv = INT_VAL(val);
-			snprintf(val_string,  DV_len, "%ld", iv);
+			snprintf(val_string,  DV_len, "%ld", (long)iv);
 			if (iv >= ' ' && iv <= 127)
 				add_char = TRUE;
 		}
@@ -648,12 +546,12 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		else if (len_required < 2 * VAR_WIDTH)
 			inc = 2;
 		else
-			inc = vars_per_line; /* use whole line, possibly run off the end */
+			inc = vp.vars_per_line; /* use whole line, possibly run off the end */
 	}
 
 	/* is var already on display ? */
 	already_there = FALSE;
-	for (i = 0; i < display_size; i += inc) {
+	for (i = 0; i < vp.display_size; i += inc) {
 		if (display_list[i].sym == s_ptr) { 
 			found = i;
 			already_there = TRUE;
@@ -668,7 +566,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 		}
 		else {
 			if (IS_ATOM(val)) {
-				if (found < display_size-1 && 
+				if (found < vp.display_size-1 && 
 					display_list[found+1].sym == s_ptr) {
 					// we might be downsizing this var in-place
 					EraseSymbol(s_ptr);
@@ -679,7 +577,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	else {
 		/* not there - look for the best slot (oldest time stamp) */
 		found = 0;
-		for (i = inc; i < display_size; i += inc) {
+		for (i = inc; i < vp.display_size; i += inc) {
 			if (display_list[i].time_stamp < display_list[found].time_stamp) {
 				found = i;
 			}
@@ -713,9 +611,9 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 	display_list[found].value_on_screen = val; 
 	
 	if (IS_SEQUENCE(val)) {
-		Print(NULL, val, 1, vars_per_line*VAR_WIDTH-3, 
+		Print(NULL, val, 1, (vp.vars_per_line * VAR_WIDTH) - 3, 
 			  strlen(s_ptr->name)+1, FALSE);
-		screen_blank(NULL, col_max);
+		screen_blank(NULL, vp.columns);
 		if (user_requested && print_chars == -1) {
 			// not enough room to show whole sequence
 			flush_screen();
@@ -725,7 +623,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 #else
 #ifdef EUNIX
 			screen_copy(screen_image, alt_image_debug);
-			blank_lines(0, line_max-1);
+			blank_lines(0, vp.lines - 1);
 #else
 			SaveDebugImage();  // should work for DOS, 
 							   // Linux will need a new window like Windows
@@ -736,7 +634,7 @@ void DisplayVar(symtab_ptr s_ptr, int user_requested)
 			snprintf(TempBuff, TEMP_SIZE, "%s=", s_ptr->name);
 			TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 			screen_output(NULL, TempBuff);
-			Print(NULL, val, line_max-5, vars_per_line*VAR_WIDTH-3, 
+			Print(NULL, val, vp.lines - 5, (vp.vars_per_line * VAR_WIDTH) - 3, 
 				  strlen(s_ptr->name), TRUE);
 			screen_output(NULL, "\n\n* Press Enter to resume trace\n");
 			if (print_chars != -1)
@@ -770,6 +668,9 @@ void UpdateGlobals()
 {
 	symtab_ptr dsym, proc, sym;
 	int i;
+	struct EuViewPort vp;
+	
+	GetViewPort( &vp );
 	
 	if (TEXT_MODE)
 		set_bk_color(_BLUE);
@@ -777,7 +678,7 @@ void UpdateGlobals()
 	if (proc == NULL)
 		LocateFail();
 	sym = proc->next;
-	for (i = 0; i < display_size; i++) {
+	for (i = 0; i < vp.display_size; i++) {
 		dsym = display_list[i].sym;
 		if (dsym == NULL) {
 			/* fill empty slot with a private. not really optimal but ok */
@@ -786,12 +687,12 @@ void UpdateGlobals()
 				sym = sym->next;
 			}       
 		}
-		else if (dsym->scope > S_PRIVATE && !PrivateName(dsym->name, proc)
+		else if ((dsym->scope > S_PRIVATE && !PrivateName(dsym->name, proc))
 				 || ValidPrivate(dsym, proc)) {
 			/* skip redundant slots */
 			do {
 				i++;
-			} while (i < display_size && display_list[i].sym == dsym);
+			} while (i < vp.display_size && display_list[i].sym == dsym);
 			i--;
 			/* display up-to-date value */
 			DisplayVar(dsym, FALSE);
@@ -805,14 +706,13 @@ void ShowDebug()
 /* switch to debug screen from main screen */
 {
 	int i;
-	long size;
+	
+	struct EuViewPort vp;
 
 	if (current_screen == DEBUG_SCREEN)
 		return;
-
-#ifdef EDJGPP
-	return;    // trace screen not implemented yet for DJGPP
-#endif
+	
+	GetViewPort( &vp );
 	
 	main_screen_col = screen_col;
 	main_screen_line = screen_line;
@@ -832,47 +732,10 @@ void ShowDebug()
 	screen_show();
 #endif
 
-#ifdef EDOS   
-#ifndef EDJGPP   // for now
-	MainPos = GetTextPositionP();
-	MainCol = _gettextcolor();
-	MainBkCol = _getbkcolor(); 
-#endif  
-	size = screen_size();
-	if (MainScreenSave == NULL) {
-		MainScreenSave = EMalloc(size);
-	}
-	else {
-		if (MainScreenSize != size) {
-			EFree(MainScreenSave);
-			MainScreenSave = EMalloc(size);
-		} 
-	}
-	MainScreenSize = size;
-
-	if (TEXT_MODE) {
-		gettextimage(MainScreenSave, size); /* save text */
-	}
-	else {
-#ifndef EDJGPP  // for now
-		_getimage(0, 0, config.numxpixels-1, config.numypixels-1, MainScreenSave);
-#endif  
-	}
-#endif
-
-	var_lines = (line_max - BASE_TRACE_LINE) / 6;
-	if (var_lines > MAX_VAR_LINES)
-		var_lines = MAX_VAR_LINES;
-	vars_per_line = col_max / VAR_WIDTH;
-	if (vars_per_line > MAX_VARS_PER_LINE)
-		vars_per_line = MAX_VARS_PER_LINE;
-	display_size = var_lines * vars_per_line;
-	num_trace_lines = line_max - var_lines - BASE_TRACE_LINE - NUM_PROMPT_LINES;
-
 	Wrap(ATOM_0);
 
 	if (first_debug) {
-		for (i = 0; i < display_size; i++) 
+		for (i = 0; i < vp.display_size; i++) 
 			ClearSlot(i);
 		init_class();
 #ifndef EUNIX
@@ -886,51 +749,11 @@ void ShowDebug()
 	first_debug = FALSE;
 }
 
-#ifndef EWINDOWS
-static int screen_size()
-// return number of bytes needed to save text or graphics mode screen
-{
-	if (TEXT_MODE) {
-		/* text mode */
-		return config.numtextrows * config.numtextcols * 2; /* text mode */
-	}
-#ifdef EDOS
-	else {
-		/* graphics mode */
-#ifndef EDJGPP  // for now      
-		return _imagesize(0, 0, config.numxpixels-1, config.numypixels-1);
-#endif  
-	}    
-#endif
-}
-#endif
-
 static void SaveDebugImage()
 /* save image of debug screen (if there's enough memory) */
 {
 #ifdef EWINDOWS
 	DebugScreenSave = (char *)1;
-#endif
-#ifdef EDOS
-	DebugScreenSize = screen_size();
-	DebugScreenSave = malloc(DebugScreenSize);  // N.B. *not* EMalloc
-	if (DebugScreenSave == NULL)
-		return;
-	if (TEXT_MODE) {
-		gettextimage(DebugScreenSave, DebugScreenSize); /* save text */
-	}
-	else {
-#ifndef EDJGPP  // for now
-		_getimage(0, 0, config.numxpixels-1, config.numypixels-1, 
-				  DebugScreenSave);
-#endif  
-	}
-	/* save other aspects of display */
-#ifndef EDJGPP  // for now  
-	DebugCol = _gettextcolor();
-	DebugBkCol = _getbkcolor();
-	DebugPos = GetTextPositionP();  //EUNIX too?
-#endif
 #endif
 }
 
@@ -940,27 +763,6 @@ static void RestoreDebugImage()
 #ifdef EWINDOWS
 	SaveNormal();
 	RestoreTrace();
-#endif
-#ifdef EDOS
-	/* restore various aspects of the display */
-	if (TEXT_MODE) {
-		puttextimage(DebugScreenSave, DebugScreenSize);
-	}
-	else {
-#ifndef EDJGPP
-		/* TO BE COMPLETED FOR DJGPP */
-		_putimage(0, 0, DebugScreenSave, _GPSET);
-#endif  
-	}
-	free(DebugScreenSave);
-#ifdef EDJGPP   
-	SetTColor(DebugCol);
-	SetBColor(DebugBkCol);
-#else   
-	_settextcolor(DebugCol);
-	_setbkcolor(DebugBkCol);
-#endif  
-	SetPosition(DebugPos.row, DebugPos.col);
 #endif
 	screen_col = debug_screen_col;
 	Wrap(0);
@@ -978,21 +780,21 @@ static void DebugCommand()
 #ifdef EUNIX
 		// must handle ANSI codes
 		if (c == 27) {
-			c = get_key();
+			c = get_key(TRUE);
 			if (c == 91) {
-				c = get_key();
+				c = get_key(TRUE);
 				if (c == 66) {
 					c = DOWN_ARROW;
 				}
 				else if (c == 49) {
-					c = get_key();
+					c = get_key(TRUE);
 					if (c == 49) {
 						c = FLIP_TO_MAIN;
-						get_key();  // 126
+						get_key(TRUE);  // 126
 					}
 					else if (c == 50) {
 						c = FLIP_TO_DEBUG;
-						get_key(); // 126
+						get_key(TRUE); // 126
 					}
 				}
 			}
@@ -1047,9 +849,6 @@ static void DebugCommand()
 void DebugScreen()
 /* Display the debug screen, if it is not already there */
 {
-#ifdef EDJGPP
-	return;    // trace screen not implemented yet for DJGPP
-#endif
 	/* set up the debug screen */
 	if (current_screen == DEBUG_SCREEN)
 		ShowTraceLine(start_line);
@@ -1065,15 +864,17 @@ void EraseSymbol(symtab_ptr sym)
 	int i;
 	symtab_ptr dsym;
 	int prev;
+	struct EuViewPort vp;
 	
+	GetViewPort( &vp );
 	prev = -1;
 	if (TEXT_MODE)
 		set_bk_color(_BLUE);
 	/* clear out any slots with same name */
-	for (i = 0; i < display_size; i++) {
+	for (i = 0; i < vp.display_size; i++) {
 		dsym = display_list[i].sym;
 		if (dsym != NULL && strcmp(dsym->name, sym->name) == 0) {
-			if (i != (prev + 1) || (i % vars_per_line) == 0) {
+			if (i != (prev + 1) || (i % vp.vars_per_line) == 0) {
 				// can't build on previous
 				flush_screen();
 				SetVarPosition(i, 0);
@@ -1094,11 +895,14 @@ static void ShowName()
 	char name[80];
 	symtab_ptr name_ptr;
 	int prompt, i, j, name_len;
+	struct EuViewPort vp;
 	
+	GetViewPort( &vp );
+
 	set_text_color(0);
 	if (TEXT_MODE)
 		set_bk_color(_YELLOW);
-	prompt = num_trace_lines + BASE_TRACE_LINE + 1;
+	prompt = vp.num_trace_lines + BASE_TRACE_LINE + 1;
 	SetPosition(prompt, 1);
 	buffer_screen();
 #ifdef EWINDOWS
@@ -1106,7 +910,7 @@ static void ShowName()
 #else
 	screen_output(NULL, "variable name?");
 #endif  
-	screen_blank(NULL, col_max-14);
+	screen_blank(NULL, vp.columns - 14);
 	flush_screen();
 	
 	SetPosition(prompt, 16); 
@@ -1127,13 +931,13 @@ static void ShowName()
 			set_bk_color(_BLUE);
 		SetPosition(prompt, 1);
 		buffer_screen();
-		screen_blank(NULL, col_max);
+		screen_blank(NULL, vp.columns);
 		flush_screen();
 		return;
 	}
 
 	name_len = strlen(name);
-	name_ptr = RTLookup(name+i, slist[trace_line].file_no, tpc, NULL, 999999999); 
+	name_ptr = RTLookup(name+i, slist[trace_line].file_no, tpc, NULL, fe.st[0].obj, trace_line ); 
 	if (name_ptr == NULL || name_ptr->token != VARIABLE) {
 		SetPosition(prompt, 18 + name_len);
 		screen_output(NULL, "- not defined at this point");
@@ -1232,10 +1036,10 @@ static void DumpGlobals(IFILE f)
 
 static int screen_err_out;
 
-#define TPTEMP_BUFF_SIZE 400
+#define TPTEMP_BUFF_SIZE (800)
 static char TPTempBuff[TPTEMP_BUFF_SIZE]; // TempBuff might contain the error message
 
-static sf_output(char *string)
+static void sf_output(char *string)
 // output error info to ex.err and optionally to the screen
 {
 	iprintf(TempErrFile, "%s", string);
@@ -1266,12 +1070,12 @@ static void TracePrint(symtab_ptr proc, int *pc)
 		subtype = "type";
 
 	if (proc == TopLevelSub) {
-		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u", file_name[file], line);
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s:%u", file_name[file], line);
 		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
 	}
 	else {
-		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.300s:%u in %s %.99s() ",
+		snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s:%u in %s %s() ",
 				 file_name[file], line, subtype, proc->name);
 		TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 		sf_output(TPTempBuff);
@@ -1285,8 +1089,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 // s_ptr is symbol involved in error
 {
 	int *new_pc;
-	symtab_ptr current_proc, prev_proc, sym;
-	object_ptr obj_ptr;
+	symtab_ptr current_proc;
+	
 	int levels, skipping, dash_count, i, task, show_message;
 	char *routine_name;
 	
@@ -1313,11 +1117,11 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			else {
 				routine_name = e_routine[tcb[current_task].rid]->name;
 			}
-			snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " TASK ID %.0f %.99s ",
+			snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, " TASK ID %.0f %s ",
 					 tcb[current_task].tid, routine_name);
 			TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 			dash_count = 60;
-			if (strlen(TPTempBuff) < dash_count) {
+			if ((int)strlen(TPTempBuff) < dash_count) {
 				dash_count = 52 - strlen(TPTempBuff);
 			}
 			if (dash_count < 1) {
@@ -1341,13 +1145,13 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// display the error message
 			show_message = FALSE;
 			if (s_ptr == NULL) {
-				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "\n%.99s", msg);
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "\n%s", msg);
 				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0; // ensure NULL
 				sf_output(TPTempBuff);
 			}
 			else {
 				sf_output(type_error_msg); // test
-				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%.99s is ", s_ptr->name);
+				snprintf(TPTempBuff, TPTEMP_BUFF_SIZE, "%s is ", s_ptr->name);
 				TPTempBuff[TPTEMP_BUFF_SIZE-1] = 0;
 				sf_output(TPTempBuff);
 				if (screen_err_out)
@@ -1381,13 +1185,13 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
-					strlcpy(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
+					copy_string(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
 				}
 				else {
 #ifdef EWINDOWS         
-					strlcpy(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
+					copy_string(TempBuff, "\n^^^ call-back from Windows\n", TEMP_SIZE);
 #else           
-					strlcpy(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
+					copy_string(TempBuff, "\n^^^ call-back from external source\n", TEMP_SIZE);
 #endif          
 				}
 				sf_output(TempBuff);
@@ -1427,11 +1231,11 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 		task = current_task;
 		for (i = 0; i < tcb_size; i++) {
 			if (tcb[i].status != ST_DEAD && 
-				tcb[i].expr_top > tcb[i].expr_stack+2-(tcb[i].tid == 0.0)) {
+				tcb[i].impl.interpreted.expr_top > tcb[i].impl.interpreted.expr_stack+2-(tcb[i].tid == 0.0)) {
 				current_task = i;
-				expr_stack = tcb[i].expr_stack;
-				expr_top = tcb[i].expr_top;
-				tpc = tcb[i].pc;
+				expr_stack = tcb[i].impl.interpreted.expr_stack;
+				expr_top = tcb[i].impl.interpreted.expr_top;
+				tpc = tcb[i].impl.interpreted.pc;
 				screen_err_out = FALSE; // only show offending task on screen
 				break;
 			}
@@ -1449,7 +1253,8 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 	RecentLines();
 }
 
-#ifdef EXTRA_CHECK
+#if defined(EXTRA_CHECK) || defined(HEAP_CHECK)
+#ifdef RUNTIME
 void RTInternal(char *msg, ...)
 {
 	va_list ap;
@@ -1463,49 +1268,54 @@ void RTInternal_va(char *msg, va_list ap)
    - see InternalErr() for compile-time errors */
 {
 #define RTI_bufflen (1000)
-	char *msg;
+	char *msgtext;
 	char *buf;
 	
-    msg = (char *)malloc(RTI_bufflen);
-	if (msg)
-	    buf = msg;
-		vsnprintf(msg, RTI_bufflen, msg, ap);
-		msg[RTI_bufflen - 1] = 0;
-	else {
-		msg = "RTI malloc failed\n";
+    msgtext = (char *)EMalloc(RTI_bufflen);
+	if (msgtext) {
+	    buf = msgtext;
+		vsnprintf(msgtext, RTI_bufflen, msg, ap);
+		msgtext[RTI_bufflen - 1] = 0;
+	} else {
+		msgtext = "RTI memory allocation failed\n";
 		buf = 0;
 	}
 	gameover = TRUE;
 
-	debug_msg(msg);
+	debug_msg(msgtext);
 	
 	OpenErrFile();  // exits if error file name is ""
 
-	TraceBack(msg, NULL);
+	TraceBack(msgtext, NULL);
 	
 	iflush(TempErrFile);
 
-	if (buf) free(msg);
+	if (buf) EFree(msgtext);
 	Cleanup(1);
 }
 #endif
+#endif
 
+#define CUE_bufflen (200)
 void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 {
-	int i;
-#define CUE_bufflen (1000)
+	long i;
+
 	char *msgtext;
 	char *buf;
 	
 	if (msg) {
-	    msgtext = (char *)malloc(CUE_bufflen);
+	    msgtext = (char *)EMalloc(CUE_bufflen);
 		if (msgtext) {
 		    buf = msgtext;
-			vsnprintf(msgtext, CUE_bufflen, msg, ap);
-			msgtext[CUE_bufflen - 1] = 0;
+			i = vsnprintf(msgtext, CUE_bufflen - 1, msg, ap);
+			if (i < 0 ) {
+				i = CUE_bufflen - 1;
+			}
+			msgtext[i] = 0;
 		}
 		else {
-			msgtext = "CleanUpError malloc failed\n";
+			msgtext = "CleanUpError memory allocation failed\n";
 			buf = 0;
 		}
 	}
@@ -1515,13 +1325,7 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	}
 
 	if (crash_msg != NULL) {
-#ifdef EDOS
-#ifndef EDJGPP
-		_setvideomode((short)-1);       
-#endif
-#else
 		ClearScreen();
-#endif
 		screen_output(stderr, crash_msg);
 	}
 	OpenErrFile();
@@ -1545,9 +1349,13 @@ void CleanUpError_va(char *msg, symtab_ptr s_ptr, va_list ap)
 	
 	gameover = TRUE;
 
-	if (buf) free(msgtext);
+	if (buf) EFree(msgtext);
 	Cleanup(1);
 }
+
+#ifdef EUNIX
+void CleanUpError(char *msg, symtab_ptr s_ptr, ...) __attribute__ ((noreturn));
+#endif
 
 void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 {
@@ -1556,6 +1364,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 	CleanUpError_va(msg, s_ptr, ap);
 	va_end(ap);
 }
+
 
 void RTFatalType(int *pc)
 /* handle type-check failures */
@@ -1587,7 +1396,7 @@ void BadSubscript(object subs, long length)
 	char subs_buff[BadSubscript_bufflen];
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, BadSubscript_bufflen, "%d", subs);
+		snprintf(subs_buff, BadSubscript_bufflen, "%d", (int)subs);
 	else
 		snprintf(subs_buff, BadSubscript_bufflen, "%.10g", DBL_PTR(subs)->dbl);
 	subs_buff[BadSubscript_bufflen - 1] = 0; // ensure NULL
@@ -1612,7 +1421,7 @@ void RangeReading(object subs, int len)
 	char subs_buff[RangeReading_buflen];
 	
 	if (IS_ATOM_INT(subs))
-		snprintf(subs_buff, RangeReading_buflen, "%d", subs);
+		snprintf(subs_buff, RangeReading_buflen, "%d", (int)subs);
 	else
 		snprintf(subs_buff, RangeReading_buflen, "%.10g", DBL_PTR(subs)->dbl);
 	subs_buff[RangeReading_buflen - 1] = 0; // ensure NULL
@@ -1633,13 +1442,10 @@ void atom_condition()
 
 /* signal handlers */
 
-#ifdef EWINDOWS
-extern void DisableControlCHandling(); // be_w.c
-#endif
-
 void INT_Handler(int sig_no)
 /* control-c, control-break */
 {
+	UNUSED(sig_no);
 	if (!allow_break) {
 		signal(SIGINT, INT_Handler);
 		control_c_count++;
@@ -1654,3 +1460,59 @@ void INT_Handler(int sig_no)
 				 /* seems to crash in Windows */
 	/* RTFatal("program interrupted");*/
 }
+
+#if (  defined(__DJGPP__) && ( (__DJGPP__ == 2 && __DJGPP_MINOR__ < 4)  ||  (__DJGPP__ < 2) )  )
+/* __DJGPP__ library version earlier than 2.4.  Use unsafe alternatives. */
+unsigned int snprintf(char * buf, size_t size, char * fmt, ...) {
+	unsigned int r;
+	va_list ap;
+	va_start(ap, fmt);
+	r = vsnprintf(buf,size,fmt,ap);
+	va_end(ap);
+	return r;
+}
+signed int vsnprintf(char * buf, size_t size, char * fmt, va_list list ) {
+	return vsprintf(buf,fmt,list);	
+}
+#endif
+
+void GetViewPort(struct EuViewPort *vp)
+{
+	int l_var_lines;
+#ifdef EUNIX
+	struct winsize ws;
+#endif
+
+#ifdef EWINDOWS
+	CONSOLE_SCREEN_BUFFER_INFO info;
+	
+	GetConsoleScreenBufferInfo(console_output, &info);
+	
+	vp->lines    = info.dwSize.Y;
+	vp->columns  = info.dwSize.X;
+
+#endif
+
+#ifdef EUNIX
+	if (consize_ioctl != 0 && !ioctl(STDIN_FILENO, TIOCGWINSZ, &ws)) {
+		line_max = ws.ws_row;
+		col_max = ws.ws_col;
+		if (line_max > MAX_LINES)
+			line_max = MAX_LINES;
+		if (col_max > MAX_COLS)
+			col_max = MAX_COLS;
+	}
+	vp->lines    = line_max;
+	vp->columns  = col_max;
+
+#endif
+	l_var_lines = (vp->lines - BASE_TRACE_LINE) / 6;
+	if (l_var_lines > MAX_VAR_LINES)
+		l_var_lines = MAX_VAR_LINES;
+	vp->vars_per_line = vp->columns / VAR_WIDTH;
+	if (vp->vars_per_line > MAX_VARS_PER_LINE)
+		vp->vars_per_line = MAX_VARS_PER_LINE;
+	vp->display_size = l_var_lines * vp->vars_per_line;
+	vp->num_trace_lines = vp->lines - l_var_lines - BASE_TRACE_LINE - NUM_PROMPT_LINES;
+}
+

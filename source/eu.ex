@@ -1,13 +1,9 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
---
--- Euphoria 3.1 
+-- (c) Copyright - See License.txt
 --
 -- A Euphoria Interpreter written 100% in Euphoria
 --
 -- usage:
---        ex eu.ex prog.ex     -- run a Euphoria program for DOS
---        exw eu.ex prog.exw   -- run a Euphoria program for Windows
---        exu eu.ex prog.exu   -- run a Euphoria program for Linux/FreeBSD
+--        eui eu.ex prog.ex    -- run a Euphoria program
 
 -- You can make this into a stand-alone .exe using the binder or the
 -- Euphoria To C Translator. When translated/compiled it will run
@@ -15,13 +11,16 @@
 -- which uses the same Euphoria-coded front-end, combined 
 -- with a high-performance back-end carefully hand-coded in C.
 
-without type_check -- FASTER
+with define EU_EX
 
-
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
 
 include mode.e
 set_mode( "interpret", 1 )		
-
 
 -- standard Euphoria includes
 include std/os.e
@@ -46,4 +45,3 @@ include execute.e
    
 -- main program:
 include main.e
-

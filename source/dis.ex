@@ -1,3 +1,4 @@
+-- (c) Copyright - See License.txt
 -- Outputs IL code and symbol table
 -- To generate doxygen-like html output use option:
 --   --html
@@ -9,8 +10,17 @@
 -- { "g", "graphs", "suppress call graphs", NO_PARAMETER, routine_id("suppress_callgraphs") }
 -- default output dir: eudox
 -- stdlib suppressed by default
-without type_check
+
+with define EUDIS
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
 include mode.e
+
 sequence cmd = command_line()
 if find( "-t", cmd ) then
 	set_mode( "translate", 0 )
@@ -37,15 +47,6 @@ include traninit.e
 
 -- Disassembler:
 include dis.e
-
--- global procedure OutputIL()
--- -- dummy routine
--- end procedure
--- 
--- global function extract_options(sequence s)
--- -- dummy routine    
--- 	return s
--- end function
 
 -- main program:
 include main.e

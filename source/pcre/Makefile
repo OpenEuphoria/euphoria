@@ -2,32 +2,25 @@
 # Makefile for PCRE to be included into Euphoria
 #
 
-CFLAGS=-O2
+CFLAGS=-O2 $(EOSTYPE) -D HAVE_CONFIG_H -D NO_RECURSE -m32 $(EOSFLAGS)
 
 include objects.mak
+include $(CONFIG)
 
-all: config.h pcre.h $(PCRE_OBJECTS)
+PREFIXED_PCRE_OBJECTS = $(addprefix $(BUILDDIR)/pcre/,$(PCRE_OBJECTS))
 
-.PHONY: mingw mingwconfigh mingwpcreh
+all: $(BUILDDIR)/pcre config.h pcre.h $(PREFIXED_PCRE_OBJECTS)
 
-mingw: mingwconfigh mingwpcreh $(PCRE_OBJECTS)
+$(BUILDDIR)/pcre :
+	-mkdir $(BUILDDIR)/pcre
 
-mingwconfigh: config.h.windows
-	cp config.h.windows config.h
-
-mingwpcreh: pcre.h.windows
-	cp pcre.h.windows pcre.h
-
-config.h: config.h.unix
-	cp config.h.unix config.h
-
-pcre.h: pcre.h.unix
-	cp pcre.h.unix pcre.h
+$(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,%.c,$(PCRE_OBJECTS))
+	$(PCRE_CC) $(CFLAGS) -c $(patsubst $(BUILDDIR)/pcre/%,%,$*).c -o $*.o
 
 .PHONY: clean distclean
 
-distclean :
-	rm -f *.o config.h pcre.h
+distclean : clean
+	
 
 clean:
-	rm -f *.o
+	rm -f $(PREFIXED_PCRE_OBJECTS)

@@ -1,23 +1,30 @@
+-- (c) Copyright - See License.txt
 --
 -- Platform settings
 --
 
-include std/os.e
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
 
+include std/os.e
+include std/text.e
+include std/io.e
 
 public constant
-	ULINUX = LINUX + 0.3,
-	UFREEBSD = FREEBSD + 0.4,
-	UOSX = OSX + 0.5,
-	USUNOS = SUNOS + 0.6,
-	UOPENBSD = OPENBSD + 0.7,
-	UNETBSD = NETBSD + 0.8,
+	ULINUX = LINUX,
+	UFREEBSD = FREEBSD,
+	UOSX = OSX,
+	USUNOS = SUNOS,
+	UOPENBSD = OPENBSD,
+	UNETBSD = NETBSD,
 	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
 
 -- For cross-translation:
 public integer
 	IWINDOWS = 0, TWINDOWS = 0,
-	IDOS     = 0, TDOS     = 0,
 	ILINUX   = 0, TLINUX   = 0,
 	IUNIX    = 0, TUNIX    = 0,
 	IBSD     = 0, TBSD     = 0,
@@ -27,11 +34,7 @@ public integer
 	INETBSD  = 0, TNETBSD  = 0
 
 -- operating system:
-ifdef DOS32 then
-	IDOS = 1
-	TDOS = 1
-
-elsifdef WIN32 then
+ifdef WIN32 then
 	IWINDOWS = 1
 	TWINDOWS = 1
 
@@ -87,23 +90,20 @@ public function host_platform()
 	return ihost_platform
 end function
 
+sequence unices = {ULINUX, UFREEBSD, UOSX, USUNOS, UOPENBSD, UNETBSD}
 public procedure set_host_platform( atom plat )
 	ihost_platform = floor(plat)
 
-	TUNIX    = (plat = ULINUX or plat = UFREEBSD or plat = UOSX or plat = USUNOS or
-	            plat = UOPENBSD or plat = UNETBSD)
-
-	TWINDOWS = plat = WIN32
-	TDOS     = plat = DOS32
-	TBSD     = plat = UFREEBSD
-	TOSX     = plat = UOSX
-	TLINUX   = plat = ULINUX
-	TSUNOS   = plat = USUNOS
-	TOPENBSD = plat = UOPENBSD
-	TNETBSD  = plat = UNETBSD
+	TUNIX    = (find(ihost_platform, unices) != 0) 
+	TWINDOWS = (ihost_platform = WIN32)
+	TBSD     = (ihost_platform = UFREEBSD)
+	TOSX     = (ihost_platform = UOSX)
+	TLINUX   = (ihost_platform = ULINUX)
+	TSUNOS   = (ihost_platform = USUNOS)
+	TOPENBSD = (ihost_platform = UOPENBSD)
+	TNETBSD  = (ihost_platform = UNETBSD)
 	IUNIX    = TUNIX
 	IWINDOWS = TWINDOWS
-	IDOS     = TDOS
 	IBSD     = TBSD
 	IOSX     = TOSX
 	ILINUX   = TLINUX
@@ -122,15 +122,57 @@ public function GetPlatformDefines(integer for_translator = 0)
 	sequence local_defines = {}
 
 	if (IWINDOWS and not for_translator) or (TWINDOWS and for_translator) then
-		local_defines &= {"DOSFAMILY", "WIN32"}
+		local_defines &= {"WINDOWS", "WIN32"}
 		sequence lcmds = command_line()
-		if match("euiw", lcmds[1]) != 0 then
-			local_defines &= { "WIN32_GUI" }
+		
+		-- Examine the executable's image file to determine subsystem.
+		integer fh
+		fh = open(lcmds[1], "rb")
+		if fh = -1 then
+			-- for some reason I can't open the file, so use the name instead.
+ 			if match("euiw", lower(lcmds[1])) != 0 then
+ 				local_defines &= { "WIN32_GUI" }
+ 			else
+ 				local_defines &= { "WIN32_CONSOLE" }
+ 			end if
 		else
-			local_defines &= { "WIN32_CONSOLE" }
+			atom sk
+			sk = seek(fh, #18) -- Fixed location of relocation table.
+			sk = get_integer16(fh)
+			if sk = #40 then
+				-- We have a Windows image and not a MS-DOS image.
+				sk = seek(fh, #3C) -- Fixed location of COFF signature offset.
+				sk = get_integer32(fh)
+				sk = seek(fh, sk)
+				sk = get_integer16(fh)
+				if sk = #4550 then -- "PE" in intel endian
+					sk = get_integer16(fh)
+					if sk = 0 then
+						-- We got a Portable Image format
+						sk = seek(fh, where(fh) + 88 )
+						sk = get_integer16(fh)
+					else
+						sk = 0	-- Don't know this format.
+					end if
+				elsif sk = #454E then -- "NE" in intel endian
+					-- We got a pre-Win95 image
+					sk = seek(fh, where(fh) + 54 )
+					sk = getc(fh)
+				else
+					sk = 0
+				end if
+			else
+				sk = 0
+			end if
+			if sk = 2 then
+				local_defines &= { "WIN32_GUI" }
+			elsif sk = 3 then
+				local_defines &= { "WIN32_CONSOLE" }
+			else
+				local_defines &= { "WIN32_UNKNOWN" }
+			end if
+			close(fh)
 		end if
-	elsif (IDOS and not for_translator) or (TDOS and for_translator) then
-		local_defines &= {"DOSFAMILY", "DOS32"}
 	elsif (ILINUX and not for_translator) or (TLINUX and for_translator) then
 		local_defines &= {"UNIX", "LINUX"}
 	elsif (IOSX and not for_translator) or (TOSX and for_translator) then

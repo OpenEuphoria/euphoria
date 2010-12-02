@@ -1,60 +1,104 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
--- Common initialization (command line options)
+--****
+-- == intinit.e: Common command line initialization of interpreter
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
+include std/cmdline.e
 include std/text.e
+include std/map.e as m
+include std/console.e
 
 include global.e
 include cominit.e
 include error.e
 include pathopen.e
+include msgtext.e
+include coverage.e
+
+sequence interpreter_opt_def = {
+	{ "coverage",         0, GetMsgText(332,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
+	{ "coverage-db",      0, GetMsgText(333,0), { NO_CASE, ONCE, HAS_PARAMETER, "file" } },
+	{ "coverage-erase",   0, GetMsgText(334,0), { NO_CASE, ONCE } },
+	{ "coverage-exclude", 0, GetMsgText(338,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"} },
+	$
+}
+
+add_options( interpreter_opt_def )
+
+include std/pretty.e
+sequence pretty_opt = PRETTY_DEFAULT
+pretty_opt[DISPLAY_ASCII] = 2
 
 export procedure intoptions()
--- set interpreter command-line options
-	integer i, option
-	sequence uparg
+	sequence pause_msg = ""
 
-	object default_args = 0
-	-- put file first, strip out the options
-
-	i = 3
-	if i > Argc then
-		default_args = GetDefaultArgs()
-		if length(default_args) > 0 then
-			Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
-			Argc += length(default_args)
+	if find("WIN32_GUI", OpDefines) then
+		if not batch_job and not test_only then
+			pause_msg = GetMsgText(278,0)
 		end if
 	end if
-	while i <= Argc do
-		if Argv[i][1] = '-' then
-			uparg = upper(Argv[i])
-			option = find( uparg, COMMON_OPTIONS )
-			if option then
-				common_options( option, i )
-			else
-				show_usage()
-				Warning("unknown option: %s" ,cmdline_warning_flag, {Argv[i]})
-			end if
-			add_switch( Argv[i], 0 )
-			-- delete "-" option from the list of args */
-			Argv[i .. Argc-1] = Argv[i+1 .. Argc ]
-			Argc -= 1
+	
+	Argv = expand_config_options(Argv)
+	Argc = length(Argv)
+	
+	sequence opts_array = get_options()
+	sequence argv_to_parse = Argv[1..2]
+	
+	if length(Argv) > 2 then
+		argv_to_parse &= merge_parameters(GetDefaultArgs(), Argv[3..$], opts_array)
+	else
+		argv_to_parse &= GetDefaultArgs()
+	end if
+	
+	m:map opts = cmd_parse( opts_array, 
+		{ NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, argv_to_parse)
+	
+	handle_common_options(opts)
 
-		elsif atom(default_args) then
-			default_args = GetDefaultArgs()
-			if length(default_args) > 0 then
-				Argv = Argv[1.. i-1] & default_args & Argv[i .. Argc ]
-				Argc += length(default_args)
-			end if
+	sequence opt_keys = map:keys(opts)
+	integer option_w = 0
 
-		else
-			exit -- first non "-" item is assumed to be the source file
+	for idx = 1 to length(opt_keys) do
+		sequence key = opt_keys[idx]
+		object val = map:get(opts, key)
+		
+		switch key do
+			case "coverage" then
+				for i = 1 to length( val ) do
+					add_coverage( val[i] )
+				end for
+				
+			case "coverage-db" then
+				coverage_db( val )
+			
+			case "coverage-erase" then
+				new_coverage_db()
+			
+			case "coverage-exclude" then
+				coverage_exclude( val )
+		end switch
+	end for
+	
+	if length(m:get(opts, OPT_EXTRAS)) = 0 then
+		show_banner()
+		ShowMsg(2, 249)
+		show_help( opts_array )
+		if find("WIN32_GUI", OpDefines) then
+			if not batch_job and not test_only then
+				any_key(pause_msg, 2)
+			end if
 		end if
-	end while
 
-	if Strict_is_on then -- overrides any -W/-X switches
-		OpWarning = all_warning_flag
-		prev_OpWarning = OpWarning
+		abort(1)
 	end if
 
+	OpDefines &= { "EUI" }
+
+	finalize_command_line(opts)
 end procedure
-

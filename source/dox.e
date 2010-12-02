@@ -1,8 +1,8 @@
+-- (c) Copyright - See License.txt
 -- writes html dox
 
 include std/error.e
 include dot.e
-include std/sets.e as set
 include std/filesys.e
 include std/sort.e
 include std/map.e as map
@@ -16,30 +16,37 @@ sequence out_dir           = "eudox" & SLASH
 integer  show_dependencies = 1
 integer  show_callgraphs   = 1
 
-set:set  files             = {}
+sequence  files             = {}
 
-export procedure set_out_dir( sequence out )
+export function set_out_dir( sequence out )
 	if length( out ) and out[$] != SLASH then
 		out &= SLASH
 	end if
 	out_dir = out
-end procedure
+	return 0
+end function
 
-export procedure suppress_dependencies()
+export function suppress_dependencies( object o )
 	show_dependencies = 0
-end procedure
+	return 0
+end function
 
-export procedure suppress_callgraphs()
+export function suppress_callgraphs( object o )
 	show_callgraphs = 0
-end procedure
+	return 0
+end function
 
-export procedure suppress_stdlib()
-	show_stdlib = 0
-end procedure
+export function suppress_stdlib( object o)
+	show_stdlib = 1
+	return 0
+end function
 
-export procedure document_file( sequence name )
-	files = set:add_to( name, files )
-end procedure
+export function document_file( sequence name )
+	if not find( name, files ) then
+		files = append( files, name )
+	end if
+	return 0
+end function
 
 function dir_exists( sequence path )
 	return file_type( path ) > 0
@@ -83,8 +90,8 @@ end procedure
 
 
 function underscore_name( sequence name )
-	name = find_replace( '\\', name, '_' )
-	name = find_replace( '/', name,  '_' )
+	name = match_replace( '\\', name, '_' )
+	name = match_replace( '/', name,  '_' )
 	return name
 end function
 

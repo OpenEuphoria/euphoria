@@ -4,6 +4,8 @@
 /*                                                                           */
 /*****************************************************************************/
 
+#ifndef _SYMTAB_H_
+#define _SYMTAB_H_ 1
 // N.B.!!! fields and size of backend symtab_entry is assumed in backend.e 
 
 // for literal constants and temporaries 
@@ -54,7 +56,7 @@ struct symtab_entry {
 	union {
 		struct {
 			// for variables only: 
-		   char dummy;
+		   struct symtab_entry *declared_in;
 		} var;
 		struct {
 			// for subprograms only: 
@@ -68,6 +70,11 @@ struct symtab_entry {
 			unsigned int stack_space; // set by fe - stack required 
 			struct symtab_entry *block; // the scope for the routine
 		} subp;
+		struct {
+			// for blocks only:
+			unsigned long first_line;
+			unsigned long last_line;
+		} block;
 		
 	} u;
 	
@@ -77,3 +84,4 @@ struct symtab_entry {
 typedef struct symtab_entry *symtab_ptr; 
 typedef struct temp_entry *temp_ptr;
 
+#endif // _SYMTAB_H_

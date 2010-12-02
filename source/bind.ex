@@ -1,10 +1,15 @@
-#!/usr/bin/exu -i /usr/share/euphoria/source/
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+#!/usr/bin/eui -i /usr/share/euphoria/source/
+-- (c) Copyright - See License.txt
 --
 -- The Binder
 -- uses the Euphoria front-end, plus a special Euphoria-coded back-end
 
-without type_check
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
 -- Disable SVN Revision banner
 with define EU_FULL_RELEASE
 
@@ -14,7 +19,7 @@ set_mode( "bind", 0 )
 
 -- BINDER backend:
 include il.e
-   
+
 -- main program:
 include main.e
 

@@ -1,8 +1,14 @@
--- (c) Copyright 2007,2008 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- IL opcodes, scanner tokens etc.
 
-export constant 
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
+export constant
 	LESS                = 1,  -- keep relops consecutive LESS..GREATER, NOT
 	GREATEREQ           = 2,
 	EQUALS              = 3,
@@ -132,97 +138,100 @@ export constant
 	PEEK                = 127,
 	POKE                = 128,
 	CALL                = 129,
-	PIXEL               = 130,
-	GET_PIXEL           = 131,
-	MEM_COPY            = 132,
-	MEM_SET             = 133,
-	C_PROC              = 134,
-	C_FUNC              = 135,
-	ROUTINE_ID          = 136,
-	CALL_BACK_RETURN    = 137,
-	CALL_PROC           = 138,
-	CALL_FUNC           = 139,
-	POKE4               = 140,
-	PEEK4S              = 141,
-	PEEK4U              = 142,
-	SC1_AND             = 143,
-	SC2_AND             = 144,
-	SC1_OR              = 145,
-	SC2_OR              = 146,
-	SC2_NULL            = 147,  -- no code address for this one
-	SC1_AND_IF          = 148,
-	SC1_OR_IF           = 149,
-	ASSIGN_SUBS2        = 150,  -- just for emit, not x.c
-	ASSIGN_OP_SUBS      = 151,
-	ASSIGN_OP_SLICE     = 152,
-	PROFILE             = 153,
-	XOR                 = 154,
-	EQUAL               = 155,
-	SYSTEM_EXEC         = 156,
-	PLATFORM            = 157,
-	END_PARAM_CHECK     = 158,
-	CONCAT_N            = 159,
-	NOPWHILE            = 160,  -- Translator only
-	NOP1                = 161,  -- Translator only
-	PLENGTH             = 162,
-	LHS_SUBS1           = 163,
-	PASSIGN_SUBS        = 164,
-	PASSIGN_SLICE       = 165,
-	PASSIGN_OP_SUBS     = 166,
-	PASSIGN_OP_SLICE    = 167,
-	LHS_SUBS1_COPY      = 168,
-	TASK_CREATE         = 169,
-	TASK_SCHEDULE       = 170,
-	TASK_YIELD          = 171,
-	TASK_SELF           = 172,
-	TASK_SUSPEND        = 173,
-	TASK_LIST           = 174,
-	TASK_STATUS         = 175,
-	TASK_CLOCK_STOP     = 176,
-	TASK_CLOCK_START    = 177,
-	FIND_FROM           = 178,
-	MATCH_FROM          = 179,
-	POKE2               = 180,
-	PEEK2S              = 181,
-	PEEK2U              = 182,
-	PEEKS               = 183,
-	PEEK_STRING         = 184,
-	OPTION_SWITCHES     = 185,
-	RETRY               = 186,
-	SWITCH              = 187,
-	CASE                = 188,
-	NOPSWITCH           = 189,  -- Translator only
-	GOTO 				= 190,
-	GLABEL 				= 191,
-	SPLICE				= 192,
-	INSERT				= 193,
-	SWITCH_SPI          = 194,
-	SWITCH_I            = 195,
-	HASH                = 196,
-	PROC_FORWARD        = 197,
-	FUNC_FORWARD        = 198,
-	TYPE_CHECK_FORWARD  = 199,
-	HEAD				= 200,
-	TAIL				= 201,
-	REMOVE				= 202,
-	REPLACE				= 203,
-	SWITCH_RT           = 204,
-	PROC_TAIL           = 205,
-	DELETE_ROUTINE      = 206,
-	DELETE_OBJECT       = 207,
-	EXIT_BLOCK          = 208,
-	MAX_OPCODE          = 208
+	MEM_COPY            = 130,
+	MEM_SET             = 131,
+	C_PROC              = 132,
+	C_FUNC              = 133,
+	ROUTINE_ID          = 134,
+	CALL_BACK_RETURN    = 135,
+	CALL_PROC           = 136,
+	CALL_FUNC           = 137,
+	POKE4               = 138,
+	PEEK4S              = 139,
+	PEEK4U              = 140,
+	SC1_AND             = 141,
+	SC2_AND             = 142,
+	SC1_OR              = 143,
+	SC2_OR              = 144,
+	SC2_NULL            = 145,  -- no code address for this one
+	SC1_AND_IF          = 146,
+	SC1_OR_IF           = 147,
+	ASSIGN_SUBS2        = 148,  -- just for emit, not x.c
+	ASSIGN_OP_SUBS      = 149,
+	ASSIGN_OP_SLICE     = 150,
+	PROFILE             = 151,
+	XOR                 = 152,
+	EQUAL               = 153,
+	SYSTEM_EXEC         = 154,
+	PLATFORM            = 155,
+	END_PARAM_CHECK     = 156,
+	CONCAT_N            = 157,
+	NOPWHILE            = 158,  -- Translator only
+	NOP1                = 159,  -- Translator only
+	PLENGTH             = 160,
+	LHS_SUBS1           = 161,
+	PASSIGN_SUBS        = 162,
+	PASSIGN_SLICE       = 163,
+	PASSIGN_OP_SUBS     = 164,
+	PASSIGN_OP_SLICE    = 165,
+	LHS_SUBS1_COPY      = 166,
+	TASK_CREATE         = 167,
+	TASK_SCHEDULE       = 168,
+	TASK_YIELD          = 169,
+	TASK_SELF           = 170,
+	TASK_SUSPEND        = 171,
+	TASK_LIST           = 172,
+	TASK_STATUS         = 173,
+	TASK_CLOCK_STOP     = 174,
+	TASK_CLOCK_START    = 175,
+	FIND_FROM           = 176,
+	MATCH_FROM          = 177,
+	POKE2               = 178,
+	PEEK2S              = 179,
+	PEEK2U              = 180,
+	PEEKS               = 181,
+	PEEK_STRING         = 182,
+	OPTION_SWITCHES     = 183,
+	RETRY               = 184,
+	SWITCH              = 185,
+	CASE                = 186,
+	NOPSWITCH           = 187,  -- Translator only
+	GOTO 				= 188,
+	GLABEL 				= 189,
+	SPLICE				= 190,
+	INSERT				= 191,
+	SWITCH_SPI          = 192,
+	SWITCH_I            = 193,
+	HASH                = 194,
+	PROC_FORWARD        = 195,
+	FUNC_FORWARD        = 196,
+	TYPE_CHECK_FORWARD  = 197,
+	HEAD				= 198,
+	TAIL				= 199,
+	REMOVE				= 200,
+	REPLACE				= 201,
+	SWITCH_RT           = 202,
+	PROC_TAIL           = 203,
+	DELETE_ROUTINE      = 204,
+	DELETE_OBJECT       = 205,
+	EXIT_BLOCK          = 206,
+	REF_TEMP            = 207,  -- Interpreter only?
+	DEREF_TEMP          = 208,  -- Interpreter only?
+	NOVALUE_TEMP        = 209,  -- Interpreter only?
+	COVERAGE_LINE       = 210,
+	COVERAGE_ROUTINE    = 211,
+	MAX_OPCODE          = 213
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
 -- be_execute.c (localjumptab[])
--- be_runtime.c (optable[]), redef.h, and maybe scanner.e, 
+-- be_runtime.c (optable[]), redef.h, and maybe scanner.e,
 -- emit.e, keylist.e and the Translator (compile.e)
--- Also, run makename.ex 
+-- Also, run makename.ex
 
 -- scanner codes
 --
--- codes for characters that are simply returned to the parser 
+-- codes for characters that are simply returned to the parser
 -- without any processing <= -20
 export constant
 	ILLEGAL_CHAR  = -20,
@@ -238,9 +247,10 @@ export constant
 	COMMA         = -30,
 	QUESTION_MARK = -31
 
--- codes for classes of characters that the scanner 
+-- codes for classes of characters that the scanner
 -- has to process in some way
 export constant
+	BACK_QUOTE   = -12,
 	NUMBER_SIGN  = -11,
 	KEYWORD      = -10,
 	BUILTIN      = -9,
@@ -253,13 +263,13 @@ export constant
 	LETTER       = -2,
 	BANG         = -1
 
--- other scanner tokens 
+-- other scanner tokens
 export constant VARIABLE = -100
 
 export constant END_OF_FILE_CHAR = 26 -- use this char to indicate EOF
 
 -- other keywords
-export enum 
+export enum
 	END = 402,
 	TO,
 	BY,
@@ -292,7 +302,7 @@ export enum
 	FALLTHRU,
 	ROUTINE
 
-export enum 
+export enum
 	FUNC = 501,
 	ATOM,
 	STRING,
@@ -317,3 +327,119 @@ export enum
 	QUALIFIED_TYPE,
 	NAMESPACE
 
+enum -- token category name id
+	TC_ILLCHAR,
+	TC_EOF,
+	TC_PUNC,
+	TC_PREDEF,
+	TC_VAR,
+	TC_PROC,
+	TC_FUNC,
+	TC_TYPE,
+	TC_OPER,
+	TC_NAMESPACE,
+	TC_LITERAL,
+	$
+
+export constant token_catname = {
+	"illegal character",
+	"end of file",
+	"punctuation",
+	"predefined",
+	"variable",
+	"procedure",
+	"function",
+	"type",
+	"operation",
+	"namespace",
+	"literal",
+	$
+	}
+export constant token_category = {
+	{ILLEGAL_CHAR, TC_ILLCHAR},
+	{END_OF_FILE, TC_EOF},
+	{DOLLAR, TC_PUNC},
+	{COLON, TC_PUNC},
+	{LEFT_BRACE, TC_PUNC},
+	{RIGHT_BRACE, TC_PUNC},
+	{LEFT_ROUND, TC_PUNC},
+	{RIGHT_ROUND, TC_PUNC},
+	{LEFT_SQUARE, TC_PUNC},
+	{RIGHT_SQUARE, TC_PUNC},
+	{COMMA, TC_PUNC},
+	{QUESTION_MARK, TC_PREDEF},
+	{NUMBER_SIGN, TC_PUNC},
+	{SINGLE_QUOTE, TC_PUNC},
+	{DOUBLE_QUOTE, TC_PUNC},
+	{DOT, TC_PUNC},
+	{BANG, TC_PUNC},
+	{INCLUDE_PATHS, TC_PREDEF},
+	{BUILT_IN, TC_PREDEF},
+	{QUALIFIED_VARIABLE, TC_VAR},
+	{VARIABLE, TC_VAR},
+	{SLICE, TC_PREDEF},
+	{PLUS_EQUALS, TC_OPER},
+	{MINUS_EQUALS, TC_OPER},
+	{MULTIPLY_EQUALS, TC_OPER},
+	{DIVIDE_EQUALS, TC_OPER},
+	{CONCAT_EQUALS, TC_OPER},
+	{EQUALS, TC_OPER},
+	{LESS, TC_OPER},
+	{GREATEREQ, TC_OPER},
+	{NOTEQ, TC_OPER},
+	{LESSEQ, TC_OPER},
+	{GREATER, TC_OPER},
+	{NOT, TC_OPER},
+	{AND, TC_OPER},
+	{OR, TC_OPER},
+	{MINUS, TC_OPER},
+	{PLUS, TC_OPER},
+	{UMINUS, TC_OPER},
+	{MULTIPLY, TC_OPER},
+	{DIVIDE, TC_OPER},
+	{CONCAT, TC_OPER},
+	{RIGHT_BRACE_N, TC_OPER},
+	{RIGHT_BRACE_2, TC_OPER},
+	{PLUS1, TC_OPER},
+	{DIV2, TC_OPER},
+	{LESS_IFW, TC_OPER},
+	{GREATEREQ_IFW, TC_OPER},
+	{EQUALS_IFW, TC_OPER},
+	{NOTEQ_IFW, TC_OPER},
+	{LESSEQ_IFW, TC_OPER},
+	{GREATER_IFW, TC_OPER},
+	{NOT_IFW, TC_OPER},
+	{PLUS_I, TC_OPER},
+	{MINUS_I, TC_OPER},
+	{PLUS1_I, TC_OPER},
+	{LESS_IFW_I, TC_OPER},
+	{GREATEREQ_IFW_I, TC_OPER},
+	{EQUALS_IFW_I, TC_OPER},
+	{NOTEQ_IFW_I, TC_OPER},
+	{LESSEQ_IFW_I, TC_OPER},
+	{GREATER_IFW_I, TC_OPER},
+	{QUALIFIED_FUNC, TC_FUNC},
+	{QUALIFIED_PROC, TC_PROC},
+	{QUALIFIED_TYPE, TC_TYPE},
+	{FUNC, TC_FUNC},
+	{FUNCTION, TC_FUNC},
+	{PROC, TC_PROC},
+	{PROCEDURE, TC_PROC},
+	{TYPE, TC_TYPE},
+	{NAMESPACE, TC_NAMESPACE},
+	{STRING, TC_LITERAL},
+	{ATOM, TC_LITERAL},
+	$
+
+}
+
+-- Commonly used token sets
+export constant
+	RTN_TOKS     = {PROC, FUNC, TYPE},
+	NAMED_TOKS   = {PROC, FUNC, TYPE, NAMESPACE},
+	ADDR_TOKS    = {VARIABLE, PROC, FUNC, TYPE},
+	ID_TOKS      = {VARIABLE, PROC, FUNC, TYPE, NAMESPACE},
+	FULL_ID_TOKS = {VARIABLE, QUALIFIED_VARIABLE, PROC, FUNC},
+	VAR_TOKS     = {VARIABLE, QUALIFIED_VARIABLE},
+	FUNC_TOKS    = {FUNC, QUALIFIED_FUNC},
+	$

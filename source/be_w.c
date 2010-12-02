@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/*      (c) Copyright 2007 Rapid Deployment Software - See License.txt       */
+/*      (c) Copyright - See License.txt       */
 /*****************************************************************************/
 /*                                                                           */
 /*                       SCREEN OUTPUT HANDLER                               */
@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
+
 #ifdef EUNIX
 #  include <sys/stat.h>
 #  include <unistd.h>
@@ -23,45 +24,28 @@
 #    include <sys\types.h>
 #    include <sys\stat.h>
 #  endif
-#  ifdef EDJGPP
-#    include <pc.h>
-#    include <sys/farptr.h>
-#    include <dpmi.h>
-#    include <go32.h>
-#    include <allegro.h>
-#  else
-#    if !defined(ELCC) && !defined(EMINGW)
+#  if !defined(EMINGW)
 #      include <graph.h>
-#    endif
 #  endif
 #endif
+
 #include <string.h>
+
 #ifdef EWINDOWS
 #  include <windows.h>
 #endif
+
 #include "alldefs.h"
-#ifdef EWATCOM
-#  ifdef EDOS
-#    include <i86.h>
-#  endif
-#endif
+#include "global.h"
+#include "be_w.h"
+#include "be_machine.h"
+#include "be_runtime.h"
+#include "be_rterror.h"
 
 /******************/
 /* Local defines  */
 /******************/
-#define MAX_SCREEN_WIDTH 200 /* what if resolutions get really high? >1280 */
-#define TAB_WIDTH 8    /* power of 2 assumed */
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern int current_screen;
-extern int line_max, col_max;
-extern int con_was_opened;
-extern struct videoconfig config;
-extern int low_on_space;
-extern unsigned current_bg_color;
-extern unsigned current_fg_color;
+#define TAB_WIDTH 4    /* power of 2 assumed */
 
 /**********************/
 /* Exported variables */
@@ -96,8 +80,9 @@ static COORD buff_size;
 static COORD buff_start;
 static SMALL_RECT screen_loc;
 #endif
-static char expanded_string[MAX_SCREEN_WIDTH];
-static char *expanded_ptr = expanded_string;
+static char *expanded_string = 0;
+static char *expanded_ptr;
+static char *expanded_end;
 static int must_flush = TRUE; /* flush output to screen or not */
 static int collect_next;   /* place to store next collect output */
 static int collect_free;   /* number of chars of empty space remaining */
@@ -112,54 +97,23 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-char *ERealloc();
-#else
-#include "alloc.h"
-#endif
-// TODO: This is required due to a bug in global.h that Jim discovered.
-#ifdef EWINDOWS
-extern unsigned default_heap;
-#endif
+#include "be_alloc.h"
 static void expand_tabs();
 void SetPosition();
-void RTInternal();
+
 
 /*********************/
 /* Defined functions */
 /*********************/
 struct rccoord GetTextPositionP()
 {
-#if defined(EDOS) && !defined(EDJGPP)
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-#endif
         struct rccoord p;
 
         p.row = screen_line;
         p.col = screen_col;
         return p;
-#if defined(EDOS) && !defined(EDJGPP)
-} else {
-        return _gettextposition();
-} //endif EUVISTA
-#endif
 }
-void OutTextP(const char * c)
-{
-#if defined(EDOS) && !defined(EDJGPP)
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-#endif
-    printf(c);
-    fflush(stdout);
-#if defined(EDOS) && !defined(EDJGPP)
-} else {
-    _outtext(c);
-} //endif EUVISTA
-#endif
-}
+
 
 #ifdef EUNIX
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],
@@ -192,18 +146,27 @@ void screen_show()
 }
 #endif
 
+#if defined (EUNIX)
+void Set_Image(struct char_cell image[MAX_LINES][MAX_COLS], char vch, char fg, char bg)
+{
+  int i, j;
+  
+    for (i = 0; i < line_max; i++) {
+        for (j = 0; j < col_max; j++) {
+            image[i][j].ascii = vch;
+            image[i][j].fg_color = fg;
+            image[i][j].bg_color = bg;
+        }
+    }
+}
+#endif
+
 void InitInOut()
 /* Set up stdout and stderr. In EWINDOWS some stuff
    is initialized right away. The rest is done later if necesssary on first
    use of the console - see show_console() below. */
 {
     struct rccoord position;
-    int i, j;
-#ifdef EDOS
-    struct stat buf;
-    int rc;
-#endif
-
 #ifdef EWINDOWS
     position.col = 1;   // should do these 2 properly
     position.row = 1;
@@ -213,8 +176,8 @@ void InitInOut()
     buff_size.Y = 1;
     buff_start.X = 0;
     buff_start.Y = 0;
-#else
-#if defined(EUNIX) || defined(EDJGPP)
+#endif
+#if defined(EUNIX)
     position.col = 1;
     position.row = 1;
     in_from_keyb  = isatty(0);
@@ -222,38 +185,22 @@ void InitInOut()
     err_to_screen = isatty(2);
     screen_line = position.row;
     screen_col = position.col;
-#ifdef EUNIX
-    for (i = 0; i < line_max; i++) {
-        for (j = 0; j < col_max; j++) {
-            screen_image[i][j].ascii = ' ';
-            screen_image[i][j].fg_color = 15;
-            screen_image[i][j].bg_color = 0;
-        }
-    }
-#endif
 
-#else
-    //DOS
-    position = GetTextPositionP();  // causes OpenWatcom 1.4 to go full-screen
-
-    screen_col = position.col;
-    err_to_screen = TRUE;  /* stderr always goes to screen in DOS */
-    rc = fstat(1, &buf);
-    if (rc == -1 || ((buf.st_atime == 0 || buf.st_mtime == 0)
-                     && (buf.st_dev < 0 || buf.st_dev > 9)))
-        out_to_screen = TRUE; /* what about printer ? */
-    else
-        out_to_screen = FALSE;
-
-    rc = fstat(0, &buf);
-    if (rc == -1 || ((buf.st_atime == 0 || buf.st_mtime == 0)
-                     && (buf.st_dev < 0 || buf.st_dev > 9)))
-        in_from_keyb = TRUE;
-    else
-        in_from_keyb = FALSE;
-#endif
+	Set_Image(screen_image, ' ', 15, 0);
 #endif
 }
+
+int console_application() {
+#if defined(EWINDOWS)
+	if (!have_console)
+			show_console();
+		
+	return already_had_console;
+#else
+	return 1;
+#endif
+}
+
 
 #if defined(EWINDOWS)
 void show_console()
@@ -272,7 +219,7 @@ void show_console()
     have_console = TRUE;
     alloc_ret = !AllocConsole();
     if (already_had_console < 0) {
-        // this effectively tells us if we were started as a GUI app or a CONSOLE app (exw.exe or exwc.exe)
+        // this effectively tells us if we were started as a GUI app or a CONSOLE app (euiw.exe or eui.exe)
         already_had_console = alloc_ret;
     }
 
@@ -306,8 +253,8 @@ void show_console()
                                 NULL);
     }
 
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
-	/* when EUCONS is set, allow stderr to be redirected so rxvt (which redirects it to a pipe) will work */
+    if (EuConsole){
+	/* when this is set, allow stderr to be redirected so rxvt (which redirects it to a pipe) will work */
     	stderr_cons = GetStdHandle(STD_ERROR_HANDLE);
     	err_to_screen = GetConsoleScreenBufferInfo(stderr_cons, &info);
     } else {
@@ -336,7 +283,8 @@ static void end_of_line(int c)
     GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
     console_info.dwCursorPosition.X = 0;
     if (c == '\n') {
-        if (console_info.dwCursorPosition.Y < console_info.dwMaximumWindowSize.Y - 1)
+//         if (console_info.dwCursorPosition.Y < console_info.dwMaximumWindowSize.Y - 1)
+        if (console_info.dwCursorPosition.Y < console_info.dwSize.Y - 1)
             console_info.dwCursorPosition.Y++;
         else {
             // scroll screen up one line
@@ -345,14 +293,15 @@ static void end_of_line(int c)
             COORD pos;
             CHAR_INFO fill_char;
 
-            if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+            if (EuConsole){
                 pos.X = 0;
                 pos.Y = console_info.dwSize.Y-1;
                 SetConsoleCursorPosition(console_output, pos);
             }
 
             src.Left = 0;
-            src.Right = console_info.dwMaximumWindowSize.X - 1;
+//             src.Right = console_info.dwMaximumWindowSize.X - 1;
+            src.Right = console_info.dwSize.X - 1;
             src.Top = 0;
             src.Bottom = console_info.dwSize.Y-1; // -1 ???
             clip = src;
@@ -387,20 +336,19 @@ static void MyWriteConsole(char *string, int nchars)
 // write a string of plain characters to the console and
 // update the cursor position
 {
-    int i;
+    unsigned long i;
     static int first = 0;
     CONSOLE_SCREEN_BUFFER_INFO console_info;
 
     COORD ch;
 
     show_console();
-    /* hack - if we are eui, output something to avoid data appearing on the last line of the console which we later on will not be able to see */
+    /* hack - if we are eui, output something to avoid data appearing on the
+     last line of the console which we later on will not be able to see */
     GetConsoleScreenBufferInfo(console_output, &console_info); // not always necessary?
-    if ( (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1) &&
-    (already_had_console==1) && !first) {
+    if ( EuConsole && (already_had_console==1) && !first) {
         if (!(console_info.dwCursorPosition.Y < console_info.dwSize.Y - 1))
         {
-            //WriteConsole(console_output, "\n", 1, &i, NULL);
             end_of_line('\n');
         }
         first = 1;
@@ -411,62 +359,72 @@ static void MyWriteConsole(char *string, int nchars)
     screen_loc.Top = console_info.dwCursorPosition.Y;
     screen_loc.Bottom = screen_loc.Top;
     screen_loc.Left = console_info.dwCursorPosition.X; //screen_col-1;
-    screen_loc.Right = console_info.dwMaximumWindowSize.X - 1;
+//     screen_loc.Right = console_info.dwMaximumWindowSize.X - 1;
+    screen_loc.Right = console_info.dwSize.X - 1;
 
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
 
-    ch.X = screen_loc.Left;
-    ch.Y = screen_loc.Top;
-	if (old_string == 0) {
-		oldstr_len = max(nchars + 3, 256);
-		old_string = (char *)malloc(oldstr_len);
-		if (old_string == 0) return;
-	}
-
-	if (nchars > oldstr_len) {
-		oldstr_len = nchars + 3;
-		old_string = (char *)realloc(old_string, oldstr_len);
-		if (old_string == 0) return;
-	}
-
-    strlcpy(old_string, string, nchars);
-
-	// Blank out any EOL characters
-    for (i = 0; i < nchars; i++)
-    {
-        if (old_string[i] == '\n')
-            old_string[i] = ' ';
-        else if (old_string[i] == '\r')
-            old_string[i] = ' ';
-    }
-
-    SetConsoleCursorPosition(console_output, ch);
-    WriteConsole(console_output, old_string, nchars, &i, NULL);
-    SetConsoleCursorPosition(console_output, ch);
+	    ch.X = screen_loc.Left;
+	    ch.Y = screen_loc.Top;
+		if (old_string == 0) {
+			oldstr_len = max(nchars + 3, 256);
+			old_string = (char *)EMalloc(oldstr_len);
+			if (old_string == 0) return;
+		}
+	
+		if (nchars > oldstr_len) {
+			oldstr_len = nchars + 3;
+			old_string = (char *)ERealloc(old_string, oldstr_len);
+			if (old_string == 0) return;
+		}
+	
+	    charcopy(old_string, oldstr_len, string, nchars);
+	
+		// Blank out any EOL characters
+	    for (i = 0; i < nchars; i++)
+	    {
+	        if (old_string[i] == '\n')
+	            old_string[i] = ' ';
+	        else if (old_string[i] == '\r')
+	            old_string[i] = ' ';
+	    }
+	
+	    SetConsoleCursorPosition(console_output, ch);
+	    WriteConsole(console_output, old_string, nchars, &i, NULL);
+	    SetConsoleCursorPosition(console_output, ch);
 
     } else {
 
-    i = 0;
-    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
-        if (line_buffer != 0) {
-            EFree(line_buffer);
-        }
-        line_buffer_size = console_info.dwMaximumWindowSize.X;
-        line_buffer = (CHAR_INFO*) EMalloc( sizeof( CHAR_INFO ) * line_buffer_size );
+	    i = 0;
+// 	    if( line_buffer_size < console_info.dwMaximumWindowSize.X || line_buffer == NULL){
+	    if( line_buffer_size < console_info.dwSize.X || line_buffer == NULL){
+	        if (line_buffer != 0) {
+	            EFree((char *)line_buffer);
+	        }
+//	        line_buffer_size = console_info.dwMaximumWindowSize.X;
+	        line_buffer_size = console_info.dwSize.X;
+	        line_buffer = (CHAR_INFO*) EMalloc( sizeof( CHAR_INFO ) * line_buffer_size );
+	    }
+	
+	    while (*string != '\0' && i < line_buffer_size) {
+		    // Avoid outputing newline characters.
+		    char ch;
+		    
+		    ch = *string;
+		    if ( ch != '\n' && ch != '\r')
+	        	line_buffer[i].Char.AsciiChar = ch;
+	        else
+	        	line_buffer[i].Char.AsciiChar = ' ';
+	        line_buffer[i].Attributes = console_info.wAttributes;
+	        string++;
+	        i++;
+	    }
+	    WriteConsoleOutput(console_output,
+	                       line_buffer, // was:  &line_buffer ?
+	                       buff_size,
+	                       buff_start,
+	                       &screen_loc);
     }
-
-    while (*string != '\0') {
-        line_buffer[i].Char.AsciiChar = *string;
-        line_buffer[i].Attributes = console_info.wAttributes;
-        string++;
-        i++;
-    }
-    WriteConsoleOutput(console_output,
-                       line_buffer, // was:  &line_buffer ?
-                       buff_size,
-                       buff_start,
-                       &screen_loc);
-    } // EUCONS
 
     console_info.dwCursorPosition.X += nchars; // what if becomes 80? (i.e 1 too big)
     SetConsoleCursorPosition(console_output, console_info.dwCursorPosition);
@@ -487,95 +445,6 @@ void flush_screen()
     expand_tabs("");
 }
 
-
-#ifdef EDJGPP
-
-#define COLOR_TEXT_MEMORY 0x000B8000
-#define MONO_TEXT_MEMORY 0x000B0000
-
-static void graphic_puts(char *text)
-// use Allegro to write text in graphics modes
-{
-    int n, last;
-
-    n = strlen(text);
-    if (n == 0)
-        return;
-    last = text[n-1];
-    textout(screen, font, text, config.x, config.y, current_fg_color);
-    config.x += text_length(font, text);
-    if (last == '\n') {
-        config.x = 0;
-        config.y += text_height(font);
-    }
-    else if (last == '\r') {
-        config.x = 0;
-    }
-}
-
-static char *DOS_scr_addr(int line, int col)
-// calculate address in DOS screen memory for a given line, column
-{
-    char *screen_memory;
-    int page_size;
-
-    if (config.mode == 7)
-        screen_memory = (char *)MONO_TEXT_MEMORY;
-    else
-        screen_memory = (char *)COLOR_TEXT_MEMORY;
-    // take out until we support pages:
-    // page_size = config.numtextrows * config.numtextcols * 2;
-    // page_size = 1024 * ((page_size + 1023) / 1024);
-    // screen_memory = screen_memory + get_active_page() * page_size;
-    return screen_memory + (line * config.numtextcols + col) * 2;
-}
-
-mem_cputs(char *text)
-/* write a string directly to screen memory */
-{
-    char *screen_memory;
-    int line, col, c;
-
-    if (TEXT_MODE) {
-        if (wrap_around) {
-            cputs(text);
-        }
-        else {
-            /* do it this way to avoid the scroll when the
-               last line is written */
-            ScreenGetCursor(&line, &col);
-            while ((c = *text++) != 0) {
-                if (c == '\n') {
-                    if (line < config.numtextrows-1)
-                        line++;
-                    else {
-                        ScreenSetCursor(line, col);
-                        cputs("\n"); // only time we want to scroll
-                    }
-                    col = 0;
-                }
-                else if (c == '\r') {
-                    col = 0;
-                }
-                else if (col < config.numtextcols) {
-                    screen_memory = DOS_scr_addr(line, col);
-                    _farpokeb(_go32_info_block.selector_for_linear_memory,
-                            (unsigned)screen_memory++,
-                            c);
-                    _farpokeb(_go32_info_block.selector_for_linear_memory,
-                            (unsigned)screen_memory,
-                            ScreenAttrib);
-                    col++;
-                }
-            }
-            ScreenSetCursor(line, col);
-        }
-    }
-    else {
-        graphic_puts(text); // graphics modes
-    }
-}
-#endif
 
 #ifdef EUNIX
 void update_screen_string(char *s)
@@ -620,7 +489,16 @@ static void expand_tabs(char *raw_string)
  */
 {
     int c, i, nblanks, true_screen_col;
+	static int screen_width;
+	int colpos;
 
+    if (expanded_string == 0) {
+	    screen_width = 200;
+	    expanded_string = (char *)EMalloc(screen_width + 3); // Extra 3 for \n\r\0
+	    expanded_ptr = expanded_string;
+	    expanded_end = expanded_string + screen_width;
+    }
+    
     while ((c = *raw_string++) != 0) {
 
         if (screen_col + (expanded_ptr - expanded_string) > col_max) {
@@ -632,21 +510,13 @@ static void expand_tabs(char *raw_string)
                 MyWriteConsole(expanded_string,
                                expanded_ptr - expanded_string);
                 end_of_line('\n');
-#else
+#endif // EWINDOWS
 #ifdef EUNIX
                 iputs(expanded_string, stdout);
                 iflush(stdout);
                 update_screen_string(expanded_string);
-#else
-//DOS
-#ifdef EDJGPP
-                mem_cputs(expanded_string); //critical function
-#else
-                OutTextP(expanded_string); //critical function
-#endif
 #endif // EUNIX
 
-#endif // EWINDOWS
                 screen_col = 1;
                 expanded_ptr = expanded_string; // make it empty
             }
@@ -664,6 +534,13 @@ static void expand_tabs(char *raw_string)
             if (true_screen_col + nblanks > col_max)
                 nblanks = col_max - true_screen_col + 1;
             for (i = 1; i <= nblanks; i++) {
+	            if (expanded_ptr >= expanded_end) {
+		            colpos = expanded_ptr - expanded_string;
+		            screen_width += 100;
+		            expanded_string = (char *)ERealloc(expanded_string, screen_width + 3);
+		            expanded_ptr = expanded_string + colpos;
+		            expanded_end = expanded_string + screen_width;
+	            }
                 *expanded_ptr++ = ' ';
             }
         }
@@ -684,19 +561,6 @@ static void expand_tabs(char *raw_string)
             iflush(stdout);
 #endif
 
-#ifdef EDOS
-#ifdef EDJGPP
-            if (c == '\n')
-                *expanded_ptr++ = '\r';
-            *expanded_ptr++ = c;
-            *expanded_ptr = '\0';
-            mem_cputs(expanded_string);
-#else
-            *expanded_ptr++ = c;
-            *expanded_ptr = '\0';
-            OutTextP(expanded_string);
-#endif
-#endif
             screen_col = 1;
             if (c == '\n' && screen_line < config.numtextrows-1)
                 screen_line += 1;
@@ -705,6 +569,14 @@ static void expand_tabs(char *raw_string)
         }
 
         else if (screen_col <= col_max) {
+//             if (expanded_ptr >= expanded_end) {
+// 	            colpos = expanded_ptr - expanded_string;
+// 	            screen_width += 100;
+// 	            expanded_string = (char *)ERealloc(expanded_string, screen_width + 3);
+// 	            expanded_ptr = expanded_string + colpos;
+// 	            expanded_end = expanded_string + screen_width;
+//             }
+	        
             // normal characters
             *expanded_ptr++ = c;
         }
@@ -716,19 +588,11 @@ static void expand_tabs(char *raw_string)
         *expanded_ptr = '\0';
 #ifdef EWINDOWS
         MyWriteConsole(expanded_string, expanded_ptr - expanded_string);
-#else
+#endif
 #ifdef EUNIX
         iputs(expanded_string, stdout);
         iflush(stdout);
         update_screen_string(expanded_string);
-#else
-// DOS
-#ifdef EDJGPP
-        mem_cputs(expanded_string);
-#else
-        OutTextP(expanded_string);
-#endif
-#endif
 #endif
         screen_col += expanded_ptr - expanded_string;
         expanded_ptr = expanded_string;
@@ -752,7 +616,7 @@ void screen_output(IFILE f, char *out_string)
 			collect_free = 80;
 			collect_len = len + collect_free;
             collect = EMalloc(collect_len + 1);
-			strlcpy(collect, out_string, collect_len);
+			copy_string(collect, out_string, collect_len);
             collect_next = len;
         }
         else {
@@ -804,9 +668,8 @@ void screen_output(IFILE f, char *out_string)
         }
 
         iputs(out_string, f);
-        if ((f == stdout || f == stderr) &&
-		(getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1)) {
-		// for rxvt - note that in this instance EUCONS will also work on DOS
+        if ((f == stdout || f == stderr) &&	EuConsole) {
+		// for rxvt
 		iflush(f);
         }
     }
@@ -820,11 +683,11 @@ void screen_output_va(IFILE f, char *out_string, va_list ap)
 	// figure out how long the string will be
 	nsize = vsnprintf(0, 0, out_string, ap);
 
-	buf = malloc(nsize+1); // add one for the trailing '\0'
+	buf = EMalloc(nsize+1); // add one for the trailing '\0'
 	vsnprintf(buf, nsize+1, out_string, ap);
 
 	screen_output(f, buf);
-	free(buf);
+	EFree(buf);
 }
 
 void screen_output_vararg(IFILE f, char *out_string, ...)
@@ -851,90 +714,6 @@ void EClearLines(int first_line, int last_line, int len, WORD attributes)
 }
 #endif
 
-#ifdef EDOS
-#ifdef EWATCOM
-void SetPosInt(char x, char y)
-{
-/* Perform a DOS software interrupt. */
-    int int_no;
-    object_ptr obj_ptr;
-
-#ifdef EDJGPP
-    __dpmi_regs reglist;
-#else
-    // register list for Causeway IntXX
-    struct xx {
-        unsigned int edi;
-        unsigned int esi;
-        unsigned int ebp;
-        unsigned int z0;
-        unsigned int ebx;
-        unsigned int edx;
-        unsigned int ecx;
-        unsigned int eax;
-        unsigned short flags;
-        unsigned short es;
-        unsigned short ds;
-        unsigned short fs;
-        unsigned short gs;
-        unsigned short z1;
-        unsigned short z2;
-        unsigned short z3;
-        unsigned short z4;
-    } reglist;
-    union REGS regs;
-    struct SREGS seg_regs;
-#endif
-
-    int_no =       0x10;
-
-    // fill up reglist
-#ifdef EDJGPP
-    reglist.x.di = 0;
-    reglist.x.si = 0;
-    reglist.x.bp = 0;
-    reglist.x.bx = 0;
-    reglist.x.dx = y*256+x;
-    reglist.x.cx = 0;
-    reglist.x.ax = 0x0200;
-    reglist.x.flags = 0;
-    reglist.x.es = 0;
-    reglist.x.ds = 0;
-
-    __dpmi_int(int_no, &reglist);
-
-#else
-    reglist.edi = 0;
-    reglist.esi = 0;
-    reglist.ebp = 0;
-    reglist.z0 = 0;
-    reglist.ebx = 0;
-    reglist.edx = y*256+x;
-    reglist.ecx = 0;
-    reglist.eax = 0x0200;
-    reglist.flags = 0;
-    reglist.es = 0;
-    reglist.ds = 0;
-
-    reglist.fs = 0;
-    reglist.gs = 0;
-    reglist.z1 = 0;
-    reglist.z2 = 0;
-    reglist.z3 = 0;
-    reglist.z4 = 0;
-
-    segread(&seg_regs);
-    memset(&regs, 0, sizeof(regs));
-    regs.x.edi = (unsigned int)&reglist;
-    regs.x.ebx = (unsigned int)int_no; // The user's interrupt number
-    regs.x.eax = 0x0ff01; // Causeway Simulate real mode interrupt
-
-    int386x(0x31, &regs, &regs, &seg_regs);
-#endif
-}
-#endif // EWATCOM
-#endif // EDOS
-
 void ClearScreen()
 {
 #ifdef EWINDOWS
@@ -948,27 +727,14 @@ void ClearScreen()
 
 #ifdef EUNIX
     // ANSI code
-    iputs("\033[2J", stdout);  // clear screen
+    SetTColor(current_fg_color);
+    SetBColor(current_bg_color);
+    iputs("\E[2J", stdout);  // clear screen
+    iflush(stdout);
     SetPosition(1,1);
+    Set_Image(screen_image, ' ', current_fg_color, current_bg_color);
 #endif
 
-#ifdef EDOS
-#ifdef EDJGPP
-    if (TEXT_MODE)
-        ScreenClear(); // text modes
-    else
-        clear_to_color(screen, current_bg_color);
-    SetPosition(1,1);
-#else
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-    system("CLS");
-    SetPosInt(0,0);
-} else {
-    _clearscreen(_GCLEARSCREEN);
-} //endif EUVISTA
-#endif
-#endif
     screen_line = 1;
     screen_col = 1;
 }
@@ -977,38 +743,12 @@ void SetPosition(int line, int col)
 {
 #ifdef EUNIX
 #define SP_buflen (20)
-    char lbuff[SP_buflen];
-    char cbuff[SP_buflen];
-#endif
-
-#ifdef EDOS
-#ifdef EDJGPP
-    if (TEXT_MODE)
-        ScreenSetCursor(line-1, col-1);
-    else {
-        config.x = (col-1) * text_length(font, "m");
-        config.y = (line-1) * text_height(font);
-    }
-
-#else
-if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
-{
-    SetPosInt((char)(line-1), (char)(col-1));
-} else {
-    _settextposition(line, col);
-} //endif EUVISTA
-#endif
+    char buff[SP_buflen];
 #endif
 
 #ifdef EUNIX
-    snprintf(lbuff, SP_buflen, "%d", line); lbuff[SP_buflen - 1] = '\0'; // ensure NULL
-    snprintf(cbuff, SP_buflen, "%d", col); cbuff[SP_buflen - 1] = '\0'; // ensure NULL
-    // ANSI code
-    iputs("\033[", stdout);
-    iputs(lbuff, stdout);
-    iputc(';', stdout);
-    iputs(cbuff, stdout);
-    iputc('H', stdout);
+    snprintf(buff, SP_buflen, "\E[%d;%dH", line, col);
+    iputs(buff, stdout);
     iflush(stdout);
 #endif
 
@@ -1026,7 +766,7 @@ if (getenv("EUVISTA")!=NULL && atoi(getenv("EUVISTA"))==1)
 
 #ifdef EWINDOWS
 
-void ReadInto(WORD * buf, LPTSTR * str, int size, int * n, int * m, WORD * saved, struct rccoord * pos)
+void ReadInto(WORD * buf, LPTSTR str, int size, unsigned long * n, unsigned long * m, WORD * saved, struct rccoord * pos)
 {
     COORD ch;
 
@@ -1042,9 +782,9 @@ void ReadInto(WORD * buf, LPTSTR * str, int size, int * n, int * m, WORD * saved
     ReadConsoleOutputAttribute(console_output, buf, size, ch, m);
 }
 
-void WriteOutFrom(WORD * buf, LPTSTR * str, int n, int m, WORD * saved, struct rccoord * pos)
+void WriteOutFrom(WORD * buf, LPTSTR str, unsigned long n, unsigned long m, WORD * saved, struct rccoord * pos)
 {
-    int size1, size2;
+    unsigned long size1, size2;
     COORD ch;
     ch.X = 0;
     ch.Y = 0;
@@ -1060,61 +800,60 @@ void WriteOutFrom(WORD * buf, LPTSTR * str, int n, int m, WORD * saved, struct r
 }
 
 TCHAR console_save_str[65536];
-int console_save_str_n = 0;
+unsigned long console_save_str_n = 0;
 WORD console_save_buf[65536];
-int console_save_buf_n = 0;
+unsigned long console_save_buf_n = 0;
 WORD console_save_saved = (WORD)-1;
 struct rccoord console_save_pos;
 
 TCHAR console_trace_str[65536];
-int console_trace_str_n = 0;
+unsigned long console_trace_str_n = 0;
 WORD console_trace_buf[65536];
-int console_trace_buf_n = 0;
+unsigned long console_trace_buf_n = 0;
 WORD console_trace_saved = (WORD)-1;
 struct rccoord console_trace_pos;
 
 void SaveNormal()
 {
-    int size = 65536;
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    unsigned long size = 65536;
+    if (EuConsole){
         ReadInto(console_save_buf, console_save_str, size, &console_save_buf_n, &console_save_str_n, &console_save_saved, &console_save_pos);
     } else {
         console_save = console_output;
-    } // EUCONS
+    }
 }
 
 void SaveTrace()
 {
     int size = 65536;
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
         ReadInto(console_trace_buf, console_trace_str, size, &console_save_buf_n, &console_save_str_n, &console_trace_saved, &console_trace_pos);
     } else {
         SetConsoleActiveScreenBuffer(console_var_display);
         console_output = console_var_display;
-    } // EUCONS
+    }
 }
 
 void RestoreTrace()
 {
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
         WriteOutFrom(console_trace_buf, console_trace_str, console_save_buf_n, console_save_str_n, &console_trace_saved, &console_trace_pos);
     } else {
         SetConsoleActiveScreenBuffer(console_trace);
         console_output = console_trace;
-    } // EUCONS
+    }
 }
 
 void RestoreNormal()
 {
-    if (getenv("EUCONS")!=NULL&&atoi(getenv("EUCONS"))==1){
+    if (EuConsole){
         WriteOutFrom(console_save_buf, console_save_str, console_save_buf_n, console_save_str_n, &console_save_saved, &console_save_pos);
     } else {
         console_output = console_save;
         SetConsoleActiveScreenBuffer(console_output);
-    } // EUCONS
+    }
 }
 
-extern void DisableControlCHandling();
 void DisableControlCHandling()
 {
 	// SetConsoleMode(console_input, ENABLE_MOUSE_INPUT);

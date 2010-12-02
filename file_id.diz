@@ -1,10 +1,10 @@
 Euphoria Programming Language v4.0
-for Windows and DOS. (Linux and FreeBSD 
-versions are also available.)  
+for Windows,  Linux, FreeBSD 
+and other unix versions available.
 Simple, flexible, and easy to learn. 
 Outperforms all popular interpreted 
 languages. Complete Reference Manual 
 included. Lots of free example programs 
 with full source. Makes .EXE files. Great 
 for games, utilities, CGI, and GUI programs.
-See README.DOC.
+See docs/ and/or http://openeuphoria.org

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/*      (c) Copyright 2007 Rapid Deployment Software - See License.txt       */
+/*      (c) Copyright - See License.txt       */
 /*****************************************************************************/
 /*                                                                           */
 /*                BACK-END SYMBOL TABLE ACCESS ROUTINES                      */
@@ -17,21 +17,11 @@
 #include <windows.h>
 #endif
 #include "alldefs.h"
+#include "be_execute.h"
+#include "be_alloc.h"
+#include "be_machine.h"
+#include "be_runtime.h"
 
-/******************/
-/* Local defines  */
-/******************/
-
-/**********************/
-/* Imported variables */
-/**********************/
-extern struct sline *slist;
-extern unsigned char TempBuff[];
-extern int gline_number;
-extern struct IL fe;
-extern int SymTabLen; // avoid > 3 args
-extern unsigned default_heap;
-extern char **file_name;
 /**********************/
 /* Exported variables */
 /**********************/
@@ -50,11 +40,7 @@ static int e_routine_size = 0;   /* number of symbol table pointers allocated */
 /**********************/
 /* Declared functions */
 /**********************/
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-#else
-#include "alloc.h"
-#endif
+#include "be_alloc.h"
 /*********************/
 /* Defined functions */
 /*********************/
@@ -154,7 +140,12 @@ symtab_ptr Locate(int *pc)
 	return NULL; 
 }
 
-symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen)
+long block_contains_line( symtab_ptr block, unsigned long line){
+// Make sure the line is inside of the block
+	return (block == 0) || ((block->u.block.first_line <= line) && (block->u.block.last_line >= line));
+}
+
+symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen, unsigned long current_line )
 /* Look up a name (routine or var) in the symbol table at runtime.
    The name must have been defined earlier in the source than
    where we are currently executing. The name may be a simple "name"
@@ -264,21 +255,41 @@ symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen
 				 s != NULL && 
 				 (s->scope == S_PRIVATE || s->scope == S_LOOP_VAR);
 				s = s->next) {
-				if (strcmp(name, s->name) == 0)
+				if ( (strcmp(name, s->name) == 0) && block_contains_line( s->u.var.declared_in, current_line) )
 					return s;           
 			}    
 		}
 		
 		/* try to match a LOCAL, EXPORT or GLOBAL symbol in the same source file */
 		for (s = TopLevelSub->next; s != NULL && ( s <= stop || s->scope == S_PRIVATE); s = s->next) {
-			if (s->file_no == file && 
-				(s->scope == S_LOCAL || s->scope == S_GLOBAL ||
-				s->scope == S_EXPORT || s->scope == S_PUBLIC ||
-				(proc == TopLevelSub && s->scope == S_GLOOP_VAR)) &&
-				strcmp(name, s->name) == 0) {  
-				// shouldn't really be able to see GLOOP_VARs unless we are
-				// currently inside the loop - only affects interactive var display
-				return s;
+			
+			if (s->file_no == file ){
+				
+				switch( s->scope ){
+					case S_GLOOP_VAR:
+						if( proc != TopLevelSub ){
+							// should only be able to see these at top level
+							continue;
+						}
+					case S_LOCAL:
+						if( !(s->token == PROC ||
+								s->token == FUNC || 
+								s->token == TYPE) &&
+							!block_contains_line( s->u.var.declared_in, current_line ) ){
+							// locals and loop vars should only be visible inside their blocks
+							continue;
+						}
+					case S_GLOBAL:
+					case S_PUBLIC:
+					case S_EXPORT:
+						if( strcmp(name, s->name) == 0) {  
+							// shouldn't really be able to see GLOOP_VARs unless we are
+							// currently inside the loop - only affects interactive var display
+							return s;
+						}
+						break;
+					
+				}
 			}
 		} 
 				
@@ -335,7 +346,7 @@ int RoutineId(symtab_ptr current_sub, object name, int file_no)
 	routine_string = (char *)&TempBuff;
 	MakeCString(routine_string, name, TEMP_SIZE);
 
-	p = RTLookup(routine_string, file_no, NULL, current_sub, SymTabLen); 
+	p = RTLookup(routine_string, file_no, NULL, current_sub, *(int*)fe.st, 0); 
 
 	if (p == NULL || (p->token != PROC && 
 					  p->token != FUNC &&

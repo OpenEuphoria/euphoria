@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/*      (c) Copyright 2007 Rapid Deployment Software - See License.txt       */
+/*      (c) Copyright - See License.txt       */
 /*****************************************************************************/
 /*                                                                           */
 /*                          Syntax Color                                     */
@@ -20,10 +20,13 @@
 #include <graph.h>
 #endif
 #include "alldefs.h"
+#include "be_runtime.h"
+#include "be_w.h"
 
 /******************/
 /* Local defines  */
 /******************/
+#define LMAX 200             /* maximum input line length */
 /* colors of various syntax classes */
 #define NORMAL_COLOR 0
 #define BUILTIN_COLOR 5
@@ -109,7 +112,8 @@ static char *keyword[] = {
 	"enum",
 	"loop",
 	"until",
-	"entry",	
+	"entry",
+	"fallthru",
 	NULL
 };
 
@@ -197,7 +201,6 @@ static char *predefined[] = {
 	"option_switches",
 	"retry",
 	"switch",
-	NULL,NULL,
 	"goto",
 	"label",
 	"splice",
@@ -206,12 +209,14 @@ static char *predefined[] = {
 	"head",
 	"tail",
 	"remove",
-	"replace"
+	"replace",
+	NULL
 };
 
 /*********************/
 /* Defined functions */
 /*********************/
+
 void init_class()
 /* set up character classes for easier line scanning */
 {
@@ -246,7 +251,6 @@ static int s_find(char *name)
 /* look up a name in the keyword/builtin list */
 {
 	int i;
-	
 	i = 0;
 	while (keyword[i] != NULL) {
 		if (strcmp(name, keyword[i]) == 0) 
@@ -268,7 +272,8 @@ static void flush(int new_color)
 	if (new_color != color) {
 		if (color != -1) {
 			set_text_color(color);
-			strlcpy(segment, line+seg_start, seg_end - seg_start);
+			if (charcopy(segment, LMAX, line+seg_start, seg_end - seg_start + 1) <= 0)
+				segment[LMAX-1] = 0; // Force null terminator if buffer too small.
 			screen_output(NULL, segment);
 			seg_start = seg_end + 1;
 		}
@@ -302,7 +307,7 @@ void DisplayColorLine(char *pline, int string_color)
 		class = char_class[c];
 
 		if (class == C_WHITE_SPACE) 
-			seg_end = seg_end + 1;  /* continue with same color */
+			seg_end++;  /* continue with same color */
 
 		else if (class == C_LETTER) {
 			last = length-1;
@@ -316,7 +321,8 @@ void DisplayColorLine(char *pline, int string_color)
 					}
 				}
 			}
-			strlcpy(word, line + seg_end + 1, last - seg_end);
+			if (charcopy(word, LMAX, line + seg_end + 1, last - seg_end) <= 0)
+				word[LMAX - 1] = 0; // Force null terminator if buffer was too small.
 			s_type = s_find(word);
 			if (s_type == S_KEYWORD) 
 				flush(KEYWORD_COLOR);
@@ -342,12 +348,12 @@ void DisplayColorLine(char *pline, int string_color)
 				flush(NORMAL_COLOR);
 			if (c == ')' || c == ']' || c == '}') 
 				bracket_level = bracket_level - 1;
-			seg_end = seg_end + 1;
+			seg_end++;
 		}
 		
-		else if (class == C_NEW_LINE) 
+		else if (class == C_NEW_LINE) {
 			break;  /* end of line */
-		
+		}
 		else if (class == C_DASH) {
 			if (line[seg_end+2] == '-') {
 				flush(COMMENT_COLOR);
@@ -355,7 +361,7 @@ void DisplayColorLine(char *pline, int string_color)
 				break;
 			}
 			flush(NORMAL_COLOR);
-			seg_end = seg_end + 1;
+			seg_end++;
 		}
 		
 		else { /* C_QUOTE */
@@ -380,7 +386,8 @@ void DisplayColorLine(char *pline, int string_color)
 	
 	if (color != -1) 
 		set_text_color(color);
-	strlcpy(segment, line+seg_start, seg_end - seg_start);
+	if (charcopy(segment, LMAX, line+seg_start, seg_end - seg_start+1) <= 0)
+		segment[LMAX - 1] = 0; // Force null terminator if buffer too small.
 	screen_output(NULL, segment);
 }
 

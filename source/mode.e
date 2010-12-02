@@ -1,21 +1,32 @@
--- (c) Copyright 2007 Rapid Deployment Software - See License.txt
+-- (c) Copyright - See License.txt
 --
 -- Modularizes the code, while allowing files to explicitly include the
 -- files they need.
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
 
 integer interpret
 integer translate
 integer bind
 integer do_extra_check
-integer init_backend_rid
-integer backend_rid
+integer init_backend_rid = -1
+integer backend_rid = -1
 integer extract_options_rid
 integer output_il_rid
 integer backend
 integer check_platform_rid = -1
 integer target_plat = platform()
 
-export procedure set_mode( sequence mode, integer extra_check )
+type valid_mode( sequence mode )
+	return find(mode, {"interpret","translate","bind","backend"})
+end type
+
+
+export procedure set_mode( valid_mode mode, integer extra_check )
 	interpret = equal( mode, "interpret" )
 	translate = equal( mode, "translate" )
 	bind      = equal( mode, "bind" )

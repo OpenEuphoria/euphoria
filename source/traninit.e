@@ -1,21 +1,55 @@
--- (c) Copyright 2008 Rapid Deployment Software - See License.txt
 --
--- This module sets one of wat_path, or dj_path or none at all 
--- to indicate lcc or gcc.  Using the command line options or environment variables
+-- (c) Copyright - See License.txt
+--
+--****
+-- == traninit.e: Initialize the translator
+--
+-- This module sets one of wat_path, or dj_path or none at all
+-- to indicate gcc.  Using the command line options or environment variables
 -- as hints it checks for command line sanity and sets the said environment
 -- variables.
--- 
+--
 -- If the user selects the compiler at the command line and it cannot
--- find its envinronment variable the translator will exit with an error.
+-- find its environment variable the translator will exit with an error.
 -- If the user doesn't select it then it will try all of the environment
 -- variables and use the selected platform to determine which compiler must
 -- be used.
 
-include std/os.e
+-- If you are translating to another platform, we expect you to take the
+-- C files and compile natively rather than using a cross compiler
+--
+-- From the GNU terminology there are three platforms ##target##, ##host##, and ##build##.
+-- For the translator that will be built using this file there are four:
+--
+-- |= GNU platform name |= Description |= Variable Names |
+-- |##target##   | The newly translated and compiled translator will translate to
+--                 any target platform for this translator... | none|
+-- |##host##     | The platform of the host this translated compiled translator will run on.|
+--                 ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/## |
+-- |##build##    | The platform where the building utilities make, wmake, compiler
+--                 and assembler are run.| ##TUNIX##, TLINUX, TWINDOWS, ##T/osname/##|
+-- |##translate##| The platform where the current translator is run on|platform()|
+--
+-- ifdef OSNAME and platform() is for our translation platform,
+-- TOSNAME is for the target platform.
+-- We assume that the target platform is the same as our build platform.
+-- Thus, no cross compilers.
+
+
+ifdef ETYPE_CHECK then
+	with type_check
+elsedef
+	without type_check
+end ifdef
+
+include std/cmdline.e
+include std/error.e
 include std/filesys.e
 include std/get.e
-include std/error.e
+include std/map.e
+include std/os.e
 include std/sort.e
+include std/text.e
 
 -- Translator initialization
 include global.e
@@ -28,349 +62,318 @@ include cominit.e
 include pathopen.e
 include error.e
 include platform.e
-
--- true if we want to force the user to choose the compiler
-constant FORCE_CHOOSE = FALSE
-
-boolean help_option = FALSE
-wat_option = FALSE
-djg_option = FALSE
-lcc_option = FALSE
-gcc_option = FALSE
-
-sequence compile_dir  =""
+include buildsys.e
+include msgtext.e
 
 function extract_options(sequence s)
--- dummy    
 	return s
 end function
 set_extract_options( routine_id("extract_options") )
 
-function upper(sequence s)
-	for i=1 to length(s) do
-		if s[i]>='a' and s[i]<='z' then
-			s[i]-=('a'-'A')
-		end if
-	end for
-	return s
-end function
+sequence trans_opt_def = {
+	{ "debug",            0, GetMsgText(189,0), { } },
+	{ "plat",             0, GetMsgText(185,0), { HAS_PARAMETER, "platform" } },
+	{ "con",              0, GetMsgText(182,0), { } },
+	{ "dll",              0, GetMsgText(183,0), { } },
+	{ "so",               0, GetMsgText(184,0), { } },
+	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
+	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
+	{ "wat",              0, GetMsgText(178,0), { } },
+	{ "gcc",              0, GetMsgText(180,0), { } },
+	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
+	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
+	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
+	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
+	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
+	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
+	{ "keep",             0, GetMsgText(191,0), { } },
+	{ "nobuild",          0, GetMsgText(196,0), { } },
+	{ "force-build",      0, GetMsgText(326,0), { } },
+	{ "emake",            0, GetMsgText(195,0), { } },
+	{ "makefile",         0, GetMsgText(193,0), { } },
+	{ "makefile-partial", 0, GetMsgText(192,0), { } },
+	{ "silent",           0, GetMsgText(177,0), { } },
+	{ "verbose",	      0, GetMsgText(319,0), { } },
+	$
+}
 
+add_options( trans_opt_def )
+
+--**
+-- Process the translator command-line options
 
 export procedure transoptions()
--- set translator command-line options  
-	integer i, option
-	sequence uparg
-	object s
+	sequence tranopts = get_options()
 	
-	Argv &= GetDefaultArgs()
+	sequence argv_to_parse = Argv[1..2]
+	if length(Argv) > 2 then
+		argv_to_parse &= merge_parameters(GetDefaultArgs(), Argv[3..$], tranopts)
+	else
+		argv_to_parse &= GetDefaultArgs()
+	end if
+
+	Argv = expand_config_options(argv_to_parse)
 	Argc = length(Argv)
+	
+	map:map opts = cmd_parse( tranopts, , Argv)
 
-	-- put file first, strip out the options
-	i = 1
-	while i <= Argc do
-		if Argv[i][1] = '-' then
-			uparg = upper(Argv[i])
-			
-			if find(uparg,{"-HELP","-?"}) then
-				help_option = TRUE
-			
-			elsif (equal("-SILENT", uparg)) then
+	handle_common_options(opts)
+
+	sequence opt_keys = map:keys(opts)
+	integer option_w = 0
+
+	for idx = 1 to length(opt_keys) do
+		sequence key = opt_keys[idx]
+		object val = map:get(opts, key)
+
+		switch key do
+			case "silent" then
 				silent = TRUE
-				
-			elsif (equal("-DLL", uparg) or equal("-SO", uparg)) then
-				dll_option = TRUE
-				
-			elsif equal("-CON", uparg) then
+
+			case "verbose" then
+				verbose = TRUE
+
+			case "cflags" then
+				cflags = val
+
+			case "lflags" then
+				lflags = val
+
+			case "wat" then
+				compiler_type = COMPILER_WATCOM
+
+			case "gcc" then
+				compiler_type = COMPILER_GCC
+
+			case "com" then
+				compiler_dir = val
+
+			case "con" then
 				con_option = TRUE
-				
-			elsif equal("-WAT", uparg) then
-				wat_option = TRUE
-				
-			elsif equal("-KEEP", uparg) then
-				keep = TRUE
-				
-			elsif equal("-DJG", uparg) then
-				djg_option = TRUE
-				
-			elsif equal("-FASTFP", uparg) then
-				fastfp = TRUE
-				
-			elsif equal("-LCCOPT-OFF", uparg) then
-				lccopt_option = FALSE
-				
-			elsif equal("-LCC", uparg) then
-				lcc_option = TRUE
+				OpDefines &= { "EUC_CON" }
 
-			elsif equal("-GCC", uparg) then
-				-- on windows this is MinGW
-				-- cygwin should get its own option
-				-- probably -CYG
-				gcc_option = TRUE
-				
-			elsif equal("-STACK", uparg) then
-				if i < Argc then
-					s = value(Argv[i+1])
-					add_switch( Argv[i+1], 1 )
-					if s[1] = GET_SUCCESS then
-						if s[2] >= 16384 then
-							total_stack_size = floor(s[2] / 4) * 4
-						end if
-					end if
-					move_args( i+1 )
-				else
-					Warning("-stack option missing stack size",translator_warning_flag)
-				end if
-				
-			elsif equal("-DEBUG", uparg) then
-				debug_option = TRUE
-				keep = TRUE -- you'll need the sources to debug
-				
-			elsif equal("-LIB", uparg ) then
-				if i < Argc then
-					user_library = Argv[i+1]
-					add_switch( user_library, 1 )
-					move_args( i+1 )
-				else
-					Warning("-lib option missing library name",translator_warning_flag)
-				end if
-			
-			elsif equal("-PLAT", uparg ) then
-				if i < Argc then
-					s = upper(Argv[i+1])
-					add_switch( Argv[i+1], 1 )
-					move_args( i+1 )
-					if equal( s, "WIN" ) then
+			case "dll", "so" then
+				dll_option = TRUE
+				OpDefines &= { "EUC_DLL" }
+
+			case "plat" then
+				switch upper(val) do
+					-- please update comments in Makefile.gnu, Makefile.wat, configure and
+					-- configure.bat; and the help section in configure and configure.bat; and
+					-- the message 201 in msgtext.e if you add another platform.
+					case "WIN" then
 						set_host_platform( WIN32 )
-					elsif equal( s, "DOS" ) then
-						set_host_platform( DOS32 )
-					elsif equal( s, "LINUX" ) then
+
+					case "LINUX" then
 						set_host_platform( ULINUX )
-					elsif equal( s, "FREEBSD" ) then
+
+					case "FREEBSD" then
 						set_host_platform( UFREEBSD )
-					elsif equal( s, "OSX" ) then
+
+					case "OSX" then
 						set_host_platform( UOSX )
-					elsif equal( s, "SUNOS" ) then
+
+					case "SUNOS" then
 						set_host_platform( USUNOS )
-					elsif equal( s, "OPENBSD" ) then
+
+					case "OPENBSD" then
 						set_host_platform( UOPENBSD )
-					elsif equal( s, "NETBSD" ) then
+
+					case "NETBSD" then
 						set_host_platform( UNETBSD )
-					else
-						Warning("unknown platform: %s", translator_warning_flag,{ Argv[i]})
-					end if
-				end if
-			
-			elsif equal("-COM", uparg ) then
-				if i < Argc then
-					compile_dir = Argv[i+1]
-					add_switch( compile_dir, 1 )
-					move_args( i+1 )
-				else
-					Warning("-com option missing compile directory",translator_warning_flag)
-				end if
 
-			elsif equal("-MAKEFILE", uparg) then
-				makefile_option = MAKE_SHORT
+					case else
+						ShowMsg(2, 201, { val, "WIN, LINUX, FREEBSD, OSX, SUNOS, OPENBSD, NETBSD" })
+						abort(1)
+				end switch
 
-			elsif equal("-MAKEFILE-FULL", uparg) then
-				makefile_option = MAKE_FULL
-
-			elsif equal("-CMAKEFILE", uparg) then
-				makefile_option = CMAKE
-
-			elsif equal("-O", uparg) then
-				if i < Argc then
-					output_dir = Argv[i+1]
-					add_switch( output_dir, 1 )
-					move_args( i+1)
-					create_directory( output_dir )
-					output_dir &= '/'
-				else
-					puts(1, "-o expects a directory name\n")
+			case "lib" then
+				user_library = canonical_path(val)
+				if not file_exists(user_library) then
+					ShowMsg(2, 348, { val })
 					abort(1)
 				end if
 
-			else
-				option = find( uparg, COMMON_OPTIONS )
-				if option then
-					common_options( option, i )
-				else
-					Warning("unknown option: %s", translator_warning_flag, {Argv[i]})
+			case "stack" then
+				sequence tmp = value(val)
+				if tmp[1] = GET_SUCCESS then
+					if tmp[2] >= 16384 then
+						total_stack_size = floor(tmp[2] / 4) * 4
+					end if
 				end if
 
+			case "debug" then
+				debug_option = TRUE
+				keep = TRUE -- you'll need the sources to debug
+
+			case "maxsize" then
+				sequence tmp = value(val)
+				if tmp[1] = GET_SUCCESS then
+					max_cfile_size = tmp[2]
+				else
+					ShowMsg(2, 202)
+					abort(1)
+				end if
+
+			case "keep" then
+				keep = TRUE
+
+			case "makefile-partial" then
+				build_system_type = BUILD_MAKEFILE_PARTIAL
+
+			case "makefile" then
+				build_system_type = BUILD_MAKEFILE_FULL
+
+			case "emake" then
+				build_system_type = BUILD_EMAKE
+
+			case "nobuild" then
+				build_system_type = BUILD_NONE
+
+			case "build-dir" then
+				output_dir = val
+				if find(output_dir[$], "/\\") = 0 then
+					output_dir &= '/'
+				end if
+
+			case "force-build" then
+				force_build = 1
+
+			case "o" then
+				exe_name = val
+		end switch
+	end for
+
+	if length(exe_name) and not absolute_path(exe_name) then
+		exe_name = current_dir() & SLASH & exe_name
+	end if
+
+	ifdef not EUDIS then
+		if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
+			output_dir = temp_file("." & SLASH, "build-", "")
+			if find(output_dir[$], "/\\") = 0 then
+				output_dir &= '/'
 			end if
-			-- delete "-" option from the list of args */
-			add_switch( Argv[i], 0 )
-			move_args( i )
-		else 
-			i += 1 -- ignore non "-" items
-		end if      
-	end while
 	
-	
-	if help_option then
-		show_usage()
-		CompileErr( "" )	
-	end if
-	
-	if FORCE_CHOOSE and (TWINDOWS or TDOS) and compare( {wat_option,  djg_option,  lcc_option }, {0,0,0} ) = 0 then
-		Warning( "No compiler specified for Windows or DOS (Watcom (-wat), DJG (-djg), or LCC (-lcc)).\n", translator_warning_flag  )
-	end if
-	
-	if (TWINDOWS or TDOS) and compare( sort({wat_option,  djg_option,  lcc_option}), {0,0,1} ) > 0 then
-		Warning( "You should specify one and only one compiler you want to use: Watcom (-wat), DJG (-djg), or LCC (-lcc).", translator_warning_flag )
-	end if
-	
-	-- The platform might have changed, so clean up in case of inconsistent options
-	if dll_option and (TDOS) then
-		dll_option = FALSE
-		Warning( "cannot build a dll for DOS",translator_warning_flag )
-	end if
-	
-	if con_option and not TWINDOWS then
-		Warning( "console option only available for Windows",translator_warning_flag )
-	end if
-	
-	if wat_option then
-		if not (TWINDOWS or TDOS) then
-			set_host_platform( WIN32 )
-			Warning( "Watcom option only available for Windows or DOS... Choosing Windows", translator_warning_flag )
+			if not silent then
+				printf(1, "Build directory: %s\n", { abbreviate_path(output_dir) })
+			end if
+			remove_output_dir = 1
 		end if
+	end ifdef
 	
-		if atom( getenv( "WATCOM" ) ) then
-	    		-- let this die later..
-		elsif find( ' ', getenv("WATCOM" ) ) != 0 then
-			Warning( "Watcom cannot build translated files when there is a space in its parent folders", translator_warning_flag )
-		elsif atom( getenv( "INCLUDE" ) ) then
-			Warning( "Watcom needs to have an INCLUDE variable set to its included directories",
-				translator_warning_flag )
-		elsif match( upper(getenv("WATCOM") & "\\H;" 
-			& getenv("WATCOM") & "\\H\\NT"),
-			upper(getenv("INCLUDE")) ) != 1 then
-				Warning( "Watcom should have the H and the H\\NT includes at the front of the INCLUDE variable.", translator_warning_flag )
-			--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
-		end if
-	
-	end if
-	
-	if djg_option and not TDOS then
-		CompileErr( "DJGPP option only available for DOS." )
+	if length(map:get(opts, OPT_EXTRAS)) = 0 then
+		-- No source supplied on command line
+		show_banner()
+		ShowMsg(2, 203)
+		-- translator_help()
+		show_help(tranopts,, Argv)
+
+		abort(1)
 	end if
 
-	if lcc_option and not TWINDOWS then
-		CompileErr( "LCC option only available for Windows." )
-	end if
-	
-	if not lccopt_option and not TWINDOWS then
-		CompileErr( "LCC Opt-Off only available for Windows." )
-	end if
-	
-	if fastfp and not TDOS then
-		fastfp = FALSE
-		CompileErr( "Fast FP option only available for DOS" )
+	OpDefines &= { "EUC" }
+
+	if host_platform() = WIN32 and not con_option then
+		OpDefines = append( OpDefines, "WIN32_GUI" )
 	end if
 
+	finalize_command_line(opts)
 end procedure
 
-procedure OpenCFiles()
+--**
 -- open and initialize translator output files
+procedure OpenCFiles()
+	if sequence(output_dir) and length(output_dir) > 0 then
+		create_directory(output_dir)
+	end if
+
 	c_code = open(output_dir & "init-.c", "w")
 	if c_code = -1 then
-		CompileErr("Can't open init-.c for output\n")
+		CompileErr(55)
 	end if
-	
+
+	add_file("init-.c")
+
 	emit_c_output = TRUE
 
-	if TDOS and sequence(dj_path) then
-		c_puts("#include <go32.h>\n")
-	end if
 	c_puts("#include \"")
-	c_puts("include" & SLASH & "euphoria.h\"\n")
+	c_puts("include/euphoria.h\"\n")
+
 	c_puts("#include \"main-.h\"\n\n")
-	
 	c_h = open(output_dir & "main-.h", "w")
 	if c_h = -1 then
-		CompileErr("Can't open main-.h file for output\n")
+		CompileErr(47)
 	end if
+
+	add_file("main-.h")
 end procedure
 
-procedure InitBackEnd(integer c)
+--**
 -- Initialize special stuff for the translator
-	
-	if c = 1 then
-		OpenCFiles()
-		return
-	end if
-	
+procedure InitBackEnd(integer c)
 	init_opcodes()
-	
 	transoptions()
 
-	-- If no compiler has been chosen test the variables to
-	-- see which is installed.  If a UNIX system choose gcc.
-	-- If Windows or DOS
-	-- Try in the order: WATCOM then DJGPP
-	
-	
-	if TDOS then
-		if gcc_option then
-			djg_option = 1
-		end if
-		wat_path = 0
-		if length(compile_dir) then
-			if djg_option then
-				dj_path  = compile_dir
-			else
-				wat_path = compile_dir
-			end if
-			return
-		end if
-			
-		dj_path = getenv("DJGPP")
-		if atom(dj_path) or wat_option then
-			wat_path = getenv("WATCOM")
-			if atom(wat_path) then
-				CompileErr("WATCOM environment variable is not set")
-			end if
-			dj_path = 0
-		end if
-		if djg_option and atom(dj_path) then
-			CompileErr("DJGPP environment variable is not set")
+	if c = 1 then
+		OpenCFiles()
+
+		return
+	end if
+
+	if compiler_type = COMPILER_UNKNOWN then
+		if TWINDOWS then
+			compiler_type = COMPILER_WATCOM
+		elsif TUNIX then
+			compiler_type = COMPILER_GCC
 		end if
 	end if
 
-	if TWINDOWS then
-		dj_path = 0
-		wat_path = 0
-		if not lcc_option then
-			if length(compile_dir) then
-				wat_path = compile_dir
+	switch compiler_type do
+	  	case COMPILER_GCC then
+			-- Nothing special we have to do for gcc
+			break -- to avoid empty block warning
+
+		case COMPILER_WATCOM then
+			if length(compiler_dir) then
+				wat_path = compiler_dir
 			else
 				wat_path = getenv("WATCOM")
 			end if
-		end if
-	
-		if wat_option and atom(wat_path) then
-			CompileErr("WATCOM environment variable is not set")
-		end if
-	end if
-	
-	if TUNIX then
-		dj_path = 0
-		gcc_option = 1
-		wat_path = 0
-	end if
-	
-	if sequence(wat_path) + gcc_option + sequence(dj_path) + lcc_option = 0 then
-		CompileErr( "Cannot determine for which compiler to translate for." ) 
-	end if
 
+			if atom(wat_path) then
+				if build_system_type = BUILD_DIRECT then
+					-- We know the building process will fail when the translator starts
+					-- calling the compiler.  So, the process fails here.
+					CompileErr(159)
+				else
+					-- In this case, the user has to call something to compile after the
+					-- translation.  The user may set up the environment after the translation or
+					-- the environment may be on another machine on the network.
+					Warning(159, translator_warning_flag)
+				end if
+			elsif find(' ', wat_path) then
+				Warning( 214, translator_warning_flag)
+			elsif atom(getenv("INCLUDE")) then
+				Warning( 215, translator_warning_flag )
+			elsif match(upper(wat_path & "\\H;" & getenv("WATCOM") & "\\H\\NT"),
+				upper(getenv("INCLUDE"))) != 1
+			then
+				Warning( 216, translator_warning_flag )
+				--http://openeuphoria.org/EUforum/index.cgi?module=forum&action=message&id=101301#101301
+			end if
+
+		case else
+			CompileErr(150)
+
+	end switch
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 
+--**
+-- make sure the defines reflect the target platform
 procedure CheckPlatform()
-	-- make sure the defines reflect the target platform
-	OpDefines = remove(OpDefines,
+	OpDefines = eu:remove(OpDefines,
 		find("_PLAT_START", OpDefines),
 		find("_PLAT_STOP", OpDefines))
 	OpDefines &= GetPlatformDefines(1)

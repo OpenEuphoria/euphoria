@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/*      (c) Copyright 2007 Rapid Deployment Software - See License.txt       */
+/*      (c) Copyright - See License.txt       */
 /*****************************************************************************/
 /*                                                                           */
 /*                 The Interpreter Back-end Main Program                     */
@@ -14,20 +14,20 @@
  *    - they won't be executed. e.g. increments of pc
  *  - top, a, obj_ptr, sym should be in registers (almost all references)
  *    avoid using * / (double) with these vars
- *  - must do tpc = pc before calling any subroutine - for error reporting 
+ *  - must do tpc = pc before calling any subroutine - for error reporting
  *    and profiling
  *  - must inc PC (sometimes have to use inc3pc() or thread4()) before jumping
  *    to next op
- *  - code is generally: operator 
+ *  - code is generally: operator
  *                       operand1
- *                       operand2 
+ *                       operand2
  *                       target
  *    operator is address of the C code that performs this operation
  *    operands are generally addresses of vars or temps containing the
  *    value to be manipulated, target is the address of the var or temp to
  *    store the result into
  *  - must deref any target pointer (double or sequence) that is overwritten
- *    e.g. temp or var location, or sequence element containing 
+ *    e.g. temp or var location, or sequence element containing
  *    non-ATOM_INT_NV. Use DeRefx when tpc=pc has not been done already
  *    in the op, to have accurate time profile of de_reference
  *  - avoid passing more than 3 arguments to any routine - it results in
@@ -41,28 +41,32 @@
 #include <time.h>
 #ifdef EUNIX
 #	include <sys/times.h>
+#	include <string.h>
 #else
-#	ifdef EDJGPP
-#		include <go32.h>
-#	endif
 #	ifdef EWATCOM
 #		include <graph.h>
 #	endif
 #	include <conio.h>
 #endif
 #include <math.h>
-#ifdef EXTRA_CHECK
-#	include <malloc.h>
-#endif
 #ifdef EWINDOWS
 #	include <windows.h>
 #endif
 #include <signal.h>
 
 #include "alldefs.h"
-#include "alloc.h"
+#include "be_alloc.h"
 #include "be_runtime.h"
-
+#include "be_decompress.h"
+#include "be_inline.h"
+#include "be_machine.h"
+#include "be_task.h"
+#include "be_rterror.h"
+#include "be_symtab.h"
+#include "be_w.h"
+#include "be_callc.h"
+#include "coverage.h"
+#include "be_execute.h"
 
 /******************/
 /* Local defines  */
@@ -76,6 +80,8 @@
 #define deprintf(s) do {  } while (0)
 #endif
 
+#define SYMTAB_INDEX(X) ((symtab_ptr)X) - fe.st
+
 /* To eliminate type casts for pc[*] you
  would need a union like this:
 union pc_t {
@@ -87,7 +93,7 @@ union pc_t {
     s1_ptr * sptr;
 };*/
 
-/* took out:    || (fp)->_flag&_UNGET \  
+/* took out:    || (fp)->_flag&_UNGET \
    added:       tpc = pc */
 #ifdef ORIGINALWATCOM
 #define getc(fp) \
@@ -130,26 +136,26 @@ union pc_t {
 					printf("%d",foo);              \
 				} else if (IS_ATOM_DBL(foo))              \
 					printf("%e",*DBL_PTR(foo))
-				
-				
+
+
 #ifdef DEBUG_OPCODE_TRACE
 #	define SHOW_START_BIN_OP_OPCODE_PARAMETERS() printf("(%d=>",pc[1]); \
 				SHOW_PARAM(a); \
 				printf(", %d=>",pc[2]); \
 				SHOW_PARAM(top); \
 				deprintf(")")
-				
+
 #else
 #	define SHOW_START_BIN_OP_OPCODE_PARAMETERS() 0
 #endif
-#ifdef EDEBUG					  
+#ifdef EDEBUG
 #	define START_BIN_OP  a = *(object_ptr)pc[1];	\
 				top = *(object_ptr)pc[2];      \
 				SHOW_START_BIN_OP_OPCODE_PARAMETERS();   \
 					  if ( a == NOVALUE || top == NOVALUE ) RTFatal( "NOVALUE passed to a binary op." ); \
 					  obj_ptr = (object_ptr)pc[3];   \
 					  if (IS_ATOM_INT(a) && IS_ATOM_INT(top)) {
-#else						  
+#else
 #	define START_BIN_OP  a = *(object_ptr)pc[1];	\
 					  top = *(object_ptr)pc[2];      \
 					  obj_ptr = (object_ptr)pc[3];   \
@@ -182,7 +188,7 @@ union pc_t {
 						   top = binary_op(x, a, top);  \
 						   pc++;                      \
 						   goto if_check;             \
-					   }                          
+					   }
 
 #define END_BIN_OP_IFW_I   {                          \
 								;                     \
@@ -197,7 +203,7 @@ union pc_t {
 #define START_BIN_OP_I  a = *(object_ptr)pc[1];      \
 					  top = *(object_ptr)pc[2];      \
 					  obj_ptr = (object_ptr)pc[3];   \
-		  
+
 #define END_BIN_OP_I      *obj_ptr = top;            \
 						  pc += 4;                   \
 						  thread();                  \
@@ -205,7 +211,7 @@ union pc_t {
 #define START_UNARY_OP  top = *(object_ptr)pc[1]; \
 						obj_ptr = (object_ptr)pc[2]; \
 						a = *obj_ptr;             \
-						if (IS_ATOM_INT(top)) {   
+						if (IS_ATOM_INT(top)) {
 
 #define END_UNARY_OP(x)     inc3pc();              \
 							*obj_ptr = top;       \
@@ -221,100 +227,46 @@ union pc_t {
 							DeRef(a);             \
 						}
 
+#define peek4(peek4_addr)	*peek4_addr
+#define peek1(peek1_addr)	*peek1_addr
+#define	poke4(peek4_addr,long_value)	*peek4_addr = ((unsigned long)long_value)
+#define poke1(addr,char_value)  *addr = char_value
 
-/**********************/
-/* Imported variables */
-/**********************/
-
-extern unsigned char *string_ptr;
-extern int clk_tck;
-extern int current_task;
-extern struct tcb *tcb;
-extern char *file_name_entered;
-extern int traced_lines;
-extern struct op_info optable[];
-extern unsigned cache_size;
-extern int align4;
-extern int clocks_per_sec;
-extern unsigned char TempBuff[];
-extern int TraceOn;
-extern int in_from_keyb;
-extern int trace_enabled;
-extern int *TraceLineBuff;
-extern int TraceLineSize;
-extern int TraceLineNext;
-extern symtab_ptr TopLevelSub;
-extern object last_w_file_no;
-extern IFILE last_w_file_ptr;
-extern object last_r_file_no;
-extern IFILE last_r_file_ptr;
-extern long bytes_allocated;
-extern int current_screen;
-extern d_ptr d_list;
-extern int color_trace;
-extern int file_trace;
-extern symtab_ptr *e_routine;
-extern int e_routine_next;
-extern char *type_error_msg;
-extern object_ptr rhs_slice_target;  /* avoids 4th arg for RHS_Slice() */
-extern s1_ptr *assign_slice_seq;
-extern int *profile_sample;
-#ifdef EWINDOWS
-extern unsigned default_heap;
-#endif
-
-/**********************/
-/* Imported functions */
-/**********************/
-extern s1_ptr Copy_elements();
-extern void Head();
-extern void Tail();
-extern object Remove_elements(int,int,int);
-extern void AssignSlice();
-extern void AssignElement();
-extern cleanup_ptr DeleteRoutine( int);
-extern cleanup_ptr ChainDeleteRoutine( cleanup_ptr, cleanup_ptr);
-extern void cleanup_sequence(s1_ptr);
-extern void cleanup_double(d_ptr);
 /**********************/
 /* Declared functions */
 /**********************/
-object decompress(unsigned int c);
+
+
 void INT_Handler(int);
 unsigned long good_rand();
-void RHS_Slice();
-object user(), Command_Line(), EOpen(), Repeat(); 
-object machine();
-object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
-	   NewDouble();
+// object user(), Command_Line(), EOpen(), Repeat();
+// object machine();
+// object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
+// 	   NewDouble();
 
-object add(), minus(), uminus(), e_sqrt(), Random(), multiply(), divide(),
-	 equals(), less(), greater(), noteq(), greatereq(), lesseq(),
-	 and(), or(), xor(), not(), e_sin(), e_cos(), e_tan(), e_arctan(),
-	 e_log(), e_floor(), eremainder(), and_bits(), or_bits(),
-	 xor_bits(), not_bits(), power();
+// object add(), minus(), uminus(), e_sqrt(), Random(), multiply(), divide(),
+// 	 equals(), less(), greater(), noteq(), greatereq(), lesseq(),
+// 	 and(), or(), xor(), not(), e_sin(), e_cos(), e_tan(), e_arctan(),
+// 	 e_log(), e_floor(), eremainder(), and_bits(), or_bits(),
+// 	 xor_bits(), not_bits(), power();
 
-object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide(),
-	 Dequals(), Dless(), Dgreater(), Dnoteq(), Dgreatereq(), Dlesseq(),
-	 Dand(), Dor(), Dxor(), Dnot(), De_sin(), De_cos(), De_tan(), De_arctan(),
-	 De_log(), De_floor(), Dremainder(), Dand_bits(), Dor_bits(),
-	 Dxor_bits(), Dnot_bits(), Dpower(), Insert();
+// object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide(),
+// 	 Dequals(), Dless(), Dgreater(), Dnoteq(), Dgreatereq(), Dlesseq(),
+// 	 Dand(), Dor(), Dxor(), Dnot(), De_sin(), De_cos(), De_tan(), De_arctan(),
+// 	 De_log(), De_floor(), Dremainder(), Dand_bits(), Dor_bits(),
+// 	 Dxor_bits(), Dnot_bits(), Dpower(), Insert();
 
-object x(); /* error */
-symtab_ptr PrivateVar();
-long find(), e_match();
-object calc_hash();
-IFILE which_file();
-#ifndef ESIMPLE_MALLOC
-char *EMalloc();
-#endif
-object_ptr BiggerStack();
-void do_exec();
-s1_ptr NewS1();
-double current_time();
-void Machine_Handler();
-long find_from();
-long e_match_from();
+// object x(); /* error */
+// symtab_ptr PrivateVar();
+// long find(), e_match();
+//
+// IFILE which_file();
+//
+// void do_exec();
+// s1_ptr NewS1();
+// double current_time();
+// void Machine_Handler();
+
 /**********************/
 /* Exported variables */
 /**********************/
@@ -349,7 +301,7 @@ static int watch_count = 1;
 static void trace_command(object x)
 // perform trace(x)
 {
-	int i;              
+	int i;
 
 	if (IS_ATOM_INT(x)) {
 		i = x;
@@ -357,16 +309,11 @@ static void trace_command(object x)
 	else if (IS_ATOM(x)) {
 		i = (int)DBL_PTR(x)->dbl;
 	}
-	else 
+	else
 		RTFatal("argument to trace() must be an atom");
-#ifdef EWINDOWS
-		if (i != 3) {
-			show_console();
-		}
-#endif
 
 #ifndef BACKEND
-		if (i == 0) { 
+		if (i == 0) {
 			TraceOn = FALSE;
 			file_trace = FALSE;
 			if (current_screen != MAIN_SCREEN)
@@ -375,15 +322,21 @@ static void trace_command(object x)
 		else if (i == 1) {
 			TraceOn = trace_enabled;
 			color_trace = TRUE;
+#ifdef EWINDOWS
+			show_console();
+#endif
 		}
 		else if (i == 2) {
 			TraceOn = trace_enabled;
 			color_trace = FALSE;
+#ifdef EWINDOWS
+			show_console();
+#endif
 		}
 		else if (i == 3) {
 			file_trace = TRUE;
 		}
-		else 
+		else
 			RTFatal("argument to trace() must be 0, 1, 2 or 3");
 #endif
 }
@@ -392,35 +345,35 @@ static void profile_command(object x)
 // perform profile(x)
 {
 	int i;
-	
+
 	if (IS_ATOM_INT(x)) {
 		i = x;
 	}
 	else if (IS_ATOM(x)) {
 		i = (int)DBL_PTR(x)->dbl;
 	}
-	else 
+	else
 		RTFatal("argument to profile() must be an atom");
-	if (i == 0) { 
+	if (i == 0) {
 		ProfileOn = FALSE;
 	}
 	else if (i == 1) {
 		ProfileOn = TRUE;
 	}
-	else 
+	else
 		RTFatal("argument to profile() must be 0 or 1");
 }
 
-static object do_peek2(object a, int b, int *pc)
+static object do_peek2(object a, int b )
 // peek2u, peek2s
 // moved it here because it was causing bad code generation for WIN32
 {
-	int i;              
+	int i;
 	unsigned short *peek2_addr;
 	object top;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-				
+
 	/* check address */
 	if (IS_ATOM_INT(a)) {
 		peek2_addr = (unsigned short *)a;
@@ -436,12 +389,6 @@ static object do_peek2(object a, int b, int *pc)
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
 		peek2_addr = (unsigned short *)get_pos_int("peek2s/peek2u", *(s1->base+1));
-#ifdef EDOS                    
-		if (current_screen != MAIN_SCREEN && 
-			(unsigned)peek2_addr >= (unsigned)0xA0000 && 
-			(unsigned)peek2_addr < (unsigned)0xC0000) 
-			MainScreen();
-#endif                  
 		i = get_pos_int("peek2s/peek2u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");
@@ -450,13 +397,8 @@ static object do_peek2(object a, int b, int *pc)
 		if (b) {
 			// unsigned
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory,
-									   (unsigned)peek2_addr++);
-				else    
-#endif                      
-					top = (object)*peek2_addr++;
+				top = (object)peek4(peek2_addr);
+				++peek2_addr;
 				if ((unsigned)top > (unsigned)MAXINT)
 					top = NewDouble((double)(unsigned long)top);
 				*(++obj_ptr) = top;
@@ -465,13 +407,8 @@ static object do_peek2(object a, int b, int *pc)
 		else {
 			// signed
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												(unsigned)peek2_addr++);
-				else    
-#endif
-					top = (object)(short)*peek2_addr++;
+				top = (object)(signed short)peek4(peek2_addr);
+				++peek2_addr;
 				if (top < MININT || top > MAXINT)
 					top = NewDouble((double)(long)top);
 				*(++obj_ptr) = top;
@@ -479,41 +416,28 @@ static object do_peek2(object a, int b, int *pc)
 		}
 		return (object)MAKE_SEQ(s1);
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)peek2_addr >= (unsigned)0xA0000 && 
-		(unsigned)peek2_addr < (unsigned)0xC0000) 
-		MainScreen();
-#endif              
-#ifdef EDJGPP                       
-	if ((unsigned)peek2_addr <= LOW_MEMORY_MAX)
-		top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)peek2_addr);
-	else    
-#endif                      
-		
 	if (b) {
 		// unsigned
-		top = (object)*peek2_addr;
+		top = (object)peek4(peek2_addr);
 		if ((unsigned)top > (unsigned)MAXINT)
 			top = NewDouble((double)(unsigned long)top);
 	}
 	else {
 		// signed
-		top = (object)(signed short)*peek2_addr;
+		top = (object)(signed short)peek4(peek2_addr);
 		if (top < MININT || top > MAXINT)
 			top = NewDouble((double)(long)top);
 	}
-	
+
 	return top;
 }
 
 
-static object do_peek4(object a, int b, int *pc)
+static object do_peek4(object a, int b )
 // peek4u, peek4s
 // moved it here because it was causing bad code generation for WIN32
 {
-	int i;              
+	int i;
 	unsigned long *peek4_addr;
 	object top;
 	s1_ptr s1;
@@ -528,18 +452,12 @@ static object do_peek4(object a, int b, int *pc)
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
-		s1 = SEQ_PTR(a);                                        
+		s1 = SEQ_PTR(a);
 		i = s1->length;
 		if (i != 2) {
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
 		peek4_addr = (unsigned long *)get_pos_int("peek4s/peek4u", *(s1->base+1));
-#ifdef EDOS                    
-		if (current_screen != MAIN_SCREEN && 
-			(unsigned)peek4_addr >= (unsigned)0xA0000 && 
-			(unsigned)peek4_addr < (unsigned)0xC0000) 
-			MainScreen();
-#endif                  
 		i = get_pos_int("peek4s/peek4u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");
@@ -548,13 +466,8 @@ static object do_peek4(object a, int b, int *pc)
 		if (b) {
 			// unsigned
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek4_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-									   (unsigned)peek4_addr++);
-				else    
-#endif                      
-					top = (object)*peek4_addr++;
+				top = peek4(peek4_addr);
+				++peek4_addr;
 				if ((unsigned)top > (unsigned)MAXINT)
 					top = NewDouble((double)(unsigned long)top);
 				*(++obj_ptr) = top;
@@ -563,13 +476,8 @@ static object do_peek4(object a, int b, int *pc)
 		else {
 			// signed
 			while (--i >= 0) {
-#ifdef EDJGPP                       
-				if ((unsigned)peek4_addr <= LOW_MEMORY_MAX)
-					top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												(unsigned)peek4_addr++);
-				else    
-#endif                      
-					top = (object)*peek4_addr++;
+				top = peek4(peek4_addr);
+				++peek4_addr;
 				if (top < MININT || top > MAXINT)
 					top = NewDouble((double)(long)top);
 				*(++obj_ptr) = top;
@@ -577,19 +485,7 @@ static object do_peek4(object a, int b, int *pc)
 		}
 		return (object)MAKE_SEQ(s1);
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)peek4_addr >= (unsigned)0xA0000 && 
-		(unsigned)peek4_addr < (unsigned)0xC0000) 
-		MainScreen();
-#endif              
-#ifdef EDJGPP                       
-	if ((unsigned)peek4_addr <= LOW_MEMORY_MAX)
-		top = _farpeekl(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)peek4_addr);
-	else    
-#endif                      
-		top = (object)*peek4_addr;
+	top = peek4(peek4_addr);
 	if (b) {
 		// unsigned
 		if ((unsigned)top > (unsigned)MAXINT)
@@ -600,7 +496,7 @@ static object do_peek4(object a, int b, int *pc)
 		if (top < MININT || top > MAXINT)
 			top = NewDouble((double)(long)top);
 	}
-	
+
 	return top;
 }
 
@@ -611,7 +507,7 @@ static void do_poke2(object a, object top)
 	double temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-		
+
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
 		poke2_addr = (unsigned short *)INT_VAL(a);
@@ -622,48 +518,25 @@ static void do_poke2(object a, object top)
 	else {
 		RTFatal("first argument to poke2 must be an atom");
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)poke2_addr >= (unsigned)0xA0000 && 
-		(unsigned)poke2_addr < (unsigned)0xC0000)
-		MainScreen();
-#endif
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-		if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr, (unsigned long)INT_VAL(top));
-		else
-#endif      
-			*poke2_addr = (unsigned long)INT_VAL(top);
+		poke4(poke2_addr,INT_VAL(top));
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal("poke2 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-		if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr, (unsigned long)temp_dbl);
-		else
-#endif      
-			*poke2_addr = (unsigned short)temp_dbl;
+		poke4(poke2_addr,temp_dbl);
 	}
 	else {
 		/* second arg is sequence */
 		s1 = SEQ_PTR(top);
 		obj_ptr = s1->base;
-		while (TRUE) { 
-			top = *(++obj_ptr); 
+		while (TRUE) {
+			top = *(++obj_ptr);
 			if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-				if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr++, (unsigned long)INT_VAL(top));
-				else
-#endif
-					*poke2_addr++ = (unsigned short)INT_VAL(top);
+				poke4(poke2_addr,INT_VAL(top));
+				++poke2_addr;
 			}
 			else if (IS_ATOM(top)) {
 				if (top == NOVALUE)
@@ -671,13 +544,8 @@ static void do_poke2(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal("poke2 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-				if ((unsigned)poke2_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke2_addr++, (unsigned long)temp_dbl);
-				else
-#endif      
-					*poke2_addr++ = (unsigned long)temp_dbl;
+				poke4(poke2_addr,temp_dbl);
+				++poke2_addr;
 			}
 			else {
 				RTFatal("sequence to be poked must only contain atoms");
@@ -693,7 +561,7 @@ static void do_poke4(object a, object top)
 	double temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
-		
+
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
 		poke4_addr = (unsigned long *)INT_VAL(a);
@@ -704,48 +572,25 @@ static void do_poke4(object a, object top)
 	else {
 		RTFatal("first argument to poke4 must be an atom");
 	}
-#ifdef EDOS
-	if (current_screen != MAIN_SCREEN && 
-		(unsigned)poke4_addr >= (unsigned)0xA0000 && 
-		(unsigned)poke4_addr < (unsigned)0xC0000)
-		MainScreen();
-#endif
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-		if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr, (unsigned long)INT_VAL(top));
-		else
-#endif      
-			*poke4_addr = (unsigned long)INT_VAL(top);
+		poke4(poke4_addr,INT_VAL(top));
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal("poke4 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-		if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-			_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr, (unsigned long)temp_dbl);
-		else
-#endif      
-			*poke4_addr = (unsigned long)temp_dbl;
+		poke4(poke4_addr,temp_dbl);
 	}
 	else {
 		/* second arg is sequence */
 		s1 = SEQ_PTR(top);
 		obj_ptr = s1->base;
-		while (TRUE) { 
-			top = *(++obj_ptr); 
+		while (TRUE) {
+			top = *(++obj_ptr);
 			if (IS_ATOM_INT(top)) {
-#ifdef EDJGPP       
-				if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr++, (unsigned long)INT_VAL(top));
-				else
-#endif      
-					*poke4_addr++ = (unsigned long)INT_VAL(top);
+				poke4(poke4_addr,INT_VAL(top));
+				++poke4_addr;
 			}
 			else if (IS_ATOM(top)) {
 				if (top == NOVALUE)
@@ -753,13 +598,8 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal("poke4 is limited to 32-bit numbers");
-#ifdef EDJGPP       
-				if ((unsigned)poke4_addr <= LOW_MEMORY_MAX)
-					_farpokel(_go32_info_block.selector_for_linear_memory,
-					  (unsigned long)poke4_addr++, (unsigned long)temp_dbl);
-				else
-#endif
-					*poke4_addr++ = (unsigned long)temp_dbl;
+				poke4(poke4_addr,temp_dbl);
+				++poke4_addr;
 			}
 			else {
 				RTFatal("sequence to be poked must only contain atoms");
@@ -775,11 +615,11 @@ static void do_poke4(object a, object top)
 
 #ifdef INT_CODES
 #define thread() goto loop_top
-#define thread2() {pc += 2; goto loop_top;}
-#define thread4() {pc += 4; goto loop_top;}
-#define thread5() {pc += 5; goto loop_top;}
+#define thread2() {(long)pc += 2; goto loop_top;}
+#define thread4() {(long)pc += 4; goto loop_top;}
+#define thread5() {(long)pc += 5; goto loop_top;}
 #define threadpc3() {pc = (int *)pc[3]; goto loop_top;}
-#define inc3pc() pc += 3
+#define inc3pc() (long)pc += 3
 #include "redef.h"
 #include "opnames.h"
 #define BREAK break
@@ -790,7 +630,7 @@ static void do_poke4(object a, object top)
 #define FP_EMULATION_NEEDED // FOR WATCOM/DOS to run on old 486/386 without f.p.
 
 #if !defined(EMINGW)
-#if defined(EWINDOWS) || (defined(EDOS) && defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
+#if defined(EWINDOWS) || (defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
 #ifdef EMSVC
 long msvc_spare = 0;
 #define thread() do { __asm { JMP [pc] } } while(0)
@@ -805,7 +645,7 @@ long msvc_spare = 0;
 #else
 // #pragma aux thread aborts; does nothing
 
-#define thread() do { wcthread(pc); } while (0)
+#define thread() do { wcthread((long)pc); } while (0)
 void wcthread(long x);
 #pragma aux wcthread = \
 		"jmp [ECX]" \
@@ -833,19 +673,19 @@ long wcinc5pc(long x);
 		value [ECX] \
 		parm [ECX];
 
-#define thread2() do { pc = wcinc2pc(pc); wcthread(pc); } while (0)
-#define thread4() do { pc = wcinc4pc(pc); wcthread(pc); } while (0)
-#define thread5() do { pc = wcinc5pc(pc); wcthread(pc); } while (0)
+#define thread2() do { pc = (int *)wcinc2pc((long)pc); wcthread((long)pc); } while (0)
+#define thread4() do { pc = (int *)wcinc4pc((long)pc); wcthread((long)pc); } while (0)
+#define thread5() do { pc = (int *)wcinc5pc((long)pc); wcthread((long)pc); } while (0)
 
 /* have to hide this from WATCOM or it will generate stupid code
    at the top of the switch */
-#define inc3pc() do { pc = wcinc3pc(pc); } while (0)
-long wcin3pc(long x);
+long wcinc3pc(long x);
 #pragma aux wcinc3pc = \
 		"ADD ECX, 12" \
 		modify [] \
 		value [ECX] \
 		parm [ECX];
+#define inc3pc() do { pc = (int *)wcinc3pc((long)pc); } while (0)
 
 // not converted because it is not used
 void threadpc3(void);
@@ -853,66 +693,14 @@ void threadpc3(void);
 		"MOV ECX, EDI" \
 		"jmp [ECX]"    \
 		modify [EAX EBX ECX EDX];
-		
+
 #define BREAK break
 #include "redef.h"
 #endif // EMSVC
 #endif
 #endif // !defined(EMINGW)
 
-#if defined(EDOS) && defined(EWATCOM) && defined(FP_EMULATION_NEEDED)
-// WATCOM:
-// #pragma aux thread aborts; does nothing
-// modify [...] seems to do very little, works no matter what regs are
-// specified or even if modify is removed
-
-#define thread() do { wcthread(pc); } while (0)
-void wcthread(long x);
-#pragma aux wcthread = \
-		"jmp [ESI]" \
-		modify [EAX EBX EDX] \
-		parm [ESI];
-
-long wcinc2pc(long x);
-#pragma aux wcinc2pc = \
-		"ADD ESI, 8" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-long wcinc4pc(long x);
-#pragma aux wcinc4pc = \
-		"ADD ESI, 16" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-long wcinc5pc(long x);
-#pragma aux wcinc5pc = \
-		"ADD ESI, 20" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-#define thread2() do { pc = wcinc2pc(pc); wcthread(pc); } while (0)
-#define thread4() do { pc = wcinc4pc(pc); wcthread(pc); } while (0)
-#define thread5() do { pc = wcinc5pc(pc); wcthread(pc); } while (0)
-
-/* have to hide this from WATCOM or it will generate stupid code
-   at the top of the switch */
-#define inc3pc() do { pc = wcinc3pc(pc); } while (0)
-long wcin3pc(long x);
-#pragma aux wcinc3pc = \
-		"ADD ESI, 12" \
-		modify [] \
-		value [ESI] \
-		parm [ESI];
-
-#define BREAK break
-#include "redef.h"
-#endif
-
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 // these GNU-based compilers support dynamic labels,
 // so threading is much easier
 #define thread() goto *((void *)*pc)
@@ -925,21 +713,23 @@ long wcin3pc(long x);
 
 #endif  // threaded code
 
+#ifdef EWATCOM
 #pragma aux nop = \
 		"nop" \
 		modify[];
+#endif
 
 static int recover_rhs_subscript(object subscript, s1_ptr s)
 /* rhs subscript failed initial check, but might be ok */
 {
 	int subscripti;
-	
+
 	if (IS_ATOM_INT(subscript)) {
 		RangeReading(subscript, s->length);
 	}
 	else if (IS_ATOM_DBL(subscript)) {
-		subscripti = (long)(DBL_PTR(subscript)->dbl); 
-		if ((unsigned long)(subscripti - 1) < s->length) 
+		subscripti = (long)(DBL_PTR(subscript)->dbl);
+		if ((unsigned long)(subscripti - 1) < (unsigned long)s->length)
 			return subscripti;
 		else
 			RangeReading(subscript, s->length);
@@ -961,21 +751,22 @@ static void wrong_arg_count(symtab_ptr sub, object a)
 }
 
 static int recover_lhs_subscript(object subscript, s1_ptr s)
-/* lhs subscript failed initial check, but might be ok */
+/* lhs subscript failed initial check but the value may be an
+ * encoded pointer to a number. */
 {
 	int subscripti;
-	
+
 	if (IS_ATOM_INT(subscript)) {
 		BadSubscript(subscript, s->length);
 	}
 	else if (IS_ATOM_DBL(subscript))  {
 		subscripti = (long)(DBL_PTR(subscript)->dbl);
-		if ((unsigned long)(subscripti - 1) < s->length)
+		if ((unsigned long)(subscripti - 1) < (unsigned long)s->length)
 			return subscripti;
 		else
 			BadSubscript(subscript, s->length);
 	}
-	else { 
+	else {
 		/* SEQUENCE */
 		SubsNotAtom();
 	}
@@ -988,50 +779,55 @@ void InitStack(int size, int toplevel)
 {
 	stack_size = size;
 	expr_stack = (object_ptr) EMalloc(stack_size * sizeof(object));
-	expr_stack[toplevel] = TopLevelSub;  
+	expr_stack[toplevel] = (object)TopLevelSub;
 	expr_top = &expr_stack[toplevel+1];  /* next available place on expr stack */
- 
+
 	/* must allow for a few extra words */
 	expr_max = expr_stack + (stack_size - 5);
 	expr_limit = expr_max - 3; // we only push two items per call
 }
 
+
 void InitExecute()
 {
 #ifndef EDEBUG
 	// signal(SIGFPE, FPE_Handler)  // generate inf and nan instead
-	signal(SIGINT, INT_Handler); 
+	signal(SIGINT, INT_Handler);
 	// SIG_IGN=> still see ^C echoed, but it has no effect other
 	// than messing up the screen. INT_Handler lets us do
 	// a bit of cleanup - tick rate, profile, active page etc.
 #endif
 
-#ifndef EDOS      // doesn't work on DOS
+#ifdef EWINDOWS
+		/* Prevent "Send Error Report to Microsoft dialog from coming up
+		   if this thing has an unhandled exception.  */
+		SetUnhandledExceptionFilter(Win_Machine_Handler);
+#endif
+
 #ifndef ERUNTIME  // dll shouldn't take handler away from main program
 #ifndef EDEBUG
 	signal(SIGILL,  Machine_Handler);
 	signal(SIGSEGV, Machine_Handler);
 #endif
 #endif
-#endif
-
 	TraceOn = FALSE;
 	ProfileOn = TRUE;
 	TraceBeyond = HUGE_LINE;
-	
+
 	// Create Call Stack
 	InitStack(EXPR_SIZE, 1);
 
 	// create first task (task 0)
 	InitTask();
 	TopLevelSub->u.subp.resident_task = current_task;
+
+	// Initialize random generator seeds.
+	setran();
 }
 
-void Execute(int *);
-
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
-int **jumptab; // initialized in do_exec() 
+#if defined(EUNIX) || defined(EMINGW)
+int **jumptab; // initialized in do_exec()
 #else
 #ifdef EWATCOM
 /* Jump table location is determined by another program. */
@@ -1049,31 +845,32 @@ struct IL fe;
 #define SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
 
 #define SET_JUMP(word) ((int *)(&code[(int)(word)]))
+#define JUMP_INDEX(word) (((int*)word) - ((symtab_ptr)expr_top[-1])->u.subp.code)
 
 void code_set_pointers(int **code)
 /* adjust code pointers, changing some indexes into pointers */
 {
 	int len, i, j, n, sub, word;
-	
+
 	len = (int)code[0];
 	i = 1;
 	while (i <= len) {
 		word = (int)code[i];
-		
+
 		if (word > MAX_OPCODE || word < 1) {
 			RTFatal("BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d",
 					i, word, len);
 		}
-		
+
 		code[i] = (int *)opcode(word);
 
 		switch (word) {
 			case TYPE_CHECK:
 			case CALL_BACK_RETURN:
-			case BADRETURNF: 
+			case BADRETURNF:
 			case RETURNT:
-			case CLEAR_SCREEN: 
-			case UPDATE_GLOBALS: 
+			case CLEAR_SCREEN:
+			case UPDATE_GLOBALS:
 			case NOP1:
 			case TASK_CLOCK_STOP:
 			case TASK_CLOCK_START:
@@ -1082,39 +879,44 @@ void code_set_pointers(int **code)
 				 // no operands follow
 				i += 1;
 				break;
-			
+
 			case GLOBAL_INIT_CHECK:
 			case PRIVATE_INIT_CHECK:
 			case INTEGER_CHECK:
-			case ATOM_CHECK: 
+			case ATOM_CHECK:
 			case SEQUENCE_CHECK:
-			case DATE: 
-			case TIME: 
-			case SPACE_USED: 
-			case CALL: 
+			case DATE:
+			case TIME:
+			case SPACE_USED:
+			case CALL:
 			case CLOSE:
-			case GET_KEY: 
+			case GET_KEY:
 			case COMMAND_LINE:
 			case OPTION_SWITCHES:
 			case TRACE:
-			case PROFILE: 
+			case PROFILE:
 			case DISPLAY_VAR:
 			case ERASE_PRIVATE_NAMES:
 			case ERASE_SYMBOL:
-			case ABORT: 
-			case PLATFORM:  
+			case ABORT:
+			case PLATFORM:
 			case TASK_SELF:
 			case TASK_SUSPEND:
 			case TASK_LIST:
 			case DELETE_OBJECT:
 			case EXIT_BLOCK:
+			case DEREF_TEMP:
+			case REF_TEMP:
+			case NOVALUE_TEMP:
 				// one operand
 				code[i+1] = SET_OPERAND(code[i+1]);
 				i += 2;
 				break;
 
-			case NOP2: 
-			case STARTLINE: 
+			case NOP2:
+			case STARTLINE:
+			case COVERAGE_LINE:
+			case COVERAGE_ROUTINE:
 				i += 2;
 				break;
 
@@ -1131,12 +933,12 @@ void code_set_pointers(int **code)
 				code[i+1] = SET_JUMP(code[i+1]);
 				i += 2;
 				break;
-				
+
 			case NOT:
 			case IS_AN_ATOM:
 			case IS_A_SEQUENCE:
-			case UMINUS: 
-			case GETS: 
+			case UMINUS:
+			case GETS:
 			case GETC:
 			case SQRT:
 			case LENGTH:
@@ -1145,7 +947,7 @@ void code_set_pointers(int **code)
 			case LOG:
 			case SIN:
 			case COS:
-			case TAN: 
+			case TAN:
 			case RAND:
 			case PEEK:
 			case PEEK_STRING:
@@ -1157,15 +959,13 @@ void code_set_pointers(int **code)
 			case IS_AN_OBJECT:
 			case NOT_BITS:
 			case CALL_PROC:
-			case POSITION: 
-			case PEEK4S: 
+			case POSITION:
+			case PEEK4S:
 			case PEEK4U:
 			case PEEK2S:
 			case PEEK2U:
-			case PIXEL: 
-			case GET_PIXEL:
-			case SYSTEM: 
-			case PUTS: 
+			case SYSTEM:
+			case PUTS:
 			case QPRINT:
 			case PRINT:
 			case GETENV:
@@ -1175,7 +975,7 @@ void code_set_pointers(int **code)
 			case POKE2:
 			case SC2_AND:
 			case SC2_OR:
-			case TASK_SCHEDULE: 
+			case TASK_SCHEDULE:
 			case TASK_STATUS:
 			case RETURNP:
 				// 2 operands follow
@@ -1199,15 +999,15 @@ void code_set_pointers(int **code)
 			case NOTEQ:
 			case LESSEQ:
 			case GREATER:
-			case AND: 
-			case OR: 
+			case AND:
+			case OR:
 			case MINUS:
 			case PLUS:
 			case MULTIPLY:
-			case DIVIDE: 
+			case DIVIDE:
 			case CONCAT:
 			case REMAINDER:
-			case POWER: 
+			case POWER:
 			case OR_BITS:
 			case XOR_BITS:
 			case APPEND:
@@ -1216,7 +1016,7 @@ void code_set_pointers(int **code)
 			case COMPARE:
 			case FIND:
 			case MATCH:
-			case XOR: 
+			case XOR:
 			case AND_BITS:
 			case EQUAL:
 			case RHS_SUBS:
@@ -1233,14 +1033,14 @@ void code_set_pointers(int **code)
 			case RIGHT_BRACE_2:
 			case PLUS_I:
 			case MINUS_I:
-			case DIV2: 
+			case DIV2:
 			case FLOOR_DIV2:
 			case FLOOR_DIV:
-			case MEM_COPY: 
+			case MEM_COPY:
 			case MEM_SET:
 			case SYSTEM_EXEC:
 			case PRINTF:
-			case SPRINTF: 
+			case SPRINTF:
 			case MACHINE_FUNC:
 			case CALL_FUNC:
 			case C_PROC:
@@ -1270,7 +1070,7 @@ void code_set_pointers(int **code)
 
 			case LESS_IFW_I:
 			case GREATEREQ_IFW_I:
-			case EQUALS_IFW_I: 
+			case EQUALS_IFW_I:
 			case NOTEQ_IFW_I:
 			case LESSEQ_IFW_I:
 			case GREATER_IFW_I:
@@ -1286,7 +1086,7 @@ void code_set_pointers(int **code)
 				code[i+3] = SET_JUMP(code[i+3]);
 				i += 4;
 				break;
-				
+
 			case ASSIGN_OP_SLICE:
 			case PASSIGN_OP_SLICE:
 			case ASSIGN_SLICE:
@@ -1342,7 +1142,7 @@ void code_set_pointers(int **code)
 				code[i+4] = SET_OPERAND(code[i+4]);
 				i += 5;
 				break;
-				
+
 			case FOR:
 			case FOR_I:
 				// 6 operands follow
@@ -1354,35 +1154,35 @@ void code_set_pointers(int **code)
 				code[i+6] = SET_JUMP(code[i+6]);
 				i += 7;
 				break;
-			
+
 			case SWITCH:
 			case SWITCH_I:
 			case SWITCH_RT:
 				code[i+2] = SET_OPERAND(code[i+2]); // cases
 			case SWITCH_SPI:
 				code[i+1] = SET_OPERAND(code[i+1]); // select val
-				
+
 				code[i+3] = SET_OPERAND(code[i+3]); // jump table
 				code[i+4] = SET_JUMP(code[i+4]);    // else or end switch
 				i += 5;
 				break;
 
 		// special cases: variable number of operands
-		
+
 			case PROC:
 			case PROC_TAIL:
 				sub = (int)code[i+1];
 				code[i+1] = SET_OPERAND(sub);
-				
+
 				// we must look at the symbol table to know
 				// how many arguments follow, and whether the
 				// routine being called is a function or not
 				n = fe.st[sub].u.subp.num_args;
-				
+
 				for (j = 2; j <= n+1; j++) {
 					code[i+j] = SET_OPERAND(code[i+j]);
 				}
-				
+
 				if (fe.st[sub].token != PROC) {
 					code[i+2+n] = SET_OPERAND(code[i+2+n]);
 					i += 1;
@@ -1390,18 +1190,18 @@ void code_set_pointers(int **code)
 
 				i += 2 + n;
 				break;
-				
+
 			case RIGHT_BRACE_N:
 				n = (int)code[i+1];
 				for (j = 1; j <= n+1; j++) {
 					word = (int)code[i+1+j];
 					code[i+1+j] = SET_OPERAND(word);
 				}
-				
+
 				// more
 				i += n + 3;
 				break;
-				
+
 			case CONCAT_N:
 				n = (int)code[i+1];
 				for (j = 1; j <= n; j++) {
@@ -1410,10 +1210,10 @@ void code_set_pointers(int **code)
 				}
 				word = (int)code[i+n+2];
 				code[i+n+2] = SET_OPERAND(word);
-				
+
 				i += n + 3;
 				break;
-				
+
 			default:
 				RTFatal("UNKNOWN IL OPCODE");
 		}
@@ -1427,37 +1227,40 @@ void symtab_set_pointers()
 	int i, len;
 	struct symtab_entry *s;
 	int **code;
-	
+
 	s = fe.st;
 	len = *(int *)s;  // number of entries
-	
+
 	s++;  // point to first real entry
 	for (i = 1; i <= len; i++) {
 		s->next = (symtab_ptr)SET_OPERAND(s->next);
 		s->next_in_block = (symtab_ptr)SET_OPERAND(s->next_in_block);
-		
+
 		if (s->mode == M_NORMAL) {
 			// normal variables, routines
 			s->obj = NOVALUE;
-			
+
 			if (s->token == PROC ||
-				s->token == FUNC || 
+				s->token == FUNC ||
 				s->token == TYPE) {
 				code = (int **)s->u.subp.code;
 				if (code != NULL) {
 					code_set_pointers(code);
 				}
 				s->u.subp.code = (int *)code+1; // skip length
-				
+
 				s->u.subp.temps = (symtab_ptr)SET_OPERAND(s->u.subp.temps);
-				
+
 				s->u.subp.resident_task = -1;
 				s->u.subp.saved_privates = NULL;
-				
+
 				if (s->name[0] == '_' && strcmp(s->name, "_toplevel_") == 0) {
 					TopLevelSub = s;
 				}
 				s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );
+			}
+			else{
+				s->u.var.declared_in = (symtab_ptr)SET_OPERAND( s->u.var.declared_in );
 			}
 		}
 		else if (s->mode == M_CONSTANT ) {
@@ -1467,10 +1270,11 @@ void symtab_set_pointers()
 				s->obj = decompress(0);
 			}
 			else {
-				// Set constants to NOVALUE because there may be 
+				// Set constants to NOVALUE because there may be
 				// forward references that require init checks
 				s->obj = NOVALUE;
 			}
+
 		}
 		else if (s->mode == M_BLOCK ) {
 			s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );
@@ -1492,7 +1296,7 @@ void analyze_switch()
  pc+2: case values
  pc+3: jump_table
  pc+4: else jump
- 
+
  SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
  SET_JUMP(word) ((int *)(&code[(int)(word)]))
 */
@@ -1518,11 +1322,11 @@ void analyze_switch()
 			sym = -sym;
 		}
 		top = fe.st[sym].obj;
-		
+
 		if( top == NOVALUE ){
 			NoValue( (symtab_ptr)sym );
 		}
-		
+
 		// int check
 		if (IS_ATOM_INT(top) || IS_ATOM_DBL(top)) {
 			if (!IS_ATOM_INT(top) ) {
@@ -1532,19 +1336,19 @@ void analyze_switch()
 					top = a;
 				}
 			}
-			
+
 			if( top > max ) max = top;
 			if( top < min ) min = top;
 		}
 		else{
 			all_ints = 0;
 		}
-		
+
 		if( negative ){
-			
+
 			if( IS_ATOM_INT( top ) ){
 				if (top == MININT) {
-					top = (object)NewDouble((double)-MININT_VAL);
+					top = (object)NewDouble((double)-MININT);
 				}
 				else
 					top = -top;
@@ -1552,34 +1356,39 @@ void analyze_switch()
 			else {
 				top = unary_op( UMINUS, top );
 			}
-				
+
 			new_values->base[i] = top;
 		}
 		else{
+
 			new_values->base[i] = fe.st[sym].obj;
 		}
 	}
-	
+
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){
-		*tpc = (int *)opcode( SWITCH_SPI );
-		a = Repeat( *(object_ptr)tpc[4], max - min + 1 );
+		*tpc = (int)opcode( SWITCH_SPI );
+
+		// calculate the 'else' jump as a relative jump:
+		offset = (tpc[4]-(int)tpc) / sizeof( int );
+
+		a = Repeat( offset, max - min + 1 );
 		lookup = SEQ_PTR( a );
 		offset = min - 1;
 		for( i = 1; i <= new_values->length; ++i ){
 			lookup->base[new_values->base[i] - offset] = jump->base[i];
 		}
-		tpc[2] = (int *)offset;
+		tpc[2] = (int)offset;
 		DeRefDS( *(object_ptr)tpc[3] );
-		*(object_ptr)tpc[3] = (int *)MAKE_SEQ( lookup );
+		*(object_ptr)tpc[3] = (object)MAKE_SEQ( lookup );
 	}
 	else{
-		*(object_ptr)tpc[2] = (int *)MAKE_SEQ( new_values );
+		*(object_ptr)tpc[2] = (object)MAKE_SEQ( new_values );
 		if( all_ints ){
-			*tpc = (int *)opcode( SWITCH_I );
+			*tpc = (int)opcode( SWITCH_I );
 		}
 		else{
-			*tpc = (int *)opcode( SWITCH );
+			*tpc = (int)opcode( SWITCH );
 		}
 	}
 }
@@ -1588,8 +1397,6 @@ struct sline *slist;
 
 /* Front-end variables passed via miscellaneous fe.misc */
 char **file_name;
-extern int warning_count;
-extern char **warning_list;
 #ifdef EWINDOWS
 extern DWORD WINAPI WinTimer(LPVOID lpParameter);
 #endif
@@ -1605,78 +1412,72 @@ void fe_set_pointers()
 	symtab_set_pointers();
 
 	slist = fe.sl;
-	
+
 	max_stack_per_call = fe.misc[0];
 	AnyTimeProfile     = fe.misc[1];
 	AnyStatementProfile= fe.misc[2];
 	sample_size        = fe.misc[3];
-	
-#ifdef EDOS
-	if (sample_size > 0) {
-		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
-		lock_region(profile_sample, sample_size * sizeof(int));
-		tick_rate(100);
-	}
-#elif defined(EWINDOWS)
+
+#if defined(EWINDOWS)
 	if (sample_size > 0) {
 		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
 		//lock_region(profile_sample, sample_size * sizeof(int));
 		//tick_rate(100);
 		SetThreadPriority(CreateThread(0,0,WinTimer,0,0,0),THREAD_PRIORITY_TIME_CRITICAL);
 	}
-#endif  
+#endif
 	gline_number = fe.misc[4];
 	il_file      = fe.misc[5];
-	
+
 	warning_count = fe.misc[6];
 	file_name = (char **)&fe.misc[7];
 	file_name_entered = (char *)fe.misc[8+fe.misc[7]];
 	warning_list = (char **)&fe.misc[9+fe.misc[7]];
-	
+
 	// string containing all literals and constants in compressed form:
-	free(fe.lit); 
+	EFree(fe.lit);
 }
 
 static object *save_private_block(symtab_ptr routine)
 // Save block for resident task on the private list for this routine.
 // Save in last-in, first-out order.
 // We use a linked list. The data is filled in by the caller after the call.
-{   
+{
 	struct private_block *entry;
 	int size, task;
-	
+
 	size = routine->u.subp.stack_space;
 	task = routine->u.subp.resident_task;
 	entry = (struct private_block *)
 			EMalloc(sizeof(struct private_block) + size * sizeof(object));
-	
+
 	entry->task_number = task;
-	
+
 	// insert block at front of list
 	entry->next = routine->u.subp.saved_privates;
 	routine->u.subp.saved_privates = entry;
-	
+
 	return (object *)&(entry->block); //private data will be filled in by caller
 }
 
 
-static load_private_block(symtab_ptr routine, int task)
+static void load_private_block(symtab_ptr routine, int task)
 // Retrieve a private block and remove it from the list for this routine.
 // We know that the block will be there, often near the start of the list.
-{   
+{
 	struct private_block *p;
 	struct private_block *prev_p;
-	struct private_block *defunct;
+
 	object *block;
 	symtab_ptr sym;
-	 
+
 	p = routine->u.subp.saved_privates; // won't be NULL
 	prev_p = NULL;
-	
+
 	while (TRUE) {
 		if (p->task_number == task) {
 			block = (object *)&(p->block);
-			
+
 			// unlink it
 			if (prev_p == NULL) {
 				routine->u.subp.saved_privates = p->next;
@@ -1686,22 +1487,22 @@ static load_private_block(symtab_ptr routine, int task)
 			}
 
 			// N.B. must read temps and privates *before* freeing p
-			
+
 			// private vars
 			sym = routine->next;
 			while (sym != NULL && sym->scope <= S_PRIVATE) {
 				sym->obj = *block++;
 				sym = sym->next;
 			}
-			
+
 			// temps
 			sym = routine->u.subp.temps;
 			while (sym != NULL) {
 				sym->obj = *block++;
 				sym = sym->next;
 			}
-			
-			EFree(p); 
+
+			EFree((char *)p);
 			return;
 		}
 		prev_p = p;
@@ -1712,27 +1513,27 @@ static load_private_block(symtab_ptr routine, int task)
 void restore_privates(symtab_ptr this_routine)
 // kick out the current private data and
 // restore the private data for the current task
-{   
+{
 	symtab_ptr sym;
 	object *block;
-	
-	if (this_routine != NULL && 
+
+	if (this_routine != NULL &&
 		this_routine->u.subp.resident_task != current_task) {
 		// get new private data
-		
-		if (this_routine->u.subp.resident_task != -1) { 
+
+		if (this_routine->u.subp.resident_task != -1) {
 			// calling routine was taken over by another task
-			
-			// save the other task's private data 
+
+			// save the other task's private data
 			block = save_private_block(this_routine);
-			
+
 			// private vars
 			sym = this_routine->next;
 			while (sym != NULL && sym->scope <= S_PRIVATE) {
 				*block++ = sym->obj;
 				sym = sym->next;
 			}
-		
+
 			// temps
 			sym = this_routine->u.subp.temps;
 			while (sym != NULL) {
@@ -1755,15 +1556,15 @@ void Execute(int *start_index)
    the big opccode switch table - see jumptab */
 {
 	do_exec(start_index);
-		
+
 	Executing = FALSE;
 }
 
 #ifndef INT_CODES
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 // don't use switch/case - use special jump to label feature
 #define case
-#endif 
+#endif
 #endif //not INT_CODES
 
 
@@ -1781,100 +1582,103 @@ void do_exec(int *start_pc)
 	volatile object v;            /* get compiler to do the right thing! */
 	register object top;          /* an object - hopefully kept in a register */
 	/*register*/ int i;           /* loop counter */
-	
+
 	double temp_dbl;
 	struct d temp_d;
-	unsigned char *poke_addr;
+	char *poke_addr;
 	void (*sub_addr)();
-	int nvars;   
+	int nvars;
+#ifndef BACKEND
 	int *iptr;
+#endif
 	int file_no;
-	int start_pos;
+
 	int end_pos;
-	int going_up; 
+	int going_up;
 	object_ptr result_ptr;
 	object result_val;
 	int cf;
 	int seqlen;
 	opcode_type *patch;
 	object b, c;
-	symtab_ptr sym, sub, caller;
+	symtab_ptr sym, sub;
 	int c0,splins;
 	s1_ptr s1,s2;
 	object *block;
-	
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+	unsigned long tuint;
+
+#if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
 	static void *localjumptab[MAX_OPCODE] = {
   &&L_LESS, &&L_GREATEREQ, &&L_EQUALS, &&L_NOTEQ, &&L_LESSEQ, &&L_GREATER,
-  &&L_NOT, &&L_AND, &&L_OR, &&L_MINUS, 
-/* 10 (previous is 10 (L_MINUS)) */  
+  &&L_NOT, &&L_AND, &&L_OR, &&L_MINUS,
+/* 10 (previous is 10 (L_MINUS)) */
   &&L_PLUS, &&L_UMINUS, &&L_MULTIPLY, &&L_DIVIDE, &&L_CONCAT, &&L_ASSIGN_SUBS,
-  &&L_GETS, &&L_ASSIGN, &&L_PRINT, &&L_IF, 
-/* 20 (previous) */  
-  &&L_FOR, &&L_ENDWHILE, &&L_ELSE, &&L_OR_BITS, &&L_RHS_SUBS, &&L_XOR_BITS, 
-  &&L_PROC, &&L_RETURNF, &&L_RETURNP, &&L_PRIVATE_INIT_CHECK, 
-/* <- 30 (previous) */  
+  &&L_GETS, &&L_ASSIGN, &&L_PRINT, &&L_IF,
+/* 20 (previous) */
+  &&L_FOR, &&L_ENDWHILE, &&L_ELSE, &&L_OR_BITS, &&L_RHS_SUBS, &&L_XOR_BITS,
+  &&L_PROC, &&L_RETURNF, &&L_RETURNP, &&L_PRIVATE_INIT_CHECK,
+/* <- 30 (previous) */
   &&L_RIGHT_BRACE_N, &&L_REPEAT, &&L_GETC, &&L_RETURNT, &&L_APPEND,
-  &&L_QPRINT, &&L_OPEN, &&L_PRINTF, &&L_ENDFOR_GENERAL, &&L_IS_AN_OBJECT, 
-/* <- 40 (previous) */  
+  &&L_QPRINT, &&L_OPEN, &&L_PRINTF, &&L_ENDFOR_GENERAL, &&L_IS_AN_OBJECT,
+/* <- 40 (previous) */
   &&L_SQRT, &&L_LENGTH, &&L_BADRETURNF, &&L_PUTS, &&L_ASSIGN_SLICE,
   &&L_RHS_SLICE, &&L_WHILE, &&L_ENDFOR_INT_UP, &&L_ENDFOR_UP, &&L_ENDFOR_DOWN,
-/* <- 50 (previous) */  
+/* <- 50 (previous) */
   &&L_NOT_BITS, &&L_ENDFOR_INT_DOWN, &&L_SPRINTF, &&L_ENDFOR_INT_UP1,
   &&L_ENDFOR_INT_DOWN1, &&L_AND_BITS, &&L_PREPEND, &&L_STARTLINE,
   &&L_CLEAR_SCREEN, &&L_POSITION,
-/* 60 (previous) */  
+/* 60 (previous) */
   &&L_EXIT, &&L_RAND, &&L_FLOOR_DIV, &&L_TRACE, &&L_TYPE_CHECK,
   &&L_FLOOR_DIV2, &&L_IS_AN_ATOM, &&L_IS_A_SEQUENCE, &&L_DATE, &&L_TIME,
-/* 70 (previous) */  
+/* 70 (previous) */
   &&L_REMAINDER, &&L_POWER, &&L_ARCTAN, &&L_LOG, NULL, &&L_COMPARE,
-  &&L_FIND, &&L_MATCH, &&L_GET_KEY, &&L_SIN, 
-/* 80 (previous) */  
+  &&L_FIND, &&L_MATCH, &&L_GET_KEY, &&L_SIN,
+/* 80 (previous) */
   &&L_COS, &&L_TAN, &&L_FLOOR, &&L_ASSIGN_SUBS_CHECK, &&L_RIGHT_BRACE_2,
   &&L_CLOSE, &&L_DISPLAY_VAR, &&L_ERASE_PRIVATE_NAMES, &&L_UPDATE_GLOBALS,
-  &&L_ERASE_SYMBOL, 
-/* 90 (previous) */  
+  &&L_ERASE_SYMBOL,
+/* 90 (previous) */
   &&L_GETENV, &&L_RHS_SUBS_CHECK, &&L_PLUS1, &&L_IS_AN_INTEGER,
   &&L_LHS_SUBS, &&L_INTEGER_CHECK, &&L_SEQUENCE_CHECK, &&L_DIV2,
   &&L_SYSTEM, &&L_COMMAND_LINE,
-/* 100 (previous) */  
+/* 100 (previous) */
   &&L_ATOM_CHECK, &&L_LESS_IFW, &&L_GREATEREQ_IFW, &&L_EQUALS_IFW,
-  &&L_NOTEQ_IFW, &&L_LESSEQ_IFW, &&L_GREATER_IFW, &&L_NOT_IFW, 
+  &&L_NOTEQ_IFW, &&L_LESSEQ_IFW, &&L_GREATER_IFW, &&L_NOT_IFW,
   &&L_GLOBAL_INIT_CHECK, &&L_NOP2,
-/* 110 (previous) */  
+/* 110 (previous) */
   &&L_MACHINE_FUNC, &&L_MACHINE_PROC, &&L_ASSIGN_I, &&L_RHS_SUBS_I,
   &&L_PLUS_I, &&L_MINUS_I, &&L_PLUS1_I, &&L_ASSIGN_SUBS_I, &&L_LESS_IFW_I,
-  &&L_GREATEREQ_IFW_I, 
-/* 120 (previous) */  
+  &&L_GREATEREQ_IFW_I,
+/* 120 (previous) */
   &&L_EQUALS_IFW_I, &&L_NOTEQ_IFW_I, &&L_LESSEQ_IFW_I, &&L_GREATER_IFW_I,
-  &&L_FOR_I, &&L_ABORT, &&L_PEEK, &&L_POKE, &&L_CALL, &&L_PIXEL,
-/* 130 (previous) */  
-  &&L_GET_PIXEL, &&L_MEM_COPY, &&L_MEM_SET, &&L_C_PROC, &&L_C_FUNC,
+  &&L_FOR_I, &&L_ABORT, &&L_PEEK, &&L_POKE, &&L_CALL,
+/* 130 (previous) */
+  &&L_MEM_COPY, &&L_MEM_SET, &&L_C_PROC, &&L_C_FUNC,
   &&L_ROUTINE_ID, &&L_CALL_BACK_RETURN, &&L_CALL_PROC, &&L_CALL_FUNC,
   &&L_POKE4,
-/* 140 (previous) */  
+/* 140 (previous) */
   &&L_PEEK4S, &&L_PEEK4U, &&L_SC1_AND, &&L_SC2_AND, &&L_SC1_OR,
   &&L_SC2_OR, NULL, &&L_SC1_AND_IF, &&L_SC1_OR_IF, NULL,
-/* 150 (previous) */  
+/* 150 (previous) */
   &&L_ASSIGN_OP_SUBS, &&L_ASSIGN_OP_SLICE, &&L_PROFILE, &&L_XOR, &&L_EQUAL,
-  &&L_SYSTEM_EXEC, 
-  &&L_PLATFORM /* PLATFORM not always emitted*/, 
-  NULL /* END_PARAM_CHECK not emitted */, 
-  &&L_CONCAT_N, 
+  &&L_SYSTEM_EXEC,
+  &&L_PLATFORM /* PLATFORM not always emitted*/,
+  NULL /* END_PARAM_CHECK not emitted */,
+  &&L_CONCAT_N,
   NULL, /* L_NOPWHILE not emitted */
 /* 160 (previous) */
   NULL, /* L_NOP1 not emitted */
   &&L_PLENGTH,
   &&L_LHS_SUBS1,
-  &&L_PASSIGN_SUBS, &&L_PASSIGN_SLICE, &&L_PASSIGN_OP_SUBS, 
+  &&L_PASSIGN_SUBS, &&L_PASSIGN_SLICE, &&L_PASSIGN_OP_SUBS,
   &&L_PASSIGN_OP_SLICE,
   &&L_LHS_SUBS1_COPY,
 /* 168 (previous) */
   &&L_TASK_CREATE, &&L_TASK_SCHEDULE, &&L_TASK_YIELD,
   &&L_TASK_SELF, &&L_TASK_SUSPEND, &&L_TASK_LIST,
   &&L_TASK_STATUS, &&L_TASK_CLOCK_STOP, &&L_TASK_CLOCK_START,
-/* 177 (previous) */ 
+/* 177 (previous) */
   &&L_FIND_FROM, &&L_MATCH_FROM,
   &&L_POKE2, &&L_PEEK2S, &&L_PEEK2U, &&L_PEEKS, &&L_PEEK_STRING,
   &&L_OPTION_SWITCHES, &&L_RETRY, &&L_SWITCH,
@@ -1887,13 +1691,17 @@ void do_exec(int *start_pc)
  NULL, NULL, NULL, /* L_PROC_FORWARD, L_FUNC_FORWARD, TYPE_CHECK_FORWARD not emitted */
   &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT,
 /* 204 (previous) */
-  &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT, &&L_EXIT_BLOCK
+  &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT, &&L_EXIT_BLOCK,
 /* 208 (previous) */
+  &&L_REF_TEMP, &&L_DEREF_TEMP, &&L_NOVALUE_TEMP,
+/* 211 (previous) */
+  &&L_COVERAGE_LINE, &&L_COVERAGE_ROUTINE
+/* 213 (previous) */
   };
 #endif
 #endif
 	if (start_pc == NULL) {
-#if defined(EUNIX) || defined(EDJGPP) || defined(EMINGW)
+#if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
 		jumptab = (int **)localjumptab;
 #endif
@@ -1904,7 +1712,7 @@ void do_exec(int *start_pc)
 	/* Initialize run-time data structures: */
 	result_ptr = NULL;
 	cf = FALSE;
-	tpc = start_pc; 
+	tpc = start_pc;
 	pc = tpc;
 
 	Executing = TRUE;
@@ -1917,7 +1725,7 @@ void do_exec(int *start_pc)
 			tpc = pc;
 			RTFatal("Runtime bad opcode (%d) at %lx", *pc, pc);
 		}
-		
+
 		switch(*pc) {
 #else
 // threaded code
@@ -1928,9 +1736,7 @@ void do_exec(int *start_pc)
 			return;
 		}
 		thread();
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
-		switch((int)pc) {                                       
-#endif
+		switch((int)pc) {
 
 #endif
 			case L_RHS_SUBS_CHECK:
@@ -1943,45 +1749,32 @@ void do_exec(int *start_pc)
 			deprintf("case L_RHS_SUBS:");
 				top = *(object_ptr)pc[2];  /* the subscript */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr)pc[1]);/* the sequence */
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) {
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
 				}
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
 				a = pc[3];
+
+				Ref( top );
+				DeRef( ((symtab_ptr)a)->obj );
+
+				*(object_ptr)a = top;
 				pc += 4;
-				if (IS_ATOM_INT(top)) {
-					if (IS_ATOM_INT_NV(*(object_ptr)a)) {
-						*(object_ptr)a = top;
-						thread();
-						BREAK;
-					}
-					else {
-						DeRefDSx(*(object_ptr)a);
-						*(object_ptr)a = top;
-						thread();
-						BREAK;
-					}
-				}
-				else {
-					RefDS(top);
-					DeRefx(*(object_ptr)a);
-					*(object_ptr)a = top;
-					thread();
-					BREAK;
-				}
+				thread();
+				BREAK;
 
 			case L_RHS_SUBS_I: /* rhs subscript of a known-to-be sequence */
 			deprintf("case L_RHS_SUBS_I:");
-				/* the target is an integer variable - no DeRef, 
+				/* the target is an integer variable - no DeRef,
 				   TypeCheck failure if assigned non-integer */
 				top = *(object_ptr)pc[2];  /* the subscript */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr)pc[1]);/* the sequence */
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) {
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					/* possibly bad subscript */
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
-				}   
+				}
 				top = (object)*(top + ((s1_ptr)obj_ptr)->base);
 				a = pc[3];
 				pc += 4;
@@ -1999,19 +1792,19 @@ void do_exec(int *start_pc)
 							BREAK;
 						}
 					}
-					RTFatalType(pc-1); 
+					RTFatalType(pc-1);
 					BREAK;
 				}
-		 
+
 			case L_PASSIGN_OP_SUBS:
 			deprintf("case L_PASSIGN_OP_SUBS:");
 				// temp has pointer to sequence
 				top = **(object_ptr *)pc[1];
 				goto aos;
-								
+
 			case L_ASSIGN_OP_SUBS:  /* var[subs] op= expr
 			pc[0..3] = { 0: L_ASSIGN_OP_SUBS
-				     1: in:var, 
+				     1: in:var,
 				     2: in:subs,
 				     3: *out: destination address
 				     4: ??
@@ -2023,14 +1816,14 @@ void do_exec(int *start_pc)
 			 */
 			deprintf("case L_ASSIGN_OP_SUBS:");
 				top = *(object_ptr)pc[1];
-			  aos:  
+			  aos:
 				if (!IS_SEQUENCE(top)) {  //optimize better
 					goto subsfail;
 				}
 				obj_ptr = (object_ptr)SEQ_PTR(top);/* the sequence */
 				top = *(object_ptr)pc[2];  /* the subscript */
 				pc[9] = pc[1]; // store in ASSIGN_SUBS op after length-4 binop
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) {
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					/* possibly bad subscript */
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
@@ -2058,11 +1851,11 @@ void do_exec(int *start_pc)
 					thread();
 					BREAK;
 				}
-				
+
 			case L_PASSIGN_SUBS:
 			deprintf("case L_PASSIGN_SUBS:");
 				// temp has pointer to sequence
-				top = *(object_ptr)pc[3];  /* the rhs value */ 
+				top = *(object_ptr)pc[3];  /* the rhs value */
 				Ref(top); /* do before UNIQUE check - avoids circularity */
 				obj_ptr = (object_ptr)SEQ_PTR(**(object_ptr **)pc[1]);
 				if (!UNIQUE(obj_ptr)) {
@@ -2070,21 +1863,22 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					obj_ptr = (object_ptr)SequenceCopy((s1_ptr)obj_ptr);
 					**(object_ptr *)pc[1] = MAKE_SEQ(obj_ptr);
-				}   
+				}
 				*(object_ptr)pc[1] = 0; // to preclude DeRef of C pointer
 				goto as;
-				
+
 			case L_ASSIGN_SUBS_CHECK:
 			deprintf("case L_ASSIGN_SUBS_CHECK:");
 				if (!IS_SEQUENCE(*(object_ptr)pc[1])) {
 					goto asubsfail;
 				}
 				/* FALL THROUGH */
-			
+
 			case L_ASSIGN_SUBS:  /* final subscript and assignment */
 			deprintf("case L_ASSIGN_SUBS:");
+
 				/* the var sequence */
-				top = *(object_ptr)pc[3];  /* the rhs value */ 
+				top = *(object_ptr)pc[3];  /* the rhs value */
 				Ref(top); /* do before UNIQUE check - avoids circularity */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr *)pc[1]);
 				if (!UNIQUE(obj_ptr)) {
@@ -2092,17 +1886,19 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					obj_ptr = (object_ptr)SequenceCopy((s1_ptr)obj_ptr);
 					*(object_ptr)pc[1] = MAKE_SEQ(obj_ptr);
-				}   
-			  as:   
+				}
+
+			  as:
 				a = *(object_ptr)pc[2]; /* the subscript */
-				if ((unsigned long)(a-1) >= ((s1_ptr)obj_ptr)->length) { 
+				if ((unsigned long)(a-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					/* subscript out of bounds (or it's a double) */
 					tpc = pc;
 					a = recover_lhs_subscript(a, (s1_ptr)obj_ptr);
-				}   
+				}
+
 				obj_ptr = a + ((s1_ptr)obj_ptr)->base;
 				a = *obj_ptr;
-				*obj_ptr = top; 
+				*obj_ptr = top;
 				pc += 4;
 				if (IS_ATOM_INT_NV(a)) {
 					thread();
@@ -2125,7 +1921,7 @@ void do_exec(int *start_pc)
 					*(object_ptr)pc[1] = MAKE_SEQ(obj_ptr);
 				}
 				top = *(object_ptr)pc[2]; /* the subscript */
-				if ((unsigned long)(top-1) >= ((s1_ptr)obj_ptr)->length) { 
+				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					/* subscript out of bounds (or it's a double) */
 					tpc = pc;
 					top = recover_lhs_subscript(top, (s1_ptr)obj_ptr);
@@ -2202,7 +1998,7 @@ void do_exec(int *start_pc)
 				a = (object)pc[3];
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
-					top++; 
+					top++;
 					if (top > MAXINT) {
 						b = top;
 						top = NewDouble((double)(INT_VAL(b)));
@@ -2214,7 +2010,7 @@ void do_exec(int *start_pc)
 				}
 				else {
 					tpc = pc;
-					top = binary_op(PLUS, ATOM_1, top); 
+					top = binary_op(PLUS, ATOM_1, top);
 				}
 				DeRefx(*(object_ptr)a);
 				*(object_ptr)a = top;
@@ -2264,15 +2060,15 @@ void do_exec(int *start_pc)
 					BREAK;
 				}
 				goto if_check;
-			
+
 			case L_SWITCH_RT:
 				tpc = pc;
-				
+
 				// *pc will be updated by analyze_switch()
 				analyze_switch();
 				thread();
 				BREAK;
-				
+
 			case L_SWITCH_SPI:
 			deprintf("case L_SWITCH_SPI:");
 				tpc = pc;
@@ -2296,7 +2092,7 @@ void do_exec(int *start_pc)
 					}
 				}
 				a -= pc[2];
-				
+
 				if( a > 0 && a <=  SEQ_PTR( *(object_ptr)pc[3])->length ){
 					// bounds check
 					top = SEQ_PTR( *(object_ptr)pc[3])->base[a];
@@ -2307,7 +2103,7 @@ void do_exec(int *start_pc)
 				pc = (int *) pc[4];
 				thread();
 				BREAK;
-				
+
 			case L_SWITCH_I:
 			deprintf("case L_SWITCH_I:");
 				tpc = pc;
@@ -2343,10 +2139,10 @@ void do_exec(int *start_pc)
 				pc = (int *) pc[4];
 				thread();
 				BREAK;
-				
+
 			case L_SWITCH:
 			deprintf("case L_SWITCH:");
-			
+
 				tpc = pc;
 				// find which case is met:
 				a = find(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2]);
@@ -2360,7 +2156,7 @@ void do_exec(int *start_pc)
 		  			// no match:  goto else or skip the switch
 					pc = (int *) pc[4];
 		  		}
-		  		
+
 		  		thread();
 		  		BREAK;
 			case L_IF:
@@ -2378,7 +2174,7 @@ void do_exec(int *start_pc)
 					pc += 9; /* DUMMY ! */
 				}
 				else {
-					if (IS_SEQUENCE(top)) { 
+					if (IS_SEQUENCE(top)) {
 						tpc = pc;
 						atom_condition();
 					}
@@ -2388,7 +2184,7 @@ void do_exec(int *start_pc)
 					else
 						inc3pc();
 					thread();
-				} 
+				}
 				BREAK;
 
 			case L_ASSIGN_I:
@@ -2400,7 +2196,7 @@ void do_exec(int *start_pc)
 				deprintf(", ");
 				SHOW_PARAM((*(int*)pc[1]));
 				deprintf(")");
-#endif				
+#endif
 				*(object_ptr)pc[2] = *(object_ptr)pc[1];
 				inc3pc();
 				thread();
@@ -2416,50 +2212,48 @@ void do_exec(int *start_pc)
 				SHOW_PARAM((*(int*)pc[1]));
 				deprintf(")");
 #endif
-				top = *obj_ptr; 
+				top = *obj_ptr;
 				*obj_ptr = *(object_ptr)pc[1];
+
 				Ref(*obj_ptr);
+
 				if (IS_ATOM_INT_NV(top)) {
 					inc3pc();
 					thread();
 					BREAK;
 				}
-				else {          
+				else {
 					DeRefDSx(top);
 					inc3pc();
 					thread();
 					BREAK;
 				}
-			  
+
 			case L_LHS_SUBS:
 			deprintf("case L_LHS_SUBS:");
 				// temp contains a pointer to the sequence
-				obj_ptr = (object_ptr)*(object_ptr)pc[1]; 
-				b = 0;
+				obj_ptr = (object_ptr)*(object_ptr)pc[1];
 				goto ls;
 
 			case L_LHS_SUBS1_COPY:
 			deprintf("case L_LHS_SUBS1_COPY:");
 				// copy base sequence into a temp, then use the temp
-				obj_ptr = (object_ptr)pc[4]; 
+				obj_ptr = (object_ptr)pc[4];
 				a = *(object_ptr)pc[1];
 				Ref(a);
-				DeRef(*obj_ptr);
 				*obj_ptr = a;
-				b = 1;
 				goto ls;
-				
-			case L_LHS_SUBS1:  
+
+			case L_LHS_SUBS1:
 			deprintf("case L_LHS_SUBS1:");
 				/* left hand side, first subscript of multiple lhs subscripts */
-				// sequence var: 
-				obj_ptr = (object_ptr)pc[1]; 
-				b = 1;
-			  ls:   
+				// sequence var:
+				obj_ptr = (object_ptr)pc[1];
+			  ls:
 				// subscript:
 				a = *(object_ptr)pc[2];
 				top = *obj_ptr;
-				if (!IS_SEQUENCE(top)) { 
+				if (!IS_SEQUENCE(top)) {
 					goto asubsfail;
 				}
 				top = (object)SEQ_PTR(top);
@@ -2469,18 +2263,18 @@ void do_exec(int *start_pc)
 					*obj_ptr = MAKE_SEQ(top);
 				}
 				obj_ptr = (object_ptr)top;
-				if ((unsigned long)(a-1) >= ((s1_ptr)obj_ptr)->length) {
+				// The variable, a, seems to index past the end of the sequence.
+				if ((unsigned long)(a-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
 					tpc = pc;
+					// It may be an encoded pointer to d struct.
+					// Do a check in the routine below.
 					a = recover_lhs_subscript(a, (s1_ptr)obj_ptr);
 				}
 				obj_ptr = a + ((s1_ptr)obj_ptr)->base;
-				
+
 				// error-check for sequence
 				if (IS_SEQUENCE(*obj_ptr)) {
 					top = pc[3]; // target temp
-					if (b) {
-						DeRef(*(object_ptr)top); // only SUBS1
-					}
 					*((object_ptr)top) = (object)obj_ptr; // storing a C pointer
 					thread5();
 				}
@@ -2492,44 +2286,44 @@ void do_exec(int *start_pc)
 				// temp has pointer to sequence
 				top = *(object_ptr)pc[1];
 				goto aosl;
-				
+
 			case L_ASSIGN_OP_SLICE:  /* var[i..j] op= expr */
 			deprintf("case L_ASSIGN_OP_SLICE:");
 				top = pc[1];
-			 aosl:  
+			 aosl:
 				pc[10] = pc[1];
 				rhs_slice_target = (object_ptr)pc[4];
 				tpc = pc;
-				RHS_Slice(*(object_ptr)top, 
-						  *(object_ptr)pc[2], 
+				RHS_Slice(*(object_ptr)top,
+						  *(object_ptr)pc[2],
 						  *(object_ptr)pc[3]);
 				thread5();
 				BREAK;
-			
+
 			case L_PASSIGN_SLICE:
 			deprintf("case L_PASSIGN_SLICE:");
 				// temp contains pointer to sequence
 				assign_slice_seq = (s1_ptr *)*(object_ptr)pc[1];
 				*(object_ptr)pc[1] = 0; // preclude DeRef of C pointer
 				goto las;
-				
+
 			case L_ASSIGN_SLICE: /* var[i..j] = expr */
 			deprintf("case L_ASSIGN_SLICE:");
 				assign_slice_seq = (s1_ptr *)pc[1]; /* extra parameter */
-			  las:  
+			  las:
 				tpc = pc;
 				AssignSlice(*(object_ptr)pc[2],
 							*(object_ptr)pc[3],  /* 3 args max for good code */
 							(s1_ptr)*(object_ptr)pc[4]);
 				thread5();
 				BREAK;
-			
+
 			case L_RHS_SLICE: /* rhs slice of a sequence a[i..j] */
 			deprintf("case L_RHS_SLICE:");
 				tpc = pc;
 				rhs_slice_target = (object_ptr)pc[4];
-				RHS_Slice(*(object_ptr)pc[1], 
-						  *(object_ptr)pc[2], 
+				RHS_Slice(*(object_ptr)pc[1],
+						  *(object_ptr)pc[2],
 						  *(object_ptr)pc[3]);
 				thread5();
 				BREAK;
@@ -2544,16 +2338,11 @@ void do_exec(int *start_pc)
 				for (a = 1; a <= nvars; a++) {
 					/* the last one comes first */
 					*obj_ptr = *((object_ptr)pc[0]);
-					if( ((symtab_ptr)pc[0])->mode != M_TEMP ){
-						Ref(*obj_ptr);
-					}
-					else{
-						*((object_ptr)pc[0]) = NOVALUE;
-					}
+					Ref(*obj_ptr);
 					pc++;
 					obj_ptr--;
 				}
-				DeRef(*(object_ptr)pc[0]);  
+				DeRef(*(object_ptr)pc[0]);
 				*(object_ptr)pc[0] = MAKE_SEQ(s1);
 				pc++;
 				thread();
@@ -2566,20 +2355,10 @@ void do_exec(int *start_pc)
 				obj_ptr = s1->base;
 				/* the second one comes first */
 				obj_ptr[1] = *((object_ptr)pc[2]);
-				if( ((symtab_ptr)(pc[2]))->mode != M_TEMP ){
-					Ref(obj_ptr[1]);
-				}
-				else{
-					*((object_ptr)pc[2]) = NOVALUE;
-				}
+				Ref(obj_ptr[1]);
 				obj_ptr[2] = *((object_ptr)pc[1]);
-				if( ((symtab_ptr)(pc[1]))->mode != M_TEMP ){
-					Ref(obj_ptr[2]);
-				}
-				else{
-					*((object_ptr)pc[1]) = NOVALUE;
-				}
-				DeRef(*(object_ptr)pc[3]);  
+				Ref(obj_ptr[2]);
+				DeRef(*(object_ptr)pc[3]);
 				*(object_ptr)pc[3] = MAKE_SEQ(s1);
 				pc += 4;
 				thread();
@@ -2596,15 +2375,15 @@ void do_exec(int *start_pc)
 					BREAK;  /* usual case L_*/
 				}
 				else if (IS_ATOM_INT(top)) {
-					if (top == ATOM_0) 
+					if (top == ATOM_0)
 						RTFatalType(pc-3);
-				} 
-				else if (IS_ATOM_DBL(top)) { 
-					if (DBL_PTR(top)->dbl == 0.0) 
+				}
+				else if (IS_ATOM_DBL(top)) {
+					if (DBL_PTR(top)->dbl == 0.0)
 						RTFatalType(pc-3);
 				}
 				else  {/* sequence */
-					type_error_msg = 
+					type_error_msg =
 						"\ntype_check failure (type returned a sequence!), ";
 					RTFatalType(pc-3);
 				}
@@ -2614,7 +2393,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_NOP2:");
 				thread2();
 				BREAK;
-			
+
 			case L_GLOBAL_INIT_CHECK:
 			deprintf("case L_GLOBAL_INIT_CHECK:");
 				pc += 2;
@@ -2684,7 +2463,7 @@ void do_exec(int *start_pc)
 				if (IS_ATOM_INT(top))
 					top = ATOM_1;
 				else if (IS_ATOM_DBL(top)) {
-					tpc = pc;
+					/* tpc = pc; */
 					top = DoubleToInt(top);
 					if (IS_ATOM_INT(top))
 						top = ATOM_1;
@@ -2703,35 +2482,59 @@ void do_exec(int *start_pc)
 			case L_IS_AN_ATOM:
 			deprintf("case L_IS_AN_ATOM:");
 				top = *(object_ptr)pc[1];
-				if (IS_ATOM(top)) 
+				if (IS_ATOM(top))
 					top = ATOM_1;
-				else 
+				else
 					top = ATOM_0;
+				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[1])->obj );
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
 				thread();
 				BREAK;
-				
+
 			case L_IS_A_SEQUENCE:
 			deprintf("case L_IS_A_SEQUENCE:");
 				top = *(object_ptr)pc[1];
-				if (IS_SEQUENCE(top)) 
+				if (IS_SEQUENCE(top))
 					top = ATOM_1;
-				else 
+				else
 					top = ATOM_0;
+				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[1])->obj );
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
 				BREAK;
-			
+
 			case L_IS_AN_OBJECT:
 			deprintf("case L_IS_AN_OBJECT:");
 				top = *(object_ptr)pc[1];
-				if (top != NOVALUE) 
-					top = ATOM_1;
-				else 
+				if (top != NOVALUE) {
+					if (IS_ATOM_INT(top))
+						top = 1;
+					else if (IS_ATOM_DBL(top)) {
+						top = DoubleToInt(top);
+						if (IS_ATOM_INT(top))
+							top = 1;
+						else
+							top = 2;
+					}
+					else if (IS_SEQUENCE(top))
+						top = 3;
+				}
+				else
 					top = ATOM_0;
+
+				if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					DeRef( ((symtab_ptr)pc[1])->obj );
+					((symtab_ptr)pc[1])->obj = NOVALUE;
+				}
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -2739,32 +2542,35 @@ void do_exec(int *start_pc)
 
 			case L_PLENGTH:
 			deprintf("case L_PLENGTH:");
-				/* *pc[1] contains a pointer to the sequence */
-				top = (object)**(object_ptr **)pc[1]; 
+				/* *pc[1] contains a pointer to the argument */
+				top = (object)**(object_ptr **)pc[1];
 				goto len;
 
 			case L_LENGTH:
 			deprintf("case L_LENGTH:");
 				/* *pc[1] is a sequence */
 				top = *(object_ptr)pc[1];
-			  len:  
-				if (IS_SEQUENCE(top)) { 
+			  len:
+				if (IS_SEQUENCE(top)) {
 					top = SEQ_PTR(top)->length;
-					obj_ptr = (object_ptr)pc[2];
-					DeRefx(*obj_ptr);
-					*obj_ptr = top;
-					inc3pc();
-					thread();
 				}
 				else {
-					tpc = pc;
-					RTFatal("length of an atom is not defined");
+					if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+						DeRef( ((symtab_ptr)pc[1])->obj );
+						((symtab_ptr)pc[1])->obj = NOVALUE;
+					}
+					top = ATOM_1;
 				}
+				obj_ptr = (object_ptr)pc[2];
+				DeRefx(*obj_ptr);
+				*obj_ptr = top;
+				inc3pc();
+				thread();
 				BREAK;
 
 				/* ---------- start of unary ops ----------------- */
 
-			case L_SQRT: 
+			case L_SQRT:
 			deprintf("case L_SQRT:");
 				a = SQRT;
 				goto unary;
@@ -2792,7 +2598,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_NOT_BITS:");
 				a = NOT_BITS;
 				goto unary;
-			
+
 			case L_FLOOR:
 			deprintf("case L_FLOOR:");
 				top = *(object_ptr)pc[1];
@@ -2805,13 +2611,13 @@ void do_exec(int *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-			
+
 			unary:
 				top = *(object_ptr)pc[1];
 				tpc = pc;
-				if (IS_ATOM_INT(top)) 
+				if (IS_ATOM_INT(top))
 					top = (*optable[a].intfn)(INT_VAL(top));
-				else 
+				else
 					top = unary_op(a, top);
 				DeRef(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
@@ -2819,7 +2625,7 @@ void do_exec(int *start_pc)
 				thread();
 				BREAK;
 
-			case L_NOT:          
+			case L_NOT:
 			deprintf("case L_NOT:");
 				START_UNARY_OP
 				if (top == ATOM_0)
@@ -2832,7 +2638,7 @@ void do_exec(int *start_pc)
 
 			case L_NOT_IFW:
 			deprintf("case L_NOT_IFW:");
-				top = *(object_ptr)pc[1]; 
+				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
 						inc3pc();
@@ -2841,7 +2647,7 @@ void do_exec(int *start_pc)
 						BREAK;
 					}
 					else {
-						pc = (int *)pc[2]; 
+						pc = (int *)pc[2];
 						thread();
 						BREAK;
 					}
@@ -2857,8 +2663,8 @@ void do_exec(int *start_pc)
 			deprintf("case L_UMINUS:");
 				START_UNARY_OP
 				if (top == MININT) {
-					tpc = pc; 
-					top = (object)NewDouble((double)-MININT_VAL);
+					tpc = pc;
+					top = (object)NewDouble((double)-MININT);
 				}
 				else
 					top = -top;
@@ -2869,7 +2675,7 @@ void do_exec(int *start_pc)
 			case L_RAND:
 			deprintf("case L_RAND:");
 				START_UNARY_OP
-				tpc = pc; 
+				tpc = pc;
 				if (INT_VAL(top) <= 0) {
 					RTFatal("argument to rand() must be >= 1");
 				}
@@ -2880,7 +2686,7 @@ void do_exec(int *start_pc)
 
 
 				/* --------- start of binary ops ----------*/
-			case L_PLUS:    
+			case L_PLUS:
 			deprintf("case L_PLUS:");
 				START_BIN_OP
 					/* INT:INT case */
@@ -2895,7 +2701,7 @@ void do_exec(int *start_pc)
 				else {
 					/* non INT:INT cases */
 					tpc = pc;
-					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) { 
+					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
 						temp_d.dbl = (double)INT_VAL(v);
 						top = Dadd(&temp_d, DBL_PTR(top));
@@ -2918,27 +2724,27 @@ void do_exec(int *start_pc)
 
 				aresult:
 					/* store result and DeRef */
-					a = *obj_ptr; 
-					*obj_ptr = top; 
-					pc += 4; 
-					if (IS_ATOM_INT_NV(a)) 
-						thread(); 
-					
-					else {  
-						DeRefDS(a);  
+					a = *obj_ptr;
+					*obj_ptr = top;
+					pc += 4;
+					if (IS_ATOM_INT_NV(a))
+						thread();
+
+					else {
+						DeRefDS(a);
 					}
-				}    
+				}
 				BREAK;
 
-			case L_PLUS_I:    
+			case L_PLUS_I:
 			deprintf("case L_PLUS_I:");
 				/* we know that the inputs and the output must be integers */
 				START_BIN_OP_I
 				top = INT_VAL(a) + INT_VAL(top);
-				if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) { 
+				if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
 					goto dblplus_i;
 				}
-			contplus_i:  
+			contplus_i:
 				END_BIN_OP_I
 				BREAK;
 
@@ -2957,7 +2763,7 @@ void do_exec(int *start_pc)
 				else {
 					/* non INT:INT cases */
 					tpc = pc;
-					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) { 
+					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
 						temp_d.dbl = (double)INT_VAL(v);
 						top = Dminus(&temp_d, DBL_PTR(top));
@@ -2996,17 +2802,17 @@ void do_exec(int *start_pc)
 				}
 				END_BIN_OP_I
 				BREAK;
-			
+
 		   case L_MULTIPLY:
 		   deprintf("case L_MULTIPLY:");
 				START_BIN_OP
 					/* INT:INT case L_*/
 					c = a;
-					b = top; 
-					
+					b = top;
+
 					if (c == (short)c) {
 						/* c is 16-bit */
-						if ((b <= INT15 && b >= -INT15) || 
+						if ((b <= INT15 && b >= -INT15) ||
 							(c == (char)c && b <= INT23 && b >= -INT23) ||
 							(b == (short)b && c <= INT15 && c >= -INT15)) {
 							top = MAKE_INT(c * b);
@@ -3027,10 +2833,10 @@ void do_exec(int *start_pc)
 					STORE_TOP_I
 				}
 				else {
-					/* non INT:INT cases 
+					/* non INT:INT cases
 					   - what if a is int and top is sequence? */
 					tpc = pc;
-					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) { 
+					if (IS_ATOM_INT(a) && IS_ATOM_DBL(top)) {
 						v = a;
 						temp_d.dbl = (double)INT_VAL(v);
 						top = Dmultiply(&temp_d, DBL_PTR(top));
@@ -3059,7 +2865,7 @@ void do_exec(int *start_pc)
 				START_BIN_OP
 				c = INT_VAL(a);
 				tpc = pc;
-				if ((b = INT_VAL(top)) == 0) 
+				if ((b = INT_VAL(top)) == 0)
 					RTFatal("attempt to divide by 0");
 				if (c % b != 0) /* could try in-line DIV call here for speed */
 					top = (object)NewDouble((double)c / b);
@@ -3081,28 +2887,31 @@ void do_exec(int *start_pc)
 				}
 				END_BIN_OP(REMAINDER)
 				BREAK;
-			
+
 			case L_AND_BITS:
 			deprintf("case L_AND_BITS:");
 				START_BIN_OP
-				top = MAKE_INT(INT_VAL(a) & INT_VAL(top));
+				tuint = (unsigned long)a & (unsigned long)top;
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(AND_BITS)
 				BREAK;
-			
+
 			case L_OR_BITS:
 			deprintf("case L_OR_BITS:");
 				START_BIN_OP
-				top = MAKE_INT(INT_VAL(a) | INT_VAL(top));
+				tuint = (unsigned long)a | (unsigned long)top;
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(OR_BITS)
 				BREAK;
-			
+
 			case L_XOR_BITS:
 			deprintf("case L_XOR_BITS:");
 				START_BIN_OP
-				top = MAKE_INT(INT_VAL(a) ^ INT_VAL(top));
+				tuint = (unsigned long)a ^ (unsigned long)top;
+				top = MAKE_UINT(tuint);
 				END_BIN_OP(XOR_BITS)
 				BREAK;
-				
+
 			case L_POWER:
 			deprintf("case L_POWER:");
 				START_BIN_OP
@@ -3119,12 +2928,12 @@ void do_exec(int *start_pc)
 					b = top;
 					if (b & 1) {
 						/* odd */
-						tpc = pc; 
-						top = NewDouble( (b >> 1) + POINT5 ); 
+						tpc = pc;
+						top = NewDouble( (b >> 1) + POINT5 );
 										/*-ves ok */
 					}
 					else
-						top = b >> 1; 
+						top = b >> 1;
 				}
 				else {
 					tpc = pc;
@@ -3134,13 +2943,13 @@ void do_exec(int *start_pc)
 				*(object_ptr)pc[3] = top;
 				thread4();
 				BREAK;
-			
+
 			case L_FLOOR_DIV2:
 			deprintf("case L_FLOOR_DIV2:");
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					b = top;
-					top = b >> 1; 
+					top = b >> 1;
 				}
 				else {
 					tpc = pc;
@@ -3172,7 +2981,7 @@ void do_exec(int *start_pc)
 						temp_dbl = floor((double)v / (double)b);
 						if (fabs(temp_dbl) <= MAXINT_DBL)
 							b = (long)temp_dbl;
-						else 
+						else
 							b = (object)NewDouble(temp_dbl);
 					}
 				}
@@ -3352,12 +3161,12 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-					}   
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl == 0.0) {
 						DeRefx(*(object_ptr)pc[2]);
-						*(object_ptr)pc[2] = ATOM_0;                
+						*(object_ptr)pc[2] = ATOM_0;
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
@@ -3369,7 +3178,7 @@ void do_exec(int *start_pc)
 				}
 				thread4();
 				BREAK;
-			
+
 			case L_SC1_AND_IF:  // no need to store ATOM_0
 			deprintf("case L_SC1_AND_IF:");
 				top = *(object_ptr)pc[1];
@@ -3378,7 +3187,7 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-					}   
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl == 0.0) {
@@ -3393,7 +3202,7 @@ void do_exec(int *start_pc)
 				}
 				thread4();
 				BREAK;
-			
+
 			case L_SC2_OR:
 			deprintf("case L_SC2_OR:");
 			case L_SC2_AND:
@@ -3401,15 +3210,15 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];
 				DeRefx(*(object_ptr)pc[2]);
 				if (IS_ATOM_INT(top)) {
-					if (top == ATOM_0) 
+					if (top == ATOM_0)
 						*(object_ptr)pc[2] = ATOM_0;
-					else    
+					else
 						*(object_ptr)pc[2] = ATOM_1;
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl == 0.0)
 						*(object_ptr)pc[2] = ATOM_0;
-					else    
+					else
 						*(object_ptr)pc[2] = ATOM_1;
 				}
 				else {
@@ -3419,7 +3228,7 @@ void do_exec(int *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-			
+
 			case L_XOR:
 			deprintf("case L_XOR:");
 				START_BIN_OP
@@ -3450,12 +3259,12 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-					}   
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl != 0.0) {
 						DeRefx(*(object_ptr)pc[2]);
-						*(object_ptr)pc[2] = ATOM_1;                
+						*(object_ptr)pc[2] = ATOM_1;
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
@@ -3467,7 +3276,7 @@ void do_exec(int *start_pc)
 				}
 				thread4();
 				BREAK;
-			
+
 			case L_SC1_OR_IF: // no need to store ATOM_1
 			deprintf("case L_SC1_OR_IF:");
 				top = *(object_ptr)pc[1];
@@ -3476,7 +3285,7 @@ void do_exec(int *start_pc)
 						pc = (int *)pc[3];
 						thread();
 						BREAK;
-					}   
+					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl != 0.0) {
@@ -3497,11 +3306,11 @@ void do_exec(int *start_pc)
 
 
 			/* Note: we *must* always patch the endfor op, because it might
-			   actually be wrong as determined by the front-end */ 
+			   actually be wrong as determined by the front-end */
 			case L_FOR:
 			deprintf("case L_FOR:");
 				obj_ptr = (object_ptr)pc[5]; /* loop var */
-				top = *obj_ptr; 
+				top = *obj_ptr;
 				c = *(object_ptr)pc[3]; /* initial value */
 				*obj_ptr = c;
 				Ref(c);
@@ -3524,7 +3333,7 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];    /* inc */
 				a = *(object_ptr)pc[2];      /* limit */
 			  intloop:
-				if ((long)((unsigned long)a + (unsigned long)top + (unsigned long)HIGH_BITS) < 0) { 
+				if ((long)((unsigned long)a + (unsigned long)top + (unsigned long)HIGH_BITS) < 0) {
 					/* purely integer loop */
 					if ((top >= 0)) {
 						/* going up */
@@ -3532,11 +3341,11 @@ void do_exec(int *start_pc)
 							pc = (int *)pc[6];
 							thread();
 							BREAK;
-						} 
+						}
 						if (top == ATOM_1) {
 							i = ENDFOR_INT_UP1;
 						}
-						else {        
+						else {
 							i = ENDFOR_INT_UP;
 						}
 					}
@@ -3546,7 +3355,7 @@ void do_exec(int *start_pc)
 							pc = (int *)pc[6];
 							thread();
 							BREAK;
-						} 
+						}
 						if (top == ATOM_M1) {
 							i = ENDFOR_INT_DOWN1;
 						}
@@ -3559,9 +3368,9 @@ void do_exec(int *start_pc)
 				  general:
 					/* general loop */
 					tpc = pc;
-					if (!IS_ATOM(c)) 
+					if (!IS_ATOM(c))
 						RTFatal("for-loop variable is not an atom");
-					if (!IS_ATOM(a)) 
+					if (!IS_ATOM(a))
 						RTFatal("for-loop limit is not an atom");
 					if (IS_ATOM_INT(top))
 						going_up = (INT_VAL(top) >= 0);
@@ -3571,9 +3380,9 @@ void do_exec(int *start_pc)
 						RTFatal("for-loop increment is not an atom");
 					if (going_up)
 						b = binary_op_a(GREATER, c, a);
-					else 
+					else
 						b = binary_op_a(LESS, c, a);
-					if (b == ATOM_1) { 
+					if (b == ATOM_1) {
 						pc = (int *)pc[6];  /* exit loop - 0 iterations */
 						BREAK;
 					}
@@ -3596,10 +3405,10 @@ void do_exec(int *start_pc)
 					}
 					else {
 						// don't upset other tasks or levels of recursion
-						patch[0] = opcode(ENDFOR_GENERAL); 
+						patch[0] = opcode(ENDFOR_GENERAL);
 					}
 				}
-				thread(); 
+				thread();
 				BREAK;
 
 
@@ -3654,8 +3463,8 @@ void do_exec(int *start_pc)
 				tpc = pc;
 				top = binary_op_a(PLUS, a, *(object_ptr)pc[4]); /* increment */
 				/* compare with limit */
-				if (binary_op_a(GREATER, top, *(object_ptr)pc[2]) == ATOM_1) { 
-					DeRef(top);  
+				if (binary_op_a(GREATER, top, *(object_ptr)pc[2]) == ATOM_1) {
+					DeRef(top);
 					thread5();
 				}
 				else {
@@ -3674,7 +3483,7 @@ void do_exec(int *start_pc)
 				tpc = pc;
 				top = binary_op_a(PLUS, a, *(object_ptr)pc[4]); /* increment */
 				if (binary_op_a(LESS, top, *(object_ptr)pc[2]) == ATOM_1) {
-					DeRef(top);  
+					DeRef(top);
 					thread5();  /* exit loop */
 				}
 				else {
@@ -3687,27 +3496,27 @@ void do_exec(int *start_pc)
 
 
 			// Call by handle to procedure, function or type
-			case L_CALL_FUNC: 
+			case L_CALL_FUNC:
 			deprintf("case L_CALL_FUNC:");
 				cf = TRUE;
-			case L_CALL_PROC: 
+			case L_CALL_PROC:
 			deprintf("case L_CALL_PROC:");
 				tpc = pc;
 				if (expr_top >= expr_limit) {
 					expr_max = BiggerStack();
 					expr_limit = expr_max - 3;
-				} 
-				
+				}
+
 				// get the routine symtab_ptr:
-				a = get_pos_int("call_proc/call_func", *(object_ptr)pc[1]); 
-				if ((unsigned)a >= e_routine_next) {
+				a = get_pos_int("call_proc/call_func", *(object_ptr)pc[1]);
+				if (a >= e_routine_next) {
 					RTFatal("invalid routine id");
 				}
 				sub = e_routine[a];
-				
+
 				// get the argument sequence
-				a = *(object_ptr)pc[2]; 
-				
+				a = *(object_ptr)pc[2];
+
 				// check for correct kind of routine
 				if (cf) {
 					cf = FALSE;
@@ -3722,28 +3531,28 @@ void do_exec(int *start_pc)
 								sub->name);
 					}
 				}
-				
+
 				if (IS_ATOM(a)) {
 					RTFatal("argument list must be a sequence");
 				}
 				a = (object)SEQ_PTR(a);
-				
+
 				// if length is huge it will be rejected here,
 				// so max_stack_per_call will protect against stack overflow
-				if (sub->u.subp.num_args != ((s1_ptr)a)->length) {
+				if (sub->u.subp.num_args != (unsigned long)((s1_ptr)a)->length) {
 					// must avoid > 3 arg calls to get better WATCOM code gen
 					wrong_arg_count(sub, a);
 				}
 				obj_ptr = ((s1_ptr)a)->base;
-				sym = sub->next; 
-				
+				sym = sub->next;
+
 				if (sub->u.subp.resident_task != -1) {
 					/* someone is using the sub - save the privates and temps */
 					block = save_private_block(sub);
-					
+
 					/* save & copy the args */
 					while (TRUE) {
-						obj_ptr++;                      
+						obj_ptr++;
 						a = *(object_ptr)obj_ptr;
 						if (!IS_ATOM_INT(a)) {
 							if (a == NOVALUE) { // sentinel
@@ -3756,16 +3565,16 @@ void do_exec(int *start_pc)
 						sym->obj = a;
 						sym = sym->next;
 					}
-					
-					/* save the remaining privates and loop-vars & 
+
+					/* save the remaining privates and loop-vars &
 					   set to NOVALUE */
-					while (sym && sym->scope <= S_PRIVATE) {
+					while (sym && sym->scope <= S_PRIVATE ) {
 						*block++ = sym->obj;
 						sym->obj = NOVALUE;
 						sym = sym->next;
 					}
-				
-					/* save the temps & set to NOVALUE */ 
+
+					/* save the temps & set to NOVALUE */
 					sym = sub->u.subp.temps;
 					while (sym != NULL) {
 						*block++ = sym->obj;
@@ -3777,7 +3586,7 @@ void do_exec(int *start_pc)
 					/* don't push */
 					/* save & copy the args */
 					while (TRUE) {
-						obj_ptr++;                      
+						obj_ptr++;
 						a = *(object_ptr)obj_ptr;
 						if (!IS_ATOM_INT(a)) {
 							if (a == NOVALUE) { // sentinel
@@ -3792,12 +3601,12 @@ void do_exec(int *start_pc)
 					/* the remaining privates and loop-vars will already
 					   contain NOVALUE from the previous first-level return */
 				}
-				
+
 				sub->u.subp.resident_task = current_task;
-				
+
 				*expr_top++ = (object)obj_ptr; // push return address
-				*expr_top++ = sub;             // push sub symtab pointer
-				pc = sub->u.subp.code;         // start executing the sub 
+				*expr_top++ = (object)sub;             // push sub symtab pointer
+				pc = sub->u.subp.code;         // start executing the sub
 				thread();
 				BREAK;
 
@@ -3808,40 +3617,39 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					expr_max = BiggerStack();
 					expr_limit = expr_max - 3;
-				} 
+				}
 				sub = (symtab_ptr)pc[1]; // subroutine
-				sym = sub->next; 
+				sym = sub->next;
 
-				// pc (ESI) is used for role of obj_ptr here and in loop 
+				// pc (ESI) is used for role of obj_ptr here and in loop
 				obj_ptr = (object_ptr)(pc + 2); // list of argument addresses
-				
+
 				a = (object)(obj_ptr + sub->u.subp.num_args);
-				
+
 				if (sub->u.subp.resident_task != -1) {
 					/* someone is using the sub - save the privates and temps */
-	
+
 					tpc = pc;
-					
 					block = save_private_block(sub);
-					
+
 					/* save & copy the args */
-					while (obj_ptr < (object_ptr)a) {
+					while ( obj_ptr < (object_ptr)a) {
 						*block++ = sym->obj;
 						sym->obj = *(object_ptr)obj_ptr[0];
 						Ref(sym->obj);
 						sym = sym->next;
-						obj_ptr++;                      
+						obj_ptr++;
 					}
-	
-					/* save the remaining privates and loop-vars & 
+
+					/* save the remaining privates and loop-vars &
 					   set to NOVALUE */
 					while (sym && sym->scope <= S_PRIVATE) {
 						*block++ = sym->obj;
 						sym->obj = NOVALUE;
 						sym = sym->next;
 					}
-					
-					/* save the temps & set to NOVALUE */ 
+
+					/* save the temps & set to NOVALUE */
 					sym = sub->u.subp.temps;
 					while (sym != NULL) {
 						*block++ = sym->obj;
@@ -3851,37 +3659,37 @@ void do_exec(int *start_pc)
 				}
 				else {
 					/* no need to save the privates or temps */
-					
+
 					/* just copy the args */
 					while (obj_ptr < (object_ptr)a) {
 						sym->obj = *(object_ptr)obj_ptr[0];
 						Ref(sym->obj);
 						sym = sym->next;
-						obj_ptr++;                      
+						obj_ptr++;
 					}
-	
-					/* the remaining privates and loop-vars will already 
+
+					/* the remaining privates and loop-vars will already
 					   contain NOVALUE from the previous level-1 return */
 				}
-				
+
 				sub->u.subp.resident_task = current_task;
-				
+
 				if (sub->token != PROC)
 					obj_ptr++; /* skip address for fn/type result */
-				
+
 				*expr_top++ = (object)obj_ptr; // push return address
-				*expr_top++ = sub;             // push sub symtab pointer 
+				*expr_top++ = (object)sub;             // push sub symtab pointer
 				pc = sub->u.subp.code;         // start executing the sub
 				thread();
 				BREAK;
-				
+
 			case L_PROC_TAIL:   // tail recursion
 				sub = ((symtab_ptr)pc[1]);
 				sym = sub->next; /* first private var */
-				
-				// pc (ESI) is used for role of obj_ptr here and in loop 
+
+				// pc (ESI) is used for role of obj_ptr here and in loop
 				obj_ptr = (object_ptr)(pc + 2); // list of argument addresses
-				
+
 				a = (object)(obj_ptr + sub->u.subp.num_args);
 				/* just copy the args */
 				while (obj_ptr < (object_ptr)a) {
@@ -3890,24 +3698,24 @@ void do_exec(int *start_pc)
 					Ref(sym->obj);
 					DeRef( b );
 					sym = sym->next;
-					obj_ptr++;                      
+					obj_ptr++;
 				}
-				
-				/* free the privates and set to NOVALUE */
+
+				/* release the privates and set to NOVALUE */
 				while (sym && sym->scope <= S_PRIVATE) {
 					DeRef(sym->obj);
 					sym->obj = NOVALUE; // not actually needed for params
 					sym = sym->next;
 				}
-					
-				/* free the temps and set to NOVALUE */ 
+
+				/* release the temps and set to NOVALUE */
 				sym = sub->u.subp.temps;
 				while (sym != NULL) {
 					DeRef(sym->obj);
 					sym->obj = NOVALUE;
 					sym = sym->next;
 				}
-				
+
 				pc = sub->u.subp.code;         // start executing the sub
 				thread();
 				BREAK;
@@ -3915,13 +3723,13 @@ void do_exec(int *start_pc)
 			case L_CALL_BACK_RETURN: /* return from a call-back */
 			deprintf("case L_CALL_BACK_RETURN:");
 				return;
-			
+
 			case L_RETURNT: /* end of execution - falling off the end */
 			deprintf("case L_RETURNT:");
 				tpc = pc;  /* we need this to be different from CALL_BACK_RETURN */
 				Cleanup(0);
 				return;
-				
+
 			case L_BADRETURNF:  /* shouldn't reach here */
 			deprintf("case L_BADRETURNF:");
 				tpc = pc;
@@ -3932,35 +3740,40 @@ void do_exec(int *start_pc)
 			deprintf("case L_RETURNF:");
 				result_val = *(object_ptr)pc[3]; /* the return value */
 				Ref(result_val);
-				// record the place to put the return value 
+
+				// record the place to put the return value
 				result_ptr = (object_ptr)*((int *)expr_top[-2] - 1);
+				goto return_p;
 
 			case L_RETURNP: /* return from procedure */
 			deprintf("case L_RETURNP:");
+
+				result_ptr = 0;
+
+			return_p:
 				sub = ((symtab_ptr)pc[1]);
-				
-				/* free the privates and set to NOVALUE */
+				/* release the privates and set to NOVALUE */
 				sym = (symtab_ptr)pc[2];
-				b = (object_ptr) sub->u.subp.block;
-				while( sym != (symtab_ptr)b ){
-					while( obj_ptr = (object_ptr)sym->next_in_block ){
+				while(1){
+					obj_ptr = (object_ptr)sym;
+					while( (obj_ptr = (object_ptr)((symtab_ptr)obj_ptr)->next_in_block) ){
 						DeRef( *obj_ptr);
 						*obj_ptr = NOVALUE;
 					}
+					if( sym == sub->u.subp.block ) break;
 					sym = sym->u.subp.block;
 				}
-					
-				
+
 				// vacating this routine
 				sub->u.subp.resident_task = -1;
 
 				tpc = pc;
-					
+
 				if (expr_top > expr_stack+3) {
 					// stack is not empty
-					pc = (int *)expr_top[-2]; 
+					pc = (int *)expr_top[-2];
 					expr_top -= 2;
-					top = expr_top[-1]; 
+					top = expr_top[-1];
 					restore_privates((symtab_ptr)top);
 
 					if (result_ptr != NULL) {
@@ -3968,6 +3781,13 @@ void do_exec(int *start_pc)
 						top = *result_ptr;
 						*result_ptr = result_val; //was important not to use "a"
 						DeRef(top);
+						if( ((symtab_ptr)tpc[3])->mode == M_TEMP ){
+							DeRef( result_val );
+
+							// Watch for recursion:
+							if( tpc[3] != (int)result_ptr )
+								((symtab_ptr)tpc[3])->obj = NOVALUE;
+						}
 						result_ptr = NULL;
 					}
 				}
@@ -3977,20 +3797,20 @@ void do_exec(int *start_pc)
 					scheduler(current_time());
 					pc = tpc;
 				}
-				
-				goto exit_block;
-			
+
+				thread();
+				BREAK;
+
 			case L_EXIT_BLOCK:
 			deprintf("case L_EXIT_BLOCK:");
 				sym = ((symtab_ptr)pc[1]);
+				result_ptr = 0;
 				pc += 2;
-				
-				exit_block:
-					// other places may jump here (RETURNP, END_FOR, etc)
-					while( sym = sym->next_in_block ){
-						DeRef(sym->obj);
-						sym->obj = NOVALUE;
-					}
+				while( (sym = sym->next_in_block) ){
+					DeRef(sym->obj);
+					sym->obj = NOVALUE;
+
+				}
 				thread();
 
 			case L_ROUTINE_ID:
@@ -4004,18 +3824,18 @@ void do_exec(int *start_pc)
 				pc += 6;
 				/*thread();*/
 				BREAK;
-			
+
 			case L_DELETE_ROUTINE:
 			deprintf("case L_DELETE_ROUTINE:");
 				a = *(object_ptr)pc[1]; // the object
-				
+
 				// get the routine symtab_ptr:
-				b = get_pos_int("call_proc/call_func", *(object_ptr)pc[2]); 
-				if ((unsigned)b >= e_routine_next) {
+				b = get_pos_int("call_proc/call_func", *(object_ptr)pc[2]);
+				if (b >= e_routine_next) {
 					RTFatal("invalid routine id");
 				}
 				obj_ptr = (object_ptr) DeleteRoutine( b );
-				
+
 				// Only ref if source and target are different, and the source
 				// isn't a temp.  If copied below, then don't ref, either.
 				b = (pc[1] != pc[3]) && (((symtab_ptr)pc[1])->mode != M_TEMP);
@@ -4025,7 +3845,8 @@ void do_exec(int *start_pc)
 					b = 0;
 				}
 				else if( IS_ATOM_DBL(a) ){
-					if( ((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+					if( (!UNIQUE(DBL_PTR(a)) && !DBL_PTR(a)->cleanup) ||
+					(((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0) ){
 						a = NewDouble( DBL_PTR(a)->dbl );
 						b = 0;
 					}
@@ -4038,7 +3859,8 @@ void do_exec(int *start_pc)
 					DBL_PTR(a)->cleanup = (cleanup_ptr) obj_ptr;
 				}
 				else{ // sequence
-					if( ((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0 ){
+					if( (!UNIQUE(SEQ_PTR(a)) && !DBL_PTR(a)->cleanup) ||
+					(((symtab_ptr)pc[1])->mode == M_CONSTANT && ((symtab_ptr)pc[1])->name == 0) ){
 						a = MAKE_SEQ( SequenceCopy( SEQ_PTR(a) ) );
 						b = 0;
 					}
@@ -4050,18 +3872,21 @@ void do_exec(int *start_pc)
 					}
 					SEQ_PTR(a)->cleanup = (cleanup_ptr)obj_ptr;
 				}
-				obj_ptr = pc[3];
+				obj_ptr = (object_ptr)pc[3];
 				if( a != *obj_ptr ){
 					DeRef( *obj_ptr );
 					*obj_ptr = a;
 				}
-				
+
 				if( b != 0 ){
 					RefDS( a );
 				}
+				else if( ((symtab_ptr)pc[1])->mode == M_TEMP ){
+					*(object_ptr)pc[1] = NOVALUE;
+				}
 				thread4();
 				BREAK;
-			
+
 			case L_DELETE_OBJECT:
 				a = *(object_ptr)pc[1];
 				if( !IS_ATOM_INT(a) ){
@@ -4069,9 +3894,27 @@ void do_exec(int *start_pc)
 						cleanup_double( DBL_PTR(a) );
 					}
 					else if( IS_SEQUENCE(a) ){
-						cleanup_sequence( DBL_PTR(a) );
+						cleanup_sequence( (s1_ptr)DBL_PTR(a) );
 					}
 				}
+				pc += 2;
+				thread();
+				BREAK;
+
+			case L_REF_TEMP:
+				deprintf("case L_REF_TEMP:");
+				Ref( ((symtab_ptr)pc[1])->obj );
+				pc += 2;
+				thread();
+				BREAK;
+
+			case L_DEREF_TEMP:
+				deprintf("case L_DEREF_TEMP:");
+				DeRef( ((symtab_ptr)pc[1])->obj );
+
+			case L_NOVALUE_TEMP:
+				deprintf("case L_NOVALUE_TEMP:");
+				((symtab_ptr)pc[1])->obj = NOVALUE;
 				pc += 2;
 				thread();
 				BREAK;
@@ -4084,7 +3927,7 @@ void do_exec(int *start_pc)
 					tpc = pc;
 					RTFatal("first argument of append must be a sequence");
 				}
-	  app_copy:  
+	  app_copy:
 				tpc = pc;
 				Ref(top);
 				Append((object_ptr)pc[3], b, top);
@@ -4116,7 +3959,7 @@ void do_exec(int *start_pc)
 				s1 = SEQ_PTR(a);
 				seqlen = s1->length;
 				b = *(object_ptr)pc[2];  //start
-				if (IS_SEQUENCE(b)) 
+				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to remove() must be an atom");
 				nvars = (IS_ATOM_INT(b)) ? b : (long)(DBL_PTR(b)->dbl);
 				top = *(object_ptr)pc[3]; //stop
@@ -4136,7 +3979,7 @@ void do_exec(int *start_pc)
 					BREAK;
 				}
 				// remove all or start
-				if (nvars < 2 ) {  
+				if (nvars < 2 ) {
 					if (end_pos >= seqlen) {   // return ""
 						*obj_ptr = MAKE_SEQ(NewS1(0));
 						Ref(*obj_ptr);
@@ -4160,22 +4003,23 @@ void do_exec(int *start_pc)
 				}
 				thread5();
 				BREAK;
-			
+
 			case L_REPLACE:
 			deprintf("case L_REPLACE:");
 				// type check arguments
 				tpc = pc;
+
 				if (!IS_SEQUENCE(*(object_ptr)pc[1])) // source
 					RTFatal("First argument to replace() must be a sequence");
-				
+
 				if (IS_SEQUENCE(*(object_ptr)pc[3])) // start
 					RTFatal("Third argument to replace() must be an atom");
-				
+
 				if (IS_SEQUENCE(*(object_ptr)pc[4])) // stop
 					RTFatal("Fourth argument to replace() must be an atom");
-				
+
 				Replace( (replace_ptr)(pc+1) );
-				
+
 				pc += 6;
 				thread();
 				BREAK;
@@ -4190,13 +4034,13 @@ void do_exec(int *start_pc)
 				s1 = SEQ_PTR(a);
 				seqlen = s1->length;
 				b = *(object_ptr)pc[2];   // start
-				if (IS_SEQUENCE(b)) 
+				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to head() must be an atom");
 				nvars = (IS_ATOM_INT(b)) ? b : (long)(DBL_PTR(b)->dbl);
-				if (nvars < 0) 
+				if (nvars < 0)
 					RTFatal("Second argument to head() must not be negative");
 				obj_ptr = (object_ptr)pc[3];
-//				top = *obj_ptr;
+
 				// get first elements
 				if (nvars == 0) {
 					// Nothing to get so return an empty sequence.
@@ -4216,20 +4060,20 @@ void do_exec(int *start_pc)
 			deprintf("case L_TAIL:");
 				// type check and normalise arguments
 				tpc = pc;
-				
+
 				a = *(object_ptr)pc[1];  // source
 				if (!IS_SEQUENCE(a))
 					RTFatal("First argument to tail() must be a sequence");
 				s1 = SEQ_PTR(a);
 				seqlen = s1->length;
-				
+
 				b = *(object_ptr)pc[2];  // length
-				if (IS_SEQUENCE(b)) 
+				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to tail() must be an atom");
 				nvars = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
-				if (nvars < 0) 
+				if (nvars < 0)
 					RTFatal("Second argument to tail() must not be negative");
-					
+
 				obj_ptr = (object_ptr)pc[3]; // target
 				// get last elements
 				if (nvars == 0) {
@@ -4264,7 +4108,7 @@ void do_exec(int *start_pc)
 				Concat((object_ptr)pc[3], b, top);
 				pc += 4;  // WATCOM thread() fails
 				BREAK;
-			
+
 			case L_SPLICE:
 			deprintf("case L_SPLICE:");
 				splins = 1;
@@ -4278,18 +4122,18 @@ void do_exec(int *start_pc)
 					RTFatal("First argument to splice/insert() must be a sequence");
 				a = *(object_ptr)pc[1]; // the source
 				i = SEQ_PTR(a)->length;
-				
-				obj_ptr = (object_ptr)pc[3];  
+
+				obj_ptr = (object_ptr)pc[3];
 				if (IS_SEQUENCE(*obj_ptr))
-					RTFatal("Third argument to splice/insert() must be an atom");  
+					RTFatal("Third argument to splice/insert() must be an atom");
 				nvars = (IS_ATOM_INT(*obj_ptr)) ?
 					*obj_ptr : (long)DBL_PTR(*obj_ptr)->dbl;  //insertion point
-				
+
 				b = *(object_ptr)pc[2]; //the stuff to insert
 				Ref(b);
-				
+
 				obj_ptr = (object_ptr)pc[4]; //-> the target
-				
+
 				// now the variable part
 				if (nvars <= 0) {
 					if (splins) Concat(obj_ptr,b,a);
@@ -4305,13 +4149,13 @@ void do_exec(int *start_pc)
 					if( (*obj_ptr != a) || ( SEQ_PTR( a )->ref != 1 ) ){
 						// not in place: need to deref the target and ref the orig seq
 						if( *obj_ptr != NOVALUE ) DeRef(*obj_ptr);
-						
+
 						// ensures that Add_internal_space will make a copy
 						RefDS( a );
 					}
-					s1 = Add_internal_space( a, nvars, s2->length );
+					s1 = (s1_ptr)Add_internal_space( a, nvars, s2->length );
 					assign_slice_seq = &s1;
-					
+
 					s1 = Copy_elements( nvars, s2, (*obj_ptr == a) );
 					*obj_ptr = MAKE_SEQ(s1);
 			}
@@ -4337,13 +4181,13 @@ void do_exec(int *start_pc)
 				Concat_Ni((object_ptr)pc[nvars+2], (object_ptr *)(pc+2), nvars);
 				pc += nvars + 3; // WATCOM thread() fails
 				BREAK;
-			
+
 			case L_REPEAT:
 			deprintf("case L_REPEAT:");
 				tpc = pc;
 				top = Repeat(*(object_ptr)pc[1], *(object_ptr)pc[2]);
 				DeRef(*(object_ptr)pc[3]);
-				*(object_ptr)pc[3] = top;               
+				*(object_ptr)pc[3] = top;
 				pc += 4;
 				thread();
 				BREAK;
@@ -4351,7 +4195,7 @@ void do_exec(int *start_pc)
 			case L_DATE:
 			deprintf("case L_DATE:");
 				tpc = pc;
-				top = Date(); 
+				top = Date();
 				DeRef(*(object_ptr)pc[1]);
 				*(object_ptr)pc[1] = top;
 				pc += 2;
@@ -4374,7 +4218,7 @@ void do_exec(int *start_pc)
 				top = MAKE_INT(bytes_allocated);
 				DeRef(*(object_ptr)pc[1]);
 				*(object_ptr)pc[1] = top;
-				pc += 2;                
+				pc += 2;
 				BREAK;
 #endif
 			case L_POSITION:
@@ -4394,7 +4238,7 @@ void do_exec(int *start_pc)
 					RTFatal("first argument of position() is not an atom");
 				}
 				BREAK;
-			
+
 			case L_EQUAL:
 			deprintf("case L_EQUAL:");
 				a = *(object_ptr)pc[1];
@@ -4413,10 +4257,10 @@ void do_exec(int *start_pc)
 				obj_ptr = (object_ptr)pc[3];
 				DeRefx(*obj_ptr);
 				pc += 4;
-				*obj_ptr = top;               
+				*obj_ptr = top;
 				thread();
 				BREAK;
-				
+
 			case L_COMPARE:
 			deprintf("case L_COMPARE:");
 				a = *(object_ptr)pc[1];
@@ -4431,18 +4275,16 @@ void do_exec(int *start_pc)
 				obj_ptr = (object_ptr)pc[3];
 				DeRefx(*obj_ptr);
 				pc += 4;
-				*obj_ptr = top;               
+				*obj_ptr = top;
 				thread();
 				BREAK;
 
 			case L_HASH:
 			deprintf("case L_HASH:");
 				tpc = pc;
-				DeRef(*(object_ptr)pc[3]);
+				a = *(object_ptr)pc[3];
 				*(object_ptr)pc[3] = calc_hash(*(object_ptr)pc[1], *(object_ptr)pc[2]);
-//				top = MAKE_INT(a);
-//				DeRef(*(object_ptr)pc[3]);
-//				*(object_ptr)pc[3] = top;               
+				DeRef( a );
 				pc += 4;
 				thread();
 				BREAK;
@@ -4453,7 +4295,7 @@ void do_exec(int *start_pc)
 				a = find(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2]);
 				top = MAKE_INT(a);
 				DeRef(*(object_ptr)pc[3]);
-				*(object_ptr)pc[3] = top;               
+				*(object_ptr)pc[3] = top;
 				pc += 4;
 				thread();
 				BREAK;
@@ -4461,10 +4303,10 @@ void do_exec(int *start_pc)
 			case L_MATCH:
 			deprintf("case L_MATCH:");
 				tpc = pc;
-				top = MAKE_INT(e_match((s1_ptr)*(object_ptr)pc[1], 
+				top = MAKE_INT(e_match((s1_ptr)*(object_ptr)pc[1],
 									 (s1_ptr)*(object_ptr)pc[2]));
 				DeRef(*(object_ptr)pc[3]);
-				*(object_ptr)pc[3] = top;               
+				*(object_ptr)pc[3] = top;
 				pc += 4;
 				thread();
 				BREAK;
@@ -4474,14 +4316,14 @@ void do_exec(int *start_pc)
 			deprintf("case L_PEEK4U:");
 				b = 1;
 				goto peek4s1;
-				
+
 			case L_PEEK4S:
 			deprintf("case L_PEEK4S:");
 				b = 0;
 			 peek4s1:
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
-				top = do_peek4(a, b, pc);
+				top = do_peek4(a, b);
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -4492,34 +4334,29 @@ void do_exec(int *start_pc)
 			deprintf("case L_PEEK2U:");
 				b = 1;
 				goto peek2s1;
-				
+
 			case L_PEEK2S:
 			deprintf("case L_PEEK2S:");
 				b = 0;
 			 peek2s1:
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
-				top = do_peek2(a, b, pc);
+				top = do_peek2(a, b);
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
 				thread();
 				BREAK;
-			
+
 			case L_PEEK_STRING:
 			deprintf("case L_PEEK_STRING:");
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (unsigned char *)INT_VAL(a);
+					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					if( b )
-						poke_addr = (signed char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
-					else
-						poke_addr = (unsigned char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
 				}
 				else { /* sequence */
 						RTFatal(
@@ -4531,47 +4368,36 @@ void do_exec(int *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-		
+
 			case L_PEEKS:
 			deprintf("case L_PEEKS:");
 				b = 1;
-				goto peeks1;	
+				goto peeks1;
 			case L_PEEK:
 			deprintf("case L_PEEK:");
 				b = 0;
-				
+
 				peeks1:
 
 				a = *(object_ptr)pc[1]; /* the address */
 				tpc = pc;  // in case of machine exception
-				
+
 				/* check address */
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (unsigned char *)INT_VAL(a);
+					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					if( b )
-						poke_addr = (signed char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
-					else
-						poke_addr = (unsigned char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
 				}
 				else {
 					/* a sequence: {addr, nbytes} */
-					s1 = SEQ_PTR(a);                                        
+					s1 = SEQ_PTR(a);
 					i = s1->length;
 					if (i != 2) {
 						RTFatal(
 				  "argument to peek() must be an atom or a 2-element sequence");
 					}
-					poke_addr = (unsigned char *)get_pos_int("peek", *(s1->base+1));
-#ifdef EDOS                    
-					if (current_screen != MAIN_SCREEN && 
-						(unsigned)poke_addr >= (unsigned)0xA0000 && 
-						(unsigned)poke_addr < (unsigned)0xC0000) 
-						MainScreen();
-#endif                  
+					poke_addr = (char *)get_pos_int("peek", *(s1->base+1));
 					i = get_pos_int("peek", *((s1->base)+2)); /* length */
 					if (i < 0)
 						RTFatal("number of bytes to peek is less than 0");
@@ -4579,46 +4405,29 @@ void do_exec(int *start_pc)
 					obj_ptr = s1->base;
 					while (--i >= 0) {
 						obj_ptr++;
-#ifdef EDJGPP                       
-						if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-							*obj_ptr = _farpeekb(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)poke_addr);
-						else    
-#endif                      
 						if(b)
-							*obj_ptr = (signed char)*poke_addr; 
+							*obj_ptr = (signed char)*poke_addr;
 						else
-							*obj_ptr = *poke_addr; 
+							*obj_ptr = (unsigned char)*poke_addr;
 						poke_addr++;
 					}
 					DeRef(*(object_ptr)pc[2]);
-					*(object_ptr)pc[2] = (object)MAKE_SEQ(s1);           
+					*(object_ptr)pc[2] = (object)MAKE_SEQ(s1);
 					inc3pc();
 					thread();
 				}
-#ifdef EDOS
-				if (current_screen != MAIN_SCREEN && 
-					(unsigned)poke_addr >= (unsigned)0xA0000 && 
-					(unsigned)poke_addr < (unsigned)0xC0000) 
-					MainScreen();
-#endif              
+
 				DeRefx(*(object_ptr)pc[2]);
-#ifdef EDJGPP                       
-				if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-					*(object_ptr)pc[2] = _farpeekb(_go32_info_block.selector_for_linear_memory, 
-												   (unsigned)poke_addr);
-				else    
-#endif              
-				{
-					if(b)        
-						*(object_ptr)pc[2] = (signed char)*poke_addr;               
-					else
-						*(object_ptr)pc[2] = *poke_addr; 
-				}             
+
+				if (b)
+					*(object_ptr)pc[2] = (signed char)*poke_addr;
+				else
+					*(object_ptr)pc[2] = (unsigned char)*poke_addr;
+
 				inc3pc();
 				thread();
 				BREAK;
-			
+
 			case L_POKE4:
 			deprintf("case L_POKE4:");
 				a = *(object_ptr)pc[1];   /* address */
@@ -4638,7 +4447,7 @@ void do_exec(int *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-				
+
 			case L_POKE:
 			deprintf("case L_POKE:");
 				a = *(object_ptr)pc[1];   /* address */
@@ -4647,73 +4456,44 @@ void do_exec(int *start_pc)
 
 				/* check address */
 				if (IS_ATOM_INT(a)) {
-					poke_addr = (unsigned char *)a;
+					poke_addr = (char *)a;
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (unsigned char *)(unsigned long)
-								(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
 				}
 				else {
 					tpc = pc;
 					RTFatal("first argument to poke must be an atom");
 				}
-#ifdef EDOS
-				if (current_screen != MAIN_SCREEN && 
-					(unsigned)poke_addr >= (unsigned)0xA0000 && 
-					(unsigned)poke_addr < (unsigned)0xC0000)
-					MainScreen();
-#endif              
 				/* the following 6 lines bumped top out of a register */
 				b = top;
-				
+
 				if (IS_ATOM_INT(b)) {
-#ifdef EDJGPP       
-					if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-						_farpokeb(_go32_info_block.selector_for_linear_memory,
-						   (unsigned long)poke_addr, (unsigned char)b);
-					else
-#endif      
-						*poke_addr = (unsigned char)b;
+					poke1(poke_addr,b);
 				}
 				else if (IS_ATOM(b)) {
-#ifdef EDJGPP       
-					if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-						_farpokeb(_go32_info_block.selector_for_linear_memory,
-						(unsigned long)poke_addr, (unsigned char)DBL_PTR(b)->dbl);
-					else
-#endif      
-						*poke_addr = (signed char)DBL_PTR(b)->dbl;
+					/* no check for overflow here.. hmm*/
+					poke1(poke_addr,DBL_PTR(b)->dbl);
 				}
 				else {
 					/* second arg is sequence */
 					s1 = SEQ_PTR(b);
 					obj_ptr = s1->base;
-					while (TRUE) { 
-						b = *(++obj_ptr); 
+					while (TRUE) {
+						b = *(++obj_ptr);
 						if (IS_ATOM_INT(b)) {
-#ifdef EDJGPP       
-							if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-								_farpokeb(_go32_info_block.selector_for_linear_memory,
-								(unsigned long)poke_addr++, (unsigned char)b);
-							else
-#endif      
-								*poke_addr++ = (unsigned char)b;
+							poke1(poke_addr,b);
 						}
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
-#ifdef EDJGPP       
-							if ((unsigned)poke_addr <= LOW_MEMORY_MAX)
-								_farpokeb(_go32_info_block.selector_for_linear_memory,
-								(unsigned long)poke_addr++, (unsigned char)DBL_PTR(b)->dbl);
-							else
-#endif      
-								*poke_addr++ = (signed char)DBL_PTR(b)->dbl;
+							poke1(poke_addr,DBL_PTR(b)->dbl);
 						}
 						else {
 							RTFatal(
 							"sequence to be poked must only contain atoms");
 						}
+						++poke_addr;
 					}
 				}
 				inc3pc();
@@ -4723,42 +4503,23 @@ void do_exec(int *start_pc)
 			case L_MEM_COPY:
 			deprintf("case L_MEM_COPY:");
 				tpc = pc;
-				memory_copy(*(object_ptr)pc[1], 
+				memory_copy(*(object_ptr)pc[1],
 							*(object_ptr)pc[2],
 							*(object_ptr)pc[3]);
-				pc += 4;                
+				pc += 4;
 				thread();
 				BREAK;
-			
+
 			case L_MEM_SET:
 			deprintf("case L_MEM_SET:");
 				tpc = pc;
-				memory_set(*(object_ptr)pc[1], 
+				memory_set(*(object_ptr)pc[1],
 						   *(object_ptr)pc[2],
 						   *(object_ptr)pc[3]);
-				pc += 4;                
+				pc += 4;
 				thread();
 				BREAK;
-			
-			case L_PIXEL:
-			deprintf("case L_PIXEL:");
-				tpc = pc;
-				Pixel(*(object_ptr)pc[1],
-					  *(object_ptr)pc[2]);
-				inc3pc();
-				thread();
-				BREAK;
-			
-			case L_GET_PIXEL:
-			deprintf("case L_GET_PIXEL:");
-				tpc = pc;
-				a = Get_Pixel(*(object_ptr)pc[1]);
-				DeRef(*(object_ptr)pc[2]);
-				*(object_ptr)pc[2] = a;
-				inc3pc();
-				thread();
-				BREAK;
-		  
+
 			case L_CALL:
 			deprintf("case L_CALL:");
 				a = *(object_ptr)pc[1];
@@ -4788,7 +4549,7 @@ void do_exec(int *start_pc)
 				system_call(*(object_ptr)pc[1], *(object_ptr)pc[2]);
 				inc3pc();
 				BREAK;
-				
+
 			case L_SYSTEM_EXEC:
 			deprintf("case L_SYSTEM_EXEC:");
 				tpc = pc;
@@ -4801,19 +4562,19 @@ void do_exec(int *start_pc)
 				thread();
 				BREAK;
 
-				
+
 				/* start of I/O routines */
 
 			case L_OPEN:
 			deprintf("case L_OPEN:");
 				tpc = pc;
-				top = EOpen(*(object_ptr)pc[1], 
+				top = EOpen(*(object_ptr)pc[1],
 							*(object_ptr)pc[2],
 							*(object_ptr)pc[3]);
 				DeRef(*(object_ptr)pc[4]);
 				*(object_ptr)pc[4] = top;
 				pc += 5;
-				thread(); 
+				thread();
 				BREAK;
 
 			case L_CLOSE:
@@ -4832,47 +4593,41 @@ void do_exec(int *start_pc)
 								  // time_profile not relevant if debugging
 				}
 				if (top != last_r_file_no) {
-					tpc = pc; 
+					tpc = pc;
 					last_r_file_ptr = which_file(top, EF_READ);
 					if (IS_ATOM_INT(top))
 						last_r_file_no = top;
 					else
 						last_r_file_no = NOVALUE;
 				}
-#ifndef EDOS
 				if (last_r_file_ptr == stdin) {
 #ifdef EWINDOWS
-					// In WIN32 this is needed before 
+					// In WIN32 this is needed before
 					// in_from_keyb is set correctly
-					show_console();  
+					show_console();
 #endif
 					if (in_from_keyb) {
 #ifdef EUNIX
-#ifdef EGPM
-						b = mgetch(TRUE); // echo the character
-#else
 						echo_wait();
 						b = getc(stdin);
-#endif                      
 #else
 						b = wingetch();
-#endif                  
+#endif
 					}
 					else {
-#ifdef EUNIX                       
+#ifdef EUNIX
 						b = getc(last_r_file_ptr);
-#else                   
-						b = mygetc(last_r_file_ptr); 
+#else
+						b = mygetc(last_r_file_ptr);
 #endif
 					}
 				}
 				else
-#endif
 #ifdef EUNIX
 					b = getc(last_r_file_ptr);
 #else
 					b = mygetc(last_r_file_ptr); /* don't use <a> ! */
-#endif          
+#endif
 				DeRefx(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = b;    //top;
 				inc3pc();
@@ -4892,8 +4647,12 @@ void do_exec(int *start_pc)
 			case L_PLATFORM: // only shrouded code needs this (for portability)
 			deprintf("case L_PLATFORM:");
 				DeRef(*(object_ptr)pc[1]);
+				top = 1;  // Unknown platform
 #ifdef EUNIX
 				top = 3;  // (UNIX, called Linux for backwards compatibility)
+#endif
+#ifdef EBSD
+				top = 8; // FreeBSD
 #endif
 #ifdef EOSX
 				top = 4;  // OSX
@@ -4910,16 +4669,13 @@ void do_exec(int *start_pc)
 #ifdef EWINDOWS
 				top = 2;  // WIN32
 #endif
-#ifdef EDOS
-				top = 1;  // DOS32
-#endif
-				
+
 				*(object_ptr)pc[1] = top;
 				pc += 2;
 				thread();
 				BREAK;
-			
-			case L_GET_KEY: /* read an immediate key (if any) from the keyboard 
+
+			case L_GET_KEY: /* read an immediate key (if any) from the keyboard
 							 or return -1 */
 			deprintf("case L_GET_KEY:");
 				tpc = pc;
@@ -4937,8 +4693,8 @@ void do_exec(int *start_pc)
 					while (times(&buf)
 #else
 					c0 = clock() + 8 * clocks_per_sec;
-					while (clock() 
-#endif                      
+					while (clock()
+#endif
 						< c0 && top == ATOM_M1) {
 						top = MAKE_INT(get_key(FALSE));
 					}
@@ -4987,9 +4743,7 @@ void do_exec(int *start_pc)
 				/* file number, format string, value */
 				tpc = pc;
 				file_no = *(object_ptr)pc[1];
-				EPrintf(file_no, 
-						(s1_ptr)*(object_ptr)pc[2], 
-						(s1_ptr)*(object_ptr)pc[3]);
+				EPrintf(file_no,*(object_ptr)pc[2], *(object_ptr)pc[3]);
 				pc += 4;
 				BREAK;
 
@@ -4997,9 +4751,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_SPRINTF:");
 				/* format string, value */
 				tpc = pc;
-				top = EPrintf(DOING_SPRINTF, 
-						(s1_ptr)*(object_ptr)pc[1], 
-						(s1_ptr)*(object_ptr)pc[2]);
+				top = EPrintf(DOING_SPRINTF, *(object_ptr)pc[1], *(object_ptr)pc[2]);
 				DeRef(*(object_ptr)pc[3]);
 				*(object_ptr)pc[3] = top;
 				pc += 4;
@@ -5015,13 +4767,13 @@ void do_exec(int *start_pc)
 				pc += 2;
 				thread();
 				BREAK;
-				
+
 			case L_OPTION_SWITCHES:
 			deprintf("case L_OPTION_SWITCHES:");
 				tpc = pc;
 				top = fe.switches;
 				RefDS( top );
-				
+
 				*(object_ptr)pc[1] = top;
 				pc += 2;
 				thread();
@@ -5030,7 +4782,7 @@ void do_exec(int *start_pc)
 			case L_GETENV:
 			deprintf("case L_GETENV:");
 				tpc = pc;
-				top = EGetEnv((s1_ptr)*(object_ptr)pc[1]);
+				top = EGetEnv( *(object_ptr)pc[1] );
 				DeRef(*(object_ptr)pc[2]);
 				*(object_ptr)pc[2] = top;
 				inc3pc();
@@ -5040,7 +4792,7 @@ void do_exec(int *start_pc)
 			case L_MACHINE_FUNC:
 			deprintf("case L_MACHINE_FUNC:");
 				tpc = pc;
-				top = machine(*(object_ptr)pc[1], 
+				top = machine(*(object_ptr)pc[1],
 							  *(object_ptr)pc[2]);
 				DeRef(*(object_ptr)pc[3]);
 				*(object_ptr)pc[3] = top;
@@ -5055,7 +4807,7 @@ void do_exec(int *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-		 
+
 			case L_C_FUNC:
 			deprintf("case L_C_FUNC:");
 				tpc = pc;
@@ -5067,7 +4819,7 @@ void do_exec(int *start_pc)
 				tpc = pc + 5;
 				thread5();
 				BREAK;
-				
+
 			case L_C_PROC:
 			deprintf("case L_C_PROC:");
 				tpc = pc;
@@ -5080,11 +4832,11 @@ void do_exec(int *start_pc)
 				BREAK;
 
 			/* Multitasking */
-			
+
 			case L_TASK_CREATE:
 			deprintf("case L_TASK_CREATE:");
 				tpc = pc;
-				top = task_create(*(object_ptr)pc[1], 
+				top = task_create(*(object_ptr)pc[1],
 								  *(object_ptr)pc[2]);
 				a = pc[3];
 				DeRef(*(object_ptr)a);
@@ -5092,16 +4844,16 @@ void do_exec(int *start_pc)
 				pc += 4;
 				thread();
 				BREAK;
-			
+
 			case L_TASK_SCHEDULE:
 			deprintf("case L_TASK_SCHEDULE:");
 				tpc = pc;
-				task_schedule(*(object_ptr)pc[1], 
+				task_schedule(*(object_ptr)pc[1],
 							  *(object_ptr)pc[2]);
 				inc3pc();
 				thread();
 				BREAK;
-			
+
 			case L_TASK_YIELD:
 			deprintf("case L_TASK_YIELD:");
 				tpc = pc;
@@ -5109,7 +4861,7 @@ void do_exec(int *start_pc)
 				pc = tpc;
 				thread();
 				BREAK;
-			
+
 			case L_TASK_SELF:
 			deprintf("case L_TASK_SELF:");
 				top = (object)pc[1];
@@ -5118,7 +4870,7 @@ void do_exec(int *start_pc)
 				pc += 2;
 				thread();
 				BREAK;
-			
+
 			case L_TASK_SUSPEND:
 			deprintf("case L_TASK_SUSPEND:");
 				tpc = pc;
@@ -5126,7 +4878,7 @@ void do_exec(int *start_pc)
 				pc += 2;
 				thread();
 				BREAK;
-			
+
 			case L_TASK_LIST:
 			deprintf("case L_TASK_LIST:");
 				tpc = pc;
@@ -5137,7 +4889,7 @@ void do_exec(int *start_pc)
 				pc += 2;
 				thread(); // causes problem? - ok now
 				BREAK;
-			
+
 			case L_TASK_STATUS:
 			deprintf("case L_TASK_STATUS:");
 				tpc = pc;
@@ -5148,14 +4900,14 @@ void do_exec(int *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-			
+
 			case L_TASK_CLOCK_STOP:
 			deprintf("case L_TASK_CLOCK_STOP:");
 				tpc = pc;
 				task_clock_stop();
 				pc += 1;
 				BREAK;
-			
+
 			case L_TASK_CLOCK_START:
 			deprintf("case L_TASK_CLOCK_START:");
 				tpc = pc;
@@ -5170,7 +4922,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_STARTLINE:");
 				top = pc[1];
 				a = slist[top].options;
-#ifndef BACKEND             
+#ifndef BACKEND
 				if (a & OP_PROFILE_STATEMENT) {
 					if (ProfileOn) {
 						iptr = (int *)slist[top].src;
@@ -5180,8 +4932,8 @@ void do_exec(int *start_pc)
 #endif
 				pc += 2;
 				tpc = pc;
-			   
-#ifndef BACKEND             
+
+#ifndef BACKEND
 				if (a & OP_TRACE) {
 					start_line = top;
 					if (file_trace) {
@@ -5211,7 +4963,7 @@ void do_exec(int *start_pc)
 					else {
 						/* stop after down-arrow pressed */
 						i = expr_top - expr_stack;
-						b = top > TraceBeyond && i == TraceStack ||
+						b = (top > TraceBeyond && i == TraceStack) ||
 							i < TraceStack;
 					}
 					if (TraceOn || b) {
@@ -5221,15 +4973,15 @@ void do_exec(int *start_pc)
 							ShowDebug();
 							UpdateGlobals();
 						}
-						
+
 						TraceBeyond = HUGE_LINE;
 						DebugScreen();
 					}
 				}
 #endif
-			
+
 				thread();
-				BREAK; 
+				BREAK;
 
 			case L_TRACE:
 			deprintf("case L_TRACE:");
@@ -5249,9 +5001,9 @@ void do_exec(int *start_pc)
 
 			case L_DISPLAY_VAR: /* display variable name and value */
 			deprintf("case L_DISPLAY_VAR:");
-				if (TraceOn) { 
+				if (TraceOn) {
 					tpc = pc;
-#ifndef BACKEND                 
+#ifndef BACKEND
 					ShowDebug();
 					DisplayVar((symtab_ptr)pc[1], FALSE);
 #endif
@@ -5261,8 +5013,8 @@ void do_exec(int *start_pc)
 
 			case L_ERASE_PRIVATE_NAMES: /* blank private vars on debug screen */
 			deprintf("case L_ERASE_PRIVATE_NAMES:");
-#ifndef BACKEND             
-				if (TraceOn) { 
+#ifndef BACKEND
+				if (TraceOn) {
 					tpc = pc;
 					ShowDebug();
 					ErasePrivates((symtab_ptr)pc[1]);
@@ -5273,8 +5025,8 @@ void do_exec(int *start_pc)
 
 			case L_ERASE_SYMBOL:
 			deprintf("case L_ERASE_SYMBOL:");
-#ifndef BACKEND             
-				if (TraceOn) { 
+#ifndef BACKEND
+				if (TraceOn) {
 					tpc = pc;
 					ShowDebug();
 					EraseSymbol((symtab_ptr)pc[1]);
@@ -5282,12 +5034,12 @@ void do_exec(int *start_pc)
 #endif
 				pc += 2;
 				BREAK;
-				
+
 			case L_UPDATE_GLOBALS:
 			deprintf("case L_UPDATE_GLOBALS:");
-				if (TraceOn) { 
+				if (TraceOn) {
 					tpc = pc;
-#ifndef BACKEND                 
+#ifndef BACKEND
 					ShowDebug();
 					UpdateGlobals();
 #endif
@@ -5305,47 +5057,60 @@ void do_exec(int *start_pc)
 				else if (IS_ATOM(top)) {
 					i = (int)DBL_PTR(top)->dbl;
 				}
-				else 
+				else
 					RTFatal("argument to abort() must be an atom");
-				UserCleanup(i);  
+				UserCleanup(i);
+				sym = TopLevelSub->u.subp.block;
+				while( (sym = sym->next_in_block) ){
+						DeRef(sym->obj);
+				}
 				BREAK;
-				
-				case L_FIND_FROM:
-				deprintf("case L_FIND_FROM:");
-						tpc = pc;
-						a = find_from(*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2], *(object_ptr)pc[3]);
-						top = MAKE_INT(a);
-						DeRef(*(object_ptr)pc[4]);
-						*(object_ptr)pc[4] = top;               
-						thread5();
-						BREAK;
-						
-				case L_MATCH_FROM:
-				deprintf("case L_MATCH_FROM:");
-						tpc = pc;
-						a = e_match_from((s1_ptr)*(object_ptr)pc[1], (s1_ptr)*(object_ptr)pc[2],
-								*(object_ptr) pc[3]);
-						top = MAKE_INT(a);
-						DeRef(*(object_ptr)pc[4]);
-						*(object_ptr)pc[4] = top;
-						
-						thread5();
-						BREAK;
-						
-#ifdef INT_CODES
+
+			case L_FIND_FROM:
+			deprintf("case L_FIND_FROM:");
+					tpc = pc;
+					a = find_from(*(object_ptr)pc[1], *(object_ptr)pc[2], *(object_ptr)pc[3]);
+					top = MAKE_INT(a);
+					DeRef(*(object_ptr)pc[4]);
+					*(object_ptr)pc[4] = top;
+					thread5();
+					BREAK;
+
+			case L_MATCH_FROM:
+			deprintf("case L_MATCH_FROM:");
+					tpc = pc;
+					a = e_match_from( *(object_ptr)pc[1], *(object_ptr)pc[2],
+							*(object_ptr) pc[3]);
+					top = MAKE_INT(a);
+					DeRef(*(object_ptr)pc[4]);
+					*(object_ptr)pc[4] = top;
+
+					thread5();
+					BREAK;
+
+			case L_COVERAGE_LINE:
+			deprintf("case L_COVERAGE_LINE");
+				COVER_LINE( *(pc+1) );
+				thread2();
+				BREAK;
+
+			case L_COVERAGE_ROUTINE:
+			deprintf("case L_COVERAGE_ROUTINE");
+				COVER_ROUTINE( *(pc+1) );
+				thread2();
+				BREAK;
+
+			default:
+				RTFatal("Unsupported Op Code ");
+
 		}
-#else
-#if !defined(EUNIX) && !defined(EDJGPP) && !defined(EMINGW)
-		}
-#endif
-#endif
 	} while(TRUE);
 
 subsfail:
 	tpc = pc;
 	RTFatal("attempt to subscript an atom\n(reading from it)");
 
-asubsfail:                  
+asubsfail:
 	tpc = pc;
 	SubsAtomAss();
 
