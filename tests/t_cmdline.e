@@ -21,7 +21,7 @@ end function
 -- Option definition
 sequence option_defs = {
     { "v", "verbose",  "Verbose output",   {MANDATORY,NO_PARAMETER} },
-    { 0  , "style",    "Style sheet file", {HAS_PARAMETER,"filename",NO_CASE} },
+    { ""  , "style",    "Style sheet file", {HAS_PARAMETER,"filename",NO_CASE} },
     { "c", "count",    "Count",            HAS_PARAMETER },
     { "i", 0,    "Include",            {HAS_PARAMETER,NO_CASE} },
     { "d", "dummy",    "Dummy Test",       {ONCE}, routine_id("got_dummy") },
@@ -29,7 +29,15 @@ sequence option_defs = {
     
 }
 
-show_help( option_defs )
+show_help( option_defs, {"help line 1", "help line 2" } )
+
+-- use different extras help display method:
+sequence alternate_opts = option_defs
+alternate_opts[$][$] = {}
+show_help( alternate_opts )
+
+alternate_opts[$][$-1] = {}
+show_help( alternate_opts )
 
 -- Parse command line
 constant extra_data = `
@@ -81,8 +89,11 @@ test_equal("build_commandline #2", "abc \"def ghi\"", build_commandline({"abc", 
 test_equal("parse_commandline #1", { "-v", "-f", "%Y-%m-%d %H:%M" }, parse_commandline("-v -f '%Y-%m-%d %H:%M'"))
 
 -- Reported bugs:
-cmd_parse({}, {}, { "eui", "prog.ex", "bug", "-h" })
+cmd_parse({}, NO_AT_EXPANSION, { "eui", "prog.ex", "bug", "/h" })
 test_pass("cmd_parse bug #2790825")
+
+cmd_parse({{ "z", "",   0, {OPTIONAL} }}, {AT_EXPANSION, NO_HELP, PAUSE_MSG, "here is a pause message"}, 
+	{ "eui", "prog.ex", "/z", "--", "bug", "-h"})
 
 -- Bug #2792895
 integer bug_help_called = 0
