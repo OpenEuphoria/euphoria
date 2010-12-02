@@ -248,18 +248,20 @@ export procedure transoptions()
 		exe_name = current_dir() & SLASH & exe_name
 	end if
 
-	if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
-		output_dir = temp_file("." & SLASH, "build-", "")
-		if find(output_dir[$], "/\\") = 0 then
-			output_dir &= '/'
+	ifdef not EUDIS then
+		if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
+			output_dir = temp_file("." & SLASH, "build-", "")
+			if find(output_dir[$], "/\\") = 0 then
+				output_dir &= '/'
+			end if
+	
+			if not silent then
+				printf(1, "Build directory: %s\n", { output_dir })
+			end if
+			remove_output_dir = 1
 		end if
-
-		if not silent then
-			printf(1, "Build directory: %s\n", { output_dir })
-		end if
-		remove_output_dir = 1
-	end if
-
+	end ifdef
+	
 	if length(map:get(opts, OPT_EXTRAS)) = 0 then
 		-- No source supplied on command line
 		show_banner()
