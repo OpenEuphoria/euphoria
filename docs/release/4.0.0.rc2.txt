@@ -98,6 +98,7 @@
                   time only to find the linker fails.
 * [[ticket:472]], eui --help display is now in a logical display order.
 * [[ticket:473]], euc --help display is now in a logical display order.
+* [[ticket:475]], Fixed memory leak with interpreted [[:rand]]
 
 === Enhancements/Changes
 
