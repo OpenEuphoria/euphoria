@@ -1690,14 +1690,14 @@ public enum
 -- Get the type of a file.
 --
 -- Parameters:
---  		# ##filename## : the name of the file to query. It must not have wildcards.
+--   # ##filename## : the name of the file to query. It must not have wildcards.
 -- 
 -- Returns:
---		An **integer**,
---		* -1 if file could be multiply defined
---      *  0 if filename does not exist
---      *  1 if filename is a file
---      *  2 if filename is a directory
+--   An **integer**,
+--     * -1 if file could be multiply defined
+--     *  0 if filename does not exist
+--     *  1 if filename is a file
+--     *  2 if filename is a directory
 --
 -- See Also:
 -- [[:dir]], [[:FILETYPE_DIRECTORY]], [[:FILETYPE_FILE]], [[:FILETYPE_NOT_FOUND]],
@@ -1952,19 +1952,19 @@ end ifdef
 -- Move a file to another location.
 --
 -- Parameters:
--- 		# ##src## : a sequence, the name of the file or directory to move
--- 		# ##dest## : a sequence, the new location for the file
---		# ##overwrite## : an integer, 0 (the default) to prevent overwriting an existing destination file,
---                                   1 to overwrite existing destination file
+--   # ##src## : a sequence, the name of the file or directory to move
+--   # ##dest## : a sequence, the new location for the file
+--   # ##overwrite## : an integer, 0 (the default) to prevent overwriting an existing destination file,
+--                     1 to overwrite existing destination file
 --
 -- Returns:
---     An **integer**, 0 on failure, 1 on success.
+--   An **integer**, 0 on failure, 1 on success.
 --
 -- Comments:
--- * If ##overwrite## was requested but the move fails, any existing destination
---  file is preserved.
+--  If ##overwrite## was requested but the move fails, any existing destination file is preserved.
+--
 -- See Also:
--- [[:rename_file]], [[:copy_file]]
+--   [[:rename_file]], [[:copy_file]]
 
 public function move_file(sequence src, sequence dest, integer overwrite=0)
 	atom psrc = 0, pdest = 0, ret
@@ -2338,8 +2338,9 @@ end function
 -- Example 1:
 -- <eucode>
 -- res = disk_size("C:\\")
--- printf(1, "Drive %s has %3.2f%% free space\n", 
---                                   {"C:", res[FREE_BYTES] / res[TOTAL_BYTES]})
+-- printf(1, "Drive %s has %3.2f%% free space\n", { 
+--     "C:", res[FREE_BYTES] / res[TOTAL_BYTES]
+-- })
 -- </eucode>
 
 public function disk_size(object disk_path) 
@@ -2475,10 +2476,9 @@ end function
 --                    count, otherwise they are included.
 --
 -- Returns:
---     A **sequence**, containing four elements; the number of sub-directories [COUNT_DIRS],
---                     the number of files [COUNT_FILES], 
---                     the total space used by the directory [COUNT_SIZE], and
---                     breakdown of the file contents by file extension [COUNT_TYPES].
+--   A **sequence**, containing four elements; the number of sub-directories [COUNT_DIRS],
+--   the number of files [COUNT_FILES], the total space used by the directory [COUNT_SIZE], 
+--   and breakdown of the file contents by file extension [COUNT_TYPES].
 --                  
 -- Comments:
 --  * The total space used by the directory does not include space used by any sub-directories.
@@ -2490,13 +2490,15 @@ end function
 -- Example 1:
 -- <eucode>
 -- res = dir_size("/usr/localbin")
--- printf(1, "Directory %s contains %d files\n", 
---                                          {"/usr/localbin", res[COUNT_FILES]})
+-- printf(1, "Directory %s contains %d files\n", {
+--         "/usr/localbin", res[COUNT_FILES]
+--     })
 -- for i = 1 to length(res[COUNT_TYPES]) do
---   printf(1, "  Type: %s (%d files %d bytes)\n", 
---               {res[COUNT_TYPES][i][EXT_NAME],
---               res[COUNT_TYPES][i][EXT_COUNT],
---               res[COUNT_TYPES][i][EXT_SIZE]})
+--     printf(1, "Type: %s (%d files %d bytes)\n", {
+--         res[COUNT_TYPES][i][EXT_NAME],
+--         res[COUNT_TYPES][i][EXT_COUNT],
+--         res[COUNT_TYPES][i][EXT_SIZE]
+--     })
 -- end for
 -- </eucode>
 
@@ -2539,17 +2541,15 @@ end function
 --               generated name. The default is not to reserve (create) the file.
 --
 -- Returns:
---     A **sequence**, A generated file name.
+--   A **sequence**, A generated file name.
 --                  
--- Comments:
---
 -- Example 1:
 -- <eucode>
---  sequence x
---  x = temp_file("/usr/space", "myapp", "tmp") --> /usr/space/myapp736321.tmp
---  x = temp_file() --> /tmp/277382._T_
---  x = temp_file("/users/me/abc.exw") --> /users/me/992831._T_
+-- temp_file("/usr/space", "myapp", "tmp") --> /usr/space/myapp736321.tmp
+-- temp_file() --> /tmp/277382._T_
+-- temp_file("/users/me/abc.exw") --> /users/me/992831._T_
 -- </eucode>
+--
 
 public function temp_file(sequence temp_location = "", sequence temp_prefix = "", sequence temp_extn = "_T_", integer reserve_temp = 0)
 	sequence  randname
@@ -2784,10 +2784,10 @@ public function checksum(sequence filename, integer size = 4, integer usename = 
 				cs_text &= ' '
 			end if
 		end for
+		
 		return cs_text
 	else
 		return cs
 	end if
-
 end function
 
