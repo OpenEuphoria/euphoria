@@ -1464,7 +1464,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
     integer lPosA = -1
     integer lPosB = -1
     sequence lLevel = ""
-    sequence lHome
+    object lHome
 
 	ifdef UNIX then
 		lPath = path_in
@@ -1481,10 +1481,12 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 
     -- Replace any leading tilde with 'HOME' directory.
     if (length(lPath) > 0 and lPath[1] = '~') then
-		ifdef UNIX then
-				lHome = getenv("HOME")
-		elsedef
+    	-- Not common but can be set on Windows
+		lHome = getenv("HOME")
+		ifdef WINDOWS then
+			if atom(lHome) then
 				lHome = getenv("HOMEDRIVE") & getenv("HOMEPATH")
+			end if
 		end ifdef
 		
 		if lHome[$] != SLASH then
@@ -1500,31 +1502,29 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 
 	ifdef not UNIX then
 		-- Strip off any drive letter attached.
-	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) )
-		then
+	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
 			lDrive = lPath[1..2]
 			lPath = lPath[3..$]
 		end if
 	end ifdef
 
 	-- If a relative path, prepend the PWD of the appropriate drive.
-	if ( (length(lPath) = 0) or (lPath[1] != SLASH) )
-	then
+	if ((length(lPath) = 0) or not find(lPath[1], "/\\")) then
 		ifdef UNIX then
-				lPath = curdir() & lPath
+			lPath = curdir() & lPath
 		elsedef
+			if (length(lDrive) = 0) then
+				lPath = curdir() & lPath
+			else
+				lPath = curdir(lDrive[1]) & lPath
+			end if
+			-- Strip of the drive letter if it got attached again.
+			if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
 				if (length(lDrive) = 0) then
-					lPath = curdir() & lPath
-				else
-					lPath = curdir(lDrive[1]) & lPath
+					lDrive = lPath[1..2]
 				end if
-				-- Strip of the drive letter if it got attached again.
-				if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
-					if (length(lDrive) = 0) then
-						lDrive = lPath[1..2]
-					end if
-					lPath = lPath[3..$]
-				end if
+				lPath = lPath[3..$]
+			end if
 		end ifdef		
 	end if
 	
