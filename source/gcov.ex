@@ -7,7 +7,8 @@ include std/sort.e
 constant BUILDDIRS = {
 	"intobj",
 	"transobj",
-	"libobj"
+	"libobj",
+	"libobjdbg"
 	}
 
 constant CSS =`
