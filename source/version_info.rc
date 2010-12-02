@@ -20,6 +20,7 @@ BEGIN
           VALUE "OriginalFilename", VER_ORIGINAL_FILENAME
           VALUE "ProductName",      VER_PRODUCT_NAME
           VALUE "ProductVersion",   "4.0.0.RC2\0"
+          VALUE "Comments",         "http://openeuphoria.org\0"
         END
     END
   BLOCK "VarFileInfo"
