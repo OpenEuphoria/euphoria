@@ -1,3 +1,4 @@
+namespace stddebug
 include std/cmdline.e
 include std/console.e
 include std/convert.e
