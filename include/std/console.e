@@ -22,8 +22,62 @@ constant
 	M_FREE_CONSOLE = 54,
 	M_GET_SCREEN_CHAR = 58,
 	M_PUT_SCREEN_CHAR = 59,
+	M_OPEN_DLL = 50,
+	M_DEFINE_C  = 51,
+	M_ALLOC = 16,
+	M_FREE = 17,
+	C_POINTER = #02000004, 
+	C_INT = #02000004,
 	$
 
+--
+-- Local code to determine if we are running in a console or GUI application
+--
+
+constant
+	UI_GUI = 2,
+	UI_CON = 3
+
+constant UI_STRS = { "" , "UI_GUI", "UI_CON" }
+
+ifdef WINDOWS then
+	
+	constant 
+		kernel_dll = machine_func(M_OPEN_DLL, "kernel32.dll"),
+		xGetConsoleProcessList = machine_func(M_DEFINE_C, { 
+			kernel_dll, "GetConsoleProcessList", { C_POINTER, C_INT }, C_INT })
+
+	-- Determine if we are in a console or not
+	function iscon()
+		ifdef WIN32_GUI then 
+			
+			-- euiw.exe on Windows
+			return UI_GUI
+			
+		elsedef
+			
+			atom data_ptr = machine_func(M_ALLOC, 4 * 3)
+			integer count = c_func(xGetConsoleProcessList, { data_ptr, 3 })
+			machine_proc(M_FREE, data_ptr)
+			if count = 1 then
+				return UI_GUI
+			end if
+			
+			return UI_CON
+			
+		end ifdef	
+	end function
+	
+elsedef
+
+	-- For all other platforms we cannot tell, simply return UI_CON
+	
+	function iscon()
+		return UI_CON
+	end function
+	
+end ifdef
+	
 --****
 -- === Cursor Style Constants
 --
@@ -101,7 +155,7 @@ public constant
 -- See Also:
 -- 		[[:check_break]]
 
-public procedure allow_break(boolean b)
+public procedure allow_break( types:boolean b)
 	machine_proc(M_ALLOW_BREAK, b)
 end procedure
 
@@ -190,8 +244,6 @@ public procedure any_key(sequence prompt="Press Any Key to continue...", integer
 	puts(con, "\n")
 end procedure
 
-ifdef WIN32_GUI then
-
 --**
 -- Description:
 --   Display a prompt to the user and wait for any key **only** if the user is
@@ -218,16 +270,12 @@ ifdef WIN32_GUI then
 -- See Also:
 -- 	[[:wait_key]]
 
-    public procedure maybe_any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
-        any_key(prompt, con)
-    end procedure
+public procedure maybe_any_key(sequence prompt="Press Any Key to continue...", integer con = 1)
+	if iscon() = UI_GUI then
+		any_key(prompt, con)
+	end if
+end procedure
 
-elsedef
-	without warning strict
-	public procedure maybe_any_key(sequence prompt="", integer con=1)
-    end procedure
-
-end ifdef
 
 --**
 -- Description:
@@ -277,8 +325,8 @@ public function prompt_number(sequence prompt, sequence range)
 		 answer = gets(0) -- make sure whole line is read
 		 puts(1, '\n')
 
-		 answer = value(answer)
-		 if answer[1] != GET_SUCCESS or sequence(answer[2]) then
+		 answer = stdget:value(answer)
+		 if answer[1] != stdget:GET_SUCCESS or sequence(answer[2]) then
 			  puts(1, "A number is expected - try again\n")
 		 else
 			 if length(range) = 2 then
@@ -554,18 +602,18 @@ public procedure display_text_image(text_point xy, sequence text)
 	integer extra_col2, extra_lines
 	sequence vc, one_row
 
-	vc = video_config()
+	vc = graphcst:video_config()
 	if xy[1] < 1 or xy[2] < 1 then
 		return -- bad starting point
 	end if
-	extra_lines = vc[VC_LINES] - xy[1] + 1
+	extra_lines = vc[graphcst:VC_LINES] - xy[1] + 1
 	if length(text) > extra_lines then
 		if extra_lines <= 0 then
 			return -- nothing to display
 		end if
 		text = text[1..extra_lines] -- truncate
 	end if
-	extra_col2 = 2 * (vc[VC_COLUMNS] - xy[2] + 1)
+	extra_col2 = 2 * (vc[graphcst:VC_COLUMNS] - xy[2] + 1)
 	for row = 1 to length(text) do
 		one_row = text[row]
 		if length(one_row) > extra_col2 then
@@ -790,23 +838,23 @@ public procedure display( object data_in, object args = 1, integer finalnl = -91
 		if integer(data_in) then
 			printf(1, "%d", data_in)
 		else
-			puts(1, trim(sprintf("%15.15f", data_in), '0'))
+			puts(1, text:trim(sprintf("%15.15f", data_in), '0'))
 		end if
 
 	elsif length(data_in) > 0 then
-		if t_display(data_in) then
+		if types:t_display( data_in ) then
 			if data_in[$] = '_' then
 				data_in = data_in[1..$-1]
 				finalnl = 0
 			end if
 			
-			puts(1, format(data_in, args))
+			puts(1, text:format(data_in, args))
 			
 		else
 			if atom(args) or length(args) = 0 then
-				pretty_print(1, data_in, {2})
+				pretty:pretty_print(1, data_in, {2})
 			else
-				pretty_print(1, data_in, args)
+				pretty:pretty_print(1, data_in, args)
 			end if
 		end if
 	else

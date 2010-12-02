@@ -1,6 +1,6 @@
 namespace lcid
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant lcid_hex = {
 		#0436,
 		#041C,

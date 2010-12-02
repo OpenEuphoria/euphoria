@@ -281,7 +281,7 @@ QQ = """This text contains a back quote ` """ & `and """ for some reason.`
  tab, newline, carriage-return. Anything else is invalid.
 # an underscore is simply ignored, as if it was never there. It is used to aid
  readability.
-# each set of contiguous binary digits represent a single sequence element
+# each set of contiguous binary digits represents a single sequence element
 # they can span multiple lines
 # The non-digits  are treated as punctuation and used to delimit individual
   values.
@@ -296,7 +296,7 @@ b"1 10 11_0100 01010110_01111000" == {0x01, 0x02, 0x34, 0x5678}
  tab, newline, carriage-return. Anything else is invalid.
 # An underscore is simply ignored, as if it was never there. It is used to aid
  readability.
-# Each pair of contiguous hex digits represent a single sequence element with a
+# Each pair of contiguous hex digits represents a single sequence element with a
  value from 0 to 255
 # They can span multiple lines
 # The non-digits are treated as punctuation and used to delimit individual
@@ -327,7 +327,7 @@ sequence of characters, and {} to suggest some other kind of sequence.
 
 An **individual character** is an **atom**. It must be entered using single
 quotes. There is a difference between an individual character (which is an
-atom), and a character string of length-1 (which is a sequence). e.g.
+atom), and a character string of length 1 (which is a sequence). e.g.
 
 <eucode>
 'B'   -- equivalent to the atom 66 - the ASCII code for B
@@ -356,8 +356,8 @@ Special characters may be entered using a back-slash:
 | \0       | null |
 | \e       | escape |
 | \E       | escape |
-| \b/d..d/ | A binary coded value, The 'b is followed by 1 or more binary digits. \\
-             Inside strings, use the space character to delimit end a binary value.
+| \b/d..d/ | A binary coded value, the \b is followed by 1 or more binary digits. \\
+             Inside strings, use the space character to delimit or end a binary value.
 | \x/hh/   | A 2-hex-digit value, e.g. "\x5F" ==> {95} |
 | \u/hhhh/ | A 4-hex-digit value, e.g. "\u2A7C" ==> {10876} |
 | \U/hhhhhhhh/ | An 8-hex-digit value, e.g. "\U8123FEDC" ==> {2166619868} |
@@ -370,7 +370,7 @@ Note that you can use the underscore character ##'_'## inside the
 values to aid readability, e.g. ##"\U8123_FEDC" ==> {2166619868}##
 
 === Identifiers
-:<<LEVELTOC level=2 depth=4>>
+
 An identifier is just the name you give something in your program. This can be
 a variable, constant, function, procedure, parameter, or namespace. An identifier
 must begin with either a letter or an underscore, then followed by zero or more
@@ -516,9 +516,7 @@ not 6       -- 0 (false)
 These operators can also be applied to sequences. See below.
 
 In some cases [[:short-circuit]] evaluation will be used for expressions
-containing ##and## or ##or##. Specifically, short circuiting applies inside
-decision taking statements, like the [[:if statement]], [[:while statement]] or
-[[:loop statements]]. More on this later.
+containing ##and## or ##or##. Specifically, short circuiting applies inside decision making expressions.  These are found in the [[:if statement]], [[:while statement]] and the [[:loop until statement]].  More on this later.
 
 ==== Arithmetic Operators
 
@@ -722,7 +720,8 @@ to make up an enum that names the various fields. This will make your program
 easier to read. For the example above you might have:
 
 <eucode>
-enum NAME, FIRST_NAME, LAST_NAME, SALARY, AGE, WEIGHT
+enum NAME, SALARY, AGE, WEIGHT
+enum FIRST_NAME, LAST_NAME
 
 employees = {
     {{"John","Smith"}, 45000, 27, 185.5},   -- a[1]
@@ -926,9 +925,9 @@ they are actually implemented much more efficiently than that.
 
 ===== length(sequence s)
 
-Returns the length of a sequence s1.
+Returns the length of a sequence s.
 
-This is the number of elements in s1. Some of these elements may be
+This is the number of elements in s. Some of these elements may be
 sequences that contain elements of their own, but ##length## just gives you the
 "top-level" count. Note however that the length of an atom is always ##1##.
 e.g.
@@ -940,7 +939,7 @@ length({})                  -- 0
 length(5)                   -- 1
 </eucode>
 
-===== repeat(object o1, integer times)
+===== repeat(object o1, integer count)
 
 Returns a sequence that consists of an item repeated count times.
 e.g.
@@ -1476,6 +1475,10 @@ enum set, and it
 returns a positive integer when the argument is a member. The value returned is
 the ordinal number of
 the member in the enum's definition, regardless of what the member's value is.
+As an exception to this, if two enums share the same value, then they will
+share the same ordinal number. The ordinal numbers of enums surrounding these
+will continue to increment as if every enum had a unique ordinal number,
+causing some numbers to be skipped.
 
 For example,
 <eucode>
@@ -1492,6 +1495,19 @@ constant color_names = {"rouge", "vert", "noir", "bleu", "rose"}
 puts(1, color_names[color(BLUE)]) --> bleu
 
 </eucode>
+
+But with the exception, 
+<eucode>
+enum type color RED, GREEN=7, BLACK=1, BLUE=3 , PINK=10 end type
+? color(RED) --> 1
+? color(GREEN) --> 2
+? color(BLACK) --> 1
+? color(BLUE) --> 4
+? color(PINK) --> 5
+</eucode>
+
+Note that none of the enums have an ordinal number with a value of 3. This is
+simply skipped.
 
 By default, unless an enum member is being specifically set to some value, its
 value
@@ -3513,7 +3529,7 @@ than 0. It will know that the overall result is false regardless. Similarly,
 if a < 0 or b > 0 then ...
 </eucode>
 
-if a < 0 is true, then Euphoria will immediately decide that the result true,
+if a < 0 is true, then Euphoria will immediately decide that the result is true,
 without testing the value of b, since the result of this test would be
 irrelevant.
 
@@ -3542,7 +3558,7 @@ you will get a compile-time warning. Older versions (pre-2.1) of Euphoria did
 not use [[:short-circuit]] evaluation, and it's possible that some
 old code will no longer work correctly, although a search of the Euphoria
 archives did not turn up any programs that depend on side-effects in this
-way, but other Euphoria code might do.
+way, but other Euphoria code might do so.
 
 The expression, B, could contain something that would normally cause a run-time
 error. If Euphoria skips the evaluation of B, the error will not be discovered.
@@ -3583,8 +3599,9 @@ will terminate immediately when i <= length(s) becomes false. Euphoria will not
 evaluate s[i] != 'a' and will not evaluate s[i] != 'A'. No subscript error will
 occur.
 
-**Short-circuit** evaluation of ##and## and ##or## takes place for if,
-elsif, until and while conditions only.  It is not used in other contexts. For
+**Short-circuit** evaluation of ##and## and ##or## takes place inside decision 
+making expressions.  These are found in the [[:if statement]], [[:while statement]] 
+and the [[:loop until statement]].  It is not used in other contexts. For
 example, the assignment statement:
 
 <eucode>

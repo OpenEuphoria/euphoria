@@ -2189,6 +2189,7 @@ procedure opSTARTLINE()
 -- common in Translator, not in Interpreter
 	sequence line
 	integer offset
+	integer close_comment = 1
 
 	c_putc('\n')
 	offset = slist[Code[pc+1]][SRC]
@@ -2203,10 +2204,11 @@ procedure opSTARTLINE()
 		c_puts("\");\n")
 
 	else
-		if not match("*/", line ) then
+		if not match("*/", line ) and not match( "/*", line ) then
 			c_stmt0("/** ")
 		else
 			c_stmt0("//")
+			close_comment = 0
 		end if
 		for i = length(line) to 1 by -1 do
 			if not find(line[i], " \t\r\n") then
@@ -2218,7 +2220,11 @@ procedure opSTARTLINE()
 			end if
 		end for
 		c_puts(line)
-		c_puts("*/\n")
+		if close_comment then
+			c_puts("*/\n")
+		else
+			c_puts("\n")
+		end if
 	end if
 	pc += 2
 end procedure
@@ -2452,12 +2458,17 @@ procedure opRHS_SUBS()
 
 	-- _2 has the sequence
 	if TypeIsNot( subs, TYPE_INTEGER) then
-		c_stmt("if (!IS_ATOM_INT(@))\n", subs )
+		c_stmt("if (!IS_ATOM_INT(@)){\n", subs )
 		c_stmt("@ = (int)*(((s1_ptr)_2)->base + (int)(DBL_PTR(@)->dbl));\n",
 				{ target, subs })
-		c_stmt0("else\n")
+		c_stmt0("}\n")
+		c_stmt0("else{\n")
 	end if
 	c_stmt("@ = (int)*(((s1_ptr)_2)->base + @);\n", {target, subs} )
+	
+	if TypeIsNot( subs, TYPE_INTEGER) then
+		c_stmt0("}\n")
+	end if
 
 	if op = PASSIGN_OP_SUBS then -- simplified
 		LeftSym = TRUE
@@ -3222,8 +3233,9 @@ procedure opPLUS1()
 				-- destroy any value, check for overflow
 				SetBBType(Code[pc+3], GType(Code[pc+3]), target_val,
 								  target_elem, HasDelete( Code[pc+3] ) )
-				c_stmt("if (@ > MAXINT)\n", Code[pc+3])
+				c_stmt("if (@ > MAXINT){\n", Code[pc+3])
 				c_stmt("@ = NewDouble((double)@);\n", {Code[pc+3], Code[pc+3]})
+				c_stmt0("}\n")
 			end if
 		end if
 	end if
@@ -3831,8 +3843,8 @@ procedure opMINUS()
 	gencode = "@ = binary_op(MINUS, @, @);\n"
 	intcode2 ="@1 = @2 - @3;\n"
 	intcode = "@1 = @2 - @3;\n"
-	intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0)\n" &
-					"@1 = NewDouble((double)@1);\n"
+	intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+					"@1 = NewDouble((double)@1);\n}\n"
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
@@ -4189,124 +4201,129 @@ procedure opFOR()
 
 	loop_stack &= {{Code[pc+5], FOR, pc+7}} -- loop var, type, Label
 	integer is_loop_var = find( SymTab[Code[pc+5]][S_SCOPE] , {SC_LOOP_VAR, SC_GLOOP_VAR})
-	if is_loop_var then
-		-- inlined loop vars are regular vars
-		c_stmt0("{\n")
-		c_stmt("int @;\n", Code[pc+5])
-	else
-		c_stmt0("{\n")
-	end if
-
-	CRef(Code[pc+3])
-	c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
-
-	Label(pc+7)
-
-	inc = ObjMinMax(Code[pc+1])
-	if TypeIs(Code[pc+1], TYPE_INTEGER) then
-		-- increment is an integer
-
-		if TypeIs(Code[pc+3], TYPE_INTEGER) and
-		   TypeIs(Code[pc+2], TYPE_INTEGER) then
-			-- loop var is an integer
-			range1 = ObjMinMax(Code[pc+3])  -- start
-			range2 = ObjMinMax(Code[pc+2])  -- limit
-			SymTab[Code[pc+5]][S_GTYPE] = TYPE_INTEGER
-		else
-			range1 = {NOVALUE, NOVALUE}
-			if TypeIs(Code[pc+3], TYPE_DOUBLE) then
-				SymTab[Code[pc+5]][S_GTYPE] = TYPE_DOUBLE
-			else
-				SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
-			end if
-			SymTab[Code[pc+5]][S_OBJ] = NOVALUE
+	c_stmt0("{\n")
+		if is_loop_var then
+			-- inlined loop vars are regular vars
+			c_stmt("int @;\n", Code[pc+5])
 		end if
 
-		if inc[MIN] >= 0 then
-			-- going up
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @)\n", {Code[pc+5], Code[pc+2]})
+		CRef(Code[pc+3])
+		c_stmt("@ = @;\n", {Code[pc+5], Code[pc+3]})
+
+		Label(pc+7)
+
+		inc = ObjMinMax(Code[pc+1])
+		if TypeIs(Code[pc+1], TYPE_INTEGER) then
+			-- increment is an integer
+
+			if TypeIs(Code[pc+3], TYPE_INTEGER) and
+			TypeIs(Code[pc+2], TYPE_INTEGER) then
+				-- loop var is an integer
+				range1 = ObjMinMax(Code[pc+3])  -- start
+				range2 = ObjMinMax(Code[pc+2])  -- limit
+				SymTab[Code[pc+5]][S_GTYPE] = TYPE_INTEGER
 			else
-				c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = range1[MIN]
-				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+				range1 = {NOVALUE, NOVALUE}
+				if TypeIs(Code[pc+3], TYPE_DOUBLE) then
+					SymTab[Code[pc+5]][S_GTYPE] = TYPE_DOUBLE
+				else
+					SymTab[Code[pc+5]][S_GTYPE] = TYPE_ATOM
+				end if
+				SymTab[Code[pc+5]][S_OBJ] = NOVALUE
 			end if
 
-		elsif inc[MAX] < 0 then
-			-- going down
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ < @)\n", {Code[pc+5], Code[pc+2]})
+			if inc[MIN] >= 0 then
+				-- going up
+				LeftSym = TRUE
+				if TypeIs(Code[pc+5], TYPE_INTEGER) and
+				TypeIs(Code[pc+2], TYPE_INTEGER) then
+					c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
+				else
+					c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
+				end if
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				if range1[MIN] != NOVALUE then
+					SymTab[Code[pc+5]][S_OBJ_MIN] = range1[MIN]
+					SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+				end if
+
+			elsif inc[MAX] < 0 then
+				-- going down
+				LeftSym = TRUE
+				if TypeIs(Code[pc+5], TYPE_INTEGER) and
+				TypeIs(Code[pc+2], TYPE_INTEGER) then
+					c_stmt("if (@ < @){\n", {Code[pc+5], Code[pc+2]})
+				else
+					c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
+				end if
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				if range1[MIN] != NOVALUE then
+					SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
+					SymTab[Code[pc+5]][S_OBJ_MAX] = range1[MAX]
+				end if
+
 			else
-				c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
-				SymTab[Code[pc+5]][S_OBJ_MAX] = range1[MAX]
+				-- integer, but value could be + or -
+				c_stmt("if (@ >= 0) {\n", Code[pc+1])
+
+					LeftSym = TRUE
+					if TypeIs(Code[pc+5], TYPE_INTEGER) and
+					TypeIs(Code[pc+2], TYPE_INTEGER) then
+						c_stmt("if (@ > @){\n", {Code[pc+5], Code[pc+2]})
+					else
+						c_stmt("if (binary_op_a(GREATER, @, @)){\n",
+													{Code[pc+5], Code[pc+2]})
+					end if
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+				c_stmt0("}\n")
+				c_stmt0("else {\n")
+					LeftSym = TRUE
+					if TypeIs(Code[pc+5], TYPE_INTEGER) and
+					TypeIs(Code[pc+2], TYPE_INTEGER) then
+						c_stmt("if (@ < @) {\n", {Code[pc+5], Code[pc+2]})
+					else
+						c_stmt("if (binary_op_a(LESS, @, @)){\n",
+													{Code[pc+5], Code[pc+2]})
+					end if
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+					if range1[MIN] != NOVALUE then
+						SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
+						SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
+					end if
+				c_stmt0("}\n")
 			end if
 
 		else
-			-- integer, but value could be + or -
+			-- increment type is not known to be integer
+
 			c_stmt("if (@ >= 0) {\n", Code[pc+1])
+				c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
+					Goto(Code[pc+6])
+				c_stmt0("}\n")
+				c_stmt("else if (IS_ATOM_INT(@)) {\n", Code[pc+1])
+					c_stmt("if (binary_op_a(LESS, @, @){)\n", {Code[pc+5], Code[pc+2]})
+						Goto(Code[pc+6])
+					c_stmt0("}\n")
+				c_stmt0("}\n")
 
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ > @)\n", {Code[pc+5], Code[pc+2]})
-			else
-				c_stmt("if (binary_op_a(GREATER, @, @))\n",
-											   {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			c_stmt0("}\n")
-			c_stmt0("else {\n")
-			LeftSym = TRUE
-			if TypeIs(Code[pc+5], TYPE_INTEGER) and
-			   TypeIs(Code[pc+2], TYPE_INTEGER) then
-				c_stmt("if (@ < @)\n", {Code[pc+5], Code[pc+2]})
-			else
-				c_stmt("if (binary_op_a(LESS, @, @))\n",
-											   {Code[pc+5], Code[pc+2]})
-			end if
-			Goto(Code[pc+6])
-			if range1[MIN] != NOVALUE then
-				SymTab[Code[pc+5]][S_OBJ_MIN] = min(range1[MIN], range2[MIN])
-				SymTab[Code[pc+5]][S_OBJ_MAX] = max(range1[MAX], range2[MAX])
-			end if
-			c_stmt0("}\n")
+				c_stmt0("else {\n")
+					c_stmt("if (DBL_PTR(@)->dbl >= 0.0) {\n", Code[pc+1])
+						c_stmt("if (binary_op_a(GREATER, @, @)){\n", {Code[pc+5], Code[pc+2]})
+							Goto(Code[pc+6])
+						c_stmt0("}\n")
+					c_stmt0("}\n")
+					c_stmt0("else {\n")
+						c_stmt("if (binary_op_a(LESS, @, @)){\n", {Code[pc+5], Code[pc+2]})
+							Goto(Code[pc+6])
+						c_stmt0("}\n")
+					c_stmt0("}\n")
+				c_stmt0("}\n")
+
 		end if
-
-	else
-		-- increment type is not known to be integer
-
-		c_stmt("if (@ >= 0) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt("else if (IS_ATOM_INT(@)) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-
-		c_stmt0("else {\n")
-		c_stmt("if (DBL_PTR(@)->dbl >= 0.0) {\n", Code[pc+1])
-		c_stmt("if (binary_op_a(GREATER, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt0("else {\n")
-		c_stmt("if (binary_op_a(LESS, @, @))\n", {Code[pc+5], Code[pc+2]})
-		Goto(Code[pc+6])
-		c_stmt0("}\n")
-		c_stmt0("}\n")
-
-	end if
 
 	pc += 7
 
@@ -4334,8 +4351,8 @@ procedure opENDFOR_GENERAL()
 
 	-- rvalue for CName should be ok - we've initialized loop var
 	intcode = "@1 = @2 + @3;\n" &
-			  "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0) \n" &
-			  "@1 = NewDouble((double)@1);\n"
+			  "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+			  "@1 = NewDouble((double)@1);\n}\n"
 
 	if TypeIs(Code[pc+3], TYPE_INTEGER) and
 	   TypeIs(Code[pc+4], TYPE_INTEGER) then
@@ -4908,7 +4925,7 @@ procedure splins()
 	c_stmt0("s1_ptr assign_space;\n")
 	--c_stmt0("_2 = (object_ptr)pc[3];\n")
 	--c_stmt("_2 = (object_ptr)@;\n",{Code[pc+3]})
-	if not TypeIsNot(Code[pc+2],TYPE_SEQUENCE) then
+	if not TypeIsNot(Code[pc+2],TYPE_ATOM) then
 		c_stmt("if (IS_SEQUENCE(@))\n",{Code[pc+3]})
 		c_stmt0("RTFatal(\"Third argument to splice/insert() must be an atom\");\n")
 	end if
@@ -4931,17 +4948,31 @@ procedure opSPLICE()
 		c_stmt( "Concat(&@,@,@);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 	c_stmt0( "}\n")
 	c_stmt("else if (IS_SEQUENCE(@)) {\n",{Code[pc+2]})
-		--c_stmt("assign_space = SEQ_PTR(@);\n",{Code[pc+1]})
+		c_stmt( "if( @ != @ || SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
+			--  not in place: need to deref the target and ref the orig seq
+			c_stmt( "DeRef( @ );\n", Code[pc+4] )
+			-- ensures that Add_internal_space will make a copy
+			c_stmt( "RefDS( @ );\n", Code[pc+1] )
+		c_stmt0( "}\n" )
 		c_stmt("assign_space = Add_internal_space( @, insert_pos,((s1_ptr)SEQ_PTR(@))->length);\n",{Code[pc+1],Code[pc+2]})
 		c_stmt0("assign_slice_seq = &assign_space;\n")
 		c_stmt("assign_space = Copy_elements( insert_pos, SEQ_PTR(@), @ == @ );\n",{Code[pc+2], Code[pc+1], Code[pc+4]})
 		c_stmt("@ = MAKE_SEQ( assign_space );\n",{Code[pc+4]})
 	c_stmt0("}\n")
 	c_stmt0( "else {\n" )
-		c_stmt("RefDS( @ );\n", Code[pc+1] )
-		c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt( "if( @ != @ && SEQ_PTR( @ )->ref != 1 ){\n", {Code[pc+4], Code[pc+1], Code[pc+1]})
+			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
+		c_stmt0("}\n")
+		c_stmt0("else {\n")
+			c_stmt("DeRef( @ );\n", Code[pc+4] )
+			c_stmt("RefDS( @ );\n", Code[pc+1] )
+			c_stmt("@ = Insert( @, @, insert_pos);\n",{Code[pc+4],Code[pc+1],Code[pc+2]})
 		c_stmt0("}\n")
 	c_stmt0("}\n")
+	
+	-- splins() starts a block that we need to close:
+	c_stmt0("}\n")
+	
 	if TypeIs(Code[pc+2], TYPE_SEQUENCE) then
 		t = or_type(SeqElem(Code[pc+1]),SeqElem(Code[pc+2]))
 	elsif TypeIs(Code[pc+2], TYPE_ATOM) then
@@ -4959,8 +4990,9 @@ end procedure
 
 procedure opINSERT()
 	splins() -- _0 = obj_ptr
-	c_stmt0( "if (insert_pos <= 0)\n" )
+	c_stmt0( "if (insert_pos <= 0){\n" )
 	c_stmt( "Prepend(&@,@,@);\n", {Code[pc+4],Code[pc+1],Code[pc+2]})
+	c_stmt0( "}\n" )
 
 	if TypeIs( Code[pc+2], TYPE_SEQUENCE ) or TypeIs( Code[pc+2], TYPE_ATOM ) then
 		c_stmt("else if (insert_pos > SEQ_PTR(@)->length) {\n",{Code[pc+1]})
@@ -5052,14 +5084,17 @@ procedure opREMOVE()
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
 	c_stmt0("if (start > len || start > stop || stop<0) {\n")
-	c_stmt("RefDS(@);\n", {Code[pc+1]})
-	c_stmt("DeRef(@);\n", {Code[pc+4]})
-	c_stmt("@ = @;\n",{Code[pc+4], Code[pc+1]})
+	if Code[pc+1] != Code[pc+4] then
+		-- only do this if it's a different target...
+		c_stmt("RefDS(@);\n", {Code[pc+1]})
+		c_stmt("DeRef(@);\n", {Code[pc+4]})
+		c_stmt("@ = @;\n",{Code[pc+4], Code[pc+1]})
+	end if
 	c_stmt0("}\n")
 	c_stmt0("else if (start < 2) {\n")
 	c_stmt0("if (stop >= len) {\n")
-	c_stmt("DeRef(@);\n", {Code[pc+4]})
-	c_stmt("@ = MAKE_SEQ(NewS1(0));\n",{Code[pc+4]})
+	-- use Head() here, which might result in an in-place modification
+	c_stmt("Head( SEQ_PTR(@), start, &@ );\n", { Code[pc+1], Code[pc+4] })
 	c_stmt0("}\n")
 	c_stmt("else Tail(SEQ_PTR(@), stop+1, &@);\n",{Code[pc+1], Code[pc+4]})
 	c_stmt0("}\n")
@@ -5565,7 +5600,7 @@ procedure opPOKE()
 -- should optimize constant address
 
 	if TypeIsIn(Code[pc+1], TYPES_AO) then
-		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
+		c_stmt("if (IS_ATOM_INT(@)){\n", Code[pc+1])
 	end if
 
 	if TypeIsIn(Code[pc+1], TYPES_IAO) then
@@ -5579,7 +5614,8 @@ procedure opPOKE()
 	end if
 
 	if TypeIsIn(Code[pc+1], TYPES_AO) then
-		c_stmt0("else\n")
+		c_stmt0("}\n" )
+		c_stmt0("else {\n")
 	end if
 
 	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
@@ -5594,7 +5630,11 @@ procedure opPOKE()
 						   Code[pc+1])
 		end if
 	end if
-
+	
+	if TypeIsIn(Code[pc+1], TYPES_AO) then
+		c_stmt0("}\n" )
+	end if
+	
 	if TypeIsIn(Code[pc+2], TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
 	end if

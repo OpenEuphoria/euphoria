@@ -1,5 +1,9 @@
+--****
+-- === win32/window.exw
+--
 -- A Standard Windows Window coded at the primitive API level
--- Most Euphoria programmers should simply use Win32Lib!
+-- Most Euphoria programmers should simply use Win32Lib, wxWidgets, EuGTK or EuIUP!
+--
 
 include std/os.e
 include std/machine.e

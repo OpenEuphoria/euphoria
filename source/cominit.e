@@ -33,24 +33,26 @@ export sequence src_name = ""
 export sequence switches = {}
 
 constant COMMON_OPTIONS = {
-	{ "batch",     0, GetMsgText(279,0), { NO_CASE } },
-	{ "c",         0, GetMsgText(280,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
-	{ "copyright", 0, GetMsgText(281,0), { NO_CASE } },
-	{ "d",         0, GetMsgText(282,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
-	{ "eudir",     0, GetMsgText(328,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "i",         0, GetMsgText(283,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir" } },
-	{ "l",         0, GetMsgText(284,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "local" } },
-	{ "ldb",       0, GetMsgText(285,0), { NO_CASE, HAS_PARAMETER, "localdb" } },
-	{ "p",         0, GetMsgText(286,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
-	{ "pf",        0, GetMsgText(287,0), { NO_CASE } },
-	{ "strict",    0, GetMsgText(288,0), { NO_CASE } },
-	{ "test",      0, GetMsgText(289,0), { NO_CASE } },
-	{ "v", "version", GetMsgText(290,0), { NO_CASE } },
-	{ "w",         0, GetMsgText(291,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
-	{ "wf",        0, GetMsgText(292,0), { NO_CASE, HAS_PARAMETER, "filename" } },
-	{ "x",         0, GetMsgText(293,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "eudir",     0, GetMsgText(328,0), { HAS_PARAMETER, "dir" } },
+	{ "c",         0, GetMsgText(280,0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+	{ "i",         0, GetMsgText(283,0), { MULTIPLE, HAS_PARAMETER, "dir" } },
+	{ "d",         0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "l",         0, GetMsgText(284,0), { MULTIPLE, HAS_PARAMETER, "local" } },
+	{ "ldb",       0, GetMsgText(285,0), { HAS_PARAMETER, "localdb" } },
+	{ "p",         0, GetMsgText(286,0), { MULTIPLE, HAS_PARAMETER, "file_ext:command" } },
+	{ "pf",        0, GetMsgText(287,0), { } },
+	{ "w",         0, GetMsgText(291,0), { MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "wf",        0, GetMsgText(292,0), { HAS_PARAMETER, "filename" } },
+	{ "x",         0, GetMsgText(293,0), { MULTIPLE, HAS_PARAMETER, "name" } },
+	{ "batch",     0, GetMsgText(279,0), { } },
+	{ "strict",    0, GetMsgText(288,0), { } },
+	{ "test",      0, GetMsgText(289,0), { } },
+	{ "copyright", 0, GetMsgText(281,0), { } },
+	{ "v", "version", GetMsgText(290,0), { } },
  	$
 }
+
+constant COMMON_OPTIONS_SPLICE_IDX = length(COMMON_OPTIONS) - 1
 
 sequence options = {}
 add_options( COMMON_OPTIONS )
@@ -58,7 +60,8 @@ add_options( COMMON_OPTIONS )
 --**
 -- Add options to be parsed.
 export procedure add_options( sequence new_options )
-	options &= new_options
+	options = splice(options, new_options, COMMON_OPTIONS_SPLICE_IDX)
+	--options &= new_options
 end procedure
 
 --**
@@ -118,6 +121,153 @@ export procedure show_banner()
 	screen_output(STDERR, "\n")
 end procedure
 
+-- Taken from std/cmdline.e :-(
+-- Record fields in 'opts' argument.
+enum
+	SHORTNAME   = 1,
+	LONGNAME    = 2,
+	DESCRIPTION = 3,
+	OPTIONS     = 4,
+	CALLBACK    = 5,
+	MAPNAME     = 6
+
+--**
+-- Find a given option from the command line in the possible options sequence
+--
+-- Parameters:
+--   * ##name_type## - type of parameter, SHORTNAME or LONGNAME
+--   * ##opt## - actual option, text only no preceding - or / characters
+--   * ##opts## - possible options (as sent to cmd_parse())
+--
+-- Returns:
+--   Matching sequence in ##opts## or an empty sequence if the option was not found
+--
+
+function find_opt(integer name_type, sequence opt, sequence opts)
+	for i = 1 to length(opts) do
+		sequence o = opts[i]		
+		integer has_case = find(HAS_CASE, o[OPTIONS])
+		
+		if has_case and equal(o[name_type], opt) then
+			return o
+		elsif not has_case and equal(text:lower(o[name_type]), text:lower(opt)) then
+			return o
+		end if
+	end for
+	
+	return {}
+end function
+
+--**
+-- Merge ##a## into ##b## keeping ##b## when there are conflicts in accordance with
+-- ##opts##
+--
+-- Parameters:
+--   * ##a## - A set of command line parameters
+--   * ##b## - B set of command line parameters (steady)
+--   * ##opts## - options sequence as normally passed to cmd_parse
+--
+-- Returns:
+--   A new harmonized command line sequence in accordance with 
+
+export function merge_parameters(sequence a, sequence b, sequence opts)
+	integer i = 1
+	
+	while i <= length(a) do
+		sequence opt = a[i]
+		if length(opt) < 2 then
+			i += 1
+			continue
+		end if
+		
+		sequence this_opt = {}
+		integer bi = 0
+		
+		if opt[2] = '-' then
+			-- We have a long option
+			-- Look to see if b has this option
+			for j = 1 to length(b) do
+				if equal(text:lower(b[j]), text:lower(opt)) then
+					bi = j
+					this_opt = find_opt(LONGNAME, opt[3..$], opts)		
+					exit
+				end if
+			end for
+			
+		elsif opt[1] = '-' or opt[1] = '/' then
+			-- We have a short option
+			-- Look to see if b has this option
+			for j = 1 to length(b) do
+				if equal(text:lower(b[j]), '-' & text:lower(opt[2..$])) or 
+							equal(text:lower(b[j]), '/' & text:lower(opt[2..$]))
+				then
+					bi = j
+					this_opt = find_opt(SHORTNAME, opt[2..$], opts)
+					exit
+				end if
+			end for
+			
+		end if
+		
+		-- If we have it in b also, is a valid option and contains the ONCE parameter
+		if bi and length(this_opt) and not find(MULTIPLE, this_opt[OPTIONS]) then
+			if find(HAS_PARAMETER, this_opt[OPTIONS]) then
+				-- remove the option and it's parameter as well
+				a = remove(a, i, i + 1)
+			else
+				-- remove only the option
+				a = remove(a, i)
+			end if
+			
+			-- no need to increment as we have removed options to in effect the parameter
+			-- to be processed next has incremented
+		else
+			i += 1
+		end if
+	end while
+	
+		
+	integer first_extra = 0
+	
+	i = 1
+	
+	-- We know the first extra is not in a (DefaultArgs)
+	while i <= length(b) do
+		sequence opt = b[i]
+		
+		-- can't be a parameter
+		if length(opt) = 1 then
+			first_extra = i
+			exit
+		end if
+		
+		sequence this_opt = {}
+		if opt[2] = '-' then
+			this_opt = find_opt(LONGNAME, opt[3..$], opts)
+		elsif opt[1] = '-' or opt[1] = '/' then
+			this_opt = find_opt(SHORTNAME, opt[2..$], opts)
+		else
+			first_extra = i
+			exit
+		end if
+		
+		if length(this_opt) then
+			if find(HAS_PARAMETER, this_opt[OPTIONS]) then
+				i += 1
+			end if
+		end if
+				
+		i += 1
+	end while
+	
+	if first_extra > 1 then
+		return splice(b, a, first_extra)
+	end if
+	
+	-- No extras, system will prob fail w/a help message later
+	return a & b
+end function
+
 --**
 -- Expand any config file options on the command line adding
 -- their content to the supplied arguments.
@@ -138,6 +288,7 @@ end function
 
 --**
 -- Process options that are common to the Interpreter and Translator.
+
 export procedure handle_common_options(m:map opts)
 	sequence opt_keys = m:keys(opts)
 	integer option_w = 0
@@ -160,7 +311,6 @@ export procedure handle_common_options(m:map opts)
 
 			case "test" then
 				test_only = 1
-				batch_job = 1
 
 			case "strict" then
 				Strict_is_on = 1
@@ -230,7 +380,7 @@ export procedure handle_common_options(m:map opts)
 			case "v", "version" then
 				show_banner()
 				if find("WIN32_GUI", OpDefines) then
-					if not batch_job then
+					if not batch_job and not test_only then
 						any_key(GetMsgText(278,0), 2)
 					end if
 				end if
@@ -240,7 +390,7 @@ export procedure handle_common_options(m:map opts)
 			case "copyright" then
 				show_copyrights()
 				if find("WIN32_GUI", OpDefines) then
-					if not batch_job then
+					if not batch_job and not test_only then
 						any_key(GetMsgText(278,0), 2)
 					end if
 				end if
@@ -267,13 +417,14 @@ export procedure finalize_command_line(m:map opts)
 		OpWarning = all_warning_flag
 		prev_OpWarning = OpWarning
 	end if
-
+	
 	-- Initialize the option_switches and remove them
 	-- from the command line
 	sequence extras = m:get(opts, OPT_EXTRAS)
 	if length(extras) > 0 then
 		integer eufile_pos = find(extras[1], Argv)
 		sequence pairs = m:pairs( opts )
+
 		for i = 1 to length( pairs ) do
 			sequence pair = pairs[i]
 			if equal( pair[1], OPT_EXTRAS ) then
@@ -292,6 +443,7 @@ export procedure finalize_command_line(m:map opts)
 				switches = append( switches, pair[1] )
 			end if
 		end for
+		
 		if eufile_pos > 3 then
 			Argv = Argv[1..2] & Argv[eufile_pos..$]
 			Argc = length(Argv)

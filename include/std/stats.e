@@ -7,7 +7,6 @@
 
 namespace stats
 
-include std/math.e
 include std/sequence.e
 include std/sort.e
 
@@ -55,7 +54,7 @@ public function small(sequence data_set, integer ordinal_idx)
 		return {}
 	end if
 	
-	lSortedData = sort(data_set)
+	lSortedData = stdsort:sort(data_set)
 	
 	return {lSortedData[ordinal_idx], find(lSortedData[ordinal_idx], data_set)}
 end function
@@ -242,10 +241,10 @@ public enum
 function massage(sequence data_set, object subseq_opt)
 	switch subseq_opt do
 		case ST_IGNSTR then
-			return remove_subseq(data_set, SEQ_NOALT)
+			return stdseq:remove_subseq(data_set, stdseq:SEQ_NOALT)
 			
 		case ST_ZEROSTR then
-			return remove_subseq(data_set, 0)
+			return stdseq:remove_subseq(data_set, 0)
 			
 		case else
 			return data_set
@@ -952,7 +951,7 @@ public function median(object data_set, object subseq_opt = ST_ALLNUM)
 	if length(data_set) < 3 then
 		return data_set[1]
 	end if
-	data_set = sort(data_set)
+	data_set = stdsort:sort(data_set)
 	return data_set[ floor((length(data_set) + 1) / 2) ]
 	
 end function
@@ -1035,7 +1034,7 @@ public function raw_frequency(object data_set, object subseq_opt = ST_ALLNUM)
 		end if
 		lCounts[lPos][1] += 1
 	end for
-	return sort(lCounts[1..lMax], DESCENDING)
+	return stdsort:sort(lCounts[1..lMax], stdsort:DESCENDING)
 	
 end function
 

@@ -30,7 +30,7 @@ constant MIN1B = -9,
 		 MIN4B = -power(2, 31)
 
 atom mem0, mem1, mem2, mem3
-mem0 = allocate(4)
+mem0 = machine:allocate(4)
 mem1 = mem0 + 1
 mem2 = mem0 + 2
 mem3 = mem0 + 3
@@ -73,11 +73,11 @@ function deserialize_file(integer fh, integer c)
 			return get4(fh) + MIN4B
 
 		case F4B then
-			return float32_to_atom({getc(fh), getc(fh),
+			return convert:float32_to_atom({getc(fh), getc(fh),
 				getc(fh), getc(fh)})
 
 		case F8B then
-			return float64_to_atom({getc(fh), getc(fh),
+			return convert:float64_to_atom({getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh),
 				getc(fh), getc(fh)})
@@ -144,11 +144,11 @@ function deserialize_object(sequence sdata, integer pos, integer c)
 			return {getp4(sdata, pos) + MIN4B, pos + 4}
 
 		case F4B then
-			return {float32_to_atom({sdata[pos], sdata[pos+1],
+			return {convert:float32_to_atom({sdata[pos], sdata[pos+1],
 				sdata[pos+2], sdata[pos+3]}), pos + 4}
 
 		case F8B then
-			return {float64_to_atom({sdata[pos], sdata[pos+1],
+			return {convert:float64_to_atom({sdata[pos], sdata[pos+1],
 				sdata[pos+2], sdata[pos+3],
 				sdata[pos+4], sdata[pos+5],
 				sdata[pos+6], sdata[pos+7]}), pos + 8}
@@ -368,18 +368,18 @@ public function serialize(object x)
 			return {I3B, and_bits(x, #FF), and_bits(floor(x / #100), #FF), floor(x / #10000)}
 
 		else
-			return I4B & int_to_bytes(x-MIN4B)
+			return I4B & convert:int_to_bytes(x-MIN4B)
 
 		end if
 
 	elsif atom(x) then
 		-- floating point
-		x4 = atom_to_float32(x)
-		if x = float32_to_atom(x4) then
+		x4 = convert:atom_to_float32(x)
+		if x = convert:float32_to_atom(x4) then
 			-- can represent as 4-byte float
 			return F4B & x4
 		else
-			return F8B & atom_to_float64(x)
+			return F8B & convert:atom_to_float64(x)
 		end if
 
 	else
@@ -387,7 +387,7 @@ public function serialize(object x)
 		if length(x) <= 255 then
 			s = {S1B, length(x)}
 		else
-			s = S4B & int_to_bytes(length(x))
+			s = S4B & convert:int_to_bytes(length(x))
 		end if
 		for i = 1 to length(x) do
 			s &= serialize(x[i])

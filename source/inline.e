@@ -611,6 +611,7 @@ procedure fixup_special_op( integer pc )
 	end switch
 end procedure
 
+constant INLINE_HASHVAL = NBUCKETS + 1
 function new_inline_var( integer ps, integer reuse = 1 )
 	-- create a new inline variable based on either a variable from the inlined routine
 	-- or a temporary (ps < 1).
@@ -621,7 +622,6 @@ function new_inline_var( integer ps, integer reuse = 1 )
 		var = 0, 
 		vtype
 	sequence name
-	integer hashval
 	symtab_index s
 	
 	if reuse then
@@ -636,7 +636,6 @@ function new_inline_var( integer ps, integer reuse = 1 )
 			else
 				name = sprintf( "%s (from inlined routine '%s'", {SymTab[s][S_NAME], SymTab[inline_sub][S_NAME] })
 			end if
-			hashval = hashfn(name)
 			
 			if reuse then
 				if not TRANSLATE then
@@ -653,7 +652,6 @@ function new_inline_var( integer ps, integer reuse = 1 )
 			vtype = SymTab[s][S_VTYPE]
 		else
 			name = sprintf( "%s_%d", {SymTab[inline_sub][S_NAME], -ps})
-			hashval = hashfn(name)
 			if reuse then
 				name &= "__tmp"
 			else
@@ -662,10 +660,10 @@ function new_inline_var( integer ps, integer reuse = 1 )
 			vtype = object_type
 		end if
 		if CurrentSub = TopLevelSub then
-			var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, hashval, 0, vtype )
+			var = NewEntry( name, varnum, SC_LOCAL, VARIABLE, INLINE_HASHVAL, 0, vtype )
 			
 		else
-			var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, hashval, 0, vtype )
+			var = NewBasicEntry( name, varnum, SC_PRIVATE, VARIABLE, INLINE_HASHVAL, 0, vtype )
 			SymTab[var][S_NEXT] = SymTab[last_param][S_NEXT]
 			SymTab[last_param][S_NEXT] = var
 			if last_param = last_sym then

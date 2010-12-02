@@ -71,50 +71,51 @@ end function
 set_extract_options( routine_id("extract_options") )
 
 sequence trans_opt_def = {
-	{ "silent",           0, GetMsgText(177,0), { NO_CASE } },
-	{ "verbose",	      0, GetMsgText(319,0), { NO_CASE } },
-	{ "wat",              0, GetMsgText(178,0), { NO_CASE } },
-	{ "gcc",              0, GetMsgText(180,0), { NO_CASE } },
-	{ "cflags", 	      0, GetMsgText(323,0), { NO_CASE, HAS_PARAMETER, "flags" } },
-	{ "lflags", 	      0, GetMsgText(324,0), { NO_CASE, HAS_PARAMETER, "flags" } },
-	{ "com",              0, GetMsgText(181,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "con",              0, GetMsgText(182,0), { NO_CASE } },
-	{ "dll",              0, GetMsgText(183,0), { NO_CASE } },
-	{ "so",               0, GetMsgText(184,0), { NO_CASE } },
-	{ "plat",             0, GetMsgText(185,0), { NO_CASE, HAS_PARAMETER, "platform" } },
-	{ "lib",              0, GetMsgText(186,0), { NO_CASE, HAS_PARAMETER, "filename" } },
-	{ "fastfp",           0, GetMsgText(187,0), { NO_CASE } },
-	{ "stack",            0, GetMsgText(188,0), { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "debug",            0, GetMsgText(189,0), { NO_CASE } },
-	{ "maxsize",          0, GetMsgText(190,0), { NO_CASE, HAS_PARAMETER, "size" } },
-	{ "keep",             0, GetMsgText(191,0), { NO_CASE } },
-	{ "makefile",         0, GetMsgText(193,0), { NO_CASE } },
-	{ "makefile-partial", 0, GetMsgText(192,0), { NO_CASE } },
-	{ "emake",            0, GetMsgText(195,0), { NO_CASE } },
-	{ "nobuild",          0, GetMsgText(196,0), { NO_CASE } },
-	{ "force-build",      0, GetMsgText(326,0), { NO_CASE } },
-	{ "build-dir",        0, GetMsgText(197,0), { NO_CASE, HAS_PARAMETER, "dir" } },
-	{ "o",                0, GetMsgText(198,0), { NO_CASE, HAS_PARAMETER, "filename" } }
+	{ "debug",            0, GetMsgText(189,0), { } },
+	{ "plat",             0, GetMsgText(185,0), { HAS_PARAMETER, "platform" } },
+	{ "con",              0, GetMsgText(182,0), { } },
+	{ "dll",              0, GetMsgText(183,0), { } },
+	{ "so",               0, GetMsgText(184,0), { } },
+	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
+	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
+	{ "wat",              0, GetMsgText(178,0), { } },
+	{ "gcc",              0, GetMsgText(180,0), { } },
+	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
+	{ "cflags", 	      0, GetMsgText(323,0), { HAS_PARAMETER, "flags" } },
+	{ "lflags", 	      0, GetMsgText(324,0), { HAS_PARAMETER, "flags" } },
+	{ "lib",              0, GetMsgText(186,0), { HAS_PARAMETER, "filename" } },
+	{ "stack",            0, GetMsgText(188,0), { HAS_PARAMETER, "size" } },
+	{ "maxsize",          0, GetMsgText(190,0), { HAS_PARAMETER, "size" } },
+	{ "keep",             0, GetMsgText(191,0), { } },
+	{ "nobuild",          0, GetMsgText(196,0), { } },
+	{ "force-build",      0, GetMsgText(326,0), { } },
+	{ "emake",            0, GetMsgText(195,0), { } },
+	{ "makefile",         0, GetMsgText(193,0), { } },
+	{ "makefile-partial", 0, GetMsgText(192,0), { } },
+	{ "silent",           0, GetMsgText(177,0), { } },
+	{ "verbose",	      0, GetMsgText(319,0), { } },
+	$
 }
 
 add_options( trans_opt_def )
-
-procedure translator_help()
-	ShowMsg(1, 199)
-	show_help( get_common_options(), NO_HELP)
-	ShowMsg(1, 200)
-	show_help(trans_opt_def, NO_HELP)
-end procedure
 
 --**
 -- Process the translator command-line options
 
 export procedure transoptions()
-	Argv &= GetDefaultArgs()
+	sequence tranopts = get_options()
+	
+	sequence argv_to_parse = Argv[1..2]
+	if length(Argv) > 2 then
+		argv_to_parse &= merge_parameters(GetDefaultArgs(), Argv[3..$], tranopts)
+	else
+		argv_to_parse &= GetDefaultArgs()
+	end if
 
-	Argv = expand_config_options(Argv)
+	Argv = expand_config_options(argv_to_parse)
 	Argc = length(Argv)
-	map:map opts = cmd_parse( get_options(), routine_id("translator_help"), Argv)
+	
+	map:map opts = cmd_parse( tranopts, , Argv)
 
 	handle_common_options(opts)
 
@@ -187,10 +188,11 @@ export procedure transoptions()
 				end switch
 
 			case "lib" then
-				user_library = val
-
-			case "fastfp" then
-				fastfp = TRUE
+				user_library = canonical_path(val)
+				if not file_exists(user_library) then
+					ShowMsg(2, 348, { val })
+					abort(1)
+				end if
 
 			case "stack" then
 				sequence tmp = value(val)
@@ -246,23 +248,26 @@ export procedure transoptions()
 		exe_name = current_dir() & SLASH & exe_name
 	end if
 
-	if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
-		output_dir = temp_file("." & SLASH, "build-", "")
-		if find(output_dir[$], "/\\") = 0 then
-			output_dir &= '/'
+	ifdef not EUDIS then
+		if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
+			output_dir = temp_file("." & SLASH, "build-", "")
+			if find(output_dir[$], "/\\") = 0 then
+				output_dir &= '/'
+			end if
+	
+			if not silent then
+				printf(1, "Build directory: %s\n", { abbreviate_path(output_dir) })
+			end if
+			remove_output_dir = 1
 		end if
-
-		if not silent then
-			printf(1, "Build directory: %s\n", { output_dir })
-		end if
-		remove_output_dir = 1
-	end if
-
+	end ifdef
+	
 	if length(map:get(opts, OPT_EXTRAS)) = 0 then
 		-- No source supplied on command line
 		show_banner()
 		ShowMsg(2, 203)
-		translator_help()
+		-- translator_help()
+		show_help(tranopts,, Argv)
 
 		abort(1)
 	end if
@@ -362,10 +367,6 @@ procedure InitBackEnd(integer c)
 			CompileErr(150)
 
 	end switch
-
-	if fastfp then
-		CompileErr(93)
-	end if
 end procedure
 mode:set_init_backend( routine_id("InitBackEnd") )
 

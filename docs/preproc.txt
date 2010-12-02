@@ -46,7 +46,7 @@ We are going to name this file ##datesub.ex##.
 -- datesub.ex
 include std/datetime.e -- now() and format()
 include std/io.e       -- read_file() and write_file()
-include std/search.e   -- find_replace()
+include std/search.e   -- match_replace()
 
 sequence cmds = command_line()
 sequence inFileName, outFileName
@@ -62,7 +62,7 @@ end for
 
 sequence content = read_file(inFileName)
 
-content = find_replace("@DATE@", content, format(now()))
+content = match_replace("@DATE@", content, format(now()))
 
 write_file(outFileName, content)
 
@@ -226,14 +226,14 @@ make here.
 -- datesub.ex
 include std/datetime.e -- now() and format()
 include std/io.e       -- read_file() and write_file()
-include std/search.e   -- find_replace()
+include std/search.e   -- match_replace()
 
 public function preprocess(sequence inFileName, sequence outFileName,
         sequence options={})
 
     sequence content = read_file(inFileName)
 
-    content = find_replace("@DATE@", content, format(now()))
+    content = match_replace("@DATE@", content, format(now()))
 
     write_file(outFileName, content)
 
@@ -307,7 +307,7 @@ include std/cmdline.e  -- command line parsing
 include std/datetime.e -- now() and format()
 include std/io.e       -- read_file() and write_file()
 include std/map.e      -- map accessor functions (get())
-include std/search.e   -- find_replace()
+include std/search.e   -- match_replace()
 
 sequence cmdopts = {
     { "f", 0, "Date format", { NO_CASE, HAS_PARAMETER, "format" } }
@@ -318,7 +318,7 @@ public function preprocess(sequence inFileName, sequence outFileName,
     map opts = cmd_parse(cmdopts, options)
     sequence content = read_file(inFileName)
 
-    content = find_replace("@DATE@", content, format(now(), map:get(opts,
+    content = match_replace("@DATE@", content, format(now(), map:get(opts,
 "f")))
 
     write_file(outFileName, content)

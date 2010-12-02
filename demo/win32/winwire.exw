@@ -1,16 +1,14 @@
-		----------------------------
-		-- 3-D Wire Frame Picture --
-		--  * * WIN32 Version * * --
-		----------------------------
+--****
+-- === win32/winwire.exw
+--
+-- 3-D Wire Frame Picture, Windows Version
+--
 -- Run in a window or in full screen.
-
+--
 -- In a window, just close the window to stop it.
-
--- When running in Full Screen, press any key to stop.
--- Make a full-screen DOS window to clear up your screen.
+--
 
 constant FULL_SCREEN = 0  -- 1 for full screen display
-
 
 without type_check
 include std/dll.e

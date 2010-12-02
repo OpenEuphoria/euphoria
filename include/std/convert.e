@@ -7,9 +7,7 @@
 namespace convert
 
 include std/search.e
-include std/sequence.e
 include std/text.e
-include std/types.e
 
 constant
 	M_A_TO_F64 = 46,
@@ -829,12 +827,13 @@ end function
 --
 -- Examples:
 -- <eucode>
--- ? to_string(12)       --> 12
--- ? to_string("abc")       --> abc
--- ? to_string("abc",'"')       --> "abc"
--- ? to_string(`abc\"`,'"')       --> "abc\\\""
--- ? to_string({12,"abc",{4.5, -99}})       --> {12, "abc", {4.5, -99}}
--- ? to_string({12,"abc",{4.5, -99}},,0)       --> {12, abc, {4.5, -99}}
+-- include std/console.e
+-- display( to_string(12))       --> 12
+-- display( to_string("abc"))       --> abc
+-- display( to_string("abc",'"'))       --> "abc"
+-- display( to_string(`abc\"`,'"'))       --> "abc\\\""
+-- display( to_string({12,"abc",{4.5, -99}}))       --> {12, "abc", {4.5, -99}}
+-- display( to_string({12,"abc",{4.5, -99}},,0))       --> {12, abc, {4.5, -99}}
 -- </eucode>
 
 public function to_string(object data_in, integer string_quote = 0, integer embed_string_quote = '"')
@@ -844,8 +843,8 @@ public function to_string(object data_in, integer string_quote = 0, integer embe
 		if string_quote = 0 then
 			return data_in
 		end if
-		data_in = match_replace(`\`, data_in, `\\`)
-		data_in = match_replace({string_quote}, data_in, `\` & string_quote)
+		data_in = search:match_replace(`\`, data_in, `\\`)
+		data_in = search:match_replace({string_quote}, data_in, `\` & string_quote)
 		return string_quote & data_in & string_quote
 	end if
 	
@@ -853,7 +852,7 @@ public function to_string(object data_in, integer string_quote = 0, integer embe
 		if integer(data_in) then
 			return sprintf("%d", data_in)
 		end if
-		data_in = trim_tail(sprintf("%.15f", data_in), '0')
+		data_in = text:trim_tail(sprintf("%.15f", data_in), '0')
 		if data_in[$] = '.' then
 			data_in = remove(data_in, length(data_in))
 		end if

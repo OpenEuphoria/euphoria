@@ -1,5 +1,8 @@
+--****
+-- === unix/qsort.ex
+--
 -- Calling a Euphoria routine from a C routine under Linux
-
+--
 -- In this demo, the C qsort() library routine calls the 
 -- Euphoria qcompare() routine to compare any two items.
 

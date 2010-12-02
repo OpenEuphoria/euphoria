@@ -78,7 +78,6 @@ else
   PREREGEX=$(FROMBSDREGEX)
   SEDFLAG=-ri
 endif
-LDLFLAG+= -pthread
 ifeq "$(EMINGW)" "1"
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
@@ -97,10 +96,15 @@ ifeq "$(EMINGW)" "1"
 		LIBRARY_NAME=eu.a
 	endif
 	EBACKENDU=eubw.exe
+	EUBW_RES=$(BUILDDIR)/eubw.res
 	EBACKENDC=eub.exe
+	EUB_RES=$(BUILDDIR)/eub.res
 	EECU=euc.exe
+	EUC_RES=$(BUILDDIR)/euc.res
 	EEXU=eui.exe
+	EUI_RES=$(BUILDDIR)/eui.res
 	EEXUW=euiw.exe
+	EUIW_RES=$(BUILDDIR)/euiw.res
 	ifeq "$(MANAGED_MEM)" "1"
 		ifeq "$(ALIGN4)" "1"
 			MEM_FLAGS=-DEALIGN4
@@ -116,6 +120,7 @@ ifeq "$(EMINGW)" "1"
 	endif
 	PCRE_CC=gcc
 else
+	LDLFLAG+= -pthread
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
@@ -143,7 +148,7 @@ DEBUG_FLAGS=-fomit-frame-pointer $(EOSMING)
 endif
 
 ifdef EPROFILE
-PROFILE_FLAGS=-pg
+PROFILE_FLAGS=-pg -g
 ifndef EDEBUG
 DEBUG_FLAGS=$(EOSMING)
 endif
@@ -209,9 +214,9 @@ CREOLEHTML=creolehtml
 endif
 
 ifdef WKHTMLTOPDF
-HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/index.html $(CYPBUILDDIR)/euphoria-4.0.pdf
+HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/euphoria-pdf.html $(CYPBUILDDIR)/euphoria-4.0.pdf
 else
-HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/index.html
+HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/euphoria-pdf.html
 endif
 
 ifeq "$(TRANSLATE)" "euc"
@@ -343,7 +348,8 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend code-page-db
+all : interpreter translator library debug-library backend
+all : binder
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
@@ -356,22 +362,22 @@ BUILD_DIRS=\
 	$(BUILDDIR)/libobj/ \
 	$(BUILDDIR)/backobj/
 
-distclean : clean
-	-rm -f $(CONFIG)
-	-rm -f Makefile
 
 clean : 	
 	-rm -fr $(BUILDDIR)
 	-rm -fr $(BUILDDIR)/backobj
 	-rm -f be_rev.c
 
+clobber distclean : clean
+	-rm -f $(CONFIG)
+	-rm -f Makefile
+	-rm -fr $(BUILDDIR)
+
 ifeq "$(MINGW)" "1"
 	-rm -f $(BUILDDIR)/{$(EBACKENDC),$(EEXUW)}
 endif
 	$(MAKE) -C pcre CONFIG=../$(CONFIG) clean
 	
-clobber : distclean
-	-rm -fr $(BUILDDIR)
 
 .PHONY : clean distclean clobber all htmldoc manual
 
@@ -417,12 +423,17 @@ ifeq "$(EUPHORIA)" "1"
 endif	
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
+EUBIND=eubind
+
+binder : translator library $(BUILDDIR)/$(EUBIND)
+
 .PHONY : library debug-library
 .PHONY : builddirs
 .PHONY : interpreter
 .PHONY : translator
 .PHONY : svn_rev
 .PHONY : code-page-db
+.PHONY : binder
 
 euisource : $(BUILDDIR)/intobj/main-.c be_rev.c
 euisource :  EU_TARGET = int.ex
@@ -467,51 +478,68 @@ source-tarball : source
 .PHONY : source
 
 
+ifeq "$(EMINGW)" "1"
+$(EUI_RES) : eui.rc version_info.rc
+$(EUIW_RES) : euiw.rc version_info.rc
+endif
+
 $(BUILDDIR)/$(EEXU) :  EU_TARGET = int.ex
-$(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES)
+$(BUILDDIR)/$(EEXU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EEXU) :  EU_OBJS = $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EU_TRANSLATOR_FILES)
+$(BUILDDIR)/$(EEXU) :  $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EU_TRANSLATOR_FILES) $(EUI_RES) $(EUIW_RES)
 	@$(ECHO) making $(EEXU)
 	@echo $(OS)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXU)
-	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXUW)
+	$(CC) $(EOSFLAGSCONSOLE) $(EUI_RES) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXU)
+	$(CC) $(EOSFLAGS) $(EUIW_RES) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EEXUW)
 else
 	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
 endif
-	
+
+ifeq "$(EMINGW)" "1"
+$(EUC_RES) : euc.rc version_info.rc
+endif
+
 $(BUILDDIR)/$(EECU) :  OBJDIR = transobj
 $(BUILDDIR)/$(EECU) :  EU_TARGET = ec.ex
-$(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
+$(BUILDDIR)/$(EECU) :  EU_MAIN = $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 $(BUILDDIR)/$(EECU) :  EU_OBJS = $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)/$(EECU) : $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUC_RES)
 	@$(ECHO) making $(EECU)
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
-
+	$(CC) $(EOSFLAGSCONSOLE) $(EUC_RES) $(EU_TRANSLATOR_OBJECTS) $(DEBUG_FLAGS) $(PROFILE_FLAGS) $(EU_BACKEND_OBJECTS) $(MSIZE) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EECU)
+	
 backend : builddirs
 ifeq "$(EUPHORIA)" "1"
 	$(MAKE) backendsource EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG)  EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 endif	
 	$(MAKE) $(BUILDDIR)/$(EBACKENDU) EBACKEND=1 OBJDIR=backobj CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
+ifeq "$(EMINGW)" "1"
+$(EUB_RES) : eub.rc version_info.rc
+$(EUBW_RES) : eubw.rc version_info.rc
+endif
+
 $(BUILDDIR)/$(EBACKENDU) : OBJDIR = backobj
 $(BUILDDIR)/$(EBACKENDU) : EU_TARGET = backend.ex
 $(BUILDDIR)/$(EBACKENDU) : EU_MAIN = $(EU_BACKEND_RUNNER_FILES)
 $(BUILDDIR)/$(EBACKENDU) : EU_OBJS = $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
-$(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
+$(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(EUB_RES) $(EUBW_RES)
 	@$(ECHO) making $(EBACKENDU) $(OBJDIR)
-	$(CC) $(EOSFLAGS) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDU)
+	$(CC) $(EOSFLAGS) $(EUBW_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(DEBUG_FLAGS) $(MSIZE) $(PROFILE_FLAGS) -o $(BUILDDIR)/$(EBACKENDU)
 ifeq "$(EMINGW)" "1"
-	$(CC) $(EOSFLAGSCONSOLE) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
+	$(CC) $(EOSFLAGSCONSOLE) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
 endif
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
-	cd ../docs/ && $(EUDOC) --strip=2 -v -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
+	cd ../docs/ && $(EUDOC) --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
 
+$(BUILDDIR)/euphoria-pdf.txt : $(EU_DOC_SOURCE)
+	cd ../docs/ && $(EUDOC) --single --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria-pdf.txt
+	
 $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
-	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
+	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o=$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/docs/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
@@ -523,7 +551,7 @@ manual-upload : manual
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
-	 $(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
+	 $(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o=$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/html
@@ -536,15 +564,11 @@ $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 
 htmldoc : $(BUILDDIR)/html/index.html
 
-$(BUILDDIR)/euphoria-pdf.txt : $(BUILDDIR)/euphoria.txt
-# 	cp  $(BUILDDIR)/euphoria.txt  $(BUILDDIR)/euphoria-pdf.txt
-	sed -e "s/splitlevel = 2/splitlevel = 1/" $(BUILDDIR)/euphoria.txt > $(BUILDDIR)/euphoria-pdf.txt
-
-$(BUILDDIR)/pdf/index.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
+$(BUILDDIR)/pdf/euphoria-pdf.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
 	-mkdir -p $(BUILDDIR)/pdf
-	$(CREOLEHTML) -A=ON -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o$(CYPBUILDDIR)/pdf -htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
+	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o=$(CYPBUILDDIR)/pdf --htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
 
-$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/index.html  $(DOCDIR)/pdf.css
+$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/euphoria-pdf.html  $(DOCDIR)/pdf.css
 	cp $(CYPTRUNKDIR)/docs/pdf.css $(CYPBUILDDIR)/pdf/
 	$(HTML2PDF)
 
@@ -561,9 +585,9 @@ test :
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
-		-bind ../source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-bind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
-		$(TESTFILE)
+		-verbose $(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
 testeu : 
@@ -593,6 +617,14 @@ coverage :
 		-coverage-db $(CYPBUILDDIR)/unit-test.edb -coverage $(CYPTRUNKDIR)/include/std \
 		 -coverage-pp "$(EXE) -i $(CYPTRUNKDIR)/include $(CYPTRUNKDIR)/bin/eucoverage.ex" $(TESTFILE)
 
+coverage-front-end : 
+	-rm $(CYPBUILDDIR)/front-end.edb
+	cd ../tests && EUDIR=$(CYPTRUNKDIR) EUCOMPILEDIR=$(CYPTRUNKDIR) \
+		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include \
+		-exe "$(CYPBUILDDIR)/$(EEXU) -coverage-db $(CYPBUILDDIR)/front-end.edb -coverage $(CYPTRUNKDIR)/source $(CYPTRUNKDIR)/source/eu.ex" \
+		-verbose $(TESTFILE)
+	eucoverage $(CYPBUILDDIR)/front-end.edb
+
 .PHONY : coverage
 
 ifeq "$(PREFIX)" ""
@@ -620,6 +652,7 @@ install :
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 endif
@@ -636,46 +669,86 @@ endif
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/tutorial ../tutorial/*
 	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/bin \
 	           ../bin/ed.ex \
-	           ../bin/ascii.ex \
 	           ../bin/bugreport.ex \
 	           ../bin/buildcpdb.ex \
 	           ../bin/ecp.dat \
-	           ../bin/eprint.ex \
 	           ../bin/eucoverage.ex \
-	           ../bin/guru.ex \
-	           ../bin/key.ex \
-	           ../bin/lines.ex \
-	           ../bin/search.ex \
-	           ../bin/where.ex
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
+	           ../bin/lines.ex
+	install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
 	           *.ex \
 	           *.e \
 	           be_*.c \
 	           *.h
-	# helper script for running dis.ex
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eudis
-	echo eui $(PREFIX)/share/euphoria/source/dis.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eudis
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eudis
-	# helper script for binding programs
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eubind
-	echo eui $(PREFIX)/share/euphoria/source/bind.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eubind
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eubind
 	# helper script for shrouding programs
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
-	echo eui $(PREFIX)/share/euphoria/source/bind.ex -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
+	echo eubind -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
 	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
-	# helper script for eutest
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eutest
-	echo eui $(PREFIX)/share/euphoria/source/eutest.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eutest
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eutest
-	# helper script for eucoverage
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eucoverage
-	echo eui $(PREFIX)/share/euphoria/bin/eucoverage.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eucoverage
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eucoverage
-	# helper script for running eudist.ex
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eudist
-	echo eui $(PREFIX)/share/euphoria/source/eudist.ex $$\@ >> $(DESTDIR)$(PREFIX)/bin/eudist
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eudist
+
+EUDIS=eudis
+EUSHROUD=eushroud
+EUTEST=eutest
+EUCOVERAGE=eucoverage
+EUDIST=eudist
+
+ifeq "$(EMINGW)" "1"
+	MINGW_FLAGS=-gcc
+else
+	MINGW_FLAGS=
+endif
+
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUDIST)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
+
+$(BUILDDIR)/$(EUDIS) : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e translator library
+$(BUILDDIR)/$(EUDIS) : $(EU_CORE_FILES) 
+$(BUILDDIR)/$(EUDIS) : $(EU_INTERPRETER_FILES)
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUDIS)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
+
+$(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex translator library
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUBIND)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
+
+$(BUILDDIR)/$(EUTEST) : $(TRUNKDIR)/source/eutest.ex translator library
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUTEST)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
+
+$(BUILDDIR)/$(EUCOVERAGE) : $(TRUNKDIR)/bin/eucoverage.ex translator library
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
+
+EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
+	$(BUILDDIR)/$(EUDIS) \
+	$(BUILDDIR)/$(EUTEST) \
+	$(BUILDDIR)/$(EUCOVERAGE)
+
+tools : $(EU_TOOLS)
+
+clean-tools :
+	-rm $(EU_TOOLS)
+
+install-tools :
+	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)/$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)/$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)/$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)/$(PREFIX)/bin/
+	
 	
 
 install-docs :
@@ -702,13 +775,13 @@ endif
 uninstall-docs :
 	-rm -rf $(PREFIX)/share/doc/euphoria
 
-.PHONY : install install-docs
+.PHONY : install install-docs install-tools
 .PHONY : uninstall uninstall-docs
 
 ifeq "$(EUPHORIA)" "1"
-$(BUILDDIR)/intobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_TRANSLATOR_FILES)
-$(BUILDDIR)/transobj/main-.c : $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES)
-$(BUILDDIR)/backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES)
+$(BUILDDIR)/intobj/main-.c : $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/transobj/main-.c : $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
+$(BUILDDIR)/backobj/main-.c : $(EU_CORE_FILES) $(EU_BACKEND_RUNNER_FILES) $(EU_TRANSLATOR_FILES) $(EU_STD_INC)
 endif
 
 %obj :
@@ -716,6 +789,9 @@ endif
 
 %back : %
 	mkdir -p $@
+
+$(BUILDDIR)/%.res : %.rc
+	windres $< -O coff -o $@
 	
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o
@@ -730,6 +806,7 @@ $(BUILDDIR)/$(OBJDIR)/%.c : $(EU_MAIN)
 	
 endif
 
+ifneq "$(OBJDIR)" ""
 $(BUILDDIR)/$(OBJDIR)/back/%.o : %.c $(CONFIG_FILE)
 	$(CC) $(BE_FLAGS) $(EBSDFLAG) -I $(BUILDDIR)/$(OBJDIR)/back $*.c -o$(BUILDDIR)/$(OBJDIR)/back/$*.o
 
@@ -738,8 +815,8 @@ $(BUILDDIR)/$(OBJDIR)/back/be_callc.o : ./$(BE_CALLC).c $(CONFIG_FILE)
 	$(CC) -S -Wall $(EOSTYPE) $(EOSFLAGS) $(EBSDFLAG) $(MSIZE) -fsigned-char -Os -O3 -ffast-math -fno-defer-pop $(CALLC_DEBUG) $(BE_CALLC).c -o$(BUILDDIR)/$(OBJDIR)/back/be_callc.s
 
 $(BUILDDIR)/$(OBJDIR)/back/be_inline.o : ./be_inline.c $(CONFIG_FILE) 
-	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$*.o
-	
+	$(CC) -finline-functions $(BE_FLAGS) $(EBSDFLAG) $(RUNTIME_FLAGS) be_inline.c -o$(BUILDDIR)/$(OBJDIR)/back/be_inline.o
+endif
 ifdef PCRE_OBJECTS	
 $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.h.unix pcre/pcre.h.unix
 	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG)

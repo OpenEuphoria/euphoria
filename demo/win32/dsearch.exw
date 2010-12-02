@@ -1,10 +1,15 @@
+--****
+-- === win32/dsearch.exw
+-- 
 -- search for a .DLL that contains a given routine
--- usage:  
---      eui dsearch [routine] 
+-- ==== Usage
+-- {{{
+-- eui dsearch [routine] 
+-- }}}
 --
 -- If you don't supply a string on the command line you will be prompted 
 -- for it. 
-
+--
 
 -- Some of the common WIN32 .DLLs. Feel free to add more.
 sequence dll_list

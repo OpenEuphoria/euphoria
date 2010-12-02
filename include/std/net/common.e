@@ -7,14 +7,14 @@
 namespace common
 
 include std/get.e
-include std/regex.e as re
+include std/regex.e
 include std/sequence.e as seq
 
 constant
 	DEFAULT_PORT = 80,
-	re_ip = re:new("""^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\:[0-9]+)?$"""),
-	re_http_url = re:new("""(http|https|ftp|ftps|gopher|gophers)://([^/]+)(/[^?]+)?(\?.*)?""", re:CASELESS),
-	re_mail_url = re:new("""(mailto):(([^@]+)@([^?]+))(\?.*)?""")
+	re_ip = regex:new("""^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\:[0-9]+)?$"""),
+	re_http_url = regex:new("""(http|https|ftp|ftps|gopher|gophers)://([^/]+)(/[^?]+)?(\?.*)?""", regex:CASELESS),
+	re_mail_url = regex:new("""(mailto):(([^@]+)@([^?]+))(\?.*)?""")
 
 --****
 -- === IP Address Handling
@@ -38,7 +38,7 @@ constant
 --
 
 public function is_inetaddr(sequence address)
-	return re:is_match(re_ip, address)
+	return regex:is_match(re_ip, address)
 end function
 
 --**
@@ -74,8 +74,8 @@ public function parse_ip_address(sequence address, integer port = -1)
 		end if
 	else
 		if port < 0 or port > 65_535 then
-			address[2] = value(address[2])
-			if address[2][1] != GET_SUCCESS then
+			address[2] = stdget:value(address[2])
+			if address[2][1] != stdget:GET_SUCCESS then
 				address[2] = DEFAULT_PORT
 			else
 				address[2] = address[2][2]
@@ -143,7 +143,7 @@ public constant
 public function parse_url(sequence url)
 	object m
 
-	m = re:matches(re_http_url, url)
+	m = regex:matches(re_http_url, url)
 	if sequence(m) then
 		if length(m) < URL_HTTP_PATH then
 			m &= { "/" }
@@ -155,7 +155,7 @@ public function parse_url(sequence url)
 		return m
 	end if
 
-	m = re:matches(re_mail_url, url)
+	m = regex:matches(re_mail_url, url)
 	if sequence(m) then
 		if length(m) < URL_MAIL_QUERY then
 			m &= { "" }
@@ -164,5 +164,5 @@ public function parse_url(sequence url)
 		return m
 	end if
 
-	return re:ERROR_NOMATCH
+	return regex:ERROR_NOMATCH
 end function

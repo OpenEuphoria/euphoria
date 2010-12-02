@@ -40,7 +40,7 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp 
 	# Add here commands to compile the arch part of the package.
 	echo TARGET build-arch-stamp
-	$(MAKE) -C source
+	$(MAKE) -C source all tools
 	touch $@
 
 build-indep: build-indep-stamp
@@ -81,7 +81,7 @@ install-arch:
 	dh_installdirs -s
 	# Add here commands to install the arch part of the package into 
 	# debian/tmp.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/euphoria install install-docs
+	$(MAKE) DESTDIR=$(CURDIR)/debian/euphoria install install-docs install-tools
 	dh_install -s --sourcedir=debian/euphoria --autodest
 	install -d $(CURDIR)/debian/euphoria/usr/share/doc-base
 	install debian/euphoria-manual $(CURDIR)/debian/euphoria/usr/share/doc-base/

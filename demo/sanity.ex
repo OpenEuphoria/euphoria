@@ -1,10 +1,19 @@
-------------------------------------------
--- AUTOMATIC SELF-CHECKING SANITY TEST  --
--- for Euphoria                         --
--- A quick test of most of the features --
-------------------------------------------
--- Usage:
---   eui sanity.ex
+--****
+-- === sanity.ex
+--
+-- this program tests hundreds of features of Euphoria, in a quick,
+-- self-test. If this program reports "PASSED" then Euphoria is
+-- working on your machine.
+--
+-- This was the old "unit testing" program for Euphoria pre 4.x, for an
+-- updated unit test system, please see [[:unittest]] and look in your
+-- ##euphoria/tests## directory.
+--
+-- ==== Usage
+-- {{{
+-- eui sanity.ex
+-- }}}
+--
 
 with type_check
 
@@ -28,12 +37,6 @@ constant generic_msg = "sanity tests failed at line number shown in ex.err"
 constant t = time()
 constant cmd_line = command_line()
 object y
-
-procedure the_end()
-	puts(msg, "Press Enter to continue\n")
-	gets(0)
-	abort(0)
-end procedure
 
 constant epsilon = 1e-10 -- allow for small floating point inaccuracy
 
@@ -993,7 +996,7 @@ procedure reboot_msg()
 	end ifdef
 	
 	puts(msg, "See INSTALL.DOC\n")
-	the_end()
+	abort(1)
 end procedure
 
 procedure check_install(integer doit)
@@ -1164,7 +1167,6 @@ global procedure sanity()
 		message_box("PASSED (100%)", "Euphoria WIN32 Sanity Test", MB_OK)
 	elsedef
 		puts(msg, "\nPASSED (100%)\n")
-		the_end()    
 	end ifdef
 end procedure
 

@@ -11,7 +11,8 @@ include std/text.e
 
 include common.e
 
--- don't change this please
+-- don't change this please, but please look for -deleted- items before adding new options
+-- to the bottom of this list. Re-use -deleted- items.
 constant StdErrMsgs = {
 	{  0, "Unknown message code"},
 	{  1, "[1] is missing defined word before 'or'"},
@@ -106,7 +107,7 @@ constant StdErrMsgs = {
 	{ 90, "found [1] '[2]' but was expecting a parameter name instead."},
 	{ 91, "found [1] but expected 'else', an atom, string, constant or enum"},
 	{ 92, "found [1] but was expecting a parameter name instead."},
-	{ 93, "Fast FP option only available for DOS"},
+	{ 93, "-deleted-"},
 	{ 94, "fractional part of number is missing"},
 	{ 95, "file name is missing"},
 	{ 96, "Goto statement without a string label."},
@@ -200,7 +201,7 @@ constant StdErrMsgs = {
 	{184, "Create a shared library"},
 	{185, "Set the platform for the translated code"},
 	{186, "Use a non-standard library"},
-	{187, "Enable hardware FPU (DOS option only)"},
+	{187, "-deleted-"},
 	{188, "Set the stack size (Watcom)"},
 	{189, "Enable debug mode for generated code"},
 	{190, "Set the number of C statements per generated file before splitting."},
@@ -210,7 +211,7 @@ constant StdErrMsgs = {
 	{194, "Could not remove directory [1]"},
 	{195, "Generate a emake/emake.bat file to build project"},
 	{196, "Do not build the project nor write a build file"},
-	{197, "Generate/compile all files in 'builddir'"},
+	{197, "Generate/compile all files in 'dir'"},
 	{198, "Set the output filename"},
 	{199, "euc.exe [options] file.ex...\n common options:"},
 	{200, "\n translator options:"},
@@ -302,7 +303,7 @@ constant StdErrMsgs = {
 	{286, "Setup a pre-processor"},
 	{287, "Force pre-processing regardless of cache state"},
 	{288, "Enable all warnings"},
-	{289, "Test syntax only, do not execute. Implies batch mode."},
+	{289, "Test syntax only, do not execute"},
 	{290, "Display the version number"},
 	{291, "Defines warning level"},
 	{292, "Write all warnings to the given file instead of STDOUT"},
@@ -360,6 +361,8 @@ constant StdErrMsgs = {
 	{344, "A numeric literal was expected"},
 	{345, "Path to backend runner to use for binding" },
 	{346, "Type check error:  assigning a sequence to an atom" },
+	{347, "deleting [1]..." },
+	{348, "User supplied library does not exist:\n    [1]"},
 	$
 }
 

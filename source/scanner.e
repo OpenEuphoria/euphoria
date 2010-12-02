@@ -240,7 +240,8 @@ export function fetch_line(integer start)
 		end if
 		line[n] = c
 	end while
-	return line[1..n]
+	line = remove( line, n+1, length( line ) )
+	return line
 end function
 
 export procedure AppendSourceLine()
@@ -2170,4 +2171,10 @@ export procedure main_file()
 		read_line()
 		default_namespace( )
 	end ifdef
+end procedure
+
+export procedure cleanup_open_includes()
+	for i = 1 to length( IncludeStk ) do
+		close( IncludeStk[i][FILE_PTR] )
+	end for
 end procedure

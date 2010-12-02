@@ -6,10 +6,10 @@
 
 namespace os
 
-include std/dll.e
+ifdef WINDOWS then
+	include std/dll.e
+end ifdef
 include std/machine.e
-include std/sequence.e
-include std/text.e
 
 ifdef UNIX then
 
@@ -95,7 +95,7 @@ public function get_pid()
 		return machine_func(M_INSTANCE, 0)
 	elsifdef WINDOWS then
 		if cur_pid = -1 then
-			cur_pid = define_c_func(open_dll("kernel32.dll"), "GetCurrentProcessId", {}, C_DWORD)
+			cur_pid = dll:define_c_func( dll:open_dll("kernel32.dll"), "GetCurrentProcessId", {}, dll:C_DWORD)
 			if cur_pid >= 0 then
 				cur_pid = c_func(cur_pid, {})
 			end if
@@ -105,8 +105,8 @@ public function get_pid()
 	end ifdef
 end function
 
-ifdef WIN32 then
-	constant M_UNAME = define_c_func(open_dll("kernel32.dll"), "GetVersionExA", {C_POINTER}, C_INT)
+ifdef WINDOWS then
+	constant M_UNAME = dll:define_c_func( dll:open_dll("kernel32.dll"), "GetVersionExA", { dll:C_POINTER }, dll:C_INT)
 elsifdef UNIX then
 	constant M_UNAME = 76
 end ifdef
@@ -145,11 +145,11 @@ end ifdef
 -- On non Unix platforms, calling the machine_func() directly returns 0.
 
 public function uname()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom buf
 		sequence sbuf
 		integer maj, mine, build, plat
-		buf = allocate(148)
+		buf = machine:allocate(148)
 		poke4(buf, 148)
 		if c_func(M_UNAME, {buf}) then
 			maj = peek4u(buf+4)
@@ -201,8 +201,10 @@ public function uname()
 			end if
 			sbuf = append(sbuf, peek_string(buf+20))
 			sbuf &= {plat, build, mine, maj}
+			machine:free( buf )
 			return sbuf
 		else
+			machine:free( buf )
 			return {}
 		end if
 	elsifdef UNIX then
@@ -224,7 +226,7 @@ end function
 -- An **integer**, 1 if host system is a newer Windows (NT/2K/XP/Vista), else 0.
 
 public function is_win_nt()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		sequence s
 		s = uname()
 		return equal(s[1], "WinNT")
@@ -491,47 +493,4 @@ public procedure sleep(atom t)
 		machine_proc(M_SLEEP, t)
 	end if
 end procedure
-
---****
--- Signature:
--- <built-in> function include_paths(integer convert)
---
--- Description:
--- Returns the list of include paths, in the order in which they are searched
---
--- Parameters:
---    # ##convert## : an integer, nonzero to include converted path entries
---    that were not validated yet.
---
--- Returns:
---	A **sequence**, of strings, each holding a fully qualified include path.
---
--- Comments:
---
--- ##convert## is checked only under //Windows//. If a path has accented characters in it, then
--- it may or may not be valid to convert those to the OEM code page. Setting ##convert## to a nonzero value
--- will force conversion for path entries that have accents and which have not been checked to be valid yet.
--- The extra entries, if any, are returned at the end of the returned sequence.
---
--- The paths are ordered in the order they are searched:
--- # current directory
--- # configuration file,
--- # command line switches,
--- # EUINC
--- # a default based on EUDIR.
---
--- Example 1:
--- <eucode>
--- sequence s = include_paths(0)
--- -- s might contain
--- {
---   "/usr/euphoria/tests",
---   "/usr/euphoria/include",
---   "./include",
---   "../include"
--- }
--- </eucode>
---
--- See Also:
--- [[:eu.cfg]], [[:include]], [[:option_switches]]
 

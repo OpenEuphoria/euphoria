@@ -6,24 +6,22 @@
 namespace datetime
 
 include std/dll.e
-include std/error.e
 include std/get.e
 include std/machine.e
-include std/sequence.e
 include std/types.e
 
 ifdef LINUX then
-	constant gmtime_ = define_c_func(open_dll(""), "gmtime", {C_POINTER}, C_POINTER)
-	constant time_ = define_c_func(open_dll(""), "time", {C_POINTER}, C_INT)
+	constant gmtime_ = dll:define_c_func(dll:open_dll(""), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
+	constant time_ = dll:define_c_func(dll:open_dll(""), "time", {dll:C_POINTER}, dll:C_INT)
 elsifdef OSX then
-	constant gmtime_ = define_c_func(open_dll("libc.dylib"), "gmtime", {C_POINTER}, C_POINTER)
-	constant time_ = define_c_func(open_dll("libc.dylib"), "time", {C_POINTER}, C_INT)
+	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.dylib"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
+	constant time_ = dll:define_c_func(dll:open_dll("libc.dylib"), "time", {dll:C_POINTER}, dll:C_INT)
 elsifdef WIN32 then
-	constant gmtime_ = define_c_func(open_dll("msvcrt.dll"), "gmtime", {C_POINTER}, C_POINTER)
-	constant time_ = define_c_proc(open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {C_POINTER})
+	constant gmtime_ = dll:define_c_func(dll:open_dll("msvcrt.dll"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
+	constant time_ = dll:define_c_proc(dll:open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {dll:C_POINTER})
 elsifdef UNIX then
-	constant gmtime_ = define_c_func(open_dll("libc.so"), "gmtime", {C_POINTER}, C_POINTER)
-	constant time_ = define_c_func(open_dll("libc.so"), "time", {C_POINTER}, C_INT)
+	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.so"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
+	constant time_ = dll:define_c_func(dll:open_dll("libc.so"), "time", {dll:C_POINTER}, dll:C_INT)
 end ifdef
 
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
@@ -33,11 +31,11 @@ function time()
 		atom ptra, valhi, vallow, deltahi, deltalow
 		deltahi = 27111902
 		deltalow = 3577643008
-		ptra = allocate(8)
+		ptra = machine:allocate(8)
 		c_proc(time_, {ptra})
 		vallow = peek4u(ptra)
 		valhi = peek4u(ptra+4)
-		free(ptra)
+		machine:free(ptra)
 		vallow -= deltalow
 		valhi -= deltahi
 		if vallow < 0 then
@@ -46,7 +44,7 @@ function time()
 		end if
 		return floor(((valhi * power(2,32)) + vallow) / 10000000)
 	elsedef
-		return c_func(time_, {NULL})
+		return c_func(time_, {dll:NULL})
 	end ifdef
 end function
 
@@ -55,12 +53,12 @@ function gmtime(atom time)
 	atom timep, tm_p
 	integer n
 
-	timep = allocate(4)
+	timep = machine:allocate(4)
 	poke4(timep, time)
 	
 	tm_p = c_func(gmtime_, {timep})
 	
-	free(timep)
+	machine:free(timep)
 	
 	ret = repeat(0, 9)
 	n = 0
@@ -1004,7 +1002,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 				sequence got
 				integer epos
 				while spos <= length(val) do
-					if t_digit(val[spos]) then
+					if types:t_digit(val[spos]) then
 						exit
 					end if
 					spos += 1
@@ -1012,7 +1010,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 			    
 				epos = spos + 1
 				while epos <= length(val) and epos < spos + maxlen do
-					if not t_digit(val[epos]) then
+					if not types:t_digit(val[epos]) then
 						exit
 					end if
 					epos += 1
@@ -1021,8 +1019,8 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 				if spos > length(val) then
 					return -1
 				end if
-				got = value(val[spos .. epos-1], , GET_LONG_ANSWER)
-				if got[1] != GET_SUCCESS then
+				got = stdget:value(val[spos .. epos-1], , stdget:GET_LONG_ANSWER)
+				if got[1] != stdget:GET_SUCCESS then
 					return -1
 				end if
 
@@ -1041,7 +1039,7 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 	
 	-- Ensure no remaining digits in string.
 	while spos <= length(val) do
-		if t_digit(val[spos]) then
+		if types:t_digit(val[spos]) then
 			return -1
 		end if
 		spos += 1

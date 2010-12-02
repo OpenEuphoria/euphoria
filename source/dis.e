@@ -15,6 +15,7 @@ include std/map.e
 include dot.e
 include std/sort.e
 include std/cmdline.e
+include std/math.e
 
 include mode.e as mode
 include cominit.e
@@ -26,6 +27,7 @@ include reswords.e
 include symtab.e
 include scanner.e
 include fwdref.e
+include c_out.e
 
 include dox.e as dox
 
@@ -1502,32 +1504,53 @@ constant TEMP_USAGES = {
 	"T_UNKNOWN",
 	"T_USED"
 	}
+
+map:map gtypes = map:new()
+map:put( gtypes, TYPE_NULL, "TYPE_NULL" )
+map:put( gtypes, TYPE_INTEGER, "TYPE_INTEGER" )
+map:put( gtypes, TYPE_DOUBLE, "TYPE_DOUBLE" )
+map:put( gtypes, TYPE_ATOM, "TYPE_ATOM" )
+map:put( gtypes, TYPE_SEQUENCE, "TYPE_SEQUENCE" )
+map:put( gtypes, TYPE_OBJECT, "TYPE_OBJECT" )
+
 function format_symbol( sequence symbol )
 	if symbol[S_MODE] = M_TEMP then
 		symbol[S_USAGE] = TEMP_USAGES[symbol[S_USAGE]]
 	else
-		switch symbol[S_USAGE] with fallthru do
+		switch symbol[S_USAGE] do
 		case U_UNUSED then
 			symbol[S_USAGE] = "U_UNUSED"
-			break
 		case U_DELETED then
 			symbol[S_USAGE] = "U_DELETED"
-			break
-		case U_READ then
-		case U_WRITTEN then
+		case U_READ, U_WRITTEN then
 			symbol[S_USAGE] = USAGES[symbol[S_USAGE]]
-			break
 		case 3 then
 			symbol[S_USAGE] = "U_READ + U_WRITTEN"
-			break
 		case else
 			symbol[S_USAGE] = "Usage Unknown"
 		end switch
+		
+		if length( symbol ) >= S_TOKEN and symbol[S_TOKEN] = VARIABLE then
+			if length( symbol ) >= S_VTYPE then
+				integer vtype = symbol[S_VTYPE]
+				if vtype > 0 then
+					symbol[S_VTYPE] = sym_name( vtype )
+				else
+					symbol[S_VTYPE] = sprintf( "Unknown Type: %d", vtype )
+				end if
+			end if
+			if TRANSLATE then
+				symbol[S_GTYPE] = map:get( gtypes, symbol[S_GTYPE], sprintf( "Unknown GType: %d", symbol[S_GTYPE] ) )
+				symbol[S_ARG_TYPE] = map:get( gtypes, symbol[S_ARG_TYPE], sprintf( "Unknown GType: %d", symbol[S_ARG_TYPE] ) )
+				symbol[S_ARG_TYPE_NEW] = map:get( gtypes, symbol[S_ARG_TYPE_NEW], sprintf( "Unknown GType: %d", symbol[S_ARG_TYPE_NEW] ) )
+			end if
+		end if
 	end if
 	symbol[S_MODE] = MODES[symbol[S_MODE]]
 	if symbol[S_SCOPE] then
 		symbol[S_SCOPE] = SCOPES[symbol[S_SCOPE]]
 	end if
+	
 
 	return symbol
 end function
@@ -1604,33 +1627,55 @@ procedure save_il( sequence name )
 
 	st = open( sprintf("%shash", { name }), "wb" )
 	sequence bucket = repeat( "", length( buckets ) )
+	sequence end_size = repeat( "", length( buckets ) )
+	sequence bucket_reps = repeat( "", length( buckets ) ) 
+	for i = 1 to length( buckets ) do
+		integer size = 0
+		integer s = buckets[i]
+		while s do
+			size += 1
+			s = SymTab[s][S_SAMEHASH]
+		end while
+		end_size[i] = size
+	end for
 	used_buckets = 0
 	symcnt = 0
 	bucket_usage = {}
+	
 	for i = 1 to length( SymTab ) do
 		if length( SymTab[i] ) >= S_HASHVAL and SymTab[i][S_HASHVAL] then
-			if not find( SymTab[i][S_NAME], bucket[SymTab[i][S_HASHVAL]] ) then
-				bucket[SymTab[i][S_HASHVAL]] = append( bucket[SymTab[i][S_HASHVAL]], SymTab[i][S_NAME] )
+			integer h = SymTab[i][S_HASHVAL]
+			integer bx = find( SymTab[i][S_NAME], bucket[h] )
+			if not bx then
+				bucket[h] = append( bucket[h], SymTab[i][S_NAME] )
+				bucket_reps[h] &= 1
+			else
+				bucket_reps[h][bx] += 1
 			end if
 		end if
 	end for
 
 	for i = 1 to length( bucket ) do
-		bucket[i] = length(bucket[i]) & i & bucket[i]
+		for j = 1 to length( bucket[i] ) do
+			bucket[i][j] = sprintf( "[%d:%s]", {bucket_reps[i][j], bucket[i][j]})
+		end for
+		bucket[i] = sum(bucket_reps[i]) & i & bucket[i]
 	end for
+	
 	bucket = sort(bucket, DESCENDING)
 	bucket_usage = repeat(0, bucket[1][1])
+	puts(st, "Bucket size / hashval / Ending Size / hits : contents\n" )
 	for i = 1 to length( bucket ) do
 		if bucket[i][1] > 0 then
 			used_buckets += 1
 			symcnt += bucket[i][1]
 			bucket_usage[bucket[i][1]] += 1
-			printf( st, "%03d %05d: ", bucket[i][1..2] )
+			printf( st, "%5d %5d %5d %5d: ", bucket[i][1..2] & end_size[i] & bucket_hits[i] )
 			for j = 3 to length( bucket[i] ) do
 				if j > 3 then
 					puts( st, ", " )
 				end if
-				puts( st, bucket[i][j] )
+				printf( st, "%s", {bucket[i][j]} )
 			end for
 			puts( st, '\n' )
 		end if
@@ -1643,6 +1688,28 @@ procedure save_il( sequence name )
 		printf( st, "Symbols / bucket: %4.2f\n", symcnt / used_buckets)
 		for i = 1 to length(bucket_usage) do
 			printf( st, "Len %2d : %d\n", {i, bucket_usage[i]})
+		end for
+		
+		sequence hit_counts = {}
+		for i = 1 to length( bucket_hits ) do
+			integer hits = bucket_hits[i] + 1 -- could be 0
+			if length( hit_counts ) < hits then
+				hit_counts &= repeat( 0, hits - length( hit_counts ) )
+			end if
+			hit_counts[hits] += 1
+		end for
+		
+		for i = 1 to length( hit_counts ) do
+			hit_counts[i] = { i-1, hit_counts[i] }
+		end for
+		
+		puts( st, "\nBucket search frequency counts (hits : # buckets):\n" )
+-- 		hit_counts = sort( hit_counts )
+		for i = length( hit_counts ) to 1 by -1 do
+			if hit_counts[i][2] then
+				printf( st, "%6d: %d\n", hit_counts[i]  )
+			end if
+			
 		end for
 	end if
 
@@ -1657,16 +1724,6 @@ procedure InitBackEnd( object ignore )
     sequence missing = {}
     -- set up operations
     operation = repeat(-1, length(opnames))
-
-	while 2 <= length(Argv) do
-		if Argv[2][1] != '-' and
-		(match("dis", Argv[2]) = 1
-		or match( SLASH & "dis", Argv[2] ) ) then
-			exit
-		end if
-		Argv = eu:remove( Argv, 2, 2 )
-	end while
-	Argc = length(Argv)
 
 	if not TRANSLATE then
 		intoptions()

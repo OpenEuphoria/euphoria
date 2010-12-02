@@ -42,8 +42,6 @@ public include std/memconst.e
 -- biggest address on a 32-bit machine
 constant MAX_ADDR = power(2, 32)-1
 
-include std/error.e
-
 ifdef DATA_EXECUTE then
 	include std/machine.e
 end ifdef
@@ -89,9 +87,9 @@ export procedure deallocate(atom addr)
 			return
 		end if
 	end ifdef
-   	machine_proc(M_FREE, addr)
+   	machine_proc( memconst:M_FREE, addr)
 end procedure
-FREE_RID = routine_id("deallocate")
+memconst:FREE_RID = routine_id("deallocate")
 
 
 --****
@@ -706,6 +704,7 @@ public integer check_calls = 1
 --****
 -- === Safe memory access
 
+without warning strict
 --**
 -- Description: Add a block of memory to the list of safe blocks maintained
 -- by safe.e (the debug version of memory.e). The block starts at address a.
@@ -749,12 +748,12 @@ public integer check_calls = 1
 -- 
 -- See Also: 
 --   [[:unregister_block]], [[:safe.e]]
-without warning strict
+
 public procedure register_block(atom block_addr, atom block_len, integer protection )
 	-- Only implemented in safe.e
 end procedure
 
-
+without warning strict
 --**
 -- Remove a block of memory from the list of safe blocks maintained by safe.e
 -- (the debug version of memory.e).
@@ -777,11 +776,12 @@ end procedure
 -- 
 -- See Also:
 --   [[:register_block]], [[:safe.e]]
-without warning strict
+
 public procedure unregister_block(atom block_addr)
 	-- Only implemented in safe.e
 end procedure
 
+without warning strict
 --**
 -- Scans the list of registered blocks for any corruption.
 --
@@ -801,7 +801,7 @@ end procedure
 --
 -- See Also:
 -- [[:register_block]], [[:unregister_block]]
-without warning strict
+
 public function safe_address(atom start, integer len, positive_int action)
 	-- Only implemented in safe.e
 	return 1
@@ -889,7 +889,7 @@ with warning
 --**
 -- Returns 1 if the DEP executing data only memory would cause an exception
 export function dep_works()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return (DEP_really_works and use_DEP)
 	end ifdef
 
@@ -899,13 +899,13 @@ end function
 export atom VirtualFree_rid
 
 public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1 )
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if dep_works() then
 			c_func(VirtualFree_rid, { addr, size*wordsize, MEM_RELEASE })
 		else
-			machine_proc(M_FREE,addr)
+			machine_proc( memconst:M_FREE, addr)
 		end if
 	elsedef
-		machine_proc(M_FREE,addr)
+		machine_proc( memconst:M_FREE, addr)
 	end ifdef
 end procedure

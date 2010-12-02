@@ -43,8 +43,8 @@ atom xUser32
 
 public procedure sound( atom sound_type = SND_DEFAULT )
 	if not object(xMessageBeep) then
-		xUser32 = open_dll("user32.dll")
-		xMessageBeep   = define_c_proc(xUser32, "MessageBeep", {C_UINT})
+		xUser32 = dll:open_dll("user32.dll")
+		xMessageBeep   = dll:define_c_proc(xUser32, "MessageBeep", {C_UINT})
 	end if
     c_proc( xMessageBeep, { sound_type } )
 end procedure

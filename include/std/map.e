@@ -664,38 +664,41 @@ end function
 -- See Also:
 --		[[:remove]], [[:has]],  [[:nested_put]]
 
-public procedure put(map the_map_p, object the_key_p, object the_value_p, integer operation_p = PUT, integer trigger_p = 100 )
+public procedure put(map the_map_p, object the_key_p, object the_value_p, integer operation_p = map:PUT, integer trigger_p = 100 )
 	integer index_
 	integer bucket_
 	atom average_length_
 	integer from_
 
-	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
-		bucket_ = calc_hash(the_key_p,  length(ram_space[the_map_p][KEY_BUCKETS]))
-		index_ = find(the_key_p, ram_space[the_map_p][KEY_BUCKETS][bucket_])
+	sequence map_data = ram_space[the_map_p]
+	ram_space[the_map_p] = 0
+	if map_data[MAP_TYPE] = LARGEMAP then
+		bucket_ = calc_hash(the_key_p,  length(map_data[KEY_BUCKETS]))
+		index_ = find(the_key_p, map_data[KEY_BUCKETS][bucket_])
 		if index_ > 0 then
 			-- The the_value_p already exists.
 			switch operation_p do
 				case PUT then
-					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] = the_value_p
+					map_data[VALUE_BUCKETS][bucket_][index_] = the_value_p
 					
 				case ADD then
-					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] += the_value_p
+					map_data[VALUE_BUCKETS][bucket_][index_] += the_value_p
 					
 				case SUBTRACT then
-					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] -= the_value_p
+					map_data[VALUE_BUCKETS][bucket_][index_] -= the_value_p
 					
 				case MULTIPLY then
-					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] *= the_value_p
+					map_data[VALUE_BUCKETS][bucket_][index_] *= the_value_p
 					
 				case DIVIDE then
-					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] /= the_value_p
+					map_data[VALUE_BUCKETS][bucket_][index_] /= the_value_p
 					
 				case APPEND then
-					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] = append( ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_], the_value_p )
-					
+					sequence data = map_data[VALUE_BUCKETS][bucket_][index_]
+					data = append( data, the_value_p )
+					map_data[VALUE_BUCKETS][bucket_][index_] = data
 				case CONCAT then
-					ram_space[the_map_p][VALUE_BUCKETS][bucket_][index_] &= the_value_p
+					map_data[VALUE_BUCKETS][bucket_][index_] &= the_value_p
 					
 				case LEAVE then
 					-- Do nothing
@@ -705,6 +708,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 					crash("Unknown operation given to map.e:put()")
 					
 			end switch
+			ram_space[the_map_p] = map_data
 			return
 		end if
 
@@ -712,6 +716,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				crash("Inappropriate initial operation given to map.e:put()")
 		end if
 		if operation_p = LEAVE then
+			ram_space[the_map_p] = map_data
 			return
 		end if
 		
@@ -722,14 +727,16 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			the_value_p = { the_value_p }
 		end if
 
-		ram_space[the_map_p][IN_USE] += (length(ram_space[the_map_p][KEY_BUCKETS][bucket_]) = 0)
-		ram_space[the_map_p][ELEMENT_COUNT] += 1 -- elementCount		
-		ram_space[the_map_p][KEY_BUCKETS][bucket_] = append(ram_space[the_map_p][KEY_BUCKETS][bucket_], the_key_p)
-		ram_space[the_map_p][VALUE_BUCKETS][bucket_] = append(ram_space[the_map_p][VALUE_BUCKETS][bucket_], the_value_p)
-				
+		map_data[IN_USE] += (length(map_data[KEY_BUCKETS][bucket_]) = 0)
+		map_data[ELEMENT_COUNT] += 1 -- elementCount		
+		map_data[KEY_BUCKETS][bucket_] = append(map_data[KEY_BUCKETS][bucket_], the_key_p)
+		map_data[VALUE_BUCKETS][bucket_] = append(map_data[VALUE_BUCKETS][bucket_], the_value_p)
+		
+		ram_space[the_map_p] = map_data
 		if trigger_p > 0 then
-			average_length_ = ram_space[the_map_p][ELEMENT_COUNT] / ram_space[the_map_p][IN_USE]
+			average_length_ = map_data[ELEMENT_COUNT] / map_data[IN_USE]
 			if (average_length_ >= trigger_p) then
+				map_data = {}
 				rehash(the_map_p)
 			end if
 		end if
@@ -742,15 +749,15 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			-- We have to double check the free list whenever we have a hit on the key.
 			from_ = 1
 			while index_ > 0 with entry do
-				if ram_space[the_map_p][FREE_LIST][index_] = 1 then
+				if map_data[FREE_LIST][index_] = 1 then
 					exit
 				end if
 				from_ = index_ + 1
 			  entry
-				index_ = find(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
+				index_ = find(the_key_p, map_data[KEY_LIST], from_)
 			end while
 		else
-			index_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
+			index_ = find(the_key_p, map_data[KEY_LIST])
 		end if
 		
 		-- Did we find the key?
@@ -760,18 +767,20 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 					crash("Inappropriate initial operation given to map.e:put()")
 			end if
 			-- No, so add it.
-			index_ = find(0, ram_space[the_map_p][FREE_LIST])
+			index_ = find(0, map_data[FREE_LIST])
 			if index_ = 0 then
 				-- No room left, so now it becomes a large map.
+				ram_space[the_map_p] = map_data
+				map_data = {}
 				convert_to_large_map(the_map_p)
 				put(the_map_p, the_key_p, the_value_p, operation_p, trigger_p)
 				return
 			end if
 			
-			ram_space[the_map_p][KEY_LIST][index_] = the_key_p
-			ram_space[the_map_p][FREE_LIST][index_] = 1
-			ram_space[the_map_p][IN_USE] += 1
-			ram_space[the_map_p][ELEMENT_COUNT] += 1
+			map_data[KEY_LIST][index_] = the_key_p
+			map_data[FREE_LIST][index_] = 1
+			map_data[IN_USE] += 1
+			map_data[ELEMENT_COUNT] += 1
 			
 			if operation_p = APPEND then
 				the_value_p = { the_value_p }
@@ -783,25 +792,25 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		
 		switch operation_p do
 			case PUT then
-				ram_space[the_map_p][VALUE_LIST][index_] = the_value_p
+				map_data[VALUE_LIST][index_] = the_value_p
 				
 			case ADD then
-				ram_space[the_map_p][VALUE_LIST][index_] += the_value_p
+				map_data[VALUE_LIST][index_] += the_value_p
 				
 			case SUBTRACT then
-				ram_space[the_map_p][VALUE_LIST][index_] -= the_value_p
+				map_data[VALUE_LIST][index_] -= the_value_p
 				
 			case MULTIPLY then
-				ram_space[the_map_p][VALUE_LIST][index_] *= the_value_p
+				map_data[VALUE_LIST][index_] *= the_value_p
 				
 			case DIVIDE then
-				ram_space[the_map_p][VALUE_LIST][index_] /= the_value_p
+				map_data[VALUE_LIST][index_] /= the_value_p
 				
 			case APPEND then
-				ram_space[the_map_p][VALUE_LIST][index_] = append( ram_space[the_map_p][VALUE_LIST][index_], the_value_p )
+				map_data[VALUE_LIST][index_] = append( map_data[VALUE_LIST][index_], the_value_p )
 				
 			case CONCAT then
-				ram_space[the_map_p][VALUE_LIST][index_] &= the_value_p
+				map_data[VALUE_LIST][index_] &= the_value_p
 				
 			case LEAVE then
 				-- do nothing
@@ -811,6 +820,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				crash("Unknown operation given to map.e:put()")
 				
 		end switch
+		ram_space[the_map_p] = map_data
 		return
 		
 	end if

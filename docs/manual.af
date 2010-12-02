@@ -58,6 +58,50 @@
 := Mini-Guides
 :<<LEVELTOC level=1 depth=2>>
 
+:%%output=demos
+:== Bundled Demos
+:<<LEVELTOC level=2 depth=3>>
+../demo/allsorts.ex
+../demo/animal.ex
+../demo/ascii.ex
+../demo/buzz.ex
+../demo/callmach.ex
+../demo/color.ex
+../demo/csort.ex
+../demo/dep.exw
+../demo/eprint.ex
+../demo/eused.ex
+../demo/guru.ex
+../demo/hash.ex
+../demo/key.ex
+../demo/loaddb.ex
+../demo/mydata.ex
+../demo/news.ex
+../demo/pipes.ex
+../demo/queens.ex
+../demo/regexps.ex
+../demo/sanity.ex
+../demo/search.ex
+../demo/tree.ex
+../demo/where.ex
+../demo/win32/dsearch.exw
+../demo/win32/taskwire.exw
+../demo/win32/window.exw
+../demo/win32/winwire.exw
+../demo/unix/callc.ex
+../demo/unix/mylib.ex
+../demo/unix/qsort.ex
+../demo/net/chat_client.ex
+../demo/net/chat_server.ex
+../demo/net/google_tts.ex
+../demo/net/httpd.ex
+../demo/net/pastey.ex
+../demo/net/sock_client.ex
+../demo/net/sock_server.ex
+../demo/net/udp_client.ex
+../demo/net/udp_server.ex
+../demo/net/wget.ex
+
 ../docs/debug.txt
 ../docs/bind.txt
 ../docs/e2c.txt

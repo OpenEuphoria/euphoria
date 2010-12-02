@@ -132,8 +132,8 @@ public function encode(sequence in, integer wrap_column = 0)
 
 	-- TODO: This surely is not the most efficient way of handling this
 	if wrap_column > 0 then
-		result = breakup(result, wrap_column)
-		result = join(result, "\r\n")
+		result = stdseq:breakup(result, wrap_column)
+		result = stdseq:join(result, "\r\n")
 	end if
 
 	return result
@@ -156,7 +156,7 @@ public function decode(sequence in)
 	sequence ccha
 
 	-- TODO: Surely this is not the most efficient way of doing this
-	in = match_replace("\r\n", in, "")
+	in = search:match_replace("\r\n", in, "")
 
 	len = length(in)
 	if remainder(len, 4) != 0 then

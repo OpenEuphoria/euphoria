@@ -568,6 +568,7 @@ op_temp_ref[ARCTAN]           = NEW_REFERENCE
 op_temp_ref[LOG]              = NEW_REFERENCE
 op_temp_ref[GETS]             = NEW_REFERENCE
 op_temp_ref[GETENV]           = NEW_REFERENCE
+op_temp_ref[RAND]             = NEW_REFERENCE
 
 procedure cont11ii(integer op, boolean ii)
 -- if ii is TRUE then integer arg always produces integer result
@@ -700,15 +701,6 @@ export procedure emit_inline( sequence code )
 	Code &= code
 end procedure
 
-constant opZeroZero = {
-	NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
-	STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE, GOTO, GLABEL,
-	ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS,
-	DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
-	TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP, NOPSWITCH,
-	COVERAGE_LINE, COVERAGE_ROUTINE,
-	$
-	}
 export procedure emit_op(integer op)
 -- Emit a postfix operator.
 -- The cases have been sorted according to profile frequency.
@@ -729,7 +721,8 @@ export procedure emit_op(integer op)
 	last_op = op
 	last_pc = length(Code) + 1
 	-- 1 input, 0 outputs, can combine with previous op
-	if op = ASSIGN label "EMIT" then
+	switch op label "EMIT" do
+	case ASSIGN then
 		symtab_index temp = 0
 		if not TRANSLATE and
 				(previous_op = RHS_SUBS_CHECK
@@ -820,7 +813,7 @@ export procedure emit_op(integer op)
 			flush_temp( temp )
 		end if
 
-	elsif op = RHS_SUBS then
+	case RHS_SUBS then
 		b = Pop() -- subscript
 		c = Pop() -- sequence
 		target = NewTempSym() -- target
@@ -846,7 +839,7 @@ export procedure emit_op(integer op)
 		current_sequence = append(current_sequence, target)
 		flush_temp( Code[$-2] )
 
-	elsif op = PROC then  -- procedure, function and type calls
+	case PROC then -- procedure, function and type calls
 
 		assignable = FALSE -- assume for now
 		subsym = op_info1
@@ -890,7 +883,7 @@ export procedure emit_op(integer op)
 
 		end if
 
-	elsif op = PROC_FORWARD or op = FUNC_FORWARD then
+	case PROC_FORWARD, FUNC_FORWARD then
 		assignable = FALSE -- assume for now
 		integer real_op
 		if op = PROC_FORWARD then
@@ -920,12 +913,12 @@ export procedure emit_op(integer op)
 			emit_temp( c, NEW_REFERENCE )
 		end if
 		
-	elsif op = WARNING then
+	case WARNING then
 		assignable = FALSE
 	    a = Pop()
 		Warning(SymTab[a][S_OBJ], custom_warning_flag,"")
 
-	elsif op = INCLUDE_PATHS then
+	case INCLUDE_PATHS then
 		sequence paths
 
 		assignable = TRUE
@@ -944,7 +937,12 @@ export procedure emit_op(integer op)
 		op = last_op
 
 	-- 0 inputs, 0 outputs - note: parser may emit an extra word
-	elsif find(op, opZeroZero) then
+	case NOP1, NOP2, NOPWHILE, PRIVATE_INIT_CHECK, GLOBAL_INIT_CHECK,
+	STARTLINE, CLEAR_SCREEN, EXIT, RETRY, ENDWHILE, ELSE, GOTO, GLABEL,
+	ERASE_PRIVATE_NAMES, BADRETURNF, ERASE_SYMBOL, UPDATE_GLOBALS,
+	DISPLAY_VAR, CALL_BACK_RETURN, END_PARAM_CHECK,
+	TASK_YIELD, TASK_CLOCK_START, TASK_CLOCK_STOP, NOPSWITCH,
+	COVERAGE_LINE, COVERAGE_ROUTINE then
 		emit_opcode(op)
 		assignable = FALSE
 		if op = UPDATE_GLOBALS then
@@ -953,7 +951,7 @@ export procedure emit_op(integer op)
 		end if
 
 	-- 1 input, 0 outputs - special
-	elsif op = IF or op = WHILE then
+	case IF, WHILE then
 		a = Pop()
 		assignable = FALSE
 		-- AND and OR will have been short-circuited:
@@ -1000,7 +998,7 @@ export procedure emit_op(integer op)
 
 		end if
 
-	elsif op = INTEGER_CHECK then
+	case INTEGER_CHECK then
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
@@ -1021,7 +1019,7 @@ export procedure emit_op(integer op)
 		end if
 		clear_temp( Code[$-1] )
 
-	elsif op = SEQUENCE_CHECK then
+	case SEQUENCE_CHECK then
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
@@ -1045,7 +1043,7 @@ export procedure emit_op(integer op)
 		end if
 
 
-	elsif op = ATOM_CHECK then
+	case ATOM_CHECK then
 		assignable = FALSE
 		if previous_op = ASSIGN then
 			c = Code[$-1]
@@ -1054,8 +1052,8 @@ export procedure emit_op(integer op)
 				-- we might know the constant's value at compile time
 				if sequence( SymTab[c][S_OBJ] ) then
 					-- type check error!
-					ThisLine = ForwardLine
-					bp = forward_bp
+					ThisLine = ExprLine
+					bp = expr_bp
 					CompileErr( 346 )
 					
 				elsif SymTab[c][S_OBJ] = NOVALUE then
@@ -1087,7 +1085,8 @@ export procedure emit_op(integer op)
 		end if
 		clear_temp( Code[$-1] )
 
-	elsif op = RIGHT_BRACE_N then -- form a sequence of n items
+	case RIGHT_BRACE_N then
+	-- form a sequence of n items
 		n = op_info1
 		-- could optimize if they are all constants with known values
 		elements = {}
@@ -1121,9 +1120,9 @@ export procedure emit_op(integer op)
 		Push(c)
 
 	-- 3 inputs, 0 outputs
-	elsif op = ASSIGN_SUBS2 or -- can't change the op
-		  op = ASSIGN_SUBS or
-		  op = PASSIGN_SUBS then  -- can't change the op
+	case ASSIGN_SUBS2,      -- can't change the op
+		ASSIGN_SUBS, 
+		PASSIGN_SUBS then   -- can't change the op
 		b = Pop() -- rhs value
 		a = Pop() -- subscript
 		c = Pop() -- sequence
@@ -1157,7 +1156,7 @@ export procedure emit_op(integer op)
 		emit_addr(b) -- rhs value
 		assignable = FALSE
 
-	elsif op = LHS_SUBS or op = LHS_SUBS1 or op = LHS_SUBS1_COPY then
+	case LHS_SUBS, LHS_SUBS1, LHS_SUBS1_COPY then
 		-- left hand side multiple subscripts, one step
 		a = Pop() -- subs
 		lhs_var = Pop() -- sequence
@@ -1183,11 +1182,11 @@ export procedure emit_op(integer op)
 		assignable = FALSE  -- need to update current_sequence like in RHS_SUBS
 
 	-- 1 input, 1 output
-	elsif find(op, {RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT,
-					TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING}) then
+	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT,
+					TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING then
 		cont11ii(op, TRUE)
 
-	elsif op = UMINUS then
+	case UMINUS then
 		-- check for constant folding
 		a = Pop()
 
@@ -1230,16 +1229,15 @@ export procedure emit_op(integer op)
 			cont11ii(op, FALSE)
 		end if
 
-	elsif find(op, {LENGTH, GETC, SQRT, SIN, COS, TAN, ARCTAN, LOG, GETS,
-					GETENV}) then
+	case LENGTH, GETC, SQRT, SIN, COS, TAN, ARCTAN, LOG, GETS, GETENV then
 		cont11ii(op, FALSE)
 
-	elsif find(op, {IS_AN_INTEGER, IS_AN_ATOM, IS_A_SEQUENCE, IS_AN_OBJECT}) then
+	case IS_AN_INTEGER, IS_AN_ATOM, IS_A_SEQUENCE, IS_AN_OBJECT then
 		cont11ii(op, FALSE)
 		clear_temp( Code[$-1] )
 
 	-- special 1 input, 1 output - also emits CurrentSub
-	elsif op = ROUTINE_ID then
+	case ROUTINE_ID then
 		emit_opcode(op)
 		source = Pop()
 		if TRANSLATE then
@@ -1269,7 +1267,7 @@ export procedure emit_op(integer op)
 	-- 1 input, 1 outputs with jump address that might be patched.
 	-- Output value is not used by the next op, but same temp must
 	-- be used by SC2 ops.
-	elsif op = SC1_OR or op = SC1_AND then
+	case SC1_OR, SC1_AND then
 		emit_opcode(op)
 		emit_addr(Pop())
 		c = NewTempSym()
@@ -1279,8 +1277,8 @@ export procedure emit_op(integer op)
 		-- jump address to follow
 
 	-- 2 inputs, 0 outputs
-	elsif find(op, {SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
-					C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2}) then
+	case SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
+					C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2 then
 		emit_opcode(op)
 
 		b = Pop()
@@ -1292,11 +1290,11 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 2 inputs, 1 output
-	elsif find(op, {EQUALS, LESS, GREATER, NOTEQ, LESSEQ, GREATEREQ,
-					AND, OR, XOR, REMAINDER, AND_BITS, OR_BITS, XOR_BITS}) then
+	case EQUALS, LESS, GREATER, NOTEQ, LESSEQ, GREATEREQ,
+					AND, OR, XOR, REMAINDER, AND_BITS, OR_BITS, XOR_BITS then
 		cont21ii(op, TRUE)  -- both integer args => integer result
 
-	elsif op = PLUS then
+	case PLUS then -- elsif op = PLUS then
 		-- result could overflow int
 		b = Pop()
 		a = Pop()
@@ -1323,7 +1321,7 @@ export procedure emit_op(integer op)
 			cont21ii(op, FALSE)
 		end if
 
-	elsif op = rw:MULTIPLY then
+	case rw:MULTIPLY then
 			-- result could overflow int
 		b = Pop()
 		a = Pop()
@@ -1354,7 +1352,7 @@ export procedure emit_op(integer op)
 
 		end if
 
-	elsif op = rw:DIVIDE then
+	case rw:DIVIDE then
 		b = Pop()
 		if b > 0 and SymTab[b][S_MODE] = M_CONSTANT and equal(SymTab[b][S_OBJ], 2) then
 			op = DIV2
@@ -1368,7 +1366,7 @@ export procedure emit_op(integer op)
 			cont21ii(op, FALSE)
 		end if
 
-	elsif op = FLOOR then
+	case FLOOR then
 		if previous_op = rw:DIVIDE then
 			op = FLOOR_DIV
 			backpatch(length(Code) - 3, op)
@@ -1392,12 +1390,12 @@ export procedure emit_op(integer op)
 		-- but not FLOOR_DIV (x/-1)
 
 	-- 2 inputs, 1 output
-	elsif find(op, {MINUS, rw:APPEND, PREPEND, COMPARE, EQUAL,
+	case MINUS, rw:APPEND, PREPEND, COMPARE, EQUAL,
 					SYSTEM_EXEC, rw:CONCAT, REPEAT, MACHINE_FUNC, C_FUNC,
-					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE}) then
+					SPRINTF, TASK_CREATE, HASH, HEAD, TAIL, DELETE_ROUTINE then
 		cont21ii(op, FALSE)
 
-	elsif op = SC2_NULL then  -- correct the stack - we aren't emitting anything
+	case SC2_NULL then  -- correct the stack - we aren't emitting anything
 		c = Pop()
 		TempKeep(c)
 		b = Pop()  -- remove SC1's temp
@@ -1407,7 +1405,7 @@ export procedure emit_op(integer op)
 		last_pc = last_pc_backup
 
 	-- Same temp must be used by SC2 ops and SC1 ops.
-	elsif op = SC2_AND or op = SC2_OR then
+	case SC2_AND, SC2_OR then
 		emit_opcode(op)
 		emit_addr(Pop())
 		c = Pop()
@@ -1418,7 +1416,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 0 outputs
-	elsif find(op, {MEM_COPY, MEM_SET, PRINTF}) then
+	case MEM_COPY, MEM_SET, PRINTF then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()
@@ -1428,7 +1426,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output
-	elsif find(op, {RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN}) then
+	case RHS_SLICE, FIND, MATCH, FIND_FROM, MATCH_FROM, SPLICE, INSERT, REMOVE, OPEN then
 		emit_opcode(op)
 		c = Pop()
 		b = Pop()
@@ -1441,7 +1439,7 @@ export procedure emit_op(integer op)
 		emit_addr(c)
 
 	-- n inputs, 1 output
-	elsif op = CONCAT_N then     -- concatenate 3 or more items
+	case CONCAT_N then     -- concatenate 3 or more items
 		n = op_info1  -- number of items to concatenate
 		emit_opcode(CONCAT_N)
 		emit(n)
@@ -1454,7 +1452,7 @@ export procedure emit_op(integer op)
 		assignable = TRUE
 		Push(c)
 
-	elsif op = FOR then
+	case FOR then
 		c = Pop() -- increment
 		TempKeep(c)
 		ic = IsInteger(c)
@@ -1498,7 +1496,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 		-- loop var, jump addr will follow
 
-	elsif op = ENDFOR_GENERAL or op = ENDFOR_INT_UP1 then  -- all ENDFORs
+	case ENDFOR_GENERAL, ENDFOR_INT_UP1 then  -- all ENDFORs
 		emit_opcode(op) -- will be patched at runtime
 		a = Pop()
 		emit_addr(op_info2) -- address of top of loop
@@ -1509,7 +1507,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 3 inputs, 1 output
-	elsif op = ASSIGN_OP_SUBS or op = PASSIGN_OP_SUBS then
+	case ASSIGN_OP_SUBS, PASSIGN_OP_SUBS then
 		-- for x[i] op= expr
 		b = Pop()      -- rhs value, keep on stack
 		TempKeep(b)
@@ -1534,7 +1532,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 4 inputs, 0 outputs
-	elsif op = ASSIGN_SLICE or op = PASSIGN_SLICE then
+	case ASSIGN_SLICE, PASSIGN_SLICE then
 		emit_opcode(op)
 		b = Pop() -- rhs value
 		a = Pop() -- 2nd subs
@@ -1546,7 +1544,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- 4 inputs, 1 output
-	elsif op = REPLACE then
+	case REPLACE then
 		emit_opcode(op)
 
 		b = Pop()  -- source
@@ -1564,7 +1562,7 @@ export procedure emit_op(integer op)
 		assignable = TRUE
 
 	-- 4 inputs, 1 output
-	elsif op = ASSIGN_OP_SLICE or op = PASSIGN_OP_SLICE then
+	case ASSIGN_OP_SLICE, PASSIGN_OP_SLICE then
 		-- for x[i..j] op= expr
 		emit_opcode(op)
 
@@ -1597,14 +1595,14 @@ export procedure emit_op(integer op)
 		assignable = FALSE
 
 	-- special cases:
-	elsif op = CALL_PROC then
+	case CALL_PROC then
 		emit_opcode(op)
 		b = Pop()
 		emit_addr(Pop())
 		emit_addr(b)
 		assignable = FALSE
 
-	elsif op = CALL_FUNC then
+	case CALL_FUNC then
 		emit_opcode(op)
 		b = Pop()
 		emit_addr(Pop())
@@ -1614,18 +1612,18 @@ export procedure emit_op(integer op)
 		Push(c)
 		emit_addr(c)
 
-	elsif op = EXIT_BLOCK then
+	case EXIT_BLOCK then
 		emit_opcode( op )
 		emit_addr( Pop() )
 		assignable = FALSE
 
-	elsif op = RETURNP then
+	case RETURNP then
 		emit_opcode(op)
 		emit_addr(CurrentSub)
 		emit_addr(top_block())
 		assignable = FALSE
 
-	elsif op = RETURNF then
+	case RETURNF then
 		clear_temp( Top() )
 		flush_temps()
 		emit_opcode(op)
@@ -1634,12 +1632,12 @@ export procedure emit_op(integer op)
 		emit_addr(Pop())
 		assignable = FALSE
 
-	elsif op = RETURNT then
+	case RETURNT then
 		emit_opcode(op)
 		assignable = FALSE
 
-	elsif find(op, {DATE, TIME, SPACE_USED, GET_KEY, TASK_LIST,
-					COMMAND_LINE, OPTION_SWITCHES}) then
+	case DATE, TIME, SPACE_USED, GET_KEY, TASK_LIST,
+					COMMAND_LINE, OPTION_SWITCHES then
 		emit_opcode(op)
 		c = NewTempSym()
 		assignable = TRUE
@@ -1649,12 +1647,12 @@ export procedure emit_op(integer op)
 		Push(c)
 		emit_addr(c)
 
-	elsif find(op, {CLOSE, ABORT, CALL, DELETE_OBJECT}) then
+	case CLOSE, ABORT, CALL, DELETE_OBJECT then
 		emit_opcode(op)
 		emit_addr(Pop())
 		assignable = FALSE
 
-	elsif op = POWER then
+	case POWER then
 		-- result could overflow int
 		b = Pop()
 		a = Pop()
@@ -1672,13 +1670,13 @@ export procedure emit_op(integer op)
 		end if
 
 	-- (doesn't need) 1 input, 0 outputs
-	elsif op = TYPE_CHECK then
+	case TYPE_CHECK then
 		emit_opcode(op)
 		c = Pop()
 		assignable = FALSE
 
 	-- 0 inputs, 1 output, special op
-	elsif op = DOLLAR then
+	case DOLLAR then
 		if current_sequence[$] < 0 or SymTab[current_sequence[$]][S_SCOPE] = SC_UNDEFINED then
 			if lhs_ptr and length(current_sequence) = 1 then
 				c = PLENGTH
@@ -1706,14 +1704,14 @@ export procedure emit_op(integer op)
 		assignable = FALSE -- it wouldn't be assigned anyway
 
 	-- 0 inputs, 1 output
-	elsif op = TASK_SELF then
+	case TASK_SELF then
 		c = NewTempSym()
 		Push(c)
 		emit_opcode(op)
 		emit_addr(c)
 		assignable = TRUE
 
-	elsif op = SWITCH then
+	case SWITCH then
 		emit_opcode( op )
 		c = Pop()
 		b = Pop()
@@ -1724,14 +1722,14 @@ export procedure emit_op(integer op)
 --		emit_addr( 0 ) -- parser emits the else after return
 		assignable = FALSE
 
-	elsif op = CASE then
+	case CASE then
 		-- only for translator
 		emit_opcode( op )
 		emit( cg_stack[cgi] )  -- the case index
 		cgi -= 1
 
 	-- 0 inputs, 1 output
-	elsif op = PLATFORM then
+	case PLATFORM then
 		if BIND and shroud_only then
 			-- must check with backend/backendw/eub.exe for platform
 			c = NewTempSym()
@@ -1749,13 +1747,13 @@ export procedure emit_op(integer op)
 		end if
 
 	-- 1 input, 0 outputs
-	elsif find(op, {PROFILE, TASK_SUSPEND}) then
+	case PROFILE, TASK_SUSPEND then
 		a = Pop()
 		emit_opcode(op)
 		emit_addr(a)
 		assignable = FALSE
 
-	elsif op = TRACE then
+	case TRACE then
 		a = Pop()
 		if OpTrace then
 			-- only emit trace op in a "with trace" section
@@ -1770,10 +1768,10 @@ export procedure emit_op(integer op)
 		end if
 		assignable = FALSE
 
-	else
+	case else
 		InternalErr(259, {op})
 
-	end if
+	end switch
 
 	previous_op = op
 	inlined = 0

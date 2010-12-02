@@ -60,7 +60,9 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-
+#ifndef MAP_ANONYMOUS
+#define MAP_ANONYMOUS MAP_ANON
+#endif
 
 #ifndef LOCK_SH
 #define LOCK_SH  1 /* shared lock */
@@ -141,7 +143,8 @@ extern double eustart_time; /* from be_runtime.c */
 HINSTANCE winInstance;
 #endif
 
-int is_batch = 0; /* batch mode? Should press enter be displayed? 1=no, 0=yes */
+int is_batch = 0; /* batch mode? 1=no, 0=yes */
+int is_test  = 0; /* test mode? 1=no, 0=yes */
 char TempBuff[TEMP_SIZE]; /* buffer for error messages */
 
 int c_routine_next = 0;       /* index of next available element */
@@ -2171,10 +2174,14 @@ object DefineC(object x)
 	return c_routine_next++;
 }
 
+#ifdef EOSX
+#define CALLBACK_SIZE (108)
+#else
 #if __GNUC__ == 4
 #define CALLBACK_SIZE (96)
 #else
 #define CALLBACK_SIZE (80)
+#endif
 #endif
 
 #define EXECUTABLE_ALIGNMENT (4)
@@ -2217,7 +2224,7 @@ void set_page_to_read_execute_only(page_ptr page_addr) {
 #endif
 }
 
-void set_page_to_write(page_ptr page_addr) {
+void set_page_to_read_write_execute(page_ptr page_addr) {
 #ifdef EWINDOWS
 	static unsigned long oldprot;
 	static unsigned long * oldprotptr = &oldprot;
@@ -2324,36 +2331,36 @@ object CallBack(object x)
 
 	/* Now allocate memory that is executable or at least can be made to be ... */
 	
-		/*	Here allocate and manage memory for 4kB is a lot to use when you
-			only use 92B.  Memory is allocated by /pagesize/ bytes at a time.
-			So, we give pieces of this page on each call until there is not enough to complete
-			up to /CALLBACK_SIZE/ bytes.
-			*/
-		if (page_addr != NULL) {
-			if (page_offset < last_block_offset) {
-				// Grab next sub-block from the current block.
-				page_offset += call_increment;
-			} else {
-				// Allocate a new block
-				page_addr = new_page();
-				page_offset = 0;
-			}
+	/*	Here allocate and manage memory for 4kB is a lot to use when you
+		only use 92B.  Memory is allocated by /pagesize/ bytes at a time.
+		So, we give pieces of this page on each call until there is not enough to complete
+		up to /CALLBACK_SIZE/ bytes.
+		*/
+	if (page_addr != NULL) {
+		if (page_offset < last_block_offset) {
+			// Grab next sub-block from the current block.
+			page_offset += call_increment;
 		} else {
-			// Set up 'constants' and initial block allocation
-			call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
-			last_block_offset = (pagesize - 2 * call_increment);
-
-			page_addr = new_page(); //VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+			// Allocate a new block
+			page_addr = new_page();
 			page_offset = 0;
 		}
-		
-		copy_addr = page_addr + page_offset;
+	} else {
+		// Set up 'constants' and initial block allocation
+		call_increment = roundup(CALLBACK_SIZE, EXECUTABLE_ALIGNMENT);
+		last_block_offset = (pagesize - 2 * call_increment);
+
+		page_addr = new_page(); //VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
+		page_offset = 0;
+	}
+	
+	copy_addr = page_addr + page_offset;
 #	ifdef EWINDOWS		   
-		/* Assume we are running under some Windows that
-		   supports VirtualAlloc() always returning 0. 
-		   This has happened before in testing.  */
-		if (copy_addr == NULL)
-			copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
+	/* Assume we are running under some Windows that
+	   supports VirtualAlloc() always returning 0. 
+	   This has happened before in testing.  */
+	if (copy_addr == NULL)
+		copy_addr = (unsigned char *)EMalloc(CALLBACK_SIZE);	
 #	endif /* def EWINDOWS */
 
 
@@ -2365,7 +2372,7 @@ object CallBack(object x)
 	/* Copy memory of the template to the newly allocated memory.
 	 * First we have to make the memory writable.
 	 */
-	set_page_to_write(page_addr);
+	set_page_to_read_write_execute(page_addr);
     res = memcopy(copy_addr, CALLBACK_SIZE, (char *)addr, CALLBACK_SIZE);
 	if (res != 0) {
 		RTFatal("Internal error: CallBack memcopy failed (%d).", res);
@@ -2567,8 +2574,8 @@ object eu_info()
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
 	s1->base[5] = NewString(get_svn_revision());
-        s1->base[6] = NewDouble(eustart_time);
-        return MAKE_SEQ(s1);
+	s1->base[6] = NewDouble(eustart_time);
+	return MAKE_SEQ(s1);
 }
 
 object eu_uname()
@@ -2666,6 +2673,8 @@ object start_backend(object x)
 
 		if (stricmp(w, "-batch") == 0) {
 			is_batch = 1;
+		} else if (stricmp(w, "-test") == 0) {
+			is_test = 1;
 		}
 		EFree(w);
 	}
@@ -2696,44 +2705,53 @@ object machine(object opcode, object x)
 			case M_COMPLETE:
 				return MAKE_INT(COMPLETE_MAGIC);
 				break;
+				
 			case M_SET_T_COLOR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return SetTColor(x);
 				break;
+				
 			case M_SET_B_COLOR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return SetBColor(x);
 				break;
+				
 			case M_GRAPHICS_MODE:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Graphics_Mode(x);
 				break;
+				
 			case M_VIDEO_CONFIG:
 				return Video_config(); /* 0 args */
 				break;
+				
 			case M_CURSOR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Cursor(x);
 				break;
+				
 			case M_TEXTROWS:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return TextRows(x);
 				break;
+				
 			case M_WRAP:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Wrap(x);
 				break;
+				
 			case M_SCROLL:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return Scroll(x);
 				break;
+				
 			case M_WAIT_KEY:
 #if defined(EWINDOWS)
 				show_console();
@@ -2742,9 +2760,11 @@ object machine(object opcode, object x)
 					MainScreen();
 				return ATOM_0 + get_key(TRUE);
 				break;
+				
 			case M_ALLOC:
 				return user_allocate(x);
 				break;
+				
 			case M_FREE:
 				addr = (char *)get_pos_int("free", x);
 				if (addr != NULL) {
@@ -2752,77 +2772,96 @@ object machine(object opcode, object x)
 				}
 				return ATOM_0;
 				break;
+				
 			case M_SEEK:
 				return Seek(x);
 				break;
+				
 			case M_WHERE:
 				return Where(x);
 				break;
+				
 			case M_DIR:
 				return Dir(x);
 				break;
+				
 			case M_CURRENT_DIR:
 				return CurrentDir();
 				break;
+				
 			case M_GET_POSITION:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return GetPosition();
 				break;
+				
 			case M_GET_SCREEN_CHAR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return GetScreenChar(x);
 				break;
+				
 			case M_PUT_SCREEN_CHAR:
 				if (current_screen != MAIN_SCREEN)
 					MainScreen();
 				return PutScreenChar(x);
 				break;
+				
 			case M_SET_RAND:
 				return set_rand(x);
 				break;
+				
 			case M_GET_RAND:
 				return get_rand();
 				break;
+				
 			case M_CRASH_MESSAGE:
 				return crash_message(x);
 				break;
+				
 			case M_TICK_RATE:
 				return tick_rate(x);
 				break;
+				
 			case M_ALLOW_BREAK:
 				allow_break = get_int(x);
 				return ATOM_1;
 				break;
+				
 			case M_CHECK_BREAK:
 				temp = control_c_count;
 				control_c_count = 0;
 				return MAKE_INT(temp);
 				break;
+				
 			case M_MEM_COPY:
 				/* obsolete, but keep it */
 				x = (object)SEQ_PTR(x);
 				return memory_copy(*(((s1_ptr)x)->base+1),
-								   *(((s1_ptr)x)->base+2),
-								   *(((s1_ptr)x)->base+3));
+						*(((s1_ptr)x)->base+2),
+						*(((s1_ptr)x)->base+3));
 				break;
+				
 			case M_MEM_SET:
 				/* obsolete, but keep it */
 				x = (object)SEQ_PTR(x);
 				return memory_set(*(((s1_ptr)x)->base+1),
-								  *(((s1_ptr)x)->base+2),
-								  *(((s1_ptr)x)->base+3));
+						*(((s1_ptr)x)->base+2),
+						*(((s1_ptr)x)->base+3));
 				break;
+				
 			case M_A_TO_F64:
 				return atom_to_float64(x);
 				break;
+				
 			case M_A_TO_F32:
 				return atom_to_float32(x);
 				break;
+
 			case M_F64_TO_A:
 				return float_to_atom(x, 8);
 				break;
+				
 			case M_F32_TO_A:
 				return float_to_atom(x, 4);
 				break;
@@ -3022,6 +3061,7 @@ object machine(object opcode, object x)
 			case M_PCRE_GET_OVECTOR_SIZE:
 				return get_ovector_size(x);
 				break;
+
 			case M_EU_INFO:
 				return eu_info();
 

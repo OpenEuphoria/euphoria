@@ -15,6 +15,7 @@ ifdef not NOINET_TESTS then
 	test_true("get_url 3", length(content) = 2)
 	test_true("get_url 4", match("<TITLE>Example Web Page</TITLE>", "" & content[2]))
 
+	-- Test nested sequence post data
     sequence num = sprintf("%d", { rand_range(1000,10000) })
 	sequence data = {
 		{ "data", num }
@@ -29,6 +30,17 @@ ifdef not NOINET_TESTS then
     content = http_get("http://test.openeuphoria.org/post_test.txt", headers)
 	test_true("get_url post 3", length(content))
 	test_equal("get_url post 4", "data=" & num, content[2])
+
+	-- Test already encoded string
+    num = sprintf("%d", { rand_range(1000,10000) })
+	data = sprintf("data=%s", { num })
+    content = http_post("http://test.openeuphoria.org/post_test.ex", data)
+	test_true("get_url post 5", length(content))
+	test_equal("get_url post 6", "success", content[2])
+
+    content = http_get("http://test.openeuphoria.org/post_test.txt", headers)
+	test_true("get_url post 7", length(content))
+	test_equal("get_url post 8", "data=" & num, content[2])
 
 	-- multipart form data
 	sequence file_content = "Hello, World. This is an icon. I hope that this really works. I am not really sure but we will see"

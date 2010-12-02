@@ -232,6 +232,7 @@ extern unsigned default_heap;
 void show_console();
 
 extern int is_batch;
+extern int is_test;
 
 #ifndef LRESULT
 #define LRESULT long

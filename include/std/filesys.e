@@ -7,10 +7,9 @@
 
 namespace filesys
 
-include std/datetime.e as dt
+include std/datetime.e
 include std/dll.e
 include std/io.e
-include std/machine.e
 include std/machine.e
 include std/map.e
 include std/math.e
@@ -18,8 +17,9 @@ include std/search.e
 include std/sequence.e
 include std/sort.e
 include std/text.e
-include std/types.e
 include std/wildcard.e
+
+public include std/types.e
 
 ifdef UNIX then
 	include std/get.e -- for disk_size()
@@ -31,43 +31,43 @@ constant
 	M_CHDIR       = 63
 
 ifdef WIN32 then	
-	constant lib = open_dll("kernel32")
+	constant lib = dll:open_dll("kernel32")
 
 elsifdef LINUX then
-	constant lib = open_dll("")
+	constant lib = dll:open_dll("")
 
 elsifdef OSX then
-	constant lib = open_dll("libc.dylib")
+	constant lib = dll:open_dll("libc.dylib")
 
 elsifdef UNIX then
-	constant lib = open_dll("libc.so")
+	constant lib = dll:open_dll("libc.so")
 	
 end ifdef
 
 ifdef LINUX then
-	constant xStatFile = define_c_func(lib, "__xstat", {C_INT, C_POINTER, C_POINTER}, C_INT)
+	constant xStatFile = dll:define_c_func(lib, "__xstat", {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
 elsifdef UNIX then
-	constant xStatFile = define_c_func(lib, "stat", {C_POINTER, C_POINTER}, C_INT)
+	constant xStatFile = dll:define_c_func(lib, "stat", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
 end ifdef
 
 ifdef UNIX then
-	constant xMoveFile        = define_c_func(lib, "rename", {C_POINTER, C_POINTER}, C_INT)
+	constant xMoveFile        = dll:define_c_func(lib, "rename", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
 	--constant xDeleteFile      = define_c_func(lib, "remove", {C_POINTER}, C_LONG)
-	constant xDeleteFile      = define_c_func(lib, "unlink", {C_POINTER}, C_INT)
-	constant xCreateDirectory = define_c_func(lib, "mkdir", {C_POINTER, C_INT}, C_INT)
-	constant xRemoveDirectory = define_c_func(lib, "rmdir", {C_POINTER}, C_INT)
-	constant xGetFileAttributes = define_c_func(lib, "access", {C_POINTER, C_INT}, C_INT)
+	constant xDeleteFile      = dll:define_c_func(lib, "unlink", {dll:C_POINTER}, dll:C_INT)
+	constant xCreateDirectory = dll:define_c_func(lib, "mkdir", {dll:C_POINTER, dll:C_INT}, dll:C_INT)
+	constant xRemoveDirectory = dll:define_c_func(lib, "rmdir", {dll:C_POINTER}, dll:C_INT)
+	constant xGetFileAttributes = dll:define_c_func(lib, "access", {dll:C_POINTER, dll:C_INT}, dll:C_INT)
 elsifdef WIN32 then
-	constant xCopyFile         = define_c_func(lib, "CopyFileA",   {C_POINTER, C_POINTER, C_BOOL},
+	constant xCopyFile         = dll:define_c_func(lib, "CopyFileA",   {dll:C_POINTER, dll:C_POINTER, dll:C_BOOL},
 		C_BOOL)
-	constant xMoveFile         = define_c_func(lib, "MoveFileA",   {C_POINTER, C_POINTER}, C_BOOL)
-	constant xDeleteFile       = define_c_func(lib, "DeleteFileA", {C_POINTER}, C_BOOL)
-	constant xCreateDirectory  = define_c_func(lib, "CreateDirectoryA", 
+	constant xMoveFile         = dll:define_c_func(lib, "MoveFileA",   {dll:C_POINTER, dll:C_POINTER}, dll:C_BOOL)
+	constant xDeleteFile       = dll:define_c_func(lib, "DeleteFileA", {dll:C_POINTER}, dll:C_BOOL)
+	constant xCreateDirectory  = dll:define_c_func(lib, "CreateDirectoryA", 
 		{C_POINTER, C_POINTER}, C_BOOL)
-	constant xRemoveDirectory  = define_c_func(lib, "RemoveDirectoryA", {C_POINTER}, C_BOOL)
-	constant xGetFileAttributes= define_c_func(lib, "GetFileAttributesA", {C_POINTER}, C_INT) -- N.B DWORD return fails this.
-	constant xGetDiskFreeSpace = define_c_func(lib, "GetDiskFreeSpaceA", 
-		{C_POINTER, C_POINTER, C_POINTER, C_POINTER, C_POINTER}, C_BOOL)	 
+	constant xRemoveDirectory  = dll:define_c_func(lib, "RemoveDirectoryA", {dll:C_POINTER}, dll:C_BOOL)
+	constant xGetFileAttributes= dll:define_c_func(lib, "GetFileAttributesA", {dll:C_POINTER}, dll:C_INT) -- N.B DWORD return fails this.
+	constant xGetDiskFreeSpace = dll:define_c_func(lib, "GetDiskFreeSpaceA", 
+		{dll:C_POINTER, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER, dll:C_POINTER}, dll:C_BOOL)	 
 elsedef
 	constant xCopyFile          = -1
 	constant xMoveFile          = -1
@@ -311,7 +311,7 @@ public function dir(sequence name)
 	else
 		-- Find a SLASH character and break the name there resulting in
 		-- a directory and file name.
-		idx = rfind(SLASH, name)
+		idx = search:rfind(SLASH, name)
 		the_dir = name[1 .. idx]
 		the_name = name[idx+1 .. $]
 	end if
@@ -328,7 +328,7 @@ public function dir(sequence name)
 	-- Filter the directory contents returning only those items
 	-- matching name.
 	for i = 1 to length(dir_data) do
- 		if wildcard_file(the_name, dir_data[i][1]) then
+ 		if wildcard:wildcard_file(the_name, dir_data[i][1]) then
  				data = append(data, dir_data[i])
  		end if
 	end for
@@ -413,7 +413,7 @@ function default_dir(sequence path)
 		return d
 	else
 		-- sort by name
-		return sort(d)
+		return stdsort:sort(d)
 	end if
 end function
 
@@ -543,7 +543,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	ifdef not UNIX then
 		path_name = match_replace('/', path_name, '\\')
 	end ifdef
-	path_name = trim_tail(path_name, {' ', SLASH, '\n'})
+	path_name = text:trim_tail(path_name, {' ', SLASH, '\n'})
 	user_data[1] = path_name
 	
 	for i = 1 to length(d) do
@@ -627,13 +627,13 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 	end if
 	
 	if mkparent != 0 then
-		pos = rfind(SLASH, name)
+		pos = search:rfind(SLASH, name)
 		if pos != 0 then
 			ret = create_directory(name[1.. pos-1], mode, mkparent)
 		end if
 	end if
 	
-	pname = allocate_string(name)
+	pname = machine:allocate_string(name)
 
 	ifdef UNIX then
 		ret = not c_func(xCreateDirectory, {pname, mode})
@@ -685,14 +685,14 @@ end function
 
 public function delete_file(sequence name)
 
-	atom pfilename = allocate_string(name)
+	atom pfilename = machine:allocate_string(name)
 	integer success = c_func(xDeleteFile, {pfilename})
 		
 	ifdef UNIX then
 		success = not success
 	end ifdef
 	
-	free(pfilename)
+	machine:free(pfilename)
 
 	return success
 end function
@@ -1012,12 +1012,12 @@ public function remove_directory(sequence dir_name, integer force=0)
 			end if
 		end for
 	end ifdef
-	pname = allocate_string(dir_name)
+	pname = machine:allocate_string(dir_name)
 	ret = c_func(xRemoveDirectory, {pname})
 	ifdef UNIX then
 			ret = not ret 
 	end ifdef
-	free(pname)
+	machine:free(pname)
 	return ret
 end function
 
@@ -1126,10 +1126,10 @@ public function pathinfo(sequence path, integer std_slash = 0)
 			elsedef
 			sequence from_slash = "/"
 			end ifdef
-			dir_name = match_replace(from_slash, dir_name, std_slash)
+			dir_name = search:match_replace(from_slash, dir_name, std_slash)
 		else
-			dir_name = match_replace("\\", dir_name, std_slash)
-			dir_name = match_replace("/", dir_name, std_slash)
+			dir_name = search:match_replace("\\", dir_name, std_slash)
+			dir_name = search:match_replace("/", dir_name, std_slash)
 		end if
 	end if
 
@@ -1200,7 +1200,7 @@ public function pathname(sequence path)
 	integer stop
 	
 	data = canonical_path(path)
-	stop = rfind(SLASH, data)
+	stop = search:rfind(SLASH, data)
 	
 	return data[1 .. stop - 1]
 
@@ -1638,7 +1638,7 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	
 	-- The first pass is to see if the parameter begins with any of the base paths.
 	for i = 1 to length(base_paths) do
-		if begins(base_paths[i], expanded_path) then
+		if search:begins(base_paths[i], expanded_path) then
 			-- Found one, so strip it off and return the remainder.
 			return expanded_path[length(base_paths[i]) + 1 .. $]
 		end if
@@ -1653,18 +1653,18 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	end ifdef
 	
 	-- Separate the current dir into its component directories.
-	base_paths = split(base_paths[$], SLASH)
+	base_paths = stdseq:split(base_paths[$], SLASH)
 	-- Separate full given path into its components.
-	expanded_path = split(expanded_path, SLASH)
+	expanded_path = stdseq:split(expanded_path, SLASH)
 	
 	-- locate where the two paths begin to get different.
-	for i = 1 to min({length(expanded_path), length(base_paths) - 1}) do
+	for i = 1 to math:min({length(expanded_path), length(base_paths) - 1}) do
 		if not equal(expanded_path[i], base_paths[i]) then
 			-- Create a new path by backing up from the current dir to
 			-- the point of difference and tacking on the remainder of the
 			-- parameter's path.
 			expanded_path = repeat("..", length(base_paths) - i) & expanded_path[i .. $]
-			expanded_path = join(expanded_path, SLASH)
+			expanded_path = stdseq:join(expanded_path, SLASH)
 			if length(expanded_path) < length(orig_path) then
 				-- If the result is actually smaller then we abbreviated it.
 		  		return expanded_path
@@ -1780,9 +1780,9 @@ public function file_exists(object name)
 		return r > 0
 
 	elsifdef UNIX then
-		atom pName = allocate_string(name)
+		atom pName = machine:allocate_string(name)
 		atom r = c_func(xGetFileAttributes, {pName, 0})
-		free(pName)
+		machine:free(pName)
 
 		return r = 0
 
@@ -1807,7 +1807,7 @@ public function file_timestamp(sequence fname)
 	object d = dir(fname)
 	if atom(d) then return -1 end if
 	
-	return dt:new(d[1][D_YEAR], d[1][D_MONTH], d[1][D_DAY],
+	return datetime:new(d[1][D_YEAR], d[1][D_MONTH], d[1][D_DAY],
 		d[1][D_HOUR], d[1][D_MINUTE], d[1][D_SECOND])
 end function
 
@@ -1915,15 +1915,15 @@ public function rename_file(sequence old_name, sequence new_name, integer overwr
 	end if
 	
 	
-	psrc = allocate_string(old_name)
-	pdest = allocate_string(new_name)
+	psrc = machine:allocate_string(old_name)
+	pdest = machine:allocate_string(new_name)
 	ret = c_func(xMoveFile, {psrc, pdest})
 		
 	ifdef UNIX then
 		ret = not ret 
 	end ifdef
 		
-	free({pdest, psrc})
+	machine:free({pdest, psrc})
 	
 	if overwrite then
 		if not ret then
@@ -2002,27 +2002,27 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	
 
 	ifdef UNIX then
-		psrcbuf = allocate(stat_buf_size)
-		psrc = allocate_string(src)
+		psrcbuf = machine:allocate(stat_buf_size)
+		psrc = machine:allocate_string(src)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
- 			free({psrcbuf, psrc})
+ 			machine:free({psrcbuf, psrc})
  			return 0
 		end if
 		
-		pdestbuf = allocate(stat_buf_size)
-		pdest = allocate_string(dest)
+		pdestbuf = machine:allocate(stat_buf_size)
+		pdest = machine:allocate_string(dest)
 		ret = xstat(pdest, pdestbuf)
 		if ret then
 			-- Assume destination doesn't exist
 			atom pdir
 			if length(dirname(dest)) = 0 then
-				pdir = allocate_string(current_dir())
+				pdir = machine:allocate_string(current_dir())
 			else
-				pdir = allocate_string(dirname(dest))
+				pdir = machine:allocate_string(dirname(dest))
 			end if
 			ret = xstat(pdir, pdestbuf)
-			free(pdir)
+			machine:free(pdir)
 		end if
 		
 		if not ret and not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
@@ -2032,13 +2032,13 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			if ret then
 				ret = delete_file(src)
 			end if
- 			free({psrcbuf, psrc, pdestbuf, pdest})
+ 			machine:free({psrcbuf, psrc, pdestbuf, pdest})
  			return (not ret)
 		end if
 		
 	elsedef		
-		psrc = allocate_string(src)
-		pdest = allocate_string(dest)
+		psrc  = machine:allocate_string(src)
+		pdest = machine:allocate_string(dest)
 	end ifdef
 
 	if overwrite then
@@ -2051,9 +2051,9 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	
 	ifdef UNIX then
 		ret = not ret 
-		free({psrcbuf, pdestbuf})
+		machine:free({psrcbuf, pdestbuf})
 	end ifdef
-	free({pdest, psrc})
+	machine:free({pdest, psrc})
 	
 	if overwrite then
 		if not ret then
@@ -2191,18 +2191,18 @@ public function locate_file(sequence filename, sequence search_list = {}, sequen
 		
 		extra_paths = getenv("USERPATH")
 		if sequence(extra_paths) then
-			extra_paths = split(extra_paths, PATHSEP)
+			extra_paths = stdseq:split(extra_paths, PATHSEP)
 			search_list &= extra_paths
 		end if
 		
 		extra_paths = getenv("PATH")
 		if sequence(extra_paths) then
-			extra_paths = split(extra_paths, PATHSEP)
+			extra_paths = stdseq:split(extra_paths, PATHSEP)
 			search_list &= extra_paths
 		end if
 	else
 		if integer(search_list[1]) then
-			search_list = split(search_list, PATHSEP)
+			search_list = stdseq:split(search_list, PATHSEP)
 		end if
 	end if
 
@@ -2300,11 +2300,11 @@ public function disk_metrics(object disk_path)
 			dev_t_size = 4
 		end ifdef
 
-		psrc = allocate_string(disk_path)
-		psrcbuf = allocate(stat_buf_size)
+		psrc    = machine:allocate_string(disk_path)
+		psrcbuf = machine:allocate(stat_buf_size)
 		ret = xstat(psrc,psrcbuf)
 		bytes_per_cluster = peek4s(psrcbuf+stat_t_offset)
-		free({psrcbuf, psrc})
+		machine:free({psrcbuf, psrc})
 		if ret then
 			-- failure
 			return result 
@@ -2511,7 +2511,7 @@ public function dir_size(sequence dir_path, integer count_all = 0)
 	
 	fc = file_counters[$]
 	file_counters = file_counters[1 .. $-1]
-	fc[COUNT_TYPES] = sort(fc[COUNT_TYPES])
+	fc[COUNT_TYPES] = stdsort:sort(fc[COUNT_TYPES])
 
 	return fc
 end function
@@ -2545,9 +2545,10 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  ? temp_file("/usr/space", "myapp", "tmp") --> /usr/space/myapp736321.tmp
---  ? temp_file() --> /tmp/277382._T_
---  ? temp_file("/users/me/abc.exw") --> /users/me/992831._T_
+--  sequence x
+--  x = temp_file("/usr/space", "myapp", "tmp") --> /usr/space/myapp736321.tmp
+--  x = temp_file() --> /tmp/277382._T_
+--  x = temp_file("/users/me/abc.exw") --> /users/me/992831._T_
 -- </eucode>
 
 public function temp_file(sequence temp_location = "", sequence temp_prefix = "", sequence temp_extn = "_T_", integer reserve_temp = 0)
@@ -2596,9 +2597,12 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 		temp_location &= SLASH
 	end if
 	
+	if length(temp_extn) and temp_extn[1] != '.' then
+		temp_extn = '.' & temp_extn
+	end if
 	
 	while 1 do
-		randname = sprintf("%s%s%06d.%s", {temp_location, temp_prefix, rand(1_000_000) - 1, temp_extn})
+		randname = sprintf("%s%s%06d%s", {temp_location, temp_prefix, rand(1_000_000) - 1, temp_extn})
 		if not file_exists( randname ) then
 			exit
 		end if
@@ -2611,7 +2615,7 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 				return ""
 			end if
 		end if
-		write_file(randname, "")
+		io:write_file(randname, "")
 	end if
 	
 	return randname
@@ -2648,11 +2652,12 @@ end function
 -- Example 1:
 -- <eucode>
 --  -- Example values. The exact values depend on the contents of the file.
---  ? checksum("myfile", 1) --> {92837498}
---  ? checksum("myfile", 2) --> {1238176, 87192873}
---  ? checksum("myfile", 2,,1) --> "0012E480 05327529"
---  ? checksum("myfile", 4) --> {23448, 239807, 79283749, 427370}
---  ? checksum("myfile")    --> {23448, 239807, 79283749, 427370} -- default
+--  include std/console.e
+--  display( checksum("myfile", 1) ) --> {92837498}
+--  display( checksum("myfile", 2) ) --> {1238176, 87192873}
+--  display( checksum("myfile", 2,,1)) --> "0012E480 05327529"
+--  display( checksum("myfile", 4) ) --> {23448, 239807, 79283749, 427370}
+--  display( checksum("myfile") )    --> {23448, 239807, 79283749, 427370} -- default
 -- </eucode>
 
 public function checksum(sequence filename, integer size = 4, integer usename = 0, integer return_text = 0)
@@ -2690,7 +2695,7 @@ public function checksum(sequence filename, integer size = 4, integer usename = 
 		nhit = 0
 		nmiss = 0
 		hits = {0,0}
-		fx = hash(filename, HSIEH32) -- Get a hash value for the whole name.
+		fx = hash(filename, map:HSIEH32) -- Get a hash value for the whole name.
 		while find(0, hits) do
 			-- find next character to use.
 			nhit += 1
@@ -2717,7 +2722,7 @@ public function checksum(sequence filename, integer size = 4, integer usename = 
 		-- Process the file, one set of bytes at a time
 		-- The size of the byte set is dependant on the file length and the check sum length requested,
 		-- and it is some value between 7 and 14 bytes long.
-		data = repeat(0, remainder( hash(jx * jx / size , HSIEH32), 8) + 7)
+		data = repeat(0, remainder( hash(jx * jx / size , map:HSIEH32), 8) + 7)
 		
 	
 		while data[1] != -1 with entry do
@@ -2728,7 +2733,7 @@ public function checksum(sequence filename, integer size = 4, integer usename = 
 			-- Change the index offset determinant for the next byte.
 			
 			-- flip some bits in the array, based on the byte set and current hash.
-			cs[ix] = xor_bits(cs[ix], hash(data, HSIEH32))
+			cs[ix] = xor_bits(cs[ix], hash(data, map:HSIEH32))
 			hits[ix] += 1
 							
 		entry

@@ -5,10 +5,8 @@
 
 namespace locale
 
-include std/convert.e
 include std/datetime.e as dt
 include std/dll.e
-include std/error.e
 include std/filesys.e
 include std/io.e
 include std/lcid.e as lcid
@@ -25,7 +23,7 @@ include std/text.e
 --
 ------------------------------------------------------------------------------------------
 
-constant P = C_POINTER, I = C_INT
+constant P = dll:C_POINTER, I = dll:C_INT
 
 ------------------------------------------------------------------------------------------
 --
@@ -136,21 +134,21 @@ public function lang_load(sequence filename)
 	keylang = map:new()
 	altlang = map:new()
 	cont = 0
-	filename = defaultext(filename, "lng")
+	filename = filesys:defaultext(filename, "lng")
 
 	if sequence(lang_path) and length(lang_path) > 0 then
 		sequence tempname 
-		tempname = locate_file(filename, {lang_path})
+		tempname = filesys:locate_file(filename, {lang_path})
 		if equal(tempname, filename) then
-			filename = locate_file(filename)
+			filename = filesys:locate_file(filename)
 		else
 			filename = tempname
 		end if
 	else
-		filename = locate_file(filename)
+		filename = filesys:locate_file(filename)
 	end if
 
-	lines = read_lines(filename)
+	lines = io:read_lines(filename)
 	if atom(lines) then
 		return 0  -- Language maps unchanged.
 	end if
@@ -159,7 +157,7 @@ public function lang_load(sequence filename)
 		
 		if cont then
 
-			line = trim_tail(lines[i])
+			line = text:trim_tail(lines[i])
 			if line[$] = '&' then
 				msg &= line[1..$-1] & '\n'
 			else
@@ -169,7 +167,7 @@ public function lang_load(sequence filename)
 				cont = 0
 			end if
 		else
-			line = trim(lines[i])
+			line = text:trim(lines[i])
 			if length(line) = 0 then
 				continue
 			end if
@@ -187,15 +185,15 @@ public function lang_load(sequence filename)
 				continue
 			end if
 			
-			key = trim(line[1..delim-1])
+			key = text:trim(line[1..delim-1])
 			if line[$] = '&' then
 				cont = 1
-				msg = trim(line[delim+1..$-1])
+				msg = text:trim(line[delim+1..$-1])
 				if length(msg) > 0 then
 					msg &= '\n'
 				end if
 			else
-				msg = trim(line[delim+1..$])
+				msg = text:trim(line[delim+1..$])
 				map:put(keylang, key, msg)
 				map:put(altlang, msg, key)
 			end if
@@ -279,7 +277,7 @@ end function
 -- 		[[:set]], [[:lang_load]]
 
 public function translate(sequence word, object langmap = 0, object defval="", integer mode = 0)
-	if equal(defval, PINF) then
+	if equal(defval, mathcons:PINF) then
 		defval = word
 	end if
 	
@@ -340,14 +338,14 @@ end function
 public function trsprintf(sequence fmt, sequence data, object langmap = 0)
 	for i = 1 to length(data) do
 		if sequence(data[i]) then
-			data[i] = translate(data[i], langmap, PINF)
-			if begins("__", data[i]) then
+			data[i] = translate(data[i], langmap, mathcons:PINF)
+			if search:begins("__", data[i]) then
 				data[i] = data[i][3 .. $]
 			end if
 		end if
 	end for
-	fmt = translate(fmt, langmap, PINF)
-	if begins("__", fmt) then
+	fmt = translate(fmt, langmap, mathcons:PINF)
+	if search:begins("__", fmt) then
 		fmt = fmt[3 .. $]
 	end if
 
@@ -361,7 +359,7 @@ end function
 --
 ------------------------------------------------------------------------------------------
 
-ifdef WIN32 then
+ifdef WINDOWS then
 constant
 	lib = open_dll("MSVCRT.DLL"),
 	lib2 = open_dll("KERNEL32.DLL"),
@@ -391,11 +389,11 @@ constant
 
 elsifdef LINUX then
 constant
-	lib = open_dll(""),
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
+	lib = dll:open_dll(""),
+	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
 	f_strfnum = -1,
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+	f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+	f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
 	LC_ALL      = 6,
 --	LC_CTYPE    = 0,
 	LC_NUMERIC  = 1,
@@ -407,11 +405,11 @@ constant
 
 elsifdef FREEBSD or SUNOS then
 constant
-	lib = open_dll("libc.so"),
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
+	lib = dll:open_dll("libc.so"),
+	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
 	f_strfnum = -1,
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+	f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+	f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
 	LC_ALL      = 0,
 --	LC_COLLATE  = 1,
 --	LC_CTYPE    = 2,
@@ -423,11 +421,11 @@ constant
 
 elsifdef OSX then
 constant
-	lib = open_dll("libc.dylib"),
-	f_strfmon = define_c_func(lib, "strfmon", {P, I, P, C_DOUBLE}, I),
+	lib = dll:open_dll("libc.dylib"),
+	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
 	f_strfnum = -1,
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+	f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+	f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
 	LC_ALL      = 0,
 --	LC_COLLATE  = 1,
 -- 	LC_CTYPE    = 2,
@@ -487,19 +485,19 @@ public function set(sequence new_locale)
 	sequence nlocale
 	
 	nlocale = lcc:decanonical(new_locale)
-	lAddr_localename = allocate_string(nlocale)
+	lAddr_localename = machine:allocate_string(nlocale)
 	ign = c_func(f_setlocale, {LC_MONETARY, lAddr_localename})
 	ign = c_func(f_setlocale, {LC_NUMERIC, lAddr_localename})
 	ign = c_func(f_setlocale, {LC_ALL, lAddr_localename})
-	free(lAddr_localename)
+	machine:free(lAddr_localename)
 	
 	if sequence(lang_path) then
 		-- Note: Failure to update language map does not fail this function.
 		def_lang = lang_load(nlocale)
 	end if
 
-	ign = (ign != NULL)
-	ifdef WIN32 then
+	ign = (ign != dll:NULL)
+	ifdef WINDOWS then
 		if ign then
 			current_locale = new_locale
 		end if
@@ -520,13 +518,13 @@ public function get()
 	sequence r
 	atom p
 
-	p = c_func(f_setlocale, {LC_ALL, NULL})
-	if p = NULL then
+	p = c_func(f_setlocale, {LC_ALL, dll:NULL})
+	if p = dll:NULL then
 		return ""
 	end if
 
 	r = peek_string(p)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if equal(lcc:decanonical(r), lcc:decanonical(current_locale)) then
 			return current_locale
 		end if
@@ -560,18 +558,18 @@ public function money(object amount)
 
 	if f_strfmon != -1 then
 		ifdef UNIX then
-			pResult = allocate(4 * 160)
-			pTmp = allocate_string("%n")
+			pResult = machine:allocate(4 * 160)
+			pTmp = machine:allocate_string("%n")
 			c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
-		elsifdef WIN32 then
-			pResult = allocate(4 * 160)
-			pTmp = allocate_string(sprintf("%.8f", {amount}))
+		elsifdef WINDOWS then
+			pResult = machine:allocate(4 * 160)
+			pTmp = machine:allocate_string(sprintf("%.8f", {amount}))
 			c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
 		end ifdef
 	
 		result = peek_string(pResult)
-		free(pResult)
-		free(pTmp)
+		machine:free(pResult)
+		machine:free(pTmp)
 	
 		return result
 	else
@@ -603,29 +601,29 @@ public function number(object num)
 
 	ifdef UNIX then
 		if f_strfmon != -1 then
-			pResult = allocate(4 * 160)
+			pResult = machine:allocate(4 * 160)
 			if integer(num) then
-				pTmp = allocate_string("%!.0n")
+				pTmp = machine:allocate_string("%!.0n")
 			else
-				pTmp = allocate_string("%!n")
+				pTmp = machine:allocate_string("%!n")
 			end if
 			c_func(f_strfmon, {pResult, 4 * 160, pTmp, num})
 		else
 			return text:format("[,,]", num)
 		end if
 		
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		atom lpFormat
 		if f_strfnum != -1 then
-			pResult = allocate(4 * 160)
+			pResult = machine:allocate(4 * 160)
 			if integer(num) then
-				pTmp = allocate_string(sprintf("%d", {num}))
-				-- lpFormat must not only be allocated but completely populated
+				pTmp = machine:allocate_string(sprintf("%d", {num}))
+				-- lpFormat must not only be machine:allocated but completely populated
 				-- with values from the current locale.
 				lpFormat = NULL
 			else
 				lpFormat = NULL
-				pTmp = allocate_string(sprintf("%.15f", {num}))
+				pTmp = machine:allocate_string(sprintf("%.15f", {num}))
 			end if
 			c_func(f_strfnum, {lcid:get_lcid(get()), 0, pTmp, lpFormat, pResult, 4 * 160})
 		else
@@ -637,8 +635,8 @@ public function number(object num)
 	end ifdef
 
 	result = peek_string(pResult)
-	free(pResult)
-	free(pTmp)
+	machine:free(pResult)
+	machine:free(pTmp)
 
 	-- Assumption: All locales remove trailing zeros and decimal point from integers
 	integer is_int = integer(num)
@@ -679,18 +677,18 @@ public function number(object num)
 	return result
 end function
 
-function mk_tm_struct(dt:datetime dtm)
+function mk_tm_struct(datetime:datetime dtm)
 	atom pDtm
 
-	pDtm = allocate(36)
+	pDtm = machine:allocate(36)
 	poke4(pDtm,    dtm[SECOND])        -- int tm_sec
 	poke4(pDtm+4,  dtm[MINUTE])        -- int tm_min
 	poke4(pDtm+8,  dtm[HOUR])          -- int tm_hour
 	poke4(pDtm+12, dtm[DAY])           -- int tm_mday
 	poke4(pDtm+16, dtm[MONTH] - 1)     -- int tm_mon
 	poke4(pDtm+20, dtm[YEAR] - 1900)   -- int tm_year
-	poke4(pDtm+24, dt:weeks_day(dtm) - 1)    -- int tm_wday
-	poke4(pDtm+28, dt:years_day(dtm))        -- int tm_yday
+	poke4(pDtm+24, datetime:weeks_day(dtm) - 1)    -- int tm_wday
+	poke4(pDtm+28, datetime:years_day(dtm))        -- int tm_yday
 	poke4(pDtm+32, 0)                  -- int tm_isdst
 
 	return pDtm
@@ -708,29 +706,29 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? datetime("Today is a %A",dt:now())
+-- ? datetime("Today is a %A",datetime:now())
 -- </eucode>
 --
 -- See Also:
 --   datetime:[[:format]]
 
-public function datetime(sequence fmt, dt:datetime dtm)
+public function datetime(sequence fmt, datetime:datetime dtm)
 	atom pFmt, pRes, pDtm
 	sequence res
 
 	if f_strftime != -1 then
 		pDtm = mk_tm_struct(dtm)
-		pFmt = allocate_string(fmt)
-		pRes = allocate(1024)
+		pFmt = machine:allocate_string(fmt)
+		pRes = machine:allocate(1024)
 		c_func(f_strftime, {pRes, 256, pFmt, pDtm})
 		res = peek_string(pRes)
-		free(pRes)
-		free(pFmt)
-		free(pDtm)
+		machine:free(pRes)
+		machine:free(pFmt)
+		machine:free(pDtm)
 	else
 		res = date()
 		res[1] += 1900
-		res = dt:format(res[1..6], fmt)
+		res = datetime:format(res[1..6], fmt)
 	end if
 	
 	return res

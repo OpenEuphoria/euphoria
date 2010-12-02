@@ -16,6 +16,7 @@ include global.e
 include reswords.e
 include msgtext.e
 include coverage.e
+include scanner.e
 
 integer Errors = 0 -- number of errors detected during compile
 
@@ -30,12 +31,14 @@ export sequence warning_list = {}
 
 --**
 -- output messages to the screen or a file
+
 export procedure screen_output(integer f, sequence msg)
 	puts(f, msg)
 end procedure
 
 --**
 -- add a warning message to the list
+
 export procedure Warning(object msg, integer mask, sequence args = {})
 	integer orig_mask
 	sequence text, w_name
@@ -97,6 +100,7 @@ end procedure
 
 --**
 -- print the warnings to the screen (or ex.err)
+
 export function ShowWarnings()
 	integer c
 	integer errfile
@@ -132,13 +136,11 @@ export function ShowWarnings()
 		for i = 1 to length(warning_list) do
 			puts(errfile, warning_list[i])
 			if errfile = STDERR then
-				if remainder(i, 20) = 0 then
+				if remainder(i, 20) = 0 and batch_job = 0 and test_only = 0 then
 					ShowMsg(errfile, 206)
-					if batch_job = 0 then
-						c = getc(0)
-						if c = 'q' then
-							exit
-						end if
+					c = getc(0)
+					if c = 'q' then
+						exit
 					end if
 				end if
 			end if
@@ -170,10 +172,15 @@ end procedure
 -- clean things up before quitting
 export procedure Cleanup(integer status)
 	integer w, show_error = 0
-	
-	ifdef WIN32 or UNIX then
-		show_error = 1
+
+	ifdef EU_EX then
+		-- normally the backend calls this, but execute.e needs us to call
+		-- it here:
+		write_coverage_db()
 	end ifdef
+	
+	show_error = 1
+	
 	if src_file >= 0 then
 		close(src_file)
 		src_file = -1
@@ -181,16 +188,14 @@ export procedure Cleanup(integer status)
 	
 	w = ShowWarnings()
 	if not TRANSLATE and (BIND or show_error) and (w or Errors) then
-		if not batch_job then
+		if not batch_job and not test_only then
 			screen_output(STDERR, GetMsgText(208,0))
 			getc(0) -- wait
 		end if
 	end if
 
 	-- Close all files now.	
-	for fh = FIRST_USER_FILE to MAX_USER_FILE - 1 do
-		close(fh)
-	end for
+	cleanup_open_includes()
 	abort(status)
 end procedure
 
@@ -302,7 +307,7 @@ export procedure InternalErr(integer  msgno, object args = {})
 		screen_output(STDERR, GetMsgText(212, 1, {known_files[current_file_no], line_number, msg}))
 	end if
 
-	if not batch_job then
+	if not batch_job and not test_only then
 		screen_output(STDERR, GetMsgText(208, 0))
 		getc(0)
 	end if

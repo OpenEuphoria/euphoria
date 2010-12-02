@@ -30,35 +30,36 @@ include std/eds.e
 include std/regex.e
 
 constant cmdopts = {
-	{"exe", 0, "interpreter path", { NO_CASE, HAS_PARAMETER, "path-to-interpreter"} },
-	{"ec",  0, "translator path",  { NO_CASE, HAS_PARAMETER, "path-to-translator"} },
-	{"trans", 0, "translate using default translator", { NO_CASE } },
-	{"lib", 0, "runtime library path", {NO_CASE, HAS_PARAMETER, "path-to-runtime-library"} },
-	{"cc",  0, "C compiler", { NO_CASE, HAS_PARAMETER, "-wat|wat|gcc|compiler-name"} },
-	{"log", 0, "output a log", { NO_CASE } },
-	{"verbose", 0, "verbose output", {NO_CASE} },
-	{"process-log", 0, "", {NO_CASE} },
-	{"html", 0, "", {NO_CASE} },
-	{"html-file", 0, "output file for html log output", {NO_CASE, HAS_PARAMETER, "html output file"}},
-	{"i", 0, "include directory", {NO_CASE, MULTIPLE, HAS_PARAMETER, "directory"}},
-	{"d", 0, "define a preprocessor word", {NO_CASE, MULTIPLE, HAS_PARAMETER, "word"}},
+	{"exe", 0, "interpreter path", { HAS_PARAMETER, "path-to-interpreter"} },
+	{"ec", 0, "translator path",  { HAS_PARAMETER, "path-to-translator"} },
+	{"trans", 0, "translate using default translator", { } },
+	{"lib", 0, "runtime library path", {HAS_PARAMETER, "path-to-runtime-library"} },
+	{"cc",  0, "C compiler", { HAS_PARAMETER, "-wat|wat|gcc|compiler-name"} },
+	{"log", 0, "output a log", { } },
+	{"verbose", 0, "verbose output", { } },
+	{"process-log", 0, "", { } },
+	{"html", 0, "", { } },
+	{"html-file", 0, "output file for html log output", {HAS_PARAMETER, "html output file"}},
+	{"i", 0, "include directory", {MULTIPLE, HAS_PARAMETER, "directory"}},
+	{"d", 0, "define a preprocessor word", {MULTIPLE, HAS_PARAMETER, "word"}},
 	{ "coverage",  0, "Indicate files or directories for which to gather coverage statistics", 
-		{ NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
+		{ MULTIPLE, HAS_PARAMETER, "dir|file" } },
 	{ "coverage-db",  0, "Specify the filename for the coverage database.", 
-		{ NO_CASE, HAS_PARAMETER, "file" } },
+		{ HAS_PARAMETER, "file" } },
 	{ "coverage-erase",  0, "Erase an existing coverage database and start a new coverage analysis.", 
-		{ NO_CASE } },
-	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", {NO_CASE, HAS_PARAMETER, "path-to-eucoverage.ex"} },
-	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
-	{ "testopt", 0, "option for tester", { NO_CASE, HAS_PARAMETER, "test-opt"} },
-	{ "bind", 0, "path to bind.ex", { NO_CASE, HAS_PARAMETER, "bind.ex"} },
-	{ "eub", 0, "path to backend runner", { NO_CASE, HAS_PARAMETER, "eub" } },
+		{ } },
+	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", { HAS_PARAMETER, "path-to-eucoverage.ex"} },
+	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { MULTIPLE, HAS_PARAMETER, "pattern"}},
+	{ "testopt", 0, "option for tester", { HAS_PARAMETER, "test-opt"} },
+	{ "bind", 0, "path to eubind", { HAS_PARAMETER, "bind.ex"} },
+	{ "eub", 0, "path to backend runner", { HAS_PARAMETER, "eub" } },
 	{ "all", 0, "show tests that pass and fail", {} },
 	{ "failed", 0, "show tests that fail only", {} },
 	{ "wait", 0, "Wait on summary", {} },
 	{ "accumulate", 0, "Count the individual tests in each file", {} },
 	{ "v", "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
-	$ }
+	$
+}
 
 constant USER_BREAK_EXIT_CODES = {255,-1073741510}
 integer verbose_switch = 0
@@ -411,7 +412,7 @@ end function
 function translate( sequence filename, sequence fail_list )
 	printf(1, " translating %s:", {filename})
 	total += 1
-	sequence cmd = sprintf("%s %s %s %s -D UNITTEST -D EC -batch %s",
+	sequence cmd = sprintf("%s %s %s %s -d UNITTEST -d EC -batch %s",
 		{ translator, library, compiler, translator_options, filename })
 	verbose_printf(1, "CMD '%s'\n", {cmd})
 	integer status = system_exec(cmd, 0)
@@ -460,8 +461,8 @@ function translate( sequence filename, sequence fail_list )
 end function
 
 function bind( sequence filename, sequence fail_list )
-	sequence cmd = sprintf("%s %s -batch \"%s\" %s %s -batch -D UNITTEST %s",
-		{ executable, interpreter_options, binder, eub_path, interpreter_options, filename } )
+	sequence cmd = sprintf("\"%s\" %s %s -batch -d UNITTEST %s",
+		{ binder, eub_path, interpreter_options, filename } )
 	
 	total += 1
 	verbose_printf(1, "CMD '%s'\n", {cmd})
@@ -515,11 +516,11 @@ function test_file( sequence filename, sequence fail_list )
 	
 	sequence crash_option = ""
 	if match("t_c_", filename) = 1 then
-		crash_option = " -D CRASH "
+		crash_option = " -d CRASH "
 	end if
 	
 	printf(1, "interpreting %s:\n", {filename})
-	sequence cmd = sprintf("%s %s %s -D UNITTEST -batch %s%s %s",
+	sequence cmd = sprintf("%s %s %s -d UNITTEST -batch %s%s %s",
 		{ executable, interpreter_options, coverage_erase, crash_option, filename, test_options })
 
 	verbose_printf(1, "CMD '%s'\n", {cmd})

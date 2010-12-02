@@ -21,7 +21,7 @@ integer convert_length
 export atom u32,fc_table,char_upper
 constant C_POINTER = #02000004
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	u32=machine_func(50,"user32.dll")
 	oem2char=machine_func(51,{u32,"OemToCharA",{C_POINTER,C_POINTER},C_POINTER})
 	char_upper=machine_func(51,{u32,"CharUpperA",{C_POINTER},C_POINTER})
@@ -85,7 +85,7 @@ function check_cache(sequence env,sequence inc_path)
 		cache_substrings = append(cache_substrings,{})
 		cache_starts = append(cache_starts,{})
 		cache_ends = append(cache_ends,{})
-		ifdef WIN32 then
+		ifdef WINDOWS then
 			cache_converted = append(cache_converted,{})
 		end ifdef
 		num_var = length(cache_vars)
@@ -112,7 +112,7 @@ function check_cache(sequence env,sequence inc_path)
 						cache_substrings[num_var] = cache_substrings[num_var][1..pos]
 						cache_starts[num_var] = cache_starts[num_var][1..pos]
 						cache_ends[num_var] = cache_ends[num_var][1..pos]
-						ifdef WIN32 then
+						ifdef WINDOWS then
 							cache_converted[num_var] = cache_converted[num_var][1..pos]
 						end ifdef
 						delim = cache_ends[num_var][$]+1
@@ -288,11 +288,11 @@ export function load_euphoria_config( sequence file )
 						end if
 					end if
 				else
-					arg = "-I"
+					arg = "-i"
 					parm = in
 				end if
 			else
-				arg = "-I"
+				arg = "-i"
 				parm = in
 			end if
 		end if
@@ -303,7 +303,7 @@ export function load_euphoria_config( sequence file )
 				case "all" then
 					needed = 1
 					
-				case "win32" then
+				case "windows" then
 					needed = TWINDOWS
 			
 				case "unix" then
@@ -312,35 +312,34 @@ export function load_euphoria_config( sequence file )
 				case "translate" then
 					needed = TRANSLATE
 					
-				case "translate:win32", "win32:translate" then
+				case "translate:windows" then
 					needed = TRANSLATE and TWINDOWS
 					
-				case "translate:unix", "unix:translate" then
+				case "translate:unix" then
 					needed = TRANSLATE and TUNIX
 					
 				case "interpret" then
 					needed = INTERPRET
 					
-				case "interpret:win32", "win32:interpret" then
+				case "interpret:windows" then
 					needed = INTERPRET and TWINDOWS
 			
-				case "interpret:unix", "unix:interpret" then
+				case "interpret:unix" then
 					needed = INTERPRET and TUNIX
 					
 				case "bind" then
 					needed = BIND
 					
-				case "bind:win32", "win32:bind" then
+				case "bind:windows" then
 					needed = BIND and TWINDOWS
 			
-				case "bind:unix", "unix:bind" then
+				case "bind:unix" then
 					needed = BIND and TUNIX
 			
 			end switch
 			
 			if needed then
-				arg = upper(arg)
-				if equal(arg, "-C") then
+				if equal(arg, "-c") then
 					if length(parm) > 0 then
 						new_args &= load_euphoria_config(parm)
 					end if
@@ -384,7 +383,7 @@ export function GetDefaultArgs()
 			default_args &= load_euphoria_config( env & "/." & conf_file )
 		end if
 		
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		env = getenv( "ALLUSERSPROFILE" )
 		if sequence(env) then
 			default_args &= load_euphoria_config( expand_path( "euphoria", env ) & conf_file )
@@ -466,7 +465,7 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 			if try != -1 then
 				return {file_path,try}
 			end if
-			ifdef WIN32 then 
+			ifdef WINDOWS then 
 				if sequence(cache_converted[num_var][i]) then
 					-- perhaps this path entry, which had never been checked valid, is so 
 					-- after conversion
@@ -509,12 +508,12 @@ export function ScanPath(sequence file_name,sequence env,integer flag)
 				file_path = full_path & file_name  
 				try = open_locked(file_path)
 				if try != -1 then -- valid path, no point trying to convert
-					ifdef WIN32 then
+					ifdef WINDOWS then
 						cache_converted[num_var] &= 0
 					end ifdef
 					return {file_path,try}
 				end if
-				ifdef WIN32 then
+				ifdef WINDOWS then
 					if find(1, full_path>=128) then
 						-- accented characters, try converting them
 						full_path = convert_from_OEM(full_path)
@@ -594,7 +593,7 @@ export function Include_paths(integer add_converted)
 				cache_substrings[num_var] = append(cache_substrings[num_var],full_path)
 				cache_starts[num_var] &= start_path
 				cache_ends[num_var] &= end_path
-				ifdef WIN32 then
+				ifdef WINDOWS then
 					if find(1, full_path>=128) then
 						-- accented characters, try converting them. There is no guarantee that
 						-- the conversion is valid
@@ -615,7 +614,7 @@ label "cache done"
 	include_Paths &= cache_substrings[num_var]
 	cache_complete[num_var] = 1
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if add_converted then
 	    	for i=1 to length(cache_converted[num_var]) do
 	        	if sequence(cache_converted[num_var][i]) then

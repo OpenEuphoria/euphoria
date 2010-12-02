@@ -6,10 +6,8 @@
 namespace stdseq
 
 include std/error.e
-include std/math.e
 include std/search.e
 include std/sort.e
-include std/types.e
 
 --****
 -- === Constants
@@ -272,11 +270,11 @@ public function rotate(sequence source, integer shift, integer start=1, integer 
 	end if
 
 	if not valid_index(source, start) then
-		crash("sequence:rotate(): invalid 'start' parameter %d", start)
+		error:crash("sequence:rotate(): invalid 'start' parameter %d", start)
 	end if
 
 	if not valid_index(source, stop) then
-		crash("sequence:rotate(): invalid 'stop' parameter %d", stop)
+		error:crash("sequence:rotate(): invalid 'stop' parameter %d", stop)
 	end if
 
 	len = stop - start + 1
@@ -1091,13 +1089,13 @@ public function add_item(object needle, sequence haystack, integer pOrder = 1)
 			return append(haystack, needle)
 
 		case ADD_SORT_UP then
-			return sort(append(haystack, needle))
+			return stdsort:sort(append(haystack, needle))
 
 		case ADD_SORT_DOWN then
-			return sort(append(haystack, needle), DESCENDING)
+			return stdsort:sort(append(haystack, needle), stdsort:DESCENDING)
 
 		case else
-			crash("sequence.e:add_item() invalid Order argument '%d'", pOrder)
+			error:crash("sequence.e:add_item() invalid Order argument '%d'", pOrder)
 	end switch
 
 	return haystack
@@ -1272,7 +1270,7 @@ public function mid(sequence source, atom start, atom len)
 	if len<0 then
 		len += length(source)
 		if len<0 then
-			crash("mid(): len was %d and should be greater than %d.",
+			error:crash("mid(): len was %d and should be greater than %d.",
 				{len-length(source),-length(source)})
 	end if
 			end if
@@ -1385,7 +1383,7 @@ public function vslice(sequence source, atom colno, object error_control=0)
 	integer substitutes, current_sub
 
 	if colno < 1 then
-		crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
+		error:crash("sequence:vslice(): colno should be a valid index, but was %d",colno)
 	end if
 
 	if atom(error_control) then
@@ -1398,7 +1396,7 @@ public function vslice(sequence source, atom colno, object error_control=0)
 	for i = 1 to length(source) do
 		if colno > length(source[i]) then
 			if substitutes = -1 then
-				crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d", {i, colno})
+				error:crash("sequence:vslice(): colno should be a valid index on the %d-th element, but was %d", {i, colno})
 			elsif substitutes = 0 then
 				return source[1..i-1]
 			else
@@ -1983,7 +1981,7 @@ public function extract(sequence source, sequence indexes)
 	for i = 1 to length(indexes) do
 		p = indexes[i]
 		if not valid_index(source,p) then
-			crash("%d is not a valid index for the input sequence",p)
+			error:crash("%d is not a valid index for the input sequence",p)
 		end if
 		indexes[i] = source[p]
 	end for
@@ -2206,7 +2204,7 @@ public function split_any(sequence source, object delim=", \t|", integer limit=0
 	end if
 
 	while 1 do
-		pos = find_any(delim, source, start)
+		pos = search:find_any(delim, source, start)
 		next_pos = pos + 1
 		if pos then
 			ret = append(ret, source[start..pos-1])
@@ -2853,7 +2851,7 @@ public function transmute(sequence source_data, sequence current_items, sequence
 				i += 1
 				pos = 0
 				for j = 1 to length(current_items) do
-					if begins(current_items[j], source_data[i .. $]) then
+					if search:begins(current_items[j], source_data[i .. $]) then
 						pos = j
 						exit
 					end if
@@ -2874,7 +2872,7 @@ public function transmute(sequence source_data, sequence current_items, sequence
 				i += 1
 				pos = 0
 				for j = 1 to length(current_items) do
-					if begins(current_items[j], source_data[i .. $]) then
+					if search:begins(current_items[j], source_data[i .. $]) then
 						pos = j
 						exit
 					end if
@@ -3090,7 +3088,7 @@ public function remove_dups(sequence source_data, integer proc_option = RD_PRESO
 	end if
 
 	if proc_option = RD_SORT then
-		source_data = sort(source_data)
+		source_data = stdsort:sort(source_data)
 		proc_option = RD_PRESORTED
 	end if
 	if proc_option = RD_PRESORTED then
@@ -3188,7 +3186,7 @@ public function combine(sequence source_data, integer proc_option = COMBINE_SORT
 	end for
 	
 	if proc_option = COMBINE_SORTED then
-		return sort(lResult)
+		return stdsort:sort(lResult)
 	else
 		return lResult
 	end if

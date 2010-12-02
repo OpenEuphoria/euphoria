@@ -35,13 +35,11 @@
 
 namespace regex
 
-include std/error.e
 include std/flags.e as flags
 include std/machine.e
 include std/math.e
 include std/search.e
 include std/text.e
-include std/types.e
 
 enum 
 	M_PCRE_COMPILE          = 68,
@@ -309,7 +307,7 @@ enum
 -- Turn off checking for the validity of your UTF string.  Use this
 -- with caution.  An invalid utf8 string with this option could **crash**
 -- your program.  Only use this if you know the string is a valid utf8 string.
--- See [[:unicode:validate]].
+-- !!See [[:unicode:validate]].
 -- This is passed to all routines including [[:new]].
 
 --****
@@ -481,7 +479,7 @@ public constant error_names = {
 	{ERROR_BADNEWLINE,     "ERROR_BADNEWLINE"          }
 }
 
-constant all_options = or_all({
+constant all_options = math:or_all({
 	DEFAULT,
 	CASELESS,
 	MULTILINE,
@@ -541,7 +539,7 @@ public type option_spec(object o)
 			end if
 		end if
 	elsif integer_array(o) then
-		return option_spec(or_all(o))
+		return option_spec( math:or_all(o) )
 	else
 		return 0
 	end if
@@ -572,7 +570,7 @@ public function error_to_string(integer i)
 	if i >= 0 or i < -23 then
 		return sprintf("%d",{i})
 	else
-		return vlookup(i, error_names, 1, 2, "Unknown Error")
+		return search:vlookup(i, error_names, 1, 2, "Unknown Error")
 	end if
 end function
 
@@ -635,7 +633,7 @@ end function
 
 public function new(string pattern, option_spec options=DEFAULT)
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 		
 	-- concatenation ensures we really get a new sequence, and don't just use the
@@ -781,7 +779,7 @@ end function
 
 public function find(regex re, string haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 	
 	if size < 0 then
@@ -824,7 +822,7 @@ end function
 
 public function find_all(regex re, string haystack, integer from=1, option_spec options=DEFAULT, integer size = get_ovector_size(re, 30))
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 	
 	if size < 0 then
@@ -833,10 +831,10 @@ public function find_all(regex re, string haystack, integer from=1, option_spec 
 	
 	object result
 	sequence results = {}
-	atom pHaystack = allocate_string(haystack)
+	atom pHaystack = machine:allocate_string(haystack)
 	while sequence(result) with entry do
 		results = append(results, result)
-		from = max(result) + 1
+		from = math:max(result) + 1
 		
 		if from > length(haystack) then
 			exit
@@ -845,7 +843,7 @@ public function find_all(regex re, string haystack, integer from=1, option_spec 
 		result = machine_func(M_PCRE_EXEC, { re, pHaystack, length(haystack), options, from, size })
 	end while
 	
-	free(pHaystack)
+	machine:free(pHaystack)
 	
 	return results
 end function
@@ -945,7 +943,7 @@ end function
 --
 public function matches(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 	integer str_offsets = and_bits(STRING_OFFSETS, options)
 	object match_data = find(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
@@ -1038,7 +1036,7 @@ end function
 
 public function all_matches(regex re, string haystack, integer from=1, option_spec options=DEFAULT)
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 	integer str_offsets = and_bits(STRING_OFFSETS, options)
 	object match_data = find_all(re, haystack, from, and_bits(options, not_bits(STRING_OFFSETS)))
@@ -1109,7 +1107,7 @@ end function
 
 public function split_limit(regex re, string text, integer limit=0, integer from=1, option_spec options=DEFAULT)
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 	sequence match_data = find_all(re, text, from, options), result
 	integer last = 1
@@ -1217,7 +1215,7 @@ end function
 public function find_replace_limit(regex ex, string text, sequence replacement,
 			integer limit, integer from=1, option_spec options=DEFAULT)
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 
     return machine_func(M_PCRE_REPLACE, { ex, text, replacement, options, 
@@ -1294,7 +1292,7 @@ end function
 public function find_replace_callback(regex ex, string text, integer rid, integer limit=0,
                 integer from=1, option_spec options=DEFAULT)
 	if sequence(options) then 
-		options = or_all(options) 
+		options = math:or_all(options) 
 	end if
 	sequence match_data = find_all(ex, text, from, options), replace_data
 	

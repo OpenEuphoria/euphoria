@@ -1,5 +1,7 @@
--- Examples of calling a machine code 
--- routine from Euphoria
+--****
+-- === callmach.ex
+--
+-- Examples of calling a machine code routine from Euphoria
 
 include std/os.e
 include std/machine.e

@@ -22,50 +22,43 @@ include msgtext.e
 include coverage.e
 
 sequence interpreter_opt_def = {
-	{ "coverage",  0, GetMsgText(332,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
-	{ "coverage-db",  0, GetMsgText(333,0), { NO_CASE, HAS_PARAMETER, "file" } },
-	{ "coverage-erase",  0, GetMsgText(334,0), { NO_CASE } },
-	{ "coverage-exclude", 0, GetMsgText(338,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"}},
-	$}
+	{ "coverage",         0, GetMsgText(332,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "dir|file" } },
+	{ "coverage-db",      0, GetMsgText(333,0), { NO_CASE, ONCE, HAS_PARAMETER, "file" } },
+	{ "coverage-erase",   0, GetMsgText(334,0), { NO_CASE, ONCE } },
+	{ "coverage-exclude", 0, GetMsgText(338,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "pattern"} },
+	$
+}
 
 add_options( interpreter_opt_def )
-
---**
--- Merges values from map b into map a, using operation CONCAT
-procedure merge_maps( m:map a, m:map b )
-	sequence pairs = m:pairs( b )
-	for i = 1 to length( pairs ) do
-		m:put( a, pairs[i][1], pairs[i][2], m:CONCAT )
-	end for
-end procedure
 
 include std/pretty.e
 sequence pretty_opt = PRETTY_DEFAULT
 pretty_opt[DISPLAY_ASCII] = 2
-export procedure intoptions()
 
+export procedure intoptions()
 	sequence pause_msg = ""
 
 	if find("WIN32_GUI", OpDefines) then
-		if not batch_job then
+		if not batch_job and not test_only then
 			pause_msg = GetMsgText(278,0)
 		end if
 	end if
-
+	
 	Argv = expand_config_options(Argv)
-	m:map opts = cmd_parse( get_options(),
-		{ NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, Argv)
-
-	sequence tmp_Argv = Argv
-	Argv = Argv[1..2] & GetDefaultArgs()
 	Argc = length(Argv)
-
-	m:map default_opts = cmd_parse( get_options(), , Argv )
-	merge_maps( opts, default_opts )
-
-	Argv = tmp_Argv
-	Argc = length( Argv )
-
+	
+	sequence opts_array = get_options()
+	sequence argv_to_parse = Argv[1..2]
+	
+	if length(Argv) > 2 then
+		argv_to_parse &= merge_parameters(GetDefaultArgs(), Argv[3..$], opts_array)
+	else
+		argv_to_parse &= GetDefaultArgs()
+	end if
+	
+	m:map opts = cmd_parse( opts_array, 
+		{ NO_VALIDATION_AFTER_FIRST_EXTRA, PAUSE_MSG, pause_msg }, argv_to_parse)
+	
 	handle_common_options(opts)
 
 	sequence opt_keys = map:keys(opts)
@@ -95,9 +88,9 @@ export procedure intoptions()
 	if length(m:get(opts, OPT_EXTRAS)) = 0 then
 		show_banner()
 		ShowMsg(2, 249)
-		show_help( get_options() )
+		show_help( opts_array )
 		if find("WIN32_GUI", OpDefines) then
-			if not batch_job then
+			if not batch_job and not test_only then
 				any_key(pause_msg, 2)
 			end if
 		end if

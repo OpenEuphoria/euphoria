@@ -5,8 +5,7 @@
 
 namespace search
 
-include std/error.e
-include std/types.e
+public include std/types.e
 
 --****
 -- === Equality
@@ -415,7 +414,7 @@ public constant
 -- See Also:
 -- [[:find]], [[:rfind]], [[:find_any]], [[:fetch]]
 
-public function find_nested(object needle, sequence haystack, integer flags=0, integer rtn_id=NO_ROUTINE_ID)
+public function find_nested(object needle, sequence haystack, integer flags=0, integer rtn_id=types:NO_ROUTINE_ID)
 	sequence occurrences = {} -- accumulated results
 	integer depth = 0
 	sequence branches = {}, indexes = {}, last_indexes = {} -- saved states

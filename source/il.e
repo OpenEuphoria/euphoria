@@ -35,22 +35,21 @@ include msgtext.e
 include intinit.e
 
 constant OPTIONS = {
-{ "shroud_only", 0, GetMsgText(303, 0), { NO_CASE, NO_PARAMETER }  },
-{ "quiet",       0, GetMsgText(304, 0), { NO_CASE, NO_PARAMETER }  },
-{ "list",        0, GetMsgText(305, 0), { NO_CASE, NO_PARAMETER }  },
-{ "icon",        0, GetMsgText(307, 0), { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "con",         0, GetMsgText(308, 0), { NO_CASE, NO_PARAMETER }  },
-{ "full_debug",  0, GetMsgText(309, 0), { NO_CASE, NO_PARAMETER }  },
-{ "out",         0, GetMsgText(310, 0), { NO_CASE, HAS_PARAMETER, "file" }  },
-{ "i",           0, GetMsgText(311, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "file" }  },
-{ "copyright",   0, GetMsgText(312, 0), { NO_CASE, NO_PARAMETER }  },
-{ "c",           0, GetMsgText(280, 0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "filename" } },
-{ "d",           0, GetMsgText(282,0), { NO_CASE, MULTIPLE, HAS_PARAMETER, "word" } },
-{ "batch",       0, GetMsgText(279,0), { NO_CASE } },
-{ "eub",         0, GetMsgText(345,0), {NO_CASE, HAS_PARAMETER, "backend runner"} },
-$
+	{ "shroud_only", 0, GetMsgText(303, 0), { } },
+	{ "quiet",       0, GetMsgText(304, 0), { } },
+	{ "list",        0, GetMsgText(305, 0), { } },
+	{ "icon",        0, GetMsgText(307, 0), { HAS_PARAMETER, "file" }  },
+	{ "con",         0, GetMsgText(308, 0), { } },
+	{ "full_debug",  0, GetMsgText(309, 0), { } },
+	{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
+	{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
+	{ "copyright",   0, GetMsgText(312, 0), { } },
+	{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+	{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+	{ "batch",       0, GetMsgText(279,0), { } },
+	{ "eub",         0, GetMsgText(345,0), { HAS_PARAMETER, "backend runner" } },
+	$
 }
-
 
 -- options for BIND
 integer list, quiet, full_debug
@@ -71,7 +70,7 @@ object eub_path = 0
 procedure fatal(sequence msg)
 -- fatal error during bind
 	puts(2, msg & '\n')
-	if not batch_job then
+	if not batch_job and not test_only then
 		ShowMsg(2, 242)
 		getc(0)
 	end if
@@ -265,12 +264,24 @@ procedure copyrights()
 end procedure
 
 function extract_options( sequence cl )
-	Argv = cl
+	sequence argv = cl[1..2]
+	if length(cl) > 2 then
+		argv &= merge_parameters(GetDefaultArgs(), cl[3..$], OPTIONS)
+	else
+		argv &= GetDefaultArgs()
+	end if
+	
+	argv = expand_config_options(argv)
+
+	Argv = argv
 	Argc = length(Argv)
-	m:map opts = cmd_parse(OPTIONS,,cl)
+	
+	m:map opts = cmd_parse(OPTIONS, , argv)
+	
 	handle_options_for_bind( opts )
 	finalize_command_line( opts )
-	return cl
+	
+	return argv
 end function
 
 --**

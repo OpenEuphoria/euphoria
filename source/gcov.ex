@@ -7,13 +7,14 @@ include std/sort.e
 constant BUILDDIRS = {
 	"intobj",
 	"transobj",
-	"libobj"
+	"libobj",
+	"libobjdbg"
 	}
 
 constant CSS =`
-.nocode { white-space: pre }
-.exec   { white-space: pre; background-color: green; color: white;}
-.noexec { white-space: pre; background-color: red; color: white;}
+.nocode   { font-family: monospace; font-style: italic; white-space: pre; background-color: #ffffdd; }
+.exec     { font-family: monospace; white-space: pre; background-color: #bbffbb; }
+.noexec   { font-family: monospace; white-space: pre; background-color: #ffbbbb; }
 `
 
 constant HEADER =`
@@ -153,6 +154,9 @@ function process_builddir( sequence builddir, sequence objectdir, sequence cover
 end function
 
 function aggregate( sequence coveragedir, sequence objectdir, sequence stats )
+	if not length( stats ) then
+		return repeat( 0, 4 )
+	end if
 	sequence total = repeat( 0, length( stats[1] ) )
 	total[1] = objectdir
 	total[2] = coveragedir & objectdir & "/index.html"

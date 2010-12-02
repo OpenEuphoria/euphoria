@@ -46,7 +46,6 @@
 #   The source targets will create a subdirectory called euphoria-r$(SVN_REV). 
 #   The default for SVN_REV is 'xxx'.
 #
-#
 #   Options:
 #                   MANAGED_MEM:  Set this to 1 to use Euphoria's memory cache.
 #                                 The default is to use straight HeapAlloc/HeapFree calls. 
@@ -73,7 +72,6 @@
 #              TESTFILE or LIST:  Set either of these to set narrow the list of unit test files for
 #                                 either the test target or the testeu target.
 #
-#
 # ex:
 # 	wmake testeu I_EXTRA="-D ETYPE_CHECK" TEST_EXTRA="-log"
 #
@@ -84,12 +82,11 @@
 #
 #       Create a copy of eu.lib with debugging on.
 #
-#
 # ex:   wmake test LIST="t_switch.e t_math.e"
 #
 #       Run eutest on only two unit test files.
 #
-#
+
 !ifndef CONFIG
 CONFIG=config.wat
 !endif
@@ -323,6 +320,7 @@ all :  .SYMBOLIC
 	wmake -h interpreter $(VARS)
 	wmake -h translator $(VARS)
 	wmake -h backend $(VARS)
+	wmake -h binder $(VARS)
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
@@ -460,7 +458,7 @@ testeu : .SYMBOLIC  $(TRUNKDIR)\tests\ecp.dat
 test : .SYMBOLIC $(TRUNKDIR)\tests\ecp.dat
 	cd ..\tests
 	set EUCOMPILEDIR=$(TRUNKDIR) 
-	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind ..\source\bind.ex -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
+	$(EUTEST) $(TEST_EXTRA) $(VERBOSE_TESTS) -i ..\include -cc wat -exe $(FULLBUILDDIR)\eui.exe -ec $(FULLBUILDDIR)\euc.exe -lib   $(FULLBUILDDIR)\eu.$(LIBEXT) -bind $(FULLBUILDDIR)\eubind.exe -eub $(BUILDDIR)\eub.exe $(LIST) $(TESTFILE)
 	cd ..\source
 
 coverage : .SYMBOLIC code-page-db
@@ -483,6 +481,10 @@ report: .SYMBOLIC
 tester: .SYMBOLIC 
 	wmake -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
 
+binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
+
+$(BUILDDIR)\eubind.exe : translator library
+	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 	
 !ifdef BUILD_TOOLS
 $(BUILDDIR)\eutestdr\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
@@ -503,16 +505,16 @@ $(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
-$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG)
+$(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option caseexact
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc file %i
 	wlink  $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\eui.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eui.exe
+	wrc -q -ad eui.rc $(BUILDDIR)\eui.exe
 	wlink $(DEBUGLINK) SYS nt_win op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euiw.lbc name $(BUILDDIR)\euiw.exe
-	wrc -q -ad exw.res $(BUILDDIR)\euiw.exe
+	wrc -q -ad euiw.rc $(BUILDDIR)\euiw.exe
 
 interpreter : .SYMBOLIC
 	wmake -h $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
@@ -567,8 +569,7 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 	@%append $(BUILDDIR)\$(OBJDIR)\euc.lbc library ws2_32
 	@for %i in ($(EU_CORE_OBJECTS) $(EU_TRANSLATOR_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\euc.lbc file %i
 	wlink $(DEBUGLINK) SYS nt op maxe=25 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\euc.lbc name $(BUILDDIR)\euc.exe
-	wrc -q -ad exw.res $(BUILDDIR)\euc.exe
-
+	wrc -q -ad euc.rc $(BUILDDIR)\euc.exe
 
 translator : .SYMBOLIC
     @echo ------- TRANSLATOR -----------
@@ -583,10 +584,10 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc option caseexact
 	@%append $(BUILDDIR)\$(OBJDIR)\eub.lbc library ws2_32
 	@for %i in ($(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)) do @%append $(BUILDDIR)\$(OBJDIR)\eub.lbc file %i
-	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eubw.exe
 	wlink $(DEBUGLINK) SYS nt op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eub.exe
-	wrc -q -ad exw.res $(BUILDDIR)\eub.exe
+	wrc -q -ad eub.rc $(BUILDDIR)\eub.exe
+	wlink $(DEBUGLINK) SYS nt_win op maxe=2 op q op symf op el @$(BUILDDIR)\$(OBJDIR)\eub.lbc name $(BUILDDIR)\eubw.exe
+	wrc -q -ad eubw.rc $(BUILDDIR)\eubw.exe
 
 backend : .SYMBOLIC backendflag
     @echo ------- BACKEND -----------
@@ -681,7 +682,10 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 !endif
 
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
-	$(EUDOC) --strip=2 -a $(DOCDIR)\manual.af -o $(BUILDDIR)\euphoria.txt
+	$(EUDOC) --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
+
+$(BUILDDIR)\euphoria-single.txt : $(EU_DOC_SOURCE)
+	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria-single.txt
 
 $(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
 	mkdir $^@
@@ -720,37 +724,27 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 	copy $(DOCDIR)\html\images\next.png $^@
 
 $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
-	cd $(TRUNKDIR)\docs
-	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\template.html -o$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
-	cd $(TRUNKDIR)\source
+	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
-	cd $(TRUNKDIR)\docs
-	$(CREOLEHTML) -A=ON -t=$(DOCSDIR)\offline-template.html -o$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
-	cd $(TRUNKDIR)\source
+	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 manual-upload: .SYMBOLIC manual
-	cd  $(BUILDDIR)\docs
-	$(SCP) *.html $(oe_username)@openeuphoria.org:/home/euweb/docs
-	cd $(TRUNKDIR)\source
+	$(SCP) $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
 
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 
 pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
 
-$(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria.txt
-	$(BUILDDIR)\eui.exe $(TRUNKDIR)\bin\eused.ex -e "splitlevel = 2" "splitlevel = 0" &
-		-e "toclevel = 3" "toclevel = 0" -e "TOC level=3" "TOC level=0" &
-		-e "LEVELTOC depth=2" "LEVELTOC depth=0"  $(BUILDDIR)\euphoria.txt > $(BUILDDIR)\euphoria-pdf.txt
-	
+$(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria-single.txt
+	$(BUILDDIR)\eui.exe $(TRUNKDIR)\demo\eused.ex -e "toclevel = 3" "toclevel = 0" &
+		-e "TOC level=3" "TOC level=0" -e "LEVELTOC depth=2" "LEVELTOC depth=0" &
+		$(BUILDDIR)\euphoria-single.txt > $(BUILDDIR)\euphoria-pdf.txt
 
-$(BUILDDIR)\pdf\index.html : $(BUILDDIR)\euphoria-pdf.txt
-	-mkdir $(BUILDDIR)\pdf
-	$(CREOLEHTML) -A=ON -d=$(TRUNKDIR)\docs\ -t=pdf-template.html -o$(BUILDDIR)\pdf -htmldoc $(BUILDDIR)\euphoria-pdf.txt
+$(BUILDDIR)\euphoria-pdf.html : $(BUILDDIR)\euphoria-pdf.txt
+	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\pdf-template.html -o=$(BUILDDIR) --htmldoc $(BUILDDIR)\euphoria-pdf.txt
 
-$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.txt $(BUILDDIR)\pdf\index.html
-	htmldoc -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\pdf\index.html
-
-
+$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.html
+	htmldoc --size letter -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\euphoria-pdf.html

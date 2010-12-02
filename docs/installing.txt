@@ -85,19 +85,19 @@ line is ignored.
 ** There are a number of predefined sections.
 ** The lines in a section are only added to the command line switches if they
  apply to the mode that Euphoria is running in.
-*** [win32] Applies to Windows platform only.
+*** [windows] Applies to Windows platform only.
 *** [unix] Applies to any Unix platform only.
 *** [interpret] Applies to the interpreter running in any platform.
 *** [translate] Applies to the translator running in any platform.
 *** [bind] Applies to the binder running in any platform.
-*** [interpret:win32] Applies to the interpreter when running under //Windows// 
+*** [interpret:windows] Applies to the interpreter when running under //Windows// 
 only.
 *** [interpret:unix] Applies to the interpreter when running under //Unix// 
 only.
-*** [translate:win32] Applies to the translator when running under //Windows// 
+*** [translate:windows] Applies to the translator when running under //Windows// 
 only.
 *** [translate:unix] Applies to the translator when running under //Unix// only.
-*** [bind:win32] Applies to the binder when running under //Windows// only.
+*** [bind:windows] Applies to the binder when running under //Windows// only.
 *** [bind:unix] Applies to the binder when running under //Unix// only.
 *** [all] Applies to all running modes.
 ** All configuration lines before the first section header are assumed to be the

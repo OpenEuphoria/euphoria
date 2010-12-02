@@ -221,9 +221,9 @@ end function
 
 public function pcre_copyright()
 	return {
-		"PCRE v7.8",
+		"PCRE v8.10",
 		`
-________Copyright (c) 1997-2008 University of Cambridge
+________Copyright (c) 1997-2010 University of Cambridge
 		All Rights Reserved
 		`
 	}
@@ -270,3 +270,51 @@ end function
 public function start_time()
 	return version_info[START_TIME]
 end function
+
+--****
+-- === Configure Information
+--
+
+--****
+-- Signature:
+-- <built-in> function include_paths(integer convert)
+--
+-- Description:
+-- Returns the list of include paths, in the order in which they are searched
+--
+-- Parameters:
+--    # ##convert## : an integer, nonzero to include converted path entries
+--    that were not validated yet.
+--
+-- Returns:
+--	A **sequence**, of strings, each holding a fully qualified include path.
+--
+-- Comments:
+--
+-- ##convert## is checked only under //Windows//. If a path has accented characters in it, then
+-- it may or may not be valid to convert those to the OEM code page. Setting ##convert## to a nonzero value
+-- will force conversion for path entries that have accents and which have not been checked to be valid yet.
+-- The extra entries, if any, are returned at the end of the returned sequence.
+--
+-- The paths are ordered in the order they are searched:
+-- # current directory
+-- # configuration file,
+-- # command line switches,
+-- # EUINC
+-- # a default based on EUDIR.
+--
+-- Example 1:
+-- <eucode>
+-- sequence s = include_paths(0)
+-- -- s might contain
+-- {
+--   "/usr/euphoria/tests",
+--   "/usr/euphoria/include",
+--   "./include",
+--   "../include"
+-- }
+-- </eucode>
+--
+-- See Also:
+-- [[:eu.cfg]], [[:include]], [[:option_switches]]
+

@@ -44,21 +44,22 @@ IF "%1" =="--prefix" (
 )
 IF "%1" =="--no-managed-mem" (
 	echo MANAGED_MEM=0 >> config.wat
-        SET DISABLED_MANAGED_MEM=1
+    SET DISABLED_MANAGED_MEM=1
 	GOTO EndLoop
 )
 IF "%1" =="--eubin" (
 	echo EUBIN=%2 >> config.wat
-        SET HAS_EUBIN=1
+    SET HAS_EUBIN=1
+	SET THIS_EUBIN=%2\
 	SHIFT
 	GOTO EndLoop
 )
 IF "%1" =="--use-binary-translator" (
-    	SET ECBIN=1
+    SET ECBIN=1
 	GOTO EndLoop
 )
 IF "%1" =="--use-source-translator" (
-    	SET ECBIN=0
+    SET ECBIN=0
 	GOTO EndLoop
 )
 IF "%1" =="--build" (
@@ -67,7 +68,7 @@ IF "%1" =="--build" (
 	GOTO EndLoop
 )
 IF "%1" =="--plat" (
-    	echo PLAT=%2  >> config.wat
+    echo PLAT=%2  >> config.wat
 	SHIFT
 	GOTO EndLoop
 )
@@ -123,7 +124,7 @@ IF "%1" == "--oe-username" (
 	GOTO EndLoop
 )
 
-IF "%1" == "-scp-client" (
+IF "%1" == "--scp-client" (
 	set SCP_CLIENT=%2
 	SHIFT
 	GOTO EndLoop
@@ -149,15 +150,14 @@ rem ============================================================
 echo SCP=%SCP_CLIENT% >> config.wat
 
 if "%HAS_EUBIN%" == "1" (
-SET NOEU=
+	SET NOEU=
 ) else (
-wtouch nothing.ex
-eui nothing.ex 2> NUL
-if "%ERRORLEVEL%" == "9009" (
-    set NOEU=1
-) else (
-    set NOEU=
-)
+	eui.exe -? 1> NUL 2> NUL
+	if "%ERRORLEVEL%" == "9009" (
+		set NOEU=1
+	) else (
+		set NOEU=
+	)
 )
 
 echo ARCH=ix86 >> config.wat
@@ -209,6 +209,33 @@ rem Going back to the source directory
 rem ============================================================
 
 cd %TRUNKDIR%\source
+
+rem ============================================================
+rem Determining where creolehtml and eudoc are
+rem ============================================================
+rem if exist %THIS_EUBIN%eudoc.exe (
+rem 	echo EUDOC=%THIS_EUBIN%eudoc.exe >> config.wat
+rem ) else (
+rem 	if exist eudoc\eudoc.ex (
+rem 		echo EUDOC=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\eudoc.ex >> config.wat
+rem 	) else (
+rem 		echo EUDOC=eudoc.ex >> config.wat
+rem 	)
+rem )
+
+echo EUDOC=eudoc.exe >> config.wat
+
+rem if exist %THIS_EUBIN%creolehtml.exe (
+rem 	echo CREOLEHTML=%THIS_EUBIN%creolehtml.exe >> config.wat
+rem ) else (
+rem 	if exist eudoc\creole\creolehtml.ex (
+rem 		echo CREOLEHTML=%THIS_EUBIN%eui.exe %TRUNKDIR%\source\eudoc\creole\creolehtml.ex >> config.wat
+rem 	) else (
+rem 		echo CREOLEHTML=creolehtml.ex >> config.wat
+rem 	)
+rem )
+
+echo CREOLEHTML=creolehtml.exe >> config.wat
 
 rem ============================================================
 rem Writing our final configuration vars

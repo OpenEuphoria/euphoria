@@ -1,24 +1,31 @@
--- Hash Table Demo
--- written by Junko C. Miura, RDS
+--****
+-- === hash.ex
+-- 
+-- Hash Table Demo written by Junko C. Miura, RDS
+-- 
 -- This reads a text file and builds a hash table containing all of 
 -- the unique words plus a count of how many times each word occurred.
 -- It outputs the words to and a bunch of hash table 
 -- statistics to "hash.out".
-
--- example: 
---          eui hash \euphoria\doc\library.doc
+--
+-- ==== Example
+-- {{{
+-- eui hash \euphoria\doc\library.doc
+-- }}}
 --
 -- hash.ex (hash table) is faster than tree.ex (binary tree),
 -- but does not produce a sorted list of words.
-
--- How it Works:
--- * hashing is generally much faster than searching a long linear list for a 
---   word. Instead of searching one big list, we create hundreds of small
---   lists, and then use a "hash function" to tell us which small list (or
---   "bucket") to search. For each word, the hash function will return an 
---   integer. For a given word, the hash function must always return the same 
---   integer. That integer is used as the index into a sequence of small 
---   word-lists. We can quickly search the selected small list for the word.
+--
+-- ==== How it Works
+--
+-- hashing is generally much faster than searching a long linear list for a 
+-- word. Instead of searching one big list, we create hundreds of small
+-- lists, and then use a "hash function" to tell us which small list (or
+-- "bucket") to search. For each word, the hash function will return an 
+-- integer. For a given word, the hash function must always return the same 
+-- integer. That integer is used as the index into a sequence of small 
+-- word-lists. We can quickly search the selected small list for the word.
+--
 
 include std/console.e
 include std/io.e
@@ -118,6 +125,12 @@ sequence vOpts = {
 
 object vOptMap
 
+without warning
+override procedure abort(integer errcode)
+	maybe_any_key("\nPress Any Key to Continue...")
+	eu:abort(errcode)
+end procedure
+
 procedure main()
 	sequence lDicts
 	object lFileList
@@ -214,8 +227,6 @@ procedure main()
 	end for
 	close(outputHandle)
 	writefln("See '[1]' for statistics and table contents", {vOutPath})
-	maybe_any_key()
-
 end procedure
 
 main()

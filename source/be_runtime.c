@@ -917,19 +917,19 @@ void Head(s1_ptr s1, int reqlen, object_ptr target)
 	int i;
 	object_ptr op, se;
 
-	if (s1->ref == 1 && *target == (object)s1) {
+	if (s1->ref == 1 && *target == MAKE_SEQ(s1)) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
 
 		// First, dereference all existing elements after the new end position.
-		for (op = (s1->base+reqlen), se = s1->base + s1->length; op < se; op++)
+		for (op = (s1->base+reqlen), se = s1->base + s1->length + 1; op < se; op++)
 			DeRef(*op);
 
 		// Mark the 'end-of-sequence'
 		*(s1->base+reqlen) = NOVALUE;
 
 		// Update the post-fill count.
-		s1->postfill += (s1->length - reqlen + 2);
+		s1->postfill += (s1->length - reqlen + 1);
 
 		// Adjust the new length.
 		s1->length = reqlen-1;
@@ -957,7 +957,7 @@ void Tail(s1_ptr s1, int start, object_ptr target)
 	object_ptr ss, op, se;
 
 	newlen = s1->length - start + 1;
-	if (s1->ref == 1 && (object)s1 == *target) {
+	if (s1->ref == 1 && MAKE_SEQ(s1) == *target) {
 		// Target is same as source and source only has one reference,
 		// so just use the existing allocation rather than creare a new sequence.
 
@@ -2669,6 +2669,8 @@ static unsigned int hsieh32(char *data, int len, unsigned int starthash)
     return hash;
 }
 
+char *hsieh_tempstr  = 0;
+int   hsieh_tempsize = 0;
 static unsigned int calc_hsieh32(object a)
 {
 
@@ -2682,10 +2684,10 @@ static unsigned int calc_hsieh32(object a)
 
 	object_ptr ap;
 	object av;
-	char *tempstr;
 	char *sp;
 	int slen;
  	unsigned int lHashVal;
+	int has_string;
 
 
 
@@ -2705,7 +2707,7 @@ static unsigned int calc_hsieh32(object a)
 		lHashVal = slen;
 		ap = SEQ_PTR(a)->base;
 		// Check for a byte array first.
-		tempstr = 0;
+		has_string = 0;
 		while (slen > 0) {
 			av = *(++ap);
 			slen--;
@@ -2715,33 +2717,35 @@ static unsigned int calc_hsieh32(object a)
 
 			if (IS_ATOM_INT(av)) {
 				if (av >= 0 && av <= 255) {
-					if (tempstr == 0) {
-						tempstr = EMalloc(SEQ_PTR(a)->length + 4);
-						sp = tempstr;
+					if ( !has_string ){
+						if(hsieh_tempstr == 0 || ( (SEQ_PTR(a)->length) > hsieh_tempsize) ) {
+							hsieh_tempsize = SEQ_PTR(a)->length;
+							if( hsieh_tempstr != 0 ){
+								hsieh_tempstr = ERealloc( hsieh_tempstr, hsieh_tempsize );
+							}
+							else{
+								hsieh_tempstr = EMalloc( hsieh_tempsize );
+							}
+						}
+						sp = hsieh_tempstr;
+						has_string = 1;
 					}
+					
 					*sp = (char)av;
 					sp++;
 				}
 				else {
-					if (tempstr != 0) {
-						EFree(tempstr);
-						tempstr = 0;
-					}
+					has_string = 0;
 					break;
 				}
 			}
 			else {
-				if (tempstr != 0) {
-					EFree(tempstr);
-					tempstr = 0;
-				}
+				has_string = 0;
 				break;
 			}
 		}
-		if (tempstr != 0) {
-			lHashVal = hsieh32(tempstr, SEQ_PTR(a)->length, lHashVal);
-			EFree(tempstr);
-			tempstr = 0;
+		if (has_string != 0) {
+			lHashVal = hsieh32( hsieh_tempstr, SEQ_PTR(a)->length, lHashVal);
 		}
 		else {
 			slen = SEQ_PTR(a)->length;
@@ -3912,7 +3916,7 @@ static void the_end()
 	int i;
 	int c;
 
-	if (is_batch == 0 && print_file == NULL && print_pretty) {
+	if (is_batch == 0 && is_test == 0 && print_file == NULL && print_pretty) {
 		/* pretty printing to screen - prompt the user */
 		screen_output(print_file, "\n");
 		screen_output(print_file, "* Press Enter to continue, or q to quit\n");
@@ -5521,7 +5525,11 @@ void Cleanup(int status)
 #endif
 
 	gameover = TRUE;
-
+#ifndef ERUNTIME
+	if( !WRITE_COVERAGE_DB() ){
+		screen_output(stderr, "\nUnable to open coverage database!\n");
+	}
+#endif
 	/* Close all user-opened files */
 	for (fh = FIRST_USER_FILE; fh < MAX_USER_FILE; fh++) {
 		EClose(fh);
@@ -5540,7 +5548,8 @@ void Cleanup(int status)
 		if (TempWarningName) {
 			wrnf = iopen(TempWarningName,"w");
 			if (wrnf != NULL) {
-				for (i = 0; i < warning_count; i++) iprintf(wrnf,"%s",warning_list[i]);
+				for (i = 0; i < warning_count; i++)
+					iprintf(wrnf,"%s",warning_list[i]);
 				iclose(wrnf);
 			}
 			else
@@ -5552,7 +5561,7 @@ void Cleanup(int status)
 			screen_output(stderr, "\n");
 			for (i = 0; i < warning_count; i++) {
 				screen_output(stderr, warning_list[i]);
-				if (((i+1) % 20) == 0 && is_batch == 0) {
+				if (((i+1) % 20) == 0 && is_batch == 0 && is_test == 0) {
 					screen_output(stderr, "\nPress Enter to continue, q to quit\n");
 #ifdef EWINDOWS
 					c = wingetch();
@@ -5573,19 +5582,18 @@ void Cleanup(int status)
 #endif
 
 #ifdef EUNIX
-	if (is_batch == 0 && have_console && (
-		config.numtextrows < 24 ||
-		config.numtextrows > 25 ||
-		config.numtextcols != 80 ||
-		((xterm = getenv("TERM")) != NULL &&
-		  strcmp_ins(xterm, "xterm") == 0))) {
+	if (is_batch == 0 && is_test == 0 && have_console &&
+		(config.numtextrows < 24 || config.numtextrows > 25 || config.numtextcols != 80 ||
+			((xterm = getenv("TERM")) != NULL &&
+		  		strcmp_ins(xterm, "xterm") == 0))) 
+	{
 		screen_output(stderr, "\n\nPress Enter...\n");
 		getc(stdin);
 	}
 #endif
 
 #ifdef EWINDOWS
-	if (is_batch == 0 && TempWarningName == NULL && display_warnings &&
+	if (is_batch == 0 && is_test == 0 && TempWarningName == NULL && display_warnings &&
 		(warning_count || (status && !user_abort)))
 	{
 		// we will have a console if we showed an error trace back or
@@ -5599,9 +5607,6 @@ void Cleanup(int status)
 	EndGraphics();
 
 #ifndef ERUNTIME
-	if( !WRITE_COVERAGE_DB() ){
-		screen_output(stderr, "\nUnable to open coverage database!\n");
-	}
 #ifdef EXTRA_STATS
 	Stats();
 #endif

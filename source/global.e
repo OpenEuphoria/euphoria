@@ -536,3 +536,4 @@ export type symtab_pointer(integer x)
 	return x = -1 or symtab_index(x) or forward_reference(x)
 end type
 				
+

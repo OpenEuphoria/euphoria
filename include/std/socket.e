@@ -6,12 +6,11 @@
 
 namespace sockets
 
-include std/get.e
-include std/machine.e as mem
-include std/regex.e as re
-include std/sequence.e as seq
+include std/machine.e
+include std/sequence.e
 
 include std/net/common.e
+
 
 enum
 	M_SOCK_GETSERVBYNAME = 77,
@@ -739,7 +738,7 @@ procedure delete_socket(object o)
 		return
 	end if
 
-	mem:free(o[SOCKET_SOCKADDR_IN])
+	machine:free(o[SOCKET_SOCKADDR_IN])
 end procedure
 integer delete_socket_rid = routine_id("delete_socket")
 
@@ -869,8 +868,8 @@ public function select(object sockets_read, object sockets_write,
 			equal(sockets_write, sockets_read) then
 		sockets_all = sockets_read
 	else
-		sockets_all = remove_dups(sockets_read & sockets_write
-			& sockets_err, RD_SORT)
+		sockets_all = stdseq:remove_dups(sockets_read & sockets_write
+			& sockets_err, stdseq:RD_SORT)
 	end if
 
 	return machine_func(M_SOCK_SELECT, { sockets_read, sockets_write,
@@ -986,7 +985,8 @@ end function
 --   # ##port## : port number
 --
 -- Returns:
---   An **integer**, 0 for success and -1 on failure.
+--   An **integer**, 0 for success and non-zero on failure.  See the ##ERR_*## constants
+--   for supported values.
 --
 -- Comments:
 --   ##address## can contain a port number. If it does not, it has to be supplied
@@ -1000,7 +1000,7 @@ end function
 -- </eucode>
 
 public function connect(socket sock, sequence address, integer port=-1)
-	object sock_data = parse_ip_address(address, port)
+	object sock_data = common:parse_ip_address(address, port)
 
 	return machine_func(M_SOCK_CONNECT, { sock, sock_data[1], sock_data[2] })
 end function
@@ -1032,7 +1032,7 @@ end function
 -- </eucode>
 
 public function bind(socket sock, sequence address, integer port=-1)
-	object sock_data = parse_ip_address(address, port)
+	object sock_data = common:parse_ip_address(address, port)
 
 	return machine_func(M_SOCK_BIND, { sock, sock_data[1], sock_data[2] })
 end function
@@ -1111,7 +1111,7 @@ end function
 
 public function send_to(socket sock, sequence data, sequence address, integer port=-1,
     	atom flags=0)
-	object sock_data = parse_ip_address(address, port)
+	object sock_data = common:parse_ip_address(address, port)
 
     return machine_func(M_SOCK_SENDTO, { sock, data, flags, sock_data[1], sock_data[2] })
 end function

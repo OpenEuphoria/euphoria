@@ -92,7 +92,8 @@ EU_ALL_FILES = \
 	source/be_task.h \
 	source/be_w.h \
 	source/object.h \
-	source/eudist.ex
+	source/eudist.ex \
+	source/eutest.ex
 
 EU_DIRS = include \
 	include/std/ \
@@ -108,6 +109,7 @@ EU_DIRS = include \
 	demo/linux \
 	demo/langwar \
 	demo/langwar/Linux \
+	demo/net \
 	demo/preproc \
 	demo/unix
 
@@ -122,7 +124,8 @@ EU_BIN_FILES = ed.ex \
 	key.ex \
 	lines.ex \
 	search.ex \
-	where.ex
+	where.ex \
+	eucoverage.ex
 
 BUILD_DIRS = intobj/ \
 	transobj/ \
@@ -177,8 +180,10 @@ update :
 	-mkdir -p $(DEB_SOURCE_DIR)/source/codepage
 	cp $(EU_BASE_DIR)/source/codepage/*ecp $(DEB_SOURCE_DIR)/source/codepage
 	-mkdir -p $(DEB_SOURCE_DIR)/docs/html/images
+	-mkdir $(DEB_SOURCE_DIR)/docs/release
 	cp $(EU_BASE_DIR)/docs/*.af $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/*.txt $(DEB_SOURCE_DIR)/docs
+	cp $(EU_BASE_DIR)/docs/release/*.txt $(DEB_SOURCE_DIR)/docs/release
 	cp $(EU_BASE_DIR)/*.txt $(DEB_SOURCE_DIR)
 	cp $(EU_BASE_DIR)/docs/*.html $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/*.css $(DEB_SOURCE_DIR)/docs

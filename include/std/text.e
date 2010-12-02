@@ -7,7 +7,6 @@
 namespace text
 
 include std/convert.e
-include std/convert.e
 include std/eds.e
 include std/error.e
 include std/filesys.e
@@ -17,7 +16,6 @@ include std/pretty.e
 include std/search.e
 include std/sequence.e
 include std/serialize.e
-include std/types.e
 
 --****
 -- === Routines
@@ -291,23 +289,23 @@ function load_code_page(sequence cpname)
 	sequence cp_source
 	sequence cp_db
 
-	cp_source = defaultext(cpname, ".ecp")
-	cp_source = locate_file(cp_source)
+	cp_source = filesys:defaultext(cpname, ".ecp")
+	cp_source = filesys:locate_file(cp_source)
 
-	cpdata = read_lines(cp_source)
+	cpdata = io:read_lines(cp_source)
 	if sequence(cpdata) then
 
 		pos = 0
 		while pos < length(cpdata) do
 			pos += 1
 			cpdata[pos]  = trim(cpdata[pos])
-			if begins("--HEAD--", cpdata[pos]) then
+			if search:begins("--HEAD--", cpdata[pos]) then
 				continue
 			end if
 			if cpdata[pos][1] = ';' then
 				continue	-- A comment line
 			end if
-			if begins("--CASE--", cpdata[pos]) then
+			if search:begins("--CASE--", cpdata[pos]) then
 				exit
 			end if
 
@@ -336,30 +334,30 @@ function load_code_page(sequence cpname)
 			end if
 
 			kv = keyvalues(cpdata[pos])
-			upper_case_SET &= hex_text(kv[1][1])
-			lower_case_SET &= hex_text(kv[1][2])
+			upper_case_SET &= convert:hex_text(kv[1][1])
+			lower_case_SET &= convert:hex_text(kv[1][2])
 		end while
 
 	else
 		-- See if its in the database.
-		cp_db = locate_file("ecp.dat")
+		cp_db = filesys:locate_file("ecp.dat")
 		integer fh = open(cp_db, "rb")
 		if fh = -1 then
 			return -2 -- Couldn't open DB
 		end if
 		object idx
 		object vers
-		vers = deserialize(fh)  -- get the database version
+		vers = serialize:deserialize(fh)  -- get the database version
 		if vers[1] = 1 then
-			idx = deserialize(fh)  -- get Code Page index offset
-			pos = seek(fh, idx)
-			idx = deserialize(fh)	-- get the Code Page Index
+			idx = serialize:deserialize(fh)  -- get Code Page index offset
+			pos = io:seek(fh, idx)
+			idx = serialize:deserialize(fh)	-- get the Code Page Index
 			pos = find(cpname, idx[1])
 			if pos != 0 then
-				pos = seek(fh, idx[2][pos])
-				upper_case_SET = deserialize(fh) -- "uppercase"
-				lower_case_SET = deserialize(fh) -- "lowercase"
-				encoding_NAME = deserialize(fh) -- "title"
+				pos = io:seek(fh, idx[2][pos])
+				upper_case_SET = serialize:deserialize(fh) -- "uppercase"
+				lower_case_SET = serialize:deserialize(fh) -- "lowercase"
+				encoding_NAME = serialize:deserialize(fh) -- "title"
 			end if
 		end if
 		close(fh)
@@ -525,7 +523,7 @@ end ifdef
 
 public function lower(object x)
 	if length(lower_case_SET) != 0 then
-		return mapping(x, upper_case_SET, lower_case_SET)
+		return stdseq:mapping(x, upper_case_SET, lower_case_SET)
 	end if
 	
 	ifdef WINDOWS then
@@ -571,7 +569,7 @@ end function
 
 public function upper(object x)
 	if length(upper_case_SET) != 0 then
-		return mapping(x, lower_case_SET, upper_case_SET)
+		return stdseq:mapping(x, lower_case_SET, upper_case_SET)
 	end if
 	ifdef WINDOWS then
 		return change_case(x, api_CharUpperBuff)
@@ -1156,24 +1154,24 @@ public function quote( sequence text_in, object quote_pair = {"\"", "\""}, integ
 			-- Simple case where both open and close quote are the same.
 			if match(quote_pair[1], text_in) then
 				if match(esc & quote_pair[1], text_in) then
-					text_in = match_replace(esc, text_in, esc & esc)
+					text_in = search:match_replace(esc, text_in, esc & esc)
 				end if
-				text_in = match_replace(quote_pair[1], text_in, esc & quote_pair[1])
+				text_in = search:match_replace(quote_pair[1], text_in, esc & quote_pair[1])
 			end if
 		else
 			if match(quote_pair[1], text_in) or
 			   match(quote_pair[2], text_in) then
 				if match(esc & quote_pair[1], text_in) then
-					text_in = match_replace(esc & quote_pair[1], text_in, esc & esc & quote_pair[1])
+					text_in = search:match_replace(esc & quote_pair[1], text_in, esc & esc & quote_pair[1])
 				end if
 				text_in = match_replace(quote_pair[1], text_in, esc & quote_pair[1])
 			end if
 
 			if match(quote_pair[2], text_in) then
 				if match(esc & quote_pair[2], text_in) then
-					text_in = match_replace(esc & quote_pair[2], text_in, esc & esc & quote_pair[2])
+					text_in = search:match_replace(esc & quote_pair[2], text_in, esc & esc & quote_pair[2])
 				end if
-				text_in = match_replace(quote_pair[2], text_in, esc & quote_pair[2])
+				text_in = search:match_replace(quote_pair[2], text_in, esc & quote_pair[2])
 			end if
 		end if
 	end if
@@ -1245,13 +1243,13 @@ public function dequote(sequence text_in, object quote_pairs = {{"\"", "\""}}, i
 	-- remove the 'escape' from any 'escaped' quote_pairs within the text.
 	for i = 1 to length(quote_pairs) do
 		if length(text_in) >= length(quote_pairs[i][1]) + length(quote_pairs[i][2]) then
-			if begins(quote_pairs[i][1], text_in) and ends(quote_pairs[i][2], text_in) then
+			if search:begins(quote_pairs[i][1], text_in) and search:ends(quote_pairs[i][2], text_in) then
 				text_in = text_in[1 + length(quote_pairs[i][1]) .. $ - length(quote_pairs[i][2])]
 				integer pos = 1
 				while pos > 0 with entry do
-					if begins(quote_pairs[i][1], text_in[pos+1 .. $]) then
+					if search:begins(quote_pairs[i][1], text_in[pos+1 .. $]) then
 						text_in = text_in[1 .. pos-1] & text_in[pos + 1 .. $]
-					elsif begins(quote_pairs[i][2], text_in[pos+1 .. $]) then
+					elsif search:begins(quote_pairs[i][2], text_in[pos+1 .. $]) then
 						text_in = text_in[1 .. pos-1] & text_in[pos + 1 .. $]
 					else
 						pos += 1
@@ -1576,7 +1574,7 @@ public function format(sequence format_pattern, object arg_list = {})
 
     				for j = 1 to length(arg_list) do
     					if sequence(arg_list[j]) then
-    						if begins(idname, arg_list[j]) then
+    						if search:begins(idname, arg_list[j]) then
     							if argn = 0 then
     								argn = j
     								exit
@@ -1668,13 +1666,13 @@ public function format(sequence format_pattern, object arg_list = {})
 						
 					elsif integer(arg_list[argn]) then
 						if istext then
-							argtext = {and_bits(0xFFFF_FFFF, abs(arg_list[argn]))}
+							argtext = {and_bits(0xFFFF_FFFF, math:abs(arg_list[argn]))}
 							
 						elsif bwz != 0 and arg_list[argn] = 0 then
 							argtext = repeat(' ', width)
 							
 						elsif binout = 1 then
-							argtext = reverse(int_to_bits(arg_list[argn], 32)) + '0'
+							argtext = stdseq:reverse( convert:int_to_bits(arg_list[argn], 32)) + '0'
 							for ib = 1 to length(argtext) do
 								if argtext[ib] = '1' then
 									argtext = argtext[ib .. $]
@@ -1730,7 +1728,7 @@ public function format(sequence format_pattern, object arg_list = {})
 
 					elsif atom(arg_list[argn]) then
 						if istext then
-							argtext = {and_bits(0xFFFF_FFFF, abs(floor(arg_list[argn])))}
+							argtext = {and_bits(0xFFFF_FFFF, math:abs(floor(arg_list[argn])))}
 							
 						else
 							if hexout then
@@ -1802,7 +1800,7 @@ public function format(sequence format_pattern, object arg_list = {})
 								argtext = tempv
 							elsif integer(tempv) then
 								if istext then
-									argtext = {and_bits(0xFFFF_FFFF, abs(tempv))}
+									argtext = {and_bits(0xFFFF_FFFF, math:abs(tempv))}
 							
 								elsif bwz != 0 and tempv = 0 then
 									argtext = repeat(' ', width)
@@ -1812,19 +1810,19 @@ public function format(sequence format_pattern, object arg_list = {})
 
 							elsif atom(tempv) then
 								if istext then
-									argtext = {and_bits(0xFFFF_FFFF, abs(floor(tempv)))}
+									argtext = {and_bits(0xFFFF_FFFF, math:abs(floor(tempv)))}
 								elsif bwz != 0 and tempv = 0 then
 									argtext = repeat(' ', width)
 								else
 									argtext = trim(sprintf("%15.15g", tempv))
 								end if
 							else
-								argtext = pretty_sprint( tempv,
+								argtext = pretty:pretty_sprint( tempv,
 											{2,0,1,1000,"%d","%.15g",32,127,1,0}
 											)
 							end if
 						else
-							argtext = pretty_sprint( arg_list[argn],
+							argtext = pretty:pretty_sprint( arg_list[argn],
 										{2,0,1,1000,"%d","%.15g",32,127,1,0}
 										)
 						end if
@@ -1852,7 +1850,7 @@ public function format(sequence format_pattern, object arg_list = {})
 							cap = cap
 
     					case else
-    						crash("logic error: 'cap' mode in format.")
+    						error:crash("logic error: 'cap' mode in format.")
 
     				end switch
 
@@ -2021,11 +2019,11 @@ public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBa
 	end if
 	for i = 1 to length(LocalQuals) do
 		dbname = DBBase & "_" & LocalQuals[i] & ".edb"
-		db_res = db_select(	locate_file( dbname ), DB_LOCK_READ_ONLY)
-		if db_res = DB_OK then
-			db_res = db_select_table("1")
-			if db_res = DB_OK then
-				lMsgText = db_fetch_record(MsgNum)
+		db_res = eds:db_select( filesys:locate_file( dbname ), eds:DB_LOCK_READ_ONLY)
+		if db_res = eds:DB_OK then
+			db_res = eds:db_select_table("1")
+			if db_res = eds:DB_OK then
+				lMsgText = eds:db_fetch_record(MsgNum)
 				if sequence(lMsgText) then
 					exit
 				end if
@@ -2035,22 +2033,22 @@ public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBa
 
 	-- Next, scan through the generic db
 	if atom(lMsgText) then
-		dbname = locate_file( DBBase & ".edb" )
-		db_res = db_select(	dbname, DB_LOCK_READ_ONLY)
-		if db_res = DB_OK then
-			db_res = db_select_table("1")
-			if db_res = DB_OK then
+		dbname = filesys:locate_file( DBBase & ".edb" )
+		db_res = eds:db_select(	dbname, DB_LOCK_READ_ONLY)
+		if db_res = eds:DB_OK then
+			db_res = eds:db_select_table("1")
+			if db_res = eds:DB_OK then
 				for i = 1 to length(LocalQuals) do
-					lMsgText = db_fetch_record({LocalQuals[i],MsgNum})
+					lMsgText = eds:db_fetch_record({LocalQuals[i],MsgNum})
 					if sequence(lMsgText) then
 						exit
 					end if
 				end for
 				if atom(lMsgText) then
-					lMsgText = db_fetch_record({"",MsgNum})
+					lMsgText = eds:db_fetch_record({"",MsgNum})
 				end if
 				if atom(lMsgText) then
-					lMsgText = db_fetch_record(MsgNum)
+					lMsgText = eds:db_fetch_record(MsgNum)
 				end if
 			end if
 		end if

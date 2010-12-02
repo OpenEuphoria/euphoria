@@ -1,11 +1,13 @@
--- The N Queens Problem:
--- Place N Queens on an NxN chess board
--- such that they don't threaten each other.
+--****
+-- === queens.ex
+--
+-- solves the N queens problem - how to place N queens on an NxN
+-- chess board so they do not attack each other
+--
 
 include std/console.e
 
 constant N = 8 -- try some other sizes
-
 constant ROW = 1, COLUMN = 2
 constant TRUE = 1, FALSE = 0
 
@@ -99,5 +101,4 @@ end procedure
 
 clear_screen()
 place_queen({})
-maybe_any_key()
 

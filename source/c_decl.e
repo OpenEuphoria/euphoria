@@ -74,8 +74,7 @@ export integer LeftSym = FALSE   -- to force name to appear, not value
 
 export boolean
 	dll_option = FALSE,
-	con_option = FALSE,
-	fastfp = FALSE
+	con_option = FALSE
 
 --**
 -- Sequence to contain files that are generated and should be delt with
@@ -382,8 +381,8 @@ end function
 -- 	   or 0 if not if has_delete then ? 1/0 end if
 constant dummy_bb = {0, TYPE_NULL, TYPE_OBJECT, NOVALUE, {MININT, MAXINT}, 0}
 export procedure SetBBType(symtab_index s, integer t, sequence val, integer etype, integer has_delete )
-	integer found, i, tn
-	sequence sym, symo
+	integer found, i, tn, int
+	sequence sym
 
 	if has_delete then
 		p_has_delete = 1
@@ -391,14 +390,19 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 	end if
 
 	sym = SymTab[s]
-	symo = sym
-	if find(sym[S_MODE], M_VARS) then
+	SymTab[s] = 0
+	
+	integer mode = sym[S_MODE]
+	if mode = M_NORMAL or mode = M_TEMP  then
 		-- A variable of some sort.
 		found = FALSE
-		if sym[S_MODE] = M_TEMP then
+		if mode = M_TEMP then
 			sym[S_GTYPE] = t
 			sym[S_SEQ_ELEM] = etype
-			if find(sym[S_GTYPE], TYPES_SO) then
+			integer gtype = sym[S_GTYPE]
+			if gtype = TYPE_OBJECT
+			or gtype = TYPE_SEQUENCE 
+			then
 				if val[MIN] < 0 then
 					sym[S_SEQ_LEN] = NOVALUE
 				else
@@ -422,17 +426,24 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 			tn = sym[S_TEMP_NAME]
 			i = 1
 			while i <= length(BB_info) do
-				sequence bbsym = SymTab[BB_info[i][BB_VAR]]
-				if bbsym[S_MODE] = M_TEMP then
-					if bbsym[S_TEMP_NAME] = tn then
+				sequence bbsym
+				int = BB_info[i][BB_VAR]
+				if int = s then
+					bbsym = sym
+				else
+					bbsym = SymTab[int]
+				end if
+				int = bbsym[S_MODE]
+				if int = M_TEMP then
+					int = bbsym[S_TEMP_NAME]
+					if int = tn then
 						found = TRUE
 						exit
 					end if
 				end if
 				i += 1
 			end while
-
-		else   -- M_NORMAL
+		 else   -- M_NORMAL
 			if t != TYPE_NULL then
 				if not Initializing then
 					sym[S_GTYPE_NEW] = or_type(sym[S_GTYPE_NEW], t)
@@ -485,7 +496,8 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 
 			i = 1
 			while i <= length(BB_info) do
-				if BB_info[i][BB_VAR] = s then
+				int = BB_info[i][BB_VAR]
+				if int = s then
 					found = TRUE
 					exit
 				end if
@@ -508,6 +520,7 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 			-- don't record anything if the var already exists in this BB
 		else
 			sequence bbi = BB_info[i]
+			BB_info[i] = 0
 			bbi[BB_VAR] = s
 			bbi[BB_TYPE] = t
 			bbi[BB_DELETE] = has_delete
@@ -538,7 +551,7 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 			BB_info[i] = bbi
 		end if
 
-	elsif sym[S_MODE] = M_CONSTANT then
+	elsif mode = M_CONSTANT then
 		sym[S_GTYPE] = t
 		sym[S_SEQ_ELEM] = etype
 		if sym[S_GTYPE] = TYPE_SEQUENCE or
@@ -554,10 +567,9 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 		end if
 		sym[S_HAS_DELETE] = has_delete
 	end if
-	if not equal(symo, sym) then
-		-- The symbol table entry got updated.
-		SymTab[s] = sym
-	end if
+	
+	SymTab[s] = sym
+	
 end procedure
 
 --**
@@ -566,7 +578,8 @@ export procedure CName(symtab_index s)
 	object v
 
 	v = ObjValue(s)
-	if SymTab[s][S_MODE] = M_NORMAL then
+	integer mode = SymTab[s][S_MODE]
+ 	if mode = M_NORMAL then
 		-- declared user variables
 
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
@@ -585,7 +598,7 @@ export procedure CName(symtab_index s)
 		end if
 		SetBBType(s, TYPE_NULL, novalue, TYPE_OBJECT, 0) -- record that this var was referenced in this BB
 
-	elsif SymTab[s][S_MODE] = M_CONSTANT then
+ 	elsif mode = M_CONSTANT then
 		-- literal integers, or declared constants
 
 		if integer( sym_obj( s ) ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
@@ -601,14 +614,14 @@ export procedure CName(symtab_index s)
 			end if
 		end if
 
-	else   -- M_TEMP
+ 	else   -- M_TEMP
 		-- literal doubles, strings, temporary vars that we create
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
 		else
 			c_printf("_%d", SymTab[s][S_TEMP_NAME])
 		end if
-	end if
+ 	end if
 
 	LeftSym = FALSE
 end procedure
@@ -864,50 +877,103 @@ export function PromoteTypeInfo()
 	return updsym
 end function
 
+procedure declare_prototype( symtab_index s )
+	sequence ret_type
+	if sym_token( s ) = PROC then
+		ret_type = "void "
+	else
+		ret_type ="int "
+	end if
+
+	c_hputs(ret_type)
+	
+	
+	if dll_option and TWINDOWS  then
+		integer scope = SymTab[s][S_SCOPE]
+		if (scope = SC_PUBLIC
+			or scope = SC_EXPORT
+			or scope = SC_GLOBAL)
+		then
+			-- declare the global routine as an exported DLL function
+			c_hputs("__stdcall ")
+		end if
+	end if
+	
+	c_hprintf("_%d", SymTab[s][S_FILE_NO])
+	c_hputs(SymTab[s][S_NAME])
+	c_hputs("(")
+	
+	for i = 1 to SymTab[s][S_NUM_ARGS] do
+		if i = 1 then
+			c_hputs("int")
+		else
+			c_hputs(", int")
+		end if
+	end for
+	c_hputs(");\n")
+end procedure
+
+procedure add_to_routine_list( symtab_index s, integer seq_num, integer first )
+	if not first then
+		c_puts(",\n")
+	end if
+	
+	c_puts("  {\"")
+
+	c_puts(SymTab[s][S_NAME])
+	c_puts("\", ")
+	c_puts("(int (*)())")
+	c_printf("_%d", SymTab[s][S_FILE_NO])
+	c_puts(SymTab[s][S_NAME])
+	c_printf(", %d", seq_num)
+	c_printf(", %d", SymTab[s][S_FILE_NO])
+	c_printf(", %d", SymTab[s][S_NUM_ARGS])
+
+	if TWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) then
+		c_puts(", 1")  -- must call with __stdcall convention
+	else
+		c_puts(", 0")  -- default: call with normal or __cdecl convention
+	end if
+
+	c_printf(", %d, 0", SymTab[s][S_SCOPE] )
+	c_puts("}")
+
+	if SymTab[s][S_NREFS] < 2 then
+		SymTab[s][S_NREFS] = 2 --s->nrefs++
+	end if
+
+	-- all bets are off:
+	-- set element type and arg type of parameters to TYPE_OBJECT
+	symtab_index p = SymTab[s][S_NEXT]
+	for i = 1 to SymTab[s][S_NUM_ARGS] do
+		SymTab[p][S_ARG_SEQ_ELEM_NEW] = TYPE_OBJECT
+		SymTab[p][S_ARG_TYPE_NEW] = TYPE_OBJECT
+		SymTab[p][S_ARG_MIN_NEW] = NOVALUE
+		SymTab[p][S_ARG_SEQ_LEN_NEW] = NOVALUE
+		p = SymTab[p][S_NEXT]
+	end for
+end procedure
+
 --**
 -- Declare the list of routines for routine_id search
 export procedure DeclareRoutineList()
-	symtab_index s, p
+	symtab_index s
 	integer first, seq_num
 
 	c_hputs("extern struct routine_list _00[];\n")
-
-	-- declare all used routines
-	s = SymTab[TopLevelSub][S_NEXT]
-	while s do
-		if SymTab[s][S_USAGE] != U_DELETED and
-			find(SymTab[s][S_TOKEN], RTN_TOKS)
-		then
-			sequence ret_type
-			if sym_token( s ) = PROC then
-				ret_type = "void "
-			else
-				ret_type ="int "
+	
+	check_file_routines()
+	for f = 1 to length( file_routines ) do
+		sequence these_routines = file_routines[f]
+		for r = 1 to length( these_routines ) do
+			s = these_routines[r]
+			if SymTab[s][S_USAGE] != U_DELETED then
+			
+				declare_prototype( s )
+				
 			end if
-
-			c_hputs(ret_type)
-			if find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC } )
-			and dll_option and TWINDOWS then
-				-- declare the global routine as an exported DLL function
-				c_hputs("__stdcall ")
-
-			else
-
-			end if
-			c_hprintf("_%d", SymTab[s][S_FILE_NO])
-			c_hputs(SymTab[s][S_NAME])
-			c_hputs("(")
-			for i = 1 to SymTab[s][S_NUM_ARGS] do
-				if i = 1 then
-					c_hputs("int")
-				else
-					c_hputs(", int")
-				end if
-			end for
-			c_hputs("); // main-.h?\n")
-		end if
-		s = SymTab[s][S_NEXT]
-	end while
+		end for
+	end for
 	c_puts("\n")
 
 	-- add all possible routine_id targets to the routine list
@@ -915,60 +981,19 @@ export procedure DeclareRoutineList()
 	first = TRUE
 	c_puts("struct routine_list _00[] = {\n")
 
-	s = SymTab[TopLevelSub][S_NEXT]
-	while s do
-		if find(SymTab[s][S_TOKEN], NAMED_TOKS) then
-			if SymTab[s][S_TOKEN] != NAMESPACE and SymTab[s][S_RI_TARGET] then
-				if not first then
-					c_puts(",\n")
-				end if
+	for f = 1 to length( file_routines ) do
+		sequence these_routines = file_routines[f]
+		for r = 1 to length( these_routines ) do
+			s = these_routines[r]
+			if SymTab[s][S_RI_TARGET] then
+				
+				add_to_routine_list( s, seq_num, first )
 				first = FALSE
-
-				c_puts("  {\"")
-
-				c_puts(SymTab[s][S_NAME])
-				c_puts("\", ")
-
-				c_puts("(int (*)())")
-
-				c_printf("_%d", SymTab[s][S_FILE_NO])
-				c_puts(SymTab[s][S_NAME])
-
-				c_printf(", %d", seq_num)
-
-				c_printf(", %d", SymTab[s][S_FILE_NO])
-
-				c_printf(", %d", SymTab[s][S_NUM_ARGS])
-
-				if TWINDOWS and dll_option and find( SymTab[s][S_SCOPE], { SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) then
-					c_puts(", 1")  -- must call with __stdcall convention
-				else
-					c_puts(", 0")  -- default: call with normal or __cdecl convention
-				end if
-
-				c_printf(", %d, 0", SymTab[s][S_SCOPE] )
-
-				c_puts("}")
-
-				if SymTab[s][S_NREFS] < 2 then
-					SymTab[s][S_NREFS] = 2 --s->nrefs++
-				end if
-
-				-- all bets are off:
-				-- set element type and arg type of parameters to TYPE_OBJECT
-				p = SymTab[s][S_NEXT]
-				for i = 1 to SymTab[s][S_NUM_ARGS] do
-					SymTab[p][S_ARG_SEQ_ELEM_NEW] = TYPE_OBJECT
-					SymTab[p][S_ARG_TYPE_NEW] = TYPE_OBJECT
-					SymTab[p][S_ARG_MIN_NEW] = NOVALUE
-					SymTab[p][S_ARG_SEQ_LEN_NEW] = NOVALUE
-					p = SymTab[p][S_NEXT]
-				end for
+				
 			end if
 			seq_num += 1
-		end if
-		s = SymTab[s][S_NEXT]
-	end while
+		end for
+	end for
 	if not first then
 		c_puts(",\n")
 	end if
@@ -1196,17 +1221,17 @@ end procedure
 -- return TRUE if the corresponding C file will contain any code
 -- Note: top level code goes into main-.c
 function any_code(integer file_no)
-	symtab_index s
-
-	s = SymTab[TopLevelSub][S_NEXT]
-	while s do
+	check_file_routines()
+	
+	sequence these_routines = file_routines[file_no]
+	for i = 1 to length( these_routines ) do
+		symtab_index s = these_routines[i]
 		if SymTab[s][S_FILE_NO] = file_no and
 		   SymTab[s][S_USAGE] != U_DELETED and
 		   find(SymTab[s][S_TOKEN], RTN_TOKS) then
 			return TRUE -- found a non-deleted routine in this file
 		end if
-		s = SymTab[s][S_NEXT]
-	end while
+	end for
 	return FALSE
 end function
 
@@ -1311,6 +1336,23 @@ end function
 --**
 -- walk through the user-defined routines, computing types and
 -- optionally generating code
+sequence file_routines = {}
+procedure check_file_routines()
+	if not length( file_routines ) then
+		file_routines = repeat( {}, length( known_files ) )
+		integer s = SymTab[TopLevelSub][S_NEXT]
+		while s do
+			if SymTab[s][S_USAGE] != U_DELETED and
+			find(SymTab[s][S_TOKEN], RTN_TOKS)
+			then
+				file_routines[SymTab[s][S_FILE_NO]] &= s
+			end if
+			s = SymTab[s][S_NEXT]
+		end while
+			
+	end if
+end procedure
+
 export procedure GenerateUserRoutines()
 	symtab_index s, sp
 	integer next_c_char, q, temps
@@ -1328,7 +1370,10 @@ export procedure GenerateUserRoutines()
 			ShowMsg(1, 241, Pass, 0)
 		end if
 	end if
-
+	
+	check_file_routines()
+	
+	
 	c_puts("// GenerateUserRoutines\n")
 	for file_no = 1 to length(known_files) do
 		if file_no = 1 or any_code(file_no) then
@@ -1373,11 +1418,11 @@ export procedure GenerateUserRoutines()
 			new_c_file(c_file)
 
 			s = SymTab[TopLevelSub][S_NEXT]
-			while s do
-				if SymTab[s][S_FILE_NO] = file_no and
-					SymTab[s][S_USAGE] != U_DELETED and
-					find(SymTab[s][S_TOKEN], RTN_TOKS)
-				then
+			
+			sequence these_routines = file_routines[file_no]
+			for routine_no = 1 to length( these_routines ) do
+				s = these_routines[routine_no]
+				if SymTab[s][S_USAGE] != U_DELETED then
 					-- a referenced routine in this file
 
 					-- Check for oversize C file
@@ -1576,9 +1621,7 @@ export procedure GenerateUserRoutines()
 					end if
 					c_puts("\n\n" )
 				end if
-
-				s = SymTab[s][S_NEXT]
-			end while
+			end for
 		end if
 	end for
 end procedure

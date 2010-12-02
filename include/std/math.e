@@ -136,7 +136,7 @@ public function max(object a)
 	if atom(a) then
 		return a
 	end if
-	b = MINF
+	b = mathcons:MINF
 	for i = 1 to length(a) do
 		c = max(a[i])
 		if c > b then
@@ -169,7 +169,7 @@ public function min(object a)
 	if atom(a) then
 			return a
 	end if
-	b = PINF
+	b = mathcons:PINF
 	for i = 1 to length(a) do
 		c = min(a[i])
 			if c < b then
@@ -590,7 +590,7 @@ public function round(object a, object precision=1)
 	end if
 	len = length(a)
 	if len != length(precision) then
-		crash("The lengths of the two supplied sequences do not match.")
+		error:crash("The lengths of the two supplied sequences do not match.")
 	end if
 	s = repeat(0, len)
 	for i = 1 to len do
@@ -760,7 +760,7 @@ end function
 
 public function arccos(trig_range x)
 --  returns angle in radians
-	return HALFPI - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
+	return mathcons:HALFPI - 2 * arctan(x / (1.0 + sqrt(1.0 - x * x)))
 end function
 
 --**
@@ -820,14 +820,14 @@ public function atan2(atom y, atom x)
 		return arctan(y/x)
 	elsif x < 0 then
 		if y < 0 then
-			return arctan(y/x) - PI
+			return arctan(y/x) - mathcons:PI
 		else
-			return arctan(y/x) + PI
+			return arctan(y/x) + mathcons:PI
 		end if
 	elsif y > 0 then
-		return HALFPI
+		return mathcons:HALFPI
 	elsif y < 0 then
-		return -(HALFPI)
+		return -(mathcons:HALFPI)
 	else
 		return 0
 	end if
@@ -857,7 +857,7 @@ end function
 --		[[:deg2rad]]
 
 public function rad2deg (object x)
-   return x * RADIANS_TO_DEGREES
+   return x * mathcons:RADIANS_TO_DEGREES
 end function
 
 --**
@@ -882,7 +882,7 @@ end function
 -- [[:rad2deg]]
 
 public function deg2rad (object x)
-   return x * DEGREES_TO_RADIANS
+   return x * mathcons:DEGREES_TO_RADIANS
 end function
 
 --****
@@ -950,7 +950,7 @@ end function
 --		[[:log]]
 
 public function log10(object x1)
-	return log(x1) * INVLN10
+	return log(x1) * mathcons:INVLN10
 end function
 
 --**
@@ -976,7 +976,7 @@ end function
 --		[[:log]]
 
 public function exp(atom x)
-	return power(E, x)
+	return power( mathcons:E, x)
 end function
 
 --****
@@ -1089,7 +1089,7 @@ end function
 -- </eucode>
 --
 public function fib(integer i)
-	return floor((power(PHI, i) / SQRT5) + 0.5)
+	return floor((power( mathcons:PHI, i) / mathcons:SQRT5) + 0.5)
 end function
 
 --****
@@ -1829,7 +1829,7 @@ public function approx(object p, object q, atom epsilon = 0.005)
 	if sequence(p) then
 		if sequence(q) then
 			if length(p) != length(q) then
-				crash("approx(): Sequence arguments must be the same length")
+				error:crash("approx(): Sequence arguments must be the same length")
 			end if
 			for i = 1 to length(p) do
 				p[i] = approx(p[i], q[i])
