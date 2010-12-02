@@ -73,6 +73,7 @@ include std/io.e
 include std/math.e
 include std/pretty.e
 include std/search.e
+include std/error.e
 
 --****
 -- === Constants
@@ -442,12 +443,12 @@ public procedure assert(object name, object outcome)
 	if sequence(name) then
 		test_true(name, outcome)
 		if equal(outcome,0) then
-			crash(name)
+			error:crash(name)
 		end if
 	else
 		test_true(outcome, name)
 		if equal(name,0) then
-			crash(outcome)
+			error:crash(outcome)
 		end if
 	end if
 end procedure
@@ -526,7 +527,7 @@ end for
 
 ifdef not CRASH then
 
-include std/error.e
+
 
 function test_crash( object o )
 	test_fail( "unittesting crashed" )
@@ -534,6 +535,6 @@ function test_crash( object o )
 	o = 0
 	return o
 end function
-crash_routine( routine_id( "test_crash" ) )
+error:crash_routine( routine_id( "test_crash" ) )
 
 end ifdef

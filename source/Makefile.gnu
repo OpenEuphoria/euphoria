@@ -79,6 +79,7 @@ else
   SEDFLAG=-ri
 endif
 ifeq "$(EMINGW)" "1"
+	EPTHREAD=
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
 	LDLFLAG=-lws2_32
@@ -120,7 +121,7 @@ ifeq "$(EMINGW)" "1"
 	endif
 	PCRE_CC=gcc
 else
-	LDLFLAG+= -pthread
+	EPTHREAD=-pthread
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
@@ -138,6 +139,8 @@ else
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
+
+LDLFLAG+= $(EPTHREAD)
 
 ifdef EDEBUG
 DEBUG_FLAGS=-g3 -O0 -Wall
@@ -230,11 +233,11 @@ REVGET=svn_rev
 endif
 
 ifeq "$(MANAGED_MEM)" "1"
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE) $(MEM_FLAGS)
 else
-FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+FE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -fsigned-char $(EOSMING) -ffast-math $(EOSFLAGS) $(DEBUG_FLAGS) -I../ -I../../include/ $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 endif
-BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) -pthread  -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
+BE_FLAGS =  $(COVERAGEFLAG) $(MSIZE) $(EPTRHEAD) -c -Wall $(EOSTYPE) $(EBSDFLAG) $(RUNTIME_FLAGS) $(EOSFLAGS) $(BACKEND_FLAGS) -fsigned-char -ffast-math $(DEBUG_FLAGS) $(MEM_FLAGS) $(PROFILE_FLAGS) -DARCH=$(ARCH) $(EREL_TYPE)
 
 EU_CORE_FILES = \
 	block.e \
