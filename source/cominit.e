@@ -257,17 +257,8 @@ export function merge_parameters(sequence a, sequence b, sequence opts)
 		i += 1
 	end while
 	
-	if first_extra then
-		sequence result = {}
-		
-		if first_extra > 1 then
-			result = splice( b, a, first_extra ) --b[1..first_extra - 1] & a & b[first_extra..$]
-		else
-			-- no user supplied parameters
-			result = a & b
-		end if
-		
-		return result
+	if first_extra > 1 then
+		return splice(b, a, first_extra)
 	end if
 	
 	-- No extras, system will prob fail w/a help message later
