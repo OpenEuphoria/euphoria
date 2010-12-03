@@ -1288,8 +1288,8 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- map the_map_p
--- the_map_p = new()
+-- map the_map_p = new()
+--
 -- put(the_map_p, 10, "ten")
 -- put(the_map_p, 20, "twenty")
 -- put(the_map_p, 30, "thirty")
@@ -1297,14 +1297,15 @@ end function
 --
 -- sequence keyvals
 -- keyvals = pairs(the_map_p) 
---           -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
+-- -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
 -- keyvals = pairs(the_map_p, 1) 
---           -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
---   </eucode>
+-- -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
+-- </eucode>
 --
- -- See Also:
- --		[[:get]], [[:keys]], [[:values]]
- --
+-- See Also:
+--		[[:get]], [[:keys]], [[:values]]
+--
+
 public function pairs(map the_map_p, integer sorted_result = 0)
 	sequence key_bucket_
 	sequence value_bucket_
@@ -1763,21 +1764,20 @@ end function
 --   put(m1, "AB", 2)
 --   put(m2, "XY", 3)
 --
---   ? pairs(m1)  -- { {"AB", 2}, {"XY", 1} }
---   ? pairs(m2)  -- { {"XY", 3} }
+--   pairs(m1) --> { {"AB", 2}, {"XY", 1} }
+--   pairs(m2) --> { {"XY", 3} }
 --
 --   -- Add same keys' values.
 --   copy(m1, m2, ADD)
 --
---   ? pairs(m2)
---   -- { {"AB", 2}, {"XY", 4} }
+--   pairs(m2) --> { {"AB", 2}, {"XY", 4} }
 --   </eucode>
 --
 -- See Also:
--- [[:put]]
+--   [[:put]]
+--
 
 public function copy(map source_map, object dest_map=0, integer put_operation = PUT)
-
 	if map(dest_map) then
 		-- Copies the contents of one map to another map.
 		sequence keys_set

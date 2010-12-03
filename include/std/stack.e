@@ -136,29 +136,33 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- push(sk,5)
--- push(sk,"abc")
--- push(sk,2.3)
--- ? at(sk,0) -- 5
--- ? at(sk,-1) -- "abc"
--- ? at(sk,1) -- 2.3
--- ? at(sk,2) -- "abc"
+--
+-- push(sk, 5)
+-- push(sk, "abc")
+-- push(sk, 2.3)
+--
+-- at(sk, 0)  --> 5
+-- at(sk, -1) --> "abc"
+-- at(sk, 1)  --> 2.3
+-- at(sk, 2)  --> "abc"
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
--- push(sk,2.3)
--- ? at(sk,0) -- 2.3
--- ? at(sk,-1) -- "abc"
--- ? at(sk,1) -- 5
--- ? at(sk,2) -- "abc"
+--
+-- push(sk, 5)
+-- push(sk, "abc")
+-- push(sk, 2.3)
+-- at(sk, 0)  --> 2.3
+-- at(sk, -1) --> "abc"
+-- at(sk, 1)  --> 5
+-- at(sk, 2)  --> "abc"
 -- </eucode>
 --
 -- See Also:
 -- [[:size]], [[:top]], [[:peek_top]], [[:peek_end]]
+--
 
 public function at(stack sk, integer idx = 1)
 	sequence o = eumem:ram_space[sk][data]
@@ -192,25 +196,28 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FIFO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 5
--- ? last(sk) -- 2.3
+-- top(sk)  --> 5
+-- last(sk) --> 2.3
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FILO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 2.3
--- ? last(sk) -- 5
+-- top(sk)  --> 2.3
+-- last(sk) --> 5
 -- </eucode>
 --
 -- See Also:
--- [[:pop]], [[:top]]
+--   [[:pop]], [[:top]]
+--
 
 public procedure push(stack sk, object value)
 	-- The last element in the data sequence is always the top item, 
@@ -245,23 +252,28 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 2.3
+--
+-- top(sk) --> 2.3
 -- </eucode>
 --
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
--- ? top(sk) -- 5
+--
+-- top(sk) --> 5
 -- </eucode>
 --
 -- See Also:
--- [[:at]], [[:pop]], [[:peek_top]], [[:last]]
+--   [[:at]], [[:pop]], [[:peek_top]], [[:last]]
+--
 
 public function top(stack sk)
 	if length(eumem:ram_space[sk][data]) = 0 then
@@ -286,19 +298,23 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? last(sk) -- 5
+--
+-- last(sk) --> 5
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FIFO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, 2.3)
--- ? last(sk) -- 2.3
+--
+-- last(sk) --> 2.3
 -- </eucode>
 --
 -- See Also:
@@ -575,29 +591,37 @@ end function
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
 -- push(sk, "")
--- ? peek_top(sk,1)  -- ""
--- ? peek_top(sk,2)  -- 2.3
+--
+-- ? peek_top(sk, 1) --> ""
+-- ? peek_top(sk, 2) --> 2.3
+--
 -- swap(sk)
--- ? peek_top(sk,1)  -- 2.3
--- ? peek_top(sk,2)  -- ""
+--
+-- ? peek_top(sk, 1) --> 2.3
+-- ? peek_top(sk, 2) --> ""
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, 2.3)
 -- push(sk, "")
--- ? peek_top(sk,1)  -- 5
--- ? peek_top(sk,2)  -- "abc"
+--
+-- peek_top(sk, 1) --> 5
+-- peek_top(sk, 2) --> "abc"
+--
 -- swap(sk)
--- ? peek_top(sk,1)  -- "abc"
--- ? peek_top(sk,2)  -- 5
+--
+-- peek_top(sk, 1) --> "abc"
+-- peek_top(sk, 2) --> 5
 -- </eucode>
 --
 
@@ -635,35 +659,45 @@ end procedure
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FILO)
+--
 -- push(sk,5)
 -- push(sk,"abc")
 -- push(sk, "")
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- ""
--- ? peek_top(sk,2)  -- "abc"
--- ? size(sk)  -- 3
+--
+-- peek_top(sk,1) --> ""
+-- peek_top(sk,2) --> "abc"
+-- size(sk)       --> 3
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- ""
--- ? peek_top(sk,2)  -- ""
--- ? peek_top(sk,3)  -- "abc"
--- ? size(sk)  -- 4
+--
+-- peek_top(sk,1) --> ""
+-- peek_top(sk,2) --> ""
+-- peek_top(sk,3) --> "abc"
+-- size(sk)       --> 4
 -- </eucode>
 --
 -- Example 1:
 -- <eucode>
 -- stack sk = new(FIFO)
--- push(sk,5)
--- push(sk,"abc")
+--
+-- push(sk, 5)
+-- push(sk, "abc")
 -- push(sk, "")
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- 5
--- ? peek_top(sk,2)  -- "abc"
--- ? size(sk)  -- 3
+--
+-- peek_top(sk, 1) --> 5
+-- peek_top(sk, 2) --> "abc"
+-- size(sk)        --> 3
+--
 -- dup(sk)
--- ? peek_top(sk,1)  -- 5
--- ? peek_top(sk,2)  -- 5
--- ? peek_top(sk,3)  -- "abc"
--- ? size(sk)  -- 4
+--
+-- peek_top(sk, 1) --> 5
+-- peek_top(sk, 2) --> 5
+-- peek_top(sk, 3) --> "abc"
+-- size(sk)        --> 4
 -- </eucode>
 --
 
@@ -698,6 +732,7 @@ end procedure
 --
 -- See Also:
 -- [[:size]], [[:top]]
+--
 
 public procedure set(stack sk, object val, integer idx = 1)
 	sequence o = eumem:ram_space[sk][data]
@@ -727,7 +762,8 @@ end procedure
 --   The stack contents is emptied.
 --
 -- See Also:
--- [[:new]], [[:is_empty]]
+--   [[:new]], [[:is_empty]]
+--
 
 public procedure clear(stack sk)
 	eumem:ram_space[sk][data] = {}

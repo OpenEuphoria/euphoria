@@ -117,6 +117,9 @@
 * [[ticket:479]], Installer now writes a eu.cfg, appends at the confirmation of the user.
 * [[ticket:485]], Fixed scanner initialization to prevent invalid accesses.
 * [[ticket:481]], RD_INPLACE, RD_PRESORTED, RD_SORT are now documented individually.
+* [[ticket:403]], Many documentation examples used ? func() and showed the output in
+                  string format which ? does not do. It was misleading to the new person
+                  to Euphoria. Found instances have been updated.
 
 === Enhancements/Changes
 

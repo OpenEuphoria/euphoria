@@ -538,19 +538,20 @@ end function
 -- Converts an amount of currency into a string representing that amount.
 --
 -- Parameters:
---		# ##amount## : an atom, the value to write out.
+--   # ##amount## : an atom, the value to write out.
 --
 -- Returns:
--- 		A **sequence**, a string that writes out ##amount## of current currency.
+--   A **sequence**, a string that writes out ##amount## of current currency.
 --
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ? money(1020.5) -- returns"$1,020.50"
+-- money(1020.5) -- returns"$1,020.50"
 -- </eucode>
 --
 -- See Also:
 --		[[:set]], [[:number]]
+--
 
 public function money(object amount)
 	sequence result
@@ -589,7 +590,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ? number(1020.5) -- returns "1,020.50"
+-- number(1020.5) -- returns "1,020.50"
 -- </eucode>
 --
 -- See Also:
@@ -706,11 +707,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? datetime("Today is a %A",datetime:now())
+-- include std/datetime.e
+--
+-- datetime("Today is a %A", datetime:now())
 -- </eucode>
 --
 -- See Also:
 --   datetime:[[:format]]
+--
 
 public function datetime(sequence fmt, datetime:datetime dtm)
 	atom pFmt, pRes, pDtm

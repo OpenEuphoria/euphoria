@@ -2512,31 +2512,31 @@ end function
 -- ##pivot()## is used as a split up a sequence relative to a specific value.
 --
 -- Example 1:
---   <eucode>
---   ? pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 )
---     -- Ans: {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}
---   ? pivot( {4, 1, -4, 6, -1, -7, 9, 10} )
---     -- Ans: {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}
---   ? pivot( 5 )
---     -- Ans: {{}, {}, {5}}
---   </eucode>
+-- <eucode>
+-- pivot( {7, 2, 8.5, 6, 6, -4.8, 6, 6, 3.341, -8, "text"}, 6 )
+-- -- Ans: {{2, -4.8, 3.341, -8}, {6, 6, 6, 6}, {7, 8.5, "text"}}
+-- pivot( {4, 1, -4, 6, -1, -7, 9, 10} )
+-- -- Ans: {{-4, -1, -7}, {}, {4, 1, 6, 9, 10}}
+-- pivot( 5 )
+-- -- Ans: {{}, {}, {5}}
+-- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- function quiksort(sequence s)
--- 	if length(s) < 2 then
--- 		return s
--- 	end if
--- 	sequence k
+--     if length(s) < 2 then
+--         return s
+--     end if
+--
+--     sequence k = pivot(s, s[rand(length(s))])
 -- 	
--- 	k = pivot(s, s[rand(length(s))])
--- 	
--- 	return quiksort(k[1]) & k[2] & quiksort(k[3])
+--     return quiksort(k[1]) & k[2] & quiksort(k[3])
 -- end function
+--
 -- sequence t2 = {5,4,7,2,4,9,1,0,4,32,7,54,2,5,8,445,67}
 -- ? quiksort(t2) --> {0,1,2,2,4,4,4,5,5,7,7,8,9,32,54,67,445}
 -- </eucode>
-
+--
 
 public function pivot(object data_p, object pivot_p = 0)
 	sequence result_
@@ -3151,24 +3151,25 @@ public enum
 -- Example 1:
 -- <eucode>
 -- sequence s = { {4,7,9}, {7,2,5,9}, {0,4}, {5}, {6,5}}
--- ? combine(s, COMBINE_SORTED)   --> {0,2,4,4,5,5,5,6,7,7,9,9}
--- ? combine(s, COMBINE_UNSORTED) --> {4,7,9,7,2,5,9,0,4,5,6,5}
+-- combine(s, COMBINE_SORTED)   --> {0,2,4,4,5,5,5,6,7,7,9,9}
+-- combine(s, COMBINE_UNSORTED) --> {4,7,9,7,2,5,9,0,4,5,6,5}
 -- </eucode>
 --
 -- Example 2:
 -- <eucode>
 -- sequence s = { {"cat", "dog"}, {"fish", "whale"}, {"wolf"}, {"snail", "worm"}}
--- ? combine(s)                   --> {"cat","dog","fish","snail","whale","wolf","worm"}
--- ? combine(s, COMBINE_UNSORTED) --> {"cat","dog","fish","whale","wolf","snail","worm"}
+-- combine(s)                   --> {"cat","dog","fish","snail","whale","wolf","worm"}
+-- combine(s, COMBINE_UNSORTED) --> {"cat","dog","fish","whale","wolf","snail","worm"}
 -- </eucode>
 --
 -- Example 3:
 -- <eucode>
 -- sequence s = { "cat", "dog","fish", "whale", "wolf", "snail", "worm"}
--- ? combine(s)                   --> "aaacdeffghhiilllmnooorsstwww"
--- ? combine(s, COMBINE_UNSORTED) --> "catdogfishwhalewolfsnailworm"
+-- combine(s)                   --> "aaacdeffghhiilllmnooorsstwww"
+-- combine(s, COMBINE_UNSORTED) --> "catdogfishwhalewolfsnailworm"
 -- </eucode>
 --
+
 public function combine(sequence source_data, integer proc_option = COMBINE_SORTED)
 	sequence lResult
 	integer lTotalSize = 0
