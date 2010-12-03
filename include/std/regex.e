@@ -34,7 +34,7 @@
 -- use UTF8 encoded UNICODE strings when you pass the UTF8 option.
 
 namespace regex
-
+include std/types.e
 include std/flags.e as flags
 include std/machine.e
 include std/math.e

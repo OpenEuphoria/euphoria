@@ -6,6 +6,7 @@
 namespace stdseq
 
 include std/error.e
+include std/types.e
 include std/search.e
 include std/sort.e
 

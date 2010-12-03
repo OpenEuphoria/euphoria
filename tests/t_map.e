@@ -63,18 +63,41 @@ test_equal("map m1 get 5#2",               "5", map:get(m1,  5, 999) )
 test_equal("map m1 get 1000",           "1000", map:get(m1, 1000, 999) )
 
 -- add 2000 floats
+o2 = map:threshold(o1)
 for i = 1 to 1000 do
 	map:put(m1, -i*1.333333, i)
 end for
 
 for i = 1 to 1000 do
+--	? i
 	map:put(m1, 1e100+i*1e90, i)
 end for
 test_equal("map m1 get#1 -133.3333",           100, map:get(m1, -1.333333*100, 999) )
 
+ifdef BENCHMARK then
+for bb = 1 to 1000 do
+for i = 1000 to 1  by -1 do
+	test_equal(sprintf("large get 1 %d", i), i, map:get(m1,  1e100+i*1e90, 0))
+end for
+
+for i = 1000 to 1  by -1 do
+	test_equal(sprintf("large get 2 %d", i), i, map:get(m1, -i*1.333333, 0))
+end for
+
+for i = 1000 to 1  by -1 do
+	test_equal(sprintf("large get 3 %d", i), -1, map:get(m1, i*2.11, -1))
+end for
+
+end for
+end ifdef
+
 o1 = statistics(m1)
+--? o1
+--getc(0)
 rehash(m1, 100)
 o2 = statistics(m1)
+--? o2
+
 test_not_equal("Rehash works for large maps", o1, o2)
 
 rehash(m1, 50_000_000) -- Force timeout for prime number determination
@@ -108,6 +131,7 @@ test_equal( "map clear #1", 0, map:size(m1))
 test_equal( "map clear #2", LARGEMAP, map:type_of(m1))
 
 -- m2: strings and objects
+map:threshold(60)
 map:map m2
 m2 = map:new(map:threshold())	-- Create a small map
 
@@ -144,9 +168,9 @@ m3 = map:new()
 map:put(m3, 1, 11)
 map:put(m3, 2, 22)
 map:put(m3, 3, 33)
-test_equal("map m3 type #1", LARGEMAP, map:type_of(m3))
+test_equal("map m3 type large", LARGEMAP, map:type_of(m3))
 map:remove(m3, 2)
-test_equal("map m3 type #2", SMALLMAP, map:type_of(m3))
+test_equal("map m3 type small", SMALLMAP, map:type_of(m3))
 test_equal("map m3 size#1", 2, map:size(m3))
 map:remove(m3, 2)
 test_equal("map m3 size#2", 2, map:size(m3))
@@ -537,16 +561,20 @@ m2 = map:new(map:threshold())	-- Create a small map
 map:put(m2, init_small_map_key, "Special Key")
 map:put(m2, "Special Key", init_small_map_key)
 test_equal("Ensure small map", SMALLMAP, type_of(m2))
+test_equal("small map magic number has #1", 1, map:has(m2, init_small_map_key))
 test_equal("small map magic number #1", "Special Key", map:get(m2, init_small_map_key))
+test_equal("small map magic number has #2", 1, map:has(m2, "Special Key"))
 test_equal("small map magic number #2", init_small_map_key, map:get(m2, "Special Key"))
 map:put(m2, init_small_map_key, "Another Special Key")
 test_equal("small map magic number #3", "Another Special Key", map:get(m2, init_small_map_key))
 
 map:clear(m2)
+test_equal("no small map magic number has #1", 0, map:has(m2, init_small_map_key))
 test_equal("no small map magic number #1", "No Key", map:get(m2, init_small_map_key, "No Key"))
 map:put(m2, "Key1", "1")
 map:put(m2, "Key2", "too")
 test_equal("Ensure small map", SMALLMAP, type_of(m2))
+test_equal("no small map magic number has #2", 0, map:has(m2, init_small_map_key))
 test_equal("no small map magic number #2", "No Key", map:get(m2, init_small_map_key, "No Key"))
 
 

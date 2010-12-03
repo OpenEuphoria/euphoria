@@ -19,7 +19,7 @@ include std/sort.e
 include std/text.e
 include std/wildcard.e
 
-public include std/types.e
+include std/types.e
 
 ifdef UNIX then
 	include std/get.e -- for disk_size()

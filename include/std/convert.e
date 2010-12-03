@@ -6,6 +6,7 @@
 
 namespace convert
 
+include std/types.e
 include std/search.e
 include std/text.e
 
@@ -839,7 +840,7 @@ end function
 public function to_string(object data_in, integer string_quote = 0, integer embed_string_quote = '"')
 	sequence data_out
 	
-	if string(data_in) then
+	if types:string(data_in) then
 		if string_quote = 0 then
 			return data_in
 		end if

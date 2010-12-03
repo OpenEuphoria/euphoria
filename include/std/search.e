@@ -5,7 +5,7 @@
 
 namespace search
 
-public include std/types.e
+include std/types.e
 
 --****
 -- === Equality
@@ -683,11 +683,16 @@ public function match_replace(object needle, sequence haystack, object replaceme
 	integer needle_len
 	integer replacement_len
 	integer scan_from
+	integer cnt
 	
-	if max = 0 then
-		max = length(haystack)
-	elsif max < 0 then
+	
+	if max < 0 then
 		return haystack
+	end if
+	
+	cnt = length(haystack)
+	if max != 0 then
+		cnt = max
 	end if
 	
 	if atom(needle) then
@@ -704,8 +709,8 @@ public function match_replace(object needle, sequence haystack, object replaceme
 	while posn with entry do
 		haystack = replace(haystack, replacement, posn, posn + needle_len)
 
-		max -= 1
-		if max = 0 then
+		cnt -= 1
+		if cnt = 0 then
 			exit
 		end if
 		scan_from = posn + replacement_len
@@ -1219,4 +1224,3 @@ public function vlookup(object find_item, sequence grid_data, integer source_col
     return def_value
 
 end function
-
