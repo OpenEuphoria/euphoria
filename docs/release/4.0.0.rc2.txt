@@ -174,3 +174,4 @@
   Directory.
 * ##printf##s third argument is now optional. ##printf(1, "Hello\n", {})## is no longer
   needed, it can be shortened to ##printf(1, "Hello\n")##
+* [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
