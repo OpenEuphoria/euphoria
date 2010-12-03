@@ -57,9 +57,7 @@ typedef signed   char   schar;
 	//#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
 	// define iseek() in be_runtime.c - uses the llseek() syscall directly
 	long long iseek(FILE *, long long, int);
-#	define itell(f) iseek(f, (long long)0, SEEK_CUR)
-#	define iiseek fseek
-#	define iitell ftell
+	long long itell(FILE *);
 #	define iflush fflush
 #	define iclose fclose
 #	define ifileno fileno
@@ -76,8 +74,6 @@ typedef signed   char   schar;
 #	define iwrite fwrite
 #   define iseek(f,o,w) (_lseeki64(fileno(f),(__int64)(o),(w)) == -1 ? -1 : 0)
 #	define itell(f) _lseeki64(fileno(f), (__int64)0, SEEK_CUR)
-#	define iiseek fseek
-#	define iitell ftell
 #	define iflush fflush
 #	define iclose fclose
 #	define ifileno fileno
@@ -95,7 +91,6 @@ typedef signed   char   schar;
 #	define iread fread
 #	define iwrite fwrite
 #	define iseek fseek
-#	define iiseek fseek
 #	define itell ftell
 #	define iflush fflush
 #	define iclose fclose

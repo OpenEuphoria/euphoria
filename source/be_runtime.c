@@ -421,15 +421,14 @@ long long iseek(FILE *f, long long o, int w)
 	long long res = 0;
 	ohi = (unsigned long)((o >> 32) & (long long)0xFFFFFFFF);
 	olow = (unsigned long)(o & (long long)0xFFFFFFFF);
-	int ret = _llseek(fileno(f), ohi, olow, &res, w);
-	
-	if( w == SEEK_SET ){
-		// Seek() just wants indication of success
-		return ret;
-	}
-	else{
-		return ((!ret) ? res : -1);
-	}
+	return _llseek(fileno(f), ohi, olow, &res, w);
+}
+
+long long itell(FILE *f)
+{
+	long long res = 0;
+	int ret = _llseek(fileno(f), 0, 0, &res, SEEK_CUR);
+	return ((!ret) ? res : -1);
 }
 #endif
 
