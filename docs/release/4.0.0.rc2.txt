@@ -90,6 +90,7 @@
 * [[ticket:457]], cmd_parse() now correctly honors the NO_HELP option and allows
                   the coder to override the default help switches.
 * [[ticket:461]], Fixed error checking for invalid C routines for c_func / c_proc.
+* [[ticket:463]], Fixed large file support for MinGW
 * [[ticket:464]], Fixed translated for loops that could result in incorrectly emitted brackets
 * [[ticket:465]], Fixed stack space calculations for forward proc to func conversion and type checks.
 * [[ticket:466]], Fixed line reporting on compile time type check error.
@@ -109,6 +110,7 @@
 * [[ticket:479]], Installer now writes a eu.cfg, appends at the confirmation of the user.
 * [[ticket:481]], RD_INPLACE, RD_PRESORTED, RD_SORT are now documented individually.
 * [[ticket:485]], Fixed scanner initialization to prevent invalid accesses.
+* [[ticket:490]], Fixed large file support for Watcom
 * [[ticket:491]], ##cmd_parse## now appends everything after the first extra to the 
                   ##OPT_EXTRAS## entry when ##NO_VALIDATION_AFTER_FIRST_EXTRA## is supplied
                   as a parsing option.
