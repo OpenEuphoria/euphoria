@@ -120,6 +120,9 @@
 * [[ticket:403]], Many documentation examples used ? func() and showed the output in
                   string format which ? does not do. It was misleading to the new person
                   to Euphoria. Found instances have been updated.
+* [[ticket:491]], ##cmd_parse## now appends everything after the first extra to the 
+                  ##OPT_EXTRAS## entry when ##NO_VALIDATION_AFTER_FIRST_EXTRA## is supplied
+                  as a parsing option.
 
 === Enhancements/Changes
 

@@ -77,7 +77,6 @@ public enum
 	-- -D TEST is meant for ##eui##, but -name and -greeting options
 	-- are meant for ##greet.ex##. See [[:cmd_parse]]
 	--
-	--
 	-- ##eui @euopts.txt greet.ex @hotmail.com##
 	-- here 'hotmail.com' is not expanded into the command line but
 	-- 'euopts.txt' is.
@@ -112,8 +111,6 @@ public enum
 	NO_HELP,
 	
 	$
-
---
 
 public enum
 	--**
@@ -1182,6 +1179,10 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 			map:put(parsed_opts, OPT_EXTRAS, cmd, map:APPEND)
 			has_extra = 1
 			if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
+				for i = arg_idx + 1 to length(cmds) do
+					map:put(parsed_opts, OPT_EXTRAS, cmds[i], map:APPEND)
+				end for
+				
 				exit
 			else
 				continue
