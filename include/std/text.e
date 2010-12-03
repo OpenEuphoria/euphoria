@@ -6,6 +6,7 @@
 
 namespace text
 
+include std/types.e
 include std/convert.e
 include std/eds.e
 include std/error.e
@@ -627,10 +628,10 @@ public function proper(sequence x)
 		if integer(res[i]) then
 			if convert then
 				-- Check for upper case
-				pos = t_upper(res[i])
+				pos = types:t_upper(res[i])
 				if pos = 0 then
 					-- Not upper, so check for lower case
-					pos = t_lower(res[i])
+					pos = types:t_lower(res[i])
 					if pos = 0 then
 						-- Not lower so check for digits
 						-- n.b. digits have no effect on if its in a word or not.
