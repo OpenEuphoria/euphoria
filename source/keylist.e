@@ -81,7 +81,7 @@ export sequence keylist = {
 	{"append",           SC_PREDEF, FUNC, APPEND,           2, E_PURE},
 	{"prepend",          SC_PREDEF, FUNC, PREPEND,          2, E_PURE},
 	{"print",            SC_PREDEF, PROC, PRINT,            2, E_OTHER_EFFECT},
-	{"printf",           SC_PREDEF, PROC, PRINTF,           3, E_OTHER_EFFECT},
+	{"printf",           SC_PREDEF, PROC, PRINTF,           3, E_OTHER_EFFECT, {0,0,{{STRING,{}}}}, {3,2,{3}} },
 	{"clear_screen",     SC_PREDEF, PROC, CLEAR_SCREEN,     0, E_OTHER_EFFECT},
 	{"floor",            SC_PREDEF, FUNC, FLOOR,            1, E_PURE},
 	{"getc",             SC_PREDEF, FUNC, GETC,             1, E_OTHER_EFFECT},

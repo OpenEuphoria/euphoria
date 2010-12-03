@@ -172,3 +172,5 @@
 * Reuse memory buffer in HSIEH32 hash implementation
 * ##abbreviate_path## is used to cleanup the display from ##euc## regarding the Build 
   Directory.
+* ##printf##s third argument is now optional. ##printf(1, "Hello\n", {})## is no longer
+  needed, it can be shortened to ##printf(1, "Hello\n")##
