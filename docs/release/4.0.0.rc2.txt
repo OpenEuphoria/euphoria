@@ -13,7 +13,7 @@
 * [[ticket:376]], ##mouse.e## and ##std/mouse.e##
 * [[ticket:484]], ##wildcard_file## is very DOS centric, doesn't act right at all on
                   modern consoles. It has been removed.
-* [[ticket:371]], ##remove_all## has been removed as it was a duplicate of the
+* [[ticket:371]], ##replace_all## has been removed as it was a duplicate of the
                   more powerful [[:match_replace]] routine.
 * [[ticket:486]], ##can_add## docs have been removed, they pointed to the name change
                   of ##can_add## to ##binop_ok##, changed during beta stage.
