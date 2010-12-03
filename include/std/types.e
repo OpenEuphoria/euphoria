@@ -121,8 +121,8 @@ public constant FALSE = (1=0)
 -- Boolean TRUE value
 public constant TRUE = (1=1)
 
---**
--- Predefined character sets:
+--****
+-- === Predefined character sets:
 public enum
 	CS_FIRST = 0,
 	CS_Consonant,

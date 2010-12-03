@@ -14,14 +14,14 @@ include std/eumem.e
 -- === Constants
 --
 
---**
--- Stack types
--- * FIFO: like people standing in line: first item in is first item out
--- * FILO: like for a stack of plates  : first item in is last item out
+--****
+-- === Stack types
 
 
 public constant
+	--**  FIFO: like people standing in line: first item in is first item out
 	FIFO = 1,
+	--**  FILO: like for a stack of plates  : first item in is last item out
 	FILO = 2
 
 --****

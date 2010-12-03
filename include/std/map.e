@@ -1028,6 +1028,15 @@ public function size(map the_map_p)
 	return ram_space[the_map_p][ELEMENT_COUNT]
 end function
 
+public enum
+	NUM_ENTRIES,
+	NUM_IN_USE,
+	NUM_BUCKETS,
+	LARGEST_BUCKET,
+	SMALLEST_BUCKET,
+	AVERAGE_BUCKET,
+	STDEV_BUCKET
+
 --**
 -- Retrieves characteristics of a map.
 --
@@ -1050,15 +1059,6 @@ end function
 --   printf(1, "The average size of the buckets is %d", s[AVERAGE_BUCKET])
 --   </eucode>
 --
-
-public enum
-	NUM_ENTRIES,
-	NUM_IN_USE,
-	NUM_BUCKETS,
-	LARGEST_BUCKET,
-	SMALLEST_BUCKET,
-	AVERAGE_BUCKET,
-	STDEV_BUCKET
 
 public function statistics(map the_map_p)
 	sequence statistic_set_
@@ -1568,6 +1568,10 @@ public function load_map(object input_file_name)
 	return new_map
 end function
 
+public enum
+	SM_TEXT,
+	SM_RAW
+
 --**
 -- Saves a map to a file.
 --
@@ -1654,10 +1658,6 @@ end function
 --
 -- See Also:
 --		[[:load_map]]
-
-public enum
-	SM_TEXT,
-	SM_RAW
 	
 public function save_map(map the_map_, object file_name_p, integer type_ = SM_TEXT)
 	integer file_handle_ = -2
