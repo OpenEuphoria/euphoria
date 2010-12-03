@@ -536,7 +536,66 @@ export procedure add_ref(token tok)
 	end if
 end procedure
 
-export procedure MarkTargets(symtab_index s, integer attribute)
+integer just_mark_everything_from = 0
+procedure mark_all( integer attribute )
+	-- mark all visible routines parsed so far
+	symtab_pointer p = SymTab[just_mark_everything_from][S_NEXT]
+	while p != 0 do
+		integer sym_file = SymTab[p][S_FILE_NO]
+		just_mark_everything_from = p
+		if sym_file = current_file_no then
+			SymTab[p][attribute] += 1
+		else
+			integer scope = SymTab[p][S_SCOPE]
+			switch scope with fallthru do
+				case SC_PUBLIC then
+					if and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[current_file_no][sym_file] ) then
+						SymTab[p][attribute] += 1
+					end if
+					break
+				case SC_EXPORT then
+					if not and_bits( DIRECT_INCLUDE, include_matrix[current_file_no][sym_file] ) then
+						break
+					end if
+					-- fallthrough
+				case SC_GLOBAL then
+					SymTab[p][attribute] += 1
+					
+			end switch
+		end if
+		p = SymTab[p][S_NEXT]
+	end while
+end procedure
+
+sequence recheck_targets = {}
+
+
+export procedure mark_final_targets()
+	if just_mark_everything_from then
+		if TRANSLATE then
+			mark_all( S_RI_TARGET )
+		elsif BIND then
+			mark_all( S_NREFS )
+		end if
+	elsif length( recheck_targets ) then
+		
+		for i = length( recheck_targets ) to 1 by -1 do
+			integer marked = 0
+			if TRANSLATE then
+				marked = MarkTargets( recheck_targets[i], S_RI_TARGET )
+			elsif BIND then
+				marked = MarkTargets( recheck_targets[i], S_NREFS )
+			end if
+			
+			if marked then
+				recheck_targets = remove( recheck_targets, i )
+			end if
+		end for
+	end if
+end procedure
+
+
+export function MarkTargets(symtab_index s, integer attribute)
 -- Note the possible targets of a routine id call
 	symtab_index p
 	sequence sname
@@ -548,6 +607,9 @@ export procedure MarkTargets(symtab_index s, integer attribute)
 		SymTab[s][S_MODE] = M_CONSTANT) and
 		sequence(SymTab[s][S_OBJ]) then
 		-- hard-coded string
+		
+		integer found = 0
+		
 		string = SymTab[s][S_OBJ]
 		colon = find(':', string)
 		if colon = 0 then
@@ -562,7 +624,7 @@ export procedure MarkTargets(symtab_index s, integer attribute)
 		-- simple approach - mark all names in hash bucket that match,
 		-- ignoring GLOBAL/LOCAL
 		if length(sname) = 0 then
-			return
+			return 1
 		end if
 		h = buckets[hashfn(sname)]
 		while h do
@@ -573,39 +635,22 @@ export procedure MarkTargets(symtab_index s, integer attribute)
 					end if
 				else
 					SymTab[h][attribute] += 1
+					found = 1
 				end if
 			end if
 			h = SymTab[h][S_SAMEHASH]
 		end while
+		
+		if not found then
+			just_mark_everything_from = TopLevelSub
+			recheck_targets &= s
+		end if
+		return found
 	else
-		-- mark all visible routines parsed so far
-		p = SymTab[TopLevelSub][S_NEXT]
-		while p != 0 do
-			integer sym_file = SymTab[p][S_FILE_NO]
-			if sym_file = current_file_no then
-				SymTab[p][attribute] += 1
-			else
-				scope = SymTab[p][S_SCOPE]
-				switch scope with fallthru do
-					case SC_PUBLIC then
-						if and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[current_file_no][sym_file] ) then
-							SymTab[p][attribute] += 1
-						end if
-						break
-					case SC_EXPORT then
-						if not and_bits( DIRECT_INCLUDE, include_matrix[current_file_no][sym_file] ) then
-							break
-						end if
-						-- fallthrough
-					case SC_GLOBAL then
-						SymTab[p][attribute] += 1
-						
-				end switch
-			end if
-			p = SymTab[p][S_NEXT]
-		end while
+		mark_all( attribute )
+		return 1
 	end if
-end procedure
+end function
 
 export sequence dup_globals, dup_overrides, in_include_path
 
