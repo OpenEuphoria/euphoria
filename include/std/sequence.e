@@ -26,15 +26,6 @@ public constant
 -- === Basic routines
 --
 
---****
--- Signature:
--- public function can_add(object a, object can_add)
---
--- Description:
--- This function, which was introduced in the 4.0 betas, has been renamed to [[:binop_ok]].
---
-
-
 --**
 -- Checks whether two objects can perform a sequence operation together.
 --
