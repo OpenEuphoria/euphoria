@@ -277,6 +277,7 @@ public procedure test_report()
 	atom score
 	integer fh
 	sequence fname
+	sequence respc
 
 	if tests_failed > 0 or verbose >= TEST_SHOW_ALL then
 		if test_count = 0 then
@@ -285,8 +286,15 @@ public procedure test_report()
 			score = (tests_passed / test_count) * 100
 		end if
 
-		printf(2, "  %d tests run, %d passed, %d failed, %.1f%% success\n",
-			{test_count, tests_passed, tests_failed, score})
+		respc = sprintf("%1.f%%", score)
+		if equal(respc, "100%") then
+			if tests_failed > 0 then
+				-- this can happen when the number of tests is huge and the number of fails is tiny.
+				respc = "99.99%" -- Cannot have 100% if any tests failed.
+			end if
+		end if
+		printf(2, "  %d tests run, %d passed, %d failed, %s success\n",
+			{test_count, tests_passed, tests_failed, respc})
 	end if
 
 	if accumulate_on_summary then

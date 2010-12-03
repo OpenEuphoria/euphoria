@@ -661,6 +661,7 @@ procedure do_test( sequence files )
 	integer first_counter = length(files)+1
 	integer log_fd = 0
 	sequence silent = ""
+	sequence respc
 	
 	total = length(files)
 
@@ -708,7 +709,16 @@ procedure do_test( sequence files )
 		printf(1, "    FAIL: %s\n", {fail_list[i]})
 	end for
 
-	printf(1, "Files (run: %d) (failed: %d) (%.1f%% success)\n", {total, failed, score})
+	if failed != 0 then
+		respc = sprintf("%1.f%%", score)
+		if equal(respc, "100%") then
+			-- this can happen when the number of files is huge and the number of fails is tiny.
+			respc = "99.99%"
+		end if
+		printf(1, "Files (run: %d) (failed: %d) (%s success)\n", {total, failed, respc})
+	else
+		printf(1, "Files (run: %d) (failed: 0) (100%% success)\n", total)
+	end if
 
 	object temps, ln = read_lines("unittest.dat")
 	if sequence(ln) then
@@ -729,7 +739,16 @@ procedure do_test( sequence files )
 			score = ((total - failed) / total) * 100
 		end if
 
-		printf(1, "Tests (run: %d) (failed: %d) (%.1f%% success)\n", {total, failed, score})
+		if failed != 0 then
+			respc = sprintf("%1.f%%", score)
+			if equal(respc, "100%") then
+				-- this can happen when the number of tests is huge and the number of fails is tiny.
+				respc = "99.99%"
+			end if
+			printf(1, "Tests (run: %d) (failed: %d) (%s success)\n", {total, failed, respc})
+		else
+			printf(1, "Tests (run: %d) (failed: 0) (100%% success)\n", total)
+		end if
 	end if
 	
 	process_coverage()
@@ -1164,6 +1183,7 @@ end procedure
 
 function build_file_list( sequence list )
 	sequence files = {}
+
 	for j = 1 to length( list ) do
 		
 		if file_type( list[j] ) = FILETYPE_DIRECTORY then
@@ -1190,7 +1210,7 @@ end function
 procedure main()
 
 	object files = {}
-	
+
 	map opts = cmd_parse( cmdopts )
 	sequence keys = map:keys( opts )
 	for i = 1 to length( keys ) do
