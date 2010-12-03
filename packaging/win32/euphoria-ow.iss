@@ -92,7 +92,7 @@ Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Componen
 Source: "..\..\bin\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
 Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
@@ -155,9 +155,7 @@ Name: {group}\Euphoria User Community (Forums and Wiki);  IconFilename: {app}\bi
 Name: "{group}\{cm:UninstallProgram,Euphoria}"; Filename: "{uninstallexe}"
 
 [UninstallDelete]
-Name: "{group}\{cm:UninstallProgram,Euphoria}"; Filename: "{uninstallexe}"
-
-[UninstallDelete]
+Name: "{group}\{cm:UninstallProgram,Euphoria}"; Name: "{uninstallexe}"
 Type: files; Name: {app}\RapidEuphoria.url
 Type: files; Name: {app}\OpenEuphoria.url
 Type: files; Name: {app}\EuphoriaManual.url
@@ -207,3 +205,31 @@ begin
 	 Result := backupDir;
 end;
 
+procedure InstallEuCfg();
+var
+  euCfgFname : String;
+  incLine : String;
+
+begin
+  incLine := ExpandConstant('-i {app}\include');
+  euCfgFname := ExpandConstant('{app}\bin\eu.cfg');
+
+  if FileExists(euCfgFname) = False then
+    begin
+      SaveStringToFile(euCfgFname, incLine + #13#10, False);
+    end
+  else
+    begin
+      if MsgBox('An eu.cfg file exists already. It should really contain' + #13#10 +
+                 incLine + #13#10 +
+                 'Should the installer append this line?', 
+                 mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES
+      then
+        begin
+          SaveStringToFile(euCfgFname, #13#10 + '[all]' + #13#10 + incLine + #13#10, True);
+        end
+      else
+        MsgBox('Please ensure ' + euCfgFname + ' contains:' + #13#10 +
+               incLine, mbInformation, MB_OK);
+    end;
+end;
