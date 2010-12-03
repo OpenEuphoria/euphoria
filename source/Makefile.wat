@@ -724,10 +724,14 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 	copy $(DOCDIR)\html\images\next.png $^@
 
 $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
+	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
