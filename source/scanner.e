@@ -62,7 +62,7 @@ sequence default_namespaces
 -- Local variables
 sequence char_class  -- character classes, some are negative
 sequence id_char     -- char that could be in an identifier
-sequence IncludeStk  -- stack of include file info
+sequence IncludeStk = {} -- stack of include file info
 
 -- IncludeStk entry
 constant FILE_NO = 1,           -- file number
