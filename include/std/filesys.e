@@ -2644,7 +2644,7 @@ end function
 -- most files and uses, a single atom will be sufficient as this gives a 32-bit
 -- file signature. However, if you require better proof that the content of two
 -- files are different then use higher values for ##size##. For example, 
--- ##size = 8 gives you 256 bits of file signature.
+-- ##size = 8## gives you 256 bits of file signature.
 -- * If ##size## is zero or negative, an empty sequence is returned.
 -- * All files of zero length will return the same checksum value when ##usename##
 --  is zero.
