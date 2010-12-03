@@ -8,19 +8,19 @@
 
 === Removed
 
-* Support for alternate style eu.cfg sections, i.e. bind:unix and unix:bind were 
-  previously supported, now only the documented method: bind:unix is accepted.
+* [[ticket:371]], ##replace_all## has been removed as it was a duplicate of the
+                  more powerful [[:match_replace]] routine.
 * [[ticket:376]], ##mouse.e## and ##std/mouse.e##
 * [[ticket:484]], ##wildcard_file## is very DOS centric, doesn't act right at all on
                   modern consoles. It has been removed.
-* [[ticket:371]], ##replace_all## has been removed as it was a duplicate of the
-                  more powerful [[:match_replace]] routine.
 * [[ticket:486]], ##can_add## docs have been removed, they pointed to the name change
                   of ##can_add## to ##binop_ok##, changed during beta stage.
 * [[ticket:487]], ##wildcard:new()##, method really didn't make sense as a planning
                   stage for regex usage as too much would have to change, a simply call
                   to new did not save much and possibly just caused bad programming
                   methods to be used.
+* Support for alternate style eu.cfg sections, i.e. bind:unix and unix:bind were 
+  previously supported, now only the documented method: bind:unix is accepted.
 
 === Bug Fixes
 
@@ -33,8 +33,13 @@
 * [[ticket:338]], Fixed //Data Execution Prevention// for FreeBSD systems.
 * [[ticket:339]], Fixed locale for FreeBSD systems.
 * [[ticket:341]], Removed unused variables in the standard library.
+* [[ticket:343]], Resolution of unqualified symbols from other files is deferred until
+                  all files that could cause symbol resolution conflicts have been read.
 * [[ticket:345]], Forward patches now update the stack space for a routine when
                   they create temps.
+* [[ticket:349]], Fixed resolution of qualified public symbols when the namespace points
+                  to the wrong file, but the namespace file directly includes the file with
+                  the actual routine
 * [[ticket:352]], A function with a defaulted parameter that is both forward
                   referenced and inlined no longer crashes.
 * [[ticket:358]], The programs eutest, creolehtml, and eudoc now all support a
@@ -58,18 +63,15 @@
 * [[ticket:391]], Watcom build system was lacking the ability to build the manual.
 * [[ticket:402]], ##[[:maybe_any_key]]## now works when run from the command line version
                   of EUPHORIA even when run without a command-line shell.
-* [[ticket:457]], cmd_parse() now correctly honors the NO_HELP option and allows
-                  the coder to override the default help switches.
-* Too numerous to list: Many documentation typo, spelling mistakes and formatting
-  errors have been corrected.
-* Removed many unnecessary ##[[:maybe_any_key]]## uses from the general demos
+* [[ticket:403]], Many documentation examples used ? func() and showed the output in
+                  string format which ? does not do. It was misleading to the new person
+                  to Euphoria. Found instances have been updated.
+* [[ticket:405]], ##dis.ex## no longer creates a build directory for no reason.
 * [[ticket:409]], Calls to ##Head()## that should have altered the sequence in place
                   did not, resulting in slower code.
-* [[ticket:343]], Resolution of unqualified symbols from other files is deferred until
-                  all files that could cause symbol resolution conflicts have been read.
-* [[ticket:349]], Fixed resolution of qualified public symbols when the namespace points
-                  to the wrong file, but the namespace file directly includes the file with
-                  the actual routine
+* [[ticket:417]], Accidental inclusion of TOC was removed
+* [[ticket:418]], ##-debug## ##eu.cfg## switch text was corrected
+* [[ticket:418]], Clarified what (all) and (translator) means
 * [[ticket:425]], Fixed crash when branches were inlined into the top level
 * [[ticket:426]], Eutest uses binary binder
 * [[ticket:429]], ##tokenize.e## no longer drops the first character of a backtick string
@@ -80,49 +82,47 @@
                   ##[[:T_NUMBER]]## as the token type and either ##[[:TF_INT]]##
                   or ##[[:TF_HEX]]## as the form. If ##[[:string_numbers]]## is
                   enabled, the prefix is returned as part of the string, i.e.
-                  {{{integer a = 0b0101}}} will return ##"0b0101"##.
+                  ###integer a = 0b0101### will return ##"0b0101"##.
 * [[ticket:439]], ##tokenize.e## fixed breakage with slice operator due to new string
                   number parsing.
-* ##net/http.e## now properly handles ##{ {key,value}, ...}##, ##{ encoding_type, {key,val}, ...}##
-  and already encoded string data, ##"name=John%20Doe"##.
-* [[ticket:417]], Accidental inclusion of TOC was removed
-* [[ticket:418]], ##-debug## ##eu.cfg## switch text was corrected
-* [[ticket:418]], Clarified what (all) and (translator) means
 * [[ticket:448]], Fixed ##splice()## translation.
 * [[ticket:453]], Reworked the way open files are cleaned up so that coverage works properly
-* The euphoria coded backend (eu.ex) in some cases did not handle recursive calls correctly.
+* [[ticket:457]], cmd_parse() now correctly honors the NO_HELP option and allows
+                  the coder to override the default help switches.
 * [[ticket:461]], Fixed error checking for invalid C routines for c_func / c_proc.
+* [[ticket:464]], Fixed translated for loops that could result in incorrectly emitted brackets
 * [[ticket:465]], Fixed stack space calculations for forward proc to func conversion and type checks.
 * [[ticket:466]], Fixed line reporting on compile time type check error.
-* [[:connect]] return value was documented incorrectly.
-* [[ticket:464]], Fixed translated for loops that could result in incorrectly emitted brackets
-* [[ticket:469]], Fixed translated block comments
 * [[ticket:467]], Fixed interpreter, translator and binder for handling multiple parameters
                   when one comes from a eu.cfg file and the other from the command line, but
                   the given option was designed to only be used ONCE, such as -batch
-* ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
-* ##std/cmdline.e##, ##cmd_parse## sets the NO_PARAMETER option when option does not have HAS_PARAMETER.
-* ##std/cmdline.e##, ##cmd_parse## sets the ONCE option when option does not have MULTIPLE.
+* [[ticket:469]], Fixed translated block comments
 * [[ticket:471]], When using the ##-lib## parameter to ##euc##, it's canoncial path is used
                   and it's existance is checked before translation has begun to prevent wasting
                   time only to find the linker fails.
 * [[ticket:472]], eui --help display is now in a logical display order.
 * [[ticket:473]], euc --help display is now in a logical display order.
 * [[ticket:475]], Fixed memory leak with interpreted [[:rand]]
-* [[ticket:405]], ##dis.ex## no longer creates a build directory for no reason.
 * [[ticket:476]], ##euc## can now translated single character base filenames, i.e. h.ex
 * [[ticket:477]], ##canonical_path## expansion of ~ now works in MSYS and CMD.exe with 
                   the MinGW build.
-* Fixed [[:seek]] return value for large files on Linux.
 * [[ticket:479]], Installer now writes a eu.cfg, appends at the confirmation of the user.
-* [[ticket:485]], Fixed scanner initialization to prevent invalid accesses.
 * [[ticket:481]], RD_INPLACE, RD_PRESORTED, RD_SORT are now documented individually.
-* [[ticket:403]], Many documentation examples used ? func() and showed the output in
-                  string format which ? does not do. It was misleading to the new person
-                  to Euphoria. Found instances have been updated.
+* [[ticket:485]], Fixed scanner initialization to prevent invalid accesses.
 * [[ticket:491]], ##cmd_parse## now appends everything after the first extra to the 
                   ##OPT_EXTRAS## entry when ##NO_VALIDATION_AFTER_FIRST_EXTRA## is supplied
                   as a parsing option.
+* Fixed [[:seek]] return value for large files on Linux.
+* [[:connect]] return value was documented incorrectly.
+* ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
+* ##std/cmdline.e##, ##cmd_parse## sets the NO_PARAMETER option when option does not have HAS_PARAMETER.
+* ##std/cmdline.e##, ##cmd_parse## sets the ONCE option when option does not have MULTIPLE.
+* The euphoria coded backend (eu.ex) in some cases did not handle recursive calls correctly.
+* Too numerous to list: Many documentation typo, spelling mistakes and formatting
+  errors have been corrected.
+* Removed many unnecessary ##[[:maybe_any_key]]## uses from the general demos
+* ##net/http.e## now properly handles ##{ {key,value}, ...}##, ##{ encoding_type, {key,val}, ...}##
+  and already encoded string data, ##"name=John%20Doe"##.
 
 === Enhancements/Changes
 
@@ -130,14 +130,13 @@
                   combined for easier maintenance.
 * [[ticket:341]], [[ticket:344]], Many unused variables have been cleaned up in the 
                   standard library.
+* [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
 * ##manual-upload## target was added to GNU and Watcom makefiles
 * Formatted ##buzz.ex## example
 * ##euc## will always remove it's temporary build directory unless the ##-keep##
   option is supplied. If one wants to keep the build directory for some reason, they
-  sould probably use ##-build-dir## as well, for example:
-  {{{
-  euc -build-dir my-build hello.ex
-  }}} which will automatically keep the build directory since it was user specified.
+  sould probably use ##-build-dir## as well, for example: ##euc -build-dir my-build 
+  hello.ex## which will automatically keep the build directory since it was user specified.
 * Converted ##bin/lines.ex## to use new language constructs and the standard library
   as an example of how an application take advantage of 4.0. Code base went from 591
   lines of code to 195 lines of code. Bugs were fixed, comment percentage calculations
@@ -177,4 +176,3 @@
   Directory.
 * ##printf##s third argument is now optional. ##printf(1, "Hello\n", {})## is no longer
   needed, it can be shortened to ##printf(1, "Hello\n")##
-* [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
