@@ -3044,16 +3044,33 @@ public function remove_subseq( sequence source_list, object alt_value = SEQ_NOAL
 	return lResult[1.. lCOW - 1]
 end function
 
---**
--- These are used with the [[:remove_dups]]() function.
--- ** RD_INPLACE removes items while preserving the original order of the unique items.
--- ** RD_PRESORTED assumes that the elements in ##source_data## are already sorted. If they
--- are not already sorted, this option merely removed adjacent duplicate elements.
--- ** RD_SORT will return the unique elements in ascending sorted order.
-
 public enum
+	--**
+	-- Removes items while preserving the original order of the unique items.
+	--
+	-- See Also:
+	--   [[:remove_dups]]
+	--
+	
 	RD_INPLACE,
+	
+	--**
+	-- Assumes that the elements in ##source_data## are already sorted. If they
+	-- are not already sorted, this option merely removed adjacent duplicate elements.
+	--
+	-- See Also:
+	--   [[:remove_dups]]
+	--
+	
 	RD_PRESORTED,
+
+	--**
+	-- Will return the unique elements in ascending sorted order.
+	--
+	-- See Also:
+	--   [[:remove_dups]]
+	--
+	
 	RD_SORT
 
 --**
