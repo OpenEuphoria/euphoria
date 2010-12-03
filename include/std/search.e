@@ -663,6 +663,7 @@ end function
 -- </eucode>
 --
 -- Example 4:
+-- <eucode>
 -- s = match_replace('a', "abracadabra", 'X')
 -- -- s is now "XbrXcXdXbrX"
 -- s = match_replace("ra", "abracadabra", 'X')
@@ -671,6 +672,7 @@ end function
 -- -- s is now "aabraacaadaabraa"
 -- s = match_replace("a", "abracadabra", "")
 -- -- s is now "brcdbr"
+-- </eucode>
 --
 -- See Also:
 --		[[:find]], [[:replace]], [[:regex:find_replace]], [[:find_replace]]
