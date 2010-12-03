@@ -1429,7 +1429,10 @@ Constants may not be declared inside a subroutine.
 ==== enum
 
 An enumerated value is a special type of constant where the first value
-defaults to the number 1 and each item after that is incremented by 1.
+defaults to the number 1 and each item after that is incremented by 1 by default. An
+optional ##by## keyword can be supplied to change the increment value. As with sequences,
+enums can also be terminated with a ##$## for ease of editing ##enum## lists that may
+change frequently during development.
 
 <eucode>
 enum ONE, TWO, THREE, FOUR
