@@ -259,7 +259,11 @@ procedure scan_char()
 	end if
 	LPos += 1
 	sti += 1
-	Look = source_text[sti]
+	if sti > length(source_text) then
+		Look = EOF
+	else
+		Look = source_text[sti]
+	end if
 end procedure
 
 function lookahead(integer dist = 1)
