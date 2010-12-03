@@ -123,6 +123,8 @@
 * Removed many unnecessary ##[[:maybe_any_key]]## uses from the general demos
 * ##net/http.e## now properly handles ##{ {key,value}, ...}##, ##{ encoding_type, {key,val}, ...}##
   and already encoded string data, ##"name=John%20Doe"##.
+* Fixed eutext.ex and std/unittest.e. Under some circumstances, they would report 100%
+  success even though there were some failures.
 
 === Enhancements/Changes
 
@@ -176,3 +178,7 @@
   Directory.
 * ##printf##s third argument is now optional. ##printf(1, "Hello\n", {})## is no longer
   needed, it can be shortened to ##printf(1, "Hello\n")##
+* Added another hashing algorithm. HSIEH30 is identical to HSIEH32 but will only
+  ever return a 30-bit integer (a Euphoria integer).
+* Removed hash elements from map.e and placed them in a new standard library module, hash.e
+* Performance tweaks to maps. 
