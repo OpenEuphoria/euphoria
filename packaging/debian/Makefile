@@ -111,7 +111,8 @@ EU_DIRS = include \
 	demo/langwar/Linux \
 	demo/net \
 	demo/preproc \
-	demo/unix
+	demo/unix \
+	demo/win32
 
 EU_BIN_FILES = ed.ex \
 	ascii.ex \
