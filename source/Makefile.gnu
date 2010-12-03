@@ -732,7 +732,9 @@ $(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex translator library
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
+		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
 $(BUILDDIR)/$(EUTEST) : $(TRUNKDIR)/source/eutest.ex translator library
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
