@@ -40,7 +40,7 @@
 
 namespace map
 
---include std/convert.e
+include std/hash.e
 include std/datetime.e
 include std/error.e
 include std/eumem.e
@@ -69,61 +69,6 @@ enum
 
 constant type_is_map   = "Eu:StdMap"
 
---****
--- Signature:
---   <built-in> function hash(object source, atom algo)
---
--- Description:
---     Calculates a hash value from //key// using the algorithm //algo//
---
--- Parameters:
---		# ##source## : Any Euphoria object
---		# ##algo## : A code indicating which algorithm to use.
--- ** -5 uses Hsieh. Fastest and good dispersion
--- ** -4 uses Fletcher. Very fast and good dispersion
--- ** -3 uses Adler. Very fast and reasonable dispersion, especially for small strings
--- ** -2 uses MD5 (not implemented yet) Slower but very good dispersion. 
--- Suitable for signatures.
--- ** -1 uses SHA256 (not implemented yet) Slow but excellent dispersion. 
--- Suitable for signatures. More secure than MD5.
--- ** 0 and above (integers and decimals) and non-integers less than zero use
---  the cyclic variant (hash = hash * algo + c).
--- This is a fast and good to excellent
--- dispersion depending on the value of //algo//. Decimals give better dispersion but are
--- slightly slower.
---
--- Returns:
---     An **integer**,
---        Except for the MD5 and SHA256 algorithms, this is a 32-bit integer.\\
---     A **sequence**,
---        MD5 returns a 4-element sequence of integers\\
---        SHA256 returns a 8-element sequence of integers.
---
--- Comments:
--- * For //algo// values from zero to less than 1, that actual value used is (algo + 69096). 
---
--- Example 1:
--- <eucode>
--- x = hash("The quick brown fox jumps over the lazy dog", 0)
--- -- x is 242399616
--- x = hash("The quick brown fox jumps over the lazy dog", 99.94)
--- -- x is 723158
--- x = hash("The quick brown fox jumps over the lazy dog", -99.94)
--- -- x is 4175585990
--- x = hash("The quick brown fox jumps over the lazy dog", -4)
--- -- x is 467406810
--- </eucode>
-
---****
--- === Hashing Algorithms
-
-public enum
-	HSIEH30 = -6,
-	HSIEH32,
-	ADLER32,
-	FLETCHER32,
-	MD5,
-	SHA256
 
 --****
 -- === Operation codes for put

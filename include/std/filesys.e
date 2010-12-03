@@ -11,7 +11,7 @@ include std/datetime.e
 include std/dll.e
 include std/io.e
 include std/machine.e
-include std/map.e
+include std/hash.e
 include std/math.e
 include std/search.e
 include std/sequence.e
@@ -503,7 +503,7 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- See Also:
 --   [[:dir]], [[:sort]], [[:sort_columns]]
 
-public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = NO_ROUTINE_ID)
+public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = types:NO_ROUTINE_ID)
 	object d, abort_now
 	object orig_func
 	sequence user_data = {path_name, 0}
@@ -523,7 +523,7 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	end if
 
 	-- get the full directory information
-	if not equal(dir_source, NO_ROUTINE_ID) then
+	if not equal(dir_source, types:NO_ROUTINE_ID) then
 		if atom(source_orig_func) then
 			d = call_func(dir_source, {path_name})
 		else
@@ -2695,7 +2695,7 @@ public function checksum(sequence filename, integer size = 4, integer usename = 
 		nhit = 0
 		nmiss = 0
 		hits = {0,0}
-		fx = hash(filename, map:HSIEH32) -- Get a hash value for the whole name.
+		fx = hash(filename, stdhash:HSIEH32) -- Get a hash value for the whole name.
 		while find(0, hits) do
 			-- find next character to use.
 			nhit += 1
@@ -2722,7 +2722,7 @@ public function checksum(sequence filename, integer size = 4, integer usename = 
 		-- Process the file, one set of bytes at a time
 		-- The size of the byte set is dependant on the file length and the check sum length requested,
 		-- and it is some value between 7 and 14 bytes long.
-		data = repeat(0, remainder( hash(jx * jx / size , map:HSIEH32), 8) + 7)
+		data = repeat(0, remainder( hash(jx * jx / size , stdhash:HSIEH32), 8) + 7)
 		
 	
 		while data[1] != -1 with entry do
@@ -2733,7 +2733,7 @@ public function checksum(sequence filename, integer size = 4, integer usename = 
 			-- Change the index offset determinant for the next byte.
 			
 			-- flip some bits in the array, based on the byte set and current hash.
-			cs[ix] = xor_bits(cs[ix], hash(data, map:HSIEH32))
+			cs[ix] = xor_bits(cs[ix], hash(data, stdhash:HSIEH32))
 			hits[ix] += 1
 							
 		entry

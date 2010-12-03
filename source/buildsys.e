@@ -9,7 +9,7 @@ include std/filesys.e
 include std/io.e
 include std/regex.e
 include std/text.e
-include std/map.e
+include std/hash.e
 include std/search.e
 
 include c_decl.e
@@ -166,7 +166,7 @@ enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EX
 --**
 -- Calculate a checksum to be used for detecting changes to generated c files.
 export procedure update_checksum( object raw_data )
-	cfile_check = xor_bits(cfile_check, hash( raw_data, HSIEH32))
+	cfile_check = xor_bits(cfile_check, hash( raw_data, stdhash:HSIEH32))
 end procedure
 
 --**
