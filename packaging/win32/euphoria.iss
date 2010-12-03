@@ -79,7 +79,7 @@ Source: "cleanbranch\include\machine.e"; DestDir: {tmp}; Flags: ignoreversion de
 Source: "cleanbranch\include\dll.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\keywords.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 Source: "cleanbranch\include\euphoria\syncolor.e"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
-Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
+;Source: "cleanbranch\source\autoexec_update.exw"; DestDir: {tmp}; Flags: ignoreversion deleteafterinstall;
 
 ; Files to Install
 ; Root
@@ -91,7 +91,7 @@ Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Componen
 Source: "..\..\bin\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
 Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
@@ -198,3 +198,31 @@ begin
   Result := backupDir;
 end;
 
+procedure InstallEuCfg();
+var
+  euCfgFname : String;
+  incLine : String;
+
+begin
+  incLine := ExpandConstant('-i {app}\include');
+  euCfgFname := ExpandConstant('{app}\bin\eu.cfg');
+
+  if FileExists(euCfgFname) = False then
+    begin
+      SaveStringToFile(euCfgFname, incLine + #13#10, False);
+    end
+  else
+    begin
+      if MsgBox('An eu.cfg file exists already. It should really contain' + #13#10 +
+                 incLine + #13#10 +
+                 'Should the installer append this line?', 
+                 mbConfirmation, MB_YESNO or MB_DEFBUTTON1) = IDYES
+      then
+        begin
+          SaveStringToFile(euCfgFname, #13#10 + '[all]' + #13#10 + incLine + #13#10, True);
+        end
+      else
+        MsgBox('Please ensure ' + euCfgFname + ' contains:' + #13#10 +
+               incLine, mbInformation, MB_OK);
+    end;
+end;

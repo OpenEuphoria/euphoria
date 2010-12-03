@@ -845,9 +845,9 @@ end function
 --   parameter, etc...) occurs. This can be used to provide additional
 --   help text. By default, just the option switches and their descriptions will be
 --   displayed. However you can provide additional text by either supplying a
---   routine_id of a procedure that accepts no parameters; this procedure is expected
---   to write text to the stdout device, or you can supply one or more lines of text
---   that will be displayed.
+--   routine_id of a procedure that accepts no parameters, or a sequence containing
+--   lines of text (one line per element).  The procedure is expected
+--   to write text to the stdout device.
 -- # ##NO_HELP## ~-- Do not automatically add the switches '-h', '-?', and '--help'
 --   to display the help text (if any).
 -- # ##NO_AT_EXPANSION## ~-- Do not expand arguments that begin with '@.'

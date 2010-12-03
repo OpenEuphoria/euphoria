@@ -170,7 +170,7 @@ end function
 -- Returns:
 --   A new harmonized command line sequence in accordance with 
 
-export function merge_parameters(sequence a, sequence b, sequence opts)
+export function merge_parameters(sequence a, sequence b, sequence opts, integer dedupe = 0)
 	integer i = 1
 	
 	while i <= length(a) do
@@ -186,10 +186,11 @@ export function merge_parameters(sequence a, sequence b, sequence opts)
 		if opt[2] = '-' then
 			-- We have a long option
 			-- Look to see if b has this option
+			this_opt = find_opt(LONGNAME, opt[3..$], opts)
+			
 			for j = 1 to length(b) do
 				if equal(text:lower(b[j]), text:lower(opt)) then
 					bi = j
-					this_opt = find_opt(LONGNAME, opt[3..$], opts)		
 					exit
 				end if
 			end for
@@ -197,36 +198,70 @@ export function merge_parameters(sequence a, sequence b, sequence opts)
 		elsif opt[1] = '-' or opt[1] = '/' then
 			-- We have a short option
 			-- Look to see if b has this option
+			this_opt = find_opt(SHORTNAME, opt[2..$], opts)
+			
 			for j = 1 to length(b) do
 				if equal(text:lower(b[j]), '-' & text:lower(opt[2..$])) or 
 							equal(text:lower(b[j]), '/' & text:lower(opt[2..$]))
 				then
 					bi = j
-					this_opt = find_opt(SHORTNAME, opt[2..$], opts)
 					exit
 				end if
 			end for
 			
 		end if
 		
+		--
 		-- If we have it in b also, is a valid option and contains the ONCE parameter
-		if bi and length(this_opt) and not find(MULTIPLE, this_opt[OPTIONS]) then
-			if find(HAS_PARAMETER, this_opt[OPTIONS]) then
-				-- remove the option and it's parameter as well
-				a = remove(a, i, i + 1)
+		--
+	
+		if length(this_opt) and not find(MULTIPLE, this_opt[OPTIONS]) then
+			if bi then
+				if find(HAS_PARAMETER, this_opt[OPTIONS]) then
+					-- remove the option and it's parameter as well
+					a = remove(a, i, i + 1)
+				else
+					-- remove only the option
+					a = remove(a, i)
+				end if
+				
+				-- no need to increment the parameter index as we have removed options 
+				-- which has the same effect as incrementing the parameter index
+				
 			else
-				-- remove only the option
-				a = remove(a, i)
-			end if
+				
+				--
+				-- Dedupe a w/in itself (eu.cfg args)
+				--
+				--   * i < length(a) makes sure we are not at the end of the list
+				--     nothing to do if so and slicing would err.
+				--
+
+				integer beginLen = length(a)
+				
+				if dedupe = 0 and i < beginLen then
+					a = merge_parameters(a[1..i], a[i + 1..$], opts, 1)
+					
+					if beginLen = length(a) then
+						-- nothing removed, increment the parameter index
+						i += 1
+					end if
+				else
+					-- nothing removed, increment the parameter index
+					i += 1
+				end if
+			end if			
 			
-			-- no need to increment as we have removed options to in effect the parameter
-			-- to be processed next has incremented
 		else
+			-- nothing processed, increment the parameter index
 			i += 1
 		end if
 	end while
 	
-		
+	if dedupe then
+		return a & b
+	end if
+	
 	integer first_extra = 0
 	
 	i = 1

@@ -101,6 +101,10 @@
 * [[ticket:475]], Fixed memory leak with interpreted [[:rand]]
 * [[ticket:405]], ##dis.ex## no longer creates a build directory for no reason.
 * [[ticket:476]], ##euc## can now translated single character base filenames, i.e. h.ex
+* [[ticket:477]], ##canonical_path## expansion of ~ now works in MSYS and CMD.exe with 
+                  the MinGW build.
+* Fixed [[:seek]] return value for large files on Linux.
+* [[ticket:479]], Installer now writes a eu.cfg, appends at the confirmation of the user.
 
 === Enhancements/Changes
 
