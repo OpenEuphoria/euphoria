@@ -76,7 +76,7 @@ procedure lines(sequence file_spec)
 		for i = 1 to length(dir_names) do
 			if not find('d', dir_names[i][D_ATTRIBUTES]) then
 				sequence name = dir_names[i][D_NAME]
-				if wildcard_file(file_spec[f], name) and not find(name, file_names) then 
+				if wildcard:is_match(file_spec[f], name) and not find(name, file_names) then 
 					file_names = append(file_names, name)
 				end if
 			end if

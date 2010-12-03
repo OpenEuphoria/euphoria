@@ -542,7 +542,7 @@ function look_at(sequence path_name, sequence direntry)
 	end if
 	-- check skip list
 	for i = 1 to length(skip_list) do
-		if wildcard_file(skip_list[i], file_name) then
+		if wildcard:is_match(skip_list[i], file_name) then
 			return 0
 		end if
 	end for

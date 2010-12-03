@@ -60,6 +60,7 @@ end ifdef
 --   </eucode>
 --
 -- See Also: [[:is_match]]
+
 public function new(sequence s)
 	return s
 end function
@@ -135,7 +136,8 @@ constant END_MARKER = -1
 -- ##bin/search.ex##
 --
 -- See Also: 
--- [[:wildcard_file]], [[:upper]], [[:lower]], [[:Regular Expressions]]
+-- [[:upper]], [[:lower]], [[:Regular Expressions]]
+--
 
 public function is_match(sequence pattern, sequence string)
 	integer p, f, t 
@@ -182,57 +184,4 @@ public function is_match(sequence pattern, sequence string)
 		end if
 	end while
 	return 0
-end function
-
---**
--- Determine whether a file name matches a wildcard pattern.
---
--- Parameters:
---		# ##pattern## : a string, the pattern to match
---		# ##filename## : the string to be matched against
---
--- Returns: 
---		An **integer**, TRUE if ##filename## matches ##pattern##, else FALSE.
---
--- Comments:
---
--- ~* matches any 0 or more characters, ? matches any single character. On //Unix// the 
--- character comparisons are case sensitive. On Windows they are not.
---
--- You might use this function to check the output of the [[:dir]]() routine for file names that match a pattern supplied by the user of your program.
---  
--- Example 1: 
--- <eucode> 
---  i = wildcard_file("AB*CD.?", "aB123cD.e")
--- -- i is set to 1 on Windows, 0 on Linux or FreeBSD
--- </eucode>
---
--- Example 2:  
--- <eucode> 
---  i = wildcard_file("AB*CD.?", "abcd.ex")
--- -- i is set to 0 on all systems, 
--- -- because the file type has 2 letters not 1
--- </eucode>
---
--- Example 3: 
--- ##bin/search.ex##
---
--- See Also: 
--- [[:is_match]], [[:dir]]
-
-public function wildcard_file(sequence pattern, sequence filename)
-	ifdef not UNIX then
-		pattern = text:upper(pattern)
-		filename = text:upper(filename)
-	end ifdef
-	
-	if not find('.', pattern) then
-		pattern = pattern & '.'
-	end if
-	
-	if not find('.', filename) then
-		filename = filename & '.'
-	end if
-	
-	return is_match(pattern, filename)
 end function

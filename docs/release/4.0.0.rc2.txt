@@ -11,6 +11,8 @@
 * [[ticket:376]], ##mouse.e## and ##std/mouse.e##
 * Support for alternate style eu.cfg sections, i.e. bind:unix and unix:bind were 
   previously supported, now only the documented method: bind:unix is accepted.
+* [[ticket:484]], ##wildcard_file## is very DOS centric, doesn't act right at all on
+  modern consoles. It has been removed.
 
 === Bug Fixes
 

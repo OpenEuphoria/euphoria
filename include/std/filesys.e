@@ -328,7 +328,7 @@ public function dir(sequence name)
 	-- Filter the directory contents returning only those items
 	-- matching name.
 	for i = 1 to length(dir_data) do
- 		if wildcard:wildcard_file(the_name, dir_data[i][1]) then
+ 		if wildcard:is_match(the_name, dir_data[i][1]) then
  				data = append(data, dir_data[i])
  		end if
 	end for

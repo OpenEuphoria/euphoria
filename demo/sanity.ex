@@ -689,11 +689,11 @@ end procedure
 
 procedure patterns()
 -- test wildcard routines   
-	if wildcard_file("ABC*DEF.*", "XBCDEF.E") then
+	if wildcard:is_match("ABC*DEF.*", "XBCDEF.E") then
 	crash(generic_msg)
 	end if
 	ifdef not UNIX then
-		if not wildcard_file("A?B?C?D", "a1b2C3D") then
+		if not wildcard:is_match("A?B?C?D", "a1b2C3D") then
 			crash(generic_msg)
 		end if
 	end ifdef
