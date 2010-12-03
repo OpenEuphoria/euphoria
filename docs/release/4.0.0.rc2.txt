@@ -17,6 +17,10 @@
                   more powerful [[:match_replace]] routine.
 * [[ticket:486]], ##can_add## docs have been removed, they pointed to the name change
                   of ##can_add## to ##binop_ok##, changed during beta stage.
+* [[ticket:487]], ##wildcard:new()##, method really didn't make sense as a planning
+                  stage for regex usage as too much would have to change, a simply call
+                  to new did not save much and possibly just caused bad programming
+                  methods to be used.
 
 === Bug Fixes
 
