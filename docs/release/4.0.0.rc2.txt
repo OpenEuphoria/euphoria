@@ -107,6 +107,7 @@
                   the MinGW build.
 * Fixed [[:seek]] return value for large files on Linux.
 * [[ticket:479]], Installer now writes a eu.cfg, appends at the confirmation of the user.
+* [[ticket:485]], Fixed scanner initialization to prevent invalid accesses.
 
 === Enhancements/Changes
 
