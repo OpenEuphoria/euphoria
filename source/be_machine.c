@@ -931,15 +931,9 @@ static object Seek(object x)
 	f = user_file[file_no].fptr;
 	pos = get_pos_off("seek", x2);
 	if (pos == -1)
-#if defined(EMINGW)
 		result = iseek(f, 0L, SEEK_END);
-#else
-		result = iiseek(f, 0L, SEEK_END);
-#endif
-#if defined(ELINUX) || defined(EWATCOM)
 	else if (!(pos > (IOFF)MAXINT || pos < (IOFF)MININT))
-		result = iiseek(f, pos, SEEK_SET);
-#endif
+		result = iseek(f, pos, SEEK_SET);
 	else
 		result = iseek(f, pos, SEEK_SET);
 	

@@ -64,7 +64,7 @@ typedef signed   char   schar;
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
-#elif defined(EWINDOWS) && !defined(EMINGW)
+#elif defined(EWINDOWS)
 #	define IFILE FILE*
 #	define IOFF __int64
 #	define iopen fopen
@@ -74,7 +74,7 @@ typedef signed   char   schar;
 #	define iputc fputc
 #	define iread fread
 #	define iwrite fwrite
-#	define iseek(f,o,w) _lseeki64(fileno(f),(__int64)(o),(w))
+#   define iseek(f,o,w) (_lseeki64(fileno(f),(__int64)(o),(w)) == -1 ? -1 : 0)
 #	define itell(f) _lseeki64(fileno(f), (__int64)0, SEEK_CUR)
 #	define iiseek fseek
 #	define iitell ftell
