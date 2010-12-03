@@ -2784,6 +2784,15 @@ static unsigned int calc_hsieh32(object a)
 }
 
 
+static unsigned int calc_hsieh30(object a)
+{
+
+	unsigned i32;
+	
+	i32 = calc_hsieh32(a);
+	return (0x3FFFFFFF & (i32 + ((0xC0000000 & i32) >> 30)));
+}
+
 unsigned int calc_fletcher32(object a)
 {
 
@@ -2908,6 +2917,9 @@ object calc_hash(object a, object b)
 	object av, lv;
 
 	if (IS_ATOM_INT(b)) {
+		if (b == -6)
+			return calc_hsieh30(a);	// Will always return a Euphoria integer.
+
 		if (b == -5)
 			return make_atom32(calc_hsieh32(a));
 
