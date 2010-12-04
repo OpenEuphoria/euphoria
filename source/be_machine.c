@@ -71,6 +71,12 @@
 #define LOCK_UN  8 /* unlock */
 #endif
 
+#ifdef EOSX
+extern unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
+						unsigned arg4, unsigned arg5, unsigned arg6,
+						unsigned arg7, unsigned arg8, unsigned arg9);
+#endif
+
 #ifdef ESUNOS
 #include <fcntl.h>
 
@@ -2153,6 +2159,7 @@ object DefineC(object x)
 
 #ifdef EOSX
 #define CALLBACK_SIZE (108)
+extern unsigned (*general_ptr)();
 #else
 #if __GNUC__ == 4
 #define CALLBACK_SIZE (96)
@@ -2305,6 +2312,10 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
+#ifdef EOSX
+	// always use the custom call back handler for OSX
+	addr = (unsigned)&osx_cdecl_call_back;
+#endif
 
 	/* Now allocate memory that is executable or at least can be made to be ... */
 	
@@ -2359,6 +2370,11 @@ object CallBack(object x)
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
+#ifdef EOSX
+         	if( (*(int*)(addr + i)) == 0xF001F001 ){
+			*(int *)(copy_addr+i) = (int)general_ptr;
+		}
+#endif
 		if (copy_addr[i]   == 0x078 &&
 			copy_addr[i+1] == 0x056) {
 #ifdef ERUNTIME

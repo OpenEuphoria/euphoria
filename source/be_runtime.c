@@ -5340,6 +5340,25 @@ unsigned (*general_ptr)() = (void *)&general_call_back;
 #pragma off (check_stack);
 #endif
 
+#ifdef EOSX
+unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
+						unsigned arg4, unsigned arg5, unsigned arg6,
+						unsigned arg7, unsigned arg8, unsigned arg9)
+{
+	// a dummy where CallBack will later assign the value of general_ptr
+	// this saves us the trouble of trying to calculate the offset of
+	// the callback copy from general_ptr and stuffing that into a LEA
+	// calculation
+	unsigned (*f)(unsigned, unsigned, unsigned, unsigned, unsigned,
+	unsigned, unsigned, unsigned, unsigned, unsigned)
+	= (unsigned (*)(unsigned, unsigned, unsigned, unsigned, unsigned,
+	unsigned, unsigned, unsigned, unsigned, unsigned)) 0xF001F001;
+	return (f)((symtab_ptr)0x12345678,
+									 arg1, arg2, arg3, arg4, arg5,
+									 arg6, arg7, arg8, arg9);
+}
+#endif
+
 /* Windows cdecl - Need only one template.
    It can handle a variable number of args.
    Not all args below will actually be provided on a given call. */
