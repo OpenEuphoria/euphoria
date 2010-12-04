@@ -146,7 +146,7 @@ constant ERROR_STRING = {
 }
 
 procedure report_error(integer err)
-	Look = EOF
+	Look = io:EOF
 	ERR = err
 	ERR_LNUM = Token[TLNUM]
 	ERR_LPOS = Token[TLPOS]
@@ -262,7 +262,7 @@ procedure scan_char()
 	LPos += 1
 	sti += 1
 	if sti > length(source_text) then
-		Look = EOF
+		Look = io:EOF
 	else
 		Look = source_text[sti]
 	end if
@@ -272,7 +272,7 @@ function lookahead(integer dist = 1)
 	if sti + dist <= length(source_text) then
 		return source_text[sti + dist]
 	else
-		return EOF
+		return io:EOF
 	end if
 end function
 
@@ -297,7 +297,7 @@ function scan_multicomment()
 	Token[TFORM] = TF_COMMENT_MULTIPLE
 
 	while 1 do
-		if (Look = EOF) then
+		if (Look = io:EOF) then
 			report_error(ERR_EOF)
 			return TRUE 
 		end if
@@ -361,7 +361,7 @@ function scan_string()
 			while (sti < length(source_text) - 2) and
 				not equal(source_text[sti .. sti +2], "\"\"\"")
 			do
-				if (Look = EOF) then
+				if (Look = io:EOF) then
 					report_error(ERR_EOF)
 					return TRUE
 				end if
@@ -419,7 +419,7 @@ function scan_multistring()
 	Token[TFORM] = TF_STRING_BACKTICK
 
 	while (Look != end_of_string) do
-		if (Look = EOF) then
+		if (Look = io:EOF) then
 			report_error(ERR_EOF)
 			return TRUE
 		end if
@@ -618,7 +618,7 @@ function scan_prefixed_number()
 		if STRING_NUMBERS then
 			Token[TDATA] = source_text[startSti .. sti - 1]
 		else
-			Token[TDATA] = to_number(source_text[startSti + 2 .. sti - 1])
+			Token[TDATA] = convert:to_number(source_text[startSti + 2 .. sti - 1])
 		end if
 
 		return TRUE
@@ -711,11 +711,11 @@ function scan_identifier()
 			scan_char() -- First char of string
 			startpos = sti
 
-			while not find(Look, {'"', EOF}) do
+			while not find(Look, {'"', io:EOF}) do
 				scan_char()
 			end while
 
-			if Look = EOF then
+			if Look = io:EOF then
 				-- No matching end-quote
 				report_error(ERR_EOF_STRING)
 				return TRUE
@@ -897,7 +897,7 @@ procedure next_token()
 		Token[TTYPE] = T_EOF
 		Token[TDATA] = Look
 
-		if (Look != EOF) then
+		if (Look != io:EOF) then
 			report_error(ERR_UNKNOWN)
 		end if
 	end if
@@ -916,12 +916,12 @@ public function tokenize_string(sequence code)
 
 	tokens = {}
 
-	source_text = code & EOL & EOF
+	source_text = code & EOL & io:EOF
 	LNum = 1
 	LPos = 1
 	sti = 1
 	Look = source_text[sti]
-	Token[TTYPE] = EOF
+	Token[TTYPE] = io:EOF
 	Token[TDATA] = ""
 	Token[TLNUM] = 1
 	Token[TLPOS] = 1
@@ -954,7 +954,7 @@ public function tokenize_string(sequence code)
 end function
 
 public function tokenize_file(sequence fname)
-	object txt = read_file(fname, TEXT_MODE)
+	object txt = io:read_file(fname, io:TEXT_MODE)
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
