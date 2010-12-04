@@ -1745,11 +1745,11 @@ public enum
 --
 -- map AppOptions
 -- if save_map(AppOptions, "c:\myapp\options.txt") = -1
---     error("Failed to save application options")
+--     crash("Failed to save application options")
 -- end if
 --
 -- if save_map(AppOptions, "c:\myapp\options.dat", SM_RAW) = -1
---     error("Failed to save application options")
+--     crash("Failed to save application options")
 -- end if
 -- </eucode>
 --
