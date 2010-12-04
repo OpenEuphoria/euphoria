@@ -29,10 +29,11 @@ typedef signed   char   schar;
 #include "symtab.h"
 
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
-#if defined(ELINUX)
+#if defined(ELINUX) || defined(EMINGW)
 	/* use glibc 64bit variants */
 #	define _LARGEFILE_SOURCE
 #	define _LARGEFILE64_SOURCE
+	/* note that LARGEFILE* macros do not work on MinGW */
 #	include <sys/types.h>
 #	include <unistd.h>
 #	include <errno.h>
@@ -61,7 +62,10 @@ typedef signed   char   schar;
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
-#elif defined(EWINDOWS)
+#ifdef EMINGW
+#   include <windef.h>
+#endif
+#elif defined(EWINDOWS) && !defined(EMINGW)
 #	define IFILE FILE*
 #	define IOFF __int64
 #	define iopen fopen
