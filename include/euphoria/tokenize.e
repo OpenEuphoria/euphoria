@@ -7,12 +7,14 @@
 namespace tokenize
 
 include std/convert.e
-include std/filesys.e
 include std/io.e
-include std/text.e
-include std/types.e
 
 include keywords.e
+
+constant 
+	EOL = '\n',
+	TRUE = 1,
+	FALSE = 0
 
 --****
 -- === tokenize return sequence key
