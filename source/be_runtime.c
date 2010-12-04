@@ -405,33 +405,6 @@ int charcopy(char *target, int target_len, char *source, int source_len)
 }
 
 
-#ifdef ELINUX
-// for largefile support on 32bit
-// int _llseek(unsigned int,unsigned long, unsigned long,long long *, unsigned int);
-// used instead of llseek() to avoid the warning
-#include <sys/types.h>
-#include <sys/syscall.h>
-#define _llseek(fd, offset_high, offset_low, result, origin) \
-	syscall(SYS__llseek, fd, offset_high, offset_low, result, origin)
-
-long long iseek(FILE *f, long long o, int w)
-{
-	unsigned long ohi;
-	unsigned long olow;
-	long long res = 0;
-	ohi = (unsigned long)((o >> 32) & (long long)0xFFFFFFFF);
-	olow = (unsigned long)(o & (long long)0xFFFFFFFF);
-	return _llseek(fileno(f), ohi, olow, &res, w);
-}
-
-long long itell(FILE *f)
-{
-	long long res = 0;
-	int ret = _llseek(fileno(f), 0, 0, &res, SEEK_CUR);
-	return ((!ret) ? res : -1);
-}
-#endif
-
 /* essential primitive debug code - might as well leave it in */
 
 IFILE debug_log = NULL;    /* DEBUG log messages */
