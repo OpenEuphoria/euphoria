@@ -2196,6 +2196,11 @@ typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned i
 	Assumptions: p_radix must be a power of two.
 				p_v and p_radix must be < power(2,31)
 */
+
+#ifdef roundup  /* EOPENBSD defines it at least, others might */
+#undef roundup
+#endif /* roundup */
+
 inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	signed int radix = (signed int)p_radix;
 	signed int v = (signed int)p_v;
