@@ -5,6 +5,8 @@
 * ##[[:find_from]]## and ##[[:match_from]]## have been deprecated. ##[[:find]]## and 
   ##[[:match]]## accept an optional argument (##start##) allowing these functions to be a
   100% drop in replacement.
+* ##OPT_EXTRAS## in ##std/cmdline.e## has been replaced by a more favored name ##EXTRAS##.
+  The use of ##OPT_EXTRAS## is still valid but has been deprecated.
 
 === Removed
 

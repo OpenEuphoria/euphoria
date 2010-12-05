@@ -185,7 +185,7 @@ procedure main()
 		"switch is used, the first filename is treated as a Euphoria program. It\n" &
 		"and all include files are then tallied."
 	})
-	sequence files = map:get(cmdopts, OPT_EXTRAS)
+	sequence files = map:get(cmdopts, cmdline:EXTRAS)
 
 	if map:get(cmdopts, "i", 0) then
 		INC_PATHS = prepend(INC_PATHS, pathname(canonical_path(files[1])))

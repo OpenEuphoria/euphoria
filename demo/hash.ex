@@ -152,7 +152,7 @@ procedure main()
 	end if
 	
 	
-	lFileList = map:get(vOptMap, OPT_EXTRAS, {})
+	lFileList = map:get(vOptMap, cmdline:EXTRAS, {})
 	
 	if length(lFileList) < 1 then
 		puts(2, "You must give the name of an input file")

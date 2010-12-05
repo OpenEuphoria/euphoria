@@ -1293,7 +1293,7 @@ procedure main()
 			case "eub" then
 				eub_path = "-eub " & val
 			
-			case OPT_EXTRAS then
+			case cmdline:EXTRAS then
 				if length( val ) then
 					files = build_file_list( val )
 				else

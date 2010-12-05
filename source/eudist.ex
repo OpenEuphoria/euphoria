@@ -372,7 +372,7 @@ procedure run()
     -- read the command line
     map:map params = cmd_parse(cmd_params)
     object 
-		inFileName    = map:get( params, OPT_EXTRAS, {} ),
+		inFileName    = map:get( params, cmdline:EXTRAS, {} ),
 		configFiles   = map:get( params, "c", {} ),
 		excludeDirRec = map:get( params, "edr"),
 		excludeDirs   = map:get( params, "ed"),
