@@ -9,14 +9,18 @@ include std/map.e
 include std/regex.e as re
 include std/search.e
 include std/sequence.e
+include std/sort.e
 include std/text.e
 include std/utils.e
 include std/wildcard.e
 
+constant column_names = { "lines", "non-blank", "code", "cmt-percent", "size", "name" }
 constant inc_line = re:new(`^\s*(public\s*)?include\s+("[^"]+"|[^ ]+)`)
 constant SCREEN = 1
 sequence INC_PATHS = include_paths(1)
 sequence global_program = ""
+
+map:map cmdopts
 
 -- count lines, non-blank lines, characters
 function scan(integer fh, integer size) 
@@ -41,23 +45,38 @@ end function
 
 procedure process_all_files(sequence file_names)
 	sequence count, total_count = { 0, 0, 0, 0, 0 }
+	sequence results = {}
 
 	puts(SCREEN, " lines non-blank      code  cmt     chars filename\n")
 	puts(SCREEN, "--------------------------------------------------\n")
 	for i = 1 to length(file_names) do
 		integer fileNum = open(file_names[i], "r")   
 		if fileNum = -1 then
-			printf(SCREEN, "cannot open %s\n", {file_names[i]})
+			printf(SCREEN, "**Warning** cannot open %s\n", {file_names[i]})
 		else
 			count = scan(fileNum, file_length(file_names[i]))
-			total_count = total_count + count
-			printf(SCREEN, "%6d %9d %9d %3d%% %9d %s\n", count & { 
-				abbreviate_path(file_names[i]) })
 			close(fileNum)
+			
+			results = append(results, count & { abbreviate_path(file_names[i]) })
+			total_count = total_count + count
 		end if
 	end for
+	
+	integer column = find(map:get(cmdopts, "sort", "none"), column_names)
+	if column then
+		-- secondary sort is always filename
+		results = sort_columns(results, { column, 6 } )
+	end if
+	
+	if map:get(cmdopts, "r", 0) then
+		results = reverse(results)
+	end if
 
-	if length(file_names) > 1 then
+	for i = 1 to length(results) do
+		printf(SCREEN, "%6d %9d %9d %3d%% %9d %s\n", results[i])
+	end for
+
+	if length(file_names) > 1 then		
 		total_count[4] = 100 * ((total_count[2] - total_count[3]) / total_count[1])
 		puts(SCREEN, "--------------------------------------------------\n")
 		printf(SCREEN, "%6d %9d %9d %3d%% %9d total\n", total_count)
@@ -178,13 +197,27 @@ procedure scan_program(sequence file_name)
 end procedure
 
 procedure main()
-	sequence opts = {{ "i", 0, "Include 'included' files in LOC output", { NO_PARAMETER }}}
-	map:map cmdopts = cmd_parse(opts, { HELP_RID, 
+	sequence opts = {
+		{ "i",      0, "Include 'included' files in LOC output", { NO_PARAMETER } },
+		{   0, "sort", "Sort resulting list",                    { HAS_PARAMETER } },
+		{ "r",      0, "Reverse the sort order" }
+	}
+	
+	cmdopts = cmd_parse(opts, { HELP_RID, 
 		"Count the lines, non-blank lines, non-blank/non-comment lines and\n" & 
 		"characters of all files given on the command line. If the optional -i\n" &
 		"switch is used, the first filename is treated as a Euphoria program. It\n" &
-		"and all include files are then tallied."
+		"and all include files are then tallied.\n" &
+		"\n" &
+		"Valid sort options are:\n" &
+		"   * lines       - lines of code\n" &
+		"   * non-blank   - lines of code that are non-blank\n" &
+		"   * code        - only lines containing code (non-comments)\n" &
+		"   * cmt-percent - percentage commented\n" &
+		"   * size        - total size\n" &
+		"   * name        - file name"
 	})
+	
 	sequence files = map:get(cmdopts, cmdline:EXTRAS)
 
 	if map:get(cmdopts, "i", 0) then
