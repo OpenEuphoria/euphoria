@@ -189,7 +189,7 @@ end function
 -- and error files.  Before the command is run, the error files
 -- are deleted and just before the functions exits the error 
 -- files are deleted unless REC is defined.
--- returns 0 iff no errors were raised
+-- returns 0 if no errors were raised
 function invoke(sequence cmd, sequence filename, integer err)
 	integer status
 	
