@@ -135,7 +135,7 @@ public constant
 	--**
 	--   The extra parameters on the cmd line, not associated with any
 	--   specific option. See [[:cmd_parse]]
-	OPT_EXTRAS = {-9,-8,-7,-6}
+	OPT_EXTRAS = {{"opt_extras"}}
 
 -- Record fields in 'opts' argument.
 enum
