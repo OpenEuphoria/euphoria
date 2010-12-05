@@ -253,18 +253,6 @@ unsigned long get_pos_int(char *where, object x)
 	}
 }
 
-unsigned IOFF get_pos_off(char *where, object x)
-/* return a positive integer value if possible */
-{
-	if (IS_ATOM_INT(x))
-		return (unsigned IOFF) INT_VAL(x);
-	else if (IS_ATOM(x))
-		return (unsigned IOFF)(DBL_PTR(x)->dbl);
-	else {
-		RTFatal("%s: an integer was expected, not a sequence", where);
-	}
-}
-
 IFILE long_iopen(char *name, char *mode)
 /* iopen a file. Has support for Windows 95 long filenames */
 {
@@ -896,13 +884,14 @@ static object Where(object x)
 	int file_no;
 	IOFF result;
 	IFILE f;
+	object pos;
 
 	file_no = CheckFileNumber(x);
 	if (user_file[file_no].mode == EF_CLOSED)
 		RTFatal("file must be open for where()");
 	f = user_file[file_no].fptr;
 #ifdef EWATCOM
-	if (user_file[file_no].mode & EF_APPEND)
+	// if (user_file[file_no].mode & EF_APPEND)
 		iflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
 #endif
 	result = itell(f);
@@ -911,17 +900,22 @@ static object Where(object x)
 		RTFatal("where() failed on this file");
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
-		result = NewDouble((double)result);  // maximum 2 billion
-	return result;
+		pos = (object)NewDouble((double)result);  // maximum 2 billion
+	else
+		pos = (object)((long)result);
+	
+	return pos;
 }
 
 static object Seek(object x)
 /* x is {file number, new position} */
 {
 	int file_no;
-	IOFF pos, result;
+	IOFF pos;
+	IOFF result;
 	IFILE f;
-	object x1, x2;
+	object x1;
+	object x2;
 
 	x = (object)SEQ_PTR(x);
 	x1 = *(((s1_ptr)x)->base+1);
@@ -932,13 +926,36 @@ static object Seek(object x)
 	}
 	
 	f = user_file[file_no].fptr;
-	pos = get_pos_off("seek", x2);
-	if (pos == -1)
-		result = iseek(f, 0L, SEEK_END);
+	if (IS_ATOM_INT(x2)) {
+		if ((long)x2 == -1)
+		{
+#ifdef EWATCOM
+			iflush(f);
+#endif
+			result = iseek(f, 0, SEEK_END);
+			return ((result == ((IOFF)-1)) ? ATOM_1 : ATOM_0);
+		}
+		
+		if ((long) x2 < 0) {
+			return ATOM_1; // -ve positions are not permitted.
+		}
+		
+		pos = (IOFF)((long)(x2));
+	}
+	else if (IS_ATOM(x2)) {
+		pos = (IOFF)(DBL_PTR(x2)->dbl);
+		if ( pos < 0) {
+			return ATOM_1; // -ve positions are not permitted.
+		}
+	}
 	else
-		result = iseek(f, pos, SEEK_SET);
-	
-	return (!result ? ATOM_0 : ATOM_1);
+		return ATOM_1; // sequences are not permitted as position.
+		
+#ifdef EWATCOM
+	iflush(f);  // Realign internal buffer position.
+#endif
+	result = iseek(f, pos, SEEK_SET);
+	return ((result == ((IOFF)-1)) ? ATOM_1 : ATOM_0);
 }
 
 // 2 implementations of dir()

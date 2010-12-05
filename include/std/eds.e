@@ -15,7 +15,6 @@ include std/math.e
 include std/pretty.e
 include std/text.e
 
-
 -- === Database File Format
 --
 -- ==== Header
@@ -447,15 +446,29 @@ procedure putn(sequence s)
 	puts(current_db, s)
 end procedure
 
-procedure safe_seek(atom pos)
--- io:seek to a position in the current db file
+procedure safe_seek(atom pos, sequence msg = "")
+-- Seek to a position in the current db file, but do it with care.
+	atom eofpos
 	if current_db = -1 then
 		fatal(NO_DATABASE, "no current database defined", "safe_seek", {pos})
+		return
+	end if
+	
+	io:seek(current_db, -1)
+	eofpos = io:where(current_db)
+	if pos > eofpos then
+		fatal(BAD_SEEK, "io:seeking past EOF", "safe_seek", {pos})
 		return
 	end if
 	if io:seek(current_db, pos) != 0 then
 		fatal(BAD_SEEK, "io:seek to position failed", "safe_seek", {pos})
 		return
+	end if
+	if pos != -1 then
+		if io:where(current_db) != pos then
+			fatal(BAD_SEEK, "io:seek not in position", "safe_seek", {pos})
+			return
+		end if
 	end if
 end procedure
 
@@ -565,7 +578,7 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 	end if
 
 	printf(fn, "Database dump as at %s\n", {datetime:format( datetime:now(), "%Y-%m-%d %H:%M:%S")})
-	safe_seek(0)
+	io:seek(current_db, 0)
 	if length(vLastErrors) > 0 then return end if
 	magic = get1()
 	if magic != DB_MAGIC then
@@ -735,7 +748,7 @@ public procedure check_free_list()
 	safe_seek(-1)
 	if length(vLastErrors) > 0 then return end if
 	max = io:where(current_db)
-	io:seek(current_db, FREE_COUNT)
+	safe_seek( FREE_COUNT)
 	free_count = get4()
 	if free_count > max/13 then
 		error:crash("free count is too high")
@@ -744,13 +757,13 @@ public procedure check_free_list()
 	if free_list > max then
 		error:crash("bad free list pointer")
 	end if
-	io:seek(current_db, free_list - 4)
+	safe_seek( free_list - 4)
 	free_list_space = get4()
 	if free_list_space > max or free_list_space < 0 then
 		error:crash("free list space is bad")
 	end if
 	for i = 0 to free_count - 1 do
-		io:seek(current_db, free_list + i * 8)
+		safe_seek( free_list + i * 8)
 		addr = get4()
 		if addr > max then
 			error:crash("bad block address")
@@ -759,7 +772,7 @@ public procedure check_free_list()
 		if size > max then
 			error:crash("block size too big")
 		end if
-		io:seek(current_db, addr - 4)
+		safe_seek( addr - 4)
 		if get4() > size then
 			error:crash("bad size in front of free block")
 		end if
@@ -770,7 +783,7 @@ function db_allocate(atom n)
 -- Allocate (at least) n bytes of space in the database file.
 -- The usable size + 4 is stored in the 4 bytes before the returned address.
 -- Upon return, the file pointer points at the allocated space, so data
--- can be stored into the space immediately without a io:seek.
+-- can be stored into the space immediately without a safe_seek.
 -- When space is allocated at the end of the file, it will be exactly
 -- n bytes in size, and the caller must fill up all the space immediately.
 	atom free_list, size, size_ptr, addr
@@ -795,7 +808,7 @@ function db_allocate(atom n)
 					io:seek(current_db, size_ptr)
 					put4(size-n-4) -- update size on free list too
 					addr += size-n-4
-					io:seek(current_db, addr - 4)
+					io:seek(current_db, addr - 4) 
 					put4(n+4)
 				else
 					-- close fit: remove whole block from list and return it
@@ -1019,10 +1032,10 @@ public function db_connect(sequence dbalias, sequence path="", sequence dboption
 	end if
 	
 	-- If the options are in a single string, convert it to a list of key-value pairs.
-	if string(dboptions) then
+	if types:string(dboptions) then
 		dboptions = text:keyvalues(dboptions)
 		for i = 1 to length(dboptions) do
-			if string(dboptions[i][2]) then
+			if types:string(dboptions[i][2]) then
 				dboptions[i][2] = convert:to_number(dboptions[i][2])
 			end if
 		end for
@@ -1424,7 +1437,7 @@ function table_find(sequence name)
 	atom nt
 	atom t_header, name_ptr
 
-	safe_seek(TABLE_HEADERS)
+	io:seek(current_db, TABLE_HEADERS)
 	if length(vLastErrors) > 0 then return -1 end if
 	tables = get4()
 	io:seek(current_db, tables)
@@ -1898,7 +1911,7 @@ public function db_table_list()
 	sequence table_names
 	atom tables, nt, name
 
-	safe_seek(TABLE_HEADERS)
+	io:seek(current_db, TABLE_HEADERS)
 	if length(vLastErrors) > 0 then return {} end if
 	tables = get4()
 	io:seek(current_db, tables)
@@ -2083,7 +2096,7 @@ public function db_insert(object key, object data, object table_name=current_tab
 	end if
 	key_pointers[key_location] = key_ptr
 
-	io:seek(current_db, current_table_pos+12) -- get after put - io:seek is necessary
+	io:seek(current_db, current_table_pos+12) -- get after put - seek is necessary
 	index_ptr = get4()
 
 	io:seek(current_db, index_ptr)
@@ -2208,7 +2221,7 @@ public procedure db_delete_record(integer key_location, object table_name=curren
 		return
 	end if
 	key_ptr = key_pointers[key_location]
-	safe_seek(key_ptr)
+	io:seek(current_db, key_ptr)
 	if length(vLastErrors) > 0 then return end if
 	data_ptr = get4()
 	db_free(key_ptr)
@@ -2401,7 +2414,7 @@ public function db_record_data(integer key_location, object table_name=current_t
 		return -1
 	end if
 
-	safe_seek(key_pointers[key_location])
+	io:seek(current_db, key_pointers[key_location])
 	if length(vLastErrors) > 0 then return -1 end if
 	data_ptr = get4()
 	io:seek(current_db, data_ptr)
