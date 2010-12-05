@@ -56,6 +56,8 @@ include std/stats.e as stats
 include std/text.e
 include std/types.e
 
+include euphoria/info.e
+
 enum
 	 TYPE_TAG,       -- ==> 'tag' for map type
 	 ELEMENT_COUNT,  -- ==> elementCount
@@ -1639,14 +1641,19 @@ public function load_map(object input_file_name)
 			return -2
 		end if
 
-		if line_in[1] = 1 then
-			-- Saved Map Format version 1
-			data_key   = serialize:deserialize(file_handle)
-			data_value =  serialize:deserialize(file_handle)
-			
-			for i = 1 to length(data_key) do
-				put(new_map, data_key[i], data_value[i])
-			end for
+		if length(line_in) > 1 then
+			switch line_in[1] do
+				case 1, 2 then
+					-- Saved Map Format version 1 and 2
+					data_key   = serialize:deserialize(file_handle)
+					data_value =  serialize:deserialize(file_handle)
+					
+					for i = 1 to length(data_key) do
+						put(new_map, data_key[i], data_value[i])
+					end for
+				case else
+					return -2
+			end switch
 		else
 			-- Bad file format
 			return -2
@@ -1781,10 +1788,10 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 	
 	if type_ = SM_RAW then
 		puts(file_handle_, serialize:serialize({
-				1, -- saved map version
+				2, -- saved map version
 				datetime:format(now_gmt(), "%Y%m%d%H%M%S" ), -- date of this saved map
-				{ 4, 0, 0, 0 } -- Euphoria version
-			}))
+				info:version_string()} -- Euphoria version
+			 	))	
 		puts(file_handle_, serialize:serialize(keys_))
 		puts(file_handle_, serialize:serialize(values_))
 	else

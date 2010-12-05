@@ -349,18 +349,27 @@ function load_code_page(sequence cpname)
 		object idx
 		object vers
 		vers = serialize:deserialize(fh)  -- get the database version
-		if vers[1] = 1 then
-			idx = serialize:deserialize(fh)  -- get Code Page index offset
-			pos = io:seek(fh, idx)
-			idx = serialize:deserialize(fh)	-- get the Code Page Index
-			pos = find(cpname, idx[1])
-			if pos != 0 then
-				pos = io:seek(fh, idx[2][pos])
-				upper_case_SET = serialize:deserialize(fh) -- "uppercase"
-				lower_case_SET = serialize:deserialize(fh) -- "lowercase"
-				encoding_NAME = serialize:deserialize(fh) -- "title"
-			end if
+		if atom(vers) or length(vers) = 0 then
+			return -3 -- DB is wrong or corrupted.
 		end if
+		
+		switch vers[1] do
+			case 1, 2 then
+				idx = serialize:deserialize(fh)  -- get Code Page index offset
+				pos = io:seek(fh, idx)
+				idx = serialize:deserialize(fh)	-- get the Code Page Index
+				pos = find(cpname, idx[1])
+				if pos != 0 then
+					pos = io:seek(fh, idx[2][pos])
+					upper_case_SET = serialize:deserialize(fh) -- "uppercase"
+					lower_case_SET = serialize:deserialize(fh) -- "lowercase"
+					encoding_NAME = serialize:deserialize(fh) -- "title"
+				end if
+			
+			case else
+				return -4 -- Unhandled ecp database version.
+				
+		end switch
 		close(fh)
 
 	end if
