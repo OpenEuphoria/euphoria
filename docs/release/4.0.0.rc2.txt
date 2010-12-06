@@ -189,3 +189,7 @@
   ever return a 30-bit integer (a Euphoria integer).
 * Removed hash elements from map.e and placed them in a new standard library module, hash.e
 * Performance tweaks to maps. 
+* [[ticket:499]] Add support for using '1', '2', and 'j' in place of F1, F2,
+  and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
+  trace(1) even if we don't recognize escape sequences for their particular
+  $TERM
