@@ -711,44 +711,63 @@ else
 	MINGW_FLAGS=
 endif
 
-$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library
+$(BUILDDIR)/eudist-build/main-.c : eudist.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
-$(BUILDDIR)/$(EUDIS) : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e translator library
-$(BUILDDIR)/$(EUDIS) : $(EU_CORE_FILES) 
-$(BUILDDIR)/$(EUDIS) : $(EU_INTERPRETER_FILES)
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
+
+ : 
+$(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
+$(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES) 
+$(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
 
-$(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex translator library
+$(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
+
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
 		-makefile \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
+
+$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
-$(BUILDDIR)/$(EUTEST) : $(TRUNKDIR)/source/eutest.ex translator library
+$(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
 
-$(BUILDDIR)/$(EUCOVERAGE) : $(TRUNKDIR)/bin/eucoverage.ex translator library
+$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
+
+$(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile \
 		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
+
+$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eucoverage-build" -f eucoverage.mak
 
 EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
 	$(BUILDDIR)/$(EUDIS) \
