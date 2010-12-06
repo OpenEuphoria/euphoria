@@ -252,7 +252,7 @@ object exec_pcre(object x ){
 #define FLAG_DOWN_NEXT   8
 
 static int add(int *len, char **s, const char *a, int alen, int *flag) {
-    int NewLen = *len + alen;
+    int NewLen = *len + alen + 1;
     int i;
     int res;
 	
@@ -515,7 +515,7 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
 	
     *Dlen = dlen;
     *Dest = dest;
-	
+	dest[dlen] = 0; // make sure it's zero terminated
     return 0;
 }
 
