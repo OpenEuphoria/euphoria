@@ -134,6 +134,7 @@
 * Fixed ##std/filesys.e## for use on OpenBSD and NetBSD.
 * Use POSIX random() to initialize random seed1 on non-Windows platforms.
 * Ensure internal C strings in be_pcre are properly null terminated.
+* [[ticket:509]], fix pointer handling in regex back end code
 
 === Enhancements/Changes
 
