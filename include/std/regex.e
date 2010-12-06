@@ -1257,6 +1257,7 @@ end function
 --   A **sequence**, the modified ##text##.
 --
 -- Examples:
+-- <eucode>
 -- include std/text.e 
 -- function my_convert(sequence params)
 --     switch params[1] do
