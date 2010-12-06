@@ -723,7 +723,7 @@ $(BUILDDIR)\docs\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\do
 $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\docs\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
+$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html $(DOCDIR)\nav.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
@@ -736,7 +736,7 @@ $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-templat
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 manual-upload: .SYMBOLIC manual
-	$(SCP) $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
+	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
 
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 
