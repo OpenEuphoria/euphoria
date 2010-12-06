@@ -688,7 +688,7 @@ endif
 	           ../bin/buildcpdb.ex \
 	           ../bin/ecp.dat \
 	           ../bin/eucoverage.ex \
-	           ../bin/lines.ex
+	           ../bin/euloc.ex
 	install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
 	           *.ex \
 	           *.e \
