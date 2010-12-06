@@ -107,7 +107,7 @@ public enum
 	PAUSE_MSG,
 
 	--**
-	-- Disable the automatic inclusion of -h, -? and --help as help switches.
+	-- Disable the automatic inclusion of -h, -? and ~--help as help switches.
 	NO_HELP,
 	
 	$
