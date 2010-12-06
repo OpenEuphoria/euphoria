@@ -1,5 +1,4 @@
 include std/filesys.e
-include std/regex.e
 include std/io.e
 
 constant H_FILE = `
@@ -32,16 +31,13 @@ procedure create_header( sequence builddir )
 		if eu:match( "coverage", c_files[i][D_NAME] ) then
 			found_file = 1
 		
-			regex filenum = regex:new( `void (_[0-9]+)cover_line` )
 			sequence lines = read_lines( builddir & '/' & c_files[i][D_NAME] )
 			
 			for j = 1 to length( lines ) do
-				--if regex:has_match( filenum, lines[j] ) then
 				if match( "cover_line", lines[j] ) and match( "void _", lines[j] ) = 1 then
 					found_line = 1
 					integer matched = match( "cover_line", lines[j] )
 
-					--sequence m = regex:all_matches( filenum, lines[j] )
 					sequence m = lines[j][length("void _")..matched-1]
 					atom out = open( builddir & "/back/coverage.h", "w", 1 )
 					if out = -1 then
