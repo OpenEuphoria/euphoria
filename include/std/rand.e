@@ -63,7 +63,7 @@ namespace random
 public function rand_range(atom lo, atom hi)
 
 	if lo > hi then
-		integer temp = hi
+		atom temp = hi
 		hi = lo
 		lo = temp
 	end if
