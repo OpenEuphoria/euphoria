@@ -201,8 +201,8 @@ end function
 
 --**
 -- Gets or Sets the threshold value that determines at what point a small map
--- converts into a large map structure. Initially this has been set to 50,
--- meaning that maps up to 50 elements use the //small map// structure.
+-- converts into a large map structure. Initially this has been set to 23,
+-- meaning that maps up to 23 elements use the //small map// structure.
 --
 -- Parameters:
 -- # ##new_value_p## : If this is greater than zero then it **sets** the threshold
