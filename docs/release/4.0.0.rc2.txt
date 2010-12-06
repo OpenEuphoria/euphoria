@@ -117,6 +117,7 @@
                   ##OPT_EXTRAS## entry when ##NO_VALIDATION_AFTER_FIRST_EXTRA## is supplied
                   as a parsing option.
 * [[ticket:501]], rand_range(hi,lo) now works with lo > 30-bits. 
+* [[ticket:505]], Fixed front-end command line processing
 * Fixed [[:seek]] return value for large files on Linux.
 * [[:connect]] return value was documented incorrectly.
 * ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
@@ -131,7 +132,6 @@
 * Fixed eutext.ex and std/unittest.e. Under some circumstances, they would report 100%
   success even though there were some failures.
 * Fixed ##std/filesys.e## for use on OpenBSD and NetBSD.
-* [[ticket:505]], Fixed front-end command line processing
 * Use POSIX random() to initialize random seed1 on non-Windows platforms.
 
 === Enhancements/Changes
@@ -141,6 +141,10 @@
 * [[ticket:341]], [[ticket:344]], Many unused variables have been cleaned up in the 
                   standard library.
 * [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
+* [[ticket:499]] Add support for using '1', '2', and 'j' in place of F1, F2,
+  and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
+  trace(1) even if we don't recognize escape sequences for their particular
+  $TERM
 * ##manual-upload## target was added to GNU and Watcom makefiles
 * Formatted ##buzz.ex## example
 * ##euc## will always remove it's temporary build directory unless the ##-keep##
@@ -193,7 +197,3 @@
   ever return a 30-bit integer (a Euphoria integer).
 * Removed hash elements from map.e and placed them in a new standard library module, hash.e
 * Performance tweaks to maps. 
-* [[ticket:499]] Add support for using '1', '2', and 'j' in place of F1, F2,
-  and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
-  trace(1) even if we don't recognize escape sequences for their particular
-  $TERM
