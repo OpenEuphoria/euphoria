@@ -361,7 +361,7 @@ static void Refresh(long line_num, int vars_too)
 			set_bk_color(_BROWN);
 
 		snprintf(TempBuff, TEMP_SIZE,
-				 " %.20s  F1=main  F2=trace  Enter  down-arrow  ?  q  Q  !",
+				 " %.20s  (F1 or 1)=main  (F2 or 2)=trace  Enter  (down-arrow or j)  ?  q  Q  !",
 				 name_ext(file_name[slist[line_num].file_no]));
 		TempBuff[TEMP_SIZE-1] = 0; // ensure NULL
 		buffer_screen();
@@ -777,6 +777,14 @@ static void DebugCommand()
 
 	while (TRUE) {
 		c = get_key(TRUE);
+		/* add ascii mode for when F1/F2 don't work */
+		if (c == 'j') {
+			c = DOWN_ARROW;
+		} else if (c == '1') {
+			c = FLIP_TO_MAIN;
+		} else if (c == '2') {
+			c = FLIP_TO_DEBUG;
+		}
 #ifdef EUNIX
 		// must handle ANSI codes
 		if (c == 27) {
