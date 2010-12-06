@@ -19,7 +19,6 @@
 #include "global.h"
 #include "be_pcre.h"
 
-
 void pcre_deref(object re) {
 	pcre_cleanup_ptr rcp;
 	object errmsg;
@@ -131,7 +130,12 @@ object compile_pcre(object x, object flags) {
 		
 		
 		regex->cleanup = (cleanup_ptr) rcp;
-		rcp->re = (struct real_pcre *)compiled_regex;
+		if( IS_ATOM_INT( compiled_regex ) ){
+			rcp->re = (struct real_pcre *) compiled_regex;
+		}
+		else {
+			rcp->re = (struct real_pcre *) (unsigned long) DBL_PTR( compiled_regex )->dbl;
+		}
 		x = MAKE_SEQ( regex );
 	}
 	
