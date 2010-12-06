@@ -82,9 +82,9 @@ for i = 1 to c do
 end for
 test_equal("roll()",0, approx(y, c * length(ls) / sides, c * 0.025))
 
-atom tmpNo = rand_range(0xFFFFFFFF, 0xFFFFFF00)
-test_true("rand_range(hi,hi) ticket:501", 
-	(tmpNo >= 0xFFFFFF00) and (tmpNo <= 0xFFFFFFFF))
+atom tmpNo = rand_range(0xFFFFFFFF, 0x3FFFFFFF)
+test_true("rand_range(hi,lo) ticket:501", 
+	(tmpNo >= 0x3FFFFFFF) and (tmpNo <= 0xFFFFFFFF))
 
 test_report()
 
