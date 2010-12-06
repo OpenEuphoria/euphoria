@@ -403,7 +403,7 @@ constant
 --	LC_MESSAGES = 5,
 	$
 
-elsifdef FREEBSD or SUNOS then
+elsifdef BSD or SUNOS then
 constant
 	lib = dll:open_dll("libc.so"),
 	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
@@ -438,12 +438,12 @@ constant
 elsedef
 
 constant
-	lib = -1
-	lib2 = -1
-	f_strfmon = -1
-	f_strfnum = -1
-	f_setlocale = -1
-	f_strftime = -1
+	lib = -1,
+	lib2 = -1,
+	f_strfmon = -1,
+	f_strfnum = -1,
+	f_setlocale = -1,
+	f_strftime = -1,
 	LC_ALL         = -1,
 --	LC_COLLATE     = -1,
 --	LC_CTYPE       = -1,
