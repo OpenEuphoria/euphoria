@@ -478,7 +478,8 @@ text-align: right;
 	padding-top: 12px;
 }
 #docs .doc-tools {
-	padding: 0px 0px 5px 0px;
+	padding: 0px;
+	margin: 0px;
 }
 #docs .doc-tools a, #docs .doc-tools a:visited {
 	text-decoration: none;
@@ -511,6 +512,12 @@ text-align: right;
   padding: 4px 7px 4px 7px;
   border: 1px dotted black;
 }
+
+#docs .doc-tools table, #docs .doc-tools td, #docs .doc-tools tr
+{
+border: 1px solid #cccccc;
+}
+
 
 #docs pre
 {
