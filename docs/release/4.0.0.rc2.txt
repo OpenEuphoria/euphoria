@@ -131,6 +131,7 @@
 * Fixed eutext.ex and std/unittest.e. Under some circumstances, they would report 100%
   success even though there were some failures.
 * Fixed ##std/filesys.e## for use on OpenBSD and NetBSD.
+* [[ticket:505]], Fixed front-end command line processing
 
 === Enhancements/Changes
 
