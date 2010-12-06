@@ -132,6 +132,7 @@
   success even though there were some failures.
 * Fixed ##std/filesys.e## for use on OpenBSD and NetBSD.
 * [[ticket:505]], Fixed front-end command line processing
+* Use POSIX random() to initialize random seed1 on non-Windows platforms.
 
 === Enhancements/Changes
 

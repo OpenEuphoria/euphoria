@@ -2163,7 +2163,7 @@ void setran()
 #ifdef EWINDOWS
 	seed1 = GetTickCount() + src;  // milliseconds since Windows started
 #else
-	seed1 = (unsigned long)(&garbage) + garbage + src;
+	seed1 = (unsigned long)(&garbage) + random() + src;
 #endif
 	src += 1;
 	good_rand();  // skip first one, second will be more random-looking
