@@ -80,7 +80,7 @@ typedef union {
 	int intval;
 } float_arg;
 
-#if !defined(EOSX)
+#if !defined(EMINGW) && !defined(EOSX)
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
