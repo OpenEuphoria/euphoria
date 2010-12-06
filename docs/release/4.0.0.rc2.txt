@@ -130,6 +130,7 @@
   and already encoded string data, ##"name=John%20Doe"##.
 * Fixed eutext.ex and std/unittest.e. Under some circumstances, they would report 100%
   success even though there were some failures.
+* Fixed ##std/filesys.e## for use on OpenBSD and NetBSD.
 
 === Enhancements/Changes
 

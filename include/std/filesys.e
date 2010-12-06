@@ -1993,7 +1993,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		stat_t_offset = 0
 		stat_buf_size = 88
 		dev_t_size = 8
-	elsifdef FREEBSD or SUNOS then
+	elsifdef BSD or SUNOS then
 		--TODO
 		stat_t_offset = 0
 		stat_buf_size = 88
@@ -2293,7 +2293,7 @@ public function disk_metrics(object disk_path)
 			stat_t_offset = 48
 			stat_buf_size = 88
 			dev_t_size = 4
-		elsifdef FREEBSD or SUNOS then
+		elsifdef BSD or SUNOS then
 			--TODO
 			stat_t_offset = 48
 			stat_buf_size = 88
