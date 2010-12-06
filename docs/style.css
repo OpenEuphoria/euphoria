@@ -92,7 +92,7 @@ a:hover
 text-decoration: none;
 }
 
-ul.links
+ul.links 
 {
 list-style: none;
 }
@@ -106,7 +106,7 @@ ul.links li.first
 {
 }
 
-p
+p 
 {
 line-height: 1.2em;
 }
@@ -198,11 +198,6 @@ border: solid 1px #DB7623;
 background: #fff url('images/n2.gif') 0px 1px repeat-x;
 }
 
-#main_inner p
-{
-margin-bottom: 2.0em;
-}
-
 #main_inner ul
 {
 margin-bottom: 2.0em;
@@ -225,68 +220,16 @@ border-bottom: dotted 1px #E1E1E1;
 {
 font-size: 2.1em;
 padding-bottom: 0.1em;
-margin-bottom: 0.8em;
+margin-top: 0.95em;
+margin-bottom: 0.4em;
 }
 
 #main_inner h4
 {
 font-size: 1.2em;
 padding-bottom: 0.175em;
-margin-bottom: 1.4em;
+margin-bottom: 0.4em;
 margin-top: 0.95em;
-}
-
-#main_inner .post
-{
-position: relative;
-}
-
-#main_inner .post h3
-{
-position: relative;
-font-size: 1.7em;
-padding-bottom: 1.2em;
-}
-
-#main_inner .post ul.post_info
-{
-list-style: none;
-position: absolute;
-top: 3em;
-font-size: 0.8em;
-}
-
-#main_inner .post ul.post_info li
-{
-background-position: 0em 0.2em;
-background-repeat: no-repeat;
-display: inline;
-padding-left: 18px;
-}
-
-#main_inner .post ul.post_info li.date
-{
-background-image: url('images/n5.gif');
-}
-
-#main_inner .post ul.post_info li.comments
-{
-background-image: url('images/n6.gif');
-margin-left: 1.1em;
-}
-
-#main_inner .post ul.post_info li.edited
-{
-background-image: url('images/post_new_message.png');
-margin-left: 1.1em;
-font-weight: bold;
-}
-
-#main_inner .post .post_tools
-{
-border-top: dotted 1px #E1E1E1;
-padding: 5px 20px 5px 20px;
-font-size: 0.8em;
 }
 
 /* Footer */
@@ -504,33 +447,6 @@ div.error_box {
 	vertical-align: text-bottom;
 }
 
-#main_inner .quote {
-	margin: 5px;
-	padding: 5px 20px 5px 20px;
-	border: 1px solid gray;
-	background-color: #f8f8f8;
-}
-
-#main_inner .quote .quote {
-	background-color: #f0f0f0;
-}
-
-#main_inner .quote .quote .quote {
-	background-color: #e8e8e8;
-}
-
-#main_inner .quote .quote .quote .quote {
-	background-color: #e0e0e0;
-}
-
-#main_inner .forum {
-	border: dotted 1px #C1C1C1;
-}
-
-#main_inner .forum p {
-	padding: 0 10px 0 10px;
-}
-
 #main_inner div.stipple {
 	background-color: #fcfcfc;
 }
@@ -569,9 +485,50 @@ text-align: right;
 	padding: 5px;
 }
 #docs table {
-	padding: 0px;
-	margin: 0px 0px 10px 0px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border-collapse: collapse;
+  border: 1px solid #336633;
+  background-color: #f8f8f8;
 }
+
+#docs table {
+  margin-left: 10px;
+}
+
+#docs table th {
+  padding: 5px;
+  text-align: center;
+  background-color: #eeffee;
+  color: #336633;
+}
+
+#docs table tr {
+  padding: 3px 0px 3px 0px;
+}
+
+#docs table td {
+  padding: 4px 7px 4px 7px;
+  border: 1px dotted black;
+}
+
+#docs pre
+{
+margin: 1em 0px 1em 0px;
+padding: 0.5em;
+background-color: #fafafa;
+border: 1px dotted black;
+}
+
+#docs .examplecode
+{
+margin: 1em 0px 1em 0px;
+background-color: #fafafa;
+border: 1px dotted #008800;
+padding: 1ex 1ex 1ex 2ex;
+overflow: auto;	
+}
+
 div.TOC a { text-decoration: none; }
 div.TOC div.toc_1 {
 	font-size: 1.5em;
@@ -594,119 +551,6 @@ div.LEVELTOC a {
 div.LEVELTOC div.toc_2 { font-size: 1.2em; font-weight: bold; padding: 5px 0px 0px 10px; }
 div.LEVELTOC div.toc_3 { font-weight: bold; font-style: italic; padding-left: 30px; }
 div.LEVELTOC div.toc_4 { padding-left: 60px; }
-
-a.forum_message {padding-right: 20px;background: url("/images/new.png") top right no-repeat;}
-a:visited.forum_message {background: 0;padding-right: 0px;}
-
-.wiki table {
-margin-top: 5px;
-border-collapse: collapse;
-border: 2px solid #607080;
-}
-
-.wiki th {
-text-align: right;
-}
-
-.wiki table th {
-background-color: #607080;
-color: white;
-
-}
-
-.wiki table tr {
-padding: 3px 0px 3px 0px;
-border-bottom: 1px solid #dfdfef;
-background-color: #efefff;
-}
-
-.wiki table td {
-padding: 3px 3px 3px 3px;
-border-width: 0px 1px 0px 1px;
-border-style: solid;
-border-color: white;
-}
-
-.wiki div.embedded {
-margin: 4px 4px 4px 4px;
-padding: 4px 4px 4px 4px;
-border-width: 2px 2px 2px 2px;
-border-color: #506070;
-border-style: solid;
-}
-
-
-.wiki div.floatright {
-float: right;
-margin: 4px 4px 4px 12px;
-padding: 4px 4px 4px 4px;
-border-width: 2px 2px 2px 2px;
-border-color: #506070;
-border-style: solid;
-}
-
-.wiki div.floatleft {
-float: left;
-margin: 4px 4px 4px 4px;
-padding: 4px 4px 4px 4px;
-border-width: 2px 2px 2px 2px;
-border-color: #506070;
-border-style: solid;
-}
-
-.wiki ul.toolbar {
-list-style: none;
-margin: 0px 2px 0px 2px;
-padding: 3px 0px 3px 0px;
-font-family: sans-serif;
-font-weight: bold;
-}
-.wiki ul.toolbar li {
-display: inline;
-border-style: solid solid solid solid;
-border-width: 1px 1px 1px 1px;
-border-color: #8090a0;
-padding: 1px 3px 1px 3px;
-background-color: #f0f0f0;
-}
-.wiki div.notsaved {
-font-family: sans-serif;
-background-color: red;
-}
-.wiki a.external {   background: url(/images/external.png) right center no-repeat;
-padding-right: 12px;
-}
-.wiki tt {font-size: 110%;}
-.wiki ul.toolbar {font-size: 80%;
-padding-right: 0px; padding-left: 0px; font-weight: bold;
-padding-bottom: 3px; margin: 0px 2px; padding-top: 3px; font-family:
-sans-serif; list-style-type: none
-}
-.wiki ul.toolbar li {font-size: 80%;
-border-right: #8090a0 1px solid; padding-right: 3px; border-top:
-#8090a0 1px solid; display: inline; padding-left: 3px; padding-bottom:
-1px; border-left: #8090a0 1px solid; padding-top: 1px; border-bottom:
-#8090a0 1px solid; background-color: #f0f0f0
-}
-.wiki div.notsaved {
-font-family: sans-serif;
-background-color: red;
-}
-.wiki ins.diff {
-background-color: rgb(200, 255, 200);
-}
-.wiki del.diff {
-background-color: rgb(255, 200, 200);
-}
-.post pre {
-padding-left: 15px;
-margin-left: 20px;
-border-left: 2px solid #8090a0;
-margin-right: 10px;
-background-color: #d0e0f0;
-padding-top: 5px;
-padding-bottom: 5px;
-}
 
 .index {
 margin: 1em;
