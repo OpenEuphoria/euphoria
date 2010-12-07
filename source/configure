@@ -129,7 +129,7 @@ while [ "$1" != "" ]; do
     case $1 in
 	--plat*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -142,7 +142,7 @@ while [ "$1" != "" ]; do
 
 	--cc*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -163,7 +163,7 @@ while [ "$1" != "" ]; do
 
 	--eubin*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -185,7 +185,7 @@ while [ "$1" != "" ]; do
 
 	--build*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -198,7 +198,7 @@ while [ "$1" != "" ]; do
 
 	--prefix*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -215,7 +215,7 @@ while [ "$1" != "" ]; do
 
 	--release*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -228,7 +228,7 @@ while [ "$1" != "" ]; do
 
 	--rootdir*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -241,7 +241,7 @@ while [ "$1" != "" ]; do
 
 	--oe-username*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
@@ -250,7 +250,7 @@ while [ "$1" != "" ]; do
 
 	--scp-client*)
 		VAL=`echo $1 | cut -d = -f 2`
-		if [ "$VAL" == "$1" ]; then
+		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
 
