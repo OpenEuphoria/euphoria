@@ -4,8 +4,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef EUNIX
 #ifndef timeval
 #include <sys/time.h>
+#endif
 #endif
 
 #include "alldefs.h"
