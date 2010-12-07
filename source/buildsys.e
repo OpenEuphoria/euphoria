@@ -87,20 +87,24 @@ end function
 export enum
 	--**
 	-- No build system will be written (C/H files written only).
+
 	BUILD_NONE = 0,
 
 	--**
 	-- Makefile containing only ##PRGNAME_SOURCES## and ##PRGNAME_OBJECTS##
 	-- Makefile that is for inclusion into a parent Makefile.
+
 	BUILD_MAKEFILE_PARTIAL,
 
 	--**
 	-- A full Makefile project suitable for building the resulting project
 	-- entirely.
+
 	BUILD_MAKEFILE_FULL,
 
 	--**
 	-- build directly from the translator
+
 	BUILD_DIRECT
 
 --**
@@ -110,6 +114,7 @@ export integer build_system_type = BUILD_DIRECT
 
 --**
 -- Known/Supported compiler types
+
 export enum
 	COMPILER_UNKNOWN = 0,
 	COMPILER_GCC,
@@ -117,19 +122,28 @@ export enum
 
 --**
 -- Compiler type flag for this invocation
+
 export integer compiler_type = COMPILER_UNKNOWN
 
 --**
 -- Compiler directory (only used for a few compilers)
+
 export sequence compiler_dir = ""
 
 --**
 -- Resulting executable name
+
 export sequence exe_name = ""
 
 --**
 -- Resource file to link into executable
+
 export sequence rc_file = ""
+
+--**
+-- Compile resource file
+
+export sequence res_file = ""
 
 --**
 -- Maximum C file size before splitting the file into multiple chunks
@@ -138,6 +152,7 @@ export integer max_cfile_size = 100_000
 
 --**
 -- Calculated value for detecting when c files have changed
+
 atom cfile_check = 0
 
 --**
@@ -320,7 +335,7 @@ function setup_build()
 			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -ad %s %s"
+			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -fo=[2] -ad [1] [3]"
 		case else
 			CompileErr(43)
 	end switch
@@ -451,7 +466,7 @@ procedure write_makefile_full()
 		})
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
 		if length(rc_file) and length(settings[SETUP_RC_COMPILER]) then
-			printf(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file, exe_name })
+			writef(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file, res_file, exe_name })
 		end if
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
@@ -634,13 +649,15 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 	
 	-- For Watcom the rc file links in after the fact	
 	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_WATCOM then
-		cmd = sprintf(settings[SETUP_RC_COMPILER], { rc_file, exe_name })
+		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file, res_file, exe_name })
 		status = system_exec(cmd, 0)
 		if status != 0 then
 			ShowMsg(2, 187, { rc_file, exe_name })
 			ShowMsg(2, 169, { status, cmd })
 			goto "build_direct_cleanup"
 		end if
+		
+		delete_file(res_file)
 	end if
 
 label "build_direct_cleanup"

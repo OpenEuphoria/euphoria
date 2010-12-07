@@ -283,6 +283,10 @@ export procedure transoptions()
 		end if
 	end ifdef
 	
+	if length(rc_file) then
+		res_file = canonical_path(output_dir & filebase(rc_file) & ".res")
+	end if
+	
 	finalize_command_line(opts)
 end procedure
 
