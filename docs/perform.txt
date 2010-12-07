@@ -271,14 +271,26 @@ some_val *= 3
  one subscript and a slice. In all simpler cases the two forms run at
  the same speed (or very close to the same).
 
-=== Library Routines
+=== Library / Built-In Routines
 
  Some common routines are extremely fast. You probably couldn't do the job
  faster any other way, even if you used C or assembly language. Some of these
  are:
-* ##mem_copy()##
-* ##mem_set()##
-* ##repeat()##
+ 
+ ==== Low Level Memory Manipulation
+* ##[[:mem_copy]]##
+* ##[[:mem_set]]##
+
+==== Sequence Manipulation
+* ##[[:append]]##
+* ##[[:head]]##
+* ##[[:insert]]##
+* ##[[:remove]]##
+* ##[[:repeat]]##
+* ##[[:replace]]##
+* ##[[:splice]]##
+* ##[[:tail]]##
+
 
  Other routines are reasonably fast, but you might be able
  to do the job faster in some cases if speed was crucial.
@@ -302,6 +314,10 @@ end for
  It will allocate somewhat more than it needs, to reduce the number of
  reallocations.)
 
+These built-in operations are also optimize to make changes in place (where possible), 
+rather than creating copies of sequences via slices.
+
+==== Bitwise operations vs Arithmetic
  You can replace:
 <eucode>
 remainder(x, p)
