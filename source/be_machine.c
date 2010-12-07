@@ -1063,7 +1063,7 @@ typedef struct _SYSTEMTIME {
 	if (fp_buf == path)
 	{
 		// Empty path so assume current directory
-		strncpy(path, ".\\*", 4);
+		copy_string(path, ".\\*", 4);
 		has_wildcards = 1;
 	}
 	else
@@ -1088,7 +1088,7 @@ typedef struct _SYSTEMTIME {
 		// a directory when no wildcards were used,
 		// so assume the caller wants to see inside the directory.
 		FindClose(next_file);
-		strncat(path, "\\*", 3);
+		append_string(path, "\\*", 3);
 		has_wildcards = 1;
 		next_file = FindFirstFile( path, &file_info);
 		if (next_file == INVALID_HANDLE_VALUE)
@@ -2918,8 +2918,8 @@ object machine(object opcode, object x)
 #else
 #ifdef EMINGW
 				dest = EMalloc(strlen(src) + 2);
-				strncpy(dest, src, strlen(src) + 1);
-				strncat(dest, "=", 2);
+				copy_string(dest, src, strlen(src) + 1);
+				append_string(dest, "=", 2);
 				/* on MinGW, putenv("var=") will unset the
 				 * variable. On any other system, use unsetenv()
 				 * as putenv("var=") will create an empty

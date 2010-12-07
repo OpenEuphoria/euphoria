@@ -1469,21 +1469,6 @@ void INT_Handler(int sig_no)
 	/* RTFatal("program interrupted");*/
 }
 
-#if (  defined(__DJGPP__) && ( (__DJGPP__ == 2 && __DJGPP_MINOR__ < 4)  ||  (__DJGPP__ < 2) )  )
-/* __DJGPP__ library version earlier than 2.4.  Use unsafe alternatives. */
-unsigned int snprintf(char * buf, size_t size, char * fmt, ...) {
-	unsigned int r;
-	va_list ap;
-	va_start(ap, fmt);
-	r = vsnprintf(buf,size,fmt,ap);
-	va_end(ap);
-	return r;
-}
-signed int vsnprintf(char * buf, size_t size, char * fmt, va_list list ) {
-	return vsprintf(buf,fmt,list);	
-}
-#endif
-
 void GetViewPort(struct EuViewPort *vp)
 {
 	int l_var_lines;

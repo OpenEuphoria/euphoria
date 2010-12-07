@@ -4824,7 +4824,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 		}
 		if (ns == 0) {
 			argv[0] = (char *)EMalloc(8); // strlen("eui.exe") + 1
-			strncpy(argv[0], "eui.exe", 8);
+			copy_string(argv[0], "eui.exe", 8);
 		}
 		w = 1;
 	}
