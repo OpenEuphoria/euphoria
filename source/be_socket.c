@@ -12,6 +12,8 @@
 #include "be_runtime.h"
 #include "be_socket.h"
 
+extern long get_pos_int(char *, object); /* from be_machine.c */
+
 // Accessors for the socket sequence given to many functions
 #define SOCK_SOCKET   1
 #define SOCK_SOCKADDR 2
@@ -1243,7 +1245,7 @@ object eusock_connect(object x)
 		RTFatal("third argument to connect must be an integer");
 
 	s    = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	addr = (struct sockaddr_in *)SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
+	addr = (struct sockaddr_in *)get_pos_int("connect", SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR]);
 
 	addr->sin_port = htons(SEQ_PTR(x)->base[3]);
 
@@ -1554,7 +1556,7 @@ object eusock_bind(object x)
 		RTFatal("third argument to bind must be an integer");
 
 	s       = SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKET];
-	service = (struct sockaddr_in *)SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR];
+	service = (struct sockaddr_in *)get_pos_int("bind", SEQ_PTR(SEQ_PTR(x)->base[1])->base[SOCK_SOCKADDR]);
 	port    = SEQ_PTR(x)->base[3];
 
 	address_s = SEQ_PTR(SEQ_PTR(x)->base[2]);
