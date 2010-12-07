@@ -303,7 +303,7 @@ function setup_build()
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" %s -O coff -o %s"
+			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" [1] -O coff -o [2]"
 			
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
@@ -461,8 +461,8 @@ procedure write_makefile_full()
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "\"%s\" : $(%s_OBJECTS) %s %s" & HOSTNL, { 
-			exe_name, upper(file0), user_library, rc_file 
+		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { 
+			exe_name, upper(file0), user_library
 		})
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
 		if length(rc_file) and length(settings[SETUP_RC_COMPILER]) then
@@ -470,6 +470,9 @@ procedure write_makefile_full()
 		end if
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
+		if length(res_file) then
+			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file })
+		end if
 		for i = 1 to length(generated_files) do
 			if match(".o", generated_files[i]) then
 				printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
@@ -478,6 +481,9 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all : .SYMBOLIC" & HOSTNL, { file0 })
 		printf(fh, "\tdel \"%s\"" & HOSTNL, { exe_name })
+		if length(res_file) then
+			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file })
+		end if
 		for i = 1 to length(generated_files) do
 			printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
 		end for
@@ -489,18 +495,18 @@ procedure write_makefile_full()
 	else
 		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { exe_name, upper(file0), user_library, rc_file })
 		if length(rc_file) then
-			printf(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file, rc_file & ".res" })
+			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file, res_file })
 		end if
 		printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
-			exe_name, upper(file0), iif(length(rc_file), rc_file & ".res", "") })
+			exe_name, upper(file0), iif(length(res_file), res_file, "") })
 		puts(fh, HOSTNL)
 		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean:" & HOSTNL, { file0 })
-		printf(fh, "\trm -rf $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+		printf(fh, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
-		printf(fh, "\trm -rf $(%s_SOURCES) %s" & HOSTNL, { upper(file0), exe_name })
+		printf(fh, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file, exe_name })
 		puts(fh, HOSTNL)
 		puts(fh, "%.o: %.c" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
@@ -604,14 +610,15 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		-- Delete a .bld file that may be left over from a previous -keep invocation
 		delete_file(file0 & ".bld")
 	end if
-	
+
 	-- For MinGW the RC file gets compiled to a .res file and then put in the normal link line
 	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_GCC then
-		cmd = sprintf(settings[SETUP_RC_COMPILER], { rc_file, rc_file & ".res" })
+		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file, res_file })
 		status = system_exec(cmd, 0)
 		if status != 0 then
 			ShowMsg(2, 350, { rc_file })
 			ShowMsg(2, 169, { status, cmd })
+			
 			goto "build_direct_cleanup"
 		end if
 	end if
@@ -623,12 +630,13 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		case COMPILER_GCC then
 			cmd = sprintf("%s -o %s %s %s %s", { 
 				settings[SETUP_LEXE], exe_name, objs, 
-				iif(length(rc_file), rc_file & ".res", ""),
+				iif(length(res_file), res_file, ""),
 				settings[SETUP_LFLAGS]
 			})
 
 		case else
 			ShowMsg(2, 167, { compiler_type })
+			
 			goto "build_direct_cleanup"
 	end switch
 
@@ -644,6 +652,7 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 	if status != 0 then
 		ShowMsg(2, 168, { exe_name })
 		ShowMsg(2, 169, { status, cmd })
+		
 		goto "build_direct_cleanup"
 	end if
 	
@@ -654,10 +663,9 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		if status != 0 then
 			ShowMsg(2, 187, { rc_file, exe_name })
 			ShowMsg(2, 169, { status, cmd })
+			
 			goto "build_direct_cleanup"
 		end if
-		
-		delete_file(res_file)
 	end if
 
 label "build_direct_cleanup"
@@ -668,6 +676,10 @@ label "build_direct_cleanup"
 			end if
 			delete_file(generated_files[i])
 		end for
+		
+		if length(res_file) then
+			delete_file(res_file)
+		end if
 
 		if remove_output_dir then
 			chdir(cwd)
