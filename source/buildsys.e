@@ -11,6 +11,7 @@ include std/regex.e
 include std/text.e
 include std/hash.e
 include std/search.e
+include std/utils.e
 
 include c_decl.e
 include c_out.e
@@ -132,6 +133,10 @@ export sequence compiler_dir = ""
 export sequence exe_name = ""
 
 --**
+-- Resource file to link into executable
+export sequence rc_file = ""
+
+--**
 -- Maximum C file size before splitting the file into multiple chunks
 
 export integer max_cfile_size = 100_000
@@ -161,7 +166,7 @@ export integer force_build = 0
 export integer remove_output_dir = 0
 
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
-	SETUP_LFLAGS_BEGIN
+	SETUP_LFLAGS_BEGIN, SETUP_RC_COMPILER
 
 --**
 -- Calculate a checksum to be used for detecting changes to generated c files.
@@ -183,7 +188,7 @@ end procedure
 
 function setup_build()
 	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "",
-		exe_ext = "", l_flags_begin = "", l_names, l_ext, t_slash
+		exe_ext = "", l_flags_begin = "", rc_comp = "", l_names, l_ext, t_slash
 
 	if length(user_library) = 0 then
 		if debug_option then
@@ -284,9 +289,12 @@ function setup_build()
 			elsif TSUNOS then
 				l_flags &= " -lsocket -lresolv -lnsl"
 			elsif TWINDOWS then
-				l_flags &= " -mno-cygwin -lws2_32"
+				l_flags &= " -mno-cygwin -lws2_32"				
 			end if
-
+			
+			-- input/output
+			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" %s -O coff -o %s"
+			
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
 			l_exe = "wlink"
@@ -315,7 +323,9 @@ function setup_build()
 			end if
 
 			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
-
+			
+			-- resource file, executable file
+			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -ad %s %s"
 		case else
 			CompileErr(43)
 	end switch
@@ -329,7 +339,9 @@ function setup_build()
 		l_flags_begin = ""
 	end if
 
-	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin }
+	return { 
+		c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin, rc_comp
+	}
 end function
 
 --**
@@ -439,8 +451,13 @@ procedure write_makefile_full()
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
+		printf(fh, "\"%s\" : $(%s_OBJECTS) %s %s" & HOSTNL, { 
+			exe_name, upper(file0), user_library, rc_file 
+		})
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
+		if length(rc_file) and length(settings[SETUP_RC_COMPILER]) then
+			printf(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file, exe_name })
+		end if
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
 		for i = 1 to length(generated_files) do
@@ -460,9 +477,12 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s: $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
-			printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
-				exe_name, upper(file0) })
+		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { exe_name, upper(file0), user_library, rc_file })
+		if length(rc_file) then
+			printf(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file, rc_file & ".res" })
+		end if
+		printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
+			exe_name, upper(file0), iif(length(rc_file), rc_file & ".res", "") })
 		puts(fh, HOSTNL)
 		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
 		puts(fh, HOSTNL)
@@ -555,6 +575,11 @@ procedure write_emake()
 
 			puts(fh, " " & settings[SETUP_LFLAGS] & HOSTNL)
 	end switch
+
+	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) then
+		printf(fh, "echo Linking resources" & HOSTNL)
+		printf(fh, settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file, exe_name })
+	end if
 
 	if compiler_type = COMPILER_GCC then
 		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
@@ -671,13 +696,28 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		-- Delete a .bld file that may be left over from a previous -keep invocation
 		delete_file(file0 & ".bld")
 	end if
+	
+	-- For MinGW the RC file gets compiled to a .res file and then put in the normal link line
+	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_GCC then
+		cmd = sprintf(settings[SETUP_RC_COMPILER], { rc_file, rc_file & ".res" })
+		status = system_exec(cmd, 0)
+		if status != 0 then
+			ShowMsg(2, 350, { rc_file })
+			ShowMsg(2, 169, { status, cmd })
+			goto "build_direct_cleanup"
+		end if
+	end if
 
 	switch compiler_type do
 		case COMPILER_WATCOM then
 			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
 
 		case COMPILER_GCC then
-			cmd = sprintf("%s -o %s %s %s", { settings[SETUP_LEXE], exe_name, objs, settings[SETUP_LFLAGS] })
+			cmd = sprintf("%s -o %s %s %s %s", { 
+				settings[SETUP_LEXE], exe_name, objs, 
+				iif(length(rc_file), rc_file & ".res", ""),
+				settings[SETUP_LFLAGS]
+			})
 
 		case else
 			ShowMsg(2, 167, { compiler_type })
@@ -697,6 +737,17 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		ShowMsg(2, 168, { exe_name })
 		ShowMsg(2, 169, { status, cmd })
 		goto "build_direct_cleanup"
+	end if
+	
+	-- For Watcom the rc file links in after the fact	
+	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_WATCOM then
+		cmd = sprintf(settings[SETUP_RC_COMPILER], { rc_file, exe_name })
+		status = system_exec(cmd, 0)
+		if status != 0 then
+			ShowMsg(2, 187, { rc_file, exe_name })
+			ShowMsg(2, 169, { status, cmd })
+			goto "build_direct_cleanup"
+		end if
 	end if
 
 label "build_direct_cleanup"

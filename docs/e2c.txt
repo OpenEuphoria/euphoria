@@ -20,7 +20,7 @@ front-end portion of the interpreter. The source code for the translator is in
 === C Compilers Supported
 
 The **Translator** currently works with GNU C on //Unix//-like OSes,
-GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
+GNU C on //Windows// from  [[http://www.mingw.org|MinGW]]  
 or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the ##-gcc## option
 and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
 These are all **free** compilers.

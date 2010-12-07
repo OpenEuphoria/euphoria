@@ -185,7 +185,7 @@ constant StdErrMsgs = {
 	{168, "Unable to link [1]"},
 	{169, "Status: [1] Command: [2]"},
 	{170, "\n[1].c files were created."},
-	{171, "-deleted-"},
+	{171, "Link resource file into resulting executable"},
 	{172, "To build your project, type [1][2].mak"},
 	{173, "To build your project, include [1].mak into a larger Makefile project"},
 	{174, "To build your project, type [1]"},
@@ -201,7 +201,7 @@ constant StdErrMsgs = {
 	{184, "Create a shared library"},
 	{185, "Set the platform for the translated code"},
 	{186, "Use a non-standard library"},
-	{187, "-deleted-"},
+	{187, "Unable to link resource file [1] into executable [2]"},
 	{188, "Set the stack size (Watcom)"},
 	{189, "Enable debug mode for generated code"},
 	{190, "Set the number of C statements per generated file before splitting."},
@@ -363,6 +363,8 @@ constant StdErrMsgs = {
 	{346, "Type check error:  assigning a sequence to an atom" },
 	{347, "deleting [1]..." },
 	{348, "User supplied library does not exist:\n    [1]"},
+	{349, "Resource file does not exist:\n    [1]"},
+	{350, "Unable to compile resource file: [1]"},
 	$
 }
 

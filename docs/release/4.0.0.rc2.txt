@@ -135,7 +135,7 @@
 * Fixed ##std/filesys.e## and ##std/locale.e## for use on OpenBSD and NetBSD.
 * Use POSIX random() to initialize random seed1 on non-Windows platforms.
 * Updated ##t_io.e## as OpenBSD allows seeking on STDIN, STDOUT and STDERR.
-* Ensure internal C strings in be_pcre are properly null terminated.
+* Now ensure internal C strings in be_pcre are properly null terminated.
 
 === Enhancements/Changes
 
@@ -143,6 +143,8 @@
                   combined for easier maintenance.
 * [[ticket:341]], [[ticket:344]], Many unused variables have been cleaned up in the 
                   standard library.
+* [[ticket:363]], ##euc## now has an optional parameter ##-rc-file## that will compile
+                  and bind the resource file to windows executables.
 * [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
 * [[ticket:499]] Add support for using '1', '2', and 'j' in place of F1, F2,
   and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
