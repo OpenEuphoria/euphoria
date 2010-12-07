@@ -372,10 +372,6 @@ procedure in ##emake## does not statically link any FSF libraries, so there
 should be no problem.
 
 
-The Allegro graphics library, used by DJGPP, is referred to as "Giftware" in
-their documentation, and they allow you to redistribute it as part of your
-program. They ask for, but do not require, some acknowledgement.
-
 === Disclaimer:
 
 This is what we believe to be the case. We are not lawyers. If it's important
