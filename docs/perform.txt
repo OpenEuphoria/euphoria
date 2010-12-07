@@ -319,7 +319,7 @@ non-negative  integer that fits in 32-bits.
 
  Euphoria's [[:find]] is the fastest way to search for a value in a
  sequence up to about 50 elements. Beyond that, you might consider a 
- //hash table//
+ [[:map]] or other implementation of a //hash table//
  (**demo\hash.ex**) or a //binary tree// (**demo\tree.ex**).
 
 === Sorting
