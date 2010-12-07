@@ -692,7 +692,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
 	if (proc_index >= (unsigned)c_routine_next) {
-		sprintf(TempBuff, "c_proc/c_func: bad routine number (%ld)", proc_index);
+		snprintf(TempBuff, TEMP_SIZE, "c_proc/c_func: bad routine number (%ld)", proc_index);
 		RTFatal(TempBuff);
 	}
 	
@@ -722,7 +722,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name), c_routine[proc_index].name->length );
 		else
 			NameBuff[0] = '\0';
-		sprintf(TempBuff, func ? "%s does not return a value" :
+		snprintf(TempBuff, TEMP_SIZE, func ? "%s does not return a value" :
 								 "%s returns a value",
 								 NameBuff);
 		RTFatal(TempBuff);
@@ -733,7 +733,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			MakeCString(NameBuff, MAKE_SEQ(c_routine[proc_index].name), c_routine[proc_index].name->length );
 		else
 			NameBuff[0] = '\0';
-		sprintf(TempBuff, "C routine %s() needs %ld argument%s, not %ld",
+		snprintf(TempBuff, TEMP_SIZE, "C routine %s() needs %ld argument%s, not %ld",
 						  NameBuff,
 						  arg_size_ptr->length,
 						  (arg_size_ptr->length == 1) ? "" : "s",
