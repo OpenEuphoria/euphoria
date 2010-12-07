@@ -127,27 +127,47 @@ SCP="scp -C"
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
-	--plat )
-		echo "PLAT=$2" >> "$PREFIX"${CONFIG_FILE}
-		shift
+	--plat*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		echo "PLAT=$VAL" >> "$PREFIX"${CONFIG_FILE}
 		;;
+
 	--watcom )
 		export XLTTARGETCC=wat
 		;;
-	--cc )
-		export CC=$2
+
+	--cc*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		export CC=$VAL
 		;;
+
 	--no-managed-mem )
 		export MANAGED_MEM=0
 		;;
+
 	--align4 )
 		export ALIGN4=1
 		;;
+
 	--without-euphoria )
 		export EUPHORIA=0
 		;;
-	--eubin )
-		export LEN=`echo $2/eucd.exe | wc -c`
+
+	--eubin*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		export LEN=`echo $VAL/eucd.exe | wc -c`
 		if test $LEN -gt 85; then
 			if test $UNAME_SYSTEM = "MS-DOS"; then
 				echo "Cannot configure with such a long path for DJGPP."
@@ -155,52 +175,88 @@ while [ "$1" != "" ]; do
 				exit
 			fi
 		fi
-		echo "EUBIN=$2" >> "$PREFIX"${CONFIG_FILE}
-		EUBIN=$2
-		shift
+		echo "EUBIN=$VAL" >> "$PREFIX"${CONFIG_FILE}
+		EUBIN=$VAL
 		;;
+
 	--full )
 		echo RELEASE=1 >> "$PREFIX"${CONFIG_FILE}
 		;;
-	--build )
-		export BUILDDIR=$2
-		shift
+
+	--build*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		export BUILDDIR=$VAL
 		;;
+
 	--debug )
 		echo EDEBUG=1 >> "$PREFIX"${CONFIG_FILE}
 		;;
-	--prefix )
-		echo "PREFIX=$2" >> ${CONFIG_FILE}
-		shift
+
+	--prefix*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		echo "PREFIX=$VAL" >> ${CONFIG_FILE}
 		;;
+
 	--use-binary-translator )
 		export EC="euc"
 		;;
+
 	--use-source-translator )
 		export EC="eui ec.ex"
 		;;
-	--release )
-		shift
-		echo EREL_TYPE=-DEREL_TYPE=\"$1\" >> ${CONFIG_FILE}
+
+	--release*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		echo EREL_TYPE=-DEREL_TYPE=\"$VAL\" >> ${CONFIG_FILE}
 		;;
+
 	--verbose-tests )
 		echo VERBOSE_TESTS=-verbose >> ${CONFIG_FILE}
 		;;
-	--rootdir )
-		shift
-		echo ROOTDIR=$1 >> ${CONFIG_FILE}
+
+	--rootdir*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		echo ROOTDIR=$VAL >> ${CONFIG_FILE}
 		;;
+
 	--wkhtmltopdf )
 		echo WKHTMLTOPDF=1 >> ${CONFIG_FILE}
 		;;
-	--oe-username )
-		shift
-		echo OE_USERNAME=$1 >> ${CONFIG_FILE}
+
+	--oe-username*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		echo OE_USERNAME=$VAL >> ${CONFIG_FILE}
 		;;
-	--scp-client )
-		shift
-		SCP=$1
+
+	--scp-client*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" == "$1" ]; then
+			shift ; VAL=$1
+		fi
+
+		SCP=$VAL
 		;;
+
 	* )
 		echo "Unknown option '$1'"
 		echo "Configures and prepares the euphoria source for building"
