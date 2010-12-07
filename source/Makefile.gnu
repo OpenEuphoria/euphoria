@@ -459,7 +459,7 @@ endif
 source-tarball :
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
 	svn export $(SVN_URL) $(BUILDDIR)/$(SOURCEDIR)
-	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure
+	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
 	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)

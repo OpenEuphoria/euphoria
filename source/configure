@@ -124,6 +124,8 @@ export CC=gcc
 
 SCP="scp -C"
 
+echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
+
 # parameters
 while [ "$1" != "" ]; do
     case $1 in
