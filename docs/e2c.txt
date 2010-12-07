@@ -85,9 +85,9 @@ to run it with the **Interpreter**, except that it should run faster, showing
 reduced times for the various sorting algorithms in 
 ##euphoria\demo\allsorts.ex##.
 
-After creating your executable file, emake removes all the C files that were
-created. If you want to look at these files, run the translator again and look
-at the files before running emake.
+After creating your executable file, the translator removes all the C files that were
+created. If you want to look at these files, you'll need to run the translator again,
+using either the ##-keep## or ##-makefile## options.
 
 === Command-Line Options
 
@@ -226,9 +226,9 @@ For Watcom, the **Translator** also creates an EXPORT command, added to
 ##objfiles.lnk## for each exported identifier, so ##foo()## would be exported as
 "##foo##".
 
-With Watcom you can edit the ##objfiles.lnk## file, and
-rerun ##emake.bat##, to rename the exported identifiers, or remove ones that you
-don't want to export.
+With Watcom, if you specify the ##-makefile## option, you can edit the 
+##objfiles.lnk## file to rename the exported identifiers, or remove ones that you
+don't want to export.  Then build with the generated makefile.
 
 Having nice exported names is not critical, since the name need only appear
 once in each Euphoria program that uses the shared dynamically loading library, 
@@ -285,7 +285,7 @@ combine the values in the Euphoria routine into the desired 32-bit atom.
 === Executable Size and Compression
 
 
-**emake** does not include a command to compress your executable file.
+The translator does not compress your executable file.
 If you want to do this we suggest you try the free
 [[UPX -> http://upx.sourceforge.net]] compressor.
 
@@ -322,7 +322,8 @@ exhausted), so you can have a huge number of levels of nested calls. Most C
 compilers, on most systems, have a pre-set limit on the size of the stack.
 Consult your compiler or linker manual if you want to increase the limit, for
 example if you have a recursive routine that might need thousands of levels of
-recursion. Modify the link command in ##emake.bat##. For Watcom C, use ##OPTION
+recursion. Modify the link command in your makefile, or use the ##-lflags##
+option when calling the translator. For Watcom C, use ##OPTION
 STACK=nnnn##, where nnnn is the number of bytes of stack space.
 
 ==== Note:
