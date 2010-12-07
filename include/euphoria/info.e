@@ -40,6 +40,8 @@ elsifdef FREEBSD then
 	return "FreeBSD"
 elsifdef OPENBSD then
 	return "OpenBSD"
+elsifdef NETBSD then
+	return "NetBSD"
 elsedef
 	return "Unknown"
 end ifdef
