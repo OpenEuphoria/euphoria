@@ -491,7 +491,7 @@ elsifdef NETBSD then
 	constant libc_h = open_dll("libc.so")
 	constant getpagesize_rid = dll:define_c_func(libc_h, "sysconf", { dll:C_INT }, dll:C_LONG )
 	if getpagesize_rid > -1 then
-		page_size = c_func(getpagesize_rid, { 30 })
+		page_size = c_func(getpagesize_rid, { 28 })
 	end if
 
 elsifdef UNIX then
