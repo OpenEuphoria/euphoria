@@ -184,6 +184,34 @@ The resulting output can be compiled by the appropriate compiler on the
 specified platform, or, possibly a cross platform compiler, if you have
 one configured.
 
+You can optionally have the translator create a makefile that you can use
+to build your program instead of building directly.  Using a makefile like
+this can be convenient if you want or need to alter the translated C code,
+or change compiling or linking options before building your program.  To
+do so:
+
+{{{
+$ euc -makefile myapp.ex
+Translating code, pass: 1 2 3 4  generating
+
+3.c files were created.
+To build your project, type make -f myapp.mak
+}}}
+
+Then, as the message indicates, simply type:
+{{{
+$ make -f myapp.mak
+}}}
+
+On Windows, when using Watcom, the message will refer to wmake, the Watcom
+version of make.  On BSD platforms, you may need to use ##gmake##, as the 
+generated makefiles are in GNU format, not BSD.
+
+You can also get a partial makefile using the ##-makefile-partial## switch.
+This generates a makefile that you can use to include into another makefile
+for a larger project.  This is useful for including the file dependencies
+for your code into the larger project.
+
 === Dynamic Link Libraries (Shared Libraries)
 
 Simply by adding ##-dll## (or ##-so##) to the command line, the **Translator** will build a 
