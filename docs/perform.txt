@@ -271,22 +271,6 @@ some_val *= 3
  one subscript and a slice. In all simpler cases the two forms run at
  the same speed (or very close to the same).
 
-=== Pixel-Graphics Tips
-
-* Mode 19 is the fastest mode for **animated graphics** and
- **games**.
-* The video memory (in mode 19) is not cached by the CPU. It usually takes longer
-   to read or write data to the screen than to a general area of memory that
-   you allocate. This adds to the efficiency of
-   //virtual// **screens**, where
-   you do all of your image updating in a **block of memory** that you
-   get from **allocate()**, and then you
-   periodically **mem_copy()** the resulting
-   image to the real **screen memory**. In this way you never have to
-   read the (slow) screen memory.
-* When plotting pixels, you may find that modes 257 and higher are fast near
-   the top of the screen, but slow near the bottom.
-
 === Library Routines
 
  Some common routines are extremely fast. You probably couldn't do the job
