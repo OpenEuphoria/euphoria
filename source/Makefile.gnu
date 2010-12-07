@@ -452,28 +452,15 @@ source : builddirs
 
 SVN_REV=xxx
 SOURCEDIR=euphoria-$(PLAT)-r$(SVN_REV)
-source-tarball : source
-	rm -rf $(BUILDDIR)/$(SOURCEDIR)/source
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/include
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/intobj
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/transobj
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/backobj
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/libobj
-	cp -r $(BUILDDIR)/intobj   $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp -r $(BUILDDIR)/transobj $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp -r $(BUILDDIR)/backobj  $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp -r $(BUILDDIR)/libobj   $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp be_*.c       $(BUILDDIR)/$(SOURCEDIR)/source
-	cp int.ex       $(BUILDDIR)/$(SOURCEDIR)/source
-	cp ec.ex        $(BUILDDIR)/$(SOURCEDIR)/source
-	cp backend.ex   $(BUILDDIR)/$(SOURCEDIR)/source
-	cp *.e          $(BUILDDIR)/$(SOURCEDIR)/source
-	cp Makefile.gnu    $(BUILDDIR)/$(SOURCEDIR)/source
-	cp Makefile.wat    $(BUILDDIR)/$(SOURCEDIR)/source
-	cp configure    $(BUILDDIR)/$(SOURCEDIR)/source
-	cp ../include/euphoria.h $(BUILDDIR)/$(SOURCEDIR)/include
-	cp *.h          $(BUILDDIR)/$(SOURCEDIR)/source
-	cp -r pcre $(BUILDDIR)/$(SOURCEDIR)/source
+ifeq "$(SVN_URL)" ""
+SVN_URL=https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/trunk/
+endif
+
+source-tarball :
+	rm -rf $(BUILDDIR)/$(SOURCEDIR)
+	svn export $(SVN_URL) $(BUILDDIR)/$(SOURCEDIR)
+	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure
+	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
 	
 .PHONY : euisource
@@ -657,7 +644,6 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/tutorial 
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/bin 
-	mkdir -p $(DESTDIR)/etc/euphoria 
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/source 
 	mkdir -p $(DESTDIR)$(PREFIX)/bin 
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
