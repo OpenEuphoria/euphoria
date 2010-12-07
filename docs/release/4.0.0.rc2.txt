@@ -136,6 +136,9 @@
 * Use POSIX random() to initialize random seed1 on non-Windows platforms.
 * Updated ##t_io.e## as OpenBSD allows seeking on STDIN, STDOUT and STDERR.
 * Now ensure internal C strings in be_pcre are properly null terminated.
+* [[ticket:503]], When translating, temps that were thought to be either sequences or objects,
+  but were ultimately atoms were not having their possible min / max values reset, leading to 
+  incorrect C code being emitted.
 
 === Enhancements/Changes
 

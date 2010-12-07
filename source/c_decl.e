@@ -371,6 +371,7 @@ end function
 -- of a temp or var s locally within a BB.
 --
 -- Parameters:
+--   # ##s##: The symbol whose type is being recorded
 --   # ##t##: the type
 --   # ##val##: is either the integer min & max values, or the length of a
 --     sequence in min, or -1 if we are to just OR-in the etype.
@@ -409,6 +410,9 @@ export procedure SetBBType(symtab_index s, integer t, sequence val, integer etyp
 					sym[S_SEQ_LEN] = val[MIN]
 				end if
 				sym[S_OBJ] = NOVALUE
+				
+				sym[S_OBJ_MIN] = NOVALUE
+				sym[S_OBJ_MAX] = NOVALUE
 			else
 				sym[S_OBJ_MIN] = val[MIN]
 				sym[S_OBJ_MAX] = val[MAX]
