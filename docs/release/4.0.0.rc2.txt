@@ -118,6 +118,7 @@
                   as a parsing option.
 * [[ticket:501]], rand_range(hi,lo) now works with lo > 30-bits. 
 * [[ticket:505]], Fixed front-end command line processing
+* [[ticket:509]], fix pointer handling in regex back end code
 * Fixed [[:seek]] return value for large files on Linux.
 * [[:connect]] return value was documented incorrectly.
 * ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
@@ -131,10 +132,10 @@
   and already encoded string data, ##"name=John%20Doe"##.
 * Fixed eutext.ex and std/unittest.e. Under some circumstances, they would report 100%
   success even though there were some failures.
-* Fixed ##std/filesys.e## for use on OpenBSD and NetBSD.
+* Fixed ##std/filesys.e## and ##std/locale.e## for use on OpenBSD and NetBSD.
 * Use POSIX random() to initialize random seed1 on non-Windows platforms.
+* Updated ##t_io.e## as OpenBSD allows seeking on STDIN, STDOUT and STDERR.
 * Ensure internal C strings in be_pcre are properly null terminated.
-* [[ticket:509]], fix pointer handling in regex back end code
 
 === Enhancements/Changes
 
