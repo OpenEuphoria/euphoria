@@ -4,8 +4,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-
+#ifndef timeval
+#include <sys/time.h>
+#endif
 
 #include "alldefs.h"
 #include "be_alloc.h"

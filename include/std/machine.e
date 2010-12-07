@@ -487,7 +487,9 @@ ifdef WINDOWS then
 	end if
 elsifdef UNIX then
 	constant getpagesize_rid = dll:define_c_func( -1, "getpagesize", { }, dll:C_UINT )	 
-	page_size = c_func( getpagesize_rid, {} )
+	if getpagesize_rid > -1 then
+		page_size = c_func( getpagesize_rid, {} )
+	end if
 end ifdef
 
 --** 
