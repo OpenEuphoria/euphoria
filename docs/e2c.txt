@@ -30,7 +30,7 @@ downloaded from their respective Web sites.
 
 ==== Notes:
 
-* Warnings are turned off when compiling with ##emake.bat##. If you turn them 
+* Warnings are turned off when compiling directly or with makefiles. If you turn them 
 on, you may see some
  harmless messages about variables declared but not used, labels defined but
  not used, function prototypes not declared etc.
@@ -62,12 +62,11 @@ but instead of running the ##allsorts.ex## program, the **Translator** will
 create several C source files. Anyone can run the **Translator**. It's
 included in euphoria\bin along with the interpreter. To compile and link the C
 files, you need to install one of the supported C compilers. The
-**Translator** creates a batch file called ##emake.bat## that does all the
-compiling and linking steps for you, so you don't actually have to know
-anything about C or C compilers. Just type:
+**Translator**, by default does all the compiling and linking steps for you, 
+so you don't actually have to know anything about C or C compilers.  Just type:
 
 {{{
-emake
+euc -con allsorts.ex
 }}}
 
 When the C compiling and linking is finished, you will have a file called:
@@ -90,11 +89,6 @@ After creating your executable file, emake removes all the C files that were
 created. If you want to look at these files, run the translator again and look
 at the files before running emake.
 
-==== Note to Unix users:
-
-The files will be called ##emake## and ##shell##, and you type ##./emake## to
-perform the compiles and link, and **./shell** to run the shell sort program.
-
 === Command-Line Options
 
 If you happen to have more than one C compiler for a given platform, you can
@@ -112,9 +106,8 @@ euc -gcc pretend.exw
 }}}
 
 Note: //Watcom// is the default on //Windows// and -wat is assumed.
-Normally, after building your ##.exe## file, the **emake** batch file will 
-delete
-all C files and object files produced by the Translator. If you want **emake**
+Normally, after building your ##.exe## file, the translator will delete
+all C files and object files produced by the Translator. If you want it
 to keep these files, add the ##-keep## option to the Translator command-line.
 e.g.
 
@@ -193,7 +186,7 @@ one configured.
 
 === Dynamic Link Libraries (Shared Libraries)
 
-Simply by adding ##-dll## to the command line, the **Translator** will build a 
+Simply by adding ##-dll## (or ##-so##) to the command line, the **Translator** will build a 
 shared dynamically loading library instead of an executable program.
 
 You can translate and compile a set of useful Euphoria routines, and share
@@ -368,7 +361,7 @@ will normally not affect programs created with this **Translator**. Simply
 compiling with GNU C does not give the Free Software Foundation any
 jurisdiction over your program. If you statically link their libraries you
 will be subject to their Library licence, but the standard compile/link
-procedure in ##emake## does not statically link any FSF libraries, so there
+procedure does not statically link any FSF libraries, so there
 should be no problem.
 
 
@@ -390,11 +383,9 @@ faster. Other programs may see only a few percent improvement.
 
 The various C compilers are not equal in optimization ability.
 
-==== What if I want to change the compile or link options in emake.bat?
+==== What if I want to change the compile or link options in my generated makefile?
 
-Feel free to do so, however you should copy ##emake.bat## to your own file
-called (say) mymake.bat, then run mymake.bat after running the Translator.
-Occasionally the number of ##.c## files produced by the Translator could change.
+Feel free to do so, that's one reason for producing a makefile.
 
 ==== How can I make my program run even faster?
 
@@ -413,14 +404,14 @@ type routine and report any type_check failure that results.
 On //Windows// we have left out the ##/ol## loop optimization for
 Watcom's ##wcc386##. We found in a couple of rare cases that this option led
 to incorrect machine code being emitted by the Watcom C compiler. If you add
-it back in to your own version of ##emake.bat## you might get a slight
+it back in to your own makefile you might get a slight
 improvement in speed, with a slight risk of buggy code.
 
 On //Linux// or //FreeBSD// you could try the ##-O3## option of gcc instead of
 ##-O2##. It will "in-line" small routines, improving speed slightly, but
 creating a larger executable. You could also try the
 [[http://www.intel.com/cd/software/products/asmo-na/eng/compilers/clin/index.htm|Intel C~+~+ Compiler for Linux]].
-It's compatible with GNU C, but some adjustments to ##emake## might be required.
+It's compatible with GNU C, but some adjustments to your makefile might be required.
 
 === Common Problems
 
@@ -437,7 +428,7 @@ the call may not work when running the ##eui## Interpreter.
 In some cases a huge Euphoria routine is translated to C, and it proves to be
 too large for the C compiler to process. If you run into this problem, make
 your Euphoria routine smaller and simpler. You can also try turning off C
-optimization in ##emake.bat## for just the ##.c## file that fails. Breaking up
+optimization in your makefile for just the ##.c## file that fails. Breaking up
 a single constant declaration of many variables into separate constant
 declarations of a single variable each, may also help. Euphoria has no limits
 on the size of a routine, or the size of a file, but most C compilers do. The
