@@ -461,6 +461,7 @@ source-tarball :
 	svn export $(SVN_URL) $(BUILDDIR)/$(SOURCEDIR)
 	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
+	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
 	
 .PHONY : euisource
