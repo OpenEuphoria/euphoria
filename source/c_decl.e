@@ -1193,7 +1193,7 @@ end function
 
 --**
 -- Add a file to the generated files list that will later be used for
--- writing build files (emake, makefile, etc...)
+-- build systems: direct, makefile, etc...
 
 export procedure add_file(sequence filename, sequence eu_filename = "")
 	if equal("c", fileext(filename)) then

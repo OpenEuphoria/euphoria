@@ -207,3 +207,5 @@
   ever return a 30-bit integer (a Euphoria integer).
 * Removed hash elements from map.e and placed them in a new standard library module, hash.e
 * Performance tweaks to maps. 
+* Removed support for ##emake.bat## build scripts, please use direct build or makefiles,
+  both of which ##euc## supports directly.

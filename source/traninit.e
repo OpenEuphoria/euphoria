@@ -90,7 +90,6 @@ sequence trans_opt_def = {
 	{ "keep",             0, GetMsgText(191,0), { } },
 	{ "nobuild",          0, GetMsgText(196,0), { } },
 	{ "force-build",      0, GetMsgText(326,0), { } },
-	{ "emake",            0, GetMsgText(195,0), { } },
 	{ "makefile",         0, GetMsgText(193,0), { } },
 	{ "makefile-partial", 0, GetMsgText(192,0), { } },
 	{ "silent",           0, GetMsgText(177,0), { } },
@@ -231,9 +230,6 @@ export procedure transoptions()
 
 			case "makefile" then
 				build_system_type = BUILD_MAKEFILE_FULL
-
-			case "emake" then
-				build_system_type = BUILD_EMAKE
 
 			case "nobuild" then
 				build_system_type = BUILD_NONE

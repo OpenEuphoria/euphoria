@@ -79,7 +79,6 @@ end function
 -- = buildsys.e
 --
 -- Deals with writing files for various build systems:
---   * emake/emake.bat
 --   * Makefile - full
 --   * Makefile - partial (for inclusion into a parent Makefile)
 --   * None
@@ -89,10 +88,6 @@ export enum
 	--**
 	-- No build system will be written (C/H files written only).
 	BUILD_NONE = 0,
-
-	--**
-	-- Standard emake/emake.bat file
-	BUILD_EMAKE,
 
 	--**
 	-- Makefile containing only ##PRGNAME_SOURCES## and ##PRGNAME_OBJECTS##
@@ -513,108 +508,6 @@ procedure write_makefile_partial()
 end procedure
 
 --**
--- Write an emake build file
-
-procedure write_emake()
-	sequence settings = setup_build()
-	sequence fname = "emake"
-
-	ensure_exename(settings[SETUP_EXE_EXT])
-
-	if TWINDOWS then
-		fname &= ".bat"
-	end if
-
-	if not silent then
-		ShowMsg(1, 162, { output_dir, fname })
-	end if
-
-	integer fh = open(output_dir & fname, "wb")
-	if fh = -1 then
-		CompileErr(45, {output_dir, fname})
-	end if
-
-	if compiler_type != COMPILER_GCC then
-		puts(fh, "@echo off" & HOSTNL)
-		puts(fh, "if not exist " & file0 & ".c goto nofiles" & HOSTNL)
-	end if
-
-	switch compiler_type do
-		case COMPILER_GCC then
-			puts(fh, "echo Compiling with GCC" & HOSTNL)
-		case COMPILER_WATCOM then
-			write_objlink_file()
-			puts(fh, "echo Compiling with Watcom" & HOSTNL)
-	end switch
-
-	for i = 1 to length(generated_files) do
-		if generated_files[i][$] = 'c' then
-			printf(fh, "echo Compiling %2.0f%%%% %s" & HOSTNL, { 100 * (i / length(generated_files)),
-				generated_files[i] })
-			printf(fh, "%s %s %s" & HOSTNL, { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
-				generated_files[i] })
-		end if
-	end for
-
-	printf(fh, "echo Linking 100%%%% %s" & HOSTNL, { exe_name })
-	puts(fh, settings[SETUP_LEXE])
-
-	switch compiler_type do
-		case COMPILER_WATCOM then
-			printf(fh, " @%s.lnk" & HOSTNL, { file0 })
-
-		case else
-			printf(fh, " -o %s ", { exe_name })
-			for i = 1 to length(generated_files) do
-				if generated_files[i][$] != 'c' then
-					continue
-				end if
-
-				printf(fh, " %s.%s ", { filebase(generated_files[i]), settings[SETUP_OBJ_EXT] })
-			end for
-
-			puts(fh, " " & settings[SETUP_LFLAGS] & HOSTNL)
-	end switch
-
-	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) then
-		printf(fh, "echo Linking resources" & HOSTNL)
-		printf(fh, settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file, exe_name })
-	end if
-
-	if compiler_type = COMPILER_GCC then
-		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
-	else
-		printf(fh, "if not exist %s goto done" & HOSTNL, { exe_name })
-	end if
-
-	printf(fh, "echo You can now use %s" & HOSTNL, { exe_name })
-
-	if not keep then
-		for i = 1 to length(generated_files) do
-			if TWINDOWS then
-				puts(fh, "del ")
-			else
-				puts(fh, "rm ")
-			end if
-
-			puts(fh, generated_files[i] & HOSTNL)
-		end for
-	end if
-
-	if compiler_type != COMPILER_GCC then
-		puts(fh, ":done" & HOSTNL)
-	end if
-
-	close(fh)
-
-	ifdef UNIX then
-		if TUNIX then
-			system("chmod +x emake", 2)
-		end if
-	end ifdef
-end procedure
-
---**
 -- Build the translated code directly from this process
 
 export procedure build_direct(integer link_only=0, sequence the_file0="")
@@ -777,7 +670,7 @@ end procedure
 --
 -- See Also:
 --   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_MAKEFILE_FULL]],
---   [[:BUILD_MAKEFILE_PARTIAL]], [[:BUILD_EMAKE]]
+--   [[:BUILD_MAKEFILE_PARTIAL]]
 
 export procedure write_buildfile()
 	switch build_system_type do
@@ -802,19 +695,6 @@ export procedure write_buildfile()
 			if not silent then
 				ShowMsg(1, 170, { cfile_count + 2 })
 				ShowMsg(1, 173, { file0 })
-			end if
-
-		case BUILD_EMAKE then
-			write_emake()
-
-			if not silent then
-				sequence fname = "emake"
-				if TWINDOWS then
-					fname &= ".bat"
-				end if
-
-				ShowMsg(1, 170, { cfile_count + 2 })
-				ShowMsg(1, 174, { fname })
 			end if
 
 		case BUILD_DIRECT then
