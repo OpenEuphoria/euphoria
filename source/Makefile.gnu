@@ -708,7 +708,7 @@ $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
@@ -722,7 +722,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
 
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
@@ -744,7 +744,7 @@ $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
 
 $(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
@@ -755,7 +755,7 @@ $(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
 
 $(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
