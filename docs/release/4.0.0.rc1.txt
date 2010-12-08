@@ -1,4 +1,4 @@
-== Version 4.0.0 Release Candidate 1 November 8th, 2010
+== Version 4.0.0 Release Candidate 1 November 8, 2010
 
 The release of Euphoria 4.0 is like no other. It's updates are massive. The change log
 here is not designed to detail every minor change that has taken place during the 4.0

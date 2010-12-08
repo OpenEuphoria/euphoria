@@ -1,4 +1,4 @@
-== Version 4.0.0 Release Candidate 2 (Release Date TBD)
+== Version 4.0.0 Release Candidate 2 December 8, 2010
 
 === Deprecation
 
@@ -119,6 +119,9 @@
 * [[ticket:501]], rand_range(hi,lo) now works with lo > 30-bits. 
 * [[ticket:505]], Fixed front-end command line processing
 * [[ticket:509]], fix pointer handling in regex back end code
+* [[ticket:503]], When translating, temps that were thought to be either sequences or objects,
+  but were ultimately atoms were not having their possible min / max values reset, leading to 
+  incorrect C code being emitted.
 * Fixed [[:seek]] return value for large files on Linux.
 * [[:connect]] return value was documented incorrectly.
 * ##std/cmdline.e##, ##cmd_parse## sets the NO_CASE option when option does not have HAS_CASE.
@@ -137,24 +140,21 @@
 * Updated ##t_io.e## as OpenBSD and NetBSD allows seeking on STDIN, STDOUT and 
   STDERR.
 * Now ensure internal C strings in be_pcre are properly null terminated.
-* [[ticket:503]], When translating, temps that were thought to be either sequences or objects,
-  but were ultimately atoms were not having their possible min / max values reset, leading to 
-  incorrect C code being emitted.
 * Fixed version display information for NetBSD
 
 === Enhancements/Changes
 
-* [[ticket:334]], OS/X, FreeBSD and Linux distribution build scripts are now
-                  combined for easier maintenance.
+* [[ticket:334]], *nix generic distribution build scripts are now combined for easier maintenance.
 * [[ticket:341]], [[ticket:344]], Many unused variables have been cleaned up in the 
                   standard library.
 * [[ticket:363]], ##euc## now has an optional parameter ##-rc-file## that will compile
                   and bind the resource file to windows executables.
 * [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
-* [[ticket:499]] Add support for using '1', '2', and 'j' in place of F1, F2,
-  and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
-  trace(1) even if we don't recognize escape sequences for their particular
-  $TERM
+* [[ticket:499]], Add support for using '1', '2', and 'j' in place of F1, F2,
+                  and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
+                  trace(1) even if we don't recognize escape sequences for their particular
+                  $TERM
+* [[ticket:513]], Moved [[:get_text]] from ##std/text##.e to ##std/locale.e##
 * ##manual-upload## target was added to GNU and Watcom makefiles
 * Formatted ##buzz.ex## example
 * ##euc## will always remove it's temporary build directory unless the ##-keep##
@@ -209,4 +209,3 @@
 * Performance tweaks to maps. 
 * Removed support for ##emake.bat## build scripts, please use direct build or makefiles,
   both of which ##euc## supports directly.
-* Moved [[:get_text]] from ##std/text##.e to ##std/locale.e##
