@@ -32,10 +32,12 @@ include msgtext.e
 
 --**
 -- number of Translator passes
+
 export integer LAST_PASS = FALSE
 
 --**
 -- the current pass number
+
 export integer Pass
 
 export enum
@@ -68,6 +70,7 @@ export enum
 --
 -- See Also:
 -- [[:BB_VAR]], [[:BB_TYPE]], [[:BB_ELEM]], [[:BB_SEQLEN]], [[:BB_OBJ]], [[:BB_DELETE]]
+
 export sequence BB_info = {}
 
 export integer LeftSym = FALSE   -- to force name to appear, not value
@@ -79,39 +82,47 @@ export boolean
 --**
 -- Sequence to contain files that are generated and should be delt with
 -- when creating a build file and/or removed when done compiling.
+
 export sequence generated_files = {}
 
 --**
 -- Sequence to contain a boolean flag for each generated file to indicate
 -- if the file is out of date or current.
+
 export sequence outdated_files = {}
 
 --**
 -- Flag to determine if the source files should be kept or deleted
 -- when a compile is finished.
+
 export boolean keep = FALSE
 
 --**
 -- Debug mode is enabled. This should affect the build process.
+
 export boolean debug_option = FALSE
 
 --**
 -- If not-empty, then the build file should link against user_library
 -- not the standard %EUDIR%/bin/eu.lib file.
+
 export sequence user_library = ""
 
 --**
 -- Write all generated files to this directory.
+
 export sequence output_dir = ""
 
 --**
 -- Stack size (used in Watcom only).
+
 export integer total_stack_size = -1 -- default size for OPTION STACK
 
 --**
 -- first check ##EUCOMPILEDIR##, to allow the user to override and use a
 -- different directory than ##EUDIR##. THen use ##EUDIR##, then default
 -- to ##/usr/share/euphoria##
+
 export function get_eucompiledir()
 	object x = getenv("EUCOMPILEDIR")
 	if is_eudir_from_cmdline() then
