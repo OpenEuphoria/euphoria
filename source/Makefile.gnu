@@ -667,23 +667,25 @@ endif
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo ../demo/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench ../demo/bench/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar ../demo/langwar/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix ../demo/unix/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/tutorial ../tutorial/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/bin \
+	install ../demo/*.e* $(DESTDIR)$(PREFIX)/share/euphoria/demo
+	install ../demo/bench/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench 
+	install ../demo/langwar/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
+	install ../demo/unix/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
+	install ../tutorial/* $(DESTDIR)$(PREFIX)/share/euphoria/tutorial
+	install  \
 	           ../bin/ed.ex \
 	           ../bin/bugreport.ex \
 	           ../bin/buildcpdb.ex \
 	           ../bin/ecp.dat \
 	           ../bin/eucoverage.ex \
-	           ../bin/euloc.ex
-	install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
+	           ../bin/euloc.ex \
+	           $(DESTDIR)$(PREFIX)/share/euphoria/bin
+	install  \
 	           *.ex \
 	           *.e \
 	           be_*.c \
-	           *.h
+	           *.h \
+	           $(DESTDIR)$(PREFIX)/share/euphoria/source
 	# helper script for shrouding programs
 	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
 	echo eubind -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
@@ -782,13 +784,16 @@ install-docs :
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images
 	install $(BUILDDIR)/euphoria-4.0.pdf $(DESTDIR)$(PREFIX)/share/doc/euphoria/
-	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html \
+	install  \
 		$(BUILDDIR)/html/*html \
-		$(BUILDDIR)/html/*css
-	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images \
-		$(BUILDDIR)/html/images/*
-	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js \
-		$(BUILDDIR)/html/js/*
+		$(BUILDDIR)/html/*css \
+		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html
+	install  \
+		$(BUILDDIR)/html/images/* \
+		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images
+	install  \
+		$(BUILDDIR)/html/js/* \
+		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 
 # This doesn't seem right. What about eushroud ?
 uninstall :
