@@ -9,6 +9,7 @@
 #   Translator            (euc.exe)  : wmake translator
 #   Translator Library     (eu.lib)  : wmake library
 #   Backend 	 eub.exe, eubw.exe)  : wmake backend
+#   Supporting Tools                 : wmake tools
 #   Code Page Database               : wmake code-page-db
 #   Create Documentation in HTML     : wmake htmldoc
 #   Create Documentation in PDF      : wmake pdfdoc
@@ -321,6 +322,7 @@ all :  .SYMBOLIC
 	wmake -h translator $(VARS)
 	wmake -h backend $(VARS)
 	wmake -h binder $(VARS)
+	wmake -h shrouder $(VARS)
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
@@ -491,12 +493,41 @@ shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 $(BUILDDIR)\eushroud.exe : translator library
 	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
 	
-!ifdef BUILD_TOOLS
-$(BUILDDIR)\eutestdr\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
-	cd $(BUILDDIR)\eutestdr	
-	$(EUBIN)\euc -con -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
+tools: .SYMBOLIC
+    @echo ------- TOOLS -----------
+	wmake -h $(BUILDDIR)\eutest.exe $(VARS)
+	wmake -h $(BUILDDIR)\euloc.exe $(VARS)
+	wmake -h $(BUILDDIR)\eucoverage.exe $(VARS)
+	wmake -h $(BUILDDIR)\eudis.exe $(VARS)
+	wmake -h $(BUILDDIR)\eudist.exe $(VARS)
 
-!endif #BUILD_TOOLS
+tools-additional: .SYMBOLIC
+    @echo ------- ADDITIONAL TOOLS -----------
+	wmake -h $(BUILDDIR)\eudoc.exe $(VARS)
+	wmake -h $(BUILDDIR)\creolehtml.exe $(VARS)
+
+tools-all: tools tools-additional
+
+$(BUILDDIR)\eutest.exe: $(TRUNKDIR)\source\eutest.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\euloc.exe: $(TRUNKDIR)\bin\euloc.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eucoverage.exe: $(TRUNKDIR)\bin\eucoverage.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudis.exe: $(TRUNKDIR)\source\dis.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudist.exe: $(TRUNKDIR)\source\eudist.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudoc.exe: $(TRUNKDIR)\source\eudoc\eudoc.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\creolehtml.exe: $(TRUNKDIR)\source\creole\creolehtml.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
 $(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
 	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
