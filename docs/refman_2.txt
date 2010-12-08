@@ -5,18 +5,17 @@
 
 ==== Atoms and Sequences
 
-All data **objects** in Euphoria are either **atoms**
-or **sequences**.  An **atom** is a single numeric
-value.  A **sequence** is a collection of objects, either atoms or sequences
+All data **objects** in Euphoria are either **atoms** or **sequences**.  An **atom** is 
+a single numeric value.  A **sequence** is a collection of objects, either atoms or sequences
 themselves. A sequence can contain any mixture of atom and sequences; a sequence
 does not have to contain all the same data type. Because the **objects**
 contained in a sequence can be an arbitrary mix of atoms or sequences, it is
 an extremely versatile data structure, capable of representing any sort of data.
 
-A sequence is represented by a list of objects in brace brackets **{ }**,
-separated by commas. Atoms can have any integer or double-precision
-floating point value. They can range from approximately -1e300 (minus one times
-10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
+A sequence is represented by a list of objects in brace brackets **{ }**, separated by 
+commas with an optional sequence terminator, ##$##. Atoms can have any integer or 
+double-precision floating point value. They can range from approximately -1e300 (minus 
+one times 10 to the power 300) to +1e300 with 15 decimal digits of accuracy. Here are
 some Euphoria objects:
 
 <eucode>
@@ -29,12 +28,11 @@ some Euphoria objects:
 x
 $
 
-
 -- examples of sequences:
 {2, 3, 5, 7, 11, 13, 17, 19}
 {1, 2, {3, 3, 3}, 4, {5, {6}}}
 {{"jon", "smith"}, 52389, 97.25}
-{}                        -- the 0-element sequence
+{} -- the 0-element sequence
 </eucode>
 
 By default, number literals use //base 10//, but you can have integer literals
@@ -49,15 +47,14 @@ code that lets Euphoria know which base to use.
 
 For example:
 <eucode>
-
- 0b101 --> decimal 5
- 0t101 --> decimal 65
- 0d101 --> decimal 101
- 0x101 --> decimal 257
+0b101 --> decimal 5
+0t101 --> decimal 65
+0d101 --> decimal 101
+0x101 --> decimal 257
 </eucode>
 
-Additionally, hexadecimal integers can also be written
-by prefixing the number with the '#' character.
+Additionally, hexadecimal integers can also be written by prefixing the number with 
+the '#' character.
 
 For example:
 <eucode>
@@ -92,7 +89,6 @@ object phone = 61_3_5536_7733
 integer bits = 0b11_00010_1
 </eucode>
 
-
 **Sequences** can be nested to any depth, i.e. you can have sequences within
 sequences within sequences and so on to any depth (until you run out of
 memory). Brace brackets are used to construct sequences out of a list of
@@ -101,6 +97,17 @@ e.g.
 
 <eucode>
 { x+6, 9, y*w+2, sin(0.5) }
+</eucode>
+
+All sequences can include a special //end of sequence// marker which is the ##$##
+character. This is for convience of editing lists that may change often as development
+proceeds.
+
+<eucode>
+sequence seq_1 = { 10, 20, 30, $ }
+sequence seq_2 = { 10, 20, 30 }
+
+equal(seq_1, seq_2) -- TRUE
 </eucode>
 
 The **"Hierarchical Objects"** part of the Euphoria acronym comes from the
@@ -1422,7 +1429,10 @@ Constants may not be declared inside a subroutine.
 ==== enum
 
 An enumerated value is a special type of constant where the first value
-defaults to the number 1 and each item after that is incremented by 1.
+defaults to the number 1 and each item after that is incremented by 1 by default. An
+optional ##by## keyword can be supplied to change the increment value. As with sequences,
+enums can also be terminated with a ##$## for ease of editing ##enum## lists that may
+change frequently during development.
 
 <eucode>
 enum ONE, TWO, THREE, FOUR

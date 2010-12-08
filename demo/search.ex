@@ -365,7 +365,7 @@ function look_at(sequence path_name, sequence dir_entry)
     if equal(file_spec[1], "*.*") then
 		-- check skip list
 		for i = 1 to length(skip_list) do
-	    	if wildcard_file(skip_list[i], file_name) then
+	    	if wildcard:is_match(skip_list[i], file_name) then
 				skipped += 1
 				return get_key() >= ESC
 		    end if
@@ -374,7 +374,7 @@ function look_at(sequence path_name, sequence dir_entry)
 		-- go through list of file specs
 		matched_one = FALSE
 		for i = 1 to length(file_spec) do
-		    if wildcard_file(file_spec[i], file_name) then
+		    if wildcard:is_match(file_spec[i], file_name) then
 				matched_one = TRUE
 				exit
 	    	end if

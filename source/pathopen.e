@@ -128,7 +128,6 @@ function check_cache(sequence env,sequence inc_path)
 	return 1
 end function
 
-
 export function get_conf_dirs()
 	integer delimiter
 	sequence dirs
@@ -150,6 +149,8 @@ export function get_conf_dirs()
 	return dirs
 end function
 
+-- TODO: Convert those calling this method to use pathname from filesys.e, may need
+-- to append a SLASH
 function strip_file_from_path( sequence full_path )
 	for i = length(full_path) to 1 by -1 do
 		if full_path[i] = SLASH then
@@ -160,6 +161,7 @@ function strip_file_from_path( sequence full_path )
 	return ""
 end function
 
+-- TODO: Convert calling methods to use canonical_path in filesys.e
 function expand_path( sequence path, sequence prefix )
 	integer absolute
 	
@@ -194,7 +196,6 @@ function expand_path( sequence path, sequence prefix )
 end function
 
 export procedure add_include_directory( sequence path )
-
 	path = expand_path( path, pwd )
    
 	if not find( path, config_inc_paths ) then
@@ -658,4 +659,3 @@ export function e_path_find(sequence name)
 
 	return -1
 end function
-

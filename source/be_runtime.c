@@ -405,34 +405,6 @@ int charcopy(char *target, int target_len, char *source, int source_len)
 }
 
 
-#ifdef ELINUX
-// for largefile support on 32bit
-// int _llseek(unsigned int,unsigned long, unsigned long,long long *, unsigned int);
-// used instead of llseek() to avoid the warning
-#include <sys/types.h>
-#include <sys/syscall.h>
-#define _llseek(fd, offset_high, offset_low, result, origin) \
-	syscall(SYS__llseek, fd, offset_high, offset_low, result, origin)
-
-long long iseek(FILE *f, long long o, int w)
-{
-	unsigned long ohi;
-	unsigned long olow;
-	long long res = 0;
-	ohi = (unsigned long)((o >> 32) & (long long)0xFFFFFFFF);
-	olow = (unsigned long)(o & (long long)0xFFFFFFFF);
-	int ret = _llseek(fileno(f), ohi, olow, &res, w);
-	
-	if( w == SEEK_SET ){
-		// Seek() just wants indication of success
-		return ret;
-	}
-	else{
-		return ((!ret) ? res : -1);
-	}
-}
-#endif
-
 /* essential primitive debug code - might as well leave it in */
 
 IFILE debug_log = NULL;    /* DEBUG log messages */
@@ -2194,7 +2166,7 @@ void setran()
 #ifdef EWINDOWS
 	seed1 = GetTickCount() + src;  // milliseconds since Windows started
 #else
-	seed1 = (unsigned long)(&garbage) + garbage + src;
+	seed1 = (unsigned long)(&garbage) + random() + src;
 #endif
 	src += 1;
 	good_rand();  // skip first one, second will be more random-looking
@@ -2787,6 +2759,15 @@ static unsigned int calc_hsieh32(object a)
 }
 
 
+static unsigned int calc_hsieh30(object a)
+{
+
+	unsigned i32;
+	
+	i32 = calc_hsieh32(a);
+	return (0x3FFFFFFF & (i32 + ((0xC0000000 & i32) >> 30)));
+}
+
 unsigned int calc_fletcher32(object a)
 {
 
@@ -2911,6 +2892,9 @@ object calc_hash(object a, object b)
 	object av, lv;
 
 	if (IS_ATOM_INT(b)) {
+		if (b == -6)
+			return calc_hsieh30(a);	// Will always return a Euphoria integer.
+
 		if (b == -5)
 			return make_atom32(calc_hsieh32(a));
 
@@ -4843,7 +4827,7 @@ char **make_arg_cv(char *cmdline, int *argc)
 		}
 		if (ns == 0) {
 			argv[0] = (char *)EMalloc(8); // strlen("eui.exe") + 1
-			strcpy(argv[0], "eui.exe");
+			copy_string(argv[0], "eui.exe", 8);
 		}
 		w = 1;
 	}
@@ -5357,6 +5341,25 @@ unsigned (*general_ptr)() = (void *)&general_call_back;
 
 #ifdef EWATCOM
 #pragma off (check_stack);
+#endif
+
+#ifdef EOSX
+unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
+						unsigned arg4, unsigned arg5, unsigned arg6,
+						unsigned arg7, unsigned arg8, unsigned arg9)
+{
+	// a dummy where CallBack will later assign the value of general_ptr
+	// this saves us the trouble of trying to calculate the offset of
+	// the callback copy from general_ptr and stuffing that into a LEA
+	// calculation
+	unsigned (*f)(unsigned, unsigned, unsigned, unsigned, unsigned,
+	unsigned, unsigned, unsigned, unsigned, unsigned)
+	= (unsigned (*)(unsigned, unsigned, unsigned, unsigned, unsigned,
+	unsigned, unsigned, unsigned, unsigned, unsigned)) 0xF001F001;
+	return (f)((symtab_ptr)0x12345678,
+									 arg1, arg2, arg3, arg4, arg5,
+									 arg6, arg7, arg8, arg9);
+}
 #endif
 
 /* Windows cdecl - Need only one template.

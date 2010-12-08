@@ -1,4 +1,10 @@
+--
+-- TODO: document this file, i.e. what is it for, how is it used, do we have tests
+-- using it, is it up to date, etc...
+--
+
 namespace stddebug
+
 include std/cmdline.e
 include std/console.e
 include std/convert.e
@@ -45,4 +51,3 @@ include std/types.e
 include std/unittest.e
 include std/wildcard.e
 include std/win32/msgbox.e
-

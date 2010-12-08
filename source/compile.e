@@ -2934,41 +2934,58 @@ end procedure
 
 procedure opLENGTH()
 -- LENGTH / PLENGTH
-	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
+	integer 
+		source_sym = Code[pc+1],
+		target_sym = Code[pc+2]
+	
+	CSaveStr("_0", target_sym, source_sym, 0, 0)
 	if opcode = LENGTH then
-		if TypeIsIn(Code[pc+1], TYPES_SO) then
+		if TypeIsIn( source_sym, TYPES_SO) then
 			-- For sequences and object we need to check the length.
-			if SeqLen(Code[pc+1]) != NOVALUE then
+			if SeqLen( source_sym ) != NOVALUE then
 				-- we know the length already, so no need for a runtime check.
-				c_stmt("@ = ", Code[pc+2])
-				c_printf("%d;\n", SeqLen(Code[pc+1]))
-				target = repeat(SeqLen(Code[pc+1]), 2)
+				ifdef DEBUG then
+					c_stmt0("// Known sequence length:\n" )
+				end ifdef
+				c_stmt("@ = ", target_sym )
+				c_printf("%d;\n", SeqLen( source_sym ) )
+				target = repeat(SeqLen( source_sym ), 2)
 			else
+				
 				-- Fetch the current length from the struct
-				c_stmt ("if (IS_SEQUENCE(@))\n", Code[pc+1])
-				c_stmt ("    @ = SEQ_PTR(@)->length;\n", {Code[pc+2], Code[pc+1]}, Code[pc+2])
-				c_stmt ("else\n    @ = 1;\n", Code[pc+2], Code[pc+2])
+				c_stmt ("if (IS_SEQUENCE(@)){\n", source_sym )
+					c_stmt ("    @ = SEQ_PTR(@)->length;\n", { target_sym, source_sym }, target_sym )
+				c_stmt0("}\n")
+				c_stmt0("else {\n" )
+					c_stmt ("@ = 1;\n", Code[pc+2], Code[pc+2])
+				c_stmt0("}\n")
 				target = {0, MAXLEN}
 			end if
 		else
-			c_stmt("@ = 1;\n", Code[pc+2])
+			ifdef DEBUG then
+				c_stmt0("// Length of an atom (always 1):\n")
+			end ifdef
+			c_stmt("@ = 1;\n", target_sym )
 			target = {1,1}
 		end if
 		CDeRefStr("_0")
-		SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0 )
+		SetBBType( target_sym, TYPE_INTEGER, target, TYPE_OBJECT, 0 )
 	else -- opcode = PLENGTH
 		-- we have a pointer to an argument
-		c_stmt0("if (IS_SEQUENCE(*(object_ptr)_3))\n")
-		c_stmt ("    @ = SEQ_PTR(*(object_ptr)_3)->length;\n", Code[pc+2])
-		c_stmt ("else\n    @ = 1;\n", Code[pc+2])
+		c_stmt0("if (IS_SEQUENCE(*(object_ptr)_3)){\n")
+			c_stmt ("    @ = SEQ_PTR(*(object_ptr)_3)->length;\n", target_sym )
+		c_stmt0("}\n")
+		c_stmt0("else {\n" )
+			c_stmt ("@ = 1;\n", target_sym )
+		c_stmt0("}\n")
 		CDeRefStr("_0")
-		SetBBType(Code[pc+2], TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
+		SetBBType( target_sym, TYPE_INTEGER, novalue, TYPE_OBJECT, 0 )
 	end if
 
 	if dispose_length() then
-		dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
+		dispose_temp( source_sym, DISCARD_TEMP, REMOVE_FROM_MAP )
 	end if
-	create_temp( Code[pc+1], NO_REFERENCE )
+	create_temp( source_sym, NO_REFERENCE )
 
 	pc += 3
 end procedure

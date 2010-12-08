@@ -20,9 +20,9 @@ front-end portion of the interpreter. The source code for the translator is in
 === C Compilers Supported
 
 The **Translator** currently works with GNU C on //Unix//-like OSes,
-GNU C on //Windows// from  [[http://www.mingw.org|minGW]]  
-or  [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]]  using the ##-gcc## option
-and with [[http://www.openwatcom.org|Watcom C]] on //Windows//.
+GNU C on //Windows// from  [[http://www.mingw.org|MinGW]]  
+or [[http://en.wikipedia.org/wiki/Cygwin|Cygwin]] using the ##-gcc## option
+and with [[http://www.openwatcom.org|Watcom C]] (the default) on //Windows//.
 These are all **free** compilers.
 
 GNU C will exist already on your //Unix// system. The others can be
@@ -30,111 +30,121 @@ downloaded from their respective Web sites.
 
 ==== Notes:
 
-* Warnings are turned off when compiling with ##emake.bat##. If you turn them 
-on, you may see some
- harmless messages about variables declared but not used, labels defined but
- not used, function prototypes not declared etc.
-* Options ##-bor## and ##-lcc## for previously supported compilers on 
-//Windows// no longer work. 
-* For the ##-gcc## option on //Windows// you will need a ##libeu.a## compiled 
-with //minGW// or //Cygwin//. The official distribution may only contain 
-##eu.lib## compiled with //Watcom//. Also, the ##-stack## and ##-con## options 
-may not produce the expected result with //GCC C//.
+* Warnings are turned off when compiling directly or with makefiles. If you turn them 
+  on, you may see some harmless messages about variables declared but not used, labels defined 
+  but not used, function prototypes not declared etc.
+* For the ##-gcc## option on //Windows// you will need a ##eu.a## compiled 
+  with //MinGW// or //Cygwin//. The official distribution may only contain 
+  ##eu.lib## compiled with //Watcom//. Also, the ##-stack## and ##-con## options 
+  may not produce the expected result with //GCC C//.
 * Currently, only 32-bit compilers are supported on 64-bit platforms.
 
 === How to Run the Translator
 
-Running the **Translator** is similar to running the **Interpreter**.
-
-On //Windows// you would type:
+Running the **Translator** is similar to running the **Interpreter**:
 
 {{{
-euc taskwire.exw
+euc -con allsorts.ex
 }}}
 
-On //Unix// you would type:
+Note: that on Unix, the demos might be installed to ##/usr/share/euphoria/demo##
+
+Instead of running the ##allsorts.ex## program, the **Translator** will
+create several C source files in a temporary build directory, compile them
+and result in a native executable file. For this to work, you have to have a 
+supporting compiler installed (mentioned above). The optional parameter used in this
+example, ##-con##, will be explained in full detail below.
+
+When the C compiling and linking is finished, you will have a file called ##allsorts.exe##
+or simply ##allsorts## on *nix systems. The C source files will have been removed to avoid 
+clutter.
+
+When you run the ##allsorts## executable, it should run the same as if you had typed:
 
 {{{
-euc qsort.ex
+eui allsorts
 }}}
-
-but instead of running the ##allsorts.ex## program, the **Translator** will
-create several C source files. Anyone can run the **Translator**. It's
-included in euphoria\bin along with the interpreter. To compile and link the C
-files, you need to install one of the supported C compilers. The
-**Translator** creates a batch file called ##emake.bat## that does all the
-compiling and linking steps for you, so you don't actually have to know
-anything about C or C compilers. Just type:
-
-{{{
-emake
-}}}
-
-When the C compiling and linking is finished, you will have a file called:
-
-{{{
-allsorts.exe
-}}}
-
-and the C source files will have been removed to avoid clutter.
-
-When you run ##allsorts.exe##, it should run the same as if you had typed:
-
-##eui allsorts##
 
 to run it with the **Interpreter**, except that it should run faster, showing
 reduced times for the various sorting algorithms in 
 ##euphoria\demo\allsorts.ex##.
 
-After creating your executable file, emake removes all the C files that were
-created. If you want to look at these files, run the translator again and look
-at the files before running emake.
-
-==== Note to Unix users:
-
-The files will be called ##emake## and ##shell##, and you type ##./emake## to
-perform the compiles and link, and **./shell** to run the shell sort program.
+After creating your executable file, the translator removes all the C files that were
+created. If you want to look at these files, you'll need to run the translator again,
+using either the ##-keep## or ##-makefile## options.
 
 === Command-Line Options
+
+==== -gcc, -wat
 
 If you happen to have more than one C compiler for a given platform, you can
 select the one you want to use with a command-line option:
 
 {{{
--wat
--gcc
+-wat  -- Watcom compiler
+-gcc  -- GCC compiler (MinGW on Windows)
 }}}
 
-on the command line to **euc** or **euc**. e.g.
+For example, to compile with GCC (or MinGW on Windows):
 
 {{{
 euc -gcc pretend.exw
 }}}
 
 Note: //Watcom// is the default on //Windows// and -wat is assumed.
-Normally, after building your ##.exe## file, the **emake** batch file will 
-delete
-all C files and object files produced by the Translator. If you want **emake**
+
+==== -keep
+
+Normally, after building your ##.exe## file, the translator will delete
+all C files and object files produced by the Translator. If you want it
 to keep these files, add the ##-keep## option to the Translator command-line.
 e.g.
 
 {{{
-euc -wat -keep sanity.ex
+euc -keep sanity.ex
 }}}
+
+==== -dll/-so - Shared Library
 
 To make a shared dynamically loading library, just
 add ##-dll## to the command line. e.g.
 
 {{{
-euc -wat -dll mylib.ew
+euc -dll mylib.ew
 }}}
+
+Note: On *nix systems, you can also use ##-so##. Both will produce a *nix 
+shared library.
+
+Please see [[:Dynamic Link Libraries]]
+
+==== -con - Console based program
 
 To make a //Windows// console program instead of a //Windows// GUI program,
 add ##-con## to the command line. e.g.
 
 {{{
-euc -wat -con myprog.exw
+euc -con myprog.exw
 }}}
+
+When creating a Windows GUI program, if the ##-con## option is used, when running
+your Windows program, you will have a blank console window appear and remain the duration
+of your application. By default, a GUI program is assumed.
+
+==== -rc-file - Resource File
+
+On Windows, ##euc## can automatically compile and link in an application specific resource
+file. This resource file can contain product and version information, an application icon
+or any other valid resource data.
+
+{{{
+euc -rc-file myapp.rc myapp.ex
+}}}
+
+The resulting executable will contain all the resources from ##myapp.rc## compiled into 
+the executable. Please see [[:Using Resource Files]].
+
+==== -stack - Stack size
 
 To increase or decrease the total amount of stack space reserved for your
 program, add ##-stack nnnn## to the command line. e.g.
@@ -154,12 +164,16 @@ calls that a task might need. At run-time, as your program creates more
 simultaneously-active tasks, the stack space allotted to each task will tend
 to decrease.
 
+==== -debug - Debug mode
+
 To compile your program with debugging information, usable with a debugger
 compatible with your compiler, use the ##-debug## option:
 
 {{{
 euc -debug myapp.ex
 }}}
+
+==== -lib - User defined library
 
 It is sometimes useful to link your translated code to a Euphoria runtime
 library other than the default supplied library. This ability is probably
@@ -171,29 +185,61 @@ that only the default library is supplied. Use the ##-lib {library}## option:
 euc -lib decu.a myapp.ex
 }}}
 
-{{{
--plat FREEBSD
--plat LINUX
--plat OSX
--plat WIN
--plat NETBSD
--plat OPENBSD
--plat SUNOS
-}}}
+==== -plat - Set platform
+
+The translator has the capability of translating Euphoria code to C code for a platform
+other than the host platform. This can be done with the ##-plat## option. It takes
+one parameter, the platform code:
+* FREEBSD
+* LINUX
+* OSX
+* WIN
+* NETBSD
+* OPENBSD
+* SUNOS
 
 Use one of these options to translate code into C for the specified platform.  
-The default will always be the native
-platform of the translator that is executed, so ##euc.exe## will default
-to //Windows//, and ##euc## will default to the platform upon which it was 
-built.
+The default will always be the host platform of the translator that is executed, 
+so ##euc.exe## will default to //Windows//, and ##euc## will default to the platform 
+upon which it was built.
 
 The resulting output can be compiled by the appropriate compiler on the
 specified platform, or, possibly a cross platform compiler, if you have
 one configured.
 
-=== Dynamic Link Libraries (Shared Libraries)
+==== -makefile/-makefile-partial - Using makefiles
 
-Simply by adding ##-dll## to the command line, the **Translator** will build a 
+You can optionally have the translator create a makefile that you can use
+to build your program instead of building directly.  Using a makefile like
+this can be convenient if you want or need to alter the translated C code,
+or change compiling or linking options before building your program.  To
+do so:
+
+{{{
+$ euc -makefile myapp.ex
+Translating code, pass: 1 2 3 4  generating
+
+3.c files were created.
+To build your project, type make -f myapp.mak
+}}}
+
+Then, as the message indicates, simply type:
+{{{
+$ make -f myapp.mak
+}}}
+
+On Windows, when using Watcom, the message will refer to wmake, the Watcom
+version of make.  On BSD platforms, you may need to use ##gmake##, as the 
+generated makefiles are in GNU format, not BSD.
+
+You can also get a partial makefile using the ##-makefile-partial## switch.
+This generates a makefile that you can use to include into another makefile
+for a larger project.  This is useful for including the file dependencies
+for your code into the larger project.
+
+=== Dynamic Link Libraries
+
+Simply by adding ##-dll## (or ##-so##) to the command line, the **Translator** will build a 
 shared dynamically loading library instead of an executable program.
 
 You can translate and compile a set of useful Euphoria routines, and share
@@ -233,9 +279,9 @@ For Watcom, the **Translator** also creates an EXPORT command, added to
 ##objfiles.lnk## for each exported identifier, so ##foo()## would be exported as
 "##foo##".
 
-With Watcom you can edit the ##objfiles.lnk## file, and
-rerun ##emake.bat##, to rename the exported identifiers, or remove ones that you
-don't want to export.
+With Watcom, if you specify the ##-makefile## option, you can edit the 
+##objfiles.lnk## file to rename the exported identifiers, or remove ones that you
+don't want to export.  Then build with the generated makefile.
 
 Having nice exported names is not critical, since the name need only appear
 once in each Euphoria program that uses the shared dynamically loading library, 
@@ -283,16 +329,111 @@ multitasking operations. The Translator will give you an error message about
 this.
 
 Euphoria shared dynamically loading library can also be used by C programs as 
-long as only 31-bit
-integer values are exchanged. If a 32-bit pointer or integer must be passed,
-and you have the source to the C program, you could pass the value in two
+long as only 31-bit integer values are exchanged. If a 32-bit pointer or integer must be 
+passed, and you have the source to the C program, you could pass the value in two
 separate 16-bit integer arguments (upper 16 bits and lower 16 bits), and then
 combine the values in the Euphoria routine into the desired 32-bit atom.
 
+=== Using Resource Files
+
+When creating an executable file to deliver to your users on Windows, its best to link
+in a resource file that at minimum sets your application icon but better if it sets 
+product and version information.
+
+When the resource compiler is launched by ##euc##, a single macro is defined named 
+##SRCDIR##. This can be used in your resource files to reference your application source
+path for including other resource files, icon files, etc...
+
+A simple resource file to attach an icon to your executable file is as simple as:
+
+{{{
+myapp ICON SRCDIR\myapp.ico
+}}}
+
+Remember that SRCDIR will be expanded to your application source path.
+
+A more complex resource file containing an icon and product/version information may look 
+like:
+
+{{{
+1 VERSIONINFO
+
+FILEVERSION 4,0,0,9
+PRODUCTVERSION 4,0,0,9
+
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x4L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+
+BEGIN
+  BLOCK "StringFileInfo"
+    BEGIN
+      BLOCK "040904B0"
+        BEGIN
+          VALUE "Comments",         "http://myapplication.com\0"
+          VALUE "CompanyName",      "John Doe Computing\0"
+          VALUE "FileDescription",  "Cool App\0
+          VALUE "FileVersion",      "4.0.0\0"
+          VALUE "InternalName",     "coolapp.exe\0"
+          VALUE "LegalCopyright",   "Copyright (c) 2022 by John Doe Computing\0"
+          VALUE "LegalTrademarks1", "Trademark Pending\0"
+          VALUE "LegalTrademarks2", "\0"
+          VALUE "OriginalFilename", "coolapp.exe\0"
+          VALUE "ProductName",      "Cool Application\0"
+          VALUE "ProductVersion",   "4.0.0\0"
+        END
+    END
+  BLOCK "VarFileInfo"
+    BEGIN
+      VALUE "Translation", 0x409, 1200
+    END
+END
+
+coolapp ICON SRCDIR\coolapp.ico
+}}}
+
+One other item you may wish to include is a manifest file which lets Windows know that
+controls should use the new theming engines available in >= Windows XP. Simply append:
+
+{{{
+1 24 "coolapp.manifest"
+}}}
+
+to the end of your resource file. The ##coolapp.manifest## file is:
+
+{{{
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assemblyIdentity
+    version="0.64.1.0"
+    processorArchitecture="x86"
+    name="euphoria"
+    type="win32"
+/>
+<dependency>
+    <dependentAssembly>
+        <assemblyIdentity
+            type="win32"
+            name="Microsoft.Windows.Common-Controls"
+            version="6.0.0.0"
+            processorArchitecture="X86"
+            publicKeyToken="6595b64144ccf1df"
+            language="*"
+        />
+    </dependentAssembly>
+</dependency>
+</assembly>
+}}}
+
+Version, Product and Manfiest information may change with new releases of Microsoft 
+Windows. You should consult MSDN for up to date information about using resource files
+with your application. [[http://msdn.microsoft.com/en-us/library/aa380599(VS.85).aspx|MSDN About Resource Files]].
+
 === Executable Size and Compression
 
-
-**emake** does not include a command to compress your executable file.
+The translator does not compress your executable file.
 If you want to do this we suggest you try the free
 [[UPX -> http://upx.sourceforge.net]] compressor.
 
@@ -329,7 +470,8 @@ exhausted), so you can have a huge number of levels of nested calls. Most C
 compilers, on most systems, have a pre-set limit on the size of the stack.
 Consult your compiler or linker manual if you want to increase the limit, for
 example if you have a recursive routine that might need thousands of levels of
-recursion. Modify the link command in ##emake.bat##. For Watcom C, use ##OPTION
+recursion. Modify the link command in your makefile, or use the ##-lflags##
+option when calling the translator. For Watcom C, use ##OPTION
 STACK=nnnn##, where nnnn is the number of bytes of stack space.
 
 ==== Note:
@@ -368,13 +510,9 @@ will normally not affect programs created with this **Translator**. Simply
 compiling with GNU C does not give the Free Software Foundation any
 jurisdiction over your program. If you statically link their libraries you
 will be subject to their Library licence, but the standard compile/link
-procedure in ##emake## does not statically link any FSF libraries, so there
+procedure does not statically link any FSF libraries, so there
 should be no problem.
 
-
-The Allegro graphics library, used by DJGPP, is referred to as "Giftware" in
-their documentation, and they allow you to redistribute it as part of your
-program. They ask for, but do not require, some acknowledgement.
 
 === Disclaimer:
 
@@ -394,11 +532,9 @@ faster. Other programs may see only a few percent improvement.
 
 The various C compilers are not equal in optimization ability.
 
-==== What if I want to change the compile or link options in emake.bat?
+==== What if I want to change the compile or link options in my generated makefile?
 
-Feel free to do so, however you should copy ##emake.bat## to your own file
-called (say) mymake.bat, then run mymake.bat after running the Translator.
-Occasionally the number of ##.c## files produced by the Translator could change.
+Feel free to do so, that's one reason for producing a makefile.
 
 ==== How can I make my program run even faster?
 
@@ -417,14 +553,14 @@ type routine and report any type_check failure that results.
 On //Windows// we have left out the ##/ol## loop optimization for
 Watcom's ##wcc386##. We found in a couple of rare cases that this option led
 to incorrect machine code being emitted by the Watcom C compiler. If you add
-it back in to your own version of ##emake.bat## you might get a slight
+it back in to your own makefile you might get a slight
 improvement in speed, with a slight risk of buggy code.
 
 On //Linux// or //FreeBSD// you could try the ##-O3## option of gcc instead of
 ##-O2##. It will "in-line" small routines, improving speed slightly, but
 creating a larger executable. You could also try the
 [[http://www.intel.com/cd/software/products/asmo-na/eng/compilers/clin/index.htm|Intel C~+~+ Compiler for Linux]].
-It's compatible with GNU C, but some adjustments to ##emake## might be required.
+It's compatible with GNU C, but some adjustments to your makefile might be required.
 
 === Common Problems
 
@@ -441,16 +577,10 @@ the call may not work when running the ##eui## Interpreter.
 In some cases a huge Euphoria routine is translated to C, and it proves to be
 too large for the C compiler to process. If you run into this problem, make
 your Euphoria routine smaller and simpler. You can also try turning off C
-optimization in ##emake.bat## for just the ##.c## file that fails. Breaking up
+optimization in your makefile for just the ##.c## file that fails. Breaking up
 a single constant declaration of many variables into separate constant
 declarations of a single variable each, may also help. Euphoria has no limits
 on the size of a routine, or the size of a file, but most C compilers do. The
 Translator will automatically produce multiple small .c files from a large
 Euphoria file to avoid stressing the C compiler. It won't however, break a
 large routine into smaller routines.
-
-
-Post bug reports on [[http://www.openeuphoria.org/forum/index.wc|EUforum]].
-
-In particular, report any program that does not run the same when compiled as
-it does when interpreted.

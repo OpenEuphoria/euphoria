@@ -1,19 +1,16 @@
 <div class="doc-tools">
-	<table border=0 padding=0 cellpadding=0>
+	<table border=0 padding=0 cellpadding=0 width="100%">
 		<tr>
 			<td><a href="{previous}"><img src="images/prev.png" /></a></td>
 			<td><a href="{currchap}">Up</a></td>
 			<td><a href="{next}"><img src="images/next.png" /></a></td>
 			<!-- Spacer -->
-			<td width="100%">&nbsp;</td>
+			<td width="100%" colspan="3">&nbsp;</td>
 			<td><a href="index.html">TOC</a></td>
             <td><a href="key_index.html">Index</a></td>
 		</tr>
-	</table>
-
-	<table border=0 padding=0 cellpadding=0 width="100%">
 		<tr>
-			<td width="20%">
+			<td width="20%" colspan="3">
 				&lt;&lt;
 				{prevchap=*:}
 				<a href="{prevchap}">{pctext}</a>
@@ -40,7 +37,7 @@
 				{:next}
 				&gt;
 			</td>
-			<td width="20%">
+			<td width="20%" colspan="2">
 				{nextchap=*:}
 				<a href="{nextchap}">{nctext}</a>
 				{:nextchap=:}

@@ -1,6 +1,8 @@
 include std/unittest.e
 
 ifdef EUI then
+include std/cmdline.e
+
 sequence base_demos = {
 	"allsorts.ex",
 	"animal.ex",
@@ -85,13 +87,15 @@ constant bins = base_bins & additional_bins
 
 constant cline = command_line()
 
+constant switches = build_commandline( option_switches() )
+
 for i = 1 to length(demos) do
-	integer r = system_exec(sprintf("%s -test ../demo/%s", { cline[1], demos[i] }))
+	integer r = system_exec(sprintf("%s -test %s ../demo/%s", { cline[1], switches, demos[i] }))
 	test_false(sprintf("demo -test %s", { demos[i] }), r)
 end for
 
 for i = 1 to length(bins) do
-	integer r = system_exec(sprintf("%s -test ../bin/%s", { cline[1], bins[i] }))
+	integer r = system_exec(sprintf("%s -test %s ../bin/%s", { cline[1], switches, bins[i] }))
 	test_false(sprintf("bin -test %s", { bins[i] }), r)
 end for
 

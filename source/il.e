@@ -34,22 +34,36 @@ include error.e
 include msgtext.e
 include intinit.e
 
-constant OPTIONS = {
-	{ "shroud_only", 0, GetMsgText(303, 0), { } },
-	{ "quiet",       0, GetMsgText(304, 0), { } },
-	{ "list",        0, GetMsgText(305, 0), { } },
-	{ "icon",        0, GetMsgText(307, 0), { HAS_PARAMETER, "file" }  },
-	{ "con",         0, GetMsgText(308, 0), { } },
-	{ "full_debug",  0, GetMsgText(309, 0), { } },
-	{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
-	{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
-	{ "copyright",   0, GetMsgText(312, 0), { } },
-	{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
-	{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
-	{ "batch",       0, GetMsgText(279,0), { } },
-	{ "eub",         0, GetMsgText(345,0), { HAS_PARAMETER, "backend runner" } },
-	$
-}
+ifdef SHROUDER then
+	constant OPTIONS = {
+		{ "list",        0, GetMsgText(305, 0), { } },
+		{ "full_debug",  0, GetMsgText(309, 0), { } },
+		{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
+		{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
+		{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+		{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+		{ "batch",       0, GetMsgText(279,0), { } },
+		{ "quiet",       0, GetMsgText(304, 0), { } },
+		{ "copyright",   0, GetMsgText(312, 0), { } },
+		$
+	}
+elsedef
+	constant OPTIONS = {
+		{ "list",        0, GetMsgText(305, 0), { } },
+		{ "icon",        0, GetMsgText(307, 0), { HAS_PARAMETER, "file" }  },
+		{ "con",         0, GetMsgText(308, 0), { } },
+		{ "full_debug",  0, GetMsgText(309, 0), { } },
+		{ "out",         0, GetMsgText(310, 0), { HAS_PARAMETER, "file" }  },
+		{ "i",           0, GetMsgText(311, 0), { MULTIPLE, HAS_PARAMETER, "file" }  },
+		{ "c",           0, GetMsgText(280, 0), { MULTIPLE, HAS_PARAMETER, "filename" } },
+		{ "d",           0, GetMsgText(282,0), { MULTIPLE, HAS_PARAMETER, "word" } },
+		{ "eub",         0, GetMsgText(345,0), { HAS_PARAMETER, "backend runner" } },
+		{ "batch",       0, GetMsgText(279,0), { } },
+		{ "quiet",       0, GetMsgText(304, 0), { } },
+		{ "copyright",   0, GetMsgText(312, 0), { } },
+		$
+	}	
+end ifdef
 
 -- options for BIND
 integer list, quiet, full_debug
@@ -299,10 +313,6 @@ export procedure handle_options_for_bind( m:map opts )
 		object val = m:get(opts, option)
 
 		switch option do
-			case "shroud_only" then
-				shroud_only = TRUE
-				OpDefines &= { "EUB_SHROUD" }
-
 			case "quiet" then
 				quiet = TRUE
 
@@ -335,7 +345,7 @@ export procedure handle_options_for_bind( m:map opts )
 			case "batch" then
 				batch_job = 1
 
-			case OPT_EXTRAS then
+			case cmdline:EXTRAS then
 				if length(val) != 0 then
 					file_supplied = 1
 				end if
@@ -353,11 +363,17 @@ export procedure handle_options_for_bind( m:map opts )
 	if file_supplied = 0 then
 		fatal(GetMsgText(313))
 	end if
+	
 	ifdef WINDOWS then
 		OpDefines &= { "EUB_WIN32" }
 		if con then
 			OpDefines &= { "EUB_CON" }
 		end if
+	end ifdef
+
+	ifdef SHROUDER then
+		shroud_only = TRUE
+		OpDefines &= { "EUB_SHROUD" }
 	end ifdef
 
 	OpDefines &= { "EUB" }

@@ -20,8 +20,7 @@
 namespace syncolor
 
 include std/text.e
-include std/wildcard.e
-include std/eumem.e as mem
+include std/eumem.e
 
 include keywords.e
 
@@ -61,7 +60,7 @@ sequence char_class
 public procedure set_colors(sequence pColorList)
 	sequence lColorName
 	for i = 1 to length(pColorList) do
-		lColorName = upper(pColorList[i][1])
+		lColorName = text:upper(pColorList[i][1])
 		switch lColorName do
 			case "NORMAL" then
 				NORMAL_COLOR  = pColorList[i][2]
@@ -147,7 +146,7 @@ function default_state()
 end function
 
 atom g_state = eumem:malloc()
-ram_space[g_state] = default_state()
+eumem:ram_space[g_state] = default_state()
 
 --**
 -- Create a new colorizer state
@@ -157,8 +156,10 @@ ram_space[g_state] = default_state()
 --
 
 public function new()
-	atom state = mem:malloc()
+	atom state = eumem:malloc()
+	
 	reset(state)
+	
 	return state
 end function
 
@@ -170,7 +171,7 @@ end function
 --
 
 public procedure reset(atom state = g_state)
-	ram_space[state] = default_state()
+	eumem:ram_space[state] = default_state()
 end procedure
 
 --**
@@ -208,13 +209,13 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 	color_segments = {}
 
 	-- TOOD: Hackery?
-	if ram_space[state][S_MULTILINE_COMMENT] then
+	if eumem:ram_space[state][S_MULTILINE_COMMENT] then
 		goto "MULTILINE_COMMENT"
 
-	elsif ram_space[state][S_STRING_TRIPLE] then
+	elsif eumem:ram_space[state][S_STRING_TRIPLE] then
 		goto "MULTILINE_STRING"
 
-	elsif ram_space[state][S_STRING_BACKTICK] then
+	elsif eumem:ram_space[state][S_STRING_BACKTICK] then
 		goto "BACKTICK_STRING"
 
 	end if
@@ -254,19 +255,19 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 
 		elsif class = BRACKET then
 			if find(c, "([{") then
-				ram_space[state][S_BRACKET_LEVEL] += 1
+				eumem:ram_space[state][S_BRACKET_LEVEL] += 1
 			end if
 
-			if ram_space[state][S_BRACKET_LEVEL] >= 1 and
-			   ram_space[state][S_BRACKET_LEVEL] <= length(BRACKET_COLOR)
+			if eumem:ram_space[state][S_BRACKET_LEVEL] >= 1 and
+			   eumem:ram_space[state][S_BRACKET_LEVEL] <= length(BRACKET_COLOR)
 			then
-				seg_flush(BRACKET_COLOR[ram_space[state][S_BRACKET_LEVEL]])
+				seg_flush(BRACKET_COLOR[eumem:ram_space[state][S_BRACKET_LEVEL]])
 			else
 				seg_flush(NORMAL_COLOR)
 			end if
 
 			if find(c, ")]}") then
-				ram_space[state][S_BRACKET_LEVEL] -= 1
+				eumem:ram_space[state][S_BRACKET_LEVEL] -= 1
 			end if
 
 			seg_end += 1
@@ -292,7 +293,7 @@ label "MULTILINE_COMMENT"
 				seg_flush(COMMENT_COLOR)
 				i = match("*/", line, seg_end)
 				if i = 0 then
-					ram_space[state][S_MULTILINE_COMMENT] = 1
+					eumem:ram_space[state][S_MULTILINE_COMMENT] = 1
 					seg_end = length(line) - 1
 					exit
 				end if
@@ -304,7 +305,7 @@ label "MULTILINE_COMMENT"
 					goto "MULTILINE_COMMENT"
 				end if
 			
-				ram_space[state][S_MULTILINE_COMMENT] = 0
+				eumem:ram_space[state][S_MULTILINE_COMMENT] = 0
 			else
 				seg_flush(NORMAL_COLOR)
 				seg_end += 1
@@ -319,13 +320,13 @@ label "BACKTICK_STRING"
 			seg_flush(STRING_COLOR)
 			i = match("`", line, seg_end + 2)
 			if i = 0 then
-				ram_space[state][S_STRING_BACKTICK] = 1
+				eumem:ram_space[state][S_STRING_BACKTICK] = 1
 				seg_end = length(line) - 1
 				exit
 			end if
 
 			seg_end = i
-			ram_space[state][S_STRING_BACKTICK] = 0
+			eumem:ram_space[state][S_STRING_BACKTICK] = 0
 
 		else  -- QUOTE
 			if line[seg_end + 2] = '"' and line[seg_end + 3] = '"' then
@@ -336,7 +337,7 @@ label "MULTILINE_STRING"
 				if seg_end + 3 < length(line) then
 					i = match(`"""`, line, seg_end + 3)
 					if i = 0 then
-						ram_space[state][S_STRING_TRIPLE] = 1
+						eumem:ram_space[state][S_STRING_TRIPLE] = 1
 						seg_end = length(line) - 1
 						exit
 					end if
@@ -346,7 +347,7 @@ label "MULTILINE_STRING"
 				end if
 
 				seg_end = i + 2
-				ram_space[state][S_STRING_TRIPLE] = 0
+				eumem:ram_space[state][S_STRING_TRIPLE] = 0
 			else
 				i = seg_end + 2
 				while i < length(line) do

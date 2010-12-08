@@ -9,6 +9,7 @@
 #   Translator            (euc.exe)  : wmake translator
 #   Translator Library     (eu.lib)  : wmake library
 #   Backend 	 eub.exe, eubw.exe)  : wmake backend
+#   Supporting Tools                 : wmake tools
 #   Code Page Database               : wmake code-page-db
 #   Create Documentation in HTML     : wmake htmldoc
 #   Create Documentation in PDF      : wmake pdfdoc
@@ -321,6 +322,7 @@ all :  .SYMBOLIC
 	wmake -h translator $(VARS)
 	wmake -h backend $(VARS)
 	wmake -h binder $(VARS)
+	wmake -h shrouder $(VARS)
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
@@ -486,12 +488,46 @@ binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 $(BUILDDIR)\eubind.exe : translator library
 	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 	
-!ifdef BUILD_TOOLS
-$(BUILDDIR)\eutestdr\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
-	cd $(BUILDDIR)\eutestdr	
-	$(EUBIN)\euc -con -i $(TRUNKDIR)\include $(TRUNKDIR)\source\eutest.ex
+shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
-!endif #BUILD_TOOLS
+$(BUILDDIR)\eushroud.exe : translator library
+	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	
+tools: .SYMBOLIC
+    @echo ------- TOOLS -----------
+	wmake -h $(BUILDDIR)\eutest.exe $(VARS)
+	wmake -h $(BUILDDIR)\euloc.exe $(VARS)
+	wmake -h $(BUILDDIR)\eucoverage.exe $(VARS)
+	wmake -h $(BUILDDIR)\eudis.exe $(VARS)
+	wmake -h $(BUILDDIR)\eudist.exe $(VARS)
+
+tools-additional: .SYMBOLIC
+    @echo ------- ADDITIONAL TOOLS -----------
+	wmake -h $(BUILDDIR)\eudoc.exe $(VARS)
+	wmake -h $(BUILDDIR)\creolehtml.exe $(VARS)
+
+tools-all: tools tools-additional
+
+$(BUILDDIR)\eutest.exe: $(TRUNKDIR)\source\eutest.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\euloc.exe: $(TRUNKDIR)\bin\euloc.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eucoverage.exe: $(TRUNKDIR)\bin\eucoverage.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudis.exe: $(TRUNKDIR)\source\dis.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudist.exe: $(TRUNKDIR)\source\eudist.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\eudoc.exe: $(TRUNKDIR)\source\eudoc\eudoc.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
+
+$(BUILDDIR)\creolehtml.exe: $(TRUNKDIR)\source\creole\creolehtml.ex
+	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
 $(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
 	$(EXE) -i $(TRUNKDIR)\include coverage.ex $(BUILDDIR)\$(OBJDIR)
@@ -723,16 +759,20 @@ $(BUILDDIR)\docs\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\do
 $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\docs\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
+$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html $(DOCDIR)\nav.html
+	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
+	cd $(TRUNKDIR)\docs
 	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 manual-upload: .SYMBOLIC manual
-	$(SCP) $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
+	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
 
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 

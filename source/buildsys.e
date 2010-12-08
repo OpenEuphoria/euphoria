@@ -9,8 +9,9 @@ include std/filesys.e
 include std/io.e
 include std/regex.e
 include std/text.e
-include std/map.e
+include std/hash.e
 include std/search.e
+include std/utils.e
 
 include c_decl.e
 include c_out.e
@@ -78,7 +79,6 @@ end function
 -- = buildsys.e
 --
 -- Deals with writing files for various build systems:
---   * emake/emake.bat
 --   * Makefile - full
 --   * Makefile - partial (for inclusion into a parent Makefile)
 --   * None
@@ -87,24 +87,24 @@ end function
 export enum
 	--**
 	-- No build system will be written (C/H files written only).
-	BUILD_NONE = 0,
 
-	--**
-	-- Standard emake/emake.bat file
-	BUILD_EMAKE,
+	BUILD_NONE = 0,
 
 	--**
 	-- Makefile containing only ##PRGNAME_SOURCES## and ##PRGNAME_OBJECTS##
 	-- Makefile that is for inclusion into a parent Makefile.
+
 	BUILD_MAKEFILE_PARTIAL,
 
 	--**
 	-- A full Makefile project suitable for building the resulting project
 	-- entirely.
+
 	BUILD_MAKEFILE_FULL,
 
 	--**
 	-- build directly from the translator
+
 	BUILD_DIRECT
 
 --**
@@ -114,6 +114,7 @@ export integer build_system_type = BUILD_DIRECT
 
 --**
 -- Known/Supported compiler types
+
 export enum
 	COMPILER_UNKNOWN = 0,
 	COMPILER_GCC,
@@ -121,15 +122,28 @@ export enum
 
 --**
 -- Compiler type flag for this invocation
+
 export integer compiler_type = COMPILER_UNKNOWN
 
 --**
 -- Compiler directory (only used for a few compilers)
+
 export sequence compiler_dir = ""
 
 --**
 -- Resulting executable name
+
 export sequence exe_name = ""
+
+--**
+-- Resource file to link into executable
+
+export sequence rc_file = ""
+
+--**
+-- Compile resource file
+
+export sequence res_file = ""
 
 --**
 -- Maximum C file size before splitting the file into multiple chunks
@@ -138,6 +152,7 @@ export integer max_cfile_size = 100_000
 
 --**
 -- Calculated value for detecting when c files have changed
+
 atom cfile_check = 0
 
 --**
@@ -161,12 +176,12 @@ export integer force_build = 0
 export integer remove_output_dir = 0
 
 enum SETUP_CEXE, SETUP_CFLAGS, SETUP_LEXE, SETUP_LFLAGS, SETUP_OBJ_EXT, SETUP_EXE_EXT,
-	SETUP_LFLAGS_BEGIN
+	SETUP_LFLAGS_BEGIN, SETUP_RC_COMPILER
 
 --**
 -- Calculate a checksum to be used for detecting changes to generated c files.
 export procedure update_checksum( object raw_data )
-	cfile_check = xor_bits(cfile_check, hash( raw_data, HSIEH32))
+	cfile_check = xor_bits(cfile_check, hash( raw_data, stdhash:HSIEH32))
 end procedure
 
 --**
@@ -183,7 +198,7 @@ end procedure
 
 function setup_build()
 	sequence c_exe   = "", c_flags = "", l_exe   = "", l_flags = "", obj_ext = "",
-		exe_ext = "", l_flags_begin = "", l_names, l_ext, t_slash
+		exe_ext = "", l_flags_begin = "", rc_comp = "", l_names, l_ext, t_slash
 
 	if length(user_library) = 0 then
 		if debug_option then
@@ -259,7 +274,7 @@ function setup_build()
 			end if
 
 			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
-				{ get_eucompiledir()  })
+				{ get_eucompiledir() })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
@@ -284,9 +299,12 @@ function setup_build()
 			elsif TSUNOS then
 				l_flags &= " -lsocket -lresolv -lnsl"
 			elsif TWINDOWS then
-				l_flags &= " -mno-cygwin -lws2_32"
+				l_flags &= " -mno-cygwin -lws2_32"				
 			end if
-
+			
+			-- input/output
+			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" [1] -O coff -o [2]"
+			
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
 			l_exe = "wlink"
@@ -315,7 +333,9 @@ function setup_build()
 			end if
 
 			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
-
+			
+			-- resource file, executable file
+			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -fo=[2] -ad [1] [3]"
 		case else
 			CompileErr(43)
 	end switch
@@ -329,7 +349,9 @@ function setup_build()
 		l_flags_begin = ""
 	end if
 
-	return { c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin }
+	return { 
+		c_exe, c_flags, l_exe, l_flags, obj_ext, exe_ext, l_flags_begin, rc_comp
+	}
 end function
 
 --**
@@ -439,10 +461,18 @@ procedure write_makefile_full()
 	puts(fh, HOSTNL)
 
 	if compiler_type = COMPILER_WATCOM then
-		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
+		printf(fh, "\"%s\" : $(%s_OBJECTS) %s" & HOSTNL, { 
+			exe_name, upper(file0), user_library
+		})
 		printf(fh, "\t$(LINKER) @%s.lnk" & HOSTNL, { file0 })
+		if length(rc_file) and length(settings[SETUP_RC_COMPILER]) then
+			writef(fh, "\t" & settings[SETUP_RC_COMPILER], { rc_file, res_file, exe_name })
+		end if
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean : .SYMBOLIC" & HOSTNL, { file0 })
+		if length(res_file) then
+			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file })
+		end if
 		for i = 1 to length(generated_files) do
 			if match(".o", generated_files[i]) then
 				printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
@@ -451,6 +481,9 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all : .SYMBOLIC" & HOSTNL, { file0 })
 		printf(fh, "\tdel \"%s\"" & HOSTNL, { exe_name })
+		if length(res_file) then
+			printf(fh, "\tdel \"%s\"" & HOSTNL, { res_file })
+		end if
 		for i = 1 to length(generated_files) do
 			printf(fh, "\tdel \"%s\"" & HOSTNL, { generated_files[i] })
 		end for
@@ -460,17 +493,20 @@ procedure write_makefile_full()
 		puts(fh, HOSTNL)
 
 	else
-		printf(fh, "%s: $(%s_OBJECTS) %s" & HOSTNL, { exe_name, upper(file0), user_library })
-			printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) $(LFLAGS)" & HOSTNL, {
-				exe_name, upper(file0) })
+		printf(fh, "%s: $(%s_OBJECTS) %s %s" & HOSTNL, { exe_name, upper(file0), user_library, rc_file })
+		if length(rc_file) then
+			writef(fh, "\t" & settings[SETUP_RC_COMPILER] & HOSTNL, { rc_file, res_file })
+		end if
+		printf(fh, "\t$(LINKER) -o %s $(%s_OBJECTS) %s $(LFLAGS)" & HOSTNL, {
+			exe_name, upper(file0), iif(length(res_file), res_file, "") })
 		puts(fh, HOSTNL)
 		printf(fh, ".PHONY: %s-clean %s-clean-all" & HOSTNL, { file0, file0 })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean:" & HOSTNL, { file0 })
-		printf(fh, "\trm -rf $(%s_OBJECTS)" & HOSTNL, { upper(file0) })
+		printf(fh, "\trm -rf $(%s_OBJECTS) %s" & HOSTNL, { upper(file0), res_file })
 		puts(fh, HOSTNL)
 		printf(fh, "%s-clean-all: %s-clean" & HOSTNL, { file0, file0 })
-		printf(fh, "\trm -rf $(%s_SOURCES) %s" & HOSTNL, { upper(file0), exe_name })
+		printf(fh, "\trm -rf $(%s_SOURCES) %s %s" & HOSTNL, { upper(file0), res_file, exe_name })
 		puts(fh, HOSTNL)
 		puts(fh, "%.o: %.c" & HOSTNL)
 		puts(fh, "\t$(CC) $(CFLAGS) $*.c -o $*.o" & HOSTNL)
@@ -490,103 +526,6 @@ procedure write_makefile_partial()
 	write_makefile_srcobj_list(fh)
 
 	close(fh)
-end procedure
-
---**
--- Write an emake build file
-
-procedure write_emake()
-	sequence settings = setup_build()
-	sequence fname = "emake"
-
-	ensure_exename(settings[SETUP_EXE_EXT])
-
-	if TWINDOWS then
-		fname &= ".bat"
-	end if
-
-	if not silent then
-		ShowMsg(1, 162, { output_dir, fname })
-	end if
-
-	integer fh = open(output_dir & fname, "wb")
-	if fh = -1 then
-		CompileErr(45, {output_dir, fname})
-	end if
-
-	if compiler_type != COMPILER_GCC then
-		puts(fh, "@echo off" & HOSTNL)
-		puts(fh, "if not exist " & file0 & ".c goto nofiles" & HOSTNL)
-	end if
-
-	switch compiler_type do
-		case COMPILER_GCC then
-			puts(fh, "echo Compiling with GCC" & HOSTNL)
-		case COMPILER_WATCOM then
-			write_objlink_file()
-			puts(fh, "echo Compiling with Watcom" & HOSTNL)
-	end switch
-
-	for i = 1 to length(generated_files) do
-		if generated_files[i][$] = 'c' then
-			printf(fh, "echo Compiling %2.0f%%%% %s" & HOSTNL, { 100 * (i / length(generated_files)),
-				generated_files[i] })
-			printf(fh, "%s %s %s" & HOSTNL, { settings[SETUP_CEXE], settings[SETUP_CFLAGS],
-				generated_files[i] })
-		end if
-	end for
-
-	printf(fh, "echo Linking 100%%%% %s" & HOSTNL, { exe_name })
-	puts(fh, settings[SETUP_LEXE])
-
-	switch compiler_type do
-		case COMPILER_WATCOM then
-			printf(fh, " @%s.lnk" & HOSTNL, { file0 })
-
-		case else
-			printf(fh, " -o %s ", { exe_name })
-			for i = 1 to length(generated_files) do
-				if generated_files[i][$] != 'c' then
-					continue
-				end if
-
-				printf(fh, " %s.%s ", { filebase(generated_files[i]), settings[SETUP_OBJ_EXT] })
-			end for
-
-			puts(fh, " " & settings[SETUP_LFLAGS] & HOSTNL)
-	end switch
-
-	if compiler_type = COMPILER_GCC then
-		printf(fh, "# TODO: check for executable, jump to done" & HOSTNL, {})
-	else
-		printf(fh, "if not exist %s goto done" & HOSTNL, { exe_name })
-	end if
-
-	printf(fh, "echo You can now use %s" & HOSTNL, { exe_name })
-
-	if not keep then
-		for i = 1 to length(generated_files) do
-			if TWINDOWS then
-				puts(fh, "del ")
-			else
-				puts(fh, "rm ")
-			end if
-
-			puts(fh, generated_files[i] & HOSTNL)
-		end for
-	end if
-
-	if compiler_type != COMPILER_GCC then
-		puts(fh, ":done" & HOSTNL)
-	end if
-
-	close(fh)
-
-	ifdef UNIX then
-		if TUNIX then
-			system("chmod +x emake", 2)
-		end if
-	end ifdef
 end procedure
 
 --**
@@ -672,15 +611,32 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 		delete_file(file0 & ".bld")
 	end if
 
+	-- For MinGW the RC file gets compiled to a .res file and then put in the normal link line
+	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_GCC then
+		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file, res_file })
+		status = system_exec(cmd, 0)
+		if status != 0 then
+			ShowMsg(2, 350, { rc_file })
+			ShowMsg(2, 169, { status, cmd })
+			
+			goto "build_direct_cleanup"
+		end if
+	end if
+
 	switch compiler_type do
 		case COMPILER_WATCOM then
 			cmd = sprintf("%s @%s.lnk", { settings[SETUP_LEXE], file0 })
 
 		case COMPILER_GCC then
-			cmd = sprintf("%s -o %s %s %s", { settings[SETUP_LEXE], exe_name, objs, settings[SETUP_LFLAGS] })
+			cmd = sprintf("%s -o %s %s %s %s", { 
+				settings[SETUP_LEXE], exe_name, objs, 
+				iif(length(res_file), res_file, ""),
+				settings[SETUP_LFLAGS]
+			})
 
 		case else
 			ShowMsg(2, 167, { compiler_type })
+			
 			goto "build_direct_cleanup"
 	end switch
 
@@ -696,7 +652,20 @@ export procedure build_direct(integer link_only=0, sequence the_file0="")
 	if status != 0 then
 		ShowMsg(2, 168, { exe_name })
 		ShowMsg(2, 169, { status, cmd })
+		
 		goto "build_direct_cleanup"
+	end if
+	
+	-- For Watcom the rc file links in after the fact	
+	if length(rc_file) and length(settings[SETUP_RC_COMPILER]) and compiler_type = COMPILER_WATCOM then
+		cmd = text:format(settings[SETUP_RC_COMPILER], { rc_file, res_file, exe_name })
+		status = system_exec(cmd, 0)
+		if status != 0 then
+			ShowMsg(2, 187, { rc_file, exe_name })
+			ShowMsg(2, 169, { status, cmd })
+			
+			goto "build_direct_cleanup"
+		end if
 	end if
 
 label "build_direct_cleanup"
@@ -707,6 +676,10 @@ label "build_direct_cleanup"
 			end if
 			delete_file(generated_files[i])
 		end for
+		
+		if length(res_file) then
+			delete_file(res_file)
+		end if
 
 		if remove_output_dir then
 			chdir(cwd)
@@ -726,7 +699,7 @@ end procedure
 --
 -- See Also:
 --   [[:build_system_type]], [[:BUILD_NONE]], [[:BUILD_MAKEFILE_FULL]],
---   [[:BUILD_MAKEFILE_PARTIAL]], [[:BUILD_EMAKE]]
+--   [[:BUILD_MAKEFILE_PARTIAL]]
 
 export procedure write_buildfile()
 	switch build_system_type do
@@ -751,19 +724,6 @@ export procedure write_buildfile()
 			if not silent then
 				ShowMsg(1, 170, { cfile_count + 2 })
 				ShowMsg(1, 173, { file0 })
-			end if
-
-		case BUILD_EMAKE then
-			write_emake()
-
-			if not silent then
-				sequence fname = "emake"
-				if TWINDOWS then
-					fname &= ".bat"
-				end if
-
-				ShowMsg(1, 170, { cfile_count + 2 })
-				ShowMsg(1, 174, { fname })
 			end if
 
 		case BUILD_DIRECT then

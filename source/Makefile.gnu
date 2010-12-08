@@ -196,13 +196,8 @@ ifdef PLAT
 TARGETPLAT=-plat $(PLAT)
 endif
 
-ifeq "$(ARCH)" "ix86"
 BE_CALLC = be_callc
 MSIZE=-m32
-else
-BE_CALLC = be_callc_conly
-MSIZE=
-endif
 
 ifndef ECHO
 ECHO=/bin/echo
@@ -425,8 +420,9 @@ endif
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 EUBIND=eubind
+EUSHROUD=eushroud
 
-binder : translator library $(BUILDDIR)/$(EUBIND)
+binder : translator library $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EUSHROUD)
 
 .PHONY : library debug-library
 .PHONY : builddirs
@@ -450,32 +446,28 @@ source : builddirs
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
+ifneq "$(VERSION)" ""
+SOURCEDIR=euphoria-$(VERSION)
+else
 SVN_REV=xxx
 SOURCEDIR=euphoria-$(PLAT)-r$(SVN_REV)
-source-tarball : source
-	rm -rf $(BUILDDIR)/$(SOURCEDIR)/source
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/include
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/intobj
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/transobj
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/backobj
-	mkdir -p $(BUILDDIR)/$(SOURCEDIR)/source/build/libobj
-	cp -r $(BUILDDIR)/intobj   $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp -r $(BUILDDIR)/transobj $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp -r $(BUILDDIR)/backobj  $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp -r $(BUILDDIR)/libobj   $(BUILDDIR)/$(SOURCEDIR)/source/build/
-	cp be_*.c       $(BUILDDIR)/$(SOURCEDIR)/source
-	cp int.ex       $(BUILDDIR)/$(SOURCEDIR)/source
-	cp ec.ex        $(BUILDDIR)/$(SOURCEDIR)/source
-	cp backend.ex   $(BUILDDIR)/$(SOURCEDIR)/source
-	cp *.e          $(BUILDDIR)/$(SOURCEDIR)/source
-	cp Makefile.gnu    $(BUILDDIR)/$(SOURCEDIR)/source
-	cp Makefile.wat    $(BUILDDIR)/$(SOURCEDIR)/source
-	cp configure    $(BUILDDIR)/$(SOURCEDIR)/source
-	cp ../include/euphoria.h $(BUILDDIR)/$(SOURCEDIR)/include
-	cp *.h          $(BUILDDIR)/$(SOURCEDIR)/source
-	cp -r pcre $(BUILDDIR)/$(SOURCEDIR)/source
+endif
+
+ifeq "$(SVN_URL)" ""
+SVN_URL=https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/trunk/
+endif
+
+source-tarball :
+	rm -rf $(BUILDDIR)/$(SOURCEDIR)
+	svn export $(SVN_URL) $(BUILDDIR)/$(SOURCEDIR)
+	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
+	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
+	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
-	
+ifneq "$(VERSION)" ""
+	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR).tar.gz $(PLAT)
+endif
+
 .PHONY : euisource
 .PHONY : eucsource
 .PHONY : backendsource
@@ -554,19 +546,20 @@ $(BUILDDIR)/euphoria-pdf.txt : $(EU_DOC_SOURCE)
 $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
-	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o=$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
+	cd$(CYPTRUNKDIR)/docs/ &&  $(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o=$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/docs/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
 manual : $(BUILDDIR)/docs/index.html
 
 manual-upload : manual
-	$(SCP) $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
+	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
+	ssh $(oe_username)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
 
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
-	 $(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o=$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
+	cd $(CYPTRUNKDIR)/docs/ && $(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o=$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/html
@@ -657,17 +650,16 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/tutorial 
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/bin 
-	mkdir -p $(DESTDIR)/etc/euphoria 
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/source 
 	mkdir -p $(DESTDIR)$(PREFIX)/bin 
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
-	mkdir -p $(DESTDIR)$(PREFIX)/include/euphoria
 	install $(BUILDDIR)/$(EECUA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUDBGA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUSHROUD) $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 endif
@@ -677,30 +669,27 @@ endif
 	install ../include/std/win32/*e  $(DESTDIR)$(PREFIX)/share/euphoria/include/std/win32
 	install ../include/euphoria/*  $(DESTDIR)$(PREFIX)/share/euphoria/include/euphoria
 	install ../include/euphoria.h $(DESTDIR)$(PREFIX)/share/euphoria/include
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo ../demo/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench ../demo/bench/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar ../demo/langwar/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix ../demo/unix/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/tutorial ../tutorial/*
-	-install -t $(DESTDIR)$(PREFIX)/share/euphoria/bin \
+	install ../demo/*.e* $(DESTDIR)$(PREFIX)/share/euphoria/demo
+	install ../demo/bench/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench 
+	install ../demo/langwar/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
+	install ../demo/unix/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
+	install ../tutorial/* $(DESTDIR)$(PREFIX)/share/euphoria/tutorial
+	install  \
 	           ../bin/ed.ex \
 	           ../bin/bugreport.ex \
 	           ../bin/buildcpdb.ex \
 	           ../bin/ecp.dat \
 	           ../bin/eucoverage.ex \
-	           ../bin/lines.ex
-	install -t $(DESTDIR)$(PREFIX)/share/euphoria/source \
+	           ../bin/euloc.ex \
+	           $(DESTDIR)$(PREFIX)/share/euphoria/bin
+	install  \
 	           *.ex \
 	           *.e \
 	           be_*.c \
-	           *.h
-	# helper script for shrouding programs
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
-	echo eubind -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
+	           *.h \
+	           $(DESTDIR)$(PREFIX)/share/euphoria/source
 
 EUDIS=eudis
-EUSHROUD=eushroud
 EUTEST=eutest
 EUCOVERAGE=eucoverage
 EUDIST=eudist
@@ -711,42 +700,73 @@ else
 	MINGW_FLAGS=
 endif
 
-$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library
+$(BUILDDIR)/eudist-build/main-.c : eudist.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudist-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIST)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eudist.ex
 
-$(BUILDDIR)/$(EUDIS) : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e translator library
-$(BUILDDIR)/$(EUDIS) : $(EU_CORE_FILES) 
-$(BUILDDIR)/$(EUDIS) : $(EU_INTERPRETER_FILES)
+$(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
+
+$(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
+$(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES) 
+$(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eudis-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUDIS)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/dis.ex
 
-$(BUILDDIR)/$(EUBIND) : $(TRUNKDIR)/source/bind.ex translator library
+$(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
+
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
 
-$(BUILDDIR)/$(EUTEST) : $(TRUNKDIR)/source/eutest.ex translator library
+$(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
+
+$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUSHROUD)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		-makefile -eudir $(TRUNKDIR) \
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/shroud.ex
+
+$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f shroud.mak
+
+$(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUTEST)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/eutest.ex
 
-$(BUILDDIR)/$(EUCOVERAGE) : $(TRUNKDIR)/bin/eucoverage.ex translator library
+$(BUILDDIR)/$(EUTEST) : $(BUILDDIR)/eutest-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eutest-build" -f eutest.mak
+
+$(BUILDDIR)/eucoverage-build/main-.c : $(TRUNKDIR)/bin/eucoverage.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eucoverage-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUCOVERAGE)" \
 		-lib "$(BUILDDIR)/eu.a" \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/bin/eucoverage.ex
+
+$(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/eucoverage-build" -f eucoverage.mak
 
 EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
 	$(BUILDDIR)/$(EUDIS) \
@@ -759,25 +779,26 @@ clean-tools :
 	-rm $(EU_TOOLS)
 
 install-tools :
-	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)/$(PREFIX)/bin/
-	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)/$(PREFIX)/bin/
-	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)/$(PREFIX)/bin/
-	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)/$(PREFIX)/bin/
-	
-	
+	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin/
 
 install-docs :
 	# create dirs
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images
 	install $(BUILDDIR)/euphoria-4.0.pdf $(DESTDIR)$(PREFIX)/share/doc/euphoria/
-	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html \
+	install  \
 		$(BUILDDIR)/html/*html \
-		$(BUILDDIR)/html/*css
-	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images \
-		$(BUILDDIR)/html/images/*
-	install -t $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js \
-		$(BUILDDIR)/html/js/*
+		$(BUILDDIR)/html/*css \
+		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html
+	install  \
+		$(BUILDDIR)/html/images/* \
+		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images
+	install  \
+		$(BUILDDIR)/html/js/* \
+		$(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 
 # This doesn't seem right. What about eushroud ?
 uninstall :

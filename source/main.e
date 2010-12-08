@@ -15,7 +15,7 @@ include std/get.e
 include std/error.e
 include std/console.e
 include std/search.e
-include std/map.e
+include std/hash.e
 include euphoria/info.e
 
 include global.e
@@ -90,7 +90,7 @@ function GetSourceName()
 		end if
 	end if
 	known_files[$] = canonical_path(real_name,,1)
-	known_files_hash &= hash(known_files[$], HSIEH32)
+	known_files_hash &= hash(known_files[$], stdhash:HSIEH32)
 	finished_files &= 0
 	file_include_depend = append( file_include_depend, { length( known_files ) } )
 
@@ -147,7 +147,7 @@ procedure main()
 		-- too early for normal error processing
 		screen_output(STDERR, GetMsgText(276, 0, {known_files[$]}))
 		if not batch_job and not test_only then
-			any_key(GetMsgText(277,0), STDERR)
+			maybe_any_key(GetMsgText(277,0), STDERR)
 		end if
 		Cleanup(1)
 

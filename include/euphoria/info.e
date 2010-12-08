@@ -40,6 +40,8 @@ elsifdef FREEBSD then
 	return "FreeBSD"
 elsifdef OPENBSD then
 	return "OpenBSD"
+elsifdef NETBSD then
+	return "NetBSD"
 elsedef
 	return "Unknown"
 end ifdef
@@ -55,9 +57,9 @@ end function
 --
 
 public function version()
-  return (version_info[MAJ_VER] * 10000) +
-	(version_info[MIN_VER] * 100) +
-	version_info[PAT_VER]
+	return (version_info[MAJ_VER] * 10000) +
+		(version_info[MIN_VER] * 100) + 
+		version_info[PAT_VER]
 end function
 
 --**
@@ -69,7 +71,7 @@ end function
 --
 
 public function version_major()
-  return version_info[MAJ_VER]
+	return version_info[MAJ_VER]
 end function
 
 --**
@@ -81,7 +83,7 @@ end function
 --
 
 public function version_minor()
-  return version_info[MIN_VER]
+	return version_info[MIN_VER]
 end function
 
 --**
@@ -93,7 +95,7 @@ end function
 --
 
 public function version_patch()
-  return version_info[PAT_VER]
+	return version_info[PAT_VER]
 end function
 
 --**
@@ -105,7 +107,7 @@ end function
 --
 
 public function version_revision()
-  return version_info[REVISION]
+	return version_info[REVISION]
 end function
 
 --****
@@ -122,7 +124,7 @@ end function
 --
 
 public function version_type()
-  return version_info[VER_TYPE]
+	return version_info[VER_TYPE]
 end function
 
 --**
@@ -139,7 +141,7 @@ end function
 --
 
 public function version_string()
-  return sprintf("%d.%d.%d %s (r%s)", version_info)
+	return sprintf("%d.%d.%d %s (r%s)", version_info)
 end function
 
 --**
@@ -156,7 +158,7 @@ end function
 --
 
 public function version_string_short()
-  return sprintf("%d.%d.%d", version_info[MAJ_VER..PAT_VER])
+	return sprintf("%d.%d.%d", version_info[MAJ_VER..PAT_VER])
 end function
 
 --**
@@ -173,7 +175,7 @@ end function
 --
 
 public function version_string_long()
-  return version_string() & " for " & platform_name()
+	return version_string() & " for " & platform_name()
 end function
 
 --****
@@ -317,4 +319,4 @@ end function
 --
 -- See Also:
 -- [[:eu.cfg]], [[:include]], [[:option_switches]]
-
+--

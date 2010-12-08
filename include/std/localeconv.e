@@ -2,7 +2,7 @@ namespace localconv
 
 --****
 -- === Constants
--- //Win32// locale names:
+-- //Windows// locale names:
 --
 -- | af-ZA|  sq-AL|  gsw-FR|  am-ET|  ar-DZ|  ar-BH|  ar-EG|  ar-IQ| 
 -- | ar-JO|  ar-KW|  ar-LB|  ar-LY|  ar-MA|  ar-OM|  ar-QA|  ar-SA| 
@@ -243,7 +243,7 @@ public constant w32_names = {
 	}
 	
 --**
--- Canonical locale names for //WIN32//:
+-- Canonical locale names for //WINDOWS//:
 -- 
 -- | Afrikaans_South Africa|  Afrikaans_South Africa| Afrikaans_South Africa| 
 -- | Afrikaans_South Africa|  Afrikaans_South Africa|  Afrikaans_South Africa| 
@@ -793,7 +793,7 @@ end ifdef
 
 public function canonical(sequence new_locale)
 	integer w, ws, p, n
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))
@@ -813,7 +813,7 @@ public function canonical(sequence new_locale)
 		return new_locale
 	end if
 	new_locale = locale_canonical[n]
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))
@@ -836,7 +836,7 @@ end function
 
 public function decanonical(sequence new_locale)
 	integer w, ws, p, n
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))
@@ -856,7 +856,7 @@ public function decanonical(sequence new_locale)
 		return new_locale
 	end if
 	new_locale = platform_locale[n]
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))
@@ -866,12 +866,21 @@ public function decanonical(sequence new_locale)
 end function
 
 --**
--- TODO: document
+-- Get the translation of a canoncial locale string for the Windows platform.
+--
+-- Parameters:
+--		# ##new_locale##: a sequence, the string for the locale.
+--
+-- Returns:
+--		A **sequence**, either the Windows native locale name on success or "C" on failure.
+--
+-- See Also:
+-- 		[[:get]], [[:set]], [[:canonical]], [[:decanonical]]
 
 public function canon2win(sequence new_locale)
 	integer w, n
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))
@@ -886,7 +895,7 @@ public function canon2win(sequence new_locale)
 
 	new_locale = w32_names[w]
 
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		n = find('.', new_locale) 
 		if n then
 			new_locale = remove(new_locale, n, length(new_locale))

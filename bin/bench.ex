@@ -32,7 +32,7 @@ procedure main()
 		iterations = to_number(iterations)
 	end if
 
-	sequence cmds = map:get(o, OPT_EXTRAS)
+	sequence cmds = map:get(o, cmdline:EXTRAS)
 	if length(cmds) = 0 then
 		show_help(opts)
 		abort(1)

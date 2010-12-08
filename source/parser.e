@@ -4723,6 +4723,7 @@ end procedure
 
 export procedure parser()
 	real_parser(0)
+	mark_final_targets()
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
 	inline_deferred_calls()

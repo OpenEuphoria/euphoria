@@ -6,8 +6,8 @@
 
 namespace text
 
+include std/types.e
 include std/convert.e
-include std/eds.e
 include std/error.e
 include std/filesys.e
 include std/io.e
@@ -348,18 +348,27 @@ function load_code_page(sequence cpname)
 		object idx
 		object vers
 		vers = serialize:deserialize(fh)  -- get the database version
-		if vers[1] = 1 then
-			idx = serialize:deserialize(fh)  -- get Code Page index offset
-			pos = io:seek(fh, idx)
-			idx = serialize:deserialize(fh)	-- get the Code Page Index
-			pos = find(cpname, idx[1])
-			if pos != 0 then
-				pos = io:seek(fh, idx[2][pos])
-				upper_case_SET = serialize:deserialize(fh) -- "uppercase"
-				lower_case_SET = serialize:deserialize(fh) -- "lowercase"
-				encoding_NAME = serialize:deserialize(fh) -- "title"
-			end if
+		if atom(vers) or length(vers) = 0 then
+			return -3 -- DB is wrong or corrupted.
 		end if
+		
+		switch vers[1] do
+			case 1, 2 then
+				idx = serialize:deserialize(fh)  -- get Code Page index offset
+				pos = io:seek(fh, idx)
+				idx = serialize:deserialize(fh)	-- get the Code Page Index
+				pos = find(cpname, idx[1])
+				if pos != 0 then
+					pos = io:seek(fh, idx[2][pos])
+					upper_case_SET = serialize:deserialize(fh) -- "uppercase"
+					lower_case_SET = serialize:deserialize(fh) -- "lowercase"
+					encoding_NAME = serialize:deserialize(fh) -- "title"
+				end if
+			
+			case else
+				return -4 -- Unhandled ecp database version.
+				
+		end switch
 		close(fh)
 
 	end if
@@ -627,10 +636,10 @@ public function proper(sequence x)
 		if integer(res[i]) then
 			if convert then
 				-- Check for upper case
-				pos = t_upper(res[i])
+				pos = types:t_upper(res[i])
 				if pos = 0 then
 					-- Not upper, so check for lower case
-					pos = t_lower(res[i])
+					pos = types:t_lower(res[i])
 					if pos = 0 then
 						-- Not lower so check for digits
 						-- n.b. digits have no effect on if its in a word or not.
@@ -1979,86 +1988,7 @@ public function format(sequence format_pattern, object arg_list = {})
 	return result
 end function
 
---**
--- Get the text associated with the message number in the requested locale.
---
--- Parameters:
---   # ##MsgNum## : An integer. The message number whose text you are trying to get.
---   # ##LocalQuals## : A sequence. Zero or more locale codes. Default is {}.
---   # ##DBBase##: A sequence. The base name for the database files containing the
---                 locale text strings. The default is "teksto".
---
--- Returns:
--- A string **sequence**, the text associated with the message number and locale.\\
--- The **integer** zero, if associated text can not be found for any reason.
---
--- Comments:
--- * This first scans the database(s) linked to the locale codes supplied.
--- * The database name for each locale takes the format of "<DBBase>_<Locale>.edb"
--- so if the default DBBase is used, and the locales supplied are {"enus", "enau"}
--- the databases scanned are "teksto_enus.edb" and "teksto_enau.edb".
--- The database table name searched is "1" with the key being the message number,
--- and the text is the record data.
--- * If the message is not found in these databases (or the databases don't exist)
--- a database called "<DBBase>.edb" is searched. Again the table name is "1" but
--- it first looks for keys with the format {<locale>,msgnum} and failing that it
--- looks for keys in the format {"", msgnum}, and if that fails it looks for a
--- key of just the msgnum.
---
 
-public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
-	integer db_res
-	object lMsgText
-	sequence dbname
-
-	db_res = -1
-	lMsgText = 0
-	-- First, scan through the specialized local dbs
-	if string(LocalQuals) and length(LocalQuals) > 0 then
-		LocalQuals = {LocalQuals}
-	end if
-	for i = 1 to length(LocalQuals) do
-		dbname = DBBase & "_" & LocalQuals[i] & ".edb"
-		db_res = eds:db_select( filesys:locate_file( dbname ), eds:DB_LOCK_READ_ONLY)
-		if db_res = eds:DB_OK then
-			db_res = eds:db_select_table("1")
-			if db_res = eds:DB_OK then
-				lMsgText = eds:db_fetch_record(MsgNum)
-				if sequence(lMsgText) then
-					exit
-				end if
-			end if
-		end if
-	end for
-
-	-- Next, scan through the generic db
-	if atom(lMsgText) then
-		dbname = filesys:locate_file( DBBase & ".edb" )
-		db_res = eds:db_select(	dbname, DB_LOCK_READ_ONLY)
-		if db_res = eds:DB_OK then
-			db_res = eds:db_select_table("1")
-			if db_res = eds:DB_OK then
-				for i = 1 to length(LocalQuals) do
-					lMsgText = eds:db_fetch_record({LocalQuals[i],MsgNum})
-					if sequence(lMsgText) then
-						exit
-					end if
-				end for
-				if atom(lMsgText) then
-					lMsgText = eds:db_fetch_record({"",MsgNum})
-				end if
-				if atom(lMsgText) then
-					lMsgText = eds:db_fetch_record(MsgNum)
-				end if
-			end if
-		end if
-	end if
-	if atom(lMsgText) then
-		return 0
-	else
-		return lMsgText
-	end if
-end function
 
 --**
 -- Wrap text

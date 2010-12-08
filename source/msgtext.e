@@ -7,6 +7,7 @@ elsedef
 end ifdef
 
 include std/filesys.e
+include std/locale.e
 include std/text.e
 
 include common.e
@@ -176,7 +177,7 @@ constant StdErrMsgs = {
 	{159, "WATCOM environment variable is not set"},
 	{160, "warning names must be enclosed in '(' ')'"},
 	{161, "#! may only be on the first line of a program"},
-	{162, "Writing emake file [1][2]"},
+	{162, "-deleted-"},
 	{163, "Compiling [1:3.0]% [2]"},
 	{164, "Couldn't compile file '[1]'"},
 	{165, "Status: [1] Command: [2]"},
@@ -185,10 +186,10 @@ constant StdErrMsgs = {
 	{168, "Unable to link [1]"},
 	{169, "Status: [1] Command: [2]"},
 	{170, "\n[1].c files were created."},
-	{171, "-deleted-"},
+	{171, "Link resource file into resulting executable"},
 	{172, "To build your project, type [1][2].mak"},
 	{173, "To build your project, include [1].mak into a larger Makefile project"},
-	{174, "To build your project, type [1]"},
+	{174, "-deleted-"},
 	{175, "\nTo run your project, type [1]"},
 	{176, "Compiling with [1]"},
 	{177, "Do not display status messages" },
@@ -201,7 +202,7 @@ constant StdErrMsgs = {
 	{184, "Create a shared library"},
 	{185, "Set the platform for the translated code"},
 	{186, "Use a non-standard library"},
-	{187, "-deleted-"},
+	{187, "Unable to link resource file [1] into executable [2]"},
 	{188, "Set the stack size (Watcom)"},
 	{189, "Enable debug mode for generated code"},
 	{190, "Set the number of C statements per generated file before splitting."},
@@ -209,7 +210,7 @@ constant StdErrMsgs = {
 	{192, "Generate a partial project Makefile"},
 	{193, "Generate a full Makefile"},
 	{194, "Could not remove directory [1]"},
-	{195, "Generate a emake/emake.bat file to build project"},
+	{195, "-deleted-"},
 	{196, "Do not build the project nor write a build file"},
 	{197, "Generate/compile all files in 'dir'"},
 	{198, "Set the output filename"},
@@ -363,6 +364,8 @@ constant StdErrMsgs = {
 	{346, "Type check error:  assigning a sequence to an atom" },
 	{347, "deleting [1]..." },
 	{348, "User supplied library does not exist:\n    [1]"},
+	{349, "Resource file does not exist:\n    [1]"},
+	{350, "Unable to compile resource file: [1]"},
 	$
 }
 

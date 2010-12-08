@@ -827,6 +827,7 @@ end function
 --
 -- See Also:
 --     [[:to_unix]], [[:parse]]
+--
 
 public function format(datetime d, sequence pattern = "%Y-%m-%d %H:%M:%S")
 	integer in_fmt, ch, tmp

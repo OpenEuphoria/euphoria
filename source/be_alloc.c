@@ -891,6 +891,8 @@ char *TransAlloc(unsigned long size){
  all of the source has been copied.
 
  To test if truncation occurred, the return value will be <= 0.
+ 
+ src must be null terminated.
 */
 long copy_string(char *dest, char *src, size_t bufflen)
 {

@@ -19,7 +19,6 @@
 #include "global.h"
 #include "be_pcre.h"
 
-
 void pcre_deref(object re) {
 	pcre_cleanup_ptr rcp;
 	object errmsg;
@@ -131,7 +130,12 @@ object compile_pcre(object x, object flags) {
 		
 		
 		regex->cleanup = (cleanup_ptr) rcp;
-		rcp->re = (struct real_pcre *)compiled_regex;
+		if( IS_ATOM_INT( compiled_regex ) ){
+			rcp->re = (struct real_pcre *) compiled_regex;
+		}
+		else {
+			rcp->re = (struct real_pcre *) (unsigned long) DBL_PTR( compiled_regex )->dbl;
+		}
 		x = MAKE_SEQ( regex );
 	}
 	
@@ -252,7 +256,7 @@ object exec_pcre(object x ){
 #define FLAG_DOWN_NEXT   8
 
 static int add(int *len, char **s, const char *a, int alen, int *flag) {
-    int NewLen = *len + alen;
+    int NewLen = *len + alen + 1;
     int i;
     int res;
 	
@@ -515,7 +519,7 @@ int replace_pcre(const char *rep, const char *Src, int len, int *ovector, int cn
 	
     *Dlen = dlen;
     *Dest = dest;
-	
+	dest[dlen] = 0; // make sure it's zero terminated
     return 0;
 }
 
