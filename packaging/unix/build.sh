@@ -29,7 +29,6 @@ cd ..
 rm -rf docs
 rm -rf packaging
 
-echo Stripping binaries that will be installed
 BINS=`ls ${ROOTDIR}/bin/eu{b,bind,c,i,shroud} ${ROOTDIR}/bin/eu{coverage,dis,dist,doc,loc,test} ${ROOTDIR}/bin/creolehtml`
 for f in ${BINS}; do
 	echo Stripping/copying ${f}
@@ -37,7 +36,7 @@ for f in ${BINS}; do
 	cp ${f} bin
 done
 
-echo Copying compiled executables to our distribution directory
+echo Copying other misc files to bin/
 cp ${ROOTDIR}/bin/ecp.dat ${ROOTDIR}/bin/eu{.a,dbg.a} bin
 
 echo Copying docs to our distribution directory
