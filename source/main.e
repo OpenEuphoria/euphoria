@@ -32,6 +32,7 @@ include error.e
 include preproc.e
 include msgtext.e
 include coverage.e
+include syncolor.e
 
 ifdef TRANSLATOR then
 	include buildsys.e

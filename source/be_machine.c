@@ -33,6 +33,7 @@
 #include "be_execute.h"
 #include "be_socket.h"
 #include "be_coverage.h"
+#include "be_syncolor.h"
 
 #ifdef ELINUX
 #include <malloc.h>
@@ -2973,6 +2974,11 @@ object machine(object opcode, object x)
 
 			case M_SET_COVERAGE:
 				set_coverage(x);
+				return ATOM_1;
+				break;
+
+			case M_SET_SYNCOLOR:
+				set_syncolor(x);
 				return ATOM_1;
 				break;
 
