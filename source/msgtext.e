@@ -7,6 +7,7 @@ elsedef
 end ifdef
 
 include std/filesys.e
+include std/locale.e
 include std/text.e
 
 include common.e

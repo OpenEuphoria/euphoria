@@ -482,12 +482,6 @@ test_equal("change case 1lc","", lower("") )
 -- curent default initial max on len of case change string
 test_equal("change case 2c",repeat('a',1024), lower(repeat('A',1024)) )
 
-test_equal("get_text unknown number", 0, get_text(-2))
-
-test_equal("get_text known number A", "Block comment from line [1] not terminated.", get_text(42,"two"))
-test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"}))
-test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"}))
-
 test_equal("wrap() #1", "Hello\nWorld", wrap("Hello World", 3))
 test_equal("wrap() #2", "Hello World, How\nare you doing?", 
 	wrap("Hello World, How are you doing?", 20))
