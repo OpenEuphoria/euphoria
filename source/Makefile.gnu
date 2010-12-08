@@ -196,13 +196,8 @@ ifdef PLAT
 TARGETPLAT=-plat $(PLAT)
 endif
 
-ifeq "$(ARCH)" "ix86"
 BE_CALLC = be_callc
 MSIZE=-m32
-else
-BE_CALLC = be_callc_conly
-MSIZE=
-endif
 
 ifndef ECHO
 ECHO=/bin/echo
