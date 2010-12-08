@@ -26,6 +26,7 @@ EU_ALL_FILES = \
 	source/eu.ex \
 	source/backend.ex \
 	source/bind.ex \
+	source/shroud.ex \
 	source/backend.e \
 	source/block.e \
 	source/buildsys.e \
@@ -108,25 +109,18 @@ EU_DIRS = include \
 	demo/bench \
 	demo/linux \
 	demo/langwar \
-	demo/langwar/Linux \
 	demo/net \
 	demo/preproc \
 	demo/unix \
 	demo/win32
 
 EU_BIN_FILES = ed.ex \
-	ascii.ex \
 	buildcpdb.ex \
 	bugreport.ex \
 	ed.ex \
-	eutest \
-	eprint.ex \
-	guru.ex \
-	key.ex \
-	lines.ex \
-	search.ex \
-	where.ex \
-	eucoverage.ex
+	euloc.ex \
+	eucoverage.ex \
+	ecp.dat
 
 BUILD_DIRS = intobj/ \
 	transobj/ \
