@@ -1,7 +1,7 @@
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.0RC2
-AppVerName=Euphoria v4.0.0RC2
+AppVersion=4.0.0.RC2
+AppVerName=Euphoria v4.0.0.RC2
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
@@ -28,13 +28,13 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
 Name: comp_main; Description: "Core files"; Types: full standard minimal custom; Flags: fixed
+Name: comp_ow; Description: "OpenWatcom"; Types: full standard;
 Name: comp_docs; Description: "Documentation"; Types: full standard
 Name: comp_tools; Description: "Euphoria related tools"; Types: full standard;
 Name: comp_demos; Description: "Demonstration programs"; Types: full standard;
 Name: comp_source; Description: "Source code"; Types: full;
 Name: comp_tests; Description: "Unit tests"; Types: full;
 Name: comp_tuts; Description: "Tutorials"; Types: full standard;
-Name: comp_ow; Description: "OpenWatcom"; Types: full standard;
 
 [Tasks]
 Name: associate; Description: "&Associate file extensions"; Flags: unchecked
@@ -88,27 +88,30 @@ Source: "cleanbranch\file_id.diz"; DestDir: {app}; Flags: ignoreversion;
 Source: "cleanbranch\license.txt"; DestDir: {app}; Flags: ignoreversion;
 
 ; Windows Binaries
+Source: "..\..\bin\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eub.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eubind.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eubw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\euc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
 Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eu.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eu.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "..\..\bin\eudbg.a"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "..\..\bin\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\bin\euinc.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "cleanbranch\bin\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
 ; Windows Tools
 Source: "..\..\bin\creolehtml.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\eudis.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\eudist.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eudoc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\euloc.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eutest.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 
 ; Generic Tools
-Source: "cleanbranch\bin\bin.doc"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\*.bat"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\*.ex"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "cleanbranch\bin\*.exw"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
@@ -118,7 +121,7 @@ Source: "cleanbranch\demo\*.*"; DestDir: {app}\demo\; Flags: ignoreversion recur
 
 ; Docs
 Source: "..\..\build\*.pdf"; DestDir: {app}\docs\; Flags: ignoreversion; Components: comp_docs
-Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion; Components: comp_docs
+;Source: "..\..\build\html\*.*"; DestDir: {app}\docs\html\; Flags: ignoreversion; Components: comp_docs
 
 ; Includes
 Source: "cleanbranch\include\*.*"; DestDir: {app}\include\; Flags: ignoreversion recursesubdirs; Components: comp_main
@@ -144,25 +147,22 @@ Filename: {app}\RapidEuphoria.url; Section: InternetShortcut; Key: URL; String: 
 Filename: {app}\OpenEuphoria.url; Section: InternetShortcut; Key: URL; String: http://openeuphoria.org
 Filename: {app}\EuphoriaManual.url; Section: InternetShortcut; Key: URL; String: http://openeuphoria.org/docs/index.html
 
-
 [Icons]
 ; Icons (shortcuts) to display in the Start menu
-Name: {group}\Euphoria Manual in HTML; Filename: {app}\docs\html\index.html;  IconFilename: {app}\bin\euinc.ico; Components: comp_docs
-Name: {group}\Euphoria Manual in PDF; Filename: {app}\docs\euphoria-4.0.pdf;  IconFilename: {app}\bin\euinc.ico; Components: comp_docs
-Name: {group}\Euphoria Manual on the Web; IconFilename: {app}\bin\euinc.ico; Filename: {app}\EuphoriaManual.url
-Name: {group}\Euphoria Website;  IconFilename: {app}\bin\euinc.ico; Filename: {app}\RapidEuphoria.url
-Name: {group}\Euphoria User Community (Forums and Wiki);  IconFilename: {app}\bin\euinc.ico; Filename: {app}\OpenEuphoria.url
+;Name: {group}\Euphoria Manual in HTML; Filename: {app}\docs\html\index.html; Components: comp_docs
+Name: {group}\Euphoria Manual in PDF; Filename: {app}\docs\euphoria-4.0.pdf; Components: comp_docs
+Name: {group}\Euphoria Manual on the Web; Filename: {app}\EuphoriaManual.url
+Name: {group}\Euphoria Website;  Filename: {app}\RapidEuphoria.url
+Name: {group}\Euphoria User Community (Forums and Wiki);  Filename: {app}\OpenEuphoria.url
 Name: "{group}\{cm:UninstallProgram,Euphoria}"; Filename: "{uninstallexe}"
 
 [UninstallDelete]
-Name: "{group}\{cm:UninstallProgram,Euphoria}"; Name: "{uninstallexe}"
 Type: files; Name: {app}\RapidEuphoria.url
 Type: files; Name: {app}\OpenEuphoria.url
 Type: files; Name: {app}\EuphoriaManual.url
 
 [Registry]
 ;set EUDIR environment variable and add to PATH on NT/2000/XP machines
-Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "EUDIR"; ValueData: "{app}"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
 Root: HKCU; SubKey: "Environment"; ValueType: string; ValueName: "INCLUDE"; ValueData: "{app}\watcom\h;{app}\watcom\h\nt"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env; Components: comp_ow;
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "WATCOM"; ValueData: "{app}\watcom"; Flags: uninsdeletevalue; MinVersion: 0, 3.51; Tasks: update_env; Components: comp_ow;
