@@ -445,8 +445,13 @@ source : builddirs
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
+ifneq "$(VERSION)" ""
+SOURCEDIR=euphoria-$(VERSION)
+else
 SVN_REV=xxx
 SOURCEDIR=euphoria-$(PLAT)-r$(SVN_REV)
+endif
+
 ifeq "$(SVN_URL)" ""
 SVN_URL=https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/trunk/
 endif
@@ -458,7 +463,10 @@ source-tarball :
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
 	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
-	
+ifneq "$(VERSION)" ""
+	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR).tar.gz $(PLAT)
+endif
+
 .PHONY : euisource
 .PHONY : eucsource
 .PHONY : backendsource
