@@ -7,12 +7,15 @@
 namespace tokenize
 
 include std/convert.e
-include std/filesys.e
 include std/io.e
-include std/text.e
-include std/types.e
+include std/eumem.e
 
 include keywords.e
+
+constant 
+	EOL = '\n',
+	TRUE = 1,
+	FALSE = 0
 
 --****
 -- === tokenize return sequence key
@@ -73,6 +76,8 @@ public enum
 	T_COLON,
 	T_DOLLAR,
 	T_SLICE,
+	T_WHITE,
+	T_BUILTIN,
 	--****
 	-- === T_NUMBER formats and T_types
 	TF_HEX = 1,
@@ -144,7 +149,7 @@ constant ERROR_STRING = {
 }
 
 procedure report_error(integer err)
-	Look = EOF
+	Look = io:EOF
 	ERR = err
 	ERR_LNUM = Token[TLNUM]
 	ERR_LPOS = Token[TLPOS]
@@ -162,20 +167,97 @@ public function error_string(integer err)
 	end if
 end function
 
+function default_state()
+	return {
+		TRUE, --IGNORE_NEWLINES
+		TRUE, --IGNORE_COMMENTS
+		FALSE, --STRING_NUMBERS
+		TRUE, --DELETE_WHITE
+		FALSE, --ID_BUILTIN
+		TRUE, --ID_KEYWORD
+		FALSE, --LITERAL_STRING
+		FALSE --STRING_KEEP_QUOTES
+	}
+end function
+
+atom g_state = eumem:malloc()
+eumem:ram_space[g_state] = default_state()
+
+--**
+-- Create a new tokenizer state
+--
+-- See Also:
+--   [[:reset]], [[:tokenize_string]], [[:tokenize_file]]
+--
+
+public function new()
+	atom state = eumem:malloc()
+	
+	reset(state)
+	
+	return state
+end function
+
+--**
+-- Reset the state to begin parsing a new file
+--
+-- See Also:
+--   [[:new]], [[:tokenize_string]], [[:tokenize_file]]
+--
+
+public procedure reset(atom state = g_state)
+	eumem:ram_space[state] = default_state()
+end procedure
+
+--**
+-- Parse Euphoria code into tokens of like colors.
 --****
 -- === get/set options
 
-integer IGNORE_NEWLINES	= TRUE
-integer IGNORE_COMMENTS = TRUE
-integer STRING_NUMBERS	= FALSE
+enum
+IGNORE_NEWLINES,
+IGNORE_COMMENTS,
+STRING_NUMBERS,
+DELETE_WHITE,
+ID_BUILTIN,
+ID_KEYWORD,
+LITERAL_STRING,
+STRING_KEEP_QUOTES
+
+--**
+-- Specify whether to identify builtins specially or not
+--
+-- default is FALSE
+
+public procedure keep_builtins(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][ID_BUILTIN] = val
+end procedure
+
+--**
+-- Specify whether to identify keywords specially or not
+--
+-- default is TRUE
+
+public procedure keep_keywords(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][ID_KEYWORD] = val
+end procedure
+
+--**
+-- Return white space (other than newlines) as tokens.
+--
+-- default is FALSE
+
+public procedure keep_whitespace(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][DELETE_WHITE] = not val
+end procedure
 
 --**
 -- Return new lines as tokens.
 --
 -- default is FALSE
 
-public procedure keep_newlines(integer val = 1)
-	IGNORE_NEWLINES = not val
+public procedure keep_newlines(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][IGNORE_NEWLINES] = not val
 end procedure
 
 --**
@@ -184,8 +266,32 @@ end procedure
 -- default is FALSE
 --
 
-public procedure keep_comments(integer val = 1)
-	IGNORE_COMMENTS = not val
+public procedure keep_comments(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][IGNORE_COMMENTS] = not val
+end procedure
+
+--**
+-- When returning string tokens, we have the option to process them and
+-- return their value, or to return the literal text that made up the
+-- original string.
+--
+-- Right now, this option only affects the processing of hex strings.
+--
+-- default is FALSE - process the string and return its value
+--
+
+public procedure return_literal_string(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][LITERAL_STRING] = val
+end procedure
+
+--**
+-- When returning string tokens, we have the option to strip the quotes.
+--
+-- default is TRUE
+--
+
+public procedure string_strip_quotes(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][STRING_KEEP_QUOTES] = not val
 end procedure
 
 --**
@@ -198,8 +304,8 @@ end procedure
 --	* Other tokens return strings
 --
 
-public procedure string_numbers(integer val = 1)
-	STRING_NUMBERS = val
+public procedure string_numbers(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][STRING_NUMBERS] = val
 end procedure
 
 ---------------------------------------------------------------------------------
@@ -248,7 +354,8 @@ type Identifier_Char(object c)
 	return Alphanum_Char(c)
 end type
 
-procedure scan_char()
+procedure scan_char(atom state = g_state)
+	state = state -- supress warning
 	if Look = EOL then
 		LNum += 1
 		LPos = 0
@@ -259,24 +366,29 @@ procedure scan_char()
 	end if
 	LPos += 1
 	sti += 1
-	Look = source_text[sti]
+	if sti > length(source_text) then
+		Look = io:EOF
+	else
+		Look = source_text[sti]
+	end if
 end procedure
 
-function lookahead(integer dist = 1)
+function lookahead(integer dist = 1, atom state = g_state)
+	state = state -- supress warning
 	if sti + dist <= length(source_text) then
 		return source_text[sti + dist]
 	else
-		return EOF
+		return io:EOF
 	end if
 end function
 
 -- returns TRUE if a newline was parsed
-function scan_white()
+function scan_white(atom state = g_state)
 	Token[TTYPE] = T_NEWLINE
 	Token[TDATA] = ""
 
 	while White_Char(Look) do
-		scan_char()
+		scan_char(state)
 		if Look = EOL then
 			return TRUE
 		end if
@@ -285,13 +397,32 @@ function scan_white()
 	return FALSE
 end function
 
-function scan_multicomment()
+-- returns TRUE if a newline was parsed
+function scankeep_white(atom state = g_state)
+	Token[TTYPE] = T_WHITE
+	Token[TDATA] = ""
+
+	while White_Char(Look) do
+		Token[TDATA] &= Look
+		scan_char(state)
+		if Look = EOL then
+			exit
+		end if
+	end while
+
+	if length(Token[TDATA]) then
+		return TRUE
+	end if
+	return FALSE
+end function
+
+function scan_multicomment(atom state = g_state)
 	Token[TTYPE] = T_COMMENT
 	Token[TDATA] = "/"
 	Token[TFORM] = TF_COMMENT_MULTIPLE
 
 	while 1 do
-		if (Look = EOF) then
+		if (Look = io:EOF) then
 			report_error(ERR_EOF)
 			return TRUE 
 		end if
@@ -299,13 +430,13 @@ function scan_multicomment()
 		if (Look = '*') and source_text[sti + 1] = '/' then
 			Token[TDATA] &= "*/"
 
-			scan_char() -- skip the */
-			scan_char()
+			scan_char(state) -- skip the */
+			scan_char(state)
 			exit
 		end if
 
 		Token[TDATA] &= Look
-		scan_char()
+		scan_char(state)
 	end while
 
 	return TRUE
@@ -313,32 +444,47 @@ end function
 
 constant QFLAGS = "t\\r\'n\""
 
-procedure scan_escaped_char()
+procedure scan_escaped_char(atom state = g_state)
 	integer f
 	Token[TDATA] &= Look
 	if (Look = '\\') then
-		scan_char()
+		scan_char(state)
 		f = find(Look,QFLAGS)
 		if not f then report_error(ERR_ESCAPE) return end if
 		Token[TDATA] &= Look
 	end if
-	scan_char()
+	scan_char(state)
 end procedure
 
-function scan_qchar()
+function scan_qchar(atom state = g_state)
 	if (Look != '\'') then return FALSE end if
-	scan_char()
+	scan_char(state)
 	Token[TTYPE] = T_CHAR
 	Token[TDATA] = ""
-	if (Look = EOL) then report_error(ERR_EOL_CHAR) return TRUE end if
-	scan_escaped_char()
+	if (Look = EOL) then
+		if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+			Token[TDATA] = "'" & Token[TDATA] & "'"
+		end if
+		report_error(ERR_EOL_CHAR)
+		return TRUE
+	end if
+	scan_escaped_char(state)
 	if ERR then return 1 end if
-	if (Look != '\'') then report_error(ERR_CLOSE_CHAR) return TRUE end if
-	scan_char()
+	if (Look != '\'') then
+		if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+			Token[TDATA] = "'" & Token[TDATA] & "'"
+		end if
+		report_error(ERR_CLOSE_CHAR)
+		return TRUE
+	end if
+	scan_char(state)
+	if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+		Token[TDATA] = "'" & Token[TDATA] & "'"
+	end if
 	return TRUE
 end function
 
-function scan_string()
+function scan_string(atom state = g_state)
 	if (Look != '"') then 
 		return FALSE 
 	end if
@@ -350,19 +496,22 @@ function scan_string()
 			Token[TDATA] = ""
 			Token[TFORM] = TF_STRING_TRIPLE
 			sti += 2
-			scan_char()
+			scan_char(state)
 
 			while (sti < length(source_text) - 2) and
 				not equal(source_text[sti .. sti +2], "\"\"\"")
 			do
-				if (Look = EOF) then
+				if (Look = io:EOF) then
 					report_error(ERR_EOF)
 					return TRUE
 				end if
 
 				Token[TDATA] &= Look
-				scan_char()
+				scan_char(state)
 			end while
+			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+				Token[TDATA] = "\"\"\"" & Token[TDATA] & "\"\"\""
+			end if
 
 			if sti > length(source_text) - 2 then
 				report_error(ERR_EOF)
@@ -370,61 +519,76 @@ function scan_string()
 			end if
 
 			sti += 2
-			scan_char()
+			scan_char(state)
 
 			return TRUE
 		end if
 	end if
 
-	scan_char()
+	scan_char(state)
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
 	Token[TFORM] = TF_STRING_SINGLE
 
 	while (Look != '"') do
 		if (Look = EOL) then 
+			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+				Token[TDATA] = "\"" & Token[TDATA] & "\""
+			end if
 			report_error(ERR_EOL_STRING) 
 			return TRUE
 		end if
 
-		scan_escaped_char()
+		scan_escaped_char(state)
 
 		if ERR then 
+			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+				Token[TDATA] = "\"" & Token[TDATA] & "\""
+			end if
 			return TRUE
 		end if
 	end while
 
-	scan_char()
+	scan_char(state)
 
+	if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+		Token[TDATA] = "\"" & Token[TDATA] & "\""
+	end if
 	return TRUE
 end function
 
-function scan_multistring()
+function scan_multistring(atom state = g_state)
 	integer end_of_string
 
 	if (Look != '`') then
 		return FALSE
 	end if
 
-	scan_char()
+	scan_char(state)
 	end_of_string = '`'
 	Token[TTYPE] = T_STRING
 	Token[TDATA] = ""
 	Token[TFORM] = TF_STRING_BACKTICK
 
 	while (Look != end_of_string) do
-		if (Look = EOF) then
+		if (Look = io:EOF) then
+			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+				Token[TDATA] = "`" & Token[TDATA] & "`"
+			end if
 			report_error(ERR_EOF)
 			return TRUE
 		end if
 
 		Token[TDATA] &= Look
 
-		scan_char()
+		scan_char(state)
 	end while
 
-	scan_char()
+	scan_char(state)
 
+	if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+		Token[TDATA] = "`" & Token[TDATA] & "`"
+	end if
 	return TRUE
 end function
 
@@ -438,14 +602,14 @@ function hex_val(integer h)
 	end if
 end function
 
-function scan_hex()
+function scan_hex(atom state = g_state)
 	if (Look != '#') then
 		return FALSE
 	end if
 
 	integer startSti = sti
 	
-	scan_char()
+	scan_char(state)
 
 	if not Hex_Char(Look) then
 		report_error(ERR_HEX) return TRUE
@@ -454,21 +618,21 @@ function scan_hex()
 	Token[TTYPE] = T_NUMBER
 	Token[TFORM] = TF_HEX
 
-	if STRING_NUMBERS then
+	if eumem:ram_space[state][STRING_NUMBERS] then
 		while Hex_Char(Look) do
-			scan_char()
+			scan_char(state)
 		end while
 		
 		Token[TDATA] = source_text[startSti .. sti - 1]
 	else
 		Token[TDATA] = hex_val(Look)
-		scan_char()
+		scan_char(state)
 
 		while Hex_Char(Look) do
 			if Look != '_' then
 				Token[TDATA] = Token[TDATA] * 16 + hex_val(Look)
 			end if
-			scan_char()
+			scan_char(state)
 		end while
 	end if
 
@@ -476,7 +640,7 @@ function scan_hex()
 end function
 
 integer SUBSCRIPT = 0
-function scan_integer()
+function scan_integer(atom state = g_state)
 	atom i = 0
 
 	while Digit_Char(Look) do
@@ -484,13 +648,13 @@ function scan_integer()
 			i = (i * 10) + (Look - '0')
 		end if
 
-		scan_char()
+		scan_char(state)
 	end while
 
 	return i
 end function
 
-function scan_fraction(atom v)
+function scan_fraction(atom v, atom state = g_state)
 	if not Digit_Char(Look) then report_error(ERR_DECIMAL) return 0 end if
 
 	atom d = 10
@@ -499,23 +663,23 @@ function scan_fraction(atom v)
 			v += (Look - '0') / d
 			d *= 10
 		end if
-		scan_char()
+		scan_char(state)
 	end while
 	return v
 end function
 
-function scan_exponent(atom v)
+function scan_exponent(atom v, atom state = g_state)
 	atom e
 
 	if ((Look != 'e') and (Look != 'E')) then return v end if
-	scan_char()
+	scan_char(state)
 
 	if (Look = '-') then
-		scan_char()
-		e = -scan_integer()
+		scan_char(state)
+		e = -scan_integer(state)
 	else
-		if (Look = '+') then scan_char() end if
-		e = scan_integer()
+		if (Look = '+') then scan_char(state) end if
+		e = scan_integer(state)
 	end if
 
 	if e > 308 then
@@ -530,7 +694,7 @@ function scan_exponent(atom v)
 	return v
 end function
 
-function scan_number()
+function scan_number(atom state = g_state)
 	if not Digit_Char(Look) then
 		return FALSE
 	end if
@@ -538,19 +702,19 @@ function scan_number()
 	Token[TTYPE] = T_NUMBER
 	Token[TFORM] = TF_INT
 
-	if STRING_NUMBERS then
+	if eumem:ram_space[state][STRING_NUMBERS] then
 		integer startSti = sti
 
 		while Digit_Char(Look) do
-			scan_char()
+			scan_char(state)
 		end while
 		
-		if Look = '.' and lookahead(1) != '.' then
+		if Look = '.' and lookahead(1, state) != '.' then
 			Token[TFORM] = TF_ATOM
-			scan_char()
+			scan_char(state)
 			
 			while Digit_Char(Look) do
-				scan_char()
+				scan_char(state)
 			end while
 		end if
 		
@@ -558,18 +722,18 @@ function scan_number()
 	else
 		atom v
 
-		Token[TDATA] = scan_integer()
+		Token[TDATA] = scan_integer(state)
 
 		if not SUBSCRIPT then
 			v = Token[TDATA]
 			if Look = '.' then
-				scan_char()
+				scan_char(state)
 	
-				Token[TDATA] = scan_fraction(Token[TDATA])
+				Token[TDATA] = scan_fraction(Token[TDATA], state)
 				if ERR then return TRUE end if
 			end if
 
-			Token[TDATA] = scan_exponent(Token[TDATA])
+			Token[TDATA] = scan_exponent(Token[TDATA], state)
 	
 			if v != Token[TDATA] then
 				Token[TFORM] = TF_ATOM
@@ -580,22 +744,22 @@ function scan_number()
 	return TRUE
 end function
 
-function scan_prefixed_number()
+function scan_prefixed_number(atom state = g_state)
 	if not (Look = '0') then
 		return FALSE
 	end if
 
-	integer pfxCh = lookahead(1)
+	integer pfxCh = lookahead(1, state)
 	if find(pfxCh, "btdx") = 0 then
 		return FALSE
 	end if
 
-	integer firstCh = lookahead(2)
+	integer firstCh = lookahead(2, state)
 	if Digit_Char(firstCh) or Hex_Char(firstCh) then
 		integer startSti = sti
 
-		scan_char() -- skip the leading zero
-		scan_char() -- skip prefix character
+		scan_char(state) -- skip the leading zero
+		scan_char(state) -- skip prefix character
 
 		Token[TTYPE] = T_NUMBER
 
@@ -606,13 +770,13 @@ function scan_prefixed_number()
 		end if
 
 		while Hex_Char(Look) or Digit_Char(Look) do
-			scan_char()
+			scan_char(state)
 		end while
 
-		if STRING_NUMBERS then
+		if eumem:ram_space[state][STRING_NUMBERS] then
 			Token[TDATA] = source_text[startSti .. sti - 1]
 		else
-			Token[TDATA] = to_number(source_text[startSti + 2 .. sti - 1])
+			Token[TDATA] = convert:to_number(source_text[startSti + 2 .. sti - 1])
 		end if
 
 		return TRUE
@@ -687,7 +851,7 @@ end function
 
 integer INCLUDE_NEXT = FALSE
 
-function scan_identifier()
+function scan_identifier(atom state = g_state)
 	integer nextch
 	integer startpos
 	object textdata
@@ -697,27 +861,36 @@ function scan_identifier()
 	end if
 
 	if find(Look, "xuU") then
-		nextch = lookahead()
+		nextch = lookahead(state, state)
 		if nextch = '"' then
 			-- A special string token
+			integer whichhex = Look
 			textdata = ""
-			scan_char()	-- Skip over starting quote
-			scan_char() -- First char of string
+			scan_char(state)	-- Skip over starting quote
+			scan_char(state) -- First char of string
 			startpos = sti
 
-			while not find(Look, {'"', EOF}) do
-				scan_char()
+			while not find(Look, {'"', io:EOF}) do
+				scan_char(state)
 			end while
 
-			if Look = EOF then
+			if Look = io:EOF then
+				if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+					Token[TDATA] = whichhex &"\"" & Token[TDATA] & "\""
+				end if
 				-- No matching end-quote
 				report_error(ERR_EOF_STRING)
 				return TRUE
 			end if
 
-			textdata = hex_string(source_text[startpos .. sti-1], source_text[startpos - 2])
+			if not eumem:ram_space[state][LITERAL_STRING] then
+				textdata = hex_string(source_text[startpos .. sti-1], source_text[startpos - 2])
+			end if
 			if atom(textdata) then
 				-- Invalid hex string
+				if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+					Token[TDATA] = whichhex &"\"" & Token[TDATA] & "\""
+				end if
 				report_error(ERR_HEX_STRING)
 				return TRUE
 			end if
@@ -726,7 +899,10 @@ function scan_identifier()
 			Token[TDATA] = textdata
 			Token[TFORM] = TF_STRING_HEX
 
-			scan_char()	-- go to next char after end of string
+			scan_char(state)	-- go to next char after end of string
+			if eumem:ram_space[state][STRING_KEEP_QUOTES] then
+				Token[TDATA] = whichhex &"\"" & Token[TDATA] & "\""
+			end if
 
 			return TRUE
 		end if
@@ -737,20 +913,26 @@ function scan_identifier()
 
 	while Identifier_Char(Look) do
 		Token[TDATA] &= Look
-		scan_char()
+		scan_char(state)
 	end while
 
 	if find(Token[TDATA],keywords) then
-		Token[TTYPE] = T_KEYWORD
+		if eumem:ram_space[state][ID_KEYWORD] then
+			Token[TTYPE] = T_KEYWORD
+		end if
 		if equal(Token[TDATA],"include") then
 			INCLUDE_NEXT = TRUE
 		end if
 	end if
 
+	if find(Token[TDATA],builtins) and eumem:ram_space[state][ID_BUILTIN] then
+		Token[TTYPE] = T_BUILTIN
+	end if
+
 	return TRUE
 end function
 
-function scan_include()
+function scan_include(atom state = g_state)
 	if not INCLUDE_NEXT then
 		return FALSE
 	end if
@@ -760,40 +942,45 @@ function scan_include()
 	Token[TTYPE] = T_IDENTIFIER
 	Token[TDATA] = ""
 
-	if not scan_string() then
+	if not scan_string(state) then
 		-- scan until whitespace
 		while not White_Char(Look) do
 			Token[TDATA] &= Look
-			scan_char()
+			scan_char(state)
 		end while
 	end if
 
 	return TRUE
 end function
 
-procedure next_token()
+procedure next_token(atom state = g_state)
 	Token[TLNUM] = LNum
 	Token[TLPOS] = LPos
 	Token[TFORM] = -1
 
-	if Look = EOL and not IGNORE_NEWLINES then
+	if Look = EOL and not eumem:ram_space[state][IGNORE_NEWLINES] then
 		-- We have a left over EOL, process it
 		Token[TDATA] = ""
 		Token[TTYPE] = T_NEWLINE
 
-		scan_char() -- advance past this newline
+		scan_char(state) -- advance past this newline
 
+		return
+	end if
+
+	if not eumem:ram_space[state][DELETE_WHITE] and scankeep_white(state) then
+		-- got whitespace token
 		return
 	end if
 
 	-- scan_white returns TRUE if it hit a T_NEWLINE
-	if scan_white() then
-		if IGNORE_NEWLINES then next_token() end if
-		scan_char() -- advanced past this newline
+	if scan_white(state) then
+		if eumem:ram_space[state][IGNORE_NEWLINES] then next_token(state) end if
+		scan_char(state) -- advanced past this newline
 		return
 	end if
 
-	if scan_include() then
+	if scan_include(state) then
 		return
 	end if
 
@@ -804,7 +991,7 @@ procedure next_token()
 		Token[TTYPE] += T_DELIMITER - 1
 		Token[TDATA] = { Look }
 
-		scan_char()
+		scan_char(state)
 
 		if (Token[TTYPE] = T_LBRACKET) then
 			-- must check before T_PERIOD
@@ -820,7 +1007,7 @@ procedure next_token()
 			Token[TTYPE] -= T_DOUBLE_OPS - 3
 			Token[TDATA] &= Look
 
-			scan_char()
+			scan_char(state)
 
 		elsif (Token[TTYPE] = T_PERIOD) then
 			-- check for .. or .number
@@ -829,19 +1016,19 @@ procedure next_token()
 				Token[TTYPE] = T_SLICE
 				Token[TDATA] &= Look
 
-				scan_char()
+				scan_char(state)
 			else
 				-- .number
 				Token[TTYPE] = T_NUMBER
-				Token[TDATA] = scan_fraction(0)
+				Token[TDATA] = scan_fraction(0, state)
 				Token[TFORM] = TF_ATOM
 				if ERR then
 					return
 				end if
 
-				Token[TDATA] = scan_exponent(Token[TDATA])
+				Token[TDATA] = scan_exponent(Token[TDATA], state)
 
-				if STRING_NUMBERS then
+				if eumem:ram_space[state][STRING_NUMBERS] then
 					if integer(Token[TDATA]) then
 						Token[TDATA] = sprintf("%d",{Token[TDATA]})
 					else
@@ -856,42 +1043,42 @@ procedure next_token()
 			Token[TDATA] = "--"
 			Token[TFORM] = TF_COMMENT_SINGLE
 
-			scan_char()
+			scan_char(state)
 
 			while (Look != EOL) do
 				Token[TDATA] &= Look
-				scan_char()
+				scan_char(state)
 			end while
 
-			if IGNORE_COMMENTS then
-				next_token()
+			if eumem:ram_space[state][IGNORE_COMMENTS] then
+				next_token(state)
 			end if
 
 		elsif (Look = '*') and (Token[TTYPE] = T_DIVIDE) then
 			-- check for multi-line comment
-			scan_multicomment()
+			scan_multicomment(state)
 		end if
 
-	elsif scan_identifier() then
+	elsif scan_identifier(state) then
 
-	elsif scan_qchar() then
+	elsif scan_qchar(state) then
 
-	elsif scan_string() then
+	elsif scan_string(state) then
 
-	elsif scan_multistring() then
+	elsif scan_multistring(state) then
 
-	elsif scan_prefixed_number() then
+	elsif scan_prefixed_number(state) then
 
-	elsif scan_hex() then
+	elsif scan_hex(state) then
 
-	elsif scan_number() then
+	elsif scan_number(state) then
 
 	else
 		-- error or end of file
 		Token[TTYPE] = T_EOF
 		Token[TDATA] = Look
 
-		if (Look != EOF) then
+		if (Look != io:EOF) then
 			report_error(ERR_UNKNOWN)
 		end if
 	end if
@@ -901,7 +1088,7 @@ end procedure
 --****
 -- === Routines
 
-public function tokenize_string(sequence code)
+public function tokenize_string(sequence code, atom state = g_state)
 	sequence tokens
 
 	ERR = FALSE
@@ -910,34 +1097,36 @@ public function tokenize_string(sequence code)
 
 	tokens = {}
 
-	source_text = code & EOL & EOF
+	source_text = code & EOL & io:EOF
 	LNum = 1
 	LPos = 1
 	sti = 1
 	Look = source_text[sti]
-	Token[TTYPE] = EOF
+	Token[TTYPE] = io:EOF
 	Token[TDATA] = ""
 	Token[TLNUM] = 1
 	Token[TLPOS] = 1
 
 	if (Look = '#') and (source_text[sti+1] = '!') then
 		sti += 1
-		scan_char()
-		scan_white()
+		scan_char(state)
+		if eumem:ram_space[state][DELETE_WHITE] then
+			scan_white(state)
+		end if
 		Token[TTYPE] = T_SHBANG
 		while Look != EOL do
 			Token[TDATA] &= Look
-			scan_char()
+			scan_char(state)
 		end while
-		scan_char()
+		scan_char(state)
 		tokens &= { Token }
 	end if
 
-	next_token()
+	next_token(state)
 	if not ERR then
 		while Token[TTYPE] != T_EOF do
 			tokens &= { Token }
-			next_token()
+			next_token(state)
 			if ERR then
 				exit 
 			end if
@@ -947,13 +1136,13 @@ public function tokenize_string(sequence code)
 	return { tokens, ERR, ERR_LNUM, ERR_LPOS }
 end function
 
-public function tokenize_file(sequence fname)
-	object txt = read_file(fname, TEXT_MODE)
+public function tokenize_file(sequence fname, atom state = g_state)
+	object txt = io:read_file(fname, io:TEXT_MODE)
 	if atom(txt) and txt = -1 then
 		return {{}, ERR_OPEN, ERR_LNUM, ERR_LPOS}
 	end if
 
-	return tokenize_string(txt)
+	return tokenize_string(txt, state)
 end function
 
 --****
@@ -968,7 +1157,7 @@ public constant token_names = {
 	"T_IDENTIFIER", "T_KEYWORD", "T_PLUSEQ", "T_MINUSEQ", "T_MULTIPLYEQ", "T_DIVIDEEQ", "T_LTEQ", 
 	"T_GTEQ", "T_NOTEQ", "T_CONCATEQ", "T_PLUS", "T_MINUS", "T_MULTIPLY", "T_DIVIDE", "T_LT", "T_GT", 
 	"T_NOT", "T_CONCAT", "T_EQ", "T_LPAREN", "T_RPAREN", "T_LBRACE", "T_RBRACE", "T_LBRACKET",
-	"T_RBRACKET", "T_QPRINT", "T_COMMA", "T_PERIOD", "T_COLON", "T_DOLLAR", "T_SLICE"
+	"T_RBRACKET", "T_QPRINT", "T_COMMA", "T_PERIOD", "T_COLON", "T_DOLLAR", "T_SLICE", "T_WHITE", "T_BUILTIN"
 }
 
 public constant token_forms = {
