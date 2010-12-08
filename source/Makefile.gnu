@@ -652,7 +652,6 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/source 
 	mkdir -p $(DESTDIR)$(PREFIX)/bin 
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
-	mkdir -p $(DESTDIR)$(PREFIX)/include/euphoria
 	install $(BUILDDIR)/$(EECUA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EECUDBGA) $(DESTDIR)$(PREFIX)/lib
 	install $(BUILDDIR)/$(EEXU) $(DESTDIR)$(PREFIX)/bin
