@@ -689,12 +689,12 @@ procedure circularity()
 end procedure
 
 procedure patterns()
--- test wildcard routines   
+	-- test wildcard routines   
 	if wildcard:is_match("ABC*DEF.*", "XBCDEF.E") then
-	crash(generic_msg)
+		crash(generic_msg)
 	end if
 	ifdef not UNIX then
-		if not wildcard:is_match("A?B?C?D", "a1b2C3D") then
+		if not wildcard:is_match("a?b?C?D", "a1b2C3D") then
 			crash(generic_msg)
 		end if
 	end ifdef
@@ -1036,11 +1036,16 @@ procedure check_install(integer doit)
 		path = lower(path)
 	end ifdef
 	
-	if not match(temp_eudir, path) then
-		puts(msg, "Note: " & eubin & " is not on your PATH.\n")
-		reboot_msg()
-	end if
-
+	--
+	-- This was trying to see if eui.ex was in your path or not and if not it figured
+	-- that some serious issue occured while installing Euphoria. This is not true and
+	-- does not work if you run sanity from a non-standard eui, such as 
+	-- source/build/eui sanity.ex
+	--
+	--if not match(temp_eudir, path) then
+	--	puts(msg, "Note: " & eubin & " is not on your PATH.\n")
+	--	reboot_msg()
+	--end if
 end procedure
 
 without profile
