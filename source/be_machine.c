@@ -1063,7 +1063,7 @@ typedef struct _SYSTEMTIME {
 	if (fp_buf == path)
 	{
 		// Empty path so assume current directory
-		copy_string(path, ".\\*", 4);
+		copy_string(path, ".\\*", MAX_FILE_NAME);
 		has_wildcards = 1;
 	}
 	else
@@ -1088,7 +1088,7 @@ typedef struct _SYSTEMTIME {
 		// a directory when no wildcards were used,
 		// so assume the caller wants to see inside the directory.
 		FindClose(next_file);
-		append_string(path, "\\*", 3);
+		append_string(path, "\\*", MAX_FILE_NAME);
 		has_wildcards = 1;
 		next_file = FindFirstFile( path, &file_info);
 		if (next_file == INVALID_HANDLE_VALUE)
@@ -2913,20 +2913,26 @@ object machine(object opcode, object x)
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
+			
+				// TODO: refactor, simply make an unset method for EWATCOM,
+				// and EMINGW, then call unsetenv(src)
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
 #else
 #ifdef EMINGW
-				dest = EMalloc(strlen(src) + 2);
-				copy_string(dest, src, strlen(src) + 1);
-				append_string(dest, "=", 2);
-				/* on MinGW, putenv("var=") will unset the
-				 * variable. On any other system, use unsetenv()
-				 * as putenv("var=") will create an empty
-				 * environment variable.MinGW() lacks unsetenv()
-				 */
-				temp = putenv(dest);
-				EFree(dest);
+				{
+					int slen = strlen(src)
+					dest = EMalloc(slen + 2);
+					copy_string(dest, src, slen + 1);
+					append_string(dest, "=", slen + 1);
+					/* on MinGW, putenv("var=") will unset the
+					 * variable. On any other system, use unsetenv()
+					 * as putenv("var=") will create an empty
+					 * environment variable.MinGW() lacks unsetenv()
+					 */
+					temp = putenv(dest);
+					EFree(dest);
+				}
 #else
 #ifdef EUNIX
 #ifdef ELINUX
