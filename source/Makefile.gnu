@@ -711,7 +711,6 @@ $(BUILDDIR)/eudist-build/main-.c : eudist.ex
 $(BUILDDIR)/$(EUDIST) : $(TRUNKDIR)/source/eudist.ex translator library $(BUILDDIR)/eudist-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudist-build" -f eudist.mak
 
- : 
 $(BUILDDIR)/eudis-build/main-.c : $(TRUNKDIR)/source/dis.ex  $(TRUNKDIR)/source/dis.e $(TRUNKDIR)/source/dox.e
 $(BUILDDIR)/eudis-build/main-.c : $(EU_CORE_FILES) 
 $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES) 
@@ -780,12 +779,10 @@ clean-tools :
 	-rm $(EU_TOOLS)
 
 install-tools :
-	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)/$(PREFIX)/bin/
-	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)/$(PREFIX)/bin/
-	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)/$(PREFIX)/bin/
-	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)/$(PREFIX)/bin/
-	
-	
+	install $(BUILDDIR)/$(EUDIST) $(DESTDIR)$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUDIS) $(DESTDIR)$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUTEST) $(DESTDIR)$(PREFIX)/bin/
+	install $(BUILDDIR)/$(EUCOVERAGE) $(DESTDIR)$(PREFIX)/bin/
 
 install-docs :
 	# create dirs
