@@ -10,10 +10,6 @@ elsedef
 	without type_check
 end ifdef
 
--- Disable SVN Revision banner
-with define EU_FULL_RELEASE
-
-
 include mode.e
 set_mode( "bind", 0 )
 
