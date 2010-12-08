@@ -17,21 +17,22 @@
 
 with type_check
 
+include std/convert.e
+include std/dll.e
+include std/error.e
+include std/filesys.e
 include std/get.e
 include std/graphics.e  -- comment after include is ok
-include std/sort.e
-include std/machine.e
-include std/filesys.e
-include std/io.e
-include std/wildcard.e
 include std/image.e
-include std/dll.e
-include std/win32/msgbox.e
+include std/io.e
+include std/machine.e
 include std/math.e
 include std/os.e
+include std/sort.e
 include std/text.e
-include std/error.e
-include std/convert.e
+include std/wildcard.e
+include std/win32/msgbox.e
+
 constant msg = 1 -- place to send messages
 constant generic_msg = "sanity tests failed at line number shown in ex.err"
 constant t = time()
