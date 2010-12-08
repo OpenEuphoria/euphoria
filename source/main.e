@@ -147,7 +147,7 @@ procedure main()
 		-- too early for normal error processing
 		screen_output(STDERR, GetMsgText(276, 0, {known_files[$]}))
 		if not batch_job and not test_only then
-			any_key(GetMsgText(277,0), STDERR)
+			maybe_any_key(GetMsgText(277,0), STDERR)
 		end if
 		Cleanup(1)
 
