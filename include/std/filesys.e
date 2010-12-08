@@ -670,8 +670,10 @@ end function
 
 public function create_file(sequence name)
 	integer fh = open(name, "wb")
-	close(fh)
-	return (fh != -1)
+	integer ret = (fh != -1)
+	if ret then
+		close(fh)
+	end if
 end function
 
 --**
