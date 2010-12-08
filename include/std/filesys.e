@@ -674,6 +674,7 @@ public function create_file(sequence name)
 	if ret then
 		close(fh)
 	end if
+	return ret
 end function
 
 --**
