@@ -486,6 +486,11 @@ binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 $(BUILDDIR)\eubind.exe : translator library
 	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 	
+shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
+
+$(BUILDDIR)\eushroud.exe : translator library
+	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	
 !ifdef BUILD_TOOLS
 $(BUILDDIR)\eutestdr\eutest.exe: $(BUILDDIR)\eutestdr $(BUILDDIR)\eutestdr\back
 	cd $(BUILDDIR)\eutestdr	

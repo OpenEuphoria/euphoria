@@ -420,8 +420,9 @@ endif
 	$(MAKE) $(BUILDDIR)/$(EECU) OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
 EUBIND=eubind
+EUSHROUD=eushroud
 
-binder : translator library $(BUILDDIR)/$(EUBIND)
+binder : translator library $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EUSHROUD)
 
 .PHONY : library debug-library
 .PHONY : builddirs
@@ -658,6 +659,7 @@ install :
 	install $(BUILDDIR)/$(EECU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EBACKENDU) $(DESTDIR)$(PREFIX)/bin
 	install $(BUILDDIR)/$(EUBIND) $(DESTDIR)$(PREFIX)/bin
+	install $(BUILDDIR)/$(EUSHROUD) $(DESTDIR)$(PREFIX)/bin
 ifeq "$(EMINGW)" "1"
 	install $(BUILDDIR)/$(EBACKENDC) $(DESTDIR)$(PREFIX)/bin
 endif
@@ -686,13 +688,8 @@ endif
 	           be_*.c \
 	           *.h \
 	           $(DESTDIR)$(PREFIX)/share/euphoria/source
-	# helper script for shrouding programs
-	echo "#!/bin/sh" > $(DESTDIR)$(PREFIX)/bin/eushroud
-	echo eubind -shroud_only $$\@ >> $(DESTDIR)$(PREFIX)/bin/eushroud
-	chmod +x $(DESTDIR)$(PREFIX)/bin/eushroud
 
 EUDIS=eudis
-EUSHROUD=eushroud
 EUTEST=eutest
 EUCOVERAGE=eucoverage
 EUDIST=eudist
@@ -738,6 +735,17 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
+
+$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex
+	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
+		-i $(TRUNKDIR)/include \
+		-o "$(BUILDDIR)/$(EUSHROUD)" \
+		-lib "$(BUILDDIR)/eu.a" \
+		-makefile -eudir $(TRUNKDIR) \
+		$(MINGW_FLAGS) $(TRUNKDIR)/source/shroud.ex
+
+$(BUILDDIR)/$(EUSHROUD) : $(BUILDDIR)/shroud-build/main-.c
+		$(MAKE) -C "$(BUILDDIR)/shroud-build" -f shroud.mak
 
 $(BUILDDIR)/eutest-build/main-.c : $(TRUNKDIR)/source/eutest.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/eutest-build" \
