@@ -723,7 +723,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
 		-lib "$(BUILDDIR)/eu.a" \
-		-makefile \
+		-makefile -eudir $(TRUNKDIR) \
 		$(MINGW_FLAGS) $(TRUNKDIR)/source/bind.ex
 
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
