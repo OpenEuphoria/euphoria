@@ -1,9 +1,7 @@
 
-ifdef not DOS32 then
 include std/localeconv.e as lcc
 include std/locale.e as l
 include std/datetime.e as d
-end ifdef
 
 include std/unittest.e
 include std/mathcons.e
@@ -101,9 +99,13 @@ test_equal("translate() #8a", "g'day", l:translate("g'day",, PINF))
 
 test_equal("translate() #9", "This is an example of some \n  translation text that spans \n   multiple lines.", l:translate("help text"))
 
-
-
 test_equal("trsprintf #1", "Hola, Bob!",  trsprintf("greeting", {       "hello", "Bob"}))
 test_equal("trsprintf #2", "hello, Bob!", trsprintf("greeting", {"__" & "hello", "Bob"}))
+
+test_equal("get_text unknown number", 0, get_text(-2))
+
+test_equal("get_text known number A", "Block comment from line [1] not terminated.", get_text(42,"two"))
+test_equal("get_text known number B", "Block comment from line [1] not terminated.", get_text(42,{"zero","two"}))
+test_equal("get_text known number C", "Block comment from line [1] not terminated.", get_text(42, {"zero"}))
 
 test_report()

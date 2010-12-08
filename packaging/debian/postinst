@@ -25,6 +25,9 @@ case "$1" in
                 echo '/usr/share/euphoria/include' >> /etc/euphoria/eu.cfg
             fi
         else
+			if [ ! -d /etc/euphoria ]; then
+				mkdir -p /etc/euphoria
+			fi
             echo '/usr/share/euphoria/include' > /etc/euphoria/eu.cfg
         fi
         exit 0

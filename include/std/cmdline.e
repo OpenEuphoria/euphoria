@@ -77,7 +77,6 @@ public enum
 	-- -D TEST is meant for ##eui##, but -name and -greeting options
 	-- are meant for ##greet.ex##. See [[:cmd_parse]]
 	--
-	--
 	-- ##eui @euopts.txt greet.ex @hotmail.com##
 	-- here 'hotmail.com' is not expanded into the command line but
 	-- 'euopts.txt' is.
@@ -108,12 +107,10 @@ public enum
 	PAUSE_MSG,
 
 	--**
-	-- Disable the automatic inclusion of -h, -? and --help as help switches.
+	-- Disable the automatic inclusion of -h, -? and ~--help as help switches.
 	NO_HELP,
 	
 	$
-
---
 
 public enum
 	--**
@@ -138,7 +135,11 @@ public constant
 	--**
 	--   The extra parameters on the cmd line, not associated with any
 	--   specific option. See [[:cmd_parse]]
-	OPT_EXTRAS = {-9,-8,-7,-6}
+	EXTRAS = {{"extras"}},
+	
+	--**
+	-- @nodoc@
+	OPT_EXTRAS = EXTRAS
 
 -- Record fields in 'opts' argument.
 enum
@@ -188,7 +189,7 @@ function standardize_opts(sequence opts, integer auto_help_switches)
 			else
 				lExtras = i
 				if atom(opt[MAPNAME]) then
-					opt[MAPNAME] = OPT_EXTRAS
+					opt[MAPNAME] = EXTRAS
 					updated = 1
 				end if
 			end if
@@ -262,7 +263,7 @@ function standardize_opts(sequence opts, integer auto_help_switches)
 			elsif sequence(opt[SHORTNAME]) then
 				opt[MAPNAME] = opt[SHORTNAME]
 			else
-				opt[MAPNAME] = OPT_EXTRAS
+				opt[MAPNAME] = EXTRAS
 			end if
 			updated = 1
 		end if
@@ -816,11 +817,11 @@ end function
 --
 -- Returns:
 -- A **map**, containing the set of actual options used in ##cmds##. The returned
--- map has one special key, ##OPT_EXTRAS## that are values passed on the
+-- map has one special key, ##EXTRAS## that are values passed on the
 -- command line that are not part of any of the defined options. This is commonly
 -- used to get the list of files entered on the command line. For instance, if
 -- the command line used was //##myprog -verbose file1.txt file2.txt##// then
--- the ##OPT_EXTRAS## data value would be ##{"file1.txt", "file2.txt"}##.
+-- the ##EXTRAS## data value would be ##{"file1.txt", "file2.txt"}##.
 --
 -- When any command item begins with an **##@##** symbol then it is assumed
 -- that it prefixes a file name. That file will then be opened and its contents used
@@ -982,7 +983,7 @@ end function
 -- 	return 1
 -- end function
 --
--- function opt_extras( sequence value)
+-- function extras( sequence value)
 --    if not file_exists(value[OPT_VAL]) then
 --        show_help(option_definition, sprintf("Cannot find '%s'", 
 --                  {value[OPT_VAL]}) )
@@ -999,7 +1000,7 @@ end function
 --                                             routine_id("opt_output_filename") },
 --     { "i", "import",  "An import path",   { HAS_PARAMETER, MULTIPLE}, -1 },
 --     { "e", "version", "Display version",  { VERSIONING, "myprog v1.0" } },
---     {  0, 0, 0, 0, routine_id("opt_extras")}
+--     {  0, 0, 0, 0, routine_id("extras")}
 -- }
 --
 -- map:map opts = cmd_parse(option_definition, NO_HELP)
@@ -1014,7 +1015,7 @@ end function
 -- -- map:get(opts, "hash") --> 0 (not supplied on command line)
 -- -- map:get(opts, "output") --> "john.txt"
 -- -- map:get(opts, "import") --> {"/usr/local", "/etc/app"}
--- -- map:get(opts, OPT_EXTRAS) --> {"input1.txt", "input2.txt"}
+-- -- map:get(opts, EXTRAS) --> {"input1.txt", "input2.txt"}
 -- </eucode>
 --
 -- See Also:
@@ -1087,7 +1088,7 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 	call_count = repeat(0, length(opts))
 
 	map:map parsed_opts = map:new()
-	map:put(parsed_opts, OPT_EXTRAS, {})
+	map:put(parsed_opts, EXTRAS, {})
 
 	-- Find if there are any help options.
 	help_opts = {}
@@ -1179,9 +1180,13 @@ public function cmd_parse(sequence opts, object parse_options = {}, sequence cmd
 
 		if (opts_done or find(cmd[1], os:CMD_SWITCHES) = 0 or length(cmd) = 1)
 		then
-			map:put(parsed_opts, OPT_EXTRAS, cmd, map:APPEND)
+			map:put(parsed_opts, EXTRAS, cmd, map:APPEND)
 			has_extra = 1
 			if validation = NO_VALIDATION_AFTER_FIRST_EXTRA then
+				for i = arg_idx + 1 to length(cmds) do
+					map:put(parsed_opts, EXTRAS, cmds[i], map:APPEND)
+				end for
+				
 				exit
 			else
 				continue

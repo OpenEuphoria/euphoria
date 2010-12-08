@@ -16,6 +16,8 @@ include std/map.e
 include std/mathcons.e
 include std/search.e
 include std/text.e
+include std/eds.e
+include std/types.e
 
 ------------------------------------------------------------------------------------------
 --
@@ -403,7 +405,7 @@ constant
 --	LC_MESSAGES = 5,
 	$
 
-elsifdef FREEBSD or SUNOS then
+elsifdef BSD or SUNOS then
 constant
 	lib = dll:open_dll("libc.so"),
 	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
@@ -438,12 +440,12 @@ constant
 elsedef
 
 constant
-	lib = -1
-	lib2 = -1
-	f_strfmon = -1
-	f_strfnum = -1
-	f_setlocale = -1
-	f_strftime = -1
+	lib = -1,
+	lib2 = -1,
+	f_strfmon = -1,
+	f_strfnum = -1,
+	f_setlocale = -1,
+	f_strftime = -1,
 	LC_ALL         = -1,
 --	LC_COLLATE     = -1,
 --	LC_CTYPE       = -1,
@@ -538,19 +540,20 @@ end function
 -- Converts an amount of currency into a string representing that amount.
 --
 -- Parameters:
---		# ##amount## : an atom, the value to write out.
+--   # ##amount## : an atom, the value to write out.
 --
 -- Returns:
--- 		A **sequence**, a string that writes out ##amount## of current currency.
+--   A **sequence**, a string that writes out ##amount## of current currency.
 --
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ? money(1020.5) -- returns"$1,020.50"
+-- money(1020.5) -- returns"$1,020.50"
 -- </eucode>
 --
 -- See Also:
 --		[[:set]], [[:number]]
+--
 
 public function money(object amount)
 	sequence result
@@ -589,7 +592,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- -- Assuming an en_US locale
--- ? number(1020.5) -- returns "1,020.50"
+-- number(1020.5) -- returns "1,020.50"
 -- </eucode>
 --
 -- See Also:
@@ -706,11 +709,14 @@ end function
 --
 -- Example 1:
 -- <eucode>
--- ? datetime("Today is a %A",datetime:now())
+-- include std/datetime.e
+--
+-- datetime("Today is a %A", datetime:now())
 -- </eucode>
 --
 -- See Also:
 --   datetime:[[:format]]
+--
 
 public function datetime(sequence fmt, datetime:datetime dtm)
 	atom pFmt, pRes, pDtm
@@ -732,4 +738,85 @@ public function datetime(sequence fmt, datetime:datetime dtm)
 	end if
 	
 	return res
+end function
+
+--**
+-- Get the text associated with the message number in the requested locale.
+--
+-- Parameters:
+--   # ##MsgNum## : An integer. The message number whose text you are trying to get.
+--   # ##LocalQuals## : A sequence. Zero or more locale codes. Default is {}.
+--   # ##DBBase##: A sequence. The base name for the database files containing the
+--                 locale text strings. The default is "teksto".
+--
+-- Returns:
+-- A string **sequence**, the text associated with the message number and locale.\\
+-- The **integer** zero, if associated text can not be found for any reason.
+--
+-- Comments:
+-- * This first scans the database(s) linked to the locale codes supplied.
+-- * The database name for each locale takes the format of "<DBBase>_<Locale>.edb"
+-- so if the default DBBase is used, and the locales supplied are {"enus", "enau"}
+-- the databases scanned are "teksto_enus.edb" and "teksto_enau.edb".
+-- The database table name searched is "1" with the key being the message number,
+-- and the text is the record data.
+-- * If the message is not found in these databases (or the databases don't exist)
+-- a database called "<DBBase>.edb" is searched. Again the table name is "1" but
+-- it first looks for keys with the format {<locale>,msgnum} and failing that it
+-- looks for keys in the format {"", msgnum}, and if that fails it looks for a
+-- key of just the msgnum.
+--
+
+public function get_text(integer MsgNum, sequence LocalQuals = {}, sequence DBBase = "teksto")
+	integer db_res
+	object lMsgText
+	sequence dbname
+
+	db_res = -1
+	lMsgText = 0
+	-- First, scan through the specialized local dbs
+	if string(LocalQuals) and length(LocalQuals) > 0 then
+		LocalQuals = {LocalQuals}
+	end if
+	for i = 1 to length(LocalQuals) do
+		dbname = DBBase & "_" & LocalQuals[i] & ".edb"
+		db_res = eds:db_select( filesys:locate_file( dbname ), eds:DB_LOCK_READ_ONLY)
+		if db_res = eds:DB_OK then
+			db_res = eds:db_select_table("1")
+			if db_res = eds:DB_OK then
+				lMsgText = eds:db_fetch_record(MsgNum)
+				if sequence(lMsgText) then
+					exit
+				end if
+			end if
+		end if
+	end for
+
+	-- Next, scan through the generic db
+	if atom(lMsgText) then
+		dbname = filesys:locate_file( DBBase & ".edb" )
+		db_res = eds:db_select(	dbname, DB_LOCK_READ_ONLY)
+		if db_res = eds:DB_OK then
+			db_res = eds:db_select_table("1")
+			if db_res = eds:DB_OK then
+				for i = 1 to length(LocalQuals) do
+					lMsgText = eds:db_fetch_record({LocalQuals[i],MsgNum})
+					if sequence(lMsgText) then
+						exit
+					end if
+				end for
+				if atom(lMsgText) then
+					lMsgText = eds:db_fetch_record({"",MsgNum})
+				end if
+				if atom(lMsgText) then
+					lMsgText = eds:db_fetch_record(MsgNum)
+				end if
+			end if
+		end if
+	end if
+	if atom(lMsgText) then
+		return 0
+	else
+		return lMsgText
+	end if
 end function

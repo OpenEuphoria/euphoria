@@ -115,16 +115,20 @@ public constant OBJ_SEQUENCE = 3
 
 --**
 -- Boolean FALSE value
+
 public constant FALSE = (1=0)
 
 --**
 -- Boolean TRUE value
+
 public constant TRUE = (1=1)
 
---**
--- Predefined character sets:
+--****
+-- === Predefined character sets
+--
+
 public enum
-	CS_FIRST = 0,
+	CS_FIRST = 0,	
 	CS_Consonant,
 	CS_Vowel,
 	CS_Hexadecimal,
@@ -1149,9 +1153,9 @@ end type
 
 --**
 -- value returned from [[:routine_id]]()
--- when the routine doesm't exist or is out of scope.
+-- when the routine doesn't exist or is out of scope.
 -- this is typically seen as -1 in legacy code.
-public constant INVALID_ROUTINE_ID = routine_id("INVALID_ROUTINE_ID")
+public constant INVALID_ROUTINE_ID = routine_id("#")
 
 --**
 -- to be used as a flag for no [[:routine_id]]() supplied.

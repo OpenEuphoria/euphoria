@@ -32,18 +32,18 @@ include std/sort.e
 --
 -- Example 1:
 --   <eucode>
---   ? small( {4,5,6,8,5,4,3,"text"}, 3 ) 
---     --> Ans: {4,1} (The 3rd smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 1 ) 
---     --> Ans: {3,7} (The 1st smallest value)
---   ? small( {4,5,6,8,5,4,3,"text"}, 7 ) 
---     --> Ans: {8,4} (The 7th smallest value)
---   ? small( {"def", "qwe", "abc", "try"}, 2 ) 
---     --> Ans: {"def", 1} (The 2nd smallest value)
---   ? small( {1,2,3,4}, -1) 
---     --> Ans: {} -- no-value
---   ? small( {1,2,3,4}, 10) 
---     --> Ans: {} -- no-value
+--   small( {4,5,6,8,5,4,3,"text"}, 3 ) 
+--   --> Ans: {4,1} (The 3rd smallest value)
+--   small( {4,5,6,8,5,4,3,"text"}, 1 ) 
+--   --> Ans: {3,7} (The 1st smallest value)
+--   small( {4,5,6,8,5,4,3,"text"}, 7 ) 
+--   --> Ans: {8,4} (The 7th smallest value)
+--   small( {"def", "qwe", "abc", "try"}, 2 ) 
+--   --> Ans: {"def", 1} (The 2nd smallest value)
+--   small( {1,2,3,4}, -1) 
+--   --> Ans: {} -- no-value
+--   small( {1,2,3,4}, 10) 
+--   --> Ans: {} -- no-value
 --   </eucode>
 --
 
@@ -75,8 +75,8 @@ end function
 --
 -- Example 1:
 --   <eucode>
---   ? largest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 8
---   ? largest( {"just","text"} ) -- Ans: {}
+--   largest( {7,2,8,5,6,6,4,8,6,6,3,3,4,1,8,"text"} ) -- Ans: 8
+--   largest( {"just","text"} ) -- Ans: {}
 --   </eucode>
 --
 -- See also:

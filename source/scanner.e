@@ -15,7 +15,7 @@ include std/machine.e
 include std/search.e
 include std/sequence.e
 include std/text.e
-include std/map.e
+include std/hash.e
 
 include global.e
 include common.e
@@ -62,7 +62,7 @@ sequence default_namespaces
 -- Local variables
 sequence char_class  -- character classes, some are negative
 sequence id_char     -- char that could be in an identifier
-sequence IncludeStk  -- stack of include file info
+sequence IncludeStk = {} -- stack of include file info
 
 -- IncludeStk entry
 constant FILE_NO = 1,           -- file number
@@ -739,7 +739,7 @@ procedure IncludePush()
 
 	new_file_handle = path_open() -- sets new_include_name to full path
 
-	new_hash = hash(canonical_path(new_include_name,,1), HSIEH32)
+	new_hash = hash(canonical_path(new_include_name,,1), stdhash:HSIEH32)
 
 	idx = find(new_hash, known_files_hash)
 	if idx then

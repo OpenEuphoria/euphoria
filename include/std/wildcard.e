@@ -13,57 +13,6 @@ end ifdef
 --****
 -- === Routines
 
---**
--- Return a text pattern
---
--- Parameters:
---   # ##pattern## : a sequence representing a text string pattern
---
--- Returns:
---   A the same ##pattern##.
---
--- Comments:
---   You might wonder why this function even exists.  If you use it and ##is_match## you can easily
---   change to the routines found in std/regex.e.  And if using std/regex.e and you restrict 
---   yourself to only using
---   [[:regex:new]] and [[:regex:is_match]], you can change to using 
---   std/wildcards.e with very little modification to your source code.
---
---   Suppose you work for a hotel and you set up a system for looking up
---   guests.
---   
---   <eucode>
---   -- The user can use regular expressions to find guests at a hotel...
---   include std/regex.e as uip -- user input patterns 'uip'
---   puts(1,"Enter a person to find.  You may use regular expressions:")
---
---   sequence person_to_find
---   object pattern
---   person_to_find = gets(0)
---   person_to_find_pattern = uip:new(person_to_find[1..$-1])
---   while sequence(line) do
---       line = line[1..$-1]
---       if uip:is_match(person_to_find_pattern, line) then
---           -- code for telling users the person is there.
---       end if
---       -- code loads next name into 'line'
---   end while
---   close(dbfd)
---   </eucode>
---
--- Later the hotel manager tells you that the users would rather use wildcard
--- matching you need only change the include line and the prompt for the pattern.
---   <eucode>
---   -- This will make things simpler...
---   include std/wildcard.e as uip -- user input patterns 'uip'.
---   puts(1,"Enter a person to find.  You may use '*' and '?' wildcards:")
---   </eucode>
---
--- See Also: [[:is_match]]
-public function new(sequence s)
-	return s
-end function
-
 function qmatch(sequence p, sequence s)
 -- find pattern p in string s
 -- p may have '?' wild cards (but not '*')
@@ -135,7 +84,8 @@ constant END_MARKER = -1
 -- ##bin/search.ex##
 --
 -- See Also: 
--- [[:wildcard_file]], [[:upper]], [[:lower]], [[:Regular Expressions]]
+-- [[:upper]], [[:lower]], [[:Regular Expressions]]
+--
 
 public function is_match(sequence pattern, sequence string)
 	integer p, f, t 
@@ -182,57 +132,4 @@ public function is_match(sequence pattern, sequence string)
 		end if
 	end while
 	return 0
-end function
-
---**
--- Determine whether a file name matches a wildcard pattern.
---
--- Parameters:
---		# ##pattern## : a string, the pattern to match
---		# ##filename## : the string to be matched against
---
--- Returns: 
---		An **integer**, TRUE if ##filename## matches ##pattern##, else FALSE.
---
--- Comments:
---
--- ~* matches any 0 or more characters, ? matches any single character. On //Unix// the 
--- character comparisons are case sensitive. On Windows they are not.
---
--- You might use this function to check the output of the [[:dir]]() routine for file names that match a pattern supplied by the user of your program.
---  
--- Example 1: 
--- <eucode> 
---  i = wildcard_file("AB*CD.?", "aB123cD.e")
--- -- i is set to 1 on Windows, 0 on Linux or FreeBSD
--- </eucode>
---
--- Example 2:  
--- <eucode> 
---  i = wildcard_file("AB*CD.?", "abcd.ex")
--- -- i is set to 0 on all systems, 
--- -- because the file type has 2 letters not 1
--- </eucode>
---
--- Example 3: 
--- ##bin/search.ex##
---
--- See Also: 
--- [[:is_match]], [[:dir]]
-
-public function wildcard_file(sequence pattern, sequence filename)
-	ifdef not UNIX then
-		pattern = text:upper(pattern)
-		filename = text:upper(filename)
-	end ifdef
-	
-	if not find('.', pattern) then
-		pattern = pattern & '.'
-	end if
-	
-	if not find('.', filename) then
-		filename = filename & '.'
-	end if
-	
-	return is_match(pattern, filename)
 end function

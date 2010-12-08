@@ -29,10 +29,11 @@ typedef signed   char   schar;
 #include "symtab.h"
 
 //TODO if we are on 64bit linux, then we should fall back to the EBSD version
-#if defined(ELINUX)
+#if defined(ELINUX) || defined(EMINGW)
 	/* use glibc 64bit variants */
 #	define _LARGEFILE_SOURCE
 #	define _LARGEFILE64_SOURCE
+	/* note that LARGEFILE* macros do not work on MinGW */
 #	include <sys/types.h>
 #	include <unistd.h>
 #	include <errno.h>
@@ -55,15 +56,15 @@ typedef signed   char   schar;
 	//long long llseek(int,long long,int);
 	//#define iseek(f,o,w) llseek(fileno(f),(o),(w))
 	//#define itell(f) llseek(fileno(f), (long long)0, SEEK_CUR)
-	// define iseek() in be_runtime.c - uses the llseek() syscall directly
-	long long iseek(FILE *, long long, int);
-#	define itell(f) iseek(f, (long long)0, SEEK_CUR)
-#	define iiseek fseek
-#	define iitell ftell
+#	define iseek fseeko64
+#	define itell ftello64
 #	define iflush fflush
 #	define iclose fclose
 #	define ifileno fileno
 #	define iprintf fprintf
+#ifdef EMINGW
+#   include <windef.h>
+#endif
 #elif defined(EWINDOWS) && !defined(EMINGW)
 #	define IFILE FILE*
 #	define IOFF __int64
@@ -74,10 +75,8 @@ typedef signed   char   schar;
 #	define iputc fputc
 #	define iread fread
 #	define iwrite fwrite
-#	define iseek(f,o,w) _lseeki64(fileno(f),(__int64)(o),(w))
+#   define iseek(f,o,w) (_lseeki64(fileno(f),(__int64)(o),(w)) == -1 ? -1 : 0)
 #	define itell(f) _lseeki64(fileno(f), (__int64)0, SEEK_CUR)
-#	define iiseek fseek
-#	define iitell ftell
 #	define iflush fflush
 #	define iclose fclose
 #	define ifileno fileno
@@ -95,7 +94,6 @@ typedef signed   char   schar;
 #	define iread fread
 #	define iwrite fwrite
 #	define iseek fseek
-#	define iiseek fseek
 #	define itell ftell
 #	define iflush fflush
 #	define iclose fclose

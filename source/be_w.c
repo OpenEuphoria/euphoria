@@ -628,7 +628,7 @@ void screen_output(IFILE f, char *out_string)
 				collect_len = len;
 			}
 			// safe to use strcpy here 'cos we already checked the remaining length.
-			strcpy(collect+collect_next, out_string);
+			copy_string(collect+collect_next, out_string, len+1);
             collect_free -= len;
             collect_next += len;
         }

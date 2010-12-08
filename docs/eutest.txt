@@ -18,7 +18,7 @@ message. You may use this section as an outline for testing your own code.
 ==== Synopsis for running the tests
 
 {{{
-stable-interpreter-path [-D REC] [-D SKIP_C_ONFAILURE] eutest.ex [-D NO_INET ] [-D NO_INET_TESTS ]
+eutest [-D NO_INET ] [-D NO_INET_TESTS ]
     [-verbose] [-log] [-i include path] [-cc wat|gcc] [-exe interpreter]
     [-ec translator] [-lib binary library path]
     [optional list of unit test files]
@@ -27,21 +27,17 @@ stable-interpreter-path [-D REC] [-D SKIP_C_ONFAILURE] eutest.ex [-D NO_INET ] [
 ==== Synopsis for creating report from the log
 
 {{{
-stable-interpreter-path eutest.ex -process-log [-html]
+eutest -process-log [-html]
 }}}
 
 ==== General behavior
 
-For your //stable-interpreter-path// please use a stable interpreter,
-to run eutest.ex.  You should use a alpha or beta release copy as your
-'//stable-interpreter-path//', then you can use ##-exe## to specify your
-'//test interpreter path//' which could be your build of an SVN version
-or your own modified copy.  If you want to test translation as well, you
-can specify it in a similar way with ##-ec##.  Developers, *please* do not
-modify ##eutest.ex## to use features not available in the last two alpha
-releases.  If you don't specify unit tests on the command line eutest
+If you want to test translation of your tests as well as interpreted tests, you
+can specify it with ##-ec##.
+
+If you don't specify unit tests on the command line eutest
 will scan the directory for unit test files using the pattern
-##t_*.e##.  If you specify a pattern it will interpret the pattern as
+##t_*.e##.  If you specify a pattern it will interpret the pattern, as
 some shells do not do this for programs.
 
 ==== Options detail
@@ -158,7 +154,7 @@ Windows:
 > wmake coverage
 
 Unix:
-> make coverage
+$ make coverage
 }}}
 
 Then, in your build directory, eutest will run the tests to create the coverage 

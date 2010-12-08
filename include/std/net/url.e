@@ -83,13 +83,43 @@ public function parse_querystring(object query_string)
 	return the_map
 end function
 
+--****
+-- === URL Parse Accessor Constants
+--
+-- Use with the result of [[:parse]].
+--
+-- Notes:
+--   If the host name, port, path, username, password or query string are not part of the 
+--   URL they will be returned as an integer value of zero.
+--
+
 public enum 
+	--**
+	-- The protocol of the URL
 	URL_PROTOCOL, 
+
+	--**
+	-- The hostname of the URL
 	URL_HOSTNAME, 
+
+	--**
+	-- The TCP port that the URL will connect to
 	URL_PORT, 
+
+	--**
+	-- The protocol-specific pathname of the URL
 	URL_PATH,
+
+	--**
+	-- The username of the URL
 	URL_USER,
+
+	--**
+	-- The password the URL
 	URL_PASSWORD, 
+
+	--**
+	-- The HTTP query string
 	URL_QUERY_STRING
 
 --**

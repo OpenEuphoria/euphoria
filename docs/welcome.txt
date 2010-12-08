@@ -220,6 +220,7 @@ and be sure to join the active [[http://openeuphoria.org/forum/index.wc|discussi
 === Disclaimer
 
 Euphoria is provided "as is" without warranty of any kind. In no event shall
-Rapid Deployment Software be held liable for any damages arising from the use
-of, or inability to use, this product.
+any authors of Euphoria or contributors to Euphoria be held liable for any
+damages arising from the use of, or inability to use, this product.
+
 

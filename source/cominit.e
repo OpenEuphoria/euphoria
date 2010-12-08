@@ -271,7 +271,7 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 		sequence opt = b[i]
 		
 		-- can't be a parameter
-		if length(opt) = 1 then
+		if length(opt) <= 1 then
 			first_extra = i
 			exit
 		end if
@@ -281,21 +281,22 @@ export function merge_parameters(sequence a, sequence b, sequence opts, integer 
 			this_opt = find_opt(LONGNAME, opt[3..$], opts)
 		elsif opt[1] = '-' or opt[1] = '/' then
 			this_opt = find_opt(SHORTNAME, opt[2..$], opts)
-		else
-			first_extra = i
-			exit
 		end if
 		
 		if length(this_opt) then
 			if find(HAS_PARAMETER, this_opt[OPTIONS]) then
 				i += 1
 			end if
+		else
+			first_extra = i
+			exit
 		end if
-				
+		
 		i += 1
 	end while
 	
 	if first_extra > 1 then
+		
 		return splice(b, a, first_extra)
 	end if
 	
@@ -455,14 +456,13 @@ export procedure finalize_command_line(m:map opts)
 	
 	-- Initialize the option_switches and remove them
 	-- from the command line
-	sequence extras = m:get(opts, OPT_EXTRAS)
+	sequence extras = m:get(opts, cmdline:EXTRAS)
 	if length(extras) > 0 then
-		integer eufile_pos = find(extras[1], Argv)
 		sequence pairs = m:pairs( opts )
-
+		
 		for i = 1 to length( pairs ) do
 			sequence pair = pairs[i]
-			if equal( pair[1], OPT_EXTRAS ) then
+			if equal( pair[1], cmdline:EXTRAS ) then
 				continue
 			end if
 			pair[1] = prepend( pair[1], '-' )
@@ -478,11 +478,9 @@ export procedure finalize_command_line(m:map opts)
 				switches = append( switches, pair[1] )
 			end if
 		end for
-		
-		if eufile_pos > 3 then
-			Argv = Argv[1..2] & Argv[eufile_pos..$]
-			Argc = length(Argv)
-		end if
+
+		Argv = Argv[2..3] & extras
+		Argc = length(Argv)
 
 		src_name = extras[1]
 	end if

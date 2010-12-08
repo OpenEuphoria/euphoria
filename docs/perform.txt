@@ -271,30 +271,26 @@ some_val *= 3
  one subscript and a slice. In all simpler cases the two forms run at
  the same speed (or very close to the same).
 
-=== Pixel-Graphics Tips
-
-* Mode 19 is the fastest mode for **animated graphics** and
- **games**.
-* The video memory (in mode 19) is not cached by the CPU. It usually takes longer
-   to read or write data to the screen than to a general area of memory that
-   you allocate. This adds to the efficiency of
-   //virtual// **screens**, where
-   you do all of your image updating in a **block of memory** that you
-   get from **allocate()**, and then you
-   periodically **mem_copy()** the resulting
-   image to the real **screen memory**. In this way you never have to
-   read the (slow) screen memory.
-* When plotting pixels, you may find that modes 257 and higher are fast near
-   the top of the screen, but slow near the bottom.
-
-=== Library Routines
+=== Library / Built-In Routines
 
  Some common routines are extremely fast. You probably couldn't do the job
  faster any other way, even if you used C or assembly language. Some of these
  are:
-* ##mem_copy()##
-* ##mem_set()##
-* ##repeat()##
+ 
+ ==== Low Level Memory Manipulation
+* ##[[:mem_copy]]##
+* ##[[:mem_set]]##
+
+==== Sequence Manipulation
+* ##[[:append]]##
+* ##[[:head]]##
+* ##[[:insert]]##
+* ##[[:remove]]##
+* ##[[:repeat]]##
+* ##[[:replace]]##
+* ##[[:splice]]##
+* ##[[:tail]]##
+
 
  Other routines are reasonably fast, but you might be able
  to do the job faster in some cases if speed was crucial.
@@ -318,6 +314,10 @@ end for
  It will allocate somewhat more than it needs, to reduce the number of
  reallocations.)
 
+These built-in operations are also optimize to make changes in place (where possible), 
+rather than creating copies of sequences via slices.
+
+==== Bitwise operations vs Arithmetic
  You can replace:
 <eucode>
 remainder(x, p)
@@ -335,7 +335,7 @@ non-negative  integer that fits in 32-bits.
 
  Euphoria's [[:find]] is the fastest way to search for a value in a
  sequence up to about 50 elements. Beyond that, you might consider a 
- //hash table//
+ [[:map]] or other implementation of a //hash table//
  (**demo\hash.ex**) or a //binary tree// (**demo\tree.ex**).
 
 === Sorting

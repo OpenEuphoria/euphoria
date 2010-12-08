@@ -190,9 +190,12 @@ end for
 test_equal( "process lines #3", tmp, alt_tmp)
 
 
-test_equal( "Seek STDIN",  1, seek(0, 0))
-test_equal( "Seek STDOUT", 1, seek(1, 0))
-test_equal( "Seek STDERR", 1, seek(2, 0))
+-- OpenBSD allows seeking on STDIN, STDOUT and STDERR
+ifdef not OPENBSD and not NETBSD then
+	test_equal( "Seek STDIN",  1, seek(0, 0))
+	test_equal( "Seek STDOUT", 1, seek(1, 0))
+	test_equal( "Seek STDERR", 1, seek(2, 0))
+end ifdef
 
 integer fh
 

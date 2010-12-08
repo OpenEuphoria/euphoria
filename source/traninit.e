@@ -78,6 +78,7 @@ sequence trans_opt_def = {
 	{ "so",               0, GetMsgText(184,0), { } },
 	{ "o",                0, GetMsgText(198,0), { HAS_PARAMETER, "filename" } },
 	{ "build-dir",        0, GetMsgText(197,0), { HAS_PARAMETER, "dir" } },
+	{ "rc-file",          0, GetMsgText(171,0), { HAS_PARAMETER, "filename" } },
 	{ "wat",              0, GetMsgText(178,0), { } },
 	{ "gcc",              0, GetMsgText(180,0), { } },
 	{ "com",              0, GetMsgText(181,0), { HAS_PARAMETER, "dir" } },
@@ -89,7 +90,6 @@ sequence trans_opt_def = {
 	{ "keep",             0, GetMsgText(191,0), { } },
 	{ "nobuild",          0, GetMsgText(196,0), { } },
 	{ "force-build",      0, GetMsgText(326,0), { } },
-	{ "emake",            0, GetMsgText(195,0), { } },
 	{ "makefile",         0, GetMsgText(193,0), { } },
 	{ "makefile-partial", 0, GetMsgText(192,0), { } },
 	{ "silent",           0, GetMsgText(177,0), { } },
@@ -132,6 +132,13 @@ export procedure transoptions()
 
 			case "verbose" then
 				verbose = TRUE
+				
+			case "rc-file" then
+				rc_file = canonical_path(val)
+				if not file_exists(rc_file) then
+					ShowMsg(2, 349, { val })
+					abort(1)
+				end if
 
 			case "cflags" then
 				cflags = val
@@ -224,9 +231,6 @@ export procedure transoptions()
 			case "makefile" then
 				build_system_type = BUILD_MAKEFILE_FULL
 
-			case "emake" then
-				build_system_type = BUILD_EMAKE
-
 			case "nobuild" then
 				build_system_type = BUILD_NONE
 
@@ -248,6 +252,22 @@ export procedure transoptions()
 		exe_name = current_dir() & SLASH & exe_name
 	end if
 
+	if length(map:get(opts, OPT_EXTRAS)) = 0 then
+		-- No source supplied on command line
+		show_banner()
+		ShowMsg(2, 203)
+		-- translator_help()
+		show_help(tranopts,, Argv)
+
+		abort(1)
+	end if
+	
+	OpDefines &= { "EUC" }
+
+	if host_platform() = WIN32 and not con_option then
+		OpDefines = append( OpDefines, "WIN32_GUI" )
+	end if
+
 	ifdef not EUDIS then
 		if build_system_type = BUILD_DIRECT and length(output_dir) = 0 then
 			output_dir = temp_file("." & SLASH, "build-", "")
@@ -258,26 +278,15 @@ export procedure transoptions()
 			if not silent then
 				printf(1, "Build directory: %s\n", { abbreviate_path(output_dir) })
 			end if
+			
 			remove_output_dir = 1
 		end if
 	end ifdef
 	
-	if length(map:get(opts, OPT_EXTRAS)) = 0 then
-		-- No source supplied on command line
-		show_banner()
-		ShowMsg(2, 203)
-		-- translator_help()
-		show_help(tranopts,, Argv)
-
-		abort(1)
+	if length(rc_file) then
+		res_file = canonical_path(output_dir & filebase(rc_file) & ".res")
 	end if
-
-	OpDefines &= { "EUC" }
-
-	if host_platform() = WIN32 and not con_option then
-		OpDefines = append( OpDefines, "WIN32_GUI" )
-	end if
-
+	
 	finalize_command_line(opts)
 end procedure
 

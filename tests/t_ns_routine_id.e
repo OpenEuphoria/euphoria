@@ -5,6 +5,7 @@
 -- an invalid routine_id. When trying it on a non-map type, it seemed to
 -- work just fine also.
 --
+namespace nsroutineid
 
 include std/unittest.e
 include std/map.e as map
@@ -19,5 +20,10 @@ str_key_map m = map:new(10)
 map:put(m, "a", 1)
 
 test_pass("type check cause machine exception?")
+
+test_not_equal( "default namespace forward reference routine_id", -1, routine_id("nsroutineid:foo") )
+function foo()
+	return 1
+end function
 
 test_report()

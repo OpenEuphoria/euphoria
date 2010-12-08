@@ -40,7 +40,7 @@
 
 namespace map
 
-include std/convert.e
+include std/hash.e
 include std/datetime.e
 include std/error.e
 include std/eumem.e
@@ -56,6 +56,8 @@ include std/stats.e as stats
 include std/text.e
 include std/types.e
 
+include euphoria/info.e
+
 enum
 	 TYPE_TAG,       -- ==> 'tag' for map type
 	 ELEMENT_COUNT,  -- ==> elementCount
@@ -69,60 +71,6 @@ enum
 
 constant type_is_map   = "Eu:StdMap"
 
---****
--- Signature:
---   <built-in> function hash(object source, atom algo)
---
--- Description:
---     Calculates a hash value from //key// using the algorithm //algo//
---
--- Parameters:
---		# ##source## : Any Euphoria object
---		# ##algo## : A code indicating which algorithm to use.
--- ** -5 uses Hsieh. Fastest and good dispersion
--- ** -4 uses Fletcher. Very fast and good dispersion
--- ** -3 uses Adler. Very fast and reasonable dispersion, especially for small strings
--- ** -2 uses MD5 (not implemented yet) Slower but very good dispersion. 
--- Suitable for signatures.
--- ** -1 uses SHA256 (not implemented yet) Slow but excellent dispersion. 
--- Suitable for signatures. More secure than MD5.
--- ** 0 and above (integers and decimals) and non-integers less than zero use
---  the cyclic variant (hash = hash * algo + c).
--- This is a fast and good to excellent
--- dispersion depending on the value of //algo//. Decimals give better dispersion but are
--- slightly slower.
---
--- Returns:
---     An **integer**,
---        Except for the MD5 and SHA256 algorithms, this is a 32-bit integer.\\
---     A **sequence**,
---        MD5 returns a 4-element sequence of integers\\
---        SHA256 returns a 8-element sequence of integers.
---
--- Comments:
--- * For //algo// values from zero to less than 1, that actual value used is (algo + 69096). 
---
--- Example 1:
--- <eucode>
--- x = hash("The quick brown fox jumps over the lazy dog", 0)
--- -- x is 242399616
--- x = hash("The quick brown fox jumps over the lazy dog", 99.94)
--- -- x is 723158
--- x = hash("The quick brown fox jumps over the lazy dog", -99.94)
--- -- x is 4175585990
--- x = hash("The quick brown fox jumps over the lazy dog", -4)
--- -- x is 467406810
--- </eucode>
-
---****
--- === Hashing Algorithms
-
-public enum
-	HSIEH32 = -5,
-	ADLER32,
-	FLETCHER32,
-	MD5,
-	SHA256
 
 --****
 -- === Operation codes for put
@@ -137,14 +85,15 @@ public enum
 	CONCAT,
 	LEAVE
 
-constant INIT_OPERATIONS = {PUT, APPEND, CONCAT, ADD, SUBTRACT, LEAVE}
+constant INIT_OPERATIONS = { PUT, APPEND, CONCAT, ADD, SUBTRACT, LEAVE }
+
 --****
 -- === Types of Maps
 
 public constant SMALLMAP = 's'
 public constant LARGEMAP = 'L'
 
-integer threshold_size = 50
+integer threshold_size = 23
 
 -- This is a improbable value used to initialize a small map's keys list. 
 constant init_small_map_key = -75960.358941
@@ -166,7 +115,7 @@ constant init_small_map_key = -75960.358941
 
 public type map(object obj_p)
 -- Must be a valid EuMem pointer.
-	if not valid(obj_p, "") then return 0 end if
+	if not eumem:valid(obj_p, "") then return 0 end if
 	
 -- Large maps have six data elements:
 --   (1) Data type magic value
@@ -187,7 +136,7 @@ public type map(object obj_p)
 --   (7) Sequence. A Free space map.
 	object m_
 	
-	m_ = ram_space[obj_p]
+	m_ = eumem:ram_space[obj_p]
 	if not sequence(m_) then return 0 end if
 	if length(m_) < 6 then return 0 end if
 	if length(m_) > 7 then return 0 end if
@@ -240,19 +189,20 @@ constant maxInt = #3FFFFFFF
 --   -- calculate a hash value and ensure it will be a value from 1 to 4097.
 --   h1 = calc_hash( symbol_name, 4097 )
 --   </eucode>
+--
 
 public function calc_hash(object key_p, integer max_hash_p)
-	atom ret_
+	integer ret_
 
-    ret_ = hash(key_p, -4) --HSIEH32)
+    ret_ = hash(key_p, stdhash:HSIEH30)
 	return remainder(ret_, max_hash_p) + 1 -- 1-based
 
 end function
 
 --**
 -- Gets or Sets the threshold value that determines at what point a small map
--- converts into a large map structure. Initially this has been set to 50,
--- meaning that maps up to 50 elements use the //small map// structure.
+-- converts into a large map structure. Initially this has been set to 23,
+-- meaning that maps up to 23 elements use the //small map// structure.
 --
 -- Parameters:
 -- # ##new_value_p## : If this is greater than zero then it **sets** the threshold
@@ -262,6 +212,7 @@ end function
 --  An **integer**, the current value (when ##new_value_p## is less than 1) or the
 -- old value prior to setting it to ##new_value_p##.
 --
+
 public function threshold(integer new_value_p = 0)
 
 	if new_value_p < 1 then
@@ -283,8 +234,9 @@ end function
 -- Returns:
 -- An **integer**, Either //SMALLMAP// or //LARGEMAP//
 --
+
 public function type_of(map the_map_p)
-	return ram_space[the_map_p][MAP_TYPE]
+	return eumem:ram_space[the_map_p][MAP_TYPE]
 end function
 	
 --**
@@ -301,8 +253,7 @@ end function
 -- See Also:
 --		[[:statistics]], [[:optimize]]
 
-
-public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
+public procedure rehash(integer the_map_p, integer requested_bucket_size_p = 0)
 	integer size_
 	integer index_2_
 	sequence old_key_buckets_
@@ -311,47 +262,88 @@ public procedure rehash(map the_map_p, integer requested_bucket_size_p = 0)
 	sequence new_val_buckets_
 	object key_
 	object value_
-	sequence temp_map_
-
-	if ram_space[the_map_p][MAP_TYPE] = SMALLMAP then
+	integer pos
+	sequence new_keys
+	integer in_use
+	integer elem_count
+	
+	if eumem:ram_space[the_map_p][MAP_TYPE] = SMALLMAP then
 		return -- small maps are not hashed.
 	end if
 	
 	if requested_bucket_size_p <= 0 then
 		-- grow bucket size_
-		size_ = floor(length(ram_space[the_map_p][KEY_BUCKETS]) * 3.5) + 1
+		size_ = floor(length(eumem:ram_space[the_map_p][KEY_BUCKETS]) * 3.5) + 1
 	else
 		size_ = requested_bucket_size_p
 	end if
 	
-	size_ = next_prime(size_, -size_, 2)	-- Allow up to 2 seconds to calc next prime.
+	size_ = primes:next_prime(size_, -size_, 2)	-- Allow up to 2 seconds to calc next prime.
 	if size_ < 0 then
 		return  -- don't do anything. New size would take too long.
 	end if
-	old_key_buckets_ = ram_space[the_map_p][KEY_BUCKETS]
-	old_val_buckets_ = ram_space[the_map_p][VALUE_BUCKETS]
-	new_key_buckets_ = repeat({}, size_)
-	new_val_buckets_ = repeat({}, size_)
-	temp_map_ = {type_is_map, 0, 0, LARGEMAP}
 
+	old_key_buckets_ = eumem:ram_space[the_map_p][KEY_BUCKETS]
+	old_val_buckets_ = eumem:ram_space[the_map_p][VALUE_BUCKETS]
+	
+	-- Preallocate buckets to be the (current threshold length + 1) each.
+	-- The last element in each keys bucket is an index to where the
+	-- next key/value is to be stored. 
+	new_key_buckets_ = repeat(repeat(1, threshold_size + 1), size_)
+	new_val_buckets_ = repeat(repeat(0, threshold_size), size_)
+	
+	elem_count = eumem:ram_space[the_map_p][ELEMENT_COUNT]
+	in_use = 0
+	
+	eumem:ram_space[the_map_p] = 0
 	for index = 1 to length(old_key_buckets_) do
 		for entry_idx = 1 to length(old_key_buckets_[index]) do
+			-- Get existing key/value pair.
 			key_ = old_key_buckets_[index][entry_idx]
 			value_ = old_val_buckets_[index][entry_idx]
+			
+			-- calc the key's new hash value.
 			index_2_ = calc_hash(key_, size_)
-			new_key_buckets_[index_2_] = append(new_key_buckets_[index_2_], key_)
-			new_val_buckets_[index_2_] = append(new_val_buckets_[index_2_], value_)
-			temp_map_[ELEMENT_COUNT] += 1
-			if length(new_key_buckets_[index_2_]) = 1 then
-				temp_map_[IN_USE] += 1
+			
+			-- cache the relevant set of keys
+			new_keys = new_key_buckets_[index_2_]
+			
+			-- grab the next position index
+			pos = new_keys[$]
+			if length(new_keys) = pos then
+				-- the set of keys is full now, so we expand it and the value set too.
+				new_keys &= repeat(pos, threshold_size)
+				new_val_buckets_[index_2_] &= repeat(0, threshold_size)
+			end if
+			-- store the key and value
+			new_keys[pos] = key_
+			new_val_buckets_[index_2_][pos] = value_
+			
+			-- increment the index.
+			new_keys[$] = pos + 1
+			
+			-- put back the cached keys
+			new_key_buckets_[index_2_] = new_keys
+			
+			if pos = 1 then
+				-- count the number of buckets actually in use.
+				in_use += 1
 			end if
 		end for
 	end for
 
-	temp_map_ = append(temp_map_, new_key_buckets_)
-	temp_map_ = append(temp_map_, new_val_buckets_)
+	-- Ensure each bucket is trimmed to the right count	for it.
+	for index = 1 to length(new_key_buckets_) do
+		pos = new_key_buckets_[index][$]
+		new_key_buckets_[index] = remove(new_key_buckets_[index], pos, 
+				length(new_key_buckets_[index]))
+		new_val_buckets_[index] = remove(new_val_buckets_[index], pos, 
+				length(new_val_buckets_[index]))
+	end for
 
-	ram_space[the_map_p] = temp_map_
+	eumem:ram_space[the_map_p] = { 
+		type_is_map, elem_count, in_use, LARGEMAP, new_key_buckets_, new_val_buckets_ 
+	}
 end procedure
 
 --**
@@ -386,23 +378,23 @@ public function new(integer initial_size_p = 690)
 	if initial_size_p < 3 then
 		initial_size_p = 3
 	end if
+	
 	if initial_size_p > threshold_size then
 		-- Return a large map
-		buckets_ = floor(initial_size_p / 30)
-		if buckets_ < 23 then
-			buckets_ = 23
-		else
-			buckets_ = next_prime(buckets_)
-		end if
+		buckets_ = floor((initial_size_p + threshold_size - 1) / threshold_size)
+		buckets_ = primes:next_prime(buckets_)
 		
-		
-		new_map_ = {type_is_map, 0, 0, LARGEMAP, repeat({}, buckets_), repeat({}, buckets_)}
+		new_map_ = { type_is_map, 0, 0, LARGEMAP, repeat({}, buckets_), repeat({}, buckets_) }
 	else
 		-- Return a small map
-		new_map_ =  {type_is_map, 0,0, SMALLMAP, repeat(init_small_map_key, initial_size_p), repeat(0, initial_size_p), repeat(0, initial_size_p)}
+		new_map_ = {
+			type_is_map, 0,0, SMALLMAP, repeat(init_small_map_key, initial_size_p), 
+				repeat(0, initial_size_p), repeat(0, initial_size_p)
+		}
 	end if
-	temp_map_ = malloc()
-	ram_space[temp_map_] = new_map_
+	
+	temp_map_ = eumem:malloc()
+	eumem:ram_space[temp_map_] = new_map_
 	
 	return temp_map_
 end function
@@ -429,6 +421,7 @@ end function
 --   map m = new_extra( foo() ) -- If foo() returns a map it is used, otherwise
 --                              --  a new map is created.
 --   </eucode>
+--
 
 public function new_extra(object the_map_p, integer initial_size_p = 690)
 	if map(the_map_p) then
@@ -437,7 +430,6 @@ public function new_extra(object the_map_p, integer initial_size_p = 690)
 		return new(initial_size_p)
 	end if
 end function
-
 
 --**
 -- Compares two maps to test equality.
@@ -463,6 +455,7 @@ end function
 --   if compare(map_1_p, map_2_p, 'k') >= 0 then
 --        ... -- two maps have the same keys
 --   </eucode>
+--
 
 public function compare(map map_1_p, map map_2_p, integer scope_p = 'd')
 	sequence data_set_1_
@@ -474,8 +467,8 @@ public function compare(map map_1_p, map map_2_p, integer scope_p = 'd')
 	
 	switch scope_p do
 		case 'v', 'V' then
-			data_set_1_ = sort(values(map_1_p))
-			data_set_2_ = sort(values(map_2_p))
+			data_set_1_ = stdsort:sort(values(map_1_p))
+			data_set_2_ = stdsort:sort(values(map_2_p))
 			
 		case 'k', 'K' then
 			data_set_1_ = keys(map_1_p, 1)
@@ -513,20 +506,41 @@ end function
 --   ? has(the_map_p, "name") -- 1
 --   ? has(the_map_p, "age")  -- 0
 --   </eucode>
---See Also:
--- 		[[:get]]
-public function has(map the_map_p, object the_key_p)
+--
+-- See Also:
+--   [[:get]]
+--
+
+public function has(integer the_map_p, object the_key_p)
 	integer index_
 	integer pos_
+	integer from_
 	
-	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
-		index_ = calc_hash(the_key_p, length(ram_space[the_map_p][KEY_BUCKETS]))
-		pos_ = find(the_key_p, ram_space[the_map_p][KEY_BUCKETS][index_])
+	if eumem:ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
+		index_ = calc_hash(the_key_p, length(eumem:ram_space[the_map_p][KEY_BUCKETS]))
+		pos_ = find(the_key_p, eumem:ram_space[the_map_p][KEY_BUCKETS][index_])
 	else
-		pos_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
+		if equal(the_key_p, init_small_map_key) then
+			from_ = 1
+			
+			while from_ > 0 do
+				pos_ = find(the_key_p, eumem:ram_space[the_map_p][KEY_LIST], from_)
+				if pos_ then
+					if eumem:ram_space[the_map_p][FREE_LIST][pos_] = 1 then
+						return 1
+					end if
+				else
+					return 0
+				end if
+				
+				from_ = pos_ + 1
+			end while
+		else
+			pos_ = find(the_key_p, eumem:ram_space[the_map_p][KEY_LIST])
+		end if
 	end if
-	return (pos_  != 0)
 	
+	return (pos_  != 0)	
 end function
 
 --**
@@ -557,48 +571,62 @@ end function
 --       printf(1, "The age is %d", age)
 --   end if
 --   </eucode>
+--
 -- See Also:
---		[[:has]]
+--   [[:has]]
+--
 
-public function get(map the_map_p, object the_key_p, object default_value_p = 0)
+public function get(integer the_map_p, object the_key_p, object default_value_p = 0)
 	integer bucket_
 	integer pos_
 	integer from_
 	
-	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
-		bucket_ = calc_hash(the_key_p, length(ram_space[the_map_p][KEY_BUCKETS]))
-		pos_ = find(the_key_p, ram_space[the_map_p][KEY_BUCKETS][bucket_])
+	sequence themap
+	
+	themap = eumem:ram_space[the_map_p]
+	if themap[MAP_TYPE] = LARGEMAP then
+		sequence thekeys
+		thekeys = themap[KEY_BUCKETS]
+		bucket_ = calc_hash(the_key_p, length(thekeys))
+		pos_ = find(the_key_p, thekeys[bucket_])
 		if pos_ > 0 then
-			return ram_space[the_map_p][VALUE_BUCKETS][bucket_][pos_]
+			return themap[VALUE_BUCKETS][bucket_][pos_]
 		end if
+		
 		return default_value_p
 	else
 		if equal(the_key_p, init_small_map_key) then
 			from_ = 1
+			
 			while from_ > 0 do
-				pos_ = find(the_key_p, ram_space[the_map_p][KEY_LIST], from_)
+				pos_ = find(the_key_p, themap[KEY_LIST], from_)
 				if pos_ then
-					if ram_space[the_map_p][FREE_LIST][pos_] = 1 then
-						return ram_space[the_map_p][VALUE_LIST][pos_]
+					if themap[FREE_LIST][pos_] = 1 then
+						return themap[VALUE_LIST][pos_]
 					end if
 				else
 					return default_value_p
 				end if
+				
 				from_ = pos_ + 1
 			end while
 		else
-			pos_ = find(the_key_p, ram_space[the_map_p][KEY_LIST])
+			pos_ = find(the_key_p, themap[KEY_LIST])
 			if pos_  then
-				return ram_space[the_map_p][VALUE_LIST][pos_]
+				return themap[VALUE_LIST][pos_]
 			end if
 		end if
 	end if
+	
 	return default_value_p
 end function
 
 --**
--- Returns the value that corresponds to the object ##the_keys_p## in the nested map the_map_p.  ##the_keys_p## is a
--- sequence of keys.  If any key is not in the map, the object default_value_p is returned instead.
+-- Returns the value that corresponds to the object ##the_keys_p## in the nested map 
+-- the_map_p.  ##the_keys_p## is a sequence of keys.  If any key is not in the map, the 
+-- object default_value_p is returned instead.
+--
+
 public function nested_get( map the_map_p, sequence the_keys_p, object default_value_p = 0)
 	for i = 1 to length( the_keys_p ) - 1 do
 		object val_ = get( the_map_p, the_keys_p[1], 0 )
@@ -611,6 +639,7 @@ public function nested_get( map the_map_p, sequence the_keys_p, object default_v
 			the_keys_p = the_keys_p[2..$]
 		end if
 	end for
+	
 	return get( the_map_p, the_keys_p[1], default_value_p )
 end function
 
@@ -622,7 +651,7 @@ end function
 --		# ##the_key_p## : an object, the the_key_p to look up
 --		# ##the_value_p## : an object, the value to add, or to use for updating.
 --		# ##operation## : an integer, indicating what is to be done with ##the_value_p##. Defaults to PUT.
---		# ##trigger_p## : an integer. Default is 100. See Comments for details.
+--		# ##trigger_p## : an integer. Default is the current threshold size. See Comments for details.
 --
 -- Comments:
 -- * The operation parameter can be used to modify the existing value.  Valid operations are: 
@@ -663,15 +692,18 @@ end function
 --
 -- See Also:
 --		[[:remove]], [[:has]],  [[:nested_put]]
+--
 
-public procedure put(map the_map_p, object the_key_p, object the_value_p, integer operation_p = map:PUT, integer trigger_p = 100 )
+public procedure put(integer the_map_p, object the_key_p, object the_value_p, 
+			integer operation_p = map:PUT, integer trigger_p = threshold_size)
 	integer index_
 	integer bucket_
 	atom average_length_
 	integer from_
 
-	sequence map_data = ram_space[the_map_p]
-	ram_space[the_map_p] = 0
+	sequence map_data = eumem:ram_space[the_map_p]
+	
+	eumem:ram_space[the_map_p] = 0
 	if map_data[MAP_TYPE] = LARGEMAP then
 		bucket_ = calc_hash(the_key_p,  length(map_data[KEY_BUCKETS]))
 		index_ = find(the_key_p, map_data[KEY_BUCKETS][bucket_])
@@ -697,6 +729,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 					sequence data = map_data[VALUE_BUCKETS][bucket_][index_]
 					data = append( data, the_value_p )
 					map_data[VALUE_BUCKETS][bucket_][index_] = data
+					
 				case CONCAT then
 					map_data[VALUE_BUCKETS][bucket_][index_] &= the_value_p
 					
@@ -705,21 +738,24 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 					operation_p = operation_p
 					
 				case else
-					crash("Unknown operation given to map.e:put()")
+					error:crash("Unknown operation given to map.e:put()")
 					
 			end switch
-			ram_space[the_map_p] = map_data
+			
+			eumem:ram_space[the_map_p] = map_data
+			
 			return
 		end if
 
 		if not eu:find(operation_p, INIT_OPERATIONS) then
-				crash("Inappropriate initial operation given to map.e:put()")
-		end if
-		if operation_p = LEAVE then
-			ram_space[the_map_p] = map_data
-			return
+				error:crash("Inappropriate initial operation given to map.e:put()")
 		end if
 		
+		if operation_p = LEAVE then
+			eumem:ram_space[the_map_p] = map_data
+			
+			return
+		end if
 		
 		-- write new entry
 		if operation_p = APPEND then
@@ -729,10 +765,20 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 
 		map_data[IN_USE] += (length(map_data[KEY_BUCKETS][bucket_]) = 0)
 		map_data[ELEMENT_COUNT] += 1 -- elementCount		
-		map_data[KEY_BUCKETS][bucket_] = append(map_data[KEY_BUCKETS][bucket_], the_key_p)
-		map_data[VALUE_BUCKETS][bucket_] = append(map_data[VALUE_BUCKETS][bucket_], the_value_p)
 		
-		ram_space[the_map_p] = map_data
+		sequence tmp_seqk
+		tmp_seqk = map_data[KEY_BUCKETS][bucket_]
+		map_data[KEY_BUCKETS][bucket_] = 0
+		tmp_seqk = append( tmp_seqk, the_key_p)
+		map_data[KEY_BUCKETS][bucket_] = tmp_seqk
+
+		sequence tmp_seqv
+		tmp_seqv = map_data[VALUE_BUCKETS][bucket_]
+		map_data[VALUE_BUCKETS][bucket_] = 0
+		tmp_seqv = append( tmp_seqv, the_value_p)
+		map_data[VALUE_BUCKETS][bucket_] = tmp_seqv
+		
+		eumem:ram_space[the_map_p] = map_data
 		if trigger_p > 0 then
 			average_length_ = map_data[ELEMENT_COUNT] / map_data[IN_USE]
 			if (average_length_ >= trigger_p) then
@@ -752,6 +798,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				if map_data[FREE_LIST][index_] = 1 then
 					exit
 				end if
+				
 				from_ = index_ + 1
 			  entry
 				index_ = find(the_key_p, map_data[KEY_LIST], from_)
@@ -762,15 +809,15 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 		
 		-- Did we find the key?
 		if index_ = 0 then
-			
 			if not eu:find(operation_p, INIT_OPERATIONS) then
-					crash("Inappropriate initial operation given to map.e:put()")
+					error:crash("Inappropriate initial operation given to map.e:put()")
 			end if
+			
 			-- No, so add it.
 			index_ = find(0, map_data[FREE_LIST])
 			if index_ = 0 then
 				-- No room left, so now it becomes a large map.
-				ram_space[the_map_p] = map_data
+				eumem:ram_space[the_map_p] = map_data
 				map_data = {}
 				convert_to_large_map(the_map_p)
 				put(the_map_p, the_key_p, the_value_p, operation_p, trigger_p)
@@ -785,6 +832,7 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 			if operation_p = APPEND then
 				the_value_p = { the_value_p }
 			end if
+			
 			if operation_p != LEAVE then
 				operation_p = PUT	-- Initially, nearly everything is a PUT.
 			end if
@@ -817,10 +865,12 @@ public procedure put(map the_map_p, object the_key_p, object the_value_p, intege
 				operation_p = operation_p
 				
 			case else
-				crash("Unknown operation given to map.e:put()")
+				error:crash("Unknown operation given to map.e:put()")
 				
 		end switch
-		ram_space[the_map_p] = map_data
+		
+		eumem:ram_space[the_map_p] = map_data
+		
 		return
 		
 	end if
@@ -835,7 +885,7 @@ end procedure
 --		# ##the_keys_p## : a sequence of keys for the nested maps
 --		# ##the_value_p## : an object, the value to add, or to use for updating.
 --		# ##operation_p## : an integer, indicating what is to be done with ##value##. Defaults to PUT.
---		# ##trigger_p## : an integer. Default is 51. See Comments for details.
+--		# ##trigger_p## : an integer. Default is the current threshold size. See Comments for details.
 --
 -- Valid operations are: 
 -- 
@@ -867,13 +917,17 @@ end procedure
 -- map city_population
 -- city_population = new()
 -- nested_put(city_population, {"United States", "California", "Los Angeles"},
---                                                                     3819951 )
+--     3819951 )
 -- nested_put(city_population, {"Canada",        "Ontario",    "Toronto"},     
---                                                                     2503281 )
---   </eucode>
+--     2503281 )
+-- </eucode>
 --
--- See also:  [[:put]]
-public procedure nested_put( map the_map_p, sequence the_keys_p, object the_value_p, integer operation_p = PUT, integer trigger_p = 51 )
+-- See also:
+--   [[:put]]
+--
+
+public procedure nested_put( map the_map_p, sequence the_keys_p, object the_value_p, 
+			integer operation_p = PUT, integer trigger_p = threshold_size )
 	atom temp_map_
 
 	if length( the_keys_p ) = 1 then
@@ -907,6 +961,7 @@ end procedure
 --
 -- See Also:
 --		[[:clear]], [[:has]]
+--
 
 public procedure remove(map the_map_p, object the_key_p)
 	integer index_
@@ -914,8 +969,7 @@ public procedure remove(map the_map_p, object the_key_p)
 	sequence temp_map_
 	integer from_
 	
-
-	temp_map_ = ram_space[the_map_p]
+	temp_map_ = eumem:ram_space[the_map_p]
 	if temp_map_[MAP_TYPE] = LARGEMAP then
 		bucket_ = calc_hash(the_key_p, length(temp_map_[KEY_BUCKETS]))
 	
@@ -927,18 +981,22 @@ public procedure remove(map the_map_p, object the_key_p)
 				temp_map_[KEY_BUCKETS][bucket_] = {}
 				temp_map_[VALUE_BUCKETS][bucket_] = {}
 			else
-				temp_map_[VALUE_BUCKETS][bucket_] = temp_map_[VALUE_BUCKETS][bucket_][1 .. index_-1] & temp_map_[VALUE_BUCKETS][bucket_][index_+1 .. $]
-				temp_map_[KEY_BUCKETS][bucket_] = temp_map_[KEY_BUCKETS][bucket_][1 .. index_-1] & temp_map_[KEY_BUCKETS][bucket_][index_+1 .. $]
+				temp_map_[VALUE_BUCKETS][bucket_] = temp_map_[VALUE_BUCKETS][bucket_][1 .. index_-1] & 
+						temp_map_[VALUE_BUCKETS][bucket_][index_+1 .. $]
+				temp_map_[KEY_BUCKETS][bucket_] = temp_map_[KEY_BUCKETS][bucket_][1 .. index_-1] & 
+						temp_map_[KEY_BUCKETS][bucket_][index_+1 .. $]
 			end if
 			
 			if temp_map_[ELEMENT_COUNT] < floor(51 * threshold_size / 100) then
-				ram_space[the_map_p] = temp_map_
+				eumem:ram_space[the_map_p] = temp_map_
 				convert_to_small_map(the_map_p)
+				
 				return
 			end if
 		end if
 	else
 		from_ = 1
+		
 		while from_ > 0 do
 			index_ = find(the_key_p, temp_map_[KEY_LIST], from_)
 			if index_ then
@@ -952,10 +1010,12 @@ public procedure remove(map the_map_p, object the_key_p)
 			else
 				exit
 			end if
+			
 			from_ = index_ + 1
 		end while
 	end if
-	ram_space[the_map_p] = temp_map_
+	
+	eumem:ram_space[the_map_p] = temp_map_
 end procedure
 
 --**
@@ -982,11 +1042,12 @@ end procedure
 --
 -- See Also:
 --		[[:remove]], [[:has]]
+--
 
 public procedure clear(map the_map_p)
 	sequence temp_map_
 
-	temp_map_ = ram_space[the_map_p]
+	temp_map_ = eumem:ram_space[the_map_p]
 	if temp_map_[MAP_TYPE] = LARGEMAP then
 		temp_map_[ELEMENT_COUNT] = 0
 		temp_map_[IN_USE] = 0
@@ -999,17 +1060,18 @@ public procedure clear(map the_map_p)
 		temp_map_[VALUE_LIST] = repeat(0, length(temp_map_[VALUE_LIST]))
 		temp_map_[FREE_LIST] = repeat(0, length(temp_map_[FREE_LIST]))
 	end if
-	ram_space[the_map_p] = temp_map_
+
+	eumem:ram_space[the_map_p] = temp_map_
 end procedure
 
 --**
 -- Return the number of entries in a map.
 --
 -- Parameters:
---		##the_map_p## : the map being queried
+--   ##the_map_p## : the map being queried
 --
 -- Returns:
---		An **integer**, the number of entries it has.
+--   An **integer**, the number of entries it has.
 --
 -- Comments:
 --   For an empty map, size will be zero
@@ -1023,33 +1085,12 @@ end procedure
 --   </eucode>
 --
 -- See Also:
---		[[:statistics]]
-public function size(map the_map_p)
-	return ram_space[the_map_p][ELEMENT_COUNT]
-end function
+--   [[:statistics]]
+--
 
---**
--- Retrieves characteristics of a map.
---
--- Parameters:
--- 		# ##the_map_p## : the map being queried
---
--- Returns:
---		A  **sequence**, of 7 integers:
--- * ##NUM_ENTRIES## ~-- number of entries
--- * ##NUM_IN_USE## ~-- number of buckets in use
--- * ##NUM_BUCKETS## ~-- number of buckets
--- * ##LARGEST_BUCKET## ~-- size of largest bucket
--- * ##SMALLEST_BUCKET## ~-- size of smallest bucket
--- * ##AVERAGE_BUCKET## ~-- average size for a bucket
--- * ##STDEV_BUCKET## ~-- standard deviation for the bucket length series
---
--- Example 1:
---   <eucode>
---   sequence s = statistics(mymap)
---   printf(1, "The average size of the buckets is %d", s[AVERAGE_BUCKET])
---   </eucode>
---
+public function size(map the_map_p)
+	return eumem:ram_space[the_map_p][ELEMENT_COUNT]
+end function
 
 public enum
 	NUM_ENTRIES,
@@ -1060,53 +1101,87 @@ public enum
 	AVERAGE_BUCKET,
 	STDEV_BUCKET
 
+--**
+-- Retrieves characteristics of a map.
+--
+-- Parameters:
+--   # ##the_map_p## : the map being queried
+--
+-- Returns:
+--   A  **sequence**, of 7 integers:
+--       * ##NUM_ENTRIES## ~-- number of entries
+--       * ##NUM_IN_USE## ~-- number of buckets in use
+--       * ##NUM_BUCKETS## ~-- number of buckets
+--       * ##LARGEST_BUCKET## ~-- size of largest bucket
+--       * ##SMALLEST_BUCKET## ~-- size of smallest bucket
+--       * ##AVERAGE_BUCKET## ~-- average size for a bucket
+--       * ##STDEV_BUCKET## ~-- standard deviation for the bucket length series
+--
+-- Example 1:
+--   <eucode>
+--   sequence s = statistics(mymap)
+--   printf(1, "The average size of the buckets is %d", s[AVERAGE_BUCKET])
+--   </eucode>
+--
+
 public function statistics(map the_map_p)
 	sequence statistic_set_
 	sequence lengths_
 	integer length_
 	sequence temp_map_
 	
-	temp_map_ = ram_space[the_map_p]
+	temp_map_ = eumem:ram_space[the_map_p]
 
 	if temp_map_[MAP_TYPE] = LARGEMAP then
-		statistic_set_ = {temp_map_[ELEMENT_COUNT], temp_map_[IN_USE], length(temp_map_[KEY_BUCKETS]), 0, maxInt, 0, 0}
+		statistic_set_ = { 
+			temp_map_[ELEMENT_COUNT], temp_map_[IN_USE], length(temp_map_[KEY_BUCKETS]), 
+			0, maxInt, 0, 0
+		}
+		
 		lengths_ = {}
 		for i = 1 to length(temp_map_[KEY_BUCKETS]) do
 			length_ = length(temp_map_[KEY_BUCKETS][i])
+			
 			if length_ > 0 then
 				if length_ > statistic_set_[LARGEST_BUCKET] then
 					statistic_set_[LARGEST_BUCKET] = length_
 				end if
+				
 				if length_ < statistic_set_[SMALLEST_BUCKET] then
 					statistic_set_[SMALLEST_BUCKET] = length_
 				end if
+				
 				lengths_ &= length_
 			end if
 		end for
+		
 		statistic_set_[AVERAGE_BUCKET] = stats:average(lengths_)
 		statistic_set_[STDEV_BUCKET] = stats:stdev(lengths_)
 	else
-		statistic_set_ = {temp_map_[ELEMENT_COUNT], 
-						  temp_map_[IN_USE], 
-						  length(temp_map_[KEY_LIST]), 
-						  length(temp_map_[KEY_LIST]), 
-						  length(temp_map_[KEY_LIST]), 
-						  length(temp_map_[KEY_LIST]),
-						  0}
+		statistic_set_ = {
+			temp_map_[ELEMENT_COUNT], 
+			temp_map_[IN_USE], 
+			length(temp_map_[KEY_LIST]), 
+			length(temp_map_[KEY_LIST]), 
+			length(temp_map_[KEY_LIST]), 
+			length(temp_map_[KEY_LIST]),
+			0
+		}
 	end if
+	
 	return statistic_set_
 end function
 
 --**
 -- Return all keys in a map.
 --
--- Parameters;
---		# ##the_map_p##: the map being queried
---      # ##sorted_result##: optional integer. 0 [default] means do not sort the
---                            output and 1 means to sort the output before returning.
+-- Parameters:
+--   # ##the_map_p##: the map being queried
+--   # ##sorted_result##: optional integer. 0 [default] means do not sort the
+--                        output and 1 means to sort the output before returning.
 --
 -- Returns:
--- 		A **sequence** made of all the keys in the map.
+--   A **sequence** made of all the keys in the map.
 --
 -- Comments:
 --   If ##sorted_result## is not used, the order of the keys returned is not predicable. 
@@ -1126,8 +1201,9 @@ end function
 --   </eucode>
 --
 -- See Also:
---		[[:has]], [[:values]], [[:pairs]]
+--   [[:has]], [[:values]], [[:pairs]]
 --
+
 public function keys(map the_map_p, integer sorted_result = 0)
 	sequence buckets_
 	sequence current_bucket_
@@ -1135,7 +1211,7 @@ public function keys(map the_map_p, integer sorted_result = 0)
 	integer pos_
 	sequence temp_map_
 	
-	temp_map_ = ram_space[the_map_p]
+	temp_map_ = eumem:ram_space[the_map_p]
 
 	results_ = repeat(0, temp_map_[ELEMENT_COUNT])
 	pos_ = 1
@@ -1156,10 +1232,10 @@ public function keys(map the_map_p, integer sorted_result = 0)
 				pos_ += 1
 			end if
 		end for
-		
 	end if
+	
 	if sorted_result then
-		return sort(results_)
+		return stdsort:sort(results_)
 	else
 		return results_
 	end if
@@ -1220,9 +1296,9 @@ end function
 --
 -- See Also:
 --   [[:get]], [[:keys]], [[:pairs]]
+--
 
 public function values(map the_map, object keys=0, object default_values=0)
-
 	if sequence(keys) then
 		if atom(default_values) then
 			default_values = repeat(default_values, length(keys))
@@ -1243,7 +1319,7 @@ public function values(map the_map, object keys=0, object default_values=0)
 	integer pos_
 	sequence temp_map_
 	
-	temp_map_ = ram_space[the_map]
+	temp_map_ = eumem:ram_space[the_map]
 
 	results_ = repeat(0, temp_map_[ELEMENT_COUNT])
 	pos_ = 1
@@ -1275,13 +1351,13 @@ end function
 -- Return all key/value pairs in a map.
 --
 -- Parameters:
---		# ##the_map_p## : the map to get the data from
---      # ##sorted_result## : optional integer. 0 [default] means do not sort the
---                            output and 1 means to sort the output before returning.
+--   # ##the_map_p## : the map to get the data from
+--   # ##sorted_result## : optional integer. 0 [default] means do not sort the
+--                         output and 1 means to sort the output before returning.
 --
 -- Returns:
---		A **sequence**, of all key/value pairs stored in ##the_map_p##. Each pair is a 
--- sub-sequence in the form {key, value}
+--   A **sequence**, of all key/value pairs stored in ##the_map_p##. Each pair is a 
+--   sub-sequence in the form {key, value}
 --
 -- Comments:
 --   If ##sorted_result## is not used, the order of the values returned is not predicable. 
@@ -1289,6 +1365,7 @@ end function
 -- Example 1:
 -- <eucode>
 -- map the_map_p
+--
 -- the_map_p = new()
 -- put(the_map_p, 10, "ten")
 -- put(the_map_p, 20, "twenty")
@@ -1297,14 +1374,16 @@ end function
 --
 -- sequence keyvals
 -- keyvals = pairs(the_map_p) 
---           -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
--- keyvals = pairs(the_map_p, 1) 
---           -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
---   </eucode>
+-- -- might be {{20,"twenty"},{40,"forty"},{10,"ten"},{30,"thirty"}}
 --
- -- See Also:
- --		[[:get]], [[:keys]], [[:values]]
- --
+-- keyvals = pairs(the_map_p, 1) 
+-- -- will be {{10,"ten"},{20,"twenty"},{30,"thirty"},{40,"forty"}}
+-- </eucode>
+--
+-- See Also:
+--		[[:get]], [[:keys]], [[:values]]
+--
+
 public function pairs(map the_map_p, integer sorted_result = 0)
 	sequence key_bucket_
 	sequence value_bucket_
@@ -1312,9 +1391,9 @@ public function pairs(map the_map_p, integer sorted_result = 0)
 	integer pos_
 	sequence temp_map_
 	
-	temp_map_ = ram_space[the_map_p]
+	temp_map_ = eumem:ram_space[the_map_p]
 
-	results_ = repeat({0,0}, temp_map_[ELEMENT_COUNT])
+	results_ = repeat({ 0, 0 }, temp_map_[ELEMENT_COUNT])
 	pos_ = 1
 
 	if temp_map_[MAP_TYPE] = LARGEMAP then
@@ -1334,11 +1413,11 @@ public function pairs(map the_map_p, integer sorted_result = 0)
 				results_[pos_][2] = temp_map_[VALUE_LIST][index]
 				pos_ += 1
 			end if
-		end for
-		
+		end for	
 	end if
+	
 	if sorted_result then
-		return sort(results_)
+		return stdsort:sort(results_)
 	else
 		return results_
 	end if
@@ -1349,8 +1428,9 @@ end function
 --
 -- Parameters:
 --		# ##the_map_p## : the map being optimized
---		# ##max_p## : an integer, the maximum desired size of a bucket. Default is 25.
---                  This must be 3 or higher.
+--		# ##max_p## : an integer, the maximum desired size of a bucket. 
+--                    Default is the current threshold size.
+--                    This must be 3 or higher.
 --      # ##grow_p## : an atom, the factor to grow the number of buckets for each
 --                   iteration of rehashing. Default is 1.333. This must be 
 --                   greater than 1.
@@ -1363,21 +1443,23 @@ end function
 -- See Also:
 --		[[:statistics]], [[:rehash]]
 --
-public procedure optimize(map the_map_p, integer max_p = 25, atom grow_p = 1.333)
+
+public procedure optimize(map the_map_p, integer max_p = threshold_size, atom grow_p = 1.333)
 	sequence stats_
 	integer next_guess_
+	integer prev_guess
 	
-	if ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
+	if eumem:ram_space[the_map_p][MAP_TYPE] = LARGEMAP then
 		if grow_p < 1 then
 			grow_p = 1.333
 		end if
+		
 		if max_p < 3 then
 			max_p = 3
 		end if
 		
-		next_guess_ = max({1, floor(ram_space[the_map_p][ELEMENT_COUNT] / max_p)})
+		next_guess_ = math:max({1, floor(eumem:ram_space[the_map_p][ELEMENT_COUNT] / max_p)})
 		while 1 with entry do
-		
 			if stats_[LARGEST_BUCKET] <= max_p then
 				exit -- Largest is now smaller than the maximum I wanted.
 			end if
@@ -1386,9 +1468,13 @@ public procedure optimize(map the_map_p, integer max_p = 25, atom grow_p = 1.333
 				exit -- Largest is smaller than is statistically expected.
 			end if
 			
+			prev_guess = next_guess_
 			next_guess_ = floor(stats_[NUM_BUCKETS] * grow_p)
+			if prev_guess = next_guess_ then
+				next_guess_ += 1
+			end if
 			
-		  entry
+		entry
 			rehash(the_map_p, next_guess_)
 			stats_ = statistics(the_map_p)
 		end while
@@ -1419,23 +1505,27 @@ end procedure
 --
 -- Example 1:
 -- <eucode>
---    object loaded
---    map AppOptions
---    sequence SavedMap = "c:\myapp\options.txt"
---    loaded = load_map(SavedMap)
---    if equal(loaded, -1) then
---       crash("Map '%s' failed to open", SavedMap)
---    end if
---    -- By now we know that it was loaded and a new map created,
---    -- so we can assign it to a 'map' variable.
---    AppOptions = loaded
---    if get(AppOptions, "verbose", 1) = 3 then
---        ShowIntructions()
---    end if
+-- include std/error.e
+--
+-- object loaded
+-- map AppOptions
+-- sequence SavedMap = "c:\myapp\options.txt"
+--
+-- loaded = load_map(SavedMap)
+-- if equal(loaded, -1) then
+--     crash("Map '%s' failed to open", SavedMap)
+-- end if
+-- 
+-- -- By now we know that it was loaded and a new map created,
+-- -- so we can assign it to a 'map' variable.
+-- AppOptions = loaded
+-- if get(AppOptions, "verbose", 1) = 3 then
+--     ShowIntructions()
+-- end if
 -- </eucode>
 --
 -- See Also:
---		[[:new]], [[:save_map]]
+--   [[:new]], [[:save_map]]
 --
 
 public function load_map(object input_file_name)
@@ -1455,6 +1545,7 @@ public function load_map(object input_file_name)
 	else
 		file_handle = input_file_name
 	end if
+	
 	if file_handle = -1 then
 		return -1
 	end if
@@ -1469,11 +1560,13 @@ public function load_map(object input_file_name)
 		if delim_pos = -1 then 
 			exit
 		end if
-	    if not t_print(delim_pos) then 
+	    
+		if not t_print(delim_pos) then 
 	    	if not t_space(delim_pos) then
 	    		exit
 	    	end if
 	    end if
+	    
 	    delim_pos = -1
 	end for
 	
@@ -1485,30 +1578,31 @@ public function load_map(object input_file_name)
 		while sequence(logical_line) with entry do
 			delim_pos = find('=', logical_line)
 			if delim_pos > 0 then
-				data_key = trim(logical_line[1..delim_pos-1])
+				data_key = text:trim(logical_line[1..delim_pos-1])
 				if length(data_key) > 0 then
-					data_key = match_replace("\\-", data_key, "-")
+					data_key = search:match_replace("\\-", data_key, "-")
 					if not t_alpha(data_key[1]) then
-						conv_res = value(data_key,,GET_LONG_ANSWER)
-						if conv_res[1] = GET_SUCCESS then
+						conv_res = stdget:value(data_key,,stdget:GET_LONG_ANSWER)
+						if conv_res[1] = stdget:GET_SUCCESS then
 							if conv_res[3] = length(data_key) then
 								data_key = conv_res[2]
 							end if
 						end if
 					end if
 									
-					data_value = trim(logical_line[delim_pos+1..$])
-					data_value = match_replace("\\-", data_value, "-")
-					conv_res = value(data_value,,GET_LONG_ANSWER)
-					if conv_res[1] = GET_SUCCESS then
+					data_value = text:trim(logical_line[delim_pos+1..$])
+					data_value = search:match_replace("\\-", data_value, "-")
+					conv_res = stdget:value(data_value,,stdget:GET_LONG_ANSWER)
+					if conv_res[1] = stdget:GET_SUCCESS then
 						if conv_res[3] = length(data_value) then
 							data_value = conv_res[2]
 						end if
 					end if
+					
 					put(new_map, data_key, data_value)
 				end if
 			end if
-		  entry
+		entry
 			logical_line = -1
 			while sequence(line_in) with entry do
 			
@@ -1516,11 +1610,11 @@ public function load_map(object input_file_name)
 					logical_line = ""
 				end if
 				
-				has_comment = rmatch("--", line_in)
+				has_comment = search:rmatch("--", line_in)
 				if has_comment != 0 then
-					line_in = trim(line_in[1..has_comment-1])
+					line_in = text:trim(line_in[1..has_comment-1])
 				else
-					line_in = trim(line_in)
+					line_in = text:trim(line_in)
 				end if
 
 				logical_line &= line_in
@@ -1530,43 +1624,54 @@ public function load_map(object input_file_name)
 						-- This line is not being continued.
 						
 						-- Remove any ",$" combinations.
-						logical_line = match_replace(`",$"`, logical_line, "")
-						logical_line = match_replace(`,$`, logical_line, "")
+						logical_line = search:match_replace(`",$"`, logical_line, "")
+						logical_line = search:match_replace(`,$`, logical_line, "")
 						exit
 					end if
 				end if
-
 			entry
 				line_in = gets(file_handle)
 			end while
-						
 		end while
 	else
-		seek(file_handle, 0)
-		line_in  = deserialize(file_handle)
+		io:seek(file_handle, 0)
+		line_in  = serialize:deserialize(file_handle)
 		if atom(line_in) then
 			-- failed to decode the file.
 			return -2
 		end if
-		if line_in[1] = 1 then
-			-- Saved Map Format version 1
-			data_key   = deserialize(file_handle)
-			data_value =  deserialize(file_handle)
-			
-			for i = 1 to length(data_key) do
-				put(new_map, data_key[i], data_value[i])
-			end for
+
+		if length(line_in) > 1 then
+			switch line_in[1] do
+				case 1, 2 then
+					-- Saved Map Format version 1 and 2
+					data_key   = serialize:deserialize(file_handle)
+					data_value =  serialize:deserialize(file_handle)
+					
+					for i = 1 to length(data_key) do
+						put(new_map, data_key[i], data_value[i])
+					end for
+				case else
+					return -2
+			end switch
 		else
 			-- Bad file format
 			return -2
 		end if
 	end if
+	
 	if sequence(input_file_name) then
 		close(file_handle)
 	end if
+	
 	optimize(new_map)
+	
 	return new_map
 end function
+
+public enum
+	SM_TEXT,
+	SM_RAW
 
 --**
 -- Saves a map to a file.
@@ -1643,22 +1748,22 @@ end function
 --
 -- Example 1:
 -- <eucode>
---    map AppOptions
---    if save_map(AppOptions, "c:\myapp\options.txt") = -1
---        Error("Failed to save application options")
---    end if
---    if save_map(AppOptions, "c:\myapp\options.dat", SM_RAW) = -1
---        Error("Failed to save application options")
---    end if
+-- include std/error.e
+--
+-- map AppOptions
+-- if save_map(AppOptions, "c:\myapp\options.txt") = -1
+--     crash("Failed to save application options")
+-- end if
+--
+-- if save_map(AppOptions, "c:\myapp\options.dat", SM_RAW) = -1
+--     crash("Failed to save application options")
+-- end if
 -- </eucode>
 --
 -- See Also:
---		[[:load_map]]
+--   [[:load_map]]
+--
 
-public enum
-	SM_TEXT,
-	SM_RAW
-	
 public function save_map(map the_map_, object file_name_p, integer type_ = SM_TEXT)
 	integer file_handle_ = -2
 	sequence keys_
@@ -1682,28 +1787,28 @@ public function save_map(map the_map_, object file_name_p, integer type_ = SM_TE
 	values_ = values(the_map_)
 	
 	if type_ = SM_RAW then
-		puts(file_handle_, serialize(
-				{1, -- saved map version
+		puts(file_handle_, serialize:serialize({
+				2, -- saved map version
 				datetime:format(now_gmt(), "%Y%m%d%H%M%S" ), -- date of this saved map
-				{4,0,0,0}} -- Euphoria version
+				info:version_string()} -- Euphoria version
 			 	))	
-		puts(file_handle_, serialize(keys_))
-		puts(file_handle_, serialize(values_))
+		puts(file_handle_, serialize:serialize(keys_))
+		puts(file_handle_, serialize:serialize(values_))
 	else
 		for i = 1 to length(keys_) do
-			keys_[i] = pretty_sprint(keys_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
-			keys_[i] = match_replace("-", keys_[i], "\\-")
-			values_[i] = pretty_sprint(values_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
-			values_[i] = match_replace("-", values_[i], "\\-")
+			keys_[i] = pretty:pretty_sprint(keys_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
+			keys_[i] = search:match_replace("-", keys_[i], "\\-")
+			values_[i] = pretty:pretty_sprint(values_[i], {2,0,1,0,"%d","%.15g",32,127,1,0})
+			values_[i] = search:match_replace("-", values_[i], "\\-")
 				
 			printf(file_handle_, "%s = %s\n", {keys_[i], values_[i]})
-			
 		end for
 	end if
 	
 	if sequence(file_name_p) then
 		close(file_handle_)
 	end if
+	
 	return length(keys_)
 end function
 
@@ -1763,28 +1868,27 @@ end function
 --   put(m1, "AB", 2)
 --   put(m2, "XY", 3)
 --
---   ? pairs(m1)  -- { {"AB", 2}, {"XY", 1} }
---   ? pairs(m2)  -- { {"XY", 3} }
+--   pairs(m1) --> { {"AB", 2}, {"XY", 1} }
+--   pairs(m2) --> { {"XY", 3} }
 --
 --   -- Add same keys' values.
 --   copy(m1, m2, ADD)
 --
---   ? pairs(m2)
---   -- { {"AB", 2}, {"XY", 4} }
+--   pairs(m2) --> { {"AB", 2}, {"XY", 4} }
 --   </eucode>
 --
 -- See Also:
--- [[:put]]
+--   [[:put]]
+--
 
 public function copy(map source_map, object dest_map=0, integer put_operation = PUT)
-
 	if map(dest_map) then
 		-- Copies the contents of one map to another map.
 		sequence keys_set
 		sequence value_set		
 		sequence source_data
 		
-		source_data = ram_space[source_map]	
+		source_data = eumem:ram_space[source_map]	
 		if source_data[MAP_TYPE] = LARGEMAP then
 			for index = 1 to length(source_data[KEY_BUCKETS]) do
 				keys_set = source_data[KEY_BUCKETS][index]
@@ -1796,7 +1900,8 @@ public function copy(map source_map, object dest_map=0, integer put_operation = 
 		else
 			for index = 1 to length(source_data[FREE_LIST]) do
 				if source_data[FREE_LIST][index] !=  0 then
-					put(dest_map, source_data[KEY_LIST][index], source_data[VALUE_LIST][index], put_operation)
+					put(dest_map, source_data[KEY_LIST][index], 
+						source_data[VALUE_LIST][index], put_operation)
 				end if
 			end for
 			
@@ -1804,12 +1909,13 @@ public function copy(map source_map, object dest_map=0, integer put_operation = 
 
 		return dest_map
 	else
-		atom temp_map = malloc()
-	 	ram_space[temp_map] = ram_space[source_map]
+		atom temp_map = eumem:malloc()
+		
+	 	eumem:ram_space[temp_map] = eumem:ram_space[source_map]
+	 	
 		return temp_map
 	end if
 end function
-
 
 --**
 -- Converts a set of Key-Value pairs to a map.
@@ -1823,17 +1929,18 @@ end function
 --   A **map**, containing the data from ##kv_pairs##
 --
 -- Example 1:
---   <eucode>
---   map m1 = new_from_kvpairs( {
---           {"application", "Euphoria"},
---           {"version", "4.0"},
---           {"genre", "programming language"},
---           {"crc", 0x4F71AE10}
---              })
+-- <eucode>
+-- map m1 = new_from_kvpairs( {
+--     { "application", "Euphoria" },
+--     { "version", "4.0" },
+--     { "genre", "programming language" },
+--     { "crc", 0x4F71AE10 }
+-- })
 --
---   v = map:get(m1, "application") --> "Euphoria"
+-- v = map:get(m1, "application") --> "Euphoria"
 -- </eucode>
 --
+
 public function new_from_kvpairs(sequence kv_pairs)
 	object new_map
 	
@@ -1844,8 +1951,7 @@ public function new_from_kvpairs(sequence kv_pairs)
 		end if
 	end for
 	
-	return new_map
-	
+	return new_map	
 end function
 
 --**
@@ -1871,20 +1977,20 @@ end function
 -- 	genre       = "programming language",
 -- 	crc         = 4F71AE10
 -- }}}
---   <eucode>
---   map m1 = new_from_string( read_file("xyz.config", TEXT_MODE))
+--
+-- <eucode>
+-- map m1 = new_from_string( read_file("xyz.config", TEXT_MODE))
 -- 
---   printf(1, "%s\n", {map:get(m1, "application")}) --> "Euphoria"
---   printf(1, "%s\n", {map:get(m1, "genre")})       --> "programming language"
---   printf(1, "%s\n", {map:get(m1, "version")})     --> "4.0"
---   printf(1, "%s\n", {map:get(m1, "crc")})         --> "4F71AE10"
---   
+-- printf(1, "%s\n", {map:get(m1, "application")}) --> "Euphoria"
+-- printf(1, "%s\n", {map:get(m1, "genre")})       --> "programming language"
+-- printf(1, "%s\n", {map:get(m1, "version")})     --> "4.0"
+-- printf(1, "%s\n", {map:get(m1, "crc")})         --> "4F71AE10"  
 -- </eucode>
 --
-public function new_from_string(sequence kv_string)
-	return new_from_kvpairs( keyvalues (kv_string) )
-end function
 
+public function new_from_string(sequence kv_string)
+	return new_from_kvpairs( text:keyvalues (kv_string) )
+end function
 
 --**
 -- Calls a user-defined routine for each of the items in a map.
@@ -1933,12 +2039,13 @@ end function
 -- include std/map.e
 -- include std/math.e
 -- include std/io.e
---   function Process_A(object k, object v, object d, integer pc)
+--
+-- function Process_A(object k, object v, object d, integer pc)
 --     writefln("[] = []", {k, v})
 --     return 0
---   end function
+-- end function
 --
---   function Process_B(object k, object v, object d, integer pc)
+-- function Process_B(object k, object v, object d, integer pc)
 --     if pc = 0 then
 --       writefln("The map is empty")
 --     else
@@ -1953,20 +2060,20 @@ end function
 --       end if
 --     end if
 --     return 0
---   end function
+-- end function
 --
---   map m1 = new()
---   map:put(m1, "application", "Euphoria")
---   map:put(m1, "version", "4.0")
---   map:put(m1, "genre", "programming language")
---   map:put(m1, "crc", "4F71AE10")
+-- map m1 = new()
+-- map:put(m1, "application", "Euphoria")
+-- map:put(m1, "version", "4.0")
+-- map:put(m1, "genre", "programming language")
+-- map:put(m1, "crc", "4F71AE10")
 --
---   -- Unsorted 
---   map:for_each(m1, routine_id("Process_A"))
---   -- Sorted
---   map:for_each(m1, routine_id("Process_B"), "List of Items", 1)
---   
+-- -- Unsorted 
+-- map:for_each(m1, routine_id("Process_A"))
+-- -- Sorted
+-- map:for_each(m1, routine_id("Process_B"), "List of Items", 1)  
 -- </eucode>
+--
 -- The output from the first call could be...
 -- {{{
 -- application = Euphoria
@@ -1985,7 +2092,9 @@ end function
 -- -------------------
 -- }}}
 --
-public function for_each(map source_map, integer user_rid, object user_data = 0, integer in_sorted_order = 0, integer signal_boundary = 0)
+
+public function for_each(map source_map, integer user_rid, object user_data = 0, 
+			integer in_sorted_order = 0, integer signal_boundary = 0)
 	sequence lKV
 	object lRes
 	integer progress_code
@@ -2001,20 +2110,23 @@ public function for_each(map source_map, integer user_rid, object user_data = 0,
 		else
 			progress_code = i
 		end if
+	
 		lRes = call_func(user_rid, {lKV[i][1], lKV[i][2], user_data, progress_code})
 		if not equal(lRes, 0) then
 			return lRes
 		end if
 	end for
+	
 	return 0
 end function
 
 -- LOCAL FUNCTIONS --
-procedure convert_to_large_map(map the_map_)
+
+procedure convert_to_large_map(integer the_map_)
 	sequence temp_map_
 	atom map_handle_
 
-	temp_map_ = ram_space[the_map_]
+	temp_map_ = eumem:ram_space[the_map_]
 
 	map_handle_ = new()
 	for index = 1 to length(temp_map_[FREE_LIST]) do
@@ -2023,21 +2135,22 @@ procedure convert_to_large_map(map the_map_)
 		end if
 	end for
 
-	ram_space[the_map_] = ram_space[map_handle_]
+	eumem:ram_space[the_map_] = eumem:ram_space[map_handle_]
 end procedure
 
-procedure convert_to_small_map(map the_map_)
+procedure convert_to_small_map(integer the_map_)
 	sequence keys_
 	sequence values_
 
 	keys_ = keys(the_map_)
 	values_ = values(the_map_)
 	
-	ram_space[the_map_] = {type_is_map, 0,0, SMALLMAP, repeat(init_small_map_key, threshold_size), repeat(0, threshold_size), repeat(0, threshold_size)}
+	eumem:ram_space[the_map_] = {
+		type_is_map, 0,0, SMALLMAP, repeat(init_small_map_key, threshold_size), 
+		repeat(0, threshold_size), repeat(0, threshold_size)
+	}
 	
 	for i = 1 to length(keys_) do
 		put(the_map_, keys_[i], values_[i], PUT, 0)
 	end for
-
 end procedure
-

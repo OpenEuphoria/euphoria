@@ -43,7 +43,7 @@ procedure fatal(sequence msg)
 -- fatal error 
     puts(2, msg)
     puts(2, '\n')
-    any_key( GetMsgText(277, 0) )
+    maybe_any_key( GetMsgText(277, 0) )
 	abort(1)
 end procedure
 

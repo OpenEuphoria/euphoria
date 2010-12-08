@@ -51,7 +51,7 @@ function is_numeric(sequence s)
 	return 1
 end function
 
--- Returns true iff the value SVN_REVISION in rev.e is set
+-- Returns true if the value SVN_REVISION in rev.e is set
 -- to is equal to the value of rev passed here.
 function is_current(object rev)
 	integer fn

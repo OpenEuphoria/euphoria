@@ -29,6 +29,7 @@
 
 include std/console.e
 include std/io.e
+include std/hash.e
 include std/map.e
 include std/types.e
 include std/convert.e
@@ -61,7 +62,7 @@ integer outputHandle
 integer numZeroBucket, max, items, len, total_words
 
 function hash_function(sequence string)
-	return remainder(hash(string, HSIEH32 ), hashBuckets) + 1
+	return remainder(hash(string, stdhash:HSIEH32 ), hashBuckets) + 1
 end function
 
 procedure update_table(sequence string)
@@ -151,7 +152,7 @@ procedure main()
 	end if
 	
 	
-	lFileList = map:get(vOptMap, OPT_EXTRAS, {})
+	lFileList = map:get(vOptMap, cmdline:EXTRAS, {})
 	
 	if length(lFileList) < 1 then
 		puts(2, "You must give the name of an input file")

@@ -15,6 +15,7 @@
 
 #define _LARGEFILE64_SOURCE
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "global.h"
 #include "alldefs.h"
@@ -70,6 +71,12 @@
 #define LOCK_EX  2 /* exclusive lock */
 #define LOCK_NB  4 /* don't block when locking */
 #define LOCK_UN  8 /* unlock */
+#endif
+
+#ifdef EOSX
+extern unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
+						unsigned arg4, unsigned arg5, unsigned arg6,
+						unsigned arg7, unsigned arg8, unsigned arg9);
 #endif
 
 #ifdef ESUNOS
@@ -243,18 +250,6 @@ unsigned long get_pos_int(char *where, object x)
 		return INT_VAL(x);
 	else if (IS_ATOM(x))
 		return (unsigned long)(DBL_PTR(x)->dbl);
-	else {
-		RTFatal("%s: an integer was expected, not a sequence", where);
-	}
-}
-
-unsigned IOFF get_pos_off(char *where, object x)
-/* return a positive integer value if possible */
-{
-	if (IS_ATOM_INT(x))
-		return (unsigned IOFF) INT_VAL(x);
-	else if (IS_ATOM(x))
-		return (unsigned IOFF)(DBL_PTR(x)->dbl);
 	else {
 		RTFatal("%s: an integer was expected, not a sequence", where);
 	}
@@ -891,13 +886,14 @@ static object Where(object x)
 	int file_no;
 	IOFF result;
 	IFILE f;
+	object pos;
 
 	file_no = CheckFileNumber(x);
 	if (user_file[file_no].mode == EF_CLOSED)
 		RTFatal("file must be open for where()");
 	f = user_file[file_no].fptr;
 #ifdef EWATCOM
-	if (user_file[file_no].mode & EF_APPEND)
+	// if (user_file[file_no].mode & EF_APPEND)
 		iflush(f);  // This fixes a bug in Watcom 10.6 that is fixed in 11.0
 #endif
 	result = itell(f);
@@ -906,21 +902,22 @@ static object Where(object x)
 		RTFatal("where() failed on this file");
 	}
 	if (result > (IOFF)MAXINT || result < (IOFF)MININT)
-		result = NewDouble((double)result);  // maximum 2 billion
-#if defined(ELINUX) || defined(EWATCOM)
+		pos = (object)NewDouble((double)result);  // maximum 2 billion
 	else
-		result = iitell(f); // for better accuracy
-#endif
-	return result;
+		pos = (object)((long)result);
+	
+	return pos;
 }
 
 static object Seek(object x)
 /* x is {file number, new position} */
 {
 	int file_no;
-	IOFF pos, result;
+	IOFF pos;
+	IOFF result;
 	IFILE f;
-	object x1, x2;
+	object x1;
+	object x2;
 
 	x = (object)SEQ_PTR(x);
 	x1 = *(((s1_ptr)x)->base+1);
@@ -931,21 +928,36 @@ static object Seek(object x)
 	}
 	
 	f = user_file[file_no].fptr;
-	pos = get_pos_off("seek", x2);
-	if (pos == -1)
-#if defined(EMINGW)
-		result = iseek(f, 0L, SEEK_END);
-#else
-		result = iiseek(f, 0L, SEEK_END);
+	if (IS_ATOM_INT(x2)) {
+		if ((long)x2 == -1)
+		{
+#ifdef EWATCOM
+			iflush(f);
 #endif
-#if defined(ELINUX) || defined(EWATCOM)
-	else if (!(pos > (IOFF)MAXINT || pos < (IOFF)MININT))
-		result = iiseek(f, pos, SEEK_SET);
-#endif
+			result = iseek(f, 0, SEEK_END);
+			return ((result == ((IOFF)-1)) ? ATOM_1 : ATOM_0);
+		}
+		
+		if ((long) x2 < 0) {
+			return ATOM_1; // -ve positions are not permitted.
+		}
+		
+		pos = (IOFF)((long)(x2));
+	}
+	else if (IS_ATOM(x2)) {
+		pos = (IOFF)(DBL_PTR(x2)->dbl);
+		if ( pos < 0) {
+			return ATOM_1; // -ve positions are not permitted.
+		}
+	}
 	else
-		result = iseek(f, pos, SEEK_SET);
-	
-	return (!result ? ATOM_0 : ATOM_1);
+		return ATOM_1; // sequences are not permitted as position.
+		
+#ifdef EWATCOM
+	iflush(f);  // Realign internal buffer position.
+#endif
+	result = iseek(f, pos, SEEK_SET);
+	return ((result == ((IOFF)-1)) ? ATOM_1 : ATOM_0);
 }
 
 // 2 implementations of dir()
@@ -1053,7 +1065,7 @@ typedef struct _SYSTEMTIME {
 	if (fp_buf == path)
 	{
 		// Empty path so assume current directory
-		strcpy(path, ".\\*");
+		copy_string(path, ".\\*", 4);
 		has_wildcards = 1;
 	}
 	else
@@ -1078,7 +1090,7 @@ typedef struct _SYSTEMTIME {
 		// a directory when no wildcards were used,
 		// so assume the caller wants to see inside the directory.
 		FindClose(next_file);
-		strcat(path, "\\*");
+		append_string(path, "\\*", 3);
 		has_wildcards = 1;
 		next_file = FindFirstFile( path, &file_info);
 		if (next_file == INVALID_HANDLE_VALUE)
@@ -2177,6 +2189,7 @@ object DefineC(object x)
 
 #ifdef EOSX
 #define CALLBACK_SIZE (108)
+extern unsigned (*general_ptr)();
 #else
 #if __GNUC__ == 4
 #define CALLBACK_SIZE (96)
@@ -2196,6 +2209,11 @@ typedef void * (__stdcall *VirtualAlloc_t)(void *, unsigned int size, unsigned i
 	Assumptions: p_radix must be a power of two.
 				p_v and p_radix must be < power(2,31)
 */
+
+#ifdef roundup  /* EOPENBSD defines it at least, others might */
+#undef roundup
+#endif /* roundup */
+
 inline signed int roundup(unsigned int p_v, unsigned int p_radix) {
 	signed int radix = (signed int)p_radix;
 	signed int v = (signed int)p_v;
@@ -2329,6 +2347,10 @@ object CallBack(object x)
 					RTFatal("routine has too many parameters for call-back");
 		}
 	}
+#ifdef EOSX
+	// always use the custom call back handler for OSX
+	addr = (unsigned)&osx_cdecl_call_back;
+#endif
 
 	/* Now allocate memory that is executable or at least can be made to be ... */
 	
@@ -2383,6 +2405,11 @@ object CallBack(object x)
 	// Plug in the symtab pointer
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
+#ifdef EOSX
+         	if( (*(int*)(addr + i)) == 0xF001F001 ){
+			*(int *)(copy_addr+i) = (int)general_ptr;
+		}
+#endif
 		if (copy_addr[i]   == 0x078 &&
 			copy_addr[i+1] == 0x056) {
 #ifdef ERUNTIME
@@ -3023,8 +3050,8 @@ object machine(object opcode, object x)
 #else
 #ifdef EMINGW
 				dest = EMalloc(strlen(src) + 2);
-				strcpy(dest, src);
-				strcat(dest, "=");
+				copy_string(dest, src, strlen(src) + 1);
+				append_string(dest, "=", 2);
 				/* on MinGW, putenv("var=") will unset the
 				 * variable. On any other system, use unsetenv()
 				 * as putenv("var=") will create an empty

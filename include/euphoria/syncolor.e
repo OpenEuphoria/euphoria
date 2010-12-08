@@ -186,7 +186,6 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 
 		if class = tokenize:T_WHITE then
 			linebuf &= c[tokenize:TDATA]-- continue with current color
-
 		elsif class = tokenize:T_KEYWORD then
 			seg_flush(KEYWORD_COLOR)
 

@@ -4,7 +4,7 @@
 -- <<LEVELTOC level=2 depth=4>>
 
 namespace eds
-
+include std/types.e
 include std/convert.e
 include std/datetime.e
 include std/error.e
@@ -15,8 +15,6 @@ include std/math.e
 include std/pretty.e
 include std/text.e
 
-
---****
 -- === Database File Format
 --
 -- ==== Header
@@ -448,15 +446,29 @@ procedure putn(sequence s)
 	puts(current_db, s)
 end procedure
 
-procedure safe_seek(atom pos)
--- io:seek to a position in the current db file
+procedure safe_seek(atom pos, sequence msg = "")
+-- Seek to a position in the current db file, but do it with care.
+	atom eofpos
 	if current_db = -1 then
 		fatal(NO_DATABASE, "no current database defined", "safe_seek", {pos})
+		return
+	end if
+	
+	io:seek(current_db, -1)
+	eofpos = io:where(current_db)
+	if pos > eofpos then
+		fatal(BAD_SEEK, "io:seeking past EOF", "safe_seek", {pos})
 		return
 	end if
 	if io:seek(current_db, pos) != 0 then
 		fatal(BAD_SEEK, "io:seek to position failed", "safe_seek", {pos})
 		return
+	end if
+	if pos != -1 then
+		if io:where(current_db) != pos then
+			fatal(BAD_SEEK, "io:seek not in position", "safe_seek", {pos})
+			return
+		end if
 	end if
 end procedure
 
@@ -566,7 +578,7 @@ public procedure db_dump(object file_id, integer low_level_too = 0)
 	end if
 
 	printf(fn, "Database dump as at %s\n", {datetime:format( datetime:now(), "%Y-%m-%d %H:%M:%S")})
-	safe_seek(0)
+	io:seek(current_db, 0)
 	if length(vLastErrors) > 0 then return end if
 	magic = get1()
 	if magic != DB_MAGIC then
@@ -736,7 +748,7 @@ public procedure check_free_list()
 	safe_seek(-1)
 	if length(vLastErrors) > 0 then return end if
 	max = io:where(current_db)
-	io:seek(current_db, FREE_COUNT)
+	safe_seek( FREE_COUNT)
 	free_count = get4()
 	if free_count > max/13 then
 		error:crash("free count is too high")
@@ -745,13 +757,13 @@ public procedure check_free_list()
 	if free_list > max then
 		error:crash("bad free list pointer")
 	end if
-	io:seek(current_db, free_list - 4)
+	safe_seek( free_list - 4)
 	free_list_space = get4()
 	if free_list_space > max or free_list_space < 0 then
 		error:crash("free list space is bad")
 	end if
 	for i = 0 to free_count - 1 do
-		io:seek(current_db, free_list + i * 8)
+		safe_seek( free_list + i * 8)
 		addr = get4()
 		if addr > max then
 			error:crash("bad block address")
@@ -760,7 +772,7 @@ public procedure check_free_list()
 		if size > max then
 			error:crash("block size too big")
 		end if
-		io:seek(current_db, addr - 4)
+		safe_seek( addr - 4)
 		if get4() > size then
 			error:crash("bad size in front of free block")
 		end if
@@ -771,7 +783,7 @@ function db_allocate(atom n)
 -- Allocate (at least) n bytes of space in the database file.
 -- The usable size + 4 is stored in the 4 bytes before the returned address.
 -- Upon return, the file pointer points at the allocated space, so data
--- can be stored into the space immediately without a io:seek.
+-- can be stored into the space immediately without a safe_seek.
 -- When space is allocated at the end of the file, it will be exactly
 -- n bytes in size, and the caller must fill up all the space immediately.
 	atom free_list, size, size_ptr, addr
@@ -796,7 +808,7 @@ function db_allocate(atom n)
 					io:seek(current_db, size_ptr)
 					put4(size-n-4) -- update size on free list too
 					addr += size-n-4
-					io:seek(current_db, addr - 4)
+					io:seek(current_db, addr - 4) 
 					put4(n+4)
 				else
 					-- close fit: remove whole block from list and return it
@@ -1020,10 +1032,10 @@ public function db_connect(sequence dbalias, sequence path="", sequence dboption
 	end if
 	
 	-- If the options are in a single string, convert it to a list of key-value pairs.
-	if string(dboptions) then
+	if types:string(dboptions) then
 		dboptions = text:keyvalues(dboptions)
 		for i = 1 to length(dboptions) do
-			if string(dboptions[i][2]) then
+			if types:string(dboptions[i][2]) then
 				dboptions[i][2] = convert:to_number(dboptions[i][2])
 			end if
 		end for
@@ -1425,7 +1437,7 @@ function table_find(sequence name)
 	atom nt
 	atom t_header, name_ptr
 
-	safe_seek(TABLE_HEADERS)
+	io:seek(current_db, TABLE_HEADERS)
 	if length(vLastErrors) > 0 then return -1 end if
 	tables = get4()
 	io:seek(current_db, tables)
@@ -1899,7 +1911,7 @@ public function db_table_list()
 	sequence table_names
 	atom tables, nt, name
 
-	safe_seek(TABLE_HEADERS)
+	io:seek(current_db, TABLE_HEADERS)
 	if length(vLastErrors) > 0 then return {} end if
 	tables = get4()
 	io:seek(current_db, tables)
@@ -2012,80 +2024,6 @@ public function db_find_key(object key, object table_name=current_table_name)
 end function
 
 --**
--- Returns the unique record identifier (##recid##) value for the record.
---
--- Parameters:
--- 		# ##key## : the identifier of the record to be looked up.
---      # ##table_name## : optional name of table to find key in
---
--- Returns:
---		An **atom**, either greater or equal to zero:
--- 		* If above zero, it is a ##recid##.
---		* If less than zero, the record wasn't found.
---      * If equal to zero, an error occured.
---
--- Errors:
--- 		If the table is not defined, an error is raised.
---
--- Comments:
--- A **##recid##** is a number that uniquely identifies a record in the database. 
--- No two records in a database has the same ##recid## value. They can be used
--- instead of keys to //quickly// refetch a record, as they avoid the overhead of
--- looking for a matching record key. They can also be used without selecting
--- a table first, as the ##recid## is unique to the database and not just a table.
--- However, they only remain valid while a database is open and so long as it
--- doesn't get compressed. Compressing the database will give each record a
--- new ##recid## value. 
---
--- Because it is faster to fetch a record with a ##recid## rather than with its key,
--- these are used when you know you have to **refetch** a record. 
---
--- Example 1:
--- <eucode>
--- rec_num = db_get_recid("Millennium")
--- if rec_num > 0 then
---     ? db_record_recid(rec_num) -- fetch key and data.
--- else
---     puts(2, "Not found\n")
--- end if
--- </eucode>
---
--- See Also:
--- 		[[:db_insert]], [[:db_replace_data]], [[:db_delete_record]], [[:db_find_key]]
-
-public function db_get_recid(object key, object table_name=current_table_name)
-	integer lo, hi, mid, c  -- works up to 1.07 billion records
-
-	if not equal(table_name, current_table_name) then
-		if db_select_table(table_name) != DB_OK then
-			fatal(NO_TABLE, "invalid table name given", "db_get_recid", {key, table_name})
-			return 0
-		end if
-	end if
-
-	if current_table_pos = -1 then
-		fatal(NO_TABLE, "no table selected", "db_get_recid", {key, table_name})
-		return 0
-	end if
-	lo = 1
-	hi = length(key_pointers)
-	mid = 1
-	c = 0
-	while lo <= hi do
-		mid = floor((lo + hi) / 2)
-		c = eu:compare(key, key_value(key_pointers[mid]))
-		if c < 0 then
-			hi = mid - 1
-		elsif c > 0 then
-			lo = mid + 1
-		else
-			return key_pointers[mid]
-		end if
-	end while
-	return -1
-end function
-
---**
 -- Insert a new record into the current table.
 --
 -- Parameters:
@@ -2158,7 +2096,7 @@ public function db_insert(object key, object data, object table_name=current_tab
 	end if
 	key_pointers[key_location] = key_ptr
 
-	io:seek(current_db, current_table_pos+12) -- get after put - io:seek is necessary
+	io:seek(current_db, current_table_pos+12) -- get after put - seek is necessary
 	index_ptr = get4()
 
 	io:seek(current_db, index_ptr)
@@ -2283,7 +2221,7 @@ public procedure db_delete_record(integer key_location, object table_name=curren
 		return
 	end if
 	key_ptr = key_pointers[key_location]
-	safe_seek(key_ptr)
+	io:seek(current_db, key_ptr)
 	if length(vLastErrors) > 0 then return end if
 	data_ptr = get4()
 	db_free(key_ptr)
@@ -2344,64 +2282,6 @@ public procedure db_delete_record(integer key_location, object table_name=curren
 			put4(key_pointers[i+r])
 		end for
 	end if
-end procedure
-
---**
--- In the current database, replace the data portion of a record with new data.
--- This can be used to quickly update records that have already been located
--- by calling [[:db_get_recid]]. This operation is faster than using
--- [[:db_replace_data]]
---
--- Parameters:
--- 		# ##recid## : an atom, the ##recid## of the record to be updated.
--- 		# ##data## : an object, the new value of the record.
---
--- Comments:
--- * ##recid## must be fetched using [[:db_get_recid]] first.
--- * ##data## is an Euphoria object of any kind, atom or sequence.
--- * The ##recid## does not have to be from the current table.
--- * This does no error checking. It assumes the database is open and valid.
---
--- Example 1:
--- <eucode>
--- rid = db_get_recid("Peter")
--- rec = db_record_recid(rid)
--- rec[2][3] *= 1.10
--- db_replace_recid(rid, rec[2])
--- </eucode>
---
--- See Also:
--- 		[[:db_replace_data]], [[:db_find_key]], [[:db_get_recid]]
-
-public procedure db_replace_recid(integer recid, object data)
-	atom old_size, new_size, data_ptr
-	sequence data_string
-
-	io:seek(current_db, recid)
-	data_ptr = get4()
-	io:seek(current_db, data_ptr-4)
-	old_size = get4()-4
-	data_string = compress(data)
-	new_size = length(data_string)
-	if new_size <= old_size and
-	   new_size >= old_size - 16 then
-		-- keep the same data block
-		io:seek(current_db, data_ptr)
-	else
-		-- free the old block
-		db_free(data_ptr)
-		-- get a new data block
-		data_ptr = db_allocate(new_size + 8)
-		io:seek(current_db, recid)
-		put4(data_ptr)
-		io:seek(current_db, data_ptr)
-		
-		-- if the data comes from the end of the file, we need to 
-		-- make sure it gets filled
-		data_string &= repeat( 0, 8 )
-		
-	end if
-	putn(data_string)
 end procedure
 
 --**
@@ -2534,7 +2414,7 @@ public function db_record_data(integer key_location, object table_name=current_t
 		return -1
 	end if
 
-	safe_seek(key_pointers[key_location])
+	io:seek(current_db, key_pointers[key_location])
 	if length(vLastErrors) > 0 then return -1 end if
 	data_ptr = get4()
 	io:seek(current_db, data_ptr)
@@ -2629,46 +2509,6 @@ public function db_record_key(integer key_location, object table_name=current_ta
 		return -1
 	end if
 	return key_value(key_pointers[key_location])
-end function
-
---**
--- Returns the key and data in a record queried by ##recid##.
---
--- Parameters:
--- 		# ##recid## : the ##recid## of the required record, which has been
---         previously fetched using [[:db_get_recid]].
---
--- Returns:
---		An **sequence**, the first element is the key and the second element
---      is the data portion of requested record.
---
--- Comments:
--- * This is much faster than calling [[:db_record_key]] and [[:db_record_data]].
--- * This does no error checking. It assumes the database is open and valid.
--- * This function does not need the requested record to be from the current
--- table. The ##recid## can refer to a record in any table.
---
--- Example 1:
--- <eucode>
--- rid = db_get_recid("SomeKey")
--- ? db_record_recid(rid)
--- </eucode>
---
--- See Also:
--- 		[[:db_get_recid]], [[:db_replace_recid]]
-
-public function db_record_recid(integer recid)
-	atom data_ptr
-	object data_value
-	object key_value
-
-	io:seek(current_db, recid)
-	data_ptr = get4()
-	key_value = decompress(0)
-	io:seek(current_db, data_ptr)
-	data_value = decompress(0)
-
-	return {key_value, data_value}
 end function
 
 --**
@@ -2860,3 +2700,176 @@ public function db_set_caching(atom new_setting)
 	end if
 	return lOldVal
 end function
+
+--**
+-- In the current database, replace the data portion of a record with new data.
+-- This can be used to quickly update records that have already been located
+-- by calling [[:db_get_recid]]. This operation is faster than using
+-- [[:db_replace_data]]
+--
+-- Parameters:
+-- 		# ##recid## : an atom, the ##recid## of the record to be updated.
+-- 		# ##data## : an object, the new value of the record.
+--
+-- Comments:
+-- * ##recid## must be fetched using [[:db_get_recid]] first.
+-- * ##data## is an Euphoria object of any kind, atom or sequence.
+-- * The ##recid## does not have to be from the current table.
+-- * This does no error checking. It assumes the database is open and valid.
+--
+-- Example 1:
+-- <eucode>
+-- rid = db_get_recid("Peter")
+-- rec = db_record_recid(rid)
+-- rec[2][3] *= 1.10
+-- db_replace_recid(rid, rec[2])
+-- </eucode>
+--
+-- See Also:
+-- 		[[:db_replace_data]], [[:db_find_key]], [[:db_get_recid]]
+
+public procedure db_replace_recid(integer recid, object data)
+	atom old_size, new_size, data_ptr
+	sequence data_string
+
+	seek(current_db, recid)
+	data_ptr = get4()
+	seek(current_db, data_ptr-4)
+	old_size = get4()-4
+	data_string = compress(data)
+	new_size = length(data_string)
+	if new_size <= old_size and
+	   new_size >= old_size - 16 then
+		-- keep the same data block
+		seek(current_db, data_ptr)
+	else
+		-- free the old block
+		db_free(data_ptr)
+		-- get a new data block
+		data_ptr = db_allocate(new_size + 8)
+		seek(current_db, recid)
+		put4(data_ptr)
+		seek(current_db, data_ptr)
+		
+		-- if the data comes from the end of the file, we need to 
+		-- make sure it gets filled
+		data_string &= repeat( 0, 8 )
+		
+	end if
+	putn(data_string)
+end procedure
+
+--**
+-- Returns the key and data in a record queried by ##recid##.
+--
+-- Parameters:
+-- 		# ##recid## : the ##recid## of the required record, which has been
+--         previously fetched using [[:db_get_recid]].
+--
+-- Returns:
+--		An **sequence**, the first element is the key and the second element
+--      is the data portion of requested record.
+--
+-- Comments:
+-- * This is much faster than calling [[:db_record_key]] and [[:db_record_data]].
+-- * This does no error checking. It assumes the database is open and valid.
+-- * This function does not need the requested record to be from the current
+-- table. The ##recid## can refer to a record in any table.
+--
+-- Example 1:
+-- <eucode>
+-- rid = db_get_recid("SomeKey")
+-- ? db_record_recid(rid)
+-- </eucode>
+--
+-- See Also:
+-- 		[[:db_get_recid]], [[:db_replace_recid]]
+
+public function db_record_recid(integer recid)
+	atom data_ptr
+	object data_value
+	object key_value
+
+	seek(current_db, recid)
+	data_ptr = get4()
+	key_value = decompress(0)
+	seek(current_db, data_ptr)
+	data_value = decompress(0)
+
+	return {key_value, data_value}
+end function
+
+--**
+-- Returns the unique record identifier (##recid##) value for the record.
+--
+-- Parameters:
+-- 		# ##key## : the identifier of the record to be looked up.
+--      # ##table_name## : optional name of table to find key in
+--
+-- Returns:
+--		An **atom**, either greater or equal to zero:
+-- 		* If above zero, it is a ##recid##.
+--		* If less than zero, the record wasn't found.
+--      * If equal to zero, an error occured.
+--
+-- Errors:
+-- 		If the table is not defined, an error is raised.
+--
+-- Comments:
+-- A **##recid##** is a number that uniquely identifies a record in the database. 
+-- No two records in a database has the same ##recid## value. They can be used
+-- instead of keys to //quickly// refetch a record, as they avoid the overhead of
+-- looking for a matching record key. They can also be used without selecting
+-- a table first, as the ##recid## is unique to the database and not just a table.
+-- However, they only remain valid while a database is open and so long as it
+-- doesn't get compressed. Compressing the database will give each record a
+-- new ##recid## value. 
+--
+-- Because it is faster to fetch a record with a ##recid## rather than with its key,
+-- these are used when you know you have to **refetch** a record. 
+--
+-- Example 1:
+-- <eucode>
+-- rec_num = db_get_recid("Millennium")
+-- if rec_num > 0 then
+--     ? db_record_recid(rec_num) -- fetch key and data.
+-- else
+--     puts(2, "Not found\n")
+-- end if
+-- </eucode>
+--
+-- See Also:
+-- 		[[:db_insert]], [[:db_replace_data]], [[:db_delete_record]], [[:db_find_key]]
+
+public function db_get_recid(object key, object table_name=current_table_name)
+	integer lo, hi, mid, c  -- works up to 1.07 billion records
+
+	if not equal(table_name, current_table_name) then
+		if db_select_table(table_name) != DB_OK then
+			fatal(NO_TABLE, "invalid table name given", "db_get_recid", {key, table_name})
+			return 0
+		end if
+	end if
+
+	if current_table_pos = -1 then
+		fatal(NO_TABLE, "no table selected", "db_get_recid", {key, table_name})
+		return 0
+	end if
+	lo = 1
+	hi = length(key_pointers)
+	mid = 1
+	c = 0
+	while lo <= hi do
+		mid = floor((lo + hi) / 2)
+		c = eu:compare(key, key_value(key_pointers[mid]))
+		if c < 0 then
+			hi = mid - 1
+		elsif c > 0 then
+			lo = mid + 1
+		else
+			return key_pointers[mid]
+		end if
+	end while
+	return -1
+end function
+

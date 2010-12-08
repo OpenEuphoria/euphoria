@@ -6,6 +6,7 @@
 
 namespace convert
 
+include std/types.e
 include std/search.e
 include std/text.e
 
@@ -828,18 +829,18 @@ end function
 -- Examples:
 -- <eucode>
 -- include std/console.e
--- display( to_string(12))       --> 12
--- display( to_string("abc"))       --> abc
--- display( to_string("abc",'"'))       --> "abc"
--- display( to_string(`abc\"`,'"'))       --> "abc\\\""
--- display( to_string({12,"abc",{4.5, -99}}))       --> {12, "abc", {4.5, -99}}
--- display( to_string({12,"abc",{4.5, -99}},,0))       --> {12, abc, {4.5, -99}}
+-- display(to_string(12))           --> 12
+-- display(to_string("abc"))        --> abc
+-- display(to_string("abc",'"'))    --> "abc"
+-- display(to_string(`abc\"`,'"'))  --> "abc\\\""
+-- display(to_string({12,"abc",{4.5, -99}}))    --> {12, "abc", {4.5, -99}}
+-- display(to_string({12,"abc",{4.5, -99}},,0)) --> {12, abc, {4.5, -99}}
 -- </eucode>
 
 public function to_string(object data_in, integer string_quote = 0, integer embed_string_quote = '"')
 	sequence data_out
 	
-	if string(data_in) then
+	if types:string(data_in) then
 		if string_quote = 0 then
 			return data_in
 		end if
