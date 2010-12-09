@@ -11,7 +11,14 @@ To install Euphoria on //Windows//, visit the following URL:
 
 :http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
 
-Download the lastest //Windows// installer found under the Binary Releases 
+The "Standard" version is a complete Euphoria installation, with
+Interpreter, Binder, Translator. Included are demo programs and
+document ion.
+
+The "Open Watcom" version has the contents of the "Standard" version, plus a bundled compiler. This is a convenient way of producing compiled executables
+from Euphoria programs.
+
+Download the latest //Windows// installer found under the Binary Releases 
 heading of the Current version of Euphoria. Run the program and follow the 
 prompts to get Euphoria installed.
    
@@ -20,21 +27,77 @@ It also sets the environment variable **EUDIR** to the Euphoria directory.
 
 === Linux and FreeBSD
 
-Euphoria may be installed using either the gzipped tarball, or from a
-distribution specific package, if available.
+Euphoria may be installed using either the "gzipped tarball", or from a
+distribution specific "package", if available.
 
-The gzipped tarball is laid out similarly to the //Windows// directory 
-structure.
-You'll need to manually edit ##/etc/profile## so the ##PATH## contains
-##euphoria\bin##, and either create a ##eu.cfg## file or set up ##EUDIR##
-and ##EUINC##.
 
-The packaged version installs Euphoria in a more //Unix//-like way, putting the
-executables into ##/usr/bin##, ##/usr/share/euphoria## and
-##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eub##,
-##shroud## and ##bind## are also installed.  It will also create
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
+
+The "Gzipped tarball" is laid out similarly to the //Windows// directory 
+structure. This may be convenient if working cross-platform between
+//Windows// and //Unix//. The files at ~SourceForge are also in this
+form, making it convenient if you with to use updates directly from
+the SVN depository.
+
+To install this version you must manually unarchive the tarball. Then
+copy the files to a suitable directory.
+
+You'll need to manually edit:
+* ##/etc/profile## so the ##PATH## contains
+** ##euphoria/bin##, and either create 
+*** a ##eu.cfg## file or 
+*** set up ##EUDIR## and ##EUINC##.
+
+The "Packaged" version installs Euphoria in a more //Unix//-like way, putting the executables into 
+* ##/usr/bin##, 
+* ##/usr/share/euphoria## and
+* ##/usr/share/doc/euphoria##.  
+* Man pages for ##eui##, ##euc##, ##eub##,
+* ##shroud## and ##bind## are also installed.  
+* It will also create
 ##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
+
+
+=== Mac OS X
+
+Look for an installation package for Apple installations.
+
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
+
+=== Adventurous Install
+
+The adventurous may install the very latest version of Euphoria.
+This is a fully manual installation. It must be understood that at
+any one time, a developmental version may be unstable~--it is after
+all in the process of being written.
+
+You can get access to the latest Euphoria version that the Developers are
+working on.
+
+:http://rapideuphoria.svn.sourceforge.net/
+
+Complete source-code for Euphoria and tools (like eudoc, creolehtml)
+are hosted at ~SourceForge. From there you may download a full tree
+of code as one ##.tgz## file. With a SVN client, it is also 
+possible to maintain a continuously updated copy of these files. A
+//Windows// program like "Tortoise" does this conveniently.
+
+For internal use, the developers have compiled binary versions of
+Euphoria available for download. These are called "eubins" and are
+located at:
+
+:http://openeuphoria.org/eubins/linux/
+
+A complete installation requires merging the original source files,
+and the contents of the eubins download. Then, the path to euphoria/bin
+must be set and a cfg file must be written.
+
+Again, for the adventurous only.
+
+
+
+
 
 %%output=post_install
 == Post Install
