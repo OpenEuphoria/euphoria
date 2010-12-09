@@ -8,6 +8,7 @@
 
 * Fix backend and interpreter to avoid "press any key" prompts when running as
   a console from a shared console window.
+* [[ticket:517]], added a bounds check that could cause the translator or binder to crash
 
 === Enhancements/Changes
 
