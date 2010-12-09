@@ -2921,7 +2921,7 @@ object machine(object opcode, object x)
 #else
 #ifdef EMINGW
 				{
-					int slen = strlen(src)
+					int slen = strlen(src);
 					dest = EMalloc(slen + 2);
 					copy_string(dest, src, slen + 1);
 					append_string(dest, "=", slen + 1);
