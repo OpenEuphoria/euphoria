@@ -1,4 +1,7 @@
-== Version 4.0.0 (Release Date TBD)
+== Version 4.0.0 (Release Date Scheduled December 22, 2010)
+
+4.0.0 has not yet been released. These changes are available in the latest SVN trunk. 
+4.0.0 is scheduled to be released on December 22, 2010.
 
 === Deprecation
 
@@ -6,9 +9,14 @@
 
 === Bug Fixes
 
+* [[ticket:438]], removed path test in ##demos/santiy.ex## as it does not function 
+                  correctly with bound, translated or even a non-standard eui location and
+                  actually cannot, thus it was removed.
+* [[ticket:514]], fixed bug with internal ##dir## implementation that would prevent displaying
+                  the content of a directory if given without a trailing slash on Windows.
+* [[ticket:517]], added a bounds check that could cause the translator or binder to crash
 * Fix backend and interpreter to avoid "press any key" prompts when running as
   a console from a shared console window.
-* [[ticket:517]], added a bounds check that could cause the translator or binder to crash
 
 === Enhancements/Changes
 
