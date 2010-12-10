@@ -1611,14 +1611,6 @@ static object set_rand(object x)
 	return ATOM_1;
 }
 
-static object use_vesa(object x)
-/* turn on/off vesa flag */
-{
-	UNUSED(x);
-	RTFatal("use_vesa() is no longer supported in Euphoria");
-	return ATOM_1;
-}
-
 static object crash_message(object x)
 /* record user's message in case of a crash */
 {
@@ -2670,7 +2662,8 @@ object machine(object opcode, object x)
 				break;
 				
 			case M_USE_VESA:
-				return use_vesa(x);
+				RTFatal("use_vesa() is no longer supported in Euphoria");
+				return ATOM_1;
 				break;
 				
 			case M_CRASH_MESSAGE:
