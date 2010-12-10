@@ -110,13 +110,8 @@ extern double eustart_time; /* from be_runtime.c */
 /*****************/
 /* Local defines */
 /*****************/
-#define C_UNDERLINE    0x0607 /* normal underline cursor */
 /* 30-bit magic #s for old Complete & PD Edition binds */
 #define COMPLETE_MAGIC ('1' + ('2'<< 8) + ('3' << 16) + ('O' << 24))
-
-/* timer and profile interrupt handler stuff: */
-#define TIMERINTR  8
-#define MASTER_FREQUENCY 1193181.667
 
 /**********************/
 /* Exported variables */
@@ -160,8 +155,6 @@ unsigned current_bg_color = 0;
 
 extern char **Argv;
 extern int Argc;
-
-
 
 /********************/
 /* Local variables */
