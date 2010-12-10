@@ -2740,10 +2740,10 @@ defined, but ##EU5## will be defined.
 * **WINDOWS** - Platform is Windows (GUI or Console)
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
-* **SUNOS** - Platform is SunOS (Open Solaris)
 * **FREEBSD** - Platform is FreeBSD
 * **OPENBSD** - Platform is OpenBSD
-* **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, SunOS and OS X)
+* **NETBSD** - Platform is NetBSD
+* **BSD** - Platform is a BSD variant (FreeBSD, OpenBSD, NetBSD and OS X)
 * **UNIX** - Platform is any Unix
 
 ==== Application Definitions

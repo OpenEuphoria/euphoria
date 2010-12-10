@@ -405,7 +405,7 @@ constant
 --	LC_MESSAGES = 5,
 	$
 
-elsifdef BSD or SUNOS then
+elsifdef BSD then
 constant
 	lib = dll:open_dll("libc.so"),
 	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),

@@ -51,7 +51,6 @@ if test $UNAME_SYSTEM = "Linux"; then
 	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX=1 >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
 	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
@@ -60,7 +59,6 @@ elif test $UNAME_SYSTEM = "MS-DOS"; then
 	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
 	echo EDJGPP=1 >> "$PREFIX"${CONFIG_FILE}
@@ -71,25 +69,14 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
 	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "SunOS"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ESUNOS=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
 	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 elif test $UNAME_SYSTEM = "OpenBSD"; then
 	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
 	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOPENBSD=1 >> "$PREFIX"${CONFIG_FILE}
 	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
 	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
@@ -98,7 +85,6 @@ elif test $UNAME_SYSTEM = "NetBSD"; then
 	echo ENETBSD=1 >> "$PREFIX"${CONFIG_FILE}
 	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
 	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
@@ -109,7 +95,6 @@ else
 	else
 		echo EOSX= >> "$PREFIX"${CONFIG_FILE}
 	fi
-	echo ESUNOS= >> "$PREFIX"${CONFIG_FILE}
 	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
 	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
 	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
@@ -284,8 +269,7 @@ while [ "$1" != "" ]; do
 		echo "   --debug             turn debugging on"
 		echo "   --prefix value      set the install directory (default /usr/local)"
 		echo "   --plat value        set the OS that we will translate to."
-		echo "                       values can be: WIN, OSX, LINUX, FREEBSD, SUNOS,"
-		echo "                       OPENBSD or NETBSD."
+		echo "                       values can be: WIN, OSX, LINUX, FREEBSD, OPENBSD or NETBSD."
 		echo "   --watcom            set this so the translator will create C code for"
 		echo "                       Watcom C."
 		echo "   --no-managed-mem    disable managed memory"

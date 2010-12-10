@@ -75,30 +75,7 @@
 extern unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
 						unsigned arg4, unsigned arg5, unsigned arg6,
 						unsigned arg7, unsigned arg8, unsigned arg9);
-#endif
-
-#ifdef ESUNOS
-#include <fcntl.h>
-
-int emul_flock(fd, cmd)
-	int fd, cmd;
-{
-	struct flock f;
-
-	memset(&f, 0, sizeof(f));
-
-	if (cmd & LOCK_UN)
-		f.l_type = F_UNLCK;
-	if (cmd & LOCK_SH)
-		f.l_type = F_RDLCK;
-	if (cmd & LOCK_EX)
-		f.l_type = F_WRLCK;
-
-	return fcntl(fd, (cmd & LOCK_NB) ? F_SETLK : F_SETLKW, &f);
-}
-
-#define flock(f,c) emul_flock(f,c)
-#endif // ESUNOS
+#endif // EOSX
 
 #else // EUNIX
 
@@ -126,7 +103,6 @@ int emul_flock(fd, cmd)
 #endif
 
 #include <signal.h>
-
 
 extern char* get_svn_revision(); /* from rev.c */
 extern double eustart_time; /* from be_runtime.c */
@@ -2792,9 +2768,6 @@ object machine(object opcode, object x)
 #ifdef EOPENBSD
 				return 6;
 #else
-#ifdef ESUNOS
-				return 5;
-#else
 #ifdef EOSX
 				return 4;
 #else
@@ -2808,13 +2781,12 @@ object machine(object opcode, object x)
 				return 2;  // WIN32
 #else
 				return 1; // Unknown platform
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
+#endif // EWINDOWS
+#endif // ELINUX
+#endif // EBSD
+#endif // EOSX
+#endif // EOPENBSD
+#endif // ENETBSD
 
 				break;
 

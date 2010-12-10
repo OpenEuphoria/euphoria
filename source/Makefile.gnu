@@ -63,10 +63,6 @@ ifeq "$(EBSD)" "1"
     LDLFLAG=-lresolv
     EBSDFLAG=-DEBSD -DEBSD62 -DEOSX
   endif
-  ifeq "$(ESUNOS)" "1"
-    LDLFLAG=-lsocket -lresolv -lnsl
-    EBSDFLAG=-DEBSD -DEBSD62 -DESUNOS
-  endif
   ifeq "$(EOPENBSD)" "1"
     EBSDFLAG=-DEBSD -DEBSD62 -DEOPENBSD
   endif

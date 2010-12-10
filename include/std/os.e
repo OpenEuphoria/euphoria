@@ -9,6 +9,7 @@ namespace os
 ifdef WINDOWS then
 	include std/dll.e
 end ifdef
+
 include std/machine.e
 
 ifdef UNIX then
@@ -34,8 +35,7 @@ public enum
 	WIN32 = 2,
 	LINUX,
 	OSX,
-	SUNOS,
-	OPENBSD,
+	OPENBSD = 6,
 	NETBSD,
 	FREEBSD
 
@@ -46,7 +46,6 @@ public enum
 -- * ##LINUX##   ~-- Host operating system is Linux
 -- * ##FREEBSD## ~-- Host operating system is FreeBSD
 -- * ##OSX##     ~-- Host operating system is Mac OS X
--- * ##SUNOS##   ~-- Host operating system is Sun's OpenSolaris
 -- * ##OPENBSD## ~-- Host operating system is OpenBSD
 -- * ##NETBSD##  ~-- Host operating system is NetBSD
 --
@@ -317,7 +316,6 @@ end function
 --     LINUX,
 --     FREEBSD,
 --     OSX,
---     SUNOS,
 --	   OPENBSD,
 --     NETBSD,
 --     FREEBSD

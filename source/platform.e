@@ -17,7 +17,6 @@ public constant
 	ULINUX = LINUX,
 	UFREEBSD = FREEBSD,
 	UOSX = OSX,
-	USUNOS = SUNOS,
 	UOPENBSD = OPENBSD,
 	UNETBSD = NETBSD,
 	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
@@ -29,7 +28,6 @@ public integer
 	IUNIX    = 0, TUNIX    = 0,
 	IBSD     = 0, TBSD     = 0,
 	IOSX     = 0, TOSX     = 0,
-	ISUNOS   = 0, TSUNOS   = 0,
 	IOPENBSD = 0, TOPENBSD = 0,
 	INETBSD  = 0, TNETBSD  = 0
 
@@ -41,10 +39,6 @@ ifdef WIN32 then
 elsifdef OSX then
 	IOSX = 1
 	TOSX = 1
-
-elsifdef SUNOS then
-	ISUNOS = 1
-	TSUNOS = 1
 
 elsifdef FREEBSD then
 	IBSD = 1
@@ -64,7 +58,7 @@ elsifdef LINUX then
 
 end ifdef
 
-ifdef OSX or SUNOS or FREEBSD or OPENBSD or NETBSD then
+ifdef OSX or FREEBSD or OPENBSD or NETBSD then
 	IBSD = 1
 	TBSD = 1
 end ifdef
@@ -90,8 +84,9 @@ public function host_platform()
 	return ihost_platform
 end function
 
-sequence unices = {ULINUX, UFREEBSD, UOSX, USUNOS, UOPENBSD, UNETBSD}
-public procedure set_host_platform( atom plat )
+sequence unices = { ULINUX, UFREEBSD, UOSX, UOPENBSD, UNETBSD }
+
+public procedure set_host_platform(atom plat)
 	ihost_platform = floor(plat)
 
 	TUNIX    = (find(ihost_platform, unices) != 0) 
@@ -99,7 +94,6 @@ public procedure set_host_platform( atom plat )
 	TBSD     = (ihost_platform = UFREEBSD)
 	TOSX     = (ihost_platform = UOSX)
 	TLINUX   = (ihost_platform = ULINUX)
-	TSUNOS   = (ihost_platform = USUNOS)
 	TOPENBSD = (ihost_platform = UOPENBSD)
 	TNETBSD  = (ihost_platform = UNETBSD)
 	IUNIX    = TUNIX
@@ -107,7 +101,6 @@ public procedure set_host_platform( atom plat )
 	IBSD     = TBSD
 	IOSX     = TOSX
 	ILINUX   = TLINUX
-	ISUNOS   = TSUNOS
 	IOPENBSD = TOPENBSD
 	INETBSD  = TNETBSD
 
@@ -177,8 +170,6 @@ public function GetPlatformDefines(integer for_translator = 0)
 		local_defines &= {"UNIX", "LINUX"}
 	elsif (IOSX and not for_translator) or (TOSX and for_translator) then
 		local_defines &= {"UNIX", "BSD", "OSX"}
-	elsif (ISUNOS and not for_translator) or (TSUNOS and for_translator) then
-		local_defines &= {"UNIX", "BSD", "SUNOS"}
 	elsif (IOPENBSD and not for_translator) or (TOPENBSD and for_translator) then
 		local_defines &= { "UNIX", "BSD", "OPENBSD"}
 	elsif (INETBSD and not for_translator) or (TNETBSD and for_translator) then

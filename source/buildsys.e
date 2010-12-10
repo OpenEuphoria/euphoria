@@ -296,8 +296,6 @@ function setup_build()
 				l_flags &= " -lm -lpthread"
 			elsif TOSX then
 				l_flags &= " -lresolv"
-			elsif TSUNOS then
-				l_flags &= " -lsocket -lresolv -lnsl"
 			elsif TWINDOWS then
 				l_flags &= " -mno-cygwin -lws2_32"				
 			end if

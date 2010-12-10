@@ -34,8 +34,6 @@ elsifdef LINUX then
 	return "Linux"
 elsifdef OSX then
 	return "OS X"
-elsifdef SUNOS then
-	return "SunOS"
 elsifdef FREEBSD then
 	return "FreeBSD"
 elsifdef OPENBSD then

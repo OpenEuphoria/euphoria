@@ -310,8 +310,7 @@ echo.
 echo     --noassert          Use this to remove 'assert()' processing in the C code.
 echo.
 echo     --plat value        set the OS that we will translate to.
-echo                         values can be: WIN, OSX, LINUX, FREEBSD, SUNOS,
-echo                         OPENBSD or NETBSD.
+echo                         values can be: WIN, OSX, LINUX, FREEBSD, OPENBSD or NETBSD.
 echo.
 echo     --use-binary-translator
 echo                         Use the already built translator rather than
