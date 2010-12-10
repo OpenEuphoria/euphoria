@@ -55,12 +55,6 @@ void *Backlink = NULL; /* DLL back pointer */
 char *eudir;           /* path to Euphoria directory */
 char main_path[PATH_MAX+1]; /* path of main file being executed */
 
-/*******************/
-/* Local variables */
-/*******************/
-
-
-
 /*********************/
 /* Defined functions */
 /*********************/
@@ -69,9 +63,6 @@ void be_init()
 /* Main routine for Interpreter back end */
 {
 	char *p;
-	
-	
-
 
 	EuConsole = (getenv("EUCONS") != NULL && atoi(getenv("EUCONS")) == 1);
 	clocks_per_sec = CLOCKS_PER_SEC;
@@ -121,7 +112,6 @@ void be_init()
 	InitTraceWindow();
 }
 
-
 #ifdef EXTRA_STATS
 void Stats()
 /* print execution statistics */
@@ -143,3 +133,4 @@ void Stats()
 	printf("bad time-profile samples: %d\n", bad_samples);
 }
 #endif
+
