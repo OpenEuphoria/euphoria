@@ -1,0 +1,66 @@
+== What's new in 4.0?
+
+**CAUTION**: serious work in progress
+
+Euphoria v4.0 is a very large jump in functionality from the previous stable release, 3.1.1.
+
+Euphoria has a brand new standard library consisting of over 800 public members. Too numerous
+list here, please see the reference section of this manual.
+
+=== General Changes
+
+* New online manual
+* New logo
+* Switched to using our own ticket system
+* Switched to using our own self hosted Mercurial SCM system
+
+=== Language Enhancements
+
+* Conditional compilation ifdef
+* Multiline strings
+* Multiline comments
+* Binary, Octal and new Hexadecimal number format
+* Hexadecimal string format
+* Ignorning function results
+* Optional list terminator ($)
+* Enumerated values/types (enum, enum type)
+* Built-in eu: namespace
+* Specify variable anywhere, not just at the top of a method
+* Scoped variables (declared inside an if for example)
+* Forward referencing
+* Additional loop constructs
+** loop/until
+** label
+** while X with entry
+** exit, break, continue, retry "label"
+** goto
+* Switch statement with or without fallthru
+* Default/optional parameters
+* Better scope modifiers
+** export
+** public (public include)
+** override
+* Built in sockets
+* Built in regular expressions
+
+=== Tool Additions/Enhancements
+
+* General
+** Warning system
+** Preprocessor
+** Configuration system (eu.cfg)
+** Version display for all tools
+* Translator
+** Compiles directly
+** Can write a makefile
+** Can compiled/bind a resource file on Windows
+* Interpreter
+** New test mode
+** Batch mode for unattended execution such as a CGI application
+* New independent shrouder
+* Coverage Analysis
+* Disassembler
+* EuDist
+* Documentation Tool (eudoc/creolehtml)
+* Unit testing framework (std/unittest.e and eutest)
+
