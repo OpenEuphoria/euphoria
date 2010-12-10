@@ -314,15 +314,18 @@ CREOLEHTML=creolehtml.exe
 !endif
 
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-all :  .SYMBOLIC
-    @echo ------- ALL -----------
-	wmake -h library $(VARS)
+all :  .SYMBOLIC core
+    @echo ------- ALL/OTHERS -----------
 	wmake -h library DEBUG=1 MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-	wmake -h interpreter $(VARS)
-	wmake -h translator $(VARS)
 	wmake -h backend $(VARS)
 	wmake -h binder $(VARS)
 	wmake -h shrouder $(VARS)
+
+core : .SYMBOLIC
+    @echo ------- CORE -----------
+	wmake -h library $(VARS)
+	wmake -h interpreter $(VARS)
+	wmake -h translator $(VARS)
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
