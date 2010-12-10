@@ -13,6 +13,7 @@ rem ============================================================
 SET ECBIN=
 SET DISABLED_MANAGED_MEM=
 SET SCP_CLIENT=pscp -C
+SET SSH_CLIENT=plink -C
 
 rem ============================================================
 rem Be sure to start with a blank config.wat
@@ -130,6 +131,12 @@ IF "%1" == "--scp-client" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--ssh-client" (
+	set SSH_CLIENT=%2
+	SHIFT
+	GOTO EndLoop
+)
+
 IF "%1" == "--help" (
 	GOTO Help
 )
@@ -148,6 +155,7 @@ rem ============================================================
 :Continue
 
 echo SCP=%SCP_CLIENT% >> config.wat
+echo SSH=%SSH_CLIENT% >> config.wat
 
 if "%HAS_EUBIN%" == "1" (
 	SET NOEU=

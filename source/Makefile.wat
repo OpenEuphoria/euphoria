@@ -771,8 +771,13 @@ $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-templat
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
-manual-upload: .SYMBOLIC manual
-	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
+manual-send: .SYMBOLIC manual
+	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(OE_USERNAME)@openeuphoria.org:/home/euweb/docs
+
+manual-reindex: .SYMBOLIC
+	$(SSH) $(OE_USERNAME)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
+
+manual-upload: manual-send manual-reindex
 
 htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
 

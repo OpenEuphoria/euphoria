@@ -552,9 +552,13 @@ $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDI
 
 manual : $(BUILDDIR)/docs/index.html
 
-manual-upload : manual
+manual-send : manual
 	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
-	ssh $(oe_username)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
+
+manual-reindex:
+	$(SSH) $(oe_username)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
+
+manual-upload: manual-send manual-reindex
 
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
