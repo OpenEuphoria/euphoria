@@ -36,12 +36,15 @@ constant cmdopts = {
 	{ "wait",             0, "Wait on summary", {} },
 	{ "accumulate",       0, "Count the individual tests in each file", {} },
 	{ "html",             0, "Enable HTML output mode", { } },
-	{ "html-file",        0, "output file for html log output", { HAS_PARAMETER, "filename" }},
+	{ "html-file",        0, "output file for html log output", { HAS_PARAMETER, "filename" } },
 	{ "testopt",          0, "option for tester", { HAS_PARAMETER, "test-opt"} },
-	{ "exe",              0, "interpreter path", { HAS_PARAMETER, "executable" } },
-	{ "bind",             0, "path to eubind", { HAS_PARAMETER, "executable"} },
-	{ "eub",              0, "path to backend runner", { HAS_PARAMETER, "excutable" } },
-	{ "ec",               0, "translator path",  { HAS_PARAMETER, "executable" } },
+	{ "eui",              0, "interpreter command", { HAS_PARAMETER, "command" } },
+	{ "exe",              0, "DEPRECATED interpreter path", { HAS_PARAMETER, "command" } },
+	{ "eubind",           0, "binder command", { HAS_PARAMETER, "command" } },
+	{ "bind",             0, "DEPRECATED path to eubind", { HAS_PARAMETER, "command"} },
+	{ "eub",              0, "path to backend runner", { HAS_PARAMETER, "command" } },
+	{ "euc",              0, "translator command", { HAS_PARAMETER, "command" } },
+	{ "ec",               0, "DEPRECATED translator path",  { HAS_PARAMETER, "command" } },
 	{ "trans",            0, "translate using default translator", { } },
 	{ "cc",               0, "C compiler (wat or gcc)", { HAS_PARAMETER, "compiler name" } },
 	{ "lib",              0, "runtime library path", { HAS_PARAMETER, "library" } },
@@ -1228,10 +1231,16 @@ procedure main()
 			case "verbose" then
 				verbose_switch = 1
 				
-			case "exe" then
+			case "eui", "exe" then
 				executable = val
 				
-			case "ec" then
+			case "eubind", "bind" then
+				binder = val
+				
+			case "eub" then
+				eub_path = "-eub " & val
+			
+			case "euc", "ec" then
 				translator = val
 				
 			case "trans" then
@@ -1284,15 +1293,9 @@ procedure main()
 			case "testopt" then
 				test_options &= " -" & val & " "
 				
-			case "bind" then
-				binder = val
-				
 			case "html-file" then
 				html_fn = val
 				
-			case "eub" then
-				eub_path = "-eub " & val
-			
 			case cmdline:EXTRAS then
 				if length( val ) then
 					files = build_file_list( val )
