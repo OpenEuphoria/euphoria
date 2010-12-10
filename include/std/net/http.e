@@ -395,6 +395,22 @@ end function
 --   If result is a positive integer, that represents a HTTP error value from
 --   the server.
 --
+-- Example:
+--
+-- <eucode>
+-- include std/console.e -- for display()
+-- include std/net/http.e
+--
+-- object result = http_get("http://example.com") 
+-- if atom(result) then 
+--    printf(1, "Web error: %d\n", result) 
+--     abort(1) 
+-- end if 
+-- 
+-- display(result[1]) -- header key/value pairs
+-- printf(1, "Content: %s\n", { result[2] }) 
+-- </eucode>
+--
 -- See Also:
 --   [[:http_post]]
 --
