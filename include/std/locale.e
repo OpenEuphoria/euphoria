@@ -291,6 +291,7 @@ public function translate(sequence word, object langmap = 0, object defval="", i
 			langmap = def_lang
 		end if
 	end if
+
 	if atom(langmap) or length(langmap) != 2 then
 		-- Not a valid language map passed.
 		return defval
@@ -301,7 +302,6 @@ public function translate(sequence word, object langmap = 0, object defval="", i
 	else
 		return map:get(langmap[2], word, defval)
 	end if
-
 end function
 
 --**
@@ -337,6 +337,7 @@ end function
 --    --> "G'day Bob, How's the family?"
 -- </eucode>
 -- 
+
 public function trsprintf(sequence fmt, sequence data, object langmap = 0)
 	for i = 1 to length(data) do
 		if sequence(data[i]) then
@@ -346,7 +347,9 @@ public function trsprintf(sequence fmt, sequence data, object langmap = 0)
 			end if
 		end if
 	end for
+
 	fmt = translate(fmt, langmap, mathcons:PINF)
+
 	if search:begins("__", fmt) then
 		fmt = fmt[3 .. $]
 	end if
@@ -362,98 +365,97 @@ end function
 ------------------------------------------------------------------------------------------
 
 ifdef WINDOWS then
-constant
-	lib = open_dll("MSVCRT.DLL"),
-	lib2 = open_dll("KERNEL32.DLL"),
-	f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I),
-	f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I),
-	f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL         = 0,
---	LC_COLLATE     = 1,
---	LC_CTYPE       = 2,
-	LC_MONETARY    = 3,
-	LC_NUMERIC     = 4,
---	LC_TIME        = 5,
---	LC_MESSAGES    = 6,
-	$
+	constant
+		lib = open_dll("MSVCRT.DLL"),
+		lib2 = open_dll("KERNEL32.DLL"),
+		f_strfmon = define_c_func(lib2, "GetCurrencyFormatA", {I, I, P, P, P, I}, I),
+		f_strfnum = define_c_func(lib2, "GetNumberFormatA", {I, I, P, P, P, I}, I),
+		f_setlocale = define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL         = 0,
+	--	LC_COLLATE     = 1,
+	--	LC_CTYPE       = 2,
+		LC_MONETARY    = 3,
+		LC_NUMERIC     = 4,
+	--	LC_TIME        = 5,
+	--	LC_MESSAGES    = 6,
+		$
 
-/* constant
-	FORMAT_SIZE    = 6 * 4,
-	NUM_DIGITS     = 0,
-	LEADING_ZERO   = 4,
-	GROUPING       = 8,
-	DECIMAL_SEP    = 12,
-	THOUSANDS_SEP  = 16,
-	NEGATIVE_ORDER = 20
-*/
-	sequence current_locale = ""
+	/* constant
+		FORMAT_SIZE    = 6 * 4,
+		NUM_DIGITS     = 0,
+		LEADING_ZERO   = 4,
+		GROUPING       = 8,
+		DECIMAL_SEP    = 12,
+		THOUSANDS_SEP  = 16,
+		NEGATIVE_ORDER = 20
+	*/
+		sequence current_locale = ""
 
 elsifdef LINUX then
-constant
-	lib = dll:open_dll(""),
-	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
-	f_strfnum = -1,
-	f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL      = 6,
---	LC_CTYPE    = 0,
-	LC_NUMERIC  = 1,
---	LC_TIME     = 2,
---	LC_COLLATE  = 3,
-	LC_MONETARY = 4,
---	LC_MESSAGES = 5,
-	$
+	constant
+		lib = dll:open_dll(""),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 6,
+	--	LC_CTYPE    = 0,
+		LC_NUMERIC  = 1,
+	--	LC_TIME     = 2,
+	--	LC_COLLATE  = 3,
+		LC_MONETARY = 4,
+	--	LC_MESSAGES = 5,
+		$
 
 elsifdef BSD then
-constant
-	lib = dll:open_dll("libc.so"),
-	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
-	f_strfnum = -1,
-	f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL      = 0,
---	LC_COLLATE  = 1,
---	LC_CTYPE    = 2,
-	LC_MONETARY = 3,
-	LC_NUMERIC  = 4,
---	LC_TIME     = 5,
---	LC_MESSAGES = 6,
-	$
+	constant
+		lib = dll:open_dll("libc.so"),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 0,
+	--	LC_COLLATE  = 1,
+	--	LC_CTYPE    = 2,
+		LC_MONETARY = 3,
+		LC_NUMERIC  = 4,
+	--	LC_TIME     = 5,
+	--	LC_MESSAGES = 6,
+		$
 
 elsifdef OSX then
-constant
-	lib = dll:open_dll("libc.dylib"),
-	f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
-	f_strfnum = -1,
-	f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
-	f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
-	LC_ALL      = 0,
---	LC_COLLATE  = 1,
--- 	LC_CTYPE    = 2,
-	LC_MONETARY = 3,
-	LC_NUMERIC  = 4,
---	LC_TIME     = 5,
---	LC_MESSAGES = 6,
-	$
+	constant
+		lib = dll:open_dll("libc.dylib"),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfnum = -1,
+		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		LC_ALL      = 0,
+	--	LC_COLLATE  = 1,
+	-- 	LC_CTYPE    = 2,
+		LC_MONETARY = 3,
+		LC_NUMERIC  = 4,
+	--	LC_TIME     = 5,
+	--	LC_MESSAGES = 6,
+		$
 	
 elsedef
-
-constant
-	lib = -1,
-	lib2 = -1,
-	f_strfmon = -1,
-	f_strfnum = -1,
-	f_setlocale = -1,
-	f_strftime = -1,
-	LC_ALL         = -1,
---	LC_COLLATE     = -1,
---	LC_CTYPE       = -1,
-	LC_MONETARY    = -1,
-	LC_NUMERIC     = -1,
---	LC_TIME        = -1,
---	LC_MESSAGES    = -1,
-	$
+	constant
+		lib = -1,
+		lib2 = -1,
+		f_strfmon = -1,
+		f_strfnum = -1,
+		f_setlocale = -1,
+		f_strftime = -1,
+		LC_ALL         = -1,
+	--	LC_COLLATE     = -1,
+	--	LC_CTYPE       = -1,
+		LC_MONETARY    = -1,
+		LC_NUMERIC     = -1,
+	--	LC_TIME        = -1,
+	--	LC_MESSAGES    = -1,
+		$
 
 end ifdef
 
