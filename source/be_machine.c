@@ -167,16 +167,6 @@ extern int Argc;
 /* Local variables */
 /*******************/
 
-char *version_name =
-#ifdef EWINDOWS
-"WIN32";
-#endif
-
-#ifdef EUNIX
-"Linux";
-#endif
-
-
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
 
@@ -329,13 +319,6 @@ void EndGraphics()
 	tcsetattr(STDIN_FILENO, TCSANOW, &savetty);
 #endif
 }
-
-void not_supported(char *feature)
-/* Report that a feature isn't supported on this platform */
-{
-	RTFatal("%s is not supported in Euphoria for %s", feature, version_name);
-}
-
 
 #define MODE_19_BASE ((unsigned)0xA0000)
 #define MODE_19_WIDTH 320
@@ -1639,7 +1622,7 @@ static object use_vesa(object x)
 /* turn on/off vesa flag */
 {
 	UNUSED(x);
-	not_supported("use_vesa()");
+	RTFatal("use_vesa() is no longer supported in Euphoria");
 	return ATOM_1;
 }
 
