@@ -1232,16 +1232,34 @@ procedure main()
 				verbose_switch = 1
 				
 			case "eui", "exe" then
-				executable = val
+				executable = canonical_path(val)
+				if not file_exists(executable) then
+					printf(1, "Specified interpreter via -eui parameter was not found\n")
+					abort(1)
+				end if
 				
 			case "eubind", "bind" then
-				binder = val
+				binder = canonical_path(val)
+				if not file_exists(binder) then
+					printf(1, "Specified binder via -eubind parameter was not found\n")
+					abort(1)
+				end if
 				
 			case "eub" then
-				eub_path = "-eub " & val
+				sequence tmp = canonical_path(val)
+				if not file_exists(tmp) then
+					printf(1, "Specified backend via -eub parameter was not found\n")
+					abort(1)
+				end if
+
+				eub_path = "-eub " & tmp
 			
 			case "euc", "ec" then
-				translator = val
+				translator = canonical_path(val)
+				if not file_exists(translator) then
+					printf(1, "Specified translator via -euc parameter was not found\n")
+					abort(1)
+				end if
 				
 			case "trans" then
 				if not length( translator ) then
@@ -1252,10 +1270,16 @@ procedure main()
 				compiler = "-" & val
 				
 			case "lib" then
-				library = "-lib " & val
+				sequence tmp = canonical_path(val)
+				if not file_exists(tmp) then
+					printf(1, "Specified library via -lib parameter was not found\n")
+					abort(1)
+				end if
+
+				library = "-lib " & tmp
 				
 			case "i", "d" then
-				for j = 1 to length( val ) do
+				for j = 1 to length(val) do
 					sequence option = sprintf( " -%s %s", {param, val[j] })
 					interpreter_options &= option
 					translator_options &= option
@@ -1265,6 +1289,7 @@ procedure main()
 				for j = 1 to length( val ) do
 					interpreter_options &= sprintf( " -coverage %s", {val[j]} )
 				end for
+
 				if not length( coverage_db ) then
 					coverage_db = "-"
 				end if
