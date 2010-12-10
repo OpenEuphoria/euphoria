@@ -19,7 +19,7 @@ public constant
 	UOSX = OSX,
 	UOPENBSD = OPENBSD,
 	UNETBSD = NETBSD,
-	DEFAULT_EXTS = { ".ex", ".exw", ".exd", "", ".ex" }
+	DEFAULT_EXTS = { ".ex", ".exw", "", ".ex" }
 
 -- For cross-translation:
 public integer
