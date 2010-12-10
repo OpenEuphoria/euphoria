@@ -3,6 +3,9 @@
 4.0.0 has not yet been released. These changes are available in the latest SVN trunk. 
 4.0.0 is scheduled to be released on December 22, 2010.
 
+For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see 
+[[:What's new in 4.0?]] section of this manual.
+
 === Deprecation
 
 === Removed
