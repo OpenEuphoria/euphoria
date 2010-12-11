@@ -29,11 +29,11 @@ It also sets the environment variable **EUDIR** to the Euphoria directory.
 === Linux and FreeBSD
 
 Euphoria may be installed using either a //Unix// archive ( ##.tar.gz## or ##.tar.bz2## ) 
-or, a distribution specific "package", if available.
+or, a distribution specific package, if available.
 
 :http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
 
-The //Unix// tarball archive is laid out similarly to the //Windows// directory 
+The //Unix// tarball "Archive" is laid out similarly to the //Windows// directory 
 structure. This may be convenient if working cross-platform between
 //Windows// and //Unix//. The files at ~SourceForge are also in this
 form, making it convenient if you with to use updates directly from
@@ -65,10 +65,15 @@ Look for an installation package for Apple installations.
 
 :http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
 
+== DOS
+
+Only up to Euphoria 3.1 is there DOS support. DOS developers are 
+invited to contribute their skills.
+
 === Nightly Builds
 
 
-You can get access to the latest Euphoria source-code that the Developers are
+You have access to the latest Euphoria source-code that the Developers are
 working on:
 
 :http://rapideuphoria.svn.sourceforge.net/
@@ -103,6 +108,7 @@ The default for the //Windows// installation, and optional for a
 //Unix// installation:
 
 {{{
+    |
     |__ euphoria
     |         file_id.diz
     |         License.txt
@@ -138,8 +144,7 @@ The default for the //Windows// installation, and optional for a
     |
     |__ tests            (unit tests for Euphoria)
     |
-    |__ packaging        (software for making installation packages)
-   
+    |__ packaging        (software for making installation packages) 
 
 }}}
 
@@ -149,7 +154,6 @@ and the ##win32## subdirectories are not included in the
  //Linux/FreeBSD// distribution. In this manual, directory names are shown
  using backslash (**\**). //Linux/FreeBSD// users should substitute forward
  slash (**/**).
-
 
 The "Debian Package" installs Euphoria into these directories:
 
@@ -169,13 +173,10 @@ The "Debian Package" installs Euphoria into these directories:
    |
    |__ /etc/euphoria                  ( eu.cfg )
 
-
+}}}
 
 The "include", "demo" and "tutorial" directories are the same in
 //Windows// and //Unix//.
-
-
-
 
 
 %%output=configuration
