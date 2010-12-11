@@ -88,9 +88,14 @@
 #       Run eutest on only two unit test files.
 #
 
+!ifndef MAKEFILE
+MAKEFILE=Makefile.wat
+!endif
+
 !ifndef CONFIG
 CONFIG=config.wat
 !endif
+
 !include $(CONFIG)
 
 !ifndef CCOM
@@ -102,6 +107,7 @@ LIBEXT=lib
 !endif
 
 BASEPATH=$(BUILDDIR)\pcre
+
 !include pcre\objects.wat
 
 FULLBUILDDIR=$(BUILDDIR)
@@ -316,16 +322,16 @@ CREOLEHTML=creolehtml.exe
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
 all :  .SYMBOLIC core
     @echo ------- ALL/OTHERS -----------
-	wmake -h library DEBUG=1 MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
-	wmake -h backend $(VARS)
-	wmake -h binder $(VARS)
-	wmake -h shrouder $(VARS)
+	wmake -f $(MAKEFILE) -h library DEBUG=1 MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
+	wmake -f $(MAKEFILE) -h backend $(VARS)
+	wmake -f $(MAKEFILE) -h binder $(VARS)
+	wmake -f $(MAKEFILE) -h shrouder $(VARS)
 
 core : .SYMBOLIC
     @echo ------- CORE -----------
-	wmake -h library $(VARS)
-	wmake -h interpreter $(VARS)
-	wmake -h translator $(VARS)
+	wmake -f $(MAKEFILE) -h library $(VARS)
+	wmake -f $(MAKEFILE) -h interpreter $(VARS)
+	wmake -f $(MAKEFILE) -h translator $(VARS)
 
 code-page-db : $(BUILDDIR)\ecp.dat .SYMBOLIC
 
@@ -386,11 +392,11 @@ BE_FLAGS = /ol /zp4 /d$(OSFLAG) /5r /dEWATCOM  /dEOW $(%ERUNTIME) $(%EBACKEND) $
 	
 library : .SYMBOLIC runtime
     @echo ------- LIBRARY -----------
-	wmake -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj$(DEBUG) $(VARS) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h $(LIBTARGET) OS=$(OS) OBJDIR=$(OS)libobj$(DEBUG) $(VARS) MANAGED_MEM=$(MANAGED_MEM)
 
 winlibrary : .SYMBOLIC
     @echo ------- WINDOWS LIBRARY -----------
-	wmake -h OS=WIN library  $(VARS)
+	wmake -f $(MAKEFILE) -h OS=WIN library  $(VARS)
 
 runtime: .SYMBOLIC 
     @echo ------- RUNTIME -----------
@@ -405,7 +411,7 @@ $(LIBTARGET) : $(BUILDDIR)\$(OBJDIR)\back $(EU_LIB_OBJECTS)
 !ifdef OBJDIR
 
 objlist : .SYMBOLIC
-	wmake -h $(VARS) OS=$(OS) EU_NAME_OBJECT=$(EU_NAME_OBJECT) OBJDIR=$(OBJDIR) $(BUILDDIR)\$(OBJDIR).wat EX=$(EUBIN)\eui.exe
+	wmake -f $(MAKEFILE) -h $(VARS) OS=$(OS) EU_NAME_OBJECT=$(EU_NAME_OBJECT) OBJDIR=$(OBJDIR) $(BUILDDIR)\$(OBJDIR).wat EX=$(EUBIN)\eui.exe
     
 $(BUILDDIR)\$(OBJDIR)\back : .EXISTSONLY $(BUILDDIR)\$(OBJDIR)
     -mkdir $(BUILDDIR)\$(OBJDIR)\back
@@ -444,9 +450,9 @@ exsource : .SYMBOLIC $(BUILDDIR)\$(OBJDIR)\main-.c
 !ifeq EUPHORIA 1
 translate source : .SYMBOLIC  
     @echo ------- TRANSLATE WIN -----------
-	wmake -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
-	wmake -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
-	wmake -h backendsource EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
+	wmake -f $(MAKEFILE) -h exwsource EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
+	wmake -f $(MAKEFILE) -h ecwsource EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
+	wmake -f $(MAKEFILE) -h backendsource EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)  $(VARS)
 
 
 $(TRUNKDIR)\tests\ecp.dat : $(BUILDDIR)\ecp.dat
@@ -484,7 +490,7 @@ report: .SYMBOLIC
 	cd ..\source
 
 tester: .SYMBOLIC 
-	wmake -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eutestdr\eutest.exe BUILD_TOOLS=1 OBJDIR=eutestdr
 
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
@@ -498,16 +504,16 @@ $(BUILDDIR)\eushroud.exe : translator library
 	
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------
-	wmake -h $(BUILDDIR)\eutest.exe $(VARS)
-	wmake -h $(BUILDDIR)\euloc.exe $(VARS)
-	wmake -h $(BUILDDIR)\eucoverage.exe $(VARS)
-	wmake -h $(BUILDDIR)\eudis.exe $(VARS)
-	wmake -h $(BUILDDIR)\eudist.exe $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eutest.exe $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\euloc.exe $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eucoverage.exe $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eudis.exe $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eudist.exe $(VARS)
 
 tools-additional: .SYMBOLIC
     @echo ------- ADDITIONAL TOOLS -----------
-	wmake -h $(BUILDDIR)\eudoc.exe $(VARS)
-	wmake -h $(BUILDDIR)\creolehtml.exe $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eudoc.exe $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\creolehtml.exe $(VARS)
 
 tools-all: tools tools-additional
 
@@ -556,10 +562,10 @@ $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_COR
 	wrc -q -ad euiw.rc $(BUILDDIR)\euiw.exe
 
 interpreter : .SYMBOLIC
-	wmake -h $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-	wmake -h objlist OBJDIR=intobj $(VARS) EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS
-	wmake -h $(BUILDDIR)\euiw.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-	wmake -h $(BUILDDIR)\eui.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h objlist OBJDIR=intobj $(VARS) EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\euiw.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eui.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
 	@echo --------- install $(PREFIX) ------------
@@ -612,9 +618,9 @@ $(BUILDDIR)\euc.exe : $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_TRAN
 
 translator : .SYMBOLIC
     @echo ------- TRANSLATOR -----------
-	wmake -h $(BUILDDIR)\transobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-	wmake -h objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
-	wmake -h $(BUILDDIR)\euc.exe EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\transobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj  $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h objlist OBJDIR=transobj EU_NAME_OBJECT=EU_TRANSLATOR_OBJECTS $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\euc.exe EX=$(EUBIN)\eui.exe EU_TARGET=ec. OBJDIR=transobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS)
     @echo ------- BACKEND WIN -----------
@@ -630,9 +636,9 @@ $(BUILDDIR)\eubw.exe :  $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_BACKEND_RUNNER_OBJECT
 
 backend : .SYMBOLIC backendflag
     @echo ------- BACKEND -----------
-	wmake -h $(BUILDDIR)\backobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
-	wmake -h objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS $(VARS)
-	wmake -h $(BUILDDIR)\eubw.exe EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\backobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
+	wmake -f $(MAKEFILE) -h objlist OBJDIR=backobj EU_NAME_OBJECT=EU_BACKEND_RUNNER_OBJECTS $(VARS)
+	wmake -f $(MAKEFILE) -h $(BUILDDIR)\eubw.exe EX=$(EUBIN)\eui.exe EU_TARGET=backend. OBJDIR=backobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 $(BUILDDIR)\intobj\main-.c: $(BUILDDIR)\intobj\back $(EU_CORE_FILES) $(EU_INTERPRETER_FILES) $(EU_INCLUDES) $(CONFIG)
 $(BUILDDIR)\transobj\main-.c: $(BUILDDIR)\transobj\back $(EU_CORE_FILES) $(EU_TRANSLATOR_FILES) $(EU_INCLUDES) $(CONFIG)
@@ -716,7 +722,7 @@ $(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG)
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
     @echo ------- REG EXP -----------
 	cd pcre
-	wmake -h -f makefile.wat CONFIG=..\$(CONFIG) EOSTYPE=-D$(OSFLAG)
+	wmake -f $(MAKEFILE) -h -f makefile.wat CONFIG=..\$(CONFIG) EOSTYPE=-D$(OSFLAG)
 	cd ..
 !endif
 
