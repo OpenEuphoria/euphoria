@@ -23,3 +23,7 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 
 === Enhancements/Changes
 
+* Made previously private method ##iscon## in ##std/console.e## a public method named
+  ##[[:has_console]]## which will return TRUE/FALSE if the current application has a
+  console window attached
+
