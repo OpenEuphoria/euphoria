@@ -24,11 +24,16 @@ build() {
 package() {
   cd "$srcdir/$pkgname-$pkgver/source"
 
+  # Base and Tool install
   make DESTDIR="$pkgdir" install install-tools
+
+  # Install our license file per ArchLinux spec
+  mkdir -p "$pkgdir/usr/share/licenses/$pkgname"
+  install -m 644 "$srcdir/$pkgname-$pkgver/License.txt" "$pkgdir/usr/share/licenses/$pkgname"
+
+  # Create a default eu.cfg file
   mkdir -p "$pkgdir/etc/euphoria"
   echo [all] > "$pkgdir/etc/euphoria/eu.cfg"
   echo -i /usr/share/euphoria/include >> "$pkgdir/etc/euphoria/eu.cfg"
-  mkdir -p "$pkgdir/usr/share/licenses/$pkgname"
-  cp "$srcdir/$pkgname-$pkgver/License.txt" "$pkgdir/usr/share/licenses/$pkgname"
 }
 
