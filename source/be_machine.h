@@ -45,6 +45,7 @@ extern int col_max;  /* current number of text columns on screen */
 int consize_ioctl;	/* 1 if line_max or col_max came from ioctl */
 #endif
 
+int use_prompt();
 void EndGraphics();
 void InitGraphics();
 object SetTColor(object x);

@@ -26,6 +26,8 @@ struct char_cell alt_image_debug[MAX_LINES][MAX_COLS];
   	1 - if the this is a console app.
 	0 - if this is a Windows Windowed application.
 */
+
+extern void check_has_console();
 extern int console_application();
 
 #ifdef EWINDOWS

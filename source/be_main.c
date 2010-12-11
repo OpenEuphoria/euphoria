@@ -46,7 +46,7 @@
 #include "be_execute.h"
 #include "be_alloc.h"
 #include "be_rterror.h"
-#include "be_execute.h"
+#include "be_w.h"
 
 /**********************/
 /* Exported variables */
@@ -64,6 +64,8 @@ void be_init()
 /* Main routine for Interpreter back end */
 {
 	char *p;
+
+	check_has_console(); // Initialize static cached variable
 
 	EuConsole = (getenv("EUCONS") != NULL && atoi(getenv("EUCONS")) == 1);
 	clocks_per_sec = CLOCKS_PER_SEC;

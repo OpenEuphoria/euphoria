@@ -179,6 +179,10 @@ LRESULT CALLBACK call_back8(unsigned, unsigned, unsigned, unsigned, unsigned,
 LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned, unsigned);
 
+int use_prompt() {
+	return (is_batch == 0 && is_test == 0 && has_console() == 0);
+}
+
 #ifdef EMINGW
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
@@ -2975,6 +2979,9 @@ object machine(object opcode, object x)
 
             case M_SOCK_RECVFROM:
                 return eusock_recvfrom(x);
+	
+			case M_HAS_CONSOLE:
+				return has_console();
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

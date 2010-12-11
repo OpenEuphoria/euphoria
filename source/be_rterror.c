@@ -117,8 +117,6 @@ static IFILE conin;
 static int first_debug;           /* first time into debug screen */
 static long trace_line;      /* current traced line */
 
-
-
 /**********************/
 /* Declared functions */
 /**********************/
@@ -386,7 +384,6 @@ static void Refresh(long line_num, int vars_too)
 
 	UpdateGlobals();
 }
-
 
 static void Move(long line_num)
 /* update the inverse video line */
@@ -1372,7 +1369,6 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 	CleanUpError_va(msg, s_ptr, ap);
 	va_end(ap);
 }
-
 
 void RTFatalType(int *pc)
 /* handle type-check failures */
