@@ -1,0 +1,34 @@
+# Contributor: Jeremy Cowgar <jeremy@cowgar.com>
+pkgname=euphoria
+pkgver=4.0.0.RC2
+pkgrel=1
+pkgdesc="Fast interpreted or compiled general purpose programming language"
+url="http://openeuphoria.org"
+license=('custom:"OpenEuphoria License"')
+source=(http://openeuphoria.org/dist/Linux/$pkgname-$pkgver.tar.gz)
+md5sums=('c446f94a94035881c5c101deb9d194b8')
+arch=('i686' 'x86_64')
+
+if [ "$CARCH" = "x86_64" ]; then
+  depends=('lib32-glibc')
+fi
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver/source"
+
+  ./configure --prefix=/usr
+  make
+  make tools
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver/source"
+
+  make DESTDIR="$pkgdir" install install-tools
+  mkdir -p "$pkgdir/etc/euphoria"
+  echo [all] > "$pkgdir/etc/euphoria/eu.cfg"
+  echo -i /usr/share/euphoria/include >> "$pkgdir/etc/euphoria/eu.cfg"
+  mkdir -p "$pkgdir/usr/share/licenses/$pkgname"
+  cp "$srcdir/$pkgname-$pkgver/License.txt" "$pkgdir/usr/share/licenses/$pkgname"
+}
+
