@@ -30,6 +30,8 @@ list here, please see the reference section of this manual.
 * Built-in eu: namespace
 * Specify variable anywhere, not just at the top of a method. 
 * Scoped variables (declared inside an if for example)
+* Assign on declaration. You can now declare a variable and assign it an initial value on the same statement.
+* The ##object()## built-in function can now be used to safely test if a variable has been initialized or not.
 * Forward referencing. You no longer need to lexically declare a routine before using it.
 * Additional loop constructs ...
 ** loop/until
