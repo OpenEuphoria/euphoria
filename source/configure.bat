@@ -137,6 +137,12 @@ IF "%1" == "--ssh-client" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--wkhtmltopdf" (
+	echo WKHTMLTOPDF=1 >> config.wat
+	SHIFT
+	GOTO EndLoop
+)
+
 IF "%1" == "--help" (
 	GOTO Help
 )
