@@ -16,23 +16,26 @@ list here, please see the reference section of this manual.
 
 === Language Enhancements
 
-* Conditional compilation ifdef
-* Multiline strings
-* Multiline comments
-* Binary, Octal and new Hexadecimal number format
-* Hexadecimal string format
-* Ignorning function results
-* Optional list terminator ($)
+* Conditional compilation using the ##ifdef## directive.
+* Raw strings, which can include multilined text.
+* Multiline comments using the C-styled comments ##/* .. */##, which can be nested.
+* Binary, Octal and an alternative Hexadecimal number format - ##0b10 (2), 0t10 (8), 0x10 (16)##
+* Hexadecimal string formats. Use ##\x## to embed any byte value into a standard string,
+  or create an entire hexadecimal byte string using ##x" ... "##
+* Function results can now be ignored.
+* Optional list terminator. The final item in a list can be the dollar symbol (##$##).
+  This is just a place holder for the //end-of-list//, making it easier to
+  add and delete items from the source code without having to adjust the commas.
 * Enumerated values/types (enum, enum type)
 * Built-in eu: namespace
-* Specify variable anywhere, not just at the top of a method
+* Specify variable anywhere, not just at the top of a method. 
 * Scoped variables (declared inside an if for example)
-* Forward referencing
-* Additional loop constructs
+* Forward referencing. You no longer need to lexically declare a routine before using it.
+* Additional loop constructs ...
 ** loop/until
-** label
+** You can label a loop 
 ** while X with entry
-** exit, break, continue, retry "label"
+** exit, break, continue, retry. All with an optional "label" 
 ** goto
 * Switch statement with or without fallthru
 * Default/optional parameters
