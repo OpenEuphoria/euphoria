@@ -1000,22 +1000,25 @@ typedef struct _SYSTEMTIME {
 	}
 
 	// Trim off trailing whitespace
-	// N.B. 'fp_buf' should now be pointing to the null terminator at this point.
-	fp_buf--;
-	while (fp_buf != path)
+	if (fp_buf != path) 
 	{
-		if (*fp_buf == ' ' || *fp_buf == '\t')
+		// N.B. 'fp_buf' should now be pointing to the null terminator at this point.
+		fp_buf--;
+		while (fp_buf != path)
 		{
-			fp_buf--;
+			if (*fp_buf == ' ' || *fp_buf == '\t')
+			{
+				fp_buf--;
+			}
+			else
+			{
+				break;
+			}
 		}
-		else
-		{
-			break;
-		}
+		fp_buf++;
+		*fp_buf = '\0'; // Mark end of C string
 	}
-	fp_buf++;
-	*fp_buf = '\0'; // Mark end of C string
-
+	
 	if (fp_buf == path)
 	{
 		// Empty path so assume current directory
