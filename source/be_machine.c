@@ -2870,9 +2870,9 @@ object machine(object opcode, object x)
 #ifdef EMINGW
 				{
 					int slen = strlen(src);
-					dest = EMalloc(slen + 2);
-					copy_string(dest, src, slen + 1);
-					append_string(dest, "=", slen + 1);
+					dest = EMalloc(slen + 3);
+					copy_string(dest, src, slen + 2);
+					append_string(dest, "=", slen + 2);
 					/* on MinGW, putenv("var=") will unset the
 					 * variable. On any other system, use unsetenv()
 					 * as putenv("var=") will create an empty
