@@ -28,7 +28,7 @@ list here, please see the reference section of this manual.
   add and delete items from the source code without having to adjust the commas.
 * Enumerated values/types (enum, enum type)
 * Built-in eu: namespace
-* Specify variable anywhere, not just at the top of a method. 
+* Declare variable anywhere, not just at the top of a method. 
 * Scoped variables (declared inside an if for example)
 * Assign on declaration. You can now declare a variable and assign it an initial value on the same statement.
 * The ##object()## built-in function can now be used to safely test if a variable has been initialized or not.
@@ -37,16 +37,24 @@ list here, please see the reference section of this manual.
 ** loop/until
 ** You can label a loop 
 ** while X with entry
-** exit, break, continue, retry. All with an optional "label" 
+** exit, continue, retry. All with an optional "label" 
 ** goto
-* Switch statement with or without fallthru
-* Default/optional parameters
-* Better scope modifiers
+* Additional conditional constructs
+** Switch statement with or without fallthru
+** You can label an if or switch
+** ##break## keyword allows exiting from ##if## / ##switch## blocks
+* Default/optional parameters for routines
+* Additional scope modifiers
 ** export
 ** public (public include)
 ** override
 * Built in sockets
 * Built in regular expressions
+* Resource clean up that can be triggered manually, or when an object's reference count goes to zero
+* Automatic inlining of small routines
+* Built in, optimized sequence operations (##remove##, ##insert##, ##splice##, ##replace##, ##head##, ##tail##)
+* Built in peek and poke 2 byte values, 1 byte signed values, peek null terminated strings
+
 
 === Tool Additions/Enhancements
 
