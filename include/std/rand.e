@@ -256,7 +256,7 @@ end function
 -- This simulates the chance of something happening. For example, if you
 -- wnat something to happen with a probablity of 25 times out of 100 times then you code ##chance(25)##
 -- and if you want something to (most likely) occur 345 times out of 999 times, you code
--- ##chance(345, 999)###.
+-- ##chance(345, 999)##.
 --
 -- Example 1:
 -- <eucode>

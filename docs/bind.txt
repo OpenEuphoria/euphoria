@@ -66,8 +66,8 @@ The Euphoria interpreter will not perform tracing on a shrouded file. You must
 trace your original source.
 
 On //Unix//, the shrouder will make your shrouded file executable,
-and will add a ###!## line at the top, that will run ##eub.exe.## You
-can override this ###!## line by specifying your own ###!##
+and will add a ##!## line at the top, that will run ##eub.exe.## You
+can override this ##!## line by specifying your own ##!##
 line at the top of your main Euphoria file.
 
 Always keep a copy of your original source. There's no way to recover it from a 

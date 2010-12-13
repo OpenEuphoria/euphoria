@@ -71,7 +71,7 @@ to run CGI programs, or you may have problems with standard output. With
 Apache Web Server, you can have a first line in your program of:
 #!.\eui.exe to run your program using eui.exe in the current (cgi-bin)
 directory. Be careful that your first line ends with the line breaking characters
-appropriate for your platform, or the ###!## won't be handled correctly. You 
+appropriate for your platform, or the ##!## won't be handled correctly. You 
 must also set the execute permissions on your program correctly, and ##ex.err## 
 and ctrace.out must be writable by the server process or they won't be updated.
 
