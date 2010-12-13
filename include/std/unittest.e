@@ -195,8 +195,8 @@ end procedure
 --
 -- If a file crashes when it should not, this event is reported no matter the verbosity level.
 --
--- The command line switch ""-failed" causes verbosity to be set to medium at startup. The
--- command line switch ""-all" causes verbosity to be set to high at startup.
+-- The command line switch "-failed" causes verbosity to be set to medium at startup. The
+-- command line switch "-all" causes verbosity to be set to high at startup.
 --
 -- See Also:
 -- [[:test_report]]
