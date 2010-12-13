@@ -70,15 +70,15 @@ There are now enthusiastic users around the world.
 Euphoria is a very high-level programming language. It is unique among a
 crowd of conventional languages.
 
-=== First, Euphoria delivers the expected features of a modern language:
+=== Euphoria delivers the expected features of a modern language:
 
 * Open source
 * Free for personal and commercial use
 * Produces royalty-free, stand-alone, programs
-* Multi-platform {{{--}}} //Windows//, //Unix//
+* Multi-platform {{{--}}} //Windows//, //OS X//, //Linux//, //FreeBSD//,
+  //OpenBSD//, //NetBSD//, ...
 * Provides a choice of multi-platform GUI toolkits: IUP, GTK, wxWindows
-* Features a //Windows// IDE and GUI library written in Euphoria
-* Colored-syntax editors, profiling, and tracing of code
+* Syntax colored profiling, debugging and tracing of code
 * Dynamic memory allocation and efficient garbage collection
 * Interfacing to existing C libraries and databases
 * Well-documented, lots of example source-code, and an enthusiastic forum
@@ -144,8 +144,8 @@ Give Euphoria a try, and discover why it has enthusiastic supporters.
 
 === Products
 
-This **Euphoria Interpreter, Binder, and Translator** package is free for anyone
-to use.
+The //Euphoria// **Interpreter** is used to execute your code directly with no
+binding or compilation steps. Edit, run, edit, run.
 
 The //Euphoria// **Binder** is used to create stand-alone programs by "binding" the
 Euphoria interpreter onto your source code.
@@ -159,21 +159,21 @@ contained in this package, in whole or in part, so anyone can run a Euphoria
 program that you have developed. You are completely free to distribute any
 Euphoria programs that you write.
 
-
 === Requirements
 
 To run the //Windows// version of Euphoria, you need any Windows 95 or any later
 32-bit version of Windows.  It runs fine on XP and Vista.
 
-To run the //Unix// version of Euphoria you need a
-Linux distribution, that has libc6 or later. For example, Red Hat 5.2 or later
-will work fine. 
+To run the //Unix// version of Euphoria you need a supported //Unix// platform
+(Linux, FreeBSD, NetBSD or OpenBSD) and GCC v4.x. Binary packages are available
+for various platforms and distributions which remove the need for GCC to be
+present.
 
-To run the //Mac OS X// version of Euphoria, you need an Intel based Mac.
+To run the //OS X// version of Euphoria, you need an Intel based Mac.
 
 === Conventions used in the manual
 
-Euphoria has multiple interpreters, the main one being **##eui##**.
+Euphoria has multiple interpreters, the main one being ##eui##.
 
 * On //Windows// platforms you have two choices. If you run ##eui## then a console
 window is created. If you run ##euiw## then no console is created, making
@@ -190,8 +190,8 @@ operating systems that includes 95/ME/98/XP/NT/Vista/7/.
 You will see the constant ##WIN32## used for //Windows// specific code.
 
 * //Unix// will be a general reference to the family operating systems that
-includes Linux, FreeBSD, Mac OS X,... You will see the constant ##UNIX## used
-for Unix specific code. 
+includes Linux, FreeBSD, NetBSD, OpenBSD, Mac OS X,... You will see the
+constant ##UNIX## used for Unix specific code.
 
 Directory names in //Windows// use ##\## separators, while //Unix// systems use ##/##.
 //Unix// users should substitute ##/## when they examine sample code.
@@ -222,5 +222,4 @@ and be sure to join the active [[http://openeuphoria.org/forum/index.wc|discussi
 Euphoria is provided "as is" without warranty of any kind. In no event shall
 any authors of Euphoria or contributors to Euphoria be held liable for any
 damages arising from the use of, or inability to use, this product.
-
 
