@@ -433,7 +433,7 @@ e.g.
 </eucode>
 
 * On the first line only of your program, you can use a special comment
-beginning with the two character sequence ##!##. This is mainly used to tell
+beginning with the two character sequence ###!##. This is mainly used to tell
 //Unix// shells which program to execute the 'script' program with.
 
 e.g.
