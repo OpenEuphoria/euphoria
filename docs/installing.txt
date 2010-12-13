@@ -65,7 +65,7 @@ Look for an installation package for Apple installations.
 
 :http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
 
-== DOS
+=== DOS
 
 Only up to Euphoria 3.1 is there DOS support. DOS developers are 
 invited to contribute their skills.
