@@ -42,7 +42,11 @@ ifdef EUI then
 		cmds = { interpreter, "print_command_line.ex" } & command_arrays[i]
 		
 		cmdline = build_commandline( splice( cmds, option_switches(), 2 ) )
-		system_exec(cmdline, 2)
+		ifdef WINDOWS then
+			system(cmdline)
+		elsedef
+			system_exec(cmdline, 2)
+		end ifdef
 		sequence lines = read_lines("command_line.txt")
 	
 		if length(lines) != length(command_arrays[i]) then
