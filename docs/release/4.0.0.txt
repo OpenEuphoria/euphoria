@@ -10,6 +10,11 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 
 === Removed
 
+* ##creolehtml## is no longer shipped with Euphoria. It has been enhanced to support
+  multiple output formats and thus its name has been changed to simply ##creole##. HTML
+  remains the default output. Usage remains the same thus simply renaming build systems
+  to use ##creole## instead of ##creolehtml## will work.
+
 === Bug Fixes
 
 * [[ticket:438]], removed path test in ##demos/santiy.ex## as it does not function 
@@ -18,6 +23,11 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 * [[ticket:514]], fixed bug with internal ##dir## implementation that would prevent displaying
                   the content of a directory if given without a trailing slash on Windows.
 * [[ticket:517]], added a bounds check that could cause the translator or binder to crash
+* [[ticket:530]], ##t_command_line_quote## test fixed on Windows.
+* [[ticket:540]], ##[[:get_key]]## was described in both ##io.e## and ##console.e##, removed
+                  from ##io.e##
+* [[ticket:545]], ##[[:canonize_path]]## did not properly insert the drive letter on Windows
+                  when the path began with a forward slash ##/##.
 * Fix backend and interpreter to avoid "press any key" prompts when running as
   a console from a shared console window.
 
@@ -28,3 +38,6 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
   console window attached
 * ##[[:cmd_parse]]## now splits onto two lines an option whose command is longer than
   the maximum pad size and its description.
+* PDF documentation is now much better, generated from LaTeX sources.
+* Bundled ##creole## program supports multiple output formats now, the addition of LaTeX
+  for great printed or PDF documentation from your creole sources.
