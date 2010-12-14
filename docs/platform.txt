@@ -27,9 +27,6 @@ Apple's **OS X**. OS X is also based on the UNIX
 operating system. While it is closed source, it is gaining a wide
 following due to it's ease of use and power.
 
-**Sun OS**.  Sun OS was developed by and is owned
-by SUN Microsystems Inc.  It is also based on UNIX.
-
 **OpenBSD**. Open BSD is also a UNIX-like
 Operating System and is developed by volunteers.
 
