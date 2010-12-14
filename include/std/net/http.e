@@ -31,14 +31,14 @@ constant FR_SIZE = 4
 --
 
 public enum by -1
-	ERR_MALFORMED_URL = -1,        -- -1
-	ERR_INVALID_PROTOCOL,          -- -2
-	ERR_INVALID_DATA,              -- -3
-	ERR_INVALID_DATA_ENCODING,     -- -4
-	ERR_HOST_LOOKUP_FAILED,        -- -5
-	ERR_CONNECT_FAILED,            -- -6
-	ERR_SEND_FAILED,               -- -7
-	ERR_RECEIVE_FAILED             -- -8
+	ERR_MALFORMED_URL = -1,
+	ERR_INVALID_PROTOCOL,
+	ERR_INVALID_DATA,
+	ERR_INVALID_DATA_ENCODING,
+	ERR_HOST_LOOKUP_FAILED,
+	ERR_CONNECT_FAILED,
+	ERR_SEND_FAILED,
+	ERR_RECEIVE_FAILED
 
 --****
 -- === Constants
