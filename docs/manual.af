@@ -243,7 +243,7 @@
 ../include/std/win32/sounds.e
 
 ########
-:%%output=unsupported
+:%%output=unsup_features
 := Unsuppored Features
 :<<LEVELTOC level=1 depth=2>>
 

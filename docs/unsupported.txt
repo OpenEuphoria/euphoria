@@ -1,5 +1,7 @@
 == Unsupported Features
+
 :<<LEVELTOC level=2 depth=4>>
+
 These are features that have been implemented either partly
 or fully, but are not officially part of the Euphoria Language. They may
 one day be officially sanctioned and thus fully supported, but that is
@@ -52,8 +54,13 @@ these to make any sense in the encoding the coder is using. That is to say,
 it is possible for the coder to use the x"", u"", and U"" syntax to create
 literals that are **not valid** UTF strings.
 
-There are routines for working with Unicode strings and for validating,
-converting and working with Unicode strings.  See [[:Unicode]].
+!!
+!! WHERE? The link is invalid, I do not see any in the manual
+!!
+!! There are routines for working with Unicode strings and for
+!! validating, converting and working with Unicode strings. See
+!! [[:Unicode]].
+!!
 
 Hexadecimal strings can be used to encode UTF-8 strings, even though the 
 resulting string does not have to be a valid UTF-8 string. 

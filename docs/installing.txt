@@ -108,44 +108,43 @@ The default for the //Windows// installation, and optional for a
 //Unix// installation:
 
 {{{
-    |
-    |__ euphoria
-    |         file_id.diz
-    |         License.txt
-    |
-    |__ bin 
-    |     Interpreter    ( eui.exe and euiw.exe,  if on Windows)
-    |                    ( eui, if on Unix)
-    |     Binder         ( eubind, with eub )
-    |     Translator     ( euc.exe, if on Windows)
-    |                    ( euc, if on Unix)
-    |     Utilities      ( bugreport.ex, bench.ex, ed.ex, ...  )
-    |
-    |__ include 
-    |      |             ( original include files )
-    |      |
-    |      |__ std       (standard Euphoria library: file.e, sequence.e, ...)
-    |      |
-    |      |__ euphoria  (Euphoria specific)
-    |
-    |
-    |__ docs             ( html and pdf documentation files )
-    |
-    |__ tutorial         (small tutorial programs to help you learn Euphoria)
-    |
-    |__ demo             (generic demo programs that run on all platforms)
-    |     |
-    |     |__ win32      ( Windows specific demo programs (optional) )
-    |     |__ unix       ( Linux/FreeBSD/OS X specific demo programs (optional))
-    |     |__ langwar    ( language war game for Linux/FreeBSD/OS X )
-    |     |__ bench      ( benchmark program )
-    |
-    |__ source           (the complete source code for: interpreter, translator)
-    |
-    |__ tests            (unit tests for Euphoria)
-    |
-    |__ packaging        (software for making installation packages) 
-
+|
+|__ euphoria
+|         file_id.diz
+|         License.txt
+|
+|__ bin 
+|     Interpreter    ( eui.exe and euiw.exe,  if on Windows)
+|                    ( eui, if on Unix)
+|     Binder         ( eubind, with eub )
+|     Translator     ( euc.exe, if on Windows)
+|                    ( euc, if on Unix)
+|     Utilities      ( bugreport.ex, bench.ex, ed.ex, ...  )
+|
+|__ include 
+|      |             ( original include files )
+|      |
+|      |__ std       (standard Euphoria library: file.e, sequence.e, ...)
+|      |
+|      |__ euphoria  (Euphoria specific)
+|
+|
+|__ docs             ( html and pdf documentation files )
+|
+|__ tutorial         (small tutorial programs to help you learn Euphoria)
+|
+|__ demo             (generic demo programs that run on all platforms)
+|     |
+|     |__ win32      ( Windows specific demo programs (optional) )
+|     |__ unix       ( Linux/FreeBSD/OS X specific demo programs (optional))
+|     |__ langwar    ( language war game for Linux/FreeBSD/OS X )
+|     |__ bench      ( benchmark program )
+|
+|__ source           (the complete source code for: interpreter, translator)
+|
+|__ tests            (unit tests for Euphoria)
+|
+|__ packaging        (software for making installation packages)
 }}}
 
 
@@ -158,21 +157,20 @@ and the ##win32## subdirectories are not included in the
 The "Debian Package" installs Euphoria into these directories:
 
 {{{
-   |
-   |__ /usr/bin                       (executables: eui, euc, ... )
-   |       
-   |__ /usr/share/euphoria     
-   |                     |   
-   |                     |__ bin      (utility programs)
-   |                     |__ demo     (general demonstration programs)
-   |                     |__ include  (standard library)
-   |                     |__ source   (source-code for Euphoria)
-   |                     |__ tutorial (tutorial programs for learning Euphoria)
-   |
-   |__ /usr/share/doc/euphoria        (html and pdf documentation)
-   |
-   |__ /etc/euphoria                  ( eu.cfg )
-
+|
+|__ /usr/bin                       (executables: eui, euc, ... )
+|       
+|__ /usr/share/euphoria     
+|                     |   
+|                     |__ bin      (utility programs)
+|                     |__ demo     (general demonstration programs)
+|                     |__ include  (standard library)
+|                     |__ source   (source-code for Euphoria)
+|                     |__ tutorial (tutorial programs for learning Euphoria)
+|
+|__ /usr/share/doc/euphoria        (html and pdf documentation)
+|
+|__ /etc/euphoria                  ( eu.cfg )
 }}}
 
 The "include", "demo" and "tutorial" directories are the same in

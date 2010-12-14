@@ -20,8 +20,8 @@ with or without your changes.
 The high-speed version of the Euphoria Interpreter back-end is written in ANSI
 C, and can be compiled with many different C compilers. The complete source
 code is in ##euphoria\source##, along with ##execute.e##, the alternate,
-Euphoria-coded back-end. The generous [[:Euphoria License|Open source License]]
-allows both personal and commercial use, and unlike many other open source
+Euphoria-coded back-end. The generous Open Source License allows both
+personal and commercial use, and unlike many other open source
 licenses, your changes do not have to be made open source.
 
 Some additional 3rd-party legal restrictions might apply when you use the
