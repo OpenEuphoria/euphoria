@@ -7,7 +7,7 @@ include std/sort.e
 include std/text.e
 include std/unittest.e
 
-sequence fullname, pname, fname, fext, eolsep, driveid
+sequence fullname, pname, fname, fext, eolsep, driveid, entire_driveid
 integer sep
 
 test_equal( "init_curdir", initial_directory, init_curdir() )
@@ -18,12 +18,14 @@ ifdef UNIX then
     sep = '/'
     eolsep = "\n"
     driveid = ""
+	entire_driveid = ""
 elsedef
     fullname = "C:\\EUPHORIA\\DOCS\\readme.txt"
     pname = "\\EUPHORIA\\DOCS"
     sep = '\\'
     eolsep = "\r\n"
-    driveid = "C"
+    driveid = filesys:driveid(current_dir())
+	entire_driveid = driveid & ":"
 end ifdef
 
 fname = "readme"
@@ -164,9 +166,9 @@ end ifdef
 ifdef WINDOWS then
 	test_equal( "canonical_path() #6", lower(current_dir() & SLASH & "UPPERNAME"), canonical_path( "UPPERNAME",,1 ))
 	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME",,0 ))
+	test_equal( "canonical_path() #8", entire_driveid & SLASH & "john" & SLASH & "doe.txt",
+		canonical_path("/john/doe.txt"))
 end ifdef
-
-
 
 sequence walk_data = {}
 function test_walk( sequence path_name, sequence item )
@@ -254,7 +256,7 @@ test_equal( "abbreviate_path with extra non matching paths 1",
 	abbreviate_path( canonical_path( "t_filesys.e" ), { "foo", canonical_path( ".." & SLASH ) } ) )
 
 test_equal( "abbreviate_path with non matching paths 1", 
-	SLASH & "baz" & SLASH & "tests" & SLASH & "t_filesys.e",  
+	entire_driveid & SLASH & "baz" & SLASH & "tests" & SLASH & "t_filesys.e",
 	abbreviate_path( canonical_path( "/baz/tests/t_filesys.e" ) ) )
 
 test_equal( "pathname", current_dir(), pathname( current_dir() & SLASH & "t_filesys.e" ) )

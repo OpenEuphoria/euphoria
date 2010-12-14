@@ -1508,6 +1508,8 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
 			lDrive = lPath[1..2]
 			lPath = lPath[3..$]
+		else
+			lDrive = driveid(current_dir()) & ':'
 		end if
 	end ifdef
 
@@ -1530,7 +1532,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 			end if
 		end ifdef		
 	end if
-	
+
 	-- If the input is supposed to be a directory, ensure it ends in a path separator.
 	if ((directory_given != 0) and (lPath[$] != SLASH) ) then
 		lPath &= SLASH
@@ -1571,7 +1573,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 			lPath = lower(lPath)
 		end if
 	end ifdef
-	
+
 	return lPath
 end function
 
