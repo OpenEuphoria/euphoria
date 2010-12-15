@@ -594,7 +594,7 @@ test :
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
-		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
+		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		-verbose $(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
@@ -607,7 +607,7 @@ test-311 :
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
-		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
+		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		$(TESTFILE)
 		
 coverage-311 :
@@ -646,6 +646,7 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/preproc
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/tutorial 
@@ -673,6 +674,8 @@ endif
 	install ../demo/bench/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench 
 	install ../demo/langwar/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
 	install ../demo/unix/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
+	install ../demo/net/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
+	install ../demo/preproc/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/preproc
 	install ../tutorial/* $(DESTDIR)$(PREFIX)/share/euphoria/tutorial
 	install  \
 	           ../bin/ed.ex \
