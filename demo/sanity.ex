@@ -6,8 +6,8 @@
 -- working on your machine.
 --
 -- This was the old "unit testing" program for Euphoria pre 4.x, for an
--- updated unit test system, please see [[:unittest]] and look in your
--- ##euphoria/tests## directory.
+-- updated unit test system, please see the [[:Unit Testing Framework]]
+-- and look in your ##euphoria/tests## directory.
 --
 -- ==== Usage
 -- {{{

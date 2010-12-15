@@ -78,7 +78,7 @@ directory or file the counter test will be marked as a failed test run.
 
 ==== A trivial example
 
-The following is a minimal unit test file:
+The following is a minimal unit test file~:
 {{{
 include std/unittest.e
 
