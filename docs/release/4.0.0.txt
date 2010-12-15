@@ -33,6 +33,7 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
                   when the path began with a forward slash ##/##.
 * Fix backend and interpreter to avoid "press any key" prompts when running as
   a console from a shared console window.
+* [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
 
 === Enhancements/Changes
 
