@@ -569,14 +569,18 @@ function scan_number()
 		if not SUBSCRIPT then
 			v = Token[TDATA]
 			if Look = '.' then
-				scan_char()
+				if lookahead() = '.' then
+					-- We have a slice, put the token back and return our number.
+					return TRUE
+				end if
 	
+				scan_char()
 				Token[TDATA] = scan_fraction(Token[TDATA])
+
 				if ERR then return TRUE end if
 			end if
 
 			Token[TDATA] = scan_exponent(Token[TDATA])
-	
 			if v != Token[TDATA] then
 				Token[TFORM] = TF_ATOM
 			end if
@@ -795,7 +799,6 @@ procedure next_token()
 	-- scan_white returns TRUE if it hit a T_NEWLINE
 	if scan_white() then
 		if IGNORE_NEWLINES then next_token() end if
-		scan_char() -- advanced past this newline
 		return
 	end if
 

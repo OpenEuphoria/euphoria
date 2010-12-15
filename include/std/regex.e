@@ -929,7 +929,7 @@ end function
 --   --   "Doe"       -- second group
 --   -- }
 --
---   matches = re:matches(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
+--   matches = re:matches(re_name, "John Doe and Jane Doe", 1, re:STRING_OFFSETS)
 --   -- matches is:
 --   -- {
 --   --   { "John Doe", 1, 8 }, -- full match data
@@ -1015,7 +1015,7 @@ end function
 --   --   }
 --   -- }
 --
---   matches = re:all_matches(re_name, "John Doe and Jane Doe", re:STRING_OFFSETS)
+--   matches = re:all_matches(re_name, "John Doe and Jane Doe", , re:STRING_OFFSETS)
 --   -- matches is:
 --   -- {
 --   --   {                         -- first match

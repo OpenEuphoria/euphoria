@@ -64,10 +64,10 @@ ifdef WIN32 then
 	constant dnsexpand_ = -1
 	constant freeaddrinfo_ = define_c_proc(sockdll_,"freeaddrinfo",{C_POINTER})
 
-elsifdef LINUX or SUNOS then
+elsifdef LINUX then
 	constant dnsdll_ = open_dll("libresolv.so")
 
-elsifdef FREEBSD then
+elsifdef BSD then
 	constant dnsdll_ = open_dll("libc.so")
 
 elsifdef OSX then

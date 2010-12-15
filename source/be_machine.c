@@ -75,30 +75,7 @@
 extern unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
 						unsigned arg4, unsigned arg5, unsigned arg6,
 						unsigned arg7, unsigned arg8, unsigned arg9);
-#endif
-
-#ifdef ESUNOS
-#include <fcntl.h>
-
-int emul_flock(fd, cmd)
-	int fd, cmd;
-{
-	struct flock f;
-
-	memset(&f, 0, sizeof(f));
-
-	if (cmd & LOCK_UN)
-		f.l_type = F_UNLCK;
-	if (cmd & LOCK_SH)
-		f.l_type = F_RDLCK;
-	if (cmd & LOCK_EX)
-		f.l_type = F_WRLCK;
-
-	return fcntl(fd, (cmd & LOCK_NB) ? F_SETLK : F_SETLKW, &f);
-}
-
-#define flock(f,c) emul_flock(f,c)
-#endif // ESUNOS
+#endif // EOSX
 
 #else // EUNIX
 
@@ -127,20 +104,14 @@ int emul_flock(fd, cmd)
 
 #include <signal.h>
 
-
 extern char* get_svn_revision(); /* from rev.c */
 extern double eustart_time; /* from be_runtime.c */
 
 /*****************/
 /* Local defines */
 /*****************/
-#define C_UNDERLINE    0x0607 /* normal underline cursor */
 /* 30-bit magic #s for old Complete & PD Edition binds */
 #define COMPLETE_MAGIC ('1' + ('2'<< 8) + ('3' << 16) + ('O' << 24))
-
-/* timer and profile interrupt handler stuff: */
-#define TIMERINTR  8
-#define MASTER_FREQUENCY 1193181.667
 
 /**********************/
 /* Exported variables */
@@ -185,21 +156,9 @@ unsigned current_bg_color = 0;
 extern char **Argv;
 extern int Argc;
 
-
-
 /********************/
 /* Local variables */
 /*******************/
-
-char *version_name =
-#ifdef EWINDOWS
-"WIN32";
-#endif
-
-#ifdef EUNIX
-"Linux";
-#endif
-
 
 /* cdecl callback - one size fits all */
 LRESULT __cdecl cdecl_call_back();
@@ -219,6 +178,10 @@ LRESULT CALLBACK call_back8(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned);
 LRESULT CALLBACK call_back9(unsigned, unsigned, unsigned, unsigned, unsigned,
 							unsigned, unsigned, unsigned, unsigned);
+
+int use_prompt() {
+	return (is_batch == 0 && is_test == 0 && has_console() == 0);
+}
 
 #if defined(EMINGW) || defined(EMSVC)
 #define setenv MySetEnv
@@ -353,13 +316,6 @@ void EndGraphics()
 	tcsetattr(STDIN_FILENO, TCSANOW, &savetty);
 #endif
 }
-
-void not_supported(char *feature)
-/* Report that a feature isn't supported on this platform */
-{
-	RTFatal("%s is not supported in Euphoria for %s", feature, version_name);
-}
-
 
 #define MODE_19_BASE ((unsigned)0xA0000)
 #define MODE_19_WIDTH 320
@@ -1044,26 +1000,29 @@ typedef struct _SYSTEMTIME {
 	}
 
 	// Trim off trailing whitespace
-	// N.B. 'fp_buf' should now be pointing to the null terminator at this point.
-	fp_buf--;
-	while (fp_buf != path)
+	if (fp_buf != path) 
 	{
-		if (*fp_buf == ' ' || *fp_buf == '\t')
+		// N.B. 'fp_buf' should now be pointing to the null terminator at this point.
+		fp_buf--;
+		while (fp_buf != path)
 		{
-			fp_buf--;
+			if (*fp_buf == ' ' || *fp_buf == '\t')
+			{
+				fp_buf--;
+			}
+			else
+			{
+				break;
+			}
 		}
-		else
-		{
-			break;
-		}
+		fp_buf++;
+		*fp_buf = '\0'; // Mark end of C string
 	}
-	fp_buf++;
-	*fp_buf = '\0'; // Mark end of C string
-
+	
 	if (fp_buf == path)
 	{
 		// Empty path so assume current directory
-		copy_string(path, ".\\*", 4);
+		copy_string(path, ".\\*", MAX_FILE_NAME);
 		has_wildcards = 1;
 	}
 	else
@@ -1088,7 +1047,7 @@ typedef struct _SYSTEMTIME {
 		// a directory when no wildcards were used,
 		// so assume the caller wants to see inside the directory.
 		FindClose(next_file);
-		append_string(path, "\\*", 3);
+		append_string(path, "\\*", MAX_FILE_NAME);
 		has_wildcards = 1;
 		next_file = FindFirstFile( path, &file_info);
 		if (next_file == INVALID_HANDLE_VALUE)
@@ -1656,14 +1615,6 @@ static object set_rand(object x)
 
 	rand_was_set = TRUE;
 
-	return ATOM_1;
-}
-
-static object use_vesa(object x)
-/* turn on/off vesa flag */
-{
-	UNUSED(x);
-	not_supported("use_vesa()");
 	return ATOM_1;
 }
 
@@ -2718,7 +2669,8 @@ object machine(object opcode, object x)
 				break;
 				
 			case M_USE_VESA:
-				return use_vesa(x);
+				RTFatal("use_vesa() is no longer supported in Euphoria");
+				return ATOM_1;
 				break;
 				
 			case M_CRASH_MESSAGE:
@@ -2792,9 +2744,6 @@ object machine(object opcode, object x)
 #ifdef EOPENBSD
 				return 6;
 #else
-#ifdef ESUNOS
-				return 5;
-#else
 #ifdef EOSX
 				return 4;
 #else
@@ -2808,13 +2757,12 @@ object machine(object opcode, object x)
 				return 2;  // WIN32
 #else
 				return 1; // Unknown platform
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
-#endif
+#endif // EWINDOWS
+#endif // ELINUX
+#endif // EBSD
+#endif // EOSX
+#endif // EOPENBSD
+#endif // ENETBSD
 
 				break;
 
@@ -2913,20 +2861,26 @@ object machine(object opcode, object x)
 				src = EMalloc(SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
 				MakeCString(src, (object) *(((s1_ptr)x)->base+1),
 							SEQ_PTR(((s1_ptr) x)->base[1])->length + 1);
+			
+				// TODO: refactor, simply make an unset method for EWATCOM,
+				// and EMINGW, then call unsetenv(src)
 #ifdef EWATCOM
 				temp = setenv(src, NULL, 1);
 #else
 #ifdef EMINGW
-				dest = EMalloc(strlen(src) + 2);
-				copy_string(dest, src, strlen(src) + 1);
-				append_string(dest, "=", 2);
-				/* on MinGW, putenv("var=") will unset the
-				 * variable. On any other system, use unsetenv()
-				 * as putenv("var=") will create an empty
-				 * environment variable.MinGW() lacks unsetenv()
-				 */
-				temp = putenv(dest);
-				EFree(dest);
+				{
+					int slen = strlen(src);
+					dest = EMalloc(slen + 3);
+					copy_string(dest, src, slen + 2);
+					append_string(dest, "=", slen + 2);
+					/* on MinGW, putenv("var=") will unset the
+					 * variable. On any other system, use unsetenv()
+					 * as putenv("var=") will create an empty
+					 * environment variable.MinGW() lacks unsetenv()
+					 */
+					temp = putenv(dest);
+					EFree(dest);
+				}
 #else
 #ifdef EUNIX
 #ifdef ELINUX
@@ -3028,6 +2982,9 @@ object machine(object opcode, object x)
 
             case M_SOCK_RECVFROM:
                 return eusock_recvfrom(x);
+	
+			case M_HAS_CONSOLE:
+				return has_console();
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

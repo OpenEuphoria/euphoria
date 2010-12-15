@@ -203,7 +203,7 @@ appear to ed to be the //end of the file//.
 
 === Line Terminator
 
-The end-of-line terminator on Linux/FreeBSD/OSX/SUNOS/OPENBSD/NETBSD
+The end-of-line terminator on Linux/FreeBSD/OSX/OPENBSD/NETBSD
 is simply ##\n##. On Windows, text files have lines ending with ##\r\n##.
 If you copy a Windows file to Linux/FreeBSD and try to modify it, **ed** will 
 give you a

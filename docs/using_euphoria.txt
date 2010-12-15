@@ -513,7 +513,7 @@ indicates that the referenced switch applies only to that execution mode.
 ; ##-PLAT word## (translator)
 : Specify the target platform for translation.  This allows euphoria code to
   be translated for any supported platform from any other supported platform.
-  Supported platforms: FREEBSD, LINUX, NETBSD, OPENBSD, OSX, SUNOS, WIN
+  Supported platforms: FREEBSD, LINUX, NETBSD, OPENBSD, OSX, WIN
 
 ; ##-STRICT## (all)
 : This turns on all warnings, overriding any with/without warning statement

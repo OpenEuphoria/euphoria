@@ -1,5 +1,5 @@
 #
-# Euphoria Manual Assembly File
+# Euphoria Manual Assembly File for PDF
 #
 # # is a comment
 # : is inline CREOLE markup
@@ -9,7 +9,7 @@
 
 # Output file generation options
 :@@(title Euphoria v4.0)@
-:%%maxnumlevel = 4
+:%%maxnumlevel = 0
 :%%toclevel = 3
 :%%output=index
 :<<TOC level=1>>
@@ -48,9 +48,6 @@
 
 ########
 :%%output=syntax
-:= Formal Syntax
-:<<LEVELTOC level=1 depth=2>>
-
 ../docs/syntax.txt
 ../docs/internals.txt
 
@@ -58,50 +55,6 @@
 :%%output=miniguide
 := Mini-Guides
 :<<LEVELTOC level=1 depth=2>>
-
-:%%output=demos
-:== Bundled Demos
-:<<LEVELTOC level=2 depth=3>>
-../demo/allsorts.ex
-../demo/animal.ex
-../demo/ascii.ex
-../demo/buzz.ex
-../demo/callmach.ex
-../demo/color.ex
-../demo/csort.ex
-../demo/dep.exw
-../demo/eprint.ex
-../demo/eused.ex
-../demo/guru.ex
-../demo/hash.ex
-../demo/key.ex
-../demo/loaddb.ex
-../demo/mydata.ex
-../demo/news.ex
-../demo/pipes.ex
-../demo/queens.ex
-../demo/regexps.ex
-../demo/sanity.ex
-../demo/search.ex
-../demo/tree.ex
-../demo/where.ex
-../demo/win32/dsearch.exw
-../demo/win32/taskwire.exw
-../demo/win32/window.exw
-../demo/win32/winwire.exw
-../demo/unix/callc.ex
-../demo/unix/mylib.ex
-../demo/unix/qsort.ex
-../demo/net/chat_client.ex
-../demo/net/chat_server.ex
-../demo/net/google_tts.ex
-../demo/net/httpd.ex
-../demo/net/pastey.ex
-../demo/net/sock_client.ex
-../demo/net/sock_server.ex
-../demo/net/udp_client.ex
-../demo/net/udp_server.ex
-../demo/net/wget.ex
 
 ../docs/debug.txt
 ../docs/bind.txt
@@ -125,9 +78,10 @@
 ../docs/dis.txt
 ../docs/eudist.txt
 
+:= API Reference
+
 ########
 :%%output=gen_routines
-:= General Routine Reference
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/cmdline.e
@@ -144,7 +98,6 @@
 
 ########
 :%%output=seq_routines
-:= Sequence Centric Routines
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/convert.e
@@ -156,7 +109,6 @@
 
 ########
 :%%output=str_routines
-:= String Centric Routines
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/locale.e
@@ -170,7 +122,6 @@
 
 ########
 :%%output=math_routines
-:= Math
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/math.e
@@ -180,7 +131,6 @@
 
 ########
 :%%output=data_routines
-:= Data Structures
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/eds.e
@@ -192,7 +142,6 @@
 
 ########
 :%%output=net_routines
-:= Networking Routines
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/socket.e
@@ -203,7 +152,6 @@
 
 ########
 :%%output=lowlvl_routines
-:= Low Level Routines
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/dll.e
@@ -216,7 +164,6 @@
 
 ########
 :%%output=graph_routines
-:= Graphics
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/graphcst.e
@@ -225,7 +172,6 @@
 
 ########
 :%%output=eu_routines
-:= Euphoria Routines
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/euphoria/info.e
@@ -236,15 +182,13 @@
 
 ########
 :%%output=win_routines
-:= Windows Routines
 :<<LEVELTOC level=1 depth=2>>
 
 ../include/std/win32/msgbox.e
 ../include/std/win32/sounds.e
 
 ########
-:%%output=unsup_features
-:= Unsuppored Features
+:%%output=unsupported
 :<<LEVELTOC level=1 depth=2>>
 
 ../docs/unsupported.txt
@@ -305,8 +249,3 @@
 ../docs/release/1.2.0.txt
 ../docs/release/1.1.0.txt
 ../docs/release/1.0.0.txt
-
-########
-:%%output=key_index
-:= Index
-:<<INDEX search>>

@@ -236,36 +236,8 @@ union pc_t {
 /* Declared functions */
 /**********************/
 
-
 void INT_Handler(int);
 unsigned long good_rand();
-// object user(), Command_Line(), EOpen(), Repeat();
-// object machine();
-// object unary_op(), binary_op(), binary_op_a(), Date(), Time(),
-// 	   NewDouble();
-
-// object add(), minus(), uminus(), e_sqrt(), Random(), multiply(), divide(),
-// 	 equals(), less(), greater(), noteq(), greatereq(), lesseq(),
-// 	 and(), or(), xor(), not(), e_sin(), e_cos(), e_tan(), e_arctan(),
-// 	 e_log(), e_floor(), eremainder(), and_bits(), or_bits(),
-// 	 xor_bits(), not_bits(), power();
-
-// object Dadd(), Dminus(), Duminus(), De_sqrt(), DRandom(), Dmultiply(), Ddivide(),
-// 	 Dequals(), Dless(), Dgreater(), Dnoteq(), Dgreatereq(), Dlesseq(),
-// 	 Dand(), Dor(), Dxor(), Dnot(), De_sin(), De_cos(), De_tan(), De_arctan(),
-// 	 De_log(), De_floor(), Dremainder(), Dand_bits(), Dor_bits(),
-// 	 Dxor_bits(), Dnot_bits(), Dpower(), Insert();
-
-// object x(); /* error */
-// symtab_ptr PrivateVar();
-// long find(), e_match();
-//
-// IFILE which_file();
-//
-// void do_exec();
-// s1_ptr NewS1();
-// double current_time();
-// void Machine_Handler();
 
 /**********************/
 /* Exported variables */
@@ -293,7 +265,6 @@ static int *watch_point = (int *)0x3aa41c;
 static int watch_value = 1948266795;
 static int watch_count = 1;
 #endif
-
 
 /*********************/
 /* Defined functions */
@@ -4657,9 +4628,6 @@ void do_exec(int *start_pc)
 #ifdef EOSX
 				top = 4;  // OSX
 #endif
-#ifdef ESUNOS
-				top = 5; // SUNOS
-#endif
 #ifdef EOPENBSD
 				top = 6; // OpenBSD
 #endif
@@ -5134,6 +5102,4 @@ void AfterExecute()
 // Address of this routine is used by time profiler
 {
 }
-
-
 

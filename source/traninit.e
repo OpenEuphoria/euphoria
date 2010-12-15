@@ -180,9 +180,6 @@ export procedure transoptions()
 					case "OSX" then
 						set_host_platform( UOSX )
 
-					case "SUNOS" then
-						set_host_platform( USUNOS )
-
 					case "OPENBSD" then
 						set_host_platform( UOPENBSD )
 
@@ -190,7 +187,7 @@ export procedure transoptions()
 						set_host_platform( UNETBSD )
 
 					case else
-						ShowMsg(2, 201, { val, "WIN, LINUX, FREEBSD, OSX, SUNOS, OPENBSD, NETBSD" })
+						ShowMsg(2, 201, { val, "WIN, LINUX, FREEBSD, OSX, OPENBSD, NETBSD" })
 						abort(1)
 				end switch
 

@@ -379,6 +379,7 @@ struct char_cell {
 #define M_SOCK_ERROR_CODE    96
 #define M_PCRE_GET_OVECTOR_SIZE 97
 #define M_GET_RAND           98
+#define M_HAS_CONSOLE        99
 
 enum CLEANUP_TYPES {
 	CLEAN_UDT,

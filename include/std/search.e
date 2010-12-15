@@ -1035,7 +1035,7 @@ end function
 --   An **integer**, 0 if ##item## is not in the ##range_limits## otherwise it returns 1.
 --
 -- Comments:
--- * In ##boundries###, square brackets mean //inclusive// and round brackets
+-- * In ##boundries##, square brackets mean //inclusive// and round brackets
 --   mean //exclusive//. Thus "[]" includes both limits in the range, while
 --   "()" excludes both limits. And, "[)" includes the lower limit and excludes
 --   the upper limits while "(]" does the reverse.

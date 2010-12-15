@@ -670,8 +670,11 @@ end function
 
 public function create_file(sequence name)
 	integer fh = open(name, "wb")
-	close(fh)
-	return (fh != -1)
+	integer ret = (fh != -1)
+	if ret then
+		close(fh)
+	end if
+	return ret
 end function
 
 --**
@@ -1505,6 +1508,8 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	    if ( (length(lPath) > 1) and (lPath[2] = ':' ) ) then
 			lDrive = lPath[1..2]
 			lPath = lPath[3..$]
+		else
+			lDrive = driveid(current_dir()) & ':'
 		end if
 	end ifdef
 
@@ -1527,7 +1532,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 			end if
 		end ifdef		
 	end if
-	
+
 	-- If the input is supposed to be a directory, ensure it ends in a path separator.
 	if ((directory_given != 0) and (lPath[$] != SLASH) ) then
 		lPath &= SLASH
@@ -1568,7 +1573,7 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 			lPath = lower(lPath)
 		end if
 	end ifdef
-	
+
 	return lPath
 end function
 
@@ -1993,7 +1998,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		stat_t_offset = 0
 		stat_buf_size = 88
 		dev_t_size = 8
-	elsifdef BSD or SUNOS then
+	elsifdef BSD then
 		--TODO
 		stat_t_offset = 0
 		stat_buf_size = 88
@@ -2293,7 +2298,7 @@ public function disk_metrics(object disk_path)
 			stat_t_offset = 48
 			stat_buf_size = 88
 			dev_t_size = 4
-		elsifdef BSD or SUNOS then
+		elsifdef BSD then
 			--TODO
 			stat_t_offset = 48
 			stat_buf_size = 88

@@ -36,8 +36,6 @@ ifdef WIN32 then
 	version_name = "WIN32"
 elsifdef LINUX then
 	version_name = "Linux"
-elsifdef SUNOS then
-	version_name = "SunOS"
 elsifdef OPENBSD then
 	version_name = "OpenBSD"
 elsifdef NETBSD then

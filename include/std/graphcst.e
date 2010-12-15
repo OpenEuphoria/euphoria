@@ -194,8 +194,6 @@ constant
 --     * ##VC_YPIXELS##
 --     * ##VC_NCOLORS##
 --     * ##VC_PAGES##
---     * ##VC_LINES##
---     * ##VC_COLUMNS##
 --     * ##VC_SCRNLINES##
 --     * ##VC_SCRNCOLS##
 --

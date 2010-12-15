@@ -3910,7 +3910,7 @@ static void the_end()
 	int i;
 	int c;
 
-	if (is_batch == 0 && is_test == 0 && print_file == NULL && print_pretty) {
+	if (use_prompt() && print_file == NULL && print_pretty) {
 		/* pretty printing to screen - prompt the user */
 		screen_output(print_file, "\n");
 		screen_output(print_file, "* Press Enter to continue, or q to quit\n");
@@ -5574,13 +5574,13 @@ void Cleanup(int status)
 			screen_output(stderr, "\n");
 			for (i = 0; i < warning_count; i++) {
 				screen_output(stderr, warning_list[i]);
-				if (((i+1) % 20) == 0 && is_batch == 0 && is_test == 0) {
+				if (((i+1) % 20) == 0 && use_prompt()) {
 					screen_output(stderr, "\nPress Enter to continue, q to quit\n");
 #ifdef EWINDOWS
 					c = wingetch();
-#else
+#else // EWINDOWS
 					c = getc(stdin);
-#endif
+#endif // EWINDOWS
 					if (c == 'q') {
 						break;
 					}
@@ -5591,11 +5591,11 @@ void Cleanup(int status)
 #ifndef BACKEND
 	if (AnyStatementProfile || AnyTimeProfile)
 		ProfileCommand();
-#endif
-#endif
+#endif // BACKEND
+#endif // ERUNTIME
 
 #ifdef EUNIX
-	if (is_batch == 0 && is_test == 0 && have_console &&
+	if (use_prompt() && have_console &&
 		(config.numtextrows < 24 || config.numtextrows > 25 || config.numtextcols != 80 ||
 			((xterm = getenv("TERM")) != NULL &&
 		  		strcmp_ins(xterm, "xterm") == 0))) 
@@ -5603,10 +5603,10 @@ void Cleanup(int status)
 		screen_output(stderr, "\n\nPress Enter...\n");
 		getc(stdin);
 	}
-#endif
 
-#ifdef EWINDOWS
-	if (is_batch == 0 && is_test == 0 && TempWarningName == NULL && display_warnings &&
+#else // EUNIX
+
+	if (use_prompt() && TempWarningName == NULL && display_warnings &&
 		(warning_count || (status && !user_abort)))
 	{
 		// we will have a console if we showed an error trace back or
@@ -5615,7 +5615,7 @@ void Cleanup(int status)
 		DisableControlCHandling();
 		MyReadConsoleChar();
 	}
-#endif
+#endif // EUNIX
 
 	EndGraphics();
 
@@ -5641,15 +5641,16 @@ void Cleanup(int status)
 	EFree( fe.st ); // = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	EFree( fe.sl ); //= (struct sline *) get_pos_int(w, *(x_ptr->base+2));
 	EFree( fe.misc ); // = (int *)        get_pos_int(w, *(x_ptr->base+3));
-#endif
-#endif
+#endif // 0
+#endif // ERUNTIME
 
 #ifdef EWINDOWS
 	// Note: ExitProcess() - frees all the dlls but won't flush the regular files
 	for (i = 0; i < open_dll_count; i++) {
 		FreeLibrary(open_dll_list[i]);
 	}
-#endif
+#endif // EWINDOWS
+
 	exit(status);
 }
 
@@ -5689,16 +5690,11 @@ int wingetch()
 // Windows - read next char from keyboard
 {
 #if defined(EMINGW)
-	int c;
 
-	c = MyReadConsoleChar();
+	return MyReadConsoleChar();
 
-	// Fix by Jacques Deschenes for 3.1
-	// if (c == '\r')
-	//     c = MyReadConsoleChar();
+#else // defined(EMINGW)
 
-	return c;
-#else
 	int c;
 	if (next_char_ptr == NULL) {
 		key_gets(one_line);
@@ -5712,8 +5708,9 @@ int wingetch()
 	}
 	if (c == CONTROL_Z)
 		c = -1; // EOF
+
 	return c;
-#endif
+#endif // defined(EMINGW)
 }
 #endif
 

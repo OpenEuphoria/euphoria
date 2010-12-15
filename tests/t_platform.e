@@ -26,10 +26,6 @@ ifdef NETBSD then
 	platform_defines &= "NETBSD "
 end ifdef
 
-ifdef SUNOS then
-	platform_defines &= "SUNOS "
-end ifdef
-
 ifdef OSX then
 	platform_defines &= "OSX "
 end ifdef
@@ -37,13 +33,13 @@ end ifdef
 ifdef WIN32 or WINDOWS then
     ifdef not WIN32 or not WINDOWS then
 		test_fail("One of the accompanying defines is not defined. Defines: " & platform_defines)
-	elsifdef DOS32 or UNIX or LINUX or OPENBSD or NETBSD or FREEBSD or SUNOS or OSX then
+	elsifdef DOS32 or UNIX or LINUX or OPENBSD or NETBSD or FREEBSD or OSX then
 		test_fail("OS Name Conflict: Both Windows and non-Windows OS def-symbol defined. Defines: " & platform_defines)	
 	end ifdef
 	test_equal("WIN32=platform()", WIN32, platform() )
 elsifdef DOS32 then
     ifdef WIN32 or  WINDOWS or  
-		UNIX or LINUX or OPENBSD or NETBSD or FREEBSD or SUNOS or OSX then
+		UNIX or LINUX or OPENBSD or NETBSD or FREEBSD or OSX then
 		test_fail("OS Name Conflict: Both DOS and non-DOS OS def-symbol defined. Defines: " & platform_defines)	
 	end ifdef
 	test_equal("DOS32=platform()", 1, platform() )
@@ -60,8 +56,6 @@ elsifdef UNIX then
 	    test_equal("NETBSD=platform()", NETBSD, platform())	
 	elsifdef FREEBSD then
 	    test_equal("FREEBSD=platform()", FREEBSD, platform())
-	elsifdef SUNOS then
-	    test_equal("SUNOS=platform()", SUNOS, platform())
 	elsifdef OSX then
 	    test_equal("OSX=platform()", OSX, platform())
 	elsedef

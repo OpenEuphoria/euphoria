@@ -5,13 +5,16 @@ It was downloaded from <http://sourceforge.net/projects/rapideuphoria>
 
 Author(s): 
 
-    Robert Craig <rds@rapideuphoria.com>
     Matt Lewis <matthewwalkerlewis@gmail.com>
-    Christian Cuvier <christian.cuvier@agriculture.gouv.fr>
-
+    
 Copyright: 
+  Copyright (c) 2007-2010 by OpenEuphoria Group.
+  Copyright (c) 1993-2006 by Rapid Deployment Software.
+  All Rights Reserved.
 
-    Copyright (c) 2007 Rapid Deployment Software (RDS)
+  PCRE v8.10
+    Copyright (c) 1997-2010 University of Cambridge
+    All Rights Reserved
 
 License:
 

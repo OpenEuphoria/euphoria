@@ -105,6 +105,44 @@ void SetPosition();
 /*********************/
 /* Defined functions */
 /*********************/
+
+static int _has_console = 1;
+
+#if defined(EWINDOWS)
+#include <windows.h>
+
+typedef int (WINAPI *GCPLA)(LPDWORD, DWORD);
+
+void check_has_console() {
+	GCPLA gCPLA;
+	HMODULE kernel32;
+
+	kernel32 = LoadLibrary("kernel32.dll");
+	gCPLA = (GCPLA) GetProcAddress(kernel32, "GetConsoleProcessList");
+
+	if (gCPLA == NULL) {
+		_has_console = 0;
+		FreeLibrary(kernel32);
+	} 
+	else {
+		DWORD count, processList[3];
+
+		count = gCPLA(&processList, 3);
+		FreeLibrary(kernel32);
+		_has_console = (count != 0);
+	}
+}
+
+#else
+
+void check_has_console() {}
+
+#endif
+
+int has_console() {
+	return _has_console;
+}
+
 struct rccoord GetTextPositionP()
 {
         struct rccoord p;
@@ -627,7 +665,7 @@ void screen_output(IFILE f, char *out_string)
 			} else {
 				collect_len = len;
 			}
-			// safe to use strcpy here 'cos we already checked the remaining length.
+
 			copy_string(collect+collect_next, out_string, len+1);
             collect_free -= len;
             collect_next += len;

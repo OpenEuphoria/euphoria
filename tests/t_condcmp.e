@@ -25,10 +25,6 @@ ifdef UNIX then
 	end if
 end ifdef
 
-ifdef SUNOS then
-	test_equal("SunOS test", 5, platform())
-end ifdef
-
 ifdef OSX then
     test_equal("OSX test", 4, platform())
 end ifdef
