@@ -103,7 +103,7 @@ end procedure
 integer wrote_coverage = 0
 export function write_coverage_db()
 	if wrote_coverage then
-		return 0
+		return 1
 	end if
 	wrote_coverage = 1
 	init_coverage()
