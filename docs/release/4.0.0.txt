@@ -6,7 +6,7 @@
 For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see 
 [[:What's new in 4.0?]] section of this manual.
 
-=== Deprecation
+!!=== Deprecation
 
 === Removed
 
