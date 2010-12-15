@@ -23,9 +23,9 @@ end procedure
 
 sequence cmds = command_line()
 if not (length(cmds) = 5) then
-    ifdef WIN32_GUI then
-	puts(1, "This program must be run from the command-line:\n\n")
-    end ifdef
+	ifdef WIN32_GUI then
+		puts(1, "This program must be run from the command-line:\n\n")
+	end ifdef
     puts(1, "Usage: eui pastey.ex user title filename\n")
 	abort(1)
 end if
@@ -42,10 +42,10 @@ sequence form_data = {
 	{ "language", "euphoria" },
 	{ "author",   username   },
 	{ "subject",  title      },
-	{ "secure",   "0"        },
+	--{ "secure",   "0"        },
 	{ "text",     data       },
 	{ "submit",   "Paste"    },
-	{ "tabstop",  "2"        }
+	{ "tabstop",  "4"        }
 }
 
 data = http_post("http://euphoria.pastey.net/submit.php", form_data)
