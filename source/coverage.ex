@@ -22,9 +22,8 @@ if length( cmd ) < 3 then
 	abort( 1 )
 end if
 
-
 procedure create_header( sequence builddir )
-	sequence c_files = dir( builddir )
+	sequence c_files = dir(builddir)
 	integer found_file = 0, found_line = 0
 
 	for i = 1 to length( c_files ) label "i_loop" do
@@ -56,8 +55,10 @@ procedure create_header( sequence builddir )
 
 	if not found_file then
 		printf(2, "ERROR - no coverage.c file was located in %s\n", { builddir })
+		abort(1)
 	elsif not found_line then
 		printf(2, "ERROR - cover_line() not found in coverage.c located at %s\n", { builddir })
+		abort(1)
 	end if
 end procedure
 

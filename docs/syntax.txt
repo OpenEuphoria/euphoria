@@ -1,9 +1,10 @@
-== basics ==
+== Formal Syntax
+
+=== Basics
 
 The syntax of Euphoria is described using BNF notation.
 
-
-<eucode>
+{{{
 ALPHA ==: ('a' - 'z') | ('A' - 'Z')
 DIGIT ==: ('0' - '9')
 USCORE ==: '_'
@@ -42,13 +43,15 @@ RAWSTRINGLIT ==: DQRAWSTRING | BQRAWSTRING
 DQRAWSTRING ==: '"""' [ MARGINSTR ] [CHAR ...] '"""'
 BQRAWSTRING ==: '`' [ MARGINSTR ] [CHAR ...] '`'
 MARGINSTR  ==: '_' ...
-</eucode>
+}}}
 
-== statements ==
-=== directives ===
+=== Statements
+
+==== Directives
+
 [[:INCLUDESTMT]]\\
 
-=== flow control ===
+==== Flow Control
 [[:IFSTMT]]\\
 [[:SWITCHSTMT]]\\
 [[:BREAKSTMT]]\\
@@ -63,7 +66,9 @@ MARGINSTR  ==: '_' ...
 
 !!splice
 
-== include == @[INCLUDESTMT]
+==== include
+
+@[INCLUDESTMT]
 <eucode>
  INCLUDESTMT  ==:  'include' FILEREF [ 'as' NAMESPACE ] EOL
  FILEREF  ==:  A file path that may be enclosed in double-quotes. 
@@ -74,7 +79,9 @@ MARGINSTR  ==: '_' ...
 
     See Also: [[:include statement]]
 
-== sequence slice == @[SLICING]
+=== Sequence Slice
+@[SLICING]
+
 <eucode>
 SLICE      ==: SLICESTART INTEXPRESSION SLICEDELIM INTEXPRESSION SLICEEND
 SLICESTART ==: '['
@@ -83,7 +90,9 @@ SLICEEND   ==: ']'
 </eucode>
     See Also: [[:Slicing of Sequences]]
 
-== if == @[IFSTMT]
+=== if
+@[IFSTMT]
+
 <eucode>
  IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF 
  IFTEST  ==:  'if' ATOMEXPR [ LABEL ] 'then' [ STMTBLOCK ] 
@@ -93,7 +102,9 @@ SLICEEND   ==: ']'
 </eucode>
     See Also: [[:if statement]]
 
-== switch == @[SWITCHSTMT]
+==== switch
+@[SWITCHSTMT]
+
 <eucode>
  SWITCHSTMT  ==:  SWITCHTEST CASE [ CASE ...] [ CASEELSE ] [ ENDSWITCH ]
  SWITCHTEST  ==:  'switch' EXPRESSION [ WITHFALL ] [ LABEL ] 'do'
@@ -105,44 +116,58 @@ SLICEEND   ==: ']'
 </eucode>
     See Also: [[:switch statement]]
 
-== break == @[BREAKSTMT]
+=== break
+@[BREAKSTMT]
+
 <eucode>
  BREAKSTMT       ==:  'break' [ STRINGLIT ]
 </eucode>
     See Also: [[:break statement]]
 
-== continue == @[CONTINUESTMT]
+=== continue
+@[CONTINUESTMT]
+
 <eucode>
  CONTINUESTMT       ==:  'continue' [ STRINGLIT ]
 </eucode>
     See Also: [[:continue statement]]
 
-== retry == @[RETRYSTMT]
+=== retry
+@[RETRYSTMT]
+
 <eucode>
  RETRYSTMT       ==:  'retry' [ STRINGLIT ]
 </eucode>
     See Also: [[:retry statement]]
 
-== exit == @[EXITSTMT]
+=== exit
+@[EXITSTMT]
+
 <eucode>
  EXITSTMT       ==:  'exit' [ STRINGLIT ]
 </eucode>
     See Also: [[:exit statement]]
 
-== fallthru == @[FALLTHRUSTMT]
+=== fallthru
+@[FALLTHRUSTMT]
+
 <eucode>
  FALLTHRUSTMT       ==:  'fallthru'
 </eucode>
     See Also: [[:switch statement]]
 
-== for == @[FORSTMT]
+=== for
+@[FORSTMT]
+
 <eucode>
  FORSTMT ==: 'for' FORIDX [ LABEL ] 'do' [STMTBLK] 'end' 'for'
  FORIDX  ==: IDENTIFIER '=' NUMEXPR 'to' NUMEXPR ['by' NUMEXPR]
 </eucode>
     See Also: [[:for statement]]
 
-== while == @[WHILESTMT]
+=== while
+@[WHILESTMT]
+
 <eucode>
 WHILESTMT ==: 
         'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
@@ -151,14 +176,18 @@ ENTRY ==: 'entry' [STMTBLK]
 </eucode>
    See Also: [[:while statement]]
 
-== loop == @[LOOPSTMT]
+=== loop
+@[LOOPSTMT]
+
 <eucode>
 LOOPSTMT ==: 
    'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
 </eucode>
    See Also: [[:loop until statement]]
 
-== goto == @[GOTOSTMT]
+=== goto
+@[GOTOSTMT]
+
 <eucode>
  GOTOSMT ==: 'goto' LABEL
 </eucode>

@@ -539,32 +539,34 @@ end procedure
 integer just_mark_everything_from = 0
 procedure mark_all( integer attribute )
 	-- mark all visible routines parsed so far
-	symtab_pointer p = SymTab[just_mark_everything_from][S_NEXT]
-	while p != 0 do
-		integer sym_file = SymTab[p][S_FILE_NO]
-		just_mark_everything_from = p
-		if sym_file = current_file_no then
-			SymTab[p][attribute] += 1
-		else
-			integer scope = SymTab[p][S_SCOPE]
-			switch scope with fallthru do
-				case SC_PUBLIC then
-					if and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[current_file_no][sym_file] ) then
-						SymTab[p][attribute] += 1
-					end if
-					break
-				case SC_EXPORT then
-					if not and_bits( DIRECT_INCLUDE, include_matrix[current_file_no][sym_file] ) then
+	if just_mark_everything_from then
+		symtab_pointer p = SymTab[just_mark_everything_from][S_NEXT]
+		while p != 0 do
+			integer sym_file = SymTab[p][S_FILE_NO]
+			just_mark_everything_from = p
+			if sym_file = current_file_no then
+				SymTab[p][attribute] += 1
+			else
+				integer scope = SymTab[p][S_SCOPE]
+				switch scope with fallthru do
+					case SC_PUBLIC then
+						if and_bits( DIRECT_OR_PUBLIC_INCLUDE, include_matrix[current_file_no][sym_file] ) then
+							SymTab[p][attribute] += 1
+						end if
 						break
-					end if
-					-- fallthrough
-				case SC_GLOBAL then
-					SymTab[p][attribute] += 1
-					
-			end switch
-		end if
-		p = SymTab[p][S_NEXT]
-	end while
+					case SC_EXPORT then
+						if not and_bits( DIRECT_INCLUDE, include_matrix[current_file_no][sym_file] ) then
+							break
+						end if
+						-- fallthrough
+					case SC_GLOBAL then
+						SymTab[p][attribute] += 1
+						
+				end switch
+			end if
+			p = SymTab[p][S_NEXT]
+		end while
+	end if
 end procedure
 
 sequence recheck_targets = {}

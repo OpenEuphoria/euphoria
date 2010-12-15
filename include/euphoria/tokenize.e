@@ -727,14 +727,18 @@ function scan_number(atom state = g_state)
 		if not SUBSCRIPT then
 			v = Token[TDATA]
 			if Look = '.' then
-				scan_char(state)
+				if lookahead() = '.' then
+					-- We have a slice, put the token back and return our number.
+					return TRUE
+				end if
 	
+				scan_char()
 				Token[TDATA] = scan_fraction(Token[TDATA], state)
+
 				if ERR then return TRUE end if
 			end if
 
 			Token[TDATA] = scan_exponent(Token[TDATA], state)
-	
 			if v != Token[TDATA] then
 				Token[TFORM] = TF_ATOM
 			end if
@@ -976,7 +980,6 @@ procedure next_token(atom state = g_state)
 	-- scan_white returns TRUE if it hit a T_NEWLINE
 	if scan_white(state) then
 		if eumem:ram_space[state][IGNORE_NEWLINES] then next_token(state) end if
-		scan_char(state) -- advanced past this newline
 		return
 	end if
 

@@ -1818,7 +1818,7 @@ end function
 -- Parameters:
 --   # ##source_map## : map to copy from
 --   # ##dest_map## : optional, map to copy to
---   # ##put_operation## : optional, operation to use when ##dest##map## is used.
+--   # ##put_operation## : optional, operation to use when ##dest_map## is used.
 --                         The default is PUT.
 --
 -- Returns:

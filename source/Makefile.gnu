@@ -63,10 +63,6 @@ ifeq "$(EBSD)" "1"
     LDLFLAG=-lresolv
     EBSDFLAG=-DEBSD -DEBSD62 -DEOSX
   endif
-  ifeq "$(ESUNOS)" "1"
-    LDLFLAG=-lsocket -lresolv -lnsl
-    EBSDFLAG=-DEBSD -DEBSD62 -DESUNOS
-  endif
   ifeq "$(EOPENBSD)" "1"
     EBSDFLAG=-DEBSD -DEBSD62 -DEOPENBSD
   endif
@@ -540,9 +536,13 @@ $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDI
 
 manual : $(BUILDDIR)/docs/index.html
 
-manual-upload : manual
+manual-send : manual
 	$(SCP) $(TRUNKDIR)/docs/style.css $(BUILDDIR)/docs/*.html $(oe_username)@openeuphoria.org:/home/euweb/docs
-	ssh $(oe_username)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
+
+manual-reindex:
+	$(SSH) $(oe_username)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
+
+manual-upload: manual-send manual-reindex
 
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
@@ -582,7 +582,7 @@ test :
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
-		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
+		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		-verbose $(TESTFILE)
 	cd ../tests && sh check_diffs.sh
 
@@ -595,7 +595,7 @@ test-311 :
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
 		-bind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
-		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME) $(COVERAGELIB)" \
+		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		$(TESTFILE)
 		
 coverage-311 :
@@ -634,6 +634,7 @@ install :
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
+	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/preproc
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/win32
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench
 	mkdir -p $(DESTDIR)$(PREFIX)/share/euphoria/tutorial 
@@ -661,6 +662,8 @@ endif
 	install ../demo/bench/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/bench 
 	install ../demo/langwar/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/langwar
 	install ../demo/unix/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/unix
+	install ../demo/net/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/net
+	install ../demo/preproc/* $(DESTDIR)$(PREFIX)/share/euphoria/demo/preproc
 	install ../tutorial/* $(DESTDIR)$(PREFIX)/share/euphoria/tutorial
 	install  \
 	           ../bin/ed.ex \

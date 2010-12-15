@@ -1,9 +1,13 @@
 --****
--- === Hashing Algorithms
+-- == Hashing Algorithms
 --
 -- <<LEVELTOC level=2 depth=4>>
 --
 namespace stdhash
+
+--****
+-- === Type Constants
+--
 
 public enum
 	HSIEH30 = -6,
@@ -12,6 +16,10 @@ public enum
 	FLETCHER32,
 	MD5,
 	SHA256
+
+--****
+-- === Routines
+--
 
 --****
 -- Signature:
@@ -63,4 +71,3 @@ public enum
 -- ? hash(1.23,                                          99        ) --> 3808916725
 -- ? hash({1, {2,3, {4,5,6}, 7}, 8.9},                   99        ) -->  526266621
 -- </eucode>
-

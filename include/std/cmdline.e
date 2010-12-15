@@ -1,7 +1,8 @@
 --****
 -- == Command Line Handling
 --
--- <<LEVELTOC level=2 depth=4>>
+-- <<LEVELTOC level=2 depth=5>>
+--
 
 namespace cmdline
 
@@ -500,7 +501,17 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 				cmd &= ']'
 			end if
 		end if
-		puts(1, "   " & stdseq:pad_tail(cmd, pad_size))
+		
+		-- If command is longer than the pad_size, display the command and it's 
+		-- description on seperate lines
+		
+		if length(cmd) > pad_size then
+			puts(1, "   " & cmd & '\n')
+			puts(1, repeat(' ', pad_size + 3))
+		else
+			puts(1, "   " & stdseq:pad_tail(cmd, pad_size))
+		end if
+		
 		puts(1, opts[i][DESCRIPTION] & '\n')
 	end for
 

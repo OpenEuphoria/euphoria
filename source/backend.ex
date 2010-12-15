@@ -172,7 +172,7 @@ end if
 -- Must be less than or equal to actual backend size.
 -- We seek to this position and then search for the marker.
 
-ifdef FREEBSD or OSX or SUNOS then
+ifdef FREEBSD or OSX then
 	constant OUR_SIZE = 150000 -- eub for FreeBSD (not compressed)
 
 elsifdef LINUX then

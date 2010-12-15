@@ -340,23 +340,6 @@ public constant EOF = (-1)
 -- See Also:
 --		[[:getc]], [[:read_lines]]
 
---****
--- Signature:
--- <built-in> function get_key()
---
--- Description:
---     Get the next keystroke without waiting for it or echoing it on the console.
---
--- Parameters:
---		# None.
---
--- Returns:
---		An **integer**, the code number for the key pressed. If there is no key
---      press waiting, then this returns -1.
---
--- See Also:
--- 		[[:gets]], [[:getc]]
-
 constant CHUNK = 100
 
 --**

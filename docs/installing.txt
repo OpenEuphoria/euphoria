@@ -11,7 +11,15 @@ To install Euphoria on //Windows//, visit the following URL:
 
 :http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
 
-Download the lastest //Windows// installer found under the Binary Releases 
+The "Standard" version is a complete Euphoria installation, with
+Interpreter, Binder, Translator. Included are demo programs and
+document ion.
+
+The "Open Watcom" version has the contents of the "Standard" version, 
+plus a bundled compiler. This is a convenient way of producing compiled executables
+from Euphoria programs.
+
+Download the latest //Windows// installer found under the Binary Releases 
 heading of the Current version of Euphoria. Run the program and follow the 
 prompts to get Euphoria installed.
    
@@ -20,52 +28,154 @@ It also sets the environment variable **EUDIR** to the Euphoria directory.
 
 === Linux and FreeBSD
 
-Euphoria may be installed using either the gzipped tarball, or from a
-distribution specific package, if available.
+Euphoria may be installed using either a //Unix// archive ( ##.tar.gz## or ##.tar.bz2## ) 
+or, a distribution specific package, if available.
 
-The gzipped tarball is laid out similarly to the //Windows// directory 
-structure.
-You'll need to manually edit ##/etc/profile## so the ##PATH## contains
-##euphoria\bin##, and either create a ##eu.cfg## file or set up ##EUDIR##
-and ##EUINC##.
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
 
-The packaged version installs Euphoria in a more //Unix//-like way, putting the
-executables into ##/usr/bin##, ##/usr/share/euphoria## and
-##/usr/share/doc/euphoria##.  Man pages for ##eui##, ##euc##, ##eub##,
-##shroud## and ##bind## are also installed.  It will also create
-##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
+The //Unix// tarball "Archive" is laid out similarly to the //Windows// directory 
+structure. This may be convenient if working cross-platform between
+//Windows// and //Unix//. The files at ~SourceForge are also in this
+form, making it convenient if you with to use updates directly from
+the SVN depository.
+
+To install this version you must manually unarchive the tarball. Then
+copy the files to a suitable directory.
+
+You'll need to manually edit:
+* ##/etc/profile## so the ##PATH## contains
+** ##euphoria/bin##, and either create 
+*** a ##eu.cfg## file or 
+*** set up ##EUDIR## and ##EUINC##.
+
+The "Packaged" version installs Euphoria in a more //Unix//-like way, putting the executables into 
+* ##/usr/bin##, 
+* ##/usr/share/euphoria## and
+* ##/usr/share/doc/euphoria##.  
+* Man pages for ##eui##, ##euc##, ##eub##,
+* ##shroud## and ##bind## are also installed.  
+* It will also create ##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
+
+Other //Unix// based installations can be compiled from "Source Releases".
+
+=== OS X
+
+Look for an installation package for Apple installations.
+
+:http://openeuphoria.org/wiki/view/DownloadEuphoria.wc
+
+=== DOS
+
+Only up to Euphoria 3.1 is there DOS support. DOS developers are 
+invited to contribute their skills.
+
+=== Nightly Builds
+
+
+You have access to the latest Euphoria source-code that the Developers are
+working on:
+
+:http://rapideuphoria.svn.sourceforge.net/
+
+You may browse, download archives, or use an SVN client (such as "Tortoise" on
+the //Windows// platform.)
+
+Binary files are called //Eubins//, and are automated "Nightly Builds" 
+produced from the latest code in the code repository:
+
+:http://openeuphoria.org/eubins/linux/
+
+A complete installation requires merging the original source files,
+and the contents of the eubins download. Then, the path to euphoria/bin
+must be set and a cfg file must be written.
+
+For the adventurous only.
+
+
+
+
 
 %%output=post_install
 == Post Install
 
-When installed, the ##euphoria## directory will look something like this:
 
-* ##\euphoria##
-** readme.doc
-** readme.htm
-** License.txt
-** ##\bin## - Interpreters ##eui.exe## and ##euiw.exe##. Translator
-    ##euc.exe##. Or on //Linux/FreeBSD//,
-    Interpreter ##eui## and Translator ##euc##. There are also utility
-    programs such as ##ed.bat##, ##guru.bat##, etc.
-** ##\include## - standard include files
-*** ##\include\std## - the standard Euphoria library include files, e.g.
-     ##file.e##, ##sequence.e##
-** ##\source## - the complete source code (interpreter, translator, binder)
-** ##\docs## - plain text, man pages, html documentation files
-** ##\tutorial## - small tutorial programs to help you learn Euphoria
-** ##\demo## - generic demo programs that run on all platforms
-*** ##\win32## - //WIN32//-specific demo programs (optional)
-*** ##\unix## - //Linux/FreeBSD/OS X//-specific demo programs (optional)
-*** ##\langwar## - language war game for //Linux/FreeBSD/OS X//
-*** ##\bench## - benchmark programs
+
+The directory maps will help you locate the Euphoria executables, documentation,
+and sample programs.
+
+The default for the //Windows// installation, and optional for a 
+//Unix// installation:
+
+{{{
+|
+|__ euphoria
+|         file_id.diz
+|         License.txt
+|
+|__ bin 
+|     Interpreter    ( eui.exe and euiw.exe,  if on Windows)
+|                    ( eui, if on Unix)
+|     Binder         ( eubind, with eub )
+|     Translator     ( euc.exe, if on Windows)
+|                    ( euc, if on Unix)
+|     Utilities      ( bugreport.ex, bench.ex, ed.ex, ...  )
+|
+|__ include 
+|      |             ( original include files )
+|      |
+|      |__ std       (standard Euphoria library: file.e, sequence.e, ...)
+|      |
+|      |__ euphoria  (Euphoria specific)
+|
+|
+|__ docs             ( html and pdf documentation files )
+|
+|__ tutorial         (small tutorial programs to help you learn Euphoria)
+|
+|__ demo             (generic demo programs that run on all platforms)
+|     |
+|     |__ win32      ( Windows specific demo programs (optional) )
+|     |__ unix       ( Linux/FreeBSD/OS X specific demo programs (optional))
+|     |__ langwar    ( language war game for Linux/FreeBSD/OS X )
+|     |__ bench      ( benchmark program )
+|
+|__ source           (the complete source code for: interpreter, translator)
+|
+|__ tests            (unit tests for Euphoria)
+|
+|__ packaging        (software for making installation packages)
+}}}
+
 
 The //Linux// subdirectory is not included in the //Windows// distribution,
 and the ##win32## subdirectories are not included in the
  //Linux/FreeBSD// distribution. In this manual, directory names are shown
  using backslash (**\**). //Linux/FreeBSD// users should substitute forward
  slash (**/**).
+
+The "Debian Package" installs Euphoria into these directories:
+
+{{{
+|
+|__ /usr/bin                       (executables: eui, euc, ... )
+|       
+|__ /usr/share/euphoria     
+|                     |   
+|                     |__ bin      (utility programs)
+|                     |__ demo     (general demonstration programs)
+|                     |__ include  (standard library)
+|                     |__ source   (source-code for Euphoria)
+|                     |__ tutorial (tutorial programs for learning Euphoria)
+|
+|__ /usr/share/doc/euphoria        (html and pdf documentation)
+|
+|__ /etc/euphoria                  ( eu.cfg )
+}}}
+
+The "include", "demo" and "tutorial" directories are the same in
+//Windows// and //Unix//.
+
 
 %%output=configuration
 == Set Up the Euphoria Configuration File (eu.cfg)

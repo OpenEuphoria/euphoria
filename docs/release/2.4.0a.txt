@@ -14,7 +14,7 @@
   "segmentation violation", "illegal instruction" etc.).
   Thanks to Martin Stachon.
 
-*  In addition to ##__stdcall##, the C ##__cdecl## calling
+*  In addition to ##stdcall##, the C ##cdecl## calling
   convention
   is now supported for calls to C routines in .dll's and also call-backs
   to Euphoria routines from C code.

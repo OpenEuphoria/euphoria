@@ -196,7 +196,6 @@ one parameter, the platform code:
 * WIN
 * NETBSD
 * OPENBSD
-* SUNOS
 
 Use one of these options to translate code into C for the specified platform.  
 The default will always be the host platform of the translator that is executed, 

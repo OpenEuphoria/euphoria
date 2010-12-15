@@ -30,34 +30,37 @@ include std/eds.e
 include std/regex.e
 
 constant cmdopts = {
-	{"exe", 0, "interpreter path", { HAS_PARAMETER, "path-to-interpreter"} },
-	{"ec", 0, "translator path",  { HAS_PARAMETER, "path-to-translator"} },
-	{"trans", 0, "translate using default translator", { } },
-	{"lib", 0, "runtime library path", {HAS_PARAMETER, "path-to-runtime-library"} },
-	{"cc",  0, "C compiler", { HAS_PARAMETER, "-wat|wat|gcc|compiler-name"} },
-	{"log", 0, "output a log", { } },
-	{"verbose", 0, "verbose output", { } },
-	{"process-log", 0, "", { } },
-	{"html", 0, "", { } },
-	{"html-file", 0, "output file for html log output", {HAS_PARAMETER, "html output file"}},
-	{"i", 0, "include directory", {MULTIPLE, HAS_PARAMETER, "directory"}},
-	{"d", 0, "define a preprocessor word", {MULTIPLE, HAS_PARAMETER, "word"}},
-	{ "coverage",  0, "Indicate files or directories for which to gather coverage statistics", 
-		{ MULTIPLE, HAS_PARAMETER, "dir|file" } },
-	{ "coverage-db",  0, "Specify the filename for the coverage database.", 
-		{ HAS_PARAMETER, "file" } },
-	{ "coverage-erase",  0, "Erase an existing coverage database and start a new coverage analysis.", 
-		{ } },
-	{ "coverage-pp", 0, "Path to eucoverage.ex for post processing", { HAS_PARAMETER, "path-to-eucoverage.ex"} },
+	{ "verbose",          0, "verbose output", { } },
+	{ "all",              0, "show tests that pass and fail", {} },
+	{ "failed",           0, "show tests that fail only", {} },
+	{ "wait",             0, "Wait on summary", {} },
+	{ "accumulate",       0, "Count the individual tests in each file", {} },
+	{ "html",             0, "Enable HTML output mode", { } },
+	{ "html-file",        0, "output file for html log output", { HAS_PARAMETER, "filename" } },
+	{ "testopt",          0, "option for tester", { HAS_PARAMETER, "test-opt"} },
+	{ "eui",              0, "interpreter command", { HAS_PARAMETER, "command" } },
+	{ "exe",              0, "DEPRECATED interpreter path", { HAS_PARAMETER, "command" } },
+	{ "eubind",           0, "binder command", { HAS_PARAMETER, "command" } },
+	{ "bind",             0, "DEPRECATED path to eubind", { HAS_PARAMETER, "command"} },
+	{ "eub",              0, "path to backend runner", { HAS_PARAMETER, "command" } },
+	{ "euc",              0, "translator command", { HAS_PARAMETER, "command" } },
+	{ "ec",               0, "DEPRECATED translator path",  { HAS_PARAMETER, "command" } },
+	{ "trans",            0, "translate using default translator", { } },
+	{ "cc",               0, "C compiler (wat or gcc)", { HAS_PARAMETER, "compiler name" } },
+	{ "lib",              0, "runtime library path", { HAS_PARAMETER, "library" } },
+	{ "i",                0, "include directory", { MULTIPLE, HAS_PARAMETER, "directory" }},
+	{ "d",                0, "define a preprocessor word", { MULTIPLE, HAS_PARAMETER, "word" }},
+	{ "log",              0, "Log filename", { } },
+	{ "process-log",      0, "Process log instead of running tests", { } },
+	{ "coverage",         0, "Indicate files or directories for which to gather coverage statistics", 
+	                         { MULTIPLE, HAS_PARAMETER, "dir|file" } },
+	{ "coverage-db",      0, "Specify the filename for the coverage database.", 
+	                         { HAS_PARAMETER, "file" } },
+	{ "coverage-erase",   0, "Erase an existing coverage database and start a new coverage analysis.", 
+	                         { } },
+	{ "coverage-pp",      0, "Coverage post-processor (eucoverage?)", { HAS_PARAMETER, "filename"} },
 	{ "coverage-exclude", 0, "Pattern for files to exclude from coverage", { MULTIPLE, HAS_PARAMETER, "pattern"}},
-	{ "testopt", 0, "option for tester", { HAS_PARAMETER, "test-opt"} },
-	{ "bind", 0, "path to eubind", { HAS_PARAMETER, "bind.ex"} },
-	{ "eub", 0, "path to backend runner", { HAS_PARAMETER, "eub" } },
-	{ "all", 0, "show tests that pass and fail", {} },
-	{ "failed", 0, "show tests that fail only", {} },
-	{ "wait", 0, "Wait on summary", {} },
-	{ "accumulate", 0, "Count the individual tests in each file", {} },
-	{ "v", "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
+	{ "v",        "version", "Display the version number", { VERSIONING, "eutest v" & APP_VERSION } },
 	$
 }
 
@@ -119,71 +122,6 @@ procedure verbose_printf(integer fh, sequence fmt, sequence data={})
 		printf(fh, fmt, data)
 	end if
 end procedure
-
-function run_emake()
-	-- parse and run the commands in emake.bat.
-	object file
-
-	ifdef UNIX then
-		file = read_lines("emake")
-	elsedef
-		file = read_lines("emake.bat")
-	end ifdef
-
-	if atom(file) then
-		return 1
-	end if
-
-	for i = 1 to length(file) do
-		sequence line = file[i]
-
-		if length(line) < 4 or
-			match("rem ", line) = 1 or
-			match("echo ", line) or
-			equal("if ", line[1..3]) or
-			match("@echo", line) = 1 or
-			match("goto ", line) or
-			line[1] = '#' or
-			line[1] = ':'
-		then
-
-			-- Do nothing with these lines
-		
-		elsif match("set ", line) = 1 then 
-			sequence pair
-			pair = stdseq:split(line[5..$], "=")
-			pair = {setenv(pair[1], pair[2])}
-
-		elsif match("move ", line) = 1 or
-			equal("del ", line[1..4]) then
-			system(line, 2)
-
-		else
-			integer status = system_exec(line, 2)
-
-			if status then
-				sequence source = ""
-				integer dl = match(".c", line)
-
-				for ws = dl to 1 by -1 do
-					if line[ws] = ' ' then
-						source = line[ws+1..dl-1]
-						exit
-					end if
-				end for
-
-				return { E_COMPILE,  "program could not be compiled.  Error %d executing:%s",
-					{ status, line }, source & ".err" }
-			end if
-		end if
-
-		puts(1,'.')
-	end for
-
-	puts(1,"\n")
-
-	return 0
-end function
 
 -- runs cmd using system exec tests for returned error values
 -- and error files.  Before the command is run, the error files
@@ -1228,11 +1166,35 @@ procedure main()
 			case "verbose" then
 				verbose_switch = 1
 				
-			case "exe" then
-				executable = val
+			case "eui", "exe" then
+				executable = canonical_path(val)
+				if not file_exists(executable) then
+					printf(1, "Specified interpreter via -eui parameter was not found\n")
+					abort(1)
+				end if
 				
-			case "ec" then
-				translator = val
+			case "eubind", "bind" then
+				binder = canonical_path(val)
+				if not file_exists(binder) then
+					printf(1, "Specified binder via -eubind parameter was not found\n")
+					abort(1)
+				end if
+				
+			case "eub" then
+				sequence tmp = canonical_path(val)
+				if not file_exists(tmp) then
+					printf(1, "Specified backend via -eub parameter was not found\n")
+					abort(1)
+				end if
+
+				eub_path = "-eub " & tmp
+			
+			case "euc", "ec" then
+				translator = canonical_path(val)
+				if not file_exists(translator) then
+					printf(1, "Specified translator via -euc parameter was not found\n")
+					abort(1)
+				end if
 				
 			case "trans" then
 				if not length( translator ) then
@@ -1243,10 +1205,16 @@ procedure main()
 				compiler = "-" & val
 				
 			case "lib" then
-				library = "-lib " & val
+				sequence tmp = canonical_path(val)
+				if not file_exists(tmp) then
+					printf(1, "Specified library via -lib parameter was not found\n")
+					abort(1)
+				end if
+
+				library = "-lib " & tmp
 				
 			case "i", "d" then
-				for j = 1 to length( val ) do
+				for j = 1 to length(val) do
 					sequence option = sprintf( " -%s %s", {param, val[j] })
 					interpreter_options &= option
 					translator_options &= option
@@ -1256,6 +1224,7 @@ procedure main()
 				for j = 1 to length( val ) do
 					interpreter_options &= sprintf( " -coverage %s", {val[j]} )
 				end for
+
 				if not length( coverage_db ) then
 					coverage_db = "-"
 				end if
@@ -1284,15 +1253,9 @@ procedure main()
 			case "testopt" then
 				test_options &= " -" & val & " "
 				
-			case "bind" then
-				binder = val
-				
 			case "html-file" then
 				html_fn = val
 				
-			case "eub" then
-				eub_path = "-eub " & val
-			
 			case cmdline:EXTRAS then
 				if length( val ) then
 					files = build_file_list( val )

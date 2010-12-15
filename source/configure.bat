@@ -13,6 +13,7 @@ rem ============================================================
 SET ECBIN=
 SET DISABLED_MANAGED_MEM=
 SET SCP_CLIENT=pscp -C
+SET SSH_CLIENT=plink -C
 
 rem ============================================================
 rem Be sure to start with a blank config.wat
@@ -130,6 +131,18 @@ IF "%1" == "--scp-client" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--ssh-client" (
+	set SSH_CLIENT=%2
+	SHIFT
+	GOTO EndLoop
+)
+
+IF "%1" == "--wkhtmltopdf" (
+	echo WKHTMLTOPDF=1 >> config.wat
+	SHIFT
+	GOTO EndLoop
+)
+
 IF "%1" == "--help" (
 	GOTO Help
 )
@@ -148,6 +161,7 @@ rem ============================================================
 :Continue
 
 echo SCP=%SCP_CLIENT% >> config.wat
+echo SSH=%SSH_CLIENT% >> config.wat
 
 if "%HAS_EUBIN%" == "1" (
 	SET NOEU=
@@ -278,49 +292,33 @@ echo.
 echo Options:
 echo     --without-euphoria  Use this option if you are building Euphoria
 echo                         with only a C compiler.
-echo.
 echo     --prefix value      Use this option to specify the location for euphoria to
 echo                         be installed.  The default is EUDIR, or c:\euphoria,
 echo                         if EUDIR is not set.
-echo.
 echo     --no-managed-mem    disable managed memory
-echo.
 echo     --align4            malloc allocates addresses that are
 echo                         always 4 byte aligned.
-echo.
 echo     --eubin value       Use this option to specify the location of the
 echo                         interpreter binary to use to translate the front end.
 echo                         The default is ..\bin
-echo.
 echo     --build value       set the build directory
-echo.
 echo     --full              Use this option to so EUPHORIA doesn't report itself
 echo                         as a development version.
-echo.
 echo     --release value     set the release type for the version string
-echo.
 echo     --noassert          Use this to remove 'assert()' processing in the C code.
-echo.
 echo     --plat value        set the OS that we will translate to.
-echo                         values can be: WIN, OSX, LINUX, FREEBSD, SUNOS,
-echo                         OPENBSD or NETBSD.
-echo.
+echo                         values can be: WIN, OSX, LINUX, FREEBSD, OPENBSD or NETBSD.
 echo     --use-binary-translator
 echo                         Use the already built translator rather than
 echo                         interpreting its source
-echo.
 echo     --use-source-translator
 echo                         Interpret the translator's source rather than
 echo                         using the already built translator (default)
-echo.
 echo     --verbose-tests     Cause eutest to use the -verbose flag during testing
-echo.
 echo     --oe-username       Developer user name on openeuphoria.org for various scp
 echo                         operations such as manual upload
-echo.
-echo     --scp-client
-echo                         SCP program to use for scp uploads (default pscp)
-echo.
+echo     --scp-client        SCP program to use for scp uploads (default pscp)
+echo     --ssh-client        SSH program to use for ssh commands (default plink)
 echo.
 echo Developer Options:
 echo     --debug             turn debugging on
