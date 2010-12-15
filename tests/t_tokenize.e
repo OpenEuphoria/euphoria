@@ -66,5 +66,13 @@ test_equal("tok_parse 1e #1", 21, tokens[1][3][TDATA])
 test_equal("tok_parse 1e #2", 0.001, tokens[1][5][TDATA]) 
 test_equal("tok_parse 1e #3", 1e-1, tokens[1][7][TDATA]) 
 
+tokenize:string_numbers(0)
+tokenize:keep_newlines(0)
+tokens = tokenize_string("\n\np[1][2..3]")
+test_equal("tokenize_string ticket #549, 1", 9, length(tokens[1]))
+test_equal("tokenize_string ticket #549, 2", 2, tokens[1][6][TDATA])
+test_equal("tokenize_string ticket #549, 3", T_SLICE, tokens[1][7][TTYPE])
+test_equal("tokenize_string ticket #549, 4", 3, tokens[1][8][TDATA])
+
 test_report()
 
