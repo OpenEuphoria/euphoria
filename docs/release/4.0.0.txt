@@ -45,3 +45,6 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 * PDF documentation is now much better, generated from LaTeX sources.
 * Bundled ##creole## program supports multiple output formats now, the addition of LaTeX
   for great printed or PDF documentation from your creole sources.
+* Bundled utility ##bench.ex## now outputs timing information to STDERR
+  by default. ##--stdout## can be supplied if output to STDOUT is desired. It now also
+  displays the min and max iteration times in addition to the already average and total.
