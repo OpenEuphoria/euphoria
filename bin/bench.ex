@@ -24,7 +24,7 @@ procedure main()
 		{ 0, "verbose", "Verbose (timing for each iteration)", { NO_PARAMETER } },
 		{ 0, "version", "Display version number", { VERSIONING, "eubench v" & VERSION } }
 	}
-	map o = cmd_parse(opts)
+	map o = cmd_parse(opts, { NO_VALIDATION_AFTER_FIRST_EXTRA })
 
 	integer verbose = map:get(o, "verbose", 0)
 	object iterations = map:get(o, "iterations", 1)
