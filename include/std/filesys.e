@@ -1992,13 +1992,15 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	ifdef LINUX then
 		stat_t_offset = 0
 		stat_buf_size = 88
-	elsifdef OSX then
+	elsifdef FREEBSD or OSX then
 		stat_t_offset = 0
 		stat_buf_size = 96
-	elsifdef BSD then
-		-- openbsd
+	elsifdef OPENBSD then
 		stat_t_offset = 0
 		stat_buf_size = 112
+	elsifdef NETBSD then
+		stat_t_offset = 0
+		stat_buf_size = 100
 	end ifdef
 	
 
@@ -2288,13 +2290,15 @@ public function disk_metrics(object disk_path)
 		ifdef LINUX then
 			stat_t_offset = 48
 			stat_buf_size = 88
-		elsifdef OSX then
+		elsifdef FREEBSD or OSX then
 			stat_t_offset = 64
 			stat_buf_size = 96
-		elsifdef BSD then
-			-- openbsd
+		elsifdef OPENBSD then
 			stat_t_offset = 72
 			stat_buf_size = 112
+		elsifdef NETBSD then
+			stat_t_offset = 80
+			stat_buf_size = 100
 		end ifdef
 
 		psrc    = machine:allocate_string(disk_path)
