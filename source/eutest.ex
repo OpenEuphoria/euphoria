@@ -1082,7 +1082,7 @@ procedure platform_init()
 		end if
 		dexe = ""
 		
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		if equal( executable, "" ) then
 			executable = "eui"
 		end if
@@ -1093,7 +1093,7 @@ procedure platform_init()
 		ifdef UNIX then
 			translator = "euc"
 		
-		elsifdef WIN32 then
+		elsifdef WINDOWS then
 			translator = "euc.exe"
 		end ifdef
 	end if	
@@ -1105,12 +1105,12 @@ procedure platform_init()
 	ifdef UNIX then
 		interpreter_os_name = "UNIX"
 
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		if length(translator) > 0 then
 			translator_options &= " -CON"
 		end if
 		
-		interpreter_os_name = "WIN32"
+		interpreter_os_name = "WINDOWS"
 
 	elsedef
 		puts(2, "eutest is only supported on Unix and Windows.\n")

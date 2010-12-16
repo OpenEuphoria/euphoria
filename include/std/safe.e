@@ -78,14 +78,14 @@ public integer check_calls = 1
 --
 -- Comments:
 --
--- If this integer is 1 (the default under //WIN32//), only check for references to the 
+-- If this integer is 1 (the default under //WINDOWS//), only check for references to the 
 -- leader or trailer areas just outside each registered block, and don't complain about 
 -- addresses that are far out of bounds (it's probably a legitimate block from another source)
 --
 -- For a stronger check, set this to 0 if your program will never read/write an 
 -- unregistered block of memory.
 --
--- On //WIN32// people often use unregistered blocks.
+-- On //WINDOWS// people often use unregistered blocks.
 public integer edges_only = (platform()=2) 
 				  
 -- Constants that tell us what we are about to try to do: read, write or execute memory.  

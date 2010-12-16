@@ -357,7 +357,7 @@ end function
 --                          {C_POINTER, C_INT}, C_INT)
 -- -- We use "LoadIconA" here because we know that LoadIconA
 -- -- needs the stdcall convention, as do
--- -- all standard .dll routines in the WIN32 API. 
+-- -- all standard .dll routines in the WINDOWS API. 
 -- -- To specify the cdecl convention, we would have used "+LoadIconA".
 --
 -- if LoadIcon = -1 then
