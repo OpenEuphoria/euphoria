@@ -1987,22 +1987,18 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	
 	ifdef UNIX then
 		atom psrcbuf = 0, pdestbuf = 0
-		integer stat_t_offset, dev_t_size, stat_buf_size
+		integer stat_t_offset, stat_buf_size
 	end ifdef
 	ifdef LINUX then
 		stat_t_offset = 0
 		stat_buf_size = 88
-		dev_t_size = 8
 	elsifdef OSX then
-		--TODO
 		stat_t_offset = 0
-		stat_buf_size = 88
-		dev_t_size = 8
+		stat_buf_size = 96
 	elsifdef BSD then
-		--TODO
+		-- openbsd
 		stat_t_offset = 0
-		stat_buf_size = 88
-		dev_t_size = 8
+		stat_buf_size = 112
 	end ifdef
 	
 
@@ -2287,22 +2283,18 @@ public function disk_metrics(object disk_path)
 
 		atom bytes_per_cluster
 		atom psrc, ret, psrcbuf
-		integer stat_t_offset, dev_t_size, stat_buf_size
+		integer stat_t_offset, stat_buf_size
 
 		ifdef LINUX then
 			stat_t_offset = 48
 			stat_buf_size = 88
-			dev_t_size = 4
 		elsifdef OSX then
-			--TODO
-			stat_t_offset = 48
-			stat_buf_size = 88
-			dev_t_size = 4
+			stat_t_offset = 64
+			stat_buf_size = 96
 		elsifdef BSD then
-			--TODO
-			stat_t_offset = 48
-			stat_buf_size = 88
-			dev_t_size = 4
+			-- openbsd
+			stat_t_offset = 72
+			stat_buf_size = 112
 		end ifdef
 
 		psrc    = machine:allocate_string(disk_path)
@@ -2370,7 +2362,7 @@ public function disk_size(object disk_path)
 		sequence filesys = ""
 
 		tempfile = "/tmp/eudf" & sprintf("%d", rand(1000)) & ".tmp"
-		system("df "&disk_path&" > "&tempfile, 2)
+		system("df -k "&disk_path&" > "&tempfile, 2)
 
 		temph = open(tempfile, "r")
 		if temph = -1 then
