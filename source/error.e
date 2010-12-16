@@ -180,8 +180,14 @@ export procedure Cleanup(integer status)
 	end ifdef
 	
 	show_error = 1
-	
-	if src_file >= 0 then
+
+	-- Sometimes (such as in the pre-processor), Cleanup can be called when
+	-- src_file has not been assigned a value. object() will return 0 if the
+	-- variable has never been assigned.
+
+	if object(src_file) = 0 then
+		src_file = -1
+	elsif src_file >= 0 then
 		close(src_file)
 		src_file = -1
 	end if

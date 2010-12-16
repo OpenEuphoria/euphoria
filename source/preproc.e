@@ -11,6 +11,7 @@ include std/sequence.e
 include std/datetime.e as dt
 include std/dll.e
 
+include global.e
 include common.e
 include error.e
 
@@ -121,6 +122,8 @@ public function maybe_preprocess(sequence fname)
 				E_INTEGER)
 			if rid = -1 then
 				CompileErr("Preprocessor entry point cound not be found\n",,1)
+
+				Cleanup(1)
 			end if
 
 			preprocessors[pp_id][PP_RID] = rid
@@ -128,6 +131,8 @@ public function maybe_preprocess(sequence fname)
 		
 		if c_func(rid, { fname, post_fname, pp[PP_PARAMS] }) != 0 then
 			CompileErr("Preprocessor call failed\n",,1)
+
+			Cleanup(1)
 		end if
 	else
 		if equal(fileext(cmd), "ex") then
@@ -139,6 +144,8 @@ public function maybe_preprocess(sequence fname)
 		integer result = system_exec(cmd, 2)
 		if result != 0 then
 			CompileErr(sprintf("Preprocessor command failed (%d): %s\n", { result, cmd } ),,1)
+
+			Cleanup(1)
 		end if
 	end if
 	
