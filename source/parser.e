@@ -3327,12 +3327,19 @@ function Global_declaration(integer type_ptr, integer scope)
 				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 			end if
 			valsym = Top()
+			
 			if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				Assign_Constant( sym )
 				sym = Pop()
 			else
+				
 				emit_op(ASSIGN)
-				valsym = get_assigned_sym()
+				if Last_op() = ASSIGN then
+					valsym = get_assigned_sym()
+				else
+					-- something else happened...could be a built-in
+					valsym = -1
+				end if
 				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
