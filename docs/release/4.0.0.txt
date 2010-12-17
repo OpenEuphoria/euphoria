@@ -40,6 +40,7 @@ running as a console from a shared console window.
 been resolved.
 * [[ticket:555]] Fixed parsing of constants when first statement is a constant assigned by a
                  built-in function.
+* [[ticket:556]] Fixed type inference for return value from [[:rand]] in translator.
 
 === Enhancements/Changes
 
