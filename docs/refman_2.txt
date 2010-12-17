@@ -522,7 +522,7 @@ not 6       -- 0 (false)
 
 These operators can also be applied to sequences. See below.
 
-In some cases [[:short-circuit]] evaluation will be used for expressions
+In some cases [[:short_circuit]] evaluation will be used for expressions
 containing ##and## or ##or##. Specifically, short circuiting applies inside decision making expressions.  These are found in the [[:if statement]], [[:while statement]] and the [[:loop until statement]].  More on this later.
 
 ==== Arithmetic Operators
@@ -2493,7 +2493,7 @@ because it does not require an ##**end if**## to go with it. There is just one
 ##**end if**## for the entire //if statement//, even when there are many
 ##**elsif**## clauses contained in it.
 
-The ##**if**## and ##**elsif**## expressions are tested using [[:short-circuit]]
+The ##**if**## and ##**elsif**## expressions are tested using [[:short_circuit]]
 evaluation.
 
 An //if statement// can have a //label clause// just before the first
@@ -3521,11 +3521,11 @@ while 1 with entry label "top" do -- CORRECT
 </eucode>
 
 %%output=lang_short_circuit
-== Short-Circuit Evaluation == @[short-circuit]
+== Short-Circuit Evaluation == @[short_circuit]
 :<<LEVELTOC level=2 depth=4>>
 
 When the condition tested by if, elsif, until, or while contains ##and## or
-##or## operators, [[:short-circuit]] evaluation will be used.  For example,
+##or## operators, [[:short_circuit]] evaluation will be used.  For example,
 
 <eucode>
 if a < 0 and b > 0 then ...
