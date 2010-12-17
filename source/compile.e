@@ -3727,6 +3727,9 @@ procedure opRAND()
 		target_val = {1, target[MAX]}
 	else
 		target_type = GType(Code[pc+1])
+		if target_type = TYPE_DOUBLE then
+			target_type = TYPE_ATOM
+		end if
 	end if
 
 	pc = unary_optimize(pc, target_type, target_val, intcode, intcode2,
