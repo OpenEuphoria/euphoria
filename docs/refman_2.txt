@@ -182,7 +182,7 @@ b"1001 00110110 0110_0111 1_0101_1010" -- ==> {#9,#36,#67,#15A}
 <eucode>
 x"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
 </eucode>
-\\
+
 When you put too many hex characters together they are split up appropriately for you:
 
 <eucode>
@@ -2498,7 +2498,7 @@ evaluation.
 
 An //if statement// can have a //label clause// just before the first
 ##**then**## keyword.
-See the section on [[:labelled headers]]. Note that an //elsif clause// can not
+See the section on [[:Header Labels]]. Note that an //elsif clause// can not
 have a label.
 
 @[case|]   @[do|]
@@ -2895,7 +2895,7 @@ end ifdef
 
 ifdef SHAREWARE then
   if record_count > 100 then
-      message("Shareware version can only contain 100 records. Please register")
+     message("Shareware version can only contain 100 records. Please register")
      abort(1)
   end if
 end ifdef
@@ -3451,7 +3451,7 @@ Label names must be double quoted constant strings. Characters that would be
 illegal in an Euphoria identifier may appear in a label name, since it is a
 regular string.
 
-[[:Labelled headers -> "Header labels"]] do not count as possible goto targets.
+[[:Header Labels|Labelled headers]] do not count as possible goto targets.
 
 Use ##goto## in production code when all the following applies:
 * you want to proceed with a statement which is not the following one;

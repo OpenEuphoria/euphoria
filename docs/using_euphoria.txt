@@ -274,11 +274,10 @@ Depending on the platform you are using the interpreter could be called:
 | ##eui##     | General interpreter on //Windows// and //Unix// variants |
 | ##euiw##    | Console-less //Windows// interpreter                 |
 
-\\The command-line may contain extra information. Following your program 
-filename
-you may add extra words (known as //arguments//) that can used in your
-program to customize its behavior. These arguments are read within your
-program by the built-in function [[:command_line]]().
+The command-line may contain extra information. Following your program filename
+you may add extra words (known as //arguments//) that can used in your program
+to customize its behavior. These arguments are read within your program by the
+built-in function [[:command_line]]().
 
 Optionally, you may also use [[:command line switches]] that are typed between
 the interpreter name and the program name. Command line switches
