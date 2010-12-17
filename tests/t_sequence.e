@@ -632,5 +632,18 @@ s = { {{1}}, {1} } + 1
 s = s[1][1]
 test_equal("RHS SUBS self assignment", 2,  s[1] )
 
+procedure xor_test()
+	sequence x = {0, 1, 2, 3, 4, 5}
+	sequence y = {1, 0, 1, 1, 0, 0}
+   
+	if not equal(x xor y, y xor x) then
+		test_fail("sanity basic sequence xor test")
+	end if
+	if compare({{1,1,0,0,1,1}}, {x} xor {y}) != 0 then
+		test_fail("sanity comparison sequence xor test")
+	end if
+end procedure
+xor_test()
+
 test_report()
 
