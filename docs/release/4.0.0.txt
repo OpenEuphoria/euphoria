@@ -38,6 +38,8 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 running as a console from a shared console window.
 * Ensure forward type checks aren't resolved until after the variable being type checked has
 been resolved.
+* [[ticket:555]] Fixed parsing of constants when first statement is a constant assigned by a
+                 built-in function.
 
 === Enhancements/Changes
 
