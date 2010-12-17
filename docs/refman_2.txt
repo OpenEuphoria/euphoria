@@ -2961,10 +2961,16 @@ more flexible.
 === while statement
 
 A **while statement** tests a condition to see if it is non-zero
-(true), and while it is true a loop is executed.
+(true), and if so, a body of statements is executed. The condition is re-tested
+after when the statements are run, and if still true the statements are
+run again, and so on.
 
 Syntax Format:
 >##**while** //expr// //[//**with entry**//]// //[//**label** //"name"// //]// **do**##
+>>##//statements//##
+>##//[//**entry**//]//##
+>>##//statements//##
+>##**end while**##
 
 Example 1
 <eucode>
@@ -3043,14 +3049,20 @@ loop label "GONEXT" do
 end loop
 </eucode>
 
-This differs from a **while** loop in more than one way:
+A ##while## statement differs from a ##loop## statement because the body of a
+loop is executed at least once, since testing takes place **after** the body
+completes.  However in a ##while## statement, the test is taken **before** 
+the body is executed.
 
-# The body of the loop is executed at least once, since testing takes place
-AFTER it completes.  In a **while**, the test is taken BEFORE execution.
-# The header contains only optional **label** and **entry** tags.
+Also note that a ##loop## can not have a ##with entry## clause.
 
 @[to|] @[by|]
 === for statement
+
+Syntax Format:
+>##**for** **loopvar** = **startexpr** to **endexpr** //[//**by delta**//]// **do**##
+>>##//statements//##
+>##end for##
 
 A **for** statement sets up a special loop that has its own **loop variable**.
 The **loop variable** starts with the specified initial value and increments or
