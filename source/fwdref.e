@@ -543,6 +543,11 @@ procedure patch_forward_type_check( token tok, integer ref )
 		var = Code[pc+1]
 	end if
 	
+	if var < 0 then
+		-- not yet...don't know the variable yet
+		return
+	end if
+	
 	-- clear out the old stuff
 	replace_code( {}, pc, pc + 2, fr[FR_SUBPROG])
 	
