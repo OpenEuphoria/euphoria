@@ -2955,7 +2955,7 @@ a loop, and each execution of code in a loop is called an iteration of the
 loop.
 
 Euphoria has three flavors of loops. They all may harbor a
-[[:labelled header -> Header Labels]], in order to make exiting or resuming them
+[[:Header Labels]], in order to make exiting or resuming them
 more flexible.
 
 === while statement
@@ -3242,7 +3242,7 @@ organization. Yet, they may prove more convenient in short, short lived
 programs, and are provided mostly for this purpose.
 
 For information on how to associate a string to a block of code, see the section
-[[:labelled headers]].
+[[:Header Labels]].
 
 An **exit** without any label or number in a [[:while statement]] or a
 [[:for statement]] causes immediate termination of that loop, with control
@@ -3451,7 +3451,7 @@ Label names must be double quoted constant strings. Characters that would be
 illegal in an Euphoria identifier may appear in a label name, since it is a
 regular string.
 
-[[:Header Labels|Labelled headers]] do not count as possible goto targets.
+[[:Header Labels]] do not count as possible goto targets.
 
 Use ##goto## in production code when all the following applies:
 * you want to proceed with a statement which is not the following one;
@@ -3482,8 +3482,7 @@ variables may be defined only in that scope, and they may or may not have
 sensible values. It is up to the programmer to take appropriate action in this
 respect.
 
-@[label|]
-=== Header Labels === @[labelled headers]
+=== Header Labels ===
 
 As shown in the above section on control flow statements, most can have their
 own label. To label a flow control statement, use a ##label## clause immediately
