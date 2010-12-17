@@ -1,4 +1,5 @@
 namespace decl
+constant cmd = command_line()
 
 include std/unittest.e
 include std/error.e
