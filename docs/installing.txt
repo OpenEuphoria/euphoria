@@ -85,7 +85,7 @@ Binary files are called //Eubins//, and are automated "Nightly Builds"
 produced from the latest code in the code repository:
 
 :http://openeuphoria.org/eubins/linux/
-zzzz should windows/osx builds be included??
+!!zzzz should windows/osx builds be included??
 
 A complete installation requires merging the original source files,
 and the contents of the eubins download. Then, the path to euphoria/bin
