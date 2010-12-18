@@ -534,7 +534,7 @@ $(MKVER): mkver.c
 	$(CC) -o $@ $<
 
 $(BUILDDIR)/$(OBJDIR)/back/be_ver.h: $(MKVER)
-	$(MKVER) $(HG) $@
+	$(MKVER) $(HG) $(BUILDDIR)/ver.cache $@
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
 	cd ../docs/ && $(EUDOC) --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt

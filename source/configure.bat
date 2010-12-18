@@ -14,6 +14,7 @@ SET ECBIN=
 SET DISABLED_MANAGED_MEM=
 SET SCP_CLIENT=pscp -C
 SET SSH_CLIENT=plink -C
+SET HG=hg
 
 rem ============================================================
 rem Be sure to start with a blank config.wat
@@ -143,6 +144,12 @@ IF "%1" == "--wkhtmltopdf" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--hg" (
+	SET HG=%2
+        SHIFT
+        GOTO EndLoop
+)
+
 IF "%1" == "--help" (
 	GOTO Help
 )
@@ -162,6 +169,7 @@ rem ============================================================
 
 echo SCP=%SCP_CLIENT% >> config.wat
 echo SSH=%SSH_CLIENT% >> config.wat
+echo HG=%HG% >> config.wat
 
 if "%HAS_EUBIN%" == "1" (
 	SET NOEU=
@@ -319,6 +327,7 @@ echo     --oe-username       Developer user name on openeuphoria.org for various
 echo                         operations such as manual upload
 echo     --scp-client        SCP program to use for scp uploads (default pscp)
 echo     --ssh-client        SSH program to use for ssh commands (default plink)
+echo     --hg                Full path to hg.exe (default hg)
 echo.
 echo Developer Options:
 echo     --debug             turn debugging on
