@@ -120,25 +120,25 @@ export procedure show_banner()
 		memory_type = GetMsgText(274,0)
 	end ifdef
 
-	sequence misc_info = { memory_type, "", info:version_revision(), info:version_date() }
+	sequence misc_info = {
+		info:platform_name(), memory_type, "", info:version_revision(), info:version_date()
+	}
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
-		misc_info[2] = GetMsgText(275,0)
+		misc_info[3] = GetMsgText(275,0)
 	else
-		misc_info = remove(misc_info, 2)
+		misc_info = remove(misc_info, 3)
 	end if
 
 	/*
 	Euphoria Interpreter v4.0.0 Final
-		Using Managed Memory, EuConsole, 09df3eac3c44, 2010-12-22
+		Windows, Using Managed Memory, 09df3eac3c44, 2010-12-22
 	*/
 
 	screen_output(STDERR, sprintf("%s v%s %s\n   %s\n", {
 		prod_name, info:version_string_short(), info:version_type(),
 		join(misc_info, ", ")
 	}))
-
-	screen_output(STDERR, "\n")
 end procedure
 
 -- Taken from std/cmdline.e :-(
