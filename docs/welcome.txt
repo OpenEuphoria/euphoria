@@ -71,7 +71,7 @@ There are now enthusiastic users around the world.
 Euphoria is a very high-level programming language. It is unique among a
 crowd of conventional languages.
 
-=== Euphoria delivers the expected features of a modern language:
+=== Euphoria delivers the expected features of a modern language
 
 * Open source
 * Free for personal and commercial use
@@ -122,13 +122,13 @@ platform you are using
 * Euphoria has a coherent design {{{--}}} Euphoria programmers enjoy programming
 in Euphoria
 
-=== As a first programming language:
+=== As a first programming language
 
 * Easy to learn, easy to program
 * No limits as to what you can program
 * Euphoria programming skills will enhance learning other languages
 
-=== As an extension to languages you already know:
+=== As an extension to languages you already know
 
 * A fast, flexible, and powerful language
 * Euphoria, the language you will prefer to program in
