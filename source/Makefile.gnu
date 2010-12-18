@@ -437,23 +437,30 @@ source : builddirs
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
+
 ifneq "$(VERSION)" ""
 SOURCEDIR=euphoria-$(VERSION)
 else
-SVN_REV=xxx
-SOURCEDIR=euphoria-$(PLAT)-r$(SVN_REV)
+
+ifeq "$(REV)" ""
+REV := $(shell hg parents --template '{node|short}')
 endif
 
-ifeq "$(SVN_URL)" ""
-SVN_URL=https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/trunk/
+ifeq "$(PLAT)" ""
+SOURCEDIR=euphoria-$(REV)
+else
+SOURCEDIR=euphoria-$(PLAT)-$(REV)
+endif
+
 endif
 
 source-tarball :
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
-	svn export $(SVN_URL) $(BUILDDIR)/$(SOURCEDIR)
+	hg archive $(BUILDDIR)/$(SOURCEDIR)
 	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
 	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
+	rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
 	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR).tar.gz $(PLAT)
