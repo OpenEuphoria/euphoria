@@ -328,11 +328,9 @@ is really just a convenient notation that saves you from having to type in all
 the ASCII codes.
 @[emptyseq|]
 It follows that "" is equivalent to {}. Both represent
-zzzz-------------------------------^^^^ 
 the sequence of zero length, also known as the **empty sequence**. As
 a matter of programming style, it is natural to use "" to suggest a zero length
 sequence of characters, and {} to suggest some other kind of sequence.
-zzzz-----------------------^^^
 An **individual character** is an **atom**. It must be entered using single
 quotes. There is a difference between an individual character (which is an
 atom), and a character string of length 1 (which is a sequence). e.g.
@@ -1665,7 +1663,7 @@ turned off type checking. Whether type checking is on or off, you will never
 get a **//machine-level//** exception.  **You will always get a
 meaningful message from Euphoria when something goes wrong**.  (//This
 might not be the case when you [[:poke]] directly
-zzzz --------------------------^^^^^^^^^
+!!zzzz-------------------------^^^^^^^^^
 into memory, or call routines written in C or machine code.//)
 
 Euphoria's method of defining types is simpler than what you will find in other
@@ -1857,7 +1855,7 @@ containing the ##public## declaration.
 any file that directly includes the file in which the identifier is declared.
 
 When you **[[:include]]** a Euphoria file in another file, only the identifiers
-zzzz-------^^^^^^^^^^^^^^ 
+!!zzzz-----^^^^^^^^^^^^^^ 
 declared using a scope modifier are accessible to the file doing the include.
 The other declarations in the included file are invisible to the file doing the
 include, and you will get an error message, "##Errors resolving the following
@@ -1929,9 +1927,8 @@ having to examine other files, or notify other users of the include file.
 
 Sometimes, when using include files developed by others, you will encounter
 a naming conflict.  One of the include file authors has used the same name for
-a exposed identifier as one of the other authors. One of fixing this, if you
-zzzz---------------------------------------------?????
-have the source, you could simply edit one of the include files to correct
+a exposed identifier as one of the other authors. One of way of fixing this, if you
+have the source, is to simply edit one of the include files to correct
 the problem, however then you'd have repeat this process whenever a new version
 of the include file was released.
 
@@ -2533,7 +2530,6 @@ end switch
 </eucode>
 
 The above example could be written with ##if## statements like this ..
-zzzzNo example above !!
 <eucode>
 object temp = expression
 object breaking = false
