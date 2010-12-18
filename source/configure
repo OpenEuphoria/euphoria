@@ -109,6 +109,7 @@ export CC=gcc
 
 SCP="scp -C"
 SSH="ssh -C"
+HG=`which hg`
 
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
 
@@ -254,6 +255,15 @@ while [ "$1" != "" ]; do
 		SSH=$VAL
 		;;
 
+	--hg*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL = $1
+		fi
+
+		HG=$VAL
+		;;
+
 	* )
 		echo "Unknown option '$1'"
 		echo "Configures and prepares the euphoria source for building"
@@ -295,6 +305,7 @@ while [ "$1" != "" ]; do
 		echo "                       operations such as manual upload"
 		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)"
+                echo "   --hg value          Mercurial binary command (default 'which hg')"
 		exit
 		;;
 	esac
@@ -321,8 +332,6 @@ else
 	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}
 fi
 
-echo HG=`which hg` >> "$PREFIX"${CONFIG_FILE}
-
 if test $UNAME_SYSTEM = "MS-DOS"; then
 	# "Information: Managed memory always on for DJGPP."
 	echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}
@@ -345,6 +354,8 @@ fi
 
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
 echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
+echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
+echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}
 
 if [ "$EC" != "" ]; then
 	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}
