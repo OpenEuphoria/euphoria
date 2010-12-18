@@ -33,6 +33,7 @@
 #include "be_alloc.h"
 #include "be_execute.h"
 #include "be_socket.h"
+#include "be_ver.h"
 
 #ifdef ELINUX
 #include <malloc.h>
@@ -104,7 +105,6 @@ extern unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsign
 
 #include <signal.h>
 
-extern char* get_svn_revision(); /* from rev.c */
 extern double eustart_time; /* from be_runtime.c */
 
 /*****************/
@@ -2421,13 +2421,14 @@ static object crash_routine(object x)
 object eu_info()
 {
 	s1_ptr s1;
-	s1 = NewS1(6);
+	s1 = NewS1(7);
 	s1->base[1] = MAJ_VER;
 	s1->base[2] = MIN_VER;
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
-	s1->base[5] = NewString(get_svn_revision());
-	s1->base[6] = NewDouble(eustart_time);
+        s1->base[5] = NewString(SCM_VER);
+        s1->base[6] = NewString(SCM_DATE);
+	s1->base[7] = NewDouble(eustart_time);
 	return MAKE_SEQ(s1);
 }
 

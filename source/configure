@@ -321,6 +321,8 @@ else
 	echo EUPHORIA=0 >> "$PREFIX"${CONFIG_FILE}
 fi
 
+echo HG=`which hg` >> "$PREFIX"${CONFIG_FILE}
+
 if test $UNAME_SYSTEM = "MS-DOS"; then
 	# "Information: Managed memory always on for DJGPP."
 	echo MANAGED_MEM=1 >> "$PREFIX"${CONFIG_FILE}

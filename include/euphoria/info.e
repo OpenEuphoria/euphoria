@@ -7,7 +7,7 @@ namespace info
 
 constant M_EU_INFO=75
 
-enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION, START_TIME
+enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION, COMPILE_DATE, START_TIME
 
 constant version_info = machine_func(M_EU_INFO, {})
 
@@ -106,6 +106,18 @@ public function version_revision()
 	return version_info[REVISION]
 end function
 
+--**
+-- Get the compilation date of the hosting Euphoria
+--
+-- Returns:
+--   A text **sequence** containing the YYYY-MM-DD formatted date
+--   of when the executing Euphoria was built.
+--
+
+public function version_date()
+	return version_info[COMPILE_DATE]
+end function
+
 --****
 -- === String Version Information
 --
@@ -137,7 +149,7 @@ end function
 --
 
 public function version_string()
-	return sprintf("%d.%d.%d %s (r%s)", version_info)
+	return sprintf("%d.%d.%d %s (%s,%s)", version_info)
 end function
 
 --**
