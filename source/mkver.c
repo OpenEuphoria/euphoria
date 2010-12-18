@@ -53,7 +53,7 @@ void put_version(const char *output_filename, const char *version,
                  const char *date)
 {
     FILE *ver_fh;
-    char version_short[SHORT_SIZE];
+    char version_short[SHORT_SIZE + 1];
 
 	strncpy(version_short, version, SHORT_SIZE);
 	version_short[SHORT_SIZE] = 0;
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 
     had_old_info = get_version_info(cache_filename, old_ver, BUF_SIZE, old_date, BUF_SIZE);
 
-#if defined(__WATCOMC__)
+#if defined(__WATCOMC__) || defined(__MINGW32__)
     snprintf(tmp, MAX_PATH,
 			 "\"%s\" parents --template {node}\\n{date^|isodate} > %s",
 			 hg_executable, cache_filename);
@@ -128,8 +128,9 @@ int main(int argc, char **argv)
 
     if (get_version_info(cache_filename, new_ver, BUF_SIZE, new_date, BUF_SIZE) == 0)
     {
-        fprintf(stderr, "Could not open ver.dat - result of hg parents\n");
-        exit(1);
+	  fprintf(stderr, "Could not open cache file %s\n  result of hg parents\n",
+			  cache_filename);
+	  exit(1);
     }
 
     if (has_be_ver() == 0 ||
