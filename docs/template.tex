@@ -1,0 +1,76 @@
+\documentclass[openany]{book}
+\usepackage{fixltx2e}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{ulem}
+\usepackage[pagebackref=true,colorlinks]{hyperref}
+\usepackage[all]{hypcap}
+\usepackage[Lenny]{fncychap}
+\usepackage{fancyhdr}
+\usepackage{vmargin}
+%\usepackage[titles]{tocloft}
+\usepackage{graphicx}
+\usepackage{fix-cm}
+
+\setpapersize{USletter}
+\setmarginsrb{0.75in}{0.5in}{0.75in}{0.5in}{10mm}{5mm}{20mm}{10mm}
+
+\pagestyle{empty}
+\fancyhf{}
+\fancyhead[RO,RE]{\slshape \rightmark}
+\fancyhead[LO,LE]{\slshape \leftmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Set the default font to serif
+\renewcommand{\familydefault}{\sfdefault}
+
+\definecolor{listinggray}{gray}{0.99}
+\definecolor{stringgray}{rgb}{0.2,0.2,1.0}
+\definecolor{keyword}{rgb}{0.05,0.35,0.05}
+\lstset{%
+	xleftmargin=10pt,xrightmargin=10pt,%
+	showspaces=false,%
+	showtabs=false,%
+	showstringspaces=false,%
+	tabsize=4,%
+	backgroundcolor=\color{listinggray},%
+	rulecolor=\color{black},%
+	basicstyle=\ttfamily\small,%
+	frame=single,%
+	captionpos=b,%
+	stringstyle=\ttfamily\color{stringgray},%
+	keywordstyle=\color{keyword},%
+	numberstyle=\tiny%
+}
+
+\begin{document}
+
+\frontmatter
+\title{OpenEuphoria 4.0 Users Manual}
+\author{OpenEuphoria Group}
+{\centering%
+  \includegraphics{images/300px-mongoose-head-colour-V2-R0.png}%
+  \par\vspace*{40pt}%
+  \includegraphics{images/300px-Logo-Logotype-orange-V2-R0.png}%
+  %\vspace*{64pt}%
+  \par{\fontsize{28}{36}\selectfont Version 4.0}%
+  \vspace*{90pt}%
+  \par{\fontsize{48}{58}\selectfont User Manual}%
+  \vspace*{12pt}%
+  \par{Published @@publishedon@@}%
+  %
+  \newpage%
+}
+
+\setcounter{tocdepth}{1}
+\tableofcontents
+
+\pagestyle{fancy}
+\mainmatter
+
+@@body@@
+
+\end{document}
