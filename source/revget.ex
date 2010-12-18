@@ -20,6 +20,15 @@ integer interactive = 0
 procedure update_rev_e(object f)
 	integer h
 
+	if file_exists(out_file) then
+		if match("unknown", f) or match("export", f) then
+			if interactive then
+				puts(1,"not updating be_rev.c, no svn info\n")
+			end if
+			return
+		end if
+	end if
+
 	if interactive then
 		puts(1,"updating be_rev.c\n")
 	end if
@@ -283,4 +292,5 @@ if match("revget.ex", cmds[2]) then
 
 	interactive = 1
 	write_be_rev()
+k
 end if
