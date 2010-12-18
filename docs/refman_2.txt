@@ -3840,7 +3840,7 @@ into internal form. Options to the ##with## and ##without## statement come
 in two flavors. One simply turns an option on or off, while the others have
 multiple states.
 
-==== On/Off options
+==== On / Off options
 
 || Default || Option                      ||
 | without  | [[:Profiling "profile"]]      |
@@ -3904,9 +3904,9 @@ with it. For example, a CGI application or a CRON job.
 You can also set this option via a
 [[:batch_command_line "command line parameter"]].
 
-==== Complex with/without options
+==== Complex with / without options
 
-===== with/without warning
+===== with / without warning
 
 Any warnings that are issued will appear on your screen after your program
 has finished execution. Warnings indicate minor problems.  A warning will

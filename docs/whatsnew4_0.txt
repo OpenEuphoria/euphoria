@@ -56,7 +56,7 @@ list here, please see the reference section of this manual.
 * Built in peek and poke 2 byte values, 1 byte signed values, peek null terminated strings
 
 
-=== Tool Additions/Enhancements
+=== Tool Additions / Enhancements
 
 * General
 ** Warning system
