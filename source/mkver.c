@@ -9,14 +9,16 @@
 #define BUF_SIZE 256
 #define SHORT_SIZE 12
 
-int has_be_ver()
+int has_be_ver(const char *filename)
 {
     FILE *ver_fh;
 
-    ver_fh = fopen("be_ver.h", "r");
+    ver_fh = fopen(filename, "r");
     if (ver_fh == NULL)
         return 0;
+
     fclose(ver_fh);
+
     return 1;
 }
 
@@ -120,7 +122,7 @@ int main(int argc, char **argv)
          * If we do not have a be_ver.h, write a junk one. Otherwise,
          * leave the existing one alone... i.e. from a source-tarball?
          */
-        if (has_be_ver() == 0)
+        if (has_be_ver(output_filename) == 0)
             put_version(output_filename, "unknown", "unknown");
 
         exit(0);
@@ -133,7 +135,7 @@ int main(int argc, char **argv)
 	  exit(1);
     }
 
-    if (has_be_ver() == 0 ||
+    if (has_be_ver(output_filename) == 0 ||
         had_old_info == 0 ||
         strncmp(new_ver, old_ver, BUF_SIZE) != 0)
     {
