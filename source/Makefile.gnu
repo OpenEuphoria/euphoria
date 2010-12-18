@@ -75,6 +75,7 @@ else
   SEDFLAG=-ri
 endif
 ifeq "$(EMINGW)" "1"
+	EXE_EXT=.exe
 	EPTHREAD=
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
@@ -83,7 +84,6 @@ ifeq "$(EMINGW)" "1"
 	EOSFLAGS=-mno-cygwin -mwindows
 	EOSFLAGSCONSOLE=-mno-cygwin
 	EOSPCREFLAGS=-mno-cygwin
-	MKVER=$(BUILDDIR)/mkver.exe
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
 	ifdef EDEBUG
@@ -93,15 +93,10 @@ ifeq "$(EMINGW)" "1"
 		EOSMING=-ffast-math -O3 -Os
 		LIBRARY_NAME=eu.a
 	endif
-	EBACKENDU=eubw.exe
 	EUBW_RES=$(BUILDDIR)/eubw.res
-	EBACKENDC=eub.exe
 	EUB_RES=$(BUILDDIR)/eub.res
-	EECU=euc.exe
 	EUC_RES=$(BUILDDIR)/euc.res
-	EEXU=eui.exe
 	EUI_RES=$(BUILDDIR)/eui.res
-	EEXUW=euiw.exe
 	EUIW_RES=$(BUILDDIR)/euiw.res
 	ifeq "$(MANAGED_MEM)" "1"
 		ifeq "$(ALIGN4)" "1"
@@ -118,16 +113,12 @@ ifeq "$(EMINGW)" "1"
 	endif
 	PCRE_CC=gcc
 else
+	EXE_EXT=
 	EPTHREAD=-pthread
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
 	EOSPCREFLAGS=
-	MKVER=$(BUILDDIR)/mkver
-	EBACKENDU=eub
-	EBACKENDC=eub
-	EECU=euc
-	EEXU=eui
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
 	ifdef EDEBUG
@@ -137,6 +128,12 @@ else
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
+
+MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
+EBACKENDU=eub$(EXE_EXT)
+EBACKENDC=eub$(EXE_EXT)
+EECU=euc$(EXE_EXT)
+EEXU=eui$(EXE_EXT)
 
 LDLFLAG+= $(EPTHREAD)
 
@@ -437,7 +434,6 @@ source : builddirs
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) backendsource OBJDIR=backobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 
-
 ifneq "$(VERSION)" ""
 SOURCEDIR=euphoria-$(VERSION)
 else
@@ -460,7 +456,7 @@ source-tarball :
 	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
 	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
-	rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver
+	rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
 	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR).tar.gz $(PLAT)
