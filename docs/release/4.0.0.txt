@@ -8,6 +8,15 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 
 !!=== Deprecation
 
+=== Possible Breaking Changes
+
+* ##std/sequence.e##/##[[:series]]## has changed the functionality of the last parameter.
+  Previously ##series(1,1,5)## would produce ##{1,2,3,4,5,6}##. i.e. 5 was the number of
+  items to add onto the starting 1. The last parameter has been changed to be the number
+  of items in the resulting list. Thus, ##series(1,1,5)## will now produce
+  ##{1,2,3,4,5}##, i.e. a sequence of 5 items. ##series(1,1,0)## before would produce
+  ##{1}##. Now it produces ##{}##, i.e. an empty series.
+
 === Removed
 
 * ##creolehtml## is no longer shipped with Euphoria. It has been enhanced to support
@@ -29,7 +38,7 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 * [[ticket:533]], Debian package copyright was updated in accordance to Debian policy.
 * [[ticket:540]], ##[[:get_key]]## was described in both ##io.e## and ##console.e##, removed
                   from ##io.e##
-* [[ticket:545]], ##[[:canonize_path]]## did not properly insert the drive letter on Windows
+* [[ticket:545]], ##[[:canonical_path]]## did not properly insert the drive letter on Windows
                   when the path began with a forward slash ##/##.
 * [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
 * [[ticket:550]], Examples for regex ##[[:matches]]## and ##[[:all_matches]]## now properly
