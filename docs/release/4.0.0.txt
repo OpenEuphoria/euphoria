@@ -38,7 +38,7 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 * [[ticket:533]], Debian package copyright was updated in accordance to Debian policy.
 * [[ticket:540]], ##[[:get_key]]## was described in both ##io.e## and ##console.e##, removed
                   from ##io.e##
-* [[ticket:545]], ##[[:canonize_path]]## did not properly insert the drive letter on Windows
+* [[ticket:545]], ##[[:canonical_path]]## did not properly insert the drive letter on Windows
                   when the path began with a forward slash ##/##.
 * [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
 * [[ticket:550]], Examples for regex ##[[:matches]]## and ##[[:all_matches]]## now properly
