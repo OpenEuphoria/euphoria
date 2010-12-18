@@ -8,6 +8,15 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 
 !!=== Deprecation
 
+=== Possible Breaking Changes
+
+* ##std/sequence.e##/##[[:series]]## has changed the functionality of the last parameter.
+  Previously ##series(1,1,5)## would produce ##{1,2,3,4,5,6}##. i.e. 5 was the number of
+  items to add onto the starting 1. The last parameter has been changed to be the number
+  of items in the resulting list. Thus, ##series(1,1,5)## will now produce
+  ##{1,2,3,4,5}##, i.e. a sequence of 5 items. ##series(1,1,0)## before would produce
+  ##{1}##. Now it produces ##{}##, i.e. an empty series.
+
 === Removed
 
 * ##creolehtml## is no longer shipped with Euphoria. It has been enhanced to support
