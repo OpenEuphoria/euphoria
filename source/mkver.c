@@ -53,7 +53,7 @@ void put_version(const char *output_filename, const char *version,
                  const char *date)
 {
     FILE *ver_fh;
-    char version_short[SHORT_SIZE];
+    char version_short[SHORT_SIZE+1];
 
 	strncpy(version_short, version, SHORT_SIZE);
 	version_short[SHORT_SIZE] = 0;
