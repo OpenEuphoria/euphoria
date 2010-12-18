@@ -26,21 +26,21 @@ constant version_info = machine_func(M_EU_INFO, {})
 --
 
 public function platform_name()
-ifdef WINDOWS then
-	return "Windows"
-elsifdef LINUX then
-	return "Linux"
-elsifdef OSX then
-	return "OS X"
-elsifdef FREEBSD then
-	return "FreeBSD"
-elsifdef OPENBSD then
-	return "OpenBSD"
-elsifdef NETBSD then
-	return "NetBSD"
-elsedef
-	return "Unknown"
-end ifdef
+	ifdef WINDOWS then
+		return "Windows"
+	elsifdef LINUX then
+		return "Linux"
+	elsifdef OSX then
+		return "OS X"
+	elsifdef FREEBSD then
+		return "FreeBSD"
+	elsifdef OPENBSD then
+		return "OpenBSD"
+	elsifdef NETBSD then
+		return "NetBSD"
+	elsedef
+		return "Unknown"
+	end ifdef
 end function
 
 --**

@@ -106,11 +106,11 @@ int main(int argc, char **argv)
 
 #if defined(__WATCOMC__) || defined(__MINGW32__)
     snprintf(tmp, MAX_PATH,
-			 "\"%s\" parents --template {node}\\n{date^|isodate} > %s",
+			 "\"%s\" parents --template {node}\\n{date^|shortdate} > %s",
 			 hg_executable, cache_filename);
 #else
 	snprintf(tmp, MAX_PATH,
-			 "%s parents --template '{node}\n{date|isodate}' > %s",
+			 "%s parents --template '{node}\n{date|shortdate}' > %s",
 			 hg_executable, cache_filename);
 #endif
 

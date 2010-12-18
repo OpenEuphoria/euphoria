@@ -96,28 +96,48 @@ procedure show_copyrights()
 end procedure
 
 --**
+-- Show the Euphoria banner message stating product name,
+-- platform, version and other miscellaneous information
+-- about the compilation
+--
+
 export procedure show_banner()
+	sequence prod_name, memory_type
+
 	if INTERPRET and not BIND then
-		screen_output(STDERR, GetMsgText(270,0))
+		prod_name = GetMsgText(270,0)
 
 	elsif TRANSLATE then
-		screen_output(STDERR, GetMsgText(271,0))
+		prod_name = GetMsgText(271,0)
 
 	elsif BIND then
-		screen_output(STDERR, GetMsgText(272,0))
+		prod_name = GetMsgText(272,0)
 	end if
-	screen_output(STDERR, version_string_long() & "\n")
 
 	ifdef EU_MANAGED_MEM then
-		screen_output(STDERR, GetMsgText(273,0))
+		memory_type = GetMsgText(273,0)
 	elsedef
-		screen_output(STDERR, GetMsgText(274,0))
+		memory_type = GetMsgText(274,0)
 	end ifdef
 
+	sequence misc_info = { memory_type, "", info:version_revision(), info:version_date() }
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
-		screen_output(STDERR, GetMsgText(275,0))
+		misc_info[2] = GetMsgText(275,0)
+	else
+		misc_info = remove(misc_info, 2)
 	end if
+
+	/*
+	Euphoria Interpreter v4.0.0 Final
+		Using Managed Memory, EuConsole, 09df3eac3c44, 2010-12-22
+	*/
+
+	screen_output(STDERR, sprintf("%s v%s %s\n   %s\n", {
+		prod_name, info:version_string_short(), info:version_type(),
+		join(misc_info, ", ")
+	}))
+
 	screen_output(STDERR, "\n")
 end procedure
 
