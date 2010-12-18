@@ -292,5 +292,4 @@ if match("revget.ex", cmds[2]) then
 
 	interactive = 1
 	write_be_rev()
-k
 end if
