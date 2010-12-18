@@ -87,7 +87,7 @@ crowd of conventional languages.
 
 === Euphoria is unique
 
-What makes Euphoria unique is a design that uses just two basic data-types~--
+What makes Euphoria unique is a design that uses just two basic data-types {{{--}}}
  //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and
  //integer//.
 
@@ -163,7 +163,7 @@ Euphoria programs that you write.
 === Requirements
 
 To run the //Windows// version of Euphoria, you need any Windows 95 or any later
-32-bit version of Windows.  It runs fine on XP and Vista.
+32-bit version of Windows.  It runs fine on XP, Vista, and Windows 7.
 
 To run the //Unix// version of Euphoria you need a supported //Unix// platform
 (Linux, FreeBSD, NetBSD or OpenBSD) and GCC v4.x. Binary packages are available

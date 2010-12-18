@@ -4,8 +4,7 @@
 
 Euphoria v4.0 is a very large jump in functionality from the previous stable release, 3.1.1.
 
-Euphoria has a brand new standard library consisting of over 800 public members. Too numerous
-list here, please see the reference section of this manual.
+Euphoria has a brand new standard library consisting of over 800 public members. Too numerous to list here, please see the reference section of this manual.
 
 === General Changes
 
@@ -66,7 +65,7 @@ list here, please see the reference section of this manual.
 * Translator
 ** Compiles directly
 ** Can write a makefile
-** Can compiled/bind a resource file on Windows
+** Can compile/bind a resource file on Windows
 * Interpreter
 ** New test mode
 ** Batch mode for unattended execution such as a CGI application
