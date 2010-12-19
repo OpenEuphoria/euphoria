@@ -303,8 +303,8 @@ PWD=$(%cdrive):$(%cwd)
 EUDOC=eudoc.exe
 !endif
 
-!ifndef CREOLEHTML
-CREOLEHTML=creolehtml.exe
+!ifndef CREOLE
+CREOLE=creole.exe
 !endif
 
 VARS=DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM) CONFIG=$(CONFIG)
@@ -501,9 +501,18 @@ tools: .SYMBOLIC
 tools-additional: .SYMBOLIC
     @echo ------- ADDITIONAL TOOLS -----------
 	wmake -h $(BUILDDIR)\eudoc.exe $(VARS)
-	wmake -h $(BUILDDIR)\creolehtml.exe $(VARS)
+	wmake -h $(BUILDDIR)\creole.exe $(VARS)
 
 tools-all: tools tools-additional
+
+get-creole : $(TRUNKDIR)\source\creole\creole.ex
+get-eudoc : $(TRUNKDIR)\source\eudoc\eudoc.ex
+
+$(TRUNKDIR)\source\creole\creole.ex :
+	hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)\source\creole
+
+$(TRUNKDIR)\source\eudoc\eudoc.ex :
+	hg clone http://scm.openeuphoria.org/hg/eudoc $(TRUNKDIR)\source\eudoc
 
 $(BUILDDIR)\eutest.exe: $(TRUNKDIR)\source\eutest.ex
 	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
@@ -523,7 +532,7 @@ $(BUILDDIR)\eudist.exe: $(TRUNKDIR)\source\eudist.ex
 $(BUILDDIR)\eudoc.exe: $(TRUNKDIR)\source\eudoc\eudoc.ex
 	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
-$(BUILDDIR)\creolehtml.exe: $(TRUNKDIR)\source\creole\creolehtml.ex
+$(BUILDDIR)\creole.exe: $(TRUNKDIR)\source\creole\creole.ex
 	$(EUBIN)\euc -con -o $^@ -i $(TRUNKDIR)\include $<
 
 $(BUILDDIR)\$(OBJDIR)\back\coverage.h : $(BUILDDIR)\$(OBJDIR)\main-.c
@@ -722,9 +731,6 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 $(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
 	$(EUDOC) --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
 
-$(BUILDDIR)\euphoria-single.txt : $(EU_DOC_SOURCE)
-	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria-single.txt
-
 $(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
 	mkdir $^@
 
@@ -763,12 +769,37 @@ $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\do
 
 $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html $(DOCDIR)\nav.html
 	cd $(TRUNKDIR)\docs
-	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
+	$(CREOLE) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
 
 $(BUILDDIR)\html\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\offline-template.html
 	cd $(TRUNKDIR)\docs
-	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	$(CREOLE) -A -t=$(TRUNKDIR)\docs\offline-template.html -o=$(BUILDDIR)\html $(BUILDDIR)\euphoria.txt
+	cd $(TRUNKDIR)\source
+
+#
+# PDF manual
+#
+
+pdfdoc : $(BUILDDIR)\euphoria.pdf
+
+$(BUILDDIR)\pdf : .EXISTSONLY
+	mkdir $^@
+
+$(BUILDDIR)\pdf\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\pdf
+	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual-pdf.af -o $(BUILDDIR)\pdf\euphoria.txt
+
+$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt
+	$(CREOLE) -f latex -A -t=$(TRUNKDIR)\docs\template.tex -o=$(BUILDDIR)\pdf $<
+
+$(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex
+	cd $(TRUNKDIR)\docs
+	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
+	cd $(TRUNKDIR)\source
+
+pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf
+	cd $(TRUNKDIR)\docs
+	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
 	cd $(TRUNKDIR)\source
 
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
@@ -781,17 +812,3 @@ manual-reindex: .SYMBOLIC
 
 manual-upload: manual-send manual-reindex
 
-htmldoc : .SYMBOLIC $(BUILDDIR)\html\index.html $(BUILDDIR)\html\js\search.js $(BUILDDIR)\html\style.css  $(BUILDDIR)\html\images\next.png $(BUILDDIR)\html\images\prev.png
-
-pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
-
-$(BUILDDIR)\euphoria-pdf.txt : $(BUILDDIR)\euphoria-single.txt
-	$(BUILDDIR)\eui.exe $(TRUNKDIR)\demo\eused.ex -e "toclevel = 3" "toclevel = 0" &
-		-e "TOC level=3" "TOC level=0" -e "LEVELTOC depth=2" "LEVELTOC depth=0" &
-		$(BUILDDIR)\euphoria-single.txt > $(BUILDDIR)\euphoria-pdf.txt
-
-$(BUILDDIR)\euphoria-pdf.html : $(BUILDDIR)\euphoria-pdf.txt
-	$(CREOLEHTML) -A -t=$(TRUNKDIR)\docs\pdf-template.html -o=$(BUILDDIR) --htmldoc $(BUILDDIR)\euphoria-pdf.txt
-
-$(BUILDDIR)\euphoria-4.0.pdf : $(BUILDDIR)\euphoria-pdf.html
-	htmldoc --size letter -f $(BUILDDIR)\euphoria-4.0.pdf --book $(BUILDDIR)\euphoria-pdf.html

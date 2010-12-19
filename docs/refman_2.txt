@@ -331,7 +331,6 @@ It follows that "" is equivalent to {}. Both represent
 the sequence of zero length, also known as the **empty sequence**. As
 a matter of programming style, it is natural to use "" to suggest a zero length
 sequence of characters, and {} to suggest some other kind of sequence.
-
 An **individual character** is an **atom**. It must be entered using single
 quotes. There is a difference between an individual character (which is an
 atom), and a character string of length 1 (which is a sequence). e.g.
@@ -1184,31 +1183,30 @@ not use these for your own identifiers:
 
 
 <eucode>
-               peek             peek2u        sprintf
-abort          peek2s           peek4s        sqrt
-and_bits       log              peek4u        system
-append         machine_func     peek_string   system_exec
-arctan         machine_proc     peeks         tail
-atom           match            pixel         tan
-c_func         match_from       platform      task_clock_start
-c_proc         get_key          poke          task_clock_stop
-call           get_pixel        poke2         task_create
-call_func      getc             poke4         task_list
-call_proc      getenv           position      task_schedule
-clear_screen   gets             power         task_self
-close          hash             prepend       task_status
-command_line   head             print         task_suspend
-compare        include_paths    printf        task_yield 
-cos            insert           profile       time
-date           mem_copy         profile_time  trace
-delete         mem_set          puts          warning
-delete_routine not_bits         rand          xor_bits
-equal          object           remainder     ?
-find           open             remove        &
-find_from      option_switches  routine_id    $
-floor          or_bits          sequence   
-integer        repeat           sin         
-length         replace          splice      
+abort           getenv          peek4s          sprintf
+and_bits        gets            peek4u          sqrt
+append          hash            peeks           system
+arctan          head            platform        system_exec
+atom            include_paths   poke            tail
+c_func          insert          poke2           tan
+c_proc          integer         poke4           task_clock_start
+call            length          position        task_clock_stop
+call_func       log             power           task_create
+call_proc       machine_func    prepend         task_list
+clear_screen    machine_proc    print           task_schedule
+close           match           printf          task_self
+command_line    match_from      profile         task_status
+compare         mem_copy        profile_time    task_suspend
+cos             mem_set         puts            task_yield
+date            not_bits        rand            time
+delete          object          remainder       trace
+delete_routine  open            remove          warning
+equal           option_switches repeat          xor_bits
+find            or_bits         replace         ?
+find_from       peek            routine_id      &
+floor           peek_string     sequence        $
+get_key         peek2s          sin
+getc            peek2u          splice
 </eucode>
 
 
@@ -1665,6 +1663,7 @@ turned off type checking. Whether type checking is on or off, you will never
 get a **//machine-level//** exception.  **You will always get a
 meaningful message from Euphoria when something goes wrong**.  (//This
 might not be the case when you [[:poke]] directly
+!!zzzz-------------------------^^^^^^^^^
 into memory, or call routines written in C or machine code.//)
 
 Euphoria's method of defining types is simpler than what you will find in other
@@ -1778,8 +1777,8 @@ elements of a sequence can have any type.
 
 ##sequence##s are implemented very efficiently. Programmers used to pointers
 will soon notice that they can get most usual pointer operations done using
-sequence indexes. The loss is efficiency is usually hard to notice, and the gain
-is code safety and bug prevention far outweighs it.
+sequence indexes. The loss in efficiency is usually hard to notice, and the gain
+in code safety and bug prevention far outweighs it.
 
 ==== object
 
@@ -1791,7 +1790,7 @@ The ##object##() type returns 0 if a variable is not initialized, else ##1##.
 
 ==== Why scopes, and what are they?
 
-The //scope// of an identifier is the portion of the program where that its
+The //scope// of an identifier is the portion of the program where its
 declaration is in effect, i.e. where that identifier is //visible//.
 
 Euphoria has many pre-defined procedures, functions and types.  These are
@@ -1807,8 +1806,8 @@ For example, procedures, functions and types can call themselves or one another
 recursion, where routine A calls routine B which directly or indirectly calls
 routine A, implies one of A or B being called before it is defined. This was
 traditionally the most frequent situation which required using the
-[[:routine_id]]() mechanism, but is now supported directly.
-See [[:Indirect Routine Calling]] for more details on the [[:routine_id()]]()
+[[:routine_id()]] mechanism, but is now supported directly.
+See [[:Indirect Routine Calling]] for more details on the [[:routine_id()]]
 mechanism.
 
 ==== Defining the scope of an identifier
@@ -1828,13 +1827,13 @@ outside one of the structures listed above, the scope of the variable starts at
 the declaration and ends at the routine's ##**end**## statement.
 * If a variable is declared outside of a routine (known as a module variable),
 and does not have a scope modifier, its scope starts at the declaration and ends
-and the end of the file it is declared in.
+at the end of the file it is declared in.
 
 The scope of a **constant** that does not have a scope modifier, starts at the
-declaration and ends and the end of the file it is declared in.
+declaration and ends at the end of the file it is declared in.
 
 The scope of a **enum** that does not have a scope modifier, starts at the
-declaration and ends and the end of the file it is declared in.
+declaration and ends at the end of the file it is declared in.
 
 The scope of all **procedures**, **functions** and **types**, which do not have
 a scope modifier, starts at the beginning of the source file and ends at the end
@@ -1856,6 +1855,7 @@ containing the ##public## declaration.
 any file that directly includes the file in which the identifier is declared.
 
 When you **[[:include]]** a Euphoria file in another file, only the identifiers
+!!zzzz-----^^^^^^^^^^^^^^ 
 declared using a scope modifier are accessible to the file doing the include.
 The other declarations in the included file are invisible to the file doing the
 include, and you will get an error message, "##Errors resolving the following
@@ -1913,7 +1913,7 @@ declared in any
 Euphoria coded file.
 
 
-@[namespace|]
+@[namespace]
 ==== Using namespaces
 
 Identifiers marked as ##global##, ##public## or ##export## are known as
@@ -1927,8 +1927,8 @@ having to examine other files, or notify other users of the include file.
 
 Sometimes, when using include files developed by others, you will encounter
 a naming conflict.  One of the include file authors has used the same name for
-a exposed identifier as one of the other authors. One of fixing this, if you
-have the source, you could simply edit one of the include files to correct
+a exposed identifier as one of the other authors. One of way of fixing this, if you
+have the source, is to simply edit one of the include files to correct
 the problem, however then you'd have repeat this process whenever a new version
 of the include file was released.
 
@@ -2338,7 +2338,7 @@ previous value of x, namely the 1000-element sequence, would simply disappear.
 Actually, the space consumed by the 1000-element sequence will be automatically
 recycled due to Euphoria's dynamic storage allocation.
 
-Note that the equals symbol '=' is used for both assignment and for a
+Note that the equals symbol '=' is used for both assignment and for 
 equality testing.  There is never any confusion
 because an assignment in Euphoria is a statement only, it can't be used as an
 expression (as in C).
@@ -2461,7 +2461,7 @@ the corresponding ##**elsif**## or ##**else**##, whichever comes next, then
 skips down to the corresponding ##**end if**##.
 * When an //expression// is false, Euphoria skips over any statements until it
 comes to the next corresponding ##**elsif**## or ##**else**##, whichever comes
-next. If this is and ##**elsif**## then its //expression// is tested otherwise
+next. If this is an ##**elsif**## then its //expression// is tested otherwise
 any statements following the ##**else**## are executed.
 
 For example:
@@ -2723,10 +2723,10 @@ Euphoria predefines some words itself:
 * **EU4_0** - Major and Minor Euphoria Version
 * **EU4_0_0** - Major, Minor and Release Euphoria Version
 
-Euphoria is release with the common version scheme of Major, Minor and Release
+Euphoria is released with the common version scheme of Major, Minor and Release
 version identifiers in the form of major.minor.release. When 4.0.1 is
 released, ##EU4_0_0## will no longer be defined, but ##EU4_0_1## will be
-defined. When 4.1 is release, ##EU4_0## will no longer be defined, but ##EU4_1##
+defined. When 4.1 is released, ##EU4_0## will no longer be defined, but ##EU4_1##
 will be defined. Finally, when 5.0 is released, ##EU4## will no longer be
 defined, but ##EU5## will be defined.
 
@@ -3923,20 +3923,20 @@ The forms available are ...
 ; ##without warning##
 : disables all warnings
 
-; ##with warning (//warning name list//)\\
-  with warning = (//warning name list//)##
+; ##with warning {//warning name list//}\\
+  with warning = {//warning name list//}##
 : enables only these warnings, and disables all other
 
-; ##without warning (//warning name list//)\\
-  without warning = (//warning name list//)##
+; ##without warning {//warning name list//}\\
+  without warning = {//warning name list//}##
 : enables all warnings except the warnings listed
 
-; ##with warning &= (//warning name list//)\\
-  with warning += (//warning name list//)##
+; ##with warning &= {//warning name list//}\\
+  with warning += {//warning name list//}##
 : enables listed warnings in addition to whichever are enabled already
 
-; ##without warning &= (//warning name list//)\\
-  without warning += (//warning name list//)##
+; ##without warning &= {//warning name list//}\\
+  without warning += {//warning name list//}##
 : disables listed warnings and leaves any not listed in its current state.
 
 ; ##with warning save##

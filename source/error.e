@@ -64,7 +64,7 @@ export procedure Warning(object msg, integer mask, sequence args = {})
 		end if
 
 		if orig_mask != 0 then
-			w_name = "( " & warning_names[orig_mask] & " )"
+			w_name = "{ " & warning_names[orig_mask] & " }"
 		else
 			w_name = "" -- not maskable
 		end if

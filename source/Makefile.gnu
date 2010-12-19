@@ -27,9 +27,17 @@
 #
 #   Html Documentation        :  make htmldoc 
 #   PDF Documentation         :  make pdfdoc
+#   Test eucode blocks in API
+#       comments              :  make test-eucode
 #
-#   Note that Html and PDF Documentation require eudoc and creolehtml
-#   PDF docs also require htmldoc
+#   Note that Html and PDF Documentation require eudoc and creole
+#   PDF docs also require a complete LaTeX installation
+#
+#   eudoc can be retrieved via make get-eudoc if you have
+#   Mercurial installed.
+#
+#   creole can be retrieved via make get-creole if you have
+#   Mercurial installed.
 #
 
 CONFIG_FILE = config.gnu
@@ -202,14 +210,8 @@ ifeq "$(EUDOC)" ""
 EUDOC=eudoc
 endif
 
-ifeq "$(CREOLEHTML)" ""
-CREOLEHTML=creolehtml
-endif
-
-ifdef WKHTMLTOPDF
-HTML2PDF=wkhtmltopdf --header-right "\e\4.0\rc1 [page]" $(CYPBUILDDIR)/pdf/euphoria-pdf.html $(CYPBUILDDIR)/euphoria-4.0.pdf
-else
-HTML2PDF=htmldoc -f $(CYPBUILDDIR)/euphoria-4.0.pdf --book $(CYPBUILDDIR)/pdf/euphoria-pdf.html
+ifeq "$(CREOLE)" ""
+CREOLE=creole
 endif
 
 ifeq "$(TRANSLATE)" "euc"
@@ -539,16 +541,28 @@ $(MKVER): mkver.c
 $(BUILDDIR)/$(OBJDIR)/back/be_ver.h: $(MKVER)
 	$(MKVER) $(HG) $(BUILDDIR)/ver.cache $@
 
-$(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
-	cd ../docs/ && $(EUDOC) --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
+###############################################################################
+#
+# Documentation
+#
+###############################################################################
 
-$(BUILDDIR)/euphoria-pdf.txt : $(EU_DOC_SOURCE)
-	cd ../docs/ && $(EUDOC) --single --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria-pdf.txt
-	
+get-eudoc: $(TRUNKDIR)/source/eudoc/eudoc.ex
+get-creole: $(TRUNKDIR)/source/creole/creole.ex
+
+$(TRUNKDIR)/source/eudoc/eudoc.ex :
+	hg clone http://scm.openeuphoria.org/hg/eudoc $(TRUNKDIR)/source/eudoc
+
+$(TRUNKDIR)/source/creole/creole.ex :
+	hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)/source/creole
+
+$(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
+	cd $(TRUNKDIR)/docs && $(EUDOC) --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
+
 $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
 	-mkdir -p $(BUILDDIR)/docs/js
-	cd$(CYPTRUNKDIR)/docs/ &&  $(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o=$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
+	cd $(CYPTRUNKDIR)/docs && $(CREOLE) -A -d=$(CYPTRUNKDIR)/docs/ -t=template.html -o=$(CYPBUILDDIR)/docs $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/docs/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/docs
 
@@ -565,7 +579,7 @@ manual-upload: manual-send manual-reindex
 $(BUILDDIR)/html/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/offline-template.html
 	-mkdir -p $(BUILDDIR)/html/images
 	-mkdir -p $(BUILDDIR)/html/js
-	cd $(CYPTRUNKDIR)/docs/ && $(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o=$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
+	cd $(CYPTRUNKDIR)/docs && $(CREOLE) -A -d=$(CYPTRUNKDIR)/docs/ -t=offline-template.html -o=$(CYPBUILDDIR)/html $(CYPBUILDDIR)/euphoria.txt
 	cp $(DOCDIR)/*js $(BUILDDIR)/html/js
 	cp $(DOCDIR)/html/images/* $(BUILDDIR)/html/images
 	cp $(DOCDIR)/style.css $(BUILDDIR)/html
@@ -578,15 +592,45 @@ $(BUILDDIR)/html/js/prototype.js: $(DOCDIR)/prototype.js  $(BUILDDIR)/html/js
 
 htmldoc : $(BUILDDIR)/html/index.html
 
-$(BUILDDIR)/pdf/euphoria-pdf.html : $(BUILDDIR)/euphoria-pdf.txt $(DOCDIR)/pdf-template.html
+#
+# PDF manual
+#
+
+pdfdoc : $(BUILDDIR)/euphoria.pdf
+
+$(BUILDDIR)/pdf/euphoria.txt : $(EU_DOC_SOURCE)
 	-mkdir -p $(BUILDDIR)/pdf
-	$(CREOLEHTML) -A -d=$(CYPTRUNKDIR)/docs/ -t=pdf-template.html -o=$(CYPBUILDDIR)/pdf --htmldoc $(CYPBUILDDIR)/euphoria-pdf.txt
+	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)/docs/manual-pdf.af -o $(BUILDDIR)/pdf/euphoria.txt
 
-$(BUILDDIR)/euphoria-4.0.pdf : $(BUILDDIR)/euphoria-pdf.txt $(BUILDDIR)/pdf/euphoria-pdf.html  $(DOCDIR)/pdf.css
-	cp $(CYPTRUNKDIR)/docs/pdf.css $(CYPBUILDDIR)/pdf/
-	$(HTML2PDF)
+$(BUILDDIR)/pdf/euphoria.tex : $(BUILDDIR)/pdf/euphoria.txt $(TRUNKDIR)/docs/template.tex
+	cd $(TRUNKDIR)/docs && $(CREOLE) -f latex -A -t=$(TRUNKDIR)/docs/template.tex -o=$(BUILDDIR)/pdf $<
 
-pdfdoc : $(BUILDDIR)/euphoria-4.0.pdf
+$(BUILDDIR)/euphoria.pdf : $(BUILDDIR)/pdf/euphoria.tex
+	cd $(TRUNKDIR)/docs && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && cp $(BUILDDIR)/pdf/euphoria.pdf $(BUILDDIR)/
+	
+pdfdoc-initial : $(BUILDDIR)/euphoria.pdf
+	cd $(TRUNKDIR)/docs && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && cp $(BUILDDIR)/pdf/euphoria.pdf $(BUILDDIR)/
+
+
+###############################################################################
+#
+# Testing Targets
+#
+###############################################################################
+
+#
+# Test <eucode>...</eucode> blocks found in our API reference docs
+#
+
+.PHONY: test-eucode
+
+test-eucode : 
+	$(EUDOC) --single --verbose --test-eucode --work-dir=$(BUILDDIR)/eudoc_test -o $(BUILDDIR)/test_eucode.txt $(EU_STD_INC)
+	$(CREOLE) -o $(BUILDDIR) $(BUILDDIR)/test_eucode.txt
+
+#
+# Unit Testing
+#
 
 test : EUDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)
@@ -797,7 +841,7 @@ install-docs :
 	# create dirs
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images
-	install $(BUILDDIR)/euphoria-4.0.pdf $(DESTDIR)$(PREFIX)/share/doc/euphoria/
+	install $(BUILDDIR)/euphoria.pdf $(DESTDIR)$(PREFIX)/share/doc/euphoria/
 	install  \
 		$(BUILDDIR)/html/*html \
 		$(BUILDDIR)/html/*css \

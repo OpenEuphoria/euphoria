@@ -47,7 +47,7 @@ build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp 
 	# Add here commands to compile the indep part of the package.
 	echo TARGET build-index-stamp
-	$(MAKE) -C source htmldoc pdfdoc
+	$(MAKE) -C source htmldoc pdfdoc-initial
 	touch $@
 
 clean:
@@ -94,7 +94,7 @@ binary-common:
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs 
-	dh_installdocs -A source/build/euphoria-4.0.pdf source/build/html/*
+	dh_installdocs -A source/build/euphoria.pdf source/build/html/*
 	dh_installexamples
 #	dh_installmenu
 #	dh_installdebconf	

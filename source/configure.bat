@@ -257,7 +257,7 @@ rem 		echo CREOLEHTML=creolehtml.ex >> config.wat
 rem 	)
 rem )
 
-echo CREOLEHTML=creolehtml.exe >> config.wat
+echo CREOLE=creole.exe >> config.wat
 
 rem ============================================================
 rem Writing our final configuration vars

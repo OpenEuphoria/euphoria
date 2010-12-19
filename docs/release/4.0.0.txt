@@ -6,7 +6,12 @@
 For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see 
 [[:What's new in 4.0?]] section of this manual.
 
-!!=== Deprecation
+=== Deprecation
+
+* with/without warning lists have changed from ##( name1, name2 )## to
+##{ name1, name2 }## as to be more like Euphoria sequences. In the
+future the old ##( name1, name2 )## syntax will be removed.
+
 
 === Possible Breaking Changes
 
@@ -43,6 +48,8 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 * [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
 * [[ticket:550]], Examples for regex ##[[:matches]]## and ##[[:all_matches]]## now properly
                   either supply or use the default ##from## parameter.
+* [[ticket:558]] Fixed crash caused by undeclared variable assignment by properly subscripting
+		  [i] when looking up forward references in the toplevel subroutine
 * Fix backend and interpreter to avoid "press any key" prompts when
 running as a console from a shared console window.
 * Ensure forward type checks aren't resolved until after the variable being type checked has
@@ -65,3 +72,5 @@ been resolved.
 * Bundled utility ##bench.ex## now outputs timing information to STDERR
   by default. ##--stdout## can be supplied if output to STDOUT is desired. It now also
   displays the min and max iteration times in addition to the already average and total.
+* ##demo/net/pastey.ex## demo has been updated to function with
+  OpenEuphoria's pastey service.
