@@ -124,8 +124,8 @@ export procedure show_banner()
 		info:platform_name(), 
 		memory_type, 
 		"", 
-		sprintf("Build Date: %s", {info:version_date() }),
-		sprintf("(SCM Rev: %s)",{info:version_revision()})
+		info:version_date(),
+		info:version_revision()
 	}
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
@@ -139,10 +139,8 @@ export procedure show_banner()
 		Windows, Using Managed Memory, 09df3eac3c44, 2010-12-22
 	*/
 
-	screen_output(STDERR, sprintf("%s v%s %s\n   %s\n", {
-		prod_name, info:version_string_short(), info:version_type(),
-		join(misc_info, ", ")
-	}))
+	screen_output(STDERR, sprintf("%s v%s %s\n   %s, %s\n   Build Date: %s Rev: %s\n", {
+		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
 end procedure
 
 -- Taken from std/cmdline.e :-(
