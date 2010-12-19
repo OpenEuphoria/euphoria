@@ -121,7 +121,11 @@ export procedure show_banner()
 	end ifdef
 
 	sequence misc_info = {
-		info:platform_name(), memory_type, "", info:version_revision(), info:version_date()
+		info:platform_name(), 
+		memory_type, 
+		"", 
+		sprintf("Build Date: %s", {info:version_date() }),
+		sprintf("(SCM Rev: %s)",{info:version_revision()})
 	}
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
