@@ -155,37 +155,9 @@ copy-files :
 source :
 
 update :
-	-mkdir -p $(DEB_SOURCE_DIR)/source/pcre
-	cp -r $(EU_BASE_DIR)/source/build $(DEB_SOURCE_DIR)/source
-	for file in $(EU_ALL_FILES); \
-	do \
-	    cp $(EU_BASE_DIR)/"$$file" $(DEB_SOURCE_DIR)/"$$file"; \
-	done
-	cp -r $(EU_BASE_DIR)/source/pcre/* $(DEB_SOURCE_DIR)/source/pcre/
-	-for dir in $(EU_DIRS); \
-	do \
-	    mkdir -p $(DEB_SOURCE_DIR)/"$$dir"; \
-	    cp $(EU_BASE_DIR)/"$$dir"/* $(DEB_SOURCE_DIR)/"$$dir"; \
-	done
-	-mkdir $(DEB_SOURCE_DIR)/bin
-	for file in $(EU_BIN_FILES); \
-	do \
-	    cp $(EU_BASE_DIR)/bin/"$$file" $(DEB_SOURCE_DIR)/bin; \
-	done
-	-mkdir -p $(DEB_SOURCE_DIR)/source/codepage
-	cp $(EU_BASE_DIR)/source/codepage/*ecp $(DEB_SOURCE_DIR)/source/codepage
-	-mkdir -p $(DEB_SOURCE_DIR)/docs/html/images
+	hg archive $(DEB_SOURCE_DIR)
 	-mkdir -p $(DEB_SOURCE_DIR)/docs/images
-	-mkdir $(DEB_SOURCE_DIR)/docs/release
-	cp $(EU_BASE_DIR)/docs/*.af $(DEB_SOURCE_DIR)/docs
-	cp $(EU_BASE_DIR)/docs/*.txt $(DEB_SOURCE_DIR)/docs
-	cp $(EU_BASE_DIR)/docs/release/*.txt $(DEB_SOURCE_DIR)/docs/release
-	cp $(EU_BASE_DIR)/*.txt $(DEB_SOURCE_DIR)
-	cp $(EU_BASE_DIR)/docs/*.html $(DEB_SOURCE_DIR)/docs
-	cp $(EU_BASE_DIR)/docs/*.css $(DEB_SOURCE_DIR)/docs
-	cp $(EU_BASE_DIR)/docs/*.js $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/*.tex $(DEB_SOURCE_DIR)/docs
-	cp $(EU_BASE_DIR)/docs/html/images/* $(DEB_SOURCE_DIR)/docs/html/images
 	cp $(EU_BASE_DIR)/docs/images/* $(DEB_SOURCE_DIR)/docs/images
 	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
 	-rm -r $(DEB_SOURCE_DIR)/debian
