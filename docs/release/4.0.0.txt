@@ -43,6 +43,8 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 * [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
 * [[ticket:550]], Examples for regex ##[[:matches]]## and ##[[:all_matches]]## now properly
                   either supply or use the default ##from## parameter.
+* [[ticket:558]] Fixed crash caused by undeclared variable assignment by properly subscripting
+		  [i] when looking up forward references in the toplevel subroutine
 * Fix backend and interpreter to avoid "press any key" prompts when
 running as a console from a shared console window.
 * Ensure forward type checks aren't resolved until after the variable being type checked has
