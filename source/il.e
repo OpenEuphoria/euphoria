@@ -365,10 +365,12 @@ export procedure handle_options_for_bind( m:map opts )
 	end if
 	
 	ifdef WINDOWS then
-		OpDefines &= { "EUB_WIN32" }
+		OpDefines &= { "GUI" }
 		if con then
-			OpDefines &= { "EUB_CON" }
+			OpDefines &= { "CONSOLE" }
 		end if
+	elsedef
+		OpDefines &= { "CONSOLE" }
 	end ifdef
 
 	ifdef SHROUDER then

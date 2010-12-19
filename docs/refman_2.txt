@@ -2732,11 +2732,10 @@ defined, but ##EU5## will be defined.
 
 ==== Platform Definitions
 
-* **WIN32_CONSOLE** - Platform is Windows and is being executed
-  with the Console version of the interpreter (eui.exe)
-* **WIN32_GUI** - Platform is Windows and is being executed with
+* **CONSOLE** - Euphoria is being executed
+  with the Console version of the interpreter (on windows, eui.exe, others are eui)
+* **GUI** - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
-* **WIN32** - Platform is Windows (GUI or Console)
 * **WINDOWS** - Platform is Windows (GUI or Console)
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
@@ -2750,15 +2749,13 @@ defined, but ##EU5## will be defined.
 
 * **EUI** - Application is being interpreted by ##eui##.
 * **EUC** - Application is being translated by ##euc##.
-* **EUC_CON** - Application is being translated by ##euc## as a
-//console// application.
 * **EUC_DLL** - Application is being translated by ##euc## into a //DLL// file.
 * **EUB** - Application is being converted to a bound program by ##eub##.
 * **EUB_SHROUD** - Application is being converted to a shrouded program by
 ##eub##.
-* **EUB_CON** - Application is being converted to a bound //console// program by
- ##eub##.
-* **EUB_WIN32** - Application is being converted to a bound //Windows//
+* **CONSOLE** - Application is being translated, or converted to a bound //console// program by
+ ##euc## or ##eub##, respectively.
+* **GUI** - Application is being converted to a bound //Windows GUI//
 program by ##eub##.
 
 ==== Library Definitions
@@ -2843,7 +2840,7 @@ applications.
 
 You should surround code that is not portable with ##ifdef## like:
 <eucode>
-ifdef WIN32 then
+ifdef WINDOWS then
    -- Windows specific code.
 elsedef
    include std/error.e
@@ -2862,7 +2859,7 @@ end ifdef
 
 -- define exported and public constants and procedures for
 -- OSX as well
-ifdef WIN32 or OSX then
+ifdef WINDOWS or OSX then
     -- OSX is not supported but we define public symbols for it anyhow.
 </eucode>
 
@@ -2887,7 +2884,7 @@ end for
 sequence os_name
 ifdef UNIX then
     include unix_ftp.e
-elsifdef WIN32 then
+elsifdef WINDOWS then
     include win32_ftp.e
 elsedef
     crash("Operating system is not supported")
@@ -3780,7 +3777,7 @@ the file relative to the following directories, in the following order:
   set of //Linux// / //FreeBSD// or //Windows// environment  variables.
   (Via ##Control Panel / Performance & Maintenance / System / Advanced##
   on //XP//, or ##AUTOEXEC.BAT## on older versions of
-  //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB##
+  //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WINDOWSLIB##
   ##EUINC## lets you organize your include files according to application
   areas, and avoid adding numerous unrelated files to ##euphoria\include##.
 # Finally, if it still hasn't found the file, it will look in
@@ -4034,7 +4031,7 @@ define/undefine tags which the ifdef statement may use.
 
 The following tags have a predefined meaning in Euphoria:
 
-* WIN32:    platform is any version of Windows (tm) from '95 on to Vista and beyond
+* WINDOWS:    platform is any version of Windows (tm) from '95 on to Vista and beyond
 * WINDOWS:  platform is any kind of Windows system
 * UNIX:     platform is any kind of Unix style system
 * LINUX:    platform is Linux

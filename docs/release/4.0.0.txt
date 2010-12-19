@@ -21,6 +21,9 @@ future the old ##( name1, name2 )## syntax will be removed.
   of items in the resulting list. Thus, ##series(1,1,5)## will now produce
   ##{1,2,3,4,5}##, i.e. a sequence of 5 items. ##series(1,1,0)## before would produce
   ##{1}##. Now it produces ##{}##, i.e. an empty series.
+* [[ticket:551]]: ##WIN32_GUI##, ##WIN32_CONSOLE##, ##EUB_CONSOLE##, ##EUC_CONSOLE## have been changed
+  to simply refer to ##GUI## or ##CONSOLE##.  On non-Windows platforms, ##CONSOLE## 
+  will be defined.
 
 === Removed
 

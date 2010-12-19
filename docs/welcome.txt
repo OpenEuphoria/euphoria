@@ -188,7 +188,7 @@ described you will see these descriptions:
 
 * //Windows// will be a general reference to a family of Microsoft Windows
 operating systems that includes 95/ME/98/XP/NT/Vista/7/. 
-You will see the constant ##WIN32## used for //Windows// specific code.
+You will see the constant ##WINDOWS## used for //Windows// specific code.
 
 * //Unix// will be a general reference to the family operating systems that
 includes Linux, FreeBSD, NetBSD, OpenBSD, Mac OS X,... You will see the
