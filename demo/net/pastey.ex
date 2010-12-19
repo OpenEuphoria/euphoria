@@ -9,14 +9,14 @@
 -- for inclusion of a demo program by Jeremy Cowgar.
 --
 
+include std/cmdline.e
+include std/console.e
 include std/io.e
-include std/regex.e as r
+include std/map.e
 include std/net/http.e
 include std/net/url.e as url
-include std/console.e
-include std/cmdline.e
+include std/regex.e as r
 include std/text.e
-include std/map.e
 
 without warning
 override procedure abort(integer x, sequence msg = {}, sequence data = {})
@@ -69,7 +69,7 @@ sequence form_data = {
     $
 }
 
-data = http_post("http://localhost/pastey/create.wc", form_data)
+data = http_post("http://openeuphoria.org/pastey/create.wc", form_data)
 
 if equal(data[1], "") or equal(data[2], "") then
     abort(1, "An error occurred while submitting your file.\n")
