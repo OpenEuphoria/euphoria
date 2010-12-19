@@ -175,6 +175,7 @@ update :
 	-mkdir -p $(DEB_SOURCE_DIR)/source/codepage
 	cp $(EU_BASE_DIR)/source/codepage/*ecp $(DEB_SOURCE_DIR)/source/codepage
 	-mkdir -p $(DEB_SOURCE_DIR)/docs/html/images
+	-mkdir -p $(DEB_SOURCE_DIR)/docs/images
 	-mkdir $(DEB_SOURCE_DIR)/docs/release
 	cp $(EU_BASE_DIR)/docs/*.af $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/*.txt $(DEB_SOURCE_DIR)/docs
@@ -183,7 +184,9 @@ update :
 	cp $(EU_BASE_DIR)/docs/*.html $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/*.css $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/*.js $(DEB_SOURCE_DIR)/docs
+	cp $(EU_BASE_DIR)/docs/*.tex $(DEB_SOURCE_DIR)/docs
 	cp $(EU_BASE_DIR)/docs/html/images/* $(DEB_SOURCE_DIR)/docs/html/images
+	cp $(EU_BASE_DIR)/docs/images/* $(DEB_SOURCE_DIR)/docs/images
 	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
 	-rm -r $(DEB_SOURCE_DIR)/debian
 	-mkdir $(DEB_SOURCE_DIR)/debian
