@@ -643,7 +643,7 @@ test :
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
-		-bind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		-verbose $(TESTFILE)
 	cd ../tests && sh check_diffs.sh
@@ -656,7 +656,7 @@ test-311 :
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
-		-bind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-eubind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		$(TESTFILE)
 		
