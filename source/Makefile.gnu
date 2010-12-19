@@ -27,6 +27,8 @@
 #
 #   Html Documentation        :  make htmldoc 
 #   PDF Documentation         :  make pdfdoc
+#   Test eucode blocks in API
+#       comments              :  make test-eucode
 #
 #   Note that Html and PDF Documentation require eudoc and creole
 #   PDF docs also require a complete LaTeX installation
@@ -533,9 +535,11 @@ ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGSCONSOLE) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
 endif
 
+###############################################################################
 #
-# Manual
+# Documentation
 #
+###############################################################################
 
 get-eudoc: $(TRUNKDIR)/source/eudoc/eudoc.ex
 get-creole: $(TRUNKDIR)/source/creole/creole.ex
@@ -601,6 +605,27 @@ $(BUILDDIR)/euphoria.pdf : $(BUILDDIR)/pdf/euphoria.tex
 
 pdfdoc-again : $(BUILDDIR)/euphoria.pdf
 	cd $(TRUNKDIR)/docs && pdflatex -aux-directory=$(BUILDDIR)/pdf -output-directory=$(BUILDDIR) $(BUILDDIR)/pdf/euphoria.tex
+
+
+###############################################################################
+#
+# Testing Targets
+#
+###############################################################################
+
+#
+# Test <eucode>...</eucode> blocks found in our API reference docs
+#
+
+.PHONY: test-eucode
+
+test-eucode : 
+	$(EUDOC) --single --verbose --test-eucode --work-dir=$(BUILDDIR)/eudoc_test -o $(BUILDDIR)/test_eucode.txt $(EU_STD_INC)
+	$(CREOLE) -o $(BUILDDIR) $(BUILDDIR)/test_eucode.txt
+
+#
+# Unit Testing
+#
 
 test : EUDIR=$(TRUNKDIR)
 test : EUCOMPILEDIR=$(TRUNKDIR)
