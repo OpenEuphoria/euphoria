@@ -811,7 +811,7 @@ install-docs :
 	# create dirs
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/js
 	install -d $(DESTDIR)$(PREFIX)/share/doc/euphoria/html/images
-	install $(BUILDDIR)/euphoria-4.0.pdf $(DESTDIR)$(PREFIX)/share/doc/euphoria/
+	install $(BUILDDIR)/euphoria.pdf $(DESTDIR)$(PREFIX)/share/doc/euphoria/
 	install  \
 		$(BUILDDIR)/html/*html \
 		$(BUILDDIR)/html/*css \
