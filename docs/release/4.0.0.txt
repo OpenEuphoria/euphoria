@@ -72,3 +72,5 @@ been resolved.
 * Bundled utility ##bench.ex## now outputs timing information to STDERR
   by default. ##--stdout## can be supplied if output to STDOUT is desired. It now also
   displays the min and max iteration times in addition to the already average and total.
+* ##demo/net/pastey.ex## demo has been updated to function with
+  OpenEuphoria's pastey service.
