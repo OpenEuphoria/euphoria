@@ -597,6 +597,7 @@ $(BUILDDIR)/pdf/euphoria.tex : $(BUILDDIR)/pdf/euphoria.txt $(TRUNKDIR)/docs/tem
 
 $(BUILDDIR)/euphoria.pdf : $(BUILDDIR)/pdf/euphoria.tex
 	cd $(TRUNKDIR)/docs && pdflatex -aux-directory=$(BUILDDIR)/pdf -output-directory=$(BUILDDIR) $(BUILDDIR)/pdf/euphoria.tex
+	cd $(TRUNKDIR)/docs && pdflatex -aux-directory=$(BUILDDIR)/pdf -output-directory=$(BUILDDIR) $(BUILDDIR)/pdf/euphoria.tex
 
 pdfdoc-again : $(BUILDDIR)/euphoria.pdf
 	cd $(TRUNKDIR)/docs && pdflatex -aux-directory=$(BUILDDIR)/pdf -output-directory=$(BUILDDIR) $(BUILDDIR)/pdf/euphoria.tex
