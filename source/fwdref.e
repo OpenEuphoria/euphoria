@@ -356,7 +356,7 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	if code_sub = TopLevelSub then
 		for i = pre_refs + 1 to length( toplevel_references[fr[FR_FILE]] ) do
-			forward_references[toplevel_references[fr[FR_FILE]]][FR_PC] += pc - 1
+			forward_references[toplevel_references[fr[FR_FILE]][i]][FR_PC] += pc - 1
 		end for
 	else
 		for i = pre_refs + 1 to length( active_references[fr[FR_FILE]][ar_sp] ) do
