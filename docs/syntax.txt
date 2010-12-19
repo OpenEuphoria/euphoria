@@ -2,14 +2,17 @@
 
 === Basics
 
-The syntax of Euphoria is described using BNF notation.
+The syntax of Euphoria is described using a form of BNF notation.
 
 {{{
 ALPHA ==: ('a' - 'z') | ('A' - 'Z')
 DIGIT ==: ('0' - '9')
 USCORE ==: '_'
+EOL ==: new line character
 
-INDENTIFIER ==: ( ALPHA | USCORE ) [(AlPHA | DIGIT | USCORE) ... ]
+IDENTIFIER ==: ( ALPHA | USCORE ) [(AlPHA | DIGIT | USCORE) ... ]
+
+EXPRESSION ==: NUMEXPR | STREXPR | SEQEXPR | BOOLEXPR
 
 NUMEXPR ==: (an expression that evaluates to an atom)
 
@@ -19,8 +22,6 @@ SEQEXPR ==: (an expression that evaluates to an sequence)
 
 BOOLEXPR ==: (an expression that evaluates to an atom in which zero represents 
               falsehood and non-zero represents truth)
-
-EXPR ==:
 
 STATEMENT ==: 
 
@@ -43,6 +44,10 @@ RAWSTRINGLIT ==: DQRAWSTRING | BQRAWSTRING
 DQRAWSTRING ==: '"""' [ MARGINSTR ] [CHAR ...] '"""'
 BQRAWSTRING ==: '`' [ MARGINSTR ] [CHAR ...] '`'
 MARGINSTR  ==: '_' ...
+
+SCOPETYPE ==: 'global' | 'public' | 'export' | 'override'
+
+DATATYPE ==: 'atom' | 'integer' | 'sequence' | 'object' | IDENTIFER
 }}}
 
 === Statements
@@ -50,8 +55,17 @@ MARGINSTR  ==: '_' ...
 ==== Directives
 
 [[:INCLUDESTMT]]\\
+[[:WITHSTMT]]\\
+[[:NAMESPACE]]\\
+
+==== Variables, Constants, Enums
+[[:VARDECLARE]]\\
+[[:CONSTDECLARE]]\\
+[[:ENUMDECLARE]]\\
+[[:SLICING]]\\
 
 ==== Flow Control
+
 [[:IFSTMT]]\\
 [[:SWITCHSTMT]]\\
 [[:BREAKSTMT]]\\
@@ -63,17 +77,23 @@ MARGINSTR  ==: '_' ...
 [[:WHILESTMT]]\\
 [[:LOOPSTMT]]\\
 [[:GOTOSTMT]]\\
+[[:CALL]]\\
 
-!!splice
+==== Routines
+
+[[:PROCDECLARE]]\\
+[[:FUNCDECLARE]]\\
+[[:TYPEDECLARE]]\\
+[[:RETURN]]\\
 
 ==== include
 
 @[INCLUDESTMT]
-<eucode>
- INCLUDESTMT  ==:  'include' FILEREF [ 'as' NAMESPACE ] EOL
+{{{
+ INCLUDESTMT  ==:  'include' FILEREF [ 'as' NAMESPACEID ] EOL
  FILEREF  ==:  A file path that may be enclosed in double-quotes. 
- NAMESPACE ==: IDENTIFIER  
-</eucode>
+ NAMESPACEID ==: IDENTIFIER  
+}}}
 **NOTE** that after the file reference, the only text allowed is the keyword 
 'as' or the start of a comment. Nothing else is permitted on the same text line.
 
@@ -82,30 +102,30 @@ MARGINSTR  ==: '_' ...
 === Sequence Slice
 @[SLICING]
 
-<eucode>
+{{{
 SLICE      ==: SLICESTART INTEXPRESSION SLICEDELIM INTEXPRESSION SLICEEND
 SLICESTART ==: '['
 SLICEDELIM ==: '..'
 SLICEEND   ==: ']'
-</eucode>
+}}}
     See Also: [[:Slicing of Sequences]]
 
 === if
 @[IFSTMT]
 
-<eucode>
+{{{
  IFSTMT  ==:  IFTEST [ ELSIF ...] [ELSE] ENDIF 
  IFTEST  ==:  'if' ATOMEXPR [ LABEL ] 'then' [ STMTBLOCK ] 
  ELSIF   ==:  'elsif' ATOMEXPR 'then' [ STMTBLOCK ] 
  ELSE    ==:  'else' [ STMTBLOCK ] 
  ENDIF   ==:  'end' 'if' 
-</eucode>
+}}}
     See Also: [[:if statement]]
 
 ==== switch
 @[SWITCHSTMT]
 
-<eucode>
+{{{
  SWITCHSTMT  ==:  SWITCHTEST CASE [ CASE ...] [ CASEELSE ] [ ENDSWITCH ]
  SWITCHTEST  ==:  'switch' EXPRESSION [ WITHFALL ] [ LABEL ] 'do'
  WITHFALL    ==:  ('with' | 'without') 'fallthru'
@@ -113,82 +133,194 @@ SLICEEND   ==: ']'
  CASELIST    ==:  EXPRESSION [(LISTDELIM EXPRESSION) ...]
  CASEELSE    ==:  'case' 'else'
  ENDSWITCH   ==:  'end' 'switch'
-</eucode>
+}}}
     See Also: [[:switch statement]]
 
 === break
 @[BREAKSTMT]
 
-<eucode>
+{{{
  BREAKSTMT       ==:  'break' [ STRINGLIT ]
-</eucode>
+}}}
     See Also: [[:break statement]]
 
 === continue
 @[CONTINUESTMT]
 
-<eucode>
+{{{
  CONTINUESTMT       ==:  'continue' [ STRINGLIT ]
-</eucode>
+}}}
     See Also: [[:continue statement]]
 
 === retry
 @[RETRYSTMT]
 
-<eucode>
+{{{
  RETRYSTMT       ==:  'retry' [ STRINGLIT ]
-</eucode>
+}}}
     See Also: [[:retry statement]]
 
 === exit
 @[EXITSTMT]
 
-<eucode>
+{{{
  EXITSTMT       ==:  'exit' [ STRINGLIT ]
-</eucode>
+}}}
     See Also: [[:exit statement]]
 
 === fallthru
 @[FALLTHRUSTMT]
 
-<eucode>
+{{{
  FALLTHRUSTMT       ==:  'fallthru'
-</eucode>
+}}}
     See Also: [[:switch statement]]
 
 === for
 @[FORSTMT]
 
-<eucode>
+{{{
  FORSTMT ==: 'for' FORIDX [ LABEL ] 'do' [STMTBLK] 'end' 'for'
  FORIDX  ==: IDENTIFIER '=' NUMEXPR 'to' NUMEXPR ['by' NUMEXPR]
-</eucode>
+}}}
     See Also: [[:for statement]]
 
 === while
 @[WHILESTMT]
 
-<eucode>
+{{{
 WHILESTMT ==: 
         'while' BOOLEXPR [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'end' 'while'
 WITHENTRY ==: 'with' 'entry'
 ENTRY ==: 'entry' [STMTBLK]
-</eucode>
+}}}
    See Also: [[:while statement]]
 
 === loop
 @[LOOPSTMT]
 
-<eucode>
+{{{
 LOOPSTMT ==: 
    'loop' [WITHENTRY] [LABEL] 'do' STMTBLK [ENTRY] 'until' BOOLEXPR 'end' 'loop'
-</eucode>
+}}}
    See Also: [[:loop until statement]]
 
 === goto
 @[GOTOSTMT]
 
-<eucode>
+{{{
  GOTOSMT ==: 'goto' LABEL
-</eucode>
+}}}
   See Also: [[:goto statement]]
+
+=== declare a variable
+@[VARDECLARE]
+{{{
+VARDECLARE ==: [SCOPETYPE] DATATYPE IDENTLIST
+IDENTLIST ==: IDENT [',' IDENTLIST]
+IDENT ==: IDENTIFIER [ '=' EXPRESSION ]
+}}}
+Notes:
+* The type of the ##EXPRESSION## must be compatable with the ##DATATYPE##.
+
+=== declare a constant
+@[CONSTDECLARE]
+{{{
+CONSTDECLARE ==: [SCOPETYPE] 'constant' IDENTLIST
+}}}
+
+=== declare an enumerated value
+@[ENUMDECLARE]
+{{{
+ENUMDECLARE ==: [SCOPETYPE] [ ENUMVAL | ENUMTYPE ]
+ENUMVAL ==: 'enum' ['by' ENUMDELTA ] IDENTLIST
+ENUMDELTA ==: [ '+' | '-' | '*' | '/' ] NUMEXPR
+ENUMTYPE ==: 'enum' 'type' ['by' ENUMDELTA ] IDENTLIST 'end' 'type'
+}}}
+
+  
+=== call a procedure or function
+@[CALL]
+Used to call (invoke) either a procedure or a function.
+{{{
+CALL ==: IDENTIFIER '(' [ARGLIST] ')'
+ARGLIST ==: ARGUMENT [',' ARGLIST]
+}}}
+  See Also: [[:procedures]] [[:functions]]
+  
+=== declare a procedure
+@[PROCDECLARE]
+{{{
+PROCDECLARE ==: [SCOPETYPE] 'procedure' IDENTIFIER '(' [PARMLIST] ')' [STMTBLK] 'end' 'procedure'
+PARMLIST ==: PARAMETER [',' PARMLIST]
+PARAMETER ==: DATATYPE IDENTIFER
+}}}
+Notes:
+* The ##procedure## statement block **must not** contain a ##return## statememt.
+
+  See Also: [[:procedures]]
+  
+=== declare a function
+@[FUNCDECLARE]
+{{{
+FUNCDECLARE ==: [SCOPETYPE] 'function' IDENTIFIER '(' [PARMLIST] ')' [STMTBLK] 'end' 'function'
+PARMLIST ==: PARAMETER [',' PARMLIST]
+PARAMETER ==: DATATYPE IDENTIFER
+}}}
+Notes:
+* The ##function## statement block **must** contain a ##return## statememt.
+
+  See Also: [[:functions]]
+  
+=== declare a user defined type
+@[TYPEDECLARE]
+{{{
+TYPEDECLARE ==: [SCOPETYPE] 'type' IDENTIFIER '(' PARAMETER ')' [STMTBLK] 'end' 'type'
+PARAMETER ==: DATATYPE IDENTIFER
+}}}
+Notes:
+* The ##type## statement block **must** contain a ##return## statememt.
+* It must return an integer; 0 means that the supplied argument is not of the correct type.
+
+  See Also: [[:types]]
+  
+=== return the result of a function
+@[RETURN]
+{{{
+RETURN ==: 'return' EXPRESSION
+}}}
+
+  See Also: [[:types]]
+  
+=== default namespace
+@[NAMESPACE]
+{{{
+NAMESPACE ==: 'namespace' IDENTIFIER EOL
+}}}
+
+  See Also: [[:Using namespaces]]
+  
+=== with options
+@[WITHSTMT]
+{{{
+WITHSTMT ==: [ "with" | "without" ] WITHOPTION
+WITHOPTION ==: [ "profile" | "profile_time" | "trace" | "batch" |
+                 "type_check" | "indirect_includes" | "inline" | WITHWARNING ]
+WITHWARNING ==: "warning" [ WARNOPT]
+WARNOPT ==: SETWARN | ADDWARN | SAVEWARN | RESTOREWARN | STRICTWARN
+SETWARN ==: ['='] '{' WARNLIST '}'
+ADDWARN ==: ['+=' | '&='] '{' WARNLIST '}'
+SAVEWARN ==: 'save'
+RESTOREWARN ==: 'restore'
+STRICTWARN ==: 'strict'
+}}}
+
+  See Also: [[:with / without]]
+  
+!! todo : ifdef
+!! todo : elsedef
+!! todo : elsifdef
+!! todo : not
+!! todo : xor 
+!! todo : or
+!! todo : and

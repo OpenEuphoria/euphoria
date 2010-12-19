@@ -4288,13 +4288,13 @@ procedure SetWith(integer on_off)
 		integer warning_extra = 1
 		if find(tok[T_ID], {CONCAT_EQUALS, PLUS_EQUALS}) != 0 then
 			tok = next_token()
-			if tok[T_ID] != LEFT_ROUND then
+			if tok[T_ID] != LEFT_BRACE and tok[T_ID] != LEFT_ROUND then
 				CompileErr(160)
 			end if
 			reset_flags = 0
 		elsif tok[T_ID] = EQUALS then
 			tok = next_token()
-			if tok[T_ID] != LEFT_ROUND then
+			if tok[T_ID] != LEFT_BRACE and tok[T_ID] != LEFT_ROUND then
 				CompileErr(160)
 			end if
 			reset_flags = 1
@@ -4327,9 +4327,15 @@ procedure SetWith(integer on_off)
 				end if
 			end if
 
-			if tok[T_ID] = LEFT_ROUND then
+			if find(tok[T_ID], {LEFT_BRACE, LEFT_ROUND}) then
+				integer endlist
+				if tok[T_ID] = LEFT_BRACE then
+					endlist = RIGHT_BRACE
+				else
+					endlist = RIGHT_ROUND
+				end if
 				tok = next_token()
-				while tok[T_ID] != RIGHT_ROUND do
+				while tok[T_ID] != endlist do
 					if tok[T_ID] = COMMA then
 						tok = next_token()
 						continue

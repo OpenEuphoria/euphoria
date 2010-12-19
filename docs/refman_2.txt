@@ -1913,7 +1913,7 @@ declared in any
 Euphoria coded file.
 
 
-@[namespace|]
+@[namespace]
 ==== Using namespaces
 
 Identifiers marked as ##global##, ##public## or ##export## are known as
@@ -3923,20 +3923,20 @@ The forms available are ...
 ; ##without warning##
 : disables all warnings
 
-; ##with warning (//warning name list//)\\
-  with warning = (//warning name list//)##
+; ##with warning {//warning name list//}\\
+  with warning = {//warning name list//}##
 : enables only these warnings, and disables all other
 
-; ##without warning (//warning name list//)\\
-  without warning = (//warning name list//)##
+; ##without warning {//warning name list//}\\
+  without warning = {//warning name list//}##
 : enables all warnings except the warnings listed
 
-; ##with warning &= (//warning name list//)\\
-  with warning += (//warning name list//)##
+; ##with warning &= {//warning name list//}\\
+  with warning += {//warning name list//}##
 : enables listed warnings in addition to whichever are enabled already
 
-; ##without warning &= (//warning name list//)\\
-  without warning += (//warning name list//)##
+; ##without warning &= {//warning name list//}\\
+  without warning += {//warning name list//}##
 : disables listed warnings and leaves any not listed in its current state.
 
 ; ##with warning save##
