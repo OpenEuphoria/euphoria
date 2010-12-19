@@ -1,141 +1,9 @@
 
 include Makefile.eu
 
-EU_VERSION =4.0
-EU_BASE_DIR =../..
-DEBIAN_VERSION =2
-EU_ALL_FILES = \
-	source/be_alloc.c \
-	source/be_callc.c \
-	source/be_decompress.c \
-	source/be_execute.c \
-	source/be_inline.c \
-	source/be_machine.c \
-	source/be_main.c \
-	source/be_pcre.c \
-	source/be_rterror.c \
-	source/be_runtime.c \
-	source/be_socket.c \
-	source/be_symtab.c \
-	source/be_syncolor.c \
-	source/be_task.c \
-	source/be_w.c \
-	source/version.h \
-	source/int.ex \
-	source/ec.ex \
-	source/eu.ex \
-	source/backend.ex \
-	source/bind.ex \
-	source/shroud.ex \
-	source/backend.e \
-	source/block.e \
-	source/buildsys.e \
-	source/c_decl.e \
-	source/cominit.e \
-	source/common.e \
-	source/compile.e \
-	source/compress.e \
-	source/c_out.e \
-	source/emit.e \
-	source/error.e \
-	source/execute.e \
-	source/fwdref.e \
-	source/global.e \
-	source/il.e \
-	source/inline.e \
-	source/intinit.e \
-	source/keylist.e \
-	source/main.e \
-	source/mode.e \
-	source/msgtext.e \
-	source/opnames.e \
-	source/parser.e \
-	source/pathopen.e \
-	source/platform.e \
-	source/preproc.e \
-	source/reswords.e \
-	source/revget.ex \
-	source/scanner.e \
-	source/scinot.e \
-	source/shift.e \
-	source/symtab.e \
-	source/traninit.e \
-	source/alldefs.h \
-	source/execute.h  \
-	source/opnames.h  \
-	source/reswords.h \
-	source/global.h \
-	source/redef.h \
-	source/symtab.h \
-	source/Makefile \
-	source/Makefile.gnu \
-	source/configure \
-	source/dis.ex \
-	source/dis.e \
-	source/dot.e \
-	source/dox.e \
-	source/std.ex \
-	source/coverage.e \
-	source/coverage.ex \
-	source/be_alloc.h \
-	source/be_callc.h \
-	source/be_decompress.h \
-	source/be_execute.h \
-	source/be_inline.h \
-	source/be_machine.h \
-	source/be_main.h \
-	source/be_pcre.h \
-	source/be_rterror.h \
-	source/be_runtime.h \
-	source/be_socket.h \
-	source/be_symtab.h \
-	source/be_syncolor.h \
-	source/be_task.h \
-	source/be_w.h \
-	source/object.h \
-	source/eudist.ex \
-	source/eutest.ex
-
-EU_DIRS = include \
-	include/std/ \
-	include/std/net \
-	include/std/unix \
-	include/std/win32 \
-	include/euphoria \
-	html \
-	doc \
-	demo \
-	tutorial \
-	demo/bench \
-	demo/linux \
-	demo/langwar \
-	demo/net \
-	demo/preproc \
-	demo/unix \
-	demo/win32
-
-EU_BIN_FILES = ed.ex \
-	buildcpdb.ex \
-	bugreport.ex \
-	ed.ex \
-	euloc.ex \
-	eucoverage.ex \
-	ecp.dat
-
-BUILD_DIRS = intobj/ \
-	transobj/ \
-	libobj/ \
-	backobj/ \
-	backobj/back/ \
-	intobj/back/ \
-	transobj/back/ \
-	libobj/back/
-
-euphoria-$(EU_VERSION)-$(DEBIAN_VERSION) : update
+euphoria : update
 	echo TARGET: $@
-	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage -nc -S
-	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage -nc -b
-
+	cd $(DEB_SOURCE_DIR) && dpkg-buildpackage -nc
 binclean :
 	for d in $(BUILD_DIRS); \
 	do \
@@ -148,7 +16,7 @@ clean :
 	-rm *deb
 	-rm *gz
 
-DEB_SOURCE_DIR = euphoria-$(EU_VERSION)
+DEB_SOURCE_DIR = euphoria
 
 copy-files :
 
@@ -156,16 +24,13 @@ source :
 
 update :
 	hg archive $(DEB_SOURCE_DIR)
-	-mkdir -p $(DEB_SOURCE_DIR)/docs/images
-	cp $(EU_BASE_DIR)/docs/*.tex $(DEB_SOURCE_DIR)/docs
-	cp $(EU_BASE_DIR)/docs/images/* $(DEB_SOURCE_DIR)/docs/images
 	cp Makefile.fake $(DEB_SOURCE_DIR)/Makefile
 	-rm -r $(DEB_SOURCE_DIR)/debian
 	-mkdir $(DEB_SOURCE_DIR)/debian
 	-cp rules $(DEB_SOURCE_DIR)/debian
 	-cp postinst $(DEB_SOURCE_DIR)/debian
 	-cp prerm $(DEB_SOURCE_DIR)/debian
-	-cp $(EU_BASE_DIR)/docs/man/*.1 $(DEB_SOURCE_DIR)/debian
+	-cp $(DEB_SOURCE_DIR)/docs/man/*.1 $(DEB_SOURCE_DIR)/debian
 	-sed s/%arch%/$(ARCH)/ control > $(DEB_SOURCE_DIR)/debian/control
 	-cp changelog $(DEB_SOURCE_DIR)/debian
 	-cp copyright $(DEB_SOURCE_DIR)/debian
