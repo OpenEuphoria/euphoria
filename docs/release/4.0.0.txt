@@ -6,7 +6,12 @@
 For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see 
 [[:What's new in 4.0?]] section of this manual.
 
-!!=== Deprecation
+=== Deprecation
+
+* with/without warning lists have changed from ##( name1, name2 )## to
+##{ name1, name2 }## as to be more like Euphoria sequences. In the
+future the old ##( name1, name2 )## syntax will be removed.
+
 
 === Possible Breaking Changes
 
