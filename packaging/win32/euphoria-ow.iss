@@ -1,19 +1,19 @@
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.0.RC2
-AppVerName=Euphoria v4.0.0.RC2
+AppVersion=4.0.0
+AppVerName=Euphoria v4.0.0
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
 AppUpdatesURL=http://openeuphoria.org
-DefaultDirName=C:\euphoria-4.0
-DefaultGroupName=Euphoria 4.0
+DefaultDirName=C:\euphoria
+DefaultGroupName=Euphoria
 AllowNoIcons=yes
 LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.0.RC2-ow
+OutputBaseFilename=euphoria-4.0.0-ow
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -103,7 +103,7 @@ Source: "cleanbranch\bin\euinc.ico"; DestDir: {app}\bin\; Flags: ignoreversion; 
 Source: "cleanbranch\bin\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
 ; Windows Tools
-Source: "..\..\bin\creolehtml.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\creole.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eudis.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eudist.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
