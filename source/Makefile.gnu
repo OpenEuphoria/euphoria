@@ -83,6 +83,7 @@ else
   SEDFLAG=-ri
 endif
 ifeq "$(EMINGW)" "1"
+	EXE_EXT=.exe
 	EPTHREAD=
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
@@ -100,15 +101,10 @@ ifeq "$(EMINGW)" "1"
 		EOSMING=-ffast-math -O3 -Os
 		LIBRARY_NAME=eu.a
 	endif
-	EBACKENDU=eubw.exe
 	EUBW_RES=$(BUILDDIR)/eubw.res
-	EBACKENDC=eub.exe
 	EUB_RES=$(BUILDDIR)/eub.res
-	EECU=euc.exe
 	EUC_RES=$(BUILDDIR)/euc.res
-	EEXU=eui.exe
 	EUI_RES=$(BUILDDIR)/eui.res
-	EEXUW=euiw.exe
 	EUIW_RES=$(BUILDDIR)/euiw.res
 	ifeq "$(MANAGED_MEM)" "1"
 		ifeq "$(ALIGN4)" "1"
@@ -125,15 +121,12 @@ ifeq "$(EMINGW)" "1"
 	endif
 	PCRE_CC=gcc
 else
+	EXE_EXT=
 	EPTHREAD=-pthread
 	EOSTYPE=-DEUNIX
 	EOSFLAGS=
 	EOSFLAGSCONSOLE=
 	EOSPCREFLAGS=
-	EBACKENDU=eub
-	EBACKENDC=eub
-	EECU=euc
-	EEXU=eui
 	EECUA=eu.a
 	EECUDBGA=eudbg.a
 	ifdef EDEBUG
@@ -143,6 +136,12 @@ else
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
+
+MKVER=$(BUILDDIR)/mkver$(EXE_EXT)
+EBACKENDU=eub$(EXE_EXT)
+EBACKENDC=eub$(EXE_EXT)
+EECU=euc$(EXE_EXT)
+EEXU=eui$(EXE_EXT)
 
 LDLFLAG+= $(EPTHREAD)
 
@@ -219,10 +218,6 @@ ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
 	TRANSLATE=$(EXE) $(CYPINCDIR) $(EC_DEBUG) $(CYPTRUNKDIR)/source/ec.ex
-endif
-
-ifeq "$(EUPHORIA)" "1"
-REVGET=svn_rev
 endif
 
 ifeq "$(MANAGED_MEM)" "1"
@@ -306,7 +301,6 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_symtab.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_socket.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
-	$(BUILDDIR)/$(OBJDIR)/back/be_rev.o \
 	$(PREFIXED_PCRE_OBJECTS)
 
 EU_LIB_OBJECTS = \
@@ -320,17 +314,17 @@ EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_runtime.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_task.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
-	$(BUILDDIR)/$(OBJDIR)/back/be_rev.o \
 	$(PREFIXED_PCRE_OBJECTS)
 	
 
-STDINCDIR = $(TRUNKDIR)/include/std
+INCDIR = $(TRUNKDIR)/include/std
 
 EU_STD_INC = \
-	$(wildcard $(STDINCDIR)/*.e) \
-	$(wildcard $(STDINCDIR)/unix/*.e) \
-	$(wildcard $(STDINCDIR)/net/*.e) \
-	$(wildcard $(STDINCDIR)/win32/*.e)
+	$(wildcard $(INCDIR)/std/*.e) \
+	$(wildcard $(INCDIR)/std/unix/*.e) \
+	$(wildcard $(INCDIR)/std/net/*.e) \
+	$(wildcard $(INCDIR)/std/win32/*.e) \
+	$(wildcard $(INCDIR)/euphoria/*.e)
 
 DOCDIR = $(TRUNKDIR)/docs
 EU_DOC_SOURCE = \
@@ -360,7 +354,7 @@ BUILD_DIRS=\
 clean : 	
 	-rm -fr $(BUILDDIR)
 	-rm -fr $(BUILDDIR)/backobj
-	-rm -f be_rev.c
+	-rm -f ver.dat
 
 clobber distclean : clean
 	-rm -f $(CONFIG)
@@ -394,12 +388,6 @@ ifeq "$(ROOTDIR)" ""
 ROOTDIR=$(TRUNKDIR)
 endif
 
-svn_rev : 
-	echo svn_rev EUPHORIA=$(EUPHORIA) REVGET=$(REVGET)
-	-$(EXE) -i ../include revget.ex -root $(ROOTDIR)
-
-be_rev.c : $(REVGET)
-
 code-page-db : $(BUILDDIR)/ecp.dat
 
 $(BUILDDIR)/ecp.dat : $(TRUNKDIR)/source/codepage/*.ecp
@@ -430,15 +418,19 @@ binder : translator library $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EUSHROUD)
 .PHONY : code-page-db
 .PHONY : binder
 
-euisource : $(BUILDDIR)/intobj/main-.c be_rev.c
+euisource : $(BUILDDIR)/intobj/main-.c
 euisource :  EU_TARGET = int.ex
 euisource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
-eucsource : $(BUILDDIR)/transobj/main-.c  be_rev.c
+euisource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+eucsource : $(BUILDDIR)/transobj/main-.c
 eucsource :  EU_TARGET = ec.ex
-eucsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h 
-backendsource : $(BUILDDIR)/backobj/main-.c  be_rev.c
+eucsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
+eucsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET = backend.ex
 backendsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
+backendsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+
 source : builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
@@ -447,20 +439,26 @@ source : builddirs
 ifneq "$(VERSION)" ""
 SOURCEDIR=euphoria-$(VERSION)
 else
-SVN_REV=xxx
-SOURCEDIR=euphoria-$(PLAT)-r$(SVN_REV)
+
+ifeq "$(REV)" ""
+REV := $(shell hg parents --template '{node|short}')
 endif
 
-ifeq "$(SVN_URL)" ""
-SVN_URL=https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/trunk/
+ifeq "$(PLAT)" ""
+SOURCEDIR=euphoria-$(REV)
+else
+SOURCEDIR=euphoria-$(PLAT)-$(REV)
+endif
+
 endif
 
 source-tarball :
 	rm -rf $(BUILDDIR)/$(SOURCEDIR)
-	svn export $(SVN_URL) $(BUILDDIR)/$(SOURCEDIR)
+	hg archive $(BUILDDIR)/$(SOURCEDIR)
 	cd $(BUILDDIR)/$(SOURCEDIR)/source && ./configure $(CONFIGURE_PARAMS)
 	$(MAKE) -C $(BUILDDIR)/$(SOURCEDIR)/source source
 	rm $(BUILDDIR)/$(SOURCEDIR)/source/config.gnu
+	rm $(BUILDDIR)/$(SOURCEDIR)/source/build/mkver$(EXE_EXT)
 	cd $(BUILDDIR) && tar -zcf $(SOURCEDIR).tar.gz $(SOURCEDIR)
 ifneq "$(VERSION)" ""
 	cd $(BUILDDIR) && mkdir -p $(PLAT) && mv $(SOURCEDIR).tar.gz $(PLAT)
@@ -470,7 +468,6 @@ endif
 .PHONY : eucsource
 .PHONY : backendsource
 .PHONY : source
-
 
 $(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
 	$(EXE) -i $(CYPTRUNKDIR)/include coverage.ex $(CYPBUILDDIR)/$(OBJDIR)
@@ -482,6 +479,8 @@ $(BUILDDIR)/backobj/back/be_execute.o : $(BUILDDIR)/backobj/back/coverage.h
 $(BUILDDIR)/intobj/back/be_runtime.o : $(BUILDDIR)/intobj/back/coverage.h
 $(BUILDDIR)/transobj/back/be_runtime.o : $(BUILDDIR)/transobj/back/coverage.h
 $(BUILDDIR)/backobj/back/be_runtime.o : $(BUILDDIR)/backobj/back/coverage.h
+
+$(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 
 ifeq "$(EMINGW)" "1"
 $(EUI_RES) : eui.rc version_info.rc
@@ -534,6 +533,13 @@ $(BUILDDIR)/$(EBACKENDU) : $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) $(
 ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGSCONSOLE) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
 endif
+
+.PHONY: $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+$(MKVER): mkver.c
+	$(CC) -o $@ $<
+
+$(BUILDDIR)/$(OBJDIR)/back/be_ver.h: $(MKVER)
+	$(MKVER) $(HG) $(BUILDDIR)/ver.cache $@
 
 ###############################################################################
 #
@@ -637,7 +643,7 @@ test :
 		$(EXE) -i ../include ../source/eutest.ex -i ../include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
-		-bind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-eubind "$(CYPBUILDDIR)/$(EUBIND)" -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		-verbose $(TESTFILE)
 	cd ../tests && sh check_diffs.sh
@@ -650,7 +656,7 @@ test-311 :
 		$(EXE) -i ../include $(CYPTRUNKDIR)/source/eutest.ex -i $(CYPTRUNKDIR)/include -cc gcc $(VERBOSE_TESTS) \
 		-exe "$(CYPBUILDDIR)/$(EEXU)" \
 		-ec "$(CYPBUILDDIR)/$(EECU)" \
-		-bind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
+		-eubind $(CYPTRUNKDIR)/source/bind.ex -eub $(CYPBUILDDIR)/$(EBACKENDC) \
 		-lib "$(CYPBUILDDIR)/$(LIBRARY_NAME)" \
 		$(TESTFILE)
 		
@@ -905,6 +911,8 @@ $(PREFIXED_PCRE_OBJECTS) : $(patsubst %.o,pcre/%.c,$(PCRE_OBJECTS)) pcre/config.
 	$(MAKE) -C pcre all CC="$(PCRE_CC)" PCRE_CC="$(PCRE_CC)" EOSTYPE="$(EOSTYPE)" EOSFLAGS="$(EOSPCREFLAGS)" CONFIG=../$(CONFIG)
 endif
 
+#$(BUILDDIR)/$(OBJDIR)/back/be_machine.o: $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+
 depend :
 	makedepend -fMakefile.gnu -Y. -I. *.c -p'$$(BUILDDIR)/intobj/back/'
 	makedepend -fMakefile.gnu -Y. -I. *.c -p'$$(BUILDDIR)/transobj/back/' -a
@@ -920,9 +928,6 @@ $(BUILDDIR)/intobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/intobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_callc.o: be_machine.h be_alloc.h
-$(BUILDDIR)/intobj/back/be_callc_conly.o: alldefs.h global.h object.h
-$(BUILDDIR)/intobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/intobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/intobj/back/be_decompress.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_decompress.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
@@ -938,9 +943,11 @@ $(BUILDDIR)/intobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/intobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/intobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/intobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/intobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/intobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/intobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
+$(BUILDDIR)/intobj/back/be_main.o: be_w.h
 $(BUILDDIR)/intobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/intobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
@@ -978,9 +985,6 @@ $(BUILDDIR)/transobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/transobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_callc.o: be_machine.h be_alloc.h
-$(BUILDDIR)/transobj/back/be_callc_conly.o: alldefs.h global.h object.h
-$(BUILDDIR)/transobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/transobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/transobj/back/be_decompress.o: alldefs.h global.h object.h
 $(BUILDDIR)/transobj/back/be_decompress.o: symtab.h execute.h reswords.h
 $(BUILDDIR)/transobj/back/be_decompress.o: be_alloc.h
@@ -997,9 +1001,11 @@ $(BUILDDIR)/transobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/transobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/transobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/transobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/transobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/transobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/transobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
+$(BUILDDIR)/transobj/back/be_main.o: be_w.h
 $(BUILDDIR)/transobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/transobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
@@ -1037,9 +1043,6 @@ $(BUILDDIR)/backobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/backobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_callc.o: be_machine.h be_alloc.h
-$(BUILDDIR)/backobj/back/be_callc_conly.o: alldefs.h global.h object.h
-$(BUILDDIR)/backobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/backobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/backobj/back/be_decompress.o: alldefs.h global.h object.h
 $(BUILDDIR)/backobj/back/be_decompress.o: symtab.h execute.h reswords.h
 $(BUILDDIR)/backobj/back/be_decompress.o: be_alloc.h
@@ -1056,9 +1059,11 @@ $(BUILDDIR)/backobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/backobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/backobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/backobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/backobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/backobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/backobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
+$(BUILDDIR)/backobj/back/be_main.o: be_w.h
 $(BUILDDIR)/backobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/backobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h
@@ -1096,9 +1101,6 @@ $(BUILDDIR)/libobj/back/be_alloc.o: be_alloc.h
 $(BUILDDIR)/libobj/back/be_callc.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_callc.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_callc.o: be_machine.h be_alloc.h
-$(BUILDDIR)/libobj/back/be_callc_conly.o: alldefs.h global.h object.h
-$(BUILDDIR)/libobj/back/be_callc_conly.o: symtab.h execute.h reswords.h
-$(BUILDDIR)/libobj/back/be_callc_conly.o: be_runtime.h be_machine.h
 $(BUILDDIR)/libobj/back/be_decompress.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_decompress.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_execute.o: alldefs.h global.h object.h symtab.h
@@ -1114,9 +1116,11 @@ $(BUILDDIR)/libobj/back/be_machine.o: execute.h reswords.h version.h
 $(BUILDDIR)/libobj/back/be_machine.o: be_runtime.h be_rterror.h be_main.h
 $(BUILDDIR)/libobj/back/be_machine.o: be_w.h be_symtab.h be_machine.h
 $(BUILDDIR)/libobj/back/be_machine.o: be_pcre.h pcre/pcre.h be_task.h
+$(BUILDDIR)/libobj/back/be_machine.o: be_alloc.h be_execute.h be_socket.h
 $(BUILDDIR)/libobj/back/be_main.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_main.o: execute.h reswords.h be_runtime.h
 $(BUILDDIR)/libobj/back/be_main.o: be_execute.h be_alloc.h be_rterror.h
+$(BUILDDIR)/libobj/back/be_main.o: be_w.h
 $(BUILDDIR)/libobj/back/be_pcre.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_pcre.o: execute.h reswords.h be_alloc.h
 $(BUILDDIR)/libobj/back/be_pcre.o: be_runtime.h be_pcre.h pcre/pcre.h

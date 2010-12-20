@@ -1,0 +1,17 @@
+~
+ver.dat
+build
+ex.err
+source/Makefile
+source/config.wat
+source/config.gnu
+bin/eui
+bin/euc
+bin/eutest
+bin/eudoc
+bin/creole
+bin/eub
+bin/eushroud
+bin/eubind
+bin/eu.a
+bin/eudbg.a

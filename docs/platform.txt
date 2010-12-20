@@ -77,7 +77,7 @@ statement with it.
 
 <eucode>
 switch platform() do
-    case WIN32 then
+    case WINDOWS then
        -- Windows code
     case LINUX then
        -- LINUX code
@@ -92,7 +92,7 @@ end switch
 Another way is to use parse-time evaluation using ifdefs.  
 
 <eucode>
-ifdef WIN32 then
+ifdef WINDOWS then
   -- Windows code
 elsifdef LINUX then
   -- LINUX code
@@ -156,16 +156,16 @@ add_code = {
     -- first int argument is at stack offset +4, 2nd int is at +8 
        #8B, #44, #24, #04,                  -- mov   eax, +4[esp]
        #03, #44, #24, #08,                  -- add   eax, +8[esp]
-       #C2, #00, #08 * (platform() = WIN32) -- ret 8  
+       #C2, #00, #08 * (platform() = WINDOWS) -- ret 8  
                                             -- pop 8 bytes off the stack
 }
 </eucode>
 
 This is machine code to be put into memory as an example from 
-##demo/callmach.ex##.  Here if ##platform() = WIN32## is true, then the code 
+##demo/callmach.ex##.  Here if ##platform() = WINDOWS## is true, then the code 
 will pop 8 bytes off of the stack, if not it will pop 0 bytes off of the stack.  
 This has to be done because of where the function call conventions are 
-implemented in the various compilers.  We use Watcom C for WIN32 and GCC for the 
+implemented in the various compilers.  We use Watcom C for WINDOWS and GCC for the 
 others.  Now if the programmer had put a non-existent symbol, such as ARCH64, the 
 parser would stop, point out the error, and the programmer would then fix it.
 
@@ -181,7 +181,7 @@ available open source code to produce an updated Euphoria version.
 The ##DOS32## platform was for computers 
 without //Windows// OS, and though people could still use the Euphoria binaries 
 built for this platform on //Windows//, it was slower than and lacked features 
-available on binaries built for the ##WIN32## platform.
+available on binaries built for the ##WINDOWS## platform.
 
 The binaries for this platform had support for low-level graphics and though 
 DOS was 16-bit, the Euphoria binaries for ##DOS32## used techniques that allowed 
@@ -192,9 +192,9 @@ three letters when creating a file.  You could not use the Windowing system even
 if your computer had //Windows//.  You were limited to full-sreen mode graphics and 
 the text console.
 
-=== The WIN32 Platform
+=== The WINDOWS Platform
 
-With the ##WIN32## platform, your programs can still use the 
+With the ##WINDOWS## platform, your programs can still use the 
 ##//text console//##.  Because most library routines work the same way on each 
 platform most text mode programs can be run using the console interpreter of any
 platform without any change.
@@ -205,7 +205,7 @@ handle calls directly into the DLLs.
 There are high-level graphics libraries for Direct3D and OpenGL available from 
 the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
 
-A console window will be created automatically when a WIN32 Euphoria program
+A console window will be created automatically when a WINDOWS Euphoria program
 first outputs something to the screen or reads from the keyboard.  If your 
 program is displaying a screen, you will also see a console window when you read
 standard input or write to standard output, even when these have been redirected
@@ -249,13 +249,13 @@ Programs translated by the translator for this platform will also pop up a
 new console whenever input is asked for our output is sent to the screen unless
 you specify the ##-CON## option.
 
-When running an interpreter or translator for the WIN32 platform, ##platform## 
-returns WIN32 and a parsetime branch (with ifdef/end ifdef) with ##WINDOWS## 
+When running an interpreter or translator for the WINDOWS platform, ##platform## 
+returns WINDOWS and a parsetime branch (with ifdef/end ifdef) with ##WINDOWS## 
 will be followed.
 
 
 
-==== High-Level WIN32 Programming
+==== High-Level WINDOWS Programming
 
 Thanks to **David Cuny**, **Derek Parnell**, **Judith Evans**
 and many others, there's a package called **Win32Lib** that
@@ -282,35 +282,35 @@ Win32Lib and Judith's IDE
 from the [[http://www.RapidEuphoria.com/archive.htm | Euphoria Web site]].
 
 
-==== Low-Level WIN32 Programming
+==== Low-Level WINDOWS Programming
 
-To allow access to WIN32 at a lower level, Euphoria
-provides a mechanism for calling any C function in any WIN32 API .dll file,
+To allow access to WINDOWS at a lower level, Euphoria
+provides a mechanism for calling any C function in any WINDOWS API .dll file,
 or indeed in any 32-bit Windows .dll file that you create or someone else
 creates. There is also a call-back mechanism that lets Windows call your
 Euphoria routines. Call-backs are necessary when you create a graphical
 user interface.
 
-To make full use of the WIN32 platform, you need documentation on 32-bit
-Windows programming, in particular the WIN32 Application Program Interface
+To make full use of the WINDOWS platform, you need documentation on 32-bit
+Windows programming, in particular the WINDOWS Application Program Interface
 (API), including the C structures defined by the API. There is a large
-WIN32.HLP file (c) Microsoft that is available with many programming tools
+WINDOWS.HLP file (c) Microsoft that is available with many programming tools
 for Windows. There are numerous books available on the
-subject of WIN32 programming for {{{C/C++}}}. You can adapt most of what you 
+subject of WINDOWS programming for {{{C/C++}}}. You can adapt most of what you 
 find
-in those books to the world of Euphoria programming for WIN32.
+in those books to the world of Euphoria programming for WINDOWS.
 A good book is **//{{{Programming Windows}}} by Charles Petzold//**.
 
-A WIN32 API Windows help file (8 Mb) can be downloaded from
+A WINDOWS API Windows help file (8 Mb) can be downloaded from
 ftp://ftp.borland.com/pub/delphi/techpubs/delphi2/win32.zip, Borland's
 Web site.
 
 === The Unix Platforms
 
-As with WIN32, you can write text on a console, or xterm window,
+As with WINDOWS, you can write text on a console, or xterm window,
 in multiple colors and at any line or column position.
 
-Just as in WIN32, you can call C routines in shared libraries
+Just as in WINDOWS, you can call C routines in shared libraries
 and C code can call back to your Euphoria routines.
 
 You can get a Euphoria 
@@ -350,7 +350,7 @@ will be followed.
 
 === Interfacing with C Code
 
-On WIN32 and Unix it's possible to interface Euphoria code with C code. Your 
+On WINDOWS and Unix it's possible to interface Euphoria code with C code. Your 
 Euphoria program can call C routines and read and write C variables. C routines 
 can even call ("callback") your Euphoria routines. The C code must reside in a 
 dynamic link or shared library. By interfacing with dynamic link libraries and 
@@ -415,7 +415,7 @@ You can examine a ##dll## file by right-clicking on it, and choosing
 "QuickView" (if it's on your system). You will see a list of all the C
 routines that the ##dll## exports.
 
-To find out which **.**dll file contains a particular WIN32 C function,
+To find out which **.**dll file contains a particular WINDOWS C function,
 run **Euphoria\demo\win32\dsearch.exw**
 
 ==== Accessing C Variables
@@ -454,7 +454,7 @@ atom p = allocate(16) -- size of "struct example"
 </eucode>
 
 The address that you get from [[:allocate]] is always at least 4-byte aligned.
-This is useful, since WIN32 structures are supposed to start on a
+This is useful, since WINDOWS structures are supposed to start on a
 4-byte boundary. Fields within a C structure that are 4-bytes or more in size
 must start on a 4-byte boundary in memory. 2-byte fields must start on a
 2-byte boundary. To achieve this you may have to leave small gaps within
@@ -585,7 +585,7 @@ routine that takes a single parameter. The single parameter is a pointer
 to a routine that takes 3 unsigned parameters - i.e. your Euphoria routine.
 
 In WATCOM C, "CALLBACK" is the same as "{{{__stdcall}}}".
-This is the calling convention that's used to call WIN32 API routines,
+This is the calling convention that's used to call WINDOWS API routines,
 and the C pointer to your Euphoria routine should be declared this way too,
 or you'll get an error when your Euphoria routine tries to return to
 your .DLL.

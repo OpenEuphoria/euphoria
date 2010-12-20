@@ -32,7 +32,7 @@ public integer
 	INETBSD  = 0, TNETBSD  = 0
 
 -- operating system:
-ifdef WIN32 then
+ifdef WINDOWS then
 	IWINDOWS = 1
 	TWINDOWS = 1
 
@@ -124,9 +124,9 @@ public function GetPlatformDefines(integer for_translator = 0)
 		if fh = -1 then
 			-- for some reason I can't open the file, so use the name instead.
  			if match("euiw", lower(lcmds[1])) != 0 then
- 				local_defines &= { "WIN32_GUI" }
+ 				local_defines &= { "GUI" }
  			else
- 				local_defines &= { "WIN32_CONSOLE" }
+ 				local_defines &= { "CONSOLE" }
  			end if
 		else
 			atom sk
@@ -158,26 +158,28 @@ public function GetPlatformDefines(integer for_translator = 0)
 				sk = 0
 			end if
 			if sk = 2 then
-				local_defines &= { "WIN32_GUI" }
+				local_defines &= { "GUI" }
 			elsif sk = 3 then
-				local_defines &= { "WIN32_CONSOLE" }
+				local_defines &= { "CONSOLE" }
 			else
-				local_defines &= { "WIN32_UNKNOWN" }
+				local_defines &= { "UNKNOWN" }
 			end if
 			close(fh)
 		end if
-	elsif (ILINUX and not for_translator) or (TLINUX and for_translator) then
-		local_defines &= {"UNIX", "LINUX"}
-	elsif (IOSX and not for_translator) or (TOSX and for_translator) then
-		local_defines &= {"UNIX", "BSD", "OSX"}
-	elsif (IOPENBSD and not for_translator) or (TOPENBSD and for_translator) then
-		local_defines &= { "UNIX", "BSD", "OPENBSD"}
-	elsif (INETBSD and not for_translator) or (TNETBSD and for_translator) then
-		local_defines &= { "UNIX", "BSD", "NETBSD"}
-	elsif (IBSD and not for_translator) or (TBSD and for_translator) then
-		local_defines &= {"UNIX", "BSD", "FREEBSD"}
+	else
+		local_defines = append( local_defines, "CONSOLE" )
+		if (ILINUX and not for_translator) or (TLINUX and for_translator) then
+			local_defines &= {"UNIX", "LINUX"}
+		elsif (IOSX and not for_translator) or (TOSX and for_translator) then
+			local_defines &= {"UNIX", "BSD", "OSX"}
+		elsif (IOPENBSD and not for_translator) or (TOPENBSD and for_translator) then
+			local_defines &= { "UNIX", "BSD", "OPENBSD"}
+		elsif (INETBSD and not for_translator) or (TNETBSD and for_translator) then
+			local_defines &= { "UNIX", "BSD", "NETBSD"}
+		elsif (IBSD and not for_translator) or (TBSD and for_translator) then
+			local_defines &= {"UNIX", "BSD", "FREEBSD"}
+		end if
 	end if
-
 	-- So the translator knows what to strip from defines if translating
 	-- to a different platform
 	return { "_PLAT_START" } & local_defines & { "_PLAT_STOP" }

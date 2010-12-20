@@ -172,10 +172,7 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
-#       &
-#       $(BUILDDIR)\$(OBJDIR)\memory.obj
 
 EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
@@ -188,7 +185,6 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
 
 EU_BACKEND_RUNNER_FILES = &
@@ -209,8 +205,6 @@ EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
 
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
 		 int.ex ec.ex backend.ex
-
-STDINCDIR = $(TRUNKDIR)/include/std
 
 DOCDIR = $(TRUNKDIR)\docs
 EU_DOC_SOURCE = &
@@ -553,6 +547,14 @@ $(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
+$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+$(BUILDDIR)\mkver.exe: mkver.c
+	owcc -o $@ $<
+
+$(BUILDDIR)\$(OBJDIR)\back\be_ver.h : $(BUILDDIR)\mkver.exe
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
@@ -717,7 +719,6 @@ $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
-$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG) 
 
 !ifdef PCRE_OBJECTS	
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
