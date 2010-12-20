@@ -539,7 +539,7 @@ $(MKVER): mkver.c
 	$(CC) -o $@ $<
 
 $(BUILDDIR)/$(OBJDIR)/back/be_ver.h: $(MKVER)
-	$(MKVER) $(HG) $(BUILDDIR)/ver.cache $@
+	$(MKVER) $(HG) $(BUILDDIR)/ver.cache $@ $(EREL_TYPE)$(RELEASE)
 
 ###############################################################################
 #

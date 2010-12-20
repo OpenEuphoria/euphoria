@@ -52,14 +52,14 @@ int get_version_info(char *cache_filename,
 }
 
 void put_version(const char *output_filename, const char *version,
-                 const char *date)
+                 const char *date, int is_dev )
 {
     FILE *ver_fh;
-    char version_short[SHORT_SIZE + 1];
+    char version_short[SHORT_SIZE + 6];
 
-	strncpy(version_short, version, SHORT_SIZE);
-	version_short[SHORT_SIZE] = 0;
-
+	strncpy(version_short, version, SHORT_SIZE + (5 * is_dev));
+	version_short[SHORT_SIZE + (5 * is_dev)] = 0;
+puts( version_short );
     ver_fh = fopen(output_filename, "w");
     if (ver_fh == NULL)
     {
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 
     if (argc < 4)
     {
-        fprintf(stderr, "Usage: %s hg-executable cache-file output-filename\n",
+        fprintf(stderr, "Usage: %s hg-executable cache-file output-filename [release]\n",
                 argv[0]);
         exit(1);
     }
@@ -107,13 +107,29 @@ int main(int argc, char **argv)
     had_old_info = get_version_info(cache_filename, old_ver, BUF_SIZE, old_date, BUF_SIZE);
 
 #if defined(__WATCOMC__) || defined(__MINGW32__)
-    snprintf(tmp, MAX_PATH,
-			 "\"%s\" parents --template {node}\\n{date^|shortdate} > %s",
-			 hg_executable, cache_filename);
+	if( argc == 4 ){
+		// dev build...include the rev
+		snprintf(tmp, MAX_PATH,
+				"\"%s\" parents --template {rev}:{node}\\n{date^|shortdate} > %s",
+				hg_executable, cache_filename);
+	}
+	else{
+		snprintf(tmp, MAX_PATH,
+				"\"%s\" parents --template {node}\\n{date^|shortdate} > %s",
+				hg_executable, cache_filename);
+	}
 #else
-	snprintf(tmp, MAX_PATH,
+	if( argc == 4 ){
+		// dev build...include the rev
+		snprintf(tmp, MAX_PATH,
+				"%s parents --template '{rev}:{node}\n{date|shortdate}' > %s",
+				hg_executable, cache_filename);
+	}
+	else{
+		snprintf(tmp, MAX_PATH,
 			 "%s parents --template '{node}\n{date|shortdate}' > %s",
 			 hg_executable, cache_filename);
+	}
 #endif
 
     if (system(tmp) != 0)
@@ -123,7 +139,7 @@ int main(int argc, char **argv)
          * leave the existing one alone... i.e. from a source-tarball?
          */
         if (has_be_ver(output_filename) == 0)
-            put_version(output_filename, "unknown", "unknown");
+            put_version(output_filename, "unknown", "unknown", argc == 4 );
 
         exit(0);
     }
@@ -139,7 +155,7 @@ int main(int argc, char **argv)
         had_old_info == 0 ||
         strncmp(new_ver, old_ver, BUF_SIZE) != 0)
     {
-        put_version(output_filename, new_ver, new_date);
+        put_version(output_filename, new_ver, new_date, argc == 4);
     }
 
     return 0;
