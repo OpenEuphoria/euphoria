@@ -14,9 +14,11 @@ bin/eushroud
 bin/eubind
 bin/eu.a
 bin/eudbg.a
+packaging/win32/euphoria-.*exe
 
 regex:
 ^build/.*
 ^build_mingw/.*
 ^source/build/.*
 ^source/build_mingw/.*
+.*/cleanbranch/.*
