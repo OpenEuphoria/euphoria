@@ -158,17 +158,18 @@ procedure init()
 	end if
 end procedure
 
-procedure main()
+procedure main( integer size )
 	integer iterations = aiterations
 	integer count
 	sequence flags
+	integer i2
 	for iter = 1 to iterations do
 		count = 0
-		flags = repeat(ON, SIZE)
-		for i = 2 to SIZE do
+		flags = repeat(ON, size)
+		for i = 2 to size do
 			if flags[i] then
-				integer i2 = i + i
-				for k = i2 to SIZE by i do
+				i2 = i + i
+				for k = i2 to size by i do
 					flags[k] = OFF
 				end for
 				count += 1
@@ -186,7 +187,7 @@ init()
 
 t = time()  -- start timer
     
-main()
+main( SIZE )
 
 t = time() - t -- end timer
 printf(1, "Count: %d, Largest: %d\ntime: %g\n", {acount, rfind(ON, aflags), t})  -- 1028
