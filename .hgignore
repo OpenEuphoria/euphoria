@@ -17,4 +17,5 @@ bin/eudbg.a
 
 regex:
 ^build/.*
+^build_mingw/.*
 ^source/build/.*
