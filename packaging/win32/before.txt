@@ -1,9 +1,3 @@
-CAUTION:
-
-This is a Release Candidate. This means that Euphoria may not yet be stable, it may
-crash and it may cause problems. This version of Euphoria is only for testing
-purposes.
-
 If you have previously installed Euphoria on your system, you may choose to install
 to the same directory. Your current Euphoria files will be saved in the
 "euphoria\backup" subdirectory.
