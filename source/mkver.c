@@ -65,7 +65,6 @@ int get_version_info(char *cache_filename,
 	tm_len = strftime(date, date_size, "%Y-%m-%d %H:%M:%S", timeinfo);
 	date[tm_len] = 0;
 
-
 	/*
 	 * Get the revision number
 	 */
