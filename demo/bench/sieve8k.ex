@@ -167,7 +167,8 @@ procedure main()
 		flags = repeat(ON, SIZE)
 		for i = 2 to SIZE do
 			if flags[i] then
-				for k = i + i to SIZE by i do
+				integer i2 = i + i
+				for k = i2 to SIZE by i do
 					flags[k] = OFF
 				end for
 				count += 1
