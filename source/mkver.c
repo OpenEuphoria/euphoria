@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifndef MAX_PATH
 #define MAX_PATH 1024
@@ -28,7 +29,10 @@ int get_version_info(char *cache_filename,
 {
     char buf[256];
     char *tmp;
-    FILE *ver_fh;
+	FILE *ver_fh;
+	time_t seconds;
+	struct tm * timeinfo;
+	size_t tm_len;
 
     ver_fh = fopen(cache_filename, "r");
     if (ver_fh == NULL)
@@ -44,22 +48,28 @@ int get_version_info(char *cache_filename,
     strncpy(version, buf, version_size);
 
     fgets(buf, BUF_SIZE, ver_fh);
-    strncpy(date, buf, date_size);
 
-    fclose(ver_fh);
+	/* convert seconds since epoch to a date/time format */
+	seconds = (time_t) atol(buf);
+
+	timeinfo = gmtime(&seconds);
+	tm_len = strftime(date, date_size, "%Y-%m-%d %H:%M:%S", timeinfo);
+	date[tm_len] = 0;
+
+	fclose(ver_fh);
 
     return 1;
 }
 
 void put_version(const char *output_filename, const char *version,
-                 const char *date, int is_dev )
+                 const char *date)
 {
     FILE *ver_fh;
-    char version_short[SHORT_SIZE + 6];
+	char version_short[SHORT_SIZE + 1];
 
-	strncpy(version_short, version, SHORT_SIZE + (5 * is_dev));
-	version_short[SHORT_SIZE + (5 * is_dev)] = 0;
-puts( version_short );
+	strncpy(version_short, version, SHORT_SIZE);
+	version_short[SHORT_SIZE] = 0;
+
     ver_fh = fopen(output_filename, "w");
     if (ver_fh == NULL)
     {
@@ -88,7 +98,7 @@ int main(int argc, char **argv)
 
     if (argc < 4)
     {
-        fprintf(stderr, "Usage: %s hg-executable cache-file output-filename [release]\n",
+        fprintf(stderr, "Usage: %s hg-executable cache-file output-filename\n",
                 argv[0]);
         exit(1);
     }
@@ -107,30 +117,16 @@ int main(int argc, char **argv)
     had_old_info = get_version_info(cache_filename, old_ver, BUF_SIZE, old_date, BUF_SIZE);
 
 #if defined(__WATCOMC__) || defined(__MINGW32__)
-	if( argc == 4 ){
-		// dev build...include the rev
-		snprintf(tmp, MAX_PATH,
-				"\"%s\" parents --template {rev}:{node}\\n{date^|shortdate} > %s",
-				hg_executable, cache_filename);
-	}
-	else{
-		snprintf(tmp, MAX_PATH,
-				"\"%s\" parents --template {node}\\n{date^|shortdate} > %s",
-				hg_executable, cache_filename);
-	}
-#else
-	if( argc == 4 ){
-		// dev build...include the rev
-		snprintf(tmp, MAX_PATH,
-				"%s parents --template '{rev}:{node}\n{date|shortdate}' > %s",
-				hg_executable, cache_filename);
-	}
-	else{
-		snprintf(tmp, MAX_PATH,
-			 "%s parents --template '{node}\n{date|shortdate}' > %s",
+    snprintf(tmp, MAX_PATH,
+			 "\"%s\" parents --template {node}\\n{date} > %s",
 			 hg_executable, cache_filename);
-	}
+#else
+    snprintf(tmp, MAX_PATH,
+			 "\"%s\" parents --template '{node}\\n{date}' > %s",
+			 hg_executable, cache_filename);
 #endif
+
+	printf("command = %s\n", tmp);
 
     if (system(tmp) != 0)
     {
@@ -139,7 +135,7 @@ int main(int argc, char **argv)
          * leave the existing one alone... i.e. from a source-tarball?
          */
         if (has_be_ver(output_filename) == 0)
-            put_version(output_filename, "unknown", "unknown", argc == 4 );
+            put_version(output_filename, "unknown", "unknown");
 
         exit(0);
     }
@@ -155,7 +151,7 @@ int main(int argc, char **argv)
         had_old_info == 0 ||
         strncmp(new_ver, old_ver, BUF_SIZE) != 0)
     {
-        put_version(output_filename, new_ver, new_date, argc == 4);
+        put_version(output_filename, new_ver, new_date);
     }
 
     return 0;

@@ -7,9 +7,25 @@ namespace info
 
 constant M_EU_INFO=75
 
-enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION, COMPILE_DATE, START_TIME
+enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION, REVISION_DATE, START_TIME
 
 constant version_info = machine_func(M_EU_INFO, {})
+
+--****
+-- === Build Type Constants
+--
+
+--**
+-- Is this build a developmental build?
+--
+
+public constant is_developmental = equal(version_info[VER_TYPE], "development")
+
+--**
+-- Is this build a release build?
+--
+
+public constant is_release = (is_developmental = 0)
 
 --****
 -- === Numeric Version Information
@@ -109,13 +125,29 @@ end function
 --**
 -- Get the compilation date of the hosting Euphoria
 --
+-- Parameters:
+--   * ##full## - Standard return value is a string formatted as ##CCYY-MM-DD##. However,
+--     if this is a development build or the ##full## parameter is TRUE (1), then
+--     the result will be formatted as ##CCYY-MM-DD HH:MM:SS##.
+--
 -- Returns:
---   A text **sequence** containing the YYYY-MM-DD formatted date
---   of when the executing Euphoria was built.
+--   A text **sequence** containing the commit date of the
+--   the associated SCM revision.
+--
+--   The date/time is UTC.
 --
 
-public function version_date()
-	return version_info[COMPILE_DATE]
+public function version_date(integer full = 0)
+	--
+	-- Date could be "unknown" if the version could not be determined in a very
+	-- rare case. Thus, we also check for length here.
+	--
+
+	if full or is_developmental or length(version_info[REVISION_DATE]) < 10 then
+		return version_info[REVISION_DATE]
+	end if
+
+	return version_info[REVISION_DATE][1..10]
 end function
 
 --****

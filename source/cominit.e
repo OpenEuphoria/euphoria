@@ -139,7 +139,7 @@ export procedure show_banner()
 		Windows, Using Managed Memory, 09df3eac3c44, 2010-12-22
 	*/
 
-	screen_output(STDERR, sprintf("%s v%s %s\n   %s, %s\n   Build Date: %s Rev: %s\n", {
+	screen_output(STDERR, sprintf("%s v%s %s\n   %s, %s\n   Revision Date: %s, Id: %s\n", {
 		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
 end procedure
 
