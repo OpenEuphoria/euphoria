@@ -175,8 +175,8 @@ parser would stop, point out the error, and the programmer would then fix it.
 This platform is no longer supported.  
 
 Those interested in writing DOS programs in Euphoria may use version 3.1
-downloadable from SourceForge. Interested DOS developers are welcome to use the 
-available open source code to produce an updated Euphoria version.
+downloadable from the original ~RapidEuphoria website:
+http://www.rapideuphoria.com/v20.htm.
 
 The ##DOS32## platform was for computers 
 without //Windows// OS, and though people could still use the Euphoria binaries 

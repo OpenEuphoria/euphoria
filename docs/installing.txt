@@ -74,18 +74,12 @@ invited to contribute their skills.
 
 
 You have access to the latest Euphoria source-code that the Developers are
-working on:
-
-:http://rapideuphoria.svn.sourceforge.net/
-
-You may browse, download archives, or use an SVN client (such as "Tortoise" on
-the //Windows// platform.)
+working on via the official OpenEuphoria Mercurial repository:
+http://scm.openeuphoria.org
 
 Binary files are called //Eubins//, and are automated "Nightly Builds" 
 produced from the latest code in the code repository:
-
-:http://openeuphoria.org/eubins/linux/
-!!zzzz should windows/osx builds be included??
+http://openeuphoria.org/eubins/
 
 A complete installation requires merging the original source files,
 and the contents of the eubins download. Then, the path to euphoria/bin
@@ -93,14 +87,8 @@ must be set and a cfg file must be written.
 
 For the adventurous only.
 
-
-
-
-
 %%output=post_install
 == Post Install
-
-
 
 The directory maps will help you locate the Euphoria executables, documentation,
 and sample programs.
