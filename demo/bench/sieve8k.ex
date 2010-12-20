@@ -134,10 +134,8 @@ without type_check
 include std/get.e
 include std/search.e
 include std/console.e as con
-integer SIZE = 8192 
-integer iterations = 8192
-integer count
-sequence flags
+integer SIZE = 8192, acount = 0, aiterations = 8192
+sequence aflags
 
 constant ON = 1, OFF = 0
 
@@ -148,33 +146,36 @@ procedure init()
 	if length(cmd) >= 3 then
 		arg = value(cmd[3])
 		if arg[1] = GET_SUCCESS then
-			iterations = arg[2]
+			aiterations = arg[2]
 		end if
 	end if
 	if length(cmd) >= 4 then
 		arg = value(cmd[4])
 		if arg[1] = GET_SUCCESS then
 			SIZE = arg[2]
+
 		end if
 	end if
 end procedure
 
 procedure main()
+	integer iterations = aiterations
+	integer count
+	sequence flags
 	for iter = 1 to iterations do
 		count = 0
 		flags = repeat(ON, SIZE)
 		for i = 2 to SIZE do
 			if flags[i] then
-				integer MAX = SIZE - i
-				integer k = i
-				while k <= MAX do
-					k += i
+				for k = i + i to SIZE by i do
 					flags[k] = OFF
-				end while
+				end for
 				count += 1
 			end if
 		end for
 	end for
+	acount = count
+	aflags = flags
 end procedure
 
 puts(1, "Prime Sieve Benchmark\n")
@@ -187,6 +188,6 @@ t = time()  -- start timer
 main()
 
 t = time() - t -- end timer
-printf(1, "Count: %d, Largest: %d\ntime: %g\n", {count, rfind(ON, flags), t})  -- 1028
+printf(1, "Count: %d, Largest: %d\ntime: %g\n", {acount, rfind(ON, aflags), t})  -- 1028
 con:maybe_any_key()
 
