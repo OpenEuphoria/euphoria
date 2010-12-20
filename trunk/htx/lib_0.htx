@@ -1,0 +1,1620 @@
+<_init_comment>
+<html>
+<head><title>Euphoria v3.1 Reference Manual Part II - Section 1 and 2</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+<_center><font color="#006633" size=+2><b>
+<br>
+                       Part II - Library Routines
+</b></font></_center>
+
+<_center><font color="#FF0099" size=+2>
+<br>
+                            1. Introduction
+</font></_center>
+<p>&nbsp;<br>
+
+ A large number of library routines are provided. Some are built right into
+ the interpreter, <font color="#993333"><b>ex.exe</b></font>,
+ <font color="#993333"><b>exw.exe</b></font> or
+ <font color="#993333"><b>exu</b></font>.
+ Others are written in Euphoria and you
+ must include one of the <b>.e</b> files in
+ <font color="#5500FF"><b>euphoria\include</b></font> to use them. Where this
+ is the case, the appropriate include file is noted in the "Syntax" part of
+ the description. Of course an include file need only be included once in your
+ program. The editor displays in magenta those routines that are built into
+ the interpreter, and require no include file. You can override the definition
+ of these built-in routines by defining your own routine with the same name.
+ You will get a suppressible warning if you do this.
+
+<p>
+ To indicate what kind of <font color="#993333"><b>object</b></font> may
+ be passed in and returned, the following prefixes are used:
+
+<p>
+<center><table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  name="x"
+  pos=10
+  description="a general <a href=\"refman_2.htm#1\">object</a>
+     (atom or sequence)"
+>
+
+<_3clist
+  name="s"
+  pos=10
+  description="a <a href=\"refman_2.htm#1\">sequence</a>"
+>
+
+<_3clist
+  name="a"
+  pos=10
+  description="an <a href=\"refman_2.htm#1\">atom</a>"
+>
+
+<_3clist
+  name="i"
+  pos=10
+  description="an <a href=\"refman_2.htm#integer\">integer</a>"
+>
+
+<_3clist
+  name="fn"
+  pos=10
+  description="an <a href=\"refman_2.htm#integer\">integer</a> used
+     as a file number"
+>
+
+<_3clist
+  name="st"
+  pos=10
+  description="a <a href=\"refman_2.htm#11\">string sequence</a>,
+     or <a href=\"refman_2.htm#char\">single-character atom</a>"
+>
+
+</table></center>
+
+<p>
+ Some routines are only available on one or two of the four platforms. 
+ This is noted
+ with "Platform: <font color="#CC3366"><b>DOS32</b></font>" or
+ "Platform: <font color="#CC3366"><b>WIN32</b></font>" or
+ "Platform: <font color="#CC3366"><b>Linux</b></font>" 
+ in the description
+ of the routine, and with (<font color="#CC3366"><b>DOS32</b></font>) or
+ (<font color="#CC3366"><b>WIN32</b></font>) or
+ (<font color="#CC3366"><b>Linux</b></font>) 
+ in some other places. Things that work on Linux can generally be assumed
+ to work on FreeBSD. The only exception is the mouse routines.
+
+<p>
+ A run-time error message will usually result if an illegal argument value
+ is passed to any of these routines.
+
+<p>
+<hr>
+<a name=2></a>
+<_center><font color="#FF0099" size=+2>
+<br>
+                    2. Routines by Application Area
+</font></_center>
+<p>
+
+<a name=predefined></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.1 Predefined Types</_dul>
+
+</font>
+<p>
+
+      As well as declaring variables with these types, you can also call them
+      just like ordinary functions, in order to test if a value is a certain
+      type.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_h_o.htm#integer"
+  name="integer"
+  description="test if an object is an integer"
+>
+
+<_3clist
+  href="lib_a_b.htm#atom"
+  name="atom"
+  description="test if an object is an atom"
+>
+
+<_3clist
+  href="lib_s_t.htm#sequence"
+  name="sequence"
+  description="test if an object is a sequence"
+>
+
+<_3clist
+  href="lib_h_o.htm#object"
+  name="object"
+  description="test if an object is an object (always true)"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=seq_manip></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.2 Sequence Manipulation</_dul>
+
+</font>
+<p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_h_o.htm#length"
+  name="length"
+  description="return the length of a sequence"
+>
+
+<_3clist
+  href="lib_p_r.htm#repeat"
+  name="repeat"
+  description="repeat an object n times to form a sequence of length n"
+>
+
+<_3clist
+  href="lib_p_r.htm#reverse"
+  name="reverse"
+  description="reverse a sequence"
+>
+
+<_3clist
+  href="lib_a_b.htm#append"
+  name="append"
+  description="add a new element to the end of a sequence"
+>
+
+<_3clist
+  href="lib_p_r.htm#prepend"
+  name="prepend"
+  description="add a new element to the beginning of a sequence"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=srch_srt></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.3 Searching and Sorting</_dul>
+
+</font>
+<p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_c_d.htm#compare"
+  name="compare"
+  description="compare two objects"
+>
+
+<_3clist
+  href="lib_e_g.htm#equal"
+  name="equal"
+  description="test if two objects are identical"
+>
+
+<_3clist
+  href="lib_e_g.htm#find"
+  name="find"
+  description="find an object in a sequence - start searching from element number 1"
+>
+<_3clist
+  href="lib_e_g.htm#find_from"
+  name="find_from"
+  description="find an object in a sequence - start searching from any element number"
+>
+
+<_3clist
+  href="lib_h_o.htm#match"
+  name="match"
+  description="find a sequence as a slice of another sequence - start searching from element number 1"
+>
+
+<_3clist
+  href="lib_h_o.htm#match_from"
+  name="match_from"
+  description="find a sequence as a slice of another sequence - start searching from any element number"
+>
+
+<_3clist
+  href="lib_s_t.htm#sort"
+  name="sort"
+  description="sort the elements of a sequence into ascending order"
+>
+
+<_3clist
+  href="lib_c_d.htm#custom_sort"
+  name="custom_sort"
+  description="sort the elements of a sequence based on a compare
+     function that you supply"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=pattern_m></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.4 Pattern Matching</_dul>
+
+</font>
+<p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_h_o.htm#lower"
+  name="lower"
+  description="convert an atom or sequence to lower case"
+>
+
+<_3clist
+  href="lib_u_z.htm#upper"
+  name="upper"
+  description="convert an atom or sequence to upper case"
+>
+
+<_3clist
+  href="lib_u_z.htm#wildcard_match"
+  name="wildcard_match"
+  description="match a pattern containing ? and * wildcards"
+>
+
+<_3clist
+  href="lib_u_z.htm#wildcard_file"
+  name="wildcard_file"
+  description="match a file name against a wildcard specification"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=math></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.5 Math</_dul>
+
+</font>
+<p>
+      These routines can be applied to individual atoms or to sequences of
+      values. See <a href="refman_2.htm#26">Part I - Core Language -
+      Operations on Sequences</a>.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_s_t.htm#sqrt"
+  name="sqrt"
+  description="calculate the square root of an object"
+>
+
+<_3clist
+  href="lib_p_r.htm#rand"
+  name="rand"
+  description="generate random numbers"
+>
+
+<_3clist
+  href="lib_s_t.htm#sin"
+  name="sin"
+  description="calculate the sine of an angle"
+>
+
+<_3clist
+  href="lib_a_b.htm#arcsin"
+  name="arcsin"
+  description="calculate the angle with a given sine"
+>
+
+<_3clist
+  href="lib_c_d.htm#cos"
+  name="cos"
+  description="calculate the cosine of an angle"
+>
+
+<_3clist
+  href="lib_a_b.htm#arccos"
+  name="arccos"
+  description="calculate the angle with a given cosine"
+>
+
+<_3clist
+  href="lib_s_t.htm#tan"
+  name="tan"
+  description="calculate the tangent of an angle"
+>
+
+<_3clist
+  href="lib_a_b.htm#arctan"
+  name="arctan"
+  description="calculate the arc tangent of a number"
+>
+
+<_3clist
+  href="lib_h_o.htm#log"
+  name="log"
+  description="calculate the natural logarithm"
+>
+
+<_3clist
+  href="lib_e_g.htm#floor"
+  name="floor"
+  description="round down to the nearest integer"
+>
+
+<_3clist
+  href="lib_p_r.htm#remainder"
+  name="remainder"
+  description="calculate the remainder when a number is divided by another"
+>
+
+<_3clist
+  href="lib_p_r.htm#power"
+  name="power"
+  description="calculate a number raised to a power"
+>
+
+<_3clist
+  href="lib_p_r.htm#PI"
+  name="PI"
+  description="the mathematical value PI (3.14159...)"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=bitw_logic></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.6 Bitwise Logical Operations</_dul>
+
+</font>
+<p>
+
+      These routines treat numbers as collections of binary bits,
+      and logical operations are performed on corresponding
+      bits in the binary representation of the numbers. There are
+      no routines for shifting bits left or right, but you can
+      achieve the same effect by multiplying or dividing by
+      powers of 2.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_a_b.htm#and_bits"
+  name="and_bits"
+  description="perform logical AND on corresponding bits"
+>
+
+<_3clist
+  href="lib_h_o.htm#or_bits"
+  name="or_bits"
+  description="perform logical OR on corresponding bits"
+>
+
+<_3clist
+  href="lib_u_z.htm#xor_bits"
+  name="xor_bits"
+  description="perform logical XOR on corresponding bits"
+>
+
+<_3clist
+  href="lib_h_o.htm#not_bits"
+  name="not_bits"
+  description="perform logical NOT on all bits"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=i_o></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.7 File and Device I/O</_dul>
+
+</font>
+<p>
+
+      To do input or output on a file or device you must first open the file
+      or device, then use the routines below to read or write to it, then close
+      the file or device. <a href="lib_h_o.htm#open">open()</a> will give you
+      a file number to use as the first argument of the other I/O routines.
+      Certain files/devices are opened for you automatically (as text files):
+<dl>
+<dl>
+<dt>
+             0 - standard input
+<dt>
+             1 - standard output
+<dt>
+             2 - standard error
+</dl>
+</dl>
+
+      Unless you redirect them on the 
+      <a href="refman_1.htm#3">command-line</a>, standard input comes from
+      the keyboard, standard output and standard error go to the screen. When
+      you write something to the screen it is written immediately without
+      buffering. If you write to a file, your characters are put into a buffer
+      until there are enough of them to write out efficiently. When you 
+      <a href=lib_c_d.htm#close>close()</a>
+      or <a href=lib_e_g.htm#flush>flush()</a> the file or device, any 
+      remaining characters are written out. 
+      Input from
+      files is also buffered. When your program terminates, any files that are
+      still open will be closed for you automatically.
+
+<dl>
+<dt>
+ <b><font color="#006633"><_sul>Note:</_sul></font></b>
+
+<dd>
+      If a program (written in Euphoria or any other language) has a
+      file open for writing, and you are forced to reboot your computer for
+      any reason, you should immediately run <b>scandisk</b> to repair any
+      damage to the file system that may have occurred.
+</dl>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_h_o.htm#open"
+  name="open"
+  description="open a file or device"
+>
+
+<_3clist
+  href="lib_c_d.htm#close"
+  name="close"
+  description="close a file or device"
+>
+
+<_3clist
+  href="lib_e_g.htm#flush"
+  name="flush"
+  description="flush out buffered data to a file or device"
+>
+
+<_3clist
+  href="lib_h_o.htm#lock_file"
+  name="lock_file"
+  description="lock a file or device"
+>
+
+<_3clist
+  href="lib_u_z.htm#unlock_file"
+  name="unlock_file"
+  description="unlock a file or device"
+>
+
+<_3clist
+  href="lib_p_r.htm#print"
+  name="print"
+  description="<a name=print></a>print a Euphoria
+     object on one line, with braces and commas {,,} to show the structure"
+>
+
+<_3clist
+  href="lib_p_r.htm#pretty_print"
+  name="pretty_print"
+  description="<a name=pretty_print></a>print a Euphoria
+     object in a nice readable form, using multiple lines
+     and appropriate indentation"
+>
+
+<_3clist
+  href="lib_a_b.htm#?"
+  name="? x"
+  description="<a name=questn></a>shorthand for print(1, x)"
+>
+
+<_3clist
+  href="lib_s_t.htm#sprint"
+  name="sprint"
+  description="return a printed Euphoria object as a string sequence"
+>
+
+<_3clist
+  href="lib_p_r.htm#printf"
+  name="printf"
+  description="formatted print to a file or device"
+>
+
+<_3clist
+  href="lib_s_t.htm#sprintf"
+  name="sprintf"
+  description="formatted print returned as a string sequence"
+>
+
+<_3clist
+  href="lib_p_r.htm#puts"
+  name="puts"
+  description="output a string sequence to a file or device"
+>
+
+<_3clist
+  href="lib_e_g.htm#getc"
+  name="getc"
+  description="read the next character from a file or device"
+>
+
+<_3clist
+  href="lib_e_g.htm#gets"
+  name="gets"
+  description="<a name=gets></a>read the next line from a file or device"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_bytes"
+  name="get_bytes"
+  description="<a name=get_bytes></a>read the next n bytes
+     from a file or device"
+>
+
+<_3clist
+  href="lib_p_r.htm#prompt_string"
+  name="prompt_string"
+  description="prompt the user to enter a string"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_key"
+  name="get_key"
+  description="<a name=get_key></a>check for key
+     pressed by the user, don't wait"
+>
+
+<_3clist
+  href="lib_u_z.htm#wait_key"
+  name="wait_key"
+  description="wait for user to press a key"
+>
+
+<_3clist
+  href="lib_e_g.htm#get"
+  name="get"
+  description="read the representation of any Euphoria object from a file"
+>
+
+<_3clist
+  href="lib_p_r.htm#prompt_number"
+  name="prompt_number"
+  description="prompt the user to enter a number"
+>
+
+<_3clist
+  href="lib_u_z.htm#value"
+  name="value"
+  description="read the representation of any Euphoria object from a string"
+>
+
+<_3clist
+  href="lib_s_t.htm#seek"
+  name="seek"
+  description="move to any byte position within an open file"
+>
+
+<_3clist
+  href="lib_u_z.htm#where"
+  name="where"
+  description="report the current byte position in an open file"
+>
+
+<_3clist
+  href="lib_c_d.htm#current_dir"
+  name="current_dir"
+  description="return the name of the current directory"
+>
+
+<_3clist
+  href="lib_c_d.htm#chdir"
+  name="chdir"
+  description="change to a new current directory"
+>
+
+<_3clist
+  href="lib_c_d.htm#dir"
+  name="dir"
+  description="return complete info on all files in a directory"
+>
+
+<_3clist
+  href="lib_u_z.htm#walk_dir"
+  name="walk_dir"
+  description="recursively walk through all files in a directory"
+>
+
+<_3clist
+  href="lib_a_b.htm#allow_break"
+  name="allow_break"
+  description="allow control-c/control-Break to terminate your program or not"
+>
+
+<_3clist
+  href="lib_c_d.htm#check_break"
+  name="check_break"
+  description="check if user has pressed control-c or control-Break"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=mouse_spt></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.8 Mouse Support (DOS32 and Linux)</_dul>
+
+</font>
+<p>
+
+<b>Note:</b> On Windows XP, if you want the DOS mouse
+to work in a (non-full-screen) window, you must disable QuickEdit mode
+in the Properties for the DOS Window. 
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_e_g.htm#get_mouse"
+  name="get_mouse"
+  description="return mouse \"events\" (clicks, movements)"
+>
+
+<_3clist
+  href="lib_h_o.htm#mouse_events"
+  name="mouse_events"
+  description="select mouse events to watch for"
+>
+
+<_3clist
+  href="lib_h_o.htm#mouse_pointer"
+  name="mouse_pointer"
+  description="display or hide the mouse pointer"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=op_sys></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.9 Operating System</_dul>
+
+</font>
+<p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_s_t.htm#time"
+  name="time"
+  description="number of seconds since a fixed point in the past"
+>
+
+<_3clist
+  href="lib_s_t.htm#tick_rate"
+  name="tick_rate"
+  description="set the number of clock ticks per second (DOS32)"
+>
+
+<_3clist
+  href="lib_c_d.htm#date"
+  name="date"
+  description="current year, month, day, hour, minute, second etc."
+>
+
+<_3clist
+  href="lib_c_d.htm#command_line"
+  name="command_line"
+  description="command-line used to run this program"
+>
+
+<_3clist
+  href="lib_e_g.htm#getenv"
+  name="getenv"
+  description="get value of an environment variable"
+>
+
+<_3clist
+  href="lib_s_t.htm#system"
+  name="system"
+  description="execute an operating system command line"
+>
+
+<_3clist
+  href="lib_s_t.htm#system_exec"
+  name="system_exec"
+  description="execute a program and get its exit code"
+>
+
+<_3clist
+  href="lib_a_b.htm#abort"
+  name="abort"
+  description="terminate execution"
+>
+
+<_3clist
+  href="lib_s_t.htm#sleep"
+  name="sleep"
+  description="suspend execution for a period of time"
+>
+
+<_3clist
+  href="lib_p_r.htm#platform"
+  name="platform"
+  description="find out which operating system are we running on"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=machine_dep></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.10 Special Machine-Dependent Routines</_dul>
+
+</font>
+<p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_h_o.htm#machine_func"
+  name="machine_func"
+  description="specialized internal operations with a return value"
+>
+
+<_3clist
+  href="lib_h_o.htm#machine_proc"
+  name="machine_proc"
+  description="specialized internal operations with no return value"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=debugging></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.11 Debugging</_dul>
+
+</font>
+<p>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_s_t.htm#trace"
+  name="trace"
+  description="dynamically turns tracing on or off"
+>
+
+<_3clist
+  href="lib_p_r.htm#profile"
+  name="profile"
+  description="dynamically turns profiling on or off"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=gr_sound></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.12 Graphics & Sound</_dul>
+
+</font>
+<p>
+
+      The following routines let you display information on the screen. 
+      In DOS, the
+      PC screen can be placed into one of many graphics modes. See the top
+      of <font color="#5500FF"><b>include\graphics.e</b></font> for a
+      description of the modes. <b>There are two basic types of graphics mode
+      available.</b> <font color="#993333"><_bq>Text</_bq> <b>modes</b></font>
+      divide the screen up into lines, where each line has a certain number
+      of characters.
+      <font color="#993333"><_bq>Pixel-graphics</_bq> <b>modes</b></font>
+      divide the screen up into many rows of dots, or "pixels". Each pixel
+      can be a different color. In text modes you can display text only,
+      with the choice of a foreground and a background
+      color for each character. In pixel-graphics modes you can display lines,
+      circles, dots, and also text. Any pixels that would be off the screen
+      are safely clipped out of the image.
+
+<p>
+      For DOS32 we've included a routine for making sounds on your PC speaker.
+      To make more sophisticated sounds, get the <b>Sound Blaster</b> library
+      developed by <b>Jacques Deschenes</b>. It's available on the
+      <a href="http://www.RapidEuphoria.com">Euphoria Web page</a>.
+
+<p>
+      <_sul><font color="#006633"><b>The following routines work in all
+      text and pixel-graphics modes:</b></font></_sul>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_c_d.htm#clear_screen"
+  name="clear_screen"
+  pos=22
+  description="clear the screen"
+>
+
+<_3clist
+  href="lib_p_r.htm#position"
+  name="position"
+  pos=22
+  description="set cursor line and column"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_position"
+  name="get_position"
+  pos=22
+  description="return cursor line and column"
+>
+
+<_3clist
+  href="lib_e_g.htm#graphics_mode"
+  name="graphics_mode"
+  pos=22
+  description="select a new pixel-graphics or text mode (DOS32)"
+>
+
+<_3clist
+  href="lib_u_z.htm#video_config"
+  name="video_config"
+  pos=22
+  description="return parameters of current mode"
+>
+
+<_3clist
+  href="lib_s_t.htm#scroll"
+  name="scroll"
+  pos=22
+  description="scroll text up or down"
+>
+
+<_3clist
+  href="lib_u_z.htm#wrap"
+  name="wrap"
+  pos=22
+  description="control line wrap at right edge of screen"
+>
+
+<_3clist
+  href="lib_s_t.htm#text_color"
+  name="text_color"
+  pos=22
+  description="set foreground text color"
+>
+
+<_3clist
+  href="lib_a_b.htm#bk_color"
+  name="bk_color"
+  pos=22
+  description="set background color"
+>
+
+<_3clist
+  href="lib_p_r.htm#palette"
+  name="palette"
+  pos=22
+  description="change color for one color number (DOS32)"
+>
+
+<_3clist
+  href="lib_a_b.htm#all_palette"
+  name="all_palette"
+  pos=22
+  description="change color for all color numbers (DOS32)"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_all_palette"
+  name="get_all_palette"
+  pos=22
+  description="get the palette values for all colors (DOS32)"
+>
+
+<_3clist
+  href="lib_p_r.htm#read_bitmap"
+  name="read_bitmap"
+  pos=22
+  description="read a bitmap (.bmp) file and return a palette and
+     a 2-d sequence of pixels"
+>
+
+<_3clist
+  href="lib_s_t.htm#save_bitmap"
+  name="save_bitmap"
+  pos=22
+  description="create a bitmap (.bmp) file, given a palette and a
+     2-d sequence of pixels"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_active_page"
+  name="get_active_page"
+  pos=22
+  description="return the page currently being written to (DOS32)"
+>
+
+<_3clist
+  href="lib_s_t.htm#set_active_page"
+  name="set_active_page"
+  pos=22
+  description="change the page currently being written to (DOS32)"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_display_page"
+  name="get_display_page"
+  pos=22
+  description="return the page currently being displayed (DOS32)"
+>
+
+<_3clist
+  href="lib_s_t.htm#set_display_page"
+  name="set_display_page"
+  pos=22
+  description="change the page currently being displayed (DOS32)"
+>
+
+<_3clist
+  href="lib_s_t.htm#sound"
+  name="sound"
+  pos=22
+  description="make a sound on the PC speaker (DOS32)"
+>
+
+</table>
+
+<p>
+      <_sul><font color="#006633"><b>The following routines work in text
+      modes only:</b></font></_sul>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_c_d.htm#cursor"
+  name="cursor"
+  pos=24
+  description="select cursor shape"
+>
+
+<_3clist
+  href="lib_s_t.htm#text_rows"
+  name="text_rows"
+  pos=24
+  description="set number of lines on text screen"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_screen_char"
+  name="get_screen_char"
+  pos=24
+  description="get one character from the screen"
+>
+
+<_3clist
+  href="lib_p_r.htm#put_screen_char"
+  name="put_screen_char"
+  pos=24
+  description="put one or more characters on the screen"
+>
+
+<_3clist
+  href="lib_s_t.htm#save_text_image"
+  name="save_text_image"
+  pos=24
+  description="save a rectangular region from a text screen"
+>
+
+<_3clist
+  href="lib_c_d.htm#display_text_image"
+  name="display_text_image"
+  pos=24
+  description="display an image on the text screen"
+>
+
+</table>
+
+<p>
+      <_sul><font color="#006633"><b>The following routines work in
+      pixel-graphics modes only (DOS32):</b></font></_sul>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_p_r.htm#pixel"
+  name="pixel"
+  description="set color of a pixel or set of pixels"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_pixel"
+  name="get_pixel"
+  description="read color of a pixel or set of pixels"
+>
+
+<_3clist
+  href="lib_c_d.htm#draw_line"
+  name="draw_line"
+  description="connect a series of graphics points with a line"
+>
+
+<_3clist
+  href="lib_p_r.htm#polygon"
+  name="polygon"
+  description="draw an n-sided figure"
+>
+
+<_3clist
+  href="lib_e_g.htm#ellipse"
+  name="ellipse"
+  description="draw an ellipse or circle"
+>
+
+<_3clist
+  href="lib_s_t.htm#save_screen"
+  name="save_screen"
+  description="save the screen to a bitmap (.bmp) file"
+>
+
+<_3clist
+  href="lib_s_t.htm#save_image"
+  name="save_image"
+  description="save a rectangular region from a pixel-graphics screen"
+>
+
+<_3clist
+  href="lib_c_d.htm#display_image"
+  name="display_image"
+  description="display an image on the pixel-graphics screen"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=m_level_i></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.13 Machine Level Interface</_dul>
+
+</font>
+<p>
+
+      We've grouped here a number of routines that you can use to access your
+      machine at a low-level. With this low-level machine interface you can
+      read and write to memory. You can also set up your own 386+ machine
+      language routines and call them.
+
+<p>
+      Some of the routines listed below are unsafe, in the sense that Euphoria
+      can't protect you if you use them incorrectly. You could crash your
+      program or even your system. Under DOS32, if you reference a bad memory
+      address it will often be safely caught by the CauseWay DOS extender, and
+      you'll get an error message on the screen plus a dump of machine-level
+      information in the file <font color="#993333"><b>cw.err</b></font>.
+      Under WIN32, the operating system will usually pop up a termination box 
+      giving a diagnostic message plus register information. Under Linux
+      you'll typically get a segmentation violation.
+
+<dl>
+<dt>
+<a name=safe></a>
+<b><font color="#006633"><_sul>Note:</_sul></font></b>
+
+<dd>
+      To assist programmers in debugging code involving these unsafe routines,
+      we have supplied <font color="#5500FF"><b>safe.e</b></font>, an
+      alternative to <font color="#5500FF"><b>machine.e</b></font>. If you copy
+      <font color="#5500FF"><b>euphoria\include\safe.e</b></font> into the directory
+      containing your program, and you rename <font color="#5500FF">
+      <b>safe.e</b></font> as <font color="#5500FF"><b>machine.e</b></font> 
+      in that directory, your program will run using safer 
+      (but slower) versions of these low-level
+      routines. <font color="#5500FF"><b>safe.e</b></font> can catch many
+      errors, such as poking into a bad memory location.
+      See the comments at the top of safe.e for instructions on
+      how to use it and how to configure it optimally for your program. 
+</dl>
+
+<p>
+      These machine-level-interface routines are important because they
+      allow Euphoria programmers
+      to access low-level features of the hardware and operating system.
+      For some applications this is essential.
+
+<p>
+      Machine code routines can be written by hand, or taken from the
+      disassembled output of a compiler for C or some other language.
+      Pete Eberlein has written a "mini-assembler" for use with Euphoria.
+      See the <a href="http://www.RapidEuphoria.com/">Archive</a>.
+      Remember that your machine code will be running in 32-bit protected
+      mode. See <font color="#5500FF"><b>demo\callmach.ex</b></font>
+      for an example.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_p_r.htm#peek"
+  name="peek"
+  description="read one or more bytes from memory"
+>
+
+<_3clist
+  href="lib_p_r.htm#peek4s"
+  name="peek4s"
+  description="read 4-byte signed values from memory"
+>
+
+<_3clist
+  href="lib_p_r.htm#peek4u"
+  name="peek4u"
+  description="read 4-byte unsigned values from memory"
+>
+
+<_3clist
+  href="lib_p_r.htm#poke"
+  name="poke"
+  description="write one or more bytes to memory"
+>
+
+<_3clist
+  href="lib_p_r.htm#poke4"
+  name="poke4"
+  description="write 4-byte values into memory"
+>
+
+<_3clist
+  href="lib_h_o.htm#mem_copy"
+  name="mem_copy"
+  description="copy a block of memory"
+>
+
+<_3clist
+  href="lib_h_o.htm#mem_set"
+  name="mem_set"
+  description="set a block of memory to a value"
+>
+
+<_3clist
+  href="lib_c_d.htm#call"
+  name="call"
+  description="call a machine language routine"
+>
+
+<_3clist
+  href="lib_c_d.htm#dos_interrupt"
+  name="dos_interrupt"
+  description="call a DOS software interrupt routine (DOS32)"
+>
+
+<_3clist
+  href="lib_a_b.htm#allocate"
+  name="allocate"
+  description="allocate a block of memory"
+>
+
+<_3clist
+  href="lib_e_g.htm#free"
+  name="free"
+  description="deallocate a block of memory"
+>
+
+<_3clist
+  href="lib_a_b.htm#allocate_low"
+  name="allocate_low"
+  description="allocate a block of low memory (address less than 1Mb) (DOS32)"
+>
+
+<_3clist
+  href="lib_e_g.htm#free_low"
+  name="free_low"
+  description="free a block allocated with allocate_low (DOS32)"
+>
+
+<_3clist
+  href="lib_a_b.htm#allocate_string"
+  name="allocate_string"
+  description="allocate a string of characters with 0 terminator"
+>
+
+<_3clist
+  href="lib_p_r.htm#register_block"
+  name="register_block"
+  description="register an externally-allocated block of memory"
+>
+
+<_3clist
+  href="lib_u_z.htm#unregister_block"
+  name="unregister_block"
+  description="unregister an externally-allocated block of memory"
+>
+
+<_3clist
+  href="lib_e_g.htm#get_vector"
+  name="get_vector"
+  description="return address of interrupt handler (DOS32)"
+>
+
+<_3clist
+  href="lib_s_t.htm#set_vector"
+  name="set_vector"
+  description="set address of interrupt handler (DOS32)"
+>
+
+<_3clist
+  href="lib_h_o.htm#lock_memory"
+  name="lock_memory"
+  description="ensure that a region of memory will never be swapped out (DOS32)"
+>
+
+<_3clist
+  href="lib_h_o.htm#int_to_bytes"
+  name="int_to_bytes"
+  description="convert an integer to 4 bytes"
+>
+
+<_3clist
+  href="lib_a_b.htm#bytes_to_int"
+  name="bytes_to_int"
+  description="convert 4 bytes to an integer"
+>
+
+<_3clist
+  href="lib_h_o.htm#int_to_bits"
+  name="int_to_bits"
+  description="convert an integer to a sequence of bits"
+>
+
+<_3clist
+  href="lib_a_b.htm#bits_to_int"
+  name="bits_to_int"
+  description="convert a sequence of bits to an integer"
+>
+
+<_3clist
+  href="lib_a_b.htm#atom_to_float64"
+  name="atom_to_float64"
+  description="convert an atom, to a sequence of 8 bytes in IEEE 64-bit
+     floating-point format"
+>
+
+<_3clist
+  href="lib_a_b.htm#atom_to_float32"
+  name="atom_to_float32"
+  description="convert an atom, to a sequence of 4 bytes in IEEE 32-bit
+     floating-point format"
+>
+
+<_3clist
+  href="lib_e_g.htm#float64_to_atom"
+  name="float64_to_atom"
+  description="convert a sequence of 8 bytes in IEEE 64-bit floating-point
+     format, to an atom"
+>
+
+<_3clist
+  href="lib_e_g.htm#float32_to_atom"
+  name="float32_to_atom"
+  description="convert a sequence of 4 bytes in IEEE 32-bit floating-point
+     format, to an atom"
+>
+
+<_3clist
+  href="lib_s_t.htm#set_rand"
+  name="set_rand"
+  description="set the random number generator so it will generate a
+     repeatable series of random numbers"
+>
+
+<_3clist
+  href="lib_u_z.htm#use_vesa"
+  name="use_vesa"
+  description="force the use of the VESA graphics standard (DOS32)"
+>
+
+<_3clist
+  href="lib_c_d.htm#crash_file"
+  name="crash_file"
+  description="specify the file for writing error diagnostics 
+     if Euphoria detects an error in your program."
+>
+
+<_3clist
+  href="lib_c_d.htm#crash_message"
+  name="crash_message"
+  description="specify a message to be printed if Euphoria detects an error
+     in your program"
+>
+
+<_3clist
+  href="lib_c_d.htm#crash_routine"
+  name="crash_routine"
+  description="specify a routine to be called if Euphoria detects an error
+     in your program"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=dyn_call></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.14 Dynamic Calls</_dul>
+
+</font>
+<p>
+
+      These routines let you call Euphoria procedures and functions using a
+      unique integer known as a
+      <font color="#993333"><b>routine identifier</b></font>, rather than by
+      specifying the name of the routine.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_p_r.htm#routine_id"
+  name="routine_id"
+  description="get a unique identifying number for a Euphoria routine"
+>
+
+<_3clist
+  href="lib_c_d.htm#call_proc"
+  name="call_proc"
+  description="call a Euphoria procedure using a routine id"
+>
+
+<_3clist
+  href="lib_c_d.htm#call_func"
+  name="call_func"
+  description="call a Euphoria function using a routine id"
+>
+
+</table>
+
+<p>
+<hr>
+
+<a name=call_c_func></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.15 Calling C Functions (WIN32 and Linux)</_dul>
+
+</font>
+<p>
+
+ See
+ <a class="blue" href="platform.htm#win32plat"><b>platform.doc</b>
+ </a> for a description of WIN32 and Linux programming in Euphoria.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_h_o.htm#open_dll"
+  name="open_dll"
+  description="open a Windows dynamic link library (.dll file) 
+  or Linux shared library (.so file)"
+>
+
+<_3clist
+  href="lib_c_d.htm#define_c_proc"
+  name="define_c_proc"
+  description="define a C function that is VOID (no value returned), or
+     whose value your program will ignore"
+>
+
+<_3clist
+  href="lib_c_d.htm#define_c_func"
+  name="define_c_func"
+  description="define a C function that returns a value that your program
+     will use"
+>
+
+<_3clist
+  href="lib_c_d.htm#define_c_var"
+  name="define_c_var"
+  description="get the memory address of a C variable."
+>
+
+<_3clist
+  href="lib_c_d.htm#c_proc"
+  name="c_proc"
+  description="call a C function, ignoring any return value"
+>
+
+<_3clist
+  href="lib_c_d.htm#c_func"
+  name="c_func"
+  description="call a C function and get the return value"
+>
+
+<_3clist
+  href="lib_c_d.htm#call_back"
+  name="call_back"
+  description="get a 32-bit machine address for a Euphoria routine for use
+     as a call-back address"
+>
+
+<_3clist
+  href="lib_h_o.htm#message_box"
+  name="message_box"
+  description="pop up a small window to get a Yes/No/Cancel response from
+     the user"
+>
+
+<_3clist
+  href="lib_e_g.htm#free_console"
+  name="free_console"
+  description="delete the console text window"
+>
+
+<_3clist
+  href="lib_h_o.htm#instance"
+  name="instance"
+  description="get the instance handle for the current program"
+>
+
+</table>
+
+
+<p>
+<hr>
+
+<a name=tasking></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.16 Multitasking</_dul>
+</font>
+<p>
+This collection of routines lets you create multiple, independent
+tasks. Each task has its own current statement being executed,
+its own subroutine call stack, and its own set of private variables.
+The local and global variables of a program are shared amongst all tasks.
+When a task calls task_yield(), it is suspended, and the Euphoria scheduler 
+decides which task to execute next. 
+<p>
+The Language War demo program, lw.ex, makes heavy use of tasks to 
+create a simulated battle involving numerous independently 
+moving ships, torpedos, phasors etc. See also the taskwire.exw 
+Windows demo program, and the news.exu demo for Linux and FreeBSD.
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_s_t.htm#task_clock_start"
+  name="task_clock_start"
+  description="restart the scheduler's clock"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_clock_stop"
+  name="task_clock_stop"
+  description="stop the scheduler's clock"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_create"
+  name="task_create"
+  description="create a new task"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_list"
+  name="task_list"
+  description="get a list of all tasks"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_schedule"
+  name="task_schedule"
+  description="schedule a task for execution"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_self"
+  name="task_self"
+  description="return the task id of the current task"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_status"
+  name="task_status"
+  description="the current status (active, suspended, terminated) of a task"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_suspend"
+  name="task_suspend"
+  description="Suspend a task."
+>
+
+<_3clist
+  href="lib_s_t.htm#task_yield"
+  name="task_yield"
+  description="Yield control, so the scheduler can pick a new task to run."
+>
+
+</table>
+
+<_continue
+  href="lib_a_b.htm"
+  name="3. Alphabetical Listing of All Routines, From A to B"
+>
+
+
+</_width>
+</body>
+</html>

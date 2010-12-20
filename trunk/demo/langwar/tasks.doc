@@ -1,0 +1,133 @@
+           
+           Multitasking in Language War
+           ----------------------------
+           
+ Language War (DOS version) makes very good use of the multitasking feature 
+ introduced with Euphoria 3.0. At any one time there are typically a 
+ couple of dozen active tasks, orchestrated by the Euphoria task scheduler. 
+ The nice thing is that each task can be developed independently, and 
+ needn't be too concerned about what other tasks may be running.
+
+ Here is a summary of the tasks that are created during the game.
+ These all run in parallel with each other. The Euphoria scheduler 
+ decides which task to run next. Tasks "yield" cooperatively at safe points 
+ when they are ready to let another task run. All tasks are "real-time" tasks,
+ except for task_video_save, which is a "time-shared" task.
+ 
+ The first group of tasks are active pretty much throughout the game,
+ and there is at most one instance of each active at a time:
+ 
+   * task_emove
+  
+     Moves the "Euphoria" ship along on the screen.
+     The time interval between invocations of this task
+     depends on the warp speed that the "Euphoria" is moving.
+
+   * task_keyb 
+ 
+     Runs every fraction of a second. It checks for keyboard input
+     from the user, and processes any completed commands.
+   
+   * task_life
+    
+     Subtracts a bit of "life support" energy from the Euphoria ship
+     at regular intervals.
+   
+   * task_bstat
+    
+     Periodically switches the status of the Basic ships between
+     TRUCE, HOSTILE and CLOAKING.
+   
+   * task_enter
+    
+     Periodically causes an enemy ship to enter the current quadrant
+     from a neighboring quadrant.
+   
+   * task_fire
+   
+     Periodically causes an enemy ship to fire on the Euphoria or another
+     ship.
+   
+   * task_move
+ 
+     Periodically causes an enemy ship to move within the current quadrant.
+ 
+   * task_docking
+    
+     Activated when the Euphoria bumps into a planet or base. It manages
+     the docking progress indicator.
+
+   * task_message
+ 
+     Processes notification messages about damage etc. Makes sure
+     that messages are displayed in an orderly way, with a reasonable
+     time delay before the next message appears, thus ensuring readability.
+   
+   * task_sound_effect
+   
+     Plays sound effects which consist of series of short tones with
+     specified pitches and durations. While each tone is playing, 
+     other tasks can run.
+   
+   * task_dead
+    
+     Clears dead ships off the screen, after they've been displayed for 
+     a while.
+   
+   * task_damage_report
+   
+     Counts down the various forms of damage and updates the damage
+     report display.
+   
+   * task_gquad
+ 
+     Periodically updates information about the current quadrant,
+     as displayed on the galaxy scan.
+   
+   * task_video_snapshot
+   
+     Periodically takes a picture (snapshot) of the screen, 
+     and stores it in a queue.
+   
+   * task_video_save (time_shared)
+   
+     When no other tasks are ready to run, this time-shared task fills in the
+     gaps, by processing the queue of video snapshots, compressing them, 
+     and writing them to disk. On any reasonably-fast machine there will be 
+     plenty of time available to avoid an unbounded build-up of the 
+     snapshot queue. (Profiling has shown that most of the time, control 
+     rests in the Euphoria scheduler, as it spins its wheels, waiting to
+     activate the next real-time task.)
+ 
+ The second group of tasks are created dynamically as the need arises,
+ and there can be multiple instances of each one, running in parallel.
+ For example, there might be two or three phasors being drawn on the screen, 
+ while a couple of torpedos are moving, and an explosion is happening. 
+ Since each instance of a task has its own set of private variables, 
+ they can execute the same routines at the same time without any confusion:
+ 
+   * task_explosion 
+ 
+     Displays an explosion, step by step, yielding after each step.
+   
+   * task_phasor
+ 
+     Draws a phasor on the screen, yielding after every few pixels.
+   
+   * task_Java_phasor
+
+     Shows a Java phasor effect on the screen, yielding after each iteration.
+ 
+   * task_torpedo
+ 
+     Draws a torpedo moving across the screen, yielding after each step.
+   
+   * task_pod
+
+     Draws a pod moving across the screen, yielding after each small step.
+ 
+   * task_pod_effect
+ 
+     Displays a pod explosion, yielding after each small step.
+ 
+   

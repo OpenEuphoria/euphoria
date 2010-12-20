@@ -1,0 +1,23 @@
+                Language War Command Summary
+                ============================
+ Examples
+ --------
+ 3              move ship in direction 3 (up the screen) 
+ w 4            set warp speed to 4   
+ p 9 1 5        shoot 900-unit phasor in direction 1.5  
+ t 3 2          shoot torpedo in direction 3.2
+ a 5 0          shoot antimatter pod in direction 5.0 - Press Enter to detonate
+ g              display or cancel galaxy scan
+ s              abandon Euphoria for shuttlecraft
+ f              freeze the game - hit 'c' to resume
+ c              cancel a partially entered command
+ Esc            abort the game
+
+                    directions
+                        3
+                   4    |    2
+                        |   
+                 5------+------1
+                        |
+                   6    |    8
+                        7 

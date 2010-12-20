@@ -1,0 +1,66 @@
+		
+		DEMO Programs for the DOS32 Platform
+		------------------------------------
+ 
+ Run each program using ex.exe.
+ 
+ -----------------------------------------------------------------------------
+ The graphics programs use:
+	
+	constant GRAPHICS_MODE = 18   -- VGA graphics resolution
+ 
+ This will provide VGA resolution, and shouldn't cause any problems.
+ See include\graphics.e for other possible graphics modes. You should also
+ run under DOS or in a full-screen DOS window under Windows. (Press Alt-Enter)
+ 
+ For modes 256 and higher (SVGA), users of ATI and some other cards, may have 
+ to add the following two statements at the top of the .ex file:
+      include machine.e
+      use_vesa(1)
+ This will force the use of the VESA graphics standard for SVGA modes.
+ -----------------------------------------------------------------------------
+
+ bitmap.ex - displays bitmap (.BMP) pictures
+    
+ dosint.ex - some examples of calling DOS system interrupt routines
+ 
+ hardint.ex - a hardware interrupt handler
+ 
+ mouse.ex  - simple demo of get_mouse() built-in function
+	   - you need DOS mouse support for this
+
+ mset.ex   - Mandelbrot Set (fractal) generator
+	   - Press Enter to stop the display and change all the colors
+           - Press Enter again to choose a region of the M-set to zoom in on
+	   - use the arrow keys to select a box to enlarge, or type 'q'
+	     to quit
+	   - your picture is saved in a .BMP file (suitable for wallpaper!)
+ 	   - it takes a few minutes as hundreds of floating-point calculations 
+ 	     are performed *per pixel*.
+  
+ plot3d.ex - 3-D surface plotting of functions 
+	   - add in your own function of x and y, and see it plotted
+	   - Press Enter to move on to the next sample function
+
+ polygon.ex - displays interesting polygon patterns
+	    - hit space bar to see a new pattern
+
+ sb.ex      - bouncing balls screen blank program 
+
+ stereo.ex - make a random dot stereo picture:
+ 	   - reads "picture" file by default 
+ 	     
+ tasksort.ex - demo of 4 different sort routines running in parallel using
+               Euphoria's multitasking feature
+ 
+ ttt.ex  - 3-dimensional tic tac toe
+         - try to get 4 in a row, on any plane or 1 per plane
+         - play against "DEFENDO" or "AGGRESSO" or a human, or
+	   watch the AGGRESSO and DEFENDO algorithms slug it out
+	 - you need DOS mouse support for a human to play
+
+ wire.ex - 3-D wire frame demo of the big 'E' in Euphoria
+	 - hit space bar to freeze/restart the display
+	 - Enter to quit
+
+

@@ -1,0 +1,7 @@
+ If you have previously installed Euphoria on your system, 
+ you may choose to install to the same directory. Your current 
+ Euphoria files will be saved in the "euphoria\backup" subdirectory.
+
+ Alternatively, you could Cancel, rename your current Euphoria 
+ directory, and start this install again.
+

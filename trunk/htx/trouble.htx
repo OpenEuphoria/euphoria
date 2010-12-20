@@ -1,0 +1,839 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Trouble-Shooting Guide</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
+<br>
+                    Euphoria Trouble-Shooting Guide
+</font></_center>
+<p>&nbsp;<br>
+<font face="Arial, Helvetica" color="#003366">
+<b><_sul>If you get stuck, here are some things you can do:</_sul></b></font>
+<p>
+ <table border=0 cellspacing=2 cellpadding=2>
+ 
+<_4clist
+  name="1."
+  pos=10
+  description="Type: <font color=\"#993333\"><b>guru</b></font><br>
+   followed by some keywords associated with your problem.
+   <p>
+   For example,<br>
+   <b>guru declare global include</b>"
+>
+ 
+<_4clist
+  name="2."
+  pos=10
+  description="Check the list of common problems
+   (<a href=\"trouble.htm#commonp\">below</a>)."
+>
+ 
+<_4clist
+  name="3."
+  pos=10
+  description="Read the relevant parts of the documentation, i.e.
+  <a class=\"blue\" href=\"refman.htm\"><b>refman.doc</b></a>
+  or
+<a class=\"blue\" href=\"library.htm\"><b>library.doc</b></a>."
+>
+ 
+<_4clist
+  name="4."
+  pos=10
+  description="Try running your program with the statements:"
+>
+<_eucode>
+        with trace
+        trace(1)
+</_eucode>
+
+<_4clist
+  col3=""
+  name=""
+  pos=10
+  description="at the top of your main <b>.ex</b> file so you can see
+   what's going on."
+>
+
+<_4clist
+  name="5."
+  pos=10
+  description="The <a href=http://www.RapidEuphoria.com/listserv.htm>
+  <b>Euphoria mailing list</b></a> has
+   a search facility. You can search the archive of all previous messages.
+   There's a good chance that your question has already been discussed."
+>
+
+<_4clist
+  name="6."
+  pos=10
+  description="Post a message on the mailing list."
+>
+
+</table>
+
+<p>&nbsp;<br>
+<a name=commonp></a>
+
+<b><_sul><font face="Arial, Helvetica" color="#003366">Here are some commonly
+ reported problems (</font>
+ <font face="Arial, Helvetica" color="#009999">P:</font>
+ <font face="Arial, Helvetica" color="#003366">) and their solutions (</font>
+ <font face="Arial, Helvetica" color="#FF0099">S:</font>
+ <font face="Arial, Helvetica" color="#003366">).</font></_sul></b>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I ran my program with <font color=\"#993333\"><b>exw</b></font>
+   and the console window disappeared before I could read the output."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="The console window will only appear if required, and will
+   disappear immediately when your program finishes execution. Perhaps you
+   should code something like:"
+ >
+
+<_eucode>
+        puts(1, "\nPress Enter\n")
+        if getc(0) then
+        end if
+</_eucode>
+
+<_2clist
+  name=""
+  pos=7
+  description="at the end of your program."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="At the end of execution of my program, I see \"Press Enter\"
+  and I have to hit the Enter key. How do I get rid of that?"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Call free_console() just before your program terminates."
+ >
+
+<_eucode>
+        include dll.e
+        
+        free_console()
+</_eucode>
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I would like to change the properties of the console window."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Right click on <b>c:\windows\system\conagent.exe</b> and
+   select \"properties\". You can change the font and several other items."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="When I run <font color=\"#993333\"><b>ex.exe</b></font> in
+   a DOS Window, it makes my small DOS window go to full screen."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="This will only happen the first time you run
+   <font color=\"#993333\"><b>ex.exe</b></font> after creating a new small
+   DOS window. You can make the window small again by pressing
+   <b>Alt-Enter</b>. It will stay small after that. Your Euphoria program
+   can keep the window small by executing:"
+ >
+
+<_eucode>
+        if graphics_mode(-1) then
+        end if
+</_eucode>
+   
+<_2clist
+  name=""
+  pos=7
+  description="at the start of execution. This may cause some brief screen
+   flicker. Your program can force a text window to be full-screen 
+   by executing:"
+ >
+<_eucode>
+        if graphics_mode(3) then
+        end if
+</_eucode>
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="My Euphoria CGI program hangs or has no output"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Look for an ex.err file in your cgi-bin directory. 
+  Turn on <b>with trace</b> / <b>trace(3)</b> to see what statements
+  are executed (see ctrace.out in your cgi-bin). Insert 
+  <b>without warning</b> at the top of your program.
+   On Windows, when there are warnings, Euphoria will issue a prompt 
+   before terminating, causing your program to hang. On Windows you should 
+   always use <b>exwc.exe</b> to run CGI programs, or you may have problems with
+   standard output. With Apache Web Server, you
+   can have a first line in your program of: #!.\exwc.exe to run your program
+   using exwc.exe in the current (cgi-bin) directory. On Linux/FreeBSD, 
+   be careful that your first line ends in LF, not CR-LF, or the #! won't
+   be handled correctly. On Linux you must also set the execute permissions
+   on your program correctly, and ex.err and ctrace.out must be 
+   writable by the server process or they won't be updated. See
+   <a href=cgi.htm>cgi.htm</a> for more"
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="How do I read/write ports?"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Get <b>Jacques Deschenes</b>' collection of machine-level and
+   DOS system routines from the
+   <a href=\"http://www.RapidEuphoria.com\">Euphoria Web page</a>. See his
+   file <b>ports.e</b>."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I'm having trouble running a
+   <font color=\"#CC3366\"><b>DOS32</b></font> graphics program. I hit
+   control-Break and now my system seems to be dead."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Some graphics programs will not run unless you start them from
+   DOS or from a full-screen DOS window under Windows. Sometimes you
+   have to edit the program source to use a lower resolution graphics mode,
+   such as mode 18. Some SVGA graphics modes might not work for you under a
+   DOS window, but will work when you restart your machine in
+   MS-DOS mode. A better driver for your video card might fix this.
+   <p>
+   You should stop a program using the method that the program documentation
+   recommends. If you abort a program with control-c or control-Break you may
+   find that your screen is left in a funny graphics mode using funny colors.
+   When you type something, it may be difficult or even impossible to read
+   what you are typing. <i>The system may even appear dead, when in fact it
+   is <b>not</b></i>.
+   <p>
+   Try the following DOS commands, in the following order, until you clear
+   things up:
+   <p>
+      1. type: Alt-Enter to get a normal (non-full-screen) window again.
+   
+   <p>
+      2. type: <b>cls</b><br>
+         Even when you can't see any keystrokes echoed on the screen
+         this may clear the screen for you.
+   <p>
+      3. type: <b>ex</b><br>
+         The Euphoria interpreter will try to restore a normal
+         <font color=\"#CC3366\">text mode</font> screen for you.
+   <p>
+      4. type: <b>exit</b><br>
+         If you are running under Windows, this will terminate the
+         DOS session for you.
+   <p>
+      5. type: <b>Control-Alt-Delete</b><br>
+         This will let you kill the current DOS session under Windows,
+         or will soft-reboot your computer if you are running under DOS.
+   <p>
+      6. If all else fails, reset or power your computer off and back on.
+         You should immediately run <b>scandisk</b> when the system
+         comes back up."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="When I run Euphoria programs in SVGA, the output on the screen
+   is crammed into the top part of the screen."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Try: <font color=\"#006699\"><b>use_vesa(1)</b></font> in
+   <font color=\"#5500FF\"><b>machine.e</b></font>.
+   <p>
+   Try downloading the latest driver for your video card from the Internet.
+   ATI's site is:
+   <p>
+   <a href=\"http://www.atitech.com\">http://www.atitech.com</a>
+   <p>
+   Others have had their video problems clear up after installing the latest
+   version of DirectX."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="My program leaves the DOS window in a messy
+   state. I want it to leave me with a normal text window."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="When your program is finished, it should call the function
+  graphics_mode(-1) to set the DOS window back to normal. e.g."
+ >
+<_eucode>
+        if graphics_mode(-1) then
+        end if
+</_eucode>
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="When I run my program from the editor and I hit control-c,
+   the program dies with an operating system error."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="This is a known problem. Run your program from the command-line,
+   outside the editor, if you might have to hit control-c or control-Break."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="When I run my program there are no errors but nothing happens."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="You probably forgot to call your main procedure. You need
+   a top-level statement that comes after your main procedure to call the
+   main procedure and start execution."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I'm trying to call a routine documented in
+   <font color=\"#5500FF\"><b>library.doc</b></font>, but it keeps saying
+   the routine has not been declared."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Did you remember to include the necessary <b>.e</b> file from
+   the <font color=\"#5500FF\"><b>euphoria\include</b></font> directory? If
+   the syntax of the routine says for example, \"include graphics.e\", then
+   your program must have \"<b>include graphics.e</b>\" (without the quotes)
+   before the place where you first call the routine."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I have an include file with a routine in it that I want to
+   call, but when I try to call the routine it says the routine has not been
+   declared. But it <b><i>has</i></b> been declared."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Did you remember to define the routine with
+   \"<b>global</b>\" in front of it in the include file? Without \"global\"
+   the routine is not visible <i><b>outside</b></i> of its own file."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="How do I input a line of text from the user?"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="See <font color=\"#006699\"><b>gets()</b></font> in
+   <a class=\"blue\" href=\"lib_e_g.htm#gets\"><b>library.doc</b></a>.
+   <font color=\"#006699\">gets(0)</font> will read a line from <b>standard
+   input</b>, which is normally the <b>keyboard</b>. The line will always
+   have <b>\n</b> on the end. To remove the trailing \n character do:"
+ >
+
+<_eucode>
+        line = line[1..length(line)-1]
+</_eucode>
+
+<_2clist
+  name=""
+  pos=7
+  description="Also see <font color=\"#006699\"><b>prompt_string()</b></font>
+   in <font color=\"#5500FF\"><b>get.e</b></font>."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="After inputting a string from the user with
+   <font color=\"#006699\"><b>gets()</b></font>, the next line that comes
+   out on the screen does not start at the left margin."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Your program should output a <i>new-line</i> character e.g.
+   <font color=\"#006699\"><b>puts(SCREEN, '\n')</b></font> after you do a
+   <font color=\"#006699\">gets()</font>. It does not happen automatically."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="Why aren't my floating-point calculations coming out exact?"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Intel CPU's, and most other CPU's, use binary numbers
+  to represent fractions. Decimal fractions such as 0.1, 0.01 and 
+  similar numbers can't be represented precisely. For example, 0.1 might
+  be stored internally as 0.0999999999999999. That means that 10 * 0.1
+  might come out as 0.999999999999999, and floor(10 * 0.1) might be 0,
+  not 1 as you'd expect. This can be a nuisance when you are dealing
+  with money calculations, but it's not a Euphoria problem. It's a
+  general problem that you must face in most programming languages.
+  Always remember: floating-point numbers are just an approximation
+  to the \"real\" numbers in mathematics. Assume that any floating-point calculation
+  might have a tiny bit of error in the result. Sometimes you can
+  solve the problem by rounding, e.g. x = floor(x + 0.5) would round
+  x off to the nearest integer. Storing money values as an integer 
+  number of pennies, rather than a fractional number of dollars 
+  (or similar currency) will help, but some calculations could still 
+  cause problems."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="How do I convert a number to a string?"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Use <font color=\"#006699\"><b>sprintf()</b></font> in
+   <font color=\"#5500FF\"><b>library.doc</b></font>. e.g."
+ >
+
+<_eucode>
+        string = sprintf("%d", number)
+</_eucode>
+
+<_2clist
+  name=""
+  pos=7
+  description="Besides <b>%d</b>, you can also try other formats, such as
+   <b>%x</b> (Hex) or <b>%f</b> (floating-point)."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="How do I convert a string to a number?"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Use <font color=\"#006699\"><b>value()</b></font> in
+   <font color=\"#5500FF\"><b>library.doc</b></font>, or, if you are reading
+   from a file or the keyboard, use
+   <font color=\"#006699\"><b>get()</b></font>."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="It says I'm attempting to redefine my for-loop variable."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="For-loop variables are declared automatically.
+   Apparently you already have a declaration with the same name earlier in
+   your routine or your program. Remove that earlier declaration or change
+   the name of your loop variable."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I get the message \"unknown escape character\" on a line
+   where I am trying to specify a file name."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="<b><i>Do not</i></b> say \"C:\TMP\MYFILE\". You need to say
+   <b>\"C:\\TMP\\MYFILE\"</b>. Backslash is used for escape characters such
+   as <b>\n</b> or <b>\t</b>. To specify a single backslash in a string you
+   need to type <b>\\</b>."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I'm trying to use mouse input in a SVGA graphics mode but it
+   just doesn't work."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="<font color=\"#CC3366\"><b>DOS</b></font> does not support
+   mouse input in modes beyond graphics mode 18 (640x480 16 color).
+   <font color=\"#CC3366\"><b>DOS 7.0 (part of Windows 95/98)</b></font> does
+   seem to let you at least read the x-y coordinate and the buttons in high
+   resolution modes, but you may have to draw your own mouse pointer in the
+   high-res modes. <b>Graeme Burke</b>, <b>Peter Blue</b> and others have good
+   solutions to this problem. See their files on the
+   <a href=\"http://www.RapidEuphoria.com/archive.htm\">Euphoria Archive
+   Web page</a>."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I'm trying to print a string using
+   <font color=\"#006699\"><b>printf()</b></font> but only the first character
+   comes out."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="See the <font color=\"#006699\"><b>printf()</b></font>
+   description in <font color=\"#5500FF\"><b>library.doc</b></font>. You may
+   need to put braces around your string so it is seen as a single value to
+   be printed, e.g. you wrote:"
+ >
+
+<_eucode>
+        printf(1, "Hello %s", mystring)
+</_eucode>
+
+<_2clist
+  name=""
+  pos=7
+  description="where you should have said:"
+ >
+
+<_eucode>
+        printf(1, "Hello %s", {mystring})
+</_eucode>
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="When I print numbers using
+   <font color=\"#006699\"><b>print()</b></font> or
+   <font color=\"#006699\"><b>?</b></font>, only 10 significant digits are
+   displayed."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Euphoria normally only shows about 10 digits. Internally, all
+   calculations are performed using at least 15 significant digits. To see
+   more digits you have to use <font color=\"#006699\"><b>printf()</b></font>.
+   For example,"
+ >
+
+<_eucode>
+        printf(1, "%.15f", 1/3)
+</_eucode>
+
+<_2clist
+  name=""
+  pos=7
+  description="This will display 15 digits."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="It complains about my routine declaration, saying \"a type is
+   expected here\"."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="When declaring subroutine parameters, Euphoria requires you to
+   provide an explicit type for each individual parameter. e.g."
+ >
+
+<_eucode>
+        procedure foo(integer x, y)         -- WRONG
+        procedure foo(integer x, integer y) -- RIGHT
+</_eucode>
+
+<_2clist
+  name=""
+  pos=7
+  description="In all other contexts it is ok to make a list:"
+ >
+
+<_eucode>
+        atom a, b, c, d, e
+</_eucode>
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I'm declaring some variables in the middle of a routine and
+   it gives me a syntax error."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="All of your <i>private</i> variable declarations must come
+   at the beginning of your <b>subroutine</b>, before any executable
+   statements. (At the top-level of a program, <b>outside of any routine</b>,
+   it is ok to declare variables anywhere.)"
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="It says:<br>
+   Syntax Error - expected to see possibly 'xxx', not 'yyy'"
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="At this point in your program you have typed a variable,
+   keyword, number or punctuation symbol, yyy, that does not fit syntactically
+   with what has come before it. The compiler is offering you one example,
+   xxx, of something that would be accepted at this point in place of yyy.
+   Note that there may be many other legal (and much better) possibilities
+   at this point than xxx, but xxx might at least give you a clue as to what
+   the compiler is \"thinking\"."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I'm having problems running Euphoria with DR-DOS."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="Your <b>config.sys</b> should have just HIMEM.SYS but not
+   EMM386.EXE in it."
+ >
+
+</table>
+
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font color=\"#009999\">P:</font>"
+  pos=7
+  description="I try to run a program with
+   <font color=\"#993333\"><b>exw</b></font> and it says \"this is a Windows
+   NT character-mode executable\"."
+ >
+
+<_2clist
+  name="<font color=\"#FF0099\">S:</font>"
+  pos=7
+  description="<font color=\"#993333\"><b>exw.exe</b></font> is a
+   <font color=\"#CC3366\"><b>32-bit Windows program</b></font>. It must be
+   run under Windows or in a DOS Window. It will not work under 
+   plain DOS in an old system.
+   <font color=\"#993333\"><b>ex.exe</b></font> <b><i>will</i></b> work under
+   <font color=\"#CC3366\"><b>plain DOS</b></font>."
+ >
+
+</table>
+
+
+<p>&nbsp;
+
+</_width>
+</body>
+</html>
+

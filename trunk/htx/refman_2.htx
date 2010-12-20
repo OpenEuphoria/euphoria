@@ -1,0 +1,2418 @@
+<_init_comment>
+<html>
+<head><title>Euphoria Reference Manual Part I - Section 2 </title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+<_center><font color="#FF0099" size=+2>
+<br>
+                         2. Language Definition
+</font></_center>
+<p>
+<a name=1></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.1 Objects</_dul>
+
+</font>
+<p>
+
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.1.1 Atoms and Sequences</_sul>
+
+</font>
+<p>
+
+ All data <font color="#993333"><b>objects</b></font> in Euphoria are either
+ <font color="#993333"><b>atoms</b></font> or
+ <font color="#993333"><b>sequences</b></font>.
+ An <font color="#993333"><b>atom</b></font> is a single numeric value.
+ A <font color="#993333"><b>sequence</b></font> is a collection of numeric
+ values.
+
+<p>
+ The <font color="#993333"><b>objects</b></font> contained in a
+ sequence can be an arbitrary mix of atoms or
+ sequences. A sequence is represented by a list of objects in brace brackets,
+ separated by commas. Atoms can have any integer or double-precision floating
+ point value. They can range from approximately -1e300 (minus one times 10 to
+ the power 300) to +1e300 with 15 decimal digits of accuracy. Here are some
+ Euphoria objects:
+
+<_eucode>
+        -- examples of atoms:
+        0
+        1000
+        98.6
+        -1e6
+
+        -- examples of sequences:
+        {2, 3, 5, 7, 11, 13, 17, 19}
+        {1, 2, {3, 3, 3}, 4, {5, {6}}}
+        {{"jon", "smith"}, 52389, 97.25}
+        {}                        -- the 0-element sequence
+</_eucode>
+<p>
+
+ Numbers can also be entered in hexadecimal. For example:
+
+<_eucode>
+        #FE             -- 254
+        #A000           -- 40960
+        #FFFF00008      -- 68718428168
+        -#10            -- -16
+</_eucode>
+<p>
+
+ Only the capital letters A, B, C, D, E, F are allowed in hex numbers.
+ Hex numbers are always positive, unless you add a minus
+ sign in front of the # character. So for instance #FFFFFFFF is a huge 
+ positive number (4294967295), *not* -1, as some machine-language programmers 
+ might expect.
+ 
+<p>
+ Sequences can be nested to any depth, i.e. you can have sequences within
+ sequences within sequences and so on to any depth (until you run out of
+ memory). Brace brackets are used to construct sequences out of a list of
+ expressions.  These expressions can be constant or evaluated at run-time.
+ e.g.
+
+<_eucode>
+        {x+6, 9, y*w+2, sin(0.5)}
+</_eucode>
+
+<p>
+ The <font color="#CC0099"><b>"Hierarchical Objects"</b></font> part
+ of the Euphoria acronym comes from the
+ hierarchical nature of nested sequences. This should not be confused with
+ the class hierarchies of certain object-oriented languages.
+
+<p>
+ Why do we call them <font color="#993333"><_bq>atoms</_bq></font>?
+ Why not just "numbers"? Well, an atom
+ <font color="#CC0099"><_ba><i>is</i></_ba></font> just a
+ number, but we wanted to have a distinctive term that emphasizes that they are
+ indivisible. Of course in the world of physics, atoms were split into smaller
+ parts many years ago, but in Euphoria you can't split them. They are the basic
+ building blocks of all the data that a Euphoria program can manipulate. With
+ this analogy, <font color="#993333"><b>sequences</b></font>
+ might be thought of as "molecules", made from atoms
+ and other molecules. A better analogy would be that sequences are like
+ directories, and atoms are like files. Just as a directory on your computer
+ can contain both files and other directories, a sequence can contain both
+ atoms and other sequences (and
+ <font color="#CC0099"><_ba><i>those</i></_ba></font> sequences can contain
+ atoms and sequences and so on).
+
+<p>
+ As you will soon discover, sequences make Euphoria very simple
+ <font color="#CC0099"><_ba><i>and</i></_ba></font> very powerful.
+ <font color="#CC0099"><b>Understanding atoms and sequences is the key to
+ understanding Euphoria.</b></font>
+
+<dl>
+<dt>
+ <b><font color="#006633"><_sul>Performance Note:</_sul></font></b>
+<dd>
+ Does this mean that
+ all atoms are stored in memory as
+ 8-byte floating-point numbers? No. The Euphoria interpreter usually stores
+ integer-valued atoms as machine integers (4 bytes) to save space and
+ improve execution speed. When fractional results occur or numbers get too
+ big, conversion to floating-point happens automatically.
+</dl>
+
+<a name=11></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.1.2 Character Strings and Individual Characters</_sul>
+
+</font>
+<p>
+
+ A <font color="#993333"><b>character string</b></font> is just a
+ <font color="#993333"><b>sequence</b></font> of characters.
+ It may be entered using quotes e.g.
+
+<_eucode>
+        "ABCDEFG"
+</_eucode>
+
+<p>
+ Character strings may be manipulated and
+ operated upon just like any other sequences. For example the above
+ string is entirely equivalent to the sequence:
+
+
+<_eucode>
+        {65, 66, 67, 68, 69, 70, 71}
+</_eucode>
+
+ which contains the corresponding ASCII codes. The Euphoria compiler
+ will immediately convert "ABCDEFG" to the above sequence of numbers.
+ In a sense, there are no "strings" in Euphoria, only sequences of numbers.
+ A quoted string is really just a convenient notation that saves you from
+ having to type in all the ASCII codes.
+
+<p>
+ <a name=empty_seq></a>
+ It follows that "" is equivalent to {}. Both represent the sequence of
+ length-0, also known as the
+ <font color="#993333"><b>empty sequence</b></font>. As a matter of
+ programming style, it is natural to use "" to
+ suggest a length-0 sequence of characters, and {} to suggest some other
+ kind of sequence.
+
+<p>
+ <a name=char></a>
+ An <font color="#993333"><b>individual character</b></font> is an
+ <font color="#993333"><b>atom</b></font>.
+ It must be entered using single quotes. There is a difference between an
+ individual character (which is an atom), and a character string of length-1
+ (which is a sequence). e.g.
+
+<_eucode>
+        'B'   -- equivalent to the atom 66 - the ASCII code for B
+        "B"   -- equivalent to the sequence {66}
+</_eucode>
+
+<p>
+ Again, 'B' is just a notation that is equivalent to typing 66. There aren't
+ really any "characters" in Euphoria, just numbers (atoms).
+
+<p>
+ Keep in mind that an atom is
+ <font color="#CC0099"><_ba><i>not</i></_ba></font> equivalent to a
+ one-element sequence containing
+ the same value, although there are a few built-in routines that choose
+ to treat them similarly.
+
+<p>
+ Special characters may be entered using a back-slash:
+
+<pre>
+        \n        newline
+        \r        carriage return
+        \t        tab
+        \\        backslash
+        \"        double quote
+        \'        single quote
+</pre>
+
+<p>
+ For example, "Hello, World!\n", or '\\'. The Euphoria editor displays
+ character strings in green.
+
+<p>
+
+<a name=12></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.1.3 Comments</_sul>
+
+</font>
+<p>
+
+ Comments are started by two dashes and extend to the end of the current line.
+ e.g.
+
+<_eucode>
+        -- this is a comment
+</_eucode>
+
+<p>
+ Comments are ignored by the compiler and have no effect on execution speed.
+ The editor displays comments in red. 
+<p> 
+ On the first line (only) of your program,
+ you can use a special comment beginning with #!, e.g.
+<_eucode>
+        #!/home/rob/euphoria/bin/exu  
+</_eucode>
+This informs the Linux shell that your file should be executed by the
+Euphoria interpreter, and gives the full path to the interpreter.
+If you make your file executable, you can run it, just by typing its name,
+and without the need to type "exu". On DOS and Windows 
+this line is just treated as a comment (though Apache Web server on Windows
+does recognize it.). If your file is a shrouded .il file, use backendu
+instead of exu.
+<p>
+<hr>
+
+<a name=2></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.2 Expressions</_dul>
+
+</font>
+<p>
+
+ Like other programming languages, Euphoria lets you calculate results by
+ forming expressions. However, in Euphoria you can perform calculations on
+ entire sequences of data with one expression, where in most other languages
+ you would have to construct a loop. In Euphoria you can handle a sequence
+ much as you would a single number. It can be copied, passed to a subroutine,
+ or calculated upon as a unit. For example,
+
+<_eucode>
+        {1,2,3} + 5
+</_eucode>
+
+ is an expression that adds the sequence {1,2,3} and the atom 5 to get the
+ resulting sequence {6,7,8}.
+
+<p>
+ We will see more examples later.
+
+<p>
+
+<a name=23></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.1 Relational Operators</_sul>
+
+</font>
+<p>
+
+ The relational operators  <font color="#993333"><b>< &nbsp; > &nbsp; <= &nbsp;
+ >= &nbsp; = &nbsp; != &nbsp;</b></font> each produce a 1 (true) or a
+ 0 (false) result.
+
+<_eucode>
+        8.8 < 8.7   -- 8.8 less than 8.7 (false)
+        -4.4 > -4.3 -- -4.4 greater than -4.3 (false)
+        8 <= 7      -- 8 less than or equal to 7 (false)
+        4 >= 4      -- 4 greater than or equal to 4 (true)
+        1 = 10      -- 1 equal to 10 (false)
+        8.7 != 8.8  -- 8.7 not equal to 8.8 (true)
+</_eucode>
+
+<p>
+ As we will soon see you can also apply these operators to sequences.
+
+<p>
+
+<a name=24></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.2 Logical Operators</_sul>
+
+</font>
+<p>
+
+ The logical operators <font color="#993333"><_bsq>and</_bsq></font>,
+ <font color="#993333"><_bsq>or</_bsq></font>,
+ <font color="#993333"><_bsq>xor</_bsq></font>,
+ and <font color="#993333"><_bsq>not</_bsq></font>
+ are used to determine the
+ "truth" of an expression. e.g.
+
+<_eucode>
+        1 and 1     -- 1 (true)
+        1 and 0     -- 0 (false)
+        0 and 1     -- 0 (false)
+        0 and 0     -- 0 (false)
+
+        1 or  1     -- 1 (true)
+        1 or  0     -- 1 (true)
+        0 or  1     -- 1 (true)
+        0 or  0     -- 0 (false)
+
+        1 xor 1     -- 0 (false)
+        1 xor 0     -- 1 (true)
+        0 xor 1     -- 1 (true)
+        0 xor 0     -- 0 (false)
+
+        not 1       -- 0 (false)
+        not 0       -- 1 (true)
+</_eucode>
+
+<p>
+ You can also apply these operators to numbers other than 1 or 0. The rule is:
+ zero means false and non-zero means true. So for instance:
+
+<_eucode>
+        5 and -4    -- 1 (true)
+        not 6       -- 0 (false)
+</_eucode>
+
+<p>
+ These operators can also be applied to sequences. See below.
+
+<p>
+ In some cases <a href="refman_2.htm#shortcir"><_bq>short-circuit</_bq></a>
+ evaluation will be used for expressions containing
+ <font color="#993333"><_bq>and</_bq></font> or
+ <font color="#993333"><_bq>or</_bq></font>.
+
+<p>
+
+<a name=25></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.3 Arithmetic Operators</_sul>
+
+</font>
+<p>
+
+ The usual arithmetic operators are available: add, subtract, multiply,
+ divide, unary minus, unary plus.
+
+<_eucode>
+        3.5 + 3  -- 6.5
+        3 - 5    -- -2
+        6 * 2    -- 12
+        7 / 2    -- 3.5
+        -8.1     -- -8.1
+        +8       -- +8
+</_eucode>
+
+<p>
+ <a name=inf_nan></a>
+ Computing a result that is too big (i.e. outside of -1e300 to +1e300) will
+ result in one of the special atoms <b>+infinity</b> or <b>-infinity</b>.
+ These appear as <_bq>inf</_bq> or <_bq>-inf</_bq> when you print them out.
+ It is also possible to generate <_bq>nan</_bq> or <_bq>-nan</_bq>.
+ "nan" means "not a number", i.e. an undefined value (such as inf
+ divided by inf). These values are defined in the IEEE
+ floating-point standard. If
+ you see one of these special values in your output, it usually indicates an
+ error in your program logic, although generating inf as an intermediate
+ result may be acceptable in some cases. For instance, 1/inf is 0, which may
+ be the "right" answer for your algorithm.
+
+<p>
+ Division by zero, as well as bad arguments to math library routines, e.g.
+ square root of a negative number, log of a non-positive number etc. cause an
+ immediate error message and your program is aborted.
+
+<p>
+ The only reason that you might use unary plus is to emphasize to the reader
+ of your program that a number is positive. The interpreter does not actually
+ calculate anything for this.
+
+<p>
+
+<a name=26></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.4 Operations on Sequences</_sul>
+
+</font>
+<p>
+
+ All of the relational, logical and arithmetic operators described above,
+ as well as the math routines described in
+ <a href="library.htm">Part II - Library Routines</a>, can be applied
+ to sequences as well as to single numbers (atoms).
+
+<p>
+ When applied to a sequence, a unary (one operand) operator is actually
+ applied to each element in the sequence to yield a sequence of results of the
+ same length. If one of these elements is itself a sequence then the same rule
+ is applied again recursively. e.g.
+
+<_eucode>
+        x = -{1, 2, 3, {4, 5}}   -- x is {-1, -2, -3, {-4, -5}}
+</_eucode>
+
+<p>
+ If a binary (two-operand) operator has operands which are both sequences then
+ the two sequences must be of the same length. The binary operation is then
+ applied to corresponding elements taken from the two sequences to get a
+ sequence of results. e.g.
+
+<_eucode>
+        x = {5, 6, 7, 8} + {10, 10, 20, 100}
+        -- x is {15, 16, 27, 108}
+</_eucode>
+
+<p>
+ If a binary operator has one operand which is a sequence while the other is a
+ single number (atom) then the single number is effectively repeated to
+ form a sequence of equal length to the sequence operand. The rules for
+ operating on two sequences then apply. Some examples:
+
+<_eucode>
+        y = {4, 5, 6}
+
+        w = 5 * y              -- w is {20, 25, 30}
+
+        x = {1, 2, 3}
+
+        z = x + y              -- z is {5, 7, 9}
+
+        z = x < y              -- z is {1, 1, 1}
+
+        w = {{1, 2}, {3, 4}, {5}}
+
+        w = w * y              -- w is {{4, 8}, {15, 20}, {30}}
+
+        w = {1, 0, 0, 1} and {1, 1, 1, 0}    -- {1, 0, 0, 0}
+
+        w = not {1, 5, -2, 0, 0}     -- w is {0, 0, 0, 1, 1}
+
+        w = {1, 2, 3} = {1, 2, 4}    -- w is {1, 1, 0}
+        -- note that the first '=' is assignment, and the
+        -- second '=' is a relational operator that tests
+        -- equality 
+</_eucode>
+
+<b><font color="#006633"><_sul>Note:</_sul></font></b>
+When you wish to compare two strings (or other sequences), 
+you should <b>not</b> (as in some other languages) use the '=' operator:
+
+<_eucode>
+       if "APPLE" = "ORANGE" then  -- ERROR! 
+</_eucode>
+
+'=' is treated as an operator, just like '+', '*' etc.,
+so it is applied to corresponding sequence elements, 
+and the sequences must be the same length. When they are equal length,
+the result is a sequence of 1's an 0's. When they are not equal length,
+the result is an error. Either way you'll get an error, since an 
+if-condition must be an atom, not a sequence.
+Instead you should use the equal() built-in routine:
+
+<_eucode>
+       if equal("APPLE", "ORANGE") then  -- CORRECT
+</_eucode>
+
+In general, you can do relational comparisons using the compare() 
+built-in routine:
+
+<_eucode>
+       if compare("APPLE", "ORANGE") = 0 then  -- CORRECT
+</_eucode>
+
+You can use compare() for other comparisons as well:
+<_eucode>
+       if compare("APPLE", "ORANGE") < 0 then  -- CORRECT
+           -- enter here if "APPLE" is less than "ORANGE" (TRUE)
+</_eucode>
+
+
+<p>
+
+<a name=21></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.5 Subscripting of Sequences</_sul>
+
+</font>
+<p>
+ A single element of a sequence may be selected by giving the element number
+ in square brackets. Element numbers start at 1. Non-integer subscripts are
+ rounded down to an integer.
+
+<p>
+ For example, if x contains {5, 7.2, 9, 0.5, 13} then x[2] is 7.2. Suppose we
+ assign something different to x[2]:
+
+<_eucode>
+        x[2] = {11,22,33}
+</_eucode>
+
+<p>
+ Then x becomes: {5, {11,22,33}, 9, 0.5, 13}. Now if we ask for x[2] we get
+ {11,22,33} and if we ask for x[2][3] we get the atom 33. If you try to
+ subscript with a number that is outside of the range 1 to the number of
+ elements, you will get a subscript error. For example x[0],  x[-99] or
+ x[6] will cause errors. So will x[1][3] since x[1] is not a sequence. There
+ is no limit to the number of subscripts that may follow a variable, but
+ the variable must contain sequences that are nested deeply enough. The
+ two dimensional array, common in other languages, can be easily represented
+ with a sequence of sequences:
+
+<_eucode>
+        x = {
+             {5, 6, 7, 8, 9},      -- x[1]
+             {1, 2, 3, 4, 5},      -- x[2]
+             {0, 1, 0, 1, 0}       -- x[3]
+            }
+</_eucode>
+
+ where we have written the numbers in a way that makes the structure
+ clearer. An expression of the form x[i][j] can be used to access any element.
+
+<p>
+ The two dimensions are not symmetric however, since an entire "row" can be
+ selected with x[i], but there is no simple expression to select an entire
+ column. Other logical structures, such as n-dimensional arrays, arrays of
+ strings, structures, arrays of structures etc. can also be handled easily and
+ flexibly:
+
+<_eucode>
+ 3-D array:
+        y = {
+             {{1,1}, {3,3}, {5,5}},
+             {{0,0}, {0,1}, {9,1}},
+             {{-1,9},{1,1}, {2,2}}
+            }
+</_eucode>
+
+<blockquote>
+     y[2][3][1] is 9
+</blockquote>
+
+<p>
+ Array of strings:
+
+<_eucode>
+        s = {"Hello", "World", "Euphoria", "", "Last One"}
+</_eucode>
+
+<blockquote>
+     s[3] is "Euphoria" <br>
+     s[3][1] is 'E'
+</blockquote>
+
+<p>
+ A Structure:
+
+<_eucode>
+        employee = {
+                    {"John","Smith"},
+                    45000,
+                    27,
+                    185.5
+                   }
+</_eucode>
+
+<blockquote>
+     To access "fields" or elements within a structure it is good
+     programming style to make up a set of constants that name the various
+     fields. This will make your program easier to read. For the example
+     above you might have:
+
+</blockquote>
+
+<_eucode>
+        constant NAME = 1
+        constant FIRST_NAME = 1, LAST_NAME = 2
+
+        constant SALARY = 2
+        constant AGE = 3
+        constant WEIGHT = 4
+</_eucode>
+
+<blockquote>
+     You could then access the person's name with employee[NAME], or if you
+     wanted the last name you could say employee[NAME][LAST_NAME].
+</blockquote>
+
+<p>
+ Array of structures:
+
+<_eucode>
+        employees = {
+                     {{"John","Smith"}, 45000, 27, 185.5},   -- a[1]
+                     {{"Bill","Jones"}, 57000, 48, 177.2},   -- a[2]
+
+                     -- .... etc.
+                    }
+</_eucode>
+
+<blockquote>
+     employees[2][SALARY] would be 57000.
+</blockquote>
+
+The length() built-in function will tell you the length of a sequence.
+So the last element of a sequence s, is:
+<_eucode>
+        s[length(s)]
+</_eucode>
+A short-hand for this is:
+<_eucode>
+        s[$]
+</_eucode>
+Similarly,
+<_eucode>
+        s[length(s)-1]
+</_eucode>
+can be simplified to:
+<_eucode>
+        s[$-1]
+</_eucode>
+
+The $ symbol equals the length of the sequence. $ may only appear
+between square braces. Where there's nesting, e.g.:
+<_eucode>
+        s[$ - t[$-1] + 1]
+</_eucode>
+The first $ above refers to the length of s, while the second $ 
+refers to the length of t (as you'd probably expect).
+An example where $ can save a lot of typing, make your code clearer,
+and probably even faster is:
+<_eucode>
+        longname[$][$] -- last element of the last element
+</_eucode>
+Compare that with the equivalent:
+<_eucode>
+        longname[length(longname)][length(longname[length(longname)])]
+</_eucode>
+
+<b><font color="#006633"><_sul>Subscripting and function side-effects:</_sul></font></b>
+In an assignment statement, with left-hand-side subscripts:
+
+<_eucode>
+    lhs_var[lhs_expr1][lhs_expr2]... = rhs_expr
+</_eucode>
+
+The expressions are evaluated, and any subscripting is performed, 
+from left to right. It is possible to have function calls 
+in the right-hand-side expression, or in any of the left-hand-side expressions. 
+If a function call has the side-effect of modifying the lhs_var, it is 
+not defined whether those changes will appear in the final value of the 
+lhs_var, once the assignment has been completed.
+To be sure about what is going to happen, perform the function call 
+in a separate statement, i.e. do not try to modify the lhs_var in two
+different ways in the same statement. 
+Where there are no left-hand-side subscripts, you can always assume 
+that the final value of the lhs_var will be the value of rhs_expr,
+regardless of any side-effects that may have changed lhs_var.
+
+<p>
+ <font color="#CC0099"><b>Euphoria data structures are
+ almost infinitely flexible.</b></font>
+ Arrays in other languages are constrained to have a fixed number of elements,
+ and those elements must all be of the same type. Euphoria eliminates both
+ of those restrictions.
+ You can easily add a new structure to the employee sequence above,
+ or store an unusually long name in the NAME field and Euphoria will take
+ care of it for you. If you wish, you can store a variety of different
+ employee "structures", with different sizes, all in one sequence.
+
+<p>
+ Not only can a Euphoria program easily represent all conventional data
+ structures but you can create very useful, flexible structures that would be
+ extremely hard to declare in a conventional language.
+ See <a href="refman_2.htm#3">2.3 Euphoria versus Conventional Languages</a>.
+
+<p>
+ Note that expressions in general may not be subscripted, just variables. For
+ example: {5+2,6-1,7*8,8+1}[3] is
+ <font color="#CC0099"><_ba><i>not</i></_ba></font> supported,
+ nor is something like: date()[MONTH]. You have to assign the sequence
+ returned by date() to a variable, then subscript the variable to
+ get the month.
+
+<p>
+
+<a name=22></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.6 Slicing of Sequences</_sul>
+
+</font>
+<p>
+
+ A sequence of consecutive elements may be selected by giving the starting and
+ ending element numbers. For example if x is {1, 1, 2, 2, 2, 1, 1, 1} then
+ x[3..5] is the sequence {2, 2, 2}. x[3..3] is the sequence {2}. x[3..2] is
+ also allowed. It evaluates to the length-0 sequence {}.  If y has the value:
+ {"fred", "george", "mary"} then y[1..2] is {"fred", "george"}.
+
+<p>
+ We can also use slices for overwriting portions of variables. After x[3..5] =
+ {9, 9, 9} x would be {1, 1, 9, 9, 9, 1, 1, 1}. We could also have said
+ x[3..5] = 9 with the same effect. Suppose y is {0, "Euphoria", 1, 1}.
+ Then y[2][1..4] is "Euph". If we say y[2][1..4]="ABCD" then y will
+ become {0, "ABCDoria", 1, 1}.
+
+<p>
+ In general, a variable name can be followed by 0 or more subscripts,
+ followed in turn by 0 or 1 slices. Only variables may be subscripted or
+ sliced, not expressions.
+
+<p>
+ We need to be a bit more precise in defining the rules for
+ <font color="#993333"><b>empty slices</b></font>. Consider a slice s[i..j]
+ where s is of length n. A slice from i to j, where  j = i-1  and i >= 1
+ produces the <a href="refman_2.htm#empty_seq">empty sequence</a>, even if
+ i = n+1. Thus 1..0  and n+1..n and everything in between are legal <b>
+ <font color="#993333">(empty) slices</font></b>.
+ Empty slices are quite useful in many algorithms. A slice from i to j where
+ j < i - 1 is illegal , i.e. "reverse" slices such as s[5..3] are not allowed.
+
+<p>
+We can also use the $ shorthand with slices, e.g.
+<_eucode>
+        s[2..$]
+        s[5..$-2]
+        s[$-5..$]
+        s[$][1..floor($/2)] -- first half of the last element of s
+</_eucode>
+
+
+<a name=27></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.7 Concatenation of Sequences and Atoms - The '&' Operator</_sul>
+
+</font>
+<p>
+
+ Any two objects may be concatenated using the
+ <font color="#993333"><b>&</b></font> operator. The result is a
+ sequence with a length equal to the sum of the lengths of the concatenated
+ objects (where atoms are considered here to have length 1). e.g.
+
+<_eucode>
+        {1, 2, 3} & 4              -- {1, 2, 3, 4}
+
+        4 & 5                      -- {4, 5}
+
+        {{1, 1}, 2, 3} & {4, 5}    -- {{1, 1}, 2, 3, 4, 5}
+
+        x = {}
+        y = {1, 2}
+        y = y & x                  -- y is still {1, 2}
+</_eucode>
+
+<p>
+You can delete element i of any sequence s by concatenating the
+parts of the sequence before and after i:
+
+<_eucode>
+	s = s[1..i-1] & s[i+1..length(s)]
+</_eucode>
+
+This works even when i is 1 or length(s), since s[1..0] is a legal empty slice,
+and so is s[length(s)+1..length(s)].
+
+<p>
+
+<a name=28></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.8 Sequence-Formation</_sul>
+
+</font>
+<p>
+
+ Finally, sequence-formation, using braces and commas:
+
+<_eucode>
+        {a, b, c, ... }
+</_eucode>
+
+ is also an operator. It takes n operands, where n is 0 or more, and makes an
+ n-element sequence from their values. e.g.
+
+<_eucode>
+        x = {apple, orange*2, {1,2,3}, 99/4+foobar}
+</_eucode>
+<p>
+ The sequence-formation operator is listed at the bottom of the
+ <a href="refman_2.htm#2A">precedence chart</a>.
+
+<p>
+
+<a name=29></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.9 Other Operations on Sequences</_sul>
+
+</font>
+<p>
+
+ Some other important operations that you can perform on sequences have
+ English names, rather than special characters.
+ These operations are built-in to 
+ <font color="#993333"><b>ex.exe</b></font>/<font color="#993333"><b>exw.exe</b></font>/<font color="#993333"><b>exu</b></font>
+ , so
+ they'll always be there, and
+ so they'll be fast. They are described in detail in
+ <a href="library.htm">Part II - Library Routines</a>, but are important
+ enough to Euphoria programming that we should mention them here before
+ proceeding. You call these operations as if they were subroutines, although
+ they are actually implemented much more efficiently than that.
+
+<p>
+
+<a name=291></a>
+
+<br>
+
+<_sul><font color="#CC3366" size=+1>length(s)</font></_sul>
+
+</font>
+<p>
+
+ <a class="brown" href="lib_h_o.htm#length"><b>length()</b></a>
+ tells you the length of a sequence s. This is the number of
+ elements in s. Some of these elements may be sequences that contain elements
+ of their own, but length just gives you the "top-level" count. You'll get an
+ error if you ask for the length of an atom. e.g.
+
+<_eucode>
+        length({5,6,7})             -- 3
+        length({1, {5,5,5}, 2, 3})  -- 4 (not 6!)
+        length({})                  -- 0
+        length(5)                   -- error!
+</_eucode>
+
+<a name=292></a>
+<br>
+
+<_sul><font color="#CC3366" size=+1>repeat(item, count)</font></_sul>
+
+</font>
+<p>
+
+ <a class="brown" href="lib_p_r.htm#repeat"><b>repeat()</b></a>
+ makes a sequence that consists of an item repeated count times. e.g.
+<_eucode>
+        repeat(0, 100)         -- {0,0,0,...,0}   i.e. 100 zeros
+        repeat("Hello", 3)     -- {"Hello", "Hello", "Hello"}
+        repeat(99,0)           -- {}
+</_eucode>
+
+<p>
+ The item to be repeated can be any atom or sequence.
+
+<p>
+
+<a name=293></a>
+
+<br>
+
+<_sul><font color="#CC3366" size=+1>append(s, item) /
+      prepend(s, item)</font></_sul>
+
+</font>
+<p>
+
+ <a class="brown" href="lib_a_b.htm#append"><b>append()</b></a>
+ creates a new sequence by adding an item to the end of a sequence s.
+ <a class="brown" href="lib_p_r.htm#prepend"><b>prepend()</b></a>
+ creates a new sequence by adding an element to the beginning of a
+ sequence s. e.g.
+
+<_eucode>
+        append({1,2,3}, 4)         -- {1,2,3,4}
+        prepend({1,2,3}, 4)        -- {4,1,2,3}
+
+        append({1,2,3}, {5,5,5})   -- {1,2,3,{5,5,5}}
+        prepend({}, 9)             -- {9}
+        append({}, 9)              -- {9}
+</_eucode>
+
+<p>
+ The length of the new sequence is always 1 greater than the length of the
+ original sequence. The item to be added to the sequence can be any atom or
+ sequence.
+
+<p>
+ These two built-in functions, <font color="#993333"><b>append()</b></font>
+ and <font color="#993333"><b>prepend()</b></font>, have some similarities
+ to the concatenate operator, <font color="#993333"><b>&</b></font>,
+ but there are clear differences. e.g.
+
+<_eucode>
+        -- appending a sequence is different
+        append({1,2,3}, {5,5,5})   -- {1,2,3,{5,5,5}}
+        {1,2,3} & {5,5,5}          -- {1,2,3,5,5,5}
+
+        -- appending an atom is the same
+        append({1,2,3}, 5)         -- {1,2,3,5}
+        {1,2,3} & 5                -- {1,2,3,5}
+</_eucode>
+
+<a name=2A></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.2.10 Precedence Chart</_sul>
+
+</font>
+<p>
+
+ The precedence of operators in expressions is as follows:
+
+<pre>
+        <font color="#009999"><b>highest precedence:</b></font>     function/type calls
+
+                                unary-  unary+  not
+
+                                *  /
+
+                                +  -
+
+                                &
+
+                                <  >  <=  >=  =  !=
+
+                                and  or  xor
+
+        <font color="#009999"><b>lowest precedence:</b></font>      { , , , }
+</pre>
+
+<p>
+ Thus 2+6*3 means 2+(6*3) rather than (2+6)*3. Operators on the same line
+ above have equal precedence and are evaluated left to right. You can force
+ any order of operations by placing round brackets ( ) 
+ around an expression.
+
+<p>
+ The equals symbol '=' used in an
+ <a href="refman_2.htm#assign">assignment statement</a> is not an operator,
+ it's just part of the syntax of the language.
+
+<p>
+<hr>
+
+<a name=3></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.3 Euphoria versus Conventional Languages</_dul>
+
+</font>
+<p>
+
+ By basing Euphoria on this one, simple, general, recursive data structure,
+ a tremendous amount of the complexity normally found in programming languages
+ has been avoided. The arrays, structures, unions, arrays of records,
+ multidimensional arrays, etc. of other languages can all be easily
+ represented in Euphoria with sequences. So can higher-level structures such
+ as lists, stacks, queues, trees etc.
+
+<p>
+ Furthermore, in Euphoria you can have sequences of mixed type; you can
+ assign any object to an element of a sequence; and sequences easily grow or
+ shrink in length without your having to worry about storage allocation issues.
+ The exact layout of a data structure does not have to be declared in advance,
+ and can change dynamically as required. It is easy to write generic code,
+ where, for instance, you push or pop a mix of various kinds of data
+ objects using a single stack. Making a flexible list that contains a variety
+ of different kinds of data objects is trivial in Euphoria, but requires dozens
+ of lines of ugly code in other languages.
+
+<p>
+ Data structure manipulations are very efficient since the Euphoria interpreter
+ will point to large data objects rather than copy them.
+
+<p>
+ Programming in Euphoria is based entirely on creating and manipulating
+ flexible, dynamic sequences of data. Sequences are
+ <font color="#CC0099"><_ba><i>it</i></_ba></font> - there are no
+ other data structures to learn. You operate in a simple, safe, elastic world
+ of <font color="#CC0099"><_ba><i>values</i></_ba></font>, that is far
+ removed from the rigid, tedious, dangerous world
+ of bits, bytes, pointers and machine crashes.
+
+<p>
+ Unlike other languages such as LISP and Smalltalk, Euphoria's
+ "garbage collection" of unused storage is a continuous process that never
+ causes random delays in execution of a program, and does not pre-allocate
+ huge regions of memory.
+
+<p>
+ The language definitions of conventional languages such as C, C++, Ada, etc.
+ are very complex. Most programmers become fluent in only a subset of the
+ language. The ANSI standards for these languages read like complex legal
+ documents.
+
+<p>
+ You are forced to write different code for different data types simply to
+ copy the data, ask for its current length, concatenate it, compare it etc.
+ The manuals for those languages are packed with routines such as "strcpy",
+ "strncpy", "memcpy", "strcat",  "strlen", "strcmp", "memcmp", etc. that
+ each only work on one of the many types of data.
+
+<p>
+ Much of the complexity surrounds issues of data type. How do you define
+ new types? Which types of data can be mixed? How do you convert one type
+ into another in a way that will keep the compiler happy? When you need to
+ do something requiring flexibility at run-time, you frequently find yourself
+ trying to fake out the compiler.
+
+<p>
+ In these languages the numeric value 4 (for example) can have a different
+ meaning depending on whether it is an int, a char, a short, a double, an
+ int * etc. In Euphoria, 4 is the atom 4, period. Euphoria has something
+ called types as we shall see later, but it is a much simpler concept.
+
+<p>
+ Issues of dynamic storage allocation and deallocation consume a great deal
+ of programmer coding time and debugging time in these other languages, and
+ make the resulting programs much harder to understand. Programs that must
+ run continuously often exhibit storage "leaks", since it takes a great
+ deal of discipline to safely and properly free all blocks of storage
+ once they are no longer needed.
+
+<p>
+ Pointer variables are extensively used. The pointer has been called the
+ "go to" of data structures. It forces programmers to think of data as
+ being bound to a fixed memory location where it can be manipulated in all
+ sorts of low-level, non-portable, tricky ways. A picture of the actual
+ hardware that your program will run on is never far from your mind. Euphoria
+ does not have pointers and does not need them.
+
+<p>
+<hr>
+
+<a name=4></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.4 Declarations</_dul>
+
+</font>
+<p>
+
+<a name=41></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.4.1 Identifiers</_sul>
+
+</font>
+<p>
+
+ <font color="#993333"><b>Identifiers</b></font>, which consist of
+ variable names and other user-defined symbols, may be of any
+ length. Upper and lower case are distinct. Identifiers must start with a
+ letter and then be followed by letters, digits or underscores. The following
+ <font color="#993333"><b>reserved words</b></font>
+ have special meaning in Euphoria and may not be used as identifiers:
+
+<b><_eucode>
+    and            end             include          to
+    by             exit            not              type
+    constant       for             or               while
+    do             function        procedure        with
+    else           global          return           without
+    elsif          if              then             xor
+</_eucode></b>
+
+<p>
+ The Euphoria editor displays these words in blue.
+
+<p>
+ Identifiers can be used in naming the following:
+ <ul>
+ <li>procedures
+ <li>functions
+ <li>types
+ <li>variables
+ <li>constants
+ </ul>
+
+<p>
+<a name=411></a>
+<font color="#CC3366" size=+1>
+<br>
+
+<_sul>procedures</_sul>
+
+</font>
+<p>
+
+        These perform some computation and may have a list of parameters,
+        e.g.
+
+<_eucode>
+        procedure empty()
+        end procedure
+
+        procedure plot(integer x, integer y)
+            position(x, y)
+            puts(1, '*')
+        end procedure
+</_eucode>
+
+<p>
+        There are a fixed number of named parameters, but this is not
+        restrictive since any parameter could be a variable-length sequence
+        of arbitrary objects. In many languages variable-length parameter
+        lists are impossible.  In C, you must set up strange mechanisms that
+        are complex enough that the average programmer cannot do it without
+        consulting a manual or a local guru.
+
+<p>
+        A copy of the value of each argument is passed in. The formal
+        parameter variables may be modified inside the procedure but this does
+        not affect the value of the arguments.
+
+<dl>
+<dt>
+        <b><font color="#006633"><_sul>Performance Note:</_sul></font></b>
+<dd>
+        The interpreter does not actually copy sequences or
+        floating-point numbers unless it becomes necessary. For example,
+<_eucode>
+            y = {1,2,3,4,5,6,7,8.5,"ABC"}
+            x = y
+</_eucode>
+        The statement x = y does not actually cause a new copy of y to be
+        created. Both x and y will simply "point" to the same sequence. If we
+        later perform x[3] = 9, then a separate sequence will be created for x
+        in memory (although there will still be just one shared copy of 8.5 and
+        "ABC"). The same thing applies to "copies" of arguments passed in to
+        subroutines.
+</dl>
+
+<a name=412></a>
+<font color="#CC3366" size=+1>
+<br>
+
+<_sul>functions</_sul>
+
+</font>
+<p>
+
+        These are just like procedures, but they return a value, and can be
+        used in an expression, e.g.
+
+<_eucode>
+        function max(atom a, atom b)
+            if a >= b then
+                return a
+            else
+                return b
+            end if
+        end function
+</_eucode>
+
+<p>
+        Any Euphoria object can be returned.  You can, in effect, have
+        multiple return values, by returning a sequence of objects. e.g.
+
+<_eucode>
+        return {x_pos, y_pos}
+</_eucode>
+
+<p>
+        We will use the general term "subroutine", or simply "routine" when a
+        remark is applicable to both procedures and functions.
+
+<p>
+<a name=413></a>
+<font color="#CC3366" size=+1>
+<br>
+
+<_sul>types</_sul>
+
+</font>
+<p>
+
+        These are special functions that may be used in declaring the allowed
+        values for a variable. A type must have exactly one parameter and
+        should return an atom that is either true (non-zero) or false (zero).
+        Types can also be called just like other functions. See
+        <a href="refman_2.htm#43">2.4.3 Specifying the Type of a Variable</a>.
+
+<p>
+<a name=414></a>
+<font color="#CC3366" size=+1>
+<br>
+
+<_sul>variables</_sul>
+
+</font>
+<p>
+
+        These may be assigned values during execution e.g.
+
+<_eucode>
+        -- x may only be assigned integer values
+        integer x
+        x = 25
+
+        -- a, b and c may be assigned *any* value
+        object a, b, c
+        a = {}
+        b = a
+        c = 0
+</_eucode>
+
+<p>
+        When you declare a variable you name the variable (which protects you
+        against making spelling mistakes later on) and you specify the values
+        that may legally be assigned to the variable during execution of
+        your program.
+
+<p>
+<a name=415></a>
+<font color="#CC3366" size=+1>
+<br>
+
+<_sul>constants</_sul>
+
+</font>
+<p>
+
+        These are variables that are assigned an initial value that can
+        never change e.g.
+
+<_eucode>
+        constant MAX = 100
+        constant Upper = MAX - 10, Lower = 5
+        constant name_list = {"Fred", "George", "Larry"}
+</_eucode>
+
+<p>
+        The result of any expression can be assigned to a constant, even one
+        involving calls to previously defined functions, but once the
+        assignment is made, the value of the constant variable is "locked in".
+
+<p>
+        Constants may not be declared inside a subroutine.
+
+<p>
+<a name=42></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.4.2 Scope</_sul>
+
+</font>
+
+<p> 
+ A symbol's <i>scope</i> is the portion of the program where that symbol's
+ declaration is in effect, i.e. where that symbol is <i>visible</i>. 
+
+<p>
+ Euphoria has many pre-defined procedures, functions and types.
+ These are defined automatically at the start of any program.
+ The Euphoria editor shows them in magenta. These pre-defined names 
+ are not reserved. You can override them with your own variables or routines.
+
+<p>
+ Every user-defined symbol must be declared before it is used. 
+ You can read a Euphoria program
+ from beginning to end without encountering any user-defined variables 
+ or routines that
+ haven't been defined yet. It is possible to call a routine that comes later
+ in the source, but you must use the special functions,
+ <font color="#993333"><b>routine_id()</b></font>,
+ and either <font color="#993333"><b>call_func()</b></font> or
+ <font color="#993333"><b>call_proc()</b></font> to do it.
+ See <a href="library.htm#dyn_call">Part II -
+ Library Routines - Dynamic Calls</a>.
+
+<p>
+ Procedures, functions and types can call themselves <i>recursively</i>. Mutual
+ recursion, where routine A calls routine B which directly or indirectly calls
+ routine A, requires the <a class="brown" href="lib_p_r.htm#routine_id">
+ <b>routine_id()</b></a> mechanism.
+
+<p>
+ <a name=scope></a>
+ A symbol is defined from the point where it is declared to the end of its
+ <font color="#993333"><_bq>scope</_bq></font>.
+ The scope of a variable declared inside a procedure or function (a
+ <font color="#993333"><_bq>private</_bq></font> variable) ends
+ at the end of the procedure or function.  The scope
+ of all other variables, constants, procedures, functions and types ends at
+ the end of the source file in which they are declared and they are referred
+ to as <font color="#993333"><_bq>local</_bq></font>,
+ unless the keyword
+ <font color="#993333"><_bq>global</_bq></font> precedes
+ their declaration, in which case their scope extends indefinitely.
+
+<p>
+ When you <b>include</b> a Euphoria file in a main file (see
+ <a href="refman_2.htm#6">2.6 Special Top-Level Statements</a>),
+ only the variables and routines declared using the
+ <font color="#993333"><_bq>global</_bq></font> keyword are
+ accessible or even visible to the main file. The other, non-global,
+ declarations in the included file are forgotten at the end of
+ the included file, and you will get an error message, "not declared", if you
+ try to use them in the main file.
+
+<p>
+ Symbols marked as <font color="#993333"><_bq>global</_bq></font> 
+ can be used externally. All other symbols can only be used internally 
+ within their own file. This information is helpful when maintaining 
+ or enhancing the file, or when learning how to use the file. You 
+ can make changes to the internal routines and variables, without
+ having to examine other files, or notify other users of the 
+ include file.
+ 
+<p>
+Sometimes, when using include files
+developed by others, you will encounter a naming conflict.
+One of the include file authors has used the same name for a global symbol
+as one of the other authors. If you have the source, you can
+simply edit one of the include files to correct the problem, but then
+you'd have repeat this process whenever a new version of the include
+file was released. Euphoria has a simpler way to solve this. Using
+an extension to the include statement, you can say for example:
+
+<_eucode>
+     include johns_file.e as john
+     include bills_file.e as bill
+
+     john:x += 1
+     bill:x += 2
+</_eucode>
+
+In this case, the variable x was declared in two different files,
+and you want to refer to both variables in your file.
+Using the <i>namespace identifier</i> of either john or bill, you can
+attach a prefix to x to indicate which x you are referring to.
+We sometimes say that john refers to one <i>namespace</i>, while bill 
+refers to another distinct <i>namespace</i>. 
+You can attach a namespace identifier
+to any user-defined variable, constant, procedure or function. You can do it
+to solve a conflict, or simply to make things clearer. A namespace identifier
+has local scope. It is known only within the file that declares it,
+i.e. the file that contains the include statement. Different files
+might define different namespace identifiers to refer to the same 
+included file.
+
+<p> 
+ Euphoria encourages you to restrict the scope of symbols. If all symbols were
+ automatically global to the whole program, you might have a lot of
+ naming conflicts, especially in a large program consisting of files
+ written by many different programmers. A naming conflict might cause
+ a compiler error message, or it could lead to a very subtle bug, where
+ different parts of a program accidentally modify the same variable without
+ being aware of it.
+ Try to use the most restrictive scope that you can. Make variables
+ <font color="#993333"><b>private</b></font> to
+ one routine where possible, and where that isn't possible, make them
+ <font color="#993333"><b>local</b></font> to a file, rather than
+ <font color="#993333"><b>global</b></font> to the whole program.
+
+<p> When Euphoria looks up the declaration of a symbol, 
+    it first checks the current routine, then the current file, 
+    then globals in other files. Symbols that are more local
+    will <i>override</i> symbols that are more global.
+    At the end of the scope of the local symbol, the more global symbol 
+    will be visible again.
+
+<p>
+ <font color="#993333"><b>Constant</b></font> declarations must be
+ outside of any subroutine. Constants can be global or local, but 
+ not <font color="#993333"><b>private</b></font>.
+
+<p>
+ Variable declarations inside a subroutine must all appear at the beginning,
+ before the executable statements of the subroutine.
+
+<p>
+ Declarations at the top level, outside of any subroutine, must not
+ be nested inside a loop or <a href="refman_2.htm#if">if-statement</a>.
+
+<p>
+ <a name=loop_scope></a>
+ The controlling variable used in a
+ <a href="refman_2.htm#for">for-loop</a> is special. It is automatically
+ declared at the beginning of the loop, and its scope ends at the end of the
+ for-loop. If the loop is inside a function or procedure, the loop variable is
+ a <font color="#993333"><b>private</b></font> variable and may not have the
+ same name as any other <font color="#993333"><b>private</b></font>
+ variable. When the loop is at the top level, outside of any function or
+ procedure, the loop variable is a <font color="#993333"><b>local</b></font>
+ variable and may not have the same name as any other
+ <font color="#993333"><b>local</b></font> variable in that file. You can
+ use the same name in many different for-loops as long as the loops aren't
+ nested. You do not
+ declare loop variables as you would other variables. The range of values
+ specified in the for statement defines the legal values of the loop
+ variable - specifying a type would be redundant and is not allowed.
+
+<p>
+
+<a name=43></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.4.3 Specifying the Type of a Variable</_sul>
+
+</font>
+<p>
+
+ So far you've already seen some examples of variable types but now we will
+ define types more precisely.
+
+<p>
+ Variable declarations have a type name followed by a list of the variables
+ being declared. For example,
+<_eucode>
+        object a
+
+        global integer x, y, z
+
+        procedure fred(sequence q, sequence r)
+</_eucode>
+
+<p>
+ The types:
+ <a class="brown" href="refman_2.htm#1"><b>object</b>,
+ <b>sequence</b>, <b>atom</b></a>
+ and <font color="#993333"><b>integer</b></font> are <b>predefined</b>.
+ Variables of type <font color="#993333"><b>object</b></font> may
+ take on <font color="#CC0099"><_ba><i>any</i></_ba></font> value.
+ Those declared with type <font color="#993333"><b>sequence</b></font>
+ must always be sequences.
+ Those declared with type <font color="#993333"><b>atom</b></font> must
+ always be atoms.
+
+ <a name=integer></a>
+ Those declared with type <font color="#993333"><b>integer</b></font> must
+ be atoms with integer values from -1073741824
+ to +1073741823 inclusive. You can perform exact calculations on larger integer
+ values, up to about 15 decimal digits, but declare them as
+ <font color="#993333"><b>atom</b></font>, rather than integer.
+
+<dl>
+<dt>
+<b><font color="#006633"><_sul>Note:</_sul></font></b>
+
+<dd>
+ In a procedure or function parameter list like the one for fred() above,
+ a type name may only be followed by a single parameter name.
+
+<p>
+<dt>
+<b><font color="#006633"><_sul>Performance Note:</_sul></font></b>
+
+<dd>
+ Calculations using variables declared as integer will
+ usually be somewhat faster than calculations involving variables declared as
+ atom. If your machine has floating-point hardware, Euphoria will use it to
+ manipulate atoms that aren't representable as integers. If your machine
+ doesn't have floating-point hardware, Euphoria will call software
+ floating-point arithmetic routines contained in
+ <font color="#993333"><b>ex.exe</b></font> (or in Windows).
+ You can force ex.exe to bypass any floating-point hardware, by setting an
+ environment variable:
+
+<pre>
+            SET NO87=1
+</pre>
+
+ The slower software routines will be used, but this could be of some
+ advantage if you are worried about the floating-point bug in some early
+ Pentium chips.
+</dl>
+
+<p>
+ <a name=type></a>
+ To augment the <a href="refman_2.htm#43">predefined types</a>, you can create
+ <font color="#993333"><b>user-defined types</b></font>. All you have to
+ do is define a single-parameter function, but declare it with
+ <font color="#993333"><b>type ... end type</b></font> instead of
+ <font color="#993333"><b>function ... end function</b></font>.
+ For example,
+
+<_eucode>
+        type hour(integer x)
+            return x >= 0 and x <= 23
+        end type
+
+        hour h1, h2
+
+        h1 = 10      -- ok
+        h2 = 25      -- error! program aborts with a message
+</_eucode>
+
+<p>
+ Variables h1 and h2 can only be assigned integer values in the range 0 to 23
+ inclusive. After each assignment to h1 or h2 the interpreter will call hour(),
+ passing the new value.  The value will first be checked to see if it is an
+ integer (because of "integer x"). If it is, the return statement will be
+ executed to test the value of x (i.e. the new value of h1 or h2).  If hour()
+ returns true, execution continues normally. If hour() returns false then the
+ program is aborted with a suitable diagnostic message.
+
+<p>
+ "hour" can be used to declare subroutine parameters as well:
+
+<_eucode>
+        procedure set_time(hour h)
+</_eucode>
+
+<p>
+ set_time() can only be called with a reasonable value for parameter h,
+ otherwise the program will abort with a message.
+
+<p>
+ A variable's type will be checked after each assignment to the variable
+ (except where the compiler can predetermine that a check will not be
+ necessary), and the program will terminate immediately if the type function
+ returns false.  Subroutine parameter types are checked each time that the
+ subroutine is called. This checking guarantees that a variable can never have
+ a value that does not belong to the type of that variable.
+
+<p>
+ <a name=typechk></a>
+ Unlike other languages, the type of a variable does not affect any
+ calculations on the variable. Only the value of the variable matters in an
+ expression. The type just serves as an error check to prevent any "corruption"
+ of the variable.
+
+<p>
+ User-defined types can catch unexpected logical errors in your program.
+ They are not designed to catch or correct user input errors.
+
+<p>
+ Type checking can be turned off or on between subroutines using the
+ <font color="#993333"><_bq>with type_check</_bq></font> or
+ <font color="#993333"><_bq>without type_check</_bq></font>
+ <a href="refman_2.htm#62">special statements</a>.
+ It is initially on by default.
+
+ 
+<dl>
+<dt>
+<b><font color="#006633"><_sul>Note to Benchmarkers:</_sul></font></b>
+<dd>
+ When comparing the speed of Euphoria programs against
+ programs written in other languages, you should specify
+ <font color="#993333"><b>without type_check</b></font> at the top of the file.
+ This gives Euphoria permission to skip run-time
+ type checks, thereby saving some execution time. All other checks are still
+ performed, e.g. subscript checking, uninitialized variable checking etc.
+ Even when you turn off type checking, Euphoria reserves the right to make
+ checks at strategic places, since this can actually allow it to run your
+ program <font color="#CC0099"><_ba><i>faster</i></_ba></font> in many cases.
+ So you may still get a type check failure
+ even when you have turned off type checking. Whether type checking is
+ on or off, you will never get a <b><i>machine-level</i></b> exception.
+ <font color="#CC0099"><b>You will always get a
+ meaningful message from Euphoria when something goes wrong.</b></font>
+ (<i>This might not be the case when you <a href="lib_p_r.htm#poke">poke</a>
+ directly into memory, or call routines written in C or machine code.</i>)
+</dl>
+
+<p>
+ Euphoria's method of defining types is simpler than what you will find
+ in other languages, yet Euphoria provides the programmer with
+ <font color="#CC0099"><_ba><i>greater</i></_ba></font> flexibility in
+ defining the legal values for a type of data. Any algorithm
+ can be used to include or exclude values. You can even declare a variable
+ to be of type <font color="#993333"><_bq>object</_bq></font> which
+ will allow it to take on <font color="#CC0099"><_ba><i>any</i></_ba></font>
+ value. Routines can
+ be written to work with very specific types, or very general types.
+
+<p>
+ For many programs, there is little advantage in defining new types, and
+ you may wish to stick with the four
+ <a href="refman_2.htm#43">predefined types</a>. 
+ Unlike other languages, Euphoria's type mechanism is optional. 
+ You don't need it to create a program. 
+
+<p>
+ However, for larger programs, strict type definitions can 
+ aid the process of debugging.  Logic errors are caught close to 
+ their source and are not allowed to propagate in subtle ways 
+ through the rest of the program.
+ Furthermore, it is easier to reason about the misbehavior of a
+ section of code when you are guaranteed that the variables involved
+ always had a legal value, if not the desired value.
+
+<p>
+ Types also provide meaningful, machine-checkable documentation about your
+ program, making it easier for you or others to understand your code at a
+ later date. Combined with the
+ <a href="refman_2.htm#21">subscript checking</a>, uninitialized variable
+ checking, and other checking that is always present, strict run-time type
+ checking makes debugging much easier in Euphoria than in most other
+ languages. It also increases the reliability of the final program since
+ many latent bugs that would have survived the testing phase in other
+ languages will have been caught by Euphoria.
+
+<dl>
+<dt>
+<b><font color="#006633"><_sul>Anecdote 1:</_sul></font></b>
+<dd>
+ In porting a large C program to Euphoria, a number
+ of latent bugs were discovered. Although this C program was believed to be
+ totally "correct", we found: a situation where an uninitialized variable
+ was being read; a place where element number "-1" of an array was routinely
+ written and read; and a situation where something was written just off the
+ screen. These problems resulted in errors that weren't easily visible to a
+ casual observer, so they had survived testing of the C code.
+
+<p>
+<dt>
+<b><font color="#006633"><_sul>Anecdote 2:</_sul></font></b>
+<dd>
+ The Quick Sort algorithm presented on page 117 of <i>Writing Efficient
+ Programs</i> by Jon Bentley has a subscript error! The algorithm will
+ sometimes read the element just <i>before</i> the beginning of the array
+ to be sorted, and will sometimes read the element just <i>after</i>
+ the end of the array.
+ Whatever garbage is read, the algorithm will still work - this is probably
+ why the bug was never caught. But what if there isn't any (virtual) memory
+ just before or just after the array? Bentley later modifies the algorithm
+ such that this bug goes away -- but he presented this version as being
+ correct. <b><i><font color="#006633">Even the experts need subscript
+ checking!</font></i></b>
+
+<p>
+<dt>
+<b><font color="#006633"><_sul>Performance Note:</_sul></font></b>
+
+<dd>
+ When typical user-defined types are used extensively, type
+ checking adds only 20 to 40 percent to execution time. Leave it on unless
+ you really need the extra speed. You might also consider turning it off for
+ just a few heavily-executed routines.
+ <a href="refman_3.htm#2">Profiling</a> can help with this decision.
+
+</dl>
+
+<hr>
+
+<a name=5></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.5 Statements</_dul>
+
+</font>
+<p>
+
+ The following kinds of executable statements are available:
+<ul>
+<li>
+        <a href="refman_2.htm#assign">assignment statement</a>
+<li>
+        <a href="refman_2.htm#proc">procedure call</a>
+<li>
+        <a href="refman_2.htm#if">if statement</a>
+<li>
+        <a href="refman_2.htm#while">while statement</a>
+<li>
+        <a href="refman_2.htm#for">for statement</a>
+<li>
+        <a href="refman_2.htm#return">return statement</a>
+<li>
+        <a href="refman_2.htm#exit">exit statement</a>
+</ul>
+
+<p>
+ Semicolons are not used in Euphoria, but you are free to put as many
+ statements as you like on one line, or to split a single statement across
+ many lines. You may not split a statement in the middle of an identifier,
+ string, number or keyword.
+
+<p>
+<a name=assign></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.5.1 assignment statement</_sul>
+
+</font>
+<p>
+
+ An <font color="#993333"><b>assignment statement</b></font> assigns
+ the value of an expression to a simple
+ variable, or to a subscript or slice of a variable. e.g.
+
+<_eucode>
+        x = a + b
+
+        y[i] = y[i] + 1
+
+        y[i..j] = {1, 2, 3}
+</_eucode>
+
+<p>
+ The previous value of the variable, or element(s) of the subscripted or
+ sliced variable are discarded.  For example, suppose x was a 1000-element
+ sequence that we had initialized with:
+
+<_eucode>
+        object x
+
+        x = repeat(0, 1000)  -- a sequence of 1000 zeros
+</_eucode>
+
+ and then later we assigned an atom to x with:
+
+<_eucode>
+        x = 7
+</_eucode>
+
+ This is perfectly legal since x is declared as an
+ <font color="#993333"><b>object</b></font>. The previous value
+ of x, namely the 1000-element sequence, would simply disappear. Actually,
+ the space consumed by the 1000-element sequence will be automatically
+ recycled due to Euphoria's dynamic storage allocation.
+
+<p>
+ Note that the equals symbol '=' is used for both assignment and for
+ <a href="refman_2.htm#23">equality testing</a>.
+ There is never any confusion because an assignment in Euphoria is
+ a statement only, it can't be used as an expression (as in C).
+
+<p>
+<a name=assignop></a>
+<font color="#CC3366" size=+1>
+<br>
+
+<_sul>Assignment with Operator</_sul>
+
+</font>
+<p>
+
+ Euphoria also provides some additional forms of the assignment statement.
+
+<p> To save typing, and to make your code a bit neater, you can combine
+ assignment with one of the operators:<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font color="#993333"><b>+ &nbsp; - &nbsp;
+                                / &nbsp; * &nbsp; &</b></font>
+
+<p> For example, instead of saying:
+
+<_eucode>
+      mylongvarname = mylongvarname + 1
+</_eucode>
+You can say:
+<_eucode>
+      mylongvarname += 1
+</_eucode>
+
+Instead of saying:
+<_eucode>
+      galaxy[q_row][q_col][q_size] = galaxy[q_row][q_col][q_size] * 10
+</_eucode>
+You can say:
+<_eucode>
+      galaxy[q_row][q_col][q_size] *= 10
+</_eucode>
+and instead of saying:
+<_eucode>
+      accounts[start..finish] = accounts[start..finish] / 10
+</_eucode>
+You can say:
+<_eucode>
+      accounts[start..finish] /= 10
+</_eucode>
+
+<p>
+In general, whenever you have an assignment of the form:
+<pre>
+      <b><i>left-hand-side = left-hand-side op expression</i></b>
+</pre>
+You can say:
+<pre>
+      <b><i>left-hand-side op= expression</i></b>
+</pre>
+where <b><i>op</i></b> is one of:&nbsp;&nbsp;&nbsp;
+  <font color="#993333"><b> + &nbsp; - &nbsp; * &nbsp; / &nbsp; &</b></font>
+<p>
+When the left-hand-side contains multiple subscripts/slices, the
+<font color="#993333"><_bq><i>op=</i></_bq></font>
+form will usually execute faster than the longer form. When you get used
+to it, you may find the <font color="#993333"><_bq><i>op=</i></_bq></font>
+form to be slightly more readable than the long form, since you don't
+have to visually compare the left-hand-side against the copy of itself
+on the right side.
+
+<p>
+<a name=proc></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.5.2 procedure call</_sul>
+
+</font>
+<p>
+ A <font color="#993333"><b>procedure call</b></font> starts execution
+ of a procedure, passing it an optional list of argument values. e.g.
+
+<_eucode>
+        plot(x, 23)
+</_eucode>
+
+<a name=if></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.5.3 if statement</_sul>
+
+</font>
+<p>
+ An <font color="#993333"><b>if statement</b></font> tests a condition
+ to see if it is 0 (false) or non-zero (true) and then executes the
+ appropriate series of statements. There may
+ be optional <font color="#993333"><b>elsif</b></font> and
+ <font color="#993333"><b>else</b></font> clauses. e.g.
+
+<_eucode>
+        if a < b then
+            x = 1
+        end if
+
+
+        if a = 9 and find(0, s) then
+            x = 4
+            y = 5
+        else
+            z = 8
+        end if
+
+
+        if char = 'a' then
+            x = 1
+        elsif char = 'b' or char = 'B' then
+            x = 2
+        elsif char = 'c' then
+            x = 3
+        else
+            x = -1
+        end if
+</_eucode>
+
+<p>
+ Notice that <font color="#993333"><_bq>elsif</_bq></font> is a contraction
+ of <font color="#993333"><_bq>else if</_bq></font>, but it's cleaner because
+ it doesn't require an <font color="#993333"><_bq>end if</_bq></font> to go
+ with it. There is just one <font color="#993333"><_bq>end if</_bq></font> for
+ the entire <font color="#993333"><b>if</b></font> statement, even when
+ there are many <b><font color="#993333">elsif's</font></b> contained in it.
+<p>
+The <font color="#993333"><b>if</b></font> and
+<font color="#993333"><b>elsif</b></font> conditions are tested using
+<a href="refman_2.htm#shortcir">short-circuit evaluation</a>. 
+<p>
+<a name=while></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.5.4 while statement</_sul>
+
+</font>
+<p>
+ A <font color="#993333"><b>while statement</b></font> tests a condition
+ to see if it is non-zero (true), and while it is true a loop is executed. e.g.
+
+<_eucode>
+        while x > 0 do
+            a = a * 2
+            x = x - 1
+        end while
+</_eucode>
+
+<a name=shortcir></a>
+<font color="#CC3366" size=+1>
+<br>
+
+<_sul>Short-Circuit Evaluation</_sul>
+
+</font>
+<p>
+ When the condition tested by <font color="#993333"><_bq>if</_bq></font>,
+ <font color="#993333"><_bq>elsif</_bq></font>, or
+ <font color="#993333"><_bq>while</_bq></font> contains
+ <font color="#993333"><_bq>and</_bq></font> or
+ <font color="#993333"><_bq>or</_bq></font> operators,
+ <font color="#993333"><_ba><i>short-circuit</i></_ba></font> evaluation
+ will be used.
+ For example,
+
+ <_eucode>
+        if a < 0 and b > 0 then ...
+ </_eucode>
+
+ If a < 0 is false, then Euphoria will not bother to test if b is greater
+ than 0. It will assume that the overall result is false. Similarly,
+
+ <_eucode>
+        if a < 0 or b > 0 then ...
+ </_eucode>
+
+ if a < 0 is true, then Euphoria will immediately decide that the result true,
+ without testing the value of b.
+
+<p>
+ In general, whenever we have a condition of the form:
+<_eucode>
+        A and B
+</_eucode>
+ where A and B can be any two expressions,
+ Euphoria will take a short-cut when A is false and immediately
+ make the overall result false, without even looking at expression B.
+
+<p>
+ Similarly, with:
+<_eucode>
+        A or B
+</_eucode>
+ when A is true, Euphoria will skip the evaluation of expression B,
+ and declare the result to be true.
+
+<p>
+ If the expression B contains a call to a function, and that function has
+ possible <b>side-effects</b>, i.e. it might do more than just return a value,
+ you will get a compile-time warning. Older versions (pre-2.1) of Euphoria
+ did not use <font color="#993333"><b>short-circuit</b></font> evaluation,
+ and it's possible that some old code will no longer work correctly,
+ although a search of the Euphoria archives did not turn up any programs
+ that depend on side-effects in this way.
+
+<p>
+ The expression, B, could contain something that would normally cause
+ a run-time error. If Euphoria skips the evaluation of B, the error will not
+ be discovered. For instance:
+
+ <_eucode>
+        if x != 0 and 1/x > 10 then  -- divide by zero error avoided
+
+        while 1 or {1,2,3,4,5} do    -- illegal sequence result avoided
+ </_eucode>
+
+ B could even contain uninitialized variables, out-of-bounds subscripts etc.
+
+<p>
+ This may look like sloppy coding, but in fact it often allows you to
+ write something in a simpler and more readable way. For instance:
+ <_eucode>
+        if atom(x) or length(x)=1 then
+ </_eucode>
+
+ Without short-circuiting, you would have a problem when x was an atom,
+ since length is not defined for atoms. With short-circuiting, length(x)
+ will only be checked when x is a sequence. Similarly:
+
+ <_eucode>
+        -- find 'a' or 'A' in s
+        i = 1
+        while i <= length(s) and s[i] != 'a' and s[i] != 'A' do
+             i += 1
+        end while
+ </_eucode>
+
+ In this loop the variable i might eventually become
+ greater than length(s). Without short-circuit evaluation, a subscript
+ out-of-bounds error will occur when s[i] is evaluated on the final
+ iteration. With short-circuiting, the loop will terminate immediately when
+ i <= length(s) becomes false. Euphoria will not evaluate s[i] != 'a'
+ and will not evaluate s[i] != 'A'. No subscript error will occur.
+
+<p>
+ <font color="#993333"><b>Short-circuit</b></font> evaluation of
+ <font color="#993333"><_bq>and</_bq></font>
+ and <font color="#993333"><_bq>or</_bq></font> takes place for
+ <font color="#993333"><_bq>if</_bq></font>,
+ <font color="#993333"><_bq>elsif</_bq></font> and
+ <font color="#993333"><_bq>while</_bq></font> conditions only.
+ It is not used in other contexts. For example, the assignment statement:
+
+ <_eucode>
+        x = 1 or {1,2,3,4,5}  -- x should be set to {1,1,1,1,1}
+ </_eucode>
+
+ If short-circuiting were used here, we would set x to 1, and not even
+ look at {1,2,3,4,5}. This would be wrong. Short-circuiting can be used
+ in if/elsif/while conditions because we only care if the result is true
+ or false, and conditions are required to produce an atom as a result.
+
+<p>
+<a name=for></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.5.5 for statement</_sul>
+
+</font>
+<p>
+ A <font color="#993333"><b>for statement</b></font> sets up a special
+ loop with a controlling <font color="#993333"><b>loop variable</b></font>
+ that runs from an initial value up or down to some final value. e.g.
+
+<_eucode>
+        for i = 1 to 10 do
+            ? i   -- ? is a short form for print()
+        end for
+
+        -- fractional numbers allowed too
+        for i = 10.0 to 20.5 by 0.3 do
+            for j = 20 to 10 by -2 do    -- counting down
+                ? {i, j}
+            end for
+        end for
+</_eucode>
+
+<p>
+ The <font color="#993333"><b>loop variable</b></font> is
+ declared automatically and exists until the end of the
+ loop. Outside of the loop the variable has no value and is not even declared.
+ If you need its final value, copy it into another variable before leaving
+ the loop. The compiler will not allow any assignments to a loop variable. The
+ initial value, loop limit and increment must all be atoms. If no increment
+ is specified then +1 is assumed. The limit and increment values are
+ established when the loop is entered, and are not affected by anything that
+ happens during the execution of the loop. See also the
+ <a href="refman_2.htm#loop_scope">scope of the loop variable in 2.4.2
+ Scope</a>.
+
+<p>
+<a name=return></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.5.6 return statement</_sul>
+
+</font>
+<p>
+ A <font color="#993333"><b>return statement</b></font> returns immediately
+ from a subroutine. If the subroutine is a function
+ or type then a value must also be returned. e.g.
+
+<_eucode>
+        return
+
+        return {50, "FRED", {}}
+</_eucode>
+
+<a name=exit></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.5.7 exit statement</_sul>
+
+</font>
+<p>
+ An <font color="#993333"><b>exit statement</b></font> may appear inside a
+ <a href="refman_2.htm#while">while-loop</a> or a
+ <a href="refman_2.htm#for">for-loop</a>. It causes immediate termination of
+ the loop, with control passing to the first statement after the loop. e.g.
+
+<_eucode>
+        for i = 1 to 100 do
+            if a[i] = x then
+                location = i
+                exit
+            end if
+        end for
+</_eucode>
+
+<p>
+ It is also quite common to see something like this:
+
+<_eucode>
+        constant TRUE = 1
+
+        while TRUE do
+            ...
+            if some_condition then
+                exit
+            end if
+            ...
+        end while
+</_eucode>
+
+ i.e. an "infinite" while-loop that actually terminates via an
+ <font color="#993333"><b>exit statement</b></font> at some arbitrary
+ point in the body of the loop. 
+ 
+<dl>
+<dt>
+ <b><font color="#006633"><_sul>Performance Note:</_sul></font></b>
+<dd>
+ Euphoria optimizes this type of loop.
+ At run-time, no test is performed at the top of the loop. There's 
+ just a simple unconditional jump from <b>end while</b> back to 
+ the first statement inside the loop.
+</dl>
+ 
+<p>
+ With <font color="#993333"><b>ex.exe</b></font>, if you happen to create
+ a real infinite loop, with no
+ input/output taking place, there is no easy way to stop it. You will have to
+ type Control-Alt-Delete to either reboot, or (under Windows) terminate your
+ DOS prompt session. If the program had files open for writing, it would be
+ advisable to run <b>scandisk</b> to check your file system integrity.
+ Only when your program is waiting for keyboard input, will control-c abort
+ the program (unless <a href="lib_a_b.htm#allow_break">allow_break(0)</a>
+ was used).
+
+<p>
+ With <font color="#993333"><b>exw.exe</b></font> or 
+      <font color="#993333"><b>exu</b></font>, control-c will
+ always stop your program immediately.
+
+<p>
+<hr>
+
+<a name=6></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_dul>2.6 Special Top-Level Statements</_dul>
+
+</font>
+<p>
+
+ Before any of your statements are executed, the Euphoria front-end 
+ quickly reads your entire program. All statements are 
+ syntax checked and converted to a low-level intermediate language (IL). 
+ The interpreter immediately executes the IL. The translator  
+ converts the IL to C. The binder/shrouder saves the IL on disk for later
+ execution. These three tools all share the same front-end 
+ (written in Euphoria).
+ 
+ <p>
+ If your program contains only routine and variable declarations, 
+ but no top-level executable statements, then nothing will
+ happen when you run it (other than syntax checking). You need
+ a top-level statement to call your main routine (see
+ <a href="refman_1.htm#1">1.1 Example Program</a>).
+ It's quite possible to have a program with nothing but
+ top-level executable statements and no routines. For example you might 
+ want to use Euphoria as a simple calculator, typing just a few
+ <a href="lib_p_r.htm#print">print</a>
+ (or <a href="lib_a_b.htm#?">?</a>) statements into a file, and
+ then executing it. 
+
+<p>
+ As we have seen, you can use any Euphoria
+ <a href="refman_2.htm#5">statement</a>, including
+ <a href="refman_2.htm#for">for-loops</a>,
+ <a href="refman_2.htm#while">while-loops</a>,
+ <a href="refman_2.htm#if">if</a> statements etc. (but not
+ <a href="refman_2.htm#return">return</a>), at the top level i.e.
+ <_ba><i>outside</i></_ba> of any
+ <a href="refman_2.htm#412">function</a> or
+ <a href="refman_2.htm#411">procedure</a>.
+ In addition, the following special statements may
+ <font color="#CC0099"><_ba><i>only</i></_ba></font> appear at the top level:
+<ul>
+<li> include
+<li> with / without
+</ul>
+
+<p>
+<a name=61></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.6.1 include</_sul>
+
+</font>
+<p>
+When you write a large program it is often helpful
+to break it up into logically separate files, by using
+<font color="#993333"><b>include statements</b></font>.
+Sometimes you will want to reuse some code that you have previously
+written, or that someone else has written. Rather than copy this code into
+your main program, you can use an
+<font color="#993333"><b>include statement</b></font> to refer to the file
+containing the code. The first form of the include statement is:
+
+<dl>
+<dt>
+ <font color="#993333"><b>include</b></font> <b><i>filename</i></b>
+
+<dd>
+                   This reads in (compiles) a Euphoria source file.
+
+<p>
+                   Some Examples:<br>
+<_eucode>
+                   include graphics.e
+</_eucode>
+<_eucode>
+                   include \mylib\myroutines.e
+</_eucode>
+<p>
+		   Any top-level code in the included file will be executed.
+<p>
+                   Any <a href="refman_2.htm#scope">global symbols</a>
+                   that have already been defined in the main file will
+                   be visible in the included file.
+
+<p>
+                   <b><font color="#006633">N.B.</font></b> Only those
+                   symbols defined as
+                   <a href="refman_2.htm#scope"><_bq>global</_bq></a>
+                   in the included file will be visible (accessible) in the
+                   remainder of the program.
+
+<p>
+                   If an absolute <i>filename</i> is given,
+                   Euphoria will open it and start parsing it. When
+                   a relative <i>filename</i> is given, Euphoria will
+                   try to open the file relative to the following directories, 
+                   in the following order:
+                   <ol>
+                   <li> 
+                   <p>
+                   The directory containing the current source file.
+                   i.e. the source file that contains the include statement
+                   that is being processed..
+                   <li> 
+                   <p>
+                   The directory containing the main file given on
+                   the interpreter, translator or binder
+                   <a href="refman_1.htm#3">command-line</a>.
+                   <li> 
+                   <p>
+                   If you've defined an environment
+                   variable, <b>EUINC</b>, Euphoria will check each directory listed
+                   in <b>EUINC</b> (from left to right).
+                   <b>EUINC</b> should be a list of directories, separated by 
+                   semicolons (colons on Linux / FreeBSD), similar in form to your PATH 
+                   variable. <b>EUINC</b> can be added to your set of Linux / FreeBSD
+                   or DOS / Windows environment  variables. 
+                   (Via Control Panel / Performance & Maintenance 
+                   / System / Advanced on XP, or AUTOEXEC.BAT on older versions of Windows).
+                   e.g.<br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB<br>
+                   
+                   <b>EUINC</b> lets you organize your include files according
+                   to application areas, and avoid adding
+                   numerous unrelated files to euphoria\include.
+                   
+                   <li> 
+                   <p>
+                   Finally, if it still hasn't found the file,
+                   it will look in        
+                   <font color="#5500FF"><b>euphoria\include</b></font>.
+                   This directory contains the standard
+                   Euphoria include files. The environment variable <b>EUDIR</b> tells
+                   Euphoria
+                   where to find your
+                   <font color="#993333"><b>euphoria</b></font> directory.
+                   </ol>
+
+<p>
+                   An included file can include other files. In fact, you can
+                   "nest" included files up to 30 levels deep.
+
+<p>                Include file names typically end in <b>.e</b>, or sometimes
+                   <b>.ew</b> or <b>.eu</b> (when they are intended for use 
+                   with Windows or Linux).
+                   This is just a convention. It is not required.
+
+<p>
+                   If your filename (or path) contains blanks, you must
+                   enclose it in double-quotes, otherwise quotes are optional.
+                   Also, be sure to double-up your backslashes.
+                   For example:<br>
+<_eucode>
+                   include "c:\\program files\\myfile.e"
+</_eucode>
+<p>
+                   Other than possibly defining a new namespace identifier
+                   (see below), an include statement will be quietly ignored 
+                   if the same file has already been included.
+
+<p>
+                   An include statement must be written on a line by itself.
+                   Only a comment can appear after it on the same line.
+</dl>
+The second form of the include statement is:
+
+<dl>
+<dt>
+ <font color="#993333"><b>include</b></font> <b><i>filename</i> as <i>namespace_identifier</i></b>
+
+<dd>
+<p>
+This is just like the simple include, but it also defines a
+<i>namespace identifier</i> that can be attached to global symbols
+in the included file that you want to refer to in the main file. This might be
+necessary to disambiguate references to those symbols, or you might feel
+that it makes your code more readable. 
+See <a href=refman_2.htm#42>Scope Rules</a> for more.
+</dl>
+
+<a name=62></a>
+<font color="#FF0099" size=+1>
+<br>
+
+<_sul>2.6.2 with / without</_sul>
+
+</font>
+<p>
+    These special statements affect the way that Euphoria
+    translates your program into internal form. They are not meant to
+    change the logic of your program, but they may affect the diagnostic
+    information that you get from running your program.
+    See <a href="refman_3.htm">3. Debugging and Profiling</a> for more
+    information.
+
+<dl>
+<dt>
+ <font color="#993333"><b>with</b></font>
+
+<dd>
+       This turns <b>on</b> one of the options:
+       <b>
+       <a class="brown" href="refman_3.htm#2">profile</a>,
+       <a class="brown" href="refman_3.htm#2">profile_time</a>,
+       <a class="brown" href="refman_3.htm#trace">trace</a>,
+       <font color="#993333">warning</font></b> or
+       <a class="brown" href="refman_2.htm#typechk"><b>type_check</b>
+       </a>.
+        Options <font color="#993333"><b>warning</b></font> and
+        <font color="#993333"><b>type_check</b></font> are
+        initially on, while
+        <font color="#993333"><b>profile</b></font>,
+        <font color="#993333"><b>profile_time</b></font> and
+        <font color="#993333"><b>trace</b></font> are initially off.
+        <p>
+        Any warnings that are issued will appear on your screen after your
+        program has finished execution. Warnings indicate very minor problems.
+        A warning will never stop your program from executing.
+<p>
+<dt>
+ <font color="#993333"><b>without</b></font>
+
+<dd>
+    This turns <b>off</b> one of the above options.
+
+</dl>
+
+<p>
+There is also a rarely-used special <font color="#993333"><b>with</b></font> 
+option where a code number appears after 
+<font color="#993333"><b>with</b></font>.
+In previous releases this code was used by RDS to make a file exempt 
+from adding to the statement count in the old "Public Domain" Edition.
+
+<p>
+You can select any combination of settings, and you can change the settings,
+but the changes must occur
+<_ba><i>between</i></_ba> subroutines, not
+within a subroutine. The only exception is that you can only turn on one
+type of profiling for a given run of your program.
+
+<p>
+An <b>included file</b> inherits the
+<font color="#993333"><b>with/without</b></font> settings in
+effect at the point where it is included.
+An included file can change these settings, but they will revert back
+to their original state at the end of the included file.
+For instance, an included file might turn off
+warnings for itself and (initially) for any files that it includes,
+but this will not turn off warnings for the main file.
+
+<_continue
+  href="refman_3.htm"
+  name="3. Debugging and Profiling"
+>
+
+</_width>
+</body>
+</html>

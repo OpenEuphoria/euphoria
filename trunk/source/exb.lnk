@@ -1,0 +1,29 @@
+option osname='CauseWay'
+libpath C:\WATCOM\lib386
+libpath C:\WATCOM\lib386\dos
+OPTION stub=..\bin\cwstub.exe
+format os2 le ^
+OPTION STACK=49152
+OPTION QUIET
+OPTION ELIMINATE
+OPTION CASEEXACT
+FILE main-.obj
+FILE init-.obj
+FILE 0ackend.obj
+FILE pathopen.obj
+FILE compress.obj
+FILE file.obj
+FILE machine.obj
+FILE wildcard.obj
+FILE be_main.obj
+FILE be_symtab.obj
+FILE be_callc.obj
+FILE be_alloc.obj
+FILE be_machine.obj
+FILE be_rterror.obj
+FILE be_w.obj
+FILE be_inline.obj
+FILE be_runtime.obj
+FILE be_task.obj
+FILE be_execute.obj
+

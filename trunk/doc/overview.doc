@@ -1,0 +1,66 @@
+
+ 
+                       Guide to Documentation Files 
+
+
+ The Euphoria documentation is spread over several plain text files in the
+ euphoria\doc directory. For each .doc file in the euphoria\doc directory,
+ there is a corresponding .htm file in the euphoria\html directory. You can
+ also type guru to quickly search for relevant information from all directories
+ under \euphoria.
+
+ Everyone should start with euphoria\readme.doc (euphoria\readme.htm).
+
+ If you are having trouble installing Euphoria read:
+ ---------------------------------------------------
+
+ install.doc   - Instructions for installing Euphoria
+
+
+ Read the following files first, if you want to learn to program in Euphoria:
+ ----------------------------------------------------------------------------
+
+ refman.doc    - The manual for the Euphoria core language
+
+ library.doc   - Documentation for all of the Euphoria library routines
+
+ what2do.doc   - Some things you can do to get started with Euphoria
+
+ platform.doc  - A discussion of the differences between the four platforms
+                 that Euphoria runs on, i.e. DOS32 (ex.exe) vs. WIN32 (exw.exe)
+                 vs. Linux (exu) vs. FreeBSD (exu). Also included is a
+                 discussion of how to interface Euphoria programs with C
+                 libraries.
+
+
+ The rest of the files can be read any time, as needed:
+ ------------------------------------------------------
+
+ database.doc  - The Euphoria Database System (EDS)
+
+ e2c.doc       - The Euphoria To C Translator
+
+ tasking.doc   - Multitasking in Euphoria
+
+ ed.doc        - Documentation for the standard Euphoria editor, ed
+
+ trouble.doc   - A list of the most common problems and their solutions
+
+ bind.doc      - Describes bind.bat and shroud.bat options for binding and
+                 shrouding
+
+ perform.doc   - Performance tips
+
+ relnotes.doc  - A description of what's new in the current release and a
+                 summary of previous releases of Euphoria
+
+ cgi.doc       - Web-based Programming using CGI and Euphoria
+
+ c.doc         - Propaganda aimed at C/C++ programmers
+
+
+ Most subdirectories under \euphoria have a .doc file that describes the files
+ in that subdirectory.
+
+
+

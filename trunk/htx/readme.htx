@@ -1,0 +1,400 @@
+<_init_comment>
+<html>
+<head><title>Euphoria v3.1 Readme</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+
+<b><pre>
+ ---> <font color="#FF0099">Is this the latest version of Euphoria?</font>
+      Visit:  <a href="http://www.RapidEuphoria.com">http://www.RapidEuphoria.com</a>
+      
+ ---> To install/uninstall Euphoria, see <a href="html/install.htm">install.htm</a>
+      
+ ---> <font color="#FF0099">What's new in this release?</font>
+      See <a href="html/relnotes.htm">relnotes.doc</a> 
+</pre></b>
+
+<_center><font face="Arial, Helvetica" color="#006633" size=+2>
+<br>
+                       Euphoria Programming Language<br>
+                              version 3.1<br>
+</font></_center>
+
+<p>&nbsp;<br>
+
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="<font face=\"Arial, Helvetica\" color=\"#003366\">Welcome to
+   Euphoria! ...</font>"
+  description="<b><font face=\"Arial, Helvetica\" color=\"#FF0099\">E</font><font face=\"Arial, Helvetica\" color=\"#003366\">nd</font>
+<font face=\"Arial, Helvetica\" color=\"#FF0099\">U</font><font face=\"Arial, Helvetica\" color=\"#003366\">ser</font>
+<font face=\"Arial, Helvetica\" color=\"#FF0099\">P</font><font face=\"Arial, Helvetica\" color=\"#003366\">rogramming with</font>
+<font face=\"Arial, Helvetica\" color=\"#FF0099\">H</font><font face=\"Arial, Helvetica\" color=\"#003366\">ierarchical</font>
+<font face=\"Arial, Helvetica\" color=\"#FF0099\">O</font><font face=\"Arial, Helvetica\" color=\"#003366\">bjects for</font>
+<font face=\"Arial, Helvetica\" color=\"#FF0099\">R</font><font face=\"Arial, Helvetica\" color=\"#003366\">obust</font>
+<font face=\"Arial, Helvetica\" color=\"#FF0099\">I</font><font face=\"Arial, Helvetica\" color=\"#003366\">nterpreted</font>
+<font face=\"Arial, Helvetica\" color=\"#FF0099\">A</font><font face=\"Arial, Helvetica\" color=\"#003366\">pplications</font></b>"
+>
+
+</table>
+
+<p>
+ Euphoria has come a long way since v1.0 was released in July 1993. There are
+ now thousands of users around the world. 
+ There's an automated <a href=http://www.ListFilter.com/EUforum>
+ <b>discussion forum</b></a>, managed and moderated by a Euphoria 
+ program, and supporting over 500 subscribers.
+ The <a href="http://www.RapidEuphoria.com">Euphoria Web site</a> contains
+ over 1600 contributed <b>.</b>zip files packed with Euphoria source programs
+ and library routines. Dozens of people have set up their own independent Web
+ pages with Euphoria-related content.
+ Euphoria has been used in a variety of
+ <font color="#009999"><b>commercial programs</b></font>. 
+ The <font color="#CC3366"><b>Windows</b></font> version has been used
+ to create numerous <font color="#009999"><b>GUI, utility and
+ Internet-related programs</b></font>. 
+ The <font color="#CC3366"><b>DOS</b></font> version has been used to create
+ many exciting <font color="#009999"><b>high-speed action games</b></font>,
+ complete with <b>Sound Blaster</b> sound effects.
+ The
+ <font color="#CC3366"><b>Linux</b></font> and
+ <font color="#CC3366"><b>FreeBSD</b></font> versions have been used to
+ write <font color="#009999"><b>X Windows GUI programs, Web-based (CGI) programs</b></font>, and lots of 
+ useful tools and utilities.
+
+<p>
+
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br>
+
+<_dul>Yet Another Programming Language?</_dul>
+
+</font>
+<p>
+ Euphoria is a very-high-level programming language with several features that
+ set it apart from the crowd:
+<ul>
+<li>
+ Euphoria programs run on 
+ <font color="#CC3366"><b>Windows</b></font>,
+ <font color="#CC3366"><b>DOS</b></font>,
+ <font color="#CC3366"><b>Linux</b></font>, and
+ <font color="#CC3366"><b>FreeBSD</b></font>.
+<p>
+<li>
+Euphoria is <font color="#CC0099"><b>free</b></font> and 
+            <font color="#CC0099"><b>open source</b></font>.
+The complete source code for the Euphoria interpreter, translator
+and binder is included in the download package.
+<p>
+<li>
+ The language is flexible, powerful, and easy to learn.
+<p>
+<li>
+ There is no waiting for compiles and links - just edit and run. 
+<p>
+<li>
+ You can create and distribute a royalty-free,
+ <font color="#CC0099"><b>stand-alone .exe</b></font> file.
+<p>
+<li>
+ <font color="#CC0099"><b>Dynamic storage allocation</b></font> is
+ fundamental to Euphoria. Variables grow or shrink in size without the
+ programmer having to worry about allocating and freeing chunks of memory.
+ Elements of an array (Euphoria sequence) can be a dynamic mixture of
+ different types and sizes of data.
+<p>
+<li>
+ Euphoria provides <font color="#CC0099"><b>extensive run-time error
+ checking</b></font> for<b>:</b> out-of-bounds subscripts, uninitialized
+ variables, bad parameter values for library routines, illegal value assigned
+ to a variable, and many more. If something goes wrong you'll get a full error
+ message, with a call traceback and a listing of variable values. 
+ With other languages you'll typically get protection faults 
+ with useless dumps of machine registers and addresses.
+
+<p>
+<li>
+ The Euphoria interpreter is more than <font color="#CC0099">
+ <b>30 times faster</b></font> than either Perl or Python, and it's 
+ considerably faster than all other interpreted languages, according to the 
+ "Great Computer Language Shootout" benchmark (see demo\bench\bench.doc). 
+ 
+<p>
+<li>
+ If that isn't enough, there's a <b>Euphoria To C Translator</b> that can 
+ translate any Euphoria program to C, and boost your speed even more. 
+ Why waste time debugging hand-coded C/C++? You can easily develop a Euphoria
+ program, and then generate the C code.
+
+<p>
+<li>
+ Euphoria programs are not constrained by any 640K memory restrictions
+ for which MS-DOS is infamous. All versions of Euphoria let you use
+ all the memory on your system, and if that isn't
+ enough, a swap file on disk will provide additional virtual memory.
+<p>
+<li>
+ An integrated, easy-to-use, <font color="#993333"><b>full-screen
+ source-level debugger/tracer</b></font> is included.
+<p>
+<li>
+ Both an <font color="#993333"><b>execution-count profiler</b></font>, and a
+ <font color="#993333"><b>time profiler</b></font> are available.
+<p>
+<li>
+ There is a large and rapidly growing collection of excellent 3rd party
+ programs and libraries, most with full source code. 
+<p>
+<li>
+ RDS has developed an extremely flexible database 
+ system (<b>EDS</b>) that is portable across all Euphoria platforms.
+<p>
+<li>
+ The <font color="#CC3366"><b>WIN32</b></font> implementation of Euphoria
+ can access any WIN32 API routine, as well as C or  
+ Euphoria routines in .DLL files. 
+ A team of people has developed
+ a Windows GUI library (<b>Win32Lib</b>), complete
+ with a powerful Interactive Development Environment.
+ You can design a user interface graphically, specify the
+ Euphoria statements to be executed when someone clicks, 
+ and the IDE will create a complete Euphoria program for you.
+ There are Windows Euphoria libraries for Internet access, 
+ 3-D games, and many other application areas. 
+
+<p>
+<li>
+ The <font color="#CC3366"><b>DOS32</b></font> implementation of Euphoria
+ on MS-DOS contains a built-in graphics library. If necessary, you can 
+ access DOS software interrupts. You can call machine-code routines. 
+ You can even
+ set up your own hardware interrupt handlers. Many high-speed action
+ games, complete with Sound Blaster sound effects, have been developed 100%
+ in Euphoria, without the need for any machine code. 
+<p>
+<li>
+ The <font color="#CC3366"><b>Linux</b></font> and
+ <font color="#CC3366"><b>FreeBSD</b></font> implementations of Euphoria
+ let you access C routines and variables in shared libraries, 
+ for tasks ranging from graphics, to X windows GUI programming, to 
+ Internet CGI programming. The good news is, you'll be 
+ programming in Euphoria, not C.
+
+</ul>
+
+<p>
+
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br>
+
+<_dul>Platforms and Products</_dul>
+
+</font>
+<p>
+ Euphoria runs on four different platforms,
+ <font color="#CC3366"><b>WIN32</b></font>,
+ <font color="#CC3366"><b>DOS32</b></font>,
+ <font color="#CC3366"><b>Linux</b></font>, and
+ <font color="#CC3366"><b>FreeBSD</b></font>.
+ 
+ <p>
+ This <b>Euphoria Interpreter, Translator and Binder</b> 
+ package is free for anyone to use.
+ 
+ <p>
+ Using the Euphoria <b>Binder</b> you can 
+ <font color="#993333"><b>shroud</b></font> 
+ (encrypt) and <font color="#993333"><b>bind</b></font> any Euphoria program 
+ with a copy of the interpreter back-end, to create a
+  <font color="#CC0099"><b>single, stand-alone, tamper-resistant
+  .exe</b></font> file for easy distribution. See <a class="blue" href="html/bind.htm"><b>bind.doc</b></a>)
+
+ <p>
+ The <b>Euphoria To C Translator</b> converts any Euphoria program 
+ into a stand-alone
+ .exe file, but it has the added advantage of boosting the program's speed
+ as well. To use it, you must have one of 7 free C compilers installed on
+ your machine, but no knowledge of C is required. 
+
+<p>
+ The documentation contained in this package comes in both plain text and
+ HTML form. The plain text (<b>.doc</b>) files can be viewed with any text
+ editor, such as Windows NotePad or WordPad. The HTML (<b>.htm</b>) files
+ can be viewed with your Web browser. A tool that we developed in Euphoria
+ allows us to automatically generate both plain text and HTML files, from a
+ common source. Thus the content of each file in the
+ <font color="#5500FF"><b>doc</b></font> subdirectory should be identical
+ to the content of the corresponding file in the
+ <font color="#5500FF"><b>html</b></font> subdirectory, aside from the
+ lack of links, fonts, colors, etc. See
+ <font color="#5500FF"><b>doc\overview.doc</b></font>
+ (or <a href="html/overview.htm"><b>html\overview.htm</b></a>) for a summary
+ of the documentation files.
+
+<p>
+ You can freely distribute the Euphoria interpreter, and any other files
+ contained in this package, in whole or in part, so anyone can run a Euphoria
+ program that you have developed. You are completely free to distribute 
+ any Euphoria programs that you write.
+
+<p>
+ To run the <font color="#CC3366"><b>WIN32</b></font> version
+ of Euphoria, you need Windows 95 or any later version of Windows.
+ It runs fine on XP.
+
+<p>
+ The <font color="#CC3366"><b>DOS32</b></font> version will run on
+ any version of Windows, and will also run on plain DOS
+ on any 386 or higher processor. Contrary to popular opinion, DOS is
+ not dead. You can run DOS Euphoria programs on Windows XP in a
+ command prompt window.
+
+<p>
+ To run the <font color="#CC3366"><b>Linux</b></font> version of Euphoria
+ you need any reasonably up-to-date Linux distribution, that has libc6 or 
+ later. For example, Red Hat 5.2 or later will work fine.
+
+<p>
+ To run the <font color="#CC3366"><b>FreeBSD</b></font> version of Euphoria
+ you need any reasonably up-to-date FreeBSD distribution. 
+
+<p>
+
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br>
+
+<_dul>Getting Started</_dul>
+
+</font>
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_2clist
+  name="0."
+  pos=7
+  description="The Euphoria interpreter is an engine for running
+  Euphoria programs. It does not have a fancy GUI interface. 
+  When you are ready to do Windows GUI
+  programming, you should download Judith Evans' IDE (written in open source
+  Euphoria code). It will provide you with a very nice graphical
+  environment for Windows programming. For most other programming,
+  all you really need is an editor, such as NotePad."
+ >
+
+<_2clist
+  name="1."
+  pos=7
+  description="After you install Euphoria, the documentation files will be in
+   the <font color=\"#5500FF\"><b>doc</b></font> and
+   <font color=\"#5500FF\"><b>html</b></font> directories.
+<a class=\"blue\" href=\"html/overview.htm\"><b>overview.doc</b></a>
+ gives an overview of the documentation.
+ <a href=\"html/refman.htm\"><b>refman.htm</b></a> (or
+ <font color=\"#5500FF\"><b>refman.doc</b></font>) should be read first.
+ If you want to search for information on any topic, type
+ <font color=\"#993333\"><b>guru</b></font>."
+ >
+
+<_2clist
+  name="2."
+  pos=7
+  description="Have fun running the programs in the
+   <font color=\"#5500FF\"><b>demo</b></font> directory. Feel free to modify
+   them, or run them in <font color=\"#993333\"><b>trace</b></font> mode by
+   adding:"
+ >
+
+<_eucode>
+        with trace
+        trace(1)
+</_eucode>
+
+<_2clist
+  name=""
+  pos=7
+  description="as the first two lines in the <b>.ex</b> or <b>.exw</b> file."
+ >
+
+<_2clist
+  name="3."
+  pos=7
+  description="Try typing in some simple statements and running them.
+   You can use any text editor. Later you may want to use the Euphoria editor,
+   <font color=\"#993333\"><b>ed</b></font>, or download David Cuny's
+   Euphoria editor from the
+   <a href=\"http://www.RapidEuphoria.com\">Euphoria Web site</a>.
+   <p>
+   Don't be afraid to try things. Euphoria won't bite!"
+ >
+
+<_2clist
+  name="4."
+  pos=7
+  description="See
+<a class=\"blue\" href=\"html/what2do.htm\"><b>what2do.doc</b></a>
+ for more ideas."
+ >
+
+<_2clist
+  name="5."
+  pos=7
+  description="Visit the Euphoria Web site, download some files, and
+   subscribe to the Euphoria <b>mailing list</b>."
+ >
+
+</table>
+
+<p>
+ If you are new to programming, and you find 
+ <a href="html/refman.htm"><b>refman.htm</b></a>
+ hard to follow, download
+ <b>David Gay</b>'s interactive tutorial called <i>"A Beginner's Guide
+ To Euphoria"</i>. It's in the Documentation section of our
+ <a href="http://www.RapidEuphoria.com/doc.htm">Archive</a>.
+
+<p>&nbsp;<br>
+<center>
+ <_ba><_ba><_ba> <font face="Arial, Helvetica" color="#003366" size=-1>If
+ you have any trouble installing, see <a class="blue" href="html/install.htm">
+ install.doc</a></font> </_ba></_ba></_ba>
+</center>
+
+<p>
+<hr>
+
+<dl>
+<dt>
+ <b><font face="Arial, Helvetica" color="#006633" size=-1>
+ <_dul>Notice to Shareware Vendors:</_dul></font></b>
+<dd>
+  <font face="Arial, Helvetica" size=-1>We encourage you to distribute
+  this Euphoria Interpreter package. You can charge whatever you
+  like for it. People can use Euphoria for as long as they like without
+  obligation.</font>
+</dl>
+
+<hr>
+
+<dl>
+<dt>
+ <b><font face="Arial, Helvetica" color="#006633" size=-1>
+ <_dul>DISCLAIMER:</_dul></font></b>
+<dd>
+  <font face="Arial, Helvetica" size=-1>
+  Euphoria is provided "as is" without warranty of any kind. In no event 
+  shall Rapid Deployment Software be held liable for any damages 
+  arising from the use of, or inability to use, this product.</font>
+</dl>
+
+<hr>
+
+<p>&nbsp;
+
+</_width>
+</body>
+</html>
+

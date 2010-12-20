@@ -1,0 +1,373 @@
+<_init_comment>
+<html>
+<head><title>Multitasking in Euphoria</title>
+<_css>
+</head>
+<body bgcolor="#FFFFFF" link="#0033BB" vlink="#006699">
+<_width>
+<_center><font face="Arial, Helvetica" color="#FF0099" size=+2>
+<br>
+	                  Multitasking in Euphoria
+</font></_center>
+<p>
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br> 
+ <_dul> Introduction </_dul> 
+</font>
+<p>
+Euphoria allows you to set up multiple, independent tasks.
+Each task has its own current statement that it is executing,
+its own call stack, and its own set of private variables.
+Tasks run in parallel with each other. That is, before any given
+task completes its work, other tasks can be given a chance to execute.
+Euphoria's task scheduler decides which task should be active at
+any given time.
+
+<p>
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br> 
+ <_dul>Why Multitask?</_dul>
+</font> 
+ <p>
+ 
+ Most programs do not need to use multitasking and would not benefit from it.
+ However it is very useful in some cases:
+
+ <ul>
+ <li>
+ <p>
+     Action games where numerous characters, projectiles etc. need to be
+     displayed in a realistic way, as if they are all independent
+     of one another. Language War is a good example.
+ <li>     
+ <p>
+     Situations where your program must sometimes wait for input
+     from a human or other computer. While one task in your program
+     is waiting, another separate task could be doing some 
+     computation, disk search, etc.
+ <li>     
+ <p>
+     Windows, Linux and FreeBSD all have special API routines that
+     let you initiate some I/O, and then proceed without waiting for
+     it to finish. A task could check periodically to see if the I/O 
+     is finished, while another task is performing some useful 
+     computation, or is perhaps starting another I/O operation.
+      
+ <li>
+ <p>
+     Situations where your program might be called upon to serve
+     many users simultaneously. With multiple tasks, it's easy to
+     keep track of the state of your interaction with all these
+     separate users.
+ 
+ <li>
+ <p>
+     Perhaps you can divide your program into two logical processes,
+     and have a task for each.
+     One produces data and stores it, while the other reads the data
+     and processes it. Maybe the first process is time-critical,
+     since it interacts with the user, while the second process can
+     be executed during lulls in the action, where the user is
+     thinking or doing something that doesn't require quick response.
+ 
+ </ul>
+      
+
+<p>
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br> 
+ <_dul>Types of Tasks</_dul>
+</font> 
+ <p>
+
+ Euphoria supports two types of tasks: real-time tasks,
+ and time-share tasks. 
+ 
+ <p>
+ <b>Real-time tasks</b> are scheduled at intervals,
+ specified by a number of seconds or fractions of a second. You might
+ schedule one real-time task to be activated every 3 seconds, while another is
+ activated every 0.1 seconds. 
+ In Language War, when the Euphoria ship moves at warp 4, or a torpedo 
+ flies across the screen, it's important that they move at a 
+ steady, timed pace.
+ 
+ <p>
+ <b>Time-share tasks</b> need a share of the CPU
+ but they needn't be rigidly scheduled according to any clock. The 4 sorting 
+ tasks in the demo\dos32\tasksort.ex demo, share the CPU, but it isn't 
+ important that they be scheduled at a particular time. 
+
+ <p>
+ It's possible to reschedule a task at any time, changing its timing or its
+ slice of the CPU. You can even convert a task from one type to the 
+ other dynamically.
+
+
+<p>
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br> 
+ <_dul>A Small Example</_dul>
+</font> 
+ <p>
+ 
+This example shows the main task (which all Euphoria programs start off
+with) creating two additional real-time tasks. We call them real-time because
+they are scheduled to get control every few seconds.
+
+<p>
+You should try copy/pasting and running this example.
+You'll see that task 1 gets control every 2.5 to 3 seconds,
+while task 2 gets control every 5 to 5.1 seconds.
+In between, the main task (task 0), has control as it
+checks for a 'q' character to abort execution.
+
+<_eucode>
+constant TRUE = 1, FALSE = 0
+
+type boolean(integer x)
+	return x = 0 or x = 1
+end type
+
+boolean t1_running, t2_running
+
+procedure task1(sequence message)
+	for i = 1 to 10 do
+		printf(1, "task1 (%d) %s\n", {i, message})
+		task_yield()
+	end for
+	t1_running = FALSE
+end procedure
+
+procedure task2(sequence message)
+	for i = 1 to 10 do
+		printf(1, "task2 (%d) %s\n", {i, message})
+		task_yield()
+	end for
+	t2_running = FALSE
+end procedure
+
+puts(1, "main task: start\n")
+
+atom t1, t2
+
+t1 = task_create(routine_id("task1"), {"Hello"})
+t2 = task_create(routine_id("task2"), {"Goodbye"})
+
+task_schedule(t1, {2.5, 3})
+task_schedule(t2, {5, 5.1})
+
+t1_running = TRUE
+t2_running = TRUE
+
+while t1_running or t2_running do
+	if get_key() = 'q' then
+		exit
+	end if  
+	task_yield()
+end while
+
+puts(1, "main task: stop\n")
+-- program ends when main task is finished
+
+</_eucode>
+ 
+ 
+<p>
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br> 
+ <_dul>Comparison with earlier multitasking schemes</_dul>
+</font> 
+ <p>
+ 
+ In earlier releases of Euphoria, Language War already had a mechanism 
+ for multitasking, and some people submitted to User Contributions 
+ their own multitasking schemes. These were all implemented using
+ plain Euphoria code, whereas this new multitasking feature 
+ is built into the interpreter. Under the old Language War tasking
+ scheme a scheduler would *call* a task, which would eventually
+ have to *return* to the scheduler, so it could then dispatch 
+ the next task. 
+ 
+ <p>
+ In the new system, a task can call the built-in procedure task_yield()
+ at any point, perhaps many levels deep in subroutine calls, and 
+ the scheduler, which is now part of the interpreter, will be able
+ to transfer control to any other task. When control comes back to
+ the original task, it will resume execution at the statement
+ after task_yield(), with its call stack and all private variables 
+ intact. Each task has its own call stack, program counter 
+ (i.e. current statement being executed), and private variables. 
+ You might have several tasks all executing a routine at the same time, 
+ and each task will have its own set of private variable values 
+ for that routine. Global and local variables are shared between tasks.
+ 
+ <p>
+ It's fairly easy to take any piece of code and run it as a task.
+ Just insert a few task_yield() statements so it won't hog the CPU.
+
+ 
+<p>
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br> 
+ <_dul>Comparison with multithreading</_dul>
+</font> 
+ <p>
+
+ When people talk about threads, they are usually referring to 
+ a mechanism provided by the operating system. That's why we
+ prefer to use the term "multitasking".
+ Threads are generally "pre-emptive", whereas Euphoria multitasking
+ is "cooperative". With preemptive threads, the operating system
+ can force a switch from one thread to another at virtually any time.
+ With cooperative multitasking, each task decides when to give up
+ the CPU and let another task get control. If a task were "greedy"
+ it could keep the CPU for itself for long intervals. However since
+ a program is written by one person or group that wants the program
+ to behave well, it would be silly for them to favor one task like that. 
+ They will try to balance things in a way that works well for the user.
+ An operating system might be running many threads, and many
+ programs, that were written by different people, and it would be 
+ useful to enforce a reasonable degree of sharing on these programs. 
+ Preemption makes sense across the whole operating system. It makes 
+ far less sense within one program.
+ 
+ <p>
+ Furthermore, threading is notorious for causing subtle bugs.
+ Nasty things can happen when a task loses control at just the
+ wrong moment. It may have been updating a global variable when
+ it loses control and leaves that variable in an inconsistent state.
+ Something as trivial as incrementing a variable can go awry
+ if a thread-switch happens at the wrong moment. e.g. consider
+ two threads. One has:
+ <p>
+     &nbsp;&nbsp;&nbsp;&nbsp;x = x + 1
+ <p>    
+ and the other also has:
+ <p>    
+     &nbsp;&nbsp;&nbsp;&nbsp;x = x + 1
+ <p>
+ At the machine level, the first task loads the value of x into a register, 
+ then loses control to the second task which increments x and stores the
+ result back into x in memory. Eventually control goes back to the first task 
+ which also increments x *using the value of x in the register*, 
+ and then stores it into x in memory. So x has only been incremented once 
+ instead of twice as was intended. To avoid this problem, each thread 
+ would need something like:
+ <p>
+     &nbsp;&nbsp;&nbsp;&nbsp;lock x<br>
+     
+     &nbsp;&nbsp;&nbsp;&nbsp;x = x + 1<br>
+     
+     &nbsp;&nbsp;&nbsp;&nbsp;unlock x<br>
+ 
+ <p>
+ where lock and unlock would be special primitives that are safe for
+ threading. It's often the case that programmers forget to lock data,
+ but their program seems to run ok. Then one day, many months after they've
+ written the code, the program crashes mysteriously.
+ 
+ <p>
+ Cooperative multitasking is much safer, and requires far fewer 
+ expensive locking operations. Tasks relinquish control at safe points 
+ once they have completed a logical operation.
+ 
+ 
+<p>
+<font face="Arial, Helvetica" color="#FF0099" size=+1>
+<br> 
+ <_dul>Built-in Multitasking Routines</_dul>
+</font> 
+ <p>
+All of these routines are built-in to Euphoria, so
+it's not necessary to include any library file.
+<p>
+<table border=0 cellspacing=2 cellpadding=2>
+
+<_3clist
+  href="lib_s_t.htm#task_create"
+  name="task_create"
+  description="Call this to create a new task. You need to pass the routine id
+  of a Euphoria procedure, as well as a list of initial arguments to pass to the
+  procedure. This is the main procedure for the task. Tasks are always
+  procedures, since it doesn't make sense for a task to return a value
+  (no other task is waiting for it).
+  task_create()
+  will return a task id (a small integer). Use this task id to identify the
+  task to the other multitasking routines below. Note that all 
+  Euphoria programs start off with one initial task running."
+>
+
+<_3clist
+  href="lib_s_t.htm#task_yield"
+  name="task_yield"
+  description="A task calls this to yield control, 
+  so the Euphoria scheduler can pick a new task to run. A task should
+  call this often enough to avoid hogging the CPU, but should not call it
+  so often that much time is wasted on scheduling. To avoid corruption of
+  data structures, a task should try to complete a logical step before 
+  giving up control. It's possible that the scheduler will
+  decide to keep running the same task in which case a quick return from
+  task_yield() will occur with no other task getting control."
+>
+
+<_3clist
+  href="lib_s_t.htm#task_schedule"
+  name="task_schedule"
+  description="Schedule a task for execution. After a task is created, it
+  is necessary to schedule it, otherwise it will never run. There are two
+  main ways of scheduling a task. One way specifies a real-time timing 
+  interval, min...max. This tells the scheduler that the task must 
+  (if possible) be scheduled to run a minimum of min seconds from now, 
+  and a maximum of max seconds from now. Subsequent runs of the task 
+  will also wait for min/max seconds. So you might say that a task
+  must run every 3.5 to 4.0 seconds. The second way uses a time-sharing system
+  where a task can execute task_yield() a certain number of times before
+  it must give up the CPU. So one task might be allowed 10 task_yields,
+  where another, perhaps lower priority task must give up the CPU on every
+  task_yield(), if possible."
+>
+
+<_3clist
+  href="lib_s_t.htm#task_list"
+  name="task_list"
+  description="Get a list of all tasks"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_self"
+  name="task_self"
+  description="Return the task id of the current task"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_status"
+  name="task_status"
+  description="Get the current status (active, suspended, terminated) of a task"
+>
+
+<_3clist
+  href="lib_s_t.htm#task_suspend"
+  name="task_suspend"
+  description="Suspend a task until further notice."
+>
+
+<_3clist
+  href="lib_s_t.htm#task_clock_start"
+  name="task_clock_start"
+  description="Restart the scheduler's clock. Used in games where the
+  real time clock must be preserved during a stoppage."
+>
+
+<_3clist
+  href="lib_s_t.htm#task_clock_stop"
+  name="task_clock_stop"
+  description="stop the scheduler's clock"
+>
+
+
+</table>
+<p>
+ 
+      
+      
