@@ -1,6 +1,5 @@
 ~
 ver.dat
-build
 ex.err
 source/Makefile
 source/config.wat
@@ -15,3 +14,7 @@ bin/eushroud
 bin/eubind
 bin/eu.a
 bin/eudbg.a
+
+regex:
+^build/.*
+^source/build/.*
