@@ -7,7 +7,7 @@ namespace info
 
 constant M_EU_INFO=75
 
-enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION, REVISION_DATE, START_TIME
+enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, NODE, REVISION, REVISION_DATE, START_TIME
 
 constant version_info = machine_func(M_EU_INFO, {})
 
@@ -111,11 +111,32 @@ public function version_patch()
 end function
 
 --**
+-- Get the source code node id of the hosting Euphoria
+--
+-- Parameters:
+--   * ##full## - If TRUE, the full node id is returned. If FALSE
+--     only the first 12 characters of the node id is returned.
+--     Typically the short node id is considered unique.
+--
+-- Returns:
+--   A text **sequence**, containing the source code management systems
+--   node id that globally identifies the executing Euphoria.
+--
+
+public function version_node(integer full = 0)
+	if full or length(version_info[NODE]) < 12 then
+		return version_info[NODE]
+	end if
+
+	return version_info[NODE][1..12]
+end function
+
+--**
 -- Get the source code revision of the hosting Euphoria
 --
 -- Returns:
---   A text **sequence**, containing the source code management system's
--- revision number that the executing Euphoria was built from.
+--   A text **sequence**, containing the source code management systems
+--   revision number that the executing Euphoria was built from.
 --
 
 public function version_revision()

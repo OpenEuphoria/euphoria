@@ -125,19 +125,19 @@ export procedure show_banner()
 		memory_type, 
 		"", 
 		info:version_date(),
-		info:version_revision()
+		info:version_node()
 	}
+
+	if info:is_developmental then
+		misc_info[$] = sprintf("%d:%s", { info:version_revision(), info:version_node() })
+	end if
+
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
 		misc_info[3] = GetMsgText(275,0)
 	else
 		misc_info = remove(misc_info, 3)
 	end if
-
-	/*
-	Euphoria Interpreter v4.0.0 Final
-		Windows, Using Managed Memory, 09df3eac3c44, 2010-12-22
-	*/
 
 	screen_output(STDERR, sprintf("%s v%s %s\n   %s, %s\n   Revision Date: %s, Id: %s\n", {
 		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
