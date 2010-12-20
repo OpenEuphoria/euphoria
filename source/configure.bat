@@ -109,7 +109,7 @@ IF "%1" == "--noassert" (
 )
 
 IF "%1" == "--release" (
-	echo EREL_TYPE = /dEREL_TYPE=\"%2\" >> config.wat
+	echo EREL_TYPE = /dEREL_TYPE="%2" >> config.wat
 	SHIFT
 	GOTO EndLoop
 )
