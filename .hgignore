@@ -19,3 +19,4 @@ regex:
 ^build/.*
 ^build_mingw/.*
 ^source/build/.*
+^source/build_mingw/.*
