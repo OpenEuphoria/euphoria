@@ -135,7 +135,7 @@ include std/get.e
 include std/search.e
 include std/console.e as con
 integer SIZE = 8192 
-integer iterations = 1
+integer iterations = 8192
 integer count
 sequence flags
 
