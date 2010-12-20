@@ -77,3 +77,5 @@ been resolved.
   displays the min and max iteration times in addition to the already average and total.
 * ##demo/net/pastey.ex## demo has been updated to function with
   OpenEuphoria's pastey service.
+* ##-version## on main products now reports build date in addition to
+  previous information.
