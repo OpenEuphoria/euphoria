@@ -61,6 +61,9 @@ been resolved.
                  built-in function.
 * [[ticket:556]] Fixed type inference for return value from [[:rand]] in translator.
 * [[ticket:557]] euphoria.h had gotten out of sync when some OPs were removed.
+* [[ticket:560]] Functions that started with an unqualified variable from another file
+                 being assigned by the return value of an unqualified function from another
+                 file could result in a crash.
 
 === Enhancements/Changes
 
