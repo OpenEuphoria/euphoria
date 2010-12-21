@@ -70,8 +70,9 @@ sequence form_data = {
 }
 
 data = http_post("http://openeuphoria.org/pastey/create.wc", form_data)
-
-if equal(data[1], "") or equal(data[2], "") then
+if atom(data) then
+	abort(1, "Could not connect to pastey server")
+elsif equal(data[1], "") or equal(data[2], "") then
     abort(1, "An error occurred while submitting your file.\n")
 end if
 
