@@ -191,7 +191,7 @@ operating systems that includes 95/ME/98/XP/NT/Vista/7/.
 You will see the constant ##WINDOWS## used for //Windows// specific code.
 
 * //Unix// will be a general reference to the family operating systems that
-includes Linux, FreeBSD, NetBSD, OpenBSD, Mac OS X,... You will see the
+includes Linux, FreeBSD, NetBSD, OpenBSD, Mac OS X, ... You will see the
 constant ##UNIX## used for Unix specific code.
 
 Directory names in //Windows// use ##\## separators, while //Unix// systems use ##/##.
@@ -199,8 +199,7 @@ Directory names in //Windows// use ##\## separators, while //Unix// systems use 
 Hint: //Windows// users can now use ##/## in directory names.
 
 Operating system names are often trademarks. There is no intent to infringe on 
-their owner rights.
-
+their owner's rights.
 Within a paragraph, Euphoria keywords (like ##atom## or ##while##) and program 
 excerpts are written in a ##fixed font##. 
 

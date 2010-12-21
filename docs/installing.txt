@@ -36,7 +36,7 @@ or, a distribution specific package, if available.
 The //Unix// tarball "Archive" is laid out similarly to the //Windows// directory 
 structure. This may be convenient if working cross-platform between
 //Windows// and //Unix//. The files at ~SourceForge are also in this
-form, making it convenient if you with to use updates directly from
+form, making it convenient if you wish to use updates directly from
 the SVN depository.
 
 To install this version you must manually unarchive the tarball. Then
@@ -45,15 +45,14 @@ copy the files to a suitable directory.
 You'll need to manually edit:
 * ##/etc/profile## so the ##PATH## contains
 ** ##euphoria/bin##, and either create 
-*** a ##eu.cfg## file or 
+*** an ##eu.cfg## file or 
 *** set up ##EUDIR## and ##EUINC##.
 
 The "Packaged" version installs Euphoria in a more //Unix//-like way, putting the executables into 
 * ##/usr/bin##, 
 * ##/usr/share/euphoria## and
 * ##/usr/share/doc/euphoria##.  
-* Man pages for ##eui##, ##euc##, ##eub##,
-* ##shroud## and ##bind## are also installed.  
+* Man pages for ##eui##, ##euc##, ##eub##, ##shroud## and ##bind## are also installed.  
 * It will also create ##/etc/euphoria/eu.cfg##, which will point to the standard euphoria include
 directory in ##/usr/share/euphoria/include##.
 
