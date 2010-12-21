@@ -607,7 +607,7 @@ pdfdoc : $(BUILDDIR)/euphoria.pdf
 
 $(BUILDDIR)/pdf/euphoria.txt : $(EU_DOC_SOURCE)
 	-mkdir -p $(BUILDDIR)/pdf
-	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)/docs/manual-pdf.af -o $(BUILDDIR)/pdf/euphoria.txt
+	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)/docs/manual.af -o $(BUILDDIR)/pdf/euphoria.txt
 
 $(BUILDDIR)/pdf/euphoria.tex : $(BUILDDIR)/pdf/euphoria.txt $(TRUNKDIR)/docs/template.tex
 	cd $(TRUNKDIR)/docs && $(CREOLE) -f latex -A -t=$(TRUNKDIR)/docs/template.tex -o=$(BUILDDIR)/pdf $<
