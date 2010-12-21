@@ -733,8 +733,15 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 	cd ..
 !endif
 
-$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
-	$(EUDOC) --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
+###############################################################################
+#
+# Documentation
+#
+###############################################################################
+
+#
+# HTML Manual
+#
 
 $(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
 	mkdir $^@
@@ -772,6 +779,9 @@ $(BUILDDIR)\docs\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\do
 $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\docs\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
+$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
+	$(EUDOC) -d HTML --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
+
 $(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLE) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
@@ -792,7 +802,7 @@ $(BUILDDIR)\pdf : .EXISTSONLY
 	mkdir $^@
 
 $(BUILDDIR)\pdf\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\pdf
-	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual-pdf.af -o $(BUILDDIR)\pdf\euphoria.txt
+	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\pdf\euphoria.txt
 
 $(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex
 	$(CREOLE) -f latex -A -t=$(TRUNKDIR)\docs\template.tex -o=$(BUILDDIR)\pdf $<
@@ -807,6 +817,10 @@ pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf
 	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex | grep Warning
 	cd $(TRUNKDIR)\source
 
+#
+# Distribution
+#
+
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 manual-send: .SYMBOLIC manual
@@ -816,4 +830,3 @@ manual-reindex: .SYMBOLIC
 	$(SSH) $(OE_USERNAME)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
 
 manual-upload: manual-send manual-reindex
-

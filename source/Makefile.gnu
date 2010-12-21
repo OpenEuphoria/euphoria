@@ -564,7 +564,7 @@ $(TRUNKDIR)/source/creole/creole.ex :
 	hg clone http://scm.openeuphoria.org/hg/creole $(TRUNKDIR)/source/creole
 
 $(BUILDDIR)/euphoria.txt : $(EU_DOC_SOURCE)
-	cd $(TRUNKDIR)/docs && $(EUDOC) --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
+	cd $(TRUNKDIR)/docs && $(EUDOC) -d HTML --strip=2 --verbose -a manual.af -o $(CYPBUILDDIR)/euphoria.txt
 
 $(BUILDDIR)/docs/index.html : $(BUILDDIR)/euphoria.txt $(DOCDIR)/*.txt $(TRUNKDIR)/include/std/*.e
 	-mkdir -p $(BUILDDIR)/docs/images
@@ -607,7 +607,7 @@ pdfdoc : $(BUILDDIR)/euphoria.pdf
 
 $(BUILDDIR)/pdf/euphoria.txt : $(EU_DOC_SOURCE)
 	-mkdir -p $(BUILDDIR)/pdf
-	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)/docs/manual-pdf.af -o $(BUILDDIR)/pdf/euphoria.txt
+	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)/docs/manual-pdf.af -o $(BUILDDIR)/pdf/euphoria.txt
 
 $(BUILDDIR)/pdf/euphoria.tex : $(BUILDDIR)/pdf/euphoria.txt $(TRUNKDIR)/docs/template.tex
 	cd $(TRUNKDIR)/docs && $(CREOLE) -f latex -A -t=$(TRUNKDIR)/docs/template.tex -o=$(BUILDDIR)/pdf $<
