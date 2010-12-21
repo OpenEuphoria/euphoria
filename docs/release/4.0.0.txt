@@ -37,9 +37,9 @@ future the old ##( name1, name2 )## syntax will be removed.
 * [[ticket:438]], removed path test in ##demos/santiy.ex## as it does not function
                   correctly with bound, translated or even a non-standard eui location and
                   actually cannot, thus it was removed.
-* [[ticket:514]], fixed bug with internal ##dir## implementation that would prevent displaying
+* [[ticket:514]], Fixed bug with internal ##dir## implementation that would prevent displaying
                   the content of a directory if given without a trailing slash on Windows.
-* [[ticket:517]], added a bounds check that could cause the translator or binder to crash.
+* [[ticket:517]], Added a bounds check that could cause the translator or binder to crash.
 * [[ticket:518]], Prevented write_coverage from being called twice on CTRL+C/error condition.
 * [[ticket:519]], preproc and net demos are now in the debian package.
 * [[ticket:530]], ##t_command_line_quote## test fixed on Windows.
@@ -51,19 +51,20 @@ future the old ##( name1, name2 )## syntax will be removed.
 * [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
 * [[ticket:550]], Examples for regex ##[[:matches]]## and ##[[:all_matches]]## now properly
                   either supply or use the default ##from## parameter.
-* [[ticket:558]] Fixed crash caused by undeclared variable assignment by properly subscripting
+* [[ticket:555]], Fixed parsing of constants when first statement is a constant assigned by a
+                  built-in function.
+* [[ticket:556]], Fixed type inference for return value from ##[[:rand]]## in translator.
+* [[ticket:557]], ##euphoria.h## had gotten out of sync when some OPs were removed.
+* [[ticket:558]], Fixed crash caused by undeclared variable assignment by properly subscripting
 		  [i] when looking up forward references in the toplevel subroutine
+* [[ticket:560]], Functions that started with an unqualified variable from another file
+                  being assigned by the return value of an unqualified function from another
+                  file could result in a crash.
+* [[ticket:564]], Documentation fix on parameter name for ##[[:calc_hash]]##.
 * Fix backend and interpreter to avoid "press any key" prompts when
-running as a console from a shared console window.
+  running as a console from a shared console window.
 * Ensure forward type checks aren't resolved until after the variable being type checked has
-been resolved.
-* [[ticket:555]] Fixed parsing of constants when first statement is a constant assigned by a
-                 built-in function.
-* [[ticket:556]] Fixed type inference for return value from [[:rand]] in translator.
-* [[ticket:557]] euphoria.h had gotten out of sync when some OPs were removed.
-* [[ticket:560]] Functions that started with an unqualified variable from another file
-                 being assigned by the return value of an unqualified function from another
-                 file could result in a crash.
+  been resolved.
 
 === Enhancements/Changes
 
