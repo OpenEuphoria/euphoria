@@ -17,6 +17,7 @@ include std/net/http.e
 include std/net/url.e as url
 include std/regex.e as r
 include std/text.e
+include std/sequence.e
 
 sequence username, password, title
 
@@ -34,29 +35,47 @@ sequence opts = {
     { "p", 0, "OpenEuphoria.org password", { HAS_PARAMETER, "password" } },
     { "f", 0, "Format (Euphoria, Text, Creole)", { HAS_PARAMETER, "format" } },
     { "t", 0, "Title of new pastey", { HAS_PARAMETER } },
-    {  0,  0, "Filename to paste", { MANDATORY } },
+    {  0,  0, "Filename to paste", { } },
     $
 }
 
 map o = cmd_parse(opts)
+sequence filenames = map:get(o, cmdline:EXTRAS)
+constant in_stdin = not length(filenames)
 
 username = map:get(o, "u", "")
 if length(username) = 0 then
+	if in_stdin then
+		puts(1, "Missing OpenEuphoria username.\n")
+		abort(4)
+	end if
 	username = prompt_string("OpenEuphoria username: ")
 end if
 
 password = map:get(o, "p", "")
 if length(password) = 0 then
+	if in_stdin then
+		puts(1, "Missing OpenEuphoria password.\n")
+		abort(5)
+	end if
 	password = prompt_string("OpenEuphoria.org password: ")
 end if
 
 title = map:get(o, "t", "")
 if length(title) = 0 then
+	if in_stdin then
+		puts(1, "Missing Pastey title.\n")
+		abort(6)
+	end if
 	title = prompt_string("Pastey title: ")
 end if
 
-sequence filenames = map:get(o, cmdline:EXTRAS)
-object data = read_file(filenames[1])
+object data
+if length(filenames) then
+	data = read_file(filenames[1], TEXT_MODE)
+else
+	data = flatten(read_lines(0))
+end if
 if atom(data) then
 	abort(1, "Could not read file: '%s'", { filenames[1] })
 end if
