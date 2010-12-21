@@ -1,7 +1,8 @@
 %%output=lang_def
 == Definition
 :<<LEVELTOC level=2 depth=4>>
-=== Objects === @[predefined types]
+=== Objects ===
+@[predefinedtypes]
 
 ==== Atoms and Sequences
 
@@ -1647,7 +1648,7 @@ presumably legal, one.
 
 @[type_check|]
 Type checking can be turned off or on between subroutines using the with
-##type_check## or ##without type_check## (see [[:special statements]]).
+##type_check## or ##without type_check## (see [[:specialstatements]]).
 It is initially on by default.
 
 ;**Note to Bench markers~:**
@@ -3530,7 +3531,8 @@ while 1 with entry label "top" do -- CORRECT
 </eucode>
 
 %%output=lang_short_circuit
-== Short-Circuit Evaluation == @[short_circuit]
+== Short-Circuit Evaluation ==
+@[short_circuit]
 :<<LEVELTOC level=2 depth=4>>
 
 When the condition tested by if, elsif, until, or while contains ##and## or
@@ -3632,7 +3634,8 @@ if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
 %%output=lang_toplevel
-== Special Top-Level Statements == @[special statements]
+== Special Top-Level Statements ==
+@[specialstatements]
 :<<LEVELTOC level=2 depth=4>>
 
 Before any of your statements are executed, the Euphoria front-end quickly

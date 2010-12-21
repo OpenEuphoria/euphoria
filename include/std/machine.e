@@ -989,7 +989,6 @@ end function
 
 --**
 -- Free up a previously allocated block of memory.
--- @[machine:free]
 --
 -- Parameters:
 --  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
@@ -1012,6 +1011,8 @@ end function
 --
 -- See Also:
 --     [[:allocate]], [[:free_code]]
+--
+
 public procedure free(object addr)
 	if types:number_array (addr) then
 		if types:ascii_string(addr) then

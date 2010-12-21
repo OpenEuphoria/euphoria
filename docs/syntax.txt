@@ -293,7 +293,6 @@ RETURN ==: 'return' EXPRESSION
   See Also: [[:types]]
   
 === default namespace
-@[NAMESPACE]
 {{{
 NAMESPACE ==: 'namespace' IDENTIFIER EOL
 }}}

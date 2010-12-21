@@ -427,7 +427,7 @@ end procedure
 -- atom is zero or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_true(sequence name, object outcome)
 	record_result(not equal(outcome,0), name, 1, outcome, 1 )
@@ -445,7 +445,7 @@ end procedure
 -- program will also be forced to fail at this point.
 --
 -- See Also:
--- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure assert(object name, object outcome)
 	if sequence(name) then
@@ -486,7 +486,8 @@ end procedure
 --		# ##name## : a string, the name of the test
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_pass]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]]
+--
 
 public procedure test_fail(sequence name)
 	record_result(0, name, 1, 0, 1)

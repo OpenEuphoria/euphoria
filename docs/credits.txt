@@ -3,8 +3,9 @@
 
 Euphoria has been continuously developed since it was started in 1993
 by Robert Craig. In 2006, version 3.0 was released as open source. Various
-releases were made to the 3.x series and then in 2009, development on [[Euphoria4|version 4.0]] was
-begun. Euphoria 4 is expected to be released in early 2011.
+releases were made to the 3.x series and then in the 4th quarter of
+2010 the largest update ever was made to Euphoria, starting the
+Euphoria 4.x series.
 
 It has taken quite a few people to get this far and we would like to
 recognize them here. Authors/Contributors are listed in alphabetical 
