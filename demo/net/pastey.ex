@@ -18,6 +18,8 @@ include std/net/url.e as url
 include std/regex.e as r
 include std/text.e
 
+sequence username, password, title
+
 without warning
 override procedure abort(integer x, sequence msg = {}, sequence data = {})
 	if length(msg) then
@@ -28,15 +30,30 @@ override procedure abort(integer x, sequence msg = {}, sequence data = {})
 end procedure
 
 sequence opts = {
-	{ "u", 0, "OpenEuphoria.org username", { MANDATORY, HAS_PARAMETER, "username" } },
-    { "p", 0, "OpenEuphoria.org password", { MANDATORY, HAS_PARAMETER, "password" } },
+	{ "u", 0, "OpenEuphoria.org username", { HAS_PARAMETER, "username" } },
+    { "p", 0, "OpenEuphoria.org password", { HAS_PARAMETER, "password" } },
     { "f", 0, "Format (Euphoria, Text, Creole)", { HAS_PARAMETER, "format" } },
-    { "t", 0, "Title of new pastey", { MANDATORY, HAS_PARAMETER } },
+    { "t", 0, "Title of new pastey", { HAS_PARAMETER } },
     {  0,  0, "Filename to paste", { MANDATORY } },
     $
 }
 
 map o = cmd_parse(opts)
+
+username = map:get(o, "u", "")
+if length(username) = 0 then
+	username = prompt_string("OpenEuphoria username: ")
+end if
+
+password = map:get(o, "p", "")
+if length(password) = 0 then
+	password = prompt_string("OpenEuphoria.org password: ")
+end if
+
+title = map:get(o, "t", "")
+if length(title) = 0 then
+	title = prompt_string("Pastey title: ")
+end if
 
 sequence filenames = map:get(o, cmdline:EXTRAS)
 object data = read_file(filenames[1])
@@ -60,9 +77,9 @@ switch lower(format) do
 end switch
 
 sequence form_data = {
-	{ "code",     map:get(o, "u") },
-    { "password", map:get(o, "p") },
-    { "title",    map:get(o, "t") },
+	{ "code",     username },
+    { "password", password },
+    { "title",    title },
     { "format",   sprintf("%d", format_i) },
     { "body",     data },
     { "submit",   "Paste" },
