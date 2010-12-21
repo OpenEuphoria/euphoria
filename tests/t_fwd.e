@@ -100,4 +100,10 @@ function bar()
 	return 1
 end function
 
+procedure ticket_560()
+	global_forward_sequence = return_a_sequence()
+end procedure
+ticket_560()
+test_pass( "ticket 560 issue is resolved" )
+
 test_report()
