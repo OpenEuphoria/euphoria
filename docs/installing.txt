@@ -161,6 +161,14 @@ The "Debian Package" installs Euphoria into these directories:
 |__ /etc/euphoria                  ( eu.cfg )
 }}}
 
+Additionally, installing from source on a Unix-like OS will install in 
+the same pattern, by default using ##/usr/local/## instead of ##/usr/##.
+You can change ##/usr/local## to something else by running:
+{{{
+$ ./configure --prefix /some/other/location
+}}}
+Before building.
+
 The "include", "demo" and "tutorial" directories are the same in
 //Windows// and //Unix//.
 
