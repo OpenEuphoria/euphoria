@@ -9,7 +9,7 @@ elsedef
 	test_true("warning file generated", fn >= 0)
 	if fn >= 0 then
 		test_equal("with warning += #1","Warning { short_circuit }:\n", gets(fn))
-		test_equal("with warning += #2","\t<0219>:: t_declasgn.e:16 - call to f() might be short-circuited\n", gets(fn))
+		test_equal("with warning += #2","\t<0219>:: t_declasgn.e:17 - call to f() might be short-circuited\n", gets(fn))
 		
 		test_equal("warning() #1","Warning { custom }:\n", gets(fn))
 		test_equal("warning() #2","\tUseless code\n", gets(fn))
