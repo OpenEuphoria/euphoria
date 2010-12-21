@@ -44,3 +44,13 @@ regex:
 ^source/build/.*
 ^source/build_mingw/.*
 .*/cleanbranch/.*
+^.*~
+^.*\.dis$
+.*/build-.*
+.*\.hash
+.*\.sym
+^packaging/debian/euphoria/.*
+^packaging/debian/.*deb
+^packaging/debian/.*dsc
+^packaging/debian/.*changes
+^packaging/debian/.*gz
