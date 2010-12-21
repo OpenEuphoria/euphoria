@@ -503,7 +503,7 @@ public integer my_dir = DEFAULT_DIR_SOURCE
 -- See Also:
 --   [[:dir]], [[:sort]], [[:sort_columns]]
 
-public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = FALSE, object dir_source = types:NO_ROUTINE_ID)
+public function walk_dir(sequence path_name, object your_function, integer scan_subdirs = 0, object dir_source = types:NO_ROUTINE_ID)
 	object d, abort_now
 	object orig_func
 	sequence user_data = {path_name, 0}
