@@ -16,7 +16,7 @@
 ########
 :%%output=eu_intro
 := Euphoria Programming Language v4.0
-:@[toc]
+:@[toc|]
 :<<LEVELTOC level=1 depth=4>>
 
 ../docs/welcome.txt
