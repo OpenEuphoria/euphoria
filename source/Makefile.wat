@@ -794,7 +794,7 @@ $(BUILDDIR)\pdf : .EXISTSONLY
 $(BUILDDIR)\pdf\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\pdf
 	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual-pdf.af -o $(BUILDDIR)\pdf\euphoria.txt
 
-$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt
+$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex
 	$(CREOLE) -f latex -A -t=$(TRUNKDIR)\docs\template.tex -o=$(BUILDDIR)\pdf $<
 
 $(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex
