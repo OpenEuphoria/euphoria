@@ -37,10 +37,13 @@ tests/dump.edb
 tests/ecp.dat
 tests/eds-dump.txt
 tests/save_map.raw3
+tests/include_subdir/foo/test.err
 
 regex:
 ^build/.*
 ^build_mingw/.*
+^source/.*res$
+^source/mkver.o$
 ^source/build/.*
 ^source/build_mingw/.*
 .*/cleanbranch/.*
