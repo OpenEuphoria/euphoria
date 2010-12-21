@@ -814,7 +814,7 @@ $(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex
 
 pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf
 	cd $(TRUNKDIR)\docs
-	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex | grep Warning
+	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
 	cd $(TRUNKDIR)\source
 
 #
