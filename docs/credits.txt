@@ -36,6 +36,7 @@ For an up-to-date listing, see the [[wiki:EuphoriaContributors|EuphoriaContribut
   * CoJaBo
   * Jason Gade
   * Ryan Johnson
+  * Lonny Nettnay
   * Marco Antonio Achury Palma
   * Michael Sabal
   * Dave Smith - Graphics

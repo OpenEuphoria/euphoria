@@ -245,7 +245,7 @@
 
 ########
 :%%output=unsup_features
-:= Unsuppored Features
+:= Unsupported Features
 :<<LEVELTOC level=1 depth=2>>
 
 ../docs/unsupported.txt
