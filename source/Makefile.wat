@@ -552,7 +552,7 @@ $(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
 $(BUILDDIR)\mkver.exe: mkver.c
 	owcc -o $@ $<
 
-$(BUILDDIR)\$(OBJDIR)\back\be_ver.h : $(BUILDDIR)\mkver.exe
+$(BUILDDIR)\$(OBJDIR)\back\be_ver.h : .SYMBOLIC $(BUILDDIR)\mkver.exe
 	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h $(RELEASE)$(EREL_TYPE)
 
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
