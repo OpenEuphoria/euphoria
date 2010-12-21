@@ -79,3 +79,4 @@ been resolved.
   OpenEuphoria's pastey service.
 * ##-version## on main products now reports build date in addition to
   previous information.
+* Optimized for loops to check for integer initial value and limits.
