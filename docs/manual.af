@@ -36,6 +36,14 @@ ifdef HTML
 :%%toclevel = 3
 :%%output=index
 :<<TOC level=1>>
+
+:@@(index <<font color="$(1)" text=`$(+)`>>)@
+:@@(subindex **$$(color #009999 bug fixed:)**)@
+end ifdef
+
+ifdef PDF
+:@@(index ``\index{$(1)}``)@
+:@@(subindex ``\index{$(1)!$(2)}``)@
 end ifdef
 
 ########
@@ -156,6 +164,9 @@ end ifdef
 ########
 
 := API Reference
+
+# General Index
+../docs/builtins.txt
 
 # General Routines
 ../include/std/cmdline.e
