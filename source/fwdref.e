@@ -400,13 +400,17 @@ procedure patch_forward_variable( token tok, integer ref )
 	end if
 	
 	set_code( ref )
-	integer vx = find( -ref, Code, fr[FR_PC] )
+	integer pc = fr[FR_PC]
+	if pc < 1 then
+		pc = 1
+	end if
+	integer vx = find( -ref, Code, pc )
 	if vx then
 		while vx do
 			-- subscript assignments might cause the
 			-- sym to be emitted multiple times
 			Code[vx] = sym
-			vx = find( -ref, Code, fr[FR_PC] )
+			vx = find( -ref, Code, vx )
 		end while
 		resolved_reference( ref )
 	end if
@@ -756,6 +760,7 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 		end if
 		fwdref_count += 1
 	end if
+	
 	return ref
 end function
 
@@ -928,6 +933,10 @@ procedure shift_top( sequence refs, integer pc, integer amount )
 		forward_references[refs[i]] = 0
 		if fr[FR_PC] >= pc then
 -- 			if fr[FR_PC] > 1 then
+				if fr[FR_PC] = -amount then
+					? Code
+					? fr
+				end if
 				fr[FR_PC] += amount
 				if fr[FR_TYPE] = CASE
 				and fr[FR_DATA] >= pc then
