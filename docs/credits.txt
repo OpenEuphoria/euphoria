@@ -38,5 +38,6 @@ For an up-to-date listing, see the [[wiki:EuphoriaContributors|EuphoriaContribut
   * Ryan Johnson
   * Marco Antonio Achury Palma
   * Michael Sabal
+  * Dave Smith - Graphics
   * Kathy Smith
   * Yuku (Aku)

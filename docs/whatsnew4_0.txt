@@ -14,6 +14,14 @@ Too numerous to list here, please see the reference section of this manual.
 * Switched to using our own ticket system
 * Switched to using our own self hosted Mercurial SCM system
 
+=== Executable name changes
+
+|| Old                         || New           || Description         ||
+| ##ex## and ##exwc##           | ##eui##        | Euphoria Interpreter |
+| ##ec## and ##ecw##            | ##euc##        | Euphoria Compiler    |
+| ##bind.bat## and ##bind##     | ##eubind##     | Euphoria Binder      |
+| ##shroud.bat## and ##shroud## | ##eushrouder## | Euphoria Shrouder    |
+
 === Language Enhancements
 
 * Conditional compilation using the ##ifdef## directive.
