@@ -22,6 +22,7 @@ include cominit.e
 include compress.e
 include symtab.e
 include coverage.e
+include syncolor.e
 
 procedure InitBackEnd(integer x)
 	if not BIND then

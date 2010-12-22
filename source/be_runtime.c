@@ -54,7 +54,7 @@
 
 #ifndef ERUNTIME
 #include "be_rterror.h"
-#include "coverage.h"
+#include "be_coverage.h"
 #include "be_execute.h"
 #include "be_symtab.h"
 #endif
@@ -462,8 +462,11 @@ int matherr(struct _exception *err)  // OW wants this
 {
 	char *msg;
 
-
+#ifdef EMSVC
+	switch(0) {
+#else
 	switch(err->type) {
+#endif
 		case DOMAIN:
 			msg = "domain";
 			break;

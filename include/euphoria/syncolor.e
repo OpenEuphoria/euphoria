@@ -22,7 +22,7 @@ namespace syncolor
 include std/text.e
 include std/eumem.e
 
-include keywords.e
+include tokenize.e
 
 integer NORMAL_COLOR,
 		COMMENT_COLOR,
@@ -33,25 +33,8 @@ integer NORMAL_COLOR,
 sequence BRACKET_COLOR
 
 enum
-	S_STRING_TRIPLE,
-	S_STRING_BACKTICK,
-	S_MULTILINE_COMMENT,
+	S_TOKENIZER,
 	S_BRACKET_LEVEL
-
--- character classes
-enum
-	DIGIT,
-	OTHER,
-	LETTER,
-	BRACKET,
-	QUOTE,
-	BACKTICK,
-	DASH,
-	FORWARD_SLASH,
-	WHITE_SPACE,
-	NEW_LINE
-
-sequence char_class
 
 --****
 -- === Routines
@@ -89,58 +72,36 @@ public procedure init_class()
 	STRING_COLOR  = #00A033
 	BRACKET_COLOR = {NORMAL_COLOR, #993333, #0000FF, #5500FF, #00FF00}
 
--- set up character classes for easier line scanning
--- (assume no 0 char)
-	char_class = repeat(OTHER, 255)
-
-	char_class['a'..'z'] = LETTER
-	char_class['A'..'Z'] = LETTER
-	char_class['_'] = LETTER
-	char_class['0'..'9'] = DIGIT
-	char_class['['] = BRACKET
-	char_class[']'] = BRACKET
-	char_class['('] = BRACKET
-	char_class[')'] = BRACKET
-	char_class['{'] = BRACKET
-	char_class['}'] = BRACKET
-	char_class['\''] = QUOTE
-	char_class['"'] = QUOTE
-	char_class['`'] = BACKTICK
-	char_class[' '] = WHITE_SPACE
-	char_class['\t'] = WHITE_SPACE
-	char_class['\r'] = WHITE_SPACE
-	char_class['\n'] = NEW_LINE
-	char_class['-'] = DASH
-	char_class['/'] = FORWARD_SLASH
 end procedure
 
 constant DONT_CARE = -1  -- any color is ok - blanks, tabs
 
 sequence line           -- the line being processed
 sequence color_segments -- the value returned
-integer current_color, seg_start, seg_end -- start and end of current segment of line
+sequence linebuf = "" -- a buffer for same color segments of a line
+integer current_color, seg -- token of current segment of line
 
 procedure seg_flush(integer new_color)
 -- if the color must change,
 -- add the current color segment to the sequence
 -- and start a new segment
 	if new_color != current_color then
-		if seg_start <= seg_end then
-			if current_color != DONT_CARE then
-				color_segments = append(color_segments,
-						{current_color, line[seg_start..seg_end]})
-				seg_start = seg_end + 1
-			end if
+		if current_color != DONT_CARE then
+			color_segments = append(color_segments,
+					{current_color, linebuf})
+			linebuf = ""
 		end if
 		current_color = new_color
 	end if
+	linebuf &= line[seg][tokenize:TDATA]
 end procedure
 
-function default_state()
+function default_state(atom token = 0)
+	if not token then
+		token = tokenize:new()
+	end if
 	return {
-		0, -- S_MULTILINE_COMMENT
-		0, -- S_STRING_TRIPLE
-		0, -- S_STRING_BACKTICK
+		token, -- S_TOKENIZER
 		0  -- S_BRACKET_LEVEL
 	}
 end function
@@ -169,8 +130,16 @@ end function
 -- See Also:
 --   [[:new]], [[:SyntaxColor]]
 --
+procedure tokenize_reset(atom token)
+	if token then
+		tokenize:reset(token)
+	end if
+end procedure
 
 public procedure reset(atom state = g_state)
+	atom token = eumem:ram_space[state][S_TOKENIZER]
+	tokenize_reset(token)
+	eumem:ram_space[state] = default_state(token)
 	eumem:ram_space[state] = default_state()
 end procedure
 
@@ -178,8 +147,7 @@ end procedure
 -- Parse Euphoria code into tokens of like colors.
 --
 -- Break up a new-line terminated line into colored text segments identifying the
--- various parts of the Euphoria language. Consecutive characters of the same color
--- are all placed in the same 'segment' - seg_start..seg_end.
+-- various parts of the Euphoria language. They are broken into separate tokens.
 --
 -- Returns:
 --   A sequence that looks like:
@@ -189,23 +157,24 @@ end procedure
 --
 
 public function SyntaxColor(sequence pline, atom state=g_state)
-	integer class, last, i, c
-	sequence word
+	integer class, last, i
+	sequence word, c
+	atom token = eumem:ram_space[state][S_TOKENIZER]
 
-	-- Ensure we have a new-line to end this one.
-	if length(pline) > 0 and pline[$] != '\n' then
-		pline &= '\n'
-	end if
+	tokenize:keep_builtins(,token)
+	tokenize:keep_keywords(,token)
+	tokenize:keep_whitespace(,token)
+	tokenize:keep_newlines(,token)
+	tokenize:keep_comments(,token)
+	tokenize:string_numbers(,token)
+	tokenize:return_literal_string(,token)
+	tokenize:string_strip_quotes(0,token)
 
-	-- Don't bother if the line is empty
-	if length(pline) < 2 then
-		return {}
-	end if
-
-	line = pline
+	line = tokenize:tokenize_string(pline, token)
+	-- TODO error checking?
+	line = line[1]
 	current_color = DONT_CARE
-	seg_start = 1
-	seg_end = 0
+	seg = 1
 	color_segments = {}
 
 	-- TOOD: Hackery?
@@ -221,40 +190,29 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 	end if
 
 	while 1 do
-		c = line[seg_end + 1]
-		class = char_class[c]
+		if seg > length(line) then
+			exit
+		end if
 
-		if class = WHITE_SPACE then
-			seg_end += 1  -- continue with current color
+		c = line[seg]
+		class = c[tokenize:TTYPE]
 
-		elsif class = LETTER then
-			last = length(line)-1
-			for j = seg_end + 2 to last do
-				c = line[j]
-				class = char_class[c]
-				if class != LETTER then
-					if class != DIGIT then
-						last = j - 1
-						exit
-					end if
-				end if
-			end for
-			word = line[seg_end+1..last]
-			if find(word, keywords) then
-				seg_flush(KEYWORD_COLOR)
-			elsif find(word, builtins) then
-				seg_flush(BUILTIN_COLOR)
-			else
-				seg_flush(NORMAL_COLOR)
-			end if
-			seg_end = last
+		if class = tokenize:T_WHITE then
+			linebuf &= c[tokenize:TDATA]-- continue with current color
+		elsif class = tokenize:T_KEYWORD then
+			seg_flush(KEYWORD_COLOR)
 
-		elsif class <= OTHER then -- DIGIT too
+		elsif class = tokenize:T_BUILTIN then
+			seg_flush(KEYWORD_COLOR)
+
+		elsif class = tokenize:T_IDENTIFIER then
 			seg_flush(NORMAL_COLOR)
-			seg_end += 1
 
-		elsif class = BRACKET then
-			if find(c, "([{") then
+		elsif class = tokenize:T_LPAREN or class = tokenize:T_RPAREN or
+		class = tokenize:T_LBRACKET or class = tokenize:T_RBRACKET or
+		class = tokenize:T_LBRACE or class = tokenize:T_RBRACE then
+			if class = tokenize:T_LPAREN or class = tokenize:T_LBRACKET or
+			class = tokenize:T_LBRACE then
 				eumem:ram_space[state][S_BRACKET_LEVEL] += 1
 			end if
 
@@ -266,105 +224,28 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 				seg_flush(NORMAL_COLOR)
 			end if
 
-			if find(c, ")]}") then
+			if class = tokenize:T_RPAREN or class = tokenize:T_RBRACKET or
+			class = tokenize:T_RBRACE then
 				eumem:ram_space[state][S_BRACKET_LEVEL] -= 1
 			end if
 
-			seg_end += 1
-
-		elsif class = NEW_LINE then
+		elsif class = tokenize:T_NEWLINE then
+			linebuf &= c[tokenize:TDATA]-- continue with current color
 			exit  -- end of line
 
-		elsif class = DASH then
-			if line[seg_end+2] = '-' then
-				seg_flush(COMMENT_COLOR)
-				seg_end = length(line)-1
-				exit
-			end if
-			seg_flush(NORMAL_COLOR)
-			seg_end += 1
+		elsif class = tokenize:T_EOF then
+			exit  -- end of line
 
-		elsif class = FORWARD_SLASH then
-			if line[seg_end + 2] = '*' then
-label "MULTILINE_COMMENT"
-				if seg_end = 0 then
-					seg_end = 1
-				end if
-				seg_flush(COMMENT_COLOR)
-				i = match("*/", line, seg_end)
-				if i = 0 then
-					eumem:ram_space[state][S_MULTILINE_COMMENT] = 1
-					seg_end = length(line) - 1
-					exit
-				end if
-			
-				integer old_seg_end = seg_end + 2
-				seg_end = i + 1
-				
-				if old_seg_end < i and match("/*", line[old_seg_end..i]) then
-					goto "MULTILINE_COMMENT"
-				end if
-			
-				eumem:ram_space[state][S_MULTILINE_COMMENT] = 0
-			else
-				seg_flush(NORMAL_COLOR)
-				seg_end += 1
-			end if
+		elsif class = tokenize:T_COMMENT then
+			seg_flush(COMMENT_COLOR)
 
-		elsif class = BACKTICK then
-label "BACKTICK_STRING"
-			if seg_end = 0 then
-				seg_end = 1
-			end if
-
+		elsif class = tokenize:T_STRING or class = tokenize:T_CHAR then
 			seg_flush(STRING_COLOR)
-			i = match("`", line, seg_end + 2)
-			if i = 0 then
-				eumem:ram_space[state][S_STRING_BACKTICK] = 1
-				seg_end = length(line) - 1
-				exit
-			end if
 
-			seg_end = i
-			eumem:ram_space[state][S_STRING_BACKTICK] = 0
-
-		else  -- QUOTE
-			if line[seg_end + 2] = '"' and line[seg_end + 3] = '"' then
-label "MULTILINE_STRING"
-				seg_end += 1
-				seg_flush(STRING_COLOR)
-			
-				if seg_end + 3 < length(line) then
-					i = match(`"""`, line, seg_end + 3)
-					if i = 0 then
-						eumem:ram_space[state][S_STRING_TRIPLE] = 1
-						seg_end = length(line) - 1
-						exit
-					end if
-				else
-					i = length(line)
-					exit
-				end if
-
-				seg_end = i + 2
-				eumem:ram_space[state][S_STRING_TRIPLE] = 0
-			else
-				i = seg_end + 2
-				while i < length(line) do
-					if line[i] = c then
-						i += 1
-						exit
-					elsif line[i] = '\\' then
-						if i < length(line)-1 then
-							i += 1 -- ignore escaped char
-						end if
-					end if
-					i += 1
-				end while
-				seg_flush(STRING_COLOR)
-				seg_end = i - 1
-			end if
+		else
+			seg_flush(NORMAL_COLOR)
 		end if
+		seg += 1
 	end while
 
 	-- add the final piece:
@@ -372,7 +253,9 @@ label "MULTILINE_STRING"
 		current_color = NORMAL_COLOR
 	end if
 
-	return append(color_segments, {current_color, line[seg_start..seg_end]})
+	sequence ret = linebuf
+	linebuf = ""
+	return append(color_segments, {current_color, ret})
 end function
 
 new()

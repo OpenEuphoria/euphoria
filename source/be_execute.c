@@ -65,7 +65,7 @@
 #include "be_symtab.h"
 #include "be_w.h"
 #include "be_callc.h"
-#include "coverage.h"
+#include "be_coverage.h"
 #include "be_execute.h"
 
 /******************/
@@ -602,6 +602,18 @@ static void do_poke4(object a, object top)
 
 #if !defined(EMINGW)
 #if defined(EWINDOWS) || (defined(EWATCOM) && !defined(FP_EMULATION_NEEDED))
+#ifdef EMSVC
+long msvc_spare = 0;
+#define thread() do { __asm { JMP [pc] } } while(0)
+#define thread2() do { msvc_spare = pc + 8; __asm { JMP [msvc_spare] } } while(0)
+#define thread4() do { msvc_spare = pc + 16; __asm { JMP [msvc_spare] } } while(0)
+#define thread5() do { msvc_spare = pc + 20; __asm { JMP [msvc_spare] } } while(0)
+#define inc3pc() do { __asm { ADD pc, 12 } } while(0)
+// not converted because it is not used
+#define threadpc3()
+#define BREAK break
+#include "redef.h"
+#else
 // #pragma aux thread aborts; does nothing
 
 #define thread() do { wcthread((long)pc); } while (0)
@@ -655,6 +667,7 @@ void threadpc3(void);
 
 #define BREAK break
 #include "redef.h"
+#endif // EMSVC
 #endif
 #endif // !defined(EMINGW)
 
