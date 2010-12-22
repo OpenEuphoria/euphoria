@@ -202,7 +202,7 @@ end function
 --
 
 public function version_string()
-	return sprintf("%d.%d.%d %s (%s,%s)", version_info)
+	return sprintf("%d.%d.%d %s (%s:%d,%s)", version_info)
 end function
 
 --**
