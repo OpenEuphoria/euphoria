@@ -433,6 +433,7 @@ eucsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET = backend.ex
 backendsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
+
 source : builddirs
 	$(MAKE) euisource OBJDIR=intobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)
 	$(MAKE) eucsource OBJDIR=transobj EBSD=$(EBSD) CONFIG=$(CONFIG) EDEBUG=$(EDEBUG) EPROFILE=$(EPROFILE)

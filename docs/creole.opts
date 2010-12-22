@@ -1,0 +1,12 @@
+wikis = {
+	{"WIKIPEDIA","http://wikipedia.org/wiki/"},
+	{"TICKET","/ticket/view.wc?id="},
+	{"MESSAGE","/forum/view.wc?id="},
+	{"NEWS","/news/view.wc?id="},
+	{"WIKI","/wiki/view.wc?page="},
+	{"CATEGORY","/category/members.wc?category="},
+	{"SVN","http://rapideuphoria.svn.sourceforge.net/viewvc/rapideuphoria?view=rev&amp;revision="},
+	{"HG","http://scm.openeuphoria.org/hg/"},
+	{"MAN","/docs/"},
+	$
+}

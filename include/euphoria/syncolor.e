@@ -140,6 +140,7 @@ public procedure reset(atom state = g_state)
 	atom token = eumem:ram_space[state][S_TOKENIZER]
 	tokenize_reset(token)
 	eumem:ram_space[state] = default_state(token)
+	eumem:ram_space[state] = default_state()
 end procedure
 
 --**
@@ -175,6 +176,18 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 	current_color = DONT_CARE
 	seg = 1
 	color_segments = {}
+
+	-- TOOD: Hackery?
+	if eumem:ram_space[state][S_MULTILINE_COMMENT] then
+		goto "MULTILINE_COMMENT"
+
+	elsif eumem:ram_space[state][S_STRING_TRIPLE] then
+		goto "MULTILINE_STRING"
+
+	elsif eumem:ram_space[state][S_STRING_BACKTICK] then
+		goto "BACKTICK_STRING"
+
+	end if
 
 	while 1 do
 		if seg > length(line) then
