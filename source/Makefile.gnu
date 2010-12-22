@@ -621,6 +621,7 @@ $(BUILDDIR)/euphoria.pdf : $(BUILDDIR)/pdf/euphoria.tex
 pdfdoc-initial : $(BUILDDIR)/euphoria.pdf
 	cd $(TRUNKDIR)/docs && pdflatex -output-directory=$(BUILDDIR)/pdf $(BUILDDIR)/pdf/euphoria.tex && cp $(BUILDDIR)/pdf/euphoria.pdf $(BUILDDIR)/
 
+.PHONY : pdfdoc-initial pdfdoc
 
 ###############################################################################
 #
