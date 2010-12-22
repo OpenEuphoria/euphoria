@@ -538,6 +538,10 @@ ifeq "$(EMINGW)" "1"
 	$(CC) $(EOSFLAGSCONSOLE) $(EUB_RES) $(EU_BACKEND_RUNNER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) -o $(BUILDDIR)/$(EBACKENDC)
 endif
 
+ifeq "$(HG)" ""
+HG=hg
+endif
+
 .PHONY: update-version-cache
 update-version-cache : $(MKVER)
 	$(MKVER) $(HG) $(BUILDDIR)/ver.cache $(BUILDDIR)/$(OBJDIR)/back/be_ver.h $(EREL_TYPE)$(RELEASE)
@@ -545,12 +549,10 @@ update-version-cache : $(MKVER)
 $(MKVER): mkver.c
 	$(CC) -o $@ $<
 
-
 $(BUILDDIR)/ver.cache : update-version-cache
 
 $(BUILDDIR)/$(OBJDIR)/back/be_ver.h:  $(BUILDDIR)/ver.cache
 	
-
 ###############################################################################
 #
 # Documentation
