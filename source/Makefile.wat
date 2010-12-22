@@ -555,7 +555,7 @@ $(BUILDDIR)\mkver.exe: mkver.c
 update-version-cache : .SYMBOLIC $(BUILDDIR)\mkver.exe
 	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
 
-$(BUILDDIR)\$(OBJDIR)\ver.cache
+$(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe
 	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
 
 $(BUILDDIR)\$(OBJDIR)\back\be_ver.h : $(BUILDDIR)\ver.cache $(BUILDDIR)\mkver.exe

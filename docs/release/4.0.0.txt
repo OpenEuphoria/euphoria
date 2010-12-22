@@ -86,4 +86,4 @@ future the old ##( name1, name2 )## syntax will be removed.
 * ##euphoria/info.e## version methods ##[[:version_string]]## and ##[[:version_string_long]]##
   now have the ability to report the enhanced version information.
 * Optimized for loops to check for integer initial value and
-limits.
+  limits.
