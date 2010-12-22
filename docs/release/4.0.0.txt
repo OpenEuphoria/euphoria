@@ -1,4 +1,4 @@
-== Version 4.0.0 (Release Date Scheduled December 22, 2010)
+== Version 4.0.0 December 22, 2010
 
 4.0.0 has not yet been released. These changes are available in the latest SVN trunk. 
 4.0.0 is scheduled to be released on December 22, 2010.
