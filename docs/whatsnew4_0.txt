@@ -73,13 +73,17 @@ Too numerous to list here, please see the reference section of this manual.
 ** [[:The User Defined Preprocessor|User Defined Preprocessor]]
 ** [[:Set Up the Euphoria Configuration File (eu.cfg)|Configuration system]] (eu.cfg)
 ** Version display for all tools
-* [[:Euphoria To C Translator|Translator]]
-** Compiles directly
-** Can write a makefile
-** Can compile/bind a resource file on Windows
 * Interpreter
 ** New test mode, [[:Command line switches]]
 ** Batch mode for unattended execution such as a CGI application, [[:Command line switches]]
+* [[:Euphoria To C Translator|Translator]]
+** Compiles directly
+** Can compile in debug mode using the ##-debug## argument
+** Can write a makefile
+** Can compile/bind a resource file on Windows
+** Now includes ##eudbg.lib##, ##eu.a## and ##eudbg.a## files in addition to the ##eu.lib##
+   file enabling one to link against debug libraries and also use the MinGW compiler directly
+   without having to recompile sources.
 * New independent shrouder
 * Coverage Analysis
 * Disassembler
