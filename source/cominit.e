@@ -437,20 +437,16 @@ export procedure handle_common_options(m:map opts)
 
 			case "v", "version" then
 				show_banner()
-				if find("WIN32_GUI", OpDefines) then
-					if not batch_job and not test_only then
-						any_key(GetMsgText(278,0), 2)
-					end if
+				if not batch_job and not test_only then
+					console:maybe_any_key(GetMsgText(278,0), 2)
 				end if
 
 				abort(0)
 
 			case "copyright" then
 				show_copyrights()
-				if find("WIN32_GUI", OpDefines) then
-					if not batch_job and not test_only then
-						any_key(GetMsgText(278,0), 2)
-					end if
+				if not batch_job and not test_only then
+					console:maybe_any_key(GetMsgText(278,0), 2)
 				end if
 				abort(0)
 			

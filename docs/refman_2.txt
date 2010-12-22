@@ -1156,59 +1156,31 @@ The Euphoria editor displays these words in blue
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
 
-!! tom, again not working
-!! |                          peek         )     peek2u        )     sprintf)|
-!!   abort )  peek2s   )       peek4s       )       sqrt)|
-!!  and_bits     )  log          )  peek4u           )    system)|
-!!   append      )   machine_func)    peek_string)   system_exec)|
-!!  arctan         )  machine_proc)   peeks      )    tail)|
-!!   atom          )  match        )   pixel           )  tan)|
-!!   c_func        )    match_from)   platform  )   task_clock_start)|
-!!   c_proc        )   get_key        )   poke        )  task_clock_stop)|
-!!   call             )  get_pixel       )  poke2       )  task_create)|
-!!   call_func     )  getc              )  poke4       )   task_list)|
-!!  call_proc     )   getenv          )  position    )   task_schedule )|
-!!  clear_screen)   gets            )   power       )  task_self  )|
-!!  close           )  hash             )  prepend    )  task_status )|
-!!  command_line)   head        )    print        )  task_suspend  )|
-!!  compare    )   include_paths)   printf       )     task_yield  )|
-!!  cos            )   insert           )      profile     )   time)|
-!!  date          )   mem_copy   )    profile_time)    trace)|
-!!  delete       )   mem_set      )  puts            )  warning)|
-!!  delete_routine)  not_bits   )     rand        )   xor_bits  )|
-!!  equal        )    object          )   remainder)  ?) |
-!!  find          )   open              )  remove      ) &)|
-!!  find_from )  option_switches)  routine_id) ~$)|
-!!  floor        )   or_bits            )  sequence )|  |
-!!  integer    )    repeat           )    sin          )|  |
-!!   length    )    replace         )  splice       )|  |
-
-
 <eucode>
-abort           getenv          peek4s          sprintf
-and_bits        gets            peek4u          sqrt
-append          hash            peeks           system
-arctan          head            platform        system_exec
-atom            include_paths   poke            tail
-c_func          insert          poke2           tan
-c_proc          integer         poke4           task_clock_start
-call            length          position        task_clock_stop
-call_func       log             power           task_create
-call_proc       machine_func    prepend         task_list
-clear_screen    machine_proc    print           task_schedule
-close           match           printf          task_self
-command_line    match_from      profile         task_status
-compare         mem_copy        profile_time    task_suspend
-cos             mem_set         puts            task_yield
-date            not_bits        rand            time
-delete          object          remainder       trace
-delete_routine  open            remove          warning
-equal           option_switches repeat          xor_bits
-find            or_bits         replace         ?
-find_from       peek            routine_id      &
-floor           peek_string     sequence        $
-get_key         peek2s          sin
-getc            peek2u          splice
+abort           getenv          peek4s          system
+and_bits        gets            peek4u          system_exec
+append          hash            peeks           tail
+arctan          head            platform        tan
+atom            include_paths   poke            task_clock_start
+c_func          insert          poke2           task_clock_stop
+c_proc          integer         poke4           task_create
+call            length          position        task_list
+call_func       log             power           task_schedule
+call_proc       machine_func    prepend         task_self
+clear_screen    machine_proc    print           task_status
+close           match           printf          task_suspend
+command_line    match_from      puts            task_yield
+compare         mem_copy        rand            time
+cos             mem_set         remainder       trace
+date            not_bits        remove          xor_bits
+delete          object          repeat          ?
+delete_routine  open            replace         &
+equal           option_switches routine_id      $
+find            or_bits         sequence        
+find_from       peek            sin             
+floor           peek_string     splice          
+get_key         peek2s          sprintf
+getc            peek2u          sqrt
 </eucode>
 
 

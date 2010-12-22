@@ -10,7 +10,7 @@ ifdef WIN32_GUI then
     puts(2,"This program must be run from the command-line:\n\n"&
 	"usage: eui datesub.ex [options]\n\n")
     procedure my_help()
-	    any_key()
+	    maybe_any_key()
     end procedure
     constant parse_opts = { HELP_RID, routine_id("my_help") }
 elsedef
