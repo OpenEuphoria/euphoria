@@ -3575,10 +3575,10 @@ the result to be true.
 If the expression B contains a call to a function, and that function has
 possible **side-effects**, i.e. it might do more than just return a value,
 you will get a compile-time warning. Older versions (pre-2.1) of Euphoria did
-not use [[:short-circuit]] evaluation, and it's possible that some
-old code will no longer work correctly, although a search of the Euphoria
-archives did not turn up any programs that depend on side-effects in this
-way, but other Euphoria code might do so.
+not use [[:short_circuit]] evaluation, and it's possible that some old
+code will no longer work correctly, although a search of the Euphoria
+archives did not turn up any programs that depend on side-effects in
+this way, but other Euphoria code might do so.
 
 The expression, B, could contain something that would normally cause a run-time
 error. If Euphoria skips the evaluation of B, the error will not be discovered.
