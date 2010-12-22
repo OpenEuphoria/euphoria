@@ -14,11 +14,11 @@ Too numerous to list here, please see the reference section of this manual.
 
 === Executable name changes
 
-|| Old                         || New           || Description         ||
-| ##ex## and ##exwc##           | ##eui##        | Euphoria Interpreter |
-| ##ec## and ##ecw##            | ##euc##        | Euphoria Compiler    |
-| ##bind.bat## and ##bind##     | ##eubind##     | Euphoria Binder      |
-| ##shroud.bat## and ##shroud## | ##eushrouder## | Euphoria Shrouder    |
+|| Old                         || New           || Description             ||
+| ##ex## and ##exwc##           | ##eui##        | Euphoria Interpreter     |
+| ##ec## and ##ecw##            | ##euc##        | Euphoria to C Translator |
+| ##bind.bat## and ##bind##     | ##eubind##     | Euphoria Binder          |
+| ##shroud.bat## and ##shroud## | ##eushrouder## | Euphoria Shrouder        |
 
 === Language Enhancements
 

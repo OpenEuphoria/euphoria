@@ -1509,7 +1509,7 @@ end procedure
 --
 -- object loaded
 -- map AppOptions
--- sequence SavedMap = "c:\myapp\options.txt"
+-- sequence SavedMap = "c:\\myapp\\options.txt"
 --
 -- loaded = load_map(SavedMap)
 -- if equal(loaded, -1) then
