@@ -2,7 +2,7 @@
 == Definition
 :<<LEVELTOC level=2 depth=4>>
 === Objects ===
-@[predefinedtypes]
+@[predefinedtypes|]
 
 ==== Atoms and Sequences
 
@@ -872,8 +872,9 @@ s[$-5..$]
 s[$][1..floor($/2)] -- first half of the last element of s
 </eucode>
 
+==== Concatenation of Sequences and Atoms - The '&' Operator ====
+@[amp concat|]
 @[amp_concat|]
-==== Concatenation of Sequences and Atoms - The '&' Operator ==== @[amp concat]
 
 Any two objects may be concatenated using the **&** operator. The
 result is a sequence with a length equal to the sum of the lengths of the
@@ -1914,8 +1915,8 @@ declared in any
 Euphoria coded file.
 
 
-@[namespace]
 ==== Using namespaces
+@[namespace|]
 
 Identifiers marked as ##global##, ##public## or ##export## are known as
 //exposed// variables because they can be used in files other than the one they
@@ -3635,7 +3636,7 @@ false, and conditions are required to produce an atom as a result.
 
 %%output=lang_toplevel
 == Special Top-Level Statements ==
-@[specialstatements]
+@[specialstatements|]
 :<<LEVELTOC level=2 depth=4>>
 
 Before any of your statements are executed, the Euphoria front-end quickly
