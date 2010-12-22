@@ -3532,7 +3532,7 @@ while 1 with entry label "top" do -- CORRECT
 
 %%output=lang_short_circuit
 == Short-Circuit Evaluation ==
-@[short_circuit]
+@[short_circuit|]
 :<<LEVELTOC level=2 depth=4>>
 
 When the condition tested by if, elsif, until, or while contains ##and## or
