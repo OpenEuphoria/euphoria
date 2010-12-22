@@ -74,10 +74,6 @@ IF "%1" =="--plat" (
 	SHIFT
 	GOTO EndLoop
 )
-IF "%1" =="--full" (
-	echo RELEASE=1 >> config.wat
-	GOTO EndLoop
-)
 IF "%1" =="--debug" (
 	echo DEBUG=1 >> config.wat
 	GOTO EndLoop
@@ -111,6 +107,11 @@ IF "%1" == "--noassert" (
 IF "%1" == "--release" (
 	echo EREL_TYPE = /dEREL_TYPE="%2" >> config.wat
 	SHIFT
+	GOTO EndLoop
+)
+
+IF "%1" =="--final" (
+	echo EREL_TYPE = /dEREL_TYPE=1 >> config.wat
 	GOTO EndLoop
 )
 
@@ -310,9 +311,9 @@ echo     --eubin value       Use this option to specify the location of the
 echo                         interpreter binary to use to translate the front end.
 echo                         The default is ..\bin
 echo     --build value       set the build directory
-echo     --full              Use this option to so EUPHORIA doesn't report itself
-echo                         as a development version.
 echo     --release value     set the release type for the version string
+echo     --final             Use this option to so EUPHORIA doesn't report itself
+echo                         as a development version.
 echo     --noassert          Use this to remove 'assert()' processing in the C code.
 echo     --plat value        set the OS that we will translate to.
 echo                         values can be: WIN, OSX, LINUX, FREEBSD, OPENBSD or NETBSD.

@@ -34,8 +34,6 @@ else
 	PREFIX=./
 fi
 
-
-
 echo "# File generated from configure" > ${CONFIG_FILE}
 
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
@@ -168,10 +166,6 @@ while [ "$1" != "" ]; do
 		EUBIN=$VAL
 		;;
 
-	--full )
-		echo RELEASE=1 >> "$PREFIX"${CONFIG_FILE}
-		;;
-
 	--build*)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
@@ -200,6 +194,10 @@ while [ "$1" != "" ]; do
 
 	--use-source-translator )
 		export EC="eui ec.ex"
+		;;
+
+	--final)
+		echo EREL_TYPE=-DEREL_TYPE=1 >> ${CONFIG_FILE}
 		;;
 
 	--release*)
