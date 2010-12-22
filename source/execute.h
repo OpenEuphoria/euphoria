@@ -301,7 +301,7 @@ struct char_cell {
 #define M_ELLIPSE            18
 #define M_SEEK               19
 #define M_WHERE              20
-#define M_REUSE_2            21 // REUSE
+#define M_SET_SYNCOLOR       21
 #define M_DIR                22
 #define M_CURRENT_DIR        23
 #define M_MOUSE_POINTER      24
@@ -316,7 +316,7 @@ struct char_cell {
 #define M_FREE_LOW           33
 #define M_INTERRUPT          34
 #define M_SET_RAND           35
-#define M_USE_VESA           36
+#define M_SET_COVERAGE       36
 #define M_CRASH_MESSAGE      37
 #define M_TICK_RATE          38
 #define M_GET_VECTOR         39

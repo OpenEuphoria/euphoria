@@ -54,7 +54,7 @@
 
 #ifndef ERUNTIME
 #include "be_rterror.h"
-#include "coverage.h"
+#include "be_coverage.h"
 #include "be_execute.h"
 #include "be_symtab.h"
 #endif

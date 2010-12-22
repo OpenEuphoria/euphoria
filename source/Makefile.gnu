@@ -297,6 +297,7 @@ EU_BACKEND_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_callc.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_inline.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_machine.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_coverage.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_pcre.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_rterror.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_syncolor.o \
@@ -309,6 +310,7 @@ EU_BACKEND_OBJECTS = \
 EU_LIB_OBJECTS = \
 	$(BUILDDIR)/$(OBJDIR)/back/be_decompress.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_machine.o \
+	$(BUILDDIR)/$(OBJDIR)/back/be_coverage.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_w.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_alloc.o \
 	$(BUILDDIR)/$(OBJDIR)/back/be_inline.o \
@@ -424,15 +426,12 @@ binder : translator library
 
 euisource : $(BUILDDIR)/intobj/main-.c
 euisource :  EU_TARGET = int.ex
-euisource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 euisource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 eucsource : $(BUILDDIR)/transobj/main-.c
 eucsource :  EU_TARGET = ec.ex
-eucsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 eucsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 backendsource : $(BUILDDIR)/backobj/main-.c
 backendsource :  EU_TARGET = backend.ex
-backendsource : $(BUILDDIR)/$(OBJDIR)/back/coverage.h
 backendsource : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 
 source : builddirs
@@ -473,19 +472,6 @@ endif
 .PHONY : backendsource
 .PHONY : source
 
-$(BUILDDIR)/$(OBJDIR)/back/coverage.h : $(BUILDDIR)/$(OBJDIR)/main-.c
-	$(EXE) -i $(CYPTRUNKDIR)/include coverage.ex $(CYPBUILDDIR)/$(OBJDIR)
-
-$(BUILDDIR)/intobj/back/be_execute.o : $(BUILDDIR)/intobj/back/coverage.h
-$(BUILDDIR)/transobj/back/be_execute.o : $(BUILDDIR)/transobj/back/coverage.h
-$(BUILDDIR)/backobj/back/be_execute.o : $(BUILDDIR)/backobj/back/coverage.h
-
-$(BUILDDIR)/intobj/back/be_runtime.o : $(BUILDDIR)/intobj/back/coverage.h
-$(BUILDDIR)/transobj/back/be_runtime.o : $(BUILDDIR)/transobj/back/coverage.h
-$(BUILDDIR)/backobj/back/be_runtime.o : $(BUILDDIR)/backobj/back/coverage.h
-
-$(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
-
 ifeq "$(EMINGW)" "1"
 $(EUI_RES) : eui.rc version_info.rc
 $(EUIW_RES) : euiw.rc version_info.rc
@@ -503,6 +489,8 @@ ifeq "$(EMINGW)" "1"
 else
 	$(CC) $(EOSFLAGS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) -lm $(LDLFLAG) $(COVERAGELIB) $(PROFILE_FLAGS) $(MSIZE) -o $(BUILDDIR)/$(EEXU)
 endif
+
+$(BUILDDIR)/$(OBJDIR)/back/be_machine.o : $(BUILDDIR)/$(OBJDIR)/back/be_ver.h
 
 ifeq "$(EMINGW)" "1"
 $(EUC_RES) : euc.rc version_info.rc
