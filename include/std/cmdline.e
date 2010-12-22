@@ -155,7 +155,7 @@ sequence pause_msg = ""
 
 procedure local_abort(integer lvl)
 	if length(pause_msg) != 0 then
-		console:any_key(pause_msg, 1)
+		console:maybe_any_key(pause_msg, 1)
 	end if
 
 	abort(lvl)
