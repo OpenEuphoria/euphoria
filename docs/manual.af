@@ -163,7 +163,9 @@ end ifdef
 
 ########
 
+:%%output=apiref
 := API Reference
+:<<LEVELTOC level=1 depth=2>>
 
 # General Index
 ../docs/builtins.txt
