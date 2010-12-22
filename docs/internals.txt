@@ -11,8 +11,8 @@ The Euphoria interpreter has two parts: the frontend and the backend. The
 **Intermediate Language** (IL) instructions. The **backend** then takes the
 IL instructions and executes the program.
 
-When the //interpreter// executes source-code, the frontend and backend work 
-together in tandem. It appears as if the source-code executes immediately.
+When the //interpreter// executes source-code, the frontend parses and prepares
+the code, and then the backend executes the code.
 
 When the //shrouder// executes source-code, only the frontend is run producing
 an ##.il## file. This ##.il## file may be run by the backend as an

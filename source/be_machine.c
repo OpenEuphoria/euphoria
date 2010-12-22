@@ -33,6 +33,7 @@
 #include "be_alloc.h"
 #include "be_execute.h"
 #include "be_socket.h"
+#include "be_ver.h"
 #include "be_coverage.h"
 #include "be_syncolor.h"
 
@@ -106,7 +107,6 @@ extern unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsign
 
 #include <signal.h>
 
-extern char* get_svn_revision(); /* from rev.c */
 extern double eustart_time; /* from be_runtime.c */
 
 /*****************/
@@ -185,7 +185,7 @@ int use_prompt() {
 	return (is_batch == 0 && is_test == 0 && has_console() == 0);
 }
 
-#ifdef EMINGW
+#if defined(EMINGW) || defined(EMSVC)
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len;
@@ -2555,13 +2555,17 @@ static object crash_routine(object x)
 object eu_info()
 {
 	s1_ptr s1;
-	s1 = NewS1(6);
+
+	s1 = NewS1(8);
 	s1->base[1] = MAJ_VER;
 	s1->base[2] = MIN_VER;
 	s1->base[3] = PAT_VER;
 	s1->base[4] = NewString(REL_TYPE);
-	s1->base[5] = NewString(get_svn_revision());
-	s1->base[6] = NewDouble(eustart_time);
+	s1->base[5] = NewString(SCM_NODE);
+	s1->base[6] = SCM_REV;
+	s1->base[7] = NewString(SCM_DATE);
+	s1->base[8] = NewDouble(eustart_time);
+
 	return MAKE_SEQ(s1);
 }
 

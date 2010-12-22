@@ -26,7 +26,7 @@ print statements at strategic locations in order to monitor the internal logic
 of the program. This approach is particularly convenient in an interpreted
 language like Euphoria since you can simply edit the source and rerun the
 program without waiting for a re-compile/re-link.
-@[trace]
+@[trace|]
 
 ==== The with / without trace directive
 
@@ -205,10 +205,10 @@ make two separate runs.
 We ran the ##sieve8k.ex## benchmark program in ##demo\bench## under both types
 of profiling. The results are in ##sieve8k.pro## (execution-count profiling)
 and ##sieve8k.pro2## (time profiling).
-@[profile]
-Execution-count profiling shows precisely how many times each statement in your
-program was executed. If the statement was never executed the count field will
-be blank.
+
+@[profile|] Execution-count profiling shows precisely how many times
+each statement in your program was executed. If the statement was never
+executed the count field will be blank.
 
 Time profiling shows an estimate of the total time spent executing
 each statement. This estimate is expressed as a percentage of the time spent

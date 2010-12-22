@@ -17,11 +17,13 @@ your source-code.
 
 You write your material using //Creole// style markup to format documention.
 This gives you creative control using elements like headers, fonts, 
-cross-references, tables, etc. The **##creolehtml##** program takes the output 
-of ##eudoc## and produces HTML-formatted documentation.
+cross-references, tables, etc. The **##creole##** program takes the
+output  of ##eudoc## and produces HTML-formatted documentation.
 
 A third party program like ##htmldoc## or ##wkhtmltopdf## may then be used to 
-convert HTML to PDF.
+convert HTML to PDF. ##creole## will also output LaTeX files directly
+that can be used to create professional PDF files for online viewing or
+publishing.
 
 === Documentation tags
 
@@ -154,7 +156,7 @@ end for
 * easy to produce
 
 
-||  tables || are |
+||  tables        || are                   |
 | easy to produce |  //with bold headers// |
 
 <eucode>
@@ -168,15 +170,19 @@ end for
 
 === Documentation software
 
-The programs required for creating documentation are hosted 
-at [[http://sourceforge.net/projects/rapideuphoria/|]]SourceForge.
+The programs required for creating documentation are hosted on our
+Mercurial SCM server at [[http://scm.openeuphoria.org]].
 
-eudoc: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/eudoc/trunk
+eudoc: http://scm.openeuphoria.org/hg/eudoc
 
-creolehtml: https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/tools/creole/trunk
+creole: http://scm.openeuphoria.org/hg/creole
 
 [[wiki:Documenting40|More on using eudoc]]
 
 [[wiki:CreoleHelp|More on using Creole markup]]
 
 The program htmldoc is found at... http://www.htmldoc.org/ and http://htmldoc-binaries.org/.
+
+For LaTeX on Windows, we suggest MiKTeX found at... http://miktex.org/
+For those on Linux, you should be able to install via your package
+manager.

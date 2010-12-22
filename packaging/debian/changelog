@@ -1,3 +1,9 @@
+euphoria (4.0.0-eu3-Final0) stable; urgency=low
+  
+  * 4.0.0 Final Release
+
+ -- Matt Lewis <mattlewis@openeuphoria.org>  Mon, 08 Dec 2010 04:53:05 -0500
+
 euphoria (4.0.0-eu2-RC.2) stable; urgency=low
 
   * Release Candidate 2

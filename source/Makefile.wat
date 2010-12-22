@@ -172,10 +172,7 @@ EU_BACKEND_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
-#       &
-#       $(BUILDDIR)\$(OBJDIR)\memory.obj
 
 EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
@@ -188,7 +185,6 @@ EU_LIB_OBJECTS = &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj &
 	$(PCRE_OBJECTS)
 
 EU_BACKEND_RUNNER_FILES = &
@@ -209,8 +205,6 @@ EU_INCLUDES = $(TRUNKDIR)\include\std\*.e $(TRUNKDIR)\include\*.e &
 
 EU_ALL_FILES = *.e $(EU_INCLUDES) &
 		 int.ex ec.ex backend.ex
-
-STDINCDIR = $(TRUNKDIR)/include/std
 
 DOCDIR = $(TRUNKDIR)\docs
 EU_DOC_SOURCE = &
@@ -553,6 +547,20 @@ $(BUILDDIR)\transobj\back\be_runtime.obj : $(BUILDDIR)\transobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_execute.obj : $(BUILDDIR)\backobj\back\coverage.h
 $(BUILDDIR)\backobj\back\be_runtime.obj : $(BUILDDIR)\backobj\back\coverage.h
 
+$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj : $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+$(BUILDDIR)\mkver.exe: mkver.c
+	owcc -o $@ $<
+
+update-version-cache : .SYMBOLIC $(BUILDDIR)\mkver.exe
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+$(BUILDDIR)\ver.cache : $(BUILDDIR)\mkver.exe
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h
+
+$(BUILDDIR)\$(OBJDIR)\back\be_ver.h : $(BUILDDIR)\ver.cache $(BUILDDIR)\mkver.exe
+	$(BUILDDIR)\mkver.exe $(HG) $(BUILDDIR)\ver.cache $(BUILDDIR)\$(OBJDIR)\back\be_ver.h BE_VER_H
+
 $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_CORE_OBJECTS) $(EU_INTERPRETER_OBJECTS) $(EU_BACKEND_OBJECTS) $(CONFIG) eui.rc version_info.rc
 	@%create $(BUILDDIR)\$(OBJDIR)\euiw.lbc
 	@%append $(BUILDDIR)\$(OBJDIR)\euiw.lbc option quiet
@@ -567,7 +575,6 @@ $(BUILDDIR)\eui.exe $(BUILDDIR)\euiw.exe: $(BUILDDIR)\$(OBJDIR)\main-.c $(EU_COR
 interpreter : .SYMBOLIC
 	wmake -h $(BUILDDIR)\intobj\main-.c EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h objlist OBJDIR=intobj $(VARS) EU_NAME_OBJECT=EU_INTERPRETER_OBJECTS
-	wmake -h $(BUILDDIR)\euiw.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 	wmake -h $(BUILDDIR)\eui.exe EX=$(EUBIN)\eui.exe EU_TARGET=int. OBJDIR=intobj $(VARS) DEBUG=$(DEBUG) MANAGED_MEM=$(MANAGED_MEM)
 
 install : .SYMBOLIC
@@ -717,7 +724,6 @@ $(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj : be_symtab.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_w.obj : be_w.c *.h $(CONFIG) 
 $(BUILDDIR)\$(OBJDIR)\back\be_socket.obj : be_socket.c *.h $(CONFIG)
 $(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj : be_pcre.c *.h $(CONFIG) 
-$(BUILDDIR)\$(OBJDIR)\back\be_rev.obj : be_rev.c *.h $(CONFIG) 
 
 !ifdef PCRE_OBJECTS	
 $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
@@ -727,8 +733,15 @@ $(PCRE_OBJECTS) : pcre/*.c pcre/pcre.h.windows pcre/config.h.windows
 	cd ..
 !endif
 
-$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
-	$(EUDOC) --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
+###############################################################################
+#
+# Documentation
+#
+###############################################################################
+
+#
+# HTML Manual
+#
 
 $(BUILDDIR)\docs\js : .EXISTSONLY $(BUILDDIR)\docs  
 	mkdir $^@
@@ -766,7 +779,10 @@ $(BUILDDIR)\docs\images\prev.png : $(DOCDIR)\html\images\prev.png $(BUILDDIR)\do
 $(BUILDDIR)\docs\images\next.png : $(DOCDIR)\html\images\next.png $(BUILDDIR)\docs\images
 	copy $(DOCDIR)\html\images\next.png $^@
 
-$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html $(DOCDIR)\nav.html
+$(BUILDDIR)\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\html
+	$(EUDOC) -d HTML --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\euphoria.txt
+
+$(BUILDDIR)\docs\index.html : $(BUILDDIR)\euphoria.txt $(DOCDIR)\template.html
 	cd $(TRUNKDIR)\docs
 	$(CREOLE) -A -t=$(TRUNKDIR)\docs\template.html -o=$(BUILDDIR)\docs $(BUILDDIR)\euphoria.txt
 	cd $(TRUNKDIR)\source
@@ -786,9 +802,9 @@ $(BUILDDIR)\pdf : .EXISTSONLY
 	mkdir $^@
 
 $(BUILDDIR)\pdf\euphoria.txt : $(EU_DOC_SOURCE) $(BUILDDIR)\pdf
-	$(EUDOC) --single --strip=2 -a $(TRUNKDIR)\docs\manual-pdf.af -o $(BUILDDIR)\pdf\euphoria.txt
+	$(EUDOC) -d PDF --single --strip=2 -a $(TRUNKDIR)\docs\manual.af -o $(BUILDDIR)\pdf\euphoria.txt
 
-$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt
+$(BUILDDIR)\pdf\euphoria.tex : $(BUILDDIR)\pdf\euphoria.txt $(TRUNKDIR)\docs\template.tex
 	$(CREOLE) -f latex -A -t=$(TRUNKDIR)\docs\template.tex -o=$(BUILDDIR)\pdf $<
 
 $(BUILDDIR)\euphoria.pdf : $(BUILDDIR)\pdf\euphoria.tex
@@ -801,6 +817,10 @@ pdfdoc-again: .SYMBOLIC $(BUILDDIR)\euphoria.pdf
 	pdflatex -aux-directory=$(BUILDDIR)\pdf -output-directory=$(BUILDDIR) $(BUILDDIR)\pdf\euphoria.tex
 	cd $(TRUNKDIR)\source
 
+#
+# Distribution
+#
+
 manual : .SYMBOLIC $(BUILDDIR)\docs\index.html $(BUILDDIR)\docs\js\search.js $(BUILDDIR)\docs\style.css  $(BUILDDIR)\docs\images\next.png $(BUILDDIR)\docs\images\prev.png
 
 manual-send: .SYMBOLIC manual
@@ -810,4 +830,3 @@ manual-reindex: .SYMBOLIC
 	$(SSH) $(OE_USERNAME)@openeuphoria.org "cd /home/euweb/prod/euweb/source/ && sh reindex_manual.sh"
 
 manual-upload: manual-send manual-reindex
-

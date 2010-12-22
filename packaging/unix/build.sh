@@ -4,14 +4,13 @@
 # Ensure a directory name was given as a command line option
 #
 
-if [ "$1" = "" ] || [ "$2" = "" ]; then
-	echo Usage: build.sh SVN_PATH VERSION
-        exit
+if [ "$1" = "" ]; then
+	echo Usage: build.sh VERSION
+	exit
 fi
 
-SVN_PATH=$1
-VERSION=$2
-OPT=$3
+VERSION=$1
+OPT=$2
 REL_NAME=euphoria-${VERSION}${OPT}
 ROOTDIR=../../..
 
@@ -19,7 +18,7 @@ echo Cleaning previous working directory
 rm -rf ${REL_NAME}
 
 echo Getting a clean SVN export
-svn export https://rapideuphoria.svn.sourceforge.net/svnroot/rapideuphoria/${SVN_PATH} ${REL_NAME}
+hg archive $REL_NAME
 
 echo Removing unnecessary file for *nix installs
 cd ${REL_NAME}/bin
@@ -29,7 +28,7 @@ cd ..
 rm -rf docs
 rm -rf packaging
 
-BINS=`ls ${ROOTDIR}/bin/eu{b,bind,c,i,shroud} ${ROOTDIR}/bin/eu{coverage,dis,dist,doc,loc,test} ${ROOTDIR}/bin/creolehtml`
+BINS=`ls ${ROOTDIR}/bin/eu{b,bind,c,i,shroud} ${ROOTDIR}/bin/eu{coverage,dis,dist,doc,loc,test} ${ROOTDIR}/bin/creole`
 for f in ${BINS}; do
 	echo Stripping/copying ${f}
 	strip ${f}

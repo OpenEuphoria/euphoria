@@ -1464,6 +1464,9 @@ export procedure emit_op(integer op)
 			emit_opcode(ASSIGN)
 			emit_addr(c)
 			c = NewTempSym()
+			if ic then
+				TempInteger( c )
+			end if
 			emit_addr(c)
 		end if
 		b = Pop() -- limit
@@ -1477,6 +1480,9 @@ export procedure emit_op(integer op)
 			emit_opcode(ASSIGN)
 			emit_addr(b)
 			b = NewTempSym()
+			if ib then
+				TempInteger( b )
+			end if
 			emit_addr(b)
 		end if
 		a = Pop() -- initial value

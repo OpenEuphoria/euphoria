@@ -22,6 +22,14 @@ SEQEXPR ==: (an expression that evaluates to an sequence)
 
 BOOLEXPR ==: (an expression that evaluates to an atom in which zero represents 
               falsehood and non-zero represents truth)
+              
+BINARYEXPR ==: [ EXPRESSION BINOP EXPRESSION ]
+
+BINOP ==: 'and' | 'or' | 'xor' | '+' | '-' | '*' | '/' 
+
+UNARYEXPR ==: [ UNARYOP EXPRESSION ]
+
+UNARYOP ==: 'not' | '-'
 
 STATEMENT ==: 
 
@@ -78,6 +86,7 @@ DATATYPE ==: 'atom' | 'integer' | 'sequence' | 'object' | IDENTIFER
 [[:LOOPSTMT]]\\
 [[:GOTOSTMT]]\\
 [[:CALL]]\\
+[[:IFDEFSTMT]]\\
 
 ==== Routines
 
@@ -121,6 +130,21 @@ SLICEEND   ==: ']'
  ENDIF   ==:  'end' 'if' 
 }}}
     See Also: [[:if statement]]
+
+=== ifdef
+@[IFDEFSTMT]
+
+{{{
+ IFDEFSTMT  ==:  IFDEFTEST [ ELSDEFIF ...] [ELSEDEF] ENDDEFIF 
+ IFDEFTEST  ==:  'ifdef' DEFEXPR 'then' [ STMTBLOCK ] 
+ ELSDEFIF   ==:  'elsifdef' DEFEXPR 'then' [ STMTBLOCK ] 
+ ELSEDEF    ==:  'elsedef' [ STMTBLOCK ] 
+ ENDDEFIF   ==:  'end' 'ifdef' 
+ DEFEXPR    ==:  DEFTERM [ DEFOP DEFTERM ]
+ DEFTERM    ==:  [ 'not' IDENTIFIER ]
+ DEFOP      ==:  'and' | 'or'
+}}}
+    See Also: [[:ifdef statement]]
 
 ==== switch
 @[SWITCHSTMT]
@@ -293,7 +317,6 @@ RETURN ==: 'return' EXPRESSION
   See Also: [[:types]]
   
 === default namespace
-@[NAMESPACE]
 {{{
 NAMESPACE ==: 'namespace' IDENTIFIER EOL
 }}}
@@ -316,11 +339,3 @@ STRICTWARN ==: 'strict'
 }}}
 
   See Also: [[:with / without]]
-  
-!! todo : ifdef
-!! todo : elsedef
-!! todo : elsifdef
-!! todo : not
-!! todo : xor 
-!! todo : or
-!! todo : and

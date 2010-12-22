@@ -33,6 +33,7 @@ constant
 
 public enum
 	WIN32 = 2,
+	WINDOWS = WIN32,
 	LINUX,
 	OSX,
 	OPENBSD = 6,
@@ -312,7 +313,7 @@ end function
 -- An **integer**,
 -- <eucode>
 -- public constant
---     WIN32,
+--     WIN32 = WINDOWS,
 --     LINUX,
 --     FREEBSD,
 --     OSX,

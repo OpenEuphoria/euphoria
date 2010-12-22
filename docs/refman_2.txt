@@ -1,7 +1,8 @@
 %%output=lang_def
 == Definition
 :<<LEVELTOC level=2 depth=4>>
-=== Objects === @[predefined types]
+=== Objects ===
+@[predefinedtypes|]
 
 ==== Atoms and Sequences
 
@@ -871,8 +872,9 @@ s[$-5..$]
 s[$][1..floor($/2)] -- first half of the last element of s
 </eucode>
 
+==== Concatenation of Sequences and Atoms - The '&' Operator ====
+@[amp concat|]
 @[amp_concat|]
-==== Concatenation of Sequences and Atoms - The '&' Operator ==== @[amp concat]
 
 Any two objects may be concatenated using the **&** operator. The
 result is a sequence with a length equal to the sum of the lengths of the
@@ -1154,59 +1156,31 @@ The Euphoria editor displays these words in blue
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
 
-!! tom, again not working
-!! |                          peek         )     peek2u        )     sprintf)|
-!!   abort )  peek2s   )       peek4s       )       sqrt)|
-!!  and_bits     )  log          )  peek4u           )    system)|
-!!   append      )   machine_func)    peek_string)   system_exec)|
-!!  arctan         )  machine_proc)   peeks      )    tail)|
-!!   atom          )  match        )   pixel           )  tan)|
-!!   c_func        )    match_from)   platform  )   task_clock_start)|
-!!   c_proc        )   get_key        )   poke        )  task_clock_stop)|
-!!   call             )  get_pixel       )  poke2       )  task_create)|
-!!   call_func     )  getc              )  poke4       )   task_list)|
-!!  call_proc     )   getenv          )  position    )   task_schedule )|
-!!  clear_screen)   gets            )   power       )  task_self  )|
-!!  close           )  hash             )  prepend    )  task_status )|
-!!  command_line)   head        )    print        )  task_suspend  )|
-!!  compare    )   include_paths)   printf       )     task_yield  )|
-!!  cos            )   insert           )      profile     )   time)|
-!!  date          )   mem_copy   )    profile_time)    trace)|
-!!  delete       )   mem_set      )  puts            )  warning)|
-!!  delete_routine)  not_bits   )     rand        )   xor_bits  )|
-!!  equal        )    object          )   remainder)  ?) |
-!!  find          )   open              )  remove      ) &)|
-!!  find_from )  option_switches)  routine_id) ~$)|
-!!  floor        )   or_bits            )  sequence )|  |
-!!  integer    )    repeat           )    sin          )|  |
-!!   length    )    replace         )  splice       )|  |
-
-
 <eucode>
-abort           getenv          peek4s          sprintf
-and_bits        gets            peek4u          sqrt
-append          hash            peeks           system
-arctan          head            platform        system_exec
-atom            include_paths   poke            tail
-c_func          insert          poke2           tan
-c_proc          integer         poke4           task_clock_start
-call            length          position        task_clock_stop
-call_func       log             power           task_create
-call_proc       machine_func    prepend         task_list
-clear_screen    machine_proc    print           task_schedule
-close           match           printf          task_self
-command_line    match_from      profile         task_status
-compare         mem_copy        profile_time    task_suspend
-cos             mem_set         puts            task_yield
-date            not_bits        rand            time
-delete          object          remainder       trace
-delete_routine  open            remove          warning
-equal           option_switches repeat          xor_bits
-find            or_bits         replace         ?
-find_from       peek            routine_id      &
-floor           peek_string     sequence        $
-get_key         peek2s          sin
-getc            peek2u          splice
+abort           getenv          peek4s          system
+and_bits        gets            peek4u          system_exec
+append          hash            peeks           tail
+arctan          head            platform        tan
+atom            include_paths   poke            task_clock_start
+c_func          insert          poke2           task_clock_stop
+c_proc          integer         poke4           task_create
+call            length          position        task_list
+call_func       log             power           task_schedule
+call_proc       machine_func    prepend         task_self
+clear_screen    machine_proc    print           task_status
+close           match           printf          task_suspend
+command_line    match_from      puts            task_yield
+compare         mem_copy        rand            time
+cos             mem_set         remainder       trace
+date            not_bits        remove          xor_bits
+delete          object          repeat          ?
+delete_routine  open            replace         &
+equal           option_switches routine_id      $
+find            or_bits         sequence        
+find_from       peek            sin             
+floor           peek_string     splice          
+get_key         peek2s          sprintf
+getc            peek2u          sqrt
 </eucode>
 
 
@@ -1647,7 +1621,7 @@ presumably legal, one.
 
 @[type_check|]
 Type checking can be turned off or on between subroutines using the with
-##type_check## or ##without type_check## (see [[:special statements]]).
+##type_check## or ##without type_check## (see [[:specialstatements]]).
 It is initially on by default.
 
 ;**Note to Bench markers~:**
@@ -1913,8 +1887,8 @@ declared in any
 Euphoria coded file.
 
 
-@[namespace]
 ==== Using namespaces
+@[namespace|]
 
 Identifiers marked as ##global##, ##public## or ##export## are known as
 //exposed// variables because they can be used in files other than the one they
@@ -2732,11 +2706,10 @@ defined, but ##EU5## will be defined.
 
 ==== Platform Definitions
 
-* **WIN32_CONSOLE** - Platform is Windows and is being executed
-  with the Console version of the interpreter (eui.exe)
-* **WIN32_GUI** - Platform is Windows and is being executed with
+* **CONSOLE** - Euphoria is being executed
+  with the Console version of the interpreter (on windows, eui.exe, others are eui)
+* **GUI** - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
-* **WIN32** - Platform is Windows (GUI or Console)
 * **WINDOWS** - Platform is Windows (GUI or Console)
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
@@ -2750,15 +2723,13 @@ defined, but ##EU5## will be defined.
 
 * **EUI** - Application is being interpreted by ##eui##.
 * **EUC** - Application is being translated by ##euc##.
-* **EUC_CON** - Application is being translated by ##euc## as a
-//console// application.
 * **EUC_DLL** - Application is being translated by ##euc## into a //DLL// file.
 * **EUB** - Application is being converted to a bound program by ##eub##.
 * **EUB_SHROUD** - Application is being converted to a shrouded program by
 ##eub##.
-* **EUB_CON** - Application is being converted to a bound //console// program by
- ##eub##.
-* **EUB_WIN32** - Application is being converted to a bound //Windows//
+* **CONSOLE** - Application is being translated, or converted to a bound //console// program by
+ ##euc## or ##eub##, respectively.
+* **GUI** - Application is being converted to a bound //Windows GUI//
 program by ##eub##.
 
 ==== Library Definitions
@@ -2843,7 +2814,7 @@ applications.
 
 You should surround code that is not portable with ##ifdef## like:
 <eucode>
-ifdef WIN32 then
+ifdef WINDOWS then
    -- Windows specific code.
 elsedef
    include std/error.e
@@ -2862,7 +2833,7 @@ end ifdef
 
 -- define exported and public constants and procedures for
 -- OSX as well
-ifdef WIN32 or OSX then
+ifdef WINDOWS or OSX then
     -- OSX is not supported but we define public symbols for it anyhow.
 </eucode>
 
@@ -2887,7 +2858,7 @@ end for
 sequence os_name
 ifdef UNIX then
     include unix_ftp.e
-elsifdef WIN32 then
+elsifdef WINDOWS then
     include win32_ftp.e
 elsedef
     crash("Operating system is not supported")
@@ -3533,7 +3504,8 @@ while 1 with entry label "top" do -- CORRECT
 </eucode>
 
 %%output=lang_short_circuit
-== Short-Circuit Evaluation == @[short_circuit]
+== Short-Circuit Evaluation ==
+@[short_circuit|]
 :<<LEVELTOC level=2 depth=4>>
 
 When the condition tested by if, elsif, until, or while contains ##and## or
@@ -3576,10 +3548,10 @@ the result to be true.
 If the expression B contains a call to a function, and that function has
 possible **side-effects**, i.e. it might do more than just return a value,
 you will get a compile-time warning. Older versions (pre-2.1) of Euphoria did
-not use [[:short-circuit]] evaluation, and it's possible that some
-old code will no longer work correctly, although a search of the Euphoria
-archives did not turn up any programs that depend on side-effects in this
-way, but other Euphoria code might do so.
+not use [[:short_circuit]] evaluation, and it's possible that some old
+code will no longer work correctly, although a search of the Euphoria
+archives did not turn up any programs that depend on side-effects in
+this way, but other Euphoria code might do so.
 
 The expression, B, could contain something that would normally cause a run-time
 error. If Euphoria skips the evaluation of B, the error will not be discovered.
@@ -3635,7 +3607,8 @@ if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
 %%output=lang_toplevel
-== Special Top-Level Statements == @[special statements]
+== Special Top-Level Statements ==
+@[specialstatements|]
 :<<LEVELTOC level=2 depth=4>>
 
 Before any of your statements are executed, the Euphoria front-end quickly
@@ -3780,7 +3753,7 @@ the file relative to the following directories, in the following order:
   set of //Linux// / //FreeBSD// or //Windows// environment  variables.
   (Via ##Control Panel / Performance & Maintenance / System / Advanced##
   on //XP//, or ##AUTOEXEC.BAT## on older versions of
-  //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB##
+  //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WINDOWSLIB##
   ##EUINC## lets you organize your include files according to application
   areas, and avoid adding numerous unrelated files to ##euphoria\include##.
 # Finally, if it still hasn't found the file, it will look in
@@ -4034,7 +4007,7 @@ define/undefine tags which the ifdef statement may use.
 
 The following tags have a predefined meaning in Euphoria:
 
-* WIN32:    platform is any version of Windows (tm) from '95 on to Vista and beyond
+* WINDOWS:    platform is any version of Windows (tm) from '95 on to Vista and beyond
 * WINDOWS:  platform is any kind of Windows system
 * UNIX:     platform is any kind of Unix style system
 * LINUX:    platform is Linux

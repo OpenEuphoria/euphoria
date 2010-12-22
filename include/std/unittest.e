@@ -319,12 +319,12 @@ public procedure test_report()
 	if match("t_c_", filename) = 1 then
 		puts(2, "  test should have failed but was a success\n")
 		if wait_on_summary then
-			console:any_key("Press a key to exit")
+			console:maybe_any_key("Press a key to exit")
 		end if
 		abort(0)
 	else
 		if wait_on_summary then
-			console:any_key("Press a key to exit")
+			console:maybe_any_key("Press a key to exit")
 		end if
 		abort(tests_failed > 0)
 	end if
@@ -427,7 +427,7 @@ end procedure
 -- atom is zero or not. Use [[:test_equal]]() instead in this case.
 --
 -- See Also:
--- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure test_true(sequence name, object outcome)
 	record_result(not equal(outcome,0), name, 1, outcome, 1 )
@@ -445,7 +445,7 @@ end procedure
 -- program will also be forced to fail at this point.
 --
 -- See Also:
--- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[test_fail]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_false]], [[:test_pass]], [[:test_fail]]
 
 public procedure assert(object name, object outcome)
 	if sequence(name) then
@@ -486,7 +486,8 @@ end procedure
 --		# ##name## : a string, the name of the test
 --
 -- See Also:
--- [[:test_equal]],  [[:test_not_equal]],[[:test_true]], [[:test_false]], [[:test_pass]]
+-- [[:test_equal]], [[:test_not_equal]], [[:test_true]], [[:test_false]], [[:test_pass]]
+--
 
 public procedure test_fail(sequence name)
 	record_result(0, name, 1, 0, 1)

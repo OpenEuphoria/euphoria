@@ -172,16 +172,16 @@ constant maxInt = #3FFFFFFF
 -- Calculate a Hashing value from the supplied data.
 --
 -- Parameters:
---   # ##pData## : The data for which you want a hash value calculated.
+--   # ##key_p## : The data for which you want a hash value calculated.
 --   # ##max_hash_p## :  The returned value will be no larger than this value.
 --
 -- Returns:
---		An **integer**, the value of which depends only on the supplied data.
+--   An **integer**, the value of which depends only on the supplied data.
 --
 -- Comments:
--- This is used whenever you need a single number to represent the data you supply.
--- It can calculate the number based on all the data you give it, which can be
--- an atom or sequence of any value.
+--   This is used whenever you need a single number to represent the data you supply.
+--   It can calculate the number based on all the data you give it, which can be
+--   an atom or sequence of any value.
 --
 -- Example 1:
 --   <eucode>
@@ -1509,7 +1509,7 @@ end procedure
 --
 -- object loaded
 -- map AppOptions
--- sequence SavedMap = "c:\myapp\options.txt"
+-- sequence SavedMap = "c:\\myapp\\options.txt"
 --
 -- loaded = load_map(SavedMap)
 -- if equal(loaded, -1) then

@@ -17,6 +17,9 @@ include std/net/http.e
 include std/net/url.e as url
 include std/regex.e as r
 include std/text.e
+include std/sequence.e
+
+sequence username, password, title
 
 without warning
 override procedure abort(integer x, sequence msg = {}, sequence data = {})
@@ -28,18 +31,51 @@ override procedure abort(integer x, sequence msg = {}, sequence data = {})
 end procedure
 
 sequence opts = {
-	{ "u", 0, "OpenEuphoria.org username", { MANDATORY, HAS_PARAMETER, "username" } },
-    { "p", 0, "OpenEuphoria.org password", { MANDATORY, HAS_PARAMETER, "password" } },
+	{ "u", 0, "OpenEuphoria.org username", { HAS_PARAMETER, "username" } },
+    { "p", 0, "OpenEuphoria.org password", { HAS_PARAMETER, "password" } },
     { "f", 0, "Format (Euphoria, Text, Creole)", { HAS_PARAMETER, "format" } },
-    { "t", 0, "Title of new pastey", { MANDATORY, HAS_PARAMETER } },
-    {  0,  0, "Filename to paste", { MANDATORY } },
+    { "t", 0, "Title of new pastey", { HAS_PARAMETER } },
+    {  0,  0, "Filename to paste", { } },
     $
 }
 
 map o = cmd_parse(opts)
-
 sequence filenames = map:get(o, cmdline:EXTRAS)
-object data = read_file(filenames[1])
+constant in_stdin = not length(filenames)
+
+username = map:get(o, "u", "")
+if length(username) = 0 then
+	if in_stdin then
+		puts(1, "Missing OpenEuphoria username.\n")
+		abort(4)
+	end if
+	username = prompt_string("OpenEuphoria username: ")
+end if
+
+password = map:get(o, "p", "")
+if length(password) = 0 then
+	if in_stdin then
+		puts(1, "Missing OpenEuphoria password.\n")
+		abort(5)
+	end if
+	password = prompt_string("OpenEuphoria.org password: ")
+end if
+
+title = map:get(o, "t", "")
+if length(title) = 0 then
+	if in_stdin then
+		puts(1, "Missing Pastey title.\n")
+		abort(6)
+	end if
+	title = prompt_string("Pastey title: ")
+end if
+
+object data
+if length(filenames) then
+	data = read_file(filenames[1], TEXT_MODE)
+else
+	data = flatten(read_lines(0))
+end if
 if atom(data) then
 	abort(1, "Could not read file: '%s'", { filenames[1] })
 end if
@@ -60,9 +96,9 @@ switch lower(format) do
 end switch
 
 sequence form_data = {
-	{ "code",     map:get(o, "u") },
-    { "password", map:get(o, "p") },
-    { "title",    map:get(o, "t") },
+	{ "code",     username },
+    { "password", password },
+    { "title",    title },
     { "format",   sprintf("%d", format_i) },
     { "body",     data },
     { "submit",   "Paste" },
@@ -70,8 +106,9 @@ sequence form_data = {
 }
 
 data = http_post("http://openeuphoria.org/pastey/create.wc", form_data)
-
-if equal(data[1], "") or equal(data[2], "") then
+if atom(data) then
+	abort(1, "Could not connect to pastey server")
+elsif equal(data[1], "") or equal(data[2], "") then
     abort(1, "An error occurred while submitting your file.\n")
 end if
 

@@ -34,8 +34,6 @@ else
 	PREFIX=./
 fi
 
-
-
 echo "# File generated from configure" > ${CONFIG_FILE}
 
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
@@ -109,6 +107,7 @@ export CC=gcc
 
 SCP="scp -C"
 SSH="ssh -C"
+HG=`which hg`
 
 echo CONFIGURE_PARAMS=$@ >> "$PREFIX"${CONFIG_FILE}
 
@@ -167,10 +166,6 @@ while [ "$1" != "" ]; do
 		EUBIN=$VAL
 		;;
 
-	--full )
-		echo RELEASE=1 >> "$PREFIX"${CONFIG_FILE}
-		;;
-
 	--build*)
 		VAL=`echo $1 | cut -d = -f 2`
 		if [ "$VAL" = "$1" ]; then
@@ -199,6 +194,10 @@ while [ "$1" != "" ]; do
 
 	--use-source-translator )
 		export EC="eui ec.ex"
+		;;
+
+	--final)
+		echo EREL_TYPE=-DEREL_TYPE=1 >> ${CONFIG_FILE}
 		;;
 
 	--release*)
@@ -254,6 +253,15 @@ while [ "$1" != "" ]; do
 		SSH=$VAL
 		;;
 
+	--hg*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL = $1
+		fi
+
+		HG=$VAL
+		;;
+
 	* )
 		echo "Unknown option '$1'"
 		echo "Configures and prepares the euphoria source for building"
@@ -295,6 +303,7 @@ while [ "$1" != "" ]; do
 		echo "                       operations such as manual upload"
 		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)"
+                echo "   --hg value          Mercurial binary command (default 'which hg')"
 		exit
 		;;
 	esac
@@ -343,6 +352,8 @@ fi
 
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
 echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
+echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
+echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}
 
 if [ "$EC" != "" ]; then
 	echo "TRANSLATE=$EC" >> "$PREFIX"${CONFIG_FILE}

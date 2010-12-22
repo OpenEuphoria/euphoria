@@ -150,6 +150,8 @@
 * [[ticket:363]], ##euc## now has an optional parameter ##-rc-file## that will compile
                   and bind the resource file to windows executables.
 * [[ticket:411]], documented the ##$## character as applied to a sequence terminator.
+* [[ticket:413]], Qualified the standard library. With so many forward lookups this allows
+                  for a pretty large speedup when using multiple standard library includes.
 * [[ticket:499]], Add support for using '1', '2', and 'j' in place of F1, F2,
                   and the DOWN_ARROW key in the Trace screen. This allows Unix users to use
                   trace(1) even if we don't recognize escape sequences for their particular

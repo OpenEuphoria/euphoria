@@ -7265,7 +7265,8 @@ procedure BackEnd(atom ignore)
 	end if
 
 	if not dll_option then
-	c_stmt0("stack_base = (char *)&_0;\n")
+		c_stmt0("stack_base = (char *)&_0;\n")
+		c_stmt0("check_has_console();\n")
 	end if
 
 	-- include path initialization

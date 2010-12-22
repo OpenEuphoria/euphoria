@@ -49,7 +49,7 @@ constant
 --
 
 public function has_console()
-	return machine_func(99)
+	return machine_func(M_HAS_CONSOLE)
 end function
 
 --****

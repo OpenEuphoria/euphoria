@@ -157,7 +157,7 @@ export procedure transoptions()
 
 			case "con" then
 				con_option = TRUE
-				OpDefines &= { "EUC_CON" }
+				OpDefines &= { "CONSOLE" }
 
 			case "dll", "so" then
 				dll_option = TRUE
@@ -262,7 +262,9 @@ export procedure transoptions()
 	OpDefines &= { "EUC" }
 
 	if host_platform() = WIN32 and not con_option then
-		OpDefines = append( OpDefines, "WIN32_GUI" )
+		OpDefines = append( OpDefines, "GUI" )
+	elsif not find( "CONSOLE", OpDefines ) then
+		OpDefines = append( OpDefines, "CONSOLE" )
 	end if
 
 	ifdef not EUDIS then

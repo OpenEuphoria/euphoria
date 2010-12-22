@@ -7,9 +7,25 @@ namespace info
 
 constant M_EU_INFO=75
 
-enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, REVISION, START_TIME
+enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, NODE, REVISION, REVISION_DATE, START_TIME
 
 constant version_info = machine_func(M_EU_INFO, {})
+
+--****
+-- === Build Type Constants
+--
+
+--**
+-- Is this build a developmental build?
+--
+
+public constant is_developmental = equal(version_info[VER_TYPE], "development")
+
+--**
+-- Is this build a release build?
+--
+
+public constant is_release = (is_developmental = 0)
 
 --****
 -- === Numeric Version Information
@@ -26,21 +42,21 @@ constant version_info = machine_func(M_EU_INFO, {})
 --
 
 public function platform_name()
-ifdef WINDOWS then
-	return "Windows"
-elsifdef LINUX then
-	return "Linux"
-elsifdef OSX then
-	return "OS X"
-elsifdef FREEBSD then
-	return "FreeBSD"
-elsifdef OPENBSD then
-	return "OpenBSD"
-elsifdef NETBSD then
-	return "NetBSD"
-elsedef
-	return "Unknown"
-end ifdef
+	ifdef WINDOWS then
+		return "Windows"
+	elsifdef LINUX then
+		return "Linux"
+	elsifdef OSX then
+		return "OS X"
+	elsifdef FREEBSD then
+		return "FreeBSD"
+	elsifdef OPENBSD then
+		return "OpenBSD"
+	elsifdef NETBSD then
+		return "NetBSD"
+	elsedef
+		return "Unknown"
+	end ifdef
 end function
 
 --**
@@ -95,15 +111,64 @@ public function version_patch()
 end function
 
 --**
+-- Get the source code node id of the hosting Euphoria
+--
+-- Parameters:
+--   * ##full## - If TRUE, the full node id is returned. If FALSE
+--     only the first 12 characters of the node id is returned.
+--     Typically the short node id is considered unique.
+--
+-- Returns:
+--   A text **sequence**, containing the source code management systems
+--   node id that globally identifies the executing Euphoria.
+--
+
+public function version_node(integer full = 0)
+	if full or length(version_info[NODE]) < 12 then
+		return version_info[NODE]
+	end if
+
+	return version_info[NODE][1..12]
+end function
+
+--**
 -- Get the source code revision of the hosting Euphoria
 --
 -- Returns:
---   A text **sequence**, containing the source code management system's
--- revision number that the executing Euphoria was built from.
+--   A text **sequence**, containing the source code management systems
+--   revision number that the executing Euphoria was built from.
 --
 
 public function version_revision()
 	return version_info[REVISION]
+end function
+
+--**
+-- Get the compilation date of the hosting Euphoria
+--
+-- Parameters:
+--   * ##full## - Standard return value is a string formatted as ##CCYY-MM-DD##. However,
+--     if this is a development build or the ##full## parameter is TRUE (1), then
+--     the result will be formatted as ##CCYY-MM-DD HH:MM:SS##.
+--
+-- Returns:
+--   A text **sequence** containing the commit date of the
+--   the associated SCM revision.
+--
+--   The date/time is UTC.
+--
+
+public function version_date(integer full = 0)
+	--
+	-- Date could be "unknown" if the version could not be determined in a very
+	-- rare case. Thus, we also check for length here.
+	--
+
+	if full or is_developmental or length(version_info[REVISION_DATE]) < 10 then
+		return version_info[REVISION_DATE]
+	end if
+
+	return version_info[REVISION_DATE][1..10]
 end function
 
 --****
@@ -126,18 +191,43 @@ end function
 --**
 -- Get a normal version string
 --
--- Returns:
---   A **#sequence**, representing the Major, Minor, Patch, Type and Revision all in
---   one string.
+-- Parameters:
+--   # ##full## - Return full version information regardless of
+--     developmental/production status.
 --
---   Example return values:
---   * "4.0.0 alpha 3 (r1234)"
---   * "4.0.0 release (r271)"
---   * "4.0.2 beta 1 (r2783)"
+-- Returns:
+--   A **#sequence**, representing the entire version information in one string.
+--   The amount of detail you get depends on if this version of Euphoria has
+--   been compiled as a developmental version (more detailed version information)
+--   or if you have indicated TRUE for the ##full## argument.
+--
+-- Example return values
+--   * "4.0.0 alpha 3 (ab8e98ab3ce4,2010-11-18)"
+--   * "4.0.0 release (8d8874dc9e0a, 2010-12-22)"
+--   * "4.1.5 development (12332:e8d8787af7de, 2011-07-18 12:55:03)"
 --
 
-public function version_string()
-	return sprintf("%d.%d.%d %s (r%s)", version_info)
+public function version_string(integer full = 0)
+	if full or is_developmental then
+		return sprintf("%d.%d.%d %s (%d:%s, %s)", {
+			version_info[MAJ_VER],
+			version_info[MIN_VER],
+			version_info[PAT_VER],
+			version_info[VER_TYPE],
+			version_revision(),
+			version_node(),
+			version_date(full)
+		})
+	else
+		return sprintf("%d.%d.%d %s (%s, %s)", {
+			version_info[MAJ_VER],
+			version_info[MIN_VER],
+			version_info[PAT_VER],
+			version_info[VER_TYPE],
+			version_node(),
+			version_date(full)
+		})
+	end if
 end function
 
 --**
@@ -160,18 +250,24 @@ end function
 --**
 -- Get a long version string
 --
--- Returns:
---   Same **value**, as [[:version_string]] with the addition of the platform
---   name.
+-- Parameters:
+--   # ##full## - Return full version information regardless of
+--     developmental/production status.
 --
---   Example return values:
---   * "4.0.0 alpha 3 for Windows"
---   * "4.0.0 release for Linux"
---   * "5.6.2 release for OS X"
+-- Returns:
+--   A **#sequence**, representing the entire version information in one string.
+--   The amount of detail you get depends on if this version of Euphoria has
+--   been compiled as a developmental version (more detailed version information)
+--   or if you have indicated TRUE for the ##full## argument.
+--
+-- Example return values
+--   * "4.0.0 alpha 3 (ab8e98ab3ce4,2010-11-18) for Windows"
+--   * "4.0.0 release (8d8874dc9e0a, 2010-12-22) for Linux"
+--   * "4.1.5 development (12332:e8d8787af7de, 2011-07-18 12:55:03) for OS X"
 --
 
-public function version_string_long()
-	return version_string() & " for " & platform_name()
+public function version_string_long(integer full = 0)
+	return version_string(full) & " for " & platform_name()
 end function
 
 --****

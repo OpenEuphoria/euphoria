@@ -462,8 +462,11 @@ int matherr(struct _exception *err)  // OW wants this
 {
 	char *msg;
 
-
+#ifdef EMSVC
+	switch(0) {
+#else
 	switch(err->type) {
+#endif
 		case DOMAIN:
 			msg = "domain";
 			break;

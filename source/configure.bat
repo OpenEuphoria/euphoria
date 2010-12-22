@@ -14,6 +14,7 @@ SET ECBIN=
 SET DISABLED_MANAGED_MEM=
 SET SCP_CLIENT=pscp -C
 SET SSH_CLIENT=plink -C
+SET HG=hg
 
 rem ============================================================
 rem Be sure to start with a blank config.wat
@@ -73,10 +74,6 @@ IF "%1" =="--plat" (
 	SHIFT
 	GOTO EndLoop
 )
-IF "%1" =="--full" (
-	echo RELEASE=1 >> config.wat
-	GOTO EndLoop
-)
 IF "%1" =="--debug" (
 	echo DEBUG=1 >> config.wat
 	GOTO EndLoop
@@ -108,8 +105,13 @@ IF "%1" == "--noassert" (
 )
 
 IF "%1" == "--release" (
-	echo EREL_TYPE = /dEREL_TYPE=\"%2\" >> config.wat
+	echo EREL_TYPE = /dEREL_TYPE="%2" >> config.wat
 	SHIFT
+	GOTO EndLoop
+)
+
+IF "%1" =="--final" (
+	echo EREL_TYPE = /dEREL_TYPE=1 >> config.wat
 	GOTO EndLoop
 )
 
@@ -143,6 +145,12 @@ IF "%1" == "--wkhtmltopdf" (
 	GOTO EndLoop
 )
 
+IF "%1" == "--hg" (
+	SET HG=%2
+        SHIFT
+        GOTO EndLoop
+)
+
 IF "%1" == "--help" (
 	GOTO Help
 )
@@ -162,6 +170,7 @@ rem ============================================================
 
 echo SCP=%SCP_CLIENT% >> config.wat
 echo SSH=%SSH_CLIENT% >> config.wat
+echo HG=%HG% >> config.wat
 
 if "%HAS_EUBIN%" == "1" (
 	SET NOEU=
@@ -302,9 +311,9 @@ echo     --eubin value       Use this option to specify the location of the
 echo                         interpreter binary to use to translate the front end.
 echo                         The default is ..\bin
 echo     --build value       set the build directory
-echo     --full              Use this option to so EUPHORIA doesn't report itself
-echo                         as a development version.
 echo     --release value     set the release type for the version string
+echo     --final             Use this option to so EUPHORIA doesn't report itself
+echo                         as a development version.
 echo     --noassert          Use this to remove 'assert()' processing in the C code.
 echo     --plat value        set the OS that we will translate to.
 echo                         values can be: WIN, OSX, LINUX, FREEBSD, OPENBSD or NETBSD.
@@ -319,6 +328,7 @@ echo     --oe-username       Developer user name on openeuphoria.org for various
 echo                         operations such as manual upload
 echo     --scp-client        SCP program to use for scp uploads (default pscp)
 echo     --ssh-client        SSH program to use for ssh commands (default plink)
+echo     --hg                Full path to hg.exe (default hg)
 echo.
 echo Developer Options:
 echo     --debug             turn debugging on

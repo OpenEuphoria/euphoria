@@ -134,59 +134,84 @@ without type_check
 include std/get.e
 include std/search.e
 include std/console.e as con
-integer SIZE = 8192 
-integer iterations = 1
-integer count
-sequence flags
 
 constant ON = 1, OFF = 0
 
-procedure init()
+function init()
 	object arg
 	sequence cmd
+	integer SIZE = 8192
+	integer aiterations = 8192
+	
 	cmd = command_line()
 	if length(cmd) >= 3 then
 		arg = value(cmd[3])
 		if arg[1] = GET_SUCCESS then
-			iterations = arg[2]
+			aiterations = arg[2]
 		end if
 	end if
 	if length(cmd) >= 4 then
 		arg = value(cmd[4])
 		if arg[1] = GET_SUCCESS then
 			SIZE = arg[2]
+
 		end if
 	end if
-end procedure
+	
+	return {SIZE, aiterations}
+end function
 
-procedure main()
+sequence aflags
+
+function main( sequence arg )
+	integer count
+	sequence all_on
+	integer i2
+	integer size = arg[1]
+	integer iterations = arg[2]
+	sequence flags
+	integer j,pos
+
+	all_on = repeat(ON, size)
 	for iter = 1 to iterations do
 		count = 0
-		flags = repeat(ON, SIZE)
-		for i = 2 to SIZE do
-			if flags[i] then
-				integer MAX = SIZE - i
-				integer k = i
-				while k <= MAX do
-					k += i
-					flags[k] = OFF
-				end while
-				count += 1
+		flags = all_on
+		pos = 2
+		while pos <= size do
+			pos = find(ON, flags, pos)
+			if not pos then
+				exit
 			end if
-		end for
+			
+			i2 = pos + pos
+			for k = i2 to size by pos do
+				flags[k] = OFF
+			end for
+			count += 1
+			pos += 1
+		end while
 	end for
+
+	aflags = flags
+	return count
+end function
+
+procedure time_it()
+	puts(1, "Prime Sieve Benchmark\n")
+	
+	atom t
+	sequence res
+	integer res2
+	
+	res = init()
+	
+	t = time()  -- start timer
+	    
+	res2 = main( res )
+	
+	printf(1, "Count: %d, Largest: %d\ntime: %g\n", {res2, rfind(ON, aflags), time() - t})  -- 1028
+	con:maybe_any_key()
+
 end procedure
 
-puts(1, "Prime Sieve Benchmark\n")
-
-atom t
-init()
-
-t = time()  -- start timer
-    
-main()
-
-t = time() - t -- end timer
-printf(1, "Count: %d, Largest: %d\ntime: %g\n", {count, rfind(ON, flags), t})  -- 1028
-con:maybe_any_key()
-
+time_it()
