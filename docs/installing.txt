@@ -98,41 +98,41 @@ The default for the //Windows// installation, and optional for a
 {{{
 |
 |__ euphoria
-|         file_id.diz
-|         License.txt
+|     file_id.diz
+|     License.txt
 |
 |__ bin 
-|     Interpreter    ( eui.exe and euiw.exe,  if on Windows)
-|                    ( eui, if on Unix)
-|     Binder         ( eubind, with eub )
-|     Translator     ( euc.exe, if on Windows)
-|                    ( euc, if on Unix)
-|     Utilities      ( bugreport.ex, bench.ex, ed.ex, ...  )
+|     Interpreter (eui.exe and euiw.exe,  if on Windows)
+|                 (eui, if on Unix)
+|     Binder      (eubind, with eub)
+|     Translator  (euc.exe, if on Windows)
+|                 (euc, if on Unix)
+|     Utilities   (bugreport.ex, bench.ex, ed.ex, ...)
 |
 |__ include 
-|      |             ( original include files )
-|      |
-|      |__ std       (standard Euphoria library: file.e, sequence.e, ...)
-|      |
-|      |__ euphoria  (Euphoria specific)
+|   |             (original include files)
+|   |
+|   |__ std       (standard Euphoria library: io.e, sequence.e, ...)
+|   |
+|   |__ euphoria  (Euphoria specific)
 |
 |
-|__ docs             ( html and pdf documentation files )
+|__ docs          (html and pdf documentation files)
 |
-|__ tutorial         (small tutorial programs to help you learn Euphoria)
+|__ tutorial      (small tutorial programs to help you learn Euphoria)
 |
-|__ demo             (generic demo programs that run on all platforms)
-|     |
-|     |__ win32      ( Windows specific demo programs (optional) )
-|     |__ unix       ( Linux/FreeBSD/OS X specific demo programs (optional))
-|     |__ langwar    ( language war game for Linux/FreeBSD/OS X )
-|     |__ bench      ( benchmark program )
+|__ demo          (generic demo programs that run on all platforms)
+|   |
+|   |__ win32     (Windows specific demo programs (optional) )
+|   |__ unix      (Linux/FreeBSD/OS X specific demo programs (optional))
+|   |__ langwar   (language war game for Linux/FreeBSD/OS X )
+|   |__ bench     (benchmark program )
 |
-|__ source           (the complete source code for: interpreter, translator)
+|__ source        (the complete source code for: interpreter, translator)
 |
-|__ tests            (unit tests for Euphoria)
+|__ tests         (unit tests for Euphoria)
 |
-|__ packaging        (software for making installation packages)
+|__ packaging     (software for making installation packages)
 }}}
 
 
