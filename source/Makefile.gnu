@@ -337,8 +337,7 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend
-all : binder
+all : interpreter translator library debug-library backend binder
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
@@ -784,7 +783,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
-$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex translator library $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
@@ -795,7 +794,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
-$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex
+$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex  translator library $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
