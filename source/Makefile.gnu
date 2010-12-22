@@ -96,11 +96,9 @@ ifeq "$(EMINGW)" "1"
 	ifdef EDEBUG
 		EOSMING=
 		LIBRARY_NAME=eudbg.a
-		DLIBRARY_NAME=libeudbg.dll
 	else
 		EOSMING=-ffast-math -O3 -Os
 		LIBRARY_NAME=eu.a
-		DLIBRARY_NAME=libeu.dll
 	endif
 	EBACKENDU=eubw.exe
 	EUBW_RES=$(BUILDDIR)/eubw.res
@@ -140,10 +138,8 @@ else
 	EECUDBGA=eudbg.a
 	ifdef EDEBUG
 		LIBRARY_NAME=eudbg.a
-		DLIBRARY_NAME=libeudbg.so
 	else
 		LIBRARY_NAME=eu.a
-		DLIBRARY_NAME=libeu.so
 	endif
 	MEM_FLAGS=-DESIMPLE_MALLOC
 endif
@@ -389,7 +385,6 @@ library : builddirs
 
 $(BUILDDIR)/$(LIBRARY_NAME) : $(EU_LIB_OBJECTS)
 	ar -rc $(BUILDDIR)/$(LIBRARY_NAME) $(EU_LIB_OBJECTS)
-	gcc -fPIC -shared -o $(BUILDDIR)/$(DLIBRARY_NAME) $(EU_LIB_OBJECTS)
 	$(ECHO) $(MAKEARGS)
 
 builddirs : $(BUILD_DIRS)
