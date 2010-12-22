@@ -183,7 +183,7 @@ int use_prompt() {
 	return (is_batch == 0 && is_test == 0 && has_console() == 0);
 }
 
-#ifdef EMINGW
+#if defined(EMINGW) || defined(EMSVC)
 #define setenv MySetEnv
 static int MySetEnv(const char *name, const char *value, const int overwrite) {
 	int len;
