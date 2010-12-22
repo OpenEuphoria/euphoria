@@ -11,15 +11,17 @@
 #   Configure the make system :  ./configure
 #
 #   Clean up binary files     :  make clean
-#   Clean up binary and       :  make distclean
+#   Clean up binary and       :  make distclean clobber
 #        translated files
-#   Everything                :  make
+#   eui, euc, eub, eu.a       :  make
 #   Interpreter          (eui):  make interpreter
 #   Translator           (euc):  make translator
 #   Translator Library  (eu.a):  make library
 #   Backend              (eub):  make backend
-#   Run Unit Tests            :  make test
+#   Utilities/Binder/Shrouder :  make tools (requires translator and library)
+#   Run Unit Tests            :  make test (requires interpreter, translator, backend, binder)
 #   Run Unit Tests with eu.ex :  make testeu
+#   Run coverage analysis     :  make coverage
 #   Code Page Database        :  make code-page-db
 #   Generate automatic        :  make depend
 #   dependencies (requires
@@ -337,7 +339,7 @@ EU_TRANSLATOR_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/transobj/*.c))
 EU_BACKEND_RUNNER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/backobj/*.c))
 EU_INTERPRETER_OBJECTS = $(patsubst %.c,%.o,$(wildcard $(BUILDDIR)/intobj/*.c))
 
-all : interpreter translator library debug-library backend binder
+all : interpreter translator library debug-library backend
 
 BUILD_DIRS=\
 	$(BUILDDIR)/intobj/back \
@@ -408,7 +410,9 @@ endif
 EUBIND=eubind
 EUSHROUD=eushroud
 
-binder : translator library $(BUILDDIR)/$(EUBIND) $(BUILDDIR)/$(EUSHROUD)
+binder : translator library 
+	$(MAKE) $(BUILDDIR)/$(EUBIND)
+	$(MAKE) $(BUILDDIR)/$(EUSHROUD)
 
 .PHONY : library debug-library
 .PHONY : builddirs
@@ -783,7 +787,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
-$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex translator library $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
@@ -794,7 +798,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex translator library $
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
-$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex  translator library $(BUILDDIR)/$(EECU) $(BUILDDIR)/$(EECUA)
+$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
@@ -830,6 +834,8 @@ $(BUILDDIR)/$(EUCOVERAGE) : $(BUILDDIR)/eucoverage-build/main-.c
 EU_TOOLS= $(BUILDDIR)/$(EUDIST) \
 	$(BUILDDIR)/$(EUDIS) \
 	$(BUILDDIR)/$(EUTEST) \
+	$(BUILDDIR)/$(EUBIND) \
+	$(BUILDDIR)/$(EUSHROUD) \
 	$(BUILDDIR)/$(EUCOVERAGE)
 
 tools : $(EU_TOOLS)
