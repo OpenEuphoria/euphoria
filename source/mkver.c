@@ -145,18 +145,26 @@ int main(int argc, char **argv)
         /*
          * If we do not have a be_ver.h, write a junk one. Otherwise,
          * leave the existing one alone... i.e. from a source-tarball?
-         */
-        if (has_be_ver(output_filename) == 0)
-            put_version(output_filename, "unknown", "unknown", 0);
+		 */
+	  if (has_be_ver(output_filename) == 0) {
+		fprintf(stderr, "Mercurial seems to not be installed, writing unknown be_ver.h\n");
+		put_version(output_filename, "unknown", "unknown", 0);
+	  }
 
-        exit(0);
+	  exit(0);
     }
 
     if (get_version_info(cache_filename, new_ver, BUF_SIZE, new_date, BUF_SIZE, &new_rev) == 0)
     {
 	  fprintf(stderr, "Could not open cache file %s\n  result of hg parents\n",
 			  cache_filename);
-	  exit(1);
+
+	  if (has_be_ver(output_filename) == 0) {
+		fprintf(stderr, "Mercurial seems to not be installed, writing unknown be_ver.h\n");
+		put_version(output_filename, "unknown", "unknown", 0);
+	  }
+
+	  exit(0);
     }
 
     if (has_be_ver(output_filename) == 0 ||
