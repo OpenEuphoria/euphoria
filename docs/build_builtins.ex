@@ -23,9 +23,11 @@ for i = 1 to length(builtins) do
 	end if
 end for
 
-for i = x - 1 to 4 do
-	printf(fh, " | ")
-end for
+if x > 1 then
+	for i = x - 1 to 4 do
+		printf(fh, " | ")
+	end for
+end if
 
 printf(fh, "\n")
 
