@@ -1,4 +1,4 @@
-== Version 1.5a June 13, 1997
+== Version 1.5.1 (release a) June 13, 1997
 
 * Many operations and library routines were optimized.
 * **get_key()** is 100x faster when there is no key in the buffer.
