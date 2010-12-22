@@ -12,14 +12,14 @@ end ifdef
 include euphoria/info.e
 
 include std/cmdline.e
+include std/console.e
 include std/error.e as error
 include std/filesys.e
 include std/io.e
-include std/search.e
-include std/text.e
 include std/map.e as m
+include std/search.e
 include std/sequence.e
-include std/console.e
+include std/text.e
 
 include common.e
 include error.e
@@ -96,29 +96,51 @@ procedure show_copyrights()
 end procedure
 
 --**
+-- Show the Euphoria banner message stating product name,
+-- platform, version and other miscellaneous information
+-- about the compilation
+--
+
 export procedure show_banner()
+	sequence prod_name, memory_type
+
 	if INTERPRET and not BIND then
-		screen_output(STDERR, GetMsgText(270,0))
+		prod_name = GetMsgText(270,0)
 
 	elsif TRANSLATE then
-		screen_output(STDERR, GetMsgText(271,0))
+		prod_name = GetMsgText(271,0)
 
 	elsif BIND then
-		screen_output(STDERR, GetMsgText(272,0))
+		prod_name = GetMsgText(272,0)
 	end if
-	screen_output(STDERR, version_string_long() & "\n")
 
 	ifdef EU_MANAGED_MEM then
-		screen_output(STDERR, GetMsgText(273,0))
+		memory_type = GetMsgText(273,0)
 	elsedef
-		screen_output(STDERR, GetMsgText(274,0))
+		memory_type = GetMsgText(274,0)
 	end ifdef
+
+	sequence misc_info = {
+		info:platform_name(), 
+		memory_type, 
+		"", 
+		info:version_date(),
+		info:version_node()
+	}
+
+	if info:is_developmental then
+		misc_info[$] = sprintf("%d:%s", { info:version_revision(), info:version_node() })
+	end if
 
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
-		screen_output(STDERR, GetMsgText(275,0))
+		misc_info[3] = GetMsgText(275,0)
+	else
+		misc_info = remove(misc_info, 3)
 	end if
-	screen_output(STDERR, "\n")
+
+	screen_output(STDERR, sprintf("%s v%s %s\n   %s, %s\n   Revision Date: %s, Id: %s\n", {
+		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
 end procedure
 
 -- Taken from std/cmdline.e :-(
@@ -415,20 +437,16 @@ export procedure handle_common_options(m:map opts)
 
 			case "v", "version" then
 				show_banner()
-				if find("WIN32_GUI", OpDefines) then
-					if not batch_job and not test_only then
-						any_key(GetMsgText(278,0), 2)
-					end if
+				if not batch_job and not test_only then
+					console:maybe_any_key(GetMsgText(278,0), 2)
 				end if
 
 				abort(0)
 
 			case "copyright" then
 				show_copyrights()
-				if find("WIN32_GUI", OpDefines) then
-					if not batch_job and not test_only then
-						any_key(GetMsgText(278,0), 2)
-					end if
+				if not batch_job and not test_only then
+					console:maybe_any_key(GetMsgText(278,0), 2)
 				end if
 				abort(0)
 			

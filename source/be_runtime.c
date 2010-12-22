@@ -265,7 +265,9 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-/* 140 */ {x, x},
+{x, x},
+{x, x},
+{x, x},/* 140 */ 
 {x, x},
 {x, x},
 {x, x},
@@ -275,27 +277,27 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-/* 150 */{x, x},
-{x, x},
-{x, x},
+{x, x},/* 150 */
 {x, x},
 {xor, Dxor},
 {x, x},
-{x, x},  // system_exec
+{x, x}, 
 {x, x},  // platform - never actually emitted
-{x, x},  //
-{x, x},  // 159: CONCAT_N
-/* 160 */{x, x},  // 160: NOPWHILE
-{x, x},   // 161: NOP1
+{x, x}, 
+{x, x}, 
+{x, x}, 
+{x, x}, 
+{x, x},/* 160 */
 {x, x},
 {x, x},
 {x, x},
 {x, x},
 {x, x},
+{x, x},     // 166: SEQUENCE_COPY
 {x, x},
-{x, x},     // 168: SEQUENCE_COPY
 {x, x},
-/* 170 */{x, x},
+{x, x},
+{x, x}, /* 170 */
 {x, x},
 {x, x},
 {x, x},
@@ -325,7 +327,7 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},
-{x, x},/*200*/
+/*200*/{x, x},
 {x, x},
 {x, x},
 {x, x},
@@ -336,8 +338,6 @@ struct op_info optable[MAX_OPCODE+1] = {
 {x, x},
 {x, x},
 {x, x},/*210*/
-{x, x},
-{x, x},
 {x, x}
 };
 
@@ -462,11 +462,8 @@ int matherr(struct _exception *err)  // OW wants this
 {
 	char *msg;
 
-#ifdef EMSVC
-	switch(0) {
-#else
+
 	switch(err->type) {
-#endif
 		case DOMAIN:
 			msg = "domain";
 			break;

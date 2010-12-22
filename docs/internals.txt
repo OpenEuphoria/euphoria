@@ -11,8 +11,8 @@ The Euphoria interpreter has two parts: the frontend and the backend. The
 **Intermediate Language** (IL) instructions. The **backend** then takes the
 IL instructions and executes the program.
 
-When the //interpreter// executes source-code, the frontend and backend work 
-together in tandem. It appears as if the source-code executes immediately.
+When the //interpreter// executes source-code, the frontend parses and prepares
+the code, and then the backend executes the code.
 
 When the //shrouder// executes source-code, only the frontend is run producing
 an ##.il## file. This ##.il## file may be run by the backend as an
@@ -156,10 +156,10 @@ A sequence is held in a 'struct s1' type and a double is contained in a
 <internal> int IS_ATOM_INT( object o )
 </eucode>
 
-===== Returns:
+===== Returns
 true if object is a Euphoria integer and not an encoded pointer.
 
-===== Note: 
+===== Note
 ##IS_ATOM_INT##() will return true even though the argument is out of the 
 Euphoria integer range when the argument is positive.  These values 
 are not possible encoded pointers.
@@ -171,10 +171,10 @@ are not possible encoded pointers.
 <internal> int IS_ATOM_DBL( object o )
 </eucode>
 
-===== Returns:
+===== Returns
 true if the object is an encoded pointer to a double struct.
 
-===== Assumption: 
+===== Assumption
 //o// must not be a Euphoria integer.
 
 
@@ -186,7 +186,7 @@ true if the object is an encoded pointer to a double struct.
 <internal> int IS_ATOM( object o )
 </eucode>
 
-===== Returns:
+===== Returns
 true if the object is a Euphoria integer or an encoded pointer to a 
 ##'struct d'##. 
 
@@ -197,10 +197,10 @@ true if the object is a Euphoria integer or an encoded pointer to a
 <internal> int IS_SEQUENCE( object o )
 </eucode>
 
-===== Returns:
+===== Returns
 true if the object is an encoded pointer to a ##'struct s1'##.
 
-===== Assumption: 
+===== Assumption
 //o// is not NOVALUE.
 
 
@@ -210,7 +210,7 @@ true if the object is an encoded pointer to a ##'struct s1'##.
 <internal> int IS_DBL_OR_SEQUENCE( object o )
 </eucode>
 
-===== Returns:
+===== Returns
 true if the object is an encoded pointer of either kind of structure.
 
 
@@ -223,7 +223,7 @@ true if the object is an encoded pointer of either kind of structure.
 <internal> object MAKE_INT( signed int x )
 </eucode>
 
-===== Returns: 
+===== Returns
 an object with the same value as x.  x must be with in the integer range of a 
 legal Euphoria integer type.
 
@@ -233,14 +233,14 @@ legal Euphoria integer type.
 <internal> object MAKE_UINT( unsigned int x )
 </eucode>
 
-===== Returns: 
+===== Returns
 an object with the same value as x.  
 
-===== Assumption:
+===== Assumption
 x must be an **unsigned** integer with in the integer range of a C unsigned 
 int type.
 
-===== Example:
+===== Example
 MAKE_UINT(4*1000*1000*1000) will make a Euphoria value of four billion by 
 creating a double.
 
@@ -250,7 +250,7 @@ creating a double.
 <internal> object MAKE_SEQ( struct s1 * sptr )
 </eucode>
 
-===== Returns:
+===== Returns
 an object with an argument of a pointer to a ##'struct s1'##
 The pointer is encoded into a range for sequences and returned.
 
@@ -260,7 +260,7 @@ The pointer is encoded into a range for sequences and returned.
 <internal> object NewString(char *s)
 </eucode>
 
-===== Returns:
+===== Returns
 an object representation of a Euphoria byte string s.  The returned encoded 
 pointer is a sequence with all of the bytes from s copied over.
 
@@ -270,7 +270,7 @@ pointer is a sequence with all of the bytes from s copied over.
 <internal> object MAKE_DBL( struct d * dptr )
 </eucode>
 
-===== Returns:
+===== Returns
 an object with an argument of a pointer to a ##'struct d'##
 The pointer is encoded into a range for doubles and returned.
 
@@ -281,7 +281,7 @@ The pointer is encoded into a range for doubles and returned.
 <internal> object NewDouble( double dbl )
 </eucode>
 
-===== Returns:
+===== Returns
 an object with an argument a double ##dbl##.  A ##struct d## is allocated and 
 dbl is assigned to the value part of that structure.  The pointer is encoded 
 into the  range for doubles and returned.
@@ -293,10 +293,10 @@ into the  range for doubles and returned.
 <internal> struct d * DBL_PTR( object o )
 </eucode>
 
-===== Returns:
+===== Returns
 The pointer to a 'struct d' from the object o.
 
-===== Assumption: 
+===== Assumption
 IS_ATOM_INT(o) is FALSE and IS_ATOM_DBL(o) is TRUE.
 
 
@@ -306,10 +306,10 @@ IS_ATOM_INT(o) is FALSE and IS_ATOM_DBL(o) is TRUE.
 <internal> struct s1 * SEQ_PTR( object o )
 </eucode>
 
-===== Returns:
+===== Returns
 The pointer to a ##'struct s1'## from the object o.
 
-===== Assumption: 
+===== Assumption
 IS_SEQUENCE(o) is TRUE and //o// is not NOVALUE.
 
 === Creating Objects
@@ -320,7 +320,7 @@ IS_SEQUENCE(o) is TRUE and //o// is not NOVALUE.
 <internal> object NewS1 ( long size )
 </eucode>
 
-===== Returns:
+===== Returns
 A sequence object with size members which are not yet set to a value.
 
 

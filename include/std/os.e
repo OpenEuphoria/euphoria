@@ -33,6 +33,7 @@ constant
 
 public enum
 	WIN32 = 2,
+	WINDOWS = WIN32,
 	LINUX,
 	OSX,
 	OPENBSD = 6,
@@ -312,7 +313,7 @@ end function
 -- An **integer**,
 -- <eucode>
 -- public constant
---     WIN32,
+--     WIN32 = WINDOWS,
 --     LINUX,
 --     FREEBSD,
 --     OSX,
@@ -330,7 +331,7 @@ end function
 --
 -- Example 1:
 -- <eucode>
---  ifdef WIN32 then
+--  ifdef WINDOWS then
 --     -- call system Beep routine
 --     err = c_func(Beep, {0,0})
 -- elsedef
@@ -419,11 +420,11 @@ end function
 --
 -- If it is not possible to run the program, ##system_exec##() will return -1.
 --
--- On //WIN32//, ##system_exec##() will only run .exe and .com programs.
+-- On //WINDOWS//, ##system_exec##() will only run .exe and .com programs.
 -- To run .bat files, or built-in shell commands, you need [[:system]](). Some commands,
 -- such as DEL, are not programs, they are actually built-in to the command interpreter.
 --
--- On //WIN32//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
+-- On //WINDOWS//, ##system_exec##() does not allow the use of command-line redirection in ##command##.
 -- Nor does it allow you to quote strings that contain blanks, such as file names.
 --
 -- exit codes from Windows programs are normally in the range 0 to 255, with 0 indicating "success".
@@ -486,7 +487,7 @@ end function
 
 public procedure sleep(atom t)
 -- go to sleep for t seconds
--- allowing (on WIN32 and Linux) other processes to run
+-- allowing other processes to run
 	if t >= 0 then
 		machine_proc(M_SLEEP, t)
 	end if

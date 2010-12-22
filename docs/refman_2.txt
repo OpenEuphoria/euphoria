@@ -1,7 +1,8 @@
 %%output=lang_def
 == Definition
 :<<LEVELTOC level=2 depth=4>>
-=== Objects === @[predefined types]
+=== Objects ===
+@[predefinedtypes|]
 
 ==== Atoms and Sequences
 
@@ -182,7 +183,7 @@ b"1001 00110110 0110_0111 1_0101_1010" -- ==> {#9,#36,#67,#15A}
 <eucode>
 x"65 66 67 AE" -- ==> {#65,#66,#67,#AE}
 </eucode>
-\\
+
 When you put too many hex characters together they are split up appropriately for you:
 
 <eucode>
@@ -331,7 +332,6 @@ It follows that "" is equivalent to {}. Both represent
 the sequence of zero length, also known as the **empty sequence**. As
 a matter of programming style, it is natural to use "" to suggest a zero length
 sequence of characters, and {} to suggest some other kind of sequence.
-
 An **individual character** is an **atom**. It must be entered using single
 quotes. There is a difference between an individual character (which is an
 atom), and a character string of length 1 (which is a sequence). e.g.
@@ -522,7 +522,7 @@ not 6       -- 0 (false)
 
 These operators can also be applied to sequences. See below.
 
-In some cases [[:short-circuit]] evaluation will be used for expressions
+In some cases [[:short_circuit]] evaluation will be used for expressions
 containing ##and## or ##or##. Specifically, short circuiting applies inside decision making expressions.  These are found in the [[:if statement]], [[:while statement]] and the [[:loop until statement]].  More on this later.
 
 ==== Arithmetic Operators
@@ -872,8 +872,9 @@ s[$-5..$]
 s[$][1..floor($/2)] -- first half of the last element of s
 </eucode>
 
+==== Concatenation of Sequences and Atoms - The '&' Operator ====
+@[amp concat|]
 @[amp_concat|]
-==== Concatenation of Sequences and Atoms - The '&' Operator ==== @[amp concat]
 
 Any two objects may be concatenated using the **&** operator. The
 result is a sequence with a length equal to the sum of the lengths of the
@@ -1155,60 +1156,31 @@ The Euphoria editor displays these words in blue
 The following are Euphoria built-in routines. It is best if you do
 not use these for your own identifiers:
 
-!! tom, again not working
-!! |                          peek         )     peek2u        )     sprintf)|
-!!   abort )  peek2s   )       peek4s       )       sqrt)|
-!!  and_bits     )  log          )  peek4u           )    system)|
-!!   append      )   machine_func)    peek_string)   system_exec)|
-!!  arctan         )  machine_proc)   peeks      )    tail)|
-!!   atom          )  match        )   pixel           )  tan)|
-!!   c_func        )    match_from)   platform  )   task_clock_start)|
-!!   c_proc        )   get_key        )   poke        )  task_clock_stop)|
-!!   call             )  get_pixel       )  poke2       )  task_create)|
-!!   call_func     )  getc              )  poke4       )   task_list)|
-!!  call_proc     )   getenv          )  position    )   task_schedule )|
-!!  clear_screen)   gets            )   power       )  task_self  )|
-!!  close           )  hash             )  prepend    )  task_status )|
-!!  command_line)   head        )    print        )  task_suspend  )|
-!!  compare    )   include_paths)   printf       )     task_yield  )|
-!!  cos            )   insert           )      profile     )   time)|
-!!  date          )   mem_copy   )    profile_time)    trace)|
-!!  delete       )   mem_set      )  puts            )  warning)|
-!!  delete_routine)  not_bits   )     rand        )   xor_bits  )|
-!!  equal        )    object          )   remainder)  ?) |
-!!  find          )   open              )  remove      ) &)|
-!!  find_from )  option_switches)  routine_id) ~$)|
-!!  floor        )   or_bits            )  sequence )|  |
-!!  integer    )    repeat           )    sin          )|  |
-!!   length    )    replace         )  splice       )|  |
-
-
 <eucode>
-               peek             peek2u        sprintf
-abort          peek2s           peek4s        sqrt
-and_bits       log              peek4u        system
-append         machine_func     peek_string   system_exec
-arctan         machine_proc     peeks         tail
-atom           match            pixel         tan
-c_func         match_from       platform      task_clock_start
-c_proc         get_key          poke          task_clock_stop
-call           get_pixel        poke2         task_create
-call_func      getc             poke4         task_list
-call_proc      getenv           position      task_schedule
-clear_screen   gets             power         task_self
-close          hash             prepend       task_status
-command_line   head             print         task_suspend
-compare        include_paths    printf        task_yield 
-cos            insert           profile       time
-date           mem_copy         profile_time  trace
-delete         mem_set          puts          warning
-delete_routine not_bits         rand          xor_bits
-equal          object           remainder     ?
-find           open             remove        &
-find_from      option_switches  routine_id    $
-floor          or_bits          sequence   
-integer        repeat           sin         
-length         replace          splice      
+abort           getenv          peek4s          system
+and_bits        gets            peek4u          system_exec
+append          hash            peeks           tail
+arctan          head            platform        tan
+atom            include_paths   poke            task_clock_start
+c_func          insert          poke2           task_clock_stop
+c_proc          integer         poke4           task_create
+call            length          position        task_list
+call_func       log             power           task_schedule
+call_proc       machine_func    prepend         task_self
+clear_screen    machine_proc    print           task_status
+close           match           printf          task_suspend
+command_line    match_from      puts            task_yield
+compare         mem_copy        rand            time
+cos             mem_set         remainder       trace
+date            not_bits        remove          xor_bits
+delete          object          repeat          ?
+delete_routine  open            replace         &
+equal           option_switches routine_id      $
+find            or_bits         sequence        
+find_from       peek            sin             
+floor           peek_string     splice          
+get_key         peek2s          sprintf
+getc            peek2u          sqrt
 </eucode>
 
 
@@ -1649,7 +1621,7 @@ presumably legal, one.
 
 @[type_check|]
 Type checking can be turned off or on between subroutines using the with
-##type_check## or ##without type_check## (see [[:special statements]]).
+##type_check## or ##without type_check## (see [[:specialstatements]]).
 It is initially on by default.
 
 ;**Note to Bench markers~:**
@@ -1665,6 +1637,7 @@ turned off type checking. Whether type checking is on or off, you will never
 get a **//machine-level//** exception.  **You will always get a
 meaningful message from Euphoria when something goes wrong**.  (//This
 might not be the case when you [[:poke]] directly
+!!zzzz-------------------------^^^^^^^^^
 into memory, or call routines written in C or machine code.//)
 
 Euphoria's method of defining types is simpler than what you will find in other
@@ -1778,8 +1751,8 @@ elements of a sequence can have any type.
 
 ##sequence##s are implemented very efficiently. Programmers used to pointers
 will soon notice that they can get most usual pointer operations done using
-sequence indexes. The loss is efficiency is usually hard to notice, and the gain
-is code safety and bug prevention far outweighs it.
+sequence indexes. The loss in efficiency is usually hard to notice, and the gain
+in code safety and bug prevention far outweighs it.
 
 ==== object
 
@@ -1791,7 +1764,7 @@ The ##object##() type returns 0 if a variable is not initialized, else ##1##.
 
 ==== Why scopes, and what are they?
 
-The //scope// of an identifier is the portion of the program where that its
+The //scope// of an identifier is the portion of the program where its
 declaration is in effect, i.e. where that identifier is //visible//.
 
 Euphoria has many pre-defined procedures, functions and types.  These are
@@ -1807,8 +1780,8 @@ For example, procedures, functions and types can call themselves or one another
 recursion, where routine A calls routine B which directly or indirectly calls
 routine A, implies one of A or B being called before it is defined. This was
 traditionally the most frequent situation which required using the
-[[:routine_id]]() mechanism, but is now supported directly.
-See [[:Indirect Routine Calling]] for more details on the [[:routine_id()]]()
+[[:routine_id()]] mechanism, but is now supported directly.
+See [[:Indirect Routine Calling]] for more details on the [[:routine_id()]]
 mechanism.
 
 ==== Defining the scope of an identifier
@@ -1828,13 +1801,13 @@ outside one of the structures listed above, the scope of the variable starts at
 the declaration and ends at the routine's ##**end**## statement.
 * If a variable is declared outside of a routine (known as a module variable),
 and does not have a scope modifier, its scope starts at the declaration and ends
-and the end of the file it is declared in.
+at the end of the file it is declared in.
 
 The scope of a **constant** that does not have a scope modifier, starts at the
-declaration and ends and the end of the file it is declared in.
+declaration and ends at the end of the file it is declared in.
 
 The scope of a **enum** that does not have a scope modifier, starts at the
-declaration and ends and the end of the file it is declared in.
+declaration and ends at the end of the file it is declared in.
 
 The scope of all **procedures**, **functions** and **types**, which do not have
 a scope modifier, starts at the beginning of the source file and ends at the end
@@ -1856,6 +1829,7 @@ containing the ##public## declaration.
 any file that directly includes the file in which the identifier is declared.
 
 When you **[[:include]]** a Euphoria file in another file, only the identifiers
+!!zzzz-----^^^^^^^^^^^^^^ 
 declared using a scope modifier are accessible to the file doing the include.
 The other declarations in the included file are invisible to the file doing the
 include, and you will get an error message, "##Errors resolving the following
@@ -1913,8 +1887,8 @@ declared in any
 Euphoria coded file.
 
 
-@[namespace|]
 ==== Using namespaces
+@[namespace|]
 
 Identifiers marked as ##global##, ##public## or ##export## are known as
 //exposed// variables because they can be used in files other than the one they
@@ -1927,8 +1901,8 @@ having to examine other files, or notify other users of the include file.
 
 Sometimes, when using include files developed by others, you will encounter
 a naming conflict.  One of the include file authors has used the same name for
-a exposed identifier as one of the other authors. One of fixing this, if you
-have the source, you could simply edit one of the include files to correct
+a exposed identifier as one of the other authors. One of way of fixing this, if you
+have the source, is to simply edit one of the include files to correct
 the problem, however then you'd have repeat this process whenever a new version
 of the include file was released.
 
@@ -2338,7 +2312,7 @@ previous value of x, namely the 1000-element sequence, would simply disappear.
 Actually, the space consumed by the 1000-element sequence will be automatically
 recycled due to Euphoria's dynamic storage allocation.
 
-Note that the equals symbol '=' is used for both assignment and for a
+Note that the equals symbol '=' is used for both assignment and for 
 equality testing.  There is never any confusion
 because an assignment in Euphoria is a statement only, it can't be used as an
 expression (as in C).
@@ -2461,7 +2435,7 @@ the corresponding ##**elsif**## or ##**else**##, whichever comes next, then
 skips down to the corresponding ##**end if**##.
 * When an //expression// is false, Euphoria skips over any statements until it
 comes to the next corresponding ##**elsif**## or ##**else**##, whichever comes
-next. If this is and ##**elsif**## then its //expression// is tested otherwise
+next. If this is an ##**elsif**## then its //expression// is tested otherwise
 any statements following the ##**else**## are executed.
 
 For example:
@@ -2493,12 +2467,12 @@ because it does not require an ##**end if**## to go with it. There is just one
 ##**end if**## for the entire //if statement//, even when there are many
 ##**elsif**## clauses contained in it.
 
-The ##**if**## and ##**elsif**## expressions are tested using [[:short-circuit]]
+The ##**if**## and ##**elsif**## expressions are tested using [[:short_circuit]]
 evaluation.
 
 An //if statement// can have a //label clause// just before the first
 ##**then**## keyword.
-See the section on [[:labelled headers]]. Note that an //elsif clause// can not
+See the section on [[:Header Labels]]. Note that an //elsif clause// can not
 have a label.
 
 @[case|]   @[do|]
@@ -2723,20 +2697,19 @@ Euphoria predefines some words itself:
 * **EU4_0** - Major and Minor Euphoria Version
 * **EU4_0_0** - Major, Minor and Release Euphoria Version
 
-Euphoria is release with the common version scheme of Major, Minor and Release
+Euphoria is released with the common version scheme of Major, Minor and Release
 version identifiers in the form of major.minor.release. When 4.0.1 is
 released, ##EU4_0_0## will no longer be defined, but ##EU4_0_1## will be
-defined. When 4.1 is release, ##EU4_0## will no longer be defined, but ##EU4_1##
+defined. When 4.1 is released, ##EU4_0## will no longer be defined, but ##EU4_1##
 will be defined. Finally, when 5.0 is released, ##EU4## will no longer be
 defined, but ##EU5## will be defined.
 
 ==== Platform Definitions
 
-* **WIN32_CONSOLE** - Platform is Windows and is being executed
-  with the Console version of the interpreter (eui.exe)
-* **WIN32_GUI** - Platform is Windows and is being executed with
+* **CONSOLE** - Euphoria is being executed
+  with the Console version of the interpreter (on windows, eui.exe, others are eui)
+* **GUI** - Platform is Windows and is being executed with
   the GUI version of the interpreter (euiw.exe)
-* **WIN32** - Platform is Windows (GUI or Console)
 * **WINDOWS** - Platform is Windows (GUI or Console)
 * **LINUX** - Platform is Linux
 * **OSX** - Platform is Mac OS X
@@ -2750,15 +2723,13 @@ defined, but ##EU5## will be defined.
 
 * **EUI** - Application is being interpreted by ##eui##.
 * **EUC** - Application is being translated by ##euc##.
-* **EUC_CON** - Application is being translated by ##euc## as a
-//console// application.
 * **EUC_DLL** - Application is being translated by ##euc## into a //DLL// file.
 * **EUB** - Application is being converted to a bound program by ##eub##.
 * **EUB_SHROUD** - Application is being converted to a shrouded program by
 ##eub##.
-* **EUB_CON** - Application is being converted to a bound //console// program by
- ##eub##.
-* **EUB_WIN32** - Application is being converted to a bound //Windows//
+* **CONSOLE** - Application is being translated, or converted to a bound //console// program by
+ ##euc## or ##eub##, respectively.
+* **GUI** - Application is being converted to a bound //Windows GUI//
 program by ##eub##.
 
 ==== Library Definitions
@@ -2843,7 +2814,7 @@ applications.
 
 You should surround code that is not portable with ##ifdef## like:
 <eucode>
-ifdef WIN32 then
+ifdef WINDOWS then
    -- Windows specific code.
 elsedef
    include std/error.e
@@ -2862,7 +2833,7 @@ end ifdef
 
 -- define exported and public constants and procedures for
 -- OSX as well
-ifdef WIN32 or OSX then
+ifdef WINDOWS or OSX then
     -- OSX is not supported but we define public symbols for it anyhow.
 </eucode>
 
@@ -2887,7 +2858,7 @@ end for
 sequence os_name
 ifdef UNIX then
     include unix_ftp.e
-elsifdef WIN32 then
+elsifdef WINDOWS then
     include win32_ftp.e
 elsedef
     crash("Operating system is not supported")
@@ -2895,7 +2866,7 @@ end ifdef
 
 ifdef SHAREWARE then
   if record_count > 100 then
-      message("Shareware version can only contain 100 records. Please register")
+     message("Shareware version can only contain 100 records. Please register")
      abort(1)
   end if
 end ifdef
@@ -2955,16 +2926,22 @@ a loop, and each execution of code in a loop is called an iteration of the
 loop.
 
 Euphoria has three flavors of loops. They all may harbor a
-[[:labelled header -> Header Labels]], in order to make exiting or resuming them
+[[:Header Labels]], in order to make exiting or resuming them
 more flexible.
 
 === while statement
 
 A **while statement** tests a condition to see if it is non-zero
-(true), and while it is true a loop is executed.
+(true), and if so, a body of statements is executed. The condition is re-tested
+after when the statements are run, and if still true the statements are
+run again, and so on.
 
 Syntax Format:
 >##**while** //expr// //[//**with entry**//]// //[//**label** //"name"// //]// **do**##
+>>##//statements//##
+>##//[//**entry**//]//##
+>>##//statements//##
+>##**end while**##
 
 Example 1
 <eucode>
@@ -3043,14 +3020,20 @@ loop label "GONEXT" do
 end loop
 </eucode>
 
-This differs from a **while** loop in more than one way:
+A ##while## statement differs from a ##loop## statement because the body of a
+loop is executed at least once, since testing takes place **after** the body
+completes.  However in a ##while## statement, the test is taken **before** 
+the body is executed.
 
-# The body of the loop is executed at least once, since testing takes place
-AFTER it completes.  In a **while**, the test is taken BEFORE execution.
-# The header contains only optional **label** and **entry** tags.
+Also note that a ##loop## can not have a ##with entry## clause.
 
 @[to|] @[by|]
 === for statement
+
+Syntax Format:
+>##**for** **loopvar** = **startexpr** to **endexpr** //[//**by delta**//]// **do**##
+>>##//statements//##
+>##end for##
 
 A **for** statement sets up a special loop that has its own **loop variable**.
 The **loop variable** starts with the specified initial value and increments or
@@ -3242,7 +3225,7 @@ organization. Yet, they may prove more convenient in short, short lived
 programs, and are provided mostly for this purpose.
 
 For information on how to associate a string to a block of code, see the section
-[[:labelled headers]].
+[[:Header Labels]].
 
 An **exit** without any label or number in a [[:while statement]] or a
 [[:for statement]] causes immediate termination of that loop, with control
@@ -3451,7 +3434,7 @@ Label names must be double quoted constant strings. Characters that would be
 illegal in an Euphoria identifier may appear in a label name, since it is a
 regular string.
 
-[[:Labelled headers -> "Header labels"]] do not count as possible goto targets.
+[[:Header Labels]] do not count as possible goto targets.
 
 Use ##goto## in production code when all the following applies:
 * you want to proceed with a statement which is not the following one;
@@ -3482,8 +3465,7 @@ variables may be defined only in that scope, and they may or may not have
 sensible values. It is up to the programmer to take appropriate action in this
 respect.
 
-@[label|]
-=== Header Labels === @[labelled headers]
+=== Header Labels ===
 
 As shown in the above section on control flow statements, most can have their
 own label. To label a flow control statement, use a ##label## clause immediately
@@ -3522,11 +3504,12 @@ while 1 with entry label "top" do -- CORRECT
 </eucode>
 
 %%output=lang_short_circuit
-== Short-Circuit Evaluation == @[short-circuit]
+== Short-Circuit Evaluation ==
+@[short_circuit|]
 :<<LEVELTOC level=2 depth=4>>
 
 When the condition tested by if, elsif, until, or while contains ##and## or
-##or## operators, [[:short-circuit]] evaluation will be used.  For example,
+##or## operators, [[:short_circuit]] evaluation will be used.  For example,
 
 <eucode>
 if a < 0 and b > 0 then ...
@@ -3565,10 +3548,10 @@ the result to be true.
 If the expression B contains a call to a function, and that function has
 possible **side-effects**, i.e. it might do more than just return a value,
 you will get a compile-time warning. Older versions (pre-2.1) of Euphoria did
-not use [[:short-circuit]] evaluation, and it's possible that some
-old code will no longer work correctly, although a search of the Euphoria
-archives did not turn up any programs that depend on side-effects in this
-way, but other Euphoria code might do so.
+not use [[:short_circuit]] evaluation, and it's possible that some old
+code will no longer work correctly, although a search of the Euphoria
+archives did not turn up any programs that depend on side-effects in
+this way, but other Euphoria code might do so.
 
 The expression, B, could contain something that would normally cause a run-time
 error. If Euphoria skips the evaluation of B, the error will not be discovered.
@@ -3624,7 +3607,8 @@ if/elsif/until/while conditions because we only care if the result is true or
 false, and conditions are required to produce an atom as a result.
 
 %%output=lang_toplevel
-== Special Top-Level Statements == @[special statements]
+== Special Top-Level Statements ==
+@[specialstatements|]
 :<<LEVELTOC level=2 depth=4>>
 
 Before any of your statements are executed, the Euphoria front-end quickly
@@ -3769,7 +3753,7 @@ the file relative to the following directories, in the following order:
   set of //Linux// / //FreeBSD// or //Windows// environment  variables.
   (Via ##Control Panel / Performance & Maintenance / System / Advanced##
   on //XP//, or ##AUTOEXEC.BAT## on older versions of
-  //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WIN32LIB##
+  //Windows//).  e.g. ##SET EUINC=C:\EU\MYFILES;C:\EU\WINDOWSLIB##
   ##EUINC## lets you organize your include files according to application
   areas, and avoid adding numerous unrelated files to ##euphoria\include##.
 # Finally, if it still hasn't found the file, it will look in
@@ -3829,7 +3813,7 @@ into internal form. Options to the ##with## and ##without## statement come
 in two flavors. One simply turns an option on or off, while the others have
 multiple states.
 
-==== On/Off options
+==== On / Off options
 
 || Default || Option                      ||
 | without  | [[:Profiling "profile"]]      |
@@ -3893,9 +3877,9 @@ with it. For example, a CGI application or a CRON job.
 You can also set this option via a
 [[:batch_command_line "command line parameter"]].
 
-==== Complex with/without options
+==== Complex with / without options
 
-===== with/without warning
+===== with / without warning
 
 Any warnings that are issued will appear on your screen after your program
 has finished execution. Warnings indicate minor problems.  A warning will
@@ -3912,20 +3896,20 @@ The forms available are ...
 ; ##without warning##
 : disables all warnings
 
-; ##with warning (//warning name list//)\\
-  with warning = (//warning name list//)##
+; ##with warning {//warning name list//}\\
+  with warning = {//warning name list//}##
 : enables only these warnings, and disables all other
 
-; ##without warning (//warning name list//)\\
-  without warning = (//warning name list//)##
+; ##without warning {//warning name list//}\\
+  without warning = {//warning name list//}##
 : enables all warnings except the warnings listed
 
-; ##with warning &= (//warning name list//)\\
-  with warning += (//warning name list//)##
+; ##with warning &= {//warning name list//}\\
+  with warning += {//warning name list//}##
 : enables listed warnings in addition to whichever are enabled already
 
-; ##without warning &= (//warning name list//)\\
-  without warning += (//warning name list//)##
+; ##without warning &= {//warning name list//}\\
+  without warning += {//warning name list//}##
 : disables listed warnings and leaves any not listed in its current state.
 
 ; ##with warning save##
@@ -4023,7 +4007,7 @@ define/undefine tags which the ifdef statement may use.
 
 The following tags have a predefined meaning in Euphoria:
 
-* WIN32:    platform is any version of Windows (tm) from '95 on to Vista and beyond
+* WINDOWS:    platform is any version of Windows (tm) from '95 on to Vista and beyond
 * WINDOWS:  platform is any kind of Windows system
 * UNIX:     platform is any kind of Unix style system
 * LINUX:    platform is Linux

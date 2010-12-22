@@ -9,7 +9,7 @@
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-	<title>OpenEuphoria: { title }</title>
+	<title>OpenEuphoria: @@title@@</title>
 	<meta name="keywords" content="" />
 	<meta name="description" content="" />
 	<link rel="stylesheet" type="text/css" href="style.css" />
@@ -20,7 +20,7 @@
 		<div id="header_inner" class="fluid">
 			<div id="logo">
 				<h1><a href="index.html"><span>Open</span>Euphoria Manual</a></h1>
-				<h2>{ title }</h2>
+				<h2>@@title@@</h2>
 			</div>
 		</div>
 	</div>
@@ -41,11 +41,83 @@
 		<td><span id="searchresults" name="searchresults"></td></span>
 	</table>
 	</form>
-				{$nav.html}
-				<div class="body">
-					{body}
-				</div>
-				{$nav.html}
+						<!-- BEGIN NAV -->
+						<div class="doc-tools">
+							<table border=0 padding=0 cellpadding=0 width="100%">
+								<tr>
+									<td><a href="@@previous@@"><img src="images/prev.png" /></a></td>
+									<td><a href="@@currchap@@">Up</a></td>
+									<td><a href="@@next@@"><img src="images/next.png" /></a></td>
+									<!-- Spacer -->
+									<td width="100%" colspan="3">&nbsp;</td>
+									<td><a href="index.html">TOC</a></td>
+									<td><a href="key_index.html">Index</a></td>
+								</tr>
+								<tr>
+									<td width="20%" colspan="3">
+										&lt;&lt;
+										<a href="@@prevchap@@">@@pctext@@</a>
+									</td>
+									<td width="20%">
+										&lt;
+										<a href="@@previous@@">@@pptext@@</a>
+									</td>
+									<td width="20%">
+										Up: <a href="@@currchap@@">@@chaptext@@</a>
+									</td>
+									<td width="20%">
+										<a href="@@next@@">@@nptext@@</a>
+										&gt;
+									</td>
+									<td width="20%" colspan="2">
+										<a href="@@nextchap@@">@@nctext@@</a>
+										&gt;&gt;
+									</td>
+								</tr>
+							</table>
+						</div>
+						<!-- END NAV -->
+
+						<div class="body">
+							@@body@@
+						</div>
+
+						<!-- BEGIN NAV -->
+						<div class="doc-tools">
+							<table border=0 padding=0 cellpadding=0 width="100%">
+								<tr>
+									<td><a href="@@previous@@"><img src="images/prev.png" /></a></td>
+									<td><a href="@@currchap@@">Up</a></td>
+									<td><a href="@@next@@"><img src="images/next.png" /></a></td>
+									<!-- Spacer -->
+									<td width="100%" colspan="3">&nbsp;</td>
+									<td><a href="index.html">TOC</a></td>
+									<td><a href="key_index.html">Index</a></td>
+								</tr>
+								<tr>
+									<td width="20%" colspan="3">
+										&lt;&lt;
+										<a href="@@prevchap@@">@@pctext@@</a>
+									</td>
+									<td width="20%">
+										&lt;
+										<a href="@@previous@@">@@pptext@@</a>
+									</td>
+									<td width="20%">
+										Up: <a href="@@currchap@@">@@chaptext@@</a>
+									</td>
+									<td width="20%">
+										<a href="@@next@@">@@nptext@@</a>
+										&gt;
+									</td>
+									<td width="20%" colspan="2">
+										<a href="@@nextchap@@">@@nctext@@</a>
+										&gt;&gt;
+									</td>
+								</tr>
+							</table>
+						</div>
+						<!-- END NAV -->
 			</div>
 		</div>
 	</div>

@@ -158,7 +158,7 @@ typedef struct s1 *s1_ptr;
 #define COS       81
 #define TAN       82
 #define FLOOR     83
-#define XOR      154
+#define XOR      152
 
 struct replace_block {
 	object_ptr copy_to;
@@ -327,4 +327,5 @@ extern struct tcb *tcb;
 // be_w:
 extern int in_from_keyb;
 extern int TraceOn;
+int check_has_console();
 #endif

@@ -6,6 +6,7 @@
 
 void screen_show();
 void InitInOut();
+int has_console();
 
 #ifdef EUNIX
 void screen_copy(struct char_cell a[MAX_LINES][MAX_COLS],

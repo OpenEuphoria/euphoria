@@ -356,7 +356,7 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	if code_sub = TopLevelSub then
 		for i = pre_refs + 1 to length( toplevel_references[fr[FR_FILE]] ) do
-			forward_references[toplevel_references[fr[FR_FILE]]][FR_PC] += pc - 1
+			forward_references[toplevel_references[fr[FR_FILE]][i]][FR_PC] += pc - 1
 		end for
 	else
 		for i = pre_refs + 1 to length( active_references[fr[FR_FILE]][ar_sp] ) do
@@ -400,13 +400,17 @@ procedure patch_forward_variable( token tok, integer ref )
 	end if
 	
 	set_code( ref )
-	integer vx = find( -ref, Code, fr[FR_PC] )
+	integer pc = fr[FR_PC]
+	if pc < 1 then
+		pc = 1
+	end if
+	integer vx = find( -ref, Code, pc )
 	if vx then
 		while vx do
 			-- subscript assignments might cause the
 			-- sym to be emitted multiple times
 			Code[vx] = sym
-			vx = find( -ref, Code, fr[FR_PC] )
+			vx = find( -ref, Code, vx )
 		end while
 		resolved_reference( ref )
 	end if
@@ -541,6 +545,11 @@ procedure patch_forward_type_check( token tok, integer ref )
 	if not var then
 		-- type type was the forward reference
 		var = Code[pc+1]
+	end if
+	
+	if var < 0 then
+		-- not yet...don't know the variable yet
+		return
 	end if
 	
 	-- clear out the old stuff
@@ -751,6 +760,7 @@ export function new_forward_reference( integer fwd_op, symtab_index sym, integer
 		end if
 		fwdref_count += 1
 	end if
+	
 	return ref
 end function
 
@@ -922,14 +932,12 @@ procedure shift_top( sequence refs, integer pc, integer amount )
 		sequence fr = forward_references[refs[i]]
 		forward_references[refs[i]] = 0
 		if fr[FR_PC] >= pc then
--- 			if fr[FR_PC] > 1 then
-				fr[FR_PC] += amount
-				if fr[FR_TYPE] = CASE
-				and fr[FR_DATA] >= pc then
-					-- the FR_DATA info tracks the pc for the switch statement for the case
-					fr[FR_DATA] += amount
-				end if
--- 			end if
+			fr[FR_PC] += amount
+			if fr[FR_TYPE] = CASE
+			and fr[FR_DATA] >= pc then
+				-- the FR_DATA info tracks the pc for the switch statement for the case
+				fr[FR_DATA] += amount
+			end if
 		end if
 		forward_references[refs[i]] = fr
 	end for

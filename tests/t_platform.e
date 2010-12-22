@@ -33,19 +33,12 @@ end ifdef
 ifdef WIN32 or WINDOWS then
     ifdef not WIN32 or not WINDOWS then
 		test_fail("One of the accompanying defines is not defined. Defines: " & platform_defines)
-	elsifdef DOS32 or UNIX or LINUX or OPENBSD or NETBSD or FREEBSD or OSX then
+	elsifdef UNIX or LINUX or OPENBSD or NETBSD or FREEBSD or OSX then
 		test_fail("OS Name Conflict: Both Windows and non-Windows OS def-symbol defined. Defines: " & platform_defines)	
 	end ifdef
 	test_equal("WIN32=platform()", WIN32, platform() )
-elsifdef DOS32 then
-    ifdef WIN32 or  WINDOWS or  
-		UNIX or LINUX or OPENBSD or NETBSD or FREEBSD or OSX then
-		test_fail("OS Name Conflict: Both DOS and non-DOS OS def-symbol defined. Defines: " & platform_defines)	
-	end ifdef
-	test_equal("DOS32=platform()", 1, platform() )
-	test_fail("Def-symbols set to an unsupported OS Defines: " & platform_defines)
 elsifdef UNIX then
-	ifdef DOS32 or WIN32 or WINDOWS then
+	ifdef WIN32 or WINDOWS then
 		test_fail("OS Name Conflict: Both UNIX and non-UNIX OS def-symbol defined. Defines: " & platform_defines)	
 	end ifdef
 	ifdef LINUX then

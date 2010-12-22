@@ -55,7 +55,7 @@ public constant
 -- === General Routines
 
 /*
-ifdef WIN32 then
+ifdef WINDOWS then
 	constant dnsdll_ = open_dll("dnsapi.dll")
 
 	constant getaddrinfo_ = define_c_func(sockdll_,"getaddrinfo",{C_POINTER,C_POINTER,C_POINTER,C_POINTER},C_INT)
@@ -345,7 +345,7 @@ end function
 --     [[:getaddrinfo]], [[:gethostbyname]], [[:getmxrr]], [[:getnsrr]]
 
 public function dnsquery(sequence dname, integer q_type, atom options)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return windows_dnsquery(dname, q_type, options)
 	elsifdef UNIX then
 		return unix_dnsquery(dname, q_type)
@@ -552,7 +552,7 @@ end function
 -- </eucode>
 
 public function getaddrinfo(object node, object service, object hints)
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		return windows_getaddrinfo(node,service,hints)
 	elsifdef UNIX then
 		return unix_getaddrinfo(node,service,hints)

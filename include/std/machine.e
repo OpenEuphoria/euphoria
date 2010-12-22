@@ -505,7 +505,7 @@ end ifdef
 -- The operating system's memory page length in bytes.
 public constant PAGE_SIZE = page_size
 
-ifdef WIN32 then
+ifdef WINDOWS then
 	function VirtualAlloc( atom addr, atom size, atom allocation_type, atom protect_ )
 		atom r1
 		r1 = c_func( VirtualAlloc_rid, {addr, size, allocation_type, protect_ } )
@@ -613,12 +613,12 @@ public type std_library_address( object addr )
 	end ifdef
 end type
 
-ifdef WIN32 then
+ifdef WINDOWS then
 std_library_address oldprotptr = allocate_data(ADDRESS_LENGTH)
 end ifdef
 
 function local_allocate_protected_memory( integer s, integer first_protection )
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if dep_works() then
 			return eu:c_func(VirtualAlloc_rid, 
 				{ 0, s, or_bits( MEM_RESERVE, MEM_COMMIT ), first_protection })
@@ -633,7 +633,7 @@ end function
 
 -- return -1 for failure. 0 success  
 function local_change_protection_on_protected_memory( atom p, integer s, integer new_protection )
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if dep_works() then
 			if eu:c_func( VirtualProtect_rid, { p, s, new_protection , oldprotptr } ) = 0 then
 				-- 0 indicates failure here
@@ -989,7 +989,6 @@ end function
 
 --**
 -- Free up a previously allocated block of memory.
--- @[machine:free]
 --
 -- Parameters:
 --  # ##addr##, either a single atom or a sequence of atoms; these are addresses of a blocks to free.
@@ -1012,6 +1011,8 @@ end function
 --
 -- See Also:
 --     [[:allocate]], [[:free_code]]
+--
+
 public procedure free(object addr)
 	if types:number_array (addr) then
 		if types:ascii_string(addr) then

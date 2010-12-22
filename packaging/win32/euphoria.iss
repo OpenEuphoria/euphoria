@@ -1,19 +1,19 @@
 [Setup]
 AppName=Euphoria
-AppVersion=4.0.0.RC2
-AppVerName=Euphoria v4.0.0.RC2
+AppVersion=4.0.0
+AppVerName=Euphoria v4.0.0
 AppPublisher=OpenEuphoria Group
 AppPublisherURL=http://openeuphoria.org
 AppSupportURL=http://openeuphoria.org
 AppUpdatesURL=http://openeuphoria.org
-DefaultDirName=C:\euphoria-4.0
-DefaultGroupName=Euphoria 4.0
+DefaultDirName=C:\euphoria
+DefaultGroupName=Euphoria
 AllowNoIcons=yes
 LicenseFile=..\..\license.txt
 DisableStartupPrompt=yes
 DisableReadyPage=yes
 OutputDir=.\
-OutputBaseFilename=euphoria-4.0.0.RC2
+OutputBaseFilename=euphoria-4.0.0
 Compression=lzma
 SolidCompression=yes
 ChangesAssociations=yes
@@ -36,8 +36,8 @@ Name: comp_tests; Description: "Unit tests"; Types: full;
 Name: comp_tuts; Description: "Tutorials"; Types: full standard;
 
 [Tasks]
-Name: associate; Description: "&Associate file extensions"; Flags: unchecked
-Name: update_env; Description: "&Update environment"; Flags: unchecked
+Name: associate; Description: "&Associate file extensions";
+Name: update_env; Description: "&Update environment";
 
 [Files]
 ; Save all Euphoria subdirectories to backup subdirectory (can't use recursesubdirs here)
@@ -98,11 +98,11 @@ Source: "..\..\bin\eudbg.lib"; DestDir: {app}\bin\; Flags: ignoreversion; Compon
 Source: "..\..\bin\eui.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main; AfterInstall: InstallEuCfg
 Source: "..\..\bin\euiw.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 Source: "..\..\bin\eushroud.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "cleanbranch\bin\euinc.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
-Source: "cleanbranch\bin\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "cleanbranch\source\eufile.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
+Source: "cleanbranch\source\euphoria.ico"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_main
 
 ; Windows Tools
-Source: "..\..\bin\creolehtml.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
+Source: "..\..\bin\creole.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eucoverage.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eudis.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
 Source: "..\..\bin\eudist.exe"; DestDir: {app}\bin\; Flags: ignoreversion; Components: comp_tools
@@ -162,18 +162,23 @@ Type: files; Name: {app}\EuphoriaManual.url
 Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "PATH"; ValueData: "{app}\bin;{reg:HKCU\Environment,PATH}"; MinVersion: 0, 3.51; Tasks: update_env
 
 ;associate .exw files to be called by euiw.exe
-Root: HKCR; Subkey: ".exw"; ValueType: string; ValueName: ""; ValueData: "EUWinApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: ".exw"; ValueType: string; ValueName: ""; ValueData: "EUWinApp"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUWinApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Windows App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUWinApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\euiw.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUWinApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUWinApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euiw.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUWinApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euc.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 ;associate .ex files to be called by eui.exe
-Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUConsoleApp"; Flags: uninsdeletevalue createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: ".ex"; ValueType: string; ValueName: ""; ValueData: "EUConsoleApp"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp"; ValueType: string; ValueName: ""; ValueData: "Euphoria Console App"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eui.exe,0"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
 Root: HKCR; Subkey: "EUConsoleApp\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\eui.exe"" ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
-Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euc.exe"" -CON ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUConsoleApp\shell\translate\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\euc.exe"" -con ""%1"""; Flags: uninsdeletekey createvalueifdoesntexist; Tasks: associate
+
+;create an icon link for .e files
+Root: HKCR; Subkey: ".e"; ValueType: string; ValueName: ""; ValueData: "EUInc"; Flags: deletekey uninsdeletevalue createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUInc"; ValueType: string; ValueName: ""; ValueData: "Euphoria Include File"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
+Root: HKCR; Subkey: "EUInc\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\bin\eufile.ico"; Flags: deletekey uninsdeletekey createvalueifdoesntexist; Tasks: associate
 
 [Messages]
 FinishedLabel=Setup has finished installing [name] on your computer.%n%nYou can now run Euphoria .ex and .exw programs by double-clicking them, or (after reboot) by typing:%n     eui filename.ex%nor%n     euiw filename.ex/euw%non a command-line.

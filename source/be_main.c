@@ -65,8 +65,6 @@ void be_init()
 {
 	char *p;
 
-	check_has_console(); // Initialize static cached variable
-
 	EuConsole = (getenv("EUCONS") != NULL && atoi(getenv("EUCONS")) == 1);
 	clocks_per_sec = CLOCKS_PER_SEC;
 #ifdef CLK_TCK

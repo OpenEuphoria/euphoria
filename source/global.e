@@ -32,8 +32,8 @@ export integer con -- Windows console option for BIND
 export integer type_i -- for type checking where in the array a failure occured
 
 export sequence version_name
-ifdef WIN32 then
-	version_name = "WIN32"
+ifdef WINDOWS then
+	version_name = "Windows"
 elsifdef LINUX then
 	version_name = "Linux"
 elsifdef OPENBSD then

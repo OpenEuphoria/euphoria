@@ -60,19 +60,14 @@
 #endif
 #endif  // EUNIX
 
-#ifdef EMSVC
-#define push() __asm { PUSH [last_offset] } do { } while (0)
-#define  pop() __asm { ADD esp,[as_offset] } do { } while (0)
-#endif
-
 #ifdef EWATCOM
 void wcpush(long X);
 #define push() wcpush(last_offset);
 #define pop()
 #pragma aux wcpush = \
-		"PUSH [EAX]" \
-		modify [ESP] \
-		parm [EAX];
+                "PUSH [EAX]" \
+                modify [ESP] \
+                parm [EAX];
 #endif // EWATCOM
 
 typedef union {
@@ -85,7 +80,7 @@ typedef union {
 	int intval;
 } float_arg;
 
-#if !defined(EMINGW) && !defined(EOSX) && !defined(EMSVC)
+#if !defined(EMINGW) && !defined(EOSX)
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
@@ -164,6 +159,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	}
 	
 	argsize = arg_list_ptr->length << 2;
+	
 	
 	// Push the Arguments
 	
@@ -338,7 +334,6 @@ object call_c(int func, object proc_ad, object arg_list)
 			return 0; // unknown function return type
 	}
 }
-
 #else //EMINGW
 /*******************/
 /* Local variables */

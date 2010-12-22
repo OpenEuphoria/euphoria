@@ -67,6 +67,7 @@ constant ENCODING_STRINGS = {
 function format_base_request(sequence request_type, sequence url, object headers)
 	sequence request = ""
 	sequence formatted_request
+	integer noport = 0
 
 	object parsedUrl = url:parse(url)
 	if atom(parsedUrl) then
@@ -80,6 +81,7 @@ function format_base_request(sequence request_type, sequence url, object headers
 	integer port = parsedUrl[URL_PORT]
 	if port = 0 then
 		port = 80
+		noport = 1
 	end if
 
 	sequence path
@@ -93,8 +95,15 @@ function format_base_request(sequence request_type, sequence url, object headers
 		path &= "?" & parsedUrl[URL_QUERY_STRING]
 	end if
 
+	-- only specify the port in the request if the caller did so explicitly
+	-- some sites, such as euphoria.pastey.net, will break otherwise
+	if noport then
+	request = sprintf("%s %s HTTP/1.0\r\nHost: %s\r\n", {
+		request_type, path, host })
+	else
 	request = sprintf("%s %s HTTP/1.0\r\nHost: %s:%d\r\n", {
 		request_type, path, host, port })
+	end if
 
 	integer has_user_agent = 0
 	integer has_connection = 0

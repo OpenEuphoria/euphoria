@@ -21,7 +21,7 @@ is a good example.
 * Situations where your program must sometimes wait for input from a human or 
 other computer. While one task in your program is waiting, another separate task
 could be doing some computation, disk search, etc.
-* //Windows//, //Linux// and //FreeBSD// all have special API routines that let 
+* All operating systems today have special API routines that let 
 you initiate some I/O, and then proceed without waiting for it to finish. A task
 could check periodically to see if the I/O is finished, while another task is 
 performing some useful computation, or is perhaps starting another I/O operation.

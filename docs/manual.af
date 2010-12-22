@@ -3,19 +3,53 @@
 #
 # # is a comment
 # : is inline CREOLE markup
+# ifdef WORD
+# ...
+# end ifdef
+#
+# ... is skipped if the "WORD" was not defined via -d WORD
+# on the command line to eudoc.
 #
 # all other non-blank entries are treated as a file
 # name that should be read and inserted into the output
+#
+# NOTES:
+#
+# This particular file has two main defines:
+#
+#    * HTML - includes additional information that we do not
+#      wish to include in the PDF version of the manual due
+#      to the sheer size of the single download/viewing PDF.
+#
+#    * PDF - items that will only be included in the PDF version
+#      of the manual.
+#
+# When running, one should be sure to define either HTML or PDF
+# via a -d WORD argument to eudoc.
+#
 
 # Output file generation options
 :@@(title Euphoria v4.0)@
+
+ifdef HTML
 :%%maxnumlevel = 4
 :%%toclevel = 3
 :%%output=index
 :<<TOC level=1>>
+
+:@@(index <<font color="$(1)" text=`$(+)`>>)@
+:@@(subindex **$$(color #009999 bug fixed:)**)@
+end ifdef
+
+ifdef PDF
+:@@(index ``\index{$(1)}``)@
+:@@(subindex ``\index{$(1)!$(2)}``)@
+end ifdef
+
 ########
 :%%output=eu_intro
 := Euphoria Programming Language v4.0
+:@[toc|]
 :<<LEVELTOC level=1 depth=4>>
 
 ../docs/welcome.txt
@@ -23,7 +57,6 @@
 ../docs/licensing.txt
 ../License.txt <nowiki
 ../docs/credits.txt
-#TODO: other release notes
 
 ########
 :%%output=installation
@@ -59,6 +92,7 @@
 := Mini-Guides
 :<<LEVELTOC level=1 depth=2>>
 
+ifdef HTML
 :%%output=demos
 :== Bundled Demos
 :<<LEVELTOC level=2 depth=3>>
@@ -85,6 +119,7 @@
 ../demo/search.ex
 ../demo/tree.ex
 ../demo/where.ex
+../demo/bench/sieve8k.ex
 ../demo/win32/dsearch.exw
 ../demo/win32/taskwire.exw
 ../demo/win32/window.exw
@@ -102,6 +137,7 @@
 ../demo/net/udp_client.ex
 ../demo/net/udp_server.ex
 ../demo/net/wget.ex
+end ifdef
 
 ../docs/debug.txt
 ../docs/bind.txt
@@ -126,10 +162,15 @@
 ../docs/eudist.txt
 
 ########
-:%%output=gen_routines
-:= General Routine Reference
+
+:%%output=apiref
+:= API Reference
 :<<LEVELTOC level=1 depth=2>>
 
+# General Index
+../docs/builtins.txt
+
+# General Routines
 ../include/std/cmdline.e
 ../include/std/console.e
 ../include/std/datetime.e
@@ -142,11 +183,7 @@
 ../include/std/types.e
 ../include/std/utils.e
 
-########
-:%%output=seq_routines
-:= Sequence Centric Routines
-:<<LEVELTOC level=1 depth=2>>
-
+# Sequence Routines
 ../include/std/convert.e
 ../include/std/get.e
 ../include/std/search.e
@@ -154,11 +191,7 @@
 ../include/std/serialize.e
 ../include/std/sort.e
 
-########
-:%%output=str_routines
-:= String Centric Routines
-:<<LEVELTOC level=1 depth=2>>
-
+# String Routines
 ../include/std/locale.e
 ../include/std/localeconv.e
 ../include/std/regex.e
@@ -168,21 +201,13 @@
 ../include/std/wildcard.e
 ../include/std/base64.e
 
-########
-:%%output=math_routines
-:= Math
-:<<LEVELTOC level=1 depth=2>>
-
+# Math Routines
 ../include/std/math.e
 ../include/std/mathcons.e
 ../include/std/rand.e
 ../include/std/stats.e
 
-########
-:%%output=data_routines
-:= Data Structures
-:<<LEVELTOC level=1 depth=2>>
-
+# Data Routines
 ../include/std/eds.e
 ../include/std/primes.e
 ../include/std/flags.e
@@ -190,22 +215,14 @@
 ../include/std/map.e
 ../include/std/stack.e
 
-########
-:%%output=net_routines
-:= Networking Routines
-:<<LEVELTOC level=1 depth=2>>
-
+# Network Routines
 ../include/std/socket.e
 ../include/std/net/common.e
 ../include/std/net/dns.e
 ../include/std/net/http.e
 ../include/std/net/url.e
 
-########
-:%%output=lowlvl_routines
-:= Low Level Routines
-:<<LEVELTOC level=1 depth=2>>
-
+# Low Level Routines
 ../include/std/dll.e
 ../include/std/error.e
 ../include/std/eumem.e
@@ -214,39 +231,23 @@
 ../include/std/safe.e
 ../include/std/memconst.e
 
-########
-:%%output=graph_routines
-:= Graphics
-:<<LEVELTOC level=1 depth=2>>
-
+# Graphic Routines
 ../include/std/graphcst.e
 ../include/std/graphics.e
 ../include/std/image.e
 
-########
-:%%output=eu_routines
-:= Euphoria Routines
-:<<LEVELTOC level=1 depth=2>>
-
+# Euphoria Routines
 ../include/euphoria/info.e
 ../include/euphoria/keywords.e
 ../include/euphoria/syncolor.e
 ../include/euphoria/tokenize.e
 ../include/std/unittest.e
 
-########
-:%%output=win_routines
-:= Windows Routines
-:<<LEVELTOC level=1 depth=2>>
-
+# Windows Routines
 ../include/std/win32/msgbox.e
 ../include/std/win32/sounds.e
 
-########
-:%%output=unsup_features
-:= Unsuppored Features
-:<<LEVELTOC level=1 depth=2>>
-
+# Unsupported Features
 ../docs/unsupported.txt
 
 ########
@@ -254,13 +255,11 @@
 := Release Notes
 :<<LEVELTOC level=1 depth=2>>
 
-:@@(color <<font color="$(1)" text=`$(+)`>>)@
-:@@(bugfix **$$(color #009999 bug fixed:)**)@
-:@@(doneby \\//$$(color #999900 Implemented by: $(0))//)@
-
 ../docs/release/4.0.0.txt
 ../docs/release/4.0.0.rc2.txt
 ../docs/release/4.0.0.rc1.txt
+
+ifdef HTML
 ../docs/release/3.1.1.txt
 ../docs/release/3.1.0.txt
 ../docs/release/3.0.2.txt
@@ -296,11 +295,11 @@
 ../docs/release/2.0.0.txt
 ../docs/release/2.0.0b.txt
 ../docs/release/2.0.0a.txt
+../docs/release/1.5.1.txt
 ../docs/release/1.5.0.txt
-../docs/release/1.5.0a.txt
+../docs/release/1.4.2.txt
+../docs/release/1.4.1.txt
 ../docs/release/1.4.0.txt
-../docs/release/1.4.0b.txt
-../docs/release/1.4.0a.txt
 ../docs/release/1.3.0.txt
 ../docs/release/1.2.0.txt
 ../docs/release/1.1.0.txt
@@ -310,3 +309,4 @@
 :%%output=key_index
 := Index
 :<<INDEX search>>
+end ifdef

@@ -267,25 +267,25 @@ test_equal("binop_ok #4",  1, binop_ok({{1,2},{3,4}}, 5))
 test_equal("binop_ok #5",  1, binop_ok(5, {{1,2},{3,4}}))
 test_equal("binop_ok #6",  1, binop_ok(1, 2))
 
-test_equal("series 1+", {{1,5},{4,8},{7,11},{10,14}},    series({1,5},  3, 3))
+test_equal("series 1+", {{1,5},{4,8},{7,11},{10,14}},    series({1,5},  3, 4))
 test_equal("series 2+", 0,                               series({1,2,3},1, -1 ) )
-test_equal("series 3+", {{1,2,3}, {5,1,13}, {9,0,23}},   series({1,2,3}, {4,-1,10}, 2))
-test_equal("series 4+", {{1,2,3}},                       series({1,2,3}, 1, 0 ) )
-test_equal("series 5+", {1, {2,3,4}, {3,5,7}, {4,7,10}}, series(1, {1,2,3}, 3 ) )
-test_equal("series 6+", {1, 5, 9, 13, 17, 21},           series(1, 4, 5 ) )
-test_equal("series 7+", 0,                               series({1,2}, {1,2,3}, 3 ) )
-test_equal("series 8+", {12, 9, 6, 3},                   series( 12, -3, 3 ) )
+test_equal("series 3+", {{1,2,3}, {5,1,13}, {9,0,23}},   series({1,2,3}, {4,-1,10}, 3))
+test_equal("series 4+", {{1,2,3}},                       series({1,2,3}, 1, 1 ) )
+test_equal("series 5+", {1, {2,3,4}, {3,5,7}, {4,7,10}}, series(1, {1,2,3}, 4 ) )
+test_equal("series 6+", {1, 5, 9, 13, 17, 21},           series(1, 4, 6 ) )
+test_equal("series 7+", 0,                               series({1,2}, {1,2,3}, 4 ) )
+test_equal("series 8+", {12, 9, 6, 3},                   series( 12, -3, 4 ) )
 
-test_equal("series 1*", {{1,5},{3,15},{9,45},{27,135}},  series({1,5},  3, 3, '*'))
+test_equal("series 1*", {{1,5},{3,15},{9,45},{27,135}},  series({1,5},  3, 4, '*'))
 test_equal("series 2*", 0,                               series({1,2,3},1, -1, '*' ) )
-test_equal("series 3*", {{1,2,3}, {4,-2,30}, {16,2,300}},series({1,2,3}, {4,-1,10}, 2, '*'))
-test_equal("series 4*", {{1,2,3}},                       series({1,2,3}, 1, 0, '*' ) )
-test_equal("series 5*", {1, {1,2,3}, {1,4,9}, {1,8,27}}, series(1, {1,2,3}, 3, '*' ) )
-test_equal("series 6*", {1, 4, 16, 64, 256, 1024},       series(1, 4, 5, '*' ) )
-test_equal("series 7*", 0,                               series({1,2}, {1,2,3}, 3, '*' ) )
-test_equal("series 8*", {12, 6, 3, 1.5},                 series( 12, 0.5, 3, '*' ) )
-
-test_equal("series 1?", 0,                               series({1,2}, {1,2,3}, 3, '?' ) )
+test_equal("series 3*", {{1,2,3}, {4,-2,30}, {16,2,300}},series({1,2,3}, {4,-1,10}, 3, '*'))
+test_equal("series 4*", {{1,2,3}},                       series({1,2,3}, 1, 1, '*' ) )
+test_equal("series 5*", {1, {1,2,3}, {1,4,9}, {1,8,27}}, series(1, {1,2,3}, 4, '*' ) )
+test_equal("series 6*", {1, 4, 16, 64, 256, 1024},       series(1, 4, 6, '*' ) )
+test_equal("series 7*", 0,                               series({1,2}, {1,2,3}, 4, '*' ) )
+test_equal("series 8*", {12, 6, 3, 1.5},                 series( 12, 0.5, 4, '*' ) )
+test_equal("series 1?", 0,                               series({1,2}, {1,2,3}, 4, '?' ) )
+test_equal("series empty", {},                           series(1,2,0) )
 
 sequence s
 s={0,1,2,3,{"aaa",{{3},{1},{2}},"ccc"},4}
@@ -631,6 +631,19 @@ test_equal("transmute Comp:item Repl:mixed", "JOWhn Smth 1njOW{}s 2ncOWOWk1d AAp
 s = { {{1}}, {1} } + 1
 s = s[1][1]
 test_equal("RHS SUBS self assignment", 2,  s[1] )
+
+procedure xor_test()
+	sequence x = {0, 1, 2, 3, 4, 5}
+	sequence y = {1, 0, 1, 1, 0, 0}
+   
+	if not equal(x xor y, y xor x) then
+		test_fail("sanity basic sequence xor test")
+	end if
+	if compare({{1,1,0,0,1,1}}, {x} xor {y}) != 0 then
+		test_fail("sanity comparison sequence xor test")
+	end if
+end procedure
+xor_test()
 
 test_report()
 

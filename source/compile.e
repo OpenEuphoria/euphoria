@@ -3727,6 +3727,9 @@ procedure opRAND()
 		target_val = {1, target[MAX]}
 	else
 		target_type = GType(Code[pc+1])
+		if target_type = TYPE_DOUBLE then
+			target_type = TYPE_ATOM
+		end if
 	end if
 
 	pc = unary_optimize(pc, target_type, target_val, intcode, intcode2,
@@ -5282,13 +5285,15 @@ end procedure
 procedure opCOMPARE()
 	-- OPTIMIZE THIS SOME MORE - IMPORTANT FOR SORTING
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
-	c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@))\n", {Code[pc+1], Code[pc+2]})
-	c_stmt("@ = (@ < @) ? -1 : ", {Code[pc+3], Code[pc+1], Code[pc+2]})
-	temp_indent = -indent
-	c_stmt("(@ > @);\n", {Code[pc+1], Code[pc+2]})
-	c_stmt0("else\n")
-	c_stmt("@ = compare(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
-	CDeRefStr("_0")
+	c_stmt("if (IS_ATOM_INT(@) && IS_ATOM_INT(@)){\n", {Code[pc+1], Code[pc+2]})
+		c_stmt("@ = (@ < @) ? -1 : ", {Code[pc+3], Code[pc+1], Code[pc+2]})
+		temp_indent = -indent
+		c_stmt("(@ > @);\n", {Code[pc+1], Code[pc+2]})
+	c_stmt0("}\n")
+	c_stmt0("else{\n")
+		c_stmt("@ = compare(@, @);\n", {Code[pc+3], Code[pc+1], Code[pc+2]})
+		CDeRefStr("_0")
+	c_stmt0("}\n")
 	target = {-1, 1}
 	SetBBType(Code[pc+3], TYPE_INTEGER, target, TYPE_OBJECT, 0)
 	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
@@ -7260,7 +7265,8 @@ procedure BackEnd(atom ignore)
 	end if
 
 	if not dll_option then
-	c_stmt0("stack_base = (char *)&_0;\n")
+		c_stmt0("stack_base = (char *)&_0;\n")
+		c_stmt0("check_has_console();\n")
 	end if
 
 	-- include path initialization

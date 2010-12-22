@@ -3327,12 +3327,19 @@ function Global_declaration(integer type_ptr, integer scope)
 				SymTab[sym][S_OBJ] = NOVALUE     -- distinguish from literals
 			end if
 			valsym = Top()
+			
 			if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 				Assign_Constant( sym )
 				sym = Pop()
 			else
+				
 				emit_op(ASSIGN)
-				valsym = get_assigned_sym()
+				if Last_op() = ASSIGN then
+					valsym = get_assigned_sym()
+				else
+					-- something else happened...could be a built-in
+					valsym = -1
+				end if
 				if valsym > 0 and compare( SymTab[valsym][S_OBJ], NOVALUE ) then
 					-- need to remember this for select/case statements
 					SymTab[sym][S_CODE] = valsym
@@ -4281,13 +4288,13 @@ procedure SetWith(integer on_off)
 		integer warning_extra = 1
 		if find(tok[T_ID], {CONCAT_EQUALS, PLUS_EQUALS}) != 0 then
 			tok = next_token()
-			if tok[T_ID] != LEFT_ROUND then
+			if tok[T_ID] != LEFT_BRACE and tok[T_ID] != LEFT_ROUND then
 				CompileErr(160)
 			end if
 			reset_flags = 0
 		elsif tok[T_ID] = EQUALS then
 			tok = next_token()
-			if tok[T_ID] != LEFT_ROUND then
+			if tok[T_ID] != LEFT_BRACE and tok[T_ID] != LEFT_ROUND then
 				CompileErr(160)
 			end if
 			reset_flags = 1
@@ -4320,9 +4327,15 @@ procedure SetWith(integer on_off)
 				end if
 			end if
 
-			if tok[T_ID] = LEFT_ROUND then
+			if find(tok[T_ID], {LEFT_BRACE, LEFT_ROUND}) then
+				integer endlist
+				if tok[T_ID] = LEFT_BRACE then
+					endlist = RIGHT_BRACE
+				else
+					endlist = RIGHT_ROUND
+				end if
 				tok = next_token()
-				while tok[T_ID] != RIGHT_ROUND do
+				while tok[T_ID] != endlist do
 					if tok[T_ID] = COMMA then
 						tok = next_token()
 						continue

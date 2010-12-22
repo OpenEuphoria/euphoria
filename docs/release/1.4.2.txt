@@ -1,4 +1,4 @@
-== Version 1.4b October 1996
+== Version 1.4.2 (release b) October 1996
 
 * **mset.ex** has a more visible selector box on it's grid. It has also been sped up.
 * **ed.ex** now allows special characters greater than ASCII 127 to be entered by
