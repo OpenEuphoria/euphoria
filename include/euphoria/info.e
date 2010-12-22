@@ -191,18 +191,43 @@ end function
 --**
 -- Get a normal version string
 --
--- Returns:
---   A **#sequence**, representing the Major, Minor, Patch, Type and Revision all in
---   one string.
+-- Parameters:
+--   # ##full## - Return full version information regardless of
+--     developmental/production status.
 --
---   Example return values:
---   * "4.0.0 alpha 3 (r1234)"
---   * "4.0.0 release (r271)"
---   * "4.0.2 beta 1 (r2783)"
+-- Returns:
+--   A **#sequence**, representing the entire version information in one string.
+--   The amount of detail you get depends on if this version of Euphoria has
+--   been compiled as a developmental version (more detailed version information)
+--   or if you have indicated TRUE for the ##full## argument.
+--
+-- Example return values
+--   * "4.0.0 alpha 3 (ab8e98ab3ce4,2010-11-18)"
+--   * "4.0.0 release (8d8874dc9e0a, 2010-12-22)"
+--   * "4.1.5 development (12332:e8d8787af7de, 2011-07-18 12:55:03)"
 --
 
-public function version_string()
-	return sprintf("%d.%d.%d %s (%s:%d,%s)", version_info)
+public function version_string(integer full = 0)
+	if full or is_developmental then
+		return sprintf("%d.%d.%d %s (%d:%s, %s)", {
+			version_info[MAJ_VER],
+			version_info[MIN_VER],
+			version_info[PAT_VER],
+			version_info[VER_TYPE],
+			version_revision(),
+			version_node(),
+			version_date(full)
+		})
+	else
+		return sprintf("%d.%d.%d %s (%s, %s)", {
+			version_info[MAJ_VER],
+			version_info[MIN_VER],
+			version_info[PAT_VER],
+			version_info[VER_TYPE],
+			version_node(),
+			version_date(full)
+		})
+	end if
 end function
 
 --**
@@ -225,18 +250,24 @@ end function
 --**
 -- Get a long version string
 --
--- Returns:
---   Same **value**, as [[:version_string]] with the addition of the platform
---   name.
+-- Parameters:
+--   # ##full## - Return full version information regardless of
+--     developmental/production status.
 --
---   Example return values:
---   * "4.0.0 alpha 3 for Windows"
---   * "4.0.0 release for Linux"
---   * "5.6.2 release for OS X"
+-- Returns:
+--   A **#sequence**, representing the entire version information in one string.
+--   The amount of detail you get depends on if this version of Euphoria has
+--   been compiled as a developmental version (more detailed version information)
+--   or if you have indicated TRUE for the ##full## argument.
+--
+-- Example return values
+--   * "4.0.0 alpha 3 (ab8e98ab3ce4,2010-11-18) for Windows"
+--   * "4.0.0 release (8d8874dc9e0a, 2010-12-22) for Linux"
+--   * "4.1.5 development (12332:e8d8787af7de, 2011-07-18 12:55:03) for OS X"
 --
 
-public function version_string_long()
-	return version_string() & " for " & platform_name()
+public function version_string_long(integer full = 0)
+	return version_string(full) & " for " & platform_name()
 end function
 
 --****

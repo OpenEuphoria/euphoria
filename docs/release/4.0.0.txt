@@ -80,7 +80,10 @@ future the old ##( name1, name2 )## syntax will be removed.
   by default. ##--stdout## can be supplied if output to STDOUT is desired. It now also
   displays the min and max iteration times in addition to the already average and total.
 * ##demo/net/pastey.ex## demo has been updated to function with
-  OpenEuphoria's pastey service.
+  OpenEuphoria's pastey service. It can also now accept file input via stdin.
 * ##-version## on main products now reports build date in addition to
   previous information.
-* Optimized for loops to check for integer initial value and limits.
+* ##euphoria/info.e## version methods ##[[:version_string]]## and ##[[:version_string_long]]##
+  now have the ability to report the enhanced version information.
+* Optimized for loops to check for integer initial value and
+limits.
