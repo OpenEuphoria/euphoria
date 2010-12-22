@@ -312,4 +312,4 @@ or routine_id("write_coverage_db") = -1 then
 end if
 
 constant M_SET_COVERAGE = 36
---machine_proc(M_SET_COVERAGE, {routine_id("cover_line"),routine_id("cover_routine"),routine_id("write_coverage_db")})
+machine_proc(M_SET_COVERAGE, {routine_id("cover_line"),routine_id("cover_routine"),routine_id("write_coverage_db")})
