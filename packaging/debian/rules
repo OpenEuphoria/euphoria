@@ -40,7 +40,8 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp 
 	# Add here commands to compile the arch part of the package.
 	echo TARGET build-arch-stamp
-	$(MAKE) -C source all tools
+	$(MAKE) -C source all
+	$(MAKE) -C source tools
 	touch $@
 
 build-indep: build-indep-stamp
@@ -48,9 +49,9 @@ build-indep-stamp: configure-stamp
 	# Add here commands to compile the indep part of the package.
 	echo TARGET build-index-stamp
 	$(MAKE) -C source htmldoc pdfdoc-initial
-	$(MAKE) -C pdfdoc-initial
-	$(MAKE) -C pdfdoc-initial
-	$(MAKE) -C pdfdoc-initial
+	$(MAKE) -C source  pdfdoc-initial
+	$(MAKE) -C source  pdfdoc-initial
+	$(MAKE) -C source  pdfdoc-initial
 	touch $@
 
 clean:
