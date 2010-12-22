@@ -64,7 +64,7 @@ Sometimes you'll find that the majority of your code will be the
 same on all platforms, but some small parts will have to be
 written differently for each platform. Use the [[:ifdef]] statement 
 to tell you 
-[[http://openEuphoria.org/docs/eu400_0021.html#_137_platformdefinitions|which platform you are currently running on]].
+[[:Platform Definitions|which platform you are currently running on]].
 
 You can also use the [[:platform]] and [[:platform_name]] functions:
 
