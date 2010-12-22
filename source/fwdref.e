@@ -932,18 +932,12 @@ procedure shift_top( sequence refs, integer pc, integer amount )
 		sequence fr = forward_references[refs[i]]
 		forward_references[refs[i]] = 0
 		if fr[FR_PC] >= pc then
--- 			if fr[FR_PC] > 1 then
-				if fr[FR_PC] = -amount then
-					? Code
-					? fr
-				end if
-				fr[FR_PC] += amount
-				if fr[FR_TYPE] = CASE
-				and fr[FR_DATA] >= pc then
-					-- the FR_DATA info tracks the pc for the switch statement for the case
-					fr[FR_DATA] += amount
-				end if
--- 			end if
+			fr[FR_PC] += amount
+			if fr[FR_TYPE] = CASE
+			and fr[FR_DATA] >= pc then
+				-- the FR_DATA info tracks the pc for the switch statement for the case
+				fr[FR_DATA] += amount
+			end if
 		end if
 		forward_references[refs[i]] = fr
 	end for
