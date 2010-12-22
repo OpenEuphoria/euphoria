@@ -19,6 +19,7 @@ public function DisplayColorLine(sequence pline, integer string_color)
 		machine_proc(9, line[i][1])
 		puts(2, line[i][2])
 	end for
+	return 0
 end function
 
 -- just to ensure that the translator doesn't get rid of 
@@ -29,4 +30,4 @@ if routine_id("DisplayColorLine") = -1 then
 end if
 
 constant M_SET_SYNCOLOR = 21
-machine_proc(M_SET_COVERAGE, {routine_id("DisplayColorLine")})
+--machine_proc(M_SET_SYNCOLOR, {routine_id("DisplayColorLine")})
