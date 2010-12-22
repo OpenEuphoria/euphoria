@@ -293,7 +293,7 @@ constant StdErrMsgs = {
 	{275, "EuConsole"},
 	{276, "Can't open [1]\n"},
 	{277, "\nPaused: press any key ..."},
-	{278, "(press any key and window will close ...)"},
+	{278, "\n(press any key and window will close ...)"},
 	{279, "Turn on batch processing (do not \"Press Enter\" on error)"},
 	{280, "Specify a configuration file"},
 	{281, "Display all copyright notices"},

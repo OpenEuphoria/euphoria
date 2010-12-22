@@ -12,14 +12,14 @@ end ifdef
 include euphoria/info.e
 
 include std/cmdline.e
+include std/console.e
 include std/error.e as error
 include std/filesys.e
 include std/io.e
-include std/search.e
-include std/text.e
 include std/map.e as m
+include std/search.e
 include std/sequence.e
-include std/console.e
+include std/text.e
 
 include common.e
 include error.e
