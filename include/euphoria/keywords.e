@@ -88,7 +88,6 @@ public constant builtins = {
 	"delete_routine",
 	"equal",
 	"find",
-	"find_from",
 	"floor",
 	"get_key",
 	"getc",
@@ -104,7 +103,6 @@ public constant builtins = {
 	"machine_func",
 	"machine_proc",
 	"match",
-	"match_from",
 	"mem_copy",
 	"mem_set",
 	"not_bits",
@@ -129,7 +127,6 @@ public constant builtins = {
 	"prepend",
 	"print",
 	"printf",
-	"profile",
 	"puts",
 	"rand",
 	"remainder",
@@ -157,6 +154,5 @@ public constant builtins = {
 	"task_yield",
 	"time",
 	"trace",
-	"warning",
 	"xor_bits"
 }

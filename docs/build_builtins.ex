@@ -13,7 +13,11 @@ These methods are built into Euphoria and require no includes.
 
 integer x = 1
 for i = 1 to length(builtins) do
-	printf(fh, "| ##[[:%s]]## ", { builtins[i] })
+	if equal(builtins[i], "?") then
+		printf(fh, "| ##[[%s -> :q_print]]## ", { builtins[i] })
+	else
+		printf(fh, "| ##[[:%s]]## ", { builtins[i] })
+	end if
 
 	if x = 4 then
 		printf(fh, "|\n")
