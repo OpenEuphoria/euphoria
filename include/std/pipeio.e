@@ -50,7 +50,6 @@ ifdef WINDOWS then
 		FAIL = 0
 	
 elsedef
-	--*NIX-specific constants
 	constant
 		STDLIB = dll:open_dll({ "libc.so", "libc.dylib", "" }),
 		PIPE   = dll:define_c_func(STDLIB, "pipe",   {dll:C_POINTER}, dll:C_INT),
@@ -163,15 +162,11 @@ end function
 
 public procedure kill(process p, atom signal=15)
 
-	--Close the pipes
-	--If any fail its probably just because they were already closed, so that is ignored
 	close(p[STDIN])
 	close(p[STDOUT])
 	close(p[STDERR])
 	
-	--Error may result, but it is usually just because the process has already ended.
 	ifdef WINDOWS then
-		--Not how to handle "signal", so its ignored on Windows for now
 		c_func(iTerminateProcess,{p[PID],signal and 0})
 	elsedef
 		c_func(KILL, {p[PID], signal})
@@ -268,7 +263,6 @@ end function
 
 public function write(atom fd, sequence str)
 	atom
-	--	fd = p[2],
 		buf = allocate_string(str),
 		ret,WrittenCount
 	
@@ -312,7 +306,6 @@ public function error_no()
 end function
 
 ifdef WINDOWS then
-	--WIN32-specific functions
 	function GetStdHandle(atom device)
 		return c_func(iGetStdHandle,{device})
 	end function
@@ -349,9 +342,7 @@ ifdef WINDOWS then
 	     return 0
 	   end if
 	   return ProcInfo
-	end function -- CreateProcess()
-
-	--WIN32 version of create()
+	end function
 
 	--**
 	-- Create pipes for inter-process communication
@@ -365,22 +356,19 @@ ifdef WINDOWS then
 	-- </eucode>
 	--
 	public function create()
-	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr, -- handles used by child process
-	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd  -- handles used by parent process
+	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr,
+	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd
 	
 	object
 	  StdInPipe = {},
 	  StdOutPipe = {},
 	  StdErrPipe = {}
 	  
-	  -- capture child process std input
 	    StdInPipe = os_pipe()
 	    if atom(StdInPipe) then return -1 end if
 	    hChildStdInRd = StdInPipe[PIPE_READ_HANDLE]
 	    hChildStdInWr = StdInPipe[PIPE_WRITE_HANDLE]
 	  
-	  
-	  -- capture child process std output  
 	    StdOutPipe = os_pipe()
 	    if atom(StdOutPipe) then 
 	      CloseAllHandles(StdInPipe)
@@ -389,7 +377,6 @@ ifdef WINDOWS then
 	    hChildStdOutWr = StdOutPipe[PIPE_WRITE_HANDLE]
 	    hChildStdOutRd = StdOutPipe[PIPE_READ_HANDLE]
 	  
-	  -- capture child process std error
 	    StdErrPipe = os_pipe()
 	    if atom(StdErrPipe) then
 	       CloseAllHandles(StdErrPipe & StdOutPipe)
@@ -423,8 +410,8 @@ ifdef WINDOWS then
 
 	public function exec(sequence cmd, sequence pipe)
 	object fnVal
-	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr, -- handles used by child process
-	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd  -- handles used by parent process
+	atom hChildStdInRd,hChildStdOutWr, hChildStdErrWr,
+	     hChildStdInWr, hChildStdOutRd,hChildStdErrRd
 	
 	hChildStdInWr = pipe[1][1]
 	hChildStdOutRd = pipe[1][2]
@@ -435,13 +422,12 @@ ifdef WINDOWS then
 
 	atom hChildProcess
 	
-	  -- create child process
 	  fnVal = CreateProcess(cmd,{hChildStdInRd,hChildStdOutWr,hChildStdErrWr})
 	  if atom(fnVal) then
 	    return -1
 	  end if
 	  hChildProcess = fnVal[1]
-	  close(fnVal[2]) -- hChildThread not needed.
+	  close(fnVal[2])
 	
 	  close(hChildStdInRd)
 	  
@@ -455,7 +441,6 @@ ifdef WINDOWS then
 
 elsedef
 
-	--*NIX-specific functions
 	function os_dup2(atom oldfd, atom newfd)
 		atom r = c_func(DUP2, {oldfd, newfd})
 		if r = -1 then
@@ -483,7 +468,7 @@ elsedef
 		atom r
 		
 		sbuf = machine:allocate_string(s)
-		vbufseq = {sbuf}--http://www.cs.toronto.edu/~demke/369S.07/OS161_man/syscall/execv.html
+		vbufseq = {sbuf}
 		
 		for i = 1 to length(v) do
 			vbufseq &= machine:allocate_string(v[i])
@@ -492,7 +477,7 @@ elsedef
 		vbufseq &= 0
 		vbuf = machine:allocate(length(vbufseq)*4)
 		poke4(vbuf, vbufseq)
-		r = c_func(EXECV, {sbuf, vbuf}) -- execv() should never return
+		r = c_func(EXECV, {sbuf, vbuf})
 		os_errno = peek4u(ERRNO)
 		return -1
 	end function
@@ -501,14 +486,11 @@ elsedef
 		return c_func(SIGNAL, {signal, handler})
 	end function
 
-	--*NIX version of create()
-	
 	--See docs above in WIN32 version
 	public function create()
 	    object ipipe,opipe,epipe
 	    integer ret
 		
-		--Create pipes
 		ipipe=os_pipe()
 		if atom(ipipe) then
 			return -1
@@ -532,8 +514,6 @@ elsedef
 	    return {{ipipe[2],opipe[1],epipe[1]},{ipipe[1],opipe[2],epipe[2]}}
 	end function
 	
-	--Linux takes parameters as a sequence of args,
-	--so this is wrapped in a function below to make it compatible with the Windows implementation
 	function exec_args(sequence command,sequence args, sequence pipe)
 	    atom pid
 	    integer ret
@@ -544,24 +524,15 @@ elsedef
 	    opipe = pipe[1][2] & pipe[2][2]
 	    epipe = pipe[1][3] & pipe[2][3]
 	    
-		--Fork
 	    pid=os_fork()
 		
 	    if pid=0 then
-	    	--Child process
-	    	
-			--Not much can really be done about errors at this stage,
-			--so most are left unchecked
-			
-			--Close the sides we don't need, otherwise they will be left hanging
 			ret=close(ipipe[2])
 			ret=close(opipe[1])
 			ret=close(epipe[1])
 			
-			--What does this do?
-			ret=os_signal(15, os_sig_dfl)--15 = sigterm
+			ret=os_signal(15, os_sig_dfl)
 			
-			--dup our pipe descriptors to STD*, then close them so they aren't left hanging
 			ret=os_dup2(ipipe[1], os_stdin)
 			ret=close(ipipe[1])
 	
@@ -571,14 +542,10 @@ elsedef
 			ret=os_dup2(epipe[2], os_stderr)
 			ret=close(epipe[2])
 			
-			--Replace the forked child process with the process we intend to launch
 			ret=os_execv(command,args)
 			
-			--We should never reach this, so its an error no matter what happens
 			error()
 	    elsif pid=-1 then
-	    	--Failed to fork
-	    	--Close all the descriptors
 			ret=close(ipipe[1])
 			ret=close(ipipe[2])
 			ret=close(opipe[1])
@@ -587,17 +554,13 @@ elsedef
 			ret=close(epipe[2])
 			return -1
 		else
-			--Parent process
 			
-			--Process info
 			p={ipipe[2], opipe[1], epipe[1], pid}
 			
-			--Close the sides we don't need, otherwise they will be left hanging
 			ret=close(ipipe[1])
 			ret=close(opipe[2]) or ret
 			ret=close(epipe[2]) or ret
 			
-			--If any failed to close, something is wrong with them, so bail out
 			if ret then
 				kill(p)
 				return -1
@@ -607,16 +570,8 @@ elsedef
    		end if
 	end function
 	
-	--*NIX version of exec()
-	
 	--See docs above in WIN32 version
 	public function exec(sequence cmd, sequence pipe)
-		--*NIX needs exe and args separated,
-		--but for Windows compatibility, we need to accept a command line
-		
-		--PHP's proc_open() does it this way.
-		--If there is a better way, please fix it.
-		--Need to make sure this works on all *NIX platforms
 		return exec_args("/bin/sh",{"-c", cmd}, pipe)
 	end function
 end ifdef

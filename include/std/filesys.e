@@ -30,7 +30,7 @@ constant
 	M_CURRENT_DIR = 23,
 	M_CHDIR       = 63
 
-ifdef WIN32 then	
+ifdef WINDOWS then	
 	constant lib = dll:open_dll("kernel32")
 
 elsifdef LINUX then
@@ -57,7 +57,7 @@ ifdef UNIX then
 	constant xCreateDirectory = dll:define_c_func(lib, "mkdir", {dll:C_POINTER, dll:C_INT}, dll:C_INT)
 	constant xRemoveDirectory = dll:define_c_func(lib, "rmdir", {dll:C_POINTER}, dll:C_INT)
 	constant xGetFileAttributes = dll:define_c_func(lib, "access", {dll:C_POINTER, dll:C_INT}, dll:C_INT)
-elsifdef WIN32 then
+elsifdef WINDOWS then
 	constant xCopyFile         = dll:define_c_func(lib, "CopyFileA",   {dll:C_POINTER, dll:C_POINTER, dll:C_BOOL},
 		C_BOOL)
 	constant xMoveFile         = dll:define_c_func(lib, "MoveFileA",   {dll:C_POINTER, dll:C_POINTER}, dll:C_BOOL)
@@ -264,13 +264,13 @@ public constant W_BAD_PATH = -1 -- error code
 -- 
 -- This function is often used just to test if a file or directory exists.
 -- 
--- Under //WIN32//, the argument can have a long file or directory name anywhere in 
+-- Under //WINDOWS//, the argument can have a long file or directory name anywhere in 
 -- the path.
 -- 
 -- Under //Unix//, the only attribute currently available is 'd' and the milliseconds
 -- are always zero.
 -- 
--- //WIN32//: The file name returned in [D_NAME] will be a long file name. If [D_ALTNAME]
+-- //WINDOWS//: The file name returned in [D_NAME] will be a long file name. If [D_ALTNAME]
 -- is not zero, it contains the 'short' name of the file.
 --
 -- Example 1:
@@ -637,7 +637,7 @@ public function create_directory(sequence name, integer mode=448, integer mkpare
 
 	ifdef UNIX then
 		ret = not c_func(xCreateDirectory, {pname, mode})
-	elsifdef WIN32 then
+	elsifdef WINDOWS then
 		ret = c_func(xCreateDirectory, {pname, 0})
 		mode = mode -- get rid of not used warning
 	end ifdef
@@ -838,7 +838,7 @@ public function clear_directory(sequence path, integer recurse = 1)
 		return 0 -- Nothing specified to clear. Not safe to assume anything.
 		         -- (btw, not allowed to clear root directory)
 	end if
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if length(path) = 2 then
 			if path[2] = ':' then
 				return 0 -- nothing specified to delete
@@ -956,7 +956,7 @@ public function remove_directory(sequence dir_name, integer force=0)
 		            -- (not allowed to delete root directory btw)
 	end if
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		if length(dir_name) = 2 then
 			if dir_name[2] = ':' then
 				return 0 -- nothing specified to delete
@@ -1054,7 +1054,7 @@ public enum
 --
 -- Example 1:
 -- <eucode>
--- -- WIN32
+-- -- WINDOWS
 -- info = pathinfo("C:\\euphoria\\docs\\readme.txt")
 -- -- info is {"C:\\euphoria\\docs", "readme.txt", "readme", "txt", "C"}
 -- </eucode>
@@ -1294,7 +1294,7 @@ public function fileext(sequence path)
 end function
 	
 --**
--- Return the drive letter of the path on //WIN32// platforms.
+-- Return the drive letter of the path on //WINDOWS// platforms.
 --
 -- Parameters:
 -- 		# ##path## : the path from which to extract information
@@ -1777,7 +1777,7 @@ public function file_exists(object name)
 		return 0
 	end if
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom pName = allocate_string(name)
 		atom r = c_func(xGetFileAttributes, {pName})
 		free(pName)
@@ -1848,7 +1848,7 @@ public function copy_file(sequence src, sequence dest, integer overwrite = 0)
 		end if
 	end if
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom psrc = allocate_string(src)
 		atom pdest = allocate_string(dest)
 		integer success = c_func(xCopyFile, {psrc, pdest, not overwrite})
@@ -1987,22 +1987,20 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	
 	ifdef UNIX then
 		atom psrcbuf = 0, pdestbuf = 0
-		integer stat_t_offset, dev_t_size, stat_buf_size
+		integer stat_t_offset, stat_buf_size
 	end ifdef
 	ifdef LINUX then
 		stat_t_offset = 0
 		stat_buf_size = 88
-		dev_t_size = 8
-	elsifdef OSX then
-		--TODO
+	elsifdef FREEBSD or OSX then
 		stat_t_offset = 0
-		stat_buf_size = 88
-		dev_t_size = 8
-	elsifdef BSD then
-		--TODO
+		stat_buf_size = 96
+	elsifdef OPENBSD then
 		stat_t_offset = 0
-		stat_buf_size = 88
-		dev_t_size = 8
+		stat_buf_size = 112
+	elsifdef NETBSD then
+		stat_t_offset = 0
+		stat_buf_size = 100
 	end ifdef
 	
 
@@ -2287,22 +2285,20 @@ public function disk_metrics(object disk_path)
 
 		atom bytes_per_cluster
 		atom psrc, ret, psrcbuf
-		integer stat_t_offset, dev_t_size, stat_buf_size
+		integer stat_t_offset, stat_buf_size
 
 		ifdef LINUX then
 			stat_t_offset = 48
 			stat_buf_size = 88
-			dev_t_size = 4
-		elsifdef OSX then
-			--TODO
-			stat_t_offset = 48
-			stat_buf_size = 88
-			dev_t_size = 4
-		elsifdef BSD then
-			--TODO
-			stat_t_offset = 48
-			stat_buf_size = 88
-			dev_t_size = 4
+		elsifdef FREEBSD or OSX then
+			stat_t_offset = 64
+			stat_buf_size = 96
+		elsifdef OPENBSD then
+			stat_t_offset = 72
+			stat_buf_size = 112
+		elsifdef NETBSD then
+			stat_t_offset = 80
+			stat_buf_size = 100
 		end ifdef
 
 		psrc    = machine:allocate_string(disk_path)
@@ -2351,7 +2347,7 @@ end function
 public function disk_size(object disk_path) 
 	sequence disk_size = {0,0,0, disk_path}
 	
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		sequence result 
 		atom bytes_per_cluster
 		
@@ -2370,7 +2366,7 @@ public function disk_size(object disk_path)
 		sequence filesys = ""
 
 		tempfile = "/tmp/eudf" & sprintf("%d", rand(1000)) & ".tmp"
-		system("df "&disk_path&" > "&tempfile, 2)
+		system("df -k "&disk_path&" > "&tempfile, 2)
 
 		temph = open(tempfile, "r")
 		if temph = -1 then
@@ -2565,7 +2561,7 @@ public function temp_file(sequence temp_location = "", sequence temp_prefix = ""
 		if atom(envtmp) then
 			envtmp = getenv("TMP")
 		end if
-		ifdef WIN32 then			
+		ifdef WINDOWS then			
 			if atom(envtmp) then
 				envtmp = "C:\\temp\\"
 			end if

@@ -13,7 +13,7 @@ To install Euphoria on //Windows//, visit the following URL:
 
 The "Standard" version is a complete Euphoria installation, with
 Interpreter, Binder, Translator. Included are demo programs and
-document ion.
+documentation.
 
 The "Open Watcom" version has the contents of the "Standard" version, 
 plus a bundled compiler. This is a convenient way of producing compiled executables
@@ -67,7 +67,7 @@ Look for an installation package for Apple installations.
 
 === DOS
 
-Only up to Euphoria 3.1 is there DOS support. DOS developers are 
+There is DOS support only up to Euphoria 3.1. DOS developers are 
 invited to contribute their skills.
 
 === Nightly Builds
@@ -85,6 +85,7 @@ Binary files are called //Eubins//, and are automated "Nightly Builds"
 produced from the latest code in the code repository:
 
 :http://openeuphoria.org/eubins/linux/
+!!zzzz should windows/osx builds be included??
 
 A complete installation requires merging the original source files,
 and the contents of the eubins download. Then, the path to euphoria/bin

@@ -356,7 +356,7 @@ procedure patch_forward_call( token tok, integer ref )
 	
 	if code_sub = TopLevelSub then
 		for i = pre_refs + 1 to length( toplevel_references[fr[FR_FILE]] ) do
-			forward_references[toplevel_references[fr[FR_FILE]]][FR_PC] += pc - 1
+			forward_references[toplevel_references[fr[FR_FILE]][i]][FR_PC] += pc - 1
 		end for
 	else
 		for i = pre_refs + 1 to length( active_references[fr[FR_FILE]][ar_sp] ) do
@@ -541,6 +541,11 @@ procedure patch_forward_type_check( token tok, integer ref )
 	if not var then
 		-- type type was the forward reference
 		var = Code[pc+1]
+	end if
+	
+	if var < 0 then
+		-- not yet...don't know the variable yet
+		return
 	end if
 	
 	-- clear out the old stuff

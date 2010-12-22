@@ -28,7 +28,7 @@ language like Euphoria since you can simply edit the source and rerun the
 program without waiting for a re-compile/re-link.
 @[trace]
 
-==== The with/without trace directive
+==== The with / without trace directive
 
 The interpreter provides you with additional powerful tools for debugging.
 Using ##trace(1)## you can **//trace//** the execution of your program on one

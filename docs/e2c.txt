@@ -104,7 +104,7 @@ e.g.
 euc -keep sanity.ex
 }}}
 
-==== -dll/-so - Shared Library
+==== -dll / -so - Shared Library
 
 To make a shared dynamically loading library, just
 add ##-dll## to the command line. e.g.
@@ -206,7 +206,7 @@ The resulting output can be compiled by the appropriate compiler on the
 specified platform, or, possibly a cross platform compiler, if you have
 one configured.
 
-==== -makefile/-makefile-partial - Using makefiles
+==== -makefile / -makefile-partial - Using makefiles
 
 You can optionally have the translator create a makefile that you can use
 to build your program instead of building directly.  Using a makefile like

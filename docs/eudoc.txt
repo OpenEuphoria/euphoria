@@ -57,26 +57,24 @@ write your documentation here...
  
 === Source documentation 
  
-"Source" documentation starts with the //(// {{{ --** }}} //)// tag. 
+"Source" documentation starts with the //(// {{{--**}}} //)// tag. 
 Locate them before a routine or identifier that you wish to be described
 in your documentation. The ##eudoc## program will extract the 
 "signature" of a routine and combines it with the comments that you 
 write after this tag. 
 
-* Starting with the source-code file **favorite.ex**: 
+Starting with the source-code file ##favorite.ex##:
 
 <eucode>
-
 --**
 -- this is my favorite routine
 
 public procedure hello( sequence name )
    printf(1, "Hello %s!", {name} )
 end procedure
-	
 </eucode>
 
-* Executing **## eui eudoc favorite.ex -o foo.txt##** produces:
+Executing ##eui eudoc -o foo.txt favorite.ex## produces:
 
 {{{
 %%disallow={camelcase}
@@ -93,10 +91,8 @@ public procedure hello(sequence name)
   This is my favorite routine.
 }}}
 
-* Process with **## eui creolehtml foo.txt ##**:
+Process with ##eui creole foo.txt##:
 
-
-\\  ** hello **
 <eucode>
 include favorite.ex
 public procedure hello(sequence name)
@@ -104,7 +100,7 @@ public procedure hello(sequence name)
 
   This is my favorite routine.
 
-* If you examine the source-code included with Euphoria you will realize
+If you examine the source-code included with Euphoria you will realize
 how these steps were used to create the documentation you are reading 
 now. 
 
@@ -120,8 +116,6 @@ produce this documentation.
 Creole is a text markup language used in wikis, such as the 
 [[http://openeuphoria.org/wiki/view/home.wc|Euphoria Wiki]], 
 and for documenting source-code. 
-
-
 
 * Common Creole tags are:
 
@@ -150,9 +144,8 @@ end for
 
 * The previous tags will produce html that looks like...
 
-
-\\ ** Title **
-\\ ** Section **
+** Title ** \\
+** Section ** 
 
 //italic// **bold** ##fixed##
 

@@ -16,7 +16,7 @@ ifdef LINUX then
 elsifdef OSX then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.dylib"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_func(dll:open_dll("libc.dylib"), "time", {dll:C_POINTER}, dll:C_INT)
-elsifdef WIN32 then
+elsifdef WINDOWS then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("msvcrt.dll"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_proc(dll:open_dll("kernel32.dll"), "GetSystemTimeAsFileTime", {dll:C_POINTER})
 elsifdef UNIX then
@@ -27,7 +27,7 @@ end ifdef
 enum TM_SEC, TM_MIN, TM_HOUR, TM_MDAY, TM_MON, TM_YEAR --, TM_WDAY, TM_YDAY, TM_ISDST
 
 function time()
-	ifdef WIN32 then
+	ifdef WINDOWS then
 		atom ptra, valhi, vallow, deltahi, deltalow
 		deltahi = 27111902
 		deltalow = 3577643008

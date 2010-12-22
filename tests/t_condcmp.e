@@ -37,8 +37,8 @@ ifdef LINUX then
 	test_equal("LINUX test", 3, platform())
 end ifdef
 
-ifdef WIN32 then
-	test_equal("WIN32 test", 2, platform())
+ifdef WINDOWS then
+	test_equal("WINDOWS test", 2, platform())
 end ifdef
 
 ifdef EU4_0_0 then

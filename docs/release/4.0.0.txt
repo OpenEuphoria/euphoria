@@ -8,6 +8,20 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 
 === Deprecation
 
+* with/without warning lists have changed from ##( name1, name2 )## to
+##{ name1, name2 }## as to be more like Euphoria sequences. In the
+future the old ##( name1, name2 )## syntax will be removed.
+
+
+=== Possible Breaking Changes
+
+* ##std/sequence.e##/##[[:series]]## has changed the functionality of the last parameter.
+  Previously ##series(1,1,5)## would produce ##{1,2,3,4,5,6}##. i.e. 5 was the number of
+  items to add onto the starting 1. The last parameter has been changed to be the number
+  of items in the resulting list. Thus, ##series(1,1,5)## will now produce
+  ##{1,2,3,4,5}##, i.e. a sequence of 5 items. ##series(1,1,0)## before would produce
+  ##{1}##. Now it produces ##{}##, i.e. an empty series.
+
 === Removed
 
 * ##creolehtml## is no longer shipped with Euphoria. It has been enhanced to support
@@ -29,13 +43,21 @@ For a concise list of what has changed from 3.1.1 to 4.0.0 final, please see
 * [[ticket:533]], Debian package copyright was updated in accordance to Debian policy.
 * [[ticket:540]], ##[[:get_key]]## was described in both ##io.e## and ##console.e##, removed
                   from ##io.e##
-* [[ticket:545]], ##[[:canonize_path]]## did not properly insert the drive letter on Windows
+* [[ticket:545]], ##[[:canonical_path]]## did not properly insert the drive letter on Windows
                   when the path began with a forward slash ##/##.
 * [[ticket:548]], Fixed error in emitted C in some translated ##for## loops.
 * [[ticket:550]], Examples for regex ##[[:matches]]## and ##[[:all_matches]]## now properly
                   either supply or use the default ##from## parameter.
+* [[ticket:558]] Fixed crash caused by undeclared variable assignment by properly subscripting
+		  [i] when looking up forward references in the toplevel subroutine
 * Fix backend and interpreter to avoid "press any key" prompts when
 running as a console from a shared console window.
+* Ensure forward type checks aren't resolved until after the variable being type checked has
+been resolved.
+* [[ticket:555]] Fixed parsing of constants when first statement is a constant assigned by a
+                 built-in function.
+* [[ticket:556]] Fixed type inference for return value from [[:rand]] in translator.
+* [[ticket:557]] euphoria.h had gotten out of sync when some OPs were removed.
 
 === Enhancements/Changes
 
@@ -50,3 +72,5 @@ running as a console from a shared console window.
 * Bundled utility ##bench.ex## now outputs timing information to STDERR
   by default. ##--stdout## can be supplied if output to STDOUT is desired. It now also
   displays the min and max iteration times in addition to the already average and total.
+* ##demo/net/pastey.ex## demo has been updated to function with
+  OpenEuphoria's pastey service.

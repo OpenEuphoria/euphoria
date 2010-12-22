@@ -492,7 +492,7 @@ procedure OutputIL()
 			end for
 
 			be = -1
-			ifdef WIN32 then
+			ifdef WINDOWS then
 				if con then
 					backend_name = "eub.exe"
 				else
@@ -543,7 +543,7 @@ procedure OutputIL()
 			end while
 		end ifdef
 
-		ifdef WIN32 then
+		ifdef WINDOWS then
 			last6 = repeat(' ', 6)
 			while 1 do
 				c = getc(be)
@@ -626,7 +626,7 @@ procedure OutputIL()
 
 		if shroud_only then
 			sequence filename = "eub"
-			ifdef WIN32 then
+			ifdef WINDOWS then
 				if con then
 					filename &= ".exe"
 				else

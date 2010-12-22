@@ -22,13 +22,11 @@ constant version_info = machine_func(M_EU_INFO, {})
 -- Get the platform name
 --
 -- Returns:
---   A **sequence**, containing the platform name, i.e. Windows, Linux, DOS, FreeBSD or OS X.
+--   A **sequence**, containing the platform name, i.e. Windows, Linux, FreeBSD or OS X.
 --
 
 public function platform_name()
-ifdef DOS32 then
-	return "DOS"
-elsifdef WIN32 then
+ifdef WINDOWS then
 	return "Windows"
 elsifdef LINUX then
 	return "Linux"

@@ -357,7 +357,7 @@ Euphoria includes two more demos of pre-processors. They are ETML and
 literate. Please explore ##demo/preproc## for these examples and
 explanations.
 
-===== Other examples of pre-processors include:
+===== Other examples of pre-processors include
 
 * eSQL - Allows you to include a ##.sql## file directly. It parses
 ##CREATE TABLE## and ##CREATE INDEX## statements building common methods

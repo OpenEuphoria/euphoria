@@ -706,7 +706,7 @@ end procedure
 -- Comments:
 --  Euphoria will create a console text window for your program the first time that your
 --  program prints something to the screen, reads something from the keyboard, or in some
---  way needs a console. On WIN32 this window will automatically disappear when your program
+--  way needs a console. On WINDOWS this window will automatically disappear when your program
 --  terminates, but you can call free_console() to make it disappear sooner. On Linux or FreeBSD, 
 --  the text mode console is always there, but an xterm window will disappear after Euphoria 
 --  issues a "Press Enter" prompt at the end of execution.
@@ -725,7 +725,7 @@ end procedure
 --  When you use the trace facility, or when your program has an error, Euphoria will
 --  automatically create a console window to display trace information, error messages etc.
 --  
---  There's a WIN32 API routine, FreeConsole() that does something similar to
+--  There's a WINDOWS API routine, FreeConsole() that does something similar to
 --  free_console(). You should use ##free_console##() instead, because it lets the interpreter know
 --  that there is no longer a console to write to or read from.
 --

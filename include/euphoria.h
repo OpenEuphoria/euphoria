@@ -158,7 +158,7 @@ typedef struct s1 *s1_ptr;
 #define COS       81
 #define TAN       82
 #define FLOOR     83
-#define XOR      154
+#define XOR      152
 
 struct replace_block {
 	object_ptr copy_to;

@@ -517,14 +517,14 @@ procedure local_help(sequence opts, object add_help_rid = -1, sequence cmds = co
 
 	if extras_mandatory != 0 then
 		if length(opts[extras_opt][DESCRIPTION]) > 0 then
-			puts(1, opts[extras_opt][DESCRIPTION])
+			puts(1, "\n" & opts[extras_opt][DESCRIPTION])
 			puts(1, '\n')
 		else
 			puts(1, "One or more additional arguments are also required\n")
 		end if
 	elsif extras_opt > 0 then
 		if length(opts[extras_opt][DESCRIPTION]) > 0 then
-			puts(1, opts[extras_opt][DESCRIPTION])
+			puts(1, "\n" & opts[extras_opt][DESCRIPTION])
 			puts(1, '\n')
 		else
 			puts(1, "One or more additional arguments can be supplied.\n")

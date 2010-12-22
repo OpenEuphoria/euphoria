@@ -53,7 +53,7 @@ include dll.e
 free_console()
 </eucode>
 
-==== CGI Program Hangs/No Output
+==== CGI Program Hangs / No Output
 
 //My Euphoria CGI program hangs or has no output//
 
@@ -76,7 +76,7 @@ must also set the execute permissions on your program correctly, and ##ex.err##
 and ctrace.out must be writable by the server process or they won't be updated.
 
 
-==== Read/Write Ports?
+==== Read / Write Ports?
 
 //How do I read/write ports?//
 

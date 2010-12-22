@@ -616,7 +616,7 @@ end function
 -- Parameters:
 --		# ##start## : the initial value from which to start
 --		# ##increment## : the value to recursively add to ##start## to get new elements
---		# ##count## :  an integer, the number of additions to perform. The default is 1.
+--		# ##count## :  an integer, the number of items in the returned sequence. The default is 2.
 --		# ##operation## :  an integer, the type of operation used to build the series.
 --                         Can be either '+' for a linear series or '*' for a geometric series.
 --                         The default is '+'.
@@ -637,19 +637,19 @@ end function
 -- Example 1:
 -- <eucode>
 -- s = series( 1, 4, 5)
--- -- s is {1, 5, 9, 13, 17, 21}
+-- -- s is {1, 5, 9, 13, 17}
 -- s = series( 1, 2, 6, '*')
--- -- s is {1, 2, 4, 8, 16, 32, 64}
+-- -- s is {1, 2, 4, 8, 16, 32}
 -- s = series({1,2,3}, 4, 2)
--- -- s is {{1,2,3}, {5,6,7}, {9,10,11}}
+-- -- s is {{1,2,3}, {5,6,7}}
 -- s = series({1,2,3}, {4,-1,10}, 2)
--- -- s is {{1,2,3}, {5,1,13}, {9,0,23}}
+-- -- s is {{1,2,3}, {5,1,13}}
 -- </eucode>
 --
 -- See Also:
 --     [[:repeat_pattern]]
 
-public function series(object start, object increment, integer count = 1, integer op = '+')
+public function series(object start, object increment, integer count = 2, integer op = '+')
 	sequence result
 
 	if count < 0 then
@@ -660,19 +660,23 @@ public function series(object start, object increment, integer count = 1, intege
 		return 0
 	end if
 	
-	result = repeat(0, count + 1)
+	if count = 0 then
+		return {}
+	end if
+	
+	result = repeat(0, count )
 	result[1] = start
 	switch op do
 		case '+' then
-			for i = 1 to count do
+			for i = 2 to count  do
 				start += increment
-				result[i+1] = start
+				result[i] = start
 			end for
 			
 		case '*' then
-			for i = 1 to count do
+			for i = 2 to count do
 				start *= increment
-				result[i+1] = start
+				result[i] = start
 			end for
 			
 		case else

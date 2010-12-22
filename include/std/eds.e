@@ -1234,7 +1234,7 @@ end function
 --
 -- Comments:
 --   ##DB_LOCK_SHARED## is only supported on Unix platforms. It allows you to read the database, 
---   but not write anything to it. If you request ##DB_LOCK_SHARED## on //WIN32// it will be 
+--   but not write anything to it. If you request ##DB_LOCK_SHARED## on //WINDOWS// it will be 
 --   treated as if you had asked for DB_LOCK_EXCLUSIVE.
 --
 --   If the lock fails, your program should wait a few seconds and try again.

@@ -8,7 +8,7 @@ one day be officially sanctioned and thus fully supported, but that is
 not certain. And even if an unsupported feature does make it way into
 the language, it may not be exactly what is documented in this section.
 
-So if you use **any** of these unsupported featues then be aware that your code
+So if you use **any** of these unsupported features then be aware that your code
 might break in future releases.
 
 === UTF Encoded String Literals

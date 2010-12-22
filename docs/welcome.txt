@@ -6,36 +6,36 @@ Welcome to the Euphoria programming language!
 Euphoria is a programming language with the following advantages over
 conventional languages:
 
-* Euphoric
-** A remarkably simple, flexible, powerful language definition that is easy to
+; Euphoric
+: A remarkably simple, flexible, powerful language definition that is easy to
    learn and use.
-* Dynamic
-** Variables grow or shrink without the programmer having to worry about
+; Dynamic
+: Variables grow or shrink without the programmer having to worry about
    allocating and freeing chunks of memory.  Objects of any size can be assigned
    to an element of a Euphoria sequence (array).
-* Fast
-** A high-performance, state-of-the-art interpreter that's significantly faster
+; Fast
+: A high-performance, state-of-the-art interpreter that's significantly faster
    than  conventional interpreters such as Perl and Python.
-* Compiles
-** An optimizing [[:Euphoria To C Translator]], that can boost your speed
+; Compiles
+: An optimizing [[:Euphoria To C Translator]], that can boost your speed
 even further, often by a factor of 2x to 5x versus the already-fast
 interpreter.
-* Safe
-** Extensive run-time checking for: out-of-bounds
+; Safe
+: Extensive run-time checking for: out-of-bounds
 subscripts, uninitialized variables, bad parameter values for library
 routines, illegal value assigned to a variable and many more. There are
 no mysterious machine exceptions{{{--}}}you will always get a full English
 description of any problem that occurs with  your program at run-time,
 along with a call-stack trace-back and a dump of all of your variable
 values. Programs can be debugged quickly, easily and  more thoroughly.
-* High level
-** Features of the underlying hardware are completely
+; High level
+: Features of the underlying hardware are completely
 hidden. Programs are not aware of word-lengths, underlying bit-level
 representation of values, byte-order etc.
-* Debugger
-** A full-screen source debugger and an execution profiler are included.
-* Editor
-** A full-screen, multi-file editor is also included.
+; Debugger
+: A full-screen source debugger and an execution profiler are included.
+; Editor
+: A full-screen, multi-file editor is also included.
 On a color monitor, the editor displays
 Euphoria programs in multiple colors, to highlight comments, reserved
 words, built-in functions, strings, and level of nesting of brackets.
@@ -43,19 +43,20 @@ It optionally performs auto-completion of statements, saving you typing
 effort and reducing syntax errors. This editor is written in Euphoria,
 and the source code is provided to you without restrictions. You are
 free to modify it, add features, and redistribute it as you wish.
-* Multi-platform
-** Euphoria programs run under Linux, FreeBSD and Windows.
-* Stand-alone
-** You can make a single, stand-alone executable
+; Multi-platform
+: Euphoria programs run under Windows, Linux, OS/X, FreeBSD, NetBSD, OpenBSD
+and can be easily ported to any platform supporting GCC.
+; Stand-alone
+: You can make a single, stand-alone executable
 file from your program.
-* Generic
-** Euphoria routines are naturally
+; Generic
+: Euphoria routines are naturally
 generic. The example program below shows a  single routine that will
 sort any type of data{{{--}}}integers, floating-point numbers, strings etc.
 Euphoria is not an "object-oriented" language, yet it achieves many of
 the benefits of these languages in a much simpler way.
-* Free
-** Euphoria is completely free and open source.
+; Free
+: Euphoria is completely free and open source.
 
 Euphoria has come a long way since v1.0 was released in July 1993 by **R**apid
 **D**eployment **S**oftware (//RDS//).
@@ -70,7 +71,7 @@ There are now enthusiastic users around the world.
 Euphoria is a very high-level programming language. It is unique among a
 crowd of conventional languages.
 
-=== Euphoria delivers the expected features of a modern language:
+=== Euphoria delivers the expected features of a modern language
 
 * Open source
 * Free for personal and commercial use
@@ -86,7 +87,7 @@ crowd of conventional languages.
 
 === Euphoria is unique
 
-What makes Euphoria unique is a design that uses just two basic data-types~--
+What makes Euphoria unique is a design that uses just two basic data-types {{{--}}}
  //atom// and //sequence//, and two 'helper' data-types {{{--}}} //object// and
  //integer//.
 
@@ -121,13 +122,13 @@ platform you are using
 * Euphoria has a coherent design {{{--}}} Euphoria programmers enjoy programming
 in Euphoria
 
-=== As a first programming language:
+=== As a first programming language
 
 * Easy to learn, easy to program
 * No limits as to what you can program
 * Euphoria programming skills will enhance learning other languages
 
-=== As an extension to languages you already know:
+=== As an extension to languages you already know
 
 * A fast, flexible, and powerful language
 * Euphoria, the language you will prefer to program in
@@ -162,7 +163,7 @@ Euphoria programs that you write.
 === Requirements
 
 To run the //Windows// version of Euphoria, you need any Windows 95 or any later
-32-bit version of Windows.  It runs fine on XP and Vista.
+32-bit version of Windows.  It runs fine on XP, Vista, and Windows 7.
 
 To run the //Unix// version of Euphoria you need a supported //Unix// platform
 (Linux, FreeBSD, NetBSD or OpenBSD) and GCC v4.x. Binary packages are available

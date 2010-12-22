@@ -734,10 +734,10 @@ end type
 --
 -- Close a file or device when done with it, flushing out any still-buffered characters prior.
 --
--- //WIN32// and //Unix//: Long filenames are fully supported for reading and writing and
+-- //WINDOWS// and //Unix//: Long filenames are fully supported for reading and writing and
 -- creating.
 --
--- //WIN32//: Be careful not to use the special device names in a file name, even if you add an
+-- //WINDOWS//: Be careful not to use the special device names in a file name, even if you add an
 -- extension. e.g. ##CON.TXT##, ##CON.DAT##, ##CON.JPG## etc. all refer to the ##CON## device,
 -- **not a file**.
 --
@@ -922,7 +922,7 @@ end procedure
 -- or writing it.
 --
 -- Under //Unix//, there are two types of locks that
--- you can request using the ##t## parameter. (Under //WIN32// the
+-- you can request using the ##t## parameter. (Under //WINDOWS// the
 -- parameter ##t## is ignored, but should be an integer.)
 -- Ask for a **shared** lock when you intend to read a file, and you want to
 -- temporarily block other processes from writing it. Ask for an
@@ -938,7 +938,7 @@ end procedure
 --     LOCK_EXCLUSIVE
 -- </eucode>
 --
--- On ///WIN32// you can lock a specified portion of a file using the ##r##  parameter.
+-- On ///WINDOWS// you can lock a specified portion of a file using the ##r##  parameter.
 -- ##r## is a sequence of the form: ##{first_byte, last_byte}##. It indicates the first byte and
 -- last byte in the file,  that the lock applies to. Specify the empty sequence ##{}##,
 -- if you want to lock the whole file, or don't specify it at all, as this is the default. In the current release for //Unix//, locks
