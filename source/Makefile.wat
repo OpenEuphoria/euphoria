@@ -157,37 +157,37 @@ EU_BACKEND_OBJECTS = &
 !ifneq INT_CODES 1
 	$(BUILDDIR)\$(OBJDIR)\back\be_magic.obj &
 !endif	
-	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_main.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_coverage.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_execute.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_coverage.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_rterror.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_main.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_rterror.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_symtab.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(PCRE_OBJECTS)
 
 EU_LIB_OBJECTS = &
-	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_coverage.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_alloc.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_callc.obj &
-	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_coverage.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_decompress.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_inline.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_machine.obj &
 	$(BUILDDIR)\$(OBJDIR)\back\be_pcre.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_runtime.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_socket.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_syncolor.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_task.obj &
+	$(BUILDDIR)\$(OBJDIR)\back\be_w.obj &
 	$(PCRE_OBJECTS)
 
 EU_BACKEND_RUNNER_FILES = &
