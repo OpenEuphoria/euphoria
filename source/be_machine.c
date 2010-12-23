@@ -2407,23 +2407,23 @@ unsigned internal_general_call_back(
 	num_args = rt00[cb_routine].num_args;
 	addr = rt00[cb_routine].addr;
 	if (num_args >= 1) {
-	  call_back_arg1->obj = make_atom32((unsigned)arg1);
+	  call_back_arg1->obj = ((unsigned)arg1);
 	  if (num_args >= 2) {
-		call_back_arg2->obj = make_atom32((unsigned)arg2);
+		call_back_arg2->obj = ((unsigned)arg2);
 		if (num_args >= 3) {
-		  call_back_arg3->obj = make_atom32((unsigned)arg3);
+		  call_back_arg3->obj = ((unsigned)arg3);
 		  if (num_args >= 4) {
-			call_back_arg4->obj = make_atom32((unsigned)arg4);
+			call_back_arg4->obj = ((unsigned)arg4);
 			if (num_args >= 5) {
-			  call_back_arg5->obj = make_atom32((unsigned)arg5);
+			  call_back_arg5->obj = ((unsigned)arg5);
 			  if (num_args >= 6) {
-				call_back_arg6->obj = make_atom32((unsigned)arg6);
+				call_back_arg6->obj = ((unsigned)arg6);
 				if (num_args >= 7) {
-				  call_back_arg7->obj = make_atom32((unsigned)arg7);
+				  call_back_arg7->obj = ((unsigned)arg7);
 				  if (num_args >= 8) {
-					call_back_arg8->obj = make_atom32((unsigned)arg8);
+					call_back_arg8->obj = ((unsigned)arg8);
 					if (num_args >= 9) {
-					  call_back_arg9->obj = make_atom32((unsigned)arg9);
+					  call_back_arg9->obj = ((unsigned)arg9);
 					}
 				  }
 				}
