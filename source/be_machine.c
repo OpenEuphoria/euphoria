@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <be_ver.h>
+
 #include "global.h"
 #include "alldefs.h"
 #include "execute.h"
@@ -33,7 +35,6 @@
 #include "be_alloc.h"
 #include "be_execute.h"
 #include "be_socket.h"
-#include "be_ver.h"
 #include "be_coverage.h"
 #include "be_syncolor.h"
 
