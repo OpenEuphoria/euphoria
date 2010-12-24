@@ -30,4 +30,4 @@ if routine_id("DisplayColorLine") = -1 then
 end if
 
 constant M_SET_SYNCOLOR = 101
--- machine_proc(M_SET_SYNCOLOR, {routine_id("DisplayColorLine")})
+machine_proc(M_SET_SYNCOLOR, {routine_id("DisplayColorLine")})
