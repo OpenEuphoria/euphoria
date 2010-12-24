@@ -29,5 +29,5 @@ if routine_id("DisplayColorLine") = -1 then
 	puts(2, "error: missing FrontEnd syncolor routines\n")
 end if
 
-constant M_SET_SYNCOLOR = 21
+constant M_SET_SYNCOLOR = 101
 machine_proc(M_SET_SYNCOLOR, {routine_id("DisplayColorLine")})

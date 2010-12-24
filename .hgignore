@@ -1,4 +1,5 @@
 ~
+config.jam
 ver.dat
 ex.err
 bin/bench
