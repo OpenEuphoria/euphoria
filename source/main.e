@@ -47,9 +47,16 @@ function GetSourceName()
 	integer fh
 	boolean has_extension = FALSE
 
-	if length(src_name) = 0 then
+	if length(src_name) = 0 and not repl then
 		show_banner()
 		return -2 -- No source file
+	elsif length(src_name) = 0 and repl then
+		known_files = append(known_files, "")
+		known_files_hash &= hash(known_files[$], stdhash:HSIEH32)
+		real_name = ""
+		finished_files &= 0
+		file_include_depend = append( file_include_depend, { length( known_files ) } )
+		return repl_file
 	end if
 
 	ifdef WINDOWS then
@@ -206,6 +213,13 @@ procedure main()
 		ifdef not STDDEBUG then
 			BackEnd(0) -- execute IL using Euphoria-coded back-end
 		end ifdef
+		while repl do
+			src_file = repl_file
+			CurrentSub = TopLevelSub
+			resolve_unincluded_globals(0)
+			parser()
+			BackEnd(0)
+		end while
 	end if
 	
 	Cleanup(0) -- does warnings

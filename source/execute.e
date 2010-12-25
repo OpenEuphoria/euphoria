@@ -118,17 +118,17 @@ SymTab[delete_code_routine][S_CODE] = delete_code
 integer TraceOn
 TraceOn = FALSE
 
-integer pc, a, b, c, d, target, len, keep_running
+integer pc=-1, a, b, c, d, target, len, keep_running
 integer lhs_seq_index -- index of lhs sequence
 sequence lhs_subs -- first n-1 LHS subscripts before final subscript or slice
-sequence val
+sequence val=""
 
 constant TASK_NEVER = 1e300
 constant TASK_ID_MAX = 9e15 -- wrap to 0 after this (and avoid in-use ones)
 boolean id_wrap = FALSE     -- have task id's wrapped around? (very rare)
 
-integer current_task  -- internal number of currently-executing task
-sequence call_stack   -- active subroutine call stack
+integer current_task=-1  -- internal number of currently-executing task
+sequence call_stack=""   -- active subroutine call stack
 -- At each subroutine call we push two items:
 -- 1. the return pc value
 -- 2. the current subroutine index
@@ -4383,8 +4383,9 @@ procedure InitBackEnd()
 	sequence name
 
 	-- set up val
-	val = repeat(0, length(SymTab))
-	for i = 1 to length(SymTab) do
+	integer len = length(val)
+	val = val & repeat(0, length(SymTab)-length(val))
+	for i = len + 1 to length(SymTab) do
 		val[i] = SymTab[i][S_OBJ] -- might be NOVALUE
 		SymTab[i][S_OBJ] = 0
 	end for
@@ -4398,11 +4399,20 @@ mode:set_init_backend( routine_id("fake_init") )
 export procedure Execute(symtab_index proc, integer start_index)
 -- top level executor
 	InitBackEnd()
+	if current_task = -1 then
 	current_task = 1
+	end if
+	if not length(call_stack) then
 	call_stack = {proc}
+	end if
+	if pc = -1 then
 	pc = start_index
+	end if
 	Code = SymTab[proc][S_CODE]
 	do_exec()
+	if repl then
+		reset_repl_line_read()
+	end if
 end procedure
 
 Execute_id = routine_id("Execute")

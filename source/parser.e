@@ -4740,9 +4740,11 @@ export procedure parser()
 	resolve_unincluded_globals( 1 )
 	Resolve_forward_references( 1 )
 	inline_deferred_calls()
+	if not repl then
 	End_block( PROC )
 	Code = {}
 	LineTable = {}
+	end if
 end procedure
 
 export procedure nested_parser()

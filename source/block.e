@@ -44,8 +44,8 @@ export enum
 sequence block_stack = { repeat( 0, BLOCK_SIZE - 1 ) } -- track nested blocks
 block_stack[1][BLOCK_VARS] = {}
 
-symtab_index 
-	current_block = 0
+export symtab_index 
+	current_block = 0, top_level_block = -1
 
 function block_type_name( integer opcode )
 	switch opcode do

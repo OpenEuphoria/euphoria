@@ -898,7 +898,7 @@ export procedure Resolve_forward_references( integer report_errors = 0 )
 		if length(msg) > 0 then
 			CompileErr( 74, {msg} )
 		end if
-	elsif report_errors then
+	elsif report_errors and not repl then
 		-- free up some space
 		forward_references  = {}
 		active_references   = {}

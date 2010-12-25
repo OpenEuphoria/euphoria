@@ -28,6 +28,7 @@ include error.e
 include keylist.e
 include preproc.e
 include coverage.e
+include block.e
 
 constant INCLUDE_LIMIT = 30   -- maximum depth of nested includes
 constant MAX_FILE = 256       -- maximum number of source files
@@ -338,6 +339,10 @@ export procedure set_dont_read( integer read )
 	dont_read = read
 end procedure
 
+integer repl_line_was_read = 0
+export procedure reset_repl_line_read()
+	repl_line_was_read = 0
+end procedure
 export procedure read_line()
 -- read next line of source
 	integer n
@@ -346,6 +351,22 @@ export procedure read_line()
 
 	if dont_read then
 		ThisLine = -1
+	elsif repl and src_file = repl_file then
+		--if repl_line_was_read and CurrentSub = TopLevelSub then
+		--if repl_line_was_read and current_block = top_level_block then
+		if repl_line_was_read and current_block = top_level_block then
+			if repl_line_was_read > 1 then
+				if not match("end", ThisLine) then
+					goto "lol"
+				end if
+			end if
+			ThisLine = -1
+		else
+			label "lol"
+			puts(1, "Enter line:\n")
+			repl_line_was_read += 1
+			ThisLine = gets(0)
+		end if
 	elsif src_file < 0 then
 		ThisLine = -1
 	else
@@ -353,7 +374,7 @@ export procedure read_line()
 	end if
 	if atom(ThisLine) then
 		ThisLine = {END_OF_FILE_CHAR}
-		if src_file >= 0 then
+		if src_file >= 0 and (src_file != 5555 or not repl) then
 			close(src_file)
 		end if
 		src_file = -1
@@ -2163,6 +2184,9 @@ end ifdef
 
 -- start parsing the main file
 export procedure main_file()
+	if repl and top_level_block = -1 then
+		top_level_block = current_block
+	end if
 	ifdef STDDEBUG then
 		all_include()
 		IncludePush()

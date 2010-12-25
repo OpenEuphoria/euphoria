@@ -2,6 +2,11 @@
 --
 -- Global declarations
 
+public integer repl = 0
+-- hack, this just happens to be larger than the largest possible
+-- open file handle that eu:open() can return
+public constant repl_file = 5555
+
 ifdef ETYPE_CHECK then
 	with type_check
 elsedef

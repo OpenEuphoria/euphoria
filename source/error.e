@@ -187,7 +187,7 @@ export procedure Cleanup(integer status)
 
 	if object(src_file) = 0 then
 		src_file = -1
-	elsif src_file >= 0 then
+	elsif src_file >= 0 and (src_file != repl_file or not repl) then
 		close(src_file)
 		src_file = -1
 	end if
