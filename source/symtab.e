@@ -1185,7 +1185,10 @@ export procedure HideLocals()
 	while s do
 		if SymTab[s][S_SCOPE] = SC_LOCAL and
 		   SymTab[s][S_FILE_NO] = current_file_no then
+		   	if current_block = top_level_block and repl then
+			else
 			Hide(s)
+			end if
 			if SymTab[s][S_TOKEN] = VARIABLE then
 				LintCheck(s)
 			end if
