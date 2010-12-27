@@ -25,6 +25,7 @@ extern int sample_size;
 
 extern struct sline *slist;
 extern struct IL fe;
+extern struct IL backupfe;
 
 extern int gline_number;  /* last global line number in program */
 extern int il_file;       /* we are processing a separate .il file */

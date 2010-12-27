@@ -97,8 +97,8 @@ void InitTask()
 	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
 	tcb[0].impl.translated.task = pthread_self();
-	pthread_mutex_init( &task_mutex, NULL );
-	pthread_cond_init(  &task_condition, NULL );
+	//pthread_mutex_init( &task_mutex, NULL );
+	//pthread_cond_init(  &task_condition, NULL );
 	task_thread = 0;
 #endif
 #else
@@ -1019,10 +1019,10 @@ static void init_task( int tx ){
  * Only allows the current thread to continue if it belongs to the current task.
  */
 void wait_for_task( int task ){
-	pthread_mutex_lock( &task_mutex );
+	/*pthread_mutex_lock( &task_mutex );
 	while( current_task != task ){
 		pthread_cond_wait( &task_condition, &task_mutex );
-	}
+	}*/
 }
 
 /**
@@ -1052,8 +1052,8 @@ static void init_task( int tx ){
 static void run_current_task( int task ){
 	int this_task = current_task;
 	current_task = task;
-	pthread_cond_broadcast( &task_condition );
-	pthread_mutex_unlock( &task_mutex );
+	//pthread_cond_broadcast( &task_condition );
+	//pthread_mutex_unlock( &task_mutex );
 	wait_for_task( this_task );
 }
 #endif
@@ -1068,6 +1068,7 @@ void scheduler(double now)
 	struct tcb *tp;
 	int p;
 
+	return;
 	// first check the real-time tasks
 	stack_top = 0; // so the compiler thinks it's used.
 	

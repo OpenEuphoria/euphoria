@@ -2621,33 +2621,68 @@ void Machine_Handler(int sig_no)
 
 #ifndef ERUNTIME
 extern struct IL fe;
+extern struct IL backendfe;
 
 object start_backend(object x)
-/* called by Euphoria-written front-end to run the back-end
- *
- * x is {symtab, topcode, subcode, names, line_table, miscellaneous }
- */
 {
-	long switch_len, i;
 	s1_ptr x_ptr;
 	char *w;
 
-
+	symtab_ptr st;
+	struct sline * sl;
+	int * misc;
+	char * lit;
+	unsigned char ** includes;
+	object switches;
+	object argv;
+	object baha;
 
 	w = "backend";
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 7)
+	if (IS_ATOM(x) || x_ptr->length != 8)
 		RTFatal("BACKEND requires a sequence of length 7");
 
-	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
-	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
-	fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
-	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
-	fe.switches = x_ptr->base[6];
-	fe.argv = x_ptr->base[7];
+	st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
+	sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
+	misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
+	includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
+	switches = x_ptr->base[6];
+	argv = x_ptr->base[7];
+	baha = x_ptr->base[8];
+
+	start_backend_runner(st, sl, misc, lit, includes, switches, argv, baha, NULL);
+}
+/* called by Euphoria-written front-end to run the back-end
+ *
+ * x is {symtab, topcode, subcode, names, line_table, miscellaneous }
+ */
+object start_backend_runner(
+	symtab_ptr st,
+	struct sline * sl,
+	int * misc,
+	char * lit,
+	unsigned char ** includes,
+	object switches,
+	object argv,
+	object baha,
+	int tpc
+)
+{
+	long switch_len, i;
+	char *w;
+
+	w = "backend";
+
+	fe.st = st;
+	fe.sl = sl;
+	fe.misc = misc;
+	fe.lit = lit;
+	fe.includes = includes;
+	fe.switches = switches;
+	fe.argv = argv;
 
 #if defined(EUNIX) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
@@ -2673,7 +2708,7 @@ object start_backend(object x)
 
 	be_init(); //earlier for DJGPP
 
-	Execute(TopLevelSub->u.subp.code);
+	Execute(TopLevelSub->u.subp.code + tpc);
 
 	return ATOM_1;
 }
