@@ -4,6 +4,7 @@
 -- <<LEVELTOC level=2 depth=4>>
 
 namespace eds
+
 include std/types.e
 include std/convert.e
 include std/datetime.e
@@ -2048,7 +2049,8 @@ end function
 -- </eucode>
 --
 -- See Also:
---		[[:db_delete_record]]
+--   [[:db_replace_data]], [[:db_delete_record]]
+--
 
 public function db_insert(object key, object data, object table_name=current_table_name)
 	sequence key_string, data_string, last_part, remaining
