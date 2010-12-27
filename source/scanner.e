@@ -352,8 +352,6 @@ export procedure read_line()
 	if dont_read then
 		ThisLine = -1
 	elsif repl and src_file = repl_file then
-		--if repl_line_was_read and CurrentSub = TopLevelSub then
-		--if repl_line_was_read and current_block = top_level_block then
 		if repl_line_was_read and current_block = top_level_block then
 			if repl_line_was_read > 1 then
 				if not match("end", ThisLine) then
@@ -374,7 +372,7 @@ export procedure read_line()
 	end if
 	if atom(ThisLine) then
 		ThisLine = {END_OF_FILE_CHAR}
-		if src_file >= 0 and (src_file != 5555 or not repl) then
+		if src_file >= 0 and (src_file != repl_file or not repl) then
 			close(src_file)
 		end if
 		src_file = -1

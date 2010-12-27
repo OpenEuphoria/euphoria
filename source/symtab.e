@@ -307,9 +307,15 @@ export function NewIntSym(integer int_val)
 
 	x = find(int_val, lastintval)
 	if x then
+		if repl then
+			if SymTab[lastintsym[x]][S_OBJ] != int_val then
+				goto "lolol"
+			end if
+		end if
 		return lastintsym[x]  -- saves space, helps Translator reduce code size
 
 	else
+		label "lolol"
 		p = tmp_alloc()
 		SymTab[p][S_MODE] = M_CONSTANT
 		SymTab[p][S_OBJ] = int_val
@@ -1185,7 +1191,10 @@ export procedure HideLocals()
 	while s do
 		if SymTab[s][S_SCOPE] = SC_LOCAL and
 		   SymTab[s][S_FILE_NO] = current_file_no then
+		   	if current_block = top_level_block and repl then
+			else
 			Hide(s)
+			end if
 			if SymTab[s][S_TOKEN] = VARIABLE then
 				LintCheck(s)
 			end if

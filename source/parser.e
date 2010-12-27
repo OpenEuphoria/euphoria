@@ -4207,7 +4207,12 @@ export procedure InitGlobals()
 
 	OpDefines &= GetPlatformDefines()
 
-	OpInline = DEFAULT_INLINE
+	if repl then
+		-- disable inlining in REPL mode
+		OpInline = 0
+	else
+		OpInline = DEFAULT_INLINE
+	end if
 	OpIndirectInclude = 1
 end procedure
 
@@ -4408,7 +4413,8 @@ procedure SetWith(integer on_off)
 		end if
 
 	elsif equal(option, "inline") then
-		if on_off then
+		-- disable inlining in REPL mode
+		if on_off and not repl then
 			token tok = next_token()
 			if tok[T_ID] = ATOM then
 				OpInline = floor( SymTab[tok[T_SYM]][S_OBJ] )
