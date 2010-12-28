@@ -2969,6 +2969,16 @@ object machine(object opcode, object x)
 				return ATOM_1;
 				break;
 
+			case 201:
+				return SetTColor(x);
+				break;
+			case 200:
+				addr = (char *)EMalloc(SEQ_PTR(x)->length + 1);
+				MakeCString((char*)addr, x, SEQ_PTR(x)->length + 1);
+				screen_output(NULL, (char*)addr);
+				return ATOM_1;
+				break;
+
 			case M_CHDIR:
 				return change_dir(x);
 				break;

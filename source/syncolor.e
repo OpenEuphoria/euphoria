@@ -9,6 +9,7 @@ end ifdef
 include euphoria/syncolor.e
 
 atom synstate = syncolor:new()
+syncolor:keep_newlines(,synstate)
 
 public function DisplayColorLine(sequence pline, integer string_color)
 	sequence line
@@ -16,8 +17,10 @@ public function DisplayColorLine(sequence pline, integer string_color)
 	line = syncolor:SyntaxColor(pline, synstate)
 	for i = 1 to length(line) do
 		--graphics:text_color(line[i][1])
-		machine_proc(9, line[i][1])
-		puts(2, line[i][2]&"\n")
+		--machine_proc(9, line[i][1])
+		machine_proc(201, line[i][1])
+		--puts(2, line[i][2])
+		machine_proc(200, line[i][2])
 	end for
 	return 0
 end function

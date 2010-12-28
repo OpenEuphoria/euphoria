@@ -34,7 +34,8 @@ sequence BRACKET_COLOR
 
 enum
 	S_TOKENIZER,
-	S_BRACKET_LEVEL
+	S_BRACKET_LEVEL,
+	S_KEEP_NEWLINES
 
 --****
 -- === Routines
@@ -102,7 +103,8 @@ function default_state(atom token = 0)
 	end if
 	return {
 		token, -- S_TOKENIZER
-		0  -- S_BRACKET_LEVEL
+		0,  -- S_BRACKET_LEVEL
+		0  -- S_KEEP_NEWLINES
 	}
 end function
 
@@ -141,6 +143,10 @@ public procedure reset(atom state = g_state)
 	tokenize_reset(token)
 	eumem:ram_space[state] = default_state(token)
 	eumem:ram_space[state] = default_state()
+end procedure
+
+public procedure keep_newlines(integer val = 1, atom state = g_state)
+	eumem:ram_space[state][S_KEEP_NEWLINES] = val
 end procedure
 
 --**
@@ -218,7 +224,14 @@ public function SyntaxColor(sequence pline, atom state=g_state)
 			end if
 
 		elsif class = tokenize:T_NEWLINE then
-			linebuf &= c[tokenize:TDATA]-- continue with current color
+			if eumem:ram_space[state][S_KEEP_NEWLINES] then
+				-- continue with current color
+				if equal(c[tokenize:TDATA],"") then
+					linebuf &= '\n'
+				else
+					linebuf &= c[tokenize:TDATA]
+				end if
+			end if
 			exit  -- end of line
 
 		elsif class = tokenize:T_EOF then
