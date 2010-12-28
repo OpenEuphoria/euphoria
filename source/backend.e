@@ -315,8 +315,8 @@ procedure BackEnd(integer il_file)
 	poke4(ms+28, length(known_files)) -- stored in 0th position
 	
 	fn = allocate(string_size)
-	mlengths[8] = nm
-	mlengths[9] = 1+string_size
+	mlengths[8] = fn
+	mlengths[9] = string_size
 	
 	for i = 1 to length(other_strings) do
 		poke4(ms+32+(i-1)*4, fn)

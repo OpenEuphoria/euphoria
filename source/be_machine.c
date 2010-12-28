@@ -2653,7 +2653,7 @@ object start_backend(object x)
 	argv = x_ptr->base[7];
 	baha = x_ptr->base[8];
 
-	start_backend_runner(st, sl, misc, lit, includes, switches, argv, baha, NULL);
+	return start_backend_runner(st, sl, misc, lit, includes, switches, argv, baha, NULL);
 }
 /* called by Euphoria-written front-end to run the back-end
  *
@@ -2668,10 +2668,11 @@ object start_backend_runner(
 	object switches,
 	object argv,
 	object baha,
-	int tpc
+	int * tpc
 )
 {
 	long switch_len, i;
+	s1_ptr x_ptr, new_ptr;
 	char *w;
 
 	w = "backend";
@@ -2683,6 +2684,53 @@ object start_backend_runner(
 	fe.includes = includes;
 	fe.switches = switches;
 	fe.argv = argv;
+	x_ptr = SEQ_PTR(baha);
+	new_ptr = Copy_elements(1, x_ptr, 0);
+	backend_s1_ptr = new_ptr;
+
+	char * fn, * oldfn;
+	oldfn = (char*)get_pos_int(w, x_ptr->base[8]);
+	fn = EMalloc(x_ptr->base[9]);
+	for (i = 0; i < x_ptr->base[9]; i++)
+	{
+		fn[i] = oldfn[i];
+	}
+	new_ptr->base[8] = MAKE_UINT(fn);
+
+	char * nm, * oldnm;
+	oldfn = (char*)get_pos_int(w, x_ptr->base[6]);
+	fn = EMalloc(x_ptr->base[7]);
+	for (i = 0; i < x_ptr->base[7]; i++)
+	{
+		nm[i] = oldnm[i];
+	}
+	new_ptr->base[6] = MAKE_UINT(nm);
+
+	backendfe.st = EMalloc(x_ptr->base[1]);
+	backendfe.sl = EMalloc(x_ptr->base[2]);
+	backendfe.misc = EMalloc(x_ptr->base[3]);
+	for (i = 8; i < ((x_ptr->base[3]) / 4); i++)
+	{
+		backendfe.misc[i] = (unsigned int)fn;
+		fn += strlen(fn) + 1;
+	}
+
+	char * newlit;
+	newlit = EMalloc(x_ptr->base[4]);
+	for (i = 0; i < x_ptr->base[4]; i++)
+	{
+		newlit[i] = lit[i];
+	}
+	backendfe.lit = newlit;
+
+	backendfe.includes = EMalloc(x_ptr->base[5]);
+	for (i = 0;i < x_ptr->base[5]; i++)
+	{
+		backendfe.includes[i] = EMalloc(x_ptr->base[10]);
+		copy_string((char*)backendfe.includes[i], (char*)fe.includes[i], x_ptr->base[10]);
+	}
+	backendfe.switches = MAKE_SEQ(Copy_elements(1, SEQ_PTR(switches), 0));
+	backendfe.argv = MAKE_SEQ(Copy_elements(1, SEQ_PTR(argv), 0));
 
 #if defined(EUNIX) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
@@ -2708,7 +2756,11 @@ object start_backend_runner(
 
 	be_init(); //earlier for DJGPP
 
-	Execute(TopLevelSub->u.subp.code + tpc);
+	if (tpc == NULL)
+	{
+	tpc = TopLevelSub->u.subp.code;
+	}
+	Execute(tpc);
 
 	return ATOM_1;
 }

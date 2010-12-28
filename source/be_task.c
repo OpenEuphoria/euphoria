@@ -710,7 +710,7 @@ object task_create(object r_id, object args)
 		RTFatal("Incorrect number of arguments (passing %d where %d are expected)",
 				SEQ_PTR(args)->length, proc_args);
 	}
-	
+
 	recycle = -1;
 	recycle_size = -1;
  
@@ -774,6 +774,8 @@ object task_create(object r_id, object args)
 	new_entry->impl.interpreted.stack_size = 0;
 	
 	id = next_task_id;
+	init_task(id);
+	
 	
 	// choose task id for next time
 	if (!id_wrap && next_task_id < TASK_ID_MAX) {
@@ -1030,7 +1032,12 @@ void wait_for_task( int task ){
  * calling the task's procedure.
  */
 void *start_task( void *task ){
+	static int **code[3];
 	wait_for_task( (int) task );
+	code[0] = (int **)opcode(CALL_PROC);
+	code[1] = (int **)&tcb[current_task].rid;
+	code[2] = (int **)&tcb[current_task].args;
+	start_backend_runner(backendfe.st, backendfe.sl, backendfe.misc, backendfe.lit, backendfe.includes, backendfe.switches, backendfe.argv, MAKE_SEQ(backend_s1_ptr), (int *)&code);
 	call_task( tcb[(int)task].rid, tcb[(int)task].args );
 	return task;
 }
