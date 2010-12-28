@@ -16,6 +16,10 @@
 
 #ifdef EWINDOWS
 #include <windows.h> /* for Sleep(), Fibers */
+#else
+#define __USE_GNU
+#include <dlfcn.h>
+#undef __USE_GNU
 #endif
 
 #include "global.h"
@@ -1032,12 +1036,37 @@ void wait_for_task( int task ){
  * calling the task's procedure.
  */
 void *start_task( void *task ){
+	void * handler;
+object (*start_backend_runner_f)(
+	symtab_ptr st,
+	struct sline * sl,
+	int * misc,
+	char * lit,
+	unsigned char ** includes,
+	object switches,
+	object argv,
+	object baha,
+	int * tpc
+);
 	static int **code[3];
+
 	wait_for_task( (int) task );
+
 	code[0] = (int **)opcode(CALL_PROC);
 	code[1] = (int **)&tcb[current_task].rid;
 	code[2] = (int **)&tcb[current_task].args;
-	start_backend_runner(backendfe.st, backendfe.sl, backendfe.misc, backendfe.lit, backendfe.includes, backendfe.switches, backendfe.argv, MAKE_SEQ(backend_s1_ptr), (int *)&code);
+
+	handler = dlmopen(LM_ID_NEWLM, "./libeubackdbg.so", RTLD_LAZY);
+
+	start_backend_runner_f = dlsym(handler, "start_backend_runner");
+	if (start_backend_runner_f == NULL)
+	{
+		// failure
+	return task;
+	}
+
+	start_backend_runner_f(backendfe.st, backendfe.sl, backendfe.misc, backendfe.lit, backendfe.includes, backendfe.switches, backendfe.argv, MAKE_SEQ(backend_s1_ptr), (int *)&code);
+
 	call_task( tcb[(int)task].rid, tcb[(int)task].args );
 	return task;
 }
