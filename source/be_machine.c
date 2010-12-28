@@ -2707,7 +2707,15 @@ object start_backend_runner(
 	new_ptr->base[6] = MAKE_UINT(nm);
 
 	backendfe.st = EMalloc(x_ptr->base[1]);
+	for (i = 0; i < x_ptr->base[1]; i++)
+	{
+		((char*)(backendfe.st))[i] = ((char*)(st))[i];
+	}
 	backendfe.sl = EMalloc(x_ptr->base[2]);
+	for (i = 0; i < x_ptr->base[2]; i++)
+	{
+		((char*)(backendfe.sl))[i] = ((char*)(sl))[i];
+	}
 	backendfe.misc = EMalloc(x_ptr->base[3]);
 	for (i = 8; i < ((x_ptr->base[3]) / 4); i++)
 	{
