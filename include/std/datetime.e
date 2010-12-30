@@ -924,6 +924,12 @@ public function format(datetime d, sequence pattern = "%Y-%m-%d %H:%M:%S")
 	return res
 end function
 
+--
+-- Used to determine how to handle %y in parse()
+--
+
+constant date_now = now()
+
 --**
 -- Parse a datetime string according to the given format.
 --
@@ -942,7 +948,8 @@ end function
 --   * ##%m## ~--  month (01..12)
 --   * ##%M## ~--  minute (00..59)
 --   * ##%S## ~--  second (00..60)
---   * ##%Y## ~--  year
+--   * ##%y## ~--  2-digit year (YY)
+--   * ##%Y## ~--  4-digit year (CCYY)
 --
 --   More format codes will be added in future versions.
 --  
@@ -972,6 +979,10 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 				case 'Y' then
 					rpos = 1
 					maxlen = 4
+
+				case 'y' then
+					rpos = 1
+					maxlen = 2
 
 				case 'm' then
 					rpos = 2
@@ -1023,6 +1034,18 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 				got = stdget:value(val[spos .. epos-1], , stdget:GET_LONG_ANSWER)
 				if got[1] != stdget:GET_SUCCESS then
 					return -1
+				end if
+
+				-- If this is a 2 digit year we have to do some special handling
+				if fmt[fpos] = 'y' then
+					-- Adjust the date to be within -80 and +20 years of today.
+					integer century = floor(date_now[YEAR] / 100) * 100
+					integer year = got[2] + (century - 100)
+					if year < (date_now[YEAR] - 80) then
+						year = got[2] + century
+					end if
+
+					got[2] = year
 				end if
 
 				res[rpos] = got[2]
