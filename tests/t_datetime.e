@@ -282,6 +282,19 @@ test_equal( "parse fail #2", -1, d:parse("2.3/10/2001 00:52:09", "%d%m%Y%H%M%S")
 dt1 = d:now_gmt()
 test_true("now_gmt() returns valid datetime type", datetime( d:now_gmt() ) )
 
+-- Test two digit year parsing
+dt1 = d:now()
+integer max_year = dt1[YEAR] + 20
+integer min_year = dt1[YEAR] - 80
+
+dt1 = d:parse("01/02/10", "%m/%d/%y")
+test_true("parse 2-digit year #1", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+dt1 = d:parse("01/01/38", "%m/%d/%y")
+test_true("parse 2-digit year #2", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
+
+dt1 = d:parse("01/01/99", "%m/%d/%y")
+test_true("parse 2-digit year #3", max_year >= dt2[YEAR] and min_year <= dt2[YEAR])
 
 test_report()
 

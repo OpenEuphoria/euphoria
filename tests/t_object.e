@@ -8,15 +8,12 @@ export atom atom_sym
 export sequence sequence_sym
 export object object_sym
 
-ifdef not EC then
 test_equal( "detect uninitialized integer", 0, object( integer_sym ) )
 test_equal( "detect uninitialized atom", 0, object( atom_sym ) )
 test_equal( "detect uninitialized sequence", 0, object( sequence_sym ) )
 test_equal( "detect uninitialized object", 0, object( object_sym ) )
 
 forward_test_uninitialized()
-
-end ifdef
 
 integer_sym = 0
 atom_sym = 0.1
