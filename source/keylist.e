@@ -177,7 +177,7 @@ if EXTRA_CHECK then
 end if
 
 -- top level pseudo-procedure (assumed to be last on the list)
-keylist = append(keylist, {"_toplevel_", SC_PREDEF, PROC, 0, 0, E_ALL_EFFECT})
+keylist = append(keylist, {"<TopLevel>", SC_PREDEF, PROC, 0, 0, E_ALL_EFFECT})
 
 export function find_category(integer tokid)
 	sequence catname = "reserved word"
