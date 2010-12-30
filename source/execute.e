@@ -465,7 +465,7 @@ procedure trace_back(sequence msg)
 			else
 				both_printf("%s:%d", find_line(sub, pc))
 
-				if not equal(SymTab[sub][S_NAME], "_toplevel_") then
+				if not equal(SymTab[sub][S_NAME], "<TopLevel>") then
 					switch SymTab[sub][S_TOKEN] do
 						case PROC then
 							both_puts(" in procedure ")
