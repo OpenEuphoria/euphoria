@@ -184,7 +184,7 @@ procedure OutputSymTab(file f)
 
 		if length(SymTab[i]) < SIZEOF_TEMP_ENTRY or
 		   (find(SymTab[i][S_SCOPE], {SC_KEYWORD, SC_PREDEF}) and
-		   not equal(SymTab[i][S_NAME], "_toplevel_")) then
+		   not equal(SymTab[i][S_NAME], "<TopLevel>")) then
 			-- an already deleted symbol, or a keyword or predefined symbol
 			SymTab[i] = SymTab[i][S_NEXT] -- store NEXT field as an atom,
 										-- to save space

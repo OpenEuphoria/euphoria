@@ -1225,7 +1225,7 @@ void symtab_set_pointers()
 				s->u.subp.resident_task = -1;
 				s->u.subp.saved_privates = NULL;
 
-				if (s->name[0] == '_' && strcmp(s->name, "_toplevel_") == 0) {
+				if (s->name[0] == '<' && strcmp(s->name, "<TopLevel>") == 0) {
 					TopLevelSub = s;
 				}
 				s->u.subp.block = (symtab_ptr)SET_OPERAND( s->u.subp.block );

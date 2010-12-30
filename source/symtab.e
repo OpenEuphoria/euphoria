@@ -466,7 +466,7 @@ export procedure InitSymTab()
 			end if
 		end if
 		if keylist[k][K_TOKEN] = PROC then
-			if equal(kname, "_toplevel_") then
+			if equal(kname, "<TopLevel>") then
 				TopLevelSub = st_index
 			end if
 		elsif keylist[k][K_TOKEN] = TYPE then
