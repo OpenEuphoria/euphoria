@@ -1,0 +1,6 @@
+== Version 4.0.1 Date TBD
+
+== Bug Fixes
+
+* Renamed implicit Top Level SubProgram to an illegal name.  Previously used "_toplevel_",
+  which became a legal name for euphoria 4.0
