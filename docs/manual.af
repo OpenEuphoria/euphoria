@@ -255,6 +255,7 @@ end ifdef
 := Release Notes
 :<<LEVELTOC level=1 depth=2>>
 
+../docs/release/4.0.1.txt
 ../docs/release/4.0.0.txt
 ../docs/release/4.0.0.rc2.txt
 ../docs/release/4.0.0.rc1.txt
