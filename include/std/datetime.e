@@ -936,6 +936,8 @@ constant date_now = now()
 -- Parameters:
 --   # ##val## : string datetime value
 --   # ##fmt## : datetime format. Default is "%Y-%m-%d %H:%M:%S"
+--   # ##yysplit## : Set the maximum difference from the current year when parsing
+--     a two digit year. Defaults to -80/+20.
 --
 -- Returns:
 --	A **datetime**, value.
@@ -958,16 +960,46 @@ constant date_now = now()
 --
 --   All non-digits in the input string are ignored.
 --
+-- Parsing Two Digit Years:
+--   When parsing a two digit year ##parse## has to make a decision if a given year
+--   is in the past or future. For example, 10/18/44. Is that Oct 18, 1944 or
+--   Oct 18, 2044. A common rule has come about for this purpose and that is the -80/+20 
+--   rule. Based on research it was found that more historical events are recorded than
+--   future events, thus it favors history rather than future. Some other applications may
+--   require a different rule, thus the ##yylower## parameter can be supplied.
+--
+--   Assuming today is 12/22/2010 here is an example of the -80/+20 rule
+--   || YY || Diff   || CCYY ||
+--   | 18   | -92/+8  |  2018 |
+--   | 95   | -15/+85 |  1995 |
+--   | 33   | -77/+23 |  1933 |
+--   | 29   | -81/+19 |  2029 |
+--
+--   Another rule in use is the -50/+50 rule. Therefore, if you supply -50 to the ##yylower## 
+--   to set the lower bounds, some examples may be (given that today is 12/22/2010)
+--   || YY || Diff   || CCYY ||
+--   | 18   | -92/+8  |  2018 |
+--   | 95   | -15/+85 |  1995 |
+--   | 33   | -77/+23 |  2033 |
+--   | 29   | -81/+19 |  2029 |
+--
 -- Example 1:
 -- <eucode>
 -- datetime d = parse("05/01/2009 10:20:30", "%m/%d/%Y %H:%M:%S")
+-- -- d is { 2009, 5, 1, 10, 20, 30 }
+-- </eucode>
+--
+-- Example 2:
+-- <eucode>
+-- datetime d = parse("05/01/44", "%m/%d/%y", -50) -- -50/+50 rule
+-- -- d is { 2044, 5, 14, 0, 0, 0 }
 -- </eucode>
 --
 -- See Also:
 --   [[:format]]
 --
 
-public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
+public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S", integer yylower = -80)
 	integer fpos = 1, spos = 1, maxlen, rpos 
 	sequence res = {0,0,0,0,0,0}
 
@@ -1038,10 +1070,10 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 
 				-- If this is a 2 digit year we have to do some special handling
 				if fmt[fpos] = 'y' then
-					-- Adjust the date to be within -80 and +20 years of today.
+					-- Adjust the date to be not more than yysplit years ago
 					integer century = floor(date_now[YEAR] / 100) * 100
 					integer year = got[2] + (century - 100)
-					if year < (date_now[YEAR] - 80) then
+					if year < (date_now[YEAR] + yylower) then
 						year = got[2] + century
 					end if
 
