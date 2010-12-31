@@ -5,6 +5,8 @@
 
 namespace datetime
 
+integer yydiff = 80
+
 include std/dll.e
 include std/get.e
 include std/machine.e
@@ -931,6 +933,31 @@ end function
 constant date_now = now()
 
 --**
+-- Set the YY adjustment break. The initial value is 80.
+-- Parameters:
+--   # ##newval## : integer. A value from 0 to 100.
+--
+-- Returns:
+--	The current (old) value.
+-- 
+-- Comments:
+--   * This value is used parse() detects a 2-digit year. It adjusts the YY value
+--     so it is between -yydiff and +(100 - yydiff) years of today.
+--   * If the ##newval## is not in the correct range, no change is made and
+--     no error is raised.
+--
+public function set_yydiff(integer newval)
+	integer oldval
+	
+	oldval = yydiff
+	if newval >= 0 and newval <= 100 then
+		yydiff = newval
+	end if
+	
+	return oldval
+end function
+
+--**
 -- Parse a datetime string according to the given format.
 --
 -- Parameters:
@@ -1038,10 +1065,10 @@ public function parse(sequence val, sequence fmt="%Y-%m-%d %H:%M:%S")
 
 				-- If this is a 2 digit year we have to do some special handling
 				if fmt[fpos] = 'y' then
-					-- Adjust the date to be within -80 and +20 years of today.
+					-- Adjust the date to be within -yydiff and +(100 - yydiff) years of today.
 					integer century = floor(date_now[YEAR] / 100) * 100
 					integer year = got[2] + (century - 100)
-					if year < (date_now[YEAR] - 80) then
+					if year < (date_now[YEAR] - yydiff) then
 						year = got[2] + century
 					end if
 
