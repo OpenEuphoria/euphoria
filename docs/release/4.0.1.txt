@@ -4,3 +4,4 @@
 
 * Renamed implicit Top Level SubProgram to an illegal name.  Previously used "_toplevel_",
   which became a legal name for euphoria 4.0
+* [[ticket:577]] ##object()## works same on translator as the interpreter.
