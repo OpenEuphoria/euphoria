@@ -3546,6 +3546,11 @@ end procedure
 
 procedure opIS_AN_OBJECT()
 	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
+	-- check 
+	c_stmt("if( NOVALUE == @ ){\n", {Code[pc+1]}, Code[pc+1])
+		c_stmt("@ = 0;\n", Code[pc+2])
+	c_stmt0("}\n")
+	c_stmt0("else{\n")
 	if TypeIs(Code[pc+1], TYPE_SEQUENCE) then
 		c_stmt("@ = 3;\n", Code[pc+2])
 	elsif TypeIs(Code[pc+1], TYPE_INTEGER) then
@@ -3568,6 +3573,7 @@ procedure opIS_AN_OBJECT()
 		c_stmt0("else\n")
 		c_stmt("@ = 0;\n", Code[pc+2])
 	end if
+	c_stmt0("}\n")
 	CDeRefStr("_0")
 	target = {0, 1}
 	SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
