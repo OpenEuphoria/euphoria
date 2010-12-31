@@ -748,7 +748,7 @@ export procedure DeclareFileVars()
 			if integer( eentry[S_OBJ] ) then
 					c_printf(" = %d;\n", eentry[S_OBJ] )
 			else
-				c_puts(" = 0;\n")
+				c_puts(" = NOVALUE;\n")
 			end if
 
 			c_hputs("extern int ")
@@ -1532,14 +1532,12 @@ export procedure GenerateUserRoutines()
 								c_stmt0("int ")
 								c_puts("_")
 								c_puts(SymTab[sp][S_NAME])
-								if SymTab[sp][S_GTYPE] != TYPE_INTEGER then
-									-- avoid DeRef in 1st BB
-									c_puts(" = 0")
-									target[MIN] = 0
-									target[MAX] = 0
-									SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT, 0)
-								end if
-								c_puts(";\n")
+								-- avoid DeRef in 1st BB
+								c_puts(" = NOVALUE;\n")
+								target[MIN] = NOVALUE
+								target[MAX] = NOVALUE
+								SetBBType(sp, TYPE_INTEGER, target, TYPE_OBJECT, 0)
+								
 								break
 
 							case else
@@ -1559,15 +1557,11 @@ export procedure GenerateUserRoutines()
 								and not find( name, names ) then
 								c_stmt0("int ")
 								c_puts( name )
-								if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE]
-									!= TYPE_INTEGER
-								then
-									c_puts(" = 0")
-									-- avoids DeRef in 1st BB, but may hurt global type:
-									target = {0, 0}
-									-- PROBLEM: sp could be temp or symtab entry?
-									SetBBType(temps, TYPE_INTEGER, target, TYPE_OBJECT, 0)
-								end if
+								c_puts(" = NOVALUE")
+								-- avoids DeRef in 1st BB, but may hurt global type:
+								target = {NOVALUE, NOVALUE}
+								-- PROBLEM: sp could be temp or symtab entry?
+								SetBBType(temps, TYPE_INTEGER, target, TYPE_OBJECT, 0)
 								ifdef DEBUG then
 									c_puts(sprintf("; // %d %d\n", {temps, SymTab[temps][S_TEMP_NAME]} ) )
 								elsedef
