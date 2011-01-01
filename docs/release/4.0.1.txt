@@ -10,3 +10,5 @@
 == Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
+* [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
+

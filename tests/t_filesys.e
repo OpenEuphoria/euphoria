@@ -279,5 +279,23 @@ test_true("temp file .TMP extension", ends(".TMP", tmp_name))
 tmp_name = filename(temp_file( , , ""))
 test_false("temp_file no extension", find('.', tmp_name))
 
+--
+-- Split/Join path
+--
+
+sequence spath_eles
+
+ifdef WINDOWS then
+	test_equal("split_path #1", { "Users", "john", "hello.txt" }, split_path("\\Users\\john\\hello.txt"))
+	test_equal("join_path #1", "\\Users\\john\\hello.txt", join_path({ "Users", "\\john\\", "hello.txt" }))
+	test_equal("split_path #2", { "C:", "Users", "john", "hello.txt" }, split_path("C:\\Users\\john\\hello.txt"))
+	test_equal("join_path #2", "C:\\Users\\john\\hello.txt", join_path({ "C:", "Users", "\\john\\", "hello.txt" }))
+elsedef
+	test_equal("split_path #1", { "usr", "home", "john", "hello.txt"},
+		split_path("/usr/home/john/hello.txt"))
+	test_equal("join path #1", "/usr/home/john/hello.txt",
+		join_path({ "/usr/", "/home", "john", "hello.txt" }))
+end ifdef
+
 test_report()
 
