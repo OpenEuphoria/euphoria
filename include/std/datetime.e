@@ -995,6 +995,9 @@ constant date_now = now()
 -- -- d is { 2044, 5, 14, 0, 0, 0 }
 -- </eucode>
 --
+-- Versioning:
+--   * Since 4.0.1 - 2-digit year parsing and ##yylower## parameter
+--
 -- See Also:
 --   [[:format]]
 --
