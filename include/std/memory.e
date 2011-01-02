@@ -319,6 +319,167 @@ memconst:FREE_RID = routine_id("deallocate")
 
 --****
 -- Signature:
+-- <built-in> procedure poke8(atom addr, object x)
+--
+-- Description:
+-- Stores one or more 8-byte values, starting at a memory location.
+--
+-- Parameters:
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either an atom or a non empty sequence of atoms.
+--
+-- Errors:
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- Comments: 
+--
+-- There is no point in having ##poke8s##() or ##poke8u##(). For example, both
+-- +power(2,63) and -power(2,63) are stored as #F0000000_00000000. It's up to whoever
+-- reads the value to figure it out.
+--
+-- It is faster to write several words at once by poking a sequence of
+-- values, than it is to write one words at a time in a loop.
+-- 
+-- The 8-byte values to be stored can be negative or positive. You can read
+-- them back with either ##peek8s##() or ##peek8u##().
+--
+-- Example 1:
+-- <eucode>
+--  a = allocate(100)   -- allocate 100 bytes in memory
+-- 
+-- -- poke one 8-byte value at a time:
+-- poke2(a, 12345)
+-- poke2(a+8, #FF00)
+-- poke2(a+16, -12345)
+--
+-- -- poke 3 8-byte values at once:
+-- poke8(a, {12345, #FF00, -12345})
+-- </eucode>
+-- 
+-- See Also:
+--     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:allocate]], [[:free]], [[:call]]
+--
+
+
+--****
+-- Signature:
+-- <built-in> function peek8s(object addr_n_length)
+--
+-- Description:
+-- Fetches a //signed// 8-byte integer, or some //signed// integers  , from an address
+-- in memory.
+--
+-- Parameters:
+--   # ##addr_n_length## : an object, either of
+--   ** an atom ##addr## ~-- to fetch one word at ##addr##, or
+--   ** a pair ##{ addr, len}##, to fetch ##len## words at ##addr##
+--
+-- Returns:
+-- An **object**, either an integer if the input was a single address,
+-- or a sequence of integers if a sequence was passed. In both cases,
+-- integers returned are 8 bytes, in the range -power(2, 63)..power(2,63)-1.
+--
+-- Errors:
+-- Peeking in memory you don't own may be blocked by the OS, and cause
+-- a machine exception. If you use the define safe these routines will 
+-- catch these problems with a EUPHORIA error.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+-- Comments: 
+-- Since addresses are 32-bit numbers, they can be larger than the largest
+-- value of type integer (31-bits). Variables that hold an address should
+-- therefore be declared as atoms.
+--
+-- It is faster to read several words at once using the second form of peek()
+-- than it is to read one word at a time in a loop. The returned sequence has
+-- the length you asked for on input.
+-- 
+-- Remember that ##peek8s##() takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--
+-- The only difference between ##peek8s##() and ##peek8u##() is how words
+-- with the highest bit set are returned. ##peek8s##() assumes them to be
+-- negative, while ##peek8u##() just assumes them to be large and positive.
+--  
+-- Example 1: 
+--
+-- <eucode>
+-- -- The following are equivalent:
+-- -- method 1
+-- s = {peek8s(100), peek8s(108), peek8s(116), peek8s(124)}
+--
+-- -- method 2
+-- s = peek8s({100, 4})
+-- </eucode>
+-- 
+-- See Also:
+--
+--  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]]
+--  [[:peek2u]]
+--
+
+--****
+-- Signature:
+-- <built-in> function peek8u(object addr_n_length)
+--
+-- Description:
+-- Fetches an //unsigned// 8-byte integer, or some //unsigned// 8 byte integers, from an address
+-- in memory.
+--
+-- Parameters:
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
+--
+-- Returns:
+--              An **object**, either an integer if the input was a single address,
+-- or a sequence of integers if a sequence was passed. In both cases,
+-- integers returned are words, in the range 0..power(2,64)-1.
+--
+-- Errors:
+--      Peek() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+-- Comments: 
+--
+-- Since addresses are 32-bit numbers, they can be larger than the largest
+-- value of type integer (31-bits). Variables that hold an address should
+-- therefore be declared as atoms.
+--
+-- It is faster to read several words at once using the second form of peek()
+-- than it is to read one word at a time in a loop. The returned sequence has
+-- the length you asked for on input.
+-- 
+-- Remember that ##peek8u##() takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--
+-- The only difference between ##peek8s##() and ##peek8u##() is how words
+-- with the highest bit set are returned. ##peek2s##() assumes them to be
+-- negative, while ##peek8u##() just assumes them to be large and positive.
+--  
+-- Example 1: 
+-- <eucode>
+-- -- The following are equivalent:
+-- -- method 1
+-- Get 4 2-byte numbers starting address 100.
+-- s = {peek8u(100), peek8u(108), peek8u(116), peek8u(124)}
+--
+-- -- method 2
+-- Get 4 8-byte numbers starting address 100.
+-- s = peek8u({100, 4})
+-- </eucode>
+-- 
+-- See Also: 
+--  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]]
+--  [[:peek4u]]
+--
+
+--****
+-- Signature:
 -- <built-in> function peek4s(object addr_n_length)
 --
 -- Description:
