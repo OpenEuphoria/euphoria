@@ -165,7 +165,11 @@ export sequence keylist = {
 	{"replace",          SC_PREDEF, FUNC, REPLACE,          4, E_PURE, {0,0,0,{{DEF_PARAM,3}}}, {4,3,{4}}},
 	{"delete_routine",   SC_PREDEF, FUNC, DELETE_ROUTINE,   2, E_PURE},
 	{"delete",           SC_PREDEF, PROC, DELETE_OBJECT,    1, E_OTHER_EFFECT},
-	{"routine",          SC_KEYWORD, ROUTINE,   0, 0, 0}
+	{"routine",          SC_KEYWORD, ROUTINE,   0, 0, 0},
+	{"poke8",            SC_PREDEF, PROC, POKE8,            2, E_OTHER_EFFECT},
+	{"peek8s",           SC_PREDEF, FUNC, PEEK8S,           1, E_PURE},
+	{"peek8u",           SC_PREDEF, FUNC, PEEK8U,           1, E_PURE},
+	$
 
 }
 	-- new words must go at end to maintain compatibility

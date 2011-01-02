@@ -251,6 +251,9 @@ struct char_cell {
 #define MAX_BITWISE_DBL ((double)(unsigned long)0xFFFFFFFF)
 #define MIN_BITWISE_DBL ((double)(signed long)  0x80000000)
 
+#define MAX_LONGLONG_DBL ((double)(unsigned long long) 0xFFFFFFFFFFFFFFFFLL)
+#define MIN_LONGLONG_DBL ((double)(signed long long)   0x8000000000000000LL)
+
 /* .dll argument & return value types */
 #define C_TYPE     0x0F000000
 #define C_DOUBLE   0x03000008

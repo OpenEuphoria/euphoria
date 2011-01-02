@@ -220,7 +220,10 @@ export constant
 	NOVALUE_TEMP        = 209,  -- Interpreter only?
 	COVERAGE_LINE       = 210,
 	COVERAGE_ROUTINE    = 211,
-	MAX_OPCODE          = 213
+	POKE8               = 212,
+	PEEK8S              = 213,
+	PEEK8U              = 214,
+	MAX_OPCODE          = 214
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),

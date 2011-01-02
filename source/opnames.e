@@ -219,5 +219,9 @@ export constant opnames = {
 	"DEREF_TEMP",
 	"NOVALUE_TEMP",
 	"COVERAGE_LINE",
-	"COVERAGE_ROUTINE"
+	"COVERAGE_ROUTINE",
+	"POKE8",
+	"PEEK8S",
+	"PEEK8U",
+	$
 }

@@ -403,6 +403,91 @@ static object do_peek2(object a, int b )
 	return top;
 }
 
+static object do_peek8(object a, int b )
+// peek8u, peek8s
+{
+	int i;
+	unsigned long long *peek8_addr;
+	object top;
+	s1_ptr s1;
+	object_ptr obj_ptr;
+	unsigned long long uval;
+	long long sval;
+
+	/* check address */
+	if (IS_ATOM_INT(a)) {
+		peek8_addr = (unsigned long long *)a;
+	}
+	else if (IS_ATOM(a)) {
+		peek8_addr = (unsigned long long *)(unsigned long)(DBL_PTR(a)->dbl);
+	}
+	else {
+		/* a sequence: {addr, nbytes} */
+		s1 = SEQ_PTR(a);
+		i = s1->length;
+		if (i != 2) {
+			RTFatal("argument to peek() must be an atom or a 2-element sequence");
+		}
+		peek8_addr = (unsigned long long *)get_pos_int("peek8s/peek8u", *(s1->base+1));
+		i = get_pos_int("peek8s/peek8u", *(s1->base+2));/* length*/
+		if (i < 0)
+			RTFatal("number of bytes to peek is less than 0");
+		s1 = NewS1(i);
+		obj_ptr = s1->base;
+		if (b) {
+			// unsigned
+			while (--i >= 0) {
+				uval = *peek8_addr;
+				++peek8_addr;
+				if ( uval > (unsigned long long)MAXINT){
+					top = NewDouble((double) uval);
+				}
+				else{
+					top = (unsigned long)uval;
+				}
+				*(++obj_ptr) = top;
+			}
+		}
+		else {
+			// signed
+			while (--i >= 0) {
+				sval = (long long) *peek8_addr;
+				++peek8_addr;
+				if (sval < (long long)MININT || sval > (long long)MAXINT){
+					top = NewDouble((double) sval);
+				}
+				else{
+					top = (long) sval;
+				}
+				*(++obj_ptr) = top;
+			}
+		}
+		return (object)MAKE_SEQ(s1);
+	}
+	if (b) {
+		// unsigned
+		uval = *peek8_addr;
+		if ( uval > (unsigned long long)MAXINT){
+			top = NewDouble((double) uval);
+		}
+		else{
+			top = (long) uval;
+		}
+	}
+	else {
+		// signed
+		sval = (long long) *peek8_addr;
+		if (sval < (long long)MININT || sval > (long long)MAXINT){
+			top = NewDouble((double) sval);
+		}
+		else{
+			top = (long) sval;
+		}
+	}
+
+	return top;
+}
+
 
 static object do_peek4(object a, int b )
 // peek4u, peek4s
@@ -517,6 +602,59 @@ static void do_poke2(object a, object top)
 					RTFatal("poke2 is limited to 32-bit numbers");
 				poke4(poke2_addr,temp_dbl);
 				++poke2_addr;
+			}
+			else {
+				RTFatal("sequence to be poked must only contain atoms");
+			}
+		}
+	}
+}
+
+static void do_poke8(object a, object top)
+{
+	unsigned long long *poke8_addr;
+	double temp_dbl;
+	s1_ptr s1;
+	object_ptr obj_ptr;
+
+	/* determine the address to be poked */
+	if (IS_ATOM_INT(a)) {
+		poke8_addr = (unsigned long long *)INT_VAL(a);
+	}
+	else if (IS_ATOM(a)) {
+		poke8_addr = (unsigned long long *)(unsigned long)(DBL_PTR(a)->dbl);
+	}
+	else {
+		RTFatal("first argument to poke8 must be an atom");
+	}
+	/* look at the value to be poked */
+	if (IS_ATOM_INT(top)) {
+		*poke8_addr = (unsigned long long) top;
+	}
+	else if (IS_ATOM(top)) {
+		temp_dbl = DBL_PTR(top)->dbl;
+		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
+			RTFatal("poke8 is limited to 64-bit numbers");
+		*poke8_addr = (unsigned long long) temp_dbl;
+	}
+	else {
+		/* second arg is sequence */
+		s1 = SEQ_PTR(top);
+		obj_ptr = s1->base;
+		while (TRUE) {
+			top = *(++obj_ptr);
+			if (IS_ATOM_INT(top)) {
+				*poke8_addr = (unsigned long long) top;
+				++poke8_addr;
+			}
+			else if (IS_ATOM(top)) {
+				if (top == NOVALUE)
+					break;
+				temp_dbl = DBL_PTR(top)->dbl;
+				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
+					RTFatal("poke8 is limited to 64-bit numbers");
+				*poke8_addr = (unsigned long long) temp_dbl;
+				++poke8_addr;
 			}
 			else {
 				RTFatal("sequence to be poked must only contain atoms");
@@ -935,6 +1073,8 @@ void code_set_pointers(int **code)
 			case PEEK4U:
 			case PEEK2S:
 			case PEEK2U:
+			case PEEK8U:
+			case PEEK8S:
 			case SYSTEM:
 			case PUTS:
 			case QPRINT:
@@ -942,6 +1082,7 @@ void code_set_pointers(int **code)
 			case GETENV:
 			case MACHINE_PROC:
 			case POKE4:
+			case POKE8:
 			case POKE:
 			case POKE2:
 			case SC2_AND:
@@ -1663,11 +1804,13 @@ void do_exec(int *start_pc)
   &&L_HEAD, &&L_TAIL, &&L_REMOVE, &&L_REPLACE, &&L_SWITCH_RT,
 /* 204 (previous) */
   &&L_PROC_TAIL, &&L_DELETE_ROUTINE, &&L_DELETE_OBJECT, &&L_EXIT_BLOCK,
-/* 208 (previous) */
+/* 207 (previous) */
   &&L_REF_TEMP, &&L_DEREF_TEMP, &&L_NOVALUE_TEMP,
+/* 209 (previous) */
+  &&L_COVERAGE_LINE, &&L_COVERAGE_ROUTINE,
 /* 211 (previous) */
-  &&L_COVERAGE_LINE, &&L_COVERAGE_ROUTINE
-/* 213 (previous) */
+  &&L_POKE8, &&L_PEEK8S, &&L_PEEK8U
+/* 214 (previous) */
   };
 #endif
 #endif
@@ -4282,6 +4425,24 @@ void do_exec(int *start_pc)
 				thread();
 				BREAK;
 
+			case L_PEEK8U:
+				deprintf("case L_PEEK8U:");
+				b = 1;
+				goto peek8s1;
+
+			case L_PEEK8S:
+			deprintf("case L_PEEK8S:");
+				b = 0;
+			 peek8s1:
+				a = *(object_ptr)pc[1]; /* the address */
+				tpc = pc;  // in case of machine exception
+				top = do_peek8(a, b);
+				DeRefx(*(object_ptr)pc[2]);
+				*(object_ptr)pc[2] = top;
+				inc3pc();
+				thread();
+				BREAK;
+
 
 			case L_PEEK4U:
 			deprintf("case L_PEEK4U:");
@@ -4399,6 +4560,16 @@ void do_exec(int *start_pc)
 				thread();
 				BREAK;
 
+			case L_POKE8:
+				deprintf("case L_POKE8:");
+				a = *(object_ptr)pc[1];   /* address */
+				top = *(object_ptr)pc[2]; /* byte value */
+				tpc = pc;
+				do_poke8(a, top);
+				inc3pc();
+				thread();
+				BREAK;
+				
 			case L_POKE4:
 			deprintf("case L_POKE4:");
 				a = *(object_ptr)pc[1];   /* address */

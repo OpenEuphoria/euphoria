@@ -222,7 +222,12 @@
 #define NOVALUE_TEMP        209
 #define COVERAGE_LINE       210
 #define COVERAGE_ROUTINE    211
-#define MAX_OPCODE          212
+#define POKE8               212
+#define PEEK8S              213
+#define PEEK8U              214
+
+
+#define MAX_OPCODE          214
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

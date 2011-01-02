@@ -1051,34 +1051,47 @@ end procedure
 
 procedure seg_peek4(integer target, integer source, boolean dbl)
 -- emit code for a 4-byte signed or unsigned peek
-	if atom(dj_path) then
-		-- WATCOM: memory is seamless
-		if dbl then
-			c_stmt("@ = *(unsigned long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
-					{target, source})
-
-		else
-			c_stmt("@ = *(unsigned long *)@;\n", {target, source})
-		end if
+	-- WATCOM: memory is seamless
+	if dbl then
+		c_stmt("@ = *(unsigned long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+				{target, source})
 
 	else
-		-- DJGPP: low memory is in a separate segment,
-		--        high memory is always >= one million
-		-- OPTIMIZE if source is a constant
-		if dbl then
-			c_stmt("_1 = (int)(unsigned)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("if ((unsigned)_1 > LOW_MEMORY_MAX)\n")
-			c_stmt("@ = *(unsigned long *)_1;\n", target)
-			c_stmt0("else\n")
-			c_stmt("@ = _farpeekl(_go32_info_block.selector_for_linear_memory, (unsigned)_1);\n",
-					target)
-		else
-			c_stmt("if ((unsigned)@ > LOW_MEMORY_MAX)\n", source)
-			c_stmt("@ = *(unsigned long *)@;\n", {target, source})
-			c_stmt0("else\n")
-			c_stmt("@ = _farpeekl(_go32_info_block.selector_for_linear_memory, (unsigned)@);\n",
-					{target, source})
-		end if
+		c_stmt("@ = *(unsigned long *)@;\n", {target, source})
+	end if
+
+end procedure
+
+procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
+-- emit code for a 4-byte signed or unsigned peek
+	if dbl then
+		c_stmt("peek8_longlong = *(unsigned long long *)(unsigned long)(DBL_PTR(@)->dbl);\n", source)
+
+	else
+		c_stmt("peek8_longlong = *(unsigned long long *)@;\n", source)
+	end if
+	
+	-- FIX: in first BB we might assume TYPE_INTEGER, value 0
+	-- so CName will output a 0 instead of the var's name
+	SetBBType( target_sym, GType(target_sym), novalue, TYPE_OBJECT, 0)
+
+	if op = PEEK8S then
+		c_stmt0("if (peek8_longlong < (long long)MININT || peek8_longlong > (long long) MAXINT){\n")
+		c_stmt("@ = NewDouble((double) peek8_longlong);\n", target_sym)
+		c_stmt0("}\n")
+		c_stmt0("else{\n")
+			c_stmt("@ = (object) peek8_longlong;\n", target_sym, target_sym )
+		c_stmt0("}\n")
+		
+
+	elsif op = PEEK8U then
+		c_stmt0("if (peek8_longlong > (unsigned long long)MAXINT){\n")
+		c_stmt("@ = NewDouble((double)(unsigned long long)peek8_longlong);\n", target_sym)
+		c_stmt0("}\n")
+		c_stmt0("else{\n")
+			c_stmt("@ = (object) peek8_longlong;\n", target_sym, target_sym )
+		c_stmt0("}\n")
+		
 	end if
 end procedure
 
@@ -1154,36 +1167,36 @@ end procedure
 
 procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
-	if atom(dj_path) then
-		-- WATCOM etc.
-		if dbl then
-			if TWINDOWS and atom(wat_path) then
-				-- do it in two steps to work around an Lcc bug:
-				c_stmt("_1 = (unsigned long)DBL_PTR(@)->dbl;\n", source)
-				c_stmt0("*poke4_addr = (unsigned long)_1;\n")
-			else
-				c_stmt("*poke4_addr = (unsigned long)DBL_PTR(@)->dbl;\n", source)
-			end if
+	-- WATCOM etc.
+	if dbl then
+		if TWINDOWS and atom(wat_path) then
+			-- do it in two steps to work around an Lcc bug:
+			c_stmt("_1 = (unsigned long)DBL_PTR(@)->dbl;\n", source)
+			c_stmt0("*poke4_addr = (unsigned long)_1;\n")
 		else
-			c_stmt("*poke4_addr = (unsigned long)@;\n", source)
-		end if
-
-	else
-		-- DJGPP
-		if dbl then
-			c_stmt0("if ((unsigned)poke4_addr > LOW_MEMORY_MAX)\n")
 			c_stmt("*poke4_addr = (unsigned long)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)poke4_addr, (unsigned long)DBL_PTR(@)->dbl);\n",
-					source)
-		else
-			c_stmt0("if ((unsigned)poke4_addr > LOW_MEMORY_MAX)\n")
-			c_stmt("*poke4_addr = (unsigned long)@;\n", source)
-			c_stmt0("else\n")
-			c_stmt("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)poke4_addr, (unsigned long)@);\n",
-					source)
 		end if
+	else
+		c_stmt("*poke4_addr = (unsigned long)@;\n", source)
 	end if
+
+end procedure
+
+procedure seg_poke8(integer source, boolean dbl)
+-- poke an 8-byte value into poke8_addr
+	-- WATCOM etc.
+	if dbl then
+		if TWINDOWS and atom(wat_path) then
+			-- do it in two steps to work around an Lcc bug:
+			c_stmt("_1 = (unsigned long)DBL_PTR(@)->dbl;\n", source)
+			c_stmt0("*poke8_addr = (unsigned long long)_1;\n")
+		else
+			c_stmt("*poke8_addr = (unsigned long long)DBL_PTR(@)->dbl;\n", source)
+		end if
+	else
+		c_stmt("*poke8_addr = (unsigned long long)@;\n", source)
+	end if
+
 end procedure
 
 function machine_func_type(integer x)
@@ -5404,382 +5417,387 @@ procedure opPEEK_STRING()
 end procedure
 
 procedure opPEEK()
--- PEEK / PEEKS / PEEK2S / PEEK2U / PEEK4U / PEEK4S
-	CSaveStr("_0", Code[pc+2], Code[pc+1], 0, 0)
-
-	if TypeIsIn(Code[pc+1], TYPES_AO) then
-		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+1])
+-- PEEK / PEEKS / PEEK2S / PEEK2U / PEEK4U / PEEK4S / PEEK8U / PEEK8S
+	integer
+		op         = Code[pc],
+		arg        = Code[pc+1], -- either ptr or {ptr,length}
+		target_sym = Code[pc+2]
+	
+	CSaveStr("_0", target_sym, arg, 0, 0)
+	
+	if op = PEEK8U or op = PEEK8S then
+		c_stmt0("{\n")
+		c_stmt0("long long peek8_longlong;\n")
+	end if
+	if TypeIsIn( arg, TYPES_AO) then
+		c_stmt("if (IS_ATOM_INT(@)) {\n", arg)
 	end if
 
-	if TypeIsIn(Code[pc+1], TYPES_IAO) then
-		if Code[pc] = PEEK then
-			seg_peek1(Code[pc+2], Code[pc+1], 0)
-		elsif Code[pc] = PEEKS then
-			seg_peek1(Code[pc+2], Code[pc+1], 0)
-		elsif find( Code[pc], {PEEK4U, PEEK4S}) then
+	if TypeIsIn(arg, TYPES_IAO) then
+		switch op do
+			case PEEK then
+				seg_peek1( target_sym, arg, 0)
+			case PEEKS then
+				seg_peek1( target_sym, arg, 0)
+			case PEEK4U, PEEK4S then
 
-			seg_peek4(Code[pc+2], Code[pc+1], 0)
+				seg_peek4( target_sym, arg, 0)
 
-			-- FIX: in first BB we might assume TYPE_INTEGER, value 0
-			-- so CName will output a 0 instead of the var's name
-			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT, 0)
+				-- FIX: in first BB we might assume TYPE_INTEGER, value 0
+				-- so CName will output a 0 instead of the var's name
+				SetBBType( target_sym, GType(target_sym), novalue, TYPE_OBJECT, 0)
 
-			if Code[pc] = PEEK4S then
-				c_stmt("if (@ < MININT || @ > MAXINT)\n",
-							  {Code[pc+2], Code[pc+2]})
-				c_stmt("@ = NewDouble((double)(long)@);\n",
-							  {Code[pc+2], Code[pc+2]})
+				if op = PEEK4S then
+					c_stmt("if (@ < MININT || @ > MAXINT)\n",
+								{target_sym, target_sym})
+					c_stmt("@ = NewDouble((double)(long)@);\n",
+								{target_sym, target_sym})
 
-			elsif Code[pc] = PEEK4U then
-				c_stmt("if ((unsigned)@ > (unsigned)MAXINT)\n",
-							  Code[pc+2])
-				c_stmt("@ = NewDouble((double)(unsigned long)@);\n",
-							  {Code[pc+2], Code[pc+2]})
+				elsif op = PEEK4U then
+					c_stmt("if ((unsigned)@ > (unsigned)MAXINT)\n",
+								target_sym)
+					c_stmt("@ = NewDouble((double)(unsigned long)@);\n",
+								{target_sym, target_sym})
 
-			end if
-		elsif find( Code[pc], {PEEK2U, PEEK2S}) then
-			seg_peek2(Code[pc+2], Code[pc+1], 0)
-		else
-			-- peek_string
-			seg_peek_string( Code[pc+2], Code[pc+1], 0 )
-		end if
+				end if
+			
+			case PEEK8U, PEEK8S then
+
+				seg_peek8(target_sym, arg, 0, op)
+
+				
+			case PEEK2U, PEEK2S then
+				seg_peek2( target_sym, arg, 0)
+			case else
+				-- peek_string
+				seg_peek_string( target_sym, arg, 0 )
+		end switch
 	end if
 
-	if TypeIs(Code[pc+1], TYPE_ATOM) then
+	if TypeIs( arg, TYPE_ATOM) then
 		c_stmt0("}\n")
 		c_stmt("else {\n", Code[pc+1])
 
-	elsif TypeIs(Code[pc+1], TYPE_OBJECT) then
+	elsif TypeIs( arg, TYPE_OBJECT) then
 		c_stmt0("}\n")
-		c_stmt("else if (IS_ATOM(@)) {\n", Code[pc+1])
+		c_stmt("else if (IS_ATOM(@)) {\n", arg)
 	end if
 
-	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
-		if find( Code[pc], { PEEK, PEEKS } ) then
-			seg_peek1(Code[pc+2], Code[pc+1], 1)
-		elsif find( Code[pc], {PEEK2U, PEEK2S}) then
-			seg_peek2(Code[pc+2], Code[pc+1], 1)
-		elsif find( Code[pc], {PEEK4U, PEEK4S}) then
+	if TypeIsNotIn( arg, TYPES_IS) then
+		switch op do
+			case PEEK, PEEKS then
+				seg_peek1( target_sym, arg, 1)
+			case PEEK2U, PEEK2S then
+				seg_peek2( target_sym, arg, 1)
+			case PEEK4U, PEEK4S then
 
-			seg_peek4(Code[pc+2], Code[pc+1], 1)
-			SetBBType(Code[pc+2], GType(Code[pc+2]), novalue, TYPE_OBJECT, 0)
-			if Code[pc] = PEEK4S then
-				c_stmt("if (@ < MININT || @ > MAXINT)\n",
-							{Code[pc+2], Code[pc+2]})
-				c_stmt("@ = NewDouble((double)(long)@);\n",
-							{Code[pc+2], Code[pc+2]})
-			else  -- PEEK4U */
-				c_stmt("if ((unsigned)@ > (unsigned)MAXINT)\n",
-							Code[pc+2])
-				c_stmt("@ = NewDouble((double)(unsigned long)@);\n",
-							{Code[pc+2], Code[pc+2]})
-			end if
-		else
-			-- peek_string
-			seg_peek_string( Code[pc+2], Code[pc+1], 1 )
-		end if
+				seg_peek4(target_sym, arg, 1)
+				SetBBType( target_sym, GType( target_sym ), novalue, TYPE_OBJECT, 0)
+				if op = PEEK4S then
+					c_stmt("if (@ < MININT || @ > MAXINT)\n",
+								{target_sym, target_sym})
+					c_stmt("@ = NewDouble((double)(long)@);\n",
+								{target_sym, target_sym})
+				else  -- PEEK4U */
+					c_stmt("if ((unsigned)@ > (unsigned)MAXINT)\n",
+								target_sym)
+					c_stmt("@ = NewDouble((double)(unsigned long)@);\n",
+								{target_sym, target_sym})
+				end if
+			case PEEK8U, PEEK8S then
+				seg_peek8( target_sym, arg, 1, op )
+				
+			case else
+				-- peek_string
+				seg_peek_string( target_sym, arg, 1 )
+		end switch
 	end if
 
-	if TypeIsIn(Code[pc+1], TYPES_AO) then
+	if TypeIsIn( arg, TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+1], TYPE_OBJECT) then
+	if TypeIs( arg, TYPE_OBJECT) then
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIsIn(Code[pc+1], TYPES_SO) then
+	if TypeIsIn( arg, TYPES_SO) then
 		-- sequence {start, length} */
-		c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+1])
-		if find( Code[pc], { PEEK, PEEKS })  then
-			c_stmt0("poke_addr = (unsigned char *)get_pos_int(\"peek\", *(((s1_ptr)_1)->base+1));\n")
-		elsif find( Code[pc], {PEEK2S, PEEK2U})  then
-			c_stmt0("poke2_addr = (unsigned short *)get_pos_int(\"peek2s/peek2u\", *(((s1_ptr)_1)->base+1));\n")
-		elsif find( Code[pc], {PEEK4S, PEEK4U}) then
-			c_stmt0("peek4_addr = (unsigned long *)get_pos_int(\"peek4s/peek4u\", *(((s1_ptr)_1)->base+1));\n")
-		end if
+		c_stmt("_1 = (int)SEQ_PTR(@);\n", arg)
+		switch op do
+			case PEEK, PEEKS  then
+				c_stmt0("poke_addr = (unsigned char *)get_pos_int(\"peek\", *(((s1_ptr)_1)->base+1));\n")
+			case PEEK2S, PEEK2U then
+				c_stmt0("poke2_addr = (unsigned short *)get_pos_int(\"peek2s/peek2u\", *(((s1_ptr)_1)->base+1));\n")
+			case PEEK4S, PEEK4U then
+				c_stmt0("peek4_addr = (unsigned long *)get_pos_int(\"peek4s/peek4u\", *(((s1_ptr)_1)->base+1));\n")
+			case PEEK8S, PEEK8U then
+				c_stmt0("peek8_addr = (unsigned long long *)get_pos_int(\"peek8s/peek8u\", *(((s1_ptr)_1)->base+1));\n")
+		end switch
 		c_stmt0("_2 = get_pos_int(\"peek\", *(((s1_ptr)_1)->base+2));\n")
 		c_stmt("poke4_addr = (unsigned long *)NewS1(_2);\n", Code[pc+2])
 		c_stmt("@ = MAKE_SEQ(poke4_addr);\n", Code[pc+2])
 		c_stmt0("poke4_addr = (unsigned long *)((s1_ptr)poke4_addr)->base;\n")
 
-		if sequence(dj_path) then
-			if find( Code[pc], { PEEK, PEEKS } ) then
-				c_stmt0("if ((unsigned)poke_addr <= LOW_MEMORY_MAX) {\n")
-			elsif find( Code[pc], {PEEK2S, PEEK2U}) then
-				c_stmt0("if ((unsigned)poke2_addr <= LOW_MEMORY_MAX) {\n")
-			else
-				c_stmt0("if ((unsigned)peek4_addr <= LOW_MEMORY_MAX) {\n")
-			end if
-			c_stmt0("while (--_2 >= 0) {\n")  -- SLOW WHILE
-			c_stmt0("poke4_addr++;\n")
-			if find( Code[pc],  {PEEK, PEEKS})  then
-				c_stmt0("*(int *)poke4_addr = _farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)(poke_addr++));\n")
-				if Code[pc] = PEEKS then
-					c_stmt0("_1 = (int)(signed char)_1);\n")
-				else
-					c_stmt0("_1 = (int)(unsigned char)_1;\n")
-				end if
-			elsif find( Code[pc], {PEEK2S, PEEK2U}) then
-				c_stmt0("*(int *)poke4_addr = _farpeekw(_go32_info_block.selector_for_linear_memory, (unsigned)(poke2_addr++));\n")
-				if Code[pc] = PEEK2S then
-					c_stmt0("_1 = (int)(signed short)_1);\n")
-				else
-					c_stmt0("_1 = (int)(unsigned short)_1;\n")
-				end if
-				c_stmt0("*(short *)poke4_addr = _1;\n")
-			else
-				c_stmt0("_1 = _farpeekl(_go32_info_block.selector_for_linear_memory, (unsigned)(peek4_addr++));\n")
-				if Code[pc] = PEEK4S then
-					c_stmt0("if (_1 < MININT || _1 > MAXINT)\n")
-					c_stmt0("_1 = NewDouble((double)(long)_1);\n")
-				else  -- PEEK4U
-					c_stmt0("if ((unsigned)_1 > (unsigned)MAXINT)\n")
-					c_stmt0("_1 = NewDouble((double)(unsigned long)_1);\n")
-				end if
-				c_stmt0("*(int *)poke4_addr = _1;\n")
-			end if
-			c_stmt0("}\n")
-			c_stmt0("}\n")
-			c_stmt0("else {\n")
-		end if
-
 		c_stmt0("while (--_2 >= 0) {\n")  -- FAST WHILE
 		c_stmt0("poke4_addr++;\n")
-		if find( Code[pc], {PEEK, PEEKS}) then
-			if Code[pc] = PEEKS then
-				c_stmt0("_1 = (int)(signed char)*poke_addr++;\n")
-			else  -- PEEK4U */
-				c_stmt0("_1 = (int)(unsigned char)*poke_addr++;\n")
-			end if
-			c_stmt0("*(int *)poke4_addr = _1;\n")
-		elsif find( Code[pc], {PEEK2S, PEEK2U}) then
+		switch op do
+			case PEEK, PEEKS then
+				if op = PEEKS then
+					c_stmt0("_1 = (int)(signed char)*poke_addr++;\n")
+				else  -- PEEK4U */
+					c_stmt0("_1 = (int)(unsigned char)*poke_addr++;\n")
+				end if
+				c_stmt0("*(int *)poke4_addr = _1;\n")
+			case PEEK2S, PEEK2U then
 
-			if Code[pc] = PEEK2S then
-				c_stmt0("_1 = (int)(short)*poke2_addr++;\n")
-			else  -- PEEK4U */
-				c_stmt0("_1 = (int)(unsigned short)*poke2_addr++;\n")
-			end if
-			c_stmt0("*(int *)poke4_addr = _1;\n")
-		else
-			c_stmt0("_1 = (int)*peek4_addr++;\n")
-			if Code[pc] = PEEK4S then
-				c_stmt0("if (_1 < MININT || _1 > MAXINT)\n")
-				c_stmt0("_1 = NewDouble((double)(long)_1);\n")
-			else  -- PEEK4U */
-				c_stmt0("if ((unsigned)_1 > (unsigned)MAXINT)\n")
-				c_stmt0("_1 = NewDouble((double)(unsigned long)_1);\n")
-			end if
-			c_stmt0("*(int *)poke4_addr = _1;\n")
-		end if
+				if op = PEEK2S then
+					c_stmt0("_1 = (int)(short)*poke2_addr++;\n")
+				else  -- PEEK4U */
+					c_stmt0("_1 = (int)(unsigned short)*poke2_addr++;\n")
+				end if
+				c_stmt0("*(int *)poke4_addr = _1;\n")
+			
+			case PEEK8S, PEEK8U then
+				c_stmt0("peek8_longlong = *peek8_addr++;\n")
+				if Code[pc] = PEEK8S then
+					c_stmt0("if (peek8_longlong < (long long) MININT || peek8_longlong > (long long) MAXINT){\n")
+						c_stmt0("_1 = NewDouble((double)(long)peek8_longlong);\n")
+					c_stmt0("}\n")
+					c_stmt0("else{\n")
+						c_stmt0("_1 = (object) peek8_longlong;\n" )
+					c_stmt0("}\n")
+					
+				else  -- PEEK8U */
+					c_stmt0("if ((unsigned long long)peek8_longlong > (unsigned long long)MAXINT){\n")
+						c_stmt0("_1 = NewDouble((double) peek8_longlong);\n")
+					c_stmt0("}\n")
+					c_stmt0("else{\n")
+						c_stmt0("_1 = (object) peek8_longlong;\n" )
+					c_stmt0("}\n")
+					
+				end if
+				c_stmt0("*(int *)poke4_addr = _1;\n")
+				
+			case else
+				c_stmt0("_1 = (int)*peek4_addr++;\n")
+				if Code[pc] = PEEK4S then
+					c_stmt0("if (_1 < MININT || _1 > MAXINT){\n")
+					c_stmt0("_1 = NewDouble((double)(long)_1);\n")
+					c_stmt0("}\n")
+					
+				else  -- PEEK4U */
+					c_stmt0("if ((unsigned)_1 > (unsigned)MAXINT){\n")
+					c_stmt0("_1 = NewDouble((double)(unsigned long)_1);\n")
+					c_stmt0("}\n")
+					
+				end if
+				c_stmt0("*(int *)poke4_addr = _1;\n")
+		end switch
 		c_stmt0("}\n")
-
-		if sequence(dj_path) then
-			c_stmt0("}\n")
-		end if
 	end if
 
-	if TypeIs(Code[pc+1], TYPE_OBJECT) then
+	if TypeIs( arg, TYPE_OBJECT) then
 		c_stmt0("}\n")
 	end if
 
 	CDeRefStr("_0")
 
-	if TypeIsIn(Code[pc+1], TYPES_IAD) then
-		if Code[pc] = PEEK then
-			target = {0, 255}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT,0 )
-		elsif Code[pc] = PEEKS then
-			target = {-127, 127}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT,0 )
-		elsif Code[pc] = PEEK2S then
-			target = {-32768, 32767}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
-		elsif Code[pc] = PEEK2U then
-			target = {0, #FFFF}
-			SetBBType(Code[pc+2], TYPE_INTEGER, target, TYPE_OBJECT, 0)
-		elsif Code[pc] = PEEK_STRING then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0 )
-		else
-			-- poke4
-			SetBBType(Code[pc+2], TYPE_ATOM, novalue, TYPE_OBJECT, 0)
-		end if
+	if TypeIsIn( arg, TYPES_IAD) then
+		
+		switch op do
+			case PEEK then
+				target = {0, 255}
+				SetBBType( target_sym, TYPE_INTEGER, target, TYPE_OBJECT,0 )
+			case PEEKS then
+				target = {-127, 127}
+				SetBBType( target_sym, TYPE_INTEGER, target, TYPE_OBJECT,0 )
+			case PEEK2S then
+				target = {-32768, 32767}
+				SetBBType( target_sym, TYPE_INTEGER, target, TYPE_OBJECT, 0)
+			case PEEK2U then
+				target = {0, #FFFF}
+				SetBBType( target_sym, TYPE_INTEGER, target, TYPE_OBJECT, 0)
+			case PEEK_STRING then
+				SetBBType( target_sym, TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0 )
+			case else
+				-- peek4, peek8
+				SetBBType( target_sym, TYPE_ATOM, novalue, TYPE_OBJECT, 0)
+		end switch
 
-	elsif TypeIs(Code[pc+1], TYPE_SEQUENCE) then
-		if find(Code[pc], { PEEK, PEEKS, PEEK2U, PEEK2S }) then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
+	elsif TypeIs( arg, TYPE_SEQUENCE) then
+		if find(op, { PEEK, PEEKS, PEEK2U, PEEK2S }) then
+			SetBBType( target_sym, TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0)
 		else
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_ATOM, 0)
+			SetBBType( target_sym, TYPE_SEQUENCE, novalue, TYPE_ATOM, 0)
 		end if
 	else
-		if Code[pc] = PEEK_STRING then
-			SetBBType(Code[pc+2], TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0 )
+		if op = PEEK_STRING then
+			SetBBType( target_sym, TYPE_SEQUENCE, novalue, TYPE_INTEGER, 0 )
 		end if
 		-- TYPE_OBJECT */
-		SetBBType(Code[pc+2], TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
+		SetBBType( target_sym, TYPE_OBJECT, novalue, TYPE_OBJECT, 0)
 
 	end if
-	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
-	create_temp( Code[pc+2], NEW_REFERENCE )
+	if op = PEEK8U or op = PEEK8S then
+		c_stmt0("}\n")
+	end if
+	dispose_temp( arg, DISCARD_TEMP, REMOVE_FROM_MAP )
+	create_temp( target_sym, NEW_REFERENCE )
 	pc += 3
 end procedure
 
 procedure opPOKE()
 -- generate code for poke and poke4
 -- should optimize constant address
-
-	if TypeIsIn(Code[pc+1], TYPES_AO) then
+	integer 
+		op  = Code[pc],
+		ptr = Code[pc+1],
+		val = Code[pc+2]
+	if TypeIsIn( ptr, TYPES_AO) then
 		c_stmt("if (IS_ATOM_INT(@)){\n", Code[pc+1])
 	end if
 
-	if TypeIsIn(Code[pc+1], TYPES_IAO) then
-		if Code[pc] = POKE4 then
-			c_stmt("poke4_addr = (unsigned long *)@;\n", Code[pc+1])
-		elsif Code[pc] = POKE2 then
-			c_stmt("poke2_addr = (unsigned short *)@;\n", Code[pc+1])
-		else
-			c_stmt("poke_addr = (unsigned char *)@;\n", Code[pc+1])
-		end if
+	if TypeIsIn( ptr, TYPES_IAO) then
+		switch op do
+			case POKE8 then
+				c_stmt("poke8_addr = (unsigned long long *)@;\n", ptr )
+			case POKE4 then
+				c_stmt("poke4_addr = (unsigned long *)@;\n", ptr )
+			case POKE2 then
+				c_stmt("poke2_addr = (unsigned short *)@;\n", ptr )
+			case else
+				c_stmt("poke_addr = (unsigned char *)@;\n", ptr )
+		end switch
 	end if
 
-	if TypeIsIn(Code[pc+1], TYPES_AO) then
+	if TypeIsIn( ptr, TYPES_AO) then
 		c_stmt0("}\n" )
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIsNotIn(Code[pc+1], TYPES_IS) then
-		if Code[pc] = POKE4 then
-			c_stmt("poke4_addr = (unsigned long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
-						   Code[pc+1])
-		elsif Code[pc] = POKE2 then
-			c_stmt("poke2_addr = (unsigned short *)(unsigned long)(DBL_PTR(@)->dbl);\n",
-						   Code[pc+1])
-		else
-			c_stmt("poke_addr = (unsigned char *)(unsigned long)(DBL_PTR(@)->dbl);\n",
-						   Code[pc+1])
-		end if
+	if TypeIsNotIn( ptr, TYPES_IS) then
+		switch op do
+			case POKE8 then
+				c_stmt("poke8_addr = (unsigned long long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+							ptr)
+			case POKE4 then
+				c_stmt("poke4_addr = (unsigned long *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+							ptr)
+			case POKE2 then
+				c_stmt("poke2_addr = (unsigned short *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+							ptr)
+			case else
+				c_stmt("poke_addr = (unsigned char *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+							ptr)
+		end switch
 	end if
 	
-	if TypeIsIn(Code[pc+1], TYPES_AO) then
+	if TypeIsIn( ptr, TYPES_AO) then
 		c_stmt0("}\n" )
 	end if
 	
-	if TypeIsIn(Code[pc+2], TYPES_AO) then
-		c_stmt("if (IS_ATOM_INT(@)) {\n", Code[pc+2])
+	if TypeIsIn( val, TYPES_AO) then
+		c_stmt("if (IS_ATOM_INT(@)) {\n", val)
 	end if
 
-	if TypeIsIn(Code[pc+2], TYPES_IAO) then
-		if Code[pc] = POKE4 then
-			seg_poke4(Code[pc+2], 0)
-		elsif Code[pc] = POKE2 then
-			seg_poke2(Code[pc+2], 0)
-		else
-			seg_poke1(Code[pc+2], 0)
-		end if
+	if TypeIsIn( val, TYPES_IAO) then
+		switch op do
+			case POKE8 then
+				seg_poke8( val, 0)
+			case POKE4 then
+				seg_poke4( val, 0)
+			case POKE2 then
+				seg_poke2( val, 0)
+			case else
+				seg_poke1( val, 0)
+		end switch
 	end if
 
-	if TypeIs(Code[pc+2], TYPE_ATOM) then
+	if TypeIs( val, TYPE_ATOM) then
 		c_stmt0("}\n")
 		c_stmt0("else {\n")
-	elsif TypeIs(Code[pc+2], TYPE_OBJECT) then
+	elsif TypeIs( val, TYPE_OBJECT) then
 		c_stmt0("}\n")
-		c_stmt("else if (IS_ATOM(@)) {\n", Code[pc+2])
+		c_stmt("else if (IS_ATOM(@)) {\n", val )
 	end if
 
-	if TypeIsNotIn(Code[pc+2], TYPES_IS) then
-		if Code[pc] = POKE4 then
-			seg_poke4(Code[pc+2], 1)
-		else
-			seg_poke1(Code[pc+2], 1)
-		end if
+	if TypeIsNotIn( val, TYPES_IS) then
+		switch op do
+			case POKE8 then
+				seg_poke8( val, 1)
+			case POKE4 then
+				seg_poke4( val, 1)
+			case POKE2 then
+				seg_poke2( val, 1)
+			case else
+				seg_poke1( val, 1)
+		end switch
 	end if
 
-	if TypeIsIn(Code[pc+2], TYPES_AO) then
+	if TypeIsIn( val, TYPES_AO) then
 		c_stmt0("}\n")
 	end if
 
-	if TypeIs(Code[pc+2], TYPE_OBJECT) then
+	if TypeIs( val, TYPE_OBJECT) then
 		c_stmt0("else {\n")
 	end if
 
-	if TypeIsIn(Code[pc+2], TYPES_SO) then
-		c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+2])
+	if TypeIsIn( val, TYPES_SO) then
+		c_stmt("_1 = (int)SEQ_PTR(@);\n", val)
 		c_stmt0("_1 = (int)((s1_ptr)_1)->base;\n")
-
-		if sequence(dj_path) then
-			if Code[pc] = POKE4 then
-				c_stmt0("if ((unsigned)poke4_addr <= LOW_MEMORY_MAX) {\n")
-			elsif Code[pc] = POKE2 then
-				c_stmt0("if ((unsigned)poke2_addr <= LOW_MEMORY_MAX) {\n")
-			else
-				c_stmt0("if ((unsigned)poke_addr <= LOW_MEMORY_MAX) {\n")
-			end if
-
-			c_stmt0("while (1) {\n")  -- SLOW WHILE
-			c_stmt0("_1 += 4;\n")
-			c_stmt0("_2 = *((int *)_1);\n")
-			c_stmt0("if (IS_ATOM_INT(_2))\n")
-			if Code[pc] = POKE4 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke4_addr++), (unsigned long)_2);\n")
-			elsif Code[pc] = POKE2 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke4_addr++), (unsigned short)_2);\n")
-			else
-				c_stmt0("_farpokeb(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke_addr++), (unsigned char)_2);\n")
-			end if
-			c_stmt0("else if (_2 == NOVALUE)\n")
-			c_stmt0("break;\n")
-			c_stmt0("else\n")
-			if Code[pc] = POKE4 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke4_addr++), (unsigned long)DBL_PTR(_2)->dbl);\n")
-			elsif Code[pc] = POKE2 then
-				c_stmt0("_farpokel(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke2_addr++), (unsigned short)DBL_PTR(_2)->dbl);\n")
-			else
-				c_stmt0("_farpokeb(_go32_info_block.selector_for_linear_memory, (unsigned long)(poke_addr++), (unsigned char)DBL_PTR(_2)->dbl);\n")
-			end if
-			c_stmt0("}\n")
-			c_stmt0("}\n")
-			c_stmt0("else {\n")
-		end if
 
 		c_stmt0("while (1) {\n") -- FAST WHILE
 		c_stmt0("_1 += 4;\n")
 		c_stmt0("_2 = *((int *)_1);\n")
 		c_stmt0("if (IS_ATOM_INT(_2))\n")
-		if Code[pc] = POKE4 then
-			c_stmt0("*(int *)poke4_addr++ = (unsigned long)_2;\n")
-		elsif Code[pc] = POKE2 then
-			c_stmt0("*poke2_addr++ = (unsigned short)_2;\n")
-		else
-			c_stmt0("*poke_addr++ = (unsigned char)_2;\n")
-		end if
+		switch op do
+			case POKE8 then
+				c_stmt0("*poke8_addr++ = (unsigned long long)_2;\n")
+			case POKE4 then
+				c_stmt0("*(int *)poke4_addr++ = (unsigned long)_2;\n")
+			case POKE2 then
+				c_stmt0("*poke2_addr++ = (unsigned short)_2;\n")
+			case else
+				c_stmt0("*poke_addr++ = (unsigned char)_2;\n")
+		end switch
 		c_stmt0("else if (_2 == NOVALUE)\n")
 		c_stmt0("break;\n")
 		c_stmt0("else {\n")
-		if Code[pc] = POKE4 then
-			if TWINDOWS and atom(wat_path) then
-				-- work around an Lcc bug
-				c_stmt0("_0 = (unsigned long)DBL_PTR(_2)->dbl;\n")
-				c_stmt0("*(int *)poke4_addr++ = (unsigned long)_0;\n")
-			else
-				c_stmt0("*(int *)poke4_addr++ = (unsigned long)DBL_PTR(_2)->dbl;\n")
-			end if
-		elsif Code[pc] = POKE2 then
-			if TWINDOWS and atom(wat_path) then
-				-- work around an Lcc bug
-				c_stmt0("_0 = (unsigned short)DBL_PTR(_2)->dbl;\n")
-				c_stmt0("*poke2_addr++ = (unsigned short)_0;\n")
-			else
-				c_stmt0("*poke2_addr++ = (unsigned short)DBL_PTR(_2)->dbl;\n")
-			end if
-		else
-			if TWINDOWS and atom(wat_path) then
-				-- work around an Lcc bug
-				c_stmt0("_0 = (signed char)DBL_PTR(_2)->dbl;\n")
-				c_stmt0("*poke_addr++ = (signed char)_0;\n")
-			else
-				c_stmt0("*poke_addr++ = (signed char)DBL_PTR(_2)->dbl;\n")
-			end if
-		end if
+		switch op do
+			case POKE8 then
+				if TWINDOWS and atom(wat_path) then
+					-- work around an Lcc bug
+					c_stmt0("_0 = (unsigned long)DBL_PTR(_2)->dbl;\n")
+					c_stmt0("*poke8_addr++ = (unsigned long long)_0;\n")
+				else
+					c_stmt0("*poke8_addr++ = (unsigned long long)DBL_PTR(_2)->dbl;\n")
+				end if
+			case POKE4 then
+				if TWINDOWS and atom(wat_path) then
+					-- work around an Lcc bug
+					c_stmt0("_0 = (unsigned long)DBL_PTR(_2)->dbl;\n")
+					c_stmt0("*(int *)poke4_addr++ = (unsigned long)_0;\n")
+				else
+					c_stmt0("*(int *)poke4_addr++ = (unsigned long)DBL_PTR(_2)->dbl;\n")
+				end if
+			case POKE2 then
+				if TWINDOWS and atom(wat_path) then
+					-- work around an Lcc bug
+					c_stmt0("_0 = (unsigned short)DBL_PTR(_2)->dbl;\n")
+					c_stmt0("*poke2_addr++ = (unsigned short)_0;\n")
+				else
+					c_stmt0("*poke2_addr++ = (unsigned short)DBL_PTR(_2)->dbl;\n")
+				end if
+			case else
+				if TWINDOWS and atom(wat_path) then
+					-- work around an Lcc bug
+					c_stmt0("_0 = (signed char)DBL_PTR(_2)->dbl;\n")
+					c_stmt0("*poke_addr++ = (signed char)_0;\n")
+				else
+					c_stmt0("*poke_addr++ = (signed char)DBL_PTR(_2)->dbl;\n")
+				end if
+		end switch
 		c_stmt0("}\n")
 		c_stmt0("}\n")
 
@@ -5788,10 +5806,10 @@ procedure opPOKE()
 		end if
 	end if
 
-	if TypeIs(Code[pc+2], TYPE_OBJECT) then
+	if TypeIs( val, TYPE_OBJECT) then
 		c_stmt0("}\n")
 	end if
-	dispose_temps( pc+1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
+	dispose_temps( pc + 1, 2, DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 3
 end procedure
 
@@ -6896,10 +6914,10 @@ export procedure init_opcodes()
 			case "CALL_FUNC" then
 				operation[i] = routine_id("opCALL_PROC")
 
-			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING" then
+			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING", "PEEK8S", "PEEK8U" then
 				operation[i] = routine_id("opPEEK")
 
-			case "POKE4", "POKE2" then
+			case "POKE4", "POKE2", "POKE8" then
 				operation[i] = routine_id("opPOKE")
 
 			case "ABORT" then
@@ -7180,6 +7198,9 @@ procedure BackEnd(atom ignore)
 		end if
 	end if
 
+	c_puts("unsigned long long *peek8_addr;\n")
+	c_hputs("extern unsigned long long *peek8_addr;\n")
+
 	c_puts("unsigned long *peek4_addr;\n")
 	c_hputs("extern unsigned long *peek4_addr;\n")
 
@@ -7191,6 +7212,9 @@ procedure BackEnd(atom ignore)
 
 	c_puts("unsigned long *poke4_addr;\n")
 	c_hputs("extern unsigned long *poke4_addr;\n")
+
+	c_puts("unsigned long long *poke8_addr;\n")
+	c_hputs("extern unsigned long long *poke8_addr;\n")
 
 	c_puts("struct d temp_d;\n")
 	c_hputs("extern struct d temp_d;\n")

@@ -25,5 +25,20 @@ free_pointer_array(p)
 
 test_equal("page & address length check", 0, remainder(PAGE_SIZE, ADDRESS_LENGTH))
 
+p = allocate( 24 )
+poke8( p, power( 2, 40 ) )
+test_equal( "poke8/peek8u 2^40", power( 2, 40 ), peek8u( p ) )
+test_equal( "poke8/peek8s 2^40", power( 2, 40 ), peek8s( p ) )
+
+poke8( p, -1 )
+test_equal( "poke8/peek8u -1", 0xffffffff + power(2,32)* 0xffffffff, peek8u( p ) )
+test_equal( "poke8/peek8s -1", -1, peek8s( p ) )
+
+poke8( p, {1, 2, 3})
+test_equal( "poke8/peek8u 1,2,3", {1,2,3}, peek8u( p & 3 ) )
+test_equal( "poke8/peek8s 1,2,3", {1,2,3}, peek8s( p & 3 ) )
+
+poke8( p, {-1, -2, -3})
+test_equal( "poke8/peek8s 1,2,3", {-1,-2,-3}, peek8s( p & 3 ) )
 
 test_report()
