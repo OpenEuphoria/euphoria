@@ -1,0 +1,8 @@
+== Version 4.1.0 Date TBD
+
+== Bug Fixes
+
+
+== Enhancements
+
+* Added 8-byte memory access: [[:poke8], [[:peek8s]], [[:peek8u]]
