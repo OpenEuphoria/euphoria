@@ -5416,6 +5416,11 @@ procedure opPEEK_STRING()
 	create_temp( Code[pc+2], NEW_REFERENCE )
 end procedure
 
+procedure opPEEK_POINTER()
+	Code[pc] = PEEK4U
+	opPEEK()
+end procedure
+
 procedure opPEEK()
 -- PEEK / PEEKS / PEEK2S / PEEK2U / PEEK4U / PEEK4S / PEEK8U / PEEK8S
 	integer
@@ -5647,8 +5652,14 @@ procedure opPEEK()
 	pc += 3
 end procedure
 
+
+procedure opPOKE_POINTER()
+	Code[pc] = POKE4
+	opPOKE()
+end procedure
+
 procedure opPOKE()
--- generate code for poke and poke4
+-- generate code for poke/2/4/8
 -- should optimize constant address
 	integer 
 		op  = Code[pc],
@@ -6919,6 +6930,12 @@ export procedure init_opcodes()
 
 			case "POKE4", "POKE2", "POKE8" then
 				operation[i] = routine_id("opPOKE")
+			
+			case "POKE_POINTER" then
+				operation[i] = routine_id("opPOKE_POINTER")
+				
+			case "PEEK_POINTER" then
+				operation[i] = routine_id("opPEEK_POINTER")
 
 			case "ABORT" then
 				operation[i] = routine_id("opCLOSE")

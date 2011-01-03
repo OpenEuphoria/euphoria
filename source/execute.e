@@ -4202,6 +4202,12 @@ procedure do_exec()
 
 			case POKE8 then
 				opPOKE8()
+			
+			case POKE_POINTER then
+				opPOKE4()
+			
+			case PEEK_POINTER then
+				opPEEK4U()
 				
 			case POSITION then
 				opPOSITION()
