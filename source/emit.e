@@ -1185,7 +1185,7 @@ export procedure emit_op(integer op)
 
 	-- 1 input, 1 output
 	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, PEEK8U, PEEK8S,
-					TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING then
+		TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING, PEEK_POINTER then
 		cont11ii(op, TRUE)
 
 	case UMINUS then
@@ -1280,7 +1280,7 @@ export procedure emit_op(integer op)
 
 	-- 2 inputs, 0 outputs
 	case SYSTEM, PUTS, PRINT, QPRINT, POSITION, MACHINE_PROC,
-					C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2, POKE8 then
+		C_PROC, POKE, POKE4, TASK_SCHEDULE, POKE2, POKE8, POKE_POINTER then
 		emit_opcode(op)
 
 		b = Pop()

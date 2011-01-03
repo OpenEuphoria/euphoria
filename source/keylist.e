@@ -169,6 +169,8 @@ export sequence keylist = {
 	{"poke8",            SC_PREDEF, PROC, POKE8,            2, E_OTHER_EFFECT},
 	{"peek8s",           SC_PREDEF, FUNC, PEEK8S,           1, E_PURE},
 	{"peek8u",           SC_PREDEF, FUNC, PEEK8U,           1, E_PURE},
+	{"poke_pointer",     SC_PREDEF, PROC, POKE8,            2, E_OTHER_EFFECT},
+	{"peek_pointer",     SC_PREDEF, FUNC, PEEK8S,           1, E_PURE},
 	$
 
 }

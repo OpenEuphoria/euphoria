@@ -414,7 +414,7 @@ end function
 function add_filename( sequence routine_info, object ignored )
 	sequence file_name = short_names[routine_info[$]]
 	sequence name = routine_info[3]
-	return { file_name, encode( encode( file_name ) ), encode( encode( name ) ), name } 
+	return { file_name, encode( encode( file_name ) ), name, name } 
 		& routine_info[5]
 		& routine_info[4]
 		& routine_info[6..$]
