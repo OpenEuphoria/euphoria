@@ -6204,15 +6204,15 @@ object eu_sizeof( object data_type ){
 	}
 	switch( dt ){
 		case C_DOUBLE:
-			return 8;
+			return sizeof( double );
 		case C_FLOAT:
-			return 4;
+			return sizeof( float );
 		case C_CHAR:
 		case C_UCHAR:
-			return 1;
+			return sizeof( char );
 		case C_SHORT:
 		case C_USHORT:
-			return 2;
+			return sizeof( short );
 		case E_INTEGER:
 		case E_ATOM:
 		case E_SEQUENCE:
