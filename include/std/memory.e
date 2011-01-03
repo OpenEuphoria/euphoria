@@ -349,18 +349,59 @@ memconst:FREE_RID = routine_id("deallocate")
 --  a = allocate(100)   -- allocate 100 bytes in memory
 -- 
 -- -- poke one 8-byte value at a time:
--- poke2(a, 12345)
--- poke2(a+8, #FF00)
--- poke2(a+16, -12345)
+-- poke8(a, 12345)
+-- poke8(a+8, #FF00)
+-- poke8(a+16, -12345)
 --
 -- -- poke 3 8-byte values at once:
 -- poke8(a, {12345, #FF00, -12345})
 -- </eucode>
 -- 
 -- See Also:
---     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:allocate]], [[:free]], [[:call]]
+--     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:poke_pointer]] [[:allocate]], [[:free]], [[:call]]
 --
 
+--****
+-- Signature:
+-- <built-in> procedure poke_pointer(atom addr, object x)
+--
+-- Description:
+-- Stores one or more native pointer size values, starting at a memory location.
+--
+-- Parameters:
+--              # ##addr## : an atom, the address at which to store
+--              # ##x## : an object, either an atom or a non empty sequence of atoms.
+--
+-- Errors:
+--      Poke() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- Comments: 
+--
+-- ##poke_pointer()## converts stores the values as the native pointer size.  When dealing with
+-- pointers, this is the correct function to use in order to be cross architecture compatible.
+--
+-- It is faster to write several values at once by poking a sequence of
+-- values, than it is to write one at a time in a loop.
+-- 
+-- The values to be stored can be negative or positive.
+--
+-- Example 1:
+-- <eucode>
+--  a = allocate(100)   -- allocate 100 bytes in memory
+-- 
+-- -- poke one pointer at a time (assuming 32-bit pointers):
+-- poke_pointer(a, 12345)
+-- poke_pointer(a+4, #FF00)
+-- poke_pointer(a+8, -12345)
+--
+-- -- poke 3 8-byte values at once:
+-- poke8(a, {12345, #FF00, -12345})
+-- </eucode>
+-- 
+-- See Also:
+--     [[:peek2s]], [[:peek2u]], [[:poke]], [[:poke4]], [[:poke8]], [[:allocate]], [[:free]], [[:call]]
+--
 
 --****
 -- Signature:
@@ -417,7 +458,7 @@ memconst:FREE_RID = routine_id("deallocate")
 -- See Also:
 --
 --  [[:poke2]], [[:peeks]], [[:peek4s]], [[:allocate]], [[:free]]
---  [[:peek2u]]
+--  [[:peek2u]], [[:peek_pointer]]
 --
 
 --****
@@ -475,7 +516,64 @@ memconst:FREE_RID = routine_id("deallocate")
 -- 
 -- See Also: 
 --  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]]
---  [[:peek4u]]
+--  [[:peek4u]], [[:peek_pointer]]
+--
+
+--****
+-- Signature:
+-- <built-in> function peek_pointer(object addr_n_length)
+--
+-- Description:
+-- Fetches one or more integers the size of a native pointer from an address
+-- in memory.
+--
+-- Parameters:
+--              # ##addr_n_length## : an object, either of
+--              ** an atom ##addr## ~-- to fetch one double word at ##addr##, or
+--              ** a pair {##addr,len}## ~-- to fetch ##len## double words at ##addr##
+--
+-- Returns:
+--              An **object**, either an integer if the input was a single address,
+-- or a sequence of integers if a sequence was passed. In both cases,
+-- integers returned are pointer values, depending on the architecture of euphoria
+-- that is running.  The value is always treated as unsigned.
+--
+-- Errors:
+--      Peek() in memory you don't own may be blocked by the OS, and cause a
+-- machine exception. If you use the define safe these routines will catch these problems with a EUPHORIA error.
+--
+-- When supplying a {address, count} sequence, the count must not be negative.
+--
+-- Comments: 
+--
+-- Since addresses on a 32-bit architecture are 32-bit (or 64-bit numbers, they
+-- can be larger than the largest value of type integer (31-bits).  Current 64-bit
+-- architectures do not use the full 64-bits for their memory space, so 64-bit 
+-- pointers should fit into 63-bit euphoria integers.  To be cross architecture
+-- compatible, variables that hold an address should therefore be declared as atoms.
+--
+-- It is faster to read several words at once using the second form of peek()
+-- than it is to read one word at a time in a loop. The returned sequence has
+-- the length you asked for on input.
+-- 
+-- Remember that ##peek_pointer##() takes just one argument, which in the second
+-- form is actually a 2-element sequence.
+--  
+-- Example 1: 
+-- <eucode>
+-- -- The following are equivalent:
+-- -- method 1
+-- Get 4 4-byte pointers starting address 100 (assuming 32-bit euphoria)
+-- s = {peek_pointer(100), peek_pointer(104), peek_pointer(108), peek_pointer(116)}
+--
+-- -- method 2
+-- Get 4 4-byte numbers starting address 100 (assuming 32-bit euphoria)
+-- s = peek-pointer({100, 4})
+-- </eucode>
+-- 
+-- See Also: 
+--  [[:poke2]], [[:peek]], [[:peek2s]], [[:allocate]], [[:free]]
+--  [[:peek4u]], [[:peek8s]], [[:peek8u]]
 --
 
 --****
@@ -531,7 +629,7 @@ memconst:FREE_RID = routine_id("deallocate")
 -- 
 -- See Also: 
 -- [[:poke4]], [[:peeks]], [[:peek4u]], [[:allocate]], [[:free]],
--- [[:peek2s]]
+-- [[:peek2s]], [[:peek8s]], [[:peek8u], [[:peek_pointer]]
 --
 
 --****
@@ -587,8 +685,8 @@ memconst:FREE_RID = routine_id("deallocate")
 -- </eucode>
 -- 
 -- See Also: 
---  [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]]
---
+--  [[:poke4]], [[:peek]], [[:peek4s]], [[:allocate]], [[:free]], [[:peek2u]],
+--  [[:peek8s]], [[:peek8u]], [[:peek_pointer]]
 
 --****
 -- Signature:
