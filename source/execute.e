@@ -3057,6 +3057,19 @@ procedure opPEEK4S()
 	pc += 3
 end procedure
 
+procedure opPEEK8U()
+	a = Code[pc+1]
+	target = Code[pc+2]
+	val[target] = peek8u(val[a])
+	pc += 3
+end procedure
+
+procedure opPEEK8S()
+	a = Code[pc+1]
+	target = Code[pc+2]
+	val[target] = peek8s(val[a])
+	pc += 3
+end procedure
 procedure opPEEK_STRING()
 	a = Code[pc+1]
 	target = Code[pc+2]
@@ -3089,6 +3102,13 @@ procedure opPOKE4()
 	a = Code[pc+1]
 	b = Code[pc+2]
 	poke4(val[a], val[b])
+	pc += 3
+end procedure
+
+procedure opPOKE8()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	poke8(val[a], val[b])
 	pc += 3
 end procedure
 
@@ -4153,6 +4173,12 @@ procedure do_exec()
 			case PEEK4U then
 				opPEEK4U()
 
+			case PEEK8S then
+				opPEEK8S()
+
+			case PEEK8U then
+				opPEEK8U()
+				
 			case PEEKS then
 				opPEEKS()
 
@@ -4174,6 +4200,9 @@ procedure do_exec()
 			case POKE4 then
 				opPOKE4()
 
+			case POKE8 then
+				opPOKE8()
+				
 			case POSITION then
 				opPOSITION()
 
