@@ -1677,38 +1677,6 @@ static void do_crash(object x)
 	RTFatal(message);
 }
 
-static void set_coverage(object x)
-{
-	object line, routine, wwrite;
-
-	if IS_ATOM(x) {
-		RTFatal("set_coverage expected a sequence");
-	}
-
-	if (SEQ_PTR(x)->length != 3) {
-		RTFatal("set_coverage expected a sequence of length 3");
-	}
-
-	line = get_pos_int("set_coverage", SEQ_PTR(x)->base[1]);
-	routine = get_pos_int("set_coverage", SEQ_PTR(x)->base[2]);
-	wwrite = get_pos_int("set_coverage", SEQ_PTR(x)->base[3]);
-
-	SET_COVERAGE((int)line, (int)routine, (int)wwrite);
-}
-
-static object frontend_callback( object x ){
-	int rid;
-	object cb;
-	
-	rid = get_pos_int("frontend_callback", x );
-	
-	cb = (object) rt00[rid].addr;
-	if (cb < MININT || cb > MAXINT){
-		cb =  NewDouble((double) cb);
-	}
-	return cb;
-}
-
 static object change_dir(object x)
 /* change to a new current directory */
 /* assume x is a sequence */
@@ -2634,7 +2602,7 @@ void Machine_Handler(int sig_no)
 
 #ifndef ERUNTIME
 extern struct IL fe;
-
+int in_backend = 0;
 object start_backend(object x)
 /* called by Euphoria-written front-end to run the back-end
  *
@@ -2645,14 +2613,12 @@ object start_backend(object x)
 	s1_ptr x_ptr;
 	char *w;
 
-
-
 	w = "backend";
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 7)
-		RTFatal("BACKEND requires a sequence of length 7");
+	if (IS_ATOM(x) || x_ptr->length != 11)
+		RTFatal("BACKEND requires a sequence of length 11");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2661,6 +2627,16 @@ object start_backend(object x)
 	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];
 	fe.argv = x_ptr->base[7];
+	
+	// Front End CallBacks:
+	cover_line        = get_pos_int(w, *(x_ptr->base+8));
+	cover_routine     = get_pos_int(w, *(x_ptr->base+9));
+	write_coverage_db = get_pos_int(w, *(x_ptr->base+10));
+	syncolor          = get_pos_int(w, *(x_ptr->base+11));
+	
+	// This is checked when we try to write coverage to make sure
+	// we need to output an error message.
+	in_backend = 1;
 
 #if defined(EUNIX) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
@@ -2972,16 +2948,6 @@ object machine(object opcode, object x)
 				return ATOM_M1;
 				break;
 
-			case M_SET_COVERAGE:
-				set_coverage(x);
-				return ATOM_1;
-				break;
-
-			case M_SET_SYNCOLOR:
-				set_syncolor(x);
-				return ATOM_1;
-				break;
-
 			case 201:
 				return SetTColor(x);
 				break;
@@ -3153,8 +3119,6 @@ object machine(object opcode, object x)
 			case M_HAS_CONSOLE:
 				return has_console();
 			
-			case M_FRONTEND_CALLBACK:
-				return frontend_callback( x );
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:

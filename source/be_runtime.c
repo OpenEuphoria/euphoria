@@ -5539,7 +5539,9 @@ void Cleanup(int status)
 
 	gameover = TRUE;
 #ifndef ERUNTIME
-	if( !WRITE_COVERAGE_DB() ){
+	if( !WRITE_COVERAGE_DB() && in_backend ){
+		// check to make sure we're in the backend, and not exiting
+		// from the front end (e.g., when user passes -v flag
 		screen_output(stderr, "\nUnable to open coverage database!\n");
 	}
 #endif

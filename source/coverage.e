@@ -301,15 +301,3 @@ end function
 export function has_coverage()
 	return length( covered_files )
 end function
-
--- just to ensure that the translator doesn't get rid of 
--- these routines...they're only called from the back end,
--- so they look unused...
-if routine_id("cover_line") = -1 
-or routine_id("cover_routine") = -1
-or routine_id("write_coverage_db") = -1 then
-	puts(2, "error: missing coverage routines\n")
-end if
-
-constant M_SET_COVERAGE = 100
-machine_proc(M_SET_COVERAGE, {routine_id("cover_line"),routine_id("cover_routine"),routine_id("write_coverage_db")})

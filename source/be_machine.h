@@ -2,9 +2,11 @@
 #define BE_MACHINE_H_
 
 #include "global.h"
+#include "execute.h"
 
 #ifndef ERUNTIME
 object start_backend(object x);
+extern int in_backend;
 #endif
 
 #ifdef EWINDOWS
@@ -71,5 +73,11 @@ void Machine_Handler(int sig_no);
 object Wrap(object x);
 
 IFILE long_iopen(char *name, char *mode);
+
+unsigned internal_general_call_back(
+		  int cb_routine,
+						   unsigned arg1, unsigned arg2, unsigned arg3,
+						   unsigned arg4, unsigned arg5, unsigned arg6,
+						   unsigned arg7, unsigned arg8, unsigned arg9);
 
 #endif

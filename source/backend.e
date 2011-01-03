@@ -336,6 +336,21 @@ procedure BackEnd(integer il_file)
 		Argv = {Argv[1]} & Argv[3 .. Argc]
 	end if
 
-	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv })
+	-- M_BACKEND:
+	machine_proc(65, 
+		{
+			st, 
+			sl, 
+			ms, 
+			lit, 
+			include_info, 
+			get_switches(), 
+			Argv,
+			routine_id( "cover_line" ),
+			routine_id( "cover_routine" ),
+			routine_id( "write_coverage_db" ),
+			routine_id( "DisplayColorLine" ),
+			$
+		})
 end procedure
 mode:set_backend( routine_id("BackEnd") )
