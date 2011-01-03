@@ -385,6 +385,8 @@ struct char_cell {
 #define M_HAS_CONSOLE        99
 #define M_SET_COVERAGE       100
 #define M_SET_SYNCOLOR       101
+#define M_FRONTEND_CALLBACK  102
+
 enum CLEANUP_TYPES {
 	CLEAN_UDT,
 	CLEAN_UDT_RT,

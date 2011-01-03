@@ -1696,6 +1696,19 @@ static void set_coverage(object x)
 	SET_COVERAGE((int)line, (int)routine, (int)wwrite);
 }
 
+static object frontend_callback( object x ){
+	int rid;
+	object cb;
+	
+	rid = get_pos_int("frontend_callback", x );
+	
+	cb = (object) rt00[rid].addr;
+	if (cb < MININT || cb > MAXINT){
+		cb =  NewDouble((double) cb);
+	}
+	return cb;
+}
+
 static object change_dir(object x)
 /* change to a new current directory */
 /* assume x is a sequence */
@@ -3139,6 +3152,9 @@ object machine(object opcode, object x)
 	
 			case M_HAS_CONSOLE:
 				return has_console();
+			
+			case M_FRONTEND_CALLBACK:
+				return frontend_callback( x );
 
 			/* remember to check for MAIN_SCREEN wherever appropriate ! */
 			default:
