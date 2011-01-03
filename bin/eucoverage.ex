@@ -415,7 +415,7 @@ function routine_detail_sort( sequence r1, sequence r2 )
 end function
 
 function add_filename( sequence routine_info, object ignored )
-	sequence name = sprintf("%s:%s:", { files[routine_info[$]], routine_info[3] } )
+	sequence name = sprintf("%s:%s:", { short_names[routine_info[$]], routine_info[3] } )
 	routine_info[3] = name
 	return routine_info[3..$]
 end function
