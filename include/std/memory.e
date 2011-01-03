@@ -578,6 +578,24 @@ memconst:FREE_RID = routine_id("deallocate")
 
 --****
 -- Signature:
+-- <built-in> function sizeof(atom data_type)
+--
+-- Description:
+-- Returns the size in bytes of the specified data type.
+--
+-- Parameters:
+-- * ##data_type## : One of the [[:C Type Constants]].
+--
+-- Returns:
+-- The size in bytes of the specified data type for the native architecture
+-- of the version of euphoria being used.  Returns zero if the type is not
+-- recognized.
+--
+
+
+
+--****
+-- Signature:
 -- <built-in> function peek4s(object addr_n_length)
 --
 -- Description:
