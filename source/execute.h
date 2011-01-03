@@ -266,7 +266,13 @@ struct char_cell {
 #define E_ATOM     0x07000004
 #define E_SEQUENCE 0x08000004
 #define E_OBJECT   0x09000004
-
+#define C_INT      0x01000004
+#define C_UINT     0x02000004
+#define C_LONG     0x01000008
+#define C_ULONG    0x02000008
+#define C_POINTER  0x03000001
+#define C_LONGLONG 0x03000002
+	
 #define C_STDCALL 0
 #define C_CDECL 1
 

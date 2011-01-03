@@ -328,4 +328,5 @@ extern struct tcb *tcb;
 extern int in_from_keyb;
 extern int TraceOn;
 int check_has_console();
+extern object eu_sizeof();
 #endif

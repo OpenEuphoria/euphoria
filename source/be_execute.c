@@ -1059,6 +1059,7 @@ void code_set_pointers(int **code)
 			case TAN:
 			case RAND:
 			case PEEK:
+			case SIZEOF:
 			case PEEK_STRING:
 			case PEEKS:
 			case FLOOR:
@@ -1814,7 +1815,8 @@ void do_exec(int *start_pc)
   &&L_POKE8, &&L_PEEK8S, &&L_PEEK8U,
 /* 214 (previous) */
   &&L_POKE_POINTER, &&L_PEEK_POINTER,
-  
+/* 215 (previous) */
+  &&L_SIZEOF,
   0
   };
 #endif
@@ -4507,6 +4509,16 @@ void do_exec(int *start_pc)
 				thread();
 				BREAK;
 
+			case L_SIZEOF:
+				a = *(object_ptr)pc[1]; /* the data type */
+				top = *(object_ptr)pc[2];
+				tpc = pc;  // in case of machine exception
+				*(object_ptr)pc[2] = eu_sizeof( a );
+				DeRef( top );
+				inc3pc();
+				thread();
+				BREAK;
+				
 			case L_PEEKS:
 			deprintf("case L_PEEKS:");
 				b = 1;

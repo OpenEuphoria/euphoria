@@ -210,4 +210,6 @@ object e_floor(long a);  // not used anymore
 
 int memcopy( void *dest, size_t avail, void *src, size_t len);
 
+object eu_sizeof( object data_type );
+
 #endif /* BE_RUNTIME_H */

@@ -519,6 +519,7 @@ op_temp_ref[PEEK4U]           = NEW_REFERENCE
 op_temp_ref[PEEK4S]           = NEW_REFERENCE
 op_temp_ref[PEEK8U]           = NEW_REFERENCE
 op_temp_ref[PEEK8S]           = NEW_REFERENCE
+op_temp_ref[PEEK_POINTER]     = NEW_REFERENCE
 op_temp_ref[OPEN]             = NEW_REFERENCE
 op_temp_ref[GETS]             = NEW_REFERENCE
 op_temp_ref[SPRINTF]          = NEW_REFERENCE
@@ -1184,7 +1185,7 @@ export procedure emit_op(integer op)
 		assignable = FALSE  -- need to update current_sequence like in RHS_SUBS
 
 	-- 1 input, 1 output
-	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, PEEK8U, PEEK8S,
+	case RAND, PEEK, PEEK4S, PEEK4U, NOT_BITS, NOT, PEEK8U, PEEK8S, SIZEOF,
 		TASK_STATUS, PEEK2U, PEEK2S, PEEKS, PEEK_STRING, PEEK_POINTER then
 		cont11ii(op, TRUE)
 

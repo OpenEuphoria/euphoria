@@ -1,4 +1,5 @@
 include std/machine.e
+include std/dll.e
 include std/unittest.e
 
 atom p, psave
@@ -46,4 +47,10 @@ test_equal( "poke/peek_pointer 0x1234", 0x1234, peek_pointer( p ) )
 
 poke_pointer( p, 0x1234 & 0x5678 )
 test_equal( "poke/peek_pointer 0x1234 & 0x5678", 0x1234 & 0x5678, peek_pointer( p & 2 ) )
+
+-- SIZEOF tests
+test_equal( "sizeof int", 4, sizeof( C_INT ) )
+test_equal( "sizeof ptr", 4, sizeof( C_POINTER ) )
+test_equal( "sizeof dbl", 8, sizeof( C_DOUBLE ) )
+
 test_report()

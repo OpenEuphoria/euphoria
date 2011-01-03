@@ -45,11 +45,11 @@ public constant
 	--** size_t 32-bits
 	C_SIZE_T  = C_UINT,
 	--** long 32-bits
-	C_LONG    = C_INT,
+	C_LONG    = #02000008,
 	--** unsigned long 32-bits
-	C_ULONG   = C_UINT,
+	C_ULONG   = #03000008,
 	--** any valid pointer 32-bits
-	C_POINTER = C_UINT,
+	C_POINTER = #03000001,
 	--** handle 32-bits
 	C_HANDLE  = C_UINT,
 	--** hwnd 32-bits
@@ -67,7 +67,9 @@ public constant
 	--** double 64-bits
 	C_DOUBLE  = #03000008,
 	--** dwordlong 64-bits
-	C_DWORDLONG  = #03000008,
+	C_DWORDLONG  = #03000002,
+	--** longlong 64-bits
+	C_LONGLONG  = C_DWORDLONG,
 	$
 	
 --****

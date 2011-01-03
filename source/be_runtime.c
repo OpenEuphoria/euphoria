@@ -6190,3 +6190,44 @@ cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev ){
 
 	return new_cup;
 }
+
+object eu_sizeof( object data_type ){
+	long dt;
+	if( IS_ATOM_INT( data_type ) ){
+		dt = data_type;
+	}
+	else if( IS_ATOM( data_type ) ){
+		dt = (long) DBL_PTR( data_type )->dbl;
+	}
+	else{
+		RTFatal("Argument to sizeof must be an atom");
+	}
+	switch( dt ){
+		case C_DOUBLE:
+			return 8;
+		case C_FLOAT:
+			return 4;
+		case C_CHAR:
+		case C_UCHAR:
+			return 1;
+		case C_SHORT:
+		case C_USHORT:
+			return 2;
+		case E_INTEGER:
+		case E_ATOM:
+		case E_SEQUENCE:
+		case E_OBJECT:
+		case C_POINTER:
+			return sizeof( void* );
+		case C_INT:
+		case C_UINT:
+			return sizeof( int );
+		case C_LONG:
+		case C_ULONG:
+			return sizeof( long );
+		case C_LONGLONG:
+			return sizeof( long long );
+		default:
+			return 0;
+	}
+}

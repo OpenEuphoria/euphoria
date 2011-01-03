@@ -5652,6 +5652,21 @@ procedure opPEEK()
 	pc += 3
 end procedure
 
+procedure opSIZEOF()
+	integer
+		datatype_sym = Code[pc+1],
+		target_sym   = Code[pc+2]
+	CSaveStr( "_0", target_sym, datatype_sym, 0, 0 )
+	
+	c_stmt("@ = eu_sizeof( @ );\n", { target_sym, datatype_sym }, target_sym )
+	
+	CDeRef( target_sym )
+	
+	dispose_temp( datatype_sym, DISCARD_TEMP, REMOVE_FROM_MAP )
+	SetBBType( target_sym, TYPE_INTEGER, {0, MAXINT}, TYPE_INTEGER, 0 )
+	create_temp( target_sym, 1 )
+	pc += 3
+end procedure
 
 procedure opPOKE_POINTER()
 	Code[pc] = POKE4
@@ -6782,6 +6797,9 @@ export procedure init_opcodes()
 
 			case "SIN" then
 				operation[i] = routine_id("opSIN")
+
+			case "SIZEOF" then
+				operation[i] = routine_id("opSIZEOF")
 
 			case "SPACE_USED" then
 				operation[i] = routine_id("opSPACE_USED")

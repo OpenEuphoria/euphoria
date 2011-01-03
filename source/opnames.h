@@ -216,5 +216,6 @@ static char *opnames[] = {
 	"PEEK8S",
 	"PEEK8U",
 	"POKE_POINTER",
-	"PEEK_POINTER"
+	"PEEK_POINTER",
+	"SIZEOF"
 };

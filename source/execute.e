@@ -3091,6 +3091,13 @@ procedure opPEEKS()
 	pc += 3
 end procedure
 
+procedure opSIZEOF()
+	a = Code[pc+1]
+	b = Code[pc+2]
+	val[b] = sizeof( a )
+	pc += 3
+end procedure
+
 procedure opPOKE()
 	a = Code[pc+1]
 	b = Code[pc+2]
@@ -4402,6 +4409,9 @@ procedure do_exec()
 
 			case COVERAGE_ROUTINE then
 				opCOVERAGE_ROUTINE()
+				
+			case SIZEOF then
+				opSIZEOF()
 
 			case else
 				RTFatal( sprintf("Unknown opcode: %d", op ) )
