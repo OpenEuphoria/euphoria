@@ -225,10 +225,9 @@
 #define POKE8               212
 #define PEEK8S              213
 #define PEEK8U              214
-#define POKE_POINTER        215
-#define PEEK_POINTER        216
 
-#define MAX_OPCODE          216
+
+#define MAX_OPCODE          214
 
 /* remember to update reswords.e, opnames.e,
    opnames.h, optable[], localjumptab[]

@@ -41,9 +41,4 @@ test_equal( "poke8/peek8s 1,2,3", {1,2,3}, peek8s( p & 3 ) )
 poke8( p, {-1, -2, -3})
 test_equal( "poke8/peek8s 1,2,3", {-1,-2,-3}, peek8s( p & 3 ) )
 
-poke_pointer( p, 0x1234 )
-test_equal( "poke/peek_pointer 0x1234", 0x1234, peek_pointer( p ) )
-
-poke_pointer( p, 0x1234 & 0x5678 )
-test_equal( "poke/peek_pointer 0x1234 & 0x5678", 0x1234 & 0x5678, peek_pointer( p & 2 ) )
 test_report()

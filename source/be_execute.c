@@ -1075,7 +1075,6 @@ void code_set_pointers(int **code)
 			case PEEK2U:
 			case PEEK8U:
 			case PEEK8S:
-			case PEEK_POINTER:
 			case SYSTEM:
 			case PUTS:
 			case QPRINT:
@@ -1085,7 +1084,6 @@ void code_set_pointers(int **code)
 			case POKE4:
 			case POKE8:
 			case POKE:
-			case POKE_POINTER:
 			case POKE2:
 			case SC2_AND:
 			case SC2_OR:
@@ -1811,11 +1809,8 @@ void do_exec(int *start_pc)
 /* 209 (previous) */
   &&L_COVERAGE_LINE, &&L_COVERAGE_ROUTINE,
 /* 211 (previous) */
-  &&L_POKE8, &&L_PEEK8S, &&L_PEEK8U,
+  &&L_POKE8, &&L_PEEK8S, &&L_PEEK8U
 /* 214 (previous) */
-  &&L_POKE_POINTER, &&L_PEEK_POINTER,
-  
-  0
   };
 #endif
 #endif
@@ -4449,7 +4444,6 @@ void do_exec(int *start_pc)
 				BREAK;
 
 
-			case L_PEEK_POINTER:
 			case L_PEEK4U:
 			deprintf("case L_PEEK4U:");
 				b = 1;
@@ -4576,7 +4570,6 @@ void do_exec(int *start_pc)
 				thread();
 				BREAK;
 				
-			case L_POKE_POINTER:
 			case L_POKE4:
 			deprintf("case L_POKE4:");
 				a = *(object_ptr)pc[1];   /* address */

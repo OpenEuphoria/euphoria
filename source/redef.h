@@ -206,5 +206,3 @@
 #define L_POKE8         POKE8
 #define L_PEEK8S        PEEK8S
 #define L_PEEK8U        PEEK8U
-#define L_POKE_POINTER  POKE_POINTER
-#define L_PEEK_POINTER  PEEK_POINTER

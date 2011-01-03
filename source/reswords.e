@@ -223,9 +223,7 @@ export constant
 	POKE8               = 212,
 	PEEK8S              = 213,
 	PEEK8U              = 214,
-	POKE_POINTER        = 215,
-	PEEK_POINTER        = 216,
-	MAX_OPCODE          = 216
+	MAX_OPCODE          = 214
 
 
 -- adding new opcodes possibly affects reswords.h (C-coded backend),
