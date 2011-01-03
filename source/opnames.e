@@ -223,5 +223,7 @@ export constant opnames = {
 	"POKE8",
 	"PEEK8S",
 	"PEEK8U",
+	"POKE_POINTER",
+	"PEEK_POINTER",
 	$
 }
