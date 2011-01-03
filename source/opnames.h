@@ -214,7 +214,5 @@ static char *opnames[] = {
 	"COVERAGE_ROUTINE",
 	"POKE8",
 	"PEEK8S",
-	"PEEK8U",
-	"POKE_POINTER",
-	"PEEK_POINTER"
+	"PEEK8U"
 };
