@@ -486,12 +486,12 @@ tester: .SYMBOLIC
 binder : .SYMBOLIC $(BUILDDIR)\eubind.exe
 
 $(BUILDDIR)\eubind.exe : translator library
-	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
+	$(BUILDDIR)\euc -lib $(BUILDDIR)\eu.lib -eudir $(TRUNKDIR) -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eubind.exe $(TRUNKDIR)\source\bind.ex
 	
 shrouder : .SYMBOLIC $(BUILDDIR)\eushroud.exe
 
 $(BUILDDIR)\eushroud.exe : translator library
-	$(BUILDDIR)\euc -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
+	$(BUILDDIR)\euc -lib $(BUILDDIR)\eu.lib -eudir $(TRUNKDIR) -con -i $(TRUNKDIR)\include -o $(BUILDDIR)\eushroud.exe $(TRUNKDIR)\source\shroud.ex
 	
 tools: .SYMBOLIC
     @echo ------- TOOLS -----------

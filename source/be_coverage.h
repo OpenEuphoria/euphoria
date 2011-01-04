@@ -1,9 +1,9 @@
 #ifndef COVERAGE_H_
 #define COVERAGE_H_
 
-int cover_line;
-int cover_routine;
-int write_coverage_db;
+extern int cover_line;
+extern int cover_routine;
+extern int write_coverage_db;
 
 void COVER_LINE( int );
 void COVER_ROUTINE( int );
