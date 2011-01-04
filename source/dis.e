@@ -1161,6 +1161,10 @@ procedure opPOKE()
 	pbinary()
 end procedure
 
+procedure opSIZEOF()
+	unary()
+end procedure
+
 procedure opMEM_COPY()
 	ptrinary()
 end procedure
