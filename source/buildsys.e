@@ -301,7 +301,7 @@ function setup_build()
 			end if
 			
 			-- input/output
-			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" [1] -O coff -o [2]"
+			rc_comp = "windres -DSRCDIR=\"" & current_dir() & "\" \"[1]\" -O coff -o \"[2]\""
 			
 		case COMPILER_WATCOM then
 			c_exe = "wcc386"
@@ -333,7 +333,7 @@ function setup_build()
 			l_flags &= sprintf(" FILE %s LIBRARY ws2_32", { user_library })
 			
 			-- resource file, executable file
-			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -fo=[2] -ad [1] [3]"
+			rc_comp = "wrc -DSRCDIR=\"" & current_dir() & "\" -q -fo=\"[2]\" -ad \"[1]\" \"[3]\""
 		case else
 			CompileErr(43)
 	end switch
