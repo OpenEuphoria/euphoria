@@ -297,7 +297,15 @@ object call_c(int func, object proc_ad, object arg_list)
 #ifdef EUNIX       
 		pop();
 #endif      
-		if ((return_type & 0x000000FF) == 04) {
+		if (return_type == C_POINTER ){
+			if ((unsigned)iresult <= (unsigned)MAXINT) {
+				return iresult;
+			}
+			else{
+				return NewDouble((double)(unsigned)iresult);
+			}
+		}
+		else if ((return_type & 0x000000FF) == 04) {
 			/* 4-byte integer - usual case */
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
