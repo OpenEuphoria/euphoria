@@ -199,8 +199,13 @@ var
 
 procedure CreateEnvBatchFile();
 begin
-	SaveStringToFile(ExpandConstant('{app}\setenv.bat'), #13#10 + 
-		ExpandConstant('SET EUDIR={app}') + #13#10 + 'SET PATH=%EUDIR%\bin;%PATH%' + #13#10, True);
+	SaveStringToFile(ExpandConstant('{app}\setenv-ow.bat'), 
+		#13#10 + 
+		ExpandConstant('SET EUDIR={app}') + #13#10 + 
+		ExpandConstant('SET WATCOM={app}\watcom') + #13#10 + 
+		'SET PATH=%EUDIR%\bin;%WATCOM\binw;%WATCOM%\binnt;%PATH%' + #13#10 + 
+		'SET INCLUDE=%WATCOM%\h;%WATCOM%\h\nt' + #13#10, 
+		True);
 end;
 
 function GetBackupPath(Param: String) : String;

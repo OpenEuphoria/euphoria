@@ -194,7 +194,6 @@ public enum
 
 public constant W_BAD_PATH = -1 -- error code
 
-
 --**
 -- Return directory information for the specified file or directory.
 --
@@ -573,7 +572,6 @@ public function walk_dir(sequence path_name, object your_function, integer scan_
 	end for
 	return 0
 end function
-
 
 --**
 -- Create a new directory.
@@ -1680,6 +1678,81 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	
 	-- If all else fails, just return the original data.
 	return orig_path
+end function
+
+--**
+-- Split a filename into path segments
+--
+-- Parameters:
+--   * ##fname## - Filename to split
+--
+-- Returns:
+--   A sequence of strings representing each path element found in ##fname##.
+--
+-- Example 1:
+-- <eucode>
+-- sequence path_elements = split_path("/usr/home/john/hello.txt")
+-- -- path_elements would be { "usr", "home", "john", "hello.txt" }
+-- </eucode>
+--
+-- Versioning:
+--   * Added in 4.0.1
+--
+-- See Also:
+--   [[:join_path]]
+--
+
+public function split_path(sequence fname)
+	return stdseq:split(fname, SLASH, 1)
+end function
+
+--**
+-- Join multiple path segments into a single path/filename
+--
+-- Parameters:
+--   * ##path_elements## - Sequence of path elements
+--
+-- Returns:
+--   A string representing the path elements on the given platform
+--
+-- Example 1:
+-- <eucode>
+-- sequence fname = join_path({ "usr", "home", "john", "hello.txt" })
+-- -- fname would be "/usr/home/john/hello.txt" on Unix
+-- -- fname would be "\\usr\\home\\john\\hello.txt" on Windows
+-- </eucode>
+--
+-- Versioning:
+--   * Added in 4.0.1
+--
+-- See Also:
+--   [[:split_path]]
+--
+
+public function join_path(sequence path_elements)
+	sequence fname = ""
+
+	for i = 1 to length(path_elements) do
+		sequence elem = path_elements[i]
+
+		if elem[$] = SLASH then
+			elem = elem[1..$ - 1]
+		end if
+
+		if length(elem) and elem[1] != SLASH then
+			ifdef WINDOWS then
+				if elem[$] != ':' then
+					elem = SLASH & elem
+				end if
+			elsedef
+				elem = SLASH & elem
+			end ifdef
+		end if
+
+		fname &= elem
+	end for
+
+	return fname
 end function
 
 --****
