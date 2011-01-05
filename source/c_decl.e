@@ -741,7 +741,7 @@ export procedure DeclareFileVars()
 			if eentry[S_TOKEN] = PROC then
 				c_puts( "void ")
 			else
-				c_puts("int ")
+				c_puts("object ")
 			end if
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
@@ -751,7 +751,7 @@ export procedure DeclareFileVars()
 				c_puts(" = NOVALUE;\n")
 			end if
 
-			c_hputs("extern int ")
+			c_hputs("extern object ")
 			c_hprintf("_%d", eentry[S_FILE_NO])
 			c_hputs(eentry[S_NAME])
 
@@ -897,7 +897,7 @@ procedure declare_prototype( symtab_index s )
 	if sym_token( s ) = PROC then
 		ret_type = "void "
 	else
-		ret_type ="int "
+		ret_type ="object "
 	end if
 
 	c_hputs(ret_type)
@@ -920,7 +920,7 @@ procedure declare_prototype( symtab_index s )
 	
 	for i = 1 to SymTab[s][S_NUM_ARGS] do
 		if i = 1 then
-			c_hputs("int")
+			c_hputs("object")
 		else
 			c_hputs(", int")
 		end if
@@ -1483,7 +1483,7 @@ export procedure GenerateUserRoutines()
 					if SymTab[s][S_TOKEN] = PROC then
 						ret_type = "void "
 					else
-						ret_type = "int "
+						ret_type = "object "
 					end if
 					if find( SymTab[s][S_SCOPE], {SC_GLOBAL, SC_EXPORT, SC_PUBLIC} ) and dll_option then
 						-- mark it as a routine_id target, so it won't be deleted
@@ -1505,7 +1505,7 @@ export procedure GenerateUserRoutines()
 					-- declare the parameters
 					sp = SymTab[s][S_NEXT]
 					for p = 1 to SymTab[s][S_NUM_ARGS] do
-						c_puts("int _")
+						c_puts("object _")
 						c_puts(SymTab[sp][S_NAME])
 						if p != SymTab[s][S_NUM_ARGS] then
 							c_puts(", ")
@@ -1529,7 +1529,7 @@ export procedure GenerateUserRoutines()
 								break
 
 							case SC_PRIVATE then
-								c_stmt0("int ")
+								c_stmt0("object ")
 								c_puts("_")
 								c_puts(SymTab[sp][S_NAME])
 								-- avoid DeRef in 1st BB
@@ -1555,7 +1555,7 @@ export procedure GenerateUserRoutines()
 							if temp_name_type[SymTab[temps][S_TEMP_NAME]][T_GTYPE]
 																!= TYPE_NULL
 								and not find( name, names ) then
-								c_stmt0("int ")
+								c_stmt0("object ")
 								c_puts( name )
 								c_puts(" = NOVALUE")
 								-- avoids DeRef in 1st BB, but may hurt global type:
@@ -1581,9 +1581,9 @@ export procedure GenerateUserRoutines()
 					Initializing = FALSE
 
 					if SymTab[s][S_LHS_SUBS2] then
-						c_stmt0("int _0, _1, _2, _3;\n\n")
+						c_stmt0("object _0, _1, _2, _3;\n\n")
 					else
-						c_stmt0("int _0, _1, _2;\n\n")
+						c_stmt0("object _0, _1, _2;\n\n")
 					end if
 
 					-- set the local parameter types in BB

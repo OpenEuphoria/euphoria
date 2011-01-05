@@ -5880,7 +5880,7 @@ long find_from(object a, object bobj, object c)
 	return 0;
 }
 
-long e_match_from(object aobj, object bobj, object c)
+object e_match_from(object aobj, object bobj, object c)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {

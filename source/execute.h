@@ -88,7 +88,7 @@ struct symtab_entry;
 */
 struct routine_list {
 	char *name;
-	int (*addr)();
+	object (*addr)();
 	int seq_num;
 	int file_num;
 	short int num_args;

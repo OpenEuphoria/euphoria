@@ -36,6 +36,7 @@ fi
 
 echo "# File generated from configure" > ${CONFIG_FILE}
 
+MFLAG=-m32
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
@@ -391,3 +392,7 @@ echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
 
+$CC euarch.c $MFLAG -oeuarch && ./euarch >> ${CONFIG_FILE}
+if [ -f euarch ]; then
+	rm euarch
+fi

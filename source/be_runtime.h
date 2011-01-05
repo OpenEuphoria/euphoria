@@ -132,7 +132,7 @@ void Tail(s1_ptr s1, int start, object_ptr target);
 void Head(s1_ptr s1, int reqlen, object_ptr target);
 object Remove_elements(int start, int stop, int in_place );
 long find_from(object a, object bobj, object c);
-long e_match_from(object aobj, object bobj, object c);
+object e_match_from(object aobj, object bobj, object c);
 long e_match(s1_ptr a, s1_ptr b);
 long find(object a, s1_ptr b);
 void RHS_Slice( object a, object start, object end);

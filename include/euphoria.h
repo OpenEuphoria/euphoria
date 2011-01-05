@@ -8,7 +8,7 @@
 #undef _segment
 #undef _self
 #undef _dos_ds
-
+#include <stdint.h>
 #include <stdio.h>
 
 /***************************************************************************
@@ -51,17 +51,17 @@
 
 #define LOW_MEMORY_MAX ((unsigned)0x0010FFEF)
 
-typedef int object;
-typedef int *object_ptr;
+typedef intptr_t object;
+typedef object *object_ptr;
 
 struct cleanup;
 typedef struct cleanup *cleanup_ptr;
 typedef void(*cleanup_func)(object);
 
 struct cleanup {
-	long type;
+	int type;
 	union func_union{
-		long rid;
+		int rid;
 		cleanup_func builtin;
 	} func;
 	cleanup_ptr next;
@@ -76,21 +76,21 @@ enum CLEANUP_TYPES {
 
 struct s1 {
 	object_ptr base;
-	long length;
-	long ref;
-	long postfill;
+	int length;
+	int ref;
+	int postfill;
 	cleanup_ptr cleanup;
 };
 
 struct d {
 	double dbl;
-	long ref;
+	int ref;
 	cleanup_ptr cleanup; 
 };
 
 struct routine_list {
 	char *name;
-	int (*addr)();
+	object (*addr)();
 	int seq_num;
 	int file_num;
 	short int num_args;
@@ -258,7 +258,7 @@ extern IFILE last_r_file_ptr;
 extern int insert_pos;;
 
 int find_from(int,int,int);
-long e_match_from(object aobj, object bobj, object c);
+object e_match_from(object aobj, object bobj, object c);
 void Tail(s1_ptr , int , object_ptr );
 void Head(s1_ptr , int , object_ptr );
 object Remove_elements(int start, int stop, int in_place );

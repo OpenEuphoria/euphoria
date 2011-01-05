@@ -6,6 +6,9 @@
 
 #ifndef _SYMTAB_H_
 #define _SYMTAB_H_ 1
+
+#include <stdint.h>
+
 // N.B.!!! fields and size of backend symtab_entry is assumed in backend.e 
 
 // for literal constants and temporaries 
@@ -60,7 +63,7 @@ struct symtab_entry {
 		} var;
 		struct {
 			// for subprograms only: 
-			int *code;          // start of proc/func/type 
+			intptr_t *code;          // start of proc/func/type 
 			int *linetab;       // line table for traceback 
 			unsigned firstline; // global line number of start of routine 
 			struct symtab_entry *temps;  // pointer to list of temps, or NULL 
@@ -72,8 +75,8 @@ struct symtab_entry {
 		} subp;
 		struct {
 			// for blocks only:
-			unsigned long first_line;
-			unsigned long last_line;
+			unsigned int first_line;
+			unsigned int last_line;
 		} block;
 		
 	} u;
