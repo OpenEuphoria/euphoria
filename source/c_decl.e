@@ -922,7 +922,7 @@ procedure declare_prototype( symtab_index s )
 		if i = 1 then
 			c_hputs("object")
 		else
-			c_hputs(", int")
+			c_hputs(", object")
 		end if
 	end for
 	c_hputs(");\n")
