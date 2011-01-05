@@ -313,6 +313,7 @@ procedure OpenCFiles()
 	if c_h = -1 then
 		CompileErr(47)
 	end if
+	c_hputs("#include \"include/euphoria.h\"\n")
 
 	add_file("main-.h")
 end procedure

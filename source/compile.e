@@ -1008,7 +1008,7 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 			source)
 
 	else
-		c_stmt( sprintf( "peek8_longlong = *(*(%sint64_t *)@;\n", {sign} ), source)
+		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)@;\n", {sign} ), source)
 	end if
 	
 	-- FIX: in first BB we might assume TYPE_INTEGER, value 0
@@ -3046,7 +3046,7 @@ procedure opRIGHT_BRACE_N()
 					CRef(t)
 				end if
 				while n >= 0 do
-					c_stmt0("*((int *)(_2")
+					c_stmt0("*((object *)(_2")
 					c_printf("+%d", (i-n)*4)
 					c_puts("))")
 					temp_indent = -indent

@@ -286,8 +286,8 @@ export function NewStringSym(sequence s)
 		else
 			SymTab[p][S_SEQ_ELEM] = TYPE_NULL
 		end if
-		c_printf("int _%d;\n", SymTab[p][S_TEMP_NAME])
-		c_hprintf("extern int _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_printf("object _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_hprintf("extern object _%d;\n", SymTab[p][S_TEMP_NAME])
 
 	else
 		SymTab[p][S_MODE] = M_CONSTANT
@@ -370,8 +370,8 @@ export function NewDoubleSym(atom d)
 	if TRANSLATE then
 		SymTab[p][S_MODE] = M_TEMP  -- override CONSTANT for compile
 		SymTab[p][S_GTYPE] = TYPE_DOUBLE
-		c_printf("int _%d;\n", SymTab[p][S_TEMP_NAME])
-		c_hprintf("extern int _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_printf("object _%d;\n", SymTab[p][S_TEMP_NAME])
+		c_hprintf("extern object _%d;\n", SymTab[p][S_TEMP_NAME])
 	end if
 
 	SymTab[p][S_NEXT] = literal_init
