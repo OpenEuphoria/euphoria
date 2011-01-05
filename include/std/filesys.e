@@ -1444,7 +1444,6 @@ end function
 --     A **sequence**, the full path and file name.
 --
 -- Comment:
--- * In non-Unix systems, the result is always in lowercase.
 -- * The supplied file/directory does not have to actually exist.
 -- * ##path_in## can be enclosed in quotes, which will be stripped off.
 -- * If ##path_in## begins with a tilde '~~' then that is replaced by the
@@ -1601,8 +1600,8 @@ end function
 -- * Next it checks if it can form a relative path from the current directory
 --   to the supplied file which is shorter than the parameter string.
 -- * Failing all of that, it returns the original parameter.
--- * In Windows, the shorter result is always in lowercase and has all '/' 
---   characters are replaced by '\' characters.
+-- * In Windows, the shorter result has all '/' characters are replaced by '\'
+--	 characters.
 -- * The supplied path does not have to actually exist.
 -- * ##orig_path## can be enclosed in quotes, which will be stripped off.
 -- * If ##orig_path## begins with a tilde '~~' then that is replaced by the
@@ -1624,7 +1623,7 @@ public function abbreviate_path(sequence orig_path, sequence base_paths = {})
 	sequence expanded_path
 
 	-- Get full path of the parameter
-	expanded_path = canonical_path(orig_path,,1)
+	expanded_path = canonical_path(orig_path)
 	
 	-- Add the current directory onto the list of base search paths.
 	base_paths = append(base_paths, curdir())

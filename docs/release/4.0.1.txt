@@ -7,9 +7,19 @@
 * [[ticket:577]] ##object()## works same on translator as the interpreter.
 * euc now uses quotes around filenames when processing resource files
 * [[ticket:575]] OW installer file setenv-ow.bat functionality restored from 4.0.0RC2.
+* case issues were removed from pathinfo(), canonical_path(), and abbreviate_path()
+  these functions now return raw OS output; it is up to the user to change case when necessary
 
 == Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
 * [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
+* ##[[:current_dir]]()## now always returns an upper case letter for the drive
+  id.
+
+== Deprecated
+
+* ##[[:canonical_path]]()##'s third parameter, ##no_case##, has been deprecated. If you are doing
+  path comparisons on windows, use lower() or upper() instead of using the ##no_case##
+  parameter.
 

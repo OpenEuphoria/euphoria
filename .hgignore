@@ -42,6 +42,7 @@ tests/include_subdir/foo/test.err
 
 regex:
 ^build/.*
+^build40/.*
 ^build_mingw/.*
 ^source/.*res$
 ^source/mkver.o$
