@@ -30,24 +30,26 @@
 *
 ****************************************************************************/
 
-#define NOVALUE      ((long)0xbfffffffL)
+#define DBL_MASK (uintptr_t)0xA0000000
+
+#define NOVALUE      ((intptr_t)0xbfffffffL)
 #define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
-#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (long)0xA0000000)
-#define IS_ATOM(ob)             (((long)(ob)) >= (long)0xA0000000)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < (long)0xA0000000)
+#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (intptr_t)DBL_MASK)
+#define IS_ATOM(ob)             (((long)(ob)) >= (intptr_t)DBL_MASK)
+#define IS_SEQUENCE(ob)         (((long)(ob))  < (intptr_t)DBL_MASK)
 #define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
 #define HIGH_BITS    ((long)0xC0000000L)
 
 #undef MININT
 #undef MAXINT
-#define MININT     (long)0xC0000000
-#define MAXINT     (long)0x3FFFFFFF
+#define MININT     (uint32_t)0xC0000000
+#define MAXINT     (uint32_t)0x3FFFFFFF
 #define MAXINT_VAL MAXINT
 #define MAXINT_DBL ((double)MAXINT_VAL)
 #define INT15      (long)0x00003FFFL
 
 #undef MAKE_UINT
-#define MAKE_UINT(x)	((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL  ? (unsigned int)x : NewDouble((double)(unsigned int)x)))
+#define MAKE_UINT(x)	((object)((uintptr_t)x <= (uintptr_t)MAXINT  ? (uintptr_t)x : NewDouble((double)(uintptr_t)x)))
 
 #define LOW_MEMORY_MAX ((unsigned)0x0010FFEF)
 

@@ -934,37 +934,13 @@ end procedure
 
 procedure seg_peek_string(integer target, integer source, integer mode)
 -- emit code for a single-byte peek  - uses _1 as a temp
-	if atom(dj_path) then
-		-- WATCOM: memory is seamless */
-		if mode = 1 then
-			c_stmt("@ = NewString((char *)(unsigned long)(DBL_PTR(@)->dbl));\n",
-					{target, source})
-		else
-			c_stmt("@ =  NewString((char *)@);\n", {target, source})
-		end if
-
+	if mode = 1 then
+		c_stmt("@ = NewString((char *)(uintptr_t)(DBL_PTR(@)->dbl));\n",
+				{target, source})
 	else
-		-- DJGPP: low memory is in a separate segment,
-		--        high memory is always >= one million
-		-- OPTIMIZE if source is a constant
-		if mode = 1 then
-			c_stmt("_1 = (int)(unsigned)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("if ((unsigned)_1 > LOW_MEMORY_MAX)\n")
-			c_stmt("@ = NewString((char *)_1);\n", target)
-			c_stmt0("else\n")
-			c_stmt("@ = NewString( (char*)_farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)_1));\n",
-					target)
-
-		elsif mode = 2 then
-
-		else
-			c_stmt("if ((unsigned)@ > LOW_MEMORY_MAX)\n", source)
-			c_stmt("@ = NewString((char *)@);\n", {target, source})
-			c_stmt0("else\n")
-			c_stmt("@ = NewString((char *) _farpeekb(_go32_info_block.selector_for_linear_memory, (unsigned)@));\n",
-					{target, source})
-		end if
+		c_stmt("@ =  NewString((char *)@);\n", {target, source})
 	end if
+
 end procedure
 
 procedure seg_peek1(integer target, integer source, integer mode)
@@ -1028,7 +1004,7 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 		sign = ""
 	end if
 	if dbl then
-		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(unsigned long)(DBL_PTR(@)->dbl);\n", {sign} ), 
+		c_stmt( sprintf( "peek8_longlong = *(%sint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {sign} ), 
 			source)
 
 	else
@@ -1049,8 +1025,8 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 		
 
 	elsif op = PEEK8U then
-		c_stmt0("if (peek8_longlong > (unsigned long long)MAXINT){\n")
-		c_stmt("@ = NewDouble((double)(unsigned long long)peek8_longlong);\n", target_sym)
+		c_stmt0("if (peek8_longlong > (uint64_t)MAXINT){\n")
+		c_stmt("@ = NewDouble((double)(uint64_t)peek8_longlong);\n", target_sym)
 		c_stmt0("}\n")
 		c_stmt0("else{\n")
 			c_stmt("@ = (object) peek8_longlong;\n", target_sym, target_sym )
@@ -2386,24 +2362,24 @@ procedure opRHS_SUBS()
 
 	switch op do
 		case PASSIGN_OP_SUBS then
-			c_stmt0("_2 = (int)SEQ_PTR(*(int *)_3);\n")
+			c_stmt0("_2 = (object)SEQ_PTR(*(int *)_3);\n")
 		case ASSIGN_OP_SUBS then
-			c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
+			c_stmt("_2 = (object)SEQ_PTR(@);\n", Code[pc+1])
 			-- element type of pc[1] is changed
 			SetBBType(Code[pc+1], TYPE_SEQUENCE, novalue, TYPE_OBJECT, 0 )
 		case else
-			c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
+			c_stmt("_2 = (object)SEQ_PTR(@);\n", Code[pc+1])
 	end switch
 
 	-- _2 has the sequence
 	if TypeIsNot( subs, TYPE_INTEGER) then
 		c_stmt("if (!IS_ATOM_INT(@)){\n", subs )
-		c_stmt("@ = (int)*(((s1_ptr)_2)->base + (int)(DBL_PTR(@)->dbl));\n",
+		c_stmt("@ = (object)*(((s1_ptr)_2)->base + (object)(DBL_PTR(@)->dbl));\n",
 				{ target, subs })
 		c_stmt0("}\n")
 		c_stmt0("else{\n")
 	end if
-	c_stmt("@ = (int)*(((s1_ptr)_2)->base + @);\n", {target, subs} )
+	c_stmt("@ = (object)*(((s1_ptr)_2)->base + @);\n", {target, subs} )
 	
 	if TypeIsNot( subs, TYPE_INTEGER) then
 		c_stmt0("}\n")
@@ -2424,7 +2400,7 @@ procedure opRHS_SUBS()
 			if SeqElem( source ) != TYPE_INTEGER then
 				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT, 0 )
 				c_stmt("if (!IS_ATOM_INT(@))\n", target )
-				c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", { target, target } )
+				c_stmt("@ = (object)DBL_PTR(@)->dbl;\n", { target, target } )
 			end if
 			CDeRefStr("_0")
 			SetBBType( target, TYPE_INTEGER, novalue, TYPE_OBJECT,
@@ -2436,7 +2412,7 @@ procedure opRHS_SUBS()
 				SetBBType( target, TYPE_OBJECT, novalue, TYPE_OBJECT,
 					HasDelete( target ) )
 				c_stmt("if (!IS_ATOM_INT(@)){\n", target )
-					c_stmt("@ = (long)DBL_PTR(@)->dbl;\n", { target, target } )
+					c_stmt("@ = (object)DBL_PTR(@)->dbl;\n", { target, target } )
 				c_stmt0("}\n")
 			end if
 			CDeRefStr("_0")
@@ -2531,11 +2507,11 @@ procedure opSWITCH_I()
 		Goto( Code[pc+4] )
 		c_stmt0("}\n")
 		c_stmt( "if(!IS_ATOM_INT(@)){\n", Code[pc+1] )
-		c_stmt( "if( (DBL_PTR(@)->dbl != (double) ((int) DBL_PTR(@)->dbl) ) ){\n",
+		c_stmt( "if( (DBL_PTR(@)->dbl != (double) ((object) DBL_PTR(@)->dbl) ) ){\n",
 						repeat( Code[pc+1], 2) )
 		Goto( Code[pc+4] )
 		c_stmt0( "}\n" )
-		c_stmt( "_0 = (int) DBL_PTR(@)->dbl;\n", Code[pc+1] )
+		c_stmt( "_0 = (object) DBL_PTR(@)->dbl;\n", Code[pc+1] )
 		c_stmt0( "}\n" )
 		c_stmt0( "else {\n" )
 		c_stmt( "_0 = @;\n", Code[pc+1] )
@@ -2741,7 +2717,7 @@ procedure opINTEGER_CHECK()
 	elsif BB_var_type(sym) != TYPE_INTEGER then
 		c_stmt("if (!IS_ATOM_INT(@)) {\n", sym)
 		LeftSym = TRUE
-		c_stmt("_1 = (long)(DBL_PTR(@)->dbl);\n", sym)
+		c_stmt("_1 = (object)(DBL_PTR(@)->dbl);\n", sym)
 		LeftSym = TRUE
 		c_stmt("DeRefDS(@);\n", sym)
 		c_stmt("@ = _1;\n", sym)
@@ -2782,18 +2758,18 @@ procedure opASSIGN_SUBS()
 	-- check for uniqueness
 	if opcode = PASSIGN_SUBS then
 		-- sequence is pointed-to from a temp
-		c_stmt0("_2 = (int)SEQ_PTR(*(int *)_3);\n")
+		c_stmt0("_2 = (object)SEQ_PTR(*(int *)_3);\n")
 		c_stmt0("if (!UNIQUE(_2)) {\n")
-		c_stmt0("_2 = (int)SequenceCopy((s1_ptr)_2);\n")
+		c_stmt0("_2 = (object)SequenceCopy((s1_ptr)_2);\n")
 		c_stmt0("*(int *)_3 = MAKE_SEQ(_2);\n")
 		c_stmt0("}\n")
 
 	else
-		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
+		c_stmt("_2 = (object)SEQ_PTR(@);\n", Code[pc+1])
 
 		if SymTab[Code[pc+1]][S_ONE_REF] = FALSE then
 			c_stmt0("if (!UNIQUE(_2)) {\n")
-			c_stmt0("_2 = (int)SequenceCopy((s1_ptr)_2);\n")
+			c_stmt0("_2 = (object)SequenceCopy((s1_ptr)_2);\n")
 			c_stmt("@ = MAKE_SEQ(_2);\n", Code[pc+1])
 			c_stmt0("}\n")
 		end if
@@ -2802,11 +2778,11 @@ procedure opASSIGN_SUBS()
 
 	if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
 		c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+2])
-		c_stmt("_2 = (int)(((s1_ptr)_2)->base + (int)(DBL_PTR(@)->dbl));\n",
+		c_stmt("_2 = (object)(((s1_ptr)_2)->base + (object)(DBL_PTR(@)->dbl));\n",
 				Code[pc+2])
 		c_stmt0("else\n")
 	end if
-	c_stmt("_2 = (int)(((s1_ptr)_2)->base + @);\n", Code[pc+2])
+	c_stmt("_2 = (object)(((s1_ptr)_2)->base + @);\n", Code[pc+2])
 
 	if opcode = PASSIGN_SUBS then
 		-- or previous_previous_op = ASSIGN_OP_SUBS  ???
@@ -3049,7 +3025,7 @@ procedure opRIGHT_BRACE_N()
 	c_printf("%d);\n", Code[pc+1])
 
 	if Code[pc+1] > 0 then
-		c_stmt0("_2 = (int)((s1_ptr)_1)->base;\n")
+		c_stmt0("_2 = (object)((s1_ptr)_1)->base;\n")
 	end if
 
 	n = 0 -- repeat count
@@ -3113,7 +3089,7 @@ procedure opRIGHT_BRACE_2()
 
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt0("_1 = NewS1(2);\n")
-	c_stmt0("_2 = (int)((s1_ptr)_1)->base;\n")
+	c_stmt0("_2 = (object)((s1_ptr)_1)->base;\n")
 	c_stmt("((int *)_2)[1] = @;\n", Code[pc+2])
 
 	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
@@ -3210,7 +3186,7 @@ procedure opPLUS1()
 		if Code[pc] = PLUS1 then
 			c_stmt("@ = binary_op(PLUS, 1, @);\n", {Code[pc+3], Code[pc+1]})
 		else
-			c_stmt("@ = 1+(long)(DBL_PTR(@)->dbl);\n", {Code[pc+3], Code[pc+1]})
+			c_stmt("@ = 1+(object)(DBL_PTR(@)->dbl);\n", {Code[pc+3], Code[pc+1]})
 		end if
 		if target_is_int then
 			-- this could lead to overflow, but you should have found that while interpreting
@@ -3264,11 +3240,11 @@ procedure opLHS_SUBS()
 
 	if opcode = LHS_SUBS then
 		-- temp has pointer to sequence
-		c_stmt0("_2 = (int)SEQ_PTR(*(object_ptr)_3);\n")
+		c_stmt0("_2 = (object)SEQ_PTR(*(object_ptr)_3);\n")
 
 	elsif opcode = LHS_SUBS1 then
 		-- sequence is stored in a variable
-		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+1])
+		c_stmt("_2 = (object)SEQ_PTR(@);\n", Code[pc+1])
 
 	else
 		-- LHS_SUBS1_COPY
@@ -3278,14 +3254,14 @@ procedure opLHS_SUBS()
 		if not is_temp( Code[pc+4] ) then
 			c_stmt("Ref(@);\n", Code[pc+4])
 		end if
-		c_stmt("_2 = (int)SEQ_PTR(@);\n", Code[pc+4])
+		c_stmt("_2 = (object)SEQ_PTR(@);\n", Code[pc+4])
 		target[MIN] = SeqLen(Code[pc+1])
 		create_temp( Code[pc+4], NEW_REFERENCE )
 		SetBBType(Code[pc+4], TYPE_SEQUENCE, target, SeqElem(Code[pc+1]), HasDelete( Code[pc+1] ) )
 	end if
 
 	c_stmt0("if (!UNIQUE(_2)) {\n")
-	c_stmt0("_2 = (int)SequenceCopy((s1_ptr)_2);\n")
+	c_stmt0("_2 = (object)SequenceCopy((s1_ptr)_2);\n")
 
 	if opcode = LHS_SUBS then
 		c_stmt0("*(object_ptr)_3 = MAKE_SEQ(_2);\n")
@@ -3302,12 +3278,12 @@ procedure opLHS_SUBS()
 
 	if TypeIsNot(Code[pc+2], TYPE_INTEGER) then
 		c_stmt("if (!IS_ATOM_INT(@))\n", Code[pc+2])
-		c_stmt("_3 = (int)(((s1_ptr)_2)->base + (int)(DBL_PTR(@)->dbl));\n",
+		c_stmt("_3 = (object)(((s1_ptr)_2)->base + (object)(DBL_PTR(@)->dbl));\n",
 				Code[pc+2])
 		c_stmt0("else\n")
 	end if
 
-	c_stmt("_3 = (int)(@ + ((s1_ptr)_2)->base);\n", Code[pc+2])
+	c_stmt("_3 = (object)(@ + ((s1_ptr)_2)->base);\n", Code[pc+2])
 	target[MIN] = -1
 	-- SetBBType(Code[pc+3], TYPE_SEQUENCE, target, TYPE_OBJECT)
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
@@ -3646,10 +3622,10 @@ end procedure
 procedure opUMINUS()
 	gencode = "@ = unary_op(UMINUS, @);\n"
 	intcode2= "@1 = - @2;\n"    -- careful about -- occurring
-	intcode = "if ((unsigned long)@2 == 0xC0000000)\n" &
-			  "@1 = (int)NewDouble((double)-0xC0000000);\n" &
-			  "else\n" &
-			  "@1 = - @2;\n"    -- careful about -- occurring
+	intcode = "if ((uintptr_t)@2 == (uintptr_t)HIGH_BITS){\n" &
+			  "@1 = (object)NewDouble((double) -HIGH_BITS);\n" &
+			  "}\nelse{\n" &
+			  "@1 = - @2;\n}\n"    -- careful about -- occurring
 	if GType(Code[pc+1]) = TYPE_INTEGER then
 		if NotInRange(Code[pc+1], MININT) then
 			target_type = TYPE_INTEGER
@@ -3665,7 +3641,7 @@ end procedure
 
 procedure opRAND()
 	gencode = "@ = unary_op(RAND, @);\n"
-	intcode = "@ = good_rand() % ((unsigned)@) + 1;\n"
+	intcode = "@ = good_rand() % ((uintptr_t)@) + 1;\n"
 	if TypeIs(Code[pc+1], TYPE_INTEGER) then
  		target_type = TYPE_INTEGER
 		target = ObjMinMax(Code[pc+1])
@@ -3791,8 +3767,8 @@ procedure opPLUS()
 	gencode = "@ = binary_op(PLUS, @, @);\n"
 	intcode2= "@1 = @2 + @3;\n"
 	intcode = "@1 = @2 + @3;\n"
-	intcode_extra = "if ((long)((unsigned long)@1 + (unsigned long)HIGH_BITS) >= 0) \n" &
-					"@1 = NewDouble((double)@1);\n"
+	intcode_extra = "if ((object)((uintptr_t)@1 + (uintptr_t)HIGH_BITS) >= 0){\n" &
+					"@1 = NewDouble((double)@1);\n}\n"
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
 		atom_type = TYPE_DOUBLE
@@ -3808,7 +3784,7 @@ procedure opMINUS()
 	gencode = "@ = binary_op(MINUS, @, @);\n"
 	intcode2 ="@1 = @2 - @3;\n"
 	intcode = "@1 = @2 - @3;\n"
-	intcode_extra = "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+	intcode_extra = "if ((object)((uintptr_t)@1 +(uintptr_t) HIGH_BITS) >= 0){\n" &
 					"@1 = NewDouble((double)@1);\n}\n"
 	if TypeIs(Code[pc+1], TYPE_DOUBLE) or
 	   TypeIs(Code[pc+2], TYPE_DOUBLE) then
@@ -3900,7 +3876,7 @@ procedure opFLOOR_DIV()
 			   "}\n" &
 			   "else {\n" &
 			   "temp_dbl = floor((double)@2 / (double)@3);\n" &
-			   "@1 = (long)temp_dbl;\n" &
+			   "@1 = (object)temp_dbl;\n" &
 			   "}\n"
 
 	if GType(Code[pc+1]) = TYPE_INTEGER and
@@ -3916,7 +3892,7 @@ procedure opFLOOR_DIV()
 				  "else {\n" &
 				  "temp_dbl = floor((double)@2 / (double)@3);\n" &
 				  "if (@2 != MININT)\n" &
-				  "@1 = (long)temp_dbl;\n" &
+				  "@1 = (object)temp_dbl;\n" &
 				  "else\n" &
 				  "@1 = NewDouble(temp_dbl);\n" &
 				  "}\n"
@@ -3928,7 +3904,7 @@ end procedure
 
 procedure opAND_BITS()
 	gencode = "@ = binary_op(AND_BITS, @, @);\n"
-	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 & (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 & (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dand_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -3936,7 +3912,7 @@ end procedure
 
 procedure opOR_BITS()
 	gencode = "@ = binary_op(OR_BITS, @, @);\n"
-	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 | (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 | (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dor_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -3944,7 +3920,7 @@ end procedure
 
 procedure opXOR_BITS()
 	gencode = "@ = binary_op(XOR_BITS, @, @);\n"
-	intcode = "{unsigned long tu;\n tu = (unsigned long)@2 ^ (unsigned long)@3;\n @1 = MAKE_UINT(tu);\n}\n"
+	intcode = "{uintptr_t tu;\n tu = (uintptr_t)@2 ^ (uintptr_t)@3;\n @1 = MAKE_UINT(tu);\n}\n"
 	dblfn="Dxor_bits"
 	pc = binary_op(pc, FALSE, target_val, intcode, intcode2,
 				   intcode_extra, gencode, dblfn, atom_type)
@@ -4317,7 +4293,7 @@ procedure opENDFOR_GENERAL()
 
 	-- rvalue for CName should be ok - we've initialized loop var
 	intcode = "@1 = @2 + @3;\n" &
-			  "if ((long)((unsigned long)@1 +(unsigned long) HIGH_BITS) >= 0){\n" &
+			  "if ((object)((uintptr_t)@1 +(uintptr_t) HIGH_BITS) >= 0){\n" &
 			  "@1 = NewDouble((double)@1);\n}\n"
 
 	if TypeIs(Code[pc+3], TYPE_INTEGER) and
@@ -4398,11 +4374,11 @@ procedure opCALL_PROC()
 		end if
 
 		if len != 0 then
-			c_stmt("_1 = (int)SEQ_PTR(@);\n", Code[pc+2])
-			c_stmt0("_2 = (int)((s1_ptr)_1)->base;\n")
+			c_stmt("_1 = (object)SEQ_PTR(@);\n", Code[pc+2])
+			c_stmt0("_2 = (object)((s1_ptr)_1)->base;\n")
 		end if
 
-		c_stmt("_0 = (int)_00[@].addr;\n", Code[pc+1])
+		c_stmt("_0 = (object)_00[@].addr;\n", Code[pc+1])
 
 		if len = NOVALUE then
 			c_stmt0("switch(((s1_ptr)_1)->length) {\n")
@@ -5002,7 +4978,7 @@ procedure opHEAD()
 	--CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt0("{\n")
 	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
-	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
 	c_stmt("if (size <= 0) @ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
 	c_stmt0("else if (len <= size) {\n")
 	c_stmt("RefDS(@);\n", {Code[pc+1]})
@@ -5021,7 +4997,7 @@ end procedure
 procedure opTAIL()
 	c_stmt0("{\n")
 	c_stmt("int len = SEQ_PTR(@)->length;\n",{Code[pc+1]})
-	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("int size = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
 	c_stmt0("if (size <= 0) {\n")
 	c_stmt("DeRef(@);\n", {Code[pc+3]})
 	c_stmt("@ = MAKE_SEQ(NewS1(0));\n", {Code[pc+3]})
@@ -5044,8 +5020,8 @@ procedure opREMOVE()
 	c_stmt0("{\n")
 	c_stmt("s1_ptr assign_space = SEQ_PTR(@);\n", {Code[pc+1]})
 	c_stmt0("int len = assign_space->length;\n")
-	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
-	c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (long)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
+	c_stmt("int start = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+2],3))
+	c_stmt("int stop = (IS_ATOM_INT(@)) ? @ : (object)(DBL_PTR(@)->dbl);\n",repeat(Code[pc+3],3))
 	c_stmt0("if (stop > len){\n")
 		c_stmt0("stop = len;\n")
 	c_stmt0("}\n")
@@ -5311,13 +5287,13 @@ procedure opPEEK_STRING()
 			if Code[pc] = PEEK4S then
 				c_stmt("if (@ < MININT || @ > MAXINT)\n",
 							  {Code[pc+2], Code[pc+2]})
-				c_stmt("@ = NewDouble((double)(long)@);\n",
+				c_stmt("@ = NewDouble((double)(object)@);\n",
 							  {Code[pc+2], Code[pc+2]})
 
 			elsif Code[pc] = PEEK4U then
-				c_stmt("if ((unsigned)@ > (unsigned)MAXINT)\n",
+				c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT)\n",
 							  Code[pc+2])
-				c_stmt("@ = NewDouble((double)(unsigned long)@);\n",
+				c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
 							  {Code[pc+2], Code[pc+2]})
 
 			end if
@@ -5381,13 +5357,13 @@ procedure opPEEK()
 				if op = PEEK4S then
 					c_stmt("if (@ < MININT || @ > MAXINT)\n",
 								{target_sym, target_sym})
-					c_stmt("@ = NewDouble((double)(long)@);\n",
+					c_stmt("@ = NewDouble((double)(object)@);\n",
 								{target_sym, target_sym})
 
 				elsif op = PEEK4U then
 					c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT)\n",
 								target_sym)
-					c_stmt("@ = NewDouble((double)(unsigned long)@);\n",
+					c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
 								{target_sym, target_sym})
 
 				end if
@@ -5427,12 +5403,12 @@ procedure opPEEK()
 				if op = PEEK4S then
 					c_stmt("if (@ < MININT || @ > MAXINT)\n",
 								{target_sym, target_sym})
-					c_stmt("@ = NewDouble((double)(long)@);\n",
+					c_stmt("@ = NewDouble((double)(object)@);\n",
 								{target_sym, target_sym})
 				else  -- PEEK4U */
-					c_stmt("if ((unsigned)@ > (unsigned)MAXINT)\n",
+					c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT)\n",
 								target_sym)
-					c_stmt("@ = NewDouble((double)(unsigned long)@);\n",
+					c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
 								{target_sym, target_sym})
 				end if
 			case PEEK8U, PEEK8S then
@@ -5454,7 +5430,7 @@ procedure opPEEK()
 
 	if TypeIsIn( arg, TYPES_SO) then
 		-- sequence {start, length} */
-		c_stmt("_1 = (int)SEQ_PTR(@);\n", arg)
+		c_stmt("_1 = (object)SEQ_PTR(@);\n", arg)
 		switch op do
 			case PEEK, PEEKS  then
 				c_stmt0("poke_addr = (uint8_t *)get_pos_int(\"peek\", *(((s1_ptr)_1)->base+1));\n")
@@ -5631,16 +5607,16 @@ procedure opPOKE()
 	if TypeIsNotIn( ptr, TYPES_IS) then
 		switch op do
 			case POKE8 then
-				c_stmt("poke8_addr = (uint64_t *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+				c_stmt("poke8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
 							ptr)
 			case POKE4 then
-				c_stmt("poke4_addr = (uint32_t *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+				c_stmt("poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
 							ptr)
 			case POKE2 then
-				c_stmt("poke2_addr = (uint16_t *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+				c_stmt("poke2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
 							ptr)
 			case else
-				c_stmt("poke_addr = (uint8_t *)(unsigned long)(DBL_PTR(@)->dbl);\n",
+				c_stmt("poke_addr = (uint8_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
 							ptr)
 		end switch
 	end if
@@ -5720,7 +5696,7 @@ procedure opPOKE()
 			case POKE8 then
 				if TWINDOWS and atom(wat_path) then
 					-- work around an Lcc bug
-					c_stmt0("_0 = (unsigned long)DBL_PTR(_2)->dbl;\n")
+					c_stmt0("_0 = (uintptr_t)DBL_PTR(_2)->dbl;\n")
 					c_stmt0("*poke8_addr++ = (uint64_t)_0;\n")
 				else
 					c_stmt0("*poke8_addr++ = (uint64_t)DBL_PTR(_2)->dbl;\n")
@@ -5785,9 +5761,9 @@ end function
 
 procedure opCALL()
 	c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
-	c_stmt("_0 = (int)@;\n", Code[pc+1])
+	c_stmt("_0 = (object)@;\n", Code[pc+1])
 	c_stmt0("else\n")
-	c_stmt("_0 = (int)(unsigned long)(DBL_PTR(@)->dbl);\n", Code[pc+1])
+	c_stmt("_0 = (object)(uintptr_t)(DBL_PTR(@)->dbl);\n", Code[pc+1])
 	c_stmt0("(*(void(*)())_0)();\n")
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
 	pc += 2
@@ -5847,9 +5823,9 @@ procedure opCLOSE()
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
 		if Code[pc] = ABORT then
-			c_stmt("UserCleanup((int)DBL_PTR(@)->dbl);\n", Code[pc+1])
+			c_stmt("UserCleanup((object)DBL_PTR(@)->dbl);\n", Code[pc+1])
 		else
-			c_stmt("EClose((int)DBL_PTR(@)->dbl);\n", Code[pc+1])
+			c_stmt("EClose((object)DBL_PTR(@)->dbl);\n", Code[pc+1])
 		end if
 	end if
 	dispose_temp( Code[pc+1], DISCARD_TEMP, REMOVE_FROM_MAP )
@@ -6023,7 +5999,7 @@ end procedure
 
 procedure delete_double( symtab_index obj )
 	c_stmt("if(DBL_PTR(@)->cleanup != 0 ){\n", obj )
-		c_stmt("_1 = (int) ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
+		c_stmt("_1 = (object) ChainDeleteRoutine( (cleanup_ptr)_1, DBL_PTR(@)->cleanup );\n", obj )
 	c_stmt0("}\n")
 	c_stmt("else if( !UNIQUE(DBL_PTR(@)) ){\n", obj )
 		CDeRef( obj )
@@ -6034,7 +6010,7 @@ end procedure
 
 procedure delete_sequence( symtab_index obj )
 	c_stmt("if(SEQ_PTR(@)->cleanup != 0 ){\n", obj )
-		c_stmt("_1 = (int) ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
+		c_stmt("_1 = (object) ChainDeleteRoutine( (cleanup_ptr)_1, SEQ_PTR(@)->cleanup );\n", obj )
 	c_stmt0("}\n")
 	c_stmt("else if( !UNIQUE(SEQ_PTR(@)) ){\n", obj )
 		c_stmt("@ = MAKE_SEQ(SequenceCopy( SEQ_PTR(@) ));\n", {obj, obj} )
@@ -6090,9 +6066,9 @@ end procedure
 
 
 procedure DeleteRoutine( symtab_index rid )
-	c_stmt("_1 = (int) _00[@].cleanup;\n", rid )
+	c_stmt("_1 = (object) _00[@].cleanup;\n", rid )
 	c_stmt0("if( _1 == 0 ){\n")
-		c_stmt0("_1 = (int) TransAlloc( sizeof(struct cleanup) );\n")
+		c_stmt0("_1 = (object) TransAlloc( sizeof(struct cleanup) );\n")
 		c_stmt( "_00[@].cleanup = (cleanup_ptr)_1;\n", rid)
 	c_stmt0("}\n")
 	c_stmt0("((cleanup_ptr)_1)->type = CLEAN_UDT_RT;\n")
@@ -7150,7 +7126,7 @@ procedure BackEnd(atom ignore)
 	c_hputs("extern char **Argv;\n")
 
 	if TWINDOWS then
-		c_puts("unsigned default_heap;\n")
+		c_puts("uintptr_t default_heap;\n")
 		if sequence(wat_path) then
 			c_puts("/* this is in the header */\n")
 			c_puts("/*__declspec(dllimport) unsigned __stdcall GetProcessHeap(void)*/;\n")
@@ -7287,15 +7263,15 @@ procedure BackEnd(atom ignore)
 	-- Complete Edition library gets out by mistake
 	if TWINDOWS then
 		if atom(wat_path) then
-			c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLOCKS_PER_SEC);\n")
+			c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLOCKS_PER_SEC);\n")
 		else
-			c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+			c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLK_TCK);\n")
 		end if
 	else
 		c_puts("#ifdef CLK_TCK\n")
-		c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)CLK_TCK);\n")
+		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)CLK_TCK);\n")
 		c_puts("#else\n")
-		c_stmt0("eu_startup(_00, _01, _02, (int)CLOCKS_PER_SEC, (int)sysconf(_SC_CLK_TCK));\n")
+		c_stmt0("eu_startup(_00, _01, _02, (object)CLOCKS_PER_SEC, (object)sysconf(_SC_CLK_TCK));\n")
 		c_puts("#endif\n")
 	end if
 

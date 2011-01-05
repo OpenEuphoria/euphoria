@@ -5,6 +5,7 @@
 /*****************************************************************************/
 #ifndef EXECUTE_H_
 #define EXECUTE_H_
+#include <stdint.h>
 
 		  /* Euphoria object format v1.2 and later */
 
@@ -34,28 +35,32 @@
    so we can simplify some tests. For speed we first check for ATOM-INT
    since that's what most objects are. */
 
-#define NOVALUE      ((long)0xbfffffffL)
-#define TOO_BIG_INT  ((long)0x40000000L)
-#define HIGH_BITS    ((long)0xC0000000L)
-#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
-#define IS_ATOM_INT_NV(ob)    ((long)(ob) >= NOVALUE)
+#define DBL_MASK (uintptr_t)0xA0000000
+#define SEQ_MASK (uintptr_t)0x80000000
+#define DS_MASK  (uintptr_t)0xE0000000
 
-#define MAKE_UINT(x) ((object)((unsigned long)x <= (unsigned long)0x3FFFFFFFL \
-                          ? (unsigned long)x : \
-                            NewDouble((double)(unsigned long)x)))
+#define NOVALUE      ((intptr_t)0xbfffffffL)
+#define TOO_BIG_INT  ((intptr_t)0x40000000L)
+#define HIGH_BITS    ((intptr_t)0xC0000000L)
+#define IS_ATOM_INT(ob)       (((intptr_t)(ob)) > NOVALUE)
+#define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
+
+#define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
+                          ? (uintptr_t)x : \
+                            NewDouble((double)(uintptr_t)x)))
 
 /* these are obsolete */
-#define INT_VAL(x)        ((int)(x))
+#define INT_VAL(x)        ((intptr_t)(x))
 #define MAKE_INT(x)       ((object)(x))
 
 /* N.B. the following distinguishes DBL's from SEQUENCES -
    must eliminate the INT case first */
-#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (long)0xA0000000)
+#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (object)DBL_MASK)
 
-#define IS_ATOM(ob)             (((long)(ob)) >= (long)0xA0000000)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < (long)0xA0000000)
+#define IS_ATOM(ob)             (((object)(ob)) >= (object)DBL_MASK)
+#define IS_SEQUENCE(ob)         (((object)(ob))  < (object)DBL_MASK)
 
-#define ASEQ(s) (((unsigned long)s & (unsigned long)0xE0000000) == (unsigned long)0x80000000)
+#define ASEQ(s) (((uintptr_t)s & (uintptr_t)DS_MASK) == (uintptr_t)SEQ_MASK)
 
 #define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
 
@@ -135,10 +140,10 @@ struct replace_block {
 
 
 /* MACROS */
-#define MAKE_DBL(x) ( (object) (((unsigned long)(x) >> 3) + (long)0xA0000000) )
-#define DBL_PTR(ob) ( (d_ptr)  (((unsigned long)(ob)) << 3) )
-#define MAKE_SEQ(x) ( (object) (((unsigned long)(x) >> 3) + (long)0x80000000) )
-#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned long)(ob)) << 3) )
+#define MAKE_DBL(x) ( (object) (((uintptr_t)(x) >> 3) + DBL_MASK) )
+#define DBL_PTR(ob) ( (d_ptr)  (((uintptr_t)(ob)) << 3) )
+#define MAKE_SEQ(x) ( (object) (((uintptr_t)(x) >> 3) + SEQ_MASK) )
+#define SEQ_PTR(ob) ( (s1_ptr) (((uintptr_t)(ob)) << 3) )
 
 /* ref a double or a sequence (both need same 3 bit shift) */
 #define RefDS(a) ++(DBL_PTR(a)->ref)
