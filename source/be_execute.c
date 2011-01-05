@@ -1815,8 +1815,7 @@ void do_exec(int *start_pc)
 /* 214 (previous) */
   &&L_POKE_POINTER, &&L_PEEK_POINTER,
 /* 215 (previous) */
-  &&L_SIZEOF,
-  0
+  &&L_SIZEOF
   };
 #endif
 #endif
