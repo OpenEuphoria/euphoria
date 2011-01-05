@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "execute.h"
+#include "symtab.h"
 
 #ifndef ERUNTIME
 object start_backend(object x);
@@ -74,10 +75,14 @@ object Wrap(object x);
 
 IFILE long_iopen(char *name, char *mode);
 
-unsigned internal_general_call_back(
+uintptr_t general_call_back(
+#ifdef ERUNTIME
 		  int cb_routine,
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9);
+#else
+		  symtab_ptr cb_routine,
+#endif
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 
 #endif

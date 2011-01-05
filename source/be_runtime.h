@@ -212,4 +212,11 @@ int memcopy( void *dest, size_t avail, void *src, size_t len);
 
 object eu_sizeof( object data_type );
 
+#ifdef EOSX
+uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
+#endif // EOSX
+uintptr_t (*general_ptr)();
+
 #endif /* BE_RUNTIME_H */

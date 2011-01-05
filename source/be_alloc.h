@@ -199,7 +199,7 @@ extern unsigned long max_bytes_allocated;   /* high water mark */
 extern void InitEMalloc();
 extern object NewSequence(char *data, int len);
 extern object NewString(char *s);
-extern s1_ptr NewS1(long size);
+extern s1_ptr NewS1(int size);
 extern s1_ptr SequenceCopy(register s1_ptr a);
 
 extern object NewDouble(double d);

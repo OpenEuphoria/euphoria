@@ -116,16 +116,6 @@ double eustart_time;
 
 object add(object a, object b);
 
-uintptr_t general_call_back(
-#ifdef ERUNTIME
-		  int cb_routine,
-#else
-		  symtab_ptr cb_routine,
-#endif
-						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
-						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
-						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
-
 struct op_info optable[MAX_OPCODE+1] = {
 {x, x}, /* no 0th element */
 {less, Dless},
@@ -4196,8 +4186,8 @@ object_ptr v_elem;
 {
 	int flen, sbuff_len=0;
 	char c;
-	object dval;
-	object uval;
+	intptr_t dval;
+	uintptr_t uval;
 	double gval;
 	char *sval;
 	char *sbuff;
@@ -4265,7 +4255,7 @@ object_ptr v_elem;
 			dval = INT_VAL(*v_elem);
 		else {
 			gval = DBL_PTR(*v_elem)->dbl;
-			if ((object)gval > (object)0x7FFFFFFF || (object)gval < (object)0x80000000) {
+			if (gval > INTPTR_MAX || gval < INTPTR_MIN) {
 				/* can't convert to long integer */
 				if (c == 'd') {
 					/* use .0f instead */
@@ -4274,13 +4264,14 @@ object_ptr v_elem;
 					c = 'f';
 				}
 				else if (gval >= 0.0 &&
-						 gval <= (object)0xFFFFFFFF) {
+						 gval <= UINTPTR_MAX ) {
 					/* need conversion to unsigned */
 					uval = gval;
 					dval = (object)uval;
 				}
-				else
+				else{
 					RTFatal("number is too big for %%x or %%o format");
+				}
 			}
 			else {
 				/* convert to positive or negative long integer */

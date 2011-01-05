@@ -77,7 +77,6 @@
 #define ATOM_1     1
 #define ATOM_2     2
 
-
 #include "object.h"
 
 
