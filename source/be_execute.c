@@ -237,7 +237,6 @@ union pc_t {
 /**********************/
 
 void INT_Handler(int);
-unsigned long good_rand();
 
 /**********************/
 /* Exported variables */

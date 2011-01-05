@@ -18,6 +18,7 @@
 #include <math.h>
 #include <time.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #ifdef EUNIX
 #  include <unistd.h>
@@ -113,17 +114,17 @@ double eustart_time;
 /* Declared Functions */
 /**********************/
 
-object add(long a, long b);
+object add(object a, object b);
 
-unsigned general_call_back(
+uintptr_t general_call_back(
 #ifdef ERUNTIME
 		  int cb_routine,
 #else
 		  symtab_ptr cb_routine,
 #endif
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9);
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 
 struct op_info optable[MAX_OPCODE+1] = {
 {x, x}, /* no 0th element */
@@ -349,7 +350,7 @@ IFILE last_w_file_ptr;
 object last_r_file_no = NOVALUE;
 IFILE last_r_file_ptr;
 struct file_info user_file[MAX_USER_FILE];
-long seed1, seed2;  /* current value of first and second random generators */
+object seed1, seed2;  /* current value of first and second random generators */
 int rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
 int con_was_opened = FALSE; /* TRUE if CON device was ever opened */
 int current_screen = MAIN_SCREEN;
@@ -663,7 +664,7 @@ void Prepend(object_ptr target, object s1, object a)
 	object_ptr p, q;
 	s1_ptr t;
 	s1_ptr s1p, new_seq;
-	long len, new_len;
+	int len, new_len;
 	object temp;
 
 	t = (s1_ptr)*target;
@@ -1245,7 +1246,7 @@ void Concat_Ni(object_ptr target, object_ptr *source, int n)
 }
 
 // used by translator
-void RepeatElem(int *addr, object item, int repcount)
+void RepeatElem(object *addr, object item, int repcount)
 /* replicate an object in memory - used by RIGHT_BRACE op */
 /* repcount will be at least 10 */
 {
@@ -1315,7 +1316,7 @@ object Repeat(object item, object repcount)
  * Calls the specified translated routine id for cleaning up the
  * UDT object.
  */
-void udt_clean_rt( object o, long rid ){
+void udt_clean_rt( object o, int rid ){
 	int pre_ref;
 
 	pre_ref = SEQ_PTR( o )->ref;
@@ -1345,7 +1346,7 @@ void udt_clean_rt( object o, long rid ){
 /**
  * Calls the specified routine id for cleaning up the UDT object.
  */
-void udt_clean( object o, long rid ){
+void udt_clean( object o, int rid ){
 
 	int *code;
 	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
@@ -1374,11 +1375,11 @@ void udt_clean( object o, long rid ){
 	}
 
 	args = MAKE_SEQ( s );
-	code = (int *)EMalloc( 4*sizeof(int*) );
-	code[0] = (int)opcode(CALL_PROC);
-	code[1] = (int)&rid;
-	code[2] = (int)&args;
-	code[3] = (int)opcode(CALL_BACK_RETURN);
+	code = (object *)EMalloc( 4 * sizeof(object*) );
+	code[0] = (object)opcode(CALL_PROC);
+	code[1] = (object)&rid;
+	code[2] = (object)&args;
+	code[3] = (object)opcode(CALL_BACK_RETURN);
 	if (expr_top >= expr_limit) {
 		expr_max = BiggerStack();
 		expr_limit = expr_max - 3;
@@ -1473,7 +1474,7 @@ void de_reference(s1_ptr a)
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
-	if ((long)a == NOVALUE || IS_ATOM_INT(a))
+	if ((object)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
 		RTInternal("more than 1000 refs");
@@ -1551,8 +1552,8 @@ void de_reference(s1_ptr a)
 						if( ((s1_ptr)t)->cleanup != 0 ){
 							cleanup_sequence( (s1_ptr)t );
 						}
-						((s1_ptr)t)->ref = (long)a;
-						((s1_ptr)t)->length = (long)p;
+						((s1_ptr)t)->ref = (int)a;
+						((s1_ptr)t)->length = (int)p;
 						a = (s1_ptr)t;
 						p = a->base;
 					}
@@ -1562,13 +1563,13 @@ void de_reference(s1_ptr a)
 	}
 }
 
-void DeRef1(int a)
+void DeRef1(object a)
 /* Saves space. Use in top-level code (outside of loops) */
 {
 	DeRef(a);
 }
 
-void DeRef5(int a, int b, int c, int d, int e)
+void DeRef5(object a, object b, object c, object d, object e)
 /* Saves space. Use instead of 5 in-line DeRef's */
 {
 	DeRef(a);
@@ -1590,7 +1591,7 @@ void de_reference_i(s1_ptr a)
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
 
-	if ((long)a == NOVALUE || IS_ATOM_INT(a))
+	if ((object)a == NOVALUE || IS_ATOM_INT(a))
 		RTInternal("bad object passed to de_reference");
 	if (DBL_PTR(a)->ref > 1000)
 		RTInternal("more than 1000 refs");
@@ -1642,7 +1643,7 @@ object DoubleToInt(object d)
 		temp_dbl <= MAXINT_DBL &&
 		temp_dbl >= MININT_DBL) {
 			/* return it in integer repn */
-			return MAKE_INT((long)temp_dbl);
+			return MAKE_INT((object)temp_dbl);
 	}
 	else
 		return d; /* couldn't convert */
@@ -1661,10 +1662,10 @@ object x()
 }
 
 
-object add(long a, long b)
+object add(object a, object b)
 /* integer add */
 {
-	long c;
+	object c;
 
 	c = a + b;
 	if (c + HIGH_BITS < 0)
@@ -1673,10 +1674,10 @@ object add(long a, long b)
 		return (object)NewDouble((double)c);
 }
 
-object minus(long a, long b)
+object minus(object a, object b)
 /* integer subtract */
 {
-	long c;
+	object c;
 
 	c = a - b;
 	if (c + HIGH_BITS < 0)
@@ -1685,10 +1686,11 @@ object minus(long a, long b)
 		return (object)NewDouble((double)c);
 }
 
-object multiply(long a, long b)
+object multiply(object a, object b)
 /* integer multiply */
 /* n.b. char type is signed */
 {
+	// TODO: this condition changes for 64-bits...
 	if (a == (short)a) {
 		if ((b <= INT15 && b >= -INT15) ||
 		   (a == (char)a && b <= INT23 && b >= -INT23) ||
@@ -1701,7 +1703,7 @@ object multiply(long a, long b)
 	return (object)NewDouble(a * (double)b);
 }
 
-object divide(long a, long b)
+object divide(object a, object b)
 /* compute a / b */
 {
 	if (b == 0)
@@ -1720,7 +1722,7 @@ object Ddivide(d_ptr a, d_ptr b)
 	return (object)NewDouble(a->dbl / b->dbl);
 }
 
-object eremainder(long a, long b)  // avoid conflict with "remainder" math fn
+object eremainder(object a, object b)  // avoid conflict with "remainder" math fn
 /* integer remainder of a divided by b */
 {
 	if (b == 0)
@@ -1738,7 +1740,7 @@ object Dremainder(d_ptr a, d_ptr b)
 }
 
 
-object and_bits(unsigned long a, unsigned long b)
+object and_bits(uintptr_t a, uintptr_t b)
 /* integer a AND b */
 {
 	a = a & b;
@@ -1748,10 +1750,10 @@ object and_bits(unsigned long a, unsigned long b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-	return and_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return and_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
 }
 
-object or_bits(unsigned long a, unsigned long b)
+object or_bits(uintptr_t a, uintptr_t b)
 /* integer a OR b */
 {
 	a = a | b;
@@ -1761,10 +1763,10 @@ object or_bits(unsigned long a, unsigned long b)
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-	return or_bits( (unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return or_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
 }
 
-object xor_bits(unsigned long a, unsigned long b)
+object xor_bits(uintptr_t a, uintptr_t b)
 /* integer a XOR b */
 {
 	a = a ^ b;
@@ -1775,10 +1777,10 @@ object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
 
-	return xor_bits((unsigned long)(a->dbl), (unsigned long)(b->dbl));
+	return xor_bits((uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
 }
 
-object not_bits(unsigned long a)
+object not_bits(uintptr_t a)
 /* integer bitwise NOT of a */
 {
 	a = ~a;
@@ -1788,10 +1790,10 @@ object not_bits(unsigned long a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-	return not_bits((unsigned long)(a->dbl));
+	return not_bits((uintptr_t)(a->dbl));
 }
 
-object power(long a, long b)
+object power(object a, object b)
 /* integer a to the power b */
 {
 	long i, p;
@@ -1826,7 +1828,7 @@ object Dpower(d_ptr a, d_ptr b)
 	return (object)NewDouble(pow(a->dbl, b->dbl));
 }
 
-object equals(long a, long b)
+object equals(object a, object b)
 /* integer a = b */
 {
 	if (a == b)
@@ -1845,7 +1847,7 @@ object Dequals(d_ptr a, d_ptr b)
 }
 
 
-object less(long a, long b)
+object less(object a, object b)
 /* integer a < b */
 {
 	if (a < b)
@@ -1864,7 +1866,7 @@ object Dless(d_ptr a, d_ptr b)
 }
 
 
-object greater(long a, long b)
+object greater(object a, object b)
 /* integer a > b */
 {
 	if (a > b)
@@ -1885,7 +1887,7 @@ object Dgreater(d_ptr a, d_ptr b)
 }
 
 
-object noteq(long a, long b)
+object noteq(object a, object b)
 /* integer a != b */
 {
 	if (a != b)
@@ -1904,7 +1906,7 @@ object Dnoteq(d_ptr a, d_ptr b)
 }
 
 
-object lesseq(long a, long b)
+object lesseq(object a, object b)
 /* integer a <= b */
 {
 	if (a <= b)
@@ -1923,7 +1925,7 @@ object Dlesseq(d_ptr a, d_ptr b)
 }
 
 
-object greatereq(long a, long b)
+object greatereq(object a, object b)
 /* integer a >= b */
 {
 	if (a >= b)
@@ -1942,7 +1944,7 @@ object Dgreatereq(d_ptr a, d_ptr b)
 }
 
 
-object and(long a, long b)
+object and(object a, object b)
 /* integer a and b */
 {
 	if (a != 0 && b != 0)
@@ -1961,7 +1963,7 @@ object Dand(d_ptr a, d_ptr b)
 }
 
 
-object or(long a, long b)
+object or(object a, object b)
 /* integer a or b */
 {
 	if (a != 0 || b != 0)
@@ -1979,7 +1981,7 @@ object Dor(d_ptr a, d_ptr b)
 		 return ATOM_0;
 }
 
-object xor(long a, long b)
+object xor(object a, object b)
 /* integer a xor b */
 {
 	if ((a != 0) != (b != 0))
@@ -1999,7 +2001,7 @@ object Dxor(d_ptr a, d_ptr b)
 
 /* --- Unary Ops --- */
 
-object uminus(long a)
+object uminus(object a)
 /* integer -a */
 {
 	if (a == MININT)
@@ -2015,7 +2017,7 @@ object Duminus(d_ptr a)
 }
 
 
-object not(long a)
+object not(object a)
 /* compute c := not a */
 {
 	if (a == 0)
@@ -2034,7 +2036,7 @@ object Dnot(d_ptr a)
 }
 
 
-object e_sqrt(long a)
+object e_sqrt(object a)
 /* integer square_root(a) */
 {
 	if (a < 0)
@@ -2051,7 +2053,7 @@ object De_sqrt(d_ptr a)
 }
 
 
-object e_sin(long a)
+object e_sin(object a)
 /* sin of an angle a (radians) */
 {
 	return (object)NewDouble( sin((double)a) );
@@ -2063,7 +2065,7 @@ object De_sin(d_ptr a)
 	return (object)NewDouble( sin(a->dbl) );
 }
 
-object e_cos(long a)
+object e_cos(object a)
 /* cos of an angle a (radians) */
 {
 	return (object)NewDouble( cos((double)a) );
@@ -2075,7 +2077,7 @@ object De_cos(d_ptr a)
 	return (object)NewDouble( cos(a->dbl) );
 }
 
-object e_tan(long a)
+object e_tan(object a)
 /* tan of an angle a (radians) */
 {
 	return (object)NewDouble( tan((double)a) );
@@ -2087,7 +2089,7 @@ object De_tan(d_ptr a)
 	return (object)NewDouble( tan(a->dbl) );
 }
 
-object e_arctan(long a)
+object e_arctan(object a)
 /* arctan of an angle a (radians) */
 {
 	return (object)NewDouble( atan((double)a) );
@@ -2099,7 +2101,7 @@ object De_arctan(d_ptr a)
 	return (object)NewDouble( atan(a->dbl) );
 }
 
-object e_log(long a)
+object e_log(object a)
 /* natural log of a (integer) */
 {
 	if (a <= 0)
@@ -2115,7 +2117,7 @@ object De_log(d_ptr a)
 	return (object)NewDouble( log(a->dbl) );
 }
 
-object e_floor(long a)  // not used anymore
+object e_floor(object a)  // not used anymore
 /* floor of a number - no op since a is already known to be an int */
 {
 	return a;
@@ -2129,7 +2131,7 @@ object De_floor(d_ptr a)
 	temp = floor(a->dbl);
 #ifndef ERUNTIME
 	if (fabs(temp) < MAXINT_DBL)
-		return MAKE_INT((long)temp);
+		return MAKE_INT((object)temp);
 	else
 #endif
 		return (object)NewDouble(temp);
@@ -2155,9 +2157,9 @@ void setran()
 	time_t time_of_day;
 	struct tm *local;
 #if !defined( EWINDOWS )
-	long garbage;
+	object garbage;
 #endif
-	static long src = prim1 ^ prim2;
+	static object src = prim1 ^ prim2;
 
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
@@ -2166,13 +2168,13 @@ void setran()
 #ifdef EWINDOWS
 	seed1 = GetTickCount() + src;  // milliseconds since Windows started
 #else
-	seed1 = (unsigned long)(&garbage) + random() + src;
+	seed1 = (uintptr_t)(&garbage) + random() + src;
 #endif
 	src += 1;
 	good_rand();  // skip first one, second will be more random-looking
 }
 
-static ldiv_t my_ldiv (long int numer, long int denom)
+static ldiv_t my_ldiv (object numer, object denom)
 {
 	ldiv_t result;
 
@@ -2187,11 +2189,11 @@ static ldiv_t my_ldiv (long int numer, long int denom)
 	return result;
 }
 
-unsigned long good_rand()
+uintptr_t good_rand()
 /* Public Domain random number generator from USENET posting */
 {
 	ldiv_t temp;
-	long remval, quotval;
+	object remval, quotval;
 
 	if (!rand_was_set && seed1 == 0 && seed2 == 0) {
 		// First time thru.
@@ -2225,13 +2227,13 @@ unsigned long good_rand()
 	return V(seed1, seed2);
 }
 
-object Random(long a)
+object Random(object a)
 /* random number from 1 to a */
 /* a is a legal integer value */
 {
 	if (a <= 0)
 		RTFatal("argument to rand must be >= 1");
-	return MAKE_INT((good_rand() % (unsigned)a) + 1);
+	return MAKE_INT((good_rand() % (uintptr_t)a) + 1);
 }
 
 
@@ -2251,7 +2253,7 @@ object unary_op(int fn, object a)
 /* recursive evaluation of a unary op
    c may be the same as a. ATOM_INT case handled in-line by caller */
 {
-	long length;
+	int length;
 	object_ptr ap, cp;
 	object x;
 	s1_ptr c;
@@ -2313,7 +2315,7 @@ object binary_op(int fn, object a, object b)
 /* Recursively calculates fn of a and b. */
 /* Caller must handle INT:INT case */
 {
-	long length;
+	int length;
 	object_ptr ap, bp, cp;
 	struct d temp_d;
 	s1_ptr c;
@@ -3062,14 +3064,14 @@ object calc_hash(object a, object b)
 
 }
 
-int compare(object a, object b)
+object compare(object a, object b)
 /* Compare general objects a and b. Return 0 if they are identical,
    1 if a > b, -1 if a < b. All atoms are less than all sequences.
    The INT-INT case *must* be taken care of by the caller */
 {
 	object_ptr ap, bp;
 	object av, bv;
-	long length, lengtha, lengthb;
+	int length, lengtha, lengthb;
 	double da, db;
 	int c;
 
@@ -3129,10 +3131,10 @@ int compare(object a, object b)
 }
 
 
-long find(object a, s1_ptr b)
+object find(object a, s1_ptr b)
 /* find object a as an element of sequence b */
 {
-	long length;
+	int length;
 	object_ptr bp;
 	object bv;
 
@@ -3191,7 +3193,7 @@ long find(object a, s1_ptr b)
 	}
 	else { // IS_SEQUENCE(a)
 
-		long a_len;
+		int a_len;
 
 		length = b->length;
 		a_len = SEQ_PTR(a)->length;
@@ -3215,15 +3217,15 @@ long find(object a, s1_ptr b)
 }
 
 
-long e_match(s1_ptr a, s1_ptr b)
+object e_match(s1_ptr a, s1_ptr b)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
-	long ntries, len_remaining;
+	int ntries, len_remaining;
 	object_ptr a1, b1, bp;
 	object_ptr ai, bi;
 	object av, bv;
-	long lengtha, lengthb;
+	int lengtha, lengthb;
 
 	if (!IS_SEQUENCE(a))
 		RTFatal("first argument of match() must be a sequence");
@@ -3266,7 +3268,7 @@ long e_match(s1_ptr a, s1_ptr b)
 }
 
 #ifndef ERUNTIME
-static void CheckSlice(object a, long startval, long endval, long length)
+static void CheckSlice(object a, int startval, int endval, int length)
 /* check legality of a slice, return integer values of start, length */
 /* startval and endval are deref'd */
 {
@@ -3302,9 +3304,9 @@ static void CheckSlice(object a, long startval, long endval, long length)
 void RHS_Slice( object a, object start, object end)
 /* Construct slice a[start..end] */
 {
-	long startval;
-	long length;
-	long endval;
+	int startval;
+	int length;
+	int endval;
 	s1_ptr newa, olda;
 	object temp;
 	object_ptr p, q, sentinel;
@@ -3313,7 +3315,7 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
 	else if (IS_ATOM_DBL(start)) {
-		startval = (long)(DBL_PTR(start)->dbl);
+		startval = (int)(DBL_PTR(start)->dbl);
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3321,7 +3323,7 @@ void RHS_Slice( object a, object start, object end)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
-		endval = (long)(DBL_PTR(end)->dbl);
+		endval = (int)(DBL_PTR(end)->dbl);
 		 /* f.p.: if the double is too big for
 			a long WATCOM produces the most negative number. This
 			will be caught as a bad subscript, although the value in the
@@ -3397,7 +3399,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 /* assign to a sliced variable */
 {
 	s1_ptr *seq_ptr, sp;
-	long startval, endval, length;
+	int startval, endval, length;
 	object_ptr s_elem;
 	object_ptr v_elem;
 
@@ -3406,7 +3408,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	if (IS_ATOM_INT(start))
 		startval = INT_VAL(start);
 	else if (IS_ATOM_DBL(start)) {
-		startval = (long)(DBL_PTR(start)->dbl);
+		startval = (int)(DBL_PTR(start)->dbl);
 	}
 	else
 		RTFatal("slice lower index is not an atom");
@@ -3414,7 +3416,7 @@ void AssignSlice(object start, object end, s1_ptr val)
 	if (IS_ATOM_INT(end))
 		endval = INT_VAL(end);
 	else if (IS_ATOM_DBL(end)) {
-		endval = (long)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
+		endval = (int)(DBL_PTR(end)->dbl); /* see above comments on f.p. */
 	}
 	else
 		RTFatal("slice upper index is not an atom");
@@ -3608,7 +3610,7 @@ object EOpen(object filename, object mode_obj, object cleanup)
 	IFILE fp;
 	long length;
 	int i;
-	long mode, text_mode;
+	int mode, text_mode;
 	cleanup_ptr cup;
 
 	if (IS_ATOM(mode_obj))
@@ -3977,7 +3979,7 @@ static void indent()
 static void rPrint(object a)
 /* print any object in default numeric format */
 {
-	long length;
+	int length;
 	int multi_line;
 	object_ptr elem;
 	char sbuff[NUM_SIZE];
@@ -3987,7 +3989,7 @@ static void rPrint(object a)
 
 	if (IS_ATOM(a)) {
 		if (IS_ATOM_INT(a)) {
-			snprintf(sbuff, NUM_SIZE, "%ld", a);
+			snprintf(sbuff, NUM_SIZE, "%" PRIdPTR, a);
 			sbuff[NUM_SIZE-1] = 0; // ensure NULL
 			screen_output(print_file, sbuff);
 			print_chars += strlen(sbuff);
@@ -4194,12 +4196,12 @@ object_ptr v_elem;
 {
 	int flen, sbuff_len=0;
 	char c;
-	long dval;
-	unsigned long uval;
+	object dval;
+	object uval;
 	double gval;
 	char *sval;
 	char *sbuff;
-	long slength;
+	int slength;
 	char quick_alloc1[LOCAL_SPACE];
 	int free_sv;
 	int free_sb;
@@ -4263,7 +4265,7 @@ object_ptr v_elem;
 			dval = INT_VAL(*v_elem);
 		else {
 			gval = DBL_PTR(*v_elem)->dbl;
-			if (gval > (long)0x7FFFFFFF || gval < (long)0x80000000) {
+			if ((object)gval > (object)0x7FFFFFFF || (object)gval < (object)0x80000000) {
 				/* can't convert to long integer */
 				if (c == 'd') {
 					/* use .0f instead */
@@ -4272,10 +4274,10 @@ object_ptr v_elem;
 					c = 'f';
 				}
 				else if (gval >= 0.0 &&
-						 gval <= (unsigned long)0xFFFFFFFF) {
+						 gval <= (object)0xFFFFFFFF) {
 					/* need conversion to unsigned */
 					uval = gval;
-					dval = (long)uval;
+					dval = (object)uval;
 				}
 				else
 					RTFatal("number is too big for %%x or %%o format");
@@ -4347,7 +4349,7 @@ object EPrintf(int file_no, object format_obj, object values)
 	char quick_alloc[LOCAL_SPACE]; // don't use TempBuff - FormatItem uses it
 	int free_cs;
 	char out_string[LOCAL_SPACE];
-	long flen;
+	int flen;
 	int s;
 	IFILE f;
 	object result;
@@ -5059,7 +5061,7 @@ void match_samples()
 	total_samples -= bad_samples;
 }
 
-static void show_prof_line(IFILE f, long i)
+static void show_prof_line(IFILE f, int i)
 /* display one line of profile output */
 {
 	if (*(slist[i].src+4) == END_OF_FILE_CHAR) {
@@ -5131,10 +5133,19 @@ void ProfileCommand()
 object make_atom32(unsigned c32)
 /* make a Euphoria atom from an unsigned C value */
 {
-	if (c32 <= (unsigned)MAXINT)
+	if (c32 <= (uintptr_t)MAXINT)
 		return c32;
 	else
 		return NewDouble((double)c32);
+}
+
+object make_atom(uintptr_t c)
+/* make a Euphoria atom from an unsigned C value */
+{
+	if (c <= (uintptr_t)MAXINT)
+		return c;
+	else
+		return NewDouble((double)c);
 }
 
 unsigned general_call_back(
@@ -5143,44 +5154,44 @@ unsigned general_call_back(
 #else
 		  symtab_ptr cb_routine,
 #endif
-						   unsigned arg1, unsigned arg2, unsigned arg3,
-						   unsigned arg4, unsigned arg5, unsigned arg6,
-						   unsigned arg7, unsigned arg8, unsigned arg9)
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 /* general call-back routine: 0 to 9 args */
 {
 	int num_args;
 #ifdef ERUNTIME
 	int (*addr)();
 #else
-	int *code[4+9]; // place to put IL: max 9 args
-	int *save_tpc;
+	object *code[4+9]; // place to put IL: max 9 args
+	object *save_tpc;
 #endif
 
 	if (gameover)
-		return (unsigned)0; // ignore messages after we decide to shutdown
+		return (uintptr_t)0; // ignore messages after we decide to shutdown
 
 #ifdef ERUNTIME
 // translator call-back
 	num_args = rt00[cb_routine].num_args;
 	addr = rt00[cb_routine].addr;
 	if (num_args >= 1) {
-	  call_back_arg1->obj = make_atom32((unsigned)arg1);
+	  call_back_arg1->obj = make_atom((uintptr_t)arg1);
 	  if (num_args >= 2) {
-		call_back_arg2->obj = make_atom32((unsigned)arg2);
+		call_back_arg2->obj = make_atom((uintptr_t)arg2);
 		if (num_args >= 3) {
-		  call_back_arg3->obj = make_atom32((unsigned)arg3);
+		  call_back_arg3->obj = make_atom((uintptr_t)arg3);
 		  if (num_args >= 4) {
-			call_back_arg4->obj = make_atom32((unsigned)arg4);
+			call_back_arg4->obj = make_atom((uintptr_t)arg4);
 			if (num_args >= 5) {
-			  call_back_arg5->obj = make_atom32((unsigned)arg5);
+			  call_back_arg5->obj = make_atom((uintptr_t)arg5);
 			  if (num_args >= 6) {
-				call_back_arg6->obj = make_atom32((unsigned)arg6);
+				call_back_arg6->obj = make_atom((uintptr_t)arg6);
 				if (num_args >= 7) {
-				  call_back_arg7->obj = make_atom32((unsigned)arg7);
+				  call_back_arg7->obj = make_atom((uintptr_t)arg7);
 				  if (num_args >= 8) {
-					call_back_arg8->obj = make_atom32((unsigned)arg8);
+					call_back_arg8->obj = make_atom((uintptr_t)arg8);
 					if (num_args >= 9) {
-					  call_back_arg9->obj = make_atom32((unsigned)arg9);
+					  call_back_arg9->obj = make_atom((uintptr_t)arg9);
 					}
 				  }
 				}
@@ -5267,40 +5278,40 @@ unsigned general_call_back(
 	num_args = cb_routine->u.subp.num_args;
 	if (num_args >= 1) {
 	  DeRef(call_back_arg1->obj);
-	  call_back_arg1->obj = make_atom32((unsigned)arg1);
-	  code[2] = (int *)call_back_arg1;
+	  call_back_arg1->obj = make_atom32((uintptr_t)arg1);
+	  code[2] = (object *)call_back_arg1;
 	  if (num_args >= 2) {
 		DeRef(call_back_arg2->obj);
-		call_back_arg2->obj = make_atom32((unsigned)arg2);
-		code[3] = (int *)call_back_arg2;
+		call_back_arg2->obj = make_atom32((uintptr_t)arg2);
+		code[3] = (object *)call_back_arg2;
 		if (num_args >= 3) {
 		  DeRef(call_back_arg3->obj);
-		  call_back_arg3->obj = make_atom32((unsigned)arg3);
-		  code[4] = (int *)call_back_arg3;
+		  call_back_arg3->obj = make_atom32((uintptr_t)arg3);
+		  code[4] = (object *)call_back_arg3;
 		  if (num_args >= 4) {
 			DeRef(call_back_arg4->obj);
-			call_back_arg4->obj = make_atom32((unsigned)arg4);
-			code[5] = (int *)call_back_arg4;
+			call_back_arg4->obj = make_atom32((uintptr_t)arg4);
+			code[5] = (object *)call_back_arg4;
 			if (num_args >= 5) {
 			  DeRef(call_back_arg5->obj);
-			  call_back_arg5->obj = make_atom32((unsigned)arg5);
-			  code[6] = (int *)call_back_arg5;
+			  call_back_arg5->obj = make_atom32((uintptr_t)arg5);
+			  code[6] = (object *)call_back_arg5;
 			  if (num_args >= 6) {
 				DeRef(call_back_arg6->obj);
-				call_back_arg6->obj = make_atom32((unsigned)arg6);
-				code[7] = (int *)call_back_arg6;
+				call_back_arg6->obj = make_atom32((uintptr_t)arg6);
+				code[7] = (object *)call_back_arg6;
 				if (num_args >= 7) {
 				  DeRef(call_back_arg7->obj);
-				  call_back_arg7->obj = make_atom32((unsigned)arg7);
-				  code[8] = (int *)call_back_arg7;
+				  call_back_arg7->obj = make_atom32((uintptr_t)arg7);
+				  code[8] = (object *)call_back_arg7;
 				  if (num_args >= 8) {
 					DeRef(call_back_arg8->obj);
-					call_back_arg8->obj = make_atom32((unsigned)arg8);
-					code[9] = (int *)call_back_arg8;
+					call_back_arg8->obj = make_atom32((uintptr_t)arg8);
+					code[9] = (object *)call_back_arg8;
 					if (num_args >= 9) {
 					  DeRef(call_back_arg9->obj);
-					  call_back_arg9->obj = make_atom32((unsigned)arg9);
-					  code[10] = (int *)call_back_arg9;
+					  call_back_arg9->obj = make_atom32((uintptr_t)arg9);
+					  code[10] = (object *)call_back_arg9;
 					}
 				  }
 				}
@@ -5311,8 +5322,8 @@ unsigned general_call_back(
 	  }
 	}
 
-	code[num_args+2] = (int *)call_back_result;
-	code[num_args+3] = (int *)opcode(CALL_BACK_RETURN);
+	code[num_args+2] = (object *)call_back_result;
+	code[num_args+3] = (object *)opcode(CALL_BACK_RETURN);
 
 	*expr_top++ = (object)tpc;    // needed for traceback
 	*expr_top++ = (object)NULL;   // prevents restore_privates()
@@ -5330,32 +5341,32 @@ unsigned general_call_back(
 	// Don't do get_pos_int() for crash handler
 	if (crash_call_back) {
 		crash_call_back = FALSE;
-		return (unsigned)(call_back_result->obj);
+		return (object)(call_back_result->obj);
 	}
 	else {
-		return (unsigned)get_pos_int("call-back", call_back_result->obj);
+		return (object)get_pos_int("call-back", call_back_result->obj);
 	}
 }
 
-unsigned (*general_ptr)() = (void *)&general_call_back;
+uintptr_t (*general_ptr)() = (void *)&general_call_back;
 
 #ifdef EWATCOM
 #pragma off (check_stack);
 #endif
 
 #ifdef EOSX
-unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
-						unsigned arg4, unsigned arg5, unsigned arg6,
-						unsigned arg7, unsigned arg8, unsigned arg9)
+uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
 	// a dummy where CallBack will later assign the value of general_ptr
 	// this saves us the trouble of trying to calculate the offset of
 	// the callback copy from general_ptr and stuffing that into a LEA
 	// calculation
-	unsigned (*f)(unsigned, unsigned, unsigned, unsigned, unsigned,
-	unsigned, unsigned, unsigned, unsigned, unsigned)
-	= (unsigned (*)(unsigned, unsigned, unsigned, unsigned, unsigned,
-	unsigned, unsigned, unsigned, unsigned, unsigned)) 0xF001F001;
+	uintptr_t (*f)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)
+	= (uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
+	uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) 0xF001F001;
 	return (f)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
@@ -5366,9 +5377,9 @@ unsigned __cdecl osx_cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3
    It can handle a variable number of args.
    Not all args below will actually be provided on a given call. */
 
-LRESULT __cdecl cdecl_call_back(unsigned arg1, unsigned arg2, unsigned arg3,
-						unsigned arg4, unsigned arg5, unsigned arg6,
-						unsigned arg7, unsigned arg8, unsigned arg9)
+LRESULT __cdecl cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, arg5,
@@ -5387,72 +5398,72 @@ LRESULT CALLBACK call_back0()
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back1(unsigned arg1)
+LRESULT CALLBACK call_back1(uintptr_t arg1)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back2(unsigned arg1, unsigned arg2)
+LRESULT CALLBACK call_back2(uintptr_t arg1, uintptr_t arg2)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back3(unsigned arg1, unsigned arg2, unsigned arg3)
+LRESULT CALLBACK call_back3(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back4(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4)
+LRESULT CALLBACK call_back4(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back5(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5)
+LRESULT CALLBACK call_back5(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, arg5,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back6(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6)
+LRESULT CALLBACK call_back6(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back7(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7)
+LRESULT CALLBACK call_back7(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+							uintptr_t arg7)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, 0, 0);
 }
 
-LRESULT CALLBACK call_back8(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7, unsigned arg8)
+LRESULT CALLBACK call_back8(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+							uintptr_t arg7, uintptr_t arg8)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, 0);
 }
 
-LRESULT CALLBACK call_back9(unsigned arg1, unsigned arg2, unsigned arg3,
-							unsigned arg4, unsigned arg5, unsigned arg6,
-							unsigned arg7, unsigned arg8, unsigned arg9)
+LRESULT CALLBACK call_back9(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+							uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
 	return (LRESULT) (*general_ptr)((symtab_ptr)0x12345678,
 									 arg1, arg2, arg3, arg4, arg5,
@@ -5777,7 +5788,7 @@ void key_gets(char *input_string)
 	}
 }
 
-long find_from(object a, object bobj, object c)
+object find_from(object a, object bobj, object c)
 /* find object a as an element of sequence b starting from c*/
 {
 	long length;
@@ -5857,7 +5868,7 @@ long find_from(object a, object bobj, object c)
 		}
 	}
 	else { // IS_SEQUENCE(a)
-		long a_len;
+		int a_len;
 
 		length -= c - 1;
 		a_len = SEQ_PTR(a)->length;
@@ -5884,11 +5895,11 @@ object e_match_from(object aobj, object bobj, object c)
 /* find sequence a as a slice within sequence b
    sequence a may not be empty */
 {
-	long ntries, len_remaining;
+	int ntries, len_remaining;
 	object_ptr a1, b1, bp;
 	object_ptr ai, bi;
 	object av, bv;
-	long lengtha, lengthb;
+	int lengtha, lengthb;
 	s1_ptr a, b;
 
 	if (!IS_SEQUENCE(aobj))
@@ -5909,7 +5920,7 @@ object e_match_from(object aobj, object bobj, object c)
 		;
 	}
 	else if (IS_ATOM_DBL(c)) {
-		c = (long)(DBL_PTR(c)->dbl);
+		c = (object)(DBL_PTR(c)->dbl);
 	}
 	else
 		RTFatal("third argument of match_from() must be an atom");
@@ -5956,12 +5967,12 @@ object e_match_from(object aobj, object bobj, object c)
 void Replace( replace_ptr rb )
 {
 //  normalise arguments, dispatch special cases
-	long start_pos, end_pos, seqlen, replace_len;
+	int start_pos, end_pos, seqlen, replace_len;
 	object copy_from, copy_to, target;
 	s1_ptr s1, s2;
 
-	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (long)(DBL_PTR(*rb->start)->dbl);
-	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (long)(DBL_PTR(*rb->stop)->dbl);
+	start_pos = (IS_ATOM_INT(*rb->start)) ? *rb->start : (int)(DBL_PTR(*rb->start)->dbl);
+	end_pos = (IS_ATOM_INT(*rb->stop)) ? *rb->stop : (int)(DBL_PTR(*rb->stop)->dbl);
 
 	copy_to   = *rb->copy_to;
 	copy_from = *rb->copy_from;
