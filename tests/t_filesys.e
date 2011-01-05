@@ -31,8 +31,13 @@ end ifdef
 fname = "readme"
 fext = "txt"
 
-test_equal("pathinfo() fully qualified path", {pname, fname & '.' & fext, fname, fext, driveid},
-    pathinfo(fullname))
+ifdef UNIX then
+	test_equal("pathinfo() fully qualified path", {pname, fname & '.' & fext, fname, fext, driveid},
+    pathinfo(fullname) )
+elsedef
+	test_equal("pathinfo() fully qualified path", upper( {pname, fname & '.' & fext, fname, fext, driveid} ), upper( pathinfo(fullname) ) )
+end ifdef
+
 test_equal("pathinfo() no extension", {pname, fname, fname, "", ""},
     pathinfo(pname & SLASH & fname))
 test_equal("pathinfo() no dir", {"", fname & '.' & fext, fname, fext, ""}, pathinfo(fname & "." & fext))
@@ -164,8 +169,8 @@ ifdef UNIX then
 end ifdef
 
 ifdef WINDOWS then
-	test_equal( "canonical_path() #6", lower(current_dir() & SLASH & "UPPERNAME"), canonical_path( "UPPERNAME",,1 ))
-	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME",,0 ))
+	test_equal( "canonical_path() #6", lower(current_dir() & SLASH & "UPPERNAME"), lower( canonical_path( "UPPERNAME" ) ) )
+	test_equal( "canonical_path() #7",       current_dir() & SLASH & "UPPERNAME",  canonical_path( "UPPERNAME" ))
 	test_equal( "canonical_path() #8", entire_driveid & SLASH & "john" & SLASH & "doe.txt",
 		canonical_path("/john/doe.txt"))
 end ifdef

@@ -6,9 +6,16 @@
   which became a legal name for euphoria 4.0
 * [[ticket:577]] ##object()## works same on translator as the interpreter.
 * [[ticket:575]] OW installer file setenv-ow.bat functionality restored from 4.0.0RC2.
+* case issues were removed from pathinfo(), canonical_path(), and abbreviate_path()
+  these functions now return raw OS output; it is up to the user to change case when necessary
 
 == Enhancements
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
 * [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
+
+== Deprecated
+
+* canonical_path() no longer uses its third parameter (no_case) for case sensitivity; the no_case
+  parameter will be removed in 4.1
 
