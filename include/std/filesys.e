@@ -1459,7 +1459,7 @@ end function
 -- -- res is now "/usr/foo/abc.def"
 -- </eucode>
 
-public function canonical_path(sequence path_in, integer directory_given = 0, integer no_case = 0 )
+public function canonical_path(sequence path_in, integer directory_given = 0, integer no_case = 0)
     sequence lPath = ""
     integer lPosA = -1
     integer lPosB = -1
@@ -1566,6 +1566,9 @@ public function canonical_path(sequence path_in, integer directory_given = 0, in
 	
 	ifdef WINDOWS then
 		lPath = lDrive & lPath
+		if no_case then
+			lPath = lower(lPath)
+		end if
 	end ifdef
 
 	return lPath

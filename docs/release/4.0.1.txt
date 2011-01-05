@@ -13,9 +13,12 @@
 
 * Added parsing of two digit years to ##std/datetime.e## ##[[:parse]]##.
 * [[ticket:516]] added ##[[:join_path]]## and ##[[:split_path]]## routines.
+* ##[[:current_dir]]()## now always returns an upper case letter for the drive
+  id.
 
 == Deprecated
 
-* canonical_path() no longer uses its third parameter (no_case) for case sensitivity; the no_case
-  parameter will be removed in 4.1
+* ##[[:canonical_path]]()##'s third parameter, ##no_case##, has been deprecated. If you are doing
+  path comparisons on windows, use lower() or upper() instead of using the ##no_case##
+  parameter.
 
