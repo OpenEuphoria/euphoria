@@ -857,7 +857,7 @@ s1_ptr SequenceCopy(register s1_ptr a)
 {
 	s1_ptr c;
 	register object_ptr cp, ap;
-	register long length;
+	register int length;
 	register object temp_ap;
 
 	/* a is a SEQ_PTR */

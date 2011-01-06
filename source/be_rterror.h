@@ -32,7 +32,7 @@ object_ptr BiggerStack();
 void atom_condition();
 void MainScreen();
 void RangeReading(object subs, int len);
-void BadSubscript(object subs, long length);
+void BadSubscript(object subs, int length);
 void NoValue(symtab_ptr s);
 
 #endif

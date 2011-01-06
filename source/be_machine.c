@@ -201,7 +201,7 @@ static int MySetEnv(const char *name, const char *value, const int overwrite) {
 }
 #endif
 
-unsigned long get_pos_int(char *where, object x)
+uintptr_t get_pos_int(char *where, object x)
 /* return a positive integer value if possible */
 {
 	if (IS_ATOM_INT(x))

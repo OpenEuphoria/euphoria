@@ -88,7 +88,7 @@ int ValidPrivate(symtab_ptr sym, symtab_ptr proc)
 	return sym->obj != NOVALUE; 
 }
 
-int FindLine(int *pc, symtab_ptr proc)
+int FindLine(intptr_t *pc, symtab_ptr proc)
 /* determine the global source line number for pc within proc */
 {
 	int pc_offset, code_offset;
@@ -112,10 +112,10 @@ int FindLine(int *pc, symtab_ptr proc)
 }
 
 symtab_ptr last_s = NULL;
-int *last_start;
-int *last_end;
+intptr_t *last_start;
+intptr_t *last_end;
 
-symtab_ptr Locate(int *pc)
+symtab_ptr Locate(intptr_t *pc)
 /* find out which routine pc is in */
 {
 	symtab_ptr s;
@@ -130,7 +130,7 @@ symtab_ptr Locate(int *pc)
 	for (s = TopLevelSub; s != NULL; s = s->next) {
 		if (s->token == PROC || s->token == FUNC || s->token == TYPE) {
 			last_start = s->u.subp.code; // address of first word of IL
-			last_end = last_start + *(unsigned *)(last_start - 1); 
+			last_end = last_start + *(uintptr_t *)(last_start - 1); 
 			if (pc >= last_start && pc <= last_end) {
 				last_s = s;
 				return s;
@@ -145,7 +145,7 @@ long block_contains_line( symtab_ptr block, unsigned long line){
 	return (block == 0) || ((block->u.block.first_line <= line) && (block->u.block.last_line >= line));
 }
 
-symtab_ptr RTLookup(char *name, int file, int *pc, symtab_ptr routine, int stlen, unsigned long current_line )
+symtab_ptr RTLookup(char *name, int file, intptr_t *pc, symtab_ptr routine, int stlen, unsigned long current_line )
 /* Look up a name (routine or var) in the symbol table at runtime.
    The name must have been defined earlier in the source than
    where we are currently executing. The name may be a simple "name"

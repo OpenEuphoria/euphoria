@@ -1053,7 +1053,7 @@ static void sf_output(char *string)
 	}
 }
 
-static void TracePrint(symtab_ptr proc, int *pc)
+static void TracePrint(symtab_ptr proc, intptr_t *pc)
 // print a line of traceback
 {
 	long gline;
@@ -1370,7 +1370,7 @@ void CleanUpError(char *msg, symtab_ptr s_ptr, ...)
 	va_end(ap);
 }
 
-void RTFatalType(int *pc)
+void RTFatalType(intptr_t *pc)
 /* handle type-check failures */
 /* pc points to variable in instruction stream */ 
 {
@@ -1393,7 +1393,7 @@ object_ptr BiggerStack()
 	return expr_stack + stack_size - 5; /* new expr_max */
 }
 
-void BadSubscript(object subs, long length)
+void BadSubscript(object subs, int length)
 /* report a subscript violation */
 {
 #define BadSubscript_bufflen (40)

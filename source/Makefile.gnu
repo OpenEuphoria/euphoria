@@ -973,7 +973,7 @@ $(BUILDDIR)/intobj/back/be_runtime.o: be_rterror.h be_coverage.h be_execute.h
 $(BUILDDIR)/intobj/back/be_runtime.o: be_symtab.h
 $(BUILDDIR)/intobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_socket.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/intobj/back/be_socket.o: be_runtime.h be_socket.h
+$(BUILDDIR)/intobj/back/be_socket.o: be_machine.h be_runtime.h be_socket.h
 $(BUILDDIR)/intobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/intobj/back/be_symtab.o: execute.h reswords.h be_execute.h
 $(BUILDDIR)/intobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h
@@ -1035,7 +1035,7 @@ $(BUILDDIR)/transobj/back/be_runtime.o: be_rterror.h be_coverage.h
 $(BUILDDIR)/transobj/back/be_runtime.o: be_execute.h be_symtab.h
 $(BUILDDIR)/transobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_socket.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/transobj/back/be_socket.o: be_runtime.h be_socket.h
+$(BUILDDIR)/transobj/back/be_socket.o: be_machine.h be_runtime.h be_socket.h
 $(BUILDDIR)/transobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/transobj/back/be_symtab.o: execute.h reswords.h be_execute.h
 $(BUILDDIR)/transobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h
@@ -1098,7 +1098,7 @@ $(BUILDDIR)/backobj/back/be_runtime.o: be_rterror.h be_coverage.h
 $(BUILDDIR)/backobj/back/be_runtime.o: be_execute.h be_symtab.h
 $(BUILDDIR)/backobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_socket.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/backobj/back/be_socket.o: be_runtime.h be_socket.h
+$(BUILDDIR)/backobj/back/be_socket.o: be_machine.h be_runtime.h be_socket.h
 $(BUILDDIR)/backobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/backobj/back/be_symtab.o: execute.h reswords.h be_execute.h
 $(BUILDDIR)/backobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h
@@ -1159,7 +1159,7 @@ $(BUILDDIR)/libobj/back/be_runtime.o: be_rterror.h be_coverage.h be_execute.h
 $(BUILDDIR)/libobj/back/be_runtime.o: be_symtab.h
 $(BUILDDIR)/libobj/back/be_socket.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_socket.o: execute.h reswords.h be_alloc.h
-$(BUILDDIR)/libobj/back/be_socket.o: be_runtime.h be_socket.h
+$(BUILDDIR)/libobj/back/be_socket.o: be_machine.h be_runtime.h be_socket.h
 $(BUILDDIR)/libobj/back/be_symtab.o: alldefs.h global.h object.h symtab.h
 $(BUILDDIR)/libobj/back/be_symtab.o: execute.h reswords.h be_execute.h
 $(BUILDDIR)/libobj/back/be_symtab.o: be_alloc.h be_machine.h be_runtime.h

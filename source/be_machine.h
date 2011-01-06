@@ -62,7 +62,7 @@ char *name_ext(char *s);
 void echo_wait();
 object memory_copy(object d, object s, object n);
 object memory_set(object d, object v, object n);
-unsigned long get_pos_int(char *where, object x);
+uintptr_t get_pos_int(char *where, object x);
 
 void NewConfig(int raise_console);
 double current_time();
@@ -85,4 +85,9 @@ uintptr_t general_call_back(
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 
+uintptr_t internal_general_call_back(
+		  int cb_routine,
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
 #endif
