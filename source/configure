@@ -38,11 +38,11 @@ echo "# File generated from configure" > ${CONFIG_FILE}
 
 MFLAG=-m32
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
+	echo ARCH=ix86
+	MFLAG=-m32
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
-	echo ARCH=ix86 >> "$PREFIX"${CONFIG_FILE}
-elif echo "$UNAME_MACHINE" | grep ARM > /dev/null; then
-	echo ARCH=ARM >> "$PREFIX"${CONFIG_FILE}
+	ARCH=ix86_64
+	MFLAG=-m64
 fi
 
 if test $UNAME_SYSTEM = "Linux"; then
@@ -262,6 +262,30 @@ while [ "$1" != "" ]; do
 
 		HG=$VAL
 		;;
+	
+	--arch*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+		ARCH=$VAL
+		case $ARCH in
+			x86.64)
+				ARCH=ix86_64
+				MFLAG=-m64
+			;;
+			x86)
+				ARCH=ix86
+				MFLAG=-m32
+			;;
+			*)
+				echo "Unknown Architecture '$VAL'"
+				echo "Supported Architectures:"
+				echo "   x86"
+				echo "   x86_64"
+				exit
+		esac
+		;;
 
 	* )
 		echo "Unknown option '$1'"
@@ -350,6 +374,9 @@ elif test $UNAME_SYSTEM = "WINDOWS"; then
 		echo ALIGN4=1 >> "$PREFIX"${CONFIG_FILE}
 	fi
 fi
+
+echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
+echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
 
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
 echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}

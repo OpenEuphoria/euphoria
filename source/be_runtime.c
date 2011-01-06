@@ -352,7 +352,7 @@ int EuConsole = 0; /* TRUE if EnvVar EUCONS=1. Forces use of alternate console s
 char *last_traced_line = NULL;
 struct routine_list *rt00;
 struct ns_list *rt01;
-unsigned char ** rt02;
+char ** rt02;
 
 /*******************/
 /* Local variables */
@@ -3385,10 +3385,10 @@ void RHS_Slice( object a, object start, object end)
 }
 
 
-void AssignSlice(object start, object end, s1_ptr val)
+void AssignSlice(object start, object end, object val)
 /* assign to a sliced variable */
 {
-	s1_ptr *seq_ptr, sp;
+	s1_ptr *seq_ptr, sp, val_seq;
 	int startval, endval, length;
 	object_ptr s_elem;
 	object_ptr v_elem;
@@ -3433,11 +3433,11 @@ void AssignSlice(object start, object end, s1_ptr val)
 		}
 	}
 	else {
-		val = SEQ_PTR(val);
-		v_elem = val->base+1;
-		if (val->length != length) {
-			RTFatal("lengths do not match on assignment to slice (%ld != %ld)",
-					length, val->length);
+		val_seq = SEQ_PTR(val);
+		v_elem = val_seq->base+1;
+		if (val_seq->length != length) {
+			RTFatal("lengths do not match on assignment to slice (%d != %d)",
+					length, val_seq->length);
 		}
 		while (TRUE) {
 			if (!IS_ATOM_INT(*v_elem)) {
@@ -4735,7 +4735,7 @@ int CRoutineId(int seq_num, int current_file_no, object name)
 	}
 }
 
-void eu_startup(struct routine_list *rl, struct ns_list *nl, unsigned char **ip,
+void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
 				int cps, int clk)
 /* Initialize run-time data structures for the compiled user program. */
 {

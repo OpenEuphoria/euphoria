@@ -30,23 +30,64 @@
 *
 ****************************************************************************/
 
-#define DBL_MASK (uintptr_t)0xA0000000
-
-#define NOVALUE      ((intptr_t)0xbfffffffL)
-#define IS_ATOM_INT(ob)       (((long)(ob)) > NOVALUE)
-#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (intptr_t)DBL_MASK)
-#define IS_ATOM(ob)             (((long)(ob)) >= (intptr_t)DBL_MASK)
-#define IS_SEQUENCE(ob)         (((long)(ob))  < (intptr_t)DBL_MASK)
-#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
-#define HIGH_BITS    ((long)0xC0000000L)
-
 #undef MININT
-#undef MAXINT
-#define MININT     (uint32_t)0xC0000000
-#define MAXINT     (uint32_t)0x3FFFFFFF
-#define MAXINT_VAL MAXINT
-#define MAXINT_DBL ((double)MAXINT_VAL)
+
+#if INTPTR_MAX == INT32_MAX
+
+#define DBL_MASK     (uintptr_t)0xA0000000L
+#define SEQ_MASK     (uintptr_t)0x80000000L
+#define DS_MASK      (uintptr_t)0xE0000000L
+#define MININT       (intptr_t) 0xC0000000L
+#define MAXINT       (intptr_t) 0x3FFFFFFFL
+#define NOVALUE      (intptr_t)0xbfffffffL
+#define TOO_BIG_INT  (intptr_t)0x40000000L
+#define HIGH_BITS    (intptr_t)0xC0000000L
+
+#else
+
+#define DBL_MASK     (uintptr_t)__INT64_C( 0xA000000000000000 )
+#define SEQ_MASK     (uintptr_t)__INT64_C( 0x8000000000000000 )
+#define DS_MASK      (uintptr_t)__INT64_C( 0xE000000000000000 )
+#define MININT       (intptr_t) __INT64_C( 0xC000000000000000 )
+#define MAXINT       (intptr_t) __INT64_C( 0x3FFFFFFFFFFFFFFF )
+#define NOVALUE      (intptr_t)__INT64_C( 0xbfffffffffffffff )
+#define TOO_BIG_INT  (intptr_t)__INT64_C( 0x4000000000000000 )
+#define HIGH_BITS    (intptr_t)__INT64_C( 0xC000000000000000 )
+
+#endif
+
+#define IS_ATOM_INT(ob)       (((intptr_t) (ob)) > NOVALUE)
+#define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
+
+#define MAKE_UINT(x) ((object)((uintptr_t)x < (uintptr_t)TOO_BIG_INT \
+                          ? (uintptr_t)x : \
+                            NewDouble((double)(uintptr_t)x)))
+
+/* these are obsolete */
+#define INT_VAL(x)        ((intptr_t)(x))
+#define MAKE_INT(x)       ((object)(x))
+
+/* N.B. the following distinguishes DBL's from SEQUENCES -
+   must eliminate the INT case first */
+#define IS_ATOM_DBL(ob)         (((object)(ob)) >= (object)DBL_MASK)
+
+#define IS_ATOM(ob)             (((object)(ob)) >= (object)DBL_MASK)
+#define IS_SEQUENCE(ob)         (((object)(ob))  < (object)DBL_MASK)
+
+#define ASEQ(s) (((uintptr_t)s & (uintptr_t)DS_MASK) == (uintptr_t)SEQ_MASK)
+
+#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
+
+
+#define MININT_DBL ((double)MININT)
+#define MAXINT_DBL ((double)MAXINT)
+#define INT23      (long)0x003FFFFFL
+#define INT16      (long)0x00007FFFL
 #define INT15      (long)0x00003FFFL
+#define ATOM_M1    -1
+#define ATOM_0     0
+#define ATOM_1     1
+#define ATOM_2     2
 
 #undef MAKE_UINT
 #define MAKE_UINT(x)	((object)((uintptr_t)x <= (uintptr_t)MAXINT  ? (uintptr_t)x : NewDouble((double)(uintptr_t)x)))
@@ -76,13 +117,18 @@ enum CLEANUP_TYPES {
 	CLEAN_FILE
 };
 
-struct s1 {
-	object_ptr base;
-	int length;
-	int ref;
-	int postfill;
-	cleanup_ptr cleanup;
-};
+struct s1 {                        /* a sequence header block */
+	object_ptr base;               /* pointer to (non-existent) 0th element */
+#if INTPTR_MAX == INT32_MAX
+	int length;                   /* number of elements */
+	int ref;                      /* reference count */
+#else
+	int ref;                      /* reference count */
+	int length;                   /* number of elements */
+#endif
+	int postfill;                 /* number of post-fill objects */
+	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
+}; /* total 20 bytes */
 
 struct d {
 	double dbl;
@@ -111,10 +157,11 @@ struct ns_list {
 typedef struct d  *d_ptr;
 typedef struct s1 *s1_ptr;
 
-#define MAKE_DBL(x) ( (int) (((unsigned)(x) >> 3) + (long)0xA0000000) )
-#define DBL_PTR(ob) ( (d_ptr)  (((unsigned)(ob)) << 3) )
-#define MAKE_SEQ(x) ( (int) (((unsigned)(x) >> 3) + (long)0x80000000) )
-#define SEQ_PTR(ob) ( (s1_ptr) (((unsigned)(ob)) << 3) ) 
+#define MAKE_DBL(x) ( (object) (((uintptr_t)(x) >> 3) + DBL_MASK) )
+#define DBL_PTR(ob) ( (d_ptr)  (((uintptr_t)(ob)) << 3) )
+#define MAKE_SEQ(x) ( (object) (((uintptr_t)(x) >> 3) + SEQ_MASK) )
+#define SEQ_PTR(ob) ( (s1_ptr) (((uintptr_t)(ob)) << 3) )
+
 
 #define RefDS(a) ++(DBL_PTR(a)->ref)    
 #define RefDSn(a,n) (DBL_PTR(a)->ref += n)    
@@ -173,13 +220,13 @@ struct replace_block {
 typedef struct replace_block *replace_ptr;
 
 int wingetch();
-int call_c();
-int Command_Line();
+object call_c();
+object Command_Line();
 void show_console();
-int Dpower();
-int Dand_bits();
-int Dand();
-int Dremainder();
+object Dpower();
+object Dand_bits();
+object Dand();
+object Dremainder();
 void Cleanup();
 void init_literal();
 char **make_arg_cv();
@@ -194,52 +241,51 @@ object binary_op_a(int, object, object);
 object binary_op(int, object, object);
 void *which_file(int, int);
 object unary_op(int, object);
-int NewS1(int);
+object NewS1(intptr_t);
 object compare(object, object);
-unsigned long get_pos_int(char *, int);
-int memory_set(int, int, int);
-int memory_copy(int, int, int);
-int EOpen(int, int,int);
-void EClose(int);
-int EPrintf(int, int, int);
-void EPuts(int, int);
-void Concat(int *, int, int);
-void Concat_N(int *, int *, int);
-void Append(int *, int, int);
-void Prepend(int *, int, int);
+intptr_t get_pos_int(char *, int);
+object memory_set(object d, object v, object n);
+object memory_copy(object d, object s, object n);
+object EOpen(object, object, object);
+void EClose(object);
+int EPrintf(object, object, object);
+void EPuts(object, object);
+void Concat(object *, object, object);
+void Concat_N(object *, object *, int);
+void Append(object *, object, object);
+void Prepend(object *, object, object);
 object EGetEnv(object name);
-void RHS_Slice(int, int, int);
-int find(int, int);
-int e_match(int, int);
+void RHS_Slice(object, object, object);
+object find(object, object);
+object e_match(object, object);
 void ctrace(char *);
-int e_floor(int);
-int DoubleToInt(int);
-int machine(int, int);
-int Repeat(int, int);
-void RepeatElem(int, int, int);
-int SequenceCopy(s1_ptr);
-int power(int, int);
-int EGets(int);
-int Pixel(int, int);
-int Get_Pixel(int);
+object e_floor(object);
+object DoubleToInt(object);
+object machine(object, object);
+object Repeat(object, object);
+void RepeatElem(object, object, object);
+object SequenceCopy(s1_ptr);
+object power(object, object);
+object EGets(object);
 void shift_args(int, char**);
 int NewString(char *);
 #ifdef __GNUC__
 #if !defined(EMINGW) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
-char *malloc(int);
+char *malloc(size_t);
 #endif
 #endif
-void eu_startup();
+void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
+				int cps, int clk);
 void exit(int);
 int CRoutineId(int, int, int);
 int e_sqrt(int);
 int e_arctan(int);
-void AssignSlice(int, int, int);
-void StdPrint(int, int, int);
+void AssignSlice(object, object, object);
+void StdPrint(int, object, int);
 void ClearScreen();
 void Position(int, int);
-int CommandLine(void);
-void system_call(int, int);
+object CommandLine(void);
+void system_call(object, object);
 void RTFatal(char *);
 
 // be_alloc:
@@ -259,10 +305,10 @@ extern object last_r_file_no;
 extern IFILE last_r_file_ptr;
 extern int insert_pos;;
 
-object find_from(int,int,int);
+object find_from(object,object,object);
 object e_match_from(object aobj, object bobj, object c);
-void Tail(s1_ptr , int , object_ptr );
-void Head(s1_ptr , int , object_ptr );
+void Tail(s1_ptr , object , object_ptr );
+void Head(s1_ptr , object , object_ptr );
 object Remove_elements(int start, int stop, int in_place );
 s1_ptr Add_internal_space(object a,int at,int len);
 object system_exec_call(object command, object wait);
@@ -270,11 +316,11 @@ s1_ptr Copy_elements(int start,s1_ptr source, int replace );
 object Insert(object a,object b,int pos);
 object calc_hash(object a, object b);
 object Dxor_bits(d_ptr a, d_ptr b);
-object not_bits(long a);
+object not_bits(object a);
 object Date();
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
 cleanup_ptr DeleteRoutine( int e_index );
-void DeRef1(int a);
+void DeRef1(object a);
 void Replace(replace_ptr rb);
 void UserCleanup(int);
 

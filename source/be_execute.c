@@ -177,7 +177,7 @@ union pc_t {
 								;                     \
 						   }                          \
 						   else {                     \
-							   pc = (int *)pc[3];     \
+							   pc = (intptr_t *)pc[3];     \
 							   BREAK;                 \
 						   }                          \
 						   thread4();             \
@@ -194,7 +194,7 @@ union pc_t {
 								;                     \
 						   }                          \
 						   else {                     \
-							   pc = (int *)pc[3];     \
+							   pc = (intptr_t *)pc[3];     \
 							   BREAK;                 \
 						   }                          \
 						   thread4();             \
@@ -249,7 +249,7 @@ int Executing = FALSE;  // TRUE if user program is executing
 int ProfileOn;          // TRUE if profile/profile_time is turned on
 
 /* Euphoria program counter needed for traceback */
-int *tpc;
+intptr_t *tpc;
 
 /*******************/
 /* Local variables */
@@ -713,7 +713,7 @@ static void do_poke4(object a, object top)
 #define thread2() {(long)pc += 2; goto loop_top;}
 #define thread4() {(long)pc += 4; goto loop_top;}
 #define thread5() {(long)pc += 5; goto loop_top;}
-#define threadpc3() {pc = (int *)pc[3]; goto loop_top;}
+#define threadpc3() {pc = (intptr_t *)pc[3]; goto loop_top;}
 #define inc3pc() (long)pc += 3
 #include "redef.h"
 #include "opnames.h"
@@ -768,9 +768,9 @@ long wcinc5pc(long x);
 		value [ECX] \
 		parm [ECX];
 
-#define thread2() do { pc = (int *)wcinc2pc((long)pc); wcthread((long)pc); } while (0)
-#define thread4() do { pc = (int *)wcinc4pc((long)pc); wcthread((long)pc); } while (0)
-#define thread5() do { pc = (int *)wcinc5pc((long)pc); wcthread((long)pc); } while (0)
+#define thread2() do { pc = (intptr_t *)wcinc2pc((long)pc); wcthread((long)pc); } while (0)
+#define thread4() do { pc = (intptr_t *)wcinc4pc((long)pc); wcthread((long)pc); } while (0)
+#define thread5() do { pc = (intptr_t *)wcinc5pc((long)pc); wcthread((long)pc); } while (0)
 
 /* have to hide this from WATCOM or it will generate stupid code
    at the top of the switch */
@@ -780,7 +780,7 @@ long wcinc3pc(long x);
 		modify [] \
 		value [ECX] \
 		parm [ECX];
-#define inc3pc() do { pc = (int *)wcinc3pc((long)pc); } while (0)
+#define inc3pc() do { pc = (intptr_t *)wcinc3pc((long)pc); } while (0)
 
 // not converted because it is not used
 void threadpc3(void);
@@ -922,11 +922,11 @@ void InitExecute()
 
 #ifndef INT_CODES
 #if defined(EUNIX) || defined(EMINGW)
-int **jumptab; // initialized in do_exec()
+intptr_t **jumptab; // initialized in do_exec()
 #else
 #ifdef EWATCOM
 /* Jump table location is determined by another program. */
-extern int ** jumptab;
+extern intptr_t ** jumptab;
 #else
 #error Not supported use INT_CODES?
 #endif
@@ -937,20 +937,20 @@ extern int ** jumptab;
 /* IL data passed from the front end */
 struct IL fe;
 
-#define SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
+#define SET_OPERAND(word) ((intptr_t *)(((word) == 0) ? 0 : (&fe.st[(intptr_t)(word)])))
 
-#define SET_JUMP(word) ((int *)(&code[(int)(word)]))
-#define JUMP_INDEX(word) (((int*)word) - ((symtab_ptr)expr_top[-1])->u.subp.code)
+#define SET_JUMP(word) ((intptr_t *)(&code[(intptr_t)(word)]))
+#define JUMP_INDEX(word) (((intptr_t*)word) - ((symtab_ptr)expr_top[-1])->u.subp.code)
 
 void code_set_pointers(intptr_t **code)
 /* adjust code pointers, changing some indexes into pointers */
 {
 	intptr_t len, i, j, n, sub, word;
 
-	len = (int)code[0];
+	len = (intptr_t) code[0];
 	i = 1;
 	while (i <= len) {
-		word = (int)code[i];
+		word = (intptr_t)code[i];
 
 		if (word > MAX_OPCODE || word < 1) {
 			RTFatal("BAD IL OPCODE: i is %d, word is %d (max=%d), len is %d",
@@ -1293,9 +1293,9 @@ void code_set_pointers(intptr_t **code)
 				break;
 
 			case RIGHT_BRACE_N:
-				n = (int)code[i+1];
+				n = (intptr_t)code[i+1];
 				for (j = 1; j <= n+1; j++) {
-					word = (int)code[i+1+j];
+					word = (intptr_t)code[i+1+j];
 					code[i+1+j] = SET_OPERAND(word);
 				}
 
@@ -1304,12 +1304,12 @@ void code_set_pointers(intptr_t **code)
 				break;
 
 			case CONCAT_N:
-				n = (int)code[i+1];
+				n = (intptr_t)code[i+1];
 				for (j = 1; j <= n; j++) {
-					word = (int)code[i+1+j];
+					word = (intptr_t)code[i+1+j];
 					code[i+1+j] = SET_OPERAND(word);
 				}
-				word = (int)code[i+n+2];
+				word = (intptr_t)code[i+n+2];
 				code[i+n+2] = SET_OPERAND(word);
 
 				i += n + 3;
@@ -1344,11 +1344,11 @@ void symtab_set_pointers()
 			if (s->token == PROC ||
 				s->token == FUNC ||
 				s->token == TYPE) {
-				code = (int **)s->u.subp.code;
+				code = (intptr_t **)s->u.subp.code;
 				if (code != NULL) {
 					code_set_pointers(code);
 				}
-				s->u.subp.code = (int *)code+1; // skip length
+				s->u.subp.code = (intptr_t *)code+1; // skip length
 
 				s->u.subp.temps = (symtab_ptr)SET_OPERAND(s->u.subp.temps);
 
@@ -1398,8 +1398,8 @@ void analyze_switch()
  pc+3: jump_table
  pc+4: else jump
 
- SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
- SET_JUMP(word) ((int *)(&code[(int)(word)]))
+ SET_OPERAND(word) ((intptr_t *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
+ SET_JUMP(word) ((intptr_t *)(&code[(int)(word)]))
 */
 
 	object a;
@@ -1682,7 +1682,7 @@ void do_exec(intptr_t *start_pc)
 	register object a;            /* another object */
 	volatile object v;            /* get compiler to do the right thing! */
 	register object top;          /* an object - hopefully kept in a register */
-	/*register*/ int i;           /* loop counter */
+	/*register*/ intptr_t i;           /* loop counter */
 
 	double temp_dbl;
 	struct d temp_d;
@@ -1842,7 +1842,7 @@ void do_exec(intptr_t *start_pc)
 			return;
 		}
 		thread();
-		switch((int)pc) {
+		switch((intptr_t)pc) {
 
 #endif
 			case L_RHS_SUBS_CHECK:
@@ -2052,7 +2052,7 @@ void do_exec(intptr_t *start_pc)
 				top = *obj_ptr + 1;
 				if (top <= *(object_ptr)pc[2]) {  /* limit */
 					*obj_ptr = top;
-					pc = (int *)pc[1];   /* loop again */
+					pc = (intptr_t *)pc[1];   /* loop again */
 					thread();
 				}
 				else {
@@ -2066,7 +2066,7 @@ void do_exec(intptr_t *start_pc)
 				top = *obj_ptr + *(object_ptr)pc[4]; /* increment */
 				if (top <= *(object_ptr)pc[2]) { /* limit */
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (intptr_t *)pc[1]; /* loop again */
 					thread();
 				}
 				else {
@@ -2181,7 +2181,7 @@ void do_exec(intptr_t *start_pc)
 				a = *(object_ptr)pc[1];
 				if( IS_SEQUENCE( a ) ){
 					// no match:  goto else or skip the switch
-					pc = (int *) pc[4];
+					pc = (intptr_t *) pc[4];
 					thread();
 					BREAK;
 				}
@@ -2242,7 +2242,7 @@ void do_exec(intptr_t *start_pc)
 					}
 				}
 				// no match
-				pc = (int *) pc[4];
+				pc = (intptr_t *) pc[4];
 				thread();
 				BREAK;
 
@@ -2753,7 +2753,7 @@ void do_exec(intptr_t *start_pc)
 						BREAK;
 					}
 					else {
-						pc = (int *)pc[2];
+						pc = (intptr_t *)pc[2];
 						thread();
 						BREAK;
 					}
@@ -3577,7 +3577,7 @@ void do_exec(intptr_t *start_pc)
 				else {
 					DeRef(*obj_ptr);
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (intptr_t *)pc[1]; /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3878,7 +3878,7 @@ void do_exec(intptr_t *start_pc)
 
 				if (expr_top > expr_stack+3) {
 					// stack is not empty
-					pc = (int *)expr_top[-2];
+					pc = (intptr_t *)expr_top[-2];
 					expr_top -= 2;
 					top = expr_top[-1];
 					restore_privates((symtab_ptr)top);
@@ -4418,6 +4418,9 @@ void do_exec(intptr_t *start_pc)
 				thread();
 				BREAK;
 
+#if INTPTR_MAX == INT64_MAX
+			case L_PEEK_POINTER:
+#endif
 			case L_PEEK8U:
 				deprintf("case L_PEEK8U:");
 				b = 1;
@@ -4437,7 +4440,9 @@ void do_exec(intptr_t *start_pc)
 				BREAK;
 
 
+#if INTPTR_MAX == INT32_MAX
 			case L_PEEK_POINTER:
+#endif
 			case L_PEEK4U:
 			deprintf("case L_PEEK4U:");
 				b = 1;

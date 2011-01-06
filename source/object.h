@@ -21,8 +21,13 @@ struct cleanup {
 
 struct s1 {                        /* a sequence header block */
 	object_ptr base;               /* pointer to (non-existent) 0th element */
+#if INTPTR_MAX == INT32_MAX
 	int length;                   /* number of elements */
 	int ref;                      /* reference count */
+#else
+	int ref;                      /* reference count */
+	int length;                   /* number of elements */
+#endif
 	int postfill;                 /* number of post-fill objects */
 	cleanup_ptr cleanup;           /* custom clean up when sequence is deallocated */
 }; /* total 20 bytes */

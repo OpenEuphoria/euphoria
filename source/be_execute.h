@@ -30,11 +30,11 @@ extern int gline_number;  /* last global line number in program */
 extern int il_file;       /* we are processing a separate .il file */
 
 /* Euphoria program counter needed for traceback */
-extern int *tpc;
+extern intptr_t *tpc;
 
 #ifndef INT_CODES
 #if defined(EUNIX) || defined(EMINGW) || defined(EWATCOM)
-extern int **jumptab; // initialized in do_exec() 
+extern intptr_t **jumptab; // initialized in do_exec() 
 #else
 #ifdef EWATCOM
 /* Jump table location is determined by another program. */
@@ -45,9 +45,9 @@ extern int **jumptab; // initialized in do_exec()
 #endif // not GNU-C
 #endif //not INT_CODES
 
-void do_exec(int *start_pc);
+void do_exec(intptr_t *start_pc);
 void fe_set_pointers();
-void Execute(int *start_index);
+void Execute(intptr_t *start_index);
 void InitStack(int size, int toplevel);
 void InitExecute();
 

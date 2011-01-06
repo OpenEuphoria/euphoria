@@ -34,14 +34,32 @@
 /* NO VALUE objects can occur only in a few well-defined places,
    so we can simplify some tests. For speed we first check for ATOM-INT
    since that's what most objects are. */
+#undef MININT
 
-#define DBL_MASK (uintptr_t)0xA0000000
-#define SEQ_MASK (uintptr_t)0x80000000
-#define DS_MASK  (uintptr_t)0xE0000000
+#if INTPTR_MAX == INT32_MAX
 
-#define NOVALUE      ((intptr_t)0xbfffffffL)
-#define TOO_BIG_INT  ((intptr_t)0x40000000L)
-#define HIGH_BITS    ((intptr_t)0xC0000000L)
+#define DBL_MASK     (uintptr_t)0xA0000000L
+#define SEQ_MASK     (uintptr_t)0x80000000L
+#define DS_MASK      (uintptr_t)0xE0000000L
+#define MININT       (intptr_t) 0xC0000000L
+#define MAXINT       (intptr_t) 0x3FFFFFFFL
+#define NOVALUE      (intptr_t) 0xbfffffffL
+#define TOO_BIG_INT  (intptr_t) 0x40000000L
+#define HIGH_BITS    (intptr_t) 0xC0000000L
+
+#else
+
+#define DBL_MASK     (uintptr_t)__INT64_C( 0xA000000000000000 )
+#define SEQ_MASK     (uintptr_t)__INT64_C( 0x8000000000000000 )
+#define DS_MASK      (uintptr_t)__INT64_C( 0xE000000000000000 )
+#define MININT       (intptr_t) __INT64_C( 0xC000000000000000 )
+#define MAXINT       (intptr_t) __INT64_C( 0x3FFFFFFFFFFFFFFF )
+#define NOVALUE      (intptr_t) __INT64_C( 0xbfffffffffffffff )
+#define TOO_BIG_INT  (intptr_t) __INT64_C( 0x4000000000000000 )
+#define HIGH_BITS    (intptr_t )__INT64_C( 0xC000000000000000 )
+
+#endif
+
 #define IS_ATOM_INT(ob)       (((intptr_t)(ob)) > NOVALUE)
 #define IS_ATOM_INT_NV(ob)    ((intptr_t)(ob) >= NOVALUE)
 
@@ -64,9 +82,7 @@
 
 #define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
 
-#undef MININT
-#define MININT     (long)0xC0000000
-#define MAXINT     (long)0x3FFFFFFF
+
 #define MININT_DBL ((double)MININT)
 #define MAXINT_DBL ((double)MAXINT)
 #define INT23      (long)0x003FFFFFL
@@ -198,7 +214,7 @@ struct arg_info {
 struct IL {
 	struct symtab_entry *st;
 	struct sline *sl;
-	int *misc;
+	intptr_t *misc;
 	char *lit;
 	unsigned char **includes;
 	object switches;

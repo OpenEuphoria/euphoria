@@ -203,7 +203,6 @@ TARGETPLAT=-plat $(PLAT)
 endif
 
 BE_CALLC = be_callc
-MSIZE=-m32
 
 ifndef ECHO
 ECHO=/bin/echo

@@ -1,7 +1,9 @@
 #ifndef BE_RTERROR_H_
 #define BE_RTERROR_H_
 
-void RTFatalType(int *pc)
+#include <stdint.h>
+
+void RTFatalType(intptr_t *pc)
 #ifdef EUNIX
 __attribute__ ((noreturn))
 #endif

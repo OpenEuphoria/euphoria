@@ -937,7 +937,7 @@ procedure add_to_routine_list( symtab_index s, integer seq_num, integer first )
 
 	c_puts(SymTab[s][S_NAME])
 	c_puts("\", ")
-	c_puts("(int (*)())")
+	c_puts("(object (*)())")
 	c_printf("_%d", SymTab[s][S_FILE_NO])
 	c_puts(SymTab[s][S_NAME])
 	c_printf(", %d", seq_num)
@@ -1014,8 +1014,8 @@ export procedure DeclareRoutineList()
 	end if
 	c_puts("  {\"\", 0, 999999999, 0, 0, 0, 0}\n};\n\n")  -- end marker
 
-	c_hputs("extern unsigned char ** _02;\n")
-	c_puts("unsigned char ** _02;\n")
+	c_hputs("extern char ** _02;\n")
+	c_puts("char ** _02;\n")
 
 	c_hputs("extern object _0switches;\n")
 	c_puts("object _0switches;\n")
@@ -1582,8 +1582,14 @@ export procedure GenerateUserRoutines()
 
 					if SymTab[s][S_LHS_SUBS2] then
 						c_stmt0("object _0, _1, _2, _3;\n\n")
+						ifdef DEBUG then
+							c_stmt0("_0 = 0; _1 = 1; if( _1 ) _2 = 0; else _3 = 1;\n")
+						end ifdef
 					else
 						c_stmt0("object _0, _1, _2;\n\n")
+						ifdef DEBUG then
+							c_stmt0("_0 = 0; _1 = 1; if( _1 ) _2 = 0;\n")
+						end ifdef
 					end if
 
 					-- set the local parameter types in BB

@@ -809,7 +809,7 @@ void freeD(unsigned char *p)
 }
 #endif
 
-s1_ptr NewS1(int size)
+s1_ptr NewS1(intptr_t size)
 /* make a new s1 sequence block with a single reference count */
 /* size is number of elements, NOVALUE is added as an end marker */
 {

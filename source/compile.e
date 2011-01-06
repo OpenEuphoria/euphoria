@@ -943,6 +943,24 @@ procedure seg_peek_string(integer target, integer source, integer mode)
 
 end procedure
 
+procedure seg_peek_pointer(integer target, integer source, integer mode)
+-- emit code for a pointer sized peek
+	if mode = 1 then
+		c_stmt( "@ = *(uintptr_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n", {target, source})
+	else
+		c_stmt( "@ = *(intptr_t *)@;\n", {target, source})
+	end if
+	
+	c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT){\n",
+				target)
+	c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
+				{target, target})
+	c_stmt0("}\n")
+	-- FIX: in first BB we might assume TYPE_INTEGER, value 0
+	-- so CName will output a 0 instead of the var's name
+	SetBBType( target, GType(target), novalue, TYPE_OBJECT, 0)
+end procedure
+
 procedure seg_peek1(integer target, integer source, integer mode)
 -- emit code for a single-byte peek  - uses _1 as a temp
 	sequence sign
@@ -992,6 +1010,20 @@ procedure seg_peek4(integer target, integer source, boolean dbl)
 	else
 		c_stmt( sprintf( "@ = (object)*(%sint32_t *)@;\n", {sign} ),  {target, source})
 	end if
+	if Code[pc] = PEEK4S then
+		c_stmt("if (@ < MININT || @ > MAXINT){\n",
+					{target, target})
+		c_stmt("@ = NewDouble((double)(object)@);\n",
+				{target, target})
+		c_stmt0("}\n")
+	else  -- PEEK4U */
+		c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT){\n", target)
+		c_stmt("@ = NewDouble((double)(uintptr_t)@);\n", {target, target})
+		c_stmt0("}\n")
+	end if
+	-- FIX: in first BB we might assume TYPE_INTEGER, value 0
+	-- so CName will output a 0 instead of the var's name
+	SetBBType( target, GType(target), novalue, TYPE_OBJECT, 0)
 
 end procedure
 
@@ -1033,19 +1065,16 @@ procedure seg_peek8(integer target_sym, integer source, boolean dbl, integer op)
 		c_stmt0("}\n")
 		
 	end if
+	-- FIX: in first BB we might assume TYPE_INTEGER, value 0
+	-- so CName will output a 0 instead of the var's name
+	SetBBType( target_sym, GType(target_sym), novalue, TYPE_OBJECT, 0)
 end procedure
 
 procedure seg_poke1(integer source, boolean dbl)
 -- poke a single byte value into poke_addr
 	-- WATCOM etc.
 	if dbl then
-		if TWINDOWS and atom(wat_path) then
-			-- do it in two steps to work around an Lcc bug:
-			c_stmt("_1 = (object)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("*poke_addr = (uint8_t)_1;\n")
-		else
-			c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
-		end if
+		c_stmt("*poke_addr = (uint8_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke_addr = (uint8_t)@;\n", source)
 	end if
@@ -1055,13 +1084,7 @@ end procedure
 procedure seg_poke2(integer source, boolean dbl)
 -- poke a word value into poke2_addr
 	if dbl then
-		if TWINDOWS and atom(wat_path) then
-			-- do it in two steps to work around an Lcc bug:
-			c_stmt("_1 = (object)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("*poke2_addr = (uint16_t _1;\n")
-		else
-			c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
-		end if
+		c_stmt("*poke2_addr = (uint16_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke2_addr = (uint16_t)@;\n", source)
 	end if
@@ -1071,13 +1094,7 @@ procedure seg_poke4(integer source, boolean dbl)
 -- poke a 4-byte value into poke4_addr
 	-- WATCOM etc.
 	if dbl then
-		if TWINDOWS and atom(wat_path) then
-			-- do it in two steps to work around an Lcc bug:
-			c_stmt("_1 = (object)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("*poke4_addr = (uint32_t)_1;\n")
-		else
-			c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
-		end if
+		c_stmt("*poke4_addr = (uint32_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke4_addr = (uint32_t)@;\n", source)
 	end if
@@ -1088,15 +1105,20 @@ procedure seg_poke8(integer source, boolean dbl)
 -- poke an 8-byte value into poke8_addr
 	-- WATCOM etc.
 	if dbl then
-		if TWINDOWS and atom(wat_path) then
-			-- do it in two steps to work around an Lcc bug:
-			c_stmt("_1 = (uint64_t)DBL_PTR(@)->dbl;\n", source)
-			c_stmt0("*poke8_addr = (uint64_t)_1;\n")
-		else
-			c_stmt("*poke8_addr = (uint64_t)DBL_PTR(@)->dbl;\n", source)
-		end if
+		c_stmt("*poke8_addr = (uint64_t)DBL_PTR(@)->dbl;\n", source)
 	else
 		c_stmt("*poke8_addr = (uint64_t)@;\n", source)
+	end if
+
+end procedure
+
+procedure seg_pokeptr(integer source, boolean dbl)
+-- poke an 8-byte value into poke8_addr
+	-- WATCOM etc.
+	if dbl then
+		c_stmt("*pokeptr_addr = (uintptr_t)DBL_PTR(@)->dbl;\n", source)
+	else
+		c_stmt("*pokeptr_addr = (uintptr_t)@;\n", source)
 	end if
 
 end procedure
@@ -1227,7 +1249,7 @@ procedure main_temps()
 			sequence name = sprintf("_%d", SymTab[sp][S_TEMP_NAME] )
 			if temp_name_type[SymTab[sp][S_TEMP_NAME]][T_GTYPE] != TYPE_NULL
 			and not find( name, names ) then
-				c_stmt0("int ")
+				c_stmt0("object ")
 				c_printf("%s", {name})
 				names = append( names, name )
 				if temp_name_type[SymTab[sp][S_TEMP_NAME]][T_GTYPE] != TYPE_INTEGER then
@@ -4145,7 +4167,7 @@ procedure opFOR()
 	c_stmt0("{\n")
 		if is_loop_var then
 			-- inlined loop vars are regular vars
-			c_stmt("int @;\n", Code[pc+5])
+			c_stmt("object @;\n", Code[pc+5])
 		end if
 
 		CRef(Code[pc+3])
@@ -5075,7 +5097,7 @@ procedure opREPLACE()
 
 	c_stmt0("{\n")
 		for i = 1 to 4 do
-			c_stmt(sprintf("int p%d = @;\n", i ), Code[pc+i])
+			c_stmt(sprintf("intptr_t p%d = @;\n", i ), Code[pc+i])
 		end for
 		c_stmt0("struct replace_block replace_params;\n")
 		c_stmt0( "replace_params.copy_to   = &p1;\n" )
@@ -5100,7 +5122,7 @@ procedure opCONCAT_N()
 -- concatenate 3 or more items
 	n = Code[pc+1]
 	c_stmt0("{\n")
-	c_stmt0("int concat_list[")
+	c_stmt0("object concat_list[")
 	c_printf("%d];\n\n", n)
 
 	t = TYPE_NULL
@@ -5318,13 +5340,8 @@ procedure opPEEK_STRING()
 	create_temp( Code[pc+2], NEW_REFERENCE )
 end procedure
 
-procedure opPEEK_POINTER()
-	Code[pc] = PEEK4U
-	opPEEK()
-end procedure
-
 procedure opPEEK()
--- PEEK / PEEKS / PEEK2S / PEEK2U / PEEK4U / PEEK4S / PEEK8U / PEEK8S
+-- PEEK / PEEKS / PEEK2S / PEEK2U / PEEK4U / PEEK4S / PEEK8U / PEEK8S / PEEK_POINTER
 	integer
 		op         = Code[pc],
 		arg        = Code[pc+1], -- either ptr or {ptr,length}
@@ -5342,39 +5359,12 @@ procedure opPEEK()
 
 	if TypeIsIn(arg, TYPES_IAO) then
 		switch op do
-			case PEEK then
-				seg_peek1( target_sym, arg, 0)
-			case PEEKS then
-				seg_peek1( target_sym, arg, 0)
-			case PEEK4U, PEEK4S then
-
-				seg_peek4( target_sym, arg, 0)
-
-				-- FIX: in first BB we might assume TYPE_INTEGER, value 0
-				-- so CName will output a 0 instead of the var's name
-				SetBBType( target_sym, GType(target_sym), novalue, TYPE_OBJECT, 0)
-
-				if op = PEEK4S then
-					c_stmt("if (@ < MININT || @ > MAXINT)\n",
-								{target_sym, target_sym})
-					c_stmt("@ = NewDouble((double)(object)@);\n",
-								{target_sym, target_sym})
-
-				elsif op = PEEK4U then
-					c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT)\n",
-								target_sym)
-					c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
-								{target_sym, target_sym})
-
-				end if
-			
-			case PEEK8U, PEEK8S then
-
-				seg_peek8(target_sym, arg, 0, op)
-
-				
-			case PEEK2U, PEEK2S then
-				seg_peek2( target_sym, arg, 0)
+			case PEEK then            seg_peek1( target_sym, arg, 0)
+			case PEEKS then           seg_peek1( target_sym, arg, 0)
+			case PEEK4U, PEEK4S then  seg_peek4( target_sym, arg, 0)
+			case PEEK8U, PEEK8S then  seg_peek8(target_sym, arg, 0, op)
+			case PEEK_POINTER then    seg_peek_pointer( target_sym, arg, 0 )
+			case PEEK2U, PEEK2S then  seg_peek2( target_sym, arg, 0)
 			case else
 				-- peek_string
 				seg_peek_string( target_sym, arg, 0 )
@@ -5392,32 +5382,16 @@ procedure opPEEK()
 
 	if TypeIsNotIn( arg, TYPES_IS) then
 		switch op do
-			case PEEK, PEEKS then
-				seg_peek1( target_sym, arg, 1)
-			case PEEK2U, PEEK2S then
-				seg_peek2( target_sym, arg, 1)
-			case PEEK4U, PEEK4S then
-
-				seg_peek4(target_sym, arg, 1)
-				SetBBType( target_sym, GType( target_sym ), novalue, TYPE_OBJECT, 0)
-				if op = PEEK4S then
-					c_stmt("if (@ < MININT || @ > MAXINT)\n",
-								{target_sym, target_sym})
-					c_stmt("@ = NewDouble((double)(object)@);\n",
-								{target_sym, target_sym})
-				else  -- PEEK4U */
-					c_stmt("if ((uintptr_t)@ > (uintptr_t)MAXINT)\n",
-								target_sym)
-					c_stmt("@ = NewDouble((double)(uintptr_t)@);\n",
-								{target_sym, target_sym})
-				end if
-			case PEEK8U, PEEK8S then
-				seg_peek8( target_sym, arg, 1, op )
-				
+			case PEEK, PEEKS then      seg_peek1( target_sym, arg, 1)
+			case PEEK2U, PEEK2S then   seg_peek2( target_sym, arg, 1)
+			case PEEK4U, PEEK4S then   seg_peek4(target_sym, arg, 1)
+			case PEEK8U, PEEK8S then   seg_peek8( target_sym, arg, 1, op )
+			case PEEK_POINTER then    seg_peek_pointer( target_sym, arg, 1 )
 			case else
 				-- peek_string
 				seg_peek_string( target_sym, arg, 1 )
 		end switch
+		
 	end if
 
 	if TypeIsIn( arg, TYPES_AO) then
@@ -5433,13 +5407,15 @@ procedure opPEEK()
 		c_stmt("_1 = (object)SEQ_PTR(@);\n", arg)
 		switch op do
 			case PEEK, PEEKS  then
-				c_stmt0("poke_addr = (uint8_t *)get_pos_int(\"peek\", *(((s1_ptr)_1)->base+1));\n")
+				c_stmt0("peek_addr = (uint8_t *)get_pos_int(\"peek\", *(((s1_ptr)_1)->base+1));\n")
 			case PEEK2S, PEEK2U then
-				c_stmt0("poke2_addr = (uint16_t *)get_pos_int(\"peek2s/peek2u\", *(((s1_ptr)_1)->base+1));\n")
+				c_stmt0("peek2_addr = (uint16_t *)get_pos_int(\"peek2s/peek2u\", *(((s1_ptr)_1)->base+1));\n")
 			case PEEK4S, PEEK4U then
 				c_stmt0("peek4_addr = (uint32_t *)get_pos_int(\"peek4s/peek4u\", *(((s1_ptr)_1)->base+1));\n")
 			case PEEK8S, PEEK8U then
 				c_stmt0("peek8_addr = (uint64_t *)get_pos_int(\"peek8s/peek8u\", *(((s1_ptr)_1)->base+1));\n")
+			case PEEK_POINTER then
+				c_stmt0("peekptr_addr = (uintptr_t *)get_pos_int(\"peek_pointer/peek_pointer\", *(((s1_ptr)_1)->base+1));\n")
 		end switch
 		c_stmt0("_2 = get_pos_int(\"peek\", *(((s1_ptr)_1)->base+2));\n")
 		c_stmt("pokeptr_addr = (uintptr_t *)NewS1(_2);\n", Code[pc+2])
@@ -5449,58 +5425,57 @@ procedure opPEEK()
 		c_stmt0("while (--_2 >= 0) {\n")  -- FAST WHILE
 		c_stmt0("pokeptr_addr++;\n")
 		switch op do
-			case PEEK, PEEKS then
-				if op = PEEKS then
-					c_stmt0("_1 = (object)(int8_t)*poke_addr++;\n")
-				else  -- PEEK4U */
-					c_stmt0("_1 = (object)(uint8_t)*poke_addr++;\n")
-				end if
-				c_stmt0("*(object *)pokeptr_addr = _1;\n")
-			case PEEK2S, PEEK2U then
-
-				if op = PEEK2S then
-					c_stmt0("_1 = (object)(int16_t)*poke2_addr++;\n")
-				else  -- PEEK4U */
-					c_stmt0("_1 = (object)(uint16_t)*poke2_addr++;\n")
-				end if
-				c_stmt0("*pokeptr_addr = _1;\n")
-			
-			case PEEK8S, PEEK8U then
+			case PEEKS then
+				c_stmt0("*pokeptr_addr = (object)(int8_t)*peek_addr++;\n")
+			case PEEK then
+				c_stmt0("*pokeptr_addr = (object)*peek_addr++;\n")
+				
+			case PEEK2S then
+				c_stmt0("*pokeptr_addr = (object)(int16_t)*peek2_addr++;\n")
+			case PEEK2U then
+				c_stmt0("*pokeptr_addr = (object)*peek2_addr++;\n")
+				
+			case PEEK8S then
 				c_stmt0("peek8_longlong = *peek8_addr++;\n")
-				if Code[pc] = PEEK8S then
-					c_stmt0("if (peek8_longlong < (int64_t) MININT || peek8_longlong > (int64_t) MAXINT){\n")
-						c_stmt0("_1 = NewDouble((double)peek8_longlong);\n")
-					c_stmt0("}\n")
-					c_stmt0("else{\n")
-						c_stmt0("_1 = (object) peek8_longlong;\n" )
-					c_stmt0("}\n")
-					
-				else  -- PEEK8U */
-					c_stmt0("if ((uint64_t)peek8_longlong > (uint64_t)MAXINT){\n")
-						c_stmt0("_1 = NewDouble((double) (uint64_t) peek8_longlong);\n")
-					c_stmt0("}\n")
-					c_stmt0("else{\n")
-						c_stmt0("_1 = (object) peek8_longlong;\n" )
-					c_stmt0("}\n")
-					
-				end if
+				c_stmt0("if (peek8_longlong < (int64_t) MININT || peek8_longlong > (int64_t) MAXINT){\n")
+					c_stmt0("_1 = NewDouble((double)peek8_longlong);\n")
+				c_stmt0("}\n")
+				c_stmt0("else{\n")
+					c_stmt0("_1 = (object) peek8_longlong;\n" )
+				c_stmt0("}\n")
 				c_stmt0("*pokeptr_addr = _1;\n")
 				
-			case else
+			case PEEK8U then
+				c_stmt0("peek8_longlong = *peek8_addr++;\n")
+				c_stmt0("if ((uint64_t)peek8_longlong > (uint64_t)MAXINT){\n")
+					c_stmt0("_1 = NewDouble((double) (uint64_t) peek8_longlong);\n")
+				c_stmt0("}\n")
+				c_stmt0("else{\n")
+					c_stmt0("_1 = (object) peek8_longlong;\n" )
+				c_stmt0("}\n")
+				c_stmt0("*pokeptr_addr = _1;\n")
+				
+			case PEEK_POINTER then
+				c_stmt0("_1 = (object)*peekptr_addr++;\n")
+				c_stmt0("if ((uintptr_t)_1 > (uintptr_t)MAXINT){\n")
+				c_stmt0("_1 = NewDouble((double)(uintptr_t)_1);\n")
+				c_stmt0("}\n")
+				c_stmt0("*pokeptr_addr = _1;\n")
+			case PEEK4U then
 				c_stmt0("_1 = (object)*peek4_addr++;\n")
-				if Code[pc] = PEEK4S then
-					c_stmt0("if (_1 < MININT || _1 > MAXINT){\n")
-					c_stmt0("_1 = NewDouble((double)_1);\n")
-					c_stmt0("}\n")
-					
-				else  -- PEEK4U */
-					c_stmt0("if ((uint32_t)_1 > (uint32_t)MAXINT){\n")
-					c_stmt0("_1 = NewDouble((double)(uint32_t)_1);\n")
-					c_stmt0("}\n")
-					
-				end if
+				c_stmt0("if ((uintptr_t)_1 > (uintptr_t)MAXINT){\n")
+				c_stmt0("_1 = NewDouble((double)(uintptr_t)_1);\n")
+				c_stmt0("}\n")
+				c_stmt0("*pokeptr_addr = _1;\n")
+			case PEEK4S then
+				c_stmt0("_1 = (object)*peek4_addr++;\n")
+				
+				c_stmt0("if (_1 < MININT || _1 > MAXINT){\n")
+				c_stmt0("_1 = NewDouble((double)_1);\n")
+				c_stmt0("}\n")
 				c_stmt0("*pokeptr_addr = _1;\n")
 		end switch
+		
 		c_stmt0("}\n")
 	end if
 
@@ -5570,11 +5545,6 @@ procedure opSIZEOF()
 	pc += 3
 end procedure
 
-procedure opPOKE_POINTER()
-	Code[pc] = POKE4
-	opPOKE()
-end procedure
-
 procedure opPOKE()
 -- generate code for poke/2/4/8
 -- should optimize constant address
@@ -5588,6 +5558,8 @@ procedure opPOKE()
 
 	if TypeIsIn( ptr, TYPES_IAO) then
 		switch op do
+			case POKE_POINTER then
+				c_stmt("pokeptr_addr = (uintptr_t *)@;\n", ptr )
 			case POKE8 then
 				c_stmt("poke8_addr = (uint64_t *)@;\n", ptr )
 			case POKE4 then
@@ -5606,6 +5578,9 @@ procedure opPOKE()
 
 	if TypeIsNotIn( ptr, TYPES_IS) then
 		switch op do
+			case POKE_POINTER then
+				c_stmt("pokeptr_addr = (uintptr_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
+							ptr)
 			case POKE8 then
 				c_stmt("poke8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(@)->dbl);\n",
 							ptr)
@@ -5631,6 +5606,8 @@ procedure opPOKE()
 
 	if TypeIsIn( val, TYPES_IAO) then
 		switch op do
+			case POKE_POINTER then
+				seg_pokeptr( val, 0 )
 			case POKE8 then
 				seg_poke8( val, 0)
 			case POKE4 then
@@ -5652,6 +5629,8 @@ procedure opPOKE()
 
 	if TypeIsNotIn( val, TYPES_IS) then
 		switch op do
+			case POKE_POINTER then
+				seg_pokeptr( val, 1 )
 			case POKE8 then
 				seg_poke8( val, 1)
 			case POKE4 then
@@ -5678,8 +5657,10 @@ procedure opPOKE()
 		c_stmt0("while (1) {\n") -- FAST WHILE
 		c_stmt0("_1 += 4;\n")
 		c_stmt0("_2 = *((object *)_1);\n")
-		c_stmt0("if (IS_ATOM_INT(_2))\n")
+		c_stmt0("if (IS_ATOM_INT(_2)) {\n")
 		switch op do
+			case POKE_POINTER then
+				c_stmt0("*pokeptr_addr++ = (uintptr_t)_2;\n")
 			case POKE8 then
 				c_stmt0("*poke8_addr++ = (uint64_t)_2;\n")
 			case POKE4 then
@@ -5689,49 +5670,29 @@ procedure opPOKE()
 			case else
 				c_stmt0("*poke_addr++ = (uint8_t)_2;\n")
 		end switch
-		c_stmt0("else if (_2 == NOVALUE)\n")
-		c_stmt0("break;\n")
+		c_stmt0("}\nelse if (_2 == NOVALUE) {\n")
+		c_stmt0("break;\n}\n")
 		c_stmt0("else {\n")
 		switch op do
+			case POKE_POINTER then
+				c_stmt0("*pokeptr_addr++ = (uintptr_t)DBL_PTR(_2)->dbl;\n")
+			
 			case POKE8 then
-				if TWINDOWS and atom(wat_path) then
-					-- work around an Lcc bug
-					c_stmt0("_0 = (uintptr_t)DBL_PTR(_2)->dbl;\n")
-					c_stmt0("*poke8_addr++ = (uint64_t)_0;\n")
-				else
-					c_stmt0("*poke8_addr++ = (uint64_t)DBL_PTR(_2)->dbl;\n")
-				end if
+				c_stmt0("*poke8_addr++ = (uint64_t)DBL_PTR(_2)->dbl;\n")
+				
 			case POKE4 then
-				if TWINDOWS and atom(wat_path) then
-					-- work around an Lcc bug
-					c_stmt0("_0 = (object)DBL_PTR(_2)->dbl;\n")
-					c_stmt0("*(object *)poke4_addr++ = (uint32_t)_0;\n")
-				else
-					c_stmt0("*(object *)poke4_addr++ = (uint32_t)DBL_PTR(_2)->dbl;\n")
-				end if
+				c_stmt0("*(object *)poke4_addr++ = (uint32_t)DBL_PTR(_2)->dbl;\n")
+				
 			case POKE2 then
-				if TWINDOWS and atom(wat_path) then
-					-- work around an Lcc bug
-					c_stmt0("_0 = (object)DBL_PTR(_2)->dbl;\n")
-					c_stmt0("*poke2_addr++ = (uint16_t)_0;\n")
-				else
 					c_stmt0("*poke2_addr++ = (uint16_t)DBL_PTR(_2)->dbl;\n")
-				end if
+				
 			case else
-				if TWINDOWS and atom(wat_path) then
-					-- work around an Lcc bug
-					c_stmt0("_0 = (object)DBL_PTR(_2)->dbl;\n")
-					c_stmt0("*poke_addr++ = (uint8_t)_0;\n")
-				else
 					c_stmt0("*poke_addr++ = (uint8_t)DBL_PTR(_2)->dbl;\n")
-				end if
+				
 		end switch
 		c_stmt0("}\n")
-		c_stmt0("}\n")
+		c_stmt0("}\n") -- while(1)
 
-		if sequence(dj_path) then
-			c_stmt0("}\n")
-		end if
 	end if
 
 	if TypeIs( val, TYPE_OBJECT) then
@@ -5839,14 +5800,14 @@ procedure opGETC()
 	c_stmt("last_r_file_ptr = which_file(@, EF_READ);\n", Code[pc+1])
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
-		c_stmt("if (IS_ATOM_INT(@))\n", Code[pc+1])
+		c_stmt("if (IS_ATOM_INT(@)){\n", Code[pc+1])
 	end if
 
 	c_stmt("last_r_file_no = @;\n", Code[pc+1])
 
 	if TypeIsNot(Code[pc+1], TYPE_INTEGER) then
-		c_stmt0("else\n")
-		c_stmt0("last_r_file_no = NOVALUE;\n")
+		c_stmt0("}\nelse{\n")
+		c_stmt0("last_r_file_no = NOVALUE;\n}\n")
 	end if
 
 	c_stmt0("}\n")
@@ -5866,16 +5827,16 @@ procedure opGETC()
 		c_stmt("@ = wingetch();\n", Code[pc+2])
 	end if
 	c_stmt0("}\n")
-	c_stmt0("else\n")
+	c_stmt0("else{\n")
 
 	-- don't bother with mygetc() - it might not be portable
 	-- to other DOS C compilers
 	c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
-
 	c_stmt0("}\n")
-	c_stmt0("else\n")
+	c_stmt0("}\n")
+	c_stmt0("else{\n")
 
-	c_stmt("@ = getc(last_r_file_ptr);\n", Code[pc+2])
+	c_stmt("@ = getc(last_r_file_ptr);\n}\n", Code[pc+2])
 
 	CDeRefStr("_0")
 	target = {-1, 255}
@@ -6845,18 +6806,14 @@ export procedure init_opcodes()
 			case "CALL_FUNC" then
 				operation[i] = routine_id("opCALL_PROC")
 
-			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING", "PEEK8S", "PEEK8U" then
+			case "PEEK4U", "PEEK4S", "PEEKS", "PEEK2U", "PEEK2S", "PEEK_STRING", 
+				"PEEK8S", "PEEK8U", "PEEK_POINTER" then
+				
 				operation[i] = routine_id("opPEEK")
 
-			case "POKE4", "POKE2", "POKE8" then
+			case "POKE4", "POKE2", "POKE8", "POKE_POINTER" then
 				operation[i] = routine_id("opPOKE")
 			
-			case "POKE_POINTER" then
-				operation[i] = routine_id("opPOKE_POINTER")
-				
-			case "PEEK_POINTER" then
-				operation[i] = routine_id("opPEEK_POINTER")
-
 			case "ABORT" then
 				operation[i] = routine_id("opCLOSE")
 
@@ -7135,6 +7092,15 @@ procedure BackEnd(atom ignore)
 		end if
 	end if
 
+	c_puts("uintptr_t *peekptr_addr;\n")
+	c_hputs("extern uintptr_t *peekptr_addr;\n")
+	
+	c_puts("uint8_t *peek_addr;\n")
+	c_hputs("extern uint8_t *peek_addr;\n")
+	
+	c_puts("uint16_t *peek2_addr;\n")
+	c_hputs("extern uint16_t *peek2_addr;\n")
+	
 	c_puts("uint64_t *peek8_addr;\n")
 	c_hputs("extern uint64_t *peek8_addr;\n")
 
@@ -7155,7 +7121,7 @@ procedure BackEnd(atom ignore)
 	
 	c_puts("uintptr_t *pokeptr_addr;\n")
 	c_hputs("extern uintptr_t *pokeptr_addr;\n")
-
+	
 	c_puts("struct d temp_d;\n")
 	c_hputs("extern struct d temp_d;\n")
 
@@ -7199,7 +7165,7 @@ procedure BackEnd(atom ignore)
 		if dll_option then
 			c_stmt0("\nvoid __attribute__ ((constructor)) eu_init()\n")
 		else
-			c_stmt0("\nvoid main(int argc, char *argv[])\n")
+			c_stmt0("\nint main(int argc, char *argv[])\n")
 		end if
 	end if
 	c_stmt0("{\n")
@@ -7247,8 +7213,8 @@ procedure BackEnd(atom ignore)
 			max_len = length(file_include[i])
 		end if
 	end for
-	c_stmt0(sprintf("_02 = (unsigned char**) malloc( sizeof(unsigned char*) * %d );\n", length(file_include) + 1 ))
-	c_stmt0("_02[0] = (unsigned char*) malloc( sizeof( unsigned char*) );\n" )
+	c_stmt0(sprintf("_02 = (char**) malloc( sizeof( char* ) * %d );\n", length(file_include) + 1 ))
+	c_stmt0("_02[0] = (char*) malloc( sizeof( char* ) );\n" )
 	c_stmt0(sprintf("_02[0][0] = %d;\n", length(file_include) ))
 
 	for i = 1 to length(include_matrix) do
@@ -7318,7 +7284,7 @@ procedure BackEnd(atom ignore)
 		c_stmt0("Cleanup(0);\n")
 	end if
 
-	c_stmt0("}\n")
+	c_stmt0("return 0;\n}\n")
 
 	if TWINDOWS then
 	if dll_option then
@@ -7354,7 +7320,7 @@ procedure BackEnd(atom ignore)
 	DeclareNameSpaceList()
 
 	c_stmt0("void init_literal()\n{\n")
-	c_stmt0("extern unsigned char *string_ptr;\n")
+	c_stmt0("extern char *string_ptr;\n")
 	c_stmt0("extern object decompress(unsigned int c);\n" )
 	c_stmt0("extern double sqrt();\n")
 	c_stmt0("setran(); /* initialize random generator seeds */\n")
@@ -7377,7 +7343,7 @@ procedure BackEnd(atom ignore)
 			c_printf("%d()\n", init_name_num)
 			c_stmt0("{\n")
 			c_stmt0("extern double sqrt();\n")
-			c_stmt0("extern unsigned char *string_ptr;\n")
+			c_stmt0("extern char *string_ptr;\n")
 			init_name_num += 1
 			tp_count = 0
 		end if

@@ -95,6 +95,7 @@ void Replace( replace_ptr rb );
 void Concat(object_ptr target, object a_obj, object b_obj);
 s1_ptr Add_internal_space(object a,int at,int len);
 void Concat_Ni(object_ptr target, object_ptr *source, int n);
+void Concat_N(object_ptr target, object_ptr  source, int n);
 
 object EGetEnv(object name);
 
@@ -125,7 +126,7 @@ extern int charcopy(char *, int, char *, int);
 s1_ptr Copy_elements(int start,s1_ptr source, int replace );
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
 cleanup_ptr DeleteRoutine( int e_index );
-void AssignSlice(object start, object end, s1_ptr val);
+void AssignSlice(object start, object end, object val);
 void cleanup_double( d_ptr dbl );
 void cleanup_sequence( s1_ptr seq );
 void Tail(s1_ptr s1, int start, object_ptr target);

@@ -24,6 +24,7 @@ typedef signed   char   schar;
 #define _LARGEFILE64_SOURCE
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include "object.h"
 #include "symtab.h"
@@ -127,10 +128,10 @@ struct replace_block;
 typedef struct replace_block *replace_ptr;
 
 #ifdef INT_CODES
-	typedef int opcode_type;
+	typedef intptr_t opcode_type;
 	#define opcode(x) (x)
 #else
-	typedef int *opcode_type;
+	typedef intptr_t *opcode_type;
 	#define opcode(x) jumptab[x-1]
 #endif
 

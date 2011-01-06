@@ -211,40 +211,7 @@ procedure BackEnd(integer il_file)
 	lit_string = {}
 	
 	-- convert symbol names to C strings in memory
-	nm = allocate(1+string_size)  
-	addr = nm
-	entry_addr = st
-	no_name = allocate_string("<no-name>")
-	for i = 1 to length(SymTab) do
-		eentry = SymTab[i]
-		entry_addr += ST_ENTRY_SIZE
-		if sequence(eentry) then 
-			if length(eentry) >= S_NAME then
-				if sequence(eentry[S_NAME]) then
-					-- record the address of the name string
-					poke_pointer(entry_addr + ST_NAME, addr) 
-					-- store the name string
-					poke(addr, eentry[S_NAME])
-					addr += length(eentry[S_NAME])
-					poke(addr, 0)  -- 0-delimited string
-					addr += 1
-				
-				else
-					-- no name
-					poke_pointer(entry_addr + ST_NAME, no_name)
-				end if
-				
-				if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
-					-- convert offset to address
-					poke_pointer(entry_addr, peek_pointer( entry_addr ) + lit )
-				end if
-			elsif eentry[S_MODE] = M_CONSTANT then
-				-- literals - convert offset of literal value to address
-				poke_pointer(entry_addr, peek_pointer( entry_addr ) + lit) 
-			
-			end if
-		end if
-	end for
+	nm = alloc_symbol_names( st, lit, string_size )
 	
 	if not has_coverage() then
 		SymTab = {}  -- free up some space
@@ -333,19 +300,7 @@ procedure BackEnd(integer il_file)
 		fn += 1
 	end for
 	
-	include_info = allocate( sizeof( C_POINTER ) * (1 + length( include_matrix )) ) 
-	include_node = include_info
-	poke4( include_info, 0 )
-	include_node += 4
-	
-	for i = 1 to length( include_matrix ) do
-		
-		include_array = allocate( 1 + length( include_matrix ) )
-		poke( include_array, i & include_matrix[i] )
-		poke_pointer( include_node, include_array )
-		
-		include_node += sizeof( C_POINTER )
-	end for
+	include_info = alloc_include_matrix()
 
 	if Argc > 2 then
 		Argv = {Argv[1]} & Argv[3 .. Argc]
@@ -369,3 +324,58 @@ procedure BackEnd(integer il_file)
 		})
 end procedure
 mode:set_backend( routine_id("BackEnd") )
+
+function alloc_include_matrix()
+	atom include_info = allocate( sizeof( C_POINTER ) * (1 + length( include_matrix )) ) 
+	atom include_node = include_info
+	poke_pointer( include_info, 0 )
+	include_node += sizeof( C_POINTER )
+	
+	for i = 1 to length( include_matrix ) do
+		atom include_array = allocate( 1 + length( include_matrix ) )
+		poke( include_array, i & include_matrix[i] )
+		poke_pointer( include_node, include_array )
+		
+		include_node += sizeof( C_POINTER )
+	end for
+	return include_info
+end function
+
+function alloc_symbol_names( atom st, atom lit, integer string_size)
+-- convert symbol names to C strings in memory
+	atom nm = allocate(1+string_size)  
+	atom addr = nm
+	atom entry_addr = st
+	atom no_name = allocate_string("<no-name>")
+	for i = 1 to length(SymTab) do
+		object eentry = SymTab[i]
+		entry_addr += ST_ENTRY_SIZE
+		if sequence(eentry) then 
+			if length(eentry) >= S_NAME then
+				if sequence(eentry[S_NAME]) then
+					-- record the address of the name string
+					poke_pointer(entry_addr + ST_NAME, addr) 
+					-- store the name string
+					poke(addr, eentry[S_NAME])
+					addr += length(eentry[S_NAME])
+					poke(addr, 0)  -- 0-delimited string
+					addr += 1
+				
+				else
+					-- no name
+					poke_pointer(entry_addr + ST_NAME, no_name)
+				end if
+				
+				if eentry[S_TOKEN] = NAMESPACE or compare( eentry[S_OBJ], NOVALUE ) then
+					-- convert offset to address
+					poke_pointer(entry_addr, peek_pointer( entry_addr ) + lit )
+				end if
+			elsif eentry[S_MODE] = M_CONSTANT then
+				-- literals - convert offset of literal value to address
+				poke_pointer(entry_addr, peek_pointer( entry_addr ) + lit) 
+			
+			end if
+		end if
+	end for
+	return nm
+end function
