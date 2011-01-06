@@ -227,11 +227,6 @@ union pc_t {
 							DeRef(a);             \
 						}
 
-#define peek4(peek4_addr)	*peek4_addr
-#define peek1(peek1_addr)	*peek1_addr
-#define	poke4(peek4_addr,long_value)	*peek4_addr = ((unsigned long)long_value)
-#define poke1(addr,char_value)  *addr = char_value
-
 /**********************/
 /* Declared functions */
 /**********************/
@@ -339,17 +334,17 @@ static object do_peek2(object a, int b )
 // moved it here because it was causing bad code generation for WIN32
 {
 	int i;
-	unsigned short *peek2_addr;
+	uint16_t *peek2_addr;
 	object top;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
 	/* check address */
 	if (IS_ATOM_INT(a)) {
-		peek2_addr = (unsigned short *)a;
+		peek2_addr = (uint16_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-		peek2_addr = (unsigned short *)(unsigned long)(DBL_PTR(a)->dbl);
+		peek2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -358,7 +353,7 @@ static object do_peek2(object a, int b )
 		if (i != 2) {
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
-		peek2_addr = (unsigned short *)get_pos_int("peek2s/peek2u", *(s1->base+1));
+		peek2_addr = (uint16_t *)get_pos_int("peek2s/peek2u", *(s1->base+1));
 		i = get_pos_int("peek2s/peek2u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");
@@ -367,20 +362,16 @@ static object do_peek2(object a, int b )
 		if (b) {
 			// unsigned
 			while (--i >= 0) {
-				top = (object)peek4(peek2_addr);
+				top = (object)*peek2_addr;
 				++peek2_addr;
-				if ((unsigned)top > (unsigned)MAXINT)
-					top = NewDouble((double)(unsigned long)top);
 				*(++obj_ptr) = top;
 			}
 		}
 		else {
 			// signed
 			while (--i >= 0) {
-				top = (object)(signed short)peek4(peek2_addr);
+				top = (object)(int16_t)*peek2_addr;
 				++peek2_addr;
-				if (top < MININT || top > MAXINT)
-					top = NewDouble((double)(long)top);
 				*(++obj_ptr) = top;
 			}
 		}
@@ -388,15 +379,11 @@ static object do_peek2(object a, int b )
 	}
 	if (b) {
 		// unsigned
-		top = (object)peek4(peek2_addr);
-		if ((unsigned)top > (unsigned)MAXINT)
-			top = NewDouble((double)(unsigned long)top);
+		top = (object)*peek2_addr;
 	}
 	else {
 		// signed
-		top = (object)(signed short)peek4(peek2_addr);
-		if (top < MININT || top > MAXINT)
-			top = NewDouble((double)(long)top);
+		top = (object)(int16_t)*peek2_addr;
 	}
 
 	return top;
@@ -405,20 +392,20 @@ static object do_peek2(object a, int b )
 static object do_peek8(object a, int b )
 // peek8u, peek8s
 {
-	int i;
-	unsigned long long *peek8_addr;
+		int64_t sval;
+int i;
+	object_ptr obj_ptr;
 	object top;
 	s1_ptr s1;
-	object_ptr obj_ptr;
-	unsigned long long uval;
-	long long sval;
+	uint64_t *peek8_addr;
+	uint64_t uval;
 
 	/* check address */
 	if (IS_ATOM_INT(a)) {
-		peek8_addr = (unsigned long long *)a;
+		peek8_addr = (uint64_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-		peek8_addr = (unsigned long long *)(unsigned long)(DBL_PTR(a)->dbl);
+		peek8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -427,7 +414,7 @@ static object do_peek8(object a, int b )
 		if (i != 2) {
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
-		peek8_addr = (unsigned long long *)get_pos_int("peek8s/peek8u", *(s1->base+1));
+		peek8_addr = (uint64_t *)get_pos_int("peek8s/peek8u", *(s1->base+1));
 		i = get_pos_int("peek8s/peek8u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");
@@ -438,11 +425,11 @@ static object do_peek8(object a, int b )
 			while (--i >= 0) {
 				uval = *peek8_addr;
 				++peek8_addr;
-				if ( uval > (unsigned long long)MAXINT){
+				if ( uval > (uint64_t)MAXINT){
 					top = NewDouble((double) uval);
 				}
 				else{
-					top = (unsigned long)uval;
+					top = (uintptr_t)uval;
 				}
 				*(++obj_ptr) = top;
 			}
@@ -450,13 +437,13 @@ static object do_peek8(object a, int b )
 		else {
 			// signed
 			while (--i >= 0) {
-				sval = (long long) *peek8_addr;
+				sval = (int64_t) *peek8_addr;
 				++peek8_addr;
-				if (sval < (long long)MININT || sval > (long long)MAXINT){
+				if (sval < (int64_t)MININT || sval > (int64_t)MAXINT){
 					top = NewDouble((double) sval);
 				}
 				else{
-					top = (long) sval;
+					top = (uintptr_t) sval;
 				}
 				*(++obj_ptr) = top;
 			}
@@ -466,21 +453,21 @@ static object do_peek8(object a, int b )
 	if (b) {
 		// unsigned
 		uval = *peek8_addr;
-		if ( uval > (unsigned long long)MAXINT){
+		if ( uval > (uint64_t)MAXINT){
 			top = NewDouble((double) uval);
 		}
 		else{
-			top = (long) uval;
+			top = (intptr_t) uval;
 		}
 	}
 	else {
 		// signed
-		sval = (long long) *peek8_addr;
-		if (sval < (long long)MININT || sval > (long long)MAXINT){
+		sval = (int64_t) *peek8_addr;
+		if (sval < (int64_t)MININT || sval > (int64_t)MAXINT){
 			top = NewDouble((double) sval);
 		}
 		else{
-			top = (long) sval;
+			top = (intptr_t) sval;
 		}
 	}
 
@@ -493,17 +480,17 @@ static object do_peek4(object a, int b )
 // moved it here because it was causing bad code generation for WIN32
 {
 	int i;
-	unsigned long *peek4_addr;
+	uint32_t *peek4_addr;
 	object top;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
 	/* check address */
 	if (IS_ATOM_INT(a)) {
-		peek4_addr = (unsigned long *)a;
+		peek4_addr = (uint32_t *)a;
 	}
 	else if (IS_ATOM(a)) {
-		peek4_addr = (unsigned long *)(unsigned long)(DBL_PTR(a)->dbl);
+		peek4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		/* a sequence: {addr, nbytes} */
@@ -512,7 +499,7 @@ static object do_peek4(object a, int b )
 		if (i != 2) {
 			RTFatal("argument to peek() must be an atom or a 2-element sequence");
 		}
-		peek4_addr = (unsigned long *)get_pos_int("peek4s/peek4u", *(s1->base+1));
+		peek4_addr = (uint32_t *)get_pos_int("peek4s/peek4u", *(s1->base+1));
 		i = get_pos_int("peek4s/peek4u", *(s1->base+2));/* length*/
 		if (i < 0)
 			RTFatal("number of bytes to peek is less than 0");
@@ -521,35 +508,35 @@ static object do_peek4(object a, int b )
 		if (b) {
 			// unsigned
 			while (--i >= 0) {
-				top = peek4(peek4_addr);
+				top = *peek4_addr;
 				++peek4_addr;
-				if ((unsigned)top > (unsigned)MAXINT)
-					top = NewDouble((double)(unsigned long)top);
+				if ((uintptr_t)top > (uintptr_t)MAXINT)
+					top = NewDouble((double)(uint32_t)top);
 				*(++obj_ptr) = top;
 			}
 		}
 		else {
 			// signed
 			while (--i >= 0) {
-				top = peek4(peek4_addr);
+				top = *peek4_addr;
 				++peek4_addr;
-				if (top < MININT || top > MAXINT)
-					top = NewDouble((double)(long)top);
+				if (top < (int32_t)MININT || top > (int32_t)MAXINT)
+					top = NewDouble((double)(int32_t)top);
 				*(++obj_ptr) = top;
 			}
 		}
 		return (object)MAKE_SEQ(s1);
 	}
-	top = peek4(peek4_addr);
+	top = *peek4_addr;
 	if (b) {
 		// unsigned
-		if ((unsigned)top > (unsigned)MAXINT)
-			top = NewDouble((double)(unsigned long)top);
+		if ((uintptr_t)top > (uintptr_t)MAXINT)
+			top = NewDouble((double)(uintptr_t)top);
 	}
 	else {
 		// signed
-		if (top < MININT || top > MAXINT)
-			top = NewDouble((double)(long)top);
+		if (top < (intptr_t) MININT || top > (intptr_t) MAXINT)
+			top = NewDouble((double)(intptr_t)top);
 	}
 
 	return top;
@@ -558,30 +545,30 @@ static object do_peek4(object a, int b )
 static void do_poke2(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
-	unsigned short *poke2_addr;
+	uint16_t *poke2_addr;
 	double temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
-		poke2_addr = (unsigned short *)INT_VAL(a);
+		poke2_addr = (uint16_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
-		poke2_addr = (unsigned short *)(unsigned long)(DBL_PTR(a)->dbl);
+		poke2_addr = (uint16_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		RTFatal("first argument to poke2 must be an atom");
 	}
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-		poke4(poke2_addr,INT_VAL(top));
+		*poke2_addr = (uint16_t) INT_VAL(top);
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal("poke2 is limited to 32-bit numbers");
-		poke4(poke2_addr,temp_dbl);
+		*poke2_addr = (uint16_t) temp_dbl;
 	}
 	else {
 		/* second arg is sequence */
@@ -590,7 +577,7 @@ static void do_poke2(object a, object top)
 		while (TRUE) {
 			top = *(++obj_ptr);
 			if (IS_ATOM_INT(top)) {
-				poke4(poke2_addr,INT_VAL(top));
+				*poke2_addr = (uint16_t) INT_VAL(top);
 				++poke2_addr;
 			}
 			else if (IS_ATOM(top)) {
@@ -599,7 +586,7 @@ static void do_poke2(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal("poke2 is limited to 32-bit numbers");
-				poke4(poke2_addr,temp_dbl);
+				*poke2_addr = (uint16_t) temp_dbl;
 				++poke2_addr;
 			}
 			else {
@@ -611,30 +598,30 @@ static void do_poke2(object a, object top)
 
 static void do_poke8(object a, object top)
 {
-	unsigned long long *poke8_addr;
+	uint64_t *poke8_addr;
 	double temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
-		poke8_addr = (unsigned long long *)INT_VAL(a);
+		poke8_addr = (uint64_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
-		poke8_addr = (unsigned long long *)(unsigned long)(DBL_PTR(a)->dbl);
+		poke8_addr = (uint64_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		RTFatal("first argument to poke8 must be an atom");
 	}
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-		*poke8_addr = (unsigned long long) top;
+		*poke8_addr = (uint64_t) top;
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 			RTFatal("poke8 is limited to 64-bit numbers");
-		*poke8_addr = (unsigned long long) temp_dbl;
+		*poke8_addr = (uint64_t) temp_dbl;
 	}
 	else {
 		/* second arg is sequence */
@@ -643,7 +630,7 @@ static void do_poke8(object a, object top)
 		while (TRUE) {
 			top = *(++obj_ptr);
 			if (IS_ATOM_INT(top)) {
-				*poke8_addr = (unsigned long long) top;
+				*poke8_addr = (uint64_t) top;
 				++poke8_addr;
 			}
 			else if (IS_ATOM(top)) {
@@ -652,7 +639,7 @@ static void do_poke8(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_LONGLONG_DBL || temp_dbl > MAX_LONGLONG_DBL)
 					RTFatal("poke8 is limited to 64-bit numbers");
-				*poke8_addr = (unsigned long long) temp_dbl;
+				*poke8_addr = (uint64_t) temp_dbl;
 				++poke8_addr;
 			}
 			else {
@@ -665,30 +652,30 @@ static void do_poke8(object a, object top)
 static void do_poke4(object a, object top)
 // moved it here because it was causing bad code generation for WIN32
 {
-	unsigned long *poke4_addr;
+	uint32_t *poke4_addr;
 	double temp_dbl;
 	s1_ptr s1;
 	object_ptr obj_ptr;
 
 	/* determine the address to be poked */
 	if (IS_ATOM_INT(a)) {
-		poke4_addr = (unsigned long *)INT_VAL(a);
+		poke4_addr = (uint32_t *)INT_VAL(a);
 	}
 	else if (IS_ATOM(a)) {
-		poke4_addr = (unsigned long *)(unsigned long)(DBL_PTR(a)->dbl);
+		poke4_addr = (uint32_t *)(uintptr_t)(DBL_PTR(a)->dbl);
 	}
 	else {
 		RTFatal("first argument to poke4 must be an atom");
 	}
 	/* look at the value to be poked */
 	if (IS_ATOM_INT(top)) {
-		poke4(poke4_addr,INT_VAL(top));
+		*poke4_addr = (uint32_t) INT_VAL(top);
 	}
 	else if (IS_ATOM(top)) {
 		temp_dbl = DBL_PTR(top)->dbl;
 		if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 			RTFatal("poke4 is limited to 32-bit numbers");
-		poke4(poke4_addr,temp_dbl);
+		*poke4_addr = (uint32_t) temp_dbl;
 	}
 	else {
 		/* second arg is sequence */
@@ -697,7 +684,7 @@ static void do_poke4(object a, object top)
 		while (TRUE) {
 			top = *(++obj_ptr);
 			if (IS_ATOM_INT(top)) {
-				poke4(poke4_addr,INT_VAL(top));
+				*poke4_addr = (uint32_t) INT_VAL(top);
 				++poke4_addr;
 			}
 			else if (IS_ATOM(top)) {
@@ -706,7 +693,7 @@ static void do_poke4(object a, object top)
 				temp_dbl = DBL_PTR(top)->dbl;
 				if (temp_dbl < MIN_BITWISE_DBL || temp_dbl > MAX_BITWISE_DBL)
 					RTFatal("poke4 is limited to 32-bit numbers");
-				poke4(poke4_addr,temp_dbl);
+				*poke4_addr = (uint32_t) temp_dbl;
 				++poke4_addr;
 			}
 			else {
@@ -830,14 +817,14 @@ void threadpc3(void);
 static int recover_rhs_subscript(object subscript, s1_ptr s)
 /* rhs subscript failed initial check, but might be ok */
 {
-	int subscripti;
+	intptr_t subscripti;
 
 	if (IS_ATOM_INT(subscript)) {
 		RangeReading(subscript, s->length);
 	}
 	else if (IS_ATOM_DBL(subscript)) {
-		subscripti = (long)(DBL_PTR(subscript)->dbl);
-		if ((unsigned long)(subscripti - 1) < (unsigned long)s->length)
+		subscripti = (intptr_t)(DBL_PTR(subscript)->dbl);
+		if ((uintptr_t)(subscripti - 1) < (uintptr_t)s->length)
 			return subscripti;
 		else
 			RangeReading(subscript, s->length);
@@ -862,14 +849,14 @@ static int recover_lhs_subscript(object subscript, s1_ptr s)
 /* lhs subscript failed initial check but the value may be an
  * encoded pointer to a number. */
 {
-	int subscripti;
+	intptr_t subscripti;
 
 	if (IS_ATOM_INT(subscript)) {
 		BadSubscript(subscript, s->length);
 	}
 	else if (IS_ATOM_DBL(subscript))  {
-		subscripti = (long)(DBL_PTR(subscript)->dbl);
-		if ((unsigned long)(subscripti - 1) < (unsigned long)s->length)
+		subscripti = (intptr_t)(DBL_PTR(subscript)->dbl);
+		if ((uintptr_t)(subscripti - 1) < (uintptr_t)s->length)
 			return subscripti;
 		else
 			BadSubscript(subscript, s->length);
@@ -955,10 +942,10 @@ struct IL fe;
 #define SET_JUMP(word) ((int *)(&code[(int)(word)]))
 #define JUMP_INDEX(word) (((int*)word) - ((symtab_ptr)expr_top[-1])->u.subp.code)
 
-void code_set_pointers(int **code)
+void code_set_pointers(intptr_t **code)
 /* adjust code pointers, changing some indexes into pointers */
 {
-	int len, i, j, n, sub, word;
+	intptr_t len, i, j, n, sub, word;
 
 	len = (int)code[0];
 	i = 1;
@@ -970,7 +957,7 @@ void code_set_pointers(int **code)
 					i, word, len);
 		}
 
-		code[i] = (int *)opcode(word);
+		code[i] = (intptr_t *)opcode(word);
 
 		switch (word) {
 			case TYPE_CHECK:
@@ -1285,7 +1272,7 @@ void code_set_pointers(int **code)
 
 			case PROC:
 			case PROC_TAIL:
-				sub = (int)code[i+1];
+				sub = (intptr_t)code[i+1];
 				code[i+1] = SET_OPERAND(sub);
 
 				// we must look at the symbol table to know
@@ -1338,12 +1325,12 @@ void code_set_pointers(int **code)
 void symtab_set_pointers()
 /* set some symbol table fields to absolute pointers, rather than indexes */
 {
-	int i, len;
+	intptr_t i, len;
 	struct symtab_entry *s;
-	int **code;
+	intptr_t **code;
 
 	s = fe.st;
-	len = *(int *)s;  // number of entries
+	len = *(intptr_t *)s;  // number of entries
 
 	s++;  // point to first real entry
 	for (i = 1; i <= len; i++) {
@@ -1416,8 +1403,8 @@ void analyze_switch()
 */
 
 	object a;
-	int min = MAXINT;
-	int max = MININT;
+	intptr_t min = MAXINT;
+	intptr_t max = MININT;
 	int all_ints = 1;
 	int negative;
 	int offset;
@@ -1481,10 +1468,10 @@ void analyze_switch()
 
 	DeRefDS( MAKE_SEQ( values ) );
 	if( all_ints &&  max - min < 1024){
-		*tpc = (int)opcode( SWITCH_SPI );
+		*tpc = (intptr_t)opcode( SWITCH_SPI );
 
 		// calculate the 'else' jump as a relative jump:
-		offset = (tpc[4]-(int)tpc) / sizeof( int );
+		offset = (tpc[4]-(intptr_t)tpc) / sizeof( intptr_t );
 
 		a = Repeat( offset, max - min + 1 );
 		lookup = SEQ_PTR( a );
@@ -1492,17 +1479,17 @@ void analyze_switch()
 		for( i = 1; i <= new_values->length; ++i ){
 			lookup->base[new_values->base[i] - offset] = jump->base[i];
 		}
-		tpc[2] = (int)offset;
+		tpc[2] = (intptr_t)offset;
 		DeRefDS( *(object_ptr)tpc[3] );
 		*(object_ptr)tpc[3] = (object)MAKE_SEQ( lookup );
 	}
 	else{
 		*(object_ptr)tpc[2] = (object)MAKE_SEQ( new_values );
 		if( all_ints ){
-			*tpc = (int)opcode( SWITCH_I );
+			*tpc = (intptr_t)opcode( SWITCH_I );
 		}
 		else{
-			*tpc = (int)opcode( SWITCH );
+			*tpc = (intptr_t)opcode( SWITCH );
 		}
 	}
 }
@@ -1664,7 +1651,7 @@ void restore_privates(symtab_ptr this_routine)
 	}
 }
 
-void Execute(int *start_index)
+void Execute(intptr_t *start_index)
 /* top level executor */
 /* CAREFUL: any change to this routine might affect the offset to
    the big opccode switch table - see jumptab */
@@ -1682,13 +1669,13 @@ void Execute(int *start_index)
 #endif //not INT_CODES
 
 
-void do_exec(int *start_pc)
+void do_exec(intptr_t *start_pc)
 /* execute code, starting at start_pc */
 {
 	/* WATCOM keeps pc in a register, and usually top, a, obj_ptr */
 
 	/* address registers: (3 max) */
-	register int *pc;               /* program counter, kept in a register */
+	register intptr_t *pc;               /* program counter, kept in a register */
 	register object_ptr obj_ptr;    /* general pointer to an object */
 
 	/* data registers: (5 max) */
@@ -1719,7 +1706,7 @@ void do_exec(int *start_pc)
 	int c0,splins;
 	s1_ptr s1,s2;
 	object *block;
-	unsigned long tuint;
+	uintptr_t tuint;
 
 #if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
@@ -1822,7 +1809,7 @@ void do_exec(int *start_pc)
 	if (start_pc == NULL) {
 #if defined(EUNIX) || defined(EMINGW)
 #ifndef INT_CODES
-		jumptab = (int **)localjumptab;
+		jumptab = (intptr_t **)localjumptab;
 #endif
 #endif
 		return;
@@ -1868,7 +1855,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_RHS_SUBS:");
 				top = *(object_ptr)pc[2];  /* the subscript */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr)pc[1]);/* the sequence */
-				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
+				if ((uintptr_t)(top-1) >= (uintptr_t)((s1_ptr)obj_ptr)->length) {
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
 				}
@@ -1889,7 +1876,7 @@ void do_exec(int *start_pc)
 				   TypeCheck failure if assigned non-integer */
 				top = *(object_ptr)pc[2];  /* the subscript */
 				obj_ptr = (object_ptr)SEQ_PTR(*(object_ptr)pc[1]);/* the sequence */
-				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
+				if ((uintptr_t)(top-1) >= (uintptr_t)((s1_ptr)obj_ptr)->length) {
 					/* possibly bad subscript */
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
@@ -1942,7 +1929,7 @@ void do_exec(int *start_pc)
 				obj_ptr = (object_ptr)SEQ_PTR(top);/* the sequence */
 				top = *(object_ptr)pc[2];  /* the subscript */
 				pc[9] = pc[1]; // store in ASSIGN_SUBS op after length-4 binop
-				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
+				if ((uintptr_t)(top-1) >= (uintptr_t)((s1_ptr)obj_ptr)->length) {
 					/* possibly bad subscript */
 					tpc = pc;
 					top = recover_rhs_subscript(top, (s1_ptr)obj_ptr);
@@ -2009,7 +1996,7 @@ void do_exec(int *start_pc)
 
 			  as:
 				a = *(object_ptr)pc[2]; /* the subscript */
-				if ((unsigned long)(a-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
+				if ((uintptr_t)(a-1) >= (uintptr_t)((s1_ptr)obj_ptr)->length) {
 					/* subscript out of bounds (or it's a double) */
 					tpc = pc;
 					a = recover_lhs_subscript(a, (s1_ptr)obj_ptr);
@@ -2040,7 +2027,7 @@ void do_exec(int *start_pc)
 					*(object_ptr)pc[1] = MAKE_SEQ(obj_ptr);
 				}
 				top = *(object_ptr)pc[2]; /* the subscript */
-				if ((unsigned long)(top-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
+				if ((uintptr_t)(top-1) >= (uintptr_t)((s1_ptr)obj_ptr)->length) {
 					/* subscript out of bounds (or it's a double) */
 					tpc = pc;
 					top = recover_lhs_subscript(top, (s1_ptr)obj_ptr);
@@ -2096,19 +2083,19 @@ void do_exec(int *start_pc)
 			deprintf("case L_ELSE:");
 			case L_RETRY:
 			deprintf("case L_RETRY:");
-				pc = (int *)pc[1];
+				pc = (intptr_t *)pc[1];
 				thread();
 				BREAK;
 
 			case L_GOTO:
 			deprintf("case L_GOTO:");
-				pc = (int *)pc[1];
+				pc = (intptr_t *)pc[1];
 				thread();
 				BREAK;
 
 			case L_GLABEL:
 			deprintf("case L_GLABEL:");
-				pc = (int *)pc[1];
+				pc = (intptr_t *)pc[1];
 				thread();
 				BREAK;
 
@@ -2200,12 +2187,12 @@ void do_exec(int *start_pc)
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (int) DBL_PTR( a )->dbl;
+					top = (intptr_t) DBL_PTR( a )->dbl;
 					if( (double)top == DBL_PTR( a )->dbl ){
-						a = (int) DBL_PTR( a )->dbl;
+						a = (intptr_t) DBL_PTR( a )->dbl;
 					}
 					else{
-						pc = (int *) pc[4];
+						pc = (intptr_t *) pc[4];
 						thread();
 						BREAK;
 					}
@@ -2219,7 +2206,7 @@ void do_exec(int *start_pc)
 					thread();
 					BREAK;
 				}
-				pc = (int *) pc[4];
+				pc = (intptr_t *) pc[4];
 				thread();
 				BREAK;
 
@@ -2229,18 +2216,18 @@ void do_exec(int *start_pc)
 				a = *(object_ptr)pc[1];
 				if( IS_SEQUENCE( a ) ){
 					// no match:  goto else or skip the switch
-					pc = (int *) pc[4];
+					pc = (intptr_t *) pc[4];
 					thread();
 					BREAK;
 				}
 				if( !IS_ATOM_INT( a ) ){
 					// have to check for integer value
-					top = (int) DBL_PTR( a )->dbl;
+					top = (intptr_t) DBL_PTR( a )->dbl;
 					if( (double)top == DBL_PTR( a )->dbl ){
-						a = (int) DBL_PTR( a )->dbl;
+						a = (intptr_t) DBL_PTR( a )->dbl;
 					}
 					else{
-						pc = (int *) pc[4];
+						pc = (intptr_t *) pc[4];
 						thread();
 						BREAK;
 					}
@@ -2273,7 +2260,7 @@ void do_exec(int *start_pc)
 		  		}
 		  		else{
 		  			// no match:  goto else or skip the switch
-					pc = (int *) pc[4];
+					pc = (intptr_t *) pc[4];
 		  		}
 
 		  		thread();
@@ -2283,7 +2270,7 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];
 			if_check:
 				if (top == ATOM_0) {
-					pc = (int *)pc[2];
+					pc = (intptr_t *)pc[2];
 					thread();
 					pc++; /* DUMMY ! */
 				}
@@ -2298,7 +2285,7 @@ void do_exec(int *start_pc)
 						atom_condition();
 					}
 					if (DBL_PTR(top)->dbl == 0.0) {
-						pc = (int *)pc[2];
+						pc = (intptr_t *)pc[2];
 					}
 					else
 						inc3pc();
@@ -2313,7 +2300,7 @@ void do_exec(int *start_pc)
 				deprintf("(");
 				SHOW_PARAM(pc[2]);
 				deprintf(", ");
-				SHOW_PARAM((*(int*)pc[1]));
+				SHOW_PARAM((*(intptr_t*)pc[1]));
 				deprintf(")");
 #endif
 				*(object_ptr)pc[2] = *(object_ptr)pc[1];
@@ -2328,7 +2315,7 @@ void do_exec(int *start_pc)
 				deprintf("(");
 				SHOW_PARAM(pc[2]);
 				deprintf(", ");
-				SHOW_PARAM((*(int*)pc[1]));
+				SHOW_PARAM((*(intptr_t *)pc[1]));
 				deprintf(")");
 #endif
 				top = *obj_ptr;
@@ -2383,7 +2370,7 @@ void do_exec(int *start_pc)
 				}
 				obj_ptr = (object_ptr)top;
 				// The variable, a, seems to index past the end of the sequence.
-				if ((unsigned long)(a-1) >= (unsigned long)((s1_ptr)obj_ptr)->length) {
+				if ((uintptr_t)(a-1) >= (uintptr_t)((s1_ptr)obj_ptr)->length) {
 					tpc = pc;
 					// It may be an encoded pointer to d struct.
 					// Do a check in the routine below.
@@ -2452,7 +2439,7 @@ void do_exec(int *start_pc)
 				nvars = pc[1];
 				pc += 2;
 				tpc = pc;
-				s1 = NewS1((long)nvars);
+				s1 = NewS1(nvars);
 				obj_ptr = s1->base + nvars;
 				for (a = 1; a <= nvars; a++) {
 					/* the last one comes first */
@@ -2470,7 +2457,7 @@ void do_exec(int *start_pc)
 			case L_RIGHT_BRACE_2: /* form a sequence of length 2 */
 			deprintf("case L_RIGHT_BRACE_2:");
 				tpc = pc;
-				s1 = NewS1((long)2);
+				s1 = NewS1(2);
 				obj_ptr = s1->base;
 				/* the second one comes first */
 				obj_ptr[1] = *((object_ptr)pc[2]);
@@ -2517,7 +2504,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_GLOBAL_INIT_CHECK:");
 				pc += 2;
 				if (*(object_ptr)pc[-1] != NOVALUE) {
-					*(pc - 2) = (int)opcode(NOP2);
+					*(pc - 2) = (intptr_t)opcode(NOP2);
 					thread();
 					BREAK;
 				}
@@ -2798,7 +2785,7 @@ void do_exec(int *start_pc)
 				if (INT_VAL(top) <= 0) {
 					RTFatal("argument to rand() must be >= 1");
 				}
-				top = MAKE_INT((good_rand() % ((unsigned)INT_VAL(top))) + 1);
+				top = MAKE_INT((good_rand() % ((uintptr_t)INT_VAL(top))) + 1);
 				END_UNARY_OP(RAND)
 				thread();
 				BREAK;
@@ -2811,7 +2798,7 @@ void do_exec(int *start_pc)
 					/* INT:INT case */
 					top = INT_VAL(a) + INT_VAL(top);
 					// mwl: gcc 4.1 doesn't do this right unless you do the unsigned casts:
-					if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
+					if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 						goto dblplus;
 					}
 				contplus:
@@ -2860,7 +2847,7 @@ void do_exec(int *start_pc)
 				/* we know that the inputs and the output must be integers */
 				START_BIN_OP_I
 				top = INT_VAL(a) + INT_VAL(top);
-				if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
+				if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 					goto dblplus_i;
 				}
 			contplus_i:
@@ -2872,7 +2859,7 @@ void do_exec(int *start_pc)
 				START_BIN_OP
 					/* INT:INT case L_*/
 					top = INT_VAL(a) - INT_VAL(top);
-					if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
+					if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 						tpc = pc;
 						v = top;
 						top = NewDouble((double)v);
@@ -2911,7 +2898,7 @@ void do_exec(int *start_pc)
 			deprintf("case L_MINUS_I:");
 				START_BIN_OP_I
 				top = a - top;
-				if ((long)((unsigned long)top + (unsigned long)HIGH_BITS) >= 0) {
+				if ((intptr_t)((uintptr_t)top + (uintptr_t)HIGH_BITS) >= 0) {
 					tpc = pc;
 					b = top;
 					top = NewDouble((double)b);
@@ -2929,6 +2916,7 @@ void do_exec(int *start_pc)
 					c = a;
 					b = top;
 
+					// TODO: the optimizations here need updating for 64-bits
 					if (c == (short)c) {
 						/* c is 16-bit */
 						if ((b <= INT15 && b >= -INT15) ||
@@ -3010,7 +2998,7 @@ void do_exec(int *start_pc)
 			case L_AND_BITS:
 			deprintf("case L_AND_BITS:");
 				START_BIN_OP
-				tuint = (unsigned long)a & (unsigned long)top;
+				tuint = (uintptr_t)a & (uintptr_t)top;
 				top = MAKE_UINT(tuint);
 				END_BIN_OP(AND_BITS)
 				BREAK;
@@ -3018,7 +3006,7 @@ void do_exec(int *start_pc)
 			case L_OR_BITS:
 			deprintf("case L_OR_BITS:");
 				START_BIN_OP
-				tuint = (unsigned long)a | (unsigned long)top;
+				tuint = (uintptr_t)a | (uintptr_t)top;
 				top = MAKE_UINT(tuint);
 				END_BIN_OP(OR_BITS)
 				BREAK;
@@ -3026,7 +3014,7 @@ void do_exec(int *start_pc)
 			case L_XOR_BITS:
 			deprintf("case L_XOR_BITS:");
 				START_BIN_OP
-				tuint = (unsigned long)a ^ (unsigned long)top;
+				tuint = (uintptr_t)a ^ (uintptr_t)top;
 				top = MAKE_UINT(tuint);
 				END_BIN_OP(XOR_BITS)
 				BREAK;
@@ -3099,7 +3087,7 @@ void do_exec(int *start_pc)
 						v = a;
 						temp_dbl = floor((double)v / (double)b);
 						if (fabs(temp_dbl) <= MAXINT_DBL)
-							b = (long)temp_dbl;
+							b = (intptr_t)temp_dbl;
 						else
 							b = (object)NewDouble(temp_dbl);
 					}
@@ -3277,7 +3265,7 @@ void do_exec(int *start_pc)
 					if (top == ATOM_0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_0;
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3286,7 +3274,7 @@ void do_exec(int *start_pc)
 					if (DBL_PTR(top)->dbl == 0.0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_0;
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3303,14 +3291,14 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top == ATOM_0) {
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl == 0.0) {
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3375,7 +3363,7 @@ void do_exec(int *start_pc)
 					if (top != ATOM_0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_1;
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3384,7 +3372,7 @@ void do_exec(int *start_pc)
 					if (DBL_PTR(top)->dbl != 0.0) {
 						DeRefx(*(object_ptr)pc[2]);
 						*(object_ptr)pc[2] = ATOM_1;
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3401,14 +3389,14 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];
 				if (IS_ATOM_INT(top)) {
 					if (top != ATOM_0) {
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
 				}
 				else if (IS_ATOM_DBL(top)) {
 					if (DBL_PTR(top)->dbl != 0.0) {
-						pc = (int *)pc[3];
+						pc = (intptr_t *)pc[3];
 						thread();
 						BREAK;
 					}
@@ -3452,12 +3440,12 @@ void do_exec(int *start_pc)
 				top = *(object_ptr)pc[1];    /* inc */
 				a = *(object_ptr)pc[2];      /* limit */
 			  intloop:
-				if ((long)((unsigned long)a + (unsigned long)top + (unsigned long)HIGH_BITS) < 0) {
+				if ((intptr_t)((uintptr_t)a + (uintptr_t)top + (uintptr_t)HIGH_BITS) < 0) {
 					/* purely integer loop */
 					if ((top >= 0)) {
 						/* going up */
 						if (c > a) {
-							pc = (int *)pc[6];
+							pc = (intptr_t *)pc[6];
 							thread();
 							BREAK;
 						}
@@ -3471,7 +3459,7 @@ void do_exec(int *start_pc)
 					else {
 						/* going down */
 						if (c < a) {
-							pc = (int *)pc[6];
+							pc = (intptr_t *)pc[6];
 							thread();
 							BREAK;
 						}
@@ -3502,7 +3490,7 @@ void do_exec(int *start_pc)
 					else
 						b = binary_op_a(LESS, c, a);
 					if (b == ATOM_1) {
-						pc = (int *)pc[6];  /* exit loop - 0 iterations */
+						pc = (intptr_t *)pc[6];  /* exit loop - 0 iterations */
 						BREAK;
 					}
 					else {
@@ -3512,8 +3500,8 @@ void do_exec(int *start_pc)
 					}
 				}
 				/* we're going in - patch the ENDFOR opcode */
-				patch = (opcode_type *) ((int *)pc[6] - 5);
-				i = (int)opcode(i);
+				patch = (opcode_type *) ((intptr_t *)pc[6] - 5);
+				i = (intptr_t)opcode(i);
 				pc += 7;   // so WATCOM will do it before thread()
 				if (patch[0] != (opcode_type)i) {
 					// changing the endfor op from what it was
@@ -3540,7 +3528,7 @@ void do_exec(int *start_pc)
 				}
 				else {
 					*obj_ptr = top;
-					pc = (int *)pc[1];  /* loop again */
+					pc = (intptr_t *)pc[1];  /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3554,7 +3542,7 @@ void do_exec(int *start_pc)
 				}
 				else {
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (intptr_t *)pc[1]; /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3608,7 +3596,7 @@ void do_exec(int *start_pc)
 				else {
 					DeRef(*obj_ptr);
 					*obj_ptr = top;
-					pc = (int *)pc[1]; /* loop again */
+					pc = (intptr_t *)pc[1]; /* loop again */
 					thread();
 				}
 				BREAK;
@@ -3658,7 +3646,7 @@ void do_exec(int *start_pc)
 
 				// if length is huge it will be rejected here,
 				// so max_stack_per_call will protect against stack overflow
-				if (sub->u.subp.num_args != (unsigned long)((s1_ptr)a)->length) {
+				if (sub->u.subp.num_args != (uintptr_t)((s1_ptr)a)->length) {
 					// must avoid > 3 arg calls to get better WATCOM code gen
 					wrong_arg_count(sub, a);
 				}
@@ -3861,7 +3849,7 @@ void do_exec(int *start_pc)
 				Ref(result_val);
 
 				// record the place to put the return value
-				result_ptr = (object_ptr)*((int *)expr_top[-2] - 1);
+				result_ptr = (object_ptr)*((intptr_t *)expr_top[-2] - 1);
 				goto return_p;
 
 			case L_RETURNP: /* return from procedure */
@@ -3904,7 +3892,7 @@ void do_exec(int *start_pc)
 							DeRef( result_val );
 
 							// Watch for recursion:
-							if( tpc[3] != (int)result_ptr )
+							if( tpc[3] != (intptr_t)result_ptr )
 								((symtab_ptr)tpc[3])->obj = NOVALUE;
 						}
 						result_ptr = NULL;
@@ -4080,11 +4068,11 @@ void do_exec(int *start_pc)
 				b = *(object_ptr)pc[2];  //start
 				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to remove() must be an atom");
-				nvars = (IS_ATOM_INT(b)) ? b : (long)(DBL_PTR(b)->dbl);
+				nvars = (IS_ATOM_INT(b)) ? b : (intptr_t)(DBL_PTR(b)->dbl);
 				top = *(object_ptr)pc[3]; //stop
 				if (IS_SEQUENCE(top))
 					RTFatal("Third argument to remove() must be an atom");
-				end_pos = (IS_ATOM_INT(top)) ? top : (long)(DBL_PTR(top)->dbl);
+				end_pos = (IS_ATOM_INT(top)) ? top : (intptr_t)(DBL_PTR(top)->dbl);
 				if (end_pos > seqlen)
 					end_pos=seqlen;
 				obj_ptr = (object_ptr)pc[4];
@@ -4155,7 +4143,7 @@ void do_exec(int *start_pc)
 				b = *(object_ptr)pc[2];   // start
 				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to head() must be an atom");
-				nvars = (IS_ATOM_INT(b)) ? b : (long)(DBL_PTR(b)->dbl);
+				nvars = (IS_ATOM_INT(b)) ? b : (intptr_t)(DBL_PTR(b)->dbl);
 				if (nvars < 0)
 					RTFatal("Second argument to head() must not be negative");
 				obj_ptr = (object_ptr)pc[3];
@@ -4189,7 +4177,7 @@ void do_exec(int *start_pc)
 				b = *(object_ptr)pc[2];  // length
 				if (IS_SEQUENCE(b))
 					RTFatal("Second argument to tail() must be an atom");
-				nvars = (!IS_ATOM_INT(b)) ? (long)(DBL_PTR(b)->dbl) : b;
+				nvars = (!IS_ATOM_INT(b)) ? (intptr_t)(DBL_PTR(b)->dbl) : b;
 				if (nvars < 0)
 					RTFatal("Second argument to tail() must not be negative");
 
@@ -4246,7 +4234,7 @@ void do_exec(int *start_pc)
 				if (IS_SEQUENCE(*obj_ptr))
 					RTFatal("Third argument to splice/insert() must be an atom");
 				nvars = (IS_ATOM_INT(*obj_ptr)) ?
-					*obj_ptr : (long)DBL_PTR(*obj_ptr)->dbl;  //insertion point
+					*obj_ptr : (intptr_t)DBL_PTR(*obj_ptr)->dbl;  //insertion point
 
 				b = *(object_ptr)pc[2]; //the stuff to insert
 				Ref(b);
@@ -4494,7 +4482,7 @@ void do_exec(int *start_pc)
 					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
 				}
 				else { /* sequence */
 						RTFatal(
@@ -4535,7 +4523,7 @@ void do_exec(int *start_pc)
 					poke_addr = (char *)INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
 				}
 				else {
 					/* a sequence: {addr, nbytes} */
@@ -4618,7 +4606,7 @@ void do_exec(int *start_pc)
 					poke_addr = (char *)a;
 				}
 				else if (IS_ATOM(a)) {
-					poke_addr = (char *)(unsigned long)(DBL_PTR(a)->dbl);
+					poke_addr = (char *)(uintptr_t)(DBL_PTR(a)->dbl);
 				}
 				else {
 					tpc = pc;
@@ -4628,11 +4616,11 @@ void do_exec(int *start_pc)
 				b = top;
 
 				if (IS_ATOM_INT(b)) {
-					poke1(poke_addr,b);
+					*poke_addr = (uint8_t) b;
 				}
 				else if (IS_ATOM(b)) {
 					/* no check for overflow here.. hmm*/
-					poke1(poke_addr,DBL_PTR(b)->dbl);
+					*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
 				}
 				else {
 					/* second arg is sequence */
@@ -4641,12 +4629,12 @@ void do_exec(int *start_pc)
 					while (TRUE) {
 						b = *(++obj_ptr);
 						if (IS_ATOM_INT(b)) {
-							poke1(poke_addr,b);
+							*poke_addr = (uint8_t) b;
 						}
 						else if (IS_ATOM(b)) {
 							if (b == NOVALUE)
 								break;
-							poke1(poke_addr,DBL_PTR(b)->dbl);
+							*poke_addr = (uint8_t) DBL_PTR(b)->dbl;
 						}
 						else {
 							RTFatal(
@@ -4688,7 +4676,7 @@ void do_exec(int *start_pc)
 					sub_addr = (void(*)())INT_VAL(a);
 				}
 				else if (IS_ATOM(a)) {
-					sub_addr = (void(*)())(unsigned long)(DBL_PTR(a)->dbl);
+					sub_addr = (void(*)())(uintptr_t)(DBL_PTR(a)->dbl);
 				}
 				else {
 					RTFatal("argument to call() must be an atom");
