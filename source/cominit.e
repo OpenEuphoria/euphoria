@@ -121,6 +121,7 @@ export procedure show_banner()
 	end ifdef
 
 	sequence misc_info = {
+		info:arch_bits(),
 		info:platform_name(), 
 		memory_type, 
 		"", 
@@ -134,12 +135,12 @@ export procedure show_banner()
 
 	object EuConsole = getenv("EUCONS")
 	if equal(EuConsole, "1") then
-		misc_info[3] = GetMsgText(275,0)
+		misc_info[4] = GetMsgText(275,0)
 	else
-		misc_info = remove(misc_info, 3)
+		misc_info = remove(misc_info, 4)
 	end if
 
-	screen_output(STDERR, sprintf("%s v%s %s\n   %s, %s\n   Revision Date: %s, Id: %s\n", {
+	screen_output(STDERR, sprintf("%s v%s %s\n   %s %s, %s\n   Revision Date: %s, Id: %s\n", {
 		prod_name, info:version_string_short(), info:version_type() } & misc_info ) )
 end procedure
 

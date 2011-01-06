@@ -9,6 +9,8 @@ constant M_EU_INFO=75
 
 enum MAJ_VER, MIN_VER, PAT_VER, VER_TYPE, NODE, REVISION, REVISION_DATE, START_TIME
 
+include std/dll.e
+
 constant version_info = machine_func(M_EU_INFO, {})
 
 --****
@@ -58,6 +60,17 @@ public function platform_name()
 		return "Unknown"
 	end ifdef
 end function
+
+--**
+-- Get the native architecture word size.
+--
+-- Returns:
+--   A **sequence** in the form of "%d-bit", where %d is the word size for the
+--   architecture for which this version of euphoria was built.
+public function arch_bits()
+	return sprintf( "%d-bit", 8 * sizeof( C_POINTER ) )
+end function
+
 
 --**
 -- Get the version, as an integer, of the host Euphoria
@@ -261,13 +274,13 @@ end function
 --   or if you have indicated TRUE for the ##full## argument.
 --
 -- Example return values
---   * "4.0.0 alpha 3 (ab8e98ab3ce4,2010-11-18) for Windows"
---   * "4.0.0 release (8d8874dc9e0a, 2010-12-22) for Linux"
---   * "4.1.5 development (12332:e8d8787af7de, 2011-07-18 12:55:03) for OS X"
+--   * "4.0.0 alpha 3 (ab8e98ab3ce4,2010-11-18) for Windows 32-bit"
+--   * "4.0.0 release (8d8874dc9e0a, 2010-12-22) for Linux 32-bit"
+--   * "4.1.5 development (12332:e8d8787af7de, 2011-07-18 12:55:03) for OS X 64-bit"
 --
 
 public function version_string_long(integer full = 0)
-	return version_string(full) & " for " & platform_name()
+	return version_string(full) & " for " & platform_name() & " " & arch_bits()
 end function
 
 --****
