@@ -1,6 +1,7 @@
 include std/convert.e
 include std/unittest.e
 include std/math.e
+include std/dll.e
 
 test_equal("int_to_bytes +ve", {231, 3, 0, 0}, int_to_bytes(999))
 test_equal("int_to_bytes -ve", {-231, -4, -1, -1}, int_to_bytes(-999))
@@ -96,7 +97,13 @@ test_equal( "to_integer #5", 0,  to_integer("a12"))
 test_equal( "to_integer #6", -1,  to_integer("a12",-1))
 test_equal( "to_integer #7", 0,  to_integer({"12"}))
 test_equal( "to_integer #8", 1073741823,  to_integer(#3FFFFFFF))
-test_equal( "to_integer #9", 0,  to_integer(#3FFFFFFF + 1))
+if sizeof( C_POINTER ) = 4 then
+	test_equal( "to_integer #9", 0,  to_integer(#3FFFFFFF + 1))
+else
+	-- The relative size of 63-bit euphoria integers and the mantissa of
+	-- doubles requires we add 513 to roll over to a double
+	test_equal( "to_integer #9", 0,  to_integer(#3FFFFFFF_FFFFFFFF + 513))
+end if
 
 test_equal( "to_string #1", `12` , to_string(12))
 test_equal( "to_string #2", `abc` , to_string("abc"))
