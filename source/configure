@@ -419,7 +419,8 @@ echo XLTTARGETCC=$XLTTARGETCC >> "$PREFIX"${CONFIG_FILE}
 # Make a generic Makefile that simply includes Makefile.gnu
 echo include Makefile.gnu > Makefile
 
-$CC euarch.c $MFLAG -oeuarch && ./euarch >> ${CONFIG_FILE}
-if [ -f euarch ]; then
-	rm euarch
-fi
+echo [all] > eu.cfg
+echo -i $TRUNKDIR/include >> eu.cfg
+echo -eudir $TRUNKDIR >> eu.cfg
+echo [translate] >> eu.cfg
+echo -com $TRUNKDIR >> eu.cfg
