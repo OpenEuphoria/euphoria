@@ -2644,7 +2644,7 @@ object start_backend(object x)
 
 	fe_set_pointers(); /* change some fe indexes into pointers */
 
-	/* Look at the switches for any information pertient to the backend */
+	/* Look at the switches for any information pertinent to the backend */
 	switch_len = SEQ_PTR(fe.switches)->length;
 
 	for (i=1; i <= switch_len; i++) {

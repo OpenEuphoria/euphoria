@@ -50,8 +50,9 @@ constant
 	ST_SCOPE          = offset( C_CHAR ), -- 13
 	ST_FILE_NO        = offset( C_CHAR ), -- 14,
 	ST_DUMMY          = offset( C_CHAR ), -- 15,
-	ST_NAME           = offset( C_POINTER ), --16,
 	ST_TOKEN          = offset( C_INT ), -- 20,
+	ST_NAME           = offset( C_POINTER ), --16,
+	
 	
 	-- var:
 	ST_DECLARED_IN    = offset( C_POINTER ), -- 24,
@@ -62,14 +63,14 @@ constant
 	
 	-- routine:
 	ST_CODE           = offset( C_POINTER, ST_DECLARED_IN ), -- 24,
+	ST_TEMPS          = offset( C_POINTER ), -- 36,
+	ST_SAVED_PRIVATES = offset( C_POINTER ), --48,
+	ST_BLOCK          = offset( C_POINTER ), --56
 	ST_LINETAB        = offset( C_POINTER ), -- 28,
 	ST_FIRSTLINE      = offset( C_UINT ), -- 32,
-	ST_TEMPS          = offset( C_POINTER ), -- 36,
 	ST_NUM_ARGS       = offset( C_UINT ), -- 40,
 	ST_RESIDENT_TASK  = offset( C_INT ), --44,
-	ST_SAVED_PRIVATES = offset( C_POINTER ), --48,
 	ST_STACK_SPACE    = offset( C_UINT ), -- 52,
-	ST_BLOCK          = offset( C_POINTER ), --56
 	
 	ST_ENTRY_SIZE = next_offset  -- size (bytes) of back-end symbol table entry
 							 -- for interpreter. Fixed size for all entries.
@@ -118,7 +119,7 @@ procedure BackEnd(integer il_file)
 	mem_set(st, 0, size) -- all fields are 0 (NULL) by default
 	
 	-- unused 0th entry contains the length:
-	poke4(st, length(SymTab))
+	poke_pointer(st, length(SymTab))
 		
 	lit_string = "" -- literal values are stored in a string like EDS
 	string_size = 0 -- precompute total space needed for symbol names
@@ -279,20 +280,24 @@ procedure BackEnd(integer il_file)
 		string_size += length(other_strings[i])+1
 	end for
 	
-	ms = allocate(4*(10+length(other_strings))) -- miscellaneous
-	poke4(ms, max_stack_per_call)
-	poke4(ms+4, AnyTimeProfile)
-	poke4(ms+8, AnyStatementProfile)
-	poke4(ms+12, sample_size)
-	poke4(ms+16, gline_number)
-	poke4(ms+20, il_file)
-	poke4(ms+24, length(warning_list))
-	poke4(ms+28, length(known_files)) -- stored in 0th position
+	ms = allocate( sizeof( C_POINTER ) * (10 + length(other_strings) ) ) -- miscellaneous
+	poke_pointer( ms, {
+						max_stack_per_call,
+						AnyTimeProfile,
+						AnyStatementProfile,
+						sample_size,
+						gline_number,
+						il_file,
+						length(warning_list),
+						length(known_files),   -- stored in 0th position
+						$
+						}
+				)
 	
 	fn = allocate(string_size)
 	
 	for i = 1 to length(other_strings) do
-		poke4(ms+32+(i-1)*4, fn)
+		poke_pointer(ms + 8 * sizeof( C_POINTER ) + (i-1) * sizeof( C_POINTER ), fn)
 			
 		poke(fn, other_strings[i])
 		fn += length(other_strings[i])

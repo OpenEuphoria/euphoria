@@ -1521,7 +1521,7 @@ void fe_set_pointers()
 
 #if defined(EWINDOWS)
 	if (sample_size > 0) {
-		profile_sample = (int *)EMalloc(sample_size * sizeof(int));
+		profile_sample = (intptr_t *)EMalloc(sample_size * sizeof(intptr_t));
 		//lock_region(profile_sample, sample_size * sizeof(int));
 		//tick_rate(100);
 		SetThreadPriority(CreateThread(0,0,WinTimer,0,0,0),THREAD_PRIORITY_TIME_CRITICAL);
