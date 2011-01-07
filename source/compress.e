@@ -42,7 +42,8 @@ export constant
 		 MAX2B =  power(2, 15)-1,
 		 MIN3B = -power(2, 23),
 		 MAX3B =  power(2, 23)-1,
-		 MIN4B = -power(2, 31)
+		 MIN4B = -power(2, 31),
+		 MAX4B =  power(2, 31 )-1
 
 export function compress(object x)
 -- Return the compressed representation of a Euphoria object
@@ -50,7 +51,7 @@ export function compress(object x)
 -- The compression cache is not used. Decompression occurs in be_execute.c
 	sequence x4, s
 
-	if integer(x) then
+	if integer(x) and x >= MIN4B and x <= MAX4B then
 		if x >= MIN1B and x <= MAX1B then
 			return {x - MIN1B}
 

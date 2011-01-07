@@ -27,7 +27,8 @@ constant MIN1B = -9,
 		 MAX2B =  power(2, 15)-1,
 		 MIN3B = -power(2, 23),
 		 MAX3B =  power(2, 23)-1,
-		 MIN4B = -power(2, 31)
+		 MIN4B = -power(2, 31),
+		 MAX4B =  power(2, 31)-1
 
 atom mem0, mem1, mem2, mem3
 mem0 = machine:allocate(4)
@@ -355,7 +356,7 @@ public function serialize(object x)
 -- as a sequence of bytes
 	sequence x4, s
 
-	if integer(x) then
+	if integer(x) and x >= MIN4B and x <= MAX4B then
 		if x >= MIN1B and x <= MAX1B then
 			return {x - MIN1B}
 
