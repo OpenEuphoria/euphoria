@@ -80,7 +80,7 @@ constant
 	SL_LINE = offset( C_SHORT ),
 	SL_FILE_NO = offset( C_CHAR ),
 	SL_OPTIONS = offset( C_CHAR ),
-	SL_SIZE    = next_offset
+	SL_SIZE    = next_offset + remainder( next_offset, sizeof( C_POINTER ) ) -- padding
 
 function get_next( symtab_index sym )
 	if get_backend() then

@@ -4751,8 +4751,8 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
 	clocks_per_sec = cps;
 	clk_tck = clk;
 	xstdin = (void *)stdin;
-        eustart_time = current_time();
-        InitInOut();
+	eustart_time = current_time();
+	InitInOut();
 	InitGraphics();
 	InitEMalloc();
 	InitFiles();
