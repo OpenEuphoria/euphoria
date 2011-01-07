@@ -2650,14 +2650,14 @@ static unsigned int hsieh32(char *data, int len, unsigned int starthash)
 
 char *hsieh_tempstr  = 0;
 int   hsieh_tempsize = 0;
-static unsigned int calc_hsieh32(object a)
+static uint32_t calc_hsieh32(object a)
 {
 
 
 	union TF
 	{
 		double ieee_double;
-		int    integer;
+		int32_t    integer;
 		char tfc[8];
 	} tf;
 
@@ -2665,7 +2665,7 @@ static unsigned int calc_hsieh32(object a)
 	object av;
 	char *sp;
 	int slen;
- 	unsigned int lHashVal;
+ 	uint32_t lHashVal;
 	int has_string;
 
 
@@ -2756,10 +2756,10 @@ static unsigned int calc_hsieh32(object a)
 }
 
 
-static unsigned int calc_hsieh30(object a)
+static uint32_t calc_hsieh30(object a)
 {
 
-	unsigned i32;
+	uint32_t i32;
 	
 	i32 = calc_hsieh32(a);
 	return (0x3FFFFFFF & (i32 + ((0xC0000000 & i32) >> 30)));
@@ -2867,11 +2867,11 @@ object calc_hash(object a, object b)
 
 */
 {
-	unsigned long lHashValue;
-	long lSLen;
+	uint32_t lHashValue;
+	int32_t lSLen;
 
 
-	int tfi;
+	int32_t tfi;
 	object lTemp;
 
 	union TF
