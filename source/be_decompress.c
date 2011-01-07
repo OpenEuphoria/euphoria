@@ -23,7 +23,7 @@ unsigned char *string_ptr;
 #define MIN3B (-0x00800000)
 #define MIN4B (-0x80000000)
 
-object decompress(unsigned int c)
+object decompress(uintptr_t c)
 // read a compressed Euphoria object
 // if c is set, then c is not <= 248    
 {
@@ -76,7 +76,7 @@ object decompress(unsigned int c)
 			len = *string_ptr++;
 		}
 		else {
-			len = *(unsigned int *)string_ptr;
+			len = *(uint32_t *)string_ptr;
 			string_ptr += 4;
 		}
 		s = NewS1(len);
