@@ -64,7 +64,7 @@ static double next_task_id = 1.0;
 /*********************/
 
 #include "alldefs.h"
-static void init_task( int tx );
+static void init_task( intptr_t tx );
 static void run_current_task( int task );
 
 /*********************/
@@ -1030,8 +1030,8 @@ void wait_for_task( int task ){
  * calling the task's procedure.
  */
 void *start_task( void *task ){
-	wait_for_task( (int) task );
-	call_task( tcb[(int)task].rid, tcb[(int)task].args );
+	wait_for_task( (intptr_t) task );
+	call_task( tcb[(intptr_t)task].rid, tcb[(intptr_t)task].args );
 	return task;
 }
 
@@ -1039,7 +1039,7 @@ void *start_task( void *task ){
  * Creates the thread where the new task will run.
  */
 
-static void init_task( int tx ){
+static void init_task( intptr_t tx ){
 	int ret;
 	ret = pthread_create( &tcb[tx].impl.translated.task, NULL, &start_task, (void*)tx );
 	// TODO error handling

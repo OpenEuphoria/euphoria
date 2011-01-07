@@ -220,7 +220,7 @@ struct replace_block {
 typedef struct replace_block *replace_ptr;
 
 int wingetch();
-object call_c();
+object call_c(int,object,object);
 object Command_Line();
 void show_console();
 object Dpower();
@@ -248,7 +248,7 @@ object memory_set(object d, object v, object n);
 object memory_copy(object d, object s, object n);
 object EOpen(object, object, object);
 void EClose(object);
-int EPrintf(object, object, object);
+object EPrintf(object, object, object);
 void EPuts(object, object);
 void Concat(object *, object, object);
 void Concat_N(object *, object *, int);
@@ -263,21 +263,22 @@ object e_floor(object);
 object DoubleToInt(object);
 object machine(object, object);
 object Repeat(object, object);
-void RepeatElem(object, object, object);
+void RepeatElem(object*, object, int);
 object SequenceCopy(s1_ptr);
 object power(object, object);
 object EGets(object);
 void shift_args(int, char**);
-int NewString(char *);
+object NewString(char *);
 #ifdef __GNUC__
 #if !defined(EMINGW) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
 char *malloc(size_t);
 #endif
 #endif
+void setran();
 void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
 				int cps, int clk);
 void exit(int);
-int CRoutineId(int, int, int);
+int CRoutineId(int, int, object);
 int e_sqrt(int);
 int e_arctan(int);
 void AssignSlice(object, object, object);
@@ -292,7 +293,7 @@ void RTFatal(char *);
 char *TransAlloc(unsigned long);
 
 // be_decompress:
-object decompress(unsigned int c);
+object decompress(uintptr_t c);
 
 // be_runtime:
 extern void *xstdin;
@@ -315,6 +316,7 @@ object system_exec_call(object command, object wait);
 s1_ptr Copy_elements(int start,s1_ptr source, int replace );
 object Insert(object a,object b,int pos);
 object calc_hash(object a, object b);
+object Dor_bits(d_ptr a, d_ptr b);
 object Dxor_bits(d_ptr a, d_ptr b);
 object not_bits(object a);
 object Date();

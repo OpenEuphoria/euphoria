@@ -36,13 +36,17 @@
    since that's what most objects are. */
 #undef MININT
 
+#define MININT32     (intptr_t) 0xC0000000L
+#define MAXINT32     (intptr_t) 0x3FFFFFFFL
+
+
 #if INTPTR_MAX == INT32_MAX
 
 #define DBL_MASK     (uintptr_t)0xA0000000L
 #define SEQ_MASK     (uintptr_t)0x80000000L
 #define DS_MASK      (uintptr_t)0xE0000000L
-#define MININT       (intptr_t) 0xC0000000L
-#define MAXINT       (intptr_t) 0x3FFFFFFFL
+#define MININT       MININT32
+#define MAXINT       MAXINT32
 #define NOVALUE      (intptr_t) 0xbfffffffL
 #define TOO_BIG_INT  (intptr_t) 0x40000000L
 #define HIGH_BITS    (intptr_t) 0xC0000000L
@@ -155,9 +159,9 @@ struct replace_block {
 
 
 /* MACROS */
-#define MAKE_DBL(x) ( (object) (((uintptr_t)(x) >> 3) + DBL_MASK) )
+#define MAKE_DBL(x) ( (object) (((uintptr_t)(x) >> 3) | DBL_MASK) )
 #define DBL_PTR(ob) ( (d_ptr)  (((uintptr_t)(ob)) << 3) )
-#define MAKE_SEQ(x) ( (object) (((uintptr_t)(x) >> 3) + SEQ_MASK) )
+#define MAKE_SEQ(x) ( (object) (((uintptr_t)(x) >> 3) | SEQ_MASK) )
 #define SEQ_PTR(ob) ( (s1_ptr) (((uintptr_t)(ob)) << 3) )
 
 /* ref a double or a sequence (both need same 3 bit shift) */
@@ -197,7 +201,7 @@ struct file_info {
 };
 
 struct arg_info {
-	int (*address)();     // pointer to C function
+	intptr_t (*address)();// pointer to C function
 	s1_ptr name;          // name of routine (for diagnostics)
 	s1_ptr arg_size;      // s1_ptr of sequence of argument sizes
 	object return_size;   // atom or sequence for return value size

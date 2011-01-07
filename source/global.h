@@ -161,7 +161,7 @@ typedef int (*FARPROC)();
 #  define LRESULT long
 #  if !defined(EMINGW)
 #    define O_TEXT 0
-#    define HINSTANCE int
+#    define HINSTANCE void*
 #  endif
 struct videoconfig {
 	int monitor;

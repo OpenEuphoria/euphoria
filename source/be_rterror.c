@@ -1093,7 +1093,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 // msg is error message or NULL
 // s_ptr is symbol involved in error
 {
-	int *new_pc;
+	intptr_t *new_pc;
 	symtab_ptr current_proc;
 	
 	int levels, skipping, dash_count, i, task, show_message;
@@ -1179,7 +1179,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 			// unwind the stack for this task
 			
 			expr_top -= 2;
-			new_pc = (int *)*expr_top;
+			new_pc = (intptr_t *)*expr_top;
 			
 			if (current_proc->u.subp.saved_privates != NULL) {
 				// called recursively or multiple tasks - restore privates
@@ -1187,7 +1187,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				restore_privates(current_proc);
 			}
 			
-			if (*new_pc == (int)opcode(CALL_BACK_RETURN)) {
+			if (*new_pc == (intptr_t)opcode(CALL_BACK_RETURN)) {
 				// we're in a callback routine
 				if (crash_count > 0) {
 					copy_string(TempBuff, "\n^^^ called to handle run-time crash\n", TEMP_SIZE);
@@ -1203,7 +1203,7 @@ static void TraceBack(char *msg, symtab_ptr s_ptr)
 				if (expr_top <= expr_stack+3)
 					break;
 				expr_top -= 2;
-				new_pc = (int *)*expr_top;
+				new_pc = (intptr_t *)*expr_top;
 			}
 
 			current_proc = Locate(new_pc - 1);

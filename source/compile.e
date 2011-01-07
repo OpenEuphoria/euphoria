@@ -1265,9 +1265,9 @@ procedure main_temps()
 		sp = SymTab[sp][S_NEXT]
 	end while
 	if SymTab[TopLevelSub][S_LHS_SUBS2] then
-		c_stmt0("int _0, _1, _2, _3;\n\n")
+		c_stmt0("object _0, _1, _2, _3;\n\n")
 	else
-		c_stmt0("int _0, _1, _2;\n\n")
+		c_stmt0("object _0, _1, _2;\n\n")
 	end if
 	Initializing = FALSE
 end procedure
@@ -2098,8 +2098,8 @@ procedure arg_list(integer i)
 -- list of arguments for CALL_PROC / CALL_FUNC
 	indent += 20
 	for k = 1 to i do
-		c_stmt0("*(int *)(_2+")
-		c_printf("%d)", k * 4)
+		c_stmt0("*( ((intptr_t *)_2) + ")
+		c_printf("%d)", k )
 		if k != i then
 			c_puts(", ")
 		end if
@@ -2384,7 +2384,7 @@ procedure opRHS_SUBS()
 
 	switch op do
 		case PASSIGN_OP_SUBS then
-			c_stmt0("_2 = (object)SEQ_PTR(*(int *)_3);\n")
+			c_stmt0("_2 = (object)SEQ_PTR(*(intptr_t *)_3);\n")
 		case ASSIGN_OP_SUBS then
 			c_stmt("_2 = (object)SEQ_PTR(@);\n", Code[pc+1])
 			-- element type of pc[1] is changed
@@ -2780,10 +2780,10 @@ procedure opASSIGN_SUBS()
 	-- check for uniqueness
 	if opcode = PASSIGN_SUBS then
 		-- sequence is pointed-to from a temp
-		c_stmt0("_2 = (object)SEQ_PTR(*(int *)_3);\n")
+		c_stmt0("_2 = (object)SEQ_PTR(*(intptr_t *)_3);\n")
 		c_stmt0("if (!UNIQUE(_2)) {\n")
 		c_stmt0("_2 = (object)SequenceCopy((s1_ptr)_2);\n")
-		c_stmt0("*(int *)_3 = MAKE_SEQ(_2);\n")
+		c_stmt0("*(intptr_t *)_3 = MAKE_SEQ(_2);\n")
 		c_stmt0("}\n")
 
 	else
@@ -2816,11 +2816,11 @@ procedure opASSIGN_SUBS()
 		-- ... we set element type to TYPE_OBJECT
 		-- in ASSIGN_OP_SUBS above
 
-		c_stmt0("_1 = *(int *)_2;\n")
+		c_stmt0("_1 = *(intptr_t *)_2;\n")
 		if Code[pc+1] = rhs then
-			c_stmt0("*(int *)_2 = _0;\n")
+			c_stmt0("*(intptr_t *)_2 = _0;\n")
 		else
-			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
+			c_stmt("*(intptr_t *)_2 = @;\n", Code[pc+3])
 		end if
 		if is_temp( Code[pc+3] ) then
 			c_stmt("if( _1 != @ ){\n", Code[pc+3] )
@@ -2834,13 +2834,13 @@ procedure opASSIGN_SUBS()
 
 	else
 		if SeqElem(Code[pc+1]) != TYPE_INTEGER then
-			c_stmt0("_1 = *(int *)_2;\n")
+			c_stmt0("_1 = *(intptr_t *)_2;\n")
 		end if
 
 		if Code[pc+1] = rhs then
-			c_stmt0("*(int *)_2 = _0;")
+			c_stmt0("*(intptr_t *)_2 = _0;")
 		else
-			c_stmt("*(int *)_2 = @;\n", Code[pc+3])
+			c_stmt("*(intptr_t *)_2 = @;\n", Code[pc+3])
 		end if
 
 		if is_temp( Code[pc+3] ) then
@@ -3068,21 +3068,12 @@ procedure opRIGHT_BRACE_N()
 					CRef(t)
 				end if
 				while n >= 0 do
-					c_stmt0("*((object *)(_2")
-					c_printf("+%d", (i-n)*4)
-					c_puts("))")
-					temp_indent = -indent
-					c_stmt(" = @;\n", t)
+					c_stmt( sprintf( "((intptr_t*)_2)[%d] = @;\n", i-n), t )
 					n -= 1
 				end while
 			else
 				-- 8 or more of the same in a row
-				c_stmt0("RepeatElem(_2")  -- does Refs too
-				temp_indent = -indent
-				c_printf("+%d,", (i-n)*4)
-				temp_indent = -indent
-				c_stmt(" @, ", t)
-				c_printf("%d);\n", n+1)
+				c_stmt( sprintf( "RepeatElem( (((intptr_t*) _2)+ %d), @, %d );\n", { i-n, n+1 } ), t )
 			end if
 			n = 0
 		end if
@@ -3112,10 +3103,10 @@ procedure opRIGHT_BRACE_2()
 	CSaveStr("_0", Code[pc+3], Code[pc+1], Code[pc+2], 0)
 	c_stmt0("_1 = NewS1(2);\n")
 	c_stmt0("_2 = (object)((s1_ptr)_1)->base;\n")
-	c_stmt("((int *)_2)[1] = @;\n", Code[pc+2])
+	c_stmt("((intptr_t *)_2)[1] = @;\n", Code[pc+2])
 
 	SymTab[Code[pc+2]][S_ONE_REF] = FALSE
-	c_stmt("((int *)_2)[2] = @;\n", Code[pc+1])
+	c_stmt("((intptr_t *)_2)[2] = @;\n", Code[pc+1])
 
 	SymTab[Code[pc+1]][S_ONE_REF] = FALSE
 	c_stmt("@ = MAKE_SEQ(_1);\n", Code[pc+3])
@@ -3322,7 +3313,7 @@ procedure opASSIGN_OP_SLICE()
 	if opcode = PASSIGN_OP_SLICE then
 		-- adjust etype of Code[pc+1]? - no, not the top level
 		c_stmt0("assign_slice_seq = (s1_ptr *)_3;\n")
-		c_stmt("RHS_Slice(*(int *)_3, @, @);\n",
+		c_stmt("RHS_Slice(*(intptr_t *)_3, @, @);\n",
 			   {Code[pc+2], Code[pc+3]})
 
 	else
@@ -4415,32 +4406,31 @@ procedure opCALL_PROC()
 			end if
 			if len = NOVALUE or len = i then
 				for k = 1 to i do
-					c_stmt0("Ref(*(int *)(_2+")
-					c_printf("%d));\n", k * 4)
+					c_stmt0( sprintf( "Ref( *(( (intptr_t*)_2) + %d) );\n", k ) )
 				end for
 
 				if TWINDOWS and dll_option then
 					c_stmt("if (_00[@].convention) {\n", Code[pc+1])
 					if Code[pc] = CALL_FUNC then
-						c_stmt0("_1 = (*(int (__stdcall *)())_0)(\n")
+						c_stmt0("_1 = (*(intptr_t (__stdcall *)())_0)(\n")
 						arg_list(i)
 						c_stmt0("}\n")
 						c_stmt0("else {\n")
-						c_stmt0("_1 = (*(int (*)())_0)(\n")
+						c_stmt0("_1 = (*(intptr_t (*)())_0)(\n")
 					else
-						c_stmt0("(*(int (__stdcall *)())_0)(\n")
+						c_stmt0("(*(intptr_t (__stdcall *)())_0)(\n")
 						arg_list(i)
 						c_stmt0("}\n")
 						c_stmt0("else {\n")
-						c_stmt0("(*(int (*)())_0)(\n")
+						c_stmt0("(*(intptr_t (*)())_0)(\n")
 					end if
 					arg_list(i)
 					c_stmt0("}\n")
 				else
 					if Code[pc] = CALL_FUNC then
-						c_stmt0("_1 = (*(int (*)())_0)(\n")
+						c_stmt0("_1 = (*(intptr_t (*)())_0)(\n")
 					else
-						c_stmt0("(*(int (*)())_0)(\n")
+						c_stmt0("(*(intptr_t (*)())_0)(\n")
 					end if
 					arg_list(i)
 				end if
@@ -5655,7 +5645,7 @@ procedure opPOKE()
 		c_stmt0("_1 = (object)((s1_ptr)_1)->base;\n")
 
 		c_stmt0("while (1) {\n") -- FAST WHILE
-		c_stmt0("_1 += 4;\n")
+		c_stmt0("_1 += sizeof(object);\n")
 		c_stmt0("_2 = *((object *)_1);\n")
 		c_stmt0("if (IS_ATOM_INT(_2)) {\n")
 		switch op do
@@ -5664,7 +5654,7 @@ procedure opPOKE()
 			case POKE8 then
 				c_stmt0("*poke8_addr++ = (uint64_t)_2;\n")
 			case POKE4 then
-				c_stmt0("*(int *)poke4_addr++ = (uint32_t)_2;\n")
+				c_stmt0("*poke4_addr++ = (uint32_t)_2;\n")
 			case POKE2 then
 				c_stmt0("*poke2_addr++ = (uint16_t)_2;\n")
 			case else
@@ -7321,7 +7311,6 @@ procedure BackEnd(atom ignore)
 
 	c_stmt0("void init_literal()\n{\n")
 	c_stmt0("extern char *string_ptr;\n")
-	c_stmt0("extern object decompress(unsigned int c);\n" )
 	c_stmt0("extern double sqrt();\n")
 	c_stmt0("setran(); /* initialize random generator seeds */\n")
 

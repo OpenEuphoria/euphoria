@@ -128,7 +128,7 @@ struct arg_info *c_routine = NULL; /* array of c_routine structs */
 int allow_break = TRUE;       /* allow control-c/control-break to kill prog */
 int control_c_count = 0;      /* number of control-c/control-break since
 								 last call */
-int *profile_sample = NULL;
+intptr_t *profile_sample = NULL;
 volatile int sample_next = 0;
 
 int line_max; /* current number of text lines on screen */
@@ -1746,7 +1746,7 @@ DWORD WINAPI WinTimer(LPVOID lpParameter)
 			Sleep((((double)(lcount.QuadPart-ncount.QuadPart))/((double)freq.QuadPart))*1000.0);
 		}
 		if (Executing && ProfileOn) {
-			profile_sample[sample_next++] = (int)tpc;
+			profile_sample[sample_next++] = tpc;
 		}
 	}
 	return 0;
@@ -1887,8 +1887,8 @@ object OpenDll(object x)
 	s1_ptr dll_ptr;
 	static char message[81];
 	char *dll_string;
-	HINSTANCE lib;
 	int message_len;
+	HINSTANCE lib;
 
 	/* x will be a sequence if called via open_dll() */
 
@@ -1927,7 +1927,7 @@ object OpenDll(object x)
 #else
 	// Linux
 
-	lib = (HINSTANCE)dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
+	lib = dlopen(dll_string, RTLD_LAZY | RTLD_GLOBAL);
 
 #endif
 	return MAKE_UINT(lib);
@@ -1936,7 +1936,9 @@ object OpenDll(object x)
 object DefineCVar(object x)
 /* Get the address of a C variable, or return -1 */
 {
+
 	HINSTANCE lib;
+
 	object variable_name;
 	s1_ptr variable_ptr;
 	char *variable_string;
@@ -1966,11 +1968,11 @@ object DefineCVar(object x)
 		return ATOM_M1;
 #else
 	// Linux
-	variable_address = (char *)dlsym((void *)lib, variable_string);
+	variable_address = (char *)dlsym( lib, variable_string);
 	if (dlerror() != NULL)
 		return ATOM_M1;
 #endif
-	addr = (unsigned)variable_address;
+	addr = (uintptr_t)variable_address;
 	return MAKE_UINT(addr);
 }
 
@@ -2060,7 +2062,7 @@ object DefineC(object x)
 
 #else
 #ifdef EUNIX
-		proc_address = (int (*)())dlsym((void *)lib, routine_string);
+		proc_address = (intptr_t (*)())dlsym((void *)lib, routine_string);
 		if (dlerror() != NULL)
 			return ATOM_M1;
 #endif
@@ -2374,7 +2376,7 @@ object CallBack(object x)
 }
 
 uintptr_t internal_general_call_back(
-		  int cb_routine,
+		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
@@ -2620,7 +2622,7 @@ object start_backend(object x)
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	fe.misc = (intptr_t *)   get_pos_int(w, *(x_ptr->base+3));
 	fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
 	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
 	fe.switches = x_ptr->base[6];

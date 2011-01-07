@@ -4,6 +4,7 @@
 #include "global.h"
 #include "execute.h"
 #include "symtab.h"
+#include <stdint.h>
 
 #ifndef ERUNTIME
 object start_backend(object x);
@@ -36,7 +37,7 @@ extern int *crash_list;       // list of routines to call when there's a crash
 extern int crash_routines;    // number of routines
 extern int crash_size;        // space allocated for crash_list
 
-extern int *profile_sample;
+extern intptr_t *profile_sample;
 extern volatile int sample_next;
 
 extern int first_mouse;
@@ -75,18 +76,8 @@ object Wrap(object x);
 
 IFILE long_iopen(char *name, char *mode);
 
-uintptr_t general_call_back(
-#ifdef ERUNTIME
-		  int cb_routine,
-#else
-		  symtab_ptr cb_routine,
-#endif
-						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
-						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
-						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);
-
 uintptr_t internal_general_call_back(
-		  int cb_routine,
+		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9);

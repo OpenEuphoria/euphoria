@@ -34,6 +34,8 @@
  */           
 
 #include <stdio.h>
+#include <stdint.h>
+
 #ifdef EWINDOWS
 #include <windows.h>
 #endif
@@ -85,7 +87,8 @@ typedef union {
 	int intval;
 } float_arg;
 
-#if !defined(EMINGW) && !defined(EOSX) && !defined(EMSVC)
+#if !defined(EMINGW) && !defined(EOSX) && !defined(EMSVC) && (INTPTR_MAX == INT32_MAX)
+// 32-bit only
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
@@ -346,7 +349,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			return 0; // unknown function return type
 	}
 }
-#else //EMINGW
+#else //EMINGW, 64-bit
 /*******************/
 /* Local variables */
 /*******************/
@@ -683,24 +686,24 @@ object call_c(int func, object proc_ad, object arg_list)
 	s1_ptr arg_list_ptr, arg_size_ptr;
 	object_ptr next_arg_ptr, next_size_ptr;
 	object next_arg, next_size;
-	long iresult, i;
+	intptr_t iresult, i;
 	double_arg dbl_arg;
 	double dresult;
 	float_arg flt_arg;
 	float fresult;
-	unsigned long size;
-	long proc_index;
-	long cdecl_call;
-	long long_proc_address;
-	unsigned return_type;
+	uintptr_t size;
+	intptr_t proc_index;
+	int cdecl_call;
+	intptr_t long_proc_address;
+	uintptr_t return_type;
 	char NameBuff[100];
-	unsigned long arg;
+	uint64_t arg;
 
-	long arg_op[16];
-	long arg_len;
-	long arg_i = 0;
-	long is_double, is_float;
-
+	int64_t arg_op[16];
+	intptr_t arg_len;
+	intptr_t arg_i = 0;
+	int is_double, is_float;
+	
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
 	if (proc_index >= (unsigned)c_routine_next) {
@@ -708,7 +711,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		RTFatal(TempBuff);
 	}
 	
-	long_proc_address = (long)(c_routine[proc_index].address);
+	long_proc_address = (intptr_t)(c_routine[proc_index].address);
 #if defined(EWINDOWS) && !defined(EWATCOM)
 	cdecl_call = c_routine[proc_index].convention;
 #else
@@ -763,7 +766,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
 		else if (IS_ATOM(next_size))
-			size = (unsigned long)DBL_PTR(next_size)->dbl;
+			size = (uintptr_t)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -789,15 +792,45 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				arg_op[arg_i++] = (unsigned long)flt_arg.intval;
+				arg_op[arg_i++] = (uintptr_t)flt_arg.intval;
+			}
+		}
+		else if( size == C_POINTER ){
+			if (IS_ATOM_INT(next_arg)) {
+				arg = next_arg;
+				arg_op[arg_i++] = arg;
+			}
+			else if (IS_ATOM(next_arg)) {
+				// atoms are rounded to integers
+				
+				arg = (uint64_t)(uintptr_t)DBL_PTR(next_arg)->dbl; //correct
+				// if it's a -ve f.p. number, Watcom converts it to long and
+				// then to unsigned long. This is exactly what we want.
+				// Works with the others too. 
+				arg_op[arg_i++] = arg;
+			}
+		}
+		else if( size == C_LONGLONG ){
+			if (IS_ATOM_INT(next_arg)) {
+				arg = next_arg;
+				arg_op[arg_i++] = arg;
+			}
+			else if (IS_ATOM(next_arg)) {
+				// atoms are rounded to integers
+				
+				arg = (uint64_t)DBL_PTR(next_arg)->dbl; //correct
+				// if it's a -ve f.p. number, Watcom converts it to long and
+				// then to unsigned long. This is exactly what we want.
+				// Works with the others too. 
+				arg_op[arg_i++] = arg;
 			}
 		}
 		else {
-			/* push 4-byte longeger */
+			/* push ptr size integer */
 			if (size >= E_INTEGER) {
 				if (IS_ATOM_INT(next_arg)) {
 					if (size == E_SEQUENCE)
-						RTFatal("passing an longeger where a sequence is required");
+						RTFatal("passing an integer where a sequence is required");
 				}
 				else {
 					if (IS_SEQUENCE(next_arg)) {
@@ -810,17 +843,17 @@ object call_c(int func, object proc_ad, object arg_list)
 					}
 					RefDS(next_arg);
 				}
-				arg = next_arg;
+				arg = (uintptr_t) next_arg;
 				arg_op[arg_i++] = arg;
 			} 
 			else if (IS_ATOM_INT(next_arg)) {
-				arg = next_arg;
+				arg = (uintptr_t) next_arg;
 				arg_op[arg_i++] = arg;
 			}
 			else if (IS_ATOM(next_arg)) {
-				// atoms are rounded to longegers
+				// atoms are rounded to integers
 				
-				arg = (unsigned long)DBL_PTR(next_arg)->dbl; //correct
+				arg = (uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
@@ -878,11 +911,11 @@ object call_c(int func, object proc_ad, object arg_list)
 			// check if unsigned result is required 
 			if ((return_type & C_TYPE) == 0x02000000) {
 				// unsigned longeger result
-				if ((unsigned)iresult <= (unsigned)MAXINT) {
+				if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
 					return iresult;
 				}
 				else
-					return NewDouble((double)(unsigned)iresult);
+					return NewDouble((double)(uintptr_t)iresult);
 			}
 			else {
 				// signed longeger result

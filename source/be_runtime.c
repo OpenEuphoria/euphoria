@@ -1338,12 +1338,12 @@ void udt_clean_rt( object o, int rid ){
  */
 void udt_clean( object o, int rid ){
 
-	int *code;
+	intptr_t *code;
 	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
 	s1_ptr s;
 	object args;
 	int pre_ref;
-	int *save_tpc;
+	intptr_t *save_tpc;
 
 	// Need to make sure that s is 8-byte aligned
 	s = (s1_ptr)( ((object)&seq[7])  & ~7 );
@@ -1460,6 +1460,7 @@ void de_reference(s1_ptr a)
 {
 	object_ptr p;
 	object t;
+	intptr_t temp;
 
 #ifdef EXTRA_CHECK
 	s1_ptr a1;
@@ -1517,11 +1518,12 @@ void de_reference(s1_ptr a)
 
 				if (t == NOVALUE) {
 					// end of sequence: back up a level
-					p = (object_ptr)a->length;
-					t = (object)a->ref;
+					
+					p = (object_ptr)a->cleanup;
+					t = (object) *(object_ptr)&(a->ref);
 					EFree((char *)a);
 					a = (s1_ptr)t;
-					if (a == NULL)
+					if (((intptr_t) a & (intptr_t) 0xffffffff) == NULL)
 						break;  // it's the top-level sequence - quit
 				}
 				else if (--(DBL_PTR(t)->ref) == 0) {
@@ -1542,8 +1544,11 @@ void de_reference(s1_ptr a)
 						if( ((s1_ptr)t)->cleanup != 0 ){
 							cleanup_sequence( (s1_ptr)t );
 						}
-						((s1_ptr)t)->ref = (int)a;
-						((s1_ptr)t)->length = (int)p;
+						temp  = (intptr_t) &((s1_ptr)t)->ref;
+						*(intptr_t*)temp =  (intptr_t) a;
+						
+						temp  = (intptr_t) &((s1_ptr)t)->cleanup;
+						*(intptr_t*) temp = (intptr_t) p;
 						a = (s1_ptr)t;
 						p = a->base;
 					}
@@ -2874,8 +2879,8 @@ object calc_hash(object a, object b)
 		double ieee_double;
 		struct dbllong
 		{
-			unsigned int a;
-			unsigned int b;
+			uint32_t a;
+			uint32_t b;
 		} ieee_uint;
 		unsigned char ieee_char[8];
 	} tf, seeder, prev;
@@ -2915,9 +2920,9 @@ object calc_hash(object a, object b)
 			else {
 				tf.ieee_double = 196069.10 + (double)(SEQ_PTR(a)->length);
 			}
-			tf.ieee_uint.a &= MAXINT;
+			tf.ieee_uint.a &= MAXINT32;
 			if (tf.ieee_uint.a == 0) {
-				tf.ieee_uint.a = MAXINT;
+				tf.ieee_uint.a = MAXINT32;
 			}
 
 			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
@@ -5032,12 +5037,12 @@ void match_samples()
 		sample_overflow = TRUE;
 	total_samples += sample_next;  // volatile
 	for (i = 0; i < sample_next; i++) {
-		proc = Locate((int *)profile_sample[i]);
+		proc = Locate((intptr_t *)profile_sample[i]);
 		if (proc == NULL) {
 			bad_samples++;
 		}
 		else {
-			gline = FindLine((int *)profile_sample[i], proc);
+			gline = FindLine((intptr_t *)profile_sample[i], proc);
 
 			if (gline == 0) {
 				bad_samples++;
@@ -5139,9 +5144,9 @@ object make_atom(uintptr_t c)
 		return NewDouble((double)c);
 }
 
-unsigned general_call_back(
+uintptr_t general_call_back(
 #ifdef ERUNTIME
-		  int cb_routine,
+		  intptr_t cb_routine,
 #else
 		  symtab_ptr cb_routine,
 #endif
@@ -5263,8 +5268,8 @@ unsigned general_call_back(
 
 #else
 	/* Interpreter: set up a PROC opcode call */
-	code[0] = (int *)opcode(PROC);
-	code[1] = (int *)cb_routine;  // symtab_ptr of Euphoria routine
+	code[0] = (intptr_t *)opcode(PROC);
+	code[1] = (intptr_t *)cb_routine;  // symtab_ptr of Euphoria routine
 
 	num_args = cb_routine->u.subp.num_args;
 	if (num_args >= 1) {
@@ -5324,7 +5329,7 @@ unsigned general_call_back(
 	// at all to the main Euphoria code.
 	save_tpc = tpc;
 
-	do_exec((int *)code);  // execute routine without setting up new stack
+	do_exec((intptr_t *)code);  // execute routine without setting up new stack
 
 	tpc = save_tpc;
 	expr_top -= 2;

@@ -2420,7 +2420,7 @@ void do_exec(intptr_t *start_pc)
 				tpc = pc;
 				AssignSlice(*(object_ptr)pc[2],
 							*(object_ptr)pc[3],  /* 3 args max for good code */
-							(s1_ptr)*(object_ptr)pc[4]);
+							*(object_ptr)pc[4]);
 				thread5();
 				BREAK;
 
