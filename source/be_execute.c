@@ -4568,7 +4568,9 @@ void do_exec(intptr_t *start_pc)
 				inc3pc();
 				thread();
 				BREAK;
-
+#if INT64_MAX == INTPTR_MAX
+			case L_POKE_POINTER:
+#endif
 			case L_POKE8:
 				deprintf("case L_POKE8:");
 				a = *(object_ptr)pc[1];   /* address */
@@ -4579,7 +4581,9 @@ void do_exec(intptr_t *start_pc)
 				thread();
 				BREAK;
 				
+#if INT32_MAX == INTPTR_MAX
 			case L_POKE_POINTER:
+#endif
 			case L_POKE4:
 			deprintf("case L_POKE4:");
 				a = *(object_ptr)pc[1];   /* address */

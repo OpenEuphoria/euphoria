@@ -50,7 +50,6 @@ test_equal( "poke/peek_pointer 0x1234 & 0x5678", 0x1234 & 0x5678, peek_pointer( 
 
 -- SIZEOF tests
 test_equal( "sizeof int", 4, sizeof( C_INT ) )
-test_equal( "sizeof ptr", 4, sizeof( C_POINTER ) )
 test_equal( "sizeof dbl", 8, sizeof( C_DOUBLE ) )
 
 poke( p, "abc" )
