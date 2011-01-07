@@ -1008,7 +1008,7 @@ void WINAPI exec_task( void *task ){
 	call_task( t->rid, t->args );
 }
 
-static void init_task( int tx ){
+static void init_task( intptr_t tx ){
 	// fibers...
 	tcb[tx].impl.translated.task = (TASK_HANDLE) CreateFiber( 0, exec_task, (void *)tx );
 }

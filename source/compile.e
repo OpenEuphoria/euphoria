@@ -7056,14 +7056,16 @@ procedure BackEnd(atom ignore)
 
 	version()
 
+	if TWINDOWS then
+		-- this has to be included before stdint.h (in euphoria.h) at least on Watcom
+		c_puts("#include <Windows.h>\n")
+	end if
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"include/euphoria.h\"\n")
 	c_puts("#include \"main-.h\"\n\n")
 
 	if TUNIX then
 		c_puts("#include <unistd.h>\n")
-	elsif TWINDOWS then
-		c_puts("#include <Windows.h>\n")
 	end if
 	c_puts("\n\n")
 	c_puts("int Argc;\n")
