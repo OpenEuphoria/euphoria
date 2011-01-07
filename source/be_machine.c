@@ -2363,7 +2363,7 @@ object CallBack(object x)
 #ifdef ERUNTIME
 			*(intptr_t *)(copy_addr+i) = routine_id;
 #else
-			*(intptr_t *)(copy_addr+i) = e_routine[routine_id];
+			*(intptr_t *)(copy_addr+i) = (intptr_t)e_routine[routine_id];
 #endif
 			not_patched = 0;
 			break;
