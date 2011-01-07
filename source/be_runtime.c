@@ -1336,7 +1336,7 @@ void udt_clean_rt( object o, int rid ){
 /**
  * Calls the specified routine id for cleaning up the UDT object.
  */
-void udt_clean( object o, int rid ){
+void udt_clean( object o, uintptr_t rid ){
 
 	intptr_t *code;
 	char seq[8+2*sizeof(object)+sizeof(struct s1)]; // seq struct on the stack
@@ -1350,8 +1350,8 @@ void udt_clean( object o, int rid ){
 	s->base = (((object_ptr)(s+1))-1);
 	s->ref = 2;
 	s->length = 1;
+	s->postfill = 0;
 	s->cleanup = 0;
-	s->base[0] = 0;
 	s->base[1] = o;
 	s->base[2] = NOVALUE;
 
@@ -1523,7 +1523,7 @@ void de_reference(s1_ptr a)
 					t = (object) *(object_ptr)&(a->ref);
 					EFree((char *)a);
 					a = (s1_ptr)t;
-					if (((intptr_t) a & (intptr_t) 0xffffffff) == NULL)
+					if ((((intptr_t) a) & ((intptr_t) 0xffffffff)) == 0)
 						break;  // it's the top-level sequence - quit
 				}
 				else if (--(DBL_PTR(t)->ref) == 0) {
