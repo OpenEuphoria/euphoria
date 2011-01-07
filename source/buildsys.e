@@ -5,6 +5,7 @@ elsedef
 end ifdef
 
 include std/datetime.e
+include std/dll.e
 include std/filesys.e
 include std/io.e
 include std/regex.e
@@ -273,8 +274,8 @@ function setup_build()
 				c_flags &= " -fPIC"
 			end if
 
-			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m32 -I%s -ffast-math",
-				{ get_eucompiledir() })
+			c_flags &= sprintf(" -c -w -fsigned-char -O2 -m%d -I%s -ffast-math",
+				{ sizeof( C_POINTER ) * 8, get_eucompiledir() })
 
 			if TWINDOWS then
 				c_flags &= " -mno-cygwin"
@@ -284,7 +285,7 @@ function setup_build()
 				end if
 			end if
 
-			l_flags = user_library & " -m32 "
+			l_flags = sprintf( "%s -m%d", { user_library, sizeof( C_POINTER ) * 8 })
 
 			if dll_option then
 				l_flags &= " -shared "
