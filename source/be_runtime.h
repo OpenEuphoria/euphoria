@@ -213,6 +213,14 @@ int memcopy( void *dest, size_t avail, void *src, size_t len);
 
 object eu_sizeof( object data_type );
 
+#if INTPTR_MAX == INT32_MAX
+#define CALLBACK_POINTER 0x12345678
+
+#elif INTPTR_MAX == INT64_MAX
+#define CALLBACK_POINTER 0x1234567812345678
+#endif
+
+
 #ifdef EOSX
 uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,

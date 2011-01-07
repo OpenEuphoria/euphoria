@@ -68,7 +68,7 @@
 #endif
 
 #ifdef EWATCOM
-void wcpush(long X);
+void wcpush(intptr_t X);
 #define push() wcpush(last_offset);
 #define pop()
 #pragma aux wcpush = \
@@ -356,149 +356,149 @@ object call_c(int func, object proc_ad, object arg_list)
 
 /* for c_proc */
 typedef void (__stdcall *proc0)();
-typedef void (__stdcall *proc1)(long);
-typedef void (__stdcall *proc2)(long,long);
-typedef void (__stdcall *proc3)(long,long,long);
-typedef void (__stdcall *proc4)(long,long,long,long);
-typedef void (__stdcall *proc5)(long,long,long,long,long);
-typedef void (__stdcall *proc6)(long,long,long,long,long,long);
-typedef void (__stdcall *proc7)(long,long,long,long,long,long,long);
-typedef void (__stdcall *proc8)(long,long,long,long,long,long,long,long);
-typedef void (__stdcall *proc9)(long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procA)(long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__stdcall *procF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__stdcall *proc1)(intptr_t);
+typedef void (__stdcall *proc2)(intptr_t,intptr_t);
+typedef void (__stdcall *proc3)(intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *proc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__stdcall *procF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
-typedef long (__stdcall *func0)();
-typedef long (__stdcall *func1)(long);
-typedef long (__stdcall *func2)(long,long);
-typedef long (__stdcall *func3)(long,long,long);
-typedef long (__stdcall *func4)(long,long,long,long);
-typedef long (__stdcall *func5)(long,long,long,long,long);
-typedef long (__stdcall *func6)(long,long,long,long,long,long);
-typedef long (__stdcall *func7)(long,long,long,long,long,long,long);
-typedef long (__stdcall *func8)(long,long,long,long,long,long,long,long);
-typedef long (__stdcall *func9)(long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcA)(long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__stdcall *funcF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef intptr_t (__stdcall *func0)();
+typedef intptr_t (__stdcall *func1)(intptr_t);
+typedef intptr_t (__stdcall *func2)(intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func3)(intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *func9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__stdcall *funcF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_proc */
 typedef void (__cdecl *cdproc0)();
-typedef void (__cdecl *cdproc1)(long);
-typedef void (__cdecl *cdproc2)(long,long);
-typedef void (__cdecl *cdproc3)(long,long,long);
-typedef void (__cdecl *cdproc4)(long,long,long,long);
-typedef void (__cdecl *cdproc5)(long,long,long,long,long);
-typedef void (__cdecl *cdproc6)(long,long,long,long,long,long);
-typedef void (__cdecl *cdproc7)(long,long,long,long,long,long,long);
-typedef void (__cdecl *cdproc8)(long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdproc9)(long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocA)(long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef void (__cdecl *cdprocF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef void (__cdecl *cdproc1)(intptr_t);
+typedef void (__cdecl *cdproc2)(intptr_t,intptr_t);
+typedef void (__cdecl *cdproc3)(intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdproc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef void (__cdecl *cdprocF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
-typedef long (__cdecl *cdfunc0)();
-typedef long (__cdecl *cdfunc1)(long);
-typedef long (__cdecl *cdfunc2)(long,long);
-typedef long (__cdecl *cdfunc3)(long,long,long);
-typedef long (__cdecl *cdfunc4)(long,long,long,long);
-typedef long (__cdecl *cdfunc5)(long,long,long,long,long);
-typedef long (__cdecl *cdfunc6)(long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc7)(long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc8)(long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfunc9)(long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef long (__cdecl *cdfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef intptr_t (__cdecl *cdfunc0)();
+typedef intptr_t (__cdecl *cdfunc1)(intptr_t);
+typedef intptr_t (__cdecl *cdfunc2)(intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc3)(intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef intptr_t (__cdecl *cdfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef float (__stdcall *ffunc0)();
-typedef float (__stdcall *ffunc1)(long);
-typedef float (__stdcall *ffunc2)(long,long);
-typedef float (__stdcall *ffunc3)(long,long,long);
-typedef float (__stdcall *ffunc4)(long,long,long,long);
-typedef float (__stdcall *ffunc5)(long,long,long,long,long);
-typedef float (__stdcall *ffunc6)(long,long,long,long,long,long);
-typedef float (__stdcall *ffunc7)(long,long,long,long,long,long,long);
-typedef float (__stdcall *ffunc8)(long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffunc9)(long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__stdcall *ffuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__stdcall *ffunc1)(intptr_t);
+typedef float (__stdcall *ffunc2)(intptr_t,intptr_t);
+typedef float (__stdcall *ffunc3)(intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__stdcall *ffuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef float (__cdecl *cdffunc0)();
-typedef float (__cdecl *cdffunc1)(long);
-typedef float (__cdecl *cdffunc2)(long,long);
-typedef float (__cdecl *cdffunc3)(long,long,long);
-typedef float (__cdecl *cdffunc4)(long,long,long,long);
-typedef float (__cdecl *cdffunc5)(long,long,long,long,long);
-typedef float (__cdecl *cdffunc6)(long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc7)(long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc8)(long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffunc9)(long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef float (__cdecl *cdffuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef float (__cdecl *cdffunc1)(intptr_t);
+typedef float (__cdecl *cdffunc2)(intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc3)(intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef float (__cdecl *cdffuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef double (__stdcall *dfunc0)();
-typedef double (__stdcall *dfunc1)(long);
-typedef double (__stdcall *dfunc2)(long,long);
-typedef double (__stdcall *dfunc3)(long,long,long);
-typedef double (__stdcall *dfunc4)(long,long,long,long);
-typedef double (__stdcall *dfunc5)(long,long,long,long,long);
-typedef double (__stdcall *dfunc6)(long,long,long,long,long,long);
-typedef double (__stdcall *dfunc7)(long,long,long,long,long,long,long);
-typedef double (__stdcall *dfunc8)(long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfunc9)(long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__stdcall *dfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__stdcall *dfunc1)(intptr_t);
+typedef double (__stdcall *dfunc2)(intptr_t,intptr_t);
+typedef double (__stdcall *dfunc3)(intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__stdcall *dfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
 /* for c_func */
 typedef double (__cdecl *cddfunc0)();
-typedef double (__cdecl *cddfunc1)(long);
-typedef double (__cdecl *cddfunc2)(long,long);
-typedef double (__cdecl *cddfunc3)(long,long,long);
-typedef double (__cdecl *cddfunc4)(long,long,long,long);
-typedef double (__cdecl *cddfunc5)(long,long,long,long,long);
-typedef double (__cdecl *cddfunc6)(long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc7)(long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc8)(long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfunc9)(long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncA)(long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncB)(long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncC)(long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncD)(long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncE)(long,long,long,long,long,long,long,long,long,long,long,long,long,long);
-typedef double (__cdecl *cddfuncF)(long,long,long,long,long,long,long,long,long,long,long,long,long,long,long);
+typedef double (__cdecl *cddfunc1)(intptr_t);
+typedef double (__cdecl *cddfunc2)(intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc3)(intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc4)(intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc5)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc6)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc7)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc8)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfunc9)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncA)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncB)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncC)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
+typedef double (__cdecl *cddfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
-float float_std_func(long i, long * op, long len) {
+float float_std_func(intptr_t i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((ffunc0)i)();
@@ -521,7 +521,7 @@ float float_std_func(long i, long * op, long len) {
     return 0.0;
 }
 
-float float_cdecl_func(long i, long * op, long len) {
+float float_cdecl_func(intptr_t i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cdffunc0)i)();
@@ -544,7 +544,7 @@ float float_cdecl_func(long i, long * op, long len) {
     return 0.0;
 }
 
-double double_std_func(long i, long * op, long len) {
+double double_std_func(intptr_t i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((dfunc0)i)();
@@ -567,7 +567,7 @@ double double_std_func(long i, long * op, long len) {
     return 0.0;
 }
 
-double double_cdecl_func(long i, long * op, long len) {
+double double_cdecl_func(intptr_t i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cddfunc0)i)();
@@ -590,7 +590,7 @@ double double_cdecl_func(long i, long * op, long len) {
     return 0.0;
 }
 
-void call_std_proc(long i, long * op, long len) {
+void call_std_proc(intptr_t i, long * op, long len) {
     
 	switch(len) {
 	    case 0: ((proc0)i)(); return;
@@ -612,7 +612,7 @@ void call_std_proc(long i, long * op, long len) {
 	}
 }
 
-long call_std_func(long i, long * op, long len) {
+long call_std_func(intptr_t i, long * op, long len) {
     
 	switch(len) {
 	    case 0: return ((func0)i)();
@@ -635,7 +635,7 @@ long call_std_func(long i, long * op, long len) {
     return 0;
 }
 
-void call_cdecl_proc(long i, long * op, long len) {
+void call_cdecl_proc(intptr_t i, long * op, long len) {
     
 	switch(len) {
 	    case 0: ((cdproc0)i)(); return;
@@ -657,7 +657,7 @@ void call_cdecl_proc(long i, long * op, long len) {
 	}
 }
 
-long call_cdecl_func(long i, long * op, long len) {
+long call_cdecl_func(intptr_t i, long * op, long len) {
 	switch(len) {
 	    case 0: return ((cdfunc0)i)();
 	    case 1: return ((cdfunc1)i)(op[0]);
@@ -699,7 +699,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	char NameBuff[100];
 	uint64_t arg;
 
-	int64_t arg_op[16];
+	intptr_t arg_op[16];
 	intptr_t arg_len;
 	intptr_t arg_i = 0;
 	int is_double, is_float;

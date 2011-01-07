@@ -2130,13 +2130,21 @@ object DefineC(object x)
 }
 
 #ifdef EOSX
-#define CALLBACK_SIZE (108)
+	#define CALLBACK_SIZE (108)
 #else
-#if __GNUC__ == 4
-#define CALLBACK_SIZE (96)
-#else
-#define CALLBACK_SIZE (80)
-#endif
+	#if __GNUC__ == 4
+		#if INTPTR_MAX == INT32_MAX
+
+		#define CALLBACK_SIZE (96)
+
+		#elif INTPTR_MAX == INT64_MAX
+
+		#define CALLBACK_SIZE 143
+
+		#endif
+	#else
+		#define CALLBACK_SIZE (80)
+	#endif
 #endif
 
 #define EXECUTABLE_ALIGNMENT (4)
@@ -2347,20 +2355,28 @@ object CallBack(object x)
 	// Find 78 56 34 12
 	for (i = 4; i < CALLBACK_SIZE-4; i++) {
 #ifdef EOSX
-         	if( (*(uintptr_t*)(addr + i)) == 0xF001F001 ){
+		if( (*(uintptr_t*)(addr + i)) == 0xF001F001 ){
 			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
 		}
 #endif
-		if (copy_addr[i]   == 0x078 &&
-			copy_addr[i+1] == 0x056) {
+		if ( *(intptr_t*)(copy_addr + i) == CALLBACK_POINTER ) {
 #ifdef ERUNTIME
-			*(int *)(copy_addr+i) = routine_id;
+			*(intptr_t *)(copy_addr+i) = routine_id;
 #else
-			*(symtab_ptr *)(copy_addr+i) = e_routine[routine_id];
+			*(intptr_t *)(copy_addr+i) = e_routine[routine_id];
 #endif
 			not_patched = 0;
 			break;
 		}
+#if INTPTR_MAX == INT64_MAX
+		else if(
+			*((int32_t*) (copy_addr + i)) == (int32_t)(((intptr_t)&general_ptr) - ((intptr_t)(addr + i + 4)) ) ) {
+			// Replacing the offset for loading general_ptr...objdump looks like this:
+			// 4c 8b 15 00 00 00 00 	mov    0x0(%rip),%r10        # acfe <cdecl_call_back+0x28> DEBUG
+			// 48 8b 2d 00 00 00 00 	mov    0x0(%rip),%rbp        # b570 <cdecl_call_back+0x2b> REGULAR
+			*((int32_t*)(copy_addr + i)) = (int32_t) (((intptr_t)&general_ptr) - ( (intptr_t)(copy_addr + i + 4) ));
+		}
+#endif
 	}
 	/* We're done writing, so protect the memory again...*/
 	set_page_to_read_execute_only(page_addr);
