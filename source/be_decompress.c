@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "alldefs.h"
 #include "be_alloc.h"
 
@@ -18,10 +19,10 @@ unsigned char *string_ptr;
 #define S1B 254   // sequence, 1-byte length follows, then elements
 #define S4B 255   // sequence, 4-byte length follows, then elements
 
-#define MIN1B (-2)
-#define MIN2B (-0x00008000)
-#define MIN3B (-0x00800000)
-#define MIN4B (-0x80000000)
+#define MIN1B (int32_t)(-2)
+#define MIN2B (int32_t)(-0x00008000)
+#define MIN3B (int32_t)(-0x00800000)
+#define MIN4B (int32_t)(-0x80000000)
 
 object decompress(uintptr_t c)
 // read a compressed Euphoria object
@@ -29,7 +30,7 @@ object decompress(uintptr_t c)
 {
 	s1_ptr s;
 	object_ptr obj_ptr;
-	unsigned int len, i;
+	int32_t len, i;
 	double d;
 	
 	if (c == 0) {
@@ -53,20 +54,20 @@ object decompress(uintptr_t c)
 	}
 	
 	else if (c == I4B) {
-		i = *(unsigned int *)string_ptr;
-		string_ptr += 4;
+		i = *(int32_t *)string_ptr;
+		string_ptr += sizeof( int32_t );
 		return i + MIN4B;
 	}
 	
 	else if (c == F4B) {
 		d = (double)*(float *)string_ptr; 
-		string_ptr += 4;
+		string_ptr += sizeof( float );
 		return NewDouble(d);
 	}
 	
 	else if (c == F8B) {
 		d = *(double *)string_ptr; 
-		string_ptr += 8;
+		string_ptr += sizeof( double );
 		return NewDouble(d);
 	}
 	
@@ -76,8 +77,8 @@ object decompress(uintptr_t c)
 			len = *string_ptr++;
 		}
 		else {
-			len = *(uint32_t *)string_ptr;
-			string_ptr += 4;
+			len = *(int32_t *)string_ptr;
+			string_ptr += sizeof( int32_t );
 		}
 		s = NewS1(len);
 		obj_ptr = s->base;
