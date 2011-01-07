@@ -518,7 +518,7 @@ static object do_peek4(object a, int b )
 		else {
 			// signed
 			while (--i >= 0) {
-				top = *peek4_addr;
+				top = (int32_t)*peek4_addr;
 				++peek4_addr;
 				if (top < (int32_t)MININT || top > (int32_t)MAXINT)
 					top = NewDouble((double)(int32_t)top);
@@ -527,14 +527,16 @@ static object do_peek4(object a, int b )
 		}
 		return (object)MAKE_SEQ(s1);
 	}
-	top = *peek4_addr;
+	
 	if (b) {
 		// unsigned
+		top = *peek4_addr;
 		if ((uintptr_t)top > (uintptr_t)MAXINT)
 			top = NewDouble((double)(uintptr_t)top);
 	}
 	else {
 		// signed
+		top = (int32_t)*peek4_addr;
 		if (top < (intptr_t) MININT || top > (intptr_t) MAXINT)
 			top = NewDouble((double)(intptr_t)top);
 	}
