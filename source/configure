@@ -46,59 +46,25 @@ elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 fi
 
 if test $UNAME_SYSTEM = "Linux"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
-elif test $UNAME_SYSTEM = "MS-DOS"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP=1 >> "$PREFIX"${CONFIG_FILE}
-	echo SHELL=bash >> "$PREFIX"${CONFIG_FILE}
-	cp Makefile.gnu "$PREFIX"../tests/Makefile.gnu
+	EHOST=ELINUX
 elif test $UNAME_SYSTEM = "WINDOWS"; then
-	echo EBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+	EHOST=EWINDOWS
 elif test $UNAME_SYSTEM = "OpenBSD"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+	EHOST=OPENBSD
+	EBSD=1
 elif test $UNAME_SYSTEM = "NetBSD"; then
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo ENETBSD=1 >> "$PREFIX"${CONFIG_FILE}
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo EOSX= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
+	EHOST=NETBSD
+	EBSD=1
 else
-	echo EBSD=1 >> "$PREFIX"${CONFIG_FILE}
+	EBSD=1
 	if test $UNAME_SYSTEM = "Darwin"; then
-		echo EOSX=1 >> "$PREFIX"${CONFIG_FILE}
+		EHOST=EOSX
 	else
-		echo EOSX= >> "$PREFIX"${CONFIG_FILE}
+		EHOST=EBSD
 	fi
-	echo EOPENBSD= >> "$PREFIX"${CONFIG_FILE}
-	echo ELINUX= >> "$PREFIX"${CONFIG_FILE}
-	echo EMINGW= >> "$PREFIX"${CONFIG_FILE}
-	echo EDJGPP= >> "$PREFIX"${CONFIG_FILE}
 fi
+ETARGET=$EHOST
+echo EHOST=$EHOST >>  "$PREFIX"${CONFIG_FILE}
 
 # default use source
 export EC="eui ec.ex"
@@ -120,6 +86,7 @@ while [ "$1" != "" ]; do
 		if [ "$VAL" = "$1" ]; then
 			shift ; VAL=$1
 		fi
+		TARGET=E$VAL
 
 		echo "PLAT=$VAL" >> "$PREFIX"${CONFIG_FILE}
 		;;
@@ -136,7 +103,15 @@ while [ "$1" != "" ]; do
 
 		export CC=$VAL
 		;;
+	--rc*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
 
+		export RC=$VAL
+		;;
+	
 	--no-managed-mem )
 		export MANAGED_MEM=0
 		;;
@@ -286,6 +261,14 @@ while [ "$1" != "" ]; do
 				exit
 		esac
 		;;
+		
+	--wine*)
+		VAL=`echo $1 | cut -d = -f 2`
+		if [ "$VAL" = "$1" ]; then
+			shift ; VAL=$1
+		fi
+		echo WINE=$VAL >> "$PREFIX"${CONFIG_FILE}
+		;;
 
 	* )
 		echo "Unknown option '$1'"
@@ -311,6 +294,8 @@ while [ "$1" != "" ]; do
 		echo "   --eubin value       Use this option to specify the location of the"
 		echo "   --cc value          set this to the name of your GNU C compiler file name if its "
 		echo "                       name is not 'gcc'"
+		echo "   --rc value          Name of the windows resource compiler.  This is used with"
+		echo "                       MinGW builds."
 		echo "   --roodir value      the root dir to use for checking the svn revision"
 		echo "                       default is the parent directory"
 		echo "   --use-binary-translator"
@@ -328,13 +313,33 @@ while [ "$1" != "" ]; do
 		echo "                       operations such as manual upload"
 		echo "   --scp-client value  SCP program to use for scp uploads (default scp -C)"
 		echo "   --ssh-client value  SSH program to use for ssh commands (default ssh -C)"
-                echo "   --hg value          Mercurial binary command (default 'which hg')"
+		echo "   --hg value          Mercurial binary command (default 'which hg')"
+		echo "   --wine value        Path to wine (useful for cross compilation to windows)"
 		exit
 		;;
 	esac
 	shift
 done
 
+if [ "$TARGET" = "EBSD" ]; then
+	EBSD=1
+elif [ "$TARGET" = "EOPENBSD" ]; then
+	EOPENBSD=1
+elif [ "$TARGET" = "EOSX" ]; then
+	EOSX=1
+elif [ "$TARGET" = "LINUX" ]; then
+	ELINUX=1
+elif [ "$TARGET" = "EWIN" ]; then
+	EMINGW=1
+fi
+
+
+echo EBSD=$EBSD >> "$PREFIX"${CONFIG_FILE}
+echo EOPENBSD=$EOPENBSD >> "$PREFIX"${CONFIG_FILE}
+echo ENETBSD=$ENETBSD >> "$PREFIX"${CONFIG_FILE}
+echo EOSX=$EOSX >> "$PREFIX"${CONFIG_FILE}
+echo ELINUX=$ELINUX >> "$PREFIX"${CONFIG_FILE}
+echo EMINGW=$EMINGW >> "$PREFIX"${CONFIG_FILE}
 # if eui doesn't exist the error message goes into
 # the device file /dev/null. [works on Mingw too.]
 if [ "x$EUBIN" = "x" ]; then
@@ -379,6 +384,7 @@ echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
 
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
+echo "RC=$RC" >> "$PREFIX"${CONFIG_FILE}
 echo "SCP=$SCP" >> "$PREFIX"${CONFIG_FILE}
 echo "SSH=$SSH" >> "$PREFIX"${CONFIG_FILE}
 echo "HG=$HG" >> "$PREFIX"${CONFIG_FILE}

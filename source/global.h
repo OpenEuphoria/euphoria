@@ -36,7 +36,9 @@ typedef signed   char   schar;
 #	define _LARGEFILE64_SOURCE
 	/* note that LARGEFILE* macros do not work on MinGW */
 #	include <sys/types.h>
+#ifndef EMINGW
 #	include <unistd.h>
+#endif
 #	include <errno.h>
 #	define IFILE FILE*
 #	define IOFF long long

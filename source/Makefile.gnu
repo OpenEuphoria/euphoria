@@ -86,6 +86,9 @@ else
 endif
 ifeq "$(EMINGW)" "1"
 	EXE_EXT=.exe
+	ifeq "$(EHOST)" "EWIN"
+		HOST_EXE_EXT=.exe
+	endif
 	EPTHREAD=
 	EOSTYPE=-DEWINDOWS
 	EBSDFLAG=-DEMINGW
@@ -121,7 +124,6 @@ ifeq "$(EMINGW)" "1"
 			MEM_FLAGS=-DESIMPLE_MALLOC
 		endif
 	endif
-	PCRE_CC=gcc
 else
 	EXE_EXT=
 	EPTHREAD=-pthread
@@ -144,6 +146,7 @@ EBACKENDU=eub$(EXE_EXT)
 EBACKENDC=eub$(EXE_EXT)
 EECU=euc$(EXE_EXT)
 EEXU=eui$(EXE_EXT)
+HOST_EEXU=eui$(HOST_EXE_EXT)
 EEXUW=euiw$(EXE_EXT)
 
 LDLFLAG+= $(EPTHREAD)
@@ -192,8 +195,10 @@ endif
 
 ifeq  "$(EUBIN)" ""
 EXE=$(EEXU)
+HOST_EXE=$(HOST_EEXU)
 else
 EXE=$(EUBIN)/$(EEXU)
+HOST_EXE=$(EUBIN)/$(HOST_EEXU)
 endif
 INCDIR=-i $(TRUNKDIR)/include
 CYPINCDIR=-i $(CYPTRUNKDIR)/include
@@ -219,7 +224,7 @@ endif
 ifeq "$(TRANSLATE)" "euc"
 	TRANSLATE=$(EECU)
 else
-	TRANSLATE=$(EXE) $(CYPINCDIR) $(EC_DEBUG) $(CYPTRUNKDIR)/source/ec.ex
+	TRANSLATE=$(HOST_EXE) $(CYPINCDIR) $(EC_DEBUG) $(CYPTRUNKDIR)/source/ec.ex
 endif
 
 ifeq "$(MANAGED_MEM)" "1"
@@ -532,7 +537,7 @@ endif
 
 .PHONY: update-version-cache
 update-version-cache : $(MKVER)
-	$(MKVER) $(HG) $(BUILDDIR)/ver.cache $(BUILDDIR)/$(OBJDIR)/back/be_ver.h $(EREL_TYPE)$(RELEASE)
+	$(WINE) $(MKVER) $(HG) $(BUILDDIR)/ver.cache $(BUILDDIR)/$(OBJDIR)/back/be_ver.h $(EREL_TYPE)$(RELEASE)
 
 $(MKVER): mkver.c
 	$(CC) -o $@ $<
@@ -885,7 +890,7 @@ endif
 	mkdir -p $@
 
 $(BUILDDIR)/%.res : %.rc
-	windres $< -O coff -o $@
+	$(RC) $< -O coff -o $@
 	
 $(BUILDDIR)/$(OBJDIR)/%.o : $(BUILDDIR)/$(OBJDIR)/%.c
 	$(CC) $(EBSDFLAG) $(FE_FLAGS) $(BUILDDIR)/$(OBJDIR)/$*.c -I/usr/share/euphoria -o$(BUILDDIR)/$(OBJDIR)/$*.o

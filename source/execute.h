@@ -53,14 +53,14 @@
 
 #else
 
-#define DBL_MASK     (uintptr_t)__INT64_C( 0xA000000000000000 )
-#define SEQ_MASK     (uintptr_t)__INT64_C( 0x8000000000000000 )
-#define DS_MASK      (uintptr_t)__INT64_C( 0xE000000000000000 )
-#define MININT       (intptr_t) __INT64_C( 0xC000000000000000 )
-#define MAXINT       (intptr_t) __INT64_C( 0x3FFFFFFFFFFFFFFF )
-#define NOVALUE      (intptr_t) __INT64_C( 0xbfffffffffffffff )
-#define TOO_BIG_INT  (intptr_t) __INT64_C( 0x4000000000000000 )
-#define HIGH_BITS    (intptr_t )__INT64_C( 0xC000000000000000 )
+#define DBL_MASK     (uintptr_t)INT64_C( 0xA000000000000000 )
+#define SEQ_MASK     (uintptr_t)INT64_C( 0x8000000000000000 )
+#define DS_MASK      (uintptr_t)INT64_C( 0xE000000000000000 )
+#define MININT       (intptr_t) INT64_C( 0xC000000000000000 )
+#define MAXINT       (intptr_t) INT64_C( 0x3FFFFFFFFFFFFFFF )
+#define NOVALUE      (intptr_t) INT64_C( 0xbfffffffffffffff )
+#define TOO_BIG_INT  (intptr_t) INT64_C( 0x4000000000000000 )
+#define HIGH_BITS    (intptr_t )INT64_C( 0xC000000000000000 )
 
 #endif
 

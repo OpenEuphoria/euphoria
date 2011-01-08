@@ -7058,7 +7058,7 @@ procedure BackEnd(atom ignore)
 
 	if TWINDOWS then
 		-- this has to be included before stdint.h (in euphoria.h) at least on Watcom
-		c_puts("#include <Windows.h>\n")
+		c_puts("#include <windows.h>\n")
 	end if
 	c_puts("#include <time.h>\n")
 	c_puts("#include \"include/euphoria.h\"\n")
