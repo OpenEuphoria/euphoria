@@ -28,8 +28,11 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
+#include <inttypes.h>
 #ifdef EWINDOWS
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 #include "alldefs.h"
 #include "be_runtime.h"
@@ -329,7 +332,7 @@ static void Free_All()
 		list->first = NULL;
 	}
 	/* now do the doubles list */
-	assert(((unsigned long)d_list & 7) == 0);		
+	assert(((uintptr_t)d_list & 7) == 0);		
 	s = (s1_ptr)d_list;
 	while (s != NULL) {
 		p = (unsigned char *)s;
@@ -413,7 +416,7 @@ static char *Out_Of_Space(long nbytes)
 }
 #endif
 #ifndef ESIMPLE_MALLOC
-char *EMalloc(unsigned long nbytes)
+char *EMalloc(uintptr_t nbytes)
 /* storage allocator */
 /* Always returns a pointer that has 8-byte alignment (essential for our
    internal representation of an object). */
@@ -429,7 +432,6 @@ char *EMalloc(unsigned long nbytes)
 #ifdef HEAP_CHECK
 	long size;
 #endif
-
 #ifdef HEAP_CHECK
 	check_pool();
 #endif
@@ -500,7 +502,7 @@ char *EMalloc(unsigned long nbytes)
 // 	}
 
 	do {
-		p = malloc(nbytes+8);
+		p = malloc((long)nbytes+8);
 // 		assert(p);
 		if (p == NULL) {
 			printf("couldn't alloc %d bytes\n", nbytes );
@@ -712,7 +714,7 @@ int heap_dump(char *ptr)
 #endif // EUNIX
 
 #ifndef ESIMPLE_MALLOC
-char *ERealloc(char *orig, unsigned long newsize)
+char *ERealloc(char *orig, uintptr_t newsize)
 /* Enlarge or shrink a malloc'd block.
    orig must not be NULL - not supported.
    Return a pointer to a storage area of the desired size

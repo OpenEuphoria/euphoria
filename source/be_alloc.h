@@ -155,13 +155,13 @@ typedef struct block_list * block_list_ptr;
 	#ifdef EUNIX
 	#include <stdlib.h>
 	#endif
-	#define EMalloc(size) malloc(size)
+	#define EMalloc(size) malloc( (size_t)size)
 	#define EFree(ptr) free(ptr)
 	#define ERealloc(orig, newsize) realloc(orig, newsize)
 #else
-	extern char *EMalloc(unsigned long size);
+	extern char *EMalloc(uintptr_t size);
 	extern void EFree(char *ptr);
-	extern char *ERealloc(char *orig, unsigned long newsize);
+	extern char *ERealloc(char *orig, uintptr_t newsize);
 #endif
 
 #if defined(__GNU_LIBRARY__) || defined(__GLIBC__) \

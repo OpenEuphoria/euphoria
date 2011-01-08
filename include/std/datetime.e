@@ -55,22 +55,17 @@ function gmtime(atom time)
 	atom timep, tm_p
 	integer n
 
-	timep = machine:allocate(4)
-	poke4(timep, time)
+	timep = machine:allocate( sizeof( C_POINTER ) )
+	poke_pointer(timep, time)
 	
 	tm_p = c_func(gmtime_, {timep})
 	
 	machine:free(timep)
-	
-	ret = repeat(0, 9)
-	n = 0
-
-	for i = 1 to 9 do
-		ret[i] = peek4s(tm_p+n)
-		n = n + 4
-	end for
-	
-	return ret
+	if tm_p != 0 then
+		return peek4s(tm_p & 9 )
+	else
+		return repeat( 0, 9 )
+	end if
 end function
 
 constant

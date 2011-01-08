@@ -4835,7 +4835,6 @@ char **make_arg_cv(char *cmdline, int *argc)
 		w = 0;
 	   }
 	i = 0;
-
 	while (TRUE) {
 		/* skip white space */
 		while (cmdline[i] == ' '  ||

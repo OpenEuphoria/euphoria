@@ -35,6 +35,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #ifdef EWINDOWS
 #include <windows.h>
@@ -178,7 +179,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		if (IS_ATOM_INT(next_size))
 			size = INT_VAL(next_size);
 		else if (IS_ATOM(next_size))
-			size = (unsigned long)DBL_PTR(next_size)->dbl;
+			size = (uintptr_t)DBL_PTR(next_size)->dbl;
 		else 
 			RTFatal("This C routine was defined using an invalid argument type");
 
@@ -236,7 +237,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
 				
-				arg = (unsigned long)DBL_PTR(next_arg)->dbl; //correct
+				arg = (uintptr_t)DBL_PTR(next_arg)->dbl; //correct
 				// if it's a -ve f.p. number, Watcom converts it to int and
 				// then to unsigned int. This is exactly what we want.
 				// Works with the others too. 
@@ -498,7 +499,7 @@ typedef double (__cdecl *cddfuncD)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,
 typedef double (__cdecl *cddfuncE)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 typedef double (__cdecl *cddfuncF)(intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t,intptr_t);
 
-float float_std_func(intptr_t i, long * op, long len) {
+float float_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((ffunc0)i)();
@@ -521,7 +522,7 @@ float float_std_func(intptr_t i, long * op, long len) {
     return 0.0;
 }
 
-float float_cdecl_func(intptr_t i, long * op, long len) {
+float float_cdecl_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cdffunc0)i)();
@@ -544,7 +545,7 @@ float float_cdecl_func(intptr_t i, long * op, long len) {
     return 0.0;
 }
 
-double double_std_func(intptr_t i, long * op, long len) {
+double double_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((dfunc0)i)();
@@ -567,7 +568,7 @@ double double_std_func(intptr_t i, long * op, long len) {
     return 0.0;
 }
 
-double double_cdecl_func(intptr_t i, long * op, long len) {
+double double_cdecl_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((cddfunc0)i)();
@@ -590,7 +591,7 @@ double double_cdecl_func(intptr_t i, long * op, long len) {
     return 0.0;
 }
 
-void call_std_proc(intptr_t i, long * op, long len) {
+void call_std_proc(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: ((proc0)i)(); return;
@@ -612,7 +613,7 @@ void call_std_proc(intptr_t i, long * op, long len) {
 	}
 }
 
-long call_std_func(intptr_t i, long * op, long len) {
+long call_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((func0)i)();
@@ -635,7 +636,7 @@ long call_std_func(intptr_t i, long * op, long len) {
     return 0;
 }
 
-void call_cdecl_proc(intptr_t i, long * op, long len) {
+void call_cdecl_proc(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: ((cdproc0)i)(); return;
@@ -657,7 +658,7 @@ void call_cdecl_proc(intptr_t i, long * op, long len) {
 	}
 }
 
-long call_cdecl_func(intptr_t i, long * op, long len) {
+long call_cdecl_func(intptr_t i, intptr_t * op, long len) {
 	switch(len) {
 	    case 0: return ((cdfunc0)i)();
 	    case 1: return ((cdfunc1)i)(op[0]);
@@ -706,8 +707,8 @@ object call_c(int func, object proc_ad, object arg_list)
 	
 	// Setup and Check for Errors
 	proc_index = get_pos_int("c_proc/c_func", proc_ad); 
-	if (proc_index >= (unsigned)c_routine_next) {
-		snprintf(TempBuff, TEMP_SIZE, "c_proc/c_func: bad routine number (%ld)", proc_index);
+	if (proc_index >= (uintptr_t)c_routine_next) {
+		snprintf(TempBuff, TEMP_SIZE, "c_proc/c_func: bad routine number (%" PRIdPTR ")", proc_index);
 		RTFatal(TempBuff);
 	}
 	

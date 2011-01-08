@@ -207,7 +207,7 @@ struct videoconfigEx {
 #define WORD unsigned short
 #define __stdcall
 #define __cdecl
-#else
+#elif !defined(EMINGW)
 /* So WATCOM debugger will work better: */
  #ifndef EXTRA_CHECK
   #pragma aux RTFatal aborts;
@@ -236,7 +236,7 @@ extern int is_batch;
 extern int is_test;
 
 #ifndef LRESULT
-#define LRESULT long
+#define LRESULT intptr_t
 #endif
 #ifndef CALLBACK
 #define CALLBACK

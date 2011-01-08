@@ -2056,7 +2056,7 @@ object DefineC(object x)
 			routine_string++;
 			convention = C_CDECL;
 		}
-		proc_address = (int (*)())GetProcAddress((void *)lib, routine_string);
+		proc_address = (intptr_t (*)())GetProcAddress((void *)lib, routine_string);
 		if (proc_address == NULL)
 			return ATOM_M1;
 
