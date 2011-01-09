@@ -613,7 +613,7 @@ void call_std_proc(intptr_t i, intptr_t * op, long len) {
 	}
 }
 
-long call_std_func(intptr_t i, intptr_t * op, long len) {
+intptr_t call_std_func(intptr_t i, intptr_t * op, long len) {
     
 	switch(len) {
 	    case 0: return ((func0)i)();
@@ -658,7 +658,7 @@ void call_cdecl_proc(intptr_t i, intptr_t * op, long len) {
 	}
 }
 
-long call_cdecl_func(intptr_t i, intptr_t * op, long len) {
+intptr_t call_cdecl_func(intptr_t i, intptr_t * op, long len) {
 	switch(len) {
 	    case 0: return ((cdfunc0)i)();
 	    case 1: return ((cdfunc1)i)(op[0]);

@@ -5368,6 +5368,15 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 }
 #endif
 
+#if INTPTR_MAX == INT32_MAX
+#define CALL_GENERAL_CALLBACK (*general_ptr)
+#else
+
+// Need to force the compiler to use an absolute address
+typedef intptr_t (*cbfunc)();
+#define CALL_GENERAL_CALLBACK ((cbfunc)0xabcdefabcdefabcd)
+#endif
+
 /* Windows cdecl - Need only one template.
    It can handle a variable number of args.
    Not all args below will actually be provided on a given call. */
@@ -5376,7 +5385,7 @@ LRESULT __cdecl cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr) ((intptr_t) CALLBACK_POINTER ),
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr) ((intptr_t) CALLBACK_POINTER ),
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
@@ -5388,28 +5397,28 @@ LRESULT __cdecl cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 
 LRESULT CALLBACK call_back0()
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER, // will be replaced
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER, // will be replaced
 									 0, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
 LRESULT CALLBACK call_back1(uintptr_t arg1)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
 LRESULT CALLBACK call_back2(uintptr_t arg1, uintptr_t arg2)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
 LRESULT CALLBACK call_back3(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, 0, 0,
 									 0, 0, 0, 0);
 }
@@ -5417,7 +5426,7 @@ LRESULT CALLBACK call_back3(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 LRESULT CALLBACK call_back4(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, 0,
 									 0, 0, 0, 0);
 }
@@ -5425,7 +5434,7 @@ LRESULT CALLBACK call_back4(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 LRESULT CALLBACK call_back5(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 0, 0, 0, 0);
 }
@@ -5433,7 +5442,7 @@ LRESULT CALLBACK call_back5(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 LRESULT CALLBACK call_back6(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, 0, 0, 0);
 }
@@ -5442,7 +5451,7 @@ LRESULT CALLBACK call_back7(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 							uintptr_t arg7)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, 0, 0);
 }
@@ -5451,7 +5460,7 @@ LRESULT CALLBACK call_back8(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 							uintptr_t arg7, uintptr_t arg8)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, 0);
 }
@@ -5460,7 +5469,7 @@ LRESULT CALLBACK call_back9(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 							uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
-	return (LRESULT) (*general_ptr)((symtab_ptr)CALLBACK_POINTER,
+	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }

@@ -2369,12 +2369,8 @@ object CallBack(object x)
 			break;
 		}
 #if INTPTR_MAX == INT64_MAX
-		else if(
-			*((int32_t*) (copy_addr + i)) == (int32_t)(((intptr_t)&general_ptr) - ((intptr_t)(addr + i + 4)) ) ) {
-			// Replacing the offset for loading general_ptr...objdump looks like this:
-			// 4c 8b 15 00 00 00 00 	mov    0x0(%rip),%r10        # acfe <cdecl_call_back+0x28> DEBUG
-			// 48 8b 2d 00 00 00 00 	mov    0x0(%rip),%rbp        # b570 <cdecl_call_back+0x2b> REGULAR
-			*((int32_t*)(copy_addr + i)) = (int32_t) (((intptr_t)&general_ptr) - ( (intptr_t)(copy_addr + i + 4) ));
+		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcd ){
+			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
 		}
 #endif
 	}
