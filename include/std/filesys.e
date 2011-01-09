@@ -2063,7 +2063,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	end ifdef
 	ifdef LINUX then
 		stat_t_offset = 0
-		stat_buf_size = 88 * 2
+		stat_buf_size = 88
 	elsifdef FREEBSD or OSX then
 		stat_t_offset = 0
 		stat_buf_size = 96
@@ -2081,7 +2081,6 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		psrc = machine:allocate_string(src, 1)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
-		? -1 & ret
  			return 0
 		end if
 		
@@ -2106,7 +2105,6 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			if ret then
 				ret = delete_file(src)
 			end if
-			? -2
  			return (not ret)
 		end if
 		
@@ -2134,7 +2132,6 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		end if
 		delete_file(tempfile)
 	end if
-	? -3
 	return ret
 end function
 
