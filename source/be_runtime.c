@@ -2882,12 +2882,12 @@ object calc_hash(object a, object b)
 			uint32_t a;
 			uint32_t b;
 		} ieee_uint;
-		unsigned char ieee_char[8];
+		uint8_t ieee_char[8];
 	} tf, seeder, prev;
 
 	object_ptr ap, lp;
 	object av, lv;
-
+	
 	if (IS_ATOM_INT(b)) {
 		if (b == -6)
 			return calc_hsieh30(a);	// Will always return a Euphoria integer.
@@ -2924,7 +2924,7 @@ object calc_hash(object a, object b)
 			if (tf.ieee_uint.a == 0) {
 				tf.ieee_uint.a = MAXINT32;
 			}
-
+			
 			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
 
 			if (IS_ATOM_INT(lTemp)) {
@@ -2945,7 +2945,7 @@ object calc_hash(object a, object b)
 		seeder.ieee_double = (DBL_PTR(b)->dbl);
 	}
 	else {
-		lTemp = calc_hash(b, 16063 + (unsigned int)(SEQ_PTR(b)->length));
+		lTemp = calc_hash(b, 16063 + (uint32_t)(SEQ_PTR(b)->length));
 		if (IS_ATOM_INT(lTemp)) {
 			seeder.ieee_uint.a = lTemp;
 			seeder.ieee_uint.b = rol(lTemp, 15);
@@ -2961,18 +2961,18 @@ object calc_hash(object a, object b)
 	for(tfi = 0; tfi < 8; tfi++)
 	{
 		if (seeder.ieee_char[tfi] == 0)
-			seeder.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+			seeder.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 		seeder.ieee_char[tfi] += (tfi + 1) << 8;
+		
 		lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
 	}
-
 	if (IS_ATOM_INT(a)) {
 		tf.ieee_uint.a = a;
 		tf.ieee_uint.b = rol(a, 15);
 		for(tfi = 0; tfi < 8; tfi++)
 		{
 			if (tf.ieee_char[tfi] == 0)
-				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+				tf.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 			lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 		}
 	}
@@ -2981,7 +2981,7 @@ object calc_hash(object a, object b)
 		for(tfi = 0; tfi < 8; tfi++)
 		{
 			if (tf.ieee_char[tfi] == 0)
-				tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+				tf.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 			lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 		}
 	}
@@ -3010,7 +3010,7 @@ object calc_hash(object a, object b)
 				prev.ieee_double = (DBL_PTR(lv)->dbl);
 			}
 			else {
-				lv = (unsigned int)(SEQ_PTR(lv)->length);
+				lv = (uint32_t)(SEQ_PTR(lv)->length);
 				prev.ieee_uint.a = lv;
 				prev.ieee_uint.b = rol(lv, 15);
 			}
@@ -3042,15 +3042,15 @@ object calc_hash(object a, object b)
 			for(tfi = 0; tfi < 8; tfi++)
 			{
 				if (tf.ieee_char[tfi] == 0)
-					tf.ieee_char[tfi] = (unsigned char)(tfi * 171 + 1);
+					tf.ieee_char[tfi] = (uint8_t)(tfi * 171 + 1);
 				lHashValue = rol(lHashValue, 3) ^ ((tf.ieee_char[tfi] + (tfi + 1)) << 8);
 			}
 			lHashValue = rol(lHashValue,1);
 			lSLen--;
 		}
 	}
-
-	if (lHashValue  & HIGH_BITS) {
+	
+	if (lHashValue  > MAXINT32 ) {
 		return NewDouble((double)lHashValue);
 	}
 	else {

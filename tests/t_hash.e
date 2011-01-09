@@ -5,6 +5,10 @@ include std/io.e
 constant s = "Euphoria Programming Language brought to you by Rapid Deployment Software"
 constant hashalgo = {-9.123, HSIEH30, HSIEH32, ADLER32, FLETCHER32, MD5, SHA256, 0, 0.5, 1, 2, 9, 9.123, #3FFFFFFF, "abc", "abb", ""}
 
+constant hashalgo_name = {
+	"-9.123", "HSIEH30", "HSIEH32", "ADLER32", "FLETCHER32", "MD5", "SHA256", "0", "0.5", "1", "2", "9", 
+	"9.123", "#3FFFFFFF", `"abc"`, `"abb"`, `""`}
+
 constant expected = {
 {#B7F48C20,#F8C6DB45,#32EE1F21,#E99E6554,#70CA9A7C,#F0CA6A78,#D0FC1278,#A5472C74,#E9FC1361,#BF6F937D,#7C6C3F8F,#339E9365,#A547AC74,#EEE47627,#31046996}, -- (-9.123)
 {#3C0D29F1,#399D68DA,#353F7BDD,#3C0D29F0,#2D67AA1E,#27DC0C95,#2F451A8C,#04975F5F,#2BE977CB,#20FD4960,#02A63700,#1197B43B,#33660E8E,#00000000,#25E9967E}, -- (HSIEH30)
@@ -51,7 +55,8 @@ for i = 1 to length(hashalgo) do
 		ifdef SHOWHASH then
     		writef(1, "#[Xz:8],", hash(test_data[x], hashalgo[i]))
     	elsedef
-    		test_equal(sprintf("hash test# %d hashalgo=%d",{x,i}), expected[i][x], hash(test_data[x], hashalgo[i]) )
+    		test_equal(sprintf("hash test# %d hashalgo=%d [%s]",{x,i, hashalgo_name[i]}), 
+				expected[i][x], hash(test_data[x], hashalgo[i]) )
     	end ifdef
     end for
     ifdef SHOWHASH then
