@@ -14,7 +14,7 @@ include std/types.e
 
 ifdef LINUX then
 	constant gmtime_ = dll:define_c_func(dll:open_dll(""), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
-	constant time_ = dll:define_c_func(dll:open_dll(""), "time", {dll:C_POINTER}, dll:C_INT)
+	constant time_ = dll:define_c_func(dll:open_dll(""), "time", {dll:C_POINTER}, dll:C_POINTER)
 elsifdef OSX then
 	constant gmtime_ = dll:define_c_func(dll:open_dll("libc.dylib"), "gmtime", {dll:C_POINTER}, dll:C_POINTER)
 	constant time_ = dll:define_c_func(dll:open_dll("libc.dylib"), "time", {dll:C_POINTER}, dll:C_INT)
@@ -46,6 +46,7 @@ function time()
 		end if
 		return floor(((valhi * power(2,32)) + vallow) / 10000000)
 	elsedef
+	? c_func(time_, {allocate( 8, 1 )})
 		return c_func(time_, {dll:NULL})
 	end ifdef
 end function
