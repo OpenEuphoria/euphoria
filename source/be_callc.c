@@ -904,9 +904,24 @@ object call_c(int func, object proc_ad, object arg_list)
 	else if (return_type == C_FLOAT) {
 		return NewDouble((double)fresult);
 	}
-	
+	else if (return_type == C_POINTER ){
+		if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
+			return iresult;
+		}
+		else{
+			return NewDouble((double)(uintptr_t)iresult);
+		}
+	}
+	else if (return_type == C_LONGLONG ){
+		if ((intptr_t)iresult <= (intptr_t)MAXINT) {
+			return iresult;
+		}
+		else{
+			return NewDouble((double)(intptr_t)iresult);
+		}
+	}
 	else {
-		// expect longeger to be returned
+		// expect integer to be returned
 		if ((return_type & 0x000000FF) == 04) {
 			/* 4-byte longeger - usual case */
 			// check if unsigned result is required 
@@ -944,8 +959,9 @@ object call_c(int func, object proc_ad, object arg_list)
 		else if (return_type == C_SHORT) {
 			return (short)iresult;
 		}
-		else
+		else{
 			return 0; // unknown function return type
+		}
 	}
 }
 #endif // EMINGW
