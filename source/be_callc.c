@@ -896,7 +896,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			iresult = 0;
 		}
 	}
-
+	
 	if (return_type == C_DOUBLE) {
 		return NewDouble(dresult);
 	}
@@ -934,13 +934,30 @@ object call_c(int func, object proc_ad, object arg_list)
 					return NewDouble((double)(uintptr_t)iresult);
 			}
 			else {
-				// signed longeger result
+				// signed integer result
 				if (return_type >= E_INTEGER ||
 					(iresult >= MININT && iresult <= MAXINT)) {
 					return iresult;
 				}
 				else
 					return NewDouble((double)iresult);
+			}
+		}
+		else if (return_type == C_LONG ){
+			if( (unsigned long)iresult > MAXINT ){
+				return NewDouble( (double)(long)iresult );
+			}
+			else{
+				return (long)iresult;
+			}
+		}
+		else if( return_type = C_ULONG ){
+			unsigned long ul = (unsigned long) iresult;
+			if( ul > MAXINT ){
+				return NewDouble( (double) ul );
+			}
+			else{
+				return ul;
 			}
 		}
 		else if (return_type == 0) {

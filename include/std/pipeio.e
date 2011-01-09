@@ -53,8 +53,8 @@ elsedef
 	constant
 		STDLIB = dll:open_dll({ "libc.so", "libc.dylib", "" }),
 		PIPE   = dll:define_c_func(STDLIB, "pipe",   {dll:C_POINTER}, dll:C_INT),
-		READ   = dll:define_c_func(STDLIB, "read",   {dll:C_INT, dll:C_POINTER, dll:C_INT}, dll:C_INT),
-		WRITE  = dll:define_c_func(STDLIB, "write",  {dll:C_INT, dll:C_POINTER, dll:C_INT}, dll:C_INT),
+		READ   = dll:define_c_func(STDLIB, "read",   {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_LONG),
+		WRITE  = dll:define_c_func(STDLIB, "write",  {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_LONG),
 		CLOSE  = dll:define_c_func(STDLIB, "close",  {dll:C_INT}, dll:C_INT),
 		DUP2   = dll:define_c_func(STDLIB, "dup2",   {dll:C_INT, dll:C_INT}, dll:C_INT),
 		KILL   = dll:define_c_func(STDLIB, "kill",   {dll:C_INT, dll:C_INT}, dll:C_INT),
@@ -233,6 +233,7 @@ public function read(atom fd, integer bytes)
 		machine:free(pReadCount)
 	elsedef
 		ret = c_func(READ, {fd, buf, bytes})
+		? ret
 		ReadCount=ret
 	end ifdef
 	
@@ -243,7 +244,6 @@ public function read(atom fd, integer bytes)
 	end if
 	
 	data=peek({buf,ReadCount})
-	
 	machine:free(buf)
 	
 	return data
@@ -475,8 +475,8 @@ elsedef
 		end for
 		
 		vbufseq &= 0
-		vbuf = machine:allocate(length(vbufseq)*4)
-		poke4(vbuf, vbufseq)
+		vbuf = machine:allocate(length(vbufseq) * sizeof( C_POINTER ) )
+		poke_pointer(vbuf, vbufseq)
 		r = c_func(EXECV, {sbuf, vbuf})
 		os_errno = peek4u(ERRNO)
 		return -1
