@@ -88,9 +88,10 @@ end ifdef
 delete_file("fstesta.txt")
 delete_file("fstestb.txt")
 write_file("fstesta.txt", "move data", TEXT_MODE)
+test_true("file to move exists", file_exists( "fstesta.txt") )
 test_true("move_file #1", move_file("fstesta.txt", "fstestb.txt", 1))
-test_true("move_file #2", sequence( dir("fstestb.txt"))) -- 'b' should now exist
-test_false("move_file #3", sequence( dir("fstesta.txt"))) -- 'a' should now be gone
+test_true("move_file #2", file_exists("fstestb.txt")) -- 'b' should now exist
+test_false("move_file #3", file_exists("fstesta.txt")) -- 'a' should now be gone
 write_file("fstesta.txt", "some data", TEXT_MODE)
 test_false("move_file #4", move_file("fstesta.txt", "fstestb.txt")) -- should not overwrite existing file
 test_false("move_file #5", move_file("fstesta.txt", "fstestb.txt", 0)) -- should not overwrite existing file

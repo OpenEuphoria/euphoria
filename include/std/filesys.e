@@ -45,6 +45,12 @@ elsifdef UNIX then
 end ifdef
 
 ifdef LINUX then
+	integer STAT_VER
+	if sizeof( C_POINTER ) = 8 then
+		STAT_VER = 0
+	else
+		STAT_VER = 3
+	end if
 	constant xStatFile = dll:define_c_func(lib, "__xstat", {dll:C_INT, dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
 elsifdef UNIX then
 	constant xStatFile = dll:define_c_func(lib, "stat", {dll:C_POINTER, dll:C_POINTER}, dll:C_INT)
@@ -2017,7 +2023,7 @@ end function
 
 ifdef LINUX then
 	function xstat(atom psrc, atom psrcbuf)
-		return c_func(xStatFile, {3, psrc, psrcbuf})
+		return c_func(xStatFile, {STAT_VER, psrc, psrcbuf})
 	end function
 elsifdef UNIX then
 	function xstat(atom psrc, atom psrcbuf)
@@ -2063,7 +2069,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	end ifdef
 	ifdef LINUX then
 		stat_t_offset = 0
-		stat_buf_size = 88
+		stat_buf_size = 88 * 2
 	elsifdef FREEBSD or OSX then
 		stat_t_offset = 0
 		stat_buf_size = 96
@@ -2081,7 +2087,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		psrc = machine:allocate_string(src, 1)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
- 			return 0
+			return 0
 		end if
 		
 		pdestbuf = machine:allocate(stat_buf_size)
@@ -2355,7 +2361,7 @@ public function disk_metrics(object disk_path)
 
 		ifdef LINUX then
 			stat_t_offset = 48
-			stat_buf_size = 88
+			stat_buf_size = 88 * 2
 		elsifdef FREEBSD or OSX then
 			stat_t_offset = 64
 			stat_buf_size = 96
@@ -2367,11 +2373,11 @@ public function disk_metrics(object disk_path)
 			stat_buf_size = 100
 		end ifdef
 
-		psrc    = machine:allocate_string(disk_path)
-		psrcbuf = machine:allocate(stat_buf_size)
+		psrc    = machine:allocate_string(disk_path, 1)
+		psrcbuf = machine:allocate(stat_buf_size, 1)
 		ret = xstat(psrc,psrcbuf)
 		bytes_per_cluster = peek4s(psrcbuf+stat_t_offset)
-		machine:free({psrcbuf, psrc})
+		
 		if ret then
 			-- failure
 			return result 
