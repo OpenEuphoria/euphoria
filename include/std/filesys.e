@@ -2063,7 +2063,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	end ifdef
 	ifdef LINUX then
 		stat_t_offset = 0
-		stat_buf_size = 88
+		stat_buf_size = 88 * 2
 	elsifdef FREEBSD or OSX then
 		stat_t_offset = 0
 		stat_buf_size = 96
@@ -2077,11 +2077,11 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	
 
 	ifdef UNIX then
-		psrcbuf = machine:allocate(stat_buf_size)
-		psrc = machine:allocate_string(src)
+		psrcbuf = machine:allocate(stat_buf_size, 1)
+		psrc = machine:allocate_string(src, 1)
 		ret = xstat(psrc, psrcbuf)
 		if ret then
- 			machine:free({psrcbuf, psrc})
+		? -1 & ret
  			return 0
 		end if
 		
@@ -2092,12 +2092,11 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			-- Assume destination doesn't exist
 			atom pdir
 			if length(dirname(dest)) = 0 then
-				pdir = machine:allocate_string(current_dir())
+				pdir = machine:allocate_string(current_dir(), 1)
 			else
-				pdir = machine:allocate_string(dirname(dest))
+				pdir = machine:allocate_string(dirname(dest), 1)
 			end if
 			ret = xstat(pdir, pdestbuf)
-			machine:free(pdir)
 		end if
 		
 		if not ret and not equal(peek(pdestbuf+stat_t_offset), peek(psrcbuf+stat_t_offset)) then
@@ -2107,13 +2106,13 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 			if ret then
 				ret = delete_file(src)
 			end if
- 			machine:free({psrcbuf, psrc, pdestbuf, pdest})
+			? -2
  			return (not ret)
 		end if
 		
 	elsedef		
-		psrc  = machine:allocate_string(src)
-		pdest = machine:allocate_string(dest)
+		psrc  = machine:allocate_string(src, 1)
+		pdest = machine:allocate_string(dest, 1)
 	end ifdef
 
 	if overwrite then
@@ -2125,10 +2124,8 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 	ret = c_func(xMoveFile, {psrc, pdest})
 	
 	ifdef UNIX then
-		ret = not ret 
-		machine:free({psrcbuf, pdestbuf})
+		ret = not ret
 	end ifdef
-	machine:free({pdest, psrc})
 	
 	if overwrite then
 		if not ret then
@@ -2137,7 +2134,7 @@ public function move_file(sequence src, sequence dest, integer overwrite=0)
 		end if
 		delete_file(tempfile)
 	end if
-	
+	? -3
 	return ret
 end function
 

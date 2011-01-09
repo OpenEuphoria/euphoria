@@ -687,7 +687,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	s1_ptr arg_list_ptr, arg_size_ptr;
 	object_ptr next_arg_ptr, next_size_ptr;
 	object next_arg, next_size;
-	intptr_t iresult, i;
+	int64_t iresult, i;
 	double_arg dbl_arg;
 	double dresult;
 	float_arg flt_arg;
@@ -897,88 +897,71 @@ object call_c(int func, object proc_ad, object arg_list)
 		}
 	}
 	
-	if (return_type == C_DOUBLE) {
-		return NewDouble(dresult);
-	}
-	
-	else if (return_type == C_FLOAT) {
-		return NewDouble((double)fresult);
-	}
-	else if (return_type == C_POINTER ){
-		if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
-			return iresult;
-		}
-		else{
-			return NewDouble((double)(uintptr_t)iresult);
-		}
-	}
-	else if (return_type == C_LONGLONG ){
-		if ((intptr_t)iresult <= (intptr_t)MAXINT) {
-			return iresult;
-		}
-		else{
-			return NewDouble((double)(intptr_t)iresult);
-		}
-	}
-	else {
-		// expect integer to be returned
-		if ((return_type & 0x000000FF) == 04) {
-			/* 4-byte longeger - usual case */
-			// check if unsigned result is required 
-			if ((return_type & C_TYPE) == 0x02000000) {
-				// unsigned longeger result
-				if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
-					return iresult;
-				}
-				else
-					return NewDouble((double)(uintptr_t)iresult);
-			}
-			else {
-				// signed integer result
-				if (return_type >= E_INTEGER ||
-					(iresult >= MININT && iresult <= MAXINT)) {
-					return iresult;
-				}
-				else
-					return NewDouble((double)iresult);
-			}
-		}
-		else if (return_type == C_LONG ){
-			if( (unsigned long)iresult > MAXINT ){
-				return NewDouble( (double)(long)iresult );
+	switch( return_type ){
+		case C_DOUBLE:
+			return NewDouble(dresult);
+		case C_FLOAT:
+			return NewDouble((double)fresult);
+		case C_POINTER:
+			if ((uintptr_t)iresult <= (uintptr_t)MAXINT) {
+				return iresult;
 			}
 			else{
+				return NewDouble((double)(uintptr_t)iresult);
+			}
+		case C_LONGLONG:
+			if ((long long int)iresult <= (long long int)MAXINT) {
+				return iresult;
+			}
+			else{
+				return NewDouble((double)(intptr_t)iresult);
+			}
+		case C_INT:
+			if ((intptr_t)(int)iresult <= MAXINT) {
+				return (int)iresult;
+			}
+			else{
+				return NewDouble((double)(int)iresult);
+			}
+		case C_UINT:
+			if ((uintptr_t)(unsigned int)iresult <= (unsigned int)MAXINT) {
+				return (unsigned int)iresult;
+			}
+			else{
+				return NewDouble((double)(unsigned int)iresult);
+			}
+		case C_LONG:
+			if ((intptr_t)(long)iresult <= MAXINT) {
 				return (long)iresult;
 			}
-		}
-		else if( return_type = C_ULONG ){
-			unsigned long ul = (unsigned long) iresult;
-			if( ul > MAXINT ){
-				return NewDouble( (double) ul );
+			else{
+				return NewDouble((double)(long)iresult);
+			}
+		case C_ULONG:
+			if ((uintptr_t)(unsigned long int)iresult <= (unsigned long int)MAXINT) {
+				return iresult;
 			}
 			else{
-				return ul;
+				return NewDouble((double)(unsigned long int)iresult);
 			}
-		}
-		else if (return_type == 0) {
-			return 0; /* void - procedure */
-		}
-		/* less common cases */
-		else if (return_type == C_UCHAR) {
-			return (unsigned char)iresult;
-		}
-		else if (return_type == C_CHAR) {
-			return (signed char)iresult;
-		}
-		else if (return_type == C_USHORT) {
-			return (unsigned short)iresult;
-		}
-		else if (return_type == C_SHORT) {
-			return (short)iresult;
-		}
-		else{
+		case C_UCHAR:
+			return (unsigned char) iresult;
+		case C_CHAR:
+			return (char) iresult;
+		case C_SHORT:
+			return (short) iresult;
+		case C_USHORT:
+			return (unsigned short) iresult;
+		case E_INTEGER:
+		case E_ATOM:
+		case E_SEQUENCE:
+			return iresult;
+		case 0:
+			// void procedure
+			return 0;
+			
+		default:
 			return 0; // unknown function return type
-		}
 	}
 }
 #endif // EMINGW
