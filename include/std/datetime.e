@@ -46,7 +46,6 @@ function time()
 		end if
 		return floor(((valhi * power(2,32)) + vallow) / 10000000)
 	elsedef
-	? c_func(time_, {allocate( 8, 1 )})
 		return c_func(time_, {dll:NULL})
 	end ifdef
 end function
