@@ -1040,6 +1040,7 @@ object call_c(int func, object proc_ad, object arg_list)
 		case E_INTEGER:
 		case E_ATOM:
 		case E_SEQUENCE:
+		case E_OBJECT:
 			return iresult;
 		case 0:
 			// void procedure
