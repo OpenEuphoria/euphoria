@@ -417,7 +417,7 @@ endif
 EUBIND=eubind
 EUSHROUD=eushroud
 
-binder : translator library 
+binder : translator library EU_BACKEND_RUNNER_FILES
 	$(MAKE) $(BUILDDIR)/$(EUBIND)
 	$(MAKE) $(BUILDDIR)/$(EUSHROUD)
 
