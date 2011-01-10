@@ -25,7 +25,7 @@ include std/types.e
 --
 ------------------------------------------------------------------------------------------
 
-constant P = dll:C_POINTER, I = dll:C_INT
+constant P = dll:C_POINTER, I = dll:C_INT, L = dll:C_LONG
 
 ------------------------------------------------------------------------------------------
 --
@@ -395,10 +395,10 @@ ifdef WINDOWS then
 elsifdef LINUX then
 	constant
 		lib = dll:open_dll(""),
-		f_strfmon = dll:define_c_func(lib, "strfmon", {P, I, P, dll:C_DOUBLE}, I),
+		f_strfmon = dll:define_c_func(lib, "strfmon", {P, L, P, dll:C_DOUBLE}, L),
 		f_strfnum = -1,
 		f_setlocale = dll:define_c_func(lib, "setlocale", {I, P}, P),
-		f_strftime = dll:define_c_func(lib, "strftime", {P, I, P, P}, I),
+		f_strftime = dll:define_c_func(lib, "strftime", {P, L, P, P}, L),
 		LC_ALL      = 6,
 	--	LC_CTYPE    = 0,
 		LC_NUMERIC  = 1,
@@ -563,19 +563,17 @@ public function money(object amount)
 
 	if f_strfmon != -1 then
 		ifdef UNIX then
-			pResult = machine:allocate(4 * 160)
-			pTmp = machine:allocate_string("%n")
+			pResult = machine:allocate(4 * 160, 1)
+			pTmp = machine:allocate_string("%n", 1)
 			c_func(f_strfmon, {pResult, 4 * 160, pTmp, amount})
 		elsifdef WINDOWS then
-			pResult = machine:allocate(4 * 160)
-			pTmp = machine:allocate_string(sprintf("%.8f", {amount}))
+			pResult = machine:allocate(4 * 160, 1)
+			pTmp = machine:allocate_string(sprintf("%.8f", {amount}), 1)
 			c_func(f_strfmon, {lcid:get_lcid(get()), 0, pTmp, NULL, pResult, 4 * 160})
 		end ifdef
 	
 		result = peek_string(pResult)
-		machine:free(pResult)
-		machine:free(pTmp)
-	
+		
 		return result
 	else
 		return text:format("$[,,.2]", amount)
