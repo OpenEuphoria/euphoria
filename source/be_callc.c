@@ -80,12 +80,13 @@ void wcpush(intptr_t X);
 
 typedef union {
 	double dbl;
-	int ints[2];
+	int32_t ints[2];
+	int64_t int64;
 } double_arg;
 
 typedef union {
 	float flt;
-	int intval;
+	int32_t int32;
 } float_arg;
 
 #if !defined(EMINGW) && !defined(EOSX) && !defined(EMSVC) && (INTPTR_MAX == INT32_MAX)
@@ -205,7 +206,7 @@ object call_c(int func, object proc_ad, object arg_list)
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				arg = (unsigned long)flt_arg.intval;
+				arg = (unsigned long)flt_arg.int32;
 				push();
 			}
 		}
@@ -355,6 +356,7 @@ object call_c(int func, object proc_ad, object arg_list)
 /* Local variables */
 /*******************/
 
+#if INTPTR_MAX == INT32_MAX
 /* for c_proc */
 typedef void (__stdcall *proc0)();
 typedef void (__stdcall *proc1)(intptr_t);
@@ -680,6 +682,60 @@ intptr_t call_cdecl_func(intptr_t i, intptr_t * op, long len) {
     return 0;
 }
 
+#else
+// 64-bit Call-C
+
+int64_t icall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+	return ((int64_t (*)())func)(
+			r[0], r[1], r[2], r[3], r[4], 
+			r[5], r[6], r[7], r[8], r[9],
+			r[10], r[11], r[12], r[13], 
+			r[14], r[15], r[16],
+			xmm[0], xmm[1], xmm[2], xmm[3], xmm[4] );
+}
+
+double dcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+	return ((double (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4],
+			r[0], r[1], r[2], r[3], r[4], 
+			r[5], r[6], r[7], r[8], r[9],
+			r[10], r[11], r[12], r[13], 
+			r[14], r[15], r[16]);
+}
+
+float fcall_x86_64( intptr_t func, double* xmm, int64_t *r ){
+	return ((float (*)())func)( xmm[0], xmm[1], xmm[2], xmm[3], xmm[4],
+			r[0], r[1], r[2], r[3], r[4], 
+			r[5], r[6], r[7], r[8], r[9],
+			r[10], r[11], r[12], r[13], 
+			r[14], r[15], r[16]);
+}
+
+union xmm_param {
+	double d;
+	float f;
+};
+#endif
+
+#if INTPTR_MAX == INT64_MAX
+/* The x86-64 calling convention uses 6 registers for the first 6 integer
+ * parameters.  After that, parameters are pushed on the stack.  Also,
+ * the first 5 floating point parameters are put into floating point
+ * registers.  Either type of argument can start overflowing onto the
+ * stack, so we have to track the number of args we're putting onto the
+ * stack separately from what goes into the registers.
+ */
+#define PUSH_INT_ARG \
+if( arg_i < 6 ){ \
+	arg_op[arg_i++] = arg; \
+} \
+else{ \
+	arg_op[arg_stack++] = arg; \
+}
+
+#else
+#define PUSH_INT_ARG arg_op[arg_i++] = arg;
+#endif
+
 object call_c(int func, object proc_ad, object arg_list)
 /* Call a WIN32 or Linux C function in a DLL or shared library. 
    Alternatively, call a machine-code routine at a given address. */
@@ -689,9 +745,9 @@ object call_c(int func, object proc_ad, object arg_list)
 	object next_arg, next_size;
 	int64_t iresult, i;
 	double_arg dbl_arg;
-	double dresult;
+	double dresult = 0;
 	float_arg flt_arg;
-	float fresult;
+	float fresult = 0;
 	uintptr_t size;
 	intptr_t proc_index;
 	int cdecl_call;
@@ -703,6 +759,16 @@ object call_c(int func, object proc_ad, object arg_list)
 	intptr_t arg_op[16];
 	intptr_t arg_len;
 	intptr_t arg_i = 0;
+#if INTPTR_MAX == INT64_MAX
+	/* The x86-64 calling convention requires us to keep the first
+	 * few floating point values separate from the ints.  And the
+	 * floating point params could start overflowing onto the stack
+	 * before we have enough ints to go there.
+	 */
+	union xmm_param dbl_op[5];
+	intptr_t xmm_i = 0;
+	intptr_t arg_stack = 6;
+#endif
 	int is_double, is_float;
 	
 	// Setup and Check for Errors
@@ -782,24 +848,38 @@ object call_c(int func, object proc_ad, object arg_list)
 			}
 
 			if (size == C_DOUBLE) {
-				#if EBITS == 32
+				#if INTPTR_MAX == INT32_MAX
 					arg_op[arg_i++] = dbl_arg.ints[1];
 					arg_op[arg_i++] = dbl_arg.ints[0];
-				#elif EBITS == 64
-					arg_op[arg_i++] = dbl_arg.longint;
+				#elif INTPTR_MAX == INT64_MAX
+					if( xmm_i < 5 ){
+						dbl_op[xmm_i++].d = dbl_arg.dbl;
+					}
+					else{
+						arg_op[arg_stack++] = dbl_arg.int64;
+					}
 				#endif
 				
 			}
 			else {
 				/* C_FLOAT */
 				flt_arg.flt = (float)dbl_arg.dbl;
-				arg_op[arg_i++] = (uintptr_t)flt_arg.intval;
+				#if INTPTR_MAX == INT32_MAX
+					arg_op[arg_i++] = (uintptr_t)flt_arg.intval;
+				#elif INTPTR_MAX == INT64_MAX
+					if( xmm_i < 5 ){
+						dbl_op[xmm_i++].f = flt_arg.flt;
+					}
+					else{
+						arg_op[arg_stack++] = flt_arg.int32;
+					}
+				#endif
 			}
 		}
 		else if( size == C_POINTER ){
 			if (IS_ATOM_INT(next_arg)) {
 				arg = next_arg;
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
@@ -808,13 +888,13 @@ object call_c(int func, object proc_ad, object arg_list)
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			}
 		}
 		else if( size == C_LONGLONG ){
 			if (IS_ATOM_INT(next_arg)) {
 				arg = next_arg;
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
@@ -823,7 +903,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			}
 		}
 		else {
@@ -845,11 +925,11 @@ object call_c(int func, object proc_ad, object arg_list)
 					RefDS(next_arg);
 				}
 				arg = (uintptr_t) next_arg;
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			} 
 			else if (IS_ATOM_INT(next_arg)) {
 				arg = (uintptr_t) next_arg;
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			}
 			else if (IS_ATOM(next_arg)) {
 				// atoms are rounded to integers
@@ -858,7 +938,7 @@ object call_c(int func, object proc_ad, object arg_list)
 				// if it's a -ve f.p. number, Watcom converts it to long and
 				// then to unsigned long. This is exactly what we want.
 				// Works with the others too. 
-				arg_op[arg_i++] = arg;
+				PUSH_INT_ARG
 			}
 			else {
 				RTFatal("arguments to C routines must be atoms");
@@ -873,6 +953,7 @@ object call_c(int func, object proc_ad, object arg_list)
 	is_double = (return_type == C_DOUBLE);
 	is_float = (return_type == C_FLOAT);
 
+#if INTPTR_MAX == INT32_MAX
 	if (func) {
 		if (cdecl_call && is_double) {
 			dresult = double_cdecl_func(long_proc_address, arg_op, arg_len);
@@ -896,7 +977,11 @@ object call_c(int func, object proc_ad, object arg_list)
 			iresult = 0;
 		}
 	}
-	
+#else
+	if( is_double ) dresult = dcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
+	if( is_float  ) fresult = fcall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
+	else            iresult = icall_x86_64( long_proc_address, (double*)dbl_op, arg_op );
+#endif
 	switch( return_type ){
 		case C_DOUBLE:
 			return NewDouble(dresult);
@@ -964,4 +1049,5 @@ object call_c(int func, object proc_ad, object arg_list)
 			return 0; // unknown function return type
 	}
 }
+
 #endif // EMINGW
