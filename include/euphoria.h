@@ -269,6 +269,8 @@ object power(object, object);
 object EGets(object);
 void shift_args(int, char**);
 object NewString(char *);
+object e_log(object a);
+object De_log(d_ptr a);
 #ifdef __GNUC__
 #if !defined(EMINGW) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
 char *malloc(size_t);
@@ -279,8 +281,8 @@ void eu_startup(struct routine_list *rl, struct ns_list *nl, char **ip,
 				int cps, int clk);
 void exit(int);
 int CRoutineId(int, int, object);
-int e_sqrt(int);
-int e_arctan(int);
+object e_sqrt(object);
+object e_arctan(object);
 void AssignSlice(object, object, object);
 void StdPrint(int, object, int);
 void ClearScreen();
@@ -321,7 +323,7 @@ object Dxor_bits(d_ptr a, d_ptr b);
 object not_bits(object a);
 object Date();
 cleanup_ptr ChainDeleteRoutine( cleanup_ptr old, cleanup_ptr prev );
-cleanup_ptr DeleteRoutine( int e_index );
+cleanup_ptr DeleteRoutine( object e_index );
 void DeRef1(object a);
 void Replace(replace_ptr rb);
 void UserCleanup(int);
