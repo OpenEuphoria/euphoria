@@ -1735,7 +1735,7 @@ object Dremainder(d_ptr a, d_ptr b)
 }
 
 
-object and_bits(uintptr_t a, uintptr_t b)
+object and_bits(uint32_t a, uint32_t b)
 /* integer a AND b */
 {
 	a = a & b;
@@ -1745,10 +1745,10 @@ object and_bits(uintptr_t a, uintptr_t b)
 object Dand_bits(d_ptr a, d_ptr b)
 /* double a AND b */
 {
-	return and_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+	return and_bits( (uint32_t)(a->dbl), (uint32_t)(b->dbl));
 }
 
-object or_bits(uintptr_t a, uintptr_t b)
+object or_bits(uint32_t a, uint32_t b)
 /* integer a OR b */
 {
 	a = a | b;
@@ -1758,10 +1758,10 @@ object or_bits(uintptr_t a, uintptr_t b)
 object Dor_bits(d_ptr a, d_ptr b)
 /* double a OR b */
 {
-	return or_bits( (uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+	return or_bits( (uint32_t)(a->dbl), (uint32_t)(b->dbl));
 }
 
-object xor_bits(uintptr_t a, uintptr_t b)
+object xor_bits(uint32_t a, uint32_t b)
 /* integer a XOR b */
 {
 	a = a ^ b;
@@ -1772,10 +1772,10 @@ object Dxor_bits(d_ptr a, d_ptr b)
 /* double a XOR b */
 {
 
-	return xor_bits((uintptr_t)(a->dbl), (uintptr_t)(b->dbl));
+	return xor_bits((uint32_t)(a->dbl), (uint32_t)(b->dbl));
 }
 
-object not_bits(uintptr_t a)
+object not_bits(uint32_t a)
 /* integer bitwise NOT of a */
 {
 	a = ~a;
@@ -1785,7 +1785,7 @@ object not_bits(uintptr_t a)
 object Dnot_bits(d_ptr a)
 /* double bitwise NOT of a */
 {
-	return not_bits((uintptr_t)(a->dbl));
+	return not_bits((uint32_t)(a->dbl));
 }
 
 object power(object a, object b)
