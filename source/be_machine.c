@@ -2175,10 +2175,8 @@ typedef unsigned char * page_ptr;
 unsigned char * new_page() {
 #ifdef EWINDOWS
 	return VirtualAlloc( NULL, CALLBACK_SIZE, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE );
-#elif ELINUX
-	return memalign( pagesize, pagesize );
 #elif EUNIX
-	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);			
+	return mmap(NULL, pagesize, PROT_EXEC|PROT_WRITE|PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
 #endif
 }
 
@@ -2606,9 +2604,9 @@ void Machine_Handler(int sig_no)
 	is_batch = console_application();
 #endif
 #ifdef ERUNTIME
-	RTFatal("A machine-level exception occurred during execution of your program");
+	RTFatal("A machine-level exception occurred during execution of your program (signal %d)", sig_no);
 #else
-	RTFatal("A machine-level exception occurred during execution of this statement");
+	RTFatal("A machine-level exception occurred during execution of this statement (signal %d)", sig_no);
 #endif
 }
 

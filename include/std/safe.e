@@ -137,6 +137,8 @@ public include std/memconst.e
 include std/error.e
 ifdef WINDOWS then
 	include std/win32/sounds.e
+elsedef
+	include std/machine.e
 end ifdef
 
 puts(1, "\n\t\tUsing Debug Version of machine.e\n")
@@ -724,7 +726,7 @@ export procedure deallocate(atom a)
 						eu:machine_proc(M_FREE, ia)
 					end if
 				elsedef
-					eu:machine_proc(M_FREE, ia)			
+					eu:c_func( MUNMAP, { ia, n } )		
 				end ifdef
 			elsedef
 				if safe_address_list[i][BLOCK_PROT] != PAGE_READ_WRITE then
@@ -781,8 +783,9 @@ public procedure free_code( atom addr, integer size, valid_wordsize wordsize = 1
 				{ addr-BORDER_SPACE, size*wordsize, MEM_RELEASE } )
 			return
 		end if
+	elsedef
+		c_func( MUNMAP, { addr - BORDER_SPACE, size * wordsize } )
 	end ifdef
-	machine_proc(M_FREE, addr-BORDER_SPACE)
 end procedure
 
 -- Shawn's custom stuff:

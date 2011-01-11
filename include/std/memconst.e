@@ -129,7 +129,12 @@ export constant MEMORY_PROTECTION = {
 	PAGE_NOACCESS
 }
 
-export type valid_memory_protection_constant( object x )
+--****
+-- == Types supporting Memory
+
+--**
+-- protection constants type
+public type valid_memory_protection_constant( object x )
 	return find( x, MEMORY_PROTECTION )
 end type
 
