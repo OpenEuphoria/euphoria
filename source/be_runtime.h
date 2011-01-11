@@ -41,7 +41,7 @@ extern char *TempErrName; // "ex.err" - but must be on the heap
 extern char *TempWarningName;
 extern int display_warnings;
 
-extern object seed1, seed2;  /* current value of first and second random generators */
+extern int32_t seed1, seed2;  /* current value of first and second random generators */
 extern int rand_was_set;
 extern int con_was_opened; /* TRUE if CON device was ever opened */
 extern int current_screen;
@@ -139,7 +139,7 @@ object find(object a, s1_ptr b);
 void RHS_Slice( object a, object start, object end);
 object Repeat(object item, object repcount);
 object Insert(object a,object b,int pos);
-uintptr_t good_rand();
+int32_t good_rand();
 object Date();
 object EOpen(object filename, object mode_obj, object cleanup);
 object Command_Line();

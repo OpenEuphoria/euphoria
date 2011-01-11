@@ -271,6 +271,7 @@ void shift_args(int, char**);
 object NewString(char *);
 object e_log(object a);
 object De_log(d_ptr a);
+int32_t good_rand();
 #ifdef __GNUC__
 #if !defined(EMINGW) && !defined(__MINGW32__) && !defined(__CYGWIN32__)
 char *malloc(size_t);

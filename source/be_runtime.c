@@ -340,7 +340,7 @@ IFILE last_w_file_ptr;
 object last_r_file_no = NOVALUE;
 IFILE last_r_file_ptr;
 struct file_info user_file[MAX_USER_FILE];
-object seed1, seed2;  /* current value of first and second random generators */
+int32_t seed1, seed2;  /* current value of first and second random generators */
 int rand_was_set = FALSE;   /* TRUE if user has called set_rand() */
 int con_was_opened = FALSE; /* TRUE if CON device was ever opened */
 int current_screen = MAIN_SCREEN;
@@ -2134,17 +2134,17 @@ object De_floor(d_ptr a)
 
 #define V(a,b) ((((a) << 1) | (a & 0x1)) ^ ((((b) >> 14) & 0x0000FFFF) | ((b) << 18)))
 
-#define prim1 ((long)2147483563L)
-#define prim2 ((long)2147483399L)
+#define prim1 ((int32_t)2147483563)
+#define prim2 ((int32_t)2147483399)
 
-#define root1 ((long)40014L)
-#define root2 ((long)40692L)
+#define root1 ((int32_t)40014)
+#define root2 ((int32_t)40692)
 
-#define quo1 ((long)53668L)  /* prim1 / root1 */
-#define quo2 ((long)52774L)  /* prim2 / root2 */
+#define quo1 ((int32_t)53668)  /* prim1 / root1 */
+#define quo2 ((int32_t)52774)  /* prim2 / root2 */
 
-#define rem1 ((long)12211L)  /* prim1 % root1 */
-#define rem2 ((long)3791L)   /* prim2 % root2 */
+#define rem1 ((int32_t)12211)  /* prim1 % root1 */
+#define rem2 ((int32_t)3791)   /* prim2 % root2 */
 
 /* set random seed1 and seed2 - neither can be 0 */
 void setran()
@@ -2154,7 +2154,7 @@ void setran()
 #if !defined( EWINDOWS )
 	object garbage;
 #endif
-	static object src = prim1 ^ prim2;
+	static int32_t src = prim1 ^ prim2;
 
 	time_of_day = time(NULL);
 	local = localtime(&time_of_day);
@@ -2163,18 +2163,18 @@ void setran()
 #ifdef EWINDOWS
 	seed1 = GetTickCount() + src;  // milliseconds since Windows started
 #else
-	seed1 = (uintptr_t)(&garbage) + random() + src;
+	seed1 = (int32_t)(0xffffffff & (uintptr_t)&garbage) + random() + src;
 #endif
 	src += 1;
 	good_rand();  // skip first one, second will be more random-looking
 }
 
-static ldiv_t my_ldiv (object numer, object denom)
+static ldiv_t my_ldiv (int32_t numer, int32_t denom)
 {
 	ldiv_t result;
 
-	result.quot = numer / denom;
-	result.rem = numer % denom;
+	result.quot = (int32_t) numer / denom;
+	result.rem =  (int32_t) numer % denom;
 
 	if (numer >= 0 && result.rem < 0)   {
 		++result.quot;
@@ -2184,11 +2184,11 @@ static ldiv_t my_ldiv (object numer, object denom)
 	return result;
 }
 
-uintptr_t good_rand()
+int32_t good_rand()
 /* Public Domain random number generator from USENET posting */
 {
 	ldiv_t temp;
-	object remval, quotval;
+	int32_t remval, quotval;
 
 	if (!rand_was_set && seed1 == 0 && seed2 == 0) {
 		// First time thru.
@@ -2197,8 +2197,8 @@ uintptr_t good_rand()
 
 	/* seed = seed * ROOT % PRIME */
 	temp = my_ldiv(seed1, quo1);
-	remval = root1 * temp.rem;
-	quotval = rem1 * temp.quot;
+	remval = root1 * (int32_t) temp.rem;
+	quotval = rem1 * (int32_t) temp.quot;
 
 	/* normalize */
 	seed1 = remval - quotval;
@@ -2228,7 +2228,7 @@ object Random(object a)
 {
 	if (a <= 0)
 		RTFatal("argument to rand must be >= 1");
-	return MAKE_INT((good_rand() % (uintptr_t)a) + 1);
+	return MAKE_INT((good_rand() % (uint32_t)a) + 1);
 }
 
 
@@ -2239,7 +2239,7 @@ object DRandom(d_ptr a)
 
 	if (a->dbl < 1.0)
 		RTFatal("argument to rand must be >= 1");
-	res = (1 + good_rand() % (unsigned)(a->dbl));
+	res = (1 + good_rand() % (uint32_t)(a->dbl));
 	return MAKE_UINT(res);
 }
 

@@ -3654,7 +3654,7 @@ end procedure
 
 procedure opRAND()
 	gencode = "@ = unary_op(RAND, @);\n"
-	intcode = "@ = good_rand() % ((uintptr_t)@) + 1;\n"
+	intcode = "@ = good_rand() % ((uint32_t)@) + 1;\n"
 	if TypeIs(Code[pc+1], TYPE_INTEGER) then
  		target_type = TYPE_INTEGER
 		target = ObjMinMax(Code[pc+1])

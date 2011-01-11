@@ -2787,7 +2787,7 @@ void do_exec(intptr_t *start_pc)
 				if (INT_VAL(top) <= 0) {
 					RTFatal("argument to rand() must be >= 1");
 				}
-				top = MAKE_INT((good_rand() % ((uintptr_t)INT_VAL(top))) + 1);
+				top = MAKE_INT((good_rand() % ((uint32_t)INT_VAL(top))) + 1);
 				END_UNARY_OP(RAND)
 				thread();
 				BREAK;
