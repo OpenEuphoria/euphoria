@@ -328,11 +328,27 @@ void DeRef1(object a);
 void Replace(replace_ptr rb);
 void UserCleanup(int);
 
-#define TASK_HANDLE int
+// from be_task.h
+extern int tcb_size;
+extern int current_task;
+extern double clock_period;
+#ifdef EWINDOWS
+#include <windows.h>
 
-// be_task:
+// Address to a fiber:
+#define TASK_HANDLE LPVOID
+
+#else
+
+#include <pthread.h>
+
+// PThread handle:
+#define TASK_HANDLE pthread_t
+
+#endif
+
 struct interpreted_task{
-	int *pc;         // program counter for this task
+	intptr_t *pc;         // program counter for this task
 	object_ptr expr_stack; // call stack for this task
 	object_ptr expr_max;   // current top limit of stack
 	object_ptr expr_limit; // don't start a new routine above this
@@ -370,11 +386,21 @@ struct tcb {
 	
 };
 
-extern int tcb_size;
-extern int current_task;
-extern double clock_period;
-void task_yield();
 extern struct tcb *tcb;
+
+// TASK API:
+void task_yield();
+void task_schedule(object task, object sparams);
+void task_suspend(object a);
+object task_list();
+object task_status(object a);
+void task_clock_stop();
+void task_clock_start();
+object ctask_create(object r_id, object args);
+void InitTask();
+void terminate_task(int task);
+void scheduler(double now);
+double Wait(double t);
 
 // be_w:
 extern int in_from_keyb;
