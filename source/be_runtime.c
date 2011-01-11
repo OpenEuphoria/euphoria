@@ -2925,7 +2925,7 @@ object calc_hash(object a, object b)
 				tf.ieee_uint.a = MAXINT32;
 			}
 			
-			lTemp = calc_hash(a, (object)tf.ieee_uint.a);
+			lTemp = calc_hash(a, (uint32_t)tf.ieee_uint.a);
 
 			if (IS_ATOM_INT(lTemp)) {
 				seeder.ieee_uint.a = lTemp;
@@ -3054,7 +3054,7 @@ object calc_hash(object a, object b)
 		return NewDouble((double)lHashValue);
 	}
 	else {
-		return MAKE_INT(lHashValue);
+		return (int32_t)MAKE_INT(lHashValue);
 	}
 
 }
@@ -5128,7 +5128,7 @@ void ProfileCommand()
 object make_atom32(unsigned c32)
 /* make a Euphoria atom from an unsigned C value */
 {
-	if (c32 <= (uintptr_t)MAXINT)
+	if (c32 <= (uintptr_t)MAXINT32)
 		return c32;
 	else
 		return NewDouble((double)c32);

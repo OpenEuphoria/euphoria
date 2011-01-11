@@ -1610,7 +1610,7 @@ static object set_rand(object x)
 			else {
 				// Complex case - an arbitary sequence supplied.
 				seed1 = get_int(calc_hash(x, slen));
-				seed2 = get_int(calc_hash(slen, make_atom32(seed1)));
+				seed2 = get_int(calc_hash(slen, make_atom32( seed1 ) ));
 			}
 		}
 	}
