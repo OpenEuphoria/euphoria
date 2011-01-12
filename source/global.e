@@ -251,11 +251,18 @@ export enum
 	MAX
 
 constant sizeof_ptr = sizeof( #03000001 ) -- C_POINTER
-integer max_int
+integer max_int, min_int
 if sizeof_ptr = 4 then
 	max_int = #3FFFFFFF
 else
-	max_int = #3FFFFFFF_FFFFFFFF
+	-- the parser, in some cases, loses precision, probably due to
+	-- the way MULTIPLY ops are optimized, as 0x3fffffff_ffffffff
+	-- turns into a double and is rounded up to 0x40000000_00000000.
+	-- Using peek8s(), we get the proper integer under 64-bit euphoria.
+	atom ptr = machine_func( 16, 8 )
+	poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
+	max_int = peek8s( ptr )
+	machine_proc( 17, ptr )
 end if
 export constant
 	MAXINT = max_int,
