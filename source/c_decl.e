@@ -616,7 +616,7 @@ export procedure CName(symtab_index s)
  	elsif mode = M_CONSTANT then
 		-- literal integers, or declared constants
 
-		if integer( sym_obj( s ) ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
+		if is_integer( sym_obj( s ) ) or (LeftSym = FALSE and TypeIs(s, TYPE_INTEGER) and v != NOVALUE) then
 			-- integer: either literal, or
 			-- declared constant rvalue with integer value
 			c_printf("%d", v)
@@ -745,7 +745,7 @@ export procedure DeclareFileVars()
 			end if
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
-			if integer( eentry[S_OBJ] ) then
+			if is_integer( eentry[S_OBJ] ) then
 					c_printf(" = %d;\n", eentry[S_OBJ] )
 			else
 				c_puts(" = NOVALUE;\n")

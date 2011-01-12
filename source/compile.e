@@ -39,6 +39,7 @@ include symtab.e
 include shift.e
 include fwdref.e
 
+
 integer np, pc
 
 constant MAXLEN = MAXINT - 1000000  -- assumed maximum length of a sequence
@@ -1389,7 +1390,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 			-- try it
 			p1 = power(left_val[MIN], right_val[MIN])
 
-			if integer(p1) then
+			if is_integer(p1) then
 				result[MIN] = p1
 				result[MAX] = result[MIN]
 				c_stmt("@ = ", target)
@@ -2570,7 +2571,7 @@ procedure opSWITCH_RT()
 	sequence values = cases
 	for i = 1 to length( cases ) do
 		object c = ObjValue( cases[i] )
-		if not integer( c ) then
+		if not is_integer( c ) then
 			all_ints = 0
 			exit
 		end if
@@ -2609,7 +2610,7 @@ procedure opSWITCH_RT()
 	c_stmt( "@ = 1;\n", s )
 	for i = 1 to length( cases ) do
 		if cases[i] < 0 then
-			if integer( ObjValue( -cases[i] ) ) then
+			if is_integer( ObjValue( -cases[i] ) ) then
 				c_stmt( sprintf("SEQ_PTR( @ )->base[%d] = -@;\n", i ), { Code[pc+2], -cases[i] } )
 			else
 				c_stmt( sprintf("SEQ_PTR( @ )->base[%d] = unary_op(UMINUS, @);\n", i ), { Code[pc+2], -cases[i] } )
@@ -2733,7 +2734,7 @@ end procedure
 procedure opINTEGER_CHECK()
 -- INTEGER_CHECK
 	symtab_index sym = Code[pc+1]
-	if SymTab[sym][S_MODE] = M_CONSTANT and integer( SymTab[sym][S_OBJ] ) then
+	if SymTab[sym][S_MODE] = M_CONSTANT and is_integer( SymTab[sym][S_OBJ] ) then
 		-- do nothing: an inlined routine could cause this situation
 
 	elsif BB_var_type(sym) != TYPE_INTEGER then
@@ -7354,7 +7355,7 @@ procedure BackEnd(atom ignore)
 
 	for csym = TopLevelSub to length(SymTab) do
 		if eu:compare( SymTab[csym][S_OBJ], NOVALUE ) then
-		if not integer( SymTab[csym][S_OBJ] ) then
+		if not is_integer( SymTab[csym][S_OBJ] ) then
 		if SymTab[csym][S_MODE] != M_TEMP then
 			if tp_count > INIT_CHUNK then
 				-- close current .c and start a new one

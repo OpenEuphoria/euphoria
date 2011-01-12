@@ -155,3 +155,4 @@ end procedure
 public function is_eudir_from_cmdline()
 	return cmdline_eudir
 end function
+

@@ -2475,7 +2475,7 @@ procedure optimize_switch( integer switch_pc, integer else_bp, integer cases, in
 		end if
 		if not equal(SymTab[sym][S_OBJ], NOVALUE) then
 			values[i] = sign * SymTab[sym][S_OBJ]
-			if not integer( values[i] ) then
+			if not is_integer( values[i] ) then
 				all_ints = 0
 				if atom( values[i] ) then
 					has_atom = 1
@@ -3384,7 +3384,7 @@ function Global_declaration(integer type_ptr, integer scope)
 							valsym = tsym[S_CODE]
 
 						elsif not equal( tsym[S_OBJ], NOVALUE ) then
-							if integer(tsym[S_OBJ]) then
+							if is_integer(tsym[S_OBJ]) then
 								valsym = tok[T_SYM]
 							else
 								CompileErr(30)
@@ -3407,7 +3407,7 @@ function Global_declaration(integer type_ptr, integer scope)
 					CompileErr(84)
 				end if
 				val = SymTab[valsym][S_OBJ] * negate
-				if integer(val) then
+				if is_integer(val) then
 					Push(NewIntSym(val))
 				else
 					Push(NewDoubleSym(val))
@@ -3420,7 +3420,7 @@ function Global_declaration(integer type_ptr, integer scope)
 				end if
 			else
 				putback(tok)
-				if integer(val) then
+				if is_integer(val) then
 					Push(NewIntSym(val))
 				else
 					Push(NewDoubleSym(val))
@@ -3463,7 +3463,7 @@ function Global_declaration(integer type_ptr, integer scope)
 				SymTab[sym][S_OBJ] = usedval
 				if TRANSLATE then
 					-- Let the translator know about its value
-					if integer( usedval ) then
+					if is_integer( usedval ) then
 						SymTab[sym][S_GTYPE] = TYPE_INTEGER
 					else
 						SymTab[sym][S_GTYPE] = TYPE_DOUBLE
@@ -4261,7 +4261,7 @@ procedure SetWith(integer on_off)
 				end if
 				token tok = next_token()
 				if tok[T_ID] = ATOM then
-					if integer(SymTab[tok[T_SYM]][S_OBJ]) then
+					if is_integer(SymTab[tok[T_SYM]][S_OBJ]) then
 						sample_size = SymTab[tok[T_SYM]][S_OBJ]
 					else
 						sample_size = -1

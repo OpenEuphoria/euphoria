@@ -1681,7 +1681,7 @@ export function Scanner()
 					basetype = 3 -- decimal
 				end if
 				d = MakeInt(yytext, nbase[basetype])
-				if integer(d) then
+				if is_integer(d) then
 					return {ATOM, NewIntSym(d)}
 				else
 					return {ATOM, NewDoubleSym(d)}
@@ -1825,7 +1825,7 @@ export function Scanner()
 				end if
 
 				ungetch()
-				if is_int then
+				if is_int and is_integer(i) then
 					return {ATOM, NewIntSym(i)}
 				else
 					if d <= MAXINT_DBL then            -- d is always >= 0
@@ -1902,7 +1902,7 @@ export function Scanner()
 			if getch() != '\'' then
 				CompileErr(56)
 			end if
-			if integer(ach) then
+			if is_integer(ach) then
 				return {ATOM, NewIntSym(ach)}
 			else
 				return {ATOM, NewDoubleSym(ach)}

@@ -37,12 +37,13 @@ fi
 echo "# File generated from configure" > ${CONFIG_FILE}
 
 MFLAG=-m32
+EFLAG=E32
 if echo "$UNAME_MACHINE" | grep "i[1-7]86" > /dev/null; then
 	echo ARCH=ix86
-	MFLAG=-m32
 elif echo "$UNAME_MACHINE" | grep "x86_64" > /dev/null; then
 	ARCH=ix86_64
 	MFLAG=-m64
+	EFLAG=E64
 fi
 
 if test $UNAME_SYSTEM = "Linux"; then
@@ -248,10 +249,12 @@ while [ "$1" != "" ]; do
 			x86.64)
 				ARCH=ix86_64
 				MFLAG=-m64
+				EFLAG=E64
 			;;
 			x86)
 				ARCH=ix86
 				MFLAG=-m32
+				EFLAG=E32
 			;;
 			*)
 				echo "Unknown Architecture '$VAL'"
@@ -378,6 +381,7 @@ fi
 
 echo "ARCH=$ARCH" >> "$PREFIX"${CONFIG_FILE}
 echo "MSIZE=$MFLAG" >> "$PREFIX"${CONFIG_FILE}
+echo "EFLAG=-d $EFLAG" >> "$PREFIX"${CONFIG_FILE}
 
 echo "CC=$CC" >> "$PREFIX"${CONFIG_FILE}
 echo "RC=$RC" >> "$PREFIX"${CONFIG_FILE}

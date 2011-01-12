@@ -502,7 +502,7 @@ export procedure InitSymTab()
 				for ij=1 to length(sj) do
 	                switch sj[ij][T_ID] with fallthru do
 	                    case ATOM then -- must create a lasting temp
-	                    	if integer(sj[ij][T_SYM]) then
+	                    	if is_integer(sj[ij][T_SYM]) then
 								st_index = NewIntSym(sj[ij][T_SYM])
 							else
 								st_index = NewDoubleSym(sj[ij][T_SYM])

@@ -1196,7 +1196,7 @@ export procedure emit_op(integer op)
 		if a > 0 then
 			obj = SymTab[a][S_OBJ]
 			if SymTab[a][S_MODE] = M_CONSTANT then
-				if integer(obj) then
+				if is_integer(obj) then
 					if obj = MININT then
 						Push(NewDoubleSym(-MININT))
 					else
