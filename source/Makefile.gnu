@@ -417,7 +417,7 @@ endif
 EUBIND=eubind
 EUSHROUD=eushroud
 
-binder : translator library EU_BACKEND_RUNNER_FILES
+binder : translator library $(EU_BACKEND_RUNNER_FILES)
 	$(MAKE) $(BUILDDIR)/$(EUBIND)
 	$(MAKE) $(BUILDDIR)/$(EUSHROUD)
 
@@ -785,7 +785,7 @@ $(BUILDDIR)/eudis-build/main-.c : $(EU_INTERPRETER_FILES)
 $(BUILDDIR)/$(EUDIS) : translator library $(BUILDDIR)/eudis-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/eudis-build" -f dis.mak
 
-$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
+$(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/bind-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUBIND)" \
@@ -796,7 +796,7 @@ $(BUILDDIR)/bind-build/main-.c : $(TRUNKDIR)/source/bind.ex
 $(BUILDDIR)/$(EUBIND) : $(BUILDDIR)/bind-build/main-.c
 		$(MAKE) -C "$(BUILDDIR)/bind-build" -f bind.mak
 
-$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex
+$(BUILDDIR)/shroud-build/main-.c : $(TRUNKDIR)/source/shroud.ex  $(EU_INTERPRETER_FILES) $(EU_BACKEND_RUNNER_FILES)
 	$(BUILDDIR)/$(EECU) -build-dir "$(BUILDDIR)/shroud-build" \
 		-i $(TRUNKDIR)/include \
 		-o "$(BUILDDIR)/$(EUSHROUD)" \
