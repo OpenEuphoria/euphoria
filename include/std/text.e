@@ -1673,7 +1673,10 @@ public function format(sequence format_pattern, object arg_list = {})
 							argtext = arg_list[argn]
 						end if
 						
-					elsif integer(arg_list[argn]) then
+					elsif integer(arg_list[argn]) 
+					-- for consistent formatting, we need to test in case of 64-bit euphoria
+					and arg_list[argn] <= 0x3fff_fff 
+					and arg_list[argn] >= -0x4000_0000 then
 						if istext then
 							argtext = {and_bits(0xFFFF_FFFF, math:abs(arg_list[argn]))}
 							
