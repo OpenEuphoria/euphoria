@@ -250,8 +250,15 @@ export enum
 	MIN,
 	MAX
 
+constant sizeof_ptr = sizeof( #03000001 ) -- C_POINTER
+integer max_int
+if sizeof_ptr = 4 then
+	max_int = #3FFFFFFF
+else
+	max_int = #3FFFFFFF_FFFFFFFF
+end if
 export constant
-	MAXINT = #3FFFFFFF,
+	MAXINT = max_int,
 	MININT = -MAXINT-1,   -- should be -ve
 	MININT_DBL = MININT,
 	MAXINT_DBL = MAXINT

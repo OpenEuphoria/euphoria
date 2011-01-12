@@ -125,7 +125,7 @@ export procedure fcompress(integer f, object x)
 	sequence x4, s
 	integer p
 
-	if integer(x) then
+	if integer(x) and x >= MIN4B and x <= MAX4B then
 		if x >= MIN1B and x <= max1b then
 			puts(f, x - MIN1B) -- normal, quite small integer
 
