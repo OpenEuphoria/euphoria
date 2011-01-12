@@ -90,7 +90,7 @@ function deserialize_file(integer fh, integer c)
 			else
 				len = get4(fh)
 			end if
-			if len < 0  or not integer(len) then
+			if len < 0  or not integer(len) or len > MAX4B then
 				return 0
 			end if
 			s = repeat(0, len)
