@@ -3274,14 +3274,14 @@ static void CheckSlice(object a, int startval, int endval, int length)
 		RTFatal("attempt to slice an atom");
 
 	if (startval < 1) {
-		RTFatal("slice lower index is less than 1 (%ld)", startval);
+		RTFatal("slice lower index is less than 1 (%d)", (int32_t) startval);
 	}
 	if (endval < 0) {
-		RTFatal("slice upper index is less than 0 (%ld)", endval);
+		RTFatal("slice upper index is less than 0 (%d)", (int32_t) endval);
 	}
 
 	if (length < 0 ) {
-		RTFatal("slice length is less than 0 (%ld)", length);
+		RTFatal("slice length is less than 0 (%d)", (int32_t) length);
 	}
 
 	s = SEQ_PTR(a);
