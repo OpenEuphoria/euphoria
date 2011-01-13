@@ -59,5 +59,25 @@ for i = 1 to length(hashalgo) do
     end ifdef
 end for
 
+for i = 1 to length(hashalgo) do
+		
+	test_equal( sprintf("%d: hashing integer vs equivalent double", i),
+		hash( 5, hashalgo[i] ),
+		hash( 5.5 - 0.5, hashalgo[i] )
+		)
+	
+	test_equal( sprintf("%d: hashing integer vs equivalent double int a sequence", i),
+		hash( {1, 5}, hashalgo[i] ),
+		hash( {1, 5.5 - 0.5}, hashalgo[i] )
+		)
+	
+	if not equal( hashalgo[i], MD5) and not equal( hashalgo[i], SHA256 ) then
+		-- MD5 and SHA256 don't do anything with atoms, so this test would falsely fail
+		test_not_equal( sprintf("%d: hashing integer vs almost equivalent double", i),
+			hash( 5, hashalgo[i] ),
+			hash( 5.5 - 0.49, hashalgo[i] )
+			)
+	end if
+end for
 
 test_report()

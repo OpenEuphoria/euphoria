@@ -2419,6 +2419,16 @@ object binary_op(int fn, object a, object b)
 	return MAKE_SEQ(c);
 }
 
+/* When hashing, we treat doubles differently from integers.  But if a 
+ * double can be represented as an integer, we want to use that.
+ */
+#define IS_DOUBLE_AN_INTEGER( X ) \
+if( !IS_ATOM_INT( X ) && IS_ATOM( X ) ){ \
+	double TMP_dbl = DBL_PTR( X )->dbl; \
+	if( TMP_dbl == (double)(object)TMP_dbl ){\
+		X = (object)TMP_dbl;\
+	}\
+}\
 
 object calc_MD5(object a)
 {
@@ -2435,6 +2445,7 @@ object calc_MD5(object a)
 	object av;
 
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
@@ -2485,6 +2496,7 @@ object calc_SHA256(object a)
 	object av;
 
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 	}
 	else if (IS_ATOM_DBL(a)) {
@@ -2502,6 +2514,7 @@ object calc_SHA256(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
 			if (IS_ATOM_INT(av)) {
 			}
 			else if (IS_ATOM_DBL(av)) {
@@ -2519,6 +2532,7 @@ object calc_SHA256(object a)
 
 	return 0;
 }
+
 
 
 unsigned int calc_adler32(object a)
@@ -2541,6 +2555,7 @@ unsigned int calc_adler32(object a)
 	lA = 1;
 	lB = 0;
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 		lA +=  a; if (lA >= 65521) lA %= 65521;
 		lB +=  lA; if (lB >= 65521) lB %= 65521;
@@ -2563,6 +2578,7 @@ unsigned int calc_adler32(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
 			if (IS_ATOM_INT(av)) {
 				lA += av; if (lA >= 65521) lA %= 65521;
 				lB += lA; if (lB >= 65521) lB %= 65521;
@@ -2668,9 +2684,8 @@ static unsigned int calc_hsieh32(object a)
  	unsigned int lHashVal;
 	int has_string;
 
-
-
- 	if (IS_ATOM_INT(a)) {
+	IS_DOUBLE_AN_INTEGER(a)
+	if (IS_ATOM_INT(a)) {
 	 	tf.integer = a;
 	 	lHashVal = hsieh32(tf.tfc, 4, a*2 - 1);
  	}
@@ -2694,6 +2709,7 @@ static unsigned int calc_hsieh32(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
 			if (IS_ATOM_INT(av)) {
 				if (av >= 0 && av <= 255) {
 					if ( !has_string ){
@@ -2736,6 +2752,7 @@ static unsigned int calc_hsieh32(object a)
 					break;  // we hit the end marker
 				}
 
+				IS_DOUBLE_AN_INTEGER(av)
 				if (IS_ATOM_INT(av)) {
 				 	tf.integer = av;
 				 	lHashVal = hsieh32(tf.tfc, 4, lHashVal);
@@ -2785,16 +2802,25 @@ unsigned int calc_fletcher32(object a)
 	lA = 1;
 	lB = 0;
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(a)) {
 		lA +=  a;
 		lB +=  lA;
 	}
 	else if (IS_ATOM_DBL(a)) {
-		tf.ieee_double = (DBL_PTR(a)->dbl);
-		for(tfi = 0; tfi < 4; tfi++)
-		{
-			lA += tf.tfc[tfi];
-			lB += lA;
+		double a_dbl = (DBL_PTR(a)->dbl);
+		if( a_dbl == (double)(object)a_dbl ){
+			a = (object) a_dbl;
+			lA +=  a;
+			lB +=  lA;
+		}
+		else{
+			tf.ieee_double = a_dbl;
+			for(tfi = 0; tfi < 4; tfi++)
+			{
+				lA += tf.tfc[tfi];
+				lB += lA;
+			}
 		}
 	}
 	else { /* input is a sequence */
@@ -2810,6 +2836,8 @@ unsigned int calc_fletcher32(object a)
 				break;  // we hit the end marker
 			}
 
+			IS_DOUBLE_AN_INTEGER(av)
+			
 			if (IS_ATOM_INT(av)) {
 				if (av < 256)
 				{
@@ -2888,6 +2916,7 @@ object calc_hash(object a, object b)
 	object_ptr ap, lp;
 	object av, lv;
 
+	IS_DOUBLE_AN_INTEGER(a)
 	if (IS_ATOM_INT(b)) {
 		if (b == -6)
 			return calc_hsieh30(a);	// Will always return a Euphoria integer.
@@ -2909,6 +2938,7 @@ object calc_hash(object a, object b)
 
 		if (b < 0)
 			RTFatal("second argument of hash() must not be a negative integer.");
+		
 		if (b == 0)
 		{
 			if (IS_ATOM_INT(a)) {
@@ -3002,6 +3032,7 @@ object calc_hash(object a, object b)
 				lHashValue = rol(lHashValue, 3) ^ seeder.ieee_char[tfi];
 			}
 
+			IS_DOUBLE_AN_INTEGER( lv )
 			if (IS_ATOM_INT(lv)) {
 				prev.ieee_uint.a = lv;
 				prev.ieee_uint.b = rol(lv, 15);
@@ -3015,12 +3046,13 @@ object calc_hash(object a, object b)
 				prev.ieee_uint.b = rol(lv, 15);
 			}
 
+			IS_DOUBLE_AN_INTEGER( av )
 			if (IS_ATOM_INT(av)) {
 				tf.ieee_uint.a = av;
 				tf.ieee_uint.b = rol(av, 15);
 			}
 			else if (IS_ATOM_DBL(av)) {
-				tf.ieee_double = (DBL_PTR(av)->dbl);
+				tf.ieee_double = DBL_PTR(av)->dbl;
 			}
 			else if (IS_SEQUENCE(av))
 			{
