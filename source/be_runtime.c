@@ -4509,6 +4509,10 @@ int nodelaych(int wait)
 }
 #endif
 
+#if defined(EWINDOWS) && defined(EMINGW)
+int winkbhit();
+#endif
+
 int get_key(int wait)
 /* Get one key from keyboard, without echo. If wait is TRUE then wait until
    a key is typed, otherwise return -1 if no key is available. */
@@ -5000,7 +5004,7 @@ object system_exec_call(object command, object wait)
 	exit_code = system(string_ptr);
 #else
 	argv = make_arg_cv(string_ptr, &exit_code);
-	exit_code = spawnvp(P_WAIT, argv[0], (char const * const *)argv);
+	exit_code = spawnvp(P_WAIT, argv[0], (char * const *)argv);
 
 	EFree(argv[0]);		// free the 'process' name
 	EFree((char *)argv); // free the list of arg addresses, but not the args themself.
@@ -5406,18 +5410,18 @@ uintptr_t __cdecl osx_cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t 
 
 // Need to force the compiler to use an absolute address
 typedef intptr_t (*cbfunc)();
-#define CALL_GENERAL_CALLBACK ((cbfunc)0xabcdefabcdefabcd)
+#define CALL_GENERAL_CALLBACK ((cbfunc)0xabcdefabcdefabcdLL)
 #endif
 
 /* Windows cdecl - Need only one template.
    It can handle a variable number of args.
    Not all args below will actually be provided on a given call. */
 
-LRESULT __cdecl cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+intptr_t __cdecl cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 						uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr) ((intptr_t) CALLBACK_POINTER ),
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr) ((uintptr_t) CALLBACK_POINTER ),
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
@@ -5427,81 +5431,81 @@ LRESULT __cdecl cdecl_call_back(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
  * Euphoria routine.
  */
 
-LRESULT CALLBACK call_back0()
+intptr_t CALLBACK call_back0()
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER, // will be replaced
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER, // will be replaced
 									 0, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back1(uintptr_t arg1)
+intptr_t CALLBACK call_back1(uintptr_t arg1)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, 0, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back2(uintptr_t arg1, uintptr_t arg2)
+intptr_t CALLBACK call_back2(uintptr_t arg1, uintptr_t arg2)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, 0, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back3(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
+intptr_t CALLBACK call_back3(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, 0, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back4(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+intptr_t CALLBACK call_back4(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, 0,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back5(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+intptr_t CALLBACK call_back5(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 0, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back6(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+intptr_t CALLBACK call_back6(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, 0, 0, 0);
 }
 
-LRESULT CALLBACK call_back7(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+intptr_t CALLBACK call_back7(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 							uintptr_t arg7)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, 0, 0);
 }
 
-LRESULT CALLBACK call_back8(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+intptr_t CALLBACK call_back8(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 							uintptr_t arg7, uintptr_t arg8)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, 0);
 }
 
-LRESULT CALLBACK call_back9(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+intptr_t CALLBACK call_back9(uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 							uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
 							uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
 {
-	return (LRESULT) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
+	return (intptr_t) CALL_GENERAL_CALLBACK((symtab_ptr)CALLBACK_POINTER,
 									 arg1, arg2, arg3, arg4, arg5,
 									 arg6, arg7, arg8, arg9);
 }
@@ -5711,8 +5715,6 @@ void UserCleanup(int status)
 }
 
 #ifdef EWINDOWS
-static char one_line[84];
-static char *next_char_ptr = NULL;
 
 #if defined(EMINGW)
 int winkbhit()
@@ -5733,6 +5735,12 @@ int winkbhit()
 		ReadConsoleInput(console_input, &pbuffer, 1, &junk);
 	}
 }
+
+#else
+
+static char one_line[84];
+static char *next_char_ptr = NULL;
+
 #endif
 
 int wingetch()

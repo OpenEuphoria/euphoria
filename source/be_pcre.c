@@ -18,6 +18,7 @@
 #include "be_runtime.h"
 #include "global.h"
 #include "be_pcre.h"
+#include "be_machine.h"
 
 void pcre_deref(object re) {
 	pcre_cleanup_ptr rcp;
@@ -41,7 +42,6 @@ void pcre_deref(object re) {
 	}
 }
 
-long get_int();
 
 object compile(object pattern, object eflags) {
 	pcre *re;

@@ -1003,7 +1003,7 @@ static void run_current_task( int task ){
 }
 
 void WINAPI exec_task( void *task ){
-	struct tcb *t = &tcb[(int)task];
+	struct tcb *t = &tcb[(intptr_t)task];
 
 	call_task( t->rid, t->args );
 }

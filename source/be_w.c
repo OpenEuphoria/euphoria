@@ -127,7 +127,7 @@ void check_has_console() {
 	else {
 		DWORD count, processList[3];
 
-		count = gCPLA(&processList, 3);
+		count = gCPLA( (LPDWORD) &processList, 3);
 		FreeLibrary(kernel32);
 		_has_console = (count != 0);
 	}

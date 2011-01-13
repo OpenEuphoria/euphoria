@@ -160,7 +160,7 @@ typedef int (*FARPROC)();
 #    define WINAPI
 #  endif // EMINGW
 #  define __interrupt
-#  define LRESULT long
+#  define LRESULT intptr_t
 #  if !defined(EMINGW)
 #    define O_TEXT 0
 #    define HINSTANCE void*
@@ -222,7 +222,7 @@ struct videoconfigEx {
 
 #ifdef EWINDOWS 
 // Use Heap functions for everything.
-extern unsigned default_heap;
+extern HANDLE default_heap;
 #define malloc(n) HeapAlloc((void *)default_heap, 0, n)
 #define free(p) HeapFree((void *)default_heap, 0, p)
 #define realloc(p, n) HeapReAlloc((void *)default_heap, 0, p, n)

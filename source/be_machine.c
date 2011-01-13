@@ -1297,10 +1297,10 @@ static object PutScreenChar(object x)
 {
 	unsigned attr, len;
 	unsigned line, column;
-	unsigned fg, bg;
 	s1_ptr args;
 	object_ptr p;
 #ifdef EUNIX
+	unsigned fg, bg;
 	unsigned c;
 	char s1[2];
 	int save_line, save_col;
@@ -1746,7 +1746,7 @@ DWORD WINAPI WinTimer(LPVOID lpParameter)
 			Sleep((((double)(lcount.QuadPart-ncount.QuadPart))/((double)freq.QuadPart))*1000.0);
 		}
 		if (Executing && ProfileOn) {
-			profile_sample[sample_next++] = tpc;
+			profile_sample[sample_next++] = (intptr_t) tpc;
 		}
 	}
 	return 0;
@@ -2357,7 +2357,7 @@ object CallBack(object x)
 			*(uintptr_t *)(copy_addr+i) = (uintptr_t)general_ptr;
 		}
 #endif
-		if ( *(intptr_t*)(copy_addr + i) == CALLBACK_POINTER ) {
+		if ( *(intptr_t*)(copy_addr + i) == (intptr_t)CALLBACK_POINTER ) {
 #ifdef ERUNTIME
 			*(intptr_t *)(copy_addr+i) = routine_id;
 #else
@@ -2367,7 +2367,7 @@ object CallBack(object x)
 			break;
 		}
 #if INTPTR_MAX == INT64_MAX
-		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcd ){
+		else if( *((uintptr_t*)(copy_addr + i)) == 0xabcdefabcdefabcdLL ){
 			*((uintptr_t*)(copy_addr + i)) = (uintptr_t)general_ptr;
 		}
 #endif

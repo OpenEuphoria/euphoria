@@ -505,7 +505,7 @@ char *EMalloc(uintptr_t nbytes)
 		p = malloc((long)nbytes+8);
 // 		assert(p);
 		if (p == NULL) {
-			printf("couldn't alloc %d bytes\n", nbytes );
+			printf("couldn't alloc %" PRIdPTR " bytes\n", nbytes );
 			// Only triggered if asserts are turned off.
 			p = Out_Of_Space(nbytes + 8);
 		}
@@ -541,7 +541,7 @@ char *EMalloc(uintptr_t nbytes)
 		align4 = 4;  // start handling 4-aligned blocks
 		nbytes += align4;
 #else
-		assert(((unsigned int)p & 7) == 0);
+		assert(((uintptr_t)p & 7) == 0);
 		return p;
 #endif
 	} while (TRUE);
@@ -758,7 +758,7 @@ char *ERealloc(char *orig, uintptr_t newsize)
 #endif
 		return orig;
 	}
-	else if (((long)q & 0x07) == ((long)p & 0x07)) {
+	else if (((uintptr_t)q & 0x07) == ((uintptr_t)p & 0x07)) {
 		/* q is aligned the same way as p modulo 8 (almost always I think) */
 		orig = orig + (q - p);
 		return orig;
@@ -959,7 +959,7 @@ static void new_dbl_block(unsigned int cnt)
 
 	blksize = cnt * dsize;
 	dbl_block = (free_block_ptr)EMalloc( blksize );
-	assert(((unsigned long)dbl_block & 7) == 0);
+	assert(((uintptr_t)dbl_block & 7) == 0);
 
 #ifdef HEAP_CHECK
 	Trash((char *)dbl_block, blksize);
@@ -994,7 +994,7 @@ object NewDouble(double d)
 	}
 
 	new_dbl = d_list;
-	assert(((unsigned long)new_dbl & 7) == 0);
+	assert(((uintptr_t)new_dbl & 7) == 0);
 	d_list = (d_ptr)((free_block_ptr)new_dbl)->next;
 
 	new_dbl->ref = 1;

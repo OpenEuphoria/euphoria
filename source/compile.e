@@ -7076,7 +7076,7 @@ procedure BackEnd(atom ignore)
 	c_hputs("extern char **Argv;\n")
 
 	if TWINDOWS then
-		c_puts("uintptr_t default_heap;\n")
+		c_puts("HANDLE default_heap;\n")
 		if sequence(wat_path) then
 			c_puts("/* this is in the header */\n")
 			c_puts("/*__declspec(dllimport) unsigned __stdcall GetProcessHeap(void)*/;\n")
