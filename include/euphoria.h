@@ -1,6 +1,10 @@
 #ifndef EUPHORIA_H_
 #define EUPHORIA_H_
 
+#ifdef EWINDOWS
+#include <windows.h>
+#endif
+
 /* Euphoria
    C include file for Euphoria programs 
    that have been translated to C */
