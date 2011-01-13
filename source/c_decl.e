@@ -599,6 +599,9 @@ export procedure CName(symtab_index s)
 
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
+			if SIZEOF_POINTER = 8 then
+				c_puts( "LL" )
+			end if
 		else
 			if SymTab[s][S_SCOPE] > SC_PRIVATE then
 				c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -620,6 +623,9 @@ export procedure CName(symtab_index s)
 			-- integer: either literal, or
 			-- declared constant rvalue with integer value
 			c_printf("%d", v)
+			if SIZEOF_POINTER = 8 then
+				c_puts( "LL" )
+			end if
 		else
 			-- Declared constant
 			c_printf("_%d", SymTab[s][S_FILE_NO])
@@ -633,6 +639,9 @@ export procedure CName(symtab_index s)
 		-- literal doubles, strings, temporary vars that we create
 		if LeftSym = FALSE and GType(s) = TYPE_INTEGER and v != NOVALUE then
 			c_printf("%d", v)
+			if SIZEOF_POINTER = 8 then
+				c_puts( "LL" )
+			end if
 		else
 			c_printf("_%d", SymTab[s][S_TEMP_NAME])
 		end if
@@ -746,7 +755,7 @@ export procedure DeclareFileVars()
 			c_printf("_%d", eentry[S_FILE_NO])
 			c_puts(eentry[S_NAME])
 			if is_integer( eentry[S_OBJ] ) then
-					c_printf(" = %d;\n", eentry[S_OBJ] )
+					c_printf(" = %d%s;\n", { eentry[S_OBJ], LL_suffix} )
 			else
 				c_puts(" = NOVALUE;\n")
 			end if

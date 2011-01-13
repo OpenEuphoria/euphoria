@@ -1273,6 +1273,10 @@ procedure main_temps()
 	Initializing = FALSE
 end procedure
 
+export sequence LL_suffix = ""
+if SIZEOF_POINTER = 8 then
+	LL_suffix = "LL"
+end if
 function FoldInteger(integer op, integer target, integer left, integer right)
 -- try to fold an integer operation: + - * power floor_div
 -- we know that left and right are of type integer.
@@ -1305,7 +1309,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 		if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 			c_stmt("@ = ", target)
-			c_printf("%d;\n", result[MIN])
+			c_printf("%d%s;\n", {result[MIN], LL_suffix})
 		end if
 
 	elsif op = MINUS or op = MINUS_I then
@@ -1328,7 +1332,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 		if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 			c_stmt("@ = ", target)
-			c_printf("%d;\n", result[MIN])
+			c_printf("%d%s;\n", {result[MIN], LL_suffix})
 		end if
 
 	elsif op = rw:MULTIPLY then
@@ -1379,7 +1383,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 			if result[MIN] = result[MAX] and result[MIN] != NOVALUE then
 				intres = result[MIN]
 				c_stmt("@ = ", target)
-				c_printf("%d;\n", intres)
+				c_printf("%d%s;\n", {intres, LL_suffix})
 			end if
 		end if
 
@@ -1394,7 +1398,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 				result[MIN] = p1
 				result[MAX] = result[MIN]
 				c_stmt("@ = ", target)
-				c_printf("%d;\n", result[MIN])
+				c_printf("%d%s;\n", {result[MIN], LL_suffix})
 			end if
 
 		else
@@ -1426,7 +1430,7 @@ function FoldInteger(integer op, integer target, integer left, integer right)
 
 			if intres >= MININT and intres <= MAXINT then
 				c_stmt("@ = ", target)
-				c_printf("%d;\n", intres)
+				c_printf("%d%s;\n", {intres, LL_suffix})
 				result[MIN] = intres
 				result[MAX] = result[MIN]
 			end if
@@ -2157,6 +2161,8 @@ procedure opSTARTLINE()
 				exit
 			end if
 		end for
+		c_puts(name_ext(known_files[slist[Code[pc+1]][LOCAL_FILE_NO]]))
+		c_printf(":%d\t", slist[Code[pc+1]][LINE])
 		c_puts(line)
 		if close_comment then
 			c_puts("*/\n")

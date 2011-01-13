@@ -253,9 +253,11 @@ export enum
 ifdef E32 then
 
 	constant max_int = #3FFFFFFF
+	export constant SIZEOF_POINTER = 4
 
 elsifdef E64 then
-
+	
+	export constant SIZEOF_POINTER = 8
 	atom ptr = machine_func( 16, 8 )
 		poke( ptr, { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x3f } )
 	constant max_int = peek8s( ptr )
@@ -263,9 +265,9 @@ elsifdef E64 then
 
 elsedef
 	-- default to native...
-	constant sizeof_ptr = sizeof( #03000001 ) -- C_POINTER
+	export constant SIZEOF_POINTER = sizeof( #03000001 ) -- C_POINTER
 	integer max_int, min_int
-	if sizeof_ptr = 4 then
+	if SIZEOF_POINTER = 4 then
 		max_int = #3FFFFFFF
 	else
 		-- the parser, in some cases, loses precision, probably due to

@@ -84,14 +84,14 @@
 
 #define ASEQ(s) (((uintptr_t)s & (uintptr_t)DS_MASK) == (uintptr_t)SEQ_MASK)
 
-#define IS_DBL_OR_SEQUENCE(ob)  (((long)(ob)) < NOVALUE)
+#define IS_DBL_OR_SEQUENCE(ob)  (((object)(ob)) < NOVALUE)
 
 
 #define MININT_DBL ((double)MININT)
 #define MAXINT_DBL ((double)MAXINT)
-#define INT23      (long)0x003FFFFFL
-#define INT16      (long)0x00007FFFL
-#define INT15      (long)0x00003FFFL
+#define INT23      (object)0x003FFFFFL
+#define INT16      (object)0x00007FFFL
+#define INT15      (object)0x00003FFFL
 #define ATOM_M1    -1
 #define ATOM_0     0
 #define ATOM_1     1
