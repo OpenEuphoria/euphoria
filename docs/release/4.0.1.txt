@@ -9,6 +9,9 @@
 * [[ticket:575]] OW installer file setenv-ow.bat functionality restored from 4.0.0RC2.
 * case issues were removed from pathinfo(), canonical_path(), and abbreviate_path()
   these functions now return raw OS output; it is up to the user to change case when necessary
+* [[ticket:593]] Atoms represented as doubles, but that hold the double representation of a
+  euphoria integer, now hash as though they were actually represented as an integer.  This
+  ensures that two objects that evaluate as ##equal()## will have the same hash value.
 
 == Enhancements
 
