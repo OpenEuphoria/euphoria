@@ -4366,7 +4366,7 @@ object_ptr v_elem;
 }
 
 
-object EPrintf(int file_no, object format_obj, object values)
+object EPrintf(object file_no, object format_obj, object values)
 /* formatted print */
 /* file_no could be DOING_SPRINTF (for sprintf) */
 {
