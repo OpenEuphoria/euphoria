@@ -10,11 +10,14 @@ extern symtab_ptr TopLevelSub; /* symbol table pointer of top level procedure. *
 extern symtab_ptr *e_routine;  /* array of symbol table pointers */
 extern cleanup_ptr *e_cleanup; /* array of cleanup_ptr pointers */ 
 extern intptr_t e_routine_next;     /* index of next available element */
+extern int e_routine_size;   /* number of symbol table pointers allocated */
 symtab_ptr Locate(intptr_t *pc);
 symtab_ptr RTLookup(char *name, int file, intptr_t *pc, symtab_ptr routine, int stlen, unsigned long current_line);
 int FindLine(intptr_t *pc, symtab_ptr proc);
 int RoutineId(symtab_ptr current_sub, object name, int file_no);
 int PrivateName(char *name, symtab_ptr proc);
 int ValidPrivate(symtab_ptr sym, symtab_ptr proc);
+extern void e_routine_copy(intptr_t old, int old_e_routine_size,
+	int old_e_routine_next, intptr_t oldsymtab);
 
 #endif

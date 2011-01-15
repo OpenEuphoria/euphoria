@@ -335,6 +335,10 @@ function BackEndify(integer il_file)
 			0, -- source copy of e_routine_size
 			0, -- source copy of e_routine_next
 			0, -- source copy of pc/tpc
+			0, -- source copy of expr_stack
+			0, -- source copy of expr_top
+			0, -- source copy of expr_max
+			0, -- source copy of expr_limit
 			$
 		}
 end function

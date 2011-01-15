@@ -401,6 +401,7 @@ void e_routine_copy(intptr_t old, int old_e_routine_size,
 	}
 
 	for ( i = 0; i < e_routine_next; ++i ){
-		e_routine[i] = (old_e_routine[i] - oldst) + fe.st;
+		e_routine[i] = (symtab_ptr)
+		(((symtab_ptr*)old_e_routine[i] - oldst) + (symtab_ptr*)fe.st);
 	}
 }

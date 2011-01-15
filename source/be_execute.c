@@ -870,6 +870,35 @@ static int recover_lhs_subscript(object subscript, s1_ptr s)
 	return 0; // not reached
 }
 
+void CopyInitStack(int size, intptr_t oldestack, intptr_t oldetop,
+	intptr_t oldemax, intptr_t oldelimit, intptr_t oldsymtab)
+// called to create the initial call stack for a thread
+// a clone of the call stack of the calling thread's current task
+{
+	symtab_ptr * oldst = (symtab_ptr *) oldsymtab;
+	object_ptr old_expr_stack = (object_ptr)oldestack;
+	object_ptr old_expr_top = (object_ptr)oldetop;
+	object_ptr old_expr_max = (object_ptr)oldemax;
+	object_ptr old_expr_limit = (object_ptr)oldelimit;
+	int i;
+
+	stack_size = old_expr_max - old_expr_stack + 5;
+	expr_stack = (object_ptr) EMalloc(stack_size * sizeof(object));
+	expr_top = old_expr_top - old_expr_stack + expr_stack;
+
+	for (i = 0; i < expr_top - expr_stack; i++)
+	{
+		// translate symtab pointers on old stack
+		// so the new stack will have them point to the
+		// new symtab instead of the old symtab
+		expr_stack[i] = (object)
+		((symtab_ptr *)old_expr_stack[i] - oldst + (symtab_ptr *)fe.st);
+	}
+
+	/* must allow for a few extra words */
+	expr_max = expr_stack + (stack_size - 5);
+	expr_limit = expr_max - 3; // we only push two items per call
+}
 
 void InitStack(int size, int toplevel)
 // called to create the initial call stack for a task
@@ -885,7 +914,8 @@ void InitStack(int size, int toplevel)
 }
 
 
-void InitExecute()
+void InitExecute(intptr_t oldestack, intptr_t oldetop, intptr_t oldemax,
+	intptr_t oldelimit, intptr_t oldsymtab)
 {
 #ifndef EDEBUG
 	// signal(SIGFPE, FPE_Handler)  // generate inf and nan instead
@@ -912,6 +942,9 @@ void InitExecute()
 	TraceBeyond = HUGE_LINE;
 
 	// Create Call Stack
+	if (oldestack)
+	CopyInitStack(EXPR_SIZE, oldestack, oldetop, oldemax, oldelimit, oldsymtab);
+	else
 	InitStack(EXPR_SIZE, 1);
 
 	// create first task (task 0)
@@ -1323,6 +1356,11 @@ void code_set_pointers(intptr_t **code)
 	}
 }
 
+object deep_copy(object x)
+{
+	return x;
+}
+
 void symtab_deep_copy(intptr_t old)
 /* copy all variable values from the old symtab into the new symtab that will *
  * be used by the new copy of the backend library */
@@ -1337,7 +1375,7 @@ void symtab_deep_copy(intptr_t old)
 	olds++;
 	s++;  // point to first real entry
 	for (i = 1; i <= len; i++) {
-		switch (s->MODE)
+		switch (s->mode)
 		{
 			case M_TEMP:
 				s->obj = deep_copy(olds->obj);

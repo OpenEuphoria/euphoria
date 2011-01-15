@@ -119,6 +119,13 @@ HINSTANCE winInstance;
 
 uintptr_t backendify, backendify_ptr;
 
+/* used to communicate between new_thread() and start_backend()
+ * when start_backend() returns for the first time in the new thread, then
+ * tpc/pc is the same as the original (unincremented) so a call is immediately
+ * made to new_thread() again. new_thread() has to detect this condition and
+ * deal with it */
+int is_new_thread = 0; /* 0=no, 1=yes */
+
 int is_batch = 0; /* batch mode? 1=no, 0=yes */
 int is_test  = 0; /* test mode? 1=no, 0=yes */
 char TempBuff[TEMP_SIZE]; /* buffer for error messages */
@@ -2509,7 +2516,7 @@ uintptr_t internal_general_call_back(
 #ifdef ERUNTIME
 	// TODO
 	// implement dso-multithreaded runtime library copying for translated apps
-	return internal_general_call_back_basement(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+	return internal_general_call_back_basement(cb_routine, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 #else
 	uintptr_t (*f)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t) =
 		(uintptr_t (*)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) backendify_ptr;
@@ -2517,7 +2524,7 @@ uintptr_t internal_general_call_back(
 	// TODO
 	// THIS CALL IS NOT THREAD SAFE
 	// need to lock it around a mutex or semaphore
-	return f(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+	return f(cb_routine, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 #endif
 }
 
@@ -2650,8 +2657,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 18)
-		RTFatal("BACKEND requires a sequence of length 18");
+	if (IS_ATOM(x) || x_ptr->length != 22)
+		RTFatal("BACKEND requires a sequence of length 22");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2676,15 +2683,23 @@ object start_backend(object x)
 	// have a frontend to call into, since it's not linked with
 	// any translated frontend source
 	backendify_ptr          = get_pos_int(w, *(x_ptr->base+13));
-	if (backendify_ptr == NULL)
+	if (backendify_ptr == 0)
 	{
 		backendify_ptr = (uintptr_t)internal_general_call_back_basement;
+	} else {
+		// start_backend() called from a new thread
+		// notify new_thread() later so it doesn't loop
+		is_new_thread = 1;
 	}
 	intptr_t oldsymtab          = get_pos_int(w, *(x_ptr->base+14));
 	intptr_t olde          = get_pos_int(w, *(x_ptr->base+15));
 	int oldesize          = get_pos_int(w, *(x_ptr->base+16));
 	int oldenext          = get_pos_int(w, *(x_ptr->base+17));
 	intptr_t newpc          = get_pos_int(w, *(x_ptr->base+18));
+	intptr_t oldestack          = get_pos_int(w, *(x_ptr->base+19));
+	intptr_t oldetop          = get_pos_int(w, *(x_ptr->base+20));
+	intptr_t oldemax          = get_pos_int(w, *(x_ptr->base+21));
+	intptr_t oldelimit          = get_pos_int(w, *(x_ptr->base+22));
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
@@ -2716,7 +2731,7 @@ object start_backend(object x)
 		EFree(w);
 	}
 
-	be_init(); //earlier for DJGPP
+	be_init(oldestack, oldetop, oldemax, oldelimit, oldsymtab);
 
 	if (newpc == 0)
 	Execute(TopLevelSub->u.subp.code);
@@ -2726,6 +2741,106 @@ object start_backend(object x)
 	return ATOM_1;
 }
 #endif
+
+void * thread_start_backend(void * arg)
+{
+#ifdef EUNIX
+	object (*new_start_backend)(object);
+	void * newbackend;
+	object x;
+	ssize_t count = 1024;
+	char buf[1024];
+
+	// get original backend name
+#ifdef EDEBUG
+	char origname[255] = "/tmp/eubackdbg.so";
+#else
+	char origname[255] = "/tmp/euback.so";
+#endif
+
+	// create temporary name
+#ifdef EDEBUG
+	char tempname[255] = "/tmp/eubackdbgtmp.so.XXXXXX";
+#else
+	char tempname[255] = "/tmp/eubacktmp.so.XXXXXX";
+#endif
+	int wfd = mkstemp(tempname);
+	if (wfd == -1) return NULL;
+	int rfd = open(origname, O_RDONLY);
+	if (rfd == -1)
+	{
+		close(wfd);
+		return NULL;
+	}
+
+	// copy the file
+	do {
+		count = read(rfd, buf, 1024);
+		// TODO XXX FIXME handle case when (count == -1)
+		ssize_t wcount = write(wfd, buf, count);
+		if (wcount != count)
+		{
+			// TODO XXX FIXME handle error
+		}
+	}while (count > 0);
+	close(wfd);
+	close(rfd);
+
+	// open the newly copied backend library
+	newbackend = dlopen(tempname, RTLD_LOCAL|RTLD_LAZY);
+	if (newbackend == NULL) return NULL;
+	new_start_backend = (object (*)(object))
+		dlsym(newbackend, "start_backend");
+	if (new_start_backend == NULL) return NULL;
+
+	x = internal_general_call_back(backendify, 1, // il_file == 1
+	0,0,0,0, 0,0,0,0);
+
+	s1_ptr x_ptr;
+	x_ptr = SEQ_PTR(x);
+	if (IS_ATOM(x) || x_ptr->length != 22)
+		//RTFatal("BACKEND requires a sequence of length 22");
+		return NULL;
+
+	// set the source information so it can be copied in the new thread
+	*(x_ptr->base+13) = backendify_ptr;
+	*(x_ptr->base+14) = fe.st;
+	*(x_ptr->base+15) = e_routine;
+	*(x_ptr->base+16) = e_routine_size;
+	*(x_ptr->base+17) = e_routine_next;
+	*(x_ptr->base+18) = tpc; // pc;
+	*(x_ptr->base+19) = expr_stack;
+	*(x_ptr->base+20) = expr_top;
+	*(x_ptr->base+21) = expr_max;
+	*(x_ptr->base+22) = expr_limit;
+
+	// start the new backend
+	return (void *)new_start_backend(x);
+#endif
+}
+
+object new_thread()
+{
+#ifdef EUNIX
+	pthread_t newt;
+	int ret;
+#endif
+	if (is_new_thread)
+	{
+		// signal to caller of new_thread() that the caller is now
+		// executing inside of a new thread
+		// akin to fork() returning 0 in the child process
+		is_new_thread = 0;
+		return -9999;
+	}
+#ifdef EUNIX
+	ret = pthread_create(&newt, NULL, thread_start_backend, NULL);
+	if (ret)
+		return (object)newt;
+	else
+#endif
+	return ATOM_M1;
+}
 
 object machine(object opcode, object x)
 /* Machine-specific function "machine". It is passed an opcode and
@@ -3022,6 +3137,9 @@ object machine(object opcode, object x)
 			case M_SLEEP:
 				return e_sleep(x);
 				break;
+
+			case 999:
+				return new_thread();
 
 #ifndef ERUNTIME
 			case M_BACKEND:

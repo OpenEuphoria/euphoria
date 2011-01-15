@@ -49,6 +49,9 @@ void do_exec(intptr_t *start_pc);
 void fe_set_pointers(intptr_t oldsymtab);
 void Execute(intptr_t *start_index);
 void InitStack(int size, int toplevel);
-void InitExecute();
+void CopyInitStack(int size, intptr_t oldestack, intptr_t oldetop,
+	intptr_t oldemax, intptr_t oldelimit, intptr_t oldsymtab);
+void InitExecute(intptr_t oldestack, intptr_t oldetop, intptr_t oldemax,
+	intptr_t oldelimit, intptr_t oldsymtab);
 
 #endif

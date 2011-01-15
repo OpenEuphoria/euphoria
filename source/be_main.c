@@ -60,7 +60,8 @@ char main_path[PATH_MAX+1]; /* path of main file being executed */
 /* Defined functions */
 /*********************/
 
-void be_init()
+void be_init(intptr_t oldestack, intptr_t oldetop, intptr_t oldemax,
+	intptr_t oldelimit, intptr_t oldsymtab)
 /* Main routine for Interpreter back end */
 {
 	char *p;
@@ -108,7 +109,7 @@ void be_init()
 		;
 	*(p+1) = '\0'; /* keep the path, truncate off the final name */    
 
-	InitExecute();
+	InitExecute(oldestack, oldetop, oldemax, oldelimit, oldsymtab);
 	InitDebug();
 	InitTraceWindow();
 }
