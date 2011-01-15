@@ -118,6 +118,11 @@ HINSTANCE winInstance;
 #endif
 
 uintptr_t backendify, backendify_ptr;
+#ifdef EUNIX
+pthread_mutex_t * internal_general_call_back_mutex = NULL;
+pthread_mutex_t * new_thread_mutex = NULL;
+pthread_cond_t * new_thread_cond = NULL;
+#endif
 
 /* used to communicate between new_thread() and start_backend()
  * when start_backend() returns for the first time in the new thread, then
@@ -2521,10 +2526,14 @@ uintptr_t internal_general_call_back(
 	uintptr_t (*f)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t) =
 		(uintptr_t (*)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) backendify_ptr;
 	
-	// TODO
-	// THIS CALL IS NOT THREAD SAFE
-	// need to lock it around a mutex or semaphore
-	return f(cb_routine, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+#ifdef EUNIX
+	pthread_mutex_lock(internal_general_call_back_mutex);
+#endif
+	uintptr_t ret = f(cb_routine, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+#ifdef EUNIX
+	pthread_mutex_unlock(internal_general_call_back_mutex);
+#endif
+	return ret;
 #endif
 }
 
@@ -2657,8 +2666,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 22)
-		RTFatal("BACKEND requires a sequence of length 22");
+	if (IS_ATOM(x) || x_ptr->length != 25)
+		RTFatal("BACKEND requires a sequence of length 25");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2700,6 +2709,16 @@ object start_backend(object x)
 	intptr_t oldetop          = get_pos_int(w, *(x_ptr->base+20));
 	intptr_t oldemax          = get_pos_int(w, *(x_ptr->base+21));
 	intptr_t oldelimit          = get_pos_int(w, *(x_ptr->base+22));
+#ifdef EUNIX
+	internal_general_call_back_mutex = (pthread_mutex_t*)get_pos_int(w, *(x_ptr->base+23));
+	if (internal_general_call_back_mutex == NULL)
+	{
+		internal_general_call_back_mutex = malloc(sizeof(pthread_mutex_t));
+		pthread_mutex_init(internal_general_call_back_mutex, NULL);
+	}
+	new_thread_mutex = (pthread_mutex_t*)get_pos_int(w, *(x_ptr->base+24));
+	new_thread_cond = (pthread_cond_t*)get_pos_int(w, *(x_ptr->base+25));
+#endif
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
@@ -2732,6 +2751,19 @@ object start_backend(object x)
 	}
 
 	be_init(oldestack, oldetop, oldemax, oldelimit, oldsymtab);
+
+	// by this time, all old data should have been copied over
+	// so we need to signal the cond-wait and unlock the mutex
+#ifdef EUNIX
+	if (new_thread_cond != NULL)
+	{
+		pthread_cond_broadcast(new_thread_cond);
+		pthread_mutex_unlock(new_thread_mutex);
+		// the parent thread will do the cleanup to destroy them
+		new_thread_cond = NULL;
+		new_thread_mutex = NULL;
+	}
+#endif
 
 	if (newpc == 0)
 	Execute(TopLevelSub->u.subp.code);
@@ -2782,7 +2814,7 @@ void * thread_start_backend(void * arg)
 		{
 			// TODO XXX FIXME handle error
 		}
-	}while (count > 0);
+	} while (count > 0);
 	close(wfd);
 	close(rfd);
 
@@ -2793,13 +2825,16 @@ void * thread_start_backend(void * arg)
 		dlsym(newbackend, "start_backend");
 	if (new_start_backend == NULL) return NULL;
 
+	// now entering thread unsafe area, time to lock the mutex
+	pthread_mutex_lock(new_thread_mutex);
+
 	x = internal_general_call_back(backendify, 1, // il_file == 1
 	0,0,0,0, 0,0,0,0);
 
 	s1_ptr x_ptr;
 	x_ptr = SEQ_PTR(x);
-	if (IS_ATOM(x) || x_ptr->length != 22)
-		//RTFatal("BACKEND requires a sequence of length 22");
+	if (IS_ATOM(x) || x_ptr->length != 25)
+		//RTFatal("BACKEND requires a sequence of length 25");
 		return NULL;
 
 	// set the source information so it can be copied in the new thread
@@ -2813,8 +2848,13 @@ void * thread_start_backend(void * arg)
 	*(x_ptr->base+20) = expr_top;
 	*(x_ptr->base+21) = expr_max;
 	*(x_ptr->base+22) = expr_limit;
+	*(x_ptr->base+23) = internal_general_call_back_mutex;
+	*(x_ptr->base+24) = new_thread_mutex;
+	*(x_ptr->base+25) = new_thread_cond;
 
 	// start the new backend
+	// it will be responsible for signaling the cond-wait and unlocking
+	// the mutex
 	return (void *)new_start_backend(x);
 #endif
 }
@@ -2823,6 +2863,8 @@ object new_thread()
 {
 #ifdef EUNIX
 	pthread_t newt;
+	pthread_mutex_t new_thread_mutex_m;
+	pthread_cond_t new_thread_cond_m;
 	int ret;
 #endif
 	if (is_new_thread)
@@ -2834,10 +2876,32 @@ object new_thread()
 		return -9999;
 	}
 #ifdef EUNIX
+	new_thread_mutex = &new_thread_mutex_m;
+	new_thread_cond = &new_thread_cond_m;
+
+	pthread_mutex_init(new_thread_mutex, NULL);
+	pthread_cond_init(new_thread_cond, NULL);
+	pthread_mutex_lock(new_thread_mutex);
+
 	ret = pthread_create(&newt, NULL, thread_start_backend, NULL);
-	if (ret)
-		return (object)newt;
-	else
+
+	if (ret != 0)
+	{
+		// no longer need these, clean up
+		pthread_mutex_unlock(new_thread_mutex);
+		pthread_mutex_destroy(new_thread_mutex);
+		pthread_cond_destroy(new_thread_cond);
+		return ATOM_M1;
+	}
+
+	// wait for child thread to copy data over (variables, call stack, etc)
+	pthread_cond_wait(new_thread_cond, new_thread_mutex);
+	// child thread has finished copying data, do cleanup
+	pthread_mutex_unlock(new_thread_mutex);
+	pthread_mutex_destroy(new_thread_mutex);
+	pthread_cond_destroy(new_thread_cond);
+
+	return (object)newt;
 #endif
 	return ATOM_M1;
 }

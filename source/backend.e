@@ -339,6 +339,9 @@ function BackEndify(integer il_file)
 			0, -- source copy of expr_top
 			0, -- source copy of expr_max
 			0, -- source copy of expr_limit
+			0, -- pthread mutex for internal_general_call_back ptr
+			0, -- temp pthread mutex used in thread creation
+			0, -- temp pthread cond_t used in thread creation
 			$
 		}
 end function

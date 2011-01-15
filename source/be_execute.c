@@ -1358,6 +1358,9 @@ void code_set_pointers(intptr_t **code)
 
 object deep_copy(object x)
 {
+	// TODO XXX FIXME: this is a shallow copy.
+	// this is not thread safe and also violates the axiom that variables be
+	// separate in threads unless explicitly declared to be shared.
 	return x;
 }
 
