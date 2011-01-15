@@ -21,6 +21,7 @@
 #include "be_alloc.h"
 #include "be_machine.h"
 #include "be_runtime.h"
+#include "be_symtab.h"
 
 /**********************/
 /* Exported variables */
@@ -404,4 +405,8 @@ void e_routine_copy(intptr_t old, int old_e_routine_size,
 		e_routine[i] = (symtab_ptr)
 		(((symtab_ptr*)old_e_routine[i] - oldst) + (symtab_ptr*)fe.st);
 	}
+}
+int get_e_routine_size()
+{
+	return e_routine_size;
 }

@@ -2806,7 +2806,7 @@ void * thread_start_backend(void * arg)
 	*(x_ptr->base+13) = backendify_ptr;
 	*(x_ptr->base+14) = fe.st;
 	*(x_ptr->base+15) = e_routine;
-	*(x_ptr->base+16) = e_routine_size;
+	*(x_ptr->base+16) = get_e_routine_size();
 	*(x_ptr->base+17) = e_routine_next;
 	*(x_ptr->base+18) = tpc; // pc;
 	*(x_ptr->base+19) = expr_stack;
