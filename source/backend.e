@@ -325,7 +325,8 @@ function BackEndify(integer il_file)
 			routine_id( "write_coverage_db" ),
 			routine_id( "DisplayColorLine" ),
 			routine_id( "BackEndify" ),
-			0,
+			0, -- internal_general_call_back ptr, null for front end
+			0, -- source copy of symtab, null for front end
 			$
 		}
 end function

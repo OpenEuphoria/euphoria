@@ -2650,8 +2650,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 13)
-		RTFatal("BACKEND requires a sequence of length 13");
+	if (IS_ATOM(x) || x_ptr->length != 14)
+		RTFatal("BACKEND requires a sequence of length 14");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2680,6 +2680,7 @@ object start_backend(object x)
 	{
 		backendify_ptr = (uintptr_t)internal_general_call_back_basement;
 	}
+	intptr_t oldsymtab          = get_pos_int(w, *(x_ptr->base+14));
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
@@ -2689,7 +2690,7 @@ object start_backend(object x)
 	do_exec(NULL);  // init jumptable
 #endif
 
-	fe_set_pointers(); /* change some fe indexes into pointers */
+	fe_set_pointers(oldsymtab); /* change some fe indexes into pointers */
 
 	/* Look at the switches for any information pertinent to the backend */
 	switch_len = SEQ_PTR(fe.switches)->length;

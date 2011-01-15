@@ -1323,6 +1323,56 @@ void code_set_pointers(intptr_t **code)
 	}
 }
 
+void symtab_deep_copy(intptr_t old)
+/* copy all variable values from the old symtab into the new symtab that will *
+ * be used by the new copy of the backend library */
+{
+	struct symtab_entry * olds, *s;
+	intptr_t i, len;
+
+	olds = (struct symtab_entry *)old;
+	s = fe.st;
+	len = *(intptr_t *)s;  // number of entries
+
+	olds++;
+	s++;  // point to first real entry
+	for (i = 1; i <= len; i++) {
+		switch (s->MODE)
+		{
+			case M_TEMP:
+				s->obj = deep_copy(olds->obj);
+				break;
+			case M_NORMAL:
+				switch (s->token)
+				{
+					case PROC:
+					case FUNC:
+					case TYPE:
+						break;
+					default:
+						// normal variables, etc
+						s->obj = deep_copy(olds->obj);
+						break;
+				}
+			case M_CONSTANT:
+				// if the constant is set to NOVALUE then
+				// need to update, the original
+				// thread might have performed the
+				// forward reference and set the value
+				// here already
+				if (s->obj == NOVALUE)
+					s->obj = deep_copy(olds->obj);
+				// else the constant/literal value was known
+				// at parse time and we don't need to bother
+				// copying it over as it can't have been changed
+				break;
+			default:
+				break;
+		}
+		s = s->next;
+		olds = olds->next;
+	}
+}
 
 void symtab_set_pointers()
 /* set some symbol table fields to absolute pointers, rather than indexes */
@@ -1510,9 +1560,11 @@ int sample_size;
 int gline_number;  /* last global line number in program */
 int il_file;       /* we are processing a separate .il file */
 
-void fe_set_pointers()
+void fe_set_pointers(intptr_t oldsymtab)
 {
 	symtab_set_pointers();
+	if (oldsymtab != (intptr_t)NULL)
+		symtab_deep_copy(oldsymtab);
 
 	slist = fe.sl;
 
