@@ -117,6 +117,8 @@ extern double eustart_time; /* from be_runtime.c */
 HINSTANCE winInstance;
 #endif
 
+uintptr_t backendify, backendify_ptr;
+
 int is_batch = 0; /* batch mode? 1=no, 0=yes */
 int is_test  = 0; /* test mode? 1=no, 0=yes */
 char TempBuff[TEMP_SIZE]; /* buffer for error messages */
@@ -2385,7 +2387,7 @@ object CallBack(object x)
 	return MAKE_UINT(addr);
 }
 
-uintptr_t internal_general_call_back(
+uintptr_t internal_general_call_back_basement(
 		  intptr_t cb_routine,
 						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
@@ -2496,6 +2498,27 @@ uintptr_t internal_general_call_back(
 
 	// Don't do get_pos_int() for crash handler
 	return (uintptr_t)get_pos_int("internal-call-back", call_back_result->obj);
+}
+uintptr_t internal_general_call_back(
+		  intptr_t cb_routine,
+						   uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
+						   uintptr_t arg4, uintptr_t arg5, uintptr_t arg6,
+						   uintptr_t arg7, uintptr_t arg8, uintptr_t arg9)
+/* general call-back routine: 0 to 9 args */
+{
+#ifdef ERUNTIME
+	// TODO
+	// implement dso-multithreaded runtime library copying for translated apps
+	return internal_general_call_back_basement(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+#else
+	uintptr_t (*f)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t) =
+		(uintptr_t (*)(intptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t)) backendify_ptr;
+	
+	// TODO
+	// THIS CALL IS NOT THREAD SAFE
+	// need to lock it around a mutex or semaphore
+	return f(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+#endif
 }
 
 int *crash_list = NULL;    // list of routines to call when there's a crash
@@ -2627,8 +2650,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 11)
-		RTFatal("BACKEND requires a sequence of length 11");
+	if (IS_ATOM(x) || x_ptr->length != 13)
+		RTFatal("BACKEND requires a sequence of length 13");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2643,6 +2666,20 @@ object start_backend(object x)
 	cover_routine     = get_pos_int(w, *(x_ptr->base+9));
 	write_coverage_db = get_pos_int(w, *(x_ptr->base+10));
 	syncolor          = get_pos_int(w, *(x_ptr->base+11));
+
+	// Front End CallBack for BackEndify()
+	// this regenerates the information we need to pass to a second
+	// call of BackEnd() in a new thread
+	backendify          = get_pos_int(w, *(x_ptr->base+12));
+	// pointer to internal_general_call_back
+	// later copies of start_backend() in euback.so won't
+	// have a frontend to call into, since it's not linked with
+	// any translated frontend source
+	backendify_ptr          = get_pos_int(w, *(x_ptr->base+13));
+	if (backendify_ptr == NULL)
+	{
+		backendify_ptr = (uintptr_t)internal_general_call_back_basement;
+	}
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
