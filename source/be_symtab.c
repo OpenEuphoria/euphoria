@@ -384,3 +384,23 @@ int RoutineId(symtab_ptr current_sub, object name, int file_no)
 	return e_routine_next++;
 }
 
+void e_routine_copy(intptr_t old, int old_e_routine_size,
+	int old_e_routine_next, intptr_t oldsymtab)
+{
+	int i;
+	e_routine_size = old_e_routine_size;
+	e_routine_next = old_e_routine_next;
+	symtab_ptr * old_e_routine = (symtab_ptr*)old;
+	symtab_ptr * oldst = (symtab_ptr*)oldsymtab;
+
+	e_routine = (symtab_ptr *)EMalloc(e_routine_size * sizeof(symtab_ptr));
+	e_cleanup = (cleanup_ptr*) EMalloc( e_routine_size * sizeof(cleanup_ptr) );
+	// TODO XXX FIXME copy over delete routines too
+	for( i = 0; i < e_routine_size; ++i ){
+		e_cleanup[i] = 0;
+	}
+
+	for ( i = 0; i < e_routine_next; ++i ){
+		e_routine[i] = (old_e_routine[i] - oldst) + fe.st;
+	}
+}

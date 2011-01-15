@@ -2650,8 +2650,8 @@ object start_backend(object x)
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 14)
-		RTFatal("BACKEND requires a sequence of length 14");
+	if (IS_ATOM(x) || x_ptr->length != 18)
+		RTFatal("BACKEND requires a sequence of length 18");
 
 	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
 	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
@@ -2681,6 +2681,10 @@ object start_backend(object x)
 		backendify_ptr = (uintptr_t)internal_general_call_back_basement;
 	}
 	intptr_t oldsymtab          = get_pos_int(w, *(x_ptr->base+14));
+	intptr_t olde          = get_pos_int(w, *(x_ptr->base+15));
+	int oldesize          = get_pos_int(w, *(x_ptr->base+16));
+	int oldenext          = get_pos_int(w, *(x_ptr->base+17));
+	intptr_t newpc          = get_pos_int(w, *(x_ptr->base+18));
 	
 	// This is checked when we try to write coverage to make sure
 	// we need to output an error message.
@@ -2691,6 +2695,9 @@ object start_backend(object x)
 #endif
 
 	fe_set_pointers(oldsymtab); /* change some fe indexes into pointers */
+
+	/* copy over old routine ids */
+	e_routine_copy(olde, oldesize, oldenext, oldsymtab);
 
 	/* Look at the switches for any information pertinent to the backend */
 	switch_len = SEQ_PTR(fe.switches)->length;
@@ -2710,7 +2717,10 @@ object start_backend(object x)
 
 	be_init(); //earlier for DJGPP
 
+	if (newpc == 0)
 	Execute(TopLevelSub->u.subp.code);
+	else
+	Execute((int*)newpc);
 
 	return ATOM_1;
 }
