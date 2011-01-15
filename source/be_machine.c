@@ -2838,19 +2838,19 @@ void * thread_start_backend(void * arg)
 		return NULL;
 
 	// set the source information so it can be copied in the new thread
-	*(x_ptr->base+13) = backendify_ptr;
-	*(x_ptr->base+14) = fe.st;
-	*(x_ptr->base+15) = e_routine;
-	*(x_ptr->base+16) = get_e_routine_size();
-	*(x_ptr->base+17) = e_routine_next;
-	*(x_ptr->base+18) = tpc; // pc;
-	*(x_ptr->base+19) = expr_stack;
-	*(x_ptr->base+20) = expr_top;
-	*(x_ptr->base+21) = expr_max;
-	*(x_ptr->base+22) = expr_limit;
-	*(x_ptr->base+23) = internal_general_call_back_mutex;
-	*(x_ptr->base+24) = new_thread_mutex;
-	*(x_ptr->base+25) = new_thread_cond;
+	*(x_ptr->base+13) = MAKE_UINT(backendify_ptr);
+	*(x_ptr->base+14) = MAKE_UINT(fe.st);
+	*(x_ptr->base+15) = MAKE_UINT(e_routine);
+	*(x_ptr->base+16) = MAKE_UINT(get_e_routine_size());
+	*(x_ptr->base+17) = MAKE_UINT(e_routine_next);
+	*(x_ptr->base+18) = MAKE_UINT(tpc); // pc;
+	*(x_ptr->base+19) = MAKE_UINT(expr_stack);
+	*(x_ptr->base+20) = MAKE_UINT(expr_top);
+	*(x_ptr->base+21) = MAKE_UINT(expr_max);
+	*(x_ptr->base+22) = MAKE_UINT(expr_limit);
+	*(x_ptr->base+23) = MAKE_UINT(internal_general_call_back_mutex);
+	*(x_ptr->base+24) = MAKE_UINT(new_thread_mutex);
+	*(x_ptr->base+25) = MAKE_UINT(new_thread_cond);
 
 	// start the new backend
 	// it will be responsible for signaling the cond-wait and unlocking
