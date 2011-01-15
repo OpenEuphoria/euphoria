@@ -2697,6 +2697,7 @@ object start_backend(object x)
 	fe_set_pointers(oldsymtab); /* change some fe indexes into pointers */
 
 	/* copy over old routine ids */
+	if (olde)
 	e_routine_copy(olde, oldesize, oldenext, oldsymtab);
 
 	/* Look at the switches for any information pertinent to the backend */
