@@ -16,10 +16,6 @@
 
 #ifdef EWINDOWS
 #include <windows.h> /* for Sleep(), Fibers */
-#else
-#define __USE_GNU
-#include <dlfcn.h>
-#undef __USE_GNU
 #endif
 
 #include "global.h"
@@ -101,8 +97,8 @@ void InitTask()
 	tcb[0].impl.translated.task = ConvertThreadToFiber( 0 );
 #else
 	tcb[0].impl.translated.task = pthread_self();
-	//pthread_mutex_init( &task_mutex, NULL );
-	//pthread_cond_init(  &task_condition, NULL );
+	pthread_mutex_init( &task_mutex, NULL );
+	pthread_cond_init(  &task_condition, NULL );
 	task_thread = 0;
 #endif
 #else
@@ -714,7 +710,7 @@ object task_create(object r_id, object args)
 		RTFatal("Incorrect number of arguments (passing %d where %d are expected)",
 				SEQ_PTR(args)->length, proc_args);
 	}
-
+	
 	recycle = -1;
 	recycle_size = -1;
  
@@ -778,8 +774,6 @@ object task_create(object r_id, object args)
 	new_entry->impl.interpreted.stack_size = 0;
 	
 	id = next_task_id;
-	init_task(id);
-	
 	
 	// choose task id for next time
 	if (!id_wrap && next_task_id < TASK_ID_MAX) {
@@ -1025,10 +1019,10 @@ static void init_task( int tx ){
  * Only allows the current thread to continue if it belongs to the current task.
  */
 void wait_for_task( int task ){
-	/*pthread_mutex_lock( &task_mutex );
+	pthread_mutex_lock( &task_mutex );
 	while( current_task != task ){
 		pthread_cond_wait( &task_condition, &task_mutex );
-	}*/
+	}
 }
 
 /**
@@ -1036,37 +1030,7 @@ void wait_for_task( int task ){
  * calling the task's procedure.
  */
 void *start_task( void *task ){
-	void * handler;
-object (*start_backend_runner_f)(
-	symtab_ptr st,
-	struct sline * sl,
-	int * misc,
-	char * lit,
-	unsigned char ** includes,
-	object switches,
-	object argv,
-	object baha,
-	int * tpc
-);
-	static int **code[3];
-
 	wait_for_task( (int) task );
-
-	code[0] = (int **)opcode(CALL_PROC);
-	code[1] = (int **)&tcb[current_task].rid;
-	code[2] = (int **)&tcb[current_task].args;
-
-	handler = dlmopen(LM_ID_NEWLM, "./libeubackdbg.so", RTLD_LAZY);
-
-	start_backend_runner_f = dlsym(handler, "start_backend_runner");
-	if (start_backend_runner_f == NULL)
-	{
-		// failure
-	return task;
-	}
-
-	start_backend_runner_f(backendfe.st, backendfe.sl, backendfe.misc, backendfe.lit, backendfe.includes, backendfe.switches, backendfe.argv, MAKE_SEQ(backend_s1_ptr), (int *)&code);
-
 	call_task( tcb[(int)task].rid, tcb[(int)task].args );
 	return task;
 }
@@ -1088,8 +1052,8 @@ static void init_task( int tx ){
 static void run_current_task( int task ){
 	int this_task = current_task;
 	current_task = task;
-	//pthread_cond_broadcast( &task_condition );
-	//pthread_mutex_unlock( &task_mutex );
+	pthread_cond_broadcast( &task_condition );
+	pthread_mutex_unlock( &task_mutex );
 	wait_for_task( this_task );
 }
 #endif
@@ -1104,7 +1068,6 @@ void scheduler(double now)
 	struct tcb *tp;
 	int p;
 
-	return;
 	// first check the real-time tasks
 	stack_top = 0; // so the compiler thinks it's used.
 	

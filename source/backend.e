@@ -94,14 +94,12 @@ procedure BackEnd(integer il_file)
 	integer string_size, short, size, repcount
 	sequence lit_string, other_strings
 	object eentry
-	sequence mlengths = repeat(0, 10)
 	
 	-- create a smaller back-end version of symbol table 
 	
 	-- allow extra for storing size 
 	size = (1+length(SymTab)) * ST_ENTRY_SIZE 
 	st = allocate(size)  -- symbol table
-	mlengths[1] = size
 	mem_set(st, 0, size) -- all fields are 0 (NULL) by default
 	
 	-- unused 0th entry contains the length:
@@ -192,7 +190,6 @@ procedure BackEnd(integer il_file)
 	
 	-- save literals and declared constant values in memory
 	lit = allocate(length(lit_string))
-	mlengths[4] = length(lit_string)
 	poke(lit, lit_string) -- shouldn't need 0
 	
 	-- free lit_string
@@ -200,8 +197,6 @@ procedure BackEnd(integer il_file)
 	
 	-- convert symbol names to C strings in memory
 	nm = allocate(1+string_size)  
-	mlengths[6] = nm
-	mlengths[7] = 1+string_size
 	addr = nm
 	entry_addr = st
 	no_name = allocate_string("<no-name>")
@@ -254,7 +249,6 @@ procedure BackEnd(integer il_file)
 	end for
 		
 	sl = allocate((size+1)*8)
-	mlengths[2] = (size+1)*8
 	mem_set(sl, 0, (size+1)*8)
 	
 	poke4(sl, size)
@@ -304,7 +298,6 @@ procedure BackEnd(integer il_file)
 	end for
 	
 	ms = allocate(4*(10+length(other_strings))) -- miscellaneous
-	mlengths[3] = 4*(10+length(other_strings))
 	poke4(ms, max_stack_per_call)
 	poke4(ms+4, AnyTimeProfile)
 	poke4(ms+8, AnyStatementProfile)
@@ -315,8 +308,6 @@ procedure BackEnd(integer il_file)
 	poke4(ms+28, length(known_files)) -- stored in 0th position
 	
 	fn = allocate(string_size)
-	mlengths[8] = fn
-	mlengths[9] = string_size
 	
 	for i = 1 to length(other_strings) do
 		poke4(ms+32+(i-1)*4, fn)
@@ -328,9 +319,6 @@ procedure BackEnd(integer il_file)
 	end for
 	
 	include_info = allocate( 4 * (1 + length( include_matrix )) ) 
-	mlengths[5] = 4 * (1 + length( include_matrix ))
-	mlengths[10] = 1 + length( include_matrix )
-	--mlengths[10] = ""
 	include_node = include_info
 	poke4( include_info, 0 )
 	include_node += 4
@@ -338,7 +326,6 @@ procedure BackEnd(integer il_file)
 	for i = 1 to length( include_matrix ) do
 		
 		include_array = allocate( 1 + length( include_matrix ) )
-		--mlengths[10] &= 1 + length( include_matrix )
 		poke( include_array, i & include_matrix[i] )
 		poke4( include_node, include_array )
 		
@@ -349,6 +336,6 @@ procedure BackEnd(integer il_file)
 		Argv = {Argv[1]} & Argv[3 .. Argc]
 	end if
 
-	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv, mlengths })
+	machine_proc(65, {st, sl, ms, lit, include_info, get_switches(), Argv })
 end procedure
 mode:set_backend( routine_id("BackEnd") )

@@ -2621,124 +2621,33 @@ void Machine_Handler(int sig_no)
 
 #ifndef ERUNTIME
 extern struct IL fe;
-extern struct IL backendfe;
 
 object start_backend(object x)
+/* called by Euphoria-written front-end to run the back-end
+ *
+ * x is {symtab, topcode, subcode, names, line_table, miscellaneous }
+ */
 {
+	long switch_len, i;
 	s1_ptr x_ptr;
 	char *w;
 
-	symtab_ptr st;
-	struct sline * sl;
-	int * misc;
-	char * lit;
-	unsigned char ** includes;
-	object switches;
-	object argv;
-	object baha;
+
 
 	w = "backend";
 
 	x_ptr = SEQ_PTR(x);
 
-	if (IS_ATOM(x) || x_ptr->length != 8)
+	if (IS_ATOM(x) || x_ptr->length != 7)
 		RTFatal("BACKEND requires a sequence of length 7");
 
-	st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
-	sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
-	misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
-	lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
-	includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
-	switches = x_ptr->base[6];
-	argv = x_ptr->base[7];
-	baha = x_ptr->base[8];
-
-	return start_backend_runner(st, sl, misc, lit, includes, switches, argv, baha, NULL);
-}
-/* called by Euphoria-written front-end to run the back-end
- *
- * x is {symtab, topcode, subcode, names, line_table, miscellaneous }
- */
-object start_backend_runner(
-	symtab_ptr st,
-	struct sline * sl,
-	int * misc,
-	char * lit,
-	unsigned char ** includes,
-	object switches,
-	object argv,
-	object baha,
-	int * tpc
-)
-{
-	long switch_len, i;
-	s1_ptr x_ptr, new_ptr;
-	char *w;
-
-	w = "backend";
-
-	fe.st = st;
-	fe.sl = sl;
-	fe.misc = misc;
-	fe.lit = lit;
-	fe.includes = includes;
-	fe.switches = switches;
-	fe.argv = argv;
-	x_ptr = SEQ_PTR(baha);
-	new_ptr = Copy_elements(1, x_ptr, 0);
-	backend_s1_ptr = new_ptr;
-
-	char * fn, * oldfn;
-	oldfn = (char*)get_pos_int(w, x_ptr->base[8]);
-	fn = EMalloc(x_ptr->base[9]);
-	for (i = 0; i < x_ptr->base[9]; i++)
-	{
-		fn[i] = oldfn[i];
-	}
-	new_ptr->base[8] = MAKE_UINT(fn);
-
-	char * nm, * oldnm;
-	oldfn = (char*)get_pos_int(w, x_ptr->base[6]);
-	fn = EMalloc(x_ptr->base[7]);
-	for (i = 0; i < x_ptr->base[7]; i++)
-	{
-		nm[i] = oldnm[i];
-	}
-	new_ptr->base[6] = MAKE_UINT(nm);
-
-	backendfe.st = EMalloc(x_ptr->base[1]);
-	for (i = 0; i < x_ptr->base[1]; i++)
-	{
-		((char*)(backendfe.st))[i] = ((char*)(st))[i];
-	}
-	backendfe.sl = EMalloc(x_ptr->base[2]);
-	for (i = 0; i < x_ptr->base[2]; i++)
-	{
-		((char*)(backendfe.sl))[i] = ((char*)(sl))[i];
-	}
-	backendfe.misc = EMalloc(x_ptr->base[3]);
-	for (i = 8; i < ((x_ptr->base[3]) / 4); i++)
-	{
-		backendfe.misc[i] = (unsigned int)fn;
-		fn += strlen(fn) + 1;
-	}
-
-	char * newlit;
-	newlit = EMalloc(x_ptr->base[4]);
-	for (i = 0; i < x_ptr->base[4]; i++)
-	{
-		newlit[i] = lit[i];
-	}
-	backendfe.lit = newlit;
-
-	backendfe.includes = EMalloc(x_ptr->base[5]);
-	for (i = 0;i < x_ptr->base[5]; i++)
-	{
-		backendfe.includes[i] = EMalloc(x_ptr->base[10]);
-		copy_string((char*)backendfe.includes[i], (char*)fe.includes[i], x_ptr->base[10]);
-	}
-	backendfe.switches = MAKE_SEQ(Copy_elements(1, SEQ_PTR(switches), 0));
-	backendfe.argv = MAKE_SEQ(Copy_elements(1, SEQ_PTR(argv), 0));
+	fe.st = (symtab_ptr)     get_pos_int(w, *(x_ptr->base+1));
+	fe.sl = (struct sline *) get_pos_int(w, *(x_ptr->base+2));
+	fe.misc = (int *)        get_pos_int(w, *(x_ptr->base+3));
+	fe.lit = (char *)        get_pos_int(w, *(x_ptr->base+4));
+	fe.includes = (unsigned char **) get_pos_int(w, *(x_ptr->base+5));
+	fe.switches = x_ptr->base[6];
+	fe.argv = x_ptr->base[7];
 
 #if defined(EUNIX) || defined(EMINGW)
 	do_exec(NULL);  // init jumptable
@@ -2764,11 +2673,7 @@ object start_backend_runner(
 
 	be_init(); //earlier for DJGPP
 
-	if (tpc == NULL)
-	{
-	tpc = TopLevelSub->u.subp.code;
-	}
-	Execute(tpc);
+	Execute(TopLevelSub->u.subp.code);
 
 	return ATOM_1;
 }

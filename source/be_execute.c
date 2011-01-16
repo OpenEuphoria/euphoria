@@ -812,9 +812,6 @@ extern int ** jumptab;
 
 /* IL data passed from the front end */
 struct IL fe;
-/* copy of IL data passed from the front end, for use in creating a new thread */
-struct IL backendfe;
-s1_ptr backend_s1_ptr;
 
 #define SET_OPERAND(word) ((int *)(((word) == 0) ? 0 : (&fe.st[(int)(word)])))
 

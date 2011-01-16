@@ -5,17 +5,6 @@
 
 #ifndef ERUNTIME
 object start_backend(object x);
-object start_backend_runner(
-	symtab_ptr st,
-	struct sline * sl,
-	int * misc,
-	char * lit,
-	unsigned char ** includes,
-	object switches,
-	object argv,
-	object baha,
-	int * tpc
-);
 #endif
 
 #ifdef EWINDOWS
